@@ -24,10 +24,7 @@ private:
   /// The species this particular instance is working on
   int SpeciesNum;
 
-  void WriteRatio()
-  {
-    //do nothing for now
-  }
+
 
   /// This function checks to see if we should accept based on the
   /// change in the node action
@@ -42,7 +39,7 @@ private:
 public:
   /// Read in the parameters this class needs from the input file.
   void Read(IOSectionClass &in);
-  
+  void WriteRatio();  
 
   /// Override base class MakeMove to do a block of moves
   void MakeMove();

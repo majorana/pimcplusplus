@@ -70,6 +70,9 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
     double revT = Rev->CalcReverseProb(*Forw);
     double Tratio = forwT/revT;
     int len=Forw->CurrentCycle.Length;
+    if (len % 2 ==0){
+      PathData.Path.Weight=PathData.Path.Weight*-1;
+    }
     double actionChange = -log(Forw->CurrentCycle.P/Forw->Gamma[len-1]);
     double psi = PathData.Path.Random.Local();
 

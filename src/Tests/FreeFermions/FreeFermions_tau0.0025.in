@@ -2,7 +2,7 @@ double tau=0.0025;
 
 Section (System)
 {
-  int NumTimeSlices=100;
+  int NumTimeSlices=200;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[2, 2, 2];
   Section (Particles)
@@ -40,7 +40,7 @@ Section (Observables)
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
-    int freq=2;
+    int freq=5;
     int dumpFreq=500;
     
   }
@@ -56,6 +56,11 @@ Section (Observables)
       int NumPoints = 100;
     }
   }
+  Section (Observable){
+    string type="PathDump";
+    string Name="PathDump";
+    int dumpFreq=500;
+  }
 }
 
 
@@ -65,7 +70,7 @@ Section (Moves) {
     string name="BisectionBlock";
     string PermuteType="NONE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-    int NumLevels=5;
+    int NumLevels=6;
     string Species = "free";
     int StepsPerBlock=1;
     
@@ -74,7 +79,7 @@ Section (Moves) {
     string type="RefSlice";
     string name="RefSlice";
     string PermuteType="NONE";
-    int NumLevels=5;
+    int NumLevels=6;
     string Species = "free";
   }
 
@@ -108,6 +113,8 @@ Section (Algorithm) {
     Section (Move) {string name = "Shift"; }
     //    Section (Move) {string name="Permutations";} 
     Section (Observe) {string name = "PairCorrelation";}
+
+    Section (Observe) {string name = "PathDump"; }
     Section (Observe) {string name = "Energy"; }
   }
 }

@@ -7,6 +7,7 @@
 #include "Common/Random/Random.h"
 #include "Common/MPI/Communication.h"
 
+
 ///The number of time slices is the number of slices on this processor.
 ///In all cases this processor shares a time slice with the processor 
 ///ahead of it and behind it. The convention for the shared slices
@@ -22,12 +23,11 @@ private:
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
   int MyNumSlices;
-  
   /////////////////////
   /// Misc. Helpers ///
   /////////////////////
   void LeviFlight (Array<dVec,1> &vec, double lambda, double tau);
-
+  void ReadOld(string fileName);
   ////////////////////////////////
   /// Boundary conditions stuff //
   ////////////////////////////////
@@ -72,6 +72,7 @@ private:
   /// Stores the position of the reference slice w.r.t. time slice 0
   /// on this processor
   int RefSlice;
+  //  int RefSliceCheck;
   void ShiftPathData(int sliceToShift);
   void ShiftRho_kData(int sliceToShift);
 public:
@@ -108,8 +109,8 @@ public:
 			double &dist, dVec &disp);
   inline void DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 			double &distA, double &distB,dVec &dispA, dVec &dispB);
-  inline void RefDistDisp (int slice, int refPtcl, int ptcl,
-			   double &dist, dVec &disp);
+  void RefDistDisp (int slice, int refPtcl, int ptcl,
+		    double &dist, dVec &disp);
   //  inline double Distance (int slice, int ptcl1, int ptcl2);Not used?
   inline dVec Velocity (int sliceA, int sliceB, int ptcl);
   inline void PutInBox (dVec &v);
@@ -149,7 +150,7 @@ public:
   //////////////////////////
   void Read(IOSectionClass &inSection);
   void Allocate();
-
+  void SetupClones();
   inline PathClass(CommunicatorClass &communicator,
 		   RandomClass &random);
   friend void SetupPathNaCl(PathClass &path);
@@ -170,6 +171,7 @@ public:
   bool OpenPaths;
   void InitOpenPaths();
   void DistanceToTail();
+  MirroredClass<int> Weight;
 };
 
 inline bool PathClass::HasFermions(const Array<int,1>& activeParticles)
@@ -278,6 +280,7 @@ inline PathClass::PathClass (CommunicatorClass &communicator,
 
   //  OpenPaths=true;
   OpenPaths=false; //turns off open loops (Should be read at some poitn)
+  Weight=1;
 
   cerr<<"Out of pathclass constructor"<<endl;
 }
@@ -368,32 +371,6 @@ inline void PathClass::DistDisp (int slice, int ptcl1, int ptcl2,
 
 #ifdef DEBUG
   dVec DBdisp = Path(slice, ptcl2) -Path(slice, ptcl1);
-  for (int i=0; i<NDIM; i++) {
-    while (DBdisp(i) > 0.5*Box(i))
-      DBdisp(i) -= Box(i);
-    while (DBdisp(i) < -0.5*Box(i)) 
-      DBdisp(i) += Box(i);
-    if (fabs(DBdisp(i)-disp(i)) > 1.0e-12){ 
-      cerr<<DBdisp(i)<<" "<<disp(i)<<endl;
-    }
-    //    assert (fabs(DBdisp(i)-disp(i)) < 1.0e-12);
-  }
-#endif
-}
-
-inline void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
-				    double &dist, dVec &disp)
-{
-  disp = Path(slice, ptcl)- RefPath(refPtcl);
-  
-  for (int i=0; i<NDIM; i++) {
-    double n = -floor(disp(i)*BoxInv(i)+0.5);
-    disp(i) += n*IsPeriodic(i)*Box(i);
-  }
-  dist = sqrt(dot(disp,disp));
-
-#ifdef DEBUG
-  dVec DBdisp = Path(slice, ptcl) -RefPath(refPtcl);
   for (int i=0; i<NDIM; i++) {
     while (DBdisp(i) > 0.5*Box(i))
       DBdisp(i) -= Box(i);

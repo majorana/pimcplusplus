@@ -12,6 +12,7 @@ public:
   void Accumulate();
   void WriteBlock();
   void Read(IOSectionClass& IO);
+  int DumpFreq;
   PathDumpClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection)  { 
     Name="PathDump";

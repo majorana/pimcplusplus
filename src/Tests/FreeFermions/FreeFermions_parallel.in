@@ -35,13 +35,13 @@ Section (System)
 
 Section (Action)
 {
-  int MaxLevels = 6;
+  int MaxLevels = 4;
   Array<string,1> PairActionFiles(1) = ["../../PairActions/zero.PairAction"];
 }
 
 Section (Observables)
 {
-  string OutFileBase = "FreeFermions_tau0.0025";
+  string OutFileBase = "FreeFermions_tau0.0025_serial2";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";

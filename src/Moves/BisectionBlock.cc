@@ -1,5 +1,11 @@
 #include "BisectionBlock.h"
 
+void BisectionBlockClass::WriteRatio()
+{
+
+  //Do nothing for now
+}
+
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
   string permuteType, speciesName;

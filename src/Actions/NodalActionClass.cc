@@ -398,7 +398,7 @@ double FreeNodalActionClass::LineSearchDist (int slice)
   int first = species.FirstPtcl;
   int last = species.LastPtcl;
 
-  double maxDist = MaxDist (slice);
+  //  double maxDist = MaxDist (slice);
   double det0, det;
   int N = last-first+1;
   double retVal;
@@ -429,6 +429,7 @@ double FreeNodalActionClass::LineSearchDist (int slice)
   bool done = false;
   // First, find first sign change
   det = det0;
+  double maxDist=sqrt(dot(PathData.Path.GetBox(),PathData.Path.GetBox()));
   while ((det*det0 > 0.0) && ((maxFactor*dist)<maxDist)) {
     maxFactor *= 2.0;
     for (int i=0; i<N; i++) 
@@ -458,7 +459,7 @@ double FreeNodalActionClass::LineSearchDist (int slice)
   // Restore original Path position
   for (int i=0; i<N; i++)
     Path (slice, i+first) = SavePath(i);
-  return min (maxDist, retVal);
+  return retVal; //min (maxDist, retVal);
 }
 
 
@@ -600,7 +601,7 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
     if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
       dist2 = sqrt(-1.0);
     else {
-      double lineDist = LineSearchDist (slice+skip);
+      //      double lineDist = LineSearchDist (slice+skip);
       dist2 = LineSearchDist (slice+skip);
       //fprintf (stderr, "%1.12e %1.12e\n", lineDist, dist2);
       if (dist2 < 0.0)

@@ -16,9 +16,10 @@ def GetPaths(infile):
 def InitVisualPaths(pathData):
      visualPath=[]
      visualBall=[]
+#     print "Path Data is ",pathData
      numPaths=len(pathData[0])
      for pathNum in range(0,numPaths):
-          visualPath.append(curve(color=color.blue,radius=0.2))
+          visualPath.append(curve(color=color.blue,radius=0.02))
           visualBall.append(sphere(pos=pathData[0,0,0], radius=0.05, color=color.red))
      return (visualPath,visualBall)
 
@@ -51,8 +52,8 @@ def PlotPaths(pathData,visualPath,visualBall,mcTime,ballTime):
           mcTime=maxMCTime-1
      numPaths=len(pathData[mcTime])
      for pathNum in range(0,numPaths):
-          visualPath[pathNum]=(curve(color=color.blue,radius=2.2))
-          visualBall[pathNum]=sphere(pos=(Id(pathData,mcTime,pathNum,ballTime)), radius=2.1, color=color.red)
+          visualPath[pathNum]=(curve(color=color.blue,radius=0.02))
+          visualBall[pathNum]=sphere(pos=(Id(pathData,mcTime,pathNum,ballTime)), radius=0.1, color=color.red)
 #          visualBall[pathNum]=sphere(pos=(pathData[mcTime,pathNum,ballTime]), radius=2.1, color=color.red)
           numSlices=len(pathData[mcTime][pathNum])
           for slice in range(0,numSlices):
@@ -71,10 +72,11 @@ dirName=fileString[0:dotLoc]
 if not(os.access(dirName,os.F_OK)):
      os.mkdir(dirName)
 os.chdir(dirName)
+infile.OpenSection("Observables")
 infile.OpenSection("PathDump")
 pathData=GetPaths(infile)
 infile.CloseSection()
-
+infile.CloseSection()
 ##c = controls() # Create controls window
 
 # Create a button in the controls window:

@@ -87,7 +87,8 @@ void PairCorrelationClass::WriteBlock()
   double norm=0.0;
   int N1 = PathData.Species(Species1).NumParticles;
   int N2 = PathData.Species(Species2).NumParticles;
-  norm = (double)TotalCounts * (double)(N1*N2)/PathData.Path.GetVol();
+  norm = (double)TotalCounts * PathData.Path.TotalNumSlices*
+    (double)(N1*N2)/PathData.Path.GetVol();
 
   if (Species1==Species2){//Normalizes things when species are same
     norm *= 0.5;
@@ -166,11 +167,11 @@ void PairCorrelationClass::Accumulate()
     return;
   }
 
-
+  TotalCounts++;
   /// HACK HACK HACK
   if (Species1==Species2) {
     for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
-      TotalCounts++;
+
       for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
 	for (int ptcl2=ptcl1+1;ptcl2<=species1.LastPtcl;ptcl2++){
 	  

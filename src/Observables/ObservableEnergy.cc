@@ -134,11 +134,12 @@ void EnergyClass::Accumulate()
   spring = dU = 0.0;
   for (int slice=0; slice<numLinks; slice++) {
     double sp, du,v;
+    //    cerr<<"My weight is "<<PathData.Path.Weight;
     PathData.Action.Energy(slice, 0, sp, du);
     v=PathData.Action.PotentialEnergy(slice);
-    dU += du;
-    spring += sp;
-    V += v;
+    dU += du; //*PathData.Path.Weight;
+    spring += sp; //*PathData.Path.Weight;
+    V += v; //*PathData.Path.Weight;
   }
 
   double node = 0.0;

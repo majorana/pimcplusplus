@@ -105,7 +105,7 @@ public:
   void Read(IOSectionClass &io);
   void Accept();
   void Reject();
-
+  virtual void WriteRatio()=0;
   virtual void MakeMove()=0;
   MultiStageClass(PathDataClass &pathData, IOSectionClass &outSection) : 
     ParticleMoveClass(pathData,outSection) 
