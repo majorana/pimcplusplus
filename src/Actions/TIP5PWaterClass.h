@@ -26,11 +26,25 @@ public:
   int FindCOM(int ptcl);
   double ProtonKineticAction (int slice1, int slice2, const Array<int,1> &changedParticles, int level);
   double ProtonKineticEnergy (int slice1, int slice2, int level);
+  double SecondProtonKineticAction(int startSlice, int endSlice, const Array<int,1> &activeParticles,int level);
+  double SecondProtonKineticEnergy(int startSlice, int endSlice, int level);
   double dotprod(dVec vec1, dVec vec2, double mag);
+  int FindOtherProton(int ptcl);
+  double NewRotKinAction(int startSlice, int endSlice, const Array<int,1> &activeParticles1,const Array<int, 1> &activeParticles2, int level);
+  double NewRotKinEnergy(int startSlice, int endSlice, int level);
+  dVec CrossProd(dVec v1, dVec v2);
+  double Mag(dVec v);
+  double GetAngle(dVec v1, dVec v2);
+  dVec Normalize(dVec v);
+  dVec Scale(dVec v, double scale);
+  dVec GetBisector(dVec v1, dVec v2);
   TIP5PWaterClass (PathDataClass &pathData);
 };
 
 const double O_H_moment_arm = 0.9572;
 const double lambda_p = 0.047848;
+//const double HOH_angle = 104.52;
+const double HOH_angle = 1.8242;
+const double HOH_half_angle = HOH_angle/2;
 
 #endif

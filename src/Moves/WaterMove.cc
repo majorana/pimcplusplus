@@ -26,6 +26,48 @@ dVec WaterTranslate::Translate(double epsilon)
 	return translate;
 }
 
+/*
+// MODIFIED VERSION
+void WaterTranslate::Molecule2Atoms(int moleculeNum)
+{
+
+  coord_loc.resize(3);
+  int speciesO = PathData.Path.SpeciesNum("O");
+  int speciese = PathData.Path.SpeciesNum("e");
+  int speciesp = PathData.Path.SpeciesNum("p");
+  coord_loc(0)=PathData.Path.Species(speciesO).FirstPtcl+moleculeNum;
+  coord_loc(1)=PathData.Path.Species(speciesp).FirstPtcl+moleculeNum;
+  coord_loc(2)=PathData.Path.Species(speciese).FirstPtcl+moleculeNum;
+
+  //cerr<<"The values of coord_loc are "<<coord_loc(0)<<" ";
+  //cerr<<coord_loc(1)<<" ";
+  //cerr<<coord_loc(2)<<" ";
+  //cerr<<endl;
+  //cerr<<"leave function"<<endl;
+
+}
+
+void WaterRotate::Molecule2Atoms(int moleculeNum)
+{
+
+  coord_loc.resize(3);
+  int speciesO = PathData.Path.SpeciesNum("O");
+  int speciese = PathData.Path.SpeciesNum("e");
+  int speciesp = PathData.Path.SpeciesNum("p");
+  coord_loc(0)=PathData.Path.Species(speciesO).FirstPtcl+moleculeNum;
+  coord_loc(1)=PathData.Path.Species(speciesp).FirstPtcl+moleculeNum;
+  coord_loc(2)=PathData.Path.Species(speciese).FirstPtcl+moleculeNum;
+
+  //cerr<<"The values of coord_loc are "<<coord_loc(0)<<" ";
+  //cerr<<coord_loc(1)<<" ";
+  //cerr<<coord_loc(2)<<" ";
+  //cerr<<endl;
+  //cerr<<"leave function"<<endl;
+}
+*/
+
+//ORIGINAL
+
 void WaterTranslate::Molecule2Atoms(int moleculeNum)
 {
 
@@ -42,16 +84,17 @@ void WaterTranslate::Molecule2Atoms(int moleculeNum)
   int numElectrons=PathData.Path.Species(speciese).LastPtcl-
     PathData.Path.Species(speciese).FirstPtcl+1;
   coord_loc(4)=PathData.Path.Species(speciese).FirstPtcl+moleculeNum+numElectrons/2;
-/*  cerr<<"The values of coord_loc are "<<coord_loc(0)<<" ";
-  cerr<<coord_loc(1)<<" ";
-  cerr<<coord_loc(2)<<" ";
-  cerr<<coord_loc(3)<<" ";
-  cerr<<coord_loc(4)<<" ";
-  cerr<<endl;
-  cerr<<"leave function"<<endl;
-*/
+  //cerr<<"The values of coord_loc are "<<coord_loc(0)<<" ";
+  //cerr<<coord_loc(1)<<" ";
+  //cerr<<coord_loc(2)<<" ";
+  //cerr<<coord_loc(3)<<" ";
+  //cerr<<coord_loc(4)<<" ";
+  //cerr<<endl;
+  //cerr<<"leave function"<<endl;
 }
 
+
+//ORIGINAL
 
 void WaterRotate::Molecule2Atoms(int moleculeNum)
 {
@@ -68,15 +111,13 @@ void WaterRotate::Molecule2Atoms(int moleculeNum)
   int numElectrons=PathData.Path.Species(speciese).LastPtcl-
     PathData.Path.Species(speciese).FirstPtcl+1;
   coord_loc(4)=PathData.Path.Species(speciese).FirstPtcl+moleculeNum+numElectrons/2;
-/*  cerr<<"The values water of coord_loc are "<<coord_loc(0)<<" ";
-  cerr<<coord_loc(1)<<" ";
-  cerr<<coord_loc(2)<<" ";
-  cerr<<coord_loc(3)<<" ";
-  cerr<<coord_loc(4)<<" ";
-  cerr<<endl;
-  cerr<<"leave function"<<endl;
-*/
-
+  //cerr<<"The values water of coord_loc are "<<coord_loc(0)<<" ";
+  //cerr<<coord_loc(1)<<" ";
+  //cerr<<coord_loc(2)<<" ";
+  //cerr<<coord_loc(3)<<" ";
+  //cerr<<coord_loc(4)<<" ";
+  //cerr<<endl;
+  //cerr<<"leave function"<<endl;
 }
 
 void WaterTranslate::MakeMove()
@@ -91,11 +132,10 @@ void WaterTranslate::MakeMove()
 // We want to evaluate the kinetic action only between oxygens (i.e. COMs)
   Array<int,1> OActiveParticles;
   OActiveParticles.resize(1);
-  Array<int,1> HActiveParticles;
-  HActiveParticles.resize(2);
   
 // choose a time slice to move
   int numSlices = PathData.Path.TotalNumSlices;
+//cerr << "numSlices is " << numSlices;
   int slice=0;
   int endSlice = 0;
   int startSlice = 0;
@@ -104,6 +144,7 @@ void WaterTranslate::MakeMove()
     slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
     startSlice = slice-1;
     endSlice = slice+1;
+//cerr << ".  We chose slice " << slice << endl;
   }
 
   Molecule2Atoms(choosemol);
@@ -112,20 +153,19 @@ void WaterTranslate::MakeMove()
     ActiveParticles(i)=coord_loc(i);
     //cerr<<"My coord_loc is "<<i<<" "<<coord_loc(i)<<endl;
   }
+//cerr << "Assigned ActiveParticles " << ActiveParticles << endl;
   OActiveParticles(0) = ActiveParticles(0);
-  HActiveParticles(0) = ActiveParticles(1);
-  HActiveParticles(1) = ActiveParticles(2);
 
   double oldAction = 0.0;
  oldAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
   oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
-//  oldAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
   dVec move = Translate(step); 
   double move_mag = sqrt(move(0)*move(0) + move(1)*move(1) + move(2)*move(2));
+//cerr << "going to move " << move << " with magnitude " << move_mag << endl;
   for(int i=0;i<coord_loc.size();i++){
     dVec old_coord=PathData.Path(slice,coord_loc(i));
     dVec new_coord = old_coord + move; 
-    //cerr<<"New Coord is "<<new_coord<<endl;
+//cerr<< i << "; moved "<<old_coord << " to " << new_coord<<endl;
     PathData.Path.SetPos(slice,coord_loc(i),new_coord);
   }
  
@@ -133,7 +173,6 @@ void WaterTranslate::MakeMove()
  newAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
 //cerr << "Potential returned " << newAction;
   newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
-//  newAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
 //cerr << " and with kinetic the action is " << newAction << endl;
   //cerr<<"TRANSLATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
@@ -144,7 +183,7 @@ void WaterTranslate::MakeMove()
     //cerr<<"TRANSLATE:  I've accepted " << NumAccepted << " " << NumMoves+1 <<endl;
   }
   else {
-    //cerr<<"TRANSLATE:  I've rejected"<<endl;
+   //cerr<<"TRANSLATE:  I've rejected"<<endl;
     PathData.RejectMove(startSlice,endSlice,ActiveParticles);
   }
   NumMoves++;
@@ -164,9 +203,11 @@ void WaterRotate::MakeMove()
     PathData.Path.Species(speciesO).FirstPtcl+1;
   int choosemol = (int)floor(PathData.Path.Random.Local()*numWater);
   Array<int,1> HActiveParticles;
-  HActiveParticles.resize(2);
+  HActiveParticles.resize(1);
   Array<int,1> OActiveParticles;
   OActiveParticles.resize(1);
+  Array<int,1> p2ActiveParticles;
+  p2ActiveParticles.resize(1);
 
 // choose a time slice to move
   int numSlices = PathData.Path.TotalNumSlices;
@@ -187,7 +228,8 @@ void WaterRotate::MakeMove()
   }
   OActiveParticles(0) = ActiveParticles(0);
   HActiveParticles(0) = ActiveParticles(1);
-  HActiveParticles(1) = ActiveParticles(2);
+//  HActiveParticles(1) = ActiveParticles(2);
+  p2ActiveParticles(0) = ActiveParticles(2);
 
 /*  these lines are just here for testing the rotation move ****
   int oxy = 0;
@@ -201,7 +243,9 @@ void WaterRotate::MakeMove()
   oldAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
   oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //  oldAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
-  oldAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
+//  oldAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
+//  oldAction += PathData.Actions.TIP5PWater.SecondProtonKineticAction(startSlice,endSlice,p2ActiveParticles,0);
+  oldAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,p2ActiveParticles,0);
 
   int x,y;
   int z = (int)floor(3*PathData.Path.Random.Local());
@@ -238,7 +282,9 @@ void WaterRotate::MakeMove()
   newAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
   newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //  newAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
-  newAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
+//  newAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
+//  newAction += PathData.Actions.TIP5PWater.SecondProtonKineticAction(startSlice,endSlice,p2ActiveParticles,0);
+  newAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,p2ActiveParticles,0);
 
 //  cerr<<"ROTATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
  
