@@ -175,7 +175,7 @@ inline double BicubicSpline::operator() (double x, double y)
   TinyMatrix<double,4,4> Z;
   TinyVector<double,4> a, b;
 
-  int ix = Ygrid->ReverseMap(x);  
+  int ix = Xgrid->ReverseMap(x);  
   int iy = Ygrid->ReverseMap(y);
 
   ix = max(0,ix); ix = min(ix, Nx-2);
@@ -342,7 +342,7 @@ inline double MultiBicubicSpline::operator() (double x, double y, int iz)
   TinyMatrix<double,4,4> Z;
   TinyVector<double,4> a, b;
 
-  int ix = Ygrid->ReverseMap(x);  
+  int ix = Xgrid->ReverseMap(x);  
   int iy = Ygrid->ReverseMap(y);
 
   ix = max(0,ix); ix = min(ix, Nx-2);
@@ -399,7 +399,7 @@ inline void MultiBicubicSpline::operator() (double x, double y,
   TinyMatrix<double,4,4> Z;
   TinyVector<double,4> a, b;
 
-  int ix = Ygrid->ReverseMap(x);  
+  int ix = Xgrid->ReverseMap(x);  
   int iy = Ygrid->ReverseMap(y);
 
   ix = max(0,ix); ix = min(ix, Nx-2);

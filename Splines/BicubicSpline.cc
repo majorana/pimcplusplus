@@ -137,6 +137,156 @@ void BicubicSpline::BiUpdate()
   BiUpToDate = true;
 }
 
+
+
+
+
+void MultiBicubicSpline::XUpdate(int iy)
+{
+  Grid &x = *Xgrid;
+  Array<double,1> mu(Nx);
+  
+  for (int iz=0; iz<Nz; iz++) {
+    // Set up tridiagonal set of equations
+    // Initialize RHS of equations
+    F(0,iy,iz).dzdx = 1.5*(F(1,iy,iz).z-F(0,iy,iz).z)/(x(1)-x(0));
+    F(Nx-1,iy,iz).dzdx = 1.5*(F(Nx-1,iy,iz).z-F(Nx-2,iy,iz).z)/(x(Nx-1)-x(Nx-2));
+    mu(0) = 0.5;
+    
+    // Solve tri-diagonal set of equations.  First eliminate lower
+    // elements.
+    for (int j=1; j<(Nx-1); j++) {
+      double lambda = 0.5*(x(j+1)-x(j))/(x(j+1)-x(j-1));
+      mu(j) = 0.5 - lambda;
+      F(j,iy,iz).dzdx = 
+	3.0*(lambda*(F(j,iy,iz).z-F(j-1,iy,iz).z)/(x(j)-x(j-1)) + 
+	     mu(j) *(F(j+1,iy,iz).z-F(j,iy,iz).z)/(x(j+1)-x(j)));
+      double cj = 1.0 - lambda * mu(j-1);
+      F(j,iy,iz).dzdx -= lambda * F(j-1,iy,iz).dzdx;
+      mu(j) /= cj;
+      F(j,iy,iz).dzdx /= cj;
+    }
+    // Last element
+    int j = Nx-1;
+    double lambda = 0.5;
+    mu(j) = 0.5 - lambda;
+    F(j,iy,iz).dzdx = 3.0*(lambda*(F(j,iy,iz).z-F(j-1,iy,iz).z)/(x(j)-x(j-1)));
+    double cj = 1.0 - lambda * mu(j-1);
+    F(j,iy,iz).dzdx -= lambda * F(j-1,iy,iz).dzdx;
+    mu(j) /= cj;
+    F(j,iy,iz).dzdx /= cj;
+    
+    // Now last dzdx is correct.  We proceed upward, back substituting.
+    for (j=Nx-2; j>=0; j--) {
+      F(j,iy,iz).dzdx -= mu(j) * F(j+1,iy,iz).dzdx;
+    }
+  }
+  XUpToDate(iy) = true;
+}
+
+
+
+
+
+void MultiBicubicSpline::YUpdate(int ix)
+{
+  Grid &y = *Ygrid;
+  Array<double,1> mu(Ny);
+
+  for (int iz=0; iz<Nz; iz++) {
+    // Set up tridiagonal set of equations
+    // Initialize RHS of equations
+    F(ix,0,iz).dzdy = 1.5*(F(ix,1,iz).z-F(ix,0,iz).z)/(y(1)-y(0));
+    F(ix,Ny-1,iz).dzdy = 
+      1.5*(F(ix,Ny-1,iz).z-F(ix,Ny-2,iz).z)/(y(Ny-1)-y(Ny-2));
+    mu(0) = 0.5;
+    
+    // Solve tri-diagonal set of equations.  First eliminate lower
+    // elements.
+    for (int j=1; j<(Ny-1); j++) {
+      double lambda = 0.5*(y(j+1)-y(j))/(y(j+1)-y(j-1));
+      mu(j) = 0.5 - lambda;
+      F(ix,j,iz).dzdy = 
+	3.0*(lambda*(F(ix,j,iz).z-F(ix,j-1,iz).z)/(y(j)-y(j-1)) + 
+	     mu(j) *(F(ix,j+1,iz).z-F(ix,j,iz).z)/(y(j+1)-y(j)));
+      double cj = 1.0 - lambda * mu(j-1);
+      F(ix,j,iz).dzdy -= lambda * F(ix,j-1,iz).dzdy;
+      mu(j) /= cj;
+      F(ix,j,iz).dzdy /= cj;
+    }
+    // Last element
+    int j = Ny-1;
+    double lambda = 0.5;
+    mu(j) = 0.5 - lambda;
+    F(ix,j,iz).dzdy = 3.0*(lambda*(F(ix,j,iz).z-F(ix,j-1,iz).z)/(y(j)-y(j-1)));
+    double cj = 1.0 - lambda * mu(j-1);
+    F(ix,j,iz).dzdy -= lambda * F(ix,j-1,iz).dzdy;
+    mu(j) /= cj;
+    F(ix,j,iz).dzdy /= cj;
+    
+    // Now last dzdy is correct.  We proceed upward, back substituting.
+    for (j=Ny-2; j>=0; j--) {
+      F(ix,j,iz).dzdy -= mu(j) * F(ix,j+1,iz).dzdy;
+    }
+  }
+  YUpToDate(ix) = true;
+}
+
+
+
+
+void MultiBicubicSpline::BiUpdate()
+{
+  // First, update X and Y derivatives
+  for (int i=0; i<Ny; i++)
+    if (!XUpToDate(i)) XUpdate(i);
+  for (int i=0; i<Nx; i++)
+    if (!YUpToDate(i)) YUpdate(i);
+
+  Grid &x = *Xgrid;
+  Array<double,1> mu(Nx);
+  for (int iz=0; iz<Nz; iz++) {
+    for (int iy=0; iy<Ny; iy++) {
+      // Set up tridiagonal set of equations
+      // Initialize RHS of equations
+      F(0,iy,iz).d2zdxdy = 1.5*(F(1,iy,iz).dzdy-F(0,iy,iz).dzdy)/(x(1)-x(0));
+      F(Nx-1,iy,iz).d2zdxdy = 
+	1.5*(F(Nx-1,iy,iz).dzdy-F(Nx-2,iy,iz).dzdy)/(x(Nx-1)-x(Nx-2));
+      mu(0) = 0.5;
+      
+      // Solve tri-diagonal set of equations.  First eliminate lower
+      // elements.
+      for (int j=1; j<(Nx-1); j++) {
+	double lambda = 0.5*(x(j+1)-x(j))/(x(j+1)-x(j-1));
+	mu(j) = 0.5 - lambda;
+	F(j,iy,iz).d2zdxdy = 
+	  3.0*(lambda*(F(j,iy,iz).dzdy-F(j-1,iy,iz).dzdy)/(x(j)-x(j-1))
+	       +mu(j) *(F(j+1,iy,iz).dzdy-F(j,iy,iz).dzdy)/(x(j+1)-x(j)));
+	double cj = 1.0 - lambda * mu(j-1);
+	F(j,iy,iz).d2zdxdy -= lambda * F(j-1,iy,iz).d2zdxdy;
+	mu(j) /= cj;
+	F(j,iy,iz).d2zdxdy /= cj;
+      }
+      // Last element
+      int j = Nx-1;
+      double lambda = 0.5;
+      mu(j) = 0.5 - lambda;
+      F(j,iy,iz).d2zdxdy = 
+	3.0*(lambda*(F(j,iy,iz).dzdy-F(j-1,iy,iz).dzdy)/(x(j)-x(j-1)));
+      double cj = 1.0 - lambda * mu(j-1);
+      F(j,iy,iz).d2zdxdy -= lambda * F(j-1,iy,iz).d2zdxdy;
+      mu(j) /= cj;
+      F(j,iy,iz).d2zdxdy /= cj;
+      
+      // Now last d2zdxdy is correct.  We proceed upward, back substituting.
+      for (j=Nx-2; j>=0; j--) {
+	F(j,iy,iz).d2zdxdy -= mu(j) * F(j+1,iy,iz).d2zdxdy;
+      }
+    }
+  }
+  BiUpToDate = true;
+}
+
   
 
 
