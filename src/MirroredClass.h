@@ -51,8 +51,8 @@ public:
   inline operator Array<T,1>&()       { return Data[ActiveCopy];           }
   inline T  operator()(int i) const   { return Data[ActiveCopy](i);        }
   inline T& operator()(int i)         { return Data[ActiveCopy](i);        }
-  inline void AcceptCopy ()           { Data[OLDMODE] = Data[NEWMODE];                 }
-  inline void RejectCopy ()           { Data[OLDMODE] = Data[NEWMODE];                 }
+  inline void AcceptCopy ()           { Data[OLDMODE] = Data[NEWMODE];     }
+  inline void RejectCopy ()           { Data[NEWMODE] = Data[OLDMODE];     }
   inline void AcceptCopy (int i)
   { Data[OLDMODE](i) = Data[NEWMODE](i); }
   inline void RejectCopy (int i)
