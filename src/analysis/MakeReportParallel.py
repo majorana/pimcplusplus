@@ -91,6 +91,9 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      hlabel=infiles.ReadVar("xlabel")[0]
      vlabel=infiles.ReadVar("ylabel")[0]
      data=infiles.ReadVar("y")
+     print "My data is ",data
+     if data==[None]:
+          return
      y = AvgLastVec(data)
      x=infiles.ReadVar("x")[0]
      description=infiles.ReadVar("Description")[0]
@@ -358,7 +361,7 @@ def ProcessMove(doc,infiles):
      doc.append(Heading(1,"Moves"))
      myTable=Table()
      myTable.body=[['Moves','Acceptance']]
-     myTable.width='50%'
+     myTable.width='100%'
      infiles.OpenSection("Moves")
      numMoves=infiles.CountSections()
      for i in range (0, numMoves):
@@ -374,6 +377,44 @@ def ProcessMove(doc,infiles):
                myTable.body.append([name+" ",totAccept/numAccept])
           else:
                myTable.body.append([name,"No acceptance available"])
+          numStages=infiles.CountSections()
+          print "The number of stages is",numStages
+          if numStages!=0:
+               stageTable=Table()
+               stageTable.body=[['Stages','Acceptance',"Total Attempts"]]
+               stageTable.width='100%'
+          for i in range (0, numStages):
+               infiles.OpenSection(i)
+               name=infiles.GetName()
+               ar = Avg(infiles.ReadVar("AcceptRatio"))
+               if (ar!=None):
+                    totAccept=ar[0]
+                    numAccept=0
+                    for counter in range(1,len(ar)):
+                         totAccept=totAccept+ar[counter]
+                         numAccept=numAccept+1
+                    stageTable.body.append([name+repr(i)+" ",totAccept/numAccept,""])
+               else:
+                    ar=Avg(infiles.ReadVar("Acceptance Ratio"))
+                    if (ar!=None):
+                         totAccept=ar[0]
+                         numAccept=0
+                         for counter in range(1,len(ar)):
+                              totAccept=totAccept+ar[counter]
+                              numAccept=numAccept+1
+                         ar=Avg(infiles.ReadVar("Perms Tried"))
+                         if (ar!=None):
+                              totPerm=ar[0]
+                              numPerm=1
+                              for counter in range(1,len(ar)):
+                                   totPerm=totPerm+ar[counter]
+                                   numPerm=numPerm+1
+                              stageTable.body.append(["PermutationStage"+" ",totAccept/numAccept,(totPerm+0.0)/(numPerm+0.0)])
+                    else:
+                         myTable.body.append([name,"No acceptance available"])
+               infiles.CloseSection()
+          if numStages!=0:
+               myTable.body.append(["StageInfo",stageTable])
           infiles.CloseSection()
      infiles.CloseSection() # "Moves"
      doc.append(myTable)
@@ -421,7 +462,7 @@ for counter in range(0,numSections):
      infiles.OpenSection(counter)
      print infiles.GetName()
      myType=infiles.ReadVar("Type")[0]
-     print "myType = " + myType
+#     print "myType = " + myType
      if myType=="Scalar":
           currNum=ProcessScalarSection(infiles,doc,currNum)
           doc.append(HR())

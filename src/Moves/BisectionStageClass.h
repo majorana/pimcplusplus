@@ -20,7 +20,7 @@ public:
 		      IOSectionClass outSection) : 
     LocalStageClass(pathData,outSection),
     NumImage(1),
-    AcceptRatioVar("AcceptanceRatio",OutSection,pathData.Path.Communicator) 
+    AcceptRatioVar("AcceptRatio",OutSection,pathData.Path.Communicator) 
   { 
     //do nothing for now
     BisectionLevel = level;

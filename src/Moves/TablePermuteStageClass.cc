@@ -36,11 +36,12 @@ void TablePermuteStageClass::WriteRatio()
   for (int len=0;len<4;len++){
     totalAttempts=totalAttempts+numAcceptTotal(len);
     if (numAttemptTotal(len)!=0)
-      ///divides by 2because accept gets called twice in acepting stages
-      ratioTotal(len)=(double)numAcceptTotal(len)/(2.0*(double)numAttemptTotal(len));
+
+      ratioTotal(len)=(double)numAcceptTotal(len)/((double)numAttemptTotal(len));
     else
       ratioTotal(len)=0.0;
   }
+      ///divides by 2because accept gets called twice in acepting stages
   for (int i=0;i<numAttemptTotal.size();i++)
     numAttemptTotal(i)=(int)(numAttemptTotal(i)/2);
       
