@@ -14,14 +14,16 @@ protected:
 public:
   ParticleClass Particle1, Particle2;
   bool UsePBC;
+  int NumBetas;
   Array<double,1> Box;
   PseudoHamiltonian *PH;
-  double LargestBeta;
+  double SmallestBeta;
   
 #ifdef MAKE_FIT
   virtual void ReadParams  (IOSectionClass &inSection)   = 0;
   virtual void WriteBetaIndependentInfo (IOSectionClass &outSection) = 0;
-  virtual void WriteFit (IOSectionClass &outSection, Rho &rho)= 0;
+  virtual void AddFit (Rho &rho) = 0;
+  virtual void WriteFits(IOSectionClass &outSection) = 0;
 #endif
   virtual bool Read (IOSectionClass &inSection,
 		     double lowestBeta, int NumBetas) = 0;
@@ -37,24 +39,28 @@ private:
   bool GridIsMine;
   Array<double, 1> Coefs;
 public:
-  int Order, NumLevels;
-  double smax;
-  Grid *grid;
+  int Order;
+  Array<double,1> smax;  // Array index is level
+  Grid *qgrid;
   Array<MultiCubicSpline,1> Ukj;
   Array<MultiCubicSpline,1> dUkj;
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);
   void WriteBetaIndependentInfo (IOSectionClass &outSection);
-  void WriteFit (IOSectionClass &outSection, Rho &rho);
+  void AddFit (Rho &rho);
+  void WriteFits(IOSectionClass &outSection);
 #endif
   void Write (IOSectionClass &outSection);
   bool Read  (IOSectionClass &inSection, double lowestBeta,
 	      int NumBetas);
   double U(double r, double rp, double costheta, int level);
   PAszFitClass()
-  { GridIsMine = false; }
+  { 
+    GridIsMine = false; 
+    NumBetas=0;
+  }
   ~PAszFitClass()
-  { if (GridIsMine) delete grid;  }
+  { if (GridIsMine) delete qgrid;  }
 };
 
 

@@ -5,7 +5,7 @@ void PAszFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
   outSection.WriteVar ("Type", "szfit");
   outSection.WriteVar ("Order", Order);
   outSection.NewSection("qGrid");
-  grid->Write(outSection);
+  qgrid->Write(outSection);
   outSection.CloseSection();
 }
 
@@ -13,17 +13,56 @@ void PAszFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 void PAszFitClass::ReadParams(IOSectionClass &inSection)
 {
   assert(inSection.OpenSection ("qGrid"));
-  grid = ReadGrid (inSection);
+  qgrid = ReadGrid (inSection);
   GridIsMine = true;
   assert(inSection.ReadVar ("Order", Order));
   UsePBC = inSection.ReadVar ("Box", Box);
 }
 
-void PAszFitClass::WriteFit (IOSectionClass &outSection, Rho &rho)
+void PAszFitClass::AddFit (Rho &rho)
 {
-  Array<double,2> Coefs (grid->NumPoints, Order);
-  Coefs = 0.0;
-  outSection.WriteVar ("Coefs", Coefs);
+  int NumCoefs = (Order+1)*(Order+2)/2 - 1;
+  NumBetas++;
+  Array<double,2>  UCoefs(qgrid->NumPoints, NumCoefs);
+  Array<double,2> dUCoefs(qgrid->NumPoints, NumCoefs);
+  UCoefs = 0.0;
+  dUCoefs = 0.0;
+
+  if (NumBetas>1) {
+    Ukj.resizeAndPreserve(NumBetas);
+    dUkj.resizeAndPreserve(NumBetas);
+    smax.resizeAndPreserve(NumBetas);
+  }
+  else {
+    Ukj.resize(NumBetas);
+    dUkj.resize(NumBetas);
+    smax.resize(NumBetas);
+  }
+  Ukj(NumBetas-1).Init(qgrid, UCoefs);
+  dUkj(NumBetas-1).Init(qgrid, dUCoefs);
+
+}
+
+void PAszFitClass::WriteFits (IOSectionClass &outSection)
+{
+  int NumCoefs = (Order+1)*(Order+2)/2 - 1;
+  Array<double,2> UCoefs(qgrid->NumPoints, NumCoefs); 
+  Array<double,2> dUCoefs(qgrid->NumPoints, NumCoefs); 
+  double beta = SmallestBeta;
+  for (int i=0; i<NumBetas; i++) {
+    outSection.NewSection("Fit");
+    outSection.WriteVar ("beta", beta);
+    for (int j=0; j<qgrid->NumPoints; j++)
+      for (int k=0; k<NumCoefs; k++) {
+	UCoefs(j,k) = Ukj(i)(j,k);
+	dUCoefs(j,k) = Ukj(i)(j,k);
+      }
+    outSection.WriteVar ("Ucoefs", UCoefs);
+    outSection.WriteVar ("dUcoefs", dUCoefs);
+    outSection.WriteVar ("smax", smax(i));
+    outSection.CloseSection();
+    beta *= 2.0;
+  }
 }
 
 bool PAszFitClass::Read (IOSectionClass &inSection,
