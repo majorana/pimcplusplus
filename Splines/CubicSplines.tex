@@ -1,0 +1,109 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{delarray}
+\author{Kenneth P. Esler Jr.}
+\date{\today}
+\title{Cubic Spline Interpolation in 1, 2 and 3 Dimensions}
+
+\newenvironment{DMatrix}{\begin{array}|{*{20}{c}}|}{\end{array}}
+\newenvironment{MyMatrix}{\begin{array}({*{20}{c}})}{\end{array}}
+
+\begin{document}
+\maketitle
+\abstract{We present the basic equations and algorithms necessary to
+  construct and evaluate cubic interpolating splines in one, two, and
+  three dimensions.  Equations are provided for both natural and
+  periodic boundary conditions.}
+
+\section{One Dimension}
+Let us consider the problem in which we have a function $y(x)$
+specified at a discrete set of points $x_i$, such that $y(x_i) = y_i$.
+We wish to construct a piece-wise cubic polynomial interpolating
+function, $f(x)$, which satisfies the following conditions:
+\begin{itemize}
+\item $f(x_i) = y_i$
+\item $f'(x_i^-) = f'(x_i^+)$
+\item $f''(x_i^-) = f''(x_i+)$
+\end{itemize}
+
+\subsection{Hermite Interpolants}
+In our piecewise representation, we wish to store only the values,
+$y_i$, and first derivatives, $y'_i$, of our function at each point
+$x_i$, which we call {\em knots}.  Given this data, we wish to
+construct the piecewise cubic function to use between $x_i$ and
+$x_{i+1}$ which satisfies the above conditions.  In particular, we
+wish to find the unique cubic polynomial, $P(x)$ satisfying
+\begin{eqnarray}
+P(x_i)      & = & y_i      \label{eq:c1} \\
+P(x_{i+1})  & = & y_{i+1}  \label{eq:c2} \\
+P'(x_i)     & = & y'_i     \label{eq:c3} \\
+P'(x_{i+1}) & = & y'_{i+1} \label{eq:c4}
+\end{eqnarray}
+\begin{eqnarray}
+h_i & \equiv & x_{i+1} - {x_i} \\
+t & \equiv & \frac{x-x_i}{h_i}.
+\end{eqnarray}
+We then define the basis functions,
+\begin{eqnarray}
+p_1(t) & = & (1+2t)(t-1)^2  \label{eq:p1}\\
+q_1(t) & = & t (t-1)^2      \\
+p_2(t) & = & t^2(3-2t)      \\
+q_2(t) & = & t^2(t-1)      \label{eq:q2}
+\end{eqnarray}
+On the interval, $(x_i, x_{i+1}]$, we define the interpolating
+function,
+\begin{equation}
+P(x) = y_i p_1(t) + y_{i+1}p_2(t) + h\left[y'_i q_1(t) + y'_{i+1} q_2(t)\right]
+\end{equation}
+It can be easily verified that $P(x)$ satisfies conditions (\ref{eq:c1})
+through (\ref{eq:c4}).  It is now left to
+determine the proper values for the $y'_i\,$s such that the continuity
+conditions given above are satisfied.
+
+By construction, the value of the function and derivative will match
+at the knots, i.e.
+\begin{equation}
+P(x_i^-) = P(x_i^+), \ \ \ \ P'(x_i^-) = P'(x_i^+).
+\end{equation}
+Then we must now enforce only the second derivative continuity:
+\begin{eqnarray}
+P''(x_i^-) & = & P''(x_i^+) \\
+\frac{1}{h_{i-1}^2}\left[\rule{0pt}{0.3cm}6 y_{i-1} -6 y_i + h_{i-1}\left(2 y'_{i-1} +4 y'_i\right) \right]& = &
+\frac{1}{h_i^2}\left[\rule{0pt}{0.3cm}-6 y_i + 6 y_{i+1} +h_i\left( -4 y'_i -2 y'_{i+1} \right)\right] \nonumber
+\end{eqnarray}
+Let us define
+\begin{eqnarray}
+\lambda_i & \equiv & \frac{h_i}{2(h_i+h_{i-1})} \\
+\mu_i & \equiv & \frac{h_{i-1}}{2(h_i+h_{i-1})}  = \frac{1}{2} - \lambda_i.
+\end{eqnarray}
+Then we may rearrage,
+\begin{equation}
+\lambda_i y'_{i-1} + y'_i + \mu_i y'_{i+1} = \underbrace{3 \left[\lambda_i \frac{y_i - y_{i-1}}{h_{i-1}} + \mu_i \frac{y_{i+1}
+    - y_i}{h_i} \right] }_{d_i}
+\end{equation}
+This equation holds for all $0<i<(N-1)$, so we have a tridiagonal set of
+equations.  The equations for $i=0$ and $i=N-1$ depend on the boundary
+conditions we are using.  For periodic boundary conditions, we have
+\begin{equation}
+\begin{matrix}
+y'_0           & +  & \mu_0 y'_1     &   &                   &            & \dots                   & +  \lambda_0 y'_{N-1} & = & d_0 \\
+\lambda_1 y'_0 & +  & y'_1           & + &  \mu_1 y'_2       &            & \dots                   &                       & = & d_1 \\
+               &    & \lambda_2 y'_1 & + &  y'_2           + & \mu_2 y'_3 & \dots                   &                       & = & d_2 \\
+               &    &                &   &  \vdots           &            &                         &                       &   &     \\
+\mu_{N-1} y'_0 &    &                &   &                   &            & +\lambda_{N-1} y'_{N-1} & +  y'_{N-2}           & = & d_3 
+\end{matrix}
+\end{equation}
+Or, in matrix form, we have,
+\begin{equation}
+\begin{MyMatrix}
+1         & \mu_0     &    0   &   0    & \dots  &      0        & \lambda_0 \\
+\lambda_1 &  1        & \mu_1  &   0    & \dots  &      0        &     0     \\
+0         & \lambda_2 &   1    & \mu_2  & \dots  &      0        &     0     \\
+\vdots    & \vdots    & \vdots & \vdots & \ddots &      1        & \mu_{N-1} \\
+\mu_{N-1} &   0       &   0    &   0    &   0    & \lambda_{N-1} &  1     
+\end{MyMatrix}
+\begin{MyMatrix} y'_0 \\ y'_1 \\ y'_2 \\ \vdots \\ y'_{N-1} \end{MyMatrix} =
+\begin{MyMatrix} d_0  \\  d_1 \\  d_2 \\ \vdots \\  d_{N-1} \end{MyMatrix} .
+\end{equation}
+
+\end{document}

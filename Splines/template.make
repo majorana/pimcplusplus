@@ -1,18 +1,21 @@
-SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc TestTricubic.cc MyTricubicSpline.cc TestMyTricubic.cc QuinticSpline.cc TestQuintic.cc DyutimanTest.cc MultiTricubicSpline.cc TestMultiTricubicSpline.cc TestMultiTricubicSpline2.cc MultiTricubicSpline3.cc TestMultiTricubicSpline3.cc
+SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc TestTricubic.cc MyTricubicSpline.cc TestMyTricubic.cc QuinticSpline.cc TestQuintic.cc DyutimanTest.cc MultiTricubicSpline.cc TestMultiTricubicSpline.cc TestMultiTricubicSpline2.cc MultiTricubicSpline3.cc TestMultiTricubicSpline3.cc PeriodicSpline.cc
 
 IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o  ../IO/InputOutputXML.o
 
 F77Objs = fortran/evtricub.o  fortran/herm3ev.o  fortran/mktricubw.o  fortran/tcspline.o fortran/ibc_ck.o fortran/splinck.o fortran/zonfind.o fortran/tcspeval.o fortran/v_spline.o fortran/bcspline.o fortran/bcspeval.o
 
-Objs:	MyTricubicSpline.o CubicSpline.o QuinticSpline.o DyutimanTest.o MultiTricubicSpline.o MultiTricubicSpline3.o
+Objs:	MyTricubicSpline.o CubicSpline.o QuinticSpline.o DyutimanTest.o MultiTricubicSpline.o MultiTricubicSpline3.o PeriodicSpline.o
 
-all:	FortranObjs TestBicubic TestGrid  TestMyTricubic Objs TestQuintic DyutimanTest TestMultiTricubicSpline TestMultiTricubicSpline2 TestMultiTricubicSpline3
+all:	FortranObjs TestBicubic TestGrid  TestMyTricubic Objs TestQuintic DyutimanTest TestMultiTricubicSpline TestMultiTricubicSpline2 TestMultiTricubicSpline3 TestPeriodic
 
 TestQuintic:	QuinticSpline.o QuinticSplines.o TestQuintic.o
 	$(LD) -o TestQuintic QuinticSpline.o QuinticSplines.o TestQuintic.o $(LIBS)
 
 TestBicubic:	CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o 
 	$(LD) -o TestBicubic CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o $(IOobjs) $(LIBS)
+TestPeriodic:  PeriodicSpline.o TestPeriodic.o Grid.o
+	$(LD) -o TestPeriodic  PeriodicSpline.o TestPeriodic.o Grid.o $(IOobjs) $(LIBS)
+
 
 TestMyTricubic:	CubicSpline.o Grid.o  TestMyTricubic.o MyTricubicSpline.o
 	$(LD) -o TestMyTricubic CubicSpline.o Grid.o TestMyTricubic.o MyTricubicSpline.o $(IOobjs) -Lfortran -lpspline $(LIBS)
