@@ -34,34 +34,34 @@ class IOSectionClass:
 
 
 
-a=IOSectionClass()
-a.OpenFile("grr.h5")
-a.OpenSection("Energies")
-print len(a.ReadVar("PotentialEnergy"))
-a.CloseSection()
-a.OpenSection("ppPC");
-a.OpenSection("grid");
-r = a.ReadVar ("Points");
-print r
+#a=IOSectionClass()
+#a.OpenFile("grr.h5")
+#a.OpenSection("Energies")
+#print len(a.ReadVar("PotentialEnergy"))
+#a.CloseSection()
+#a.OpenSection("ppPC");
+#a.OpenSection("grid");
+#r = a.ReadVar ("Points");
+#print r
 
-b = IOSectionClass()
-b.OpenFile ("junk.dat")
-print b.ReadVar ("string_data")
-print b.ReadVar ("int_2");
-print b.ReadVar ("double_2");
-print b.ReadVar ("bool_2");
-print b.ReadVar ("string_2");
+#b = IOSectionClass()
+#b.OpenFile ("junk.dat")
+#print b.ReadVar ("string_data")
+#print b.ReadVar ("int_2");
+#print b.ReadVar ("double_2");
+#print b.ReadVar ("bool_2");
+#print b.ReadVar ("string_2");
 
-print b.ReadVar ("int_3");
-print b.ReadVar ("double_3");
-print b.ReadVar ("bool_3");
-print b.ReadVar ("string_3");
+#print b.ReadVar ("int_3");
+#print b.ReadVar ("double_3");
+#print b.ReadVar ("bool_3");
+#print b.ReadVar ("string_3");
 
-print 
-print b.ReadVar ("int_4");
-print 
-print b.ReadVar ("double_4");
-print 
-print b.ReadVar ("bool_4");
-print 
-print b.ReadVar ("string_4");
+#print 
+#print b.ReadVar ("int_4");
+#print 
+#print b.ReadVar ("double_4");
+#print 
+#print b.ReadVar ("bool_4");
+#print 
+#print b.ReadVar ("string_4");

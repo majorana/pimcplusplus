@@ -11,6 +11,37 @@ extern "C" PyObject* IOSection_New(PyObject *self, PyObject *args)
 }
 
 
+extern "C" PyObject*
+IOSection_CountSectionsName (PyObject *self, PyObject *args)
+{
+  char *name;
+  void *IOSectionPtr;
+
+  if (!PyArg_ParseTuple (args, "is",&IOSectionPtr,&name))
+    return NULL;
+  else {
+    bool success = ((IOSectionClass*)IOSectionPtr)->CountSections(name);
+    return Py_BuildValue("i",(int)success);
+  }
+}
+
+
+
+
+extern "C" PyObject*
+IOSection_CountSections (PyObject *self, PyObject *args)
+{
+  void *IOSectionPtr;
+
+  if (!PyArg_ParseTuple (args, "i",&IOSectionPtr))
+    return NULL;
+  else {
+    bool success = ((IOSectionClass*)IOSectionPtr)->CountSections();
+    return Py_BuildValue("i",(int)success);
+  }
+}
+
+
 
 extern "C" PyObject*
 IOSection_OpenFile (PyObject *self, PyObject *args)
@@ -108,7 +139,7 @@ IOSection_OpenSectionNameNum (PyObject *self, PyObject *args)
   char *sectionName;
   void *IOSectionPtr;
   int num;
-  if (!PyArg_ParseTuple (args, "isi",&IOSectionPtr,&sectionName,num))
+  if (!PyArg_ParseTuple (args, "isi",&IOSectionPtr,&sectionName,&num))
     return NULL;
   else {
     bool success = ((IOSectionClass*)IOSectionPtr)->OpenSection(sectionName,num);
@@ -122,7 +153,7 @@ IOSection_OpenSectionNum (PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
   int num;
-  if (!PyArg_ParseTuple (args, "ii",&IOSectionPtr,num))
+  if (!PyArg_ParseTuple (args, "ii",&IOSectionPtr,&num))
     return NULL;
   else {
     bool success = ((IOSectionClass*)IOSectionPtr)->OpenSection(num);
@@ -191,11 +222,11 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
   VarClass *varPtr;
   bool success;
   if (!PyArg_ParseTuple (args, "is",&IOSectionPtr,&name))
-    return NULL;
+    return Py_None;
   else {
     varPtr=((IOSectionClass*)IOSectionPtr)->GetVarPtr(name);
     if (varPtr==NULL)
-      return NULL;
+      return Py_None;
     int type=varPtr->Type;
     int dim=varPtr->Dim;
     if (dim == 0) {
@@ -205,7 +236,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	if (success)
 	  return Py_BuildValue("i",val);
 	else
-	  return NULL;
+	  return Py_None;
       }
       else if (type==DOUBLE_TYPE){
 	double val;    
@@ -213,7 +244,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	if (success)
 	  return Py_BuildValue("d",val);
 	else
-	  return NULL;
+	  return Py_None;
       }
       else if (type==STRING_TYPE){
 	string val;    
@@ -221,7 +252,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	if (success)
 	  return Py_BuildValue("s",val.c_str());
 	else
-	  return NULL;
+	  return Py_None;
       }
       else if (type==BOOL_TYPE){
 	bool val;    
@@ -229,7 +260,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	if (success)
 	  return Py_BuildValue("i",(int)val);
 	else
-	  return NULL;
+	  return Py_None;
       }
     }
     // 1D arrays
@@ -247,7 +278,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       if (type==DOUBLE_TYPE){
 	blitz::Array<double,1> val;
@@ -262,7 +293,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       if (type==BOOL_TYPE){
 	blitz::Array<bool,1> val;
@@ -277,7 +308,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       else if (type==STRING_TYPE){
 	blitz::Array<string,1> val;    
@@ -291,7 +322,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject*)array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
     }
     // 2D arrays
@@ -311,7 +342,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       if (type==DOUBLE_TYPE) {
 	blitz::Array<double,2> val;
@@ -328,7 +359,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       if (type==BOOL_TYPE){
 	blitz::Array<bool,2> val;
@@ -345,7 +376,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       else if (type==STRING_TYPE){
 	blitz::Array<string,2> val;    
@@ -364,7 +395,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject*)totalArray;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
     }
     // 3D arrays
@@ -384,7 +415,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       if (type==DOUBLE_TYPE) {
 	blitz::Array<double,3> val;
@@ -401,7 +432,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       if (type==BOOL_TYPE){
 	blitz::Array<bool,3> val;
@@ -418,7 +449,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       else if (type==STRING_TYPE){
 	blitz::Array<string,3> val;    
@@ -439,7 +470,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject*)l0;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
     }
     // 4D arrays
@@ -462,7 +493,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       if (type==DOUBLE_TYPE) {
 	blitz::Array<double,4> val;
@@ -482,7 +513,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       if (type==BOOL_TYPE){
 	blitz::Array<bool,4> val;
@@ -502,7 +533,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject *) array;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
       else if (type==STRING_TYPE){
 	blitz::Array<string,4> val;    
@@ -528,7 +559,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return (PyObject*)l0;
 	}
 	else
-	  return NULL;
+	  return Py_None;
       }
     }
   }
@@ -564,6 +595,10 @@ static PyMethodDef IOSectionMethods[] = {
      "Creates a new section in a new file given the section and file name"},
     {"CloseSection", IOSection_CloseSection, METH_VARARGS,
      "Closes a section"},
+    {"CountSections", IOSection_CountSections, METH_VARARGS,
+     "Counts the total number of sections in the current section"},
+    {"CountSectionsName", IOSection_CountSectionsName, METH_VARARGS,
+     "Counts the total number of sections in the current section"},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
