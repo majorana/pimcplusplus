@@ -150,6 +150,15 @@ public:
   bool ReadVar(string name, T &var)
   {  return (CurrentSection->ReadVar(name, var)); }
 
+  template<class T>
+  bool ReadVar(string name, T &var, T Default)
+  { 
+    bool success = ReadVar(name, var);
+    if (!success)
+      var = Default;
+    return (success);
+  }
+
   /// Writes a variable under the current section.
   /* template <class T>
   void WriteVar(string name, T val)
