@@ -32,7 +32,7 @@ double TIP5PWaterClass::Action (int startSlice, int endSlice,
   int speciesO=Path.SpeciesNum("O");
   int speciesp=Path.SpeciesNum("p");
   int speciese=Path.SpeciesNum("e");
-  double CUTOFF = 9.0; // spherical cutoff in angstroms
+  double CUTOFF = 7.0; // setcutoff: spherical cutoff in angstroms
 
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = activeParticles(ptcl1Index);
@@ -156,7 +156,7 @@ double TIP5PWaterClass::d_dBeta (int startSlice, int endSlice,  int level)
   int speciesO=Path.SpeciesNum("O");
   int speciesp=Path.SpeciesNum("p");
   int speciese=Path.SpeciesNum("e");
-  double CUTOFF = 9.0; // spherical cutoff in angstroms
+  double CUTOFF = 7.0; // setcutoff: spherical cutoff in angstroms
 
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = activeParticles(ptcl1Index);
@@ -265,4 +265,131 @@ double TIP5PWaterClass::OOSeparation (int slice,int ptcl1,int ptcl2)
 void TIP5PWaterClass::Read (IOSectionClass &in)
 {
   //do nothing for now
+}
+
+double TIP5PWaterClass::RotationalKinetic(int startSlice, int endSlice, const Array<int,1> &activeParticles,int level)
+{
+  double RotK = 0.0;
+  int numChangedPtcls = activeParticles.size();
+  int skip = 1<<level;
+  double levelTau = Path.tau* (1<<level);
+  for (int ptclIndex=0; ptclIndex<numChangedPtcls; ptclIndex++){
+    int ptcl = activeParticles(ptclIndex);
+    int species=Path.ParticleSpeciesNum(ptcl);
+    double FourLambdaTauInv=1.0/(4.0*lambda_p*levelTau);
+    for (int slice=startSlice; slice < endSlice;slice+=skip) {
+      dVec vel;
+      vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
+      vel -= COMVelocity(slice,slice+skip,ptcl);
+      double vel_squared = GetAngles(vel);
+      double GaussProd = 1.0;
+//    for (int dim=0; dim<NDIM; dim++) {
+//  	int NumImage=1;
+      double GaussSum=0.0;
+//	for (int image=-NumImage; image<=NumImage; image++) {
+//	  double dist = vel[dim]+(double)image*Path.GetBox()[dim];
+      GaussSum += exp(-vel_squared*FourLambdaTauInv);
+//      }
+
+      GaussProd *= GaussSum;
+//      }
+      RotK -= log(GaussProd);    
+    //RotK += dot(vel,vel)*FourLambdaTauInv; 
+    }
+  }
+  //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+//  cerr << "I'm returning kinetic action " << RotK << endl;
+  return (RotK);
+}
+
+double TIP5PWaterClass::RotationalEnergy(int startSlice, int endSlice, int level)
+{
+  double spring=0.0;
+  // ldexp(double x, int n) = x*2^n
+  double levelTau=ldexp(Path.tau, level);
+//   for (int i=0; i<level; i++) 
+//     levelTau *= 2.0;
+  spring  = 0.0;  
+  int skip = 1<<level;
+  const int NumImage=1;  
+  double vel_squared;
+  double Z = 0.0;
+  double FourLambdaTauInv = 1.0/(4.0*lambda_p*levelTau);
+int count_2 = 0;
+  for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++) {
+int count = 0;
+    // Do free-particle part
+    int speciesNum  = Path.ParticleSpeciesNum(ptcl);
+    if (speciesNum == PathData.Path.SpeciesNum("p")){
+      SpeciesClass &species = Path.Species(speciesNum);
+      for (int slice=startSlice; slice<endSlice; slice+=skip) {
+count ++;
+cerr << "particle " << ptcl << "; I've done this " << count << " times.  On slice " << slice << endl;
+	spring += (0.5*NDIM)/levelTau;
+	dVec vel;
+	vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
+        vel -= COMVelocity(slice,slice+skip,ptcl);
+        vel_squared = GetAngles(vel);
+        double GaussSum;
+        double numSum;
+//      dVec GaussSum=0.0;
+//      dVec numSum=0.0;
+//      for (int dim=0; dim<NDIM; dim++) {
+//        for (int image=-NumImage; image<=NumImage; image++) {
+//	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
+	double d2overFLT = vel_squared*FourLambdaTauInv;
+	double expPart = exp(-d2overFLT);
+        GaussSum = expPart;
+        numSum = -d2overFLT/levelTau* expPart; 
+//	GaussSum[dim] += expPart;
+//	numSum[dim] += -d2overFLT/levelTau* expPart;
+//	}
+//	Z *= GaussSum[dim];
+        Z += GaussSum;
+//      }
+/*      double scalarnumSum=0.0;
+        for (int dim=0;dim<NDIM;dim++) {
+          dVec numProd=1.0;
+	  for (int dim2=0;dim2<NDIM;dim2++) {
+	    if (dim2!=dim)
+	      numProd[dim] *= GaussSum[dim2];
+	    else 
+	      numProd[dim] *=  numSum[dim2];
+	  }
+	  scalarnumSum += numProd[dim];
+        }
+*/
+	//cerr << "Z = " << Z << " scalarnumSum = " << scalarnumSum << endl;
+        spring += numSum; 
+      }
+    }
+  }
+  spring = spring/Z;
+  cerr << "spring = " << spring << endl;
+  return spring;
+}
+
+double TIP5PWaterClass::GetAngles(dVec disp)
+{
+  double x = disp(0);
+  double z = disp(2);
+  double R = O_H_moment_arm;
+  double theta = acos(z/R);  
+  double phi = acos(x/(R*sin(theta)));
+  double omega_squared = theta*theta + phi*phi;
+  double vel_squared = omega_squared*R*R;
+  return vel_squared;
+}
+
+dVec TIP5PWaterClass::COMVelocity (int slice1,int slice2,int ptcl)
+{
+  int speciesO=PathData.Path.SpeciesNum("O");
+  int Optcl;
+  dVec Ovel;
+
+  Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
+  Ovel = PathData.Path.Velocity(slice1, slice2, Optcl);
+//cerr << "I'm correcting velocity for ptcl " << ptcl << " of species " << Path.ParticleSpeciesNum(ptcl) << ".  Found COM oxygen at " << Optcl;
+//cerr << "Returning COM velocity " << Ovel << endl;
+  return Ovel;
 }

@@ -15,8 +15,14 @@ public:
 		 const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
   double OOSeparation (int slice,int ptcl1,int ptcl2);
+  double RotationalKinetic(int startSlice, int endSlice, const Array<int,1> &activeParticles,int level);
+  double RotationalEnergy(int startSlice, int endSlice, int level);
+  double GetAngles(dVec disp);
+  dVec COMVelocity (int slice1,int slice2,int ptcl);
   TIP5PWaterClass (PathDataClass &pathData);
 };
 
+const double O_H_moment_arm = 0.9572;
+const double lambda_p = 0.047848;
 
 #endif

@@ -109,8 +109,9 @@ void WaterTranslateRing::MakeMove()
 //    cerr<<"My coord_loc is "<<i<<" "<<coord_loc(i)<<endl;
   }
 //  cerr << "OLD ";
-  double oldAction = PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
-  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+  double oldAction = 0.0;
+ oldAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
+//  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
   
   dVec move = Translate(step); 
   double move_mag = sqrt(move(0)*move(0) + move(1)*move(1) + move(2)*move(2));
@@ -125,8 +126,9 @@ void WaterTranslateRing::MakeMove()
   }
  
 //  cerr << "NEW " ; 
-  double newAction = PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
-  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+  double newAction = 0.0;
+ newAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
+//  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //  cerr<<"TRANSLATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
     PathData.AcceptMove(startSlice,endSlice,ActiveParticles);
@@ -185,7 +187,8 @@ void WaterRotateRing::MakeMove()
   cerr << "BEFORE " << check << " " << PathData.Path(slice,coord_loc(check)) << old_dist << " ";
 *************************************************************/
 //  cerr << "OLD " ;
-  double oldAction = PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
+  double oldAction = 0.0;
+ oldAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
   oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 
   int x,y;
@@ -223,7 +226,8 @@ void WaterRotateRing::MakeMove()
   cerr << "AFTER " << check << " " << PathData.Path(slice,coord_loc(check)) << old_dist << endl;
  *************************************************************/
 //  cerr << "NEW " ;
-  double newAction = PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
+  double newAction = 0.0;
+newAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
   newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //  cerr<<"ROTATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
  

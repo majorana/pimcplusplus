@@ -538,7 +538,6 @@ inline dVec PathClass::Velocity (int sliceA, int sliceB, int ptcl)
   return vel;
 }
 
-
 inline void PathClass::PutInBox (dVec &v)
 {
 #ifdef DEBUG

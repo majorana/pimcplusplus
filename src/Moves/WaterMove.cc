@@ -81,13 +81,16 @@ void WaterRotate::Molecule2Atoms(int moleculeNum)
 
 void WaterTranslate::MakeMove()
 {
-  double step = 0.4;
+  double step = 0.08;
   int speciesO = PathData.Path.SpeciesNum("O");
   int speciesp = PathData.Path.SpeciesNum("p");
   int speciese = PathData.Path.SpeciesNum("e");
   int  numWater=PathData.Path.Species(speciesO).LastPtcl-
     PathData.Path.Species(speciesO).FirstPtcl+1;
   int choosemol = (int)floor(PathData.Path.Random.Local()*numWater);
+// We want to evaluate the kinetic action only between oxygens (i.e. COMs)
+  Array<int,1> OActiveParticles;
+  OActiveParticles.resize(1);
   
 // choose a time slice to move
   int numSlices = PathData.Path.TotalNumSlices;
@@ -107,9 +110,11 @@ void WaterTranslate::MakeMove()
     ActiveParticles(i)=coord_loc(i);
     //cerr<<"My coord_loc is "<<i<<" "<<coord_loc(i)<<endl;
   }
-  //cerr << "T OLD ";
-  double oldAction = PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
-  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+OActiveParticles(0) = ActiveParticles(0);
+
+  double oldAction = 0.0;
+// oldAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
+  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,OActiveParticles,0); 
   dVec move = Translate(step); 
   double move_mag = sqrt(move(0)*move(0) + move(1)*move(1) + move(2)*move(2));
   for(int i=0;i<coord_loc.size();i++){
@@ -119,10 +124,10 @@ void WaterTranslate::MakeMove()
     PathData.Path.SetPos(slice,coord_loc(i),new_coord);
   }
  
-  //cerr << "NEW " ; 
-  double newAction = PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
+  double newAction = 0.0;
+// newAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
 //cerr << "Potential returned " << newAction;
-  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,OActiveParticles,0); 
 //cerr << " and with kinetic the action is " << newAction << endl;
   //cerr<<"TRANSLATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
@@ -152,6 +157,8 @@ void WaterRotate::MakeMove()
   int  numWater=PathData.Path.Species(speciesO).LastPtcl-
     PathData.Path.Species(speciesO).FirstPtcl+1;
   int choosemol = (int)floor(PathData.Path.Random.Local()*numWater);
+  Array<int,1> HActiveParticles;
+  HActiveParticles.resize(2);
 
 // choose a time slice to move
   int numSlices = PathData.Path.TotalNumSlices;
@@ -170,6 +177,8 @@ void WaterRotate::MakeMove()
   for (int i=0;i<coord_loc.size();i++){
     ActiveParticles(i)=coord_loc(i);
   }
+  HActiveParticles(0) = ActiveParticles(1);
+  HActiveParticles(1) = ActiveParticles(2);
 
 /*  these lines are just here for testing the rotation move ****
   int oxy = 0;
@@ -179,9 +188,10 @@ void WaterRotate::MakeMove()
   PathData.Path.DistDisp(slice,coord_loc(oxy),coord_loc(check),old_dist,r);
   cerr << "BEFORE " << check << " " << PathData.Path(slice,coord_loc(check)) << old_dist << " ";
 *************************************************************/
-//  cerr << "R OLD " ;
-  double oldAction = PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
-  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+  double oldAction = 0.0;
+//  oldAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
+//  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+  oldAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
 
   int x,y;
   int z = (int)floor(3*PathData.Path.Random.Local());
@@ -214,9 +224,11 @@ void WaterRotate::MakeMove()
   PathData.Path.DistDisp(slice,coord_loc(oxy),coord_loc(check),new_dist,r2);
   cerr << "AFTER " << check << " " << PathData.Path(slice,coord_loc(check)) << old_dist << endl;
  *************************************************************/
-//  cerr << "NEW " ;
-  double newAction = PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
-  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+  double newAction = 0.0;
+//  newAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
+//  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+  newAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
+
 //  cerr<<"ROTATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
  
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
