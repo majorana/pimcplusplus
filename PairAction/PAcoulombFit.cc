@@ -175,11 +175,9 @@ void PAcoulombFitClass::WriteFits (IOSectionClass &outSection)
 
 #endif
 
-double PAcoulombFitClass::U(double r, double rp, double costheta, int level)
+double PAcoulombFitClass::U(double q, double z, double s2, int level)
 {
-  double q = 0.5*(r+rp);
   if (q < qgrid->End) {
-    double s2 = r*r + r*rp - 2.0*r*rp*costheta;
     Uj(level)(q, Ucoefs);
     double s2j = 1.0;
     double Usum = 0.0;
@@ -193,15 +191,14 @@ double PAcoulombFitClass::U(double r, double rp, double costheta, int level)
     double beta = SmallestBeta;
     for (int i=0; i<level; i++)
       beta *= 2.0;
-    return (0.5*beta*(Potential->V(r) + Potential->V(rp)));
+    // Coulomb action is independent of z
+    return (beta*Potential->V(q));
   }
 }
 
-double PAcoulombFitClass::dU(double r, double rp, double costheta, int level)
+double PAcoulombFitClass::dU(double q, double z, double s2, int level)
 {
-  double q = 0.5*(r+rp);
   if (q < qgrid->End) {
-    double s2 = r*r + r*rp - 2.0*r*rp*costheta;
     dUj(level)(q, Ucoefs);
     double s2j = 1.0;
     double dUsum = 0.0;
@@ -243,7 +240,7 @@ bool PAcoulombFitClass::Read (IOSectionClass &in,
   // Read the fits
   assert(in.OpenSection("Fits"));
   // Read the qgrid
-  assert(in.OpenSection("qgrid"));
+  assert(in.OpenSection("qGrid"));
   qgrid = ReadGrid (in);
   in.CloseSection();
   GridIsMine=true;
@@ -279,6 +276,7 @@ bool PAcoulombFitClass::Read (IOSectionClass &in,
     assert(in.ReadVar("dUcoefs", temp));
     dUj(betaIndex).Init(qgrid,temp);
     in.CloseSection(); // "Fit"
+    desiredBeta *= 2.0;
   }
   in.CloseSection(); // "Fits"
   return true;

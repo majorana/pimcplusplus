@@ -79,12 +79,12 @@ bool PAszFitClass::Read (IOSectionClass &inSection,
   return (true);
 }
 
-double PAszFitClass::U(double r, double rp, double costheta, int level)
+double PAszFitClass::U(double q, double z, double s2, int level)
 {
   return (0.0);
 }
 
-double PAszFitClass::dU(double r, double rp, double costheta, int level)
+double PAszFitClass::dU(double q, double z, double s2, int level)
 {
   return (0.0);
 }

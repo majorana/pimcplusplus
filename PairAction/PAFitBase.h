@@ -30,9 +30,9 @@ public:
   virtual void WriteFits(IOSectionClass &outSection) = 0;
 #endif
   virtual bool Read (IOSectionClass &inSection,
-		     double lowestBeta, int NumBetas) = 0;
-  virtual double U(double r, double rp, double costheta, int level) = 0;
-  virtual double dU(double r, double rp, double costheta, int level) = 0;
+		     double smallestBeta, int NumBetas) = 0;
+  virtual double U(double q, double z, double s2, int level) = 0;
+  virtual double dU(double q, double z, double s2, int level) = 0;
 };
 
 

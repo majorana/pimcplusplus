@@ -24,8 +24,8 @@ public:
   void Write (IOSectionClass &outSection);
   bool Read  (IOSectionClass &inSection, double lowestBeta,
 	      int NumBetas);
-  double U(double r, double rp, double costheta, int level);
-  double dU(double r, double rp, double costheta, int level);
+  double U (double q, double z, double s2, int level);
+  double dU(double q, double z, double s2, int level);
   PAszFitClass()
   { 
     GridIsMine = false; 

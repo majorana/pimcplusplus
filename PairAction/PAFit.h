@@ -4,7 +4,8 @@
 #include "PAszFit.h"
 #include "PAcoulombFit.h"
 
-inline PairActionFitClass *ReadFit (IOSectionClass &in)
+inline PairActionFitClass *ReadPAFit (IOSectionClass &in, 
+				      double smallestBeta, int numLevels)
 {
   assert (in.OpenSection("Fits"));
   string type;
@@ -20,6 +21,7 @@ inline PairActionFitClass *ReadFit (IOSectionClass &in)
 	 << type << "\".  Exitting.\n";
     exit(1);
   }
+  fit->Read(in, smallestBeta, numLevels);
   return (fit);
 }
 
