@@ -8,7 +8,7 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DNO_COUT -O3 # -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -O3 -ffast-math # -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                           \
   Main.o                             \
@@ -18,6 +18,7 @@ PIMCobjs =                           \
   BlockMove.o                        \
   ObservableClass.o                  \
   Common/Splines/CubicSpline.o       \
+  Common/Splines/MyTricubicSpline.o  \
   Common/Splines/Grid.o              \
   SpeciesClass.o                     \
   Common.o                           \
@@ -58,6 +59,7 @@ TestPermobjs =                       \
   PIMCClass.o                        \
   ObservableClass.o                  \
   Common/Splines/CubicSpline.o       \
+  Common/Splines/MyTricubicSpline.o  \
   Common/Splines/Grid.o              \
   SpeciesClass.o                     \
   Common.o                           \

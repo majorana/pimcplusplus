@@ -176,8 +176,10 @@ void TotalEnergyClass::WriteBlock()
       IOSection.WriteVar ("TotalEnergy", dummy);
       IOVar = IOSection.GetVarPtr("TotalEnergy");
     }
-    else
+    else {
       IOVar->Append(avg);
+      IOSection.FlushFile();
+    }
   }
   ESum = 0.0;
   NumSamples = 0;
