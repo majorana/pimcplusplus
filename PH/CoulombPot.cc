@@ -17,6 +17,7 @@ double CoulombPot::d2Vdr2 (double r)
 
 void CoulombPot::Write(IOSectionClass &out)
 {
+  out.WriteVar("Type", "Coulomb");
   out.WriteVar("Z1Z2", Z1Z2);
 }
 
