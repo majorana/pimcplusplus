@@ -23,7 +23,8 @@ void ExportClass::InitGLStuff()
   glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
   glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-
+  glEnable (GL_MULTISAMPLE);
+  glEnable (GL_COLOR_MATERIAL);
   
 
   glViewport(0, 0, Width, Height);
