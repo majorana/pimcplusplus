@@ -5,7 +5,7 @@
 
 using namespace std;
 
-GLObject::GLObject() : Created(false), Visible(true)
+GLObject::GLObject() : Created(false), Visible(true), Transparent(false)
 {
  
 };
@@ -45,4 +45,14 @@ void GLObject::SetVisible (bool visible)
 bool GLObject::GetVisible ()
 {
   return Visible;
+}
+
+void GLObject::SetTransparent (bool trans)
+{
+  Transparent = trans;
+}
+
+bool GLObject::GetTransparent ()
+{
+  return Transparent;
 }

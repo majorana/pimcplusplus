@@ -76,6 +76,7 @@ public:
   /// Stores number of images to sum over for kinetic action and energy.
   int NumImages;
 
+  Potential &GetPotential (int species1, int species2);
 
   /// Return the all the energies for this processor's segment of
   /// the path.  Must do global sum to get total energy.

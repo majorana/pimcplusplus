@@ -8,7 +8,8 @@
 #include "../Common/Integration/GKIntegration.h"
 
 ///Actionsclass. Stores all the actsion
-void ActionsClass::Read(IOSectionClass &in)
+void 
+ActionsClass::Read(IOSectionClass &in)
 { 
   PathClass &Path=PathData.Path;
   assert(in.ReadVar ("tau", Path.tau));
@@ -282,3 +283,10 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
 	 
 
 // }
+
+
+Potential&
+ActionsClass::GetPotential (int species1, int species2)
+{
+  return *(PairMatrix(species1, species2)->Pot);
+}

@@ -30,6 +30,7 @@ public:
   double Scale, OldScale;
   double Quaternion[4];
   double RotMat[4][4];
+  Vec3 LightPos;
 
   bool OnButtonPress   (GdkEventButton* event);
   bool OnButtonRelease (GdkEventButton* event);

@@ -53,10 +53,10 @@ void VisualClass::MakeFrame(int frame)
   for (int li=0; li<Paths.size(); li++) {
     PathObject* pathObj = new PathObject;
     pathObj->Closed = Paths[li]->Closed;
-    if (Paths[li]->Closed)
+    if (li < 8)
       pathObj->SetColor (0.0, 0.0, 1.0);
     else
-      pathObj->SetColor (1.0, 0.0, 0.0);
+      pathObj->SetColor (0.7, 0.7, 0.0);
     pathObj->SetRadius (min(min(Box[0], Box[1]), Box[2])*0.005);
     if (PathType == TUBES)
       pathObj->TubesSet (Paths[li]->Path);

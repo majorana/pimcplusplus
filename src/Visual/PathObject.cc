@@ -39,19 +39,15 @@ void PathObject::TubesSet(vector<Vec3> &path)
   centroid *= 1.0/N;
 
   float fcolor[4];
-  if (Closed && (fabs(centroid[0]) > 2.0)) {
+  if (false/*Closed && (fabs(centroid[0]) > 2.0)*/) 
     alpha = 0.2;
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);
-    fcolor[0]=1.0-Color[0]; fcolor[1]=1.0-Color[1]; fcolor[2]=1.0-Color[2]; 
-  }
-  else {
+  else 
     alpha = 1.0;
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendEquation(GL_FUNC_ADD);
-    fcolor[0]=Color[0]; fcolor[1]=Color[1]; fcolor[2]=Color[2];
-    //    glBlendFunc(GL_ONE, GL_ZERO);
-  }
+
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendEquation(GL_FUNC_ADD);
+  fcolor[0]=Color[0]; fcolor[1]=Color[1]; fcolor[2]=Color[2]; 
+
 
   glColor3d (Color[0], Color[1], Color[2]);
 

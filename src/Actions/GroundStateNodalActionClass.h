@@ -18,12 +18,16 @@ private:
   Array<double,2> Matrix, Cofactors;
   Array<double,1> UpDists, DownDists;
 
-  Array<Vec3,1> Gradient, TempGrad;
+  Array<Vec3,1> Gradient, Temp, Rions;
+  int NumUp, NumDown, NumIons, NumBands;
+  // This stores the real space grid dimensions
+  LinearGrid xGrid, yGrid, zGrid;
+  double Det         (int slice, int speciesNum);
   double GradientDet (int slice, int speciesNum);
-
-
   bool IonsHaveMoved();
   void UpdateBands();
+  double SimpleDistance (int slice, int species);
+  double LineSearchDistance (int slice, int species);
 public:
   double Action (int slice1, int slice2,
 		 const Array<int,1> &activeParticles, int level);
