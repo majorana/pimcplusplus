@@ -191,8 +191,8 @@ void ActionClass::PrintDensityMatrix()
 
   cerr<<"I'm printing now!"<<endl;
   for (int counter=0;counter<1000;counter++){
-    double q=counter/100.0;
-    cerr<<q<<" "<<((DavidPAClass*)(PairActionVector(0)))->VV(q,0.0,0.0,0)<<endl;
+    //    double q=counter/100.0;
+    //    cerr<<q<<" "<<((DavidPAClass*)(PairActionVector(0)))->VV(q,0.0,0.0,0)<<endl;
   }
   cerr<<"I'm done printing!"<<endl;
 }

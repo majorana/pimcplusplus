@@ -54,33 +54,6 @@ public:
 
 
 
-class TotalEnergyClass : public ObservableClass
-{
-
-private:
-  double ESum;
-  int NumSamples;
-  int TimesCalled;
-  int Freq;
-  int DumpFreq;
-public:
-  void Accumulate();
-  void WriteBlock();
-  void ShiftData(int numTimeSlices);
-  void Read(IOSectionClass& IO) {  
-    assert(IO.ReadVar("name",Name));
-    assert(IO.ReadVar("freq",Freq));
-    assert(IO.ReadVar("dumpFreq",DumpFreq));
-  }
-  TotalEnergyClass(PathDataClass &myPathData, IOSectionClass &ioSection)
-    : ObservableClass(myPathData, ioSection) 
-  {
-    ESum = 0.0;
-    NumSamples = 0;
-    TimesCalled=0;
-  }
-};
-
 
 /// A pair correlation function observable.
 class PairCorrelationClass : public ObservableClass

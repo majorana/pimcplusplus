@@ -2,6 +2,8 @@
 #include "BisectionMoveClass.h"
 #include "MetaMoves.h"
 #include "BlockMove.h"
+#include "ObservableClass.h"
+#include "ObservableEnergy.h"
 
 void PIMCClass::Read(IOSectionClass &in)
 {
@@ -112,7 +114,7 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 
 void PIMCClass::Run()
 {
-  // PathData.Action.PrintDensityMatrix();
+  PathData.Action.PrintDensityMatrix();
   Algorithm.DoEvent();
   //  Array<MoveClass*,1> Moves;
   cerr<<"hello"<<endl;

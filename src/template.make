@@ -12,6 +12,7 @@ DEFS = -DNO_COUT -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -
 
 PIMCobjs =                           \
   Main.o                             \
+  ObservableEnergy.o		     \
   BisectionClass.o                   \
   PIMCClass.o                        \
   MetaMoves.o 			     \
@@ -62,6 +63,7 @@ TestPermobjs =                       \
   MetaMoves.o                        \
   PIMCClass.o                        \
   ObservableClass.o                  \
+  ObservableEnergy.o                 \
   Common/Splines/CubicSpline.o       \
   Common/Splines/MyTricubicSpline.o  \
   Common/Splines/Grid.o              \
@@ -146,7 +148,7 @@ clean:	Common_clean
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc 
+SOURCES = ObservableClass.cc ObservableEnergy.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc 
 
 newmake: Common_newmake Tests_newmake
 	make -f template.make Makefile FRC=force_rebuild

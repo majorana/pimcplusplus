@@ -4,6 +4,7 @@
 #include "PathDataClass.h"
 #include "MoveClass.h"
 #include "ObservableClass.h"
+#include "ObservableEnergy.h"
 #include "WrapClass.h"
 #include "PermuteTableClass.h"
 

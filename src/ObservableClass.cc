@@ -38,186 +38,186 @@
 
 // // }
 
-// Fix to include final link between link M and 0
-void TotalEnergyClass::Accumulate()
-{
-  TimesCalled++;
-  if (TimesCalled % DumpFreq==0){
-    WriteBlock();
-  }
+// // Fix to include final link between link M and 0
+// void TotalEnergyClass::Accumulate()
+// {
+//   TimesCalled++;
+//   if (TimesCalled % DumpFreq==0){
+//     WriteBlock();
+//   }
 
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
-  //Move the join to the end so we don't have to worry about permutations
-  PathData.MoveJoin(PathData.NumTimeSlices()-1);
-  // Loop over all links
-  int numPtcls = PathData.NumParticles();
-  int numLinks = PathData.NumTimeSlices()-1; 
-  double tau = PathData.Action.tau;
-  // Add constant part.  Note: we should really check the number of
-  // dimensions. 
-  double sum = 0.0;
-  double vSum=0.0;
-  double prefact=0.0;
-  int NumImage=1;
-  for (int ptcl=0; ptcl<numPtcls; ptcl++)
-    if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
-      sum += 1.5/tau * (double)numLinks;
-  for (int link=0; link<numLinks; link++) {
-    for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
-      // Do free-particle part
-      int species1 = PathData.Path.ParticleSpeciesNum(ptcl1);
-      double lambda = PathData.Path.ParticleSpecies(ptcl1).lambda;
-      if (lambda != 0.0) {
-	double FourLambdaTauInv=1.0/(4.0*PathData.Path.Species(species1).lambda*tau);
-	dVec vel;
-	vel = PathData.Path.Velocity(link, link+1, ptcl1);
-	double Z = 1.0;
-	dVec GaussSum=0.0;
-	for (int dim=0; dim<NDIM; dim++) {
-	  for (int image=-NumImage; image<=NumImage; image++) {
-	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
-	    GaussSum[dim] += exp(-dist*dist*FourLambdaTauInv);
-	  }
-	  Z *= GaussSum[dim];
-	}
-	dVec numSum=0.0;
-	for (int dim=0;dim<NDIM;dim++){
-	  for (int image=-NumImage;image<=NumImage;image++){
-	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
-	    numSum[dim] += 
-	      (-dist*dist*FourLambdaTauInv/tau)*exp(-dist*dist*FourLambdaTauInv);
-	  }
-	}
-	double scalarnumSum=0.0;
-	for (int dim=0;dim<NDIM;dim++){
-	  dVec numProd=1.0;
-	  for (int dim2=0;dim2<NDIM;dim2++){
-	    if (dim2!=dim){
-	      numProd[dim] *= GaussSum[dim2];
-	    }
-	    else {
-	      numProd[dim] *=  numSum[dim2];
-	    }
+//   if ((TimesCalled % Freq)!=0){
+//     return;
+//   }
+//   //Move the join to the end so we don't have to worry about permutations
+//   PathData.MoveJoin(PathData.NumTimeSlices()-1);
+//   // Loop over all links
+//   int numPtcls = PathData.NumParticles();
+//   int numLinks = PathData.NumTimeSlices()-1; 
+//   double tau = PathData.Action.tau;
+//   // Add constant part.  Note: we should really check the number of
+//   // dimensions. 
+//   double sum = 0.0;
+//   double vSum=0.0;
+//   double prefact=0.0;
+//   int NumImage=1;
+//   for (int ptcl=0; ptcl<numPtcls; ptcl++)
+//     if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
+//       sum += 1.5/tau * (double)numLinks;
+//   for (int link=0; link<numLinks; link++) {
+//     for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
+//       // Do free-particle part
+//       int species1 = PathData.Path.ParticleSpeciesNum(ptcl1);
+//       double lambda = PathData.Path.ParticleSpecies(ptcl1).lambda;
+//       if (lambda != 0.0) {
+// 	double FourLambdaTauInv=1.0/(4.0*PathData.Path.Species(species1).lambda*tau);
+// 	dVec vel;
+// 	vel = PathData.Path.Velocity(link, link+1, ptcl1);
+// 	double Z = 1.0;
+// 	dVec GaussSum=0.0;
+// 	for (int dim=0; dim<NDIM; dim++) {
+// 	  for (int image=-NumImage; image<=NumImage; image++) {
+// 	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
+// 	    GaussSum[dim] += exp(-dist*dist*FourLambdaTauInv);
+// 	  }
+// 	  Z *= GaussSum[dim];
+// 	}
+// 	dVec numSum=0.0;
+// 	for (int dim=0;dim<NDIM;dim++){
+// 	  for (int image=-NumImage;image<=NumImage;image++){
+// 	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
+// 	    numSum[dim] += 
+// 	      (-dist*dist*FourLambdaTauInv/tau)*exp(-dist*dist*FourLambdaTauInv);
+// 	  }
+// 	}
+// 	double scalarnumSum=0.0;
+// 	for (int dim=0;dim<NDIM;dim++){
+// 	  dVec numProd=1.0;
+// 	  for (int dim2=0;dim2<NDIM;dim2++){
+// 	    if (dim2!=dim){
+// 	      numProd[dim] *= GaussSum[dim2];
+// 	    }
+// 	    else {
+// 	      numProd[dim] *=  numSum[dim2];
+// 	    }
 	    
-	  }
-	  scalarnumSum += numProd[dim];
-	}
-	sum += scalarnumSum/Z; //NOT HACK!!!!
+// 	  }
+// 	  scalarnumSum += numProd[dim];
+// 	}
+// 	sum += scalarnumSum/Z; //NOT HACK!!!!
 	
-	//	sum += log(scalarnumSum/Z);
-	//	sum -= log(Z);
-      }
+// 	//	sum += log(scalarnumSum/Z);
+// 	//	sum -= log(Z);
+//       }
       
      
       
-      for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
-	dVec r, rp;
-	double rmag, rpmag;
-	PathData.Path.DistDisp(link, link+1, ptcl1, ptcl2,
-					 rmag, rpmag, r, rp); 
-// 		dVec r1 = PathData(link,ptcl1);
-// 		dVec r2 = PathData(link,ptcl2);
-// 		dVec rp1 = PathData(link+1,ptcl1);
-// 		dVec rp2 = PathData(link+1,ptcl2);
-// 		r=r2-r1;
-// 		rp=rp2-rp1;
-// 		rmag=sqrt(dot(r,r));
-// 		rpmag=sqrt(dot(rp,rp));
+//       for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
+// 	dVec r, rp;
+// 	double rmag, rpmag;
+// 	PathData.Path.DistDisp(link, link+1, ptcl1, ptcl2,
+// 					 rmag, rpmag, r, rp); 
+// // 		dVec r1 = PathData(link,ptcl1);
+// // 		dVec r2 = PathData(link,ptcl2);
+// // 		dVec rp1 = PathData(link+1,ptcl1);
+// // 		dVec rp2 = PathData(link+1,ptcl2);
+// // 		r=r2-r1;
+// // 		rp=rp2-rp1;
+// // 		rmag=sqrt(dot(r,r));
+// // 		rpmag=sqrt(dot(rp,rp));
 
-	double s2 = dot(r-rp, r-rp);
-	double q = 0.5*(rmag+rpmag);
-	double z = (rmag-rpmag);
-	double dU;
-	double dV;
-	int PairIndex = 
-	  PathData.Action.PairMatrix(species1, 
-				     PathData.Path.ParticleSpeciesNum(ptcl2));
-	//	cerr<<"hello"<<endl;
-	//	cerr<<r<<" "<<rp<<" "<<endl;
-	dU=PathData.Action.PairActionVector(PairIndex)->dU(q, z, s2, 0);
+// 	double s2 = dot(r-rp, r-rp);
+// 	double q = 0.5*(rmag+rpmag);
+// 	double z = (rmag-rpmag);
+// 	double dU;
+// 	double dV;
+// 	int PairIndex = 
+// 	  PathData.Action.PairMatrix(species1, 
+// 				     PathData.Path.ParticleSpeciesNum(ptcl2));
+// 	//	cerr<<"hello"<<endl;
+// 	//	cerr<<r<<" "<<rp<<" "<<endl;
+// 	dU=PathData.Action.PairActionVector(PairIndex)->dU(q, z, s2, 0);
 	
-	//	cerr<<"bye"<<endl;
-	PairActionFitClass &PA=*PathData.Action.PairActionVector(PairIndex);
-	// 	cerr << "ptcl1 = " << ptcl1 << endl;
-	// 	cerr << "ptcl2 = " << ptcl2 << endl;
-	// 	cerr << "species1 = " << PathData.Path.ParticleSpecies(ptcl1).Name
-	// 	     << endl;
-	// 	cerr << "species2 = " << PathData.Path.ParticleSpecies(ptcl2).Name
-	// 	     << endl;
-	// 	cerr << "PA species1 = " << PA.Particle1.Name << endl;
-	// 	cerr << "PA species2 = " << PA.Particle2.Name << endl;
-	//       	if (((ptcl1==2) && (ptcl2==1)) || ((ptcl1==3) && (ptcl2==0)))
+// 	//	cerr<<"bye"<<endl;
+// 	PairActionFitClass &PA=*PathData.Action.PairActionVector(PairIndex);
+// 	// 	cerr << "ptcl1 = " << ptcl1 << endl;
+// 	// 	cerr << "ptcl2 = " << ptcl2 << endl;
+// 	// 	cerr << "species1 = " << PathData.Path.ParticleSpecies(ptcl1).Name
+// 	// 	     << endl;
+// 	// 	cerr << "species2 = " << PathData.Path.ParticleSpecies(ptcl2).Name
+// 	// 	     << endl;
+// 	// 	cerr << "PA species1 = " << PA.Particle1.Name << endl;
+// 	// 	cerr << "PA species2 = " << PA.Particle2.Name << endl;
+// 	//       	if (((ptcl1==2) && (ptcl2==1)) || ((ptcl1==3) && (ptcl2==0)))
 
-	sum += dU; // HACK!
-      }
-    }
-  }
+// 	sum += dU; // HACK!
+//       }
+//     }
+//   }
   
 
   
-  vSum=0.0;
-  for (int ptcl1=0; ptcl1<numPtcls; ptcl1++){
-    int species1=PathData.Path.ParticleSpeciesNum(ptcl1);
-    for (int ptcl2=0;ptcl2<ptcl1;ptcl2++){
-      int species2=PathData.Path.ParticleSpeciesNum(ptcl2);
-      int PairIndex =PathData.Action.PairMatrix(species1,species2);
-      for (int slice=0;slice<PathData.NumTimeSlices();slice++){
-	dVec r, rp;
-	double rmag, rpmag;
-	PathData.Path.DistDisp(slice, slice+1, ptcl1, ptcl2,
-			       rmag, rpmag, r, rp); 
-	double s2 = dot(r-rp, r-rp);
-	double q = 0.5*(rmag+rpmag);
-	double z = (rmag-rpmag);
-	double dU;
-	double dV;
-	dV=((DavidPAClass*)(PathData.Action.PairActionVector(PairIndex)))->VV(q, z, s2, 0);
-	vSum +=dV;
-      }
-    }
-  }
+//   vSum=0.0;
+//   for (int ptcl1=0; ptcl1<numPtcls; ptcl1++){
+//     int species1=PathData.Path.ParticleSpeciesNum(ptcl1);
+//     for (int ptcl2=0;ptcl2<ptcl1;ptcl2++){
+//       int species2=PathData.Path.ParticleSpeciesNum(ptcl2);
+//       int PairIndex =PathData.Action.PairMatrix(species1,species2);
+//       for (int slice=0;slice<PathData.NumTimeSlices();slice++){
+// 	dVec r, rp;
+// 	double rmag, rpmag;
+// 	PathData.Path.DistDisp(slice, slice+1, ptcl1, ptcl2,
+// 			       rmag, rpmag, r, rp); 
+// 	double s2 = dot(r-rp, r-rp);
+// 	double q = 0.5*(rmag+rpmag);
+// 	double z = (rmag-rpmag);
+// 	double dU;
+// 	double dV;
+// 	dV=((DavidPAClass*)(PathData.Action.PairActionVector(PairIndex)))->VV(q, z, s2, 0);
+// 	vSum +=dV;
+//       }
+//     }
+//   }
   
-    //  ESum += sum; //HACK!
-  ESum += vSum;
-  NumSamples++;
-}
+//     //  ESum += sum; //HACK!
+//   ESum += vSum;
+//   NumSamples++;
+// }
 
-void TotalEnergyClass::ShiftData (int NumTimeSlices)
-{
-  // Do nothing
-}
+// void TotalEnergyClass::ShiftData (int NumTimeSlices)
+// {
+//   // Do nothing
+// }
 
-void TotalEnergyClass::WriteBlock()
-{
-  double totSum;
-  double totNumSamples;
+// void TotalEnergyClass::WriteBlock()
+// {
+//   double totSum;
+//   double totNumSamples;
 
-  double myAvg = ESum/(double)NumSamples; //everybody should have the same number of samples for this to be happy
-  double avg = PathData.Communicator.Sum(myAvg);
-  avg=avg/(double)PathData.Path.TotalNumSlices;
+//   double myAvg = ESum/(double)NumSamples; //everybody should have the same number of samples for this to be happy
+//   double avg = PathData.Communicator.Sum(myAvg);
+//   avg=avg/(double)PathData.Path.TotalNumSlices;
 
 
-  // Only processor 0 writes.
-  if (PathData.Communicator.MyProc()==0) {
-    cerr << "myAvg = " << myAvg << endl;
-    cerr << "avg = " << avg << endl;
-    if (FirstTime) {
-      FirstTime = false;
-      Array<double,1> dummy(1);
-      dummy(0)=avg;
-      IOSection.WriteVar ("TotalEnergy", dummy);
-      IOVar = IOSection.GetVarPtr("TotalEnergy");
-    }
-    else {
-      IOVar->Append(avg);
-      IOSection.FlushFile();
-    }
-  }
-  ESum = 0.0;
-  NumSamples = 0;
-}
+//   // Only processor 0 writes.
+//   if (PathData.Communicator.MyProc()==0) {
+//     cerr << "myAvg = " << myAvg << endl;
+//     cerr << "avg = " << avg << endl;
+//     if (FirstTime) {
+//       FirstTime = false;
+//       Array<double,1> dummy(1);
+//       dummy(0)=avg;
+//       IOSection.WriteVar ("TotalEnergy", dummy);
+//       IOVar = IOSection.GetVarPtr("TotalEnergy");
+//     }
+//     else {
+//       IOVar->Append(avg);
+//       IOSection.FlushFile();
+//     }
+//   }
+//   ESum = 0.0;
+//   NumSamples = 0;
+// }
 
 
 
