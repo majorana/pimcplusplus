@@ -70,7 +70,8 @@ public:
   {}
 };
 
-
+/// Test the orthonormality of a PolynomialSet by constructing an
+/// overlap matrix.  The result should be the identity matrix.
 void TestPolySet3()
 {
   const int order=10;

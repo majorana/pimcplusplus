@@ -23,7 +23,7 @@ public:
 void PolynomialSetClass::MakeOrthoSet(int order, double xmin, double xmax,
 				      WeightFuncClass &wf)
 {
-  const double tolerance = 1.0e-10;
+  const double tolerance = 1.0e-8;
   /// First, calculate S_n = \int_{xmin}^{xmax} x^n w(x) \ dx
   Array<double,1> Sn(2*order+1);
   for (int n=0; n<=(2*order); n++) {
