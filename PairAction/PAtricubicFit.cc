@@ -243,9 +243,9 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	costheta = max(-1.0, costheta);	
 	double U, dU;
 	rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
-	if (s > Usmax)
+	if (s>Usmax && q>2.4)
 	  U = Usemi.U(r,rp,costheta);
-	if (s > dUsmax)
+	if (s>dUsmax && q>2.4)
 	  dU = Usemi.dU(r,rp,costheta);
 
 	if (isnan(U))
@@ -436,7 +436,8 @@ void PAtricubicFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
       fprintf (costhetadat, "\n");
     }
   }
-  fclose (Uxdat); fclose(Ufdat); fclose(tdat); fclose(ydat); fclose(sdat);
+  fclose (Uxdat); fclose(Ufdat); 
+  fclose (dUxdat); fclose(dUfdat);fclose(tdat); fclose(ydat); fclose(sdat);
   fclose(costhetadat);
   Uerror = sqrt(U2err/weight);
   dUerror = sqrt(dU2err/weight);
