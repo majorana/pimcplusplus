@@ -1,10 +1,10 @@
 include /home/common/Codes/Make.include
 
 LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
-       $(G2CLIB) $(HDF5LIB) -lm 
-INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) 
+       $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
+INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 
-CCFLAGS = -c -g  -Wno-deprecated  -O3   #-pg
+CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpicc
 LD = mpicc  -Bstatic 
 DEFS = -DNO_COUT -DUSE_MPI   -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
@@ -30,6 +30,7 @@ TestObjs =                         \
   Common/IO/InputOutputHDF5.o      \
   Common/IO/InputFile.o            \
   Common/IO/InputOutputASCII.o     \
+  Common/IO/InputOutputXML.o     \
   Common/PairAction/PAcoulombFit.o \
   Common/PairAction/PAszFit.o      \
   Common/PH/PH.o                   \
@@ -39,6 +40,7 @@ MakeInputObjs =                 \
   Common/IO/InputOutput.o       \
   Common/IO/InputOutputHDF5.o   \
   Common/IO/InputOutputASCII.o  \
+  Common/IO/InputOutputXML.o  \
   makeInput.o
 
 PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}"
