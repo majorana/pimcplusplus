@@ -349,7 +349,7 @@ public:
     return (y(i,j)); 
   }
   /// Copy constructor
-  MultiCubicSpline (MultiCubicSpline &a)
+  MultiCubicSpline (const MultiCubicSpline &a)
   {
     UpToDate.resize(a.UpToDate.rows());
     UpToDate = a.UpToDate;
@@ -365,6 +365,45 @@ public:
     EndDeriv.resize(a.EndDeriv.rows());
     EndDeriv = a.EndDeriv;
   }
+
+  /// Assignment operator -- necessary for array resizeAndPreserve
+  MultiCubicSpline & operator= (MultiCubicSpline &a)
+  {
+    UpToDate.resize(a.UpToDate.rows());
+    UpToDate = a.UpToDate;
+    y.resize(a.y.rows(), a.y.cols());
+    y = a.y;
+    d2y.resize(a.d2y.rows(), a.d2y.cols());
+    d2y = a.d2y;
+    NumGridPoints = a.NumGridPoints;
+    NumSplines = a.NumSplines;
+    grid = a.grid;
+    StartDeriv.resize(a.StartDeriv.rows());
+    StartDeriv = a.StartDeriv;
+    EndDeriv.resize(a.EndDeriv.rows());
+    EndDeriv = a.EndDeriv;
+    return *this;
+  }
+
+  /// Assignment operator -- necessary for array resizeAndPreserve
+  MultiCubicSpline & operator= (MultiCubicSpline a)
+  {
+    UpToDate.resize(a.UpToDate.rows());
+    UpToDate = a.UpToDate;
+    y.resize(a.y.rows(), a.y.cols());
+    y = a.y;
+    d2y.resize(a.d2y.rows(), a.d2y.cols());
+    d2y = a.d2y;
+    NumGridPoints = a.NumGridPoints;
+    NumSplines = a.NumSplines;
+    grid = a.grid;
+    StartDeriv.resize(a.StartDeriv.rows());
+    StartDeriv = a.StartDeriv;
+    EndDeriv.resize(a.EndDeriv.rows());
+    EndDeriv = a.EndDeriv;
+    return *this;
+  }
+
 
   MultiCubicSpline()
   {
