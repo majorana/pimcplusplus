@@ -350,6 +350,20 @@ void OutputSectionHDF5Class::CloseFile()
 }
 
 
+string NumExtension (int num)
+{
+  string retString;
+  char numstr[100];
+  snprintf(numstr, 100, ".%d", num);
+  int len = strlen(numstr);
+  int numZeros = 8-len;
+  for (int i=0; i<numZeros; i++)
+    retString += '0';
+  retString += numstr;
+  return (retString);
+}
+
+
 void OutputSectionHDF5Class::OpenSection(string name)
 {
   hid_t newGroup;
@@ -359,16 +373,14 @@ void OutputSectionHDF5Class::OpenSection(string name)
   if (SectionStack.empty())
     {
       num = newSection.SectionNumber(name);
-      char numstr[100];
-      snprintf (numstr, 100, ".%d", num);
+      string numstr = NumExtension(num);
       name += numstr;
       newSection.GroupID = H5Gcreate(FileID, name.c_str(), 0);
     }
   else
     {
       num = SectionStack.top().SectionNumber(name);
-      char numstr[100];
-      snprintf (numstr, 100, ".%d", num);
+      string numstr = NumExtension(num);
       name += numstr;
 
       newSection.GroupID = H5Gcreate(SectionStack.top().GroupID,
