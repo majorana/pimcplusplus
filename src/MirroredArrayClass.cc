@@ -60,6 +60,7 @@ void MirroredArrayClass<T>::shiftData(int slicesToShift, CommClass &Communicator
   if (slicesToShift<0){
     int tempProc=sendProc;
     sendProc=recvProc;
+    recvProc=tempProc;
   }
 
   ///First shifts the data in the A copy left or right by the appropriate amount

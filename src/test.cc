@@ -8,9 +8,6 @@
 #include "ObservableClass.h"
 
 
-template class MirroredArrayClass<int>;
-template class MirroredArrayClass<dVec>;
-
 void setupAction(ActionClass &myActionClass,PathDataClass &myPathData)
 
 
@@ -92,11 +89,45 @@ void setupMove(BisectionMoveClass &myBisectionMove,ShiftMove &myShiftMove, PathD
 
 #include <mpi.h>
 
+#include <unistd.h>
 
 int main(int argc, char **argv)
 
 {
   MPI_Init(&argc, &argv);
+
+  CommClass myCommunicator;
+  myCommunicator.my_mpi_comm = MPI_COMM_WORLD;
+  int MyProc = myCommunicator.MyProc();
+
+  MirroredArrayClass<int> myArray(5,5);
+  for (int counter=0;counter<5;counter++){
+    for (int counter2=0;counter2<5;counter2++){
+      myArray.Set(counter,counter2,counter*10+counter2+MyProc*5);
+    }
+  }
+  if (myCommunicator.MyProc() == 0)
+    myArray.Print();
+  cout<<endl<<endl;
+  sleep(2);
+  if (myCommunicator.MyProc() == 1)
+    myArray.Print();
+
+  myArray.shiftData(-3,myCommunicator);
+  cout<<endl<<endl;
+
+  sleep(2);
+  if (myCommunicator.MyProc() == 0)
+    myArray.Print();
+  
+  sleep(2);
+  
+  if (myCommunicator.MyProc() == 1)
+    myArray.Print();
+
+
+
+  /*
   PathDataClass myPathData;
   PairCorrelation PC;
   PC.PathData = &myPathData;
@@ -105,6 +136,7 @@ int main(int argc, char **argv)
   PC.Initialize();
   //  ActionClass myActionClass;
   setupIDParticleArray(myPathData);
+  myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
   setupAction(myPathData.TotalAction,myPathData);
   BisectionMoveClass myBisectionMove;
   ShiftMove myShiftMove;
@@ -125,10 +157,8 @@ int main(int argc, char **argv)
     }
     myShiftMove.makeMove();
   }
-  PC.Print();
+  PC.Print();*/
   //cerr<<"done! done!"<<endl;
   MPI_Finalize();
-  //  if (&myPathData == (void *)0xff823cf)
-    //    foo();
 }
   

@@ -3,9 +3,17 @@
 
 #include "Common.h"
 
+#ifdef PARALLEL
+#include <mpi.h>
+#endif
+
+
 class CommClass
 {
  public:
+#ifdef PARALLEL
+  MPI_Comm my_mpi_comm;  
+#endif
 
   int NumProcs() const;
   int MyProc() const;
