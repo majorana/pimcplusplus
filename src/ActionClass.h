@@ -6,6 +6,7 @@
 #include "Common/Ewald/Ewald.h"
 
 class PathDataClass;
+typedef enum {DO_U, DO_DU, DO_V} TaskType; 
 
 /// This is the class that controls all of the actions and is in
 /// charge of calculating them. When this is initialized a pointer needs
@@ -15,10 +16,11 @@ class ActionClass
 private:
   PathDataClass &PathData;
   PathClass &Path;
-  LinearGrid UlongGrid;
+  LinearGrid LongGrid;
   /// This calculates the quantity 
   /// \f$ X_k \equiv -\frac{4\pi}{\Omega k} \int_{r_c}^\infty dr \, r \sin(kr) V(r).\f$
-  double CalcXk (int paIndex, int level, double k, double rc);
+  double CalcXk (int paIndex, int level, double k, double rc,
+		 TaskType type);
 public:
   double LongRangeAction(int slice, int level);
   /// This holds all of the Pair Action Classes
@@ -50,7 +52,9 @@ public:
   /// k-space cutoff.  
   /// Only \f$\mathbf{k}\f$ with \f$|\mathbf{k}| < k_c$\f will be
   /// included in the simulation sum.
-  void OptimizedBreakup(int numKnots, double kcut);
+  void OptimizedBreakup_U(int numKnots);
+  void OptimizedBreakup_dU(int numKnots);
+  void OptimizedBreakup_V(int numKnots);
   ActionClass(PathDataClass  &pathdata);
 };
 

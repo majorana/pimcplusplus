@@ -104,13 +104,13 @@ void TestRho_k(PathClass &path)
 
   SetMode(NEWMODE);
   start = clock();
-  for (int i=0; i<100; i++) 
+  for (int i=0; i<1000; i++) 
     for (int slice=0; slice<path.NumTimeSlices(); slice++) 
       for (int species=0; species<path.NumSpecies(); species++)
 	path.CalcRho_ks_Fast(slice,species);
   end = clock();
   deltat = (double)(end-start)/1.0e6;
-  cerr << "Fast speed = " << 1.0e2/deltat << endl;
+  cerr << "Fast speed = " << 1.0e3/deltat << endl;
   SetMode(OLDMODE);
   start = clock();
   for (int i=0; i<100; i++) 
@@ -162,7 +162,9 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
   action.PairMatrix(1,0)=2;
   int numKnots=10;
   double kCut=kcutoff;
-  action.OptimizedBreakup(numKnots,kCut);
+  action.OptimizedBreakup_U(numKnots);
+  action.OptimizedBreakup_dU(numKnots);
+  action.OptimizedBreakup_V(numKnots);
   FILE *fout = fopen ("p-plong.dat", "w");
   for (double r=0.0; r<2.5; r+=0.001)
     fprintf (fout, "%1.12e %1.12e %1.12e\n", r, 

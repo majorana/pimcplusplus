@@ -206,15 +206,42 @@ private:
   int Level;
   double k;
   double beta;
-public:
-  inline double operator()(double r)
+  TaskType Task;
+
+  inline double Uintegrand(double r)
   {
     double U = PA.Udiag(r, Level);
     U -= beta * PA.Z1Z2/r;
     return r * sin(k*r)*U;
   }
-  CoulombXkIntegrand (PairActionFitClass &pa, int level, double k_) :
-    PA(pa), Level(level), k(k_)
+  inline double dUintegrand(double r)
+  {
+    double dU = PA.dUdiag(r, Level);
+    dU -= PA.Z1Z2/r;
+    return r * sin(k*r)*dU;
+  }
+  inline double Vintegrand(double r)
+  {
+    double V = PA.V(r);
+    V -= PA.Z1Z2/r;
+    return r * sin(k*r)*V;
+  }
+  
+public:
+
+  inline double operator()(double r)
+  {
+    if (Task == DO_U)
+      return Uintegrand(r);
+    else if (Task == DO_DU)
+      return dUintegrand(r);
+    else
+      return Vintegrand(r);
+  }
+
+  CoulombXkIntegrand (PairActionFitClass &pa, int level, double k_,
+		      TaskType task) :
+    PA(pa), Level(level), k(k_), Task(task)
   { 
     beta = pa.SmallestBeta;
     for (int i=0; i<level; i++)
@@ -228,13 +255,37 @@ private:
   PairActionFitClass &PA;
   int Level;
   double k;
+  TaskType Task;
+  inline double Uintegrand(double r)
+  {
+    double U = PA.Udiag(r, Level);
+    return r * sin(k*r)*U;
+  }
+  inline double dUintegrand(double r)
+  {
+    double dU = PA.dUdiag(r, Level);
+    return r * sin(k*r)*dU;
+  }
+  inline double Vintegrand(double r)
+  {
+    double V = PA.V(r);
+    return r * sin(k*r)*V;
+  } 
+
 public:
   inline double operator()(double r) 
   {
-    return r * sin(k*r) * PA.Udiag(r, Level);
+    if (Task == DO_U)
+      return Uintegrand(r);
+    else if (Task == DO_DU)
+      return dUintegrand(r);
+    else
+      return Vintegrand(r);
+ 
   }
-  XkIntegrand (PairActionFitClass &pa, int level, double k_) :
-    PA(pa), Level(level), k(k_)
+  XkIntegrand (PairActionFitClass &pa, int level, double k_,
+	       TaskType task) :
+    PA(pa), Level(level), k(k_), Task(task)
   { /* do nothing else*/  }
 };
 
@@ -242,33 +293,37 @@ public:
 
 /// This calculates the quantity 
 /// \f$ X_k \equiv -\frac{4 \pi}{\Omega k} \int_{r_c}^\infty dr \, r \sin(kr) V(r).\f$
-double ActionClass::CalcXk (int paIndex, int level, double k, double rc)
+double ActionClass::CalcXk (int paIndex, int level, double k, double rc,
+			    TaskType task)
 {
   const double tolerance = 1.0e-10;
   PairActionFitClass &pa = *PairActionVector(paIndex);
   if (pa.Z1Z2 == 0.0) {
-    XkIntegrand integrand(pa, level, k);
+    XkIntegrand integrand(pa, level, k, task);
     GKIntegration<XkIntegrand, GK31> integrator(integrand);
-    integrator.SetRelativeErrorMode();
     double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
       integrator.Integrate(rc, 30.0*rc, tolerance,tolerance,false);
     return Xk;
   }
   else {
-    CoulombXkIntegrand integrand(pa, level, k);
+    CoulombXkIntegrand integrand(pa, level, k, task);
     GKIntegration<CoulombXkIntegrand, GK31> integrator(integrand);
-    integrator.SetRelativeErrorMode();
     double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
       integrator.Integrate(rc, 30.0*rc, tolerance,tolerance,false);
     /// Add in the analytic part that I ignored
-    double beta = pa.SmallestBeta;
-    for (int i=0; i<level; i++)
-      beta *= 2.0;
-    //Xk -= beta*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc);
-    Xk = -beta*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc);
+    /// Multiply analytic term by tau only for U -- do not multiply
+    /// for dU or V.
+    double coef;
+    if (task == DO_U) {
+      coef = pa.SmallestBeta;
+      for (int i=0; i<level; i++)
+	coef *= 2.0;
+    }
+    else
+      coef = 1.0;
+    Xk -= coef*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc);
     return Xk;
   }
-  
 }
 
 /// This computes the optimized breakups for the pair actions stored
@@ -277,8 +332,9 @@ double ActionClass::CalcXk (int paIndex, int level, double k, double rc)
 /// k-space cutoff.  
 /// Only \f$\mathbf{k}\f$ with \f$|\mathbf{k}| < k_c$\f will be
 /// included in the simulation sum.
-void ActionClass::OptimizedBreakup(int numKnots, double kCut)
+void ActionClass::OptimizedBreakup_U(int numKnots)
 {
+  double kCut = Path.Getkc();
   dVec box = Path.GetBox();
   double rc = 0.5*box[0];
   for (int i=1; i<NDIM; i++)
@@ -307,8 +363,9 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
   // Would be 0.5, but with two timeslice distdisp, it could be a
   // little longer
   double rmax = 0.75 * sqrt (dot(box,box));
-  UlongGrid.Init (0.0, rmax, 1000);
-  Array<double,1> Ulong_r(1000);
+  const int numPoints = 1000;
+  LongGrid.Init (0.0, rmax, numPoints);
+  Array<double,1> Ulong_r(numPoints);
 
   for (int paIndex=0; paIndex<PairActionVector.size(); paIndex++) {
     PairActionFitClass &pa = *PairActionVector(paIndex);
@@ -320,7 +377,7 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
       Ulong_r = 0.0;
       // Calculate Xk's
       for (int ki=0; ki<numk; ki++)
-	Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc);
+	Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc, DO_U);
 
       // Set boundary conditions at rc:  Force value and first and
       // second derivatives of long-range potential to match the full
@@ -329,20 +386,19 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
       t(N-3) = pa.Udiag(rc, level);     adjust(N-3) = false;
       t(N-2) = pa.Udiag_p(rc, level);   adjust(N-2) = false;
       t(N-1) = pa.Udiag_pp(rc, level);  adjust(N-1) = false;
-      //      t(1) = 0.0;                       adjust(1)   = false;
+      t(1) = 0.0;                       adjust(1)   = false;
 
       // Now, do the optimal breakup:  this gives me the coefficents
       // of the basis functions, h_n in the array t.
       breakup.DoBreakup (Xk, t, adjust);
       
-      cerr << "t = " << t << endl;
       // Now, we must put this information into the pair action
       // object.  First do real space part
       pa.Ulong_0(level)=0.0;
       for (int n=0; n<N; n++)
 	pa.Ulong_0(level) += t(n)*basis.h(n,0.0);
-      for (int i=0; i<UlongGrid.NumPoints; i++) {
-	double r = UlongGrid(i);
+      for (int i=0; i<LongGrid.NumPoints; i++) {
+	double r = LongGrid(i);
 	if (r <= rc) {
 	  // Sum over basis functions
 	  for (int n=0; n<N; n++) 
@@ -351,7 +407,7 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
 	else
 	  Ulong_r(i) = pa.Udiag (r, level);
       }
-      pa.Ulong(level).Init(&UlongGrid, Ulong_r);
+      pa.Ulong(level).Init(&LongGrid, Ulong_r);
 
       // Now do k-space part
       for (int ki=0; ki < Path.kVecs.size(); ki++) {
@@ -361,7 +417,7 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
 	for (int n=0; n<N; n++)
 	  pa.Ulong_k(level,ki) += t(n) * basis.c(n,k);
 	// Now add on part from rc to infinity
-	pa.Ulong_k(level,ki) -= CalcXk(paIndex, level, k, rc);
+	pa.Ulong_k(level,ki) -= CalcXk(paIndex, level, k, rc, DO_U);
       }
 //       // HACK HACK HACK HACK
 //       FILE *fout = fopen ("Vlongk.dat", "w");
@@ -376,6 +432,202 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
 // 	fprintf (fout, "%1.16e \n", U);
 //       }
 //       fclose (fout);
+    }
+  }
+}
+
+
+
+
+void ActionClass::OptimizedBreakup_dU(int numKnots)
+{
+  double kCut = Path.Getkc();
+  dVec box = Path.GetBox();
+  double rc = 0.5*box[0];
+  for (int i=1; i<NDIM; i++)
+    rc = min (rc, 0.5*box[i]);
+  double kvol = Path.GetkBox()[0];
+  for (int i=1; i<NDIM; i++)
+    kvol *= Path.GetkBox()[i];
+  double kavg = pow(kvol,1.0/3.0);
+  // We try to pick kcont to keep reasonable number of k-vectors
+  double kCont = 50.0 * kavg;
+  double kMax = 150 * kavg;
+
+  LPQHI_BasisClass basis;
+  basis.Set_rc(rc);
+  basis.SetBox(box);
+  basis.SetNumKnots (numKnots);
+
+  OptimizedBreakupClass breakup(basis);
+  breakup.SetkVecs (kCut, kCont, kMax);
+  int numk = breakup.kpoints.size();
+  int N = basis.NumElements();
+  Array<double,1> t(N);
+  Array<bool,1>   adjust (N);
+  Array<double,1> Xk(numk);
+
+  // Would be 0.5, but with two timeslice distdisp, it could be a
+  // little longer
+  double rmax = 0.75 * sqrt (dot(box,box));
+  const int numPoints = 1000;
+  LongGrid.Init (0.0, rmax, numPoints);
+  Array<double,1> dUlong_r(numPoints);
+
+  for (int paIndex=0; paIndex<PairActionVector.size(); paIndex++) {
+    PairActionFitClass &pa = *PairActionVector(paIndex);
+    pa.dUlong.resize(MaxLevels);
+    pa.dUlong_k.resize(MaxLevels,Path.kVecs.size());
+    pa.dUlong_k = 0.0;
+    pa.dUlong_0.resize(MaxLevels);
+    for (int level=0; level<MaxLevels; level++) {
+      dUlong_r = 0.0;
+      // Calculate Xk's
+      for (int ki=0; ki<numk; ki++)
+	Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc,
+			DO_DU);
+
+      // Set boundary conditions at rc:  Force value and first and
+      // second derivatives of long-range potential to match the full
+      // potential at rc.
+      adjust = true;
+      t(N-3) = pa.dUdiag(rc, level);     adjust(N-3) = false;
+      t(N-2) = pa.dUdiag_p(rc, level);   adjust(N-2) = false;
+      t(N-1) = pa.dUdiag_pp(rc, level);  adjust(N-1) = false;
+      t(1) = 0.0;                       adjust(1)   = false;
+
+      // Now, do the optimal breakup:  this gives me the coefficents
+      // of the basis functions, h_n in the array t.
+      breakup.DoBreakup (Xk, t, adjust);
+      
+      // Now, we must put this information into the pair action
+      // object.  First do real space part
+      pa.dUlong_0(level)=0.0;
+      for (int n=0; n<N; n++)
+	pa.dUlong_0(level) += t(n)*basis.h(n,0.0);
+      for (int i=0; i<LongGrid.NumPoints; i++) {
+	double r = LongGrid(i);
+	if (r <= rc) {
+	  // Sum over basis functions
+	  for (int n=0; n<N; n++) 
+	    dUlong_r(i) += t(n) * basis.h(n, r);
+	}
+	else
+	  dUlong_r(i) = pa.dUdiag (r, level);
+      }
+      pa.dUlong(level).Init(&LongGrid, dUlong_r);
+
+      // Now do k-space part
+      for (int ki=0; ki < Path.kVecs.size(); ki++) {
+	const dVec &kv = Path.kVecs(ki);
+	double k = sqrt (dot(kv,kv));
+	// Sum over basis functions
+	for (int n=0; n<N; n++)
+	  pa.dUlong_k(level,ki) += t(n) * basis.c(n,k);
+	// Now add on part from rc to infinity
+	pa.dUlong_k(level,ki) -= CalcXk(paIndex, level, k, rc, DO_DU);
+      }
+//       // HACK HACK HACK HACK
+//       FILE *fout = fopen ("Vlongk.dat", "w");
+//       for (double k=0; k<50.0; k+=0.01) {
+// 	double U = 0.0;
+// 	// Sum over basis functions
+// 	for (int n=0; n<N; n++)
+// 	  U += t(n) * basis.c(n,k);
+// 	fprintf (fout, "%1.16e %1.16e ", k, U);
+// 	// Now add on part from rc to infinity
+// 	U -= CalcXk(paIndex, level, k, rc);
+// 	fprintf (fout, "%1.16e \n", U);
+//       }
+//       fclose (fout);
+    }
+  }
+}
+
+
+void ActionClass::OptimizedBreakup_V(int numKnots)
+{
+  double kCut = Path.Getkc();
+  dVec box = Path.GetBox();
+  double rc = 0.5*box[0];
+  for (int i=1; i<NDIM; i++)
+    rc = min (rc, 0.5*box[i]);
+  double kvol = Path.GetkBox()[0];
+  for (int i=1; i<NDIM; i++)
+    kvol *= Path.GetkBox()[i];
+  double kavg = pow(kvol,1.0/3.0);
+  // We try to pick kcont to keep reasonable number of k-vectors
+  double kCont = 50.0 * kavg;
+  double kMax = 150 * kavg;
+
+  LPQHI_BasisClass basis;
+  basis.Set_rc(rc);
+  basis.SetBox(box);
+  basis.SetNumKnots (numKnots);
+
+  OptimizedBreakupClass breakup(basis);
+  breakup.SetkVecs (kCut, kCont, kMax);
+  int numk = breakup.kpoints.size();
+  int N = basis.NumElements();
+  Array<double,1> t(N);
+  Array<bool,1>   adjust (N);
+  Array<double,1> Xk(numk);
+
+  // Would be 0.5, but with two timeslice distdisp, it could be a
+  // little longer
+  double rmax = 0.75 * sqrt (dot(box,box));
+  const int numPoints = 1000;
+  LongGrid.Init (0.0, rmax, numPoints);
+  Array<double,1> Vlong_r(numPoints);
+
+  for (int paIndex=0; paIndex<PairActionVector.size(); paIndex++) {
+    PairActionFitClass &pa = *PairActionVector(paIndex);
+    pa.Vlong_k.resize(Path.kVecs.size());
+    pa.Vlong_k = 0.0;
+    Vlong_r = 0.0;
+    // Calculate Xk's
+    for (int ki=0; ki<numk; ki++)
+      Xk(ki) = CalcXk(paIndex, 0, breakup.kpoints(ki)[0], rc, DO_V);
+    
+    // Set boundary conditions at rc:  Force value and first and
+    // second derivatives of long-range potential to match the full
+    // potential at rc.
+    adjust = true;
+    t(N-3) = pa.V(rc);     adjust(N-3) = false;
+    t(N-2) = pa.Vp(rc);   adjust(N-2) = false;
+    t(N-1) = pa.Vpp(rc);  adjust(N-1) = false;
+    t(1) = 0.0;                adjust(1)   = false;
+    
+    // Now, do the optimal breakup:  this gives me the coefficents
+    // of the basis functions, h_n in the array t.
+    breakup.DoBreakup (Xk, t, adjust);
+    
+    // Now, we must put this information into the pair action
+    // object.  First do real space part
+    pa.Vlong_0=0.0;
+    for (int n=0; n<N; n++)
+      pa.Vlong_0 += t(n)*basis.h(n,0.0);
+    for (int i=0; i<LongGrid.NumPoints; i++) {
+      double r = LongGrid(i);
+      if (r <= rc) {
+	// Sum over basis functions
+	for (int n=0; n<N; n++) 
+	  Vlong_r(i) += t(n) * basis.h(n, r);
+      }
+      else
+	Vlong_r(i) = pa.V (r);
+    }
+    pa.Vlong.Init(&LongGrid, Vlong_r);
+
+    // Now do k-space part
+    for (int ki=0; ki < Path.kVecs.size(); ki++) {
+      const dVec &kv = Path.kVecs(ki);
+      double k = sqrt (dot(kv,kv));
+      // Sum over basis functions
+      for (int n=0; n<N; n++)
+	pa.Vlong_k(ki) += t(n) * basis.c(n,k);
+      // Now add on part from rc to infinity
+      pa.Vlong_k(ki) -= CalcXk(paIndex, 0, k, rc, DO_V);
     }
   }
 }

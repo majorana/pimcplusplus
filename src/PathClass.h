@@ -74,6 +74,7 @@ public:
   inline const dVec& GetBox();
   inline const dVec& GetkBox();
   inline const double GetVol();
+  inline const double Getkc();
   inline void  SetPeriodic(TinyVector<bool,NDIM> period);
 
   /////////////////////////////////
@@ -245,6 +246,11 @@ inline const double PathClass::GetVol()
     vol*=Box(i);
   }
   return vol;
+}
+
+inline const double PathClass::Getkc()
+{
+  return kCutoff;
 }
 
 
