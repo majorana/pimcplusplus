@@ -74,19 +74,27 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      myImg=Image(fileBase+".png")
      return myImg
 
+# Takes a list of 2D arrays and returns the average of the
+# last row.
+def AvgLastVec (data):
+     s = data[0][-1]
+     for i in range(0,len(data)):
+          s = s+data[i][-1]
+     return s/len(data)
 
 def ProcessCorrelationSection(infiles,doc,currNum):
      sectionName=infiles.GetName()
      doc.append(Heading(1,sectionName))
      hlabel=infiles.ReadVar("xlabel")[0]
      vlabel=infiles.ReadVar("ylabel")[0]
-     data=infiles.ReadVar("y")[0]
+     data=infiles.ReadVar("y")
+     y = AvgLastVec(data)
      x=infiles.ReadVar("x")[0]
      description=infiles.ReadVar("Description")[0]
      doc.append(Heading(4,description))
      currNum=currNum+1
      baseName=sectionName+repr(currNum)
-     myImg=ProduceCorrelationPicture(x, data[-1],baseName,hlabel,vlabel)
+     myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel)
 ####     myImg=ProduceCorrelationPicture(x, data[-1000],baseName,hlabel,vlabel)
      doc.append(myImg)
 ##   Write ASCII data to a file
@@ -95,7 +103,7 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      n = len(x)
      for i in range(0,n):
 ##          asciiFile.write(repr(x[i]) + ' ' + repr(data[-1,i]) +'\n')
-          asciiFile.write('%20.16e %20.16e\n' % (x[i], data[-1,i]))
+          asciiFile.write('%20.16e %20.16e\n' % (x[i], y[i]))
      asciiFile.close()
      psFileName=baseName+'.ps'
      doc.append(BR())
@@ -168,7 +176,7 @@ def WeightedAvg (means, errors):
           error2 = 0.0
           for i in range (0,len(means)):
                avg = avg + means[i]*weights[i]
-               error2 = error2 + weights[i]*errors[i]*errors[i]
+               error2 = error2 + weights[i]**2*errors[i]*errors[i]
           return (avg, math.sqrt(error2))
      else:
           return (Avg(means), 0.0)
@@ -198,7 +206,7 @@ def ProcessScalarSection(infiles,doc,currNum):
 ##   Write ASCII data to a file
                asciiFileName = baseName + '.dat'
                asciiFile = open (asciiFileName, "w")
-               n = len(data)
+               n = len(data[0])
                for i in range(0,n):
                     asciiFile.write('%20.16e\n' % data[0][i])
                asciiFile.close()
