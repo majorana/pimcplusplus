@@ -247,7 +247,6 @@ bool PAcoulombFitClass::Read (IOSectionClass &in,
   // Read Order
   assert (in.ReadVar ("Order", Order));
   Ucoefs.resize(Order+1);
-  dUcoefs.resize(Order+1);
 
   double desiredBeta = smallestBeta;
   for (int betaIndex=0; betaIndex<NumBetas; betaIndex++) {
