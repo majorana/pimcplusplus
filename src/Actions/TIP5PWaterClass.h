@@ -47,7 +47,8 @@ public:
 const double O_H_moment_arm = 1.0;
 const double lambda_p = 0.047848;
 //const double HOH_angle = 104.52;
-const double HOH_angle = 1.8242;
+// tip5p const double HOH_angle = 1.8242;
+const double HOH_angle = 1.9073; //st2
 const double HOH_half_angle = HOH_angle/2;
 
 #endif

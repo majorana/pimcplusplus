@@ -122,7 +122,7 @@ void WaterRotate::Molecule2Atoms(int moleculeNum)
 
 void WaterTranslate::MakeMove()
 {
-  double step = 0.2;
+  double step = 0.08;
   int speciesO = PathData.Path.SpeciesNum("O");
   int speciesp = PathData.Path.SpeciesNum("p");
   int speciese = PathData.Path.SpeciesNum("e");
@@ -159,7 +159,7 @@ void WaterTranslate::MakeMove()
   double oldAction = 0.0;
 // oldAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
  oldAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
-// oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+ oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
   dVec move = Translate(step); 
   double move_mag = sqrt(move(0)*move(0) + move(1)*move(1) + move(2)*move(2));
 //cerr << "going to move " << move << " with magnitude " << move_mag << endl;
@@ -173,8 +173,7 @@ void WaterTranslate::MakeMove()
   double newAction = 0.0;
 // newAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
  newAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
-//cerr << "Potential returned " << newAction;
-// newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+ newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //cerr << " and with kinetic the action is " << newAction << endl;
   //cerr<<"TRANSLATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
@@ -199,7 +198,7 @@ void WaterTranslate::MakeMove()
 
 void WaterRotate::MakeMove()
 {
-  double dtheta = 2*M_PI*0.3;
+  double dtheta = 2*M_PI*0.2;
   int speciesO = PathData.Path.SpeciesNum("O");
   int  numWater=PathData.Path.Species(speciesO).LastPtcl-
     PathData.Path.Species(speciesO).FirstPtcl+1;
@@ -249,10 +248,10 @@ cerr << "test angle is " << PathData.Actions.TIP5PWater.GetAngle(v1,v2) << endl;
 //  oldAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
   oldAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
 //  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
-//  oldAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
+  oldAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
 //  oldAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
 //  oldAction += PathData.Actions.TIP5PWater.SecondProtonKineticAction(startSlice,endSlice,p2ActiveParticles,0);
-//  oldAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
+  oldAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
 //  oldAction += PathData.Actions.TIP5PWater.FixedAxisAction(startSlice,endSlice,HActiveParticles,0);
 
   int x,y;
@@ -294,10 +293,10 @@ cerr << "test angle is " << PathData.Actions.TIP5PWater.GetAngle(v1,v2) << endl;
 //  newAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
   newAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
 //  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
-//  newAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
+  newAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
 //  newAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
 //  newAction += PathData.Actions.TIP5PWater.SecondProtonKineticAction(startSlice,endSlice,p2ActiveParticles,0);
-//  newAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
+  newAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
 //  newAction += PathData.Actions.TIP5PWater.FixedAxisAction(startSlice,endSlice,HActiveParticles,0);
 
   //cerr<<"ROTATE:  The actions are "<<newAction<<" "<<oldAction<<endl;

@@ -433,7 +433,7 @@ double TIP5PWaterClass::CalcEnergy(double reftheta,double dtheta, double dphi)
 {
   double R = O_H_moment_arm;
   double SineTheta = sin(reftheta);
-  double omega_squared = dtheta*dtheta + dphi*dphi*SineTheta*SineTheta;
+  double omega_squared = dtheta*dtheta;// + dphi*dphi*SineTheta*SineTheta;
   double vel_squared = omega_squared*R*R;
   return vel_squared;
 }
@@ -1314,8 +1314,8 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
 //cerr << "lpsi " << lpsi << endl;
         double vel_psi_squared = 2*lpsi*lpsi*(psi*psi + psiprime*psiprime);
 //cerr << "vel_psi_sq " << vel_psi_squared << endl;
-        vel_squared = vel_psi_squared + vel_theta_squared;
-        //vel_squared = vel_theta_squared;//vel_theta_squared;
+        //vel_squared = vel_psi_squared + vel_theta_squared;
+        vel_squared = vel_psi_squared;//vel_theta_squared;
       }
 //cerr << "from which I calculate vel_squared                      " << vel_squared << endl;
 
@@ -1361,7 +1361,7 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
     if (speciesNum == PathData.Path.SpeciesNum("p")){
       for (int slice=startSlice; slice<endSlice; slice+=skip) {
 //cerr << "slice " << slice << " -- " << slice+skip << endl;
-	spring += (0.5*3)/levelTau;
+	spring += (0.5*1)/levelTau;
 //cerr << spring << endl;
         // Load coords and their corresponding oxygens (COMs)
         dVec P1 = PathData.Path(slice,ptcl1);
@@ -1471,8 +1471,8 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
         }
           double lpsi = R*SinAlpha;
           double vel_psi_squared = 2*lpsi*lpsi*(psi*psi + psiprime*psiprime);
-          vel_squared = vel_psi_squared + vel_phi_squared;
-          //vel_squared = vel_phi_squared;//vel_phi_squared;
+          //vel_squared = vel_psi_squared + vel_phi_squared;
+          vel_squared = vel_psi_squared;//vel_phi_squared;
         }
 
         double GaussSum;

@@ -61,8 +61,8 @@ double ST2WaterClass::Action (int startSlice, int endSlice,
               double omega = 2.6*pow(10.0,13);
               double mass = 0.036;
               double x = (rmag-2.85)*angstrom_to_m;
-              double quad = -0.5*mass*omega*omega*x*x;
-          //    TotalU += quad;
+              double quad = 0.5*mass*omega*omega*x*x;
+//              TotalU += quad;
 //	      cerr << "lj  " << lj << " at distance " << rmag << endl;
             }
 	  }
