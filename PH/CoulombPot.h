@@ -11,6 +11,7 @@ public:
   double V      (double r);
   double dVdr   (double r);
   double d2Vdr2 (double r);
+  bool NeedsRel();
   void Write(IOSectionClass &out);
   void Read (IOSectionClass &in);
 };

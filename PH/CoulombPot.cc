@@ -25,3 +25,8 @@ void CoulombPot::Read(IOSectionClass &in)
 {
   assert(in.ReadVar("Z1Z2", Z1Z2));
 }
+
+bool CoulombPot::NeedsRel()
+{
+  return true;
+}

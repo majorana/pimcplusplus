@@ -5,6 +5,11 @@ bool ScreenedPot::IsPH()
   return (BarePot->IsPH());
 }
 
+bool ScreenedPot::NeedsRel()
+{
+  return true;
+}
+
 double ScreenedPot::CoreRadius()
 {
   return (BarePot->CoreRadius());

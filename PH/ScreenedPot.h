@@ -12,6 +12,7 @@ public:
   Potential *BarePot;
 
   bool IsPH();
+  bool NeedsRel();
   double CoreRadius();
   double A      (double r);
   double B      (double r);
