@@ -174,8 +174,8 @@ class DistributedArray3
 {
 private:
   CommunicatorClass MyComm;
-  Array<double,3> Mat;
 public:
+  Array<double,3> Mat;
   inline double operator()(int i, int j, int k) const
   {
     return Mat(i,j,k);

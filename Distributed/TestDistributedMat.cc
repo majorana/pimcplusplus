@@ -1,11 +1,12 @@
 #include "DistributedMat.h"
 
-void TestDistributedMat()
+bool TestDistributedSymmMat()
 {
+  const int N=6;
   CommunicatorClass comm;
   comm.SetWorld();
   
-  DistributedSymmMat  dmat(5,comm);
+  DistributedSymmMat  dmat(N,comm);
   int row, col;
 
   for (int i=0; i<dmat.MyNumElements(); i++)
@@ -13,12 +14,18 @@ void TestDistributedMat()
       dmat.MyElement(i,row,col);
       dmat(row,col) = 10.0*row+col;
     }
-  dmat.Print();
   dmat.AllGather();
-  dmat.Print();
+  bool passed=true;
+  for (int row=0; row<N; row++)
+    for (int col=0; col<=row; col++)
+      if (dmat(row,col) != (10.0*row+col))
+	passed = false;
+  if (!passed)
+    cerr << "Error in TestDistributedSymmMat()\n";
+  return (passed);
 }
 
-void TestDistributedArray3()
+bool TestDistributedArray3()
 {
   const int L=5;
   const int M=7;
@@ -44,14 +51,35 @@ void TestDistributedArray3()
 	  cerr << d3(i,j,k) << endl;
 	  passed = false;
 	}
-	
+  if (!passed)
+    cerr << "Error in TestDistributedArray3()\n";
+  return passed;
 }
 
 
 main(int argc, char **argv)
 {
   COMM::Init(argc, argv);
-  TestDistributedMat();
-  TestDistributedArray3();
+  CommunicatorClass comm;
+  comm.SetWorld();
+  if (comm.NumProcs() == 1) {
+    cerr << "Error:  This test must be run on more than one processor.\n";
+    exit(-1);
+  }
+  bool passed;
+  passed = TestDistributedSymmMat();
+  passed = passed && TestDistributedArray3();
+  int MyProc = comm.MyProc();
   COMM::Finalize();
+  if (MyProc == 0) {
+    cout << "Distributed Matrices Test:\n";
+    if (passed)
+      cout << "  Passed.\n";
+    else
+      cout << "  Failed.\n";
+  }      
+  if (passed) 
+    return (0);
+  else 
+    return (-1);
 }
