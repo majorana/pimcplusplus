@@ -169,16 +169,16 @@ void PAsFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
     double q = qgrid2(qi);
     // HACK
     //q = 1.0;
-    double zmax = 1.999*min(2.0*q,sMax(level));
+    double zmax = 0.9999*min(2.0*q,sMax(level));
     LinearGrid zgrid(0.0, zmax, 20);
     for (int zi=0; zi<zgrid.NumPoints; zi++) {
       double z = zgrid(zi);
       double y = z/zmax;
-      double smax = 1.9999*min(2.0*q,sMax(level));
+      double smax = 0.9999*min(2.0*q,sMax(level));
       LinearGrid sgrid(z, smax, 20);
       for (int si=0; si<sgrid.NumPoints; si++) {
 	double s = sgrid(si);
-	double smax = min(2.0*q, sMax(level));
+	//cerr << "q = " << q << " z = " << z << " s = " << s << endl;
 	double t = s/smax;
 	double w = exp(-s*s/(4.0*rho.lambda*rho.Beta()));
 	double Uex, dUex, Ufit, dUfit;
