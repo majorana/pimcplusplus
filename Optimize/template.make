@@ -2,6 +2,9 @@ SOURCES = "*.cc"
 
 all:	Minimize.o
 
+clean:
+	rm -f *.o
+
 .cc.o: 
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 
 .f.o:
