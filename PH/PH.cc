@@ -367,7 +367,7 @@ PH_FullCore::Read(FILE *fin)
 }
 
 
-PseudoHamiltonian* ReadPH (InputSectionClass &inSection)
+PseudoHamiltonian* ReadPH (IOSectionClass &inSection)
 {
   string Type;
   PseudoHamiltonian *PH;

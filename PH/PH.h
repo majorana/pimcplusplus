@@ -41,7 +41,7 @@ public:
     V.Write(outSection);
     outSection.CloseSection();
   }
-  void Read  (InputSectionClass &inSection)
+  void Read  (IOSectionClass &inSection)
   {
     assert(inSection.ReadVar("Z", Z));
     assert(inSection.OpenSection("V"));
@@ -177,7 +177,7 @@ public:
     outSection.CloseSection();
   }
 
-  virtual bool Read (InputSectionClass &inSection)
+  virtual bool Read (IOSectionClass &inSection)
   {
     assert (inSection.ReadVar ("CoreRadius", CoreRadius));
     assert (inSection.ReadVar ("Z", Z));
@@ -397,7 +397,7 @@ public:
     outSection.WriteVar ("Vfuncparams", Params);
   }
 
-  bool Read (InputSectionClass &inSection)
+  bool Read (IOSectionClass &inSection)
   {
     PseudoHamiltonian::Read(inSection);
     assert(inSection.OpenSection("Agrid"));
@@ -712,7 +712,7 @@ public:
     return (0.0);
   }
 
-  bool Read (InputSectionClass &inSection)
+  bool Read (IOSectionClass &inSection)
   {
     assert(inSection.ReadVar ("Zion", Zion));
     assert(inSection.ReadVar ("UseVHXC", UseVHXC));
@@ -979,7 +979,7 @@ public:
     outSection.WriteVar ("sigma", sigma);
   }
 
-  bool Read (InputSectionClass &inSection)
+  bool Read (IOSectionClass &inSection)
   {
     assert (inSection.ReadVar ("Amp", Amp));
     assert (inSection.ReadVar ("sigma", sigma));
@@ -1006,7 +1006,7 @@ public:
 
 
 PseudoHamiltonian *ReadPH (InputBuffer &SectionBuf);
-PseudoHamiltonian *ReadPH (InputSectionClass &inSection);
+PseudoHamiltonian *ReadPH (IOSectionClass &inSection);
 PseudoHamiltonian *Read_PH(char *FileName);
 
 #endif
