@@ -29,10 +29,14 @@ void PairCorrelation::Accumulate()
 	if (dist != distDummy)
 	  cerr << "Bad bad evil inconsistency is DistTable.\n";
 #endif
+	
 	TotalCounts++;
 	if (dist<grid.End){
 	  int index=grid.ReverseMap(dist);
 	  Histogram(index)++;
+	}
+	else {
+	  //	  cerr<<"The distance is really "<<dist<<endl;
 	}
       }
     }

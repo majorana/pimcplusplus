@@ -32,6 +32,9 @@ dVec GaussianRandomVec(double sigma);
 /// Changes the mode the entire code is running in.
 void SetMode(ModeType);
 
+
+
+
 class ImageNumClass
 {
 public:

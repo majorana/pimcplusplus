@@ -189,3 +189,9 @@ dVec DistanceTableFreeClass::Velocity(int timeSliceA, int timeSliceB, int ptcl)
 {
   return (Path(timeSliceB,ptcl)-Path(timeSliceA,ptcl));
 }
+
+
+
+void DistanceTableFreeClass::PutInBox (dVec &r)
+{
+}

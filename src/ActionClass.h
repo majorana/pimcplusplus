@@ -187,7 +187,16 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
       //dVec rbar=0.5*(r+rp);
       dVec rbar = r + 0.5*rdiff;
       dVec newDelta=GaussianRandomVec(sigma);
-      
+
+      for (int dim=0; dim<NDIM; dim++)
+	{
+	  while (newDelta[dim] > (0.5*Path.Box[dim]))
+	    newDelta -= Path.Box[dim];
+	  while (newDelta[dim] < (-(0.5*Path.Box[dim])))
+	    newDelta += Path.Box[dim];
+	}
+
+      DistanceTable->PutInBox(newDelta);
       rpp=rbar+newDelta;
       logNewSampleProb=logNewSampleProb+
 	(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
@@ -232,6 +241,7 @@ inline double ActionClass::LogSampleProb(int startSlice, int endSlice,
       ///We've ignored boundary conditions here
       dVec rbar=r + 0.5*rdiff;
       dVec Delta= rpp - rbar;
+      DistanceTable->PutInBox(Delta);
       logSampleProb=logSampleProb+
 	(prefactorOfSampleProb-0.5*dot(Delta,Delta)/(sigma2));
     }

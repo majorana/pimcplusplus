@@ -1,6 +1,6 @@
 #include "DistanceTablePBCClass.h"
 
-void DistanceTablePBCClass::TestDistDisp(int timeSlice, int ptcl1, int ptcl2, 
+void DistanceTablePBCClass::DistDispTest(int timeSlice, int ptcl1, int ptcl2, 
 		       double &dist, dVec &disp)
 {
   dVec p1=Path(timeSlice,ptcl1);
@@ -22,7 +22,7 @@ void DistanceTablePBCClass::TestDistDisp(int timeSlice, int ptcl1, int ptcl2,
   
 }
 
-void DistanceTablePBCClass::TestDistDisp(int timeSliceA, int timeSliceB,
+void DistanceTablePBCClass::DistDispTest(int timeSliceA, int timeSliceB,
 		       int ptcl1, int ptcl2, double &distA, double &distB,
 		       dVec &dispA, dVec &dispB)
 {
@@ -244,13 +244,23 @@ void DistanceTablePBCClass::Update(int timeSlice,
 dVec DistanceTablePBCClass::Velocity(int timeSliceA, int timeSliceB, int ptcl)
 {
   dVec vel = Path(timeSliceB,ptcl) - Path(timeSliceA,ptcl);
-  for (int dim=0; dim<NDIM; dim++)
-    {
-      while (vel[dim] > (0.5*Path.Box[dim]))
-	vel[dim] -= Path.Box[dim];
-      while (vel[dim] < -(0.5*Path.Box[dim]))
-	vel[dim] += Path.Box[dim];
-    }
+   for (int dim=0; dim<NDIM; dim++)
+     {
+       while (vel[dim] > (0.5*Path.Box[dim]))
+  	vel[dim] -= Path.Box[dim];
+       while (vel[dim] < -(0.5*Path.Box[dim]))
+  	vel[dim] += Path.Box[dim];
+     }
   return (vel);
 }
 
+void DistanceTablePBCClass::PutInBox (dVec &r)
+{
+  for (int dim=0; dim<NDIM; dim++)
+    {
+      while (r[dim] > (0.5*Path.Box[dim]))
+	r -= Path.Box[dim];
+      while (r[dim] < -(0.5*Path.Box[dim]))
+	r += Path.Box[dim];
+    }
+}

@@ -39,6 +39,7 @@ public:
   virtual void Update (int timeSlice, const Array<int,1> &ptclArray) = 0;
   virtual void UpdateAll() = 0;
   virtual void UpdateAll(int timeSlice) = 0;
+  virtual void PutInBox(dVec &r)=0;
   void ShiftData(int numTimeSlicesToShift,CommunicatorClass& Communicator);
   inline void DistDisp(int timeSlice, int ptcl1, int ptcl2, 
 		       double &distance, dVec &displacement);

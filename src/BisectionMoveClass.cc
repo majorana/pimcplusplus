@@ -60,6 +60,8 @@ void BisectionMoveClass::MakeMove()
     SetMode(NEWMODE);
     newLogSampleProb = PathData.Action.SampleParticles
       (StartTimeSlice,EndTimeSlice,ActiveParticles,levelCounter);
+    double testNewLogSampleProb= PathData.Action.LogSampleProb
+      (StartTimeSlice,EndTimeSlice,ActiveParticles,levelCounter);
     PathData.Update(StartTimeSlice,EndTimeSlice,ActiveParticles,
 		    levelCounter);
 		      
@@ -70,11 +72,11 @@ void BisectionMoveClass::MakeMove()
     double currActionChange=newAction-oldAction;
     double logAcceptProb=
       -oldLogSampleProb+newLogSampleProb+currActionChange-prevActionChange;
-    //cerr << "prevActionChange = " << prevActionChange << endl;
-    //cerr << "logAcceptProb = " << logAcceptProb << endl;
-    //cerr<<"My new action is "<<newAction<<" and my old action was
-    //"<<oldAction<<endl;
-    //    cout<<"The log of the accept prob is " << logAcceptProb;
+    //    cerr << "prevActionChange = " << prevActionChange << endl;
+    //    cerr << "logAcceptProb = " << logAcceptProb << " "<<oldLogSampleProb<<endl;
+    //    cerr<<"My new action is "<<newAction<<" and my old action was ";
+    //    cerr<<oldAction<<endl;
+    //cout<<"The log of the accept prob is " << logAcceptProb;
     //    cout<<" "<<oldAction<<" "<<newAction<<" "<<endl;
     if (-logAcceptProb<log(sprng())){///reject conditin
       toAccept=false;

@@ -13,16 +13,17 @@ private:
 			    dVec vecMask, dVecInt imageMask);
 public:
   dVec Velocity(int timeSliceA, int timeSliceB, int ptcl);
+  void PutInBox (dVec &r);
   void Update (int timeSlice, const Array<int,1> &ptclArray);
   void UpdateAll();
   void UpdateAll(int timeSlice);
 
   /// Test functions
-  void TestDistDisp(int timeSlice, int ptcl1, int ptcl2, 
+  void DistDispTest(int timeSlice, int ptcl1, int ptcl2, 
 		       double &dist, dVec &disp);
 
 
-  void TestDistDisp(int timeSliceA, int timeSliceB,
+  void DistDispTest(int timeSliceA, int timeSliceB,
 		       int ptcl1, int ptcl2, double &distA, double &distB,
 		       dVec &dispA, dVec &dispB);
 

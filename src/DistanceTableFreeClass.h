@@ -16,7 +16,7 @@ private:
   inline void Displacement (int timeSlice, int ptcl1, int ptcl2,
 			    dVec &disp, double &dist, dVec vecMask);
 public:
-
+  void PutInBox (dVec &r);
   void DistDispTest(int timeSlice, int ptcl1, int ptcl2, 
 		       double &dist, dVec &disp);
 

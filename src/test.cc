@@ -1,3 +1,4 @@
+#include <fstream>
 #include "Common.h"
 #include "PathClass.h"
 #include "SpeciesClass.h"
@@ -179,11 +180,11 @@ int main(int argc, char **argv)
   BisectionMoveClass myBisectionMove(myPathData);
   ShiftMoveClass myShiftMove(myPathData);
   setupMove(myBisectionMove,myShiftMove,myPathData);
-  myPathData.Path.Box[0]=3.14159265358979323846;
-  myPathData.Path.Box[1]=3.14159265358979323846;
-  myPathData.Path.Box[2]=3.14159265358979323846;
-  DistanceTableFreeClass *myDistTable=
-    new DistanceTableFreeClass(myPathData.Path);
+  myPathData.Path.Box[0]=50*3.14159265358979323846;
+  myPathData.Path.Box[1]=50*3.14159265358979323846;
+  myPathData.Path.Box[2]=50*3.14159265358979323846;
+  DistanceTablePBCClass *myDistTable=
+    new DistanceTablePBCClass(myPathData.Path);
   myPathData.DistanceTable=myDistTable;
 
   myPathData.Action.DistanceTable=myDistTable;
@@ -193,9 +194,23 @@ int main(int argc, char **argv)
   //  cerr<<"What the action class thinks the size is: ";
   //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
   //  PrintConfigClass myPrintConfig(myPathData);
-  for (int counter=0;counter<1000000;counter++){
-    if ((counter % 1000) == 0)
+  ofstream outfile;
+  outfile.open("ourPath.dat");
+  for (int counter=0;counter<100000;counter++){
+    if ((counter % 1000) == 0){
       cerr << "Step #" << counter << ":\n";
+      for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
+	outfile<<myPathData.Path(slice,0)[0]<<" ";
+	outfile<<myPathData.Path(slice,0)[1]<<" ";
+	outfile<<myPathData.Path(slice,0)[2]<<" ";
+	outfile<<endl;
+      }
+      outfile<<myPathData.Path(0,0)[0]<<" ";
+      outfile<<myPathData.Path(0,0)[1]<<" ";
+      outfile<<myPathData.Path(0,0)[2]<<" ";
+      outfile<<endl;
+    }
+      
     for (int counter2=0;counter2<2;counter2++){
       //cerr << "Doing step " << counter << endl;
       
@@ -210,5 +225,7 @@ int main(int argc, char **argv)
   cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
   //cerr<<"done! done!"<<endl;
   MPI_Finalize();
+  outfile.close();
+  
 }
   

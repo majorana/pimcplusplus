@@ -113,7 +113,7 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 
 //  cout<<"The total potential action is "<< TotalU<<endl;
 //  cout<<"The total kinetic action is "<< TotalK<<endl;
-  return (TotalK + TotalU);
+  return TotalK;// + TotalU);
 
 
 }

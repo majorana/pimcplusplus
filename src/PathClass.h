@@ -13,10 +13,6 @@ private:
   MirroredArrayClass<dVec> Path;
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
-
-
-
-
   int TimeSliceNumber;
 public:
   MirroredArrayClass1D<int> Permutation;
@@ -42,25 +38,7 @@ public:
 
   }
 
-  inline void MinDistance(dVec p1, dVec p2,double &dist,dVec &disp)
-  {
-    dVec normalDisplace=p2-p1;
-    for (int dim=0;dim<NDIM;dim++){
-      while (normalDisplace(dim)>Box(dim)/2){
-	normalDisplace(dim)=normalDisplace(dim)-Box(dim)/2;
-      }
-      while (normalDisplace(dim)< -Box(dim)/2){
-	normalDisplace(dim)=normalDisplace(dim)+Box(dim)/2;
-      }
 
-    }
-    disp=normalDisplace;
-    dist=dot(disp,disp);
-
-    
-    
-
-  }
 
 
   /// Shifts the data to other processors or to yourself if there 
