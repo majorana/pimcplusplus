@@ -17,7 +17,8 @@ bool InputSectionHDF5Class::OpenFile(string fileName,
   IsOpen = true;
   IsRoot = true;
   Parent = parent;
-  ReadGroup (GroupID, "all", NULL);
+  ReadGroup (GroupID, "/", NULL);
+  Name = "all";
 }
 
 /// C-style wrapper for member function iterator.
