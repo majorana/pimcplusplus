@@ -101,6 +101,8 @@ void ActionsClass::Read(IOSectionClass &in)
     else
       NodalActions(spIndex) = NULL;
   }
+  
+  //ReadNodalActions (in);
 
 //   // Now create nodal actions for Fermions
 //   NodalActions.resize(PathData.Path.NumSpecies());
@@ -124,6 +126,44 @@ void ActionsClass::Read(IOSectionClass &in)
   }
 
 }
+
+/// Read in the nodal actions.
+/// This should only be called after the PairActions have been read.
+void
+ActionsClass::ReadNodalActions(IOSectionClass &in)
+{
+  int numNodeSections=in.CountSections("NodalAction");
+  for (int nodeSection=0; nodeSection<numNodeSections; nodeSection++) {
+    in.OpenSection("NodalAction", nodeSection);
+    string type, speciesString;
+    assert (in.ReadVar ("Type", type));
+    if (type == "FREE") {
+      assert (in.ReadVar("Species", speciesString));
+      int species = PathData.Path.SpeciesNum(speciesString);
+      NodalActions.resizeAndPreserve(NodalActions.size()+1);
+      NodalActions(species) = 
+	new FreeNodalActionClass (PathData, species);
+    }
+    else if (type == "GROUNDSTATE") {
+      string speciesString;
+      assert (in.ReadVar ("IonSpecies",  speciesString));
+      int ionSpeciesNum  = PathData.Path.SpeciesNum (speciesString);
+      assert (in.ReadVar ("UpSpecies",   speciesString));
+      int upSpeciesNum   = PathData.Path.SpeciesNum (speciesString);
+      assert (in.ReadVar ("DownSpecies", speciesString));
+      int downSpeciesNum = PathData.Path.SpeciesNum (speciesString);
+      double kCut;
+      assert (in.ReadVar ("kCut", kCut));
+      int numUp   = PathData.Path.Species(upSpeciesNum).NumParticles;
+      int numDown = PathData.Path.Species(downSpeciesNum).NumParticles;
+      assert (numUp == numDown);
+      
+
+    }
+    in.CloseSection();
+  }
+}
+
 
 
 void

@@ -783,11 +783,11 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
 
     double prod_llt = prod/(lambda*levelTau);
     double exp_m1 = expm1 (prod_llt);
-    //    if (fpclassify(exp_m1)==FP_NORMAL) //HACK! BAD SHOULDN't BE COMMENTED
-    //    if (!isnan(exp_m1) && !isinf(exp_m1))
-    //    if (isnormal(exp_m1))
-      if ((!isnan(prod_llt)) && (exp_m1 != 0.0))
-	uNode += prod_llt / (levelTau*exp_m1);
+    if (fpclassify(exp_m1)==FP_NORMAL) 
+      if (!isnan(exp_m1) && !isinf(exp_m1))
+        if (isnormal(exp_m1))
+	  if ((!isnan(prod_llt)) && (exp_m1 != 0.0))
+	    uNode += prod_llt / (levelTau*exp_m1);
     if (isnan(uNode))
       cerr << "uNode broken again!\n";
     dist1 = dist2;

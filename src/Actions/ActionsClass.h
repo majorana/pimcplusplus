@@ -8,6 +8,7 @@
 #include "LongRangePotClass.h"
 #include "KineticClass.h"
 #include "NodalActionClass.h"
+#include "GroundStateNodalActionClass.h"
 #include "DavidLongRangeClass.h"
 #include "TIP5PWaterClass.h"
 #include "ST2WaterClass.h"
@@ -26,6 +27,7 @@ private:
   Array<PairActionFitClass*,2> PairMatrix;
   PathDataClass &PathData;
   int MaxLevels; //is this the right place for this?
+  void ReadNodalActions (IOSectionClass &in);
 public:
 
   // Actions
