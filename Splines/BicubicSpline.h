@@ -64,7 +64,55 @@ public:
   inline double  d2_dxdy    (double x, double y);
   /// Initialize the bicubic spline with the given grids and data
   inline void Init (Grid *xgrid, Grid *ygrid, Array<double,2> &f);
+
+  /// Copy constructor
+  inline BicubicSpline (const BicubicSpline &a);
+
+  /// Assigment operator -- necessary for array resizeAndPreserve
+  inline BicubicSpline & operator= (BicubicSpline &a);
+  inline BicubicSpline & operator= (BicubicSpline a);
+  inline BicubicSpline() {}
 };
+
+inline BicubicSpline::BicubicSpline (const BicubicSpline &a)
+{
+  XUpToDate.resize(a.XUpToDate.size());
+  XUpToDate = a.XUpToDate;
+  YUpToDate.resize(a.YUpToDate.size());
+  YUpToDate = a.YUpToDate;
+  F.resize(a.F.rows(), a.F.cols());
+  F=a.F;
+  Nx=a.Nx; Ny=a.Ny;
+  Xgrid=a.Xgrid; Ygrid=a.Ygrid;
+  BiUpToDate = a.BiUpToDate;
+}
+
+inline BicubicSpline& BicubicSpline::operator=(BicubicSpline &a)
+{
+  XUpToDate.resize(a.XUpToDate.size());
+  XUpToDate = a.XUpToDate;
+  YUpToDate.resize(a.YUpToDate.size());
+  YUpToDate = a.YUpToDate;
+  F.resize(a.F.rows(), a.F.cols());
+  F=a.F;
+  Nx=a.Nx; Ny=a.Ny;
+  Xgrid=a.Xgrid; Ygrid=a.Ygrid;
+  BiUpToDate = a.BiUpToDate;
+}
+
+inline BicubicSpline& BicubicSpline::operator=(BicubicSpline a)
+{
+  XUpToDate.resize(a.XUpToDate.size());
+  XUpToDate = a.XUpToDate;
+  YUpToDate.resize(a.YUpToDate.size());
+  YUpToDate = a.YUpToDate;
+  F.resize(a.F.rows(), a.F.cols());
+  F=a.F;
+  Nx=a.Nx; Ny=a.Ny;
+  Xgrid=a.Xgrid; Ygrid=a.Ygrid;
+  BiUpToDate = a.BiUpToDate;
+}
+
 
 inline void BicubicSpline::Init(Grid *xgrid, Grid *ygrid, Array<double,2> &f)
 {
