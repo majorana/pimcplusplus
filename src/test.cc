@@ -95,16 +95,16 @@ int main(int argc, char **argv)
 {
   MPI_Init(&argc, &argv);
   PathDataClass myPathData;
-  ActionClass myActionClass;
+  //  ActionClass myActionClass;
   setupIDParticleArray(myPathData);
-  setupAction(myActionClass,myPathData);
+  setupAction(myPathData.TotalAction,myPathData);
   BisectionMoveClass myBisectionMove;
   ShiftMove myShiftMove;
   setupMove(myBisectionMove,myShiftMove,myPathData);
-  cerr<<"The size of the IdenticalParticleArray is ";
-  cerr << (myBisectionMove.PathData)->IdenticalParticleArray.size()<<endl;
-  cerr<<"What the action class thinks the size is: ";
-  cerr<<  myActionClass.myIdenticalParticleArray->size()<<endl;
+  //  cerr<<"The size of the IdenticalParticleArray is ";
+  //  cerr << (myBisectionMove.PathData)->IdenticalParticleArray.size()<<endl;
+  //  cerr<<"What the action class thinks the size is: ";
+  //  cerr<<  myActionClass.myIdenticalParticleArray->size()<<endl;
   for (int counter=0;counter<10000;counter++){
     for (int counter2=0;counter2<2;counter2++){
       cerr << "Doing step " << counter << endl;
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
     }
     myShiftMove.makeMove();
   }
-
+  cerr<<"done! done!"<<endl;
   MPI_Finalize();
 }
   

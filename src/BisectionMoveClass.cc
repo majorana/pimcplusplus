@@ -29,34 +29,41 @@ void BisectionMoveClass::makeMove()
   int EndTimeSlice=1<<NumLevels+StartTimeSlice;
   double prevActionChange=0;
   
-  cerr<<"At the beginning fo the makeMove the size is ";
-  cerr <<  PathData->IdenticalParticleArray.size()<<endl;
+  //  cerr<<"At the beginning fo the makeMove the size is ";
+  //  cerr <<  PathData->IdenticalParticleArray.size()<<endl;
   ChooseParticles();   
-  for (int levelCounter=NumLevels;levelCounter>0;levelCounter--){
-    cerr<<"At the level Counter in Bisection makeMove being  "<<levelCounter<<" the size is ";
-    cerr <<  PathData->IdenticalParticleArray.size()<<endl;
+  //////////  for (int levelCounter=NumLevels;levelCounter>0;levelCounter--){
+  int levelCounter=NumLevels;
+
+  while (levelCounter>0 && toAccept==true){
+    //    cerr<<"At the level Counter in Bisection makeMove being  "<<levelCounter<<" the size is ";
+    //    cerr <<  PathData->IdenticalParticleArray.size()<<endl;
     setMode(OLDMODE);
-    bool toAccept=true;
+    toAccept=true;
     double oldAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter-1);
     setMode(NEWMODE);
     (*PathData).TotalAction.SampleParticles(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter,newLogSampleProb,oldLogSampleProb);
     double newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter-1);
     double currActionChange=newAction-oldAction;
     double logAcceptProb=oldLogSampleProb-newLogSampleProb+currActionChange-prevActionChange;
+    cerr<<"My new action is "<<newAction<<" and my old action was "<<oldAction<<endl;
     if (-logAcceptProb<log(sprng())){///reject conditin
       toAccept=false;
-      break;
+      cerr<<"REJECTION?"<<endl;
+      //      break;
 
     }
 
     prevActionChange=currActionChange;
-    
+    levelCounter--;
   }
   if (toAccept ==true ){
     (*PathData).acceptMove(ActiveParticles,StartTimeSlice,EndTimeSlice);
+      cout<<"I'm accepting! I'm accepting!"<<endl;
   }
   else {
     (*PathData).rejectMove(ActiveParticles,StartTimeSlice,EndTimeSlice);
+      cout<<"I'm rejecting! I'm rejecting!"<<endl;
   }
     
 

@@ -12,6 +12,8 @@ class ArrayOfIdenticalParticlesClass
   }
   inline void resize(int newsize)
     {
+      //      cerr<<"The Array of IdenticalParticleClass is being resized to ";
+      //      cerr<<newsize<<endl;
       IdenticalParticlesArray.resize(newsize);
     }
   inline void Set(int i, IdenticalParticlesClass &IDptcls)

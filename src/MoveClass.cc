@@ -14,14 +14,14 @@ void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
     TotalParticles += CurrentNumPtcls;
   }
 
-  cerr << "TotalParticles = " << TotalParticles << endl;
+  //  cerr << "TotalParticles = " << TotalParticles << endl;
   MyParticles.resize(TotalParticles);
 
   TotalParticles = 0;
   for (int i=0; i<ActSpecies.size(); i++) {
     int CurrentNumPtcls = 
       PathData->IdenticalParticleArray(ActSpecies(i)).NumParticles; 
-    cerr << "CurrentNumPtcls = " << CurrentNumPtcls << endl;
+    //    cerr << "CurrentNumPtcls = " << CurrentNumPtcls << endl;
     for (int j=0; j<CurrentNumPtcls; j++) {
       MyParticles(j+TotalParticles)[0] = ActSpecies(i);
       MyParticles(j+TotalParticles)[1] = j;

@@ -16,7 +16,8 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
 
   ArrayOfIdenticalParticlesClass &IdentPtcls = *myIdenticalParticleArray;
   NumSpecies = IdentPtcls.size();
-
+  //  cerr<<"What the action class thinks the size is in calctotalaction: ";
+  //  cerr<<  myIdenticalParticleArray->size()<<endl;
   int skip = 1<<level;
   double levelTau = tau* (1<<level);
   for (int i=0; i<NumChangedPtcls; i++)
@@ -59,7 +60,8 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
       }
     }
     
-      return (TotalK+TotalU);
+  return (TotalK+TotalU);
+
 }
 
 
@@ -82,11 +84,13 @@ string PairActionClass::SkipTo(ifstream &infile,string skipToString)
 void PairActionClass::ReadFORTRAN3Tensor(ifstream &infile,Array<double,3> &tempUkj)
 {
 
-  
+   
   for (int counterTau=0;counterTau<tempUkj.extent(2);counterTau++){
     for (int counterUkj=0;counterUkj<tempUkj.extent(1);counterUkj++){
       for (int counterGridPoints=0;counterGridPoints<tempUkj.extent(0);counterGridPoints++){
+
 	infile>>tempUkj(counterGridPoints,counterUkj,counterTau);
+	//	tempUkj(counterGridPoints,counterUkj,counterTau)=0;
       }
     }
   }
