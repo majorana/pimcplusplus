@@ -54,17 +54,17 @@ public:
   }
 
   inline int MyProc()
-    {
-      int MyRank;
-      MPI_Comm_rank(MPIComm, &MyRank);
-      return MyRank;
-    }
+  {
+    int MyRank;
+    MPI_Comm_rank(MPIComm, &MyRank);
+    return MyRank;
+  }
   inline int NumProcs()
-    {
-      int NumProcs;
-      MPI_Comm_size(MPIComm, &NumProcs);
-      return NumProcs;
-    }
+  {
+    int NumProcs;
+    MPI_Comm_size(MPIComm, &NumProcs);
+    return NumProcs;
+  }
   inline void Send (void *sendBuf, int count, MPI_Datatype datatype,
 		    int dest, int tag)
   {
@@ -76,6 +76,10 @@ public:
     Send(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
   }
 
+  inline void BroadCast (int root, Array<double,1> &buff)
+  {
+    MPI_Bcast(buff.data(), buff.size(), MPI_DOUBLE, root, MPIComm);
+  }
   inline void Receive (void *recvBuf, int count, MPI_Datatype datatype,
 		       int source, int tag)
   {
@@ -160,6 +164,8 @@ public:
     cerr << "Sends not supported in serial mode.\n";
     exit(1);
   }
+  inline void BroadCast(int root, Array<double,1> &buff)
+  { /* Do nothing in serial mode */ }
   inline void Receive (int toProc, Array<double,1> &buff)
   {
     cerr << "Receives not supported in serial mode.\n";
