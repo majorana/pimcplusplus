@@ -225,7 +225,7 @@ double ActionClass::CalcLRAction(int slice, int level)
 	for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	  double rhorho = 
 	    Path.Rho_k(slice, species1, ki).real() *
-	    Path.Rho_k(slice, species2, ki).real() + 
+	    Path.Rho_k(slice, species2, ki).real() - 
 	    Path.Rho_k(slice, species1, ki).imag() *
 	    Path.Rho_k(slice, species2, ki).imag();
 	  hetero += rhorho * PA.Ulong_k(level,ki);

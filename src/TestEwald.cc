@@ -12,7 +12,7 @@ void SetupPath (PathClass &path)
   box = 2.0, 2.0, 2.0;
   path.SetBox(box);
   
-  path.kCutoff = 25.0;
+  path.kCutoff = 35.0;
   
   FermionClass *protons=new FermionClass();
   FermionClass *electrons=new FermionClass();
@@ -81,6 +81,7 @@ void TestRho_k(PathClass &path)
 	  cerr << "Fast/slow discrepancy in TestRho_k\n";
   // Make copies exactly the same.
   path.Rho_k[0] = path.Rho_k[1];
+  SetMode(NEWMODE);
 }
 
 void SetupAction(ActionClass &action,PathDataClass &pathData)
@@ -118,6 +119,9 @@ void MadelungTest(ActionClass &action)
   double longRange=action.CalcLRAction(0,0);
   Array<int,1> changedParticles(8);
   changedParticles=0,1,2,3,4,5,6,7;
+  //  Array<int,1> changedParticles(4);
+  //  changedParticles=0,1,2,3;
+
   double shortRange=action.calcTotalAction(0,1,changedParticles,0);
   cerr<<"LongRange, ShortRange, Total: "<<longRange<<", "<<shortRange;
   cerr<<", "<<longRange+shortRange<<endl;
