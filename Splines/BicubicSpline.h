@@ -57,6 +57,11 @@ public:
   inline double  Deriv2     (double x, int iy);
   inline double  Deriv3     (int ix,   double y);
   inline double  Deriv3     (double x, int iy);
+  inline double  d_dx       (double x, double y);
+  inline double  d_dy       (double x, double y);
+  inline double  d2_dx2     (double x, double y);
+  inline double  d2_dy2     (double x, double y);
+  inline double  d2_dxdy    (double x, double y);
   /// Initialize the bicubic spline with the given grids and data
   inline void Init (Grid *xgrid, Grid *ygrid, Array<double,2> &f);
 };
@@ -204,6 +209,30 @@ inline double q1(double t)
 inline double q2(double t)
 { return (t*t*(t-1.0)); }
 
+inline double dp1(double t)
+{ return (6.0*t*(t-1.0)); }
+
+inline double dq1(double t)
+{ return ((t-1.0)*(3.0*t-1.0)); }
+
+inline double dp2(double t)
+{ return (-dp1(t)); }
+
+inline double dq2 (double t)
+{ return (3.0*t*t - 2.0*t); }
+
+inline double d2p1(double t)
+{ return (12.0*t-6.0); }
+
+inline double d2q1 (double t)
+{ return (6.0*t - 4.0); }
+
+inline double d2p2 (double t)
+{ return (-d2p1(t)); }
+
+inline double d2q2 (double t)
+{ return (6.0*t - 2.0); } 
+
 inline double BicubicSpline::operator() (double x, double y)
 {
   if (!BiUpToDate)
@@ -257,6 +286,288 @@ inline double BicubicSpline::operator() (double x, double y)
   }
   return (val);
 }
+
+inline double BicubicSpline::d_dx (double x, double y)
+{
+  if (!BiUpToDate)
+    BiUpdate();
+  TinyMatrix<double,4,4> Z;
+  TinyVector<double,4> a, b;
+
+  int ix = Xgrid->ReverseMap(x);  
+  int iy = Ygrid->ReverseMap(y);
+
+  ix = max(0,ix); ix = min(ix, Nx-2);
+  iy = max(0,iy); iy = min(iy, Ny-2);
+
+  double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
+  double hinv = 1.0/h;
+  double k = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+  double u = (x - (*Xgrid)(ix))*hinv;
+  double v = (y - (*Ygrid)(iy))/k;
+  a(0) = hinv*dp1(u);
+  a(1) = hinv*dp2(u);
+  a(2) = dq1(u);
+  a(3) = dq2(u);
+
+  b(0) = p1(v);
+  b(1) = p2(v);
+  b(2) = k*q1(v);
+  b(3) = k*q2(v);
+  
+  Z(0,0) = F(ix,iy).z;
+  Z(0,1) = F(ix,iy+1).z;
+  Z(0,2) = F(ix,iy).dzdy;
+  Z(0,3) = F(ix,iy+1).dzdy;
+  Z(1,0) = F(ix+1,iy).z;
+  Z(1,1) = F(ix+1,iy+1).z;
+  Z(1,2) = F(ix+1,iy).dzdy;
+  Z(1,3) = F(ix+1,iy+1).dzdy;
+  Z(2,0) = F(ix,iy).dzdx;
+  Z(2,1) = F(ix,iy+1).dzdx;
+  Z(2,2) = F(ix,iy).d2zdxdy;
+  Z(2,3) = F(ix,iy+1).d2zdxdy;
+  Z(3,0) = F(ix+1,iy).dzdx;
+  Z(3,1) = F(ix+1,iy+1).dzdx;
+  Z(3,2) = F(ix+1,iy).d2zdxdy;
+  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  
+  double val = 0.0;
+  for (int m=0; m<4; m++) {
+    double Zb_m = 0.0;
+    for (int n=0; n<4; n++)
+      Zb_m += Z(m,n) * b(n);
+    val += Zb_m * a(m);
+  }
+  return (val);
+}
+
+inline double BicubicSpline::d_dy (double x, double y)
+{
+  if (!BiUpToDate)
+    BiUpdate();
+  TinyMatrix<double,4,4> Z;
+  TinyVector<double,4> a, b;
+
+  int ix = Xgrid->ReverseMap(x);  
+  int iy = Ygrid->ReverseMap(y);
+
+  ix = max(0,ix); ix = min(ix, Nx-2);
+  iy = max(0,iy); iy = min(iy, Ny-2);
+
+  double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
+  double k = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+  double hinv = 1.0/h;
+  double kinv = 1.0/k;
+  double u = (x - (*Xgrid)(ix))*hinv;
+  double v = (y - (*Ygrid)(iy))*kinv;
+  a(0) = p1(u);
+  a(1) = p2(u);
+  a(2) = h*q1(u);
+  a(3) = h*q2(u);
+
+  b(0) = kinv*dp1(v);
+  b(1) = kinv*dp2(v);
+  b(2) = dq1(v);
+  b(3) = dq2(v);
+  
+  Z(0,0) = F(ix,iy).z;
+  Z(0,1) = F(ix,iy+1).z;
+  Z(0,2) = F(ix,iy).dzdy;
+  Z(0,3) = F(ix,iy+1).dzdy;
+  Z(1,0) = F(ix+1,iy).z;
+  Z(1,1) = F(ix+1,iy+1).z;
+  Z(1,2) = F(ix+1,iy).dzdy;
+  Z(1,3) = F(ix+1,iy+1).dzdy;
+  Z(2,0) = F(ix,iy).dzdx;
+  Z(2,1) = F(ix,iy+1).dzdx;
+  Z(2,2) = F(ix,iy).d2zdxdy;
+  Z(2,3) = F(ix,iy+1).d2zdxdy;
+  Z(3,0) = F(ix+1,iy).dzdx;
+  Z(3,1) = F(ix+1,iy+1).dzdx;
+  Z(3,2) = F(ix+1,iy).d2zdxdy;
+  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  
+  double val = 0.0;
+  for (int m=0; m<4; m++) {
+    double Zb_m = 0.0;
+    for (int n=0; n<4; n++)
+      Zb_m += Z(m,n) * b(n);
+    val += Zb_m * a(m);
+  }
+  return (val);
+}
+
+inline double BicubicSpline::d2_dxdy (double x, double y)
+{
+  if (!BiUpToDate)
+    BiUpdate();
+  TinyMatrix<double,4,4> Z;
+  TinyVector<double,4> a, b;
+
+  int ix = Xgrid->ReverseMap(x);  
+  int iy = Ygrid->ReverseMap(y);
+
+  ix = max(0,ix); ix = min(ix, Nx-2);
+  iy = max(0,iy); iy = min(iy, Ny-2);
+
+  double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
+  double k = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+  double hinv = 1.0/h;
+  double kinv = 1.0/k;
+  double u = (x - (*Xgrid)(ix))*hinv;
+  double v = (y - (*Ygrid)(iy))*kinv;
+  a(0) = hinv*dp1(u);
+  a(1) = hinv*dp2(u);
+  a(2) = dq1(u);
+  a(3) = dq2(u);
+
+  b(0) = kinv*dp1(v);
+  b(1) = kinv*dp2(v);
+  b(2) = dq1(v);
+  b(3) = dq2(v);
+  
+  Z(0,0) = F(ix,iy).z;
+  Z(0,1) = F(ix,iy+1).z;
+  Z(0,2) = F(ix,iy).dzdy;
+  Z(0,3) = F(ix,iy+1).dzdy;
+  Z(1,0) = F(ix+1,iy).z;
+  Z(1,1) = F(ix+1,iy+1).z;
+  Z(1,2) = F(ix+1,iy).dzdy;
+  Z(1,3) = F(ix+1,iy+1).dzdy;
+  Z(2,0) = F(ix,iy).dzdx;
+  Z(2,1) = F(ix,iy+1).dzdx;
+  Z(2,2) = F(ix,iy).d2zdxdy;
+  Z(2,3) = F(ix,iy+1).d2zdxdy;
+  Z(3,0) = F(ix+1,iy).dzdx;
+  Z(3,1) = F(ix+1,iy+1).dzdx;
+  Z(3,2) = F(ix+1,iy).d2zdxdy;
+  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  
+  double val = 0.0;
+  for (int m=0; m<4; m++) {
+    double Zb_m = 0.0;
+    for (int n=0; n<4; n++)
+      Zb_m += Z(m,n) * b(n);
+    val += Zb_m * a(m);
+  }
+  return (val);
+}
+
+inline double BicubicSpline::d2_dx2 (double x, double y)
+{
+  if (!BiUpToDate)
+    BiUpdate();
+  TinyMatrix<double,4,4> Z;
+  TinyVector<double,4> a, b;
+
+  int ix = Xgrid->ReverseMap(x);  
+  int iy = Ygrid->ReverseMap(y);
+
+  ix = max(0,ix); ix = min(ix, Nx-2);
+  iy = max(0,iy); iy = min(iy, Ny-2);
+
+  double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
+  double hinv = 1.0/h;
+  double k = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+  double u = (x - (*Xgrid)(ix))*hinv;
+  double v = (y - (*Ygrid)(iy))/k;
+  a(0) = hinv*hinv*d2p1(u);
+  a(1) = hinv*hinv*d2p2(u);
+  a(2) = hinv*d2q1(u);
+  a(3) = hinv*d2q2(u);
+
+  b(0) = p1(v);
+  b(1) = p2(v);
+  b(2) = k*q1(v);
+  b(3) = k*q2(v);
+  
+  Z(0,0) = F(ix,iy).z;
+  Z(0,1) = F(ix,iy+1).z;
+  Z(0,2) = F(ix,iy).dzdy;
+  Z(0,3) = F(ix,iy+1).dzdy;
+  Z(1,0) = F(ix+1,iy).z;
+  Z(1,1) = F(ix+1,iy+1).z;
+  Z(1,2) = F(ix+1,iy).dzdy;
+  Z(1,3) = F(ix+1,iy+1).dzdy;
+  Z(2,0) = F(ix,iy).dzdx;
+  Z(2,1) = F(ix,iy+1).dzdx;
+  Z(2,2) = F(ix,iy).d2zdxdy;
+  Z(2,3) = F(ix,iy+1).d2zdxdy;
+  Z(3,0) = F(ix+1,iy).dzdx;
+  Z(3,1) = F(ix+1,iy+1).dzdx;
+  Z(3,2) = F(ix+1,iy).d2zdxdy;
+  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  
+  double val = 0.0;
+  for (int m=0; m<4; m++) {
+    double Zb_m = 0.0;
+    for (int n=0; n<4; n++)
+      Zb_m += Z(m,n) * b(n);
+    val += Zb_m * a(m);
+  }
+  return (val);
+}
+
+
+
+
+inline double BicubicSpline::d2_dy2 (double x, double y)
+{
+  if (!BiUpToDate)
+    BiUpdate();
+  TinyMatrix<double,4,4> Z;
+  TinyVector<double,4> a, b;
+
+  int ix = Xgrid->ReverseMap(x);  
+  int iy = Ygrid->ReverseMap(y);
+
+  ix = max(0,ix); ix = min(ix, Nx-2);
+  iy = max(0,iy); iy = min(iy, Ny-2);
+
+  double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
+  double hinv = 1.0/h;
+  double k = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+  double kinv = 1.0/k;
+  double u = (x - (*Xgrid)(ix))*hinv;
+  double v = (y - (*Ygrid)(iy))*kinv;
+  a(0) = p1(u);
+  a(1) = p2(u);
+  a(2) = h*q1(u);
+  a(3) = h*q2(u);
+
+  b(0) = kinv*kinv*d2p1(v);
+  b(1) = kinv*kinv*d2p2(v);
+  b(2) = kinv*d2q1(v);
+  b(3) = kinv*d2q2(v);
+  
+  Z(0,0) = F(ix,iy).z;
+  Z(0,1) = F(ix,iy+1).z;
+  Z(0,2) = F(ix,iy).dzdy;
+  Z(0,3) = F(ix,iy+1).dzdy;
+  Z(1,0) = F(ix+1,iy).z;
+  Z(1,1) = F(ix+1,iy+1).z;
+  Z(1,2) = F(ix+1,iy).dzdy;
+  Z(1,3) = F(ix+1,iy+1).dzdy;
+  Z(2,0) = F(ix,iy).dzdx;
+  Z(2,1) = F(ix,iy+1).dzdx;
+  Z(2,2) = F(ix,iy).d2zdxdy;
+  Z(2,3) = F(ix,iy+1).d2zdxdy;
+  Z(3,0) = F(ix+1,iy).dzdx;
+  Z(3,1) = F(ix+1,iy+1).dzdx;
+  Z(3,2) = F(ix+1,iy).d2zdxdy;
+  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  
+  double val = 0.0;
+  for (int m=0; m<4; m++) {
+    double Zb_m = 0.0;
+    for (int n=0; n<4; n++)
+      Zb_m += Z(m,n) * b(n);
+    val += Zb_m * a(m);
+  }
+  return (val);
+}
+ 
 
 
 
