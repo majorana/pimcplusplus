@@ -1,6 +1,6 @@
 SOURCES = EwaldBase.cc SimpleEwald.cc NaClTest.cc
 
-all:	EwaldBase.o SimpleEwald.o NaClTest
+all:	EwaldBase.o SimpleEwald.o #NaClTest
 
 NaClTest: NaClTest.o EwaldBase.o SimpleEwald.o 
 	$(LD) -o NaClTest NaClTest.o EwaldBase.o SimpleEwald.o $(IOobjs) $(LIBS)

@@ -179,13 +179,13 @@ Here, we sum all of the terms we computed in the sections above,
 \begin{eqnarray}
 V & = & \sum_{\alpha > \beta} \left[\sum_{i,j} v_s(|\vr_i^\alpha
   -\vr_j^\beta|) + \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
-  \rho_{-\vk}^\beta\right)    \right] \nonumber \\
+  \rho_{-\vk}^\beta\right)v^{\alpha\beta}_k    \right] \nonumber \\
 & + & \sum_\alpha \left[ N^\alpha v_M^\alpha + \sum_{i>j} v_s(|\vr_i^\alpha -
   \vr_j^\alpha|) + \sum_\vk \left( |\rho_\vk^\alpha|^2 -
   N\right) v^{\alpha\alpha}_\vk \right] \nonumber \\
 & = & \sum_{\alpha > \beta} \left[\sum_{i,j} v_s(|\vr_i^\alpha
   -\vr_j^\beta|) + \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
-  \rho_{-\vk}^\beta\right)    \right] \nonumber \\
+  \rho_{-\vk}^\beta\right) v^{\alpha \beta}_k   \right] \nonumber \\
 & + & \sum_\alpha \left[ -\frac{N^\alpha v_l^{\alpha \alpha}(0)}{2}  + \sum_{i>j} v_s(|\vr_i^\alpha -
   \vr_j^\alpha|) + \frac{1}{2} \sum_\vk |\rho_\vk^\alpha|^2 v^{\alpha\alpha}_\vk \right] 
 \end{eqnarray}
@@ -234,6 +234,23 @@ v_k^{\alpha \beta} = \frac{4\pi}{\Omega}
 \subsection{RPA improvements}
 \section{Breakup Methods}
 \subsection{Gaussian charge screening}
+This original approach to the short and long-ranged breakup adds an
+opposite screening charge of gaussian shape around each point charge.
+It then removes the charge in the long-ranged part of the potential.
+In this potential,
+\begin{equation}
+v_{\text{long}}(r) = \frac{Z_1 Z_2}{r} \text{erf}(\alpha r),
+\end{equation}
+where $\alpha$ is an adjustable parameter used to control how
+short-ranged the potential should be.  If the box size is $L$, a
+typical value for $\alpha$ might be $7/(LZ_1 Z_2)$. We should note
+that this form for the long-ranged potential should also work for any
+general potential with a coulomb tail, e.g. pseudo-Hamiltonian
+potentials.  For this form of the long-ranged potential, we have in $k$-space
+\begin{equation}
+v_k = \frac{4\pi\exp\left[\frac{-k^2}{4\alpha^2}\right]}{\Omega k^2}.
+\end{equation}
+
 \subsection{Optimizing the breakup}
 
 
