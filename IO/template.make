@@ -1,12 +1,15 @@
-SOURCES = InputOutput.cc InputOutputHDF5.cc InputFile.cc  InputOutputASCII.cc TestXML.cc
+SOURCES = InputOutput.cc InputOutputHDF5.cc InputFile.cc  InputOutputASCII.cc TestXML.cc TestHDF5.cc
 
 objs = InputOutput.o  InputOutputHDF5.o InputFile.o   InputOutputASCII.o InputOutputXML.o
-all:	$(objs) TestXML
+all:	$(objs) TestXML TestHDF5
 
 
 
 TestXML:	$(objs) TestXML.o
 	$(LD) -o $@ $(objs) TestXML.o $(LIBS)
+
+TestHDF5:	$(objs) TestHDF5.o
+	$(LD) -o $@ $(objs) TestHDF5.o $(LIBS)
 
 clean:
 	rm -f *.o

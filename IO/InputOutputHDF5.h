@@ -17,7 +17,7 @@
 class VarHDF5Class : public VarClass
 {
 public:
-  hid_t DataSetID, DataSpaceID;
+  hid_t DataSetID, DataSpaceID, BoolType;
   blitz::Array<hsize_t,1> Dimensions;
 
   bool ReadInto (double &val);
@@ -78,6 +78,7 @@ class IOTreeHDF5Class : public IOTreeClass
 {
 private:
   bool IsOpen;
+  hid_t BoolType;
   /// ReadGroup reads a HDF5 group, given by name, from the file.
   /// It reads in all variables and groups within the file, calling
   /// itself recursively for groups within itself.
