@@ -113,11 +113,9 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 all:   pimc++ TestPerm
 	
 pimc++: Common_obj Tests $(PIMCobjs)
-	pushd ..; make; pushd
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
 
 TestPerm: Common_obj Tests $(TestPermobjs)
-	pushd ..; make; pushd
 	$(LD) -o $@ $(TestPermobjs) $(LIBS) $(PSPLINELIB)
 
 Common_obj:
