@@ -20,9 +20,18 @@ public:
   virtual void Read(IOSectionClass &in) = 0;
   virtual void SetGrid(Grid *newGrid) = 0;
   inline Grid* GetGrid(){ return grid; }
+  inline double NumElecs();
   virtual void SetBarePot (Potential *pot) = 0;
 };
 
+inline double
+Atom::NumElecs()
+{
+  double num = 0.0;
+  for (int i=0; i<RadialWFs.size(); i++) 
+    num += RadialWFs(i).Occupancy;
+  return num;
+}
 
 
 #endif
