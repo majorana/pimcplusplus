@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define SIMPLE_SPRNG
+// #define SIMPLE_SPRNG
 
 /// Number of dimensions that dVec uses.
 #define NDIM 3
@@ -23,9 +23,6 @@ extern int Write1;
 extern int Write2; 
 
 
-/// Produces a guassian random vector with radius that has variance
-/// sigma 
-dVec GaussianRandomVec(double sigma);
 
 /// Changes the mode the entire code is running in.
 void SetMode(ModeType);

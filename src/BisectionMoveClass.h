@@ -30,7 +30,7 @@ class JoinMoveClass : public MoveClass
     //    PathData.MoveJoin();
   }
   void Read(IOSectionClass &input){};
-  double AcceptanceRatio(){return 1.0;}
+
   void MakeMove() {};
   JoinMoveClass (PathDataClass &myPathData ) : MoveClass(myPathData)
   {/* Do nothing for now. */ }
@@ -74,7 +74,7 @@ class ShiftMoveClass : public MoveClass
   //Currently we don't read anything for the shift move class.
   void Read(IOSectionClass &theInput);
   ///You always accept everything!
-  double AcceptanceRatio() {return 1.0;}
+  
   ShiftMoveClass (PathDataClass &myPathData) : MoveClass(myPathData)
   { /* Do nothing for now. */ }
   

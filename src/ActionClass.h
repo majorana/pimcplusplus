@@ -89,7 +89,8 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
       dVec rdiff=DistanceTable->Velocity(slice, slice+skip, ptcl);
       //dVec rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
       dVec rbar = r + 0.5*rdiff;
-      dVec newDelta=GaussianRandomVec(sigma);
+      dVec newDelta;
+      Path.Random.LocalGaussianVec(sigma,newDelta);
       double GaussProd=1.0;
       for (int dim=0; dim<NDIM; dim++) {
 	  while (newDelta[dim] > (0.5*Path.Box[dim]))

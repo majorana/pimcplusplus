@@ -4,7 +4,7 @@
 #include "Common/IO/InputOutput.h"
 #include "MirroredArrayClass.h"
 #include "SpeciesClass.h"
-
+#include "Common/Random/Random.h"
 
 ///The number of time slices is the number of slices on this processor.
 ///In all cases this processor shares a time slice with the processor 
@@ -20,9 +20,11 @@ private:
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
   int MyNumSlices;
-  int TotalNumSlices;
-  CommunicatorClass &Communicator;
+
+  PIMCCommunicatorClass &Communicator;
+
 public:
+  RandomClass Random;
   MirroredArrayClass1D<int> Permutation;
   inline void Print(){Path.Print();}
   void Read(IOSectionClass &inSection);
@@ -80,6 +82,7 @@ public:
   {
     return (*(SpeciesArray(speciesNum)));
   }
+  int TotalNumSlices;
   /// Returns the number of particle Species
   inline int NumSpecies() {return SpeciesArray.size();}
   inline int NumParticles() { return Path.NumParticles();}
@@ -88,7 +91,7 @@ public:
   ///ahead of it and behind it. The convention for the shared slices
   ///is that the processor owns its first but not its last slice.
   inline int NumTimeSlices() { return Path.NumTimeSlices();}
-  inline void SetTimeSlices(int tSlices){TotalNumSlices=tSlices;}
+
   /// Returns the position of particle ptcl at time slice timeSlice
   inline dVec operator() (int timeSlice, int ptcl)
   { return Path(timeSlice, ptcl); }
@@ -142,10 +145,11 @@ public:
     }
   }
 
-  PathClass(CommunicatorClass &communicator): Communicator(communicator)
+  PathClass(PIMCCommunicatorClass &communicator): Communicator(communicator), Random(Communicator)
     {
       //      NumSpecies = 0;
       TotalNumSlices=0;
+      Random.Init();
     }
 };
 

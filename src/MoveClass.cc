@@ -40,11 +40,11 @@ void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
 }
 
 
-inline int RandInt (int Max) //Hopefully this didn't break anything
+inline int ParticleMoveClass::RandInt (int Max) //Hopefully this didn't break anything
 {
   double myRandNum;
   double myNum;
-  myRandNum=sprng();
+  myRandNum=PathData.Path.Random.Common();
   myNum=(double)Max * myRandNum;
     
   return ((int)floor(myNum));

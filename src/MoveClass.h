@@ -19,7 +19,8 @@ class MoveClass
   string Name;
   ///All moves ought to be able to read
   virtual void Read(IOSectionClass &input)=0;
-  virtual double AcceptanceRatio()=0;
+  virtual double AcceptanceRatio() {return sqrt((double)-1.0);}
+
   /// MoveClass constructor. Sets reference to the PathData object
   MoveClass(PathDataClass &myPathData) : PathData(myPathData)
     {Name="";}
@@ -38,6 +39,7 @@ protected:
   Array<int,1> ActiveSpecies;
   /// Total number of particles in the active species
   int TotalParticles;
+
   /// Scratch Array holding a random subset of particles
   Array<int,1> MyParticleIndices; 
   ////  /// A mapping from integers to particle ids
@@ -70,6 +72,7 @@ protected:
   /// Function that chooses the particles that you should move and
   /// places them in ActiveParticles; 
   void ChooseParticles();
+  inline int RandInt(int x);
   ParticleMoveClass(PathDataClass &myPathData) : MoveClass (myPathData)
   { 
     NumAccepted=0;

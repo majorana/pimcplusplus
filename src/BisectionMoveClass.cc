@@ -28,7 +28,7 @@ void ShiftMoveClass::Read(IOSectionClass &theInput)
 void ShiftMoveClass::MakeMove()
 {//Remember to mark Actions dirty!!!
   //int numTimeSlicesToShift=(int)floor(sprng()*PathData->NumTimeSlices);
-  int numTimeSlicesToShift =(int)floor((PathData.NumTimeSlices()-1)*drand48());
+  int numTimeSlicesToShift =(int)floor((PathData.NumTimeSlices()-1)*PathData.Path.Random.Common());
   
   //      PathData.MoveJoin(1);
   PathData.ShiftData(numTimeSlicesToShift);
@@ -124,7 +124,7 @@ void BisectionMoveClass::MakeMove()
     //    cerr<<oldAction<<endl;
     //cout<<"The log of the accept prob is " << logAcceptProb;
     //    cout<<" "<<oldAction<<" "<<newAction<<" "<<endl;
-    if (-logAcceptProb<log(sprng())){///reject conditin
+    if (-logAcceptProb<log(PathData.Path.Random.Local())){///reject conditin
       toAccept=false;
       //      break;
 

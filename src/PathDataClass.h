@@ -8,6 +8,7 @@
 #include "PathClass.h"
 #include "CommunicatorClass.h"
 #include "DistanceTablePBCClass.h"
+#include "Common/Random/Random.h"
 //#include "DistanceTableFreeClass.h"
 
 /// This is the class that holds all of the information about the paths 
@@ -24,7 +25,7 @@ public:
 
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
-  CommunicatorClass Communicator;
+  PIMCCommunicatorClass Communicator;
 
   /// This object computes all actions.
   ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);

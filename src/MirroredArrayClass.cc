@@ -83,7 +83,7 @@ void MirroredArrayClass<T>::Print()
 }
 
 template <class T>
-void MirroredArrayClass<T>::ShiftData(int slicesToShift, CommunicatorClass &Communicator)
+void MirroredArrayClass<T>::ShiftData(int slicesToShift, PIMCCommunicatorClass &Communicator)
 {
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
@@ -196,7 +196,7 @@ void MirroredSymmetricMatrixClass<T>::Print()
 
 
 template <class T>
-void MirroredSymmetricMatrixClass<T>::ShiftData(int slicesToShift, CommunicatorClass &Communicator)
+void MirroredSymmetricMatrixClass<T>::ShiftData(int slicesToShift, PIMCCommunicatorClass &Communicator)
 {
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
@@ -357,7 +357,7 @@ void MirroredAntiSymmetricMatrixClass<T>::Print()
 
 template <class T>
 void MirroredAntiSymmetricMatrixClass<T>::ShiftData(int slicesToShift, 
-						    CommunicatorClass 
+						    PIMCCommunicatorClass 
 						    &Communicator)
 {
   int numProcs=Communicator.NumProcs();

@@ -4,7 +4,7 @@ template class MirroredAntiSymmetricMatrixClass<ImageNumClass>;
 
 
 void DistanceTableClass::ShiftData(int slicesToShift,
-				   CommunicatorClass &Communicator)
+				   PIMCCommunicatorClass &Communicator)
 {
 
   DistTable.ShiftData(slicesToShift,Communicator);

@@ -126,7 +126,7 @@ public:
 
   ///This shifts slicesToShift time slices to the next (if positive)
   ///or previous (if negative) processor 
-  void ShiftData(int slicesToShift,CommunicatorClass &communicator); 
+  void ShiftData(int slicesToShift,PIMCCommunicatorClass &communicator); 
 
   
   /// Write to the mirrored array in the way specified by the present
@@ -261,7 +261,7 @@ public:
 
   ///This shifts slicesToShift time slices to the next (if positive)
   ///or previous (if negative) processor 
-  void ShiftData(int slicesToShift,CommunicatorClass &communicator); 
+  void ShiftData(int slicesToShift,PIMCCommunicatorClass &communicator); 
 
   void MoveJoin(MirroredArrayClass1D<int> &PermMatrix,
 		int oldJoin, int newJoin);
@@ -422,7 +422,7 @@ public:
 
   ///This shifts slicesToShift time slices to the next (if positive)
   ///or previous (if negative) processor 
-  void ShiftData(int slicesToShift,CommunicatorClass &communicator); 
+  void ShiftData(int slicesToShift,PIMCCommunicatorClass &communicator); 
 
   void MoveJoin(MirroredArrayClass1D<int> &PermMatrix,
 		int oldJoin, int newJoin);

@@ -8,7 +8,7 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -O3 -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DNO_COUT -DDEBUG -DBZ_DEBUG #-DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -DDEBUG -DBZ_DEBUG  -DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 TestObjs =                           \
   ObservableClass.o                  \
@@ -28,6 +28,7 @@ TestObjs =                           \
   DistanceTableClass.o               \
   MirroredArrayClass.o               \
   WrapClass.o			     \
+  Common/MPI/Communication.o	     \
   Common/IO/InputOutput.o            \
   Common/IO/InputOutputHDF5.o        \
   Common/IO/InputFile.o              \
