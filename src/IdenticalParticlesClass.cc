@@ -1,4 +1,4 @@
-#include "IdenticalParticlesClass.h"
+#include "SpeciesClass.h"
 
 
 

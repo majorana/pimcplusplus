@@ -1,26 +1,26 @@
 #ifndef ARRAYOFIDENTICALPARTICLECLASS_H
 #define ARRAYOFIDENTICALPARTICLECLASS_H
 
-#include "IdenticalParticlesClass.h"
+#include "SpeciesClass.h"
 
 class SpeciesArrayClass
 {
-  Array<IdenticalParticlesClass*,1> IdenticalParticlesArray;
+  Array<SpeciesClass*,1> IdenticalParticlesArray;
  public:
   inline int size(){
     return IdenticalParticlesArray.size();
   }
   inline void resize(int newsize)
     {
-      //      cerr<<"The Array of IdenticalParticleClass is being resized to ";
+      //      cerr<<"The Array of SpeciesClass is being resized to ";
       //      cerr<<newsize<<endl;
       IdenticalParticlesArray.resize(newsize);
     }
-  inline void Set(int i, IdenticalParticlesClass &IDptcls)
+  inline void Set(int i, SpeciesClass &IDptcls)
     {
       IdenticalParticlesArray(i) = &IDptcls;
     }
-  inline IdenticalParticlesClass& operator()(int i){
+  inline SpeciesClass& operator()(int i){
     return (*(IdenticalParticlesArray(i)));
   }
   inline void SetPos(int Species, int Ptcl, int Slice, const dVec &pos){
@@ -31,7 +31,7 @@ class SpeciesArrayClass
   }
 
 
-  //  inline IdenticalParticlesClass operator()(int i) const {
+  //  inline SpeciesClass operator()(int i) const {
   //    return (*(IdenticlesParticleArray(i)));
   //  }
 

@@ -14,7 +14,7 @@ class PermutationClass
 /*! This is an base class that holds all the information about
 identical particles.  It may be specialized to hold specialized
 information about particular types of particles. */
-class IdenticalParticlesClass
+class SpeciesClass
 {
 public:
   int NumParticles;
@@ -30,7 +30,7 @@ public:
 };
 
 
-class ElectronsClass : public IdenticalParticlesClass
+class ElectronsClass : public SpeciesClass
 {
 public:
   double NodeAction (int Ptcl, int LinkNum);
@@ -39,7 +39,7 @@ public:
 
 };
 
-class ProtonsClass : public IdenticalParticlesClass
+class ProtonsClass : public SpeciesClass
 {
 public:
   double NodeAction (int Ptcl, int LinkNum)

@@ -2,7 +2,7 @@
 #define ACTION_CLASS
 
 #include "CubicSpline.h"
-#include "IdenticalParticlesClass.h"
+#include "SpeciesClass.h"
 #include "MemoizedDataClass.h"
 #include "SpeciesArrayClass.h"
 
@@ -95,7 +95,7 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
 
 /*! This is the class that controls all of the actions and is in
   charge of calculating them. When this is initialized a pointer needs
-  to be sent that has the memoizedData and IdenticalParticleClass */ 
+  to be sent that has the memoizedData and SpeciesClass */ 
 
 class ActionClass
 {
@@ -106,7 +106,7 @@ public:
   Array<PairActionClass,1> PairActionVector;
   Array<int,2> PairMatrix;
   Array<SavedPairActionClass,2> SavedPairActionArray;
-  //  Array<IdenticalParticlesClass,1> *mySpeciesArray;
+  //  Array<SpeciesClass,1> *mySpeciesArray;
   SpeciesArrayClass *mySpeciesArray;
   double tau;
   double calcTotalAction(Array<ParticleID,1> changedParticles,int startSlice, int endSlice,int level);

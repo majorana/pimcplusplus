@@ -2,7 +2,7 @@
 #define PATH_DATA_CLASS
 
 #include "Common.h"
-#include "IdenticalParticlesClass.h"
+#include "SpeciesClass.h"
 #include "MemoizedDataClass.h"
 #include "ActionClass.h"
 
@@ -36,7 +36,7 @@ public:
     return SpeciesArray.Size();
   }
   /// Returns a reference to the SpeciesClass object of number species
-  inline IdenticalParticlesClass& operator()(int species){
+  inline SpeciesClass& operator()(int species){
     return SpeciesArray(species);
   }
   /// Returns the position of the particle of type species, particle
