@@ -13,9 +13,9 @@ int RadialWF::TurningIndex()
     {
       double r = grid(index);
       double A = pot->A(r);
-      double B = pot->V(r);
+      double B = pot->B(r);
       double V = pot->V(r);
-      double dAdr = pot->dVdr(r);
+      double dAdr = pot->dAdr(r);
       double E = Energy;
       double sl = (double) l;
       
@@ -39,7 +39,7 @@ RadialWF::OriginBC(double r0, double &u0, double &du0)
     {  // Use relativistic equations
       const double alpha = 1.0/137.036;
       double Z = -pot->V(r0)*r0;
-      cerr << "Z = " << Z << endl;
+      //      cerr << "Z = " << Z << endl;
       double a2Z2 = alpha*alpha*(double)Z*(double)Z;
 
       double sl = (double) l;
@@ -123,6 +123,8 @@ double RadialWF::IntegrateInOut (int &tindex)
   Grid &grid = *u.grid;
   // Find classical turning point
   tindex = TurningIndex();
+  //  cerr << "TurningIndex = " << tindex << endl;
+  // cerr << "Turning Point = " << (*u.grid)(tindex) << endl;
   // Compute starting value and derivative at origin
   double r0 = grid(0);
   OriginBC (r0, uduVec(0)[0], uduVec(0)[1]);
@@ -203,15 +205,15 @@ void RadialWF::Solve(double tolerance)
   Grid &grid = *u.grid;
   int TotalNodes = n-l-1;
 
-  char fname[100];
-  snprintf ("WFn%dl%d.h5", 100, n, l);
-  IOSectionClass out;
-  out.NewFile(fname);    
-  out.WriteVar ("x", u.grid->Points());
-  Array<double,2> tmp(u.grid->NumPoints,1);
-  tmp(Range::all,0) = u.Data();
-  out.WriteVar ("u", tmp);
-  VarClass *varPtr = out.GetVarPtr("u");
+//   char fname[100];
+//   snprintf (fname, 100, "WFn%dl%d.h5", n, l);
+//   IOSectionClass out;
+//   out.NewFile(fname);    
+//   out.WriteVar ("x", u.grid->Points());
+//   Array<double,2> tmp(1,u.grid->NumPoints);
+//   tmp(0,Range::all()) = u.Data();
+//   out.WriteVar ("u", tmp);
+//   VarClass *varPtr = out.GetVarPtr("u");
 
   if (!pot->IsPH()){
     double N = n;
@@ -233,7 +235,7 @@ void RadialWF::Solve(double tolerance)
   Eold = Etrial = Energy;
   bool done = false;
   while (!done) {
-    cerr << "Etrial = " << Etrial << endl;
+    //cerr << "Etrial = " << Etrial << endl;
     //cerr << "Ehigh = " << Ehigh << " Elow = " << Elow << endl;
     double CuspValue = IntegrateInOut(tindex);
     //cerr << "Cusp value = " << CuspValue << "\n";
@@ -253,7 +255,7 @@ void RadialWF::Solve(double tolerance)
       Elow = Etrial;
     
     Normalize();
-    varPtr->Append(u.Data());
+    // varPtr->Append(u.Data());
     double A = pot->A(grid(tindex));
     double C = 0.5 * A * CuspValue;
     double u0 = u(tindex);
@@ -281,7 +283,7 @@ void RadialWF::Solve(double tolerance)
 //     out.CloseFile();
     cerr << "Energy = " << Energy << endl;
   }
-  out.CloseFile();
+  //out.CloseFile();
 }
 
 
@@ -303,9 +305,13 @@ void RadialWF::Normalize()
 int RadialWF::CountNodes()
 {
   int nodes=0;
-  for (int i=0; i<(u.grid->NumPoints-1); i++)
-    if (u(i)*u(i+1) < 0.0)
+  double sign = u(0);
+  for (int i=1; i<u.grid->NumPoints; i++)
+    if ((sign*u(i)) < 0.0) {
       nodes++;
+      sign *= -1.0;
+      //      cerr << "Node at i=" << i << " r=" << (*u.grid)(i) << endl;
+    }
   return (nodes);
 }
 
