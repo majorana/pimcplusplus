@@ -352,13 +352,13 @@ void OutputSectionHDF5Class::CloseFile()
 
 string NumExtension (int num)
 {
-  string retString;
+  string retString = ".";
   char numstr[100];
-  snprintf(numstr, 100, ".%d", num);
+  snprintf(numstr, 100, "%d", num);
   int len = strlen(numstr);
   int numZeros = 8-len;
   for (int i=0; i<numZeros; i++)
-    retString += '0';
+    retString += "0";
   retString += numstr;
   return (retString);
 }
