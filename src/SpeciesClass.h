@@ -25,7 +25,10 @@ public:
   /// classical particle.
   double lambda;
   double Charge;
-  
+  /// sigma and epsilon are parameters for the Lennard-Jones potential used in the TIP5P water model. -jg
+  double Sigma;
+  double Epsilon;  
+
   /// Returns the nodal action for fermions.  Returns 0 for bosons.
   virtual ParticleType GetParticleType() = 0;
 };

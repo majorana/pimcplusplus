@@ -4,6 +4,9 @@ bool SpeciesClass::Read(IOSectionClass &inSection)
 {
   assert(inSection.ReadVar("Name",Name));
   assert(inSection.ReadVar("lambda",lambda));
+  inSection.ReadVar("Charge",Charge);
+  inSection.ReadVar("Epsilon",Epsilon);
+  inSection.ReadVar("Sigma",Sigma);
   assert(inSection.ReadVar("NumParticles",NumParticles));
   assert(inSection.ReadVar("NumDim",NumDim));
   assert(inSection.ReadVar("Type",Type));

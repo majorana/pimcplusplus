@@ -22,27 +22,31 @@ double KineticClass::Action (int slice1, int slice2,
   for (int ptclIndex=0; ptclIndex<numChangedPtcls; ptclIndex++){
     int ptcl = changedParticles(ptclIndex);
     int species=Path.ParticleSpeciesNum(ptcl);
-    double FourLambdaTauInv=1.0/(4.0*Path.Species(species).lambda*levelTau);
-    for (int slice=slice1; slice < slice2;slice+=skip) {
-      dVec vel;
-      vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
-      double GaussProd = 1.0;
-      for (int dim=0; dim<NDIM; dim++) {
-	int NumImage=1;
-	double GaussSum=0.0;
-	for (int image=-NumImage; image<=NumImage; image++) {
-	  double dist = vel[dim]+(double)image*Path.GetBox()[dim];
-	  GaussSum += exp(-dist*dist*FourLambdaTauInv);
-	}
-	GaussProd *= GaussSum;
-      }
-      TotalK -= log(GaussProd);    
+    double lambda = Path.Species(species).lambda;
+    if (lambda != 0){
+      double FourLambdaTauInv=1.0/(4.0*Path.Species(species).lambda*levelTau);
+      for (int slice=slice1; slice < slice2;slice+=skip) {
+        dVec vel;
+        vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
+        double GaussProd = 1.0;
+        for (int dim=0; dim<NDIM; dim++) {
+  	  int NumImage=1;
+	  double GaussSum=0.0;
+	  for (int image=-NumImage; image<=NumImage; image++) {
+	    double dist = vel[dim]+(double)image*Path.GetBox()[dim];
+	    GaussSum += exp(-dist*dist*FourLambdaTauInv);
+	  }
+	  GaussProd *= GaussSum;
+        }
+        TotalK -= log(GaussProd);    
       //TotalK += dot(vel,vel)*FourLambdaTauInv; 
+      }
     }
   }
   if (changedParticles(0) == 30)
     cerr << "Kinetic = " << TotalK << endl;
   //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+//  cerr << "I'm returning kinetic action " << TotalK << endl;
   return (TotalK);
 }
 

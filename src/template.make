@@ -34,7 +34,7 @@ ifeq ($(HOSTTYPE),powermac)
    LD = mpiCC
    F77 = f77
    CCFLAGS = -c -g  -Wno-long-double
-   EXTRADEFS = -DNOUNDERSCORE -DNOCUSERID
+   EXTRADEFS = -DNOUNDERSCORE -DNOCUSERID -DMAC
    MAKE = make
 endif
 ifeq ($(HOSTTYPE),i386-linux)
@@ -83,6 +83,8 @@ PIMCobjs =                            \
   Moves/DisplaceMove.o                \
   Moves/OpenEndMove.o                 \
   Moves/MoveBase.o                    \
+  Moves/WaterMove.o                    \
+  Moves/WaterMoveRing.o                    \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
   Actions/OpenLoopImportance.o        \
@@ -95,6 +97,7 @@ PIMCobjs =                            \
   Actions/KineticClass.o              \
   Actions/ActionsClass.o              \
   Actions/NodalActionClass.o          \
+  Actions/TIP5PWaterClass.o           \
   Moves/MultiStage.o                  \
   LongRangeRPA.o                      \
   PathDataClass.o                     \

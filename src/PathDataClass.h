@@ -73,6 +73,7 @@ public:
     return Path.NumParticles();
   }
 
+
   /// Returns a reference to the SpeciesClass object of number species
   inline SpeciesClass& Species(int species){
     return Path.Species(species);

@@ -176,29 +176,30 @@ void PairCorrelationClass::Accumulate()
 
       for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
 	for (int ptcl2=ptcl1+1;ptcl2<=species1.LastPtcl;ptcl2++){
-	  
-	  dVec disp;
-	  double dist;
-	  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
+	  //	  if (PathData.Path.MolRef(ptcl1)!=PathData.Path.MolRef(ptcl2)){
+	    dVec disp;
+	    double dist;
+	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
 	
-	  #ifdef OLDDEBUG
-	  dVec r1=PathData(slice,ptcl1);
-	  dVec r2=PathData(slice,ptcl2);
-	  dVec dispDummy=r2-r1;
-	  double distDummy=sqrt(dot(dispDummy,dispDummy));
-	  for (int i=0; i<NDIM; i++)
-	    if (disp[i] != dispDummy[i]){
-	      cerr << "Bad bad evil inconsistency is DispTable.\n";
-	      cerr<<r1<<" "<<r2<<" "<<dispDummy<<" "<<disp<<endl;
-	    }
-	  if (dist != distDummy)
-	    cerr << "Bad bad evil inconsistency is DistTable.\n";
-	  #endif
-	  if (dist<grid.End){
-	    int index=grid.ReverseMap(dist);
-	    Histogram(index)++;
-	  } 
-	}
+	    #ifdef OLDDEBUG
+	    dVec r1=PathData(slice,ptcl1);
+	    dVec r2=PathData(slice,ptcl2);
+	    dVec dispDummy=r2-r1;
+	    double distDummy=sqrt(dot(dispDummy,dispDummy));
+	    for (int i=0; i<NDIM; i++)
+	      if (disp[i] != dispDummy[i]){
+	        cerr << "Bad bad evil inconsistency is DispTable.\n";
+	        cerr<<r1<<" "<<r2<<" "<<dispDummy<<" "<<disp<<endl;
+	      }
+	    if (dist != distDummy)
+	      cerr << "Bad bad evil inconsistency is DistTable.\n";
+	    #endif
+	    if (dist<grid.End){
+	      int index=grid.ReverseMap(dist);
+	      Histogram(index)++;
+	    } 
+	    //	  }
+        }
     }
   }
   else {
@@ -207,25 +208,27 @@ void PairCorrelationClass::Accumulate()
       for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
 	for (int ptcl2=species2.FirstPtcl;ptcl2<=species2.LastPtcl;ptcl2++){
 	  
-	  dVec disp;
-	  double dist;
-	  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
+	  //	  if (PathData.Path.MolRef(ptcl1)!=PathData.Path.MolRef(ptcl2)){
+	    dVec disp;
+	    double dist;
+	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
 	  
 #ifdef OLDDEBUG
-	  dVec r1=PathData(slice,ptcl1);
-	  dVec r2=PathData(slice,ptcl2);
-	  dVec dispDummy=r2-r1;
-	  double distDummy=sqrt(dot(dispDummy,dispDummy));
-	  for (int i=0; i<NDIM; i++)
-	    if (disp[i] != dispDummy[i])
+	    dVec r1=PathData(slice,ptcl1);
+	    dVec r2=PathData(slice,ptcl2);
+	    dVec dispDummy=r2-r1;
+	    double distDummy=sqrt(dot(dispDummy,dispDummy));
+	    for (int i=0; i<NDIM; i++)
+	      if (disp[i] != dispDummy[i])
+	        cerr << "Bad bad evil inconsistency in DistTable.\n";
+	    if (dist != distDummy)
 	      cerr << "Bad bad evil inconsistency in DistTable.\n";
-	  if (dist != distDummy)
-	    cerr << "Bad bad evil inconsistency in DistTable.\n";
 #endif
-	  if (dist<grid.End){
-	    int index=grid.ReverseMap(dist);
-	    Histogram(index)++;
-	  }
+  	    if (dist<grid.End){
+	      int index=grid.ReverseMap(dist);
+	      Histogram(index)++;
+	    }
+	    //}
 	}
     }
   }

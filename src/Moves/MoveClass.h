@@ -12,5 +12,8 @@
 #include "RefSliceMove.h"
 #include "DisplaceMove.h"
 #include "OpenEndMove.h"
-//#include "StructureReject.h"
+#include "WaterMove.h"
+#include "WaterMoveRing.h"
+#include "StructureReject.h"
+
 #endif

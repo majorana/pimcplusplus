@@ -217,6 +217,24 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)=new DisplaceMoveClass(PathData,OutFile);
       Moves(counter)->Read(in); 
     }
+    else if (MoveType=="WaterRotate") {
+      OutFile.NewSection("WaterRotate");
+      Moves(counter)=new WaterRotate(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection(); // Whatever Move section we opened above.
+    }
+    else if (MoveType=="WaterTranslate") {
+      OutFile.NewSection("WaterTranslate");
+      Moves(counter)=new WaterTranslate(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection(); // Whatever Move section we opened above.
+    }
+    else if (MoveType=="WaterTranslateRing") {
+      OutFile.NewSection("WaterTranslateRing");
+      Moves(counter)=new WaterTranslateRing(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection(); // Whatever Move section we opened above.
+    }
     else {
       cerr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();

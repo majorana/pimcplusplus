@@ -9,7 +9,9 @@
 #include "KineticClass.h"
 #include "NodalActionClass.h"
 #include "DavidLongRangeClass.h"
+#include "TIP5PWaterClass.h"
 #include "OpenLoopImportance.h"
+
 
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
@@ -44,6 +46,9 @@ public:
 
   ///David's Long Range Class
   DavidLongRangeClass DavidLongRange;
+
+  /// Action for simulations using the TIP5P water model
+  TIP5PWaterClass TIP5PWater;
 
   /// This array of actions are used for Restricted PIMC for
   /// fermions.  These effective actions ensure that the paths do not
@@ -85,6 +90,7 @@ public:
     OpenLoopImportance(pathData),
     Kinetic(pathData),
     PathData(pathData),
+    TIP5PWater(pathData),
     NumImages(1)
   {
     ///Do nothing for now

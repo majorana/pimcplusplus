@@ -1,8 +1,9 @@
 #include "PathClass.h"
 #include "Actions/ActionsClass.h"
 
-void PathClass::ReadOld(string fileName)
+void PathClass::ReadOld(string fileName,bool replicate)
 {
+// This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
   IOSectionClass inFile;
   assert (inFile.OpenFile(fileName.c_str()));
   inFile.OpenSection("Observables");
@@ -19,7 +20,12 @@ void PathClass::ReadOld(string fileName)
       dVec pos;
       pos = 0.0;
       for (int dim=0; dim<NDIM; dim++)
-	pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim);
+	if (replicate){
+          pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim);
+        }
+        else{
+	  pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim);
+        }
       Path(slice,ptcl) = pos;
     }      
   }
@@ -30,8 +36,6 @@ void PathClass::ReadOld(string fileName)
 
 
 }
-
-
 
 void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
 			     double &dist, dVec &disp)
@@ -271,6 +275,7 @@ void PathClass::Read (IOSectionClass &inSection)
   // Now actually allocate the path
   Allocate();
 
+
 }
 
 /// This function initializes the paths depending on how they are
@@ -293,6 +298,8 @@ void PathClass::InitPaths (IOSectionClass &in)
     assert(in.OpenSection("Species", speciesIndex));
     string InitPaths;
     in.ReadVar ("InitPaths", InitPaths);
+    string Replicate;
+    in.ReadVar ("Replicate", Replicate);
     if (InitPaths == "RANDOM") {
       cerr << "Don't know how to do RANDOM yet.\n";
       exit(1);
@@ -364,9 +371,14 @@ void PathClass::InitPaths (IOSectionClass &in)
       }
     }    
     else if (InitPaths == "FILE"){
+      bool replicate = false;
+      if (Replicate == "ON"){
+        replicate = true;
+        cerr << "Replicate 'ON'; Using time slice 0 for all time slices." << endl;
+      }
       string pathFile;
       assert(in.ReadVar("File",pathFile));
-      ReadOld(pathFile);
+      ReadOld(pathFile,replicate);
     }
     else if (InitPaths == "LEVIFLIGHT") {
       Array<double,2> Positions;
@@ -407,9 +419,23 @@ void PathClass::InitPaths (IOSectionClass &in)
       abort();
     }
     in.CloseSection(); // Species
+//   jgadd: get numMol
+    if (speciesIndex == 0){  
+      numMol = species.NumParticles;
+    }
   }
   in.CloseSection(); // "Particles"
 
+// jgadd: correct entries where necessary
+//  cerr << "PRINT MolRef corrected" << endl;
+  for(int m = 0;m < MolRef.size(); m++){
+    int ref = MolRef(m);
+    while(ref >= numMol){
+      ref -= numMol;
+    MolRef(m) = ref;
+    }
+    cerr << m << " " << MolRef(m) << endl;
+  } 
   string openSpeciesName;
   if (OpenPaths) {
     assert(in.ReadVar("OpenSpecies",openSpeciesName));
@@ -487,6 +513,13 @@ void PathClass::Allocate()
     SetupkVecs2D();
 #endif
     Rho_k.resize(MyNumSlices, NumSpecies(), kVecs.size());
+  }
+  // jgadd
+  MolRef.resize(numParticles);
+//  cerr << "PRINT MolRef Initialized" << endl;
+  for(int q = 0;q < MolRef.size();q++){
+    MolRef(q) = q;
+//    cerr << q << " " << MolRef(q) << endl;
   }
 }
 

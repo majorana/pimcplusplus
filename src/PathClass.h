@@ -35,7 +35,7 @@ private:
   /// Misc. Helpers ///
   /////////////////////
   void LeviFlight (Array<dVec,1> &vec, double lambda);
-  void ReadOld(string fileName);
+  void ReadOld(string fileName, bool replicate);
   ////////////////////////////////
   /// Boundary conditions stuff //
   ////////////////////////////////
@@ -109,6 +109,10 @@ public:
   /// A scratch array to hold a boolean indicating whether we've
   /// looped over this particle yet
   Array<bool,1> DoPtcl;
+
+  //jgadd
+  int numMol;  // we want to store the number of molecules; it's loaded in the .cc file
+  Array<int,1> MolRef;
 
   inline void  SetBox (dVec box);
   inline const dVec& GetBox();

@@ -56,6 +56,8 @@ protected:
  public:
   /// Stores the number of moves made and the number accepted
   int NumMoves, NumAccepted;
+  /// An accumulator used to publish the diffusion value. -jg
+  double total_r_squared;
   /// This returns the Acceptance Ratio.
   inline double AcceptanceRatio() {return (double)(NumAccepted)/(double)NumMoves;}
   /// Call this to make a move
