@@ -5,7 +5,7 @@ MAKE_ALL = ${MAKE} all $(PASS_DEFS)
 MAKE_NEWMAKE = ${MAKE} -f template.make newmake $(PASS_DEFS)
 MAKE_CLEAN = ${MAKE} clean
 
-all:	Splines_obj IO_obj PH_obj Integration_obj DFT_obj Random_obj \
+all:	IO_obj Splines_obj PH_obj Integration_obj DFT_obj Random_obj \
 	MPI_obj Optimize_obj SpecialFunctions_obj MatrixOps_obj \
 	Fitting_obj PairAction_obj Distributed_obj
 
