@@ -2,6 +2,7 @@
 #define MYBLITZ_H
 
 #include <blitz/array.h>
+#include <blitz/tinyvec-et.h>
 typedef double scalar;
 
 // #define NDIM 3
@@ -15,6 +16,8 @@ typedef TinyMatrix<scalar,3,3> Mat3;
 
 typedef TinyVector<scalar,NDIM> dVec;
 typedef TinyVector<int,NDIM> dVecInt;
+
+extern "C" double isnan (double x);
 
 template <class T, int size>
 inline TinyVector<T,size> operator-(TinyVector<T,size> v)

@@ -2,6 +2,7 @@
 #define MY_TRICUBIC_SPLINE_H
 
 #include "Grid.h"
+#include <cmath>
 //#include <blitz/array.h>
 //using namespace blitz;
 

@@ -1,10 +1,14 @@
 #include "Grid.h"
+#include <cmath>
 
 #ifdef NOUNDERSCORE 
 #define FORT(name) name
 #else
 #define FORT(name) name ## _
 #endif 
+
+#include <math.h>
+#include <architecture/ppc/math.h>
 
 extern "C" void FORT(mktricubw)(double x[], int *nx,
 				double y[], int *ny,
@@ -27,7 +31,7 @@ extern "C" void FORT(evtricub)(double *xget, double *yget, double *zget,
 			       double *f, int *inf2, int *inf3,
 			       int *iselect, double *fval,
 			       int *ier);
-  
+
 
 class TricubicSpline
 {

@@ -420,719 +420,719 @@ C
       F(N) = 0.
    40 RETURN
       END
-C    DRIVER PROGRAM FOR TEST OF QUINAT, QUINEQ AND QUINDF               MAN   10
-C       FOLLOWS.                                                        MAN   20
-C                                                                       MAN   30
-      INTEGER N,NM1,M,MM,MM1,I,K,J,JJ                                   MAN   40
-      REAL*8 Z                                                          MAN   50
-      REAL*8 X(200),Y(200),B(200),BB(200),CC(200),DD(200),EE(200),      MAN   60
-     *                 FF(200),A(200,6),C(6),DIFF(5),COM(5)             MAN   70
-C                                                                       MAN   80
-C     N          NUMBER OF DATA POINTS.                                 MAN   90
-C     M          2*M-1 IS ORDER OF SPLINE.                              MAN  100
-C                   M = 3 ALWAYS FOR QUINTIC SPLINE.                    MAN  110
-C     NN,NM1,MM,                                                        MAN  120
-C     MM1,I,K,                                                          MAN  130
-C     J,JJ       TEMPORARY INTEGER VARIABLES.                           MAN  140
-C     Z,P        TEMPORARY REAL*8 VARIABLES.                            MAN  150
-C     X(1:N)     THE SEQUENCE OF KNOTS.                                 MAN  160
-C     Y(1:N)     THE PRESCRIBED FUNCTION VALUES AT THE KNOTS.           MAN  170
-C     B(1:N)     THE PRESCRIBED DERIVATIVE VALUES AT THE KNOTS.         MAN  180
-C     BB,CC,DD,                                                         MAN  190
-C     EE,FF(1:N) THE COMPUTED SPLINE COEFFICIENTS                       MAN  200
-C     A(1:N,1:6) TWO DIMENSIONAL ARRAY WHOSE COLUMNS ARE                MAN  210
-C                   Y, BB, CC, DD, EE, FF.                              MAN  220
-C     DIFF(1:5)  MAXIMUM VALUES OF DIFFERENCES OF VALUES AND            MAN  230
-C                   DERIVATIVES TO RIGHT AND LEFT OF KNOTS.             MAN  240
-C     COM(1:5)   MAXIMUM VALUES OF COEFFICIENTS.                        MAN  250
-C                                                                       MAN  260
-C                                                                       MAN  270
-C     TEST OF QUINAT WITH NONEQUIDISTANT KNOTS AND                      MAN  280
-C        EQUIDISTANT KNOTS FOLLOWS.                                     MAN  290
-C                                                                       MAN  300
-      NOUT=6                                                            MAN  310
-      WRITE(NOUT,10)                                                    MAN  320
-   10 FORMAT(50H1         TEST OF QUINAT WITH NONEQUIDISTANT KNOTS)     MAN  330
-      N = 5                                                             MAN  340
-      X(1) = -3.0                                                       MAN  350
-      X(2) = -1.0                                                       MAN  360
-      X(3) =  0.0                                                       MAN  370
-      X(4) =  3.0                                                       MAN  380
-      X(5) =  4.0                                                       MAN  390
-      Y(1) =  7.0                                                       MAN  400
-      Y(2) = 11.0                                                       MAN  410
-      Y(3) = 26.0                                                       MAN  420
-      Y(4) = 56.0                                                       MAN  430
-      Y(5) = 29.0                                                       MAN  440
-      M = 3                                                             MAN  450
-      MM = 2*M                                                          MAN  460
-      MM1 = MM - 1                                                      MAN  470
-      WRITE(NOUT,15) N,M                                                MAN  480
-   15 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN  490
-      CALL QUINAT(N,X,Y,BB,CC,DD,EE,FF)                                 MAN  500
-      DO 20 I = 1,N                                                     MAN  510
-         A(I,1) = Y(I)                                                  MAN  520
-         A(I,2) = BB(I)                                                 MAN  530
-         A(I,3) = CC(I)                                                 MAN  540
-         A(I,4) = DD(I)                                                 MAN  550
-         A(I,5) = EE(I)                                                 MAN  560
-         A(I,6) = FF(I)                                                 MAN  570
-   20 CONTINUE                                                          MAN  580
-      DO 30 I = 1,MM1                                                   MAN  590
-         DIFF(I) = 0.0                                                  MAN  600
-         COM(I) = 0.0                                                   MAN  610
-   30 CONTINUE                                                          MAN  620
-      DO 70 K = 1,N                                                     MAN  630
-         DO 35 I = 1,MM                                                 MAN  640
-            C(I) = A(K,I)                                               MAN  650
-   35 CONTINUE                                                          MAN  660
-      WRITE(NOUT,40) K                                                  MAN  670
-   40 FORMAT(40H ---------------------------------------,I3,            MAN  680
-     *  45H --------------------------------------------)               MAN  690
-      WRITE(NOUT,45) X(K)                                               MAN  700
-   45 FORMAT(F12.8)                                                     MAN  710
-      IF (K .EQ. N) WRITE(NOUT,55) C(1)                                 MAN  720
-      IF (K .EQ. N) GO TO 75                                            MAN  730
-      WRITE(NOUT,55) (C(I),I=1,MM)                                      MAN  740
-      DO 50 I = 1,MM1                                                   MAN  750
-         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN  760
-   50 CONTINUE                                                          MAN  770
-   55 FORMAT(6F16.8)                                                    MAN  780
-      Z = X(K+1) - X(K)                                                 MAN  790
-      DO 60 I = 2,MM                                                    MAN  800
-         DO 60 JJ = I,MM                                                MAN  810
-            J = MM + I - JJ                                             MAN  820
-            C(J-1) = C(J)*Z + C(J-1)                                    MAN  830
-   60 CONTINUE                                                          MAN  840
-      WRITE(NOUT,55) (C(I),I=1,MM)                                      MAN  850
-      DO 65 I = 1,MM1                                                   MAN  860
-         IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 65                    MAN  870
-         Z = ABS(C(I) - A(K+1,I))                                       MAN  880
-         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN  890
-   65 CONTINUE                                                          MAN  900
-   70 CONTINUE                                                          MAN  910
-   75 WRITE(NOUT,80)                                                    MAN  920
-   80 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN  930
-      WRITE(NOUT,85) (DIFF(I),I=1,MM1)                                  MAN  940
-   85 FORMAT(5E18.9)                                                    MAN  950
-      WRITE(NOUT,90)                                                    MAN  960
-   90 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN  970
-      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN  980
-      WRITE(NOUT,95) (COM(I),I=1,MM1)                                   MAN  990
-   95 FORMAT(5F16.8)                                                    MAN 1000
-      M = 3                                                             MAN 1010
-      DO 200 N = 10,100,10                                              MAN 1020
-      MM = 2*M                                                          MAN 1030
-      MM1 = MM - 1                                                      MAN 1040
-      NM1 = N -1                                                        MAN 1050
-      DO 100 I = 1,NM1,2                                                MAN 1060
-         X(I)   = I                                                     MAN 1070
-         X(I+1) = I + 1                                                 MAN 1080
-         Y(I)   = 1.                                                    MAN 1090
-         Y(I+1) = 0.                                                    MAN 1100
-  100 CONTINUE                                                          MAN 1110
-      IF (MOD(N,2) .EQ. 0) GOTO 105                                     MAN 1120
-      X(N) = N                                                          MAN 1130
-      Y(N) = 1.                                                         MAN 1140
-  105 CONTINUE                                                          MAN 1150
-      WRITE(NOUT,110) N,M                                               MAN 1160
-  110 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 1170
-      CALL QUINAT(N,X,Y,BB,CC,DD,EE,FF)                                 MAN 1180
-      DO 115 I = 1,N                                                    MAN 1190
-         A(I,1) = Y(I)                                                  MAN 1200
-         A(I,2) = BB(I)                                                 MAN 1210
-         A(I,3) = CC(I)                                                 MAN 1220
-         A(I,4) = DD(I)                                                 MAN 1230
-         A(I,5) = EE(I)                                                 MAN 1240
-         A(I,6) = FF(I)                                                 MAN 1250
-  115 CONTINUE                                                          MAN 1260
-      DO 120 I = 1, MM1                                                 MAN 1270
-         DIFF(I) = 0.0                                                  MAN 1280
-         COM(I) = 0.0                                                   MAN 1290
-  120 CONTINUE                                                          MAN 1300
-      DO 165 K = 1,N                                                    MAN 1310
-         DO 125 I = 1,MM                                                MAN 1320
-            C(I) = A(K,I)                                               MAN 1330
-  125    CONTINUE                                                       MAN 1340
-         IF (N .GT. 10) GOTO 140                                        MAN 1350
-         WRITE(NOUT,130) K                                              MAN 1360
-  130 FORMAT(40H ---------------------------------------,I3,            MAN 1370
-     *       45H --------------------------------------------)          MAN 1380
-         WRITE(NOUT,135) X(K)                                           MAN 1390
-  135 FORMAT(F12.8)                                                     MAN 1400
-         IF (K .EQ. N) WRITE(NOUT,150) C(1)                             MAN 1410
-  140    CONTINUE                                                       MAN 1420
-         IF (K .EQ. N) GO TO 170                                        MAN 1430
-         IF (N .LE. 10) WRITE(NOUT,150) (C(I), I=1,MM)                  MAN 1440
-         DO 145 I = 1,MM1                                               MAN 1450
-            IF (ABS(A(K,I)) .GT.  COM(I)) COM(I) = ABS(A(K,I))          MAN 1460
-  145    CONTINUE                                                       MAN 1470
-  150 FORMAT(6F16.8)                                                    MAN 1480
-         Z = X(K+1) - X(K)                                              MAN 1490
-         DO 155 I = 2,MM                                                MAN 1500
-            DO 155 JJ = I,MM                                            MAN 1510
-               J = MM + I - JJ                                          MAN 1520
-               C(J-1) = C(J)*Z + C(J-1)                                 MAN 1530
-  155    CONTINUE                                                       MAN 1540
-         IF (N .LE. 10) WRITE(NOUT,150) (C(I), I=1,MM)                  MAN 1550
-         DO 160 I = 1,MM1                                               MAN 1560
-            IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 160                MAN 1570
-            Z = ABS(C(I) - A(K+1,I))                                    MAN 1580
-            IF (Z .GT. DIFF(I)) DIFF(I) = Z                             MAN 1590
-  160    CONTINUE                                                       MAN 1600
-  165 CONTINUE                                                          MAN 1610
-  170 WRITE(NOUT,175)                                                   MAN 1620
-  175 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 1630
-      WRITE(NOUT,180) (DIFF(I),I=1,MM1)                                 MAN 1640
-  180 FORMAT(5E18.9)                                                    MAN 1650
-      WRITE(NOUT,185)                                                   MAN 1660
-  185 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 1670
-      IF (ABS(C(1)) .GT. COM(1)) COM(1) = ABS(C(1))                     MAN 1680
-      WRITE(NOUT,190) (COM(I),I=1,MM1)                                  MAN 1690
-  190 FORMAT(5E18.9)                                                    MAN 1700
-  200 CONTINUE                                                          MAN 1710
-C                                                                       MAN 1720
-C                                                                       MAN 1730
-C     TEST OF QUINEQ FOLLOWS.                                           MAN 1740
-C                                                                       MAN 1750
-      WRITE(NOUT,210)                                                   MAN 1760
-  210 FORMAT(18H1   TEST OF QUINEQ)                                     MAN 1770
-      M = 3                                                             MAN 1780
-      DO 400 N = 10,100,10                                              MAN 1790
-      MM = 2*M                                                          MAN 1800
-      MM1 = MM - 1                                                      MAN 1810
-      NM1 = N -1                                                        MAN 1820
-      DO 300 I = 1,NM1,2                                                MAN 1830
-         X(I)   = I                                                     MAN 1840
-         X(I+1) = I + 1                                                 MAN 1850
-         Y(I)   = 1.                                                    MAN 1860
-         Y(I+1) = 0.                                                    MAN 1870
-  300 CONTINUE                                                          MAN 1880
-      IF (MOD(N,2) .EQ. 0) GOTO 305                                     MAN 1890
-      X(N) = FLOAT(N)                                                   MAN 1900
-      Y(N) = 1.                                                         MAN 1910
-  305 CONTINUE                                                          MAN 1920
-      WRITE(NOUT,310) N,M                                               MAN 1930
-  310 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 1940
-      CALL QUINEQ(N,Y,BB,CC,DD,EE,FF)                                   MAN 1950
-      DO 315 I = 1,N                                                    MAN 1960
-         A(I,1) = Y(I)                                                  MAN 1970
-         A(I,2) = BB(I)                                                 MAN 1980
-         A(I,3) = CC(I)                                                 MAN 1990
-         A(I,4) = DD(I)                                                 MAN 2000
-         A(I,5) = EE(I)                                                 MAN 2010
-         A(I,6) = FF(I)                                                 MAN 2020
-  315 CONTINUE                                                          MAN 2030
-      DO 320 I = 1, MM1                                                 MAN 2040
-         DIFF(I) = 0.0                                                  MAN 2050
-         COM(I) = 0.0                                                   MAN 2060
-  320 CONTINUE                                                          MAN 2070
-      DO 365 K = 1,N                                                    MAN 2080
-         DO 325 I = 1,MM                                                MAN 2090
-            C(I) = A(K,I)                                               MAN 2100
-  325    CONTINUE                                                       MAN 2110
-         IF (N .GT. 10) GOTO 340                                        MAN 2120
-         WRITE(NOUT,330) K                                              MAN 2130
-  330 FORMAT(40H ---------------------------------------,I3,            MAN 2140
-     *       45H --------------------------------------------)          MAN 2150
-         WRITE(NOUT,335) X(K)                                           MAN 2160
-  335 FORMAT(F12.8)                                                     MAN 2170
-         IF (K .EQ. N) WRITE(NOUT,350) C(1)                             MAN 2180
-  340    CONTINUE                                                       MAN 2190
-         IF (K .EQ. N) GO TO 370                                        MAN 2200
-         IF (N .LE. 10) WRITE(NOUT,350) (C(I), I=1,MM)                  MAN 2210
-         DO 345 I = 1,MM1                                               MAN 2220
-            IF (ABS(A(K,I)) .GT.  COM(I)) COM(I) = ABS(A(K,I))          MAN 2230
-  345    CONTINUE                                                       MAN 2240
-  350 FORMAT(6F16.8)                                                    MAN 2250
-         Z = 1.                                                         MAN 2260
-         DO 355 I = 2,MM                                                MAN 2270
-            DO 355 JJ = I,MM                                            MAN 2280
-               J = MM + I - JJ                                          MAN 2290
-               C(J-1) = C(J)*Z + C(J-1)                                 MAN 2300
-  355    CONTINUE                                                       MAN 2310
-         IF (N .LE. 10) WRITE(NOUT,350) (C(I), I=1,MM)                  MAN 2320
-         DO 360 I = 1,MM1                                               MAN 2330
-            IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 360                MAN 2340
-            Z = ABS(C(I) - A(K+1,I))                                    MAN 2350
-            IF (Z .GT. DIFF(I)) DIFF(I) = Z                             MAN 2360
-  360    CONTINUE                                                       MAN 2370
-  365 CONTINUE                                                          MAN 2380
-  370 WRITE(NOUT,375)                                                   MAN 2390
-  375 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 2400
-      WRITE(NOUT,380) (DIFF(I),I=1,MM1)                                 MAN 2410
-  380 FORMAT(5E18.9)                                                    MAN 2420
-      WRITE(NOUT,385)                                                   MAN 2430
-  385 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 2440
-      IF (ABS(C(1)) .GT. COM(1)) COM(1) = ABS(C(1))                     MAN 2450
-      WRITE(NOUT,390) (COM(I),I=1,MM1)                                  MAN 2460
-  390 FORMAT(5E18.9)                                                    MAN 2470
-  400 CONTINUE                                                          MAN 2480
-C                                                                       MAN 2490
-C                                                                       MAN 2500
-C     TEST OF QUINDF WITH NONEQUIDISTANT KNOTS FOLLOWS.                 MAN 2510
-C                                                                       MAN 2520
-      WRITE(NOUT,410)                                                   MAN 2530
-  410 FORMAT(50H1         TEST OF QUINDF WITH NONEQUIDISTANT KNOTS)     MAN 2540
-      N = 5                                                             MAN 2550
-      X(1) = -3.0                                                       MAN 2560
-      X(2) = -1.0                                                       MAN 2570
-      X(3) =  0.0                                                       MAN 2580
-      X(4) =  3.0                                                       MAN 2590
-      X(5) =  4.0                                                       MAN 2600
-      Y(1) =  7.0                                                       MAN 2610
-      Y(2) = 11.0                                                       MAN 2620
-      Y(3) = 26.0                                                       MAN 2630
-      Y(4) = 56.0                                                       MAN 2640
-      Y(5) = 29.0                                                       MAN 2650
-      B(1) =  2.0                                                       MAN 2660
-      B(2) = 15.0                                                       MAN 2670
-      B(3) = 10.0                                                       MAN 2680
-      B(4) =-27.0                                                       MAN 2690
-      B(5) =-30.0                                                       MAN 2700
-      M = 3                                                             MAN 2710
-      MM = 2*M                                                          MAN 2720
-      MM1 = MM - 1                                                      MAN 2730
-      WRITE(NOUT,415) N,M                                               MAN 2740
-  415 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 2750
-      CALL QUINDF(N,X,Y,B,CC,DD,EE,FF)                                  MAN 2760
-      DO 420 I = 1,N                                                    MAN 2770
-         A(I,1) = Y(I)                                                  MAN 2780
-         A(I,2) = B(I)                                                  MAN 2790
-         A(I,3) = CC(I)                                                 MAN 2800
-         A(I,4) = DD(I)                                                 MAN 2810
-         A(I,5) = EE(I)                                                 MAN 2820
-         A(I,6) = FF(I)                                                 MAN 2830
-  420 CONTINUE                                                          MAN 2840
-      DO 430 I = 1,MM1                                                  MAN 2850
-         DIFF(I) = 0.0                                                  MAN 2860
-         COM(I) = 0.0                                                   MAN 2870
-  430 CONTINUE                                                          MAN 2880
-      DO 470 K = 1,N                                                    MAN 2890
-         DO 435 I = 1,MM                                                MAN 2900
-            C(I) = A(K,I)                                               MAN 2910
-  435 CONTINUE                                                          MAN 2920
-      WRITE(NOUT,440) K                                                 MAN 2930
-  440 FORMAT(40H ---------------------------------------,I3,            MAN 2940
-     *  45H --------------------------------------------)               MAN 2950
-      WRITE(NOUT,445) X(K)                                              MAN 2960
-  445 FORMAT(F12.8)                                                     MAN 2970
-      IF (K .EQ. N) WRITE(NOUT,455) C(1)                                MAN 2980
-      IF (K .EQ. N) GO TO 475                                           MAN 2990
-      WRITE(NOUT,455) (C(I),I=1,MM)                                     MAN 3000
-      DO 450 I = 1,MM1                                                  MAN 3010
-         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN 3020
-  450 CONTINUE                                                          MAN 3030
-  455 FORMAT(6F16.8)                                                    MAN 3040
-      Z = X(K+1) - X(K)                                                 MAN 3050
-      DO 460 I = 2,MM                                                   MAN 3060
-         DO 460 JJ = I,MM                                               MAN 3070
-            J = MM + I - JJ                                             MAN 3080
-            C(J-1) = C(J)*Z + C(J-1)                                    MAN 3090
-  460 CONTINUE                                                          MAN 3100
-      WRITE(NOUT,455) (C(I),I=1,MM)                                     MAN 3110
-      DO 465 I = 1,MM1                                                  MAN 3120
-         IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 465                   MAN 3130
-         Z = ABS(C(I) - A(K+1,I))                                       MAN 3140
-         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN 3150
-  465 CONTINUE                                                          MAN 3160
-  470 CONTINUE                                                          MAN 3170
-  475 WRITE(NOUT,480)                                                   MAN 3180
-  480 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 3190
-      WRITE(NOUT,485) (DIFF(I),I=1,MM1)                                 MAN 3200
-  485 FORMAT(5E18.9)                                                    MAN 3210
-      WRITE(NOUT,490)                                                   MAN 3220
-  490 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 3230
-      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN 3240
-      WRITE(NOUT,495) (COM(I),I=1,MM1)                                  MAN 3250
-  495 FORMAT(5F16.8)                                                    MAN 3260
-      M = 3                                                             MAN 3270
-      DO 600 N = 10,100,10                                              MAN 3280
-      MM = 2*M                                                          MAN 3290
-      MM1 = MM - 1                                                      MAN 3300
-      P = 0.0                                                           MAN 3310
-      DO 500 I = 1,N                                                    MAN 3320
-         P = P + ABS(SIN((FLOAT(I)))) + 0.001*FLOAT(I)                  MAN 3330
-         X(I) = P                                                       MAN 3340
-         Y(I) = COS((FLOAT(I))) - 0.5                                   MAN 3350
-         B(I) = COS((FLOAT(2*I))) - 0.5                                 MAN 3360
-  500 CONTINUE                                                          MAN 3370
-      WRITE(NOUT,510) N,M                                               MAN 3380
-  510 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 3390
-      CALL QUINDF(N,X,Y,B,CC,DD,EE,FF)                                  MAN 3400
-      DO 515 I = 1,N                                                    MAN 3410
-         A(I,1) = Y(I)                                                  MAN 3420
-         A(I,2) = B(I)                                                  MAN 3430
-         A(I,3) = CC(I)                                                 MAN 3440
-         A(I,4) = DD(I)                                                 MAN 3450
-         A(I,5) = EE(I)                                                 MAN 3460
-         A(I,6) = FF(I)                                                 MAN 3470
-  515 CONTINUE                                                          MAN 3480
-      DO 520 I = 1, MM1                                                 MAN 3490
-         DIFF(I) = 0.0                                                  MAN 3500
-         COM(I) = 0.0                                                   MAN 3510
-  520 CONTINUE                                                          MAN 3520
-      DO 565 K = 1,N                                                    MAN 3530
-         DO 525 I = 1,MM                                                MAN 3540
-            C(I) = A(K,I)                                               MAN 3550
-  525    CONTINUE                                                       MAN 3560
-         IF (N .GT. 10) GOTO 540                                        MAN 3570
-         WRITE(NOUT,530) K                                              MAN 3580
-  530 FORMAT(40H ---------------------------------------,I3,            MAN 3590
-     *       45H --------------------------------------------)          MAN 3600
-         WRITE(NOUT,535) X(K)                                           MAN 3610
-  535 FORMAT(F12.8)                                                     MAN 3620
-         IF (K .EQ. N) WRITE(NOUT,550) C(1)                             MAN 3630
-  540    CONTINUE                                                       MAN 3640
-         IF (K .EQ. N) GO TO 570                                        MAN 3650
-         IF (N .LE. 10) WRITE(NOUT,550) (C(I), I=1,MM)                  MAN 3660
-         DO 545 I = 1,MM1                                               MAN 3670
-            IF (ABS(A(K,I)) .GT.  COM(I)) COM(I) = ABS(A(K,I))          MAN 3680
-  545    CONTINUE                                                       MAN 3690
-  550 FORMAT(6F16.8)                                                    MAN 3700
-         Z = X(K+1) - X(K)                                              MAN 3710
-         DO 555 I = 2,MM                                                MAN 3720
-            DO 555 JJ = I,MM                                            MAN 3730
-               J = MM + I - JJ                                          MAN 3740
-               C(J-1) = C(J)*Z + C(J-1)                                 MAN 3750
-  555    CONTINUE                                                       MAN 3760
-         IF (N .LE. 10) WRITE(NOUT,550) (C(I), I=1,MM)                  MAN 3770
-         DO 560 I = 1,MM1                                               MAN 3780
-            IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 560                MAN 3790
-            Z = ABS(C(I) - A(K+1,I))                                    MAN 3800
-            IF (Z .GT. DIFF(I)) DIFF(I) = Z                             MAN 3810
-  560    CONTINUE                                                       MAN 3820
-  565 CONTINUE                                                          MAN 3830
-  570 WRITE(NOUT,575)                                                   MAN 3840
-  575 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 3850
-      WRITE(NOUT,580) (DIFF(I),I=1,MM1)                                 MAN 3860
-  580 FORMAT(5E18.9)                                                    MAN 3870
-      WRITE(NOUT,585)                                                   MAN 3880
-  585 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 3890
-      IF (ABS(C(1)) .GT. COM(1)) COM(1) = ABS(C(1))                     MAN 3900
-      WRITE(NOUT,590) (COM(I),I=1,MM1)                                  MAN 3910
-  590 FORMAT(5E18.9)                                                    MAN 3920
-  600 CONTINUE                                                          MAN 3930
-C                                                                       MAN 3940
-C                                                                       MAN 3950
-C     TEST OF QUINAT WITH NONEQUIDISTANT DOUBLE KNOTS FOLLOWS.          MAN 3960
-C                                                                       MAN 3970
-      WRITE(NOUT,610)                                                   MAN 3980
-  610 FORMAT(50H1  TEST OF QUINAT WITH NONEQUIDISTANT DOUBLE KNOTS)     MAN 3990
-      N = 5                                                             MAN 4000
-      X(1) = -3.                                                        MAN 4010
-      X(2) = -3.                                                        MAN 4020
-      X(3) = -1.                                                        MAN 4030
-      X(4) = -1.                                                        MAN 4040
-      X(5) = 0.                                                         MAN 4050
-      X(6) = 0.                                                         MAN 4060
-      X(7) = 3.                                                         MAN 4070
-      X(8) = 3.                                                         MAN 4080
-      X(9) = 4.                                                         MAN 4090
-      X(10) = 4.                                                        MAN 4100
-      Y(1) = 7.                                                         MAN 4110
-      Y(2) = 2.                                                         MAN 4120
-      Y(3) = 11.                                                        MAN 4130
-      Y(4) = 15.                                                        MAN 4140
-      Y(5) = 26.                                                        MAN 4150
-      Y(6) = 10.                                                        MAN 4160
-      Y(7) = 56.                                                        MAN 4170
-      Y(8) = -27.                                                       MAN 4180
-      Y(9) = 29.                                                        MAN 4190
-      Y(10) = -30.                                                      MAN 4200
-      M = 3                                                             MAN 4210
-      NN = 2*N                                                          MAN 4220
-      MM = 2*M                                                          MAN 4230
-      MM1 = MM - 1                                                      MAN 4240
-      WRITE(NOUT,615) N,M                                               MAN 4250
-  615 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 4260
-      CALL QUINAT(NN,X,Y,BB,CC,DD,EE,FF)                                MAN 4270
-      DO 620 I = 1,NN                                                   MAN 4280
-         A(I,1) = Y(I)                                                  MAN 4290
-         A(I,2) = BB(I)                                                 MAN 4300
-         A(I,3) = CC(I)                                                 MAN 4310
-         A(I,4) = DD(I)                                                 MAN 4320
-         A(I,5) = EE(I)                                                 MAN 4330
-         A(I,6) = FF(I)                                                 MAN 4340
-  620 CONTINUE                                                          MAN 4350
-      DO 630 I = 1,MM1                                                  MAN 4360
-         DIFF(I) = 0.0                                                  MAN 4370
-         COM(I) = 0.0                                                   MAN 4380
-  630 CONTINUE                                                          MAN 4390
-      DO 670 K = 1,NN                                                   MAN 4400
-         DO 635 I = 1,MM                                                MAN 4410
-            C(I) = A(K,I)                                               MAN 4420
-  635 CONTINUE                                                          MAN 4430
-      WRITE(NOUT,640) K                                                 MAN 4440
-  640 FORMAT(40H ---------------------------------------,I3,            MAN 4450
-     *  45H --------------------------------------------)               MAN 4460
-      WRITE(NOUT,645) X(K)                                              MAN 4470
-  645 FORMAT(F12.8)                                                     MAN 4480
-      IF (K .EQ. NN) WRITE(NOUT,655) C(1)                               MAN 4490
-      IF (K .EQ. NN) GO TO 675                                          MAN 4500
-      WRITE(NOUT,655) (C(I),I=1,MM)                                     MAN 4510
-      DO 650 I = 1,MM1                                                  MAN 4520
-         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN 4530
-  650 CONTINUE                                                          MAN 4540
-  655 FORMAT(6F16.8)                                                    MAN 4550
-      Z = X(K+1) - X(K)                                                 MAN 4560
-      DO 660 I = 2,MM                                                   MAN 4570
-         DO 660 JJ = I,MM                                               MAN 4580
-            J = MM + I - JJ                                             MAN 4590
-            C(J-1) = C(J)*Z + C(J-1)                                    MAN 4600
-  660 CONTINUE                                                          MAN 4610
-      WRITE(NOUT,655) (C(I),I=1,MM)                                     MAN 4620
-      DO 665 I = 1,MM1                                                  MAN 4630
-         IF ((K .GE. NN-1) .AND. (I .NE. 1)) GO TO 665                  MAN 4640
-         Z = ABS(C(I) - A(K+1,I))                                       MAN 4650
-         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN 4660
-  665 CONTINUE                                                          MAN 4670
-  670 CONTINUE                                                          MAN 4680
-  675 WRITE(NOUT,680)                                                   MAN 4690
-  680 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 4700
-      WRITE(NOUT,685) (DIFF(I),I=1,MM1)                                 MAN 4710
-  685 FORMAT(5E18.9)                                                    MAN 4720
-      WRITE(NOUT,690)                                                   MAN 4730
-  690 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 4740
-      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN 4750
-      WRITE(NOUT,695) (COM(I),I=1,MM1)                                  MAN 4760
-  695 FORMAT(5F16.8)                                                    MAN 4770
-      M = 3                                                             MAN 4780
-      DO 800 N = 10,100,10                                              MAN 4790
-      NN = 2*N                                                          MAN 4800
-      MM = 2*M                                                          MAN 4810
-      MM1 = MM - 1                                                      MAN 4820
-      P = 0.0                                                           MAN 4830
-      DO 700 I = 1,N                                                    MAN 4840
-         P = P + ABS(SIN(FLOAT(I)))                                     MAN 4850
-         X(2*I-1) = P                                                   MAN 4860
-         X(2*I)   = P                                                   MAN 4870
-         Y(2*I-1) = COS(FLOAT(I)) - 0.5                                 MAN 4880
-         Y(2*I)   = COS(FLOAT(2*I)) - 0.5                               MAN 4890
-  700 CONTINUE                                                          MAN 4900
-      WRITE(NOUT,710) N,M                                               MAN 4910
-  710 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 4920
-      CALL QUINAT(NN,X,Y,BB,CC,DD,EE,FF)                                MAN 4930
-      DO 715 I = 1,NN                                                   MAN 4940
-         A(I,1) = Y(I)                                                  MAN 4950
-         A(I,2) = BB(I)                                                 MAN 4960
-         A(I,3) = CC(I)                                                 MAN 4970
-         A(I,4) = DD(I)                                                 MAN 4980
-         A(I,5) = EE(I)                                                 MAN 4990
-         A(I,6) = FF(I)                                                 MAN 5000
-  715 CONTINUE                                                          MAN 5010
-      DO 720 I = 1, MM1                                                 MAN 5020
-         DIFF(I) = 0.0                                                  MAN 5030
-         COM(I) = 0.0                                                   MAN 5040
-  720 CONTINUE                                                          MAN 5050
-      DO 765 K = 1,NN                                                   MAN 5060
-         DO 725 I = 1,MM                                                MAN 5070
-            C(I) = A(K,I)                                               MAN 5080
-  725    CONTINUE                                                       MAN 5090
-         IF (N .GT. 10)  GOTO 740                                       MAN 5100
-         WRITE(NOUT,730) K                                              MAN 5110
-  730 FORMAT(40H ---------------------------------------,I3,            MAN 5120
-     *       45H --------------------------------------------)          MAN 5130
-         WRITE(NOUT,735) X(K)                                           MAN 5140
-  735 FORMAT(F12.8)                                                     MAN 5150
-         IF (K .EQ. NN) WRITE(NOUT,750) C(1)                            MAN 5160
-  740    CONTINUE                                                       MAN 5170
-         IF (K .EQ. NN) GO TO 770                                       MAN 5180
-         IF (N .LE. 10) WRITE(NOUT,750) (C(I), I=1,MM)                  MAN 5190
-         DO 745 I = 1,MM1                                               MAN 5200
-            IF (ABS(A(K,I)) .GT.  COM(I)) COM(I) = ABS(A(K,I))          MAN 5210
-  745    CONTINUE                                                       MAN 5220
-  750 FORMAT(6F16.8)                                                    MAN 5230
-         Z = X(K+1) - X(K)                                              MAN 5240
-         DO 755 I = 2,MM                                                MAN 5250
-            DO 755 JJ = I,MM                                            MAN 5260
-               J = MM + I - JJ                                          MAN 5270
-               C(J-1) = C(J)*Z + C(J-1)                                 MAN 5280
-  755    CONTINUE                                                       MAN 5290
-         IF (N .LE. 10) WRITE(NOUT,750) (C(I), I=1,MM)                  MAN 5300
-         DO 760 I = 1,MM1                                               MAN 5310
-            IF ((K .GE. NN-1) .AND. (I .NE. 1)) GO TO 760               MAN 5320
-            Z = ABS(C(I) - A(K+1,I))                                    MAN 5330
-            IF (Z .GT. DIFF(I)) DIFF(I) = Z                             MAN 5340
-  760    CONTINUE                                                       MAN 5350
-  765 CONTINUE                                                          MAN 5360
-  770 WRITE(NOUT,775)                                                   MAN 5370
-  775 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 5380
-      WRITE(NOUT,780) (DIFF(I),I=1,MM1)                                 MAN 5390
-  780 FORMAT(5E18.9)                                                    MAN 5400
-      WRITE(NOUT,785)                                                   MAN 5410
-  785 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 5420
-      IF (ABS(C(1)) .GT. COM(1)) COM(1) = ABS(C(1))                     MAN 5430
-      WRITE(NOUT,790) (COM(I),I=1,MM1)                                  MAN 5440
-  790 FORMAT(5E18.9)                                                    MAN 5450
-  800 CONTINUE                                                          MAN 5460
-C                                                                       MAN 5470
-C                                                                       MAN 5480
-C     TEST OF QUINAT WITH NONEQUIDISTANT KNOTS, ONE DOUBLE KNOT,        MAN 5490
-C        ONE TRIPLE KNOT, FOLLOWS.                                      MAN 5500
-C                                                                       MAN 5510
-      WRITE(NOUT,805)                                                   MAN 5520
-      WRITE(NOUT,810)                                                   MAN 5530
-  805 FORMAT(51H1         TEST OF QUINAT WITH NONEQUIDISTANT KNOTS,)    MAN 5540
-  810 FORMAT(40H             ONE DOUBLE, ONE TRIPLE KNOT)               MAN 5550
-      N = 8                                                             MAN 5560
-      X(1) = -3.                                                        MAN 5570
-      X(2) = -1.                                                        MAN 5580
-      X(3) =  -1.                                                       MAN 5590
-      X(4) =  0.                                                        MAN 5600
-      X(5) =  3.                                                        MAN 5610
-      X(6) = 3.                                                         MAN 5620
-      X(7) = 3.                                                         MAN 5630
-      X(8) = 4.                                                         MAN 5640
-      Y(1) =  7.                                                        MAN 5650
-      Y(2) = 11.                                                        MAN 5660
-      Y(3) = 15.                                                        MAN 5670
-      Y(4) = 26.                                                        MAN 5680
-      Y(5) = 56.                                                        MAN 5690
-      Y(6) = -30.                                                       MAN 5700
-      Y(7) =  -7.                                                       MAN 5710
-      Y(8) =  29.                                                       MAN 5720
-      M = 3                                                             MAN 5730
-      MM = 2*M                                                          MAN 5740
-      MM1 = MM - 1                                                      MAN 5750
-      WRITE(NOUT,815) N,M                                               MAN 5760
-  815 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 5770
-      CALL QUINAT(N,X,Y,BB,CC,DD,EE,FF)                                 MAN 5780
-      DO 820 I = 1,N                                                    MAN 5790
-         A(I,1) = Y(I)                                                  MAN 5800
-         A(I,2) = BB(I)                                                 MAN 5810
-         A(I,3) = CC(I)                                                 MAN 5820
-         A(I,4) = DD(I)                                                 MAN 5830
-         A(I,5) = EE(I)                                                 MAN 5840
-         A(I,6) = FF(I)                                                 MAN 5850
-  820 CONTINUE                                                          MAN 5860
-      DO 830 I = 1,MM1                                                  MAN 5870
-         DIFF(I) = 0.0                                                  MAN 5880
-         COM(I) = 0.0                                                   MAN 5890
-  830 CONTINUE                                                          MAN 5900
-      DO 870 K = 1,N                                                    MAN 5910
-         DO 835 I = 1,MM                                                MAN 5920
-            C(I) = A(K,I)                                               MAN 5930
-  835 CONTINUE                                                          MAN 5940
-      WRITE(NOUT,840) K                                                 MAN 5950
-  840 FORMAT(40H ---------------------------------------,I3,            MAN 5960
-     *  45H --------------------------------------------)               MAN 5970
-      WRITE(NOUT,845) X(K)                                              MAN 5980
-  845 FORMAT(F12.8)                                                     MAN 5990
-      IF (K .EQ. N) WRITE(NOUT,855) C(1)                                MAN 6000
-      IF (K .EQ. N) GO TO 875                                           MAN 6010
-      WRITE(NOUT,855) (C(I),I=1,MM)                                     MAN 6020
-      DO 850 I = 1,MM1                                                  MAN 6030
-         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN 6040
-  850 CONTINUE                                                          MAN 6050
-  855 FORMAT(6F16.8)                                                    MAN 6060
-      Z = X(K+1) - X(K)                                                 MAN 6070
-      DO 860 I = 2,MM                                                   MAN 6080
-         DO 860 JJ = I,MM                                               MAN 6090
-            J = MM + I - JJ                                             MAN 6100
-            C(J-1) = C(J)*Z + C(J-1)                                    MAN 6110
-  860 CONTINUE                                                          MAN 6120
-      WRITE(NOUT,855) (C(I),I=1,MM)                                     MAN 6130
-      DO 865 I = 1,MM1                                                  MAN 6140
-         IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 865                   MAN 6150
-         Z = ABS(C(I) - A(K+1,I))                                       MAN 6160
-         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN 6170
-  865 CONTINUE                                                          MAN 6180
-  870 CONTINUE                                                          MAN 6190
-  875 WRITE(NOUT,880)                                                   MAN 6200
-  880 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 6210
-      WRITE(NOUT,885) (DIFF(I),I=1,MM1)                                 MAN 6220
-  885 FORMAT(5E18.9)                                                    MAN 6230
-      WRITE(NOUT,890)                                                   MAN 6240
-  890 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 6250
-      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN 6260
-      WRITE(NOUT,895) (COM(I),I=1,MM1)                                  MAN 6270
-  895 FORMAT(5F16.8)                                                    MAN 6280
-C                                                                       MAN 6290
-C                                                                       MAN 6300
-C     TEST OF QUINAT WITH NONEQUIDISTANT KNOTS, TWO DOUBLE KNOTS,       MAN 6310
-C        ONE TRIPLE KNOT,FOLLOWS.                                       MAN 6320
-C                                                                       MAN 6330
-      WRITE(NOUT,905)                                                   MAN 6340
-      WRITE(NOUT,910)                                                   MAN 6350
-  905 FORMAT(51H1         TEST OF QUINAT WITH NONEQUIDISTANT KNOTS,)    MAN 6360
-  910 FORMAT(40H             TWO DOUBLE, ONE TRIPLE KNOT)               MAN 6370
-      N = 10                                                            MAN 6380
-      X(1) = 0.                                                         MAN 6390
-      X(2) = 2.                                                         MAN 6400
-      X(3) = 2.                                                         MAN 6410
-      X(4) = 3.                                                         MAN 6420
-      X(5) = 3.                                                         MAN 6430
-      X(6) = 3.                                                         MAN 6440
-      X(7) = 5.                                                         MAN 6450
-      X(8) = 8.                                                         MAN 6460
-      X(9) = 9.                                                         MAN 6470
-      X(10)= 9.                                                         MAN 6480
-      Y(1) = 163.                                                       MAN 6490
-      Y(2) = 237.                                                       MAN 6500
-      Y(3) = -127.                                                      MAN 6510
-      Y(4) = 119.                                                       MAN 6520
-      Y(5) = -65.                                                       MAN 6530
-      Y(6) = 192.                                                       MAN 6540
-      Y(7) = 293.                                                       MAN 6550
-      Y(8) =  326.                                                      MAN 6560
-      Y(9) = 0.                                                         MAN 6570
-      Y(10)= -414.0                                                     MAN 6580
-      M = 3                                                             MAN 6590
-      MM = 2*M                                                          MAN 6600
-      MM1 = MM - 1                                                      MAN 6610
-      WRITE(NOUT,915) N,M                                               MAN 6620
-  915 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 6630
-      CALL QUINAT(N,X,Y,BB,CC,DD,EE,FF)                                 MAN 6640
-      DO 920 I = 1,N                                                    MAN 6650
-         A(I,1) = Y(I)                                                  MAN 6660
-         A(I,2) = BB(I)                                                 MAN 6670
-         A(I,3) = CC(I)                                                 MAN 6680
-         A(I,4) = DD(I)                                                 MAN 6690
-         A(I,5) = EE(I)                                                 MAN 6700
-         A(I,6) = FF(I)                                                 MAN 6710
-  920 CONTINUE                                                          MAN 6720
-      DO 930 I = 1,MM1                                                  MAN 6730
-         DIFF(I) = 0.0                                                  MAN 6740
-         COM(I) = 0.0                                                   MAN 6750
-  930 CONTINUE                                                          MAN 6760
-      DO 970 K = 1,N                                                    MAN 6770
-         DO 935 I = 1,MM                                                MAN 6780
-            C(I) = A(K,I)                                               MAN 6790
-  935 CONTINUE                                                          MAN 6800
-      WRITE(NOUT,940) K                                                 MAN 6810
-  940 FORMAT(40H ---------------------------------------,I3,            MAN 6820
-     *  45H --------------------------------------------)               MAN 6830
-      WRITE(NOUT,945) X(K)                                              MAN 6840
-  945 FORMAT(F12.8)                                                     MAN 6850
-      IF (K .EQ. N) WRITE(NOUT,955) C(1)                                MAN 6860
-      IF (K .EQ. N) GO TO 975                                           MAN 6870
-      WRITE(NOUT,955) (C(I),I=1,MM)                                     MAN 6880
-      DO 950 I = 1,MM1                                                  MAN 6890
-         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN 6900
-  950 CONTINUE                                                          MAN 6910
-  955 FORMAT(6F16.8)                                                    MAN 6920
-      Z = X(K+1) - X(K)                                                 MAN 6930
-      DO 960 I = 2,MM                                                   MAN 6940
-         DO 960 JJ = I,MM                                               MAN 6950
-            J = MM + I - JJ                                             MAN 6960
-            C(J-1) = C(J)*Z + C(J-1)                                    MAN 6970
-  960 CONTINUE                                                          MAN 6980
-      WRITE(NOUT,955) (C(I),I=1,MM)                                     MAN 6990
-      DO 965 I = 1,MM1                                                  MAN 7000
-         IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 965                   MAN 7010
-         Z = ABS(C(I) - A(K+1,I))                                       MAN 7020
-         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN 7030
-  965 CONTINUE                                                          MAN 7040
-  970 CONTINUE                                                          MAN 7050
-  975 WRITE(NOUT,980)                                                   MAN 7060
-  980 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 7070
-      WRITE(NOUT,985) (DIFF(I),I=1,MM1)                                 MAN 7080
-  985 FORMAT(5E18.9)                                                    MAN 7090
-      WRITE(NOUT,990)                                                   MAN 7100
-  990 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 7110
-      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN 7120
-      WRITE(NOUT,995) (COM(I),I=1,MM1)                                  MAN 7130
-  995 FORMAT(5F16.8)                                                    MAN 7140
-      STOP                                                              MAN 7150
-      END                                                               MAN 7160
+c$$$C    DRIVER PROGRAM FOR TEST OF QUINAT, QUINEQ AND QUINDF               MAN   10
+c$$$C       FOLLOWS.                                                        MAN   20
+c$$$C                                                                       MAN   30
+c$$$      INTEGER N,NM1,M,MM,MM1,I,K,J,JJ                                   MAN   40
+c$$$      REAL*8 Z                                                          MAN   50
+c$$$      REAL*8 X(200),Y(200),B(200),BB(200),CC(200),DD(200),EE(200),      MAN   60
+c$$$     *                 FF(200),A(200,6),C(6),DIFF(5),COM(5)             MAN   70
+c$$$C                                                                       MAN   80
+c$$$C     N          NUMBER OF DATA POINTS.                                 MAN   90
+c$$$C     M          2*M-1 IS ORDER OF SPLINE.                              MAN  100
+c$$$C                   M = 3 ALWAYS FOR QUINTIC SPLINE.                    MAN  110
+c$$$C     NN,NM1,MM,                                                        MAN  120
+c$$$C     MM1,I,K,                                                          MAN  130
+c$$$C     J,JJ       TEMPORARY INTEGER VARIABLES.                           MAN  140
+c$$$C     Z,P        TEMPORARY REAL*8 VARIABLES.                            MAN  150
+c$$$C     X(1:N)     THE SEQUENCE OF KNOTS.                                 MAN  160
+c$$$C     Y(1:N)     THE PRESCRIBED FUNCTION VALUES AT THE KNOTS.           MAN  170
+c$$$C     B(1:N)     THE PRESCRIBED DERIVATIVE VALUES AT THE KNOTS.         MAN  180
+c$$$C     BB,CC,DD,                                                         MAN  190
+c$$$C     EE,FF(1:N) THE COMPUTED SPLINE COEFFICIENTS                       MAN  200
+c$$$C     A(1:N,1:6) TWO DIMENSIONAL ARRAY WHOSE COLUMNS ARE                MAN  210
+c$$$C                   Y, BB, CC, DD, EE, FF.                              MAN  220
+c$$$C     DIFF(1:5)  MAXIMUM VALUES OF DIFFERENCES OF VALUES AND            MAN  230
+c$$$C                   DERIVATIVES TO RIGHT AND LEFT OF KNOTS.             MAN  240
+c$$$C     COM(1:5)   MAXIMUM VALUES OF COEFFICIENTS.                        MAN  250
+c$$$C                                                                       MAN  260
+c$$$C                                                                       MAN  270
+c$$$C     TEST OF QUINAT WITH NONEQUIDISTANT KNOTS AND                      MAN  280
+c$$$C        EQUIDISTANT KNOTS FOLLOWS.                                     MAN  290
+c$$$C                                                                       MAN  300
+c$$$      NOUT=6                                                            MAN  310
+c$$$      WRITE(NOUT,10)                                                    MAN  320
+c$$$   10 FORMAT(50H1         TEST OF QUINAT WITH NONEQUIDISTANT KNOTS)     MAN  330
+c$$$      N = 5                                                             MAN  340
+c$$$      X(1) = -3.0                                                       MAN  350
+c$$$      X(2) = -1.0                                                       MAN  360
+c$$$      X(3) =  0.0                                                       MAN  370
+c$$$      X(4) =  3.0                                                       MAN  380
+c$$$      X(5) =  4.0                                                       MAN  390
+c$$$      Y(1) =  7.0                                                       MAN  400
+c$$$      Y(2) = 11.0                                                       MAN  410
+c$$$      Y(3) = 26.0                                                       MAN  420
+c$$$      Y(4) = 56.0                                                       MAN  430
+c$$$      Y(5) = 29.0                                                       MAN  440
+c$$$      M = 3                                                             MAN  450
+c$$$      MM = 2*M                                                          MAN  460
+c$$$      MM1 = MM - 1                                                      MAN  470
+c$$$      WRITE(NOUT,15) N,M                                                MAN  480
+c$$$   15 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN  490
+c$$$      CALL QUINAT(N,X,Y,BB,CC,DD,EE,FF)                                 MAN  500
+c$$$      DO 20 I = 1,N                                                     MAN  510
+c$$$         A(I,1) = Y(I)                                                  MAN  520
+c$$$         A(I,2) = BB(I)                                                 MAN  530
+c$$$         A(I,3) = CC(I)                                                 MAN  540
+c$$$         A(I,4) = DD(I)                                                 MAN  550
+c$$$         A(I,5) = EE(I)                                                 MAN  560
+c$$$         A(I,6) = FF(I)                                                 MAN  570
+c$$$   20 CONTINUE                                                          MAN  580
+c$$$      DO 30 I = 1,MM1                                                   MAN  590
+c$$$         DIFF(I) = 0.0                                                  MAN  600
+c$$$         COM(I) = 0.0                                                   MAN  610
+c$$$   30 CONTINUE                                                          MAN  620
+c$$$      DO 70 K = 1,N                                                     MAN  630
+c$$$         DO 35 I = 1,MM                                                 MAN  640
+c$$$            C(I) = A(K,I)                                               MAN  650
+c$$$   35 CONTINUE                                                          MAN  660
+c$$$      WRITE(NOUT,40) K                                                  MAN  670
+c$$$   40 FORMAT(40H ---------------------------------------,I3,            MAN  680
+c$$$     *  45H --------------------------------------------)               MAN  690
+c$$$      WRITE(NOUT,45) X(K)                                               MAN  700
+c$$$   45 FORMAT(F12.8)                                                     MAN  710
+c$$$      IF (K .EQ. N) WRITE(NOUT,55) C(1)                                 MAN  720
+c$$$      IF (K .EQ. N) GO TO 75                                            MAN  730
+c$$$      WRITE(NOUT,55) (C(I),I=1,MM)                                      MAN  740
+c$$$      DO 50 I = 1,MM1                                                   MAN  750
+c$$$         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN  760
+c$$$   50 CONTINUE                                                          MAN  770
+c$$$   55 FORMAT(6F16.8)                                                    MAN  780
+c$$$      Z = X(K+1) - X(K)                                                 MAN  790
+c$$$      DO 60 I = 2,MM                                                    MAN  800
+c$$$         DO 60 JJ = I,MM                                                MAN  810
+c$$$            J = MM + I - JJ                                             MAN  820
+c$$$            C(J-1) = C(J)*Z + C(J-1)                                    MAN  830
+c$$$   60 CONTINUE                                                          MAN  840
+c$$$      WRITE(NOUT,55) (C(I),I=1,MM)                                      MAN  850
+c$$$      DO 65 I = 1,MM1                                                   MAN  860
+c$$$         IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 65                    MAN  870
+c$$$         Z = ABS(C(I) - A(K+1,I))                                       MAN  880
+c$$$         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN  890
+c$$$   65 CONTINUE                                                          MAN  900
+c$$$   70 CONTINUE                                                          MAN  910
+c$$$   75 WRITE(NOUT,80)                                                    MAN  920
+c$$$   80 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN  930
+c$$$      WRITE(NOUT,85) (DIFF(I),I=1,MM1)                                  MAN  940
+c$$$   85 FORMAT(5E18.9)                                                    MAN  950
+c$$$      WRITE(NOUT,90)                                                    MAN  960
+c$$$   90 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN  970
+c$$$      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN  980
+c$$$      WRITE(NOUT,95) (COM(I),I=1,MM1)                                   MAN  990
+c$$$   95 FORMAT(5F16.8)                                                    MAN 1000
+c$$$      M = 3                                                             MAN 1010
+c$$$      DO 200 N = 10,100,10                                              MAN 1020
+c$$$      MM = 2*M                                                          MAN 1030
+c$$$      MM1 = MM - 1                                                      MAN 1040
+c$$$      NM1 = N -1                                                        MAN 1050
+c$$$      DO 100 I = 1,NM1,2                                                MAN 1060
+c$$$         X(I)   = I                                                     MAN 1070
+c$$$         X(I+1) = I + 1                                                 MAN 1080
+c$$$         Y(I)   = 1.                                                    MAN 1090
+c$$$         Y(I+1) = 0.                                                    MAN 1100
+c$$$  100 CONTINUE                                                          MAN 1110
+c$$$      IF (MOD(N,2) .EQ. 0) GOTO 105                                     MAN 1120
+c$$$      X(N) = N                                                          MAN 1130
+c$$$      Y(N) = 1.                                                         MAN 1140
+c$$$  105 CONTINUE                                                          MAN 1150
+c$$$      WRITE(NOUT,110) N,M                                               MAN 1160
+c$$$  110 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 1170
+c$$$      CALL QUINAT(N,X,Y,BB,CC,DD,EE,FF)                                 MAN 1180
+c$$$      DO 115 I = 1,N                                                    MAN 1190
+c$$$         A(I,1) = Y(I)                                                  MAN 1200
+c$$$         A(I,2) = BB(I)                                                 MAN 1210
+c$$$         A(I,3) = CC(I)                                                 MAN 1220
+c$$$         A(I,4) = DD(I)                                                 MAN 1230
+c$$$         A(I,5) = EE(I)                                                 MAN 1240
+c$$$         A(I,6) = FF(I)                                                 MAN 1250
+c$$$  115 CONTINUE                                                          MAN 1260
+c$$$      DO 120 I = 1, MM1                                                 MAN 1270
+c$$$         DIFF(I) = 0.0                                                  MAN 1280
+c$$$         COM(I) = 0.0                                                   MAN 1290
+c$$$  120 CONTINUE                                                          MAN 1300
+c$$$      DO 165 K = 1,N                                                    MAN 1310
+c$$$         DO 125 I = 1,MM                                                MAN 1320
+c$$$            C(I) = A(K,I)                                               MAN 1330
+c$$$  125    CONTINUE                                                       MAN 1340
+c$$$         IF (N .GT. 10) GOTO 140                                        MAN 1350
+c$$$         WRITE(NOUT,130) K                                              MAN 1360
+c$$$  130 FORMAT(40H ---------------------------------------,I3,            MAN 1370
+c$$$     *       45H --------------------------------------------)          MAN 1380
+c$$$         WRITE(NOUT,135) X(K)                                           MAN 1390
+c$$$  135 FORMAT(F12.8)                                                     MAN 1400
+c$$$         IF (K .EQ. N) WRITE(NOUT,150) C(1)                             MAN 1410
+c$$$  140    CONTINUE                                                       MAN 1420
+c$$$         IF (K .EQ. N) GO TO 170                                        MAN 1430
+c$$$         IF (N .LE. 10) WRITE(NOUT,150) (C(I), I=1,MM)                  MAN 1440
+c$$$         DO 145 I = 1,MM1                                               MAN 1450
+c$$$            IF (ABS(A(K,I)) .GT.  COM(I)) COM(I) = ABS(A(K,I))          MAN 1460
+c$$$  145    CONTINUE                                                       MAN 1470
+c$$$  150 FORMAT(6F16.8)                                                    MAN 1480
+c$$$         Z = X(K+1) - X(K)                                              MAN 1490
+c$$$         DO 155 I = 2,MM                                                MAN 1500
+c$$$            DO 155 JJ = I,MM                                            MAN 1510
+c$$$               J = MM + I - JJ                                          MAN 1520
+c$$$               C(J-1) = C(J)*Z + C(J-1)                                 MAN 1530
+c$$$  155    CONTINUE                                                       MAN 1540
+c$$$         IF (N .LE. 10) WRITE(NOUT,150) (C(I), I=1,MM)                  MAN 1550
+c$$$         DO 160 I = 1,MM1                                               MAN 1560
+c$$$            IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 160                MAN 1570
+c$$$            Z = ABS(C(I) - A(K+1,I))                                    MAN 1580
+c$$$            IF (Z .GT. DIFF(I)) DIFF(I) = Z                             MAN 1590
+c$$$  160    CONTINUE                                                       MAN 1600
+c$$$  165 CONTINUE                                                          MAN 1610
+c$$$  170 WRITE(NOUT,175)                                                   MAN 1620
+c$$$  175 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 1630
+c$$$      WRITE(NOUT,180) (DIFF(I),I=1,MM1)                                 MAN 1640
+c$$$  180 FORMAT(5E18.9)                                                    MAN 1650
+c$$$      WRITE(NOUT,185)                                                   MAN 1660
+c$$$  185 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 1670
+c$$$      IF (ABS(C(1)) .GT. COM(1)) COM(1) = ABS(C(1))                     MAN 1680
+c$$$      WRITE(NOUT,190) (COM(I),I=1,MM1)                                  MAN 1690
+c$$$  190 FORMAT(5E18.9)                                                    MAN 1700
+c$$$  200 CONTINUE                                                          MAN 1710
+c$$$C                                                                       MAN 1720
+c$$$C                                                                       MAN 1730
+c$$$C     TEST OF QUINEQ FOLLOWS.                                           MAN 1740
+c$$$C                                                                       MAN 1750
+c$$$      WRITE(NOUT,210)                                                   MAN 1760
+c$$$  210 FORMAT(18H1   TEST OF QUINEQ)                                     MAN 1770
+c$$$      M = 3                                                             MAN 1780
+c$$$      DO 400 N = 10,100,10                                              MAN 1790
+c$$$      MM = 2*M                                                          MAN 1800
+c$$$      MM1 = MM - 1                                                      MAN 1810
+c$$$      NM1 = N -1                                                        MAN 1820
+c$$$      DO 300 I = 1,NM1,2                                                MAN 1830
+c$$$         X(I)   = I                                                     MAN 1840
+c$$$         X(I+1) = I + 1                                                 MAN 1850
+c$$$         Y(I)   = 1.                                                    MAN 1860
+c$$$         Y(I+1) = 0.                                                    MAN 1870
+c$$$  300 CONTINUE                                                          MAN 1880
+c$$$      IF (MOD(N,2) .EQ. 0) GOTO 305                                     MAN 1890
+c$$$      X(N) = FLOAT(N)                                                   MAN 1900
+c$$$      Y(N) = 1.                                                         MAN 1910
+c$$$  305 CONTINUE                                                          MAN 1920
+c$$$      WRITE(NOUT,310) N,M                                               MAN 1930
+c$$$  310 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 1940
+c$$$      CALL QUINEQ(N,Y,BB,CC,DD,EE,FF)                                   MAN 1950
+c$$$      DO 315 I = 1,N                                                    MAN 1960
+c$$$         A(I,1) = Y(I)                                                  MAN 1970
+c$$$         A(I,2) = BB(I)                                                 MAN 1980
+c$$$         A(I,3) = CC(I)                                                 MAN 1990
+c$$$         A(I,4) = DD(I)                                                 MAN 2000
+c$$$         A(I,5) = EE(I)                                                 MAN 2010
+c$$$         A(I,6) = FF(I)                                                 MAN 2020
+c$$$  315 CONTINUE                                                          MAN 2030
+c$$$      DO 320 I = 1, MM1                                                 MAN 2040
+c$$$         DIFF(I) = 0.0                                                  MAN 2050
+c$$$         COM(I) = 0.0                                                   MAN 2060
+c$$$  320 CONTINUE                                                          MAN 2070
+c$$$      DO 365 K = 1,N                                                    MAN 2080
+c$$$         DO 325 I = 1,MM                                                MAN 2090
+c$$$            C(I) = A(K,I)                                               MAN 2100
+c$$$  325    CONTINUE                                                       MAN 2110
+c$$$         IF (N .GT. 10) GOTO 340                                        MAN 2120
+c$$$         WRITE(NOUT,330) K                                              MAN 2130
+c$$$  330 FORMAT(40H ---------------------------------------,I3,            MAN 2140
+c$$$     *       45H --------------------------------------------)          MAN 2150
+c$$$         WRITE(NOUT,335) X(K)                                           MAN 2160
+c$$$  335 FORMAT(F12.8)                                                     MAN 2170
+c$$$         IF (K .EQ. N) WRITE(NOUT,350) C(1)                             MAN 2180
+c$$$  340    CONTINUE                                                       MAN 2190
+c$$$         IF (K .EQ. N) GO TO 370                                        MAN 2200
+c$$$         IF (N .LE. 10) WRITE(NOUT,350) (C(I), I=1,MM)                  MAN 2210
+c$$$         DO 345 I = 1,MM1                                               MAN 2220
+c$$$            IF (ABS(A(K,I)) .GT.  COM(I)) COM(I) = ABS(A(K,I))          MAN 2230
+c$$$  345    CONTINUE                                                       MAN 2240
+c$$$  350 FORMAT(6F16.8)                                                    MAN 2250
+c$$$         Z = 1.                                                         MAN 2260
+c$$$         DO 355 I = 2,MM                                                MAN 2270
+c$$$            DO 355 JJ = I,MM                                            MAN 2280
+c$$$               J = MM + I - JJ                                          MAN 2290
+c$$$               C(J-1) = C(J)*Z + C(J-1)                                 MAN 2300
+c$$$  355    CONTINUE                                                       MAN 2310
+c$$$         IF (N .LE. 10) WRITE(NOUT,350) (C(I), I=1,MM)                  MAN 2320
+c$$$         DO 360 I = 1,MM1                                               MAN 2330
+c$$$            IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 360                MAN 2340
+c$$$            Z = ABS(C(I) - A(K+1,I))                                    MAN 2350
+c$$$            IF (Z .GT. DIFF(I)) DIFF(I) = Z                             MAN 2360
+c$$$  360    CONTINUE                                                       MAN 2370
+c$$$  365 CONTINUE                                                          MAN 2380
+c$$$  370 WRITE(NOUT,375)                                                   MAN 2390
+c$$$  375 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 2400
+c$$$      WRITE(NOUT,380) (DIFF(I),I=1,MM1)                                 MAN 2410
+c$$$  380 FORMAT(5E18.9)                                                    MAN 2420
+c$$$      WRITE(NOUT,385)                                                   MAN 2430
+c$$$  385 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 2440
+c$$$      IF (ABS(C(1)) .GT. COM(1)) COM(1) = ABS(C(1))                     MAN 2450
+c$$$      WRITE(NOUT,390) (COM(I),I=1,MM1)                                  MAN 2460
+c$$$  390 FORMAT(5E18.9)                                                    MAN 2470
+c$$$  400 CONTINUE                                                          MAN 2480
+c$$$C                                                                       MAN 2490
+c$$$C                                                                       MAN 2500
+c$$$C     TEST OF QUINDF WITH NONEQUIDISTANT KNOTS FOLLOWS.                 MAN 2510
+c$$$C                                                                       MAN 2520
+c$$$      WRITE(NOUT,410)                                                   MAN 2530
+c$$$  410 FORMAT(50H1         TEST OF QUINDF WITH NONEQUIDISTANT KNOTS)     MAN 2540
+c$$$      N = 5                                                             MAN 2550
+c$$$      X(1) = -3.0                                                       MAN 2560
+c$$$      X(2) = -1.0                                                       MAN 2570
+c$$$      X(3) =  0.0                                                       MAN 2580
+c$$$      X(4) =  3.0                                                       MAN 2590
+c$$$      X(5) =  4.0                                                       MAN 2600
+c$$$      Y(1) =  7.0                                                       MAN 2610
+c$$$      Y(2) = 11.0                                                       MAN 2620
+c$$$      Y(3) = 26.0                                                       MAN 2630
+c$$$      Y(4) = 56.0                                                       MAN 2640
+c$$$      Y(5) = 29.0                                                       MAN 2650
+c$$$      B(1) =  2.0                                                       MAN 2660
+c$$$      B(2) = 15.0                                                       MAN 2670
+c$$$      B(3) = 10.0                                                       MAN 2680
+c$$$      B(4) =-27.0                                                       MAN 2690
+c$$$      B(5) =-30.0                                                       MAN 2700
+c$$$      M = 3                                                             MAN 2710
+c$$$      MM = 2*M                                                          MAN 2720
+c$$$      MM1 = MM - 1                                                      MAN 2730
+c$$$      WRITE(NOUT,415) N,M                                               MAN 2740
+c$$$  415 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 2750
+c$$$      CALL QUINDF(N,X,Y,B,CC,DD,EE,FF)                                  MAN 2760
+c$$$      DO 420 I = 1,N                                                    MAN 2770
+c$$$         A(I,1) = Y(I)                                                  MAN 2780
+c$$$         A(I,2) = B(I)                                                  MAN 2790
+c$$$         A(I,3) = CC(I)                                                 MAN 2800
+c$$$         A(I,4) = DD(I)                                                 MAN 2810
+c$$$         A(I,5) = EE(I)                                                 MAN 2820
+c$$$         A(I,6) = FF(I)                                                 MAN 2830
+c$$$  420 CONTINUE                                                          MAN 2840
+c$$$      DO 430 I = 1,MM1                                                  MAN 2850
+c$$$         DIFF(I) = 0.0                                                  MAN 2860
+c$$$         COM(I) = 0.0                                                   MAN 2870
+c$$$  430 CONTINUE                                                          MAN 2880
+c$$$      DO 470 K = 1,N                                                    MAN 2890
+c$$$         DO 435 I = 1,MM                                                MAN 2900
+c$$$            C(I) = A(K,I)                                               MAN 2910
+c$$$  435 CONTINUE                                                          MAN 2920
+c$$$      WRITE(NOUT,440) K                                                 MAN 2930
+c$$$  440 FORMAT(40H ---------------------------------------,I3,            MAN 2940
+c$$$     *  45H --------------------------------------------)               MAN 2950
+c$$$      WRITE(NOUT,445) X(K)                                              MAN 2960
+c$$$  445 FORMAT(F12.8)                                                     MAN 2970
+c$$$      IF (K .EQ. N) WRITE(NOUT,455) C(1)                                MAN 2980
+c$$$      IF (K .EQ. N) GO TO 475                                           MAN 2990
+c$$$      WRITE(NOUT,455) (C(I),I=1,MM)                                     MAN 3000
+c$$$      DO 450 I = 1,MM1                                                  MAN 3010
+c$$$         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN 3020
+c$$$  450 CONTINUE                                                          MAN 3030
+c$$$  455 FORMAT(6F16.8)                                                    MAN 3040
+c$$$      Z = X(K+1) - X(K)                                                 MAN 3050
+c$$$      DO 460 I = 2,MM                                                   MAN 3060
+c$$$         DO 460 JJ = I,MM                                               MAN 3070
+c$$$            J = MM + I - JJ                                             MAN 3080
+c$$$            C(J-1) = C(J)*Z + C(J-1)                                    MAN 3090
+c$$$  460 CONTINUE                                                          MAN 3100
+c$$$      WRITE(NOUT,455) (C(I),I=1,MM)                                     MAN 3110
+c$$$      DO 465 I = 1,MM1                                                  MAN 3120
+c$$$         IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 465                   MAN 3130
+c$$$         Z = ABS(C(I) - A(K+1,I))                                       MAN 3140
+c$$$         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN 3150
+c$$$  465 CONTINUE                                                          MAN 3160
+c$$$  470 CONTINUE                                                          MAN 3170
+c$$$  475 WRITE(NOUT,480)                                                   MAN 3180
+c$$$  480 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 3190
+c$$$      WRITE(NOUT,485) (DIFF(I),I=1,MM1)                                 MAN 3200
+c$$$  485 FORMAT(5E18.9)                                                    MAN 3210
+c$$$      WRITE(NOUT,490)                                                   MAN 3220
+c$$$  490 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 3230
+c$$$      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN 3240
+c$$$      WRITE(NOUT,495) (COM(I),I=1,MM1)                                  MAN 3250
+c$$$  495 FORMAT(5F16.8)                                                    MAN 3260
+c$$$      M = 3                                                             MAN 3270
+c$$$      DO 600 N = 10,100,10                                              MAN 3280
+c$$$      MM = 2*M                                                          MAN 3290
+c$$$      MM1 = MM - 1                                                      MAN 3300
+c$$$      P = 0.0                                                           MAN 3310
+c$$$      DO 500 I = 1,N                                                    MAN 3320
+c$$$         P = P + ABS(SIN((FLOAT(I)))) + 0.001*FLOAT(I)                  MAN 3330
+c$$$         X(I) = P                                                       MAN 3340
+c$$$         Y(I) = COS((FLOAT(I))) - 0.5                                   MAN 3350
+c$$$         B(I) = COS((FLOAT(2*I))) - 0.5                                 MAN 3360
+c$$$  500 CONTINUE                                                          MAN 3370
+c$$$      WRITE(NOUT,510) N,M                                               MAN 3380
+c$$$  510 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 3390
+c$$$      CALL QUINDF(N,X,Y,B,CC,DD,EE,FF)                                  MAN 3400
+c$$$      DO 515 I = 1,N                                                    MAN 3410
+c$$$         A(I,1) = Y(I)                                                  MAN 3420
+c$$$         A(I,2) = B(I)                                                  MAN 3430
+c$$$         A(I,3) = CC(I)                                                 MAN 3440
+c$$$         A(I,4) = DD(I)                                                 MAN 3450
+c$$$         A(I,5) = EE(I)                                                 MAN 3460
+c$$$         A(I,6) = FF(I)                                                 MAN 3470
+c$$$  515 CONTINUE                                                          MAN 3480
+c$$$      DO 520 I = 1, MM1                                                 MAN 3490
+c$$$         DIFF(I) = 0.0                                                  MAN 3500
+c$$$         COM(I) = 0.0                                                   MAN 3510
+c$$$  520 CONTINUE                                                          MAN 3520
+c$$$      DO 565 K = 1,N                                                    MAN 3530
+c$$$         DO 525 I = 1,MM                                                MAN 3540
+c$$$            C(I) = A(K,I)                                               MAN 3550
+c$$$  525    CONTINUE                                                       MAN 3560
+c$$$         IF (N .GT. 10) GOTO 540                                        MAN 3570
+c$$$         WRITE(NOUT,530) K                                              MAN 3580
+c$$$  530 FORMAT(40H ---------------------------------------,I3,            MAN 3590
+c$$$     *       45H --------------------------------------------)          MAN 3600
+c$$$         WRITE(NOUT,535) X(K)                                           MAN 3610
+c$$$  535 FORMAT(F12.8)                                                     MAN 3620
+c$$$         IF (K .EQ. N) WRITE(NOUT,550) C(1)                             MAN 3630
+c$$$  540    CONTINUE                                                       MAN 3640
+c$$$         IF (K .EQ. N) GO TO 570                                        MAN 3650
+c$$$         IF (N .LE. 10) WRITE(NOUT,550) (C(I), I=1,MM)                  MAN 3660
+c$$$         DO 545 I = 1,MM1                                               MAN 3670
+c$$$            IF (ABS(A(K,I)) .GT.  COM(I)) COM(I) = ABS(A(K,I))          MAN 3680
+c$$$  545    CONTINUE                                                       MAN 3690
+c$$$  550 FORMAT(6F16.8)                                                    MAN 3700
+c$$$         Z = X(K+1) - X(K)                                              MAN 3710
+c$$$         DO 555 I = 2,MM                                                MAN 3720
+c$$$            DO 555 JJ = I,MM                                            MAN 3730
+c$$$               J = MM + I - JJ                                          MAN 3740
+c$$$               C(J-1) = C(J)*Z + C(J-1)                                 MAN 3750
+c$$$  555    CONTINUE                                                       MAN 3760
+c$$$         IF (N .LE. 10) WRITE(NOUT,550) (C(I), I=1,MM)                  MAN 3770
+c$$$         DO 560 I = 1,MM1                                               MAN 3780
+c$$$            IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 560                MAN 3790
+c$$$            Z = ABS(C(I) - A(K+1,I))                                    MAN 3800
+c$$$            IF (Z .GT. DIFF(I)) DIFF(I) = Z                             MAN 3810
+c$$$  560    CONTINUE                                                       MAN 3820
+c$$$  565 CONTINUE                                                          MAN 3830
+c$$$  570 WRITE(NOUT,575)                                                   MAN 3840
+c$$$  575 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 3850
+c$$$      WRITE(NOUT,580) (DIFF(I),I=1,MM1)                                 MAN 3860
+c$$$  580 FORMAT(5E18.9)                                                    MAN 3870
+c$$$      WRITE(NOUT,585)                                                   MAN 3880
+c$$$  585 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 3890
+c$$$      IF (ABS(C(1)) .GT. COM(1)) COM(1) = ABS(C(1))                     MAN 3900
+c$$$      WRITE(NOUT,590) (COM(I),I=1,MM1)                                  MAN 3910
+c$$$  590 FORMAT(5E18.9)                                                    MAN 3920
+c$$$  600 CONTINUE                                                          MAN 3930
+c$$$C                                                                       MAN 3940
+c$$$C                                                                       MAN 3950
+c$$$C     TEST OF QUINAT WITH NONEQUIDISTANT DOUBLE KNOTS FOLLOWS.          MAN 3960
+c$$$C                                                                       MAN 3970
+c$$$      WRITE(NOUT,610)                                                   MAN 3980
+c$$$  610 FORMAT(50H1  TEST OF QUINAT WITH NONEQUIDISTANT DOUBLE KNOTS)     MAN 3990
+c$$$      N = 5                                                             MAN 4000
+c$$$      X(1) = -3.                                                        MAN 4010
+c$$$      X(2) = -3.                                                        MAN 4020
+c$$$      X(3) = -1.                                                        MAN 4030
+c$$$      X(4) = -1.                                                        MAN 4040
+c$$$      X(5) = 0.                                                         MAN 4050
+c$$$      X(6) = 0.                                                         MAN 4060
+c$$$      X(7) = 3.                                                         MAN 4070
+c$$$      X(8) = 3.                                                         MAN 4080
+c$$$      X(9) = 4.                                                         MAN 4090
+c$$$      X(10) = 4.                                                        MAN 4100
+c$$$      Y(1) = 7.                                                         MAN 4110
+c$$$      Y(2) = 2.                                                         MAN 4120
+c$$$      Y(3) = 11.                                                        MAN 4130
+c$$$      Y(4) = 15.                                                        MAN 4140
+c$$$      Y(5) = 26.                                                        MAN 4150
+c$$$      Y(6) = 10.                                                        MAN 4160
+c$$$      Y(7) = 56.                                                        MAN 4170
+c$$$      Y(8) = -27.                                                       MAN 4180
+c$$$      Y(9) = 29.                                                        MAN 4190
+c$$$      Y(10) = -30.                                                      MAN 4200
+c$$$      M = 3                                                             MAN 4210
+c$$$      NN = 2*N                                                          MAN 4220
+c$$$      MM = 2*M                                                          MAN 4230
+c$$$      MM1 = MM - 1                                                      MAN 4240
+c$$$      WRITE(NOUT,615) N,M                                               MAN 4250
+c$$$  615 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 4260
+c$$$      CALL QUINAT(NN,X,Y,BB,CC,DD,EE,FF)                                MAN 4270
+c$$$      DO 620 I = 1,NN                                                   MAN 4280
+c$$$         A(I,1) = Y(I)                                                  MAN 4290
+c$$$         A(I,2) = BB(I)                                                 MAN 4300
+c$$$         A(I,3) = CC(I)                                                 MAN 4310
+c$$$         A(I,4) = DD(I)                                                 MAN 4320
+c$$$         A(I,5) = EE(I)                                                 MAN 4330
+c$$$         A(I,6) = FF(I)                                                 MAN 4340
+c$$$  620 CONTINUE                                                          MAN 4350
+c$$$      DO 630 I = 1,MM1                                                  MAN 4360
+c$$$         DIFF(I) = 0.0                                                  MAN 4370
+c$$$         COM(I) = 0.0                                                   MAN 4380
+c$$$  630 CONTINUE                                                          MAN 4390
+c$$$      DO 670 K = 1,NN                                                   MAN 4400
+c$$$         DO 635 I = 1,MM                                                MAN 4410
+c$$$            C(I) = A(K,I)                                               MAN 4420
+c$$$  635 CONTINUE                                                          MAN 4430
+c$$$      WRITE(NOUT,640) K                                                 MAN 4440
+c$$$  640 FORMAT(40H ---------------------------------------,I3,            MAN 4450
+c$$$     *  45H --------------------------------------------)               MAN 4460
+c$$$      WRITE(NOUT,645) X(K)                                              MAN 4470
+c$$$  645 FORMAT(F12.8)                                                     MAN 4480
+c$$$      IF (K .EQ. NN) WRITE(NOUT,655) C(1)                               MAN 4490
+c$$$      IF (K .EQ. NN) GO TO 675                                          MAN 4500
+c$$$      WRITE(NOUT,655) (C(I),I=1,MM)                                     MAN 4510
+c$$$      DO 650 I = 1,MM1                                                  MAN 4520
+c$$$         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN 4530
+c$$$  650 CONTINUE                                                          MAN 4540
+c$$$  655 FORMAT(6F16.8)                                                    MAN 4550
+c$$$      Z = X(K+1) - X(K)                                                 MAN 4560
+c$$$      DO 660 I = 2,MM                                                   MAN 4570
+c$$$         DO 660 JJ = I,MM                                               MAN 4580
+c$$$            J = MM + I - JJ                                             MAN 4590
+c$$$            C(J-1) = C(J)*Z + C(J-1)                                    MAN 4600
+c$$$  660 CONTINUE                                                          MAN 4610
+c$$$      WRITE(NOUT,655) (C(I),I=1,MM)                                     MAN 4620
+c$$$      DO 665 I = 1,MM1                                                  MAN 4630
+c$$$         IF ((K .GE. NN-1) .AND. (I .NE. 1)) GO TO 665                  MAN 4640
+c$$$         Z = ABS(C(I) - A(K+1,I))                                       MAN 4650
+c$$$         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN 4660
+c$$$  665 CONTINUE                                                          MAN 4670
+c$$$  670 CONTINUE                                                          MAN 4680
+c$$$  675 WRITE(NOUT,680)                                                   MAN 4690
+c$$$  680 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 4700
+c$$$      WRITE(NOUT,685) (DIFF(I),I=1,MM1)                                 MAN 4710
+c$$$  685 FORMAT(5E18.9)                                                    MAN 4720
+c$$$      WRITE(NOUT,690)                                                   MAN 4730
+c$$$  690 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 4740
+c$$$      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN 4750
+c$$$      WRITE(NOUT,695) (COM(I),I=1,MM1)                                  MAN 4760
+c$$$  695 FORMAT(5F16.8)                                                    MAN 4770
+c$$$      M = 3                                                             MAN 4780
+c$$$      DO 800 N = 10,100,10                                              MAN 4790
+c$$$      NN = 2*N                                                          MAN 4800
+c$$$      MM = 2*M                                                          MAN 4810
+c$$$      MM1 = MM - 1                                                      MAN 4820
+c$$$      P = 0.0                                                           MAN 4830
+c$$$      DO 700 I = 1,N                                                    MAN 4840
+c$$$         P = P + ABS(SIN(FLOAT(I)))                                     MAN 4850
+c$$$         X(2*I-1) = P                                                   MAN 4860
+c$$$         X(2*I)   = P                                                   MAN 4870
+c$$$         Y(2*I-1) = COS(FLOAT(I)) - 0.5                                 MAN 4880
+c$$$         Y(2*I)   = COS(FLOAT(2*I)) - 0.5                               MAN 4890
+c$$$  700 CONTINUE                                                          MAN 4900
+c$$$      WRITE(NOUT,710) N,M                                               MAN 4910
+c$$$  710 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 4920
+c$$$      CALL QUINAT(NN,X,Y,BB,CC,DD,EE,FF)                                MAN 4930
+c$$$      DO 715 I = 1,NN                                                   MAN 4940
+c$$$         A(I,1) = Y(I)                                                  MAN 4950
+c$$$         A(I,2) = BB(I)                                                 MAN 4960
+c$$$         A(I,3) = CC(I)                                                 MAN 4970
+c$$$         A(I,4) = DD(I)                                                 MAN 4980
+c$$$         A(I,5) = EE(I)                                                 MAN 4990
+c$$$         A(I,6) = FF(I)                                                 MAN 5000
+c$$$  715 CONTINUE                                                          MAN 5010
+c$$$      DO 720 I = 1, MM1                                                 MAN 5020
+c$$$         DIFF(I) = 0.0                                                  MAN 5030
+c$$$         COM(I) = 0.0                                                   MAN 5040
+c$$$  720 CONTINUE                                                          MAN 5050
+c$$$      DO 765 K = 1,NN                                                   MAN 5060
+c$$$         DO 725 I = 1,MM                                                MAN 5070
+c$$$            C(I) = A(K,I)                                               MAN 5080
+c$$$  725    CONTINUE                                                       MAN 5090
+c$$$         IF (N .GT. 10)  GOTO 740                                       MAN 5100
+c$$$         WRITE(NOUT,730) K                                              MAN 5110
+c$$$  730 FORMAT(40H ---------------------------------------,I3,            MAN 5120
+c$$$     *       45H --------------------------------------------)          MAN 5130
+c$$$         WRITE(NOUT,735) X(K)                                           MAN 5140
+c$$$  735 FORMAT(F12.8)                                                     MAN 5150
+c$$$         IF (K .EQ. NN) WRITE(NOUT,750) C(1)                            MAN 5160
+c$$$  740    CONTINUE                                                       MAN 5170
+c$$$         IF (K .EQ. NN) GO TO 770                                       MAN 5180
+c$$$         IF (N .LE. 10) WRITE(NOUT,750) (C(I), I=1,MM)                  MAN 5190
+c$$$         DO 745 I = 1,MM1                                               MAN 5200
+c$$$            IF (ABS(A(K,I)) .GT.  COM(I)) COM(I) = ABS(A(K,I))          MAN 5210
+c$$$  745    CONTINUE                                                       MAN 5220
+c$$$  750 FORMAT(6F16.8)                                                    MAN 5230
+c$$$         Z = X(K+1) - X(K)                                              MAN 5240
+c$$$         DO 755 I = 2,MM                                                MAN 5250
+c$$$            DO 755 JJ = I,MM                                            MAN 5260
+c$$$               J = MM + I - JJ                                          MAN 5270
+c$$$               C(J-1) = C(J)*Z + C(J-1)                                 MAN 5280
+c$$$  755    CONTINUE                                                       MAN 5290
+c$$$         IF (N .LE. 10) WRITE(NOUT,750) (C(I), I=1,MM)                  MAN 5300
+c$$$         DO 760 I = 1,MM1                                               MAN 5310
+c$$$            IF ((K .GE. NN-1) .AND. (I .NE. 1)) GO TO 760               MAN 5320
+c$$$            Z = ABS(C(I) - A(K+1,I))                                    MAN 5330
+c$$$            IF (Z .GT. DIFF(I)) DIFF(I) = Z                             MAN 5340
+c$$$  760    CONTINUE                                                       MAN 5350
+c$$$  765 CONTINUE                                                          MAN 5360
+c$$$  770 WRITE(NOUT,775)                                                   MAN 5370
+c$$$  775 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 5380
+c$$$      WRITE(NOUT,780) (DIFF(I),I=1,MM1)                                 MAN 5390
+c$$$  780 FORMAT(5E18.9)                                                    MAN 5400
+c$$$      WRITE(NOUT,785)                                                   MAN 5410
+c$$$  785 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 5420
+c$$$      IF (ABS(C(1)) .GT. COM(1)) COM(1) = ABS(C(1))                     MAN 5430
+c$$$      WRITE(NOUT,790) (COM(I),I=1,MM1)                                  MAN 5440
+c$$$  790 FORMAT(5E18.9)                                                    MAN 5450
+c$$$  800 CONTINUE                                                          MAN 5460
+c$$$C                                                                       MAN 5470
+c$$$C                                                                       MAN 5480
+c$$$C     TEST OF QUINAT WITH NONEQUIDISTANT KNOTS, ONE DOUBLE KNOT,        MAN 5490
+c$$$C        ONE TRIPLE KNOT, FOLLOWS.                                      MAN 5500
+c$$$C                                                                       MAN 5510
+c$$$      WRITE(NOUT,805)                                                   MAN 5520
+c$$$      WRITE(NOUT,810)                                                   MAN 5530
+c$$$  805 FORMAT(51H1         TEST OF QUINAT WITH NONEQUIDISTANT KNOTS,)    MAN 5540
+c$$$  810 FORMAT(40H             ONE DOUBLE, ONE TRIPLE KNOT)               MAN 5550
+c$$$      N = 8                                                             MAN 5560
+c$$$      X(1) = -3.                                                        MAN 5570
+c$$$      X(2) = -1.                                                        MAN 5580
+c$$$      X(3) =  -1.                                                       MAN 5590
+c$$$      X(4) =  0.                                                        MAN 5600
+c$$$      X(5) =  3.                                                        MAN 5610
+c$$$      X(6) = 3.                                                         MAN 5620
+c$$$      X(7) = 3.                                                         MAN 5630
+c$$$      X(8) = 4.                                                         MAN 5640
+c$$$      Y(1) =  7.                                                        MAN 5650
+c$$$      Y(2) = 11.                                                        MAN 5660
+c$$$      Y(3) = 15.                                                        MAN 5670
+c$$$      Y(4) = 26.                                                        MAN 5680
+c$$$      Y(5) = 56.                                                        MAN 5690
+c$$$      Y(6) = -30.                                                       MAN 5700
+c$$$      Y(7) =  -7.                                                       MAN 5710
+c$$$      Y(8) =  29.                                                       MAN 5720
+c$$$      M = 3                                                             MAN 5730
+c$$$      MM = 2*M                                                          MAN 5740
+c$$$      MM1 = MM - 1                                                      MAN 5750
+c$$$      WRITE(NOUT,815) N,M                                               MAN 5760
+c$$$  815 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 5770
+c$$$      CALL QUINAT(N,X,Y,BB,CC,DD,EE,FF)                                 MAN 5780
+c$$$      DO 820 I = 1,N                                                    MAN 5790
+c$$$         A(I,1) = Y(I)                                                  MAN 5800
+c$$$         A(I,2) = BB(I)                                                 MAN 5810
+c$$$         A(I,3) = CC(I)                                                 MAN 5820
+c$$$         A(I,4) = DD(I)                                                 MAN 5830
+c$$$         A(I,5) = EE(I)                                                 MAN 5840
+c$$$         A(I,6) = FF(I)                                                 MAN 5850
+c$$$  820 CONTINUE                                                          MAN 5860
+c$$$      DO 830 I = 1,MM1                                                  MAN 5870
+c$$$         DIFF(I) = 0.0                                                  MAN 5880
+c$$$         COM(I) = 0.0                                                   MAN 5890
+c$$$  830 CONTINUE                                                          MAN 5900
+c$$$      DO 870 K = 1,N                                                    MAN 5910
+c$$$         DO 835 I = 1,MM                                                MAN 5920
+c$$$            C(I) = A(K,I)                                               MAN 5930
+c$$$  835 CONTINUE                                                          MAN 5940
+c$$$      WRITE(NOUT,840) K                                                 MAN 5950
+c$$$  840 FORMAT(40H ---------------------------------------,I3,            MAN 5960
+c$$$     *  45H --------------------------------------------)               MAN 5970
+c$$$      WRITE(NOUT,845) X(K)                                              MAN 5980
+c$$$  845 FORMAT(F12.8)                                                     MAN 5990
+c$$$      IF (K .EQ. N) WRITE(NOUT,855) C(1)                                MAN 6000
+c$$$      IF (K .EQ. N) GO TO 875                                           MAN 6010
+c$$$      WRITE(NOUT,855) (C(I),I=1,MM)                                     MAN 6020
+c$$$      DO 850 I = 1,MM1                                                  MAN 6030
+c$$$         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN 6040
+c$$$  850 CONTINUE                                                          MAN 6050
+c$$$  855 FORMAT(6F16.8)                                                    MAN 6060
+c$$$      Z = X(K+1) - X(K)                                                 MAN 6070
+c$$$      DO 860 I = 2,MM                                                   MAN 6080
+c$$$         DO 860 JJ = I,MM                                               MAN 6090
+c$$$            J = MM + I - JJ                                             MAN 6100
+c$$$            C(J-1) = C(J)*Z + C(J-1)                                    MAN 6110
+c$$$  860 CONTINUE                                                          MAN 6120
+c$$$      WRITE(NOUT,855) (C(I),I=1,MM)                                     MAN 6130
+c$$$      DO 865 I = 1,MM1                                                  MAN 6140
+c$$$         IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 865                   MAN 6150
+c$$$         Z = ABS(C(I) - A(K+1,I))                                       MAN 6160
+c$$$         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN 6170
+c$$$  865 CONTINUE                                                          MAN 6180
+c$$$  870 CONTINUE                                                          MAN 6190
+c$$$  875 WRITE(NOUT,880)                                                   MAN 6200
+c$$$  880 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 6210
+c$$$      WRITE(NOUT,885) (DIFF(I),I=1,MM1)                                 MAN 6220
+c$$$  885 FORMAT(5E18.9)                                                    MAN 6230
+c$$$      WRITE(NOUT,890)                                                   MAN 6240
+c$$$  890 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 6250
+c$$$      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN 6260
+c$$$      WRITE(NOUT,895) (COM(I),I=1,MM1)                                  MAN 6270
+c$$$  895 FORMAT(5F16.8)                                                    MAN 6280
+c$$$C                                                                       MAN 6290
+c$$$C                                                                       MAN 6300
+c$$$C     TEST OF QUINAT WITH NONEQUIDISTANT KNOTS, TWO DOUBLE KNOTS,       MAN 6310
+c$$$C        ONE TRIPLE KNOT,FOLLOWS.                                       MAN 6320
+c$$$C                                                                       MAN 6330
+c$$$      WRITE(NOUT,905)                                                   MAN 6340
+c$$$      WRITE(NOUT,910)                                                   MAN 6350
+c$$$  905 FORMAT(51H1         TEST OF QUINAT WITH NONEQUIDISTANT KNOTS,)    MAN 6360
+c$$$  910 FORMAT(40H             TWO DOUBLE, ONE TRIPLE KNOT)               MAN 6370
+c$$$      N = 10                                                            MAN 6380
+c$$$      X(1) = 0.                                                         MAN 6390
+c$$$      X(2) = 2.                                                         MAN 6400
+c$$$      X(3) = 2.                                                         MAN 6410
+c$$$      X(4) = 3.                                                         MAN 6420
+c$$$      X(5) = 3.                                                         MAN 6430
+c$$$      X(6) = 3.                                                         MAN 6440
+c$$$      X(7) = 5.                                                         MAN 6450
+c$$$      X(8) = 8.                                                         MAN 6460
+c$$$      X(9) = 9.                                                         MAN 6470
+c$$$      X(10)= 9.                                                         MAN 6480
+c$$$      Y(1) = 163.                                                       MAN 6490
+c$$$      Y(2) = 237.                                                       MAN 6500
+c$$$      Y(3) = -127.                                                      MAN 6510
+c$$$      Y(4) = 119.                                                       MAN 6520
+c$$$      Y(5) = -65.                                                       MAN 6530
+c$$$      Y(6) = 192.                                                       MAN 6540
+c$$$      Y(7) = 293.                                                       MAN 6550
+c$$$      Y(8) =  326.                                                      MAN 6560
+c$$$      Y(9) = 0.                                                         MAN 6570
+c$$$      Y(10)= -414.0                                                     MAN 6580
+c$$$      M = 3                                                             MAN 6590
+c$$$      MM = 2*M                                                          MAN 6600
+c$$$      MM1 = MM - 1                                                      MAN 6610
+c$$$      WRITE(NOUT,915) N,M                                               MAN 6620
+c$$$  915 FORMAT(5H-N = ,I3,7H    M =,I2)                                   MAN 6630
+c$$$      CALL QUINAT(N,X,Y,BB,CC,DD,EE,FF)                                 MAN 6640
+c$$$      DO 920 I = 1,N                                                    MAN 6650
+c$$$         A(I,1) = Y(I)                                                  MAN 6660
+c$$$         A(I,2) = BB(I)                                                 MAN 6670
+c$$$         A(I,3) = CC(I)                                                 MAN 6680
+c$$$         A(I,4) = DD(I)                                                 MAN 6690
+c$$$         A(I,5) = EE(I)                                                 MAN 6700
+c$$$         A(I,6) = FF(I)                                                 MAN 6710
+c$$$  920 CONTINUE                                                          MAN 6720
+c$$$      DO 930 I = 1,MM1                                                  MAN 6730
+c$$$         DIFF(I) = 0.0                                                  MAN 6740
+c$$$         COM(I) = 0.0                                                   MAN 6750
+c$$$  930 CONTINUE                                                          MAN 6760
+c$$$      DO 970 K = 1,N                                                    MAN 6770
+c$$$         DO 935 I = 1,MM                                                MAN 6780
+c$$$            C(I) = A(K,I)                                               MAN 6790
+c$$$  935 CONTINUE                                                          MAN 6800
+c$$$      WRITE(NOUT,940) K                                                 MAN 6810
+c$$$  940 FORMAT(40H ---------------------------------------,I3,            MAN 6820
+c$$$     *  45H --------------------------------------------)               MAN 6830
+c$$$      WRITE(NOUT,945) X(K)                                              MAN 6840
+c$$$  945 FORMAT(F12.8)                                                     MAN 6850
+c$$$      IF (K .EQ. N) WRITE(NOUT,955) C(1)                                MAN 6860
+c$$$      IF (K .EQ. N) GO TO 975                                           MAN 6870
+c$$$      WRITE(NOUT,955) (C(I),I=1,MM)                                     MAN 6880
+c$$$      DO 950 I = 1,MM1                                                  MAN 6890
+c$$$         IF (ABS(A(K,I)) .GT. COM(I)) COM(I) = ABS(A(K,I))              MAN 6900
+c$$$  950 CONTINUE                                                          MAN 6910
+c$$$  955 FORMAT(6F16.8)                                                    MAN 6920
+c$$$      Z = X(K+1) - X(K)                                                 MAN 6930
+c$$$      DO 960 I = 2,MM                                                   MAN 6940
+c$$$         DO 960 JJ = I,MM                                               MAN 6950
+c$$$            J = MM + I - JJ                                             MAN 6960
+c$$$            C(J-1) = C(J)*Z + C(J-1)                                    MAN 6970
+c$$$  960 CONTINUE                                                          MAN 6980
+c$$$      WRITE(NOUT,955) (C(I),I=1,MM)                                     MAN 6990
+c$$$      DO 965 I = 1,MM1                                                  MAN 7000
+c$$$         IF ((K .GE. N-1) .AND. (I .NE. 1)) GO TO 965                   MAN 7010
+c$$$         Z = ABS(C(I) - A(K+1,I))                                       MAN 7020
+c$$$         IF (Z .GT. DIFF(I)) DIFF(I) = Z                                MAN 7030
+c$$$  965 CONTINUE                                                          MAN 7040
+c$$$  970 CONTINUE                                                          MAN 7050
+c$$$  975 WRITE(NOUT,980)                                                   MAN 7060
+c$$$  980 FORMAT(41H  MAXIMUM ABSOLUTE VALUES OF DIFFERENCES )              MAN 7070
+c$$$      WRITE(NOUT,985) (DIFF(I),I=1,MM1)                                 MAN 7080
+c$$$  985 FORMAT(5E18.9)                                                    MAN 7090
+c$$$      WRITE(NOUT,990)                                                   MAN 7100
+c$$$  990 FORMAT(42H  MAXIMUM ABSOLUTE VALUES OF COEFFICIENTS )             MAN 7110
+c$$$      IF (ABS(C(1)) .GT. COM(1)) COM(1) =ABS(C(1))                      MAN 7120
+c$$$      WRITE(NOUT,995) (COM(I),I=1,MM1)                                  MAN 7130
+c$$$  995 FORMAT(5F16.8)                                                    MAN 7140
+c$$$      STOP                                                              MAN 7150
+c$$$      END                                                               MAN 7160

@@ -2,11 +2,13 @@
 #include <blitz/mstruct.h>
 
 
-#ifdef NOUNDERSCORE 
-#define FORT(name) name
-#else
+//#ifdef NOUNDERSCORE 
+//#define FORT(name) name
+//#else
 #define FORT(name) name ## _
-#endif 
+//#endif 
+
+
 
 
 extern "C" void FORT(dgesvd)(char *JOBU, char* JOBVT, int *M, int *N,

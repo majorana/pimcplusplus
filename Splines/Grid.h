@@ -1,8 +1,9 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include "../Blitz.h"
 #include "../IO/InputOutput.h"
+#include "../Blitz.h"
+
 
 //Ken's Grid Class
 
