@@ -96,26 +96,7 @@
 
 void BisectionStageClass::WriteRatio()
 { 
- if (FirstTime) {
-    FirstTime = false;
-    OutSection.NewSection("BisectionStageClass");
-    OutSection.WriteVar("BisectionLevel",BisectionLevel);
-    Array<double,1> ratios(1);
-    if (NumAttempted!=0)
-      ratios(0) = (double)NumAccepted/(double)NumAttempted;
-    else 
-      ratios(0)=0.0;
-    OutSection.WriteVar("AcceptRatio", ratios);
-    IOVar = OutSection.GetVarPtr("AcceptRatio");
-  }
-  else {
-    double ratio;
-    if (NumAttempted!=0)
-      ratio = (double)NumAccepted/(double)NumAttempted;
-    else
-      ratio=0.0;
-    IOVar->Append(ratio);
-  }
+  AcceptRatioVar.Write((double)NumAccepted/(double)NumAttempted);
   OutSection.FlushFile();
 }
 

@@ -1,4 +1,3 @@
-
 #ifndef MULTI_STAGE_H
 #define MULTI_STAGE_H
 
@@ -11,6 +10,7 @@ class StageClass
 {
 protected:
   PathDataClass &PathData;
+  IOSectionClass OutSection;
 public:
   int NumAccepted, NumAttempted;
   int BisectionLevel;
@@ -34,11 +34,13 @@ public:
 		       double &prevActionChange) = 0;
 
 
-  StageClass(PathDataClass &pathData) :
+  StageClass(PathDataClass &pathData,IOSectionClass outSection) :
     PathData(pathData), NumAccepted(0), NumAttempted(0),
-    BisectionLevel(0)
+    BisectionLevel(0),
+    OutSection(outSection)
   {
-    // Do nothing for now
+    if (PathData.Path.Communicator.MyProc()==0)
+      OutSection.NewSection("Stage");
   }
 
 
@@ -52,8 +54,8 @@ public:
   bool Attempt(int &slice1, int &slice2,
 	       Array<int,1> &activeParticles,
 	       double &prevActionChange);
-  CommonStageClass(PathDataClass &pathData) :
-    StageClass(pathData)
+  CommonStageClass(PathDataClass &pathData,IOSectionClass &outSection) :
+    StageClass(pathData,outSection)
   {
     // Do nothing for now
   }
@@ -66,10 +68,10 @@ public:
   bool Attempt(int &slice1, int &slice2,
 	       Array<int,1> &activeParticles,
 	       double &prevActionChange);
-  LocalStageClass(PathDataClass &pathData) :
-    StageClass(pathData)
+  LocalStageClass(PathDataClass &pathData,IOSectionClass &outSection) :
+    StageClass(pathData,outSection)
   {
-    // Do nothing for now
+
   }
 	       
 };
