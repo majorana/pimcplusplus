@@ -4,7 +4,7 @@
 #include "CubicSpline.h"
 #include "IdenticalParticlesClass.h"
 #include "MemoizedDataClass.h"
-#include "ArrayOfIdenticalParticlesClass.h"
+#include "SpeciesArrayClass.h"
 
 class SavedPairActionClass
 {
@@ -106,8 +106,8 @@ public:
   Array<PairActionClass,1> PairActionVector;
   Array<int,2> PairMatrix;
   Array<SavedPairActionClass,2> SavedPairActionArray;
-  //  Array<IdenticalParticlesClass,1> *myIdenticalParticleArray;
-  ArrayOfIdenticalParticlesClass *myIdenticalParticleArray;
+  //  Array<IdenticalParticlesClass,1> *mySpeciesArray;
+  SpeciesArrayClass *mySpeciesArray;
   double tau;
   double calcTotalAction(Array<ParticleID,1> changedParticles,int startSlice, int endSlice,int level);
   MemoizedDataClass *myMemoizedData;
@@ -141,14 +141,14 @@ inline double ActionClass::SampleParticles(Array<ParticleID,1> particles,
   for (int ptcl=0;ptcl<particles.size();ptcl++){
     int species=particles(ptcl)(0);
     int ptclNum=particles(ptcl)(1);
-    double lambda=((*myIdenticalParticleArray)(species)).lambda;
+    double lambda=((*mySpeciesArray)(species)).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-      dVec r =(*myIdenticalParticleArray)(species,ptclNum,sliceCounter);
-      dVec rp=(*myIdenticalParticleArray)(species,ptclNum,sliceCounter+skip);
-      rpp=(*myIdenticalParticleArray)(species,ptclNum,sliceCounter+(skip>>1));
+      dVec r =(*mySpeciesArray)(species,ptclNum,sliceCounter);
+      dVec rp=(*mySpeciesArray)(species,ptclNum,sliceCounter+skip);
+      rpp=(*mySpeciesArray)(species,ptclNum,sliceCounter+(skip>>1));
       ///We've ignored boundary conditions here
       dVec rbar=0.5*(r+rp);
       dVec newDelta=GaussianRandomVec(sigma);
@@ -156,7 +156,7 @@ inline double ActionClass::SampleParticles(Array<ParticleID,1> particles,
       rpp=rbar+newDelta;
       logNewSampleProb=logNewSampleProb+(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
       ///Here we've stored the new position in the path
-      (*myIdenticalParticleArray).SetPos(species,ptclNum,sliceCounter+(skip>>1),rpp );
+      (*mySpeciesArray).SetPos(species,ptclNum,sliceCounter+(skip>>1),rpp );
     }
   }
   return logNewSampleProb;
@@ -174,14 +174,14 @@ inline double ActionClass::LogSampleProb(Array<ParticleID,1> particles,
   for (int ptcl=0;ptcl<particles.size();ptcl++){
     int species=particles(ptcl)(0);
     int ptclNum=particles(ptcl)(1);
-    double lambda=((*myIdenticalParticleArray)(species)).lambda;
+    double lambda=((*mySpeciesArray)(species)).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-      dVec r =(*myIdenticalParticleArray)(species,ptclNum,sliceCounter);
-      dVec rp=(*myIdenticalParticleArray)(species,ptclNum,sliceCounter+skip);
-      rpp=(*myIdenticalParticleArray)(species,ptclNum,sliceCounter+(skip>>1));
+      dVec r =(*mySpeciesArray)(species,ptclNum,sliceCounter);
+      dVec rp=(*mySpeciesArray)(species,ptclNum,sliceCounter+skip);
+      rpp=(*mySpeciesArray)(species,ptclNum,sliceCounter+(skip>>1));
       ///We've ignored boundary conditions here
       dVec rbar=0.5*(r+rp);
       dVec Delta= rpp - rbar;

@@ -14,10 +14,10 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
   int Species1, Species2, Ptcl1, Ptcl2;
   int NumSpecies;
 
-  ArrayOfIdenticalParticlesClass &IdentPtcls = *myIdenticalParticleArray;
+  SpeciesArrayClass &IdentPtcls = *mySpeciesArray;
   NumSpecies = IdentPtcls.size();
   //  cerr<<"What the action class thinks the size is in calctotalaction: ";
-  //  cerr<<  myIdenticalParticleArray->size()<<endl;
+  //  cerr<<  mySpeciesArray->size()<<endl;
   int skip = 1<<level;
   double levelTau = tau* (1<<level);
   for (int i=0; i<NumChangedPtcls; i++)

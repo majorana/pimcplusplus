@@ -18,7 +18,7 @@ void setupAction(ActionClass &myActionClass,PathDataClass &myPathData)
   myActionClass.PairMatrix=0;
   myActionClass.tau=myActionClass.PairActionVector(0).tau;
   cerr << "Tau = " << myActionClass.tau << endl;
-  myActionClass.myIdenticalParticleArray=&(myPathData.IdenticalParticleArray);
+  myActionClass.mySpeciesArray=&(myPathData.SpeciesArray);
 
      
 }
@@ -26,7 +26,7 @@ void setupAction(ActionClass &myActionClass,PathDataClass &myPathData)
 
 void setupIDParticleArray(PathDataClass &myPathData)
 {
-  ArrayOfIdenticalParticlesClass &myIDParticles=myPathData.IdenticalParticleArray;
+  SpeciesArrayClass &myIDParticles=myPathData.SpeciesArray;
   double tau=1.0; //This better be the same as in the squarer file! UGly!
   int NumTimeSlices=50;
   ElectronsClass *myElectronptr = new ElectronsClass;
@@ -56,9 +56,9 @@ void setupIDParticleArray(PathDataClass &myPathData)
     }
   }
 
-  myPathData.IdenticalParticleArray.resize(2);
-  myPathData.IdenticalParticleArray.Set(0,myElectrons);
-  myPathData.IdenticalParticleArray.Set(1,myProtons);
+  myPathData.SpeciesArray.resize(2);
+  myPathData.SpeciesArray.Set(0,myElectrons);
+  myPathData.SpeciesArray.Set(1,myProtons);
   myPathData.NumTimeSlices=NumTimeSlices;
 }
   
@@ -146,14 +146,14 @@ int main(int argc, char **argv)
   //  ActionClass myActionClass;
   setupIDParticleArray(myPathData);
   myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
-  setupAction(myPathData.TotalAction,myPathData);
+  setupAction(myPathData.Action,myPathData);
   BisectionMoveClass myBisectionMove;
   ShiftMove myShiftMove;
   setupMove(myBisectionMove,myShiftMove,myPathData);
-  //  cerr<<"The size of the IdenticalParticleArray is ";
-  //  cerr << (myBisectionMove.PathData)->IdenticalParticleArray.size()<<endl;
+  //  cerr<<"The size of the SpeciesArray is ";
+  //  cerr << (myBisectionMove.PathData)->SpeciesArray.size()<<endl;
   //  cerr<<"What the action class thinks the size is: ";
-  //  cerr<<  myActionClass.myIdenticalParticleArray->size()<<endl;
+  //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
   for (int counter=0;counter<1000000;counter++){
     if ((counter % 1000) == 0)
       cerr << "Step #" << counter << ":\n";

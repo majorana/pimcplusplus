@@ -2,17 +2,17 @@
 
 void PairCorrelation::Accumulate()
 {
-  int NumPtcl1 = PathData->IdenticalParticleArray(Species1).NumParticles;
-  int NumPtcl2 = PathData->IdenticalParticleArray(Species2).NumParticles;
+  int NumPtcl1 = PathData->SpeciesArray(Species1).NumParticles;
+  int NumPtcl2 = PathData->SpeciesArray(Species2).NumParticles;
   bool DifferentSpecies = (Species1 != Species2);
   
   
   if (DifferentSpecies)
     for (int Slice=0; Slice<PathData->NumTimeSlices; Slice++) {
       for (int Ptcl1=0; Ptcl1<NumPtcl1; Ptcl1++) {
-	dVec r1 =PathData->IdenticalParticleArray(Species1).Path(Ptcl1, Slice);
+	dVec r1 =PathData->SpeciesArray(Species1).Path(Ptcl1, Slice);
 	for (int Ptcl2=0; Ptcl2<NumPtcl2; Ptcl2++) {
-	  dVec r2=PathData->IdenticalParticleArray(Species2).Path(Ptcl2,Slice);
+	  dVec r2=PathData->SpeciesArray(Species2).Path(Ptcl2,Slice);
 	  dVec diff = r1-r2;
 	  double dist = sqrt(dot(diff,diff));
 
@@ -28,9 +28,9 @@ void PairCorrelation::Accumulate()
   else
     for (int Slice=0; Slice<PathData->NumTimeSlices; Slice++) {
       for (int Ptcl1=0; Ptcl1<NumPtcl1; Ptcl1++) {
-	dVec r1 = PathData->IdenticalParticleArray(Species1).Path(Ptcl1,Slice);
+	dVec r1 = PathData->SpeciesArray(Species1).Path(Ptcl1,Slice);
 	for (int Ptcl2=Ptcl1+1; Ptcl2<NumPtcl2; Ptcl2++)  {
-	  dVec r2=PathData->IdenticalParticleArray(Species2).Path(Ptcl2,Slice);
+	  dVec r2=PathData->SpeciesArray(Species2).Path(Ptcl2,Slice);
 	  dVec diff = r1-r2;
 	  double dist = sqrt(dot(diff,diff));
 	  

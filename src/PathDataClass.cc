@@ -16,7 +16,7 @@ void PathDataClass::acceptMove(Array <ParticleID,1> ActiveParticles,int StartTim
     {
       int Species = ActiveParticles(i)[0];
       int Ptcl = ActiveParticles(i)[1];
-      IdenticalParticleArray(Species).Path.AcceptCopy(Ptcl, StartTimeSlice,
+      SpeciesArray(Species).Path.AcceptCopy(Ptcl, StartTimeSlice,
 						      EndTimeSlice);
     }
 
@@ -29,7 +29,7 @@ void PathDataClass::rejectMove(Array <ParticleID,1> ActiveParticles,int StartTim
     {
       int Species = ActiveParticles(i)[0];
       Ptcl = ActiveParticles(i)[1];
-      IdenticalParticleArray(Species).Path.RejectCopy(Ptcl, StartTimeSlice,
+      SpeciesArray(Species).Path.RejectCopy(Ptcl, StartTimeSlice,
 						      EndTimeSlice);
     }
 }

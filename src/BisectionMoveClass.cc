@@ -29,23 +29,23 @@ void BisectionMoveClass::makeMove()
   double prevActionChange=0;
   
   //  cerr<<"At the beginning fo the makeMove the size is ";
-  //  cerr <<  PathData->IdenticalParticleArray.size()<<endl;
+  //  cerr <<  PathData->SpeciesArray.size()<<endl;
   ChooseParticles();   
   //////////  for (int levelCounter=NumLevels;levelCounter>0;levelCounter--){
   int levelCounter=NumLevels-1;
 
   while (levelCounter>=0 && toAccept==true){
     //    cerr<<"At the level Counter in Bisection makeMove being  "<<levelCounter<<" the size is ";
-    //    cerr <<  PathData->IdenticalParticleArray.size()<<endl;
+    //    cerr <<  PathData->SpeciesArray.size()<<endl;
     setMode(OLDMODE);
     toAccept=true;
-    double oldAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
-    oldLogSampleProb = (*PathData).TotalAction.LogSampleProb(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
+    double oldAction = (*PathData).Action.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
+    oldLogSampleProb = (*PathData).Action.LogSampleProb(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
     setMode(NEWMODE);
-    newLogSampleProb = (*PathData).TotalAction.SampleParticles(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
+    newLogSampleProb = (*PathData).Action.SampleParticles(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
     //cerr << "newLogSampleProb = " << newLogSampleProb << endl;
     //cerr << "oldLogSampleProb = " << oldLogSampleProb << endl;
-    double newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter);
+    double newAction = (*PathData).Action.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter);
     double currActionChange=newAction-oldAction;
     double logAcceptProb=-oldLogSampleProb+newLogSampleProb+currActionChange-prevActionChange;
     //cerr << "prevActionChange = " << prevActionChange << endl;

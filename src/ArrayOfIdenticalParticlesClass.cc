@@ -1,7 +1,7 @@
-#include "ArrayOfIdenticalParticlesClass.h"
+#include "SpeciesArrayClass.h"
 
 
-//inline int ArrayOfIdenticalParticlesClass::size()
+//inline int SpeciesArrayClass::size()
 //{
 
 

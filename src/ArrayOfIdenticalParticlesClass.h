@@ -3,7 +3,7 @@
 
 #include "IdenticalParticlesClass.h"
 
-class ArrayOfIdenticalParticlesClass
+class SpeciesArrayClass
 {
   Array<IdenticalParticlesClass*,1> IdenticalParticlesArray;
  public:
