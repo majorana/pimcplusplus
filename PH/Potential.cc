@@ -13,6 +13,8 @@ Potential* ReadPotential (IOSectionClass &in)
     pot = new ScreenedPot;
   else if (type == "Spline")
     pot = new SplinePot;
+  else if (type == "HeAziz")
+    pot = new HeAzizPot;
   else {
     cerr << "Unrecognize potential type \"" << type << "\".  Exitting.\n";
     exit(1);

@@ -5,5 +5,6 @@
 #include "ScreenedPot.h"
 #include "QuinticPH.h"
 #include "SplinePot.h"
+#include "HeAzizPot.h"
 
 #endif
