@@ -134,6 +134,16 @@ inline Mat3 operator+(const Mat3 &A, const Mat3 &B)
   return (ApB);
 }
 
+
+inline Mat3 operator-(const Mat3 &A, const Mat3 &B)
+{
+  Mat3 AmB;
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      AmB(i,j) = A(i,j) - B(i,j);
+  return (AmB);
+}
+
 inline Vec3 operator*(const Mat3& A, const Vec3 &v)
 {
   Vec3 Av;
