@@ -295,14 +295,19 @@ public:
 		   const Array<double,1> &startderiv, 
 		   const Array<double,1> &endderiv)
   {
+
     grid = NewGrid;
     NumGridPoints = grid->NumPoints;
     NumSplines = NewYs.cols(); 
     UpToDate.resize(NumSplines);
     StartDeriv.resize(NumSplines);
+
     StartDeriv = startderiv;
+
     EndDeriv.resize(NumSplines);
+
     EndDeriv = endderiv;
+
     if (NewGrid->NumPoints != NewYs.rows())
       {
 	cerr << "Size mismatch in CubicSpline.\n";
@@ -310,16 +315,20 @@ public:
 	cerr << "Y points    = " << NewYs.rows() << endl;
 	exit(1);
       }
-    
+
     y.resize(NumGridPoints,NumSplines);
     d2y.resize(NumGridPoints,NumSplines);
+
     y = NewYs;
+
     for (int i=0; i<NumSplines; i++)
       Update(i);
+
   }
 
   inline void Init (Grid *NewGrid, const Array<double,2> &NewYs)
   {
+
     grid = NewGrid;
     NumGridPoints = grid->NumPoints;
     NumSplines = NewYs.cols();
@@ -327,18 +336,22 @@ public:
     StartDeriv.resize(NumSplines);
     EndDeriv.resize(NumSplines);
     StartDeriv = 5.0e30;
-    EndDeriv = 5.0e30;    
+    EndDeriv = 5.0e30;
+
     if (NewGrid->NumPoints != NewYs.rows())
       {
 	cerr << "Size mismatch in CubicSpline.\n";
 	exit(1);
       }
-   
+
     y.resize(NumGridPoints,NumSplines);
     d2y.resize(NumGridPoints,NumSplines);
+
     y = NewYs;
+
     for (int i=0; i<NumSplines; i++)
       Update(i);
+
   }
 
   inline MultiCubicSpline (Grid *NewGrid, Array<double,2> NewYs,
