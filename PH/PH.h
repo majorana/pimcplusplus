@@ -448,8 +448,6 @@ public:
   CubicSpline PA, PB, Vfunc;
   Grid *Agrid, *Bgrid, *Vgrid;
 
-  // Nelecs is the number of electrons in the pseudo-atom;
-  scalar NumElecs;
   scalar Amin, Bmin;
 
   PHType Type()
@@ -678,6 +676,7 @@ public:
     PB.Init (Bgrid, Params, 0.0, 0.0);
     assert(inSection.ReadVar ("Vfuncparams", Params));
     Vfunc.Init(Vgrid, Params, 5.0e30, 5.0e30);
+    UseVHXC = false;
     return (true);
    }
 
