@@ -92,6 +92,7 @@ public:
     Path.Resize(TimeSliceNumber,numParticles);
     Permutation.Resize(numParticles);
     SpeciesNumber.resize(numParticles);
+
     /// Assign the species number to the SpeciesNumber array
     for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
       for (int i=SpeciesArray(speciesNum)->FirstPtcl; 

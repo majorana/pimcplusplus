@@ -21,8 +21,8 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
   int skip = 1<<level;
   double levelTau = tau* (1<<level);
   for (int ptcl1=0; ptcl1<numChangedPtcls; ptcl1++){
+    species1=Path.ParticleSpeciesNum(ptcl1);
     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
-      int species1=Path.ParticleSpeciesNum(ptcl1);
       double notMyself=(double)(ptcl1!=ptcl2);
       for (int slice=startSlice;slice<endSlice;slice+=skip){
 	///I think we're double counting particles here
