@@ -1,6 +1,27 @@
 #include "PermuteTableClass.h"
 
 
+// double PermuteTableClass::Sample (int &slice1, int &slice2,
+// 				  Array<double,1> &activeParticles)
+// {
+//   if (activeParticles(0) == -1) {
+//     // We need to choose the permutation now
+
+
+//     return 1.0;
+//   }
+//   else {
+//     // We need to compute the transition probability now
+    
+//     // Construct the reverse table;
+    
+//     // Calculate the reverse probability
+    
+//     // Return ratio
+//   }
+  
+// }
+
     
 Array<int,1> PermuteTableClass::CurrentParticles()
 {

@@ -12,19 +12,25 @@ class StageClass
 protected:
   PathDataClass &PathData;
 public:
+  int NumAccepted, NumAttempted;
   int BisectionLevel;
   list<ActionBaseClass*> Actions;
   ///The highest stage will set the slices and activeParticles
   ///This returns transition probability T(new->old)/T(old->new)
   virtual double Sample (int &slice1,int &slice2,
-			 Array<int,1> activeParticles); 
+			 Array<int,1> &activeParticles) = 0; 
+  virtual void Read (IOSectionClass &in);
   virtual void Accept();
   virtual void Reject();
   inline double StageAction(int startSlice,int endSlice,
-		     const Array<int,1> &changedParticles);
-  StageClass(PathDataClass &pathData) :PathData(pathData)
+			    const Array<int,1> &changedParticles);
+  inline double AcceptRatio () 
+  { return (double)NumAccepted / (double) NumAttempted; }
+
+  StageClass(PathDataClass &pathData) :
+    PathData(pathData), NumAccepted(0), NumAttempted(0)
   {
-    //do nothing for now
+    // Do nothing for now
   }
 };
 

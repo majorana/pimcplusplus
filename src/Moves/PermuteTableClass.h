@@ -53,12 +53,11 @@ class PermuteTableClass
   PathDataClass &PathData;
   void ConstructHTable();
 
- public:
   double Norm, NormInv;
   inline int FindEntry(double xi);  
   inline int FindEntrySlow(double xi);  
 
-
+public:
   int NumEntries;
   CycleClass CurrentCycle;
   Array<double,2> HTable;
@@ -73,13 +72,17 @@ class PermuteTableClass
   // Smallest value of exp(-s^2/(4*lambda*beta) which we will include
   // in Htable.
   double epsilon;
-  void Read(IOSectionClass &inSection);
+
   void ConstructCycleTable(int speciesNum,int slice1,int slice2);
   void CanonicalPermRep(Array<int,1> P);
   double AttemptPermutation();
   double CalcReverseProb(const PermuteTableClass &forwardTable);
   Array<int,1> CurrentParticles();
   void PrintTable() const;
+
+
+  void Read(IOSectionClass &inSection);
+
   PermuteTableClass(PathDataClass &myPathData) : PathData(myPathData)
   {
     NumEntries=0;

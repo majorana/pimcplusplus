@@ -1,11 +1,12 @@
-#ifndef BISECTIONBLOCK_CLASS_H
-#define BISECTIONBLOCK_CLASS_H
+#ifndef BISECTION_BLOCK_CLASS_H
+#define BISECTION_BLOCK_CLASS_H
 
 
 #include "MoveBase.h"
-#include "MultiStageClass.h"
 #include "../PathDataClass.h"
-#include "BisectionClass.h"
+#include "PermuteStageClass.h"
+#include "BisectionStageClass.h"
+
 
 /// This is the bisection move class inherited from ParticleMoveClass
 /// Explanation of how bisection moves work is in  
@@ -13,17 +14,25 @@
 /// by D.M. Ceperley  (Review of Modern Physics 1995) section V.H
 class BisectionBlockClass : public MultiStageLocalClass
 {
- public:
-  ///Number of levels the bisection move works on 
+private:
   int NumLevels;
+  int StepsPerBlock;
+  bool IsFermion;
+  int SpeciesNum;
+
+  void ChooseTimeSlices();
+public:
+
+  /// Number of levels the bisection move works on 
   void Read(IOSectionClass &in);
+  
+  /// Override base class MakeMove to do a block of moves
+  void MakeMove();
 
   BisectionBlockClass(PathDataClass &pathData, IOSectionClass &out) : 
-    MultiStageLocalClass(pathData, outSection), 
+    MultiStageLocalClass(pathData, out)
   { 
-    ///Defaults to the 0'th time slice but shouldn't matter because it
-    ///chooses a different time slice each time.
-    StartTimeSlice=0;
+    // do nothing for now
   }
 };
 
