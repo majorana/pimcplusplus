@@ -89,6 +89,7 @@ double QuinticPH::d2Vdr2(double r)
 
 void QuinticPH::Write(IOSectionClass &out)
 {
+  out.WriteVar ("Type", "QuinticPH");
   out.NewSection("Agrid");  Agrid.Write(out);  out.CloseSection();
   out.NewSection("Bgrid");  Bgrid.Write(out);  out.CloseSection();
   out.NewSection("Vgrid");  Vgrid.Write(out);  out.CloseSection();
@@ -114,6 +115,14 @@ void QuinticPH::Read(IOSectionClass &in)
   pA.Init (&Agrid, temp, 0.0, 0.0, 0.0, 0.0);
   assert (in.ReadVar ("pB", temp));
   pB.Init (&Bgrid, temp, 0.0, 0.0, 0.0, 0.0);
+
+  bool success = in.OpenSection ("Vouter");
+  if (success) {
+    Vouter = ReadPotential(in);
+    in.CloseSection();
+  }
+  in.ReadVar ("UseVcore", UseVcore);
+
   double dVend  = Vouter->dVdr(CoreRadius);
   double d2Vend = Vouter->d2Vdr2(CoreRadius);
   assert (in.ReadVar ("Vcore", temp));

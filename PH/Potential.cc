@@ -1,30 +1,22 @@
-#include "PH.h"
+#include "Potential.h"
 
-//////////////////////////////////////////////////////////////////
-//                FullCorePotential Routines                    //
-//////////////////////////////////////////////////////////////////
-
-void
-FullCorePotential::Read(char *FName)
+Potential* ReadPotential (IOSectionClass &in)
 {
-  strncpy (FileName, FName, 1000);
-  FILE *fin;
-  if ((fin = fopen(FileName, "r")) == NULL)
-    {
-      cerr << "Cannot open " << FileName << " for reading. Exitting.";
-      exit(1);
-    }
-
-  fscanf (fin, " %lf ", &Z);
-  Grid *TempGrid;
-  TempGrid = ReadGrid(fin);
-  if (GridInitialized)
-    delete(V.grid);
-  GridInitialized = 1;
-  scalar dummy;
-  Array<scalar, 1> PotVals(TempGrid->NumPoints);
-  for (int i=0; i<TempGrid->NumPoints; i++)
-    fscanf(fin, " %lf %lf ", &PotVals(i), &dummy);
-  V.Init(TempGrid, PotVals, 5.0e30, 5.0e30);
-  fclose(fin);
+  string type;
+  Potential *pot;
+  assert (in.ReadVar ("Type", type));
+  if (type == "Coulomb")
+    pot = new CoulombPot;
+  else if (type == "QuinticPH")
+    pot = new QuinticPH;
+  else if (type == "Screened")
+    pot = new ScreenedPot;
+  else if (type == "Spline")
+    pot = new SplinePot;
+  else {
+    cerr << "Unrecognize potential type \"" << type << "\".  Exitting.\n";
+    exit(1);
+  }
+  pot->Read(in);
+  return pot;
 }

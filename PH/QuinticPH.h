@@ -269,7 +269,7 @@ void QuinticPH::Init (Potential *outer, double coreRadius,
   initV(numV) = Vend;
   pA.Init (&Agrid, initA, 0.0, 0.0, 0.0, 0.0);
   pB.Init (&Bgrid, initB, 0.0, 0.0, 0.0, 0.0);
-  Vcore.Init (&Vgrid, initV, NAN, dVend, 0.0, d2Vend);
+  Vcore.Init (&Vgrid, initV, NAN, dVend, NAN, d2Vend);
 }
 
   

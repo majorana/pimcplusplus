@@ -23,5 +23,6 @@ public:
   virtual void Read(IOSectionClass &in) = 0;
 };
 
+Potential* ReadPotential (IOSectionClass &in);
 
 #endif
