@@ -134,6 +134,7 @@ void BicubicSpline::BiUpdate()
       F(j,iy).d2zdxdy -= mu(j) * F(j+1,iy).d2zdxdy;
     }
   }
+  BiUpToDate = true;
 }
 
   

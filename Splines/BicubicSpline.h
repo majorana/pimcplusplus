@@ -21,8 +21,8 @@ private:
   void XUpdate(int ix);
   void YUpdate(int iy);
   void BiUpdate();
-public:
   Array<BCpoint,2> F;
+public:
   int Nx, Ny;
   Grid *Xgrid, *Ygrid;
 
@@ -71,6 +71,7 @@ inline double& BicubicSpline::operator() (int ix, int iy)
 { 
   XUpToDate(iy) = false;
   YUpToDate(ix) = false;
+  BiUpToDate = false;
   return (F(ix,iy).z);
 }
 
@@ -135,6 +136,8 @@ inline double q2(double t)
 
 inline double BicubicSpline::operator() (double x, double y)
 {
+  if (!BiUpToDate)
+    BiUpdate();
   TinyMatrix<double,4,4> Z;
   TinyVector<double,4> a, b;
 
