@@ -10,7 +10,7 @@ void PAcoulombBCFitClass::ReadParams(IOSectionClass &inSection)
   qgrid = ReadGrid (inSection);
   inSection.CloseSection();
   assert(inSection.OpenSection ("tGrid"));
-  qgrid = ReadGrid (inSection);
+  tgrid = ReadGrid (inSection);
   inSection.CloseSection();
   GridsAreMine = true;
   UsePBC = inSection.ReadVar ("Box", Box);
@@ -74,6 +74,8 @@ void PAcoulombBCFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
   double weight;
   FILE *Uxdat = fopen ("Ux.dat", "w");
   FILE *Ufdat = fopen ("Uf.dat", "w");
+  FILE *dUxdat = fopen ("dUx.dat", "w");
+  FILE *dUfdat = fopen ("dUf.dat", "w");
   FILE *sdat = fopen ("s.dat", "w");
   FILE *costhetadat = fopen ("costheta.dat", "w");
   FILE *qdat = fopen ("q.dat", "w");
@@ -98,12 +100,16 @@ void PAcoulombBCFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
       weight += w;
       fprintf (Uxdat, "%1.16e ", Uex);
       fprintf (Ufdat, "%1.16e ", Ufit);
+      fprintf (dUxdat, "%1.16e ", dUex);
+      fprintf (dUfdat, "%1.16e ", dUfit);
       fprintf (sdat, "%1.16e ", s);
       fprintf (costhetadat, "%1.16e ", costheta);
       fprintf (qdat, "%1.16e ", q);
     }
     fprintf (Uxdat, "\n");
     fprintf (Ufdat, "\n");
+    fprintf (dUxdat, "\n");
+    fprintf (dUfdat, "\n");
     fprintf (sdat, "\n");
     fprintf (qdat, "\n");
     fprintf (costhetadat, "\n");
@@ -144,7 +150,7 @@ double PAcoulombBCFitClass::U(double q, double z, double s2, int level)
   for (int i=0; i<level; i++)
     beta *= 2.0;
 
-  if (q < qgrid->End) {
+  if (q <= (qgrid->End*1.0000001)) {
     double t = sqrt(s2)/(2.0*q);
     return (Usplines(level)(q,t));
   }
@@ -160,7 +166,7 @@ double PAcoulombBCFitClass::dU(double q, double z, double s2, int level)
   for (int i=0; i<level; i++)
     beta *= 2.0;
 
-  if (q < qgrid->End) {
+  if (q <= (qgrid->End*1.0000001)) {
     double t = sqrt(s2)/(2.0*q);
     return (dUsplines(level)(q,t));
   }
