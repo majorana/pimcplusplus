@@ -65,12 +65,7 @@ class Grid
     return (0);
   }
 
-  virtual void Write (OutputSectionClass &out)
-  {
-    cerr << "Should never get here. Grid::Write()\n";
-    exit(1);
-  }
-
+  virtual void Write (OutputSectionClass &out) = 0;
 };
 
 
@@ -109,6 +104,15 @@ class LinearGrid : public Grid
     fprintf (fout, "    End = %1.16e;\n", End);
     fprintf (fout, "    NumPoints = %d;\n", NumPoints);
     fprintf (fout, "  }\n");
+  }
+  
+  void Write (OutputSectionClass &outSection)
+  {
+    outSection.WriteVar ("Points", grid); 
+    outSection.WriteVar ("Type", "Linear");
+    outSection.WriteVar ("Start", Start);
+    outSection.WriteVar ("End", End);
+    outSection.WriteVar ("NumPoints", NumPoints);
   }
 
   /// Returns the index of the nearest point below r. 
@@ -181,6 +185,14 @@ class OptimalGrid : public Grid
     fprintf (fout, "    b = %1.16e;\n", b);
     fprintf (fout, "    NumPoints = %d;\n", NumPoints);
     fprintf (fout, "  }\n");
+  }
+
+  void Write (OutputSectionClass &outSection)
+  {
+    outSection.WriteVar ("Points", grid); 
+    outSection.WriteVar ("Type", "Optimal");
+    outSection.WriteVar ("a", a);
+    outSection.WriteVar ("b", b);
   }
 
   int ReverseMap(scalar r)
@@ -304,6 +316,16 @@ class LogGrid : public Grid
     fprintf (fout, "  }\n");
   }
 
+  void Write (OutputSectionClass &outSection)
+  {
+    outSection.WriteVar ("Points", grid); 
+    outSection.WriteVar ("Type", "Log");
+    outSection.WriteVar ("r0", r0);
+    outSection.WriteVar ("Spacing", Spacing);
+  }
+
+
+
   int ReverseMap(scalar r)
     {
       return ((int)(floor(log(Z*r/r0)/log(Spacing))));
@@ -421,5 +443,49 @@ inline Grid *ReadGrid(FILE *fin)
 }
 
 Grid *ReadGrid (InputBuffer &SectionBuf);
+
+inline Grid* ReadGrid (InputSectionClass &inSection)
+{
+  string Type;
+  assert (inSection.ReadVar ("Type", Type));
+
+  Grid *newGrid;
+  if (Type == "Linear")
+    {
+      double Start, End;
+      int NumPoints;
+      assert (inSection.ReadVar ("Start", Start));
+      assert (inSection.ReadVar ("End", End));
+      assert (inSection.ReadVar ("NumPoints", NumPoints));
+      newGrid = new LinearGrid(Start, End, NumPoints);
+    }
+  else if (Type == "Optimal")
+    {
+      double a, b;
+      int NumPoints;
+      assert (inSection.ReadVar ("a", a));
+      assert (inSection.ReadVar ("b", b));
+      assert (inSection.ReadVar ("NumPoints", NumPoints));
+      newGrid = new OptimalGrid (a, b, NumPoints);
+    }
+  else if (Type == "Log")
+    {
+      double r0, Spacing;
+      int NumPoints;
+      assert (inSection.ReadVar ("r0", r0));
+      assert (inSection.ReadVar ("Spacing", Spacing));
+      assert (inSection.ReadVar ("NumPoints", NumPoints));
+      newGrid = new LogGrid (r0, Spacing, NumPoints);
+    }
+  else
+    {
+      cerr << "Unrecognized Grid type " << Type << "\n";
+      exit(1);
+    }
+  return (newGrid);
+}
+
+
+
 
 #endif

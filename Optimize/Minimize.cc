@@ -1,6 +1,5 @@
 #include "Minimize.h"
 #include <gsl/gsl_multimin.h>
-#include "Blitz.h"
 
 double MCost (const gsl_vector *v, void *params)
 {
