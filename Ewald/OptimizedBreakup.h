@@ -9,20 +9,35 @@ class BasisClass
 {
 protected:
   double r_c;
+  TinyVector<double,3> Box;
+  double Omega;
 public:
   /// Set the cutoff radius
   virtual void Set_rc(double rc) = 0;
   inline double Get_rc() { return r_c; }
+  inline void SetBox (TinyVector<double,3> box);
   /// Returns the number of basis elements
   virtual int NumElements() = 0;
   /// Returns the basis element n evaluated in real space at r
   virtual double h(int n, double r) = 0;
   /// Returns the basis element n evaluated in k space at k
   virtual double c(int n, double k) = 0;
+  /// This returns the coefficent of the nth basis function
+  virtual double  Get_t(int n) const     = 0;
+  /// This sets the coefficent of the nth basis function
+  virtual void    Set_t(int n, double t) = 0;
+  /// This returns the linear combination of the basis functions with
+  /// coefficients t_n
+  virtual double f (double r) = 0;
   BasisClass() : r_c (0.0)
   { /* do nothing */ }
 };
 
+inline void BasisClass::SetBox (TinyVector<double,3> box)
+{
+  Box = box;
+  Omega = box[0]*box[1]*box[2];
+}
 
 
 /// Locally Piecewise Quintic Hermite Interpolant
@@ -32,6 +47,13 @@ private:
   int NumKnots;
   double delta, deltaInv;
   TinyMatrix<double,3,6> S;
+  /// The following are helpers to calculate the Fourier tranform of
+  /// the basis functions
+  inline complex<double> Eplus(int i, double k, int n);
+  inline complex<double> Eminus(int i, double k, int n);
+  inline double Dplus(int i, double k, int n);
+  inline double Dminus(int i, double k, int n);
+  Array<double,1> tvec;
 public:
   // n must be at least 2;
   void SetNumKnots(int n);
@@ -49,5 +71,56 @@ public:
   }
 };
 
+inline complex<double> LPQHI_BasisClass::Eplus(int i, double k, int n)
+{
+  complex<double> eye(0.0, 1.0);
+
+  if (n == 0) {
+    complex<double> e1(cos(k*delta)-1.0, sin(k*delta));
+    complex<double> e2(cos(k*delta*i),   sin(k*delta*i));
+    return ((-4.0*M_PI/(Omega*k*k))*eye*e1*e2);
+  }
+  else {
+    complex<double> t1, t2;
+    double sign = 1.0;
+    t1 = 4.0*M_PI/(Omega*k)*sign*
+      complex<double>(cos(k*delta*(i+1)),sin(k*delta*(i+1)));
+    t2=-(double)n/delta*Eplus(i,k,n-1);;
+    return (-eye/k*(t1+t2));
+  }
+}
+
+inline complex<double> LPQHI_BasisClass::Eminus(int i, double k, int n)
+{
+  complex<double> eye(0.0, 1.0);
+
+  if (n == 0) {
+    complex<double> e1(cos(k*delta)-1.0, -sin(k*delta));
+    complex<double> e2(cos(k*delta*i),    sin(k*delta*i));
+    return ((4.0*M_PI/(Omega*k*k))*eye*e1*e2);
+  }
+  else {
+    complex<double> t1, t2;
+    double sign = (n & 1) ? 1.0 : -1.0;
+    t1 = 4.0*M_PI/(Omega*k)*sign*
+      complex<double> (cos(k*delta*(i-1)),sin(k*delta*(i-1)));
+    t2=-(double)n/delta*Eminus(i,k,n-1);
+    return (-eye/k*(t1+t2));
+  }
+}
+
+inline double LPQHI_BasisClass::Dplus(int i, double k, int n)
+{
+  complex<double> eye(0.0, 1.0); 
+  complex<double> Z = Eplus(i,k,n+1) + eye*Eplus(i,k,n);
+  return delta * Z.imag();
+}
+
+inline double LPQHI_BasisClass::Dminus(int i, double k, int n)
+{
+  complex<double> eye(0.0, 1.0); 
+  complex<double> Z = Eminus(i,k,n+1) + eye*Eminus(i,k,n);
+  return delta * Z.imag();
+}
 
 #endif

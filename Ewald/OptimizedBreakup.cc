@@ -67,5 +67,14 @@ double LPQHI_BasisClass::c(int n, double k)
 {
   int i=n/3;
   int alpha = n-3*i;
+  
+  double sum = 0.0;
+  for (int n=0; n<=5; n++) {
+    double sign = ((alpha+n)&1) ? -1.0 : 1.0;
+    sum += S(alpha, n) * (Dplus(i,k,n) + Dminus(i,k,n)*sign);
+  }
+  for (int j=0; j<alpha; j++)
+    sum *= delta;
 
+  return (sum);
 };
