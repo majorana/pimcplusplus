@@ -22,7 +22,7 @@ CoreTransform::Initialize(Potential *pot, int NumPoints)
 {
 
   // First, we calculate the r->x transform by integrating
-  rMax = pot->CoreRadius();
+  rMax = pot->GetCoreRadius();
   rgrid.Init (0.0, rMax, NumPoints);
   Array<double,1> Temp(NumPoints);
 

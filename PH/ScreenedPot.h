@@ -13,7 +13,7 @@ public:
 
   bool IsPH();
   bool NeedsRel();
-  double CoreRadius();
+  double GetCoreRadius();
   double A      (double r);
   double B      (double r);
   double dAdr   (double r);

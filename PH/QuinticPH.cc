@@ -5,6 +5,11 @@ bool QuinticPH::IsPH()
   return true; 
 }
 
+double QuinticPH::GetCoreRadius()
+{
+  return (CoreRadius);
+}
+
 double QuinticPH::A(double r)
 {
   double val;

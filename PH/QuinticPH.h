@@ -22,7 +22,7 @@ public:
 
   bool IsPH();
 
-  inline double GetCoreRadius ();
+  double GetCoreRadius ();
   inline void   SetCoreRadius (double coreRadius);
 
   // These are used to get and set the minimum value of A and B,
@@ -62,10 +62,6 @@ public:
   { /* do nothing for now */ }
 };
 
-inline double QuinticPH::GetCoreRadius()
-{
-  return (CoreRadius);
-}
 
 inline void QuinticPH::SetCoreRadius(double coreRadius)
 {

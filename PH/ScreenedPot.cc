@@ -10,9 +10,9 @@ bool ScreenedPot::NeedsRel()
   return true;
 }
 
-double ScreenedPot::CoreRadius()
+double ScreenedPot::GetCoreRadius()
 {
-  return (BarePot->CoreRadius());
+  return (BarePot->GetCoreRadius());
 }
 
 double ScreenedPot::A (double r)

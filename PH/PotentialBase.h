@@ -10,7 +10,7 @@ public:
   // you do not need to define these
   virtual bool IsPH()     { return false; }
   virtual bool NeedsRel() { return false; }
-  virtual double CoreRadius() { return 0.0; }
+  virtual double GetCoreRadius() { return 0.0; }
   virtual double A      (double r) { return 1.0; }
   virtual double B      (double r) { return 1.0; }
   virtual double dAdr   (double r) { return 0.0; }
