@@ -1,12 +1,12 @@
-SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc TestTricubic.cc MyTricubicSpline.cc TestMyTricubic.cc QuinticSpline.cc TestQuintic.cc
+SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc TestTricubic.cc MyTricubicSpline.cc TestMyTricubic.cc QuinticSpline.cc TestQuintic.cc DyutimanTest.cc
 
 IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o ../IO/InputFile.o ../IO/InputOutputXML.o
 
 F77Objs = fortran/evtricub.o  fortran/herm3ev.o  fortran/mktricubw.o  fortran/tcspline.o fortran/ibc_ck.o fortran/splinck.o fortran/zonfind.o fortran/tcspeval.o fortran/v_spline.o fortran/bcspline.o fortran/bcspeval.o
 
-Objs:	MyTricubicSpline.o CubicSpline.o QuinticSpline.o
+Objs:	MyTricubicSpline.o CubicSpline.o QuinticSpline.o DyutimanTest.o
 
-all:	FortranObjs TestBicubic TestGrid  TestMyTricubic Objs TestQuintic
+all:	FortranObjs TestBicubic TestGrid  TestMyTricubic Objs TestQuintic DyutimanTest
 
 TestQuintic:	QuinticSpline.o QuinticSplines.o TestQuintic.o
 	$(LD) -o TestQuintic QuinticSpline.o QuinticSplines.o TestQuintic.o $(LIBS)
@@ -16,6 +16,10 @@ TestBicubic:	CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o
 
 TestMyTricubic:	CubicSpline.o Grid.o  TestMyTricubic.o MyTricubicSpline.o
 	$(LD) -o TestMyTricubic CubicSpline.o Grid.o TestMyTricubic.o MyTricubicSpline.o $(IOobjs) -Lfortran -lpspline $(LIBS)
+
+
+DyutimanTest:	CubicSpline.o Grid.o  TestMyTricubic.o MyTricubicSpline.o
+	$(LD) -o DyutimanTest CubicSpline.o Grid.o DyutimanTest.o MyTricubicSpline.o $(IOobjs) -Lfortran -lpspline $(LIBS)
 
 
 TestTricubic:	Grid.o TestTricubic.o FortranObjs TestMyTricubic
