@@ -48,15 +48,18 @@ double ShortRangeClass::Action (int slice1, int slice2,
 
 	  double U;
 	  U = PA.U(q,z,s2, level);
-	  if (isnan(U))
-	    cerr << "Before long range sub:  ptcl1=" << ptcl1
-		 << " ptcl2=" << ptcl2 << " slice="<< slice << endl;
+	  //	  if (isnan(U)){
+	  //	    cerr << "Before long range sub:  ptcl1=" << ptcl1
+	  //		 << " ptcl2=" << ptcl2 << " slice="<< slice 
+	  //		 << "q: "<<q<<"z: "<<z<<"s2: "<<s2<<"level: "<<level<<endl;
+	  //	    cerr<<"U is "<<U<<endl;
+	  //	  }
 	  // Subtract off long-range part from short-range action
 	  if (PA.IsLongRange())
 	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
-	  if (isnan(U))
-	    cerr << "After  long range sub:  ptcl1=" << ptcl1
-		 << " ptcl2=" << ptcl2 << " slice="<< slice << endl;
+	  //	  if (isnan(U))
+	    //	    cerr << "After  long range sub:  ptcl1=" << ptcl1
+	    //		 << " ptcl2=" << ptcl2 << " slice="<< slice << endl;
 
 	  TotalU += U;
 	}

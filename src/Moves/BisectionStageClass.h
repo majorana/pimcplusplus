@@ -27,7 +27,7 @@ public:
   { 
     //do nothing for now
     BisectionLevel = level;
-    FirstTime=false;
+    FirstTime=true;
     
   }
 };

@@ -1,11 +1,6 @@
 #include "BisectionBlock.h"
 #include "StructureReject.h"
 
-void BisectionBlockClass::WriteRatio()
-{
-
-  //Do nothing for now
-}
 
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
@@ -45,6 +40,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     else
       newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
+      ////ADDED JUST FOR THE MINUTE HACK! FOR THE hehp project
+      ////      newStage->Actions.push_back(&PathData.Actions.StructureReject);
       ///If it's David's long range class then do this
       if (PathData.Path.DavidLongRange){
 	newStage->Actions.push_back(&PathData.Actions.DavidLongRange);

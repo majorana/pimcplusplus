@@ -113,6 +113,11 @@ void ActionsClass::Read(IOSectionClass &in)
   cerr << "Finished reading the action.\n"; 
 
 
+  if (in.OpenSection("StructureReject")){
+    StructureReject.Read(in);
+    in.CloseSection();
+  }
+
   ///Reading in information for David long range action
   if (PathData.Path.DavidLongRange){
     DavidLongRange.Read(in);

@@ -86,6 +86,7 @@ PIMCobjs =                            \
   Moves/MoveBase.o                    \
   Moves/WaterMove.o                    \
   Moves/WaterMoveRing.o                    \
+  Actions/StructureReject.o           \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
   Actions/OpenLoopImportance.o        \

@@ -2,13 +2,17 @@
 #include "Moves/MoveClass.h"
 #include "Observables/ObservableClass.h"
 #include <sstream>
+#include "Common/Blitz.h"
 
 void PIMCClass::Read(IOSectionClass &in)
 {
   // Read the parallelization strategy
   PathData.Read (in);
   cerr << "Finished PathData Read.\n";
-
+  double dummy=2.0;
+  if (isnan(dummy)){
+    cerr<<"WARNING! 2.0 IS NOT A NUMBER!";
+  }
   // Read in the system information and allocate the path
   assert(in.OpenSection("System"));
   PathData.Path.Read(in);

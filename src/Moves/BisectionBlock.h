@@ -22,7 +22,7 @@ private:
   int SpeciesNum;
   void ChooseTimeSlices();
 public:
-  void WriteRatio();
+
 
   /// Number of levels the bisection move works on 
   void Read(IOSectionClass &in);

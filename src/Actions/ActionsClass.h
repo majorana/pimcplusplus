@@ -11,7 +11,7 @@
 #include "DavidLongRangeClass.h"
 #include "TIP5PWaterClass.h"
 #include "OpenLoopImportance.h"
-
+#include "StructureReject.h"
 
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
@@ -29,6 +29,7 @@ public:
 
   // Actions
   OpenLoopImportanceClass OpenLoopImportance;
+  StructureRejectClass StructureReject;
   /// The Kinetic action
   KineticClass Kinetic;
 
@@ -91,6 +92,7 @@ public:
     Kinetic(pathData),
     PathData(pathData),
     TIP5PWater(pathData),
+    StructureReject(pathData),
     NumImages(1)
   {
     ///Do nothing for now
