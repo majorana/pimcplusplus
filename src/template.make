@@ -8,7 +8,7 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DTHREE_D -DNO_COUT -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DTHREE_D -DNO_COUT  -O3 #-DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                           \
   Main.o                             \
@@ -50,12 +50,13 @@ PIMCobjs =                           \
   Common/PH/ScreenedPot.o            \
   Common/PH/SplinePot.o              \
   Common/PH/HeAzizPot.o              \
+  Common/PairAction/DavidPAClass.o   \
   MirroredClass.o
 #  Common/PairAction/PAcoulombFit.o   \
 #  Common/PairAction/PAszFit.o        \
 #  Common/PairAction/PAsFit.o         \
 #  Common/PairAction/PAtricubicFit.o  \
-#  Common/PairAction/DavidPAClass.o   \
+
 
 TestPermobjs =                       \
   TestPermutation.o                  \
@@ -97,12 +98,13 @@ TestPermobjs =                       \
   Common/PH/ScreenedPot.o            \
   Common/PH/SplinePot.o              \
   Common/PH/HeAzizPot.o              \
+  Common/PairAction/DavidPAClass.o   \
   MirroredClass.o  
 #  Common/PairAction/PAcoulombFit.o   \
 #  Common/PairAction/PAszFit.o        \
 #  Common/PairAction/PAsFit.o         \
 #  Common/PairAction/PAtricubicFit.o  \
-#  Common/PairAction/DavidPAClass.o   \
+
 
 TestEwaldobjs =                      \
   TestEwald.o                        \
@@ -120,6 +122,7 @@ TestEwaldobjs =                      \
   Common/PairAction/PAcoulombBCFit.o \
   Common/PairAction/PAclassicalFit.o \
   Common/PairAction/PAzeroFit.o      \
+  Common/PairAction/DavidPAClass.o   \
   Common/Splines/BicubicSpline.o     \
   Common/PH/Potential.o              \
   Common/PH/QuinticPH.o              \

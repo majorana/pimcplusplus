@@ -7,10 +7,12 @@ extern int ActiveCopy;
 typedef enum {OLDMODE, NEWMODE} ModeType;
 inline void SetMode (ModeType type)
 {
-  if (type == OLDMODE)
-    ActiveCopy = 0;
-  else 
-    ActiveCopy = 1;
+  ActiveCopy=type;
+  return;
+  //  if (type == OLDMODE)
+  //    ActiveCopy = 0;
+  //  else 
+  //    ActiveCopy = 1;
 }
 
 using namespace blitz;
@@ -23,8 +25,8 @@ private:
 public:
   inline operator T() const     { return Data[ActiveCopy]; }
   void operator= (const T &val) { Data[ActiveCopy] = val;  }
-  inline void AcceptCopy()      { Data[0] = Data[1];       }
-  inline void RejectCopy()      { Data[1] = Data[0];       }
+  inline void AcceptCopy()      { Data[OLDMODE] = Data[NEWMODE];       }
+  inline void RejectCopy()      { Data[NEWMODE] = Data[OLDMODE];       }
 };
 
 
@@ -34,24 +36,24 @@ class Mirrored1DClass
 private:
   TinyVector<Array<T,1>,2> Data;
 public:
-  inline void resize (int m)          {Data[0].resize(m);Data[1].resize(m);}
-  inline int size() const             { return Data[0].size();             }
+  inline void resize (int m)          {Data[OLDMODE].resize(m);Data[NEWMODE].resize(m);}
+  inline int size() const             { return Data[NEWMODE].size();             }
   inline Array<T,1>& data() const     { return Data[ActiveCopy];           }
   inline Array<T,1>& data()           { return Data[ActiveCopy];           }
   inline operator Array<T,1>&() const { return Data[ActiveCopy];           }
   inline operator Array<T,1>&()       { return Data[ActiveCopy];           }
   inline T  operator()(int i) const   { return Data[ActiveCopy](i);        }
   inline T& operator()(int i)         { return Data[ActiveCopy](i);        }
-  inline void AcceptCopy ()           { Data[0] = Data[1];                 }
-  inline void RejectCopy ()           { Data[1] = Data[0];                 }
+  inline void AcceptCopy ()           { Data[OLDMODE] = Data[NEWMODE];                 }
+  inline void RejectCopy ()           { Data[OLDMODE] = Data[NEWMODE];                 }
   inline void AcceptCopy (int i)
-  { Data[0](i) = Data[1](i); }
+  { Data[OLDMODE](i) = Data[NEWMODE](i); }
   inline void RejectCopy (int i)
-  { Data[1](i) = Data[0](i); }
+  { Data[NEWMODE](i) = Data[OLDMODE](i); }
   inline void AcceptCopy (int start, int end)
-  { Data[0](Range(start,end)) = Data[1](Range(start,end)); }
+  { Data[OLDMODE](Range(start,end)) = Data[NEWMODE](Range(start,end)); }
   inline void RejectCopy (int start, int end)
-  { Data[1](Range(start,end)) = Data[0](Range(start,end)); }
+  { Data[NEWMODE](Range(start,end)) = Data[OLDMODE](Range(start,end)); }
 };
 
 
@@ -63,13 +65,13 @@ protected:
   TinyVector<Array<T,2>,2> Data;
 public:
   inline void resize (int m, int n)      
-    { Data[0].resize(m,n); Data[1].resize(m,n); }
+    { Data[OLDMODE].resize(m,n); Data[NEWMODE].resize(m,n); }
   inline int rows() const                
-    { return Data[0].rows(); }
+    { return Data[NEWMODE].rows(); }
   inline int cols() const                
-    { return Data[0].cols(); }
+    { return Data[NEWMODE].cols(); }
   inline int extent(int i) const
-    { return Data[0].extent(i); }
+    { return Data[NEWMODE].extent(i); }
   inline const Array<T,2>& data() const        
     { return Data[ActiveCopy]; }
   inline Array<T,2>& data()              
@@ -87,9 +89,9 @@ public:
   inline T& operator()(int i, int j)       
     { return Data[ActiveCopy](i,j);      }
   inline void AcceptCopy ()              
-    { Data[0] = Data[1]; }
+    { Data[OLDMODE] = Data[NEWMODE]; }
   inline void RejectCopy ()              
-    { Data[1] = Data[0]; }
+    { Data[NEWMODE] = Data[OLDMODE]; }
 };
 
 template <class T>
@@ -99,15 +101,15 @@ protected:
   TinyVector<Array<T,3>,2> Data;
 public:
   inline void resize (int m, int n, int o)      
-    { Data[0].resize(m,n,o);  Data[1].resize(m,n,o); }
+    { Data[NEWMODE].resize(m,n,o);  Data[OLDMODE].resize(m,n,o); }
   inline int rows() const                
-    { return Data[0].rows(); }
+    { return Data[NEWMODE].rows(); }
   inline int cols() const                
-    { return Data[0].cols(); }
+    { return Data[NEWMODE].cols(); }
   inline int depth() const 
-    { return Data[0].depth(); } 
+    { return Data[NEWMODE].depth(); } 
   inline int extent (int i) const
-    { return Data[0].extent(i); }
+    { return Data[NEWMODE].extent(i); }
   inline const Array<T,3>& data() const        
     { return Data[ActiveCopy]; }
   inline Array<T,3>& data()              
@@ -125,9 +127,9 @@ public:
   inline Array<T,3>& operator[](int i) 
     { return Data[i]; }
   inline void AcceptCopy ()              
-    { Data[0] = Data[1]; }
+    { Data[OLDMODE] = Data[NEWMODE]; }
   inline void RejectCopy ()              
-    { Data[1] = Data[0]; }
+    { Data[NEWMODE] = Data[OLDMODE]; }
 };
 
 

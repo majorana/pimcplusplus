@@ -170,8 +170,8 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
   //    cerr<<"TotalU:  "<<TotalU<<endl;
   //  }
   //  cerr<<"My Action is "<<(TotalK + TotalU)<<endl;
-  //  return (TotalK + TotalU);
-  return TotalU; //HACK! HACK!
+  return (TotalK + TotalU);
+  //  return TotalU; //HACK! HACK!
   
   
 }

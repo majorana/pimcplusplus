@@ -73,6 +73,8 @@ void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
   }
   path.SetPos(slice,CycleRep(Length-1)+firstPtcl,tempPos);
   path.Permutation(CycleRep(Length-1)+firstPtcl) = tempPtcl;
+
+
 }
 
 

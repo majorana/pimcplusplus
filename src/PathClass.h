@@ -123,6 +123,7 @@ public:
 
   inline PathClass(PIMCCommunicatorClass &communicator);
   friend void SetupPath(PathClass &path);
+
 };
 
 

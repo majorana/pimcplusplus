@@ -81,7 +81,10 @@ void PathClass::Read (IOSectionClass &inSection)
     inSection.CloseSection();
   }
   inSection.CloseSection(); // "Particles"
+  //Everything needs to be accepted
   Path.AcceptCopy();
+  Permutation.AcceptCopy();
+  Rho_k.AcceptCopy();
 }
 
 
@@ -101,6 +104,7 @@ inline bool Include(dVec k)
 
 void PathClass::Allocate()
 {
+
   assert(TotalNumSlices>0);
   int myProc=Communicator.MyProc();
   int numProcs=Communicator.NumProcs();
@@ -141,6 +145,7 @@ void PathClass::Allocate()
     SetupkVecs();
     Rho_k.resize(MyNumSlices, NumSpecies(),kVecs.size());
   }
+  
 }
 
 
@@ -257,17 +262,19 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
   //  for (int ptcl=0;ptcl<NumParticles();ptcl++){
     //    cerr<<Permutation(ptcl)<<endl;
   //  }
+
   if (newJoin>oldJoin){
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path[0](timeSlice,ptcl)=Path[1](timeSlice,Permutation(ptcl));
+	Path[OLDMODE](timeSlice,ptcl)=Path[NEWMODE](timeSlice,Permutation(ptcl));
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){ 
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path[1](timeSlice,ptcl)=Path[0](timeSlice,ptcl);
+
+	Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
       }
     }
   }
@@ -275,14 +282,15 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     //  else if (oldJoin>=newJoin){//CHANGED!
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path[0](timeSlice,Permutation(ptcl))=Path[1](timeSlice,ptcl);
+
+	Path[OLDMODE](timeSlice,Permutation(ptcl))=Path[NEWMODE](timeSlice,ptcl);
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path[1](timeSlice,ptcl)=Path[0](timeSlice,ptcl);
+	Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
       }
     }
   }
@@ -293,10 +301,11 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
 void PathClass::AcceptCopy(int startSlice,int endSlice, 
 				  const Array <int,1> &activeParticles)
 {
+
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
-    Path[1](Range(startSlice, endSlice), ptcl) = 
-      Path[0](Range(startSlice, endSlice), ptcl);
+    Path[OLDMODE](Range(startSlice, endSlice), ptcl) = 
+      Path[NEWMODE](Range(startSlice, endSlice), ptcl);
     Permutation.AcceptCopy(ptcl);
   }
 }
@@ -304,10 +313,11 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
 void PathClass::RejectCopy(int startSlice,int endSlice, 
 				  const Array <int,1> &activeParticles)
 {
+
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
-    Path[0](Range(startSlice, endSlice), ptcl) = 
-      Path[1](Range(startSlice, endSlice), ptcl);
+    Path[NEWMODE](Range(startSlice, endSlice), ptcl) = 
+      Path[OLDMODE](Range(startSlice, endSlice), ptcl);
     Permutation.RejectCopy(ptcl);
   }
 }
@@ -429,12 +439,12 @@ void PathClass::ShiftPathData(int slicesToShift)
   if (slicesToShift>0){
     for (int slice=numSlices-1; slice>=slicesToShift;slice--)
       for (int ptcl=0;ptcl<numPtcls;ptcl++)
-	Path[0](slice,ptcl) = Path[0](slice-slicesToShift,ptcl);
+	Path[NEWMODE](slice,ptcl) = Path[NEWMODE](slice-slicesToShift,ptcl);
   }
   else {
     for (int slice=0; slice<numSlices+slicesToShift;slice++)
       for (int ptcl=0;ptcl<numPtcls;ptcl++)
-	Path[0](slice,ptcl) = Path[0](slice-slicesToShift,ptcl);
+	Path[NEWMODE](slice,ptcl) = Path[NEWMODE](slice-slicesToShift,ptcl);
   }
   
 
@@ -449,7 +459,7 @@ void PathClass::ShiftPathData(int slicesToShift)
       for (int ptcl=0;ptcl<numPtcls;ptcl++){
 	///If shifting forward, don't send the last time slice (so always)
 	///send slice-1
-	sendBuffer(buffIndex)=Path[1](slice-1,ptcl);
+	sendBuffer(buffIndex)=Path[OLDMODE](slice-1,ptcl);
 	buffIndex++;
       }
     }
@@ -460,7 +470,7 @@ void PathClass::ShiftPathData(int slicesToShift)
       for (int ptcl=0;ptcl<numPtcls;ptcl++){
 	///If shifting backward, don't send the first time slice (so always)
 	///send slice+1
-	sendBuffer(buffIndex)=Path[1](slice+1,ptcl);
+	sendBuffer(buffIndex)=Path[OLDMODE](slice+1,ptcl);
 	buffIndex++;
       }
     }
@@ -478,7 +488,7 @@ void PathClass::ShiftPathData(int slicesToShift)
   buffIndex=0;
   for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
     for (int ptcl=0;ptcl<numPtcls;ptcl++){
-      Path[0](slice,ptcl)=receiveBuffer(buffIndex);
+      Path[NEWMODE](slice,ptcl)=receiveBuffer(buffIndex);
       buffIndex++;
     }
   }
@@ -486,7 +496,7 @@ void PathClass::ShiftPathData(int slicesToShift)
   // Now copy A into B, since A has all the good, shifted data now.
   for (int slice=0; slice<numSlices; slice++)
     for (int ptcl=0; ptcl<numPtcls; ptcl++)
-      Path[1](slice,ptcl) = Path[0](slice,ptcl);
+      Path[OLDMODE](slice,ptcl) = Path[NEWMODE](slice,ptcl);
 
   // And we're done!
 }
