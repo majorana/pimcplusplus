@@ -18,12 +18,17 @@ void TablePermuteStageClass::InitBlock()
 void TablePermuteStageClass::Read (IOSectionClass &in)
 {
   Array<double,1> gamma;
+  double epsilon;
   assert (in.ReadVar("Gamma", gamma));
+  assert (in.ReadVar("epsilon",epsilon));
   assert (gamma.size()==4);
   for (int i=0; i<4; i++) {
     Table1.Gamma[i] = gamma(i);
     Table2.Gamma[i] = gamma(i);
   }
+  Table1.epsilon=epsilon;
+  Table2.epsilon=epsilon;
+      
 }
 
 bool TablePermuteStageClass::Attempt (int &slice1, int &slice2, 
