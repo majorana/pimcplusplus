@@ -193,7 +193,8 @@ void PathClass::CalcRho_ks()
 	     ptcl <= Species(speciesIndex).LastPtcl; ptcl++) {
 	  const dVec &r = (*this)(slice, ptcl);
 	  double phase = dot(r, kVecs(ki));
-	  rho += complex<double> (cos(phase), sin(phase));
+	  // The 2 accounts for the k/-k optimization
+	  rho += 2.0 * complex<double> (cos(phase), sin(phase));
 	}
 	Rho_k(speciesIndex, slice, ki) = rho;
       }

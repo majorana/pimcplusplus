@@ -3,6 +3,7 @@
 
 #include "PathClass.h"
 #include "Common/PairAction/PAFit.h"
+#include "Common/Ewald/Ewald.h"
 
 /// This is the class that controls all of the actions and is in
 /// charge of calculating them. When this is initialized a pointer needs
@@ -17,6 +18,7 @@ private:
 public:
   /// This holds all of the Pair Action Classes
   Array<PairActionFitClass*,1> PairActionVector;
+  Array<EwaldClass*,1> EwaldVector;
   /// Holds indices to which PairActionClass in the PairAcctionVector
   /// you use for a given pair of particles indexed by
   /// (species1,species2) 
