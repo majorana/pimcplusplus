@@ -161,9 +161,9 @@ inline void TricubicSpline::Init (Grid *xGrid_, Grid *yGrid_, Grid *zGrid_,
       for (int iz=0; iz<Nz; iz++)
 	f(iz, iy, ix, 0) = f_(ix, iy, iz);
   Nwk = 80*Nx*Ny*Nz;
-  IxMinBC=5; IxMaxBC=5;
-  IyMinBC=5; IyMaxBC=5;
-  IzMinBC=5; IzMaxBC=5;
+  IxMinBC=4; IxMaxBC=4;
+  IyMinBC=4; IyMaxBC=4;
+  IzMinBC=4; IzMaxBC=4;
   xIsLin = (xGrid->Type() == LINEAR);
   yIsLin = (yGrid->Type() == LINEAR);
   zIsLin = (zGrid->Type() == LINEAR);
