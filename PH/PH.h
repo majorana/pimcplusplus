@@ -202,6 +202,7 @@ public:
     FullCoreV = new FullCorePotential;
     FullCoreV->Read (inSection);
     inSection.CloseSection();
+    return (true);
   } 
 
 
@@ -1072,6 +1073,7 @@ public:
   {
     assert (inSection.ReadVar ("Amp", Amp));
     assert (inSection.ReadVar ("sigma", sigma));
+    return (true);
   }
 
   PH_Gaussian(double Amp_, double sigma_)
@@ -1204,6 +1206,7 @@ public:
     assert (inSection.ReadVar ("Z1Z2", Z1Z2));
     assert (inSection.ReadVar ("beta", beta));
     Init(lambda, beta, Z1Z2);
+    return (true);
   }
 
   void Init (double lambda_, double beta_, double Z1Z2_)
