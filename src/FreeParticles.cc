@@ -33,6 +33,7 @@ public:
   void Read (IOSectionClass &in);
   virtual void FillStates();
   void Run();
+  void PrintStates();
   ParticleClass() :
     Random(Communicator)
   {
@@ -107,14 +108,25 @@ void ParticleClass::MCStep()
 double ParticleClass::Sample(int &ptclToMove, State &newState)
 {
   ptclToMove=Random.LocalInt(OccupiedStates.size());
-  int toChange;
-  if (Random.Local()>0.5)
-    toChange=1;
-  else
-    toChange=-1;
-  int dimToChange=Random.LocalInt(NDIM);
-  newState=OccupiedStates(ptclToMove);
-  newState[dimToChange]+=toChange;
+
+  if (Random.Local()>0.5){ //make a energy changing move
+    int toChange;
+    if (Random.Local()>0.5)
+      toChange=1;
+    else
+      toChange=-1;
+    int dimToChange=Random.LocalInt(NDIM);
+    newState=OccupiedStates(ptclToMove);
+    newState[dimToChange]+=toChange;
+
+  }
+  else {
+    newState=OccupiedStates(ptclToMove);
+    int dimToChange=Random.LocalInt(NDIM);
+    newState[dimToChange]=newState[dimToChange]*-1;
+    //    cerr<<"This is "<<ptclToMove<<" "<<OccupiedStates(ptclToMove)<<" "<<newState<<endl;
+    
+  }
   return 1.0;
 }
 
@@ -147,6 +159,7 @@ void ParticleClass::Run()
     double E = Esum / BlockSize;
     meanSum += E;
     mean2Sum += E*E;
+    PrintStates();
   }
   // Write block data
   double mean = meanSum / NumBlocks;
@@ -159,6 +172,17 @@ void ParticleClass::Run()
 ///////////////////////////////////
 // FermionClass Member Functions //
 ///////////////////////////////////
+
+void ParticleClass::PrintStates()
+{
+  cerr<<"Beginning to Print States"<<endl;
+  for (int counter=0;counter<OccupiedStates.size();counter++){
+    cerr<<OccupiedStates(counter)<<endl;
+  }
+  cerr<<"Done Printing States";
+
+
+}
 
 #if NDIM == 3
 void FermionClass::FillStates()
