@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 #endif
 
   IOSectionClass inSection;
-  assert(inSection.OpenFile("H2.in"));  
+  assert(inSection.OpenFile(argv[1]));  
   //  inSection.PrintTree();
   cerr<<"I've opened the file\n";
   assert(inSection.OpenSection("System"));
@@ -194,12 +194,21 @@ int main(int argc, char **argv)
   }
 
   IOSectionClass out;
-  out.NewFile ("Observables2.h5");
+  inSection.OpenSection("Observables");
+  string outFileName;
+  inSection.ReadVar("outFile", outFileName);
+  inSection.CloseSection();
+  out.NewFile (outFileName);
   out.NewSection("Energies");
   TotalEnergyClass TotE(myPathData, out);
   out.CloseSection();
   out.NewSection("gofr");
-  PairCorrelationClass gofr(myPathData,out);
+  out.NewSection("ep");
+  PairCorrelationClass ep(myPathData,out, 0, 1);
+  out.CloseSection();
+  out.NewSection("ee");
+  PairCorrelationClass ee(myPathData,out, 0, 0);
+  out.CloseSection();
   out.CloseSection();
   out.NewSection("Paths");
   PathDumpClass pathDump(myPathData,out);
@@ -260,11 +269,12 @@ int main(int argc, char **argv)
 //   //  PrintConfigClass myPrintConfig(myPathData);
   ofstream outfile;
   outfile.open("ourPath.dat");
-  int steps=2000;
+  int steps=25000;
   for (int counter=0;counter<steps;counter++){
     if (counter>steps/8 && (counter % 1)==0){
       TotE.Accumulate();
-      gofr.Accumulate();
+      ep.Accumulate();
+      ee.Accumulate();
     }
     if (counter>steps/8 && (counter % 10) == 0){
       TotE.WriteBlock();
@@ -284,14 +294,15 @@ int main(int argc, char **argv)
       pathDump.WriteBlock();
       
       
-    for (int counter2=0;counter2<200;counter2++){
+    for (int counter2=0;counter2<50;counter2++){
       //cerr << "Doing step " << counter << endl;
       
       myBisectionMove.MakeMove();
     }
     myShiftMove.MakeMove();
   }
-  gofr.WriteBlock();
+  ep.WriteBlock();
+  ee.WriteBlock();
   out.CloseFile();
   //PC.Print();
   cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;

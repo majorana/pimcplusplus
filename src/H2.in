@@ -2,7 +2,7 @@ double tau=0.5;
 
 Section (System)
 {
-  int NumTimeSlices=100;
+  int NumTimeSlices=300;
   Array<double,1> Box(3)=[125.0,125.0,125.0];
   Section (Particles)
   {
@@ -43,7 +43,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string outFile = "Observables2.h5";
+  string outFile = "H2_bservables.h5";
   Section (Observable)
     {
       string type = "Energies";

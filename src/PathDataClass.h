@@ -76,9 +76,9 @@ public:
     return Path.NumParticles();
   }
   /// Returns a reference to the SpeciesClass object of number species
-  //  inline SpeciesClass& operator()(int species){
-  //    return Path.SpeciesArray(species);
-  //  }
+  inline SpeciesClass& Species(int species){
+    return Path.Species(species);
+  }
   /// Returns the position of the particle of type species, particle
   /// number particle, and time slice timeSlice.
   inline dVec operator()(int timeSlice,int particle){

@@ -89,6 +89,8 @@ void PairCorrelationClass::WriteBlock()
     IOSection.NewSection("grid");
     grid.Write(IOSection);
     IOSection.CloseSection();
+    IOSection.WriteVar("Species1", PathData.Species(Species1).Name);
+    IOSection.WriteVar("Species2", PathData.Species(Species2).Name);
     Array<double,2> gofrArray(1,Histogram.size());
     for (int i=0; i<(grid.NumPoints-1); i++){
 	double r1 = grid(i);
@@ -97,7 +99,7 @@ void PairCorrelationClass::WriteBlock()
 	double vol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
 	gofrArray(0,i) = (double) Histogram(i) / (vol*TotalCounts);
     }
-    //IOSection.WriteVar("gofr",gofrArray);
+    IOSection.WriteVar("gofr",gofrArray);
     IOVar = IOSection.GetVarPtr("gofr");
   }
   else {
@@ -109,7 +111,7 @@ void PairCorrelationClass::WriteBlock()
 	double vol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
 	gofrArray(i) = (double) Histogram(i) / (vol*TotalCounts);
     }
-    //IOVar->Append(gofrArray);
+    IOVar->Append(gofrArray);
   }
   
 
@@ -137,54 +139,75 @@ void PairCorrelationClass::Print()
 /// interested in.
 void PairCorrelationClass::Accumulate()
 {
-  Array<bool,1> doPtcl2(PathData.NumParticles());
+  SpeciesClass &species1=PathData.Path.Species(Species1);
+  SpeciesClass &species2=PathData.Path.Species(Species2);
 
   /// HACK HACK HACK
-  for (int slice=0;slice<PathData.NumTimeSlices();slice++){
-    for (int ptcl1=0;ptcl1<PathData.NumParticles();ptcl1++){
-      for (int ptcl2=ptcl1+1;ptcl2<PathData.NumParticles();ptcl2++){
-	dVec r1=PathData(slice,ptcl1);
-	dVec r2=PathData(slice,ptcl2);
+  if (Species1==Species2) {
+    for (int slice=0;slice<PathData.NumTimeSlices();slice++) 
+      for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
+	for (int ptcl2=ptcl1+1;ptcl2<=species1.LastPtcl;ptcl2++){
+	  dVec r1=PathData(slice,ptcl1);
+	  dVec r2=PathData(slice,ptcl2);
+	  
+	  dVec disp;
+	  double dist;
+	  PathData.DistanceTable->DistDisp(slice,ptcl1,ptcl2,dist,disp);
 	
-	dVec disp;
-	double dist;
-	PathData.DistanceTable->DistDisp(slice,ptcl1,ptcl2,dist,disp);
-	//	cout<<"For periodic bc "<<disp<<" ";
-	//PathData.Path.MinDistance(PathData(slice,ptcl1),
-	//			  PathData(slice,ptcl2),dist,disp);
-	//cout<<disp<<endl;
 #ifdef OLDDEBUG
-	dVec dispDummy=r2-r1;
-	double distDummy=sqrt(dot(dispDummy,dispDummy));
-	for (int i=0; i<NDIM; i++)
-	  if (disp[i] != dispDummy[i])
+	  dVec dispDummy=r2-r1;
+	  double distDummy=sqrt(dot(dispDummy,dispDummy));
+	  for (int i=0; i<NDIM; i++)
+	    if (disp[i] != dispDummy[i])
+	      cerr << "Bad bad evil inconsistency is DistTable.\n";
+	  if (dist != distDummy)
 	    cerr << "Bad bad evil inconsistency is DistTable.\n";
-	if (dist != distDummy)
-	  cerr << "Bad bad evil inconsistency is DistTable.\n";
 #endif
-	
-	TotalCounts++;
-	if (dist<grid.End){
-	  int index=grid.ReverseMap(dist);
-	  Histogram(index)++;
+	  TotalCounts++;
+	  if (dist<grid.End){
+	    int index=grid.ReverseMap(dist);
+	    Histogram(index)++;
+	  } 
 	}
-	else {
-	  //	  cerr<<"The distance is really "<<dist<<endl;
+  }
+  else {
+    for (int slice=0;slice<PathData.NumTimeSlices();slice++) 
+      for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
+	for (int ptcl2=species2.FirstPtcl;ptcl2<=species2.LastPtcl;ptcl2++){
+	  dVec r1=PathData(slice,ptcl1);
+	  dVec r2=PathData(slice,ptcl2);
+	  
+	  dVec disp;
+	  double dist;
+	  PathData.DistanceTable->DistDisp(slice,ptcl1,ptcl2,dist,disp);
+	  
+#ifdef OLDDEBUG
+	  dVec dispDummy=r2-r1;
+	  double distDummy=sqrt(dot(dispDummy,dispDummy));
+	  for (int i=0; i<NDIM; i++)
+	    if (disp[i] != dispDummy[i])
+	      cerr << "Bad bad evil inconsistency is DistTable.\n";
+	  if (dist != distDummy)
+	    cerr << "Bad bad evil inconsistency is DistTable.\n";
+#endif
+	  
+	  TotalCounts++;
+	  if (dist<grid.End){
+	    int index=grid.ReverseMap(dist);
+	    Histogram(index)++;
+	  }
 	}
-      }
-    }
   }
 }
-
 
 
 
 void PairCorrelationClass::Initialize()
 {
   int numTimeSlices=PathData.Path.NumTimeSlices();
-  grid.Init (0.0, 5.0, numTimeSlices);
+  grid.Init (0.0, 12.0, 100);
   TotalCounts = 0;
-  Histogram.resize(numTimeSlices-1);
+  Histogram.resize(100);
   Histogram = 0;
 }
 

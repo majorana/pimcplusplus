@@ -2,7 +2,7 @@ double tau=1.0;
 
 Section (System)
 {
-  int NumTimeSlices=100;
+  int NumTimeSlices=50;
   Array<double,1> Box(3)=[125.0,125.0,125.0];
   Section (Particles)
   {
@@ -32,12 +32,12 @@ Section (System)
 Section (Action)
 {
   int MaxLevels = 4;
-  Array<string,1> PairActionFiles(1) = ["e-p_beta8.0.coulombfit.h5"];
+  Array<string,1> PairActionFiles(1) = ["e-p_beta8.0.coulombBCfit.h5"];
 }
 
 Section (Observables)
 {
-  string outFile = "Observables2.h5";
+  string outFile = "H_observables.h5";
   Section (Observable)
     {
       string type = "Energies";

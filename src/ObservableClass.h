@@ -92,8 +92,10 @@ public:
   void Initialize();
   /// My specialization of the virtual function.
   void Print();
-  PairCorrelationClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
-    ObservableClass(myPathData, ioSection) 
+  PairCorrelationClass(PathDataClass &myPathData, IOSectionClass &ioSection,
+		       int species1, int species2) : 
+    ObservableClass(myPathData, ioSection), 
+    Species1(species1), Species2(species2) 
   { Initialize(); }
   void WriteBlock();
 

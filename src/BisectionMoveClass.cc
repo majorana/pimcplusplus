@@ -11,7 +11,7 @@
 void ShiftMoveClass::MakeMove()
 {//Remember to mark Actions dirty!!!
   //int numTimeSlicesToShift=(int)floor(sprng()*PathData->NumTimeSlices);
-  int numTimeSlicesToShift = 29;
+  int numTimeSlicesToShift = (int)floor(PathData.NumTimeSlices()*drand48());
   
   if (numTimeSlicesToShift > 0){
     for (int counter=0;counter<PathData.NumSpecies();counter++){
