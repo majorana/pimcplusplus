@@ -1,0 +1,41 @@
+double tau=1.0;
+
+Section (System)
+{
+  int NumTimeSlices=50;
+  Array<double,1> Box(3)=[5.0,5.0,5.0];
+  Section (Particles)
+  {
+    Section (Species)
+    {
+      string Name="electron";
+      double lambda=0.5;
+      string Type="FERMION";
+      int NumParticles=1;
+      int NumDim=3;
+      string InitPaths="FIXED";
+      Array<double,2> Positions(1,3)=[0.1,0.0,0.0];
+    }
+    Section (Species)
+    {
+      string Name="proton";
+      double lambda=0.0; //classical particle
+      string Type="FERMION";
+      int NumParticles=1;
+      int NumDim=3;
+      string InitPaths="FIXED";
+      Array<double,2> Positions(1,3)=[0.0,0.0,0.0];
+    }
+  }
+}
+Section (Action)
+{
+  Section (PairAction)
+    {
+      string type1="electron";
+      string type2="proton";
+      string dmfile="../inputs/ep_beta1.0.dm";
+    }
+}
+
+
