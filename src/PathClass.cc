@@ -1,5 +1,74 @@
 #include "PathClass.h"
 
+
+void PathClass::ReadOld(string fileName)
+{
+  IOSectionClass inFile;
+  assert (inFile.OpenFile(fileName.c_str()));
+  inFile.OpenSection("Observables");
+  inFile.OpenSection("PathDump");
+  Array<double,4> oldPaths; //(58,2560,2,3);
+  
+  assert(inFile.ReadVar("Path",oldPaths));
+  cerr<<"My paths are of size"<<oldPaths.extent(0)<<" "<<oldPaths.extent(1)<<" "<<oldPaths.extent(2)<<endl;
+  
+
+
+  for (int ptcl=0;ptcl<NumParticles();ptcl++){
+    for (int slice=0; slice<NumTimeSlices(); slice++) {
+      dVec pos;
+      pos = 0.0;
+      for (int dim=0; dim<NDIM; dim++)
+	pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim);
+      Path(slice,ptcl) = pos;
+    }      
+  }
+  
+  inFile.CloseSection();
+  inFile.CloseSection();
+  inFile.CloseFile();
+
+
+}
+
+
+
+void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
+			     double &dist, dVec &disp)
+{
+  disp = Path(slice, ptcl)- RefPath(refPtcl);
+  
+  for (int i=0; i<NDIM; i++) {
+    double n = -floor(disp(i)*BoxInv(i)+0.5);
+    disp(i) += n*IsPeriodic(i)*Box(i);
+    if (!(-Box(i)/2.0<=disp(i))){
+      cerr<<"ERROR: "<<Box(i)<<" "<<disp(i)<<" "
+	  <<slice<<" "<<ptcl<<" "<<refPtcl<<" "
+	  <<BoxInv(i)<<Path(slice,ptcl)<<" "<<endl;
+      sleep(5000);
+    }
+    assert(-Box(i)/2.0<=disp(i));
+    assert(disp(i)<=Box(i)/2.0);
+  }
+  dist = sqrt(dot(disp,disp));
+
+#ifdef DEBUG
+  dVec DBdisp = Path(slice, ptcl) -RefPath(refPtcl);
+  for (int i=0; i<NDIM; i++) {
+    while (DBdisp(i) > 0.5*Box(i))
+      DBdisp(i) -= Box(i);
+    while (DBdisp(i) < -0.5*Box(i)) 
+      DBdisp(i) += Box(i);
+    if (fabs(DBdisp(i)-disp(i)) > 1.0e-12){ 
+      cerr<<DBdisp(i)<<" "<<disp(i)<<endl;
+    }
+    //    assert (fabs(DBdisp(i)-disp(i)) < 1.0e-12);
+  }
+#endif
+}
+
+
+
 /// Constructs a Levi flight beginning in the vec(0) and ending
 /// in vec(N-1) if vec has length N.  This is a path which samples
 /// exactly the free particle density matrix.
@@ -33,6 +102,7 @@ void PathClass::LeviFlight (Array<dVec,1> &vec, double lambda, double tau)
 void PathClass::Read (IOSectionClass &inSection)
 {
   SetMode (NEWMODE);
+  Weight=1;
   double tau;
   assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
   assert(inSection.ReadVar ("tau", tau));
@@ -152,6 +222,11 @@ void PathClass::Read (IOSectionClass &inSection)
 	}      
       }
     }    
+    else if (InitPaths == "FILE"){
+      string pathFile;
+      assert(inSection.ReadVar("File",pathFile));
+      ReadOld(pathFile);
+    }
     else if (InitPaths == "LEVIFLIGHT") {
       int myStart, myEnd;
       SliceRange (Communicator.MyProc(), myStart, myEnd);
@@ -170,7 +245,7 @@ void PathClass::Read (IOSectionClass &inSection)
 	LeviFlight (flight, species.lambda, tau);
 // 	for (int i=0; i<MyNumSlices; i++)
 // 	  Path(i, ptcl) = flight(i-RefSlice);
-	for (int slice=myStart; slice<myEnd; slice++)
+	for (int slice=myStart; slice<=myEnd; slice++)
 	  Path(slice-myStart, ptcl) = flight(slice);
       }
     }
@@ -192,6 +267,7 @@ void PathClass::Read (IOSectionClass &inSection)
   BroadcastRefPath();
   cerr << "after BroadcastRefPath().\n";
   RefPath.AcceptCopy();
+  Weight.AcceptCopy();
 }
 
 
@@ -434,13 +510,14 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
 void PathClass::AcceptCopy(int startSlice,int endSlice, 
 				  const Array <int,1> &activeParticles)
 {
-
+  Weight.AcceptCopy();
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
     Path[OLDMODE](Range(startSlice, endSlice), ptcl) = 
       Path[NEWMODE](Range(startSlice, endSlice), ptcl);
     Permutation.AcceptCopy(ptcl);
   }
+
   if (OpenPaths){
     OpenPtcl.AcceptCopy();
     OpenLink.AcceptCopy();
@@ -457,13 +534,14 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
 void PathClass::RejectCopy(int startSlice,int endSlice, 
 				  const Array <int,1> &activeParticles)
 {
-
+  Weight.RejectCopy();
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
     Path[NEWMODE](Range(startSlice, endSlice), ptcl) = 
       Path[OLDMODE](Range(startSlice, endSlice), ptcl);
     Permutation.RejectCopy(ptcl);
   }
+
   if (OpenPaths){
     OpenPtcl.RejectCopy();
     OpenLink.RejectCopy();
@@ -476,6 +554,7 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
 
 void PathClass::ShiftData(int slicesToShift)
 {
+
   ShiftPathData(slicesToShift);
   if (LongRange)
     ShiftRho_kData(slicesToShift);
@@ -485,6 +564,8 @@ void PathClass::ShiftData(int slicesToShift)
     RefSlice -= TotalNumSlices;
   while (RefSlice < 0)
     RefSlice += TotalNumSlices;
+  //  cerr<<"My ref slice at particle 0 is "<<Path(RefSlice,0)<<endl;
+
 }
 
 void PathClass::ShiftRho_kData(int slicesToShift)
