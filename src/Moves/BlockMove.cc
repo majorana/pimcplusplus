@@ -52,6 +52,7 @@ void CycleBlockMoveClass::MakeMove()
     Array<int,1> currentParticles=Forw->CurrentParticles();  
     double pi_ratio = exp(-actionChange);
     double accept_prob = min(1.0, pi_ratio/Tratio);
+    cerr<<"My accept prob is "<<pi_ratio/Tratio<<endl;
     //    if (log(psi) < -(actionChange + log(Tratio))) {
     if  (accept_prob > psi) {
       bool acceptBisect = 

@@ -81,7 +81,7 @@ Section (Moves){
       string type="CycleBlock";
       string name="Permutations";
       int NumLevels=3;
-      Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 0.0];
+      Array<double,1> Gamma(4) = [0.00001, 0.00001, 1.0, 0.0];
       double epsilon=0.0;
       int Steps=9;
       string Species="free";
@@ -99,7 +99,7 @@ Section (Algorithm)
       int steps=3;
       Section (Move) {string name="Bisection";} 
     }
-    //    Section (Move) {string name="Permutations";} 
+    Section (Move) {string name="Permutations";} 
     Section (Move) {string name = "Shift";}
   }
   Section (Loop){ //Start Accumulating observables
@@ -109,7 +109,7 @@ Section (Algorithm)
       Section (Move) {string name="Bisection";} 
     }
     Section (Move) {string name = "Shift"; }
-    //    Section (Move) {string name="Permutations";} 
+    Section (Move) {string name="Permutations";} 
     Section (Observe) {string name = "PairCorrelation";}
     Section (Observe) {string name = "Energy"; }
   }

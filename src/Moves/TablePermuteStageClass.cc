@@ -24,3 +24,9 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
     return true;
   }
 }
+
+void TablePermuteStageClass::InitBlock()
+{
+
+
+}
