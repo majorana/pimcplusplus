@@ -291,9 +291,9 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
     }
 
     if (isnan (dist1) || (dist1==0.0))
-      uNode = log1p(-exp(-dist2*dist2/(lambda*levelTau)));
+      uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
     else if (isnan(dist2) || (dist2==0.0))
-      uNode = log1p(-exp(-dist1*dist1/(lambda*levelTau)));
+      uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
     else
       uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
     dist1 = dist2;
