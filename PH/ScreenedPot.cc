@@ -56,6 +56,7 @@ double ScreenedPot::d2Vdr2(double r)
 
 void ScreenedPot::Write (IOSectionClass &out)
 {
+  out.WriteVar ("Type", "Screened");
   out.WriteVar ("Charge", Charge);
 
   out.NewSection("HXC");
