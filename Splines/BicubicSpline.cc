@@ -98,7 +98,7 @@ void BicubicSpline::BiUpdate()
 
   Grid &x = *Xgrid;
   Array<double,1> mu(Nx);
-  for (int iy=0; iy<Nx; iy++) {
+  for (int iy=0; iy<Ny; iy++) {
     // Set up tridiagonal set of equations
     // Initialize RHS of equations
     F(0,iy).d2zdxdy = 1.5*(F(1,iy).dzdy-F(0,iy).dzdy)/(x(1)-x(0));
