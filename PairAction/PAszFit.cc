@@ -1,8 +1,5 @@
 #include "PAFit.h"
 
-
-
-
 #ifdef MAKE_FIT
 
 void PAszFitClass::ReadParams(IOSectionClass &inSection)
@@ -36,7 +33,7 @@ void PAszFitClass::AddFit (Rho &rho)
 
   Ukj.resizeAndPreserve(NumBetas);
   dUkj.resizeAndPreserve(NumBetas);
-  smax.resizeAndPreserve(NumBetas);
+  sMax.resizeAndPreserve(NumBetas);
 
   Ukj(NumBetas-1).Init(qgrid, UCoefs);
   dUkj(NumBetas-1).Init(qgrid, dUCoefs);
@@ -57,9 +54,9 @@ void PAszFitClass::WriteFits (IOSectionClass &outSection)
 	UCoefs(j,k) = Ukj(i)(j,k);
 	dUCoefs(j,k) = Ukj(i)(j,k);
       }
-    outSection.WriteVar ("Ucoefs", UCoefs);
-    outSection.WriteVar ("dUcoefs", dUCoefs);
-    outSection.WriteVar ("smax", smax(i));
+    outSection.WriteVar ("UCoefs", UCoefs);
+    outSection.WriteVar ("dUCoefs", dUCoefs);
+    outSection.WriteVar ("sMax", sMax(i));
     outSection.CloseSection();
     beta *= 2.0;
   }
@@ -67,14 +64,147 @@ void PAszFitClass::WriteFits (IOSectionClass &outSection)
 
 void PAszFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 {
+  int level = (int)floor(log(rho.Beta()/SmallestBeta)/log(2.0)+ 0.5);
+
+  double U2err = 0.0;
+  double dU2err = 0.0;
+  double weight = 0.0;
+  FILE *Uxdat = fopen ("Ux.dat", "w");
+  FILE *Ufdat = fopen ("Uf.dat", "w");
+  FILE *dUxdat = fopen ("dUx.dat", "w");
+  FILE *dUfdat = fopen ("dUf.dat", "w");
+  FILE *tdat = fopen ("t.dat", "w");
+  FILE *costhetadat = fopen ("costheta.dat", "w");
+  FILE *ydat = fopen ("y.dat", "w");
+  LinearGrid qgrid2(qgrid->Start, 0.999*qgrid->End, 20);
+  Array<double,1> Ul, dUl;
+  for (int qi=0; qi<qgrid2.NumPoints; qi++) {
+    double q = qgrid2(qi);
+    // HACK
+    //q = 1.0;
+    double zmax = 0.9999999*min(2.0*q,sMax(level));
+    LinearGrid zgrid(0.0, zmax, 20);
+    for (int zi=0; zi<zgrid.NumPoints; zi++) {
+      double z = zgrid(zi);
+      double y = z/zmax;
+      double smax = 0.9999999*min(2.0*q,sMax(level));
+      //cerr << "smin = "  << z << " smax = " << smax << endl;
+      LinearGrid sgrid(z, smax, 100);
+      for (int si=0; si<sgrid.NumPoints; si++) {
+	double s = sgrid(si);
+	//cerr << "q = " << q << " z = " << z << " s = " << s << endl;
+	double t = s/smax;
+	double w = exp(-s*s/(4.0*rho.lambda*rho.Beta()));
+	double Uex, dUex, Ufit, dUfit;
+	double r, rp, costheta;
+	r  = q+0.5*z;
+	rp = q-0.5*z;
+	if (q == 0.0)
+	  costheta = 1.0;
+	else
+	  costheta = (r*r + rp*rp - s*s)/(2.0*r*rp); 
+	
+	//cerr << "costheta = " << costheta << endl;
+
+	costheta = min(costheta,1.0);
+	costheta = max(costheta,-1.0);
+
+	rho.U_lArray(r,rp,Ul, dUl);
+	rho.UdU(r, rp, costheta, Ul, dUl, Uex, dUex);
+	if (!isnan(Uex) && !isnan(dUex)) {
+	  Ufit = U(q, z, s*s, level);
+	  dUfit = dU(q, z, s*s, level);
+	  U2err += w*(Uex-Ufit)*(Uex-Ufit);
+	  dU2err += w*(dUex-dUfit)*(dUex-dUfit);
+	  weight += w;
+	}
+	fprintf (Uxdat, "%1.16e ", Uex);
+	fprintf (Ufdat, "%1.16e ", Ufit);
+	fprintf (dUxdat, "%1.16e ", dUex);
+	fprintf (dUfdat, "%1.16e ", dUfit);
+	fprintf (tdat, "%1.16e ", t);
+	fprintf (costhetadat, "%1.16e ", costheta);
+	fprintf (ydat, "%1.16e ", y);
+      }
+      fprintf (Uxdat, "\n");
+      fprintf (Ufdat, "\n");
+      fprintf (dUxdat, "\n");
+      fprintf (dUfdat, "\n");
+      fprintf (tdat, "\n");
+      fprintf (ydat, "\n");
+      fprintf (costhetadat, "\n");
+    }
+  }
+  fclose (Uxdat); fclose(Ufdat); fclose(tdat); fclose(ydat); 
+  fclose(costhetadat);
+  Uerror = sqrt(U2err/weight);
+  dUerror = sqrt(dU2err/weight);
 }
 
 #endif
 
 
-bool PAszFitClass::Read (IOSectionClass &inSection,
-			 double lowestBeta, int NumBetas)
+bool PAszFitClass::Read (IOSectionClass &in,
+			 double smallestBeta, int numBetas)
 {
+  NumBetas = numBetas;
+  SmallestBeta = smallestBeta;
+  // Resize
+  //  Usplines.resize(NumBetas);
+  //  dUsplines.resize(NumBetas);
+  Array<double,3> temp;
+
+  // Read Particles;
+  assert(in.OpenSection("Particle1"));
+  Particle1.Read(in);
+  in.CloseSection();
+  assert(in.OpenSection("Particle2"));
+  Particle2.Read(in);
+  in.CloseSection();
+  lambda = Particle1.lambda + Particle2.lambda;
+
+  // Read Potential;
+  assert(in.OpenSection("Potential"));
+  Potential = ReadPH(in);
+  in.CloseSection();
+
+  // Read the fits
+  assert(in.OpenSection("Fits"));
+
+  assert (in.ReadVar("Order", Order));
+  assert (in.OpenSection("qGrid"));
+  qgrid = ReadGrid(in);
+  in.CloseSection();
+  int NumCoefs = (Order+1)*(Order+2)/2 - 1;
+
+  Array<double,2> UCoefs(qgrid->NumPoints, NumCoefs); 
+  Array<double,2> dUCoefs(qgrid->NumPoints, NumCoefs); 
+
+  double desiredBeta = smallestBeta;
+  for (int betaIndex=0; betaIndex<NumBetas; betaIndex++) {
+    int i=0;
+    int numTemps = in.CountSections("Fit");
+    bool found=false;
+    while ((i<numTemps) && !found) {
+      double beta;
+      assert (in.OpenSection("Fit", i));
+      assert (in.ReadVar("beta", beta));
+      if ((fabs(beta-desiredBeta)/desiredBeta) < 1.0e-12)
+	found = true;
+      else {
+	in.CloseSection();
+	i++;
+      }
+    }
+    if (!found) {
+    cerr << "Couldn't find beta = " << desiredBeta 
+	 << " in fit file.  Exitting\n";
+    exit(1);
+    }
+    assert (in.ReadVar ("UCoefs", UCoefs));
+    assert (in.ReadVar ("dUCoefs", dUCoefs));
+  }
+  in.CloseSection(); // "Fits"
 
   return (true);
 }

@@ -7,10 +7,10 @@ class PAszFitClass : public PairActionFitClass
 {
 private:
   bool GridIsMine;
-  Array<double, 1> Coefs;
+  Array<double, 2> Coefs;
+  Array<double,1> sMax; // Array index is level
 public:
   int Order;
-  Array<double,1> smax;  // Array index is level
   Grid *qgrid;
   Array<MultiCubicSpline,1> Ukj;
   Array<MultiCubicSpline,1> dUkj;

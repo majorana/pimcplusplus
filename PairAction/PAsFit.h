@@ -12,13 +12,15 @@ private:
   bool GridsAreMine;
   Array<double,1> Coefs;
   Array<double,1> Pn;
+  Array<double,1> sMax;
+//   Array<double,1> UsMax;
+//   Array<double,1> dUsMax;
 #ifdef MAKE_FIT
   CommunicatorClass Comm;
 #endif
 public:
   Grid *qgrid, *ygrid;
   Array<MultiBicubicSpline,1> Usplines, dUsplines;
-  Array<double,1> sMax;
   int Order;
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);
