@@ -41,9 +41,11 @@ class OptimizedBreakup
 {
 private:
   BasisClass &Basis;
+  void Addk(double k);
 public:
-  Array<TinyVector<double,3>,1> kVecs;  
-  void SetkVecs(double kc, double kMax);
+  // First element is |k|, second is degeneracy of the point.
+  Array<TinyVector<double,2>,1> kpoints;
+  void SetkVecs(double kc, double kcont, double kMax);
   /// kc is the k-space cutoff for the Ewald sum.  
   /// kMax is largest k we use in determining the error in the breakup.  
   /// t is the set of coefficients of the breakup.
@@ -107,20 +109,6 @@ inline complex<double> LPQHI_BasisClass::Eplus(int i, double k, int n)
 {
   complex<double> eye(0.0, 1.0);
 
-//   if (n == 0) {
-//     complex<double> e1(cos(k*delta)-1.0, sin(k*delta));
-//     complex<double> e2(cos(k*delta*i),   sin(k*delta*i));
-//     return ((-4.0*M_PI/(Omega*k*k))*eye*e1*e2);
-//   }
-//   else {
-//     complex<double> t1, t2;
-//     double sign = 1.0;
-//     t1 = 4.0*M_PI/(Omega*k)*sign*
-//       complex<double>(cos(k*delta*(i+1)),sin(k*delta*(i+1)));
-//     t2=-(double)n/delta*Eplus(i,k,n-1);;
-//     return (-eye/k*(t1+t2));
-//   }
-
   if (n == 0) {
     complex<double> e1(cos(k*delta)-1.0, sin(k*delta));
     complex<double> e2(cos(k*delta*i),   sin(k*delta*i));
@@ -133,26 +121,12 @@ inline complex<double> LPQHI_BasisClass::Eplus(int i, double k, int n)
     t2=-(double)n/delta*Eplus(i,k,n-1);;
     return (-(eye/k)*(t1+t2));
   }
-
 }
 
 inline complex<double> LPQHI_BasisClass::Eminus(int i, double k, int n)
 {
   complex<double> eye(0.0, 1.0);
 
-//   if (n == 0) {
-//     complex<double> e1(cos(k*delta)-1.0, -sin(k*delta));
-//     complex<double> e2(cos(k*delta*i),    sin(k*delta*i));
-//     return ((4.0*M_PI/(Omega*k*k))*eye*e1*e2);
-//   }
-//   else {
-//     complex<double> t1, t2;
-//     double sign = (n & 1) ? 1.0 : -1.0;
-//     t1 = 4.0*M_PI/(Omega*k)*sign*
-//       complex<double> (cos(k*delta*(i-1)),sin(k*delta*(i-1)));
-//     t2=-(double)n/delta*Eminus(i,k,n-1);
-//     return (-eye/k*(t1+t2));
-//   }
   if (n == 0) {
     complex<double> e1(cos(k*delta)-1.0, -sin(k*delta));
     complex<double> e2(cos(k*delta*i),    sin(k*delta*i));
@@ -168,12 +142,6 @@ inline complex<double> LPQHI_BasisClass::Eminus(int i, double k, int n)
   }
 }
 
-// inline double LPQHI_BasisClass::Dplus(int i, double k, int n)
-// {
-//   complex<double> eye(0.0, 1.0); 
-//   complex<double> Z = Eplus(i,k,n+1) + eye*Eplus(i,k,n);
-//   return delta * Z.imag();
-// }
 
 inline double LPQHI_BasisClass::Dplus(int i, double k, int n)
 {
@@ -183,13 +151,6 @@ inline double LPQHI_BasisClass::Dplus(int i, double k, int n)
   return 4.0*M_PI/(k*Omega)*(delta* Z1.imag() + i*delta*Z2.imag());
 }
 
-
-// inline double LPQHI_BasisClass::Dminus(int i, double k, int n)
-// {
-//   complex<double> eye(0.0, 1.0); 
-//   complex<double> Z = Eminus(i,k,n+1) + eye*Eminus(i,k,n);
-//   return delta * Z.imag();
-// }
 
 inline double LPQHI_BasisClass::Dminus(int i, double k, int n)
 {

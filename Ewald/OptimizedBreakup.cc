@@ -34,11 +34,25 @@ double BasisClass::c_numerical(int n, double k)
 }
 
 
+void OptimizedBreakup::Addk(double k)
+{
+  int ki=0;
+  while ((ki < kpoints.size()) && (fabs(k-kpoints(ki)[0]) > 1.0e-12))
+    ki++;
+  if (ki == kpoints.size()) {
+    kpoints.resizeAndPreserve(kpoints.size()+1);
+    kpoints(ki)[0] = k;
+    kpoints(ki)[1] = 1.0;
+  }
+  else
+    kpoints(ki)[1] += 1.0;
+}
+
 
 ///////////////////////////////////////////
 /// OptimizedBreakup Memember Functions ///
 ///////////////////////////////////////////
-void OptimizedBreakup::SetkVecs(double kc, double kMax)
+void OptimizedBreakup::SetkVecs(double kc, double kcont, double kMax)
 {
   int numk = 0;
   TinyVector<double,3> b;
@@ -58,28 +72,16 @@ void OptimizedBreakup::SetkVecs(double kc, double kMax)
       for (int iz=-maxIndex[2]; iz<=maxIndex[2]; iz++) {
 	k[2] = iz*b[2];
 	double k2 = dot(k,k);
-	if ((k2 > (kc*kc)) && (k2 <= (kMax*kMax)))
-	  numk++;
-      }
-    }
-  }
-  
-  kVecs.resize(numk);
-  numk = 0;
-  for (int ix=-maxIndex[0]; ix<=maxIndex[0]; ix++) {
-    k[0] = ix*b[0];
-    for (int iy=-maxIndex[1]; iy<=maxIndex[1]; iy++) {
-      k[1] = iy*b[1];
-      for (int iz=-maxIndex[2]; iz<=maxIndex[2]; iz++) {
-	k[2] = iz*b[2];
-	double k2 = dot(k,k);
 	if ((k2 > (kc*kc)) && (k2 <= (kMax*kMax))) {
-	  kVecs(numk) = k;
+	  Addk(sqrt(k2));
 	  numk++;
 	}
       }
     }
   }
+
+  cerr << "Total k vecs = " << numk << endl;
+  cerr << "non-degenerate k vecs = " << kpoints.size() << endl;
 }
 
 void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
@@ -99,13 +101,13 @@ void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
   //    numElem--;
   A.resize(numElem, numElem);
   b.resize(numElem);
-  cnk.resize(numElem,kVecs.rows());
+  cnk.resize(numElem,kpoints.rows());
 
   // Fill in cnk.
   for (int n=0; n<t.rows(); n++) {
-    for (int ki=0; ki<kVecs.rows(); ki++) {
-      double k = sqrt(dot(kVecs(ki),kVecs(ki)));
-      cnk(n,ki) = Basis.c_numerical(n,k);
+    for (int ki=0; ki<kpoints.rows(); ki++) {
+      double k = kpoints(ki)[0];
+      cnk(n,ki) = Basis.c(n,k);
     }
   }
 
@@ -113,10 +115,10 @@ void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
   A = 0.0;
   b = 0.0;
   for (int l=0; l<numElem; l++) {
-    for (int ki=0; ki<kVecs.rows(); ki++) {
-      b(l) += Vk(ki) * cnk(l, ki);
+    for (int ki=0; ki<kpoints.rows(); ki++) {
+      b(l) += kpoints(ki)[1]*Vk(ki) * cnk(l, ki);
       for (int n=0; n<numElem; n++) 
-	A(l,n) += cnk(l,ki)*cnk(n,ki);
+	A(l,n) += kpoints(ki)[1]*cnk(l,ki)*cnk(n,ki);
     }
   }
 

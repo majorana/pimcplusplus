@@ -30,29 +30,31 @@ void TestCoulomb()
   box = 10.0, 10.0, 10.0;
   basis.SetBox (box);
   double Omega = box[0]*box[1]*box[2];
-  basis.SetNumKnots(15);
+  basis.SetNumKnots(40);
   basis.Set_rc(5.0);
 
   cerr << "delta = " << basis.delta << endl;
   cerr << "omega = " << Omega << endl;
   cerr << "Dminus(2,1.123,2) = " << basis.Dminus(2, 1.123, 2) << endl;
 
-  double k = 1;
-  for (int n=0; n<basis.NumElements(); n++) {
-    double c = basis.c(n,k);
-    double c_numerical = basis.c_numerical(n,k);
-    fprintf (stderr, "n = %d\n", n);
-    fprintf (stderr, "c           = %1.12e\n", c);
-    fprintf (stderr, "c_numerical = %1.12e\n", c_numerical);
-  }
+//   double k = 1;
+//   for (int n=0; n<basis.NumElements(); n++) {
+//     double c = basis.c(n,k);
+//     double c_numerical = basis.c_numerical(n,k);
+//     fprintf (stderr, "n = %d\n", n);
+//     fprintf (stderr, "c           = %1.12e\n", c);
+//     fprintf (stderr, "c_numerical = %1.12e\n", c_numerical);
+//   }
 
   OptimizedBreakup breakup(basis);
-  breakup.SetkVecs (4.5, 25.0);
-  cerr << "Num kVecs = " << breakup.kVecs.size() << endl;
-  Array<double,1> Vk(breakup.kVecs.size());
-  for (int i=0; i<breakup.kVecs.size(); i++) {
-    TinyVector<double,3> &kv = breakup.kVecs(i);
-    double k = sqrt(dot(kv,kv));
+  breakup.SetkVecs (2.0, 10.0, 50.0);
+//   for (int i=0; i<breakup.kpoints.size(); i++)
+//     cerr << "k = " << breakup.kpoints(i)[0] 
+// 	 << " d = " << breakup.kpoints(i)[1] << endl;
+//   cerr << "Num kVecs = " << breakup.kpoints.size() << endl;
+  Array<double,1> Vk(breakup.kpoints.size());
+  for (int i=0; i<breakup.kpoints.size(); i++) {
+    double k = breakup.kpoints(i)[0];
     double k0 = 2.0*M_PI;
     Vk(i) = 4.0*M_PI/(Omega*(k*k)) /** cos(k*basis.Get_rc())*/;
   }
