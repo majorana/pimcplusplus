@@ -26,11 +26,14 @@ private:
   void TestRPA();
   bool RPATaskIsU;
   int Level, ki;
+  bool UseRPA;
 public:
   inline Array<double,1> operator()(double t, Array<double,1> uwvec)
   { return RPAIntegrand(t, uwvec); }
   double LongRange_U(int slice, int level);
+  double LongRange_U_RPA(int slice, int level);
   double LongRange_dU(int slice, int level);
+  double LongRange_dU_RPA(int slice, int level);
   double LongRange_V(int slice);
   /// This holds all of the Pair Action Classes
   Array<PairActionFitClass*,1> PairActionVector;
