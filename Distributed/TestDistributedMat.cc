@@ -57,6 +57,37 @@ bool TestDistributedArray3()
 }
 
 
+bool TestDistributedArray3b()
+{
+  const int L=5;
+  const int M=7;
+  const int N=3;
+  CommunicatorClass comm;
+  comm.SetWorld();
+  DistributedArray3b d3(L,M,N,comm);
+  int row,col;
+  for (int elem=0; elem<d3.MyNumElements(); elem++) {
+    int i,j,k;
+    d3.MyElement(elem,i,j,k);
+    d3(i,j,k) = 100.0*i + 10.0*j + (double)(k+1);
+  }
+  d3.AllGather();
+  bool passed = true;
+  for (int i=0; i<L; i++)
+    for (int j=0; j<M; j++)
+      for (int k=0; k<N; k++) 
+	if (d3(i,j,k) != (100.0*i + 10.0*j + (double)(k+1))) {
+	  cerr << "Error in TestDistributedArray3b at i="
+	       << i << " j=" << j << " k=" << k << endl;
+	  cerr << d3(i,j,k) << endl;
+	  passed = false;
+	}
+  if (!passed)
+    cerr << "Error in TestDistributedArray3b()\n";
+  return passed;
+}
+
+
 main(int argc, char **argv)
 {
   COMM::Init(argc, argv);
@@ -69,6 +100,7 @@ main(int argc, char **argv)
   bool passed;
   passed = TestDistributedSymmMat();
   passed = passed && TestDistributedArray3();
+  passed = passed && TestDistributedArray3b();
   int MyProc = comm.MyProc();
   COMM::Finalize();
   if (MyProc == 0) {

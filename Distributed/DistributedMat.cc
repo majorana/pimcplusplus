@@ -89,16 +89,42 @@ void DistributedArray3::AllGather()
 
   // Now, put elements where they should be
   for (int proc=0; proc<numProcs; proc++)
-    {
-      for (int i=0; i<NumElements(proc); i++)
-	{
-	  Element(proc, i, row, col);
-	  for (int k=0; k<depth; k++)
-	    Mat(row,col,k) = RecvBuffer((i+maxElements*proc)*depth+k);
-	}
+    for (int i=0; i<NumElements(proc); i++) {
+      Element(proc, i, row, col);
+      for (int k=0; k<depth; k++)
+	Mat(row,col,k) = RecvBuffer((i+maxElements*proc)*depth+k);
     }
 }
 
+
+
+void DistributedArray3b::AllGather()
+{
+  int maxElements = NumElements(0);
+  int numProcs = MyComm.NumProcs();
+
+  // Allocate send an receive buffers
+  Array<double,1> SendBuffer(maxElements),
+    RecvBuffer(maxElements*numProcs);
+  
+  // Now fill send buffer with my elements
+  for (int elem=0; elem<MyNumElements(); elem++) {
+    int i, j, k;
+    MyElement(elem, i, j, k);
+    SendBuffer(elem) = Mat(i,j,k);
+  }
+
+  // Do collective communication
+  MyComm.AllGather(SendBuffer, RecvBuffer);
+
+  // Now, put elements where they should be
+  for (int proc=0; proc<numProcs; proc++)
+    for (int elem=0; elem<NumElements(proc); elem++) {
+      int i,j,k;
+      Element(proc, elem, i, j, k);
+      Mat(i,j,k) = RecvBuffer(elem+maxElements*proc);
+    }
+}
 
 
 

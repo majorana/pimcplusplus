@@ -243,4 +243,81 @@ public:
 };
 
 
+/// This version is truly a distributed Array<double,3> in which each
+/// processor is responsible for about the same number of elements.
+class DistributedArray3b
+{
+private:
+  CommunicatorClass MyComm;
+public:
+  Array<double,3> Mat;
+  inline double operator()(int i, int j, int k) const
+  {
+    return Mat(i,j,k);
+  }
+  inline double& operator()(int i, int j, int k)
+  {
+    return Mat(i,j,k);
+  }
+  inline void Resize(int rows, int cols, int depth)
+  { 
+    Mat.resize(rows,cols,depth); 
+  }
+  /// Returns the number of elements this processor is responsible for
+  inline int NumElements(int proc)
+  {
+    int totalElements = Mat.extent(0)*Mat.extent(1)*Mat.extent(2);
+    int numProcs = MyComm.NumProcs();
+    int Elements  = totalElements/numProcs;
+    if ((totalElements%numProcs)>proc)
+      Elements++;
+    return (Elements);
+  }
+  inline int MyNumElements()
+  {
+    return (NumElements(MyComm.MyProc()));
+  }
+  
+  /// Sets the row and column of the i'th element process proc
+  /// is responsible for.
+  inline void Element(int proc, int index, int &i, int &j, int &k)
+  {
+    int NumProcs = MyComm.NumProcs();
+    int elem = index*NumProcs + proc;
+    i = elem / (Mat.extent(1)*Mat.extent(2));
+    int rem = elem % (Mat.extent(1)*Mat.extent(2));
+    j = rem / Mat.extent(2);
+    k = rem % Mat.extent(2);
+  }    
+      
+  /// Returns the row and column of the ith element this processor is
+  /// responsible for. 
+  inline void MyElement(int index, int &i, int &j, int &k)
+  {
+    int MyProc = MyComm.MyProc();
+    Element(MyProc, index, i, j, k);
+  }
+  
+  inline void Print()
+  {
+    cerr << "MyProc = " << MyComm.MyProc() << endl;
+    cerr << Mat << endl;
+  }
+
+  /// Gathers the elements from all the processors to all the
+  /// processors 
+  void AllGather();
+
+  DistributedArray3b(CommunicatorClass comm)
+  {
+    MyComm = comm;
+  }
+  DistributedArray3b(int rows, int cols, int depth, CommunicatorClass comm)
+  {
+    MyComm = comm;
+    Mat.resize(rows,cols,depth);
+  }
+};
+
+
 #endif
