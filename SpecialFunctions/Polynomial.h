@@ -39,6 +39,19 @@ public:
       C(i) = P[i];
     return (*this);
   }
+  inline PolynomialClass& operator+=(const PolynomialClass &P)
+  {
+    assert(Order() == P.Order());
+    for (int i=0; i<=P.Order(); i++)
+      C(i) += P[i];
+    return (*this);
+  }
+
+  inline PolynomialClass& operator=(double x)
+  {
+    for (int i=0; i<=Order(); i++)
+      C(i) = x;
+  }
 
   PolynomialClass (const PolynomialClass &P) 
   {
