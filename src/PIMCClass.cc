@@ -187,6 +187,11 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)=new RefSliceMoveClass(PathData,OutFile);
       Moves(counter)->Read(in); 
     }
+    else if (MoveType=="Displace"){
+      moveName="Displace";
+      Moves(counter)=new DisplaceMoveClass(PathData,OutFile);
+      Moves(counter)->Read(in); 
+    }
     else {
       cerr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();

@@ -67,6 +67,7 @@ PIMCobjs =                            \
   Moves/RandomPermClass.o             \
   Moves/OpenBisectionMoveClass.o      \
   Moves/BisectionMoveClass.o          \
+  Moves/DisplaceMove.o                \
   Moves/MoveBase.o                    \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
@@ -125,6 +126,7 @@ TestPermobjs =                        \
   Moves/BisectionClass.o              \
   Moves/PermuteStageClass.o           \
   Moves/BisectionBlock.o              \
+  Moves/DisplaceMove.o                \
   Moves/RefSliceMove.o                \
   Moves/NoPermuteClass.o              \
   Moves/BlockMove.o                   \
