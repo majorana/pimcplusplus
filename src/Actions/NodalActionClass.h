@@ -6,7 +6,11 @@
 
 class PathClass;
 
-
+/// FreeNodalActionClass implements the nodal action corresponding to
+/// the free fermion density matrix in periodic boundary conditions.
+/// Currently, the beta-derivative of the action is computed only
+/// approximately, but in a way that becomes accurate as \f$ \tau
+/// \rightarrow 0 \f$.
 class FreeNodalActionClass : public ActionBaseClass
 {
 private:

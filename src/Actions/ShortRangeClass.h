@@ -4,6 +4,10 @@
 #include "ActionBase.h"
 #include "../Common/PairAction/PAFit.h"
 
+/// The ShortRangeClass is an action class which stores the part of
+/// the potential pair action that is summed in real space.  If the
+/// potential is short range, it contains the whole potential action.
+/// This action, in general, contains off diagaonal contributions.
 class ShortRangeClass : public ActionBaseClass
 {
 protected:

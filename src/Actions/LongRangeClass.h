@@ -6,6 +6,12 @@
 
 typedef enum {JOB_U, JOB_DU, JOB_V} JobType; 
 
+/// The LongRangeClass is an action class responsible for the long
+/// wavelength components of the action that are summed in k-space.
+/// This class has member functions which perform the optimized
+/// short range/long range breakup of the action and its
+/// beta-derivative.  This is based on modified version of the method
+/// by Natoli and Ceperley (J. Comp. Phys. 117, 171-178 [1995]).
 class LongRangeClass : public ActionBaseClass
 {
 protected:

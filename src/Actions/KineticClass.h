@@ -3,6 +3,10 @@
 
 #include "ActionBase.h"
 
+/// The KineticClass calculates the kinetic part of the action.  This
+/// is the "spring term", of the form
+/// \f$ K \equiv \left(4\pi\lambda\tau\right)^{-\frac{ND}{2}} 
+/// \exp\left[-\frac{(R-R')^2}{4\lambda\tau}\right] \f$
 class KineticClass : public ActionBaseClass
 {
 public:

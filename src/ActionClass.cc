@@ -71,22 +71,22 @@ void ActionClass::Read(IOSectionClass& inSection)
       cerr << "done.\n";
     }
     // Print out some debug info
-    for (int i=0; i<numPairActions; i++) {
-      string fname = PairActionVector(i)->Particle1.Name + "-" +
-	PairActionVector(i)->Particle2.Name + ".dat";
-      FILE *fout = fopen (fname.c_str(), "w");
-      for (double q=0.0; q<20000.0; q+=1.0) {
-	double Udiag = PairActionVector(i)->Udiag(q, 0);
-	double Ulong = PairActionVector(i)->Ulong(0)(q);
-	double dUdiag = PairActionVector(i)->dUdiag(q, 0);
-	double dUlong = PairActionVector(i)->dUlong(0)(q);
-	double V = PairActionVector(i)->V(q);
-	double Vlong = PairActionVector(i)->Vlong(q);
-	fprintf (fout, "%1.16e %1.16e %1.16e %1.16e %1.16e %1.16e %1.16e\n", 
-		 q, Udiag, Ulong, dUdiag, dUlong, V, Vlong);
-      }
-      fclose (fout);
-    }
+//     for (int i=0; i<numPairActions; i++) {
+//       string fname = PairActionVector(i)->Particle1.Name + "-" +
+// 	PairActionVector(i)->Particle2.Name + ".dat";
+//       FILE *fout = fopen (fname.c_str(), "w");
+//       for (double q=0.0; q<20000.0; q+=1.0) {
+// 	double Udiag = PairActionVector(i)->Udiag(q, 0);
+// 	double Ulong = PairActionVector(i)->Ulong(0)(q);
+// 	double dUdiag = PairActionVector(i)->dUdiag(q, 0);
+// 	double dUlong = PairActionVector(i)->dUlong(0)(q);
+// 	double V = PairActionVector(i)->V(q);
+// 	double Vlong = PairActionVector(i)->Vlong(q);
+// 	fprintf (fout, "%1.16e %1.16e %1.16e %1.16e %1.16e %1.16e %1.16e\n", 
+// 		 q, Udiag, Ulong, dUdiag, dUlong, V, Vlong);
+//       }
+//       fclose (fout);
+//     }
   }
   
 

@@ -4,6 +4,10 @@
 #include "ActionBase.h"
 #include "../Common/PairAction/PAFit.h"
 
+/// LongRangeRPAClass is the Random Phase Approximation corrected
+/// version of LongRangeClass.  This class solves the couple
+/// differential equations derived from the random phase approximation
+/// to improve the converge of the actions as \f$ \tau \rightarrow 0 \f$.
 class LongRangeRPAClass : public ActionBaseClass
 {
 protected:
@@ -11,7 +15,7 @@ protected:
   Array<PairActionFitClass*,1> &PairArray;
   LinearGrid LongGrid;
 
-  // This must be called after all of the OptimizedBreakup_x's
+  /// This must be called after all of the OptimizedBreakup_x's
   Array<double,1> Integrand(double t, const Array<double,1> &Uvec);
 
   void Test();
@@ -19,7 +23,6 @@ protected:
   /// These keep track of which level and k vector we are working on
   /// when solving the RPA equations.
   int Level, ki;
-  bool UseRPA;
 public:
   inline Array<double,1> operator()(double t, Array<double,1> uwvec)
   { return Integrand(t, uwvec); }

@@ -8,6 +8,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   assert (in.ReadVar ("name", Name));
+  cerr << "speciesName = " << speciesName << ".\n";
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
   IsFermion = PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION;
 
@@ -30,10 +31,10 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
       if (PathData.Path.LongRange) 
-      if (PathData.Actions.UseRPA)
-      newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-      else
-      newStage->Actions.push_back(&PathData.Actions.LongRange);
+	if (PathData.Actions.UseRPA)
+	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+	else
+	  newStage->Actions.push_back(&PathData.Actions.LongRange);
       
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
 	cerr << "Adding fermion node action for species " 

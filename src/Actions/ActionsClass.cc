@@ -14,7 +14,8 @@ void ActionsClass::Read(IOSectionClass &in)
   assert(in.ReadVar ("MaxLevels", MaxLevels));
   cerr << "MaxLevels = " << MaxLevels << endl;
 
-  in.ReadVar ("UseRPA", UseRPA);
+  if (!in.ReadVar ("UseRPA", UseRPA))
+    UseRPA = false;
   if (UseRPA) 
     cerr << "Using RPA for long range action.\n";
   else      
@@ -58,7 +59,7 @@ void ActionsClass::Read(IOSectionClass &in)
   if (longRange){
     LongRange.Init(in);
     if (UseRPA)
-      LongRange.Init(in);
+      LongRangeRPA.Init(in);
   }
    
   // Now check to make sure all PairActions that we need are defined.
