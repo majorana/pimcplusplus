@@ -18,7 +18,7 @@ private:
 public:
   MirroredArrayClass1D<int> Permutation;
 
-  void Read(InputSectionClass &inSection);
+  void Read(IOSectionClass &inSection);
   ///A scratch array to hold a boolean indicating whether we've
   ///looped over this particle yet
   Array<bool,1> DoPtcl;

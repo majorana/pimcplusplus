@@ -20,7 +20,7 @@ public:
   int NumDim;
   int NumParticles;
   TinyVector <bool,NDIM> DimensionActive;
-  virtual bool Read(InputSectionClass &inSection);
+  virtual bool Read(IOSectionClass &inSection);
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
   /// classical particle.
   double lambda;
@@ -30,7 +30,7 @@ public:
   virtual ParticleType GetParticleType() = 0;
 };
 
-SpeciesClass* ReadSpecies(InputSectionClass &inSection);
+SpeciesClass* ReadSpecies(IOSectionClass &inSection);
 
 
 
@@ -43,7 +43,7 @@ class FermionClass : public SpeciesClass
 public:
   ///When we make this work, this calculates the NodeActions
   double NodeAction (int Ptcl, int LinkNum);
-  bool Read(InputSectionClass &inSection);
+  bool Read(IOSectionClass &inSection);
   FermionClass()  { 
     NumDim=NDIM;  
     DimensionActive=true;
