@@ -8,13 +8,12 @@ class QuinticPH : public Potential
 {
 private:
   QuinticSpline pA, pB, Vcore;
-  Potential *Vouter;
   double CoreRadius;
   LinearGrid Agrid, Bgrid, Vgrid;
   // The minimum value of A and B
   double ABmin;
 public:
-
+  Potential *Vouter;
   // This is true if this represents a bare potential.  Otherwise, it
   // represents a total potential:  Total = Bare + XC
   bool IsBare;
@@ -29,12 +28,15 @@ public:
   // These are used to get and set the minimum value of A and B,
   // adjusting PA and PB accordingly.
   inline double GetABmin();
-  inline double SetABmin();
+  inline void SetABmin(double newmin);
 
   // These are used to get and set the values of A, B and V
-  inline int    NumAParams();
-  inline int    NumBParams();
-  inline int    NumVParams();
+  inline int    GetNumAParams();
+  inline void   SetNumAParams(int num);
+  inline int    GetNumBParams();
+  inline void   SetNumBParams(int num);
+  inline int    GetNumVParams();
+  inline void   SetNumVParams(int num);
   inline double GetAval (int i);
   inline void   SetAval (int i, double Aval, bool isNegative);
   inline double GetBval (int i);
@@ -52,6 +54,8 @@ public:
   inline double  GetParam (int i) const;
   inline void SetParam (int i, double val);
   inline int NumParams();
+  inline void Init (Potential *outer, double coreRadius,
+		    double abmin, int numA, int numB, int numV);
   void Read (IOSectionClass &in);
   void Write (IOSectionClass &out); 
 };
@@ -64,6 +68,25 @@ inline double QuinticPH::GetCoreRadius()
 inline void QuinticPH::SetCoreRadius(double coreRadius)
 {
   CoreRadius = coreRadius;
+  Array<double,1> Atmp, Btmp, Vtmp;
+  if (pA.NumPoints() != 0) {
+    Atmp.resize(   pA.NumPoints());  Atmp  = pA.Data();
+    Btmp.resize(   pB.NumPoints());  Btmp  = pB.Data();
+    Vtmp.resize(Vcore.NumPoints());  Vtmp = Vcore.Data();
+  }
+  else {
+    Atmp.resize(4);  Atmp = sqrt(1.0-ABmin);
+    Btmp.resize(4);  Btmp = sqrt(1.0-ABmin);
+    Vtmp.resize(4);  Vtmp = 0.0;
+  }
+  Agrid.Init (0.0, CoreRadius, Atmp.size());
+  Bgrid.Init (0.0, CoreRadius, Btmp.size());
+  Vgrid.Init (0.0, CoreRadius, Vtmp.size());
+  pA.Init (&Agrid, Atmp, 0.0, 0.0, 0.0, 0.0);
+  pB.Init (&Bgrid, Btmp, 0.0, 0.0, 0.0, 0.0);
+  double dVend = Vouter->dVdr(CoreRadius);
+  double d2Vend = Vouter->d2Vdr2(CoreRadius);
+  Vcore.Init(&Vgrid, Vtmp, NAN, dVend, NAN, d2Vend);
 }
 
 inline double QuinticPH::GetParam(int i) const
@@ -144,20 +167,108 @@ inline void QuinticPH::SetVval (int i, double val)
   Vcore(i) = val;
 }
 
-inline int QuinticPH::NumAParams()
+inline int QuinticPH::GetNumAParams()
 {
   return (pA.NumPoints()-1);
 }
 
-inline int QuinticPH::NumBParams()
+inline void QuinticPH::SetNumAParams(int num)
+{
+  int oldNum = pA.NumPoints();
+  Array<double,1> newpA(num+1);
+  for (int i=0; i<min(oldNum,num+1); i++)
+    newpA(i) = pA(i);
+  for (int i=oldNum; i<num+1; i++)
+    newpA(i) = sqrt(1.0-ABmin);
+  Agrid.Init(0.0, CoreRadius, num+1);
+  pA.Init(&Agrid, newpA, 0.0, 0.0, 0.0, 0.0);
+}
+
+inline int QuinticPH::GetNumBParams()
 {
   return (pB.NumPoints()-2);
 }
 
-inline int QuinticPH::NumVParams()
+inline void QuinticPH::SetNumBParams(int num)
+{
+  int oldNum = pB.NumPoints();
+  Array<double,1> newpB(num+2);
+  for (int i=0; i<min(oldNum,num+2); i++)
+    newpB(i) = pB(i);
+  for (int i=oldNum; i<num+2; i++)
+    newpB(i) = sqrt(1.0-ABmin);
+  Bgrid.Init(0.0, CoreRadius, num+2);
+  pB.Init(&Bgrid, newpB, 0.0, 0.0, 0.0, 0.0);
+}
+
+inline int QuinticPH::GetNumVParams()
 {
   return (Vcore.NumPoints()-1);
 }
+
+inline void QuinticPH::SetNumVParams(int num)
+{
+  int oldNum = Vcore.NumPoints();
+  double Vend = Vouter->V(CoreRadius);
+  double dVend = Vouter->dVdr(CoreRadius);
+  double d2Vend = Vouter->d2Vdr2(CoreRadius);
+  Array<double,1> newV(num+1);
+  for (int i=0; i<min(oldNum, num+1); i++)
+    newV(i) = Vcore(i);
+  for (int i=oldNum; i<num+1; i++)
+    newV(i) = Vend;
+  Vgrid.Init(0.0, CoreRadius, num+1);
+  Vcore.Init(&Vgrid, newV, NAN, dVend, NAN, d2Vend);
+}
+
+inline double QuinticPH::GetABmin()
+{
+  return ABmin;
+}
+
+inline void QuinticPH::SetABmin(double newmin)
+{
+  for (int i=0; i<pA.NumPoints(); i++) {
+    double val = pA(i)*pA(i)+ABmin;
+    if (pA(i) < 0.0)
+      pA(i) = (val>newmin) ? -sqrt(newmin-val) : 0.0;
+    else
+      pA(i) = (val>newmin) ?  sqrt(newmin-val) : 0.0;
+  }
+  for (int i=0; i<pB.NumPoints(); i++) {
+    double val = pB(i)*pB(i)+ABmin;
+    if (pB(i) < 0.0)
+      pB(i) = (val>newmin) ? -sqrt(newmin-val) : 0.0;
+    else
+      pB(i) = (val>newmin) ?  sqrt(newmin-val) : 0.0;
+  }
+  ABmin = newmin;
+}
+
+void QuinticPH::Init (Potential *outer, double coreRadius,
+		      double abmin, int numA, int numB, int numV)
+{
+  Vouter = outer;
+  CoreRadius = coreRadius;
+  Agrid.Init (0.0, CoreRadius, numA+1);
+  Bgrid.Init (0.0, CoreRadius, numB+2);
+  Vgrid.Init (0.0, CoreRadius, numV+1);
+  Array<double,1> initA(numA+1);
+  Array<double,1> initB(numB+2);
+  Array<double,1> initV(numV+1);
+  initA = sqrt(1.0-ABmin);
+  initB = sqrt(1.0-ABmin);
+  initV = 0.0;
+  double Vend = Vouter->V(CoreRadius);
+  double dVend = Vouter->dVdr(CoreRadius);
+  double d2Vend = Vouter->d2Vdr2(CoreRadius);
+  initV(numV) = Vend;
+  pA.Init (&Agrid, initA, 0.0, 0.0, 0.0, 0.0);
+  pB.Init (&Bgrid, initB, 0.0, 0.0, 0.0, 0.0);
+  Vcore.Init (&Vgrid, initV, NAN, dVend, 0.0, d2Vend);
+}
+
+  
 
 
 #endif
