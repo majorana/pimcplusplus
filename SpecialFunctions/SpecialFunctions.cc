@@ -363,7 +363,7 @@ double log_il_scaled(int l, double z)
   double lp1 = sl+1.0;
   double approxlog = sl*log(z) - lp1*(log(2.0*lp1) -  1.0);
   /// Check for underflow;
-  if (approxlog < -300.0)
+  if (approxlog < -200.0)
     return (log_il_scaled_series_small(l,z));
   else 
     {
