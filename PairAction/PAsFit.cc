@@ -68,7 +68,7 @@ public:
     double costheta;
     
     if ((r*rp)==0.0)
-      costheta = 0.0;
+      costheta = 1.0;
     else
       costheta = (r*r + rp*rp - s*s)/(2.0*r*rp);
     

@@ -6,6 +6,7 @@
 #include "PAcoulombBCFit.h"
 #include "PAclassicalFit.h"
 #include "PAsFit.h"
+#include "PAtricubicFit.h"
 
 inline PairActionFitClass *ReadPAFit (IOSectionClass &in, 
 				      double smallestBeta, int numLevels)
@@ -25,6 +26,8 @@ inline PairActionFitClass *ReadPAFit (IOSectionClass &in,
     fit = new PAclassicalFitClass;
   else if (type == "sfit")
     fit = new PAsFitClass;
+  else if (type == "tricubicfit")
+    fit = new PAtricubicFitClass;
   else {
     cerr << "Unrecognize pair action fit type \"" 
 	 << type << "\".  Exitting.\n";
