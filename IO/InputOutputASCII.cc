@@ -937,31 +937,94 @@ bool VarASCIIbool2Class::ReadInto (Array<bool,2> &val)
 bool VarASCIIbool3Class::ReadInto (Array<bool,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; }
 
-bool VarASCIIdouble1Class::Append (double val)
-{ ComplainAppend(); }
-bool VarASCIIint1Class::Append (int val)
-{ ComplainAppend(); }
-bool VarASCIIstring1Class::Append (string val)
-{ ComplainAppend(); }
-bool VarASCIIbool1Class::Append (bool val)
-{ ComplainAppend(); }
-bool VarASCIIdouble2Class::Append (Array<double,1> &val)
-{ ComplainAppend(); }
-bool VarASCIIdouble3Class::Append (Array<double,2> &val)
-{ ComplainAppend(); }
-bool VarASCIIint2Class::Append (Array<int,1> &val)
-{ ComplainAppend(); }
-bool VarASCIIint3Class::Append (Array<int,2> &val)
-{ ComplainAppend(); }
-bool VarASCIIstring2Class::Append (Array<string,1> &val)
-{ ComplainAppend(); }
-bool VarASCIIstring3Class::Append (Array<string,2> &val)
-{ ComplainAppend(); }
-bool VarASCIIbool2Class::Append (Array<bool,1> &val)
-{ ComplainAppend(); }
-bool VarASCIIbool3Class::Append (Array<bool,2> &val)
-{ ComplainAppend(); }
 
+/*****************************************************************
+ *                         Variable  Appends                     *
+ *****************************************************************/
+bool VarASCIIdouble1Class::Append (double val)
+{
+  int n = Value.extent(0);
+  Value.resizeAndPreserve(n+1);
+  Value(n) = val;
+}
+bool VarASCIIint1Class::Append (int val)
+{
+  int n = Value.extent(0);
+  Value.resizeAndPreserve(n+1);
+  Value(n) = val;
+}
+bool VarASCIIstring1Class::Append (string val)
+{
+  int n = Value.extent(0);
+  Value.resizeAndPreserve(n+1);
+  Value(n) = val;
+}
+bool VarASCIIbool1Class::Append (bool val)
+{
+  int n = Value.extent(0);
+  Value.resizeAndPreserve(n+1);
+  Value(n) = val;
+}
+bool VarASCIIdouble2Class::Append (Array<double,1> &val)
+{
+  int n = Value.extent(0);  int m = Value.extent(1);
+  assert(val.extent(0) == m);
+  Value.resizeAndPreserve(n+1,m);
+  Value(n,Range::all()) = val;
+}
+bool VarASCIIdouble3Class::Append (Array<double,2> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); int o=Value.extent(2);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  Value.resizeAndPreserve(n+1,m,o);
+  Value(n,Range::all(),Range::all()) = val;
+}
+bool VarASCIIint2Class::Append (Array<int,1> &val)
+{
+  int n = Value.extent(0);  int m = Value.extent(1);
+  assert(val.extent(0) == m);
+  Value.resizeAndPreserve(n+1,m);
+  Value(n,Range::all()) = val;
+}
+bool VarASCIIint3Class::Append (Array<int,2> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); int o=Value.extent(2);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  Value.resizeAndPreserve(n+1,m,o);
+  Value(n,Range::all(),Range::all()) = val;
+}
+bool VarASCIIstring2Class::Append (Array<string,1> &val)
+{
+  int n = Value.extent(0);  int m = Value.extent(1);
+  assert(val.extent(0) == m);
+  Value.resizeAndPreserve(n+1,m);
+  Value(n,Range::all()) = val;
+}
+bool VarASCIIstring3Class::Append (Array<string,2> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); int o=Value.extent(2);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  Value.resizeAndPreserve(n+1,m,o);
+  Value(n,Range::all(),Range::all()) = val;
+}
+bool VarASCIIbool2Class::Append (Array<bool,1> &val)
+{
+  int n = Value.extent(0);  int m = Value.extent(1);
+  assert(val.extent(0) == m);
+  Value.resizeAndPreserve(n+1,m);
+  Value(n,Range::all()) = val;
+}
+bool VarASCIIbool3Class::Append (Array<bool,2> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); int o=Value.extent(2);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  Value.resizeAndPreserve(n+1,m,o);
+  Value(n,Range::all(),Range::all()) = val;
+}
 
 void VarASCIIdouble0Class::Print (ofstream &outFile)
 { outFile << "double " << Name << " = " << Value << ";\n";}
