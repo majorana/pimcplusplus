@@ -104,7 +104,7 @@ public:
     grid->Write(outSection);
     outSection.CloseSection();
   }
-  void Read(InputSectionClass &inSection)
+  void Read(IOSectionClass &inSection)
   {
     assert(inSection.ReadVar("StartDeriv", StartDeriv));
     assert(inSection.ReadVar("EndDeriv", EndDeriv));

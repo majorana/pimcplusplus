@@ -66,7 +66,7 @@ class Grid
   }
 
   virtual void Write (OutputSectionClass &out) = 0;
-  virtual void Read  (InputSectionClass &inSection) = 0;
+  virtual void Read  (IOSectionClass &inSection) = 0;
 };
 
 
@@ -133,7 +133,7 @@ class LinearGrid : public Grid
     outSection.WriteVar ("End", End);
     outSection.WriteVar ("NumPoints", NumPoints);
   }
-  void Read (InputSectionClass &inSection)
+  void Read (IOSectionClass &inSection)
   {
     assert(inSection.ReadVar("Start", Start));
     assert(inSection.ReadVar("End", End));
@@ -264,7 +264,7 @@ class OptimalGrid : public Grid
     outSection.WriteVar ("NumPoints", NumPoints);
   }
 
-  void Read (InputSectionClass &inSection)
+  void Read (IOSectionClass &inSection)
   {
     double aval, bval;
     int numPoints;
@@ -380,7 +380,7 @@ class LogGrid : public Grid
     outSection.WriteVar ("Spacing", Spacing);
   }
 
-  void Read (InputSectionClass &inSection)
+  void Read (IOSectionClass &inSection)
   {
     double tempr0, tempSpacing;
     int  tempNumPoints;
@@ -490,7 +490,7 @@ inline Grid *ReadGrid(FILE *fin)
 
 Grid *ReadGrid (InputBuffer &SectionBuf);
 
-inline Grid* ReadGrid (InputSectionClass &inSection)
+inline Grid* ReadGrid (IOSectionClass &inSection)
 {
   string Type;
   assert (inSection.ReadVar ("Type", Type));
