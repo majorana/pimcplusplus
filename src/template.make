@@ -3,7 +3,7 @@ PSPLINELIB = -L$(PWD)/Common/Splines/fortran -lpspline
 ifeq ($(HOSTTYPE),alpha)
 include /usr/users/0/kesler/lib/Make.include
     MPILIB = -lmpi -lelan
-    LIBS = $(MPILIB) $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
+    LIBS =  $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
          $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
     INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
     MAKE = gmake
@@ -44,7 +44,7 @@ VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 
 
 
-DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT -O3 #-DUSE_MPI#-DDEBUG -DBZ_DEBUG # -DPARALLEL -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT  -DDEBUG -DBZ_DEBUG # -DPARALLEL -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \
@@ -292,6 +292,18 @@ actions:
 Common_clean:
 	cd Common; ${MAKE} clean
 
+Tests_clean:
+	cd Tests; ${MAKE} clean
+
+Actions_clean:
+	cd Actions; ${MAKE} clean
+
+Moves_clean:
+	cd Moves; ${MAKE} clean
+
+Observables_clean:
+	cd Observables; ${MAKE} clean
+
 CodeTests:    
 	cd Tests; ${MAKE_ALL}
 
@@ -307,7 +319,7 @@ TestASCII:	Common_obj TestASCII.o Common/IO/InputOutput.o Common/IO/InputOutputA
 #	pushd ..; make; pushd
 #	$(LD) -o $@ $(TestSubarrayObjs) $(LIBS)
 
-clean:	Common_clean
+clean:	Common_clean Tests_clean Actions_clean Moves_clean Observables_clean
 	rm *.o
 
 .cc.o: $(HEADERS)
