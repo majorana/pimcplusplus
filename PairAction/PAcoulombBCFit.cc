@@ -436,7 +436,7 @@ void PAcoulombBCFitClass::Setrc (double rc)
     LinFitSVD (y, sigma, F, coefs, error, 1.0e-15);
     for (int i=0; i<coefs.size(); i++)
       Ucoefs(i, level) = coefs(i);
-    cerr << "Ucoefs = " << coefs << endl;
+    //    cerr << "Ucoefs = " << coefs << endl;
   }
 
   // Do dU fits;
@@ -460,6 +460,8 @@ void PAcoulombBCFitClass::Setrc (double rc)
   LinFitSVD (y, sigma, F, coefs, error, 1.0e-15);
   for (int i=0; i<coefs.size(); i++)
     Vcoefs(i) = coefs(i);
+  Vcoefs = 0.0;
+  Vcoefs(0) = Z1Z2; Vcoefs(1) = 0.0; Vcoefs(2) = 0.0;
 }
 
 #include <gsl/gsl_sf.h>
@@ -482,11 +484,9 @@ double PAcoulombBCFitClass::Xk_dU (double k, int level)
   return (dUcoefs(0,level)*C0 + dUcoefs(1,level)*C1 + dUcoefs(2,level)*C2);
 }
  
-double PAcoulombBCFitClass::Xk_V (double k, int level)
+double PAcoulombBCFitClass::Xk_V (double k)
 {
   double C0 = -4.0*M_PI/(k*k) * cos(k*rcut);
-  double C1 =  4.0*M_PI/k * (gsl_sf_Si(k*rcut) - 0.5*M_PI);
-  double C2 =  4.0*M_PI/k * (k*gsl_sf_Ci(k*rcut) - sin(k*rcut)/rcut);
 
-  return (Vcoefs(0,level)*C0 + Vcoefs(1,level)*C1 + Vcoefs(2,level)*C2);
+  return (Z1Z2*C0); 
 }

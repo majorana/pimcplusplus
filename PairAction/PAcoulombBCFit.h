@@ -56,7 +56,7 @@ public:
   void Setrc(double rc);
   double Xk_U  (double k, int level);
   double Xk_dU (double k, int level);
-  double Xk_V  (double k, int level);
+  double Xk_V  (double k);
 
   /////////////////////////
   /// Long-ranged stuff ///
