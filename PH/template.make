@@ -1,8 +1,9 @@
-SOURCES = PH.cc Chebyshev.cc Potential.cc Atom.cc Cost.cc CoreTransform.cc ScreenedPot.cc \
-          QuinticPH.cc CoulombPot.cc SplinePot.cc
+SOURCES = PH.cc Chebyshev.cc Potential.cc Atom.cc Cost.cc CoreTransform.cc \
+	  ScreenedPot.cc OldPotential.cc QuinticPH.cc CoulombPot.cc        \
+	  SplinePot.cc
 
 all:	PH.o Chebyshev.o Potential.o Atom.o Cost.o CoreTransform.o\
-	ScreenedPot.o QuinticPH.o CoulombPot.o SplinePot.o
+	ScreenedPot.o QuinticPH.o CoulombPot.o SplinePot.o OldPotential.o
 
 clean:
 	rm -f *.o
