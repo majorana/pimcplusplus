@@ -4,7 +4,9 @@
 #include "PathVis.h"
 #include "../Common/IO/InputOutput.h"
 #include <gtkmm/adjustment.h>
-
+#include "OnePath.h"
+#include "BoxClass.h"
+#include "SmoothClass.h"
 
 class SpeciesClass
 {
@@ -21,56 +23,6 @@ public:
 
 typedef enum {LINES, TUBES} PathTypeType;
 
-class OnePath
-{
-public:
-  vector<Vec3> Path;
-  vector<Vec3> Color;
-  bool Closed;
-};
-
-class BoxClass
-{
-private:
-  Vec3 Box, BoxInv;
-  inline void PutInBox(Vec3 &r);
-  inline void PutInBox(Vec3 &r, int dim);
-  bool BreakSegment (Vec3 &r1, Vec3 &r2, Vec3 &wall1, Vec3 &wall2);
-  bool BreakSegment (Vec3 &r1, Vec3 &r2, Vec3 &wall1, Vec3 &wall2, int dim);
-public:
-  inline void Set (Vec3 box) 
-  { 
-    Box = box; 
-    BoxInv[0]=1.0/Box[0]; BoxInv[1]=1.0/Box[1]; BoxInv[2]=1.0/Box[2];
-  }
-  inline void Set (double lx, double ly, double lz)
-  {
-    Box[0] = lx; Box[1] = ly; Box[2] = lz;
-    BoxInv[0]=1.0/lx; BoxInv[1]=1.0/ly; BoxInv[2]=1.0/lz;
-  }
-  inline double operator[](int i) const
-  { return Box[i]; }
-//   inline double& operator[](int i)
-//   { return Box[i]; }
-  inline operator Vec3() const
-  { return Box; }
-
-  void PutPathsInBox (vector<OnePath*>& inList);
-};
-
-inline void BoxClass::PutInBox (Vec3 &r)
-{
-  for (int i=0; i<3; i++) {
-    double n = -floor(r[i]*BoxInv[i]+0.5);
-    r[i] += n*Box[i];
-  }
-}
-
-inline void BoxClass::PutInBox (Vec3 &r, int dim)
-{
-  double n = -floor(r[dim]*BoxInv[dim]+0.5);
-  r[dim] += n*Box[dim];
-}
 
 
 class VisualClass : public Gtk::Window
@@ -84,6 +36,7 @@ protected:
   Array<SpeciesClass,1> Species;
   vector<OnePath*> Paths;
   BoxClass Box;
+  SmoothClass Smoother;
   void MakePaths(int frame);
 
   // member widgets:
@@ -97,8 +50,7 @@ protected:
     WrapButton, NoWrapButton;
   void FrameChanged();
   PathTypeType PathType; 
-  void LineToggle();
-  void WrapToggle();
+  void LineToggle(), WrapToggle(), SmoothToggle();
   Gtk::Image TubesImage, LinesImage, StraightImage, SmoothImage,
     NoWrapImage, WrapImage;
 
@@ -116,7 +68,7 @@ protected:
 
   Gtk::FileChooserDialog FileChooser;
 
-  bool Wrap;
+  bool Wrap, Smooth;
 public:
   PathVisClass PathVis;
 
