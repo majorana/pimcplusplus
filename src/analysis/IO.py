@@ -33,7 +33,11 @@ class IOSectionClass:
         return IOSection.CountSections(this.handle)
     def CountSections2(this,name):
         return IOSection.CountSectionsName(this.handle,name)
- 
+    def CountVars(this):
+        return IOSection.CountVars(this.handle)
+    def GetVarName(this,num):
+        return IOSection.GetVarName(this.handle,num)
+    
 
 
 
