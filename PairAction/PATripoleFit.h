@@ -1,8 +1,8 @@
-#ifndef PA_COULOMB_FIT_H
-#define PA_COULOMB_FIT_H
+#ifndef PA_TRIPOLE_FIT_H
+#define PA_TRIPOLE_FIT_H
 #include "PAFitBase.h"
 
-class PACoulombFitClass : public PairActionFitClass
+class PATripoleFitClass : public PairActionFitClass
 {
 private:
   // Real space cutoff parameter;
@@ -55,7 +55,7 @@ public:
   bool IsLongRange();
   //  void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
 
-  PACoulombFitClass()
+  PATripoleFitClass()
   { 
 
   }

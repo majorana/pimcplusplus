@@ -1,7 +1,7 @@
-SOURCES = PAszFit.cc PAcoulombFit.cc PAcoulombBCFit.cc PAclassicalFit.cc PAsFit.cc PAtricubicFit.cc PAzeroFit.cc DavidPAClass.cc
+SOURCES = PAszFit.cc PAcoulombFit.cc PAcoulombBCFit.cc PAclassicalFit.cc PAsFit.cc PAtricubicFit.cc PAzeroFit.cc DavidPAClass.cc PACoulombFit.cc PADipoleFit.cc PATripoleFit.cc
 
 #all:	PAszFit.o PAcoulombFit.o PAcoulombBCFit.o PAclassicalFit.o PAsFit.o PAtricubicFit.o PAzeroFit.o DavidPAClass.o
-all:	 PAcoulombBCFit.o PAtricubicFit.o PAclassicalFit.o PAzeroFit.o DavidPAClass.o
+all:	 PAcoulombBCFit.o PAtricubicFit.o PAclassicalFit.o PAzeroFit.o DavidPAClass.o PACoulombFit.o PADipoleFit.o PATripoleFit.o
 
 clean:
 	rm -f *.o

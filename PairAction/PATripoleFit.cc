@@ -3,53 +3,53 @@
 /// The following routines are used only if we are creating fits, not
 /// using them.
 #ifdef MAKE_FIT
-void PACoulombFitClass::ReadParams(IOSectionClass &inSection)
+void PATripoleFitClass::ReadParams(IOSectionClass &inSection)
 {
 }
 
-void PACoulombFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
+void PATripoleFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 { }
 
 
-void PACoulombFitClass::AddFit (Rho &rho)
+void PATripoleFitClass::AddFit (Rho &rho)
 {
 }
 
 
-void PACoulombFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
+void PATripoleFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 {
   Uerror = 0.0;
   dUerror = 0.0;
 }
 
 
-void PACoulombFitClass::WriteFits (IOSectionClass &outSection)
+void PATripoleFitClass::WriteFits (IOSectionClass &outSection)
 {
 }
 #endif
 
 
-double PACoulombFitClass::U(double q, double z, double s2, int level)
+double PATripoleFitClass::U(double q, double z, double s2, int level)
 {
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
     beta *= 2.0;
   double r = q + 0.5*z;
   double rp = q - 0.5*z;
-  double V = 0.5*Z1Z2*(1.0/r + 1.0/rp);
+  double V = 0.5*Z1Z2*(1.0/(r*r*r) + 1.0/(rp*rp*rp));
   return (beta*V);
 }
 
-double PACoulombFitClass::dU(double q, double z, double s2, int level)
+double PATripoleFitClass::dU(double q, double z, double s2, int level)
 {
   double r = q + 0.5*z;
   double rp = q - 0.5*z;
-  double V = 0.5*Z1Z2*(1.0/r + 1.0/rp);
+  double V = 0.5*Z1Z2*(1.0/(r*r*rp) + 1.0/(rp*rp*rp));
   return (V);
 }
 
 
-bool PACoulombFitClass::Read (IOSectionClass &in,
+bool PATripoleFitClass::Read (IOSectionClass &in,
 			      double smallestBeta, int numBetas)
 {
   SmallestBeta = smallestBeta;
@@ -79,94 +79,96 @@ bool PACoulombFitClass::Read (IOSectionClass &in,
 /////////////////////////
 /// Long-ranged stuff ///
 /////////////////////////
-bool PACoulombFitClass::IsLongRange()
+bool PATripoleFitClass::IsLongRange()
 {
   return (Z1Z2 != 0.0);
 }
 
 
 /// The diagonal action only -- used for long-range breakup
-double PACoulombFitClass::Udiag(double q, int level)
+double PATripoleFitClass::Udiag(double q, int level)
 {  
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
     beta *= 2.0;
-  return beta*Z1Z2/q;
+  return beta*Z1Z2/(q*q*q);
 }
 
 /// The q-derivative of the above
-double PACoulombFitClass::Udiag_p(double q, int level) 
+double PATripoleFitClass::Udiag_p(double q, int level) 
 {  
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
     beta *= 2.0;
-  return -beta*Z1Z2/(q*q);
+  return -3.0*beta*Z1Z2/(q*q*q*q);
 }
 
 /// The q-derivative of the above
-double PACoulombFitClass::Udiag_pp(double q, int level) 
+double PATripoleFitClass::Udiag_pp(double q, int level) 
 {  
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
     beta *= 2.0;
-  return 2.0*beta*Z1Z2/(q*q*q);
+  return 12.0*beta*Z1Z2/(q*q*q*q*q);
 }
 
 /// The beta-derivative of the diagonal action
-double PACoulombFitClass::dUdiag    (double q, int level) 
+double PATripoleFitClass::dUdiag    (double q, int level) 
 {
-  return Z1Z2/q;
+  return Z1Z2/(q*q*q);
 }
 
 /// The q-derivative of the above
-double PACoulombFitClass::dUdiag_p  (double q, int level) 
+double PATripoleFitClass::dUdiag_p  (double q, int level) 
 {
-  return -Z1Z2/(q*q);
+  return -3.0*Z1Z2/(q*q*q*q);
 }
 
 /// The q-derivative of the above
-double PACoulombFitClass::dUdiag_pp (double q, int level) 
+double PATripoleFitClass::dUdiag_pp (double q, int level) 
 {
-  return 2.0*Z1Z2/(q*q*q);
+  return 12.0*Z1Z2/(q*q*q*q*q);
 }
 
 /// The potential to which this action corresponds.
-double PACoulombFitClass::V  (double r) 
+double PATripoleFitClass::V  (double r) 
 {
-  return Z1Z2/r;
+  return Z1Z2/(r*r*r);
 }
 
 /// The q-derivative of the above
-double PACoulombFitClass::Vp (double r)
+double PATripoleFitClass::Vp (double r)
 {
-  return -Z1Z2/(r*r);
+  return -3.0*Z1Z2/(r*r*r*r);
 }
 
 /// The q-derivative of the above
-double PACoulombFitClass::Vpp(double r) 
+double PATripoleFitClass::Vpp(double r) 
 {
-  return 2.0*Z1Z2/(r*r*r);
+  return 12.0*Z1Z2/(r*r*r*r*r);
 }
 
-void PACoulombFitClass::Setrc(double rc)
+void PATripoleFitClass::Setrc(double rc)
 {
   rcut = rc;
 }
 
-double PACoulombFitClass::Xk_U(double k, int level)
+#include <gsl/gsl_sf.h>
+
+double PATripoleFitClass::Xk_U(double k, int level)
 {
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
     beta *= 2.0;
-  return -beta*4.0*M_PI*Z1Z2/(k*k)*cos(k*rcut);
+  return 4.0*M_PI*beta*Z1Z2/k*(k*gsl_sf_Ci(k*rcut)-sin(k*rcut)/rcut);
 }
 
-double PACoulombFitClass::Xk_dU(double k, int level)
+double PATripoleFitClass::Xk_dU(double k, int level)
 {
-  return -4.0*M_PI*Z1Z2/(k*k)*cos(k*rcut);
+  return 4.0*M_PI*Z1Z2/k*(k*gsl_sf_Ci(k*rcut)-sin(k*rcut)/rcut);
 }
 
-double PACoulombFitClass::Xk_V(double k)
+double PATripoleFitClass::Xk_V(double k)
 {
-  return -4.0*M_PI*Z1Z2/(k*k)*cos(k*rcut);
+  return 4.0*M_PI*Z1Z2/k*(k*gsl_sf_Ci(k*rcut)-sin(k*rcut)/rcut);
 }

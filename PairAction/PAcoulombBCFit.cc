@@ -325,14 +325,22 @@ double PAcoulombBCFitClass::dVlong(double q, int level)
 
 double PAcoulombBCFitClass::Udiag (double r, int level)
 {
-  if (r <= (qgrid->End*1.0000001)) 
+  double rend = qgrid->End;
+
+  if (r <= (rend*1.0000001)) 
     return Usplines(level)(r, 0.0);
   else {
     // Coulomb action is independent of z
     double beta = SmallestBeta;
     for (int i=0; i<level; i++)
       beta *= 2.0;
-    return (beta*Pot->V(r));
+    double V = beta * Z1Z2/r;
+    // Now add residual term
+    double Uend = Usplines(level)(rend,0.0);
+    double Vend = beta * Z1Z2/qgrid->End;
+    double delta = Uend - Vend;
+    double correction = delta * rend*rend*rend/(r*r*r);
+    return (V + correction);
   }
 }
 
@@ -366,10 +374,17 @@ double PAcoulombBCFitClass::Udiag_pp (double r, int level)
 
 double PAcoulombBCFitClass::dUdiag (double r, int level)
 {
-  if (r <= (qgrid->End*1.0000001)) 
+  double rend = qgrid->End;
+  if (r <= (rend*1.0000001)) 
     return dUsplines(level)(r, 0.0);
-  else // Coulomb action is independent of z
-    return (Pot->V(r));
+  else {
+    double V = Z1Z2/r;
+    double dUend = dUsplines(level)(rend, 0.0);
+    double Vend  = Z1Z2/rend;
+    double delta = dUend-Vend;
+    double correction = delta * (rend*rend*rend)/(r*r*r);
+    return (V + correction);
+  }
 }
 
 double PAcoulombBCFitClass::dUdiag_p (double r, int level)

@@ -9,6 +9,7 @@
 #include "../../Rho.h"
 #endif
 
+/// Base class for pair actions
 class PairActionFitClass
 {
 protected:
@@ -36,7 +37,6 @@ public:
   // Product of the two charges.  Zero if not coulomb or not charged.
   double Z1Z2;
 
-  bool UsePBC;
   int NumBetas;
   
   Potential *Pot;
@@ -68,17 +68,29 @@ public:
   /////////////////////////
   virtual bool IsLongRange() = 0;
   /// The diagonal action only -- used for long-range breakup
-  virtual double Udiag(double q, int level) { return 0.0; }
+  virtual double Udiag(double q, int level)      { return 0.0; }
   /// The q-derivative of the above
-  virtual double Udiag_p(double q, int level) { return 0.0; }
+  virtual double Udiag_p(double q, int level)    { return 0.0; }
   /// The q-derivative of the above
-  virtual double Udiag_pp(double q, int level) { return 0.0; }
+  virtual double Udiag_pp(double q, int level)   { return 0.0; }
   /// The beta-derivative of the diagonal action
   virtual double dUdiag    (double q, int level) { return 0.0; }
   /// The q-derivative of the above
   virtual double dUdiag_p  (double q, int level) { return 0.0; }
   /// The q-derivative of the above
   virtual double dUdiag_pp (double q, int level) { return 0.0; }
+  /// This sets the cutoff radius for the long-range fit (NOT the core-radius for PH's)
+  virtual void Setrc (double rc)                 {             }
+  /** This is the k-compontent of the modified Fourier transform of
+      the diagonal part of U, dU, and V, respectively, where the 
+      integral is take from rc (not zero) to infinity. 
+      \f[ X_k \equiv -\frac{4\pi}{\Omega k} \int_{r_c}^\infty \sin
+      (kr) v(r) \, dr \f]
+      Note that since we don't have the box here, we can't divide by
+      \f$\Omega\f$. This must be done by the caller. */
+  virtual double Xk_U  (double k, int level)     { return 0.0; }
+  virtual double Xk_dU (double k, int level)     { return 0.0; }
+  virtual double Xk_V  (double k)                { return 0.0; }
 
   // Fills in the Vlong_k and dVlong_k array.
   virtual void DoBreakup (const dVec &box, const Array<dVec,1> &kVecs) 
