@@ -82,12 +82,13 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
-    for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-      dVec r = Path(sliceCounter,ptcl);
-      dVec rp= Path(sliceCounter+skip,ptcl);
-      dVec rpp=Path(sliceCounter+(skip>>1),ptcl);
-      dVec rdiff = 
-	DistanceTable->Velocity(sliceCounter, sliceCounter+skip, ptcl);
+    for (int slice=startSlice;slice<endSlice;slice+=skip){
+      dVec r = Path(slice,ptcl);
+      dVec rp= Path(slice+skip,ptcl);
+      dVec rpp=Path(slice+(skip>>1),ptcl);
+      dVec rdiff;// = 
+      //DistanceTable->Velocity(slice, slice+skip, ptcl);
+      rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
       dVec rbar = r + 0.5*rdiff;
       dVec newDelta=GaussianRandomVec(sigma);
       for (int dim=0; dim<NDIM; dim++)
@@ -97,12 +98,12 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
 	  while (newDelta[dim] < (-(0.5*Path.Box[dim])))
 	    newDelta += Path.Box[dim];
 	}
-      DistanceTable->PutInBox(newDelta);
+      //DistanceTable->PutInBox(newDelta);
       rpp=rbar+newDelta;
       logNewSampleProb=logNewSampleProb+
 	(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
       ///Here we've stored the new position in the path
-      Path.SetPos(sliceCounter+(skip>>1),ptcl,rpp);
+      Path.SetPos(slice+(skip>>1),ptcl,rpp);
     }
   }
   return logNewSampleProb;
@@ -121,21 +122,23 @@ inline double ActionClass::LogSampleProb(int startSlice, int endSlice,
   double logSampleProb=0.0;
 
   double levelTau = 0.5*tau*skip;
-  for (int ptcl=0;ptcl<particles.size();ptcl++){
+  for (int ptclIndex=0;ptclIndex<particles.size();ptclIndex++){
+    int ptcl = particles(ptclIndex);
     double lambda=Path.ParticleSpecies(ptcl).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
-    for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-      dVec r = Path(sliceCounter,ptcl);
-      dVec rdiff = 
-	DistanceTable->Velocity(sliceCounter, sliceCounter+skip, ptcl);
-      dVec rp= Path(sliceCounter+skip,ptcl);
-      dVec rpp=Path(sliceCounter+(skip>>1),ptcl);
+    for (int slice=startSlice;slice<endSlice;slice+=skip){
+      dVec r = Path(slice,ptcl);
+      dVec rdiff;// = 
+      //DistanceTable->Velocity(slice, slice+skip, ptcl);
+      rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
+      dVec rp= Path(slice+skip,ptcl);
+      dVec rpp=Path(slice+(skip>>1),ptcl);
       ///We've ignored boundary conditions here (well we think this is fixed but we're not sure)
       dVec rbar=r + 0.5*rdiff;
       dVec Delta= rpp - rbar;
-      DistanceTable->PutInBox(Delta);
+      //DistanceTable->PutInBox(Delta);
       logSampleProb=logSampleProb+
 	(prefactorOfSampleProb-0.5*dot(Delta,Delta)/(sigma2));
     }

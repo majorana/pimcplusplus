@@ -101,7 +101,9 @@ void setupMove(BisectionMoveClass &myBisectionMove,ShiftMoveClass &myShiftMove, 
   myBisectionMove.SetActiveSpecies(ActiveSpecies);
   myBisectionMove.SetNumParticlesToMove(1);
   myBisectionMove.StartTimeSlice=0;
-  myBisectionMove.NumLevels=3;
+  myBisectionMove.NumLevels=thePathData.Action.MaxLevels;
+  cerr << "Levels = " << myBisectionMove.NumLevels << endl;
+
   //  myShiftMove.PathData=&thePathData;
 
 }
@@ -158,7 +160,34 @@ void TestShift()
 }
 
 
+void debug(PathDataClass &pathData)
+{
+  dVec tempPos;
+  double actAns;
+  SetMode(BOTHMODE);
+  for (int slice=0;slice<pathData.NumTimeSlices();slice++){
+    double theta=2*M_PI*slice/(pathData.NumTimeSlices()-1);
+    tempPos[0]=2*sin(theta);
+    tempPos[1]=2*cos(theta);
+    tempPos[2]=0.0;
+    pathData.SetPos(slice,0,tempPos);
+    pathData.SetPos(slice,1,tempPos);
+  }
+  Array<int,1> changedParticles(1);
+  changedParticles(0)=0;
+  actAns=pathData.Action.calcTotalAction(0, pathData.NumTimeSlices(), 
+		  changedParticles,0);
+  fprintf(stderr,"%1.15e\n",actAns);
+  changedParticles(0)=1;
 
+
+
+  actAns=pathData.Action.calcTotalAction(0, pathData.NumTimeSlices(), 
+		  changedParticles,0);
+  fprintf(stderr,"%1.15e\n",actAns);
+
+
+}
 
 
 int main(int argc, char **argv)
@@ -189,10 +218,10 @@ int main(int argc, char **argv)
   LinearGrid qgrid(0.0, 3.0, 31);
   for (int i=0; i<qgrid.NumPoints; i++) {
     double q = qgrid(i);
-    double U = myPathData.Action.PairActionVector(0)->U(q,0.0, 4.0*q*q, 3);
+    double U = myPathData.Action.PairActionVector(0)->U(q,0.0, 4.0*q*q, 0);
     cerr << q << " " << U << endl;
   }
-
+  cerr << "Before Observables.\n";
   IOSectionClass out;
   inSection.OpenSection("Observables");
   string outFileName;
@@ -222,8 +251,11 @@ int main(int argc, char **argv)
   //Observable Setup Done
 
   //Move Setup Hack
+  
+  cerr << "Before bisection move constructor.\n";
   BisectionMoveClass myBisectionMove(myPathData);
   ShiftMoveClass myShiftMove(myPathData);
+  cerr << "Before setup moves.\n";
   setupMove(myBisectionMove,myShiftMove,myPathData);
   //Move Setup Done
   
@@ -267,16 +299,19 @@ int main(int argc, char **argv)
 //   //  cerr<<"What the action class thinks the size is: ";
 //   //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
 //   //  PrintConfigClass myPrintConfig(myPathData);
+
+//  debug(myPathData);
+//  pathDump.WriteBlock();
   ofstream outfile;
   outfile.open("ourPath.dat");
-  int steps=25000;
+  int steps=5000000;
   for (int counter=0;counter<steps;counter++){
-    if (counter>steps/8 && (counter % 1)==0){
+    if (counter>steps/4 && (counter % 1)==0){
       TotE.Accumulate();
       ep.Accumulate();
       ee.Accumulate();
     }
-    if (counter>steps/8 && (counter % 10) == 0){
+    if (counter>steps/4 && (counter % 100) == 0){
       TotE.WriteBlock();
       cerr << "Step #" << counter << ":\n";
 //       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){

@@ -19,23 +19,41 @@ void TotalEnergyClass::Accumulate()
       int species1 = PathData.Path.ParticleSpeciesNum(ptcl1);
       double lambda = PathData.Path.ParticleSpecies(ptcl1).lambda;
       if (lambda != 0.0) {
-	dVec vel = PathData.DistanceTable->Velocity(link, link+1, ptcl1);
+	dVec vel;// = PathData.DistanceTable->Velocity(link, link+1, ptcl1);
+	vel = PathData(link+1,ptcl1)-PathData(link,ptcl1);
 	sum -= dot(vel,vel)/(4.0*lambda*tau*tau);
       }
       for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
 	dVec r, rp;
 	double rmag, rpmag;
-	PathData.DistanceTable->DistDisp(link, link+1, ptcl1, ptcl2,
-					 rmag, rpmag, r, rp);
+	//PathData.DistanceTable->DistDisp(link, link+1, ptcl1, ptcl2,
+	//				 rmag, rpmag, r, rp);
+	dVec r1 = PathData(link,ptcl1);
+	dVec r2 = PathData(link,ptcl2);
+	dVec rp1 = PathData(link+1,ptcl1);
+	dVec rp2 = PathData(link+1,ptcl2);
+	r=r2-r1;
+	rp=rp2-rp1;
+	rmag=sqrt(dot(r,r));
+	rpmag=sqrt(dot(rp,rp));
 	double s2 = dot(r-rp, r-rp);
 	double q = 0.5*(rmag+rpmag);
 	double z = (rmag-rpmag);
+	double dU;
 	int PairIndex = 
 	  PathData.Action.PairMatrix(species1, 
 				     PathData.Path.ParticleSpeciesNum(ptcl2));
-	double dU;
-
 	dU=PathData.Action.PairActionVector(PairIndex)->dU(q, z, s2, 0);
+	PairActionFitClass &PA=*PathData.Action.PairActionVector(PairIndex);
+// 	cerr << "ptcl1 = " << ptcl1 << endl;
+// 	cerr << "ptcl2 = " << ptcl2 << endl;
+// 	cerr << "species1 = " << PathData.Path.ParticleSpecies(ptcl1).Name
+// 	     << endl;
+// 	cerr << "species2 = " << PathData.Path.ParticleSpecies(ptcl2).Name
+// 	     << endl;
+// 	cerr << "PA species1 = " << PA.Particle1.Name << endl;
+// 	cerr << "PA species2 = " << PA.Particle2.Name << endl;
+//       	if (((ptcl1==2) && (ptcl2==1)) || ((ptcl1==3) && (ptcl2==0)))
 	sum += dU;
       }
     }

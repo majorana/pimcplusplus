@@ -11,23 +11,12 @@
 void ShiftMoveClass::MakeMove()
 {//Remember to mark Actions dirty!!!
   //int numTimeSlicesToShift=(int)floor(sprng()*PathData->NumTimeSlices);
-  int numTimeSlicesToShift = (int)floor(PathData.NumTimeSlices()*drand48());
+  int numTimeSlicesToShift =(int)floor((PathData.NumTimeSlices()-1)*drand48());
   
-  if (numTimeSlicesToShift > 0){
-    for (int counter=0;counter<PathData.NumSpecies();counter++){
-      //      PathData.MoveJoin(1);
-      PathData.ShiftData(numTimeSlicesToShift);
-      //      PathData.Join=1+numTimeSlicesToShift;
-    }
-  }
-  else if (numTimeSlicesToShift<=0){
-    for (int counter=0;counter<PathData.NumSpecies();counter++){
-      //      PathData.MoveJoin(PathData.NumTimeSlices()-2); //< -1 so you don't overflow and -1 again because you 
-                                                              //don't actually want to be at the entire end
-      PathData.ShiftData(numTimeSlicesToShift);
-      //      PathData.Join=PathData.NumTimeSlices()-2+numTimeSlicesToShift;
-    }
-  }
+  //      PathData.MoveJoin(1);
+  PathData.ShiftData(numTimeSlicesToShift);
+  //      PathData.Join=1+numTimeSlicesToShift;
+
   
     
 }

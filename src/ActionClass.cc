@@ -8,6 +8,7 @@ void ActionClass::Read(IOSectionClass& inSection)
 { 
   assert(inSection.ReadVar ("tau", tau));
   assert(inSection.ReadVar ("MaxLevels", MaxLevels));
+  cerr << "MaxLevels = " << MaxLevels << endl;
 
   Array<string,1> PAFiles;
   assert (inSection.ReadVar ("PairActionFiles", PAFiles));
@@ -53,6 +54,7 @@ void ActionClass::Read(IOSectionClass& inSection)
 	  exit(1);
 	}
       }
+  cerr << "Finished reading the action.\n";
 }
 
 double ActionClass::calcTotalAction(int startSlice, int endSlice, 
@@ -60,9 +62,11 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 				    int level)//, double &PE, double &KE)
 {
   double PE, KE;
-
+  //  cerr<<"My changed particle is "<<changedParticles(0)<<endl;
   // First, sum the pair actions
-  Path.DoPtcl = true;
+  for (int counter=0;counter<Path.DoPtcl.size();counter++){
+    Path.DoPtcl(counter)=true;
+  }
   PE = 0.0;
   KE = 0.0;
   double TotalU = 0.0;
@@ -76,6 +80,9 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
     int species1=Path.ParticleSpeciesNum(ptcl1);
     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
       if (Path.DoPtcl(ptcl2)){
+	int PairIndex = PairMatrix(species1,
+				   Path.ParticleSpeciesNum(ptcl2));
+	//cerr<<"PairIndex: "<<PairIndex<<endl;
 	for (int slice=startSlice;slice<endSlice;slice+=skip){
 	  dVec r1=Path(slice,ptcl1);
 	  dVec r2=Path(slice,ptcl2);
@@ -85,18 +92,25 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	  dVec r, rp;
 	  double rmag, rpmag;
 
-	  DistanceTable->DistDisp(slice, slice+skip, ptcl1, ptcl2,
-				  rmag, rpmag, r, rp);
+	  //	  DistanceTable->DistDisp(slice, slice+skip, ptcl1, ptcl2,
+	  //				  rmag, rpmag, r, rp);
+	  r=r2-r1;
+	  rp=rp2-rp1;
+	  rmag=sqrt(dot(r,r));
+	  rpmag=sqrt(dot(rp,rp));
+	  //	  cerr<<"rmag "<<rmag<<endl;
+	  //	  cerr<<"rpmag "<<rpmag<<endl;
 	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
-	  int PairIndex = PairMatrix(species1,
-				     Path.ParticleSpeciesNum(ptcl2));
 	  double U, dU, V;
 	  U = PairActionVector(PairIndex)->U(q,z,s2, level);//, U, dU, V);
+	  //     	  cerr<<"q, z, s2, U: "<<q<<" "<<" "<<z<<" "<<s2<<" "<<U<<endl;
+	  //	  if (((ptcl1==1) && (ptcl2==2)) || ((ptcl1==0) && (ptcl2==3)))
 	  TotalU += U;
 	  PE += V;
 	  KE -= dU;
+
 	}
       }
       
@@ -104,13 +118,15 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
     double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
       dVec vel;
-      vel = DistanceTable->Velocity(slice, slice+skip, ptcl1);
+      //vel = DistanceTable->Velocity(slice, slice+skip, ptcl1);
+      vel = Path(slice+skip,ptcl1) - Path(slice,ptcl1);
       //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
       TotalK += dot(vel,vel)*FourLambdaTauInv; 
     }
   }
   KE += TotalK / levelTau;
-  
+  // cerr<<"TotalK:  "<<TotalK<<endl;
+  //  cerr<<"TotalU:  "<<TotalU<<endl;
   return (TotalK + TotalU);
   
   

@@ -71,4 +71,6 @@ void ParticleMoveClass::ChooseParticles()
   }
   for (int i=0; i<NumParticlesToMove; i++) 
     ActiveParticles(i) = MyParticleIndices(i);
+  /// HACK HACK HACK
+  //ActiveParticles(0) = 0;
 }
