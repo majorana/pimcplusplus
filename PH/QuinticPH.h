@@ -140,7 +140,8 @@ inline void QuinticPH::SetAval (int i, double Aval, bool isNegative)
   double pAval = sqrt (Aval - ABmin);
   if (isNegative)
     pAval = -pAval;
-
+  if (i == 0)
+    pB(0) = pAval;
   pA(i) = pAval;
 }
 
