@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 {
   MPI_Init(&argc, &argv);
 
-  CommClass myCommunicator;
+  CommunicatorClass myCommunicator;
   myCommunicator.my_mpi_comm = MPI_COMM_WORLD;
   int MyProc = myCommunicator.MyProc();
 

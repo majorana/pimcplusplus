@@ -8,7 +8,7 @@
 #endif
 
 
-class CommClass
+class CommunicatorClass
 {
  public:
 #ifdef PARALLEL

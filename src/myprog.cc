@@ -17,7 +17,7 @@ int main()
   PathDataClass myPathData;
   BisectionMoveClass myBisectionMove;
   PairActionClass myPairAction;
-  CommClass myCommunicator;
+  CommunicatorClass myCommunicator;
   myPairAction.ReadDavidSquarerFile("../inputs/testcoul.dm");
 
   LinearGrid grid(0.0, 3.0, 31);

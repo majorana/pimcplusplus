@@ -46,7 +46,7 @@ void MirroredArrayClass<T>::Print()
 }
 
 template <class T>
-void MirroredArrayClass<T>::shiftData(int slicesToShift, CommClass &Communicator)
+void MirroredArrayClass<T>::shiftData(int slicesToShift, CommunicatorClass &Communicator)
 {
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
@@ -122,7 +122,7 @@ void MirroredArrayClass<T>::shiftData(int slicesToShift, CommClass &Communicator
 //void foo()
 //{
 //  MirroredArrayClass<int> myArray;
-//  CommClass myCommunicator;
+//  CommunicatorClass myCommunicator;
 //  myArray.Print();
 //  myArray.shiftData(3,myCommunicator);
 //  MirroredArrayClass<dVec> myArray2;

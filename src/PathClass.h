@@ -19,7 +19,7 @@ class PathClass
   
  public:
   /// Holds the MC step number each particle/timeslice was last updated.
-  void shiftData(int slicesToShift,CommClass &Communicator);
+  void shiftData(int slicesToShift,CommunicatorClass &Communicator);
   inline void resize(int numPtcles,int numTimeSlices)
     {
       Positions.resize(numPtcles,numTimeSlices);

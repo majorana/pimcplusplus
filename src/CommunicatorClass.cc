@@ -3,21 +3,21 @@
 // Parallel MPI Communicator functions definitions
 #ifdef PARALLEL
 
-int CommClass::NumProcs() const
+int CommunicatorClass::NumProcs() const
 {
   int size;
   MPI_Comm_size(my_mpi_comm, &size);
   return (size);
 }
 
-int CommClass::MyProc() const
+int CommunicatorClass::MyProc() const
 {
   int proc;
   MPI_Comm_rank(my_mpi_comm, &proc);
   return (proc);
 }
 
-void CommClass::SendReceive(int SendProc, const Array<dVec,1> &SendBuff,
+void CommunicatorClass::SendReceive(int SendProc, const Array<dVec,1> &SendBuff,
 			    int RecvProc,  Array<dVec,1> &RecvBuff)
 {
   double *SendPtr = (double *)SendBuff.data();
@@ -32,7 +32,7 @@ void CommClass::SendReceive(int SendProc, const Array<dVec,1> &SendBuff,
 
 
 
-void CommClass::SendReceive(int SendProc, const Array<double,1> &SendBuff,
+void CommunicatorClass::SendReceive(int SendProc, const Array<double,1> &SendBuff,
 			    int RecvProc, Array<double,1> &RecvBuff)
 {
   double *SendPtr = (double *)SendBuff.data();
@@ -47,7 +47,7 @@ void CommClass::SendReceive(int SendProc, const Array<double,1> &SendBuff,
 
 
 
-void CommClass::SendReceive(int SendProc, const Array<int,1> &SendBuff,
+void CommunicatorClass::SendReceive(int SendProc, const Array<int,1> &SendBuff,
 			    int RecvProc, Array<int,1> &RecvBuff)
 {
   int *SendPtr = (int *) SendBuff.data();
@@ -66,29 +66,29 @@ void CommClass::SendReceive(int SendProc, const Array<int,1> &SendBuff,
 
 // Serial definition
 #else
-int CommClass::NumProcs() const
+int CommunicatorClass::NumProcs() const
 {
   return(1);
 }
 
-int CommClass::MyProc() const
+int CommunicatorClass::MyProc() const
 {
   return (0);
 }
 
-void CommClass::SendReceive(int SendProc, const Array<dVec,1> &SendBuff,
+void CommunicatorClass::SendReceive(int SendProc, const Array<dVec,1> &SendBuff,
 			       int RecvProc,       Array<dVec,1> &RecvBuff)
 {
   RecvBuff = SendBuff;
 }
 
-void CommClass::SendReceive(int SendProc, const Array<double,1> &SendBuff,
+void CommunicatorClass::SendReceive(int SendProc, const Array<double,1> &SendBuff,
 			       int RecvProc,       Array<double,1> &RecvBuff)
 {
   RecvBuff = SendBuff;
 }
 
-void CommClass::SendReceive(int SendProc, const Array<int,1> &SendBuff,
+void CommunicatorClass::SendReceive(int SendProc, const Array<int,1> &SendBuff,
 			       int RecvProc,       Array<int,1> &RecvBuff)
 {
   RecvBuff = SendBuff;
