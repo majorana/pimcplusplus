@@ -22,7 +22,11 @@ typedef TinyVector<int,NDIM> dVecInt;
 #ifdef MAC
 //  extern "C" double isnan (double x);
 #define isnan(x) __isnand(x)
+#define fpclassify(x) __fpclassifyd(x)
+#define isnormal(x) __isnormald(x)
+#define isinf(x) __isinfd(x)
 #endif
+
 template <class T, int size>
 inline TinyVector<T,size> operator-(TinyVector<T,size> v)
 {
