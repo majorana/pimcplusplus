@@ -144,6 +144,14 @@ public:
     AB(Write2,x,y)=newVal;
   }
 
+  inline void AcceptCopy (int slice, int ptcl){
+    AB(1,slice,ptcl)=AB(0,slice,ptcl);
+  }
+  inline void RejectCopy(int slice,int ptcl){
+    AB(0,slice,ptcl)=AB(1,slice,ptcl);
+  }
+    
+
 
   /// In case of acceptance, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This

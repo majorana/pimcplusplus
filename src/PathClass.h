@@ -15,9 +15,14 @@ private:
   Array<SpeciesClass *,1> SpeciesArray;
 
 
+
+
   int TimeSliceNumber;
 public:
   MirroredArrayClass1D<int> Permutation;
+  ///A scratch array to hold a boolean indicating whether we've
+  ///looped over this particle yet
+  Array<bool,1> DoPtcl;
   dVec Box;
   inline void MoveJoin(int oldJoin, int newJoin){
     Path.MoveJoin(Permutation,oldJoin,newJoin);
@@ -92,7 +97,7 @@ public:
     Path.Resize(TimeSliceNumber,numParticles);
     Permutation.Resize(numParticles);
     SpeciesNumber.resize(numParticles);
-
+    DoPtcl.resize(numParticles);
     /// Assign the species number to the SpeciesNumber array
     for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
       for (int i=SpeciesArray(speciesNum)->FirstPtcl; 

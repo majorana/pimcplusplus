@@ -9,8 +9,8 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 				    int level)
 {
   // First, sum the pair actions
-  Array<bool,1> doptcl2(Path.NumParticles());
-  doptcl2 = true;
+  //  Array<bool,1> doptcl2(Path.NumParticles());
+  Path.DoPtcl = true;
   double TotalU = 0.0;
   double TotalK = 0.0;
   int numChangedPtcls = changedParticles.size();
@@ -18,10 +18,10 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
   double levelTau = tau* (1<<level);
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = changedParticles(ptcl1Index);
-    doptcl2(ptcl1) = false;
+    Path.DoPtcl(ptcl1) = false;
     int species1=Path.ParticleSpeciesNum(ptcl1);
     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
-      if (doptcl2(ptcl2)){
+      if (Path.DoPtcl(ptcl2)){
 
 	for (int slice=startSlice;slice<endSlice;slice+=skip){
 	  dVec r1=Path(slice,ptcl1);

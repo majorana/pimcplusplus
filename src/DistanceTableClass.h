@@ -1,6 +1,8 @@
 #ifndef DISTANCE_TABLE_CLASS_H
 #define DISTANCE_TABLE_CLASS_H
 
+#include "PathClass.h"
+
 ///Particle 1 is always in the middle of the box
 ///Particle 1 > Particle 2
 ///Particle 1 is in the middle of the box
@@ -22,10 +24,13 @@ protected:
   MirroredArrayClass<int> ImageNumTable; ///<(timeslice, ptcl x ptcl)
   ///Stores what vectors the image numbers corresponds to
   Array<dVec,1> ImageVectors;
+  Array<dVecInt,2> LowerDimImageMasks;
+  Array<dVec,2> LowerDimVectorMasks;
+  int FirstLowerDimSpecies;
   inline void ArrayIndex(int ptcl1, int ptcl2, 
 			 int &index, double &sign) const;
 public:
-  virtual void Update (int timeSlice, int ptcl) = 0;
+  virtual void Update (int timeSlice, Array<int,1> ptclArray) = 0;
   virtual void UpdateAll() = 0;
   virtual void UpdateAll(int timeSlice) = 0;
   inline void DistDisp(int timeSlice, int ptcl1, int ptcl2, 
@@ -33,10 +38,61 @@ public:
   inline void DistDisp(int timeSliceA, int timeSliceB,
 		       int ptcl1, int ptcl2, double &distA, double &distB,
 		       dVec &dispA, dVec &dispB);
-  DistanceTableClass (PathClass &myPath);
-
+  inline DistanceTableClass (PathClass &myPath);
+  inline void AcceptCopy(int startTimeSlice, int endTimeSlice,
+			 const Array<int,1> &activeParticles);
+  
+  inline void RejectCopy(int startTimeSlice, int endTimeSlice,
+			 const Array<int,1> &activeParticles);
 };
 
+inline void DistanceTableClass::AcceptCopy(int startTimeSlice, 
+					   int endTimeSlice, 
+					   const Array<int,1> &activeParticles)
+{
+
+
+  for (int slice=startTimeSlice;slice<=endTimeSlice;slice++){
+    for (int ptcl1Index=0;ptcl1Index<activeParticles.size();ptcl1Index++){
+      int ptcl1=activeParticles(ptcl1Index);
+      for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
+	double dummySign;
+	int index;
+	ArrayIndex(ptcl1,ptcl2,index,dummySign);
+	DistTable.AcceptCopy(slice,index);
+	DispTable.AcceptCopy(slice,index);
+	ImageNumTable.AcceptCopy(slice,index);
+	
+      }
+    }
+  }
+}
+
+inline void DistanceTableClass::RejectCopy(int startTimeSlice, 
+					   int endTimeSlice,
+					   const Array<int,1> &activeParticles)
+{
+
+
+  for (int slice=startTimeSlice;slice<=endTimeSlice;slice++){
+    for (int ptcl1Index=0;ptcl1Index<activeParticles.size();ptcl1Index++){
+      int ptcl1=activeParticles(ptcl1Index);
+      for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
+	double dummySign;
+	int index;
+	ArrayIndex(ptcl1,ptcl2,index,dummySign);
+	DistTable.RejectCopy(slice,index);
+	DispTable.RejectCopy(slice,index);
+	ImageNumTable.RejectCopy(slice,index);
+	
+      }
+    }
+  }
+}
+      
+
+      
+  
 
 
 /// Return the image number correspoding to the negative of the
@@ -131,11 +187,9 @@ inline void DistanceTableClass::DistDisp(int timeSliceA, int timeSliceB,
 
 
 
-
-DistanceTableClass::DistanceTableClass (PathClass &myPath) :
+inline DistanceTableClass::DistanceTableClass (PathClass &myPath) :
   Path(myPath)
 {
-
   int size=(Path.NumParticles()*(Path.NumParticles()+1))/2;
   DistTable.Resize(Path.NumTimeSlices(),size);
   DispTable.Resize(Path.NumTimeSlices(),size);
@@ -153,7 +207,36 @@ DistanceTableClass::DistanceTableClass (PathClass &myPath) :
       for (int dim=0; dim<NDIM; dim++)
 	ImageVectors(dim) = (double)image[dim]*Path.Box[dim];
     }
+  // Now initialize the Masks for lower dimensionality;
+  int NumSpecies = Path.NumSpecies();
+  LowerDimImageMasks.resize(NumSpecies,NumSpecies);
+  LowerDimVectorMasks.resize(NumSpecies,NumSpecies);
+  FirstLowerDimSpecies = NumSpecies;
+  for (int species1=0; species1<NumSpecies; species1++) {
+    dVecInt imageMask;
+    dVec vectorMask;
+    imageMask = 1;
+    vectorMask = 1.0;
+    for (int dim=0; dim<NDIM; dim++)
+      if (!Path.Species(species1).DimensionActive[dim]) {
+	if (FirstLowerDimSpecies > species1)
+	  FirstLowerDimSpecies = species1;
+	imageMask[dim] = 0;
+	vectorMask[dim] = 0.0;
+      }
+    for (int species2=0; species2<NumSpecies; species2++)
+      {
+	for (int dim=0; dim<NDIM; dim++)
+	  if (!Path.Species(species2).DimensionActive[dim]) {
+	    imageMask[dim] = 0;
+	    vectorMask[dim] = 0.0;
+	  }
+	LowerDimImageMasks(species1,species2) = imageMask;
+	LowerDimVectorMasks(species1,species2) = vectorMask;
+      }
+  }  
 }
+
 
 /// Maps particle x particle to a location in our distance or
 /// displacement table. 
@@ -172,9 +255,6 @@ inline void DistanceTableClass::ArrayIndex(int ptcl1, int ptcl2,
   //ptcl1*(ptcl1+1)/2+ptcl2;  
   index = ((ptcl1*(ptcl1+1))>>1)+ptcl2;   
 }
-
-#include "DistanceTableFreeClass.h"
-// #include "DistanceTablePBCClass.h"
 
 
 #endif

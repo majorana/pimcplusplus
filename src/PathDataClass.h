@@ -7,7 +7,8 @@
 #include "ActionClass.h"
 #include "PathClass.h"
 #include "CommunicatorClass.h"
-#include "DistanceTableClass.h"
+#include "DistanceTablePBCClass.h"
+//#include "DistanceTableFreeClass.h"
 
 /// This is the class that holds all of the information about the paths 
 /// including all of the particles, the momized data, and the action.
@@ -47,6 +48,10 @@ public:
       Path.MoveJoin(Join,newJoin);
       Join=newJoin;
     }
+  inline void Update(int timeSlice,Array <int,1> ptclArray){
+    DistanceTable->Update(timeSlice,ptclArray);
+  }
+
 
   /// Returns the number of time slices.
   inline int NumTimeSlices()
@@ -90,7 +95,7 @@ inline void PathDataClass::AcceptMove(int startTimeSlice,int endTimeSlice,
 {
 
   Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
-  //  DistanceTable.AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
+  DistanceTable->AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
   
 }
 
@@ -98,8 +103,8 @@ inline void PathDataClass::RejectMove(int startTimeSlice,int endTimeSlice,
 			       const Array <int,1> &activeParticles)
 {
   Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticles);  
-  ///NEEDS TO BE PUT BACK IN! NEEDS TO BE PUT BACK IN! NEEDS TO BE PUT BACK IN!
-  //  DistanceTable.RejectCopy(startTimeSlice,endTimeSlice,activeParticles);
+  
+  DistanceTable->RejectCopy(startTimeSlice,endTimeSlice,activeParticles);
 
   
 }

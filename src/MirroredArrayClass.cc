@@ -3,6 +3,7 @@
 
 
 template class MirroredArrayClass<int>;
+template class MirroredArrayClass<double>;
 template class MirroredArrayClass<dVec>;
 template class MirroredArrayClass1D<int>;
 
