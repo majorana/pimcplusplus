@@ -92,7 +92,7 @@ inline void MyTricubicSpline::Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
   Xgrid = xgrid; Nx = xgrid->NumPoints;
   Ygrid = ygrid; Ny = ygrid->NumPoints;
   Zgrid = zgrid; Nz = zgrid->NumPoints;
-  
+
   assert (init.extent(0) == Nx);
   assert (init.extent(1) == Ny);
   assert (init.extent(2) == Nz);
