@@ -83,7 +83,7 @@ void ScreenedPot::Read (IOSectionClass &in)
   in.CloseSection();
 
   assert (in.OpenSection("BarePot"));
-  BarePot->Read(in);
+  BarePot=ReadPotential(in);
   in.CloseSection();
 }
 
