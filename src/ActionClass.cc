@@ -1,4 +1,6 @@
 #include "ActionClass.h"
+#include <sstream>
+#include <stdio.h>
 
 double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
 				  int StartSlice, int EndSlice, int level)
@@ -67,10 +69,9 @@ string PairActionClass::SkipTo(ifsteam &infile,string skipToString)
   } while (lineString.find(skipToString,0)==string::npos && !infile.eof());
 
   if (infile.eof()){
-    cout<<"ERROR!!! ERROR!!! ERROR! No NDERIV found in Davids squarer file\n";
+    cout<<"ERROR!!!  No NDERIV found in Davids squarer file\n";
   }
   return lineString;
-
 
 }
 
@@ -89,12 +90,65 @@ void PairActionClass::ReadFORTRAN3Tensor(ifstream &infile,Array<double,3> &tempU
 
 }
 
+
+inline bool IsDigit(char c)
+{
+  return (((c>='0') && (c<='9')) || (c == '-'));
+}
+
+inline bool IsNumberChar(char c)
+{
+  bool IsNumber = false;
+  
+  IsNumber = IsNumber || ((c>='0')&&(c<='9'));
+  IsNumber = IsNumber || (c=='-');
+  IsNumber = IsNumber || (c=='.');
+}
+
+
+
+int GetNextInt(string &s)
+{
+  int i=0;
+  int size = s.size();
+  while ((i<size) && (!IsDigit(s[i])))
+    i++;
+  s = substr (i, size-i);
+
+  istringstream sstream(s);
+
+  int num;
+  sstream >> num;
+  int pos = sstream.tellg();
+  s = s.substr(pos, s.size()-pos);
+
+  return (num);
+}
+
+double GetNextDouble(string &s)
+{
+  int i=0;
+  int size = s.size();
+  while ((i<size) && (!IsNumberChar(s[i])))
+    i++;
+  s = substr (i, size-i);
+
+  istringstream sstream(s);
+
+  double num;
+  sstream >> num;
+  int pos = sstream.tellg();
+  s = s.substr(pos, s.size()-pos);
+
+  return (num);
+}
+
+
 void PairActionClass::ReadDavidSquarerFile(string DMFile)
 {
   ifstream infile;
   infile.open(DMFile);  
   
-
   string NDERIVString = SkipTo(infile,"NDERIV");
   int numOfFits=GetNextInt(NDERIVString);
   //  NDERIVString.erase(NDERIVString.find("NDERIV"),strlen("NDERIV"));
@@ -147,9 +201,6 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
     }
     tau=smallestTau;
     n=NMax;
-	
-    
-    
   }
 
   for (counter=0;counter<=nderiv;counter++){ // Get the Beta derivatives
@@ -159,10 +210,5 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
   
   
   
-  
-  
-
-
-
 
 }
