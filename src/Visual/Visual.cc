@@ -9,44 +9,70 @@ void VisualClass::MakeFrame(int frame)
   
   PathVis.Objects.resize(0);
 
+  MakePaths(frame);
+
   int numPtcls = PathArray.extent(1);
   int numSlices = PathArray.extent(2);
 
 
-  Array<Vec3,1> onePath(numSlices);
-  for (int si=0; si<numSpecies; si++) {
-    for (int ptcl=Species(si).FirstParticle; 
-	 ptcl<=Species(si).LastParticle; ptcl++) {
-      if (Species(si).lambda != 0.0) {
-	for (int slice=0; slice<numSlices; slice++) {
-	  onePath(slice)[0] = PathArray(frame,ptcl,slice,0);
-	  onePath(slice)[1] = PathArray(frame,ptcl,slice,1);
-	  onePath(slice)[2] = PathArray(frame,ptcl,slice,2);
-	}
-	PathObject* pathObj = new PathObject;
-	if (si == 0)
-	  pathObj->SetColor (0.3, 0.3, 1.0);
-	else
-	  pathObj->SetColor (0.0, 1.0, 0.0);
-	if (PathType == TUBES)
-	  pathObj->TubesSet (onePath);
-	else
-	  pathObj->LinesSet (onePath);
-	PathVis.Objects.push_back(pathObj);
-      }
-      else {
-	Vec3 pos;
-	pos[0] = PathArray(frame, ptcl, 0, 0);
-	pos[1] = PathArray(frame, ptcl, 0, 1);
-	pos[2] = PathArray(frame, ptcl, 0, 2);
+//   Array<Vec3,1> onePath(numSlices);
+//   for (int si=0; si<numSpecies; si++) {
+//     for (int ptcl=Species(si).FirstParticle; 
+// 	 ptcl<=Species(si).LastParticle; ptcl++) {
+//       if (Species(si).lambda != 0.0) {
+// 	for (int slice=0; slice<numSlices; slice++) {
+// 	  onePath(slice)[0] = PathArray(frame,ptcl,slice,0);
+// 	  onePath(slice)[1] = PathArray(frame,ptcl,slice,1);
+// 	  onePath(slice)[2] = PathArray(frame,ptcl,slice,2);
+// 	}
+// 	PathObject* pathObj = new PathObject;
+// 	if (si == 0)
+// 	  pathObj->SetColor (0.3, 0.3, 1.0);
+// 	else
+// 	  pathObj->SetColor (0.0, 1.0, 0.0);
+// 	if (PathType == TUBES)
+// 	  pathObj->TubesSet (onePath);
+// 	else
+// 	  pathObj->LinesSet (onePath);
+// 	PathVis.Objects.push_back(pathObj);
+//       }
+//       else {
+// 	Vec3 pos;
+// 	pos[0] = PathArray(frame, ptcl, 0, 0);
+// 	pos[1] = PathArray(frame, ptcl, 0, 1);
+// 	pos[2] = PathArray(frame, ptcl, 0, 2);
 
+// 	SphereObject* sphere = new SphereObject;
+// 	sphere->SetPos (pos);
+// 	sphere->SetColor (Vec3(1.0, 0.0, 1.0));
+// 	PathVis.Objects.push_back(sphere);
+//       }
+//     }
+//   }
+  cerr << "Paths.size() = " << Paths.size() << endl;
+  for (int li=0; li<Paths.size(); li++) {
+    PathObject* pathObj = new PathObject;
+    pathObj->SetColor (0.0, 0.0, 1.0);
+    if (PathType == TUBES)
+      pathObj->TubesSet (Paths[li]->Path);
+    else
+      pathObj->LinesSet (Paths[li]->Path);
+    PathVis.Objects.push_back(pathObj);
+  }
+  for (int si=0; si<numSpecies; si++) 
+    if (Species(si).lambda == 0)
+      for (int ptcl=Species(si).FirstParticle; ptcl<=Species(si).LastParticle;
+	   ptcl++) {
 	SphereObject* sphere = new SphereObject;
+	dVec pos;
+	pos[0] = PathArray(frame, ptcl, 0, 0);
+ 	pos[1] = PathArray(frame, ptcl, 0, 1);
+ 	pos[2] = PathArray(frame, ptcl, 0, 2);
 	sphere->SetPos (pos);
 	sphere->SetColor (Vec3(1.0, 0.0, 1.0));
 	PathVis.Objects.push_back(sphere);
       }
-    }
-  }
+  
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
   boxObject->Set (Box[0], Box[1], Box[2]);
@@ -340,20 +366,21 @@ void VisualClass::MakePaths(int frame)
 
   vector<vector<int> > loopList;
 
-  // Constuct list of permuting loops.
+  // Constuct list of permuting loops.  Ignore classical particles.
   for (int ptcl=0; ptcl<numPtcls; ptcl++) 
-    if (!used(ptcl)) {
+    if (!used(ptcl) && (PtclSpecies(ptcl).lambda!=0.0)) {
       vector<int> loop;
       int permPtcl = ptcl;
-      while (permPtcl != ptcl) {
-	loop.push_back(ptcl);
-	used(permPtcl) = true;
-	permPtcl = PermArray(frame, permPtcl);
-      }
+       do {
+	 loop.push_back(permPtcl);
+	 used(permPtcl) = true;
+	 permPtcl = PermArray(frame, permPtcl);
+       } while (permPtcl != ptcl);
       loopList.push_back(loop);
     }
 
-  Paths.resize(loopList.size());
+  //  Paths.resize(loopList.size());
+  cerr << loopList.size() << " loops.\n";
   for (int li=0; li<loopList.size(); li++) {
     vector<int> &loop = loopList[li];
     OnePath &path = (*new OnePath);
@@ -369,6 +396,15 @@ void VisualClass::MakePaths(int frame)
       }
       offset +=  numSlices;
     }
+    // Now, make sure the path doesn't have any discontinuities 
+    // because having different period images.
+    for (int slice=0; slice<path.Path.size()-1; slice++) 
+      for (int dim=0; dim<3; dim++) {
+	while ((path.Path(slice+1)[dim] - path.Path(slice)[dim]) >0.5*Box[dim])
+	  path.Path(slice+1)[dim] -= Box[dim];
+	while ((path.Path(slice+1)[dim] - path.Path(slice)[dim])<-0.5*Box[dim])
+	  path.Path(slice+1)[dim] += Box[dim];
+      }
     Paths.push_back (&path);
   }
   used = false;

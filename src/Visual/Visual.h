@@ -72,6 +72,7 @@ protected:
 public:
   PathVisClass PathVis;
 
+  inline SpeciesClass& PtclSpecies (int ptcl);
   void Read(string fileName);
   void MakeFrame (int frame);
   
@@ -79,5 +80,14 @@ public:
   virtual ~VisualClass();
 
 };
+
+
+inline SpeciesClass& VisualClass::PtclSpecies (int ptcl)
+{
+  int si = 0;
+  while (si < Species.size() && (Species(si).FirstParticle > ptcl))
+    si++;
+  return Species(si);
+}
 
 #endif
