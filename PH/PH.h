@@ -984,6 +984,10 @@ public:
     return (0.0);
   }
 
+  bool Read (IOSectionClass &in) 
+  {
+
+  }
   void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Type", "Zero");
