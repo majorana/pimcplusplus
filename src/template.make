@@ -13,7 +13,7 @@ DEFS = -DTHREE_D -DNO_COUT  -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ
 PIMCobjs =                           \
   Main.o                             \
   Observables/ObservableEnergy.o     \
-  BisectionClass.o                   \
+  Moves/BisectionClass.o                   \
   PIMCClass.o                        \
   Moves/MetaMoves.o 			     \
   Moves/BlockMove.o                        \
@@ -72,7 +72,7 @@ PIMCobjs =                           \
 
 TestPermobjs =                       \
   TestPermutation.o                  \
-  BisectionClass.o                   \
+  Moves/BisectionClass.o                   \
   Moves/BlockMove.o                        \
   Moves/MetaMoves.o                        \
   PIMCClass.o                        \

@@ -48,10 +48,15 @@ void BisectionMoveClass::MakeMove()
 
   //  int EndTimeSlice=(1<<NumLevels)+StartTimeSlice;
   
-  if (StartTimeSlice<=(int)PathData.Path.OpenLink && (int)PathData.Path.OpenLink<=EndTimeSlice)
-    ChooseParticles(); 
-  else 
+  if (PathData.Path.OpenPaths){
+    if (StartTimeSlice<=(int)PathData.Path.OpenLink && (int)PathData.Path.OpenLink<=EndTimeSlice)
+      ChooseParticles(); 
+    else 
+      ChooseParticlesOpen();
+  }
+  else {
     ChooseParticlesOpen();
+  }
   PathData.MoveJoin(EndTimeSlice);
   bool toAccept=Bisection.Bisect(StartTimeSlice,NumLevels,ActiveParticles);
   if (toAccept ==true ){
