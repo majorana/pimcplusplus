@@ -1300,6 +1300,7 @@ void IOTreeHDF5Class::GroupIterator(string member_name)
       newTree->GroupID = newGroupID;
       StripName(member_name,newTree->Name,newTree->MyNumber);
       InsertSection(newTree);
+      newTree->BoolType = BoolType;
       newTree->ReadGroup (GroupID, member_name, this);
     }
     else {
