@@ -11,6 +11,7 @@ private:
   double CoreRadius;
   // The minimum value of A and B
   double ABmin;
+  inline void Copy (const QuinticPH &ph);
 public:
   LinearGrid Agrid, Bgrid, Vgrid;
   Potential *Vouter;
@@ -59,10 +60,45 @@ public:
   void Read (IOSectionClass &in);
   void WriteWithoutVouter (IOSectionClass &out);
   void Write (IOSectionClass &out); 
+  inline QuinticPH& operator=(const QuinticPH &ph);
+
   QuinticPH() : ABmin(0.0), UseVcore(true)
   { /* do nothing for now */ }
 };
 
+
+inline QuinticPH& QuinticPH::operator=(const QuinticPH &ph)
+{
+  Copy(ph);
+  return (*this);
+}
+
+inline void QuinticPH::Copy (const QuinticPH &ph)
+{
+  CoreRadius = ph.CoreRadius;
+  ABmin = ph.ABmin;
+  Agrid.Init (0.0, ph.CoreRadius, ph.Agrid.NumPoints);
+  Bgrid.Init (0.0, ph.CoreRadius, ph.Bgrid.NumPoints);
+  Vgrid.Init (0.0, ph.CoreRadius, ph.Vgrid.NumPoints);
+  Vouter = ph.Vouter;
+  IsBare = ph.IsBare;
+  UseVcore = ph.UseVcore;
+
+  Array<double,1> Aparams(ph.pA.NumPoints());
+  Aparams = ph.pA.Data();
+  pA.Init (&Agrid, Aparams, 0.0, 0.0, 0.0, 0.0);
+
+  Array<double,1> Bparams(ph.pB.NumPoints());
+  Bparams = ph.pB.Data();
+  pB.Init (&Bgrid, Bparams, 0.0, 0.0, 0.0, 0.0);
+
+  Array<double,1> Vparams(ph.Vcore.NumPoints());
+  Vparams = ph.Vcore.Data();
+  double Vend = Vouter->V(CoreRadius);
+  double dVend = Vouter->dVdr(CoreRadius);
+  double d2Vend = Vouter->d2Vdr2(CoreRadius);
+  Vcore.Init (&Vgrid, Vparams, NAN, dVend, NAN, d2Vend);
+}
 
 inline void QuinticPH::SetCoreRadius(double coreRadius)
 {
