@@ -7,4 +7,4 @@ set echo
 
 cd $SCRATCH/svnwork/PIMC2/src/Tests/FreeFermions
 # execute program
-prun -N ${RMS_NODES} -n ${RMS_PROCS} ../../pimc++ FF_tau0.00125_beta0.25.in
+prun -N ${RMS_NODES} -n ${RMS_PROCS} ../../pimc++ FF_tau0.00125_beta0.25.nodist.in
