@@ -51,6 +51,16 @@ Section (Observables)
     int dumpFreq=100;
     
   }
+  Section (Observable)
+    {
+      string type = "TimeAnalysis";
+      string Name = "TimeAnalysis";
+      string Description="Analyzes time!";
+      int dumpFreq=20;
+      int freq=20;
+    }
+
+
   Section (Observable) {
     string type = "PairCorrelation";
     string Name = "PairCorrelation";
@@ -80,6 +90,7 @@ Section (Moves) {
     int NumLevels=6;
     string Species = "free";
     int StepsPerBlock=1;
+    double epsilon=1e-3;
     
   }
   Section (Move) {
@@ -89,6 +100,7 @@ Section (Moves) {
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
     int NumLevels=6;
     string Species = "free";
+    double epsilon=1e-3;
   }
 
   Section (Move) {
@@ -121,6 +133,7 @@ Section (Algorithm) {
     Section (Move) {string name = "Shift"; }
     //    Section (Move) {string name="Permutations";} 
     Section (Observe) {string name = "PairCorrelation";}
+    Section (Observe) {string name = "TimeAnalysis";}
     Section (Observe) {string name = "Energy"; }
     Section (Observe) {string name = "PathDump"; }
   }

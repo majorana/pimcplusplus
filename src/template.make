@@ -60,6 +60,8 @@ PIMCobjs =                            \
   Common.o                            \
   Main.o                              \
   Observables/ObservableEnergy.o      \
+  Observables/Time.o      \
+  Observables/DistanceToHead.o        \
   Observables/ObservableModifiedEnergy.o      \
   Observables/Weight.o                \
   Observables/StructureFactor.o       \
@@ -302,7 +304,7 @@ MAKE_ALL = $(MAKE) all $(PASS_DEFS)
 MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
-all:    pimc++  FreeParticles #Visual_obj TestPerm TestEwald 
+all:    pimc++  FreeParticles Visual_obj #TestPerm TestEwald 
 
 pimc++: Common_obj observables moves actions Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)

@@ -9,6 +9,7 @@ class EventClass
  public:
   virtual void DoEvent()=0;
   virtual void Read(IOSectionClass& IO)=0;
+  
 
 };
 

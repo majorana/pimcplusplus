@@ -111,7 +111,16 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection("Energies(modified)");
       tempObs = new ModifiedEnergyClass(PathData,OutFile);
     }
-
+    else if (theObserveType=="DistanceToOpen"){
+      if (iAmRoot)
+	OutFile.NewSection("DistanceToOpen");
+      tempObs = new HeadLocClass(PathData,OutFile);
+    }
+    else if (theObserveType=="TimeAnalysis"){
+      if (iAmRoot)
+	OutFile.NewSection("TimeAnalysis");
+      tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables);
+    }
     else if (theObserveType=="PathDump"){
       if (iAmRoot)
 	OutFile.NewSection("PathDump");

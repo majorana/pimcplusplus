@@ -89,6 +89,16 @@ Section (Observables)
 	  int NumPoints = 50;
 	}
     }
+//   Section (Observable)
+//     {
+//       string type = "TimeAnalysis";
+//       string Name = "TimeAnalysis";
+//       string Description="Analyzes time!";
+//       int dumpFreq=20;
+//       int freq=100;
+//     }
+
+
 }
 
 Section (Moves) {
@@ -128,6 +138,7 @@ Section (Algorithm)
     Section (Move) {string name = "Shift"; }
     Section (Observe) {string name = "epPC";}
     Section (Observe) {string name = "eePC";}
+    //    Section (Observe) {string name = "TimeAnalysis";}
     Section (Observe) {string name = "Energy"; }
     //    Section (Observe) {string name = "PathDump";}
   }

@@ -1,7 +1,7 @@
 #ifndef WRAP_CLASS_H
 #define WRAP_CLASS_H
 
-
+#include "time.h"
 #include "EventClass.h"
 #include "Moves/MoveClass.h"
 #include "Observables/ObservableClass.h"
@@ -10,8 +10,16 @@ class MoveWrap : public EventClass
 {
  public:
   MoveClass* Move;
-  void DoEvent() {Move->MakeMove();}
+  void DoEvent() 
+  {
+
+    int start=clock();
+    Move->MakeMove();
+    int end=clock();
+    Move->SecondsInMove+=(double)(end-start)/(double)CLOCKS_PER_SEC;
+  }
   void Read(IOSectionClass &IO) {Move->Read(IO);}
+
 };
 
 
@@ -20,8 +28,17 @@ class ObserveWrap : public EventClass
  public:
   ObservableClass* Observe;
   ///Need to implement the do event here
-  void DoEvent() {Observe->Accumulate();}
+  void DoEvent() 
+  {
+
+    int start=clock();
+    Observe->Accumulate();
+    int end=clock();
+    Observe->SecondsInObservable+=
+      (double)(end-start)/(double)CLOCKS_PER_SEC;
+  }
   void Read(IOSectionClass &IO) {Observe->Read(IO);}
+
 };
 
 class LoopClass : public EventClass 

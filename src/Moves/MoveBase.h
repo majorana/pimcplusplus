@@ -14,10 +14,12 @@ protected:
   /// info like the description, etc.
   bool FirstTime;
   int TimesCalled, DumpFreq;
+
   ///You can add more IOVar pointers to inhereted classes if necessary
   VarClass *IOVar;
   IOSectionClass OutSection;  
 public:
+  double SecondsInMove;
   /// This hold a reference to the Path Data
   PathDataClass &PathData;
   /// Call this in order to make a move.
