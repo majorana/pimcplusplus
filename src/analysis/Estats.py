@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import tables
 import sys
-from visual import *
 import stats
 #import Numeric
 h5file = tables.openFile(sys.argv[1])
@@ -10,9 +9,9 @@ h5file = tables.openFile(sys.argv[1])
 
 E = h5file.root.Energies_0.TotalEnergy.read()
 (mean,var,error,kappa)= stats.Stats(E)
-print 'Mean:  ', mean/300
-print 'Var:   ', var/300
-print 'Error: ', error/300
+print 'Mean:  ', mean/600
+print 'Var:   ', var/600
+print 'Error: ', error/600
 print 'kappa  ', kappa
 ## quit
 ## Emean = sum(E)/len(E)

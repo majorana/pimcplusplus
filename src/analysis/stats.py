@@ -10,22 +10,13 @@ def Stats(x):
     xSquared=x*x
     var=sum(xSquared)/(N+0.0)-mean*mean
     i=0          
-    tempC=1.0
+    tempC=0.5
     kappa=0.0
     while (tempC>0 and i<N):
-        kappa=kappa+tempC
+        kappa=kappa+2.0*tempC
         i=i+1
         tempC=c(i,x,mean,var)
-    kappa=2.0*kappa+1.0
     Neff=(N+0.0)/(kappa+0.0)
     error=sqrt(var/Neff)
     return (mean,var,error,kappa)
 
-    
-        
-a=zeros(5)
-a[0]=1.
-a[1]=3.
-a[2]=2.
-a[4]=1.
-print Stats(a)
