@@ -175,13 +175,22 @@ TestEwaldobjs =                      \
   Common/Splines/QuinticSplines.o    
 
 
+FreeParticleObjs =                   \
+  FreeParticles.o                    \
+  Common/IO/InputOutput.o            \
+  Common/IO/InputOutputHDF5.o        \
+  Common/IO/InputFile.o              \
+  Common/IO/InputOutputASCII.o       \
+  Common/IO/InputOutputXML.o         
+
+
 PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}"
 
 MAKE_ALL = $(MAKE) all $(PASS_DEFS)
 MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
-all:   pimc++ TestPerm TestEwald
+all:   pimc++ TestPerm TestEwald FreeParticles
 	
 pimc++: Common_obj observables moves Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
@@ -191,6 +200,9 @@ TestPerm: Common_obj Tests $(TestPermobjs)
 
 TestEwald: Common_obj Tests $(TestEwaldobjs)
 	$(LD) -o $@ $(TestEwaldobjs) $(LIBS) $(PSPLINELIB)
+
+FreeParticles: Common_obj $(FreeParticleObjs)
+	$(LD) -o $@ $(FreeParticleObjs) $(LIBS) $(PSPLINELIB)
 
 Common_obj:
 	cd Common; ${MAKE_ALL}
@@ -205,6 +217,8 @@ Common_clean:
 
 CodeTests:    
 	cd Tests; ${MAKE_ALL}
+
+
 
 TestHDF5:	Common_obj TestHDF5.o Common/IO/InputOutput.o Common/IO/InputOutputHDF5.o Common/IO/InputOutputASCII.o
 	$(LD) -o $@ TestHDF5.o Common/IO/InputOutput.o Common/IO/InputOutputHDF5.o Common/IO/InputOutputASCII.o $(LIBS)
@@ -226,7 +240,7 @@ clean:	Common_clean
 
 
 
-SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc
+SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc
 
 
 newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake
