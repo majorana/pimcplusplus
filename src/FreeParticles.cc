@@ -134,21 +134,25 @@ double ParticleClass::Energy()
 
 void ParticleClass::Run()
 {
+  double meanSum, mean2Sum;
+  meanSum = mean2Sum = 0.0;
   for (int block=0; block<NumBlocks; block++) {
     // Reset block sums
-    Esum = E2sum = 0.0;
+    Esum = 0.0;
     for (int step=0; step<BlockSize; step++) {
       MCStep();
       double E = Energy();
       Esum += E;
-      E2sum += E*E;
     }
-    // Write block data
-    double mean = Esum / BlockSize;
-    double mean2 = E2sum / BlockSize;
-    double var = sqrt (mean2 - mean*mean);
-    fprintf (stderr, "%1.12e %1.12e\n", mean, sqrt(var/BlockSize));
+    double E = Esum / BlockSize;
+    meanSum += E;
+    mean2Sum += E*E;
   }
+  // Write block data
+  double mean = meanSum / NumBlocks;
+  double mean2 = mean2Sum / NumBlocks;
+  double var = sqrt (mean2 - mean*mean);
+  fprintf (stderr, "Energy:\n%1.12e +/- %1.12e\n", mean, sqrt(var/NumBlocks));
 }
 
 

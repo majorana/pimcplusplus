@@ -1,0 +1,8 @@
+Array<double,1> Box(3) = [2.0, 2.0, 2.0];
+double kCut = 10.0;
+double beta = 1.0;
+double lambda = 0.5;
+int BlockSize = 100000;
+int NumBlocks = 10000;
+int NumParticles = 1;
+string Type = "FERMION";
