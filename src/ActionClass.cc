@@ -324,7 +324,7 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
       t(N-3) = pa.Udiag(rc, level);     adjust(N-3) = false;
       t(N-2) = pa.Udiag_p(rc, level);   adjust(N-2) = false;
       t(N-1) = pa.Udiag_pp(rc, level);  adjust(N-1) = false;
-      t(1) = 0.0;                       adjust(1)   = false;
+      //      t(1) = 0.0;                       adjust(1)   = false;
 
       /// Now, do the optimal breakup:  this gives me the coefficents
       /// of the basis functions, h_n in the array t.
