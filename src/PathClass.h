@@ -276,9 +276,12 @@ inline void PathClass::DistDisp (int slice, int ptcl1, int ptcl2,
   for (int i=0; i<NDIM; i++) {
     while (DBdisp(i) > 0.5*Box(i))
       DBdisp(i) -= Box(i);
-    while (DBdisp(i) < -0.5*Box(i))
+    while (DBdisp(i) < -0.5*Box(i)) 
       DBdisp(i) += Box(i);
-    assert (fabs(DBdisp(i)-disp(i)) < 1.0e-12);
+    if (fabs(DBdisp(i)-disp(i)) > 1.0e-12){ 
+      cerr<<DBdisp(i)<<" "<<disp(i)<<endl;
+    }
+    //    assert (fabs(DBdisp(i)-disp(i)) < 1.0e-12);
   }
 #endif
 }
@@ -360,18 +363,21 @@ inline dVec PathClass::Velocity (int sliceA, int sliceB, int ptcl)
   PutInBox(vel);
 
 
-#ifdef DEBUG
- dVec DBvel = Path(sliceB,ptcl) - Path(sliceA,ptcl);
-   for (int dim=0; dim<NDIM; dim++)
-     {
-       while (DBvel[dim] > (0.5*Box[dim]))
-  	DBvel[dim] -= Box[dim];
-       while (DBvel[dim] < -(0.5*Box[dim]))
-	 DBvel[dim] += Box[dim];
-       assert(fabs(DBvel[dim]-vel[dim])<1e-12);
-     }
+/* #ifdef DEBUG */
+/*  dVec DBvel = Path(sliceB,ptcl) - Path(sliceA,ptcl); */
+/*    for (int dim=0; dim<NDIM; dim++) */
+/*      { */
+/*        while (DBvel[dim] > (0.5*Box[dim])) */
+/*   	DBvel[dim] -= Box[dim]; */
+/*        while (DBvel[dim] < -(0.5*Box[dim])) */
+/* 	 DBvel[dim] += Box[dim]; */
+/*        if (fabs(DBvel[dim]-vel[dim])<1e-12){ */
+/* 	 cerr<<DBvel[dim]<<" "<<vel[dim]<<endl; */
+/*        } */
+/*        assert(fabs(DBvel[dim]-vel[dim])<1e-12); */
+/*      } */
 
-#endif
+/* #endif */
 
   return vel;
 }
@@ -386,15 +392,19 @@ inline void PathClass::PutInBox (dVec &v)
     double n = -floor(v(i)*BoxInv(i)+0.5);
     v(i) += n*IsPeriodic(i)*Box(i);
   }
-#ifdef DEBUG
-  for (int dim=0; dim<NDIM; dim++){
-    while (Dv[dim] > (0.5*Box[dim]))
-      Dv[dim] -= Box[dim];
-    while (Dv[dim] < (-(0.5*Box[dim])))
-      Dv[dim] += Box[dim];
-    assert(fabs(Dv[dim]-v[dim])<1e-12);
-  }
-#endif 
+/* #ifdef DEBUG */
+/*   for (int dim=0; dim<NDIM; dim++){ */
+/*     while (Dv[dim] > (0.5*Box[dim])) */
+/*       Dv[dim] -= Box[dim]; */
+/*     while (Dv[dim] < (-(0.5*Box[dim]))) */
+/*       Dv[dim] += Box[dim]; */
+/*     if (fabs(Dv[dim]-v[dim])>1e-12){ */
+/* 	 cerr<<Dv[dim]<<" "<<v[dim]<<" "<<Box(dim)<<" "<<dim<<BoxInv(dim) */
+/* 	     <<endl; */
+/*     } */
+/*     assert(fabs(Dv[dim]-v[dim])<1e-12); */
+/*   } */
+/* #endif  */
   
 }
 

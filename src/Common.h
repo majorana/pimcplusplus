@@ -17,6 +17,11 @@
 
 typedef TinyVector<int,2> ParticleID;
 
+
+
+
+
+
 /// These are the global variables to be used to decide what part of
 /// the mirrored array we are writing to and reading from  
 extern int Write1;

@@ -94,6 +94,10 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       OutFile.NewSection("PathDump");
       tempObs=new PathDumpClass(PathData,OutFile);
     }
+    else if (theObserveType=="WindingNumber"){
+      OutFile.NewSection("WindingNumber");
+      tempObs=new WindingNumberClass(PathData,OutFile);
+    }
     else {
       cerr<<"We do not recognize the observable "<<theObserveType<<endl;
       abort();

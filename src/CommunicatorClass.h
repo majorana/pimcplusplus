@@ -19,6 +19,8 @@ class PIMCCommunicatorClass : public CommunicatorClass
   void SendReceive (int sendProc, const Array<ImageNumClass,1> &sendBuff,
   		    int recvProc,       Array<ImageNumClass,1> &recvBuff);
 
+  using CommunicatorClass::Sum;
+  void Sum (Array<dVec,1> &sendBuff, Array<dVec,1> &recvBuff);
 };
 
 

@@ -20,6 +20,19 @@ void PIMCCommunicatorClass::SendReceive(int SendProc,
 		 MPIComm, &status);
 }
 
+///Sums up the vectors in sendBuff.  Processor 0 only gets the
+///resulting sum.
+void PIMCCommunicatorClass::Sum (Array<dVec,1> &sendBuff, Array<dVec,1> &recvBuff)
+{
+  double *sendPtr = sendBuff.data();
+  double *recvPtr = recvBuff.data();
+  int count = sendBuff.size()*NDIM;
+  
+  MPI_Reduce(sendPtr, recvPtr, count, MPI_DOUBLE, MPI_SUM, 0, 
+	     MPIComm);
+}
+
+
 
 
 // Serial definition
@@ -34,6 +47,9 @@ void PIMCCommunicatorClass::SendReceive(int SendProc,
   RecvBuff = SendBuff;
 }
 
+void PIMCCommunicatorClass::Sum (Array<dVec,1> &sendBuff, Array<dVec,1> &recvBuff)
+{
+  recvBuff=sendBuff;
 
-
+}
 #endif
