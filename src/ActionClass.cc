@@ -22,7 +22,7 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
   double levelTau = tau* (1<<level);
   for (int ptcl1=0; ptcl1<numChangedPtcls; ptcl1++){
     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
-      int species1=Path(ptcl1).ParticleSpeciesNum(ptcl);
+      int species1=Path.ParticleSpeciesNum(ptcl1);
       double notMyself=(double)(ptcl1!=ptcl2);
       for (int slice=startSlice;slice<endSlice;slice+=skip){
 	///I think we're double counting particles here
@@ -40,7 +40,7 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	int PairIndex = PairMatrix(species1,
 				   Path.ParticleSpeciesNum(ptcl2));
 	//I bet it's cheaper to have an if statement that avoids all this nonsense, instead of hte NotMyself thing
-	TotalU += NotMyself*
+	TotalU += notMyself*
 	  PairActionVector(PairIndex).calcUsqz(s,q,z, level);
       
       }
@@ -48,7 +48,7 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
     double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
       dVec r1 = Path(slice,ptcl1);
-      dVec r2 = IdentPtcls(slice+skip,ptcl1);
+      dVec r2 = Path(slice+skip,ptcl1);
       //This function has to be written and possibly memoized or something?
       double LinkDistSqrd=distSqrd(r1,r2);  
       //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}

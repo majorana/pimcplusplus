@@ -1,7 +1,7 @@
-#ifndef SPECIES_CLASS
-#define SPECIES_CLASS
+#ifndef SPECIES_CLASS_H
+#define SPECIES_CLASS_H
 
-#include "PathClass.h"
+
 #include "PermutationClass.h"
 
 typedef enum {FERMION, BOSON, BOLTZMANNON, ANYON} ParticleType;

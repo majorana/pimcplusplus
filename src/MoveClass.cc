@@ -10,7 +10,7 @@ void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
   int CurrentNumPtcls = 1234567;
   for (int i=0; i<ActSpecies.size(); i++) {
     CurrentNumPtcls = 
-      PathData.SpeciesArray(ActSpecies(i)).NumParticles(); 
+      PathData.Path.Species(i).NumParticles; 
     TotalParticles += CurrentNumPtcls;
   }
 
@@ -53,7 +53,7 @@ inline int RandInt (int Max) //Hopefully this didn't break anything
 
 /// So do we still want to choose particles by dumping everything
 /// into some mapping array from teh active particles and dealing 
-// with it that way?
+// with it that way? I think this is doing duplicate stuff in here.
 void ParticleMoveClass::ChooseParticles()
 {
   for (int i=0; i<NumParticlesToMove; i++) { 
@@ -70,5 +70,5 @@ void ParticleMoveClass::ChooseParticles()
     } while (Redundant); 
   }
   for (int i=0; i<NumParticlesToMove; i++) 
-    ActiveParticles(i) = MyParticles(MyParticleIndices(i));
+    ActiveParticles(i) = MyParticleIndices(i);
 }

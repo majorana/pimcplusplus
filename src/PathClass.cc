@@ -2,9 +2,4 @@
 
 
 
-void PathClass::Allocate()
-{
-  
 
-
-}

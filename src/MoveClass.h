@@ -45,7 +45,7 @@ protected:
   /// Call this to make a move
   virtual void MakeMove()=0;
  
-  /// This array contains the Particle ID's of particles that you are 
+  /// This array contains the int's of particles that you are 
   /// currently moving (i.e. NumParticlesToMove of them
   Array<int,1> ActiveParticles;
   /// When we choose particles we select the  particles (randomly)
@@ -55,7 +55,7 @@ protected:
   inline void SetNumParticlesToMove(int i)
   {
     NumParticlesToMove = i;
-    //    MyParticleIndices.resize(i);
+    MyParticleIndices.resize(i);
     ActiveParticles.resize(i);
   }
   /// Function that chooses the particles that you should move and

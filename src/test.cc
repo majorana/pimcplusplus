@@ -27,44 +27,60 @@ void setupAction(ActionClass &myActionClass)
 void setupIDParticleArray(PathDataClass &myPathData)
 {
 
-  SpeciesArrayClass &myIDParticles=myPathData.SpeciesArray;
+  //  SpeciesArrayClass &myIDParticles=myPathData.SpeciesArray;
   double tau=1.0; //This better be the same as in the squarer file! UGly!
   int NumTimeSlices=50;
 
-  ElectronsClass *myElectronptr = new ElectronsClass;
-  ProtonsClass *myProtonptr = new ProtonsClass;
-
+  FermionClass *myElectronptr = new FermionClass;
+  FermionClass *myProtonptr = new FermionClass;
+  myPathData.Path.SetTimeSlices(NumTimeSlices);
   //  (*myElectronptr).NumParticles=1;
   //  (*myProtonptr).NumParticles=1;
   (*myElectronptr).lambda=0.5;
   (*myProtonptr).lambda=0;
-   
-  (*myElectronptr).Path.Resize(1,NumTimeSlices);
-  (*myProtonptr).Path.Resize(1,NumTimeSlices);
+  (*myElectronptr).NumParticles=1;
+  (*myProtonptr).NumParticles=1;
+  myPathData.Path.AddSpecies(myProtonptr);
+  myPathData.Path.AddSpecies(myElectronptr);
+  myPathData.Path.Allocate();
+    
+  //  (*myElectronptr).Path.Resize(1,NumTimeSlices);
+  //  (*myProtonptr).Path.Resize(1,NumTimeSlices);
   SetMode(BOTHMODE);
   dVec zeroVector=0;
-  for  (int counter=0;counter<(*myProtonptr).NumParticles();counter++){
+  for (int counter=(*myProtonptr).FirstPtcl;counter<=(*myProtonptr).LastPtcl;counter++){
     for (int counter2=0;counter2<NumTimeSlices;counter2++){
-      (*myProtonptr).Path.SetPos(counter,counter2,zeroVector);
+      myPathData.Path.SetPos(counter2,counter,zeroVector);
     }
   }
+  //  for  (int counter=0;counter<(*myProtonptr).NumParticles();counter++){
+  //    for (int counter2=0;counter2<NumTimeSlices;counter2++){
+  //      (*myProtonptr).Path.SetPos(counter,counter2,zeroVector);
+  //    }
+  //  }
   double sigma=sqrt(2*0.5*tau);
   dVec electronVector;
-  for (int counter=0;counter<(*myElectronptr).NumParticles();counter++){
+  for (int counter=(*myElectronptr).FirstPtcl;counter<=(*myElectronptr).LastPtcl;counter++){
     for (int counter2=0;counter2<NumTimeSlices;counter2++){
       electronVector=GaussianRandomVec(sigma);
-      (*myElectronptr).Path.SetPos(counter,counter2,electronVector);
+      myPathData.Path.SetPos(counter2,counter,electronVector);
     }
   }
-  (*myElectronptr).InitPermMatrix();
-  (*myProtonptr).InitPermMatrix();
+  //  for (int counter=0;counter<(*myElectronptr).NumParticles();counter++){
+  //    for (int counter2=0;counter2<NumTimeSlices;counter2++){
+  //a      electronVector=GaussianRandomVec(sigma);
+  //      (*myElectronptr).Path.SetPos(counter,counter2,electronVector);
+  //    }
+  //  }
+  //  (*myElectronptr).InitPermMatrix();
+  //  (*myProtonptr).InitPermMatrix();
 
 
-  ProtonsClass &myProtons = *myProtonptr;
-  ElectronsClass &myElectrons= *myElectronptr;
-  myPathData.SpeciesArray.Resize(2);
-  myPathData.SpeciesArray.Set(0,myElectrons);
-  myPathData.SpeciesArray.Set(1,myProtons);
+  //  ProtonsClass &myProtons = *myProtonptr;
+  //  ElectronsClass &myElectrons= *myElectronptr;
+  //  myPathData.Path.SpeciesArray.Resize(2);
+  //  myPathData.Path.SpeciesArray.Set(0,myElectrons);
+  //  myPathData.Path.SpeciesArray.Set(1,myProtons);
   //  myPathData.NumTimeSlices=NumTimeSlices;
 }
   
@@ -164,7 +180,7 @@ int main(int argc, char **argv)
   //  cerr << (myBisectionMove.PathData)->SpeciesArray.size()<<endl;
   //  cerr<<"What the action class thinks the size is: ";
   //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
-  PrintConfigClass myPrintConfig(myPathData);
+  //  PrintConfigClass myPrintConfig(myPathData);
   for (int counter=0;counter<1000000;counter++){
     if ((counter % 1000) == 0)
       cerr << "Step #" << counter << ":\n";
@@ -174,7 +190,7 @@ int main(int argc, char **argv)
       myBisectionMove.MakeMove();
       if (counter > 100)
       PC.Accumulate();
-      myPrintConfig.Print();
+      //      myPrintConfig.Print();
     }
     myShiftMove.MakeMove();
   }

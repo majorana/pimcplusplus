@@ -1,8 +1,9 @@
 #ifndef PATH_CLASS_H
 #define PATH_CLASS_H
 
-#include "MirroredArrayClass.h"
 
+#include "MirroredArrayClass.h"
+#include "SpeciesClass.h"
 
 class PathClass
 {
@@ -18,14 +19,18 @@ private:
 public:
   MirroredArrayClass1D<int> Permutation;
   dVec Box;
-  AcceptCopy(int startTimeSlice,int endTimeSlice, 
+  inline void MoveJoin(int oldJoin, int newJoin){
+    Path.MoveJoin(Permutation,oldJoin,newJoin);
+  }
+      
+  inline void AcceptCopy(int startTimeSlice,int endTimeSlice, 
 	     const Array <int,1> &activeParticle)
   {
       Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticle);
 
   }
 
-  RejectCopy(int startTimeSlice,int endTimeSlice, 
+  inline void RejectCopy(int startTimeSlice,int endTimeSlice, 
 	     const Array <int,1> &activeParticle )
   {
       Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticle);
@@ -58,12 +63,13 @@ public:
   inline int NumSpecies() {return SpeciesArray.size();}
   inline int NumParticles() { return Path.NumParticles();}
   inline int NumTimeSlices() { return Path.NumTimeSlices();}
+  inline void SetTimeSlices(int tSlices){TimeSliceNumber=tSlices;}
   /// Returns the position of particle ptcl at time slice timeSlice
   inline dVec operator() (int timeSlice, int ptcl)
   { return Path(timeSlice, ptcl); }
   /// Set the position of particle ptcl at time slice timeSlice
   inline void SetPos (int timeSlice, int ptcl, dVec r)
-  { Path.SetPos(timeSlice, ptcl, r) };
+  { Path.Set(timeSlice, ptcl, r); }
 
   void AddSpecies (SpeciesClass *newSpecies)
   {
@@ -80,11 +86,11 @@ public:
     /// Set the particle range for the new species
     for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
       SpeciesArray(speciesNum)->FirstPtcl = numParticles;
-      numParticles=numParticles+SpeciesArray(speciesNum).NumParticles();
+      numParticles=numParticles + SpeciesArray(speciesNum)->NumParticles;
       SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
     }
-    Path.resize(TimeSliceNumber,numParticles);
-    Permutation.resize(TimeSliceNumber,numParticles);
+    Path.Resize(TimeSliceNumber,numParticles);
+    Permutation.Resize(numParticles);
 
     /// Assign the species number to the SpeciesNumber array
     for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
@@ -93,14 +99,14 @@ public:
 	SpeciesNumber(i) = speciesNum;
     }
     //Sets to the identity permutaiton 
-    for (int ptcl=0;ptcl<Permutation.Size();ptcl++){
+    for (int ptcl=0;ptcl<Permutation.NumParticles();ptcl++){
       Permutation.Set(ptcl,ptcl);
     }
   }
 
   PathClass()
     {
-      NumSpecies = 0;
+      //      NumSpecies = 0;
 
       TimeSliceNumber=0;
       

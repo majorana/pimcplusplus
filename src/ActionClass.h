@@ -4,7 +4,8 @@
 #include "CubicSpline.h"
 #include "SpeciesClass.h"
 #include "MemoizedDataClass.h"
-#include "SpeciesArrayClass.h"
+#include "PathClass.h"
+// #include "SpeciesArrayClass.h"
 // #include "ObservableClass.h"
 
 /// Doesn't do anything right now but saves the pair action class
@@ -119,9 +120,9 @@ public:
   Array<int,2> PairMatrix;
   /// This indexes into the non-existent Saved Pair Actions
   Array<SavedPairActionClass,2> SavedPairActionArray;
-  ActionClass(MemoizedDataClass &p_MemoizedData,SpeciesArrayClass &p_SpeciesArray) : myMemoizedData(p_MemoizedData), mySpeciesArray(p_SpeciesArray){};
+  ActionClass(PathClass  &p_path) : Path(p_path) {};
   /// This holds a reference to the Array of Species
-  SpeciesArrayClass &mySpeciesArray;
+  PathClass &Path;
   /// Temperature
   double tau;
   /// Calculates the total action.
@@ -131,11 +132,12 @@ public:
   ///This picks a new location in space for the particles in the
   ///particles Array at all of the time slices between startSlice and
   ///endSlice (at the appropriate skip for the level)
-  inline double SampleParticles(int startSlice, int endSlice, Array<ParticleID,1> particles,int level);
+
+  inline double SampleParticles(int startSlice, int endSlice, Array<int,1> particles, int level);
   /// This calculates the sample probability for going from the state
   /// that is currently in the newMode of MirroredArrayClass to the
   /// state that is currently in oldMode of MirroredArrayClass 
-  inline double LogSampleProb(int startSlice, int endSlice, Array<ParticleID,1> particles,int level);
+  inline double LogSampleProb(int startSlice, int endSlice, Array<int,1> particles,int level);
   /// Function to calculate the total action.
   void calcTotalAction();
 
@@ -183,7 +185,7 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
 	(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
       ////      ///Here we've stored the new position in the path
      //    mySpeciesArray.SetPos(species,ptclNum,sliceCounter+(skip>>1),rpp );
-      Path.SetPos(sliceCounter+(skip>>1),ptcl,rpp)
+      Path.SetPos(sliceCounter+(skip>>1),ptcl,rpp);
     }
   }
   return logNewSampleProb;
@@ -206,7 +208,7 @@ inline double ActionClass::LogSampleProb(int startSlice, int endSlice,
     //    int species=particles(ptcl)(0);
     //    int ptclNum=particles(ptcl)(1);
     //    double lambda=mySpeciesArray(species).lambda;
-    double lambda=Path.SpeciesArray(Path.ParticleSpeciesNum(ptcl)).lambda;
+    double lambda=Path.ParticleSpecies(ptcl).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);

@@ -33,30 +33,30 @@ public:
   {   }
 };
 
-class PrintConfigClass : public ObservableClass
-{
- public:
-  void Accumulate(){;}
-  void Initialize(){;}
-  PrintConfigClass(PathDataClass &myPathData) : ObservableClass(myPathData){;}
-  void Write(OutputFileClass &outputFile){;}
-  void Print(){
-    cout<<"Here are the current configurations";
-    for (int counter=0;counter<PathData.NumSpecies();counter++){
-      for (int counter2=0;counter2<PathData(counter).NumParticles();counter2++){
-	for (int counter3=0;counter3<PathData.NumTimeSlices();counter3++){
-	  cout<<PathData(counter,counter2,counter3)(0)<<" ";
-	  cout<<PathData(counter,counter2,counter3)(1)<<" ";
-	  cout<<PathData(counter,counter2,counter3)(2)<<" ";
-	  cout<<endl;
-	}
-	cout<<endl;
-      }
-      cout<<endl;
-      cout<<endl;
-    }
-  }
-};
+/* class PrintConfigClass : public ObservableClass */
+/* { */
+/*  public: */
+/*   void Accumulate(){;} */
+/*   void Initialize(){;} */
+/*   PrintConfigClass(PathDataClass &myPathData) : ObservableClass(myPathData){;} */
+/*   void Write(OutputFileClass &outputFile){;} */
+/*   void Print(){ */
+/*     cout<<"Here are the current configurations"; */
+/*     for (int counter=0;counter<PathData.NumSpecies();counter++){ */
+/*       for (int counter2=0;counter2<PathData(counter).NumParticles();counter2++){ */
+/* 	for (int counter3=0;counter3<PathData.NumTimeSlices();counter3++){ */
+/* 	  cout<<PathData(counter3,counter,counter2)(0)<<" "; */
+/* 	  cout<<PathData(counter3,counter,counter2)(1)<<" "; */
+/* 	  cout<<PathData(counter3,counter,counter2)(2)<<" "; */
+/* 	  cout<<endl; */
+/* 	} */
+/* 	cout<<endl; */
+/*       } */
+/*       cout<<endl; */
+/*       cout<<endl; */
+/*     } */
+/*   } */
+/* }; */
      
 
 /// This template class will be used to construct distributed versions
