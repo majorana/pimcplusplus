@@ -59,7 +59,7 @@ void OptimizedBreakup::SetkVecs(double kc, double kCont, double kMax)
   b[0] = 2.0*M_PI/Basis.GetBox()[0];
   b[1] = 2.0*M_PI/Basis.GetBox()[1];
   b[2] = 2.0*M_PI/Basis.GetBox()[2];
-  TinyVector<int,1> maxIndex;
+  TinyVector<int,3> maxIndex;
   maxIndex[0] = (int)ceil(kCont/b[0]);
   maxIndex[1] = (int)ceil(kCont/b[1]);
   maxIndex[2] = (int)ceil(kCont/b[2]);
@@ -97,21 +97,15 @@ void OptimizedBreakup::SetkVecs(double kc, double kCont, double kMax)
   cerr << "non-degenerate k vecs = " << kpoints.size() << endl;
 }
 
-void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
-				 const Array<bool,1> &adjust)
+void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t)
 {
   const double tolerance = 1.0e-12;
-  assert(t.rows()==adjust.rows());
   assert(t.rows()==Basis.NumElements());
   Array<double,2> A;
   Array<double,1> b;
   Array<double,2> cnk;
 
   int numElem = t.rows();
-  /// HACK:  for simplicity, we ignore adjust for now
-  //  for (int i=0; i<adjust.rows(); i++)
-  //   if (!adjust(i))
-  //    numElem--;
   A.resize(numElem, numElem);
   b.resize(numElem);
   cnk.resize(numElem,kpoints.rows());
@@ -149,36 +143,117 @@ void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
     Smax = max (S(i),Smax);
   for (int i=0; i<S.size(); i++)
     Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
-
   t = 0.0;
-  // Compute t_n, checking singular values
-//   for (int i=0; i<numElem; i++) {
-//     double coef = 0.0;
-//     for (int j=0; j<numElem; j++)
-//       coef += U(j,i) * b(j);
-//     coef *= Sinv(i);
-//     for (int j=0; j<numElem; j++)
-//       t(j) += coef * V(j,i);
-//   }
-  for (int k=0; k<numElem; k++)
-    for (int i=0; i<numElem; i++) {
-      double coef = 0.0;
-      for (int j=0; j<numElem; j++)
-	coef += U(j,i) * b(j);
-      coef *= Sinv(i);
+  // Compute t_n, removing singular values
+  for (int i=0; i<numElem; i++) {
+    double coef = 0.0;
+    for (int j=0; j<numElem; j++)
+      coef += U(j,i) * b(j);
+    coef *= Sinv(i);
+    for (int k=0; k<numElem; k++)
       t(k) += coef * V(k,i);
   }
-
-      
-  
-
 }
 
-void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t)
+void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
+				 const Array<bool,1> &adjust)
 {
-  Array<bool,1> adjust(t.rows());
-  adjust = true;
-  DoBreakup (Vk, t, adjust);
+  const double tolerance = 1.0e-9;
+  assert(t.rows()==adjust.rows());
+  assert(t.rows()==Basis.NumElements());
+  Array<double,2> A;
+  Array<double,1> b;
+  Array<double,2> cnk;
+
+  int N = t.rows();
+  A.resize(N, N);
+  b.resize(N);
+  cnk.resize(N,kpoints.rows());
+
+  // Fill in cnk.
+  for (int n=0; n<t.rows(); n++) {
+    for (int ki=0; ki<kpoints.rows(); ki++) {
+      double k = kpoints(ki)[0];
+      cnk(n,ki) = Basis.c(n,k);
+    }
+  }
+
+  // Now, fill in A and b
+  A = 0.0;
+  b = 0.0;
+  for (int l=0; l<N; l++) {
+    for (int ki=0; ki<kpoints.rows(); ki++) {
+      b(l) += kpoints(ki)[1]*Vk(ki) * cnk(l, ki);
+      for (int n=0; n<N; n++) 
+	A(l,n) += kpoints(ki)[1]*cnk(l,ki)*cnk(n,ki);
+    }
+  }
+
+  // Now reduce for constraints
+  int M = N;
+  for (int i=0; i<adjust.size(); i++) 
+    if (!adjust(i))
+      M--;
+
+  // The c is for "constrained"
+  Array<double,2> Ac(M,M);
+  Array<double,1> bc(M), tc(M);
+
+  // Build constrained Ac and bc
+  int j=0;
+  for (int col=0; col<N; col++) {
+    if (adjust(col)) {
+      // Copy column a A to Ac
+      int i=0;
+      for (int row=0; row<N; row++) 
+	if (adjust(row)) {
+	  Ac(i,j) = A(row,col);
+	  i++;
+	}
+      j++;
+    }
+    else {
+      // Otherwise, subtract t(col)*A(:,col) from bc
+      for (int row=0; row<N; row++)
+      	b(row) -= A(row,col)*t(col);
+    }
+  }
+  j=0;
+  for (int row=0; row<N; row++)
+    if (adjust(row)) {
+      bc(j) = b(row);
+      j++;
+    }
+
+  // Now do SVD decomposition:
+  Array<double,2> U(M, M), V(M, M);
+  Array<double,1> S(M), Sinv(M);
+  SVdecomp(Ac, U, S, V);
+
+  // Zero out near-singular values
+  double Smax=S(0);
+  for (int i=1; i<M; i++)
+    Smax = max (S(i),Smax);
+  for (int i=0; i<M; i++)
+    Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
+  tc = 0.0;
+  // Compute t_n, removing singular values
+  for (int i=0; i<M; i++) {
+    double coef = 0.0;
+    for (int j=0; j<M; j++)
+      coef += U(j,i) * bc(j);
+    coef *= Sinv(i);
+    for (int k=0; k<M; k++)
+      tc(k) += coef * V(k,i);
+  }
+
+  // Now copy tc values into t
+  j=0;
+  for (int i=0; i<N; i++)
+    if (adjust(i)) {
+      t(i) = tc(j);
+      j++;
+    }
 }
 
 /////////////////////////////////////////

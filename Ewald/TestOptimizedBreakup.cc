@@ -30,12 +30,8 @@ void TestCoulomb()
   box = 10.0, 10.0, 10.0;
   basis.SetBox (box);
   double Omega = box[0]*box[1]*box[2];
-  basis.SetNumKnots(5);
+  basis.SetNumKnots(10);
   basis.Set_rc(5.0);
-
-  cerr << "delta = " << basis.delta << endl;
-  cerr << "omega = " << Omega << endl;
-  cerr << "Dminus(2,1.123,2) = " << basis.Dminus(2, 1.123, 2) << endl;
 
 //   double k = 1;
 //   for (int n=0; n<basis.NumElements(); n++) {
@@ -48,19 +44,24 @@ void TestCoulomb()
 
   OptimizedBreakup breakup(basis);
   breakup.SetkVecs (2.0, 25.0, 1000.0);
-//   for (int i=0; i<breakup.kpoints.size(); i++)
-//     cerr << "k = " << breakup.kpoints(i)[0] 
-// 	 << " d = " << breakup.kpoints(i)[1] << endl;
-//   cerr << "Num kVecs = " << breakup.kpoints.size() << endl;
+
   Array<double,1> Vk(breakup.kpoints.size());
   for (int i=0; i<breakup.kpoints.size(); i++) {
     double k = breakup.kpoints(i)[0];
     double k0 = 2.0*M_PI;
     Vk(i) = 4.0*M_PI/(Omega*(k*k)) * cos(k*basis.Get_rc());
   }
-  Array<double,1> t(basis.NumElements());
+  int N = basis.NumElements();
+  Array<double,1> t(N);
+  Array<bool,1> adjust(N);
+  adjust = true;
   t = 0.0;
-  breakup.DoBreakup(Vk, t);
+  adjust(N-3) = false; t(N-3) = -0.2;
+  adjust(N-2) = false; t(N-2) = 1.0/25.0;
+  adjust(N-1) = false; t(N-1) = -1/125.0;
+  adjust(1)   = false; t(1) = 0.0;
+
+  breakup.DoBreakup(Vk, t, adjust);
   cerr << "t = " << t << endl;
 
   FILE *fout = fopen ("Vlong.dat", "w");
