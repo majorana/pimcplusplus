@@ -73,12 +73,14 @@ void TestRho_k(PathClass &path)
   cerr << "Slow speed = " << 1.0e1/deltat << endl;
   for (int slice=0; slice<path.NumTimeSlices(); slice++) 
     for (int species=0; species<path.NumSpecies(); species++)
-      for (int ki=0; ki<path.kVecs.size(); ki++)
+      for (int ki=0; ki<path.kVecs.size(); ki++) {
+	// cerr << "rho_k = " << path.Rho_k[0](slice,species,ki) << endl;
 	if (fabs(path.Rho_k[0](slice,species,ki).real() - 
 		 path.Rho_k[1](slice,species,ki).real())> 1.0e-13 ||
 	    fabs(path.Rho_k[0](slice,species,ki).imag() - 
 		 path.Rho_k[1](slice,species,ki).imag())> 1.0e-13)
 	  cerr << "Fast/slow discrepancy in TestRho_k\n";
+      }
   // Make copies exactly the same.
   path.Rho_k[0] = path.Rho_k[1];
   SetMode(NEWMODE);

@@ -208,7 +208,7 @@ double ActionClass::CalcLRAction(int slice, int level)
     if (PA.IsLongRange()) {
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
-	homo += 0.5 * rhok2 * PA.Ulong_k(level,ki);
+	homo += 0.5 * 2.0* rhok2 * PA.Ulong_k(level,ki);
       }
     }
     // We can't forget the Madelung term.
@@ -225,10 +225,10 @@ double ActionClass::CalcLRAction(int slice, int level)
 	for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	  double rhorho = 
 	    Path.Rho_k(slice, species1, ki).real() *
-	    Path.Rho_k(slice, species2, ki).real() - 
+	    Path.Rho_k(slice, species2, ki).real() + 
 	    Path.Rho_k(slice, species1, ki).imag() *
 	    Path.Rho_k(slice, species2, ki).imag();
-	  hetero += rhorho * PA.Ulong_k(level,ki);
+	  hetero += 2.0 * rhorho * PA.Ulong_k(level,ki);
 	}
       }
     }

@@ -206,8 +206,7 @@ void PathClass::CalcRho_ks_Slow(int slice, int species)
 	 ptcl <= Species(species).LastPtcl; ptcl++) {
       const dVec &r = (*this)(slice, ptcl);
       double phase = dot(r, kVecs(ki));
-      // The 2 accounts for the k/-k optimization
-      rho += 2.0 * complex<double> (cos(phase), sin(phase));
+      rho += complex<double> (cos(phase), sin(phase));
     }
     Rho_k(slice, species, ki) = rho;
   }
@@ -238,10 +237,10 @@ void PathClass::CalcRho_ks_Fast(int slice,int species)
       const TinyVector<int,NDIM> &kIndex = kIndices(ki);
 #ifdef THREE_D
       Rho_k(slice,species,ki) += 
-	2.0*C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
+	C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
 #endif
 #ifdef TWO_D
-      Rho_k(slice,species,ki) += 2.0*C[0](kIndex[0])*C[1](kIndex[1]);
+      Rho_k(slice,species,ki) += C[0](kIndex[0])*C[1](kIndex[1]);
 #endif
     }
   }
