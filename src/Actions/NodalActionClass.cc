@@ -10,6 +10,10 @@ FreeNodalActionClass::ActionImageSum (double L, double lambdaBeta,
   int numImages = 10;
   double sum = 0.0;
   double fourLambdaBetaInv = (lambdaBeta!=0.0) ?  1.0/(4.0*lambdaBeta) : 0.0;
+  // If the images won't contributed anything, let's not worry
+  // about image sums.
+  if ((disp*disp*fourLambdaBetaInv) > 50.0)
+    return (disp*disp*fourLambdaBetaInv);
   for (int image=-numImages; image<numImages; image++) {
     double x = disp + (double)image*L;
     sum += exp (-(x*x)*fourLambdaBetaInv);
@@ -98,14 +102,12 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
 
   for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
-      const dVec &r = Path(slice, ptcl);
       dVec diff;
       double dist;
       Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
       double action = 0.0;
       for (int dim=0; dim<NDIM; dim++)
 	action += ActionSplines(sliceDiff)[dim](diff[dim]);
-      //DetMatrix(refPtcl-first, ptcl-first) = exp(-C*dist*dist);
       DetMatrix(refPtcl-first, ptcl-first) = exp(-action);
     }
   }
@@ -130,7 +132,6 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
   // Now compute gradient of determinant
   for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
     gradient(ptcl-first) = 0.0;
-    dVec &r = Path(slice, ptcl);
     for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
       dVec diff;
       double dist;
@@ -167,20 +168,24 @@ FreeNodalActionClass::GradientDetFD (int slice, double &det,
   double lambda = species.lambda;
   double C = 1.0/(4.0*M_PI * lambda * t);
 
+  int sliceDiff = abs(slice-refSlice);
+  sliceDiff = min (sliceDiff, Path.TotalNumSlices-sliceDiff);
+  assert (sliceDiff <= Path.TotalNumSlices);
+
   // HACK HACK HACK for now;  should work for serial mode.
 //   if (Path.GetRefSlice() < Path.NumTimeSlices())
 //     for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
 //       Path.RefPath(ptcl) = Path(Path.GetRefSlice(), ptcl);
 
   for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
-    const dVec &rRef = Path.RefPath(refPtcl);
     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
-      const dVec &r = Path(slice, ptcl);
-      //      dVec diff = r-rRef;
       dVec diff;
       double dist;
       Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
-      DetMatrix(refPtcl-first, ptcl-first) = exp(-C*dist*dist);
+      double action = 0.0;
+      for (int dim=0; dim<NDIM; dim++)
+	action += ActionSplines(sliceDiff)[dim](diff[dim]);
+      DetMatrix(refPtcl-first, ptcl-first) = exp(-action);
     }
   }
 
@@ -202,19 +207,28 @@ FreeNodalActionClass::GradientDetFD (int slice, double &det,
       for (int ref=first; ref <= last; ref++) {
 	Path.RefDistDisp (slice, ref, ptcl, dist, disp);
 	dVec diff = disp + delta;
-        DetMatrix(ref-first, ptcl-first) = exp(-C*dot(diff,diff));
+	double action = 0.0;
+	for (int dim=0; dim<NDIM; dim++)
+	  action += ActionSplines(sliceDiff)[dim](diff[dim]);
+	DetMatrix(ref-first, ptcl-first) = exp(-action);
       }
       dplus = Determinant (DetMatrix);
       for (int ref=first; ref <= last; ref++) {
 	Path.RefDistDisp (slice, ref, ptcl, dist, disp);
-	dVec diff = disp + delta;
-        DetMatrix(ref-first, ptcl-first) = exp(-C*dot(diff,diff));
+	dVec diff = disp - delta;
+	double action = 0.0;
+	for (int dim=0; dim<NDIM; dim++)
+	  action += ActionSplines(sliceDiff)[dim](diff[dim]);
+	DetMatrix(ref-first, ptcl-first) = exp(-action);
       }
       dminus = Determinant(DetMatrix);
       for (int ref=first; ref <= last; ref++) {
 	Path.RefDistDisp (slice, ref, ptcl, dist, disp);
-	dVec diff = disp + delta;
-        DetMatrix(ref-first, ptcl-first) = exp(-C*dot(diff,diff));
+	dVec diff = disp;
+	double action = 0.0;
+	for (int dim=0; dim<NDIM; dim++)
+	  action += ActionSplines(sliceDiff)[dim](diff[dim]);
+	DetMatrix(ref-first, ptcl-first) = exp(-action);
       }
       gradient(ptcl-first)[dim] = (dplus-dminus)/eps;
     }
@@ -233,16 +247,24 @@ double FreeNodalActionClass::NodalDist (int slice)
   int N = last-first+1;
 
   GradientDet (slice, det, GradVec);
-  //Array<dVec,1> gradFD(N);
-  //GradientDetFD (slice, det, gradFD);
-//   for (int i=0; i<N; i++)
-//     for (int dim=0; dim<NDIM; dim++)
-//       assert (fabs(gradFD(i)[dim] - GradVec(i)[dim]) < 1.0e-9);
+//   Array<dVec,1> gradFD(N);
+//   double det2;
+//   GradientDetFD (slice, det2, gradFD);
+//   assert (det2 == det);
+//   for (int i=0; i<N; i++) {
 //     fprintf (stderr, "(%1.6e %1.6e %1.6e) (%1.6e %1.6e %1.6e) \n", 
-// 	     gradFD(i)[0], gradFD(i)[1], gradFD(i)[2], 
-// 	     GradVec(i)[0], GradVec(i)[1], GradVec(i)[2]);
+//  	     gradFD(i)[0], gradFD(i)[1], gradFD(i)[2], 
+//  	     GradVec(i)[0], GradVec(i)[1], GradVec(i)[2]);
+//     for (int dim=0; dim<NDIM; dim++) 
+//       assert (fabs(gradFD(i)[dim] - GradVec(i)[dim]) < 1.0e-7);
+//   }
+    
   for (int i=0; i<N; i++)
     grad2 += dot (GradVec(i), GradVec(i));
+  double dist = det/sqrt(grad2);
+  //cerr << "grad = " << GradVec << endl;
+  
+  //cerr << "dist = " << dist << endl;
   return (det/sqrt(grad2));
 }
 
@@ -287,13 +309,17 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
       if (dist2 < 0.0)
 	return 1.0e100;
     }
-
-    if (isnan (dist1) || (dist1==0.0))
-      uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
-    else if (isnan(dist2) || (dist2==0.0))
-      uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
-    else
-      uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
+    
+    if (!isnan(dist1) && (dist1<0.0))
+      uNode += 1.0e100;
+    else if (!isnan(dist2) && (dist2 < 0.0))
+      uNode += 1.0e100;
+//     else if (isnan (dist1) || (dist1==0.0))
+//       uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
+//     else if (isnan(dist2) || (dist2==0.0))
+//       uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
+//     else
+//       uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
     dist1 = dist2;
   }
   return uNode;

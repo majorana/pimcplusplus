@@ -36,7 +36,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "FreeFermions_tau0.0025.h5";
+  string OutFile = "FreeFermions_tau0.0025b.h5";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";

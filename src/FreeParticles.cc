@@ -159,7 +159,7 @@ void ParticleClass::Run()
     double E = Esum / BlockSize;
     meanSum += E;
     mean2Sum += E*E;
-    PrintStates();
+    //    PrintStates();
   }
   // Write block data
   double mean = meanSum / NumBlocks;
