@@ -1,7 +1,8 @@
-SOURCES = SpecialFunctions.cc HermitePoly.cc
+SOURCES = SpecialFunctions.cc HermitePoly.cc TestLegendre.cc
 
-all:	SpecialFunctions.o HermitePoly.o
+all:	SpecialFunctions.o HermitePoly.o TestLegendre.o
 	$(LD) -o TestHermite HermitePoly.o $(LIBS)
+	$(LD) -o TestLegendre TestLegendre.o SpecialFunctions.o $(LIBS)
 
 clean:
 	rm -f *.o
