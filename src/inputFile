@@ -1,0 +1,62 @@
+Section (System)
+{
+  int NumTimeSlices = 50;
+  double tau = 1.0;
+  Array<double,1> Box = [5.0, 5.0, 5.0];
+  
+
+
+  Section (Particles)
+  {
+    Section (Species)
+      {
+	string Name = "electron";
+	double lambda = 0.5;
+	string Type = "FERMION";
+	int NumParticles = 1;
+	int NumDim = 3;
+	string InitPaths="FIXED";
+	Array<double,2> POSITIONS = [[0.1, 0.0, 0.0]];
+      }
+    Section (Species)
+    {
+      string Name = "proton";
+      double lambda = 0.0; // Classical particle
+      string Type = "BOLTZMANNON";
+      int NumParticles = 1;
+      int NumDim = 3;
+      string InitPaths="FIXED";
+      Array<double,2> Positions = [[0.0, 0.0, 0.0]];
+    }
+  }
+}
+
+Section (Moves)
+{
+  Section (Move){
+    string type="Bisection";
+    Array<string,1> ActiveSpecies=["electron"];   
+    int NumParticlesToMove=1;
+    int NumLevels=3;
+  }
+  
+}
+
+Section (Observables) 
+{
+  Section (Observable){
+    type="Pair Correlation";
+  }
+      
+
+}
+Section (Action)
+{
+  Section (PairAction){
+      string type1="electron";
+      string type2="proton";
+      string dmfile="../inputs/ep_beta1.0.dm";    
+  }
+      
+
+}
