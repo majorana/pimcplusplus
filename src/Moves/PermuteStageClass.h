@@ -61,8 +61,8 @@ class TablePermuteStageClass : public PermuteStageClass
 private:
   PermuteTableClass Table1, Table2;
   PermuteTableClass *Forw, *Rev;
-  //  ObservableVecDouble1 AcceptanceRatioVar;
-  
+  ObservableVecDouble1 AcceptanceRatioVar;
+  ObservableVecInt1 AcceptanceTotalVar;
   Array<int,1> NumAccepted;
   Array<int,1> NumAttempted;
 public:
@@ -75,17 +75,20 @@ public:
   /// ratio for the sampling.  This is so we can avoid calculating
   /// that ratio if the move is rejected, saving time.  Thus, this
   /// function is called twice during a successful multistage move.
-
+ 
   void InitBlock();
   void Read (IOSectionClass &in);
   double Sample (int &slice1, int &slice2,
 		 Array<int,1> &activeParticles);
   bool Attempt (int &slice1, int &slice2, 
 		   Array<int,1> &activeParticles, double &prevActionChange);
+  void Accept ();
+  void Reject();
+  void WriteRatio();
   TablePermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels,IOSectionClass &outSection) : 
     PermuteStageClass(pathData, speciesNum, numLevels,outSection),
-    Table1(pathData), Table2(pathData)
-    //    AcceptanceRatioVar("Acceptance Ratio",OutSection,PathData.Path.Communicator)
+    Table1(pathData), Table2(pathData),
+    AcceptanceRatioVar("Acceptance Ratio",OutSection,PathData.Path.Communicator),    AcceptanceTotalVar("Perms Tried",OutSection,PathData.Path.Communicator)
 
   {
     Forw = &Table1;

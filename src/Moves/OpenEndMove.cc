@@ -4,7 +4,7 @@
 
 void OpenEndMoveClass::WriteRatio()
 {
-
+  MultiStageClass::WriteRatio();
   //Do nothing for now
 }
 

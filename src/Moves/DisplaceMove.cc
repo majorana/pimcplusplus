@@ -89,6 +89,6 @@ DisplaceMoveClass::MakeMove ()
 void
 DisplaceMoveClass::WriteRatio()
 {
-
+  MultiStageClass::WriteRatio();
 
 }

@@ -70,6 +70,32 @@ public:
   }
 };
 
+
+class ObservableVecInt1 : public ObservableVar
+{
+public:
+  inline void Write (Array<int,1> &val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<int,2> mat(1,val.size());
+	mat(0,Range::all()) = val;
+	Out.WriteVar (Name, mat);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableVecInt1(string name, IOSectionClass &out, 
+		       CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
 class ObservableVecDouble2 : public ObservableVar
 {
 public:
