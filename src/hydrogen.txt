@@ -38,4 +38,45 @@ Section (Action)
     }
 }
 
+Section (Observables)
+{
+  string outFile = "Observables.h5";
+  Section (Observable)
+    {
+      string type = "Energies";
+      string name = "Energies";
+    }
+  Section (Observable)
+    {
+      string type = "PairCorrelation";
+      string name = "epPC";
+      string type1 = "electron";
+      string type2 = "proton";
+      Section (Grid)
+	{
+	  string type = "Linear";
+	  double start = 0.0;
+	  double end = 3.0;
+	  int NumPoints = 100;
+	}
+    }
+}
 
+Section (PIMC)
+{
+  Section (Loop)
+    {
+      int n = 10000;
+      Section (Loop)
+	{
+	  int N = 100;
+	  Section (Move) { string name = "epBisection"; }
+	}
+      Section {Observe} { string name = "all"; }
+      Section (Move) { string name = "MoveJoin"; }
+    }
+      
+
+
+}
+	  

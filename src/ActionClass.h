@@ -40,7 +40,7 @@ class PairActionClass
   void ReadFORTRAN3Tensor(ifstream &infile, Array<double,3> &tempUkj);
  public:
   string type1,type2;
-  void Read(InputSectionClass &inSection);
+  void Read(IOSectionClass &IOSection);
 
   /// This stores the interaction potential
   CubicSpline V;
@@ -128,7 +128,7 @@ class ActionClass
 {
 private:
 public:
-  void Read(InputSectionClass &inSection);
+  void Read(IOSectionClass &IOSection);
   DistanceTableClass *DistanceTable;
   /// This holds all of the Pair Action Classes
   Array<PairActionClass,1> PairActionVector;

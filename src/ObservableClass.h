@@ -3,13 +3,7 @@
 
 #include "Common.h"
 #include "PathDataClass.h"
-
-class OutputFileClass
-{
-public:
-  int dummy;
-  /// Current has nothing in it.
-};
+#include "Common/IO/InputOutput.h"
 
 
 /// This is the parent class for all observables.  It contains
@@ -23,42 +17,17 @@ public:
   /// Observe the state of the present path and add it to the
   /// running sum for averages.
   virtual void Accumulate() = 0;
-  /// Initialize my data.
-  virtual void Initialize() = 0;
 
   IOSectionClass &IOSection;  
   virtual void WriteBlock()=0;
   virtual void ShiftData(int numTimeSlices)=0;
   /// The constructor.  Sets PathData references and calls initialize.
-  ObservableClass(PathDataClass &myPathData,IOSectionClass &ioSection) : PathData(myPathData), IOSection(ioSection)
+  ObservableClass(PathDataClass &myPathData,IOSectionClass &ioSection) 
+    : PathData(myPathData), IOSection(ioSection)
   {   }
 };
 
 
-/* class PrintConfigClass : public ObservableClass */
-/* { */
-/*  public: */
-/*   void Accumulate(){;} */
-/*   void Initialize(){;} */
-/*   PrintConfigClass(PathDataClass &myPathData) : ObservableClass(myPathData){;} */
-/*   void Write(OutputFileClass &outputFile){;} */
-/*   void Print(){ */
-/*     cout<<"Here are the current configurations"; */
-/*     for (int counter=0;counter<PathData.NumSpecies();counter++){ */
-/*       for (int counter2=0;counter2<PathData(counter).NumParticles();counter2++){ */
-/* 	for (int counter3=0;counter3<PathData.NumTimeSlices();counter3++){ */
-/* 	  cout<<PathData(counter3,counter,counter2)(0)<<" "; */
-/* 	  cout<<PathData(counter3,counter,counter2)(1)<<" "; */
-/* 	  cout<<PathData(counter3,counter,counter2)(2)<<" "; */
-/* 	  cout<<endl; */
-/* 	} */
-/* 	cout<<endl; */
-/*       } */
-/*       cout<<endl; */
-/*       cout<<endl; */
-/*     } */
-/*   } */
-/* }; */
      
 
 /// This template class will be used to construct distributed versions
@@ -75,10 +44,15 @@ class DistributedObservableClass : public ObservableClass
   { /* Do nothing for now. */ }
 };
 
+
+/// This class stores observables which will be averaged over all
+/// links.
 class LinkObservableClass : public ObservableClass
 {
 protected:
   //  virtual void MyBlockAverage(double &mean, double &error) = 0;
+  bool FirstTime;
+  VarClass *MyIOVar;
 public:
   Array<double,1> LinkArray;
   double Total;
@@ -91,25 +65,35 @@ public:
     NumSamples++;
   } 
   virtual void Update(int startTimeSlice,int endTimeSlice)=0;
-  virtual void UpdateAll()=0;
+  inline void UpdateAll()
+  {  Update(0, PathData.NumTimeSlices()-1); }
   /// Initialize my data.
   virtual void Initialize() = 0;
   IOSectionClass &IOSection;  
   virtual void WriteBlock()=0;
   void ShiftData(int numTimeSlices);
-  virtual void WriteBlock()=0;
-  ScalarObservableClass (PathDataClass &myPathData, IOSectionClass &IOSection) : ObservableClass(myPathData), ObservableClass(IOSection)
+  LinkObservableClass (PathDataClass &myPathData, IOSectionClass &IOSection) 
+    : ObservableClass(myPathData, IOSection)
   { 
     LinkArray.resize(PathData.NumTimeSlices());
     NumSamples=0;
+    UpdateAll();
+    FirstTime = true;
   }
-  
 };
 
-class EnergyClass : public LinkObservableClass
+class TotalEnergyClass : public LinkObservableClass
 {
+public:
+  void WriteBlock();
+  void Update (int startTimeSlice, int endTimeSlice);
+  void UpdateAll();
   
 
+  TotalEnergyClass(PathDataClass &myPathData, IOSectionClass &IOSection)
+    : LinkObservableClass(myPathData, IOSection) 
+  {
+  }
 };
 
 
