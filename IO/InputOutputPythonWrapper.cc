@@ -367,6 +367,170 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return NULL;
       }
     }
+    // 3D arrays
+    else if (dim == 3) {
+      if (type==INT_TYPE){
+	blitz::Array<int,3> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0); int d1 = val.extent(1); int d2 = val.extent(2);
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tInt32, 3, d0, d1, d2);
+	  // Now copy data into new array
+	  for (int i=0; i<d0; i++)
+	    for (int j=0; j<d1; j++)
+	      for (int k=0; k<d2; k++)
+	      *(((int*)array->data)+(i*d1*d2)+(j*d2)+k) = val(i,j,k);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      if (type==DOUBLE_TYPE) {
+	blitz::Array<double,3> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0); int d1 = val.extent(1); int d2 = val.extent(2);
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tFloat64, 3, d0, d1, d2);
+	  // Now copy data into new array
+	  for (int i=0; i<d0; i++)
+	    for (int j=0; j<d1; j++)
+	      for (int k=0; k<d2; k++)
+		*(((double*)array->data)+(i*d1*d2)+j*d2+k) = val(i,j,k);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      if (type==BOOL_TYPE){
+	blitz::Array<bool,3> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0); int d1 = val.extent(1); int d2 = val.extent(2);
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tBool, 3, d0, d1, d2);
+	  // Now copy data into new array
+	  for (int i=0; i<d0; i++)
+	    for (int j=0; j<d1; j++)
+	      for (int k=0; k<d2; k++)
+		*(((bool*)array->data)+(i*d1*d2)+j*d2+k) = val(i,j,k);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      else if (type==STRING_TYPE){
+	blitz::Array<string,3> val;    
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0); int d1 = val.extent(1); int d2 = val.extent(2);
+	if (success){
+	  PyObject* l0=PyList_New(0);
+	  for (int i=0; i<d0; i++) {
+	    PyObject* l1=PyList_New(0);
+	    for (int j=0;j<d1;j++) {
+	      PyObject* l2 = PyList_New(0);
+	      for (int k=0; k<d2; k++)
+		PyList_Append(l2,Py_BuildValue("s",val(i,j,k).c_str()));
+	      PyList_Append(l1,l2);
+	    }
+	    PyList_Append (l0, l1);
+	  }
+	  return (PyObject*)l0;
+	}
+	else
+	  return NULL;
+      }
+    }
+    // 4D arrays
+    else if (dim == 4) {
+      if (type==INT_TYPE){
+	blitz::Array<int,4> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0); int d1 = val.extent(1); 
+	int d2 = val.extent(2); int d3 = val.extent(3);
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tInt32, 4, d0, d1, d2, d3);
+	  // Now copy data into new array
+	  for (int i=0; i<d0; i++)
+	    for (int j=0; j<d1; j++)
+	      for (int k=0; k<d2; k++)
+		for (int m=0; m<d3; m++)
+	      *(((int*)array->data)+(i*d1*d2*d3)+(j*d2*d3)+k*d3+m) = 
+		val(i,j,k,m);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      if (type==DOUBLE_TYPE) {
+	blitz::Array<double,4> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0); int d1 = val.extent(1); 
+	int d2 = val.extent(2); int d3 = val.extent(3);
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tFloat64, 4, d0, d1, d2, d3);
+	  // Now copy data into new array
+	  for (int i=0; i<d0; i++)
+	    for (int j=0; j<d1; j++)
+	      for (int k=0; k<d2; k++)
+		for (int m=0; m<d3; m++)
+		  *(((double*)array->data)+(i*d1*d2*d3)+j*d2*d3+k*d3+m) = 
+		    val(i,j,k,m);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      if (type==BOOL_TYPE){
+	blitz::Array<bool,4> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0); int d1 = val.extent(1); 
+	int d2 = val.extent(2); int d3 = val.extent(3);
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tBool, 4, d0, d1, d2, d3);
+	  // Now copy data into new array
+	  for (int i=0; i<d0; i++)
+	    for (int j=0; j<d1; j++)
+	      for (int k=0; k<d2; k++)
+		for (int m=0; m<d3; m++)
+		*(((bool*)array->data)+(i*d1*d2*d3)+j*d2*d3+k*d3+m) = 
+		  val(i,j,k,m);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      else if (type==STRING_TYPE){
+	blitz::Array<string,4> val;    
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0); int d1 = val.extent(1); 
+	int d2 = val.extent(2); int d3 = val.extent(3);
+	if (success){
+	  PyObject* l0=PyList_New(0);
+	  for (int i=0; i<d0; i++) {
+	    PyObject* l1=PyList_New(0);
+	    for (int j=0;j<d1;j++) {
+	      PyObject* l2 = PyList_New(0);
+	      for (int k=0; k<d2; k++) {
+		PyObject* l3 = PyList_New(0);
+		for (int m=0; m<d3; m++)
+		  PyList_Append(l3,Py_BuildValue("s",val(i,j,k,m).c_str()));
+		PyList_Append(l2,l3);
+	      }
+	      PyList_Append (l1, l2);
+	    }
+	    PyList_Append(l0, l1);
+	  }
+	  return (PyObject*)l0;
+	}
+	else
+	  return NULL;
+      }
+    }
   }
 }
 

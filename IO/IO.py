@@ -51,3 +51,17 @@ print b.ReadVar ("int_2");
 print b.ReadVar ("double_2");
 print b.ReadVar ("bool_2");
 print b.ReadVar ("string_2");
+
+print b.ReadVar ("int_3");
+print b.ReadVar ("double_3");
+print b.ReadVar ("bool_3");
+print b.ReadVar ("string_3");
+
+print 
+print b.ReadVar ("int_4");
+print 
+print b.ReadVar ("double_4");
+print 
+print b.ReadVar ("bool_4");
+print 
+print b.ReadVar ("string_4");

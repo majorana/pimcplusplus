@@ -586,7 +586,7 @@ VarASCIIClass *NewASCIIVar (AtomicType newType, int ndim,
     else if (newType == STRING_TYPE)
       {
 	VarASCIIstring4Class *newVar = new VarASCIIstring4Class;
-	newVar->Value.resize(dims(0), dims(1), dims(2), dims(4));
+	newVar->Value.resize(dims(0), dims(1), dims(2), dims(3));
 	return newVar;
       }
     else if (newType == BOOL_TYPE)
