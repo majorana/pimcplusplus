@@ -121,10 +121,12 @@ void PathClass::Allocate()
     numParticles=numParticles + SpeciesArray(speciesNum)->NumParticles;
     SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
   }
+  cerr<<"my number of particles is "<<numParticles<<endl;
   Path.resize(MyNumSlices,numParticles);
   Permutation.resize(numParticles);
   SpeciesNumber.resize(numParticles);
   DoPtcl.resize(numParticles);
+  cerr<<"Permutation size is "<<Permutation.size()<<endl;
   /// Assign the species number to the SpeciesNumber array
   for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
     for (int i=SpeciesArray(speciesNum)->FirstPtcl; 
@@ -135,9 +137,10 @@ void PathClass::Allocate()
   for (int ptcl=0;ptcl<Permutation.size();ptcl++){
     Permutation(ptcl) = ptcl;
   }
-  
-  SetupkVecs();
-  Rho_k.resize(MyNumSlices, NumSpecies(),kVecs.size());
+  if (LongRange){
+    SetupkVecs();
+    Rho_k.resize(MyNumSlices, NumSpecies(),kVecs.size());
+  }
 }
 
 
@@ -250,6 +253,10 @@ void PathClass::CalcRho_ks_Fast(int slice,int species)
 
 void PathClass::MoveJoin(int oldJoin, int newJoin)
 {
+  //  cerr<<"My time slices is "<<NumTimeSlices()<<endl;
+  //  for (int ptcl=0;ptcl<NumParticles();ptcl++){
+    //    cerr<<Permutation(ptcl)<<endl;
+  //  }
   if (newJoin>oldJoin){
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
@@ -309,7 +316,8 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
 void PathClass::ShiftData(int slicesToShift)
 {
   ShiftPathData(slicesToShift);
-  ShiftRho_kData(slicesToShift);
+  if (LongRange)
+    ShiftRho_kData(slicesToShift);
 }
 
 void PathClass::ShiftRho_kData(int slicesToShift)

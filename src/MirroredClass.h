@@ -8,9 +8,9 @@ typedef enum {OLDMODE, NEWMODE} ModeType;
 inline void SetMode (ModeType type)
 {
   if (type == OLDMODE)
-    ActiveCopy = 1;
-  else 
     ActiveCopy = 0;
+  else 
+    ActiveCopy = 1;
 }
 
 using namespace blitz;
@@ -23,8 +23,8 @@ private:
 public:
   inline operator T() const     { return Data[ActiveCopy]; }
   void operator= (const T &val) { Data[ActiveCopy] = val;  }
-  inline void AcceptCopy()      { Data[1] = Data[0];       }
-  inline void RejectCopy()      { Data[0] = Data[1];       }
+  inline void AcceptCopy()      { Data[0] = Data[1];       }
+  inline void RejectCopy()      { Data[1] = Data[0];       }
 };
 
 
@@ -42,16 +42,16 @@ public:
   inline operator Array<T,1>&()       { return Data[ActiveCopy];           }
   inline T  operator()(int i) const   { return Data[ActiveCopy](i);        }
   inline T& operator()(int i)         { return Data[ActiveCopy](i);        }
-  inline void AcceptCopy ()           { Data[1] = Data[0];                 }
-  inline void RejectCopy ()           { Data[0] = Data[1];                 }
+  inline void AcceptCopy ()           { Data[0] = Data[1];                 }
+  inline void RejectCopy ()           { Data[1] = Data[0];                 }
   inline void AcceptCopy (int i)
-  { Data[1](i) = Data[0](i); }
-  inline void RejectCopy (int i)
   { Data[0](i) = Data[1](i); }
+  inline void RejectCopy (int i)
+  { Data[1](i) = Data[0](i); }
   inline void AcceptCopy (int start, int end)
-  { Data[1](Range(start,end)) = Data[0](Range(start,end)); }
-  inline void RejectCopy (int start, int end)
   { Data[0](Range(start,end)) = Data[1](Range(start,end)); }
+  inline void RejectCopy (int start, int end)
+  { Data[1](Range(start,end)) = Data[0](Range(start,end)); }
 };
 
 
@@ -87,9 +87,9 @@ public:
   inline T& operator()(int i, int j)       
     { return Data[ActiveCopy](i,j);      }
   inline void AcceptCopy ()              
-    { Data[1] = Data[0]; }
-  inline void RejectCopy ()              
     { Data[0] = Data[1]; }
+  inline void RejectCopy ()              
+    { Data[1] = Data[0]; }
 };
 
 template <class T>
@@ -125,9 +125,9 @@ public:
   inline Array<T,3>& operator[](int i) 
     { return Data[i]; }
   inline void AcceptCopy ()              
-    { Data[1] = Data[0]; }
-  inline void RejectCopy ()              
     { Data[0] = Data[1]; }
+  inline void RejectCopy ()              
+    { Data[1] = Data[0]; }
 };
 
 

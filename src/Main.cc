@@ -4,7 +4,7 @@
 
 main(int argc, char **argv)
 {
-  MirroredClassTest();
+  //  MirroredClassTest();
 #ifdef USE_MPI
   MPI_Init(&argc, &argv);
 #endif

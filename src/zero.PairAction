@@ -20,7 +20,7 @@ Section (Fits)
 
   Section (Potential)
   {
-    string Type = "Coulomb";
-    double Z1Z2 = 1;
+//    string Type = "Coulomb";
+//    double Z1Z2 = 1;
   }
 }
