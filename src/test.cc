@@ -8,6 +8,8 @@
 #include "ObservableClass.h"
 
 
+template class MirroredArrayClass<int>;
+template class MirroredArrayClass<dVec>;
 
 void setupAction(ActionClass &myActionClass,PathDataClass &myPathData)
 
@@ -126,5 +128,7 @@ int main(int argc, char **argv)
   PC.Print();
   //cerr<<"done! done!"<<endl;
   MPI_Finalize();
+  //  if (&myPathData == (void *)0xff823cf)
+    //    foo();
 }
   

@@ -2,6 +2,11 @@
 #include "MirroredArrayClass.h"
 
 
+template class MirroredArrayClass<int>;
+template class MirroredArrayClass<dVec>;
+
+
+// #pragma implementation "MirroredArrayClass.h"
 
 //template <class T>
 //MirroredArrayClass<T>::MirroredArrayClass(int dim1, int dim2)
@@ -113,15 +118,14 @@ void MirroredArrayClass<T>::shiftData(int slicesToShift, CommClass &Communicator
 
 }
 
-void foo()
-{
-  MirroredArrayClass<int> myArray;
-  CommClass myCommunicator;
-  myArray.Print();
-  myArray.shiftData(3,myCommunicator);
-  MirroredArrayClass<dVec> myArray2;
-  myArray2.resize(1,1);
-  myArray.resize(1,1);
-  myArray2.shiftData(3,myCommunicator);
-
-}
+//void foo()
+//{
+//  MirroredArrayClass<int> myArray;
+//  CommClass myCommunicator;
+//  myArray.Print();
+//  myArray.shiftData(3,myCommunicator);
+//  MirroredArrayClass<dVec> myArray2;
+//  myArray2.resize(1,1);
+//  myArray.resize(1,1);
+//  myArray2.shiftData(3,myCommunicator);
+//}
