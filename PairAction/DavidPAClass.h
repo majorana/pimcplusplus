@@ -68,6 +68,7 @@ class DavidPAClass : public PairActionFitClass
 inline void DavidPAClass::calcUsqz(double s,double q,double z,int level,
 				      double &U, double &dU, double &V)
 {
+  double rmin = ukj(level).grid->Start;
   //  level=level+2;
   U=0.0;
   dU=0.0;
@@ -77,12 +78,7 @@ inline void DavidPAClass::calcUsqz(double s,double q,double z,int level,
     U = 0.0; dU=0.0; V = 0.0;
     return;
   }
-  else if (q < ukj(level).grid->Start) {
-    U = 5000.0;
-    dU = 0.0;
-    //    q = ukj(level).grid->Start;
-    return;
-  }
+
   double r=q+0.5*z;
   double rprime=q-0.5*z;
   if (r > ukj(level).grid->End) {
@@ -93,11 +89,20 @@ inline void DavidPAClass::calcUsqz(double s,double q,double z,int level,
     U = 0.0; dU=0.0; V = 0.0;
     return;
   }
-
+  
   // This is the endpoint action 
+  
+  
+  if ((rprime < rmin) || (r < rmin)){
+    U = 5000.0; dU = 0.0;
+    return;
+  }
+
+  // Compensate for potential, which is subtracted from diaganal action in
+  // dm file.
   V = 0.5*(ukj(level)(0,r) + ukj(level)(0,rprime));
-  U+=0.5*((ukj(level))(1,r)+(ukj(level))(1,rprime)); 
-  dU+=0.5*((dukj(level))(1,r)+(dukj(level))(1,rprime));  
+  U+= 0.5*(ukj(level)(1,r)+ukj(level)(1,rprime));
+  dU+=0.5*((dukj(level))(1,r)+(dukj(level))(1,rprime));
   dU+=V;
   return;
   if (s > 0.0)
