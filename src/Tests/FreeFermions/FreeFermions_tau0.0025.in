@@ -36,7 +36,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "FreeFermions_tau0.0025d.h5";
+  string OutFile = "FreeFermions_tau0.0025new.h5";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
@@ -67,7 +67,7 @@ Section (Moves) {
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
     int NumLevels=5;
     string Species = "free";
-    int StepsPerBlock=5;
+    int StepsPerBlock=1;
     
   }
   Section (Move) {

@@ -27,10 +27,11 @@ private:
 
   Array<double,2> DetMatrix, Cofactors;
   Array<dVec,1> GradVec;
-  double Det();
+  double Det(int slice);
   void GradientDet (int slice, double &det, Array<dVec,1> &gradient);
   void GradientDetFD (int slice, double &det, Array<dVec,1> &gradient);
   double NodalDist (int slice);
+  double LineSearchDist (int slice);
   int SpeciesNum;
 public:
   double Action (int slice1, int slice2,
