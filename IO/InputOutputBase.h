@@ -124,9 +124,9 @@ public:
   inline VarClass* GetVarPtr(string name)
   {
     list<VarClass *>::iterator iter = VarList.begin();
-
-    while ((iter != VarList.end()) && ((*iter)->Name != name))
+    while ((iter != VarList.end()) && ((*iter)->Name != name)){
       iter++;
+    }
     if (iter == VarList.end())
       return NULL;
     else {
