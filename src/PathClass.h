@@ -37,8 +37,6 @@ private:
 private:
   /// This is the maximum number of k vectors in each direction
   TinyVector<int,NDIM> MaxkIndex;
-  /// True if we need k-space sums for long range potentials.
-  bool LongRange;
   /// Stores the radius of the k-space sphere we sum over
   double kCutoff;
   /// Allocates and sets up the k-vectors.
@@ -48,6 +46,8 @@ private:
   /// This stores e^{i\vb_i \cdot r_i^\alpha}
   TinyVector<Array<complex<double>,1>,NDIM> C;
 public:
+  /// True if we need k-space sums for long range potentials.
+  bool LongRange;
   /// Stores the actual k vectors
   Array<dVec,1> kVecs;
   /// This holds the density of particles in k-space.  Indexed by
@@ -84,7 +84,7 @@ public:
 			double &dist, dVec &disp);
   inline void DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 			double &distA, double &distB,dVec &dispA, dVec &dispB);
-  inline double Distance (int slice, int ptcl1, int ptcl2);
+  //  inline double Distance (int slice, int ptcl1, int ptcl2);Not used?
   inline dVec Velocity (int sliceA, int sliceB, int ptcl);
   inline void PutInBox (dVec &v);
 
@@ -127,6 +127,15 @@ public:
   friend void SetupPathNaCl(PathClass &path);
   friend void SetupPathZincBlend(PathClass &path);
   friend void SetupPathSimpleCubic(PathClass &path);
+
+  //////////////////////////
+  /// IO and allocations ///
+  //////////////////////////
+  MirroredClass<int> OpenPtcl;
+  MirroredClass<int> OpenLink;
+  bool OpenPaths;
+  void InitOpenPaths();
+  void DistanceToTail();
 };
 
 
@@ -169,7 +178,7 @@ inline int PathClass::NumSpecies()
 
 inline int PathClass::NumParticles() 
 { 
-  return Path.cols();
+  return Path.cols()-OpenPaths;
 }
 
 ///The number of time slices is the number of slices on this processor.
@@ -211,8 +220,36 @@ inline PathClass::PathClass (PIMCCommunicatorClass &communicator) :
   Communicator(communicator), Random(Communicator)
 {
   //      NumSpecies = 0;
+  cerr<<"In pathclass constructor"<<endl;
   TotalNumSlices=0;
   Random.Init(314159);
+  OpenPaths=true;
+
+  cerr<<"Out of pathclass constructor"<<endl;
+}
+
+
+
+inline void PathClass::InitOpenPaths()
+{
+  cerr<<"Starting to initialize"<<endl;
+  if (OpenPaths){
+    cerr<<"openpaths"<<endl;
+    SetMode(OLDMODE);
+    OpenLink=3;
+    cerr<<"Set up the open link"<<endl;
+    OpenPtcl=0;
+    cerr<<"set up the open particle"<<endl;
+    SetMode(NEWMODE);
+    OpenLink=3;
+    OpenPtcl=0;
+    cerr<<"Preparing for moving things in path around"<<endl;
+    Path[OLDMODE]((int)OpenLink,NumParticles())=Path[OLDMODE]((int)OpenLink,(int)OpenPtcl);
+    cerr<<"Moved the first thing"<<endl;
+    Path[NEWMODE]((int)OpenLink,NumParticles())=Path[NEWMODE]((int)OpenLink,(int)OpenPtcl);
+    cerr<<"Moved the second thing"<<endl;
+  }
+  cerr<<"Initialized the open paths"<<endl;
 }
 
 
@@ -295,8 +332,20 @@ inline void PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 			       double &distA, double &distB, 
 			       dVec &dispA, dVec &dispB)
 {  
+  //  //  bool changePtcl1=(OpenPaths && sliceB==(int)OpenLink && ptcl1==(int)OpenPtcl);
+  //  //  ptcl1=ptcl1*!changePtcl1+NumParticles()*changePtcl1;
+  //  //  bool changePtcl2=(OpenPaths && sliceB==(int)OpenLink && ptcl2==(int)OpenPtcl);
+  //  //  ptcl2=ptcl2*!changePtcl2+NumParticles()*changePtcl2;
   dispA = Path(sliceA, ptcl2) - Path(sliceA,ptcl1);
-  dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
+  if (OpenPaths && sliceB==(int)OpenLink && ptcl1==(int)OpenPtcl){
+    dispB=Path(sliceB,ptcl2)-Path(sliceB,NumParticles());
+  }
+  else if (OpenPaths && sliceB==(int)OpenLink && ptcl2==(int)OpenPtcl){
+    dispB=Path(sliceB,NumParticles())-Path(sliceB,ptcl1);
+  }
+  else{
+    dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
+  }
   //  dVec tempDispB;
   //  dVec tempDispBN;
   //  dVec dispBNew;
@@ -363,9 +412,18 @@ inline void PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 
 inline dVec PathClass::Velocity (int sliceA, int sliceB, int ptcl)
 {
-  dVec vel = Path(sliceB, ptcl) - Path(sliceA,ptcl);
-  PutInBox(vel);
 
+  //  bool changePtcl=(OpenPaths && sliceB==(int)OpenLink && ptcl==(int)OpenPtcl);
+  //  ptcl=ptcl*!changePtcl+NumParticles()*changePtcl;
+  dVec vel;
+  if (OpenPaths && sliceB==(int)OpenLink && ptcl==(int)OpenPtcl){
+    vel=Path(sliceB,NumParticles())-Path(sliceA,ptcl);
+  }
+  else{
+    vel = Path(sliceB, ptcl) - Path(sliceA,ptcl);
+  }
+  PutInBox(vel);
+  
 
 /* #ifdef DEBUG */
 /*  dVec DBvel = Path(sliceB,ptcl) - Path(sliceA,ptcl); */

@@ -1,5 +1,6 @@
 #include "PIMCClass.h"
 #include "BisectionMoveClass.h"
+#include "OpenBisectionMoveClass.h"
 #include "MetaMoves.h"
 #include "BlockMove.h"
 #include "ObservableClass.h"
@@ -52,12 +53,16 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     assert(in.ReadVar("type",MoveType));
     if (MoveType=="Bisection")
       Moves(counter)=new BisectionMoveClass(PathData);
+    else if (MoveType=="OpenBisection")
+      Moves(counter)=new OpenBisectionMoveClass(PathData);
     else if (MoveType=="ShiftMove")
       Moves(counter)=new ShiftMoveClass(PathData);
     else if (MoveType=="PrintMove")
       Moves(counter)=new PrintMoveClass(PathData);
     else if (MoveType=="CycleBlock")
       Moves(counter)=new CycleBlockMoveClass(PathData);
+    else if (MoveType=="PermMove")
+      Moves(counter)=new PermMove(PathData);
     else {
       cerr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();
@@ -90,6 +95,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       assert(in.ReadVar("Name",theObserveName));
       OutFile.NewSection(theObserveName);
       tempObs = new PairCorrelationClass(PathData,OutFile);
+    }
+    else if (theObserveType=="nofr"){
+      assert(in.ReadVar("Name",theObserveName));
+      OutFile.NewSection(theObserveName);
+      tempObs = new nofrClass(PathData,OutFile);
     }
     else if (theObserveType=="Energy"){
       OutFile.NewSection("Energies");

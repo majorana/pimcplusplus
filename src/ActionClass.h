@@ -19,21 +19,11 @@ private:
   LinearGrid LongGrid;
   /// This calculates the quantity 
   /// \f$ X_k \equiv -\frac{4\pi}{\Omega k} \int_{r_c}^\infty dr \, r \sin(kr) V(r).\f$
-  double CalcXk (int paIndex, int level, double k, double rc, TaskType type);
-  // This must be called after all of the OptimizedBreakup_x's
-  Array<double,1> RPAIntegrand(double t, const Array<double,1> &Uvec);
-  void SetupRPA();
-  void TestRPA();
-  bool RPATaskIsU;
-  int Level, ki;
-  bool UseRPA;
+  double CalcXk (int paIndex, int level, double k, double rc,
+		 TaskType type);
 public:
-  inline Array<double,1> operator()(double t, Array<double,1> uwvec)
-  { return RPAIntegrand(t, uwvec); }
   double LongRange_U(int slice, int level);
-  double LongRange_U_RPA(int slice, int level);
   double LongRange_dU(int slice, int level);
-  double LongRange_dU_RPA(int slice, int level);
   double LongRange_V(int slice);
   /// This holds all of the Pair Action Classes
   Array<PairActionFitClass*,1> PairActionVector;
@@ -51,8 +41,12 @@ public:
   /// Calculates the total action.
   double UAction (int startSlice, int endSlice, 
 		  const Array<int,1> &changedParticles, int level);
+  double UApproximateAction (int startSlice, int endSlice, 
+			     const Array<int,1> &changedParticles,int level);
   double KAction (int startSlice, int endSlice, 
 		  const Array<int,1> &changedParticles, int level);
+  double OtherAction(int startSlice, int endSlice, 
+		     const Array<int,1> &changedParticles, int level);
   double TotalAction(int startSlice, int endSlice, 
 		     const Array<int,1> &changedParticles, int level);
 

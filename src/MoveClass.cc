@@ -60,6 +60,33 @@ void ParticleMoveClass::ChooseParticles()
     bool Redundant;
     do {
       MyParticleIndices(i) = RandInt(TotalParticles);
+      while (MyParticleIndices(i)==(int)(PathData.Path.OpenPtcl)){ //HACK!HACK!
+	MyParticleIndices(i) = RandInt(TotalParticles);
+      } 
+      Redundant = false;
+      for (int j=0; j<i; j++){
+	  if (MyParticleIndices(i) == MyParticleIndices(j)){
+	      Redundant = true;
+	      break;
+	  }
+      }      
+    } while (Redundant); 
+  }
+  for (int i=0; i<NumParticlesToMove; i++) 
+    ActiveParticles(i) = MyParticleIndices(i);
+  /// HACK HACK HACK
+  //ActiveParticles(0) = 0;
+}
+
+/// So do we still want to choose particles by dumping everything
+/// into some mapping array from teh active particles and dealing 
+// with it that way? I think this is doing duplicate stuff in here.
+void ParticleMoveClass::ChooseParticlesOpen()
+{
+  for (int i=0; i<NumParticlesToMove; i++) { 
+    bool Redundant;
+    do {
+      MyParticleIndices(i) = RandInt(TotalParticles);
       Redundant = false;
       for (int j=0; j<i; j++){
 	  if (MyParticleIndices(i) == MyParticleIndices(j)){
