@@ -60,6 +60,7 @@ PIMCobjs =                            \
   Common.o                            \
   Main.o                              \
   Observables/ObservableEnergy.o      \
+  Observables/ObservableModifiedEnergy.o      \
   Observables/Weight.o                \
   Observables/StructureFactor.o       \
   Moves/NoPermuteClass.o              \
@@ -175,6 +176,7 @@ TestPermobjs =                        \
   PIMCClass.o                         \
   Observables/ObservableBase.o        \
   Observables/ObservableEnergy.o      \
+  Observables/ObservableModifiedEnergy.o      \
   Observables/Weight.o                \
   Observables/ObservableCorrelation.o \
   Observables/StructureFactor.o       \

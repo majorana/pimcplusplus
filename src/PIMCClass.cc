@@ -102,6 +102,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection("Energies");
       tempObs = new EnergySignClass(PathData,OutFile);
     }
+    else if (theObserveType=="ModifiedEnergy"){
+      if (iAmRoot)
+	OutFile.NewSection("Energies(modified)");
+      tempObs = new ModifiedEnergyClass(PathData,OutFile);
+    }
 
     else if (theObserveType=="PathDump"){
       if (iAmRoot)
