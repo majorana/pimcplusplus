@@ -26,7 +26,7 @@ class TricubicSpline
 {
 private:
   Array<double,4> f;
-  Array<double,1> wk;
+
   bool UpToDate;
   int Nx, Ny, Nz;
   int xIsLin, yIsLin, zIsLin;
@@ -51,6 +51,14 @@ public:
   inline void Init (Grid *xGrid_, Grid *yGrid_, Grid *zGrid_,
 		    Array<double,3> &f_);
 
+
+  /// Copy constructor
+  inline TricubicSpline (const TricubicSpline &a);
+
+  /// Assigment operator -- necessary for array resizeAndPreserve
+  inline TricubicSpline & operator= (TricubicSpline &a);
+  inline TricubicSpline & operator= (TricubicSpline a);
+
   TricubicSpline(Grid *xGrid_, Grid *yGrid_, Grid *zGrid_,
 		 Array<double,3> &f_)
   {
@@ -61,6 +69,53 @@ public:
 };
 
 
+inline TricubicSpline::TricubicSpline(const TricubicSpline &a)
+{
+  f.resize(a.f.shape());
+  f = a.f;
+  UpToDate = a.UpToDate;
+  Nx = a.Nx; Ny = a.Ny; Nz = a.Nz;
+  xIsLin = a.xIsLin;
+  yIsLin = a.yIsLin;
+  zIsLin = a.zIsLin;
+  IxMinBC = a.IxMinBC; IxMaxBC = a.IxMaxBC;
+  IyMinBC = a.IyMinBC; IyMaxBC = a.IyMaxBC;
+  IzMinBC = a.IzMinBC; IzMaxBC = a.IzMaxBC;
+  Nwk = a.Nwk;
+  xGrid = a.xGrid; yGrid = a.yGrid; zGrid = a.zGrid;
+}
+
+inline TricubicSpline& TricubicSpline::operator= (TricubicSpline &a)
+{
+  f.resize(a.f.shape());
+  f = a.f;
+  UpToDate = a.UpToDate;
+  Nx = a.Nx; Ny = a.Ny; Nz = a.Nz;
+  xIsLin = a.xIsLin;
+  yIsLin = a.yIsLin;
+  zIsLin = a.zIsLin;
+  IxMinBC = a.IxMinBC; IxMaxBC = a.IxMaxBC;
+  IyMinBC = a.IyMinBC; IyMaxBC = a.IyMaxBC;
+  IzMinBC = a.IzMinBC; IzMaxBC = a.IzMaxBC;
+  Nwk = a.Nwk;
+  xGrid = a.xGrid; yGrid = a.yGrid; zGrid = a.zGrid;
+}
+
+inline TricubicSpline& TricubicSpline::operator= (TricubicSpline a)
+{
+  f.resize(a.f.shape());
+  f = a.f;
+  UpToDate = a.UpToDate;
+  Nx = a.Nx; Ny = a.Ny; Nz = a.Nz;
+  xIsLin = a.xIsLin;
+  yIsLin = a.yIsLin;
+  zIsLin = a.zIsLin;
+  IxMinBC = a.IxMinBC; IxMaxBC = a.IxMaxBC;
+  IyMinBC = a.IyMinBC; IyMaxBC = a.IyMaxBC;
+  IzMinBC = a.IzMinBC; IzMaxBC = a.IzMaxBC;
+  Nwk = a.Nwk;
+  xGrid = a.xGrid; yGrid = a.yGrid; zGrid = a.zGrid;
+}
 
 
 inline double TricubicSpline::operator()(double x, double y, double z) 
@@ -131,7 +186,7 @@ inline void TricubicSpline::Update()
 //   for (int i=0; i<Nz; i++)
 //     cerr << (*zGrid)(i) << endl;
 
-  wk.resize(Nwk);
+  double *wk = new double[Nwk];
   mktricubw_(xGrid->Points(), &Nx,
 	     yGrid->Points(), &Ny,
 	     zGrid->Points(), &Nz,
@@ -139,8 +194,8 @@ inline void TricubicSpline::Update()
 	     &IxMinBC, &dummyDouble, &IxMaxBC, &dummyDouble, &dummyInt,
 	     &IyMinBC, &dummyDouble, &IyMaxBC, &dummyDouble, &dummyInt,
 	     &IzMinBC, &dummyDouble, &IzMaxBC, &dummyDouble, &dummyInt,
-	     wk.data(), &Nwk, &xIsLin, &yIsLin, &zIsLin, &errorCode);
-  wk.resize(1);
+	     wk, &Nwk, &xIsLin, &yIsLin, &zIsLin, &errorCode);
+  delete wk;
   for (int ix=0; ix<Nx; ix++)
     for (int iy=0; iy<Ny; iy++)
       for (int iz=0; iz<Nz; iz++)
