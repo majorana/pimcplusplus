@@ -357,6 +357,7 @@ void XMLparserClass::startElement(string &name, list<XMLattribute> &attributes)
 
   if (ElementIsSection) {
     if (file != "") { // We're including another file
+      // DO SOMETHING!!!!
       cerr << "Section (" << name << ") is including "
 	   << file << ".\n";
     }
@@ -457,7 +458,7 @@ void VarXMLdouble2Class::ReadVals(list<string> &vals)
 void VarXMLdouble3Class::ReadVals(list<string> &vals)
 {
   if (vals.size()!=Value.size()) {
-    cerr << "Wrong number of doubles in XML parser for variable "
+    cerr << "Wrong number of ints in XML parser for variable "
 	 << Name << endl;
     cerr << "Expected " << Value.size() << ", but got " 
 	 << vals.size() << ".\n";
@@ -473,18 +474,195 @@ void VarXMLdouble3Class::ReadVals(list<string> &vals)
 }
 
 
-void VarXMLint0Class::ReadVals(list<string> &vals) {}
-void VarXMLint1Class::ReadVals(list<string> &vals) {}
-void VarXMLint2Class::ReadVals(list<string> &vals) {}
-void VarXMLint3Class::ReadVals(list<string> &vals) {}
-void VarXMLstring0Class::ReadVals(list<string> &vals) {}
-void VarXMLstring1Class::ReadVals(list<string> &vals) {}
-void VarXMLstring2Class::ReadVals(list<string> &vals) {}
-void VarXMLstring3Class::ReadVals(list<string> &vals) {}
-void VarXMLbool0Class::ReadVals(list<string> &vals) {}
-void VarXMLbool1Class::ReadVals(list<string> &vals) {}
-void VarXMLbool2Class::ReadVals(list<string> &vals) {}
-void VarXMLbool3Class::ReadVals(list<string> &vals) {}
+void VarXMLint0Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=1) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    abort();
+  }
+  Value = StrToInt (vals.front());
+}
+
+void VarXMLint1Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) {
+    Value(i) = StrToInt(*iter);
+    iter++;
+  }
+}
+
+void VarXMLint2Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) {
+      Value(i,j) = StrToInt(*iter);
+      iter++;
+    }
+}
+
+void VarXMLint3Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) 
+      for (int k=0; k<Value.extent(2); k++){
+	Value(i,j,k) = StrToInt(*iter);
+	iter++;
+      }
+}
+
+
+
+void VarXMLstring0Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=1) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    abort();
+  }
+  Value = StrToString (vals.front());
+}
+
+void VarXMLstring1Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) {
+    Value(i) = StrToString(*iter);
+    iter++;
+  }
+}
+
+void VarXMLstring2Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) {
+      Value(i,j) = StrToString(*iter);
+      iter++;
+    }
+}
+
+void VarXMLstring3Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) 
+      for (int k=0; k<Value.extent(2); k++){
+	Value(i,j,k) = StrToString(*iter);
+	iter++;
+      }
+}
+
+
+
+void VarXMLbool0Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=1) {
+    cerr << "Wrong number of bools in XML parser for variable "
+	 << Name << endl;
+    abort();
+  }
+  Value = StrToBool (vals.front());
+}
+
+void VarXMLbool1Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of bools in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) {
+    Value(i) = StrToBool(*iter);
+    iter++;
+  }
+}
+
+void VarXMLbool2Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of bools in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) {
+      Value(i,j) = StrToBool(*iter);
+      iter++;
+    }
+}
+
+void VarXMLbool3Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) 
+      for (int k=0; k<Value.extent(2); k++){
+	Value(i,j,k) = StrToBool(*iter);
+	iter++;
+      }
+}
+
+
+
 
 
 
