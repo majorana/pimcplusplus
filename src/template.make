@@ -1,4 +1,4 @@
-include /home/esler/MyCodes/Make.include
+include /home/common/Codes/Make.include
 
 LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) $(G2CLIB) -lm #-lstdc++
 INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) 
@@ -8,7 +8,7 @@ CC = icc
 LD = icc -Bstatic
 DEFS = -DNO_COUT -DUSE_MPI -DBZ_DEBUG -g #-DUSE_MPI 
 
-TestObjs = CubicSpline.o Grid.o InputFile.o
+TestObjs = CubicSpline.o Grid.o InputFile.o myprog.o IdenticleParticleClass.o Common.o 
 
 Test: 	$(TestObjs)
 	pushd ..; make; pushd
@@ -20,7 +20,7 @@ Test: 	$(TestObjs)
 	g77 -c $<
 
 
-SOURCES = CubicSpline.cc Grid.cc InputFile.cc
+SOURCES = CubicSpline.cc Grid.cc InputFile.cc myprog.cc IdenticleParticleClass.cc Common.cc
 
 
 newmake: 

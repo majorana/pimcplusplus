@@ -197,7 +197,7 @@ double MultiCubicSpline::operator()(int i, double x)
 }
 
 
-void MultiCubicSpline::Operator()(double x, Array<double,1> &yVec)
+void MultiCubicSpline::operator()(double x, Array<double,1> &yVec)
 {
   for (int i=0; i<NumSplines; i++)
     if (!UpToDate(i))
@@ -510,7 +510,7 @@ void TestMultiCubicSpline()
   for (int i=0; i<=5000; i++)
     {
       double r = ((double)i/5000.0)*2.0*M_PI;
-      spline.Vals (r, yVal);
+      spline(r, yVal);
       spline.Deriv (r, yDeriv);
       spline.Deriv2 (r, yDeriv2);
       spline.Deriv3 (r, yDeriv3);
@@ -525,10 +525,10 @@ void TestMultiCubicSpline()
 
 
 
-main()
-{
+//main()
+//{
   //Test2();
   //TestSpline();
-  TestMultiCubicSpline();
-}
+//  TestMultiCubicSpline();
+//}
 

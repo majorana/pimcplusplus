@@ -3,7 +3,12 @@
 
 #include "PathClass.h"
 
+class PermutationClass
+{
 
+
+
+};
 
 
 /*! This is an base class that holds all the information about
@@ -22,14 +27,17 @@ public:
   
   /// Returns the nodal action for fermions.  Returns 0 for bosons.
   virtual double NodeAction (int Ptcl, int LinkNum) = 0;
-}
+};
 
 
-class ElectronsClass: public IdenticalParticlesClass
+class ElectronsClass : public IdenticalParticlesClass
 {
 public:
-  double NodeAction (int Ptcl. int LinkNum);
+  double NodeAction (int Ptcl, int LinkNum);
+  ElectronsClass();
+  ~ElectronsClass();
 
-}
+};
 
 #endif
+

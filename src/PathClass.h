@@ -8,10 +8,6 @@
   particles.  In addition, it holds the time in which each particle
   and timeslice was moved. */
 
-int GetCurrentTimeStamp()
-{
-  return 0;
-}
 
 
 class PathClass
@@ -35,8 +31,8 @@ public:
   inline void SetPos (int Ptcl, int TimeSlice, const dVec &NewPos)
   {
 	
-		Positions.Set(Ptcl,TimeSlice,NewPos);
-		TimeStamp.Set(Ptcl,TimeSlice,GetCurrentTimeStamp());
+    Positions.Set(Ptcl,TimeSlice,NewPos);
+    TimeStamp.Set(Ptcl,TimeSlice,GetCurrentTimeStamp());
   }
 
   inline int GetTimeStamp (int Ptcl, int TimeSlice)

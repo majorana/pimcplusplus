@@ -2,7 +2,8 @@
 #define ACTION_CLASS
 
 #include "CubicSpline.h"
-
+#include "IdenticleParticleClass.h"
+#include "MemoizedDataClass.h"
 
 class SavedPairActionClass
 {
@@ -65,7 +66,7 @@ inline double PairActionClass::calcUrrptau(double s,double q,double z,int level)
     Sto2k=Sto2k*ssquared;
   }
   
-  
+  return sum; //I hope this is the right thing to return 
 }
 
 /*! This is the class that controls all of the actions and is in
@@ -74,18 +75,20 @@ inline double PairActionClass::calcUrrptau(double s,double q,double z,int level)
 
 class ActionClass
 {
+
+
+private:
 public:
   Array<PairActionClass,1> PairActionVector;
   Array<int,2> PairMatrix;
   Array<SavedPairActionClass,2> SavedPairActionArray;
-  Array<IdenticalParticleClass,1> *myIdenticalParticleArray;
+  Array<IdenticalParticlesClass,1> *myIdenticalParticleArray;
   double tau;
-  bool calcTotalNewAction(Array<ParticleID,1> changedParticles,level);
-  bool calcTotalOldAction(Array<ParticleID,1> changedParticles, level);
+  bool calcTotalAction(Array<ParticleID,1> changedParticles,int level);
   MemoizedDataClass *myMemoizedData;
-  inline void ActionClass::SampleParticles(Array<int,1> particles,int startSlice,int endSlice,int level);
-  calcTotalAction();
-private:
+  inline void SampleParticles(Array<ParticleID,1> particles,int startSlice,int endSlice,int level,double&, double&);
+  void calcTotalAction();
+
 
 
 };
@@ -111,7 +114,7 @@ inline void ActionClass::SampleParticles(Array<ParticleID,1> particles,int start
   for (int ptcl=0;ptcl<particles.size();ptcl++){
     int species=particles(ptcl)(0);
     int ptclNum=particles(ptcl)(1);
-    double lambda=(*myIdenticalParticleArray)(species).lambda;
+    double lambda=((*myIdenticalParticleArray)(species)).lambda;
     double sigma2=(2*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=-NDIM/2*log(2*M_PI*sigma2);
@@ -135,3 +138,5 @@ inline void ActionClass::SampleParticles(Array<ParticleID,1> particles,int start
 
 
 }
+
+#endif

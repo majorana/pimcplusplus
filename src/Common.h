@@ -8,4 +8,6 @@ typedef enum {MOVEMODE, OBSERVABLEMODE} ModeType;
 
 typedef TinyVector<int,2> ParticleID;
 
+int GetCurrentTimeStamp();
+
 #endif
