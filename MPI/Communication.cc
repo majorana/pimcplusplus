@@ -224,6 +224,8 @@ double CommunicatorClass::Sum (double a)
   else
     return (0.0);
 }
+
+
 #endif
 
 
