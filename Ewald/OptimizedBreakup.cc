@@ -30,7 +30,7 @@ double BasisClass::c_numerical(int n, double k)
   cIntegrand integrand(*this, n, k);
   GKIntegration<cIntegrand,GK31> integrator(integrand);
   integrator.SetRelativeErrorMode();
-  return integrator.Integrate (ra, rb, 1.0e-7, 1.0e-10, false);
+  return integrator.Integrate (ra, rb, 1.0e-12, 1.0e-10, false);
 }
 
 
@@ -212,7 +212,7 @@ double LPQHI_BasisClass::h(int n, double r)
     }
     for (int j=0; j<alpha; j++)
       sum *= (-delta);
-    return (sum/r);
+    return (sum);
   }
   else if ((r > rb) && (r <= rc)) {
     double sum = 0.0;
@@ -223,7 +223,7 @@ double LPQHI_BasisClass::h(int n, double r)
     }
     for (int j=0; j<alpha; j++)
       sum *= delta;
-    return sum/r;
+    return sum;
   }
   return 0.0;
 };
@@ -235,10 +235,21 @@ double LPQHI_BasisClass::c(int m, double k)
   int alpha = m-3*i;
   
   double sum = 0.0;
-  for (int n=0; n<=5; n++) {
-    double sign = ((alpha+n)&1) ? -1.0 : 1.0;
-    sum += S(alpha, n) * (Dplus(i,k,n) + Dminus(i,k,n)*sign);
-  }
+  if (i == 0) 
+    for (int n=0; n<=5; n++) {
+      double sign = ((alpha+n)&1) ? -1.0 : 1.0;
+      sum += S(alpha, n) * (Dplus(i,k,n));
+    }
+  else if (i == (NumKnots-1)) 
+    for (int n=0; n<=5; n++) {
+      double sign = ((alpha+n)&1) ? -1.0 : 1.0;
+      sum += S(alpha, n) * (Dminus(i,k,n)*sign);
+    }
+  else
+    for (int n=0; n<=5; n++) {
+      double sign = ((alpha+n)&1) ? -1.0 : 1.0;
+      sum += S(alpha, n) * (Dplus(i,k,n) + Dminus(i,k,n)*sign);
+    }
   for (int j=0; j<alpha; j++)
     sum *= delta;
 
