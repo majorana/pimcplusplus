@@ -1,8 +1,5 @@
 #include "PathClass.h"
 
-
-
-
 void PathClass::Read (IOSectionClass &inSection)
 {
   SetMode (BOTHMODE);
@@ -27,11 +24,13 @@ void PathClass::Read (IOSectionClass &inSection)
     for (int counter=0;counter<tempBox.size();counter++)
       Box(counter)=tempBox(counter);
     SetBox (Box);
-    kCut=-1;
-    inSection.ReadVar("kCutoff",kCut);
   }
   else 
     cerr << "Using free boundary conditions.\n";
+
+  // Read in the k-space radius.  If we don't have that,
+  // we're not long-ranged.
+  LongRange = inSection.ReadVar("kCutoff", kCutoff);
 
   assert(inSection.OpenSection("Particles"));
   int NumSpecies = inSection.CountSections ("Species");
@@ -84,24 +83,122 @@ void PathClass::Read (IOSectionClass &inSection)
   
 }
 
-PathClass::SetupkVectors()
+
+inline bool Include(dVec k)
 {
+  assert (NDIM == 3);
+  if (k[0] > 0.0)
+    return true;
+  else if ((k[0]==0.0) && (k[1]>0.0))
+    return true;
+  else if ((k[0]==0.0) && (k[1]==0.0) && (k[2] > 0.0))
+    return true;
+  else
+    return false;
+}
  
-  int currVec=0;
-  for (kx=-ceil(kCut/kBox(0));kx<ceil(kCut/kBox(0));kx++){
-    for (ky=-ceil(kCut/kBox(1));ky<ceil(kCut/kBox(1));ky++){
-        for (kz=-ceil(kCut/kBox(1));kx<ceil(kCut/kBox(2));kz++){
-	  kMag2=kx*kx+ky*ky+kz*kz;
-	  if (kMag2<kCut*kCut && (kx>0 || (kx==0 & ky>0) || (kx==0 && ky==0 && kz>0))){
-	    kVectors(currVec)(0)=kx;
-	    kVectors(currVec)(1)=ky;
-	    kVectors(currVec)(2)=kz;
-	  }
-	}
-    }
-  }      
+
+void PathClass::Allocate()
+{
+  assert(TotalNumSlices>0);
+  int myProc=Communicator.MyProc();
+  int numProcs=Communicator.NumProcs();
+  ///Everybody gets the same number of time slices if possible.
+  ///Otherwise the earlier processors get the extra one slice 
+  ///until we run out of extra slices.
+  ///The last slice on processor i is the first slices on processor i+1
+  MyNumSlices=TotalNumSlices/numProcs+1+(myProc<(TotalNumSlices % numProcs));
+  cerr<<"Numprocs is "<<numProcs<<endl;
+  cerr<<"mynumslices: "<<MyNumSlices<<endl;
+  
+  
+  int numParticles = 0;
+  /// Set the particle range for the new species
+  for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
+    SpeciesArray(speciesNum)->FirstPtcl = numParticles;
+    numParticles=numParticles + SpeciesArray(speciesNum)->NumParticles;
+    SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
+  }
+  Path.Resize(MyNumSlices,numParticles);
+  Permutation.Resize(numParticles);
+  SpeciesNumber.resize(numParticles);
+  DoPtcl.resize(numParticles);
+  /// Assign the species number to the SpeciesNumber array
+  for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
+    for (int i=SpeciesArray(speciesNum)->FirstPtcl; 
+	 i<= SpeciesArray(speciesNum)->LastPtcl; i++)
+      SpeciesNumber(i) = speciesNum;
+  }
+  //Sets to the identity permutaiton 
+  for (int ptcl=0;ptcl<Permutation.NumParticles();ptcl++){
+    Permutation.Set(ptcl,ptcl);
+  }
+
+  SetupkVecs();
+  Rho_k.resize(NumSpecies(), MyNumSlices, kVecs.size());
 }
 
 
+void PathClass::SetupkVecs()
+{
+  dVec kBox;
+  for (int i=0; i<NDIM; i++)
+    kBox[i] = 2.0*M_PI/Box(i);
+  
+  int numVecs=0;
+
+  assert (NDIM == 3);
+  int nx = (int) ceil(1.25*kCutoff / kBox[0]);
+  int ny = (int) ceil(1.25*kCutoff / kBox[1]);
+  int nz = (int) ceil(1.25*kCutoff / kBox[2]);
+  
+  dVec k;
+  for (int ix=-nx; ix<=nx; ix++) {
+    k[0] = ix*kBox[0];
+    for (int iy=-nx; iy<=ny; iy++) {
+      k[1] = iy*kBox[1];
+      for (int iz=-nx; iz<=nz; iz++) {
+	k[2] = iz*kBox[2];
+	if ((dot(k,k)<kCutoff*kCutoff) && Include(k))
+	  numVecs++;
+      }
+    }
+  }
+  kVecs.resize(numVecs);
+  numVecs = 0;
+  for (int ix=-nx; ix<=nx; ix++) {
+    k[0] = ix*kBox[0];
+    for (int iy=-nx; iy<=ny; iy++) {
+      k[1] = iy*kBox[1];
+      for (int iz=-nx; iz<=nz; iz++) {
+	k[2] = iz*kBox[2];
+	if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
+	  kVecs(numVecs) = k;
+	  numVecs++;
+	}
+      }
+    }
+  }
+}
+
+
+void PathClass::CalcRho_ks()
+{
+  for (int speciesIndex=0; speciesIndex<NumSpecies(); speciesIndex++)
+    for (int slice=0; slice<MyNumSlices; slice++)
+      for (int ki=0; ki<kVecs.size(); ki++) {
+	complex<double> rho;
+	rho = 0.0;
+	for (int ptcl=Species(speciesIndex).FirstPtcl; 
+	     ptcl <= Species(speciesIndex).LastPtcl; ptcl++) {
+	  const dVec &r = (*this)(slice, ptcl);
+	  double phase = dot(r, kVecs(ki));
+	  rho += complex<double> (cos(phase), sin(phase));
+	}
+	Rho_k(speciesIndex, slice, ki) = rho;
+      }
+}
+	  
+	
 
 

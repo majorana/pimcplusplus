@@ -16,15 +16,32 @@ private:
   /// Path stores the position of all the particles at all time
   /// slices.  The order for access is timeslice, particle
   MirroredArrayClass<dVec> Path;
-  SetupkVectors();
-  /// Stores what species a particle belongs to
+   /// Stores what species a particle belongs to
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
   int MyNumSlices;
   PIMCCommunicatorClass &Communicator;
-  ///(species x timeslice x k vector)
-  Array<double,3> Rhok;
-  Array<dVec,1> kVectors;
+
+
+  ///////////////////////////////////////////////
+  /// k-space stuff for long-range potentials ///
+  ///////////////////////////////////////////////
+  /// True if we need k-space sums for long range potentials.
+  bool LongRange;
+
+  /// This holds the density of particles in k-space.  Indexed by
+  /// (species, slice, k-vector).  Defined as
+  /// \rho^\alpha_k = \sum_i e^{i\mathbf{k}\cdot\mathbf{r}_i^\alpha}
+  Array<complex<double>,3> Rho_k;
+  /// Stores the kvectors needed for the reciporical space sum.
+  /// Stores only half the vectors because of k/-k symmetry.
+  Array<dVec,1> kVecs;
+  /// Stores the radius of the k-space sphere we sum over
+  double kCutoff;
+  /// Allocates and sets up the k-vectors.
+  void SetupkVecs();
+  void CalcRho_ks();
+
   ////////////////////////////////
   /// Boundary conditions stuff //
   ////////////////////////////////
@@ -32,8 +49,6 @@ private:
   dVec IsPeriodic;
   dVec Box, BoxInv;
   dVec kBox; //kBox(i)=2*Pi/Box(i)
-//This is the maximum momentum vector magnitude for k space sums 
-  double kCut; 
 
 public:
   inline void SetBox (dVec box);
@@ -79,7 +94,7 @@ public:
   /// IO and allocations
   void Read(IOSectionClass &inSection);
   inline void Print();
-  inline void Allocate();
+  void Allocate();
 
   inline PathClass(PIMCCommunicatorClass &communicator);
 };
@@ -179,46 +194,6 @@ inline void PathClass::AddSpecies (SpeciesClass *newSpecies)
   /// Add an element for the new species
   SpeciesArray.resizeAndPreserve(numSpecies+1);
   SpeciesArray(numSpecies) = newSpecies;
-}
-
-inline void PathClass::Allocate()
-{
-  assert(TotalNumSlices>0);
-  int myProc=Communicator.MyProc();
-  int numProcs=Communicator.NumProcs();
-  ///Everybody gets the same number of time slices if possible.
-  ///Otherwise the earlier processors get the extra one slice 
-  ///until we run out of extra slices.
-  ///The last slice on processor i is the first slices on processor i+1
-  MyNumSlices=TotalNumSlices/numProcs+1+(myProc<(TotalNumSlices % numProcs));
-  cerr<<"Numprocs is "<<numProcs<<endl;
-  cerr<<"mynumslices: "<<MyNumSlices<<endl;
-  
-  
-  int numParticles = 0;
-  /// Set the particle range for the new species
-  for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
-    SpeciesArray(speciesNum)->FirstPtcl = numParticles;
-    numParticles=numParticles + SpeciesArray(speciesNum)->NumParticles;
-    SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
-  }
-  Path.Resize(MyNumSlices,numParticles);
-  cerr<<"I've resized to "<<MyNumSlices<<" "<<numParticles<<endl;
-  Permutation.Resize(numParticles);
-  SpeciesNumber.resize(numParticles);
-  DoPtcl.resize(numParticles);
-  Rhok.resize(NumSpecies,MyNumSlices,numParticles);
-  SetupkVectors();
-  /// Assign the species number to the SpeciesNumber array
-  for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
-    for (int i=SpeciesArray(speciesNum)->FirstPtcl; 
-	 i<= SpeciesArray(speciesNum)->LastPtcl; i++)
-      SpeciesNumber(i) = speciesNum;
-  }
-  //Sets to the identity permutaiton 
-  for (int ptcl=0;ptcl<Permutation.NumParticles();ptcl++){
-    Permutation.Set(ptcl,ptcl);
-  }
 }
 
 inline PathClass::PathClass (PIMCCommunicatorClass &communicator) : 
