@@ -106,7 +106,7 @@ PseudoHamiltonian *ReadPH (InputBuffer &SectionBuf)
 	    Abort ("Error in Vgrid section of section PH.");
 	  
 	  // DEBUG
-	  cerr << "Vgrid.End = " << Vgrid->End << ".\n";
+	  //cerr << "Vgrid.End = " << Vgrid->End << ".\n";
 
 	  	  
 	  PH_CubicSplineXC *PHXC;

@@ -45,7 +45,7 @@ public:
   {
     assert(inSection.ReadVar("Z", Z));
     assert(inSection.OpenSection("V"));
-    V.Read (inSection);
+    //V.Read (inSection);
     inSection.CloseSection();
   }
 
@@ -168,7 +168,11 @@ public:
     outSection.WriteVar ("Vmin", Vmin);
     outSection.WriteVar ("Vmax", Vmax);
     outSection.WriteVar ("UseVHXC", UseVHXC);
-
+    if (UseVHXC) {
+      outSection.OpenSection("VHXC");
+      VHXC.Write (outSection);
+      outSection.CloseSection();
+    }
     outSection.OpenSection ("FullCoreV");
     FullCoreV->Write(outSection);
     outSection.CloseSection();
@@ -637,6 +641,33 @@ public:
   scalar d2Adr2(scalar r)
   {
     return (0.0);
+  }
+
+  bool Read (InputSectionClass &inSection)
+  {
+    assert(inSection.ReadVar ("Zion", Zion));
+    assert(inSection.ReadVar ("UseVHXC", UseVHXC));
+    if (UseVHXC)
+      {
+	assert(inSection.ReadVar ("NumElecs", NumElecs));
+	inSection.OpenSection("VHXC");
+	VHXC.Read(inSection);
+	inSection.CloseSection();
+      }
+    return (true);
+  }
+
+  void Write (OutputSectionClass &outSection)
+  {
+    outSection.WriteVar ("Type", "Nuclear");
+    outSection.WriteVar ("Zion", Zion);
+    outSection.WriteVar ("UseVHXC", UseVHXC);
+    if (UseVHXC) {
+      outSection.WriteVar ("NumElecs", NumElecs);
+      outSection.OpenSection("VHXC");
+      VHXC.Write(outSection);
+      outSection.CloseSection();
+    } 
   }
 
   PH_Nuclear(scalar z)

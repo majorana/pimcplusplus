@@ -1,6 +1,9 @@
-SOURCES = PH.cc Chebyshev.cc Potential.cc Atom.cc
+SOURCES = PH.cc Chebyshev.cc Potential.cc Atom.cc Cost.cc
 
-all:	PH.o Chebyshev.o Potential.o Atom.o
+all:	PH.o Chebyshev.o Potential.o Atom.o Cost.o
+
+clean:
+	rm -f *.o
 
 .cc.o: $(HEADERS)
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 
