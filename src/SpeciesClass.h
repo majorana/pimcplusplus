@@ -26,7 +26,7 @@ public:
   
   /// Returns the nodal action for fermions.  Returns 0 for bosons.
   virtual double NodeAction (int Ptcl, int LinkNum) = 0;
-  virtual ParticleType GetParticleType();
+  virtual ParticleType GetParticleType()=0;
 };
 
 
