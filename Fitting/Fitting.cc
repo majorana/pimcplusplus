@@ -1,4 +1,26 @@
 #include "Fitting.h"
+#include "../MatrixOps/MatrixOps.h"
+
+inline Array<double,1> operator*(Array<double,2> &A, Array<double,1> &x)
+{
+  assert (A.cols() == x.size());
+  Array<double,1> Ax(A.rows());
+  Ax = 0.0;
+  for (int i=0; i<A.rows();i++)
+    for (int j=0; j<A.cols(); j++)
+      Ax(i) += A(i,j) * x(j);
+  return Ax;
+}
+
+inline Array<double,1> diag (Array<double,2> &A)
+{
+  assert (A.rows() == A.cols());
+  Array<double,1> d(A.rows());
+  for (int i=0; i<A.rows(); i++)
+    d(i) = A(i,i);
+  return (d);
+}
+
 
 void LinFit (Array<double,1> &y, Array<double,1> &sigma,    // inputs
 	     Array<double,2> &F,                     // input
@@ -34,17 +56,20 @@ void LinFit (Array<double,1> &y, Array<double,1> &sigma,    // inputs
   for (int j=0; j<M; j++)
     for (int k=0; k<M; k++)
       for (int i=0; i<N; i++)
-	alpha += A(i,j) * A(i,k);
+	alpha(k,j) += A(i,j) * A(i,k);
   
   // Next, construct beta vector
   Array<double,1> beta(M);
   beta = 0.0;
   for (int k=0; k<M; k++)
     for (int i=0; i<N; i++)
-      beta += b(i)*A(i,k);
+      beta(k) += b(i)*A(i,k);
 
   // Now, invert alpha
   Array<double,2> C(M,M);
-  
   C = Inverse(alpha);
+  a = C * beta;
+  for (int i=0; i<M; i++)
+    errors(i) = sqrt(C(i,i));
+  //  errors = sqrt(diag(C));  
 }

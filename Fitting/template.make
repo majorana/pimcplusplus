@@ -1,7 +1,7 @@
 SOURCES = Fitting.cc Test.cc
 
-all:	Fitting.o Test.o
-	$(LD) -o Test Fitting.o Test.o $(LIBS)
+all:	Fitting.o Test.o 
+	$(LD) -o Test Fitting.o Test.o ../MatrixOps/MatrixOps.o $(LIBS)
 	
 clean:
 	rm -f *.o
