@@ -9,10 +9,18 @@
 class InputSectionASCIIClass : public InputSectionClass
 {
   void ReadWithoutComments(string fileName, Array<char,1> &buffer);
-  void PrintTree(InputSectionClass *sec);
+
  public:
+  void PrintTree(InputSectionClass *sec);
+  void PrintTree() { }
+  void PrintTree(int index) { }
   bool OpenFile (string fileName, InputSectionClass *parent);
+  bool OpenFile (string filename, string parentName, 
+		 InputSectionClass *parent) { }
+  void Close() { };
   void CloseFile();
+
+  
   
  
 };
@@ -50,6 +58,16 @@ public:
     }
     return true;
   }
+  bool ReadInto (Array<double,1> &v) { }
+  bool ReadInto (Array<double,2> &v) { }
+  bool ReadInto (Array<double,3> &v) { }
+  bool ReadInto (Array<int,1> &v) { }
+  bool ReadInto (Array<int,2> &v) { }
+  bool ReadInto (Array<int,3> &v) { }
+  bool ReadInto (Array<string,1> &v) { }
+  bool ReadInto (Array<string,2> &v) { }
+  bool ReadInto (Array<string,3> &v) { }
+
 };
 
 #endif
