@@ -34,5 +34,4 @@ void IntegrateSecondOrder (const Grid &grid,
 			   void *Params);
 
 
-
 #endif

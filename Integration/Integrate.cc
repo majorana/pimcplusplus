@@ -98,50 +98,6 @@ void IntegrateFirstOrderNS (const Grid &grid,
 
 
 
-void IntegrateFirstOrder (const Grid &grid,
-			   int StartPoint, int EndPoint,
-			   Array<scalar,1> &Result,
-			   scalar (*DerivFunc)(scalar x, scalar y,
-					     void *Params),
-			   void *Params)
-{
-  scalar k1, k2, k3, k4;
-  scalar y, yplus;
-  scalar h, x;
-  int direction;
-
-  if (StartPoint < EndPoint)
-    direction = 1;
-  else
-    direction = -1;
-  
-  const static scalar OneSixth = 1.0/6.0;
-  const static scalar OneThird = 1.0/3.0;
-
-  int i = StartPoint;
-  while (i!=EndPoint)
-    {
-      x = grid(i);
-      h = grid(i+direction) - x;
-      y = Result (i);
-      k1 = h * (*DerivFunc)(x,       y, Params);
-      yplus = y + 0.5*k1;
-      k2 = h * (*DerivFunc)(x+0.5*h, yplus, Params);
-      yplus = y + 0.5*k2;
-      k3 = h * (*DerivFunc)(x+0.5*h, yplus, Params);
-      yplus = y + k3;
-      k4 = h * (*DerivFunc)(x+h, yplus, Params);
-      Result(i+direction) = 
-	y + (OneSixth*(k1+k4) + OneThird*(k2+k3));
-      int TooBig = 0;
-      if (fabs(Result(i+direction)) > 1.0e10)
-	for (int j=StartPoint; j!=(EndPoint+direction); j+=direction)
-	  Result(j) *= 1.0e-10;
-      i += direction;
-    }
-}
-
-
 
 
 void IntegrateSecondOrder (const Grid &grid,
