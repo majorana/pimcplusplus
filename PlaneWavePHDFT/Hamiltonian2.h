@@ -77,14 +77,14 @@ private:
 
   void Setup();
   void SetVr();
-  FFTBox FFT;
+  FFTBox &FFT;
 public:
   void Apply (const zVec &c, zVec &Hc);
   void SetIons (const Array<Vec3,1> &rions);
   void Vmatrix (Array<complex<double>,2> &vmat);
 
-  CoulombFFTClass (double z, GVecsClass &gvecs) : 
-    VionBase (gvecs), Z(z), FFT(gvecs)
+  CoulombFFTClass (double z, GVecsClass &gvecs, FFTBox &fft) : 
+    VionBase (gvecs), Z(z), FFT(fft)
   {
     // nothing for now
   }
@@ -125,7 +125,7 @@ private:
   Array<complex<double>,3> Vr;
   zVec Vc;
   zVecVec Gc;
-  FFTBox      cFFT;
+  FFTBox      &cFFT;
   FFTVecBox VecFFT;
   FFTMatBox MatFFT;
   void SetupkPotentials();
@@ -136,9 +136,8 @@ public:
   void Vmatrix (Array<complex<double>,2> &vmat);
 
   void Apply (const zVec &c, zVec &Hc);
-  PHPotFFTClass (Potential &ph, GVecsClass &gvecs) :
-    VionBase (gvecs), kPH(ph),
-    cFFT(gvecs), VecFFT(gvecs), MatFFT(gvecs)
+  PHPotFFTClass (Potential &ph, GVecsClass &gvecs, FFTBox &fft) :
+    VionBase (gvecs), kPH(ph), cFFT(fft), VecFFT(gvecs), MatFFT(gvecs)
   {
 
   }
@@ -149,6 +148,7 @@ class HamiltonianClass
 {
 private:
 public:
+  FFTBox &FFT;
   GVecsClass &GVecs;
   KineticClass Kinetic;
   VionBase *Vion;
@@ -161,8 +161,8 @@ public:
   void SetIons (const Array<Vec3,1>& rions);
   void Setk (Vec3 k);
 
-  HamiltonianClass (GVecsClass &gvecs) 
-    : GVecs(gvecs), Kinetic(gvecs), Vion(NULL)
+  HamiltonianClass (GVecsClass &gvecs, FFTBox &fft) 
+    : GVecs(gvecs), Kinetic(gvecs), Vion(NULL), FFT(fft)
   {
 
   }

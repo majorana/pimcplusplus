@@ -129,7 +129,6 @@ CoulombFFTClass::SetVr()
 void 
 CoulombFFTClass::Setup()
 {
-  FFT.Setup();
   SetVr();
   IsSetup = true;
 }
@@ -372,7 +371,6 @@ void
 PHPotFFTClass::Setup()
 {
   cerr << "Setting up FFT boxes:\n";
-  cFFT.Setup();
   VecFFT.Setup();
   MatFFT.Setup();
   cerr << "done.\n";
@@ -448,7 +446,7 @@ void
 HamiltonianClass::SetIonPot (double z, bool useFFT)
 {
   if (useFFT)
-    Vion = new CoulombFFTClass(z, GVecs);
+    Vion = new CoulombFFTClass(z, GVecs, FFT);
   else
     Vion = new CoulombClass (z, GVecs);
 }
@@ -458,7 +456,7 @@ void
 HamiltonianClass::SetIonPot (Potential &ph, bool useFFT)
 {
   if (useFFT)
-    Vion = new PHPotFFTClass (ph, GVecs);
+    Vion = new PHPotFFTClass (ph, GVecs, FFT);
   else
     Vion = new PHPotClass (ph, GVecs);
 }

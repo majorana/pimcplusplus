@@ -78,13 +78,15 @@ void ConjGrad::InitBands()
 
 }
 
-void ConjGrad::CalcPhiSD()
+double ConjGrad::CalcPhiSD()
 {
   H.Apply(c, Hc);
   E0 = realconjdot (c, Hc);
   cerr << "E = " << E0 << endl;
   Phip = E0*c - Hc;
+  double nrm = norm (Phip);
   Normalize (Phip);  
+  return nrm;
 }
 
 void ConjGrad::Precondition()
@@ -98,7 +100,9 @@ void ConjGrad::Precondition()
   }
 }
 
-void ConjGrad::CalcPhiCG()
+
+// Returns the norm of the residual Hc - Ec
+double ConjGrad::CalcPhiCG()
 {
   Hc = 0.0;
   H.Kinetic.Apply (c, Hc);
@@ -106,6 +110,7 @@ void ConjGrad::CalcPhiCG()
   H.Vion->Apply (c, Hc);
   E0 = realconjdot (c, Hc);
   Xi = E0*c - Hc;
+  double residualNorm = norm (Xi);
   /// Orthonalize to other bands here
   zVec &Xip = Xi;
   Orthogonalize2 (Bands, Xip, CurrentBand);
@@ -134,6 +139,7 @@ void ConjGrad::CalcPhiCG()
   Phip = Phipp;
   Normalize (Phip);
   Energies(CurrentBand) = E0;
+  return residualNorm;
 }
 
 
@@ -148,11 +154,13 @@ void ConjGrad::Solve(int band)
   Normalize(c);
 
   double Elast = 1.0e100;
-  while (fabs (Elast - Energies(band)) > Tolerance) {
+  double residualNorm = 1.0;
+  //  while (fabs (Elast - Energies(band)) > Tolerance) {
+  while (residualNorm > 1.0e-6) {
     //    cerr << "Energy = " << 27.211383*Energies(band) << endl;
     Elast = Energies(band);
     // First, calculate conjugate gradient direction
-    CalcPhiCG();
+    residualNorm = CalcPhiCG();
     
     // Now, pick optimal theta for 
     double dE_dtheta = 2.0*realconjdot(Phip, Hc);

@@ -3,9 +3,10 @@
 main()
 {
   //  Vec3 box(5.32117439923148, 5.32117439923148, 5.32117439923148);
-  Vec3 box(10.0, 11.0, 12.0);
+  //  Vec3 box(10.0, 11.0, 12.0);
+  Vec3 box (30.195, 30.195, 30.195);
   //  Vec3 box(6.5, 6.500, 6.501);
-  double kcut = 3.0;
+  double kcut = 2.0;
   IOSectionClass in;
   in.OpenFile ("NaUnscreenedPH_Feb18_05.h5");
   //in.OpenFile ("NaPH_US_March1_05b.h5");
@@ -40,9 +41,13 @@ main()
     }
   
   system.SetIons (rions);
+  clock_t start, end;
+  start = clock();
   system.DiagonalizeH();
+  end = clock();
+  cerr << "Time = " << (double)(end-start)/CLOCKS_PER_SEC << "s.\n";
   
-
+  system.WriteXSFFile ("NaRho.xsf");
 //   FILE *fout = fopen ("HRho_k10.0.dat", "w");
 //   Vec3 r(0.0, 0.0, 0.0);
 //   for (double x=-0.5*box[0]; x<=0.5*box[0]; x+=0.01) {

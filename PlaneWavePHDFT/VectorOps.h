@@ -24,6 +24,11 @@ inline void Normalize (zVec &c)
   cblas_zdscal(c.size(), 1.0/norm, c.data(), 1);
 }
 
+inline double norm (const zVec &c)
+{
+  return cblas_dznrm2(c.size(), c.data(), 1);
+}
+
 inline complex<double> conjdot(zVec &cA, zVec &cB)
 {
  //  complex<double> z(0.0, 0.0);

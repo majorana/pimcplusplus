@@ -1,4 +1,4 @@
-SOURCES = PlaneWavePHDFT.cc Hamiltonian.cc ConjGrad.cc TestPW.cc GVecs.cc     \
+SOURCES = Hamiltonian.cc ConjGrad.cc TestPW.cc GVecs.cc                      \
           FFTBox.cc Hamiltonian2.cc TestPW2.cc PlaneWaves.cc ConjGrad2.cc
 
 Objs = Hamiltonian.o ConjGrad.o GVecs.o FFTBox.o 

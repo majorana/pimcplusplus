@@ -12,8 +12,8 @@ protected:
   zVec Phip, Phipp, Xi, Eta;
   complex<double> EtaXiLast;
   double E0;
-  void CalcPhiSD();
-  void CalcPhiCG();
+  double CalcPhiSD();
+  double CalcPhiCG();
   void Setup();
   bool IsSetup;
   void Precondition();
