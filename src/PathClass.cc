@@ -27,6 +27,8 @@ void PathClass::Read (IOSectionClass &inSection)
     for (int counter=0;counter<tempBox.size();counter++)
       Box(counter)=tempBox(counter);
     SetBox (Box);
+    kCut=-1;
+    inSection.ReadVar("kCutoff",kCut);
   }
   else 
     cerr << "Using free boundary conditions.\n";
@@ -44,7 +46,7 @@ void PathClass::Read (IOSectionClass &inSection)
     }
   // Now actually allocate the path
   Allocate();
-  // Now initilize the Path
+  // Now initialize the Path
   for (int speciesIndex=0; speciesIndex<NumSpecies; speciesIndex++)
   {
     SpeciesClass &species = *SpeciesArray(speciesIndex);
@@ -82,7 +84,23 @@ void PathClass::Read (IOSectionClass &inSection)
   
 }
 
-
+PathClass::SetupkVectors()
+{
+ 
+  int currVec=0;
+  for (kx=-ceil(kCut/kBox(0));kx<ceil(kCut/kBox(0));kx++){
+    for (ky=-ceil(kCut/kBox(1));ky<ceil(kCut/kBox(1));ky++){
+        for (kz=-ceil(kCut/kBox(1));kx<ceil(kCut/kBox(2));kz++){
+	  kMag2=kx*kx+ky*ky+kz*kz;
+	  if (kMag2<kCut*kCut && (kx>0 || (kx==0 & ky>0) || (kx==0 && ky==0 && kz>0))){
+	    kVectors(currVec)(0)=kx;
+	    kVectors(currVec)(1)=ky;
+	    kVectors(currVec)(2)=kz;
+	  }
+	}
+    }
+  }      
+}
 
 
 

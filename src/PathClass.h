@@ -16,19 +16,25 @@ private:
   /// Path stores the position of all the particles at all time
   /// slices.  The order for access is timeslice, particle
   MirroredArrayClass<dVec> Path;
-
+  SetupkVectors();
   /// Stores what species a particle belongs to
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
   int MyNumSlices;
   PIMCCommunicatorClass &Communicator;
-
+  ///(species x timeslice x k vector)
+  Array<double,3> Rhok;
+  Array<dVec,1> kVectors;
   ////////////////////////////////
   /// Boundary conditions stuff //
   ////////////////////////////////
 private:
   dVec IsPeriodic;
   dVec Box, BoxInv;
+  dVec kBox; //kBox(i)=2*Pi/Box(i)
+//This is the maximum momentum vector magnitude for k space sums 
+  double kCut; 
+
 public:
   inline void SetBox (dVec box);
   inline const dVec& GetBox();
@@ -201,6 +207,8 @@ inline void PathClass::Allocate()
   Permutation.Resize(numParticles);
   SpeciesNumber.resize(numParticles);
   DoPtcl.resize(numParticles);
+  Rhok.resize(NumSpecies,MyNumSlices,numParticles);
+  SetupkVectors();
   /// Assign the species number to the SpeciesNumber array
   for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
     for (int i=SpeciesArray(speciesNum)->FirstPtcl; 
@@ -229,8 +237,11 @@ inline PathClass::PathClass (PIMCCommunicatorClass &communicator) :
 inline void PathClass::SetBox (dVec box)
 {
   Box = box;
-  for (int i=0; i<NDIM; i++)
+  for (int i=0; i<NDIM; i++){
     BoxInv(i) = 1.0/box(i);
+    kBox(i)=2*M_PI*BoxInv(i);
+  }
+  
 }
 
 inline const dVec& PathClass::GetBox()
