@@ -348,7 +348,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return NULL;
       }
       else if (type==STRING_TYPE){
-	blitz::Array<string,1> val;    
+	blitz::Array<string,2> val;    
 	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
 	if (success){
 	  int d0=val.extent(0);
