@@ -1,5 +1,6 @@
 #include "PAFit.h"
 #include "../SpecialFunctions/HermitePoly.h"
+#include "../SpecialFunctions/LegendrePoly.h"
 #include "../Fitting/Fitting.h"
 
 /// The following routines are used only if we are creating fits, not
@@ -26,87 +27,155 @@ void PAcoulombFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 
 
 
+// void PAcoulombFitClass::AddFit (Rho &rho)
+// {
+//   NumBetas++;
+//   Uj.resizeAndPreserve(NumBetas);
+//   dUj.resizeAndPreserve(NumBetas);
+
+//   FILE *Udebug = fopen ("U.dat", "w");
+//   FILE *sdebug = fopen ("s.dat", "w");
+
+//   double lambda = rho.lambda;
+//   double beta = rho.Beta();
+//   const int N = 400;
+//   int M = Order+1;
+//   Array<double,2>  UCoefs(qgrid->NumPoints, M);
+//   Array<double,2> dUCoefs(qgrid->NumPoints, M);
+
+//   Array<double,1> Uexact(N), dUexact(N), sigma(N);
+//   Array<double,2> Basis(N,M-1);
+//   Array<double,1> Hn(2*M), errors(M), Ui(M), dUi(M);
+//   for (int qi=0; qi<qgrid->NumPoints; qi++) {
+//     double q = (*qgrid)(qi);
+//     LinearGrid sgrid(0.0, 2.0*q, N);
+//     double U0, dU0;
+//     rho.UdU_Coulomb (q, q, 1.0, U0, dU0);
+//     for (int si=0; si<sgrid.NumPoints; si++) {
+//       double s = sgrid(si);
+//       double costheta;
+//       if (q == 0.0)
+// 	costheta = 1.0;
+//       else
+// 	costheta = 1.0 - s*s/(2.0*q*q);
+//       costheta = min(1.0, costheta);
+//       costheta = max(-1.0, costheta);
+//       // Compute exact U and dU
+//       double Uex, dUex;
+//       rho.UdU_Coulomb (q, q, costheta, Uex, dUex);
+//       Uexact(si) = Uex-U0;
+//       fprintf (Udebug, "%1.16e ", Uex-U0);
+//       fprintf (sdebug, "%1.16e ", s);
+//       fflush (Udebug);
+//       fflush (sdebug);
+//       dUexact(si) = dUex-dU0;
+//       if (isnan(Uexact(si))) {
+// 	cerr << "NAN is Uexact for q = " << q << " s = " << s << endl;
+// 	abort();
+//       }
+//       if (isnan(dUexact(si))){
+// 	cerr << "NAN in dUexact for q = " << q << "s = " << s << endl;
+// 	abort();
+//       }
+//       // Compute weight for point
+//       double rho = exp(-s*s/(4.0*lambda*beta));
+//       if (rho > 1e-8)
+// 	sigma(si) = 1.0/sqrt(rho);
+//       else
+// 	sigma(si) = 1.0/sqrt(1e-8);
+//       // Compute basis functions
+//       double t = s / sqrt(4.0*lambda*beta);
+//       for (int i=1; i<M; i++) 
+// 	Basis(si,i-1) = pow(s, 2*i);
+//     }
+//     // Now do fits
+//     LinFitSVD( Uexact, sigma, Basis,  Ui, errors, 1.0e-12);
+//     LinFitSVD(dUexact, sigma, Basis, dUi, errors, 1.0e-12);
+//     UCoefs(qi,0) = U0;
+//     dUCoefs(qi,0) = dU0;
+//     UCoefs(qi,Range(1,M-1)) = Ui;
+//     dUCoefs(qi,Range(1,M-1)) = dUi;
+//     fprintf (Udebug, "\n");
+//     fflush (Udebug);
+//     fprintf (sdebug, "\n");
+//     fflush (sdebug);
+//   } 
+    
+//   fclose (Udebug);
+//   fclose (sdebug);
+
+//   // Initialize splines
+//   Uj(NumBetas-1).Init(qgrid, UCoefs);
+//   dUj(NumBetas-1).Init(qgrid, dUCoefs);  
+// }
+
+
+
+class CoulombFitIntegrand
+{
+public:
+  Rho &rho;
+  int n;
+  double q;
+  double smax;
+
+  double operator()(double x)
+  {
+    double s = 0.5*(x+1.0)*smax;
+
+    double costheta;
+    if (q == 0.0)
+      costheta = 1.0;
+    else
+      costheta = 1.0 - s*s/(2.0*q*q);
+    costheta = min(1.0, costheta);
+    costheta = max(-1.0, costheta);
+
+    double U, dU;
+    rho.UdU_Coulomb(q,q,costheta, U, dU);
+    return (0.5*(2.0*n+1)*U*LegendrePoly(n,x));
+  }
+
+  CoulombFitIntegrand(Rho &myrho) : rho(myrho)
+  {  }
+};
+
+
+
+
 void PAcoulombFitClass::AddFit (Rho &rho)
 {
   NumBetas++;
   Uj.resizeAndPreserve(NumBetas);
   dUj.resizeAndPreserve(NumBetas);
 
-  FILE *Udebug = fopen ("U.dat", "w");
-  FILE *sdebug = fopen ("s.dat", "w");
-
   double lambda = rho.lambda;
   double beta = rho.Beta();
-  const int N = 400;
   int M = Order+1;
   Array<double,2>  UCoefs(qgrid->NumPoints, M);
   Array<double,2> dUCoefs(qgrid->NumPoints, M);
 
-  Array<double,1> Uexact(N), dUexact(N), sigma(N);
-  Array<double,2> Basis(N,M-1);
-  Array<double,1> Hn(2*M), errors(M), Ui(M), dUi(M);
+  CoulombFitIntegrand integrand(rho);
+  const double Tolerance = 1.0e-7;
   for (int qi=0; qi<qgrid->NumPoints; qi++) {
-    double q = (*qgrid)(qi);
-    LinearGrid sgrid(0.0, 2.0*q, N);
-    double U0, dU0;
-    rho.UdU_Coulomb (q, q, 1.0, U0, dU0);
-    for (int si=0; si<sgrid.NumPoints; si++) {
-      double s = sgrid(si);
-      double costheta;
-      if (q == 0.0)
-	costheta = 1.0;
-      else
-	costheta = 1.0 - s*s/(2.0*q*q);
-      costheta = min(1.0, costheta);
-      costheta = max(-1.0, costheta);
-      // Compute exact U and dU
-      double Uex, dUex;
-      rho.UdU_Coulomb (q, q, costheta, Uex, dUex);
-      Uexact(si) = Uex-U0;
-      fprintf (Udebug, "%1.16e ", Uex-U0);
-      fprintf (sdebug, "%1.16e ", s);
-      fflush (Udebug);
-      fflush (sdebug);
-      dUexact(si) = dUex-dU0;
-      if (isnan(Uexact(si))) {
-	cerr << "NAN is Uexact for q = " << q << " s = " << s << endl;
-	abort();
-      }
-      if (isnan(dUexact(si))){
-	cerr << "NAN in dUexact for q = " << q << "s = " << s << endl;
-	abort();
-      }
-      // Compute weight for point
-      double rho = exp(-s*s/(4.0*lambda*beta));
-      if (rho > 1e-8)
-	sigma(si) = 1.0/sqrt(rho);
-      else
-	sigma(si) = 1.0/sqrt(1e-8);
-      // Compute basis functions
-      double t = s / sqrt(4.0*lambda*beta);
-      for (int i=1; i<M; i++) 
-	Basis(si,i-1) = pow(s, 2*i);
+    integrand.q = (*qgrid)(qi);
+    cerr << "qi = " << qi << " of " << qgrid->NumPoints << endl;
+
+    integrand.smax = 2.0*integrand.q;
+    for (int n=0; n<M; n++) {
+      integrand.n=n;
+      GKIntegration<CoulombFitIntegrand,GK15> Fit_gk(integrand);
+      Fit_gk.SetRelativeErrorMode();
+      UCoefs(qi,n) = Fit_gk.Integrate(-1.0, 1.0, Tolerance);
     }
-    // Now do fits
-    LinFitSVD( Uexact, sigma, Basis,  Ui, errors, 1.0e-12);
-    LinFitSVD(dUexact, sigma, Basis, dUi, errors, 1.0e-12);
-    UCoefs(qi,0) = U0;
-    dUCoefs(qi,0) = dU0;
-    UCoefs(qi,Range(1,M-1)) = Ui;
-    dUCoefs(qi,Range(1,M-1)) = dUi;
-    fprintf (Udebug, "\n");
-    fflush (Udebug);
-    fprintf (sdebug, "\n");
-    fflush (sdebug);
-  } 
-    
-  fclose (Udebug);
-  fclose (sdebug);
+  }
 
   // Initialize splines
   Uj(NumBetas-1).Init(qgrid, UCoefs);
   dUj(NumBetas-1).Init(qgrid, dUCoefs);  
 }
+
+
 
 void PAcoulombFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 {
@@ -119,8 +188,9 @@ void PAcoulombFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
   FILE *Ufdat = fopen ("Uf.dat", "w");
   FILE *sdat = fopen ("s.dat", "w");
   FILE *qdat = fopen ("q.dat", "w");
-  for (int qi=0; qi<qgrid->NumPoints; qi++) {
-    double q = (*qgrid)(qi);
+  LinearGrid qgrid2(qgrid->Start, qgrid->End, 315);
+  for (int qi=0; qi<qgrid2.NumPoints; qi++) {
+    double q = qgrid2(qi);
     LinearGrid sgrid(0.0, 2.0*q, 350);
     for (int si=0; si<sgrid.NumPoints; si++) {
       double s = sgrid(si);
@@ -175,16 +245,39 @@ void PAcoulombFitClass::WriteFits (IOSectionClass &outSection)
 
 #endif
 
+// double PAcoulombFitClass::U(double q, double z, double s2, int level)
+// {
+//   if (q < qgrid->End) {
+//     Uj(level)(q, Ucoefs);
+//     double s2j = 1.0;
+//     double Usum = 0.0;
+//     for (int j=0; j<=Order; j++){
+//       Usum += Ucoefs(j)*s2j;
+//       s2j *= s2;
+//     }
+//     return (Usum);
+//   }
+//   else {
+//     double beta = SmallestBeta;
+//     for (int i=0; i<level; i++)
+//       beta *= 2.0;
+//     // Coulomb action is independent of z
+//     return (beta*Potential->V(q));
+//   }
+// }
+
 double PAcoulombFitClass::U(double q, double z, double s2, int level)
 {
   if (q < qgrid->End) {
+    Array<double,1> Pn(Order+1);
+    double s = sqrt(s2);
+    double smax = 2.0*q;
+    double x = 2.0*s/smax - 1.0;
+    LegendrePoly(x, Pn);
     Uj(level)(q, Ucoefs);
-    double s2j = 1.0;
     double Usum = 0.0;
-    for (int j=0; j<=Order; j++){
-      Usum += Ucoefs(j)*s2j;
-      s2j *= s2;
-    }
+    for (int j=0; j<=Order; j++)
+      Usum += Ucoefs(j)*Pn(j);
     return (Usum);
   }
   else {
