@@ -20,7 +20,7 @@ public:
   // True if we want to use Vcore spline
   bool UseVcore;
 
-  bool IsPH() { return true; }
+  bool IsPH();
 
   inline double GetCoreRadius ();
   inline void   SetCoreRadius (double coreRadius);

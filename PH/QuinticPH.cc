@@ -1,5 +1,10 @@
 #include "QuinticPH.h"
 
+bool QuinticPH::IsPH()
+{ 
+  return true; 
+}
+
 double QuinticPH::A(double r)
 {
   double val;
