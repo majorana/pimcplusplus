@@ -1,7 +1,7 @@
 #ifndef CORE_TRANSFORM_H
 #define CORE_TRANSFORM_H
 
-#include "PH.h"
+#include "Potential.h"
 
 /// The core transform class describes a coordinate transformation
 /// used in calculating the pair density matrix through matrix
@@ -12,14 +12,14 @@
 /// us to use the traditional matrix squaring formalism.
 class CoreTransform
 {
-  scalar rMax, xMax;
+  double rMax, xMax;
   LinearGrid xgrid, rgrid;
   CubicSpline x_of_r;
   CubicSpline r_of_x;
 
 public:
   /// Convert from x coordinate to r coordinate
-  inline scalar x2r(scalar x)
+  inline double x2r(double x)
   {
     if (x >= xMax)
       return ((x-xMax)+rMax);
@@ -28,7 +28,7 @@ public:
   }
 
   /// Convert from r coordinate to x coordinate
-  inline scalar r2x(scalar r)
+  inline double r2x(double r)
   {
     if (r >= rMax)
       return ((r-rMax)+xMax);
@@ -37,7 +37,7 @@ public:
   }
   
   /// Calculate the transform from the pseudohamiltonian.
-  void Initialize(PseudoHamiltonian *PH, int NumPoints);
+  void Initialize(Potential *pot, int NumPoints);
 };
 
 #endif

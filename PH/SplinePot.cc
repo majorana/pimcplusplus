@@ -19,6 +19,7 @@ void SplinePot::Read(IOSectionClass &in)
 {
   assert(in.OpenSection("Grid"));
   Grid *grid = ReadGrid(in);
+  in.CloseSection(); // "Grid" 
   Array<double,1> data;
   assert(in.ReadVar("SplineData", data));
   Spline.Init (grid, data);

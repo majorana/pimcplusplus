@@ -1,49 +1,45 @@
-#include "..//Integration/Integrate.h"
+#include "../Integration/Integrate.h"
 #include "CoreTransform.h"
 
-scalar dx_dr (scalar r, scalar x, void *PHptr)
+double dx_dr (double r, double x, void *potptr)
 {
-  PseudoHamiltonian &PH = *(PseudoHamiltonian *)PHptr;
-  scalar A, B, V, dAdr;
-  PH.ABV(r, A, B, V, dAdr);
+  Potential &pot = *(Potential *)potptr;
+  double A = pot.A(r);
 
   return (1.0/sqrt(A));
 }
 
-scalar dr_dx (scalar x, scalar r, void *PHptr)
+double dr_dx (double x, double r, void *potptr)
 {
-  PseudoHamiltonian &PH = *(PseudoHamiltonian *)PHptr;
-
-  scalar A, B, V, dAdr;
-  PH.ABV(r, A, B, V, dAdr);
+  Potential &pot = *(Potential *)potptr;
+  double A = pot.A(r);
 
   return (sqrt(A));
 }
 
 void
-CoreTransform::Initialize(PseudoHamiltonian *PH, int NumPoints)
+CoreTransform::Initialize(Potential *pot, int NumPoints)
 {
 
   // First, we calculate the r->x transform by integrating
-  rMax = PH->CoreRadius;
+  rMax = pot->CoreRadius();
   rgrid.Init (0.0, rMax, NumPoints);
-  Array<scalar,1> Temp(NumPoints);
+  Array<double,1> Temp(NumPoints);
 
   Temp(0) = 0.0;
-  IntegrateFirstOrderNS(rgrid, 0, NumPoints-1, Temp, dx_dr, PH);
+  IntegrateFirstOrderNS(rgrid, 0, NumPoints-1, Temp, dx_dr, pot);
   xMax = Temp(NumPoints-1);
 
-  scalar A0, B0, V0, dA0;
-  PH->ABV(0.0, A0, B0, V0, dA0);
-  scalar StartDeriv = 1.0/sqrt(A0);
-  scalar EndDeriv = 1.0;
+  double A0 = pot->A(0.0);
+  double StartDeriv = 1.0/sqrt(A0);
+  double EndDeriv = 1.0;
 
   x_of_r.Init(&rgrid, Temp, StartDeriv, EndDeriv);
 
   // Now, we calculate the x->r transform
   xgrid.Init(0.0, xMax, NumPoints);
   Temp(0) = 0.0;
-  IntegrateFirstOrderNS(xgrid, 0, NumPoints-1, Temp, dr_dx, PH);
+  IntegrateFirstOrderNS(xgrid, 0, NumPoints-1, Temp, dr_dx, pot);
   StartDeriv = sqrt(A0);
   EndDeriv = 1.0;
 
