@@ -648,6 +648,15 @@ public:
   inline double  Deriv3     (int ix,   double y, int iz);
   inline double  Deriv3     (double x, int iy, int iz);
   inline void Init (Grid *xgrid, Grid *ygrid, Array<double,3> &f);
+
+  /// Copy constructor
+  inline MultiBicubicSpline (const MultiBicubicSpline &a);
+
+  /// Assigment operator -- necessary for array resizeAndPreserve
+  inline MultiBicubicSpline & operator= (MultiBicubicSpline &a);
+  inline MultiBicubicSpline & operator= (MultiBicubicSpline a);
+  inline MultiBicubicSpline() {}
+
 };
 
 inline void 
@@ -840,6 +849,48 @@ inline void MultiBicubicSpline::operator() (double x, double y,
       z(iz) += Zb_m * a(m);
     }
   }
+}
+
+
+/// Copy constructor
+inline MultiBicubicSpline::MultiBicubicSpline(const MultiBicubicSpline &a)
+{
+  XUpToDate.resize(a.XUpToDate.size());
+  XUpToDate = a.XUpToDate;
+  YUpToDate.resize(a.YUpToDate.size());
+  YUpToDate = a.YUpToDate;
+  F.resize(a.F.extent(0), a.F.extent(1), a.F.extent(2));
+  F=a.F;
+  Nx=a.Nx; Ny=a.Ny; Nz=a.Nz;
+  Xgrid=a.Xgrid; Ygrid=a.Ygrid;
+  BiUpToDate = a.BiUpToDate;
+}
+
+
+inline MultiBicubicSpline& MultiBicubicSpline::operator=(MultiBicubicSpline a)
+{
+  XUpToDate.resize(a.XUpToDate.size());
+  XUpToDate = a.XUpToDate;
+  YUpToDate.resize(a.YUpToDate.size());
+  YUpToDate = a.YUpToDate;
+  F.resize(a.F.extent(0), a.F.extent(1), a.F.extent(2));
+  F=a.F;
+  Nx=a.Nx; Ny=a.Ny; Nz=a.Nz;
+  Xgrid=a.Xgrid; Ygrid=a.Ygrid;
+  BiUpToDate = a.BiUpToDate;
+}
+
+inline MultiBicubicSpline& MultiBicubicSpline::operator=(MultiBicubicSpline &a)
+{
+  XUpToDate.resize(a.XUpToDate.size());
+  XUpToDate = a.XUpToDate;
+  YUpToDate.resize(a.YUpToDate.size());
+  YUpToDate = a.YUpToDate;
+  F.resize(a.F.extent(0), a.F.extent(1), a.F.extent(2));
+  F=a.F;
+  Nx=a.Nx; Ny=a.Ny; Nz=a.Nz;
+  Xgrid=a.Xgrid; Ygrid=a.Ygrid;
+  BiUpToDate = a.BiUpToDate;
 }
 
 
