@@ -85,7 +85,6 @@ inline BicubicSpline::BicubicSpline (const BicubicSpline &a)
   Nx=a.Nx; Ny=a.Ny;
   Xgrid=a.Xgrid; Ygrid=a.Ygrid;
   BiUpToDate = a.BiUpToDate;
-  return *this;
 }
 
 inline BicubicSpline& BicubicSpline::operator=(BicubicSpline &a)
@@ -782,6 +781,7 @@ inline SymmBicubicSpline& SymmBicubicSpline::operator=(SymmBicubicSpline &a)
   Nx=a.Nx; Ny=a.Ny;
   Xgrid=a.Xgrid; Ygrid=a.Ygrid;
   BiUpToDate = a.BiUpToDate;
+  return *this;
 }
 
 inline SymmBicubicSpline& SymmBicubicSpline::operator=(SymmBicubicSpline a)

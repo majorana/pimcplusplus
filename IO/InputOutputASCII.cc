@@ -828,6 +828,7 @@ bool IOTreeASCIIClass::NewFile (string fileName,
   FileName=fileName;
   Parent=parent;
   Name=mySectionName;
+  return true;
 }
 
 
