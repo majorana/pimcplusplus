@@ -1,26 +1,40 @@
 from IO import *
 import sys
 import stats
-#import povexport
-#from visual import *
 import numarray
 from matplotlib.matlab import *
 from HTMLgen import *
+import povexport
+from visual import *
 
-## def Gofr(infile,data,doc):
-##     tempImg=ProduceCorrelationPicture(infile,data,"gofr")
-##     doc.append(Heading(2,"G(r) Plot"))
-##     doc.append(tempImg)
-##     numVars=infile.CountVars()
-##     for counter in range(0,numVars):
-##          data=infile.ReadVar(counter)
-##          if type(data)==numarray.numarraycore.NumArray:
-##               varName=infile.GetVarName(counter)
-##               doc.append(Name(sectionName+varName+repr(currNum)))
-##               doc.append(Heading(2,varName))
-##               myImg=ProduceCorrelationPicture(data[-1],varName+repr(currNum),'r',varName)
-              
 
+def GetPaths(infile):
+     paths=infile.ReadVar("Path")
+     return paths
+
+def InitVisualPaths(pathData):
+     visualPath=[]
+     numPaths=len(pathData[0])
+     for pathNum in range(0,numPaths):
+          visualPath.append(curve(color=color.blue,radius=0.2))          
+     return visualPath
+
+
+def PlotPaths(pathData,visualPath,mcTime):
+     maxMCTime=len(pathData)
+     if mcTime>=maxMCTime:
+          mcTime=maxMCTime-1
+     numPaths=len(pathData[mcTime])
+     for pathNum in range(0,numPaths):
+          visualPath[pathNum]=(curve(color=color.blue,radius=0.2))
+          print pathNum,numPaths
+          numSlices=len(pathData[mcTime][pathNum])
+          for slice in range(0,numSlices):
+               print pathNum,numPaths,numSlices,slice
+               visualPath[pathNum].append(pos=(pathData[mcTime][pathNum][slice]))
+     
+
+     
 
 def ProduceCorrelationPicture(data,fileBase,hlabel,vlabel):
      clf()
@@ -40,7 +54,6 @@ def ProduceCorrelationPicture(data,fileBase,hlabel,vlabel):
      savefig(fileBase+".ps")
      myImg=Image(fileBase+".png")
      return myImg
-
 
 
 def ProcessCorrelationSection(infile,doc,currNum):
@@ -103,47 +116,6 @@ def ProcessScalarSection(infile,doc,currNum):
           doc.append(toAddList[counter])
      return currNum
 
-## def Energy(infile,doc):
-
-##     myTable=Table("Energy Table")
-##     myTable.body=[['','Mean','Variance','Error','Kappa']]
-    
-    
-##     data=infile.ReadVar("TotalEnergy")
-##     (mean,var,error,kappa)= stats.Stats(data)
-##     doc.append(Heading(2,"Total Energy"))
-##     myImg=ProduceTracePicture(data,"TotalEnergy.png")
-##     doc.append(myImg)
-    
-##     myTable.body.append([Href('#totE','Total Energy'),mean,var,error,kappa])
-    
-
-##     data=infile.ReadVar("SpringEnergy")
-##     (mean,var,error,kappa)= stats.Stats(data)
-##     doc.append(Heading(2,"Spring Energy"))
-##     myImg=ProduceTracePicture(data,"SpringEnergy.png")
-##     doc.append(myImg)
-##     myTable.body.append(['Spring Energy',mean,var,error,kappa])
-
-##     data=infile.ReadVar("PotentialEnergy")
-##     (mean,var,error,kappa)= stats.Stats(data)
-##     doc.append(Name('potE'))
-##     doc.append(Heading(2,"Potential Energy"))
-##     myImg=ProduceTracePicture(data,"PotentialEnergy.png")
-##     doc.append(myImg)
-##     myTable.body.append([Href('#potE','Potential Energy'),mean,var,error,kappa])
-
-               
-##     data=infile.ReadVar("DBetaEnergy")
-##     (mean,var,error,kappa)= stats.Stats(data)
-##     doc.append(Heading(2,"du/dBeta Energy"))
-##     myImg=ProduceTracePicture(data,"dBetaEnergy.png")
-##     doc.append(myImg)
-##     myTable.body.append(['du/dBeta Energy',mean,var,error,kappa])
-
-##     doc.prepend(myTable)
-    
-    
 
 def ProcessRunInfo(doc,infile):
      doc.append(Heading(2,"Run information"))
@@ -160,6 +132,14 @@ def ProcessRunInfo(doc,infile):
 
 infile=IOSectionClass()
 infile.OpenFile(sys.argv[1])
+
+
+infile.OpenSection("PathDump")
+pathData=GetPaths(infile)
+infile.CloseSection()
+visualPath=InitVisualPaths(pathData)
+PlotPaths(pathData,visualPath,0)
+exit()
 doc=SeriesDocument()
 infile.OpenSection("RunInfo")
 ProcessRunInfo(doc,infile)
@@ -171,6 +151,7 @@ RunTime=infile.ReadVar("RunTime")
 UserName=infile.ReadVar("UserName")
 Version=infile.ReadVar("Version")
 infile.CloseSection()
+
 
 
 currNum=0
@@ -185,17 +166,10 @@ for counter in range(0,numSections):
      elif myType=="CorrelationFunction":
           currNum=ProcessCorrelationSection(infile,doc,currNum)
      doc.append(HR())
-#     data=infile.ReadVar("gofr")
-#     if data!=None:
-#         Gofr(infile,data,doc)
-#     elif infile.GetName()=="Energies":
-#         Energy(infile,doc)
      infile.CloseSection()
-#doc.logo="beach.jpg"
 doc.logo=""
 doc.author="Ken and Bryan"
 doc.email="bkclark@uiuc.edu"
-#doc.banner=("PICT0067.JPG",640,300)
 doc.banner=("pimcLogo.png")
 doc.place_nav_buttons=0
 doc.header()
