@@ -635,6 +635,43 @@ where $k_b = (k_i + k_{i+1})/2$ and $k_a = (k_i + k_{i-1})$.  In doing
 so, we typically reduce our total number of k-points to sum over $\sim
 2500$ from the $10^9$ we had to start.
 
+\subsection{Calculating $x_k$'s}
+\subsubsection{The coulomb potential}
+For $v(r) = \frac{1}{r}$, $x_k$ is given by
+\begin{equation}
+x_k^{\text{coulomb}} = -\frac{4 \pi}{\Omega k^2} \cos(k r_c)
+\end{equation}
+
+\subsection{The $1/r^2$ potential}
+For $v(r) = \frac{1}{r^2}$, $x_k$ is given by
+\begin{equation}
+x_k^{1/r^2} = \frac{4 \pi}{\omega k} 
+\left[ \text{Si}(k r_c) -\frac{\pi}{2}\right],
+\end{equation}
+where the {\em sin integral}, $\text{Si}(z)$, is given by
+\begin{equation}
+\text{Si}(z) \equiv \int_0^z \frac{\sin \ t}{t} dt.
+\end{equation}
+
+\subsection{The $1/r^3$ potential}
+For $v(r) = \frac{1}{r^3}$, $x_k$ is given by
+\begin{equation}
+x_k^{1/r^3} = \frac{4\pi}{\Omega k} 
+\left[k\text{Ci}(k r_c) - \frac{\sin(k r_c)}{r_c} \right],
+\end{equation}
+where the {\em cosine integral}, $\text{Ci}(z)$, is given by
+\begin{equation}
+\text{Ci}(z) \equiv -\int_z^\infty \frac{\cos t}{t} dt.
+\end{equation}
+
+\subsection{The $1/r^4$ potential}
+For $v(r) = \frac{1}{r^4}$, $x_k$ is given by
+\begin{equation}
+x_k^{1/r^4} = -\frac{4 \pi}{\Omega k} 
+\left\{
+\frac{k \cos(k r_c)}{2 r_c} + \frac{\sin(k r_c)}{2r_c^2} + \frac{k^2}{2} \left[ \text{Si}(k r_c) - \frac{\pi}{2}\right]\right\}
+\end{equation}
+
 
 \section{Adapting to PIMC}
 \subsection{Pair actions}
