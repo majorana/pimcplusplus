@@ -161,7 +161,7 @@ inline double CubicSpline::operator()(double x)
 	{
 	  cerr << "x outside grid in CubicSpline.\n";
 	  cerr << "x = " << x << " X.End = " << X.End << "\n";
-	  exit(1);
+	  abort();
 	}
     }
 #endif

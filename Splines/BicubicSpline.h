@@ -344,6 +344,12 @@ inline double BicubicSpline::operator() (double x, double y)
   //  TinyMatrix<double,4,4> Z;
   TinyVector<double,4> a, b;
 
+//   if (x > (Xgrid->End*1.00001)) 
+//     cerr << "x too large in BiCubicSpline:  " << x << endl;
+//   if (y > (Ygrid->End*1.0001)) 
+//     cerr << "y too large in BiCubicSpline:  " << y << endl;
+
+
   int ix = Xgrid->ReverseMap(x);  
   int iy = Ygrid->ReverseMap(y);
 

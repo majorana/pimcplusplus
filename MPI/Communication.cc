@@ -42,6 +42,13 @@ void CommunicatorClass::Send (int toProc, Array<int,1> &buff)
 void CommunicatorClass::Broadcast (int root, int &val)
 {  MPI_Bcast(&val, 1, MPI_INT, root, MPIComm); }
 
+void CommunicatorClass::Broadcast (int root, bool &val)
+{  
+  int intval = val ? 1 : 0;
+  MPI_Bcast(&intval, 1, MPI_INT, root, MPIComm); 
+  return (intval == 1);
+}
+
 void CommunicatorClass::Broadcast (int root, double &val)
 {  MPI_Bcast(&val, 1, MPI_DOUBLE, root, MPIComm); }
 

@@ -66,6 +66,7 @@ public:
   void Send (int toProc, Array<double,1> &buff);
   void Send (int toProc, Array<int,1> &buff);
   void Broadcast (int root, int &val);
+  void Broadcast (int root, bool &val);
   void Broadcast (int root, double &val);
   void Broadcast (int root, Array<double,1> &buff);
   void Broadcast (int root, Array<Vec2,1> &buff);
@@ -175,6 +176,7 @@ public:
     exit(1);
   }
   inline void Broadcast(int root, int &val) {}
+  inline void Broadcast(int root, bool &val) {}
   inline void Broadcast(int root, double &val) {}
   inline void Broadcast(int root, Array<double,1> &buff)
   { /* Do nothing in serial mode */ }

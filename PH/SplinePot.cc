@@ -2,17 +2,38 @@
 
 double SplinePot::V(double r)
 {
-  return Spline(r);
+  if (r <= Spline.grid->End)
+    return Spline(r);
+  else {
+#ifdef BZ_DEBUG
+    cerr << "r outside grid in SplinePot:  " << r << endl;
+#endif
+    return 0.0;
+  }
 }
 
 double SplinePot::dVdr(double r)
 {
-  return Spline.Deriv(r);
+  if (r <= Spline.grid->End)
+    return Spline.Deriv(r);
+  else {
+#ifdef BZ_DEBUG
+    cerr << "r outside grid in SplinePot:  " << r << endl;
+#endif
+    return 0.0;
+  }
 }
 
 double SplinePot::d2Vdr2(double r)
 {
-  return Spline.Deriv2(r);
+  if (r <= Spline.grid->End)
+    return Spline.Deriv2(r);
+  else {
+#ifdef BZ_DEBUG
+    cerr << "r outside grid in SplinePot:  " << r << endl;
+#endif
+    return 0.0;
+  }
 }
 
 void SplinePot::Read(IOSectionClass &in)
