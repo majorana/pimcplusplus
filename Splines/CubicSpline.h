@@ -31,13 +31,13 @@ public:
   double StartDeriv, EndDeriv;
 
   /// Returns the interpolated value.
-  double operator()(double x);
+  inline double operator()(double x);
   /// Returns the interpolated first derivative.
-  double Deriv(double x);
+  inline double Deriv(double x);
   /// Returns the interpolated second derivative.
-  double Deriv2(double x);
+  inline double Deriv2(double x);
   /// Returns the interpolated third derivative.
-  double Deriv3(double x);
+  inline double Deriv3(double x);
   /// Recompute the second derivatives from the function values
   void Update();
   
@@ -126,6 +126,119 @@ public:
 };
 
 
+
+
+
+
+inline double CubicSpline::operator()(double x)
+{
+  if (!UpToDate)
+    Update();
+
+
+  Grid &X = *grid;
+#ifdef BZ_DEBUG
+  if (x > X.End)
+    {
+      if (x < (X.End * 1.000000001))
+	x = X.End;
+      else
+	{
+	  cerr << "x outside grid in CubicSpline.\n";
+	  cerr << "x = " << x << " X.End = " << X.End << "\n";
+	  exit(1);
+	}
+    }
+#endif
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  if (hi>(X.NumPoints-1))
+    {
+      hi = (X.NumPoints-1);
+      low = hi-1;
+    }
+
+  double h = X(hi) - X(low);
+  double hinv = 1.0/h;
+  double a = (X(hi)-x)*hinv;
+  double b = (x-X(low))*hinv;
+  double sixinv = 0.1666666666666666666;
+  
+  return (a*y(low) + b*y(hi) +
+	  ((a*a*a-a)*d2y(low)+(b*b*b-b)*d2y(hi))*(h*h*sixinv));
+}
+
+double CubicSpline::Deriv(double x)
+{
+  if(!UpToDate)
+    Update();
+
+  Grid &X = *grid;
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  
+  double h = X(hi) - X(low);
+  double hinv = 1.0/h;
+  double a = (X(hi)-x)*hinv;
+  double b = (x-X(low))*hinv;
+  double sixinv = 0.1666666666666666666;
+  
+  return ((y(hi)-y(low))*hinv + (h*sixinv)*((3.0*b*b-1.0)*d2y(hi) -
+				      (3.0*a*a-1.0)*d2y(low)));
+}
+
+inline double CubicSpline::Deriv2(double x)
+{
+  if(!UpToDate)
+    Update();
+  Grid &X = *grid;
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  
+  double h = X(hi) - X(low);
+  double hinv = 1.0/h;
+  double a = (X(hi)-x)*hinv;
+  double b = (x-X(low))*hinv;
+  return (a*d2y(low) + b*d2y(hi));
+}
+
+
+inline double CubicSpline::Deriv3(double x)
+{
+  if(!UpToDate)
+    Update();
+  Grid &X = *grid;
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  double h = X(hi)-X(low);
+  
+  return ((d2y(hi)-d2y(low))/h);
+}
+
+
+
+
+
 /// The MulitCubicSpline class is nearly identical to the CubicSpline
 /// class, except that it stores the values of several functions at
 /// the same grid point.  This can be used to simultaneously
@@ -144,14 +257,14 @@ public:
   Grid *grid;
   Array<double, 1> StartDeriv, EndDeriv;
 
-  double operator()(int, double x);
-  void operator()(double x, Array<double,1> &yVec);
-  double Deriv(int i, double x);
-  void   Deriv (double x, Array<double,1> &deriv);
-  double Deriv2(int i, double x);
-  void   Deriv2 (double x, Array<double,1> &deriv2);
-  double Deriv3(int i, double x);
-  void   Deriv3 (double x, Array<double,1> &deriv3);
+  inline double operator()(int, double x);
+  inline void operator()(double x, Array<double,1> &yVec);
+  inline double Deriv(int i, double x);
+  inline void   Deriv (double x, Array<double,1> &deriv);
+  inline double Deriv2(int i, double x);
+  inline void   Deriv2 (double x, Array<double,1> &deriv2);
+  inline double Deriv3(int i, double x);
+  inline void   Deriv3 (double x, Array<double,1> &deriv3);
   void Update(int i);
   
   inline void Init(Grid *NewGrid, const Array<double,2> &NewYs,
@@ -229,6 +342,253 @@ public:
   {
   }
 };
+
+
+
+//////////////////////////////////////////////////////////////////////
+// MultiCubicSpline operator
+//////////////////////////////////////////////////////////////////////
+inline double MultiCubicSpline::operator()(int i, double x)
+{
+  if (!UpToDate(i))
+    Update(i);
+
+  Grid &X = *grid;
+#ifdef BZ_DEBUG
+  if (x > X.End)
+    {
+      if (x < (X.End * 1.000000001))
+	x = X.End;
+      else
+	{
+	  cerr << "x outside grid in CubicSpline.\n";
+	  cerr << "x = " << x << " X.End = " << X.End << "\n";
+	  exit(1);
+	}
+    }
+#endif
+
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  if (hi>(X.NumPoints-1))
+    {
+      hi = (X.NumPoints-1);
+      low = hi-1;
+    }
+
+  double h = X(hi) - X(low);
+  double hinv = 1.0/h;
+  double a = (X(hi)-x)*hinv;
+  double b = (x-X(low))*hinv;
+  double sixinv = 0.1666666666666666666;
+  
+  return (a*y(low,i) + b*y(hi,i) +
+	  ((a*a*a-a)*d2y(low,i)+(b*b*b-b)*d2y(hi,i))*(h*h*sixinv));
+}
+
+
+inline void MultiCubicSpline::operator()(double x, Array<double,1> &yVec)
+{
+  for (int i=0; i<NumSplines; i++)
+    if (!UpToDate(i))
+      Update(i);
+
+  Grid &X = *grid;
+#ifdef BZ_DEBUG
+  if (x > X.End)
+    {
+      if (x < (X.End * 1.000000001))
+	x = X.End;
+      else
+	{
+	  cerr << "x outside grid in CubicSpline.\n";
+	  cerr << "x = " << x << " X.End = " << X.End << "\n";
+	  exit(1);
+	}
+    }
+#endif
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  if (hi>(X.NumPoints-1))
+    {
+      hi = (X.NumPoints-1);
+      low = hi-1;
+    }
+
+  double h = X(hi) - X(low);
+  double hinv = 1.0/h;
+  double a = (X(hi)-x)*hinv;
+  double b = (x-X(low))*hinv;
+  
+  double a3minusa = a*a*a-a;
+  double b3minusb = b*b*b-b;
+  double h2over6 = h*h*0.1666666666666666666;
+  
+  for (int i=0; i<NumSplines; i++)
+    {
+      yVec(i) = a*y(low,i) + b*y(hi,i) +
+	(a3minusa*d2y(low,i)+b3minusb*d2y(hi,i))*h2over6;
+    }
+}
+
+
+
+
+
+inline double MultiCubicSpline::Deriv(int i, double x)
+{
+  if(!UpToDate(i))
+    Update(i);
+
+  Grid &X = *grid;
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  
+  double h = X(hi) - X(low);
+  double hinv = 1.0/h;
+  double a = (X(hi)-x)*hinv;
+  double b = (x-X(low))*hinv;
+  double sixinv = 0.166666666666666666666;
+  
+  return ((y(hi,i)-y(low,i))*hinv + (h*sixinv)*((3.0*b*b-1.0)*d2y(hi,i) -
+						(3.0*a*a-1.0)*d2y(low,i)));
+}
+
+
+inline void MultiCubicSpline::Deriv(double x, Array<double,1> &deriv)
+{
+  for (int i=0; i<NumSplines; i++)
+    if(!UpToDate(i))
+      Update(i);
+
+  Grid &X = *grid;
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  
+  double h = X(hi) - X(low);
+  double hinv = 1.0/h;
+  double a = (X(hi)-x)*hinv;
+  double b = (x-X(low))*hinv;
+  
+  double a2times3 = 3.0*a*a;
+  double b2times3 = 3.0*b*b;
+  double hover6 = h*0.1666666666666666666666;
+
+  for (int i=0; i<NumSplines; i++)
+    {
+      deriv(i) = (y(hi,i)-y(low,i))*hinv + 
+	hover6 * ((b2times3-1.0)*d2y(hi,i) -
+		  (a2times3-1.0)*d2y(low,i));
+    }
+}
+
+
+
+inline double MultiCubicSpline::Deriv2(int i, double x)
+{
+  if(!UpToDate(i))
+    Update(i);
+  Grid &X = *grid;
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  
+  double h = X(hi) - X(low);
+  double hinv = 1.0/h;
+  double a = (X(hi)-x)*hinv;
+  double b = (x-X(low))*hinv;
+  return (a*d2y(low, i) + b*d2y(hi, i));
+}
+
+
+inline void MultiCubicSpline::Deriv2(double x, Array<double,1> &deriv2)
+{
+  for (int i=0; i<NumSplines; i++)  
+    if(!UpToDate(i))
+      Update(i);
+  Grid &X = *grid;
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  
+  double h = X(hi) - X(low);
+  double hinv = 1.0/h;
+  double a = (X(hi)-x)*hinv;
+  double b = (x-X(low))*hinv;
+
+  for (int i=0; i<NumSplines; i++)  
+    deriv2(i) = a*d2y(low,i) + b*d2y(hi,i);
+}
+
+
+
+inline double MultiCubicSpline::Deriv3(int i, double x)
+{
+  if(!UpToDate(i))
+    Update(i);
+  Grid &X = *grid;
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  double h = X(hi)-X(low);
+  
+  return ((d2y(hi, i)-d2y(low, i))/h);
+}
+
+
+inline void MultiCubicSpline::Deriv3(double x, Array<double,1> &deriv3)
+{
+  for (int i=0; i<NumSplines; i++)
+    if(!UpToDate(i))
+      Update(i);
+  Grid &X = *grid;
+  int hi = X.ReverseMap(x)+1;
+  int low = hi-1;
+  if (low<0)
+    {
+      low = 0;
+      hi = 1;
+    }
+  double h = X(hi)-X(low);
+  double hinv = 1.0/h;
+
+  for (int i=0; i<NumSplines; i++)
+    deriv3(i) = (d2y(hi,i) - d2y(low,i))*hinv;
+}
+
+
 
 
 

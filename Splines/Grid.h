@@ -75,7 +75,7 @@ class LinearGrid : public Grid
 {
  private:
   /// The value between successive grid points.
-  scalar delta;
+  scalar delta, deltainv;
  public:
   /// Returns the type of the grid (in this case LINEAR)
   GridType Type()
@@ -111,7 +111,7 @@ class LinearGrid : public Grid
   /// Returns the index of the nearest point below r. 
   int ReverseMap(scalar r)
     {
-      return ((int)floor((r-Start)/delta));
+      return ((int)floor((r-Start)*deltainv));
     }
 
   /// Initializes the linear grid.
@@ -120,6 +120,7 @@ class LinearGrid : public Grid
       Start=start; End=end; NumPoints=numpoints;
       grid.resize(NumPoints);
       delta = (End-Start)/(scalar)(NumPoints-1);
+      deltainv = 1.0/delta;
       for (int i=0; i<NumPoints; i++)
 	grid(i) = Start + (scalar)i*delta;
   }
