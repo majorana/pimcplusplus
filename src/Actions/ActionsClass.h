@@ -15,7 +15,6 @@ private:
   Array<PairActionFitClass*,2> PairMatrix;
   PathDataClass &PathData;
   int MaxLevels; //is this the right place for this?
-  bool UseRPA;
 public:
   // Actions
   KineticClass Kinetic;
@@ -31,6 +30,7 @@ public:
   ShortRangePotClass ShortRangePot;
   LongRangePotClass  LongRangePot;
   
+  bool UseRPA;
 
   void Read(IOSectionClass &in);
   ActionsClass(PathDataClass &pathData) : 

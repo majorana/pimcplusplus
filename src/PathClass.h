@@ -390,7 +390,7 @@ inline void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
   dist = sqrt(dot(disp,disp));
 
 #ifdef DEBUG
-  dVec DBdisp = Path(slice, ptcl2) -Path(slice, ptcl1);
+  dVec DBdisp = Path(slice, ptcl) -RefPath(refPtcl);
   for (int i=0; i<NDIM; i++) {
     while (DBdisp(i) > 0.5*Box(i))
       DBdisp(i) -= Box(i);

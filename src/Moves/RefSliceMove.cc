@@ -24,9 +24,21 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
   
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level);
-    //newStage->Actions.push_back(&PathData.Actions.ShortRange);
-    //newStage->Actions.push_back(&PathData.Actions.LongRange);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
+    newStage->Actions.push_back(&PathData.Actions.ShortRange);
+    if (level == 0) {
+      if (PathData.Path.LongRange) 
+      if (PathData.Actions.UseRPA)
+      newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+      else
+      newStage->Actions.push_back(&PathData.Actions.LongRange);
+      
+      if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
+	cerr << "Adding fermion node action for species " 
+	     << speciesName << endl;
+	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+      }
+    }
     newStage->BisectionLevel = level;
     Stages.push_back (newStage);
   }
