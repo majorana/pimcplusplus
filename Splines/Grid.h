@@ -65,7 +65,7 @@ class Grid
     return (0);
   }
 
-  virtual void Write (OutputSectionClass &out) = 0;
+  virtual void Write (IOSectionClass &out) = 0;
   virtual void Read  (IOSectionClass &inSection) = 0;
 };
 
@@ -125,7 +125,7 @@ class LinearGrid : public Grid
 	grid(i) = Start + (scalar)i*delta;
   }
 
-  void Write (OutputSectionClass &outSection)
+  void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Points", grid); 
     outSection.WriteVar ("Type", "Linear");
@@ -255,7 +255,7 @@ class OptimalGrid : public Grid
     Init (aval, bval, numPoints);
   }
 
-  void Write (OutputSectionClass &outSection)
+  void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Points", grid); 
     outSection.WriteVar ("Type", "Optimal");
@@ -372,7 +372,7 @@ class LogGrid : public Grid
 
 
 
-  void Write (OutputSectionClass &outSection)
+  void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Points", grid); 
     outSection.WriteVar ("Type", "Log");

@@ -51,6 +51,8 @@ public:
     if (NewGrid->NumPoints != NewYs.rows())
       {
 	cerr << "Size mismatch in CubicSpline.\n";
+	cerr << "Grid Points = " << NewGrid->NumPoints << endl;
+	cerr << "Y points    = " << NewYs.rows() << endl;
 	exit(1);
       }
     grid = NewGrid;
@@ -94,13 +96,13 @@ public:
     UpToDate = 0;
     return (y(i));
   }
-  void Write(OutputSectionClass &outSection)
+  void Write(IOSectionClass &outSection)
   {
     outSection.WriteVar("StartDeriv", StartDeriv);
     outSection.WriteVar("EndDeriv", EndDeriv);
     outSection.WriteVar("y", y);
 
-    outSection.OpenSection("Grid");
+    outSection.NewSection("Grid");
     grid->Write(outSection);
     outSection.CloseSection();
   }
@@ -282,6 +284,8 @@ public:
     if (NewGrid->NumPoints != NewYs.rows())
       {
 	cerr << "Size mismatch in CubicSpline.\n";
+	cerr << "Grid Points = " << NewGrid->NumPoints << endl;
+	cerr << "Y points    = " << NewYs.rows() << endl;
 	exit(1);
       }
     
