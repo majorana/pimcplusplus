@@ -1,35 +1,41 @@
 #ifndef MOVE_BASE_H
 #define MOVE_BASE_H
 
-
-//#include "../Common.h"
 #include "../PathDataClass.h"
-//#include "BisectionClass.h" 
 
 /// This is the generic parent class for all moves, including "real moves"
 /// which actually move particles and "pseudo moves", which just shift around
 /// data, but don't move anything physical.
 class MoveClass 
 {
- public:
+protected:
+  /// The first time you write to an observable you have to do the
+  /// write a little differently and you might need to write additional
+  /// info like the description, etc.
+  bool FirstTime;
+  int TimesCalled, DumpFreq;
+  ///You can add more IOVar pointers to inhereted classes if necessary
+  VarClass *IOVar;
+  IOSectionClass OutSection;  
+public:
   /// This hold a reference to the Path Data
   PathDataClass &PathData;
   /// Call this in order to make a move.
-  virtual void MakeMove()=0;
+  virtual void MakeMove();
   ///Moves have a name by which they can be referenced
   string Name;
   ///All moves ought to be able to read
   virtual void Read(IOSectionClass &input)=0;
   virtual double AcceptanceRatio() {return sqrt((double)-1.0);}
+  virtual void WriteRatio();
   
   /// MoveClass constructor. Sets reference to the PathData object
-  MoveClass(PathDataClass &myPathData) : PathData(myPathData)
+  MoveClass(PathDataClass &myPathData, IOSectionClass outSection) : 
+    PathData(myPathData), FirstTime(true), OutSection(outSection),
+    TimesCalled(0), DumpFreq(1000)
     {Name="";}
-
 };
   
-///This is the loop move that allows you to loop
-
 
 /// This is a specialization of MoveClass which actually physically moves
 /// particles.
@@ -75,7 +81,8 @@ protected:
   void ChooseParticles();
   void ChooseParticlesOpen();
   inline int RandInt(int x);
-  ParticleMoveClass(PathDataClass &myPathData) : MoveClass (myPathData)
+  ParticleMoveClass(PathDataClass &myPathData, IOSectionClass outSection) : 
+    MoveClass (myPathData, outSection)
   { 
     NumAccepted=0;
     NumMoves=0;

@@ -22,8 +22,8 @@ public:
   void Read(IOSectionClass &input);
   double AcceptanceRatio();
 
-  CycleBlockMoveClass(PathDataClass &myPathData ) : 
-    MoveClass(myPathData), Bisection(myPathData),
+  CycleBlockMoveClass(PathDataClass &myPathData, IOSectionClass outSection ) : 
+    MoveClass(myPathData, outSection), Bisection(myPathData),
     Table1(myPathData), Table2(myPathData)
   { 
     Forw = &Table1;

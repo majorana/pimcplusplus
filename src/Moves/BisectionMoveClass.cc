@@ -29,7 +29,26 @@ void BisectionMoveClass::Read(IOSectionClass &moveInput)
 
 }
 
-    
+
+void BisectionMoveClass::WriteRatio()
+{
+  Array<double,1> ratios;
+  Bisection.AcceptanceRatios(ratios);
+  if (FirstTime) {
+    FirstTime = false;
+    Array<double,2> writeRatios(1,ratios.size());
+    writeRatios(0,Range::all()) = ratios;
+    OutSection.WriteVar("AcceptRatio", writeRatios);
+    IOVar = OutSection.GetVarPtr("AcceptRatio");
+  }
+  else {
+    IOVar->Append(ratios);
+  }
+  OutSection.FlushFile();
+}
+
+
+
 
 void BisectionMoveClass::MakeMove()
 {
@@ -42,9 +61,6 @@ void BisectionMoveClass::MakeMove()
   //  int EndTimeSlice=(1<<NumLevels)+StartTimeSlice;
   StartTimeSlice=slice1;
   int EndTimeSlice=slice2;
-
-
-
 
   //  int EndTimeSlice=(1<<NumLevels)+StartTimeSlice;
   
@@ -67,4 +83,5 @@ void BisectionMoveClass::MakeMove()
     PathData.RejectMove(StartTimeSlice,EndTimeSlice,ActiveParticles);
   }
   NumMoves++;
+  MoveClass::MakeMove();
 }

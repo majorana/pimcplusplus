@@ -23,7 +23,8 @@ class OpenBisectionMoveClass : public ParticleMoveClass
   /// Function to actually make a bisection move.
   void MakeMove();
 
-  OpenBisectionMoveClass(PathDataClass &myPathData ) : ParticleMoveClass(myPathData), 
+  OpenBisectionMoveClass(PathDataClass &myPathData, IOSectionClass iosection) :
+    ParticleMoveClass(myPathData, iosection), 
     Bisection(myPathData)
   { 
     /* Do nothing for now. */ 

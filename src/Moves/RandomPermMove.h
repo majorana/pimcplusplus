@@ -70,8 +70,8 @@ class PermMove : public ParticleMoveClass
     assert(in.ReadVar("name",Name));
     assert(in.ReadVar("NumLevels",NumLevels));
   }
-  PermMove(PathDataClass &myPathData) : 
-    ParticleMoveClass (myPathData) , myPerm(myPathData),
+  PermMove(PathDataClass &myPathData, IOSectionClass outSection) : 
+    ParticleMoveClass (myPathData, outSection) , myPerm(myPathData),
     Bisection(myPathData)
   {
     /* do nothing for now */

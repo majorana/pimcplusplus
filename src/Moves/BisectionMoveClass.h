@@ -24,8 +24,10 @@ class BisectionMoveClass : public ParticleMoveClass
   void Read(IOSectionClass &moveInput);
   /// Function to actually make a bisection move.
   void MakeMove();
+  void WriteRatio();
 
-  BisectionMoveClass(PathDataClass &myPathData ) : ParticleMoveClass(myPathData), 
+  BisectionMoveClass(PathDataClass &myPathData, IOSectionClass outSection) : 
+    ParticleMoveClass(myPathData, outSection), 
     Bisection(myPathData)
   { 
     ///Defaults to the 0'th time slice but shouldn't matter because it

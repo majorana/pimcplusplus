@@ -13,7 +13,8 @@ class PrintMoveClass : public MoveClass
   void Read(IOSectionClass &IO);
   double AcceptanceRatio() {return 1.0;}
   void MakeMove() {cerr<<"This is printing  "<<MyString<<endl;}
-  PrintMoveClass(PathDataClass &myPathData) : MoveClass(myPathData)
+  PrintMoveClass(PathDataClass &myPathData, IOSectionClass outSection) : 
+    MoveClass(myPathData, outSection)
     {MyString="Hi";}
 		    
 };
@@ -31,7 +32,8 @@ class JoinMoveClass : public MoveClass
   void Read(IOSectionClass &input){};
 
   void MakeMove() {};
-  JoinMoveClass (PathDataClass &myPathData ) : MoveClass(myPathData)
+  JoinMoveClass (PathDataClass &myPathData, IOSectionClass outSection) : 
+    MoveClass(myPathData, outSection)
   {/* Do nothing for now. */ }
 
 };
@@ -56,7 +58,8 @@ class ShiftMoveClass : public MoveClass
   void MakeMove();
   //Currently we don't read anything for the shift move class.
   void Read(IOSectionClass &theInput);
-  ShiftMoveClass (PathDataClass &myPathData) : MoveClass(myPathData)
+  ShiftMoveClass (PathDataClass &myPathData, IOSectionClass outSection) : 
+    MoveClass(myPathData, outSection)
   { /* Do nothing for now. */ }
   
 };

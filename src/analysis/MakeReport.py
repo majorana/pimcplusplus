@@ -139,7 +139,6 @@ def MeanErrorString (mean, error):
      meanDigits = math.floor(math.log(abs(mean))/math.log(10))
      rightDigits = -math.floor(math.log(error)/math.log(10))+1
      formatstr = '%1.' + '%d' % rightDigits + 'f'
-     print formatstr
      meanstr  = formatstr % mean
      errorstr = formatstr % error
      return (meanstr, errorstr)
@@ -150,7 +149,7 @@ def ProcessScalarSection(infile,doc,currNum):
      toAddList=[]
     #put description
      myTable=Table()
-     myTable.body=[['','Mean','Variance','Error','Kappa']]
+     myTable.body=[['','Mean','Error','Variance', 'Kappa']]
      myTable.width='50%'
      numVars=infile.CountVars()
 #     print "Num vars is ",numVars
@@ -185,7 +184,7 @@ def ProcessScalarSection(infile,doc,currNum):
                (mean,var,error,kappa)=stats.Stats(data)
                (meanstr, errorstr) = MeanErrorString (mean, error)
                myTable.body.append([Href("#"+sectionName+varName+repr(currNum),varName),\
-                                    meanstr,'%1.2e' % var,errorstr,'%1.2f' % kappa])
+                                    meanstr,errorstr, '%1.2e' % var ,'%1.2f' % kappa])
      doc.append(myTable)
      for counter in range(0,len(toAddList)):
           doc.append(toAddList[counter])
@@ -274,8 +273,9 @@ ProcessTopTable(doc,infile)
 
 
 currNum=0
+infile.OpenSection("Observables")
 numSections=infile.CountSections()
-print "The number of sections is ",numSections
+#print "The number of sections is ",numSections
 for counter in range(0,numSections):
      infile.OpenSection(counter)
      print infile.GetName()
@@ -287,6 +287,19 @@ for counter in range(0,numSections):
           currNum=ProcessCorrelationSection(infile,doc,currNum)
           doc.append(HR())
      infile.CloseSection()
+infile.CloseSection() # "Observables"
+
+infile.OpenSection("Moves")
+numMoves=infile.CountSections()
+for i in range (0, numMoves):
+     infile.OpenSection(i)
+     print infile.GetName()
+     ar = infile.ReadVar("AcceptRatio")
+     print ar
+     infile.CloseSection()
+
+infile.CloseSection() # "Moves"
+
 doc.logo=""
 doc.author="Ken and Bryan"
 doc.email="bkclark@uiuc.edu"

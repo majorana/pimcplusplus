@@ -1,6 +1,30 @@
 #include "MoveBase.h"
 
 
+void MoveClass::WriteRatio()
+{
+  if (FirstTime) {
+    FirstTime = false;
+    Array<double,1> ratios(1);
+    ratios(0) = AcceptanceRatio();
+    OutSection.WriteVar("AcceptRatio", ratios);
+    IOVar = OutSection.GetVarPtr("AcceptRatio");
+  }
+  else {
+    double ratio = AcceptanceRatio();
+    IOVar->Append(ratio);
+  }
+  OutSection.FlushFile();
+}
+
+void MoveClass::MakeMove()
+{
+  TimesCalled++;
+  if ((TimesCalled % DumpFreq) == 0)
+    WriteRatio();
+}
+
+
 void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
 {
   ActiveSpecies.resize(ActSpecies.size());

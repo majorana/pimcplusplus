@@ -18,15 +18,16 @@ void PIMCClass::Read(IOSectionClass &in)
   PathData.Action.Read(in);
   in.CloseSection();
 
+  // Read in the Observables
+  assert(in.OpenSection("Observables"));
+  ReadObservables(in);
+  in.CloseSection();
+
   // Read in the Moves
   assert(in.OpenSection("Moves"));
   ReadMoves(in);
   in.CloseSection();
 
-  // Read in the Observables
-  assert(in.OpenSection("Observables"));
-  ReadObservables(in);
-  in.CloseSection();
   
   // Read in the Algorithm
   assert(in.OpenSection("Algorithm"));
@@ -41,37 +42,7 @@ void PIMCClass::Read(IOSectionClass &in)
 }
 
 
-void PIMCClass::ReadMoves(IOSectionClass &in)
-{
 
-  int numOfMoves=in.CountSections("Move");
-  Moves.resize(numOfMoves);
-  int steps;
-  for (int counter=0;counter<numOfMoves;counter++){
-    in.OpenSection("Move",counter);
-    string MoveType;
-    assert(in.ReadVar("type",MoveType));
-    if (MoveType=="Bisection")
-      Moves(counter)=new BisectionMoveClass(PathData);
-    else if (MoveType=="OpenBisection")
-      Moves(counter)=new OpenBisectionMoveClass(PathData);
-    else if (MoveType=="ShiftMove")
-      Moves(counter)=new ShiftMoveClass(PathData);
-    else if (MoveType=="PrintMove")
-      Moves(counter)=new PrintMoveClass(PathData);
-    else if (MoveType=="CycleBlock")
-      Moves(counter)=new CycleBlockMoveClass(PathData);
-    else if (MoveType=="PermMove")
-      Moves(counter)=new PermMove(PathData);
-    else {
-      cerr<<"This type of move is not recognized: "<< MoveType <<endl;
-      abort();
-    }
-    Moves(counter)->Read(in);
-    in.CloseSection();
-  }
-
-}
 
 void PIMCClass::ReadObservables(IOSectionClass &in)
 {
@@ -85,6 +56,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
   OutFile.CloseSection(); // "System" 
   int numOfObservables=in.CountSections("Observable");
   Observables.resize(numOfObservables);
+  OutFile.NewSection ("Observables");
   for (int counter=0;counter<numOfObservables;counter++){
     in.OpenSection("Observable",counter);
     string theObserveType;
@@ -126,9 +98,55 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     OutFile.CloseSection();
     in.CloseSection();//Observable
   }
-  
-
+  OutFile.CloseSection(); // "Observables"
 }
+
+
+
+void PIMCClass::ReadMoves(IOSectionClass &in)
+{
+  int numOfMoves=in.CountSections("Move");
+  Moves.resize(numOfMoves);
+  int steps;
+  OutFile.NewSection("Moves");
+  for (int counter=0;counter<numOfMoves;counter++){
+    in.OpenSection("Move",counter);
+    string MoveType;
+    assert(in.ReadVar("type",MoveType));
+    if (MoveType=="Bisection") {
+      OutFile.NewSection("BisectionMove");
+      Moves(counter)=new BisectionMoveClass(PathData, OutFile);
+    }
+    else if (MoveType=="OpenBisection") {
+      OutFile.NewSection("OpenBisectionMove");
+      Moves(counter)=new OpenBisectionMoveClass(PathData, OutFile);
+    }
+    else if (MoveType=="ShiftMove") {
+      Moves(counter)=new ShiftMoveClass(PathData, OutFile);
+    }
+    else if (MoveType=="PrintMove") {
+      Moves(counter)=new PrintMoveClass(PathData, OutFile);
+    }
+    else if (MoveType=="CycleBlock") {
+      OutFile.NewSection("CycleBlockMove");
+      Moves(counter)=new CycleBlockMoveClass(PathData, OutFile);
+    }
+    else if (MoveType=="PermMove") {
+      OutFile.NewSection("PermMove");
+      Moves(counter)=new PermMove(PathData, OutFile);
+    }
+    else {
+      cerr<<"This type of move is not recognized: "<< MoveType <<endl;
+      abort();
+    }
+    Moves(counter)->Read(in);
+    OutFile.CloseSection(); // Whatever Move section we opened above.
+    in.CloseSection();
+  }
+  OutFile.CloseSection (); // "Moves"
+}
+
+
 
 void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 {

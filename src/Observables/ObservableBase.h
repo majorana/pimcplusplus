@@ -18,12 +18,12 @@ protected:
   bool FirstTime;
   ///You can add more IOVar pointers to inhereted classes if necessary
   VarClass *IOVar;
+  IOSectionClass IOSection;  
 public:
   /// A reference to the PathData I'm observing
   PathDataClass &PathData;
   /// Note: This is not a reference.  If it were, it could change
   /// behind our backs
-  IOSectionClass IOSection;  
   string Name;
   string Description;
   /// Observe the state of the present path and add it to the
@@ -31,9 +31,6 @@ public:
   virtual void Accumulate() = 0;
   virtual void WriteBlock()=0;
   virtual void Read(IOSectionClass& IO);
-  ////We don't actually ever call this so we really shouldn't allow
-/// it's existence yet. 
-  ///  virtual void ShiftData(int numTimeSlices) {;}
   virtual void WriteInfo();
 
   /// The constructor.  Sets PathData references and calls initialize.

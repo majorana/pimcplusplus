@@ -110,9 +110,11 @@ double BisectionClass::LogSampleProb(int startSlice, int endSlice,
 
 
 // This does a multilevel construction of a path.
-bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activeParticles,
+bool BisectionClass::Bisect(int startSlice, int numLevels, 
+			    Array<int,1> activeParticles,
 			    double permActionChange)
 {
+  assert (numLevels <= PathData.Action.MaxLevels);
   bool toAccept=true;
   double oldLogSampleProb;
   double newLogSampleProb;
@@ -148,12 +150,28 @@ bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activePar
 
     if (-logAcceptProb<log(PathData.Path.Random.Local())) ///reject conditin
       toAccept=false;
-
+    if (toAccept)
+      NumAccepted(levelCounter)++;
+    else
+      NumRejected(levelCounter)++;
     prevActionChange=currActionChange;
     levelCounter--;
   }
   return (toAccept);
 }
 
-bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activeParticles)
-{ return Bisect (startSlice, numLevels, activeParticles, 0.0); }
+
+
+bool BisectionClass::Bisect(int startSlice,int numLevels, 
+			    Array<int,1> activeParticles)
+{ 
+  return Bisect (startSlice, numLevels, activeParticles, 0.0); 
+}
+
+
+void BisectionClass::AcceptanceRatios(Array<double,1> &ratios)
+{
+  ratios.resize(NumAccepted.size());
+  for (int i=0; i<NumAccepted.size(); i++)
+    ratios(i) = (double)NumAccepted(i)/(double)(NumAccepted(i)+NumRejected(i));
+}
