@@ -34,6 +34,11 @@ void CommunicatorClass::Send (int toProc, Array<double,1> &buff)
   Send(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
 }
 
+void CommunicatorClass::Send (int toProc, Array<int,1> &buff)
+{
+  Send(buff.data(), buff.size(), MPI_INT, toProc, 1);
+}
+
 void CommunicatorClass::Broadcast (int root, int &val)
 {  MPI_Bcast(&val, 1, MPI_INT, root, MPIComm); }
 
@@ -63,6 +68,11 @@ void CommunicatorClass::Receive (void *recvBuf, int count,
 }
 
 void CommunicatorClass::Receive (int toProc, Array<double,1> &buff)
+{
+  Receive(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
+}
+
+void CommunicatorClass::Receive (int toProc, Array<int,1> &buff)
 {
   Receive(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
 }

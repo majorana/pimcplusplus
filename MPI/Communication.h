@@ -64,6 +64,7 @@ public:
   void Send (void *sendBuf, int count, MPI_Datatype datatype,
 	     int dest, int tag);
   void Send (int toProc, Array<double,1> &buff);
+  void Send (int toProc, Array<int,1> &buff);
   void Broadcast (int root, int &val);
   void Broadcast (int root, double &val);
   void Broadcast (int root, Array<double,1> &buff);
@@ -72,6 +73,7 @@ public:
   void Receive (void *recvBuf, int count, MPI_Datatype datatype,
 		int source, int tag);
   void Receive (int toProc, Array<double,1> &buff);
+  void Receive (int toProc, Array<int,1> &buff);
   bool Probe(int source, int tag, CommStatusClass &status);
   void AllGather(void *sendbuf, int sendcount, 
 		 MPI_Datatype sendtype, 
@@ -166,6 +168,12 @@ public:
     cerr << "Sends not supported in serial mode.\n";
     exit(1);
   }
+
+  inline void Send (int toProc, Array<int,1> &buff)
+  {
+    cerr << "Sends not supported in serial mode.\n";
+    exit(1);
+  }
   inline void Broadcast(int root, int &val) {}
   inline void Broadcast(int root, double &val) {}
   inline void Broadcast(int root, Array<double,1> &buff)
@@ -175,6 +183,11 @@ public:
   void Broadcast (int root, Array<Vec3,1> &buff)
   { /* Do nothing in serial mode */ }
   inline void Receive (int toProc, Array<double,1> &buff)
+  {
+    cerr << "Receives not supported in serial mode.\n";
+    exit(1);
+  }
+  inline void Receive (int toProc, Array<int,1> &buff)
   {
     cerr << "Receives not supported in serial mode.\n";
     exit(1);

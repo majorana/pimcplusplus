@@ -4,7 +4,7 @@
 #include <blitz/array.h>
 typedef double scalar;
 
-#define NDIM 3
+// #define NDIM 3
 
 using namespace blitz;
 typedef TinyVector<scalar,2> Vec2;
