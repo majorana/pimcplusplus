@@ -303,7 +303,7 @@ void CorrelationPotential(scalar  nup, scalar ndown,
 #ifdef NOUNDERSCORE 
 #define FORT(name) name
 #else
-#define FORT(name) name_
+#define FORT(name) name ## _
 #endif 
 
 extern "C" void FORT(exccor)(double &n, double &zeta, double &exc, double &vxc, 

@@ -53,7 +53,7 @@ public:
   ///Produces an int between 0 and max (not including max) that is common among processors
   inline int CommonInt(int max)
   { return (int)floor(Common()*max); }
-
+  
   
   void Init()
   {
@@ -61,7 +61,7 @@ public:
     //cerr<<"My seed is "<<seed<<endl;
     Init (seed);
   }
-
+ 
   void Init(int seed, int numClones=1)
   {
     NumClones=numClones;
@@ -70,10 +70,13 @@ public:
     int procsPerClone=numProcs/NumClones;
     CloneNumber=myProc/procsPerClone;
     int commID=numProcs+CloneNumber;
-    LocalStream = 
-      init_sprng(SPRNG_DEFAULT, myProc,numProcs+NumClones,seed,SPRNG_DEFAULT);
-    CommonStream = 
-      init_sprng(SPRNG_DEFAULT, commID,numProcs+NumClones,seed,SPRNG_DEFAULT);
+
+    ///LocalStream is a stream of random numbers unique to the node
+    LocalStream = init_sprng(SPRNG_DEFAULT, myProc,numProcs+NumClones,seed,SPRNG_DEFAULT);
+    ///CommonStream is a stream of random numbers shared between all
+    ///processors that are on the same clone 
+    CommonStream = init_sprng(SPRNG_DEFAULT, commID,numProcs+NumClones,seed,SPRNG_DEFAULT);
+
   }
 
 

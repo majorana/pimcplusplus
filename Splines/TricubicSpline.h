@@ -3,7 +3,7 @@
 #ifdef NOUNDERSCORE 
 #define FORT(name) name
 #else
-#define FORT(name) name_
+#define FORT(name) name ## _
 #endif 
 
 extern "C" void FORT(mktricubw)(double x[], int *nx,
