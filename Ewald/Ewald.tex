@@ -17,6 +17,7 @@ the system as,
 V = \sum_\alpha \left\{\sum_{i<j} v^{\alpha\alpha}(|\vr^\alpha_i - \vr^\alpha_j|) +
 \sum_{\beta<\alpha} 
 \sum_{i,j} v^{\alpha \beta}(|\vr^{\alpha}_i - \vr^{\beta}_j|) \right\}
+\label{eq:Vperiodic}
 \end{equation}
 \newcommand{\va}{\mathbf{a}}
 \newcommand{\vb}{\mathbf{b}}
@@ -288,15 +289,15 @@ m_3)$ indices.
   \FORALL{$i \in $ particles}
     \FOR{$j \in [1\cdots3]$}
       \STATE Compute $C^{i \alpha}_j \equiv e^{i \vb_j \cdot
-	\vr^{\alpha}_i}$
+        \vr^{\alpha}_i}$
        \FOR{$m \in [-m_{\text{max}}\dots m_\text{max}]$}
          \STATE Compute $[C^{i \alpha}_j]^m$ and store in array
        \ENDFOR
     \ENDFOR
      \FORALL{$(m_1, m_2, m_3) \in $ index list}
        \STATE Compute $e^{i \vk \cdot r^\alpha_i} =
-	 [C^{i\alpha}_1]^{m_1} [C^{i\alpha}_2]^{m_2}
-	 [C^{i\alpha}_3]^{m_3}$ from array
+         [C^{i\alpha}_1]^{m_1} [C^{i\alpha}_2]^{m_2}
+         [C^{i\alpha}_3]^{m_3}$ from array
     \ENDFOR
   \ENDFOR
 \ENDFOR
@@ -697,7 +698,60 @@ x_k^{1/r^4} = -\frac{4 \pi}{\Omega k}
 \frac{k \cos(k r_c)}{2 r_c} + \frac{\sin(k r_c)}{2r_c^2} + \frac{k^2}{2} \left[ \text{Si}(k r_c) - \frac{\pi}{2}\right]\right\}
 \end{equation}
 
-\subsection{RPA improvements}
+
+\section{Adapting to PIMC}
+\subsection{Pair actions}
+Let us begin by summarizing what we have done so far.  We began with the many-body Hamiltonian given by 
+\begin{equation}
+\mathcal{H} = \sum_i -\lambda_i \nabla_i^2 + V,
+\end{equation}
+where $V$ is the periodic potential given by (\ref{eq:Vperiodic}), and $\lambda \equiv \frac{\hbar^2}{2m_i}$. 
+
+We approximately solved the action of this Hamiltonian by considering
+the particles pairwise, and solving for the density matrix for the
+density matrix of each pair exactly using the matrix squaring method.
+This yields the the {\em pair action}, defined by
+\begin{equation}
+\rho^{\alpha \beta}(\vr, \vr';\tau) \equiv \rho_0(\vr, \vr';\tau)
+e^{-u^{\alpha \beta}(\vr, \vr';\tau)},
+\end{equation}
+where $\rho_0$ is the {\em free particle} density matrix for species
+$\alpha$ interacting with species $\beta$.  $\rho^{\alpha \beta}$ is
+the density matrix for the pair Hamiltonian
+\begin{equation}
+H^{\alpha\beta} = -\lambda^{\alpha\beta} \nabla^2 + v^{\alpha\beta}(|\vr|),
+\end{equation}
+where $\vr \equiv \vr_i - \vr_j$ and particles $i$ and $j$ are members
+of species $\alpha$ and $\beta$, respecively, and
+$\lambda^{\alpha\beta}$ is given by
+\begin{equation}
+\lambda^{\alpha \beta} = \frac{\hbar^2}{2m_{\alpha}} +
+\frac{\hbar^2}{2m_\beta}.
+\end{equation}
+If the potential $v^{\alpha \beta}(r)$ is long range, then the action,
+$u^{\alpha \beta}(\vr, \vr';\beta)$, will also be long range.  We
+note, however, that the action is not a simple function of the scalar
+$r$, as the potential is.  Experience shows, however, that at large
+distances, the action is well approximated by
+\begin{eqnarray}
+u^{\alpha\beta}(\vr, \vr';\tau) & \approx & 
+\frac{1}{2} \left[ u^{\alpha\beta}(\vr,\vr;\tau) +
+  u^{\alpha\beta}(\vr',\vr';\tau)\right] \\
+& = & \frac{1}{2} \left[ u^{\alpha\beta}_\text{diag}(r,\tau)+
+u^{\alpha\beta}_\text{diag}(r',\tau)\right]
+\end{eqnarray}
+This is known as the {\em diagonal approximation}.  Thus, as long as
+this approximation is valid at half the minimum box dimension, we may
+break up the diagonal action as we did the potential.  The same
+analysis follows for the $\tau$-derivative the the action, which is
+required to compute the total energy.  Note that PIMC simulation
+requires the pair action at several values of $\tau$, so that in
+practice, we need to do several optimized breakups for each
+$u_\text{diag}_{\alpha\beta}$ and $\dot{u}_\text{diag}^{\alpha\beta}$ and a single breakup for
+each $v^{\alpha\beta}.
+
+
+\subsection{Beyond the pair approximation: RPA improvements}
 Thusfar in our discussion, the long-range parts of action has been
 treated in was is effectively a primitive approximation.  While this
 is correct in the limit that the timestep, $\tau$, goes to zero, it
@@ -720,12 +774,10 @@ we define
 \end{equation}
 The Bloch equation gives us 
 \begin{equation}
-0 = 
+0 = +
 \end{equation}
 
 
-\section{Adapting to PIMC}
-\subsection{Pair actions}
 
 
 \begin{thebibliography}{9}
