@@ -46,6 +46,15 @@ public:
     return (f(iz,iy,ix,0));
   }
   inline double operator()(double x, double y, double z); 
+  inline double d_dx(double x, double y, double z); 
+  inline double d_dy(double x, double y, double z); 
+  inline double d_dz(double x, double y, double z); 
+  inline double d2_dx2(double x, double y, double z); 
+  inline double d2_dy2(double x, double y, double z); 
+  inline double d2_dz2(double x, double y, double z); 
+  inline double d2_dxdy(double x, double y, double z); 
+  inline double d2_dxdz(double x, double y, double z); 
+  inline double d2_dydz(double x, double y, double z); 
   inline void Update();
 
   inline void Init (Grid *xGrid_, Grid *yGrid_, Grid *zGrid_,
