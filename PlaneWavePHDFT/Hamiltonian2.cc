@@ -3,7 +3,7 @@
 
 
 void 
-KineticClass::Setup()
+PWKineticClass::Setup()
 {
   halfG2.resize(GVecs.size());
   for (int i=0; i<GVecs.size(); i++) {
@@ -14,14 +14,14 @@ KineticClass::Setup()
 }
 
 void 
-KineticClass::Setk (Vec3 k)
+PWKineticClass::Setk (Vec3 k)
 {
   kPoint = k;
   Setup();
 }
 
 void 
-KineticClass::Apply(const zVec &c, zVec &Kc)
+PWKineticClass::Apply(const zVec &c, zVec &Kc)
 {
   if (!IsSetup)
     Setup();

@@ -9,7 +9,7 @@
 #define sincos(p,s,c) *(s)=sin(p); *(c)=cos(p);
 #endif
 
-class KineticClass
+class PWKineticClass
 {
 private:
   GVecsClass &GVecs;
@@ -21,7 +21,7 @@ public:
   void Apply (const zVec &c, zVec &Kc);
   void Setk  (Vec3 k);
 
-  KineticClass (GVecsClass &gvecs) : 
+  PWKineticClass (GVecsClass &gvecs) : 
     GVecs (gvecs), IsSetup(false), kPoint(0.0, 0.0, 0.0)
   {
   }
@@ -153,7 +153,7 @@ private:
 public:
   FFTBox &FFT;
   GVecsClass &GVecs;
-  KineticClass Kinetic;
+  PWKineticClass Kinetic;
   VionBase *Vion;
   Vec3 kPoint;
 

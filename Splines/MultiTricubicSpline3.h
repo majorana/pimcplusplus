@@ -57,10 +57,10 @@ public:
   Grid *Xgrid, *Ygrid, *Zgrid;
   TinyVector<Grid*,3> Grids;
   void Update();
-  inline double operator()(int ix, int iy, int iz) const
-  { return (F(ix,iy,ix)[0]); }
-  inline double& operator()(int ix, int iy, int iz) 
-  { UpToDate=false; return (F(ix,iy,iz)[0]); }
+  inline double operator()(int ix, int iy, int iz, int i) const
+  { return (F(ix,iy,ix, i)[0]); }
+  inline double& operator()(int ix, int iy, int iz, int i) 
+  { UpToDate=false; return (F(ix,iy,iz, i)[0]); }
   inline void operator()(double x, double y, double z, Array<double,1> &vals);
   inline void d_dx      (double x, double y, double z, Array<double,1> &vals); 
   inline void d_dy      (double x, double y, double z, Array<double,1> &vals); 

@@ -49,7 +49,7 @@ void ConjGrad::Setup()
 void ConjGrad::InitBands()
 {
   int numBands = Bands.rows();
-  int numVecs = 20 * numBands;
+  int numVecs = 4 * numBands;
   assert (numVecs <= H.GVecs.size());
   Array<complex<double>,2> Hmat(numVecs, numVecs);
   Array<complex<double>,2> EigVecs(numBands, numVecs);
@@ -156,6 +156,7 @@ void ConjGrad::Solve(int band)
   double Elast = 1.0e100;
   double residualNorm = 1.0;
   //  while (fabs (Elast - Energies(band)) > Tolerance) {
+  int iter=0;
   while (residualNorm > 1.0e-6) {
     //    cerr << "Energy = " << 27.211383*Energies(band) << endl;
     Elast = Energies(band);
@@ -164,16 +165,23 @@ void ConjGrad::Solve(int band)
     
     // Now, pick optimal theta for 
     double dE_dtheta = 2.0*realconjdot(Phip, Hc);
-    double theta1 = M_PI/300.0;
-    cnext = cos(theta1)*c + sin(theta1)*Phip;
-    H.Apply (cnext, Hc);
-    double E1 = realconjdot (cnext, Hc);
-    double A1=(E0 - E1 + 0.5*sin(2.0*theta1)*dE_dtheta)/(1.0-cos(2.0*theta1));
-    double B1 = 0.5*dE_dtheta;
-    double thetaMin = 0.5*atan (B1/A1);
-    
+
+    H.Apply (Phip, Hc);
+    double d2E_dtheta2 = 2.0*(realconjdot(Phip, Hc) - E0);
+    double thetaMin = 0.5*atan(-dE_dtheta/(0.5*d2E_dtheta2));
+
+//     double theta1 = M_PI/300.0;
+//     cnext = cos(theta1)*c + sin(theta1)*Phip;
+//     H.Apply (cnext, Hc);
+//     double E1 = realconjdot (cnext, Hc);
+//     double A1=(E0 - E1 + 0.5*sin(2.0*theta1)*dE_dtheta)/(1.0-cos(2.0*theta1));
+//     double B1 = 0.5*dE_dtheta;
+//     double thetaMin = 0.5*atan (B1/A1);
+
     c = cos(thetaMin)*c + sin(thetaMin)*Phip;
+    iter++;
   }
+  cerr << "# of iterations = " << iter << endl;
 }
 
 void

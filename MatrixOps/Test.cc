@@ -104,12 +104,85 @@ double MulTest(int N)
 }
   
 
+void TestDetCofactors()
+{
+  const int N = 5;
+  int worksize = DetCofactorsWorksize(N);
+  Array<double,1> workspace(worksize);
+
+  Array<double,2> A(N,N), B(N,N);
+  
+  for (int i=0; i<N; i++)
+    for (int j=0; j<N; j++)
+      A(i,j) = drand48()-0.5;
+  
+  B = A;
+  double detA = Determinant(A);
+  GJInverse(A);
+  Transpose(A);
+  A = detA * A;
+  double detB = DetCofactors(B, workspace);
+
+  cerr << "det A = " << detA << endl;
+  cerr << "det B = " << detB << endl;
+
+  cerr << "A cofactors = " << A << endl;
+  cerr << "B cofactors = " << B << endl;
+
+}
+
+
+void 
+TimeDetCofactors()
+{
+  const int N = 16;
+  int worksize = DetCofactorsWorksize(N);
+  Array<double,1> workspace(worksize);
+
+  Array<double,2> A(N,N), B(N,N);
+  
+  for (int i=0; i<N; i++)
+    for (int j=0; j<N; j++)
+      A(i,j) = drand48()-0.5;
+  
+  clock_t start, end;
+
+  start = clock();
+  const int num = 100000;
+
+  for (int i=0; i < num; i++) {
+    B = A;
+    double detA = Determinant(B);
+    GJInverse(B);
+    Transpose(B);
+    B = detA * B;
+  }
+  end = clock();
+  fprintf (stderr, "Old way time = %1.5e\n", 
+	   (double)(end-start)/((double)CLOCKS_PER_SEC * (double)num));
+  
+  start = clock();
+  for (int i=0; i<num; i++) {
+    B = A;
+    double detB = DetCofactors(B, workspace);
+  }
+  end = clock();
+  fprintf (stderr, "New way time = %1.5e\n", 
+	   (double)(end-start)/((double)CLOCKS_PER_SEC * (double)num));
+  
+}
+
 
 
 
 main()
 {
+  //TestDetCofactors();
+  TimeDetCofactors();
   TimeDet();
+//   for (int N=10; N<300; N+=5)
+//     cerr << "N = " << N << " Rate = " << MulTest(N) << endl;
+
 //   for (int N=10; N<300; N+=5)
 //     cerr << "N = " << N << " Rate = " << MulTest(N) << endl;
 //   TestDet();

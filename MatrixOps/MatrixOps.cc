@@ -16,8 +16,12 @@ extern "C" void FORT(dgesvd)(char *JOBU, char* JOBVT, int *M, int *N,
 			     int *LDU, double *VT, int *LDVT, double *work,
 			     int *LWORK, int *INFO);
 
-extern "C" void FORT(dgetrf)(int *m, int *n, double A[], int *lda, int ipiv[],
+extern "C" void 
+FORT(dgetrf)(int *m, int *n, double A[], int *lda, int ipiv[],
 			int *info);
+extern "C" void 
+FORT(dgetri)(int *N, double A[], int *lda, int ipiv[], double work[], 
+	     int *lwork, int *info);
 
 extern "C" void FORT(dgemm)(char *transA, char *transB, int *m, int *n, int *k,
 			    double *alpha, const double *A, int *lda, const double *B, int *ldb,
@@ -552,4 +556,61 @@ void SymmEigenPairs (const Array<complex<double>,2> &A, int NumPairs,
    delete[] Amat, EigVals, EigVecs, WorkSpace, IWorkSpace, ISuppZ;
    
 
+}
+
+
+/// This function returns the determinant of A and replaces A with its
+/// cofactors.
+double 
+DetCofactors (Array<double,2> &A, Array<double,1> &work)
+{
+  const int maxN = 2000;
+  int ipiv[maxN];
+  int N = A.rows();
+  int M = A.cols();
+  assert (N == M);
+  assert (N <= maxN);
+  // First, transpose A for fortran ordering
+//   for (int i=0; i<N; i++)
+//     for (int j=0; j<i; j++) {
+//       double tmp = A(i,j);
+//       A(i,j) = A(j,i);
+//       A(j,i) = tmp;
+//     }
+  Transpose(A);
+  
+  int info;
+  // Do LU factorization
+  FORT(dgetrf)(&N, &M, A.data(), &N, ipiv, &info);
+  double det = 1.0;
+  int numPerm = 0;
+  for (int i=0; i<N; i++) {
+    det *= A(i,i);
+    numPerm += (ipiv[i] != (i+1));
+  }
+  if (numPerm & 1)
+    det *= -1.0;
+  
+  int lwork = work.size();
+  // Now, do inverse
+  FORT(dgetri)(&N, A.data(), &N, ipiv, work.data(), &lwork, &info);
+
+  // Now, we have the transpose of Ainv.  Now, just multiply by det:
+  A = det * A;
+  // And we're done!
+  return det;
+}
+
+int 
+DetCofactorsWorksize(int N)
+{
+  double work;
+  double dummy;
+  int info;
+  int ipiv;
+  int lwork = -1;
+  
+  FORT (dgetri)(&N, &dummy, &N, &ipiv, &work, &lwork, &info);
+
+  return ((int)ceil(work));
 }

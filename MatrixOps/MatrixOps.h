@@ -27,6 +27,14 @@ void MatMult (const Array<double,2> &A, const Array<double,2> &B,
 	      Array<double,2> &C);
 
 double Determinant (const Array<double,2> &A);
+
+/// This function returns the determinant of A and replaces A with its
+/// cofactors.
+double DetCofactors (Array<double,2> &A, Array<double,1> &work);
+
+/// This function returns the worksize needed by the previous function.
+int DetCofactorsWorksize(int N);
+
 void GJInverse (Array<double,2> &A);
 
 Array<double,2> Inverse (Array<double,2> &A);
