@@ -1,6 +1,9 @@
-SOURCES = Integrate.cc GKIntegration.cc HermiteQuad.cc
+SOURCES = Integrate.cc GKIntegration.cc HermiteQuad.cc TestHermite.cc
 
-all:	Integrate.o GKIntegration.o HermiteQuad.o
+all:	Integrate.o GKIntegration.o HermiteQuad.o TestHermite.o TestHermite
+
+TestHermite: TestHermite.o HermiteQuad.o
+	$(LD) -o TestHermite  HermiteQuad.o TestHermite.o $(IOobjs) $(LIBS)
 
 clean:
 	rm -f *.o

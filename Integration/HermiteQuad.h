@@ -2,6 +2,18 @@
 #define HERMITE_QUAD_H
 
 #include "math.h"
+#include "../Blitz.h"
+
+
+class Hermite16
+{
+public:
+  static const int n=16;
+  static const double u[16];
+  static const double weight[16];
+  double w[16];
+  double x[16];
+};
 
 class Hermite20
 {
@@ -55,6 +67,50 @@ class HermiteQuadClass
 };
 
 
-void TestHermite();
+
+template <class RuleClass, class ScaledIntegrand> 
+class Hermite3DQuadClass
+{
+ private:
+  RuleClass Rule;
+  double sigma;
+  Array<double,2> Points;
+ public:
+  void SetSigma(double mysigma)
+    {
+      int n = Rule.n;
+      Points.resize(n*n*n,4);
+
+      sigma = mysigma;
+      for (int i=0; i<Rule.n; i++)
+	Rule.x[i] = Rule.u[i]*M_SQRT2*sigma;
+      for (int i=0; i<n; i++)
+	for (int j=0; j<n; j++)
+	  for (int k=0; k<n; k++) {
+	    int index = k+(j+i*n)*n;
+	    Points(index,0) = Rule.x[i];
+	    Points(index,1) = Rule.x[j];
+	    Points(index,2) = Rule.x[k];
+	    Points(index,3) = Rule.w[i]*Rule.w[j]*Rule.w[k];
+	  }
+    }  
+
+  inline double Integrate(ScaledIntegrand &Integrand)
+    {
+      int n = Rule.n;
+      int N = n*n*n;
+      double sum=0; 
+      for (int i=0; i<N; i++)
+	sum += Points(i,3)*Integrand(Points(i,0), Points(i,1), Points(i,2));
+      double a = M_SQRT2*sigma;
+      sum *= (a*a*a);
+      return (sum);
+    }
+  Hermite3DQuadClass()
+  {
+    for (int i=0; i<Rule.n; i++)
+      Rule.w[i] = Rule.weight[i]*exp(-Rule.u[i]*Rule.u[i]);
+  }
+};
 
 #endif

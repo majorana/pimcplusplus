@@ -112,6 +112,43 @@ inline Mat3 operator*(scalar s, const Mat3 &M)
   return (sM);
 }
 
+inline Mat3 operator*(const Mat3 &A, const Mat3 &B)
+{
+  Mat3 AB;
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      AB(i,j) = 0.0;
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      for (int k=0; k<3; k++)
+	AB(i,j) += A(i,k)*B(k,j);
+  return (AB);
+}
+
+inline Mat3 operator+(const Mat3 &A, const Mat3 &B)
+{
+  Mat3 ApB;
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      ApB(i,j) = A(i,j) + B(i,j);
+  return (ApB);
+}
+
+inline Vec3 operator*(const Mat3& A, const Vec3 &v)
+{
+  Vec3 Av;
+  Av[0] = A(0,0)*v[0] + A(0,1)*v[1] + A(0,2)*v[2];
+  Av[1] = A(1,0)*v[0] + A(1,1)*v[1] + A(1,2)*v[2];
+  Av[2] = A(2,0)*v[0] + A(2,1)*v[1] + A(2,2)*v[2];
+  return Av;
+}
+
+inline double operator*(const Vec3 &v1, const Vec3 &v2)
+{
+  return (v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]);
+}
+
+
 inline double distSqrd(Vec2 a,Vec2 b)
 {
   return dot(a-b,a-b);
