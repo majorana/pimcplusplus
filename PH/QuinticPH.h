@@ -234,16 +234,16 @@ inline void QuinticPH::SetABmin(double newmin)
   for (int i=0; i<pA.NumPoints(); i++) {
     double val = pA(i)*pA(i)+ABmin;
     if (pA(i) < 0.0)
-      pA(i) = (val>newmin) ? -sqrt(newmin-val) : 0.0;
+      pA(i) = (val>newmin) ? -sqrt(val-newmin) : 0.0;
     else
-      pA(i) = (val>newmin) ?  sqrt(newmin-val) : 0.0;
+      pA(i) = (val>newmin) ?  sqrt(val-newmin) : 0.0;
   }
   for (int i=0; i<pB.NumPoints(); i++) {
     double val = pB(i)*pB(i)+ABmin;
     if (pB(i) < 0.0)
-      pB(i) = (val>newmin) ? -sqrt(newmin-val) : 0.0;
+      pB(i) = (val>newmin) ? -sqrt(val-newmin) : 0.0;
     else
-      pB(i) = (val>newmin) ?  sqrt(newmin-val) : 0.0;
+      pB(i) = (val>newmin) ?  sqrt(val-newmin) : 0.0;
   }
   ABmin = newmin;
 }
