@@ -12,7 +12,7 @@
 /// Explanation of how bisection moves work is in  
 /// Path Integrals in the theory of condensed helium
 /// by D.M. Ceperley  (Review of Modern Physics 1995) section V.H
-class BisectionBlockClass : public MultiStageLocalClass
+class BisectionBlockClass : public MultiStageClass
 {
 private:
   int NumLevels;
@@ -34,7 +34,7 @@ public:
   void MakeMove();
 
   BisectionBlockClass(PathDataClass &pathData, IOSectionClass &out) : 
-    MultiStageLocalClass(pathData, out)
+    MultiStageClass(pathData, out)
   { 
     // do nothing for now
   }

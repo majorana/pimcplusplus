@@ -3,7 +3,7 @@
 
 #include "MultiStage.h"
 
-class PermuteStageClass : public StageClass
+class PermuteStageClass : public LocalStageClass
 {
 protected:
   int SpeciesNum, NumLevels;
@@ -16,13 +16,15 @@ public:
   /// probability if the move is rejected before this stage.
   virtual double Sample (int &slice1, int &slice2, 
 			 Array<int,1> &activeParticles) = 0;
+  virtual bool Attempt (int &slice1, int &slice2, 
+			Array<int,1> &activeParticles, double &prevActionChange) = 0;
   virtual void InitBlock();
   virtual void Read (IOSectionClass &in);
   virtual void Accept();
   virtual void Reject();
   PermuteStageClass(PathDataClass &pathData, int speciesNum,
 		    int numLevels) : 
-    StageClass (pathData), 
+    LocalStageClass (pathData), 
     SpeciesNum (speciesNum), 
     NumLevels(numLevels)
   {
@@ -39,6 +41,8 @@ private:
 public:
   double Sample (int &slice1, int &slice2,
 		 Array<int,1> &activeParticles);
+  bool Attempt (int &slice1, int &slice2, 
+		 Array<int,1> &activeParticles, double &prevActionChange);
   NoPermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels) 
     : PermuteStageClass(pathData, speciesNum, numLevels)
   {
@@ -61,7 +65,8 @@ public:
   /// function is called twice during a successful multistage move.
   double Sample (int &slice1, int &slice2,
 		 Array<int,1> &activeParticles);
-
+  bool Attempt (int &slice1, int &slice2, 
+		   Array<int,1> &activeParticles, double &prevActionChange);
   TablePermuteStageClass (PathDataClass &pathData, 
 			  int speciesNum, int numLevels) : 
     PermuteStageClass(pathData, speciesNum, numLevels)

@@ -4,7 +4,7 @@
 #include "MultiStage.h"
 
 
-class BisectionStageClass : public StageClass
+class BisectionStageClass : public LocalStageClass
 {
 private:
   int NumImage;
@@ -15,7 +15,7 @@ public:
   double Sample(int &slice1,int &slice2, 
 		Array<int,1> &activeParticles);
   BisectionStageClass(PathDataClass &pathData, int level) : 
-    StageClass(pathData), NumImage(1)
+    LocalStageClass(pathData), NumImage(1)
   { 
     //do nothing for now
     BisectionLevel = level;

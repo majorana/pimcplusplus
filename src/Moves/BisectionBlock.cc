@@ -33,7 +33,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     Stages.push_back (newStage);
   }
   // Add the second stage of the permutation step
-  //  Stages.push_back (permuteStage);
+  Stages.push_back (permuteStage);
 
   // Add the nodal action stage, if necessary
   
@@ -64,7 +64,8 @@ void BisectionBlockClass::MakeMove()
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
   ActiveParticles.resize(1);
-  ActiveParticles(0)=-1;
-  for (int step=0; step<StepsPerBlock; step++)
-    MultiStageLocalClass::MakeMove();
+  for (int step=0; step<StepsPerBlock; step++) {
+    ActiveParticles(0)=-1;
+    MultiStageClass::MakeMove();
+  }
 }

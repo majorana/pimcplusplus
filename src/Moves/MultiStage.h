@@ -27,11 +27,44 @@ public:
   inline double AcceptRatio () 
   { return (double)NumAccepted / (double) NumAttempted; }
 
+  virtual bool Attempt(int &slice1, int &slice2, 
+		       Array<int,1> &activeParticles,
+		       double &prevActionChange) = 0;
+
   StageClass(PathDataClass &pathData) :
     PathData(pathData), NumAccepted(0), NumAttempted(0)
   {
     // Do nothing for now
   }
+
+};
+
+class CommonStageClass : public StageClass
+{
+public:
+  bool Attempt(int &slice1, int &slice2,
+	       Array<int,1> &activeParticles,
+	       double &prevActionChange);
+  CommonStageClass(PathDataClass &pathData) :
+    StageClass(pathData)
+  {
+    // Do nothing for now
+  }
+	       
+};
+
+class LocalStageClass : public StageClass
+{
+public:
+  bool Attempt(int &slice1, int &slice2,
+	       Array<int,1> &activeParticles,
+	       double &prevActionChange);
+  LocalStageClass(PathDataClass &pathData) :
+    StageClass(pathData)
+  {
+    // Do nothing for now
+  }
+	       
 };
 
 
@@ -69,28 +102,28 @@ public:
   }
 };
 
-class MultiStageLocalClass : public MultiStageClass
-{
-public:
-  void MakeMove();
-  MultiStageLocalClass(PathDataClass &pathData, IOSectionClass &outSection) :
-    MultiStageClass(pathData,outSection)
-  {
-    //do nothing for now
-  }
-};
+// class MultiStageLocalClass : public MultiStageClass
+// {
+// public:
+//   void MakeMove();
+//   MultiStageLocalClass(PathDataClass &pathData, IOSectionClass &outSection) :
+//     MultiStageClass(pathData,outSection)
+//   {
+//     //do nothing for now
+//   }
+// };
 
 
-class MultiStageCommonClass : public MultiStageClass
-{
-public:
-  void MakeMove();
-  MultiStageCommonClass(PathDataClass &pathData, IOSectionClass &outSection) :
-    MultiStageClass(pathData,outSection)
-  {
-    //do nothing for now
-  }
-};
+// class MultiStageCommonClass : public MultiStageClass
+// {
+// public:
+//   void MakeMove();
+//   MultiStageCommonClass(PathDataClass &pathData, IOSectionClass &outSection) :
+//     MultiStageClass(pathData,outSection)
+//   {
+//     //do nothing for now
+//   }
+// };
 
 
 #endif
