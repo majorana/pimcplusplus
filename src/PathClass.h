@@ -295,29 +295,33 @@ inline void PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
   for (int i=0; i<NDIM; i++) {
     double n = -floor(dispA(i)*BoxInv(i)+0.5);
     dispA(i) += n*IsPeriodic(i)*Box(i);
-    double mNew=-floor((dispA(i)-dispB(i))*BoxInv(i)+0.5);
-    dispBNew(i)=dispB(i)-mNew*IsPeriodic(i)*Box(i);
-    // HACK HACK HACK
-    m=0;
-    tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
-    tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
-    while (fabs(dispA(i)-tempDispB(i))>Box(i)/2.0 &&
-	   fabs(dispA(i)-tempDispBN(i))>Box(i)/2.0){
-      m=m+1;
-      tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
-      tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
-    }
-    if (fabs(dispA(i)-tempDispB(i))<=Box(i)/2.0)
-      dispB(i)=tempDispB(i);
-    else if (fabs(dispA(i)-tempDispBN(i))<=Box(i)/2.0)
-      dispB(i)=tempDispBN(i);
-    else cerr<<"ERROR! ERROR! ERROR!"<<endl;
-    if (fabs(dispBNew(i)-dispB(i))>1e-12){
-      cerr<<"dispBNew and dispB are not the same!\n";
-    }
-    //    double m = -floor(dispB(i)*BoxInv(i)+0.5);
-    //    dispB(i) += m*IsPeriodic(i)*Box(i);
-    //    cerr << "n = " << n << endl;
+    double m = -floor(dispB(i)*BoxInv(i)+0.5);
+    dispB(i) += m*IsPeriodic(i)*Box(i);
+
+
+//     double mNew=-floor((dispA(i)-dispB(i))*BoxInv(i)+0.5);
+//     dispBNew(i)=dispB(i)-mNew*IsPeriodic(i)*Box(i);
+//     // HACK HACK HACK
+//     m=0;
+//     tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
+//     tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
+//     while (fabs(dispA(i)-tempDispB(i))>Box(i)/2.0 &&
+// 	   fabs(dispA(i)-tempDispBN(i))>Box(i)/2.0){
+//       m=m+1;
+//       tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
+//       tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
+//     }
+//     if (fabs(dispA(i)-tempDispB(i))<=Box(i)/2.0)
+//       dispB(i)=tempDispB(i);
+//     else if (fabs(dispA(i)-tempDispBN(i))<=Box(i)/2.0)
+//       dispB(i)=tempDispBN(i);
+//     else cerr<<"ERROR! ERROR! ERROR!"<<endl;
+//     if (fabs(dispBNew(i)-dispB(i))>1e-12){
+//       cerr<<"dispBNew and dispB are not the same!\n";
+//     }
+//     //    double m = -floor(dispB(i)*BoxInv(i)+0.5);
+//     //    dispB(i) += m*IsPeriodic(i)*Box(i);
+//     //    cerr << "n = " << n << endl;
   }
 //   cerr << "dispA = " << dispA << endl;
 //   cerr << "dispB = " << dispB << endl;

@@ -58,6 +58,7 @@ void TotalEnergyClass::Accumulate()
   // Add constant part.  Note: we should really check the number of
   // dimensions. 
   double sum = 0.0;
+  double vSum=0.0;
   double prefact=0.0;
   int NumImage=1;
   for (int ptcl=0; ptcl<numPtcls; ptcl++)
@@ -129,12 +130,14 @@ void TotalEnergyClass::Accumulate()
 	double q = 0.5*(rmag+rpmag);
 	double z = (rmag-rpmag);
 	double dU;
+	double dV;
 	int PairIndex = 
 	  PathData.Action.PairMatrix(species1, 
 				     PathData.Path.ParticleSpeciesNum(ptcl2));
 	//	cerr<<"hello"<<endl;
 	//	cerr<<r<<" "<<rp<<" "<<endl;
 	dU=PathData.Action.PairActionVector(PairIndex)->dU(q, z, s2, 0);
+	
 	//	cerr<<"bye"<<endl;
 	PairActionFitClass &PA=*PathData.Action.PairActionVector(PairIndex);
 	// 	cerr << "ptcl1 = " << ptcl1 << endl;
@@ -146,11 +149,38 @@ void TotalEnergyClass::Accumulate()
 	// 	cerr << "PA species1 = " << PA.Particle1.Name << endl;
 	// 	cerr << "PA species2 = " << PA.Particle2.Name << endl;
 	//       	if (((ptcl1==2) && (ptcl2==1)) || ((ptcl1==3) && (ptcl2==0)))
+
 	sum += dU; // HACK!
       }
     }
   }
-  ESum += sum;
+  
+
+  
+  vSum=0.0;
+  for (int ptcl1=0; ptcl1<numPtcls; ptcl1++){
+    int species1=PathData.Path.ParticleSpeciesNum(ptcl1);
+    for (int ptcl2=0;ptcl2<ptcl1;ptcl2++){
+      int species2=PathData.Path.ParticleSpeciesNum(ptcl2);
+      int PairIndex =PathData.Action.PairMatrix(species1,species2);
+      for (int slice=0;slice<PathData.NumTimeSlices();slice++){
+	dVec r, rp;
+	double rmag, rpmag;
+	PathData.Path.DistDisp(slice, slice+1, ptcl1, ptcl2,
+			       rmag, rpmag, r, rp); 
+	double s2 = dot(r-rp, r-rp);
+	double q = 0.5*(rmag+rpmag);
+	double z = (rmag-rpmag);
+	double dU;
+	double dV;
+	dV=((DavidPAClass*)(PathData.Action.PairActionVector(PairIndex)))->VV(q, z, s2, 0);
+	vSum +=dV;
+      }
+    }
+  }
+  
+    //  ESum += sum; //HACK!
+  ESum += vSum;
   NumSamples++;
 }
 
@@ -259,9 +289,9 @@ void PairCorrelationClass::WriteBlock()
       IOSection.WriteVar("Species1", PathData.Species(Species1).Name);
       IOSection.WriteVar("Species2", PathData.Species(Species2).Name);
       Array<double,2> gofrArray(1,HistSum.size());
-      for (int i=0; i<(grid.NumPoints-2); i++){
+      for (int i=0; i<grid.NumPoints; i++){
 	double r1 = grid(i);
-	double r2 = grid(i+1);
+	double r2 = (i<grid.NumPoints-1) ? grid(i+1) : 2*grid(i)-grid(i-1);
 	double r = 0.5*(r1+r2);
 	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
 	gofrArray(0,i) = (double) HistSum(i) / (binVol*norm);
@@ -271,9 +301,9 @@ void PairCorrelationClass::WriteBlock()
     }
     else {
       Array<double,1> gofrArray(HistSum.size());
-      for (int i=0; i<(grid.NumPoints-2); i++){
+      for (int i=0; i<grid.NumPoints; i++){
 	double r1 = grid(i);
-	double r2 = grid(i+1);
+	double r2 = (i<grid.NumPoints-1) ? grid(i+1) : 2*grid(i)-grid(i-1);
 	double r = 0.5*(r1+r2);
 	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
 	gofrArray(i) = (double) HistSum(i) / (binVol*norm);
@@ -319,18 +349,18 @@ void PairCorrelationClass::Accumulate()
 
   /// HACK HACK HACK
   if (Species1==Species2) {
-    for (int slice=0;slice<PathData.NumTimeSlices();slice++) {
+    for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
       TotalCounts++;
       for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
 	for (int ptcl2=ptcl1+1;ptcl2<=species1.LastPtcl;ptcl2++){
-	  dVec r1=PathData(slice,ptcl1);
-	  dVec r2=PathData(slice,ptcl2);
 	  
 	  dVec disp;
 	  double dist;
 	  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
 	
 	  #ifdef OLDDEBUG
+	  dVec r1=PathData(slice,ptcl1);
+	  dVec r2=PathData(slice,ptcl2);
 	  dVec dispDummy=r2-r1;
 	  double distDummy=sqrt(dot(dispDummy,dispDummy));
 	  for (int i=0; i<NDIM; i++)
@@ -345,23 +375,22 @@ void PairCorrelationClass::Accumulate()
 	    int index=grid.ReverseMap(dist);
 	    Histogram(index)++;
 	  } 
-	  //	  else cerr<<"Distance is outside grid"<<r1<<" "<<r2<<" "<<disp<<endl;
 	}
     }
   }
   else {
-    for (int slice=0;slice<PathData.NumTimeSlices();slice++) {
+    for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
       TotalCounts++;
       for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
 	for (int ptcl2=species2.FirstPtcl;ptcl2<=species2.LastPtcl;ptcl2++){
-	  dVec r1=PathData(slice,ptcl1);
-	  dVec r2=PathData(slice,ptcl2);
 	  
 	  dVec disp;
 	  double dist;
 	  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
 	  
 #ifdef OLDDEBUG
+	  dVec r1=PathData(slice,ptcl1);
+	  dVec r2=PathData(slice,ptcl2);
 	  dVec dispDummy=r2-r1;
 	  double distDummy=sqrt(dot(dispDummy,dispDummy));
 	  for (int i=0; i<NDIM; i++)
@@ -398,6 +427,7 @@ void PathDumpClass::Accumulate()
     WriteBlock();
   }
 }
+
 void PathDumpClass::Read(IOSectionClass &in)
 {
   assert(in.ReadVar("name",Name));

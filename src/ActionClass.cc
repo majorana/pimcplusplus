@@ -116,7 +116,7 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	  //	  cerr<<"rmag "<<rmag<<endl;
 	  //	  cerr<<"rpmag "<<rpmag<<endl;
 	  //	  Array<double,1> rmrp(NDIM);
-	  dVec inBoxrmrp=r-rp;
+	  //dVec inBoxrmrp=r-rp;
 	  //	  for (int q=0;q<NDIM;q++){
 	  //	    rmrp(q)=dvecrmrp(q);
 	  //	  }
@@ -189,11 +189,12 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 void ActionClass::PrintDensityMatrix()
 {
 
-  for (int counter=0;counter<100;counter++){
-    double q=counter/10.0;
-    cerr<<q<<" "<<PairActionVector(0)->U(q,0.0,0.0,0)<<endl;
+  cerr<<"I'm printing now!"<<endl;
+  for (int counter=0;counter<1000;counter++){
+    double q=counter/100.0;
+    cerr<<q<<" "<<((DavidPAClass*)(PairActionVector(0)))->VV(q,0.0,0.0,0)<<endl;
   }
-
+  cerr<<"I'm done printing!"<<endl;
 }
   
   
