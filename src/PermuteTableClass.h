@@ -34,12 +34,9 @@ class PermuteTableClass
 {
  private:
   int TableSize;
-  int NumEntries;
   int SpeciesNum;
   int Slice1, Slice2;
   double Norm, NormInv;
-  Array<double,2> HTable;
-  Array<CycleClass,1> PermTable;
   inline void AddEntry(const CycleClass &cycle);
   inline int FindEntry(double xi);  
   PathDataClass &PathData;
@@ -49,6 +46,10 @@ class PermuteTableClass
   /// Stores which Htable and PermTable is for the forward move
   /// 0 or 1.  Flips when a permutation is accepted.
  public:
+  int NumEntries;
+
+  Array<double,2> HTable;
+  Array<CycleClass,1> PermTable;
 
   //  void PermuteHTable();
 

@@ -20,7 +20,7 @@ void PermuteTableClass::ConstructHTable()
   double lambda = PathData.Species(SpeciesNum).lambda;
   double beta = PathData.Action.tau * (double) (Slice2-Slice1);
   double fourLambdaBetaInv = 1.0/(4.0*lambda*beta);
-  int N = firstPtcl-lastPtcl+1;
+  int N = lastPtcl-firstPtcl+1;
   HTable.resize(N,N);
   for (int i=0; i<N; i++) {
     for (int j=0; j<N; j++) {
@@ -107,8 +107,8 @@ double PermuteTableClass::CalcReverseProb(const CycleClass &myPerm,
 void PermuteTableClass::Read(IOSectionClass &inSection)
 {
   Array<double,1> tempGamma;
-  tempGamma.resize(4);
   assert(inSection.ReadVar("Gamma",tempGamma));
+  assert(tempGamma.size() == 4);
   for (int counter=0;counter<tempGamma.size();counter++){
     Gamma(counter)=tempGamma(counter);
   }
@@ -141,7 +141,7 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
     tempPerm.P=Gamma(0);
     tempPerm.C=tempPerm.P;
     if (NumEntries!=0){
-      tempPerm.P+=PermTable(NumEntries-1).C;
+      tempPerm.C+=PermTable(NumEntries-1).C;
     }
     AddEntry(tempPerm);
     for (int j=i+1; j<N; j++) {// 2 and higher cycles
@@ -169,6 +169,7 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
 		  tempPerm.CycleRep[3]=l;
 		  tempPerm.Ncycles=4;
 		  tempPerm.P=Gamma(3)*hprod*HTable(l,i);
+		  tempPerm.C=tempPerm.P+PermTable(NumEntries-1).C;
 		  if (tempPerm.P != 0.0) 
 		    AddEntry(tempPerm);
 		}

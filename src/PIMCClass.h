@@ -5,6 +5,7 @@
 #include "MoveClass.h"
 #include "ObservableClass.h"
 #include "WrapClass.h"
+#include "PermuteTableClass.h"
 
 
 class PIMCClass 
@@ -19,10 +20,11 @@ private:
   IOSectionClass OutFile;
   LoopClass Algorithm;
 public:
+  PermuteTableClass PermuteTable;
   PathDataClass PathData;
   void Read(IOSectionClass &in);
   void Run();
-  PIMCClass() : Algorithm(&Moves, &Observables)
+  PIMCClass() : Algorithm(&Moves, &Observables), PermuteTable(PathData)
   { /* Do nothing for now */ }
 };
 

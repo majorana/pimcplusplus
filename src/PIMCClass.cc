@@ -36,6 +36,11 @@ void PIMCClass::Read(IOSectionClass &in)
   assert(in.OpenSection("Algorithm"));
   ReadAlgorithm(in);
   in.CloseSection();
+
+  // Read in the Permuation info
+  assert(in.OpenSection("Permutations"));
+  PermuteTable.Read(in);
+  in.CloseSection();
 }
 
 
