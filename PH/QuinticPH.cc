@@ -50,7 +50,7 @@ double QuinticPH::B(double r)
     val = pb*pb + ABmin;
   }
   else
-    val = 0.0;
+    val = 1.0;
   return val;
 }
 
