@@ -19,19 +19,21 @@ class ObservableClass
 public:
   /// A reference to the PathData I'm observing
   PathDataClass &PathData;
-
+  
   /// Observe the state of the present path and add it to the
   /// running sum for averages.
   virtual void Accumulate() = 0;
   /// Initialize my data.
   virtual void Initialize() = 0;
-  /// Print running average to screen for debugging purposes
-  virtual void Print() = 0;
-  virtual void Write(OutputFileClass &outputFile)=0;
+
+  IOSectionClass &IOSection;  
+  virtual void WriteBlock()=0;
+  virtual void ShiftData(int numTimeSlices)=0;
   /// The constructor.  Sets PathData references and calls initialize.
-  ObservableClass(PathDataClass &myPathData) : PathData(myPathData)
+  ObservableClass(PathDataClass &myPathData,IOSectionClass &ioSection) : PathData(myPathData), IOSection(ioSection)
   {   }
 };
+
 
 /* class PrintConfigClass : public ObservableClass */
 /* { */
@@ -73,16 +75,41 @@ class DistributedObservableClass : public ObservableClass
   { /* Do nothing for now. */ }
 };
 
-class ScalarObservableClass : public ObservableClass
+class LinkObservableClass : public ObservableClass
 {
 protected:
-  virtual void MyBlockAverage(double &mean, double &error) = 0;
+  //  virtual void MyBlockAverage(double &mean, double &error) = 0;
 public:
-  /// This routine will collect averages of
-  void Write (OutputFileClass &outputFile);
+  Array<double,1> LinkArray;
+  double Total;
+  int NumSamples;
+  void Accumulate()
+  {
+    for (int counter=0;counter<LinkArray.size();counter++){
+      Total+=LinkArray(counter);
+    }
+    NumSamples++;
+  } 
+  virtual void Update(int startTimeSlice,int endTimeSlice)=0;
+  virtual void UpdateAll()=0;
+  /// Initialize my data.
+  virtual void Initialize() = 0;
+  IOSectionClass &IOSection;  
+  virtual void WriteBlock()=0;
+  void ShiftData(int numTimeSlices);
+  virtual void WriteBlock()=0;
+  ScalarObservableClass (PathDataClass &myPathData, IOSectionClass &IOSection) : ObservableClass(myPathData), ObservableClass(IOSection)
+  { 
+    LinkArray.resize(PathData.NumTimeSlices());
+    NumSamples=0;
+  }
+  
+};
 
-  ScalarObservableClass (PathDataClass &myPathData) : ObservableClass(myPathData)
-  { /* Do nothing for now. */ }
+class EnergyClass : public LinkObservableClass
+{
+  
+
 };
 
 

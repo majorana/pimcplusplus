@@ -110,3 +110,12 @@ void PairCorrelation::Print()
       fprintf (stderr, "%1.12e %1.12e\n", r, gofr);
     }
 }
+
+
+void LinkObservableClass::ShiftData(int numTimeSlices)
+{
+
+
+
+
+}
