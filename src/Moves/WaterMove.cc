@@ -198,7 +198,7 @@ void WaterTranslate::MakeMove()
 
 void WaterRotate::MakeMove()
 {
-  double dtheta = 2*M_PI*0.2;
+  double dtheta = 2*M_PI*0.1;
   int speciesO = PathData.Path.SpeciesNum("O");
   int  numWater=PathData.Path.Species(speciesO).LastPtcl-
     PathData.Path.Species(speciesO).FirstPtcl+1;
@@ -244,19 +244,32 @@ dVec v1 = PathData.Path(slice,coord_loc(check)) - PathData.Path(slice,coord_loc(
 dVec v2 = PathData.Path(slice,coord_loc(check2)) - PathData.Path(slice,coord_loc(0));
 cerr << "test angle is " << PathData.Actions.TIP5PWater.GetAngle(v1,v2) << endl;
 ***********************************************************/
+/*
+cerr << "BEFORE: " << "slice " << slice << endl;
+cerr << "printing slice, P1 coords " << endl;
+cerr << slice-1 << " || " << PathData.Path(slice-1,3) << endl;
+cerr << slice << " || " << PathData.Path(slice,3) << endl;
+cerr << slice+1 << " || " << PathData.Path(slice+1,3) << endl;
+cerr << "printing slice, P2 coords " << endl;
+cerr << slice-1 << " || " << PathData.Path(slice-1,4) << endl;
+cerr << slice << " || " << PathData.Path(slice,4) << endl;
+cerr << slice+1 << " || " << PathData.Path(slice+1,4) << endl;
+*/
   double oldAction = 0.0;
 //  oldAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
   oldAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
 //  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
-  oldAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
+//  oldAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
 //  oldAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
 //  oldAction += PathData.Actions.TIP5PWater.SecondProtonKineticAction(startSlice,endSlice,p2ActiveParticles,0);
-  oldAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
-//  oldAction += PathData.Actions.TIP5PWater.FixedAxisAction(startSlice,endSlice,HActiveParticles,0);
+//  oldAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
+  oldAction += PathData.Actions.TIP5PWater.FixedAxisAction(startSlice,endSlice,HActiveParticles,0);
 
   int x,y;
   int z = (int)floor(3*PathData.Path.Random.Local());
+//  int z = 2;
   double theta = (PathData.Path.Random.Local()-0.5)*dtheta;
+//  double theta = 0.0;
   if (z == 0){
     x = 1;
     y = 2;
@@ -269,7 +282,7 @@ cerr << "test angle is " << PathData.Actions.TIP5PWater.GetAngle(v1,v2) << endl;
     x = 0;
     y = 1;
   }
-//cerr << "ROTATE " << theta/M_PI << " pi rad about " << z << endl;
+//cerr << "ROTATE " << theta << " rad about " << z << endl;
   // error statement?
   for(int i=1;i<coord_loc.size();i++){
 //cerr << "MOVING PTCL " << coord_loc(i) << " which is of species " <<  PathData.Path.ParticleSpeciesNum(coord_loc(i)) << endl;
@@ -289,27 +302,38 @@ v1 = PathData.Path(slice,coord_loc(check)) - PathData.Path(slice,coord_loc(0));
 v2 = PathData.Path(slice,coord_loc(check2)) - PathData.Path(slice,coord_loc(0));
 cerr << "test angle is " << PathData.Actions.TIP5PWater.GetAngle(v1,v2) << endl;
  *************************************************************/
+/*
+cerr << "AFTER: " << endl;
+cerr << "printing slice, P1 coords " << endl;
+cerr << slice-1 << " || " << PathData.Path(slice-1,3) << endl;
+cerr << slice << " || " << PathData.Path(slice,3) << endl;
+cerr << slice+1 << " || " << PathData.Path(slice+1,3) << endl;
+cerr << "printing slice, P2 coords " << endl;
+cerr << slice-1 << " || " << PathData.Path(slice-1,4) << endl;
+cerr << slice << " || " << PathData.Path(slice,4) << endl;
+cerr << slice+1 << " || " << PathData.Path(slice+1,4) << endl;
+*/
   double newAction = 0.0;
 //  newAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
   newAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
 //  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
-  newAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
+//  newAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
 //  newAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
 //  newAction += PathData.Actions.TIP5PWater.SecondProtonKineticAction(startSlice,endSlice,p2ActiveParticles,0);
-  newAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
-//  newAction += PathData.Actions.TIP5PWater.FixedAxisAction(startSlice,endSlice,HActiveParticles,0);
+//  newAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
+  newAction += PathData.Actions.TIP5PWater.FixedAxisAction(startSlice,endSlice,HActiveParticles,0);
 
-  //cerr<<"ROTATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
+//  cerr<<"ROTATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
  
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
     PathData.AcceptMove(startSlice,endSlice,ActiveParticles);
-    //cerr<<"ROTATE:  I've accepted " << NumAccepted << " " << NumMoves+1 <<endl;
+//    cerr<<"ROTATE:  I've accepted " << NumAccepted << " " << NumMoves+1 <<endl;
     NumAccepted++;
     total_r_squared += 2*(1-cos(theta));
   }
   else {
     PathData.RejectMove(startSlice,endSlice,ActiveParticles);
-    //cerr<<"ROTATE:  I've rejected"<<endl;
+//    cerr<<"ROTATE:  I've rejected"<<endl;
   }
   NumMoves++;
   if (NumMoves%10000 == 0){

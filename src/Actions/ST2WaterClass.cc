@@ -10,7 +10,8 @@ ST2WaterClass::ST2WaterClass (PathDataClass &pathData) :
 double ST2WaterClass::Action (int startSlice, int endSlice, 
 	       const Array<int,1> &activeParticles, int level)
 {
-//  cerr << "I'm calculating the Action" << endl;
+//cerr << "I'm calculating the Action" << endl;
+//cerr << "Looping over slices " << startSlice << " to " << endSlice << endl;
   for (int counter=0;counter<Path.DoPtcl.size();counter++){
     Path.DoPtcl(counter)=true;
   }
@@ -46,6 +47,7 @@ double ST2WaterClass::Action (int startSlice, int endSlice,
 	if (Path.DoPtcl(ptcl2)){
 //          int PairIndex = PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2));
 	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
+//cerr << "in slice loop: on slice " << slice << endl;
 	    dVec r, rp;
 	    double rmag, rpmag;
 	    PathData.Path.DistDisp(slice, ptcl1, ptcl2, rmag, r);
@@ -63,7 +65,7 @@ double ST2WaterClass::Action (int startSlice, int endSlice,
               double x = (rmag-2.85)*angstrom_to_m;
               double quad = 0.5*mass*omega*omega*x*x;
 //              TotalU += quad;
-//	      cerr << "lj  " << lj << " at distance " << rmag << endl;
+//	      cerr << "lj  " << lj << " at distance " << rmag << " for slice " << slice << endl;
             }
 	  }
 	}
@@ -121,13 +123,14 @@ double ST2WaterClass::Action (int startSlice, int endSlice,
   
   }
   double TotalU_times_tau = TotalU*PathData.Path.tau;
-//  cerr << TotalU << " and times tau " << TotalU_times_tau << " at temp " << 1.0/PathData.Path.tau << endl;
-//  cerr << "I'm returning ST2 action " << TotalU_times_tau << endl;
+//cerr << TotalU << " and times tau " << TotalU_times_tau << " at temp " << 1.0/PathData.Path.tau << endl;
+//cerr << "I'm returning ST2 action " << TotalU_times_tau << endl;
   return (TotalU_times_tau);
 }
 
 double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 {
+//cerr << "I was given slices " << startSlice << " and " << endSlice << endl;
   double thermal = 6/PathData.Path.tau;
   Array<int,1> activeParticles(PathData.Path.NumParticles());
   for (int i=0;i<PathData.Path.NumParticles();i++){

@@ -23,9 +23,9 @@ void ModifiedEnergyClass::Accumulate()
   int slice2 = PathData.Path.NumTimeSlices()-1;
   tip5p = PathData.Actions.TIP5PWater.d_dBeta(slice1,slice2,0);
   st2 = PathData.Actions.ST2Water.d_dBeta(slice1,slice2,0);
-  p2rotkin = PathData.Actions.TIP5PWater.NewRotKinEnergy(slice1,slice2,0); // Calculates psi; should return 1/2 kT
-  rotkin = PathData.Actions.TIP5PWater.RotationalEnergy(slice1,slice2,0);  // Calculates phi and theta; should return kT
-// Fixed Axis  rotkin = PathData.Actions.TIP5PWater.FixedAxisEnergy(slice1,slice2,0);
+  p2rotkin = PathData.Actions.TIP5PWater.NewRotKinEnergy(slice1,slice2,0); // Calculates angles; should return 3/2 kT
+  //rotkin = PathData.Actions.TIP5PWater.RotationalEnergy(slice1,slice2,0);  // Calculates phi and theta; should return kT
+  rotkin = PathData.Actions.TIP5PWater.FixedAxisEnergy(slice1,slice2,0); //Fixed Axis
 //  p2rotkin = PathData.Actions.TIP5PWater.SecondProtonKineticEnergy(slice1,slice2,0);
 
   TotalSum   += kinetic + dUShort + dULong + node + st2;// +tip5p + rotkin;
@@ -93,6 +93,7 @@ void ModifiedEnergyClass::ShiftData (int NumTimeSlices)
 void ModifiedEnergyClass::WriteBlock()
 {
   int nslices=PathData.Path.TotalNumSlices;
+cerr << "okay nslices is " << nslices << endl;
   double norm = 1.0/((double)NumSamples*(double)nslices);
 
 // NORMALIZE BY NUMBER OF MOLECULES *******

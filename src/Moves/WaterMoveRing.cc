@@ -110,7 +110,8 @@ void WaterTranslateRing::MakeMove()
   }
 //  cerr << "OLD ";
   double oldAction = 0.0;
- oldAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
+ oldAction += PathData.Actions.ST2Water.Action(startSlice,endSlice,ActiveParticles,0);
+// oldAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
 //  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
   
   dVec move = Translate(step); 
@@ -127,7 +128,8 @@ void WaterTranslateRing::MakeMove()
  
 //  cerr << "NEW " ; 
   double newAction = 0.0;
- newAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
+ newAction += PathData.Actions.ST2Water.Action(startSlice,endSlice,ActiveParticles,0);
+// newAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
 //  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //  cerr<<"TRANSLATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
@@ -188,7 +190,8 @@ void WaterRotateRing::MakeMove()
 *************************************************************/
 //  cerr << "OLD " ;
   double oldAction = 0.0;
- oldAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
+ oldAction += PathData.Actions.ST2Water.Action(startSlice,endSlice,ActiveParticles,0);
+// oldAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
   oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 
   int x,y;
@@ -227,7 +230,8 @@ void WaterRotateRing::MakeMove()
  *************************************************************/
 //  cerr << "NEW " ;
   double newAction = 0.0;
-newAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
+newAction += PathData.Actions.ST2Water.Action(startSlice,endSlice,ActiveParticles,0);
+//newAction += PathData.Actions.TIP5PWater.Action(startSlice,endSlice,ActiveParticles,0);
   newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //  cerr<<"ROTATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
  
