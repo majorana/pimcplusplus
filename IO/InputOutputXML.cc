@@ -308,6 +308,32 @@ VarXMLClass *NewXMLVar (AtomicType newType, int ndim,
 	return newVar;
       }
   }  
+  else if (ndim == 4) {
+    if (newType == DOUBLE_TYPE)
+      {
+	VarXMLdouble4Class *newVar = new VarXMLdouble4Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2), dims(3));
+	return newVar;
+      }
+    else if (newType == INT_TYPE)
+      {
+	VarXMLint4Class *newVar = new VarXMLint4Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2), dims(3));
+	return newVar;
+      }
+    else if (newType == STRING_TYPE)
+      {
+	VarXMLstring4Class *newVar = new VarXMLstring4Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2), dims(3));
+	return newVar;
+      }
+    else if (newType == BOOL_TYPE)
+      {
+	VarXMLbool4Class *newVar = new VarXMLbool4Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2), dims(3));
+	return newVar;
+      }
+  }  
 }
 
 
@@ -473,6 +499,25 @@ void VarXMLdouble3Class::ReadVals(list<string> &vals)
       }
 }
 
+void VarXMLdouble4Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) 
+      for (int k=0; k<Value.extent(2); k++)
+	for (int l=0; l<Value.extent(3); l++) {
+	  Value(i,j,k,l) = StrToDouble(*iter);
+	  iter++;
+	}
+}
+
 
 void VarXMLint0Class::ReadVals(list<string> &vals)
 {
@@ -533,6 +578,25 @@ void VarXMLint3Class::ReadVals(list<string> &vals)
 	Value(i,j,k) = StrToInt(*iter);
 	iter++;
       }
+}
+
+void VarXMLint4Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) 
+      for (int k=0; k<Value.extent(2); k++)
+	for (int l=0; l<Value.extent(3); l++){
+	  Value(i,j,k,l) = StrToInt(*iter);
+	  iter++;
+	}
 }
 
 
@@ -599,6 +663,26 @@ void VarXMLstring3Class::ReadVals(list<string> &vals)
 }
 
 
+void VarXMLstring4Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of ints in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) 
+      for (int k=0; k<Value.extent(2); k++)
+	for (int l=0; l<Value.extent(3); l++){
+	  Value(i,j,k,l) = StrToString(*iter);
+	  iter++;
+	}
+}
+
+
 
 void VarXMLbool0Class::ReadVals(list<string> &vals)
 {
@@ -646,6 +730,24 @@ void VarXMLbool2Class::ReadVals(list<string> &vals)
 void VarXMLbool3Class::ReadVals(list<string> &vals)
 {
   if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of bools in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) 
+      for (int k=0; k<Value.extent(2); k++) {
+	Value(i,j,k) = StrToBool(*iter);
+	iter++;
+      }
+}
+
+void VarXMLbool4Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
     cerr << "Wrong number of ints in XML parser for variable "
 	 << Name << endl;
     cerr << "Expected " << Value.size() << ", but got " 
@@ -655,10 +757,11 @@ void VarXMLbool3Class::ReadVals(list<string> &vals)
   list<string>::iterator iter = vals.begin();
   for (int i=0; i<Value.extent(0); i++) 
     for (int j=0; j<Value.extent(1); j++) 
-      for (int k=0; k<Value.extent(2); k++){
-	Value(i,j,k) = StrToBool(*iter);
-	iter++;
-      }
+      for (int k=0; k<Value.extent(2); k++)
+	for (int l=0; l<Value.extent(3); l++){
+	  Value(i,j,k,l) = StrToBool(*iter);
+	  iter++;
+	}
 }
 
 
@@ -865,11 +968,15 @@ bool VarXMLClass::ReadInto (Array<double,2> &val)
 { ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (Array<double,3> &val)
 { ComplainReadInto(); return false; }
+bool VarXMLClass::ReadInto (Array<double,4> &val)
+{ ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (Array<int,1> &val)
 { ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (Array<int,2> &val)
 { ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (Array<int,3> &val)
+{ ComplainReadInto(); return false; }
+bool VarXMLClass::ReadInto (Array<int,4> &val)
 { ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (Array<string,1> &val)
 { ComplainReadInto(); return false; }
@@ -877,11 +984,15 @@ bool VarXMLClass::ReadInto (Array<string,2> &val)
 { ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (Array<string,3> &val)
 { ComplainReadInto(); return false; }
+bool VarXMLClass::ReadInto (Array<string,4> &val)
+{ ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (Array<bool,1> &val)
 { ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (Array<bool,2> &val)
 { ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (Array<bool,3> &val)
+{ ComplainReadInto(); return false; }
+bool VarXMLClass::ReadInto (Array<bool,4> &val)
 { ComplainReadInto(); return false; }
 
 bool VarXMLClass::Append (double val)
@@ -896,17 +1007,25 @@ bool VarXMLClass::Append (Array<double,1> &val)
 { ComplainAppend(); return false; }
 bool VarXMLClass::Append (Array<double,2> &val)
 { ComplainAppend(); return false; }
+bool VarXMLClass::Append (Array<double,3> &val)
+{ ComplainAppend(); return false; }
 bool VarXMLClass::Append (Array<int,1> &val)
 { ComplainAppend(); return false; }
 bool VarXMLClass::Append (Array<int,2> &val)
+{ ComplainAppend(); return false; }
+bool VarXMLClass::Append (Array<int,3> &val)
 { ComplainAppend(); return false; }
 bool VarXMLClass::Append (Array<string,1> &val)
 { ComplainAppend(); return false; }
 bool VarXMLClass::Append (Array<string,2> &val)
 { ComplainAppend(); return false; }
+bool VarXMLClass::Append (Array<string,3> &val)
+{ ComplainAppend(); return false; }
 bool VarXMLClass::Append (Array<bool,1> &val)
 { ComplainAppend(); return false; }
 bool VarXMLClass::Append (Array<bool,2> &val)
+{ ComplainAppend(); return false; }
+bool VarXMLClass::Append (Array<bool,3> &val)
 { ComplainAppend(); return false; }
 
 
@@ -923,14 +1042,21 @@ bool VarXMLdouble1Class::ReadInto (Array<double,1> &val)
 bool VarXMLdouble2Class::ReadInto (Array<double,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarXMLdouble3Class::ReadInto (Array<double,3> &val)
-{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; return true; }
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
+  val = Value; return true; }
+bool VarXMLdouble4Class::ReadInto (Array<double,4> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
+  val = Value; return true; }
 bool VarXMLint1Class::ReadInto (Array<int,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
 bool VarXMLint2Class::ReadInto (Array<int,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarXMLint3Class::ReadInto (Array<int,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
- val = Value; return true; }
+  val = Value; return true; }
+bool VarXMLint4Class::ReadInto (Array<int,4> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
+  val = Value; return true; }
 bool VarXMLstring1Class::ReadInto (Array<string,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
 bool VarXMLstring2Class::ReadInto (Array<string,2> &val)
@@ -938,12 +1064,18 @@ bool VarXMLstring2Class::ReadInto (Array<string,2> &val)
 bool VarXMLstring3Class::ReadInto (Array<string,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
  val = Value; return true; }
+bool VarXMLstring4Class::ReadInto (Array<string,4> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
+ val = Value; return true; }
 bool VarXMLbool1Class::ReadInto (Array<bool,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
 bool VarXMLbool2Class::ReadInto (Array<bool,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarXMLbool3Class::ReadInto (Array<bool,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
+ val = Value; return true; }
+bool VarXMLbool4Class::ReadInto (Array<bool,4> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
  val = Value; return true; }
 
 
@@ -995,6 +1127,17 @@ bool VarXMLdouble3Class::Append (Array<double,2> &val)
   Value(n,Range::all(),Range::all()) = val;
   return(true);
 }
+bool VarXMLdouble4Class::Append (Array<double,3> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); 
+  int o=Value.extent(2); int p=Value.extent(3);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  assert(val.extent(2) == p);
+  Value.resizeAndPreserve(n+1,m,o,p);
+  Value(n,Range::all(),Range::all(),Range::all()) = val;
+  return(true);
+}
 bool VarXMLint2Class::Append (Array<int,1> &val)
 {
   int n = Value.extent(0);  int m = Value.extent(1);
@@ -1010,6 +1153,17 @@ bool VarXMLint3Class::Append (Array<int,2> &val)
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
   Value(n,Range::all(),Range::all()) = val;
+  return(true);
+}
+bool VarXMLint4Class::Append (Array<int,3> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); 
+  int o=Value.extent(2); int p=Value.extent(3);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  assert(val.extent(2) == p);
+  Value.resizeAndPreserve(n+1,m,o,p);
+  Value(n,Range::all(),Range::all(),Range::all()) = val;
   return(true);
 }
 bool VarXMLstring2Class::Append (Array<string,1> &val)
@@ -1029,6 +1183,17 @@ bool VarXMLstring3Class::Append (Array<string,2> &val)
   Value(n,Range::all(),Range::all()) = val;
   return(true);
 }
+bool VarXMLstring4Class::Append (Array<string,3> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); 
+  int o=Value.extent(2); int p=Value.extent(3);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  assert(val.extent(1) == p);
+  Value.resizeAndPreserve(n+1,m,o,p);
+  Value(n,Range::all(),Range::all(),Range::all()) = val;
+  return(true);
+}
 bool VarXMLbool2Class::Append (Array<bool,1> &val)
 {
   int n = Value.extent(0);  int m = Value.extent(1);
@@ -1044,6 +1209,17 @@ bool VarXMLbool3Class::Append (Array<bool,2> &val)
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
   Value(n,Range::all(),Range::all()) = val;
+  return(true);
+}
+bool VarXMLbool4Class::Append (Array<bool,3> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); 
+  int o=Value.extent(2); int p=Value.extent(3);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  assert(val.extent(2) == p);
+  Value.resizeAndPreserve(n+1,m,o,p);
+  Value(n,Range::all(),Range::all(),Range::all()) = val;
   return(true);
 }
 
@@ -1088,6 +1264,24 @@ void VarXMLdouble3Class::Print (ofstream &outFile)
   outFile << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) 
 	  << "];\n";
 }
+void VarXMLdouble4Class::Print (ofstream &outFile)
+{
+  outFile << "Array<double,4> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << "," 
+	  << Value.extent(2) << ","
+	  << Value.extent(3) <<") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+	for (int l=0; l<(Value.extent(3)); l++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	  || (k<(Value.extent(2)-1)) || (l<(Value.extent(3)-1)))
+	outFile << Value(i,j,k,l) << ", ";
+  outFile << Value(Value.extent(0)-1,Value.extent(1)-1,
+		   Value.extent(2)-1,Value.extent(3)-1) 
+	  << "];\n";
+}
 void VarXMLint1Class::Print (ofstream &outFile)
 {
   outFile << "Array<int,1> " << Name 
@@ -1119,6 +1313,25 @@ void VarXMLint3Class::Print (ofstream &outFile)
 	  || (k<(Value.extent(2)-1)))
 	outFile << Value(i,j,k) << ", ";
   outFile << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) 
+	  << "];\n";
+}
+void VarXMLint4Class::Print (ofstream &outFile)
+{
+  outFile << "Array<int,4> " << Name
+	  << "(" 
+	  << Value.extent(0) << "," 
+	  << Value.extent(1) << "," 
+	  << Value.extent(2) << ","
+	  << Value.extent(3) <<") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+	for (int l=0; l<(Value.extent(3)); l++)
+	  if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	      || (k<(Value.extent(2)-1)) || (l<(Value.extent(3)-1)))
+	    outFile << Value(i,j,k,l) << ", ";
+  outFile << Value(Value.extent(0)-1,Value.extent(1)-1,
+		   Value.extent(2)-1,Value.extent(3)-1) 
 	  << "];\n";
 }
 void VarXMLstring1Class::Print (ofstream &outFile)
@@ -1155,6 +1368,26 @@ void VarXMLstring3Class::Print (ofstream &outFile)
 	  << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) 
 	  << "\"];\n";
 }
+void VarXMLstring4Class::Print (ofstream &outFile)
+{
+  outFile << "Array<string,4> " << Name
+	  << "(" 
+	  << Value.extent(0) << "," 
+	  << Value.extent(1) << "," 
+	  << Value.extent(2) << ","
+	  << Value.extent(3) <<") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+	for (int l=0; l<(Value.extent(3)); l++)
+	  if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	      || (k<(Value.extent(2)-1)) || (l<(Value.extent(3)-1)))
+	    outFile << "\"" << Value(i,j,k,l) << "\", ";
+  outFile << "\"" << Value(Value.extent(0)-1,Value.extent(1)-1,
+		   Value.extent(2)-1,Value.extent(3)-1) 
+	  << "\"];\n";
+}
+
 void VarXMLbool1Class::Print (ofstream &outFile)
 {
   outFile << "Array<bool,1> " << Name 
@@ -1185,7 +1418,25 @@ void VarXMLbool3Class::Print (ofstream &outFile)
       for (int k=0; k<(Value.extent(2)); k++)
       if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
 	  || (k<(Value.extent(2)-1)))
-	outFile << Value(i,j,k) << ", ";
+	outFile << (Value(i,j,k) ? "true" : "false") << ", ";
+  outFile << (Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) ?
+	      "true" : "false") << "];\n";
+}
+void VarXMLbool4Class::Print (ofstream &outFile)
+{
+  outFile << "Array<bool,4> " << Name
+	  << "(" 
+	  << Value.extent(0) << "," 
+	  << Value.extent(1) << "," 
+	  << Value.extent(2) << ","
+	  << Value.extent(3) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+	for (int l=0; l<(Value.extent(3)); l++)
+	  if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	      || (k<(Value.extent(2)-1)) || (l<(Value.extent(3)-1)))
+	    outFile << (Value(i,j,k,l) ? "true" : "false") << ", ";
   outFile << (Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) ?
 	      "true" : "false") << "];\n";
 }
@@ -1233,6 +1484,16 @@ void IOTreeXMLClass::WriteVar(string name, Array<double,3> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
+void IOTreeXMLClass::WriteVar(string name, Array<double,4> &val)
+{
+  VarXMLdouble4Class *newVar = new VarXMLdouble4Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), 
+		       val.extent(2), val.extent(3));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+  MarkModified();
+}
 
 void IOTreeXMLClass::WriteVar(string name, int val)
 {
@@ -1265,6 +1526,16 @@ void IOTreeXMLClass::WriteVar(string name, Array<int,3> &val)
   VarXMLint3Class *newVar = new VarXMLint3Class;
   newVar->Name=name;
   newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+  MarkModified();
+}
+void IOTreeXMLClass::WriteVar(string name, Array<int,4> &val)
+{
+  VarXMLint4Class *newVar = new VarXMLint4Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), 
+		       val.extent(2), val.extent(3));
   newVar->Value=val;
   VarList.push_back(newVar);
   MarkModified();
@@ -1305,6 +1576,16 @@ void IOTreeXMLClass::WriteVar(string name, Array<string,3> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
+void IOTreeXMLClass::WriteVar(string name, Array<string,4> &val)
+{
+  VarXMLstring4Class *newVar = new VarXMLstring4Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), 
+		       val.extent(2), val.extent(3));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+  MarkModified();
+}
  
 void IOTreeXMLClass::WriteVar(string name, bool val)
 {
@@ -1337,6 +1618,16 @@ void IOTreeXMLClass::WriteVar(string name, Array<bool,3> &val)
   VarXMLbool3Class *newVar = new VarXMLbool3Class;
   newVar->Name=name;
   newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+  MarkModified();
+}
+void IOTreeXMLClass::WriteVar(string name, Array<bool,4> &val)
+{
+  VarXMLbool4Class *newVar = new VarXMLbool4Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), 
+		       val.extent(2), val.extent(3));
   newVar->Value=val;
   VarList.push_back(newVar);
   MarkModified();

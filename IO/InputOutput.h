@@ -163,6 +163,8 @@ public:
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, Array<double,3> &val)
   { CurrentSection->WriteVar(name, val); }
+  inline void WriteVar (string name, Array<double,4> &val)
+  { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, int val)
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, Array<int,1> &val)
@@ -171,6 +173,8 @@ public:
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, Array<int,3> &val)
   { CurrentSection->WriteVar(name, val); }
+  inline void WriteVar (string name, Array<int,4> &val)
+  { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, bool val)
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, Array<bool,1> &val)
@@ -178,6 +182,8 @@ public:
   inline void WriteVar (string name, Array<bool,2> &val)
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, Array<bool,3> &val)
+  { CurrentSection->WriteVar(name, val); }
+  inline void WriteVar (string name, Array<bool,4> &val)
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, const char *val)
   { CurrentSection->WriteVar(name, (string)val);}
@@ -189,7 +195,8 @@ public:
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, Array<string,3> &val)
   { CurrentSection->WriteVar(name, val); }
-
+  inline void WriteVar (string name, Array<string,4> &val)
+  { CurrentSection->WriteVar(name, val); }
   
   template<class T>
   bool AppendVar(string name, T val)

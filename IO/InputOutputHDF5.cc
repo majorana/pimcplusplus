@@ -45,6 +45,15 @@ bool VarHDF5Class::ReadInto (Array<double,3> &val)
 			  H5S_ALL, H5P_DEFAULT, val.data());
   return (status == 0);
 }
+bool VarHDF5Class::ReadInto (Array<double,4> &val)
+{
+  assert (Type == DOUBLE_TYPE);
+  assert (Dimensions.size() == 4);
+  val.resize(Dimensions(0), Dimensions(1), Dimensions(2), Dimensions(3));
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_DOUBLE, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, val.data());
+  return (status == 0);
+}
  
 bool VarHDF5Class::ReadInto (int &val)
 {
@@ -80,6 +89,16 @@ bool VarHDF5Class::ReadInto (Array<int,3> &val)
   assert (Type == INT_TYPE);
   assert (Dimensions.size() == 3);
   val.resize(Dimensions(0), Dimensions(1), Dimensions(2));
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_INT, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, val.data());
+  return (status == 0);
+}
+
+bool VarHDF5Class::ReadInto (Array<int,4> &val)
+{
+  assert (Type == INT_TYPE);
+  assert (Dimensions.size() == 4);
+  val.resize(Dimensions(0), Dimensions(1), Dimensions(2), Dimensions(3));
   herr_t status = H5Dread(DataSetID, H5T_NATIVE_INT, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, val.data());
   return (status == 0);
@@ -159,6 +178,27 @@ bool VarHDF5Class::ReadInto (Array<string,3> &val)
   return (status == 0);
 }
 
+bool VarHDF5Class::ReadInto (Array<string,4> &val)
+{
+  assert (Type == STRING_TYPE);
+  assert (Dimensions.size() == 4);
+  val.resize(Dimensions(0), Dimensions(1), Dimensions(2), Dimensions(3));
+  hid_t type = H5Dget_type(DataSetID);
+  size_t length = H5Tget_size(type);
+
+  Array<char,5> charArray(Dimensions(0),Dimensions(1),
+			  Dimensions(2),Dimensions(3),length);
+  herr_t status = H5Dread(DataSetID, type, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, charArray.data());
+  for (int i=0; i<Dimensions(0);i++)
+    for (int j=0; j<Dimensions(1);j++)
+      for (int k=0; k<Dimensions(2);k++)
+	for (int l=0; l<Dimensions(3);l++)
+	  val(i,j,k,l) = &(charArray(i,j,k,l,0));
+  H5Tclose(type);
+  return (status == 0);
+}
+
 
 bool VarHDF5Class::ReadInto (bool &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
@@ -170,6 +210,9 @@ bool VarHDF5Class::ReadInto (Array<bool,2> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
 bool VarHDF5Class::ReadInto (Array<bool,3> &val)
+{ cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
+
+bool VarHDF5Class::ReadInto (Array<bool,4> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
 
@@ -259,6 +302,51 @@ bool VarHDF5Class::Append(Array<double,1> &val)
 bool VarHDF5Class::Append(Array<double,2> &val)
 {
   int RANK = 3;
+
+  if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
+    cerr << "Trying to append a double to a non Array<double,1>.  Exitting.\n";
+    return false;
+  }
+
+  for (int i=1; i<RANK; i++)
+    if (Dimensions(i)!=val.extent(i-1)) {
+      cerr << "Dimension mismatch in appending to Array<double,2>.\n";
+      return false;
+    }
+
+  hid_t memSpace;
+  // Extend the dataset
+  Dimensions(0)++;
+
+  hsize_t maxdim[RANK], size[RANK];
+  hssize_t offset[RANK];
+  offset[0] = Dimensions(0)-1;
+  size[0] = 1;
+  maxdim[0] = H5S_UNLIMITED;
+  for (int i=1; i<RANK; i++) {
+    offset[i] = 0;
+    size[i] = Dimensions(i);
+    maxdim[i] = Dimensions(i);
+  }
+
+  H5Dextend(DataSetID, Dimensions.data());
+  H5Sset_extent_simple(DataSpaceID, RANK, Dimensions.data(), maxdim);
+
+  /// Select which part of the file to write to
+  H5Sselect_hyperslab(DataSpaceID, H5S_SELECT_SET, offset, NULL,
+		      size, NULL);
+  memSpace = H5Screate_simple (RANK, size, NULL);
+  /// Write the new data
+  H5Dwrite (DataSetID, H5T_NATIVE_DOUBLE, memSpace, DataSpaceID,
+  	    H5P_DEFAULT, val.data());
+  H5Sclose (memSpace);
+  return (true);
+}
+
+
+bool VarHDF5Class::Append(Array<double,3> &val)
+{
+  int RANK = 4;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append a double to a non Array<double,1>.  Exitting.\n";
@@ -426,6 +514,54 @@ bool VarHDF5Class::Append(Array<int,2> &val)
   H5Sclose (memSpace);
   return (true);
 }
+
+
+
+bool VarHDF5Class::Append(Array<int,3> &val)
+{
+  int RANK = 4;
+
+  if ((Type != INT_TYPE) || (Dim != RANK)) {
+    cerr << "Trying to append a int to a non Array<int,1>.  Exitting.\n";
+    return false;
+  }
+
+  for (int i=1; i<RANK; i++)
+    if (Dimensions(i)!=val.extent(i-1)) {
+      cerr << "Dimension mismatch in appending to Array<int,2>.\n";
+      return false;
+    }
+
+  hid_t memSpace;
+  // Extend the dataset
+  Dimensions(0)++;
+
+  hsize_t maxdim[RANK], size[RANK];
+  hssize_t offset[RANK];
+  offset[0] = Dimensions(0)-1;
+  size[0] = 1;
+  maxdim[0] = H5S_UNLIMITED;
+  for (int i=1; i<RANK; i++) {
+    offset[i] = 0;
+    size[i] = Dimensions(i);
+    maxdim[i] = Dimensions(i);
+  }
+
+  H5Dextend(DataSetID, Dimensions.data());
+  H5Sset_extent_simple(DataSpaceID, RANK, Dimensions.data(), maxdim);
+
+  /// Select which part of the file to write to
+  H5Sselect_hyperslab(DataSpaceID, H5S_SELECT_SET, offset, NULL,
+		      size, NULL);
+  memSpace = H5Screate_simple (RANK, size, NULL);
+  /// Write the new data
+  H5Dwrite (DataSetID, H5T_NATIVE_INT, memSpace, DataSpaceID,
+  	    H5P_DEFAULT, val.data());
+  H5Sclose (memSpace);
+  return (true);
+}
+
+
 
 bool VarHDF5Class::Append(string val)
 {
@@ -599,6 +735,73 @@ bool VarHDF5Class::Append(Array<string,2> &strs)
 }
 
 
+bool VarHDF5Class::Append(Array<string,3> &strs)
+{
+  int RANK = 4;
+  if ((Type != STRING_TYPE) || (Dim != RANK)) {
+    cerr << "Trying to append a string to a non Array<string,1>.  Exitting.\n";
+    return false;
+  }
+
+  for (int i=1; i<RANK; i++)
+    if (Dimensions(i)!=strs.extent(i-1)) {
+      cerr << "Dimension mismatch in appending to Array<string,2>.\n";
+      return false;
+    }
+
+  // Copy strings over into a character array
+  Array<char,4> charArray(strs.extent(0),strs.extent(1), strs.extent(2),
+			  MAX_HDF5_STRING_LENGTH+1);
+
+  for (int i=0; i<strs.extent(0); i++)
+    for (int j=0; j<strs.extent(1); j++)
+      for (int k=0; k<strs.extent(2); k++)
+	{
+	  for (int x=0; 
+	       (x<strs(i,j,k).length()) && (x < MAX_HDF5_STRING_LENGTH); 
+	       x++) 
+	    charArray(i,j,k,x) = (strs(i,j,k))[x];
+	  int x = strs(i,j,k).length();
+	  if (x > MAX_HDF5_STRING_LENGTH)
+	    x = MAX_HDF5_STRING_LENGTH;
+	  charArray(i,j,k,x) = '\0';
+	}
+  
+  
+  hid_t strType = H5Tcopy (H5T_C_S1);
+  H5Tset_size (strType, MAX_HDF5_STRING_LENGTH+1);
+
+  hid_t memSpace;
+  // Extend the dataset
+  Dimensions(0)++;
+
+  hsize_t maxdim[RANK], size[RANK];
+  hssize_t offset[RANK];
+  offset[0] = Dimensions(0)-1;
+  size[0] = 1;
+  maxdim[0] = H5S_UNLIMITED;
+  for (int i=1; i<RANK; i++) {
+    offset[i] = 0;
+    size[i] = Dimensions(i);
+    maxdim[i] = Dimensions(i);
+  }
+
+  H5Dextend(DataSetID, Dimensions.data());
+  H5Sset_extent_simple(DataSpaceID, RANK, Dimensions.data(), maxdim);
+
+  /// Select which part of the file to write to
+  H5Sselect_hyperslab(DataSpaceID, H5S_SELECT_SET, offset, NULL,
+		      size, NULL);
+  memSpace = H5Screate_simple (RANK, size, NULL);
+  /// Write the new data
+  H5Dwrite (DataSetID, strType, memSpace, DataSpaceID,
+  	    H5P_DEFAULT,charArray.data());
+  H5Sclose (memSpace);
+  return (true);
+}
+
+
+
 bool VarHDF5Class::Append(bool val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
@@ -606,6 +809,9 @@ bool VarHDF5Class::Append(Array<bool,1> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
 bool VarHDF5Class::Append(Array<bool,2> &val)
+{ cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
+
+bool VarHDF5Class::Append(Array<bool,3> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
 /************************************************************
@@ -1171,6 +1377,62 @@ void IOTreeHDF5Class::WriteVar(string name, Array<double,3> &v)
 
 
 
+void IOTreeHDF5Class::WriteVar(string name, Array<double,4> &v)
+{
+  int RANK=4;
+  /// Create new variable
+  VarHDF5Class *newVar = new VarHDF5Class;
+  newVar->Name = name;
+  newVar->Type = DOUBLE_TYPE;
+  newVar->Dim = RANK;
+  newVar->Dimensions.resize(RANK);
+  for (int i=0; i<RANK; i++)
+    newVar->Dimensions(i) = v.extent(i);
+
+  /// Add it to the list
+  VarList.push_back(newVar);
+
+  // Now do HDF5 stuff
+  hid_t dataspace_id, status, DSprops;
+
+  hsize_t dim[RANK], maxdim[RANK];
+  for(int i=0; i<RANK; i++)
+    dim[i] = v.extent(i);
+  // First dimension can be extended indefinitely
+  maxdim[0] = H5S_UNLIMITED;
+  
+  // Rest of dimensions can't be extended
+  for(int i=1; i<RANK; i++)
+    maxdim[i] = v.extent(i);
+
+  newVar->DataSpaceID = H5Screate_simple(RANK, dim, maxdim);
+  DSprops = H5Pcreate (H5P_DATASET_CREATE);
+  /// Chunk_dims tells us how big of chunks to allocate in the file at
+  /// a time.
+  hsize_t chunk_dims[RANK];
+  chunk_dims[0]=30;
+  for (int i=1;i<RANK;i++)
+    chunk_dims[i]=v.extent(i);
+
+  status = H5Pset_chunk(DSprops, RANK, chunk_dims);  
+  assert(status>=0);
+ 
+  // Actually create the dataspace
+  newVar->DataSetID = H5Dcreate(GroupID, name.c_str(),
+				H5T_NATIVE_DOUBLE, newVar->DataSpaceID,
+				DSprops);
+  ///Extend dataset to size of v
+  status=H5Dextend(newVar->DataSetID,dim); 
+  assert(status>=0);
+  // Do the writing.
+  status = H5Dwrite(newVar->DataSetID, H5T_NATIVE_DOUBLE, 
+		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+  if (status < 0)
+    cerr << "Error writing double to HDF5 file in WriteVar.\n";
+}
+
+
+
 
 void IOTreeHDF5Class::WriteVar(string name, int T)
 {
@@ -1367,6 +1629,59 @@ void IOTreeHDF5Class::WriteVar(string name, Array<int,3> &v)
 
 
 
+void IOTreeHDF5Class::WriteVar(string name, Array<int,4> &v)
+{
+  int RANK=4;
+  /// Create new variable
+  VarHDF5Class *newVar = new VarHDF5Class;
+  newVar->Name = name;
+  newVar->Type = INT_TYPE;
+  newVar->Dim = RANK;
+  newVar->Dimensions.resize(RANK);
+  for (int i=0; i<RANK; i++)
+    newVar->Dimensions(i) = v.extent(i);
+
+  /// Add it to the list
+  VarList.push_back(newVar);
+
+  // Now do HDF5 stuff
+  hid_t dataspace_id, status, DSprops;
+
+  hsize_t dim[RANK], maxdim[RANK];
+  for(int i=0; i<RANK; i++)
+    dim[i] = v.extent(i);
+  // First dimension can be extended indefinitely
+  maxdim[0] = H5S_UNLIMITED;
+  
+  // Rest of dimensions can't be extended
+  for(int i=1; i<RANK; i++)
+    maxdim[i] = v.extent(i);
+
+  newVar->DataSpaceID = H5Screate_simple(RANK, dim, maxdim);
+  DSprops = H5Pcreate (H5P_DATASET_CREATE);
+  /// Chunk_dims tells us how big of chunks to allocate in the file at
+  /// a time.
+  hsize_t chunk_dims[RANK];
+  chunk_dims[0]=30;
+  for (int i=1;i<RANK;i++)
+    chunk_dims[i]=v.extent(i);
+
+  status = H5Pset_chunk(DSprops, RANK, chunk_dims);  
+  assert(status>=0);
+ 
+  // Actually create the dataspace
+  newVar->DataSetID = H5Dcreate(GroupID, name.c_str(),
+				H5T_NATIVE_INT, newVar->DataSpaceID,
+				DSprops);
+  ///Extend dataset to size of v
+  status=H5Dextend(newVar->DataSetID,dim); 
+  assert(status>=0);
+  // Do the writing.
+  status = H5Dwrite(newVar->DataSetID, H5T_NATIVE_INT, 
+		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+  if (status < 0)
+    cerr << "Error writing int to HDF5 file in WriteVar.\n";
+}
 
 
 
@@ -1637,6 +1952,82 @@ void IOTreeHDF5Class::WriteVar(string name, Array<string,3> &strs)
 
 
 
+void IOTreeHDF5Class::WriteVar(string name, Array<string,4> &strs)
+{
+  int RANK=4;
+  /// Create new variable
+  VarHDF5Class *newVar = new VarHDF5Class;
+  newVar->Name = name;
+  newVar->Type = STRING_TYPE;
+  newVar->Dim = RANK;
+  newVar->Dimensions.resize(RANK);
+  for (int i=0; i<RANK; i++)
+    newVar->Dimensions(i) = strs.extent(i);
+
+  /// Add it to the list
+  VarList.push_back(newVar);
+
+  // Copy strings over into a character array
+  Array<char,5> charArray(strs.extent(0), strs.extent(1), strs.extent(2),
+			  strs.extent(3), MAX_HDF5_STRING_LENGTH+1);
+  for (int i=0; i<strs.extent(0); i++)
+    for (int j=0; j<strs.extent(1); j++)
+      for (int k=0; k<strs.extent(2); k++)
+	for (int l=0; l<strs.extent(3); l++) {
+	  for (int x=0; 
+	       (x<strs(i,j,k,l).length()) && (x < MAX_HDF5_STRING_LENGTH); 
+	       x++) 
+	    charArray(i,j,k,l,x) = (strs(i,j,k,l))[x];
+	  int x = strs(i,j,k,l).length();
+	  if (x > MAX_HDF5_STRING_LENGTH)
+	    x = MAX_HDF5_STRING_LENGTH;
+	  charArray(i,j,k,l,x) = '\0';
+	}
+  
+  // Now do HDF5 stuff
+  hid_t dataspace_id, status, DSprops;
+
+  hsize_t dim[RANK], maxdim[RANK];
+  for(int i=0; i<RANK; i++)
+    dim[i] = strs.extent(i);
+  // First dimension can be extended indefinitely
+  maxdim[0] = H5S_UNLIMITED;
+  
+  // Rest of dimensions can't be extended
+  for(int i=1; i<RANK; i++)
+    maxdim[i] = strs.extent(i);
+
+  newVar->DataSpaceID = H5Screate_simple(RANK, dim, maxdim);
+  hid_t strType = H5Tcopy (H5T_C_S1);
+  H5Tset_size (strType, MAX_HDF5_STRING_LENGTH+1);
+  DSprops = H5Pcreate (H5P_DATASET_CREATE);
+  /// Chunk_dims tells us how big of chunks to allocate in the file at
+  /// a time.
+  hsize_t chunk_dims[RANK];
+  chunk_dims[0]=30;
+  for (int i=1;i<RANK;i++)
+    chunk_dims[i]=strs.extent(i);
+
+  status = H5Pset_chunk(DSprops, RANK, chunk_dims);  
+  assert(status>=0);
+ 
+  // Actually create the dataspace
+  newVar->DataSetID = H5Dcreate(GroupID, name.c_str(),
+				strType, newVar->DataSpaceID,
+				DSprops);
+  ///Extend dataset to size of v
+  status=H5Dextend(newVar->DataSetID,dim); 
+  assert(status>=0);
+  // Do the writing.
+  status = H5Dwrite(newVar->DataSetID, strType, 
+		    H5S_ALL, H5S_ALL, H5P_DEFAULT, charArray.data());
+  if (status < 0)
+    cerr << "Error writing string to HDF5 file in WriteVar.\n";
+  H5Tclose(strType);
+}
+
+
+
 
 
 void IOTreeHDF5Class::WriteVar(string name, bool T)
@@ -1830,6 +2221,12 @@ void IOTreeHDF5Class::WriteVar(string name, Array<bool,3> &v)
 // 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
 //   if (status < 0)
 //     cerr << "Error writing bool to HDF5 file in WriteVar.\n";
+}
+
+
+
+void IOTreeHDF5Class::WriteVar(string name, Array<bool,4> &v)
+{
 }
 
 

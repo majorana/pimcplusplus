@@ -447,6 +447,41 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 }
 
 
+/// This template function reads a 4-D array from a token list into
+/// the array.  The syntax requires an opening '[' the a
+/// comma-separated list of values, then a closing ']'.  The data is
+/// read row-ordered, i.e. the first index changes fastests as we read
+/// in the values.
+template <class T>
+void ReadArrayData(list<TokenClass>::iterator &iter,
+		   list<TokenClass> &tokenList,
+		   Array<T,4> valArray)
+{
+  ReadAbort(iter->Str != "[", iter->LineNumber, "Expected [ not found\n");
+  iter++;
+  for (int h=0;h<valArray.extent(3);h++)
+    for (int i=0;i<valArray.extent(2);i++)
+      for (int j=0; j<valArray.extent(1); j++)
+	for (int k=0; k<valArray.extent(0); k++) {
+	  ReadAtomicVar(*iter,valArray(k,j,i,h));
+	  iter++;
+	  // Read comma if this isn't the last value.
+	  if ((h!=valArray.extent(3)-1) || 
+	      (i!=valArray.extent(2)-1) || 
+	      (j!=valArray.extent(1)-1) ||
+	      (k!=valArray.extent(0)-1)) {
+	    ReadAbort(iter->Str != ",", iter->LineNumber, 
+		      "Expected , not found\n");
+	    iter++;
+	  }
+	}
+  ReadAbort(iter->Str != "]", iter->LineNumber, "Expected ] not found\n");
+  iter++;
+  ReadAbort(iter->Str != ";", iter->LineNumber, "Expected ; not found\n");
+  iter++;
+}
+
+
 VarASCIIClass *NewASCIIVar (AtomicType newType, int ndim,
 			    Array<int,1> dims)
 {
@@ -537,7 +572,34 @@ VarASCIIClass *NewASCIIVar (AtomicType newType, int ndim,
 	newVar->Value.resize(dims(0), dims(1), dims(2));
 	return newVar;
       }
+  }
+  else if (ndim == 4) {
+    if (newType == DOUBLE_TYPE)
+      {
+	VarASCIIdouble4Class *newVar = new VarASCIIdouble4Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2), dims(3));
+	return newVar;
+      }
+    else if (newType == INT_TYPE)
+      {
+	VarASCIIint4Class *newVar = new VarASCIIint4Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2), dims(3));
+	return newVar;
+      }
+    else if (newType == STRING_TYPE)
+      {
+	VarASCIIstring4Class *newVar = new VarASCIIstring4Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2), dims(4));
+	return newVar;
+      }
+    else if (newType == BOOL_TYPE)
+      {
+	VarASCIIbool4Class *newVar = new VarASCIIbool4Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2), dims(3));
+	return newVar;
+      }
   }  
+  
 }
 
 
@@ -618,6 +680,16 @@ VarASCIIClass * ReadArray(list<TokenClass>::iterator &iter,
       ReadArrayData(iter, tokenList, ((VarASCIIstring3Class *)newVar)->Value);
     else if (myType == BOOL_TYPE)
       ReadArrayData(iter, tokenList, ((VarASCIIbool3Class *)newVar)->Value);
+  }
+  if (numDim == 4) {
+    if (myType == DOUBLE_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIdouble4Class *)newVar)->Value);
+    else if (myType == INT_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIint4Class *)newVar)->Value);
+    else if (myType == STRING_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIstring4Class *)newVar)->Value);
+    else if (myType == BOOL_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIbool4Class *)newVar)->Value);
   }
   return (newVar);
 }
@@ -865,11 +937,15 @@ bool VarASCIIClass::ReadInto (Array<double,2> &val)
 { ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<double,3> &val)
 { ComplainReadInto(); return false; }
+bool VarASCIIClass::ReadInto (Array<double,4> &val)
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<int,1> &val)
 { ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<int,2> &val)
 { ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<int,3> &val)
+{ ComplainReadInto(); return false; }
+bool VarASCIIClass::ReadInto (Array<int,4> &val)
 { ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<string,1> &val)
 { ComplainReadInto(); return false; }
@@ -877,11 +953,15 @@ bool VarASCIIClass::ReadInto (Array<string,2> &val)
 { ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<string,3> &val)
 { ComplainReadInto(); return false; }
+bool VarASCIIClass::ReadInto (Array<string,4> &val)
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<bool,1> &val)
 { ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<bool,2> &val)
 { ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<bool,3> &val)
+{ ComplainReadInto(); return false; }
+bool VarASCIIClass::ReadInto (Array<bool,4> &val)
 { ComplainReadInto(); return false; }
 
 bool VarASCIIClass::Append (double val)
@@ -896,17 +976,25 @@ bool VarASCIIClass::Append (Array<double,1> &val)
 { ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<double,2> &val)
 { ComplainAppend(); return false; }
+bool VarASCIIClass::Append (Array<double,3> &val)
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<int,1> &val)
 { ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<int,2> &val)
+{ ComplainAppend(); return false; }
+bool VarASCIIClass::Append (Array<int,3> &val)
 { ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<string,1> &val)
 { ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<string,2> &val)
 { ComplainAppend(); return false; }
+bool VarASCIIClass::Append (Array<string,3> &val)
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<bool,1> &val)
 { ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<bool,2> &val)
+{ ComplainAppend(); return false; }
+bool VarASCIIClass::Append (Array<bool,3> &val)
 { ComplainAppend(); return false; }
 
 
@@ -924,12 +1012,18 @@ bool VarASCIIdouble2Class::ReadInto (Array<double,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarASCIIdouble3Class::ReadInto (Array<double,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; return true; }
+bool VarASCIIdouble4Class::ReadInto (Array<double,4> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
+  val = Value; return true; }
 bool VarASCIIint1Class::ReadInto (Array<int,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
 bool VarASCIIint2Class::ReadInto (Array<int,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarASCIIint3Class::ReadInto (Array<int,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
+ val = Value; return true; }
+bool VarASCIIint4Class::ReadInto (Array<int,4> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
  val = Value; return true; }
 bool VarASCIIstring1Class::ReadInto (Array<string,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
@@ -938,12 +1032,18 @@ bool VarASCIIstring2Class::ReadInto (Array<string,2> &val)
 bool VarASCIIstring3Class::ReadInto (Array<string,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
  val = Value; return true; }
+bool VarASCIIstring4Class::ReadInto (Array<string,4> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
+ val = Value; return true; }
 bool VarASCIIbool1Class::ReadInto (Array<bool,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
 bool VarASCIIbool2Class::ReadInto (Array<bool,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarASCIIbool3Class::ReadInto (Array<bool,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
+ val = Value; return true; }
+bool VarASCIIbool4Class::ReadInto (Array<bool,4> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
  val = Value; return true; }
 
 
@@ -995,6 +1095,17 @@ bool VarASCIIdouble3Class::Append (Array<double,2> &val)
   Value(n,Range::all(),Range::all()) = val;
   return(true);
 }
+bool VarASCIIdouble4Class::Append (Array<double,3> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); 
+  int o=Value.extent(2); int p=Value.extent(3);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  assert(val.extent(2) == p);
+  Value.resizeAndPreserve(n+1,m,o,p);
+  Value(n,Range::all(),Range::all(),Range::all()) = val;
+  return(true);
+}
 bool VarASCIIint2Class::Append (Array<int,1> &val)
 {
   int n = Value.extent(0);  int m = Value.extent(1);
@@ -1010,6 +1121,17 @@ bool VarASCIIint3Class::Append (Array<int,2> &val)
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
   Value(n,Range::all(),Range::all()) = val;
+  return(true);
+}
+bool VarASCIIint4Class::Append (Array<int,3> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); 
+  int o=Value.extent(2); int p=Value.extent(3);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  assert(val.extent(2) == p);
+  Value.resizeAndPreserve(n+1,m,o,p);
+  Value(n,Range::all(),Range::all(),Range::all()) = val;
   return(true);
 }
 bool VarASCIIstring2Class::Append (Array<string,1> &val)
@@ -1029,6 +1151,17 @@ bool VarASCIIstring3Class::Append (Array<string,2> &val)
   Value(n,Range::all(),Range::all()) = val;
   return(true);
 }
+bool VarASCIIstring4Class::Append (Array<string,3> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); 
+  int o=Value.extent(2); int p=Value.extent(3);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  assert(val.extent(2) == p);
+  Value.resizeAndPreserve(n+1,m,o,p);
+  Value(n,Range::all(),Range::all(),Range::all()) = val;
+  return(true);
+}
 bool VarASCIIbool2Class::Append (Array<bool,1> &val)
 {
   int n = Value.extent(0);  int m = Value.extent(1);
@@ -1046,6 +1179,18 @@ bool VarASCIIbool3Class::Append (Array<bool,2> &val)
   Value(n,Range::all(),Range::all()) = val;
   return(true);
 }
+bool VarASCIIbool4Class::Append (Array<bool,3> &val)
+{
+  int n=Value.extent(0); int m=Value.extent(1); 
+  int o=Value.extent(2); int p=Value.extent(3);
+  assert(val.extent(0) == m);
+  assert(val.extent(1) == o);
+  assert(val.extent(2) == o);
+  Value.resizeAndPreserve(n+1,m,o,p);
+  Value(n,Range::all(),Range::all(),Range::all()) = val;
+  return(true);
+}
+
 
 void VarASCIIdouble0Class::Print (ofstream &outFile)
 { outFile << "double " << Name << " = " << Value << ";\n";}
@@ -1088,6 +1233,23 @@ void VarASCIIdouble3Class::Print (ofstream &outFile)
   outFile << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) 
 	  << "];\n";
 }
+void VarASCIIdouble4Class::Print (ofstream &outFile)
+{
+  outFile << "Array<double,4> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << "," << Value.extent(2) << ","
+	  << Value.extent(3) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+	for (int l=0; l<(Value.extent(3)); l++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	  || (k<(Value.extent(2)-1)) || (l<(Value.extent(3)-1)))
+	outFile << Value(i,j,k,l) << ", ";
+  outFile << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1,
+		   Value.extent(3)-1) 
+	  << "];\n";
+}
 void VarASCIIint1Class::Print (ofstream &outFile)
 {
   outFile << "Array<int,1> " << Name 
@@ -1119,6 +1281,23 @@ void VarASCIIint3Class::Print (ofstream &outFile)
 	  || (k<(Value.extent(2)-1)))
 	outFile << Value(i,j,k) << ", ";
   outFile << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) 
+	  << "];\n";
+}
+void VarASCIIint4Class::Print (ofstream &outFile)
+{
+  outFile << "Array<int,4> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << "," << Value.extent(2) 
+	  << "," << Value.extent(3)<< ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+	for (int l=0; l<(Value.extent(2)); l++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	  || (k<(Value.extent(2)-1)) || (l<(Value.extent(3)-1)))
+	outFile << Value(i,j,k,l) << ", ";
+  outFile << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1,
+		   Value.extent(3)-1)
 	  << "];\n";
 }
 void VarASCIIstring1Class::Print (ofstream &outFile)
@@ -1155,6 +1334,24 @@ void VarASCIIstring3Class::Print (ofstream &outFile)
 	  << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) 
 	  << "\"];\n";
 }
+void VarASCIIstring4Class::Print (ofstream &outFile)
+{
+  outFile << "Array<string,4> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << "," << Value.extent(2)
+	  << "," << Value.extent(3) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+	for (int l=0; l<(Value.extent(3)); l++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	  || (k<(Value.extent(2)-1))|| (l<(Value.extent(3)-1)))
+	outFile << "\"" << Value(i,j,k,l) << "\", ";
+  outFile << "\"" 
+	  << Value(Value.extent(0)-1,Value.extent(1)-1,
+		   Value.extent(2)-1,Value.extent(3)-1) 
+	  << "\"];\n";
+}
 void VarASCIIbool1Class::Print (ofstream &outFile)
 {
   outFile << "Array<bool,1> " << Name 
@@ -1187,6 +1384,23 @@ void VarASCIIbool3Class::Print (ofstream &outFile)
 	  || (k<(Value.extent(2)-1)))
 	outFile << Value(i,j,k) << ", ";
   outFile << (Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) ?
+	      "true" : "false") << "];\n";
+}
+void VarASCIIbool4Class::Print (ofstream &outFile)
+{
+  outFile << "Array<bool,4> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << "," << Value.extent(2)
+	  << "," << Value.extent(3) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+	for (int l=0; l<(Value.extent(3)); l++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	  || (k<(Value.extent(2)-1)) || (l<(Value.extent(3)-1)))
+	outFile << Value(i,j,k,l) << ", ";
+  outFile << (Value(Value.extent(0)-1,Value.extent(1)-1,
+		    Value.extent(2)-1,Value.extent(3)-1) ?
 	      "true" : "false") << "];\n";
 }
 
@@ -1233,6 +1447,16 @@ void IOTreeASCIIClass::WriteVar(string name, Array<double,3> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
+void IOTreeASCIIClass::WriteVar(string name, Array<double,4> &val)
+{
+  VarASCIIdouble4Class *newVar = new VarASCIIdouble4Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), 
+		       val.extent(2), val.extent(3));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+  MarkModified();
+}
 
 void IOTreeASCIIClass::WriteVar(string name, int val)
 {
@@ -1265,6 +1489,16 @@ void IOTreeASCIIClass::WriteVar(string name, Array<int,3> &val)
   VarASCIIint3Class *newVar = new VarASCIIint3Class;
   newVar->Name=name;
   newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+  MarkModified();
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<int,4> &val)
+{
+  VarASCIIint4Class *newVar = new VarASCIIint4Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), 
+		       val.extent(2), val.extent(3));
   newVar->Value=val;
   VarList.push_back(newVar);
   MarkModified();
@@ -1305,6 +1539,16 @@ void IOTreeASCIIClass::WriteVar(string name, Array<string,3> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
+void IOTreeASCIIClass::WriteVar(string name, Array<string,4> &val)
+{
+  VarASCIIstring4Class *newVar = new VarASCIIstring4Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), 
+		       val.extent(2), val.extent(3));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+  MarkModified();
+}
  
 void IOTreeASCIIClass::WriteVar(string name, bool val)
 {
@@ -1337,6 +1581,16 @@ void IOTreeASCIIClass::WriteVar(string name, Array<bool,3> &val)
   VarASCIIbool3Class *newVar = new VarASCIIbool3Class;
   newVar->Name=name;
   newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+  MarkModified();
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<bool,4> &val)
+{
+  VarASCIIbool4Class *newVar = new VarASCIIbool4Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), 
+		       val.extent(2), val.extent(3));
   newVar->Value=val;
   VarList.push_back(newVar);
   MarkModified();
