@@ -4,7 +4,7 @@ IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o  .
 
 F77Objs = fortran/evtricub.o  fortran/herm3ev.o  fortran/mktricubw.o  fortran/tcspline.o fortran/ibc_ck.o fortran/splinck.o fortran/zonfind.o fortran/tcspeval.o fortran/v_spline.o fortran/bcspline.o fortran/bcspeval.o
 
-Objs:	MyTricubicSpline.o CubicSpline.o QuinticSpline.o DyutimanTest.o MultiTricubicSpline.o MultiTricubicSpline2.o
+Objs:	MyTricubicSpline.o CubicSpline.o QuinticSpline.o DyutimanTest.o MultiTricubicSpline.o MultiTricubicSpline3.o
 
 all:	FortranObjs TestBicubic TestGrid  TestMyTricubic Objs TestQuintic DyutimanTest TestMultiTricubicSpline TestMultiTricubicSpline2 TestMultiTricubicSpline3
 
