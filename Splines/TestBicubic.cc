@@ -15,9 +15,9 @@ void BCSplineTest1()
   }
   BicubicSpline BCspline;   
   BCspline.Init(&xgrid, &ygrid, F);
-  /*FILE *exout = fopen ("BCexact", "w");
+  FILE *exout = fopen ("BCexact", "w");
   FILE *spout = fopen ("BCspline", "w");
-  LinearGrid finegrid(0.0,4.0*M_PI, 1000);
+  /*LinearGrid finegrid(0.0,4.0*M_PI, 1000);
   for (int i=0; i<1000; i++) {
     double x = finegrid(i);
     for (int j=0; j<1000; j++) {
@@ -32,21 +32,23 @@ void BCSplineTest1()
   }
   fclose(exout);
   fclose(spout);*/
-  for (int k=0; k<10000000; k++) {
+  /*for (int k=0; k<10000000; k++) {
     double x = drand48()*4.0*M_PI;
     double y = drand48()*4.0*M_PI;
     BCspline(x,y);
-  }
+    }*/
   
 
 
-  /*LinearGrid x2(0.0, 10.0*M_PI, 10000);
+  LinearGrid x2(0.0, 4.0*M_PI, 10000);
   for (int i=0; i<10000; i++) {
+    double x = xgrid(20);
     double y = x2(i);
-    double x = 0.0;
-    fprintf (stderr, "%1.17e %1.17e %1.17e %1.17e\n", x,
-	     BCspline(0, y), Cspline(y), cos(x) * cos(y));
-	     }*/
+    fprintf (stderr, "%1.17e %1.17e %1.17e %1.17e %1.17e %1.17e %1.17e %1.17e %1.17e\n", y,
+	     BCspline(20, y), BCspline.Deriv(20,y), BCspline.Deriv2(20,y),
+	     BCspline.Deriv3(20,y),
+	     sin(x) * sin(y), sin(x)*cos(y), -sin(x)*sin(y), -sin(x)*cos(y));
+  }
 }
 
 main()

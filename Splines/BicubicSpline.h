@@ -139,21 +139,57 @@ inline double BicubicSpline::operator() (int ix, double y)
 
 inline double BicubicSpline::Deriv (int ix, double y)
 {
-  cerr << "BicubicSpline::Deriv Not implemented yet!\n";
-  abort();
+  if (!YUpToDate(ix))
+    YUpdate(ix);
+  
+  int iy = Ygrid->ReverseMap(y);
+  iy = max(0,iy);
+  iy = min(iy, Ny-2);
+  
+  double t = (y - (*Ygrid)(iy))/((*Ygrid)(iy+1) - (*Ygrid)(iy));
+  double tm1 = t - 1.0;
+  double h = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+  double hinv = 1.0/h;
+  double dp1 = 6.0*t*tm1;  
+  double dq1 = tm1*(3.0*t-1.0);
+  double dp2 = -dp1;  
+  double dq2 = 3.0*t*t - 2.0*t;
+
+  return (hinv*(F(ix,iy).z*dp1 + F(ix,iy+1).z*dp2) + 
+	  (F(ix,iy).dzdy*dq1 + F(ix,iy+1).dzdy*dq2));
 }
 
 inline double BicubicSpline::Deriv2 (int ix, double y)
 {
-  cerr << "BicubicSpline::Deriv2 Not implemented yet!\n";
-  abort();
+  if (!YUpToDate(ix))
+    YUpdate(ix);
+  
+  int iy = Ygrid->ReverseMap(y);
+  iy = max(0,iy);
+  iy = min(iy, Ny-2);
+  double t = (y - (*Ygrid)(iy))/((*Ygrid)(iy+1) - (*Ygrid)(iy));
+  double h = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+  double hinv = 1.0/h;
+
+  return (hinv*((12.0*t-6.0)*hinv*(F(ix,iy).z -F(ix,iy+1).z)
+		+(6.0*t-4.0)*F(ix,iy).dzdy + (6.0*t-2.0)*F(ix,iy+1).dzdy));
 }
 
 inline double BicubicSpline::Deriv3 (int ix, double y)
 {
-  cerr << "BicubicSpline::Deriv3 Not implemented yet!\n";
-  abort();
-}
+
+  if (!YUpToDate(ix))
+    YUpdate(ix);
+  
+  int iy = Ygrid->ReverseMap(y);
+  iy = max(0,iy);
+  iy = min(iy, Ny-2);
+  double h = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+  double hinv = 1.0/h;
+
+  return (hinv*hinv*(12.0*hinv*(F(ix,iy).z -F(ix,iy+1).z)
+		+6.0*(F(ix,iy).dzdy + F(ix,iy+1).dzdy)));
+ }
 
 
 inline double p1(double t)
