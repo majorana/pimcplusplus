@@ -65,6 +65,7 @@ public:
   virtual bool Append (blitz::Array<bool,1> &val) = 0;
   virtual bool Append (blitz::Array<bool,2> &val) = 0;
   virtual bool Append (blitz::Array<bool,3> &val) = 0;
+  virtual ~VarClass() { /* do nothing */ }
 };
 
 

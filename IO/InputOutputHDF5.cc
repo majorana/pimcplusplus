@@ -1087,7 +1087,7 @@ bool IOTreeHDF5Class::OpenFile(string fileName,
   // If we don't already have this in here (old version of this
   // library created this file), create a new one and stick it in the
   // file. 
-  if (BoolType < 0.0) {
+  if (BoolType < 0) {
       BoolType = H5Tcreate(H5T_ENUM, sizeof(bool));
       bool val = false;
       H5Tenum_insert(BoolType, "FALSE", &val);
@@ -1148,16 +1148,20 @@ void IOTreeHDF5Class::CloseFile()
   }
    
   // Now, call all closes recursively and delete all sections
-  while (!SectionList.empty())
-    {
+  while (!SectionList.empty()) {
       SectionList.front()->CloseFile();
       delete SectionList.front();
       SectionList.pop_front();
-    }
-  if (FileName!="")
+  }
+
+  if (FileName!="") {
+    // Release BoolType;
+    H5Tclose (BoolType);
     H5Fclose(GroupID);
-  else
+  }
+  else {
     H5Gclose(GroupID);
+  }
 }    
 
 
@@ -1487,6 +1491,9 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,1> &v)
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
   if (status < 0)
     cerr << "Error writing double to HDF5 file in WriteVar.\n";
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -1540,8 +1547,12 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,2> &v)
   // Do the writing.
   status = H5Dwrite(newVar->DataSetID, H5T_NATIVE_DOUBLE, 
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+
   if (status < 0)
     cerr << "Error writing double to HDF5 file in WriteVar.\n";
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -1596,8 +1607,12 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,3> &v)
   // Do the writing.
   status = H5Dwrite(newVar->DataSetID, H5T_NATIVE_DOUBLE, 
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+
   if (status < 0)
     cerr << "Error writing double to HDF5 file in WriteVar.\n";
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -1652,6 +1667,10 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,4> &v)
   // Do the writing.
   status = H5Dwrite(newVar->DataSetID, H5T_NATIVE_DOUBLE, 
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+
+  // Free DSprops
+  H5Pclose (DSprops);
+
   if (status < 0)
     cerr << "Error writing double to HDF5 file in WriteVar.\n";
 }
@@ -1737,8 +1756,12 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,1> &v)
   // Do the writing.
   status = H5Dwrite(newVar->DataSetID, H5T_NATIVE_INT, 
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+
   if (status < 0)
     cerr << "Error writing int to HDF5 file in WriteVar.\n";
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -1792,8 +1815,12 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,2> &v)
   // Do the writing.
   status = H5Dwrite(newVar->DataSetID, H5T_NATIVE_INT, 
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+
   if (status < 0)
     cerr << "Error writing int to HDF5 file in WriteVar.\n";
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -1848,6 +1875,10 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,3> &v)
   // Do the writing.
   status = H5Dwrite(newVar->DataSetID, H5T_NATIVE_INT, 
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+
+  // Free DSprops
+  H5Pclose (DSprops);
+
   if (status < 0)
     cerr << "Error writing int to HDF5 file in WriteVar.\n";
 }
@@ -1904,6 +1935,10 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,4> &v)
   // Do the writing.
   status = H5Dwrite(newVar->DataSetID, H5T_NATIVE_INT, 
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+
+  // Free DSprops
+  H5Pclose (DSprops);
+
   if (status < 0)
     cerr << "Error writing int to HDF5 file in WriteVar.\n";
 }
@@ -2019,6 +2054,9 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,1> &strs)
   if (status < 0)
     cerr << "Error writing string to HDF5 file in WriteVar.\n";
   H5Tclose(strType);
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -2096,6 +2134,9 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,2> &strs)
   if (status < 0)
     cerr << "Error writing string to HDF5 file in WriteVar.\n";
   H5Tclose(strType);
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -2173,6 +2214,9 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,3> &strs)
   if (status < 0)
     cerr << "Error writing string to HDF5 file in WriteVar.\n";
   H5Tclose(strType);
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -2249,6 +2293,9 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,4> &strs)
   if (status < 0)
     cerr << "Error writing string to HDF5 file in WriteVar.\n";
   H5Tclose(strType);
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -2337,6 +2384,10 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,1> &v)
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
   if (status < 0)
     cerr << "Error writing bool to HDF5 file in WriteVar.\n";
+
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -2393,6 +2444,9 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,2> &v)
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
   if (status < 0)
     cerr << "Error writing bool to HDF5 file in WriteVar.\n";
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -2450,6 +2504,9 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,3> &v)
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
   if (status < 0)
     cerr << "Error writing bool to HDF5 file in WriteVar.\n";
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
@@ -2507,6 +2564,9 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,4> &v)
 		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
   if (status < 0)
     cerr << "Error writing int to HDF5 file in WriteVar.\n";
+
+  // Free DSprops
+  H5Pclose (DSprops);
 }
 
 
