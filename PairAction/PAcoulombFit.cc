@@ -37,7 +37,7 @@ void PAcoulombFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 //   FILE *Udebug = fopen ("U.dat", "w");
 //   FILE *sdebug = fopen ("s.dat", "w");
 
-//   double lambda = rho.lambda;
+//   lambda = rho.lambda;
 //   double beta = rho.Beta();
 //   const int N = 400;
 //   int M = Order+1;
@@ -144,51 +144,131 @@ public:
 
 
 
-void PAcoulombFitClass::AddFit (Rho &rho)
+// void PAcoulombFitClass::AddFit (Rho &rho)
+// {
+//   NumBetas++;
+//   Ujshort.resizeAndPreserve(NumBetas);
+//   Ujlong.resizeAndPreserve(NumBetas);
+//   dUjshort.resizeAndPreserve(NumBetas);
+//   dUjlong.resizeAndPreserve(NumBetas);
+
+//   lambda = rho.lambda;
+//   double beta = rho.Beta();
+//   int M = Order+1;
+//   Array<double,2>  UCoefsShort(qgrid->NumPoints, M);
+//   Array<double,2>  UCoefsLong(qgrid->NumPoints, M);
+//   Array<double,2> dUCoefsShort(qgrid->NumPoints, M);
+//   Array<double,2> dUCoefsLong(qgrid->NumPoints, M);
+
+//   CoulombFitIntegrand integrand(rho);
+//   const double Tolerance = 1.0e-7;
+//   double sigma = sqrt(2.0*lambda*beta);
+//   for (int qi=0; qi<qgrid->NumPoints; qi++) {
+//     integrand.q = (*qgrid)(qi);
+//     cerr << "qi = " << qi << " of " << qgrid->NumPoints << endl;
+//     integrand.smax = min(2.0*integrand.q, 3.0*sigma);
+//     for (int n=0; n<M; n++) {
+//       integrand.n=n;
+//       GKIntegration<CoulombFitIntegrand,GK15> Fit_gk(integrand);
+//       Fit_gk.SetRelativeErrorMode();
+//       UCoefsShort(qi,n) = Fit_gk.Integrate(-1.0, 1.0, Tolerance);
+//     }
+//     integrand.smax = 2.0*integrand.q;
+//     for (int n=0; n<M; n++) {
+//       integrand.n=n;
+//       GKIntegration<CoulombFitIntegrand,GK15> Fit_gk(integrand);
+//       Fit_gk.SetRelativeErrorMode();
+//       UCoefsLong(qi,n) = Fit_gk.Integrate(-1.0, 1.0, Tolerance);
+//     }
+//   }
+
+//   // Initialize splines
+//   Ujshort(NumBetas-1).Init(qgrid, UCoefsShort);
+//   dUjshort(NumBetas-1).Init(qgrid, dUCoefsShort);  
+//   Ujlong(NumBetas-1).Init(qgrid, UCoefsLong);
+//   dUjlong(NumBetas-1).Init(qgrid, dUCoefsLong);  
+// }
+
+
+
+
+
+
+class LConvertIntegrandClass
 {
-  NumBetas++;
-  Ujshort.resizeAndPreserve(NumBetas);
-  Ujlong.resizeAndPreserve(NumBetas);
-  dUjshort.resizeAndPreserve(NumBetas);
-  dUjlong.resizeAndPreserve(NumBetas);
-
-  lambda = rho.lambda;
-  double beta = rho.Beta();
-  int M = Order+1;
-  Array<double,2>  UCoefsShort(qgrid->NumPoints, M);
-  Array<double,2>  UCoefsLong(qgrid->NumPoints, M);
-  Array<double,2> dUCoefsShort(qgrid->NumPoints, M);
-  Array<double,2> dUCoefsLong(qgrid->NumPoints, M);
-
-  CoulombFitIntegrand integrand(rho);
-  const double Tolerance = 1.0e-7;
-  double sigma = sqrt(2.0*lambda*beta);
-  for (int qi=0; qi<qgrid->NumPoints; qi++) {
-    integrand.q = (*qgrid)(qi);
-    cerr << "qi = " << qi << " of " << qgrid->NumPoints << endl;
-    integrand.smax = min(2.0*integrand.q, 3.0*sigma);
-    for (int n=0; n<M; n++) {
-      integrand.n=n;
-      GKIntegration<CoulombFitIntegrand,GK15> Fit_gk(integrand);
-      Fit_gk.SetRelativeErrorMode();
-      UCoefsShort(qi,n) = Fit_gk.Integrate(-1.0, 1.0, Tolerance);
-    }
-    integrand.smax = 2.0*integrand.q;
-    for (int n=0; n<M; n++) {
-      integrand.n=n;
-      GKIntegration<CoulombFitIntegrand,GK15> Fit_gk(integrand);
-      Fit_gk.SetRelativeErrorMode();
-      UCoefsLong(qi,n) = Fit_gk.Integrate(-1.0, 1.0, Tolerance);
-    }
+public:
+  const PolynomialClass &P;
+  int n;
+  double smax;
+  double operator()(double x)
+  {
+    double s = 0.5*(x+1.0)*smax;
+    return (0.5*(2.0*n+1)*P(s)*LegendrePoly(n,x));
   }
+  LConvertIntegrandClass(const PolynomialClass &p) : P(p)
+  { }
+};
 
-  // Initialize splines
-  Ujshort(NumBetas-1).Init(qgrid, UCoefsShort);
-  dUjshort(NumBetas-1).Init(qgrid, dUCoefsShort);  
-  Ujlong(NumBetas-1).Init(qgrid, UCoefsLong);
-  dUjlong(NumBetas-1).Init(qgrid, dUCoefsLong);  
+
+
+
+Array<double,1> ConvertToLegendre(const PolynomialClass &P,
+				  double smax)
+{
+  Array<double,1> coefs(P.Order()+1);
+  coefs = 0.0;
+  LConvertIntegrandClass integrand(P);
+  integrand.smax = smax;
+  for (int n=0; n<=P.Order(); n++) {
+    integrand.n = n;
+    GKIntegration<LConvertIntegrandClass, GK15> integrator(integrand);
+    //integrator.SetRelativeErrorMode();
+    coefs(n) = integrator.Integrate(-1.0, 1.0, 1.0e-7, 1.0e-7, false);
+  }
+  return coefs;
 }
 
+
+inline double factorial(double n)
+{
+  if (n<=1.0)
+    return(1.0);
+  else
+    return (n*factorial(n-1.0));
+}
+
+class HConvertIntegrandClass
+{
+public:
+  const PolynomialClass &P;
+  int n;
+  double Sqrt4LambdaBeta;
+  double operator()(double x)
+  {
+    double s = x*Sqrt4LambdaBeta;
+    double Ak = 1.0/((double)(1<<n)*factorial((double)n)*sqrt(M_PI));
+    return (Ak*exp(-x*x)*P(s)*HermitePoly(n,x));
+  }
+  HConvertIntegrandClass(const PolynomialClass &p) : P(p)
+  { }
+};
+
+
+Array<double,1> ConvertToHermite(const PolynomialClass &P,
+				 double lambda, double beta)
+{
+  Array<double,1> coefs(P.Order()+1);
+  coefs = 0.0;
+  HConvertIntegrandClass integrand(P);
+  integrand.Sqrt4LambdaBeta = sqrt(4.0*lambda*beta);
+  for (int n=0; n<=P.Order(); n+=2) {
+    integrand.n = n;
+    GKIntegration<HConvertIntegrandClass, GK15> integrator(integrand);
+    //integrator.SetRelativeErrorMode();
+    coefs(n) = integrator.Integrate(-10.0, 10.0, 1.0e-8);
+  }
+  return coefs;
+}
 
 class GaussianWeightClass : public WeightFuncClass
 {
@@ -198,7 +278,7 @@ public:
   /// returns a Gaussian or the miniumum weight, whichever is greater
   double operator()(double s)
   {
-    double gauss = exp(-s*s*FourLambdaBetaInv);
+    double gauss = exp(-s*s*FourLambdaBetaInv) + MinWeight;
     //return ( (gauss>MinWeight) ? gauss : MinWeight);
     return (gauss);
   }
@@ -241,120 +321,64 @@ public:
 };
 
 
-class LConvertIntegrandClass
+
+void PAcoulombFitClass::AddFit (Rho &rho)
 {
-public:
-  const PolynomialClass &P;
-  int n;
-  double smax;
-  double operator()(double x)
-  {
-    double s = 0.5*(x+1.0)*smax;
-    return (0.5*(2.0*n+1)*P(s)*LegendrePoly(n,x));
+  NumBetas++;
+  Ujshort.resizeAndPreserve(NumBetas);
+  dUjshort.resizeAndPreserve(NumBetas);
+  Ujlong.resizeAndPreserve(NumBetas);
+  dUjlong.resizeAndPreserve(NumBetas);
+
+  lambda = rho.lambda;
+  double beta = rho.Beta();
+  int M = Order+1;
+
+  Array<double,2>  UCoefsShort(qgrid->NumPoints, M);
+  Array<double,2> dUCoefsShort(qgrid->NumPoints, M);
+  Array<double,2>  UCoefsLong(qgrid->NumPoints, M);
+  Array<double,2> dUCoefsLong(qgrid->NumPoints, M);
+
+  UCoefsShort = 0.0;  UCoefsLong=0.0;
+  dUCoefsShort = 0.0; dUCoefsLong=0.0;
+
+  const double Tolerance = 1.0e-8;
+  GaussianWeightClass gaussWeight(lambda, beta, 1.0e-8);
+  PolynomialClass poly(Order);
+  PolynomialSetClass Pset;
+  UFitIntegrand integrand(rho, Pset, gaussWeight);
+  for (int qi=0; qi<qgrid->NumPoints; qi++) {
+    cerr << "qi = " << qi+1 << " of " << qgrid->NumPoints << endl;
+    integrand.q = (*qgrid)(qi);
+    double smax = 2.0*integrand.q;
+    // Create the orthonormal polynomials
+    Pset.MakeOrthoSet(Order, -smax, smax, gaussWeight);
+    for (int j=0; j<M; j++)
+      poly[j] = 0.0;
+    cerr << "Fitting to custom polynomial set:\n";
+    for (int n=0; n<M; n+=2) {
+      integrand.n=n;
+      GKIntegration<UFitIntegrand,GK15> Fit_gk(integrand);
+      Fit_gk.SetRelativeErrorMode();
+      double C = Fit_gk.Integrate(-smax, smax, Tolerance);
+      //poly[n] = C;
+      //UCoefs(qi, n) = C;
+      for (int j=0; j<M; j++)
+ 	poly[j] += C * Pset(n)[j];
+    }
+    cerr << "Hermite conversion:\n";
+    UCoefsLong(qi, Range::all()) = ConvertToHermite(poly, lambda, beta);
+    cerr << "Legendre conversion:\n";
+    UCoefsShort(qi, Range::all()) = ConvertToLegendre(poly, 2.0*integrand.q);
   }
-  LConvertIntegrandClass(const PolynomialClass &p) : P(p)
-  { }
-};
 
+  // Initialize splines
+  Ujshort(NumBetas-1).Init(qgrid, UCoefsShort);
+  dUjshort(NumBetas-1).Init(qgrid, dUCoefsShort);  
+  Ujlong(NumBetas-1).Init(qgrid, UCoefsLong);
+  dUjlong(NumBetas-1).Init(qgrid, dUCoefsLong);  
 
-
-
-Array<double,1> ConvertToLegendre(const PolynomialClass &P,
-				  double smax)
-{
-  Array<double,1> coefs(P.Order()+1);
-  coefs = 0.0;
-  LConvertIntegrandClass integrand(P);
-  integrand.smax = smax;
-  for (int n=0; n<=P.Order(); n++) {
-    integrand.n = n;
-    GKIntegration<LConvertIntegrandClass, GK15> integrator(integrand);
-    integrator.SetRelativeErrorMode();
-    coefs(n) = integrator.Integrate(-1.0, 1.0, 1.0e-9);
-  }
-  return coefs;
 }
-
-
-class HConvertIntegrandClass
-{
-public:
-  const PolynomialClass &P;
-  int n;
-  double Sqrt4LambdaBeta;
-  double operator()(double x)
-  {
-    double s = x*Sqrt4LambdaBeta;
-    return (exp(-x*x)*P(s)*HermitePoly(n,x));
-  }
-  HConvertIntegrandClass(const PolynomialClass &p) : P(p)
-  { }
-};
-
-
-Array<double,1> ConvertToHermite(const PolynomialClass &P,
-				  double lambda, double beta)
-{
-  Array<double,1> coefs(P.Order()+1);
-  coefs = 0.0;
-  HConvertIntegrandClass integrand(P);
-  integrand.Sqrt4LambdaBeta = sqrt(4.0*lambda*beta);
-  for (int n=0; n<=P.Order(); n++) {
-    integrand.n = n;
-    GKIntegration<HConvertIntegrandClass, GK15> integrator(integrand);
-    integrator.SetRelativeErrorMode();
-    coefs(n) = integrator.Integrate(0.0, 10.0, 1.0e-9);
-  }
-  return coefs;
-}
-
-
-// void PAcoulombFitClass::AddFit (Rho &rho)
-// {
-//   NumBetas++;
-//   Uj.resizeAndPreserve(NumBetas);
-//   dUj.resizeAndPreserve(NumBetas);
-
-//   double lambda = rho.lambda;
-//   double beta = rho.Beta();
-//   int M = Order+1;
-
-//   Array<double,2>  UCoefs(qgrid->NumPoints, M);
-//   Array<double,2> dUCoefs(qgrid->NumPoints, M);
-
-//   UCoefs = 0.0;
-//   dUCoefs = 0.0;
-
-//   const double Tolerance = 1.0e-9;
-//   GaussianWeightClass gaussWeight(lambda, beta, 1.0e-3);
-//   PolynomialClass poly(Order);
-//   PolynomialSetClass Pset;
-//   UFitIntegrand integrand(rho, Pset, gaussWeight);
-//   for (int qi=0; qi<qgrid->NumPoints; qi++) {
-//     cerr << "qi = " << qi+1 << " of " << qgrid->NumPoints << endl;
-//     integrand.q = (*qgrid)(qi);
-//     double smax = 2.0*integrand.q;
-//     // Create the orthonormal polynomials
-//     Pset.MakeOrthoSet(Order, 0.0, smax, gaussWeight);
-//     for (int j=0; j<M; j++)
-//       poly[j] = 0.0;
-//     for (int n=0; n<M; n++) {
-//       integrand.n=n;
-//       GKIntegration<UFitIntegrand,GK15> Fit_gk(integrand);
-//       Fit_gk.SetRelativeErrorMode();
-//       double C = Fit_gk.Integrate(0.0, smax, Tolerance);
-//       poly[n] = C;
-//       //UCoefs(qi, n) = C;
-//       for (int j=0; j<M; j++)
-//  	poly[j] += C * Pset(n)[j];
-//     }
-//     UCoefs(qi, Range::all()) = ConvertToHermite(poly, lambda, beta);
-//   }
-
-//   // Initialize splines
-//   Uj(NumBetas-1).Init(qgrid, UCoefs);
-//   dUj(NumBetas-1).Init(qgrid, dUCoefs);  
-// }
 
 
 
@@ -473,7 +497,7 @@ double PAcoulombFitClass::U(double q, double z, double s2, int level)
     Array<double,1> Pn(Order+1);
     double s = sqrt(s2);
     double sigma = sqrt(2.0*lambda*beta);
-    double smax = min(2.0*q, 3.0*sigma);
+    double smax = 2.0*q;//min(2.0*q, 3.0*sigma);
     double x = 2.0*s/smax - 1.0;
     LegendrePoly(x, Pn);
     Ujshort(level)(q, Ucoefs);
@@ -482,14 +506,14 @@ double PAcoulombFitClass::U(double q, double z, double s2, int level)
       UsumShort += Ucoefs(j)*Pn(j);
     
     smax = 2.0*q;
-    x = 2.0*s/smax - 1.0;
-    LegendrePoly(x, Pn);
+    x = s*sqrt(4.0*lambda*beta);
+    HermitePoly(x, Pn);
     double UsumLong = 0.0;
     Ujlong(level)(q, Ucoefs);
     for (int j=0; j<=Order; j++) 
       UsumLong += Ucoefs(j)*Pn(j);
 
-    double y = s/(3.0*sigma);
+    double y = q/(2.0*sigma);
     double f = SmoothStep(y);
 
     return (f*UsumShort+(1.0-f)*UsumLong);
