@@ -3,11 +3,10 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "InputOutput.h"
 
 void ActionClass::Read(InputSectionClass& inSection)
 { 
-  tau = Path.tau;
+  inSection.ReadVar ("tau", tau);
   int numPairActions=inSection.CountSections("PairAction"); 
   PairActionVector.resize(numPairActions);
   PairMatrix.resize(Path.NumSpecies(),Path.NumSpecies());
@@ -18,7 +17,7 @@ void ActionClass::Read(InputSectionClass& inSection)
   for (int PAnum=0;PAnum<numPairActions;PAnum++){
     inSection.OpenSection("PairAction");
     PairActionVector(PAnum).Read(inSection);
-    inSection.Close(); //"PairAction"
+    inSection.CloseSection(); //"PairAction"
     int type1 = Path.SpeciesNum (PairActionVector(PAnum).type1);
     int type2 = Path.SpeciesNum (PairActionVector(PAnum).type2);
     // Now point the matrix to the vector entry.
@@ -27,17 +26,17 @@ void ActionClass::Read(InputSectionClass& inSection)
     assert(PairActionVector(PAnum).tau == tau);
   }
   // Now check to make sure all PairActions that we need are defined.
-  for (int species1=0; species1<Path.NumSpecies; species1++)
-    for (int species2=0; species2<Path.NumSpecies; species2++)
+  for (int species1=0; species1<Path.NumSpecies(); species1++)
+    for (int species2=0; species2<Path.NumSpecies(); species2++)
       if (PairMatrix(species1,species2) == -1) {
 	if ((species1 != species2) || 
-	    (Path.SpeciesArray(species1)->NumParticles > 1) {
+	    (Path.Species(species1).NumParticles > 1)) {
 	  cerr << "We're missing a PairAction for species1 = "
-	       << Path.SpeciesArray(species1)->Name << " and species2 = "
-	       << Path.SpeciesArray(species2)->Name << endl;
+	       << Path.Species(species1).Name << " and species2 = "
+	       << Path.Species(species2).Name << endl;
 	  exit(1);
 	}
-
+      }
 }
 
 double ActionClass::calcTotalAction(int startSlice, int endSlice, 

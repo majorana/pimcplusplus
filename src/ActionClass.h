@@ -117,7 +117,7 @@ class ActionClass
 {
 private:
 public:
-  void Read(InputSectionClass *theInput);
+  void Read(InputSectionClass &inSection);
   DistanceTableClass *DistanceTable;
   /// This holds all of the Pair Action Classes
   Array<PairActionClass,1> PairActionVector;

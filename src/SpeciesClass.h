@@ -1,8 +1,8 @@
 #ifndef SPECIES_CLASS_H
 #define SPECIES_CLASS_H
 
-
 #include "PermutationClass.h"
+#include "Common/IO/InputOutput.h"
 
 typedef enum {FERMION, BOSON, BOLTZMANNON, ANYON} ParticleType;
 
@@ -30,6 +30,7 @@ public:
   virtual ParticleType GetParticleType() = 0;
 };
 
+SpeciesClass* ReadSpecies(InputSectionClass &inSection);
 
 
 

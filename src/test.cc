@@ -9,9 +9,8 @@
 #include "ObservableClass.h"
 #include "DistanceTablePBCClass.h"
 #include "DistanceTableFreeClass.h"
-#include "InputOutput.h"
+#include "Common/IO/InputOutput.h"
 // #include "InputOutputASCII.h"
-#include "InputOutputHDF5.h"
 
 void setupAction(ActionClass &myActionClass)
 
@@ -186,20 +185,22 @@ int main(int argc, char **argv)
 
   PathDataClass myPathData;
   InputSectionClass inSection;
-  inSection.OpenFile("inputFile");  
+  inSection.OpenFile("hydrogen.h5");  
+  cerr<<"I've opened the file\n";
   inSection.OpenSection("System");
   myPathData.Path.Read(inSection);
   inSection.CloseSection(); // "System"
-  inSection.Open("Action");
+  cerr<<"I'm right before the action\n";
+  inSection.OpenSection("Action");
   myPathData.Action.Read(inSection);
-  myPathData.CloseSection(); //"Action"
+  inSection.CloseSection(); //"Action"
 
-  ///Here we are setting up distance table
-  DistanceTablePBCClass *myDistTable=
-    new DistanceTablePBCClass(myPathData.Path);
-  myPathData.DistanceTable=myDistTable;
-  myPathData.Action.DistanceTable=myDistTable;
-  myPathData.DistanceTable->UpdateAll();
+  //  ///Here we are setting up distance table
+  //  DistanceTablePBCClass *myDistTable=
+  //    new DistanceTablePBCClass(myPathData.Path);
+  //  myPathData.DistanceTable=myDistTable;
+  //  myPathData.Action.DistanceTable=myDistTable;
+  //  myPathData.DistanceTable->UpdateAll();
   ///Done setting up distance table
 
 #ifdef PARALLEL
@@ -207,68 +208,68 @@ int main(int argc, char **argv)
 #endif
   
 
-  //  ActionClass myActionClass;
-  //  setupIDParticleArray(myPathData);
-  InputSectionClass *theInput=new InputSectionHDF5Class();
-  theInput->OpenFile("inputFile","nonameyet",NULL);
-  InputSectionClass *pathInput;
-  theInput->FindSection("PathInfo",pathInput,true);
-  pathInput->Rewind();
-  myPathData.Path.Read(pathInput);
-  //#ifdef PARALLEL
-  //  myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
-  //#endif
+//   //  ActionClass myActionClass;
+//   //  setupIDParticleArray(myPathData);
+//   InputSectionClass *theInput=new InputSectionHDF5Class();
+//   theInput->OpenFile("inputFile","nonameyet",NULL);
+//   InputSectionClass *pathInput;
+//   theInput->FindSection("PathInfo",pathInput,true);
+//   pathInput->Rewind();
+//   myPathData.Path.Read(pathInput);
+//   //#ifdef PARALLEL
+//   //  myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
+//   //#endif
 
-  setupAction(myPathData.Action);
-  BisectionMoveClass myBisectionMove(myPathData);
-  ShiftMoveClass myShiftMove(myPathData);
-  setupMove(myBisectionMove,myShiftMove,myPathData);
-  myPathData.Path.Box[0]=0.25*3.14159265358979323846;
-  myPathData.Path.Box[1]=0.25*3.14159265358979323846;
-  myPathData.Path.Box[2]=0.25*3.14159265358979323846;
-  DistanceTablePBCClass *myDistTable=
-    new DistanceTablePBCClass(myPathData.Path);
-  myPathData.DistanceTable=myDistTable;
+//   setupAction(myPathData.Action);
+//   BisectionMoveClass myBisectionMove(myPathData);
+//   ShiftMoveClass myShiftMove(myPathData);
+//   setupMove(myBisectionMove,myShiftMove,myPathData);
+//   myPathData.Path.Box[0]=0.25*3.14159265358979323846;
+//   myPathData.Path.Box[1]=0.25*3.14159265358979323846;
+//   myPathData.Path.Box[2]=0.25*3.14159265358979323846;
+//   DistanceTablePBCClass *myDistTable=
+//     new DistanceTablePBCClass(myPathData.Path);
+//   myPathData.DistanceTable=myDistTable;
 
-  myPathData.Action.DistanceTable=myDistTable;
-  myPathData.DistanceTable->UpdateAll();
-  //  cerr<<"The size of the SpeciesArray is ";
-  //  cerr << (myBisectionMove.PathData)->SpeciesArray.size()<<endl;
-  //  cerr<<"What the action class thinks the size is: ";
-  //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
-  //  PrintConfigClass myPrintConfig(myPathData);
-  ofstream outfile;
-  outfile.open("ourPath.dat");
-  for (int counter=0;counter<100000;counter++){
-    if ((counter % 1000) == 0){
-      cerr << "Step #" << counter << ":\n";
-      for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
-	outfile<<myPathData.Path(slice,0)[0]<<" ";
-	outfile<<myPathData.Path(slice,0)[1]<<" ";
-	outfile<<myPathData.Path(slice,0)[2]<<" ";
-	outfile<<endl;
-      }
-      outfile<<myPathData.Path(0,0)[0]<<" ";
-      outfile<<myPathData.Path(0,0)[1]<<" ";
-      outfile<<myPathData.Path(0,0)[2]<<" ";
-      outfile<<endl;
-    }
+//   myPathData.Action.DistanceTable=myDistTable;
+//   myPathData.DistanceTable->UpdateAll();
+//   //  cerr<<"The size of the SpeciesArray is ";
+//   //  cerr << (myBisectionMove.PathData)->SpeciesArray.size()<<endl;
+//   //  cerr<<"What the action class thinks the size is: ";
+//   //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
+//   //  PrintConfigClass myPrintConfig(myPathData);
+//   ofstream outfile;
+//   outfile.open("ourPath.dat");
+//   for (int counter=0;counter<100000;counter++){
+//     if ((counter % 1000) == 0){
+//       cerr << "Step #" << counter << ":\n";
+//       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
+// 	outfile<<myPathData.Path(slice,0)[0]<<" ";
+// 	outfile<<myPathData.Path(slice,0)[1]<<" ";
+// 	outfile<<myPathData.Path(slice,0)[2]<<" ";
+// 	outfile<<endl;
+//       }
+//       outfile<<myPathData.Path(0,0)[0]<<" ";
+//       outfile<<myPathData.Path(0,0)[1]<<" ";
+//       outfile<<myPathData.Path(0,0)[2]<<" ";
+//       outfile<<endl;
+//     }
       
-    for (int counter2=0;counter2<2;counter2++){
-      //cerr << "Doing step " << counter << endl;
+//     for (int counter2=0;counter2<2;counter2++){
+//       //cerr << "Doing step " << counter << endl;
       
-      myBisectionMove.MakeMove();
-      if (counter >= 0)
-	PC.Accumulate();
-      //      myPrintConfig.Print();
-    }
-    myShiftMove.MakeMove();
-  }
-  PC.Print();
-  cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
-  //cerr<<"done! done!"<<endl;
-  MPI_Finalize();
-  outfile.close();
+//       myBisectionMove.MakeMove();
+//       if (counter >= 0)
+// 	PC.Accumulate();
+//       //      myPrintConfig.Print();
+//     }
+//     myShiftMove.MakeMove();
+//   }
+//   PC.Print();
+//   cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
+//   //cerr<<"done! done!"<<endl;
+//   MPI_Finalize();
+//   outfile.close();
   
 }
   

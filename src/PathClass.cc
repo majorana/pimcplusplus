@@ -7,17 +7,18 @@ void PathClass::Read (InputSectionClass &inSection)
 {
   SetMode (BOTHMODE);
   double tau;
-  assert(inSection.FindVar ("NumTimeSlices", TimeSliceNumber));
-  assert(inSection.FindVar ("tau", tau));
+  assert(inSection.ReadVar ("NumTimeSlices", TimeSliceNumber));
+  assert(inSection.ReadVar ("tau", tau));
   Array<double,1> tempBox;
-  assert(inSection.FindVar ("Box",tempBox));
+  assert(inSection.ReadVar ("Box",tempBox));
   assert(tempBox.size()==NDIM);
   for (int counter=0;counter<tempBox.size();counter++){
     Box(counter)=tempBox(counter);
   }
   assert(inSection.OpenSection("Particles"));
   int NumSpecies = inSection.CountSections ("Species");
-  SpeciesArray.resize(NumSpecies);
+  cerr<<"we have this many sections: "<<NumSpecies<<endl;
+  //SpeciesArray.resize(NumSpecies);
   // First loop over species and read info about species
   for (int Species=0; Species < NumSpecies; Species++)
     {
@@ -29,10 +30,10 @@ void PathClass::Read (InputSectionClass &inSection)
   // Now actually allocate the path
   Allocate();
   // Now initilize the Path
-  for (int speciesIndex=0; speciesIndex<NumSpecies; speciesIndex++);
+  for (int speciesIndex=0; speciesIndex<NumSpecies; speciesIndex++)
   {
     SpeciesClass &species = *SpeciesArray(speciesIndex);
-    assert(inSection.OpenSection("Species",Species));
+    assert(inSection.OpenSection("Species", speciesIndex));
     string InitPaths;
     inSection.ReadVar ("InitPaths", InitPaths);
     if (InitPaths == "RANDOM") {
@@ -45,23 +46,24 @@ void PathClass::Read (InputSectionClass &inSection)
       
       assert (Positions.rows() == species.NumParticles);
       assert (Positions.cols() == species.NumDim);
-      for (int ptcl=species.FirtPtcl; 
+      for (int ptcl=species.FirstPtcl; 
 	   ptcl<=species.LastPtcl; ptcl++)
-	for (int slice=0; slice<NumTimeSlices; slice++) {
+	for (int slice=0; slice<NumTimeSlices(); slice++) {
 	  dVec pos;
 	  pos = 0.0;
 	  for (int dim=0; dim<species.NumDim; dim++)
 	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
-	  Path.SetPos(ptcl,slice,pos);
+	  SetPos(slice,ptcl,pos);
 	}
     }
     else {
       cerr << "Unrecognize initialization strategy " 
 	   << InitPaths << endl;
     }
+    inSection.CloseSection();
   }
 
-  CloseSection(); // "Particles"
+  inSection.CloseSection(); // "Particles"
   
 }
 

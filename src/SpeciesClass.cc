@@ -15,12 +15,12 @@ bool FermionClass::Read(InputSectionClass &inSection)
 }
 
 
-SectionClass& ReadSpecies(InputSectionClass &inSection)
+SpeciesClass* ReadSpecies(InputSectionClass &inSection)
 {
   
   string typeString;
   SpeciesClass *mySpecies;
-  assert(inSection.ReadVar("type",typeString));
+  assert(inSection.ReadVar("Type",typeString));
   if (typeString=="FERMION")
     mySpecies=new FermionClass();
   //  else if (typeString=="BOSON"){

@@ -1,7 +1,7 @@
 #ifndef PATH_CLASS_H
 #define PATH_CLASS_H
 
-#include "InputOutput.h"
+#include "Common/IO/InputOutput.h"
 #include "MirroredArrayClass.h"
 #include "SpeciesClass.h"
 
@@ -18,7 +18,7 @@ private:
 public:
   MirroredArrayClass1D<int> Permutation;
 
-  void Read(InputSectionClass section);
+  void Read(InputSectionClass &inSection);
   ///A scratch array to hold a boolean indicating whether we've
   ///looped over this particle yet
   Array<bool,1> DoPtcl;
@@ -41,7 +41,16 @@ public:
 
   }
 
-
+  inline int SpeciesNum (string name)
+  {
+    int i=0;
+    while ((i<SpeciesArray.size()) && (SpeciesArray(i)->Name != name))
+      i++;
+    if (i == SpeciesArray.size())
+      return -1;
+    else
+      return i;
+  }
 
 
   /// Shifts the data to other processors or to yourself if there 
