@@ -8,7 +8,7 @@
 
 
 
-class TotalEnergyClass : public ObservableClass
+class EnergyClass : public ObservableClass
 {
 
 private:
@@ -17,6 +17,15 @@ private:
   double SSum;
   double FSum;
   double NodeSum;
+
+  ObservableDouble TotAvg;
+  ObservableDouble VAvg;
+  ObservableDouble SAvg;
+  ObservableDouble FAvg;
+  ObservableDouble NAvg;
+
+
+
   int NumSamples;
   int TimesCalled;
   int Freq;
@@ -29,13 +38,14 @@ public:
   void Accumulate();
   void WriteBlock();
   void ShiftData(int numTimeSlices);
-  void Read(IOSectionClass& in) {  
-    ObservableClass::Read(in);
-    assert(in.ReadVar("freq",Freq));
-    assert(in.ReadVar("dumpFreq",DumpFreq));
-  }
-  TotalEnergyClass(PathDataClass &myPathData, IOSectionClass &ioSection)
-    : ObservableClass(myPathData, ioSection) 
+  void Read(IOSectionClass& in);
+  EnergyClass(PathDataClass &myPathData, IOSectionClass &ioSection)
+    : ObservableClass(myPathData, ioSection) , 
+      TotAvg("Total",  IOSection,myPathData.Path.Communicator),
+      VAvg("Potential",IOSection,myPathData.Path.Communicator), 
+      SAvg("Spring",   IOSection,myPathData.Path.Communicator) , 
+      FAvg("dUdBeta",  IOSection,myPathData.Path.Communicator),
+      NAvg("Node",     IOSection,myPathData.Path.Communicator)
   {
     ESum = 0.0;
     VSum = 0.0;

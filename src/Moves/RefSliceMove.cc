@@ -125,9 +125,9 @@ void RefSliceMoveClass::MakeMoveMaster()
   // Now, if we accept local stages, move on to global nodal
   // decision. 
   if (toAccept) {
-    if ((NodeAccept+NodeReject) % 1000 == 999)
-      fprintf (stderr, "Node accept ratio = %5.3f\n",
-	       (double)NodeAccept/(double)(NodeAccept+NodeReject));
+//     if ((NodeAccept+NodeReject) % 1000 == 999)
+//       fprintf (stderr, "Node accept ratio = %5.3f\n",
+// 	       (double)NodeAccept/(double)(NodeAccept+NodeReject));
     if (NodeCheck()) {
       NodeAccept++;
       Accept();
@@ -168,10 +168,14 @@ void RefSliceMoveClass::MakeMoveSlave()
   /// Receive broadcast from Master.
   PathData.Path.Communicator.Broadcast (master, accept);
   if (accept==1) {
-    if (NodeCheck()) 
+    if (NodeCheck()) {
       Path.RefPath.AcceptCopy();
-    else 
+      NodeAccept++;
+    }
+    else {
       Path.RefPath.RejectCopy();
+      NodeReject++;
+    }
   }
 }
 
@@ -184,4 +188,7 @@ void RefSliceMoveClass::MakeMove()
     MakeMoveMaster();
   else
     MakeMoveSlave();
+  if ((NodeAccept+NodeReject) % 1000 == 999)
+    fprintf (stderr, "Node accept ratio = %5.3f\n",
+	     (double)NodeAccept/(double)(NodeAccept+NodeReject));
 }

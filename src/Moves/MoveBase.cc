@@ -20,7 +20,8 @@ void MoveClass::WriteRatio()
 void MoveClass::MakeMove()
 {
   TimesCalled++;
-  if ((TimesCalled % DumpFreq) == 0)
+  if ((PathData.Path.Communicator.MyProc()==0) && 
+      (TimesCalled % DumpFreq) == 0)
     WriteRatio();
 }
 

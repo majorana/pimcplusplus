@@ -68,13 +68,18 @@ void BisectionBlockClass::ChooseTimeSlices()
     // refSlice is relative to my first slice
     int refSlice = Path.GetRefSlice() - myStart;
     int numSlices = Path.NumTimeSlices();
-    if (refSlice < bSlices) {
+    assert(bSlices*2<numSlices);
+    if (refSlice < bSlices) {  
       int numStarts = numSlices - bSlices - refSlice;
       Slice1 = refSlice + Path.Random.LocalInt(numStarts);
       Slice2 = Slice1 + bSlices;
+      if (Slice2>=numSlices){
+	cerr<<"(Slice 2, numSlices): ("<<Slice2<<", "<<numSlices<<")"<<" "<<bSlices<<" "
+	    <<numStarts<<" "<<refSlice<<endl;
+      }
       assert (Slice2 < numSlices);
     }
-    else if (refSlice > (numSlices-1-bSlices)) {
+    else if (refSlice > (numSlices-1-bSlices) && refSlice<numSlices) {
       int numStarts = refSlice - bSlices + 1;
       Slice1 = Path.Random.LocalInt(numStarts);
       Slice2 = Slice1+bSlices;

@@ -6,6 +6,121 @@
 #include "../PathDataClass.h"
 #include "../Common/IO/InputOutput.h"
 
+class ObservableVar
+{
+protected:
+  IOSectionClass &Out;
+  CommunicatorClass &Comm;
+  bool FirstTime;
+  VarClass *IOVar;
+  string Name;
+public:
+  ObservableVar (string name, IOSectionClass &out,  CommunicatorClass &comm) :
+    Out(out), FirstTime(true), Comm(comm), Name(name)
+  {
+  }
+};
+
+class ObservableDouble : public ObservableVar
+{
+public:
+  inline void Write (double val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<double,1> vec(1);
+	vec(0) = val;
+	Out.WriteVar (Name, vec);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableDouble (string name, IOSectionClass &out, CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
+class ObservableVecDouble1 : public ObservableVar
+{
+public:
+  inline void Write (Array<double,1> &val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<double,2> mat(1,val.size());
+	mat(0,Range::all()) = val;
+	Out.WriteVar (Name, mat);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableVecDouble1(string name, IOSectionClass &out, 
+		       CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
+class ObservableVecDouble2 : public ObservableVar
+{
+public:
+  inline void Write (Array<double,2> &val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<double,3> tensor(1,val.extent(0), val.extent(1));
+	tensor(0,Range::all(),Range::all()) = val;
+	Out.WriteVar (Name, tensor);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableVecDouble2(string name, IOSectionClass &out, 
+		       CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
+class ObservableVecDouble3 : public ObservableVar
+{
+public:
+  inline void Write (Array<double,3> &val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<double,4> tensor(1,val.extent(0), val.extent(1), val.extent(2));
+	tensor(0,Range::all(),Range::all(),Range::all()) = val;
+	Out.WriteVar (Name, tensor);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableVecDouble3(string name, IOSectionClass &out, 
+		       CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
+
 
 /// This is the parent class for all observables.  It contains
 /// a pointer to PathData.
@@ -34,6 +149,11 @@ public:
   virtual void WriteInfo();
 
   /// The constructor.  Sets PathData references and calls initialize.
+  /// Note: the ioSection is passed by value, NOT by reference.  This
+  /// is so we maintain our position in the file, even if the section
+  /// variable we pass here changes.  If we pass the IO section to 
+  /// any ObservableVar classes, we should do with our local IOSection
+  /// variable, NOT the reference passed to derived classes.
   ObservableClass(PathDataClass &myPathData,IOSectionClass ioSection) 
     : PathData(myPathData), IOSection(ioSection)
   {

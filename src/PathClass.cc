@@ -188,7 +188,9 @@ void PathClass::Read (IOSectionClass &inSection)
   Path.AcceptCopy();
   Permutation.AcceptCopy();
   Rho_k.AcceptCopy();
+  cerr << "before BroadcastRefPath().\n";
   BroadcastRefPath();
+  cerr << "after BroadcastRefPath().\n";
   RefPath.AcceptCopy();
 }
 
@@ -687,6 +689,8 @@ void PathClass::BroadcastRefPath()
     for (int ptcl=0; ptcl<NumParticles(); ptcl++)
       buffer(ptcl) = Path(RefSlice-myStart, ptcl);
   }
+  
+  //  cerr << "procWithRefSlice = " << procWithRefSlice << endl;
 
   // Do broadcast
   Communicator.Broadcast(procWithRefSlice, buffer);

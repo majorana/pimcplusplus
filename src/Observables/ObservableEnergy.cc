@@ -2,12 +2,11 @@
 
 
 // Fix to include final link between link M and 0
-void TotalEnergyClass::Accumulate()
+void EnergyClass::Accumulate()
 {
   TimesCalled++;
-  if (TimesCalled % DumpFreq==0){
+  if (TimesCalled % DumpFreq==0)
     WriteBlock();
-  }
 
   if ((TimesCalled % Freq)!=0){
     return;
@@ -167,74 +166,109 @@ void TotalEnergyClass::Accumulate()
 //   }
 }
 
-void TotalEnergyClass::ShiftData (int NumTimeSlices)
+void EnergyClass::ShiftData (int NumTimeSlices)
 {
   // Do nothing
 }
 
-void TotalEnergyClass::WriteBlock()
+void EnergyClass::WriteBlock()
 {
-  double totSum;
-  double totNumSamples;
-  
-  double myAvg = ESum/(double)NumSamples; //everybody should have the same number of samples for this to be happy
-  double myVAvg= VSum/(double)NumSamples;
-  double mySAvg= SSum/(double)NumSamples;
-  double myFAvg= FSum/(double)NumSamples;
-  double myNodeAvg = NodeSum/(double)NumSamples;
-  double avg = PathData.Path.Communicator.Sum(myAvg);
-  double vavg =PathData.Path.Communicator.Sum(myVAvg);
-  double savg =PathData.Path.Communicator.Sum(mySAvg);
-  double favg =PathData.Path.Communicator.Sum(myFAvg);
-  double NodeAvg =PathData.Path.Communicator.Sum(myNodeAvg);
-  avg  = avg/(double)PathData.Path.TotalNumSlices;
-  vavg =vavg/(double)PathData.Path.TotalNumSlices;
-  savg =savg/(double)PathData.Path.TotalNumSlices;
-  favg =favg/(double)PathData.Path.TotalNumSlices;
-  NodeAvg = NodeAvg/(double)(PathData.Path.TotalNumSlices);
-  // Only processor 0 writes.
-  if (PathData.Path.Communicator.MyProc()==0) {
-    cerr << "myAvg = " << myAvg << endl;
-    cerr << "avg = " << avg << endl;
-    cerr << "Pot avg = " << vavg << endl;
-    cerr << "S avg = " << savg << endl;
-    cerr << "U avg = " <<favg <<endl;
-    cerr << "NodeAvg = " <<NodeAvg <<endl;
-    if (FirstTime) {
-      FirstTime = false;
-      WriteInfo();
-      IOSection.WriteVar("Type","Scalar");
-      Array<double,1> dummy(1);
-      dummy(0)=avg;
-      IOSection.WriteVar ("TotalEnergy", dummy);
-      dummy(0)=vavg;
-      IOSection.WriteVar ("PotentialEnergy",dummy);
-      dummy(0)=savg;
-      IOSection.WriteVar ("SpringEnergy",dummy);
-      dummy(0)=favg;
-      IOSection.WriteVar ("DBetaEnergy",dummy);
-      dummy(0)=NodeAvg;
-      IOSection.WriteVar ("NodeEnergy",dummy);
-      IOVar = IOSection.GetVarPtr("TotalEnergy");
-      IOVVar= IOSection.GetVarPtr("PotentialEnergy");
-      IOSVar= IOSection.GetVarPtr("SpringEnergy");
-      IOUVar= IOSection.GetVarPtr("DBetaEnergy");
-      IONodeVar= IOSection.GetVarPtr("NodeEnergy");
-    }
-    else {
-      IOVar->Append(avg);
-      IOVVar->Append(vavg);
-      IOSVar->Append(savg);
-      IOUVar->Append(favg);
-      IONodeVar->Append(NodeAvg);
-      IOSection.FlushFile();
-    }
-  }
+
+  int nslices=PathData.Path.TotalNumSlices;
+
+  double avg=PathData.Path.Communicator.Sum(ESum)/((double)NumSamples*nslices);
+  double vavg=PathData.Path.Communicator.Sum(VSum)/((double)NumSamples*nslices);
+  double savg=PathData.Path.Communicator.Sum(SSum)/((double)NumSamples*nslices);
+  double favg=PathData.Path.Communicator.Sum(FSum)/((double)NumSamples*nslices);
+  double navg=PathData.Path.Communicator.Sum(NodeSum)/((double)NumSamples*nslices);
+  TotAvg.Write(avg);
+  VAvg.Write(vavg);
+  SAvg.Write(savg);
+  FAvg.Write(favg);
+  NAvg.Write(navg);
+  if (PathData.Path.Communicator.MyProc()==0)
+    IOSection.FlushFile();
+
   ESum       = 0.0;
   VSum       = 0.0;
   SSum       = 0.0;
   FSum       = 0.0;
   NodeSum    = 0.0;
-  NumSamples = 0;
+  NumSamples = 0; 
+
+
+
+//   double totSum;
+//   double totNumSamples;
+  
+//   double myAvg = ESum/(double)NumSamples; //everybody should have the same number of samples for this to be happy
+//   double myVAvg= VSum/(double)NumSamples;
+//   double mySAvg= SSum/(double)NumSamples;
+//   double myFAvg= FSum/(double)NumSamples;
+//   double myNodeAvg = NodeSum/(double)NumSamples;
+//   double avg = PathData.Path.Communicator.Sum(myAvg);
+//   double vavg =PathData.Path.Communicator.Sum(myVAvg);
+//   double savg =PathData.Path.Communicator.Sum(mySAvg);
+//   double favg =PathData.Path.Communicator.Sum(myFAvg);
+//   double NodeAvg =PathData.Path.Communicator.Sum(myNodeAvg);
+//   avg  = avg/(double)PathData.Path.TotalNumSlices;
+//   vavg =vavg/(double)PathData.Path.TotalNumSlices;
+//   savg =savg/(double)PathData.Path.TotalNumSlices;
+//   favg =favg/(double)PathData.Path.TotalNumSlices;
+//   NodeAvg = NodeAvg/(double)(PathData.Path.TotalNumSlices);
+//   // Only processor 0 writes.
+//   if (PathData.Path.Communicator.MyProc()==0) {
+//     cerr << "myAvg = " << myAvg << endl;
+//     cerr << "avg = " << avg << endl;
+//     cerr << "Pot avg = " << vavg << endl;
+//     cerr << "S avg = " << savg << endl;
+//     cerr << "U avg = " <<favg <<endl;
+//     cerr << "NodeAvg = " <<NodeAvg <<endl;
+//     if (FirstTime) {
+//       FirstTime = false;
+//       WriteInfo();
+//       IOSection.WriteVar("Type","Scalar");
+//       Array<double,1> dummy(1);
+//       dummy(0)=avg;
+//       IOSection.WriteVar ("TotalEnergy", dummy);
+//       dummy(0)=vavg;
+//       IOSection.WriteVar ("PotentialEnergy",dummy);
+//       dummy(0)=savg;
+//       IOSection.WriteVar ("SpringEnergy",dummy);
+//       dummy(0)=favg;
+//       IOSection.WriteVar ("DBetaEnergy",dummy);
+//       dummy(0)=NodeAvg;
+//       IOSection.WriteVar ("NodeEnergy",dummy);
+//       IOVar = IOSection.GetVarPtr("TotalEnergy");
+//       IOVVar= IOSection.GetVarPtr("PotentialEnergy");
+//       IOSVar= IOSection.GetVarPtr("SpringEnergy");
+//       IOUVar= IOSection.GetVarPtr("DBetaEnergy");
+//       IONodeVar= IOSection.GetVarPtr("NodeEnergy");
+//     }
+//     else {
+//       IOVar->Append(avg);
+//       IOVVar->Append(vavg);
+//       IOSVar->Append(savg);
+//       IOUVar->Append(favg);
+//       IONodeVar->Append(NodeAvg);
+//       IOSection.FlushFile();
+//     }
+//   }
+//   ESum       = 0.0;
+//   VSum       = 0.0;
+//   SSum       = 0.0;
+//   FSum       = 0.0;
+//   NodeSum    = 0.0;
+//  NumSamples = 0;
 }
 
+void EnergyClass::Read(IOSectionClass &in)
+{  
+  ObservableClass::Read(in);
+  assert(in.ReadVar("freq",Freq));
+  assert(in.ReadVar("dumpFreq",DumpFreq));
+  if (PathData.Path.Communicator.MyProc()==0){
+    WriteInfo();
+    IOSection.WriteVar("Type","Scalar");
+  }
+}

@@ -11,27 +11,33 @@ void PIMCClass::Read(IOSectionClass &in)
 {
   // Read the parallelization strategy
   PathData.Read (in);
+  cerr << "Finished PathData Read.\n";
   // Read in the system information and set up the path
   assert(in.OpenSection("System"));
   PathData.Path.Read(in);
   in.CloseSection();
-
+  cerr << "Finished Path read.\n";
   // Read in the action information
   assert(in.OpenSection("Action"));
   PathData.Action.Read(in);
+  cerr << "Finished Action read.\n";
   PathData.Actions.Read(in);
+  cerr << "Finished Actions read.\n";
   in.CloseSection();
   // Read in the Observables
   assert(in.OpenSection("Observables"));
   ReadObservables(in);
+  cerr << "Finished Observables Read.\n";
   in.CloseSection();
+
 
   // Read in the Moves
   assert(in.OpenSection("Moves"));
   ReadMoves(in);
+  cerr << "Finished Moves Read.\n";
   in.CloseSection();
 
-  
+
   // Read in the Algorithm
   assert(in.OpenSection("Algorithm"));
   ReadAlgorithm(in);
@@ -49,8 +55,9 @@ void PIMCClass::Read(IOSectionClass &in)
 
 void PIMCClass::ReadObservables(IOSectionClass &in)
 {
-
-  if (PathData.Path.Communicator.MyProc()==0) {
+  int myProc=PathData.Path.Communicator.MyProc();
+  bool iAmRoot= myProc==0;
+  if (iAmRoot) {
     string outFileBase;
     assert(in.ReadVar("OutFileBase",outFileBase));
     ostringstream cloneNum;
@@ -64,78 +71,93 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     OutFile.NewSection("System");
     WriteSystemInfo();
     OutFile.CloseSection(); // "System" 
-    int numOfObservables=in.CountSections("Observable");
-    Observables.resize(numOfObservables);
     OutFile.NewSection ("Observables");
-    for (int counter=0;counter<numOfObservables;counter++){
-      in.OpenSection("Observable",counter);
-      string theObserveType;
-      string theObserveName;
-      assert(in.ReadVar("type",theObserveType));
-      ObservableClass* tempObs;
-      if (theObserveType=="PairCorrelation"){
-	assert(in.ReadVar("Name",theObserveName));
-	OutFile.NewSection(theObserveName);
-	tempObs = new PairCorrelationClass(PathData,OutFile);
-      }
-      else if (theObserveType=="nofr"){
-	assert(in.ReadVar("Name",theObserveName));
-	OutFile.NewSection(theObserveName);
-	tempObs = new nofrClass(PathData,OutFile);
-      }
-      else if (theObserveType=="Energy"){
-	OutFile.NewSection("Energies");
-	tempObs = new TotalEnergyClass(PathData,OutFile);
-      }
-      else if (theObserveType=="PathDump"){
-	OutFile.NewSection("PathDump");
-	tempObs=new PathDumpClass(PathData,OutFile);
-      }
-      else if (theObserveType=="WindingNumber"){
-	OutFile.NewSection("WindingNumber");
-	tempObs=new WindingNumberClass(PathData,OutFile);
-      }
-      else if (theObserveType=="StructureFactor"){
-	OutFile.NewSection("StructureFactor");
-	tempObs=new StructureFactorClass(PathData,OutFile);
-      }
-      else {
-	cerr<<"We do not recognize the observable "<<theObserveType<<endl;
-	abort();
-      }
-      tempObs->Read(in);
-      Observables(counter)=tempObs;
-      OutFile.CloseSection();
-      in.CloseSection();//Observable
-    }
-    OutFile.CloseSection(); // "Observables"
   }
+  int numOfObservables=in.CountSections("Observable");
+  Observables.resize(numOfObservables);
+  
+  for (int counter=0;counter<numOfObservables;counter++){
+    in.OpenSection("Observable",counter);
+    string theObserveType;
+    string theObserveName;
+    assert(in.ReadVar("type",theObserveType));
+    ObservableClass* tempObs;
+    if (theObserveType=="PairCorrelation"){
+      assert(in.ReadVar("Name",theObserveName));
+      if (iAmRoot)
+	OutFile.NewSection(theObserveName);
+      tempObs = new PairCorrelationClass(PathData,OutFile);
+    }
+    else if (theObserveType=="nofr"){
+      assert(in.ReadVar("Name",theObserveName));
+      if (iAmRoot)
+	OutFile.NewSection(theObserveName);
+      tempObs = new nofrClass(PathData,OutFile);
+    }
+    else if (theObserveType=="Energy"){
+      if (iAmRoot)
+	OutFile.NewSection("Energies");
+      tempObs = new EnergyClass(PathData,OutFile);
+    }
+    else if (theObserveType=="PathDump"){
+      if (iAmRoot)
+	OutFile.NewSection("PathDump");
+      tempObs=new PathDumpClass(PathData,OutFile);
+    }
+    else if (theObserveType=="WindingNumber"){
+      if (iAmRoot)
+	OutFile.NewSection("WindingNumber");
+      tempObs=new WindingNumberClass(PathData,OutFile);
+    }
+    else if (theObserveType=="StructureFactor"){
+      if (iAmRoot)
+	OutFile.NewSection("StructureFactor");
+      tempObs=new StructureFactorClass(PathData,OutFile);
+    }
+    else {
+      cerr<<"We do not recognize the observable "<<theObserveType<<endl;
+	abort();
+    }
+    tempObs->Read(in);
+    Observables(counter)=tempObs;
+    if (iAmRoot)
+      OutFile.CloseSection();
+    in.CloseSection();//Observable
+  }
+  if (iAmRoot)
+    OutFile.CloseSection(); // "Observables"
 }
+
 
 
 
 void PIMCClass::ReadMoves(IOSectionClass &in)
 {
+
   int numOfMoves=in.CountSections("Move");
   Moves.resize(numOfMoves);
   int steps;
-  OutFile.NewSection("Moves");
+  int myProc=PathData.Path.Communicator.MyProc();
+  bool iAmRoot = myProc == 0;
+  
+  if (iAmRoot)
+    OutFile.NewSection("Moves");
   for (int counter=0;counter<numOfMoves;counter++){
+    string moveName;
     in.OpenSection("Move",counter);
     string MoveType;
     assert(in.ReadVar("type",MoveType));
+    if (iAmRoot)
+      OutFile.NewSection(MoveType);
     if (MoveType=="Bisection") {
-      OutFile.NewSection("BisectionMove");
+      moveName = "BisectionMove";
       Moves(counter)=new BisectionMoveClass(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="OpenBisection") {
-      OutFile.NewSection("OpenBisectionMove");
+      moveName = "OpenBisectionMove";
       Moves(counter)=new OpenBisectionMoveClass(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection(); // Whatever Move section we opened above.
-
     }
     else if (MoveType=="ShiftMove") {
       Moves(counter)=new ShiftMoveClass(PathData, OutFile);
@@ -146,36 +168,36 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)->Read(in);
     }
     else if (MoveType=="CycleBlock") {
-      OutFile.NewSection("CycleBlockMove");
+      moveName = "CycleBlockMove";
       Moves(counter)=new CycleBlockMoveClass(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="PermMove") {
-      OutFile.NewSection("PermMove");
+      moveName= "PermMove";
       Moves(counter)=new PermMove(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="BisectionBlock"){
-      OutFile.NewSection("BisectionBlock");
+      moveName="BisectionBlock";
       Moves(counter)=new BisectionBlockClass(PathData,OutFile);
       Moves(counter)->Read(in); 
-      OutFile.CloseSection(); //Whatever Move section we openned above
     }
     else if (MoveType=="RefSlice"){
-      OutFile.NewSection("RefSlice");
+      moveName="RefSlice";
       Moves(counter)=new RefSliceMoveClass(PathData,OutFile);
       Moves(counter)->Read(in); 
-      OutFile.CloseSection(); //Whatever Move section we openned above
     }
     else {
       cerr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();
     }
+    if (iAmRoot)
+      OutFile.CloseSection();
     in.CloseSection();
   }
-  OutFile.CloseSection (); // "Moves"
+  if (iAmRoot)
+    OutFile.CloseSection (); // "Moves"
+  
 }
 
 

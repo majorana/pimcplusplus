@@ -3,7 +3,8 @@
 
 void ObservableClass::WriteInfo()
 {
-  IOSection.WriteVar("Description",Description);
+  if (PathData.Path.Communicator.MyProc()==0)
+    IOSection.WriteVar("Description",Description);
 }
 
 void ObservableClass::Read(IOSectionClass &in)

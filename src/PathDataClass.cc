@@ -17,12 +17,12 @@ void PathDataClass::Read (IOSectionClass &in)
   // Create IntraComm
   WorldComm.Split(MyCloneNum, IntraComm);
   
-  if (IntraComm.MyProc()==0) {    
-    Array<int,1> ranks (numClones);
-    for (int clone=0; clone<numClones; clone++)
-      ranks(clone) = clone*procsPerClone;
-    WorldComm.Subset (ranks, InterComm);
-  }
+  cerr << "before subset.\n";
+  Array<int,1> ranks (numClones);
+  for (int clone=0; clone<numClones; clone++)
+    ranks(clone) = clone*procsPerClone;
+  WorldComm.Subset (ranks, InterComm);
+  cerr << "after subset.\n";
   
   // Now, set up random number generator
   Random.Init (314159, numClones);

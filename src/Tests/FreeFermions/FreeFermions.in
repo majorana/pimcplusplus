@@ -1,4 +1,8 @@
 double tau=0.1;
+Section (Parallel)
+{
+  int ProcsPerClone = 2;
+}
 
 Section (System)
 {
@@ -34,7 +38,8 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "FreeFermionsBoson.h5";
+  string OutFileBase = "FreeFermionsBoson";
+
   Section (Observable)
     {
       string type = "Energy";
