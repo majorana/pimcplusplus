@@ -1324,7 +1324,11 @@ void ActionClass::Energy(int slice1, int level,
   }
   if (PathData.Path.LongRange){
     // Add long range part of energy
-    dU += 0.5*(LongRange_dU (slice1, level)+LongRange_dU(slice2,level));
+    if (UseRPA)
+      dU += 0.5*(LongRange_dU_RPA (slice1, level)+
+		 LongRange_dU_RPA(slice2,level));
+    else
+      dU += 0.5*(LongRange_dU (slice1, level)+LongRange_dU(slice2,level));
   }
 }
 
