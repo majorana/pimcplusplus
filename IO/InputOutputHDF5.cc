@@ -1353,7 +1353,7 @@ void IOTreeHDF5Class::GroupIterator(string member_name)
 
 void PrintIndent(int num)
 {
-  for (int counter=0;counter<num*3;counter++){
+  for (int counter=0;counter<num*2;counter++){
     cout<<' ';
   }
 }
