@@ -902,3 +902,16 @@ VarASCIIClass::~VarASCIIClass()
       delete ((Array<string,3> *)Value);
   }
 }
+
+//////////////////////////////////////////////////////////////////////
+//                             Append's                             //
+//////////////////////////////////////////////////////////////////////
+  bool Append (double val);
+  bool Append (Array<double,1> &val);
+  bool Append (Array<double,2> &val);
+  bool Append (int val);
+  bool Append (Array<int,1> &val);
+  bool Append (Array<int,2> &val);
+  bool Append (string val);
+  bool Append (Array<string,1> &val);
+  bool Append (Array<string,2> &val);

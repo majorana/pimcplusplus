@@ -39,26 +39,23 @@ public:
   virtual bool ReadInto (Array<string,1> &val)     = 0;
   virtual bool ReadInto (Array<string,2> &val)     = 0;
   virtual bool ReadInto (Array<string,3> &val)     = 0; 
+  //virtual bool ReadInto (bool &val)                = 0;
+  //virtual bool ReadInto (Array<bool,1> &val)       = 0;
+  //virtual bool ReadInto (Array<bool,2> &val)       = 0;
+  //virtual bool ReadInto (Array<bool,3> &val)       = 0;
+
   virtual bool Append (double val) = 0;
   virtual bool Append (Array<double,1> &val) = 0;
-//   virtual bool Append (Array<double,2 val) = 0;
-//   virtual bool Append (int val) = 0;
-//   virtual bool Append (Array<int,1> val) = 0;
-//   virtual bool Append (Array<int,2 val) = 0;
-//   virtual bool Append (string val) = 0;
-//   virtual bool Append (Array<string,1> val) = 0;
-//   virtual bool Append (Array<string,2 val) = 0;
+  virtual bool Append (Array<double,2> &val) = 0;
+  virtual bool Append (int val) = 0;
+  virtual bool Append (Array<int,1> &val) = 0;
+  virtual bool Append (Array<int,2> &val) = 0;
+  virtual bool Append (string val) = 0;
+  virtual bool Append (Array<string,1> &val) = 0;
+  virtual bool Append (Array<string,2> &val) = 0;
   //virtual bool Append (bool val) = 0;
-  //virtual bool Append (Array<bool,1> val) = 0;
-  //virtual bool Append (Array<bool,2 val) = 0;
-
-  
-
-  /*virtual bool ReadInto (bool &val)                = 0;
-  virtual bool ReadInto (Array<bool,1> &val)       = 0;
-  virtual bool ReadInto (Array<bool,2> &val)       = 0;
-  virtual bool ReadInto (Array<bool,3> &val)       = 0;*/
-
+  //virtual bool Append (Array<bool,1> &val) = 0;
+  //virtual bool Append (Array<bool,2> &val) = 0;
 };
 
 
@@ -95,10 +92,9 @@ public:
   {
     bool readVarSuccess;
     list<VarClass*>::iterator varIter=VarList.begin();
-    while ((varIter!=VarList.end() && (*varIter)->Name!=name)){
-      cerr<<"The current name to compare against is "<<(*varIter)->Name<<endl;
+    while ((varIter!=VarList.end() && (*varIter)->Name!=name))
       varIter++;
-    }
+
     bool found = varIter != VarList.end();
     if (found){
       readVarSuccess=(*varIter)->ReadInto(var);
@@ -137,6 +133,7 @@ public:
   /// Inserts a new Include directive in the present section.
   virtual void IncludeSection (IOTreeClass *) = 0;
   virtual void CloseFile() = 0;
+  virtual void FlushFile() = 0;
   virtual void WriteVar(string name, double val)=0;
   virtual void WriteVar(string name, Array<double,1> &val)=0;
   virtual void WriteVar(string name, Array<double,2> &val)=0;
@@ -157,13 +154,25 @@ public:
   virtual void WriteVar(string name, Array<string,2> &val)=0;
   virtual void WriteVar(string name, Array<string,3> &val)=0;
 
-  /// Append a single double to an Array<double,1> variable
-  virtual bool AppendVar(string name, double val)=0;
-  virtual bool AppendVar(string name, Array<double,1> &val )=0;
-
+  /// Append a value to a variable of dimension of 1 higher than val.
+  /// i.e. Add a double to an Array<double,1> or add Array<double,1>
+  /// to an Array<double,2>, etc.
+  template<class T>
+  inline bool AppendVar(string name, T val);
 
   inline IOTreeClass(){ FileName="";}
 };
+
+
+template<class T>
+inline bool IOTreeClass::AppendVar(string name, T val)
+{ 
+  VarClass *var = GetVarPtr(name);
+  if (var == NULL)
+    return false;
+  
+  return var->Append(val);
+}
 
 
 
@@ -238,6 +247,7 @@ inline void IOTreeClass::InsertSection(IOTreeClass *newSec)
 
 
 
+
 class OutputSectionClass
 {
 public:
@@ -259,7 +269,6 @@ public:
   virtual void WriteVar(string name, Array<string,3> &v) = 0;
 
 };
-
 
 
 

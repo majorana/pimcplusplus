@@ -8,6 +8,46 @@
 
 
 
+class VarASCIIClass : public VarClass
+{  
+public:
+  /// Hack to hold different types.  We cast to to whatever type is
+  /// indicated by the Type and Dim variables in the parent class.
+  void *Value;
+
+  /// The ReadIntos take copy their contents into val if the type
+  /// that's passed to them matches the type that's actually stored in
+  /// it's void *Value, as indicated by Type and Dim.
+  bool ReadInto (double &val);
+  bool ReadInto (int &val);
+  bool ReadInto (string &val);
+  bool ReadInto (bool &val);
+  bool ReadInto (Array<double,1> &v);
+  bool ReadInto (Array<double,2> &v);
+  bool ReadInto (Array<double,3> &v);
+  bool ReadInto (Array<int,1> &v);
+  bool ReadInto (Array<int,2> &v);
+  bool ReadInto (Array<int,3> &v);
+  bool ReadInto (Array<string,1> &v);
+  bool ReadInto (Array<string,2> &v);
+  bool ReadInto (Array<string,3> &v);
+  bool ReadInto (Array<bool,1> &v);
+  bool ReadInto (Array<bool,2> &v);
+  bool ReadInto (Array<bool,3> &v);
+
+  bool Append (double val);
+  bool Append (Array<double,1> &val);
+  bool Append (Array<double,2> &val);
+  bool Append (int val);
+  bool Append (Array<int,1> &val);
+  bool Append (Array<int,2> &val);
+  bool Append (string val);
+  bool Append (Array<string,1> &val);
+  bool Append (Array<string,2> &val);
+  ~VarASCIIClass();
+};
+
+
 /// This class holds an ASCII token, which is just a string and the
 /// line number in which it appeared in the file.
 class TokenClass
@@ -58,33 +98,6 @@ class InputTreeASCIIClass : public InputTreeClass
 };
 
 
-class VarASCIIClass : public VarClass
-{  
-public:
-  /// Hack to hold different types.  We cast to to whatever type is
-  /// indicated by the Type and Dim variables in the parent class.
-  void *Value;
 
-  /// The ReadIntos take copy their contents into val if the type
-  /// that's passed to them matches the type that's actually stored in
-  /// it's void *Value, as indicated by Type and Dim.
-  bool ReadInto (double &val);
-  bool ReadInto (int &val);
-  bool ReadInto (string &val);
-  bool ReadInto (bool &val);
-  bool ReadInto (Array<double,1> &v);
-  bool ReadInto (Array<double,2> &v);
-  bool ReadInto (Array<double,3> &v);
-  bool ReadInto (Array<int,1> &v);
-  bool ReadInto (Array<int,2> &v);
-  bool ReadInto (Array<int,3> &v);
-  bool ReadInto (Array<string,1> &v);
-  bool ReadInto (Array<string,2> &v);
-  bool ReadInto (Array<string,3> &v);
-  bool ReadInto (Array<bool,1> &v);
-  bool ReadInto (Array<bool,2> &v);
-  bool ReadInto (Array<bool,3> &v);
-  ~VarASCIIClass();
-};
 
 #endif

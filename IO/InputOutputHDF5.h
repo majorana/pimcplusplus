@@ -38,7 +38,13 @@ public:
   bool ReadInto (Array<bool,3> &val); */
   bool Append (double val);
   bool Append (Array<double,1> &val);
-//   bool Append (Array<double,2 val);
+  bool Append (Array<double,2> &val);
+  bool Append (int val);
+  bool Append (Array<int,1> &val);
+  bool Append (Array<int,2> &val);
+  bool Append (string val);
+  bool Append (Array<string,1> &strs);
+  bool Append (Array<string,2> &strs);
 //   bool Append (int val);
 //   bool Append (Array<int,1> val);
 //   bool Append (Array<int,2 val);
@@ -86,6 +92,7 @@ public:
   bool NewFile(string fileName,string myName,IOTreeClass* parent);
   void IncludeSection (IOTreeClass *);
   void CloseFile();
+  void FlushFile();
   IOTreeHDF5Class() : IOTreeClass()
   {
     IsOpen=false;
@@ -105,12 +112,6 @@ public:
   void WriteVar (string name, Array<string,1> &v);
   void WriteVar (string name, Array<string,2> &v);
   void WriteVar (string name, Array<string,3> &v);
-
-  bool AppendVar (string name, double val);
-  bool AppendVar (string name, Array<double,1> &val);
-  //bool AppendVar (string name, Array<double,2> val);
-  //bool AppendVar (string name, Array<double,3> val);
-
 };
 
 

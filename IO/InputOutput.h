@@ -100,82 +100,31 @@ public:
   /// IOTreeHDF5Class.  For ".xml" it creaes an IOTreeXMLClass.
   /// After creating the object, it calls the objects virtual OpenFile
   /// function, reading the contents of the file into the tree.
-  bool OpenFile (string fileName)
-  {
-    CurrentSection = ReadTree (fileName, "Root", NULL);
-    if (CurrentSection == NULL)
-      return (false);
-    else
-      return (true);
-  }
+  bool OpenFile (string fileName);
 
   /// Creates a file at the top level, choosing the appropriate type
   /// based on the file extension.
-  bool NewFile (string fileName)
-  {
-    CurrentSection = NewTree (fileName, "Root", NULL);
-    if (CurrentSection == NULL)
-      return (false);
-    else
-      return (true);
-  }
+  bool NewFile (string fileName);
 
   /// Calls CurrentSections close file and then deletes the
   /// CurrentSection.  
-  void CloseFile ()
-  {
-    while (CurrentSection->Parent != NULL)
-      CloseSection();
-    CurrentSection->CloseFile();
-    delete (CurrentSection);
-  }
+  void CloseFile ();
+
+  /// Flush all buffers to disk for safety
+  inline void FlushFile();
 
   /// Opens the num'th section with the given name.  The default
   /// value for num is 0.
-  inline bool OpenSection (string name, int num=0)
-  {
-    IOTreeClass *newSection;
-    bool success;
-    success = CurrentSection->FindSection(name, newSection, num);
-    if (success)
-      CurrentSection=newSection;
-    return success;
-  }
+  inline bool OpenSection (string name, int num=0);
 
   /// Opens the num'th section below CurrentSection.
-  inline bool OpenSection (int num)
-  {
-    IOTreeClass *newSection;
-    list<IOTreeClass*>::iterator Iter=CurrentSection->SectionList.begin();
-    int i = 0;
-    while ((i<num) && 
-	   (Iter != CurrentSection->SectionList.end())){
-      i++;
-      Iter++;
-    }
-    if (i<num)
-      return false;
-    else {
-      CurrentSection = *Iter;
-      return true;
-    }
-  }
+  inline bool OpenSection (int num);
 
   /// This mounts a file in the current tree under CurrentSection at
   /// the end of CurrentsSection's SectionList.  It does not change
   /// what CurrentSection points to, ie. it does not descend to the
   /// newly-opened section.
-  inline bool IncludeSection (string name, string fileName)
-  {
-    IOTreeClass *newSection;
-    newSection = ReadTree (fileName, name, CurrentSection);
-    if (newSection == NULL)
-      return false;
-    else {
-      CurrentSection->IncludeSection(newSection);
-      return true;
-    }
-  }
+  inline bool IncludeSection (string name, string fileName);
 
   /// Creates a new section of the same type as currentSection under
   /// currentSection.  Pushes the new section to the end of the
@@ -189,131 +138,38 @@ public:
   /// determined by the extension of fileName and mounts it at the end
   /// of the list under CurrentSection.  Returns false if the file
   /// couldn't be created.
-  inline bool NewSection (string name, string fileName)
-  {
-    IOTreeClass *newSection;
-    newSection = NewTree (fileName, name, CurrentSection);
-     if (newSection == NULL)
-      return false;
-    else {
-      CurrentSection->IncludeSection(newSection);
-      CurrentSection = newSection;
-      return true;
-    }
-  }
+  inline bool NewSection (string name, string fileName);
 
   /// Closes the current section.  That is, CurrentSection becomes
   /// CurrentSection's parent.
-  inline void CloseSection ()
-  {
-    assert (CurrentSection->Parent != NULL);
-    CurrentSection = CurrentSection->Parent;
-  }
+  inline void CloseSection ();
 
   /// Template function which reads a variable in the present section
   /// into the passed-by-reference T variable.
   template<class T>
   bool ReadVar(string name, T &var)
-  {
-    return (CurrentSection->ReadVar(name, var));
-  }
+  {  return (CurrentSection->ReadVar(name, var)); }
 
   /// Writes a variable under the current section.
-  void WriteVar(string name, double val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  void WriteVar(string name, Array<double,1> &val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  void WriteVar(string name, Array<double,2> &val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  void WriteVar(string name, Array<double,3> &val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  bool AppendVar(string name, double val)
-  {
-    return CurrentSection->AppendVar(name, val);
-  }
-  bool AppendVar(string name, Array<double,1> &val)
-  {
-    return CurrentSection->AppendVar(name, val);
-  }
-
-
-
-  void WriteVar(string name, int val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  void WriteVar(string name, Array<int,1> &val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  void WriteVar(string name, Array<int,2> &val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  void WriteVar(string name, Array<int,3> &val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-
-
-//   void WriteVar(string name, bool val)
-//   {
-//     CurrentSection->WriteVar(name, val);
-//   }
-//   void WriteVar(string name, Array<bool,1> &val)
-//   {
-//     CurrentSection->WriteVar(name, val);
-//   }
-//   void WriteVar(string name, Array<bool,2> &val)
-//   {
-//     CurrentSection->WriteVar(name, val);
-//   }
-//   void WriteVar(string name, Array<bool,3> &val)
-//   {
-//     CurrentSection->WriteVar(name, val);
-//   }
-
-
-  void WriteVar(string name, string val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  void WriteVar(string name, Array<string,1> &val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  void WriteVar(string name, Array<string,2> &val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
-  void WriteVar(string name, Array<string,3> &val)
-  {
-    CurrentSection->WriteVar(name, val);
-  }
+  template <class T>
+  void WriteVar(string name, T val)
+  { CurrentSection->WriteVar(name, val); }
+  
+  template<class T>
+  bool AppendVar(string name, T val)
+  { return CurrentSection->AppendVar(name, val); }
 
   /// Returns the number of subsections within the present section
   /// which have the name name.  If called without a name, it returns
   /// the total number of sections.
   inline int CountSections(string name="")
-  {
-    return (CurrentSection->CountSections(name));
-  }
+  { return (CurrentSection->CountSections(name)); }
 
   /// Calls CurrentSections virtual PrintTree() function.  This is for
   /// debugging purposes.  It spits out a hierarchy of the sections
   /// and variable names.
   void PrintTree()
-  {
-    CurrentSection->PrintTree();
-  }
+  { CurrentSection->PrintTree(); }
 
   IOSectionClass() 
   {
@@ -324,6 +180,105 @@ public:
 };
 
 
+
+inline bool IOSectionClass::OpenFile (string fileName)
+{
+  CurrentSection = ReadTree (fileName, "Root", NULL);
+  if (CurrentSection == NULL)
+    return (false);
+  else
+    return (true);
+}
+
+inline bool IOSectionClass::NewFile (string fileName)
+{
+  CurrentSection = NewTree (fileName, "Root", NULL);
+  if (CurrentSection == NULL)
+    return (false);
+  else
+    return (true);
+}
+
+
+inline void IOSectionClass::CloseFile ()
+{
+  while (CurrentSection->Parent != NULL)
+    CloseSection();
+  CurrentSection->CloseFile();
+  delete (CurrentSection);
+}
+
+
+inline void IOSectionClass::FlushFile()
+{
+  IOTreeClass *tree = CurrentSection;
+  while (tree->Parent != NULL)
+    tree = tree->Parent;
+  tree->FlushFile();
+}
+
+
+inline bool IOSectionClass::OpenSection (string name, int num)
+{
+  IOTreeClass *newSection;
+  bool success;
+  success = CurrentSection->FindSection(name, newSection, num);
+  if (success)
+    CurrentSection=newSection;
+  return success;
+}
+
+
+inline bool IOSectionClass::OpenSection (int num)
+{
+  IOTreeClass *newSection;
+  list<IOTreeClass*>::iterator Iter=CurrentSection->SectionList.begin();
+  int i = 0;
+  while ((i<num) && 
+	 (Iter != CurrentSection->SectionList.end())){
+    i++;
+    Iter++;
+  }
+  if (i<num)
+    return false;
+  else {
+    CurrentSection = *Iter;
+    return true;
+  }
+}
+
+
+inline bool IOSectionClass::IncludeSection (string name, string fileName)
+{
+  IOTreeClass *newSection;
+  newSection = ReadTree (fileName, name, CurrentSection);
+  if (newSection == NULL)
+    return false;
+  else {
+    CurrentSection->IncludeSection(newSection);
+    return true;
+  }
+}
+
+
+inline bool IOSectionClass::NewSection (string name, string fileName)
+{
+  IOTreeClass *newSection;
+  newSection = NewTree (fileName, name, CurrentSection);
+  if (newSection == NULL)
+    return false;
+  else {
+    CurrentSection->IncludeSection(newSection);
+    CurrentSection = newSection;
+    return true;
+  }
+}
+
+inline void IOSectionClass::CloseSection ()
+{
+  assert (CurrentSection->Parent != NULL);
+  CurrentSection = CurrentSection->Parent;
+}
 
 
 
