@@ -101,7 +101,7 @@ public:
   /// After creating the object, it calls the objects virtual OpenFile
   /// function, reading the contents of the file into the tree.
   bool OpenFile (string fileName);
-
+  string GetName(){ return CurrentSection->Name;}
   /// Creates a file at the top level, choosing the appropriate type
   /// based on the file extension.
   bool NewFile (string fileName);
