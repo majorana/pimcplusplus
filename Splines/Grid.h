@@ -66,6 +66,7 @@ class Grid
   }
 
   virtual void Write (OutputSectionClass &out) = 0;
+  virtual void Read  (InputSectionClass &inSection) = 0;
 };
 
 
@@ -106,15 +107,7 @@ class LinearGrid : public Grid
     fprintf (fout, "  }\n");
   }
   
-  void Write (OutputSectionClass &outSection)
-  {
-    outSection.WriteVar ("Points", grid); 
-    outSection.WriteVar ("Type", "Linear");
-    outSection.WriteVar ("Start", Start);
-    outSection.WriteVar ("End", End);
-    outSection.WriteVar ("NumPoints", NumPoints);
-  }
-
+  
   /// Returns the index of the nearest point below r. 
   int ReverseMap(scalar r)
     {
@@ -130,6 +123,23 @@ class LinearGrid : public Grid
       for (int i=0; i<NumPoints; i++)
 	grid(i) = Start + (scalar)i*delta;
   }
+
+  void Write (OutputSectionClass &outSection)
+  {
+    outSection.WriteVar ("Points", grid); 
+    outSection.WriteVar ("Type", "Linear");
+    outSection.WriteVar ("Start", Start);
+    outSection.WriteVar ("End", End);
+    outSection.WriteVar ("NumPoints", NumPoints);
+  }
+  void Read (InputSectionClass &inSection)
+  {
+    assert(inSection.ReadVar("Start", Start));
+    assert(inSection.ReadVar("End", End));
+    assert(inSection.ReadVar("NumPoints", NumPoints));
+    Init (Start, End, NumPoints);
+  }
+
 
   /// Useless constructor
   LinearGrid ()
@@ -187,14 +197,6 @@ class OptimalGrid : public Grid
     fprintf (fout, "  }\n");
   }
 
-  void Write (OutputSectionClass &outSection)
-  {
-    outSection.WriteVar ("Points", grid); 
-    outSection.WriteVar ("Type", "Optimal");
-    outSection.WriteVar ("a", a);
-    outSection.WriteVar ("b", b);
-  }
-
   int ReverseMap(scalar r)
     {
       if ((r/a) < 1e-6)
@@ -231,12 +233,11 @@ class OptimalGrid : public Grid
       grid(i) = a*(exp(b*(i+1))-1.0);
   }
 
-  /// This form of the constructor takes a, b, and the number of points.
-  OptimalGrid (scalar aval, scalar bval, int numpoints)
+  void Init (scalar aval, scalar bval, int numPoints)
   {
     a = aval;
     b = bval;
-    NumPoints = numpoints;
+    NumPoints = numPoints;
     Start = a * (exp(b) - 1.0);
     End   = a * (exp(b*NumPoints) - 1.0);
       
@@ -245,6 +246,33 @@ class OptimalGrid : public Grid
     for (int i=0; i<NumPoints; i++)
       grid(i) = a*(exp(b*(i+1))-1.0);
   }
+
+
+  /// This form of the constructor takes a, b, and the number of points.
+  OptimalGrid (scalar aval, scalar bval, int numPoints)
+  { 
+    Init (aval, bval, numPoints);
+  }
+
+  void Write (OutputSectionClass &outSection)
+  {
+    outSection.WriteVar ("Points", grid); 
+    outSection.WriteVar ("Type", "Optimal");
+    outSection.WriteVar ("a", a);
+    outSection.WriteVar ("b", b);
+  }
+
+  void Read (InputSectionClass &inSection)
+  {
+    double aval, bval;
+    int numPoints;
+    assert(inSection.ReadVar("a", aval));
+    assert(inSection.ReadVar("b", bval));
+    assert(inSection.ReadVar("NumPoints", numPoints));
+    Init (aval,bval,numPoints);
+  }
+
+
   /// This form of the constructor takes a nuclear charge and a
   /// maxmimum radius and chooses an appropriate number of points for
   /// that atom.
@@ -316,14 +344,6 @@ class LogGrid : public Grid
     fprintf (fout, "  }\n");
   }
 
-  void Write (OutputSectionClass &outSection)
-  {
-    outSection.WriteVar ("Points", grid); 
-    outSection.WriteVar ("Type", "Log");
-    outSection.WriteVar ("r0", r0);
-    outSection.WriteVar ("Spacing", Spacing);
-  }
-
 
 
   int ReverseMap(scalar r)
@@ -336,7 +356,7 @@ class LogGrid : public Grid
     // Do nothing
   }
 
-  LogGrid (scalar R0, scalar spacing, int numpoints)
+  void Init (scalar R0, scalar spacing, int numpoints)
   {
     NumPoints = numpoints;
     Z = 1.0; r0 = R0; Spacing = spacing;
@@ -348,6 +368,30 @@ class LogGrid : public Grid
       grid(i) = r0 * pow(Spacing, (scalar) i);
   }
 
+
+
+  void Write (OutputSectionClass &outSection)
+  {
+    outSection.WriteVar ("Points", grid); 
+    outSection.WriteVar ("Type", "Log");
+    outSection.WriteVar ("r0", r0);
+    outSection.WriteVar ("Spacing", Spacing);
+  }
+
+  void Read (InputSectionClass &inSection)
+  {
+    double tempr0, tempSpacing;
+    int  tempNumPoints;
+    assert (inSection.ReadVar("r0", tempr0));
+    assert (inSection.ReadVar("Spacing", tempSpacing));
+    assert (inSection.ReadVar("NumPoints", tempNumPoints));
+    Init (tempr0, tempSpacing, tempNumPoints);
+  }
+
+  LogGrid (scalar R0, scalar spacing, int numpoints)
+  {
+    Init  (R0, spacing, numpoints);
+  }
 
   LogGrid (int numpoints, scalar z, scalar R0, scalar spacing)
     {
@@ -451,37 +495,17 @@ inline Grid* ReadGrid (InputSectionClass &inSection)
 
   Grid *newGrid;
   if (Type == "Linear")
-    {
-      double Start, End;
-      int NumPoints;
-      assert (inSection.ReadVar ("Start", Start));
-      assert (inSection.ReadVar ("End", End));
-      assert (inSection.ReadVar ("NumPoints", NumPoints));
-      newGrid = new LinearGrid(Start, End, NumPoints);
-    }
+    newGrid = new LinearGrid;
   else if (Type == "Optimal")
-    {
-      double a, b;
-      int NumPoints;
-      assert (inSection.ReadVar ("a", a));
-      assert (inSection.ReadVar ("b", b));
-      assert (inSection.ReadVar ("NumPoints", NumPoints));
-      newGrid = new OptimalGrid (a, b, NumPoints);
-    }
+    newGrid = new OptimalGrid;
   else if (Type == "Log")
-    {
-      double r0, Spacing;
-      int NumPoints;
-      assert (inSection.ReadVar ("r0", r0));
-      assert (inSection.ReadVar ("Spacing", Spacing));
-      assert (inSection.ReadVar ("NumPoints", NumPoints));
-      newGrid = new LogGrid (r0, Spacing, NumPoints);
-    }
+    newGrid = new LogGrid;
   else
     {
       cerr << "Unrecognized Grid type " << Type << "\n";
       exit(1);
     }
+  newGrid->Read(inSection);
   return (newGrid);
 }
 

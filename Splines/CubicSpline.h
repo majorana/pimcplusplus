@@ -2,6 +2,7 @@
 #define CUBIC_SPLINE_H
 
 #include "Grid.h"
+#include "../IO/InputOutput.h"
 #include <iostream>
 
 
@@ -93,6 +94,29 @@ public:
     UpToDate = 0;
     return (y(i));
   }
+  void Write(OutputSectionClass &outSection)
+  {
+    outSection.WriteVar("StartDeriv", StartDeriv);
+    outSection.WriteVar("EndDeriv", EndDeriv);
+    outSection.WriteVar("y", y);
+
+    outSection.OpenSection("Grid");
+    grid->Write(outSection);
+    outSection.CloseSection();
+  }
+  void Read(InputSectionClass &inSection)
+  {
+    assert(inSection.ReadVar("StartDeriv", StartDeriv));
+    assert(inSection.ReadVar("EndDeriv", EndDeriv));
+    assert(inSection.ReadVar("y", y));
+    NumParams = y.size();
+    d2y.resize(NumParams);
+    assert(inSection.OpenSection("Grid"));
+    grid = ReadGrid(inSection);
+    inSection.CloseSection();
+    Update();
+  }
+
 
   /// Trivial constructor
   CubicSpline()
