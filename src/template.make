@@ -18,22 +18,23 @@ PIMCobjs =                           \
   MetaMoves.o 			     \
   BlockMove.o                        \
   ObservableClass.o                  \
-  Common/Splines/CubicSpline.o       \
-  Common/Splines/MyTricubicSpline.o  \
-  Common/Splines/Grid.o              \
-  Common/Splines/QuinticSpline.o     \
-  Common/Splines/QuinticSplines.o    \
   SpeciesClass.o                     \
   Common.o                           \
   PermuteTableClass.o		     \
   BisectionMoveClass.o               \
   MoveClass.o                        \
   ActionClass.o                      \
+  LongRangeRPA.o                     \
   PathDataClass.o                    \
   CommunicatorClass.o                \
   PathClass.o                        \
   MirroredArrayClass.o               \
   WrapClass.o			     \
+  Common/Splines/CubicSpline.o       \
+  Common/Splines/MyTricubicSpline.o  \
+  Common/Splines/Grid.o              \
+  Common/Splines/QuinticSpline.o     \
+  Common/Splines/QuinticSplines.o    \
   Common/MPI/Communication.o	     \
   Common/IO/InputOutput.o            \
   Common/IO/InputOutputHDF5.o        \
@@ -43,7 +44,7 @@ PIMCobjs =                           \
   Common/PairAction/PAcoulombBCFit.o \
   Common/PairAction/PACoulombFit.o   \
   Common/PairAction/PADipoleFit.o    \
-  Common/PairAction/PATripoleFit.o    \
+  Common/PairAction/PATripoleFit.o   \
   Common/PairAction/PAclassicalFit.o \
   Common/PairAction/PAzeroFit.o      \
   Common/Splines/BicubicSpline.o     \
@@ -73,22 +74,23 @@ TestPermobjs =                       \
   PIMCClass.o                        \
   ObservableClass.o                  \
   ObservableEnergy.o                 \
-  Common/Splines/CubicSpline.o       \
-  Common/Splines/MyTricubicSpline.o  \
-  Common/Splines/Grid.o              \
-  Common/Splines/QuinticSpline.o     \
-  Common/Splines/QuinticSplines.o    \
   SpeciesClass.o                     \
   Common.o                           \
   PermuteTableClass.o		     \
   BisectionMoveClass.o               \
   MoveClass.o                        \
   ActionClass.o                      \
+  LongRangeRPA.o                     \
   PathDataClass.o                    \
   CommunicatorClass.o                \
   PathClass.o                        \
   MirroredArrayClass.o               \
   WrapClass.o			     \
+  Common/Splines/CubicSpline.o       \
+  Common/Splines/MyTricubicSpline.o  \
+  Common/Splines/Grid.o              \
+  Common/Splines/QuinticSpline.o     \
+  Common/Splines/QuinticSplines.o    \
   Common/MPI/Communication.o	     \
   Common/IO/InputOutput.o            \
   Common/IO/InputOutputHDF5.o        \
@@ -98,7 +100,7 @@ TestPermobjs =                       \
   Common/PairAction/PAcoulombBCFit.o \
   Common/PairAction/PACoulombFit.o   \
   Common/PairAction/PADipoleFit.o    \
-  Common/PairAction/PATripoleFit.o    \
+  Common/PairAction/PATripoleFit.o   \
   Common/PairAction/PAclassicalFit.o \
   Common/PairAction/PAzeroFit.o      \
   Common/Splines/BicubicSpline.o     \
@@ -127,6 +129,7 @@ TestEwaldobjs =                      \
   SpeciesClass.o                     \
   ActionClass.o                      \
   PathDataClass.o                    \
+  LongRangeRPA.o                     \
   Common/MPI/Communication.o	     \
   Common/IO/InputOutput.o            \
   Common/IO/InputOutputHDF5.o        \
@@ -136,7 +139,7 @@ TestEwaldobjs =                      \
   Common/PairAction/PAcoulombBCFit.o \
   Common/PairAction/PACoulombFit.o   \
   Common/PairAction/PADipoleFit.o    \
-  Common/PairAction/PATripoleFit.o    \
+  Common/PairAction/PATripoleFit.o   \
   Common/PairAction/PAclassicalFit.o \
   Common/PairAction/PAzeroFit.o      \
   Common/PairAction/DavidPAClass.o   \
@@ -203,7 +206,7 @@ clean:	Common_clean
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc ObservableEnergy.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc MirroredClass.cc TestEwald.cc
+SOURCES = ObservableClass.cc ObservableEnergy.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc
 
 newmake: Common_newmake Tests_newmake
 	make -f template.make Makefile FRC=force_rebuild

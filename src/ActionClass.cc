@@ -58,6 +58,9 @@ void ActionClass::Read(IOSectionClass& inSection)
     OptimizedBreakup_U(numKnots);
     OptimizedBreakup_dU(numKnots);
     OptimizedBreakup_V(numKnots);
+    cerr << "Doing RPA correction...\n";
+    SetupRPA();
+    cerr << "done.\n";
     // Print out some debug info
     for (int i=0; i<numPairActions; i++) {
       string fname = PairActionVector(i)->Particle1.Name + "-" +

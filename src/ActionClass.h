@@ -19,9 +19,14 @@ private:
   LinearGrid LongGrid;
   /// This calculates the quantity 
   /// \f$ X_k \equiv -\frac{4\pi}{\Omega k} \int_{r_c}^\infty dr \, r \sin(kr) V(r).\f$
-  double CalcXk (int paIndex, int level, double k, double rc,
-		 TaskType type);
+  double CalcXk (int paIndex, int level, double k, double rc, TaskType type);
+  // This must be called after all of the OptimizedBreakup_x's
+  Array<double,1> RPAIntegrand(double t, const Array<double,1> &Uvec);
+  void SetupRPA();
+  int Level, ki;
 public:
+  inline Array<double,1> operator()(double t, Array<double,1> uwvec)
+  { return RPAIntegrand(t, uwvec); }
   double LongRange_U(int slice, int level);
   double LongRange_dU(int slice, int level);
   double LongRange_V(int slice);
