@@ -101,4 +101,84 @@ public:
 };
 
 
+
+template <class IntegrandClass>
+class RungeKutta2
+{
+private:
+  IntegrandClass &Integrand;
+
+  // Separate functions are just a little faster...
+  inline void IntegrateForw (const Grid &grid, int startPoint, int endPoint,
+			     Array<double,2> &result)
+  {
+    int numVars = result.cols();
+    Array<double,1> k1(numVars),    k2(numVars), k3(numVars), k4(numVars);
+    Array<double,1>  y(numVars), yplus(numVars);
+    double h, x;
+    
+    const static double OneSixth = 1.0/6.0;
+    const static double OneThird = 1.0/3.0;
+    
+    for (int i=startPoint; i<endPoint; i++) {
+      x = grid(i);
+      h = grid(i+1) - x;
+      y = result (i,Range::all());
+      k1 = h * Integrand(x,       y);
+      yplus = y + 0.5*k1;
+      k2 = h * Integrand(x+0.5*h, yplus);
+      yplus = y + 0.5*k2;
+      k3 = h * Integrand(x+0.5*h, yplus);
+      yplus = y + k3;
+      k4 = h * Integrand(x+h, yplus);
+      result(i+1,Range::all()) = 
+	y + (OneSixth*(k1+k4) + OneThird*(k2+k3));
+    }
+  }
+
+  inline void IntegrateRev (const Grid &grid, int startPoint, int endPoint,
+			    Array<double,2> &result)
+  {
+    int numVars = result.cols();
+    Array<double,1> k1(numVars),    k2(numVars), k3(numVars), k4(numVars);
+    Array<double,1>  y(numVars), yplus(numVars);
+    double h, x;
+    
+    const static double OneSixth = 1.0/6.0;
+    const static double OneThird = 1.0/3.0;
+    
+    for (int i=startPoint; i>endPoint; i--) {
+      x = grid(i);
+      h = grid(i-1) - x;
+      y = result (i,Range::all());
+      k1 = h * Integrand(x,       y);
+      yplus = y + 0.5*k1;
+      k2 = h * Integrand(x+0.5*h, yplus);
+      yplus = y + 0.5*k2;
+      k3 = h * Integrand(x+0.5*h, yplus);
+      yplus = y + k3;
+      k4 = h * Integrand(x+h, yplus);
+      result(i-1,Range::all()) = 
+	y + (OneSixth*(k1+k4) + OneThird*(k2+k3));
+    }
+  }
+
+
+public:
+  inline void Integrate (const Grid &grid, int startPoint, int endPoint,
+			 Array<double,2> &result)
+  {
+    if (endPoint > startPoint)
+      IntegrateForw(grid, startPoint, endPoint, result);
+    else
+      IntegrateRev (grid, startPoint, endPoint, result);
+  }
+
+  RungeKutta2(IntegrandClass &integrand) : Integrand(integrand)
+  {
+    // Do nothing 
+  }
+};
+
+
 #endif
