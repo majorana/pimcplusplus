@@ -69,5 +69,36 @@ public:
   }
 };
 
+class FFTMat3D
+{
+private:
+  cMat3 *rData, *kData;
+  fftw_plan r2kPlan, k2rPlan;
+  bool Allocated;
+  double sqrtNinv;
+public:
+  Array<cMat3,3> rBox, kBox;
+
+  void resize (int nx, int ny, int nz);
+  inline int size()
+  { return rBox.size(); }
+  void r2k();
+  void k2r();
+
+  FFTMat3D() : Allocated(false)
+  {
+    // Do nothing for now
+  }
+  ~FFTMat3D()
+  {
+    if (Allocated) {
+      fftw_free(rData);
+      fftw_free(kData);
+      fftw_destroy_plan(r2kPlan);
+      fftw_destroy_plan(k2rPlan);
+    }
+  }
+};
+
 
 #endif
