@@ -9,6 +9,7 @@ void EndStageClass::WriteRatio()
   AcceptRatioVar.Flush();
 }
 
+
 void EndStageClass::Accept()
 {
   if (Open==HEAD)
@@ -24,6 +25,7 @@ void EndStageClass::Reject()
   EndAttempts++;
 
 }
+
 
 ///Chooses the time slices and moves the join so that the join is in
 ///the correct place for that time slice.

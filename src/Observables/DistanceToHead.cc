@@ -83,7 +83,7 @@ void HeadLocClass::Read(IOSectionClass &in)
   assert(positions.extent(0)==HeadLoc.size());
   assert(positions.extent(1)==NDIM);
   dVec pos;
-  for (int loc=0;loc<=FixedLoc.size(); loc++){
+  for (int loc=0;loc<FixedLoc.size(); loc++){
     for (int dim=0; dim<NDIM; dim++)
       pos(dim) = positions(loc,dim);
     FixedLoc(loc) = pos;

@@ -449,10 +449,11 @@ dirName=basename
 cutoff=None
 if (os.access(dirName+".pref",os.F_OK)):
      print dirName+".pref"
+     prefFile=IOSectionClass()
      prefFile.OpenFile(dirName+".pref")
      print prefFile.ReadVar("cutoff")
      cutoff=prefFile.ReadVar("cutoff")
-     prefFile.CloseFile() 
+#     prefFile.CloseFile() 
 if cutoff==None:
      cutoff=0
 if not(os.access(dirName,os.F_OK)):
@@ -475,13 +476,13 @@ for counter in range(0,numSections):
      infiles.OpenSection(counter)
      print infiles.GetName()
      myType=infiles.ReadVar("Type")[0]
-     print "myType = " + myType
+#     print "myType = " + myType
      if myType=="Scalar":
           currNum=ProcessScalarSection(infiles,doc,currNum)
           doc.append(HR())
      elif myType=="CorrelationFunction":
           currNum=ProcessCorrelationSection(infiles,doc,currNum)
-          doc.append(HR())
+          doc.append(HR()) 
      else:
           a=5
      infiles.CloseSection()
