@@ -1,5 +1,6 @@
 #include "ObservableClass.h"
 
+// Fix to include final link between link M and 0
 void TotalEnergyClass::Accumulate()
 {
   // Loop over all links
@@ -12,6 +13,7 @@ void TotalEnergyClass::Accumulate()
   for (int ptcl=0; ptcl<numPtcls; ptcl++)
     if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
       sum += 1.5/tau * (double)numLinks;
+      //sum += 1.5*tau * (double)numLinks;
   for (int link=0; link<numLinks; link++) {
     for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
       // Do free-particle part

@@ -144,7 +144,7 @@ void TestShift()
   if (myCommunicator.MyProc() == 1)
     myArray.Print();
 
-  myArray.ShiftData(-3,myCommunicator);
+  myArray.ShiftData(-29,myCommunicator);
   cout<<endl<<endl;
 
   sleep(2);
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
   }
 
   IOSectionClass out;
-  out.NewFile ("Observables.h5");
+  out.NewFile ("Observables2.h5");
   out.NewSection("Energies");
   TotalEnergyClass TotE(myPathData, out);
   out.CloseSection();
@@ -256,13 +256,13 @@ int main(int argc, char **argv)
 //   //  PrintConfigClass myPrintConfig(myPathData);
   ofstream outfile;
   outfile.open("ourPath.dat");
-  int steps=100000;
+  int steps=2000000;
   for (int counter=0;counter<steps;counter++){
-    if (counter>steps/2 && (counter % 100)==0){
+    if (counter>steps/8 && (counter % 100)==0){
       TotE.Accumulate();
       gofr.Accumulate();
     }
-    if (counter>steps/2 && (counter % 1000) == 0){
+    if (counter>steps/8 && (counter % 1000) == 0){
       TotE.WriteBlock();
       cerr << "Step #" << counter << ":\n";
 //       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
