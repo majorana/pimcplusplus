@@ -31,6 +31,7 @@ private:
   void GradientDet (int slice, double &det, Array<dVec,1> &gradient);
   void GradientDetFD (int slice, double &det, Array<dVec,1> &gradient);
   double NodalDist (int slice);
+  double HybridDist(int slice, double lambdaTau);
   /// This returns the upper bound on the distance to a node by
   /// returning the minimum distance to particle coincidence.
   double MaxDist(int slice);
@@ -41,6 +42,7 @@ private:
   /// approach
   double NewtonRaphsonDist (int slice);
   int SpeciesNum;
+  int NumGradDists, NumLineDists;
 public:
   double Action (int slice1, int slice2,
 		 const Array<int,1> &activeParticles,

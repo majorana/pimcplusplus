@@ -112,6 +112,7 @@ FreeNodalActionClass::FreeNodalActionClass (PathDataClass &pathData,
   Cofactors.resize(N,N);
   GradVec.resize(N);
   SavePath.resize(N);
+  NumLineDists = NumGradDists = 0;
 }
 
 
@@ -372,6 +373,40 @@ double FreeNodalActionClass::NodalDist (int slice)
     return (dist);  
 }
 
+
+double FreeNodalActionClass::HybridDist (int slice, double lambdaTau)
+{
+  SpeciesClass &species = Path.Species(SpeciesNum);
+  int first = species.FirstPtcl;
+  int last = species.LastPtcl;
+  double det;
+  int N = last-first+1;
+
+  GradientDet (slice, det, GradVec);
+  double grad2 = 0.0;    
+  for (int i=0; i<N; i++)
+    grad2 += dot (GradVec(i), GradVec(i));
+
+  double gradDist = det/sqrt(grad2);
+
+  if (((NumGradDists+NumLineDists)%100000) == 99999) {
+    cerr << "Percent line searches = "
+	 << (double)NumLineDists/(NumGradDists+NumLineDists) << endl;
+  }
+    
+
+  if (gradDist > sqrt(6.0*lambdaTau)) {
+    NumGradDists++;
+    return (gradDist);
+  }
+  else {
+    NumLineDists++;
+    return LineSearchDist(slice);
+  }
+}
+
+
+
 double FreeNodalActionClass::MaxDist(int slice)
 {
   if (Det(slice) < 0.0)
@@ -611,7 +646,7 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
   
   double dist1, dist2;
   if (startSlice != refSlice) {
-    dist1 = MaxDist (startSlice);
+    dist1 = HybridDist (startSlice, lambda*levelTau);
     if (dist1 < 0.0) {
       return 1.0e100;
     }
@@ -628,7 +663,8 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
     if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
       dist2 = sqrt(-1.0);
     else {
-      dist2 = MaxDist(slice+skip);//LineSearchDist (slice+skip);
+      //dist2 = MaxDist(slice+skip);//LineSearchDist (slice+skip);
+      dist1 = HybridDist (slice+skip, lambda*levelTau);
       //fprintf (stderr, "%1.12e %1.12e\n", lineDist, dist2);
       if (dist2 < 0.0) {
 	return 1.0e100;
@@ -665,7 +701,7 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
   
   double dist1, dist2;
   if (slice1 != refSlice) {
-    dist1 = MaxDist (slice1);
+    dist1 = HybridDist (slice1, lambda*levelTau);
     if (dist1 < 0.0)
       return 1.0e100;
   }
@@ -678,7 +714,7 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
     if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
       dist2 = sqrt(-1.0);
     else {
-      dist2 = MaxDist (slice+skip);
+      dist2 = HybridDist (slice+skip, lambda*levelTau);
       if (dist2 < 0.0)
 	return 1.0e100;
     }
