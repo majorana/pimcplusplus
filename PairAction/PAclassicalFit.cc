@@ -36,8 +36,9 @@ double PAclassicalFitClass::U(double q, double z, double s2, int level)
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
     beta *= 2.0;
-
+  cerr<<Particle1.Name<<" "<<Particle2.Name<<" "<<beta<<" ";
   double V = Pot->V(q);
+  cerr<<"V is "<<V<<endl;
   if (IsLongRange())
     V -= Vlong(q, level);
   cerr<<"V is "<<V<<endl;
@@ -106,7 +107,7 @@ double PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
   if (k <= 0.0)
     k = 1.0e-30;
   double Vk =  4.0*M_PI/(boxVol*k*k)*exp(-k*k/(4.0*alpha*alpha));
-  cerr << "Vk = " << Vk << endl;
+  //  cerr << "Vk = " << Vk << endl;
   return Vk;
 }
 
@@ -114,6 +115,7 @@ double PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
 void PAclassicalFitClass::DoBreakup(const dVec& box,const Array<dVec,1> &kVecs)
 {
     // Calculate the cutoff parameter
+  cerr<<"Smallest beta is "<<SmallestBeta<<endl;
   double minL, boxVol;
   boxVol = minL = box[0];
   for (int i=1; i<NDIM; i++) {
@@ -135,8 +137,8 @@ void PAclassicalFitClass::DoBreakup(const dVec& box,const Array<dVec,1> &kVecs)
     dUlong_0(level) = Vlong(0.0, level);
     for (int ki=0; ki<kVecs.size(); ki++) {
       double k = sqrt(dot(kVecs(ki), kVecs(ki)));
-      Ulong_k = tau*Vlong_k(boxVol, k, level);
-      dUlong_k = Vlong_k(boxVol, k, level);
+      Ulong_k(level,ki) = tau*Vlong_k(boxVol, k, level);
+      dUlong_k(level,ki) = Vlong_k(boxVol, k, level);
     }
   }
 }
