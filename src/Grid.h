@@ -428,7 +428,7 @@ class LogGrid : public Grid
   LogGrid (scalar R0, scalar spacing, int numpoints)
   {
     NumPoints = numpoints;
-    Z = 1.0; r0 = R0; Spacing = Spacing;
+    Z = 1.0; r0 = R0; Spacing = spacing;
     Start = r0;
     End = r0 * pow(Spacing, (scalar) NumPoints-1);
     grid.resize (NumPoints);

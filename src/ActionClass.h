@@ -29,6 +29,7 @@ public:
   /// value and a temporary array to get all of the values in that
   /// column. 
   Array<MultiCubicSpline,1> ukj; //(level )
+  Array<MultiCubicSpline,1> dukj; //(level )
   inline double calcUsqz(double s,double q,double z,int level);
   int n;
   double tau;
@@ -43,32 +44,38 @@ public:
 
 inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
 {
-  double sum=0;
-  double r=0.5*(q+z);
-  double rprime=0.5*(q-z);
+  double sum=0.0;
+  double r=q+0.5*z;
+  double rprime=q-0.5*z;
 ///I'm about to change this line to make it work  sum=sum+(ukj(level,0))(r)+(ukj(level,0))(rprime);//this is the endpoint action
-  sum=sum+(ukj(level))(0,r)+(ukj(level))(0,rprime);//this is the endpoint action
-  double zsquared=z*z;
-  double ssquared=s*s;
-  double ssquaredinverse=1/ssquared;
-  double Sto2k=2;
-  (ukj(level))(q,tempukjArray); 
-  for (int k=1;k<=n;k++){  
-				
-    double Zto2j=1;
-    double currS=Sto2k;
+  //cerr << "r = " << r << "\n";
+  //cerr << "rp = " << rprime << "\n";
+  sum=sum+0.5*((ukj(level))(0,r)+(ukj(level))(0,rprime));//this is the endpoint action
 
-    for (int j=0;j<=k;j++){
-
-      double cof=tempukjArray(k*(k+1)/2+j); //indexing into the 2darray
-      sum=sum+cof*Zto2j*currS;
-      
-      
-      Zto2j*=zsquared;
-      currS=currS*ssquaredinverse;				
-    }				
-    Sto2k=Sto2k*ssquared;
-  }
+  if (s > 0.0)
+    {
+      double zsquared=z*z;
+      double ssquared=s*s;
+      double ssquaredinverse=1.0/ssquared;
+      double Sto2k=ssquared;
+      (ukj(level))(q,tempukjArray); 
+      for (int k=1;k<=n;k++){  
+	
+	double Zto2j=1;
+	double currS=Sto2k;
+	
+	for (int j=0;j<=k;j++){
+	  
+	  double cof=tempukjArray(k*(k+1)/2+j); //indexing into the 2darray
+	  sum=sum+cof*Zto2j*currS;
+	  
+	  
+	  Zto2j*=zsquared;
+	  currS=currS*ssquaredinverse;				
+	}				
+	Sto2k=Sto2k*ssquared;
+      }
+    }
   
   return sum; //I hope this is the right thing to return 
 }
