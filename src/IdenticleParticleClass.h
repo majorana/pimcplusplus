@@ -12,6 +12,7 @@ information about particular types of particles. */
 class IdenticalParticlesClass
 {
 public:
+  int NumParticles;
   PathClass Path;
   PermutationClass Permutation;
 

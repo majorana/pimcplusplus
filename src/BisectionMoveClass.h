@@ -20,36 +20,18 @@ private:
 
 
 
-void getNextParticles(Array<int,1> &theParticles)
-{
-
-  for (int counter=0;counter<theParticles.size()){    
-    bool particleOk=false;
-    while (!particleOk){
-      theParticle(counter)=floor(sprng()*NumOfParticlesToMove);
-      particleOk=true;
-      for (int nter2=0;counter2<counter;counter2++){
-	if (theParticle(counter)==theParticle(counter2)){
-	  particleOk=false;
-	}
-      }
-    }
-  }
-
-}
-
 void BisectionMoveClass::makeMove()
 {
 
   Array<int,1> theParticles;
-  theParticles.resize(NumOfParticlesToMove);
+
     
   int EndTimeSlice=1<<NumLevels+StartSlice;
   skip=1<<NumLevels;
   for (int levelCounter=NumLevels;levelCounter>0;NumLevels++){
     for (int Slice=StartTimeSlice+skip;Slice<EndTimeSlice;Slice=Slice+skip){
-      getNextParticles(theParticles);
-      (*PathData).
+      getNextParticles();
+      
 
 
       singleSliceSample(theParticles,Slice);
