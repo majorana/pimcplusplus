@@ -36,12 +36,9 @@ double PAclassicalFitClass::U(double q, double z, double s2, int level)
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
     beta *= 2.0;
-  cerr<<Particle1.Name<<" "<<Particle2.Name<<" "<<beta<<" ";
   double V = Pot->V(q);
-  cerr<<"V is "<<V<<endl;
   if (IsLongRange())
     V -= Vlong(q, level);
-  cerr<<"V is "<<V<<endl;
   return (beta*V);
 }
 
@@ -75,7 +72,6 @@ bool PAclassicalFitClass::Read (IOSectionClass &in,
   assert(in.OpenSection("Potential"));
   if (!in.ReadVar ("Z1Z2", Z1Z2))
     Z1Z2 = 0.0;
-  cerr<<"Z1Z2="<<Z1Z2<<endl;
   Pot = ReadPotential(in);
   in.CloseSection();
   in.CloseSection();
@@ -115,14 +111,12 @@ double PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
 void PAclassicalFitClass::DoBreakup(const dVec& box,const Array<dVec,1> &kVecs)
 {
     // Calculate the cutoff parameter
-  cerr<<"Smallest beta is "<<SmallestBeta<<endl;
   double minL, boxVol;
   boxVol = minL = box[0];
   for (int i=1; i<NDIM; i++) {
     minL = min(minL, box[i]);
     boxVol *= box[i];
   }
-  cerr << "boxVol = " << boxVol << endl;
   alpha = 7.0/(minL*fabs(Z1Z2));
   // Now, calculate the k-space parts
   Ulong_k.resize(NumBetas, kVecs.size());
