@@ -1,8 +1,10 @@
-SOURCES = SpecialFunctions.cc HermitePoly.cc TestLegendre.cc
+SOURCES = SpecialFunctions.cc HermitePoly.cc TestLegendre.cc TestPoly.cc PolynomialSet.cc TestPolySet.cc
 
-all:	SpecialFunctions.o HermitePoly.o TestLegendre.o
+all:	SpecialFunctions.o HermitePoly.o TestLegendre.o TestPoly.o PolynomialSet.o TestPolySet.o
 	$(LD) -o TestHermite HermitePoly.o $(LIBS)
 	$(LD) -o TestLegendre TestLegendre.o SpecialFunctions.o $(LIBS)
+	$(LD) -o TestPoly TestPoly.o $(LIBS)
+	$(LD) -o TestPolySet TestPolySet.o PolynomialSet.o ../Integration/GKIntegration.o $(LIBS)
 
 clean:
 	rm -f *.o
