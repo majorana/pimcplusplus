@@ -39,5 +39,14 @@ public:
 
 };
 
+class ProtonsClass : public IdenticalParticlesClass
+{
+public:
+  double NodeAction (int Ptcl, int LinkNum);
+  ElectronsClass();
+  ~ElectronsClass();
+
+};
+
 #endif
 

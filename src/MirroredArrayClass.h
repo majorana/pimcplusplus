@@ -19,6 +19,7 @@ private:
 
 
 public:
+  void resize(int numPtcles,int numTimeSlices);
   inline MirroredArrayClass(int particleNum, int timeSliceNum)
   {
     AB.resize(2,particleNum,timeSliceNum);

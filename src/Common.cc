@@ -9,8 +9,20 @@ int GetCurrentTimeStamp()
   return 0;
 }
 
-void setMode(int x)
+
+
+void setMode(ModeType theMode)
 {
+
+  if (theMode==MOVEMODE){
+    Write1=0;
+    Write2=0;
+  }
+
+  else  if (theMode==OBSERVABLEMODE){
+    Write1=0;
+    Write2=1;
+  }
 
 
 }

@@ -15,7 +15,8 @@ public:
   MemoizedDataClass MemoizedData;
   ArrayOfIdenticalParticlesClass IdenticalParticleArray;
     //  Array<IdenticalParticleClass,1> IdenticalParticleArray;
-
+  CommClass Communicator;
+  int NumTimeSlices;
   void acceptMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice);
   void rejectMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice);
 };

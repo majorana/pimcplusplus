@@ -5,12 +5,12 @@
 #include "MoveClass.h"
 #include "ActionClass.h"
 
-class BisectionMoveClass : public MoveClass
+class BisectionMoveClass : public ParticleMoveClass
 {
 private:
 
-  int NumOfParticlesToMove;
-  int ParticleTypeToMove;
+
+
   int StartTimeSlice;
   int NumLevels;
   
@@ -20,6 +20,14 @@ private:
 };
 
 
+class ShiftMove : public MoveClass
+{
+  int numTimeSlicesToShift;
+  void makeMove();
+  
+
+
+}
 
 
 

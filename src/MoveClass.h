@@ -6,9 +6,17 @@
 #include "PathDataClass.h"
 
 
-class MoveClass
+class MoveClass 
 {
-private:
+  PathDataClass *PathData;
+  virtual void makeMove()=0;
+}
+  
+
+class ParticleMoveClass : public MoveClass
+
+{
+ public:
   /// Stores which species of particles this moves will work on
   Array<int,1> ActiveSpecies;
   ///Total number of particles in the active species
@@ -18,12 +26,14 @@ private:
   ///A mapping from integers to particle ids
   Array<ParticleID,1> MyParticles;
   inline int RandInt (int Max);
+
  public:
-  PathDataClass *PathData;
+  virtual void makeMove()=0;
   int NumParticlesToMove;
+  SetNumParticlesToMove(int passed_NumParticlesToMove)
   Array<ParticleID,1> ActiveParticles;
 
-  virtual void makeMove()=0;
+
 
 
   void SetActiveSpecies(Array<int,1> ActSpecies);

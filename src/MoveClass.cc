@@ -1,5 +1,12 @@
 #include "MoveClass.h"
 
+void MoveClass:SetNumParticlesToMove(int passed_NumParticlesToMove)
+{
+  NumParticlesToMove=passed_NumParticlesToMove;
+  MyParticleIndices.resize(NumParticlesToMove);
+}
+
+
 void MoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
 {
   ActiveSpecies.resize(ActSpecies.size());
@@ -14,7 +21,7 @@ void MoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
   }
 
   MyParticles.resize(TotalParticles);
-  
+
   TotalParticles = 0;
   for (int i=0; i<ActSpecies.size(); i++) {
     int CurrentNumPtcls = 

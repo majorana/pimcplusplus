@@ -21,6 +21,14 @@
 int Write1=0;
 int Write2=1;
 
+template<class T>
+void MirroredArrayClass<T>::resize(int numParticles,int numTimeSlices)
+{
+  AB.resize(2,numParticles,numTimeSlices);
+
+}
+
+
 template <class T>
 void MirroredArrayClass<T>::Print()
 {

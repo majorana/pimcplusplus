@@ -3,6 +3,15 @@
 #include "Common.h"
 
 
+void ShiftMove::makeMove()
+{//Remember to mark Actions dirty!!!
+  int numTimeSlicesToShift=floor(sprng()*PathData.NumTimeSlices);
+  for (counter=0;counter<PathData.IdenticalParticleArray.size();counter++){
+    (*PathData.IdenticalParticleArray(counter)).Path.shiftData(numTimeSlicesToShift,PathData.Communicator);
+  }
+}
+
+    
 
 BisectionMoveClass::BisectionMoveClass()
 {

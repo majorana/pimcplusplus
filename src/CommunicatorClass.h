@@ -6,6 +6,7 @@
 class CommClass
 {
  public:
+
   int NumProcs() const;
   int MyProc() const;
 
