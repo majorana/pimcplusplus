@@ -94,7 +94,7 @@ public:
   {
     bool readVarSuccess;
     list<VarClass*>::iterator varIter=VarList.begin();
-    while ((varIter!=VarList.end() && (*varIter)->Name!=name))
+    while ((varIter!=VarList.end()) && ((*varIter)->Name!=name)) 
       varIter++;
 
     bool found = varIter != VarList.end();

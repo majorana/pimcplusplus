@@ -194,6 +194,11 @@ public:
   bool AppendVar(string name, T val)
   { return CurrentSection->AppendVar(name, val); }
 
+  inline VarClass *GetVarPtr(string name)
+  {
+    return (CurrentSection->GetVarPtr(name));
+  }
+
   /// Returns the number of subsections within the present section
   /// which have the name name.  If called without a name, it returns
   /// the total number of sections.

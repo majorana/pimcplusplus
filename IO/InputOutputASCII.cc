@@ -619,6 +619,7 @@ VarASCIIClass * ReadArray(list<TokenClass>::iterator &iter,
     else if (myType == BOOL_TYPE)
       ReadArrayData(iter, tokenList, ((VarASCIIbool3Class *)newVar)->Value);
   }
+  return (newVar);
 }
 
 
