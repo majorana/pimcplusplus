@@ -97,7 +97,7 @@ private:
   Array<complex<double>,3> Vr;
   FFTBox      cFFT;
   FFTVecBox VecFFT;
-  FFTMatBox MatFFT;
+  //  FFTMatBox MatFFT;
   Vec3 k;
 public:
   void Setup();
@@ -106,7 +106,7 @@ public:
   void Apply (const zVec &c, zVec &Hc);
   PHPotFFTClass (Potential &ph, GVecsClass &gvecs) :
     HamiltonianBase (gvecs), kPH(ph),
-    cFFT(gvecs), VecFFT(gvecs), MatFFT(gvecs), IsSetup(false),
+    cFFT(gvecs), VecFFT(gvecs),/* MatFFT(gvecs),*/ IsSetup(false),
     k(0.0, 0.0, 0.0)
   {
 

@@ -163,13 +163,14 @@ void Hamiltonian::Apply(const zVec &c, zVec &Hc)
 void PHPotFFTClass::Setup()
 {
   cerr << "In PHPotFFTClass::Setup().\n";
-  kPH.CalcTailCoefs (30.0, 60.0);
+  kPH.CalcTailCoefs (15.0, 60.0);
   int nx, ny, nz;
   cerr << "Before cFFT Setup.\n";
   cFFT.Setup();
   cerr << "Before VecFFT Setup.\n";
   VecFFT.Setup();
   cerr << "Before MatFFT Setup.\n";
+  FFTMatBox MatFFT(GVecs);
   MatFFT.Setup();
   MatFFT.GetDims(nx,ny,nz);
   Fr.resize(nx,ny,nz);

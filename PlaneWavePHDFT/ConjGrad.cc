@@ -4,24 +4,23 @@
 void ConjGrad::Setup()
 {
   int N = H.GVecs.size();
-  c.resize (N);
+  Bands.resize (NumBands, N);
   cnext.resize (N);
-  Hcnext.resize (N);
   Hc.resize (N);
   Phi.resize (N);
-  LastPhi.resize (N);
   Phip.resize(N);
   Phipp.resize(N);
   Xi.resize(N);
-  Xip.resize(N);
   Eta.resize(N);
-  Etap.resize(N);
-  c = 0.0;
-  for (int i=0; i<N; i++) {
-    if (dot (H.GVecs(i), H.GVecs(i)) < 1.0)
-      c(i) = 1.0;
+  Bands = 0.0;
+  for (int band=0; band<NumBands; band++) {
+    c.reference(Bands(band,Range::all()));
+    for (int i=0; i<N; i++) {
+      if (dot (H.GVecs(i), H.GVecs(i)) < 1.0)
+	c(i) = drand48();
+    }
+    Normalize (c);
   }
-  Normalize (c);
   IsSetup = true;
 }
 
@@ -40,7 +39,7 @@ void ConjGrad::Precondition()
     double x = 0.5*dot(H.GVecs(i), H.GVecs(i))/T;
     double num = 27.0 + 18.0*x +12.0*x*x + 8.0*x*x*x;
     double denom = num + 16.0*x*x*x*x;
-    Eta(i) = (num/denom)* Xip(i);
+    Eta(i) = (num/denom)* Xi(i);
   }
 }
 
@@ -55,12 +54,16 @@ void ConjGrad::CalcPhiCG()
   E0 = realconjdot (c, Hc);
   Xi = E0*c - Hc;
   /// Orthonalize to other bands here
-  Xip = Xi;
-  
+  //Xip = Xi;
+  zVec &Xip = Xi;
+  Orthogonalize (Bands, Xip);
+
   Precondition();
   //Eta = Xip;
 
   // Now, orthogonalize to psi
+  // rename for clarity
+  zVec &Etap = Eta;
   Etap = Eta - conjdot (c, Eta)*c;
   complex<double> etaxi = conjdot(Etap, Xip);
   complex<double> gamma; 
@@ -70,8 +73,7 @@ void ConjGrad::CalcPhiCG()
     gamma = 0.0;
   EtaXiLast = etaxi;
   
-  Phi = Etap + gamma * LastPhi;
-  LastPhi = Phi;
+  Phi = Etap + gamma * Phi;
   
   Phipp = Phi - conjdot(c, Phi) * c;
   Phip = Phipp;
@@ -81,10 +83,12 @@ void ConjGrad::CalcPhiCG()
 }
 
 
-void ConjGrad::Iterate()
+void ConjGrad::Iterate(int band)
 {
+  CurrentBand = band;
   if (!IsSetup)
     Setup();
+  c.reference (Bands(band,Range::all()));
   // First, calculate steepest descent vector:
   CalcPhiCG();
   //CalcPhiSD();
@@ -94,8 +98,8 @@ void ConjGrad::Iterate()
   double dE_dtheta = 2.0*realconjdot(Phip, Hc);
   double theta1 = M_PI/300.0;
   cnext = cos(theta1)*c + sin(theta1)*Phip;
-  H.Apply (cnext, Hcnext);
-  double E1 = realconjdot (cnext, Hcnext);
+  H.Apply (cnext, Hc);
+  double E1 = realconjdot (cnext, Hc);
   double A1 = (E0 - E1 + 0.5*sin(2.0*theta1)*dE_dtheta)/(1.0-cos(2.0*theta1));
   double B1 = 0.5*dE_dtheta;
   double thetaMin = 0.5*atan (B1/A1);

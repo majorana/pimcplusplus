@@ -7,8 +7,9 @@ class ConjGrad
 {
 protected:
   Hamiltonian &H;
-  zVec cnext, Hc, Hcnext, Phi, LastPhi;
-  zVec Phip, Phipp, Xi, Xip, Eta, Etap;
+  zVec c;
+  zVec cnext, Hc, Phi;
+  zVec Phip, Phipp, Xi, Eta;
   complex<double> EtaXiLast;
   double E0;
   void CalcPhiSD();
@@ -17,12 +18,13 @@ protected:
   bool IsSetup;
   void Precondition();
   double T;
-  int iter;
+  int iter, NumBands;
+  int CurrentBand;
 public:
-  zVec c;
-  void Iterate();
-  ConjGrad (Hamiltonian &h) : H(h), IsSetup(false),
-			      EtaXiLast(0.0, 0.0), iter(0)
+  Array<complex<double>,2> Bands;
+  void Iterate(int band);
+  ConjGrad (Hamiltonian &h, int numBands) : 
+    H(h), IsSetup(false), EtaXiLast(0.0, 0.0), iter(0), NumBands(numBands)
   {
     // Do nothing for now
   }

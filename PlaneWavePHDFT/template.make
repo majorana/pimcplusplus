@@ -18,11 +18,15 @@ SplineObjs = ../Splines/BicubicSpline.o ../Splines/CubicSpline.o              \
 
 MiscObjs =   ../Integration/GKIntegration.o ../Fitting/Fitting.o              \
              ../MatrixOps/MatrixOps.o ../FFT/FFT.o
-all:    $(Objs) TestPW
+
+all:    $(Objs) TestPW Hamiltonian.s
 
 TestPW:  $(TestObjs) $(Objs) $(PHObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)
 	$(LD) -o $@ $(TestObjs) $(Objs) $(PHObjs) $(IOObjs) $(SplineObjs) \
         $(MiscObjs) $(LIBS)
+
+Hamiltonian.s:  Hamiltonian.cc
+	$(CC) -S -mmmx -m3dnow -march=athlon -O3 -ffast-math -g  $(DEFS) $(INCL) -o $*.s $<
 
 clean:
 	rm -f *.o

@@ -61,6 +61,28 @@ inline double realconjdot(zVec &cA, zVec &cB)
 // }
     
 
+inline void 
+Orthogonalize (const Array<complex<double>,2> &A, zVec &x)
+{
+  int m = A.rows();
+  int n = A.cols();
+  assert (n == x.size());
+  complex<double> zero(0.0, 0.0);
+  complex<double> one (1.0, 0.0);
+  complex<double> minusone (-1.0, 0.0);
+  complex<double> S[m];
+  
+  // Calculate overlaps
+  // Calling with column major and ConjTrans is equivalent to
+  // conjugate of untransposed row major
+  cblas_zgemv(CblasColMajor, CblasConjTrans, n, m, &one,
+	      A.data(), n, x.data(), 1, &zero, S, 1);
+    
+  // Now, subtract off components * overlaps
+  cblas_zgemv(CblasRowMajor, CblasTrans, m, n, &minusone,
+ 	      A.data(), n, S, 1, &one, x.data(), 1);
+
+}
 
 
 #endif

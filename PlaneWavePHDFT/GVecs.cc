@@ -58,7 +58,7 @@ void GVecsClass::Set (Vec3 box, double kcut)
   sort (vecs.begin(), vecs.end());
   GVecs.resize(vecs.size());
   Indices.resize(vecs.size());
-  int numUnique = 0;
+  int numUnique = 1;
   for (int i=0; i<vecs.size(); i++) {
     GVecs(i) = vecs[i].G;
     Indices(i) = vecs[i].I;
@@ -90,7 +90,7 @@ void GVecsClass::Set (Vec3 box, double kcut)
   sort (vecs.begin(), vecs.end());
   GDiff.resize(vecs.size());
   IDiff.resize(vecs.size());
-  numUnique = 0;
+  numUnique = 1;
   for (int i=0; i<vecs.size(); i++) {
     GDiff(i) = vecs[i].G;
     IDiff(i) = vecs[i].I;
@@ -99,7 +99,7 @@ void GVecsClass::Set (Vec3 box, double kcut)
 	numUnique++;
   }
   cerr << "Using " << vecs.size() << " G-difference vectors, of which "
-       << numUnique << " have unqiue magnitudes.\n";
+       << numUnique << " have unique magnitudes.\n";
 }
 
 
