@@ -1,8 +1,8 @@
-#include "PathClass.h"
+#include "NewPathClass.h"
 
 void PathClass::Read (IOSectionClass &inSection)
 {
-  SetMode (BOTHMODE);
+  SetMode (NEWMODE);
   double tau;
   assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
   assert(inSection.ReadVar ("tau", tau));
@@ -69,7 +69,7 @@ void PathClass::Read (IOSectionClass &inSection)
 	  pos = 0.0;
 	  for (int dim=0; dim<species.NumDim; dim++)
 	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
-	  SetPos(slice,ptcl,pos);
+	  Path(slice,ptcl) = pos;
 	}      
     }
     else {
@@ -78,9 +78,8 @@ void PathClass::Read (IOSectionClass &inSection)
     }
     inSection.CloseSection();
   }
-
   inSection.CloseSection(); // "Particles"
-  
+  Path.AcceptCopy();
 }
 
 
@@ -119,8 +118,8 @@ void PathClass::Allocate()
     numParticles=numParticles + SpeciesArray(speciesNum)->NumParticles;
     SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
   }
-  Path.Resize(MyNumSlices,numParticles);
-  Permutation.Resize(numParticles);
+  Path.resize(MyNumSlices,numParticles);
+  Permutation.resize(numParticles);
   SpeciesNumber.resize(numParticles);
   DoPtcl.resize(numParticles);
   /// Assign the species number to the SpeciesNumber array
@@ -130,10 +129,10 @@ void PathClass::Allocate()
       SpeciesNumber(i) = speciesNum;
   }
   //Sets to the identity permutaiton 
-  for (int ptcl=0;ptcl<Permutation.NumParticles();ptcl++){
-    Permutation.Set(ptcl,ptcl);
+  for (int ptcl=0;ptcl<Permutation.size();ptcl++){
+    Permutation(ptcl) = ptcl;
   }
-
+  
   SetupkVecs();
   Rho_k.resize(NumSpecies(), MyNumSlices, kVecs.size());
 }
@@ -199,7 +198,161 @@ void PathClass::CalcRho_ks()
 	Rho_k(speciesIndex, slice, ki) = rho;
       }
 }
-	  
-	
 
 
+void PathClass::MoveJoin(int oldJoin, int newJoin)
+{
+  if (newJoin>oldJoin){
+    for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
+      for (int ptcl=0;ptcl<NumParticles();ptcl++){
+	Path.Data[0](timeSlice,ptcl)=Path.Data[1](timeSlice,Permutation(ptcl));
+      }
+    }
+    //Now that we've copied the data from B into A, we need to copy the 
+    //information into B
+    for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){ 
+      for (int ptcl=0;ptcl<NumParticles();ptcl++){
+	Path.Data[1](timeSlice,ptcl)=Path.Data[0](timeSlice,ptcl);
+      }
+    }
+  }
+  else if (oldJoin>newJoin){
+    //  else if (oldJoin>=newJoin){//CHANGED!
+    for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
+      for (int ptcl=0;ptcl<NumParticles();ptcl++){
+	Path.Data[0](timeSlice,Permutation(ptcl))=Path.Data[1](timeSlice,ptcl);
+      }
+    }
+    //Now that we've copied the data from B into A, we need to copy the 
+    //information into B
+    for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
+      for (int ptcl=0;ptcl<NumParticles();ptcl++){
+	Path.Data[1](timeSlice,ptcl)=Path.Data[0](timeSlice,ptcl);
+      }
+    }
+  }
+}
+
+
+
+void PathClass::AcceptCopy(int startSlice,int endSlice, 
+				  const Array <int,1> &activeParticles)
+{
+  for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
+    int ptcl = activeParticles(ptclIndex);
+    Path.Data[1](Range(startSlice, endSlice), ptcl) = 
+      Path.Data[0](Range(startSlice, endSlice), ptcl);
+    Permutation.AcceptCopy(ptcl);
+  }
+}
+
+void PathClass::RejectCopy(int startSlice,int endSlice, 
+				  const Array <int,1> &activeParticles)
+{
+  for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
+    int ptcl = activeParticles(ptclIndex);
+    Path.Data[0](Range(startSlice, endSlice), ptcl) = 
+      Path.Data[1](Range(startSlice, endSlice), ptcl);
+    Permutation.RejectCopy(ptcl);
+  }
+}
+
+
+void PathClass::ShiftData(int slicesToShift)
+{
+  ShiftPathData(slicesToShift);
+}
+
+void PathClass::ShiftPathData(int slicesToShift)
+{
+  int numProcs=Communicator.NumProcs();
+  int myProc=Communicator.MyProc();
+  int recvProc;
+  int sendProc;
+  int numPtcls=Path.cols();
+  int numSlices=Path.rows();
+  assert(abs(slicesToShift)<numSlices);
+  sendProc=(myProc+1) % numProcs;
+  recvProc=((myProc-1) + numProcs) % numProcs;
+  if (slicesToShift<0){
+    int tempProc=sendProc;
+    sendProc=recvProc;
+    recvProc=tempProc;
+  }
+
+  ///First shifts the data in the A copy left 
+  ///or right by the appropriate amount   
+  if (slicesToShift>0){
+    for (int ptcl=0;ptcl<numPtcls;ptcl++){
+      for (int slice=numSlices-1;
+	   slice>=slicesToShift;slice--){
+	Path.Data[0](slice,ptcl)=
+	  Path.Data[0](slice-slicesToShift,ptcl);
+      }
+    }
+  }
+  else{
+    for (int ptcl=0;ptcl<numPtcls;ptcl++){
+      for (int slice=0;
+	   slice<numSlices+slicesToShift;slice++){
+	Path.Data[0](slice,ptcl)=
+	  Path.Data[0](slice-slicesToShift,ptcl);
+      }
+    }
+  }
+  
+  int bufferSize=abs(slicesToShift)*numPtcls;
+  Array<dVec,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
+  int startTimeSlice;
+  int buffIndex=0;
+  if (slicesToShift>0){
+    startTimeSlice=numSlices-slicesToShift;
+
+    for (int ptcl=0;ptcl<numPtcls;ptcl++){
+      for (int slice=startTimeSlice;
+	   slice<startTimeSlice+abs(slicesToShift);slice++){
+	///If shifting forward, don't send the last time slice (so always)
+	///send slice-1
+	sendBuffer(buffIndex)=Path.Data[1](slice-1,ptcl);
+	buffIndex++;
+      }
+    }
+  }
+  else {
+    startTimeSlice=0;
+    for (int ptcl=0;ptcl<numPtcls;ptcl++){
+      for (int slice=startTimeSlice;
+	   slice<startTimeSlice+abs(slicesToShift);slice++){
+	///If shifting backward, don't send the first time slice (so always)
+	///send slice+1
+	sendBuffer(buffIndex)=Path.Data[1](slice+1,ptcl);
+	buffIndex++;
+      }
+    }
+    
+  }
+
+  Communicator.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
+  
+  if (slicesToShift>0)
+    startTimeSlice=0;
+  else 
+    startTimeSlice=numSlices+slicesToShift;
+
+  buffIndex=0;
+  for (int ptcl=0;ptcl<numPtcls;ptcl++){
+    for (int slice=startTimeSlice;
+	 slice<startTimeSlice+abs(slicesToShift);slice++){
+      Path[0](slice,ptcl)=receiveBuffer(buffIndex);
+      buffIndex++;
+    }
+  }
+  
+  // Now copy A into B, since A has all the good, shifted data now.
+  for (int ptcl=0;ptcl<numPtcls;ptcl++)
+    for (int slice=0; slice<numSlices; slice++)
+      Path[1](slice,ptcl) = Path[0](slice,ptcl);
+
+  // And we're done!
+
+}

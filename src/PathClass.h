@@ -2,9 +2,10 @@
 #define PATH_CLASS_H
 
 #include "Common/IO/InputOutput.h"
-#include "MirroredArrayClass.h"
+#include "MirroredClass.h"
 #include "SpeciesClass.h"
 #include "Common/Random/Random.h"
+#include "CommunicatorClass.h"
 
 ///The number of time slices is the number of slices on this processor.
 ///In all cases this processor shares a time slice with the processor 
@@ -15,24 +16,29 @@ class PathClass
 private:  
   /// Path stores the position of all the particles at all time
   /// slices.  The order for access is timeslice, particle
-  MirroredArrayClass<dVec> Path;
+  Mirrored2DClass<dVec> Path;
    /// Stores what species a particle belongs to
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
   int MyNumSlices;
   PIMCCommunicatorClass &Communicator;
 
+  ////////////////////////////////
+  /// Boundary conditions stuff //
+  ////////////////////////////////
+  dVec IsPeriodic;
+  dVec Box, BoxInv;
+  dVec kBox; //kBox(i)=2*Pi/Box(i)
 
   ///////////////////////////////////////////////
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
   /// True if we need k-space sums for long range potentials.
   bool LongRange;
-
   /// This holds the density of particles in k-space.  Indexed by
   /// (species, slice, k-vector).  Defined as
   /// \rho^\alpha_k = \sum_i e^{i\mathbf{k}\cdot\mathbf{r}_i^\alpha}
-  Array<complex<double>,3> Rho_k;
+  Mirrored3DClass<complex<double> > Rho_k;
   /// Stores the kvectors needed for the reciporical space sum.
   /// Stores only half the vectors because of k/-k symmetry.
   Array<dVec,1> kVecs;
@@ -42,19 +48,23 @@ private:
   void SetupkVecs();
   void CalcRho_ks();
 
-  ////////////////////////////////
-  /// Boundary conditions stuff //
-  ////////////////////////////////
-private:
-  dVec IsPeriodic;
-  dVec Box, BoxInv;
-  dVec kBox; //kBox(i)=2*Pi/Box(i)
-
+  void ShiftPathData(int sliceToShift);
 public:
-  inline void SetBox (dVec box);
+  Mirrored1DClass<int> Permutation;
+  RandomClass Random;
+  int TotalNumSlices;
+  /// A scratch array to hold a boolean indicating whether we've
+  /// looped over this particle yet
+  Array<bool,1> DoPtcl;
+
+  inline void  SetBox (dVec box);
   inline const dVec& GetBox();
   inline const double GetVol();
-  inline void SetPeriodic(TinyVector<bool,NDIM> period);
+  inline void  SetPeriodic(TinyVector<bool,NDIM> period);
+
+  /////////////////////////////////
+  /// Displacements / Distances ///
+  /////////////////////////////////
   inline void DistDisp (int slice, int ptcl1, int ptcl2,
 			double &dist, dVec &disp);
   inline void DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
@@ -62,28 +72,28 @@ public:
   inline double Distance (int slice, int ptcl1, int ptcl2);
   inline dVec Velocity (int sliceA, int sliceB, int ptcl);
   inline void PutInBox (dVec &v);
-public:
-  MirroredArrayClass1D<int> Permutation;
-  RandomClass Random;
-  int TotalNumSlices;
-  /// A scratch array to hold a boolean indicating whether we've
-  /// looped over this particle yet
-  Array<bool,1> DoPtcl;
 
-  /// Data manipulations
-  inline dVec operator() (int timeSlice, int ptcl);
-  inline void SetPos (int timeSlice, int ptcl, dVec r);
+
+  //////////////////////////
+  /// Data manipulations ///
+  //////////////////////////
+  inline dVec& operator() (int slice, int ptcl) const;
+  inline dVec& operator() (int slice, int ptcl);
+  inline void SetPos (int slice, int ptcl, const dVec& r);
   inline int NumParticles();
   inline int NumTimeSlices();
 
-  inline void MoveJoin(int oldJoin, int newJoin);      
-  inline void ShiftData(int sliceToShift);
-  inline void AcceptCopy(int startTimeSlice,int endTimeSlice, 
-			 const Array <int,1> &activeParticle);
-  inline void RejectCopy(int startTimeSlice,int endTimeSlice, 
-			 const Array <int,1> &activeParticle );
+  void MoveJoin(int oldJoin, int newJoin);      
+  void ShiftData(int sliceToShift);
+  void AcceptCopy(int startTimeSlice,int endTimeSlice, 
+		  const Array <int,1> &activeParticle);
+  void RejectCopy(int startTimeSlice,int endTimeSlice, 
+		  const Array <int,1> &activeParticle );
 
-  /// Species Manipulations
+
+  /////////////////////////////
+  /// Species Manipulations ///
+  /////////////////////////////
   inline int ParticleSpeciesNum(int ptcl);
   inline SpeciesClass& ParticleSpecies(int ptcl);
   inline SpeciesClass& Species(int speciesNum);
@@ -91,33 +101,18 @@ public:
   inline void AddSpecies (SpeciesClass *newSpecies);
   inline int NumSpecies();
 
-  /// IO and allocations
+
+  //////////////////////////
+  /// IO and allocations ///
+  //////////////////////////
   void Read(IOSectionClass &inSection);
-  inline void Print();
   void Allocate();
 
   inline PathClass(PIMCCommunicatorClass &communicator);
 };
 
-inline void PathClass::MoveJoin(int oldJoin, int newJoin) 
-{
-  Path.MoveJoin(Permutation,oldJoin,newJoin);
-}
 
 
-inline void PathClass::AcceptCopy(int startTimeSlice,int endTimeSlice, 
-		       const Array <int,1> &activeParticle)
-{
-  Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticle);
-  Permutation.AcceptCopy(activeParticle);
-}
-
-inline void PathClass::RejectCopy(int startTimeSlice,int endTimeSlice, 
-		       const Array <int,1> &activeParticle )
-{
-  Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticle);
-  Permutation.RejectCopy(activeParticle);
-}
 
 inline int PathClass::SpeciesNum (string name)
 {
@@ -130,13 +125,6 @@ inline int PathClass::SpeciesNum (string name)
     return i;
 }
 
-
-/// Shifts the data to other processors or to yourself if there 
-/// are no other processors
-inline void PathClass::ShiftData(int sliceToShift)
-{
-  Path.ShiftData(sliceToShift,Communicator);
-}
 
 /// Return what species type a particle belongs to;
 inline int PathClass::ParticleSpeciesNum(int ptcl)
@@ -163,7 +151,7 @@ inline int PathClass::NumSpecies()
 
 inline int PathClass::NumParticles() 
 { 
-  return Path.NumParticles();
+  return Path.cols();
 }
 
 ///The number of time slices is the number of slices on this processor.
@@ -172,20 +160,25 @@ inline int PathClass::NumParticles()
 ///is that the processor owns its first but not its last slice.
 inline int PathClass::NumTimeSlices() 
 { 
-  return Path.NumTimeSlices();
+  return Path.rows();
 }
 
 
 /// Returns the position of particle ptcl at time slice timeSlice
-inline dVec PathClass::operator() (int timeSlice, int ptcl)
+inline dVec& PathClass::operator() (int slice, int ptcl) const
 { 
-  return Path(timeSlice, ptcl); 
+  return Path(slice, ptcl); 
 }
 
-/// Set the position of particle ptcl at time slice timeSlice
-inline void PathClass::SetPos (int timeSlice, int ptcl, dVec r)
+/// Returns the position of particle ptcl at time slice timeSlice
+inline dVec& PathClass::operator() (int slice, int ptcl)
 { 
-  Path.Set(timeSlice, ptcl, r); 
+  return Path(slice, ptcl); 
+}
+
+inline void PathClass::SetPos(int slice, int ptcl, const dVec &r)
+{
+  (*this)(slice, ptcl) = r;
 }
 
 inline void PathClass::AddSpecies (SpeciesClass *newSpecies)
@@ -358,10 +351,6 @@ inline dVec PathClass::Velocity (int sliceA, int sliceB, int ptcl)
   return vel;
 }
 
-inline void PathClass::Print()
-{
-  Path.Print();
-}
 
 inline void PathClass::PutInBox (dVec &v)
 {
