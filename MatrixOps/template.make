@@ -1,9 +1,9 @@
 SOURCES = MatrixOps.cc Test.cc
 
-all:	MatrixOps.o Test.o
-	$(LD) -o Test MatrixOps.o Test.o $(LIBS)
+all:	MatrixOps.o Test.o Test
 	
-all:	MatrixOps.o Test.o
+Test:  MatrixOps.o Test.o
+	$(LD) -o Test MatrixOps.o Test.o $(LIBS)
 
 clean:
 	rm -f *.o

@@ -12,7 +12,7 @@ TestQuintic:	QuinticSpline.o QuinticSplines.o TestQuintic.o
 	$(LD) -o TestQuintic QuinticSpline.o QuinticSplines.o TestQuintic.o $(LIBS)
 
 TestBicubic:	CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o 
-	$(LD) -o TestBiCubic CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o $(IOobjs) $(LIBS)
+	$(LD) -o TestBicubic CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o $(IOobjs) $(LIBS)
 
 TestMyTricubic:	CubicSpline.o Grid.o  TestMyTricubic.o MyTricubicSpline.o
 	$(LD) -o TestMyTricubic CubicSpline.o Grid.o TestMyTricubic.o MyTricubicSpline.o $(IOobjs) -Lfortran -lpspline $(LIBS)

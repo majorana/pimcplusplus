@@ -1,6 +1,8 @@
 SOURCES = TestRandom.cc
 
-all:	TestRandom.o 
+all:	TestRandom.o TestRandom
+
+TestRandom: TestRandom.o
 	$(LD) -o TestRandom TestRandom.o ../MPI/Communication.o $(LIBS)
 
 clean:

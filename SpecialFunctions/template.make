@@ -1,9 +1,17 @@
 SOURCES = SpecialFunctions.cc HermitePoly.cc TestLegendre.cc TestPoly.cc PolynomialSet.cc TestPolySet.cc
 
-all:	SpecialFunctions.o HermitePoly.o TestLegendre.o TestPoly.o PolynomialSet.o TestPolySet.o
+all:	SpecialFunctions.o HermitePoly.o TestLegendre.o TestPoly.o PolynomialSet.o TestPolySet.o TestHermite TestLegendre TestPoly TestPolySet
+
+TestHermite: HermitePoly.o
 	$(LD) -o TestHermite HermitePoly.o $(LIBS)
+
+TestLegendre: TestLegendre.o
 	$(LD) -o TestLegendre TestLegendre.o SpecialFunctions.o $(LIBS)
+
+TestPoly: TestPoly.o
 	$(LD) -o TestPoly TestPoly.o $(LIBS)
+
+TestPolySet: TestPolySet.o PolynomialSet.o
 	$(LD) -o TestPolySet TestPolySet.o PolynomialSet.o ../Integration/GKIntegration.o $(LIBS)
 
 clean:
