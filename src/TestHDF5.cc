@@ -31,8 +31,14 @@ void TestHDF5Output()
   HDF5out.CloseFile();
 
   InputSectionHDF5Class HDF5in;
-  HDF5in.OpenFile ("HDF5test.h5",NULL);
-  
+  InputSectionClass *sec;
+  HDF5in.OpenFile ("HDF5test.h5", "Root", NULL);
+  HDF5in.FindSection ("Action", sec);
+  double tau;
+  sec->ReadVar ("tau", tau);
+  cerr << "tau = " << tau << endl;
+
+  HDF5in.PrintTree();
   HDF5in.Close();
 }
 

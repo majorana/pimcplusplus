@@ -9,23 +9,21 @@
 using namespace std;
 
 
-
 class VarClass 
 {  
 public:
   string Name;
 
-  virtual bool ReadInto (double &val) = 0;
-  virtual bool ReadInto (int &val)                 = 0;
-  virtual bool ReadInto (string &val)              = 0;
-  /*  virtual bool ReadInto (Array<double,1> &val) = 0;
+  virtual bool ReadInto (double &val)              = 0;
+  virtual bool ReadInto (Array<double,1> &val)     = 0;
   virtual bool ReadInto (Array<double,2> &val)     = 0;
   virtual bool ReadInto (Array<double,3> &val)     = 0;
   virtual bool ReadInto (int &val)                 = 0;
   virtual bool ReadInto (Array<int,1> &val)        = 0;
   virtual bool ReadInto (Array<int,2> &val)        = 0;
   virtual bool ReadInto (Array<int,3> &val)        = 0;
-  virtual bool ReadInto (bool &val)                = 0;
+  virtual bool ReadInto (string &val)              = 0;
+  /*virtual bool ReadInto (bool &val)                = 0;
   virtual bool ReadInto (Array<bool,1> &val)       = 0;
   virtual bool ReadInto (Array<bool,2> &val)       = 0;
   virtual bool ReadInto (Array<bool,3> &val)       = 0;
@@ -42,7 +40,8 @@ public:
 class InputSectionClass
 {
  public:
-  virtual void PrintTree(InputSectionClass *sec)=0;
+  virtual void PrintTree(int numIndent)=0;
+  virtual void PrintTree()=0;
   InputSectionClass* Parent;
   list<InputSectionClass*> SectionList;
   list<VarClass*> VarList;
@@ -78,7 +77,9 @@ public:
       return readVarSuccess;	 
     }
   
-  virtual bool OpenFile (string fileName, InputSectionClass *parent) = 0;
+  virtual bool OpenFile (string fileName, 
+			 string mySectionName, 
+			 InputSectionClass *parent) = 0;
   virtual void Close() = 0;
 };
 
@@ -104,8 +105,8 @@ inline int InputSectionClass::CountSections(string name)
 
 
 inline bool InputSectionClass::FindSection (string name, 
-				     InputSectionClass* &sectionPtr,
-				     bool rewind)
+					    InputSectionClass* &sectionPtr,
+					    bool rewind)
 {
   
   list<InputSectionClass*>::iterator tempIter=Iter;

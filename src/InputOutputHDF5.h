@@ -18,11 +18,16 @@ class VarHDF5Class : public VarClass
 public:
   hid_t DataSetID;
   H5T_class_t TypeClass;
-  int Ndims;
   Array<hsize_t,1> Dimensions;
 
-  bool ReadInto (double &val) {return true; }
-  bool ReadInto (int &val) {return true; }
+  bool ReadInto (double &val);
+  bool ReadInto (Array<double,1> &v);
+  bool ReadInto (Array<double,2> &v);
+  bool ReadInto (Array<double,3> &v);
+  bool ReadInto (int &val);
+  bool ReadInto (Array<int,1> &v);
+  bool ReadInto (Array<int,2> &v);
+  bool ReadInto (Array<int,3> &v);
   bool ReadInto (string &val) {return true; }
 
   ~VarHDF5Class()
@@ -46,16 +51,18 @@ private:
   /// StripName strips the trailing ".#" from a string.  These were
   /// added by the HDF5 writer in order to have multiples sections
   /// with the same name.
-  void StripName (string &name);
+  string StripName (string name);
+  void PrintTree(int numIndent );
 public:
   /// This is the HDF5 handle for the group.
   hid_t GroupID;
   /// This prints the variables and sections below me, mostly for
   /// debugging purposes.
-  void PrintTree(InputSectionClass *sec)
-  { cerr << "Tree";}
+
+  void PrintTree();
   void GroupIterator (string member_name);
-  bool OpenFile (string fileName, InputSectionClass *parent);
+  bool OpenFile (string fileName, string mySectionName,
+		 InputSectionClass *parent);
   void Close();
   InputSectionHDF5Class() : IsOpen(false), IsRoot(false)
   { }

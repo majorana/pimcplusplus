@@ -5,7 +5,98 @@
  *                    Input Functions                      *
  ************************************************************/
 
-bool InputSectionHDF5Class::OpenFile(string fileName, 
+bool VarHDF5Class::ReadInto (double &val)
+{
+  assert (TypeClass == H5T_FLOAT);
+  assert (Dimensions.size() == 1);
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_DOUBLE, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, &val);
+  return (status == 0);
+}
+
+bool VarHDF5Class::ReadInto (Array<double,1> &val)
+{
+  assert (TypeClass == H5T_FLOAT);
+  assert (Dimensions.size() == 1);
+  val.resize(Dimensions(0));
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_DOUBLE, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, val.data());
+  return (status == 0);
+}
+
+bool VarHDF5Class::ReadInto (Array<double,2> &val)
+{
+  assert (TypeClass == H5T_FLOAT);
+  assert (Dimensions.size() == 2);
+  val.resize(Dimensions(0), Dimensions(1));
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_DOUBLE, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, val.data());
+  return (status == 0);
+}
+
+bool VarHDF5Class::ReadInto (Array<double,3> &val)
+{
+  assert (TypeClass == H5T_FLOAT);
+  assert (Dimensions.size() == 3);
+  val.resize(Dimensions(0), Dimensions(1), Dimensions(2));
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_DOUBLE, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, val.data());
+  return (status == 0);
+}
+ 
+bool VarHDF5Class::ReadInto (int &val)
+{
+  assert (TypeClass == H5T_INTEGER);
+  assert (Dimensions.size() == 1);
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_INT, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, &val);
+  return (status == 0);
+}
+
+bool VarHDF5Class::ReadInto (Array<int,1> &val)
+{
+  assert (TypeClass == H5T_INTEGER);
+  assert (Dimensions.size() == 1);
+  val.resize(Dimensions(0));
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_INT, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, val.data());
+  return (status == 0);
+}
+
+bool VarHDF5Class::ReadInto (Array<int,2> &val)
+{
+  assert (TypeClass == H5T_INTEGER);
+  assert (Dimensions.size() == 2);
+  val.resize(Dimensions(0), Dimensions(1));
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_INT, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, val.data());
+  return (status == 0);
+}
+
+bool VarHDF5Class::ReadInto (Array<int,3> &val)
+{
+  assert (TypeClass == H5T_INTEGER);
+  assert (Dimensions.size() == 3);
+  val.resize(Dimensions(0), Dimensions(1), Dimensions(2));
+  herr_t status = H5Dread(DataSetID, H5T_NATIVE_INT, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, val.data());
+  return (status == 0);
+}
+
+
+
+/// Strips everything after and including a '.' in the string.
+/// Used to remove section numbers.
+string InputSectionHDF5Class::StripName (string str)
+{
+  int pos = str.find(".");
+  if (pos > 0)
+    str.erase(pos,str.length());
+  return(str);
+}
+
+bool InputSectionHDF5Class::OpenFile(string fileName,
+				     string mySectionName,
 				     InputSectionClass *parent)
 {
   GroupID = H5Fopen(fileName.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -19,7 +110,7 @@ bool InputSectionHDF5Class::OpenFile(string fileName,
   IsRoot = true;
   Parent = parent;
   ReadGroup (GroupID, "/", NULL);
-  Name = "all";
+  Name = mySectionName;
   return true;
 }
 
@@ -34,7 +125,7 @@ herr_t HDF5GroupIterator(hid_t group_id, const char *member_name,
 
 void InputSectionHDF5Class::GroupIterator(string member_name)
 {
-  cerr << "GroupIterator( " << member_name << ")\n";
+  //cerr << "GroupIterator( " << member_name << ")\n";
 
   H5G_stat_t statbuf;
   
@@ -59,9 +150,10 @@ void InputSectionHDF5Class::GroupIterator(string member_name)
     newVar->TypeClass = H5Tget_class (dataTypeID);
     H5Tclose (dataTypeID);
     hid_t dataSpaceID = H5Dget_space (newVar->DataSetID);
-    newVar->Ndims = H5Sget_simple_extent_ndims(dataSpaceID);
-    newVar->Dimensions.resize(newVar->Ndims);
-    H5Sget_simple_extent_dims(dataSpaceID, newVar->Dimensions.data(), NULL);
+    int ndims = H5Sget_simple_extent_ndims(dataSpaceID);
+    newVar->Dimensions.resize(ndims);
+    H5Sget_simple_extent_dims(dataSpaceID, newVar->Dimensions.data(), 
+			      NULL);
     H5Sclose (dataSpaceID);
     VarList.push_back(newVar);
   }
@@ -75,6 +167,41 @@ void InputSectionHDF5Class::GroupIterator(string member_name)
 
 }
 
+
+void PrintIndent(int num)
+{
+  for (int counter=0;counter<num*3;counter++){
+    cout<<' ';
+  }
+  
+
+}
+
+
+
+void InputSectionHDF5Class::PrintTree(int indentNum)
+{
+  PrintIndent(indentNum);
+  cout<<"Section: "<<Name<<endl;
+  list<VarClass*>::iterator varIter=VarList.begin();
+  while (varIter!=VarList.end()){
+    PrintIndent(indentNum+1);
+    cout<<"Variable: "<<(*varIter)->Name<<" "<<endl;
+    varIter++;
+  }
+  list<InputSectionClass*>::iterator secIter=SectionList.begin();
+  while (secIter!=SectionList.end()){
+    //    cout<<"Section: "<<(*secIter)->Name<<endl;
+    (*secIter)->PrintTree(indentNum+1);
+    secIter++;
+  }
+}
+
+void InputSectionHDF5Class::PrintTree()
+{
+  PrintTree(0);
+}
+
 /// ReadGroup iterates over the members of it's group, creating
 /// VarHDF5Class objects and new InputSectionHDF5Class objects as it
 /// goes, calling itself recursively as necessary to traverse all the
@@ -84,14 +211,12 @@ void InputSectionHDF5Class::ReadGroup(hid_t parentGroupID,
 				      InputSectionClass *parent)
 {
   Parent = parent;
-  Name = name;
-  
-  cerr << "name = " << name << endl;
+  Name = StripName(name);  
 
   H5Giterate (parentGroupID, name.c_str(), (int *)NULL, HDF5GroupIterator,
 	      this);
-
-
+  // Make sure Iter is sane to start with.
+  Iter = SectionList.begin();
 }
 
 
