@@ -6,8 +6,10 @@
 #include "ActionClass.h"
 #include "PathClass.h"
 #include "CommunicatorClass.h"
-
+#include "Actions/ActionsClass.h"
 #include "Common/Random/Random.h"
+
+
 
 /// This is the class that holds all of the information about the paths 
 /// including all of the particles, the momized data, and the action.
@@ -22,7 +24,7 @@ public:
 
   /// This object computes all actions.
   ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
-
+  ActionsClass Actions;
   /// The constructor that initializes the action and such
   int Join;
   PathClass Path;
@@ -85,7 +87,7 @@ public:
   }
 
   inline PathDataClass() : 
-    Action(*this), Path(Communicator)
+    Action(*this), Actions(*this), Path(Communicator)
   { Join = 1; }
 
 };

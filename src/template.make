@@ -30,6 +30,9 @@ PIMCobjs =                            \
   Moves/OpenBisectionMoveClass.o      \
   Moves/BisectionMoveClass.o          \
   Moves/MoveBase.o                    \
+  Actions/ShortRangeClass.o           \
+  Actions/ActionsClass.o              \
+  Moves/MultiStage.o                  \
   ActionClass.o                       \
   LongRangeRPA.o                      \
   PathDataClass.o                     \
@@ -78,6 +81,9 @@ TestPermobjs =                        \
   Moves/BisectionClass.o              \
   Moves/BlockMove.o                   \
   Moves/MetaMoves.o                   \
+  Actions/ShortRangeClass.o           \
+  Actions/ActionsClass.o              \
+  Moves/MultiStage.o                  \
   PIMCClass.o                         \
   Observables/ObservableBase.o        \
   Observables/ObservableEnergy.o      \
@@ -144,6 +150,7 @@ TestEwaldobjs =                      \
   NodalAction.o                      \
   PathDataClass.o                    \
   LongRangeRPA.o                     \
+  Actions/ShortRangeClass.o          \
   Common/MPI/Communication.o	     \
   Common/IO/InputOutput.o            \
   Common/IO/InputOutputHDF5.o        \
@@ -192,7 +199,7 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 all:   pimc++ TestPerm TestEwald FreeParticles
 	
-pimc++: Common_obj observables moves Tests $(PIMCobjs)
+pimc++: Common_obj observables moves actions Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
 
 TestPerm: Common_obj Tests $(TestPermobjs)
@@ -212,6 +219,10 @@ observables:
 
 moves:
 	cd Moves; ${MAKE_ALL}
+
+actions:
+	cd Actions; ${MAKE_ALL}
+
 Common_clean:
 	cd Common; ${MAKE} clean
 
@@ -243,7 +254,7 @@ clean:	Common_clean
 SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc
 
 
-newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake
+newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake
 	make -f template.make Makefile FRC=force_rebuild
 
 Common_newmake:
@@ -257,6 +268,9 @@ Observables_newmake:
 
 Moves_newmake:
 	cd Moves; ${MAKE_NEWMAKE}
+
+Actions_newmake:
+	cd Actions; ${MAKE_NEWMAKE}
 
 Makefile:	$(FRC)
 	rm -f $@

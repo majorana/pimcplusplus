@@ -76,6 +76,7 @@ public:
   Mirrored1DClass<int> Permutation;
   RandomClass Random;
   int TotalNumSlices;
+  double tau; //we need to set this still
   /// A scratch array to hold a boolean indicating whether we've
   /// looped over this particle yet
   Array<bool,1> DoPtcl;
