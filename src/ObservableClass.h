@@ -10,20 +10,27 @@
 /// a pointer to PathData.
 class ObservableClass 
 {
+protected:
+  bool FirstTime;
+  VarClass *IOVar;
 public:
   /// A reference to the PathData I'm observing
   PathDataClass &PathData;
-  IOSectionClass &IOSection;  
+  /// Note: This is not a reference.  If it were, it could change
+  /// behind our backs
+  IOSectionClass IOSection;  
   
   /// Observe the state of the present path and add it to the
   /// running sum for averages.
   virtual void Accumulate() = 0;
   virtual void WriteBlock()=0;
-  virtual void ShiftData(int numTimeSlices)=0;
+  virtual void ShiftData(int numTimeSlices) {;}
   /// The constructor.  Sets PathData references and calls initialize.
-  ObservableClass(PathDataClass &myPathData,IOSectionClass &ioSection) 
+  ObservableClass(PathDataClass &myPathData,IOSectionClass ioSection) 
     : PathData(myPathData), IOSection(ioSection)
-  {   }
+  {
+    FirstTime = true;
+  }
 };
 
 
@@ -44,59 +51,29 @@ public:
 // };
 
 
-/// This class stores observables which will be averaged over all
-/// links.
-class LinkObservableClass : public ObservableClass
+
+class TotalEnergyClass : public ObservableClass
 {
-protected:
-  //  virtual void MyBlockAverage(double &mean, double &error) = 0;
-  bool FirstTime;
-  VarClass *MyIOVar;
-public:
-  Array<double,1> LinkArray;
-  double Total;
+
+private:
+  double ESum;
   int NumSamples;
-  void Accumulate()
-  {
-    for (int counter=0;counter<LinkArray.size();counter++){
-      Total+=LinkArray(counter);
-    }
-    NumSamples++;
-  } 
-  virtual void Update(int startTimeSlice,int endTimeSlice)=0;
-  inline void UpdateAll()
-  {  Update(0, PathData.NumTimeSlices()-1); }
-  /// Initialize my data.
-  virtual void Initialize() = 0;
-  virtual void WriteBlock()=0;
-  void ShiftData(int numTimeSlices);
-  LinkObservableClass (PathDataClass &myPathData, IOSectionClass &ioSection) 
-    : ObservableClass(myPathData, ioSection)
-  { 
-    LinkArray.resize(PathData.NumTimeSlices());
-    NumSamples=0;
-    UpdateAll();
-    FirstTime = true;
-  }
-};
-
-class TotalEnergyClass : public LinkObservableClass
-{
 public:
+  void Accumulate();
   void WriteBlock();
-  void Update (int startTimeSlice, int endTimeSlice);
-  void UpdateAll();
+  void ShiftData(int numTimeSlices);
   
-
   TotalEnergyClass(PathDataClass &myPathData, IOSectionClass &IOSection)
-    : LinkObservableClass(myPathData, IOSection) 
+    : ObservableClass(myPathData, IOSection) 
   {
+    ESum = 0.0;
+    NumSamples = 0;
   }
 };
 
 
 /// A pair correlation function observable.
-class PairCorrelation : public ObservableClass
+class PairCorrelationClass : public ObservableClass
 {
   /// Stores number of counts in each bin
   Array<int,1> Histogram;
@@ -115,11 +92,11 @@ public:
   void Initialize();
   /// My specialization of the virtual function.
   void Print();
-  PairCorrelation(PathDataClass &myPathData, IOSectionClass &ioSection) : 
+  PairCorrelationClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
     ObservableClass(myPathData, ioSection) 
-  { /* Do nothing for now. */ }
-  void Write (IOSectionClass &outputFile)
-    {/*Currently doesn't do anything*/};
+  { Initialize(); }
+  void WriteBlock();
+
 };
 
 

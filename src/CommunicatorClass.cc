@@ -67,7 +67,6 @@ void CommunicatorClass::SendReceive(int SendProc,
 				    int RecvProc, 
 				    Array<ImageNumClass,1> &RecvBuff)
 {
-  int a = SendProc + RecvProc;
   int *SendPtr = (int *) SendBuff.data();
   int *RecvPtr = RecvBuff.data();
   int NumSend = SendBuff.size();
@@ -78,6 +77,26 @@ void CommunicatorClass::SendReceive(int SendProc,
 		my_mpi_comm, &status);
 }
 
+void CommunicatorClass::Sum(Array<double,1> &sendBuff, 
+			    Array<double,1> &recvBuff)
+{
+  double *sendPtr = sendBuff.data();
+  double *recvPtr = recvBuff.data();
+  int count = sendBuff.size();
+  
+  MPI_Reduce(sendPtr, recvPtr, count, MPI_DOUBLE, MPI_SUM, 0, 
+	     my_mpi_comm);
+}
+
+double CommunicatorClass::Sum(double a)
+{
+  double sum;
+  MPI_Reduce(&a, &sum, 1, MPI_DOUBLE, MPI_SUM, 0, my_mpi_comm);
+  if (MyProc()==0)
+    return sum;
+  else
+    return (0.0);
+}
 
 
 
@@ -120,5 +139,12 @@ void CommunicatorClass::SendReceive(int SendProc,
 {
   RecvBuff = SendBuff;
 }
+
+
+double CommunicatorClass::Sum(double a)
+{
+  return (a);
+}
+
 
 #endif

@@ -17,10 +17,10 @@ void setupAction(ActionClass &myActionClass)
 
 {
   myActionClass.PairActionVector.resize(1);
-  myActionClass.PairActionVector(0).ReadDavidSquarerFile("../inputs/ep_beta1.0.dm");
+  //  myActionClass.PairActionVector(0).ReadDavidSquarerFile("../inputs/ep_beta1.0.dm");
   myActionClass.PairMatrix.resize(2,2);
   myActionClass.PairMatrix=0;
-  myActionClass.tau=myActionClass.PairActionVector(0).tau;
+  //myActionClass.tau=myActionClass.PairActionVector(0).tau;
   cerr << "Tau = " << myActionClass.tau << endl;
   //  myActionClass.mySpeciesArray =&(myPathData.SpeciesArray);
 
@@ -170,16 +170,25 @@ int main(int argc, char **argv)
 
   PathDataClass myPathData;
   IOSectionClass inSection;
-  inSection.OpenFile("hydrogen.txt");  
+  assert(inSection.OpenFile("hydrogen.in"));  
+  //  inSection.PrintTree();
   cerr<<"I've opened the file\n";
-  inSection.OpenSection("System");
+  assert(inSection.OpenSection("System"));
   myPathData.Path.Read(inSection);
   inSection.CloseSection(); // "System"
   cerr<<"I'm right before the action\n";
   inSection.OpenSection("Action");
   myPathData.Action.Read(inSection);
   inSection.CloseSection(); //"Action"
- 
+
+  IOSectionClass out;
+  out.NewFile ("Observables.h5");
+  out.NewSection("Energies");
+  TotalEnergyClass TotE(myPathData, out);
+  out.CloseSection();
+  out.NewSection("gofr");
+  PairCorrelationClass gofr(myPathData,out);
+  out.CloseSection();
   //Observable setup Hack!
   //PairCorrelation PC(myPathData);
   //  PC.PathData = &myPathData;
@@ -239,9 +248,14 @@ int main(int argc, char **argv)
 //   //  PrintConfigClass myPrintConfig(myPathData);
   ofstream outfile;
   outfile.open("ourPath.dat");
-  int steps=300000;
+  int steps=100000;
   for (int counter=0;counter<steps;counter++){
-    if ((counter % 1000) == 0){
+    if (counter>steps/2 && (counter % 10)==0){
+      TotE.Accumulate();
+      gofr.Accumulate();
+    }
+    if (counter>steps/2 && (counter % 1000) == 0){
+      TotE.WriteBlock();
       cerr << "Step #" << counter << ":\n";
       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
 	outfile<<myPathData.Path(slice,0)[0]<<" ";
@@ -265,6 +279,8 @@ int main(int argc, char **argv)
     }
     myShiftMove.MakeMove();
   }
+  gofr.WriteBlock();
+  out.CloseFile();
   //PC.Print();
   cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
   //cerr<<"done! done!"<<endl;

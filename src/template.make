@@ -4,32 +4,36 @@ LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
        $(G2CLIB) $(HDF5LIB) -lm 
 INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) 
 
-CCFLAGS = -c -g  -Wno-deprecated  #-O3   #-pg
+CCFLAGS = -c -g  -Wno-deprecated  -O3   #-pg
 CC = mpicc
 LD = mpicc  -Bstatic 
 DEFS = -DNO_COUT -DUSE_MPI   -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
-TestObjs =                      \
-  ObservableClass.o             \
-  Common/Splines/CubicSpline.o  \
-  Common/Splines/Grid.o         \
-  SpeciesClass.o                \
-  Common.o                      \
-  BisectionMoveClass.o          \
-  MoveClass.o                   \
-  ActionClass.o                 \
-  PathDataClass.o               \
-  CommunicatorClass.o           \
-  PathClass.o                   \
-  test.o                        \
-  DistanceTablePBCClass.o       \
-  DistanceTableFreeClass.o      \
-  DistanceTableClass.o          \
-  MirroredArrayClass.o          \
-  Common/IO/InputOutput.o       \
-  Common/IO/InputOutputHDF5.o   \
-  Common/IO/InputFile.o         \
-  Common/IO/InputOutputASCII.o 
+TestObjs =                         \
+  ObservableClass.o                \
+  Common/Splines/CubicSpline.o     \
+  Common/Splines/Grid.o            \
+  SpeciesClass.o                   \
+  Common.o                         \
+  BisectionMoveClass.o             \
+  MoveClass.o                      \
+  ActionClass.o                    \
+  PathDataClass.o                  \
+  CommunicatorClass.o              \
+  PathClass.o                      \
+  test.o                           \
+  DistanceTablePBCClass.o          \
+  DistanceTableFreeClass.o         \
+  DistanceTableClass.o             \
+  MirroredArrayClass.o             \
+  Common/IO/InputOutput.o          \
+  Common/IO/InputOutputHDF5.o      \
+  Common/IO/InputFile.o            \
+  Common/IO/InputOutputASCII.o     \
+  Common/PairAction/PAcoulombFit.o \
+  Common/PairAction/PAszFit.o      \
+  Common/PH/PH.o                   \
+  Common/PH/Potential.o
 
 MakeInputObjs =                 \
   Common/IO/InputOutput.o       \

@@ -7,7 +7,7 @@ using namespace std;
 int  main()
 {
 
-  IOSectionClass ASCIIout;
+  IOSectionClass ASCIIout, ASCIIin;
 
   Array<double,1> v(5);
   Array<double,3> m(3,3,1);
@@ -60,7 +60,8 @@ int  main()
   
 
   cerr << "Finished writing.\n";
- 
+  ASCIIin.OpenFile("ASCIItest2.txt");
+  ASCIIin.PrintTree();
 
 
 

@@ -22,6 +22,13 @@ private:
 public:
   DistanceTableClass *DistanceTable;
 
+  /// This defines a communicator for the group of processors working
+  /// on this PathDataClass.
+  CommunicatorClass Communicator;
+
+  /// This object computes all actions.
+  ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
+
   ///The constructor that initializes the action and such
   int Join;
   PathClass Path;
@@ -32,15 +39,6 @@ public:
     Path.ShiftData(numTimeSlicesToShift,Communicator);
     DistanceTable->ShiftData(numTimeSlicesToShift, Communicator);
   }
-
-
-
-  /// This defines a communicator for the group of processors working
-  /// on this PathDataClass.
-  CommunicatorClass Communicator;
-
-  /// This object computes all actions.
-  ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
 
   ///We are probaby going to have to move permutation
   ///information up here if we want it to notice

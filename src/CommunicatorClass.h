@@ -25,6 +25,9 @@ class CommunicatorClass
   int MyProc() const;
 
   
+  void ReceiveFromAll(const Array<dVec,1> &recvBuff);
+  void Send(int sendProc,const Array<dVec,1> &sendBuff);
+
   ///Sends and receives an array of dVec
   void SendReceive (int sendProc, const Array<dVec,1> &sendBuff,
 		    int recvProc,       Array<dVec,1> &recvBuff);
@@ -41,6 +44,12 @@ class CommunicatorClass
   void SendReceive (int sendProc, const Array<ImageNumClass,1> &sendBuff,
 		    int recvProc,       Array<ImageNumClass,1> &recvBuff);
 
+  ///Sums up the vectors in sendBuff.  Processor 0 only gets the
+  ///resulting sum.
+  void Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuff);
+  ///Sums up all values a.  Only processor 0 gets the result.  All
+  ///other processors return 0;
+  double Sum (double a);
 };
 
 

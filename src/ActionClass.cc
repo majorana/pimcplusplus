@@ -6,25 +6,60 @@
 
 void ActionClass::Read(IOSectionClass& inSection)
 { 
-  inSection.ReadVar ("tau", tau);
-  int numPairActions=inSection.CountSections("PairAction"); 
+  assert(inSection.ReadVar ("tau", tau));
+  assert(inSection.ReadVar ("MaxLevels", MaxLevels));
+
+  Array<string,1> PAFiles;
+  assert (inSection.ReadVar ("PairActionFiles", PAFiles));
+  int numPairActions = PAFiles.size();
   PairActionVector.resize(numPairActions);
   PairMatrix.resize(Path.NumSpecies(),Path.NumSpecies());
   // Initialize to a nonsense value so we can later check in the table
   // element was filled in.
+
   PairMatrix = -1;
-  // Now read the pair actions into the file
-  for (int PAnum=0;PAnum<numPairActions;PAnum++){
-    inSection.OpenSection("PairAction");
-    PairActionVector(PAnum).Read(inSection);
-    inSection.CloseSection(); //"PairAction"
-    int type1 = Path.SpeciesNum (PairActionVector(PAnum).type1);
-    int type2 = Path.SpeciesNum (PairActionVector(PAnum).type2);
-    // Now point the matrix to the vector entry.
-    PairMatrix(type1,type2)= PAnum;
-    PairMatrix(type2,type1)= PAnum;
-    assert(PairActionVector(PAnum).tau == tau);
+  // Read pair actions files
+  IOSectionClass PAIO;
+  for (int i=0; i<numPairActions; i++) {
+    assert(PAIO.OpenFile (PAFiles(i)));
+    PairActionVector(i) = ReadPAFit (PAIO, tau, MaxLevels);
+    int type1 = Path.SpeciesNum(PairActionVector(i)->Particle1.Name);
+    int type2 = Path.SpeciesNum(PairActionVector(i)->Particle2.Name);
+    if (type1==-1) {
+      cerr << "Unrecognized type \""
+	   << PairActionVector(i)->Particle1.Name << "\".\n";
+      abort();
+    }
+    if (type2==-1) {
+      cerr << "Unrecognized type \""
+	   << PairActionVector(i)->Particle2.Name << "\".\n";
+      abort();
+    }
+    PairMatrix(type1,type2) = i;
+    PairMatrix(type2,type1) = i;
+    PAIO.CloseFile();
   }
+
+
+//   int numPairActions=inSection.CountSections("PairAction"); 
+//   PairActionVector.resize(numPairActions);
+//   PairMatrix.resize(Path.NumSpecies(),Path.NumSpecies());
+//   // Initialize to a nonsense value so we can later check in the table
+//   // element was filled in.
+//   PairMatrix = -1;
+//   // Now read the pair actions into the file
+//   for (int PAnum=0;PAnum<numPairActions;PAnum++){
+//     inSection.OpenSection("PairAction");
+//     PairActionVector(PAnum).Read(inSection);
+//     inSection.CloseSection(); //"PairAction"
+//     int type1 = Path.SpeciesNum (PairActionVector(PAnum).type1);
+//     int type2 = Path.SpeciesNum (PairActionVector(PAnum).type2);
+//     // Now point the matrix to the vector entry.
+//     PairMatrix(type1,type2)= PAnum;
+//     PairMatrix(type2,type1)= PAnum;
+//     assert(PairActionVector(PAnum).tau == tau);
+//   }
+
   // Now check to make sure all PairActions that we need are defined.
   for (int species1=0; species1<Path.NumSpecies(); species1++)
     for (int species2=0; species2<Path.NumSpecies(); species2++)
@@ -71,13 +106,13 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 
 	  DistanceTable->DistDisp(slice, slice+skip, ptcl1, ptcl2,
 				  rmag, rpmag, r, rp);
-	  double s = sqrt(dot (r-rp, r-rp));
+	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
 	  int PairIndex = PairMatrix(species1,
 				     Path.ParticleSpeciesNum(ptcl2));
 	  double U, dU, V;
-	  PairActionVector(PairIndex).calcUsqz(s,q,z, level, U, dU, V);
+	  U = PairActionVector(PairIndex)->U(q,z,s2, level);//, U, dU, V);
 	  TotalU += U;
 	  PE += V;
 	  KE -= dU;

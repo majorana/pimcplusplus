@@ -2,6 +2,7 @@
 #define ACTION_CLASS
 
 #include "Common/Splines/CubicSpline.h"
+#include "Common/PairAction/PAFit.h"
 #include "SpeciesClass.h"
 #include "MemoizedDataClass.h"
 #include "PathClass.h"
@@ -128,23 +129,27 @@ class ActionClass
 {
 private:
 public:
-  void Read(IOSectionClass &IOSection);
   DistanceTableClass *DistanceTable;
   /// This holds all of the Pair Action Classes
-  Array<PairActionClass,1> PairActionVector;
+  Array<PairActionFitClass*,1> PairActionVector;
   /// Holds indices to which PairActionClass in the PairAcctionVector
   /// you use for a given pair of particles indexed by
   /// (species1,species2) 
   Array<int,2> PairMatrix;
   /// This indexes into the non-existent Saved Pair Actions
   Array<SavedPairActionClass,2> SavedPairActionArray;
+  PathClass &Path;
+  /// Temperature
+  double tau;
+  /// The maximum number of levels we can have in a bisection move.
+  int MaxLevels;
+
+
+  void Read(IOSectionClass &IOSection);
   ActionClass(PathClass  &p_path) : Path(p_path) 
   {
   }
   /// This holds a reference to the Array of Species
-  PathClass &Path;
-  /// Temperature
-  double tau;
   /// Calculates the total action.
   double calcTotalAction(int startSlice, int endSlice, 
 			 Array<int,1> changedParticles,int level);
