@@ -148,3 +148,8 @@ void DistanceTableFreeClass::Update(int timeSlice,
   }
 }   
 
+
+dVec DistanceTableFreeClass::Velocity(int timeSliceA, int timeSliceB, int ptcl)
+{
+  return (Path(timeSliceB,ptcl)-Path(timeSliceA,ptcl));
+}

@@ -16,6 +16,7 @@ private:
   inline void Displacement (int timeSlice, int ptcl1, int ptcl2,
 			    dVec &disp, double &dist, dVec vecMask);
 public:
+  dVec Velocity (int timeSliceA, int timeSliceB, int ptcl);
   void Update (int timeSlice, const Array<int,1> &ptclArray);
   void UpdateAll();
   void UpdateAll(int timeSlice);

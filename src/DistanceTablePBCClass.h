@@ -12,6 +12,7 @@ private:
 			    dVec &disp, double &dist, int &imageNum,
 			    dVec vecMask, dVecInt imageMask);
 public:
+  dVec Velocity(int timeSliceA, int timeSliceB, int ptcl);
   void Update (int timeSlice, const Array<int,1> &ptclArray);
   void UpdateAll();
   void UpdateAll(int timeSlice);
@@ -36,8 +37,6 @@ inline void DistanceTablePBCClass::Displacement(int timeSlice,
     //    disp[i] += image[i]*Path.Box[i];
   }
   imageNum = ImageNum(image);
-  cerr << "ImageNum = " << imageNum << endl;
-  cerr << "ImageVectors(imageNum) = " << ImageVectors(imageNum) << endl;
   disp = disp + ImageVectors(imageNum);
   dist = sqrt(dot(disp,disp));
 }

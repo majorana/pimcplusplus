@@ -187,3 +187,17 @@ void DistanceTablePBCClass::Update(int timeSlice,
   }
 }   
 
+
+dVec DistanceTablePBCClass::Velocity(int timeSliceA, int timeSliceB, int ptcl)
+{
+  dVec vel = Path(timeSliceB,ptcl) - Path(timeSliceA,ptcl);
+  for (int dim=0; dim<NDIM; dim++)
+    {
+      while (vel[dim] > (0.5*Path.Box[dim]))
+	vel[dim] -= Path.Box[dim];
+      while (vel[dim] < -(0.5*Path.Box[dim]))
+	vel[dim] += Path.Box[dim];
+    }
+  return (vel);
+}
+

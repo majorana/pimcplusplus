@@ -28,10 +28,16 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	  dVec r2=Path(slice,ptcl2);
 	  dVec rp1=Path(slice+skip,ptcl1);
 	  dVec rp2=Path(slice+skip,ptcl2);
-	  dVec r=r1-r2;
-	  dVec rp=(rp1-rp2);
-	  double rmag=sqrt(dot(r,r));
-	  double rpmag=sqrt(dot(rp,rp));
+
+	  dVec r, rp;
+	  double rmag, rpmag;
+
+	  DistanceTable->DistDisp(slice, slice+skip, ptcl1, ptcl2,
+				  rmag, rpmag, r, rp);
+	  //dVec r=r1-r2;
+	  //dVec rp=(rp1-rp2);
+	  //double rmag=sqrt(dot(r,r));
+	  //double rpmag=sqrt(dot(rp,rp));
 	  double s = sqrt(dot (r-rp, r-rp));
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
@@ -47,12 +53,15 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
     //    cout<<"levelTau is "<<levelTau<<endl;
     double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
-      dVec r1 = Path(slice,ptcl1);
-      dVec r2 = Path(slice+skip,ptcl1);
+      //      double LinkDist;
+      dVec vel;
+      //      dVec r1 = Path(slice,ptcl1);
+      //      dVec r2 = Path(slice+skip,ptcl1);
+      vel = DistanceTable->Velocity(slice, slice+skip, ptcl1);
       //This function has to be written and possibly memoized or something?
-      double LinkDistSqrd=distSqrd(r1,r2);  
+      //      double LinkDistSqrd=distSqrd(r1,r2);  
       //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-      TotalK += LinkDistSqrd*FourLambdaTauInv; 
+      TotalK += dot(vel,vel)*FourLambdaTauInv; 
     }
   }
    

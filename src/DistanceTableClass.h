@@ -39,6 +39,7 @@ public:
   inline void DistDisp(int timeSliceA, int timeSliceB,
 		       int ptcl1, int ptcl2, double &distA, double &distB,
 		       dVec &dispA, dVec &dispB);
+  virtual dVec Velocity(int timeSliceA, int timeSliceB, int ptcl) = 0;
   inline DistanceTableClass (PathClass &myPath);
   inline void AcceptCopy(int startTimeSlice, int endTimeSlice,
 			 const Array<int,1> &activeParticles);

@@ -112,12 +112,9 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
 /// to be sent that has the memoizedData and SpeciesClass 
 class ActionClass
 {
-
-
 private:
 public:
   DistanceTableClass *DistanceTable;
-
   /// This holds all of the Pair Action Classes
   Array<PairActionClass,1> PairActionVector;
   /// Holds indices to which PairActionClass in the PairAcctionVector
@@ -132,22 +129,23 @@ public:
   /// Temperature
   double tau;
   /// Calculates the total action.
-  double calcTotalAction(int startSlice, int endSlice, Array<int,1> changedParticles,int level);
+  double calcTotalAction(int startSlice, int endSlice, 
+			 Array<int,1> changedParticles,int level);
   /// This is a reference to the memoized data class
   //  MemoizedDataClass &myMemoizedData;
   ///This picks a new location in space for the particles in the
   ///particles Array at all of the time slices between startSlice and
   ///endSlice (at the appropriate skip for the level)
 
-  inline double SampleParticles(int startSlice, int endSlice, Array<int,1> particles, int level);
+  inline double SampleParticles(int startSlice, int endSlice, 
+				Array<int,1> particles, int level);
   /// This calculates the sample probability for going from the state
   /// that is currently in the newMode of MirroredArrayClass to the
   /// state that is currently in oldMode of MirroredArrayClass 
-  inline double LogSampleProb(int startSlice, int endSlice, Array<int,1> particles,int level);
+  inline double LogSampleProb(int startSlice, int endSlice, 
+			      Array<int,1> particles,int level);
   /// Function to calculate the total action.
   void calcTotalAction();
-
-
 
 };
 
@@ -183,8 +181,11 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
       dVec r = Path(sliceCounter,ptcl);
       dVec rp= Path(sliceCounter+skip,ptcl);
       dVec rpp=Path(sliceCounter+(skip>>1),ptcl);
+      dVec rdiff = 
+	DistanceTable->Velocity(sliceCounter, sliceCounter+skip, ptcl);
       ////      ///We've ignored boundary conditions here
-      dVec rbar=0.5*(r+rp);
+      //dVec rbar=0.5*(r+rp);
+      dVec rbar = r + 0.5*rdiff;
       dVec newDelta=GaussianRandomVec(sigma);
       
       rpp=rbar+newDelta;
@@ -221,13 +222,15 @@ inline double ActionClass::LogSampleProb(int startSlice, int endSlice,
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
       dVec r = Path(sliceCounter,ptcl);
+      dVec rdiff = 
+	DistanceTable->Velocity(sliceCounter, sliceCounter+skip, ptcl);
       dVec rp= Path(sliceCounter+skip,ptcl);
       dVec rpp=Path(sliceCounter+(skip>>1),ptcl);
       //      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
       //      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
       //      rpp    =mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
       ///We've ignored boundary conditions here
-      dVec rbar=0.5*(r+rp);
+      dVec rbar=r + 0.5*rdiff;
       dVec Delta= rpp - rbar;
       logSampleProb=logSampleProb+
 	(prefactorOfSampleProb-0.5*dot(Delta,Delta)/(sigma2));

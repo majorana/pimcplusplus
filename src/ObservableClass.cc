@@ -16,11 +16,11 @@ void PairCorrelation::Accumulate()
 	dVec disp;
 	double dist;
 	PathData.DistanceTable->DistDisp(slice,ptcl1,ptcl2,dist,disp);
-	cout<<"For periodic bc "<<disp<<" ";
-	PathData.Path.MinDistance(PathData(slice,ptcl1),
-					PathData(slice,ptcl2),dist,disp);
-	cout<<disp<<endl;
-#ifdef BZ_DEBUG
+	//	cout<<"For periodic bc "<<disp<<" ";
+	//PathData.Path.MinDistance(PathData(slice,ptcl1),
+	//			  PathData(slice,ptcl2),dist,disp);
+	//cout<<disp<<endl;
+#ifdef DEBUG
 	dVec dispDummy=r2-r1;
 	double distDummy=sqrt(dot(dispDummy,dispDummy));
 	for (int i=0; i<NDIM; i++)
