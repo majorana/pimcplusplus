@@ -1,7 +1,7 @@
 #ifndef DISTRIBUTED_MAT_H
 #define DISTRIBUTED_MAT_H
 
-#include "Common/MPI/Communication.h"
+#include "../MPI/Communication.h"
 
 class DistributedMat
 {
@@ -231,10 +231,9 @@ public:
   /// processors 
   void AllGather();
 
-  DistributedMat(CommunicatorClass comm)
+  DistributedArray3(CommunicatorClass comm)
   {
     MyComm = comm;
-
   }
   DistributedArray3(int rows, int cols, int depth, CommunicatorClass comm)
   {

@@ -74,7 +74,7 @@ void DistributedArray3::AllGather()
 
   int depth = Mat.extent(2);
   // Allocate send an receive buffers
-  Array<double,2> SendBuffer(maxElements*depth),
+  Array<double,1> SendBuffer(maxElements*depth),
     RecvBuffer(maxElements*numProcs*depth);
   
   // Now fill send buffer with my elements
@@ -101,23 +101,6 @@ void DistributedArray3::AllGather()
 
 
 
-void TestDistributedMat()
-{
-  CommunicatorClass comm;
-  comm.SetWorld();
-  
-  DistributedSymmMat  dmat(5,comm);
-  int row, col;
-
-  for (int i=0; i<dmat.MyNumElements(); i++)
-    {
-      dmat.MyElement(i,row,col);
-      dmat(row,col) = 10.0*row+col;
-    }
-  dmat.Print();
-  dmat.AllGather();
-  dmat.Print();
-}
 
 
 /* main(int argc, char **argv)
