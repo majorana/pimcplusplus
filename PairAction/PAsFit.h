@@ -2,6 +2,9 @@
 #define PA_S_FIT_H
 #include "PAFitBase.h"
 #include "../Splines/BicubicSpline.h"
+#ifdef MAKE_FIT
+#include "../MPI/Communication.h"
+#endif
 
 class PAsFitClass : public PairActionFitClass
 {
@@ -9,6 +12,9 @@ private:
   bool GridsAreMine;
   Array<double,1> Coefs;
   Array<double,1> Pn;
+#ifdef MAKE_FIT
+  CommunicatorClass Comm;
+#endif
 public:
   Grid *qgrid, *ygrid;
   Array<MultiBicubicSpline,1> Usplines, dUsplines;
@@ -29,6 +35,9 @@ public:
   double dU(double q, double z, double s2, int level);
   PAsFitClass()
   { 
+#ifdef MAKE_FIT
+    Comm.SetWorld();
+#endif
     GridsAreMine = false; 
     NumBetas=0;
   }

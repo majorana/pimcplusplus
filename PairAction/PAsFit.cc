@@ -1,6 +1,7 @@
 #include "PAFit.h"
 #include "../Splines/BicubicSpline.h"
 #include "../SpecialFunctions/LegendrePoly.h"
+#include "../Distributed/DistributedMat.h"
 
 const double Rho0Min = 1.0e-4;
 
@@ -24,14 +25,16 @@ void PAsFitClass::ReadParams(IOSectionClass &inSection)
 
 void PAsFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 {
-  outSection.WriteVar ("Type", "sfit");
-  outSection.NewSection("qGrid");
-  qgrid->Write(outSection);
-  outSection.CloseSection();
-  outSection.NewSection("yGrid");
-  ygrid->Write(outSection);
-  outSection.CloseSection();
-  outSection.WriteVar("Order", Order);
+  if (Comm.MyProc() == 0) {
+    outSection.WriteVar ("Type", "sfit");
+    outSection.NewSection("qGrid");
+    qgrid->Write(outSection);
+    outSection.CloseSection();
+    outSection.NewSection("yGrid");
+    ygrid->Write(outSection);
+    outSection.CloseSection();
+    outSection.WriteVar("Order", Order);
+  }
 }
 
 
@@ -113,39 +116,47 @@ void PAsFitClass::AddFit (Rho &rho)
 
   int numq = qgrid->NumPoints;
   int numy = ygrid->NumPoints;
-  Array<double,3> Umat(numq, numy,Order+1), dUmat(numq, numy, Order+1);
+  CommunicatorClass comm;
+  comm.SetWorld();
+  DistributedArray3 Umat(numq, numy,Order+1,comm), 
+    dUmat(numq, numy, Order+1, comm);
   sFitIntegrand integrand(rho);
-  for (int qi=0; qi<numq; qi++) {
-    cerr << "qi = " << qi+1 << " of " << numq << ".\n";
-    double q = (*qgrid)(qi);
+  int qi, yi;
+  qi = -1;
+  for (int i=0; i<Umat.MyNumElements(); i++) {
+    int tempqi;
+    Umat.MyElement(i, tempqi, yi);
+    if (tempqi != qi) {
+      cerr << "qi = " << qi+1 << " of " << numq << ".\n";      
+      qi = tempqi;
+    }
+    double q = (*qgrid)(qi);    
     double zmax = 0.999999*min(2.0*q, sMax(NumBetas-1));
-    for (int yi=0; yi<numy; yi++) {
-      //cerr << "  yi = " << yi+1 << " of " << numy << ".\n";
-      double z = zmax*(*ygrid)(yi);
-      double smin = z;
-      double smax = min (2.0*q, sMax(NumBetas-1));
-      //cerr << "smin = " << smin << " smax = " << smax << endl;
-      integrand.Setqz(q,z,smin,smax);
-      for(int k=0; k<=Order; k++) {
-	//cerr << " k = " << k << endl;
-	integrand.k=k;
-	integrand.IsdU=false;
-	GKIntegration<sFitIntegrand,GK15> Uintegrator(integrand);
-	// Accept a relative OR absolute toleraance of 1.0e-7
-	Umat(qi, yi, k) = Uintegrator.Integrate(-1.0, 1.0, 
-						beta*Tolerance, Tolerance, 
-						false);
+    double z = zmax*(*ygrid)(yi);
+    double smin = z;
+    double smax = min (2.0*q, sMax(NumBetas-1));
+    //cerr << "smin = " << smin << " smax = " << smax << endl;
+    integrand.Setqz(q,z,smin,smax);
+    for(int k=0; k<=Order; k++) {
+      integrand.k=k;
+      integrand.IsdU=false;
+      GKIntegration<sFitIntegrand,GK15> Uintegrator(integrand);
+      // Accept a relative OR absolute toleraance of 1.0e-7
+      Umat(qi, yi, k) = Uintegrator.Integrate(-1.0, 1.0, 
+					      beta*Tolerance, Tolerance, 
+					      false);
 
-	integrand.IsdU = true;
-	GKIntegration<sFitIntegrand,GK15> dUintegrator(integrand);
-	dUmat(qi, yi, k) = dUintegrator.Integrate(-1.0, 1.0, Tolerance,
+      integrand.IsdU = true;
+      GKIntegration<sFitIntegrand,GK15> dUintegrator(integrand);
+      dUmat(qi, yi, k) = dUintegrator.Integrate(-1.0, 1.0, Tolerance,
 						  Tolerance, false);
-      }
     }
   }
+  Umat.AllGather();
+  dUmat.AllGather();
   // Initialize the bicubic splines
-  Usplines(NumBetas-1).Init(qgrid,ygrid,Umat);
-  dUsplines(NumBetas-1).Init(qgrid,ygrid,dUmat);
+  Usplines(NumBetas-1).Init(qgrid,ygrid,Umat.Mat);
+  dUsplines(NumBetas-1).Init(qgrid,ygrid,dUmat.Mat);
 }
 
 
@@ -227,25 +238,27 @@ void PAsFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 
 void PAsFitClass::WriteFits (IOSectionClass &outSection)
 {
-  Array<double,3> Umat(qgrid->NumPoints, ygrid->NumPoints, Order+1); 
-  Array<double,3> dUmat(qgrid->NumPoints, ygrid->NumPoints,Order+1); 
-  double beta = SmallestBeta;
-  for (int bi=0; bi<NumBetas; bi++) {
-    cerr << "Writing Beta "<< bi+1 << " of " << NumBetas << ":\n";
-    outSection.NewSection("Fit");
-    outSection.WriteVar ("beta", beta);
-    double smax = sMax(bi);
-    outSection.WriteVar ("sMax", smax);
-    for (int qi=0; qi<qgrid->NumPoints; qi++)
-      for (int yi=0; yi<ygrid->NumPoints; yi++) 
-	for (int j=0; j<=Order; j++) {
-	  Umat(qi,yi,j)  =  Usplines(bi)(qi,yi,j);
-	  dUmat(qi,yi,j) = dUsplines(bi)(qi,yi,j);
-	}
-    outSection.WriteVar ("Umat", Umat);
-    outSection.WriteVar ("dUmat", dUmat);
-    outSection.CloseSection();
-    beta *= 2.0;
+  if (Comm.MyProc() == 0) {
+    Array<double,3> Umat(qgrid->NumPoints, ygrid->NumPoints, Order+1); 
+    Array<double,3> dUmat(qgrid->NumPoints, ygrid->NumPoints,Order+1); 
+    double beta = SmallestBeta;
+    for (int bi=0; bi<NumBetas; bi++) {
+      cerr << "Writing Beta "<< bi+1 << " of " << NumBetas << ":\n";
+      outSection.NewSection("Fit");
+      outSection.WriteVar ("beta", beta);
+      double smax = sMax(bi);
+      outSection.WriteVar ("sMax", smax);
+      for (int qi=0; qi<qgrid->NumPoints; qi++)
+	for (int yi=0; yi<ygrid->NumPoints; yi++) 
+	  for (int j=0; j<=Order; j++) {
+	    Umat(qi,yi,j)  =  Usplines(bi)(qi,yi,j);
+	    dUmat(qi,yi,j) = dUsplines(bi)(qi,yi,j);
+	  }
+      outSection.WriteVar ("Umat", Umat);
+      outSection.WriteVar ("dUmat", dUmat);
+      outSection.CloseSection();
+      beta *= 2.0;
+    }
   }
 }
 
