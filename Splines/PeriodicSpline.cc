@@ -12,7 +12,7 @@ PeriodicSpline::Update()
   double lambda[N], mu[N], d[N], gamma[N];
   
   // Setup lambdas, mus, and d's
-  lambda[0] = 0.5*(x(1)-x(0))/(x(1)-x(N-1));
+  lambda[0] = 0.5*(x(1)-x(0))/(x(N)-x(N-2));
   mu[0]     = 0.5-lambda[0];
   d[0]      = 3.0*(lambda[0]*(F(0)[0]-F(N-1)[0])/(x(N)-x(N-1)) +
 		   mu[0]    *(F(1)[0]-F(0)[0])  /(x(1)-x(0)));
@@ -50,7 +50,7 @@ PeriodicSpline::Update()
   
   // Now proceed up upper diagonal, backsubstituting
   for (int i=N-2; i>=0; i--)
-    F(i)[1] = d[i] - mu[i]*F(i+1)[1] - gamma[i]*d[N-1];
+    F(i)[1] = d[i] - mu[i]*F(i+1)[1] - gamma[i]*F(N-1)[1];
 
   // Finally, assign repeated last element for PBC
   F(N) = F(0);
