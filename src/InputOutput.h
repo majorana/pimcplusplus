@@ -79,8 +79,7 @@ public:
     }
   
   virtual bool OpenFile (string fileName, InputSectionClass *parent) = 0;
-  virtual void CloseFile() = 0;
-
+  virtual void Close() = 0;
 };
 
 

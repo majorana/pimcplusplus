@@ -34,6 +34,8 @@ herr_t HDF5GroupIterator(hid_t group_id, const char *member_name,
 
 void InputSectionHDF5Class::GroupIterator(string member_name)
 {
+  cerr << "GroupIterator( " << member_name << ")\n";
+
   H5G_stat_t statbuf;
   
   H5Gget_objinfo(GroupID, member_name.c_str(), 0, &statbuf);
@@ -41,13 +43,13 @@ void InputSectionHDF5Class::GroupIterator(string member_name)
 
   if (statbuf.type == H5G_GROUP) {
     InputSectionHDF5Class *newGroup = new InputSectionHDF5Class;
-    hid_t newGroupID = H5Gopen (GroupID, member_name.c_str());
-    if (newGroupID < 0) {
+    newGroup->GroupID = H5Gopen (GroupID, member_name.c_str());
+    if (newGroup->GroupID < 0) {
       cerr << "Error in InputSectionHDF5Class::GroupIterator.\n";
       exit(10);
     }
     SectionList.push_back(newGroup);
-    newGroup->ReadGroup (newGroupID, member_name, this);
+    newGroup->ReadGroup (GroupID, member_name, this);
   }
   else if (statbuf.type == H5G_DATASET) {
     VarHDF5Class *newVar = new VarHDF5Class;
@@ -77,25 +79,43 @@ void InputSectionHDF5Class::GroupIterator(string member_name)
 /// VarHDF5Class objects and new InputSectionHDF5Class objects as it
 /// goes, calling itself recursively as necessary to traverse all the
 /// subobjects below itself.
-void InputSectionHDF5Class::ReadGroup(hid_t groupID,
+void InputSectionHDF5Class::ReadGroup(hid_t parentGroupID,
 				      string name,
 				      InputSectionClass *parent)
 {
-  GroupID = groupID;
   Parent = parent;
   Name = name;
   
-  H5Giterate (groupID, name.c_str(), (int *)NULL, HDF5GroupIterator,
+  cerr << "name = " << name << endl;
+
+  H5Giterate (parentGroupID, name.c_str(), (int *)NULL, HDF5GroupIterator,
 	      this);
 
 
 }
 
-void InputSectionHDF5Class::CloseFile()
-{
-  cerr << "Please implement InputSectionHDF5Class::CloseFile()\n";
 
-}
+void InputSectionHDF5Class::Close()
+{
+  // First, free all the variables in the list
+  while (!VarList.empty()) {
+    delete(VarList.front());
+    VarList.pop_front();
+  }
+   
+  // Now, call all closes recursively and delete all sections
+  while (!SectionList.empty())
+    {
+      SectionList.front()->Close();
+      delete SectionList.front();
+      SectionList.pop_front();
+    }
+  if (IsRoot)
+    H5Fclose(GroupID);
+  else
+    H5Gclose(GroupID);
+}    
+
 
 
 /************************************************************

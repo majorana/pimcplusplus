@@ -33,7 +33,7 @@ void TestHDF5Output()
   InputSectionHDF5Class HDF5in;
   HDF5in.OpenFile ("HDF5test.h5",NULL);
   
-  HDF5in.CloseFile();
+  HDF5in.Close();
 }
 
 

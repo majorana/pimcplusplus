@@ -21,26 +21,42 @@ public:
   int Ndims;
   Array<hsize_t,1> Dimensions;
 
-
   bool ReadInto (double &val) {return true; }
   bool ReadInto (int &val) {return true; }
   bool ReadInto (string &val) {return true; }
+
+  ~VarHDF5Class()
+  {
+    H5Dclose(DataSetID);
+  }
 };
 
 
+/// This class stores a section of an HDF5 file.  The boolean value,
+/// IsRoot, store whether this particular section is a the root node
+/// of an HDF5 file.
 class InputSectionHDF5Class : public InputSectionClass
 {
 private:
   bool IsOpen, IsRoot;
-  hid_t GroupID;
-
-  void ReadGroup (hid_t GroupID, string name, InputSectionClass *parent);
+  /// ReadGroup reads a HDF5 group, given by name, from the file.
+  /// It reads in all variables and groups within the file, calling
+  /// itself recursively for groups within itself.
+  void ReadGroup (hid_t parentGroupID, string name, InputSectionClass *parent);
+  /// StripName strips the trailing ".#" from a string.  These were
+  /// added by the HDF5 writer in order to have multiples sections
+  /// with the same name.
+  void StripName (string &name);
 public:
+  /// This is the HDF5 handle for the group.
+  hid_t GroupID;
+  /// This prints the variables and sections below me, mostly for
+  /// debugging purposes.
   void PrintTree(InputSectionClass *sec)
   { cerr << "Tree";}
   void GroupIterator (string member_name);
   bool OpenFile (string fileName, InputSectionClass *parent);
-  void CloseFile ();
+  void Close();
   InputSectionHDF5Class() : IsOpen(false), IsRoot(false)
   { }
 };
