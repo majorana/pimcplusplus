@@ -100,8 +100,8 @@ void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
 double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk, 
 					Array<double,1> &t)
 {
-  //  const double tolerance = 1.0e-16;
-  const double tolerance = 0.0;
+  const double tolerance = 1.0e-16;
+  //const double tolerance = 0.0;
   assert(t.rows()==Basis.NumElements());
   Array<double,2> A;
   Array<double,1> b;
@@ -143,6 +143,7 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
   double Smax=S(0);
   for (int i=1; i<S.size(); i++)
     Smax = max (S(i),Smax);
+
   for (int i=0; i<S.size(); i++)
     Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
   int numSingular = 0;
@@ -178,8 +179,8 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
 					Array<double,1> &t,
 					const Array<bool,1> &adjust)
 {
-  //  const double tolerance = 1.0e-16;
-  const double tolerance = 0.0;
+  const double tolerance = 1.0e-16;
+  //const double tolerance = 0.0;
   assert(t.rows()==adjust.rows());
   assert(t.rows()==Basis.NumElements());
   Array<double,2> A;
@@ -209,6 +210,8 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
 	A(l,n) += kpoints(ki)[1]*cnk(l,ki)*cnk(n,ki);
     }
   }
+  // cerr << "A = " << A << endl;
+
 
   // Now reduce for constraints
   int M = N;
@@ -255,6 +258,13 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
   double Smax=S(0);
   for (int i=1; i<M; i++)
     Smax = max (S(i),Smax);
+
+  for (int i=0; i<M; i++)
+    if (S(i) < 0.0)
+      cerr << "negative singlar value.\n";
+
+  cerr << "Smax = " << Smax << endl;
+
   for (int i=0; i<M; i++)
     Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
   int numSingular = 0;
@@ -340,8 +350,10 @@ double LPQHI_BasisClass::h(int n, double r)
       sum += (S(alpha,j) * prod);
       prod *= ((rb - r) * deltaInv);
     }
+    //for (int j=0; j<alpha; j++)
+    //  sum *= (-delta);
     for (int j=0; j<alpha; j++)
-      sum *= (-delta);
+      sum *= -1.0;
     return (sum);
   }
   else if ((r > rb) && (r <= rc)) {
@@ -351,8 +363,8 @@ double LPQHI_BasisClass::h(int n, double r)
       sum += S(alpha,j) * prod;
       prod *= ((r-rb) * deltaInv);
     }
-    for (int j=0; j<alpha; j++)
-      sum *= delta;
+    //for (int j=0; j<alpha; j++)
+    //  sum *= delta;
     return sum;
   }
   return 0.0;
@@ -380,8 +392,8 @@ double LPQHI_BasisClass::c(int m, double k)
       double sign = ((alpha+n)&1) ? -1.0 : 1.0;
       sum += S(alpha, n) * (Dplus(i,k,n) + Dminus(i,k,n)*sign);
     }
-  for (int j=0; j<alpha; j++)
-    sum *= delta;
+  //for (int j=0; j<alpha; j++)
+  //  sum *= delta;
 
   return (sum);
 };

@@ -41,7 +41,7 @@ class OptimizedBreakupClass
 {
 private:
   BasisClass &Basis;
-  void Addk(double k, double degeracy=1.0);
+  void Addk(double k, double degeneracy=1.0);
 public:
   // First element is |k|, second is degeneracy of the point.
   Array<TinyVector<double,2>,1> kpoints;
@@ -90,6 +90,7 @@ public:
   inline double Dminus(int i, double k, int n);
   Array<double,1> tvec;
 public:
+  inline double GetDelta() { return delta; }
   // n must be at least 2;
   void SetNumKnots(int n);
   void Set_rc(double rc);
