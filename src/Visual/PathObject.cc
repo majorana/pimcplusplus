@@ -7,6 +7,10 @@ void PathObject::Set(Array<Vec3,1> &path)
 {
   Start();
   glColor3d (Color[0], Color[1], Color[2]);
+  float fcolor[4];
+  fcolor[0] = Color[0]; fcolor[1] = Color[1]; fcolor[2] = Color[2];
+  fcolor[3] = 1.0;
+  glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
   gleSetJoinStyle (TUBE_JN_ROUND /* | TUBE_JN_CAP */ | TUBE_CONTOUR_CLOSED);
 //   glBegin(GL_LINE_STRIP);
 //   for (int i=0; i<path.size(); i++)
@@ -14,17 +18,19 @@ void PathObject::Set(Array<Vec3,1> &path)
 //   glEnd();
   
   int N = path.size();
-  gleDouble pointArray[N+2][3];
+  gleDouble pointArray[N+3][3];
   if (Closed) {
     for (int i=0; i<3; i++) {
       pointArray[0][i] = path(N-2)[i];
       pointArray[N+1][i] = path(1)[i];
+      pointArray[N+2][i] = path(2)[i];
     }
   }
   else {  // Fix this
     for (int i=0; i<3; i++) {
       pointArray[0][i] = path(N-2)[i];
       pointArray[N+1][i] = path(1)[i];
+      pointArray[N+2][i] = path(2)[i];
     }
   }
 
@@ -32,14 +38,14 @@ void PathObject::Set(Array<Vec3,1> &path)
     for (int j=0; j<3; j++)
       pointArray[i+1][j] = path(i)[j];
 
-  float colors[N+2][3];
-  for (int i=0; i<N+2; i++) {
+  float colors[N+3][3];
+  for (int i=0; i<N+3; i++) {
     colors[i][0] = Color[0];    
     colors[i][1] = Color[1];
     colors[i][2] = Color[2];
   }
-  glePolyCylinder (N+2, pointArray,
-		   colors, 0.2);
+  glePolyCylinder (N+3, pointArray,
+		   colors, Radius);
 
   End();
 }

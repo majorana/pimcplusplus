@@ -9,6 +9,8 @@
 #include <GL/glu.h>
 #include "../Common/Blitz.h"
 #include "GLObject.h"
+#include "PathObject.h"
+#include "BoxObject.h"
 
 
 class PathVisClass;
@@ -21,6 +23,7 @@ private:
   bool Button1Pressed; 
   double MinScale, MaxScale;
   PathVisClass &PathVis;
+  double Distance;
 public:
   double Scale;
   double Quaternion[4];
@@ -29,6 +32,7 @@ public:
   bool OnButtonPress   (GdkEventButton* event);
   bool OnButtonRelease (GdkEventButton* event);
   bool OnMotion        (GdkEventMotion* event);
+  void SetDistance (double dist);
 
   void GLtransform();
 
@@ -49,7 +53,7 @@ protected:
   void Invalidate();
 public:
   ViewClass View;
-  list<GLObject *> Objects;
+  vector<GLObject *> Objects;
   void AddBox  (double xSize, double ySize, double zSize);
   void AddPath (Array<Vec3,1> &path, bool closed=true);
 

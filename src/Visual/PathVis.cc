@@ -8,6 +8,7 @@
 #include "PathVis.h"
 #include "GLObject.h"
 #include "PathObject.h"
+#include "BoxObject.h"
 
 namespace Trackball {
   extern "C" {
@@ -137,15 +138,11 @@ bool PathVisClass::on_expose_event(GdkEventExpose* event)
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-  list<GLObject*>::iterator iter = Objects.begin();
+  vector<GLObject*>::iterator iter = Objects.begin();
   while (iter != Objects.end()) {
     (*iter)->Draw();
     iter++;
   }
-  for (int i=1; i<=NumLists; i++) {
-    glCallList(i);
-  }
-
   // Swap buffers.
   if (GLwindow->is_double_buffered())
     GLwindow->swap_buffers();
@@ -253,58 +250,60 @@ void Simple::on_button_quit_clicked()
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char** argv)
-{
-  Gtk::Main kit(argc, argv);
+// int main(int argc, char** argv)
+// {
+//   Gtk::Main kit(argc, argv);
 
-  //
-  // Init gtkglextmm.
-  //
+//   //
+//   // Init gtkglextmm.
+//   //
 
-  Gtk::GL::init(argc, argv);
+//   Gtk::GL::init(argc, argv);
 
-  //
-  // Query OpenGL extension version.
-  //
+//   //
+//   // Query OpenGL extension version.
+//   //
 
-  int major, minor;
-  Gdk::GL::query_version(major, minor);
-  std::cout << "OpenGL extension version - "
-            << major << "." << minor << std::endl;
+//   int major, minor;
+//   Gdk::GL::query_version(major, minor);
+//   std::cout << "OpenGL extension version - "
+//             << major << "." << minor << std::endl;
 
-  //
-  // Instantiate and run the application.
-  //
+//   //
+//   // Instantiate and run the application.
+//   //
 
-  Simple simple;
+//   Simple simple;
 
+//   Array<Vec3, 1> path(5);
+//   path(0) = Vec3(-0.5,  0.5, -0.5);
+//   path(1) = Vec3( 0.5,  0.5, -0.5);
+//   path(2) = Vec3( 0.5, -0.5, -0.5);
+//   path(3) = Vec3(-0.5, -0.5, -0.5);
+//   path(4) = Vec3(-0.5,  0.5, -0.5);
 
-  Array<Vec3, 1> path(5);
-  path(0) = Vec3(-0.5,  0.5, -0.5);
-  path(1) = Vec3( 0.5,  0.5, -0.5);
-  path(2) = Vec3( 0.5, -0.5, -0.5);
-  path(3) = Vec3(-0.5, -0.5, -0.5);
-  path(4) = Vec3(-0.5,  0.5, -0.5);
+//   PathObject *p1 = new PathObject();
+//   p1->SetColor (0.0, 0.0, 1.0);
+//   p1->Set (path);
 
-  PathObject *p1 = new PathObject();
-  p1->SetColor (0.0, 0.0, 1.0);
-  p1->Set (path);
+//   simple.PathVis.Objects.push_back(p1);
 
-  simple.PathVis.Objects.push_back(p1);
-
-  // simple.PathVis.AddPath (path);
-  for (int i=0; i<5; i++)
-    path(i) += Vec3(0.0, 0.0, 1.0);
-  //  simple.PathVis.AddPath (path);
+//   // simple.PathVis.AddPath (path);
+//   for (int i=0; i<5; i++)
+//     path(i) += Vec3(0.0, 0.0, 1.0);
+//   //  simple.PathVis.AddPath (path);
   
-  PathObject *p2 = new PathObject();
-  p2->SetColor (1.0, 0.0, 0.0);
-  p2->Set (path);
-  simple.PathVis.Objects.push_back(p2);
+//   PathObject *p2 = new PathObject();
+//   p2->SetColor (1.0, 0.0, 0.0);
+//   p2->Set (path);
+//   simple.PathVis.Objects.push_back(p2);
   
+//   BoxObject *box = new BoxObject;
+//   box->Set (2.0, 1.0, 0.5);
+//   simple.PathVis.Objects.push_back(box);
 
 
-  kit.run(simple);
+//   kit.run(simple);
 
-  return 0;
-}
+//   return 0;
+// }

@@ -8,7 +8,7 @@ namespace Trackball {
 
 ViewClass::ViewClass (PathVisClass &pathVis) :
   PathVis(pathVis), Button1Pressed(false), MinScale(0.2), MaxScale(5.0),
-    Scale(1.0)
+  Scale(1.0), Distance(3.0)
 {
   for (int i=0; i<4; i++)
     for (int j=0; j<4; j++)
@@ -78,15 +78,22 @@ void ViewClass::GLtransform()
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(40.0, 1.0, 1.0, 10.0);
+  //  gluPerspective(40.0, 1.0, 1.0, 10.0);
+  gluPerspective(40.0, 1.0, 1.0, 3.0*Distance);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  gluLookAt(0.0, 0.0, 3.0,
+  gluLookAt(0.0, 0.0, Distance,
             0.0, 0.0, 0.0,
             0.0, 1.0, 0.0);
   
-  glTranslatef(0.0, 0.0, -3.0);
+  glTranslatef(0.0, 0.0, -Distance);
   glMultMatrixd(&RotMat[0][0]);
+}
+
+
+void ViewClass::SetDistance (double dist)
+{
+  Distance = dist;
 }
