@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from IO import *
 import sys
 import os
