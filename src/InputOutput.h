@@ -36,22 +36,6 @@ public:
 };
 
 
-  /*  bool ReadInto (Array<double,1> &val);
-  bool ReadInto (Array<double,2> &val);
-  bool ReadInto (Array<double,3> &val);
-
-  bool ReadInto (Array<int,1> &val);
-  bool ReadInto (Array<int,2> &val);
-  bool ReadInto (Array<int,3> &val);
-  bool ReadInto (bool &val);
-  bool ReadInto (Array<bool,1> &val);
-  bool ReadInto (Array<bool,2> &val);
-  bool ReadInto (Array<bool,3> &val);
-  bool ReadInto (string &val);
-  bool ReadInto (Array<string,1> &val);
-  bool ReadInto (Array<string,2> &val);
-  bool ReadInto (Array<string,3> &val); */
-
 
 
 
@@ -77,6 +61,8 @@ public:
 
 };
 
+
+
 inline int InputSectionClass::CountSections(string name)
 {
   list<InputSectionClass*>::iterator sectionIter;
@@ -91,10 +77,12 @@ inline int InputSectionClass::CountSections(string name)
   return numSections;
 }
 
+
+
 class OutputSectionClass
 {
 public:
-  virtual void OpenFile(string fileName)=0;
+  virtual bool OpenFile(string fileName)=0;
   virtual void OpenSection(string name)=0;
   virtual void CloseSection()=0;
   virtual void WriteVar(string name, double &T)=0;
