@@ -1,4 +1,4 @@
-SOURCES = "*.cc"
+SOURCES = InputOutput.cc InputOutputHDF5.cc InputFile.cc
 
 all:	InputOutput.o  InputOutputHDF5.o InputFile.o # InputOutputASCII.o
 

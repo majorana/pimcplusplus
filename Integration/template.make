@@ -1,4 +1,4 @@
-SOURCES = "*.cc"
+SOURCES = Integrate.cc GKIntegration.cc HermiteQuad.cc
 
 all:	Integrate.o GKIntegration.o HermiteQuad.o
 
