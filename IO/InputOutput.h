@@ -157,45 +157,45 @@ public:
 
   inline void WriteVar (string name, double val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<double,1> &val)
+  inline void WriteVar (string name, blitz::Array<double,1> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<double,2> &val)
+  inline void WriteVar (string name, blitz::Array<double,2> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<double,3> &val)
+  inline void WriteVar (string name, blitz::Array<double,3> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<double,4> &val)
+  inline void WriteVar (string name, blitz::Array<double,4> &val)
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, int val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<int,1> &val)
+  inline void WriteVar (string name, blitz::Array<int,1> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<int,2> &val)
+  inline void WriteVar (string name, blitz::Array<int,2> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<int,3> &val)
+  inline void WriteVar (string name, blitz::Array<int,3> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<int,4> &val)
+  inline void WriteVar (string name, blitz::Array<int,4> &val)
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, bool val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<bool,1> &val)
+  inline void WriteVar (string name, blitz::Array<bool,1> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<bool,2> &val)
+  inline void WriteVar (string name, blitz::Array<bool,2> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<bool,3> &val)
+  inline void WriteVar (string name, blitz::Array<bool,3> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<bool,4> &val)
+  inline void WriteVar (string name, blitz::Array<bool,4> &val)
   { CurrentSection->WriteVar(name, val); }
   inline void WriteVar (string name, const char *val)
   { CurrentSection->WriteVar(name, (string)val);}
   inline void WriteVar (string name, string val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<string,1> &val)
+  inline void WriteVar (string name, blitz::Array<string,1> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<string,2> &val)
+  inline void WriteVar (string name, blitz::Array<string,2> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<string,3> &val)
+  inline void WriteVar (string name, blitz::Array<string,3> &val)
   { CurrentSection->WriteVar(name, val); }
-  inline void WriteVar (string name, Array<string,4> &val)
+  inline void WriteVar (string name, blitz::Array<string,4> &val)
   { CurrentSection->WriteVar(name, val); }
   
   template<class T>

@@ -4,15 +4,16 @@
 #include <string>
 #include <list>
 #include <stack>
-#include "../Blitz.h"
+#include <blitz/array.h>
+//#include "../Blitz.h"
 #include <fstream>
 
 using namespace std;
-
+//using namespace blitz;
 /// This typedef enumerates the atomic datatype that are supported in
 /// inputfiles.   Note that 1,2, and 3-dimensional arrays of these
 /// types are also supported
-typedef enum{NOT_ATOMIC,INT_TYPE,DOUBLE_TYPE,STRING_TYPE,BOOL_TYPE} AtomicType; 
+typedef enum{NOT_ATOMIC,INT_TYPE,DOUBLE_TYPE,STRING_TYPE,BOOL_TYPE} AtomicType; typedef double scalar;
 
 /// This is the abstract base class for the storage of variables in
 /// the IOTreeClass lists.   It contains the name of the variable,
@@ -28,42 +29,42 @@ public:
   
 
   virtual bool ReadInto (double &val)              = 0;
-  virtual bool ReadInto (Array<double,1> &val)     = 0;
-  virtual bool ReadInto (Array<double,2> &val)     = 0;
-  virtual bool ReadInto (Array<double,3> &val)     = 0;
-  virtual bool ReadInto (Array<double,4> &val)     = 0;
+  virtual bool ReadInto (blitz::Array<double,1> &val)     = 0;
+  virtual bool ReadInto (blitz::Array<double,2> &val)     = 0;
+  virtual bool ReadInto (blitz::Array<double,3> &val)     = 0;
+  virtual bool ReadInto (blitz::Array<double,4> &val)     = 0;
   virtual bool ReadInto (int &val)                 = 0;
-  virtual bool ReadInto (Array<int,1> &val)        = 0;
-  virtual bool ReadInto (Array<int,2> &val)        = 0;
-  virtual bool ReadInto (Array<int,3> &val)        = 0;
-  virtual bool ReadInto (Array<int,4> &val)        = 0;
+  virtual bool ReadInto (blitz::Array<int,1> &val)        = 0;
+  virtual bool ReadInto (blitz::Array<int,2> &val)        = 0;
+  virtual bool ReadInto (blitz::Array<int,3> &val)        = 0;
+  virtual bool ReadInto (blitz::Array<int,4> &val)        = 0;
   virtual bool ReadInto (string &val)              = 0;
-  virtual bool ReadInto (Array<string,1> &val)     = 0;
-  virtual bool ReadInto (Array<string,2> &val)     = 0;
-  virtual bool ReadInto (Array<string,3> &val)     = 0; 
-  virtual bool ReadInto (Array<string,4> &val)     = 0; 
+  virtual bool ReadInto (blitz::Array<string,1> &val)     = 0;
+  virtual bool ReadInto (blitz::Array<string,2> &val)     = 0;
+  virtual bool ReadInto (blitz::Array<string,3> &val)     = 0; 
+  virtual bool ReadInto (blitz::Array<string,4> &val)     = 0; 
   virtual bool ReadInto (bool &val)                = 0;
-  virtual bool ReadInto (Array<bool,1> &val)       = 0;
-  virtual bool ReadInto (Array<bool,2> &val)       = 0;
-  virtual bool ReadInto (Array<bool,3> &val)       = 0;
-  virtual bool ReadInto (Array<bool,4> &val)       = 0;
+  virtual bool ReadInto (blitz::Array<bool,1> &val)       = 0;
+  virtual bool ReadInto (blitz::Array<bool,2> &val)       = 0;
+  virtual bool ReadInto (blitz::Array<bool,3> &val)       = 0;
+  virtual bool ReadInto (blitz::Array<bool,4> &val)       = 0;
 
   virtual bool Append (double val) = 0;
-  virtual bool Append (Array<double,1> &val) = 0;
-  virtual bool Append (Array<double,2> &val) = 0;  
-  virtual bool Append (Array<double,3> &val) = 0;
+  virtual bool Append (blitz::Array<double,1> &val) = 0;
+  virtual bool Append (blitz::Array<double,2> &val) = 0;  
+  virtual bool Append (blitz::Array<double,3> &val) = 0;
   virtual bool Append (int val) = 0;
-  virtual bool Append (Array<int,1> &val) = 0;
-  virtual bool Append (Array<int,2> &val) = 0;
-  virtual bool Append (Array<int,3> &val) = 0;
+  virtual bool Append (blitz::Array<int,1> &val) = 0;
+  virtual bool Append (blitz::Array<int,2> &val) = 0;
+  virtual bool Append (blitz::Array<int,3> &val) = 0;
   virtual bool Append (string val) = 0;
-  virtual bool Append (Array<string,1> &val) = 0;
-  virtual bool Append (Array<string,2> &val) = 0;
-  virtual bool Append (Array<string,3> &val) = 0;
+  virtual bool Append (blitz::Array<string,1> &val) = 0;
+  virtual bool Append (blitz::Array<string,2> &val) = 0;
+  virtual bool Append (blitz::Array<string,3> &val) = 0;
   virtual bool Append (bool val) = 0;
-  virtual bool Append (Array<bool,1> &val) = 0;
-  virtual bool Append (Array<bool,2> &val) = 0;
-  virtual bool Append (Array<bool,3> &val) = 0;
+  virtual bool Append (blitz::Array<bool,1> &val) = 0;
+  virtual bool Append (blitz::Array<bool,2> &val) = 0;
+  virtual bool Append (blitz::Array<bool,3> &val) = 0;
 };
 
 
@@ -149,32 +150,32 @@ public:
   virtual void CloseFile() = 0;
   virtual void FlushFile() = 0;
   virtual void WriteVar(string name, double val)=0;
-  virtual void WriteVar(string name, Array<double,1> &val)=0;
-  virtual void WriteVar(string name, Array<double,2> &val)=0;
-  virtual void WriteVar(string name, Array<double,3> &val)=0;
-  virtual void WriteVar(string name, Array<double,4> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<double,1> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<double,2> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<double,3> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<double,4> &val)=0;
 
   virtual void WriteVar(string name, int val)=0;
-  virtual void WriteVar(string name, Array<int,1> &val)=0;
-  virtual void WriteVar(string name, Array<int,2> &val)=0;
-  virtual void WriteVar(string name, Array<int,3> &val)=0;
-  virtual void WriteVar(string name, Array<int,4> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<int,1> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<int,2> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<int,3> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<int,4> &val)=0;
 
   virtual void WriteVar(string name, string val)=0;
-  virtual void WriteVar(string name, Array<string,1> &val)=0;
-  virtual void WriteVar(string name, Array<string,2> &val)=0;
-  virtual void WriteVar(string name, Array<string,3> &val)=0;
-  virtual void WriteVar(string name, Array<string,4> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<string,1> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<string,2> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<string,3> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<string,4> &val)=0;
 
   virtual void WriteVar(string name, bool val)=0;
-  virtual void WriteVar(string name, Array<bool,1> &val)=0;
-  virtual void WriteVar(string name, Array<bool,2> &val)=0;
-  virtual void WriteVar(string name, Array<bool,3> &val)=0;
-  virtual void WriteVar(string name, Array<bool,4> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<bool,1> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<bool,2> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<bool,3> &val)=0;
+  virtual void WriteVar(string name, blitz::Array<bool,4> &val)=0;
 
   /// Append a value to a variable of dimension of 1 higher than val.
-  /// i.e. Add a double to an Array<double,1> or add Array<double,1>
-  /// to an Array<double,2>, etc.
+  /// i.e. Add a double to an blitz::Array<double,1> or add blitz::Array<double,1>
+  /// to an blitz::Array<double,2>, etc.
   template<class T>
   inline bool AppendVar(string name, T val);
 
@@ -283,17 +284,17 @@ public:
   virtual void OpenSection(string name)                  = 0;
   virtual void CloseSection()                            = 0;
   virtual void WriteVar(string name, double T)           = 0;
-  virtual void WriteVar(string name, Array<double,1> &v) = 0;
-  virtual void WriteVar(string name, Array<double,2> &v) = 0;
-  virtual void WriteVar(string name, Array<double,3> &v) = 0;
+  virtual void WriteVar(string name, blitz::Array<double,1> &v) = 0;
+  virtual void WriteVar(string name, blitz::Array<double,2> &v) = 0;
+  virtual void WriteVar(string name, blitz::Array<double,3> &v) = 0;
   virtual void WriteVar(string name, int T)              = 0;
-  virtual void WriteVar(string name, Array<int,1> &v)    = 0;
-  virtual void WriteVar(string name, Array<int,2> &v)    = 0;
-  virtual void WriteVar(string name, Array<int,3> &v)    = 0;
+  virtual void WriteVar(string name, blitz::Array<int,1> &v)    = 0;
+  virtual void WriteVar(string name, blitz::Array<int,2> &v)    = 0;
+  virtual void WriteVar(string name, blitz::Array<int,3> &v)    = 0;
   virtual void WriteVar(string name, string str)         = 0;
-  virtual void WriteVar(string name, Array<string,1> &v) = 0;
-  virtual void WriteVar(string name, Array<string,2> &v) = 0;
-  virtual void WriteVar(string name, Array<string,3> &v) = 0;
+  virtual void WriteVar(string name, blitz::Array<string,1> &v) = 0;
+  virtual void WriteVar(string name, blitz::Array<string,2> &v) = 0;
+  virtual void WriteVar(string name, blitz::Array<string,3> &v) = 0;
 
 };
 

@@ -326,7 +326,7 @@ InputBuffer::FindBlock (char StartChar, char EndChar,
   pos++;
   
   BlockBuffer.size = EndPos - StartPos + 1;
-  BlockBuffer.buffer.reference(buffer(Range(StartPos,EndPos)));
+  BlockBuffer.buffer.reference(buffer(blitz::Range(StartPos,EndPos)));
   BlockBuffer.pos = 0;  
   return (1);
 }
@@ -359,7 +359,7 @@ InputBuffer::FindQuoteBlock (InputBuffer &BlockBuffer)
   pos++;
   
   BlockBuffer.size = EndPos - StartPos + 1;
-  BlockBuffer.buffer.reference(buffer(Range(StartPos,EndPos)));
+  BlockBuffer.buffer.reference(buffer(blitz::Range(StartPos,EndPos)));
   BlockBuffer.pos = 0;  
   return (1);
 
@@ -560,7 +560,7 @@ int InputBuffer::ReadBool(bool &IsTrue)
 
 
 
-/*int InputBuffer::ReadVector(Array<scalar,1> &vec)
+/*int InputBuffer::ReadVector(blitz::Array<scalar,1> &vec)
 {
   int count = 0;
   int SavePos = pos;
@@ -576,7 +576,7 @@ int InputBuffer::ReadBool(bool &IsTrue)
 }*/
 
 // Faster version
-int InputBuffer::ReadVector(Array<scalar,1> &vec)
+int InputBuffer::ReadVector(blitz::Array<scalar,1> &vec)
 {
   char tempbuf[size-pos+1];
   char *endptr;
@@ -617,7 +617,7 @@ int InputBuffer::ReadVector(Array<scalar,1> &vec)
 
 
 
-/*int InputBuffer::ReadVector(Array<int,1> &vec)
+/*int InputBuffer::ReadVector(blitz::Array<int,1> &vec)
 {
   int count = 0;
   int SavePos = pos;
@@ -647,7 +647,7 @@ int InputBuffer::ReadQuoteString (string &str)
 }
 
 
-int InputBuffer::ReadVector(Array<string,1> &vec)
+int InputBuffer::ReadVector(blitz::Array<string,1> &vec)
 {
   int count = 0;
   int SavePos = pos;
@@ -665,7 +665,7 @@ int InputBuffer::ReadVector(Array<string,1> &vec)
 
 
 // Faster version
-int InputBuffer::ReadVector(Array<int,1> &vec)
+int InputBuffer::ReadVector(blitz::Array<int,1> &vec)
 {
   char tempbuf[size-pos+1];
   char *endptr;
@@ -793,9 +793,9 @@ int InputBuffer::ReadVar (char *Name, bool &IsTrue, bool rewind)
 
 
 //////////////////////
-// Array of doubles //
+// blitz::Array of doubles //
 //////////////////////
-int InputBuffer::ReadVar (char *Name, Array<double,1> &Vec, bool rewind)
+int InputBuffer::ReadVar (char *Name, blitz::Array<double,1> &Vec, bool rewind)
 {
   int SavePos = pos;
   InputBuffer VarBuf;
@@ -815,9 +815,9 @@ int InputBuffer::ReadVar (char *Name, Array<double,1> &Vec, bool rewind)
 }
 
 ///////////////////
-// Array of ints //
+// blitz::Array of ints //
 ///////////////////
-int InputBuffer::ReadVar (char *Name, Array<int,1> &Vec, bool rewind)
+int InputBuffer::ReadVar (char *Name, blitz::Array<int,1> &Vec, bool rewind)
 {
   int SavePos = pos;
   InputBuffer VarBuf;
@@ -863,9 +863,9 @@ int InputBuffer::ReadVar (char *Name, char *str, int maxlength, bool rewind)
 
 
 ////////////////////////////////
-// Array of character strings //
+// blitz::Array of character strings //
 ////////////////////////////////
-int InputBuffer::ReadVar (char *Name, Array<string,1> &Vec, bool rewind)
+int InputBuffer::ReadVar (char *Name, blitz::Array<string,1> &Vec, bool rewind)
 {
   int SavePos = pos;
   InputBuffer VarBuf, StrBuf;
@@ -1030,8 +1030,8 @@ void TestVector()
   NumSec.Write(stderr);
   cerr << "\"\n";
 
-  Array<int, 1> a;
-  Array<scalar, 1> v;
+  blitz::Array<int, 1> a;
+  blitz::Array<scalar, 1> v;
 
   NumSec.ReadVar ("a", a);
   int found = NumSec.ReadVar("v", v);
@@ -1078,7 +1078,7 @@ void TestStringVector()
   InputBuffer InBuf;
   InBuf.Read ("test.txt");
   
-  Array<string,1> stringvec;
+  blitz::Array<string,1> stringvec;
   InputBuffer Sec;
 
   InBuf.FindSection("StringVector", Sec);

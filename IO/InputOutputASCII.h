@@ -32,39 +32,39 @@ public:
   virtual bool ReadInto (int &val);
   virtual bool ReadInto (string &val);
   virtual bool ReadInto (bool &val);
-  virtual bool ReadInto (Array<double,1> &v);
-  virtual bool ReadInto (Array<double,2> &v);
-  virtual bool ReadInto (Array<double,3> &v);
-  virtual bool ReadInto (Array<double,4> &v);
-  virtual bool ReadInto (Array<int,1> &v);
-  virtual bool ReadInto (Array<int,2> &v);
-  virtual bool ReadInto (Array<int,3> &v);
-  virtual bool ReadInto (Array<int,4> &v);
-  virtual bool ReadInto (Array<string,1> &v);
-  virtual bool ReadInto (Array<string,2> &v);
-  virtual bool ReadInto (Array<string,3> &v);
-  virtual bool ReadInto (Array<string,4> &v);
-  virtual bool ReadInto (Array<bool,1> &v);
-  virtual bool ReadInto (Array<bool,2> &v);
-  virtual bool ReadInto (Array<bool,3> &v);
-  virtual bool ReadInto (Array<bool,4> &v);
+  virtual bool ReadInto (blitz::Array<double,1> &v);
+  virtual bool ReadInto (blitz::Array<double,2> &v);
+  virtual bool ReadInto (blitz::Array<double,3> &v);
+  virtual bool ReadInto (blitz::Array<double,4> &v);
+  virtual bool ReadInto (blitz::Array<int,1> &v);
+  virtual bool ReadInto (blitz::Array<int,2> &v);
+  virtual bool ReadInto (blitz::Array<int,3> &v);
+  virtual bool ReadInto (blitz::Array<int,4> &v);
+  virtual bool ReadInto (blitz::Array<string,1> &v);
+  virtual bool ReadInto (blitz::Array<string,2> &v);
+  virtual bool ReadInto (blitz::Array<string,3> &v);
+  virtual bool ReadInto (blitz::Array<string,4> &v);
+  virtual bool ReadInto (blitz::Array<bool,1> &v);
+  virtual bool ReadInto (blitz::Array<bool,2> &v);
+  virtual bool ReadInto (blitz::Array<bool,3> &v);
+  virtual bool ReadInto (blitz::Array<bool,4> &v);
 
   virtual bool Append (double val);
-  virtual bool Append (Array<double,1> &val);
-  virtual bool Append (Array<double,2> &val);
-  virtual bool Append (Array<double,3> &val);
+  virtual bool Append (blitz::Array<double,1> &val);
+  virtual bool Append (blitz::Array<double,2> &val);
+  virtual bool Append (blitz::Array<double,3> &val);
   virtual bool Append (int val);
-  virtual bool Append (Array<int,1> &val);
-  virtual bool Append (Array<int,2> &val);
-  virtual bool Append (Array<int,3> &val);
+  virtual bool Append (blitz::Array<int,1> &val);
+  virtual bool Append (blitz::Array<int,2> &val);
+  virtual bool Append (blitz::Array<int,3> &val);
   virtual bool Append (string val);
-  virtual bool Append (Array<string,1> &val);
-  virtual bool Append (Array<string,2> &val);
-  virtual bool Append (Array<string,3> &val);
+  virtual bool Append (blitz::Array<string,1> &val);
+  virtual bool Append (blitz::Array<string,2> &val);
+  virtual bool Append (blitz::Array<string,3> &val);
   virtual bool Append (bool val);
-  virtual bool Append (Array<bool,1> &val);
-  virtual bool Append (Array<bool,2> &val);
-  virtual bool Append (Array<bool,3> &val);
+  virtual bool Append (blitz::Array<bool,1> &val);
+  virtual bool Append (blitz::Array<bool,2> &val);
+  virtual bool Append (blitz::Array<bool,3> &val);
 
 
   virtual void Print(ofstream &outFile) = 0;
@@ -81,8 +81,8 @@ public:
 class VarASCIIdouble1Class : public VarASCIIClass
 {
 public:
-  Array<double,1> Value;
-  bool ReadInto (Array<double,1> &val);
+  blitz::Array<double,1> Value;
+  bool ReadInto (blitz::Array<double,1> &val);
   bool Append (double val);
   void Print(ofstream &outFile);
 };
@@ -90,27 +90,27 @@ public:
 class VarASCIIdouble2Class : public VarASCIIClass
 {
 public:
-  Array<double,2> Value;
-  bool ReadInto (Array<double,2> &val);
-  bool Append (Array<double,1> &val);
+  blitz::Array<double,2> Value;
+  bool ReadInto (blitz::Array<double,2> &val);
+  bool Append (blitz::Array<double,1> &val);
   void Print(ofstream &outFile);
 };
 
 class VarASCIIdouble3Class : public VarASCIIClass
 {
 public:
-  Array<double,3> Value;
-  bool ReadInto (Array<double,3> &val);
-  bool Append (Array<double,2> &val);
+  blitz::Array<double,3> Value;
+  bool ReadInto (blitz::Array<double,3> &val);
+  bool Append (blitz::Array<double,2> &val);
   void Print(ofstream &outFile);
 };
 
 class VarASCIIdouble4Class : public VarASCIIClass
 {
 public:
-  Array<double,4> Value;
-  bool ReadInto (Array<double,4> &val);
-  bool Append (Array<double,3> &val);
+  blitz::Array<double,4> Value;
+  bool ReadInto (blitz::Array<double,4> &val);
+  bool Append (blitz::Array<double,3> &val);
   void Print(ofstream &outFile);
 };
 
@@ -126,8 +126,8 @@ public:
 class VarASCIIint1Class : public VarASCIIClass
 {
 public:
-  Array<int,1> Value;
-  bool ReadInto (Array<int,1> &val);
+  blitz::Array<int,1> Value;
+  bool ReadInto (blitz::Array<int,1> &val);
   bool Append (int val);
   void Print(ofstream &outFile);
 };
@@ -135,18 +135,18 @@ public:
 class VarASCIIint2Class : public VarASCIIClass
 {
 public:
-  Array<int,2> Value;
-  bool ReadInto (Array<int,2> &val);
-  bool Append (Array<int,1> &val);
+  blitz::Array<int,2> Value;
+  bool ReadInto (blitz::Array<int,2> &val);
+  bool Append (blitz::Array<int,1> &val);
   void Print(ofstream &outFile);
 };
 
 class VarASCIIint3Class : public VarASCIIClass
 {
 public:
-  Array<int,3> Value;
-  bool ReadInto (Array<int,3> &val);
-  bool Append (Array<int,2> &val);
+  blitz::Array<int,3> Value;
+  bool ReadInto (blitz::Array<int,3> &val);
+  bool Append (blitz::Array<int,2> &val);
   void Print(ofstream &outFile);
 };
 
@@ -154,9 +154,9 @@ public:
 class VarASCIIint4Class : public VarASCIIClass
 {
 public:
-  Array<int,4> Value;
-  bool ReadInto (Array<int,4> &val);
-  bool Append (Array<int,3> &val);
+  blitz::Array<int,4> Value;
+  bool ReadInto (blitz::Array<int,4> &val);
+  bool Append (blitz::Array<int,3> &val);
   void Print(ofstream &outFile);
 };
 
@@ -172,8 +172,8 @@ public:
 class VarASCIIstring1Class : public VarASCIIClass
 {
 public:
-  Array<string,1> Value;
-  bool ReadInto (Array<string,1> &val);
+  blitz::Array<string,1> Value;
+  bool ReadInto (blitz::Array<string,1> &val);
   bool Append (string val);
   void Print(ofstream &outFile);
 };
@@ -181,27 +181,27 @@ public:
 class VarASCIIstring2Class : public VarASCIIClass
 {
 public:
-  Array<string,2> Value;
-  bool ReadInto (Array<string,2> &val);
-  bool Append (Array<string,1> &val);
+  blitz::Array<string,2> Value;
+  bool ReadInto (blitz::Array<string,2> &val);
+  bool Append (blitz::Array<string,1> &val);
   void Print(ofstream &outFile);
 };
 
 class VarASCIIstring3Class : public VarASCIIClass
 {
 public:
-  Array<string,3> Value;
-  bool ReadInto (Array<string,3> &val);
-  bool Append (Array<string,2> &val);
+  blitz::Array<string,3> Value;
+  bool ReadInto (blitz::Array<string,3> &val);
+  bool Append (blitz::Array<string,2> &val);
   void Print(ofstream &outFile);
 };
 
 class VarASCIIstring4Class : public VarASCIIClass
 {
 public:
-  Array<string,4> Value;
-  bool ReadInto (Array<string,4> &val);
-  bool Append (Array<string,3> &val);
+  blitz::Array<string,4> Value;
+  bool ReadInto (blitz::Array<string,4> &val);
+  bool Append (blitz::Array<string,3> &val);
   void Print(ofstream &outFile);
 };
 
@@ -218,8 +218,8 @@ public:
 class VarASCIIbool1Class : public VarASCIIClass
 {
 public:
-  Array<bool,1> Value;
-  bool ReadInto (Array<bool,1> &val);
+  blitz::Array<bool,1> Value;
+  bool ReadInto (blitz::Array<bool,1> &val);
   bool Append (bool val);
   void Print(ofstream &outFile);
 };
@@ -227,27 +227,27 @@ public:
 class VarASCIIbool2Class : public VarASCIIClass
 {
 public:
-  Array<bool,2> Value;
-  bool ReadInto (Array<bool,2> &val);
-  bool Append (Array<bool,1> &val);
+  blitz::Array<bool,2> Value;
+  bool ReadInto (blitz::Array<bool,2> &val);
+  bool Append (blitz::Array<bool,1> &val);
   void Print(ofstream &outFile);
 };
 
 class VarASCIIbool3Class : public VarASCIIClass
 {
 public:
-  Array<bool,3> Value;
-  bool ReadInto (Array<bool,3> &val);
-  bool Append (Array<bool,2> &val);
+  blitz::Array<bool,3> Value;
+  bool ReadInto (blitz::Array<bool,3> &val);
+  bool Append (blitz::Array<bool,2> &val);
   void Print(ofstream &outFile);
 };
 
 class VarASCIIbool4Class : public VarASCIIClass
 {
 public:
-  Array<bool,4> Value;
-  bool ReadInto (Array<bool,4> &val);
-  bool Append (Array<bool,3> &val);
+  blitz::Array<bool,4> Value;
+  bool ReadInto (blitz::Array<bool,4> &val);
+  bool Append (blitz::Array<bool,3> &val);
   void Print(ofstream &outFile);
 };
 
@@ -269,8 +269,8 @@ public:
 /// Section (SectionName)
 /// {
 ///   double x = 3;
-///   Array<int,1> y(3) = [1, 2, 3];
-///   Array<int,3> z(2,2,1) = [ 1, 2, 
+///   blitz::Array<int,1> y(3) = [1, 2, 3];
+///   blitz::Array<int,3> z(2,2,1) = [ 1, 2, 
 ///                             3, 4 ];
 ///   Section (Species, "species1.h5");
 /// }
@@ -278,7 +278,7 @@ class IOTreeASCIIClass : public IOTreeClass
 {
   /// Reads a text file into a buffer eliminating c++ and c-style
   /// comments.  
-  void ReadWithoutComments(string fileName, Array<char,1> &buffer);
+  void ReadWithoutComments(string fileName, blitz::Array<char,1> &buffer);
   /// Reads a section from a list of TokenClass objects.  iter should
   /// refer to the current place in the list that we should start
   /// reading at.  iter should point to a place just after the '{'.
@@ -309,28 +309,28 @@ class IOTreeASCIIClass : public IOTreeClass
   void FlushFile();
 
   void WriteVar(string name, double val);
-  void WriteVar(string name, Array<double,1> &val);
-  void WriteVar(string name, Array<double,2> &val);
-  void WriteVar(string name, Array<double,3> &val);
-  void WriteVar(string name, Array<double,4> &val);
+  void WriteVar(string name, blitz::Array<double,1> &val);
+  void WriteVar(string name, blitz::Array<double,2> &val);
+  void WriteVar(string name, blitz::Array<double,3> &val);
+  void WriteVar(string name, blitz::Array<double,4> &val);
 
   void WriteVar(string name, int val);
-  void WriteVar(string name, Array<int,1> &val);
-  void WriteVar(string name, Array<int,2> &val);
-  void WriteVar(string name, Array<int,3> &val);
-  void WriteVar(string name, Array<int,4> &val);
+  void WriteVar(string name, blitz::Array<int,1> &val);
+  void WriteVar(string name, blitz::Array<int,2> &val);
+  void WriteVar(string name, blitz::Array<int,3> &val);
+  void WriteVar(string name, blitz::Array<int,4> &val);
 
   void WriteVar(string name, bool val);
-  void WriteVar(string name, Array<bool,1> &val);
-  void WriteVar(string name, Array<bool,2> &val);
-  void WriteVar(string name, Array<bool,3> &val);
-  void WriteVar(string name, Array<bool,4> &val);
+  void WriteVar(string name, blitz::Array<bool,1> &val);
+  void WriteVar(string name, blitz::Array<bool,2> &val);
+  void WriteVar(string name, blitz::Array<bool,3> &val);
+  void WriteVar(string name, blitz::Array<bool,4> &val);
 
   void WriteVar(string name, string val);
-  void WriteVar(string name, Array<string,1> &val);
-  void WriteVar(string name, Array<string,2> &val);
-  void WriteVar(string name, Array<string,3> &val);
-  void WriteVar(string name, Array<string,4> &val);
+  void WriteVar(string name, blitz::Array<string,1> &val);
+  void WriteVar(string name, blitz::Array<string,2> &val);
+  void WriteVar(string name, blitz::Array<string,3> &val);
+  void WriteVar(string name, blitz::Array<string,4> &val);
   IOTreeASCIIClass()
   { IsModified = false; }
 };
