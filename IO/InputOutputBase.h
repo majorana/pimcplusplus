@@ -15,7 +15,7 @@ using namespace std;
 typedef enum{NOT_ATOMIC,INT_TYPE,DOUBLE_TYPE,STRING_TYPE,BOOL_TYPE} AtomicType; 
 
 /// This is the abstract base class for the storage of variables in
-/// the InputTreeClass lists.   It contains the name of the variable,
+/// the IOTreeClass lists.   It contains the name of the variable,
 /// it's atomic type (see above), and it's dimensionality.
 /// Specializations of this class will also have some reference to the
 /// data in the variable itself.
@@ -39,6 +39,21 @@ public:
   virtual bool ReadInto (Array<string,1> &val)     = 0;
   virtual bool ReadInto (Array<string,2> &val)     = 0;
   virtual bool ReadInto (Array<string,3> &val)     = 0; 
+  virtual bool Append (double val) = 0;
+  virtual bool Append (Array<double,1> &val) = 0;
+//   virtual bool Append (Array<double,2 val) = 0;
+//   virtual bool Append (int val) = 0;
+//   virtual bool Append (Array<int,1> val) = 0;
+//   virtual bool Append (Array<int,2 val) = 0;
+//   virtual bool Append (string val) = 0;
+//   virtual bool Append (Array<string,1> val) = 0;
+//   virtual bool Append (Array<string,2 val) = 0;
+  //virtual bool Append (bool val) = 0;
+  //virtual bool Append (Array<bool,1> val) = 0;
+  //virtual bool Append (Array<bool,2 val) = 0;
+
+  
+
   /*virtual bool ReadInto (bool &val)                = 0;
   virtual bool ReadInto (Array<bool,1> &val)       = 0;
   virtual bool ReadInto (Array<bool,2> &val)       = 0;
@@ -52,63 +67,115 @@ public:
 /// This class stores a tree of input file sections.  Each member of
 /// the tree contains a list of tree nodes below it and a list of
 /// variables contained in the present node.
-class InputTreeClass
+class IOTreeClass
 {
- public:
-  virtual void PrintTree(int numIndent)=0;
-  virtual void PrintTree()=0;
-  InputTreeClass* Parent;
-  list<InputTreeClass*> SectionList;
+protected:
+
   list<VarClass*> VarList;
-  list<InputTreeClass*>::iterator Iter;
 public:
+  /// This is used to ensure proper ordering of sections in the HDF
+  /// version in which there is no guarantee that the sections will
+  /// come out of the file in the same order you put them in.
+  int MyNumber, CurrSecNum;
+  virtual void PrintTree()=0;
+  virtual void PrintTree(int numIndent)=0;
+
+  list<IOTreeClass*> SectionList;
+  IOTreeClass* Parent;
+  /// This is the empty string unless I'm the root node of some file. 
+  string FileName;
   string Name;
-  inline bool FindSection (string name, InputTreeClass * &sectionPtr, 
-		    bool rewind=true);
-  inline void Rewind(){
-    Iter=SectionList.begin();
-  }
+  inline void InsertSection (IOTreeClass *newSec);
+  inline bool FindSection (string name, IOTreeClass * &sectionPtr, 
+			   int num=0);
   inline int CountSections(string name);
 
   template<class T>
-    bool ReadVar(string name, T &var)
-    {
-      bool readVarSuccess;
-      list<VarClass*>::iterator varIter=VarList.begin();
-      while ((varIter!=VarList.end() && (*varIter)->Name!=name)){
-	varIter++;
-      }
-      bool found = varIter != VarList.end();
-      if (found){
-	readVarSuccess=(*varIter)->ReadInto(var);
-      }
-      else if (Parent!=NULL){
-	readVarSuccess=Parent->ReadVar(name,var);
-      }
-      else {
-	cerr<<"Couldn't find variable "<<name;
-	return false;
-      }  
-      return readVarSuccess;	 
+  bool ReadVar(string name, T &var)
+  {
+    bool readVarSuccess;
+    list<VarClass*>::iterator varIter=VarList.begin();
+    while ((varIter!=VarList.end() && (*varIter)->Name!=name)){
+      cerr<<"The current name to compare against is "<<(*varIter)->Name<<endl;
+      varIter++;
     }
+    bool found = varIter != VarList.end();
+    if (found){
+      readVarSuccess=(*varIter)->ReadInto(var);
+    }
+    else if (Parent!=NULL){
+      readVarSuccess=Parent->ReadVar(name,var);
+    }
+    else {
+      cerr<<"Couldn't find variable "<<name<<endl;
+      return false;
+    }  
+    return readVarSuccess;	 
+  }
+
+  inline VarClass* GetVarPtr(string name)
+  {
+    list<VarClass *>::iterator iter = VarList.begin();
+
+    while ((iter != VarList.end()) && ((*iter)->Name != name))
+      iter++;
+    if (iter == VarList.end())
+      return NULL;
+    else
+      return *iter;
+  }
+
+  /// Write me!
+  virtual IOTreeClass* NewSection(string name)=0;
   
   virtual bool OpenFile (string fileName, 
 			 string mySectionName, 
-			 InputTreeClass *parent) = 0;
+			 IOTreeClass *parent) = 0;
+  virtual bool NewFile (string fileName,
+			string mySectionName,
+			IOTreeClass *parent) = 0;
+  /// Inserts a new Include directive in the present section.
+  virtual void IncludeSection (IOTreeClass *) = 0;
   virtual void CloseFile() = 0;
+  virtual void WriteVar(string name, double val)=0;
+  virtual void WriteVar(string name, Array<double,1> &val)=0;
+  virtual void WriteVar(string name, Array<double,2> &val)=0;
+  virtual void WriteVar(string name, Array<double,3> &val)=0;
+
+  virtual void WriteVar(string name, int val)=0;
+  virtual void WriteVar(string name, Array<int,1> &val)=0;
+  virtual void WriteVar(string name, Array<int,2> &val)=0;
+  virtual void WriteVar(string name, Array<int,3> &val)=0;
+
+  //  virtual void WriteVar(string name, bool val)=0;
+  //  virtual void WriteVar(string name, Array<bool,1> &val)=0;
+  //  virtual void WriteVar(string name, Array<bool,2> &val)=0;
+  //  virtual void WriteVar(string name, Array<bool,3> &val)=0;
+
+  virtual void WriteVar(string name, string val)=0;
+  virtual void WriteVar(string name, Array<string,1> &val)=0;
+  virtual void WriteVar(string name, Array<string,2> &val)=0;
+  virtual void WriteVar(string name, Array<string,3> &val)=0;
+
+  /// Append a single double to an Array<double,1> variable
+  virtual bool AppendVar(string name, double val)=0;
+  virtual bool AppendVar(string name, Array<double,1> &val )=0;
+
+
+  inline IOTreeClass(){ FileName="";}
 };
 
 
 
 /// Returns the number of subsections with the given name within the
 /// present section.
-inline int InputTreeClass::CountSections(string name)
+inline int IOTreeClass::CountSections(string name)
 {
-  list<InputTreeClass*>::iterator sectionIter;
+  list<IOTreeClass*>::iterator sectionIter;
   sectionIter=SectionList.begin();
   int numSections=0;
   while (sectionIter!=SectionList.end()){
-    if (name==(*sectionIter)->Name){
+    if ((name==(*sectionIter)->Name) || (name == "")){
       numSections++;
     }
     sectionIter++;
@@ -127,32 +194,46 @@ inline int InputTreeClass::CountSections(string name)
 /// optionally resets the section iterator to the beginning of the
 /// section.  Thus, one may control whether or not order is
 /// significant.  
-inline bool InputTreeClass::FindSection (string name, 
-					 InputTreeClass* &sectionPtr,
-					 bool rewind)
+inline bool IOTreeClass::FindSection (string name, 
+					 IOTreeClass* &sectionPtr,
+					 int num)
 {
   
-  list<InputTreeClass*>::iterator tempIter=Iter;
-  while ((Iter != SectionList.end()) && ((*Iter)->Name!=name)){
+  list<IOTreeClass*>::iterator Iter=SectionList.begin();
+  int counter=0;
+  while(counter<num && Iter!=SectionList.end()){
+    if ((*Iter)->Name==name){
+      counter++;
+    }
     Iter++;
   }
   bool found = Iter != SectionList.end(); 
   if (found){
     sectionPtr = *Iter;
-    sectionPtr->Iter=sectionPtr->SectionList.begin();
-    Iter++;
-  }
-  if (rewind)
-    Iter = SectionList.begin();
-
-  if (!found){
-    Iter=tempIter;
   }
   return (found); 
 }
 
 
 
+inline void IOTreeClass::InsertSection(IOTreeClass *newSec)
+{
+  list<IOTreeClass *>::iterator iter;
+  
+  if (SectionList.empty())
+    SectionList.push_back(newSec);
+  else
+    {
+      iter = SectionList.begin();
+      while ((iter != SectionList.end()) && 
+	     ((*iter)->MyNumber < newSec->MyNumber))
+	iter++;
+      if (iter!=SectionList.end())
+	SectionList.insert(iter, newSec);
+      else
+	SectionList.push_back(newSec);
+    }
+}
 
 
 
