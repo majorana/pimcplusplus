@@ -4,6 +4,7 @@
 #include "InputOutputBase.h"
 #include "InputOutputHDF5.h"
 #include "InputOutputASCII.h"
+#include "InputOutputXML.h"
 
 #include <stack>
 
@@ -46,8 +47,8 @@ inline IOTreeClass *ReadTree (string fileName,
   string extn = Extension (fileName);
   if (extn == "h5")
     newTree = new IOTreeHDF5Class;
-  //  else if (extn == "xml")
-  //    newTree = newIOTreeXMLClass;
+  else if (extn == "xml")
+    newTree = new IOTreeXMLClass;
   else
     newTree = new IOTreeASCIIClass;
   
