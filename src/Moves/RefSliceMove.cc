@@ -167,7 +167,6 @@ void RefSliceMoveClass::MakeMoveSlave()
 
   int accept;
   /// Receive broadcast from Master.
-  cerr << "Before SetMode(NEWMODE), mode = " << 
   SetMode (NEWMODE);
   PathData.Path.Communicator.Broadcast (master, accept);
   if (accept==1) {

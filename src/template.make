@@ -2,31 +2,46 @@ PSPLINELIB = -L$(PWD)/Common/Splines/fortran -lpspline
 
 ifeq ($(HOSTTYPE),alpha)
 include /usr/users/0/kesler/lib/Make.include
-  MPILIB = -lmpi -lelan
-  LIBS = $(MPILIB) $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
+    MPILIB = -lmpi -lelan
+    LIBS = $(MPILIB) $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
          $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
-#  LIBS = $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
-#         $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
-  INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
-  MAKE = gmake
-  CC = g++
-  LD = g++ #-static
-  F77 = g77
-  EXTRADEFS = -DNOCUSERID
-else
-	include /home/common/Codes/Make.include	
-	LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
-	       $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
-	INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
-	CC = mpiCC
-	LD = mpiCC  -Bstatic 
+    INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
+    MAKE = gmake
+    CC = g++
+    LD = g++ #-static
+    F77 = g77
+    EXTRADEFS = -DNOCUSERID
+    CCFLAGS = -c -g  -Wno-deprecated  #-pg 
 endif
+ifeq ($(HOSTTYPE),rs6000)
+    include /users/uiuc/ux455254/lib/Make.include
+    LIBS = $(MPILIB) $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
+           $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(MATHLIB) -lm -lz -lf
+    INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
+    MAKE = gmake
+    CC = mpCC
+    LD = mpCC -LOOK_IT_UP #-qstaticinline #-static
+    F77 = f77
+    EXTRADEFS = -DNOCUSERID -DNOUNDERSCORE
+    CCFLAGS = -c -g 
+endif
+ifeq ($(HOSTTYPE),i386-linux)
+    include /home/common/Codes/Make.include	
+    LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
+           $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
+    INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
+    CC = mpiCC
+    LD = mpiCC  -Bstatic 
+    CCFLAGS = -c -g  -Wno-deprecated  #-pg 
+endif
+
+MAKECC = g++
 
 # Gets the subversion revision number
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 
 
-CCFLAGS = -c -g  -Wno-deprecated  #-pg 
+
 
 
 DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT -O3 -DUSE_MPI#-DDEBUG -DBZ_DEBUG # -DPARALLEL -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
@@ -241,7 +256,8 @@ FreeParticleObjs =                   \
   Common/MPI/Communication.o
 
 
-PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}" "F77=${F77}"
+PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}" "F77=${F77}"\
+  "MAKECC=${MAKECC}"
 
 MAKE_ALL = $(MAKE) all $(PASS_DEFS)
 MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
@@ -326,7 +342,7 @@ Makefile:	$(FRC)
 	rm -f $@
 	cp template.make $@
 	echo 'Automatically generated dependency list:' >> $@
-	$(CC) $(CCFLAGS) $(INCL) -MM $(SOURCES) >> $@
+	$(MAKECC) $(CCFLAGS) $(INCL) -MM $(SOURCES) >> $@
 	chmod -w $@
 
 
