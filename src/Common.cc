@@ -38,12 +38,6 @@ scalar GaussianRandNum(scalar mean, scalar sigma)
 
 
 
-int GetCurrentTimeStamp()
-{
-  return 0;
-}
-
-
 /// In NEW mode, write only to the first copy,in OLD MODE 
 /// write to the section copy,  in OBSERVABLE
 /// mode, write to both copies.

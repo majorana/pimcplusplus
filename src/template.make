@@ -7,7 +7,7 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpicc
 LD = mpicc  -Bstatic 
-DEFS = -DNO_COUT -DUSE_MPI   -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -DUSE_MPI -DPARALLEL  -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 TestObjs =                         \
   ObservableClass.o                \
@@ -50,7 +50,7 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
 
-Test: 	Common_obj $(TestObjs)
+Test: 	Common_obj Tests $(TestObjs)
 	pushd ..; make; pushd
 	$(LD) -o $@ $(TestObjs) $(LIBS)
 
@@ -63,6 +63,9 @@ Common_obj:
 
 Common_clean:
 	cd Common; ${MAKE} clean
+
+CodeTests:    
+	cd Tests; ${MAKE_ALL}
 
 TestHDF5:	Common_obj TestHDF5.o Common/IO/InputOutput.o Common/IO/InputOutputHDF5.o Common/IO/InputOutputASCII.o
 	$(LD) -o $@ TestHDF5.o Common/IO/InputOutput.o Common/IO/InputOutputHDF5.o Common/IO/InputOutputASCII.o $(LIBS)
@@ -85,11 +88,14 @@ clean:	Common_clean
 
 SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc TestHDF5.cc TestASCII.cc
 
-newmake: Common_newmake
+newmake: Common_newmake Tests_newmake
 	make -f template.make Makefile FRC=force_rebuild
 
 Common_newmake:
 	cd Common; $(MAKE_NEWMAKE)
+
+Tests_newmake:
+	cd Tests; $(MAKE_NEWMAKE)
 
 Makefile:	$(FRC)
 	rm -f $@

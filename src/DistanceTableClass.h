@@ -85,21 +85,6 @@ inline void DistanceTableClass::AcceptCopy(int startTimeSlice,
   DispTable.AcceptCopy(startTimeSlice, endTimeSlice, activeParticles);
   ImageNumTable.AcceptCopy(startTimeSlice, endTimeSlice, activeParticles);
 
-
-  for (int slice=startTimeSlice;slice<=endTimeSlice;slice++){
-    for (int ptcl1Index=0;ptcl1Index<activeParticles.size();ptcl1Index++){
-      int ptcl1=activeParticles(ptcl1Index);
-      for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
-	double dummySign;
-	int index;
-	ArrayIndex(ptcl1,ptcl2,index,dummySign);
-	//DistTable.AcceptCopy(slice,index);
-	//DispTable.AcceptCopy(slice,index);
-	//ImageNumTable.AcceptCopy(slice,index);
-	
-      }
-    }
-  }
 }
 
 inline void DistanceTableClass::RejectCopy(int startTimeSlice, 
@@ -112,20 +97,7 @@ inline void DistanceTableClass::RejectCopy(int startTimeSlice,
   ImageNumTable.RejectCopy(startTimeSlice, endTimeSlice, activeParticles);
 
 
-  for (int slice=startTimeSlice;slice<=endTimeSlice;slice++){
-    for (int ptcl1Index=0;ptcl1Index<activeParticles.size();ptcl1Index++){
-      int ptcl1=activeParticles(ptcl1Index);
-      for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
-	double dummySign;
-	int index;
-	ArrayIndex(ptcl1,ptcl2,index,dummySign);
-	//DistTable.RejectCopy(slice,index);
-	//DispTable.RejectCopy(slice,index);
-	//ImageNumTable.RejectCopy(slice,index);
-	
-      }
-    }
-  }
+
 }
       
 

@@ -46,7 +46,6 @@ inline void DistanceTablePBCClass::Displacement(int timeSlice,
   // Determine the image number of ptcl2 w.r.t ptcl1
   for (int i=0; i<NDIM; i++) {
     image[i] = -(disp[i]<-0.5*Path.Box[i]) + (disp[i]>0.5*Path.Box[i]);
-    //    disp[i] += image[i]*Path.Box[i];
   }
   imageNum = ImageNum(image);
   disp = disp + ImageVectors(imageNum);

@@ -5,6 +5,11 @@
 #include "MirroredArrayClass.h"
 #include "SpeciesClass.h"
 
+
+///The number of time slices is the number of slices on this processor.
+///In all cases this processor shares a time slice with the processor 
+///ahead of it and behind it. The convention for the shared slices
+///is that the processor owns its first but not its last slice.
 class PathClass
 {
 private:
@@ -14,7 +19,9 @@ private:
   /// Stores what species a particle belongs to
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
-  int TimeSliceNumber;
+  int MyNumSlices;
+  int TotalNumSlices;
+  CommunicatorClass &Communicator;
 public:
   MirroredArrayClass1D<int> Permutation;
 
@@ -55,8 +62,8 @@ public:
 
   /// Shifts the data to other processors or to yourself if there 
   /// are no other processors
-  inline void ShiftData(int sliceToShift, CommunicatorClass &communicator)
-  {Path.ShiftData(sliceToShift,communicator);}
+  inline void ShiftData(int sliceToShift)
+  {Path.ShiftData(sliceToShift,Communicator);}
 
   /// Return what species type a particle belongs to;
   inline int ParticleSpeciesNum(int ptcl)
@@ -76,8 +83,12 @@ public:
   /// Returns the number of particle Species
   inline int NumSpecies() {return SpeciesArray.size();}
   inline int NumParticles() { return Path.NumParticles();}
+  ///The number of time slices is the number of slices on this processor.
+  ///In all cases this processor shares a time slice with the processor 
+  ///ahead of it and behind it. The convention for the shared slices
+  ///is that the processor owns its first but not its last slice.
   inline int NumTimeSlices() { return Path.NumTimeSlices();}
-  inline void SetTimeSlices(int tSlices){TimeSliceNumber=tSlices;}
+  inline void SetTimeSlices(int tSlices){TotalNumSlices=tSlices;}
   /// Returns the position of particle ptcl at time slice timeSlice
   inline dVec operator() (int timeSlice, int ptcl)
   { return Path(timeSlice, ptcl); }
@@ -95,7 +106,17 @@ public:
 
   void Allocate()
   {
-    assert(TimeSliceNumber>0);
+    assert(TotalNumSlices>0);
+    int myProc=Communicator.MyProc();
+    int numProcs=Communicator.NumProcs();
+    ///Everybody gets the same number of time slices if possible.
+    ///Otherwise the earlier processors get the extra one slice 
+    ///until we run out of extra slices.
+    ///The last slice on processor i is the first slices on processor i+1
+    MyNumSlices=TotalNumSlices/numProcs+1+(myProc<(TotalNumSlices % numProcs));
+    
+
+
     int numParticles = 0;
     /// Set the particle range for the new species
     for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
@@ -103,8 +124,8 @@ public:
       numParticles=numParticles + SpeciesArray(speciesNum)->NumParticles;
       SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
     }
-    Path.Resize(TimeSliceNumber,numParticles);
-    cerr<<"I've resized to "<<TimeSliceNumber<<" "<<numParticles<<endl;
+    Path.Resize(MyNumSlices,numParticles);
+    cerr<<"I've resized to "<<MyNumSlices<<" "<<numParticles<<endl;
     Permutation.Resize(numParticles);
     SpeciesNumber.resize(numParticles);
     DoPtcl.resize(numParticles);
@@ -120,12 +141,10 @@ public:
     }
   }
 
-  PathClass()
+  PathClass(CommunicatorClass &communicator): Communicator(communicator)
     {
       //      NumSpecies = 0;
-
-      TimeSliceNumber=0;
-      
+      TotalNumSlices=0;
     }
 };
 

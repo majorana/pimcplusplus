@@ -32,11 +32,8 @@ public:
   ///The constructor that initializes the action and such
   int Join;
   PathClass Path;
-  inline PathDataClass() : Action(Path){
-    Join=1;
-  }
   inline void ShiftData(int numTimeSlicesToShift){
-    Path.ShiftData(numTimeSlicesToShift,Communicator);
+    Path.ShiftData(numTimeSlicesToShift);
     DistanceTable->ShiftData(numTimeSlicesToShift, Communicator);
   }
 
@@ -93,6 +90,12 @@ public:
   inline void SetPos(int timeSlice, int particle, const dVec& r){
     Path.SetPos(timeSlice,particle,r);
   }
+
+  inline PathDataClass() : Action(Path), Path(Communicator){
+    Join=1;
+  }
+
+
 };
 
 

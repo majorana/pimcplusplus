@@ -2,7 +2,7 @@
 #define COMM_CLASS_H
 
 #include "Common.h"
-#include "ImageNumClass.h"
+
 
 ///Here we include mpi if we are doing parallel runs
 #ifdef PARALLEL

@@ -1,6 +1,6 @@
 #include "Common.h"
 #include "MirroredArrayClass.h"
-#include "ImageNumClass.h"
+
 
 template class MirroredArrayClass<int>;
 template class MirroredArrayClass<double>;
@@ -89,7 +89,7 @@ void MirroredArrayClass<T>::ShiftData(int slicesToShift, CommunicatorClass &Comm
   int sendProc;
   int NumPtcls=AB.extent(2);
   int NumSlices=AB.extent(1);
-
+  assert(abs(slicesToShift)<NumSlices);
   sendProc=(myProc+1) % numProcs;
   recvProc=((myProc-1) + numProcs) % numProcs;
   if (slicesToShift<0){
@@ -122,19 +122,34 @@ void MirroredArrayClass<T>::ShiftData(int slicesToShift, CommunicatorClass &Comm
   int bufferSize=abs(slicesToShift)*NumPtcls;
   Array<T,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
   int startTimeSlice;
-  if (slicesToShift>0)
-    startTimeSlice=NumSlices-slicesToShift;
-  else 
-    startTimeSlice=0;
-
   int BufferCounter=0;
-  for (int ptclCounter=0;ptclCounter<NumPtcls;ptclCounter++){
-    for (int sliceCounter=startTimeSlice;
-	 sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-      sendBuffer(BufferCounter)=AB(1,sliceCounter,ptclCounter);
-      BufferCounter++;
+  if (slicesToShift>0){
+    startTimeSlice=NumSlices-slicesToShift;
+
+    for (int ptclCounter=0;ptclCounter<NumPtcls;ptclCounter++){
+      for (int sliceCounter=startTimeSlice;
+	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
+	///If shifting forward, don't send the last time slice (so always)
+	///send sliceCounter-1
+	sendBuffer(BufferCounter)=AB(1,sliceCounter-1,ptclCounter);
+	BufferCounter++;
+      }
     }
   }
+  else {
+    startTimeSlice=0;
+    for (int ptclCounter=0;ptclCounter<NumPtcls;ptclCounter++){
+      for (int sliceCounter=startTimeSlice;
+	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
+	///If shifting backward, don't send the first time slice (so always)
+	///send sliceCounter+1
+	sendBuffer(BufferCounter)=AB(1,sliceCounter+1,ptclCounter);
+	BufferCounter++;
+      }
+    }
+    
+  }
+
   
   Communicator.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
   

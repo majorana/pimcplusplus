@@ -4,123 +4,12 @@
 #include "Common/Splines/CubicSpline.h"
 #include "Common/PairAction/PAFit.h"
 #include "SpeciesClass.h"
-#include "MemoizedDataClass.h"
 #include "PathClass.h"
 //#include "DistanceTablePBCClass.h"
 //#include "DistanceTableFreeClass.h"
 #include "DistanceTableClass.h"
 
-// #include "SpeciesArrayClass.h"
-// #include "ObservableClass.h"
 
-/// Doesn't do anything right now but saves the pair action class
-/// eventually 
-class SavedPairActionClass
-{
-  ///This is a test comment
-
-
-};
-
-///This is the pair action class. It uses the following formula in
-///order to calculate the pair action
-/*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
-  \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */
-class PairActionClass
-{
-
- private:
-  
-  ///Holds the Ukj coefficients for a given q
-  Array<double,1> TempukjArray;
-  Array<double,1> TempdukjArray;
-  DistanceTableClass *DistanceTable;
-  /// Skips to the next string in the file whose substring matches skipToString
-  string SkipTo(ifstream &infile, string skipToString);
-  /// Reads a Fortran 3 tensor
-  void ReadFORTRAN3Tensor(ifstream &infile, Array<double,3> &tempUkj);
- public:
-  string type1,type2;
-  void Read(IOSectionClass &IOSection);
-
-  /// This stores the interaction potential
-  CubicSpline V;
-  /// This stores the coefficients of the expansion specified above.
-  /// The array index is over the levels.  You call it with the q
-  /// value and a temporary array to get all of the values in that
-  /// column. 
-  Array<MultiCubicSpline,1> ukj; ///<(level )
-  ///Same as ukj but stores the beta derivatives.
-  Array<MultiCubicSpline,1> dukj; ///<(level )
-  /// Calculate the U(s,q,z) value when given s,q,z and the level 
-  inline void calcUsqz(double s,double q,double z,int level,
-		       double &U, double &dU, double &V);
-  /// This is the order of the fit to use. 
-  int n;
-  /// This is the temperature 
-  double tau;
-  /// Function to read David's squarer file input.
-  void ReadDavidSquarerFile(string DMFile);
-
-};
-
-/// Calculate the U(s,q,z) value when given s,q,z and the level 
-/*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
-  \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */
-inline void PairActionClass::calcUsqz(double s,double q,double z,int level,
-				      double &U, double &dU, double &V)
-{
-  U=0.0;
-  dU=0.0;
-  double r=q+0.5*z;
-  double rprime=q-0.5*z;
-
-  // Check to make sure we're inside the grid.
-  if (q > ukj(level).grid->End) {
-    U = 0.0; dU=0.0; V = 0.0;
-    return;
-  }
-  if (r > ukj(level).grid->End) {
-    U = 0.0; dU=0.0; V = 0.0;
-    return;
-  }
-  if (rprime > ukj(level).grid->End) {
-    U = 0.0; dU=0.0; V = 0.0;
-    return;
-  }
-
-  // This is the endpoint action 
-  V = 0.5*(ukj(level)(0,r) + ukj(level)(0,rprime));
-  U+=0.5*((ukj(level))(1,r)+(ukj(level))(1,rprime)); 
-  dU+=0.5*((dukj(level))(1,r)+(dukj(level))(1,rprime)); 
-
-  if (s > 0.0)
-    {
-      double zsquared=z*z;
-      double ssquared=s*s;
-      double ssquaredinverse=1.0/ssquared;
-      double Sto2k=ssquared;
-      (ukj(level))(q,TempukjArray); 
-      (dukj(level))(q,TempdukjArray); 
-      for (int k=1;k<=n;k++){  
-	
-	double Zto2j=1;
-	double currS=Sto2k;
-	
-	for (int j=0;j<=k;j++){
-	  // indexing into the 2darray
-	  double Ucof  = TempukjArray(k*(k+1)/2+j+1); 
-				
-	  double dUcof = TempdukjArray(k*(k+1)/2+j+1);
-	  U+=Ucof*Zto2j*currS;
-	  dU+=dUcof*Zto2j*currS;
-	  Zto2j*=zsquared;
-	  currS=currS*ssquaredinverse;				
-	}				
-	Sto2k=Sto2k*ssquared;
-      }
-    }
-}
 
 /// This is the class that controls all of the actions and is in
 /// charge of calculating them. When this is initialized a pointer needs
@@ -136,8 +25,6 @@ public:
   /// you use for a given pair of particles indexed by
   /// (species1,species2) 
   Array<int,2> PairMatrix;
-  /// This indexes into the non-existent Saved Pair Actions
-  Array<SavedPairActionClass,2> SavedPairActionArray;
   PathClass &Path;
   /// Temperature
   double tau;
@@ -149,23 +36,25 @@ public:
   ActionClass(PathClass  &p_path) : Path(p_path) 
   {
   }
-  /// This holds a reference to the Array of Species
+
+
   /// Calculates the total action.
   double calcTotalAction(int startSlice, int endSlice, 
 			 Array<int,1> changedParticles,int level);
-  /// This is a reference to the memoized data class
-  //  MemoizedDataClass &myMemoizedData;
+
   ///This picks a new location in space for the particles in the
   ///particles Array at all of the time slices between startSlice and
   ///endSlice (at the appropriate skip for the level)
 
   inline double SampleParticles(int startSlice, int endSlice, 
 				Array<int,1> particles, int level);
+
   /// This calculates the sample probability for going from the state
   /// that is currently in the newMode of MirroredArrayClass to the
   /// state that is currently in oldMode of MirroredArrayClass 
   inline double LogSampleProb(int startSlice, int endSlice, 
 			      Array<int,1> particles,int level);
+
   /// Function to calculate the total action.
   void calcTotalAction();
 
@@ -189,27 +78,18 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
   double levelTau = 0.5*tau*skip;
   for (int ptclIndex=0;ptclIndex<particles.size();ptclIndex++){
     int  ptcl=particles(ptclIndex);
-    //    int species=particles(ptcl)(0);
-    //    int ptclNum=particles(ptcl)(1);
     double lambda=Path.ParticleSpecies(ptcl).lambda;
-    //    double lambda=(mySpeciesArray(species)).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-    //      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
-      //      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
-      //      rpp=mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
       dVec r = Path(sliceCounter,ptcl);
       dVec rp= Path(sliceCounter+skip,ptcl);
       dVec rpp=Path(sliceCounter+(skip>>1),ptcl);
       dVec rdiff = 
 	DistanceTable->Velocity(sliceCounter, sliceCounter+skip, ptcl);
-      ////      ///We've ignored boundary conditions here
-      //dVec rbar=0.5*(r+rp);
       dVec rbar = r + 0.5*rdiff;
       dVec newDelta=GaussianRandomVec(sigma);
-
       for (int dim=0; dim<NDIM; dim++)
 	{
 	  while (newDelta[dim] > (0.5*Path.Box[dim]))
@@ -217,13 +97,11 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
 	  while (newDelta[dim] < (-(0.5*Path.Box[dim])))
 	    newDelta += Path.Box[dim];
 	}
-
       DistanceTable->PutInBox(newDelta);
       rpp=rbar+newDelta;
       logNewSampleProb=logNewSampleProb+
 	(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
-      ////      ///Here we've stored the new position in the path
-     //    mySpeciesArray.SetPos(species,ptclNum,sliceCounter+(skip>>1),rpp );
+      ///Here we've stored the new position in the path
       Path.SetPos(sliceCounter+(skip>>1),ptcl,rpp);
     }
   }
@@ -231,9 +109,9 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
 }
 
 
-  /// This calculates the sample probability for going from the state
-  /// that is currently in the newMode of MirroredArrayClass to the
-  /// state that is currently in oldMode of MirroredArrayClass 
+/// This calculates the sample probability for going from the state
+/// that is currently in the newMode of MirroredArrayClass to the
+/// state that is currently in oldMode of MirroredArrayClass 
 inline double ActionClass::LogSampleProb(int startSlice, int endSlice, 
 					 Array<int,1> particles, 
 					 int level)
@@ -244,9 +122,6 @@ inline double ActionClass::LogSampleProb(int startSlice, int endSlice,
 
   double levelTau = 0.5*tau*skip;
   for (int ptcl=0;ptcl<particles.size();ptcl++){
-    //    int species=particles(ptcl)(0);
-    //    int ptclNum=particles(ptcl)(1);
-    //    double lambda=mySpeciesArray(species).lambda;
     double lambda=Path.ParticleSpecies(ptcl).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
@@ -257,10 +132,7 @@ inline double ActionClass::LogSampleProb(int startSlice, int endSlice,
 	DistanceTable->Velocity(sliceCounter, sliceCounter+skip, ptcl);
       dVec rp= Path(sliceCounter+skip,ptcl);
       dVec rpp=Path(sliceCounter+(skip>>1),ptcl);
-      //      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
-      //      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
-      //      rpp    =mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
-      ///We've ignored boundary conditions here
+      ///We've ignored boundary conditions here (well we think this is fixed but we're not sure)
       dVec rbar=r + 0.5*rdiff;
       dVec Delta= rpp - rbar;
       DistanceTable->PutInBox(Delta);

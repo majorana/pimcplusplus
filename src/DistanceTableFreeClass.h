@@ -33,7 +33,7 @@ public:
   /// Constructor
   DistanceTableFreeClass (PathClass &myPath) : DistanceTableClass(myPath)
   { 
-    // Set all ImageNum's to be     int numIndices = Path.Num
+    // Set all ImageNum's to be 0    
     int numIndices = Path.NumParticles()*(Path.NumParticles()+1)/2;
     for (int slice=0; slice<Path.NumTimeSlices(); slice++)
       for (int index=0; index<numIndices; index++)
@@ -62,15 +62,12 @@ inline void DistanceTableFreeClass::Displacement(int timeSlice,
 						 double &dist,
 						 dVec vecMask)
 {
-
   double dist2;
   for (int i=0; i<NDIM; i++) {
     disp[i] = vecMask[i]*(Path(timeSlice,ptcl2)[i] -
 			  Path(timeSlice,ptcl1)[i]);
     dist2+=disp[i]*disp[i];
   }
-
-  
   dist = sqrt(dist2);
 }
 

@@ -7,7 +7,7 @@ void PathClass::Read (IOSectionClass &inSection)
 {
   SetMode (BOTHMODE);
   double tau;
-  assert(inSection.ReadVar ("NumTimeSlices", TimeSliceNumber));
+  assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
   assert(inSection.ReadVar ("tau", tau));
   Array<double,1> tempBox;
   assert(inSection.ReadVar ("Box",tempBox));
@@ -18,8 +18,7 @@ void PathClass::Read (IOSectionClass &inSection)
   assert(inSection.OpenSection("Particles"));
   int NumSpecies = inSection.CountSections ("Species");
   cerr<<"we have this many sections: "<<NumSpecies<<endl;
-  //SpeciesArray.resize(NumSpecies);
-  // First loop over species and read info about species
+   // First loop over species and read info about species
   for (int Species=0; Species < NumSpecies; Species++)
     {
       inSection.OpenSection("Species", Species);
@@ -54,7 +53,7 @@ void PathClass::Read (IOSectionClass &inSection)
 	  for (int dim=0; dim<species.NumDim; dim++)
 	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
 	  SetPos(slice,ptcl,pos);
-	}
+	}      
     }
     else {
       cerr << "Unrecognize initialization strategy " 

@@ -80,37 +80,6 @@ void DistanceTableFreeClass::UpdateAll(int timeSlice)
   
 
 
-//   /// Now zero out components of displacement due to inactive
-//   /// dimensions of lower dimensional particles, eg. a cylinder in
-//   /// 3-space.
-//   for (int specCntr1=0; specCntr1<Path.NumSpecies; specCntr1++) {
-//     SpeciesClass &species1=Path.Species(speciesCntr1);
-//     if (species1.NumDim<NDIM){
-//       int NotMask = 3;
-//       for (int dim=0; dim<NDIM; dim++) {
-// 	if (!species1.DimensionActive(dim)){
-// 	  int Mask = ~NotMask;
-// 	  for (int ptcl=0;ptcl<Path.NumParticles();ptcl++){
-// 	    int index=ArrayIndex(ptcl1,ptcl2);
-// 	    // This zeros out the image number corresponding to the
-// 	    // dimension dim;
-// 	    ImageNumTable(timeSlice,index) &= Mask;
-// 	    DispTable(timeSlice,index)[dim] = 0.0;	
-// 	  }
-// 	}
-// 	NotMask <<=2;
-//       }
-//     }
-//   }
-//   for (int ptcl1=0;ptcl1<Path.NumParticles;ptcl1++){
-//     for (int ptcl2=0;ptcl2<=ptcl1;ptcl2++){
-//       dVec& disp= DispTable(timeSlice,index);
-//       DistanceTable(timeSlice,index)=sqrt(dot(disp,disp));
-//       index++;
-//     }
-//   }
-// }
-
 void DistanceTableFreeClass::UpdateAll()
 {
   for (int timeSlice=0;timeSlice<Path.NumTimeSlices();timeSlice++){

@@ -13,7 +13,6 @@ void TotalEnergyClass::Accumulate()
   for (int ptcl=0; ptcl<numPtcls; ptcl++)
     if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
       sum += 1.5/tau * (double)numLinks;
-      //sum += 1.5*tau * (double)numLinks;
   for (int link=0; link<numLinks; link++) {
     for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
       // Do free-particle part
@@ -177,50 +176,6 @@ void PairCorrelationClass::Accumulate()
   }
 }
 
-
-	    //  int NumPtcl1 = PathData.SpeciesArray(Species1).NumParticles();
-	    //  int NumPtcl2 = PathData.SpeciesArray(Species2).NumParticles();
-//   bool DifferentSpecies = (Species1 != Species2);
-  
-  
-//   if (DifferentSpecies)
-//     for (int Slice=0; Slice<PathData.NumTimeSlices(); Slice++) {
-//       for (int Ptcl1=0; Ptcl1<NumPtcl1; Ptcl1++) {
-// 	dVec r1 =PathData.SpeciesArray(Species1).Path(Ptcl1, Slice);
-// 	for (int Ptcl2=0; Ptcl2<NumPtcl2; Ptcl2++) {
-// 	  dVec r2=PathData.SpeciesArray(Species2).Path(Ptcl2,Slice);
-// 	  dVec diff = r1-r2;
-// 	  double dist = sqrt(dot(diff,diff));
-
-// 	  if (dist < grid.End)
-// 	    {
-// 	      int index = grid.ReverseMap(dist);
-// 	      Histogram(index)++;
-// 	    }
-// 	  TotalCounts++;
-// 	}
-//       }
-//     }
-//   else
-//     for (int Slice=0; Slice<PathData.NumTimeSlices(); Slice++) {
-//       for (int Ptcl1=0; Ptcl1<NumPtcl1; Ptcl1++) {
-// 	dVec r1 = PathData.SpeciesArray(Species1).Path(Ptcl1,Slice);
-// 	for (int Ptcl2=Ptcl1+1; Ptcl2<NumPtcl2; Ptcl2++)  {
-// 	  dVec r2=PathData.SpeciesArray(Species2).Path(Ptcl2,Slice);
-// 	  dVec diff = r1-r2;
-// 	  double dist = sqrt(dot(diff,diff));
-	  
-// 	  if (dist < grid.End)
-// 	    {
-
-// 	      int index = grid.ReverseMap(dist);
-// 	      Histogram(index)++;
-// 	    }
-// 	  TotalCounts++;
-// 	}
-//       }
-//     }
-//}
 
 
 

@@ -68,7 +68,7 @@ void CommunicatorClass::SendReceive(int SendProc,
 				    Array<ImageNumClass,1> &RecvBuff)
 {
   int *SendPtr = (int *) SendBuff.data();
-  int *RecvPtr = RecvBuff.data();
+  int *RecvPtr = (int*) RecvBuff.data();
   int NumSend = SendBuff.size();
   int NumRecv = RecvBuff.size();
   MPI_Status status;
