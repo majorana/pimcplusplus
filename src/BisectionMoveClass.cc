@@ -28,11 +28,13 @@ void BisectionMoveClass::makeMove()
   double logSampleProb;
   int EndTimeSlice=1<<NumLevels+StartTimeSlice;
   double prevActionChange=0;
-
-
+  
+  cerr<<"At the beginning fo the makeMove the size is ";
+  cerr <<  PathData->IdenticalParticleArray.size()<<endl;
   ChooseParticles();   
   for (int levelCounter=NumLevels;levelCounter>0;levelCounter--){
-
+    cerr<<"At the level Counter in Bisection makeMove being  "<<levelCounter<<" the size is ";
+    cerr <<  PathData->IdenticalParticleArray.size()<<endl;
     setMode(OLDMODE);
     bool toAccept=true;
     double oldAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter-1);

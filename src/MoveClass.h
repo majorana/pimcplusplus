@@ -36,6 +36,7 @@ class ParticleMoveClass : public MoveClass
   {
     NumParticlesToMove = i;
     MyParticleIndices.resize(i);
+    ActiveParticles.resize(i);
   }
 
   void ChooseParticles();

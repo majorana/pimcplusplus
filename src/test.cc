@@ -9,14 +9,16 @@
 
 
 
-void setupAction(ActionClass &myActionClass,ArrayOfIdenticalParticlesClass &myIDParticles)
+void setupAction(ActionClass &myActionClass,PathDataClass &myPathData)
+
+
 {
   myActionClass.PairActionVector.resize(1);
   myActionClass.PairActionVector(0).ReadDavidSquarerFile("../inputs/testcoul.dm");
   myActionClass.PairMatrix.resize(2,2);
   myActionClass.PairMatrix=0;
   myActionClass.tau=myActionClass.PairActionVector(0).tau;
-  myActionClass.myIdenticalParticleArray=&myIDParticles;
+  myActionClass.myIdenticalParticleArray=&(myPathData.IdenticalParticleArray);
 
      
 }
@@ -95,11 +97,14 @@ int main(int argc, char **argv)
   PathDataClass myPathData;
   ActionClass myActionClass;
   setupIDParticleArray(myPathData);
-  setupAction(myActionClass,myPathData.IdenticalParticleArray);
+  setupAction(myActionClass,myPathData);
   BisectionMoveClass myBisectionMove;
   ShiftMove myShiftMove;
   setupMove(myBisectionMove,myShiftMove,myPathData);
-  
+  cerr<<"The size of the IdenticalParticleArray is ";
+  cerr << (myBisectionMove.PathData)->IdenticalParticleArray.size()<<endl;
+  cerr<<"What the action class thinks the size is: ";
+  cerr<<  myActionClass.myIdenticalParticleArray->size()<<endl;
   for (int counter=0;counter<10000;counter++){
     for (int counter2=0;counter2<2;counter2++){
       cerr << "Doing step " << counter << endl;
