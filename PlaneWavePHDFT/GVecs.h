@@ -22,10 +22,16 @@ public:
   inline Vec3 operator()(int i) const
   { return GVecs(i); }
 
+  inline const Vec3& operator()(int i) 
+  { return GVecs(i); }
+
   inline Int3 Index(int i) const
   { return Indices(i); }
   
   inline Vec3 DeltaG (int i) const
+  { return GDiff(i); }
+
+  inline const Vec3& DeltaG (int i)
   { return GDiff(i); }
 
   inline Int3 DeltaI (int i) const
@@ -48,12 +54,6 @@ public:
 
   inline Vec3 GetkBox()
   { return kBox; }
-
-  inline bool Allowed (int ix, int iy, int iz) 
-  {
-    Vec3 G(kBox[0]*ix, kBox[1]*iy, kBox[2]*iz);
-    return dot (G,G) < (kCut*kCut);
-  }
 
   void GetFFTBoxSize (int &nx, int &ny, int &nz);
 };

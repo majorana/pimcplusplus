@@ -1,9 +1,13 @@
 SOURCES = PlaneWavePHDFT.cc Hamiltonian.cc ConjGrad.cc TestPW.cc GVecs.cc     \
-          FFTBox.cc
+          FFTBox.cc Hamiltonian2.cc TestPW2.cc PlaneWaves.cc ConjGrad2.cc
 
-Objs = Hamiltonian.o ConjGrad.o GVecs.o FFTBox.o
+Objs = Hamiltonian.o ConjGrad.o GVecs.o FFTBox.o 
+
+Objs2 = Hamiltonian2.o ConjGrad2.o GVecs.o FFTBox.o PlaneWaves.o
 
 TestObjs  = TestPW.o
+
+TestObjs2  = TestPW2.o
 
 PHObjs = ../PH/Potential.o ../PH/ScreenedPot.o ../PH/QuinticPH.o              \
          ../PH/CoulombPot.o ../PH/SplinePot.o ../PH/HeAzizPot.o               \
@@ -19,10 +23,14 @@ SplineObjs = ../Splines/BicubicSpline.o ../Splines/CubicSpline.o              \
 MiscObjs =   ../Integration/GKIntegration.o ../Fitting/Fitting.o              \
              ../MatrixOps/MatrixOps.o ../FFT/FFT.o
 
-all:    $(Objs) TestPW Hamiltonian.s
+all:    $(Objs) $(Objs2) TestPW TestPW2 Hamiltonian.s
 
 TestPW:  $(TestObjs) $(Objs) $(PHObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)
 	$(LD) -o $@ $(TestObjs) $(Objs) $(PHObjs) $(IOObjs) $(SplineObjs) \
+        $(MiscObjs) $(LIBS)
+
+TestPW2:  $(TestObjs2) $(Objs2) $(PHObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)
+	$(LD) -o $@ $(TestObjs2) $(Objs2) $(PHObjs) $(IOObjs) $(SplineObjs) \
         $(MiscObjs) $(LIBS)
 
 Hamiltonian.s:  Hamiltonian.cc

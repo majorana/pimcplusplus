@@ -11,10 +11,13 @@ class HamiltonianBase
 {
 protected:
   GVecsClass &GVecs;
+  bool IsSetup;
 public:
   // Adds H*c to the Hc vector.  Does not zero Hc before accumulating
-  virtual void Apply (const zVec &c, zVec &Hc) = 0;
-  HamiltonianBase (GVecsClass &gvecs) : GVecs(gvecs)
+  virtual void Apply   (const zVec &c, zVec &Hc) = 0;
+  virtual void SetIons (const Array<Vec3,1> rions) { }
+  HamiltonianBase (GVecsClass &gvecs) 
+    : GVecs(gvecs), IsSetup(false)
   {
     // do nothing for now
   }
@@ -26,14 +29,16 @@ class KineticClass : public HamiltonianBase
 private:
   Array<double,1> halfG2;
   void Setup();
-  bool IsSetup;
 public:
   void Apply (const zVec &c, zVec &Kc);
   KineticClass (GVecsClass &gvecs) : 
-    HamiltonianBase (gvecs),  IsSetup(false)
+    HamiltonianBase (gvecs)
   {
   }
 };
+
+
+
 
 
 class CoulombClass : public HamiltonianBase
@@ -42,6 +47,7 @@ private:
   double Z;
 public:
   void Apply (const zVec &c, zVec &Hc);
+  void SetIons (const Array<Vec3,1> &rions);
   CoulombClass (double z, GVecsClass &gvecs) : 
     HamiltonianBase (gvecs), Z(z)
   {
@@ -54,13 +60,14 @@ class CoulombFFTClass : public HamiltonianBase
 private:
   double Z;
   void Setup();
-  bool IsSetup;
   Array<complex<double>,3> Vr;
 public:
   FFTBox FFT;
   void Apply (const zVec &c, zVec &Hc);
+  void SetIons (const Array<Vec3,1> &rions);
+
   CoulombFFTClass (double z, GVecsClass &gvecs) : 
-    HamiltonianBase (gvecs), Z(z), FFT(gvecs), IsSetup(false)
+    HamiltonianBase (gvecs), Z(z), FFT(gvecs)
   {
     // nothing for now
   }
@@ -71,13 +78,13 @@ class PHPotClass : public HamiltonianBase
 private:
   kSpacePH kPH;
   void Setup();
-  bool IsSetup;
   Array<complex<double>,2> VGGp;
 public:
-  
   void Apply (const zVec &c, zVec &Hc);
+  void SetIons (const Array<Vec3,1> &rions);
+
   PHPotClass (Potential &ph, GVecsClass &gvecs) :
-    HamiltonianBase (gvecs), kPH(ph), IsSetup(false)
+    HamiltonianBase (gvecs), kPH(ph)
   {
 
   }
@@ -88,7 +95,6 @@ class PHPotFFTClass : public HamiltonianBase
 {
 private:
   kSpacePH kPH;
-  bool IsSetup;
   Array<cMat3,3> Fr;
   zVec Vc;
   zVec Vk, StructureFactor;
@@ -106,7 +112,7 @@ public:
   void Apply (const zVec &c, zVec &Hc);
   PHPotFFTClass (Potential &ph, GVecsClass &gvecs) :
     HamiltonianBase (gvecs), kPH(ph),
-    cFFT(gvecs), VecFFT(gvecs),/* MatFFT(gvecs),*/ IsSetup(false),
+    cFFT(gvecs), VecFFT(gvecs),/* MatFFT(gvecs),*/
     k(0.0, 0.0, 0.0)
   {
 
