@@ -9,6 +9,9 @@ from HTMLgen import *
 #import povexport
 #from visual import *
 
+ 
+
+
 
 def GetPaths(infiles):
      paths=infiles.ReadVar("Path")
@@ -182,6 +185,13 @@ def WeightedAvg (means, errors):
           return (Avg(means), 0.0)
 
 
+def BuildScalarTracePage(data,baseName,varName):
+     doc=SimpleDocument()
+     #wrong
+     map(lambda x: doc.append(ProduceTracePicture(x,baseName,'Blocks',varName)),data)
+     doc.write(baseName+'.html')
+     return baseName+'.html'
+          
 def ProcessScalarSection(infiles,doc,currNum):
      sectionName=infiles.GetName()
      doc.append(Heading(1,sectionName))
@@ -200,8 +210,15 @@ def ProcessScalarSection(infiles,doc,currNum):
                baseName = varName+repr(currNum)
                toAddList.append(Name(sectionName+varName+repr(currNum)))
                toAddList.append(Heading(2,varName))
-               myImg=ProduceTracePicture(data[0], baseName,'Blocks',varName)
-               toAddList.append(myImg)
+               pageName=BuildScalarTracePage(data,baseName,varName)
+               print "My page name is",pageName
+               myFrame=IFrame()
+#               myFrame.scrolling='no'
+               myFrame.src=pageName
+               myFrame.width="1000%"
+               myFrame.height="400"
+#               myImg=ProduceTracePicture(data[0], baseName,'Blocks',varName)
+               toAddList.append(myFrame)
 
 ##   Write ASCII data to a file
                asciiFileName = baseName + '.dat'
@@ -335,6 +352,11 @@ infiles.OpenFiles(basename);
       
 print 'Found ' +repr(infiles.len()) + ' output files.'
 
+
+
+
+
+
 dirName=basename 
 cutoff=None
 if (os.access(dirName+".pref",os.F_OK)):
@@ -356,6 +378,10 @@ ProcessMove(doc,infiles)
 currNum=0
 infiles.OpenSection("Observables")
 numSections=infiles.CountSections()
+
+
+
+
 #print "The number of sections is ",numSections
 for counter in range(0,numSections):
      infiles.OpenSection(counter)
@@ -371,7 +397,9 @@ for counter in range(0,numSections):
      infiles.CloseSection()
 infiles.CloseSection() # "Observables"
 
-
+#myFrame=IFrame("index.html","blah")
+#myFrame.src="hi"
+#doc.append(myFrame)
 doc.logo=""
 doc.author="Ken and Bryan"
 doc.email="bkclark@uiuc.edu"
