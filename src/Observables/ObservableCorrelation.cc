@@ -292,6 +292,8 @@ void nofrClass::Read(IOSectionClass& in)
   TotalCounts=0;
   Histogram.resize(numGridPoints-1);
   Histogram=0;
+  Histogram3d.resize(numGridPoints-1,numGridPoints-1,numGridPoints-1);
+  Histogram3d=0;
   in.CloseSection();
 }
 
@@ -323,11 +325,16 @@ void nofrClass::WriteInfo()
 ///fact currently
 void nofrClass::WriteBlock()
 {
+ 
+
   PathClass &Path = PathData.Path;
   Array<double,1> HistSum(Histogram.size());
   double norm=0.0;
   norm = TotalCounts/PathData.Path.GetVol();
   Path.Communicator.Sum(Histogram, HistSum);
+  ///This will only work in serial because I'm not summing!!!!
+  Histogram3d=Histogram3d/norm;
+  HistSum3d.Write(Histogram3d);
   if (Path.Communicator.MyProc()==0) {
     if (FirstTime) {
       FirstTime=false;
@@ -378,6 +385,7 @@ void nofrClass::Print()
 ///loop. This does not compensaite for volume effects or importance sampling
 void nofrClass::Accumulate()
 {
+  cerr<<"I've been called to accumulate"<<endl;
   TimesCalled++;
   if (TimesCalled % DumpFreq==0){
     WriteBlock();
@@ -385,7 +393,7 @@ void nofrClass::Accumulate()
   if ((TimesCalled % Freq)!=0){
     return;
   }
-
+  cerr<<"I'm actually going to accumulate (exciting isn't it)"<<endl;
   dVec disp;
   double dist;
   int openLink=(int)(PathData.Path.OpenLink);
@@ -393,10 +401,18 @@ void nofrClass::Accumulate()
   PathData.Path.DistDisp(openLink,openPtcl,PathData.Path.NumParticles(),
 			 dist,disp); //This is distance between head and tail!
 
+  
   if (dist<grid.End){
     int index=grid.ReverseMap(dist);
     //    Histogram(index)=Histogram(index)+(0.5)/(dist*dist)+(0.9*exp(-dist*dist)+0.1);
     Histogram(index)=Histogram(index)+1.0;
+    if (disp(0)<grid.End && disp(1)<grid.End && disp(2)<grid.End){
+      int index0=grid.ReverseMap(disp(0));
+      int index1=grid.ReverseMap(disp(1));
+      int index2=grid.ReverseMap(disp(2));
+      Histogram3d(index0,index1,index2)=Histogram3d(index0,index1,index2)+1.0;
+    }
+      
   }  
   TotalCounts++;  
   return; 
