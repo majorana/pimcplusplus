@@ -21,6 +21,7 @@ protected:
   double lambda, beta;
   CommunicatorClass Communicator;
   RandomClass Random;
+  double Energy();
 public: 
   Array<State,1> OccupiedStates;
   virtual double AcceptProb (int ptclNum, State &newState) = 0;
@@ -35,7 +36,7 @@ public:
   ParticleClass() :
     Random(Communicator)
   {
-    // Do nothing for now
+    Random.Init();
   }
 };
 
@@ -77,6 +78,8 @@ void ParticleClass::Read(IOSectionClass &in)
   assert(in.ReadVar ("beta", beta));
   assert(in.ReadVar ("BlockSize", BlockSize));
   assert(in.ReadVar ("NumBlocks", NumBlocks));
+  assert(in.ReadVar ("lambda", lambda));
+
   Esum = 0.0;
   E2sum = 0.0;
   FillStates();
@@ -97,11 +100,8 @@ void ParticleClass::MCStep()
   double sampleRatio = Sample (ptclToMove, newState);
 
   double toAccept = AcceptProb (ptclToMove, newState);
-  if (toAccept*sampleRatio>Random.Local()){
+  if (toAccept*sampleRatio>Random.Local())
     OccupiedStates(ptclToMove)=newState;
-  }
-  else {
-  }
 }
 
 double ParticleClass::Sample(int &ptclToMove, State &newState)
@@ -112,15 +112,43 @@ double ParticleClass::Sample(int &ptclToMove, State &newState)
     toChange=1;
   else
     toChange=-1;
-  int dimToChange=Random.LocalInt(3);
-  newState=OccupiedStates(toChange);
+  int dimToChange=Random.LocalInt(NDIM);
+  newState=OccupiedStates(ptclToMove);
   newState[dimToChange]+=toChange;
   return 1.0;
 }
 
+
+double ParticleClass::Energy()
+{
+  double E=0.0;
+  for (int ptcl=0; ptcl<NumParticles; ptcl++) {
+    //    cerr << "State: " << OccupiedStates(ptcl) << endl;
+    for (int i=0; i<NDIM; i++)
+      E += kPrim[i]*kPrim[i]*OccupiedStates(ptcl)[i]*OccupiedStates(ptcl)[i];
+  }
+  E *= lambda;
+  return (E);
+}
+
+
 void ParticleClass::Run()
 {
-
+  for (int block=0; block<NumBlocks; block++) {
+    // Reset block sums
+    Esum = E2sum = 0.0;
+    for (int step=0; step<BlockSize; step++) {
+      MCStep();
+      double E = Energy();
+      Esum += E;
+      E2sum += E*E;
+    }
+    // Write block data
+    double mean = Esum / BlockSize;
+    double mean2 = E2sum / BlockSize;
+    double var = sqrt (mean2 - mean*mean);
+    fprintf (stderr, "%1.12e %1.12e\n", mean, sqrt(var/BlockSize));
+  }
 }
 
 
@@ -128,11 +156,51 @@ void ParticleClass::Run()
 // FermionClass Member Functions //
 ///////////////////////////////////
 
+#if NDIM == 3
 void FermionClass::FillStates()
 {
-
-
+  OccupiedStates.resize (NumParticles);
+  double kmin = min(kPrim[0], kPrim[1]);
+  kmin = min (kmin, kPrim[2]);
+  double deltaEmin = lambda * kmin*kmin;
+  
+  int n = 0;
+  double Ecut = deltaEmin;
+  while (n < NumParticles) {
+    int ixmax = (int)ceil(sqrt(Ecut/lambda)/kPrim[0]);
+    int iymax = (int)ceil(sqrt(Ecut/lambda)/kPrim[1]);
+    int izmax = (int)ceil(sqrt(Ecut/lambda)/kPrim[2]);
+    dVec k;
+    State tryState;
+    for (int ix=-ixmax; ix<=ixmax; ix++) {
+      tryState[0] = ix;
+      k[0] = kPrim[0]*ix;
+      for (int iy=-iymax; iy<=iymax; iy++) {
+	tryState[1] = iy;
+	k[0] = kPrim[1]*iy;
+	for (int iz=-izmax; iz<=izmax; iz++) {
+	  tryState[2] = iz;
+	  k[0] = kPrim[2]*iz;
+	  double E = lambda * dot(k,k);
+	  if (n < NumParticles)
+	    if (E < Ecut) {
+	      bool occupied = false;
+	      for (int i=0; i<n; i++)
+		occupied = occupied || (tryState==OccupiedStates(i));
+	      if (!occupied) {
+		OccupiedStates(n) = tryState;
+		n++;
+	      }
+	    }
+	}
+	Ecut += deltaEmin;
+      }
+    }
+  }
 }
+#endif
+
+
 
 
 
