@@ -18,6 +18,28 @@ void TestDet()
   fprintf (stderr, "det(C) = %1.16e\n", Determinant(C));
 }
 
+#include <time.h>
+
+void TimeDet()
+{
+  Array<double,2> C(16,16);
+  fprintf (stderr, "C = \n");
+  fprintf (stdout, "C = [ ");
+  for (int i=0; i<16; i++) 
+    for (int j=0; j<16; j++)
+      C(i,j) = 2.0*drand48()-1.0;
+    
+  clock_t start, end;
+
+  start  = clock();
+  for (int i=0; i<10000; i++)
+    Determinant(C);
+  end = clock();
+
+  fprintf (stderr, "Time = %5.2 sec.\n", (double)(end-start)/CLOCKS_PER_SEC);
+  fprintf (stderr, "det(C) = %1.16e\n", Determinant(C));
+}
+
 
 bool TestInv()
 {
@@ -83,8 +105,9 @@ double MulTest(int N)
 
 main()
 {
-  for (int N=10; N<300; N+=5)
-    cerr << "N = " << N << " Rate = " << MulTest(N) << endl;
+  TimeDet();
+//   for (int N=10; N<300; N+=5)
+//     cerr << "N = " << N << " Rate = " << MulTest(N) << endl;
 //   TestDet();
 //   TestInv();
 
