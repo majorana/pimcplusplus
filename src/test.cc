@@ -5,7 +5,7 @@
 #include "PathDataClass.h"
 #include "BisectionMoveClass.h"
 #include "MirroredArrayClass.h"
-
+#include "ObservableClass.h"
 
 
 
@@ -73,7 +73,7 @@ void setupMove(BisectionMoveClass &myBisectionMove,ShiftMove &myShiftMove, PathD
   myBisectionMove.SetActiveSpecies(ActiveSpecies);
   myBisectionMove.SetNumParticlesToMove(1);
   myBisectionMove.StartTimeSlice=0;
-  myBisectionMove.NumLevels=5;
+  myBisectionMove.NumLevels=4;
   myShiftMove.PathData=&thePathData;
 
 }
@@ -95,6 +95,9 @@ int main(int argc, char **argv)
 {
   MPI_Init(&argc, &argv);
   PathDataClass myPathData;
+  PairCorrelation PC;
+  PC.PathData = &myPathData;
+  PC.Initialize();
   //  ActionClass myActionClass;
   setupIDParticleArray(myPathData);
   setupAction(myPathData.TotalAction,myPathData);
@@ -109,9 +112,11 @@ int main(int argc, char **argv)
     for (int counter2=0;counter2<2;counter2++){
       cerr << "Doing step " << counter << endl;
       myBisectionMove.makeMove();
+      PC.Accumulate();
     }
-    //myShiftMove.makeMove();
+    myShiftMove.makeMove();
   }
+  PC.Print();
   cerr<<"done! done!"<<endl;
   MPI_Finalize();
 }
