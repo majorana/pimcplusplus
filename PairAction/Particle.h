@@ -1,6 +1,8 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
+#include "../IO/InputOutput.h"
+
 class ParticleClass
 {
 public:
@@ -8,14 +10,14 @@ public:
   double lambda;
   double Charge;
   int Ndim;
-  void Write (IOSectionClass &outSection)
+  inline void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Name", Name);
     outSection.WriteVar ("lambda", lambda);
     outSection.WriteVar ("Charge", Charge);
     outSection.WriteVar ("Ndim", Ndim);
   }
-  bool Read  (IOSectionClass &inSection)
+  inline bool Read  (IOSectionClass &inSection)
   {
     bool success;
     success =  inSection.ReadVar ("Name", Name);
