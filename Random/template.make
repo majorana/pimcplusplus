@@ -1,6 +1,7 @@
-SOURCES = *.cc
+SOURCES = TestRandom.cc
 
-all:	
+all:	TestRandom.o 
+	$(LD) -o TestRandom TestRandom.o ../MPI/Communication.o $(LIBS)
 
 clean:
 	rm -f *.o
