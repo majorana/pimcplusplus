@@ -93,22 +93,31 @@ void QuinticPH::Write(IOSectionClass &out)
   out.NewSection("Bgrid");  Bgrid.Write(out);  out.CloseSection();
   out.NewSection("Vgrid");  Vgrid.Write(out);  out.CloseSection();
 
+  out.WriteVar ("ABmin", ABmin);
   out.WriteVar ("pA", pA.Data());
   out.WriteVar ("pB", pB.Data());
   out.WriteVar ("Vcore", Vcore.Data());
 }
 
+
+/// Note:  Vouter must be set before calling "Read".
 void QuinticPH::Read(IOSectionClass &in)
 {
   assert (in.OpenSection ("Agrid")); Agrid.Read(in); in.CloseSection();
   assert (in.OpenSection ("Bgrid")); Bgrid.Read(in); in.CloseSection();
   assert (in.OpenSection ("Vgrid")); Vgrid.Read(in); in.CloseSection();
-  
+  CoreRadius = Agrid.End;
+
+  assert(in.ReadVar("ABmin", ABmin));
   Array<double,1> temp;
   assert (in.ReadVar ("pA", temp));
   pA.Init (&Agrid, temp, 0.0, 0.0, 0.0, 0.0);
   assert (in.ReadVar ("pB", temp));
   pB.Init (&Bgrid, temp, 0.0, 0.0, 0.0, 0.0);
+  double dVend  = Vouter->dVdr(CoreRadius);
+  double d2Vend = Vouter->d2Vdr2(CoreRadius);
+  assert (in.ReadVar ("Vcore", temp));
+  Vcore.Init (&Bgrid, temp, NAN, dVend, NAN, d2Vend);
 
   CoreRadius = Agrid.End;
 }
