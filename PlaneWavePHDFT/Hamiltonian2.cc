@@ -65,16 +65,16 @@ CoulombClass::Apply(const zVec &c, zVec &Vc)
   for (int i=0; i<c.size(); i++) {
     for (int j=0; j<i; j++) {
       Vec3 diff = GVecs(i) - GVecs(j);
-      complex<double> s(0.0);
-      for (int zi=0; zi<rions.size(); zi++) {
+      complex<double> s(0.0,0.0);
+      for (int zi=0; zi<Rions.size(); zi++) {
 	double cosVal, sinVal, phase;
-	phase = dot (diff, rions(zi));
+	phase = dot (diff, Rions(zi));
 	sincos(phase, &sinVal, &cosVal);
 	s += complex<double> (cosVal,sinVal);
       }
-      complex<double> val = -4.0*volInv*s*M_PI*Z/dot(diff,diff)*c(j);
-      Vc(i) += val;
-      Vc(j) += conj(val);
+      complex<double> val = -4.0*volInv*s*M_PI*Z/dot(diff,diff);
+      Vc(i) += val*c(j);
+      Vc(j) += conj(val)*c(i);
     }
   }
 }

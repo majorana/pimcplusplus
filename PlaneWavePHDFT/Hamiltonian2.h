@@ -55,7 +55,6 @@ class CoulombClass : public VionBase
 {
 private:
   double Z;
-  Array<Vec3,1> rions;
 public:
   void Setup();
   void Apply (const zVec &c, zVec &Hc);
