@@ -17,9 +17,9 @@ public:
   /// FirstPtcl and LastPtcl are inclusive
   int LastPtcl;
   int FirstPtcl;
-
+  int NumDim;
   int NumParticles;
-
+  TinyVector <bool,NDIM> DimensionActive;
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
   /// classical particle.
   double lambda;
@@ -41,7 +41,10 @@ class FermionClass : public SpeciesClass
 public:
   ///When we make this work, this calculates the NodeActions
   double NodeAction (int Ptcl, int LinkNum);
-  FermionClass()  { };
+  FermionClass()  { 
+    NumDim=NDIM;  
+    DimensionActive=true;
+  };
   ~FermionClass() { };
   ParticleType GetParticleType(){ return FERMION; }
 };
@@ -61,7 +64,8 @@ public:
     }  
   BosonClass()
     {
-
+      NumDim=NDIM;
+      DimensionActive=true;
     }
   ~BosonClass()
     {

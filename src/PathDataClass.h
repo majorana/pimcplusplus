@@ -7,6 +7,7 @@
 #include "ActionClass.h"
 #include "PathClass.h"
 #include "CommunicatorClass.h"
+#include "DistanceTableClass.h"
 
 /// This is the class that holds all of the information about the paths 
 /// including all of the particles, the momized data, and the action.
@@ -28,7 +29,7 @@ public:
     Path.ShiftData(numTimeSlicesToShift,Communicator);
   }
 
-  //////  DistanceTableClass DistanceTable;
+  DistanceTableClass *DistanceTable;
   /// This object functions as an array of SpeciesClass objects.
 
   /// This defines a communicator for the group of processors working

@@ -34,45 +34,8 @@ public:
 		       int ptcl1, int ptcl2, double &distA, double &distB,
 		       dVec &dispA, dVec &dispB);
   DistanceTableClass (PathClass &myPath);
+
 };
-
-
-inline void DistDisp(int timeSlice,int ptc1, int ptcl2,
-		     double &distance, dVec &displacement)
-{
-  int index;
-  double sign;
-  ArrayIndex(ptcl1,ptcl2,index,sign);
-  distance=DistTable(timeSlice,index);
-  displacement=sign*DispTable(timeSlice,index);
-}
-
-inline void DistDisp(int timeSliceA, int timeSliceB,
-		     int ptcl1, int ptcl2, double &distA, double &distB,
-		     dVec &dispA, dVec &dispB)
-{
-  DistDisp(timeSliceA,ptcl1,ptcl2,distA,dispA);
-  int index;
-  double sign;
-  ArrayIndex(ptcl1,ptcl2,index,sign);
-  distA=DistTable(timeSlice,index);
-  dispA=sign*DispTable(timeSlice,index);
-  int imageNumA=ImageNum(timeSliceA,index);
-  int imageNumB=ImageNum(timeSliceB,index);
-  if (imageNumA!=imageNumB){
-    dispB=Path(timeSliceB,ptcl1)-Path(timeSliceB,ptcl2)+
-      ImageVectors(imageNumA)*sign;
-    distB=sqrt(dot(dispB,dispB));
-  }
-  else {
-    dispB=sign*DispTable(timeSlice,index);
-    distB=DistTable(timeSlice,index); 
-  }
-
-
-
-
-}
 
 
 
@@ -104,24 +67,24 @@ inline int ImageNum(dVecInt image)
 }
 
 /// Performs the reverse mapping of the previous function
-inline dVecInt Image(int ImageNum)
+inline dVecInt Image(int imageNum)
 {
   dVecInt image;
   if (NDIM==1)
-    Image[0] = ImageNum;
+    image[0] = imageNum;
   else if (NDIM==2)
     {
-      Image[0]=(ImageNum&3);
-      ImageNum >>=2;
-      Image[1]=(ImageNum&3);
+      image[0]=(imageNum&3);
+      imageNum >>=2;
+      image[1]=(imageNum&3);
     }
   else if (NDIM==3)
     {
-      Image[0]=(ImageNum&3);
-      ImageNum >>=2;
-      Image[1]=(ImageNum&3);
-      ImageNum >>=2;
-      Image[2]=(ImageNum&3);
+      image[0]=(imageNum&3);
+      imageNum >>=2;
+      image[1]=(imageNum&3);
+      imageNum >>=2;
+      image[2]=(imageNum&3);
     }
   image -= 1;
   return image;
@@ -129,7 +92,47 @@ inline dVecInt Image(int ImageNum)
 
 
 
-DistanceTableClass::DistanceTableClass (PathClass myPath) :
+inline void DistanceTableClass::DistDisp(int timeSlice,int ptcl1, int ptcl2,
+		     double &distance, dVec &displacement)
+{
+  int index;
+  double sign;
+  ArrayIndex(ptcl1,ptcl2,index,sign);
+  distance=DistTable(timeSlice,index);
+  displacement=sign*DispTable(timeSlice,index);
+}
+
+inline void DistanceTableClass::DistDisp(int timeSliceA, int timeSliceB,
+		     int ptcl1, int ptcl2, double &distA, double &distB,
+		     dVec &dispA, dVec &dispB)
+{
+  DistDisp(timeSliceA,ptcl1,ptcl2,distA,dispA);
+  int index;
+  double sign;
+  ArrayIndex(ptcl1,ptcl2,index,sign);
+  distA=DistTable(timeSliceA,index);
+  dispA=sign*DispTable(timeSliceA,index);
+  int imageNumA=ImageNumTable(timeSliceA,index);
+  int imageNumB=ImageNumTable(timeSliceB,index);
+  if (imageNumA!=imageNumB){
+    dispB=Path(timeSliceB,ptcl1)-Path(timeSliceB,ptcl2)+
+      ImageVectors(imageNumA)*sign;
+    distB=sqrt(dot(dispB,dispB));
+  }
+  else {
+    dispB=sign*DispTable(timeSliceB,index);
+    distB=DistTable(timeSliceB,index); 
+  }
+
+
+
+
+}
+
+
+
+
+DistanceTableClass::DistanceTableClass (PathClass &myPath) :
   Path(myPath)
 {
 
@@ -170,7 +173,8 @@ inline void DistanceTableClass::ArrayIndex(int ptcl1, int ptcl2,
   index = ((ptcl1*(ptcl1+1))>>1)+ptcl2;   
 }
 
-
+#include "DistanceTableFreeClass.h"
+// #include "DistanceTablePBCClass.h"
 
 
 #endif

@@ -42,7 +42,7 @@ void DistanceTablePBClass::UpdateAll(int timeSlice)
   int index=0;
   for (int ptcl1=0;ptcl1<Path.NumParticles;ptcl1++){
     for (int ptcl2=0;ptcl2<=ptcl1;ptcl2++){
-      Displacement(timeSlice,ptcl1,ptcl2, DisplaceTable(timeSlice,index),
+      Displacement(timeSlice,ptcl1,ptcl2, DispTable(timeSlice,index),
 		   ImageNumTable(timeSlice, index));
       index++;
     }
@@ -71,7 +71,6 @@ void DistanceTablePBClass::UpdateAll(int timeSlice)
   }
   for (int ptcl1=0;ptcl1<Path.NumParticles;ptcl1++){
     for (int ptcl2=0;ptcl2<=ptcl1;ptcl2++){
-      int index = ArrayIndex(ptcl1,ptcl2);
       dVec& disp= DispTable(timeSlice,index);
       DistanceTable(timeSlice,index)=sqrt(dot(disp,disp));
       index++;
@@ -82,7 +81,7 @@ void DistanceTablePBClass::UpdateAll(int timeSlice)
 void DistanceTablePBClass::UpdateAll()
 {
   for (int timeSlice=0;timeSlice<Path.NumTimeSlices();timeSlice++){
-    updateAll(timeSlice);
+    UpdateAll(timeSlice);
   }
 }
 
@@ -105,15 +104,21 @@ void DistanceTablePBCClass::Update(int timeSlice,int ptcl1)
   for (int speciesNum=0; speciesNum<Path.NumSpecies; speciesNum++) {
     SpeciesClass &Species = Path.Species(speciesNum);
     if (Species.NumDim < NDIM || Species1.NumDim<NDIM) {
-      for (int dim=0; dim<NDIM; dim++) 
+      int NotMask = 3;
+      for (int dim=0; dim<NDIM; dim++) {
 	// Zero out inactive dimensions
 	if (!Species.DimensionActive(dim) || 
-	    !Species1.DimensionActive(dim))
+	    !Species1.DimensionActive(dim)) {
+	  int Mask = ~NotMask;
 	  for (int ptcl2=Species.StartPtcl; ptcl2<Species.EndPtcl; ptcl2++) {
 	    int index = ArrayIndex(ptcl1,ptcl2);
 	    DispTable(timeSlice,index)[dim] = 0.0;
+	    ImageNumTable(timeSlice,index) &= Mask;
 	  }
-    } 
+	}
+	NotMask <<= 2;
+      }
+    }
   }
   for (int ptcl2=0; ptcl2<Path.NumParticles; ptcl2++) {
     int index = ArrayIndex(ptcl1, ptcl2);
