@@ -321,9 +321,10 @@ void ReadAtomicVar(TokenClass token,int &d)
 /// is a problem.
 void ReadAtomicVar(TokenClass token,string &d)
 {
-  ReadAbort (token.Str[0] == '\"', token.LineNumber, 
+  cerr << token.Str << endl;
+  ReadAbort (token.Str[0] != '\"', token.LineNumber, 
 	     "Expected '\"'.");
-  ReadAbort (token.Str[token.Str.length()-1] == '\"', token.LineNumber, 
+  ReadAbort (token.Str[token.Str.length()-1] != '\"', token.LineNumber, 
 	     "Expected '\"'.");
   d=StripQuote(token.Str);
 }
