@@ -21,7 +21,37 @@ void TestFFT3D()
   for (int i=0; i<2; i++)
     for (int j=0; j<2; j++)
       for (int k=0; k<2; k++)
-	fprintf (stderr, "%1.5f\n", fft.kBox(i,j,k).real());
+	fprintf (stderr, "%1.5f\n", fft.kBox(i,j,k).real()/8.0);
+}
+
+void TestFFTVec3D()
+{
+  FFTVec3D fft;
+  fft.resize(2,2,2);
+  fft.kBox(0,0,0)[0]=1.0;  fft.kBox(0,0,0)[1]=1.1;  fft.kBox(0,0,0)[2]=1.2;  
+  fft.kBox(0,0,1)[0]=2.0;  fft.kBox(0,0,1)[1]=2.1;  fft.kBox(0,0,1)[2]=2.2;  
+  fft.kBox(0,1,0)[0]=3.0;  fft.kBox(0,1,0)[1]=3.1;  fft.kBox(0,1,0)[2]=3.2;  
+  fft.kBox(0,1,1)[0]=4.0;  fft.kBox(0,1,1)[1]=4.1;  fft.kBox(0,1,1)[2]=4.2;  
+  fft.kBox(1,0,0)[0]=5.0;  fft.kBox(1,0,0)[1]=5.1;  fft.kBox(1,0,0)[2]=5.2;  
+  fft.kBox(1,0,1)[0]=6.0;  fft.kBox(1,0,1)[1]=6.1;  fft.kBox(1,0,1)[2]=6.2;  
+  fft.kBox(1,1,0)[0]=7.0;  fft.kBox(1,1,0)[1]=7.1;  fft.kBox(1,1,0)[2]=7.2;  
+  fft.kBox(1,1,1)[0]=8.0;  fft.kBox(1,1,1)[1]=8.1;  fft.kBox(1,1,1)[2]=8.2;  
+
+  cerr << "Orignal:\n";
+  for (int i=0; i<2; i++)
+    for (int j=0; j<2; j++)
+      for (int k=0; k<2; k++)
+	for (int l=0; l<3; l++)
+	  fprintf (stderr, "%1.5f\n", fft.kBox(i,j,k)[l].real());
+  fft.k2r();
+  fft.kBox = complex<double>(0.0,0.0);
+  fft.r2k();
+  cerr << "FFT^-1(FFT(Original)):\n";
+  for (int i=0; i<2; i++)
+    for (int j=0; j<2; j++)
+      for (int k=0; k<2; k++)
+	for (int l=0; l<3; l++)
+	  fprintf (stderr, "%1.5f\n", fft.kBox(i,j,k)[l].real()/8.0);
 }
 
 
@@ -53,5 +83,6 @@ void TimeTest()
 main()
 {
   TestFFT3D();
+  TestFFTVec3D();
   TimeTest();
 }
