@@ -1,4 +1,4 @@
-SOURCES = "*.cc"
+SOURCES = Functionals.cc
 
 all:	Functionals.o ExCorr.o
 

@@ -1,4 +1,4 @@
-SOURCES = "*.cc"
+SOURCES = SpecialFunctions.cc
 
 all:	SpecialFunctions.o
 

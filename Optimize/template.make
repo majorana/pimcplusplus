@@ -1,4 +1,4 @@
-SOURCES = "*.cc"
+SOURCES = Minimize.cc
 
 all:	Minimize.o
 
