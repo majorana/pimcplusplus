@@ -11,8 +11,8 @@ private:
 public:
   int Order;
   Grid *qgrid;
-  Array<MultiCubicSpline,1> Uj;
-  Array<MultiCubicSpline,1> dUj;
+  Array<MultiCubicSpline,1> Ujshort, Ujlong;
+  Array<MultiCubicSpline,1> dUjshort, dUjlong;
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);
   void WriteBetaIndependentInfo (IOSectionClass &outSection);
