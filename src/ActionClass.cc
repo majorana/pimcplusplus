@@ -1,6 +1,8 @@
 #include "ActionClass.h"
 #include <sstream>
-#include <stdio.h>
+#include <iostream>
+#include <string>
+#include <fstream>
 
 double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
 				  int StartSlice, int EndSlice, int level)
@@ -16,7 +18,7 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
   NumSpecies = IdentPtcls.size();
 
   int skip = 1<<level;
-  int levelTau = tau* (1<<level);
+  double levelTau = tau* (1<<level);
   for (int i=0; i<NumChangedPtcls; i++)
     {
       Species1 = changedParticles(i)[0];
@@ -81,9 +83,9 @@ void PairActionClass::ReadFORTRAN3Tensor(ifstream &infile,Array<double,3> &tempU
 {
 
   
-  for (int counterTau=0;counterTau<tempUkj.extent(3);counterTau++){
-    for (int counterUkj=0;counterUkj<tempUkj.extent(2);counterUkj++){
-      for (int counterGridPoints=0;counterGridPoints<tempUkj.extent(1);counterGridPoints++){
+  for (int counterTau=0;counterTau<tempUkj.extent(2);counterTau++){
+    for (int counterUkj=0;counterUkj<tempUkj.extent(1);counterUkj++){
+      for (int counterGridPoints=0;counterGridPoints<tempUkj.extent(0);counterGridPoints++){
 	infile>>tempUkj(counterGridPoints,counterUkj,counterTau);
       }
     }
@@ -122,7 +124,10 @@ int GetNextInt(string &s)
   int num;
   sstream >> num;
   int pos = sstream.tellg();
-  s = s.substr(pos, s.size()-pos);
+  if (pos == -1)
+    s = "";
+  else
+    s = s.substr(pos, s.size()-pos);
 
   return (num);
 }
@@ -156,7 +161,10 @@ double GetNextDouble(string &s)
   double num;
   sstream >> num;
   int pos = sstream.tellg();
-  s = s.substr(pos, s.size()-pos);
+  if (pos == -1)
+    s = "";
+  else
+    s = s.substr(pos, s.size()-pos);
 
   return (num);
 }
@@ -165,7 +173,7 @@ double GetNextDouble(string &s)
 void PairActionClass::ReadDavidSquarerFile(string DMFile)
 {
   ifstream infile;
-  cout <<DMFile<<endl;
+  //cout <<DMFile<<endl;
   infile.open(DMFile.c_str());  
   if (infile.fail()){
     cerr<<"CAN'T OPEN THE FILE!!!!!!!!!!";
@@ -183,10 +191,10 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
   for (int counter=0;counter<=numOfFits;counter++){ //Get the U's 
     string RankString =SkipTo(infile,"RANK");
     int theRank=GetNextInt(RankString);
-    cout<<theRank<<endl;
+    //cout<<theRank<<endl;
 
     if (theRank!=3){
-      cerr<<"ERROR! ERROR! Rank was not 3";
+      //cerr<<"ERROR! ERROR! Rank was not 3" << endl;
       counter--;
     }
     else {
@@ -197,6 +205,8 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
       
       string RGridString =SkipTo(infile,"GRID 1");
       string GridType=GetNextWord(RGridString);
+      GridType=GetNextWord(RGridString);
+      GridType=GetNextWord(RGridString);
       double startGrid = GetNextDouble(RGridString);
       double endGrid = GetNextDouble(RGridString);
     
@@ -207,6 +217,11 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
 	double delta=pow((endGrid/startGrid),1.0/(NumGridPoints-1.0));
 	theGrid = new LogGrid(startGrid,delta,NumGridPoints);
       }
+      else {
+	cerr << "Unrecognized grid type in ReadDavidSquarerFile.\n";
+	cerr << "GridType = \"" << GridType << "\"\n";
+      }
+	  
       
       string TauGridString = SkipTo(infile,"GRID   3"); //We hope this is a log grid
       GetNextWord(TauGridString);
@@ -218,11 +233,11 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
       }
       double smallestTau=GetNextDouble(TauGridString);
       double largestTau=GetNextDouble(TauGridString);
-      int numTauCalc=floor(log(largestTau/smallestTau)/log(2.0)+0.5-1.0); ///I think this -1 is correct but who knows
+      int numTauCalc=(int)floor(log(largestTau/smallestTau)/log(2.0)+0.5+1.0); ///I think this -1 is correct but who knows
       if (NumTau!=numTauCalc){
 	
 	cerr<<"ERROR!!! ERROR!!! num tau inconsistency \n";
-	cerr<<NumTau<< " "<<numTauCalc<<"  "<<log(largestTau/smallestTau)/log(2.0)-1.0<< endl;
+	cerr<<NumTau<< " "<<numTauCalc<<"  "<<log(largestTau/smallestTau)/log(2.0) + 1.0<< endl;
       }
       string beginString=SkipTo(infile,"BEGIN density matrix table");
       int NMax=GetNextInt(beginString); //This is magically the most accurate fit i.e. NDERIV-1
@@ -231,6 +246,7 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
       }
       Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
       
+      ukj.resize(NumTau);
       ReadFORTRAN3Tensor(infile,tempUkj);
       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
 	ukj(levelCounter).Init(theGrid,tempUkj(Range::all(),Range::all(),levelCounter));
@@ -240,6 +256,13 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
       
     }
   }
+
+  for (int i=0; i<ukj(0).grid->NumPoints; i++)
+    {
+      double r = (*ukj(0).grid)(i);
+      double u = ukj(0).Params(i,0);
+      cerr << r << " " << u  << "\n";
+    }
   
 
 //   for (counter=0;counter<=nderiv;counter++){ // Get the Beta derivatives

@@ -6,6 +6,7 @@
 #include "BisectionMoveClass.h"
 #include "MirroredArrayClass.h"
 
+using namespace std;
 int main()
 
 {
@@ -17,8 +18,8 @@ int main()
   BisectionMoveClass myBisectionMove;
   PairActionClass myPairAction;
   CommClass myCommunicator;
-  //  myPairAction.ReadDavidSquarerFile("He4.95.dm");
-  MirroredArrayClass<int> myArray(5,5);
+  myPairAction.ReadDavidSquarerFile("/home/common/Codes/PIMC/UPI/RUNS/He_hp/He4.95.dm");
+  /*  MirroredArrayClass<int> myArray(5,5);
   for (int counter=0;counter<5;counter++){
     for (int counter2=0;counter2<5;counter2++){
       myArray.Set(counter,counter2,counter*10+counter2);
@@ -28,6 +29,6 @@ int main()
   myArray.shiftData(-3,myCommunicator);
   cout<<endl<<endl;
   myArray.Print();
-
+  */
 
 }

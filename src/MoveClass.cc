@@ -36,7 +36,7 @@ inline int MoveClass::RandInt (int Max) //Hopefully this didn't break anything
   myRandNum=sprng();
   myNum=(double)Max * myRandNum;
     
-  return (floor(myNum));
+  return ((int)floor(myNum));
 
   //  sprng(myInt);
   //  return *myInt;

@@ -3,7 +3,7 @@ include /home/common/Codes/Make.include
 LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) $(G2CLIB) -lm #-lstdc++
 INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) 
 
-CCFLAGS = -c -g -DBZ_DEBUG #-pg
+CCFLAGS = -c -g -DBZ_DEBUG -Wno-deprecated #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
 DEFS = -DNO_COUT -DUSE_MPI -DBZ_DEBUG -g #-DUSE_MPI 
@@ -30,7 +30,7 @@ Makefile:	$(FRC)
 	rm -f $@
 	cp template.make $@
 	echo 'Automatically generated dependency list:' >> $@
-	$(CC) $(CFLAGS) $(INCL) -M $(SOURCES) >> $@
+	$(CC) $(CCFLAGS) $(INCL) -M $(SOURCES) >> $@
 	chmod -w $@
 
 
