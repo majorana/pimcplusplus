@@ -177,7 +177,7 @@ Distributed_newmake Atom_newmake Ewald_newmake #Plotting_newmake
 SOURCES = `*.cc`
 
 ifeq ($(strip $(SOURCES)),)
-	TO_MAKE = $(CC) $(CCFLAGS) $(INCL) -M $(SOURCES) >> $@
+	TO_MAKE = $(CC) $(CCFLAGS) $(INCL) -MM $(SOURCES) >> $@
 else
 	TO_MAKE = 
 endif

@@ -12,9 +12,18 @@ void SVdecomp (Array<double,2> &A,
 	       Array<double,2> &U, Array<double,1> &S,
 	       Array<double,2> &V);
 
+const Array<double,2> operator*(const Array<double,2> &A,
+				const Array<double,2> &B);
+
+void MatMult (const Array<double,2> &A, const Array<double,2> &B,
+	      Array<double,2> &C);
+
+double Determinant (const Array<double,2> &A);
+void GJInverse (Array<double,2> &A);
+
 Array<double,2> Inverse (Array<double,2> &A);
 
-inline void Transpose (Array<double,2> &A)
+inline void OutOfPlaceTranspose (Array<double,2> &A)
 {
   int m = A.rows();
   int n = A.cols();
@@ -25,6 +34,21 @@ inline void Transpose (Array<double,2> &A)
   A.resize(n,m);
   A = Atrans;
 }
+
+inline void Transpose (Array<double,2> &A)
+{
+  int m = A.rows();
+  int n = A.cols();
+  if (m != n)
+    OutOfPlaceTranspose (A);
+  else {
+    for (int i=0; i<m; i++)
+      for (int j=i+1; j<m; j++) 
+	swap (A(i,j), A(j,i));
+  }
+}
+	
+
 
 inline void Print (const Mat3 &A)
 {
