@@ -111,7 +111,7 @@ void LinFitSVD (Array<double,1> &y, Array<double,1> &sigma,  // inputs
   Array<double,1> S;
   SVdecomp (A, U, S, V);
 
-  cerr << "S = " << S << endl;
+  //  cerr << "S = " << S << endl;
   // Zero out near-singular values
   double Smax=S(0);
   for (int i=1; i<S.size(); i++)
