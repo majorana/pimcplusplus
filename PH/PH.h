@@ -1261,10 +1261,10 @@ public:
   double V(double r)
   {
     // HACK 
-    if (r < 0.0001)
+    if (r > 0.001)
       return (Z1Z2/r);
     else
-      return (1e4*Z1Z2);
+      return (1e3*Z1Z2);
   }
 
   PHType Type()
