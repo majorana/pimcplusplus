@@ -14,19 +14,24 @@ def GetPaths(infile):
 
 def InitVisualPaths(pathData):
      visualPath=[]
+     visualBall=[]
      numPaths=len(pathData[0])
      for pathNum in range(0,numPaths):
-          visualPath.append(curve(color=color.blue,radius=0.2))          
-     return visualPath
+          visualPath.append(curve(color=color.blue,radius=0.2))
+          visualBall.append(sphere(pos=pathData[0,0,0], radius=0.05, color=color.red))
+     return (visualPath,visualBall)
 
 
-def PlotPaths(pathData,visualPath,mcTime):
+def PlotPaths(pathData,visualPath,visualBall,mcTime):
      maxMCTime=len(pathData)
      if mcTime>=maxMCTime:
           mcTime=maxMCTime-1
      numPaths=len(pathData[mcTime])
      for pathNum in range(0,numPaths):
           visualPath[pathNum]=(curve(color=color.blue,radius=0.2))
+          visualBall[pathNum].visible=0
+          visualBall[pathNum]=sphere(pos=(pathData[0,pathNum,0]), radius=0.1, color=color.red)
+          visualBall[pathNum].visible=1
           print pathNum,numPaths
           numSlices=len(pathData[mcTime][pathNum])
           for slice in range(0,numSlices):
@@ -137,9 +142,9 @@ infile.OpenFile(sys.argv[1])
 infile.OpenSection("PathDump")
 pathData=GetPaths(infile)
 infile.CloseSection()
-visualPath=InitVisualPaths(pathData)
-PlotPaths(pathData,visualPath,0)
-exit()
+(visualPath,visualBall)=InitVisualPaths(pathData)
+PlotPaths(pathData,visualPath,visualBall,0)
+
 doc=SeriesDocument()
 infile.OpenSection("RunInfo")
 ProcessRunInfo(doc,infile)
