@@ -1,10 +1,9 @@
-SOURCES = EwaldBase.cc SimpleEwald.cc
+SOURCES = EwaldBase.cc SimpleEwald.cc NaClTest.cc
 
-all:	EwaldBase.o SimpleEwald.o
+all:	EwaldBase.o SimpleEwald.o NaClTest
 
-TestIntegrate: TestIntegrate.o Integrate.o
-	$(LD) -o TestIntegrate TestIntegrate.o Integrate.o $(IOobjs) $(LIBS)
-
+NaClTest: NaClTest.o EwaldBase.o SimpleEwald.o 
+	$(LD) -o NaClTest NaClTest.o EwaldBase.o SimpleEwald.o $(IOobjs) $(LIBS)
 TestHermite: TestHermite.o HermiteQuad.o
 	$(LD) -o TestHermite  HermiteQuad.o TestHermite.o $(IOobjs) $(LIBS)
 

@@ -6,7 +6,7 @@
 \begin{document}
 \maketitle
 Consider a group of particles interacting with long-ranged central
-potentials, $v^{\alpha \beta}(|r^{\alpha}_i - r^{\beta}_j)$, where the Greek superscripts
+potentials, $v^{\alpha \beta}(|r^{\alpha}_i - r^{\beta}_j|)$, where the Greek superscripts
 represent the particle species (eg. $\alpha=\text{electron}$,
 $\beta=\text{proton}$), and Roman subscripts refer to particle number
 within a species.  We can then write the total interaction energy for
@@ -36,8 +36,9 @@ V = & \sum_\vL \sum_\alpha \left\{
 \right\}  \\
 & + \underbrace{\sum_{\vL \neq \mathbf{0}} \sum_\alpha N^\alpha v^{\alpha \alpha} (|\vL|)}_\text{Madelung}
 \end{split}
-\label{eq:direct}
+\label{eq:direct},
 \end{equation}
+where $N^\alpha$ is the number particles of species $\alpha$.
 If the potentials $v^{\alpha\beta}(r)$ are indeed long-range, the
 summation over direct lattice vectors will not converge in this naive
 form.  A solution to the problem was positted by Ewald.  We break the
@@ -48,13 +49,13 @@ v^{\alpha \beta}(r) = v_s^{\alpha\beta}(r) + v_l^{\alpha \beta}(r).
 \end{equation}
 We will perform the summation over images for the short-range part in
 real space, while performing the sum for the long-range part in
-reciporical space.  For simplicity, we choose $v^{\alpha \beta}_s(r)$
+reciprocal space.  For simplicity, we choose $v^{\alpha \beta}_s(r)$
 so that it is identically zero at the half the box length.  This
 eliminates the need to sum over images in real space. In this letter,
 we develop the details of the calculation and provide a way for
 integrating this into a Path Integral Monte Carlo simulation.
 
-\section{Reciporical-Space Sums}
+\section{Reciprocal-Space Sums}
 \subsection{Heterologous terms}
 We begin with (\ref{eq:direct}), starting with the heterologous terms,
 i.e. the terms involving particles of different species.  The
@@ -76,7 +77,7 @@ v^{\alpha\beta}_l(|\vr - \vr' + \vL|) \nonumber \\
 e^{i\vk'\cdot(\vr_j^\beta-\vr')} e^{i\vk''\cdot(\vr -\vr')}
 v^{\alpha\beta}_{\vk''}, \nonumber.
 \end{eqnarray}
-Here, the $\vk$ summations are over reciporical lattice vectors given
+Here, the $\vk$ summations are over reciprocal lattice vectors given
 by $\vk = m_1 \vb_1 + m_2\vb_2 + m_3\vb_3$, where
 \begin{eqnarray}
 \vb_1 & = & 2\pi \frac{\va_2 \times \va_3}{\va_1 \cdot (\va_2 \times
@@ -91,7 +92,7 @@ We note that $\vk \cdot \vL = 2\pi(n_1 m_1 + n_2 m_2 + n_3 m_3)$.
 \begin{eqnarray}
 v_{k''}^{\alpha \beta} & = & 
 \frac{1}{\Omega} \int_{\text{cell}} d\vr'' \sum_\vL
-e^{-i\vk''\cdot(|\vr''+\vL|)} v^{\alpha\beta}(|\tilde{\vr}+\vL|), \\
+e^{-i\vk''\cdot(|\vr''+\vL|)} v^{\alpha\beta}(|\vr''+\vL|), \\
 & = & \frac{1}{\Omega} \int_\text{all space} d\tilde{\vr} \, 
     e^{-i\vk'' \cdot \tilde{\vr}} v^{\alpha\beta}(\tilde{r}), \label{eq:vk}
 \end{eqnarray}
@@ -122,7 +123,7 @@ We now separate the summations, yielding
 \underbrace{\left[\sum_i e^{i\vk  \cdot \vr_i^\alpha} \rule{0cm}{0.705cm}
     \right]}_{\rho_\vk^\alpha}
 \underbrace{\left[\sum_j e^{i\vk' \cdot \vr_j^\beta} \right]}_{\rho_{\vk'}^\beta}
-\delta_{-\vk', \vk''} v^{\alpha
+ \delta_{\vk,\vk''} \delta_{-\vk', \vk''} v^{\alpha
   \beta}_{\vk''}.
 \end{equation}
 Summing over $\vk$ and $\vk'$, we have
@@ -135,7 +136,7 @@ sums over species,
 \begin{eqnarray}
 \text{hetero} & = & \frac{1}{2} \sum_{\alpha > \beta} \sum_{\vk}
 \left(\rho^\alpha_\vk \rho^\beta_{-\vk} + \rho^\alpha_{-\vk}
-\rho^\beta_\vk\right) v_{k''}^{\alpha\beta} \\
+\rho^\beta_\vk\right) v_{k}^{\alpha\beta} \\
 & = & \sum_{\alpha > \beta} \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
 \rho_{-\vk}^\beta\right)v_k^{\alpha\beta} .
 \end{eqnarray}
@@ -154,7 +155,7 @@ above, with the slight difficulty of avoiding the self-interaction term.
 \begin{eqnarray}
 \text{homologous} & = & \frac{1}{2} \sum_\alpha \sum_L 
 \left[
--N^\alpha v_l^{\alpha \alpha}(|\vL|)  + \sum_{i,j} v^{\alpha \alpha}(|\vr_i^\alpha - \vr_j^\alpha + \vL|)
+-N^\alpha v_l^{\alpha \alpha}(|\vL|)  + \sum_{i,j} v^{\alpha \alpha}_l(|\vr_i^\alpha - \vr_j^\alpha + \vL|)
   \right] \\
 & = & \frac{1}{2} \sum_\alpha \sum_\vk \left(|\rho_k^\alpha|^2 - N
 \right) v_k^{\alpha \alpha}
@@ -166,7 +167,7 @@ $\alpha$.  This term corresponds to the interaction of a particle with
 all of its periodic images.  
 \begin{eqnarray}
 v_M^{\alpha} & = & \frac{1}{2} \sum_{\vL \neq \mathbf{0}} v^{\alpha
-  \alpha}(|vL|) \\
+  \alpha}(|\vL|) \\
 & = & \frac{1}{2} \left[ -v_l^{\alpha \alpha}(0) + \sum_\vL v^{\alpha
   \alpha}(|\vL|) \right] \\
 & = & \frac{1}{2} \left[ -v_l^{\alpha \alpha}(0) + \sum_\vk v^{\alpha
@@ -189,7 +190,7 @@ V & = & \sum_{\alpha > \beta} \left[\sum_{i,j} v_s(|\vr_i^\alpha
   \vr_j^\alpha|) + \frac{1}{2} \sum_\vk |\rho_\vk^\alpha|^2 v^{\alpha\alpha}_\vk \right] 
 \end{eqnarray}
 
-\section {Computing the Reciporical Potential}
+\section {Computing the Reciprocal Potential}
 Now we return to (\ref{eq:vk}).  Without loss of generality, we define
 for convenience $\vk = k\hat{\mathbf{z}}$.
 \begin{equation}
