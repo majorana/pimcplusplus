@@ -1,5 +1,39 @@
 #include "OptimizedBreakup.h"
 #include "../MatrixOps/MatrixOps.h"
+#include "../Integration/GKIntegration.h"
+
+class cIntegrand
+{
+private:
+  BasisClass &Basis;
+  int n;
+  double k;
+public:
+  double operator()(double r)
+  {
+    return 4.0*M_PI/(k*Basis.Omega) *Basis.h(n,r)*r*sin(k*r);
+  }
+  cIntegrand(BasisClass &basis, int n_, double k_) : Basis(basis), n(n_), k(k_)
+  { /* do nothing */ }
+};
+
+///////////////////////////////////
+/// BasisClass Member Functions ///
+///////////////////////////////////
+double BasisClass::c_numerical(int n, double k)
+{
+  int i = n/3;
+  int numKnots = NumElements()/3;
+  double ra = 0.0;
+  double rb = r_c;
+
+  cIntegrand integrand(*this, n, k);
+  GKIntegration<cIntegrand,GK31> integrator(integrand);
+  integrator.SetRelativeErrorMode();
+  return integrator.Integrate (ra, rb, 1.0e-7, 1.0e-10, false);
+}
+
+
 
 ///////////////////////////////////////////
 /// OptimizedBreakup Memember Functions ///
@@ -51,6 +85,7 @@ void OptimizedBreakup::SetkVecs(double kc, double kMax)
 void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
 				 const Array<bool,1> &adjust)
 {
+  const double tolerance = 1.0e-12;
   assert(t.rows()==adjust.rows());
   assert(t.rows()==Basis.NumElements());
   Array<double,2> A;
@@ -70,7 +105,7 @@ void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
   for (int n=0; n<t.rows(); n++) {
     for (int ki=0; ki<kVecs.rows(); ki++) {
       double k = sqrt(dot(kVecs(ki),kVecs(ki)));
-      cnk(n,ki) = Basis.c(n,k);
+      cnk(n,ki) = Basis.c_numerical(n,k);
     }
   }
 
@@ -90,22 +125,33 @@ void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
 
   // Now do SVD decomposition:
   Array<double,2> U(numElem, numElem), V(numElem, numElem);
-  Array<double,1> S(numElem);
+  Array<double,1> S(numElem), Sinv(numElem);
   SVdecomp(A, U, S, V);
   
+  // Zero out near-singular values
+  double Smax=S(0);
+  for (int i=1; i<S.size(); i++)
+    Smax = max (S(i),Smax);
+  for (int i=0; i<S.size(); i++)
+    Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
+
   t = 0.0;
   // Compute t_n, checking singular values
-  for (int i=0; i<numElem; i++) {
-    double coef = 0.0;
-    for (int j=0; j<numElem; j++)
-      coef += U(j,i) * b(j);
-    // Check for singular value...
-    if (fabs(S(i)) > 1.0e-8)
-      coef /= S(i);
-    else
-      coef = 0.0;
-    for (int j=0; j<numElem; j++)
-      t(j) += coef * V(j,i);
+//   for (int i=0; i<numElem; i++) {
+//     double coef = 0.0;
+//     for (int j=0; j<numElem; j++)
+//       coef += U(j,i) * b(j);
+//     coef *= Sinv(i);
+//     for (int j=0; j<numElem; j++)
+//       t(j) += coef * V(j,i);
+//   }
+  for (int k=0; k<numElem; k++)
+    for (int i=0; i<numElem; i++) {
+      double coef = 0.0;
+      for (int j=0; j<numElem; j++)
+	coef += U(j,i) * b(j);
+      coef *= Sinv(i);
+      t(k) += coef * V(k,i);
   }
 
       
@@ -166,7 +212,7 @@ double LPQHI_BasisClass::h(int n, double r)
     }
     for (int j=0; j<alpha; j++)
       sum *= (-delta);
-    return (sum);
+    return (sum/r);
   }
   else if ((r > rb) && (r <= rc)) {
     double sum = 0.0;
@@ -177,7 +223,7 @@ double LPQHI_BasisClass::h(int n, double r)
     }
     for (int j=0; j<alpha; j++)
       sum *= delta;
-    return sum;
+    return sum/r;
   }
   return 0.0;
 };

@@ -4,9 +4,10 @@ all:	EwaldBase.o SimpleEwald.o OptimizedBreakup.o TestOptimizedBreakup.o \
         TestOptimizedBreakup #NaClTest
 
 TestOptimizedBreakup: OptimizedBreakup.o TestOptimizedBreakup.o \
-                      ../MatrixOps/MatrixOps.o
+                      ../MatrixOps/MatrixOps.o ../Integration/GKIntegration.o
 	$(LD) -o TestOptimizedBreakup TestOptimizedBreakup.o \
-                 OptimizedBreakup.o ../MatrixOps/MatrixOps.o $(LIBS)
+                 OptimizedBreakup.o ../MatrixOps/MatrixOps.o \
+                 ../Integration/GKIntegration.o $(LIBS)
 
 NaClTest: NaClTest.o EwaldBase.o SimpleEwald.o 
 	$(LD) -o NaClTest NaClTest.o EwaldBase.o SimpleEwald.o $(IOobjs) $(LIBS)

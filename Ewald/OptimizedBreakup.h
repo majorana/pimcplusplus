@@ -7,7 +7,8 @@ using namespace blitz;
 
 class BasisClass
 {
-protected:
+public:
+  //protected:
   double r_c;
   TinyVector<double,3> Box;
   double Omega;
@@ -23,6 +24,7 @@ public:
   virtual double h(int n, double r) = 0;
   /// Returns the basis element n evaluated in k space at k
   virtual double c(int n, double k) = 0;
+  double c_numerical (int n, double k);
   /// This returns the coefficent of the nth basis function
   //virtual double  Get_t(int n) const     = 0;
   /// This sets the coefficent of the nth basis function
@@ -66,6 +68,7 @@ inline TinyVector<double,3> BasisClass::GetBox ()
 {
   return Box;
 }
+
 
 
 /// Locally Piecewise Quintic Hermite Interpolant
