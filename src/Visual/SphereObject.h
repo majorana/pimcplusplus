@@ -14,7 +14,7 @@ public:
   void SetPos (Vec3 pos);
   void SetRadius (double radius);
   void SetColor (Vec3 color);
-  void DrawPOV (FILE *fout);
+  void DrawPOV (FILE *fout, string rotString);
   SphereObject() : Radius (1.0)
   {
     Color = Vec3 (1.0, 0.0, 0.0);

@@ -131,7 +131,7 @@ void PathObject::Cylinder(const Vec3 &r1, const Vec3 &r2)
 }
 
 
-void PathObject::DrawPOV(FILE *fout)
+void PathObject::DrawPOV(FILE *fout, string rotString)
 {
   fprintf (fout, "sphere_sweep {\n  cubic_spline\n");
   fprintf (fout, "  %d,\n", MyPath.size()+2);
@@ -160,6 +160,8 @@ void PathObject::DrawPOV(FILE *fout)
   // Write th color
   fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
 	   Color[0], Color[1], Color[2]);
+  fprintf (fout, "  finish { specular 0.9 roughness 0.05 }\n");
+  fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "}\n\n");
 }
 

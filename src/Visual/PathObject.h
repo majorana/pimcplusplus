@@ -19,7 +19,7 @@ public:
   void LinesSet (vector<Vec3> &path);
   void TubesSet (vector<Vec3> &path);
   void SetColor (double red, double green, double blue);
-  void DrawPOV(FILE *fout);
+  void DrawPOV(FILE *fout, string rotString);
   inline void SetRadius (double radius) 
   { Radius = radius; }
   PathObject() : Closed(true), Radius (0.1)

@@ -30,7 +30,8 @@ ViewClass::ViewClass (PathVisClass &pathVis) :
 }
 
 
-bool ViewClass::OnButtonPress (GdkEventButton *event)
+bool 
+ViewClass::OnButtonPress (GdkEventButton *event)
 {
   if (event->button == 1) {
     StartX = event->x;
@@ -49,7 +50,8 @@ bool ViewClass::OnButtonPress (GdkEventButton *event)
 }
 
 
-bool ViewClass::OnButtonRelease (GdkEventButton *event)
+bool 
+ViewClass::OnButtonRelease (GdkEventButton *event)
 {
   if (event->button == 1)
     Button1Pressed = false;
@@ -58,7 +60,8 @@ bool ViewClass::OnButtonRelease (GdkEventButton *event)
   return false;
 }
 
-bool ViewClass::OnMotion (GdkEventMotion *event)
+bool 
+ViewClass::OnMotion (GdkEventMotion *event)
 {
   if (Button1Pressed) {
     double w = PathVis.get_width();
@@ -93,7 +96,8 @@ bool ViewClass::OnMotion (GdkEventMotion *event)
 }
 
 
-void ViewClass::GLtransform()
+void 
+ViewClass::GLtransform()
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -117,24 +121,28 @@ void ViewClass::GLtransform()
 }
 
 
-void ViewClass::POVtransform (FILE *fout)
+void 
+ViewClass::POVtransform (FILE *fout)
 {
   fprintf (fout, "camera {\n");
   fprintf (fout, "  location <%14.10f, %14.10f %14.10f>\n",
-	   0.0, 0.0, 2.5*Distance/Scale);
+	   0.0, 0.0, 2.0*Distance/Scale);
   fprintf (fout, "  angle 40.0\n");
+  fprintf (fout, "  right <-1.33,0,0>\n");
   fprintf (fout, "  look_at <%14.10f %14.10f %14.10f>\n}\n\n",
 	   0.0, 0.0, 0.0);
 }
 
 
-void ViewClass::SetDistance (double dist)
+void 
+ViewClass::SetDistance (double dist)
 {
   Distance = dist;
 }
 
 
-void ViewClass::Reset()
+void 
+ViewClass::Reset()
 {
   for (int i=0; i<4; i++)
     for (int j=0; j<4; j++)
@@ -142,4 +150,19 @@ void ViewClass::Reset()
   Quaternion[0] = 0.0;  Quaternion[1] = 0.0;
   Quaternion[2] = 0.0;  Quaternion[3] = 1.0;
   Scale = 1.0;
+}
+
+
+string
+ViewClass::RotationString()
+{
+  char rotString[500];
+  
+  snprintf (rotString, 500, "  matrix <%8.5f, %8.5f, %8.5f,\n         %8.5f, %8.5f, %8.5f,\n         %8.5f, %8.5f, %8.5f,\n         %8.5f, %8.5f, %8.5f >\n",
+	    RotMat[0][0], RotMat[0][1], RotMat[0][2],
+	    RotMat[1][0], RotMat[1][1], RotMat[1][2],
+	    RotMat[2][0], RotMat[2][1], RotMat[2][2],
+	    0.0         , 0.0         , 0.0         );
+  string str = rotString;
+  return str;
 }

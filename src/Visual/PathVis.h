@@ -40,6 +40,7 @@ public:
   { UsePerspective = usePersp; }
   void GLtransform();
   void POVtransform (FILE *fout);
+  string RotationString();
   void Reset();
 
   ViewClass (PathVisClass &pathVis);

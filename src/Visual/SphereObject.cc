@@ -50,11 +50,12 @@ SphereObject::SetColor (Vec3 color)
 
 
 void
-SphereObject::DrawPOV (FILE *fout)
+SphereObject::DrawPOV (FILE *fout, string rotString)
 {
   fprintf (fout, "sphere {\n");
   fprintf (fout, "  <%10.8f, %10.8f, %10.8f>, %10.8f\n",
 	   Pos[0], Pos[1], Pos[2], Radius);
+  fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
 	   Color[0], Color[1], Color[2]);
 }

@@ -41,7 +41,7 @@ void
 BoxObject::POVLine (FILE *fout, 
 		    double x1, double y1, double z1,
 		    double x2, double y2, double z2,
-		    double radius)
+		    double radius, string rotString)
 {
   fprintf (fout, "cylinder {\n");
   fprintf (fout, "  <%12.8f, %12.8f, %12.8f>,\n",
@@ -51,39 +51,40 @@ BoxObject::POVLine (FILE *fout,
   fprintf (fout, "  %10.8f\n", radius);
   fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
 	   0.0, 0.0, 0.0);
+  fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "}\n\n");
 }
 
 void
-BoxObject::DrawPOV (FILE *fout)
+BoxObject::DrawPOV (FILE *fout, string rotString)
 {
   double minDim = min(min(Lx,Ly),Lz);
-  double radius = minDim/150.0;
+  double radius = minDim/250.0;
   POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
-	          0.5*Lx ,-0.5*Ly, -0.5*Lz, radius);
+	          0.5*Lx ,-0.5*Ly, -0.5*Lz, radius, rotString);
   POVLine (fout, -0.5*Lx,  0.5*Ly, -0.5*Lz,
-	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius);
+	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius, rotString);
   POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
-	         -0.5*Lx , 0.5*Ly, -0.5*Lz, radius);
+	         -0.5*Lx , 0.5*Ly, -0.5*Lz, radius, rotString);
   POVLine (fout,  0.5*Lx, -0.5*Ly, -0.5*Lz,
-	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius);
+	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius, rotString);
 
   POVLine (fout, -0.5*Lx, -0.5*Ly,  0.5*Lz,
-	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius);
+	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius, rotString);
   POVLine (fout, -0.5*Lx,  0.5*Ly,  0.5*Lz,
-	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
   POVLine (fout, -0.5*Lx, -0.5*Ly,  0.5*Lz,
-	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
   POVLine (fout,  0.5*Lx, -0.5*Ly,  0.5*Lz,
-	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
 
   POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
-	         -0.5*Lx ,-0.5*Ly,  0.5*Lz, radius);
+	         -0.5*Lx ,-0.5*Ly,  0.5*Lz, radius, rotString);
   POVLine (fout, -0.5*Lx,  0.5*Ly, -0.5*Lz,
-	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
   POVLine (fout,  0.5*Lx, -0.5*Ly, -0.5*Lz,
-	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius);
+	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius, rotString);
   POVLine (fout,  0.5*Lx,  0.5*Ly, -0.5*Lz,
-	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
 
 }
