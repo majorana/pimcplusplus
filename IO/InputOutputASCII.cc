@@ -613,7 +613,10 @@ VarASCIIClass* ReadASCIIVar (list<TokenClass>::iterator &iter,
 
 /// ReadSection parses a section in the input file.  It takes as
 /// arguments this sections parent, its name, a tokenlist iterator,
-/// the tokenlist, and a bool
+/// the tokenlist, and a bool telling us if we want to look for a "}"
+/// at the end of the input.  If we don't, we keep parsing until the
+/// buffer runs out.  Calls itself recursively as necessary, builing
+/// up a tree of sections and variables.
 bool InputTreeASCIIClass::ReadSection (InputTreeClass *parent,
 				       string myName,
 				       list<TokenClass>::iterator &iter,
@@ -672,36 +675,40 @@ bool InputTreeASCIIClass::ReadSection (InputTreeClass *parent,
 }
 
 
-
+/// OpenFile takes a filename to open, the name of this section and
+/// the parent of this section.  It reads the file into a buffer,
+/// converts it to a list of tokens, then parses the tokens,
+/// constructing a tree of sections containing variables lists.  
 bool InputTreeASCIIClass::OpenFile(string fileName, 
 				   string myName, 
 				   InputTreeClass *parent)
 {
-  //  Name = myName;
-  //  Parent = parent;
   Array<char,1> buffer;
   ReadWithoutComments(fileName,buffer);
   list<TokenClass> tokenList;
   Tokenize(buffer,tokenList);
   list<TokenClass>::iterator iter=tokenList.begin();
   ReadSection(parent,myName,iter,tokenList, false);
-//   list<TokenClass>::iterator listIt;
-//   listIt=tokenList.begin();
-//   while (listIt!=tokenList.end()){
-//     cerr<<listIt->Str << " Line Number: " << listIt->LineNumber << endl;
-//     listIt++;
-//   }
-  
-
   return true;
 }
 
 
-
+/// CloseFile recursively destroys the tree of data we constructed.
 void InputTreeASCIIClass::CloseFile()
-{
-  return;
-
+{  
+  // First, free all the variables in the list
+  while (!VarList.empty()) {
+    delete(VarList.front());
+    VarList.pop_front();
+  }
+  
+  // Now, call all closes recursively and delete all sections
+  while (!SectionList.empty())
+    {
+      SectionList.front()->CloseFile();
+      delete SectionList.front();
+      SectionList.pop_front();
+    }
 }
 
 
