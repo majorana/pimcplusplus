@@ -28,7 +28,7 @@ void MCTimeClass::WriteBlock()
     cerr<<"My moves size is "<<MoveTime.size()<<endl;
     cerr<<"My observable size is "<<ObservableTime.size()<<endl;
   }
-  cerr<<"This is being called"<<endl;
+  //  cerr<<"This is being called"<<endl;
   TotalTime+=(double)(clock()-StartTime)/(double)CLOCKS_PER_SEC;
   StartTime=clock();
   TotalTimeVar.Write(TotalTime);

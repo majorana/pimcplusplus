@@ -1032,6 +1032,8 @@ void PathClass::ShiftPathData(int slicesToShift)
   if (OpenPaths){ //only works for serialo positive slices
     if ((int)OpenLink+slicesToShift >= NumTimeSlices())
       OpenLink=OpenLink+1;
+    if ((int)OpenLink+slicesToShift <0)
+      OpenLink=OpenLink-1;
     OpenLink=((int)OpenLink+slicesToShift+NumTimeSlices()) % NumTimeSlices();
     if ((int)OpenLink==0){
       cerr<<"equal to 0"<<endl;

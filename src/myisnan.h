@@ -1,7 +1,7 @@
 #ifndef MY_ISNAN_H
 #define MY_ISNAN_H
 
-#ifdef BIG_ENDIAN
+#ifdef BIG_ENDIAN_ON
 typedef union 
 {
   double value;
@@ -34,7 +34,7 @@ typedef union
 } ieee_double_type;
 #endif
 
-#ifdef LITTLE_ENDIAN
+#ifdef LITTLE_ENDIAN_ON
 typedef union 
 {
   double value;

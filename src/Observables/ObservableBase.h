@@ -16,6 +16,7 @@ protected:
   string Name;
   
 public:
+  void Flush();
   ObservableVar (string name, IOSectionClass &out,  CommunicatorClass &comm) :
     Out(out), FirstTime(true), Comm(comm), Name(name)
   {

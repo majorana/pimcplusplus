@@ -95,13 +95,14 @@ public:
   void CalcRho_ks_Fast(int slice, int species);  
 
 private:
-  /// Stores the position of the reference slice w.r.t. time slice 0
-  /// on this processor
-  int RefSlice;
   //  int RefSliceCheck;
   void ShiftPathData(int sliceToShift);
   void ShiftRho_kData(int sliceToShift);
 public:
+  /// Stores the position of the reference slice w.r.t. time slice 0
+  /// on this processor
+  int RefSlice;
+
   Mirrored1DClass<int> Permutation;
   /// This function accumulates the total permutation vector
   /// from all of the processors individual permutation vector.

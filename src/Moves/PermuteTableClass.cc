@@ -247,7 +247,7 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
       }
       AddEntry(tempPerm);
       for (int j=i+1; j<N; j++) {// 2 and higher cycles
-	if (j!=particleExclude){
+	if (j!=particleExclude && i!=particleExclude){
 	  //2 cycle permutations
 	  tempPerm.CycleRep[1]=j;
 	  hprod=HTable(i,j);

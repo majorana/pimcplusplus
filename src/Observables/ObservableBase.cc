@@ -15,3 +15,10 @@ void ObservableClass::Read(IOSectionClass &in)
   }
   
 }
+
+void ObservableVar::Flush()
+{
+  if (Comm.MyProc()==0)
+    Out.FlushFile();
+
+}

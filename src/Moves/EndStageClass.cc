@@ -1,5 +1,29 @@
 #include "EndStageClass.h"
 
+void EndStageClass::WriteRatio()
+{
+  Array<double,1> acceptRatio(2);
+  acceptRatio(0)=(double)AcceptRatio(0)/EndAttempts;
+  acceptRatio(1)=(double)AcceptRatio(1)/EndAttempts;
+  AcceptRatioVar.Write(acceptRatio);
+  AcceptRatioVar.Flush();
+}
+
+void EndStageClass::Accept()
+{
+  if (Open==HEAD)
+    AcceptRatio(0)++;
+  else 
+    AcceptRatio(1)++;
+  EndAttempts++;
+
+}
+
+void EndStageClass::Reject()
+{
+  EndAttempts++;
+
+}
 
 ///Chooses the time slices and moves the join so that the join is in
 ///the correct place for that time slice.

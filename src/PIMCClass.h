@@ -1,6 +1,7 @@
 #ifndef PIMC_CLASS_H
 #define PIMC_CLASS_H
 
+
 #include "PathDataClass.h"
 #include "Moves/MoveClass.h"
 #include "Observables/ObservableClass.h"

@@ -9,6 +9,10 @@ class PathDumpClass : public ObservableClass
 private:
   ObservableVecDouble3 PathVar;
   ObservableVecInt1 PermVar;
+  ObservableInt OpenLinkVar;
+  ObservableInt OpenLinkPtclVar;
+  ObservableInt RefLinkVar;
+  ObservableVecDouble1 TailLocVar;
 public:
   int TimesCalled;
   void Accumulate();
@@ -18,7 +22,12 @@ public:
   PathDumpClass(PathDataClass &myPathData, IOSectionClass &ioSection) :
     ObservableClass(myPathData, ioSection),
     PathVar ("Path", IOSection, myPathData.Path.Communicator),
-    PermVar ("Permutation", IOSection, myPathData.Path.Communicator)
+    PermVar ("Permutation", IOSection, myPathData.Path.Communicator),
+    OpenLinkVar("OpenLinkSlice",IOSection,myPathData.Path.Communicator),
+    TailLocVar("TailLocation",IOSection,myPathData.Path.Communicator),
+    OpenLinkPtclVar("OpenPtcl",IOSection,myPathData.Path.Communicator),
+    RefLinkVar("RefLink",IOSection,myPathData.Path.Communicator)
+  
   { 
     Name="PathDump";
     TimesCalled=0;
