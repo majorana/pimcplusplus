@@ -60,34 +60,7 @@ void ActionsClass::Read(IOSectionClass &in)
     if (UseRPA)
       LongRange.Init(in);
   }
- 
-
-//     if (UseRPA) {
-//       cerr << "Doing RPA correction...\n";
-//       SetupRPA();
-//       cerr << "done.\n";
-//     }
-//     // Print out some debug info
-//     for (int i=0; i<numPairActions; i++) {
-//       string fname = PairArray(i)->Particle1.Name + "-" +
-// 	PairArray(i)->Particle2.Name + ".dat";
-//       FILE *fout = fopen (fname.c_str(), "w");
-//       for (double q=0.0; q<20000.0; q+=1.0) {
-// 	double Udiag = PairArray(i)->Udiag(q, 0);
-// 	double Ulong = PairArray(i)->Ulong(0)(q);
-// 	double dUdiag = PairArray(i)->dUdiag(q, 0);
-// 	double dUlong = PairArray(i)->dUlong(0)(q);
-// 	double V = PairArray(i)->V(q);
-// 	double Vlong = PairArray(i)->Vlong(q);
-// 	fprintf (fout, "%1.16e %1.16e %1.16e %1.16e %1.16e %1.16e %1.16e\n", 
-// 		 q, Udiag, Ulong, dUdiag, dUlong, V, Vlong);
-//       }
-//       fclose (fout);
-//     }
-//  }
-  
-
-
+   
   // Now check to make sure all PairActions that we need are defined.
   for (int species1=0; species1<Path.NumSpecies(); species1++)
     for (int species2=0; species2<Path.NumSpecies(); species2++)
@@ -100,6 +73,21 @@ void ActionsClass::Read(IOSectionClass &in)
 	  exit(1);
 	}
       }
+
+  // Create nodal action objects
+  for (int spIndex=0; spIndex<PathData.Path.NumSpecies(); spIndex++) {
+    SpeciesClass &species = PathData.Path.Species(spIndex);
+    if (species.GetParticleType() == FERMION) {
+      NodalActions.resizeAndPreserve (NodalActions.size()+1);
+      if (species.NodeType == "FREE")
+	NodalActions (NodalActions.size()-1) = 
+	  new FreeNodalActionClass(PathData, spIndex);
+      else {
+	cerr << "Unrecognized node type " << species.NodeType << ".\n";
+	exit(EXIT_FAILURE);
+      }
+    }
+  }
 
 //   // Now create nodal actions for Fermions
 //   NodalActions.resize(PathData.Path.NumSpecies());

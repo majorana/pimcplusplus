@@ -26,12 +26,16 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level);
-    //newStage->Actions.push_back(&PathData.Actions.ShortRange);
+    newStage->Actions.push_back(&PathData.Actions.ShortRange);
     //newStage->Actions.push_back(&PathData.Actions.LongRange);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
+    if (level == 0)
+      for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
+	newStage->Actions.push_back(PathData.Actions.NodalActions(i));
     newStage->BisectionLevel = level;
     Stages.push_back (newStage);
   }
+
   // Add the second stage of the permutation step
   Stages.push_back (permuteStage);
 

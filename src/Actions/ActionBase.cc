@@ -17,3 +17,4 @@ PotentialBaseClass::PotentialBaseClass(PathDataClass &pathData) :
 {
   /* Do nothing */
 }
+

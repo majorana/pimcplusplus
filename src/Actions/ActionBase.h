@@ -17,6 +17,8 @@ public:
 			int level) = 0;
   virtual double d_dBeta (int slice1, int slice2,
 			  int level) = 0;
+  // This returns the sum over all time slices, using MPI
+  // to sum over processors if necessary.
   virtual void Read (IOSectionClass &in);
   ActionBaseClass(PathDataClass &pathData);				   
 };

@@ -13,7 +13,7 @@ typedef enum {FERMION, BOSON, BOLTZMANNON, ANYON} ParticleType;
 class SpeciesClass
 {
 public:
-  string Name;
+  string Name, NodeType;
   /// FirstPtcl and LastPtcl are inclusive
   int LastPtcl;
   int FirstPtcl;
@@ -27,7 +27,6 @@ public:
   double Charge;
   
   /// Returns the nodal action for fermions.  Returns 0 for bosons.
-  virtual double NodeAction (int Ptcl, int LinkNum) = 0;
   virtual ParticleType GetParticleType() = 0;
 };
 
@@ -42,8 +41,6 @@ SpeciesClass* ReadSpecies(IOSectionClass &inSection);
 class FermionClass : public SpeciesClass
 {
 public:
-  ///When we make this work, this calculates the NodeActions
-  double NodeAction (int Ptcl, int LinkNum);
   bool Read(IOSectionClass &inSection);
   FermionClass()  { 
     NumDim=NDIM;  
@@ -62,18 +59,14 @@ class BosonClass : public SpeciesClass
 public:
   ParticleType GetParticleType(){ return BOSON; }
   ///Just returns 0 until we do something more intelligble.
-  double NodeAction (int Ptcl, int LinkNum)
-    {
-      return (0.0);
-    }  
-  BosonClass()
-    {
-      NumDim=NDIM;
-      DimensionActive=true;
-    }
+  BosonClass() 
+  {
+    NumDim=NDIM;
+    DimensionActive=true;
+  }
   ~BosonClass()
-    {
-    }
+  {
+  }
   
 };
 
@@ -81,19 +74,16 @@ class BoltzmannonClass : public SpeciesClass
 {
 public:
   ParticleType GetParticleType(){ return BOLTZMANNON; }
-  ///Just returns 0 until we do something more intelligble.
-  double NodeAction (int Ptcl, int LinkNum)
-    {
-      return (0.0);
-    }  
+
   BoltzmannonClass()
-    {
-      NumDim=NDIM;  
-      DimensionActive=true;
-    }
+  {
+    NumDim=NDIM;  
+    DimensionActive=true;
+  }
+  
   ~BoltzmannonClass()
-    {
-    }
+  {
+  }
   
 };
 

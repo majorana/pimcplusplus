@@ -1,6 +1,6 @@
-SOURCES = ShortRangeClass.cc  LongRangeRPAClass.cc LongRangeClass.cc ActionsClass.cc ActionBase.cc ShortRangePotClass.cc LongRangePotClass.cc KineticClass.cc
+SOURCES = ShortRangeClass.cc  LongRangeRPAClass.cc LongRangeClass.cc ActionsClass.cc ActionBase.cc ShortRangePotClass.cc LongRangePotClass.cc KineticClass.cc NodalActionClass.cc
 
-objs = ShortRangeClass.o LongRangeClass.o LongRangeRPAClass.o ActionsClass.o ActionBase.o ShortRangePotClass.o LongRangePotClass.o KineticClass.o
+objs = ShortRangeClass.o LongRangeClass.o LongRangeRPAClass.o ActionsClass.o ActionBase.o ShortRangePotClass.o LongRangePotClass.o KineticClass.o NodalActionClass.o
 
 
 all: Actions	

@@ -43,6 +43,7 @@ PIMCobjs =                            \
   Actions/LongRangeRPAClass.o         \
   Actions/KineticClass.o              \
   Actions/ActionsClass.o              \
+  Actions/NodalActionClass.o          \
   Moves/MultiStage.o                  \
   ActionClass.o                       \
   LongRangeRPA.o                      \
@@ -105,6 +106,7 @@ TestPermobjs =                        \
   Actions/ShortRangePotClass.o        \
   Actions/LongRangePotClass.o         \
   Actions/KineticClass.o              \
+  Actions/NodalActionClass.o          \
   Moves/MultiStage.o                  \
   PIMCClass.o                         \
   Observables/ObservableBase.o        \
@@ -179,6 +181,7 @@ TestEwaldobjs =                       \
   Actions/ShortRangePotClass.o        \
   Actions/LongRangePotClass.o         \
   Actions/KineticClass.o              \
+  Actions/NodalActionClass.o          \
   Common/MPI/Communication.o	      \
   Common/IO/InputOutput.o             \
   Common/IO/InputOutputHDF5.o         \

@@ -6,6 +6,7 @@
 #include "ShortRangePotClass.h"
 #include "LongRangePotClass.h"
 #include "KineticClass.h"
+#include "NodalActionClass.h"
 
 class ActionsClass
 {
@@ -21,6 +22,7 @@ public:
   ShortRangeClass ShortRange;
   LongRangeClass LongRange;
   LongRangeRPAClass LongRangeRPA;
+  Array<ActionBaseClass *,1> NodalActions;
   //NodalClass Nodal;
   //DiagonalClass Diagonal;
   //ImportanceSampleClass ImportanceSample;

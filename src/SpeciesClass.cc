@@ -8,9 +8,11 @@ bool SpeciesClass::Read(IOSectionClass &inSection)
   assert(inSection.ReadVar("NumDim",NumDim));
   return true;
 }
+
 bool FermionClass::Read(IOSectionClass &inSection)
 {
   bool success = SpeciesClass::Read(inSection);
+  assert (inSection.ReadVar ("NodeType", NodeType));
   return success;
 }
 
@@ -41,13 +43,6 @@ SpeciesClass* ReadSpecies(IOSectionClass &inSection)
 
 }
 
-
-double FermionClass::NodeAction(int ptcl,int LinkNum)
-{
-
-
-  return 0.0;
-}
 
 
 
