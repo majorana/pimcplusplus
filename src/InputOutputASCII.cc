@@ -201,7 +201,7 @@ SpecialInputSectionClass<VarASCIIClass>::ReadWithoutComments(string fileName,
 
 
 
-bool SpecialInputSectionClass<VarASCIIClass>::ReadFile(string fileName)
+bool SpecialInputSectionClass<VarASCIIClass>::OpenFile(string fileName)
 {
 
 
@@ -244,14 +244,14 @@ bool SpecialInputSectionClass<VarASCIIClass>::ReadFile(string fileName)
 	new SpecialInputSectionClass<VarASCIIClass>;
       newSec->Name=secName;
       newSec->Iter=newSec->SectionList.begin();
-      newSec->parent=sec;
+      newSec->Parent=sec;
       sec->SectionList.push_back(newSec);
       sec=newSec;
     }
     else if (buffer(counter)=='}' &&
 	     !inQuotes){
-      //      sec=&((SpecialSectionClass<VarASCIIClass>)(*(sec->parent)))
-      sec=(SpecialInputSectionClass<VarASCIIClass>*)(sec->parent);
+      //      sec=&((SpecialSectionClass<VarASCIIClass>)(*(sec->Parent)))
+      sec=(SpecialInputSectionClass<VarASCIIClass>*)(sec->Parent);
     }
     else if(buffer(counter)=='='
 	    && !inQuotes){

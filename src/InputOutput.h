@@ -42,9 +42,8 @@ public:
 class InputSectionClass
 {
  public:
-  virtual void printTree(InputSectionClass *sec)=0;
- public:
-  InputSectionClass* parent;
+  virtual void PrintTree(InputSectionClass *sec)=0;
+  InputSectionClass* Parent;
   list<InputSectionClass*> SectionList;
   list<VarClass*> VarList;
   list<InputSectionClass*>::iterator Iter;
@@ -57,7 +56,8 @@ public:
   }
   inline int CountSections(string name);
   template<class T> bool ReadVar(string name, T &var);
-  virtual bool ReadFile (string fileName) = 0;
+  virtual bool OpenFile (string fileName, InputSectionClass *parent) = 0;
+  virtual void CloseFile() = 0;
 
 };
 
@@ -78,16 +78,6 @@ inline int InputSectionClass::CountSections(string name)
 }
 
 
-
-class OutputSectionClass
-{
-public:
-  virtual bool OpenFile(string fileName)=0;
-  virtual void OpenSection(string name)=0;
-  virtual void CloseSection()=0;
-  virtual void WriteVar(string name, double T)=0;
- 
-};
 
 
 
@@ -125,7 +115,8 @@ class SpecialInputSectionClass : public InputSectionClass
   void printTree(InputSectionClass *sec);
   
 public:
-  bool ReadFile (string fileName);
+  bool OpenFile (string fileName);
+  void CloseFile();
 };
 
 
@@ -143,8 +134,8 @@ bool InputSectionClass::ReadVar(string name, T &var)
   if (found){
     readVarSuccess=(*varIter)->ReadInto(var);
   }
-  else if (parent!=NULL){
-    readVarSuccess=parent->ReadVar(name,var);
+  else if (Parent!=NULL){
+    readVarSuccess=Parent->ReadVar(name,var);
   }
   else {
     cerr<<"Couldn't find variable "<<name;
@@ -154,6 +145,20 @@ bool InputSectionClass::ReadVar(string name, T &var)
 }
 
 
+
+
+
+class OutputSectionClass
+{
+public:
+  virtual bool OpenFile(string fileName)=0;
+  virtual void OpenSection(string name)=0;
+  virtual void CloseSection()=0;
+  virtual void WriteVar(string name, double T)=0;
+  virtual void WriteVar(string name, Array<double,1> &v) = 0;
+  virtual void WriteVar(string name, Array<double,2> &v) = 0;
+  virtual void WriteVar(string name, Array<double,3> &v) = 0;
+};
 
 
 
