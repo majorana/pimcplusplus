@@ -34,10 +34,10 @@ public:
       return (Z/(r*r));
   }
   void Read(char *FName);
-  void Write (OutputSectionClass &outSection)
+  void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Z", Z);
-    outSection.OpenSection("V");
+    outSection.NewSection("V");
     V.Write(outSection);
     outSection.CloseSection();
   }
@@ -110,10 +110,17 @@ public:
     exit(1);
     return(0.0);
   }
-  virtual void ABV(scalar r, scalar &A, scalar &B, scalar &V,
-		   scalar &dAdr)
+  virtual scalar    V(scalar r)
   {
     cerr << "Should never get to PseudoHamiltonian base class.\n";
+    exit(1);
+    return(0.0);
+  }
+  virtual void ABV(scalar r, scalar &A, scalar &B, scalar &Vval,
+		   scalar &dAdr)
+  {
+    A = 1.0; B = 1.0; dAdr = 0.0;
+    Vval = V(r);
   }
 
   virtual scalar d2Adr2(scalar r)
@@ -128,12 +135,7 @@ public:
     exit(1);
     return(0.0);
   }
-  virtual scalar    V(scalar r)
-  {
-    cerr << "Should never get to PseudoHamiltonian base class.\n";
-    exit(1);
-    return(0.0);
-  }
+
   virtual void Write(char *FileName)
   {
     FILE *fout;
@@ -154,7 +156,7 @@ public:
     cerr << "Should never get to PseudoHamiltonian base class.\n";
   }
 
-  virtual void Write (OutputSectionClass &outSection)
+  virtual void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("CoreRadius", CoreRadius);
     outSection.WriteVar ("Z", Z);
@@ -168,11 +170,11 @@ public:
     outSection.WriteVar ("Vmax", Vmax);
     outSection.WriteVar ("UseVHXC", UseVHXC);
     if (UseVHXC) {
-      outSection.OpenSection("VHXC");
+      outSection.NewSection("VHXC");
       VHXC.Write (outSection);
       outSection.CloseSection();
     }
-    outSection.OpenSection ("FullCoreV");
+    outSection.NewSection ("FullCoreV");
     FullCoreV->Write(outSection);
     outSection.CloseSection();
   }
@@ -366,18 +368,18 @@ public:
     // Do nothing for now
   }
 
-  void Write (OutputSectionClass &outSection)
+  void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Type", "PH_CubicSpline");
     // Write common variables
     PseudoHamiltonian::Write(outSection);
-    outSection.OpenSection ("Agrid");
+    outSection.NewSection ("Agrid");
     Agrid.Write(outSection);
     outSection.CloseSection();
-    outSection.OpenSection ("Bgrid");
+    outSection.NewSection ("Bgrid");
     Bgrid.Write(outSection);
     outSection.CloseSection();
-    outSection.OpenSection ("Vgrid");
+    outSection.NewSection ("Vgrid");
     Vgrid.Write(outSection);
     outSection.CloseSection();
     Array<double,1> Params;
@@ -620,6 +622,65 @@ public:
     // Make the slope match assymptotic form as well
     Vfunc.Init(Vgrid, Vinit, 5.0e30, Zion/(rmax*rmax));
   }
+
+  void Write (IOSectionClass &outSection)
+  {
+    outSection.WriteVar ("Type", "PH_CubicSplineXC");
+    // Write common variables
+    outSection.WriteVar ("CoreRadius", CoreRadius);
+    outSection.WriteVar ("Zion", Zion);
+    outSection.NewSection ("Agrid");
+    Agrid->Write(outSection);
+    outSection.CloseSection();
+    outSection.NewSection ("Bgrid");
+    Bgrid->Write(outSection);
+    outSection.CloseSection();
+    outSection.NewSection ("Vgrid");
+    Vgrid->Write(outSection);
+    outSection.CloseSection();
+    Array<double,1> Params;
+    Params.resize(Agrid->NumPoints);
+    for (int i=0; i<Agrid->NumPoints; i++)
+      Params(i) = PA.Params(i);
+    outSection.WriteVar ("PAparams", Params);
+
+    Params.resize(Bgrid->NumPoints);
+    for (int i=0; i<Bgrid->NumPoints; i++)
+      Params(i) = PB.Params(i);
+    outSection.WriteVar ("PBparams", Params);
+
+    Params.resize(Vgrid->NumPoints);
+    for (int i=0; i<Vgrid->NumPoints; i++)
+      Params(i) = Vfunc.Params(i);
+    outSection.WriteVar ("Vfuncparams", Params);
+  }
+
+  bool Read (IOSectionClass &inSection)
+  {
+    assert (inSection.ReadVar("CoreRadius", CoreRadius));
+    assert (inSection.ReadVar("Zion", Zion));
+    assert(inSection.OpenSection("Agrid"));
+    Agrid = ReadGrid(inSection);
+    inSection.CloseSection();
+    
+    assert(inSection.OpenSection("Bgrid"));
+    Bgrid = ReadGrid(inSection);
+    inSection.CloseSection();
+
+    assert(inSection.OpenSection("Vgrid"));
+    Vgrid = ReadGrid(inSection);
+    inSection.CloseSection();
+
+    Array<double,1> Params;
+    assert(inSection.ReadVar ("PAparams", Params));
+    PA.Init (Agrid, Params, 0.0, 0.0);
+    assert(inSection.ReadVar ("PBparams", Params));
+    PB.Init (Bgrid, Params, 0.0, 0.0);
+    assert(inSection.ReadVar ("Vfuncparams", Params));
+    Vfunc.Init(Vgrid, Params, 5.0e30, 5.0e30);
+    return (true);
+   }
+
     
   PH_CubicSplineXC()
   {
@@ -726,14 +787,14 @@ public:
     return (true);
   }
 
-  void Write (OutputSectionClass &outSection)
+  void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Type", "Nuclear");
     outSection.WriteVar ("Zion", Zion);
     outSection.WriteVar ("UseVHXC", UseVHXC);
     if (UseVHXC) {
       outSection.WriteVar ("NumElecs", NumElecs);
-      outSection.OpenSection("VHXC");
+      outSection.NewSection("VHXC");
       VHXC.Write(outSection);
       outSection.CloseSection();
     } 
@@ -894,7 +955,7 @@ public:
     return (0.0);
   }
 
-  void Write (OutputSectionClass &outSection)
+  void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Type", "Zero");
   }
@@ -972,7 +1033,7 @@ public:
     return (0.0);
   }
 
-  void Write (OutputSectionClass &outSection)
+  void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Type", "Gaussian");
     outSection.WriteVar ("Amp", Amp);
@@ -1001,6 +1062,20 @@ public:
   //void Write(char *FileName);
   //void Read (FILE *fin);
   
+};
+
+
+class Aziz92 : public PseudoHamiltonian
+{
+private:
+  static const double Astar = 1.8443101e5;
+  static const double alphastar = 10.43329537;
+  static const double c6 = 1.36745214;
+  static const double c8 = 0.42123807;
+  static const double c10 = 0.17473318;
+public:
+
+
 };
 
 
