@@ -16,7 +16,6 @@ Section (System)
     {
       string Name="O";
       double lambda=0.0029906; 
-      string File="20050209_125_PI5_mcc3_test.0.h5";
 //      double lambda=0.0; 
       string Type="O";
       string Statistics="BOLTZMANNON";
@@ -25,32 +24,33 @@ Section (System)
       double Sigma = 3.12;
       double Epsilon = 0.16;
       string InitPaths="FILE";
-      string File="20050209_125_PI5_mcc3_test.0.h5";
+      string File="20050213_125_PI5_PIMC_mcc3_test.0.h5";
     }
     Section (Species)
     {
       string Name = "e";
 //      double lambda = 87.852;
       double lambda = 0.0;
-      double Charge=-0.241;
+      double Charge=-0.251;
       string Type = "e";
       string Statistics = "BOLTZMANNON";
       int NumParticles = 250;
       int NumDim = 3;
       string InitPaths="FILE";
-      string File="20050209_125_PI5_mcc3_test.0.h5";
+      string File="20050213_125_PI5_PIMC_mcc3_test.0.h5";
   }
     Section (Species)
     {
       string Name = "p";
-      double Charge=0.241;
-      double lambda = 0.047848;
+      double Charge=0.251;
+//      double lambda = 0.047848;
+      double lambda = 0.0;
       string Type = "p";
       string Statistics = "BOLTZMANNON";
       int NumParticles = 250;
       int NumDim = 3;
       string InitPaths="FILE";
-      string File="20050209_125_PI5_mcc3_test.0.h5";
+      string File="20050213_125_PI5_PIMC_mcc3_test.0.h5";
   }
  }
 }
@@ -65,7 +65,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "20050210_125_PI5_mcc3_test";
+  string OutFileBase = "20050215_125_PI5_PIMC_mcc3_test";
   Section (Observable)
     {
       string type = "ModifiedEnergy";

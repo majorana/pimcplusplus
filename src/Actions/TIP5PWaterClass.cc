@@ -262,6 +262,7 @@ double TIP5PWaterClass::OOSeparation (int slice,int ptcl1,int ptcl2)
 //  cerr << "We have particles " << ptcl1 << " and " << ptcl2 << " belonging to molecules " << Path.MolRef(ptcl1) << " and " << Path.MolRef(ptcl2) << " and calculate the distance between O " << Optcl1 << " and " << Optcl2 << " from " << Path.MolRef(Optcl1) << " and " << Path.MolRef(Optcl2) << endl;
   return Ormag;
 }
+
 void TIP5PWaterClass::Read (IOSectionClass &in)
 {
   //do nothing for now
@@ -278,10 +279,32 @@ double TIP5PWaterClass::RotationalKinetic(int startSlice, int endSlice, const Ar
     int species=Path.ParticleSpeciesNum(ptcl);
     double FourLambdaTauInv=1.0/(4.0*lambda_p*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
-      dVec vel;
-      vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
-      vel -= COMVelocity(slice,slice+skip,ptcl);
-      double vel_squared = GetAngles(vel);
+      // Load the coordinates we'll be manipulating; these are coords for adjacent time slices of a proton.
+      dVec coord1 = PathData.Path(slice,ptcl);
+      dVec coord2 = PathData.Path(slice+skip,ptcl);
+//cerr << "loaded " << coord1 << " and " << coord2 << " for slice " << slice << " and ptcl " << ptcl << endl;
+      // Identify the index for the corresponding oxygen, i.e. COM
+      int Optcl = FindCOM(ptcl);
+      dVec Ocoord1 = PathData.Path(slice,Optcl);
+      dVec Ocoord2 = PathData.Path(slice+skip,Optcl);
+//cerr << "identified COM " << Optcl << " with coords " << Ocoord1 << " and " << Ocoord2 << endl;
+      // We want to measure rotations relative to the COM ONLY, so we need to redefine coords WRT their respective COMs so that we can calculate polar and azimuthal angles WRT the COM.
+      // Sync COMs for coord1 and coord2
+//      dVec COMdisp = Displacement(slice,slice+skip,Optcl,Optcl);
+//      coord2 -= COMdisp;
+      // Redefine coordinates WRT COM
+      coord1 -= Ocoord1;
+      coord2 -= Ocoord2;
+//cerr << "now WRT COM coords are " << coord1 << " and " << coord2 << endl;
+      // Get the corresponding polar and azimuthal angles
+      double theta1,theta2,phi1,phi2;
+      GetAngles(coord1,theta1,phi1);
+      GetAngles(coord2,theta2,phi2); 
+//cerr << "corresponding angles are " << theta1 << ", " << phi1 << ", " << theta2 << ", " << phi2 << endl;
+      // Calculate the rotational kinetic energy
+      double vel_squared = CalcEnergy(theta1,theta2-theta1,phi2-phi1);
+//cerr << "from which I calculate vel_squared " << vel_squared << endl;
+
       double GaussProd = 1.0;
 //    for (int dim=0; dim<NDIM; dim++) {
 //  	int NumImage=1;
@@ -298,7 +321,7 @@ double TIP5PWaterClass::RotationalKinetic(int startSlice, int endSlice, const Ar
     }
   }
   //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-//  cerr << "I'm returning kinetic action " << RotK << endl;
+//  //cerr << "I'm returning kinetic action " << RotK << endl;
   return (RotK);
 }
 
@@ -312,24 +335,42 @@ double TIP5PWaterClass::RotationalEnergy(int startSlice, int endSlice, int level
   spring  = 0.0;  
   int skip = 1<<level;
   const int NumImage=1;  
-  double vel_squared;
   double Z = 0.0;
   double FourLambdaTauInv = 1.0/(4.0*lambda_p*levelTau);
-int count_2 = 0;
   for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++) {
-int count = 0;
     // Do free-particle part
     int speciesNum  = Path.ParticleSpeciesNum(ptcl);
     if (speciesNum == PathData.Path.SpeciesNum("p")){
       SpeciesClass &species = Path.Species(speciesNum);
       for (int slice=startSlice; slice<endSlice; slice+=skip) {
-count ++;
-//cerr << "particle " << ptcl << "; I've done this " << count << " times.  On slice " << slice << endl;
 	spring += (0.5*NDIM)/levelTau;
-	dVec vel;
-	vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
-        vel -= COMVelocity(slice,slice+skip,ptcl);
-        vel_squared = GetAngles(vel);
+
+      // Load the coordinates we'll be manipulating; these are coords for adjacent time slices of a proton.
+      dVec coord1 = PathData.Path(slice,ptcl);
+      dVec coord2 = PathData.Path(slice+skip,ptcl);
+//cerr << "loaded " << coord1 << " and " << coord2 << " for slice " << slice << " and ptcl " << ptcl << endl;
+      // Identify the index for the corresponding oxygen, i.e. COM
+      int Optcl = FindCOM(ptcl);
+      dVec Ocoord1 = PathData.Path(slice,Optcl);
+      dVec Ocoord2 = PathData.Path(slice+skip,Optcl);
+//cerr << "identified COM " << Optcl << " with coords " << Ocoord1 << " and " << Ocoord2 << endl;
+      // We want to measure rotations relative to the COM ONLY, so we need to redefine coords WRT their respective COMs so that we can calculate polar and azimuthal angles WRT the COM.
+      // Sync COMs for coord1 and coord2
+//      dVec COMdisp = Displacement(slice,slice+skip,Optcl,Optcl);
+//      coord2 -= COMdisp;
+      // Redefine coordinates WRT COM
+      coord1 -= Ocoord1;
+      coord2 -= Ocoord2;
+//cerr << "now WRT COM coords are " << coord1 << " and " << coord2 << endl;
+      // Get the corresponding polar and azimuthal angles
+      double theta1,theta2,phi1,phi2;
+      GetAngles(coord1,theta1,phi1);
+      GetAngles(coord2,theta2,phi2); 
+//cerr << "corresponding angles are " << theta1 << ", " << phi1 << ", " << theta2 << ", " << phi2 << endl;
+      // Calculate the rotational kinetic energy
+      double vel_squared = CalcEnergy(theta1,theta2-theta1,phi2-phi1);
+//cerr << "from which I calculate vel_squared " << vel_squared << endl;
+
         double GaussSum;
         double numSum;
 //      dVec GaussSum=0.0;
@@ -365,20 +406,44 @@ count ++;
     }
   }
   spring = spring/Z;
-  cerr << "spring = " << spring << endl;
+//  cerr << "spring = " << spring << endl;
   return spring;
 }
 
-double TIP5PWaterClass::GetAngles(dVec disp)
+void TIP5PWaterClass::GetAngles(dVec disp, double &theta, double &phi)
 {
   double x = disp(0);
+  double y = disp(1);
   double z = disp(2);
   double R = O_H_moment_arm;
-  double theta = acos(z/R);  
-  double phi = acos(x/(R*sin(theta)));
-  double omega_squared = theta*theta + phi*phi;
+  theta = acos(z/R);
+  double SineTheta = sin(theta);  
+  phi = acos(x/(R*SineTheta));
+  double phicheck = asin(y/(R*SineTheta));
+  if(y<0){
+    phi = 2*M_PI - phi;
+  }
+}
+
+double TIP5PWaterClass::CalcEnergy(double reftheta,double dtheta, double dphi)
+{
+  double R = O_H_moment_arm;
+  double SineTheta = sin(reftheta);
+  double omega_squared = dtheta*dtheta + dphi*dphi*SineTheta*SineTheta;
   double vel_squared = omega_squared*R*R;
   return vel_squared;
+}
+
+double TIP5PWaterClass::SineOfPolar(dVec coords)
+{
+  double x = coords(0);
+  double z = coords(2);
+  double R = O_H_moment_arm;
+  double theta = acos(z/R);  
+cerr << "I find theta = " << theta << " for coords " << x << ", " << coords(1) << ", " << z << ";";
+  double SineTheta = sin(theta);
+cerr << "returning " << SineTheta << endl;
+  return SineTheta;
 }
 
 dVec TIP5PWaterClass::COMVelocity (int slice1,int slice2,int ptcl)
@@ -392,4 +457,32 @@ dVec TIP5PWaterClass::COMVelocity (int slice1,int slice2,int ptcl)
 //cerr << "I'm correcting velocity for ptcl " << ptcl << " of species " << Path.ParticleSpeciesNum(ptcl) << ".  Found COM oxygen at " << Optcl;
 //cerr << "Returning COM velocity " << Ovel << endl;
   return Ovel;
+}
+
+dVec TIP5PWaterClass::COMCoords (int slice, int ptcl)
+{
+  int speciesO=PathData.Path.SpeciesNum("O");
+  int Optcl;
+  dVec relative_coords;
+
+  Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
+  relative_coords = PathData.Path(slice,ptcl) - PathData.Path(slice,Optcl);
+//cerr << "I'm correcting velocity for ptcl " << ptcl << " of species " << Path.ParticleSpeciesNum(ptcl) << ".  Found COM oxygen at " << Optcl;
+//cerr << "Returning COM velocity " << Ovel << endl;
+  return relative_coords;
+}
+
+dVec TIP5PWaterClass::Displacement(int slice1, int slice2, int ptcl1, int ptcl2)
+{
+  dVec disp;
+  disp = PathData.Path(slice1,ptcl1) - PathData.Path(slice2,ptcl2);
+  return disp;
+}
+
+int TIP5PWaterClass::FindCOM(int ptcl)
+{
+  int speciesO=PathData.Path.SpeciesNum("O");
+  int Optcl;
+  Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
+  return Optcl;
 }

@@ -4,14 +4,13 @@
 void PathDumpClass::Accumulate()
 {
   TimesCalled++;
-  if (TimesCalled % DumpFreq==0){
+  if (TimesCalled%10000 == 0){
     WriteBlock();
   }
 }
 
 void PathDumpClass::Read(IOSectionClass &in)
 {
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   ObservableClass::Read(in);
 }
 

@@ -25,7 +25,8 @@ Section (System)
       double Sigma = 3.12;
       double Epsilon = 0.16;
       string InitPaths="FILE";
-      string File="20050203_125_PI5_pc2.h5";
+      string File="../WaterTest/20050211_125_PI5_rotationalkinetictest.0.h5";
+
     }
     Section (Species)
     {
@@ -38,7 +39,7 @@ Section (System)
       int NumParticles = 250;
       int NumDim = 3;
       string InitPaths="FILE";
-      string File="20050203_125_PI5_pc2.h5";
+      string File="../WaterTest/20050211_125_PI5_rotationalkinetictest.0.h5";
   }
     Section (Species)
     {
@@ -51,7 +52,7 @@ Section (System)
       int NumParticles = 250;
       int NumDim = 3;
       string InitPaths="FILE";
-      string File="20050203_125_PI5_pc2.h5";
+      string File="../WaterTest/20050211_125_PI5_rotationalkinetictest.0.h5";
   }
  }
 }
@@ -66,7 +67,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "20050211_125_PI5_kinetictest";
+  string OutFileBase = "20050217_125_PI5_rotationalkinetictest";
   Section (Observable)
     {
       string type = "ModifiedEnergy";

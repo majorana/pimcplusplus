@@ -17,8 +17,13 @@ public:
   double OOSeparation (int slice,int ptcl1,int ptcl2);
   double RotationalKinetic(int startSlice, int endSlice, const Array<int,1> &activeParticles,int level);
   double RotationalEnergy(int startSlice, int endSlice, int level);
-  double GetAngles(dVec disp);
+  void GetAngles(dVec disp, double &theta, double &phi);
+  double CalcEnergy(double reftheta,double dtheta, double dphi);
+  double SineOfPolar(dVec coords);
   dVec COMVelocity (int slice1,int slice2,int ptcl);
+  dVec COMCoords (int slice, int ptcl);
+  dVec Displacement(int slice1, int slice2, int ptcl1, int ptcl2);
+  int FindCOM(int ptcl);
   TIP5PWaterClass (PathDataClass &pathData);
 };
 
