@@ -339,8 +339,6 @@ void PathClass::InitPaths (IOSectionClass &in)
 	r[0] = ix*delta-0.5*Box[0];
 	r[1] = iy*delta-0.5*Box[1];
 	r[2] = iz*delta-0.5*Box[2];
-// 	cerr << "r = " << r << "  ix=" << ix << " iy=" << iy << " iz=" 
-// 	     << iz << endl;
 	if (ptcl % 2) 
 	  r += 0.5*delta;
 	for (int slice=0; slice<NumTimeSlices(); slice++) 

@@ -60,7 +60,7 @@ DisplaceMoveClass::MakeMove ()
   // First, choose particle to move
   int numActive = 0;
   for (int i=0; i<ActiveSpecies.size(); i++)
-    numActive += PathData.Path.Species(i).NumParticles;
+    numActive += PathData.Path.Species(ActiveSpecies(i)).NumParticles;
   ActiveParticles.resize(1);
 
 

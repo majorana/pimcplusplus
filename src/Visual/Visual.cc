@@ -1,5 +1,55 @@
 #include "Visual.h"
 
+void VisualClass::MakeFrame(int frame)
+{
+  int numSpecies = Species.size();
+
+  for (int i=0; i<PathVis.Objects.size(); i++)
+    delete PathVis.Objects[i];
+  
+  PathVis.Objects.resize(0);
+
+  int numPtcls = Paths.extent(1);
+  int numSlices = Paths.extent(2);
+
+
+  Array<Vec3,1> onePath(numSlices);
+  for (int si=0; si<numSpecies; si++) {
+    for (int ptcl=Species(si).FirstParticle; 
+	 ptcl<=Species(si).LastParticle; ptcl++) {
+      if (Species(si).lambda != 0.0) {
+	for (int slice=0; slice<numSlices; slice++) {
+	  onePath(slice)[0] = Paths(frame,ptcl,slice,0);
+	  onePath(slice)[1] = Paths(frame,ptcl,slice,1);
+	  onePath(slice)[2] = Paths(frame,ptcl,slice,2);
+	}
+	PathObject* pathObj = new PathObject;
+	if (si == 0)
+	  pathObj->SetColor (0.3, 0.3, 1.0);
+	else
+	  pathObj->SetColor (0.0, 1.0, 0.0);
+	pathObj->Set (onePath);
+	PathVis.Objects.push_back(pathObj);
+      }
+      else {
+	Vec3 pos;
+	pos[0] = Paths(frame, ptcl, 0, 0);
+	pos[1] = Paths(frame, ptcl, 0, 1);
+	pos[2] = Paths(frame, ptcl, 0, 2);
+
+	SphereObject* sphere = new SphereObject;
+	sphere->SetPos (pos);
+	sphere->SetColor (Vec3(1.0, 0.0, 0.0));
+	PathVis.Objects.push_back(sphere);
+      }
+    }
+  }
+  BoxObject *boxObject = new BoxObject;
+  boxObject->SetColor (0.5, 0.5, 1.0);
+  boxObject->Set (Box[0], Box[1], Box[2]);
+  PathVis.Objects.push_back(boxObject);
+}
+
 void VisualClass::Read(string fileName)
 {
   IOSectionClass in;
@@ -8,12 +58,10 @@ void VisualClass::Read(string fileName)
   Array<double,1> box;
   assert (in.OpenSection("System"));
   assert (in.ReadVar ("Box", box));
+  Box[0] = box(0); Box[1] = box(1); Box[2] = box(2);
   cerr << "Box = " << box << endl;
-  BoxObject *boxObject = new BoxObject;
-  boxObject->Set (box(0), box(1), box(2));
-  boxObject->SetColor (0.5, 0.5, 1.0);
+
   double maxDim = max(max(box(0), box(1)), box(2));
-  PathVis.Objects.push_back(boxObject);
   PathVis.View.SetDistance (1.2*maxDim);
   //PathVis.View.SetDistance (0.2*maxDim);
 
@@ -39,59 +87,18 @@ void VisualClass::Read(string fileName)
 
   assert(in.OpenSection("Observables"));
   assert(in.OpenSection("PathDump"));
-  Array<double,4> paths;
-  assert(in.ReadVar ("Path", paths));
+  assert(in.ReadVar ("Path", Paths));
+
+  FrameAdjust.set_upper(Paths.extent(0)-1);
   
-  int numPtcls = paths.extent(1);
-  int numSlices = paths.extent(2);
-
-  int frame = 0;
-
-  Array<Vec3,1> onePath(numSlices);
-  for (int si=0; si<numSpecies; si++) {
-    for (int ptcl=Species(si).FirstParticle; 
-	 ptcl<=Species(si).LastParticle; ptcl++) {
-      if (Species(si).lambda != 0.0) {
-	for (int slice=0; slice<numSlices; slice++) {
-	  onePath(slice)[0] = paths(frame,ptcl,slice,0);
-	  onePath(slice)[1] = paths(frame,ptcl,slice,1);
-	  onePath(slice)[2] = paths(frame,ptcl,slice,2);
-	}
-	PathObject* pathObj = new PathObject;
-	if (si == 0)
-	  pathObj->SetColor (0.3, 0.3, 1.0);
-	else
-	  pathObj->SetColor (0.0, 1.0, 0.0);
-	pathObj->Set (onePath);
-	PathVis.Objects.push_back(pathObj);
-      }
-      else {
-	Vec3 pos;
-	pos[0] = paths(frame, ptcl, 0, 0);
-	pos[1] = paths(frame, ptcl, 0, 1);
-	pos[2] = paths(frame, ptcl, 0, 2);
-// 	for (int i=0; i<3; i++) {
-// 	  while (pos[i] > 0.5*box(i)) 
-// 	    pos[i] -= box(i);
-// 	  while (pos[i] < -0.5*box(i)) 
-// 	    pos[i] += box(i);
-// 	}
-
-	SphereObject* sphere = new SphereObject;
-	sphere->SetPos (pos);
-	sphere->SetColor (Vec3(1.0, 0.0, 0.0));
-	PathVis.Objects.push_back(sphere);
-      }
-    }
-  }
-
   in.CloseSection();
-
   in.CloseFile();
+  MakeFrame (0);
 }
 
 VisualClass::VisualClass()
-  : m_VBox(false, 0), m_ButtonQuit("Quit")
+  : m_VBox(false, 0), m_ButtonQuit("Quit"), 
+    FrameAdjust (0.0, 0.0, 0.0)
 {
   // Top-level window.
   set_title("VisualClass");
@@ -108,7 +115,13 @@ VisualClass::VisualClass()
 
   m_ButtonQuit.signal_clicked().connect(
     sigc::mem_fun(*this, &VisualClass::on_button_quit_clicked));
+  m_VBox.pack_start(FrameScale, Gtk::PACK_SHRINK,0);
   m_VBox.pack_start(m_ButtonQuit, Gtk::PACK_SHRINK, 0);
+  FrameScale.set_adjustment (FrameAdjust);
+  FrameScale.signal_value_changed().connect
+    (sigc::mem_fun(*this, &VisualClass::FrameChanged));
+  FrameAdjust.set_step_increment(1.0);
+  FrameScale.set_digits(0);
 
   // Show window.
   show_all();
@@ -120,6 +133,12 @@ VisualClass::~VisualClass()
 void VisualClass::on_button_quit_clicked()
 {
   Gtk::Main::quit();
+}
+
+void VisualClass::FrameChanged()
+{
+  MakeFrame ((int)floor(FrameAdjust.get_value()));
+  PathVis.Invalidate();
 }
 
 

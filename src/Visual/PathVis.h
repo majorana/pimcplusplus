@@ -51,12 +51,13 @@ protected:
   virtual bool on_configure_event(GdkEventConfigure* event);
   virtual bool on_expose_event(GdkEventExpose* event);
   int NumLists;
-  void Invalidate();
 public:
   ViewClass View;
   vector<GLObject *> Objects;
   void AddBox  (double xSize, double ySize, double zSize);
   void AddPath (Array<Vec3,1> &path, bool closed=true);
+
+  void Invalidate();
 
   // Constructor
   PathVisClass();

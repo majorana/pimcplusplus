@@ -3,6 +3,7 @@
 
 #include "PathVis.h"
 #include "../Common/IO/InputOutput.h"
+#include <gtkmm/adjustment.h>
 
 
 class SpeciesClass
@@ -24,15 +25,21 @@ protected:
   // signal handlers:
   void on_button_quit_clicked();
 
+  Array<double,4> Paths;
+  Array<SpeciesClass,1> Species;
+  Vec3 Box;
+
   // member widgets:
   Gtk::VBox m_VBox;
   Gtk::Button m_ButtonQuit;
-  Array<double,4> Paths;
-  Array<SpeciesClass,1> Species;
+  Gtk::HScale FrameScale;
+  Gtk::Adjustment FrameAdjust;
+  void FrameChanged();
 public:
   PathVisClass PathVis;
 
   void Read(string fileName);
+  void MakeFrame (int frame);
   
   VisualClass();
   virtual ~VisualClass();
