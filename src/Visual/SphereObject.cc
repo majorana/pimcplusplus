@@ -12,6 +12,7 @@ void SphereObject::Set()
   float fcolor[4];
   fcolor[0] = Color[0]; fcolor[1] = Color[1]; fcolor[2] = Color[2];
   fcolor[3] = 1.0;
+  glColor3f (Color[0], Color[1], Color[2]);
   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
   float spec[4] = { 1.0, 1.0, 1.0, 1.0 };
   glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);

@@ -35,6 +35,8 @@ void PathObject::TubesSet(vector<Vec3> &path)
   glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);
   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30.0);
 
+  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
   gleSetJoinStyle (TUBE_JN_ROUND /* | TUBE_JN_CAP */ | TUBE_CONTOUR_CLOSED);
   
   int N = path.size();
@@ -60,9 +62,13 @@ void PathObject::TubesSet(vector<Vec3> &path)
 
   float colors[N+3][3];
   for (int i=0; i<N+3; i++) {
-    colors[i][0] = Color[0];//*(double)i/(double)(path.size()-1);
-    colors[i][1] = Color[1];//*(double)i/(double)(path.size()-1);
-    colors[i][2] = Color[2];//*(double)i/(double)(path.size()-1);
+    double a = (double)i/(double)(path.size()-1);
+    double b = 1.0-a;
+    colors[i][0] = Color[0]*a + (1.0-Color[0])*b;
+    colors[i][1] = Color[1]*a + (1.0-Color[1])*b;
+    colors[i][2] = Color[2]*a + (1.0-Color[2])*b;
+//     colors[i][1] = Color[1]*(double)i/(double)(path.size()-1);
+//     colors[i][2] = Color[2]*(double)i/(double)(path.size()-1);
   }
   glePolyCylinder (N+3, pointArray,
 		   colors, Radius);
