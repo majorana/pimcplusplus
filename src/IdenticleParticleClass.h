@@ -7,21 +7,28 @@
 
 
 /*! This is an base class that holds all the information about
-identicle particles.  It may be specialized to hold specialized
+identical particles.  It may be specialized to hold specialized
 information about particular types of particles. */
-class IdenticleParticlesClass
+class IdenticalParticlesClass
 {
 public:
   PathClass Path;
   PermutationClass Permutation;
 
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
-  /// classicle particle.
+  /// classical particle.
   double lambda;
   
   /// Returns the nodal action for fermions.  Returns 0 for bosons.
   virtual double NodeAction (int Ptcl, int LinkNum);
 }
 
+
+class ElectronsClass::IdenticalParticlesClass
+{
+public:
+  double NodeAction (int Ptcl. int LinkNum);
+  
+}
 
 #endif
