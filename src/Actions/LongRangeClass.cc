@@ -222,7 +222,7 @@ double LongRangeClass::Action (int slice1, int slice2,
   double hetero = 0.0;
   int skip = (1<<level);
   double levelTau = Path.tau * (double)skip;
-  for (int slice=slice1; slice<=slice2; slice1+=skip) {
+  for (int slice=slice1; slice<=slice2; slice+=skip) {
     double factor;
     if ((slice == slice1) || (slice==slice2))
       factor = 0.5;
@@ -274,7 +274,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
   double hetero = 0.0;
   int skip = (1<<level);
   double levelTau = Path.tau * (double)skip;
-  for (int slice=slice1; slice<=slice2; slice1+=skip) {
+  for (int slice=slice1; slice<=slice2; slice+=skip) {
     double factor;
     if ((slice == slice1) || (slice==slice2))
       factor = 0.5;

@@ -14,7 +14,7 @@ FreeNodalActionClass::ActionImageSum (double L, double lambdaBeta,
   // about image sums.
   if ((disp*disp*fourLambdaBetaInv) > 50.0)
     return (disp*disp*fourLambdaBetaInv);
-  for (int image=-numImages; image<numImages; image++) {
+  for (int image=-numImages; image<=numImages; image++) {
     double x = disp + (double)image*L;
     sum += exp (-(x*x)*fourLambdaBetaInv);
   }
