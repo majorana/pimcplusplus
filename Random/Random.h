@@ -25,7 +25,7 @@ public:
 
   ///Produces an int that is unique to your processor between 0 and max
   inline int LocalInt(int max)
-  { return (int)floor(sprng(LocalStream)*max); }
+  { return (int)floor(Local()*max); }
   
   /* normal random variate generator */
   // Returns a random number distributed according to
@@ -48,6 +48,12 @@ public:
   /// Produces a guassian random vector with radius that has STD sigma 
   inline void CommonGaussianVec(double sigma,Vec2 &c)
   { c(0)=CommonGaussian(sigma); c(1)=CommonGaussian(sigma); }
+
+
+  ///Produces an int between 0 and max (not including max) that is common among processors
+  inline int CommonInt(int max)
+  { return (int)floor(Common()*max); }
+
   
   void Init()
   {
