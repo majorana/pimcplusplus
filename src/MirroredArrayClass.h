@@ -71,7 +71,7 @@ public:
   inline void AcceptCopy (const Array<int,1> &activePtcls)
   {
     for (int i=0; i<activePtcls.size(); i++)
-      AcceptCopy(i);
+      AcceptCopy(activePtcls(i));
   }
 
   /// In case of rejection, this is called to copy the new path over
@@ -84,7 +84,7 @@ public:
   inline void RejectCopy (const Array<int,1> &activePtcls)
   {
     for (int i=0; i<activePtcls.size(); i++)
-      RejectCopy(i);
+      RejectCopy(activePtcls(i));
   }
 
 

@@ -1,15 +1,6 @@
 #include "PermuteTableClass.h"
 
 
-// void CycleClass::CanonicalPermRep(Array<int,1> Perm)
-// {
-//   // Set to identity permutation
-//   for (int i=0;i<myArray;i++)
-//     Perm(i)=i;
-//   // Apply cyclic permutation
-//   for(int i=0;i<Length;i++)
-//     Perm(CycleRep(i)) = CycleRep((i+1) % Length);
-// }
     
 Array<int,1> PermuteTableClass::CurrentParticles()
 {
@@ -19,9 +10,6 @@ Array<int,1> PermuteTableClass::CurrentParticles()
     tempPtcl(i)=CurrentCycle.CycleRep(i)+firstPtcl;
   }
   return tempPtcl;
-    
-
-
 }
 
 void PermuteTableClass::ConstructHTable()
@@ -74,6 +62,7 @@ void PermuteTableClass::ConstructHTable()
 // slice and the permutation vector in the path
 void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
 {
+  SetMode(NEWMODE);
   dVec tempPos = path(slice, CycleRep(0)+firstPtcl);
   int tempPtcl = path.Permutation(CycleRep(0)+firstPtcl);
   for(int i=0;i<Length-1;i++) {
@@ -98,14 +87,15 @@ double PermuteTableClass::AttemptPermutation()
   // Now, apply the permutation to the Path
   int firstPtcl=PathData.Species(SpeciesNum).FirstPtcl;
   CurrentCycle.Apply(PathData.Path,firstPtcl,Slice2);
-  int diff = Slice2-Slice1;
-  int numLevels = 0;
-  while (diff != 1) {
-    diff >>= 1;
-    numLevels++;
-  }
-  ///Remember to update distance table after permutation
   PathData.Update(Slice2,CurrentParticles());
+//   int diff = Slice2-Slice1;
+//   int numLevels = 0;
+//   while (diff != 1) {
+//     diff >>= 1;
+//     numLevels++;
+//   }
+  ///Remember to update distance table after permutation
+
 
   return (CurrentCycle.P * NormInv);
 }
@@ -121,6 +111,10 @@ double PermuteTableClass::CalcReverseProb(const PermuteTableClass &forwardTable)
   //thing. We can try to incrementally make this faster.
   ConstructCycleTable(forwardTable.SpeciesNum,
 		      forwardTable.Slice1,forwardTable.Slice2); 
+//   cerr << "Forward Table:\n";
+//   forwardTable.PrintTable();
+//   cerr << "Reverse Table:\n";
+//   PrintTable();
   return (1.0/(forwardTable.CurrentCycle.P)*NormInv);
 	 
 	   
@@ -142,6 +136,20 @@ void PermuteTableClass::Read(IOSectionClass &inSection)
 }
 
 
+void PermuteTableClass::PrintTable() const
+{
+  for (int i=0; i<NumEntries; i++) {
+    const CycleClass &cycle = CycleTable(i);
+    cerr << "Length = " << cycle.Length << endl;
+    cerr << "Cycle = [";
+    for (int j=0; j<cycle.Length; j++)
+      cerr << cycle.CycleRep[j] << " ";
+    cerr << "]\n";
+    cerr << "P = " << cycle.P << " C = " << cycle.C << endl;
+    cerr << endl;
+  }    
+}
+
 void PermuteTableClass::ConstructCycleTable(int speciesNum,
 					    int slice1, int slice2)
 {
@@ -152,8 +160,6 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
   int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
   CycleTable.resize(TableSize);
   NumEntries = 0;
-  //  int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
-  //  int lastPtcl = PathData.Species(SpeciesNum).LastPtcl;
   int N=HTable.extent(0);
   for (int i=0; i<N; i++) {
     ///Single particle move
@@ -161,7 +167,7 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
     double hprod=1.0;
     tempPerm.Length=1;
     tempPerm.CycleRep[0]=i;
-    tempPerm.P=Gamma(0);
+    tempPerm.P= Gamma(0);
     tempPerm.C=tempPerm.P;
     if (NumEntries!=0){
       tempPerm.C+=CycleTable(NumEntries-1).C;
@@ -172,7 +178,7 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
       tempPerm.CycleRep[1]=j;
       hprod*=HTable(i,j);
       tempPerm.Length=2;
-      tempPerm.P=Gamma(1)*hprod*HTable(j,i);
+      tempPerm.P= Gamma(1)*hprod*HTable(j,i);
       tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;      
       if (hprod != 0.0) {
 	AddEntry(tempPerm);
@@ -182,7 +188,7 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
 	    tempPerm.CycleRep[2]=k;
 	    hprod*=HTable(j,k);
 	    tempPerm.Length=3;
-	    tempPerm.P=Gamma(2)*hprod*HTable(k,i);
+	    tempPerm.P= Gamma(2)*hprod*HTable(k,i);
 	    tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
 	    if (hprod != 0.0) {
 	      AddEntry(tempPerm);
@@ -204,16 +210,4 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
   }
   Norm = CycleTable(NumEntries-1).C;
   NormInv = 1.0/Norm;
-  for (int i=0; i<NumEntries; i++) {
-    CycleClass &cycle = CycleTable(i);
-//     cerr << "Length = " << cycle.Length << endl;
-//     cerr << "Cycle = [";
-//     for (int j=0; j<cycle.Length; j++)
-//       cerr << cycle.CycleRep[j] << " ";
-//     cerr << "]\n";
-//     cerr << "P = " << cycle.P << " C = " << cycle.C << endl;
-//     cerr << endl;
-//   
-//   cerr<<"finished with norm!"<<Norm<<endl;
-  }
 }

@@ -53,13 +53,13 @@ void TotalEnergyClass::Accumulate()
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
   // Loop over all links
   int numPtcls = PathData.NumParticles();
-  int numLinks = PathData.NumTimeSlices()-1;
+  int numLinks = PathData.NumTimeSlices()-1; 
   double tau = PathData.Action.tau;
   // Add constant part.  Note: we should really check the number of
   // dimensions. 
   double sum = 0.0;
   double prefact=0.0;
-  int NumImage=4;
+  int NumImage=1;
   for (int ptcl=0; ptcl<numPtcls; ptcl++)
     if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
       sum += 1.5/tau * (double)numLinks;
@@ -372,11 +372,12 @@ void PairCorrelationClass::Initialize()
 
 
 void PathDumpClass::Accumulate()
-{//Do nothing!
+{
+  WriteBlock();
 }
 void PathDumpClass::Read(IOSectionClass &in)
 {
-  // Do nothing.
+  assert(in.ReadVar("name",Name));
 }
 
 void PathDumpClass::WriteBlock()
@@ -419,5 +420,6 @@ void PathDumpClass::WriteBlock()
 	for (int dim=0;dim<NDIM;dim++)
 	  pathArray(ptcl,slice,dim)=PathData(slice,ptcl)[dim];
     IOVar->Append(pathArray);
+    IOSection.FlushFile();
   }
 }

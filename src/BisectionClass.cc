@@ -112,14 +112,15 @@ double BisectionClass::LogSampleProb(int startSlice, int endSlice,
 
 
 // This does a multilevel construction of a path.
-bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activeParticles)
+bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activeParticles,
+			    double permActionChange)
 {
   bool toAccept=true;
   double oldLogSampleProb;
   double newLogSampleProb;
   Array<int,1> theParticles;
   int endSlice=(1<<numLevels)+startSlice;
-  double prevActionChange=0;
+  double prevActionChange=permActionChange;
 
   int levelCounter=numLevels-1;
 
@@ -135,6 +136,7 @@ bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activePar
       SamplePaths(startSlice,endSlice,activeParticles,levelCounter);
     double testNewLogSampleProb=
       LogSampleProb(startSlice,endSlice,activeParticles,levelCounter);
+    assert(fabs(newLogSampleProb-testNewLogSampleProb)<1e-12);
     PathData.Update(startSlice,endSlice,activeParticles,
 		    levelCounter);
 
@@ -152,3 +154,6 @@ bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activePar
   }
   return (toAccept);
 }
+
+bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activeParticles)
+{ return Bisect (startSlice, numLevels, activeParticles, 0.0); }

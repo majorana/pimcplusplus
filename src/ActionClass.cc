@@ -121,7 +121,7 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
       vel = DistanceTable->Velocity(slice, slice+skip, ptcl1);
       double GaussProd = 1.0;
       for (int dim=0; dim<NDIM; dim++) {
-	int NumImage=4;
+	int NumImage=1;
 	double GaussSum=0.0;
 	for (int image=-NumImage; image<=NumImage; image++) {
 	  double dist = vel[dim]+(double)image*Path.Box[dim];

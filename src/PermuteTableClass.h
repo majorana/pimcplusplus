@@ -67,6 +67,7 @@ class PermuteTableClass
   double AttemptPermutation();
   double CalcReverseProb(const PermuteTableClass &forwardTable);
   Array<int,1> CurrentParticles();
+  void PrintTable() const;
   PermuteTableClass(PathDataClass &myPathData) : PathData(myPathData)
   {
     NumEntries=0;
@@ -96,6 +97,8 @@ inline int PermuteTableClass::FindEntry(double xi)
   xi *= Norm; 
   int hi = NumEntries-1;
   int lo = 0;
+  if (xi < CycleTable(lo).C)
+    return (lo);
   int attempt = (hi+lo)>>1;
   while (attempt != lo) {
     attempt = (hi+lo)>>1;

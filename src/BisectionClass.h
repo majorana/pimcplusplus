@@ -10,6 +10,8 @@ class BisectionClass
  public:
   PathDataClass  &PathData;
   bool Bisect(int startTimeSlice,int numLevels, Array<int,1> activeParticles);
+  bool Bisect(int startTimeSlice,int numLevels, Array<int,1> activeParticles,
+	      double permActionChange);
 
   ///This picks a new location in space for the particles in the
   ///particles Array at all of the time slices between startSlice and
