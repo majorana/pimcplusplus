@@ -49,7 +49,7 @@ void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
       cerr<<"ERROR: "<<Box(i)<<" "<<disp(i)<<" "
 	  <<slice<<" "<<ptcl<<" "<<refPtcl<<" "
 	  <<BoxInv(i)<<Path(slice,ptcl)<<" "<<endl;
-      sleep(5000);
+//      sleep(5000);
     }
     assert(-Box(i)/2.0<=disp(i));
     assert(disp(i)<=Box(i)/2.0);

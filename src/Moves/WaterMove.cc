@@ -81,7 +81,7 @@ void WaterRotate::Molecule2Atoms(int moleculeNum)
 
 void WaterTranslate::MakeMove()
 {
-  double step = 0.08;
+  double step = 0.4;
   int speciesO = PathData.Path.SpeciesNum("O");
   int speciesp = PathData.Path.SpeciesNum("p");
   int speciese = PathData.Path.SpeciesNum("e");
@@ -147,7 +147,7 @@ void WaterTranslate::MakeMove()
 
 void WaterRotate::MakeMove()
 {
-  double dtheta = 2*M_PI*0.1;
+  double dtheta = 2*M_PI*0.3;
   int speciesO = PathData.Path.SpeciesNum("O");
   int  numWater=PathData.Path.Species(speciesO).LastPtcl-
     PathData.Path.Species(speciesO).FirstPtcl+1;

@@ -20,7 +20,7 @@ void ModifiedEnergyClass::Accumulate()
   PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong);
 
   int slice1 = 0;
-  int slice2 = PathData.Path.TotalNumSlices;
+  int slice2 = PathData.Path.TotalNumSlices-1;
   tip5p = PathData.Actions.TIP5PWater.d_dBeta(slice1,slice2,0);
   
   TotalSum   += kinetic + dUShort + dULong + node + tip5p;

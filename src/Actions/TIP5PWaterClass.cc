@@ -32,7 +32,7 @@ double TIP5PWaterClass::Action (int startSlice, int endSlice,
   int speciesO=Path.SpeciesNum("O");
   int speciesp=Path.SpeciesNum("p");
   int speciese=Path.SpeciesNum("e");
-  double CUTOFF = 7.0; // spherical cutoff in angstroms
+  double CUTOFF = 9.0; // spherical cutoff in angstroms
 
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = activeParticles(ptcl1Index);
@@ -124,7 +124,7 @@ double TIP5PWaterClass::Action (int startSlice, int endSlice,
   double TotalU_times_tau = TotalU*PathData.Path.tau;
 //  cerr << TotalU << " and times tau " << TotalU_times_tau << " at temp " << 1.0/PathData.Path.tau << endl;
 //  cerr << "I'm returning TIP5P action " << TotalU_times_tau << endl;
-  return (TotalU_times_tau+1.0);
+  return (TotalU_times_tau);
 }
 
 double TIP5PWaterClass::d_dBeta (int startSlice, int endSlice,  int level)
@@ -156,7 +156,7 @@ double TIP5PWaterClass::d_dBeta (int startSlice, int endSlice,  int level)
   int speciesO=Path.SpeciesNum("O");
   int speciesp=Path.SpeciesNum("p");
   int speciese=Path.SpeciesNum("e");
-  double CUTOFF = 7.0; // spherical cutoff in angstroms
+  double CUTOFF = 9.0; // spherical cutoff in angstroms
 
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = activeParticles(ptcl1Index);
