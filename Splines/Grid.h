@@ -3,6 +3,7 @@
 
 #include "Blitz.h"
 #include "InputFile.h"
+#include "../IO/InputOutput.h"
 
 //Ken's Grid Class
 
@@ -64,7 +65,12 @@ class Grid
     return (0);
   }
 
-
+  virtual void Write (OutputSectionClas &out)
+  {
+    cerr << "Should never get here. Grid::Write()\n";
+    exit(1);
+    return (0);
+  }
 
 };
 
