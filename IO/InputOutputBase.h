@@ -67,7 +67,8 @@ public:
 class IOTreeClass
 {
 protected:
-
+  // USE ME!  I'm not being used yet.
+  bool IsModified;
   list<VarClass*> VarList;
 public:
   /// This is used to ensure proper ordering of sections in the HDF

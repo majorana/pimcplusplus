@@ -91,7 +91,6 @@ class IOSectionClass
 {
 private:
   IOTreeClass *CurrentSection;
-  bool IsModified;
 public:
 
   /// Opens the file reference by fileName and reads the contents into
@@ -174,7 +173,6 @@ public:
   IOSectionClass() 
   {
     CurrentSection=NULL;
-    IsModified=false;
   }
 	
 };
