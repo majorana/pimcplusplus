@@ -180,9 +180,9 @@ int main(int argc, char **argv)
   BisectionMoveClass myBisectionMove(myPathData);
   ShiftMoveClass myShiftMove(myPathData);
   setupMove(myBisectionMove,myShiftMove,myPathData);
-  myPathData.Path.Box[0]=50*3.14159265358979323846;
-  myPathData.Path.Box[1]=50*3.14159265358979323846;
-  myPathData.Path.Box[2]=50*3.14159265358979323846;
+  myPathData.Path.Box[0]=0.25*3.14159265358979323846;
+  myPathData.Path.Box[1]=0.25*3.14159265358979323846;
+  myPathData.Path.Box[2]=0.25*3.14159265358979323846;
   DistanceTablePBCClass *myDistTable=
     new DistanceTablePBCClass(myPathData.Path);
   myPathData.DistanceTable=myDistTable;
