@@ -248,12 +248,21 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	if (s>dUsmax && q>2.4)
 	  dU = Usemi.dU(r,rp,costheta);
 
-	if (isnan(U))
+	if (isnan(U)) {
 	  fprintf (stderr, "NAN in U at (qi,yi,ti) = (%d,%d,%d)\n",
-		   qi, yi, ti);
-	if (isnan(dU))
+		   qi, yi, ti); 
+	  fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
+		   q, z, s);
+	  fprintf (stderr, "exp(-s^2/4lb) = %1.4e\n", 
+		   exp(-s*s/(4.0*lambda*beta)));
+	}
+	if (isnan(dU)) {
 	  fprintf (stderr, "NAN in dU at (qi,yi,ti) = (%d,%d,%d)\n",
 		   qi, yi, ti);
+	  fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
+		   q, z, s);
+	}
+
 	Umat(qi,yi,ti) = U;
 	dUmat(qi,yi,ti) = dU;
       }

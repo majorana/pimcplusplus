@@ -69,11 +69,12 @@ class GKIntegration {
 
   class IntervalResult {
   public:
-    IntervalResult(const double a_, const double b_):a(a_),b(b_),result(0.0),err(0.0){};
-    double a,b,result,err;
+    IntervalResult(const double a_, const double b_,
+		   const double delta_):a(a_),b(b_),result(0.0),err(0.0),delta(delta_){};
+    double a,b,result,err, delta;
 
     double ErrorL() const {
-      return (b!=a) ? err/(b-a) : err;
+      return (lenth) ? err/length : err;
     }
 
     friend ostream& operator<<(ostream &os, const IntervalResult & ir) {
@@ -113,7 +114,7 @@ class GKIntegration {
 		 IntervalResult & r) {
 
     const double center     = 0.5 * (r.a + r.b);
-    const double halfLength = 0.5 * (r.b - r.a);
+    const double halfLength = 0.5 * r.delta;
     const double fCenter = f(center);
 
     double resultGauss   = 0;
@@ -267,7 +268,7 @@ class GKIntegration {
     const int iterationMax=30;
     double lengthMin = (b-a)*pow(0.5,iterationMax);
     
-    IntervalResult r0(a,b);
+    IntervalResult r0(a,b,b-a);
     GK(r0);
     double result =r0.result;
     double err    =r0.err;
@@ -284,7 +285,7 @@ class GKIntegration {
       // this contribution to the 'unresolved' errors to be printed at the end
       while (ir.size()>0) {
 	IntervalResult & rTest (ir.front());
-	double lengthTest = rTest.b-rTest.a;
+	double lengthTest = rTest.delta;
 	if (lengthTest<lengthMin) {
 	  warning("KC:Interval was divided too many times",iterationMax,
 		  rTest.a,rTest.b,rTest.err,ir.size());
@@ -307,8 +308,8 @@ class GKIntegration {
       IntervalResult & r (ir.front());
 
       double center = 0.5*(r.a+r.b);
-      IntervalResult r1(r.a,   center);
-      IntervalResult r2(center,r.b   );
+      IntervalResult r1(r.a,center,0.5*r.delta);
+      IntervalResult r2(center,r.b,0.5*r.delta);
 
       GK(r1);
       GK(r2);
