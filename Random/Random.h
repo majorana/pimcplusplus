@@ -22,6 +22,10 @@ public:
   ///Produces a double that is unique to your processor
   inline double Local()
   {   return sprng(LocalStream); }
+
+  ///Produces an int that is unique to your processor between 0 and max
+  inline int LocalInt(int max)
+  { return (int)floor(sprng(LocalStream)*max); }
   
   /* normal random variate generator */
   // Returns a random number distributed according to
@@ -48,7 +52,7 @@ public:
   void Init()
   {
     int seed = make_sprng_seed();
-    cerr<<"My seed is "<<seed<<endl;
+    //cerr<<"My seed is "<<seed<<endl;
     Init (seed);
   }
 
