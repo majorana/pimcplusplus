@@ -10,8 +10,8 @@ from HTMLgen import *
 #from visual import *
 
 
-def GetPaths(infile):
-     paths=infile.ReadVar("Path")
+def GetPaths(infiles):
+     paths=infiles.ReadVar("Path")
      return paths
 
 def InitVisualPaths(pathData):
@@ -50,9 +50,9 @@ def IsMonotonic (x):
 
 def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      clf()
-#     infile.OpenSection("grid")
-#     x=infile.ReadVar("Points")
-#     infile.CloseSection()
+#     infiles.OpenSection("grid")
+#     x=infiles.ReadVar("Points")
+#     infiles.CloseSection()
      if (IsMonotonic(x)):
           plot(x, y)
      else:
@@ -75,14 +75,14 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      return myImg
 
 
-def ProcessCorrelationSection(infile,doc,currNum):
-     sectionName=infile.GetName()
+def ProcessCorrelationSection(infiles,doc,currNum):
+     sectionName=infiles.GetName()
      doc.append(Heading(1,sectionName))
-     hlabel=infile.ReadVar("xlabel")
-     vlabel=infile.ReadVar("ylabel")
-     data=infile.ReadVar("y")
-     x=infile.ReadVar("x")
-     description=infile.ReadVar("Description")
+     hlabel=infiles.ReadVar("xlabel")[0]
+     vlabel=infiles.ReadVar("ylabel")[0]
+     data=infiles.ReadVar("y")[0]
+     x=infiles.ReadVar("x")[0]
+     description=infiles.ReadVar("Description")[0]
      doc.append(Heading(4,description))
      currNum=currNum+1
      baseName=sectionName+repr(currNum)
@@ -110,12 +110,12 @@ def ProcessCorrelationSection(infile,doc,currNum):
      
 
      
-##      numVars=infile.CountVars()
+##      numVars=infiles.CountVars()
 ##      for counter in range(0,numVars):
-##           data=infile.ReadVar(counter)
+##           data=infiles.ReadVar(counter)
 ##           if type(data)==numarray.numarraycore.NumArray:
 
-##                varName=infile.GetVarName(counter)
+##                varName=infiles.GetVarName(counter)
 ##                doc.append(Name(sectionName+varName+repr(currNum)))
 ##                doc.append(Heading(2,varName))
 ##                myImg=ProduceCorrelationPicture(data[-1],varName+repr(currNum),'r',varName)
@@ -153,25 +153,46 @@ def MeanErrorString (mean, error):
      errorstr = formatstr % error
      return (meanstr, errorstr)
 
-def ProcessScalarSection(infile,doc,currNum):
-     sectionName=infile.GetName()
+def Avg (x):
+     if x[0] == None:
+          return None
+     else:
+          return sum(x)/len(x)
+
+def WeightedAvg (means, errors):
+     if (errors[0] != 0.0):
+          weights = map (lambda x: 1.0/(x*x), errors)
+          norm = 1.0/sum(weights)
+          weights = map(lambda x: x*norm, weights)
+          avg = 0.0
+          error2 = 0.0
+          for i in range (0,len(means)):
+               avg = avg + means[i]*weights[i]
+               error2 = error2 + weights[i]*errors[i]*errors[i]
+          return (avg, math.sqrt(error2))
+     else:
+          return (Avg(means), 0.0)
+
+
+def ProcessScalarSection(infiles,doc,currNum):
+     sectionName=infiles.GetName()
      doc.append(Heading(1,sectionName))
      toAddList=[]
     #put description
      myTable=Table()
      myTable.body=[['','Mean','Error','Variance', 'Kappa']]
      myTable.width='50%'
-     numVars=infile.CountVars()
+     numVars=infiles.CountVars()
 #     print "Num vars is ",numVars
      for counter in range(0,numVars):
-          data=infile.ReadVar(counter)
-          if type(data)==numarray.numarraycore.NumArray:
+          data = infiles.ReadVar(counter)
+          if type(data[0])==numarray.numarraycore.NumArray:
                currNum=currNum+1
-               varName=infile.GetVarName(counter)
+               varName=infiles.GetVarName(counter)
                baseName = varName+repr(currNum)
                toAddList.append(Name(sectionName+varName+repr(currNum)))
                toAddList.append(Heading(2,varName))
-               myImg=ProduceTracePicture(data, baseName,'Blocks',varName)
+               myImg=ProduceTracePicture(data[0], baseName,'Blocks',varName)
                toAddList.append(myImg)
 
 ##   Write ASCII data to a file
@@ -179,7 +200,7 @@ def ProcessScalarSection(infile,doc,currNum):
                asciiFile = open (asciiFileName, "w")
                n = len(data)
                for i in range(0,n):
-                    asciiFile.write('%20.16e\n' % data[i])
+                    asciiFile.write('%20.16e\n' % data[0][i])
                asciiFile.close()
                psFileName=baseName+'.ps'
                doc.append(BR())
@@ -190,8 +211,19 @@ def ProcessScalarSection(infile,doc,currNum):
                fileTable.column1_align='center'
                fileTable.cell_align='center'
                toAddList.append(fileTable)
-               
-               (mean,var,error,kappa)=stats.Stats(data)
+               meanlist = []
+               varlist = []
+               errorlist = []
+               kappalist = []
+               for d in data:
+                    (mean,var,error,kappa)=stats.Stats(d)
+                    meanlist.append(mean)
+                    errorlist.append(error)
+                    varlist.append(var)
+                    kappalist.append(kappa)
+               (mean,error) = WeightedAvg(meanlist, errorlist)
+               print repr(mean) + "+/-" + repr(error)
+                    
                (meanstr, errorstr) = MeanErrorString (mean, error)
                myTable.body.append([Href("#"+sectionName+varName+repr(currNum),varName),\
                                     meanstr,errorstr, '%1.2e' % var ,'%1.2f' % kappa])
@@ -201,11 +233,10 @@ def ProcessScalarSection(infile,doc,currNum):
      return currNum
 
 
-def ProcessSystemInfo(infile):
-     tau=infile.ReadVar("tau")
-     box=infile.ReadVar("Box")
-     numTimeSlices=infile.ReadVar("NumTimeSlices")
-     print numTimeSlices,tau
+def ProcessSystemInfo(infiles):
+     tau=infiles.ReadVar("tau")[0]
+     box=infiles.ReadVar("Box")[0]
+     numTimeSlices=infiles.ReadVar("NumTimeSlices")[0]
      beta=tau*numTimeSlices
      temp=1.0/beta
      systemTable=Table("System")
@@ -217,15 +248,15 @@ def ProcessSystemInfo(infile):
      speciesTable=Table("Species")
      speciesTable.body=[]
      speciesTable.body.append(["Name","NumParticles","lambda","Type"])
-     numSections=infile.CountSections2("Species")
+     numSections=infiles.CountSections2("Species")
      for spec in range(0,numSections):
-          infile.OpenSection2("Species",spec)
-          name=infile.ReadVar("Name")
-          numPtcl=infile.ReadVar("NumParticles")
-          lambdam = infile.ReadVar("lambda")
-          type=infile.ReadVar("ParticleType")
+          infiles.OpenSection2("Species",spec)
+          name=infiles.ReadVar("Name")[0]
+          numPtcl=infiles.ReadVar("NumParticles")[0]
+          lambdam = infiles.ReadVar("lambda")[0]
+          type=infiles.ReadVar("ParticleType")[0]
           speciesTable.body.append([name,numPtcl,lambdam,type])
-          infile.CloseSection()
+          infiles.CloseSection()
      totalTable=Table()
      totalTable.body=[]
      totalTable.border=0
@@ -237,118 +268,100 @@ def ProcessSystemInfo(infile):
                        
 
 
-def ProcessRunInfo(infile):
+def ProcessRunInfo(infiles):
      myTable=Table("Run Information")
      myTable.body=[]
      myTable.width='40%'
-     numVars=infile.CountVars()
+     numVars=infiles.CountVars()
      for counter in range(0,numVars):
-          data=infile.ReadVar(counter)
-          varName=infile.GetVarName(counter)
+          data=infiles.ReadVar(counter)[0]
+          varName=infiles.GetVarName(counter)
           myTable.body.append([varName,data])
      return myTable
 
 
 
-def ProcessTopTable(doc,infile):
+def ProcessTopTable(doc,infiles):
      largeTable=Table()
      largeTable.border=0
-     infile.OpenSection("RunInfo")
-     runTable=ProcessRunInfo(infile)
-     infile.CloseSection()
-     infile.OpenSection("System")
-     speciesTable=ProcessSystemInfo(infile)
-     infile.CloseSection()
+     infiles.OpenSection("RunInfo")
+     runTable=ProcessRunInfo(infiles)
+     infiles.CloseSection()
+     infiles.OpenSection("System")
+     speciesTable=ProcessSystemInfo(infiles)
+     infiles.CloseSection()
      largeTable.body.append([runTable,speciesTable])
      doc.append(largeTable)
      doc.append(HR())
      return doc
 
-
-def ProcessMove(doc,infile):
+def ProcessMove(doc,infiles):
      doc.append(Heading(1,"Moves"))
      myTable=Table()
      myTable.body=[['Moves','Acceptance']]
      myTable.width='50%'
-     infile.OpenSection("Moves")
-     numMoves=infile.CountSections()
+     infiles.OpenSection("Moves")
+     numMoves=infiles.CountSections()
      for i in range (0, numMoves):
-          infile.OpenSection(i)
-          name=infile.GetName()
-          print name
-          ar = infile.ReadVar("AcceptRatio")
+          infiles.OpenSection(i)
+          name=infiles.GetName()
+          ar = Avg(infiles.ReadVar("AcceptRatio"))
           if (ar!=None):
                totAccept=ar[0]
                numAccept=0
                for counter in range(1,len(ar)):
                     totAccept=totAccept+ar[counter]
                     numAccept=numAccept+1
-               print ar
-               print totAccept/numAccept
                myTable.body.append([name+" ",totAccept/numAccept])
           else:
                myTable.body.append([name,"No acceptance available"])
-          infile.CloseSection()
-     infile.CloseSection() # "Moves"
+          infiles.CloseSection()
+     infiles.CloseSection() # "Moves"
      doc.append(myTable)
 
 
-infiles = []
+
 basename = sys.argv[1]
-proc=0
-done = 0
-while (done == 0):
-   name = basename + '.' + repr(proc) + '.h5'
-   infile = IOSectionClass()
-   success = infile.OpenFile (name)
-   if (success==1) :
-        infiles.append(infile)
-   else:
-        done=1
-   proc = proc + 1
+infiles = IOSectionClassList()
+infiles.OpenFiles(basename);
       
-print 'Found ' +repr(len(infiles)) + ' output files.'
+print 'Found ' +repr(infiles.len()) + ' output files.'
 
 dirName=basename 
 cutoff=None
 if (os.access(dirName+".pref",os.F_OK)):
      print dirName+".pref"
      prefFile.OpenFile(dirName+".pref")
-#     prefFile.OpenSection("Test")
      print prefFile.ReadVar("cutoff")
      cutoff=prefFile.ReadVar("cutoff")
-#     prefFile.CloseFile() closing having issue?
+     prefFile.CloseFile() 
 if cutoff==None:
      cutoff=0
 if not(os.access(dirName,os.F_OK)):
      os.mkdir(dirName)
 os.chdir(dirName)
-#infile.OpenSection("PathDump")
-#pathData=GetPaths(infile)
-#infile.CloseSection()
-#(visualPath,visualBall)=InitVisualPaths(pathData)
-#PlotPaths(pathData,visualPath,visualBall,0)
 
 doc=SeriesDocument()
-ProcessTopTable(doc,infile)
-ProcessMove(doc,infile)
+ProcessTopTable(doc,infiles)
+ProcessMove(doc,infiles)
 
 currNum=0
-infile.OpenSection("Observables")
-numSections=infile.CountSections()
+infiles.OpenSection("Observables")
+numSections=infiles.CountSections()
 #print "The number of sections is ",numSections
 for counter in range(0,numSections):
-     infile.OpenSection(counter)
-     print infile.GetName()
-     myType=infile.ReadVar("Type")
+     infiles.OpenSection(counter)
+     print infiles.GetName()
+     myType=infiles.ReadVar("Type")[0]
+     print "myType = " + myType
      if myType=="Scalar":
-          currNum=ProcessScalarSection(infile,doc,currNum)
+          currNum=ProcessScalarSection(infiles,doc,currNum)
           doc.append(HR())
      elif myType=="CorrelationFunction":
-          currNum=ProcessCorrelationSection(infile,doc,currNum)
+          currNum=ProcessCorrelationSection(infiles,doc,currNum)
           doc.append(HR())
-     infile.CloseSection()
-infile.CloseSection() # "Observables"
+     infiles.CloseSection()
+infiles.CloseSection() # "Observables"
 
 
 doc.logo=""
