@@ -2,10 +2,10 @@
 
 main()
 {
-  Vec3 box(20.0, 20.0, 20.0);
-  Hamiltonian H(box, 2.0, 1.0);
+  Vec3 box(15.0, 15.0, 15.0);
+  Hamiltonian H(box, 4.0, 1.0);
   ConjGrad CG(H);
-  for (int i=0; i<30; i++)
+  for (int i=0; i<3000; i++)
     CG.Iterate();
 
 }

@@ -8,8 +8,8 @@ void ConjGrad::Setup()
   Hcnext.resize (H.GVecs.size());
   Hc.resize (H.GVecs.size());
   SDvec.resize (H.GVecs.size());
-  c = 0.0;
-  c(0) = 1.0;
+  c = 1.0;
+  Normalize (c);
   IsSetup = true;
 }
 
@@ -40,7 +40,8 @@ void ConjGrad::Iterate()
 
   double A1 = (E0 - E1 + 0.5*dE_dtheta)/(1.0-cos(2.0*theta1));
   double B1 = 0.5*dE_dtheta;
-  double thetaMin = 0.5*atan (B1/A1);
+  double thetaMin = 50.0*0.5*atan (B1/A1);
+  //  cerr << "thetaMin = " << thetaMin << endl;
 
   c = cos (thetaMin)*c + sin(thetaMin)*SDvec;
   Normalize (c);

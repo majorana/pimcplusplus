@@ -93,7 +93,8 @@ private:
   double Z;
 public:
   void Apply (const zVec &c, zVec &Hc);
-  CoulombClass (double z, GVecsClass &gvecs) : HamiltonianBase (gvecs) 
+  CoulombClass (double z, GVecsClass &gvecs) : 
+    HamiltonianBase (gvecs), Z(z)
   {
     // nothing for now
   }

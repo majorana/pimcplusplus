@@ -80,11 +80,16 @@ void KineticClass::Apply(const zVec &c, zVec &Kc)
 void CoulombClass::Apply(const zVec &c, zVec &Vc)
 {
   double volInv = 1.0/GVecs.GetBoxVol();
-  for (int i=0; i<c.size(); i++) 
-    for (int j=0; j<c.size(); j++) {
+  for (int i=0; i<c.size(); i++) {
+    for (int j=0; j<i; j++) {
       Vec3 diff = GVecs(i) - GVecs(j);
       Vc(i) += -4.0*volInv*M_PI*Z/dot(diff,diff)*c(j);
     }
+    for (int j=i+1; j<c.size(); j++) {
+      Vec3 diff = GVecs(i) - GVecs(j);
+      Vc(i) += -4.0*volInv*M_PI*Z/dot(diff,diff)*c(j);
+    }
+  }
 }
 
 

@@ -16,7 +16,7 @@ inline void Normalize (zVec &c)
 inline complex<double> conjdot(zVec &cA, zVec &cB)
 {
   complex<double> z(0.0, 0.0);
-  for (int i; i<cA.size(); i++)
+  for (int i=0; i<cA.size(); i++)
     z += conj(cA(i))*cB(i);
   return z;
 }
@@ -24,7 +24,7 @@ inline complex<double> conjdot(zVec &cA, zVec &cB)
 inline double realconjdot(zVec &cA, zVec &cB)
 {
   double re = 0.0;
-  for (int i; i<cA.size(); i++)
+  for (int i=0; i<cA.size(); i++)
     re += real(conj(cA(i))*cB(i));
   return re;
 }
