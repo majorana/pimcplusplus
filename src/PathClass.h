@@ -151,7 +151,7 @@ public:
     {
       //      NumSpecies = 0;
       TotalNumSlices=0;
-      Random.Init();
+      Random.Init(314159);
     }
 };
 

@@ -27,15 +27,11 @@ void ShiftMoveClass::Read(IOSectionClass &theInput)
 
 void ShiftMoveClass::MakeMove()
 {//Remember to mark Actions dirty!!!
-  //int numTimeSlicesToShift=(int)floor(sprng()*PathData->NumTimeSlices);
   int numTimeSlicesToShift =(int)floor((PathData.NumTimeSlices()-1)*PathData.Path.Random.Common());
   
   //      PathData.MoveJoin(1);
   PathData.ShiftData(numTimeSlicesToShift);
   //      PathData.Join=1+numTimeSlicesToShift;
-
-  
-    
 }
 
 void BisectionMoveClass::Read(IOSectionClass &moveInput)

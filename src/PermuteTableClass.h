@@ -17,7 +17,7 @@
 class CycleClass
 {
  public:
-  int Ncycles;
+  int Length;
   TinyVector<int,4> CycleRep;
   double P, C;
   ///Takes the number of particles you have and returns the
@@ -36,20 +36,20 @@ class PermuteTableClass
   int TableSize;
   int SpeciesNum;
   int Slice1, Slice2;
-  double Norm, NormInv;
   inline void AddEntry(const CycleClass &cycle);
-  inline int FindEntry(double xi);  
+
   PathDataClass &PathData;
   void ConstructHTable();
 
-
-  /// Stores which Htable and PermTable is for the forward move
-  /// 0 or 1.  Flips when a permutation is accepted.
  public:
-  int NumEntries;
+  double Norm, NormInv;
+  inline int FindEntry(double xi);  
 
+
+  int NumEntries;
+  CycleClass CurrentCycle;
   Array<double,2> HTable;
-  Array<CycleClass,1> PermTable;
+  Array<CycleClass,1> CycleTable;
 
   //  void PermuteHTable();
 
@@ -64,13 +64,12 @@ class PermuteTableClass
   void ConstructCycleTable(int speciesNum,int slice1,int slice2);
   void CanonicalPermRep(Array<int,1> P);
   double AttemptPermutation();
-  double CalcReverseProb(const CycleClass &myPerm,
-			 const PermuteTableClass &forwardTable);
+  double CalcReverseProb(const PermuteTableClass &forwardTable);
   PermuteTableClass(PathDataClass &myPathData) : PathData(myPathData)
   {
     NumEntries=0;
     TableSize = 1000;
-    PermTable.resize(TableSize);
+    CycleTable.resize(TableSize);
   }
 
 };
@@ -79,10 +78,10 @@ inline void PermuteTableClass::AddEntry(const CycleClass &cycle)
 {
   if (NumEntries >= (TableSize-1)) {
     TableSize *= 2;
-    PermTable.resizeAndPreserve(TableSize);
+    CycleTable.resizeAndPreserve(TableSize);
   }
 
-  PermTable(NumEntries) = cycle;
+  CycleTable(NumEntries) = cycle;
   NumEntries++;
 }
 
@@ -93,17 +92,17 @@ inline int PermuteTableClass::FindEntry(double xi)
 {
   // Do a binary search
   xi *= Norm; 
-  int hi = NumEntries;
+  int hi = NumEntries-1;
   int lo = 0;
-  int attempt;
-  while (hi != lo) {
+  int attempt = (hi+lo)>>1;
+  while (attempt != lo) {
     attempt = (hi+lo)>>1;
-    if (PermTable(attempt).C > xi)
+    if (CycleTable(attempt).C > xi)
       hi = attempt;
     else
       lo = attempt;
   }
-  return (lo);
+  return (hi);
 }
 
 

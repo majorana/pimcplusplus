@@ -12,7 +12,9 @@ DEFS = -DNO_COUT -DDEBUG -DBZ_DEBUG  -DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG
 
 PIMCobjs =                           \
   Main.o                             \
+  BisectionClass.o                   \
   PIMCClass.o                        \
+  BisectionMoveClass2.o		     \
   ObservableClass.o                  \
   Common/Splines/CubicSpline.o       \
   Common/Splines/Grid.o              \
@@ -49,6 +51,8 @@ PIMCobjs =                           \
 
 TestPermobjs =                       \
   TestPermutation.o                  \
+  BisectionClass.o                   \
+  BisectionMoveClass2.o		     \
   PIMCClass.o                        \
   ObservableClass.o                  \
   Common/Splines/CubicSpline.o       \
@@ -130,7 +134,7 @@ clean:	Common_clean
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc
+SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc BisectionMoveClass2.cc
 
 newmake: Common_newmake Tests_newmake
 	make -f template.make Makefile FRC=force_rebuild

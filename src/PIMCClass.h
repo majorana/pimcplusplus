@@ -20,11 +20,12 @@ private:
   IOSectionClass OutFile;
   LoopClass Algorithm;
 public:
-  PermuteTableClass PermuteTable;
+  PermuteTableClass ForwPermuteTable, RevPermuteTable;
   PathDataClass PathData;
   void Read(IOSectionClass &in);
   void Run();
-  PIMCClass() : Algorithm(&Moves, &Observables), PermuteTable(PathData)
+  PIMCClass() : Algorithm(&Moves, &Observables), 
+		ForwPermuteTable(PathData), RevPermuteTable(PathData)
   { /* Do nothing for now */ }
 };
 

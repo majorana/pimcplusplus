@@ -6,23 +6,47 @@ void TestPerm(PIMCClass &pimc)
   PathDataClass &PathData = pimc.PathData;
   PathClass &Path = PathData.Path;
 
-  pimc.PermuteTable.ConstructCycleTable(0, 0, 8);
-  PermuteTableClass &PermuteTable = pimc.PermuteTable;
+  pimc.ForwPermuteTable.ConstructCycleTable(0, 0, 8);
+  PermuteTableClass &ForwPermuteTable = pimc.ForwPermuteTable;
 
-  cerr << "HTable = \n" << PermuteTable.HTable << endl;
+  cerr << "HTable = \n" << ForwPermuteTable.HTable << endl;
   cerr << "CycleTable = \n";
-  for (int i=0; i<PermuteTable.NumEntries; i++) {
-    CycleClass &perm = PermuteTable.PermTable(i);
-    cerr << "Ncycles = " << perm.Ncycles << endl;
+  for (int i=0; i<ForwPermuteTable.NumEntries; i++) {
+    CycleClass &cycle = ForwPermuteTable.CycleTable(i);
+    cerr << "Length = " << cycle.Length << endl;
     cerr << "Cycle = [";
-    for (int j=0; j<perm.Ncycles; j++)
-      cerr << perm.CycleRep[j] << " ";
+    for (int j=0; j<cycle.Length; j++)
+      cerr << cycle.CycleRep[j] << " ";
     cerr << "]\n";
-    cerr << "P = " << perm.P << " C = " << perm.C << endl;
+    cerr << "P = " << cycle.P << " C = " << cycle.C << endl;
     cerr << endl;
   }
+  //  cerr<<"MAde it here"<<endl;
+  double forwardProb=pimc.ForwPermuteTable.AttemptPermutation();
+  //  cerr<<"calculated forward prob"<<endl;
+  double reverseProb=
+    pimc.RevPermuteTable.CalcReverseProb(ForwPermuteTable);
+  cerr<<forwardProb<<" "<<reverseProb << endl;
+
+  int N = ForwPermuteTable.NumEntries;
+  Array<int,1> hits(N);
+  hits  = 0;
+  for (int i=0; i<10000000; i++) {
+    double xi = pimc.PathData.Path.Random.Local();
+    hits(ForwPermuteTable.FindEntry(xi))++;
+  }
+  
+  for (int i=0; i<N; i++) {
+    double expProb = 
+      ForwPermuteTable.CycleTable(i).P * ForwPermuteTable.NormInv;
+    double obsProb = (double)hits(i) * 1.0e-6;
+    cerr << "Expected prob: "<<expProb<<endl;
+    cerr << "Observed prob: "<<obsProb<<endl;
+  }
+    
 
 }
+
 
 main(int argc, char **argv)
 {
@@ -33,5 +57,7 @@ main(int argc, char **argv)
   IOSectionClass in;
   in.OpenFile ("TestPerm.in");
   pimc.Read(in);
+  pimc.Run();
   TestPerm (pimc);
+  
 }

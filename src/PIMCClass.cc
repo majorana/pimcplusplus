@@ -1,6 +1,6 @@
 #include "PIMCClass.h"
 #include "BisectionMoveClass.h"
-
+#include "BisectionMoveClass2.h"
 
 void PIMCClass::Read(IOSectionClass &in)
 {
@@ -39,7 +39,8 @@ void PIMCClass::Read(IOSectionClass &in)
 
   // Read in the Permuation info
   assert(in.OpenSection("Permutations"));
-  PermuteTable.Read(in);
+  ForwPermuteTable.Read(in);
+  RevPermuteTable.Read(in);
   in.CloseSection();
 }
 
@@ -61,6 +62,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)=new ShiftMoveClass(PathData);
     else if (MoveType=="PrintMove")
       Moves(counter)=new PrintMoveClass(PathData);
+    else if (MoveType=="Bisection2")
+      Moves(counter)=new BisectionMoveClass2(PathData);
     else {
       cerr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();
