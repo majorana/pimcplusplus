@@ -1,6 +1,9 @@
 SOURCES = "*.cc"
 
-all:	InputOutput.o InputOutputASCII.o InputOutputHDF5.o InputFile.o
+all:	InputOutput.o  InputOutputHDF5.o InputFile.o # InputOutputASCII.o
+
+clean:
+	rm -f *.o
 
 .cc.o: 
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 

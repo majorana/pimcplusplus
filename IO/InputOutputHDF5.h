@@ -1,5 +1,6 @@
 #ifndef INPUT_OUTPUT_HDF5_H
-#include "InputOutput.h"
+#define INPUT_OUTPUT_HDF5_H
+#include "InputOutputBase.h"
 #include <iostream>
 #include <stack>
 #include "hdf5.h"
@@ -48,14 +49,14 @@ public:
 /// This class stores a section of an HDF5 file.  The boolean value,
 /// IsRoot, store whether this particular section is a the root node
 /// of an HDF5 file.
-class InputSectionHDF5Class : public InputSectionClass
+class InputTreeHDF5Class : public InputTreeClass
 {
 private:
   bool IsOpen, IsRoot;
   /// ReadGroup reads a HDF5 group, given by name, from the file.
   /// It reads in all variables and groups within the file, calling
   /// itself recursively for groups within itself.
-  void ReadGroup (hid_t parentGroupID, string name, InputSectionClass *parent);
+  void ReadGroup (hid_t parentGroupID, string name, InputTreeClass *parent);
   /// StripName strips the trailing ".#" from a string.  These were
   /// added by the HDF5 writer in order to have multiples sections
   /// with the same name.
@@ -70,9 +71,9 @@ public:
   void PrintTree();
   void GroupIterator (string member_name);
   bool OpenFile (string fileName, string mySectionName,
-		 InputSectionClass *parent);
-  void Close();
-  InputSectionHDF5Class() : IsOpen(false), IsRoot(false)
+		 InputTreeClass *parent);
+  void CloseFile();
+  InputTreeHDF5Class() : IsOpen(false), IsRoot(false)
   { }
 };
 
@@ -153,6 +154,7 @@ private:
   stack<HDF5SectionClass> SectionStack;
 public:
   bool OpenFile (string fileName);
+  void CloseFile();
   void OpenSection (string name);
   void CloseSection ();
   void WriteVar (string name, double T);
@@ -167,10 +169,8 @@ public:
   void WriteVar(string name, Array<string,1> &v);
   void WriteVar(string name, Array<string,2> &v);
   void WriteVar(string name, Array<string,3> &v);
-
-
   //void WriteVar (string name, Array<double,2> &m);
-  void CloseFile();
+
   OutputSectionHDF5Class() : IsOpen(false)
   { }
 };

@@ -1,167 +1,91 @@
 #ifndef INPUT_OUTPUT_H
 #define INPUT_OUTPUT_H
 
-#include <string>
-#include <list>
-#include "../Blitz.h"
-#include <fstream>
+#include "InputOutputBase.h"
+#include "InputOutputHDF5.h"
+//#include "InputOutputASCII.h"
 
-using namespace std;
-
-
-class VarClass 
-{  
-public:
-  string Name;
-
-  virtual bool ReadInto (double &val)              = 0;
-  virtual bool ReadInto (Array<double,1> &val)     = 0;
-  virtual bool ReadInto (Array<double,2> &val)     = 0;
-  virtual bool ReadInto (Array<double,3> &val)     = 0;
-  virtual bool ReadInto (int &val)                 = 0;
-  virtual bool ReadInto (Array<int,1> &val)        = 0;
-  virtual bool ReadInto (Array<int,2> &val)        = 0;
-  virtual bool ReadInto (Array<int,3> &val)        = 0;
-  virtual bool ReadInto (string &val)              = 0;
-  virtual bool ReadInto (Array<string,1> &val)     = 0;
-  virtual bool ReadInto (Array<string,2> &val)     = 0;
-  virtual bool ReadInto (Array<string,3> &val)     = 0; 
-  /*virtual bool ReadInto (bool &val)                = 0;
-  virtual bool ReadInto (Array<bool,1> &val)       = 0;
-  virtual bool ReadInto (Array<bool,2> &val)       = 0;
-  virtual bool ReadInto (Array<bool,3> &val)       = 0;*/
-
-};
+#include <stack>
+inline string Extension (string fileName)
+{
+  string extn;
+  stack<char> bwExtn;
+  int pos = fileName.length()-1;
+  while ((pos >= 0) && fileName[pos]!='.') {
+    bwExtn.push(fileName[pos]);
+    pos--;
+  }
+  
+  if (fileName[pos] == '.') 
+    while (!bwExtn.empty()) {
+      extn += bwExtn.top();
+      bwExtn.pop();
+    }
+  else
+    extn = "";
+  return (extn);
+}
 
 
 
 
-
+///  Wrapper class for InputTreeClass that gives a nearly identical
+///  interface as the OutputSectionClass.
 class InputSectionClass
 {
- public:
-  virtual void PrintTree(int numIndent)=0;
-  virtual void PrintTree()=0;
-  InputSectionClass* Parent;
-  list<InputSectionClass*> SectionList;
-  list<VarClass*> VarList;
-  list<InputSectionClass*>::iterator Iter;
+private:
+  InputTreeClass *CurrentSection;
 public:
-  string Name;
-  inline bool FindSection (string name, InputSectionClass * &sectionPtr, 
-		    bool rewind=true);
-  inline void Rewind(){
-    Iter=SectionList.begin();
+  bool OpenFile (string fileName)
+  {
+    bool success;
+    string extn = Extension (fileName);
+    if (extn == "h5") 
+      CurrentSection = new InputTreeHDF5Class;
+    //else if (extn == "xml")
+    //CurrentSection = new InputTreeXMLClass;
+    //else
+    //  CurrentSection = new InputTreeASCIIClass;
+    success = CurrentSection->OpenFile(fileName, "Root", NULL);
+    if (!success)
+      delete (CurrentSection);
+    
+    return (success);
   }
-  inline int CountSections(string name);
+
+  void CloseFile ()
+  {
+    CurrentSection->CloseFile();
+    delete (CurrentSection);
+  }
+
+  inline bool OpenSection (string name)
+  {
+    InputTreeClass *newSection;
+    bool success = CurrentSection->FindSection(name, newSection);
+    if (success)
+      CurrentSection=newSection;
+    return success;
+  }
+  
+  inline void CloseSection ()
+  {
+    assert (CurrentSection->Parent != NULL);
+    CurrentSection = CurrentSection->Parent;
+  }
 
   template<class T>
-    bool ReadVar(string name, T &var)
-    {
-      bool readVarSuccess;
-      list<VarClass*>::iterator varIter=VarList.begin();
-      while ((varIter!=VarList.end() && (*varIter)->Name!=name)){
-	varIter++;
-      }
-      bool found = varIter != VarList.end();
-      if (found){
-	readVarSuccess=(*varIter)->ReadInto(var);
-      }
-      else if (Parent!=NULL){
-	readVarSuccess=Parent->ReadVar(name,var);
-      }
-      else {
-	cerr<<"Couldn't find variable "<<name;
-	return false;
-      }  
-      return readVarSuccess;	 
-    }
-  
-  virtual bool OpenFile (string fileName, 
-			 string mySectionName, 
-			 InputSectionClass *parent) = 0;
-  virtual void Close() = 0;
+  bool ReadVar(string name, T &var)
+  {
+    CurrentSection->ReadVar(name, var);
+  }
+
+  inline int CountSections(string fileName)
+  {
+    CurrentSection->CountSections(fileName);
+  }
 };
 
-
-
-inline int InputSectionClass::CountSections(string name)
-{
-  list<InputSectionClass*>::iterator sectionIter;
-  sectionIter=SectionList.begin();
-  int numSections=0;
-  while (sectionIter!=SectionList.end()){
-    if (name==(*sectionIter)->Name){
-      numSections++;
-    }
-    sectionIter++;
-  }
-  return numSections;
-}
-
-
-
-
-
-
-inline bool InputSectionClass::FindSection (string name, 
-					    InputSectionClass* &sectionPtr,
-					    bool rewind)
-{
-  
-  list<InputSectionClass*>::iterator tempIter=Iter;
-  while ((Iter != SectionList.end()) && ((*Iter)->Name!=name)){
-    Iter++;
-  }
-  bool found = Iter != SectionList.end(); 
-  if (found){
-    sectionPtr = *Iter;
-    Iter++;
-  }
-  if (rewind)
-    Iter = SectionList.begin();
-  sectionPtr->Iter=sectionPtr->SectionList.begin();
-  if (!found){
-    Iter=tempIter;
-  }
-  return (found);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class OutputSectionClass
-{
-public:
-  virtual bool OpenFile(string fileName)                 = 0;
-  virtual void CloseFile()                               = 0;
-  virtual void OpenSection(string name)                  = 0;
-  virtual void CloseSection()                            = 0;
-  virtual void WriteVar(string name, double T)           = 0;
-  virtual void WriteVar(string name, Array<double,1> &v) = 0;
-  virtual void WriteVar(string name, Array<double,2> &v) = 0;
-  virtual void WriteVar(string name, Array<double,3> &v) = 0;
-  virtual void WriteVar(string name, int T)              = 0;
-  virtual void WriteVar(string name, Array<int,1> &v)    = 0;
-  virtual void WriteVar(string name, Array<int,2> &v)    = 0;
-  virtual void WriteVar(string name, Array<int,3> &v)    = 0;
-  virtual void WriteVar(string name, string str)         = 0;
-  virtual void WriteVar(string name, Array<string,1> &v) = 0;
-  virtual void WriteVar(string name, Array<string,2> &v) = 0;
-  virtual void WriteVar(string name, Array<string,3> &v) = 0;
-
-};
 
 
 

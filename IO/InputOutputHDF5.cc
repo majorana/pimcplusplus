@@ -161,7 +161,7 @@ bool VarHDF5Class::ReadInto (Array<string,3> &val)
 
 /// Strips everything after and including a '.' in the string.
 /// Used to remove section numbers.
-string InputSectionHDF5Class::StripName (string str)
+string InputTreeHDF5Class::StripName (string str)
 {
   int pos = str.find(".");
   if (pos > 0)
@@ -169,9 +169,9 @@ string InputSectionHDF5Class::StripName (string str)
   return(str);
 }
 
-bool InputSectionHDF5Class::OpenFile(string fileName,
+bool InputTreeHDF5Class::OpenFile(string fileName,
 				     string mySectionName,
-				     InputSectionClass *parent)
+				     InputTreeClass *parent)
 {
   GroupID = H5Fopen(fileName.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
   if (GroupID < 0)
@@ -192,12 +192,12 @@ bool InputSectionHDF5Class::OpenFile(string fileName,
 herr_t HDF5GroupIterator(hid_t group_id, const char *member_name,
 			 void *classPtr)
 {
-  InputSectionHDF5Class &HDF5sec= *((InputSectionHDF5Class *)classPtr);
+  InputTreeHDF5Class &HDF5sec= *((InputTreeHDF5Class *)classPtr);
   HDF5sec.GroupIterator(member_name);
   return (0);
 }
 
-void InputSectionHDF5Class::GroupIterator(string member_name)
+void InputTreeHDF5Class::GroupIterator(string member_name)
 {
   //cerr << "GroupIterator( " << member_name << ")\n";
 
@@ -207,10 +207,10 @@ void InputSectionHDF5Class::GroupIterator(string member_name)
   
 
   if (statbuf.type == H5G_GROUP) {
-    InputSectionHDF5Class *newGroup = new InputSectionHDF5Class;
+    InputTreeHDF5Class *newGroup = new InputTreeHDF5Class;
     newGroup->GroupID = H5Gopen (GroupID, member_name.c_str());
     if (newGroup->GroupID < 0) {
-      cerr << "Error in InputSectionHDF5Class::GroupIterator.\n";
+      cerr << "Error in InputTreeHDF5Class::GroupIterator.\n";
       exit(10);
     }
     SectionList.push_back(newGroup);
@@ -233,7 +233,7 @@ void InputSectionHDF5Class::GroupIterator(string member_name)
   }
   else if (statbuf.type == H5G_TYPE) {
     cerr << "Compound types not yet supported "
-	 << "in InputSectionHDF5Class.  Ignoring " 
+	 << "in InputTreeHDF5Class.  Ignoring " 
 	 << member_name << endl;
   }
   else
@@ -253,7 +253,7 @@ void PrintIndent(int num)
 
 
 
-void InputSectionHDF5Class::PrintTree(int indentNum)
+void InputTreeHDF5Class::PrintTree(int indentNum)
 {
   PrintIndent(indentNum);
   cout<<"Section: "<<Name<<endl;
@@ -263,7 +263,7 @@ void InputSectionHDF5Class::PrintTree(int indentNum)
     cout<<"Variable: "<<(*varIter)->Name<<" "<<endl;
     varIter++;
   }
-  list<InputSectionClass*>::iterator secIter=SectionList.begin();
+  list<InputTreeClass*>::iterator secIter=SectionList.begin();
   while (secIter!=SectionList.end()){
     //    cout<<"Section: "<<(*secIter)->Name<<endl;
     (*secIter)->PrintTree(indentNum+1);
@@ -271,18 +271,18 @@ void InputSectionHDF5Class::PrintTree(int indentNum)
   }
 }
 
-void InputSectionHDF5Class::PrintTree()
+void InputTreeHDF5Class::PrintTree()
 {
   PrintTree(0);
 }
 
 /// ReadGroup iterates over the members of it's group, creating
-/// VarHDF5Class objects and new InputSectionHDF5Class objects as it
+/// VarHDF5Class objects and new InputTreeHDF5Class objects as it
 /// goes, calling itself recursively as necessary to traverse all the
 /// subobjects below itself.
-void InputSectionHDF5Class::ReadGroup(hid_t parentGroupID,
+void InputTreeHDF5Class::ReadGroup(hid_t parentGroupID,
 				      string name,
-				      InputSectionClass *parent)
+				      InputTreeClass *parent)
 {
   Parent = parent;
   Name = StripName(name);  
@@ -294,7 +294,7 @@ void InputSectionHDF5Class::ReadGroup(hid_t parentGroupID,
 }
 
 
-void InputSectionHDF5Class::Close()
+void InputTreeHDF5Class::CloseFile()
 {
   // First, free all the variables in the list
   while (!VarList.empty()) {
@@ -305,7 +305,7 @@ void InputSectionHDF5Class::Close()
   // Now, call all closes recursively and delete all sections
   while (!SectionList.empty())
     {
-      SectionList.front()->Close();
+      SectionList.front()->CloseFile();
       delete SectionList.front();
       SectionList.pop_front();
     }
