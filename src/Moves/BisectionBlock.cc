@@ -38,14 +38,13 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
-      if (PathData.Path.LongRange){
+      ///If it's David's long range class then do this
+      if (PathData.Path.DavidLongRange){
+	newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+      }
+      else if (PathData.Path.LongRange){
 	if (PathData.Actions.UseRPA)
 	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-      ///If it's David's long range class then do this
-	else if (PathData.Path.DavidLongRange){
-	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
-	}
-	////
 	else
 	  newStage->Actions.push_back(&PathData.Actions.LongRange);
 

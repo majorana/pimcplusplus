@@ -53,13 +53,15 @@ private:
   ///make the readings of David's file work correctly (sorry,
   ///Ken...I'll find out how to make it more transparent in a bit)
   void SortRhoK();
-  Array<int,1> MagKint;
 
   /// Stores indices into C array for fast computation of rho_k
   Array<TinyVector<int,NDIM>,1> kIndices;
   /// This stores e^{i\vb_i \cdot r_i^\alpha}
   TinyVector<Array<complex<double>,1>,NDIM> C;
 public:
+  Array<int,1> MagKint;
+  Array<double,1> MagK;
+
   CommunicatorClass &Communicator;
 
   Mirrored1DClass<dVec> RefPath;

@@ -414,12 +414,12 @@ void PathClass::SetupkVecs2D()
 ///range class. 
 void PathClass::SortRhoK()
 {
-  Array<double,1> magK;
+  /////  Array<double,1> MagK;
   //  Array<int,1> MagKint;
-  magK.resize(kVecs.size());
+  MagK.resize(kVecs.size());
   MagKint.resize(kVecs.size());
   for (int kVec=0;kVec<kVecs.size();kVec++){
-    magK(kVec)=sqrt(kVecs(kVec)[0]*kVecs(kVec)[0]+
+    MagK(kVec)=sqrt(kVecs(kVec)[0]*kVecs(kVec)[0]+
 			kVecs(kVec)[1]*kVecs(kVec)[1]);
   }
   int smallIndex=0;
@@ -431,18 +431,18 @@ void PathClass::SortRhoK()
 
 
   for (int currentNum=0;currentNum<kVecs.size();currentNum++){
-    for (int counter=0;counter<magK.size();counter++){
-      if (MagKint(counter)==-1 && magK(counter)<magK(smallIndex)){
+    for (int counter=0;counter<MagK.size();counter++){
+      if (MagKint(counter)==-1 && MagK(counter)<MagK(smallIndex)){
 	smallIndex=counter;
       }
     }
-    for (int counter=0;counter<magK.size();counter++){
-      if (abs(magK(smallIndex)-magK(counter))<1e-4){
+    for (int counter=0;counter<MagK.size();counter++){
+      if (abs(MagK(smallIndex)-MagK(counter))<1e-4){
 	MagKint(counter)=currentNum;
       }
     }
     smallIndex=-1;
-    for (int counter=0;counter<magK.size();counter++){
+    for (int counter=0;counter<MagK.size();counter++){
       if (MagKint(counter)==-1)
 	smallIndex=counter;
     }
@@ -514,7 +514,7 @@ void PathClass::SetupkVecs3D()
 
 void PathClass::CalcRho_ks_Slow(int slice, int species)
 {
-  cerr<<"My size is "<< kVecs.size()<<endl;
+  ///  cerr<<"My size is "<< kVecs.size()<<endl;
   for (int ki=0; ki<kVecs.size(); ki++) {
     complex<double> rho;
     rho = 0.0;
@@ -530,7 +530,7 @@ void PathClass::CalcRho_ks_Slow(int slice, int species)
 
 void PathClass::CalcRho_ks_Fast(int slice,int species)
 {
-  cerr<<"My size is "<< kVecs.size()<<endl;
+  //  cerr<<"My size is "<< kVecs.size()<<endl;
   //  cerr<<"Beginning the calcrhok stuff"<<endl;
   // Zero out Rho_k array
   for (int ki=0;ki<kIndices.size();ki++)

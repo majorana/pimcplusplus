@@ -6,8 +6,8 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
 {
   double myNum;
   cerr<<"The current size of the thing is "<<Path.kVecs.size()<<endl;
-  uk.resize(Path.kVecs.size());
-  duk.resize(Path.kVecs.size());
+  uk.resize(Path.MagK.size());
+  duk.resize(Path.MagK.size());
   for (int counter=0;counter<duk.size();counter++){
     duk(counter)=0.0;
   }
@@ -24,10 +24,10 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
 	infile>>myNum;
 	if (lvl==1 && isEnergy==1){
 	  uk(kVec)=myNum;
-	  cout<<myNum<<endl;
 	}
-	if (lvl==1 && isEnergy!=1){
+	if (lvl==1 && isEnergy==2){
 	  duk(kVec)+=myNum;
+	  cout<<"My energy is "<<myNum<<endl;
 	}
 
       }
@@ -56,23 +56,32 @@ double DavidLongRangeClass::Action (int slice1, int slice2,
       factor = 0.5;
     else
       factor = 1.0;
-
+    //    cerr<<"Starting loop\n";
     for (int species=0; species<Path.NumSpecies(); species++) {
       Path.CalcRho_ks_Fast(slice,species);
       //      PairActionFitClass &pa = *PairMatrix(species,species);
       //      if (pa.IsLongRange()) {
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
+	double kmagnitude=sqrt(Path.kVecs(ki)[0]*Path.kVecs(ki)[0]+
+			Path.kVecs(ki)[1]*Path.kVecs(ki)[1]);
+	int kcounter=0;
+	while (abs(kmagnitude-Path.MagK(kcounter))>1e-10)
+	  kcounter++;
+	assert(kcounter<Path.MagK.size());
+	////	cerr<<"K counter is "<<kcounter<<" "<<Path.MagKint(kcounter)<<endl;
 	//	cerr<<"My ki is "<<ki<<endl;
 	//	cerr<<"The spot I'm acessing is "<<Path.MagKint(ki)<<endl;
 	//	cerr<<"The value of this spot is "<<uk(Path.MagKint(ki))<<endl;
-	total +=  factor*rhok2 * uk(Path.MagKint(ki));
+	total +=  factor*rhok2 * uk(Path.MagKint(kcounter));
 	
       }
     }
+    //    cerr<<"Ending loop";
   }
   //  cerr<<"I am being called"<<endl;
   //  cerr<<"My total is "<<total;
+
   return total;
 
 }
@@ -80,31 +89,42 @@ double DavidLongRangeClass::Action (int slice1, int slice2,
   ///Not really d_dbeta but total energy
 double DavidLongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 {
-
-
+  //  cerr<<"My level is "<<level<<endl;
   double total=0;
-  double factor;
+  double factor=1.0;
   for (int slice=slice1;slice<=slice2;slice++){
-    if ((slice == slice1) || (slice==slice2))
-      factor = 0.5;
-    else
-      factor = 1.0;
+    //    if ((slice == slice1) || (slice==slice2))
+    //      factor = 0.5;
+    //    else
+    //      factor = 1.0;
+    //    cerr<<"Starting loop\n";
     for (int species=0; species<Path.NumSpecies(); species++) {
       Path.CalcRho_ks_Fast(slice,species);
       //      PairActionFitClass &pa = *PairMatrix(species,species);
       //      if (pa.IsLongRange()) {
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
+	double kmagnitude=sqrt(Path.kVecs(ki)[0]*Path.kVecs(ki)[0]+
+			Path.kVecs(ki)[1]*Path.kVecs(ki)[1]);
+	int kcounter=0;
+	while (abs(kmagnitude-Path.MagK(kcounter))>1e-10)
+	  kcounter++;
+	assert(kcounter<Path.MagK.size());
+	////	cerr<<"K counter is "<<kcounter<<" "<<Path.MagKint(kcounter)<<endl;
 	//	cerr<<"My ki is "<<ki<<endl;
 	//	cerr<<"The spot I'm acessing is "<<Path.MagKint(ki)<<endl;
 	//	cerr<<"The value of this spot is "<<uk(Path.MagKint(ki))<<endl;
-	total +=  factor*rhok2 * duk(Path.MagKint(ki));
+	total +=  factor*rhok2 * duk(Path.MagKint(kcounter));
 	
       }
     }
+    //    cerr<<"Ending loop";
   }
   //  cerr<<"I am being called"<<endl;
+  //  cerr<<"My total is "<<total;
+
   return total;
+
 
 }
 

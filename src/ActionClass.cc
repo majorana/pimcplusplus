@@ -1300,7 +1300,7 @@ void ActionClass::Energy(int slice1, int level,
   const int NumImage=1;
   for (int ptcl=0; ptcl<numPtcls; ptcl++){
     if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
-      spring += 1.5/levelTau;
+      spring += (NDIM*0.5)/levelTau;
   }
   for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
     // Do free-particle part
@@ -1398,7 +1398,11 @@ double ActionClass::PotentialEnergy (int slice)
 	vSum -= PairActionVector(PairIndex)->Vlong(rmag);
     }
   }
-  if (PathData.Path.LongRange){
+  
+  if (PathData.Path.DavidLongRange){
+    vSum += PathData.Actions.DavidLongRange.d_dBeta(slice,slice,0);
+  } 
+  else if (PathData.Path.LongRange){
     vSum += LongRange_V(slice);
   }
   return vSum;
