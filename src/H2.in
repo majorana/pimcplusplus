@@ -64,8 +64,22 @@ Section (Observables)
 	}
     }
 }
+Section (Moves){
+  Section (Move)
+    {
+      string type="Bisection";
+      string name="electronBisection";
+      string<int,5> ActiveParticles=[5,4,3];
+    }
+  Section (Move)
+    {
+      string type = "Displacement";
+      string name = "asdf";
+    }
+}
 
-Section (PIMC)
+
+Section (Program)
 {
   int steps = 1000000;
   Section (Loop)

@@ -9,11 +9,11 @@ void DistanceTablePBCClass::DistDispTest(int timeSlice, int ptcl1, int ptcl2,
     
   dVec normalDisplace=p2-p1;
   for (int dim=0;dim<NDIM;dim++){
-    while (normalDisplace(dim)>Path.Box(dim)/2){
-      normalDisplace(dim)=normalDisplace(dim)-Path.Box(dim)/2;
+    while (normalDisplace(dim)>Path.Box(dim)*0.5){
+      normalDisplace(dim)=normalDisplace(dim)-Path.Box(dim);
     }
-    while (normalDisplace(dim)< -Path.Box(dim)/2){
-      normalDisplace(dim)=normalDisplace(dim)+Path.Box(dim)/2;
+    while (normalDisplace(dim)< -Path.Box(dim)*0.5){
+      normalDisplace(dim)=normalDisplace(dim)+Path.Box(dim);
     }
     
   }
@@ -35,16 +35,21 @@ void DistanceTablePBCClass::DistDispTest(int timeSliceA, int timeSliceB,
   dVec normalDisplaceB=p2B-p1B;
   
   for (int dim=0;dim<NDIM;dim++){
-    while (normalDisplaceA(dim)>Path.Box(dim)/2){
-      normalDisplaceA(dim)=normalDisplaceA(dim)-Path.Box(dim)/2;
-      normalDisplaceB(dim)=normalDisplaceB(dim)-Path.Box(dim)/2;
+    while (normalDisplaceA(dim)>Path.Box(dim)*0.5){
+      normalDisplaceA(dim)=normalDisplaceA(dim)-Path.Box(dim);
+      normalDisplaceB(dim)=normalDisplaceB(dim)-Path.Box(dim);
     }
-    while (normalDisplaceA(dim)< -Path.Box(dim)/2){
-      normalDisplaceA(dim)=normalDisplaceA(dim)+Path.Box(dim)/2;
-      normalDisplaceB(dim)=normalDisplaceB(dim)+Path.Box(dim)/2;
+    while (normalDisplaceA(dim)< -Path.Box(dim)*0.5){
+      normalDisplaceA(dim)=normalDisplaceA(dim)+Path.Box(dim);
+      normalDisplaceB(dim)=normalDisplaceB(dim)+Path.Box(dim);
     }
     
   }
+  //  cerr<<"P1A "<<p1A<<endl;
+  //  cerr<<"P2A "<<p2A<<endl;
+  //  cerr<<"P1B "<<p1B<<endl;
+  //  cerr<<"P2B "<<p2B<<endl; 
+
   dispA=normalDisplaceA;
   distA=sqrt(dot(dispA,dispA));
   dispB=normalDisplaceB;
@@ -125,6 +130,7 @@ void DistanceTablePBCClass::UpdateAll()
 void DistanceTablePBCClass::Update(int timeSlice,
 				   const Array<int,1> &ptclArray)
 {
+
   /// First, force all particles that have moved back into the box.
   for (int ptclIndex=0; ptclIndex<ptclArray.size(); ptclIndex++)
     {

@@ -86,22 +86,29 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
       dVec r = Path(slice,ptcl);
       dVec rp= Path(slice+skip,ptcl);
       dVec rpp=Path(slice+(skip>>1),ptcl);
-      dVec rdiff;// = 
-      //DistanceTable->Velocity(slice, slice+skip, ptcl);
-      rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
+      dVec rdiff=DistanceTable->Velocity(slice, slice+skip, ptcl);
+      //dVec rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
       dVec rbar = r + 0.5*rdiff;
       dVec newDelta=GaussianRandomVec(sigma);
-      for (int dim=0; dim<NDIM; dim++)
-	{
+      double GaussProd=1.0;
+      for (int dim=0; dim<NDIM; dim++) {
 	  while (newDelta[dim] > (0.5*Path.Box[dim]))
-	    newDelta -= Path.Box[dim];
+	    newDelta[dim] -= Path.Box[dim];
 	  while (newDelta[dim] < (-(0.5*Path.Box[dim])))
-	    newDelta += Path.Box[dim];
-	}
+	    newDelta[dim] += Path.Box[dim];
+	  double GaussSum = 0.0;
+	  int NumImage = 4;
+	  for (int image=-NumImage; image <= NumImage; image++) {
+	    double dist = newDelta[dim]+(double)image*Path.Box[dim];
+	    GaussSum += exp(-0.5*dist*dist/sigma2);
+	  }
+	  GaussProd *= GaussSum;
+      }
+      logNewSampleProb += prefactorOfSampleProb + log(GaussProd);
       //DistanceTable->PutInBox(newDelta);
       rpp=rbar+newDelta;
-      logNewSampleProb=logNewSampleProb+
-	(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
+      //logNewSampleProb=logNewSampleProb+
+      //	(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
       ///Here we've stored the new position in the path
       Path.SetPos(slice+(skip>>1),ptcl,rpp);
     }
@@ -130,17 +137,29 @@ inline double ActionClass::LogSampleProb(int startSlice, int endSlice,
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int slice=startSlice;slice<endSlice;slice+=skip){
       dVec r = Path(slice,ptcl);
-      dVec rdiff;// = 
-      //DistanceTable->Velocity(slice, slice+skip, ptcl);
-      rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
+      dVec rdiff = DistanceTable->Velocity(slice, slice+skip, ptcl);
+      //dVec rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
       dVec rp= Path(slice+skip,ptcl);
       dVec rpp=Path(slice+(skip>>1),ptcl);
       ///We've ignored boundary conditions here (well we think this is fixed but we're not sure)
       dVec rbar=r + 0.5*rdiff;
       dVec Delta= rpp - rbar;
-      //DistanceTable->PutInBox(Delta);
-      logSampleProb=logSampleProb+
-	(prefactorOfSampleProb-0.5*dot(Delta,Delta)/(sigma2));
+      DistanceTable->PutInBox(Delta);
+      
+      double GaussProd=1.0;
+      for (int dim=0; dim<NDIM; dim++) {
+	double GaussSum = 0.0;
+	int NumImage = 4;
+	for (int image=-NumImage; image <= NumImage; image++) {
+	  double dist = Delta[dim]+(double)image*Path.Box[dim];
+	  GaussSum += exp(-0.5*dist*dist/sigma2);
+	}
+	GaussProd *= GaussSum;
+      }
+      logSampleProb += prefactorOfSampleProb + log(GaussProd);
+
+      //logSampleProb=logSampleProb+
+      //	(prefactorOfSampleProb-0.5*dot(Delta,Delta)/(sigma2));
     }
   }
 

@@ -178,6 +178,7 @@ inline void DistanceTableClass::DistDisp(int timeSlice,int ptcl1, int ptcl2,
   if (!(distTest==distance)){
     cerr<<"Broken dist: "<<dispTest<<" "<<displacement<<endl;
     cerr<<"Broken dist: "<<distTest<<" "<<distance<<endl;
+    cerr<<Path(timeSlice,ptcl1)<<" "<<Path(timeSlice,ptcl2);
   }
   assert(dispTest==displacement);
   assert(distTest==distance);
@@ -198,7 +199,7 @@ inline void DistanceTableClass::DistDisp(int timeSliceA, int timeSliceB,
   int imageNumA=ImageNumTable(timeSliceA,index);
   int imageNumB=ImageNumTable(timeSliceB,index);
   if (imageNumA!=imageNumB){
-    dispB=Path(timeSliceB,ptcl1)-Path(timeSliceB,ptcl2)+
+    dispB=Path(timeSliceB,ptcl2)-Path(timeSliceB,ptcl1)-
       ImageVectors(imageNumA)*sign;
     distB=sqrt(dot(dispB,dispB));
   }
@@ -211,8 +212,18 @@ inline void DistanceTableClass::DistDisp(int timeSliceA, int timeSliceB,
 #ifdef DEBUG
   dVec dispATest, dispBTest;
   double distATest, distBTest;
+
   DistDispTest(timeSliceA,timeSliceB,ptcl1,ptcl2,distATest,distBTest,
 	       dispATest,dispBTest);
+  //  cerr<<dispBTest<<" "<<dispB<<" "<<endl;
+  if (!(dispBTest==dispB)){
+    cerr<<dispBTest<<" "<<dispB<<" "<<endl;
+    cerr<<ptcl1<<" "<<ptcl2<<" "<<timeSliceA<<" "<<timeSliceB<<" "<<endl;
+    cerr<<dispATest<<" "<<dispA<<" "<<endl;
+    cerr<<imageNumA<<" "<<imageNumB<<endl;
+    cerr<<sign<<endl;
+    cerr<<"IM: "<<ImageVectors(imageNumA)<<" "<<ImageVectors(imageNumB)<<endl;
+  }
   assert(dispATest==dispA);
   assert(dispBTest==dispB);
   assert(distATest==distA);

@@ -6,6 +6,21 @@
 #include "ActionClass.h"
 
 
+class PrintMoveClass : public MoveClass
+{
+  string MyString;
+ public:
+  void Read(IOSectionClass &IO);
+  double AcceptanceRatio() {return 1.0;}
+  void MakeMove() {cerr<<"This is printing  "<<MyString<<endl;}
+  PrintMoveClass(PathDataClass &myPathData) : MoveClass(myPathData)
+    {MyString="Hi";}
+  //  PrintMoveClass(string tempString) {MyString=tempString;}
+		    
+};
+
+
+
 
 class JoinMoveClass : public MoveClass
 {
@@ -14,6 +29,9 @@ class JoinMoveClass : public MoveClass
   {
     //    PathData.MoveJoin();
   }
+  void Read(IOSectionClass &input){};
+  double AcceptanceRatio(){return 1.0;}
+  void MakeMove() {};
   JoinMoveClass (PathDataClass &myPathData ) : MoveClass(myPathData)
   {/* Do nothing for now. */ }
 
@@ -31,7 +49,7 @@ class BisectionMoveClass : public ParticleMoveClass
   int StartTimeSlice; 
   ///Number of levels the bisection move works on 
   int NumLevels;
-  void Read(IOSectionClass *moveInput);
+  void Read(IOSectionClass &moveInput);
   /// Function to actually make a bisection move.
   void MakeMove();
   BisectionMoveClass(PathDataClass &myPathData ) : ParticleMoveClass(myPathData)
@@ -53,8 +71,13 @@ class ShiftMoveClass : public MoveClass
   int numTimeSlicesToShift;
   /// Function to actually make a shift move. 
   void MakeMove();
+  //Currently we don't read anything for the shift move class.
+  void Read(IOSectionClass &theInput);
+  ///You always accept everything!
+  double AcceptanceRatio() {return 1.0;}
   ShiftMoveClass (PathDataClass &myPathData) : MoveClass(myPathData)
   { /* Do nothing for now. */ }
+  
 };
 
 

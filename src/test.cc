@@ -8,6 +8,8 @@
 #include "MirroredArrayClass.h"
 #include "ObservableClass.h"
 #include "DistanceTablePBCClass.h"
+#include "EventClass.h"
+#include "WrapClass.h"
 #include "DistanceTableFreeClass.h"
 #include "Common/IO/InputOutput.h"
 // #include "InputOutputASCII.h"
@@ -122,6 +124,8 @@ void setupMove(BisectionMoveClass &myBisectionMove,ShiftMoveClass &myShiftMove, 
 #include <unistd.h>
 
 
+
+
 void TestShift()
 {
 
@@ -222,26 +226,26 @@ int main(int argc, char **argv)
      fprintf (stderr, "%1.2f %1.5e\n", q, U);
    }
 
-  IOSectionClass out;
-  inSection.OpenSection("Observables");
-  string outFileName;
-  inSection.ReadVar("outFile", outFileName);
-  inSection.CloseSection();
-  out.NewFile (outFileName);
-  out.NewSection("Energies");
-  TotalEnergyClass TotE(myPathData, out);
-  out.CloseSection();
-  out.NewSection("gofr");
-  out.NewSection("ep");
-  PairCorrelationClass ep(myPathData,out, 0, 1);
-  out.CloseSection();
-  out.NewSection("ee");
-  PairCorrelationClass ee(myPathData,out, 0, 0);
-  out.CloseSection();
-  out.CloseSection();
-  out.NewSection("Paths");
-  PathDumpClass pathDump(myPathData,out);
-  out.CloseSection();
+// //   IOSectionClass out;
+// //   inSection.OpenSection("Observables");
+// //   string outFileName;
+// //   inSection.ReadVar("outFile", outFileName);
+// //   inSection.CloseSection();
+// //   out.NewFile (outFileName);
+// //   out.NewSection("Energies");
+// //   TotalEnergyClass TotE(myPathData, out);
+// //   out.CloseSection();
+// //   out.NewSection("gofr");
+// //   out.NewSection("ep");
+// //   PairCorrelationClass ep(myPathData,out, 0, 1);
+// //   out.CloseSection();
+// //   out.NewSection("ee");
+// //   PairCorrelationClass ee(myPathData,out, 0, 0);
+// //   out.CloseSection();
+// //   out.CloseSection();
+// //   out.NewSection("Paths");
+// //   PathDumpClass pathDump(myPathData,out);
+// //   out.CloseSection();
   //Observable setup Hack!
   //PairCorrelation PC(myPathData);
   //  PC.PathData = &myPathData;
@@ -252,11 +256,11 @@ int main(int argc, char **argv)
 
   //Move Setup Hack
   
-  cerr << "Before bisection move constructor.\n";
-  BisectionMoveClass myBisectionMove(myPathData);
-  ShiftMoveClass myShiftMove(myPathData);
-  cerr << "Before setup moves.\n";
-  setupMove(myBisectionMove,myShiftMove,myPathData);
+  ///////  cerr << "Before bisection move constructor.\n";
+  //////  BisectionMoveClass myBisectionMove(myPathData);
+  /////  ShiftMoveClass myShiftMove(myPathData);
+  /////  cerr << "Before setup moves.\n";
+  /////  setupMove(myBisectionMove,myShiftMove,myPathData);
   //Move Setup Done
   
   ///Here we are setting up distance table
@@ -302,50 +306,145 @@ int main(int argc, char **argv)
 
 //  debug(myPathData);
 //  pathDump.WriteBlock();
-  int steps;
-  inSection.OpenSection("PIMC");
-  assert(inSection.ReadVar("steps", steps));
-  inSection.CloseSection();
-  for (int counter=0;counter<steps;counter++){
-    if (counter>10000 && (counter % 20)==0) {
-      TotE.Accumulate();
-    }
-    if (counter>10000 && (counter % 200)==0) {    
-      ep.Accumulate();
-      ee.Accumulate();
-    }
 
-    if (counter>10000 && (counter % 10000) == 0){
-      TotE.WriteBlock();
-      out.FlushFile();
-      cerr << "Step #" << counter << ":\n";
-//       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
-// 	outfile<<myPathData.Path(slice,0)[0]<<" ";
-// 	outfile<<myPathData.Path(slice,0)[1]<<" ";
-// 	outfile<<myPathData.Path(slice,0)[2]<<" ";
-// 	outfile<<endl;
-//       }
-//       outfile<<myPathData.Path(0,0)[0]<<" ";
-//       outfile<<myPathData.Path(0,0)[1]<<" ";
-//       outfile<<myPathData.Path(0,0)[2]<<" ";
-//       outfile<<endl;
+///Reading in the moves
+
+  inSection.OpenSection("Moves");
+  int NumOfMoves=inSection.CountSections("Move");
+  Array<MoveClass*,1> theMoves(NumOfMoves);
+  int steps;
+  for (int counter=0;counter<NumOfMoves;counter++){
+    inSection.OpenSection("Move",counter);
+    string theMoveType;
+    assert(inSection.ReadVar("type",theMoveType));
+    cerr<<"The name is "<<theMoveType<<endl;
+    if (theMoveType=="Bisection"){
+      theMoves(counter)=new BisectionMoveClass(myPathData);
+      //      ((MoveWrap*)(theMoves(counter)))->Move=new BisectionMoveClass(myPathData);
+      theMoves(counter)->Read(inSection);
     }
-    if (counter > 10000 && ((counter % 100000) == 0))
-      pathDump.WriteBlock();
-      
-    for (int counter2=0;counter2<3;counter2++){
-      //cerr << "Doing step " << counter << endl;
-      myBisectionMove.MakeMove();
+    if (theMoveType=="ShiftMove"){
+      theMoves(counter)=new ShiftMoveClass(myPathData);
+      //      ((MoveWrap*)theMoves(counter))->Move=new ShiftMoveClass(myPathData);
+      theMoves(counter)->Read(inSection);
     }
-    myShiftMove.MakeMove();
+    if (theMoveType=="PrintMove"){
+      theMoves(counter)=new PrintMoveClass(myPathData);
+      theMoves(counter)->Read(inSection);
+    }
+    inSection.CloseSection();
   }
-  ep.WriteBlock();
-  ee.WriteBlock();
+  inSection.CloseSection();
+
+
+
+
+
+
+
+  ///Reading in the observables
+  string outFileName;
+  IOSectionClass out;
+  inSection.OpenSection("Observables");
+  inSection.ReadVar("outFile",outFileName);
+  out.NewFile(outFileName);
+  int numOfObservables=inSection.CountSections("Observable");
+  Array<ObservableClass* ,1> theObservables(numOfObservables);
+  for (int counter=0;counter<numOfObservables;counter++){
+    inSection.OpenSection("Observable",counter);
+    string theObserveType;
+    string theObserveName;
+    assert(inSection.ReadVar("type",theObserveType));
+    cerr<<"The observe name is "<<theObserveType<<endl;
+    if (theObserveType=="PairCorrelation"){
+      assert(inSection.ReadVar("name",theObserveName));
+      out.NewSection(theObserveName);
+      PairCorrelationClass *tempPC = new PairCorrelationClass(myPathData,out);
+      tempPC->Read(inSection);
+      theObservables(counter)=tempPC;
+      out.CloseSection();
+    }
+    else if (theObserveType=="Energy"){
+      cerr<<"We have found the energy section"<<endl;
+      out.NewSection("Energies");
+      TotalEnergyClass *tempE = new TotalEnergyClass(myPathData,out);
+      tempE->Read(inSection);
+      theObservables(counter)=tempE;
+      out.CloseSection();
+    }
+    else {
+      cerr<<"This is an observe type that I do not recognize"<<endl;
+    }
+    inSection.CloseSection();
+  }
+  inSection.CloseSection();
+
+  cerr<<"The current name is "<<inSection.GetName()<<endl;
+
+  LoopClass outerLoop(&theMoves,&theObservables);
+  assert(inSection.OpenSection("Algorithm"));
+  assert(inSection.OpenSection("Loop"));
+
+  outerLoop.Read(inSection);
+
+  inSection.CloseSection();
+  inSection.CloseSection();
+
+
+  outerLoop.DoEvent();
   out.CloseFile();
-  //PC.Print();
-  cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
-  //cerr<<"done! done!"<<endl;
   MPI_Finalize();
+
+
+  //  assert(1==2);
+
+//   inSection.OpenSection("PIMC");
+//   assert(inSection.ReadVar("steps", steps));
+//   inSection.CloseSection();
+//   for (int counter=0;counter<steps;counter++){
+//     if (counter>10000 && (counter % 20)==0) {
+//       //      TotE.Accumulate();
+//       theObservables(0)->Accumulate();
+//     }
+//     if (counter>10000 && (counter % 200)==0) {    
+//       theObservables(1)->Accumulate();
+//       //      ep.Accumulate();
+//       //      ee.Accumulate();
+//     }
+
+//     if (counter>10000 && (counter % 10000) == 0){
+//       theObservables(0)->WriteBlock();
+//       //      TotE.WriteBlock();
+//       out.FlushFile();
+//       cerr << "Step #" << counter << ":\n";
+// //       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
+// // 	outfile<<myPathData.Path(slice,0)[0]<<" ";
+// // 	outfile<<myPathData.Path(slice,0)[1]<<" ";
+// // 	outfile<<myPathData.Path(slice,0)[2]<<" ";
+// // 	outfile<<endl;
+// //       }
+// //       outfile<<myPathData.Path(0,0)[0]<<" ";
+// //       outfile<<myPathData.Path(0,0)[1]<<" ";
+// //       outfile<<myPathData.Path(0,0)[2]<<" ";
+// //       outfile<<endl;
+//     }
+//     if (counter > 10000 && ((counter % 100000) == 0)){
+//       /////////////      pathDump.WriteBlock();
+//     }
+//     for (int counter2=0;counter2<3;counter2++){
+//       //cerr << "Doing step " << counter << endl;
+//       theMoves(0)->MakeMove();
+//     }
+//     theMoves(1)->MakeMove();
+//   }
+//   theObservables(1)->WriteBlock();
+//   ////////  ep.WriteBlock();
+//   ///////  ee.WriteBlock();
+//   out.CloseFile();
+//   //PC.Print();
+  cout<<"My acceptance ratio is "<<theMoves(0)->AcceptanceRatio()<<endl;
+  //cerr<<"done! done!"<<endl;
+  /////  MPI_Finalize();
   
 }
   

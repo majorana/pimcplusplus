@@ -44,11 +44,12 @@ inline void DistanceTablePBCClass::Displacement(int timeSlice,
   dVecInt image;
   disp=Path(timeSlice,ptcl2)-Path(timeSlice,ptcl1);
   // Determine the image number of ptcl2 w.r.t ptcl1
+  //////Changing sign here on the image
   for (int i=0; i<NDIM; i++) {
     image[i] = -(disp[i]<-0.5*Path.Box[i]) + (disp[i]>0.5*Path.Box[i]);
   }
   imageNum = ImageNum(image);
-  disp = disp + ImageVectors(imageNum);
+  disp = disp - ImageVectors(imageNum);
   dist = sqrt(dot(disp,disp));
 }
 

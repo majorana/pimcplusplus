@@ -1,8 +1,18 @@
 #include "ObservableClass.h"
+#include "Common/IO/InputOutput.h"
+
 
 // Fix to include final link between link M and 0
 void TotalEnergyClass::Accumulate()
 {
+  TimesCalled++;
+  if (TimesCalled % DumpFreq==0){
+    WriteBlock();
+  }
+
+  if ((TimesCalled % Freq)!=0){
+    return;
+  }
   // Loop over all links
   int numPtcls = PathData.NumParticles();
   int numLinks = PathData.NumTimeSlices()-1;
@@ -19,23 +29,23 @@ void TotalEnergyClass::Accumulate()
       int species1 = PathData.Path.ParticleSpeciesNum(ptcl1);
       double lambda = PathData.Path.ParticleSpecies(ptcl1).lambda;
       if (lambda != 0.0) {
-	dVec vel;// = PathData.DistanceTable->Velocity(link, link+1, ptcl1);
-	vel = PathData(link+1,ptcl1)-PathData(link,ptcl1);
+	dVec vel = PathData.DistanceTable->Velocity(link, link+1, ptcl1);
+	//vel = PathData(link+1,ptcl1)-PathData(link,ptcl1);
 	sum -= dot(vel,vel)/(4.0*lambda*tau*tau);
       }
       for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
 	dVec r, rp;
 	double rmag, rpmag;
-	//PathData.DistanceTable->DistDisp(link, link+1, ptcl1, ptcl2,
-	//				 rmag, rpmag, r, rp);
-	dVec r1 = PathData(link,ptcl1);
-	dVec r2 = PathData(link,ptcl2);
-	dVec rp1 = PathData(link+1,ptcl1);
-	dVec rp2 = PathData(link+1,ptcl2);
-	r=r2-r1;
-	rp=rp2-rp1;
-	rmag=sqrt(dot(r,r));
-	rpmag=sqrt(dot(rp,rp));
+	PathData.DistanceTable->DistDisp(link, link+1, ptcl1, ptcl2,
+					 rmag, rpmag, r, rp);
+// 	dVec r1 = PathData(link,ptcl1);
+// 	dVec r2 = PathData(link,ptcl2);
+// 	dVec rp1 = PathData(link+1,ptcl1);
+// 	dVec rp2 = PathData(link+1,ptcl2);
+// 	r=r2-r1;
+// 	rp=rp2-rp1;
+// 	rmag=sqrt(dot(r,r));
+// 	rpmag=sqrt(dot(rp,rp));
 	double s2 = dot(r-rp, r-rp);
 	double q = 0.5*(rmag+rpmag);
 	double z = (rmag-rpmag);
@@ -98,7 +108,46 @@ void TotalEnergyClass::WriteBlock()
 
 
 
+void PairCorrelationClass::Read(IOSectionClass& IO)
+{
+  string type1;
+  string type2;
+  Species1=-1;
+  Species2=-1;
+  assert(IO.ReadVar("name",Name));
+  assert(IO.ReadVar("type1",type1));
+  assert(IO.ReadVar("type2",type2));
+  assert(IO.ReadVar("freq",Freq));
+  assert(IO.ReadVar("dumpFreq",DumpFreq));
+  for (int spec=0;spec<PathData.NumSpecies();spec++){
+    if (PathData.Species(spec).Name==type1){
+      Species1=spec;
+    }
+    if (PathData.Species(spec).Name==type2){
+      Species2=spec;
+    }
+  }
+  assert(Species1!=-1);
+  assert(Species2!=-1);
+  assert(IO.OpenSection("Grid"));
+  string gridType;
+  double gridStart;
+  double gridEnd;
+  int numGridPoints;
+  assert(IO.ReadVar("type",gridType));
+  assert(gridType=="Linear");
+  assert(IO.ReadVar("start",gridStart));
+  assert(IO.ReadVar("end",gridEnd));
+  assert(IO.ReadVar("NumPoints",numGridPoints));
+  grid.Init(gridStart,gridEnd,numGridPoints);
+  TotalCounts=0;
+  Histogram.resize(numGridPoints);
+  Histogram=0;
+  IO.CloseSection();
+    
+  
 
+}
 
 void PairCorrelationClass::WriteBlock()
 {
@@ -159,6 +208,16 @@ void PairCorrelationClass::Accumulate()
 {
   SpeciesClass &species1=PathData.Path.Species(Species1);
   SpeciesClass &species2=PathData.Path.Species(Species2);
+
+  TimesCalled++;
+
+  if (TimesCalled % DumpFreq==0){
+    WriteBlock();
+  }
+  if ((TimesCalled % Freq)!=0){
+    return;
+  }
+
 
   /// HACK HACK HACK
   if (Species1==Species2) {
@@ -222,7 +281,7 @@ void PairCorrelationClass::Accumulate()
 
 void PairCorrelationClass::Initialize()
 {
-  int numTimeSlices=PathData.Path.NumTimeSlices();
+  int numTimeSlices=PathData.Path.NumTimeSlices();//<--What is that there for...it's not used
   grid.Init (0.0, 12.0, 100);
   TotalCounts = 0;
   Histogram.resize(100);

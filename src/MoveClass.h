@@ -15,11 +15,20 @@ class MoveClass
   PathDataClass &PathData;
   /// Call this in order to make a move.
   virtual void MakeMove()=0;
+  ///Moves have a name by which they can be referenced
+  string Name;
+  ///All moves ought to be able to read
+  virtual void Read(IOSectionClass &input)=0;
+  virtual double AcceptanceRatio()=0;
   /// MoveClass constructor. Sets reference to the PathData object
   MoveClass(PathDataClass &myPathData) : PathData(myPathData)
-  {  /* Do nothing right now.*/  };
+    {Name="";}
+
 };
   
+///This is the loop move that allows you to loop
+
+
 /// This is a specialization of MoveClass which actually physically moves
 /// particles.
 class ParticleMoveClass : public MoveClass
@@ -44,7 +53,7 @@ protected:
   inline double AcceptanceRatio() {return (double)(NumAccepted)/(double)NumMoves;}
   /// Call this to make a move
   virtual void MakeMove()=0;
- 
+
   /// This array contains the int's of particles that you are 
   /// currently moving (i.e. NumParticlesToMove of them
   Array<int,1> ActiveParticles;

@@ -4,8 +4,25 @@
 #include "SpeciesClass.h"
 
 
+void PrintMoveClass::Read(IOSectionClass &IO)
+{
+  string typeCheck;
+  assert(IO.ReadVar("type",typeCheck));
+  assert(typeCheck=="PrintMove");
+  assert(IO.ReadVar("name",Name));
+  assert(IO.ReadVar("toprint",MyString));
+}
 
 
+
+void ShiftMoveClass::Read(IOSectionClass &theInput)
+{
+  string typeCheck;
+  assert(theInput.ReadVar("type",typeCheck));
+  assert(typeCheck=="ShiftMove");
+  assert(theInput.ReadVar("name",Name));
+
+}
 
 
 void ShiftMoveClass::MakeMove()
@@ -21,18 +38,39 @@ void ShiftMoveClass::MakeMove()
     
 }
 
-void BisectionMoveClass::Read(IOSectionClass *moveInput)
+void BisectionMoveClass::Read(IOSectionClass &moveInput)
 {
-  moveInput->ReadVar("NumLevels",NumLevels);
+  string typeCheck;
+  assert(moveInput.ReadVar("type",typeCheck));
+  assert(typeCheck=="Bisection");
+  assert(moveInput.ReadVar("name",Name));
+  Array<int,1> tempActiveSpecies(0);
+  assert(moveInput.ReadVar("ActiveSpecies",tempActiveSpecies));
+  SetActiveSpecies(tempActiveSpecies);
   int tempNumParticlesToMove;
-  moveInput->ReadVar("NumParticlesToMove",tempNumParticlesToMove);
+  assert(moveInput.ReadVar("NumParticlesToMove",tempNumParticlesToMove));
   SetNumParticlesToMove(tempNumParticlesToMove);
-  StartTimeSlice=0;
+  assert(moveInput.ReadVar("StartTimeSlice",StartTimeSlice));
+  string tempNumLevels="";
+  assert(moveInput.ReadVar("NumLevels",tempNumLevels));
+  if (tempNumLevels=="Max"){
+    NumLevels=PathData.Action.MaxLevels;
+  }
+  else {
+    cerr<<"Don't know how to different number of levels from max yet"<<endl;
+    assert(1==2);
+  }
+
+  //  moveInput->ReadVar("NumLevels",NumLevels);
+  // int tempNumParticlesToMove;
+  //moveInput->ReadVar("NumParticlesToMove",tempNumParticlesToMove);
+  //SetNumParticlesToMove(tempNumParticlesToMove);
+  //StartTimeSlice=0;
 
   ///HACK! HACK! HACK! HACK! Have to Find right way to input this.
-  Array<int,1> activeSpecies(1);
-  activeSpecies(0) = 0;
-  SetActiveSpecies(activeSpecies);
+  //Array<int,1> activeSpecies(1);
+  //activeSpecies(0) = 0;
+  //SetActiveSpecies(activeSpecies);
 
 
 }

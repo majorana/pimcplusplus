@@ -19,17 +19,19 @@ public:
   /// Note: This is not a reference.  If it were, it could change
   /// behind our backs
   IOSectionClass IOSection;  
-  
+  string Name;
   /// Observe the state of the present path and add it to the
   /// running sum for averages.
   virtual void Accumulate() = 0;
   virtual void WriteBlock()=0;
+  virtual void Read(IOSectionClass& IO)=0;
   virtual void ShiftData(int numTimeSlices) {;}
   /// The constructor.  Sets PathData references and calls initialize.
   ObservableClass(PathDataClass &myPathData,IOSectionClass ioSection) 
     : PathData(myPathData), IOSection(ioSection)
   {
     FirstTime = true;
+    Name="";
   }
 };
 
@@ -58,16 +60,24 @@ class TotalEnergyClass : public ObservableClass
 private:
   double ESum;
   int NumSamples;
+  int TimesCalled;
+  int Freq;
+  int DumpFreq;
 public:
   void Accumulate();
   void WriteBlock();
   void ShiftData(int numTimeSlices);
-  
+  void Read(IOSectionClass& IO) {  
+    assert(IO.ReadVar("name",Name));
+    assert(IO.ReadVar("freq",Freq));
+    assert(IO.ReadVar("dumpFreq",DumpFreq));
+  }
   TotalEnergyClass(PathDataClass &myPathData, IOSectionClass &IOSection)
     : ObservableClass(myPathData, IOSection) 
   {
     ESum = 0.0;
     NumSamples = 0;
+    TimesCalled=0;
   }
 };
 
@@ -79,6 +89,9 @@ class PairCorrelationClass : public ObservableClass
   Array<int,1> Histogram;
   /// Stores the total number of counts
   int TotalCounts;
+  int TimesCalled;
+  int Freq;
+  int DumpFreq;
 public:
   /// The species between which I am calculating the pair correlation
   /// function.
@@ -92,12 +105,18 @@ public:
   void Initialize();
   /// My specialization of the virtual function.
   void Print();
+  void WriteBlock();
+  void Read(IOSectionClass& IO);
+  PairCorrelationClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
+    ObservableClass(myPathData,ioSection){
+    TimesCalled=0;
+  }
   PairCorrelationClass(PathDataClass &myPathData, IOSectionClass &ioSection,
 		       int species1, int species2) : 
     ObservableClass(myPathData, ioSection), 
     Species1(species1), Species2(species2) 
   { Initialize(); }
-  void WriteBlock();
+
 
 };
 
@@ -108,7 +127,7 @@ private:
 public:
   void Accumulate();
   void WriteBlock();
-  
+  void Read(IOSectionClass& IO) { };
   PathDumpClass(PathDataClass &myPathData, IOSectionClass &IOSection)
     : ObservableClass(myPathData, IOSection)  {  }
 };

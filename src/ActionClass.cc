@@ -92,12 +92,12 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	  dVec r, rp;
 	  double rmag, rpmag;
 
-	  //	  DistanceTable->DistDisp(slice, slice+skip, ptcl1, ptcl2,
-	  //				  rmag, rpmag, r, rp);
-	  r=r2-r1;
-	  rp=rp2-rp1;
-	  rmag=sqrt(dot(r,r));
-	  rpmag=sqrt(dot(rp,rp));
+	  DistanceTable->DistDisp(slice, slice+skip, ptcl1, ptcl2,
+				  rmag, rpmag, r, rp);
+	  //	  //	  r=r2-r1;
+	  //	  //	  rp=rp2-rp1;
+	  //	  //	  rmag=sqrt(dot(r,r));
+	  //	  //	  rpmag=sqrt(dot(rp,rp));
 	  //	  cerr<<"rmag "<<rmag<<endl;
 	  //	  cerr<<"rpmag "<<rpmag<<endl;
 	  double s2 = dot (r-rp, r-rp);
@@ -118,10 +118,21 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
     double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
       dVec vel;
-      //vel = DistanceTable->Velocity(slice, slice+skip, ptcl1);
-      vel = Path(slice+skip,ptcl1) - Path(slice,ptcl1);
+      vel = DistanceTable->Velocity(slice, slice+skip, ptcl1);
+      double GaussProd = 1.0;
+      for (int dim=0; dim<NDIM; dim++) {
+	int NumImage=4;
+	double GaussSum=0.0;
+	for (int image=-NumImage; image<=NumImage; image++) {
+	  double dist = vel[dim]+(double)image*Path.Box[dim];
+	  GaussSum += exp(-dist*dist*FourLambdaTauInv);
+	}
+	GaussProd *= GaussSum;
+      }
+      TotalK -= log(GaussProd);
+      //vel = Path(slice+skip,ptcl1) - Path(slice,ptcl1);
       //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-      TotalK += dot(vel,vel)*FourLambdaTauInv; 
+      //TotalK += dot(vel,vel)*FourLambdaTauInv; 
     }
   }
   KE += TotalK / levelTau;

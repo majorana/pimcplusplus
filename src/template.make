@@ -8,7 +8,7 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -O3 -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DNO_COUT #-DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -DDEBUG -DBZ_DEBUG #-DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 TestObjs =                           \
   ObservableClass.o                  \
@@ -27,6 +27,7 @@ TestObjs =                           \
   DistanceTableFreeClass.o           \
   DistanceTableClass.o               \
   MirroredArrayClass.o               \
+  WrapClass.o			     \
   Common/IO/InputOutput.o            \
   Common/IO/InputOutputHDF5.o        \
   Common/IO/InputFile.o              \
@@ -38,6 +39,7 @@ TestObjs =                           \
   Common/PairAction/PAszFit.o        \
   Common/PairAction/PAsFit.o         \
   Common/PairAction/PAtricubicFit.o  \
+  Common/PairAction/PAzeroFit.o  \
   Common/Splines/BicubicSpline.o     \
   Common/PH/PH.o                     \
   Common/PH/Potential.o
@@ -92,7 +94,7 @@ clean:	Common_clean
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc TestHDF5.cc TestASCII.cc
+SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc WrapClass.cc TestHDF5.cc TestASCII.cc
 
 newmake: Common_newmake Tests_newmake
 	make -f template.make Makefile FRC=force_rebuild
