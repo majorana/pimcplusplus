@@ -1,10 +1,34 @@
-SOURCES = Atom.cc RadialWF.cc TestRadialWF.cc DFTAtom.cc TestDFTAtom.cc
+SOURCES = Atom.cc RadialWF.cc TestRadialWF.cc DFTAtom.cc TestDFTAtom.cc 
 
-all:	Atom.o RadialWF.o TestRadialWF DFTAtom.o TestDFTAtom
+all:	Atom.o RadialWF.o TestRadialWF DFTAtom.o TestDFTAtom 
 
-TestWFobjs = TestRadialWF.o RadialWF.o ../PH/CoulombPot.o ../Splines/CubicSpline.o 
+TestWFobjs =                     \
+	TestRadialWF.o           \
+	RadialWF.o               \
+        ../PH/CoulombPot.o       \
+	../Splines/CubicSpline.o \
+	../IO/InputOutput.o      \
+ 	../IO/InputOutputHDF5.o  \
+	../IO/InputOutputASCII.o \
+	../IO/InputOutputXML.o
 
-TestDFTAtomobjs = RadialWF.o ../PH/CoulombPot.o ../Splines/CubicSpline.o TestDFTAtom.o DFTAtom.o ../PH/ScreenedPot.o ../DFT/Functionals.o ../DFT/ExCorr.o
+TestDFTAtomobjs =                   \
+	RadialWF.o                  \
+	TestDFTAtom.o               \
+	DFTAtom.o                   \
+	../PH/CoulombPot.o          \
+	../PH/QuinticPH.o           \
+	../PH/ScreenedPot.o         \
+	../Splines/CubicSpline.o    \
+	../Splines/QuinticSpline.o  \
+	../Splines/QuinticSplines.o \
+	../DFT/Functionals.o        \
+	../DFT/ExCorr.o             \
+	../IO/InputOutput.o         \
+	../IO/InputOutputHDF5.o     \
+	../IO/InputOutputASCII.o    \
+	../IO/InputOutputXML.o
+
 
 TestRadialWF:  $(TestWFobjs)
 	$(LD) -o TestRadialWF $(TestWFobjs) $(LIBS)

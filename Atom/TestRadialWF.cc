@@ -8,7 +8,7 @@ void TestRadialWF1()
   OptimalGrid grid(1.0, 50.0);
   RadialWF wf;
   wf.l = 1;
-  wf.TotalNodes = 0;
+  wf.n = 2;
   wf.Energy = -0.25;
   wf.Occupancy = 1.0;
   wf.SetPotential (&pot);

@@ -7,14 +7,15 @@ void TestDFTAtom()
   OptimalGrid grid(1.0, 50.0);
   DFTAtom atom;
   atom.RadialWFs.resize(1);
+  atom.RadialWFs(0).n = 1;
   atom.RadialWFs(0).l = 0;
   atom.RadialWFs(0).Occupancy = 1.0;
   atom.RadialWFs(0).Energy = -0.3;
   atom.SetGrid (&grid);
   atom.SetBarePot (&barePot);
 
-  atom.newMix = 0.9;
-  atom.SolveSC();
+  atom.NewMix = 0.9;
+  atom.Solve();
 }
 
 

@@ -39,6 +39,7 @@ RadialWF::OriginBC(double r0, double &u0, double &du0)
     {  // Use relativistic equations
       const double alpha = 1.0/137.036;
       double Z = -pot->V(r0)*r0;
+      cerr << "Z = " << Z << endl;
       double a2Z2 = alpha*alpha*(double)Z*(double)Z;
 
       double sl = (double) l;
@@ -78,7 +79,7 @@ RadialWF::OriginBC(double r0, double &u0, double &du0)
       }
     }  
   // Flip sign for odd number of nodes
-  if ((TotalNodes % 2) == 1)
+  if (((n-l-1) % 2) == 1)
     {
       u0 *= -1.0;
       du0 *= -1.0;
@@ -200,11 +201,12 @@ void RadialWF::Solve(double tolerance)
   double Ehigh, Elow, Etrial;
   Ehigh = 0.0;
   Grid &grid = *u.grid;
-  
+  int TotalNodes = n-l-1;
+
   if (!pot->IsPH()){
-    double n = TotalNodes + 1.0;
+    double N = n;
     double Z = -pot->V(grid(0))*grid(0);
-    Elow = -1.5*Z*Z/(n*n);
+    Elow = -1.5*Z*Z/(N*N);
   } 
   else {
     // Eigenenergy can't be lower than lowest potential -- otherwise
@@ -219,9 +221,9 @@ void RadialWF::Solve(double tolerance)
 
   double Eold;
   Eold = Etrial = Energy;
-  int done = 0;
+  bool done = false;
   while (!done) {
-    //cerr << "Etrial = " << Etrial << endl;
+    cerr << "Etrial = " << Etrial << endl;
     //cerr << "Ehigh = " << Ehigh << " Elow = " << Elow << endl;
     double CuspValue = IntegrateInOut(tindex);
     //cerr << "Cusp value = " << CuspValue << "\n";
@@ -253,14 +255,22 @@ void RadialWF::Solve(double tolerance)
     Energy = Etrial;
     
     if ((NumNodes == TotalNodes) && (fabs(Etrial - Eold) < tolerance))
-      done = 1;
+      done = true;
     Eold = Etrial;       
   }
   IntegrateInOut(tindex);
   Normalize();
   NumNodes = CountNodes();
-  if (NumNodes != TotalNodes)
-    cerr << "Node number error!!!!!!!!!!.\n";
+  if (NumNodes != TotalNodes) {
+    cerr << "Node number error!  We have " << NumNodes 
+	 << " nodes and want " << TotalNodes << ".\n";
+    IOSectionClass out;
+    out.NewFile ("BadWF.h5");
+    out.WriteVar ("u", u.Data());
+    out.WriteVar ("x", u.grid->Points());
+    out.CloseFile();
+    cerr << "Energy = " << Energy << endl;
+  }
 }
 
 
@@ -304,16 +314,37 @@ void RadialWF::SetPotential(Potential *newPot)
   pot = newPot;
 }
 
-
+// This will write all the information except the potential and the
+// grid.  We assume that those are store somewhere else
 void RadialWF::Write(IOSectionClass &out)
 {
-  
-
+  out.WriteVar ("u", u.Data());
+  out.WriteVar ("dudr", dudr.Data());
+  out.WriteVar ("n", n);
+  out.WriteVar ("l", l);
+  out.WriteVar ("CoreNodes", CoreNodes);
+  out.WriteVar ("Occupancy", Occupancy);
+  out.WriteVar ("Weight", Weight);
+  out.WriteVar ("Energy", Weight);
+  out.WriteVar ("PartialNorm", PartialNorm);
+  out.WriteVar ("Label", Label);
 }
 
-
+// This function assumes the grid has already been set.
 void RadialWF::Read (IOSectionClass &in)
 {
-
-
+  bool succ;
+  if (u.grid == NULL) {
+    cerr << "Grid not set prior to calling RadialWF::Read.\n";
+    exit(1);
+  }
+  in.ReadVar ("u", u.Data());
+  in.ReadVar ("dudr", dudr.Data());
+  assert(in.ReadVar("n", n));
+  assert(in.ReadVar("l", l));
+  assert(in.ReadVar("Occupancy", Occupancy));
+  in.ReadVar("Energy", Energy, -1.0);
+  in.ReadVar("Weight", Weight, 1.0);
+  in.ReadVar("PartialNorm",PartialNorm);
+  assert(in.ReadVar("Label", Label));
 }

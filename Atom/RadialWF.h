@@ -17,7 +17,7 @@ private:
   Potential *pot;  
 public:
   CubicSpline u, dudr;
-  int l, CoreNodes, TotalNodes;
+  int n, l, CoreNodes;
   double Energy, Occupancy, PartialNorm, Weight;
   string Label;
 

@@ -1,4 +1,4 @@
-#include "NewAtom.h"
+#include "DFTAtom.h"
 #include "../Integration/RungeKutta.h"
 #include "../DFT/Functionals.h"
 
@@ -105,7 +105,7 @@ void DFTAtom::SetBarePot(Potential *newPot)
 }
 
 
-void DFTAtom::SolveSC()
+void DFTAtom::Solve()
 {
   int N = grid->NumPoints; 
   // Just rename temp and temp2 for clarity
@@ -115,26 +115,35 @@ void DFTAtom::SolveSC()
   // First, zero out screening
   for (int i=0; i<N; i++)
     V.HXC(i) = 0.0;
-  
+
+  Array<double,1> oldEnergies(RadialWFs.size());  
   // Now solve radial equations
-  for (int i=0; i<RadialWFs.size(); i++)
+  for (int i=0; i<RadialWFs.size(); i++) {
     RadialWFs(i).Solve();
+    fprintf (stderr, "Energy(%d) = %1.16f\n", i, RadialWFs(i).Energy);
+    oldEnergies(i) = RadialWFs(i).Energy;
+  }
 
   UpdateChargeDensity();
   oldCharge = 0.0;
   newCharge = ChargeDensity.Data();
 
   bool done = false;
+
   while (!done) {
     for (int i=0; i<N; i++)
-      ChargeDensity(i) = newMix*(newCharge(i)) + (1.0-newMix)*oldCharge(i);
+      ChargeDensity(i) = NewMix*(newCharge(i)) + (1.0-NewMix)*oldCharge(i);
     UpdateHartree();
     UpdateExCorr();
     for (int i=0; i < grid->NumPoints; i++)
       V.HXC(i) = Hartree(i) + ExCorr(i);
 
+    done = true;
     for (int i=0; i<RadialWFs.size(); i++) {
       RadialWFs(i).Solve();
+      if (fabs(oldEnergies(i)-RadialWFs(i).Energy) > 1.0e-8)
+	done = false;
+      oldEnergies(i) = RadialWFs(i).Energy;
       fprintf (stderr, "Energy(%d) = %1.16f\n", i, RadialWFs(i).Energy);
     }
     oldCharge = ChargeDensity.Data();
@@ -146,16 +155,53 @@ void DFTAtom::SolveSC()
 }
 
 
-void DFTAtom::Read(IOSectionClass &in) 
-{
-
-}
-
 void DFTAtom::Write(IOSectionClass &out)
 {
+  out.WriteVar ("Type", "DFT");
+  out.NewSection("Grid");
+  grid->Write(out);
+  out.CloseSection();
 
+  for (int i=0; i<RadialWFs.size(); i++) {
+    out.NewSection("RadialWF");
+    RadialWFs(i).Write(out);
+    out.CloseSection();
+  }
 
+  out.WriteVar ("ChargeDensity", ChargeDensity.Data());
+  out.WriteVar ("Hartree", Hartree.Data());
+  out.WriteVar ("ExCorr", ExCorr.Data());
+  out.NewSection("Potential");
+  BarePot->Write(out);
+  out.CloseSection();
+  out.WriteVar ("NewMix", NewMix);
 }
+
+
+void DFTAtom::Read(IOSectionClass &in) 
+{
+  assert(in.OpenSection("Grid"));
+  grid = ReadGrid(in);
+  in.CloseSection();
+
+  assert(in.OpenSection("Potential"));
+  BarePot = ReadPotential(in);
+  in.CloseSection();
+  V.BarePot = BarePot;
+
+  int numRadialWFs = in.CountSections("RadialWF");
+  RadialWFs.resize(numRadialWFs);
+  SetGrid(grid);
+  for (int i=0; i<numRadialWFs; i++) {
+    RadialWFs(i).SetGrid (grid);
+    RadialWFs(i).SetPotential (&V);
+    assert (in.OpenSection("RadialWF", i));
+    RadialWFs(i).Read(in);
+    in.CloseSection();
+  }
+  assert (in.ReadVar("NewMix", NewMix));
+}
+
 
 void DFTAtom::CalcEnergies(double &kinetic, double &potential,
 			   double &hartree, double &XC)
