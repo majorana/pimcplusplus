@@ -14,8 +14,9 @@ private:
 public:
   double Sample(int &slice1,int &slice2, 
 		Array<int,1> &activeParticles);
-  EndStageClass(PathDataClass &pathData, int numLevels) : 
-    LocalStageClass(pathData),
+  EndStageClass(PathDataClass &pathData, int numLevels,
+		IOSectionClass &outSection) : 
+    LocalStageClass(pathData,outSection),
     NumLevels(numLevels)
   { 
     //do nothing for now

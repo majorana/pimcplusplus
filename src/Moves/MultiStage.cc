@@ -32,6 +32,7 @@ void MultiStageClass::WriteRatio()
     (*stageIter)->WriteRatio();
     stageIter++;
   }  
+  MoveClass::WriteRatio();
 }
 
 // void MultiStageLocalClass::MakeMove()

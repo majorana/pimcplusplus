@@ -7,7 +7,7 @@
 #include "PermuteStageClass.h"
 #include "CoupledPermuteStageClass.h"
 #include "BisectionStageClass.h"
-
+#include "../Observables/ObservableBase.h"
 
 /// This is the bisection move class inherited from ParticleMoveClass
 /// Explanation of how bisection moves work is in  
@@ -21,6 +21,8 @@ private:
   bool IsFermion;
   int SpeciesNum;
   void ChooseTimeSlices();
+  //  void WriteRatio();
+  //  ObservableDouble AcceptanceRatioVar;
 public:
 
 
@@ -32,6 +34,7 @@ public:
 
   BisectionBlockClass(PathDataClass &pathData, IOSectionClass &out) : 
     MultiStageClass(pathData, out)
+
   { 
     // do nothing for now
   }

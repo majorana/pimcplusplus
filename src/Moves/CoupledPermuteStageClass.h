@@ -33,8 +33,8 @@ public:
 		 Array<int,1> &activeParticles);
   bool Attempt (int &slice1, int &slice2, 
 		   Array<int,1> &activeParticles, double &prevActionChange);
-  CoupledPermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels) : 
-    PermuteStageClass(pathData, speciesNum, numLevels),
+  CoupledPermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels,IOSectionClass &outSection) : 
+    PermuteStageClass(pathData, speciesNum, numLevels,outSection),
     Table1(pathData), Table2(pathData)
   {
     Forw = &Table1;

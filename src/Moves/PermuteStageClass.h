@@ -3,6 +3,7 @@
 
 #include "MultiStage.h"
 #include "PermuteTableClass.h"
+#include "../Observables/ObservableBase.h"
 
 class PermuteStageClass : public LocalStageClass
 {
@@ -15,6 +16,7 @@ public:
   /// the two return values must be equal to true transition
   /// probablity ratio.  This allows avoiding computing the reverse
   /// probability if the move is rejected before this stage.
+
   virtual double Sample (int &slice1, int &slice2, 
 			 Array<int,1> &activeParticles) = 0;
   virtual bool Attempt (int &slice1, int &slice2, 
@@ -24,10 +26,11 @@ public:
   virtual void Accept();
   virtual void Reject();
   PermuteStageClass(PathDataClass &pathData, int speciesNum,
-		    int numLevels) : 
-    LocalStageClass (pathData), 
+		    int numLevels,IOSectionClass &outSection) : 
+    LocalStageClass (pathData,outSection), 
     SpeciesNum (speciesNum), 
     NumLevels(numLevels)
+
   {
     // do nothing for now 
   }
@@ -44,8 +47,9 @@ public:
 		 Array<int,1> &activeParticles);
   bool Attempt (int &slice1, int &slice2, 
 		 Array<int,1> &activeParticles, double &prevActionChange);
-  NoPermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels) 
-    : PermuteStageClass(pathData, speciesNum, numLevels)
+  NoPermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels,
+		       IOSectionClass &outSection) 
+    : PermuteStageClass(pathData, speciesNum, numLevels,outSection)
   {
     // do nothing for now
   }
@@ -57,6 +61,10 @@ class TablePermuteStageClass : public PermuteStageClass
 private:
   PermuteTableClass Table1, Table2;
   PermuteTableClass *Forw, *Rev;
+  //  ObservableVecDouble1 AcceptanceRatioVar;
+  
+  Array<int,1> NumAccepted;
+  Array<int,1> NumAttempted;
 public:
   /// This function will construct a new permutation if
   /// activeParticles is set to the array, [ -1 ];  In this case,
@@ -74,12 +82,16 @@ public:
 		 Array<int,1> &activeParticles);
   bool Attempt (int &slice1, int &slice2, 
 		   Array<int,1> &activeParticles, double &prevActionChange);
-  TablePermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels) : 
-    PermuteStageClass(pathData, speciesNum, numLevels),
+  TablePermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels,IOSectionClass &outSection) : 
+    PermuteStageClass(pathData, speciesNum, numLevels,outSection),
     Table1(pathData), Table2(pathData)
+    //    AcceptanceRatioVar("Acceptance Ratio",OutSection,PathData.Path.Communicator)
+
   {
     Forw = &Table1;
     Rev  = &Table2;
+    NumAccepted.resize(4);
+    NumAttempted.resize(4);
   }
 };
 

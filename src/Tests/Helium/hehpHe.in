@@ -146,6 +146,7 @@ Section (Observables)
       string Description="Helium-Helium Structure Factor";
       int freq=20;
       int dumpFreq=2000;
+      double kCutoff=2.0;
     }
   
 

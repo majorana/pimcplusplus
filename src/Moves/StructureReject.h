@@ -19,8 +19,9 @@ public:
 	       Array<int,1> &activeParticles,
 	       double &prevActionChange);
 
-  StructureRejectStageClass (PathDataClass &pathData, IOSectionClass &in) 
-    : LocalStageClass(pathData),
+  StructureRejectStageClass (PathDataClass &pathData, IOSectionClass &in,
+			     IOSectionClass &out) 
+    : LocalStageClass(pathData,out),
     StructureFactor(pathData,in)
   {
     // do nothing for now

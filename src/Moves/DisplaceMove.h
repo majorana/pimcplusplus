@@ -17,8 +17,8 @@ public:
   /// within a single close must displace by the same amount.
   double Sample (int &slice1, int &slice2,
 		 Array <int,1> &activeParticles);
-  DisplaceStageClass (PathDataClass &pathData) :
-    CommonStageClass (pathData) 
+  DisplaceStageClass (PathDataClass &pathData,IOSectionClass &outSection) :
+    CommonStageClass (pathData,outSection) 
   {
     // Do nothing for now.
   }
@@ -43,7 +43,7 @@ public:
   void MakeMove();
   DisplaceMoveClass (PathDataClass &pathData, IOSectionClass &outSection) :
     MultiStageClass(pathData, outSection),
-    DisplaceStage(pathData)
+    DisplaceStage(pathData,OutSection)
   {
     // do nothing for now
   }

@@ -70,7 +70,7 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
 	PathData.Path.OpenLink<=slice2)
       Forw->ConstructCycleTable(SpeciesNum, slice1, slice2,
 				PathData.Path.OpenPtcl);
-
+    
     else
       Forw->ConstructCycleTable(SpeciesNum, slice1, slice2);
     int NumPerms = 0;

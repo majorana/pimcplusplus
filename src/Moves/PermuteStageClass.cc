@@ -11,7 +11,7 @@ void PermuteStageClass::Read (IOSectionClass &in)
 }
 void PermuteStageClass::Accept()
 {
-  //do nothing for now
+  //
 }
 
 void PermuteStageClass::Reject()

@@ -11,7 +11,7 @@ private:
 
 public:
   void WriteRatio();
-  ObservableVarDouble AcceptRatioVar;
+  ObservableDouble AcceptRatioVar;
   double Sample(int &slice1,int &slice2, 
 		Array<int,1> &activeParticles);
   void Accept();
@@ -20,7 +20,7 @@ public:
 		      IOSectionClass outSection) : 
     LocalStageClass(pathData,outSection),
     NumImage(1),
-    AcceptRatioVar("AcceptanceRatio",OutSection,myPathData.Path.Communicator) 
+    AcceptRatioVar("AcceptanceRatio",OutSection,pathData.Path.Communicator) 
   { 
     //do nothing for now
     BisectionLevel = level;

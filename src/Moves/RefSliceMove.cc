@@ -28,9 +28,11 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
-    permuteStage = new TablePermuteStageClass (PathData,SpeciesNum,NumLevels);
+    permuteStage = new TablePermuteStageClass (PathData,SpeciesNum,NumLevels,
+					       OutSection);
   else if (permuteType == "NONE") 
-    permuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels);
+    permuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
+					   OutSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);

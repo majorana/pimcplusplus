@@ -16,7 +16,7 @@ void OpenEndMoveClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("name", Name));
   SpeciesNum = PathData.Path.OpenSpeciesNum;
   StageClass* endStage;
-  endStage=new EndStageClass(PathData,NumLevels);
+  endStage=new EndStageClass(PathData,NumLevels,OutSection);
   endStage->Read(in);
   Stages.push_back (endStage);
   for (int level=NumLevels-1; level>=0; level--) {
