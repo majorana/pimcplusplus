@@ -40,6 +40,9 @@ class PairActionClass
  public:
   string type1,type2;
   void Read(InputSectionClass &inSection);
+
+  /// This stores the interaction potential
+  CubicSpline V;
   /// This stores the coefficients of the expansion specified above.
   /// The array index is over the levels.  You call it with the q
   /// value and a temporary array to get all of the values in that
@@ -79,7 +82,7 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
 
 
 
-  sum=sum+0.5*((ukj(level))(0,r)+(ukj(level))(0,rprime)); //This is the endpoint action 
+  sum=sum+0.5*((ukj(level))(1,r)+(ukj(level))(1,rprime)); //This is the endpoint action 
 
 
   if (s > 0.0)
@@ -96,7 +99,7 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
 	
 	for (int j=0;j<=k;j++){
 	  
-	  double cof=TempukjArray(k*(k+1)/2+j); //indexing into the 2darray
+	  double cof=TempukjArray(k*(k+1)/2+j+1); //indexing into the 2darray
 	  sum=sum+cof*Zto2j*currS;
 	  
 	  

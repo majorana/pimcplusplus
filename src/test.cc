@@ -249,7 +249,7 @@ int main(int argc, char **argv)
 //   //  PrintConfigClass myPrintConfig(myPathData);
   ofstream outfile;
   outfile.open("ourPath.dat");
-  int steps=1000000;
+  int steps=300000;
   for (int counter=0;counter<steps;counter++){
     if ((counter % 1000) == 0){
       cerr << "Step #" << counter << ":\n";
@@ -269,7 +269,7 @@ int main(int argc, char **argv)
       //cerr << "Doing step " << counter << endl;
       
       myBisectionMove.MakeMove();
-      if (counter >= steps/10)
+      if (counter >= steps/3)
 	PC.Accumulate();
       //      myPrintConfig.Print();
     }

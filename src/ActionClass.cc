@@ -41,10 +41,10 @@ void ActionClass::Read(InputSectionClass& inSection)
 
 double ActionClass::calcTotalAction(int startSlice, int endSlice, 
 				    Array<int,1> changedParticles,
+				    // double &PE, double &KE,
 				    int level)
 {
   // First, sum the pair actions
-  //  Array<bool,1> doptcl2(Path.NumParticles());
   Path.DoPtcl = true;
   double TotalU = 0.0;
   double TotalK = 0.0;
@@ -69,10 +69,6 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 
 	  DistanceTable->DistDisp(slice, slice+skip, ptcl1, ptcl2,
 				  rmag, rpmag, r, rp);
-	  //dVec r=r1-r2;
-	  //dVec rp=(rp1-rp2);
-	  //double rmag=sqrt(dot(r,r));
-	  //double rpmag=sqrt(dot(rp,rp));
 	  double s = sqrt(dot (r-rp, r-rp));
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
@@ -84,73 +80,19 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
       }
       
     }
-    //    cout<<"Lambda is "<<Path.Species(species1).lambda;
-    //    cout<<"levelTau is "<<levelTau<<endl;
     double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
-      //      double LinkDist;
       dVec vel;
-      //      dVec r1 = Path(slice,ptcl1);
-      //      dVec r2 = Path(slice+skip,ptcl1);
       vel = DistanceTable->Velocity(slice, slice+skip, ptcl1);
-      //This function has to be written and possibly memoized or something?
-      //      double LinkDistSqrd=distSqrd(r1,r2);  
       //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
       TotalK += dot(vel,vel)*FourLambdaTauInv; 
     }
   }
-   
-
-
-//       Species1 = changedParticles(i)[0];
-//       Ptcl1 = changedParticles(i)[1];
-//       for (int Species2=0; Species2<NumSpecies; Species2++) {
-// 	int NumPtcls2 = IdentPtcls(Species2).NumParticles();
-// 	for (int Ptcl2=0; Ptcl2<NumPtcls2; Ptcl2++) {
-// 	  for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {	    
-
-/////Aren't we calculating everybody in the list 
-//// against themselves multiple times here?
-// 	    double NotMyself = (double)((Ptcl1!=Ptcl2)||(Species1!=Species2));
-// 	    dVec r1 = IdentPtcls(Species1,Ptcl1,Slice);
-// 	    dVec r2 = IdentPtcls(Species2,Ptcl2,Slice);
-// 	    dVec rp1 = IdentPtcls(Species1,Ptcl1,Slice+skip);
-// 	    dVec rp2 = IdentPtcls(Species2,Ptcl2,Slice+skip);
-// 	    dVec r = r1 - r2;
-// 	    dVec rp = (rp1 -rp2);
-// 	    double rmag = sqrt(dot(r,r));
-// 	    double rpmag = sqrt(dot(rp,rp));
-	    
-// 	    double s = sqrt(dot (r-rp, r-rp));
-// 	    double q = 0.5 * (rmag + rpmag);
-// 	    double z = (rmag - rpmag);
-// 	    int PairIndex = PairMatrix(Species1, Species2);
-// 	    TotalU += NotMyself*
-// 	      PairActionVector(PairIndex).calcUsqz(s,q,z, level);
-// 	  }
-// 	}
-
-      
-      // Now, sum up the kinetic action
-//       double FourLambdaTauInv=1.0/(4.0*IdentPtcls(Species1).lambda*levelTau);
-//       for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {
-// 	dVec r1 = IdentPtcls(Species1,Ptcl1,Slice);
-// 	dVec r2 = IdentPtcls(Species1,Ptcl1,Slice+skip);
-// 	//This function has to be written and possibly memoized or something?
-// 	double LinkDistSqrd=distSqrd(r1,r2);  
-// 	//We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-// 	TotalK += LinkDistSqrd*FourLambdaTauInv; 
-//       }
-//     }
-    
-
   
-
-//  cout<<"The total potential action is "<< TotalU<<endl;
-//  cout<<"The total kinetic action is "<< TotalK<<endl;
+  
   return (TotalK + TotalU);
-
-
+  
+  
 }
 
  
@@ -290,6 +232,17 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
 
   int numOfFits=GetNextInt(numOfFitsString);
   n = numOfFits;
+
+  // Read in  the potential
+  Array<double,1> potential;
+  string potGridString = SkipTo(infile, "RANK");
+  GetNextWord(potGridString);
+  int numPotPoints = GetNextInt(potGridString);
+  potential.resize(numPotPoints);
+  SkipTo(infile, "potential");
+  for (int i=0; i<numPotPoints; i++)
+    infile >> potential(i);
+
   string NDERIVString = SkipTo(infile,"NDERIV");
 
 
@@ -360,8 +313,12 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
       
       ukj.resize(NumTau);
       ReadFORTRAN3Tensor(infile,tempUkj);
+      Array<double,3> tempUkj2(NumGridPoints,NumUKJ+1,NumTau);
+      for(int i=0; i<NumTau; i++)
+	tempUkj2(Range::all(),0,i) = potential;
+      tempUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempUkj;
       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
-	ukj(levelCounter).Init(theGrid,tempUkj(Range::all(),Range::all(),levelCounter));
+	ukj(levelCounter).Init(theGrid,tempUkj2(Range::all(),Range::all(),levelCounter));
       }
       tau=smallestTau;
       n=NMax;
@@ -430,11 +387,15 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
 	cerr<<"ERROR!!! ERROR!!! We didn't get the beta derivative.\n";
       }
       Array<double,3> tempdUkj(NumGridPoints,NumUKJ,NumTau);
-      TempukjArray.resize(NumUKJ);      
+      Array<double,3> tempdUkj2(NumGridPoints,NumUKJ+1,NumTau);
+      TempukjArray.resize(NumUKJ+1);      
       dukj.resize(NumTau);
       ReadFORTRAN3Tensor(infile,tempdUkj);
+      for(int i=0; i<NumTau; i++)
+	tempdUkj2(Range::all(),0,i) = potential;
+      tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
-	dukj(levelCounter).Init(theGrid,tempdUkj(Range::all(),Range::all(),levelCounter));
+	dukj(levelCounter).Init(theGrid,tempdUkj2(Range::all(),Range::all(),levelCounter));
       }
       tau=smallestTau;
       n=NMax;
