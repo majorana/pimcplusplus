@@ -167,10 +167,39 @@ double kSpacePH::Vk (double k)
 }
 
 
+TinyMatrix<double,3,3> kSpacePH::Ftensor (Vec3 deltaG)
+{
+  double Gmag = sqrt(dot(deltaG, deltaG));  
+  Vec3 g = deltaG / Gmag;
+  double aval = a(Gmag);
+  double bPerpval = bPerp(Gmag);
+  double bParval = bPar(Gmag);
+
+  TinyMatrix<double,3,3> F, G;
+  F = 0.0;
+  for (int i=0; i<3; i++)
+    F(i,i) += aval + bPerpval;
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      G(i,j) = g[i]*g[j];
+  F = F + (bParval - bPerpval)*G;
+  return F;
+}
+
 double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
 {
   Vec3 deltaG = G-Gp;
   double Gmag = sqrt(dot(deltaG, deltaG));
-  double v = Vk(Gmag);
+  double Vval = Vk(Gmag);
 
+  TinyMatrix<double,3,3> F = Ftensor (deltaG);
+  
+  Vec3 Gk = G + k;
+  Vec3 Gpk = Gp + k;
+  Vec3 FGpk (0.0, 0.0, 0.0);
+  FGpk[0] = F(0,0)*Gpk[0] + F(0,1)*Gpk[1] + F(0,2)*Gpk[2];
+  FGpk[1] = F(0,0)*Gpk[0] + F(1,1)*Gpk[1] + F(1,2)*Gpk[2];
+  FGpk[2] = F(0,0)*Gpk[0] + F(2,1)*Gpk[1] + F(2,2)*Gpk[2];
+  
+  return 0.5*dot(Gk, FGpk) + Vval;
 }

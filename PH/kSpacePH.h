@@ -25,7 +25,7 @@ protected:
   /// The perpendicular component of the b tensor
   double bPar  (double k);
   /// Returns the F tensor for k
-  TinyMatrix<double,3,3> F (double k);
+  TinyMatrix<double,3,3> Ftensor (Vec3 deltaG);
   bool HaveTailCoefs;
   double R1, R2;
 public:
