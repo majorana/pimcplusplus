@@ -15,7 +15,7 @@ public:
   int NumAccepted, NumAttempted;
   int BisectionLevel;
   list<ActionBaseClass*> Actions;
-  ///The highest stage will set the slices and activeParticles
+  ///The first stage will set the slices and activeParticles
   ///This returns transition probability T(new->old)/T(old->new)
   virtual double Sample (int &slice1,int &slice2,
 			 Array<int,1> &activeParticles) = 0; 

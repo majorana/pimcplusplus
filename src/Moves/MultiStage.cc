@@ -122,6 +122,8 @@ void MultiStageClass::Accept()
        stageIter!=Stages.end();stageIter++){
     (*stageIter)->Accept();
   }  
+  NumAccepted++;
+  NumMoves++;
 }
 
 void MultiStageClass::Reject()
@@ -131,6 +133,7 @@ void MultiStageClass::Reject()
 	 stageIter=Stages.begin();stageIter!=Stages.end();stageIter++){
     (*stageIter)->Reject();
   }
+  NumMoves++;
 }
 
 

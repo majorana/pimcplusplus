@@ -10,5 +10,6 @@
 #include "MultiStage.h"
 #include "BisectionBlock.h"
 #include "RefSliceMove.h"
+#include "DisplaceMove.h"
 
 #endif
