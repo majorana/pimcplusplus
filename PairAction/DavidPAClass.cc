@@ -80,9 +80,10 @@ void DavidPAClass::DoBreakup (const dVec &box, const Array<dVec,1> &kVecs)
 void DavidPAClass::calcUsqz(double s,double q,double z,int level,
 				      double &U, double &dU, double &V)
 {
-
   //level=level+(NumTau-(TauPos+1));
+  level=level+TauPos;
   //  cerr<<"My level is "<<level<<endl;
+  
   double rmin = ukj(level).grid->Start;
   
   U=0.0;
@@ -239,8 +240,8 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
 
 void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 {
-
-
+  double tau; //used to be in the base clase
+  double smallestTau;
   ifstream infile;
   //cout <<DMFile<<endl;
   infile.open(DMFile.c_str());  
@@ -328,7 +329,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 	cerr<<"ERROR!!! ERROR!!! The tau grid is not a LOG Grid\n";
 	cerr<<shouldBeLog<<endl;
       }
-      double smallestTau=GetNextDouble(TauGridString);
+      smallestTau=GetNextDouble(TauGridString);
       double largestTau=GetNextDouble(TauGridString);
       int numTauCalc=(int)floor(log(largestTau/smallestTau)/log(2.0)+0.5+1.0); ///I think this -1 is correct but who knows
       if (NumTau!=numTauCalc){
@@ -357,12 +358,13 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       Array<double,1> endDeriv(NumUKJ+1);
       endDeriv=0.0;
 
-      tau=largestTau; //HACK!
+      ///////      tau=largestTau; //HACK!
+      tau=smallestTau;
       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){//the -3 here is a HACK!
 	if (NMax==2){ //MORE HACK!
 	  ukj(levelCounter).Init(theGrid,tempUkj2(Range::all(),Range::all(),levelCounter),startDeriv,endDeriv);
 	}
-	tau=tau/2; //HACK!
+	tau=tau*2; //HACK!
       }
       //      tau=smallestTau; HACK REMOVAL!
       n=NMax;
@@ -417,9 +419,11 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 	cerr<<"ERROR!!! ERROR!!! The tau grid is not a LOG Grid\n";
 	cerr<<shouldBeLog<<endl;
       }
-      double smallestTau=GetNextDouble(TauGridString);
+      smallestTau=GetNextDouble(TauGridString);
       double largestTau=GetNextDouble(TauGridString);
       int numTauCalc=(int)floor(log(largestTau/smallestTau)/log(2.0)+0.5+1.0); ///I think this -1 is correct but who knows
+      cerr<<"The largest and smallest tau are respectively"
+	  <<largestTau<<" "<<smallestTau<<endl;
       if (NumTau!=numTauCalc){
 	
 	cerr<<"ERROR!!! ERROR!!! num tau inconsistency \n";
@@ -445,15 +449,16 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       endDeriv=0.0;
 
       ReadFORTRAN3Tensor(infile,tempdUkj);
-      tau=largestTau; //HACK
+      /////      tau=largestTau; //HACK
+      tau=smallestTau;
       for(int i=0; i<NumTau; i++){ //HACK!
 	tempdUkj2(Range::all(),0,i) = potential;
 	cerr<<"Current tau is "<<tau<<" "<<i<<endl;
-	if (fabs(tau-DesiredTau)<1e-10){
+	if (fabs(tau-DesiredTau)<1e-4){
 	  cerr<<"The tau I've chosen is "<<tau;
 	  TauPos=i;
 	}
-	tau=tau/2; //HACK!
+	tau=tau*2; //HACK!
       }
       cerr<<"I'm about ot actually initialize dukj now!"<<endl;
       tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
@@ -473,5 +478,11 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   for (int counter=0;counter<potential.size();counter++){
     Potential(counter)=potential(counter);
   }
+  tau=smallestTau;
+  for (int i=0;i<TauPos;i++){
+    tau *= 2;
+  }
+  cerr<<"I've FINALLY CHOSEN A TAU OF "<<tau;
+  cerr<<"TauPos is "<<TauPos<<endl;
 }
 

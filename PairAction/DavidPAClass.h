@@ -49,7 +49,7 @@ class DavidPAClass : public PairActionFitClass
   /// This is the order of the fit to use. 
   int n;
   /// This is the temperature 
-  double tau;
+  //////  double tau;
   /// Function to read David's squarer file input.
   void ReadDavidSquarerFile(string DMFile);
   double U (double q, double z, double s2, int level);
