@@ -28,11 +28,13 @@ TestObjs =                      \
   MirroredArrayClass.o          \
   Common/IO/InputOutput.o       \
   Common/IO/InputOutputHDF5.o   \
-  Common/IO/InputFile.o
+  Common/IO/InputFile.o         \
+  Common/IO/InputOutputASCII.o 
 
 MakeInputObjs =                 \
   Common/IO/InputOutput.o       \
   Common/IO/InputOutputHDF5.o   \
+  Common/IO/InputOutputASCII.o  \
   makeInput.o
 
 PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}"
@@ -56,11 +58,11 @@ Common_obj:
 Common_clean:
 	cd Common; ${MAKE} clean
 
-TestHDF5:	TestHDF5.o Common/IO/InputOutput.o Common/IO/InputOutputHDF5.o
+TestHDF5:	Common_obj TestHDF5.o Common/IO/InputOutput.o Common/IO/InputOutputHDF5.o
 	$(LD) -o $@ TestHDF5.o Common/IO/InputOutput.o Common/IO/InputOutputHDF5.o $(LIBS)
 
-TestASCII:	TestASCII.o Common/IO/InputOutput.o Common/IO/InputOutputASCII.o
-	$(LD) -o $@ TestASCII.o Common/IO/InputOutput.o Common/IO/InputOutputASCII.o $(LIBS)
+TestASCII:	Common_obj TestASCII.o Common/IO/InputOutput.o Common/IO/InputOutputASCII.o Common/IO/InputOutputHDF5.o
+	$(LD) -o $@ TestASCII.o Common/IO/InputOutput.o Common/IO/InputOutputASCII.o Common/IO/InputOutputHDF5.o $(LIBS)
 
 #TestSubarrays: 	$(TestSubarrayObjs)
 #	pushd ..; make; pushd
