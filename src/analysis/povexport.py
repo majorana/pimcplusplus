@@ -159,12 +159,13 @@ cylinder {
 def export_curve_sweep(a):
     object_code = "sphere_sweep {\n  cubic_spline\n"
     n = len(a.pos)
-    object_code=object_code+" "+repr(n+1)+",\n"
+    object_code=object_code+" "+repr(n+2)+",\n"
     object_code=object_code+"<"+repr(a.pos[n-2][0])+", "+repr(a.pos[n-2][1])+ ", "+repr(a.pos[n-2][2])+">, "+repr(a.radius)+"\n"
     ii = 0
     while ii < n:
         object_code=object_code+"  <"+repr(a.pos[ii][0])+", "+repr(a.pos[ii][1])+", "+repr(a.pos[ii][2])+">, " + repr(a.radius)+"\n"
         ii = ii+1
+    object_code=object_code+"  <"+repr(a.pos[1][0])+", "+repr(a.pos[1][1])+", "+repr(a.pos[1][2])+">, " + repr(a.radius)+"\n" 
     object_code=object_code+"pigment { color rgb <" +repr(a.color[0][0]) + ", " +repr(a.color[0][1]) + ", " + repr(a.color[0][2]) + ">}\n}\n\n"
     
 #    object_code = process_frame(a, object_code)
