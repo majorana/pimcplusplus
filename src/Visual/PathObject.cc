@@ -150,7 +150,7 @@ void PathObject::DrawPOV(FILE *fout, string rotString)
 	   startControl[0], startControl[1], startControl[2], Radius);
 	   
   for (int i=0; i<N; i++)
-    fprintf (fout, "  <%14.10f, %14.10f %14.10f>, %8.5f\n",
+    fprintf (fout, "  <%14.10f, %14.10f, %14.10f>, %8.5f\n",
 	     MyPath[i][0], MyPath[i][1], MyPath[i][2], Radius);
 
   // Now, write the last control point

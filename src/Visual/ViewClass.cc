@@ -127,8 +127,10 @@ ViewClass::POVtransform (FILE *fout)
   fprintf (fout, "camera {\n");
   fprintf (fout, "  location <%14.10f, %14.10f %14.10f>\n",
 	   0.0, 0.0, 2.0*Distance/Scale);
-  fprintf (fout, "  angle 40.0\n");
-  fprintf (fout, "  right <-1.33,0,0>\n");
+  double angle = 51.661;
+  angle = 40.0;
+  fprintf (fout, "  angle %1.5f\n", angle);
+  fprintf (fout, "  right <-1.0,0,0>\n");
   fprintf (fout, "  look_at <%14.10f %14.10f %14.10f>\n}\n\n",
 	   0.0, 0.0, 0.0);
 }
@@ -158,7 +160,8 @@ ViewClass::RotationString()
 {
   char rotString[500];
   
-  snprintf (rotString, 500, "  matrix <%8.5f, %8.5f, %8.5f,\n         %8.5f, %8.5f, %8.5f,\n         %8.5f, %8.5f, %8.5f,\n         %8.5f, %8.5f, %8.5f >\n",
+  snprintf(rotString,500,
+	   "  matrix <%8.5f, %8.5f, %8.5f,\n          %8.5f, %8.5f, %8.5f,\n          %8.5f, %8.5f, %8.5f,\n          %8.5f, %8.5f, %8.5f >\n",
 	    RotMat[0][0], RotMat[0][1], RotMat[0][2],
 	    RotMat[1][0], RotMat[1][1], RotMat[1][2],
 	    RotMat[2][0], RotMat[2][1], RotMat[2][2],
