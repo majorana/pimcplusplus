@@ -1,5 +1,10 @@
+#if NDIM==3
 #include "ActionClass.h"
 #include "PathDataClass.h"
+
+
+//The ewald test only functions for 3 dimensions.
+
 
 double kcutoff = 40.0;
 //double kcutoff = 0.08;
@@ -237,10 +242,14 @@ void MadelungTest(ActionClass &action)
   fprintf (stderr, "dU = %1.9f\n", dU*2.0);
   fprintf (stderr, "Spring = %1.9f\n", spring*2.0);
 }
+#endif
+
+
 
 main()
 {
 
+#if NDIM==3
   {
 //     cerr << "ZincBlend: Ashcroft and Mermin give 1.6381\n";
 //     PathDataClass pathData;
@@ -263,6 +272,7 @@ main()
      MadelungTest(action);
   }
 
-
+#endif
 
 }
+

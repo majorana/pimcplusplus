@@ -22,6 +22,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
     permuteStage = new TablePermuteStageClass (PathData, SpeciesNum, NumLevels);
+  else if (permuteType=="COUPLE")
+    permuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels);
   else if (permuteType == "NONE") 
     permuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels);
   else {
@@ -36,18 +38,27 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
-      if (PathData.Path.LongRange) 
+      if (PathData.Path.LongRange){
 	if (PathData.Actions.UseRPA)
 	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+      ///If it's David's long range class then do this
+	else if (PathData.Path.DavidLongRange){
+	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+	}
+	////
 	else
 	  newStage->Actions.push_back(&PathData.Actions.LongRange);
-      
+
+	
+      }
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
 	cerr << "Adding fermion node action for species " 
 	     << speciesName << endl;
+
 	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
       }
     }
+
     newStage->BisectionLevel = level;
     Stages.push_back (newStage);
   }

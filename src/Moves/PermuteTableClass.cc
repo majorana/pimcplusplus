@@ -269,18 +269,35 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
       }
     }
   }
-  int currSpot=0;
-  for (int counter=0;counter<NumEntries;counter++){
-    if (CycleTable(counter).Length % 2 ==1){
-      CycleTable(currSpot)=CycleTable(counter);
-      currSpot++;
+  if (OnlyOdd || PathData.Path.Species(SpeciesNum).GetParticleType()==FERMION){
+    int currSpot=0;
+    for (int counter=0;counter<NumEntries;counter++){
+      if (CycleTable(counter).Length % 2 ==1){
+	CycleTable(currSpot)=CycleTable(counter);
+	currSpot++;
+      }
+    }
+    NumEntries=currSpot;
+    CycleTable(0).C=CycleTable(0).P;
+    for (int counter=1;counter<NumEntries;counter++){
+      CycleTable(counter).C=CycleTable(counter-1).C+CycleTable(counter).P;
     }
   }
-  NumEntries=currSpot;
-  CycleTable(0).C=CycleTable(0).P;
-  for (int counter=1;counter<NumEntries;counter++){
-    CycleTable(counter).C=CycleTable(counter-1).C+CycleTable(counter).P;
+  else if (OnlyEven) {
+    int currSpot=0;
+    for (int counter=0;counter<NumEntries;counter++){
+      if (CycleTable(counter).Length % 2 ==0){
+	CycleTable(currSpot)=CycleTable(counter);
+	currSpot++;
+      }
+    }
+    NumEntries=currSpot;
+    CycleTable(0).C=CycleTable(0).P;
+    for (int counter=1;counter<NumEntries;counter++){
+      CycleTable(counter).C=CycleTable(counter-1).C+CycleTable(counter).P;
+    }
   }
+
   Norm = CycleTable(NumEntries-1).C;
   NormInv = 1.0/Norm;
 }

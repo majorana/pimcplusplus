@@ -97,7 +97,7 @@ void StructureFactorClass::WriteBlock()
 void StructureFactorClass::Accumulate()
 {
   Array<dVec,1> &kVecs = PathData.Path.kVecs;
-
+  //  cerr<<"I have been told to accumulate"<<endl;
   SpeciesClass &species1=PathData.Path.Species(Species1);
   SpeciesClass &species2=PathData.Path.Species(Species2);
 

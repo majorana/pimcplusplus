@@ -56,8 +56,10 @@ class PermuteTableClass
   double Norm, NormInv;
   inline int FindEntry(double xi);  
   inline int FindEntrySlow(double xi);  
-
 public:
+  ///Designed to allow it to give only odd or only even permutations.  Specifically used for a coupling move.
+  bool OnlyOdd;
+  bool OnlyEven;
   int NumEntries;
   CycleClass CurrentCycle;
   Array<double,2> HTable;
@@ -88,6 +90,8 @@ public:
     NumEntries=0;
     TableSize = 1000;
     CycleTable.resize(TableSize);
+    OnlyOdd=false;
+    OnlyEven=false;
   }
 
 };

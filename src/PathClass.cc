@@ -132,7 +132,11 @@ void PathClass::Read (IOSectionClass &inSection)
   // Read in the k-space radius.  If we don't have that,
   // we're not long-ranged.
   LongRange = inSection.ReadVar("kCutoff", kCutoff);
-
+  if (!(inSection.ReadVar("DavidLongRange",DavidLongRange))){
+    DavidLongRange=false;
+  }
+  if (DavidLongRange)
+    cerr<<"I am doing DAVID LONG RANGE!"<<endl;
   assert(inSection.OpenSection("Particles"));
   int NumSpecies = inSection.CountSections ("Species");
   cerr<<"we have this many sections: "<<NumSpecies<<endl;
@@ -273,12 +277,12 @@ void PathClass::Read (IOSectionClass &inSection)
 
 inline bool Include(dVec k)
 {
-  assert (NDIM == 3);
+  //  assert (NDIM == 3);
   if (k[0] > 0.0)
     return true;
   else if ((k[0]==0.0) && (k[1]>0.0))
     return true;
-  else if ((k[0]==0.0) && (k[1]==0.0) && (k[2] > 0.0))
+  else if ((NDIM==3) && ((k[0]==0.0) && (k[1]==0.0) && (k[2] > 0.0)))
     return true;
   else
     return false;
@@ -335,14 +339,123 @@ void PathClass::Allocate()
     Permutation(ptcl) = ptcl;
   }
   if (LongRange){
-    SetupkVecs();
+#if NDIM==3    
+    SetupkVecs3D();
+#endif
+#if NDIM==2
+    SetupkVecs2D();
+#endif
     Rho_k.resize(MyNumSlices, NumSpecies(),kVecs.size());
   }
   
 }
 
+void PathClass::SetupkVecs2D()
+{
 
-void PathClass::SetupkVecs()
+  for (int i=0; i<NDIM; i++)
+    kBox[i] = 2.0*M_PI/Box[i];
+  
+  int numVecs=0;
+
+  assert (NDIM == 2);
+
+  for (int i=0;i<NDIM;i++){
+    MaxkIndex[i]= (int) ceil(1.1*kCutoff/kBox[i]);
+    // cerr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
+  }
+
+
+  dVec k;
+  TinyVector<int,NDIM> ki;
+  for (int ix=-MaxkIndex[0]; ix<=MaxkIndex[0]; ix++) {
+    k[0] = ix*kBox[0];
+    for (int iy=-MaxkIndex[1]; iy<=MaxkIndex[1]; iy++) {
+      k[1] = iy*kBox[1];
+      //      for (int iz=-MaxkIndex[2]; iz<=MaxkIndex[2]; iz++) {
+      //	k[2] = iz*kBox[2];
+      if ((dot(k,k)<kCutoff*kCutoff) && Include(k))
+	numVecs++;
+      //}
+    }
+  }
+  kIndices.resize(numVecs);
+  cerr << "kCutoff = " << kCutoff << endl;
+  cerr << "Number of kVecs = " << numVecs << endl;
+  kVecs.resize(numVecs);
+  for (int i=0; i<NDIM; i++)
+    C[i].resize(2*MaxkIndex[i]+1);
+  numVecs = 0;
+  for (int ix=-MaxkIndex[0]; ix<=MaxkIndex[0]; ix++) {
+    k[0] = ix*kBox[0];
+    ki[0]= ix+MaxkIndex[0];
+    for (int iy=-MaxkIndex[1]; iy<=MaxkIndex[1]; iy++) {
+      k[1] = iy*kBox[1];
+      ki[1]= iy+MaxkIndex[1];
+      //      for (int iz=-MaxkIndex[2]; iz<=MaxkIndex[2]; iz++) {
+      //	k[2] = iz*kBox[2];
+      //	ki[2]= iz+MaxkIndex[2];
+	if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
+	  kVecs(numVecs) = k;
+	  kIndices(numVecs)=ki;
+	  numVecs++;
+	}
+	//      }
+    }
+  }
+  SortRhoK();
+}
+
+
+///Puts in the vector MagKInt a number that corresponds to the sorted
+///order of teh magnitude of the k vectors. Doesn't actually change
+///what's in kVec. Currently only used for the reading of David's long
+///range class. 
+void PathClass::SortRhoK()
+{
+  Array<double,1> magK;
+  //  Array<int,1> MagKint;
+  magK.resize(kVecs.size());
+  MagKint.resize(kVecs.size());
+  for (int kVec=0;kVec<kVecs.size();kVec++){
+    magK(kVec)=sqrt(kVecs(kVec)[0]*kVecs(kVec)[0]+
+			kVecs(kVec)[1]*kVecs(kVec)[1]);
+  }
+  int smallIndex=0;
+ 
+  for (int counter=0;counter<MagKint.size();counter++){
+    MagKint(counter)=-1;
+  }
+
+
+
+  for (int currentNum=0;currentNum<kVecs.size();currentNum++){
+    for (int counter=0;counter<magK.size();counter++){
+      if (MagKint(counter)==-1 && magK(counter)<magK(smallIndex)){
+	smallIndex=counter;
+      }
+    }
+    for (int counter=0;counter<magK.size();counter++){
+      if (abs(magK(smallIndex)-magK(counter))<1e-4){
+	MagKint(counter)=currentNum;
+      }
+    }
+    smallIndex=-1;
+    for (int counter=0;counter<magK.size();counter++){
+      if (MagKint(counter)==-1)
+	smallIndex=counter;
+    }
+    if (smallIndex==-1)
+      currentNum=kVecs.size()+1;
+  }
+  for (int counter=0;counter<MagKint.size();counter++){
+    cerr<<"My mag K int is "<<MagKint(counter)<<endl;
+  }
+
+}
+
+
+void PathClass::SetupkVecs3D()
 {
 
   for (int i=0; i<NDIM; i++)
@@ -416,6 +529,7 @@ void PathClass::CalcRho_ks_Slow(int slice, int species)
 
 void PathClass::CalcRho_ks_Fast(int slice,int species)
 {
+  //  cerr<<"Beginning the calcrhok stuff"<<endl;
   // Zero out Rho_k array
   for (int ki=0;ki<kIndices.size();ki++)
     Rho_k(slice,species,ki)=0.0;
@@ -437,15 +551,18 @@ void PathClass::CalcRho_ks_Fast(int slice,int species)
     // Now, loop over k-vector indices;
     for (int ki=0; ki<kIndices.size(); ki++) {
       const TinyVector<int,NDIM> &kIndex = kIndices(ki);
-#ifdef THREE_D
+      //#ifdef THREE_D
+#if NDIM==3
       Rho_k(slice,species,ki) += 
 	C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
 #endif
-#ifdef TWO_D
+      //#ifdef TWO_D
+#if NDIM==2
       Rho_k(slice,species,ki) += C[0](kIndex[0])*C[1](kIndex[1]);
 #endif
     }
   }
+  //  cerr<<"ending the calcrhok stuff"<<endl;
 }
       
 

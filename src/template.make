@@ -41,15 +41,18 @@ MAKECC = g++
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
-DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -DUSE_MPI  -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
 
 PIMCobjs =                            \
+  Common.o                            \
   Main.o                              \
   Observables/ObservableEnergy.o      \
+  Observables/Weight.o                \
   Observables/StructureFactor.o       \
   Moves/BisectionClass.o              \
   Moves/NoPermuteClass.o              \
   Moves/PermuteStageClass.o           \
+  Moves/CoupledPermuteStageClass.o    \
   Moves/BisectionBlock.o              \
   Moves/RefSliceMove.o                \
   Moves/BisectionStageClass.o         \
@@ -61,7 +64,6 @@ PIMCobjs =                            \
   Observables/PathDump.o              \
   Observables/WindingNumber.o         \
   SpeciesClass.o                      \
-  Common.o                            \
   Moves/PermuteTableClass.o	      \
   Moves/TablePermuteStageClass.o      \
   Moves/RandomPermClass.o             \
@@ -75,6 +77,7 @@ PIMCobjs =                            \
   Actions/ShortRangePotClass.o        \
   Actions/LongRangePotClass.o         \
   Actions/LongRangeRPAClass.o         \
+  Actions/DavidLongRangeClass.o       \
   Actions/KineticClass.o              \
   Actions/ActionsClass.o              \
   Actions/NodalActionClass.o          \
@@ -122,6 +125,7 @@ PIMCobjs =                            \
 
 
 TestPermobjs =                        \
+  Common.o                            \
   TestPermutation.o                   \
   Moves/BisectionClass.o              \
   Moves/PermuteStageClass.o           \
@@ -132,6 +136,7 @@ TestPermobjs =                        \
   Moves/BlockMove.o                   \
   Moves/MetaMoves.o                   \
   Moves/TablePermuteStageClass.o      \
+  Moves/CoupledPermuteStageClass.o    \
   Moves/BisectionStageClass.o         \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
@@ -140,18 +145,19 @@ TestPermobjs =                        \
   Actions/LongRangeRPAClass.o         \
   Actions/ShortRangePotClass.o        \
   Actions/LongRangePotClass.o         \
+  Actions/DavidLongRangeClass.o       \
   Actions/KineticClass.o              \
   Actions/NodalActionClass.o          \
   Moves/MultiStage.o                  \
   PIMCClass.o                         \
   Observables/ObservableBase.o        \
   Observables/ObservableEnergy.o      \
+  Observables/Weight.o                \
   Observables/ObservableCorrelation.o \
   Observables/StructureFactor.o       \
   Observables/PathDump.o              \
   Observables/WindingNumber.o         \
   SpeciesClass.o                      \
-  Common.o                            \
   Moves/PermuteTableClass.o	      \
   Moves/RandomPermClass.o             \
   Moves/BisectionMoveClass.o          \
@@ -211,6 +217,7 @@ TestEwaldobjs =                       \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
   Actions/LongRangeClass.o            \
+  Actions/DavidLongRangeClass.o       \
   Actions/LongRangeRPAClass.o         \
   Actions/ShortRangePotClass.o        \
   Actions/LongRangePotClass.o         \
@@ -328,7 +335,7 @@ clean:	Common_clean Tests_clean Actions_clean Moves_clean Observables_clean
 
 
 
-SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc
+SOURCES =  Common.cc myprog.cc SpeciesClass.cc  ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc
 
 
 newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake

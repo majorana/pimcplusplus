@@ -792,6 +792,7 @@ public:
 /// included in the simulation sum.
 void ActionClass::OptimizedBreakup_U(int numKnots)
 {
+#if NDIM==3
   const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
@@ -922,10 +923,12 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
 //       fclose (fout);
     }
   }
+#endif
 }
 
 void ActionClass::OptimizedBreakup_dU(int numKnots)
 {
+#if NDIM==3
   const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
@@ -1039,6 +1042,7 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
       }
     }
   }
+#endif
 }
 
 
@@ -1154,6 +1158,7 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
 
 void ActionClass::OptimizedBreakup_V(int numKnots)
 {
+#if NDIM==3
   const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
@@ -1266,6 +1271,7 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
       pa.Vlong_k(ki) -= pa.Xk_V(k) / boxVol;
     }
   }
+#endif
 }
 
 
@@ -1357,6 +1363,9 @@ void ActionClass::Energy(int slice1, int level,
     if (UseRPA)
       dU += 0.5*(LongRange_dU_RPA (slice1, level)+
 		 LongRange_dU_RPA(slice2,level));
+    else if (PathData.Path.DavidLongRange){//only works on level 0
+      dU += PathData.Actions.DavidLongRange.d_dBeta(slice1,slice2,level);
+    }
     else
       dU += 0.5*(LongRange_dU (slice1, level)+LongRange_dU(slice2,level));
   }

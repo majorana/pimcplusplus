@@ -114,6 +114,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection("StructureFactor");
       tempObs=new StructureFactorClass(PathData,OutFile);
     }
+    else if (theObserveType=="Sign"){
+      if (iAmRoot)
+	OutFile.NewSection("Sigh");
+      tempObs=new WeightClass(PathData,OutFile);
+    }
     else {
       cerr<<"We do not recognize the observable "<<theObserveType<<endl;
 	abort();

@@ -7,6 +7,7 @@
 #include "LongRangePotClass.h"
 #include "KineticClass.h"
 #include "NodalActionClass.h"
+#include "DavidLongRangeClass.h"
 
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
@@ -37,6 +38,9 @@ public:
   /// The Random Phase Approximation-corrected form of the above.
   LongRangeRPAClass LongRangeRPA;
 
+  ///David's Long Range Class
+  DavidLongRangeClass DavidLongRange;
+
   /// This array of actions are used for Restricted PIMC for
   /// fermions.  These effective actions ensure that the paths do not
   /// cross the nodes of some trial density matrix with respective to
@@ -61,6 +65,7 @@ public:
     ShortRange(pathData,PairMatrix),
     ShortRangePot(pathData, PairMatrix),
     LongRange(pathData,PairMatrix,PairArray), 
+    DavidLongRange(pathData),
     LongRangeRPA(pathData, PairMatrix, PairArray),
     LongRangePot(pathData, PairMatrix),
     Kinetic(pathData),

@@ -99,8 +99,15 @@ void ActionsClass::Read(IOSectionClass &in)
 //       NodalActions(species) = new FPNodalActionClass(PathData, species);
 //     else
 //       NodalActions(species) = NULL;
-
+  
   cerr << "Finished reading the action.\n"; 
+
+
+  ///Reading in information for David long range action
+  if (PathData.Path.DavidLongRange){
+    DavidLongRange.Read(in);
+  }
+
 }
 
 

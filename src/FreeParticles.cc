@@ -2,10 +2,10 @@
 #include "Common/Random/Random.h"
 #include "Common/IO/InputOutput.h"
 
-#define NDIM 3
+// #define NDIM 3
 
 typedef TinyVector<int,NDIM> State;
-typedef TinyVector<double,3> dVec;
+typedef TinyVector<double,NDIM> dVec;
 
 class ParticleClass
 {
@@ -184,7 +184,7 @@ void ParticleClass::PrintStates()
 
 }
 
-#if NDIM == 3
+
 void FermionClass::FillStates()
 {
   OccupiedStates.resize (NumParticles);
@@ -226,7 +226,7 @@ void FermionClass::FillStates()
     }
   }
 }
-#endif
+
 
 
 

@@ -5,6 +5,7 @@
 #include "MoveBase.h"
 #include "../PathDataClass.h"
 #include "PermuteStageClass.h"
+#include "CoupledPermuteStageClass.h"
 #include "BisectionStageClass.h"
 
 

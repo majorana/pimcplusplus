@@ -131,6 +131,7 @@ void PairCorrelationClass::WriteBlock()
       }
       IOVar->Append(gofrArray);
     }
+    IOSection.FlushFile();
   }
 }
 
@@ -155,6 +156,7 @@ void PairCorrelationClass::Print()
 /// interested in.
 void PairCorrelationClass::Accumulate()
 {
+
   SpeciesClass &species1=PathData.Path.Species(Species1);
   SpeciesClass &species2=PathData.Path.Species(Species2);
 
@@ -227,7 +229,10 @@ void PairCorrelationClass::Accumulate()
 	}
     }
   }
+
+
 }
+
 
 
 
@@ -385,7 +390,7 @@ void nofrClass::Print()
 ///loop. This does not compensaite for volume effects or importance sampling
 void nofrClass::Accumulate()
 {
-  cerr<<"I've been called to accumulate"<<endl;
+
   TimesCalled++;
   if (TimesCalled % DumpFreq==0){
     WriteBlock();

@@ -45,7 +45,16 @@ private:
   /// Stores the radius of the k-space sphere we sum over
   double kCutoff;
   /// Allocates and sets up the k-vectors.
-  void SetupkVecs();
+  void SetupkVecs3D();
+
+  void SetupkVecs2D();
+
+  ///These two preceding function/array only need to be used in order to
+  ///make the readings of David's file work correctly (sorry,
+  ///Ken...I'll find out how to make it more transparent in a bit)
+  void SortRhoK();
+  Array<int,1> MagKint;
+
   /// Stores indices into C array for fast computation of rho_k
   Array<TinyVector<int,NDIM>,1> kIndices;
   /// This stores e^{i\vb_i \cdot r_i^\alpha}
@@ -57,6 +66,8 @@ public:
   void BroadcastRefPath();
   /// True if we need k-space sums for long range potentials.
   bool LongRange;
+  ///True if we are doing long range in David's way
+  bool DavidLongRange;
   /// Stores the actual k vectors
   Array<dVec,1> kVecs;
   /// This holds the density of particles in k-space.  Indexed by

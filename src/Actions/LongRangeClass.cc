@@ -345,6 +345,8 @@ void LongRangeClass::Init(IOSectionClass &in)
 /// included in the simulation sum.
 void LongRangeClass::OptimizedBreakup_U(int numKnots)
 {
+  /// BUG: Long Range Optimized Breakups only work for NDIM=3
+#if NDIM==3
   PathClass &Path=PathData.Path;
   const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
@@ -476,10 +478,13 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots)
 //       fclose (fout);
     }
   }
+#endif
 }
 
 void LongRangeClass::OptimizedBreakup_dU(int numKnots)
 {
+  ///BUG: Optimized Breakup only works when NDIM==3
+#if NDIM==3
   PathClass &Path=PathData.Path;
   const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
@@ -594,6 +599,7 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots)
       }
     }
   }
+#endif
 }
 
 
@@ -709,6 +715,8 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots)
 
 void LongRangeClass::OptimizedBreakup_V(int numKnots)
 {
+  ///BUG: Optimized breakup only works when NDIM==3
+#if NDIM==3
   const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
@@ -821,4 +829,5 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots)
       pa.Vlong_k(ki) -= pa.Xk_V(k) / boxVol;
     }
   }
+#endif
 }
