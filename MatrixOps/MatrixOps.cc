@@ -63,6 +63,8 @@ double Determinant (const Array<double,2> &A)
   int n = A.cols();
   assert (m == n);  // Cannot take a determinant of a non-square
 		    // matrix
+  if (A.rows() == 1)
+    return (A(0,0));
   if (A.rows() == 2) 
     return (A(0,0)*A(1,1)-A(0,1)*A(1,0));
   else {
