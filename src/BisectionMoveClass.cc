@@ -7,10 +7,9 @@ void ShiftMove::makeMove()
 {//Remember to mark Actions dirty!!!
   //int numTimeSlicesToShift=(int)floor(sprng()*PathData->NumTimeSlices);
   int numTimeSlicesToShift = 5;
-  for (int counter=0;counter<PathData->IdenticalParticleArray.size();counter++)
-    {
-      (PathData->IdenticalParticleArray)(counter).Path.shiftData(numTimeSlicesToShift,PathData->Communicator);
-    }
+  for (int counter=0;counter<PathData->NumSpecies();counter++){
+      (*PathData)(counter).shiftData(numTimeSlicesToShift,PathData->Communicator);
+  }
 }
 
     

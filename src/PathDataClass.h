@@ -19,5 +19,20 @@ public:
   int NumTimeSlices;
   void acceptMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice);
   void rejectMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice);
+  inline int NumSpecies(){
+    return IdenticalParticleArray.size();
+  }
+  inline PathClass& operator()(int Species){
+    return IdenticalParticleArray(Species).Path;
+  }
+
+  inline dVec operator()(int Species,int Particle,int TimeSlice){
+    return IdenticalParticleArray(Species,Particle,TimeSlice);
+  }
+  inline void SetPos(int Species, int Particle, int TimeSlice,const dVec& r){
+    IdenticalParticleArray.SetPos(Species,Particle,TimeSlice,r);
+  }
+
 };
+
 #endif

@@ -91,12 +91,11 @@ void setupMove(BisectionMoveClass &myBisectionMove,ShiftMove &myShiftMove, PathD
 
 #include <unistd.h>
 
-int main(int argc, char **argv)
 
+void TestShift()
 {
-  MPI_Init(&argc, &argv);
 
-  CommunicatorClass myCommunicator;
+ CommunicatorClass myCommunicator;
   myCommunicator.my_mpi_comm = MPI_COMM_WORLD;
   int MyProc = myCommunicator.MyProc();
 
@@ -126,8 +125,18 @@ int main(int argc, char **argv)
     myArray.Print();
 
 
+}
 
-  /*
+
+int main(int argc, char **argv)
+
+{
+  MPI_Init(&argc, &argv);
+
+ 
+
+
+  
   PathDataClass myPathData;
   PairCorrelation PC;
   PC.PathData = &myPathData;
@@ -157,7 +166,7 @@ int main(int argc, char **argv)
     }
     myShiftMove.makeMove();
   }
-  PC.Print();*/
+  PC.Print();
   //cerr<<"done! done!"<<endl;
   MPI_Finalize();
 }

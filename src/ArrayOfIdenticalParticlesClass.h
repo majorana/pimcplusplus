@@ -23,7 +23,7 @@ class ArrayOfIdenticalParticlesClass
   inline IdenticalParticlesClass& operator()(int i){
     return (*(IdenticalParticlesArray(i)));
   }
-  inline void SetPos(int Species, int Ptcl, int Slice, dVec &pos){
+  inline void SetPos(int Species, int Ptcl, int Slice, const dVec &pos){
     IdenticalParticlesArray(Species)->Path.SetPos(Ptcl, Slice, pos);
   }
   inline dVec operator()(int Species, int Ptcl, int Slice) const {

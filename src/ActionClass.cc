@@ -29,10 +29,10 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
 	for (int Ptcl2=0; Ptcl2<NumPtcls2; Ptcl2++) {
 	  for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {	    
 	    double NotMyself = (double)((Ptcl1!=Ptcl2)||(Species1!=Species2));
-	    dVec r1 = IdentPtcls(Species1).Path(Ptcl1,Slice);
-	    dVec r2 = IdentPtcls(Species2).Path(Ptcl2,Slice);
-	    dVec rp1 = IdentPtcls(Species1).Path(Ptcl1,Slice+skip);
-	    dVec rp2 = IdentPtcls(Species2).Path(Ptcl2,Slice+skip);
+	    dVec r1 = IdentPtcls(Species1,Ptcl1,Slice);
+	    dVec r2 = IdentPtcls(Species2,Ptcl2,Slice);
+	    dVec rp1 = IdentPtcls(Species1,Ptcl1,Slice+skip);
+	    dVec rp2 = IdentPtcls(Species2,Ptcl2,Slice+skip);
 	    dVec r = r1 - r2;
 	    dVec rp = (rp1 -rp2);
 	    double rmag = sqrt(dot(r,r));
@@ -51,8 +51,8 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
       // Now, sum up the kinetic action
       double FourLambdaTauInv=1.0/(4.0*IdentPtcls(Species1).lambda*levelTau);
       for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {
-	dVec r1 = IdentPtcls(Species1).Path(Ptcl1,Slice);
-	dVec r2 = IdentPtcls(Species1).Path(Ptcl1,Slice+skip);
+	dVec r1 = IdentPtcls(Species1,Ptcl1,Slice);
+	dVec r2 = IdentPtcls(Species1,Ptcl1,Slice+skip);
 	//This function has to be written and possibly memoized or something?
 	double LinkDistSqrd=distSqrd(r1,r2);  
 	//We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}

@@ -49,18 +49,18 @@ class PathClass
   /// In case of acceptance, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This
   /// copies from A to B.
-  void AcceptCopy (const Array<int,1> &Ptcls, int StartSlice, int EndSlice)
+  void AcceptCopy (int Ptcl, int StartSlice, int EndSlice)
     {
-      Positions.AcceptCopy(Ptcls,StartSlice,EndSlice);
-      TimeStamp.AcceptCopy(Ptcls,StartSlice,EndSlice);
+      Positions.AcceptCopy(Ptcl,StartSlice,EndSlice);
+      TimeStamp.AcceptCopy(Ptcl,StartSlice,EndSlice);
     }
   /// In case of rejection, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This
   /// copies from B to A.
-  void RejectCopy (const Array<int,1> &Ptcls, int StartSlice, int EndSlice)
+  void RejectCopy (int Ptcl, int StartSlice, int EndSlice)
     {
-      Positions.RejectCopy(Ptcls,StartSlice,EndSlice);
-      TimeStamp.RejectCopy(Ptcls,StartSlice,EndSlice);
+      Positions.RejectCopy(Ptcl,StartSlice,EndSlice);
+      TimeStamp.RejectCopy(Ptcl,StartSlice,EndSlice);
       
     }
 };

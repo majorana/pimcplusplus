@@ -38,7 +38,7 @@ public:
   {
     return (1,x,y);
   }
-
+  
   /// Write to the mirrored array in the way specified by the present
   /// mode. 
   inline void Set(int x, int y,const T &NewVal)
@@ -51,29 +51,23 @@ public:
   /// In case of acceptance, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This
   /// copies from 0 to 1.
-  void AcceptCopy (const Array<int,1> &Ptcls, int StartSlice, int EndSlice)
+  inline void AcceptCopy (int Particle, int StartSlice, int EndSlice)
   {
-    for (int i=0; i<Ptcls.size(); i++)
-      for (int j=StartSlice; j<=EndSlice; j++)
-	AB(1,i,j) = AB(0,i,j);
+    for (int Slice=StartSlice; Slice<=EndSlice; Slice++)
+      AB(1,Particle,Slice) = AB(0,Particle,Slice);
   }
 
   /// In case of rejection, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This
   /// copies from 1 to 0.
-  void RejectCopy (const Array<int,1> &Ptcls, int StartSlice, int EndSlice)
+  inline void RejectCopy (int Particle, int StartSlice, int EndSlice)
   {
-    for (int i=0; i<Ptcls.size(); i++)
-      for (int j=StartSlice; j<=EndSlice; j++)
-	  AB(0,i,j) = AB(1,i,j);
+    for (int Slice=StartSlice; Slice<=EndSlice; Slice++)
+      AB(0,Particle,Slice) = AB(1,Particle,Slice);
   }
-
-
 };
 
 
-
-//void foo();
 
 
 #endif
