@@ -18,6 +18,9 @@ FPNodalActionClass::GradientDet (int slice, double &det,
   double t = abs(slice-PathData.Path.GetRefSlice()) * PathData.Action.tau;
   double beta = PathData.Path.TotalNumSlices * PathData.Action.tau;
   t = min (t, fabs(beta-t));
+  assert (t <= 0.500000001*beta);
+//   cerr << "slice = " << slice << " refslice = " << PathData.Path.GetRefSlice() 
+//        << " t = " << t << " beta = " << beta << endl;
   double lambda = species.lambda;
   double C = 1.0/(4.0*M_PI * lambda * t);
 
@@ -37,9 +40,9 @@ FPNodalActionClass::GradientDet (int slice, double &det,
     }
   }
 
-  cerr << "slice = " << slice << endl;
-  cerr << "RefSlice = " << Path.GetRefSlice() << endl;
-  cerr << "DetMatrix = " << endl << DetMatrix << endl;
+//   cerr << "slice = " << slice << endl;
+//   cerr << "RefSlice = " << Path.GetRefSlice() << endl;
+//   cerr << "DetMatrix = " << endl << DetMatrix << endl;
 
 
   // Compute determinant
@@ -49,43 +52,21 @@ FPNodalActionClass::GradientDet (int slice, double &det,
   Transpose (Cofactors);
   Cofactors = det * Cofactors;
 
-  double cofDet = 0.0;
-  for (int col=0; col<DetMatrix.cols(); col++)
-    cofDet += DetMatrix(col,0) * Cofactors(col,0);
-  cerr << "Determinant      = " << det << endl;
-  cerr << "Det by cofactors = " << cofDet << endl;
+//   double cofDet = 0.0;
+//   for (int col=0; col<DetMatrix.cols(); col++)
+//     cofDet += DetMatrix(col,0) * Cofactors(col,0);
 
   // Now compute gradient of determinant
   for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
     gradient(ptcl-first) = 0.0;
-    cerr << gradient(ptcl-first) << endl;
     dVec &r = Path(slice, ptcl);
     for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
       dVec &rRef = Path.RefPath(refPtcl);
       dVec diff =  r-rRef;
       dVec gradPhi = -2.0*C*diff*DetMatrix(refPtcl-first,ptcl-first);
 
-      ///////////////////
-      /// HACK HACK HACK
-      dVec gradPhiFD;
-      dVec delta = 0.0;
-      delta[0] = 1.0e-6; delta[1] = 0.0; delta[2] = 0.0;
-      gradPhiFD[0] = 
-	(exp(-C*(dot(diff+delta,diff+delta))) - exp(-C*dot(diff-delta,diff-delta)))/(2.0e-6);
-      delta[0] = 0.0; delta[1] = 1.0e-6; delta[2] = 0.0;
-      gradPhiFD[1] = 
-	(exp(-C*(dot(diff+delta,diff+delta))) - exp(-C*dot(diff-delta,diff-delta)))/(2.0e-6);
-      delta[0] = 0.0; delta[1] = 0.0; delta[2] = 1.0e-6;
-      gradPhiFD[2] = 
-	(exp(-C*(dot(diff+delta,diff+delta))) - exp(-C*dot(diff-delta,diff-delta)))/(2.0e-6);
-      cerr << "gradPhi   = " << gradPhi << endl;
-      cerr << "gradPhiFD = " << gradPhiFD << endl;
-      /// END HACK HACK HACK
-      ///////////////////////
-
       gradient(ptcl-first) = 
 	gradient(ptcl-first)+ gradPhi*Cofactors(refPtcl-first, ptcl-first);
-      //gradient(ptcl-first)+ gradPhi*Cofactors(ptcl-first, refPtcl-first);
     }
   }
 }
@@ -105,7 +86,9 @@ FPNodalActionClass::GradientDetFD (int slice, double &det,
   int first = species.FirstPtcl;
   int last = species.LastPtcl;
   // Fill up determinant matrix
-  double t = slice * PathData.Action.tau;
+  double t = abs(slice-PathData.Path.GetRefSlice()) * PathData.Action.tau;
+  double beta = PathData.Path.TotalNumSlices * PathData.Action.tau;
+  t = min (t, fabs(beta-t));
   double lambda = species.lambda;
   double C = 1.0/(4.0*M_PI * lambda * t);
 
@@ -136,7 +119,6 @@ FPNodalActionClass::GradientDetFD (int slice, double &det,
     for (int dim=0; dim<NDIM; dim++) {
       delta = 0.0;
       delta[dim] = 0.5*eps;
-      cerr << "delta = " << delta << endl;
       for (int ref=first; ref <= last; ref++) {
 	dVec &rRef = Path.RefPath(ref);
 	dVec diff = r - rRef + delta;
@@ -174,9 +156,11 @@ double FPNodalActionClass::NodalDist (int slice)
   Array<dVec,1> gradFD(N);
   GradientDetFD (slice, det, gradFD);
   for (int i=0; i<N; i++)
-    fprintf (stderr, "(%1.6e %1.6e %1.6e) (%1.6e %1.6e %1.6e) \n", 
-	     gradFD(i)[0], gradFD(i)[1], gradFD(i)[2], 
-	     GradVec(i)[0], GradVec(i)[1], GradVec(i)[2]);
+    for (int dim=0; dim<NDIM; dim++)
+      assert (fabs(gradFD(i)[dim] - GradVec(i)[dim]) < 1.0e-9);
+//     fprintf (stderr, "(%1.6e %1.6e %1.6e) (%1.6e %1.6e %1.6e) \n", 
+// 	     gradFD(i)[0], gradFD(i)[1], gradFD(i)[2], 
+// 	     GradVec(i)[0], GradVec(i)[1], GradVec(i)[2]);
   for (int i=0; i<N; i++)
     grad2 += dot (GradVec(i), GradVec(i));
   return (det/sqrt(grad2));

@@ -310,12 +310,16 @@ double ActionClass::NodeAction (int startSlice, int endSlice,
 				const Array<int,1> &changedParticles, 
 				int level)
 {
-  double nodeAction = 0.0;
-  for (int species=0; species < PathData.Path.NumSpecies(); species++)
-    if (NodalActions(species) != NULL)
-      nodeAction += NodalActions(species)->Action (startSlice, endSlice,
-						   changedParticles, level);
-  return nodeAction;
+  if (level != 0)
+    return 0.0;
+  else {
+    double nodeAction = 0.0;
+    for (int species=0; species < PathData.Path.NumSpecies(); species++)
+      if (NodalActions(species) != NULL)
+	nodeAction += NodalActions(species)->Action (startSlice, endSlice,
+						     changedParticles, level);
+    return nodeAction;
+  }
 }
 
 

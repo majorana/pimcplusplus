@@ -153,18 +153,17 @@ void PathClass::Read (IOSectionClass &inSection)
       assert (inSection.ReadVar ("Positions", Positions));
       assert (Positions.rows() == species.NumParticles);
       assert (Positions.cols() == species.NumDim);
-      Array<dVec,1> flight(TotalNumSlices);
+      Array<dVec,1> flight(TotalNumSlices+1);
       double tau;
       assert (inSection.ReadVar ("tau", tau));
       for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
 	for (int dim=0; dim<NDIM; dim++) {
 	  flight(0)[dim] = Positions(ptcl-species.FirstPtcl,dim);
-	  flight(TotalNumSlices-1)[dim] = Positions(ptcl-species.FirstPtcl,dim);
+	  flight(TotalNumSlices)[dim] = Positions(ptcl-species.FirstPtcl,dim);
 	}
 	LeviFlight (flight, species.lambda, tau);
-	for (int i=0; i<(MyNumSlices-1); i++)
+	for (int i=0; i<MyNumSlices; i++)
 	  Path(i, ptcl) = flight(i-RefSlice);
-        Path(MyNumSlices-1,ptcl) = flight(MyNumSlices-2-RefSlice);
       }
     }
 

@@ -51,8 +51,6 @@ private:
   Array<TinyVector<int,NDIM>,1> kIndices;
   /// This stores e^{i\vb_i \cdot r_i^\alpha}
   TinyVector<Array<complex<double>,1>,NDIM> C;
-  /// Stores the position of the reference slice w.r.t. time slice 0
-  /// on this processor
 public:
   Mirrored1DClass<dVec> RefPath;
   /// True if we need k-space sums for long range potentials.
@@ -69,6 +67,8 @@ public:
   void CalcRho_ks_Fast(int slice, int species);  
 
 private:
+  /// Stores the position of the reference slice w.r.t. time slice 0
+  /// on this processor
   int RefSlice;
   void ShiftPathData(int sliceToShift);
   void ShiftRho_kData(int sliceToShift);
