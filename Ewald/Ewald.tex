@@ -278,11 +278,7 @@ m_3)$ indices.
 \end{algorithmic}
 \end{algorithm}
 
-\section{Adapting to PIMC}
-\subsection{Pair actions}
-\subsection{RPA improvements}
-\section{Breakup Methods}
-\subsection{Gaussian charge screening}
+\section{Gaussian Charge Screening Breakup}
 This original approach to the short and long-ranged breakup adds an
 opposite screening charge of gaussian shape around each point charge.
 It then removes the charge in the long-ranged part of the potential.
@@ -300,8 +296,176 @@ potentials.  For this form of the long-ranged potential, we have in $k$-space
 v_k = \frac{4\pi q_1 q_2 \exp\left[\frac{-k^2}{4\alpha^2}\right]}{\Omega k^2}.
 \end{equation}
 
-\subsection{Optimizing the breakup}
+\section{Optimized Breakup Method}
+In this section, we undertake the task of choosing a
+long-range/short-range partioning of the potential which is optimimum
+in that it minimizes the error for given real and $k$-space cutoffs
+$r_c$ and $k_c$.  Here, we modify slightly the method introduced
+Natoli and Ceperley\cite{Natoli}. We choose $r_c =
+\frac{1}{2}\min\{L_i\}$, so that we require the nearest image in
+real space summation.  $k_c$ is then chosen so as to satisfy our
+accuracy requirements.
+
+Here we modify our notation slightly to accomodate details not
+required above.  We restrict our discussion to the interaction of two
+paricles species (which may be the same), and drop our species
+indices.  Thus we are looking for short and long-range potentials
+defined by,
+\newcommand{\vs}{v^s}
+\newcommand{\vl}{v^\ell}
+\begin{equation}
+v(r) = \vs(r) + \vl(r)
+\end{equation}
+Define $\vs_k$ and $\vl_k$ to be the respective fourier transforms of
+the above.  The goal is to choose $v_s(r)$ such that its value and
+first two derivatives vanish at $r_c$, while making $\vl(r)$ as smooth as
+possible so that $k$-space components, $\vl_k$, are very small for
+$k>k_c$.  Here, we describe how to do this is an optimal way.
+
+Define the periodic potential, $V_p$, as 
+\begin{equation}
+V_p(\vr) = \sum_l v(|\vr + \mathbf{l}|),
+\end{equation}
+where $\vr$ is the displacement between the two particles and
+$\mathbf{l}$ is a lattice vector.  Let us then define our
+approximation to this potential, $V_a$, as
+\begin{equation}
+V_a(\vr) = \vs(r) + \sum_{|\vk| < k_c} \vl_k e^{i\mathbf \vk \cdot \vr}
+\end{equation}
+Now, we seek to minimize the RMS error over the cell,
+\begin{equation}
+\chi^2 = \frac{1}{\Omega}\int_\Omega d^3 \mathbf{r} \ 
+\left| V_p(\vr) - V_a(\vr)\right|^2 
+\end{equation}
+We may write
+\begin{equation}
+V_p(\vr) = \sum_{\vk} v_k e^{i \vk \cdot \vr},
+\end{equation}
+where 
+\begin{equation}
+v_k = \frac{1}{\Omega} \int d^3\vr \ e^{-i\vk\cdot\vr}v(r).
+\end{equation}
+We now need a basis in which to represent the broken up potential.  We
+may choose to represent either $\vs(r)$ or $\vl(r)$ in a real-space
+basis.  Natoli and Ceperley chose the prior in their paper.  We choose
+the latter for a number of reasons.  First, singular potentials are
+difficult to represent in a linear basis unless the singularity is
+explicitly included.  This requires a separate basis for each type of
+singularity.  The short-range potential may have an arbitrary number
+of features for $r<r_c$ and still be a valid potential.  By
+construction, however, we desire that $\vl(r)$ be smooth in real-space
+so that its Fourier transform falls off quickly with increasing $k$.
+We therefore expect that, in general, $\vl(r)$ should be
+well-represented by fewer basis functions than $\vs(r)$.  Therefore,
+we define,
+\begin{equation}
+\vl(r) \equiv
+\begin{cases}
+ \sum_{n=0}^{M-1} c_n t_n(r) & \text{for } r \le r_c \\
+ v(r) & \text{for } r > r_c.
+\end{cases}
+\end{equation}
+where the $t_n(r)$ are a set of $M$ basis functions.  We require that
+the two cases agree on the value and first two derivatves at $r_c$.
+We may then define
+\begin{equation}
+c_{nk} \equiv \frac{1}{\Omega} \int_0^{r_c} d^3 \vr \ e^{-i\vk\cdot\vr} h_n(r).
+\end{equation}
+Similarly, we define
+\begin{equation}
+x_k \equiv -\int_{r_c}^\infty d^3\vr \ e^{-i\vk\cdot\vr} v(r)
+\end{equation}
+Therefore,
+\begin{equation}
+\vl_k = -x_k + \sum_{n=0}^{M-1} t_n c_{nk} 
+\end{equation}
+Because $\vs(r)$ goes identically to zero at the box edge, inside the
+cell we may write
+\begin{equation}
+\vs(\vr) = \sum_\vk \vs_k e^{i\vk \cdot \vr}
+\end{equation}
+We then write
+\begin{equation}
+\chi^2 = \frac{1}{\Omega} \int_\Omega d^3 \vr \ 
+\left| \sum_\vk e^{i\vk \cdot \vr} \left(v_k - \vs_k \right)
+-\sum_{|\vk| \le k_c} \vl_k \right|^2
+\end{equation}
+We see that if we define
+\begin{equation}
+\vs(r) \equiv v(r) - \vl(r)
+\end{equation}
+Then
+\begin{equation}
+\vl_k + \vs_k = v_k,
+\end{equation}
+which then cancels out all terms for $|\vk| < k_c$.  Then we have
+\begin{eqnarray}
+\chi^2 & = & \frac{1}{\Omega} \int_\Omega d^3 \vr \ 
+\left|\sum_{|\vk|>k_c} e^{i\vk\cdot\vr} 
+\left(v_k -\vs_k \right)\right|^2 \\
+& = & \frac{1}{\Omega} \int_\Omega d^3 \vr \ 
+\left|\sum_{|\vk|>k_c} e^{i\vk\cdot\vr} \vl_k \right|^2 \\ 
+& = & 
+\frac{1}{\Omega} \int_\Omega d^3 \vr
+\left|\sum_{|\vk|>k_c} e^{i\vk\cdot\vr}\left( -x_k + \sum_{n=0}^{M-1} t_n
+c_{nk}\right) \right|^2
+\end{eqnarray}
+We expand the summation,
+\newcommand{\ns}{\negthickspace}
+\begin{equation}
+\chi^2 = \frac{1}{\Omega} \int_\Omega d^3 \vr \ns \ns \ns
+\sum_{\{|\vk|,|\vk'|\}>k_c} \ns\ns\ns\ns\ns
+ e^{i(\vk-\vk')\cdot \vr}
+\left(x_k -\sum_{n=0}^{M-1} t_n c_{nk} \right)
+\left(x_k -\sum_{m=0}^{M-1} t_{m} c_{mk'} \right)
+\end{equation}
+We take the derivative w.r.t. $t_{m}$,
+\begin{equation}
+\frac{\partial (\chi^2)}{\partial t_{m}} =
+\frac{2}{\Omega}\int_\Omega d^3 \vr \ns \ns \ns
+\sum_{\{|\vk|,|\vk'|\}>k_c} \ns\ns\ns\ns\ns
+ e^{i(\vk-\vk')\cdot \vr}
+\left(x_k -\sum_{n=0}^{M-1} t_n c_{nk} \right) c_{mk'}
+\end{equation}
+We integrate w.r.t. $\vr$, yielding a kroneker $\delta$.
+\begin{equation}
+\frac{\partial (\chi^2)}{\partial t_{m}} =
+2 \ns\ns\ns\ns\ns\ns\ns 
+\sum_{\ \ \ \ \{|\vk|,|\vk'|\}>k_c} \ns\ns\ns\ns\ns\ns\ns \delta_{\vk, \vk'} 
+\left(x_k -\sum_{n=0}^{M-1} t_n c_{nk} \right) c_{mk'}
+\end{equation}
+Summing over $\vk'$ and equating the derivative to zero, we find the
+minimum of our error function is given by
+\begin{equation}
+\sum_{n=1}^{M-1} \sum_{|\vk|>k_c} c_{mk}c_{nk} t_n = 
+\sum_{|\vk|>k_c} x_k c_{mk},
+\end{equation}
+which is equivalent in form to equation (19) in \cite{Natoli}, where
+we have $x_k$, instead of $V_k$.  Thus, we see that we may optimize
+the short-range or long-range potential in simply by choosing to use
+$V_k$ or $x_k$ in the above equation.  We now define
+\begin{eqnarray}
+A_{mn} & \equiv & \sum_{|\vk|>k_c} c_{mk} c_{nk} \\
+b_{m} & \equiv & \sum_{|\vk|>k_c} x_k c_{mk}
+\end{eqnarray}
+Thus, it becomes clear that our minimization equations can be cast in
+the canonical linear form,
+\begin{equation}
+A\mathbf{t} = \mathbf{b}.
+\end{equation}
+\subsection{Solution by SVD}
+In practice, we note that the matrix $A$ frequently becomes singular
+in practice.  For this reason, we use the singular value decomposition
+to solve for $t_n$.  
 
 
+\section{Adapting to PIMC}
+\subsection{Pair actions}
+\subsection{RPA improvements}
+
+\begin{thebibliography}{9}
+  \bibitem{Natoli} V. Natoli and D.M. Ceperley, J. Chem. Phys. {\bf
+  117}, 171-178 (1995)
+\end{thebibliography}
 
 \end{document}
