@@ -30,7 +30,7 @@ void TestCoulomb()
   box = 10.0, 10.0, 10.0;
   basis.SetBox (box);
   double Omega = box[0]*box[1]*box[2];
-  basis.SetNumKnots(10);
+  basis.SetNumKnots(11);
   basis.Set_rc(5.0);
 
 //   double k = 1;
@@ -61,7 +61,8 @@ void TestCoulomb()
   adjust(N-1) = false; t(N-1) = -1/125.0;
   adjust(1)   = false; t(1) = 0.0;
 
-  breakup.DoBreakup(Vk, t, adjust);
+  double chi2 = breakup.DoBreakup(Vk, t, adjust);
+  cerr << "chi-squared = " << chi2 << endl;
   cerr << "t = " << t << endl;
 
   FILE *fout = fopen ("Vlong.dat", "w");

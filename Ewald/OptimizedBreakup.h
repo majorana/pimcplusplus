@@ -50,11 +50,11 @@ public:
   /// kMax is largest k we use in determining the error in the breakup.  
   /// t is the set of coefficients of the breakup.
   /// inFit is a boolean array telling whether t_n should be optimized
-  /// or left at its initial value.
-  void DoBreakup (const Array<double,1> &Vk, Array<double,1> &t, 
-		  const Array<bool,1> &adjust);
+  /// or left at its initial value.  Returns chi-squared for the breakup.
+  double DoBreakup (const Array<double,1> &Vk, Array<double,1> &t, 
+		    const Array<bool,1> &adjust);
   /// Same as above, but we assume that all t's are adjusted.
-  void DoBreakup (const Array<double,1> &Vk, Array<double,1> &t);
+  double DoBreakup (const Array<double,1> &Vk, Array<double,1> &t);
   OptimizedBreakup (BasisClass &basis) : Basis(basis)
   { /* Do nothing */ }
 };

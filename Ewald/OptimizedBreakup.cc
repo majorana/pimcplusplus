@@ -97,7 +97,8 @@ void OptimizedBreakup::SetkVecs(double kc, double kCont, double kMax)
   cerr << "non-degenerate k vecs = " << kpoints.size() << endl;
 }
 
-void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t)
+double OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, 
+				   Array<double,1> &t)
 {
   const double tolerance = 1.0e-12;
   assert(t.rows()==Basis.NumElements());
@@ -153,10 +154,22 @@ void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t)
     for (int k=0; k<numElem; k++)
       t(k) += coef * V(k,i);
   }
+  // Calculate chi-squared
+  double Yk, chi2;
+  chi2 = 0.0;
+  for (int ki=0; ki<kpoints.rows(); ki++) {
+    Yk = Vk(ki);
+    for (int n=0; n<t.rows(); n++) {
+      Yk -= cnk(n,ki)*t(n);
+    }
+    chi2 += kpoints(ki)[1]*Yk+Yk;
+  }
+  return (chi2);
 }
 
-void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
-				 const Array<bool,1> &adjust)
+double OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, 
+				   Array<double,1> &t,
+				   const Array<bool,1> &adjust)
 {
   const double tolerance = 1.0e-9;
   assert(t.rows()==adjust.rows());
@@ -254,6 +267,18 @@ void OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, Array<double,1> &t,
       t(i) = tc(j);
       j++;
     }
+
+  // Calculate chi-squared
+  double Yk, chi2;
+  chi2 = 0.0;
+  for (int ki=0; ki<kpoints.rows(); ki++) {
+    Yk = Vk(ki);
+    for (int n=0; n<t.rows(); n++) {
+      Yk -= cnk(n,ki)*t(n);
+    }
+    chi2 += kpoints(ki)[1]*Yk*Yk;
+  }
+  return (chi2);
 }
 
 /////////////////////////////////////////
