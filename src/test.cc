@@ -118,7 +118,7 @@ int main(int argc, char **argv)
       //cerr << "Doing step " << counter << endl;
       
       myBisectionMove.makeMove();
-      if (counter > 50000)
+      if (counter > 100000)
       PC.Accumulate();
     }
     myShiftMove.makeMove();

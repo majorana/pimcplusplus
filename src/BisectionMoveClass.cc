@@ -47,7 +47,7 @@ void BisectionMoveClass::makeMove()
     //cerr << "oldLogSampleProb = " << oldLogSampleProb << endl;
     double newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter);
     double currActionChange=newAction-oldAction;
-    double logAcceptProb=oldLogSampleProb-newLogSampleProb-currActionChange+prevActionChange;
+    double logAcceptProb=-oldLogSampleProb+newLogSampleProb+currActionChange-prevActionChange;
     //cerr << "prevActionChange = " << prevActionChange << endl;
     //cerr << "logAcceptProb = " << logAcceptProb << endl;
     //cerr<<"My new action is "<<newAction<<" and my old action was "<<oldAction<<endl;

@@ -60,8 +60,8 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
       }
     }
     
-  cerr << "TotalK = " << TotalK << " Total U = " << TotalU << endl;
-  return (TotalK - TotalU);
+  //cerr << "TotalK = " << TotalK << " Total U = " << TotalU << endl;
+  return (TotalK + TotalU);
 
 }
 
