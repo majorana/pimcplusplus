@@ -8,6 +8,7 @@ class PAsFitClass : public PairActionFitClass
 private:
   bool GridsAreMine;
   Array<double,1> Coefs;
+  Array<double,1> Pn;
 public:
   Grid *qgrid, *ygrid;
   Array<MultiBicubicSpline,1> Usplines, dUsplines;

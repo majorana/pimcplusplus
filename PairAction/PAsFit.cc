@@ -1,5 +1,6 @@
 #include "PAFit.h"
 #include "../Splines/BicubicSpline.h"
+#include "../SpecialFunctions/LegendrePoly.h"
 
 const double Rho0Min = 1.0e-4;
 
@@ -16,6 +17,7 @@ void PAsFitClass::ReadParams(IOSectionClass &inSection)
   inSection.CloseSection();
   assert(inSection.ReadVar("Order", Order));
   Coefs.resize(Order+1);
+  Pn.resize(Order+1);
   GridsAreMine = true;
   UsePBC = inSection.ReadVar ("Box", Box);
 }
@@ -33,10 +35,73 @@ void PAsFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 }
 
 
+class sFitIntegrand
+{
+private:
+  double q, z;
+  double r, rp;
+  double sMin, sMax;
+public:
+  Rho &rho;
+  bool IsdU;
+  int k;
+
+  Array<double,1> Ul, dUl;
+  
+  void Setqz(double newq, double newz,
+	     double smin, double smax)
+  {
+    q = newq; z = newz;
+    sMin = smin; sMax = smax;
+    
+    r = q + 0.5*z;
+    rp = q - 0.5*z;
+    rho.U_lArray(r,rp, Ul, dUl);
+  }
+
+  inline double operator()(double x)
+  {
+    double s=sMin+0.5*(sMax-sMin)*(x+1.0);
+    double costheta;
+    
+    if ((r*rp)==0.0)
+      costheta = 0.0;
+    else
+      costheta = (r*r + rp*rp - s*s)/(2.0*r*rp);
+    
+    costheta = min(1.0, costheta);
+    costheta = max(-1.0, costheta);
+    double U, dU;
+    rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
+    if (isnan(U)) {
+      cerr << "r = " << r << " rp = " << rp << endl;
+      cerr << "costheta = " << costheta << endl;
+      cerr << "x = " << x << endl;
+    }
+    // U = 0.0;
+    //cerr << "r = " << r << " rp = " << rp << endl;
+    //cerr << "smin = " << sMin << " smax = " << sMax << endl;
+    //cerr << "x = " << x << endl;
+    //cerr << "costheta = " << costheta << endl;
+    if (!IsdU)
+      return (0.5*(2.0*k+1.0)*U*LegendrePoly(k,x));
+    else
+      return (0.5*(2.0*k+1.0)*dU*LegendrePoly(k,x));
+  }
+  
+  sFitIntegrand(Rho &myRho) : rho(myRho)
+  {
+    Ul.resize(rho.U_ls.size());
+    dUl.resize(rho.U_ls.size());
+  };
+};
+
+
 /// y = |z/z_max|
 /// z_max = 
 void PAsFitClass::AddFit (Rho &rho)
 {
+  const double Tolerance = 1.0e-7;
   NumBetas++;
   Usplines.resizeAndPreserve(NumBetas);
   dUsplines.resizeAndPreserve(NumBetas);
@@ -49,13 +114,33 @@ void PAsFitClass::AddFit (Rho &rho)
   int numq = qgrid->NumPoints;
   int numy = ygrid->NumPoints;
   Array<double,3> Umat(numq, numy,Order+1), dUmat(numq, numy, Order+1);
+  sFitIntegrand integrand(rho);
   for (int qi=0; qi<numq; qi++) {
+    cerr << "qi = " << qi << " of " << numq << ".\n";
     double q = (*qgrid)(qi);
+    double zmax = 0.999999*min(2.0*q, sMax(NumBetas-1));
     for (int yi=0; yi<numy; yi++) {
-            
-      double r, rp,costheta;
-      double U, dU;
-      rho.UdU(r,rp,costheta, U, dU);
+      cerr << "  yi = " << yi << " of " << numy << ".\n";
+      double z = zmax*(*ygrid)(yi);
+      double smin = z;
+      double smax = min (2.0*q, sMax(NumBetas-1));
+      //cerr << "smin = " << smin << " smax = " << smax << endl;
+      integrand.Setqz(q,z,smin,smax);
+      for(int k=0; k<=Order; k++) {
+	//cerr << " k = " << k << endl;
+	integrand.k=k;
+	integrand.IsdU=false;
+	GKIntegration<sFitIntegrand,GK15> Uintegrator(integrand);
+	// Accept a relative OR absolute toleraance of 1.0e-7
+	Umat(qi, yi, k) = Uintegrator.Integrate(-1.0, 1.0, 
+						beta*Tolerance, Tolerance, 
+						false);
+
+	integrand.IsdU = true;
+	GKIntegration<sFitIntegrand,GK15> dUintegrator(integrand);
+	dUmat(qi, yi, k) = dUintegrator.Integrate(-1.0, 1.0, Tolerance,
+						  Tolerance, false);
+      }
     }
   }
   // Initialize the bicubic splines
@@ -76,45 +161,64 @@ void PAsFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
   FILE *Ufdat = fopen ("Uf.dat", "w");
   FILE *dUxdat = fopen ("dUx.dat", "w");
   FILE *dUfdat = fopen ("dUf.dat", "w");
-  FILE *sdat = fopen ("s.dat", "w");
+  FILE *tdat = fopen ("t.dat", "w");
   FILE *costhetadat = fopen ("costheta.dat", "w");
-  FILE *qdat = fopen ("q.dat", "w");
-  LinearGrid qgrid2(qgrid->Start, qgrid->End, 315);
+  FILE *ydat = fopen ("y.dat", "w");
+  LinearGrid qgrid2(qgrid->Start, qgrid->End, 20);
   for (int qi=0; qi<qgrid2.NumPoints; qi++) {
     double q = qgrid2(qi);
-    LinearGrid sgrid(0.0, 2.0*q, 350);
-    for (int si=0; si<sgrid.NumPoints; si++) {
-      double s = sgrid(si);
-      double w = exp(-s*s/(4.0*rho.lambda*rho.Beta()));
-      double Uex, dUex, Ufit, dUfit;
-      double costheta;
-      if (q == 0.0)
-	costheta = 1.0;
-      else
-	costheta = 1.0 - s*s/(2.0*q*q); 
-      rho.UdU_Coulomb(q, q, costheta, Uex, dUex);
-      Ufit = U(q, 0.0, s*s, level);
-      dUfit = dU(q, 0.0, s*s, level);
-      U2err += w*(Uex-Ufit)*(Uex-Ufit);
-      dU2err += w*(dUex-dUfit)*(dUex-dUfit);
-      weight += w;
-      fprintf (Uxdat, "%1.16e ", Uex);
-      fprintf (Ufdat, "%1.16e ", Ufit);
-      fprintf (dUxdat, "%1.16e ", dUex);
-      fprintf (dUfdat, "%1.16e ", dUfit);
-      fprintf (sdat, "%1.16e ", s);
-      fprintf (costhetadat, "%1.16e ", costheta);
-      fprintf (qdat, "%1.16e ", q);
+    // HACK
+    //q = 1.0;
+    double zmax = 1.999*min(2.0*q,sMax(level));
+    LinearGrid zgrid(0.0, zmax, 20);
+    for (int zi=0; zi<zgrid.NumPoints; zi++) {
+      double z = zgrid(zi);
+      double y = z/zmax;
+      double smax = 1.9999*min(2.0*q,sMax(level));
+      LinearGrid sgrid(z, smax, 20);
+      for (int si=0; si<sgrid.NumPoints; si++) {
+	double s = sgrid(si);
+	double smax = min(2.0*q, sMax(level));
+	double t = s/smax;
+	double w = exp(-s*s/(4.0*rho.lambda*rho.Beta()));
+	double Uex, dUex, Ufit, dUfit;
+	double r, rp, costheta;
+	r  = q+0.5*z;
+	rp = q-0.5*z;
+	if (q == 0.0)
+	  costheta = 1.0;
+	else
+	  costheta = (r*r + rp*rp - s*s)/(2.0*r*rp); 
+	costheta = min(costheta,1.0);
+	costheta = max(costheta,-1.0);
+
+
+	rho.UdU(r, rp, costheta, Uex, dUex);
+	if (!isnan(Uex) && !isnan(dUex)) {
+	  Ufit = U(q, z, s*s, level);
+	  dUfit = dU(q, z, s*s, level);
+	  U2err += w*(Uex-Ufit)*(Uex-Ufit);
+	  dU2err += w*(dUex-dUfit)*(dUex-dUfit);
+	  weight += w;
+	}
+	fprintf (Uxdat, "%1.16e ", Uex);
+	fprintf (Ufdat, "%1.16e ", Ufit);
+	fprintf (dUxdat, "%1.16e ", dUex);
+	fprintf (dUfdat, "%1.16e ", dUfit);
+	fprintf (tdat, "%1.16e ", t);
+	fprintf (costhetadat, "%1.16e ", costheta);
+	fprintf (ydat, "%1.16e ", y);
+      }
+      fprintf (Uxdat, "\n");
+      fprintf (Ufdat, "\n");
+      fprintf (dUxdat, "\n");
+      fprintf (dUfdat, "\n");
+      fprintf (tdat, "\n");
+      fprintf (ydat, "\n");
+      fprintf (costhetadat, "\n");
     }
-    fprintf (Uxdat, "\n");
-    fprintf (Ufdat, "\n");
-    fprintf (dUxdat, "\n");
-    fprintf (dUfdat, "\n");
-    fprintf (sdat, "\n");
-    fprintf (qdat, "\n");
-    fprintf (costhetadat, "\n");
   }
-  fclose (Uxdat); fclose(Ufdat); fclose(sdat); fclose(qdat); 
+  fclose (Uxdat); fclose(Ufdat); fclose(tdat); fclose(ydat); 
   fclose(costhetadat);
   Uerror = sqrt(U2err/weight);
   dUerror = sqrt(dU2err/weight);
@@ -132,7 +236,7 @@ void PAsFitClass::WriteFits (IOSectionClass &outSection)
     for (int qi=0; qi<qgrid->NumPoints; qi++)
       for (int yi=0; yi<ygrid->NumPoints; yi++) 
 	for (int j=0; j<=Order; j++) {
-	  Umat(qi,yi,j) = Usplines(bi)(qi,yi,j);
+	  Umat(qi,yi,j)  =  Usplines(bi)(qi,yi,j);
 	  dUmat(qi,yi,j) = dUsplines(bi)(qi,yi,j);
 	}
     outSection.WriteVar ("Umat", Umat);
@@ -147,38 +251,71 @@ void PAsFitClass::WriteFits (IOSectionClass &outSection)
 
 double PAsFitClass::U(double q, double z, double s2, int level)
 {
-  if (q <= (qgrid->End*1.0000001)) {
+  z = fabs(z);
+  double qmax = qgrid->End*1.000001;
+  double zmax = 1.000001*min (2.0*q, sMax(level));
+  double smax = 1.000001*min (2.0*q, sMax(level));
+  double s=sqrt(s2);
+
+  if ((q<=qmax)&&(z<=zmax)&&(s<=smax)) {
     if (q == 0) 
       Usplines(level)(0.0,0.0,Coefs);
     else {
-      double t = sqrt(s2)/(2.0*q);
-      Usplines(level)(q,t, Coefs);
+      double zmax = min(2.0*q, sMax(level));
+      double y = z/zmax;
+      Usplines(level)(q,y, Coefs);
     }
+    double smin = z;
+    double smax = min (2.0*q, sMax(NumBetas-1));
+    double x = (s-smin)/(smax-smin)*2.0 - 1.0;
+    LegendrePoly(x, Pn);
     // Now do summation
+    double sum=0.0;
+    for (int k=0; k<=Order; k++)
+      sum += Pn(k)*Coefs(k);
+    return (sum);
   }
   else {
-    // Coulomb action is independent of z
     double beta = SmallestBeta;
     for (int i=0; i<level; i++)
       beta *= 2.0;
-    return (beta*Potential->V(q));
+    double r = q+0.5*z;
+    double rp = q-0.5*z;
+    return (0.5*beta*(Potential->V(r)+Potential->V(rp)));
   }
 }
 
+
 double PAsFitClass::dU(double q, double z, double s2, int level)
 {
-  if (q <= (qgrid->End*1.0000001)) {
-    if (q == 0)
+  z = fabs(z);
+  double qmax = qgrid->End*1.000001;
+  double zmax = 1.000001*min (2.0*q, sMax(level));
+  double smax = 1.000001*min (2.0*q, sMax(level));
+  double s=sqrt(s2);
+
+  if ((q<=qmax)&&(z<=zmax)&&(s<=smax)) {
+    if (q == 0) 
       dUsplines(level)(0.0,0.0,Coefs);
     else {
-      double t = sqrt(s2)/(2.0*q);
-      dUsplines(level)(q,t,Coefs);
+      double zmax = min(2.0*q, sMax(level));
+      double y = z/zmax;
+      dUsplines(level)(q,y, Coefs);
     }
+    double smin = z;
+    double smax = min (2.0*q, sMax(NumBetas-1));
+    double x = (s-smin)/(smax-smin)*2.0 - 1.0;
+    LegendrePoly(x, Pn);
     // Now do summation
+    double sum=0.0;
+    for (int k=0; k<=Order; k++)
+      sum += Pn(k)*Coefs(k);
+    return (sum);
   }
   else {
-    // Coulomb action is independent of z
-    return (Potential->V(q));
+    double r = q+0.5*z;
+    double rp = q-0.5*z;
+    return (0.5*(Potential->V(r)+Potential->V(rp)));
   }
 }
 
@@ -221,6 +358,7 @@ bool PAsFitClass::Read (IOSectionClass &in,
   // Read Order
   assert(in.ReadVar("Order", Order));
   Coefs.resize(Order+1);
+  Pn.resize(Order+1);
 
   double desiredBeta = smallestBeta;
   for (int betaIndex=0; betaIndex<NumBetas; betaIndex++) {
