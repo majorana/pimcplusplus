@@ -215,8 +215,11 @@ double ActionClass::LongRange_U(int slice, int level)
 	homo += 0.5 * 2.0* rhok2 * PA.Ulong_k(level,ki);
       }
     }
+    int N = Path.Species(species).NumParticles;
     // We can't forget the Madelung term.
-    homo -= 0.5 * Path.Species(species).NumParticles * PA.Ulong_0(level);
+    homo -= 0.5 * N * PA.Ulong_r0(level);
+    // Or the neutralizing background term
+    homo -= 0.5*N*N*PA.Ushort_k0(level);
   }
 
   // Now do the heterologous terms
@@ -233,6 +236,9 @@ double ActionClass::LongRange_U(int slice, int level)
 	    Path.Rho_k(slice, species2, ki).imag();
 	  hetero += 2.0 * rhorho * PA.Ulong_k(level,ki);
 	}
+	int N1 = Path.Species(species1).NumParticles;
+	int N2 = Path.Species(species2).NumParticles;
+	hetero -= N1*N2*PA.Ushort_k0(level);
       }
     }
 //   cerr << "homo = " << homo << endl;
@@ -257,8 +263,11 @@ double ActionClass::LongRange_dU(int slice, int level)
 	homo += 0.5 * 2.0* rhok2 * PA.dUlong_k(level,ki);
       }
     }
+    int N = Path.Species(species).NumParticles;
     // We can't forget the Madelung term.
-    homo -= 0.5 * Path.Species(species).NumParticles * PA.dUlong_0(level);
+    homo -= 0.5 * N * PA.dUlong_r0(level);
+    // Or the neutralizing background term
+    homo -= 0.5*N*N*PA.dUshort_k0(level);
   }
 
   // Now do the heterologous terms
@@ -275,6 +284,9 @@ double ActionClass::LongRange_dU(int slice, int level)
 	    Path.Rho_k(slice, species2, ki).imag();
 	  hetero += 2.0 * rhorho * PA.dUlong_k(level,ki);
 	}
+	int N1 = Path.Species(species1).NumParticles;
+	int N2 = Path.Species(species2).NumParticles;
+	hetero -= N1*N2*PA.dUshort_k0(level);
       }
     }
   return (homo+hetero);
@@ -299,8 +311,11 @@ double ActionClass::LongRange_V(int slice)
 	homo += 0.5 * 2.0* rhok2 * PA.Vlong_k(ki);
       }
     }
+    int N = Path.Species(species).NumParticles;
     // We can't forget the Madelung term.
-    homo -= 0.5 * Path.Species(species).NumParticles * PA.Vlong_0;
+    homo -= 0.5 * N * PA.Vlong_r0;
+    // Or the neutralizing background term
+    homo -= 0.5*N*N*PA.Vshort_k0;
   }
 
   // Now do the heterologous terms
@@ -317,6 +332,9 @@ double ActionClass::LongRange_V(int slice)
 	    Path.Rho_k(slice, species2, ki).imag();
 	  hetero += 2.0 * rhorho * PA.Vlong_k(ki);
 	}
+	int N1 = Path.Species(species1).NumParticles;
+	int N2 = Path.Species(species2).NumParticles;
+	hetero -= N1*N2*PA.Vshort_k0;
       }
     }
   return (homo+hetero);
@@ -471,6 +489,47 @@ double ActionClass::CalcXk (int paIndex, int level, double k, double rc,
   }
 }
 
+
+class UshortIntegrand
+{
+private:
+  PairActionFitClass &PA;
+  int Level;
+  TaskType Task;
+  inline double Uintegrand(double r)
+  {
+    double Ushort = PA.Udiag(r, Level) - PA.Ulong(Level)(r);
+    return r*r*Ushort;
+  }
+  inline double dUintegrand(double r)
+  {
+    double dUshort = PA.dUdiag(r, Level) - PA.dUlong(Level)(r);
+    return r*r*dUshort;
+  }
+  inline double Vintegrand(double r)
+  {
+    double Vshort = PA.V(r) - PA.Vlong(r);
+    return r*r*Vshort;
+  } 
+
+public:
+  inline double operator()(double r) 
+  {
+    if (Task == DO_U)
+      return Uintegrand(r);
+    else if (Task == DO_DU)
+      return dUintegrand(r);
+    else
+      return Vintegrand(r);
+ 
+  }
+  UshortIntegrand (PairActionFitClass &pa, int level,
+	       TaskType task) :
+    PA(pa), Level(level), Task(task)
+  { /* do nothing else*/  }
+};
+
+
 /// This computes the optimized breakups for the pair actions stored
 /// in PairActionVector.  The parameters are the number of knots in
 /// the "spline" representation of the long-range action and the
@@ -479,6 +538,7 @@ double ActionClass::CalcXk (int paIndex, int level, double k, double rc,
 /// included in the simulation sum.
 void ActionClass::OptimizedBreakup_U(int numKnots)
 {
+  const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
   double boxVol = box[0]*box[1]*box[2];
@@ -525,9 +585,11 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
     pa.Ulong.resize(MaxLevels);
     pa.Ulong_k.resize(MaxLevels,Path.kVecs.size());
     pa.Ulong_k = 0.0;
-    pa.Ulong_0.resize(MaxLevels);
+    pa.Ulong_r0.resize(MaxLevels);
+    pa.Ushort_k0.resize(MaxLevels);
     for (int level=0; level<MaxLevels; level++) {
       Ulong_r = 0.0;
+      
       // Calculate Xk's
       cerr << "Calculating Xk's for U...\n";
       for (int ki=0; ki<numk; ki++) {
@@ -544,11 +606,11 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
       // potential at rc.
       adjust = true;
       /// Warning:  the following constraints may cause instabilities!!!!
-//       t(N-3) = pa.Udiag(rc, level);                 adjust(N-3) = false;
-//       t(N-2) = pa.Udiag_p(rc, level)*delta;         adjust(N-2) = false;
-//       t(N-1) = pa.Udiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
-//       t(1) = 0.0;                                   adjust(1)   = false;
-
+      //  t(N-3) = pa.Udiag(rc, level);                 adjust(N-3) = false;
+      //  t(N-2) = pa.Udiag_p(rc, level)*delta;         adjust(N-2) = false;
+      //  t(N-1) = pa.Udiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
+      //  t(1) = 0.0;                                   adjust(1)   = false;
+      
       // Now, do the optimal breakup:  this gives me the coefficents
       // of the basis functions, h_n in the array t.
       cerr << "Doing U breakup...\n";
@@ -557,9 +619,9 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
       
       // Now, we must put this information into the pair action
       // object.  First do real space part
-      pa.Ulong_0(level)=0.0;
+      pa.Ulong_r0(level)=0.0;
       for (int n=0; n<N; n++)
-	pa.Ulong_0(level) += t(n)*basis.h(n,0.0);
+	pa.Ulong_r0(level) += t(n)*basis.h(n,0.0);
       for (int i=0; i<LongGrid.NumPoints; i++) {
 	double r = LongGrid(i);
 	if (r <= rc) {
@@ -571,6 +633,14 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
 	  Ulong_r(i) = pa.Udiag (r, level);
       }
       pa.Ulong(level).Init(&LongGrid, Ulong_r);
+
+      // Calculate FT of Ushort at k=0
+      UshortIntegrand integrand(pa, level, DO_U);
+      GKIntegration<UshortIntegrand, GK31> integrator(integrand);
+      integrator.SetRelativeErrorMode();
+      pa.Ushort_k0(level) = 4.0*M_PI/boxVol * 
+	integrator.Integrate(0.0, rc, tolerance);
+      cerr << "Ushort_k0(" << level << ") = " << pa.Ushort_k0(level) << endl;
 
       // Now do k-space part
       for (int ki=0; ki < Path.kVecs.size(); ki++) {
@@ -602,6 +672,7 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
 
 void ActionClass::OptimizedBreakup_dU(int numKnots)
 {
+  const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
   double boxVol = box[0]*box[1]*box[2];
@@ -646,9 +717,11 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
     pa.dUlong.resize(MaxLevels);
     pa.dUlong_k.resize(MaxLevels,Path.kVecs.size());
     pa.dUlong_k = 0.0;
-    pa.dUlong_0.resize(MaxLevels);
+    pa.dUlong_r0.resize(MaxLevels);
+    pa.dUshort_k0.resize(MaxLevels);
     for (int level=0; level<MaxLevels; level++) {
       dUlong_r = 0.0;
+
       // Calculate Xk's
       cerr << "Calculating Xk's for dU...\n";
       for (int ki=0; ki<numk; ki++) {	
@@ -676,9 +749,9 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
       
       // Now, we must put this information into the pair action
       // object.  First do real space part
-      pa.dUlong_0(level)=0.0;
+      pa.dUlong_r0(level)=0.0;
       for (int n=0; n<N; n++)
-	pa.dUlong_0(level) += t(n)*basis.h(n,0.0);
+	pa.dUlong_r0(level) += t(n)*basis.h(n,0.0);
       for (int i=0; i<LongGrid.NumPoints; i++) {
 	double r = LongGrid(i);
 	if (r <= rc) {
@@ -690,6 +763,14 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
 	  dUlong_r(i) = pa.dUdiag (r, level);
       }
       pa.dUlong(level).Init(&LongGrid, dUlong_r);
+
+      // Calculate FT of Ushort at k=0
+      UshortIntegrand integrand(pa, level, DO_DU);
+      GKIntegration<UshortIntegrand, GK31> integrator(integrand);
+      integrator.SetRelativeErrorMode();
+      pa.dUshort_k0(level) = 4.0*M_PI/boxVol * 
+	integrator.Integrate(0.0, rc, tolerance);
+      cerr << "dUshort_k0(" << level << ") = " << pa.dUshort_k0(level) << endl;
 
       // Now do k-space part
       for (int ki=0; ki < Path.kVecs.size(); ki++) {
@@ -750,7 +831,7 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
 //     pa.dUlong.resize(MaxLevels);
 //     pa.dUlong_k.resize(MaxLevels,Path.kVecs.size());
 //     pa.dUlong_k = 0.0;
-//     pa.dUlong_0.resize(MaxLevels);
+//     pa.dUlong_r0.resize(MaxLevels);
 //     for (int level=0; level<MaxLevels; level++) {
 //       dUlong_r = 0.0;
 //       // Calculate Xk's
@@ -787,9 +868,9 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
       
 //       // Now, we must put this information into the pair action
 //       // object.  First do real space part
-//       pa.dUlong_0(level)=0.0;
+//       pa.dUlong_r0(level)=0.0;
 //       for (int n=0; n<N; n++)
-// 	pa.dUlong_0(level) += t(n)*basis.h(n,0.0);
+// 	pa.dUlong_r0(level) += t(n)*basis.h(n,0.0);
 //       for (int i=0; i<LongGrid.NumPoints; i++) {
 // 	double r = LongGrid(i);
 // 	if (r <= rc) {
@@ -819,6 +900,7 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
 
 void ActionClass::OptimizedBreakup_V(int numKnots)
 {
+  const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
   double boxVol = box[0]*box[1]*box[2];
@@ -869,6 +951,7 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
     pa.Vlong_k.resize(Path.kVecs.size());
     pa.Vlong_k = 0.0;
     Vlong_r = 0.0;
+
     // Calculate Xk's
     for (int ki=0; ki<numk; ki++) {
       Xk(ki) = CalcXk(paIndex, 0, breakup.kpoints(ki)[0], rc, DO_V);
@@ -894,9 +977,9 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
     
     // Now, we must put this information into the pair action
     // object.  First do real space part
-    pa.Vlong_0=0.0;
+    pa.Vlong_r0=0.0;
     for (int n=0; n<N; n++)
-      pa.Vlong_0 += t(n)*basis.h(n,0.0);
+      pa.Vlong_r0 += t(n)*basis.h(n,0.0);
     for (int i=0; i<LongGrid.NumPoints; i++) {
       double r = LongGrid(i);
       if (r <= rc) {
@@ -908,6 +991,14 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
 	Vlong_r(i) = pa.V (r);
     }
     pa.Vlong.Init(&LongGrid, Vlong_r);
+    // Calculate FT of Ushort at k=0
+    UshortIntegrand integrand(pa, 0, DO_V);
+    GKIntegration<UshortIntegrand, GK31> integrator(integrand);
+    integrator.SetRelativeErrorMode();
+    pa.Vshort_k0 = 4.0*M_PI/boxVol * 
+      integrator.Integrate(0.0, rc, tolerance);
+    cerr << "Vshort_k0 = " << pa.Vshort_k0 << endl;
+
 
     // Now do k-space part
     for (int ki=0; ki < Path.kVecs.size(); ki++) {

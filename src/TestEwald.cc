@@ -1,10 +1,10 @@
 #include "ActionClass.h"
 #include "PathDataClass.h"
 
-//double kcutoff = 40.0;
+double kcutoff = 40.0;
 //double kcutoff = 0.08;
 //double kcutoff = 20.0;
-double kcutoff = 0.02;
+//double kcutoff = 0.02;
 
 void SetupPathNaCl (PathClass &path)
 {
@@ -17,8 +17,8 @@ void SetupPathNaCl (PathClass &path)
   //  box = 2.0, 2.0, 2.0;
   //box = 974.87, 974.87, 974.87;
   //  box = 0.97487, 0.97487, 0.97487;
-  //box = 2.0, 2.0, 2.0;
-  box = 2000.0, 2000.0, 2000.0;
+  box = 2.0, 2.0, 2.0;
+  //box = 2000.0, 2000.0, 2000.0;
   path.SetBox(box);
   
   path.kCutoff = kcutoff;
@@ -52,6 +52,38 @@ void SetupPathNaCl (PathClass &path)
     path(slice, 6) = 0.0, 0.0,   d;
     path(slice, 7) =   d,   d,   d;
   }
+
+  path.Path.AcceptCopy();
+}
+
+
+void SetupPathSimpleCubic (PathClass &path)
+{
+  SetMode (NEWMODE);
+  path.TotalNumSlices = 10;
+  TinyVector<bool,3> periodic;
+  periodic = true, true, true;
+  path.SetPeriodic (periodic);
+  dVec box;
+  box = 1.0, 1.0, 1.0;
+  path.SetBox(box);
+  
+  path.kCutoff = kcutoff;  
+
+  FermionClass *electrons=new FermionClass();
+  electrons->Name = "electrons";
+  electrons->lambda = 0.5;
+  electrons->NumParticles = 1;
+  electrons->NumDim = 3;
+
+  path.AddSpecies (electrons);
+
+  path.Allocate();
+
+  /// Initialize the path positions for NaCl structure.
+  double d = 0.5*box[0];
+  for (int slice=0; slice <= path.TotalNumSlices; slice++) 
+    path(slice, 0) = 0.0, 0.0, 0.0;
 
   path.Path.AcceptCopy();
 }
@@ -150,9 +182,10 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
   action.tau = 1.0;
   action.MaxLevels=1;
   Array<string,1> PAFiles(3);
+  PAFiles="e-e.PairAction";
   //PAFiles="p-p.PairAction","e-e.PairAction","p-e.PairAction";
   //PAFiles="p-p.Dipole","e-e.Dipole","p-e.Dipole";
-  PAFiles="p-p.Tripole","e-e.Tripole","p-e.Tripole";
+  //PAFiles="p-p.Tripole","e-e.Tripole","p-e.Tripole";
   int numPairActions=3;
   action.PairActionVector.resize(3);
   IOSectionClass PAIO;
@@ -190,17 +223,19 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
 void MadelungTest(ActionClass &action)
 {
   double longRange=action.LongRange_U(0,0);
-  Array<int,1> changedParticles(8);
-  changedParticles=0,1,2,3,4,5,6,7;
+  //  Array<int,1> changedParticles(8);
+  //  changedParticles=0,1,2,3,4,5,6,7;
+  Array<int,1> changedParticles(1);
+  changedParticles=0;
   //  Array<int,1> changedParticles(4);
   //  changedParticles=0,1,2,3;
 
   double totalAction = action.UAction(0, 1, changedParticles, 0);
   double dU,spring;
   action.Energy(0,0,spring,dU);
-  fprintf (stderr, "Total = %1.9f\n", totalAction/4.0);
-  fprintf (stderr, "dU = %1.9f\n", dU/4.0);
-  fprintf (stderr, "Spring = %1.9f\n", spring/4.0);
+  fprintf (stderr, "Total = %1.9f\n", 2.0*totalAction);
+  fprintf (stderr, "dU = %1.9f\n", dU*2.0);
+  fprintf (stderr, "Spring = %1.9f\n", spring*2.0);
 }
 
 main()
@@ -218,9 +253,11 @@ main()
   
   {
      cerr << "NaCl: Ashcroft and Mermin give 1.747558\n";
+     cerr << "Simple Cubic: Kittel gives 2.83729479\n";
      PathDataClass pathData;
      ActionClass action(pathData);
-     SetupPathNaCl(pathData.Path);
+     //     SetupPathNaCl(pathData.Path);
+     SetupPathSimpleCubic(pathData.Path);
      SetupAction (action,pathData);
      TestRho_k(pathData.Path);
      MadelungTest(action);

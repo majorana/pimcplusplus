@@ -126,6 +126,7 @@ public:
   inline PathClass(PIMCCommunicatorClass &communicator);
   friend void SetupPathNaCl(PathClass &path);
   friend void SetupPathZincBlend(PathClass &path);
+  friend void SetupPathSimpleCubic(PathClass &path);
 };
 
 
