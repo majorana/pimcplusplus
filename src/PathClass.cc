@@ -128,8 +128,6 @@ void PathClass::Read (IOSectionClass &inSection)
     inSection.CloseSection();
   }
   inSection.CloseSection(); // "Particles"
-
-  InitOpenPaths();
   //Everything needs to be accepted
   Path.AcceptCopy();
   Permutation.AcceptCopy();
@@ -175,10 +173,10 @@ void PathClass::Allocate()
     SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
   }
   cerr<<"my number of particles is "<<numParticles<<endl;
-  Path.resize(MyNumSlices,numParticles+OpenPaths);
-  Permutation.resize(numParticles+OpenPaths);
-  SpeciesNumber.resize(numParticles+OpenPaths);
-  DoPtcl.resize(numParticles+OpenPaths);
+  Path.resize(MyNumSlices,numParticles);
+  Permutation.resize(numParticles);
+  SpeciesNumber.resize(numParticles);
+  DoPtcl.resize(numParticles);
   cerr<<"Permutation size is "<<Permutation.size()<<endl;
   /// Assign the species number to the SpeciesNumber array
   for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
@@ -312,27 +310,19 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
   //  for (int ptcl=0;ptcl<NumParticles();ptcl++){
     //    cerr<<Permutation(ptcl)<<endl;
   //  }
-  //  cerr<<oldJoin<<" "<<newJoin<<" "<<endl;
-  //  cerr<<"Starting"<<endl;
-  //  cerr<<Path(OpenLink,OpenPtcl)<<endl;
-  bool swappedAlready=false;
+
   if (newJoin>oldJoin){
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
 	Path[OLDMODE](timeSlice,ptcl)=Path[NEWMODE](timeSlice,Permutation(ptcl));
-	if (timeSlice==(int)OpenLink && Permutation(ptcl)==(int)OpenPtcl && !swappedAlready){
-	  OpenPtcl[OLDMODE]=ptcl;
-	  OpenPtcl[NEWMODE]=ptcl;
-	  swappedAlready=true;
-	}
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){ 
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
 
+	Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
       }
     }
   }
@@ -340,11 +330,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     //  else if (oldJoin>=newJoin){//CHANGED!
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	if (timeSlice==(int)OpenLink && ptcl==(int)OpenPtcl && !swappedAlready){
-	  OpenPtcl[OLDMODE]=Permutation(ptcl);
-	  OpenPtcl[NEWMODE]=Permutation(ptcl);
-	  swappedAlready=true;
-	}
+
 	Path[OLDMODE](timeSlice,Permutation(ptcl))=Path[NEWMODE](timeSlice,ptcl);
       }
     }
@@ -353,12 +339,9 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
 	Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
-	
       }
     }
   }
-  //  cerr<<Path(OpenLink,OpenPtcl)<<endl;
-  //  cerr<<"Ending"<<endl;
 }
 
 
@@ -373,17 +356,6 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
       Path[NEWMODE](Range(startSlice, endSlice), ptcl);
     Permutation.AcceptCopy(ptcl);
   }
-  if (OpenPaths){
-    OpenPtcl.AcceptCopy();
-    OpenLink.AcceptCopy();
-    for (int counter=0;counter<NumTimeSlices();counter++){
-      Path[OLDMODE](counter,NumParticles())=Path[NEWMODE](counter,NumParticles());
-    }
-    //    Path[OLDMODE](Range(startSlice,endSlice),NumParticles())=
-    //      Path[NEWMODE](Range(startSlice,endSlice),NumParticles());
-  }
-    
-  
 }
 
 void PathClass::RejectCopy(int startSlice,int endSlice, 
@@ -396,13 +368,6 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
       Path[OLDMODE](Range(startSlice, endSlice), ptcl);
     Permutation.RejectCopy(ptcl);
   }
-  if (OpenPaths){
-    OpenPtcl.RejectCopy();
-    OpenLink.RejectCopy();
-    Path[NEWMODE](Range(startSlice,endSlice),NumParticles())=
-      Path[OLDMODE](Range(startSlice,endSlice),NumParticles());
-  }
-
 }
 
 
@@ -411,12 +376,10 @@ void PathClass::ShiftData(int slicesToShift)
   ShiftPathData(slicesToShift);
   if (LongRange)
     ShiftRho_kData(slicesToShift);
-  OpenLink.AcceptCopy(); ///the open link has changed and youw ant to accept it
 }
 
 void PathClass::ShiftRho_kData(int slicesToShift)
 {
-
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
   int recvProc, sendProc;
@@ -505,11 +468,10 @@ void PathClass::ShiftRho_kData(int slicesToShift)
 
 void PathClass::ShiftPathData(int slicesToShift)
 {
-  //  cerr<<"Slices to shift are "<<slicesToShift<<endl;
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
   int recvProc, sendProc;
-  int numPtcls=NumParticles()+OpenPaths;
+  int numPtcls=NumParticles();
   int numSlices=NumTimeSlices();
   assert(abs(slicesToShift)<numSlices);
   sendProc=(myProc+1) % numProcs;
@@ -585,15 +547,4 @@ void PathClass::ShiftPathData(int slicesToShift)
       Path[OLDMODE](slice,ptcl) = Path[NEWMODE](slice,ptcl);
 
   // And we're done!
-  if (OpenPaths){ //only works for serialo positive slices
-    if ((int)OpenLink+slicesToShift >= NumTimeSlices())
-      OpenLink=OpenLink+1;
-    OpenLink=((int)OpenLink+slicesToShift+NumTimeSlices()) % NumTimeSlices();
-    if ((int)OpenLink==0){
-      cerr<<"equal to 0"<<endl;
-      OpenLink=NumTimeSlices()-1;
-    }
-    OpenLink[OLDMODE]=OpenLink[NEWMODE];
-  }
-  //  cerr<<Path(OpenLink,NumParticles())<<endl;
 }

@@ -1,7 +1,7 @@
 #include "PathDataClass.h"
 
 ActionClass::ActionClass(PathDataClass  &pathdata) : 
-  PathData(pathdata), Path(pathdata.Path)
+  PathData(pathdata), Path(pathdata.Path), UseRPA(false)
 {
 }
 
@@ -11,6 +11,12 @@ void ActionClass::Read(IOSectionClass& inSection)
   assert(inSection.ReadVar ("tau", tau));
   assert(inSection.ReadVar ("MaxLevels", MaxLevels));
   cerr << "MaxLevels = " << MaxLevels << endl;
+
+  inSection.ReadVar ("UseRPA", UseRPA);
+  if (UseRPA) 
+    cerr << "Using RPA for long range action.\n";
+  else      
+    cerr << "Not using RPA for long range action.\n";
 
 
   Array<string,1> PAFiles;
@@ -58,6 +64,11 @@ void ActionClass::Read(IOSectionClass& inSection)
     OptimizedBreakup_U(numKnots);
     OptimizedBreakup_dU(numKnots);
     OptimizedBreakup_V(numKnots);
+    if (UseRPA) {
+      cerr << "Doing RPA correction...\n";
+      SetupRPA();
+      cerr << "done.\n";
+    }
     // Print out some debug info
     for (int i=0; i<numPairActions; i++) {
       string fname = PairActionVector(i)->Particle1.Name + "-" +
@@ -94,87 +105,6 @@ void ActionClass::Read(IOSectionClass& inSection)
   cerr << "Finished reading the action.\n"; 
 }
 
-double ActionClass::OtherAction(int startSlice, int endSlice, 
-		   const Array<int,1> &changedParticles, int level)
-{
-
-  int openLink=PathData.Path.OpenLink;
-  int openPtcl=PathData.Path.OpenPtcl;
-  dVec disp;
-  double dist;
-  PathData.Path.DistDisp(openLink,openPtcl,PathData.Path.NumParticles(),
-			 dist,disp); //This is distance between head and tail!
-  return log(0.1+(dist*dist)*(0.94*exp(-dist*dist)+0.06));
-
-
-}
-
-
-
-double ActionClass::UApproximateAction (int startSlice, int endSlice, 
-			     const Array<int,1> &changedParticles, int level)
-{
-  // First, sum the pair actions
-  for (int counter=0;counter<Path.DoPtcl.size();counter++){
-    Path.DoPtcl(counter)=true;
-  }
-  double TotalU = 0.0;
-  int numChangedPtcls = changedParticles.size();
-  int skip = 1<<level;
-  double levelTau = tau* (1<<level);
-  for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
-    int ptcl1 = changedParticles(ptcl1Index);
-    Path.DoPtcl(ptcl1) = false;
-    int species1=Path.ParticleSpeciesNum(ptcl1);
-    for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++) {
-      if (Path.DoPtcl(ptcl2)){
-	int PairIndex = PairMatrix(species1,
-				   Path.ParticleSpeciesNum(ptcl2));
-
-	for (int slice=startSlice;slice<endSlice;slice+=skip){
-	  dVec r, rp;
-	  double rmag, rpmag;
-	  double U;
-	  PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
-				 rmag, rpmag, r, rp);
-	  
-	  if (level>0){
-	    double V1=PairActionVector(PairIndex)->V(rmag);
-	    double V2=PairActionVector(PairIndex)->V(rpmag);
-	    U=(PairActionVector(PairIndex)->U(rmag,0,0,level)+
-	       PairActionVector(PairIndex)->U(rpmag,0,0,level))/2.0;
-	    
-
-	  }
-	  else{
-	    double s2 = dot (r-rp, r-rp);
-	    double q = 0.5 * (rmag + rpmag);
-	    double z = (rmag - rpmag);
-
-
-	    U = PairActionVector(PairIndex)->U(q,z,s2, level);
-	    // Subtract off long-range part from short-range action
-	    if (PairActionVector(PairIndex)->IsLongRange())
-	      U -= 0.5* (PairActionVector(PairIndex)->Ulong(level)(rmag) +
-			 PairActionVector(PairIndex)->Ulong(level)(rpmag));
-
-	  }
-	  TotalU += U;
-	}
-      }
-    }
-  }
-  if (PathData.Path.LongRange){
-    // Now add in the long-range part of the action
-    // In primitive form, end slices get weighted by 1/2.  Others by 1.
-    for (int slice=startSlice;slice<=endSlice;slice+=skip) 
-      if ((slice==startSlice) || (slice == endSlice))
-	TotalU += 0.5*LongRange_U (slice, level);
-      else
-	TotalU += LongRange_U (slice, level);
-  }
-  return (TotalU);
-}
 
 double ActionClass::UAction (int startSlice, int endSlice, 
 			     const Array<int,1> &changedParticles, int level)
@@ -218,9 +148,16 @@ double ActionClass::UAction (int startSlice, int endSlice,
       }
     }
   }
-  if (PathData.Path.LongRange){
-    // Now add in the long-range part of the action
-    // In primitive form, end slices get weighted by 1/2.  Others by 1.
+  // Now add in the long-range part of the action
+  // In primitive form, end slices get weighted by 1/2.  Others by 1.
+  if (UseRPA) {
+    for (int slice=startSlice;slice<=endSlice;slice+=skip) 
+      if ((slice==startSlice) || (slice == endSlice))
+	TotalU += 0.5*LongRange_U_RPA (slice, level);
+      else
+	TotalU += LongRange_U_RPA (slice, level);
+  }
+  else {
     for (int slice=startSlice;slice<=endSlice;slice+=skip) 
       if ((slice==startSlice) || (slice == endSlice))
 	TotalU += 0.5*LongRange_U (slice, level);
@@ -268,9 +205,8 @@ double ActionClass::TotalAction(int startSlice, int endSlice,
 				const Array<int,1> &changedParticles,
 				int level)
 {
-  return UApproximateAction(startSlice,endSlice,changedParticles,level)+
-    KAction(startSlice,endSlice,changedParticles,level)+
-    OtherAction(startSlice,endSlice,changedParticles,level);
+  return UAction(startSlice,endSlice,changedParticles,level)+
+    KAction(startSlice,endSlice,changedParticles,level);
 }
 
 
@@ -375,6 +311,105 @@ double ActionClass::LongRange_dU(int slice, int level)
     }
   return (homo+hetero);
 }
+
+////////////////////
+/// RPA Versions ///
+////////////////////
+/// Calculates the long-range part of the action at a given timeslice  
+double ActionClass::LongRange_U_RPA(int slice, int level)
+{
+  double homo = 0.0;
+  double hetero = 0.0;
+
+  // First, do the homologous (same species) terms
+  for (int species=0; species<Path.NumSpecies(); species++) {
+    Path.CalcRho_ks_Fast(slice,species);
+    int paIndex = PairMatrix(species,species);
+    PairActionFitClass &PA = *PairActionVector(paIndex);
+    if (PA.IsLongRange()) {
+      for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
+	homo += 0.5 * 2.0* rhok2 * PA.U_RPA_long_k(level,ki);
+      }
+    }
+    int N = Path.Species(species).NumParticles;
+    // We can't forget the Madelung term.
+    homo -= 0.5 * N * PA.Ulong_r0(level);
+    // Or the neutralizing background term
+    homo -= 0.5*N*N*PA.Ushort_k0(level);
+  }
+
+  // Now do the heterologous terms
+  for (int species1=0; species1<Path.NumSpecies(); species1++)
+    for (int species2=species1+1; species2<Path.NumSpecies(); species2++) {
+      int paIndex = PairMatrix(species1, species2);
+      PairActionFitClass &PA = *PairActionVector(paIndex);
+      if (PA.IsLongRange()) {
+	for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	  double rhorho = 
+	    Path.Rho_k(slice, species1, ki).real() *
+	    Path.Rho_k(slice, species2, ki).real() + 
+	    Path.Rho_k(slice, species1, ki).imag() *
+	    Path.Rho_k(slice, species2, ki).imag();
+	  hetero += 2.0 * rhorho * PA.U_RPA_long_k(level,ki);
+	}
+	int N1 = Path.Species(species1).NumParticles;
+	int N2 = Path.Species(species2).NumParticles;
+	hetero -= N1*N2*PA.Ushort_k0(level);
+      }
+    }
+//   cerr << "homo = " << homo << endl;
+//   cerr << "hetero = " << hetero << endl;
+  return (homo+hetero);
+}
+
+/// Calculates the long-range part of the action at a given timeslice  
+double ActionClass::LongRange_dU_RPA(int slice, int level)
+{
+  double homo = 0.0;
+  double hetero = 0.0;
+
+  // First, do the homologous (same species) terms
+  for (int species=0; species<Path.NumSpecies(); species++) {
+    Path.CalcRho_ks_Fast(slice,species);
+    int paIndex = PairMatrix(species,species);
+    PairActionFitClass &PA = *PairActionVector(paIndex);
+    if (PA.IsLongRange()) {
+      for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
+	homo += 0.5 * 2.0* rhok2 * PA.dU_RPA_long_k(level,ki);
+      }
+    }
+    int N = Path.Species(species).NumParticles;
+    // We can't forget the Madelung term.
+    homo -= 0.5 * N * PA.dUlong_r0(level);
+    // Or the neutralizing background term
+    homo -= 0.5*N*N*PA.dUshort_k0(level);
+  }
+
+  // Now do the heterologous terms
+  for (int species1=0; species1<Path.NumSpecies(); species1++)
+    for (int species2=species1+1; species2<Path.NumSpecies(); species2++) {
+      int paIndex = PairMatrix(species1, species2);
+      PairActionFitClass &PA = *PairActionVector(paIndex);
+      if (PA.IsLongRange()) {
+	for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	  double rhorho = 
+	    Path.Rho_k(slice, species1, ki).real() *
+	    Path.Rho_k(slice, species2, ki).real() + 
+	    Path.Rho_k(slice, species1, ki).imag() *
+	    Path.Rho_k(slice, species2, ki).imag();
+	  hetero += 2.0 * rhorho * PA.dU_RPA_long_k(level,ki);
+	}
+	int N1 = Path.Species(species1).NumParticles;
+	int N2 = Path.Species(species2).NumParticles;
+	hetero -= N1*N2*PA.dUshort_k0(level);
+      }
+    }
+  return (homo+hetero);
+}
+
+
 
 
 
@@ -1182,10 +1217,8 @@ void ActionClass::Energy(int slice1, int level,
 		   
     }
   }
-  if (PathData.Path.LongRange){
-    // Add long range part of energy
-    dU += 0.5*(LongRange_dU (slice1, level)+LongRange_dU(slice2,level));
-  }
+  // Add long range part of energy
+  dU += 0.5*(LongRange_dU (slice1, level)+LongRange_dU(slice2,level));
 }
 
 
@@ -1207,9 +1240,6 @@ double ActionClass::PotentialEnergy (int slice)
 	vSum -= PairActionVector(PairIndex)->Vlong(rmag);
     }
   }
-  if (PathData.Path.LongRange){
-    vSum += LongRange_V(slice);
-  }
+  vSum += LongRange_V(slice);
   return vSum;
 } 
- 

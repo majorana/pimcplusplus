@@ -7,32 +7,10 @@ double CycleBlockMoveClass::AcceptanceRatio()
 void CycleBlockMoveClass::MakeMove()
 {
   // First, decide on the chunk of slices we're working on
-  int slice1;
-  int slice2;
   int numSlices=PathData.NumTimeSlices();
-
-  if (!PathData.Path.OpenPaths){
-    cerr<<"wrong path!"<<endl;
-    double xi=PathData.Path.Random.Local();
-    slice2=(int)(xi*(double)(numSlices-(1<<NumLevels)))+(1<<NumLevels);
-    slice1=slice2-(1<<NumLevels);
-  }
-  else {
-    // First, decide on the chunk of slices we're working on
-    do{
-      double xi=PathData.Path.Random.Local();
-      slice2=(int)(xi*(double)(numSlices-(1<<NumLevels)))+(1<<NumLevels);
-      slice1=slice2-(1<<NumLevels);
-      //      if (slice2>=PathData.Path.NumTimeSlices()-1){
-	//	cerr<<"ERROR!"<<slice2<<endl;
-      //	slice2--;
-      //      }
-    } while ((slice1<=(int)(PathData.Path.OpenLink) && (int)(PathData.Path.OpenLink)<=slice2));
-  }
-  //  if (slice2>=PathData.Path.NumTimeSlices()-1){
-  //    cerr<<"ERROR! ERROR! ERROR!";
-  //  }
-  //  cerr<<slice1<<" "<<slice2<<" "<<PathData.Path.NumTimeSlices()<<endl;
+  double xi=PathData.Path.Random.Local();
+  int slice2=(int)(xi*(double)(numSlices-(1<<NumLevels)))+(1<<NumLevels);
+  int slice1=slice2-(1<<NumLevels);
   PathData.MoveJoin(slice2);
   
   int step = 0;

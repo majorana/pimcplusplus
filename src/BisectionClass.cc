@@ -37,7 +37,7 @@ double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> pa
       double GaussProd=1.0;
       for (int dim=0; dim<NDIM; dim++) {
 	  double GaussSum = 0.0;
-	  int NumImage = 1;
+	  int NumImage = 4;
 	  for (int image=-NumImage; image <= NumImage; image++) {
 	    double dist = newDelta[dim]+(double)image*Path.GetBox()[dim];
 	    GaussSum += exp(-0.5*dist*dist/sigma2);
@@ -92,7 +92,7 @@ double BisectionClass::LogSampleProb(int startSlice, int endSlice,
       double GaussProd=1.0;
       for (int dim=0; dim<NDIM; dim++) {
 	double GaussSum = 0.0;
-	int NumImage = 1;
+	int NumImage = 4;
 	for (int image=-NumImage; image <= NumImage; image++) {
 	  double dist = Delta[dim]+(double)image*Path.GetBox()[dim];
 	  GaussSum += exp(-0.5*dist*dist/sigma2);
@@ -134,7 +134,6 @@ bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activePar
       SamplePaths(startSlice,endSlice,activeParticles,levelCounter);
     double testNewLogSampleProb=
       LogSampleProb(startSlice,endSlice,activeParticles,levelCounter);
-
     if (fabs(newLogSampleProb-testNewLogSampleProb)>1e-10){
       cerr<<newLogSampleProb<<" "<<testNewLogSampleProb<<" "<<fabs(newLogSampleProb-testNewLogSampleProb)<<endl;
     }

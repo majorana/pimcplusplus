@@ -33,26 +33,8 @@ void BisectionMoveClass::Read(IOSectionClass &moveInput)
 
 void BisectionMoveClass::MakeMove()
 {
-  int numSlices=PathData.NumTimeSlices();
-  double xi=PathData.Path.Random.Local();
-  int slice2=(int)(xi*(double)(numSlices-(1<<NumLevels)))+(1<<NumLevels);
-  int slice1=slice2-(1<<NumLevels);
-  PathData.MoveJoin(slice2);
-
-  //  int EndTimeSlice=(1<<NumLevels)+StartTimeSlice;
-  StartTimeSlice=slice1;
-  int EndTimeSlice=slice2;
-
-
-
-
-  //  int EndTimeSlice=(1<<NumLevels)+StartTimeSlice;
-  
-  if (StartTimeSlice<=(int)PathData.Path.OpenLink && (int)PathData.Path.OpenLink<=EndTimeSlice)
-    ChooseParticles(); 
-  else 
-    ChooseParticlesOpen();
-  PathData.MoveJoin(EndTimeSlice);
+  int EndTimeSlice=(1<<NumLevels)+StartTimeSlice;
+  ChooseParticles(); 
   bool toAccept=Bisection.Bisect(StartTimeSlice,NumLevels,ActiveParticles);
   if (toAccept ==true ){
     PathData.AcceptMove(StartTimeSlice,EndTimeSlice,ActiveParticles);
