@@ -6,7 +6,7 @@
 void PathClass::LeviFlight (Array<dVec,1> &vec, double lambda, double tau)
 {
   // HACK HACK HACK
-  //tau *= 0.0001;
+  tau *= 0.0001;
 
   int N = vec.size();
   for (int slice=1; slice<(N-1); slice++) {

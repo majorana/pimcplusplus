@@ -22,6 +22,7 @@ else
 	LD = mpiCC  -Bstatic 
 endif
 
+# Gets the subversion revision number
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 
 
