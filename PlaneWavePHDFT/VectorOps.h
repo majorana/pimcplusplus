@@ -93,12 +93,8 @@ inline double mag (complex<double> x)
   return (x.real()*x.real() + x.imag()*x.imag());
 }
 
-inline void
-Orthogonalize (Array<complex<double>,2> &A);
-
 inline void 
-Orthogonalize2 (Array<complex<double>,2> &A, zVec &x,
-		int exclBand)
+Orthogonalize2 (Array<complex<double>,2> &A, zVec &x, int lastBand)
 {
   int m = A.rows();
   int n = A.cols();
@@ -106,18 +102,21 @@ Orthogonalize2 (Array<complex<double>,2> &A, zVec &x,
   zVec Ar;
   complex<double> S[m];
 
-  for (int row=0; row<A.rows(); row++) {
+  for (int row=0; row<=lastBand; row++) {
     Ar.reference (A(row,Range::all()));
     S[row] = conjdot (Ar, x);
   }
-  for (int row=0; row<A.rows(); row++) 
-    if (row != exclBand)
-      x -= S[row] * A(row,Range::all());
-  for (int row=0; row<A.rows(); row++) {
+  for (int row=0; row<=lastBand; row++) 
+    x -= S[row] * A(row,Range::all());
+  for (int row=0; row<=lastBand; row++) {
     Ar.reference (A(row,Range::all()));
     S[row] = conjdot (Ar, x);
-    if ((row != exclBand) && (mag(S[row]) > 1.0e-14))
+    if (mag(S[row]) > 1.0e-14) {
+      cerr << "row = " << row << " lastband = " << lastBand << endl;
       cerr << "Error in Orthogonalize2!, s = " << S[row] << endl;
+      double norm = realconjdot (Ar, Ar);
+      cerr << "norm = " << norm << endl;
+    }
   }
 }
 
@@ -155,6 +154,14 @@ inline void CheckOrthog (const Array<complex<double>,2> &A,
     }
   }
 }
+
+
+// inline Array<complex<double>,3>&
+// operator*= (Array<complex<double>,3> &A, const Array<complex<double>,3> &B)
+// {
+  
+
+// }
 
 
 #endif

@@ -20,11 +20,12 @@ protected:
   double T;
   int iter, NumBands;
   int CurrentBand, LastBand;
-  void PrintOverlaps();
 public:
   Array<complex<double>,2> Bands;
   Array<double,1> Energies;
   void Iterate(int band);
+  void PrintOverlaps();
+
   ConjGrad (Hamiltonian &h, int numBands) : 
     H(h), IsSetup(false), EtaXiLast(0.0, 0.0), iter(0), NumBands(numBands),
     LastBand(-1)

@@ -19,15 +19,15 @@ void ConjGrad::Setup()
     c = 0.0;
     for (int i=0; i<N; i++) {
       if (dot (H.GVecs(i), H.GVecs(i)) < 1.0)
-	c(i) = drand48();
+	c(i) = 1.0;
     }
     Normalize(c);
   }
-  Orthogonalize (Bands);
-  for (int band=0; band<NumBands; band++) {
-    c.reference(Bands(band,Range::all()));
-    Normalize (c);
-  }
+//   Orthogonalize (Bands);
+//   for (int band=0; band<NumBands; band++) {
+//     c.reference(Bands(band,Range::all()));
+//     Normalize (c);
+//   }
 
   PrintOverlaps();
   IsSetup = true;
@@ -58,6 +58,8 @@ void ConjGrad::CalcPhiCG()
   if (LastBand != CurrentBand) {
     LastBand = CurrentBand;
     EtaXiLast = 0.0;
+    Orthogonalize2(Bands, c, CurrentBand-1);
+    Normalize(c);
   }
   Hc = 0.0;
   H.Kinetic.Apply (c, Hc);
@@ -71,8 +73,9 @@ void ConjGrad::CalcPhiCG()
   /// Orthonalize to other bands here
   //Xip = Xi;
   zVec &Xip = Xi;
-  Orthogonalize (Bands, Xip);
-  CheckOrthog (Bands, Xip);
+  Orthogonalize2 (Bands, Xip, CurrentBand);
+  //Orthogonalize (Bands, Xip);
+  //  CheckOrthog (Bands, Xip);
 
   Precondition();
   //Eta = Xip;
@@ -80,9 +83,10 @@ void ConjGrad::CalcPhiCG()
   // Now, orthogonalize to psi
   // rename for clarity
   zVec &Etap = Eta;
-  Orthogonalize (Bands, Etap);
-  CheckOrthog (Bands, Etap);
-  //Etap = Eta - conjdot (c, Eta)*c;
+  Orthogonalize2 (Bands, Etap, CurrentBand);
+  //Orthogonalize (Bands, Etap);
+  //  CheckOrthog (Bands, Etap);
+  // Etap = Eta - conjdot (c, Eta)*c;
   complex<double> etaxi = conjdot(Etap, Xip);
   complex<double> gamma; 
   if (EtaXiLast != complex<double>(0.0, 0.0)) 
