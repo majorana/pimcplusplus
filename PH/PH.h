@@ -18,16 +18,16 @@ public:
   char FileName[1000];
 
   CubicSpline V;
-  scalar Z;
+  double Z;
 
-  inline scalar operator()(scalar r)
+  inline double operator()(double r)
   {
     if (r < V.grid->End)
       return (-Z/r + V(r));
     else
       return (-Z/r);
   }
-  inline scalar Deriv(scalar r)
+  inline double Deriv(double r)
   {
     if (r < V.grid->End)
       return (Z/(r*r) + V.Deriv(r));
@@ -67,16 +67,16 @@ public:
 class PseudoHamiltonian
 {
 public:
-  scalar CoreRadius;
-  scalar Z, Zion;  // Zion is the unscreened pseudohamiltonian charge
+  double CoreRadius;
+  double Z, Zion;  // Zion is the unscreened pseudohamiltonian charge
   double Amin, Amax, Bmin, Bmax, Vmin, Vmax;
 
   FullCorePotential *FullCoreV;
   CubicSpline VHXC;  // The Hartree, exchange, and correlation potentials
-  scalar NumElecs;
+  double NumElecs;
   int UseVHXC;
 
-  inline void UpdateVHXC (CubicSpline NewVHXC, scalar Nelecs)
+  inline void UpdateVHXC (CubicSpline NewVHXC, double Nelecs)
   {
     NumElecs = Nelecs;
     VHXC = NewVHXC;
@@ -97,40 +97,40 @@ public:
     return(0);
   }
 
-  virtual scalar &Params(int i)
+  virtual double &Params(int i)
   {
     cerr << "Should never get to PseudoHamiltonian base class.\n";
     exit(1);
-    static scalar r = 0.0;
+    static double r = 0.0;
     return(r);
   }
   
-  virtual scalar Params(int i) const
+  virtual double Params(int i) const
   {
     cerr << "Should never get to PseudoHamiltonian base class.\n";
     exit(1);
     return(0.0);
   }
-  virtual scalar    V(scalar r)
+  virtual double    V(double r)
   {
     cerr << "Should never get to PseudoHamiltonian base class.\n";
     exit(1);
     return(0.0);
   }
-  virtual void ABV(scalar r, scalar &A, scalar &B, scalar &Vval,
-		   scalar &dAdr)
+  virtual void ABV(double r, double &A, double &B, double &Vval,
+		   double &dAdr)
   {
     A = 1.0; B = 1.0; dAdr = 0.0;
     Vval = V(r);
   }
 
-  virtual scalar d2Adr2(scalar r)
+  virtual double d2Adr2(double r)
   {
     cerr << "Should never get to PseudoHamiltonian base class.\n";
     return (0.0);
   }
 
-  virtual scalar dVdr(scalar r)
+  virtual double dVdr(double r)
   {
     cerr << "Should never get to PseudoHamiltonian base class.\n";
     exit(1);
@@ -212,6 +212,34 @@ public:
   }
 };
 
+
+class Potential : PseudoHamiltonian
+{
+public:
+  // These five functions must be specialized
+  virtual PHType Type() = 0;
+  virtual double V(double r) = 0;
+  virtual double dVdr(double r) = 0;
+  virtual void Write(IOSectionClass &outSection) = 0;
+  virtual bool Read (IOSectionClass &inSection)  = 0;
+
+  int NumParams()
+  { return 0; }
+  double Params(int i) const 
+  { return 0.0; }
+  double &Params(int i) 
+  { return CoreRadius; }
+  
+  void ABV(double r, double A, double B, double Vval, double dAdr)
+  {
+    A = 1.0; B = 1.0; dAdr = 0.0;
+    Vval = V(r);
+  }
+  double d2Adr2 (double r)
+  { return 0.0; }
+};
+
+
 ///////////////////////////////////////////////////////////////////
 //                       Cubic Spline PH                         //
 ///////////////////////////////////////////////////////////////////
@@ -234,7 +262,7 @@ public:
     return (PA.NumParams-1 + PB.NumParams-2 + Vfunc.NumParams-1);
   }
   
-  scalar &Params(int i)
+  double &Params(int i)
   {
     if (i==0)
       UpDateB = 1;
@@ -246,7 +274,7 @@ public:
       return (Vfunc.Params(i-PA.NumParams - PB.NumParams + 3));
   }
 
-  scalar Params(int i) const
+  double Params(int i) const
   {
     if (i < (PA.NumParams-1))
       return (PA.Params(i));
@@ -257,8 +285,8 @@ public:
   }
 
 	
-  void ABV(scalar r, scalar &A, scalar &B, scalar &V,
-		  scalar &dAdr)
+  void ABV(double r, double &A, double &B, double &V,
+		  double &dAdr)
   {
     if (r<CoreRadius)
       {
@@ -267,8 +295,8 @@ public:
 	    PB.Params(0) = sqrt(Amin - Bmin + PA.Params(0)*PA.Params(0));
 	    UpDateB = 0;
 	  }
-	scalar pa = PA(r);
-	scalar pb = PB(r);
+	double pa = PA(r);
+	double pb = PB(r);
 	A = Amin + pa * pa;
 	B = Bmin + pb * pb;
 	V = Vfunc(r);
@@ -283,7 +311,7 @@ public:
       }
   }
 
-  scalar V(scalar r)
+  double V(double r)
   {
     if (r<CoreRadius)
       return (Vfunc(r));
@@ -291,7 +319,7 @@ public:
       return ((*FullCoreV)(r));
   }
 
-  scalar dVdr(scalar r)
+  double dVdr(double r)
   {
     if (r<CoreRadius)
       return (Vfunc.Deriv(r));
@@ -299,27 +327,27 @@ public:
       return (FullCoreV->Deriv(r));
   }
 
-  scalar d2Adr2(scalar r)
+  double d2Adr2(double r)
   {
     if (r<CoreRadius)
       {
-	scalar p = PA(r);
-	scalar pp = PA.Deriv(r);
-	scalar ppp = PA.Deriv2(r);
+	double p = PA(r);
+	double pp = PA.Deriv(r);
+	double ppp = PA.Deriv2(r);
 	return (2.0*(p*ppp+pp*pp));
       }
     else
       return (0.0);
   }
 
-  void SetCoreRadius (scalar radius)
+  void SetCoreRadius (double radius)
     {
       CoreRadius = radius;
       Agrid.Init(0.0, CoreRadius, PA.NumParams);
       Bgrid.Init(0.0, CoreRadius, PB.NumParams);
       int NumV = Vfunc.NumParams;
       Vgrid.Init(0.0, CoreRadius, NumV);
-      Array<scalar,1> Vparams(NumV);
+      Array<double,1> Vparams(NumV);
       for (int i=0; i<NumV; i++)
 	Vparams(i) = Vfunc.Params(i);
       Vparams(NumV-1) = (*FullCoreV)(CoreRadius);
@@ -327,13 +355,13 @@ public:
     }
       
 
-  inline void Init (scalar amin, scalar bmin, scalar vmin,
-		    scalar amax, scalar bmax, scalar vmax,
-		    Array<scalar,1> Aparams,
-		    Array<scalar,1> Bparams,
-		    Array<scalar,1> Vparams,
+  inline void Init (double amin, double bmin, double vmin,
+		    double amax, double bmax, double vmax,
+		    Array<double,1> Aparams,
+		    Array<double,1> Bparams,
+		    Array<double,1> Vparams,
 		    FullCorePotential *FullCorePot,
-		    scalar coreradius)
+		    double coreradius)
   {
     CoreRadius = coreradius;
     Amin = amin; Amax = amax; 
@@ -343,14 +371,14 @@ public:
 
     int NumA = Aparams.rows();
     Agrid.Init(0.0, CoreRadius, NumA+1);
-    Array<scalar,1> Ainit(NumA+1);
+    Array<double,1> Ainit(NumA+1);
     Ainit(Range(0,NumA-1)) = Aparams;
     Ainit(NumA) = sqrt(1.0-amin);
     PA.Init(&Agrid, Ainit, 0.0, 0.0);
 
     int NumB = Bparams.rows();
     Bgrid.Init(0.0, CoreRadius, NumB+2);
-    Array<scalar,1> Binit(NumB+2);
+    Array<double,1> Binit(NumB+2);
     Binit(Range(1,NumB)) = Bparams;
     Binit(0) = sqrt(Aparams(0)*Aparams(0) + Amin - Bmin);    
     Binit(NumB+1) = sqrt(1.0 - bmin);
@@ -358,7 +386,7 @@ public:
 
     int NumV = Vparams.rows();
     Vgrid.Init(0.0, CoreRadius, NumV+1);
-    Array<scalar,1> Vinit(NumV+1);
+    Array<double,1> Vinit(NumV+1);
     Vinit(Range(0,NumV-1)) = Vparams;
     Vinit(NumV) = (*FullCoreV)(CoreRadius);
     Vfunc.Init(&Vgrid, Vinit, 5.0e30, FullCoreV->Deriv(CoreRadius));
@@ -449,7 +477,7 @@ public:
   CubicSpline PA, PB, Vfunc;
   Grid *Agrid, *Bgrid, *Vgrid;
 
-  scalar Amin, Bmin;
+  double Amin, Bmin;
 
   PHType Type()
   {
@@ -461,7 +489,7 @@ public:
     return (PA.NumParams-1 + PB.NumParams-2 + Vfunc.NumParams-1);
   }
   
-  scalar &Params(int i)
+  double &Params(int i)
   {
     if (i==0)
       UpDateB = 1;
@@ -473,7 +501,7 @@ public:
       return (Vfunc.Params(i-PA.NumParams - PB.NumParams + 3));
   }
 
-  scalar Params(int i) const
+  double Params(int i) const
   {
     if (i < (PA.NumParams-1))
       return (PA.Params(i));
@@ -484,8 +512,8 @@ public:
   }
 
 	
-  void ABV(scalar r, scalar &A, scalar &B, scalar &V,
-		  scalar &dAdr)
+  void ABV(double r, double &A, double &B, double &V,
+		  double &dAdr)
   {
     if (r<CoreRadius)
       {
@@ -494,8 +522,8 @@ public:
 	    PB.Params(0) = sqrt(Amin - Bmin + PA.Params(0)*PA.Params(0));
 	    UpDateB = 0;
 	  }
-	scalar pa = PA(r);
-	scalar pb = PB(r);
+	double pa = PA(r);
+	double pb = PB(r);
 	A = Amin + pa * pa;
 	B = Bmin + pb * pb;
 
@@ -519,9 +547,9 @@ public:
 
   }
 
-  scalar V(scalar r)
+  double V(double r)
   {
-    scalar v;
+    double v;
     if (r < Vgrid->End)
       {
 	v = Vfunc(r);
@@ -534,9 +562,9 @@ public:
     return (v);
   }
 
-  scalar dVdr(scalar r)
+  double dVdr(double r)
   {
-    scalar dV;
+    double dV;
     if (r < Vgrid->End)
       {
 	dV = Vfunc.Deriv(r);
@@ -551,25 +579,25 @@ public:
   }
 
   
-   scalar d2Adr2(scalar r)
+   double d2Adr2(double r)
   {
     if (r<CoreRadius)
       {
-	scalar p = PA(r);
-	scalar pp = PA.Deriv(r);
-	scalar ppp = PA.Deriv2(r);
+	double p = PA(r);
+	double pp = PA.Deriv(r);
+	double ppp = PA.Deriv2(r);
 	return (2.0*(p*ppp+pp*pp));
       }
     else
       return (0.0);
   }   
 
-  inline void Init (Array<scalar,1> Aparams,
-		    Array<scalar,1> Bparams,
-		    Array<scalar,1> Vparams,
+  inline void Init (Array<double,1> Aparams,
+		    Array<double,1> Bparams,
+		    Array<double,1> Vparams,
 		    Grid *agrid, Grid *bgrid,
-		    Grid *vgrid, scalar zion,
-		    scalar coreradius)
+		    Grid *vgrid, double zion,
+		    double coreradius)
   {
     UseVHXC = 0;
     NumElecs = 0;
@@ -582,7 +610,7 @@ public:
     Bmin = 0.0;
 
     int NumA = Aparams.rows();
-    Array<scalar,1> Ainit(NumA+1);
+    Array<double,1> Ainit(NumA+1);
     if (Ainit.rows() != Agrid->NumPoints)
       {
 	cerr << "Size mismatch in PH_CubicSplineXC.\n";
@@ -593,7 +621,7 @@ public:
     PA.Init(Agrid, Ainit, 0.0, 0.0);
 
     int NumB = Bparams.rows();
-    Array<scalar,1> Binit(NumB+2);
+    Array<double,1> Binit(NumB+2);
     if (Binit.rows() != Bgrid->NumPoints)
       {
 	cerr << "Size mismatch in PH_CubicSplineXC.\n";
@@ -605,7 +633,7 @@ public:
     PB.Init(Bgrid, Binit, 0.0, 0.0);
 
     int NumV = Vparams.rows();
-    Array<scalar,1> Vinit(NumV+1);
+    Array<double,1> Vinit(NumV+1);
     if (Vinit.rows() != Vgrid->NumPoints)
       {
 	cerr << "Size mismatch in PH_CubicSplineXC.\n";
@@ -614,7 +642,7 @@ public:
 	exit(1);
       }
     Vinit(Range(0,NumV-1)) = Vparams;
-    scalar rmax = Vgrid->End; 
+    double rmax = Vgrid->End; 
 
     // Force the last point to agree with asymptotic form
     Vinit(NumV) = -Zion/rmax;
@@ -705,7 +733,7 @@ public:
 class PH_Nuclear : public PseudoHamiltonian
 {
 public:
-  scalar dummy;  // To satisfy compiler warnings about no return value
+  double dummy;  // To satisfy compiler warnings about no return value
 
   PHType Type()
   {
@@ -717,21 +745,21 @@ public:
     return (0);
   }
   
-  scalar &Params(int i)
+  double &Params(int i)
   {
     cerr << "Nuclear PH has no parameters.\n";
     return (dummy);
   }
 
-  scalar Params(int i) const
+  double Params(int i) const
   {
     cerr << "Nuclear PH has no parameters.\n";
     return (0.0);
   }
 
 	
-  void ABV(scalar r, scalar &A, scalar &B, scalar &V,
-		  scalar &dAdr)
+  void ABV(double r, double &A, double &B, double &V,
+		  double &dAdr)
   {
     A = B = 1.0;
     dAdr = 0.0;
@@ -744,9 +772,9 @@ public:
 	V = -(Zion-NumElecs)/r;
   }
 
-  scalar V(scalar r)
+  double V(double r)
   {
-    scalar v = -Zion/r;
+    double v = -Zion/r;
     if (UseVHXC)
       if (r < VHXC.grid->End)
 	v += VHXC(r);
@@ -755,9 +783,9 @@ public:
     return (v);
   }
 
-  scalar dVdr(scalar r)
+  double dVdr(double r)
   {
-    scalar dV;
+    double dV;
     dV = Zion / (r*r);
     if (UseVHXC)
       if (r < VHXC.grid->End)
@@ -768,7 +796,7 @@ public:
     return (dV);
   }
 
-  scalar d2Adr2(scalar r)
+  double d2Adr2(double r)
   {
     return (0.0);
   }
@@ -800,7 +828,7 @@ public:
     } 
   }
 
-  PH_Nuclear(scalar z)
+  PH_Nuclear(double z)
   {
 
     Zion = z;
@@ -828,7 +856,7 @@ class PH_FullCore : public PseudoHamiltonian
 public:
   // Zion is the unscreened pseudohamiltonian charge and Nelecs
   // is the number of electrons in the pseudo-atom;
-  scalar dummy;  // To satisfy compiler warning.
+  double dummy;  // To satisfy compiler warning.
 
 
   PHType Type()
@@ -841,21 +869,21 @@ public:
     return (0);
   }
   
-  scalar &Params(int i)
+  double &Params(int i)
   {
     cerr << "Nuclear PH has no parameters.\n";
     return (dummy);
   }
 
-  scalar Params(int i) const
+  double Params(int i) const
   {
     cerr << "Nuclear PH has no parameters.\n";
     return (0.0);
   }
 
 	
-  void ABV(scalar r, scalar &A, scalar &B, scalar &V,
-		  scalar &dAdr)
+  void ABV(double r, double &A, double &B, double &V,
+		  double &dAdr)
   {
     A = B = 1.0;
     dAdr = 0.0;
@@ -863,17 +891,17 @@ public:
     V = (*FullCoreV)(r);
   }
 
-  scalar V(scalar r)
+  double V(double r)
   {
     return ((*FullCoreV)(r));
   }
 
-  scalar dVdr(scalar r)
+  double dVdr(double r)
   {
     return (FullCoreV->Deriv(r));
   }
 
-  scalar d2Adr2(scalar r)
+  double d2Adr2(double r)
   {
     return (0.0);
   }
@@ -906,7 +934,7 @@ public:
 class PH_Zero : public PseudoHamiltonian
 {
 public:
-  scalar dummy;  // To satisfy compiler warnings about no return value
+  double dummy;  // To satisfy compiler warnings about no return value
 
   PHType Type()
   {
@@ -918,21 +946,21 @@ public:
     return (0);
   }
   
-  scalar &Params(int i)
+  double &Params(int i)
   {
     cerr << "Nuclear PH has no parameters.\n";
     return (dummy);
   }
 
-  scalar Params(int i) const
+  double Params(int i) const
   {
     cerr << "Nuclear PH has no parameters.\n";
     return (0.0);
   }
 
 	
-  void ABV(scalar r, scalar &A, scalar &B, scalar &V,
-		  scalar &dAdr)
+  void ABV(double r, double &A, double &B, double &V,
+		  double &dAdr)
   {
     A = B = 1.0;
     dAdr = 0.0;
@@ -940,17 +968,17 @@ public:
     V = 0.0;
   }
 
-  scalar V(scalar r)
+  double V(double r)
   {
     return (0.0);
   }
 
-  scalar dVdr(scalar r)
+  double dVdr(double r)
   {
     return (0.0);
   }
 
-  scalar d2Adr2(scalar r)
+  double d2Adr2(double r)
   {
     return (0.0);
   }
@@ -980,7 +1008,7 @@ public:
 class PH_Gaussian : public PseudoHamiltonian
 {
 public:
-  scalar Amp, sigma;  // To satisfy compiler warnings about no return value
+  double Amp, sigma;  // To satisfy compiler warnings about no return value
 
   PHType Type()
   {
@@ -992,7 +1020,7 @@ public:
     return (0);
   }
   
-  scalar &Params(int i)
+  double &Params(int i)
   {
     if (i==0)
       return (Amp);
@@ -1000,7 +1028,7 @@ public:
       return (sigma);
   }
 
-  scalar Params(int i) const
+  double Params(int i) const
   {
     if (i==0)
       return (Amp);
@@ -1009,8 +1037,8 @@ public:
   }
 
 	
-  void ABV(scalar r, scalar &A, scalar &B, scalar &V,
-		  scalar &dAdr)
+  void ABV(double r, double &A, double &B, double &V,
+		  double &dAdr)
   {
     A = B = 1.0;
     dAdr = 0.0;
@@ -1018,17 +1046,17 @@ public:
     V = Amp*exp(-r*r/(2.0*sigma*sigma));
   }
 
-  scalar V(scalar r)
+  double V(double r)
   {
     return (Amp*exp(-r*r/(2.0*sigma*sigma)));
   }
 
-  scalar dVdr(scalar r)
+  double dVdr(double r)
   {
     return (-r/(sigma*sigma) * Amp*exp(-r*r/(2.0*sigma*sigma)));
   }
 
-  scalar d2Adr2(scalar r)
+  double d2Adr2(double r)
   {
     return (0.0);
   }
@@ -1135,18 +1163,18 @@ public:
     return (0);
   }
   
-  scalar &Params(int i)
+  double &Params(int i)
   {
     return Z1Z2;
   }
 
-  scalar Params(int i) const
+  double Params(int i) const
   {
     return (0.0);
   }
 	
-  void ABV(scalar r, scalar &A, scalar &B, scalar &Vr,
-	   scalar &dAdr)
+  void ABV(double r, double &A, double &B, double &Vr,
+	   double &dAdr)
   {
     A = B = 1.0;
     dAdr = 0.0;
@@ -1154,10 +1182,10 @@ public:
     Vr=V(r);
   }
   // We don't need this
-  scalar dVdr(scalar r)
+  double dVdr(double r)
   {    return (0.0); }
 
-  scalar d2Adr2(scalar r)
+  double d2Adr2(double r)
   {
     return (0.0);
   }
@@ -1172,8 +1200,8 @@ public:
 
   bool Read (IOSectionClass &inSection)
   {
-    assert (inSection.ReadVar ("Z1Z2", Z1Z2));
     assert (inSection.ReadVar ("lambda", lambda));
+    assert (inSection.ReadVar ("Z1Z2", Z1Z2));
     assert (inSection.ReadVar ("beta", beta));
     Init(lambda, beta, Z1Z2);
   }
