@@ -7,7 +7,7 @@ MAKE_CLEAN = ${MAKE} clean
 
 all:	IO_obj Splines_obj PH_obj Integration_obj DFT_obj MPI_obj Random_obj \
         Optimize_obj SpecialFunctions_obj MatrixOps_obj \
-	Fitting_obj PairAction_obj Distributed_obj Atom_obj
+	Fitting_obj PairAction_obj Distributed_obj Atom_obj Plotting_obj
 
 
 PH_obj:
@@ -51,11 +51,14 @@ Distributed_obj:
 Atom_obj:
 	cd Atom; $(MAKE_ALL)
 
+Plotting_obj:
+	cd Plotting; $(MAKE_ALL)
+
 
 CLEANS = PH_clean Splines_clean Integration_clean IO_clean DFT_clean \
 	 Random_clean MPI_clean Optimize_clean SpecialFunctions_clean \
 	 MatrixOps_clean Fitting_clean PairAction_clean Distributed_clean \
-	 Atom_clean
+	 Atom_clean Plotting_clean
 
 
 clean:	$(CLEANS)
@@ -103,6 +106,9 @@ Distributed_clean:
 Atom_clean:
 	cd Atom; $(MAKE_CLEAN)
 
+Plotting_clean:
+	cd Plotting; $(MAKE_CLEAN)
+
 
 
 
@@ -148,12 +154,15 @@ Distributed_newmake:
 Atom_newmake:
 	cd Atom; $(MAKE_NEWMAKE)
 
+Plotting_newmake:
+	cd Plotting; $(MAKE_NEWMAKE)
+
 
 
 NEW_MAKES = PH_newmake Splines_newmake Integration_newmake IO_newmake \
 DFT_newmake Random_newmake MPI_newmake Optimize_newmake \
 SpecialFunctions_newmake MatrixOps_newmake Fitting_newmake PairAction_newmake \
-Distributed_newmake Atom_newmake
+Distributed_newmake Atom_newmake Plotting_newmake
 
 SOURCES = `*.cc`
 
