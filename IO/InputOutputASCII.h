@@ -2,12 +2,13 @@
 #define INPUT_OUTPUT_ASCII_H
 
 
-#include "InputOutput.h"
+#include "InputOutputBase.h"
 
 
 
 class InputSectionASCIIClass : public InputSectionClass
 {
+
   void ReadWithoutComments(string fileName, Array<char,1> &buffer);
 
  public:

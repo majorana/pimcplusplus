@@ -142,6 +142,97 @@ void InputSectionASCIIClass::CloseFile()
   return;
 
 }
+
+
+bool isSpecial(char theChar)
+{
+  return ( (theChar=='(') ||
+	   (theChar==')') ||
+	   (theChar=='{') ||
+	   (theChar=='}') ||
+	   (theChar=='[') ||
+	   (theChar==']') ||
+	   (theChar=='<') ||
+	   (theChar=='>') ||	
+	   (theChar=='=') ||
+	   (theChar==';') ||
+	   (theChar==','));
+}
+	   
+      
+bool isWhiteSpace(char theChar)
+{
+  return ( (theChar=='\n') ||
+	   (theChar==' ' ) ||
+	   (theChar=='\t') ||
+	   (theChar=='\r'));
+}
+      
+
+		      
+bool isAlpha(char theChar)
+{
+  return ((theChar>='a' && theChar<='z') || (theChar>='A' && theChar<='Z')
+	  ||theChar=='_');
+}
+
+bool isDigit(char theChar)
+{
+  return (theChar>='0' && theChar<='9');
+}
+
+bool isNumStart(char theChar)
+{
+  return ((isNumber(theChar)) || (theChar=='.') || (theChar=='-'));
+}
+
+
+void Tokenize(Array<char,1> buffer, list<string>& tokenList)
+{
+  int pos=0;
+  int lineNum=0;
+  while (pos<buffer.size()){
+    if (isSpecial(buffer(pos))){
+      tokenList.push_back(buffer(pos));
+      pos++;
+    }
+    else if (buffer(pos)=='\"'){
+      string tempString="";
+      while (buffer(pos)!='\"'){
+	tempString+=buffer(pos);
+	pos++;
+      }
+      tempString=tempString+'\"';
+      tokenList.push_back(tempString);
+    }
+    else if (isAlpha(buffer(pos))){
+      string tempString="";
+      while (!(isAlpha(buffer(pos)) || isNumeric(buffer(pos)))){
+	tempString+=buffer(pos);
+	pos++;
+      }
+      tokenList.push_back(tempString);
+    }
+    else if (isWhiteSpace(buffer(pos))){
+      if (buffer(pos)=='\n')
+	lineNum++;
+      pos++;
+    }
+    else if (isNumStart(buffer(pos))){
+      string tempString="";
+      while (!isNumStart(buffer(pos))){
+	tempString+=buffer(pos);
+	pos++;
+      }
+    }
+    else {
+      cerr<<"There was a token we do not recognize in line "<<lineNum<<endl;
+      exit(1);
+    }
+  }
+}	     
+	  
+
 void 
 InputSectionASCIIClass::ReadWithoutComments(string fileName,
 							     Array<char,1> 
@@ -239,47 +330,56 @@ bool InputSectionASCIIClass::OpenFile(string fileName, InputSectionClass *parent
   int newCounter;
   Array<char,1> buffer;
   ReadWithoutComments(fileName,buffer);
-  //  cout<<buffer;
-  int braceLevel=0;
-  bool inQuotes=false;
-  sec->Name="all";
-  sec->Parent=parent;
-  for (int counter=0;counter<buffer.size();counter++){
-    //    cout<<currWord(buffer,counter,secName)<<endl;
-    if (buffer(counter)=='\"' && buffer(counter-1)!='\\'){
-      inQuotes=!inQuotes;
-    }
-    else if (buffer(counter)=='S' &&
-	     currWord(buffer,counter,secName)=="Section" &&
-	     !inQuotes){
-      InputSectionASCIIClass *newSec = 
-	new InputSectionASCIIClass;
-      newSec->Name=secName;
-      newSec->Iter=newSec->SectionList.begin();
-      newSec->Parent=sec;
-      sec->SectionList.push_back(newSec);
-      sec=newSec;
-    }
-    else if (buffer(counter)=='}' &&
-	     !inQuotes){
-      //      sec=&((SpecialSectionClass<VarASCIIClass>)(*(sec->Parent)))
-      sec=(InputSectionASCIIClass*)(sec->Parent);
-    }
-    else if(buffer(counter)=='='
-	    && !inQuotes){
-      string theName;
-      Array <char,1> theValue;
-      getVariable(buffer,counter,theName,theValue);
-      VarASCIIClass *var = new VarASCIIClass;
-      var->Name=theName;
-      //      cout<<"Right here the value is "<<theValue;
-      var->Value.resize(theValue.size());
-      var->Value=theValue;
-      sec->VarList.push_back(var);
-    }
+  list<string> tokenList;
+  Tokenize(buffer,tokenList);
+  list<string>::iterator listIt;
+  listIt=tokenList.begin();
+  while (listIt!=tokenList.end()){
+    cerr<<*listIt;
+    listIt++;
   }
-  //  sec=oldSec;
-  Iter =SectionList.begin();
+     
+//   //  cout<<buffer;
+//   int braceLevel=0;
+//   bool inQuotes=false;
+//   sec->Name="all";
+//   sec->Parent=parent;
+//   for (int counter=0;counter<buffer.size();counter++){
+//     //    cout<<currWord(buffer,counter,secName)<<endl;
+//     if (buffer(counter)=='\"' && buffer(counter-1)!='\\'){
+//       inQuotes=!inQuotes;
+//     }
+//     else if (buffer(counter)=='S' &&
+// 	     currWord(buffer,counter,secName)=="Section" &&
+// 	     !inQuotes){
+//       InputSectionASCIIClass *newSec = 
+// 	new InputSectionASCIIClass;
+//       newSec->Name=secName;
+//       newSec->Iter=newSec->SectionList.begin();
+//       newSec->Parent=sec;
+//       sec->SectionList.push_back(newSec);
+//       sec=newSec;
+//     }
+//     else if (buffer(counter)=='}' &&
+// 	     !inQuotes){
+//       //      sec=&((SpecialSectionClass<VarASCIIClass>)(*(sec->Parent)))
+//       sec=(InputSectionASCIIClass*)(sec->Parent);
+//     }
+//     else if(buffer(counter)=='='
+// 	    && !inQuotes){
+//       string theName;
+//       Array <char,1> theValue;
+//       getVariable(buffer,counter,theName,theValue);
+//       VarASCIIClass *var = new VarASCIIClass;
+//       var->Name=theName;
+//       //      cout<<"Right here the value is "<<theValue;
+//       var->Value.resize(theValue.size());
+//       var->Value=theValue;
+//       sec->VarList.push_back(var);
+//     }
+//   }
+//   //  sec=oldSec;
+//   Iter =SectionList.begin();
   return true;
 }
 
