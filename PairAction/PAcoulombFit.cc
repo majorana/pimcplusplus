@@ -2,7 +2,9 @@
 #include "../SpecialFunctions/HermitePoly.h"
 #include "../Fitting/Fitting.h"
 
-
+/// The following routines are used only if we are creating fits, not
+/// using them.
+#ifdef MAKE_FIT
 void PAcoulombFitClass::ReadParams(IOSectionClass &inSection)
 {
   assert(inSection.OpenSection ("qGrid"));
@@ -12,9 +14,6 @@ void PAcoulombFitClass::ReadParams(IOSectionClass &inSection)
   Ucoefs.resize(Order+1);
   UsePBC = inSection.ReadVar ("Box", Box);
 }
-
-
-#ifdef MAKE_FITS
 
 void PAcoulombFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 {

@@ -2,6 +2,9 @@
 
 
 
+
+#ifdef MAKE_FIT
+
 void PAszFitClass::ReadParams(IOSectionClass &inSection)
 {
   assert(inSection.OpenSection ("qGrid"));
@@ -11,7 +14,6 @@ void PAszFitClass::ReadParams(IOSectionClass &inSection)
   UsePBC = inSection.ReadVar ("Box", Box);
 }
 
-#ifdef MAKE_FIT
 
 void PAszFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 {
