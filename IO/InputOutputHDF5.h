@@ -112,6 +112,10 @@ public:
   void WriteVar (string name, Array<string,1> &v);
   void WriteVar (string name, Array<string,2> &v);
   void WriteVar (string name, Array<string,3> &v);
+  void WriteVar (string name, bool val);
+  void WriteVar (string name, Array<bool,1> &v);
+  void WriteVar (string name, Array<bool,2> &v);
+  void WriteVar (string name, Array<bool,3> &v);
 };
 
 

@@ -5,14 +5,14 @@
 /// Simply prints 3*num spaces
 inline void ASCIIPrintIndent(int num)
 {
-  for (int counter=0;counter<num*3;counter++)
+  for (int counter=0;counter<num*2;counter++)
     cout<<' ';
 }
 
 /// Simply prints 3*num spaces
 inline void ASCIIPrintIndent(int num,ofstream &outFile)
 {
-  for (int counter=0;counter<num*3;counter++)
+  for (int counter=0;counter<num*2;counter++)
     outFile<<' ';
 }
 
@@ -447,13 +447,106 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 }
 
 
+VarASCIIClass *NewASCIIVar (AtomicType newType, int ndim,
+			    Array<int,1> dims)
+{
+  if (ndim == 0) {
+    if (newType == DOUBLE_TYPE)
+      return new VarASCIIdouble0Class;
+    else if (newType == INT_TYPE)
+      return new VarASCIIint0Class;
+    else if (newType == STRING_TYPE)
+      return new VarASCIIstring0Class;
+    else if (newType == BOOL_TYPE)
+      return new VarASCIIbool0Class;
+  }
+  else if (ndim == 1) {
+    if (newType == DOUBLE_TYPE)
+      {
+	VarASCIIdouble1Class *newVar = new VarASCIIdouble1Class;
+	newVar->Value.resize(dims(0));
+	return newVar;
+      }
+    else if (newType == INT_TYPE)
+      {
+	VarASCIIint1Class *newVar = new VarASCIIint1Class;
+	newVar->Value.resize(dims(0));
+	return newVar;
+      }
+    else if (newType == STRING_TYPE)
+      {
+	VarASCIIstring1Class *newVar = new VarASCIIstring1Class;
+	newVar->Value.resize(dims(0));
+	return newVar;
+      }
+    else if (newType == BOOL_TYPE)
+      {
+	VarASCIIbool1Class *newVar = new VarASCIIbool1Class;
+	newVar->Value.resize(dims(0));
+	return newVar;
+      }
+  }
+  else if (ndim == 2) {
+    if (newType == DOUBLE_TYPE)
+      {
+	VarASCIIdouble2Class *newVar = new VarASCIIdouble2Class;
+	newVar->Value.resize(dims(0), dims(1));
+	return newVar;
+      }
+    else if (newType == INT_TYPE)
+      {
+	VarASCIIint2Class *newVar = new VarASCIIint2Class;
+	newVar->Value.resize(dims(0), dims(1));
+	return newVar;
+      }
+    else if (newType == STRING_TYPE)
+      {
+	VarASCIIstring2Class *newVar = new VarASCIIstring2Class;
+	newVar->Value.resize(dims(0), dims(1));
+	return newVar;
+      }
+    else if (newType == BOOL_TYPE)
+      {
+	VarASCIIbool2Class *newVar = new VarASCIIbool2Class;
+	newVar->Value.resize(dims(0), dims(1));
+	return newVar;
+      }
+  }  
+  else if (ndim == 3) {
+    if (newType == DOUBLE_TYPE)
+      {
+	VarASCIIdouble3Class *newVar = new VarASCIIdouble3Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2));
+	return newVar;
+      }
+    else if (newType == INT_TYPE)
+      {
+	VarASCIIint3Class *newVar = new VarASCIIint3Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2));
+	return newVar;
+      }
+    else if (newType == STRING_TYPE)
+      {
+	VarASCIIstring3Class *newVar = new VarASCIIstring3Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2));
+	return newVar;
+      }
+    else if (newType == BOOL_TYPE)
+      {
+	VarASCIIbool3Class *newVar = new VarASCIIbool3Class;
+	newVar->Value.resize(dims(0), dims(1), dims(2));
+	return newVar;
+      }
+  }  
+}
+
+
 
 /// Reads an array from a list of tokens, starting at the token
 /// pointed to by iter.  It places the array into the newVar object.
 /// It expects to begin reading after the word "Array".
-void ReadArray(list<TokenClass>::iterator &iter,
-	       list<TokenClass> &tokenList,
-	       VarASCIIClass *newVar)
+VarASCIIClass * ReadArray(list<TokenClass>::iterator &iter,
+			  list<TokenClass> &tokenList)
 {
   ReadAbort(iter->Str != "<", iter->LineNumber, "Expected < not found\n");
   iter++;
@@ -472,7 +565,7 @@ void ReadArray(list<TokenClass>::iterator &iter,
   Array<int,1> dimSize(numDim);
   
   string myName=iter->Str;
-  newVar->Name = myName;
+
   iter++;
   ReadAbort(iter->Str != "(", iter->LineNumber, "Expected ( not found\n");
   iter++;
@@ -482,6 +575,7 @@ void ReadArray(list<TokenClass>::iterator &iter,
     ReadAbort(iter->Str != ",", iter->LineNumber, "Expected , not found\n");
     iter++;
   }
+
   //Read the last dimension
   ReadAtomicVar(*iter,dimSize(numDim-1));
   iter++;
@@ -489,88 +583,41 @@ void ReadArray(list<TokenClass>::iterator &iter,
   iter++;
   ReadAbort(iter->Str!="=",iter->LineNumber,"Expected = not found\n");
   iter++;
+  
+  VarASCIIClass *newVar = NewASCIIVar (myType, numDim, dimSize);
+  
+  newVar->Name = myName;
   newVar->Dim=numDim;
   newVar->Type=myType;
-  if (numDim==1){
-    if (myType==INT_TYPE){
-      Array<int,1> *valArray=new Array<int,1>(dimSize(0));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
-    else if (myType==DOUBLE_TYPE){
-      Array<double,1> *valArray =new Array<double,1>(dimSize(0));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
-    else if (myType==BOOL_TYPE){
-      Array<bool,1> *valArray=new Array<bool,1>(dimSize(0));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
-    else if (myType==STRING_TYPE){
-      Array<string,1> *valArray=new Array<string,1>(dimSize(0));
-      ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-    }
+  if (numDim == 1) {
+    if (myType == DOUBLE_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIdouble1Class *)newVar)->Value);
+    else if (myType == INT_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIint1Class *)newVar)->Value);
+    else if (myType == STRING_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIstring1Class *)newVar)->Value);
+    else if (myType == BOOL_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIbool1Class *)newVar)->Value);
   }
-  else if (numDim==2){
-    if (myType==INT_TYPE){
-      Array<int,2> *valArray=new Array<int,2>(dimSize(0),dimSize(1));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
-    else if (myType==DOUBLE_TYPE){
-      Array<double,2> *valArray =new Array<double,2>(dimSize(0),
-						     dimSize(1));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
-    else if (myType==BOOL_TYPE){
-      Array<bool,2> *valArray=new Array<bool,2>(dimSize(0),
-						dimSize(1));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
-    else if (myType==STRING_TYPE){
-      Array<string,2> *valArray=new Array<string,2>(dimSize(0),
-						    dimSize(1));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
+  if (numDim == 2) {
+    if (myType == DOUBLE_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIdouble2Class *)newVar)->Value);
+    else if (myType == INT_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIint2Class *)newVar)->Value);
+    else if (myType == STRING_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIstring2Class *)newVar)->Value);
+    else if (myType == BOOL_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIbool2Class *)newVar)->Value);
   }
-  else if (numDim==3){
-    if (myType==INT_TYPE){
-      Array<int,3> *valArray=new Array<int,3>(dimSize(0),
-					      dimSize(1),
-					      dimSize(2));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
-    else if (myType==DOUBLE_TYPE){
-      Array<double,3> *valArray =new Array<double,3>(dimSize(0),
-						     dimSize(1),
-						     dimSize(2));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
-    else if (myType==BOOL_TYPE){
-      Array<bool,3> *valArray=new Array<bool,3>(dimSize(0),
-						dimSize(1),
-						dimSize(2));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-      
-    }
-    else if (myType==STRING_TYPE){
-      Array<string,3> *valArray=new Array<string,3>(dimSize(0),
-						    dimSize(1),
-						    dimSize(2));
-      ReadArrayData(iter,tokenList,*valArray);
-      newVar->Value=valArray;
-    }
-  }
-  else if (numDim>1){
-    cerr<<"We haven't implemented this yet\n";
+  if (numDim == 3) {
+    if (myType == DOUBLE_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIdouble3Class *)newVar)->Value);
+    else if (myType == INT_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIint3Class *)newVar)->Value);
+    else if (myType == STRING_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIstring3Class *)newVar)->Value);
+    else if (myType == BOOL_TYPE)
+      ReadArrayData(iter, tokenList, ((VarASCIIbool3Class *)newVar)->Value);
   }
 }
 
@@ -583,18 +630,18 @@ void ReadArray(list<TokenClass>::iterator &iter,
 VarASCIIClass* ReadASCIIVar (list<TokenClass>::iterator &iter,
 			     list<TokenClass> &tokenList)
 {
-  VarASCIIClass *newVar = new VarASCIIClass;  
+  VarASCIIClass *newVar;
   AtomicType myType=GetType(iter->Str);
   if (myType==NOT_ATOMIC){
     ReadAbort(iter->Str!="Array",iter->LineNumber,
 	      "Invalid Type: "+iter->Str+"\n");
     iter++;
-    ReadArray(iter,tokenList,newVar);
+    newVar = ReadArray(iter,tokenList);
   }
   else {
     iter++;
     string myName=iter->Str;
-    newVar->Name = myName;
+
     iter++;
     ReadAbort(iter->Str!="=",iter->LineNumber,"Expected equals sign\n");
     iter++;
@@ -602,24 +649,19 @@ VarASCIIClass* ReadASCIIVar (list<TokenClass>::iterator &iter,
     iter++;
     ReadAbort(iter->Str!=";",iter->LineNumber,"Expected semicolon\n");
     iter++;
+    Array<int,1> dims(1);
+    newVar = NewASCIIVar (myType, 0, dims);
     newVar->Type=myType;
     newVar->Dim=0;
-    if (myType==INT_TYPE){
-      newVar->Value=new int;
-      ReadAtomicVar(valToken,*((int*)newVar->Value));
-    }
-    else if (myType==DOUBLE_TYPE){
-      newVar->Value=new double;
-      ReadAtomicVar(valToken,*((double*)newVar->Value));
-    }
-    else if (myType==STRING_TYPE){
-      newVar->Value=new string;
-      ReadAtomicVar(valToken,*((string*)newVar->Value));
-    }
-    else if (myType==BOOL_TYPE){
-      newVar->Value=new bool();
-      ReadAtomicVar(valToken,*((bool*)newVar->Value));
-    }
+    newVar->Name = myName;
+    if (myType == DOUBLE_TYPE)
+      ReadAtomicVar (valToken, ((VarASCIIdouble0Class *)newVar)->Value);
+    else if (myType == INT_TYPE)
+      ReadAtomicVar (valToken, ((VarASCIIint0Class *)newVar)->Value);
+    else if (myType == STRING_TYPE)
+      ReadAtomicVar (valToken, ((VarASCIIstring0Class *)newVar)->Value);
+    else if (myType == BOOL_TYPE)
+      ReadAtomicVar (valToken, ((VarASCIIbool0Class *)newVar)->Value);
   }
   return(newVar);
 }
@@ -755,11 +797,11 @@ void IOTreeASCIIClass::WriteSection(ofstream &outFile,int indentNum)
       outFile<<"{\n";
       ((IOTreeASCIIClass*)(*secIter))->WriteSection(outFile,indentNum+1);
       ASCIIPrintIndent(indentNum,outFile);
-      outFile<<"}\n";
+      outFile<<"}\n\n";
     }
     else {
       ASCIIPrintIndent(indentNum,outFile);
-      outFile<<"Section( "<<(*secIter)->Name<<",\" ";
+      outFile<<"Section ("<<(*secIter)->Name<<", \"";
       outFile<<(*secIter)->FileName<<"\");"<<endl;
       (*secIter)->FlushFile();
     }
@@ -804,246 +846,398 @@ void IOTreeASCIIClass::CloseFile()
 //////////////////////////////////////////////////////////////////////
 
 bool VarASCIIClass::ReadInto (double &val)
-{
-  assert (Type == DOUBLE_TYPE);
-  assert (Dim == 0);
-  val = *((double *)Value);
-}
-
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (int &val)
-{
-  assert (Type == INT_TYPE);
-  assert (Dim == 0);
-  val = *((int *)Value);
-}
-
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (string &val)
-{
-  assert (Type == STRING_TYPE);
-  assert (Dim == 0);
-  val = *((string *)Value);
-}
-
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (bool &val)
-{
-  assert (Type == BOOL_TYPE);
-  assert (Dim == 0);
-  val = *((bool *)Value);
-}
-
-
-
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<double,1> &val)
-{
-  assert (Type == DOUBLE_TYPE);
-  assert (Dim == 1);
-  Array<double,1> &myVal = *((Array<double,1>*)Value);
-  val.resize(myVal.extent(0));
-  val = myVal;
-}
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<double,2> &val)
-{
-  assert (Type == DOUBLE_TYPE);
-  assert (Dim == 2);
-  Array<double,2> &myVal = *((Array<double,2>*)Value);
-  val.resize(myVal.extent(0), myVal.extent(1));
-  val = myVal;
-}
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<double,3> &val)
-{
-  assert (Type == DOUBLE_TYPE);
-  assert (Dim == 3);
-  Array<double,3> &myVal = *((Array<double,3>*)Value);
-  val.resize(myVal.extent(0), myVal.extent(1), myVal.extent(2));
-  val = myVal;
-}
-
-
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<int,1> &val)
-{
-  assert (Type == INT_TYPE);
-  assert (Dim == 1);
-  Array<int,1> &myVal = *((Array<int,1>*)Value);
-  val.resize(myVal.extent(0));
-  val = myVal;
-}
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<int,2> &val)
-{
-  assert (Type == INT_TYPE);
-  assert (Dim == 2);
-  Array<int,2> &myVal = *((Array<int,2>*)Value);
-  val.resize(myVal.extent(0), myVal.extent(1));
-  val = myVal;
-}
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<int,3> &val)
-{
-  assert (Type == INT_TYPE);
-  assert (Dim == 3);
-  Array<int,3> &myVal = *((Array<int,3>*)Value);
-  val.resize(myVal.extent(0), myVal.extent(1), myVal.extent(2));
-  val = myVal;
-}
-
-
-
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<string,1> &val)
-{
-  assert (Type == STRING_TYPE);
-  assert (Dim == 1);
-  Array<string,1> &myVal = *((Array<string,1>*)Value);
-  val.resize(myVal.extent(0));
-  val = myVal;
-}
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<string,2> &val)
-{
-  assert (Type == STRING_TYPE);
-  assert (Dim == 2);
-  Array<string,2> &myVal = *((Array<string,2>*)Value);
-  val.resize(myVal.extent(0), myVal.extent(1));
-  val = myVal;
-}
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<string,3> &val)
-{
-  assert (Type == STRING_TYPE);
-  assert (Dim == 3);
-  Array<string,3> &myVal = *((Array<string,3>*)Value);
-  val.resize(myVal.extent(0), myVal.extent(1), myVal.extent(2));
-  val = myVal;
-}
-
-
-
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<bool,1> &val)
-{
-  assert (Type == BOOL_TYPE);
-  assert (Dim == 1);
-  Array<bool,1> &myVal = *((Array<bool,1>*)Value);
-  val.resize(myVal.extent(0));
-  val = myVal;
-}
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<bool,2> &val)
-{
-  assert (Type == BOOL_TYPE);
-  assert (Dim == 2);
-  Array<bool,2> &myVal = *((Array<bool,2>*)Value);
-  val.resize(myVal.extent(0), myVal.extent(1));
-  val = myVal;
-}
+{ ComplainReadInto(); }
 bool VarASCIIClass::ReadInto (Array<bool,3> &val)
+{ ComplainReadInto(); }
+
+bool VarASCIIClass::Append (double val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (int val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (string val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (bool val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (Array<double,1> &val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (Array<double,2> &val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (Array<int,1> &val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (Array<int,2> &val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (Array<string,1> &val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (Array<string,2> &val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (Array<bool,1> &val)
+{ ComplainAppend(); }
+bool VarASCIIClass::Append (Array<bool,2> &val)
+{ ComplainAppend(); }
+
+
+bool VarASCIIdouble0Class::ReadInto (double &val)
+{ val = Value; }
+bool VarASCIIint0Class::ReadInto (int &val)
+{  val = Value; }
+bool VarASCIIstring0Class::ReadInto (string &val)
+{  val = Value; }
+bool VarASCIIbool0Class::ReadInto (bool &val)
+{ val = Value; }
+bool VarASCIIdouble1Class::ReadInto (Array<double,1> &val)
+{ val.resize(Value.extent(0)); val = Value; }
+bool VarASCIIdouble2Class::ReadInto (Array<double,2> &val)
+{ val.resize(Value.extent(0),Value.extent(1)); val = Value; }
+bool VarASCIIdouble3Class::ReadInto (Array<double,3> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; }
+bool VarASCIIint1Class::ReadInto (Array<int,1> &val)
+{ val.resize(Value.extent(0)); val = Value; }
+bool VarASCIIint2Class::ReadInto (Array<int,2> &val)
+{ val.resize(Value.extent(0),Value.extent(1)); val = Value; }
+bool VarASCIIint3Class::ReadInto (Array<int,3> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; }
+bool VarASCIIstring1Class::ReadInto (Array<string,1> &val)
+{ val.resize(Value.extent(0)); val = Value; }
+bool VarASCIIstring2Class::ReadInto (Array<string,2> &val)
+{ val.resize(Value.extent(0),Value.extent(1)); val = Value; }
+bool VarASCIIstring3Class::ReadInto (Array<string,3> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; }
+bool VarASCIIbool1Class::ReadInto (Array<bool,1> &val)
+{ val.resize(Value.extent(0)); val = Value; }
+bool VarASCIIbool2Class::ReadInto (Array<bool,2> &val)
+{ val.resize(Value.extent(0),Value.extent(1)); val = Value; }
+bool VarASCIIbool3Class::ReadInto (Array<bool,3> &val)
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; }
+
+bool VarASCIIdouble1Class::Append (double val)
+{ ComplainAppend(); }
+bool VarASCIIint1Class::Append (int val)
+{ ComplainAppend(); }
+bool VarASCIIstring1Class::Append (string val)
+{ ComplainAppend(); }
+bool VarASCIIbool1Class::Append (bool val)
+{ ComplainAppend(); }
+bool VarASCIIdouble2Class::Append (Array<double,1> &val)
+{ ComplainAppend(); }
+bool VarASCIIdouble3Class::Append (Array<double,2> &val)
+{ ComplainAppend(); }
+bool VarASCIIint2Class::Append (Array<int,1> &val)
+{ ComplainAppend(); }
+bool VarASCIIint3Class::Append (Array<int,2> &val)
+{ ComplainAppend(); }
+bool VarASCIIstring2Class::Append (Array<string,1> &val)
+{ ComplainAppend(); }
+bool VarASCIIstring3Class::Append (Array<string,2> &val)
+{ ComplainAppend(); }
+bool VarASCIIbool2Class::Append (Array<bool,1> &val)
+{ ComplainAppend(); }
+bool VarASCIIbool3Class::Append (Array<bool,2> &val)
+{ ComplainAppend(); }
+
+
+void VarASCIIdouble0Class::Print (ofstream &outFile)
+{ outFile << "double " << Name << " = " << Value << ";\n";}
+void VarASCIIint0Class::Print (ofstream &outFile)
+{ outFile << "int " << Name << " = " << Value << ";\n";} 
+void VarASCIIstring0Class::Print (ofstream &outFile)
+{ outFile << "string " << Name << " = " << "\"" << Value << "\";\n";} 
+void VarASCIIbool0Class::Print (ofstream &outFile)
+{ outFile << "bool " << Name <<" = "<< (Value ? "true;\n" : "false;\n"); }
+void VarASCIIdouble1Class::Print (ofstream &outFile)
+{ 
+  outFile << "Array<double,1> " << Name 
+	  << "(" << Value.extent(0) << ") = [";
+  for (int i=0; i<(Value.extent(0)-1); i++)
+    outFile << Value(i) << ", ";
+  outFile << Value(Value.extent(0)-1) << "];\n";
+}
+void VarASCIIdouble2Class::Print (ofstream &outFile)
 {
-  assert (Type == BOOL_TYPE);
-  assert (Dim == 3);
-  Array<bool,3> &myVal = *((Array<bool,3>*)Value);
-  val.resize(myVal.extent(0), myVal.extent(1), myVal.extent(2));
-  val = myVal;
+  outFile << "Array<double,2> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1)))
+	outFile << Value(i,j) << ", ";
+  outFile << Value(Value.extent(0)-1,Value.extent(1)-1) << "];\n";
+}
+void VarASCIIdouble3Class::Print (ofstream &outFile)
+{
+  outFile << "Array<double,3> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << "," << Value.extent(2) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	  || (k<(Value.extent(2)-1)))
+	outFile << Value(i,j,k) << ", ";
+  outFile << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) 
+	  << "];\n";
+}
+void VarASCIIint1Class::Print (ofstream &outFile)
+{
+  outFile << "Array<int,1> " << Name 
+	  << "(" << Value.extent(0) << ") = [";
+  for (int i=0; i<(Value.extent(0)-1); i++)
+    outFile << Value(i) << ", ";
+  outFile << Value(Value.extent(0)-1) << "];\n";
+}
+void VarASCIIint2Class::Print (ofstream &outFile)
+{
+  outFile << "Array<int,2> " << Name 
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1)))
+	outFile << Value(i,j) << ", ";
+  outFile << Value(Value.extent(0)-1,Value.extent(1)-1) << "];\n";
+}
+void VarASCIIint3Class::Print (ofstream &outFile)
+{
+  outFile << "Array<int,3> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << "," << Value.extent(2) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	  || (k<(Value.extent(2)-1)))
+	outFile << Value(i,j,k) << ", ";
+  outFile << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) 
+	  << "];\n";
+}
+void VarASCIIstring1Class::Print (ofstream &outFile)
+{
+  outFile << "Array<string,1> " << Name 
+	  << "(" << Value.extent(0) << ") = [";
+  for (int i=0; i<(Value.extent(0)-1); i++)
+    outFile << "\"" << Value(i) << "\"" << ", ";
+  outFile << "\"" << Value(Value.extent(0)-1) << "\"];\n";
+}
+void VarASCIIstring2Class::Print (ofstream &outFile)
+{
+  outFile << "Array<string,2> " << Name 
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1)))
+	outFile << "\"" << Value(i,j) << "\", ";
+  outFile << Value(Value.extent(0)-1,Value.extent(1)-1) << "];\n";
+}
+void VarASCIIstring3Class::Print (ofstream &outFile)
+{
+  outFile << "Array<string,3> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << "," << Value.extent(2) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	  || (k<(Value.extent(2)-1)))
+	outFile << "\"" << Value(i,j,k) << "\", ";
+  outFile << "\"" 
+	  << Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) 
+	  << "\"];\n";
+}
+void VarASCIIbool1Class::Print (ofstream &outFile)
+{
+  outFile << "Array<bool,1> " << Name 
+	  << "(" << Value.extent(0) << ") = [";
+  for (int i=0; i<(Value.extent(0)-1); i++)
+    outFile << (Value(i) ? "true" : "false") << ", ";
+  outFile << (Value(Value.extent(0)-1) ? "true" : "false") << "];\n";
+}
+void VarASCIIbool2Class::Print (ofstream &outFile)
+{
+  outFile << "Array<bool,2> " << Name 
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1)))
+	outFile << (Value(i,j) ? "true" : "false") << ", ";
+  outFile << 
+    (Value(Value.extent(0)-1,Value.extent(1)-1) ? "true" : "false") << "];\n";
+}
+void VarASCIIbool3Class::Print (ofstream &outFile)
+{
+  outFile << "Array<bool,3> " << Name
+	  << "(" << Value.extent(0) << "," 
+	  << Value.extent(1) << "," << Value.extent(2) << ") = [";
+  for (int i=0; i<(Value.extent(0)); i++)
+    for (int j=0; j<(Value.extent(1)); j++)
+      for (int k=0; k<(Value.extent(2)); k++)
+      if ((i < (Value.extent(0)-1)) || (j<(Value.extent(1)-1))
+	  || (k<(Value.extent(2)-1)))
+	outFile << Value(i,j,k) << ", ";
+  outFile << (Value(Value.extent(0)-1,Value.extent(1)-1,Value.extent(2)-1) ?
+	      "true" : "false") << "];\n";
 }
 
 
-VarASCIIClass::~VarASCIIClass()
-{
-  if (Dim==0){
-    if (Type==INT_TYPE)
-      delete ((int *)Value);   
-    else if (Type==DOUBLE_TYPE)
-      delete ((double *)Value);
-    else if (Type==BOOL_TYPE)
-      delete ((bool *)Value);
-    else if (Type==STRING_TYPE)
-      delete ((string *)Value);
-  }
-  else if (Dim==1){
-    if (Type==INT_TYPE)
-      delete ((Array<int,1> *)Value);   
-    else if (Type==DOUBLE_TYPE)
-      delete ((Array<double,1> *)Value);
-    else if (Type==BOOL_TYPE)
-      delete ((Array<bool,1> *)Value);
-    else if (Type==STRING_TYPE)
-      delete ((Array<string,1> *)Value);
-  }
-  else if (Dim==2){
-    if (Type==INT_TYPE)
-      delete ((Array<int,2> *)Value);   
-    else if (Type==DOUBLE_TYPE)
-      delete ((Array<double,2> *)Value);
-    else if (Type==BOOL_TYPE)
-      delete ((Array<bool,2> *)Value);
-    else if (Type==STRING_TYPE)
-      delete ((Array<string,2> *)Value);
-  }
-  else if (Dim==3){
-    if (Type==INT_TYPE)
-      delete ((Array<int,3> *)Value);   
-    else if (Type==DOUBLE_TYPE)
-      delete ((Array<double,3> *)Value);
-    else if (Type==BOOL_TYPE)
-      delete ((Array<bool,3> *)Value);
-    else if (Type==STRING_TYPE)
-      delete ((Array<string,3> *)Value);
-  }
-}
+
 
 //////////////////////////////////////////////////////////////////////
 //                             Append's                             //
 //////////////////////////////////////////////////////////////////////
-bool VarASCIIClass::Append (double val)
-{
-  assert(Type==DOUBLE_TYPE);
-  assert(Dim==1);
-  Array<double,1> &myArray= *((Array<double,1> *)Value);
-  myArray.resizeAndPreserve(myArray.extent(0)+1);
-  myArray(myArray.extent(0)-1)=val;
-
-}
-bool VarASCIIClass::Append (Array<double,1> &val)
-{
-  assert(Type==DOUBLE_TYPE);
-  assert(Dim==2);
-  Array<double,2> &myArray= *((Array<double,2> *)Value);
-  assert(val.extent(0)==myArray.extent(1));
-  myArray.resizeAndPreserve(myArray.extent(0)+1,
-			    myArray.extent(1));
-  myArray(myArray.extent(0)-1,Range::all())=val;
-}
-
-bool VarASCIIClass::Append(Array<double,2> &val){;}
-bool VarASCIIClass::Append (int val){;}
-bool VarASCIIClass::Append (Array<int,1> &val){;}
-bool VarASCIIClass::Append (Array<int,2> &val){;}
-bool VarASCIIClass::Append (string val){;}
-bool VarASCIIClass::Append (Array<string,1> &val){;}
-bool VarASCIIClass::Append (Array<string,2> &val){;}
-
 
 
 void IOTreeASCIIClass::WriteVar(string name, double val)
 {
-  VarASCIIClass *newVar=new VarASCIIClass();
-  double *myDouble=new double(val);
+  VarASCIIdouble0Class *newVar = new VarASCIIdouble0Class;
   newVar->Name=name;
-  newVar->Value=myDouble;
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<double,1> &val)
+{
+  VarASCIIdouble1Class *newVar = new VarASCIIdouble1Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<double,2> &val)
+{
+  VarASCIIdouble2Class *newVar = new VarASCIIdouble2Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<double,3> &val)
+{
+  VarASCIIdouble3Class *newVar = new VarASCIIdouble3Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
+  newVar->Value=val;
   VarList.push_back(newVar);
 }
 
-  
+void IOTreeASCIIClass::WriteVar(string name, int val)
+{
+  VarASCIIint0Class *newVar = new VarASCIIint0Class;
+  newVar->Name=name;
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<int,1> &val)
+{
+  VarASCIIint1Class *newVar = new VarASCIIint1Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<int,2> &val)
+{
+  VarASCIIint2Class *newVar = new VarASCIIint2Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<int,3> &val)
+{
+  VarASCIIint3Class *newVar = new VarASCIIint3Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
 
-
-
-void IOTreeASCIIClass::WriteVar(string name, Array<double,1> &val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<double,2> &val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<double,3> &val){;}
-
-  void IOTreeASCIIClass::WriteVar(string name, int val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<int,1> &val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<int,2> &val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<int,3> &val){;}
-
-  void IOTreeASCIIClass::WriteVar(string name, bool val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<bool,1> &val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<bool,2> &val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<bool,3> &val){;}
-
-  void IOTreeASCIIClass::WriteVar(string name, string val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<string,1> &val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<string,2> &val){;}
-  void IOTreeASCIIClass::WriteVar(string name, Array<string,3> &val){;}
+void IOTreeASCIIClass::WriteVar(string name, string val)
+{
+  VarASCIIstring0Class *newVar = new VarASCIIstring0Class;
+  newVar->Name=name;
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<string,1> &val)
+{
+  VarASCIIstring1Class *newVar = new VarASCIIstring1Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<string,2> &val)
+{
+  VarASCIIstring2Class *newVar = new VarASCIIstring2Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<string,3> &val)
+{
+  VarASCIIstring3Class *newVar = new VarASCIIstring3Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+ 
+void IOTreeASCIIClass::WriteVar(string name, bool val)
+{
+  VarASCIIbool0Class *newVar = new VarASCIIbool0Class;
+  newVar->Name=name;
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<bool,1> &val)
+{
+  VarASCIIbool1Class *newVar = new VarASCIIbool1Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<bool,2> &val)
+{
+  VarASCIIbool2Class *newVar = new VarASCIIbool2Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}
+void IOTreeASCIIClass::WriteVar(string name, Array<bool,3> &val)
+{
+  VarASCIIbool3Class *newVar = new VarASCIIbool3Class;
+  newVar->Name=name;
+  newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
+  newVar->Value=val;
+  VarList.push_back(newVar);
+}

@@ -10,83 +10,204 @@
 
 class VarASCIIClass : public VarClass
 {  
+protected:
+  inline void ComplainReadInto()
+  { 
+    cerr << "Trying to read into wrong type in ReadInto.\n";
+    exit(1);
+  }
+  inline void ComplainAppend()
+  {
+    cerr << "Trying to Append to a variable of wrong type.\n";
+  }
+
 public:
   /// Hack to hold different types.  We cast to to whatever type is
   /// indicated by the Type and Dim variables in the parent class.
-  void *Value;
 
   /// The ReadIntos take copy their contents into val if the type
   /// that's passed to them matches the type that's actually stored in
   /// it's void *Value, as indicated by Type and Dim.
-  bool ReadInto (double &val);
-  bool ReadInto (int &val);
-  bool ReadInto (string &val);
-  bool ReadInto (bool &val);
-  bool ReadInto (Array<double,1> &v);
-  bool ReadInto (Array<double,2> &v);
-  bool ReadInto (Array<double,3> &v);
-  bool ReadInto (Array<int,1> &v);
-  bool ReadInto (Array<int,2> &v);
-  bool ReadInto (Array<int,3> &v);
-  bool ReadInto (Array<string,1> &v);
-  bool ReadInto (Array<string,2> &v);
-  bool ReadInto (Array<string,3> &v);
-  bool ReadInto (Array<bool,1> &v);
-  bool ReadInto (Array<bool,2> &v);
-  bool ReadInto (Array<bool,3> &v);
+  virtual bool ReadInto (double &val);
+  virtual bool ReadInto (int &val);
+  virtual bool ReadInto (string &val);
+  virtual bool ReadInto (bool &val);
+  virtual bool ReadInto (Array<double,1> &v);
+  virtual bool ReadInto (Array<double,2> &v);
+  virtual bool ReadInto (Array<double,3> &v);
+  virtual bool ReadInto (Array<int,1> &v);
+  virtual bool ReadInto (Array<int,2> &v);
+  virtual bool ReadInto (Array<int,3> &v);
+  virtual bool ReadInto (Array<string,1> &v);
+  virtual bool ReadInto (Array<string,2> &v);
+  virtual bool ReadInto (Array<string,3> &v);
+  virtual bool ReadInto (Array<bool,1> &v);
+  virtual bool ReadInto (Array<bool,2> &v);
+  virtual bool ReadInto (Array<bool,3> &v);
 
-  bool Append (double val);
-  bool Append (Array<double,1> &val);
-  bool Append (Array<double,2> &val);
-  bool Append (int val);
-  bool Append (Array<int,1> &val);
-  bool Append (Array<int,2> &val);
-  bool Append (string val);
-  bool Append (Array<string,1> &val);
-  bool Append (Array<string,2> &val);
+  virtual bool Append (double val);
+  virtual bool Append (Array<double,1> &val);
+  virtual bool Append (Array<double,2> &val);
+  virtual bool Append (int val);
+  virtual bool Append (Array<int,1> &val);
+  virtual bool Append (Array<int,2> &val);
+  virtual bool Append (string val);
+  virtual bool Append (Array<string,1> &val);
+  virtual bool Append (Array<string,2> &val);
+  virtual bool Append (bool val);
+  virtual bool Append (Array<bool,1> &val);
+  virtual bool Append (Array<bool,2> &val);
 
-  inline void Print(ofstream &outFile);
-  ~VarASCIIClass();
+
+  virtual void Print(ofstream &outFile) = 0;
 };
- 
-inline void VarASCIIClass::Print(ofstream &outFile)
+
+class VarASCIIdouble0Class : public VarASCIIClass
 {
+public:
+  double Value;
+  bool ReadInto (double &val);
+  void Print(ofstream &outFile);
+};
 
-  if (Dim==0  && 
+class VarASCIIdouble1Class : public VarASCIIClass
+{
+public:
+  Array<double,1> Value;
+  bool ReadInto (Array<double,1> &val);
+  bool Append (double val);
+  void Print(ofstream &outFile);
+};
+
+class VarASCIIdouble2Class : public VarASCIIClass
+{
+public:
+  Array<double,2> Value;
+  bool ReadInto (Array<double,2> &val);
+  bool Append (Array<double,1> &val);
+  void Print(ofstream &outFile);
+};
+
+class VarASCIIdouble3Class : public VarASCIIClass
+{
+public:
+  Array<double,3> Value;
+  bool ReadInto (Array<double,3> &val);
+  bool Append (Array<double,2> &val);
+  void Print(ofstream &outFile);
+};
 
 
+class VarASCIIint0Class : public VarASCIIClass
+{
+public:
+  int Value;
+  bool ReadInto (int &val);
+  void Print(ofstream &outFile);
+};
 
+class VarASCIIint1Class : public VarASCIIClass
+{
+public:
+  Array<int,1> Value;
+  bool ReadInto (Array<int,1> &val);
+  bool Append (int val);
+  void Print(ofstream &outFile);
+};
 
+class VarASCIIint2Class : public VarASCIIClass
+{
+public:
+  Array<int,2> Value;
+  bool ReadInto (Array<int,2> &val);
+  bool Append (Array<int,1> &val);
+  void Print(ofstream &outFile);
+};
 
-  if (Dim>0)
-    outFile <<"Array<";
-  if (Type==DOUBLE_TYPE){
-    outFile<<"double";
-  }
-  else if (Type==INT_TYPE){
-    outFile<<"int";
-  }
-  else if (Type==STRING_TYPE){
-    outFile<<"string";
-  }
-  else if (Type==BOOL_TYPE){
-    outFile<<"bool";
-  }
-  if (Dim>0){
-    outFile<<", "; 
-    outFile<<Dim<<">";
-  }
-  outFile<<" "<<Name;
-  if (Dim>0){
-    outFile<<"(";
-    for (int counter=0;counter<Dim;counter++){
-      outFile<<
-      
-    
-  
+class VarASCIIint3Class : public VarASCIIClass
+{
+public:
+  Array<int,3> Value;
+  bool ReadInto (Array<int,3> &val);
+  bool Append (Array<int,2> &val);
+  void Print(ofstream &outFile);
+};
 
+ 
+class VarASCIIstring0Class : public VarASCIIClass
+{
+public:
+  string Value;
+  bool ReadInto (string &val);
+  void Print(ofstream &outFile);
+};
 
-}
+class VarASCIIstring1Class : public VarASCIIClass
+{
+public:
+  Array<string,1> Value;
+  bool ReadInto (Array<string,1> &val);
+  bool Append (string val);
+  void Print(ofstream &outFile);
+};
+
+class VarASCIIstring2Class : public VarASCIIClass
+{
+public:
+  Array<string,2> Value;
+  bool ReadInto (Array<string,2> &val);
+  bool Append (Array<string,1> &val);
+  void Print(ofstream &outFile);
+};
+
+class VarASCIIstring3Class : public VarASCIIClass
+{
+public:
+  Array<string,3> Value;
+  bool ReadInto (Array<string,3> &val);
+  bool Append (Array<string,2> &val);
+  void Print(ofstream &outFile);
+};
+
+ 
+
+class VarASCIIbool0Class : public VarASCIIClass
+{
+public:
+  bool Value;
+  bool ReadInto (bool &val);
+  void Print(ofstream &outFile);
+};
+
+class VarASCIIbool1Class : public VarASCIIClass
+{
+public:
+  Array<bool,1> Value;
+  bool ReadInto (Array<bool,1> &val);
+  bool Append (bool val);
+  void Print(ofstream &outFile);
+};
+
+class VarASCIIbool2Class : public VarASCIIClass
+{
+public:
+  Array<bool,2> Value;
+  bool ReadInto (Array<bool,2> &val);
+  bool Append (Array<bool,1> &val);
+  void Print(ofstream &outFile);
+};
+
+class VarASCIIbool3Class : public VarASCIIClass
+{
+public:
+  Array<bool,3> Value;
+  bool ReadInto (Array<bool,3> &val);
+  bool Append (Array<bool,2> &val);
+  void Print(ofstream &outFile);
+};
+
+ 
+
 
 /// This class holds an ASCII token, which is just a string and the
 /// line number in which it appeared in the file.
