@@ -1,6 +1,10 @@
-SOURCES = EwaldBase.cc SimpleEwald.cc NaClTest.cc
+SOURCES = EwaldBase.cc SimpleEwald.cc NaClTest.cc OptimizedBreakup.cc TestOptimizedBreakup.cc
 
-all:	EwaldBase.o SimpleEwald.o #NaClTest
+all:	EwaldBase.o SimpleEwald.o OptimizedBreakup.o TestOptimizedBreakup.o \
+        TestOptimizedBreakup #NaClTest
+
+TestOptimizedBreakup: OptimizedBreakup.o TestOptimizedBreakup.o
+	$(LD) -o TestOptimizedBreakup TestOptimizedBreakup.o OptimizedBreakup.o $(LIBS)
 
 NaClTest: NaClTest.o EwaldBase.o SimpleEwald.o 
 	$(LD) -o NaClTest NaClTest.o EwaldBase.o SimpleEwald.o $(IOobjs) $(LIBS)
