@@ -42,7 +42,12 @@ public:
   {    k = newk;    kinv = 1.0/newk; }
    
   inline double operator()(double r)
-  { return 4.0*M_PI*(PH.A(r)-1.0)*r*sin(k*r)*kinv; }
+  { 
+    if (k < 1.0e-12)
+      return 4.0*M_PI*(PH.A(r)-1.0)*r*r;
+    else
+      return 4.0*M_PI*(PH.A(r)-1.0)*r*sin(k*r)*kinv; 
+  }
 
   aIntegrand (Potential &ph) : PH(ph) 
   { /* do nothing for now */ }
@@ -73,9 +78,16 @@ public:
     double kr = k*r;
     double krInv = 1.0/kr;
     double b = PH.B(r) - 1.0;
-    double j0 = sin(kr)/kr;
-    double j2 = (3.0*krInv*krInv*krInv-krInv)*sin(kr) - 
+    double j0, j2;
+    if (k < 1.0e-12) {
+      j0 = 1.0;
+      j2 = -1.0;
+    }
+    else {
+      j0 = sin(kr)/kr;
+      j2 = (3.0*krInv*krInv*krInv-krInv)*sin(kr) - 
       3.0*krInv*krInv*cos(kr);
+    }
     return (4.0*M_PI*r*r*b*(TwoThirds*j0-Third*j2));
   }
   
@@ -110,9 +122,16 @@ public:
     double kr = k*r;
     double krInv = 1.0/kr;
     double b = PH.B(r) - 1.0;
-    double j0 = sin(kr)/kr;
-    double j2 = (3.0*krInv*krInv*krInv-krInv)*sin(kr) - 
+    double j0, j2;
+    if (k < 1.0e-12) {
+      j0 = 1.0;
+      j2 = -1.0;
+    }
+    else {
+      j0 = sin(kr)/kr;
+      j2 = (3.0*krInv*krInv*krInv-krInv)*sin(kr) - 
       3.0*krInv*krInv*cos(kr);
+    }
     return (4.0*M_PI*r*r*b*(TwoThirds*j0+TwoThirds*j2));
   }
   
@@ -150,6 +169,8 @@ public:
 
 double kSpacePH::Vk (double k)
 {
+  if (k == 0.0)
+    return 0.0;
   // First, do the part of the integral up to R1 numerically
   VIntegrand integrand(PH);
   integrand.Setk(k);
@@ -169,8 +190,14 @@ double kSpacePH::Vk (double k)
 
 TinyMatrix<double,3,3> kSpacePH::Ftensor (Vec3 deltaG)
 {
-  double Gmag = sqrt(dot(deltaG, deltaG));  
-  Vec3 g = deltaG / Gmag;
+  double Gmag = sqrt(dot(deltaG, deltaG));
+  Vec3 g; 
+  if (Gmag == 0.0)
+    //    g = Vec3 (1.0, 0.0, 0.0);
+    // HACK
+    g = Vec3 (0.0, 0.0, 0.0);
+  else
+    g = deltaG / Gmag;
 
   double aval, bPerpval, bParval, Vval;
   if (UseCache)
@@ -196,8 +223,6 @@ TinyMatrix<double,3,3> kSpacePH::Ftensor (Vec3 deltaG)
 
 double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
 {
-  if (G == Gp)
-    return 0.0;
   Vec3 deltaG = G-Gp;
   double Gmag = sqrt(dot(deltaG, deltaG));
 
@@ -208,6 +233,8 @@ double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
     Vval = Vk(Gmag);
 
   TinyMatrix<double,3,3> F = Ftensor (deltaG);
+//   if (G == Gp)
+//     cerr << "F = " << F << endl;
   
   Vec3 Gk = G + k;
   Vec3 Gpk = Gp + k;
@@ -231,7 +258,6 @@ void kCache::GetVals(double k, double &a, double &bPerp, double &bPar,
     bPerp = Cache[i].bPerp;
     bPar  = Cache[i].bPar;
     V     = Cache[i].V;
-    cerr << "found cache for k = " << k << endl;
   }
   else {
     a     = kPH.a(k);
@@ -245,6 +271,5 @@ void kCache::GetVals(double k, double &a, double &bPerp, double &bPar,
     newPoint.V     = V;
     newPoint.k = k;
     Cache.push_back(newPoint);
-    cerr << "entering val for k = " << k << endl;
   }
 }

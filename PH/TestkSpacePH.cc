@@ -17,6 +17,7 @@ public:
   void SetupGVecs(double kcut);
   void CalcHamiltonian (Vec3 k);
   void Diagonalize();
+  void PlotRho (Array<double,1> phik);
   kSpaceTest (Potential &ph) : PH(ph), kPH(ph)
   {
     kPH.CalcTailCoefs (40.0, 80.0);
@@ -82,7 +83,6 @@ void kSpaceTest::CalcHamiltonian(Vec3 k)
   double volInv = 1.0/(Box[0] * Box[1] * Box[2]);
 
   for (int row=0; row<numG; row++) {
-    cerr << "row = " << row << endl;
     Vec3 &G = GVecs(row);
     for (int col=0; col<numG; col++) {
       H(row,col) = 0.0;
@@ -96,6 +96,25 @@ void kSpaceTest::CalcHamiltonian(Vec3 k)
 }
 
 
+void kSpaceTest::PlotRho(Array<double,1> phik)
+{
+  assert (phik.size() == GVecs.size());
+  double vol = Box[0]*Box[1]*Box[2];
+  // Now, calculate charge density
+  FILE *fout = fopen ("rho.dat", "w");
+  for (double x=-0.5*Box[0]; x<=0.5*Box[0]; x+=0.1) {
+    Vec3 r(x, 0.0, 0.0);
+    complex<double> psi(0.0, 0.0);
+    for (int i=0; i<GVecs.size(); i++) {
+      double phase = dot (r, GVecs(i));
+      complex<double> ex (cos(phase), sin(phase));
+      psi += phik(i) * ex;
+    }
+    double rho = (psi.real()*psi.real() + psi.imag()*psi.imag())/vol;
+    fprintf (fout, "%1.12e %1.12e\n", x, rho);
+  }
+  fclose (fout);
+}
 
 
 
@@ -122,16 +141,17 @@ void Test (IOSectionClass &in)
   kTest.CalcHamiltonian(k);
 
   int N = kTest.H.rows();
-  cerr << "H = \n";
-  for (int i=0; i<N; i++) {
-    for (int j=0; j<N; j++)
-      fprintf (stderr, "%11.4e ", kTest.H(i,j));
-    fprintf (stderr, "\n");
-  }
+//   cerr << "H = \n";
+//   for (int i=0; i<N; i++) {
+//     for (int j=0; j<N; j++)
+//       fprintf (stderr, "%11.4e ", kTest.H(i,j));
+//     fprintf (stderr, "\n");
+//   }
   Array<double,1> vals(N);
   Array<double,2> vecs(1,N);
   SymmEigenPairs (kTest.H, 1, vals, vecs);
   cerr << "Energy = " << vals(0) << endl;
+  kTest.PlotRho (vecs(0,Range::all()));
 }
 
 
