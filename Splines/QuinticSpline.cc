@@ -63,3 +63,31 @@ void QuinticSpline::Update()
 
   UpToDate=true;
 }
+
+
+void QuinticSpline::Write(IOSectionClass &outSection)
+{
+  outSection.WriteVar("StartDeriv", StartDeriv);
+  outSection.WriteVar("EndDeriv", EndDeriv);
+  outSection.WriteVar("StartDeriv2", StartDeriv2);
+  outSection.WriteVar("EndDeriv2", EndDeriv2);
+  outSection.WriteVar("Y", Y);
+  
+  outSection.NewSection("Grid");
+  grid->Write(outSection);
+  outSection.CloseSection();
+}
+
+void QuinticSpline::Read(IOSectionClass &inSection)
+{
+  assert(inSection.ReadVar("StartDeriv", StartDeriv));
+  assert(inSection.ReadVar("EndDeriv", EndDeriv));
+  assert(inSection.ReadVar("StartDeriv2", StartDeriv2));
+  assert(inSection.ReadVar("EndDeriv2", EndDeriv2));
+  assert(inSection.ReadVar("Y", Y));
+  NumParams = Y.size();
+  assert(inSection.OpenSection("Grid"));
+  grid = ReadGrid(inSection);
+  inSection.CloseSection();
+  Update();
+}

@@ -72,8 +72,8 @@ public:
 
   /// Full constructor.
   inline QuinticSpline (Grid *NewGrid, Array<double,1> NewYs,
-		      double startderiv, double startderiv2,
-		      double endderiv, double endderiv2)
+			double startderiv, double startderiv2,
+			double endderiv, double endderiv2)
   {
     Init (NewGrid, NewYs, startderiv, startderiv2, endderiv, endderiv2);
     Update();
@@ -87,42 +87,22 @@ public:
   /// Returns a reference to the value at the ith grid point.
   inline double & operator()(int i)
   {
-    UpToDate = 0;
+    UpToDate = false;
     return (Y(i));
   }
-  void Write(IOSectionClass &outSection)
-  {
-    outSection.WriteVar("StartDeriv", StartDeriv);
-    outSection.WriteVar("EndDeriv", EndDeriv);
-    outSection.WriteVar("StartDeriv2", StartDeriv);
-    outSection.WriteVar("EndDeriv2", EndDeriv);
-    outSection.WriteVar("Y", Y);
-
-    outSection.NewSection("Grid");
-    grid->Write(outSection);
-    outSection.CloseSection();
-  }
-  void Read(IOSectionClass &inSection)
-  {
-    assert(inSection.ReadVar("StartDeriv", StartDeriv));
-    assert(inSection.ReadVar("EndDeriv", EndDeriv));
-    assert(inSection.ReadVar("StartDeriv2", StartDeriv));
-    assert(inSection.ReadVar("EndDeriv2", EndDeriv));
-    assert(inSection.ReadVar("Y", Y));
-    NumParams = Y.size();
-    assert(inSection.OpenSection("Grid"));
-    grid = ReadGrid(inSection);
-    inSection.CloseSection();
-    Update();
-  }
-
+  void Write(IOSectionClass &outSection);
+  void Read(IOSectionClass &inSection);
 
   /// Trivial constructor
   QuinticSpline()
   {
-    UpToDate = 0;
+    UpToDate = false;
   }
 };
+
+
+
+
 
 
 inline int QuinticSpline::NumPoints() const 
@@ -135,7 +115,7 @@ void QuinticSpline::Init(Grid *NewGrid, Array<double,1> NewY,
 			 double startderiv2, double endderiv2)
 {
   StartDeriv = startderiv; StartDeriv2 = startderiv2;
-  EndDeriv = endderiv; EndDeriv2 = endderiv2;
+  EndDeriv   = endderiv;   EndDeriv2   = endderiv2;
   grid = NewGrid;
   if (NewGrid->NumPoints != NewY.size()) {
     cerr << "Size mismatch in QuinticSpline.\n";
@@ -171,7 +151,7 @@ void QuinticSpline::Init(Grid *NewGrid, Array<double,1> NewY,
   FD.resize(NumParams);
   FE.resize(NumParams);
   FF.resize(NumParams);
-
+  UpToDate = false;
 }
 
 
