@@ -20,7 +20,7 @@ public:
   void PlotRho (Array<double,1> phik);
   kSpaceTest (Potential &ph) : PH(ph), kPH(ph)
   {
-    kPH.CalcTailCoefs (40.0, 80.0);
+    kPH.CalcTailCoefs (10.0, 80.0);
   }
 };
 
@@ -89,8 +89,7 @@ void kSpaceTest::CalcHamiltonian(Vec3 k)
       Vec3 &Gp = GVecs(col);
       if (row == col)
 	H(row,col) = 0.5*dot(G+k,G+k);
-      H(row,col) += kPH.V(k, G, Gp);
-      H(row,col) *= volInv;
+      H(row,col) += (kPH.V(k, G, Gp)*volInv);
     }
   }
 }
@@ -102,7 +101,7 @@ void kSpaceTest::PlotRho(Array<double,1> phik)
   double vol = Box[0]*Box[1]*Box[2];
   // Now, calculate charge density
   FILE *fout = fopen ("rho.dat", "w");
-  for (double x=-0.5*Box[0]; x<=0.5*Box[0]; x+=0.1) {
+  for (double x=-0.5*Box[0]; x<=0.5*Box[0]; x+=0.02) {
     Vec3 r(x, 0.0, 0.0);
     complex<double> psi(0.0, 0.0);
     for (int i=0; i<GVecs.size(); i++) {

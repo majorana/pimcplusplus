@@ -193,9 +193,7 @@ TinyMatrix<double,3,3> kSpacePH::Ftensor (Vec3 deltaG)
   double Gmag = sqrt(dot(deltaG, deltaG));
   Vec3 g; 
   if (Gmag == 0.0)
-    //    g = Vec3 (1.0, 0.0, 0.0);
-    // HACK
-    g = Vec3 (0.0, 0.0, 0.0);
+    g = Vec3 (1.0, 0.0, 0.0);
   else
     g = deltaG / Gmag;
 
