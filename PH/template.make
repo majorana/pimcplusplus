@@ -19,7 +19,7 @@ SplineObjs = ../Splines/BicubicSpline.o ../Splines/CubicSpline.o              \
 MiscObjs =   ../Integration/GKIntegration.o ../Fitting/Fitting.o              \
              ../MatrixOps/MatrixOps.o
 
-all:    TestkSpacePH 
+all:    TestkSpacePH $(Objs)
 
 TestkSpacePH:  $(TestObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)
 	$(LD) -o $@ $(TestObjs) $(IOObjs) $(SplineObjs) $(MiscObjs) $(LIBS)
