@@ -12,6 +12,10 @@ void SVdecomp (Array<double,2> &A,
 	       Array<double,2> &U, Array<double,1> &S,
 	       Array<double,2> &V);
 
+void SymmEigenPairs (const Array<scalar,2> A, int NumPairs,
+		     Array<scalar,1> &Vals,
+		     Array<scalar,2> &Vectors);
+
 const Array<double,2> operator*(const Array<double,2> &A,
 				const Array<double,2> &B);
 
