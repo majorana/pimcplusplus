@@ -2,7 +2,7 @@
 #define PA_FIT_BASE_H
 
 #include "../IO/InputOutput.h"
-#include "../PH/PH.h"
+#include "../PH/Potential.h"
 #include "../Splines/CubicSpline.h"
 #include "Particle.h"
 #ifdef MAKE_FIT
@@ -18,7 +18,7 @@ public:
   bool UsePBC;
   int NumBetas;
   Array<double,1> Box;
-  PseudoHamiltonian *Potential;
+  Potential *Pot;
   double SmallestBeta;
   double lambda;
   

@@ -39,7 +39,7 @@ double PAclassicalFitClass::U(double q, double z, double s2, int level)
 
   double r = q+0.5*z;
   double rp = q-0.5*z;
-  return (0.5*beta*(Potential->V(r)+Potential->V(rp)));
+  return (0.5*beta*(Pot->V(r)+Pot->V(rp)));
 }
 
 double PAclassicalFitClass::dU(double q, double z, double s2, int level)
@@ -50,7 +50,7 @@ double PAclassicalFitClass::dU(double q, double z, double s2, int level)
 
   double r = q+0.5*z;
   double rp = q-0.5*z;
-  return (0.5*(Potential->V(r)+Potential->V(rp)));
+  return (0.5*(Pot->V(r)+Pot->V(rp)));
 }
 
 
@@ -72,7 +72,7 @@ bool PAclassicalFitClass::Read (IOSectionClass &in,
 
   // Read Potential;
   assert(in.OpenSection("Potential"));
-  Potential = ReadPH(in);
+  Pot = ReadPotential(in);
   in.CloseSection();
   in.CloseSection();
   return true;

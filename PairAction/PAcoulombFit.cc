@@ -477,7 +477,7 @@ void PAcoulombFitClass::WriteFits (IOSectionClass &outSection)
 //     for (int i=0; i<level; i++)
 //       beta *= 2.0;
 //     // Coulomb action is independent of z
-//     return (beta*Potential->V(q));
+//     return (beta*Pot->V(q));
 //   }
 // }
 
@@ -520,7 +520,7 @@ double PAcoulombFitClass::U(double q, double z, double s2, int level)
   }
   else {
     // Coulomb action is independent of z
-    return (beta*Potential->V(q));
+    return (beta*Pot->V(q));
   }
 }
 
@@ -543,7 +543,7 @@ double PAcoulombFitClass::U(double q, double z, double s2, int level)
 //     for (int i=0; i<level; i++)
 //       beta *= 2.0;
 //     // Coulomb action is independent of z
-//     return (beta*Potential->V(q));
+//     return (beta*Pot->V(q));
 //   }
 // }
 
@@ -587,7 +587,7 @@ bool PAcoulombFitClass::Read (IOSectionClass &in,
 
   // Read Potential;
   assert(in.OpenSection("Potential"));
-  Potential = ReadPH(in);
+  Pot = ReadPotential(in);
   in.CloseSection();
 
   // Read the fits

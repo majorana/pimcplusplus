@@ -159,7 +159,7 @@ double PAcoulombBCFitClass::U(double q, double z, double s2, int level)
     double beta = SmallestBeta;
     for (int i=0; i<level; i++)
       beta *= 2.0;
-    return (beta*Potential->V(q));
+    return (beta*Pot->V(q));
   }
 }
 
@@ -175,7 +175,7 @@ double PAcoulombBCFitClass::dU(double q, double z, double s2, int level)
   }
   else {
     // Coulomb action is independent of z
-    return (Potential->V(q));
+    return (Pot->V(q));
   }
 }
 
@@ -202,7 +202,7 @@ bool PAcoulombBCFitClass::Read (IOSectionClass &in,
 
   // Read Potential;
   assert(in.OpenSection("Potential"));
-  Potential = ReadPH(in);
+  Pot = ReadPotential(in);
   in.CloseSection();
 
   // Read the fits

@@ -165,7 +165,7 @@ bool PAszFitClass::Read (IOSectionClass &in,
 
   // Read Potential;
   assert(in.OpenSection("Potential"));
-  Potential = ReadPH(in);
+  Pot = ReadPotential(in);
   in.CloseSection();
 
   // Read the fits
