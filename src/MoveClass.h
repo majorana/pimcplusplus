@@ -62,7 +62,11 @@ protected:
   /// places them in ActiveParticles; 
   void ChooseParticles();
   ParticleMoveClass(PathDataClass &myPathData) : MoveClass (myPathData)
-  {/* Do nothing for now.*/  }
+  { 
+    NumAccepted=0;
+    NumMoves=0;
+    /* Do nothing for now.*/  
+  }
 };
 
 

@@ -81,12 +81,15 @@ void BisectionMoveClass::MakeMove()
   }
   if (toAccept ==true ){
     PathData.AcceptMove(StartTimeSlice,EndTimeSlice,ActiveParticles);
+    NumAccepted++;
+    
     //cout<<"I'm accepting! I'm accepting!"<<endl;
   }
   else {
     PathData.RejectMove(StartTimeSlice,EndTimeSlice,ActiveParticles);
     //  cout<<"I'm rejecting! I'm rejecting!"<<endl;
   }
+  NumMoves++;
     
 
 }

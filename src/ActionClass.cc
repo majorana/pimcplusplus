@@ -9,41 +9,35 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 				    int level)
 {
   // First, sum the pair actions
+  Array<bool,1> doptcl2(Path.NumParticles());
+  doptcl2 = true;
   double TotalU = 0.0;
   double TotalK = 0.0;
   int numChangedPtcls = changedParticles.size();
-  int species1;
-  //  int NumSpecies;
-  //  SpeciesArrayClass &IdentPtcls = mySpeciesArray;
-  //  NumSpecies = IdentPtcls.Size();
-  //  cerr<<"What the action class thinks the size is in calctotalaction: ";
-  //  cerr<<  mySpeciesArray->size()<<endl;
   int skip = 1<<level;
   double levelTau = tau* (1<<level);
-  for (int ptcl1=0; ptcl1<numChangedPtcls; ptcl1++){
-    species1=Path.ParticleSpeciesNum(ptcl1);
+  for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
+    int ptcl1 = changedParticles(ptcl1Index);
+    doptcl2(ptcl1) = false;
+    int species1=Path.ParticleSpeciesNum(ptcl1);
     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
-      double notMyself=(double)(ptcl1!=ptcl2);
-      for (int slice=startSlice;slice<endSlice;slice+=skip){
-	///I think we're double counting particles here
-	dVec r1=Path(slice,ptcl1);
-	dVec r2=Path(slice,ptcl2);
-	dVec rp1=Path(slice+skip,ptcl1);
-	dVec rp2=Path(slice+skip,ptcl2);
-	dVec r=r1-r2;
-	dVec rp=(rp1-rp2);
-	double rmag=sqrt(dot(r,r));
-	double rpmag=sqrt(dot(rp,rp));
-	double s = sqrt(dot (r-rp, r-rp));
-	double q = 0.5 * (rmag + rpmag);
-	double z = (rmag - rpmag);
-	int PairIndex = PairMatrix(species1,
-				   Path.ParticleSpeciesNum(ptcl2));
-	//I bet it's cheaper to have an if statement that avoids all this nonsense, instead of hte NotMyself thing
-	TotalU += notMyself*
-	  PairActionVector(PairIndex).calcUsqz(s,q,z, level);
-      
-      }
+      if (doptcl2(ptcl2))
+	for (int slice=startSlice;slice<endSlice;slice+=skip){
+	  dVec r1=Path(slice,ptcl1);
+	  dVec r2=Path(slice,ptcl2);
+	  dVec rp1=Path(slice+skip,ptcl1);
+	  dVec rp2=Path(slice+skip,ptcl2);
+	  dVec r=r1-r2;
+	  dVec rp=(rp1-rp2);
+	  double rmag=sqrt(dot(r,r));
+	  double rpmag=sqrt(dot(rp,rp));
+	  double s = sqrt(dot (r-rp, r-rp));
+	  double q = 0.5 * (rmag + rpmag);
+	  double z = (rmag - rpmag);
+	  int PairIndex = PairMatrix(species1,
+				     Path.ParticleSpeciesNum(ptcl2));
+	  TotalU += PairActionVector(PairIndex).calcUsqz(s,q,z, level);
+	}
     }
     double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
@@ -103,6 +97,7 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
   
 
   
+  TotalU=0; 
   return (TotalK + TotalU);
 
 

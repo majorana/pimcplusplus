@@ -161,7 +161,8 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
   double logNewSampleProb=0.0;
 
   double levelTau = 0.5*tau*skip;
-  for (int ptcl=0;ptcl<particles.size();ptcl++){
+  for (int ptclIndex=0;ptclIndex<particles.size();ptclIndex++){
+    int  ptcl=particles(ptclIndex);
     //    int species=particles(ptcl)(0);
     //    int ptclNum=particles(ptcl)(1);
     double lambda=Path.ParticleSpecies(ptcl).lambda;

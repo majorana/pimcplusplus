@@ -181,7 +181,7 @@ int main(int argc, char **argv)
   //  cerr<<"What the action class thinks the size is: ";
   //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
   //  PrintConfigClass myPrintConfig(myPathData);
-  for (int counter=0;counter<1000000;counter++){
+  for (int counter=0;counter<50000;counter++){
     if ((counter % 1000) == 0)
       cerr << "Step #" << counter << ":\n";
     for (int counter2=0;counter2<2;counter2++){
@@ -189,12 +189,13 @@ int main(int argc, char **argv)
       
       myBisectionMove.MakeMove();
       if (counter > 100)
-      PC.Accumulate();
+	PC.Accumulate();
       //      myPrintConfig.Print();
     }
     myShiftMove.MakeMove();
   }
   PC.Print();
+  cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
   //cerr<<"done! done!"<<endl;
   MPI_Finalize();
 }

@@ -2,7 +2,7 @@
 
 void PairCorrelation::Accumulate()
 {
-
+  Array<bool,1> doPtcl2(PathData.NumParticles());
 
   for (int slice=0;slice<PathData.NumTimeSlices();slice++){
     for (int ptcl1=0;ptcl1<PathData.NumParticles();ptcl1++){
@@ -11,6 +11,7 @@ void PairCorrelation::Accumulate()
 	dVec r2=PathData(slice,ptcl2);
 	dVec diff=r1-r2;
 	double dist=sqrt(dot(diff,diff));
+	TotalCounts++;
 	if (dist<grid.End){
 	  int index=grid.ReverseMap(dist);
 	  Histogram(index)++;
