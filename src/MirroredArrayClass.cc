@@ -1,4 +1,6 @@
+// #pragma implementation "MirroredArrayClass.h"
 #include "MirroredArrayClass.h"
+
 
 
 //template <class T>
@@ -15,6 +17,20 @@
 //  AB.resize(2,0,0); 
 
 //}
+
+int Write1=0;
+int Write2=1;
+
+template <class T>
+void MirroredArrayClass<T>::Print()
+{
+  for (int counter=0;counter<AB.extent(1);counter++){
+    for (int counter2=0;counter2<AB.extent(2);counter2++){
+      cout<<AB(0,counter,counter2)<<" ";
+    }
+    cout<<endl;
+  }
+}
 
 template <class T>
 void MirroredArrayClass<T>::shiftData(int slicesToShift, CommClass &Communicator)
@@ -49,7 +65,7 @@ void MirroredArrayClass<T>::shiftData(int slicesToShift, CommClass &Communicator
     }
   }
   
-  bufferSize=slicesToShift*NumPtcls;
+  int bufferSize=abs(slicesToShift)*NumPtcls;
   Array<T,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
   int startTimeSlice;
   if (slicesToShift>0)
@@ -65,7 +81,7 @@ void MirroredArrayClass<T>::shiftData(int slicesToShift, CommClass &Communicator
     }
   }
   
-  Communicator.SendReceive(sendProc, sendBuffer,receiveProc, receiveBuffer);
+  Communicator.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
   
   if (slicesToShift>0)
     startTimeSlice=0;
@@ -86,5 +102,14 @@ void MirroredArrayClass<T>::shiftData(int slicesToShift, CommClass &Communicator
       AB(1,ptclCounter,sliceCounter) = AB(0,ptclCounter,sliceCounter);
 
   // And we're done!
+
+}
+
+void foo()
+{
+  MirroredArrayClass<int> myArray;
+  CommClass myCommunicator;
+  myArray.Print();
+  myArray.shiftData(3,myCommunicator);
 
 }

@@ -1,6 +1,7 @@
 #ifndef PATH_DATA_CLASS
 #define PATH_DATA_CLASS
 
+#include "Common.h"
 #include "IdenticleParticleClass.h"
 #include "MemoizedDataClass.h"
 #include "ActionClass.h"

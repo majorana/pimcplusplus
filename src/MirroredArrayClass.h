@@ -24,6 +24,7 @@ public:
     AB.resize(2,particleNum,timeSliceNum);
   }
   MirroredArrayClass(){};
+  void  Print();
   /// Returns the active value.
   inline T operator()(int x,int y) const
   {
