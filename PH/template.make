@@ -1,6 +1,6 @@
-SOURCES = PH.cc Chebyshev.cc Potential.cc Atom.cc Cost.cc
+SOURCES = PH.cc Chebyshev.cc Potential.cc Atom.cc Cost.cc CoreTransform.cc
 
-all:	PH.o Chebyshev.o Potential.o Atom.o Cost.o
+all:	PH.o Chebyshev.o Potential.o Atom.o Cost.o CoreTransform.o
 
 clean:
 	rm -f *.o
