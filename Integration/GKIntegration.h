@@ -75,7 +75,7 @@ class GKIntegration {
     double a,b,result,err, delta;
 
     double ErrorL() const {
-      return (length ? err/length : err);
+      return (delta ? err/delta : err);
     }
 
     friend ostream& operator<<(ostream &os, const IntervalResult & ir) {

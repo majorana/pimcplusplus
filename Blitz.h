@@ -251,7 +251,9 @@ public:
   { N=0; }
 };
 
-
+#ifndef NAN
+#define NAN sqrt(-1.0)
+#endif
 
 
 #endif
