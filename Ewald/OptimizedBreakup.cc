@@ -148,7 +148,8 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
   for (int i=0; i<Sinv.size(); i++)
     if (Sinv(i) == 0.0)
       numSingular++;
-  cerr << "There were " << numSingular << " singular values.\n";
+  if (numSingular > 0)
+    cerr << "There were " << numSingular << " singular values.\n";
   t = 0.0;
   // Compute t_n, removing singular values
   for (int i=0; i<numElem; i++) {
@@ -258,7 +259,8 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
   for (int i=0; i<Sinv.size(); i++)
     if (Sinv(i) == 0.0)
       numSingular++;
-  cerr << "There were " << numSingular << " singular values.\n";
+  if (numSingular > 0)
+    cerr << "There were " << numSingular << " singular values.\n";
   tc = 0.0;
   // Compute t_n, removing singular values
   for (int i=0; i<M; i++) {
