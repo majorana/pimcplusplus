@@ -4,6 +4,8 @@ double SplinePot::V(double r)
 {
   if (r <= Spline.grid->End)
     return Spline(r);
+  else if (Vouter != NULL) 
+    return (Vouter->V(r));
   else {
 #ifdef BZ_DEBUG
     cerr << "r outside grid in SplinePot:  " << r << endl;
@@ -16,6 +18,8 @@ double SplinePot::dVdr(double r)
 {
   if (r <= Spline.grid->End)
     return Spline.Deriv(r);
+  else if (Vouter != NULL) 
+    return (Vouter->dVdr(r));
   else {
 #ifdef BZ_DEBUG
     cerr << "r outside grid in SplinePot:  " << r << endl;
@@ -28,6 +32,8 @@ double SplinePot::d2Vdr2(double r)
 {
   if (r <= Spline.grid->End)
     return Spline.Deriv2(r);
+  else if (Vouter != NULL) 
+    return (Vouter->d2Vdr2(r));
   else {
 #ifdef BZ_DEBUG
     cerr << "r outside grid in SplinePot:  " << r << endl;
@@ -44,7 +50,13 @@ void SplinePot::Read(IOSectionClass &in)
   Array<double,1> data;
   assert(in.ReadVar("SplineData", data));
   Spline.Init (grid, data);
-}
+  if(in.OpenSection("Vouter")) {
+    Vouter = ReadPotential(in);
+    in.CloseSection();
+  }
+  else
+    Vouter = NULL;
+ }
 
 
 void SplinePot::Write(IOSectionClass &out)
@@ -53,6 +65,10 @@ void SplinePot::Write(IOSectionClass &out)
   out.NewSection("Grid");
   Spline.grid->Write(out);
   out.CloseSection();
-
   out.WriteVar ("SplineData", Spline.Data());
+  if (Vouter != NULL) {
+    out.NewSection ("Vouter");
+    Vouter->Write(out);
+    out.CloseSection();
+  }
 }
