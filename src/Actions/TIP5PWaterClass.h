@@ -38,6 +38,7 @@ public:
   dVec Normalize(dVec v);
   dVec Scale(dVec v, double scale);
   dVec GetBisector(dVec v1, dVec v2);
+  double CalcPsi(double theta);
   TIP5PWaterClass (PathDataClass &pathData);
 };
 

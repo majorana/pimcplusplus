@@ -912,7 +912,7 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
 //cerr << "nprime " << nprime << endl;
       double vel_squared;
       if (n == nprime){
-//        cerr << "EQUAL--------------------------------" << endl;
+//        //cerr << "EQUAL--------------------------------" << endl;
         vel_squared = 0.0;
       }
       else{
@@ -928,9 +928,7 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
         double theta1prime = GetAngle(P1prime,r);
         double theta2 = GetAngle(P2,r);
         double theta2prime = GetAngle(P2prime,r);
-        double SinTheta1 = sin(theta1);
         double CosTheta1 = cos(theta1);
-        double SinTheta2 = sin(theta2);
         double CosTheta2 = cos(theta2);
         double CosTheta1prime = cos(theta1prime);
         double CosTheta2prime = cos(theta2prime);
@@ -939,9 +937,7 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
 //cerr << "theta2 " << theta2 << endl;
 //cerr << "theta1prime " << theta1prime << endl;
 //cerr << "theta2prime " << theta2prime << endl;
-//cerr << "SineTheta1 " << SinTheta1 << endl;
 //cerr << "CosTheta1 " << CosTheta1 << endl;
-//cerr << "SineTheta2 " << SinTheta2 << endl;
 //cerr << "CosTheta2 " << CosTheta2 << endl;
         // Calculate azimuthal angle
         double phi = GetAngle(n,nprime);
@@ -951,15 +947,15 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
         double SineAlpha = sin(alpha);
         double CosAlpha = cos(alpha);
         double l = R*CosAlpha;
-//cerr << "l1 " << l1 << endl;
-//cerr << "l2 " << l2 << endl;
+//cerr << "l " << l << endl;
         double vel_phi_squared = 2*l*l*phi*phi;
-//cerr << "vel_phi1_sq " << vel_phi1_squared << endl;
-//cerr << "vel_phi2_sq " << vel_phi2_squared << endl;
+//cerr << "vel_phi_sq " << vel_phi_squared << endl;
         // Calculate angle of rotation (psi)
 //cerr << "elements : cos(theta1) is " << CosTheta1 << " and sin(alpha) is " << SineAlpha << endl;
-        double psi = acos(CosTheta1/SineAlpha);
-        double psiprime = acos(CosTheta1prime/SineAlpha);
+        double psi = CalcPsi(theta1);
+        double psiprime = CalcPsi(theta1prime);
+        //double psi = acos(CosTheta1/SineAlpha);
+        //double psiprime = acos(CosTheta1prime/SineAlpha);
 //cerr << "psi " << psi << endl;
 //cerr << "psiprime " << psiprime << endl;
         double checkdeltapsi = acos(CosTheta2/SineAlpha) - acos(CosTheta2prime/SineAlpha);  
@@ -971,7 +967,7 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
         vel_squared = vel_psi_squared + vel_phi_squared;
         //vel_squared = vel_psi_squared;//vel_phi_squared;
       }
-//cerr << "from which I calculate vel_squared " << vel_squared << endl;
+//cerr << "from which I calculate vel_squared                      " << vel_squared << endl;
 
       double GaussProd = 1.0;
 //    for (int dim=0; dim<NDIM; dim++) {
@@ -989,7 +985,8 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
     }
   }
   //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-//  //cerr << "I'm returning kinetic action " << RotK << endl;
+//cerr << "I'm returning kinetic action " << RotK << endl;
+//cerr << "*************************************" << endl;
   return (RotK);
 }
 
@@ -1050,9 +1047,7 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
           double theta1prime = GetAngle(P1prime,r);
           double theta2 = GetAngle(P2,r);
           double theta2prime = GetAngle(P2prime,r);
-          double SinTheta1 = sin(theta1);
           double CosTheta1 = cos(theta1);
-          double SinTheta2 = sin(theta2);
           double CosTheta2 = cos(theta2);
           double CosTheta1prime = cos(theta1prime);
           double CosTheta2prime = cos(theta2prime);
@@ -1065,8 +1060,8 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
           double l = R*CosAlpha;
           double vel_phi_squared = 2*l*l*phi*phi;
           // Calculate angle of rotation (psi)
-          double psi = acos(CosTheta1/SineAlpha);
-          double psiprime= acos(CosTheta1prime/SineAlpha);
+          double psi = CalcPsi(theta1);
+          double psiprime = CalcPsi(theta1prime);
           double checkdeltapsi = acos(CosTheta2/SineAlpha) - acos(CosTheta2prime/SineAlpha);  
           double deltapsi = psiprime - psi;
           double lpsi = R*SineAlpha;
@@ -1136,4 +1131,20 @@ dVec TIP5PWaterClass::Scale(dVec v, double scale)
   norm *= scale;
 //cerr << "Test scaling: mag of v is " << mag << " and scaled it's" << Mag(norm) << endl;
   return norm;
+}
+
+double TIP5PWaterClass::CalcPsi(double theta)
+{
+  double Alpha = HOH_half_angle;
+  double SinAlpha = sin(Alpha);
+  double TROUBLE1 = M_PI/2 - Alpha;
+  double TROUBLE2 = TROUBLE1 + HOH_angle;
+  double psi;
+  if (theta < TROUBLE1)
+    psi = 0.0;
+  else if (theta > TROUBLE2)
+    psi = M_PI;
+  else
+    psi = acos(cos(theta)/SinAlpha);  
+  return psi;
 }
