@@ -254,7 +254,7 @@ InputTreeASCIIClass::ReadWithoutComments(string fileName,
       }
     }
   }
-  buffer.resizeAndPreserve(bufferLoc+1);
+  buffer.resizeAndPreserve(bufferLoc);
 }
 
 
@@ -618,6 +618,8 @@ bool InputTreeASCIIClass::ReadSection (InputTreeClass *parent,
 	iter++;
 	ReadAbort (iter->Str!=")", iter->LineNumber, "Expected ) not found\n");
 	iter++;
+	ReadAbort (iter->Str!=";", iter->LineNumber, "Expected ; not found\n");
+	iter++;	
 	newTree = ReadTree (fileName, newName, this);
       }
       else {

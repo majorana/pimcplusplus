@@ -247,8 +247,6 @@ void PrintIndent(int num)
   for (int counter=0;counter<num*3;counter++){
     cout<<' ';
   }
-  
-
 }
 
 
