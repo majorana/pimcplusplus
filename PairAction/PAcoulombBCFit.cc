@@ -182,6 +182,7 @@ double PAcoulombBCFitClass::dU(double q, double z, double s2, int level)
 bool PAcoulombBCFitClass::Read (IOSectionClass &in,
 				double smallestBeta, int NumBetas)
 {
+  SmallestBeta = smallestBeta;
   // Resize
   Usplines.resize(NumBetas);
   dUsplines.resize(NumBetas);
