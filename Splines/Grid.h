@@ -8,7 +8,7 @@
 //Ken's Grid Class
 
 /// The different types of grids that we currently allow
-typedef enum {NONE, LINEAR, OPTIMAL, LOG} GridType;
+typedef enum {NONE, LINEAR, OPTIMAL, OPTIMAL2, LOG, CLUSTER} GridType;
 
 
 /// Parent class for all grids
@@ -164,6 +164,7 @@ class OptimalGrid : public Grid
 {
  private:
   scalar a, b;
+  
  public:
 
   GridType Type()
@@ -303,6 +304,111 @@ class OptimalGrid : public Grid
 };
 
 
+/// The OptimalGrid class stores a grid which has linear spacing at
+/// the origin and exponential spacing further out.  It has the
+/// analytic form \f[r_k = a\left(e^{kb}-1\right)\f].
+class OptimalGrid2 : public Grid
+{
+ private:
+  double a, b, c;
+  double Ratio;
+ public:
+
+  GridType Type()
+    { return (OPTIMAL2); }
+
+  void ReadParams (FILE *fin)
+    {    }
+
+  void WriteParams (FILE *fout)
+    {    }
+
+
+  void WriteInput (FILE *fout)
+  {  }
+
+  int ReverseMap(scalar r)
+    {
+      r -= c;
+      if ((r/a) < 1e-6)
+	return ((int)floor(r/(a*b)+0.5));
+      else
+	return((int)floor(log(r/a + 1.0)/b + 0.5));
+    }
+
+  /// Returns a parameter
+  double Geta() const
+    { return (a); }
+
+  /// Returns b parameter
+  double Getb() const
+    { return (b); }
+
+  OptimalGrid2 ()
+  {
+    // Do nothing
+  }
+
+  /// This form of the constructor takes the number of points, the
+  /// maximum radius and the value of b.
+  OptimalGrid2 (int numpoints, scalar rmax, scalar bval)
+  {
+    NumPoints = numpoints;
+    b = bval;
+    End = rmax;
+    a = End / (exp(b*(scalar)NumPoints) - 1.0);  
+    Start = a * (exp(b) - 1.0);
+    grid.resize(NumPoints);
+      
+    for (int i=0; i<NumPoints; i++)
+      grid(i) = a*(exp(b*(i+1))-1.0);
+  }
+
+  void Init (double start, double end, double ratio, int numpoints)
+  {
+    Start = start;
+    End = end; 
+    Ratio = ratio;
+    NumPoints = numpoints;
+    
+    b = log(ratio)/(double)(numpoints-2);
+    c = Start;
+    a = (end - c)/(exp(b*(double)(numpoints-1)) - 1);
+      
+    grid.resize(NumPoints);
+      
+    for (int i=0; i<NumPoints; i++)
+      grid(i) = c + a*(exp(b*i)-1.0);
+  }
+
+
+  /// This form of the constructor takes a, b, and the number of points.
+  OptimalGrid2 (double start, double end, double ratio, int numpoints)
+  { 
+    Init (start, end, ratio, numpoints);
+  }
+
+  void Write (IOSectionClass &outSection)
+  {
+    outSection.WriteVar ("Points", grid); 
+    outSection.WriteVar ("Type", "Optimal2");
+    outSection.WriteVar ("Start", Start);
+    outSection.WriteVar ("End", End);
+    outSection.WriteVar ("Ratio", Ratio);
+    outSection.WriteVar ("NumPoints", NumPoints);
+  }
+
+  void Read (IOSectionClass &inSection)
+  {
+    double start, end, ratio;
+    int numPoints;
+    assert(inSection.ReadVar("Start", start));
+    assert(inSection.ReadVar("End", end));
+    assert(inSection.ReadVar("Ratio", ratio));
+    assert(inSection.ReadVar("NumPoints", numPoints));
+    Init (start,end,ratio,numPoints);
+  }
+};
 
 
 /// LogGrid is a function whose gridpoints increase exponentially with
@@ -410,6 +516,81 @@ class LogGrid : public Grid
     }
 };
 
+
+
+
+/// ClusterGrid is a function whose gridpoints are clustered tightly
+/// around the origin.
+class ClusterGrid : public Grid
+{
+private:
+  double x0, dri, rr;
+
+ public:
+  double Start, End, Cluster;
+
+  GridType Type()
+    { return (CLUSTER); }
+
+  void ReadParams (FILE *fin)
+    {    }
+
+  void WriteParams (FILE *fout)
+    {    }
+
+  void WriteInput (FILE *fout)
+  {  }
+
+  int ReverseMap(scalar r)
+    {
+      return ((int)floor (dri/(r-rr) -1.0 + x0));
+    }
+
+  void Init (double start, double end, double cluster, int numpoints)
+  {
+    Start = start; End = end; Cluster = cluster;
+    NumPoints = numpoints;
+    
+    x0 = (NumPoints - Cluster)/(1.0-Cluster);
+    dri = -(End-Start)*((double) NumPoints-x0)*(1.0-x0) / 
+      ((double)NumPoints-1.0);
+    rr = Start - dri/(1.0-x0);
+    grid.resize(NumPoints);
+    for (int i=0; i<NumPoints; i++)
+      grid(i) = rr+dri/(i+1.0-x0);
+  }
+
+
+
+  void Write (IOSectionClass &outSection)
+  {
+    outSection.WriteVar ("Points", grid); 
+    outSection.WriteVar ("Type", "Cluster");
+    outSection.WriteVar ("Start", Start);
+    outSection.WriteVar ("End", End);
+    outSection.WriteVar ("Cluster", Cluster);
+    outSection.WriteVar ("NumPoints", NumPoints);
+  }
+
+  void Read (IOSectionClass &inSection)
+  {
+    double start, end, cluster;
+    int numpoints;
+    assert (inSection.ReadVar("Start", start));
+    assert (inSection.ReadVar("End", end));
+    assert (inSection.ReadVar("Cluster", cluster));
+    assert (inSection.ReadVar("NumPoints", numpoints));
+    Init (start, end, cluster, numpoints);
+  }
+
+  ClusterGrid (double start, double end, double cluster, int numpoints)
+  {
+    Init  (start, end, cluster, numpoints);
+  }
+  ClusterGrid () 
+  { /* Do nothing */ }
+};
+
 Grid *ReadGrid (InputBuffer &SectionBuf);
 
 //  class FlexGrid
@@ -502,6 +683,8 @@ inline Grid* ReadGrid (IOSectionClass &inSection)
     newGrid = new OptimalGrid;
   else if (Type == "Log")
     newGrid = new LogGrid;
+  else if (Type == "Cluster")
+    newGrid = new ClusterGrid;
   else
     {
       cerr << "Unrecognized Grid type " << Type << "\n";

@@ -1,9 +1,13 @@
-SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc
+SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc
 
 IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o ../IO/InputFile.o
 
-all:	CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o 
+all:	TestBicubic TestGrid
+TestBicubic:	CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o 
 	$(LD) -o TestBiCubic CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o $(IOobjs) $(LIBS)
+
+TestGrid:	 Grid.o  TestGrid.o 
+	$(LD) -o TestGrid Grid.o TestGrid.o $(IOobjs) $(LIBS)
 
 clean:
 	rm -f *.o
