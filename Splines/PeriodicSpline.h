@@ -14,6 +14,7 @@ private:
   
 public:
   inline double operator()(double x);
+  inline double Deriv     (double x);
   
   void Init (Grid *newGrid, const Array<double,1> &data);
   PeriodicSpline() : IsUp2Date(false)
@@ -37,6 +38,24 @@ PeriodicSpline::operator()(double x)
   double q2 = t*t*tm1;
 
   return (F(i)[0]*p1 + F(i+1)[0]*p2 + h*(F(i)[1]*q1 + F(i+1)[1]*q2));
+}
+
+
+inline double 
+PeriodicSpline::Deriv(double x)
+{
+  if (!IsUp2Date)
+    Update();
+  int i = grid->ReverseMap(x);
+  double h = (*grid)(i+1) - (*grid)(i);
+  double hinv = 1.0/h;
+  double t = (x - (*grid)(i))/h;
+  double tm1 = t-1.0;
+  double dp1 = 6.0*t*tm1;
+  double dq1 = tm1*(3.0*t-1.0);
+  double dp2 = -dp1;
+  double dq2 = 3.0*t*t-2.0*t;
+  return hinv*(F(i)[0]*dp1 + F(i+1)[0]*dp2) + F(i)[1]*dq1 + F(i+1)[1]*dq2;
 }
 
 

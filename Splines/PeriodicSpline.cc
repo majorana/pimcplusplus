@@ -37,14 +37,22 @@ PeriodicSpline::Update()
     double diagInv = 1.0/diag;
     gamma[i] *= diagInv;
     d[i]     *= diagInv;
+    mu[i]    *= diagInv;
     // last row
     d[N-1] -= mu[N-1] * d[i-1];
     gamma[N-1] -= mu[N-1] * gamma[i-1];
     mu[N-1] = -mu[N-1]*mu[i-1];
   }
   // last row
-  d[N-1] -= (lambda[N-1]+mu[N-1]) * d[N-1];
-  gamma[N-1] -= (lambda[N-1]+mu[N-1]) * (gamma[N-2]+ mu[N-2]);
+  // mu is really on top of lambda in the last row
+  cerr << "gamma[N-1]  = " << gamma[N-1] << endl;
+  cerr << "d[N-1]      = " << d[N-1] << endl;
+  cerr << "lambda[N-1] = " << lambda[N-1] << endl;
+  cerr << "mu[N-1]     = " << mu[N-1] << endl;
+
+  lambda[N-1] += mu[N-1];
+  d[N-1] -= lambda[N-1] * d[N-2];
+  gamma[N-1] -= lambda[N-1] * (gamma[N-2]+ mu[N-2]);
   // Compute last derivative;
   F(N-1)[1] = d[N-1]/gamma[N-1];
   
@@ -54,6 +62,12 @@ PeriodicSpline::Update()
 
   // Finally, assign repeated last element for PBC
   F(N) = F(0);
+  
+  //  F(3)[1] = 1.455;
+
+  for (int i=0; i<=N; i++)
+    fprintf (stderr, "slope(%d) = %1.8e\n", i, F(i)[1]);
+
   IsUp2Date = true;
 }
 

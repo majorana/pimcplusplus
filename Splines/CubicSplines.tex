@@ -96,14 +96,16 @@ y'_0           & +  & \mu_0 y'_1     &   &                   &            & \dot
 Or, in matrix form, we have,
 \begin{equation}
 \begin{MyMatrix}
-1         & \mu_0     &    0   &   0    & \dots  &      0        & \lambda_0 \\
-\lambda_1 &  1        & \mu_1  &   0    & \dots  &      0        &     0     \\
-0         & \lambda_2 &   1    & \mu_2  & \dots  &      0        &     0     \\
-\vdots    & \vdots    & \vdots & \vdots & \ddots &      1        & \mu_{N-1} \\
-\mu_{N-1} &   0       &   0    &   0    &   0    & \lambda_{N-1} &  1     
+1         & \mu_0     &    0   &   0           & \dots         &      0        & \lambda_0 \\
+\lambda_1 &  1        & \mu_1  &   0           & \dots         &      0        &     0     \\
+0         & \lambda_2 &   1    & \mu_2         & \dots         &      0        &     0     \\
+\vdots    & \vdots    & \vdots & \vdots        & \ddots        &   \vdots      &  \vdots   \\
+0         &   0       &   0    & \lambda_{N-3} &      1        & \mu_{N-3}     &    0      \\
+0         &   0       &   0    &   0    & \lambda_{N-2} &      1        & \mu_{N-2} \\
+\mu_{N-1} &   0       &   0    &   0    &   0           & \lambda_{N-1} &  1     
 \end{MyMatrix}
-\begin{MyMatrix} y'_0 \\ y'_1 \\ y'_2 \\ \vdots \\ y'_{N-1} \end{MyMatrix} =
-\begin{MyMatrix} d_0  \\  d_1 \\  d_2 \\ \vdots \\  d_{N-1} \end{MyMatrix} .
+\begin{MyMatrix} y'_0 \\ y'_1 \\ y'_2 \\ \vdots \\ y'_{N-3} \\ y'_{N-2} \\ y'_{N-1} \end{MyMatrix} =
+\begin{MyMatrix} d_0  \\  d_1 \\  d_2 \\ \vdots \\  d_{N-3} \\  d_{N-2} \\  d_{N-1} \end{MyMatrix} .
 \end{equation}
 
 \end{document}
