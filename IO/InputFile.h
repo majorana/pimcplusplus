@@ -1,6 +1,6 @@
 #ifndef INPUTFILE_H
 #define INPUTFILE_H
-#include "Blitz.h"
+#include "../Blitz.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
