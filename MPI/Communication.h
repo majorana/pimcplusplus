@@ -64,7 +64,11 @@ public:
   void Send (void *sendBuf, int count, MPI_Datatype datatype,
 	     int dest, int tag);
   void Send (int toProc, Array<double,1> &buff);
+  void BroadCast (int root, int &val);
+  void BroadCast (int root, double &val);
   void BroadCast (int root, Array<double,1> &buff);
+  void BroadCast (int root, Array<Vec2,1> &buff);
+  void BroadCast (int root, Array<Vec3,1> &buff);
   void Receive (void *recvBuf, int count, MPI_Datatype datatype,
 		int source, int tag);
   void Receive (int toProc, Array<double,1> &buff);
@@ -112,6 +116,10 @@ public:
   ///other processors return 0;
   double Sum (double a);
 
+  /// Sums up all values of a on all processors.  All processors
+  ///  get result.
+  double AllSum (double a);
+
   CommunicatorClass()
   {
     SetWorld();
@@ -153,7 +161,13 @@ public:
     cerr << "Sends not supported in serial mode.\n";
     exit(1);
   }
+  inline void BroadCast(int root, int &val) {}
+  inline void BroadCast(int root, double &val) {}
   inline void BroadCast(int root, Array<double,1> &buff)
+  { /* Do nothing in serial mode */ }
+  void BroadCast (int root, Array<Vec2,1> &buff)
+  { /* Do nothing in serial mode */ }
+  void BroadCast (int root, Array<Vec3,1> &buff)
   { /* Do nothing in serial mode */ }
   inline void Receive (int toProc, Array<double,1> &buff)
   {
@@ -216,6 +230,11 @@ public:
     recvBuff=sendBuff;
   }
   
+  /// Sums up all values of a on all processors.  All processors
+  ///  get result.
+  inline double AllSum (double a)
+  {  return a; } 
+
 
 
 #endif

@@ -34,9 +34,25 @@ void CommunicatorClass::Send (int toProc, Array<double,1> &buff)
   Send(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
 }
 
+void CommunicatorClass::BroadCast (int root, int &val)
+{  MPI_Bcast(&val, 1, MPI_INTEGER, root, MPIComm); }
+
+void CommunicatorClass::BroadCast (int root, double &val)
+{  MPI_Bcast(&val, 1, MPI_DOUBLE, root, MPIComm); }
+
 void CommunicatorClass::BroadCast (int root, Array<double,1> &buff)
 {
   MPI_Bcast(buff.data(), buff.size(), MPI_DOUBLE, root, MPIComm);
+}
+
+void CommunicatorClass::BroadCast (int root, Array<Vec2,1> &buff)
+{
+  MPI_Bcast(buff.data(), 2*buff.size(), MPI_DOUBLE, root, MPIComm);
+}
+
+void CommunicatorClass::BroadCast (int root, Array<Vec2,1> &buff)
+{
+  MPI_Bcast(buff.data(), 3*buff.size(), MPI_DOUBLE, root, MPIComm);
 }
 
 void CommunicatorClass::Receive (void *recvBuf, int count, 
@@ -223,6 +239,13 @@ double CommunicatorClass::Sum (double a)
     return sum;
   else
     return (0.0);
+}
+
+double CommunicatorClass::AllSum (double a)
+{
+  double sum;
+  MPI_AllReduce(&a, &sum, 1, MPI_DOUBLE, MPI_SUM, MPIComm);
+  return sum;
 }
 
 
