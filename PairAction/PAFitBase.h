@@ -57,11 +57,11 @@ public:
   /// The beta-derivative of the action
   virtual double dU(double q, double z, double s2, int level) = 0;
   /// The potential to which this action corresponds.
-  virtual double V  (double r) { return 0.0; }
+  virtual double V  (double r) { return Pot->V(r); }
   /// The q-derivative of the above
-  virtual double Vp (double r) { return 0.0; }
+  virtual double Vp (double r) { return Pot->dVdr(r); }
   /// The q-derivative of the above
-  virtual double Vpp(double r) { return 0.0; }
+  virtual double Vpp(double r) { return Pot->d2Vdr2(r); }
 
   /////////////////////////
   /// Long-ranged stuff ///
