@@ -7,6 +7,7 @@
 #include "../Common/Ewald/OptimizedBreakup.h"
 #include "../Common/Integration/GKIntegration.h"
 
+///Actionsclass. Stores all the actsion
 void ActionsClass::Read(IOSectionClass &in)
 { 
   PathClass &Path=PathData.Path;
