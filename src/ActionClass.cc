@@ -48,10 +48,10 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
       for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {
 	dVec r1 = IdentPtcls(Species1).Path(Ptcl1,Slice);
 	dVec r2 = IdentPtcls(Species1).Path(Ptcl1,Slice+skip);
-	double LinkDistSqrd=distSqrd(r1,r2);  ///This function has to be written and possibly memoized or something?
-	TotalK += LinkDistSqrd*FourLambdaTauInv; //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-	
-	
+	//This function has to be written and possibly memoized or something?
+	double LinkDistSqrd=distSqrd(r1,r2);  
+	//We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+	TotalK += LinkDistSqrd*FourLambdaTauInv; 
       }
     }
     
