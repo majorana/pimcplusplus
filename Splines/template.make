@@ -31,7 +31,7 @@ clean:
 .cc.o: 
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 
 .f.o:
-	g77 -c -o $*.o $<
+	g77 -c -O3 -o $*.o $<
 
 newmake:
 	$(MAKE) -f template.make Makefile FRC=force_rebuild

@@ -55,8 +55,8 @@ main()
   double myRate = 1e12/(double)(myEnd-myStart);
 
   cerr << "Fortran rate: " << fortRate << " per second\n";
- cerr << "My rate:      " << myRate << " per second\n";
-  
+  cerr << "My rate:      " << myRate << " per second\n";
+ 
 
 
   for (double x=0.0; x < 1.0; x+=0.001) {
