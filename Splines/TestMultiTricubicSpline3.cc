@@ -154,8 +154,7 @@ void SpeedTest()
 main()
 {
   PeriodicTest();
-  //ValTest();
-  //SpeedTest();
-
+  ValTest();
+  SpeedTest();
 }
   

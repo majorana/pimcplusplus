@@ -145,3 +145,11 @@ SystemClass::WriteXSFFile (string filename)
 
 	   
 	
+void 
+SystemClass::SetRealSpaceBandNum(int num)
+{
+  zVec c;
+  c.reference (Bands(num,Range::all()));
+  FFT.PutkVec (c);
+  FFT.k2r();
+}
