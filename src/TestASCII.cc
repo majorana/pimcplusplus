@@ -19,12 +19,15 @@ int  main()
   Array<double,2> mplus(3,1);
   mplus = 10.0, 11.0, 12.0;
   Array<string,3> types(2,4,1);
+  Array<bool,1> bools(3);
+  bools = true, false, true;
   types = "Electron", "Proton", "Kenon", "Bryon", "Nonon", "Brainon",
     "Stepon", "Offon";
   Array<string,2> typeAdd(4,1);
   typeAdd="on", "off", "in", "out";
   ASCIIout.NewFile ("ASCIItest2.txt");
   ASCIIout.WriteVar ("v", v);
+  ASCIIout.WriteVar ("bools", bools);
   for (int i=0; i<1; i++)
     ASCIIout.AppendVar ("v", 6.0+i);
   ASCIIout.WriteVar ("m", m);
