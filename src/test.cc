@@ -188,11 +188,11 @@ int main(int argc, char **argv)
   cerr<<"I'm right before the action\n";
   inSection.OpenSection("Action");
   myPathData.Action.Read(inSection);
-  myPathData.CloseSection(); //"Action"
+  inSection.CloseSection(); //"Action"
  
   //Observable setup Hack!
   PairCorrelation PC(myPathData);
-  PC.PathData = &myPathData;
+  //  PC.PathData = &myPathData;
   PC.Species1 = 0;
   PC.Species2 = 1;
   PC.Initialize();

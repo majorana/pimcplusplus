@@ -1,6 +1,8 @@
-#include "Common/IO/InputOutput.h"
+#include <string.h>
+#include <list>
 #include "Common/IO/InputOutputASCII.h"
-#include <iostream>
+
+using namespace std;
 
 int  main()
 {

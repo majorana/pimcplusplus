@@ -5,8 +5,8 @@ LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
 INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) 
 
 CCFLAGS = -c -g  -Wno-deprecated -DBZ_DEBUG # -O3   #-pg
-CC = mpiCC
-LD = mpiCC  -Bstatic 
+CC = mpicc
+LD = mpicc  -Bstatic 
 DEFS = -DNO_COUT -DUSE_MPI  -DDEBUG #-DBZ_DEBUG  -g #-DUSE_MPI 
 
 TestObjs =                      \
