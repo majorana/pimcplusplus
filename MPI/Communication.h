@@ -211,6 +211,10 @@ public:
   {
     recvBuff=sendBuff;
   }
+  void Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuff)
+  {
+    recvBuff=sendBuff;
+  }
   
 
 
