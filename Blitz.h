@@ -9,6 +9,7 @@ typedef double scalar;
 using namespace blitz;
 typedef TinyVector<scalar,2> Vec2;
 typedef TinyVector<scalar,3> Vec3;
+typedef TinyVector<scalar,4> Vec4;
 typedef TinyMatrix<scalar,2,2> Mat2;
 typedef TinyMatrix<scalar,3,3> Mat3;
 
@@ -102,6 +103,49 @@ inline Vec3 operator-(const Vec3 &v1, const Vec3 &v2)
   result[2] = v1[2]-v2[2];
   return (result);
 }
+
+
+inline Vec4 operator*(scalar s, const Vec4 &v)
+{
+  Vec4 result;
+  result[0] = s*v[0];
+  result[1] = s*v[1];
+  result[2] = s*v[2];
+  result[3] = s*v[3];
+  return (result);
+}
+
+inline Vec4 operator*(const Vec4 &v, scalar s)
+{
+  Vec4 result;
+  result[0] = s*v[0];
+  result[1] = s*v[1];
+  result[2] = s*v[2];
+  result[3] = s*v[3];
+  return (result);
+}
+
+
+inline Vec4 operator+(const Vec4 &v1, const Vec4 &v2)
+{
+  Vec4 result;
+  result[0] = v1[0]+v2[0];
+  result[1] = v1[1]+v2[1];
+  result[2] = v1[2]+v2[2];
+  result[3] = v1[3]+v2[3];
+  return (result);
+}
+
+inline Vec4 operator-(const Vec4 &v1, const Vec4 &v2)
+{
+  Vec4 result;
+  result[0] = v1[0]-v2[0];
+  result[1] = v1[1]-v2[1];
+  result[2] = v1[2]-v2[2];
+  result[3] = v1[3]-v2[3];
+  return (result);
+}
+
 
 inline Mat3 operator*(scalar s, const Mat3 &M)
 {
