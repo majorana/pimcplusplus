@@ -36,7 +36,7 @@ Array<double,1> ActionClass::RPAIntegrand(double t,
     levelTau *= 2.0;
 
   double boxVol = Path.GetVol();
-    Array<double,1> duwvec(uwvec.size());
+  Array<double,1> duwvec(uwvec.size());
   int numSpecies = Path.NumSpecies();
   dVec &k = Path.kVecs(ki);
   double k2 = dot (k, k);
@@ -46,12 +46,15 @@ Array<double,1> ActionClass::RPAIntegrand(double t,
       PairActionFitClass &pa12 = 
 	*PairActionVector(PairMatrix(species1,species2));
 
-      double vlongk = pa12.Ulong_k(Level, ki)/levelTau;
-      //cerr << "vlong_k = " << vlongk << endl;
+      double vlongk;
+      if (RPATaskIsU)
+	vlongk = pa12.Ulong_k(Level, ki)/levelTau;
+      else
+	vlongk = pa12.dUlong_k(Level,ki);
       int i12 = uindex(species1,species2,numSpecies);
-      duwvec(i12) = 
-	-pa12.lambda*k2*uwvec(i12) + vlongk;
-      //cerr << "duwvec = " << duwvec(i12) << endl;
+      double lambda12 = 
+	0.5* (Path.Species(species1).lambda + Path.Species(species2).lambda);
+      duwvec(i12) = -lambda12*k2*uwvec(i12) + vlongk;
       for (int species3=0; species3<numSpecies; species3++) {
 	int N3 = Path.Species(species3).NumParticles;
 	double lambda3 = Path.Species(species3).lambda;
@@ -68,11 +71,16 @@ Array<double,1> ActionClass::RPAIntegrand(double t,
       PairActionFitClass &pa12 = 
 	*PairActionVector(PairMatrix(species1,species2));
       double k = sqrt(k2);
-      double vlongk = pa12.Ulong_k(Level, ki)/levelTau;
+      double vlongk;
+      if (RPATaskIsU)
+	vlongk = pa12.Ulong_k(Level, ki)/levelTau;
+      else
+	vlongk = pa12.dUlong_k(Level,ki);
       double vshortk = pa12.Vk(k)/boxVol - vlongk;
       int i12 = windex(species1,species2,numSpecies);
-      duwvec(i12) = 
-	-pa12.lambda*k2*uwvec(i12) + vshortk;
+      double lambda12 = 
+	0.5* (Path.Species(species1).lambda + Path.Species(species2).lambda);
+      duwvec(i12) = -lambda12*k2*uwvec(i12) + vshortk;
       for (int species3=0; species3<numSpecies; species3++) {
 	int N3 = Path.Species(species3).NumParticles;
 	double lambda3 = Path.Species(species3).lambda;
@@ -104,10 +112,11 @@ void ActionClass::SetupRPA()
 
   double boxVol = Path.GetVol();
   // Calculated RPA for U
+  RPATaskIsU = true;
   for (Level=0; Level<MaxLevels; Level++) {
     LinearGrid tGrid(0.0, levelTau, numPoints);
     for (ki=0; ki<Path.kVecs.size(); ki++) {
-      cerr << "ki = " << ki << endl;
+      //cerr << "ki = " << ki << endl;
       /// Set initial conditions
       for (int i=0; i<m; i++)
 	uwvec(0, i) = 0.0;
@@ -120,44 +129,87 @@ void ActionClass::SetupRPA()
 	    uwvec(numPoints-1,uindex(species1, species2, Path.NumSpecies()));
 	  double k2 = dot(Path.kVecs(ki), Path.kVecs(ki));
 	  double k = sqrt(k2);
-	  cerr << "k = " << k << endl;
-	  cerr << "Numerical value = " << pa.U_RPA_long_k(Level,ki) << endl;
+	  //cerr << "k = " << k << endl;
+	  //cerr << "Numerical value = " << pa.U_RPA_long_k(Level,ki) << endl;
 	  double lambda = pa.lambda;
 	  double N = Path.Species(species1).NumParticles;
 	  double vklong = pa.Ulong_k(Level, ki)/levelTau;
-	  cerr << "uklong  =         " << pa.Ulong_k(Level, ki) << endl;
-	  cerr << "vshort  =         " << 
-	    pa.Vk(k)/boxVol - pa.Ulong_k(Level, ki)/levelTau << endl; 
-	  cerr << "ukshort =         " << 
-	    uwvec(numPoints-1,windex(species1,species2,Path.NumSpecies()))
-	       << endl;
+	  //cerr << "uklong  =         " << pa.Ulong_k(Level, ki) << endl;
+	  //cerr << "vshort  =         " << 
+	  //  pa.Vk(k)/boxVol - pa.Ulong_k(Level, ki)/levelTau << endl; 
+	  //cerr << "ukshort =         " << 
+	  //  uwvec(numPoints-1,windex(species1,species2,Path.NumSpecies()))
+	  //     << endl;
 	  double Uanalytic = (-1.0+sqrt(1.0+4.0*N*vklong/(lambda*k2)))/(2.0*N);
-	  cerr << "One component ground state analytic = " << Uanalytic 
-	       << endl;
+	  //cerr << "One component ground state analytic = " << Uanalytic 
+	  //     << endl;
 	}
     
     levelTau *= 2.0;
     }
   }
 
-//   // Calculated RPA for dU
-//   for (Level=0; Level<MaxLevels; Level++) {
-//     LinearGrid tGrid(0.0, levelTau, numPoints);
-//     for (ki=0; ki<Path.kVecs.size(); ki++) {
-//       /// Set initial conditions
-//       for (int i=0; i<m; i++)
-// 	uwvec(0, i) = 0.0;
-//       integrator.Integrate(tGrid, 0, numPoints-1, uwvec);
-//       for (int species1=0; species1<Path.NumSpecies(); species1++)
-// 	for (int species2=species1; species2<Path.NumSpecies(); species2++) {
-// 	  PairActionFitClass &pa = 
-// 	    *PairActionVector(PairMatrix(species1, species2));
-// 	  pa.U_RPA_long_k(Level, ki) = 
-// 	    uwvec(numPoints-1,uindex(species1, species2, Path.NumSpecies()));
-// 	}
-    
-//     levelTau *= 2.0;
-//     }
-//   }
+  // Calculated RPA for dU
+  RPATaskIsU = false;
+  for (Level=0; Level<MaxLevels; Level++) {
+    LinearGrid tGrid(0.0, levelTau, numPoints);
+    for (ki=0; ki<Path.kVecs.size(); ki++) {
+      /// Set initial conditions
+      for (int i=0; i<m; i++)
+	uwvec(0, i) = 0.0;
+      integrator.Integrate(tGrid, 0, numPoints-1, uwvec);
+      Array<double,1> duvec(m);
+      duvec = RPAIntegrand (levelTau, uwvec(numPoints-1,Range::all()));
+      for (int species1=0; species1<Path.NumSpecies(); species1++)
+	for (int species2=species1; species2<Path.NumSpecies(); species2++) {
+	  PairActionFitClass &pa = 
+	    *PairActionVector(PairMatrix(species1, species2));
+	  pa.dU_RPA_long_k(Level, ki) = 
+	    duvec (uindex(species1, species2, Path.NumSpecies()));
+	}
+    } 
+  }
+  TestRPA();
 }
 
+
+void ActionClass::TestRPA()
+{
+  FILE *fout = fopen ("RPAtest.dat", "w");
+  double minL = Path.GetBox()[0];
+  for (int i=1; i<NDIM; i++)
+    minL = min(minL, Path.GetBox()[i]);
+  int numPoints = 1000;
+  LinearGrid rgrid(0.0, 0.5*minL, numPoints);
+  int m = (Path.NumSpecies()*(Path.NumSpecies()+1))/2;
+  Array<double,2> u(m,numPoints), du(m,numPoints), 
+    uRPA(m,numPoints), duRPA(m, numPoints);
+  u = 0.0; du = 0.0; uRPA = 0.0; duRPA = 0.0;
+  for (int ri=0; ri<rgrid.NumPoints; ri++) {
+    double r = rgrid(ri);
+    dVec vr;
+    vr[0] = r; vr[1] = 0.0; vr[2] = 0.0;
+    for (int ki=0; ki<Path.kVecs.size(); ki++) {
+      dVec &vk = Path.kVecs(ki);
+      double coskr = cos(dot(vk, vr));
+      
+      for (int species1=0; species1<Path.NumSpecies(); species1++) 
+	for (int species2 = species1; species2<Path.NumSpecies(); species2++) {
+	  PairActionFitClass &pa = 
+	    *PairActionVector(PairMatrix(species1, species2));
+	  int si = uindex(species1, species2, Path.NumSpecies());
+	  u(si, ri)     += pa.Ulong_k(0, ki) * 2.0*(1.0+coskr);
+	  du(si, ri)    += pa.dUlong_k(0, ki) * 2.0*(1.0+coskr);
+	  uRPA(si, ri)  += pa.U_RPA_long_k(0, ki) * 2.0*(1.0+coskr);
+	  duRPA(si, ri) += pa.dU_RPA_long_k(0, ki) * 2.0*(1.0+coskr);
+	}
+    }
+    fprintf (fout, "%1.12e", r);
+    for (int si=0; si<m; si++) 
+      fprintf (fout, " %1.12e %1.12e %1.12e %1.12e", 
+	       u(si, ri), uRPA(si, ri), du(si, ri), duRPA(si,ri));
+    fprintf (fout, "\n");
+    
+  }
+  fclose (fout);
+}

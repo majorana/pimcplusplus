@@ -23,6 +23,8 @@ private:
   // This must be called after all of the OptimizedBreakup_x's
   Array<double,1> RPAIntegrand(double t, const Array<double,1> &Uvec);
   void SetupRPA();
+  void TestRPA();
+  bool RPATaskIsU;
   int Level, ki;
 public:
   inline Array<double,1> operator()(double t, Array<double,1> uwvec)
