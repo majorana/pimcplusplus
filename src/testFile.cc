@@ -36,8 +36,8 @@ public:
 
 class VarASCIIClass : public VarClass
 {  
-  Array<char,1> Value;
 public:
+  Array<char,1> Value;
   bool ReadInto (double &val)
   {
     int l = Value.size();
@@ -67,23 +67,23 @@ public:
 
 
 
-class SectionTreeClass
+class SectionClass
 {
 protected:
-  SectionTreeClass* parent;
-  list<SectionTreeClass*> SectionList;
+  SectionClass* parent;
+  list<SectionClass*> SectionList;
   list<VarClass*> VarList;
-  list<SectionTreeClass*>::iterator Iter;
+  list<SectionClass*>::iterator Iter;
 public:
   string Name;
-  bool FindSection (string name, SectionTreeClass * &sectionPtr, 
+  bool FindSection (string name, SectionClass * &sectionPtr, 
 		    bool rewind=true);
-  //  virtual template<class T> bool ReadVar(string name, T &var) = 0;
-  virtual bool ReadVar (string name, double &var);
+  template<class T> bool ReadVar(string name, T &var);
   virtual bool ReadFile (string fileName) = 0;
+
 };
 
-bool SectionTreeClass::FindSection (string name, SectionTreeClass* &sectionPtr,
+bool SectionClass::FindSection (string name, SectionClass* &sectionPtr,
 				    bool rewind)
 {
   while ((Iter != SectionList.end()) && ((*Iter)->Name!=name))
@@ -98,38 +98,58 @@ bool SectionTreeClass::FindSection (string name, SectionTreeClass* &sectionPtr,
 
 
 template <class vartype>
-class SpecialSectionClass : public SectionTreeClass
+class SpecialSectionClass : public SectionClass
 {
 public:
   bool ReadFile (string fileName);
-  template<class T> bool ReadVar(string name, T &var)
-  {
-    bool readVarSuccess;
-    list<VarClass*>::iterator varIter=VarList.begin();
-    while ((varIter!=VarList.end() && varIter->Name!=name)){
-      varIter++;
-    }
-    bool found = varIter != VarList.end();
-    if (found)
-      readVarSuccess=varIter.ReadInto(var);
-    else if (parent!=NULL){
-      readVarSuccess=parent->ReadVar(name,var);
-    }
-    else {
-      cerr<<"Couldn't find variable "<<name;
-      return false;
-    }  
-    return readVarSuccess;	 
-  }
 };
 
 
 
+template<class T>
+bool SectionClass::ReadVar(string name, T &var)
+{
+  bool readVarSuccess;
+  list<VarClass*>::iterator varIter=VarList.begin();
+  while ((varIter!=VarList.end() && (*varIter)->Name!=name)){
+    varIter++;
+  }
+  bool found = varIter != VarList.end();
+  if (found)
+    readVarSuccess=(*varIter)->ReadInto(var);
+  else if (parent!=NULL){
+    readVarSuccess=parent->ReadVar(name,var);
+  }
+  else {
+    cerr<<"Couldn't find variable "<<name;
+    return false;
+  }  
+  return readVarSuccess;	 
+}
 
 
+
+// Dummy:
 bool SpecialSectionClass<VarASCIIClass>::ReadFile(string FileName)
 {
+  SpecialSectionClass<VarASCIIClass> *sec = 
+    new SpecialSectionClass<VarASCIIClass>;
+  sec->Name = "Species";
+  VarASCIIClass *var = new VarASCIIClass;
+  var->Name = "Mass";
+  var->Value.resize(5);
+  var->Value(0) = '3';
+  var->Value(1) = '.';
+  var->Value(2) = '1';
+  var->Value(3) = '4';
+  var->Value(4) = '2';
+  sec->VarList.push_back(var);
+  SectionList.push_back(sec);
+  Iter = SectionList.begin();
   return true;
+  //  Array<char,1> 
+  //  ReadWithout
+
 
 }
 
@@ -228,7 +248,32 @@ inline bool checkPair(Array<char,1> &buffer,int counter,char* toSee)
 // }
  
 
+void test()
+{
+  SpecialSectionClass<VarASCIIClass> section;
+  SectionClass *newsec;
+  section.ReadFile("dummy");
+  
+  bool found = section.FindSection("Species", newsec);
+  if (found)
+    {
+      cerr << newsec->Name <<endl;      
+      double x;
+      found = newsec->ReadVar("Mass", x);
+      if (found)
+	cerr << "x = " << x << endl;
+    }
+  
+  
+
+  cerr << found;
+
+
+}
+
+
 main()
 {
+  test();
   exit(1);
 }
