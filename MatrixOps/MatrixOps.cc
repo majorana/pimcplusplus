@@ -371,20 +371,20 @@ Array<double,2> Inverse (Array<double,2> &A)
 }
 
   
-extern "C" void dsyevr_(char *JobType, char *Range, char *UpperLower, 
-			int *N, double *Amat, int *LDA,
-			double *VL, double *VU,
-			int *IL, int *IU, 
-			double *AbsTolerance, int *M,
-			double *EigVals, 
-			double *EigVecs, int *LDEigVecs, int *ISuppZ,
-			double *Work, int *Lwork, 
-			int *IWorkSpace, int *LIwork,
-			int *Info);
+extern "C" void FORT(dsyevr)(char *JobType, char *Range, char *UpperLower, 
+			     int *N, double *Amat, int *LDA,
+			     double *VL, double *VU,
+			     int *IL, int *IU, 
+			     double *AbsTolerance, int *M,
+			     double *EigVals, 
+			     double *EigVecs, int *LDEigVecs, int *ISuppZ,
+			     double *Work, int *Lwork, 
+			     int *IWorkSpace, int *LIwork,
+			     int *Info);
 
-void SymmEigenPairs (const Array<scalar,2> A, int NumPairs,
-		 Array<scalar,1> &Vals,
-		 Array<scalar,2> &Vectors)
+void SymmEigenPairs (const Array<scalar,2> &A, int NumPairs,
+		     Array<scalar,1> &Vals,
+		     Array<scalar,2> &Vectors)
 {
   char JobType = 'V';    // Find eigenvectors and eignevalues
   char Range   = 'I';    // Find eigenpairs in a range of indices
@@ -412,10 +412,10 @@ void SymmEigenPairs (const Array<scalar,2> A, int NumPairs,
   int IWorkSize;
   
   
-   dsyevr_(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
-	 &IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
-	 &LDEigVecs, ISuppZ, &WorkSize, &Lwork, &IWorkSize, &LIwork, 
-	 &Info);
+   FORT(dsyevr)(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
+		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
+		&LDEigVecs, ISuppZ, &WorkSize, &Lwork, &IWorkSize, &LIwork, 
+		&Info);
    fprintf (stderr, "WorkSize = %1.8f\n", WorkSize);
    fprintf (stderr, "IWorkSize = %d\n", IWorkSize);
 
@@ -430,10 +430,10 @@ void SymmEigenPairs (const Array<scalar,2> A, int NumPairs,
      for (int col=0; col<N; col++)
        *(Amat+(col*N)+row) = A(row,col);
   
-   dsyevr_(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
-	 &IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
-	 &LDEigVecs, ISuppZ, WorkSpace, &Lwork, IWorkSpace, &LIwork, 
-	 &Info);
+   FORT(dsyevr)(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
+		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
+		&LDEigVecs, ISuppZ, WorkSpace, &Lwork, IWorkSpace, &LIwork, 
+		&Info);
 
    if (Info !=0) 
      {
@@ -451,6 +451,102 @@ void SymmEigenPairs (const Array<scalar,2> A, int NumPairs,
        for (int j=0; j<N; j++)
 	 Vectors(i,j) = *(EigVecs+(i*N)+j);
      }
+
+   // Now free allocate memory
+   delete[] Amat, EigVals, EigVecs, WorkSpace, IWorkSpace, ISuppZ;
+   
+
+}
+
+
+extern "C" void FORT(zheevr)(char *JobType, char *Range, char *UpperLower, 
+			     int *N, complex<double> *Amat, int *LDA,
+			     double *VL, double *VU,
+			     int *IL, int *IU, 
+			     double *AbsTolerance, int *M,
+			     double *EigVals, 
+			     complex<double> *EigVecs, int *LDEigVecs, 
+			     int *ISuppZ,
+			     complex<double> *Work, int *Lwork, 
+			     double *Rwork, int *LRwork,
+			     int *IWorkSpace, int *LIwork,
+			     int *Info);
+
+
+void SymmEigenPairs (const Array<complex<double>,2> &A, int NumPairs,
+		     Array<scalar,1> &Vals,
+		     Array<complex<double>,2> &Vectors)
+{
+  char JobType = 'V';    // Find eigenvectors and eignevalues
+  char Range   = 'I';    // Find eigenpairs in a range of indices
+  char UpperLower = 'U'; // Use upper triagle of A
+
+  int N   = A.rows();
+  complex<double> *Amat = new complex<double>[N*N];
+  int LDA = N;
+  double VL = 0.0;
+  double VU = 0.0;
+  int IL = 1;
+  int IU = NumPairs;
+  double AbsTolerance = 0.0;
+  int NumComputed;
+  double *EigVals = new double[N];
+  complex<double> *EigVecs = new complex<double>[N*NumPairs];
+  int LDEigVecs = N;
+  int *ISuppZ = new int[2*NumPairs];
+  int Info;
+
+  // First do workspace query
+  int Lwork = -1;
+  int LIwork = -1;
+  int LRwork = -1;
+  complex<double> WorkSize;
+  double RWorkSize;
+  int IWorkSize;
+  
+  
+   FORT(zheevr)(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
+		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
+		&LDEigVecs, ISuppZ, &WorkSize, &Lwork, &RWorkSize, &LRwork, &IWorkSize, &LIwork, 
+		&Info);
+   fprintf (stderr, "WorkSize  = %1.8f\n", WorkSize.real());
+   fprintf (stderr, "RWorkSize = %1.8f\n", RWorkSize);
+   fprintf (stderr, "IWorkSize = %d\n", IWorkSize);
+
+   // Now allocate WorkSpace;
+   Lwork = (int) floor(WorkSize.real()+0.5);
+   LIwork = IWorkSize;
+   LRwork = (int) floor (RWorkSize+0.5);
+   complex<double> *WorkSpace = new complex<double>[Lwork];
+   double * RWorkSpace = new double[LRwork];
+   int *IWorkSpace = new int[LIwork];
+   
+   // Copy A int Amat
+   for (int row=0; row<N; row++)
+     for (int col=0; col<N; col++)
+       *(Amat+(col*N)+row) = A(row,col);
+   
+   cerr << "Before zheevr.\n";
+   FORT(zheevr)(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
+		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
+		&LDEigVecs, ISuppZ, WorkSpace, &Lwork, RWorkSpace, &LRwork, IWorkSpace, &LIwork, 
+		&Info);
+   cerr << "After zheevr.\n";
+
+   if (Info !=0) {
+     fprintf (stderr, "Lapack error in zheevr.  Exitting.\n");
+     exit(-1);
+   }
+
+   // Now copy over output of Vectors and Vals
+   Vals.resize(NumPairs);
+   Vectors.resize(NumPairs,N);
+   
+   for (int i=0; i<NumPairs; i++) {
+     Vals(i) = *(EigVals+i);
+     for (int j=0; j<N; j++)
+       Vectors(i,j) = *(EigVecs+(i*N)+j);
+   }
 
    // Now free allocate memory
    delete[] Amat, EigVals, EigVecs, WorkSpace, IWorkSpace, ISuppZ;
