@@ -4,6 +4,7 @@
 #include "CubicSpline.h"
 #include "IdenticleParticleClass.h"
 #include "MemoizedDataClass.h"
+#include "ArrayOfIdenticalParticlesClass.h"
 
 class SavedPairActionClass
 {
@@ -82,7 +83,8 @@ public:
   Array<PairActionClass,1> PairActionVector;
   Array<int,2> PairMatrix;
   Array<SavedPairActionClass,2> SavedPairActionArray;
-  Array<IdenticalParticlesClass,1> *myIdenticalParticleArray;
+  //  Array<IdenticalParticlesClass,1> *myIdenticalParticleArray;
+  ArrayOfIdenticalParticlesClass *myIdenticalParticleArray;
   double tau;
   bool calcTotalAction(Array<ParticleID,1> changedParticles,int level);
   MemoizedDataClass *myMemoizedData;
@@ -126,12 +128,12 @@ inline void ActionClass::SampleParticles(Array<ParticleID,1> particles,int start
       dVec rbar=0.5*(r+rp);
       dVec newDelta=GuassianRandomVec(sigma);
       
-      dVec oldDelta=rpp-rbar;
+      dVec oldDelta=dVecSubtract(rpp,rbar);
       rpp=rbar+newDelta;
       logNewSampleProb=logNewSampleProb+(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
       logOldSampleProb=logOldSampleProb+(prefactorOfSampleProb-0.5*dot(oldDelta,oldDelta)/(sigma2));
       ///Here we've stored the new position in the path
-      (*myIdenticalParticleArray)(species).Path(ptclNum,sliceCounter+skip>>1).setPos(rpp);
+      (*myIdenticalParticleArray)(species).Path.SetPos(ptclNum,sliceCounter+skip>>1,rpp );
       
     }
   }

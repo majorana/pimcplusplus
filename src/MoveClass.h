@@ -1,8 +1,8 @@
 #ifndef MOVE_CLASS_H
 #define MOVE_CLASS_H
-
+#include <sprng.h>
 #include "Common.h"
-
+#include "PathDataClass.h"
 
 
 class MoveClass
@@ -16,21 +16,23 @@ private:
   Array<int,1> MyParticleIndices; 
   ///A mapping from integers to particle ids
   Array<ParticleID,1> MyParticles;
-protected:
+  inline int RandInt (int Max);
+ public:
   PathDataClass *PathData;
   int NumParticlesToMove;
   Array<ParticleID,1> ActiveParticles;
-  void ChooseParticles ();
+
+  virtual void makeMove()=0;
 
 
-public:
   void SetActiveSpecies(Array<int,1> ActSpecies);
   inline void SetNumParticlesToMove(int i)
   {
     NumParticlesToMove = i;
     MyParticleIndices.resize(i);
   }
-  virtual void makeMove()=0;
+
+  void ChooseParticles();
  
 };
 
