@@ -8,7 +8,8 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DTHREE_D -DNO_COUT  -O3 -DPARALLEL# -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+
+DEFS = -DTHREE_D -DNO_COUT  -O3 #-DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \
@@ -35,6 +36,7 @@ PIMCobjs =                            \
   CommunicatorClass.o                 \
   PathClass.o                         \
   WrapClass.o			      \
+  NodalAction.o                       \
   Common/Splines/CubicSpline.o        \
   Common/Splines/MyTricubicSpline.o   \
   Common/Splines/Grid.o               \
@@ -222,7 +224,7 @@ clean:	Common_clean
 
 
 
-SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc
+SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc
 
 
 newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake
@@ -244,7 +246,7 @@ Makefile:	$(FRC)
 	rm -f $@
 	cp template.make $@
 	echo 'Automatically generated dependency list:' >> $@
-	$(CC) $(CCFLAGS) $(INCL) -M $(SOURCES) >> $@
+	$(CC) $(CCFLAGS) $(INCL) -MM $(SOURCES) >> $@
 	chmod -w $@
 
 
