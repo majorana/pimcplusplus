@@ -60,7 +60,9 @@ bool CommunicatorClass::Probe(int source, int tag, CommStatusClass &status)
   status.Source = mpiStat.MPI_SOURCE;
   status.Tag    = mpiStat.MPI_TAG;
   status.Error  = mpiStat.MPI_ERROR;
-  status.Length = mpiStat.st_length;
+  // The following is illegal.  Must use function instead
+  //  status.Length = mpiStat.st_length;
+  MPI_Get_count(&mpiStat, MPI_CHAR, &status.Length);
   return (flag != 0);
 }
 
