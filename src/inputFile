@@ -7,7 +7,8 @@ Section (System)
   
   Section (Particles)
   {
-    Section (Species, "Species1.txt")
+    Section (Species, "Species1.txt");
+    Section (Hydrogen, "hydrogen.h5");
     Section (Species)
       {
 	string Name = "electron";
@@ -82,12 +83,4 @@ Section (PIMC)
     Section (Observable){
       string name="Pair Correlation";
     }
-  }
-
-
-
-  }
-
-
-
 }
