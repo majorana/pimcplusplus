@@ -81,7 +81,7 @@ public:
     double j0, j2;
     if (k < 1.0e-12) {
       j0 = 1.0;
-      j2 = -1.0;
+      j2 = 0.0;
     }
     else {
       j0 = sin(kr)/kr;
@@ -125,7 +125,7 @@ public:
     double j0, j2;
     if (k < 1.0e-12) {
       j0 = 1.0;
-      j2 = -1.0;
+      j2 = 0.0;
     }
     else {
       j0 = sin(kr)/kr;
