@@ -1,6 +1,6 @@
 SOURCES = InputOutput.cc InputOutputHDF5.cc InputFile.cc  InputOutputASCII.cc TestXML.cc TestHDF5.cc
 
-objs = InputOutput.o  InputOutputHDF5.o InputFile.o   InputOutputASCII.o InputOutputXML.o
+objs = InputOutput.o  InputOutputHDF5.o  InputOutputASCII.o InputOutputXML.o #InputFile.o  
 all:	$(objs) TestXML TestHDF5
 
 
