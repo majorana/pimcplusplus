@@ -823,7 +823,7 @@ Recall that $\nabla^2(ab) = a\nabla^2 b + b\nabla^2a +2(\nabla a)
 -\left [\dot{\rho_s} -\rho_s\dot{\bar{U}}\right] e^{-\bar{U}} & = &
 \sum_{\alpha,\  i\in\alpha} -\lambda_\alpha
 \left[\rho_s \nabla^2_i e^{-\bar{U}} + e^{-\bar{U}} \nabla^2_i \rho_s
-  + 2(\nabla \rho_s)\cdot (\nabla e^{-\bar{U}}) 
+  + 2(\nabla_i \rho_s)\cdot (\nabla_i e^{-\bar{U}}) 
 \right] \nonumber \\ & & + (\hat{V} + \bar{V}) \rho_s e^{-\bar{U}}.
 \end{eqnarray} 
 Subtracting the Bloch equation for the short range part,
@@ -832,7 +832,7 @@ we are left with
 \left[\dot{\bar{U}}-\bar{V}\right] \rho_s e^{-\bar{U}}  = 
 \sum_{\alpha,\  i\in\alpha} -\lambda_\alpha
 \left[\rho_s \nabla^2_i e^{-\bar{U}}
-  + 2(\nabla \rho_s)\cdot (\nabla e^{-\bar{U}}) 
+  + 2(\nabla_i \rho_s)\cdot (\nabla_i e^{-\bar{U}}) 
 \right].
 \end{equation} 
 Recall that
@@ -843,26 +843,32 @@ Recall that
 \text{ (for $\vR = \vR'$)} \\
 \nabla \rho_s & = & -\rho_s \nabla \hat{U} \\
 \nabla^2 e^{-\bar{U}} & = & 
-\left[(\nabla \bar{U})^2 - \nabla^2 \bar{U}\right] e^{-\bar{U}} \\
+\left[(\nabla \bar{U})^2 - \nabla^2 \bar{U}\right] e^{-\bar{U}} 
 \end{eqnarray} 
 We now attempt to solve the Bloch equation under the restriction that
 $\vR = \vR'$, i.e. along the diagonal of the density matrix.  Hence
-let us define $\bar{\mathcal{U}}(\vR;\tau) \equiv
-\bar{U}(\vR,\vR;\tau)$ and $\hat{\mathcal{U}}(\vR) \equiv \hat{U}(\vR,
-\vR;\tau)$ as the long and short range diagonal actions written as
-functions of only one spatial argument.  We then recall that
+let us define
+\begin{eqnarray} 
+\bar{U}(\vR, \vR';\tau) & \equiv &
+  \frac{1}{2}\left[\bar{\mathcal{U}}(\vR;\tau) +
+  \bar{\mathcal{U}}(\vR';\tau) \right] \\ 
+ \hat{U}(\vR,\vR';\tau) & \equiv & 
+  \frac{1}{2} \left[\hat{\mathcal{U}}(\vR;\tau) +
+  \hat{\mathcal{U}}(\vR';\tau) \right] 
+\end{eqnarray}
+as the long and short range diagonal actions written as
+functions of only one spatial argument.  Then we have, along the
+diagonal,
 \begin{eqnarray}
 \nabla U   & = & \frac{1}{2} \nabla\mathcal{U} \\
 \nabla^2 U & = & \frac{1}{2} \nabla^2\mathcal{U}.
 \end{eqnarray}
-The half and quarter factors come from the contributions from
-occurrences of $\vR$ in each spatial argument of $U$.  Substituting
-back into out Bloch equation,
+Substituting back into out Bloch equation,
 \begin{equation}
 \dot{\bar{\mathcal{U}}} = \sum_{\alpha, \ i\in \alpha} -\lambda_\alpha
-\left\{ \frac{1}{4} (\nabla \bar{\mathcal{U}})^2 - 
-\frac{1}{2}\nabla^2 \bar{\mathcal{U}} + \frac{1}{2} (\nabla\hat{\mathcal{U}})
-  \cdot (\nabla \bar{\mathcal{U}}) \right\} +\bar{V}
+\left\{ \frac{1}{4} (\nabla_i \bar{\mathcal{U}})^2 - 
+\frac{1}{2}\nabla_i^2 \bar{\mathcal{U}} + \frac{1}{2} (\nabla_i\hat{\mathcal{U}})
+  \cdot (\nabla_i \bar{\mathcal{U}}) \right\} +\bar{V}
 \end{equation}
 
 We recall that the long range potential, $\bar{V}$, may be written as
@@ -878,7 +884,7 @@ When we wrote this expression above, we did so to optimize the speed
 of computation.  For the following analysis, we will find it more
 convenient to write
 \begin{equation}
-\bar{V} = \frac{1}{2} \sum_\vk \sum{\alpha, \beta} \rho_\vk^\alpha
+\bar{V} = \frac{1}{2} \sum_\vk \sum_{\alpha, \beta} \rho_\vk^\alpha
 \rho_{-\vk}^\beta v^{\alpha \beta}_k.
 \end{equation}
 The sum is guaranteed to be real since for every $\vk$, we have a
@@ -893,7 +899,7 @@ Recall that
 \rho_\vk^\alpha = \sum_{i\in\alpha} e^{i\vk \cdot \vr_i}
 \end{equation}
 \begin{eqnarray}
-\nabla_i U & = & \frac{1}{2}\sum_\vk \left[ i\vk e^{i\vk \cdot \vr_i} \sum_\alpha
+\nabla_i \mathcal{U} & = & \frac{1}{2}\sum_\vk \left[ i\vk e^{i\vk \cdot \vr_i} \sum_\alpha
 \rho_{-\vk}^\alpha u^{\alpha \beta}_k + \text{c.c.} \right] \\
 & = & \frac{1}{2} \sum_\vk 2\mathcal{R}e \left[i\vk e^{i\vk \cdot \vr_i} \sum_\alpha
 \rho_{-\vk}^\alpha u^{\alpha \beta}_k\right] \\ 
@@ -907,7 +913,7 @@ there is a corresponding $-\vk$, so that the sum is purely real.
 
 Next, we compute the Laplacian w.r.t. the $i^{\text{th}}$ particle.
 \begin{eqnarray}
-\nabla^2_i U & = & \nabla_i \cdot \nabla_i U \\
+\nabla^2_i \mathcal{U} & = & \nabla_i \cdot \nabla_i \mathcal{U} \\
 & = & \nabla_i \cdot \sum_\vk i\vk e^{i\vk \cdot \vr_i} \sum_\alpha
 \rho_{-\vk}^\alpha u^{\alpha \sigma_i}_k \\
 & = & \sum_\vk i\vk \cdot \nabla_i \left[ e^{i\vk \cdot \vr_i}
@@ -918,16 +924,22 @@ u_k^{\alpha \sigma_i}\right],
 where $\sigma_i$ is the species of the $i^{\text{th}}$ particle.  Now,
 let us sum over all particles,
 \begin{eqnarray}
-\sum_i \nabla^2_i U & = & \sum_\vk k^2 \left[\sum_\beta N_\beta u_k^{\beta
+\sum_i \lambda_i \nabla^2_i \mathcal{U} & = & \sum_\vk k^2 \left[\sum_\beta N_\beta u_k^{\beta
   \beta} - \rho_{\vk}^\beta \sum_\alpha \rho_{-\vk} u_k^{\alpha \beta}
   \right] \\
 & = & \sum_{\vk} k^2 \sum_{\alpha, \beta}
-  \left[N^{\alpha}\delta_{\alpha,\beta} -
-  \rho_{-\vk}^{\alpha}\rho_\vk^\beta \right]u_k^{\alpha \beta}.
+  \lambda_\beta \left[N^{\alpha}\delta_{\alpha,\beta} -
+  \rho_{-\vk}^{\alpha}\rho_\vk^\beta \right]u_k^{\alpha \beta} 
+%\\
+%& = & \sum_{\vk} k^2 \sum_{\alpha, \beta}
+%  \left(\frac{\lambda_\alpha +\lambda_\beta}{2} \right) \left[N^{\alpha}\delta_{\alpha,\beta} -
+%  \rho_{-\vk}^{\alpha}\rho_\vk^\beta \right]u_k^{\alpha \beta}.
 \end{eqnarray}
+%In the last step, we have added half the sum with $\alpha$ and $\beta$
+%swapped so as to symmetrize the summation.
 Now, let us consider the cross term,
 \begin{eqnarray}
-(\nabla_i \hat{U}) \cdot ( \nabla_i \bar{U} ) 
+(\nabla_i \hat{\mathcal{U}}) \cdot ( \nabla_i \bar{\mathcal{U}} ) 
 & = & \left[\sum_\vk i\vk e^{i\vk\cdot \vr_i} \sum_\alpha
   \rho_{-\vk}^\alpha \hat{u}^{\sigma_i \alpha}_k \right] \cdot
 \left[\sum_\vq i\vq e^{i\vq\cdot \vr_i} \sum_\beta
@@ -938,44 +950,99 @@ Now, let us consider the cross term,
 \end{eqnarray}
 Again, summing over all particles,
 \begin{equation}
-\sum_i (\nabla_i \hat{U}) \cdot ( \nabla_i \bar{U} ) =
+\sum_i (\nabla_i \hat{\mathcal{U}}) \cdot ( \nabla_i \bar{\mathcal{U}} ) =
 -\sum_{\vk, \vq} \vk \cdot \vq \sum_{\alpha, \beta, \gamma}
 \rho_{\vk + \vq}^\gamma \rho_{-\vk}^{\alpha} \rho_{-\vq}^\beta
 \hat{u}^{\alpha \gamma}_k \bar{u}^{\beta \gamma}_k
 \end{equation}
 Similarly,
 \begin{equation}
-\sum_i (\nabla_i \bar{U})^2 = -\sum_{\vk, \vq} \vk \cdot \vq 
+\sum_i (\nabla_i \bar{\mathcal{U}})^2 = -\sum_{\vk, \vq} \vk \cdot \vq 
 \sum_{\alpha, \beta, \gamma} \rho^\gamma_{\vk+\vq} \rho^\alpha_{-\vk}
 \rho^\gamma_{-\vq} \bar{u}^{\alpha \gamma}_k \bar{u}^{\beta \gamma}_k
 \end{equation}
 
-The {\em Random Phase Approximation}(RPA) amounts to the assumption
+The {\em Random Phase Approximation} (RPA) amounts to the assumption
 that $\rho^\gamma_{\vk + \vq} \approx N_\gamma \delta_{\vk + \vq}$. 
 Then we have,
-\begin{equation}
-\sum_i (\nabla_i \hat{U}) \cdot ( \nabla_i \bar{U} ) \overset{\text{RPA}}{=}
+\begin{eqnarray}
+\sum_i (\nabla_i \hat{\mathcal{U}}) \cdot ( \nabla_i \bar{\mathcal{U}}
+) & \overset{\text{RPA}}{=} &
 \sum_\vk k^2 \sum_{\alpha, \beta, \gamma} N_\gamma \rho^\alpha_{-\vk}
-\rho^\beta_\vk \hat{u}^{\alpha \gamma}_k \bar{u}^{\beta \gamma}_k
-\end{equation}
-
-Then
+\rho^\beta_\vk \hat{u}^{\alpha \gamma}_k \bar{u}^{\beta \gamma}_k \\
+\sum_i (\nabla_i \bar{\mathcal{U}})^2 & \overset{\text{RPA}}{=} &
+\sum_\vk k^2 \sum_{\alpha, \beta, \gamma} N_\gamma
+\rho^{\alpha}_{-\vk} \rho^\beta_\vk \bar{u}_k^{\alpha \gamma}
+\bar{u}_k^{\beta \gamma}
+\end{eqnarray}
+We now return to the Bloch equation
 \begin{equation}
-\nabla_i \left(\sum_\alpha \left| \rho_\vk^{\alpha}\right|^2\right) =
-2i\vk \ \Im\left( \rho_k^\alpha\right)
+\begin{split}
+\sum_\vk \sum_{\alpha,\beta} & \left\{ 
+\frac{1}{2} \rho_\vk^\alpha
+\rho_{-\vk}^\beta \left(\dot{\bar{u}}_k - \bar{v}_k^{\alpha \beta} \right)
++\frac{1}{2} \lambda_\alpha k^2 \bar{u}_k^{\alpha \beta}
+\left(\rho_{-\vk}^\alpha 
+  \rho_\vk^\beta - N_\beta \delta_{\alpha,\beta} \right) 
+\right. \\
+& \left. -\sum_\gamma k^2 N_\gamma \lambda_\gamma \rho_{-\vk}^\alpha
+  \rho_\vk^\beta \left[ 
+\frac{1}{4} \hat{u}^{\alpha \gamma}_k \bar{u}^{\beta\gamma}_k +
+\frac{1}{2} \bar{u}^{\alpha \gamma}_k \bar{u}^{\beta \gamma}
+\right]\right\} = 0
+\end{split}
 \end{equation}
-
+Next, we symmetrize this equation w.r.t $\alpha$ and $\beta$.
 \begin{equation}
-\nabla_i \left[ \sum_{\beta<\alpha}
-\mathcal{R}e \left(\rho_\vk^\alpha \rho_{-\vk}^\beta \right)\right] = 
+\begin{split}
+\sum_{\vk, \alpha, \beta} & \left\{ \left( \rho^\alpha_{\vk} \rho^\beta_{-\vk} 
++ \rho^\alpha_{-\vk} \rho^\beta_{\vk} \right) \left[
+\dot{\bar{u}}_k^{\alpha \beta} - \bar{v}_k^{\alpha \beta}
+ +k^2 \left(\frac{\lambda_\alpha+\lambda_\beta}{2}\right) 
+\bar{u}_k^{\alpha \beta} \rule{0cm}{0.6cm} \right.\right. \\
+& \ \ \left.\left.-\sum_\gamma \frac{k^2}{2} N^\gamma \left(
+\bar{u}_k^{\alpha \gamma} \bar{u}_k^{\beta \gamma} +
+\hat{u}_k^{\alpha \gamma} \bar{u}_k^{\beta \gamma} +
+\bar{u}_k^{\alpha \gamma} \hat{u}_k^{\beta \gamma}  \right)
+\right]
+- k^2 N^\alpha \delta_{\alpha \beta}
+\right\} = 0
+\end{split}
 \end{equation}
-
-We then may write
+We require that this expression hold independent of the positions of
+the particles, i.e. independent of the values of $\rho^\alpha_{\vk}$ and
+$\rho^\beta_{\vk}$.  Thus, the equations separate for each value of
+$\vk$, $\alpha$, and $\beta$.  For $\vk \neq 0$,
 \begin{equation}
-\nabla \bar{\mathcal{U}} = \sum_{\alpha, \ i\in\alpha} -\lambda_\alpha
-...
+\dot{\bar{u}}_k^{\alpha \beta} = \bar{v}_k^{\alpha \beta} 
+- k^2 \left(\frac{\lambda_\alpha+\lambda_\beta}{2}\right)
+\bar{u}_k^{\alpha\beta} +\frac{k^2}{2} \sum_\gamma N_\gamma
+\left(
+\bar{u}_k^{\alpha \gamma} \bar{u}_k^{\beta \gamma} +
+\hat{u}_k^{\alpha \gamma} \bar{u}_k^{\beta \gamma} +
+\bar{u}_k^{\alpha \gamma} \hat{u}_k^{\beta \gamma}
+\right)
 \end{equation}
-
+%% \begin{equation}
+%% \begin{split}
+%% \sum_\vk \sum_{\alpha,\beta} 
+%%  & \left\{
+%% \rho_{-\vk}^\alpha \rho_\vk^\beta 
+%% \left[
+%% \dot{\bar{u}}^{\alpha \beta}_k + k^2 \sum_\gamma \lambda_\gamma
+%% N_\gamma 
+%% \left(\frac{\bar{u}^{\alpha \gamma}_k \bar{u}^{\beta \gamma}_k}{4} -
+%% \frac{\hat{u}^{\alpha \gamma}_k \bar{u}^{\beta \gamma}_k}{2}
+%% \right) 
+%% \frac{k^2}{2} \lambda_\beta \bar{u}_k^{\alpha \beta} +
+%% \bar{v}_k^{\alpha \beta}
+%% \right] \right.\\
+%%  & \left. \rule{0pt}{0.6cm}
+%% + \frac{k^2}{2}\lambda_\beta N_\beta \delta_{\alpha,\beta}
+%% \bar{u}_k^{\alpha \beta}
+%% \right\} = 0
+%% \end{split}
+%% \end{equation}
 
 
 %% While this
@@ -998,12 +1065,6 @@ We then may write
 %% \mathcal{H} = \left[ -\lambda \sum_i \nabla_i^2 \right] + V_s + V_l
 %% \end{equation}
 %% The Bloch equation gives us 
-\begin{equation}
-0 = +
-\end{equation}
-
-
-
 
 \begin{thebibliography}{9}
   \bibitem{Natoli} V. Natoli and D.M. Ceperley, J. Chem. Phys. {\bf
