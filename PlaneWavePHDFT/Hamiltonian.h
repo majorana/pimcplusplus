@@ -2,9 +2,8 @@
 #define HAMILTONIAN_H
 
 #include "../FFT/FFT.h"
+#include "VectorOps.h"
 
-typedef TinyVector<int,3> Int3;
-typedef Array<complex<double>,1> zVec;
 
 class GVecsClass
 {
@@ -22,7 +21,7 @@ public:
   { return GVecs(i); }
 
   inline Int3 Index(int i) const
-  { return Index(i); }
+  { return Indices(i); }
   
   inline int size()
   { return GVecs.size(); }
@@ -43,17 +42,28 @@ class FFTBox : public FFT3D
 protected:
   GVecsClass &GVecs;
 public:
+  int Nx, Ny, Nz;
+
   // Puts a linear c-vector into the fft box.
-  FFTBox& operator= (const zVec &c);
+  void PutkVec (const zVec &c);
   
   // Puts appropriate elements of fftbox into a c vector.
-  void GetVec (zVec &c);
+  void GetkVec (zVec &c);
   
+  // Adds the appropriate elements of the fftbox to a c vector.
+  void AddFromVec (const zVec &c);
+
+  // Add the c vector to the contents of the fftbox.
+  void AddToVec (zVec &c);
+  
+  void Setup()
+  {
+    GVecs.GetFFTBoxSize(Nx, Ny, Nz);
+    resize(Nx, Ny, Nz);
+  }
+
   FFTBox (GVecsClass &gvecs) : GVecs (gvecs)
   {
-    int nx, ny, nz;
-    gvecs.GetFFTBoxSize(nx,ny,nz);
-    resize(nx, ny, nz);
   }
 };
 
@@ -100,16 +110,35 @@ public:
   }
 };
 
+class CoulombFFTClass : public HamiltonianBase
+{
+private:
+  double Z;
+  void Setup();
+  bool IsSetup;
+  Array<complex<double>,3> Vr;
+public:
+  FFTBox FFT;
+  void Apply (const zVec &c, zVec &Hc);
+  CoulombFFTClass (double z, GVecsClass &gvecs) : 
+    HamiltonianBase (gvecs), Z(z), FFT(gvecs), IsSetup(false)
+  {
+    // nothing for now
+  }
+};
+
 class Hamiltonian : public HamiltonianBase
 {
 private:
   CoulombClass Coulomb;
+  CoulombFFTClass CoulombFFT;
   KineticClass Kinetic;
 public:
   GVecsClass GVecs;
   void Apply (const zVec &c, zVec &Hc);
   Hamiltonian (Vec3 box, double kcut, double z) :
-    Kinetic (GVecs), Coulomb(z, GVecs), HamiltonianBase(GVecs)
+    Kinetic (GVecs), Coulomb(z, GVecs), HamiltonianBase(GVecs),
+    CoulombFFT(z, GVecs)
   {
     GVecs.Set (box, kcut);
   }

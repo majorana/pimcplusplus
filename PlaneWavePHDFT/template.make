@@ -16,7 +16,7 @@ SplineObjs = ../Splines/BicubicSpline.o ../Splines/CubicSpline.o              \
              ../Splines/QuinticSpline.o ../Splines/QuinticSplines.o 
 
 MiscObjs =   ../Integration/GKIntegration.o ../Fitting/Fitting.o              \
-             ../MatrixOps/MatrixOps.o
+             ../MatrixOps/MatrixOps.o ../FFT/FFT.o
 all:    $(Objs) TestPW
 
 TestPW:  $(TestObjs) $(Objs) $(PHObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)

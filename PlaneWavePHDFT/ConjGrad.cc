@@ -36,13 +36,16 @@ void ConjGrad::Iterate()
   cnext = cos(theta1)*c + sin(theta1)*SDvec;
   H.Apply (cnext, Hcnext);
   double E1 = realconjdot (cnext, Hcnext);
-  
+//   cerr << "dE_dtheta        = " << dE_dtheta << endl;
+//   cerr << "dE_dtheta approx = " << (E1-E0)/theta1 << endl;
+//   cerr << "E0 = " << E0 << "  E1 = " << E1 << endl;
 
-  double A1 = (E0 - E1 + 0.5*dE_dtheta)/(1.0-cos(2.0*theta1));
+  //double A1 = (E0 - E1 + 0.5*dE_dtheta)/(1.0-cos(2.0*theta1));
+  double A1 = (E0 - E1 + 0.5*sin(2.0*theta1)*dE_dtheta)/(1.0-cos(2.0*theta1));
   double B1 = 0.5*dE_dtheta;
-  double thetaMin = 50.0*0.5*atan (B1/A1);
+  //  cerr << "A1 = " << A1 << "  B1 = " << B1 << endl;
+  double thetaMin = 0.5*atan (B1/A1);
   //  cerr << "thetaMin = " << thetaMin << endl;
 
-  c = cos (thetaMin)*c + sin(thetaMin)*SDvec;
-  Normalize (c);
+  c = cos(thetaMin)*c + sin(thetaMin)*SDvec;
 }

@@ -52,11 +52,56 @@ void GVecsClass::Set (Vec3 box, double kcut)
 }
 
 
-FFTBox &
-FFTBox::operator=(const Array<complex<double>,1> &c)
+void GVecsClass::GetFFTBoxSize(int &nx, int &ny, int &nz)
 {
+  nx=Nx; ny=Ny; nz=Nz;
+}
+
+void
+FFTBox::PutkVec (const zVec &c)
+{
+  kBox = 0.0;
+  for (int n=0; n<c.size(); n++) {
+    int i = (GVecs.Index(n)[0]+Nx)%Nx;
+    int j = (GVecs.Index(n)[1]+Ny)%Ny;
+    int k = (GVecs.Index(n)[2]+Nz)%Nz;
+    kBox(i,j,k) = c(n);
+  }
+}
+
+void 
+FFTBox::GetkVec (zVec &c)
+{
+  for (int n=0; n<c.size(); n++) {
+    int i = (GVecs.Index(n)[0]+Nx)%Nx;
+    int j = (GVecs.Index(n)[1]+Ny)%Ny;
+    int k = (GVecs.Index(n)[2]+Nz)%Nz;
+    c(n) = kBox(i,j,k);
+  }
+}
 
 
+void
+FFTBox::AddFromVec (const zVec &c)
+{
+  kBox = 0.0;
+  for (int n=0; n<c.size(); n++) {
+    int i = (GVecs.Index(n)[0]+Nx)%Nx;
+    int j = (GVecs.Index(n)[1]+Ny)%Ny;
+    int k = (GVecs.Index(n)[2]+Nz)%Nz;
+    kBox(i,j,k) += c(n);
+  }
+}
+
+void 
+FFTBox::AddToVec (zVec &c)
+{
+  for (int n=0; n<c.size(); n++) {
+    int i = (GVecs.Index(n)[0]+Nx)%Nx;
+    int j = (GVecs.Index(n)[1]+Ny)%Ny;
+    int k = (GVecs.Index(n)[2]+Nz)%Nz;
+    c(n) += kBox(i,j,k);
+  }
 }
 
 
@@ -93,9 +138,72 @@ void CoulombClass::Apply(const zVec &c, zVec &Vc)
 }
 
 
+void CoulombFFTClass::Setup()
+{
+  FFT.Setup();
+  Vec3 dG;
+  Int3 dI;
+  //double prefact = -4.0*M_PI*Z;// /GVecs.GetBoxVol();
+  double prefact = -4.0*M_PI*Z/GVecs.GetBoxVol();
+  FFT.kBox = 0.0;
+  for (int m=0; m<GVecs.size(); m++)
+    for (int n=0; n<GVecs.size(); n++) {
+      dG = GVecs(m)-GVecs(n);
+      dI = GVecs.Index(n) - GVecs.Index(m);
+      double val = (m == n) ? 0.0 : prefact/dot(dG,dG);
+      int i = (dI[0] + FFT.Nx) % FFT.Nx;
+      int j = (dI[1] + FFT.Ny) % FFT.Ny;
+      int k = (dI[2] + FFT.Nz) % FFT.Nz;
+      FFT.kBox(i,j,k) = val;
+    }
+  FFT.k2r();
+  FILE *fout = fopen ("Vr.dat", "w");
+  for (int i=0; i<FFT.Nx; i++) {
+    for (int j=0; j<FFT.Ny; j++)
+      fprintf (fout, "%1.15e ", FFT.rBox(i,j,0).real());
+    fprintf (fout, "\n");
+  }
+  fclose (fout);
+  Vr.resize(FFT.Nx, FFT.Ny, FFT.Nz);
+  Vr = FFT.rBox;
+  IsSetup = true;
+  cerr << "Finished CoulombFFT setup.\n";
+}
+
+void 
+CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
+{
+  if (!IsSetup)
+    Setup();
+
+  double Ninv = 1.0/(FFT.Nx*FFT.Ny*FFT.Nz);
+  // First, put c into FFTbox
+  FFT.PutkVec (c);
+  // Now, transform to real space
+  FFT.k2r();
+  FFT.rBox *= sqrt(Ninv);
+  // Now, multiply by V
+  //FFT.rBox *= Vr;
+  for (int i=0; i<FFT.Nx; i++)
+    for (int j=0; j<FFT.Ny; j++)
+      for (int k=0; k<FFT.Nz; k++)
+	FFT.rBox(i,j,k) *= Vr(i,j,k); 
+
+  // Transform back
+  FFT.r2k();
+  FFT.kBox *= sqrt(Ninv);
+  // And put into Vc
+  FFT.AddToVec (Vc);
+}
+
+
 void Hamiltonian::Apply(const zVec &c, zVec &Hc)
 {
   Hc = 0.0;
   Kinetic.Apply (c, Hc);
-  Coulomb.Apply (c, Hc);
+  //Coulomb.Apply (c, Hc);
+  CoulombFFT.Apply (c, Hc);
+  
 }
+
+
