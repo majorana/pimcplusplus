@@ -126,7 +126,7 @@ double ActionClass::OtherAction(int startSlice, int endSlice,
   PathData.Path.DistDisp(openLink,openPtcl,PathData.Path.NumParticles(),
 			 dist,disp); //This is distance between head and tail!
   //  return -log(0.01+(dist*dist)*(0.94*exp(-dist*dist)+0.06));
-  return -log(dist*dist*exp(-(dist-3.5)*(dist-3.5)));
+  return -log(dist*dist*exp(-(dist-4.5)*(dist-4.5)));
 
 
 }

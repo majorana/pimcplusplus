@@ -9,7 +9,7 @@ CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
 
-DEFS = -DTHREE_D -DNO_COUT  -O3 #-DDEBUG -DBZ_DEBUG #-O3 #-DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DTHREE_D -DNO_COUT -O3 # -DDEBUG -DBZ_DEBUG #-O3 #-DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \
@@ -33,6 +33,8 @@ PIMCobjs =                            \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
   Actions/LongRangeClass.o            \
+  Actions/ShortRangePotClass.o        \
+  Actions/LongRangePotClass.o         \
   Actions/LongRangeRPAClass.o         \
   Actions/ActionsClass.o              \
   Moves/MultiStage.o                  \
@@ -89,6 +91,8 @@ TestPermobjs =                        \
   Actions/ActionsClass.o              \
   Actions/LongRangeClass.o            \
   Actions/LongRangeRPAClass.o         \
+  Actions/ShortRangePotClass.o        \
+  Actions/LongRangePotClass.o         \
   Moves/MultiStage.o                  \
   PIMCClass.o                         \
   Observables/ObservableBase.o        \
@@ -160,6 +164,8 @@ TestEwaldobjs =                       \
   Actions/ShortRangeClass.o           \
   Actions/LongRangeClass.o            \
   Actions/LongRangeRPAClass.o         \
+  Actions/ShortRangePotClass.o        \
+  Actions/LongRangePotClass.o         \
   Common/MPI/Communication.o	      \
   Common/IO/InputOutput.o             \
   Common/IO/InputOutputHDF5.o         \

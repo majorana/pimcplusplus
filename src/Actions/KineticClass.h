@@ -1,10 +1,8 @@
-#ifndef SHORT_RANGE_CLASS_H
-#define SHORT_RANGE_CLASS_H
+#ifndef KINETIC_CLASS_H
+#define KINETIC_CLASS_H
 
-#include "ActionBase.h"
-#include "../Common/PairAction/PAFit.h"
 
-class ShortRangeClass : public ActionBaseClass
+class KineticClass : public ActionBaseClass
 {
 protected:
   Array<PairActionFitClass*,2> &PairMatrix;
@@ -14,8 +12,11 @@ public:
   double Action (int slice1, int slice2, 
 		 const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
-  ShortRangeClass (PathDataClass &pathData,
-		   Array<PairActionFitClass*, 2> &pairMatrix);
+  KineticClass (PathDataClass &pathData,
+		Array<PairActionFitClass*, 2> &pairMatrix);
+
+
 };
+
 
 #endif

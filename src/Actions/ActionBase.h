@@ -11,11 +11,22 @@ protected:
   PathDataClass &PathData;
   PathClass &Path;
 public:
-  virtual double Evaluate(int slice1, int slice2,
-			  const Array<int,1> &activeParticles,
+  virtual double Action(int slice1, int slice2,
+			const Array<int,1> &activeParticles,
+			int level) = 0;
+  virtual double d_dBeta (int slice1, int slice2,
 			  int level) = 0;
-  ActionBaseClass(PathDataClass &pathData);
-					   
+  ActionBaseClass(PathDataClass &pathData);				   
+};
+
+class PotentialBaseClass
+{
+protected:
+  PathDataClass &PathData;
+  PathClass &Path;
+public:
+  virtual double V (int slice) = 0;
+  PotentialBaseClass (PathDataClass &pathData);
 };
 
 #endif

@@ -36,8 +36,8 @@ inline double StageClass::StageAction(int startSlice,int endSlice,
   list<ActionBaseClass*>::iterator actionIter=Actions.begin();
   while (actionIter!=Actions.end()){
     TotalAction += 
-      ((*actionIter)->Evaluate(startSlice, endSlice, changedParticles,
-			       BisectionLevel));
+      ((*actionIter)->Action(startSlice, endSlice, changedParticles,
+			     BisectionLevel));
     actionIter++;
   }
   return TotalAction;
