@@ -1,17 +1,25 @@
 #include "MatrixOps.h"
 #include <blitz/mstruct.h>
 
-extern "C" void dgesvd_(char *JOBU, char* JOBVT, int *M, int *N,
-			double *A, int *LDA, double *S, double *U,
-			int *LDU, double *VT, int *LDVT, double *work,
-			int *LWORK, int *INFO);
 
-extern "C" void dgetrf_(int *m, int *n, double A[], int *lda, int ipiv[],
+#ifdef NOUNDERSCORE 
+#define FORT(name) name
+#else
+#define FORT(name) name_
+#endif 
+
+
+extern "C" void FORT(dgesvd)(char *JOBU, char* JOBVT, int *M, int *N,
+			     double *A, int *LDA, double *S, double *U,
+			     int *LDU, double *VT, int *LDVT, double *work,
+			     int *LWORK, int *INFO);
+
+extern "C" void FORT(dgetrf)(int *m, int *n, double A[], int *lda, int ipiv[],
 			int *info);
 
-extern "C" void dgemm_(char *transA, char *transB, int *m, int *n, int *k,
-		       double *alpha, const double *A, int *lda, const double *B, int *ldb,
-		       double *beta,  double *C, int *ldc);
+extern "C" void FORT(dgemm)(char *transA, char *transB, int *m, int *n, int *k,
+			    double *alpha, const double *A, int *lda, const double *B, int *ldb,
+			    double *beta,  double *C, int *ldc);
 
 const Array<double,2> operator*(const Array<double,2> &A,
 				const Array<double,2> &B)
@@ -29,7 +37,7 @@ const Array<double,2> operator*(const Array<double,2> &A,
   GeneralArrayStorage<2> colMajor;
   colMajor.ordering() = firstDim, secondDim;
   Array<double,2> C(m,n,colMajor);
-  dgemm_(&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
+  FORT(dgemm)(&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
 	 B.data(), &n,
 	 &beta, C.data(), &m);
   return C;
@@ -51,9 +59,9 @@ void MatMult (const Array<double,2> &A, const Array<double,2> &B,
   double beta = 0.0;
   GeneralArrayStorage<2> colMajor;
   colMajor.ordering() = firstDim, secondDim;
-  dgemm_(&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
-	 B.data(), &n,
-	 &beta, C.data(), &m);
+  FORT(dgemm)(&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
+	      B.data(), &n,
+	      &beta, C.data(), &m);
 }
 
 
@@ -73,7 +81,7 @@ double Determinant (const Array<double,2> &A)
     int info;
     LU = A;
     // Do LU factorization
-    dgetrf_(&m, &n, LU.data(), &m, ipiv.data(), &info);
+    FORT(dgetrf)(&m, &n, LU.data(), &m, ipiv.data(), &info);
     double det = 1.0;
     int numPerm = 0;
     for (int i=0; i<m; i++) {
@@ -91,7 +99,9 @@ double Determinant (const Array<double,2> &A)
 // Adapted from Numerical Recipes in C
 void GJInverse (Array<double,2> &A)
 {
+  const int maxSize = 2000;
   assert (A.cols() == A.rows());
+  assert (A.cols() <= maxSize);
   int n = A.rows();
 
   if (n == 2) { // Special case for 2x2
@@ -105,7 +115,7 @@ void GJInverse (Array<double,2> &A)
     return;
   }
 
-  int colIndex[n], rowIndex[n], ipiv[n];
+  int colIndex[maxSize], rowIndex[maxSize], ipiv[maxSize];
   double big, dum, pivInv, temp;
   int icol, irow;
   
@@ -164,6 +174,7 @@ void GJInverse (Array<double,2> &A)
 }
 
 
+
 inline void SwapRow (Array<double,2> A, int row1, int row2)
 {
   int m = A.cols();
@@ -181,17 +192,19 @@ void Cofactors (const Array<double,2> &A,
 		Array<double,2> &cof,
 		Array<double,2> &scratch)
 {
+  const int maxSize = 2000;
   int m = A.rows();
   int n = A.cols();
   assert (m == n);  // Cannot take cofactors of a non-square matrix
-  int  ipiv[m];
+  assert (A.cols() < maxSize);
+  int  ipiv[maxSize];
   int info;
   // Copy and transpose for FORTRAN ordering
   for (int i=0; i<m; i++)
     for (int j=0; j<m; j++)
       scratch(i,j) = A(j,i);
   // Do LU decomposition
-  dgetrf_ (&m, &n, scratch.data(), &m, ipiv, &info);
+  FORT(dgetrf) (&m, &n, scratch.data(), &m, ipiv, &info);
   // Now scratch contains LU matrix in fortran ordering with pivots in ipiv
   // Put identity matrix in cof
   cof = 0.0;
@@ -234,9 +247,9 @@ void SVdecomp (Array<double,2> &A,
   Array<double,1> WORK(LWORK);
   int INFO;
 
-  dgesvd_(&JOBU, &JOBVT, &M, &N, Atrans.data(), &LDA,
-	  S.data(), U.data(), &LDU, V.data(), &LDVT,
-	  WORK.data(), &LWORK, &INFO);
+  FORT(dgesvd)(&JOBU, &JOBVT, &M, &N, Atrans.data(), &LDA,
+	       S.data(), U.data(), &LDU, V.data(), &LDVT,
+	       WORK.data(), &LWORK, &INFO);
   assert (INFO == 0);
   // Transpose U to get back to C ordering
   // V was really Vtrans so we don't need to transpose

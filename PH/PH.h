@@ -192,7 +192,7 @@ public:
 };
 
 
-class Potential : PseudoHamiltonian
+class Potential : public PseudoHamiltonian
 {
 public:
   // These five functions must be specialized
@@ -949,7 +949,7 @@ public:
 
   bool Read (IOSectionClass &in) 
   {
-
+    return true;
   }
   void Write (IOSectionClass &outSection)
   {
@@ -1055,18 +1055,18 @@ public:
 };
 
 
-class Aziz92 : public PseudoHamiltonian
-{
-private:
-  static const double Astar = 1.8443101e5;
-  static const double alphastar = 10.43329537;
-  static const double c6 = 1.36745214;
-  static const double c8 = 0.42123807;
-  static const double c10 = 0.17473318;
-public:
+// class Aziz92 : public PseudoHamiltonian
+// {
+// private:
+//   static const double Astar = 1.8443101e5;
+//   static const double alphastar = 10.43329537;
+//   static const double c6 = 1.36745214;
+//   static const double c8 = 0.42123807;
+//   static const double c10 = 0.17473318;
+// public:
 
 
-};
+// };
 
 
 // This potential provides a good primitive action for the coulomb

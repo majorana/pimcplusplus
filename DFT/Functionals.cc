@@ -300,8 +300,14 @@ void CorrelationPotential(scalar  nup, scalar ndown,
     Vdown = 0.0;
 }
 
-extern "C" void exccor_(double &n, double &zeta, double &exc, double &vxc, 
-		        double &vpol, int &type, int &Macdonald_Vosko);
+#ifdef NOUNDERSCORE 
+#define FORT(name) name
+#else
+#define FORT(name) name_
+#endif 
+
+extern "C" void FORT(exccor)(double &n, double &zeta, double &exc, double &vxc, 
+			     double &vpol, int &type, int &Macdonald_Vosko);
 
 void FortranExCorr(scalar  nup, scalar  ndown,
 		   scalar &Vup, scalar &Vdown)
@@ -313,7 +319,7 @@ void FortranExCorr(scalar  nup, scalar  ndown,
   int Macdonald_Vosko=/*0*/1;
   
   double exc, vxc, vpol;
-  exccor_(n, zeta, exc, vxc, vpol, type, Macdonald_Vosko);
+  FORT(exccor)(n, zeta, exc, vxc, vpol, type, Macdonald_Vosko);
 
   //  fprintf (stderr, "Fortran Exc = %12.8f\n", exc);
 
@@ -332,7 +338,7 @@ double FortranXCE (scalar nup, scalar ndown)
   int Macdonald_Vosko=/*0*/1;
   
   double exc, vxc, vpol;
-  exccor_(n, zeta, exc, vxc, vpol, type, Macdonald_Vosko);
+  FORT(exccor)(n, zeta, exc, vxc, vpol, type, Macdonald_Vosko);
   return (exc);
 }
   

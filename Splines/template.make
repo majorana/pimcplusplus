@@ -1,6 +1,6 @@
 SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc TestTricubic.cc MyTricubicSpline.cc TestMyTricubic.cc QuinticSpline.cc TestQuintic.cc DyutimanTest.cc
 
-IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o ../IO/InputFile.o ../IO/InputOutputXML.o
+IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o  ../IO/InputOutputXML.o
 
 F77Objs = fortran/evtricub.o  fortran/herm3ev.o  fortran/mktricubw.o  fortran/tcspline.o fortran/ibc_ck.o fortran/splinck.o fortran/zonfind.o fortran/tcspeval.o fortran/v_spline.o fortran/bcspline.o fortran/bcspeval.o
 
@@ -47,7 +47,7 @@ Makefile:	$(FRC)
 	rm -f $@
 	cp template.make $@
 	echo 'Automatically generated dependency list:' >> $@
-	$(CC) $(CCFLAGS) $(INCL) -MM $(SOURCES) >> $@
+	$(MAKECC) $(CCFLAGS) $(INCL) -MM $(SOURCES) >> $@
 	chmod -w $@
 
 

@@ -1,26 +1,33 @@
 #include "Grid.h"
 
-extern "C" void mktricubw_(double x[], int *nx,
-			   double y[], int *ny,
-			   double z[], int *nz,
-			   double *f, int *nf2, int *nf3,
-			   int *ibcxmin, double *bcxmin, 
-			   int *ibcxmax, double *bcxmax, int *inb1x,
-			   int *ibcymin, double *bcymin, 
-			   int *ibcymax, double *bcymax, int *inb1y,
-			   int *ibczmin, double *bczmin,
-			   int *ibczmax, double *bczmax, int *inb1z,
-			   double *wk, int *nwk, 
-			   int *ilinx, int *iliny, int *ilinz, int *ier);
+#ifdef NOUNDERSCORE 
+#define FORT(name) name
+#else
+#define FORT(name) name_
+#endif 
 
-extern "C" void evtricub_(double *xget, double *yget, double *zget,
-			  double *x, int *nx,
-			  double *y, int *ny,
-			  double *z, int *nz,
-			  int *ilinx, int *iliny, int *ilinz,
-			  double *f, int *inf2, int *inf3,
-			  int *iselect, double *fval,
-			  int *ier);
+extern "C" void FORT(mktricubw)(double x[], int *nx,
+				double y[], int *ny,
+				double z[], int *nz,
+				double *f, int *nf2, int *nf3,
+				int *ibcxmin, double *bcxmin, 
+				int *ibcxmax, double *bcxmax, int *inb1x,
+				int *ibcymin, double *bcymin, 
+				int *ibcymax, double *bcymax, int *inb1y,
+				int *ibczmin, double *bczmin,
+				int *ibczmax, double *bczmax, int *inb1z,
+				double *wk, int *nwk, 
+				int *ilinx, int *iliny, int *ilinz, int *ier);
+
+extern "C" void FORT(evtricub)(double *xget, double *yget, double *zget,
+			       double *x, int *nx,
+			       double *y, int *ny,
+			       double *z, int *nz,
+			       int *ilinx, int *iliny, int *ilinz,
+			       double *f, int *inf2, int *inf3,
+			       int *iselect, double *fval,
+			       int *ier);
+  
 
 class TricubicSpline
 {
@@ -108,6 +115,7 @@ inline TricubicSpline& TricubicSpline::operator= (TricubicSpline &a)
   IzMinBC = a.IzMinBC; IzMaxBC = a.IzMaxBC;
   Nwk = a.Nwk;
   xGrid = a.xGrid; yGrid = a.yGrid; zGrid = a.zGrid;
+  return *this;
 }
 
 inline TricubicSpline& TricubicSpline::operator= (TricubicSpline a)
@@ -124,6 +132,7 @@ inline TricubicSpline& TricubicSpline::operator= (TricubicSpline a)
   IzMinBC = a.IzMinBC; IzMaxBC = a.IzMaxBC;
   Nwk = a.Nwk;
   xGrid = a.xGrid; yGrid = a.yGrid; zGrid = a.zGrid;
+  return *this;
 }
 
 
@@ -139,13 +148,13 @@ inline double TricubicSpline::operator()(double x, double y, double z)
     iselect[i] = 0;
   int errorCode;
 
-  evtricub_(&x, &y, &z, 
-	    xGrid->data(), &Nx, 
-	    yGrid->data(), &Ny, 
-	    zGrid->data(), &Nz,
-	    &xIsLin, &yIsLin, &zIsLin,
-	    f.data(), &Nx, &Ny, 
-	    iselect, fval, &errorCode);
+  FORT(evtricub)(&x, &y, &z, 
+		 xGrid->data(), &Nx, 
+		 yGrid->data(), &Ny, 
+		 zGrid->data(), &Nz,
+		 &xIsLin, &yIsLin, &zIsLin,
+		 f.data(), &Nx, &Ny, 
+		 iselect, fval, &errorCode);
   if (errorCode != 0 || isnan(fval[0])){
     cerr << "x = " << x << endl;
     cerr << "y = " << y << endl;
@@ -196,14 +205,14 @@ inline void TricubicSpline::Update()
 //     cerr << (*zGrid)(i) << endl;
 
   double *wk = new double[Nwk];
-  mktricubw_(xGrid->data(), &Nx,
-	     yGrid->data(), &Ny,
-	     zGrid->data(), &Nz,
-	     f.data(), &Nx, &Ny,
-	     &IxMinBC, &dummyDouble, &IxMaxBC, &dummyDouble, &dummyInt,
-	     &IyMinBC, &dummyDouble, &IyMaxBC, &dummyDouble, &dummyInt,
-	     &IzMinBC, &dummyDouble, &IzMaxBC, &dummyDouble, &dummyInt,
-	     wk, &Nwk, &xIsLin, &yIsLin, &zIsLin, &errorCode);
+  FORT(mktricubw)(xGrid->data(), &Nx,
+		  yGrid->data(), &Ny,
+		  zGrid->data(), &Nz,
+		  f.data(), &Nx, &Ny,
+		  &IxMinBC, &dummyDouble, &IxMaxBC, &dummyDouble, &dummyInt,
+		  &IyMinBC, &dummyDouble, &IyMaxBC, &dummyDouble, &dummyInt,
+		  &IzMinBC, &dummyDouble, &IzMaxBC, &dummyDouble, &dummyInt,
+		  wk, &Nwk, &xIsLin, &yIsLin, &zIsLin, &errorCode);
   delete wk;
   for (int ix=0; ix<Nx; ix++)
     for (int iy=0; iy<Ny; iy++)

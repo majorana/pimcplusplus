@@ -1,5 +1,5 @@
 PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" \
-"DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}"
+"DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}" "MAKECC=${MAKECC}"
 
 MAKE_ALL = ${MAKE} all $(PASS_DEFS)
 MAKE_NEWMAKE = ${MAKE} -f template.make newmake $(PASS_DEFS)

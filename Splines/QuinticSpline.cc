@@ -1,8 +1,14 @@
 #include "QuinticSpline.h"
 
-extern "C" void quinat_ (int *N, double X[], double Y[], 
-			 double B[], double C[], double D[], 
-			 double E[], double F[]);
+#ifdef NOUNDERSCORE 
+#define FORT(name) name
+#else
+#define FORT(name) name_
+#endif 
+
+extern "C" void FORT(quinat) (int *N, double X[], double Y[], 
+			      double B[], double C[], double D[], 
+			      double E[], double F[]);
 
 
 
@@ -44,8 +50,8 @@ void QuinticSpline::Update()
   }
   int Fpoints = FX.size();
   // Call FORTRAN routine
-  quinat_ (&Fpoints, FX.data(), FY.data(), FB.data(), FC.data(),
-	   FD.data(), FE.data(), FF.data());
+  FORT(quinat) (&Fpoints, FX.data(), FY.data(), FB.data(), FC.data(),
+		FD.data(), FE.data(), FF.data());
 
   // Now copy the data into our coefficents
   B(0) = FB(offset);
