@@ -1141,7 +1141,10 @@ public:
   // a primitive approximation for large r.
   inline double V2(double r)
   {
-    return (Z1Z2/r);
+    if (r != 0.0)
+      return (Z1Z2/r);
+    else
+      return (1e4*r);
   }
   
   // This is a mixing function to transition from V1 to V2;
@@ -1257,7 +1260,11 @@ public:
 
   double V(double r)
   {
-    return (Z1Z2/r);
+    // HACK 
+    if (r < 0.0001)
+      return (Z1Z2/r);
+    else
+      return (1e4*Z1Z2);
   }
 
   PHType Type()
