@@ -215,7 +215,7 @@ def ProcessScalarSection(infiles,doc,currNum):
                myFrame=IFrame()
 #               myFrame.scrolling='no'
                myFrame.src=pageName
-               myFrame.width="1000%"
+               myFrame.width="100%"
                myFrame.height="400"
 #               myImg=ProduceTracePicture(data[0], baseName,'Blocks',varName)
                toAddList.append(myFrame)
