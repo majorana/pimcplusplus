@@ -219,6 +219,50 @@ TinyMatrix<double,3,3> kSpacePH::Ftensor (Vec3 deltaG)
   return F;
 }
 
+TinyMatrix<double,3,3> 
+kSpacePH::Ftensor (Vec3 deltaG, double aVal, double bPerpVal,
+				double bParVal)
+{
+  Vec3 g;
+  double Gmag = sqrt (dot(deltaG, deltaG));
+  if (Gmag == 0.0)
+    g = Vec3 (1.0, 0.0, 0.0);
+  else
+    g = deltaG / Gmag;
+
+  TinyMatrix<double,3,3> F, G;
+  F(0,0)=aVal+bPerpVal;   F(0,1)=0.0;           F(0,2)=0.0;
+  F(1,0)=0.0;             F(1,1)=aVal+bPerpVal; F(1,2)=0.0;  
+  F(2,0)=0.0;             F(2,1)=0.0;           F(2,2)=aVal+bPerpVal;
+  G(0,0)=g[0]*g[0]; G(0,1)=g[0]*g[1]; G(0,2)=g[0]*g[2];
+  G(1,0)=g[1]*g[0]; G(1,1)=g[1]*g[1]; G(1,2)=g[1]*g[2];
+  G(2,0)=g[2]*g[0]; G(2,1)=g[2]*g[1]; G(2,2)=g[2]*g[2];
+  F = F + (bParVal - bPerpVal)*G;
+  return F;
+}
+
+void
+kSpacePH::GetVals (double dGmag, double &aVal, 
+		   double &bPerpVal, double &bParVal, double &VVal)
+{
+  aVal     = a(dGmag);
+  bPerpVal = bPerp(dGmag);
+  bParVal  = bPar (dGmag);
+  VVal     = Vk (dGmag);
+}
+
+double 
+kSpacePH::V (double deltaGmag)
+{
+  double aval, bPerpval, bParval, Vval;
+  if (UseCache)
+    Cache.GetVals (deltaGmag, aval, bPerpval, bParval, Vval);
+  else
+    Vval = Vk(deltaGmag);
+  return Vval;
+}
+		   
+
 double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
 {
   Vec3 deltaG = G-Gp;

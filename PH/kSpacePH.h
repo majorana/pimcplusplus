@@ -43,15 +43,18 @@ protected:
   /// V = Ctail/r + Ctail2/r^2 + Ctail3/r^3
   double Ctail1, Ctail2, Ctail3;
 
-  /// Member functions 
+  //////////////////////
+  // Member functions //
+  //////////////////////
+
+  /// Returns fourier component of potential part
   double Vk (double k);
+  /// Fourier transform of a(r)
   double a  (double k);
   /// The perpendicular component of the b tensor
   double bPerp (double k);
   /// The perpendicular component of the b tensor
   double bPar  (double k);
-  /// Returns the F tensor for k
-  TinyMatrix<double,3,3> Ftensor (Vec3 deltaG);
   bool HaveTailCoefs;
   double R1, R2;
   kCache Cache;
@@ -61,6 +64,18 @@ public:
   /// and end of the region of the potential fit to the form given
   /// above. 
   void CalcTailCoefs(double r1, double r2);
+
+  /// Returns the F tensor for k
+  TinyMatrix<double,3,3> Ftensor (Vec3 deltaG, 
+				  double aVal, double bPerpVal,
+				  double bPparVal);
+  TinyMatrix<double,3,3> Ftensor (Vec3 deltaG);
+
+  void GetVals (double dGmag, 
+		double &aval, double &bPerpVal, double &bParVal, double &VVal);
+
+  /// Returns to fourier component of V, using cached values
+  double V(double deltaGmag);
 
   /// This returns the k-space representation of the
   /// pseudohamiltonian.  Note that it does not contain the 1/Vcell

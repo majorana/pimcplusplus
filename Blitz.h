@@ -13,6 +13,8 @@ typedef TinyVector<scalar,3> Vec3;
 typedef TinyVector<scalar,4> Vec4;
 typedef TinyMatrix<scalar,2,2> Mat2;
 typedef TinyMatrix<scalar,3,3> Mat3;
+typedef TinyVector<complex<double>,3>   cVec3;
+typedef TinyMatrix<complex<double>,3,3> cMat3;
 
 typedef TinyVector<scalar,NDIM> dVec;
 typedef TinyVector<int,NDIM> dVecInt;
@@ -201,11 +203,65 @@ inline Vec3 operator*(const Mat3& A, const Vec3 &v)
   return Av;
 }
 
+inline cMat3 operator+(const cMat3 &A, const cMat3 &B)
+{
+  cMat3 ApB;
+  ApB(0,0)=A(0,0)+B(0,0); ApB(0,1)=A(0,1)+B(0,1); ApB(0,2)=A(0,2)+B(0,2);
+  ApB(1,0)=A(1,0)+B(1,0); ApB(1,1)=A(1,1)+B(1,1); ApB(1,2)=A(1,2)+B(1,2);
+  ApB(2,0)=A(2,0)+B(2,0); ApB(2,1)=A(2,1)+B(2,1); ApB(2,2)=A(2,2)+B(2,2);
+}
+
+inline cMat3 operator-(const cMat3 &A, const cMat3 &B)
+{
+  cMat3 AmB;
+  AmB(0,0)=A(0,0)-B(0,0); AmB(0,1)=A(0,1)-B(0,1); AmB(0,2)=A(0,2)-B(0,2);
+  AmB(1,0)=A(1,0)-B(1,0); AmB(1,1)=A(1,1)-B(1,1); AmB(1,2)=A(1,2)-B(1,2);
+  AmB(2,0)=A(2,0)-B(2,0); AmB(2,1)=A(2,1)-B(2,1); AmB(2,2)=A(2,2)-B(2,2);
+}
+
+inline cMat3& operator+=(cMat3 &A, const cMat3 &B)
+{
+  A(0,0)+=B(0,0); A(0,1)+=B(0,1); A(0,2)+=B(0,2);
+  A(1,0)+=B(1,0); A(1,1)+=B(1,1); A(1,2)+=B(1,2);
+  A(2,0)+=B(2,0); A(2,1)+=B(2,1); A(2,2)+=B(2,2);
+  return A;
+}
+
+inline cMat3& operator-=(cMat3 &A, const cMat3 &B)
+{
+  A(0,0)-=B(0,0); A(0,1)-=B(0,1); A(0,2)-=B(0,2);
+  A(1,0)-=B(1,0); A(1,1)-=B(1,1); A(1,2)-=B(1,2);
+  A(2,0)-=B(2,0); A(2,1)-=B(2,1); A(2,2)-=B(2,2);
+  return A;
+}
+
 inline double operator*(const Vec3 &v1, const Vec3 &v2)
 {
   return (v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]);
 }
 
+inline cMat3 operator*(complex<double> z, const Mat3 &A)
+{
+  cMat3 zA;
+  zA(0,0)=z*A(0,0); zA(0,1)=z*A(0,1); zA(0,2)=z*A(0,2);
+  zA(1,0)=z*A(1,0); zA(1,1)=z*A(1,1); zA(1,2)=z*A(1,2);
+  zA(2,0)=z*A(2,0); zA(2,1)=z*A(2,1); zA(2,2)=z*A(2,2);
+  return zA;
+}
+
+inline cMat3 operator*(const Mat3 &A, complex<double> z)
+{
+  return z*A;
+}
+
+inline cVec3 operator*(const cMat3 &A, const cVec3 &x)
+{
+  cVec3 Ax;
+  Ax[0] = A(0,0)*x[0] + A(0,1)*x[1] + A(0,2)*x[2];
+  Ax[1] = A(1,0)*x[0] + A(1,1)*x[1] + A(1,2)*x[2];
+  Ax[2] = A(2,0)*x[0] + A(2,1)*x[1] + A(2,2)*x[2];
+  return Ax;
+}
 
 inline double distSqrd(Vec2 a,Vec2 b)
 {

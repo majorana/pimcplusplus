@@ -22,10 +22,10 @@ void FFT3D::resize(int nx, int ny, int nz)
 
   r2kPlan = 
     fftw_plan_dft_3d(nx, ny, nz, reinterpret_cast<fftw_complex*>(rData), 
-		     reinterpret_cast<fftw_complex*>(kData), 1, FFTW_PATIENT);
+		     reinterpret_cast<fftw_complex*>(kData), 1, FFTW_MEASURE);
   k2rPlan = 
     fftw_plan_dft_3d (nx, ny, nz, reinterpret_cast<fftw_complex*>(kData), 
-		      reinterpret_cast<fftw_complex*>(rData), -1,FFTW_PATIENT);
+		      reinterpret_cast<fftw_complex*>(rData), -1,FFTW_MEASURE);
 
   sqrtNinv = sqrt(1.0/(double)(nx*ny*nz));
   Allocated = true;
@@ -73,13 +73,13 @@ void FFTVec3D::resize(int nx, int ny, int nz)
 			reinterpret_cast<fftw_complex*>(rData),
 			n, 3, 1, 
 			reinterpret_cast<fftw_complex*>(kData), 
-			n, 3, 1, 1, FFTW_PATIENT);
+			n, 3, 1, 1, FFTW_MEASURE);
   assert (r2kPlan != NULL);
   k2rPlan = 
     fftw_plan_many_dft (3, n, 3, reinterpret_cast<fftw_complex*>(kData),
 			n, 3, 1, 
 			reinterpret_cast<fftw_complex*>(rData), n,
-			3, 1, -1, FFTW_PATIENT);
+			3, 1, -1, FFTW_MEASURE);
   assert (k2rPlan != NULL);
 
 //   r2kPlan = 
@@ -134,13 +134,13 @@ void FFTMat3D::resize(int nx, int ny, int nz)
 			reinterpret_cast<fftw_complex*>(rData),
 			n, 9, 1, 
 			reinterpret_cast<fftw_complex*>(kData), 
-			n, 9, 1, 1, FFTW_PATIENT);
+			n, 9, 1, 1, FFTW_MEASURE);
   assert (r2kPlan != NULL);
   k2rPlan = 
     fftw_plan_many_dft (3, n, 9, reinterpret_cast<fftw_complex*>(kData),
 			n, 9, 1, 
 			reinterpret_cast<fftw_complex*>(rData), 
-			n, 9, 1, -1, FFTW_PATIENT);
+			n, 9, 1, -1, FFTW_MEASURE);
   assert (k2rPlan != NULL);
 
   sqrtNinv = sqrt(1.0/(double)(nx*ny*nz));

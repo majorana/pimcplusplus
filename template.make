@@ -8,7 +8,7 @@ MAKE_CLEAN = ${MAKE} clean
 all:	IO_obj Splines_obj PH_obj Integration_obj DFT_obj MPI_obj Random_obj \
         Optimize_obj SpecialFunctions_obj MatrixOps_obj \
 	Fitting_obj PairAction_obj Distributed_obj Atom_obj \
-        Ewald_obj #Plotting_obj
+        Ewald_obj FFT_obj PW_obj #Plotting_obj
 
 
 PH_obj:
@@ -58,11 +58,17 @@ Ewald_obj:
 Plotting_obj:
 	cd Plotting; $(MAKE_ALL)
 
+FFT_obj:
+	cd FFT; $(MAKE_ALL)
+
+PW_obj:
+	cd PlaneWavePHDFT; $(MAKE_ALL)
+
 
 CLEANS = PH_clean Splines_clean Integration_clean IO_clean DFT_clean \
 	 Random_clean MPI_clean Optimize_clean SpecialFunctions_clean \
 	 MatrixOps_clean Fitting_clean PairAction_clean Distributed_clean \
-	 Atom_clean Ewald_clean #Plotting_clean
+	 Atom_clean Ewald_clean FFT_clean PW_clean #Plotting_clean
 
 
 clean:	$(CLEANS)
@@ -116,6 +122,11 @@ Ewald_clean:
 Plotting_clean:
 	cd Plotting; $(MAKE_CLEAN)
 
+FFT_clean:
+	cd FFT; $(MAKE_CLEAN)
+
+PW_clean:
+	cd PlaneWavePHDFT; $(MAKE_CLEAN)
 
 
 
@@ -167,12 +178,18 @@ Ewald_newmake:
 Plotting_newmake:
 	cd Plotting; $(MAKE_NEWMAKE)
 
+FFT_newmake:
+	cd FFT; $(MAKE_NEWMAKE)
+
+PW_newmake:
+	cd PlaneWavePHDFT; $(MAKE_NEWMAKE)
 
 
-NEW_MAKES = PH_newmake Splines_newmake Integration_newmake IO_newmake \
-DFT_newmake Random_newmake MPI_newmake Optimize_newmake \
+NEW_MAKES = PH_newmake Splines_newmake Integration_newmake IO_newmake         \
+DFT_newmake Random_newmake MPI_newmake Optimize_newmake                       \
 SpecialFunctions_newmake MatrixOps_newmake Fitting_newmake PairAction_newmake \
-Distributed_newmake Atom_newmake Ewald_newmake #Plotting_newmake
+Distributed_newmake Atom_newmake Ewald_newmake FFT_newmake PW_newmake         \
+ #Plotting_newmake
 
 SOURCES = `*.cc`
 
