@@ -17,9 +17,10 @@ void PairActionFitClass::WriteHeader (Rho &rho, IOSectionClass &outSection)
 
   outSection.NewSection("PH");
   PH->Write (outSection);
+  outSection.CloseSection();
 }
 
-void PA2DFitClass::Write(IOSectionClass &outSection)
+void PA2DFitClass::WriteHeader(IOSectionClass &outSection)
 {
 
 }
