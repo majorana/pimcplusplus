@@ -6,6 +6,7 @@ bool SpeciesClass::Read(IOSectionClass &inSection)
   assert(inSection.ReadVar("lambda",lambda));
   assert(inSection.ReadVar("NumParticles",NumParticles));
   assert(inSection.ReadVar("NumDim",NumDim));
+  assert(inSection.ReadVar("Type",Type));
   return true;
 }
 
@@ -20,20 +21,20 @@ bool FermionClass::Read(IOSectionClass &inSection)
 SpeciesClass* ReadSpecies(IOSectionClass &inSection)
 {
   
-  string typeString;
+  string statisticsString;
   SpeciesClass *mySpecies;
-  assert(inSection.ReadVar("Type",typeString));
+  assert(inSection.ReadVar("Statistics",statisticsString));
   //  cerr<<"My type string is "<<typeString<<endl;
-  if (typeString=="FERMION")
+  if (statisticsString=="FERMION")
     mySpecies=new FermionClass();
-  else if (typeString=="BOSON"){
+  else if (statisticsString=="BOSON"){
     mySpecies=new BosonClass();
   }
-  else if (typeString=="BOLTZMANNON"){
+  else if (statisticsString=="BOLTZMANNON"){
     mySpecies=new BoltzmannonClass();
   }
   else {
-    cerr<<"Species Type Unknown "<<typeString<<endl;
+    cerr<<"Species Statistics Unknown "<<statisticsString<<endl;
     exit(1);
   }
   assert(mySpecies->Read(inSection));

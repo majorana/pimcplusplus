@@ -35,24 +35,29 @@ void ActionsClass::Read(IOSectionClass &in)
   IOSectionClass PAIO;
   bool longRange = false;
   for (int i=0; i<numPairActions; i++) {
-    // cerr << "i = " << i << endl;
     assert(PAIO.OpenFile (PAFiles(i)));
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
     longRange |= PairArray(i)->IsLongRange();
-    int type1 = Path.SpeciesNum(PairArray(i)->Particle1.Name);
-    int type2 = Path.SpeciesNum(PairArray(i)->Particle2.Name);
-    if (type1==-1) {
-      cerr << "Unrecognized type \""
-	   << PairArray(i)->Particle1.Name << "\".\n";
-      abort();
+    bool paUsed=false;
+    for (int spec1=0;spec1<Path.NumSpecies();spec1++)
+      if (Path.Species(spec1).Type==PairArray(i)->Particle1.Name)
+	for (int spec2=0;spec2<Path.NumSpecies();spec2++) 
+	  if (Path.Species(spec2).Type==PairArray(i)->Particle2.Name) {
+	    if (PairMatrix(spec1,spec2) != NULL) {
+	      cerr << "More than one pair action for species types (" 
+		   << PairArray(i)->Particle1.Name << ", "
+		   << PairArray(i)->Particle1.Name << ")." << endl;
+	      exit(-1);
+	    }
+	    PairMatrix(spec1,spec2) = PairArray(i);
+	    PairMatrix(spec2,spec1) = PairArray(i);
+	    paUsed = true;
+	  }
+    if (!paUsed) {
+      cerr << "Warning:  Pair action for species types (" 
+	   << PairArray(i)->Particle1.Name << ", "
+ 	   << PairArray(i)->Particle1.Name << ") not used.\n";
     }
-    if (type2==-1) {
-      cerr << "Unrecognized type \""
-	   << PairArray(i)->Particle2.Name << "\".\n";
-      abort();
-    }
-    PairMatrix(type1,type2) = PairArray(i);
-    PairMatrix(type2,type1) = PairArray(i);
     PAIO.CloseFile();
   }
 

@@ -13,7 +13,7 @@ typedef enum {FERMION, BOSON, BOLTZMANNON, ANYON} ParticleType;
 class SpeciesClass
 {
 public:
-  string Name, NodeType;
+  string Name, Type, NodeType;
   /// FirstPtcl and LastPtcl are inclusive
   int LastPtcl;
   int FirstPtcl;
