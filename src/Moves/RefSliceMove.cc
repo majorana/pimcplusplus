@@ -122,7 +122,8 @@ void RefSliceMoveClass::MakeMoveMaster()
   Slice2 = Slice1 + bisectSlices;
   assert (Slice1 >= 0);
   assert ((localRef >= Slice1) && (localRef <= Slice2));
-
+  // Move the join out of the way.
+  PathData.MoveJoin(Slice2);
   ActiveParticles.resize(1);
   ActiveParticles(0) = -1;
   // Go through local stages

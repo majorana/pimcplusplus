@@ -374,6 +374,11 @@ double FreeNodalActionClass::NodalDist (int slice)
 }
 
 
+
+/// HybridDist first computes a distance with the 1/grad(ln(det))
+/// method.  If this method says we're far from the nodes, we go with
+/// that.  If it says we're close, call LineSearchDist to get a more
+/// accurate value.
 double FreeNodalActionClass::HybridDist (int slice, double lambdaTau)
 {
   SpeciesClass &species = Path.Species(SpeciesNum);
@@ -392,15 +397,20 @@ double FreeNodalActionClass::HybridDist (int slice, double lambdaTau)
 
   double gradDist = det/sqrt(grad2);
 
-  if (((NumGradDists+NumLineDists)%100000) == 99999) {
+  if (((NumGradDists+NumLineDists)%1000000) == 999999) {
     cerr << "Percent line searches = "
 	 << (double)NumLineDists/(NumGradDists+NumLineDists) << endl;
   }
     
-  if (gradDist > sqrt(6.0*lambdaTau)) {
+  // gradDist will almost always be a lower bound to the real
+  // distance.  Therefore, if says we are far from the nodes, we
+  // probably are and we can just use its value.
+  if (gradDist > sqrt(5.0*lambdaTau)) {
     NumGradDists++;
     return (gradDist);
   }
+  // However, if gradDist says we are close, we should check to see if
+  // it is correct with a more accurate bisection search.
   else {
     NumLineDists++;
     return LineSearchDist(slice);
@@ -729,7 +739,10 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
     else
       prod = dist1*dist2;
 
-    uNode += prod/(lambda*levelTau*levelTau)/expm1(prod/(lambda*levelTau));
+    double prod_llt = prod/(lambda*levelTau);
+    double exp_m1 = expm1 (prod_llt);
+    if ((!isnan(prod_llt)) && (exp_m1 != 0.0))
+      uNode += prod_llt / (levelTau*exp_m1);
     dist1 = dist2;
   }
   //  return 0.0;

@@ -6,7 +6,11 @@
 #include "PermuteStageClass.h"
 #include "BisectionStageClass.h"
 
-/// This is the bisection move class inherited from ParticleMoveClass
+/// This move, inherited from ParticleMoveClass, performs a set of
+/// bisection stages over a set of time slices which contains the
+/// reference slice.  The processor which owns the reference slice is
+/// the only one that actually moves particles, while the other
+/// processors simply compute the change in the nodal action.
 /// Explanation of how bisection moves work is in  
 /// Path Integrals in the theory of condensed helium
 /// by D.M. Ceperley  (Review of Modern Physics 1995) section V.H

@@ -19,15 +19,16 @@ Section (System)
       string Type="FERMION";
       //      string Type="BOLTZMANNON";
       string NodeType = "FREE";
-      int NumParticles=2;
+      int NumParticles=3;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
 //       Array<double,2> Positions(4,3)=[ 0.0, 0.0, 0.0 ,
 // 				       4.1, 4.1, 4.1 , 
 // 				       2.2, -2.2, 0.2 ,
 // 				       -4.1,-4.1,-4.1];
-      Array<double,2> Positions(2,3)=[ -0.2, -0.2, -0.2,
-				       0.2, 0.2, 0.2 ];
+      Array<double,2> Positions(3,3)=[ -0.2, -0.2, -0.2,
+				       0.2, 0.2, 0.2,
+				       0.3, 0.3, 0.4 ];
     }
   }
 }
@@ -41,7 +42,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "FF_tau0.00125_beta0.25.hybrid6";
+  string OutFileBase = "3FF_tau0.00125_beta0.25.hybrid";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
@@ -68,7 +69,7 @@ Section (Moves) {
   Section (Move) {
     string type="BisectionBlock";
     string name="BisectionBlock";
-    string PermuteType="NONE";
+    string PermuteType="TABLE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
     int NumLevels=6;
     string Species = "free";
@@ -78,7 +79,8 @@ Section (Moves) {
   Section (Move) {
     string type="RefSlice";
     string name="RefSlice";
-    string PermuteType="NONE";
+    string PermuteType="TABLE";
+    Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
     int NumLevels=6;
     string Species = "free";
   }
