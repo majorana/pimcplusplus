@@ -27,6 +27,7 @@ private:
   /// Boundary conditions stuff //
   ////////////////////////////////
   dVec IsPeriodic;
+
   dVec Box, BoxInv;
   dVec kBox; //kBox(i)=2*Pi/Box(i)
 
@@ -34,13 +35,20 @@ private:
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
 private:
+  /// This is the maximum number of k vectors in each direction
+  TinyVector<int,NDIM> MaxkIndex;
   /// True if we need k-space sums for long range potentials.
   bool LongRange;
   /// Stores the radius of the k-space sphere we sum over
   double kCutoff;
   /// Allocates and sets up the k-vectors.
   void SetupkVecs();
+  /// Stores indices into C array for fast computation of rho_k
+  Array<TinyVector<int,NDIM>,1> kIndices;
+  /// This stores e^{i\vb_i \cdot r_i^\alpha}
+  TinyVector<Array<complex<double>,1>,NDIM> C;
 public:
+  /// Stores the actual k vectors
   Array<dVec,1> kVecs;
   /// This holds the density of particles in k-space.  Indexed by
   /// (slice, species, k-vector).  Defined as
@@ -48,7 +56,8 @@ public:
   /// Stores the kvectors needed for the reciporical space sum.
   /// Stores only half the vectors because of k/-k symmetry.
   Mirrored3DClass< complex<double> > Rho_k;
-  void CalcRho_ks(int slice);  
+  void CalcRho_ks_Slow(int slice, int species);  
+  void CalcRho_ks_Fast(int slice, int species);  
 
 private:
   void ShiftPathData(int sliceToShift);
@@ -113,6 +122,7 @@ public:
   void Allocate();
 
   inline PathClass(PIMCCommunicatorClass &communicator);
+  friend void SetupPath(PathClass &path);
 };
 
 
@@ -317,9 +327,9 @@ inline void PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
       DBdispA(i) -= Box(i);
     while (DBdispA(i) < -0.5*Box(i)) 
       DBdispA(i) += Box(i);
-    while ((DBdispB-DBdispA) > 0.5*Box(i))
+    while ((DBdispB(i)-DBdispA(i)) > 0.5*Box(i))
       DBdispB -= Box(i);
-    while ((DBdispB-DBdispA) < -0.5*Box(i))
+    while ((DBdispB(i)-DBdispA(i)) < -0.5*Box(i))
       DBdispB += Box(i);
   }
 //   cerr << "DBdispA = " << DBdispA << endl;

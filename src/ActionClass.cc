@@ -212,7 +212,7 @@ double ActionClass::CalcLRAction(int slice, int level)
 
   // First, do the homologous (same species) terms
   for (int species=0; species<Path.NumSpecies(); species++) {
-    Path.CalcRho_ks(slice);
+    Path.CalcRho_ks_Fast(slice,species);
     int paIndex = PairMatrix(species,species);
     PairActionFitClass &PA = *PairActionVector(paIndex);
     if (PA.IsLongRange()) {

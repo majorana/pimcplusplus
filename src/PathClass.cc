@@ -140,39 +140,51 @@ void PathClass::Allocate()
 
 void PathClass::SetupkVecs()
 {
-  dVec kBox;
+
   for (int i=0; i<NDIM; i++)
-    kBox[i] = 2.0*M_PI/Box(i);
+    kBox[i] = 2.0*M_PI/Box[i];
   
   int numVecs=0;
 
   assert (NDIM == 3);
-  int nx = (int) ceil(1.25*kCutoff / kBox[0]);
-  int ny = (int) ceil(1.25*kCutoff / kBox[1]);
-  int nz = (int) ceil(1.25*kCutoff / kBox[2]);
-  
+
+  cerr << "kBox = " << kBox << endl;
+  for (int i=0;i<NDIM;i++){
+    MaxkIndex[i]= (int) ceil(1.1*kCutoff/kBox[i]);
+    cerr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
+  }
+
+
   dVec k;
-  for (int ix=-nx; ix<=nx; ix++) {
+  TinyVector<int,NDIM> ki;
+  for (int ix=-MaxkIndex[0]; ix<=MaxkIndex[0]; ix++) {
     k[0] = ix*kBox[0];
-    for (int iy=-nx; iy<=ny; iy++) {
+    for (int iy=-MaxkIndex[1]; iy<=MaxkIndex[1]; iy++) {
       k[1] = iy*kBox[1];
-      for (int iz=-nx; iz<=nz; iz++) {
+      for (int iz=-MaxkIndex[2]; iz<=MaxkIndex[2]; iz++) {
 	k[2] = iz*kBox[2];
 	if ((dot(k,k)<kCutoff*kCutoff) && Include(k))
 	  numVecs++;
       }
     }
   }
+  kIndices.resize(numVecs);
   kVecs.resize(numVecs);
+  for (int i=0; i<NDIM; i++)
+    C[i].resize(2*MaxkIndex[i]+1);
   numVecs = 0;
-  for (int ix=-nx; ix<=nx; ix++) {
+  for (int ix=-MaxkIndex[0]; ix<=MaxkIndex[0]; ix++) {
     k[0] = ix*kBox[0];
-    for (int iy=-nx; iy<=ny; iy++) {
+    ki[0]= ix+MaxkIndex[0];
+    for (int iy=-MaxkIndex[1]; iy<=MaxkIndex[1]; iy++) {
       k[1] = iy*kBox[1];
-      for (int iz=-nx; iz<=nz; iz++) {
+      ki[1]= iy+MaxkIndex[1];
+      for (int iz=-MaxkIndex[2]; iz<=MaxkIndex[2]; iz++) {
 	k[2] = iz*kBox[2];
+	ki[2]= iz+MaxkIndex[2];
 	if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
 	  kVecs(numVecs) = k;
+	  kIndices(numVecs)=ki;
 	  numVecs++;
 	}
       }
@@ -181,23 +193,55 @@ void PathClass::SetupkVecs()
 }
 
 
-void PathClass::CalcRho_ks(int slice)
+void PathClass::CalcRho_ks_Slow(int slice, int species)
 {
 
-  for (int species=0; species<NumSpecies(); species++)
-    for (int ki=0; ki<kVecs.size(); ki++) {
-      complex<double> rho;
-      rho = 0.0;
-      for (int ptcl=Species(species).FirstPtcl; 
-	   ptcl <= Species(species).LastPtcl; ptcl++) {
-	const dVec &r = (*this)(slice, ptcl);
-	double phase = dot(r, kVecs(ki));
-	// The 2 accounts for the k/-k optimization
-	rho += 2.0 * complex<double> (cos(phase), sin(phase));
-      }
-      Rho_k(slice, species, ki) = rho;
+  for (int ki=0; ki<kVecs.size(); ki++) {
+    complex<double> rho;
+    rho = 0.0;
+    for (int ptcl=Species(species).FirstPtcl; 
+	 ptcl <= Species(species).LastPtcl; ptcl++) {
+      const dVec &r = (*this)(slice, ptcl);
+      double phase = dot(r, kVecs(ki));
+      // The 2 accounts for the k/-k optimization
+      rho += 2.0 * complex<double> (cos(phase), sin(phase));
     }
+    Rho_k(slice, species, ki) = rho;
+  }
 }
+
+void PathClass::CalcRho_ks_Fast(int slice,int species)
+{
+  // Zero out Rho_k array
+  for (int ki=0;ki<kIndices.size();ki++)
+    Rho_k(slice,species,ki)=0.0;
+
+  for (int ptcl=Species(species).FirstPtcl; 
+       ptcl <= Species(species).LastPtcl; ptcl++) {
+    // First, compute C arrays
+    const dVec &r = (*this)(slice, ptcl);
+    for (int dim=0;dim<NDIM;dim++){
+      complex<double> tempC;
+      double phi = r[dim] * kBox[dim];
+      tempC=complex<double>(cos(phi), sin(phi));
+      C[dim](MaxkIndex[dim]) = 0.0;
+      for (int n=1; n<=MaxkIndex[dim]; n++) {
+	C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
+	C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));
+      }
+    }
+    // Now, loop over k-vector indices;
+    for (int ki=0; ki<kIndices.size(); ki++) {
+      complex<double> rho_k;
+      const TinyVector<int,NDIM> &kIndex = kIndices(ki);
+      rho_k = C[0](kIndex[0]);
+      for (int i=1; i<NDIM; i++)
+	rho_k *= C[i](kIndex[i]);
+      Rho_k(slice,species,ki) += rho_k;
+    }
+  }
+}
+      
 
 
 void PathClass::MoveJoin(int oldJoin, int newJoin)
