@@ -100,7 +100,7 @@ void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
 double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk, 
 					Array<double,1> &t)
 {
-  const double tolerance = 1.0e-12;
+  const double tolerance = 1.0e-16;
   assert(t.rows()==Basis.NumElements());
   Array<double,2> A;
   Array<double,1> b;
@@ -144,6 +144,11 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
     Smax = max (S(i),Smax);
   for (int i=0; i<S.size(); i++)
     Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
+  int numSingular = 0;
+  for (int i=0; i<Sinv.size(); i++)
+    if (Sinv(i) == 0.0)
+      numSingular++;
+  cerr << "There were " << numSingular << " singular values.\n";
   t = 0.0;
   // Compute t_n, removing singular values
   for (int i=0; i<numElem; i++) {
@@ -171,7 +176,7 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
 					Array<double,1> &t,
 					const Array<bool,1> &adjust)
 {
-  const double tolerance = 1.0e-9;
+  const double tolerance = 1.0e-16;
   assert(t.rows()==adjust.rows());
   assert(t.rows()==Basis.NumElements());
   Array<double,2> A;
@@ -249,6 +254,11 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
     Smax = max (S(i),Smax);
   for (int i=0; i<M; i++)
     Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
+  int numSingular = 0;
+  for (int i=0; i<Sinv.size(); i++)
+    if (Sinv(i) == 0.0)
+      numSingular++;
+  cerr << "There were " << numSingular << " singular values.\n";
   tc = 0.0;
   // Compute t_n, removing singular values
   for (int i=0; i<M; i++) {
