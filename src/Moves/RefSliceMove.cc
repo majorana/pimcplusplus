@@ -142,6 +142,7 @@ void RefSliceMoveClass::MakeMoveMaster()
   // Otherwise, reject the whole move
   else {
     Reject();
+    Path.RefPath.RejectCopy();
   }
 
 }
@@ -166,6 +167,8 @@ void RefSliceMoveClass::MakeMoveSlave()
 
   int accept;
   /// Receive broadcast from Master.
+  cerr << "Before SetMode(NEWMODE), mode = " << 
+  SetMode (NEWMODE);
   PathData.Path.Communicator.Broadcast (master, accept);
   if (accept==1) {
     if (NodeCheck()) {
