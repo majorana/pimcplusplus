@@ -4,53 +4,29 @@
 #include "PathClass.h"
 #include "PermutationClass.h"
 
+typedef enum {FERMION, BOSON, BOLTZMANNON, ANYON} ParticleType;
+
+
 /// This is an base class that holds all the information about
 /// identical particles.  It may be specialized to hold specialized
 /// information about particular types of particles.
 class SpeciesClass
 {
 public:
-  /// Stores the positions and timestamp for all particles and TimeSlices
-  PathClass Path;
-  int Join;
-  /// Stores the permutation for my set of time-slices. This needs to be resized at some point!!
-  MirroredArrayClass1D<int> Permutation;
-  
-  void InitPermMatrix()
-    {
 
-      Permutation.Resize(NumParticles());
-      for (int counter=0;counter<NumParticles();counter++){
-	Permutation.Set(counter,counter);
-      }
-    }
+  /// FirstPtcl and LastPtcl are inclusive
+  int LastPtcl;
+  int FirstPtcl;
 
-  inline int NumParticles()
-  { return Path.NumParticles(); }
-  inline int NumTimeSlices()
-  { return Path.NumTimeSlices(); }
+  int NumParticles;
 
-
-  ////This function moves the join from one place to another.
-  ///Do not move the join to slice 0 or slice n. I think this 
-  ///will cause problems. 
-
-  inline void MoveJoin(int newJoin)
-  {
-    Path.MoveJoin(Permutation,Join,newJoin);
-    Join=newJoin;
-    return;
-  }
-  
-
-  inline void ShiftData(int sliceToShift, CommunicatorClass &communicator)
-    {Path.ShiftData(sliceToShift,communicator);};
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
   /// classical particle.
   double lambda;
   
   /// Returns the nodal action for fermions.  Returns 0 for bosons.
   virtual double NodeAction (int Ptcl, int LinkNum) = 0;
+  virtual ParticleType GetParticleType();
 };
 
 
@@ -60,33 +36,53 @@ public:
 ///the electrons. Eventually this will probably be turned into
 ///a fermion class.  Currently, no actual information about the electrons
 ///are actually included.
-class ElectronsClass : public SpeciesClass
+class FermionClass : public SpeciesClass
 {
 public:
   ///When we make this work, this calculates the NodeActions
   double NodeAction (int Ptcl, int LinkNum);
-  ElectronsClass(){};
-  ~ElectronsClass();
-
+  FermionClass()  { };
+  ~FermionClass() { };
+  ParticleType GetParticleType(){ return FERMION; }
 };
 
 
 ///This is the inherited class that holds the information about
 ///the protons.  Currently no useful information about protons is contained
 ///here
-class ProtonsClass : public SpeciesClass
+class BosonClass : public SpeciesClass
 {
 public:
+  ParticleType GetParticleType(){ return BOSON; }
   ///Just returns 0 until we do something more intelligble.
   double NodeAction (int Ptcl, int LinkNum)
     {
       return (0.0);
     }  
-  ProtonsClass()
+  BosonClass()
     {
 
     }
-  ~ProtonsClass()
+  ~BosonClass()
+    {
+    }
+  
+};
+
+class BoltzmannonClass : public SpeciesClass
+{
+public:
+  ParticleType GetParticleType(){ return BOLTZMANNON; }
+  ///Just returns 0 until we do something more intelligble.
+  double NodeAction (int Ptcl, int LinkNum)
+    {
+      return (0.0);
+    }  
+  BoltzmannonClass()
+    {
+
+    }
+  ~BoltzmannonClass()
     {
     }
   

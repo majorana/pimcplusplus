@@ -4,12 +4,16 @@
 #include <blitz/array.h>
 typedef double scalar;
 
+#define NDIM 3
+
 using namespace blitz;
 typedef TinyVector<scalar,2> Vec2;
 typedef TinyVector<scalar,3> Vec3;
-typedef TinyVector<scalar,3> dVec;
 typedef TinyMatrix<scalar,2,2> Mat2;
 typedef TinyMatrix<scalar,3,3> Mat3;
+
+typedef TinyVector<scalar,NDIM> dVec;
+typedef TinyVector<int,NDIM> dVecInt;
 
 inline Vec2 operator*(const Vec2 &v, scalar s)
 {

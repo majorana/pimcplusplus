@@ -12,18 +12,23 @@
 /// between the processors.
 class PathDataClass
 {
+private:
+  int Join;
+
 public:
   ///The constructor that initializes the action and such
+
+  PathClass Path;
   inline PathDataClass() : Action(MemoizedData,SpeciesArray)
     {
 
-
-
+      Join=1;
+  
     }
-  /// This object holds computed data which is used multiple times.
-  MemoizedDataClass MemoizedData;
+
+  DistanceTableClass DistanceTable;
   /// This object functions as an array of SpeciesClass objects.
-  SpeciesArrayClass SpeciesArray;
+
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
   CommunicatorClass Communicator;

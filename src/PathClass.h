@@ -1,82 +1,95 @@
 #ifndef PATH_CLASS_H
 #define PATH_CLASS_H
 
-#include "Common.h"
 #include "MirroredArrayClass.h"
 
-/*! A primitive class holding the postions of a group of identicle
-  particles.  In addition, it holds the time in which each particle
-  and timeslice was moved. */
+
 class PathClass
 {
- private:
-  
-  MirroredArrayClass<dVec> Positions; ///< The particle positions
-  /// Holds the MC step number each particle/timeslice was last updated.
-  MirroredArrayClass<int> TimeStamp;  
-  
- public:
-  /// Uses a Communicator to shift the date between processors so that
-  /// the timeslices that each processor holds shifts by slicesToShift.
-  void ShiftData(int slicesToShift,CommunicatorClass &communicator);
-  /// Changes number of particles and timeslices;
-  inline void Resize(int numPtcles,int numTimeSlices)
-    {
-      Positions.Resize(numPtcles,numTimeSlices);
-      TimeStamp.Resize(numPtcles,numTimeSlices);
-    }
-  /// Returns the number of particles stored
-  inline int NumParticles()
-  {
-    return Positions.NumParticles();
-  }
-  /// Returns the number of time slices
-  inline int NumTimeSlices()
-  {
-    return Positions.NumTimeSlices();
-  }
-  /// Operator to access by value.
-  inline dVec operator()(int ptcl, int timeSlice) const
-    {
-      return Positions(ptcl, timeSlice);
-    }
-  inline void MoveJoin(MirroredArrayClass1D<int> &PermMatrix,int oldJoin,int newJoin)
-    {
-      Positions.MoveJoin(PermMatrix,oldJoin,newJoin);
-    }
-  /// Write access function.
-  inline void SetPos (int ptcl, int timeSlice, const dVec &newPos)
-    {
-      
-      Positions.Set(ptcl,timeSlice,newPos);
-      TimeStamp.Set(ptcl,timeSlice,GetCurrentTimeStamp());
-    }
-  /// Returns the MC stepnum in which ptcl/timeslice was last
-  /// updated.
-  inline int GetTimeStamp (int ptcl, int timeSlice)
-    {
-      return TimeStamp(ptcl, timeSlice);
-    }
-  
+private:
+  /// Path stores the position of all the particles at all time
+  /// slices.  The order for access is timeslice, particle
+  MirroredArrayClass<dVec> Path;
+  Array<int,1> SpeciesNumber;
+  Array<SpeciesClass *,1> SpeciesArray;
 
-  /// In case of acceptance, this is called to copy the new path over
-  /// the backup copy.  StartSlice and EndSlice are inclusive.  This
-  /// copies from A to B.
-  void AcceptCopy (int ptcl, int startSlice, int endSlice)
-    {
-      Positions.AcceptCopy(ptcl,startSlice,endSlice);
-      TimeStamp.AcceptCopy(ptcl,startSlice,endSlice);
+
+  int TimeSliceNumber;
+public:
+  MirroredArrayClass1D<int> Permutation;
+  dVec Box;
+
+  /// Shifts the data to other processors or to yourself if there 
+  /// are no other processors
+  inline void ShiftData(int sliceToShift, CommunicatorClass &communicator)
+  {Path.ShiftData(sliceToShift,communicator);};
+
+  /// Return what species type a particle belongs to;
+  inline int ParticleSpeciesNum(int ptcl)
+  {
+    return (SpeciesNumber(ptcl));
+  }
+  /// Return a reference to the species that particle ptcl belongs to
+  inline SpeciesClass& ParticleSpecies(int ptcl) 
+  {
+    return *(SpeciesArray(SpeciesNumber(ptcl)));
+  }
+  /// Return a species references
+  inline SpeciesClass& Species(int speciesNum)
+  {
+    return (*(SpeciesArray(speciesNum)));
+  }
+  /// Returns the number of particle Species
+  inline int NumSpecies() {return SpeciesArray.size();}
+  inline int NumParticles() { return Path.NumParticles();}
+  inline int NumTimeSlices() { return Path.NumTimeSlices();}
+  /// Returns the position of particle ptcl at time slice timeSlice
+  inline dVec operator() (int timeSlice, int ptcl)
+  { return Path(timeSlice, ptcl); }
+  /// Set the position of particle ptcl at time slice timeSlice
+  inline void SetPos (int timeSlice, int ptcl, dVec r)
+  { Path.SetPos(timeSlice, ptcl, r) };
+
+  void AddSpecies (SpeciesClass *newSpecies)
+  {
+    int numSpecies = SpeciesArray.size();
+    /// Add an element for the new species
+    SpeciesArray.resizeAndPreserve(numSpecies+1);
+    SpeciesArray(numSpecies) = newSpecies;
+  }
+
+  void Allocate()
+  {
+    assert(TimeSliceNumber>0);
+    int numParticles = 0;
+    /// Set the particle range for the new species
+    for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
+      SpeciesArray(speciesNum)->FirstPtcl = numParticles;
+      numParticles=numParticles+SpeciesArray(speciesNum).NumParticles();
+      SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
     }
-  /// In case of rejection, this is called to copy the new path over
-  /// the backup copy.  StartSlice and EndSlice are inclusive.  This
-  /// copies from B to A.
-  void RejectCopy (int ptcl, int startSlice, int endSlice)
+    Path.resize(TimeSliceNumber,numParticles);
+    Permutation.resize(TimeSliceNumber,numParticles);
+
+    /// Assign the species number to the SpeciesNumber array
+    for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
+      for (int i=SpeciesArray(speciesNum)->FirstPtcl; 
+	   i<= SpeciesArray(speciesNum)->LastPtcl; i++)
+	SpeciesNumber(i) = speciesNum;
+    }
+    //Sets to the identity permutaiton 
+    for (int ptcl=0;ptcl<Permutation.Size();ptcl++){
+      Permutation.Set(ptcl,ptcl);
+    }
+  }
+
+  PathClass()
     {
-      Positions.RejectCopy(ptcl,startSlice,endSlice);
-      TimeStamp.RejectCopy(ptcl,startSlice,endSlice);
+      NumSpecies = 0;
+
+      TimeSliceNumber=0;
       
     }
 };
-
 
 #endif

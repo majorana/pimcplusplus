@@ -3,7 +3,7 @@
 
 
 
-double ElectronsClass::NodeAction(int ptcl,int LinkNum)
+double FermionClass::NodeAction(int ptcl,int LinkNum)
 {
 
 
@@ -12,8 +12,4 @@ double ElectronsClass::NodeAction(int ptcl,int LinkNum)
 
 
 
-ElectronsClass::~ElectronsClass()
-{
 
-
-}
