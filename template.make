@@ -1,11 +1,13 @@
 PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" \
 "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}"
 
-MAKE_ALL = make all $(PASS_DEFS)
-MAKE_NEWMAKE = make -f template.make newmake $(PASS_DEFS)
+MAKE_ALL = ${MAKE} all $(PASS_DEFS)
+MAKE_NEWMAKE = ${MAKE} -f template.make newmake $(PASS_DEFS)
+MAKE_CLEAN = ${MAKE} clean
 
 all:	PH_obj Splines_obj Integration_obj IO_obj DFT_obj Random_obj \
 	MPI_obj Optimize_obj SpecialFunctions_obj
+
 
 PH_obj:
 	cd PH; $(MAKE_ALL) 
@@ -25,13 +27,49 @@ Random_obj:
 	cd Random; $(MAKE_ALL)
 
 MPI_obj:
-	cd Random; $(MAKE_ALL)
+	cd MPI; $(MAKE_ALL)
 
 Optimize_obj:
-	cd Random; $(MAKE_ALL)
+	cd Optimize; $(MAKE_ALL)
 
 SpecialFunctions_obj:
-	cd Random; $(MAKE_ALL)
+	cd SpecialFunctions; $(MAKE_ALL)
+
+
+CLEANS = PH_clean Splines_clean Integration_clean IO_clean DFT_clean \
+	 Random_clean MPI_clean Optimize_clean SpecialFunctions_clean 
+
+
+clean:	$(CLEANS)
+	rm *.o
+
+
+PH_clean:
+	cd PH; $(MAKE_CLEAN)
+
+Splines_clean:
+	cd Splines; $(MAKE_CLEAN)
+
+Integration_clean:
+	cd Integration; $(MAKE_CLEAN)
+
+IO_clean:
+	cd IO; $(MAKE_CLEAN)
+
+DFT_clean:
+	cd DFT; $(MAKE_CLEAN)
+
+Random_clean:
+	cd Random; $(MAKE_CLEAN)
+
+MPI_clean:
+	cd MPI; $(MAKE_CLEAN)
+
+Optimize_clean:
+	cd Optimize; $(MAKE_CLEAN)
+
+SpecialFunctions_clean:
+	cd SpecialFunctions; $(MAKE_CLEAN)
 
 
 PH_newmake:
