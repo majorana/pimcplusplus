@@ -205,6 +205,9 @@ bool PAcoulombBCFitClass::Read (IOSectionClass &in,
   Pot = ReadPotential(in);
   in.CloseSection();
 
+  Z1Z2 = ((CoulombPot *)Pot)->Z1Z2;
+  cerr << "Z1Z2 = " << Z1Z2 << endl;
+
   // Read the fits
   assert(in.OpenSection("Fits"));
   // Read the qgrid
@@ -319,5 +322,70 @@ void PAcoulombBCFitClass::DoBreakup(const dVec &box, const Array<dVec,1> &kVecs)
       dUlong_k = Vlong_k(boxVol, k, level);
     }
   }
+}
+
+double PAcoulombBCFitClass::Udiag (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return Usplines(level)(q, 0.0);
+  else {
+    // Coulomb action is independent of z
+    double beta = SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
+    return (beta*Pot->V(q));
+  }
+}
+
+double PAcoulombBCFitClass::Udiag_p (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return Usplines(level).d_dx(q, 0.0);
+  else {
+    // Coulomb action is independent of z
+    double beta = SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
+    return (beta*Pot->dVdr(q));
+  }
+}
+
+double PAcoulombBCFitClass::Udiag_pp (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return Usplines(level).d2_dx2(q, 0.0);
+  else {
+    // Coulomb action is independent of z
+    double beta = SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
+    return (beta*Pot->d2Vdr2(q));
+  }
+}
+
+
+
+double PAcoulombBCFitClass::dUdiag (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return dUsplines(level)(q, 0.0);
+  else // Coulomb action is independent of z
+    return (Pot->V(q));
+}
+
+double PAcoulombBCFitClass::dUdiag_p (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return dUsplines(level).d_dx(q, 0.0);
+  else // Coulomb action is independent of z
+    return (Pot->dVdr(q));
+}
+
+double PAcoulombBCFitClass::dUdiag_pp (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return dUsplines(level).d2_dx2(q, 0.0);
+  else  // Coulomb action is independent of z
+    return (Pot->d2Vdr2(q));
 }
 
