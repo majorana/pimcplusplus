@@ -34,9 +34,14 @@ void MultiStageLocalClass::MakeMove()
     SetMode(NEWMODE);
     double newAction = (*stageIter)->StageAction(Slice1,Slice2,ActiveParticles);
     double currActionChange=newAction-oldAction;
-    double logAcceptProb=sampleRatio+currActionChange-prevActionChange;
-    
-    if (-logAcceptProb<log(PathData.Path.Random.Local())) ///reject conditin
+    double neglogAcceptProb=-log(sampleRatio)+currActionChange-prevActionChange;
+
+//     cerr << "currActionChange = " << currActionChange << endl;
+//     cerr << "log(sampleRatio) = " << log(sampleRatio) << endl;
+//     cerr << "prevActionChange = " << prevActionChange << endl;
+//     cerr << "neglogAcceptProb = " << neglogAcceptProb << endl;
+
+    if (-neglogAcceptProb<log(PathData.Path.Random.Local())) ///reject conditin
       toAccept=false;
     if (toAccept)
       (*stageIter)->NumAccepted++;
@@ -62,7 +67,7 @@ void MultiStageClass::Accept()
 
 void MultiStageClass::Reject()
 {
-  PathData.AcceptMove(Slice1,Slice2,ActiveParticles);
+  PathData.RejectMove(Slice1,Slice2,ActiveParticles);
   for (list<StageClass*>::iterator 
 	 stageIter=Stages.begin();stageIter!=Stages.end();stageIter++){
     (*stageIter)->Reject();
@@ -79,10 +84,11 @@ void MultiStageCommonClass::MakeMove()
     SetMode(OLDMODE);
     double oldAction=(*stageIter)->StageAction(Slice1,Slice2,ActiveParticles);
     SetMode(NEWMODE);
-    double sampleRatio=(*stageIter)->Sample(Slice1,Slice2,ActiveParticles);    
+    double sampleRatio=(*stageIter)->Sample(Slice1,Slice2,ActiveParticles);
+   
     double newAction = (*stageIter)->StageAction(Slice1,Slice2,ActiveParticles);
     double currActionChange=newAction-oldAction;
-    double logAcceptProb=sampleRatio+currActionChange-prevActionChange;
+    double logAcceptProb=log(sampleRatio)+currActionChange-prevActionChange;
 
     
     if (-logAcceptProb<log(PathData.Path.Random.Common())) ///reject conditin
@@ -95,10 +101,8 @@ void MultiStageCommonClass::MakeMove()
     prevActionChange=currActionChange;
     stageIter++;
   }
-  if (toAccept){
-    PathData.AcceptMove(Slice1,Slice2,ActiveParticles);
-  }
-  else {
-    PathData.RejectMove(Slice1,Slice2,ActiveParticles);
-  }
+  if (toAccept)
+    Accept();
+  else 
+    Reject();
 }

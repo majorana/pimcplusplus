@@ -1,7 +1,9 @@
 #ifndef TABLE_PERMUTE_STAGE_CLASS_H
 #define TABLE_PERMUTE_STAGE_CLASS_H
 
-class TablePermuteStageClass : public StageClass
+#include "PermuteStageClass.h"
+
+class TablePermuteStageClass : public PermuteStageClass
 {
 private:
   int SpeciesNum;
@@ -17,6 +19,12 @@ public:
   /// function is called twice during a successful multistage move.
   double Sample (int &slice1,int &slice2,
 		 Array<int,1> &changedParticles); 
+  TablePermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels) 
+    : PermuteStageClass(pathData, speciesNum, numLevels)
+  {
+    // do nothing for now
+  }
+
 };
 
 #endif

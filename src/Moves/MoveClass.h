@@ -8,5 +8,6 @@
 #include "OpenBisectionMoveClass.h"
 #include "RandomPermMove.h"
 #include "MultiStage.h"
+#include "BisectionBlock.h"
 
 #endif

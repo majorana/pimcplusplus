@@ -1,24 +1,19 @@
 #include "KineticClass.h"
+#include "../PathDataClass.h"
 
 ///This has to be called after pathdata knows how many
 ///particles it has
 void KineticClass::Read(IOSectionClass& in)
 {
-  cerr<<"I'm about to resize things now"<<endl;
-  DoPtcl.resize(PathData.Path.NumParticles());
-  cerr<<"I've finished resizing things"<<endl;
 }
 
-KineticClass::KineticClass(PathDataClass &pathData,
-				 Array<PairActionFitClass* ,2> &pairMatrix) : 
-  ActionBaseClass (pathData),
-  PairMatrix(pairMatrix)
+KineticClass::KineticClass(PathDataClass &pathData ) : 
+  ActionBaseClass (pathData)
 {
 }
 
 double KineticClass::Action (int slice1, int slice2,
-				const Array<int,1> &changedParticles,
-				int level)
+			     const Array<int,1> &changedParticles, int level)
 {
   double TotalK = 0.0;
   int numChangedPtcls = changedParticles.size();
@@ -28,7 +23,7 @@ double KineticClass::Action (int slice1, int slice2,
     int ptcl = changedParticles(ptclIndex);
     int species=Path.ParticleSpeciesNum(ptcl);
     double FourLambdaTauInv=1.0/(4.0*Path.Species(species).lambda*levelTau);
-    for (int slice=startSlice; slice < endSlice;slice+=skip) {
+    for (int slice=slice1; slice < slice2;slice+=skip) {
       dVec vel;
       vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
       double GaussProd = 1.0;
@@ -56,16 +51,15 @@ double KineticClass::d_dBeta (int slice1, int slice2,
 {
   double spring=0.0;
   double levelTau=Path.tau;
-  int slice2 = slice1 + (1<<level);
   for (int i=0; i<level; i++) 
     levelTau *= 2.0;
   spring  = 0.0;
   const int NumImage=1;
-  for (int ptcl=0; ptcl<numPtcls; ptcl++)
+  for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
     if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
       spring += 1.5/levelTau;
   
-  for (int ptcl=0; ptcl<numPtcls; ptcl++) {
+  for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++) {
     // Do free-particle part
     int species1 = PathData.Path.ParticleSpeciesNum(ptcl);
     double lambda = PathData.Path.ParticleSpecies(ptcl).lambda;
@@ -88,26 +82,24 @@ double KineticClass::d_dBeta (int slice1, int slice2,
 	for (int image=-NumImage;image<=NumImage;image++){
 	  double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
 	  numSum[dim] += 
-	    (-dist*dist*FourLambdaTauInv/levelTau)*exp(-dist*dist*FourLambdaTauInv);
+	    (-dist*dist*FourLambdaTauInv/levelTau)*
+	    exp(-dist*dist*FourLambdaTauInv);
 	}
       }
       double scalarnumSum=0.0;
-      for (int dim=0;dim<NDIM;dim++){
+      for (int dim=0;dim<NDIM;dim++) {
 	dVec numProd=1.0;
-	for (int dim2=0;dim2<NDIM;dim2++){
-	  if (dim2!=dim){
+	for (int dim2=0;dim2<NDIM;dim2++) {
+	  if (dim2!=dim)
 	    numProd[dim] *= GaussSum[dim2];
-	  }
-	  else {
+	  else 
 	    numProd[dim] *=  numSum[dim2];
-	  }
-	  
 	}
 	scalarnumSum += numProd[dim];
       }
       spring += scalarnumSum/Z; 
     }
   }
-    
+  
   return spring;
 }

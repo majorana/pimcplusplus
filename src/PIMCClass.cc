@@ -3,6 +3,7 @@
 #include "Moves/OpenBisectionMoveClass.h"
 #include "Moves/MetaMoves.h"
 #include "Moves/BlockMove.h"
+#include "Moves/BisectionBlock.h"
 #include "Observables/ObservableClass.h"
 
 
@@ -16,8 +17,8 @@ void PIMCClass::Read(IOSectionClass &in)
   // Read in the action information
   assert(in.OpenSection("Action"));
   PathData.Action.Read(in);
+  PathData.Actions.Read(in);
   in.CloseSection();
-
   // Read in the Observables
   assert(in.OpenSection("Observables"));
   ReadObservables(in);
@@ -145,6 +146,12 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)=new PermMove(PathData, OutFile);
       Moves(counter)->Read(in);
       OutFile.CloseSection(); // Whatever Move section we opened above.
+    }
+    else if (MoveType=="BisectionBlock"){
+      OutFile.NewSection("BisectionBlock");
+      Moves(counter)=new BisectionBlockClass(PathData,OutFile);
+      Moves(counter)->Read(in); 
+      OutFile.CloseSection(); //Whatever Move section we openned above
     }
     else {
       cerr<<"This type of move is not recognized: "<< MoveType <<endl;

@@ -145,10 +145,10 @@ bool BisectionClass::Bisect(int startSlice, int numLevels,
     double newAction = PathData.Action.TotalAction
       (startSlice,endSlice, activeParticles,levelCounter);
     double currActionChange=newAction-oldAction;
-    double logAcceptProb=
+    double neglogAcceptProb=
       -oldLogSampleProb+newLogSampleProb+currActionChange-prevActionChange;
 
-    if (-logAcceptProb<log(PathData.Path.Random.Local())) ///reject conditin
+    if (-neglogAcceptProb<log(PathData.Path.Random.Local())) ///reject conditin
       toAccept=false;
     if (toAccept)
       NumAccepted(levelCounter)++;

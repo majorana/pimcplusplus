@@ -19,6 +19,10 @@ private:
   int StepsPerBlock;
   bool IsFermion;
   int SpeciesNum;
+  void WriteRatio()
+  {
+    //do nothing for now
+  }
 
   void ChooseTimeSlices();
 public:

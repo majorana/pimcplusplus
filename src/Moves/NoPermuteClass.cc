@@ -11,6 +11,9 @@ double NoPermuteStageClass::Sample (int &slice1, int &slice2,
 
 int NoPermuteStageClass::ChooseParticle()
 {
-  return (PathData.Path.Random.LocalInt 
+  int myPtcl=(PathData.Path.Random.LocalInt 
     (PathData.Path.Species(SpeciesNum).NumParticles));
+  //  cerr<<"I've chosen the particle "<<myPtcl;
+  return myPtcl;
 }
+

@@ -7,15 +7,18 @@
 class BisectionStageClass : public StageClass
 {
 private:
-  int NumImages;
-  int Level;
+  int NumImage;
+  //  double LogSampleProb (int slice1, int slice2, 
+  //			Array<int,1> particles);
+//  double SamplePaths (int slice1, int slice2, Array<int,1> particles);
 public:
   double Sample(int &slice1,int &slice2, 
 		Array<int,1> &activeParticles);
   BisectionStageClass(PathDataClass &pathData, int level) : 
-    StageClass(pathData), Level(level)
+    StageClass(pathData), NumImage(1)
   { 
     //do nothing for now
+    BisectionLevel = level;
   }
 };
 

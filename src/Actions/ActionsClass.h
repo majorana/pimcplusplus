@@ -5,6 +5,7 @@
 #include "LongRangeRPAClass.h"
 #include "ShortRangePotClass.h"
 #include "LongRangePotClass.h"
+#include "KineticClass.h"
 
 class ActionsClass
 {
@@ -16,6 +17,7 @@ private:
   bool UseRPA;
 public:
   // Actions
+  KineticClass Kinetic;
   ShortRangeClass ShortRange;
   LongRangeClass LongRange;
   LongRangeRPAClass LongRangeRPA;
@@ -35,6 +37,7 @@ public:
     LongRange(pathData,PairMatrix,PairArray), 
     LongRangeRPA(pathData, PairMatrix, PairArray),
     LongRangePot(pathData, PairMatrix),
+    Kinetic(pathData),
     PathData(pathData)
   {
     ///Do nothing for now

@@ -2,6 +2,7 @@
 #define ACTION_BASE_H
 
 #include "../Common.h"
+#include "../Common/IO/InputOutput.h"
 
 class PathDataClass;
 class PathClass;
@@ -16,6 +17,7 @@ public:
 			int level) = 0;
   virtual double d_dBeta (int slice1, int slice2,
 			  int level) = 0;
+  virtual void Read (IOSectionClass &in);
   ActionBaseClass(PathDataClass &pathData);				   
 };
 

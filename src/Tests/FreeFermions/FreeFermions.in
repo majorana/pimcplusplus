@@ -11,7 +11,8 @@ Section (System)
     {
       string Name="free";
       double lambda=1.0; 
-      string Type="FERMION";
+      //string Type="FERMION";
+      string Type="BOLTZMANNON";
       int NumParticles=4;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
@@ -98,7 +99,7 @@ Section (Algorithm)
       int steps=3;
       Section (Move) {string name="Bisection";} 
     }
-    Section (Move) {string name="Permutations";} 
+    //    Section (Move) {string name="Permutations";} 
     Section (Move) {string name = "Shift";}
   }
   Section (Loop){ //Start Accumulating observables
@@ -108,7 +109,7 @@ Section (Algorithm)
       Section (Move) {string name="Bisection";} 
     }
     Section (Move) {string name = "Shift"; }
-    Section (Move) {string name="Permutations";} 
+    //    Section (Move) {string name="Permutations";} 
     Section (Observe) {string name = "PairCorrelation";}
     Section (Observe) {string name = "Energy"; }
   }

@@ -9,13 +9,17 @@ CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
 
-DEFS = -DTHREE_D -DNO_COUT -O3 # -DDEBUG -DBZ_DEBUG #-O3 #-DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DTHREE_D -DNO_COUT  -O3 #-DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \
   Observables/ObservableEnergy.o      \
   Observables/StructureFactor.o       \
   Moves/BisectionClass.o              \
+  Moves/NoPermuteClass.o              \
+  Moves/PermuteStageClass.o           \
+  Moves/BisectionBlock.o              \
+  Moves/BisectionStageClass.o         \
   PIMCClass.o                         \
   Moves/MetaMoves.o 	              \
   Moves/BlockMove.o                   \
@@ -26,6 +30,7 @@ PIMCobjs =                            \
   SpeciesClass.o                      \
   Common.o                            \
   Moves/PermuteTableClass.o	      \
+  Moves/TablePermuteStageClass.o      \
   Moves/RandomPermClass.o             \
   Moves/OpenBisectionMoveClass.o      \
   Moves/BisectionMoveClass.o          \
@@ -36,6 +41,7 @@ PIMCobjs =                            \
   Actions/ShortRangePotClass.o        \
   Actions/LongRangePotClass.o         \
   Actions/LongRangeRPAClass.o         \
+  Actions/KineticClass.o              \
   Actions/ActionsClass.o              \
   Moves/MultiStage.o                  \
   ActionClass.o                       \
@@ -84,8 +90,13 @@ PIMCobjs =                            \
 TestPermobjs =                        \
   TestPermutation.o                   \
   Moves/BisectionClass.o              \
+  Moves/PermuteStageClass.o           \
+  Moves/BisectionBlock.o              \
+  Moves/NoPermuteClass.o              \
   Moves/BlockMove.o                   \
   Moves/MetaMoves.o                   \
+  Moves/TablePermuteStageClass.o      \
+  Moves/BisectionStageClass.o         \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
   Actions/ActionsClass.o              \
@@ -93,6 +104,7 @@ TestPermobjs =                        \
   Actions/LongRangeRPAClass.o         \
   Actions/ShortRangePotClass.o        \
   Actions/LongRangePotClass.o         \
+  Actions/KineticClass.o              \
   Moves/MultiStage.o                  \
   PIMCClass.o                         \
   Observables/ObservableBase.o        \
@@ -166,6 +178,7 @@ TestEwaldobjs =                       \
   Actions/LongRangeRPAClass.o         \
   Actions/ShortRangePotClass.o        \
   Actions/LongRangePotClass.o         \
+  Actions/KineticClass.o              \
   Common/MPI/Communication.o	      \
   Common/IO/InputOutput.o             \
   Common/IO/InputOutputHDF5.o         \

@@ -4,7 +4,7 @@
 
 
 #include "list.h"
-#include "MoveClass.h"
+#include "MoveBase.h"
 #include "../Actions/ActionBase.h"
 
 class StageClass

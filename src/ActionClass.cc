@@ -126,7 +126,7 @@ double ActionClass::OtherAction(int startSlice, int endSlice,
   PathData.Path.DistDisp(openLink,openPtcl,PathData.Path.NumParticles(),
 			 dist,disp); //This is distance between head and tail!
   //  return -log(0.01+(dist*dist)*(0.94*exp(-dist*dist)+0.06));
-  return -log(dist*dist*exp(-(dist-4.5)*(dist-4.5)));
+  return -log(dist*dist*exp(-2*(dist-4.5)*(dist-4.5)));
 
 
 }
@@ -1284,10 +1284,10 @@ void ActionClass::Energy(int slice1, int level,
   // dimensions. 
   spring = dU = 0.0;
   const int NumImage=1;
-  for (int ptcl=0; ptcl<numPtcls; ptcl++)
+  for (int ptcl=0; ptcl<numPtcls; ptcl++){
     if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
       spring += 1.5/levelTau;
-
+  }
   for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
     // Do free-particle part
     int species1 = PathData.Path.ParticleSpeciesNum(ptcl1);
