@@ -28,7 +28,10 @@ void VisualClass::MakeFrame(int frame)
 	  pathObj->SetColor (0.3, 0.3, 1.0);
 	else
 	  pathObj->SetColor (0.0, 1.0, 0.0);
-	pathObj->Set (onePath);
+	if (PathType == TUBES)
+	  pathObj->TubesSet (onePath);
+	else
+	  pathObj->LinesSet (onePath);
 	PathVis.Objects.push_back(pathObj);
       }
       else {
@@ -98,7 +101,9 @@ void VisualClass::Read(string fileName)
 
 VisualClass::VisualClass()
   : m_VBox(false, 0), m_ButtonQuit("Quit"), 
-    FrameAdjust (0.0, 0.0, 0.0)
+    FrameAdjust (0.0, 0.0, 0.0),
+    PathType (LINES),
+    TubesImage("tubes.png"), LinesImage("lines.png")
 {
   // Top-level window.
   set_title("VisualClass");
@@ -108,20 +113,36 @@ VisualClass::VisualClass()
   add(m_VBox);
 
   // VisualClass OpenGL scene.
-  PathVis.set_size_request(400, 400);
+  PathVis.set_size_request(600, 600);
 
-  m_VBox.pack_start(PathVis);
+
   // VisualClass quit button.
 
   m_ButtonQuit.signal_clicked().connect(
     sigc::mem_fun(*this, &VisualClass::on_button_quit_clicked));
-  m_VBox.pack_start(FrameScale, Gtk::PACK_SHRINK,0);
-  m_VBox.pack_start(m_ButtonQuit, Gtk::PACK_SHRINK, 0);
   FrameScale.set_adjustment (FrameAdjust);
   FrameScale.signal_value_changed().connect
     (sigc::mem_fun(*this, &VisualClass::FrameChanged));
   FrameAdjust.set_step_increment(1.0);
   FrameScale.set_digits(0);
+
+  // Setup tool bar
+  Gtk::RadioButtonGroup group = LinesButton.get_group();
+  LinesButton.set_label("Lines");
+  TubesButton.set_label("Tubes");
+  LinesButton.signal_toggled().connect
+    (sigc::mem_fun(*this, &VisualClass::LineToggle));
+  TubesButton.set_group (group);
+  TubesButton.set_icon_widget (TubesImage);
+  LinesButton.set_icon_widget (LinesImage);
+  Tools.append (LinesButton);
+  Tools.append (TubesButton);
+  m_VBox.pack_start(Tools, Gtk::PACK_SHRINK, 0);
+  m_VBox.pack_start(PathVis);
+  m_VBox.pack_start(FrameScale, Gtk::PACK_SHRINK,0);
+  m_VBox.pack_start(m_ButtonQuit, Gtk::PACK_SHRINK, 0);
+
+  
 
   // Show window.
   show_all();
@@ -180,7 +201,7 @@ int main(int argc, char** argv)
 
   PathObject *p1 = new PathObject();
   p1->SetColor (0.0, 0.0, 1.0);
-  p1->Set (path);
+  p1->TubesSet (path);
 
   visual.PathVis.Objects.push_back(p1);
 
@@ -191,7 +212,7 @@ int main(int argc, char** argv)
   
   PathObject *p2 = new PathObject();
   p2->SetColor (1.0, 0.0, 0.0);
-  p2->Set (path);
+  p2->TubesSet (path);
   visual.PathVis.Objects.push_back(p2);
   
   BoxObject *box = new BoxObject;
@@ -202,4 +223,15 @@ int main(int argc, char** argv)
   kit.run(visual);
 
   return 0;
+}
+
+
+void VisualClass::LineToggle()
+{
+  if (LinesButton.get_active())
+    PathType = LINES;
+  else
+    PathType = TUBES;
+
+  FrameChanged();
 }

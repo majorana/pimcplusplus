@@ -13,7 +13,8 @@ protected:
   bool Closed;
   double Radius;
 public:
-  void Set (Array<Vec3, 1> &path);
+  void LinesSet (Array<Vec3, 1> &path);
+  void TubesSet (Array<Vec3, 1> &path);
   void SetColor (double red, double green, double blue);
   PathObject() : Closed(true), Radius (0.1)
   {

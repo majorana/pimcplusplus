@@ -19,6 +19,8 @@ public:
   }
 };
 
+typedef enum {LINES, TUBES} PathTypeType;
+
 class VisualClass : public Gtk::Window
 {
 protected:
@@ -34,7 +36,12 @@ protected:
   Gtk::Button m_ButtonQuit;
   Gtk::HScale FrameScale;
   Gtk::Adjustment FrameAdjust;
+  Gtk::Toolbar Tools;
+  Gtk::RadioToolButton LinesButton, TubesButton;
   void FrameChanged();
+  PathTypeType PathType; 
+  void LineToggle();
+  Gtk::Image TubesImage, LinesImage;
 public:
   PathVisClass PathVis;
 

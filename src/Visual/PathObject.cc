@@ -3,7 +3,22 @@
 #include <GL/glu.h>
 #include <GL/gle.h>
 
-void PathObject::Set(Array<Vec3,1> &path)
+void PathObject::LinesSet(Array<Vec3,1> &path)
+{
+  Start();
+  glColor3d (Color[0], Color[1], Color[2]);
+  float fcolor[4];
+  fcolor[0] = Color[0]; fcolor[1] = Color[1]; fcolor[2] = Color[2];
+  fcolor[3] = 1.0;
+  glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
+  glBegin(GL_LINE_STRIP);
+  for (int i=0; i<path.size(); i++)
+    glVertex3dv ((double*)&path(i));
+  glEnd();
+  End();
+}
+
+void PathObject::TubesSet(Array<Vec3,1> &path)
 {
   Start();
   glColor3d (Color[0], Color[1], Color[2]);
@@ -16,10 +31,6 @@ void PathObject::Set(Array<Vec3,1> &path)
   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30.0);
 
   gleSetJoinStyle (TUBE_JN_ROUND /* | TUBE_JN_CAP */ | TUBE_CONTOUR_CLOSED);
-//   glBegin(GL_LINE_STRIP);
-//   for (int i=0; i<path.size(); i++)
-//     glVertex3dv ((double*)&path(i));
-//   glEnd();
   
   int N = path.size();
   gleDouble pointArray[N+3][3];
