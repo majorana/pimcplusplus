@@ -2,7 +2,7 @@
 \usepackage{amsmath}
 \title{Ewald Breakup for Long-Range Potentials in PIMC}
 \author{Kenneth P. Esler Jr.}
-
+\date{\today}
 \begin{document}
 \maketitle
 Consider a group of particles interacting with long-ranged central
@@ -12,6 +12,7 @@ $\beta=\text{proton}$), and Roman subscripts refer to particle number
 within a species.  We can then write the total interaction energy for
 the system as,
 \newcommand{\vr}{\mathbf{r}}
+\newcommand{\vk}{\mathbf{k}}
 \begin{equation}
 V = \sum_\alpha \left\{\sum_{i<j} v^{\alpha\alpha}(|\vr^\alpha_i - \vr^\alpha_j|) +
 \sum_{\beta<\alpha} 
@@ -20,6 +21,7 @@ V = \sum_\alpha \left\{\sum_{i<j} v^{\alpha\alpha}(|\vr^\alpha_i - \vr^\alpha_j|
 \newcommand{\va}{\mathbf{a}}
 \newcommand{\vb}{\mathbf{b}}
 \newcommand{\vL}{\mathbf{L}}
+\subsection{The Long-Range Problem}
 Consider such a system in periodic boundary conditions in a cell
 defined by primitive lattice vectors $\va_1$, $\va_2$, and $\va_3$.
 Let $\vL \equiv n_1 \va_1 + n_2 \va_2 + n_3\va_3$ be a direct lattice
@@ -27,14 +29,156 @@ vector.  Then the interaction energy per cell for the periodic system
 is given by
 \begin{equation}
 \begin{split}
-N_\text{cell} V = & \sum_\vL \sum_\alpha \left\{ 
- \sum_{i<j} v^{\alpha\alpha}(|\vr^\alpha_i - \vr^\alpha_j|) +
-\sum_{\beta<\alpha} 
-\sum_{i,j} v^{\alpha \beta}(|\vr^{\alpha}_i - \vr^{\beta}_j|)
+V = & \sum_\vL \sum_\alpha \left\{ 
+\overbrace{\sum_{i<j} v^{\alpha\alpha}(|\vr^\alpha_i - \vr^\alpha_j + \vL|)}^{\text{homologous}} +
+\overbrace{\sum_{\beta<\alpha} 
+\sum_{i,j} v^{\alpha \beta}(|\vr^{\alpha}_i - \vr^{\beta}_j+\vL|)}^{\text{heterologous}}
 \right\}  \\
-& + \sum_{\vL \neq \mathbf{0}} \sum_\alpha N^\alpha v^{\alpha \alpha} (|\vL|)
+& + \underbrace{\sum_{\vL \neq \mathbf{0}} \sum_\alpha N^\alpha v^{\alpha \alpha} (|\vL|)}_\text{Madelung}
 \end{split}
+\label{eq:direct}
 \end{equation}
+If the potentials $v^{\alpha\beta}(r)$ are indeed long-range, the
+summation over direct lattice vectors will not converge in this naive
+form.  A solution to the problem was positted by Ewald.  We break the
+central potentials into two pieces -- a short range and a long range
+part define by
+\begin{equation}
+v^{\alpha \beta}(r) = v_s^{\alpha\beta}(r) + v_l^{\alpha \beta}(r).
+\end{equation}
+We will perform the summation over images for the short-range part in
+real space, while performing the sum for the long-range part in
+reciporical space.  For simplicity, we choose $v^{\alpha \beta}_s(r)$
+so that it is identically zero at the half the box length.  This
+eliminates the need to sum over images in real space. In this letter,
+we develop the details of the calculation and provide a way for
+integrating this into a Path Integral Monte Carlo simulation.
+
+\section{Reciporical-Space Sums}
+\subsection{Heterologous terms}
+We begin with (\ref{eq:direct}), starting with the heterologous (same
+species) terms.
+\begin{equation}
+\text{hetero} = \frac{1}{2} \sum_{\alpha \neq \beta} \sum_{i,j} \sum_\vL
+v^{\alpha\beta}_l(\vr_i^\alpha - \vr_j^\beta + \vL)
+\end{equation}
+We insert the resolution of unity in real space twice,
+\begin{eqnarray}
+\text{hetero} & = & \frac{1}{2}\sum_{\alpha \neq \beta} \int_\text{cell} d\vr \, d\vr' \, \sum_{i,j}
+\delta(\vr_i^\alpha - \vr) \delta(\vr_j^\beta-\vr') \sum_\vL
+v^{\alpha\beta}_l(|\vr - \vr' + \vL|) \\
+& = & \frac{1}{2\Omega^2}\sum_{\alpha \neq \beta} \int_\text{cell} d\vr \, d\vr' \, \sum_{\vk, \vk', i, j} e^{i\vk\cdot(\vr_i^\alpha
+  - \vr)} e^{i\vk'\cdot(\vr_j^\beta - \vr')} \sum_\vL
+v^{\alpha\beta}_l(|\vr - \vr' + \vL|) \nonumber \\
+& = & \frac{1}{2\Omega^2} \sum_{\alpha \neq \beta} \int_\text{cell} d\vr \, d\vr'\,
+\sum_{\vk, \vk', \vk'', i, j} e^{i\vk\cdot(\vr_i^\alpha - \vr)}
+e^{i\vk'\cdot(\vr_j^\beta-\vr')} e^{i\vk''\cdot(\vr -\vr')}
+v^{\alpha\beta}_{\vk''}, \nonumber.
+\end{eqnarray}
+Here, the $\vk$ summations are over reciporical lattice vectors given
+by $\vk = m_1 \vb_1 + m_2\vb_2 + m_3\vb_3$, where
+\begin{eqnarray}
+\vb_1 & = & 2\pi \frac{\va_2 \times \va_3}{\va_1 \cdot (\va_2 \times
+  \va_3)} \nonumber \\
+\vb_2 & = & 2\pi \frac{\va_3 \times \va_1}{\va_1 \cdot (\va_2 \times
+  \va_3)} \\
+\vb_3 & = & 2\pi \frac{\va_1 \times \va_2}{\va_1 \cdot (\va_2 \times
+  \va_3)} \nonumber.
+\end{eqnarray}
+We note that $\vk \cdot \vL = 2\pi(n_1 m_1 + n_2 m_2 + n_3 m_3)$. 
+
+\begin{eqnarray}
+v_{k''}^{\alpha \beta} & = & 
+\frac{1}{\Omega} \int_{\text{cell}} d\vr'' \sum_\vL
+e^{-i\vk''\cdot(|\vr''+\vL|)} v^{\alpha\beta}(|\tilde{\vr}+\vL|), \\
+& = & \frac{1}{\Omega} \int_\text{all space} d\tilde{\vr} \, 
+    e^{-i\vk'' \cdot \tilde{\vr}} v^{\alpha\beta}(\tilde{r}), \label{eq:vk}
+\end{eqnarray}
+where $\Omega$ is the volume of the cell. Here we have used the fact
+that summing over all cells of the integral over the cell is
+equivalent to integrating over all space.
+\begin{equation}
+\text{hetero} = \frac{1}{2\Omega^2} \sum_{\alpha \neq \beta}
+\int_\text{cell} d\vr \, d\vr' \, \sum_{\vk, \vk', \vk'', i, j}
+e^{i(\vk \cdot \vr_i^\alpha + \vk' \cdot\vr_j^\beta)} e^{i(\vk''-\vk)\cdot \vr}
+e^{-i(\vk'' + \vk')\cdot \vr'} v^{\alpha \beta}_{\vk''}.
+\end{equation}
+We have
+\begin{equation}
+\frac{1}{\Omega} \int d\vr \  e^{i(\vk -\vk')\cdot \vr} =
+\delta_{\vk,\vk'},
+\end{equation}
+Then, performing the integrations we have
+\begin{eqnarray}
+\text{hetero} = \frac{1}{2} \sum_{\alpha \neq \beta}
+\sum_{\vk, \vk', \vk'', i, j}
+e^{i(\vk \cdot \vr_i^\alpha + \vk' \cdot\vr_j^\beta)} \delta_{\vk,\vk''}
+\delta_{-\vk', \vk''} v^{\alpha \beta}_{\vk''}.
+\end{eqnarray}
+We now separate the summations, yielding
+\begin{equation}
+\text{hetero} = \frac{1}{2} \sum_{\alpha \neq \beta} \sum_{\vk, \vk'}
+\underbrace{\left[\sum_i e^{i\vk  \cdot \vr_i^\alpha} \rule{0cm}{0.705cm}
+    \right]}_{\rho_\vk^\alpha}
+\underbrace{\left[\sum_j e^{i\vk' \cdot \vr_j^\beta} \right]}_{\rho_{\vk'}^\beta}
+\delta_{-\vk', \vk''} v^{\alpha
+  \beta}_{\vk''}.
+\end{equation}
+Summing over $\vk$ and $\vk'$, we have
+\begin{equation}
+\text{hetero} = \frac{1}{2} \sum_{\alpha \neq \beta} \sum_{\vk''}
+\rho_{\vk''}^\alpha \, \rho_{-\vk''}^\beta v_{k''}^{\alpha \beta}.
+\end{equation}
+
+\subsection{Homologous Terms}
+
+\subsection{Madelung Terms}
+
+\section {Computing the Reciporical Potential}
+Now we return to (\ref{eq:vk}).  Without loss of generality, we define
+for convenience $\vk = k\hat{\mathbf{z}}$.
+\begin{equation}
+v^{\alpha \beta}_k = \frac{2\pi}{\Omega} \int_0^\infty dr \int_{-1}^1
+  d\cos(\theta) \ r^2 e^{-i k r \cos(\theta)} v_l^{\alpha \beta}(r)
+\end{equation}
+We do the angular integral first.  By inversion symmetry, the
+imaginary part of the integral vanishes, yielding
+\begin{equation}
+v^{\alpha \beta}_k = \frac{4\pi}{\Omega k}\int _0^\infty dr\ r \sin(kr)
+v^{\alpha \beta}_l(r).
+\label{eq:vkint}
+\end{equation}
+
+\section{The Coulomb Potential}
+For the case of the Coulomb potential, the above integral is not
+formally convergent if we do the integral naively. We may remedy the
+situation by including a convergence factor, $e^{-k_0 r}$.  For a
+potential of the form $v^\text{coul}(r) = q_1 q_2/r$, this yields
+\begin{eqnarray}
+v^{\text{screened coul}}_k & = & \frac{4\pi q_1 q_2}{\Omega k} \int_0^\infty dr\ \sin(kr)
+e^{-k_0r} \\ 
+& = & \frac{4\pi q_1 q_2}{\Omega (k^2 + k_0^2)}
+\end{eqnarray}
+Allowing the convergence factor to tend to zero, we have
+\begin{equation}
+v_k^\text{coul} = \frac{4 \pi q_1 q_2}{\Omega k^2}
+\end{equation}
+
+For more generalized potentials with a coulomb tail, we cannot
+evaluate (\ref{eq:vkint}) numerically but must handle the coulomb part
+analytically.  In this case, we have
+\begin{equation}
+v_k^{\alpha \beta} = \frac{4\pi}{\Omega} 
+\left\{ \frac{q_1 q_2}{k^2} + \int_0^\infty dr \ r \sin(kr) \left[ v_l^{\alpha \beta}(r) -
+  \frac{q_1 q_2}{r} \right] \right\}
+\end{equation}
+
+\section{Madelung Constants}
+
+\section{Adapting to PIMC}
+\subsection{Adapting to Pair Actions}
+\subsection{RPA Improvements}
+
 
 
 \end{document}
