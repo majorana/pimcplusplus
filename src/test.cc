@@ -13,8 +13,6 @@
 // #include "InputOutputASCII.h"
 
 void setupAction(ActionClass &myActionClass)
-
-
 {
   myActionClass.PairActionVector.resize(1);
   //  myActionClass.PairActionVector(0).ReadDavidSquarerFile("../inputs/ep_beta1.0.dm");
@@ -176,7 +174,7 @@ int main(int argc, char **argv)
 #endif
 
   IOSectionClass inSection;
-  assert(inSection.OpenFile("hydrogen.in"));  
+  assert(inSection.OpenFile("H2.in"));  
   //  inSection.PrintTree();
   cerr<<"I've opened the file\n";
   assert(inSection.OpenSection("System"));
@@ -261,11 +259,11 @@ int main(int argc, char **argv)
   outfile.open("ourPath.dat");
   int steps=20000;
   for (int counter=0;counter<steps;counter++){
-    if (counter>steps/8 && (counter % 100)==0){
+    if (counter>steps/8 && (counter % 1)==0){
       TotE.Accumulate();
       gofr.Accumulate();
     }
-    if (counter>steps/8 && (counter % 1000) == 0){
+    if (counter>steps/8 && (counter % 10) == 0){
       TotE.WriteBlock();
       cerr << "Step #" << counter << ":\n";
 //       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
@@ -280,7 +278,7 @@ int main(int argc, char **argv)
 //       outfile<<endl;
     }
       
-    for (int counter2=0;counter2<2;counter2++){
+    for (int counter2=0;counter2<200;counter2++){
       //cerr << "Doing step " << counter << endl;
       
       myBisectionMove.MakeMove();

@@ -6,6 +6,8 @@
 
 
 
+
+
 void ShiftMoveClass::MakeMove()
 {//Remember to mark Actions dirty!!!
   //int numTimeSlicesToShift=(int)floor(sprng()*PathData->NumTimeSlices);
@@ -59,7 +61,7 @@ void BisectionMoveClass::MakeMove()
 
   //  cerr<<"At the beginning fo the makeMove the size is ";
   //  cerr <<  PathData->SpeciesArray.size()<<endl;
-  ChooseParticles();   
+  ChooseParticles(); 
   //////////  for (int levelCounter=NumLevels;levelCounter>0;levelCounter--){
   int levelCounter=NumLevels-1;
 

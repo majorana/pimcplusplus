@@ -9,31 +9,34 @@ CC = mpicc
 LD = mpicc  -Bstatic 
 DEFS = -DNO_COUT -DUSE_MPI -DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
-TestObjs =                         \
-  ObservableClass.o                \
-  Common/Splines/CubicSpline.o     \
-  Common/Splines/Grid.o            \
-  SpeciesClass.o                   \
-  Common.o                         \
-  BisectionMoveClass.o             \
-  MoveClass.o                      \
-  ActionClass.o                    \
-  PathDataClass.o                  \
-  CommunicatorClass.o              \
-  PathClass.o                      \
-  test.o                           \
-  DistanceTablePBCClass.o          \
-  DistanceTableFreeClass.o         \
-  DistanceTableClass.o             \
-  MirroredArrayClass.o             \
-  Common/IO/InputOutput.o          \
-  Common/IO/InputOutputHDF5.o      \
-  Common/IO/InputFile.o            \
-  Common/IO/InputOutputASCII.o     \
-  Common/IO/InputOutputXML.o     \
-  Common/PairAction/PAcoulombFit.o \
-  Common/PairAction/PAszFit.o      \
-  Common/PH/PH.o                   \
+TestObjs =                           \
+  ObservableClass.o                  \
+  Common/Splines/CubicSpline.o       \
+  Common/Splines/Grid.o              \
+  SpeciesClass.o                     \
+  Common.o                           \
+  BisectionMoveClass.o               \
+  MoveClass.o                        \
+  ActionClass.o                      \
+  PathDataClass.o                    \
+  CommunicatorClass.o                \
+  PathClass.o                        \
+  test.o                             \
+  DistanceTablePBCClass.o            \
+  DistanceTableFreeClass.o           \
+  DistanceTableClass.o               \
+  MirroredArrayClass.o               \
+  Common/IO/InputOutput.o            \
+  Common/IO/InputOutputHDF5.o        \
+  Common/IO/InputFile.o              \
+  Common/IO/InputOutputASCII.o       \
+  Common/IO/InputOutputXML.o         \
+  Common/PairAction/PAcoulombFit.o   \
+  Common/PairAction/PAcoulombBCFit.o \
+  Common/PairAction/PAclassicalFit.o \
+  Common/PairAction/PAszFit.o        \
+  Common/Splines/BicubicSpline.o     \
+  Common/PH/PH.o                     \
   Common/PH/Potential.o
 
 MakeInputObjs =                 \

@@ -9,10 +9,13 @@
 
 class JoinMoveClass : public MoveClass
 {
-  int joinLocation;
-  void moveJoin();
+  int JoinLocation;
+  void MoveJoin()
+  {
+    //    PathData.MoveJoin();
+  }
   JoinMoveClass (PathDataClass &myPathData ) : MoveClass(myPathData)
-  { /* Do nothing for now. */ }
+  {/* Do nothing for now. */ }
 
 };
 

@@ -47,10 +47,10 @@ void MirroredArrayClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMatrix,
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
-    //information into a
+    //information into B
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	AB(0,timeSlice,ptcl)=AB(1,timeSlice,ptcl);
+	AB(1,timeSlice,ptcl)=AB(0,timeSlice,ptcl);
       }
     }
   }
@@ -61,10 +61,10 @@ void MirroredArrayClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMatrix,
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
-    //information into a
+    //information into B
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	AB(0,timeSlice,ptcl)=AB(1,timeSlice,ptcl);
+	AB(1,timeSlice,ptcl)=AB(0,timeSlice,ptcl);
       }
     }
   }
@@ -312,10 +312,10 @@ void MirroredSymmetricMatrixClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMa
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
-    //information into a
+    //information into B
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       for (int index=0;index<AB.extent(2);index++){
-	AB(0,timeSlice,index)=AB(1,timeSlice,index);
+	AB(1,timeSlice,index)=AB(0,timeSlice,index);
       }
     }
   }
@@ -326,10 +326,10 @@ void MirroredSymmetricMatrixClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMa
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
-    //information into a
+    //information into B
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int index=0;index<NumParticles();index++){
-	AB(0,timeSlice,index)=AB(1,timeSlice,index);
+	AB(1,timeSlice,index)=AB(0,timeSlice,index);
       }
     }
   }
@@ -482,10 +482,10 @@ void MirroredAntiSymmetricMatrixClass<T>::MoveJoin
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
-    //information into a
+    //information into B
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       for (int index=0;index<AB.extent(2);index++){
-	AB(0,timeSlice,index)=AB(1,timeSlice,index);
+	AB(1,timeSlice,index)=AB(0,timeSlice,index);
       }
     }
   }
@@ -499,10 +499,10 @@ void MirroredAntiSymmetricMatrixClass<T>::MoveJoin
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
-    //information into a
+    //information into B
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int index=0;index<NumParticles();index++){
-	AB(0,timeSlice,index)=AB(1,timeSlice,index);
+	AB(1,timeSlice,index)=AB(0,timeSlice,index);
       }
     }
   }

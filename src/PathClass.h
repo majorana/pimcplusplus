@@ -24,7 +24,7 @@ private:
   CommunicatorClass &Communicator;
 public:
   MirroredArrayClass1D<int> Permutation;
-
+  inline void Print(){Path.Print();}
   void Read(IOSectionClass &inSection);
   ///A scratch array to hold a boolean indicating whether we've
   ///looped over this particle yet
