@@ -1,11 +1,11 @@
 #include "MatrixOps.h"
 
-void LUdecomp (Array<double,2> A, Array<double,1> perm, 
+void LUdecomp (Array<double,2> &A, Array<int,1> &perm, 
 	       double &sign)
 {
   int i, imax, j, k;
   int n = A.rows();
-  double dig, dum, sum, temp;
+  double big, dum, sum, temp;
   Array<double,1> vv(n);
   sign = 1.0;
 
@@ -25,8 +25,8 @@ void LUdecomp (Array<double,2> A, Array<double,1> perm,
     for (i=0; i<j; i++) {
       sum=A(i,j);
       for(k=0; k<i; k++) 
-	sum -= A(i,k)*A(i,j);
-      A(i,k) = sum;
+	sum -= A(i,k)*A(k,j);
+      A(i,j) = sum;
     }
     big=0.0;
     for (i=j; i<n; i++) {
@@ -52,7 +52,7 @@ void LUdecomp (Array<double,2> A, Array<double,1> perm,
     if (A(j,j) == 0.0)
       A(j,j) = 1.0e-200;
     if (j != (n-1)) {
-      dum=1.0/A(i,j);
+      dum=1.0/A(j,j);
       for (i=j+1; i<n; i++)
 	A(i,j) *= dum;
     }
@@ -60,11 +60,12 @@ void LUdecomp (Array<double,2> A, Array<double,1> perm,
 }
 
 
-void LUsolve (Array<double,2> &LU, Array<double,1> perm,
+void LUsolve (Array<double,2> &LU, Array<int,1> &perm,
 	      Array<double,1> &b)
 {
   int i, ii=-1,ip,j;
   double sum;
+  int n = LU.rows();
   
   for (i=0; i<n; i++) {
     ip = perm(i);
@@ -72,7 +73,7 @@ void LUsolve (Array<double,2> &LU, Array<double,1> perm,
     b(ip) = b(i);
     if (ii>=0)
       for (j=ii; j<i; j++)
-	sum -= A(i,j)*b(j);
+	sum -= LU(i,j)*b(j);
     else if (sum) 
       ii = i;
     b(i) = sum;
@@ -80,8 +81,30 @@ void LUsolve (Array<double,2> &LU, Array<double,1> perm,
   for (i=n-1; i>=0; i--) {
     sum = b(i);
     for (j=i+1; j<n; j++)
-      sum -= A(i,j)*b(j);
-    b(i) = sum/A(i,i);
+      sum -= LU(i,j)*b(j);
+    b(i) = sum/LU(i,i);
   }
 }
 
+
+Array<double,2> Inverse (Array<double,2> &A)
+{
+  Array<double,2> LU(A.rows(), A.cols()), Ainv(A.rows(), A.cols());
+  Array<double,1> col(A.rows());
+  Array<int,1> perm;
+  double sign;
+
+  LU = A;
+  LUdecomp (LU, perm, sign);
+  for (int j=0; j<A.rows(); j++) {
+    for (int i=0; i<A.rows(); i++)
+      col(i) = 0.0;
+    col(j) = 1.0;
+    LUsolve (LU, perm, col);
+    for (int i=0; i<A.rows(); i++)
+      Ainv(i,j) = col(i);
+  }
+  return (Ainv);
+}
+
+  
