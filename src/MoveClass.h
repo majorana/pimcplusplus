@@ -31,8 +31,8 @@ protected:
   int TotalParticles;
   /// Scratch Array holding a random subset of particles
   Array<int,1> MyParticleIndices; 
-  /// A mapping from integers to particle ids
-  Array<ParticleID,1> MyParticles;
+  ////  /// A mapping from integers to particle ids
+  //  Array<ParticleID,1> MyParticles;
  ///Our move class takes the number of particles to move at a
 /// time. This is stored here. 
   int NumParticlesToMove;
@@ -47,7 +47,7 @@ protected:
  
   /// This array contains the Particle ID's of particles that you are 
   /// currently moving (i.e. NumParticlesToMove of them
-  Array<ParticleID,1> ActiveParticles;
+  Array<int,1> ActiveParticles;
   /// When we choose particles we select the  particles (randomly)
   /// from the set of species enumerated in ActiveSpecies 
   void SetActiveSpecies(Array<int,1> ActSpecies);
@@ -55,7 +55,7 @@ protected:
   inline void SetNumParticlesToMove(int i)
   {
     NumParticlesToMove = i;
-    MyParticleIndices.resize(i);
+    //    MyParticleIndices.resize(i);
     ActiveParticles.resize(i);
   }
   /// Function that chooses the particles that you should move and

@@ -5,7 +5,7 @@ void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
 {
   ActiveSpecies.resize(ActSpecies.size());
   ActiveSpecies = ActSpecies;
-
+  ///This calculates the total number of particles
   TotalParticles = 0;
   int CurrentNumPtcls = 1234567;
   for (int i=0; i<ActSpecies.size(); i++) {
@@ -14,9 +14,16 @@ void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
     TotalParticles += CurrentNumPtcls;
   }
 
+
+  ///This proceeds to calculate the pieces necessary for
+  ///the particle id mapping..I don't think this is necessary 
+  ///any longer,  but I'm not sure. 
+
+  /*
+
   //  cerr << "TotalParticles = " << TotalParticles << endl;
   MyParticles.resize(TotalParticles);
-
+  ///This sets the total number of particles 
   TotalParticles = 0;
   for (int i=0; i<ActSpecies.size(); i++) {
     int CurrentNumPtcls = 
@@ -28,6 +35,8 @@ void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
     }
     TotalParticles += CurrentNumPtcls;
   }
+
+  */
 }
 
 
@@ -42,7 +51,9 @@ inline int RandInt (int Max) //Hopefully this didn't break anything
 }
 
 
-
+/// So do we still want to choose particles by dumping everything
+/// into some mapping array from teh active particles and dealing 
+// with it that way?
 void ParticleMoveClass::ChooseParticles()
 {
   for (int i=0; i<NumParticlesToMove; i++) { 
@@ -50,14 +61,12 @@ void ParticleMoveClass::ChooseParticles()
     do {
       MyParticleIndices(i) = RandInt(TotalParticles);
       Redundant = false;
-      for (int j=0; j<i; j++)
-	{
-	  if (MyParticleIndices(i) == MyParticleIndices(j))
-	    {
+      for (int j=0; j<i; j++){
+	  if (MyParticleIndices(i) == MyParticleIndices(j)){
 	      Redundant = true;
 	      break;
-	    }
-	}      
+	  }
+      }      
     } while (Redundant); 
   }
   for (int i=0; i<NumParticlesToMove; i++) 

@@ -52,6 +52,10 @@ public:
   inline int NumSpecies(){
     return Path.NumSpecies();
   }
+  /// Returns the total number of particles
+  inline int NumParticles(){
+    return Path.NumParticles();
+  }
   /// Returns a reference to the SpeciesClass object of number species
   //  inline SpeciesClass& operator()(int species){
   //    return Path.SpeciesArray(species);

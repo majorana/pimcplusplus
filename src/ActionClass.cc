@@ -4,61 +4,100 @@
 #include <string>
 #include <fstream>
 
-double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
-				  int StartSlice, int EndSlice, int level)
+double ActionClass::calcTotalAction(int startSlice, int endSlice, 
+				    Array<int,1> changedParticles,
+				    int level)
 {
   // First, sum the pair actions
   double TotalU = 0.0;
   double TotalK = 0.0;
-  int NumChangedPtcls = changedParticles.size();
-  int Species1, Species2, Ptcl1, Ptcl2;
-  int NumSpecies;
-
-  SpeciesArrayClass &IdentPtcls = mySpeciesArray;
-  NumSpecies = IdentPtcls.Size();
+  int numChangedPtcls = changedParticles.size();
+  int species1;
+  //  int NumSpecies;
+  //  SpeciesArrayClass &IdentPtcls = mySpeciesArray;
+  //  NumSpecies = IdentPtcls.Size();
   //  cerr<<"What the action class thinks the size is in calctotalaction: ";
   //  cerr<<  mySpeciesArray->size()<<endl;
   int skip = 1<<level;
   double levelTau = tau* (1<<level);
-  for (int i=0; i<NumChangedPtcls; i++)
-    {
-      Species1 = changedParticles(i)[0];
-      Ptcl1 = changedParticles(i)[1];
-      for (int Species2=0; Species2<NumSpecies; Species2++) {
-	int NumPtcls2 = IdentPtcls(Species2).NumParticles();
-	for (int Ptcl2=0; Ptcl2<NumPtcls2; Ptcl2++) {
-	  for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {	    
-	    double NotMyself = (double)((Ptcl1!=Ptcl2)||(Species1!=Species2));
-	    dVec r1 = IdentPtcls(Species1,Ptcl1,Slice);
-	    dVec r2 = IdentPtcls(Species2,Ptcl2,Slice);
-	    dVec rp1 = IdentPtcls(Species1,Ptcl1,Slice+skip);
-	    dVec rp2 = IdentPtcls(Species2,Ptcl2,Slice+skip);
-	    dVec r = r1 - r2;
-	    dVec rp = (rp1 -rp2);
-	    double rmag = sqrt(dot(r,r));
-	    double rpmag = sqrt(dot(rp,rp));
-	    
-	    double s = sqrt(dot (r-rp, r-rp));
-	    double q = 0.5 * (rmag + rpmag);
-	    double z = (rmag - rpmag);
-	    int PairIndex = PairMatrix(Species1, Species2);
-	    TotalU += NotMyself*
-	      PairActionVector(PairIndex).calcUsqz(s,q,z, level);
-	  }
-	}
-      }
+  for (int ptcl1=0; ptcl1<numChangedPtcls; ptcl1++){
+    for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
+      int species1=Path(ptcl1).ParticleSpeciesNum(ptcl);
+      double notMyself=(double)(ptcl1!=ptcl2);
+      for (int slice=startSlice;slice<endSlice;slice+=skip){
+	///I think we're double counting particles here
+	dVec r1=Path(slice,ptcl1);
+	dVec r2=Path(slice,ptcl2);
+	dVec rp1=Path(slice+skip,ptcl1);
+	dVec rp2=Path(slice+skip,ptcl2);
+	dVec r=r1-r2;
+	dVec rp=(rp1-rp2);
+	double rmag=sqrt(dot(r,r));
+	double rpmag=sqrt(dot(rp,rp));
+	double s = sqrt(dot (r-rp, r-rp));
+	double q = 0.5 * (rmag + rpmag);
+	double z = (rmag - rpmag);
+	int PairIndex = PairMatrix(species1,
+				   Path.ParticleSpeciesNum(ptcl2));
+	//I bet it's cheaper to have an if statement that avoids all this nonsense, instead of hte NotMyself thing
+	TotalU += NotMyself*
+	  PairActionVector(PairIndex).calcUsqz(s,q,z, level);
       
-      // Now, sum up the kinetic action
-      double FourLambdaTauInv=1.0/(4.0*IdentPtcls(Species1).lambda*levelTau);
-      for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {
-	dVec r1 = IdentPtcls(Species1,Ptcl1,Slice);
-	dVec r2 = IdentPtcls(Species1,Ptcl1,Slice+skip);
-	//This function has to be written and possibly memoized or something?
-	double LinkDistSqrd=distSqrd(r1,r2);  
-	//We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-	TotalK += LinkDistSqrd*FourLambdaTauInv; 
       }
     }
+    double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
+    for (int slice=startSlice; slice < endSlice;slice+=skip) {
+      dVec r1 = Path(slice,ptcl1);
+      dVec r2 = IdentPtcls(slice+skip,ptcl1);
+      //This function has to be written and possibly memoized or something?
+      double LinkDistSqrd=distSqrd(r1,r2);  
+      //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+      TotalK += LinkDistSqrd*FourLambdaTauInv; 
+    }
+  }
+   
+
+
+//       Species1 = changedParticles(i)[0];
+//       Ptcl1 = changedParticles(i)[1];
+//       for (int Species2=0; Species2<NumSpecies; Species2++) {
+// 	int NumPtcls2 = IdentPtcls(Species2).NumParticles();
+// 	for (int Ptcl2=0; Ptcl2<NumPtcls2; Ptcl2++) {
+// 	  for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {	    
+
+/////Aren't we calculating everybody in the list 
+//// against themselves multiple times here?
+// 	    double NotMyself = (double)((Ptcl1!=Ptcl2)||(Species1!=Species2));
+// 	    dVec r1 = IdentPtcls(Species1,Ptcl1,Slice);
+// 	    dVec r2 = IdentPtcls(Species2,Ptcl2,Slice);
+// 	    dVec rp1 = IdentPtcls(Species1,Ptcl1,Slice+skip);
+// 	    dVec rp2 = IdentPtcls(Species2,Ptcl2,Slice+skip);
+// 	    dVec r = r1 - r2;
+// 	    dVec rp = (rp1 -rp2);
+// 	    double rmag = sqrt(dot(r,r));
+// 	    double rpmag = sqrt(dot(rp,rp));
+	    
+// 	    double s = sqrt(dot (r-rp, r-rp));
+// 	    double q = 0.5 * (rmag + rpmag);
+// 	    double z = (rmag - rpmag);
+// 	    int PairIndex = PairMatrix(Species1, Species2);
+// 	    TotalU += NotMyself*
+// 	      PairActionVector(PairIndex).calcUsqz(s,q,z, level);
+// 	  }
+// 	}
+
+      
+      // Now, sum up the kinetic action
+//       double FourLambdaTauInv=1.0/(4.0*IdentPtcls(Species1).lambda*levelTau);
+//       for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {
+// 	dVec r1 = IdentPtcls(Species1,Ptcl1,Slice);
+// 	dVec r2 = IdentPtcls(Species1,Ptcl1,Slice+skip);
+// 	//This function has to be written and possibly memoized or something?
+// 	double LinkDistSqrd=distSqrd(r1,r2);  
+// 	//We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+// 	TotalK += LinkDistSqrd*FourLambdaTauInv; 
+//       }
+//     }
     
 
   

@@ -125,17 +125,17 @@ public:
   /// Temperature
   double tau;
   /// Calculates the total action.
-  double calcTotalAction(Array<ParticleID,1> changedParticles,int startSlice, int endSlice,int level);
+  double calcTotalAction(int startSlice, int endSlice, Array<int,1> changedParticles,int level);
   /// This is a reference to the memoized data class
-  MemoizedDataClass &myMemoizedData;
+  //  MemoizedDataClass &myMemoizedData;
   ///This picks a new location in space for the particles in the
   ///particles Array at all of the time slices between startSlice and
   ///endSlice (at the appropriate skip for the level)
-  inline double SampleParticles(Array<ParticleID,1> particles,int startSlice,int endSlice,int level);
+  inline double SampleParticles(int startSlice, int endSlice, Array<ParticleID,1> particles,int level);
   /// This calculates the sample probability for going from the state
   /// that is currently in the newMode of MirroredArrayClass to the
   /// state that is currently in oldMode of MirroredArrayClass 
-  inline double LogSampleProb(Array<ParticleID,1> particles,int startSlice,int endSlice,int level);
+  inline double LogSampleProb(int startSlice, int endSlice, Array<ParticleID,1> particles,int level);
   /// Function to calculate the total action.
   void calcTotalAction();
 
@@ -152,8 +152,7 @@ public:
 \delta}{\sigma * \sigma}  \$] )
 
 */
-inline double ActionClass::SampleParticles(Array<ParticleID,1> particles,
-					   int startSlice,int endSlice, int level)
+inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<int,1> particles, int level)
 {
   dVec rpp;
   int skip = 1<<(level+1);
@@ -161,24 +160,30 @@ inline double ActionClass::SampleParticles(Array<ParticleID,1> particles,
 
   double levelTau = 0.5*tau*skip;
   for (int ptcl=0;ptcl<particles.size();ptcl++){
-    int species=particles(ptcl)(0);
-    int ptclNum=particles(ptcl)(1);
-    double lambda=(mySpeciesArray(species)).lambda;
+    //    int species=particles(ptcl)(0);
+    //    int ptclNum=particles(ptcl)(1);
+    double lambda=Path.ParticleSpecies(ptcl).lambda;
+    //    double lambda=(mySpeciesArray(species)).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
-      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
-      rpp=mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
-      ///We've ignored boundary conditions here
+      //      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
+      //      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
+      //      rpp=mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
+      dVec r = Path(sliceCounter,ptcl);
+      dVec rp= Path(sliceCounter+skip,ptcl);
+      dVec rpp=Path(sliceCounter+(skip>>1),ptcl);
+      ////      ///We've ignored boundary conditions here
       dVec rbar=0.5*(r+rp);
       dVec newDelta=GaussianRandomVec(sigma);
       
       rpp=rbar+newDelta;
-      logNewSampleProb=logNewSampleProb+(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
-      ///Here we've stored the new position in the path
-      mySpeciesArray.SetPos(species,ptclNum,sliceCounter+(skip>>1),rpp );
+      logNewSampleProb=logNewSampleProb+
+	(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
+      ////      ///Here we've stored the new position in the path
+     //    mySpeciesArray.SetPos(species,ptclNum,sliceCounter+(skip>>1),rpp );
+      Path.SetPos(sliceCounter+(skip>>1),ptcl,rpp)
     }
   }
   return logNewSampleProb;
@@ -188,8 +193,9 @@ inline double ActionClass::SampleParticles(Array<ParticleID,1> particles,
   /// This calculates the sample probability for going from the state
   /// that is currently in the newMode of MirroredArrayClass to the
   /// state that is currently in oldMode of MirroredArrayClass 
-inline double ActionClass::LogSampleProb(Array<ParticleID,1> particles,
-				      int startSlice,int endSlice,int level)
+inline double ActionClass::LogSampleProb(int startSlice, int endSlice, 
+					 Array<int,1> particles, 
+					 int level)
 {
   dVec rpp;
   int skip = 1<<(level+1);
@@ -197,20 +203,25 @@ inline double ActionClass::LogSampleProb(Array<ParticleID,1> particles,
 
   double levelTau = 0.5*tau*skip;
   for (int ptcl=0;ptcl<particles.size();ptcl++){
-    int species=particles(ptcl)(0);
-    int ptclNum=particles(ptcl)(1);
-    double lambda=mySpeciesArray(species).lambda;
+    //    int species=particles(ptcl)(0);
+    //    int ptclNum=particles(ptcl)(1);
+    //    double lambda=mySpeciesArray(species).lambda;
+    double lambda=Path.SpeciesArray(Path.ParticleSpeciesNum(ptcl)).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
-      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
-      rpp    =mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
+      dVec r = Path(sliceCounter,ptcl);
+      dVec rp= Path(sliceCounter+skip,ptcl);
+      dVec rpp=Path(sliceCounter+(skip>>1),ptcl);
+      //      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
+      //      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
+      //      rpp    =mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
       ///We've ignored boundary conditions here
       dVec rbar=0.5*(r+rp);
       dVec Delta= rpp - rbar;
-      logSampleProb=logSampleProb+(prefactorOfSampleProb-0.5*dot(Delta,Delta)/(sigma2));
+      logSampleProb=logSampleProb+
+	(prefactorOfSampleProb-0.5*dot(Delta,Delta)/(sigma2));
     }
   }
 
