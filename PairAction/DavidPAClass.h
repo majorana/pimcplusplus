@@ -3,8 +3,8 @@
 
 #include "PAFitBase.h"
 #include "../Blitz.h"
-#include "fstream.h"
-#include "iostream.h"
+#include <fstream>
+#include <iostream>
 //#include "../../PathDataClass.h"
 
 
@@ -49,33 +49,18 @@ class DavidPAClass : public PairActionFitClass
   double tau;
   /// Function to read David's squarer file input.
   inline void ReadDavidSquarerFile(string DMFile);
-  inline double U (double q, double z, double s2, int level);
-  inline double dU(double q, double z, double s2, int level);
+  double U (double q, double z, double s2, int level);
+  double dU(double q, double z, double s2, int level);
+#ifdef MAKE_FIT
+  void ReadParams  (IOSectionClass &inSection);
+  void WriteBetaIndependentInfo (IOSectionClass &outSection);
+  /// Returns weighter RMS error
+  void Error (Rho &rho, double &Uerror, double &dUerror);
+  void AddFit (Rho &rho);
+  void WriteFits(IOSectionClass &outSection);
+#endif
 };
 
-
-inline double DavidPAClass::U (double q, double z, double s2, int level)
-{
-  double s=sqrt(s2);
-  double uTemp;
-  double duTemp;
-  double vTemp;
-  calcUsqz(s,q,z,level,uTemp,duTemp,vTemp);
-  return uTemp;
-
-}
-inline double DavidPAClass::dU(double q, double z, double s2, int level)
-{
-  double s=sqrt(s2);
-  double uTemp;
-  double duTemp;
-  double vTemp;
-  calcUsqz(s,q,z,level,uTemp,duTemp,vTemp);
-  //  cerr<<"my vtemp is "<<vTemp<<endl;
-  return duTemp;
-
-
-}
 
 /// Calculate the U(s,q,z) value when given s,q,z and the level 
 /*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
