@@ -28,16 +28,10 @@ void PAszFitClass::AddFit (Rho &rho)
   UCoefs = 0.0;
   dUCoefs = 0.0;
 
-  if (NumBetas>1) {
-    Ukj.resizeAndPreserve(NumBetas);
-    dUkj.resizeAndPreserve(NumBetas);
-    smax.resizeAndPreserve(NumBetas);
-  }
-  else {
-    Ukj.resize(NumBetas);
-    dUkj.resize(NumBetas);
-    smax.resize(NumBetas);
-  }
+  Ukj.resizeAndPreserve(NumBetas);
+  dUkj.resizeAndPreserve(NumBetas);
+  smax.resizeAndPreserve(NumBetas);
+
   Ukj(NumBetas-1).Init(qgrid, UCoefs);
   dUkj(NumBetas-1).Init(qgrid, dUCoefs);
 
