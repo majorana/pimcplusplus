@@ -1,9 +1,9 @@
 #ifndef BISECTIONMOVE_CLASS2_H
 #define BISECTIONMOVE_CLASS2_H
 
-#include "Common.h"
+#include "../Common.h"
 #include "MoveClass.h"
-#include "ActionClass.h"
+#include "../ActionClass.h"
 #include "BisectionClass.h"
 
 /// This is the bisection move class inherited from ParticleMoveClass

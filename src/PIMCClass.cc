@@ -1,8 +1,8 @@
 #include "PIMCClass.h"
-#include "BisectionMoveClass.h"
-#include "OpenBisectionMoveClass.h"
-#include "MetaMoves.h"
-#include "BlockMove.h"
+#include "Moves/BisectionMoveClass.h"
+#include "Moves/OpenBisectionMoveClass.h"
+#include "Moves/MetaMoves.h"
+#include "Moves/BlockMove.h"
 #include "Observables/ObservableClass.h"
 
 

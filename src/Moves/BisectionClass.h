@@ -1,7 +1,7 @@
 #ifndef BISECTION_CLASS_H
 #define BISECTION_CLASS_H
 
-#include "PathDataClass.h"
+#include "../PathDataClass.h"
 
 
 class BisectionClass 

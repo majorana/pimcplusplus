@@ -4,7 +4,7 @@
 #include "../SpeciesClass.h"
 #include "../ActionClass.h"
 #include "../PathDataClass.h"
-#include "../BisectionMoveClass.h"
+#include "../Moves/BisectionMoveClass.h"
 //#include "../MirroredArrayClass.h"
 #include "../Observables/ObservableClass.h"
 #include "../Common/IO/InputOutput.h"

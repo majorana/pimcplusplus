@@ -3,7 +3,7 @@
 
 
 #include "EventClass.h"
-#include "MoveClass.h"
+#include "Moves/MoveClass.h"
 #include "Observables/ObservableClass.h"
 
 class MoveWrap : public EventClass

@@ -3,8 +3,8 @@
 #include "SpeciesClass.h"
 #include "ActionClass.h"
 #include "PathDataClass.h"
-#include "BisectionMoveClass.h"
-#include "MirroredArrayClass.h"
+#include "Moves/BisectionMoveClass.h"
+#include "MirroredClass.h"
 
 using namespace std;
 int main()

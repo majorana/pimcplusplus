@@ -15,19 +15,19 @@ PIMCobjs =                           \
   Observables/ObservableEnergy.o     \
   BisectionClass.o                   \
   PIMCClass.o                        \
-  MetaMoves.o 			     \
-  BlockMove.o                        \
+  Moves/MetaMoves.o 			     \
+  Moves/BlockMove.o                        \
   Observables/ObservableBase.o      \
   Observables/ObservableCorrelation.o      \
   Observables/PathDump.o             \
   Observables/WindingNumber.o        \
   SpeciesClass.o                     \
   Common.o                           \
-  PermuteTableClass.o		     \
+  Moves/PermuteTableClass.o		     \
   RandomPermClass.o                  \
-  OpenBisectionMoveClass.o           \
-  BisectionMoveClass.o               \
-  MoveClass.o                        \
+  Moves/OpenBisectionMoveClass.o           \
+  Moves/BisectionMoveClass.o               \
+  Moves/MoveClass.o                        \
   ActionClass.o                      \
   LongRangeRPA.o                     \
   PathDataClass.o                    \
@@ -73,8 +73,8 @@ PIMCobjs =                           \
 TestPermobjs =                       \
   TestPermutation.o                  \
   BisectionClass.o                   \
-  BlockMove.o                        \
-  MetaMoves.o                        \
+  Moves/BlockMove.o                        \
+  Moves/MetaMoves.o                        \
   PIMCClass.o                        \
   Observables/ObservableBase.o      \
   Observables/ObservableEnergy.o     \
@@ -83,11 +83,11 @@ TestPermobjs =                       \
   Observables/WindingNumber.o        \
   SpeciesClass.o                     \
   Common.o                           \
-  PermuteTableClass.o		     \
+  Moves/PermuteTableClass.o		     \
   RandomPermClass.o                  \
-  BisectionMoveClass.o               \
-  OpenBisectionMoveClass.o           \
-  MoveClass.o                        \
+  Moves/BisectionMoveClass.o               \
+  Moves/OpenBisectionMoveClass.o           \
+  Moves/MoveClass.o                        \
   ActionClass.o                      \
   LongRangeRPA.o                     \
   PathDataClass.o                    \
@@ -177,7 +177,7 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 all:   pimc++ TestPerm TestEwald
 	
-pimc++: Common_obj observables Tests $(PIMCobjs)
+pimc++: Common_obj observables moves Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
 
 TestPerm: Common_obj Tests $(TestPermobjs)
@@ -192,6 +192,8 @@ Common_obj:
 observables:
 	cd Observables; ${MAKE_ALL}
 
+moves:
+	cd Moves; ${MAKE_ALL}
 Common_clean:
 	cd Common; ${MAKE} clean
 
@@ -218,10 +220,10 @@ clean:	Common_clean
 
 
 
-SOURCES =  myprog.cc SpeciesClass.cc Common.cc OpenBisectionMoveClass.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc RandomPermClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc
+SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc RandomPermClass.cc Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc
 
 
-newmake: Common_newmake Tests_newmake Observables_newmake
+newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake
 	make -f template.make Makefile FRC=force_rebuild
 
 Common_newmake:
@@ -232,6 +234,9 @@ Tests_newmake:
 
 Observables_newmake:
 	cd Observables; ${MAKE_NEWMAKE}
+
+Moves_newmake:
+	cd Moves; ${MAKE_NEWMAKE}
 
 Makefile:	$(FRC)
 	rm -f $@

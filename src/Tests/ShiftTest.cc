@@ -1,4 +1,4 @@
-#include "../MirroredArrayClass.h"
+#include "../MirroredClass.h"
 #include <unistd.h>
 
 

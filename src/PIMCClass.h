@@ -2,11 +2,11 @@
 #define PIMC_CLASS_H
 
 #include "PathDataClass.h"
-#include "MoveClass.h"
+#include "Moves/MoveClass.h"
 #include "Observables/ObservableClass.h"
 #include "Observables/ObservableEnergy.h"
 #include "WrapClass.h"
-#include "PermuteTableClass.h"
+#include "Moves/PermuteTableClass.h"
 #include "RunInfoClass.h"
 
 

@@ -1,10 +1,10 @@
-double tau=0.05;
+double tau=0.1;
 
 Section (System)
 {
   int NumTimeSlices=20;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
-  Array<double,1> Box(3)=[3.0,3.0,3.0];
+  Array<double,1> Box(3)=[15.5,15.5,15.5];
   Section (Particles)
   {
     Section (Species)

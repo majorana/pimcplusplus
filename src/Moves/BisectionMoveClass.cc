@@ -1,7 +1,7 @@
-#include "PathDataClass.h"
+#include "../PathDataClass.h"
 #include "BisectionMoveClass.h"
-#include "Common.h"
-#include "SpeciesClass.h"
+#include "../Common.h"
+#include "../SpeciesClass.h"
 
 
 void BisectionMoveClass::Read(IOSectionClass &moveInput)

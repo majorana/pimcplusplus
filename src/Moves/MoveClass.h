@@ -2,9 +2,9 @@
 #define MOVE_CLASS_H
 
 
-#include "Common.h"
-#include "PathDataClass.h"
-#include "RandomPermClass.h"
+#include "../Common.h"
+#include "../PathDataClass.h"
+#include "../RandomPermClass.h"
 #include "BisectionClass.h" 
 
 /// This is the generic parent class for all moves, including "real moves"
