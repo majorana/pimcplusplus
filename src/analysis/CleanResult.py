@@ -62,7 +62,6 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
 
 
 def ProcessCorrelationSection(infile,doc,currNum):
-     print "here"
      sectionName=infile.GetName()
      doc.append(Heading(1,sectionName))
      hlabel=infile.ReadVar("xlabel")
@@ -118,10 +117,9 @@ def ProcessScalarSection(infile,doc,currNum):
      myTable=Table()
      myTable.body=[['','Mean','Variance','Error','Kappa']]
      numVars=infile.CountVars()
-     print "Num vars is ",numVars
+#     print "Num vars is ",numVars
      for counter in range(0,numVars):
           data=infile.ReadVar(counter)
-          print type(data)
           if type(data)==numarray.numarraycore.NumArray:
                currNum=currNum+1
                varName=infile.GetVarName(counter)
@@ -137,18 +135,68 @@ def ProcessScalarSection(infile,doc,currNum):
      return currNum
 
 
-def ProcessRunInfo(doc,infile):
-     doc.append(Heading(2,"Run information"))
-     myTable=Table()
+def ProcessSystemInfo(infile):
+     tau=infile.ReadVar("tau")
+     box=infile.ReadVar("Box")
+     numTimeSlices=infile.ReadVar("NumTimeSlices")
+     print numTimeSlices,tau
+     beta=tau*numTimeSlices
+     temp=1.0/beta
+     systemTable=Table("System")
+     systemTable.body=[["tau",repr(tau)]]
+     systemTable.body.append(["# of Slices",repr(numTimeSlices)])
+     systemTable.body.append(["beta",repr(beta)])
+     systemTable.body.append(["temperature",repr(temp)])
+     systemTable.body.append(["Box","[ "+repr(box[0])+",  "+repr(box[1])+",  "+repr(box[2])+" ]"])
+     speciesTable=Table("Species")
+     speciesTable.body=[]
+     speciesTable.body.append(["Name","NumParticles","lambda","Type"])
+     numSections=infile.CountSections2("Species")
+     for spec in range(0,numSections):
+          infile.OpenSection2("Species",spec)
+          name=infile.ReadVar("Name")
+          numPtcl=infile.ReadVar("NumParticles")
+          lambdam = infile.ReadVar("lambda")
+          type=infile.ReadVar("ParticleType")
+          speciesTable.body.append([name,numPtcl,lambdam,type])
+          infile.CloseSection()
+     totalTable=Table()
+     totalTable.body=[]
+     totalTable.border=0
+     totalTable.body.append([systemTable])
+     totalTable.body.append([speciesTable])
+     return totalTable
+     
+                       
+                       
+
+
+def ProcessRunInfo(infile):
+     myTable=Table("Run Information")
      myTable.body=[]
-     myTable.width=400
+     myTable.width='40%'
      numVars=infile.CountVars()
      for counter in range(0,numVars):
           data=infile.ReadVar(counter)
           varName=infile.GetVarName(counter)
           myTable.body.append([varName,data])
-     doc.append(myTable)
+     return myTable
+
+
+
+def ProcessTopTable(doc,infile):
+     largeTable=Table()
+     largeTable.border=0
+     infile.OpenSection("RunInfo")
+     runTable=ProcessRunInfo(infile)
+     infile.CloseSection()
+     infile.OpenSection("System")
+     speciesTable=ProcessSystemInfo(infile)
+     infile.CloseSection()
+     largeTable.body.append([runTable,speciesTable])
+     doc.append(largeTable)
      doc.append(HR())
+     return doc
 
 infile=IOSectionClass()
 infile.OpenFile(sys.argv[1])
@@ -161,9 +209,7 @@ infile.OpenFile(sys.argv[1])
 #PlotPaths(pathData,visualPath,visualBall,0)
 
 doc=SeriesDocument()
-infile.OpenSection("RunInfo")
-ProcessRunInfo(doc,infile)
-infile.CloseSection()
+ProcessTopTable(doc,infile)
 
 
 currNum=0
@@ -173,13 +219,12 @@ for counter in range(0,numSections):
      infile.OpenSection(counter)
      print infile.GetName()
      myType=infile.ReadVar("Type")
-     print "Section Type is "
-     print myType
      if myType=="Scalar":
           currNum=ProcessScalarSection(infile,doc,currNum)
+          doc.append(HR())
      elif myType=="CorrelationFunction":
           currNum=ProcessCorrelationSection(infile,doc,currNum)
-     doc.append(HR())
+          doc.append(HR())
      infile.CloseSection()
 doc.logo=""
 doc.author="Ken and Bryan"

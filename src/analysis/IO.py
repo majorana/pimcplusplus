@@ -14,7 +14,7 @@ class IOSectionClass:
         return IOSection.CloseFile(this.handle)
     def FlushFile(this):
         return IOSection.FlushFile(this.handle)
-    def OpenSection(this,name,num):
+    def OpenSection2(this,name,num):
         return IOSection.OpenSectionNameNum(this.handle,name,num)
     def OpenSection(this,namenum):
         if type(namenum)==int:
