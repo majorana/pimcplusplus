@@ -1,9 +1,12 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define SIMPLE_SPRNG
+
 #define NDIM 3
 #define OLD 0
 #define NEW 1
+#include <sprng.h>
 #include "Blitz.h"
 typedef enum {MOVEMODE, OBSERVABLEMODE} ModeType;
 

@@ -15,5 +15,7 @@ public:
   ArrayOfIdenticalParticlesClass IdenticalParticleArray;
     //  Array<IdenticalParticleClass,1> IdenticalParticleArray;
 
+  void acceptMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice);
+  void rejectMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice);
 };
 #endif

@@ -36,26 +36,28 @@ public:
     AB(Write2,x,y)=NewVal;
   }
 
-  /// In MOVE mode, write only to the first copy, while in OBSERVABLE
+  /// In NEW mode, write only to the first copy,in OLD MODE 
+  /// write to the section copy,  in OBSERVABLE
   /// mode, write to both copies.
   inline void SetMode(ModeType Mode)
   {
     /// Write only to the first copy
-    if (Mode == MOVEMODE) 
-      {
+    if (Mode == NEW) {
 	Write1 = 0;
 	Write2 = 0;
-      }
-    else if (Mode == OBSERVABLEMODE)
-      {
+    }
+    else if (Mode == OLD){
+      Write1 = 1;
+      Write1 = 1;
+    }
+    else if (Mode == OBSERVABLEMODE){
 	Write1 = 0;
 	Write2 = 1;
-      }
-    else
-      {
+    }
+    else{
       ///This needs to be put back in when somebody tells me what abort does
 //	abort ("Undefined mode type!");
-      }
+    }
   }
 
   /// In case of acceptance, this is called to copy the new path over

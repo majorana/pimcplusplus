@@ -31,10 +31,14 @@ void MoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
 
 inline int MoveClass::RandInt (int Max) //Hopefully this didn't break anything
 {
-  //  return (floor((double)Max*sprng(1)));
-  int *myInt;
-  sprng(myInt);
-  return *myInt;
+  double myRandNum;
+  myRandNum=sprng();
+  myNum=(double)Max * myRandNum;
+    
+  return (floor(myNum));
+
+  //  sprng(myInt);
+  //  return *myInt;
 }
 
 

@@ -1,5 +1,6 @@
 #ifndef MOVE_CLASS_H
 #define MOVE_CLASS_H
+
 #include <sprng.h>
 #include "Common.h"
 #include "PathDataClass.h"
