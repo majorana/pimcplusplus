@@ -34,7 +34,7 @@ TestPW2:  $(TestObjs2) $(Objs2) $(PHObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)
         $(MiscObjs) $(LIBS)
 
 Hamiltonian.s:  Hamiltonian.cc
-	$(CC) -S -mmmx -m3dnow -march=athlon -O3 -ffast-math -g  $(DEFS) $(INCL) -o $*.s $<
+	$(CC) -S -O3 -ffast-math -g  $(DEFS) $(INCL) -o $*.s $<
 
 clean:
 	rm -f *.o

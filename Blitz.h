@@ -20,7 +20,8 @@ typedef TinyVector<scalar,NDIM> dVec;
 typedef TinyVector<int,NDIM> dVecInt;
 
 #ifdef MAC
-  extern "C" double isnan (double x);
+//  extern "C" double isnan (double x);
+#define isnan(x) __isnand(x)
 #endif
 template <class T, int size>
 inline TinyVector<T,size> operator-(TinyVector<T,size> v)

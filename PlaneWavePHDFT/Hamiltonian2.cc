@@ -1,6 +1,7 @@
 #include "Hamiltonian2.h"
 #include "../PH/kSpacePH.h"
 
+
 void 
 KineticClass::Setup()
 {
