@@ -132,8 +132,8 @@ inline double BicubicSpline::operator() (int ix, double y)
   double q2 = t*t*tm1;
   double h = (*Ygrid)(iy+1) - (*Ygrid)(iy);
 
-  return (F(iy,ix).z*p1 + F(iy+1,ix).z*p2 + 
-	  h*(F(iy,ix).dzdy*q1 + F(iy+1,ix).dzdy*q2));
+  return (F(ix,iy).z*p1 + F(ix,iy+1).z*p2 + 
+	  h*(F(ix,iy).dzdy*q1 + F(ix,iy+1).dzdy*q2));
 }
 
 
