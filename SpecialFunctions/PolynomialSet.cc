@@ -23,7 +23,7 @@ public:
 void PolynomialSetClass::MakeOrthoSet(int order, double xmin, double xmax,
 				      WeightFuncClass &wf)
 {
-  const double tolerance = 1.0e-9;
+  const double tolerance = 1.0e-10;
   /// First, calculate S_n = \int_{xmin}^{xmax} x^n w(x) \ dx
   Array<double,1> Sn(2*order+1);
   for (int n=0; n<=(2*order); n++) {
@@ -42,7 +42,14 @@ void PolynomialSetClass::MakeOrthoSet(int order, double xmin, double xmax,
   }
 
   // Initialize first function to a constant
-  P(0)[0] = 1.0/sqrt(xmax-xmin);
+  P(0)[0] = 1.0;
+  PolynomialClass P2 = P(0)*P(0);
+  double norm=0.0;
+  for (int i=0; i<=(2*order); i++)
+    norm += P2[i]*Sn(i);
+  P(0) = (1.0/sqrt(norm))*P(0);
+
+  // Now construct remaining functions
   for (int n=1; n<=order; n++) {
     // First, set P(n) = x*P(n-1)
     for (int j=1; j<=order; j++)

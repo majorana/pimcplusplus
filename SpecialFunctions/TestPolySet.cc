@@ -1,4 +1,7 @@
 #include "PolynomialSet.h"
+#include "LegendrePoly.h"
+#include "HermitePoly.h"
+#include "../Integration/GKIntegration.h"
 
 class ConstClass : public WeightFuncClass
 {
@@ -6,6 +9,15 @@ public:
   double operator()(double x)
   { return 1.0; }
 };
+
+class GaussianClass : public WeightFuncClass
+{
+public:
+  double operator()(double x)
+  { return exp(-x*x); }
+};
+
+
 
 void TestPolySet()
 {
@@ -16,13 +28,68 @@ void TestPolySet()
   for (double x=-1.0; x<=1.00001; x+=0.001) {
     fprintf (stderr, "%1.4e ", x);
     for (int n=0; n<=order; n++)
-      fprintf (stderr, "%1.14e ", Pset(n, x));
+      fprintf (stderr, "%1.14e %1.14e ", Pset(n, x)/Pset(n,1.0),
+	       LegendrePoly(n, x));
     fprintf (stderr, "\n");
   }
 }
 
 
+void TestPolySet2()
+{
+  const int order=10;
+  PolynomialSetClass Pset;
+  GaussianClass wf;
+  Pset.MakeOrthoSet(order, -15.0, 15.0, wf);
+  for (double x=-2.0; x<=2.00001; x+=0.001) {
+    fprintf (stderr, "%1.4e ", x);
+    for (int n=0; n<=order; n++)
+      fprintf (stderr, "%1.14e %1.14e ", 
+	       Pset(n, x)/Pset(n,1.0) * HermitePoly(n,1.0),
+	       HermitePoly(n, x));
+    fprintf (stderr, "\n");
+  }
+}
+
+
+class OrthoCheckClass
+{
+  int n, m;
+  PolynomialSetClass &Pset;
+  WeightFuncClass &WF;
+public:
+  double operator()(double x)
+  {
+    return (WF(x)*Pset(m)(x)*Pset(n)(x));
+  }
+
+  OrthoCheckClass(int M, int N, 
+		  WeightFuncClass &wf, 
+		  PolynomialSetClass &pset) 
+    : Pset(pset), WF(wf), m(M), n(N)
+  {}
+};
+
+
+void TestPolySet3()
+{
+  const int order=10;
+  PolynomialSetClass Pset;
+  GaussianClass wf;
+  Pset.MakeOrthoSet(order, -15.0, 15.0, wf);
+
+  for(int m=0; m<=order; m++) {
+    for (int n=0; n<=order; n++) {
+      OrthoCheckClass orthoCheck(m, n, wf, Pset);
+      GKIntegration<OrthoCheckClass, GK15> Integrator(orthoCheck);
+      double val = Integrator.Integrate(-15.0, 15.0, 1.0e-12);
+      fprintf (stderr, "%1.16e ", val);
+    }
+    fprintf (stderr, "\n");
+  }
+}
+
 main()
 {
-  TestPolySet();
+  TestPolySet2();
 }
