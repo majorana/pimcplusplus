@@ -10,7 +10,7 @@ void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
   int CurrentNumPtcls = 1234567;
   for (int i=0; i<ActSpecies.size(); i++) {
     CurrentNumPtcls = 
-      (PathData->SpeciesArray)(ActSpecies(i)).NumParticles; 
+      PathData.SpeciesArray(ActSpecies(i)).NumParticles(); 
     TotalParticles += CurrentNumPtcls;
   }
 
@@ -20,7 +20,7 @@ void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
   TotalParticles = 0;
   for (int i=0; i<ActSpecies.size(); i++) {
     int CurrentNumPtcls = 
-      PathData->SpeciesArray(ActSpecies(i)).NumParticles; 
+      PathData.SpeciesArray(ActSpecies(i)).NumParticles(); 
     //    cerr << "CurrentNumPtcls = " << CurrentNumPtcls << endl;
     for (int j=0; j<CurrentNumPtcls; j++) {
       MyParticles(j+TotalParticles)[0] = ActSpecies(i);

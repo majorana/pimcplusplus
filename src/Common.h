@@ -29,6 +29,6 @@ int GetCurrentTimeStamp();
 dVec GaussianRandomVec(double sigma);
 
 /// Changes the mode the entire code is running in.
-void setMode(ModeType);
+void SetMode(ModeType);
 
 #endif

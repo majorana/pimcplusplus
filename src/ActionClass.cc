@@ -14,8 +14,8 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
   int Species1, Species2, Ptcl1, Ptcl2;
   int NumSpecies;
 
-  SpeciesArrayClass &IdentPtcls = *mySpeciesArray;
-  NumSpecies = IdentPtcls.size();
+  SpeciesArrayClass &IdentPtcls = mySpeciesArray;
+  NumSpecies = IdentPtcls.Size();
   //  cerr<<"What the action class thinks the size is in calctotalaction: ";
   //  cerr<<  mySpeciesArray->size()<<endl;
   int skip = 1<<level;
@@ -25,7 +25,7 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
       Species1 = changedParticles(i)[0];
       Ptcl1 = changedParticles(i)[1];
       for (int Species2=0; Species2<NumSpecies; Species2++) {
-	int NumPtcls2 = IdentPtcls(Species2).NumParticles;
+	int NumPtcls2 = IdentPtcls(Species2).NumParticles();
 	for (int Ptcl2=0; Ptcl2<NumPtcls2; Ptcl2++) {
 	  for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {	    
 	    double NotMyself = (double)((Ptcl1!=Ptcl2)||(Species1!=Species2));
@@ -336,7 +336,7 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
 	cerr<<"ERROR!!! ERROR!!! We didn't get the beta derivative.\n";
       }
       Array<double,3> tempdUkj(NumGridPoints,NumUKJ,NumTau);
-      tempukjArray.resize(NumUKJ);      
+      TempukjArray.resize(NumUKJ);      
       dukj.resize(NumTau);
       ReadFORTRAN3Tensor(infile,tempdUkj);
       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){

@@ -25,6 +25,14 @@ public:
   /// Resizes the two dimensional array.
   void Resize(int numPtcles,int numTimeSlices);
 
+  inline int NumParticles()
+  {
+    return AB.extent(1);
+  }
+  inline int NumTimeSlices()
+  {
+    return AB.extent(2);
+  }
   /// Constructor that creates the 2d array of the correct size
   inline MirroredArrayClass(int particleNum, int timeSliceNum)
   {

@@ -11,11 +11,11 @@ class SpeciesArrayClass
   Array<SpeciesClass*,1> SpeciesArray;
  public:
   /// Returns the size of the array
-  inline int size(){
+  inline int Size(){
     return SpeciesArray.size();
   }
   /// Resizes the array
-  inline void resize(int newsize)
+  inline void Resize(int newsize)
     {
       //      cerr<<"The Array of SpeciesClass is being resized to ";
       //      cerr<<newsize<<endl;

@@ -14,9 +14,10 @@ class MoveClass
   /// This hold a reference to the Path Data
   PathDataClass &PathData;
   /// Call this in order to make a move.
-  virtual void makeMove()=0;
+  virtual void MakeMove()=0;
   /// MoveClass constructor. Sets reference to the PathData object
-  MoveClass(PathDataClass &myPathData) : PathData(myPathData);
+  MoveClass(PathDataClass &myPathData) : PathData(myPathData)
+  {  /* Do nothing right now.*/  };
 };
   
 /// This is a specialization of MoveClass which actually physically moves
@@ -40,9 +41,9 @@ protected:
   /// Stores the number of moves made and the number accepted
   int NumMoves, NumAccepted;
   /// This returns the Acceptance Ratio.
-  inline double AcceptanceRatio() {return (double)(NumAccepted)/(double)NumMoves};
+  inline double AcceptanceRatio() {return (double)(NumAccepted)/(double)NumMoves;}
   /// Call this to make a move
-  virtual void makeMove()=0;
+  virtual void MakeMove()=0;
  
   /// This array contains the Particle ID's of particles that you are 
   /// currently moving (i.e. NumParticlesToMove of them
@@ -60,7 +61,8 @@ protected:
   /// Function that chooses the particles that you should move and
   /// places them in ActiveParticles; 
   void ChooseParticles();
- 
+  ParticleMoveClass(PathDataClass &myPathData) : MoveClass (myPathData)
+  {/* Do nothing for now.*/  }
 };
 
 

@@ -1,10 +1,10 @@
 #include "PathClass.h"
 
 
-void PathClass::shiftData(int slicesToShift,CommunicatorClass &Communicator)
+void PathClass::ShiftData(int slicesToShift,CommunicatorClass &Communicator)
 {
-  Positions.shiftData(slicesToShift,Communicator);
-  TimeStamp.shiftData(slicesToShift,Communicator);
+  Positions.ShiftData(slicesToShift,Communicator);
+  TimeStamp.ShiftData(slicesToShift,Communicator);
 
 
 }

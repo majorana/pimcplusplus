@@ -80,11 +80,4 @@ dVec GaussianRandomVec(double sigma)
 
 
 
-
-double distSqrd(dVec a, dVec b) //Did I do this right?
-{
-  dVec Disp = a - b;
-  return (dot(Disp,Disp));
-}
-
   

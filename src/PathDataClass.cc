@@ -1,7 +1,7 @@
 #include "PathDataClass.h"
 
 /// FIX ME!  BAD BAD SLOW HACK!!!
-void PathDataClass::acceptMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice)
+void PathDataClass::AcceptMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice)
 {
   //  Array<int> NumPerSpecies;
   //  int speciesSize=PathDataClass.IdenticalParticleArrray.size();
@@ -22,7 +22,7 @@ void PathDataClass::acceptMove(Array <ParticleID,1> ActiveParticles,int StartTim
 
 }
 
-void PathDataClass::rejectMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice)
+void PathDataClass::RejectMove(Array <ParticleID,1> ActiveParticles,int StartTimeSlice,int EndTimeSlice)
 {
   int Ptcl;
   for (int i=0; i<ActiveParticles.size(); i++)

@@ -22,8 +22,8 @@ class PathClass
   /// Changes number of particles and timeslices;
   inline void Resize(int numPtcles,int numTimeSlices)
     {
-      Positions.resize(numPtcles,numTimeSlices);
-      TimeStamp.resize(numPtcles,numTimeSlices);
+      Positions.Resize(numPtcles,numTimeSlices);
+      TimeStamp.Resize(numPtcles,numTimeSlices);
     }
   /// Returns the number of particles stored
   inline int NumParticles()
@@ -46,7 +46,7 @@ class PathClass
     {
       
       Positions.Set(ptcl,timeSlice,newPos);
-      TimeStamp.Set(ptcl,timeSlice,getCurrentTimeStamp());
+      TimeStamp.Set(ptcl,timeSlice,GetCurrentTimeStamp());
     }
   /// Returns the MC stepnum in which ptcl/timeslice was last
   /// updated.

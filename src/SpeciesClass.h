@@ -17,7 +17,10 @@ public:
   
   inline int NumParticles()
   { return Path.NumParticles(); }
+  inline int NumTimeSlices()
+  { return Path.NumTimeSlices(); }
 
+  void ShiftData(int sliceToShift, CommunicatorClass &communicator);
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
   /// classical particle.
   double lambda;

@@ -9,7 +9,7 @@ class OutputFileClass
 public:
   int dummy;
   /// Current has nothing in it.
-}
+};
 
 
 /// This is the parent class for all observables.  It contains
@@ -30,7 +30,7 @@ public:
   virtual void Write(OutputFileClass &outputFile);
   /// The constructor.  Sets PathData references and calls initialize.
   ObservableClass(PathDataClass &myPathData) : PathData(myPathData)
-  { Initialize();  }
+  {   }
 };
 
 
@@ -39,11 +39,14 @@ public:
 /// observables, array observables, array of dVec observables, etc.
 /// We will write one class functions which correctly manages
 /// collecting observables from all processors with MPI.
-template class DistributedObservableClass<T> : public ObservableClass
+template<class T> 
+class DistributedObservableClass : public ObservableClass
 {
   int dummy;
 
-}
+  DistributedObservableClass(PathDataClass &myPathData) : ObservableClass (myPathData)
+  { /* Do nothing for now. */ }
+};
 
 class ScalarObservableClass : public ObservableClass
 {
@@ -53,8 +56,9 @@ public:
   /// This routine will collect averages of
   void Write (OutputFileClass &outputFile);
 
-
-}
+  ScalarObservableClass (PathDataClass &myPathData) : ObservableClass(myPathData)
+  { /* Do nothing for now. */ }
+};
 
 
 /// A pair correlation function observable.
@@ -77,6 +81,8 @@ public:
   void Initialize();
   /// My specialization of the virtual function.
   void Print();
+  PairCorrelation(PathDataClass &myPathData) : ObservableClass(myPathData)
+  { /* Do nothing for now. */ }
 };
 
 

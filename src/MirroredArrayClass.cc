@@ -27,10 +27,9 @@ int Write1=0;
 int Write2=1;
 
 template<class T>
-void MirroredArrayClass<T>::resize(int numParticles,int numTimeSlices)
+void MirroredArrayClass<T>::Resize(int numParticles,int numTimeSlices)
 {
   AB.resize(2,numParticles,numTimeSlices);
-
 }
 
 
@@ -46,7 +45,7 @@ void MirroredArrayClass<T>::Print()
 }
 
 template <class T>
-void MirroredArrayClass<T>::shiftData(int slicesToShift, CommunicatorClass &Communicator)
+void MirroredArrayClass<T>::ShiftData(int slicesToShift, CommunicatorClass &Communicator)
 {
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();

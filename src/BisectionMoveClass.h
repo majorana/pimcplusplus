@@ -22,8 +22,9 @@ class BisectionMoveClass : public ParticleMoveClass
   int NumLevels;
 
   /// Function to actually make a bisection move.
-  void makeMove();
-  BisectionMoveClass();
+  void MakeMove();
+  BisectionMoveClass(PathDataClass &myPathData ) : ParticleMoveClass(myPathData)
+  { /* Do nothing for now. */ }
 };
 
 
@@ -38,7 +39,9 @@ class ShiftMove : public MoveClass
 ///this change itself randomly from other objects.
   int numTimeSlicesToShift;
   /// Function to actually make a shift move. 
-  void makeMove();
+  void MakeMove();
+  ShiftMove (PathDataClass &myPathData) : MoveClass(myPathData)
+  { /* Do nothing for now. */ }
 };
 
 

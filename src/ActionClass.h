@@ -79,7 +79,7 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
       double ssquared=s*s;
       double ssquaredinverse=1.0/ssquared;
       double Sto2k=ssquared;
-      (ukj(level))(q,tempukjArray); 
+      (ukj(level))(q,TempukjArray); 
       for (int k=1;k<=n;k++){  
 	
 	double Zto2j=1;
@@ -87,7 +87,7 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
 	
 	for (int j=0;j<=k;j++){
 	  
-	  double cof=tempukjArray(k*(k+1)/2+j); //indexing into the 2darray
+	  double cof=TempukjArray(k*(k+1)/2+j); //indexing into the 2darray
 	  sum=sum+cof*Zto2j*currS;
 	  
 	  
@@ -162,14 +162,14 @@ inline double ActionClass::SampleParticles(Array<ParticleID,1> particles,
   for (int ptcl=0;ptcl<particles.size();ptcl++){
     int species=particles(ptcl)(0);
     int ptclNum=particles(ptcl)(1);
-    double lambda=((*mySpeciesArray)(species)).lambda;
+    double lambda=(mySpeciesArray(species)).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-      dVec r =(*mySpeciesArray)(species,ptclNum,sliceCounter);
-      dVec rp=(*mySpeciesArray)(species,ptclNum,sliceCounter+skip);
-      rpp=(*mySpeciesArray)(species,ptclNum,sliceCounter+(skip>>1));
+      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
+      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
+      rpp=mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
       ///We've ignored boundary conditions here
       dVec rbar=0.5*(r+rp);
       dVec newDelta=GaussianRandomVec(sigma);
@@ -177,7 +177,7 @@ inline double ActionClass::SampleParticles(Array<ParticleID,1> particles,
       rpp=rbar+newDelta;
       logNewSampleProb=logNewSampleProb+(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
       ///Here we've stored the new position in the path
-      (*mySpeciesArray).SetPos(species,ptclNum,sliceCounter+(skip>>1),rpp );
+      mySpeciesArray.SetPos(species,ptclNum,sliceCounter+(skip>>1),rpp );
     }
   }
   return logNewSampleProb;
@@ -198,14 +198,14 @@ inline double ActionClass::LogSampleProb(Array<ParticleID,1> particles,
   for (int ptcl=0;ptcl<particles.size();ptcl++){
     int species=particles(ptcl)(0);
     int ptclNum=particles(ptcl)(1);
-    double lambda=((*mySpeciesArray)(species)).lambda;
+    double lambda=mySpeciesArray(species).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-      dVec r =(*mySpeciesArray)(species,ptclNum,sliceCounter);
-      dVec rp=(*mySpeciesArray)(species,ptclNum,sliceCounter+skip);
-      rpp=(*mySpeciesArray)(species,ptclNum,sliceCounter+(skip>>1));
+      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
+      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
+      rpp    =mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
       ///We've ignored boundary conditions here
       dVec rbar=0.5*(r+rp);
       dVec Delta= rpp - rbar;

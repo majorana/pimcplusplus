@@ -3,23 +3,18 @@
 #include "Common.h"
 
 
-void ShiftMove::makeMove()
+void ShiftMove::MakeMove()
 {//Remember to mark Actions dirty!!!
   //int numTimeSlicesToShift=(int)floor(sprng()*PathData->NumTimeSlices);
   int numTimeSlicesToShift = 5;
-  for (int counter=0;counter<PathData->NumSpecies();counter++){
-      (*PathData)(counter).shiftData(numTimeSlicesToShift,PathData->Communicator);
+  for (int counter=0;counter<PathData.NumSpecies();counter++){
+      PathData(counter).ShiftData(numTimeSlicesToShift,PathData.Communicator);
   }
 }
 
     
 
-BisectionMoveClass::BisectionMoveClass()
-{
-
-}
-
-void BisectionMoveClass::makeMove()
+void BisectionMoveClass::MakeMove()
 {
   bool toAccept=true;
   double oldLogSampleProb;
@@ -35,19 +30,25 @@ void BisectionMoveClass::makeMove()
   int levelCounter=NumLevels-1;
 
   while (levelCounter>=0 && toAccept==true){
-    //    cerr<<"At the level Counter in Bisection makeMove being  "<<levelCounter<<" the size is ";
+    // cerr<<"At the level Counter in Bisection makeMove being  "
+    // <<levelCounter<<" the size is ";
     //    cerr <<  PathData->SpeciesArray.size()<<endl;
-    setMode(OLDMODE);
+    SetMode(OLDMODE);
     toAccept=true;
-    double oldAction = (*PathData).Action.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
-    oldLogSampleProb = (*PathData).Action.LogSampleProb(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
-    setMode(NEWMODE);
-    newLogSampleProb = (*PathData).Action.SampleParticles(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
+    double oldAction = PathData.Action.calcTotalAction
+      (ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
+    oldLogSampleProb = PathData.Action.LogSampleProb
+      (ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
+    SetMode(NEWMODE);
+    newLogSampleProb = PathData.Action.SampleParticles
+      (ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
     //cerr << "newLogSampleProb = " << newLogSampleProb << endl;
     //cerr << "oldLogSampleProb = " << oldLogSampleProb << endl;
-    double newAction = (*PathData).Action.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter);
+    double newAction = PathData.Action.calcTotalAction
+      (ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter);
     double currActionChange=newAction-oldAction;
-    double logAcceptProb=-oldLogSampleProb+newLogSampleProb+currActionChange-prevActionChange;
+    double logAcceptProb=
+      -oldLogSampleProb+newLogSampleProb+currActionChange-prevActionChange;
     //cerr << "prevActionChange = " << prevActionChange << endl;
     //cerr << "logAcceptProb = " << logAcceptProb << endl;
     //cerr<<"My new action is "<<newAction<<" and my old action was "<<oldAction<<endl;
@@ -61,11 +62,11 @@ void BisectionMoveClass::makeMove()
     levelCounter--;
   }
   if (toAccept ==true ){
-    (*PathData).acceptMove(ActiveParticles,StartTimeSlice,EndTimeSlice);
+    PathData.AcceptMove(ActiveParticles,StartTimeSlice,EndTimeSlice);
     //cout<<"I'm accepting! I'm accepting!"<<endl;
   }
   else {
-    (*PathData).rejectMove(ActiveParticles,StartTimeSlice,EndTimeSlice);
+    PathData.RejectMove(ActiveParticles,StartTimeSlice,EndTimeSlice);
     //  cout<<"I'm rejecting! I'm rejecting!"<<endl;
   }
     
