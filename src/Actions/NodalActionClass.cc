@@ -387,6 +387,9 @@ double FreeNodalActionClass::HybridDist (int slice, double lambdaTau)
   for (int i=0; i<N; i++)
     grad2 += dot (GradVec(i), GradVec(i));
 
+  if (det < 0.0)
+    return -1.0;
+
   double gradDist = det/sqrt(grad2);
 
   if (((NumGradDists+NumLineDists)%100000) == 99999) {
@@ -394,7 +397,6 @@ double FreeNodalActionClass::HybridDist (int slice, double lambdaTau)
 	 << (double)NumLineDists/(NumGradDists+NumLineDists) << endl;
   }
     
-
   if (gradDist > sqrt(6.0*lambdaTau)) {
     NumGradDists++;
     return (gradDist);
@@ -664,7 +666,7 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
       dist2 = sqrt(-1.0);
     else {
       //dist2 = MaxDist(slice+skip);//LineSearchDist (slice+skip);
-      dist1 = HybridDist (slice+skip, lambda*levelTau);
+      dist2 = HybridDist (slice+skip, lambda*levelTau);
       //fprintf (stderr, "%1.12e %1.12e\n", lineDist, dist2);
       if (dist2 < 0.0) {
 	return 1.0e100;
