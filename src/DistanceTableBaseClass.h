@@ -219,6 +219,14 @@ inline void DistanceTableClass::DistDisp(int timeSliceA, int timeSliceB,
 	       dispATest,dispBTest);
   //  cerr<<dispBTest<<" "<<dispB<<" "<<endl;
   if (!(dispBTest==dispB)){
+    cerr << "ptcl1 = " << ptcl1 << endl;
+    cerr << "ptcl2 = " << ptcl2 << endl;
+    cerr << "index = " << index << endl;
+    cerr << "sign = " << sign   << endl;
+    cerr<<"Particle 1, time slice A location:"<<Path(timeSliceA,ptcl1)<<endl;
+    cerr<<"Particle 2, time slice A location:"<<Path(timeSliceA,ptcl2)<<endl;
+    cerr<<"Particle 1, time slice B location:"<<Path(timeSliceB,ptcl1)<<endl;
+    cerr<<"Particle 2, time slice B location:"<<Path(timeSliceB,ptcl2)<<endl;
     cerr<<dispBTest<<" "<<dispB<<" "<<endl;
     cerr<<ptcl1<<" "<<ptcl2<<" "<<timeSliceA<<" "<<timeSliceB<<" "<<endl;
     cerr<<dispATest<<" "<<dispA<<" "<<endl;

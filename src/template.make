@@ -8,7 +8,7 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DNO_COUT -O3 -ffast-math # -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -O3 -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                           \
   Main.o                             \
@@ -20,6 +20,8 @@ PIMCobjs =                           \
   Common/Splines/CubicSpline.o       \
   Common/Splines/MyTricubicSpline.o  \
   Common/Splines/Grid.o              \
+  Common/Splines/QuinticSpline.o     \
+  Common/Splines/QuinticSplines.o    \
   SpeciesClass.o                     \
   Common.o                           \
   PermuteTableClass.o		     \
@@ -48,8 +50,12 @@ PIMCobjs =                           \
   Common/PairAction/PAtricubicFit.o  \
   Common/PairAction/PAzeroFit.o      \
   Common/Splines/BicubicSpline.o     \
-  Common/PH/PH.o                     \
-  Common/PH/Potential.o
+  Common/PH/Potential.o              \
+  Common/PH/QuinticPH.o              \
+  Common/PH/CoulombPot.o             \
+  Common/PH/ScreenedPot.o            \
+  Common/PH/SplinePot.o              \
+  Common/PH/HeAzizPot.o    
 
 TestPermobjs =                       \
   TestPermutation.o                  \
@@ -61,6 +67,8 @@ TestPermobjs =                       \
   Common/Splines/CubicSpline.o       \
   Common/Splines/MyTricubicSpline.o  \
   Common/Splines/Grid.o              \
+  Common/Splines/QuinticSpline.o     \
+  Common/Splines/QuinticSplines.o    \
   SpeciesClass.o                     \
   Common.o                           \
   PermuteTableClass.o		     \
@@ -89,8 +97,12 @@ TestPermobjs =                       \
   Common/PairAction/PAtricubicFit.o  \
   Common/PairAction/PAzeroFit.o      \
   Common/Splines/BicubicSpline.o     \
-  Common/PH/PH.o                     \
-  Common/PH/Potential.o
+  Common/PH/Potential.o              \
+  Common/PH/QuinticPH.o              \
+  Common/PH/CoulombPot.o             \
+  Common/PH/ScreenedPot.o            \
+  Common/PH/SplinePot.o              \
+  Common/PH/HeAzizPot.o    
 
 
 
@@ -101,7 +113,7 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
 all:   pimc++ TestPerm
-
+	
 pimc++: Common_obj Tests $(PIMCobjs)
 	pushd ..; make; pushd
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
@@ -138,7 +150,7 @@ clean:	Common_clean
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc
+SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc 
 
 newmake: Common_newmake Tests_newmake
 	make -f template.make Makefile FRC=force_rebuild

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "Common/PairAction/DavidPAClass.h"
 
 void ActionClass::Read(IOSectionClass& inSection)
 { 
@@ -40,6 +41,18 @@ void ActionClass::Read(IOSectionClass& inSection)
     PairMatrix(type2,type1) = i;
     PAIO.CloseFile();
   }
+  string fileName;
+  //  if(inSection.ReadVar("Daviddmfile",fileName)){
+  //    DavidPAClass myPAClass;
+  //    myPAClass.Print();
+  //    myPAClass.ReadDavidSquarerFile(fileName.c_str());
+    //    assert(inSection.ReadVar("type1",type1));
+    //    assert(inSection.ReadVar("type2",type2));
+  //  }
+
+  
+  
+
 
 
   // Now check to make sure all PairActions that we need are defined.
@@ -54,7 +67,7 @@ void ActionClass::Read(IOSectionClass& inSection)
 	  exit(1);
 	}
       }
-  cerr << "Finished reading the action.\n";
+  cerr << "Finished reading the action.\n"; 
 }
 
 double ActionClass::calcTotalAction(int startSlice, int endSlice, 
@@ -100,12 +113,16 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	  //	  //	  rpmag=sqrt(dot(rp,rp));
 	  //	  cerr<<"rmag "<<rmag<<endl;
 	  //	  cerr<<"rpmag "<<rpmag<<endl;
+ 
 	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
 	  double U, dU, V;
 	  U = PairActionVector(PairIndex)->U(q,z,s2, level);//, U, dU, V);
-	  //     	  cerr<<"q, z, s2, U: "<<q<<" "<<" "<<z<<" "<<s2<<" "<<U<<endl;
+	  if (U!=0){
+	    //	    cerr<<"q, z, s2, U: "<<q<<" "<<" "<<z<<" "<<s2<<" "<<U<<endl;
+	    //	    cerr<<r<<rp<<endl;
+	  }
 	  //	  if (((ptcl1==1) && (ptcl2==2)) || ((ptcl1==0) && (ptcl2==3)))
 	  TotalU += U;
 	  PE += V;
@@ -136,8 +153,12 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
     }
   }
   KE += TotalK / levelTau;
-  // cerr<<"TotalK:  "<<TotalK<<endl;
-  //  cerr<<"TotalU:  "<<TotalU<<endl;
+  //  static int count=0;
+  //  count++;
+  //  if (count % 5000==0){
+  //    cerr<<"TotalK:  "<<TotalK<<endl;
+  //    cerr<<"TotalU:  "<<TotalU<<endl;
+  //  }
   return (TotalK + TotalU);
   
   

@@ -2,13 +2,14 @@
 #define ACTION_CLASS
 
 #include "Common/Splines/CubicSpline.h"
-#include "Common/PairAction/PAFit.h"
+
+
 #include "SpeciesClass.h"
 #include "PathClass.h"
 //#include "DistanceTablePBCClass.h"
 //#include "DistanceTableFreeClass.h"
 #include "DistanceTableClass.h"
-
+#include "Common/PairAction/PAFit.h"
 
 
 /// This is the class that controls all of the actions and is in

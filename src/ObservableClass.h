@@ -125,12 +125,14 @@ class PathDumpClass : public ObservableClass
 {
 private:
 public:
+  int TimesCalled;
   void Accumulate();
   void WriteBlock();
   void Read(IOSectionClass& IO);
   PathDumpClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection)  { 
     Name="PathDump";
+    TimesCalled=0;
   }
 };
 
