@@ -131,7 +131,7 @@ def ProcessCorrelationSection(infiles,doc,currNum):
 ##                doc.append(Heading(2,varName))
 ##                myImg=ProduceCorrelationPicture(data[-1],varName+repr(currNum),'r',varName)
 
-def ProduceTracePicture(data,fileBase,hlabel,vlabel):
+def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
     clf()
     x=fromfunction(lambda i:i,(len(data),))
     plot(x,data)
@@ -139,6 +139,9 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel):
     set(h1,"FontSize",20)
     v1=ylabel(vlabel)
     set(v1,"FontSize",20)
+    if len(myTitle) != 0:
+         t1=title(myTitle)
+         set(t1,"FontSize",20)
     labels = get(gca(), 'xticklabels')
     set(labels, 'fontsize', 16)
     labels = get(gca(), 'yticklabels')
@@ -188,9 +191,20 @@ def WeightedAvg (means, errors):
 def BuildScalarTracePage(data,baseName,varName):
      doc=SimpleDocument()
      #wrong
-     map(lambda x: doc.append(ProduceTracePicture(x,baseName,'Blocks',varName)),data)
+     picTable = Table()
+     picTable.width = 500*len(data)
+     picTable.body = [[]]
+     row = []
+     for i in range(0,len(data)):
+          d = data[i];
+          row.append(ProduceTracePicture(d, baseName+"_"+repr(i), 'Blocks', varName,"Proc "+repr(i)))
+     picTable.body.append(row)
+     doc.append(picTable)
      doc.write(baseName+'.html')
-     return baseName+'.html'
+     return baseName+'.html'                    
+#     map(lambda x: doc.append(ProduceTracePicture(x,baseName,'Blocks',varName)),data)
+#     doc.write(baseName+'.html')
+#     return baseName+'.html'
           
 def ProcessScalarSection(infiles,doc,currNum):
      sectionName=infiles.GetName()
@@ -216,7 +230,7 @@ def ProcessScalarSection(infiles,doc,currNum):
 #               myFrame.scrolling='no'
                myFrame.src=pageName
                myFrame.width="100%"
-               myFrame.height="400"
+               myFrame.height="450"
 #               myImg=ProduceTracePicture(data[0], baseName,'Blocks',varName)
                toAddList.append(myFrame)
 
