@@ -36,6 +36,8 @@ inline void DistanceTablePBCClass::Displacement(int timeSlice,
     //    disp[i] += image[i]*Path.Box[i];
   }
   imageNum = ImageNum(image);
+  cerr << "ImageNum = " << imageNum << endl;
+  cerr << "ImageVectors(imageNum) = " << ImageVectors(imageNum) << endl;
   disp = disp + ImageVectors(imageNum);
   dist = sqrt(dot(disp,disp));
 }

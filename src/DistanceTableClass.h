@@ -206,7 +206,7 @@ inline DistanceTableClass::DistanceTableClass (PathClass &myPath) :
     {
       dVecInt image = Image(i);
       for (int dim=0; dim<NDIM; dim++)
-	ImageVectors(dim) = (double)image[dim]*Path.Box[dim];
+	ImageVectors(i)[dim] = (double)image[dim]*Path.Box[dim];
     }
   // Now initialize the Masks for lower dimensionality;
   int NumSpecies = Path.NumSpecies();

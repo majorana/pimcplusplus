@@ -2,6 +2,20 @@
 
 void DistanceTablePBCClass::UpdateAll(int timeSlice)
 {
+  /// First, force all particles back into the box.
+  for (int ptcl=0; ptcl < Path.NumParticles(); ptcl++)
+    {
+      dVec v = Path(timeSlice,ptcl);
+      for (int dim=0; dim<NDIM;dim++)
+	{
+	  while (v[dim] > (0.5*Path.Box[dim]))
+	    v[dim] -= Path.Box[dim];
+	  while (v[dim] < -(0.5*Path.Box[dim]))
+	    v[dim] += Path.Box[dim];
+	}
+      Path.SetPos(timeSlice, ptcl, v);
+    } 
+
   int index=0;
 
   dVec disp;
@@ -88,6 +102,22 @@ void DistanceTablePBCClass::UpdateAll()
 void DistanceTablePBCClass::Update(int timeSlice,
 				   const Array<int,1> &ptclArray)
 {
+  /// First, force all particles that have moved back into the box.
+  for (int ptclIndex=0; ptclIndex<ptclArray.size(); ptclIndex++)
+    {
+      int ptcl = ptclArray(ptclIndex);
+      dVec v = Path(timeSlice,ptcl);
+      for (int dim=0; dim<NDIM;dim++)
+	{
+	  while (v[dim] > (0.5*Path.Box[dim]))
+	    v[dim] -= Path.Box[dim];
+	  while (v[dim] < -(0.5*Path.Box[dim]))
+	    v[dim] += Path.Box[dim];
+	}
+      Path.SetPos(timeSlice, ptcl, v);
+    }
+	    
+
   Path.DoPtcl=true;
   dVec disp;
   double dist;
