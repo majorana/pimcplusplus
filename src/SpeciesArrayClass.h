@@ -8,8 +8,13 @@
 class SpeciesArrayClass
 {
   /// This is the actual array that holds the SpeciesClass objects.
-  Array<SpeciesClass*,1> SpeciesArray;
+  Array<SpeciesClass*,1> SpeciesArray; 
  public:
+  /// Calculates the distance and displacement betweeen
+  ///two particles and their respective timeslices
+  inline void Distance(ParticleID particle1, ParticleID particle2,int timeSlice1, int timeSlice2,
+	   double &dist,dVec &disp );
+  
   /// Returns the size of the array
   inline int Size(){
     return SpeciesArray.size();
@@ -43,6 +48,15 @@ class SpeciesArrayClass
 
 };
 
+  /// Calculates the distance and displacement betweeen
+  ///two particles and their respective timeslices
+inline void Distance(ParticleID particle1, ParticleID particle2,int timeSlice1, int timeSlice2,
+	   double &dist,dVec &disp )
+{
+  
+
+
+}
 
 
 #endif

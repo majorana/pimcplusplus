@@ -12,13 +12,28 @@ class SpeciesClass
 public:
   /// Stores the positions and timestamp for all particles and TimeSlices
   PathClass Path;
-  /// Stores the permutation for my set of time-slices
-  PermutationClass Permutation;
+  int Join;
+  /// Stores the permutation for my set of time-slices. This needs to be resized at some point!!
+  MirroredArrayClass1D<int> Permutation;
+  
   
   inline int NumParticles()
   { return Path.NumParticles(); }
   inline int NumTimeSlices()
   { return Path.NumTimeSlices(); }
+
+
+  ////This function moves the join from one place to another.
+  ///Do not move the join to slice 0 or slice n. I think this 
+  ///will cause problems. 
+
+  inline void MoveJoin(int newJoin)
+  {
+    Path.MoveJoin(Permutation,Join,newJoin);
+    Join=newJoin;
+    return;
+  }
+
 
   void ShiftData(int sliceToShift, CommunicatorClass &communicator);
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a

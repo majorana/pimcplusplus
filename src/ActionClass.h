@@ -118,7 +118,7 @@ public:
   Array<int,2> PairMatrix;
   /// This indexes into the non-existent Saved Pair Actions
   Array<SavedPairActionClass,2> SavedPairActionArray;
-
+  ActionClass(MemoizedDataClass &p_MemoizedData,SpeciesArrayClass &p_SpeciesArray) : myMemoizedData(p_MemoizedData), mySpeciesArray(p_SpeciesArray){};
   /// This holds a reference to the Array of Species
   SpeciesArrayClass &mySpeciesArray;
   /// Temperature

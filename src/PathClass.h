@@ -40,7 +40,10 @@ class PathClass
     {
       return Positions(ptcl, timeSlice);
     }
-  
+  inline void MoveJoin(MirroredArrayClass1D<int> &PermMatrix,int oldJoin,int newJoin)
+    {
+      Positions.MoveJoin(PermMatrix,oldJoin,newJoin);
+    }
   /// Write access function.
   inline void SetPos (int ptcl, int timeSlice, const dVec &newPos)
     {

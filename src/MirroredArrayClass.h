@@ -3,6 +3,89 @@
 
 #include "CommunicatorClass.h"
 
+
+
+
+ 
+  
+/// This is our magic backup array class.  It stores two copies of a
+///one-dimensional array in a two-dimensional internal array, an
+///active copy and a backed-up copy.  The first copy is indicated by a
+///first index of 0 and the second by 1.  It has two modes, MOVE and
+///OBSERVABLE.  In MOVE mode, it writes only to the first copy, while
+///in observable mode, it writes to both copies.  The AcceptCopy and
+///RejectCopy member functions are used to accept or reject moves.
+///Currently, I have pulled out the shiftData, because it wasn't exactly clear 
+///to me what exactly it meant to shift the data in this case
+
+template<class T>
+class MirroredArrayClass1D
+{
+private:
+
+  /// Array holds the A and B copies of a two dimensional array 
+  Array<T,2> AB; /// (0=A 1=B, particles)
+
+
+
+public:
+  /// Resizes the two dimensional array.
+  void Resize(int numPtcles);
+
+  inline int NumParticles()
+  {
+    return AB.extent(1);
+  }
+
+  /// Constructor that creates the 2d array of the correct size
+  inline MirroredArrayClass1D(int particleNum, int timeSliceNum)
+  {
+    AB.resize(2,particleNum);
+  }
+  /// Constructor that does nothing.
+  MirroredArrayClass1D(){};
+  /// Debug Printing of some sort
+  void  Print();
+  /// Returns the active value. 
+  inline T operator()(int x) const
+  {
+    return AB(Write1,x);
+  }
+
+  ///This shifts slicesToShift time slices to the next (if positive)
+  ///or previous (if negative) processor 
+  void ShiftData(int slicesToShift,CommunicatorClass &communicator); 
+
+  
+  /// Write to the mirrored array in the way specified by the present
+  /// mode. 
+  inline void Set(int x, const T &newVal)
+  {
+    AB(Write1,x)=newVal;
+    AB(Write2,x)=newVal;
+  }
+
+
+  /// In case of acceptance, this is called to copy the new path over
+  /// the backup copy.  StartSlice and EndSlice are inclusive.  This
+  /// copies from A to B.
+  inline void AcceptCopy (int particle)
+  {
+      AB(1,particle) = AB(0,particle);
+  }
+
+  /// In case of rejection, this is called to copy the new path over
+  /// the backup copy.  StartSlice and EndSlice are inclusive.  This
+  /// copies from B to A.
+  inline void RejectCopy (int particle)
+  {
+
+      AB(0,particle) = AB(1,particle);
+  }
+
+};
+
+ 
 /// This is our magic backup array class.  It stores two copies of a
 ///two-dimensional array in a three-dimensional internal array, an
 ///active copy and a backed-up copy.  The first copy is indicated by a
@@ -24,7 +107,7 @@ private:
 public:
   /// Resizes the two dimensional array.
   void Resize(int numPtcles,int numTimeSlices);
-
+  void MoveJoin(MirroredArrayClass1D<int> &PermMatrix,int oldJoin, int newJoin);
   inline int NumParticles()
   {
     return AB.extent(1);
@@ -80,6 +163,7 @@ public:
       AB(0,particle,slice) = AB(1,particle,slice);
   }
 };
+
 
 
 

@@ -6,6 +6,16 @@
 #include "ActionClass.h"
 
 
+
+class JoinMoveClass : public MoveClass
+{
+  int joinLocation;
+  void moveJoin();
+  
+
+
+};
+
 /// This is the bisection move class inherited from ParticleMoveClass
 /// Explanation of how bisection moves work is in  
 /// Path Integrals in the theory of condensed helium
