@@ -17,6 +17,9 @@ void GVecsClass::Set (Vec3 box, double kcut)
   Ny = 4*maxY+1;
   Nz = 4*maxZ+1;
 
+  ////////////////////////////////////////////
+  // First, set up G-vectors and difference //
+  ////////////////////////////////////////////
   int numG = 0;
   Vec3 G;
   /// First, count k-vectors
@@ -50,6 +53,40 @@ void GVecsClass::Set (Vec3 box, double kcut)
     }
   }
   cerr << "Using " << numG << " G-vectors.\n";
+  ////////////////////////////////////////////
+  // Now, set up G-vector differences.      //
+  ////////////////////////////////////////////
+  numG = 0;
+  /// First, count k-vectors
+  for (int ix=-2*maxX; ix<=2*maxX; ix++) {
+    G[0] = ix*kBox[0];
+    for (int iy=-2*maxY; iy<=2*maxY; iy++) {
+      G[1] = iy*kBox[1];
+      for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
+	G[2] = iz*kBox[2];
+	if (dot(G,G) < (4.0*kcut*kcut))
+	  numG++;
+      }
+    }
+  }
+  GDiff.resize(numG);
+  IDiff.resize(numG);
+  numG = 0;
+  /// Now assign
+  for (int ix=-2*maxX; ix<=2*maxX; ix++) {
+    G[0] = ix*kBox[0];
+    for (int iy=-2*maxY; iy<=2*maxY; iy++) {
+      G[1] = iy*kBox[1];
+      for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
+	G[2] = iz*kBox[2];
+	if (dot(G,G) < (4.0*kcut*kcut)) {
+	  GDiff(numG) = G;
+	  IDiff(numG) = Int3(ix,iy,iz);
+	  numG++;
+	}
+      }
+    }
+  }
 }
 
 
@@ -62,22 +99,46 @@ void
 FFTBox::PutkVec (const zVec &c)
 {
   kBox = 0.0;
-  for (int n=0; n<c.size(); n++) {
-    int i = (GVecs.Index(n)[0]+Nx)%Nx;
-    int j = (GVecs.Index(n)[1]+Ny)%Ny;
-    int k = (GVecs.Index(n)[2]+Nz)%Nz;
-    kBox(i,j,k) = c(n);
+  if (c.size() == GVecs.size()) 
+    for (int n=0; n<c.size(); n++) {
+      int i = (GVecs.Index(n)[0]+Nx)%Nx;
+      int j = (GVecs.Index(n)[1]+Ny)%Ny;
+      int k = (GVecs.Index(n)[2]+Nz)%Nz;
+      kBox(i,j,k) = c(n);
+    }
+  else if (c.size() == GVecs.DeltaSize()) 
+    for (int n=0; n<c.size(); n++) {
+      int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
+      int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
+      int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
+      kBox(i,j,k) = c(n);
+    }
+  else {
+    cerr << "Incommensurate dimensions in PutkVec.\n";
+    abort();
   }
 }
 
 void 
 FFTBox::GetkVec (zVec &c)
 {
-  for (int n=0; n<c.size(); n++) {
-    int i = (GVecs.Index(n)[0]+Nx)%Nx;
-    int j = (GVecs.Index(n)[1]+Ny)%Ny;
-    int k = (GVecs.Index(n)[2]+Nz)%Nz;
-    c(n) = kBox(i,j,k);
+  if (c.size() == GVecs.size()) 
+    for (int n=0; n<c.size(); n++) {
+      int i = (GVecs.Index(n)[0]+Nx)%Nx;
+      int j = (GVecs.Index(n)[1]+Ny)%Ny;
+      int k = (GVecs.Index(n)[2]+Nz)%Nz;
+      c(n) = kBox(i,j,k);
+    }
+  else if (c.size() == GVecs.DeltaSize()) 
+    for (int n=0; n<c.size(); n++) {
+      int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
+      int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
+      int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
+      c(n) = kBox(i,j,k);
+    }
+  else {
+    cerr << "Incommensurate dimensions in GetkVec.\n";
+    abort();
   }
 }
 
@@ -85,23 +146,46 @@ FFTBox::GetkVec (zVec &c)
 void
 FFTBox::AddFromVec (const zVec &c)
 {
-  kBox = 0.0;
-  for (int n=0; n<c.size(); n++) {
-    int i = (GVecs.Index(n)[0]+Nx)%Nx;
-    int j = (GVecs.Index(n)[1]+Ny)%Ny;
-    int k = (GVecs.Index(n)[2]+Nz)%Nz;
-    kBox(i,j,k) += c(n);
+  if (c.size() == GVecs.size()) 
+    for (int n=0; n<c.size(); n++) {
+      int i = (GVecs.Index(n)[0]+Nx)%Nx;
+      int j = (GVecs.Index(n)[1]+Ny)%Ny;
+      int k = (GVecs.Index(n)[2]+Nz)%Nz;
+      kBox(i,j,k) += c(n);
+    }
+  else if (c.size() == GVecs.DeltaSize()) 
+    for (int n=0; n<c.size(); n++) {
+      int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
+      int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
+      int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
+      kBox(i,j,k) += c(n);
+    }
+  else {
+    cerr << "Incommensurate dimensions in AddFromVec.\n";
+    abort();
   }
 }
 
 void 
 FFTBox::AddToVec (zVec &c)
 {
-  for (int n=0; n<c.size(); n++) {
-    int i = (GVecs.Index(n)[0]+Nx)%Nx;
-    int j = (GVecs.Index(n)[1]+Ny)%Ny;
-    int k = (GVecs.Index(n)[2]+Nz)%Nz;
-    c(n) += kBox(i,j,k);
+  if (c.size() == GVecs.size()) 
+    for (int n=0; n<c.size(); n++) {
+      int i = (GVecs.Index(n)[0]+Nx)%Nx;
+      int j = (GVecs.Index(n)[1]+Ny)%Ny;
+      int k = (GVecs.Index(n)[2]+Nz)%Nz;
+      c(n) += kBox(i,j,k);
+    }
+  else if (c.size() == GVecs.DeltaSize()) 
+    for (int n=0; n<c.size(); n++) {
+      int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
+      int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
+      int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
+      c(n) += kBox(i,j,k);
+    }
+  else {
+    cerr << "Incommensurate dimensions in GetkVec.\n";
+    abort();
   }
 }
 

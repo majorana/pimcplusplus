@@ -9,13 +9,15 @@
 class GVecsClass
 {
 protected:
+  // This stores the actual G-Vectors
   Array<Vec3,1> GVecs;
   Array<Int3,1> Indices;
+  // This stores the differences between g-vectors:
+  Array<Vec3,1> GDiff;
+  Array<Int3,1> IDiff;
   Vec3 Box, kBox;
   int Nx, Ny, Nz;
   double kCut;
-
-
 
 public:
   void Set (Vec3 box, double kcut);
@@ -26,8 +28,17 @@ public:
   inline Int3 Index(int i) const
   { return Indices(i); }
   
+  inline Vec3 DeltaG (int i) const
+  { return GDiff(i); }
+
+  inline Int3 DeltaI (int i) const
+  { return IDiff(i); }
+
   inline int size()
   { return GVecs.size(); }
+
+  inline int DeltaSize() 
+  { return GDiff.size(); }
 
   inline double GetBoxVol() 
   { return Box[0]*Box[1]*Box[2]; }
@@ -151,6 +162,24 @@ public:
   
   void Apply (const zVec &c, zVec &Hc);
   PHPotClass (Potential &ph, GVecsClass &gvecs) :
+    HamiltonianBase (gvecs), kPH(ph), IsSetup(false)
+  {
+
+  }
+};
+
+
+class PHPotFFTClass : public HamiltonianBase
+{
+private:
+  kSpacePH kPH;
+  void Setup();
+  bool IsSetup;
+  Array<complex<double>,2> VGGp;
+public:
+  
+  void Apply (const zVec &c, zVec &Hc);
+  PHPotFFTClass (Potential &ph, GVecsClass &gvecs) :
     HamiltonianBase (gvecs), kPH(ph), IsSetup(false)
   {
 
