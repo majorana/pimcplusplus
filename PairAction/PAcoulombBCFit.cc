@@ -303,6 +303,7 @@ void PAcoulombBCFitClass::DoBreakup(const dVec &box, const Array<dVec,1> &kVecs)
     }
   }
 
+
   // Now, calculate the k-space parts
   Ulong_k.resize(NumBetas, kVecs.size());
   dUlong_k.resize(NumBetas, kVecs.size());
@@ -310,6 +311,8 @@ void PAcoulombBCFitClass::DoBreakup(const dVec &box, const Array<dVec,1> &kVecs)
   dU_RPA_long_k.resize(NumBetas, kVecs.size());
   for (int level=0; level<NumBetas; level++) {
     double tau = SmallestBeta * pow(2.0, level);
+    Ulong_0(level)  = tau*Vlong(0.0, level);
+    dUlong_0(level) = Vlong(0.0, level);
     for (int ki=0; ki<kVecs.size(); ki++) {
       double k = sqrt(dot(kVecs(ki), kVecs(ki)));
       Ulong_k = tau*Vlong_k(boxVol, k, level);

@@ -90,6 +90,10 @@ public:
   ///Sends and receives an array of double
   void SendReceive (int sendProc, const Array<double,1> &sendBuff,
 		    int recvProc,       Array<double,1> &recvBuff);
+
+  ///Sends and receives an array of complex
+  void SendReceive (int sendProc, const Array<complex<double>,1> &sendBuff,
+		    int recvProc,       Array<complex<double>,1> &recvBuff);
   
   ///Sends and receives an array of int
   void SendReceive (int sendProc, const Array<int,1> &sendBuff,
@@ -120,18 +124,18 @@ public:
     // Do nothing
   }
   inline int MyProc()
-    {
-      return 0;
-    }
+  {
+    return 0;
+  }
   inline int NumProcs()
-    {
-      return 1;
-    }
+  {
+    return 1;
+  }
   inline void AllGather (Array<double,1> &SendVec, 
 			 Array<double,1> &RecvVec)
-    {
-      RecvVec = SendVec;
-    }
+  {
+    RecvVec = SendVec;
+  }
   inline void Split (int color, CommunicatorClass &newComm)
   {
     // Do nothing
@@ -139,8 +143,8 @@ public:
   inline void Subset (Array<int,1> ranks, CommunicatorClass &newComm)
   {
     if (ranks.size() !=1) {
-      cerr << "Serial verion of code does not suport nontrial "
-	   << "subsets.  Exitting.\n";
+      cerr << "Serial verion of code does not support nontrivial "
+	   << "subsets.  Exiting.\n";
       exit(1);
     }
   }
@@ -157,44 +161,49 @@ public:
     exit(1);
   }
 
-
   ///Sends and receives an array of dVec
   void SendReceive (int sendProc, const Array<Vec3,1> &sendBuff,
 		    int recvProc,       Array<Vec3,1> &recvBuff)
-    {
-      recvBuff=sendBuff;
-    }
-
+  {
+    recvBuff=sendBuff;
+  }
+  
   ///Sends and receives an array of dVec
   void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
 		    int recvProc,       Array<Vec2,1> &recvBuff)
-    {
-      recvBuff=sendBuff;
-    }
+  {
+    recvBuff=sendBuff;
+  }
 
 
   ///Sends and receives an array of double
   void SendReceive (int sendProc, const Array<double,1> &sendBuff,
 		    int recvProc,       Array<double,1> &recvBuff)
-    {
-      recvBuff=sendBuff;
-    }
+  {
+    recvBuff=sendBuff;
+  }
   
+  ///Sends and receives an array of complex
+  void SendReceive (int sendProc, const Array<complex<double>,1> &sendBuff,
+		    int recvProc,       Array<complex<double>,1> &recvBuff)
+  {
+    recvBuff=sendBuff;
+  }
   ///Sends and receives an array of int
   void SendReceive (int sendProc, const Array<int,1> &sendBuff,
 		    int recvProc,       Array<int,1> &recvBuff)
-    {
-      recvBuff=sendBuff;
-    }
+  {
+    recvBuff=sendBuff;
+  }
 
 
 
   ///Sums up all values a.  Only processor 0 gets the result.  All
   ///other processors return 0;
   double Sum (double a)
-    {
-      return a;
-    }
+  {
+    return a;
+  }
 
   ///Sums up the vectors in sendBuff.  Processor 0 only gets the
   ///resulting sum.

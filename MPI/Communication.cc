@@ -153,6 +153,23 @@ void CommunicatorClass::SendReceive (int sendProc,
 }
 
 
+///Sends and receives an array of complex<double>
+void CommunicatorClass::SendReceive (int sendProc, 
+				     const Array<complex<double>,1> &sendBuff,
+				     int recvProc,
+				     Array<complex<double>,1> &recvBuff)
+{
+  double *sendPtr = (double *)sendBuff.data();
+  double *recvPtr = (double *)recvBuff.data();
+  int numSend = 2*sendBuff.size();
+  int numRecv = 2*recvBuff.size();
+  MPI_Status status;
+  MPI_Sendrecv (sendPtr, numSend, MPI_DOUBLE, sendProc, 4, 
+		recvPtr, numRecv, MPI_DOUBLE, recvProc, 4,
+		MPIComm, &status);
+}
+
+
 
 ///Sends and receives an array of int
 void CommunicatorClass::SendReceive (int sendProc,const Array<int,1> &sendBuff,
