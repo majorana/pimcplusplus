@@ -55,6 +55,8 @@ class DavidPAClass : public PairActionFitClass
   double U (double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
   double V(double r);
+  bool IsLongRange(); 
+  void DoBreakup (const dVec &box, const Array<dVec,1> &kVecs);
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);
   void WriteBetaIndependentInfo (IOSectionClass &outSection);

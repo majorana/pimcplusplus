@@ -63,6 +63,17 @@ double DavidPAClass::dU(double q, double z, double s2, int level)
 
 
 }
+bool DavidPAClass::IsLongRange()
+{
+  return false;
+}
+
+
+void DavidPAClass::DoBreakup (const dVec &box, const Array<dVec,1> &kVecs)
+{
+  return;
+}
+
 /// Calculate the U(s,q,z) value when given s,q,z and the level 
 /*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
   \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */
@@ -70,7 +81,7 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
 				      double &U, double &dU, double &V)
 {
 
-  level=level+(NumTau-(TauPos+1));
+  //level=level+(NumTau-(TauPos+1));
   //  cerr<<"My level is "<<level<<endl;
   double rmin = ukj(level).grid->Start;
   
@@ -255,11 +266,6 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   GetNextWord(potGridString);//HACK?
   int numPotPoints = GetNextInt(potGridString);
   potential.resize(numPotPoints);
-  Array<double,1> startDeriv(numPotPoints+1); //I think this is the right number of grid poins
-  startDeriv=5.0e30;
-  Array<double,1> endDeriv(numPotPoints+1);
-  endDeriv=0.0;
-
 
   SkipTo(infile, "potential");
   cerr<<"I'm reading the potential\n";
@@ -289,6 +295,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       int NumGridPoints=GetNextInt(RankString);
       int NumUKJ=GetNextInt(RankString);
       NumTau=GetNextInt(RankString);
+
       
       
       string RGridString =SkipTo(infile,"GRID 1");
@@ -337,6 +344,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
       cerr<<"NumTau is"<<NumTau<<endl;
       ukj.resize(NumTau);
+      ////???      ukj.resize(NumUKJ+1);
       ReadFORTRAN3Tensor(infile,tempUkj);
       Array<double,3> tempUkj2(NumGridPoints,NumUKJ+1,NumTau);
       for(int i=0; i<NumTau; i++){
@@ -344,7 +352,11 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       }
       tempUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempUkj;
       tempUkj2(NumGridPoints-1,Range::all(),Range::all())=0.0;
-	
+      Array<double,1> startDeriv(NumUKJ+1); //I think this is the right number of grid poins
+      startDeriv=5.0e30;
+      Array<double,1> endDeriv(NumUKJ+1);
+      endDeriv=0.0;
+
       tau=largestTau; //HACK!
       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){//the -3 here is a HACK!
 	if (NMax==2){ //MORE HACK!
@@ -426,6 +438,12 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 	TempdukjArray.resize(NumUKJ+1);      
       }
       dukj.resize(NumTau);
+      ///???dukj.resize(NumUKJ+1);
+      Array<double,1> startDeriv(NumUKJ+1); //I think this is the right number of grid poins
+      startDeriv=5.0e30;
+      Array<double,1> endDeriv(NumUKJ+1);
+      endDeriv=0.0;
+
       ReadFORTRAN3Tensor(infile,tempdUkj);
       tau=largestTau; //HACK
       for(int i=0; i<NumTau; i++){ //HACK!

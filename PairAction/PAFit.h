@@ -8,7 +8,7 @@
 //#include "PAsFit.h"
 //#include "PAtricubicFit.h"
 #include "PAzeroFit.h"
-//#include "DavidPAClass.h"
+#include "DavidPAClass.h"
 
 inline PairActionFitClass *ReadPAFit (IOSectionClass &in, 
 				      double smallestBeta, int numLevels)
@@ -32,8 +32,8 @@ inline PairActionFitClass *ReadPAFit (IOSectionClass &in,
   //  fit = new PAtricubicFitClass;
   else if (type == "zerofit")
     fit=new PAzeroFitClass;
-  //else if (type=="DavidFit")
-  //  fit = new DavidPAClass;
+  else if (type=="DavidFit")
+    fit = new DavidPAClass;
   else {
     cerr << "Unrecognize pair action fit type \"" 
 	 << type << "\".  Exitting.\n";
