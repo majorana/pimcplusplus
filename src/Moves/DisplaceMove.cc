@@ -57,6 +57,9 @@ DisplaceMoveClass::Read (IOSectionClass &in)
 void
 DisplaceMoveClass::MakeMove ()
 {
+  // Move the Join out of the way.
+  PathData.MoveJoin (PathData.Path.NumTimeSlices()-1);
+
   // First, choose particle to move
   int numActive = 0;
   for (int i=0; i<ActiveSpecies.size(); i++)

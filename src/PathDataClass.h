@@ -51,6 +51,11 @@ public:
     Join=newJoin;
   }
   
+  /// This function shifts the path to make the reference slice
+  /// equal to the absolute slice position absSlice.  The join is left
+  /// on the last slice, so the permutation is out of the way.
+  void MoveRefSlice (int absSlice);
+
   /// Returns the number of time slices.
   inline int NumTimeSlices()
   {  return Path.NumTimeSlices();  }

@@ -148,6 +148,110 @@ public:
 
 
 
+
+
+class ObservableInt : public ObservableVar
+{
+public:
+  inline void Write (int val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<int,1> vec(1);
+	vec(0) = val;
+	Out.WriteVar (Name, vec);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableInt (string name, IOSectionClass &out, CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
+class ObservableVecInt1 : public ObservableVar
+{
+public:
+  inline void Write (Array<int,1> &val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<int,2> mat(1,val.size());
+	mat(0,Range::all()) = val;
+	Out.WriteVar (Name, mat);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableVecInt1(string name, IOSectionClass &out, 
+		       CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
+class ObservableVecInt2 : public ObservableVar
+{
+public:
+  inline void Write (Array<int,2> &val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<int,3> tensor(1,val.extent(0), val.extent(1));
+	tensor(0,Range::all(),Range::all()) = val;
+	Out.WriteVar (Name, tensor);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableVecInt2(string name, IOSectionClass &out, 
+		       CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
+class ObservableVecInt3 : public ObservableVar
+{
+public:
+  inline void Write (Array<int,3> &val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<int,4> tensor(1,val.extent(0), val.extent(1), val.extent(2));
+	tensor(0,Range::all(),Range::all(),Range::all()) = val;
+	Out.WriteVar (Name, tensor);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableVecInt3(string name, IOSectionClass &out, 
+		       CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
+
+
+
 /// This is the parent class for all observables.  It contains
 /// a pointer to PathData.
 class ObservableClass 
@@ -181,7 +285,7 @@ public:
   /// any ObservableVar classes, we should do with our local IOSection
   /// variable, NOT the reference passed to derived classes.
   ObservableClass(PathDataClass &myPathData,IOSectionClass ioSection) 
-    : PathData(myPathData), IOSection(ioSection)
+    : PathData(myPathData), IOSection(ioSection), FirstTime(true)
   {
     FirstTime = true;
     Name="";
