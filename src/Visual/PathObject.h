@@ -12,9 +12,9 @@ class PathObject : public GLObject
 protected:
   Vec3 Color;
   void Cylinder(const Vec3 &r1, const Vec3 &r2);
-  bool Closed;
   double Radius;
 public:
+  bool Closed;
   void LinesSet (vector<Vec3> &path);
   void TubesSet (vector<Vec3> &path);
   void SetColor (double red, double green, double blue);

@@ -52,7 +52,11 @@ void VisualClass::MakeFrame(int frame)
   cerr << "Paths.size() = " << Paths.size() << endl;
   for (int li=0; li<Paths.size(); li++) {
     PathObject* pathObj = new PathObject;
-    pathObj->SetColor (0.0, 0.0, 1.0);
+    pathObj->Closed = Paths[li]->Closed;
+    if (Paths[li]->Closed)
+      pathObj->SetColor (0.0, 0.0, 1.0);
+    else
+      pathObj->SetColor (1.0, 0.0, 0.0);
     pathObj->SetRadius (min(min(Box[0], Box[1]), Box[2])*0.005);
     if (PathType == TUBES)
       pathObj->TubesSet (Paths[li]->Path);
@@ -123,7 +127,19 @@ void VisualClass::Read(string fileName)
   assert(in.ReadVar ("Permutation", PermArray));
   PutInBox();
 
+  if (in.ReadVar ("OpenPtcl", OpenPtcl)) {
+    assert (OpenPtcl.size() == PathArray.extent(0));
+    assert (in.ReadVar ("TailLocation", Tail));
+    assert (Tail.extent(0) == PathArray.extent(0));
+  }
+  else {
+    OpenPtcl.resize (PathArray.extent(0));
+    OpenPtcl = -1;
+  }
+
+
   FrameAdjust.set_upper(PathArray.extent(0)-1);
+  DetailAdjust.set_upper(PathArray.extent(2)/2);
   
   in.CloseSection();
   in.CloseFile();
@@ -157,9 +173,10 @@ VisualClass::VisualClass()
     TubesImage("tubes.png"), LinesImage("lines.png"),
     StraightImage("straight.png"), SmoothImage("smooth.png"),
     NoWrapImage("nowrap2.png"), WrapImage("wrap.png"),
+    OrthoImage("orthographic.png"), PerspectImage("perspective.png"),
     FileChooser ("Choose an output file"),
     Wrap(false), Smooth(false), DetailFrame ("Detail"),
-    DetailAdjust(0.1, 0.1, 1.0),
+    DetailAdjust(1.0, 1.0, 2.0),
     Export(*this)
 {
   // Top-level window.
@@ -170,7 +187,7 @@ VisualClass::VisualClass()
   add(m_VBox);
 
   // VisualClass OpenGL scene.
-  PathVis.set_size_request(600, 600);
+  PathVis.set_size_request(700, 700);
 
 
   // VisualClass quit button.
@@ -198,12 +215,20 @@ VisualClass::VisualClass()
   NoWrapButton.set_label("No Wrap");
   WrapButton.set_label("Wrap");
 
+
   LinesButton.signal_toggled().connect
     (sigc::mem_fun(*this, &VisualClass::LineToggle));
   WrapButton.signal_toggled().connect
     (sigc::mem_fun(*this, &VisualClass::WrapToggle));
   SmoothButton.signal_toggled().connect
     (sigc::mem_fun(*this, &VisualClass::SmoothToggle));
+  OrthoButton.signal_toggled().connect
+    (sigc::mem_fun(*this, &VisualClass::PerspectiveToggle));
+
+  group = OrthoButton.get_group();
+  PerspectButton.set_group (group);
+  OrthoButton.set_label ("Ortho");
+  PerspectButton.set_label ("Persp");
 
   TubesButton.set_icon_widget (TubesImage);
   LinesButton.set_icon_widget (LinesImage);
@@ -211,6 +236,8 @@ VisualClass::VisualClass()
   SmoothButton.set_icon_widget(SmoothImage);
   NoWrapButton.set_icon_widget(NoWrapImage);
   WrapButton.set_icon_widget(WrapImage);
+  OrthoButton.set_icon_widget(OrthoImage);
+  PerspectButton.set_icon_widget(PerspectImage);
   Tools.append (LinesButton);
   Tools.append (TubesButton);
   Tools.append (ToolSep1);
@@ -219,11 +246,14 @@ VisualClass::VisualClass()
   Tools.append (ToolSep2);
   Tools.append (NoWrapButton);
   Tools.append (WrapButton);
+  Tools.append (ToolSep3);
+  Tools.append (OrthoButton);
+  Tools.append (PerspectButton);
 
   // Setup detail stuff
   DetailScale.set_adjustment(DetailAdjust);
-  DetailScale.set_digits(1);
-  DetailAdjust.set_step_increment(0.1);
+  DetailScale.set_digits(0);
+  DetailAdjust.set_step_increment(1.0);
   DetailAdjust.signal_value_changed().connect
     (sigc::mem_fun(*this, &VisualClass::OnDetailChange));
   DetailFrame.add(DetailScale);
@@ -408,6 +438,16 @@ void VisualClass::WrapToggle()
   FrameChanged();
 }
 
+void VisualClass::PerspectiveToggle()
+{
+  bool persp = !OrthoButton.get_active();
+  cerr << "Now using " << (persp ? "perspective" : "orthographic") 
+       << " projection.\n";
+  PathVis.View.SetPerspective(persp);
+  //  PathVis.Invalidate();
+  FrameChanged();
+}
+
 
 void VisualClass::MakePaths(int frame)
 {
@@ -427,11 +467,25 @@ void VisualClass::MakePaths(int frame)
     if (!used(ptcl) && (PtclSpecies(ptcl).lambda!=0.0)) {
       vector<int> loop;
       int permPtcl = ptcl;
+      bool haveOpen = false;
        do {
 	 loop.push_back(permPtcl);
+	 if (permPtcl == OpenPtcl(frame))
+	   haveOpen = true;
 	 used(permPtcl) = true;
 	 permPtcl = PermArray(frame, permPtcl);
        } while (permPtcl != ptcl);
+       if (haveOpen) {  // make sure open ptcl is las
+	 cerr << "open cycle loop = ";
+	 for (int i=0; i<loop.size(); i++)
+	   cerr << loop[i] << " ";
+	 cerr << endl;
+	 if (loop.size()==2)
+	   swap (loop[0], loop[1]);
+// 	 while (loop[loop.size()-1] != OpenPtcl(frame) {
+// 	   // cyclic permute
+// 	 }
+       }
       loopList.push_back(loop);
     }
 
@@ -440,6 +494,7 @@ void VisualClass::MakePaths(int frame)
   for (int li=0; li<loopList.size(); li++) {
     vector<int> &loop = loopList[li];
     OnePath &path = (*new OnePath);
+    path.Closed = true;
     path.Path.resize(numSlices*loop.size()+1);
     path.Color.resize(numSlices*loop.size()+1);
     int offset = 0;
@@ -451,12 +506,21 @@ void VisualClass::MakePaths(int frame)
 	path.Path[slice+offset][2] = PathArray(frame,ptcl,slice,2);
       }
       offset +=  numSlices;
+      if (ptcl == OpenPtcl(frame)) 
+	path.Closed = false;
     }
     // Close the path!!!
-    path.Path[path.Path.size()-1][0] = PathArray(frame,loop[0],0,0);
-    path.Path[path.Path.size()-1][1] = PathArray(frame,loop[0],0,1);
-    path.Path[path.Path.size()-1][2] = PathArray(frame,loop[0],0,2);
-    // Now, make sure the path doesn't have any discontinuities 
+    if (path.Closed) {
+      path.Path[path.Path.size()-1][0] = PathArray(frame,loop[0],0,0);
+      path.Path[path.Path.size()-1][1] = PathArray(frame,loop[0],0,1);
+      path.Path[path.Path.size()-1][2] = PathArray(frame,loop[0],0,2);
+    }
+    else {
+      path.Path[path.Path.size()-1][0] = Tail(frame,0);
+      path.Path[path.Path.size()-1][1] = Tail(frame,1);
+      path.Path[path.Path.size()-1][2] = Tail(frame,2);
+    }
+      // Now, make sure the path doesn't have any discontinuities 
     // because having different period images.
     for (int slice=0; slice<path.Path.size()-1; slice++) 
       for (int dim=0; dim<3; dim++) {
@@ -466,7 +530,6 @@ void VisualClass::MakePaths(int frame)
 	  path.Path[slice+1][dim] += Box[dim];
       }
     // Check to see if the path is closed or is a winding path
-    path.Closed = true;
     int last = path.Path.size()-1;
     for (int dim=0; dim<3; dim++)
       if (fabs(path.Path[last][dim] - path.Path[0][dim]) > 0.5*Box[dim]) {
@@ -496,7 +559,7 @@ void VisualClass::MakePaths(int frame)
 void VisualClass::OnDetailChange()
 {
   double val = DetailAdjust.get_value();
-  Smoother.SetLevel(0.5*val);
+  Smoother.SetLevel(val);
   if (Smooth)
     FrameChanged();
 }

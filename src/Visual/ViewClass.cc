@@ -8,7 +8,7 @@ namespace Trackball {
 
 ViewClass::ViewClass (PathVisClass &pathVis) :
   PathVis(pathVis), Button1Pressed(false), MinScale(0.2), MaxScale(5.0),
-  Scale(1.0), Distance(3.0)
+  Scale(1.0), Distance(3.0), UsePerspective(false)
 {
   for (int i=0; i<4; i++)
     for (int j=0; j<4; j++)
@@ -98,7 +98,11 @@ void ViewClass::GLtransform()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   //  gluPerspective(40.0, 1.0, 1.0, 10.0);
-  gluPerspective(40.0, 1.0, 1.0, 8.0*Distance/Scale);
+  if (UsePerspective)
+    gluPerspective(40.0, 1.0, 1.0, 8.0*Distance/Scale);
+  else
+    glOrtho(-0.6*Distance/Scale, 0.6*Distance/Scale, 
+	    -0.6*Distance/Scale, 0.6*Distance/Scale, 1.0, 8.0*Distance/Scale);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();

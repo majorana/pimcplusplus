@@ -25,6 +25,8 @@ void ExportClass::InitGLStuff()
   glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
   glEnable (GL_MULTISAMPLE);
   glEnable (GL_COLOR_MATERIAL);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
 
   glViewport(0, 0, Width, Height);

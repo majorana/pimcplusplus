@@ -43,6 +43,11 @@ protected:
   /// This stores the raw paths from the pimc++ output file.  The 4
   /// dimension are (frame, ptcl, slice, dim)
   Array<double,4> PathArray;
+
+  /// These are used only for open loops.
+  Array<int,1>    OpenPtcl;
+  Array<double,2>   Tail;
+
   /// This stores the global permutations for the paths.
   /// (frame, ptcl).  The permutation acts between the last and first
   /// slice.  
@@ -62,13 +67,14 @@ protected:
   Gtk::HBox ToolBox;
   Gtk::RadioToolButton LinesButton, TubesButton, 
     SmoothButton, StraightButton,
-    WrapButton, NoWrapButton;
+    WrapButton, NoWrapButton,
+    OrthoButton, PerspectButton;
   void FrameChanged();
   PathTypeType PathType; 
-  void LineToggle(), WrapToggle(), SmoothToggle();
+  void LineToggle(), WrapToggle(), SmoothToggle(), PerspectiveToggle();
   Gtk::Image TubesImage, LinesImage, StraightImage, SmoothImage,
-    NoWrapImage, WrapImage;
-  Gtk::SeparatorToolItem ToolSep1, ToolSep2;
+    NoWrapImage, WrapImage, OrthoImage, PerspectImage;
+  Gtk::SeparatorToolItem ToolSep1, ToolSep2, ToolSep3;
 
   // Detail control
   Gtk::Frame DetailFrame;

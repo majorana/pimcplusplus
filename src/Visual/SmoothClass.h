@@ -18,7 +18,7 @@ public:
 
   // Perform fourier smoothing of the paths
   void SmoothPaths (vector<OnePath*> &inList);
-  SmoothClass() : PointsPerPath(300), SmoothLevel (0.05)
+  SmoothClass() : PointsPerPath(300), SmoothLevel (1.0)
   {
 
   }

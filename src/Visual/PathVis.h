@@ -25,6 +25,7 @@ private:
   double MinScale, MaxScale;
   PathVisClass &PathVis;
   double Distance;
+  bool UsePerspective;
 public:
   double Scale, OldScale;
   double Quaternion[4];
@@ -35,6 +36,8 @@ public:
   bool OnMotion        (GdkEventMotion* event);
   void SetDistance (double dist);
 
+  inline bool SetPerspective (bool usePersp) 
+  { UsePerspective = usePersp; }
   void GLtransform();
   void Reset();
 
