@@ -2,6 +2,7 @@
 #define PERMUTE_STAGE_CLASS_H
 
 #include "MultiStage.h"
+#include "PermuteTableClass.h"
 
 class PermuteStageClass : public LocalStageClass
 {
@@ -54,8 +55,8 @@ public:
 class TablePermuteStageClass : public PermuteStageClass
 {
 private:
-  //  PermuteTableClass Table1, Table2;
-  //  PermuteTableClass *Forw, *Rev;
+  PermuteTableClass Table1, Table2;
+  PermuteTableClass *Forw, *Rev;
 public:
   /// This function will construct a new permutation if
   /// activeParticles is set to the array, [ -1 ];  In this case,
@@ -68,15 +69,17 @@ public:
   /// function is called twice during a successful multistage move.
 
   void InitBlock();
+  void Read (IOSectionClass &in);
   double Sample (int &slice1, int &slice2,
 		 Array<int,1> &activeParticles);
   bool Attempt (int &slice1, int &slice2, 
 		   Array<int,1> &activeParticles, double &prevActionChange);
-  TablePermuteStageClass (PathDataClass &pathData, 
-			  int speciesNum, int numLevels) : 
-    PermuteStageClass(pathData, speciesNum, numLevels)
+  TablePermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels) : 
+    PermuteStageClass(pathData, speciesNum, numLevels),
+    Table1(pathData), Table2(pathData)
   {
-    // do nothing for now
+    Forw = &Table1;
+    Rev  = &Table2;
   }
 };
 

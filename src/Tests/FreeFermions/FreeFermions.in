@@ -12,7 +12,8 @@ Section (System)
       string Name="free";
       double lambda=1.0; 
       //string Type="FERMION";
-      string Type="BOLTZMANNON";
+      string Type="BOSON";
+      //      string Type="BOLTZMANNON";
       int NumParticles=4;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
@@ -33,7 +34,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "FreeFermions.h5";
+  string OutFile = "FreeFermionsBoson.h5";
   Section (Observable)
     {
       string type = "Energy";
@@ -81,9 +82,9 @@ Section (Moves){
       string type="CycleBlock";
       string name="Permutations";
       int NumLevels=3;
-      Array<double,1> Gamma(4) = [0.00001, 0.00001, 1.0, 0.0];
+      Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
       double epsilon=0.0;
-      int Steps=9;
+      int Steps=5;
       string Species="free";
     }
 }
@@ -97,19 +98,17 @@ Section (Algorithm)
     int steps=1000; 
     Section (Loop){ 
       int steps=3;
-      Section (Move) {string name="Bisection";} 
+      Section (Move) {string name="Permutations";} 
     }
-    Section (Move) {string name="Permutations";} 
     Section (Move) {string name = "Shift";}
   }
   Section (Loop){ //Start Accumulating observables
-    int steps=3000000;
+    int steps=30000;
     Section (Loop){
       int steps=3;
-      Section (Move) {string name="Bisection";} 
+      Section (Move) {string name="Permutations";} 
     }
     Section (Move) {string name = "Shift"; }
-    Section (Move) {string name="Permutations";} 
     Section (Observe) {string name = "PairCorrelation";}
     Section (Observe) {string name = "Energy"; }
   }
