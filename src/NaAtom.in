@@ -1,8 +1,8 @@
-double tau=0.5;
+double tau=0.25;
 
 Section (System)
 {
-  int NumTimeSlices=300;
+  int NumTimeSlices=600;
   Array<double,1> Box(3)=[125.0,125.0,125.0];
   Section (Particles)
   {
@@ -41,7 +41,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string outFile = "NaAtom_tau0.25_beta150.good.h5";
+  string outFile = "NaAtom_tau0.25_beta150.good2.h5";
   Section (Observable)
     {
       string type = "Energies";
@@ -65,7 +65,7 @@ Section (Observables)
 
 Section (PIMC)
 {
-  int steps = 5000000;
+  int steps = 100000000;
   Section (Loop)
     {
       int n = 10000;

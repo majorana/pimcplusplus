@@ -1,7 +1,8 @@
 include /home/common/Codes/Make.include
 
+PSPLINELIB = -L$(PWD)/Common/Splines/fortran -lpspline
 LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
-       $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
+       $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(PSPLINELIB) -lm 
 INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 
 CCFLAGS = -c -g  -O3 -Wno-deprecated  #-pg
@@ -35,7 +36,8 @@ TestObjs =                           \
   Common/PairAction/PAcoulombBCFit.o \
   Common/PairAction/PAclassicalFit.o \
   Common/PairAction/PAszFit.o        \
-  Common/PairAction/PAsFit.o        \
+  Common/PairAction/PAsFit.o         \
+  Common/PairAction/PAtricubicFit.o  \
   Common/Splines/BicubicSpline.o     \
   Common/PH/PH.o                     \
   Common/PH/Potential.o
