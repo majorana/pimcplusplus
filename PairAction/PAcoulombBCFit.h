@@ -2,6 +2,7 @@
 #define PA_COULOMBBC_FIT_H
 
 #include "PAFitBase.h"
+#include "../Splines/BicubicSpline.h"
 
 class PAcoulombBCFitClass : public PairActionFitClass
 {
