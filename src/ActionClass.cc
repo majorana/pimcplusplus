@@ -7,9 +7,7 @@
 
 void ActionClass::Read(InputSectionClass *theInput)
 {
-  cerr<<"I AM PRINTING A TREE NOW!!!\n";
-  theInput->printTree(theInput);
-  cerr<<endl<<endl<<endl;
+
 
   while (theInput->FindSection("PairAction",theInput,false)){
 

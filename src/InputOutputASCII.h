@@ -5,6 +5,19 @@
 #include "InputOutput.h"
 
 
+
+class InputSectionASCIIClass : public InputSectionClass
+{
+  void ReadWithoutComments(string fileName, Array<char,1> &buffer);
+  void PrintTree(InputSectionClass *sec);
+ public:
+  bool OpenFile (string fileName, InputSectionClass *parent);
+  void CloseFile();
+  
+ 
+};
+
+
 class VarASCIIClass : public VarClass
 {  
 public:

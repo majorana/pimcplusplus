@@ -55,7 +55,29 @@ public:
     Iter=SectionList.begin();
   }
   inline int CountSections(string name);
-  template<class T> bool ReadVar(string name, T &var);
+
+  template<class T>
+    bool ReadVar(string name, T &var)
+    {
+      bool readVarSuccess;
+      list<VarClass*>::iterator varIter=VarList.begin();
+      while ((varIter!=VarList.end() && (*varIter)->Name!=name)){
+	varIter++;
+      }
+      bool found = varIter != VarList.end();
+      if (found){
+	readVarSuccess=(*varIter)->ReadInto(var);
+      }
+      else if (Parent!=NULL){
+	readVarSuccess=Parent->ReadVar(name,var);
+      }
+      else {
+	cerr<<"Couldn't find variable "<<name;
+	return false;
+      }  
+      return readVarSuccess;	 
+    }
+  
   virtual bool OpenFile (string fileName, InputSectionClass *parent) = 0;
   virtual void CloseFile() = 0;
 
@@ -108,41 +130,12 @@ inline bool InputSectionClass::FindSection (string name,
 
 
 
-template <class vartype>
-class SpecialInputSectionClass : public InputSectionClass
-{
-  void ReadWithoutComments(string fileName,Array<char,1> &buffer);
-  void printTree(InputSectionClass *sec);
-  
-public:
-  bool OpenFile (string fileName);
-  void CloseFile();
-};
 
 
 
 
-template<class T>
-bool InputSectionClass::ReadVar(string name, T &var)
-{
-  bool readVarSuccess;
-  list<VarClass*>::iterator varIter=VarList.begin();
-  while ((varIter!=VarList.end() && (*varIter)->Name!=name)){
-    varIter++;
-  }
-  bool found = varIter != VarList.end();
-  if (found){
-    readVarSuccess=(*varIter)->ReadInto(var);
-  }
-  else if (Parent!=NULL){
-    readVarSuccess=Parent->ReadVar(name,var);
-  }
-  else {
-    cerr<<"Couldn't find variable "<<name;
-    return false;
-  }  
-  return readVarSuccess;	 
-}
+
+
 
 
 

@@ -1,4 +1,12 @@
 #include "InputOutputASCII.h"
+#include "InputOutputHDF5.h"
+
+
+
+
+
+
+
 
 bool checkPair(Array<char,1> &buffer,int counter,char* toSee)
 {
@@ -109,7 +117,7 @@ void getVariable(Array <char,1> &buffer,int &counter,string &theName,
 }
 
 
-void SpecialInputSectionClass<VarASCIIClass>::printTree(InputSectionClass *sec )
+void InputSectionASCIIClass::PrintTree(InputSectionClass *sec )
 {
 
   cout<<"Section: "<<sec->Name<<endl;
@@ -124,14 +132,18 @@ void SpecialInputSectionClass<VarASCIIClass>::printTree(InputSectionClass *sec )
   list<InputSectionClass*>::iterator secIter=sec->SectionList.begin();
   while (secIter!=sec->SectionList.end()){
     //    cout<<"Section: "<<(*secIter)->Name<<endl;
-    printTree(*secIter);
+    PrintTree(*secIter);
     secIter++;
   }
 }
 
+void InputSectionASCIIClass::CloseFile()
+{
+  return;
 
+}
 void 
-SpecialInputSectionClass<VarASCIIClass>::ReadWithoutComments(string fileName,
+InputSectionASCIIClass::ReadWithoutComments(string fileName,
 							     Array<char,1> 
 							     &buffer)
 {
@@ -201,14 +213,14 @@ SpecialInputSectionClass<VarASCIIClass>::ReadWithoutComments(string fileName,
 
 
 
-bool SpecialInputSectionClass<VarASCIIClass>::OpenFile(string fileName)
+bool InputSectionASCIIClass::OpenFile(string fileName, InputSectionClass *parent)
 {
 
 
-  SpecialInputSectionClass<VarASCIIClass> *sec;
+  InputSectionASCIIClass *sec;
   sec=this;
-  SpecialInputSectionClass<VarASCIIClass> *oldSec=
-    new SpecialInputSectionClass<VarASCIIClass>;
+  InputSectionASCIIClass *oldSec=
+    new InputSectionASCIIClass;
   //  oldSec=sec;
   //  VarASCIIClass *var = new VarASCIIClass;
   //  sec->Name = "Species";
@@ -231,7 +243,7 @@ bool SpecialInputSectionClass<VarASCIIClass>::OpenFile(string fileName)
   int braceLevel=0;
   bool inQuotes=false;
   sec->Name="all";
-
+  sec->Parent=parent;
   for (int counter=0;counter<buffer.size();counter++){
     //    cout<<currWord(buffer,counter,secName)<<endl;
     if (buffer(counter)=='\"' && buffer(counter-1)!='\\'){
@@ -240,8 +252,8 @@ bool SpecialInputSectionClass<VarASCIIClass>::OpenFile(string fileName)
     else if (buffer(counter)=='S' &&
 	     currWord(buffer,counter,secName)=="Section" &&
 	     !inQuotes){
-      SpecialInputSectionClass<VarASCIIClass> *newSec = 
-	new SpecialInputSectionClass<VarASCIIClass>;
+      InputSectionASCIIClass *newSec = 
+	new InputSectionASCIIClass;
       newSec->Name=secName;
       newSec->Iter=newSec->SectionList.begin();
       newSec->Parent=sec;
@@ -251,7 +263,7 @@ bool SpecialInputSectionClass<VarASCIIClass>::OpenFile(string fileName)
     else if (buffer(counter)=='}' &&
 	     !inQuotes){
       //      sec=&((SpecialSectionClass<VarASCIIClass>)(*(sec->Parent)))
-      sec=(SpecialInputSectionClass<VarASCIIClass>*)(sec->Parent);
+      sec=(InputSectionASCIIClass*)(sec->Parent);
     }
     else if(buffer(counter)=='='
 	    && !inQuotes){

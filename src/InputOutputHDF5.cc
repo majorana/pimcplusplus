@@ -1,4 +1,5 @@
 #include "InputOutputHDF5.h"
+#include "InputOutputASCII.h"
 
 /************************************************************
  *                    Input Functions                      *
@@ -19,6 +20,7 @@ bool InputSectionHDF5Class::OpenFile(string fileName,
   Parent = parent;
   ReadGroup (GroupID, "/", NULL);
   Name = "all";
+  return true;
 }
 
 /// C-style wrapper for member function iterator.

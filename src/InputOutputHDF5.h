@@ -22,9 +22,9 @@ public:
   Array<hsize_t,1> Dimensions;
 
 
-  bool ReadInto (double &val) { }
-  bool ReadInto (int &val) { }
-  bool ReadInto (string &val) { }
+  bool ReadInto (double &val) {return true; }
+  bool ReadInto (int &val) {return true; }
+  bool ReadInto (string &val) {return true; }
 };
 
 
