@@ -555,13 +555,19 @@ double PAtricubicFitClass::U(double q, double z, double s2, int level)
   double s=sqrt(s2);
   double x;
 
-  if ((q<=qmax)&&(z<=zmax)&&(s<=smax)) {
+  if ((q<=qmax)&&(z<zmax)&&(s<smax)) {
     if (q == 0.0) 
       return(Usplines(level)(0.0,0.0,0.0));
     else {
       double y = z/zmax;
       double t = (s-z)/(smax-z);
-      return(Usplines(level)(q,y,t));
+      double spline = Usplines(level)(q,y,t);
+      if (isnan (spline)) {
+	cerr << "q = " << q << " s = " << s << " z = " << z << endl;
+	cerr << "smax - z = " << smax-z << endl;
+	cerr << "NAN in spline!!!!!!!!\n";
+      }
+      return(spline);
     }
   }
   else {
@@ -570,7 +576,10 @@ double PAtricubicFitClass::U(double q, double z, double s2, int level)
       beta *= 2.0;
     double r = q+0.5*z;
     double rp = q-0.5*z;
-    return (0.5*beta*(Pot->V(r)+Pot->V(rp)));
+    double prim  = 0.5*beta*(Pot->V(r)+Pot->V(rp));
+    if (isnan(prim))
+      cerr << "NAN in prim!!!!!\n";
+    return (prim);
   }
 }
 
@@ -584,7 +593,7 @@ double PAtricubicFitClass::dU(double q, double z, double s2, int level)
   double s=sqrt(s2);
   double x;
 
-  if ((q<=qmax)&&(z<=zmax)&&(s<=smax)) {
+  if ((q<=qmax)&&(z<zmax)&&(s<smax)) {
     if (q == 0.0) 
       return(dUsplines(level)(0.0,0.0,0.0));
     else {
