@@ -146,29 +146,32 @@ void PAcoulombBCFitClass::WriteFits (IOSectionClass &outSection)
 
 double PAcoulombBCFitClass::U(double q, double z, double s2, int level)
 {
-  double beta = SmallestBeta;
-  for (int i=0; i<level; i++)
-    beta *= 2.0;
-
   if (q <= (qgrid->End*1.0000001)) {
-    double t = sqrt(s2)/(2.0*q);
-    return (Usplines(level)(q,t));
+    if (q == 0)
+      return (Usplines(level)(0.0,0.0));
+    else {
+      double t = sqrt(s2)/(2.0*q);
+      return (Usplines(level)(q,t));
+    }
   }
   else {
     // Coulomb action is independent of z
+    double beta = SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
     return (beta*Potential->V(q));
   }
 }
 
 double PAcoulombBCFitClass::dU(double q, double z, double s2, int level)
 {
-  double beta = SmallestBeta;
-  for (int i=0; i<level; i++)
-    beta *= 2.0;
-
   if (q <= (qgrid->End*1.0000001)) {
-    double t = sqrt(s2)/(2.0*q);
-    return (dUsplines(level)(q,t));
+    if (q == 0)
+      return (dUsplines(level)(0.0,0.0));
+    else {
+      double t = sqrt(s2)/(2.0*q);
+      return (dUsplines(level)(q,t));
+    }
   }
   else {
     // Coulomb action is independent of z
