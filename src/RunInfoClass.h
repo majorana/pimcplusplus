@@ -52,6 +52,7 @@ public:
     HostName = hostname;
     time_t seconds = time(NULL);
     RunTime = ctime(&seconds);
+    Version = VERSION;
   }
 };
 

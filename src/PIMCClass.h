@@ -31,11 +31,9 @@ public:
   void Run();
   PIMCClass() : Algorithm(&Moves, &Observables)
 		//	ForwPermuteTable(PathData), RevPermuteTable(PathData)
-    {
-
+  {
     RunInfo.ProgramName="pimc++";
-    RunInfo.Version="0.1";
-    }
+  }
 };
 
 

@@ -22,11 +22,13 @@ else
 	LD = mpiCC  -Bstatic 
 endif
 
+VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
+
 
 CCFLAGS = -c -g  -Wno-deprecated  #-pg 
 
 
-DEFS = $(EXTRADEFS) -DTHREE_D -DNO_COUT -O3# -DPARALLEL -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT -O3# -DPARALLEL -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \
@@ -248,7 +250,7 @@ MAKE_ALL = $(MAKE) all $(PASS_DEFS)
 MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
-all:   pimc++ TestPerm TestEwald FreeParticles
+all:    pimc++ TestPerm TestEwald FreeParticles
 
 pimc++: Common_obj observables moves actions Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)

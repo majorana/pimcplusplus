@@ -4,6 +4,9 @@
 
 main(int argc, char **argv)
 {
+  string version = VERSION;
+  cerr << "pimc++ v. " << version << endl;
+
   //  MirroredClassTest();
 #ifdef USE_MPI
   MPI_Init(&argc, &argv);
