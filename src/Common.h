@@ -15,8 +15,8 @@ typedef enum {MOVEMODE, OBSERVABLEMODE} ModeType;
 
 typedef TinyVector<int,2> ParticleID;
 
-int Write1=0;
-int Write2=0; //These are the variables for writing 
+extern int Write1;
+extern int Write2; //These are the variables for writing 
 
 
 int GetCurrentTimeStamp();
