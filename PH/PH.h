@@ -1141,10 +1141,10 @@ public:
   // a primitive approximation for large r.
   inline double V2(double r)
   {
-    if (r != 0.0)
+    if (r > 1.0e-4)
       return (Z1Z2/r);
     else
-      return (1e4*r);
+      return (1e4*Z1Z2);
   }
   
   // This is a mixing function to transition from V1 to V2;
