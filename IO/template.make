@@ -1,6 +1,6 @@
-SOURCES = InputOutput.cc InputOutputHDF5.cc InputFile.cc # InputOutputASCII.cc
+SOURCES = InputOutput.cc InputOutputHDF5.cc InputFile.cc  InputOutputASCII.cc
 
-all:	InputOutput.o  InputOutputHDF5.o InputFile.o  # InputOutputASCII.o
+all:	InputOutput.o  InputOutputHDF5.o InputFile.o   InputOutputASCII.o
 
 clean:
 	rm -f *.o

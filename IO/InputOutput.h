@@ -3,7 +3,7 @@
 
 #include "InputOutputBase.h"
 #include "InputOutputHDF5.h"
-// #include "InputOutputASCII.h"
+#include "InputOutputASCII.h"
 
 #include <stack>
 
@@ -48,8 +48,8 @@ inline IOTreeClass *ReadTree (string fileName,
     newTree = new IOTreeHDF5Class;
   //  else if (extn == "xml")
   //    newTree = newIOTreeXMLClass;
-  /////else
-  /////    newTree = new IOTreeASCIIClass;
+  else
+    newTree = new IOTreeASCIIClass;
   
   newTree->FileName = fileName;
   bool success = newTree->OpenFile (fileName, myName, parent);
@@ -72,8 +72,8 @@ inline IOTreeClass *NewTree (string fileName,
     newTree = new IOTreeHDF5Class;
   //  else if (extn == "xml")
   //    newTree = newIOTreeXMLClass;
-  ////// else
-  /////    newTree = new IOTreeASCIIClass;
+  else
+    newTree = new IOTreeASCIIClass;
 
   bool success = newTree->NewFile (fileName, myName, parent);
   if (success)
@@ -204,6 +204,7 @@ inline void IOSectionClass::CloseFile ()
 {
   while (CurrentSection->Parent != NULL)
     CloseSection();
+  CurrentSection->FlushFile();
   CurrentSection->CloseFile();
   delete (CurrentSection);
 }
@@ -260,7 +261,7 @@ inline bool IOSectionClass::IncludeSection (string name, string fileName)
   }
 }
 
-
+///Don't think this pushes to back of list like it should nor does newfile
 inline bool IOSectionClass::NewSection (string name, string fileName)
 {
   IOTreeClass *newSection;

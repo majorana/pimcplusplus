@@ -44,9 +44,49 @@ public:
   bool Append (string val);
   bool Append (Array<string,1> &val);
   bool Append (Array<string,2> &val);
+
+  inline void Print(ofstream &outFile);
   ~VarASCIIClass();
 };
+ 
+inline void VarASCIIClass::Print(ofstream &outFile)
+{
 
+  if (Dim==0  && 
+
+
+
+
+
+  if (Dim>0)
+    outFile <<"Array<";
+  if (Type==DOUBLE_TYPE){
+    outFile<<"double";
+  }
+  else if (Type==INT_TYPE){
+    outFile<<"int";
+  }
+  else if (Type==STRING_TYPE){
+    outFile<<"string";
+  }
+  else if (Type==BOOL_TYPE){
+    outFile<<"bool";
+  }
+  if (Dim>0){
+    outFile<<", "; 
+    outFile<<Dim<<">";
+  }
+  outFile<<" "<<Name;
+  if (Dim>0){
+    outFile<<"(";
+    for (int counter=0;counter<Dim;counter++){
+      outFile<<
+      
+    
+  
+
+
+}
 
 /// This class holds an ASCII token, which is just a string and the
 /// line number in which it appeared in the file.
@@ -58,7 +98,7 @@ public:
 };
 
 
-/// This is the ASCII specialization of InputTreeClass for ASCII text
+/// This is the ASCII specialization of IOTreeClass for ASCII text
 /// files.  It's syntax is as follows:
 /// Section (SectionName)
 /// {
@@ -68,7 +108,7 @@ public:
 ///                             3, 4 ];
 ///   Section (Species, "species1.h5");
 /// }
-class InputTreeASCIIClass : public InputTreeClass
+class IOTreeASCIIClass : public IOTreeClass
 {
   /// Reads a text file into a buffer eliminating c++ and c-style
   /// comments.  
@@ -78,23 +118,51 @@ class InputTreeASCIIClass : public InputTreeClass
   /// reading at.  iter should point to a place just after the '{'.
   /// If wantEndBrace is true, it will look for an ending '}'.
   /// Otherwise it will read until the list of Tokens runs out.  
-  bool ReadSection (InputTreeClass *parent, string name,
+  bool ReadSection (IOTreeClass *parent, string name,
 		    list<TokenClass>::iterator &iter,
 		    list<TokenClass> &tokenList,
 		    bool wantEndBrace);
 
  public:
+  void FlushFile();
+  void WriteSection(ofstream &outFile,int indent);
   /// Print an indented tree of section variable names.
   void PrintTree(int level);
   /// Same thing, just calls above with level 0;
   void PrintTree();
   /// Takes the name of a file to read, the name of my section and a
   /// pointer to my parent.  Reads the file into a tree of
-  /// InputTreeClass's.
+  /// IOTreeClass's.
   bool OpenFile (string filename, string myName, 
-		 InputTreeClass *parent);
+		 IOTreeClass *parent);
   /// Do any file handling necessary and delete the whole tree of data.
   void CloseFile();
+  IOTreeClass* NewSection(string name);
+  void WriteVar(string name, double val);
+  void WriteVar(string name, Array<double,1> &val);
+  void WriteVar(string name, Array<double,2> &val);
+  void WriteVar(string name, Array<double,3> &val);
+
+  void WriteVar(string name, int val);
+  void WriteVar(string name, Array<int,1> &val);
+  void WriteVar(string name, Array<int,2> &val);
+  void WriteVar(string name, Array<int,3> &val);
+
+  void WriteVar(string name, bool val);
+  void WriteVar(string name, Array<bool,1> &val);
+  void WriteVar(string name, Array<bool,2> &val);
+  void WriteVar(string name, Array<bool,3> &val);
+
+  void WriteVar(string name, string val);
+  void WriteVar(string name, Array<string,1> &val);
+  void WriteVar(string name, Array<string,2> &val);
+  void WriteVar(string name, Array<string,3> &val);
+  bool NewFile (string fileName,
+			string mySectionName,
+			IOTreeClass *parent);
+  void IncludeSection (IOTreeClass *);
+
+
 };
 
 

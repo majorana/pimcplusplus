@@ -1,5 +1,6 @@
 #include "InputOutput.h"
 
+#include <fstream.h>
 
 /// Simply prints 3*num spaces
 inline void ASCIIPrintIndent(int num)
@@ -8,10 +9,17 @@ inline void ASCIIPrintIndent(int num)
     cout<<' ';
 }
 
+/// Simply prints 3*num spaces
+inline void ASCIIPrintIndent(int num,ofstream &outFile)
+{
+  for (int counter=0;counter<num*3;counter++)
+    outFile<<' ';
+}
+
 
 /// Prints an indented hierarchy of sections and variable names to
 /// cout. 
-void InputTreeASCIIClass::PrintTree(int indentNum)
+void IOTreeASCIIClass::PrintTree(int indentNum)
 {
   ASCIIPrintIndent(indentNum);
   cout<<"Section: "<<Name<<endl;
@@ -21,7 +29,7 @@ void InputTreeASCIIClass::PrintTree(int indentNum)
     cout<<"Variable: "<<(*varIter)->Name<<" "<<endl;
     varIter++;
   }
-  list<InputTreeClass*>::iterator secIter=SectionList.begin();
+  list<IOTreeClass*>::iterator secIter=SectionList.begin();
   while (secIter!=SectionList.end()){
     //    cout<<"Section: "<<(*secIter)->Name<<endl;
     (*secIter)->PrintTree(indentNum+1);
@@ -30,7 +38,7 @@ void InputTreeASCIIClass::PrintTree(int indentNum)
 }
 
 /// Calls PrintTree(0)
-void InputTreeASCIIClass::PrintTree()
+void IOTreeASCIIClass::PrintTree()
 {
   PrintTree(0);
 }
@@ -177,7 +185,7 @@ bool checkPair(Array<char,1> &buffer,int counter,char* toSee)
 
 /// Reads a file into a character array, removing C and C++ style
 /// comments. 
-void InputTreeASCIIClass::ReadWithoutComments(string fileName,
+void IOTreeASCIIClass::ReadWithoutComments(string fileName,
 					      Array<char,1> 
 					      &buffer)
 {
@@ -623,7 +631,7 @@ VarASCIIClass* ReadASCIIVar (list<TokenClass>::iterator &iter,
 /// at the end of the input.  If we don't, we keep parsing until the
 /// buffer runs out.  Calls itself recursively as necessary, builing
 /// up a tree of sections and variables.
-bool InputTreeASCIIClass::ReadSection (InputTreeClass *parent,
+bool IOTreeASCIIClass::ReadSection (IOTreeClass *parent,
 				       string myName,
 				       list<TokenClass>::iterator &iter,
 				       list<TokenClass> &tokenList,
@@ -633,7 +641,7 @@ bool InputTreeASCIIClass::ReadSection (InputTreeClass *parent,
   Name = myName;
   while ((iter != tokenList.end()) && (iter->Str != "}")) {
     if (iter->Str == "Section") {
-      InputTreeClass *newTree;
+      IOTreeClass *newTree;
       iter++;
       ReadAbort(iter->Str != "(", iter->LineNumber, "Expected ( not found\n");
       iter++;
@@ -658,8 +666,8 @@ bool InputTreeASCIIClass::ReadSection (InputTreeClass *parent,
 	ReadAbort(iter->Str != "{", iter->LineNumber, 
 		  "Expected { not found\n");
 	iter++;
-	newTree = new InputTreeASCIIClass();
-	((InputTreeASCIIClass*)newTree)->ReadSection((InputTreeClass*)this,
+	newTree = new IOTreeASCIIClass();
+	((IOTreeASCIIClass*)newTree)->ReadSection((IOTreeClass*)this,
 						     newName,iter,tokenList,
 						     true);         
       }
@@ -680,14 +688,44 @@ bool InputTreeASCIIClass::ReadSection (InputTreeClass *parent,
   return (true);
 }
 
+IOTreeClass* IOTreeASCIIClass::NewSection(string name)
+{
+  IOTreeClass* tempSection=new IOTreeASCIIClass();
+  tempSection->Name=name;
+  tempSection->Parent=this;
+  tempSection->MyNumber=CurrSecNum;
+  CurrSecNum++;
+  SectionList.push_back(tempSection);
+  return tempSection;
+}
+
+void IOTreeASCIIClass::IncludeSection(IOTreeClass *newSection)
+{
+  newSection->MyNumber=CurrSecNum++;
+  SectionList.push_back(newSection);
+}
+
+
+
+bool IOTreeASCIIClass::NewFile (string fileName,
+				string mySectionName,
+				IOTreeClass *parent)
+{
+  FileName=fileName;
+  Parent=parent;
+  Name=mySectionName;
+
+}
+
+
 
 /// OpenFile takes a filename to open, the name of this section and
 /// the parent of this section.  It reads the file into a buffer,
 /// converts it to a list of tokens, then parses the tokens,
 /// constructing a tree of sections containing variables lists.  
-bool InputTreeASCIIClass::OpenFile(string fileName, 
+bool IOTreeASCIIClass::OpenFile(string fileName, 
 				   string myName, 
-				   InputTreeClass *parent)
+				   IOTreeClass *parent)
 {
   Array<char,1> buffer;
   ReadWithoutComments(fileName,buffer);
@@ -699,8 +737,50 @@ bool InputTreeASCIIClass::OpenFile(string fileName,
 }
 
 
+
+void IOTreeASCIIClass::WriteSection(ofstream &outFile,int indentNum)
+{
+  list<VarClass*>::iterator varIter=VarList.begin();
+  while (varIter!=VarList.end()){
+    ASCIIPrintIndent(indentNum,outFile);
+    ((VarASCIIClass*)(*varIter))->Print(outFile);    
+    varIter++;
+  }
+  list<IOTreeClass*>::iterator secIter=SectionList.begin();
+  while (secIter!=SectionList.end()){
+    if ((*secIter)->FileName==""){
+      ASCIIPrintIndent(indentNum,outFile);
+      outFile<<"Section ("<<(*secIter)->Name<<")\n";
+      ASCIIPrintIndent(indentNum,outFile);
+      outFile<<"{\n";
+      ((IOTreeASCIIClass*)(*secIter))->WriteSection(outFile,indentNum+1);
+      ASCIIPrintIndent(indentNum,outFile);
+      outFile<<"}\n";
+    }
+    else {
+      ASCIIPrintIndent(indentNum,outFile);
+      outFile<<"Section( "<<(*secIter)->Name<<",\" ";
+      outFile<<(*secIter)->FileName<<"\");"<<endl;
+      (*secIter)->FlushFile();
+    }
+    secIter++;
+  }
+}
+
+
+
+
+void IOTreeASCIIClass::FlushFile()
+{
+  ofstream outfile;
+  if (FileName!=""){
+    outfile.open(FileName.c_str());
+  }
+  WriteSection(outfile,0);
+}
+
 /// CloseFile recursively destroys the tree of data we constructed.
-void InputTreeASCIIClass::CloseFile()
+void IOTreeASCIIClass::CloseFile()
 {  
   // First, free all the variables in the list
   while (!VarList.empty()) {
@@ -906,12 +986,64 @@ VarASCIIClass::~VarASCIIClass()
 //////////////////////////////////////////////////////////////////////
 //                             Append's                             //
 //////////////////////////////////////////////////////////////////////
-  bool Append (double val);
-  bool Append (Array<double,1> &val);
-  bool Append (Array<double,2> &val);
-  bool Append (int val);
-  bool Append (Array<int,1> &val);
-  bool Append (Array<int,2> &val);
-  bool Append (string val);
-  bool Append (Array<string,1> &val);
-  bool Append (Array<string,2> &val);
+bool VarASCIIClass::Append (double val)
+{
+  assert(Type==DOUBLE_TYPE);
+  assert(Dim==1);
+  Array<double,1> &myArray= *((Array<double,1> *)Value);
+  myArray.resizeAndPreserve(myArray.extent(0)+1);
+  myArray(myArray.extent(0)-1)=val;
+
+}
+bool VarASCIIClass::Append (Array<double,1> &val)
+{
+  assert(Type==DOUBLE_TYPE);
+  assert(Dim==2);
+  Array<double,2> &myArray= *((Array<double,2> *)Value);
+  assert(val.extent(0)==myArray.extent(1));
+  myArray.resizeAndPreserve(myArray.extent(0)+1,
+			    myArray.extent(1));
+  myArray(myArray.extent(0)-1,Range::all())=val;
+}
+
+bool VarASCIIClass::Append(Array<double,2> &val){;}
+bool VarASCIIClass::Append (int val){;}
+bool VarASCIIClass::Append (Array<int,1> &val){;}
+bool VarASCIIClass::Append (Array<int,2> &val){;}
+bool VarASCIIClass::Append (string val){;}
+bool VarASCIIClass::Append (Array<string,1> &val){;}
+bool VarASCIIClass::Append (Array<string,2> &val){;}
+
+
+
+void IOTreeASCIIClass::WriteVar(string name, double val)
+{
+  VarASCIIClass *newVar=new VarASCIIClass();
+  double *myDouble=new double(val);
+  newVar->Name=name;
+  newVar->Value=myDouble;
+  VarList.push_back(newVar);
+}
+
+  
+
+
+
+void IOTreeASCIIClass::WriteVar(string name, Array<double,1> &val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<double,2> &val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<double,3> &val){;}
+
+  void IOTreeASCIIClass::WriteVar(string name, int val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<int,1> &val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<int,2> &val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<int,3> &val){;}
+
+  void IOTreeASCIIClass::WriteVar(string name, bool val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<bool,1> &val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<bool,2> &val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<bool,3> &val){;}
+
+  void IOTreeASCIIClass::WriteVar(string name, string val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<string,1> &val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<string,2> &val){;}
+  void IOTreeASCIIClass::WriteVar(string name, Array<string,3> &val){;}

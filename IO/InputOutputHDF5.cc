@@ -714,6 +714,7 @@ IOTreeClass* IOTreeHDF5Class::NewSection(string newName)
   IOTreeHDF5Class* newSection = new IOTreeHDF5Class();
   newSection->Name=newName;
   newSection->Parent=this;
+  newSection->MyNumber=CurrSecNum;
   SectionList.push_back(newSection);
   
   string numstr = NumExtension(CurrSecNum);
