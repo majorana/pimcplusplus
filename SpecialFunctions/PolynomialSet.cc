@@ -23,14 +23,19 @@ public:
 void PolynomialSetClass::MakeOrthoSet(int order, double xmin, double xmax,
 				      WeightFuncClass &wf)
 {
-  const double tolerance = 1.0e-8;
+  const double absTolerance = 1.0e-8;
+  const double relTolerance = 1.0e-7;
   /// First, calculate S_n = \int_{xmin}^{xmax} x^n w(x) \ dx
   Array<double,1> Sn(2*order+1);
   for (int n=0; n<=(2*order); n++) {
     PolyIntegrand polyInt(n, wf);
     GKIntegration<PolyIntegrand,GK15> Integrator(polyInt);
-    Integrator.SetRelativeErrorMode();
-    Sn(n) = Integrator.Integrate(xmin, xmax, tolerance);
+    if ((n%2)==0)
+      Integrator.SetRelativeErrorMode();
+    // Integrate until the absolute tolerance OR the relative
+    // tolerance is satisfied.
+    Sn(n) = Integrator.Integrate(xmin, xmax, 
+				 absTolerance, relTolerance, false);
   }
     
 
