@@ -131,11 +131,11 @@ public:
   PHPotFFTClass PHFFT;
   GVecsClass GVecs;
   void Apply (const zVec &c, zVec &Hc);
-  Hamiltonian (Vec3 box, double kcut, double z, Potential &ph) :
+  Hamiltonian (Vec3 box, Vec3 k, double kcut, double z, Potential &ph) :
     Kinetic (GVecs), Coulomb(z, GVecs), HamiltonianBase(GVecs),
     CoulombFFT(z, GVecs), PH(ph, GVecs), PHFFT(ph, GVecs)
   {
-    GVecs.Set (box, kcut);
+    GVecs.Set (box, k, kcut);
   }
 };
 

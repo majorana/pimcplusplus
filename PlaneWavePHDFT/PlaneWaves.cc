@@ -1,23 +1,24 @@
 #include "PlaneWaves.h"
 
 void
-SystemClass::Setup (Vec3 box, double kcut, Potential &ph,
+SystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
 		    bool useFFT)
 {
   Box = box;
-  GVecs.Set (box, kcut);
+  GVecs.Set (box, k, kcut);
   H.SetIonPot (ph, useFFT);
   Bands.resize (NumBands, GVecs.size());
 }
 
 
 void 
-SystemClass::Setup (Vec3 box, double kcut, double z,
+SystemClass::Setup (Vec3 box, Vec3 k, double kcut, double z,
 		    bool useFFT)
 {
   Box = box;
-  GVecs.Set (box, kcut);
+  GVecs.Set (box, k, kcut);
   H.SetIonPot (z, useFFT);
+  H.Setk(k);
   cerr << "NumBands = " << NumBands << endl;
   Bands.resize (NumBands, GVecs.size());
 }

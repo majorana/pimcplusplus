@@ -16,10 +16,7 @@ void
 KineticClass::Setk (Vec3 k)
 {
   kPoint = k;
-  for (int i=0; i<GVecs.size(); i++) {
-    Vec3 Gpk = GVecs(i)+kPoint;
-    halfG2(i) = 0.5*dot(Gpk, Gpk);
-  }
+  Setup();
 }
 
 void 
@@ -51,12 +48,35 @@ VionBase::SetIons(const Array<Vec3,1> &rions)
 }
 
 
+
 void
 CoulombClass::Setup()
 {
 
 }
 
+
+void 
+CoulombClass::Vmatrix (Array<complex<double>,2> &vmat)
+{
+  double volInv = 1.0/GVecs.GetBoxVol();
+  for (int i=0; i<vmat.rows(); i++) 
+    for (int j=0; j<=i; j++) {
+      Vec3 diff = GVecs(i) - GVecs(j);
+      complex<double> s(0.0,0.0);
+      for (int zi=0; zi<Rions.size(); zi++) {
+	double cosVal, sinVal, phase;
+	phase = dot (diff, Rions(zi));
+	sincos(phase, &sinVal, &cosVal);
+	s += complex<double> (cosVal,sinVal);
+      }
+      complex<double> val = -4.0*volInv*s*M_PI*Z/dot(diff,diff);
+      vmat(i,j) = val;
+      vmat(j,i) = conj(val);
+    }
+  for (int i=0; i<vmat.rows(); i++)
+    vmat(i,i) = 0.0;
+}
 
 void 
 CoulombClass::Apply(const zVec &c, zVec &Vc)
@@ -113,6 +133,30 @@ CoulombFFTClass::Setup()
   SetVr();
   IsSetup = true;
 }
+
+
+void 
+CoulombFFTClass::Vmatrix (Array<complex<double>,2> &vmat)
+{
+  double volInv = 1.0/GVecs.GetBoxVol();
+  for (int i=0; i<vmat.rows(); i++) 
+    for (int j=0; j<=i; j++) {
+      Vec3 diff = GVecs(i) - GVecs(j);
+      complex<double> s(0.0,0.0);
+      for (int zi=0; zi<Rions.size(); zi++) {
+	double cosVal, sinVal, phase;
+	phase = dot (diff, Rions(zi));
+	sincos(phase, &sinVal, &cosVal);
+	s += complex<double> (cosVal,sinVal);
+      }
+      complex<double> val = -4.0*volInv*s*M_PI*Z/dot(diff,diff);
+      vmat(i,j) = val;
+      vmat(j,i) = conj(val);
+    }
+  for (int i=0; i<vmat.rows(); i++)
+    vmat(i,i) = 0.0;
+}
+
 
 void 
 CoulombFFTClass::SetIons(const Array<Vec3,1> &rions)
@@ -174,6 +218,19 @@ PHPotClass::SetIons (const Array<Vec3,1> &rions)
   CalcStructFact();
 }
 
+void
+PHPotClass::Vmatrix (Array<complex<double>,2> &vmat)
+{
+  if (!IsSetup)
+    Setup();
+  double volInv = 1.0/GVecs.GetBoxVol();
+  for (int i=0; i<vmat.rows(); i++) 
+    for (int j=0; j<=i; j++) {
+      vmat (i,j) = kPH.V(kPoint, GVecs(i), GVecs(j))*volInv;
+      vmat (j,i) = conj(vmat(i,j));
+    }
+}
+
 void 
 PHPotClass::SetVmat()
 {
@@ -217,6 +274,22 @@ PHPotClass::Apply (const zVec &c, zVec &Hc)
       Hc(i) += StructFact(i,j)*VGGp (i,j) * c(j);
 }
 
+
+
+void
+PHPotFFTClass::Vmatrix (Array<complex<double>,2> &vmat)
+{
+  if (!IsSetup)
+    Setup();
+  double volInv = 1.0/GVecs.GetBoxVol();
+  for (int i=0; i<vmat.rows(); i++) 
+    for (int j=0; j<=i; j++) {
+      vmat (i,j) = kPH.V(kPoint, GVecs(i), GVecs(j))*volInv;
+      vmat (j,i) = conj(vmat(i,j));
+    }
+  for (int i=0; i<vmat.rows(); i++)
+    cerr << "vmat(" << i << "," << i << ") = " << vmat(i,i) << endl;
+}
 
 
 void 
@@ -374,6 +447,14 @@ void
 HamiltonianClass::SetIons (const Array<Vec3,1>& rions)
 {
   Vion->SetIons(rions);
+}
+
+void
+HamiltonianClass::Setk (Vec3 k)
+{
+  kPoint = k;
+  Kinetic.Setk(k);
+  Vion->Setk(k);
 }
 
 void

@@ -2,7 +2,7 @@
 
 main()
 {
-  //Vec3 box(5.32117439923148, 5.32117439923148, 5.32117439923148);
+  //  Vec3 box(5.32117439923148, 5.32117439923148, 5.32117439923148);
   Vec3 box(10.0, 11.0, 12.0);
   //  Vec3 box(6.5, 6.500, 6.501);
   double kcut = 3.0;
@@ -13,8 +13,9 @@ main()
   in.CloseFile();
 
   SystemClass system(10);
-  system.Setup (box, kcut, *ph, false); 
-  //system.Setup (box, kcut, 1.0, false);
+  Vec3 k(0.0, 0.0, 0.0);
+  //system.Setup (box, k, kcut, *ph, true); 
+  system.Setup (box, k, kcut, 1.0, true);
   Array<Vec3,1> rions(16);
   rions(0)  = Vec3 ( -1.017425796249996E-005, -2.030943049556812E-005,  4.920717706347283E-005);
   rions(1)  = Vec3 ( -0.500075239272832     , 3.968267796505207E-005 , -6.913079201222320E-005);
@@ -33,9 +34,11 @@ main()
   rions(14) = Vec3 (  0.249903446595725     ,-0.250033815724168      , -0.250138869986818);
   rions(15) = Vec3 ( -0.249894729888688     ,-0.249903398844062      , -0.249977204406117);
   for (int i=0; i<16; i++)
-    for (int j=0; j<3; j++)
+    for (int j=0; j<3; j++) {
       rions(i)[j] = box[j] * rions(i)[j];
-  //  rions(0) = Vec3(0.0, 0.0, 0.0);
+      //rions(i)[j] = box[j]*(drand48()-0.5);
+    }
+  
   system.SetIons (rions);
   system.DiagonalizeH();
   

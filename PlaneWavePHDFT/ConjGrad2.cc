@@ -1,5 +1,5 @@
 #include "ConjGrad2.h"
-
+#include "../MatrixOps/MatrixOps.h"
 
 void ConjGrad::Setup()
 {
@@ -34,14 +34,46 @@ void ConjGrad::Setup()
     Normalize(c);
   }
   cerr << "numNonZero = " << numNonZero << endl;
+  InitBands();
 //   Orthogonalize (Bands);
 //   for (int band=0; band<numBands; band++) {
 //     c.reference(Bands(band,Range::all()));
 //     Normalize (c);
 //   }
 
-  PrintOverlaps();
+//  PrintOverlaps();
   IsSetup = true;
+}
+
+
+void ConjGrad::InitBands()
+{
+  int numBands = Bands.rows();
+  int numVecs = 4 * numBands;
+  assert (numVecs <= H.GVecs.size());
+  Array<complex<double>,2> Hmat(numVecs, numVecs);
+  Array<complex<double>,2> EigVecs(numBands, numVecs);
+  Array<double,1> EigVals (numBands);
+
+  cerr << "Before Vmatrix.\n";
+  H.Vion->Vmatrix(Hmat);
+  cerr << "After Vmatrix.\n";
+  for (int i=0; i<numVecs; i++) {
+    Vec3 Gpk = H.GVecs(i) + H.kPoint;
+    Hmat(i,i) += 0.5 * dot (Gpk,Gpk);
+  }
+  // Now diagonalize
+  SymmEigenPairs (Hmat, numBands, EigVals, EigVecs);
+
+  for (int i=0; i<numBands; i++)
+    cerr << "Mini energy(" << i << ") = " << 27.211383*EigVals(i) << endl;
+
+  // Now put results in Bands
+  Bands = 0.0;
+  for (int band=0; band<numBands; band++) 
+    for (int i=0; i<numVecs; i++)
+      Bands(band, i) = EigVecs(band, i);
+
 }
 
 void ConjGrad::CalcPhiSD()

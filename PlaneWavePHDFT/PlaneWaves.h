@@ -14,9 +14,10 @@ protected:
   Vec3 Box;
   int NumBands;
 public:
-  void Setup(Vec3 box, double kcut, Potential &ph, bool useFFT=true);
-  void Setup(Vec3 box, double kcut, double z, bool useFFT=true);
+  void Setup(Vec3 box, Vec3 k, double kcut, Potential &ph, bool useFFT=true);
+  void Setup(Vec3 box, Vec3 k, double kcut, double z, bool useFFT=true);
   void SetIons (const Array<Vec3,1> &rions);
+  void Setk (Vec3 k);
   void DiagonalizeH();
 
   SystemClass(int numBands) 

@@ -22,8 +22,10 @@ protected:
   int CurrentBand, LastBand;
   Array<complex<double>,2> &Bands;
   double Tolerance;
+
 public:
   Array<double,1> Energies;
+  void InitBands();
   void Solve(int band);
   inline void SetTolerance(double tol) { Tolerance = tol;}
   void PrintOverlaps();

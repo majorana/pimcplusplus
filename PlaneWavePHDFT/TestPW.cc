@@ -8,7 +8,8 @@ main()
     //in.OpenFile ("NaPH_US_March1_05b.h5");
   Potential *ph = ReadPotential(in);
   in.CloseFile();
-  Hamiltonian H(box, 4.0, 1.0, *ph);
+  Vec3 k(0.0, 0.0, 0.0);
+  Hamiltonian H(box, k, 4.0, 1.0, *ph);
   H.PHFFT.Setup();
   int numBands = 6;
   ConjGrad CG(H,numBands);

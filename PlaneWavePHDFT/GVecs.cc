@@ -19,8 +19,9 @@ inline bool operator==(const GVec &g1, const GVec &g2)
   return (fabs(dot(g1.G,g1.G)-dot(g2.G,g2.G)) < 1.0e-12);
 }
 
-void GVecsClass::Set (Vec3 box, double kcut)
+void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut)
 {
+  k = kVec;
   Box = box;
   kCut = kcut;
   kBox[0]=2.0*M_PI/box[0]; kBox[1]=2.0*M_PI/box[1]; kBox[2]=2.0*M_PI/box[2];
@@ -50,7 +51,7 @@ void GVecsClass::Set (Vec3 box, double kcut)
       for (int iz=-maxZ; iz<=maxZ; iz++) {
 	vec.G[2] = iz*kBox[2];
 	vec.I[2] = (iz+Nz)%Nz;
-	if (dot(vec.G,vec.G) < (kcut*kcut)) 
+	if (dot(k+vec.G,k+vec.G) < (kcut*kcut)) 
 	  vecs.push_back(vec);
       }
     }
@@ -82,7 +83,7 @@ void GVecsClass::Set (Vec3 box, double kcut)
       for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
 	vec.G[2] = iz*kBox[2];
 	vec.I[2] = (iz+Nz)%Nz;
-	if (dot(vec.G,vec.G) < (4.0*kcut*kcut))
+	if (dot(k+vec.G,k+vec.G) < (4.0*kcut*kcut))
 	  vecs.push_back(vec);
       }
     }

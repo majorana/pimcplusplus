@@ -39,6 +39,7 @@ public:
   virtual void Apply   (const zVec &c, zVec &Hc) = 0;
   virtual void SetIons (const Array<Vec3,1> &rions); 
   virtual void Setup() = 0;
+  virtual void Vmatrix (Array<complex<double>,2> &vmat) = 0;
   
   virtual void Setk    (Vec3 k) 
   { kPoint = k; }
@@ -59,6 +60,7 @@ public:
   void Setup();
   void Apply (const zVec &c, zVec &Hc);
   void SetIons (const Array<Vec3,1> &rions);
+  void Vmatrix (Array<complex<double>,2> &vmat);
 
   CoulombClass (double z, GVecsClass &gvecs) : 
     VionBase (gvecs), Z(z)
@@ -79,6 +81,7 @@ private:
 public:
   void Apply (const zVec &c, zVec &Hc);
   void SetIons (const Array<Vec3,1> &rions);
+  void Vmatrix (Array<complex<double>,2> &vmat);
 
   CoulombFFTClass (double z, GVecsClass &gvecs) : 
     VionBase (gvecs), Z(z), FFT(gvecs)
@@ -100,6 +103,7 @@ private:
 public:
   void Apply (const zVec &c, zVec &Hc);
   void SetIons (const Array<Vec3,1> &rions);
+  void Vmatrix (Array<complex<double>,2> &vmat);
   void Setk(Vec3 k);
   
   PHPotClass (Potential &ph, GVecsClass &gvecs) :
@@ -129,6 +133,7 @@ private:
 public:
   void Setup();
   void SetIons (const Array<Vec3, 1>& rions);
+  void Vmatrix (Array<complex<double>,2> &vmat);
 
   void Apply (const zVec &c, zVec &Hc);
   PHPotFFTClass (Potential &ph, GVecsClass &gvecs) :
@@ -147,12 +152,14 @@ public:
   GVecsClass &GVecs;
   KineticClass Kinetic;
   VionBase *Vion;
+  Vec3 kPoint;
 
   void Apply (const zVec &c, zVec &Hc);
   
   void SetIonPot (double z, bool useFFT);
   void SetIonPot (Potential &ph, bool useFFT);
   void SetIons (const Array<Vec3,1>& rions);
+  void Setk (Vec3 k);
 
   HamiltonianClass (GVecsClass &gvecs) 
     : GVecs(gvecs), Kinetic(gvecs), Vion(NULL)

@@ -15,9 +15,10 @@ protected:
   Vec3 Box, kBox;
   int Nx, Ny, Nz;
   double kCut;
+  Vec3 k;
 
 public:
-  void Set (Vec3 box, double kcut);
+  void Set (Vec3 box, Vec3 kvec, double kcut);
 
   inline Vec3 operator()(int i) const
   { return GVecs(i); }
