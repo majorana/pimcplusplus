@@ -3,7 +3,8 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 
-void SphereObject::Set()
+void 
+SphereObject::Set()
 {
   GLUquadricObj* qobj = gluNewQuadric();
   gluQuadricDrawStyle(qobj, GLU_FILL);
@@ -26,20 +27,34 @@ void SphereObject::Set()
   End();
 }
 
-void SphereObject::SetPos (Vec3 pos)
+void 
+SphereObject::SetPos (Vec3 pos)
 {
   Pos = pos;
   Set();
 }
 
-void SphereObject::SetRadius (double radius)
+void 
+SphereObject::SetRadius (double radius)
 {
   Radius = radius;
   Set();
 }
 
-void SphereObject::SetColor (Vec3 color)
+void 
+SphereObject::SetColor (Vec3 color)
 {
   Color = color;
   Set();
+}
+
+
+void
+SphereObject::DrawPOV (FILE *fout)
+{
+  fprintf (fout, "sphere {\n");
+  fprintf (fout, "  <%10.8f, %10.8f, %10.8f>, %10.8f\n",
+	   Pos[0], Pos[1], Pos[2], Radius);
+  fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
+	   Color[0], Color[1], Color[2]);
 }

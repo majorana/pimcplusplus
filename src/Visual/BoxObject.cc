@@ -13,6 +13,7 @@ BoxObject::Set(Vec3 box)
 void 
 BoxObject::Set (double lx, double ly, double lz)
 {
+  Lx=lx; Ly=ly; Lz=lz;
   Start();
   glPushMatrix();
   glLineWidth (2.0);
@@ -33,4 +34,56 @@ void BoxObject::SetColor (double red, double green, double blue)
   Color[0] = red;
   Color[1] = green;
   Color[2] = blue;
+}
+
+
+void 
+BoxObject::POVLine (FILE *fout, 
+		    double x1, double y1, double z1,
+		    double x2, double y2, double z2,
+		    double radius)
+{
+  fprintf (fout, "cylinder {\n");
+  fprintf (fout, "  <%12.8f, %12.8f, %12.8f>,\n",
+	   x1, y1, z1);
+  fprintf (fout, "  <%12.8f, %12.8f, %12.8f>,\n",
+	   x2, y2, z2);
+  fprintf (fout, "  %10.8f\n", radius);
+  fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
+	   0.0, 0.0, 0.0);
+  fprintf (fout, "}\n\n");
+}
+
+void
+BoxObject::DrawPOV (FILE *fout)
+{
+  double minDim = min(min(Lx,Ly),Lz);
+  double radius = minDim/150.0;
+  POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
+	          0.5*Lx ,-0.5*Ly, -0.5*Lz, radius);
+  POVLine (fout, -0.5*Lx,  0.5*Ly, -0.5*Lz,
+	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius);
+  POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
+	         -0.5*Lx , 0.5*Ly, -0.5*Lz, radius);
+  POVLine (fout,  0.5*Lx, -0.5*Ly, -0.5*Lz,
+	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius);
+
+  POVLine (fout, -0.5*Lx, -0.5*Ly,  0.5*Lz,
+	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius);
+  POVLine (fout, -0.5*Lx,  0.5*Ly,  0.5*Lz,
+	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+  POVLine (fout, -0.5*Lx, -0.5*Ly,  0.5*Lz,
+	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+  POVLine (fout,  0.5*Lx, -0.5*Ly,  0.5*Lz,
+	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+
+  POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
+	         -0.5*Lx ,-0.5*Ly,  0.5*Lz, radius);
+  POVLine (fout, -0.5*Lx,  0.5*Ly, -0.5*Lz,
+	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+  POVLine (fout,  0.5*Lx, -0.5*Ly, -0.5*Lz,
+	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius);
+  POVLine (fout,  0.5*Lx,  0.5*Ly, -0.5*Lz,
+	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius);
+
 }

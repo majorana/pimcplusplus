@@ -277,6 +277,8 @@ VisualClass::VisualClass()
 		sigc::mem_fun(*this, &VisualClass::OnOpen));
   Actions->add (Gtk::Action::create("Export", "_Export Image"),
 		sigc::mem_fun(*this, &VisualClass::OnExport));
+  Actions->add (Gtk::Action::create("ExportPOV", "_Export POV"),
+		sigc::mem_fun(*this, &VisualClass::OnExportPOV));
   Actions->add (Gtk::Action::create("Quit", "_Quit"),
 		sigc::mem_fun(*this, &VisualClass::Quit));
   Actions->add (Gtk::Action::create("MenuView", "View"));
@@ -293,6 +295,7 @@ VisualClass::VisualClass()
     "    <menu action='MenuFile'>"
     "      <menuitem action='Open'/>"
     "      <menuitem action='Export'/>"
+    "      <menuitem action='ExportPOV'/>"
     "      <separator/>"
     "      <menuitem action='Quit'/>"
     "    </menu>"
@@ -344,6 +347,11 @@ void VisualClass::OnOpen()
 void VisualClass::OnExport()
 {
   Export.Export ("frame.png");
+}
+
+void VisualClass::OnExportPOV()
+{
+  Export.ExportPOV("frame.pov");
 }
 
 void VisualClass::ResetView()

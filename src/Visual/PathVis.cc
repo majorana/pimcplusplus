@@ -151,6 +151,35 @@ void PathVisClass::GLRender()
 }
 
 
+void PathVisClass::POVRender(string filename)
+{
+  FILE *fout;
+  fout = fopen (filename.c_str(), "w");
+  if (fout == NULL) {
+    cerr << "Cannot open " << filename << " for writing.\n";
+    return;
+  }
+  
+  // do global settings
+  fprintf (fout, "background { color rgb <1.0, 1.0, 1.0> }\n");
+  fprintf (fout, "global_settings { ambient_light rgb <2.0, 2.0, 2.0> }\n");
+  double light_position[] = {50.0, 50.0, 50.0, 0.0};
+  fprintf (fout, "light_source { <%8.5f, %8.5f, %8.5f> \n",
+	   light_position[0], light_position[1], light_position[2]);
+  fprintf (fout, "    color rgb <1.333, 1.333, 1.333> \n}\n\n");
+  View.POVtransform (fout);
+
+  vector<GLObject*>::iterator iter = Objects.begin();
+  while (iter != Objects.end()) {
+    (*iter)->DrawPOV(fout);
+    iter++;
+  }
+
+
+  fclose (fout);
+}
+
+
 bool PathVisClass::on_expose_event(GdkEventExpose* event)
 {
   // *** OpenGL BEGIN ***

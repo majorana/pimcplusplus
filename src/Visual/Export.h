@@ -22,6 +22,7 @@ private:
   void InitGLStuff();
 public:
   void Export (string filename);
+  void ExportPOV (string filename);
   ExportClass (VisualClass &visual) : 
     Visual(visual), Width(2000), Height(2000)
   {

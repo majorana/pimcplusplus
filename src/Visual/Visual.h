@@ -87,6 +87,7 @@ protected:
 
   void OnOpen();
   void OnExport();
+  void OnExportPOV();
   //  bool on_delete_event();
   void Quit();
   void ResetView();

@@ -39,6 +39,7 @@ public:
   inline bool SetPerspective (bool usePersp) 
   { UsePerspective = usePersp; }
   void GLtransform();
+  void POVtransform (FILE *fout);
   void Reset();
 
   ViewClass (PathVisClass &pathVis);
@@ -61,6 +62,7 @@ public:
   void AddBox  (double xSize, double ySize, double zSize);
   void AddPath (Array<Vec3,1> &path, bool closed=true);
   void GLRender();
+  void POVRender(string filename);
   void Invalidate();
 
   // Constructor

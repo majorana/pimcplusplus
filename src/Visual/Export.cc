@@ -84,3 +84,11 @@ void ExportClass::Export (string filename)
 
 
 }
+
+
+
+void
+ExportClass::ExportPOV(string filename)
+{
+  Visual.PathVis.POVRender (filename);
+}

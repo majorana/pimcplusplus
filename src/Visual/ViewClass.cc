@@ -117,6 +117,17 @@ void ViewClass::GLtransform()
 }
 
 
+void ViewClass::POVtransform (FILE *fout)
+{
+  fprintf (fout, "camera {\n");
+  fprintf (fout, "  location <%14.10f, %14.10f %14.10f>\n",
+	   0.0, 0.0, 2.5*Distance/Scale);
+  fprintf (fout, "  angle 40.0\n");
+  fprintf (fout, "  look_at <%14.10f %14.10f %14.10f>\n}\n\n",
+	   0.0, 0.0, 0.0);
+}
+
+
 void ViewClass::SetDistance (double dist)
 {
   Distance = dist;

@@ -5,6 +5,7 @@
 
 void PathObject::LinesSet(vector<Vec3> &path)
 {
+  MyPath = path;
   Start();
   glColor3d (Color[0], Color[1], Color[2]);
   float fcolor[4];
@@ -26,6 +27,7 @@ void PathObject::LinesSet(vector<Vec3> &path)
 
 void PathObject::TubesSet(vector<Vec3> &path)
 {
+  MyPath = path;
   Start();
   double alpha;
   int N = path.size();
@@ -127,3 +129,37 @@ void PathObject::Cylinder(const Vec3 &r1, const Vec3 &r2)
   
 
 }
+
+
+void PathObject::DrawPOV(FILE *fout)
+{
+  fprintf (fout, "sphere_sweep {\n  cubic_spline\n");
+  fprintf (fout, "  %d,\n", MyPath.size()+2);
+  Vec3 startControl, endControl;
+  int N = MyPath.size();
+  if (Closed) {
+    startControl = MyPath[N-1];
+    endControl   = MyPath[0];
+  }
+  else {
+    startControl = 2.0*MyPath[0] - MyPath[1];
+    endControl   = 2.0*MyPath[N-1] - MyPath[N-2];
+  }
+  // First write the first control point
+  fprintf (fout, "  <%14.10f, %14.10f, %14.10f>, %8.5f\n",
+	   startControl[0], startControl[1], startControl[2], Radius);
+	   
+  for (int i=0; i<N; i++)
+    fprintf (fout, "  <%14.10f, %14.10f %14.10f>, %8.5f\n",
+	     MyPath[i][0], MyPath[i][1], MyPath[i][2], Radius);
+
+  // Now, write the last control point
+  fprintf (fout, "  <%14.10f, %14.10f, %14.10f>, %8.5f\n",
+	   endControl[0], endControl[1], endControl[2], Radius);
+  
+  // Write th color
+  fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
+	   Color[0], Color[1], Color[2]);
+  fprintf (fout, "}\n\n");
+}
+
