@@ -4,6 +4,7 @@
 void GVecsClass::Set (Vec3 box, double kcut)
 {
   Box = box;
+  kCut = kcut;
   kBox[0]=2.0*M_PI/box[0]; kBox[1]=2.0*M_PI/box[1]; kBox[2]=2.0*M_PI/box[2];
 
   int maxX, maxY, maxZ;
@@ -12,9 +13,9 @@ void GVecsClass::Set (Vec3 box, double kcut)
   maxZ = (int) ceil(kcut/kBox[2]);
 
   // The FFT box must be twice the size as the maximum G in each direction.
-  Nx = 2*(2*maxX+1);
-  Ny = 2*(2*maxY+1);
-  Nz = 2*(2*maxZ+1);
+  Nx = 4*maxX+1;
+  Ny = 4*maxY+1;
+  Nz = 4*maxZ+1;
 
   int numG = 0;
   Vec3 G;
@@ -146,16 +147,43 @@ void CoulombFFTClass::Setup()
   //double prefact = -4.0*M_PI*Z;// /GVecs.GetBoxVol();
   double prefact = -4.0*M_PI*Z/GVecs.GetBoxVol();
   FFT.kBox = 0.0;
-  for (int m=0; m<GVecs.size(); m++)
-    for (int n=0; n<GVecs.size(); n++) {
-      dG = GVecs(m)-GVecs(n);
-      dI = GVecs.Index(n) - GVecs.Index(m);
-      double val = (m == n) ? 0.0 : prefact/dot(dG,dG);
-      int i = (dI[0] + FFT.Nx) % FFT.Nx;
-      int j = (dI[1] + FFT.Ny) % FFT.Ny;
-      int k = (dI[2] + FFT.Nz) % FFT.Nz;
-      FFT.kBox(i,j,k) = val;
+//   for (int m=0; m<GVecs.size(); m++)
+//     for (int n=0; n<GVecs.size(); n++) {
+//       dG = GVecs(m)-GVecs(n);
+//       dI = GVecs.Index(n) - GVecs.Index(m);
+//       double val = (m == n) ? 0.0 : prefact/dot(dG,dG);
+//       int i = (dI[0] + FFT.Nx) % FFT.Nx;
+//       int j = (dI[1] + FFT.Ny) % FFT.Ny;
+//       int k = (dI[2] + FFT.Nz) % FFT.Nz;
+//       FFT.kBox(i,j,k) = val;
+//     }
+  Vec3 Gdiff;
+  int Nx=FFT.Nx; int Ny=FFT.Ny; int Nz=FFT.Nz;
+  cerr << "Nx=" << Nx << " Ny=" << Ny << " Nz=" << Nz << endl;
+  int mx = (Nx-1)/2;
+  int my = (Ny-1)/2;
+  int mz = (Nz-1)/2;
+  double cut = 4.0*GVecs.GetkCut() * GVecs.GetkCut();
+  for (int ix=-mx; ix<=mx; ix++) {
+    int nx = (ix+Nx)%Nx;
+    Gdiff[0] = GVecs.GetkBox()[0]*ix;
+    for (int iy=-my; iy<=my; iy++) {
+      int ny = (iy+Ny)%Ny;
+      Gdiff[1] = GVecs.GetkBox()[1]*iy;
+      for (int iz=-mz; iz<=mz; iz++) {
+	int nz = (iz+Nz)%Nz;
+	Gdiff[2] = GVecs.GetkBox()[2]*iz;
+	double prod = dot(Gdiff,Gdiff);
+	if (prod < cut) {
+	  //cerr << "oldval = " << FFT.kBox(nx,ny,nz) <<endl;
+	  FFT.kBox(nx,ny,nz) = prefact/prod;
+	  //cerr << "newval = " << FFT.kBox(nx,ny,nz) <<endl;
+	}
+      }
     }
+  }
+  FFT.kBox(0,0,0) = 0.0;
+    
   FFT.k2r();
   FILE *fout = fopen ("Vr.dat", "w");
   for (int i=0; i<FFT.Nx; i++) {
@@ -183,11 +211,11 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
   FFT.k2r();
   FFT.rBox *= sqrt(Ninv);
   // Now, multiply by V
-  //FFT.rBox *= Vr;
-  for (int i=0; i<FFT.Nx; i++)
-    for (int j=0; j<FFT.Ny; j++)
-      for (int k=0; k<FFT.Nz; k++)
-	FFT.rBox(i,j,k) *= Vr(i,j,k); 
+  FFT.rBox *= Vr;
+//   for (int i=0; i<FFT.Nx; i++)
+//     for (int j=0; j<FFT.Ny; j++)
+//       for (int k=0; k<FFT.Nz; k++)
+// 	FFT.rBox(i,j,k) *= Vr(i,j,k); 
 
   // Transform back
   FFT.r2k();
