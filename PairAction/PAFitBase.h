@@ -2,6 +2,8 @@
 #define PA_FIT_BASE_H
 
 #include "../IO/InputOutput.h"
+#include "../PH/PH.h"
+#include "../Splines/CubicSpline.h"
 #include "Particle.h"
 #ifdef MAKE_FIT
 #include "../../Rho.h"
