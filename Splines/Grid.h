@@ -681,6 +681,8 @@ inline Grid* ReadGrid (IOSectionClass &inSection)
     newGrid = new LinearGrid;
   else if (Type == "Optimal")
     newGrid = new OptimalGrid;
+  else if (Type == "Optimal2")
+    newGrid = new OptimalGrid2;
   else if (Type == "Log")
     newGrid = new LogGrid;
   else if (Type == "Cluster")
