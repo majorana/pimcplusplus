@@ -42,6 +42,15 @@ protected:
   PathTypeType PathType; 
   void LineToggle();
   Gtk::Image TubesImage, LinesImage;
+
+  Glib::RefPtr<Gtk::ActionGroup> Actions;
+  Glib::RefPtr<Gtk::UIManager> Manager;
+
+  void OnOpen();
+  void OnExport();
+  void on_delete_event();
+  void ResetView();
+  void PutInBox();
 public:
   PathVisClass PathVis;
 

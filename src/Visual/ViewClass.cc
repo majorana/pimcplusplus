@@ -36,6 +36,14 @@ bool ViewClass::OnButtonPress (GdkEventButton *event)
     StartX = event->x;
     StartY = event->y;
     Button1Pressed=true;
+    Button2Pressed=false;
+  }
+  else if (event->button == 2) {
+    StartX = event->x;
+    StartY = event->y;
+    Button1Pressed=false;
+    Button2Pressed=true;
+    OldScale = Scale;
   }
   return false;
 }
@@ -45,6 +53,8 @@ bool ViewClass::OnButtonRelease (GdkEventButton *event)
 {
   if (event->button == 1)
     Button1Pressed = false;
+  if (event->button == 2)
+    Button2Pressed = false;
   return false;
 }
 
@@ -70,6 +80,15 @@ bool ViewClass::OnMotion (GdkEventMotion *event)
     StartX = x;
     StartY = y;
   }
+  else if (Button2Pressed) {
+    double w = PathVis.get_width();
+    double delta = (event->x - StartX) / w;
+    if (delta < 0.0)
+      Scale = max (MinScale, OldScale + delta);
+    else
+      Scale = min (MaxScale, OldScale + delta);
+    PathVis.Invalidate();
+  }
   return false;
 }
 
@@ -89,6 +108,7 @@ void ViewClass::GLtransform()
             0.0, 1.0, 0.0);
   
   glTranslatef(0.0, 0.0, -Distance);
+  glScaled(Scale, Scale, Scale);
   glMultMatrixd(&RotMat[0][0]);
 }
 

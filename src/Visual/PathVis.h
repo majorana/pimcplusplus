@@ -21,12 +21,12 @@ class ViewClass : public sigc::trackable
 private:
   friend class PathVisClass;
   double StartX, StartY;
-  bool Button1Pressed; 
+  bool Button1Pressed, Button2Pressed; 
   double MinScale, MaxScale;
   PathVisClass &PathVis;
   double Distance;
 public:
-  double Scale;
+  double Scale, OldScale;
   double Quaternion[4];
   double RotMat[4][4];
 

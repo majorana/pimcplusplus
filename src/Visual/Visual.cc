@@ -42,7 +42,10 @@ void VisualClass::MakeFrame(int frame)
 
 	SphereObject* sphere = new SphereObject;
 	sphere->SetPos (pos);
-	sphere->SetColor (Vec3(1.0, 0.0, 0.0));
+	if (ptcl != 30)
+	  sphere->SetColor (Vec3(1.0, 0.0, 0.0));
+	else
+	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
 	PathVis.Objects.push_back(sphere);
       }
     }
@@ -91,6 +94,7 @@ void VisualClass::Read(string fileName)
   assert(in.OpenSection("Observables"));
   assert(in.OpenSection("PathDump"));
   assert(in.ReadVar ("Path", Paths));
+  PutInBox();
 
   FrameAdjust.set_upper(Paths.extent(0)-1);
   
@@ -98,6 +102,25 @@ void VisualClass::Read(string fileName)
   in.CloseFile();
   MakeFrame (0);
 }
+
+void VisualClass::PutInBox()
+{
+  for (int frame=0; frame<Paths.extent(0); frame++) 
+    for (int ptcl=0; ptcl<Paths.extent(1); ptcl++) 
+      for (int dim=0; dim<3; dim++) {
+	while (Paths(frame,ptcl,0,dim) > 0.5*Box[dim])
+	  for (int slice=0; slice<Paths.extent(2); slice++)
+	    Paths(frame,ptcl,slice,dim) -= Box[dim];
+	while (Paths(frame,ptcl,0,dim) < -0.5*Box[dim])
+	  for (int slice=0; slice<Paths.extent(2); slice++)
+	    Paths(frame,ptcl,slice,dim) += Box[dim];
+      }
+	  
+}
+
+
+#include "tubes.xpm"
+#include "lines.xpm"
 
 VisualClass::VisualClass()
   : m_VBox(false, 0), m_ButtonQuit("Quit"), 
@@ -137,12 +160,54 @@ VisualClass::VisualClass()
   LinesButton.set_icon_widget (LinesImage);
   Tools.append (LinesButton);
   Tools.append (TubesButton);
+
+
+//   Gtk::Color black ("Black");
+//   Glib::RefPtr<Pixmap> linesPM = 
+//     Gdk::Pixmap::create_from_xpm (TubesButton.window, NULL, black, lines);
+
+
+  Actions = Gtk::ActionGroup::create();
+  Actions->add (Gtk::Action::create("MenuFile", "_File"));
+  Actions->add (Gtk::Action::create("Open", "_Open"),
+		sigc::mem_fun(*this, &VisualClass::OnOpen));
+  Actions->add (Gtk::Action::create("Export", "_Export POV"),
+		sigc::mem_fun(*this, &VisualClass::OnExport));
+  Actions->add (Gtk::Action::create("Quit", "_Quit"),
+		sigc::mem_fun(*this, &VisualClass::on_delete_event));
+  Actions->add (Gtk::Action::create("MenuView", "View"));
+  Actions->add (Gtk::Action::create("Reset", "Reset"),
+		sigc::mem_fun(*this, &VisualClass::ResetView));
+
+  Manager = Gtk::UIManager::create();
+  Manager->insert_action_group(Actions);
+  add_accel_group (Manager->get_accel_group());
+
+  Glib::ustring ui_info =
+    "<ui>"
+    "  <menubar name='MenuBar'>"
+    "    <menu action='MenuFile'>"
+    "      <menuitem action='Open'/>"
+    "      <menuitem action='Export'/>"
+    "      <separator/>"
+    "      <menuitem action='Quit'/>"
+    "    </menu>"
+    "    <menu action='MenuView'>"
+    "      <menuitem action='Reset'/>"
+    "    </menu>"
+    "  </menubar>"
+    "  <toolbar  name='ToolBar'>"
+    "    <toolitem action='Open'/>"
+    "    <toolitem action='Quit'/>"
+    "  </toolbar>"
+    "</ui>";
+  
+  Manager->add_ui_from_string (ui_info);
+  m_VBox.pack_start (*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK, 0);
   m_VBox.pack_start(Tools, Gtk::PACK_SHRINK, 0);
   m_VBox.pack_start(PathVis);
   m_VBox.pack_start(FrameScale, Gtk::PACK_SHRINK,0);
   m_VBox.pack_start(m_ButtonQuit, Gtk::PACK_SHRINK, 0);
-
-  
 
   // Show window.
   show_all();
@@ -150,6 +215,26 @@ VisualClass::VisualClass()
 
 VisualClass::~VisualClass()
 {}
+  
+void VisualClass::OnOpen()
+{
+  cerr << "Open called\n";
+}
+
+void VisualClass::OnExport()
+{
+  cerr << "Export called.\n";
+}
+
+void VisualClass::ResetView()
+{
+  cerr << "Reset View.\n";
+}
+
+void VisualClass::on_delete_event()
+{
+  cerr << "delete event called.\n";
+}
 
 void VisualClass::on_button_quit_clicked()
 {
