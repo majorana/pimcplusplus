@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{amsmath}
+\usepackage{amsmath,algorithmic,algorithm}
 \title{Ewald Breakup for Long-Range Potentials in PIMC}
 \author{Kenneth P. Esler Jr.}
 \date{\today}
@@ -228,6 +228,55 @@ v_k^{\alpha \beta} = \frac{4\pi}{\Omega}
 \left\{ \frac{q_1 q_2}{k^2} + \int_0^\infty dr \ r \sin(kr) \left[ v_l^{\alpha \beta}(r) -
   \frac{q_1 q_2}{r} \right] \right\}
 \end{equation}
+
+\section{Efficient calculation methods}
+\subsection{Fast computation of $\rho_\vk$}
+We wish to quickly calculate the quantity
+\begin{equation}
+\rho_\vk^\alpha \equiv \sum_i e^{i\vk \cdot r_i^\alpha}
+\end{equation}
+First, we write 
+\begin{eqnarray}
+\vk & = & m_1 \vb_1 + m_2 \vb_2 + m_3 \vb_3 \\
+\vk \cdot \vr_i^\alpha & = &  m_1 \vb_1 \cdot \vr_i^\alpha + 
+m_2 \vb_2 \cdot \vr_i^\alpha + m_3 \vb_3 \cdot \vr_i^\alpha \\
+e^{i\vk \cdot r_i^\alpha} & = & 
+{\underbrace{\left[e^{i \vb_1 \cdot\vr_i^\alpha}\right]}_{C^{i\alpha}_1}}^{m_1}
+{\underbrace{\left[e^{i \vb_2 \cdot\vr_i^\alpha}\right]}_{C^{i\alpha}_2}}^{m_2}
+{\underbrace{\left[e^{i \vb_3 \cdot\vr_i^\alpha}\right]}_{C^{i\alpha}_3}}^{m_3}
+\end{eqnarray}
+Now, we note that
+\begin{equation}
+[C^{i\alpha}_1]^{m_1} = C^{i\alpha}_1 [C^{i\alpha}]^{(m_1-1)}.
+\end{equation}
+This allows us to recursively build up an array of the $C^{i\alpha}$s,
+and then compute $\rho_\vk$ for all $\vk$-vectors by looping over all
+k-vectors, requiring only two complex multiplies per particle per
+$\vk$.
+\begin{algorithm}
+\caption{Algorithm to quickly calculate $\rho_\vk^\alpha$.}
+\begin{algorithmic}
+\STATE Create list of $\vk$-vectors and corresponding $(m_1, m_2,
+m_3)$ indices.
+\FORALL{$\alpha \in $ species}
+  \STATE Zero out $\rho_\vk^\alpha$
+  \FORALL{$i \in $ particles}
+    \FOR{$j \in [1\cdots3]$}
+      \STATE Compute $C^{i \alpha}_j \equiv e^{i \vb_j \cdot
+	\vr^{\alpha}_i}$
+       \FOR{$m \in [-m_{\text{max}}\dots m_\text{max}]$}
+         \STATE Compute $[C^{i \alpha}_j]^m$ and store in array
+       \ENDFOR
+    \ENDFOR
+     \FORALL{$(m_1, m_2, m_3) \in $ index list}
+       \STATE Compute $e^{i \vk \cdot r^\alpha_i} =
+	 [C^{i\alpha}_1]^{m_1} [C^{i\alpha}_2]^{m_2}
+	 [C^{i\alpha}_3]^{m_3}$ from array
+    \ENDFOR
+  \ENDFOR
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
 
 \section{Adapting to PIMC}
 \subsection{Pair actions}
