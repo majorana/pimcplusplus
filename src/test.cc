@@ -56,10 +56,12 @@ void setupIDParticleArray(PathDataClass &myPathData)
       (*myElectronptr).Path.SetPos(counter,counter2,electronVector);
     }
   }
+  (*myElectronptr).InitPermMatrix();
+  (*myProtonptr).InitPermMatrix();
 
-  ElectronsClass &myElectrons = *myElectronptr;
+
   ProtonsClass &myProtons = *myProtonptr;
-
+  ElectronsClass &myElectrons= *myElectronptr;
   myPathData.SpeciesArray.Resize(2);
   myPathData.SpeciesArray.Set(0,myElectrons);
   myPathData.SpeciesArray.Set(1,myProtons);

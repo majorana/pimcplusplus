@@ -15,14 +15,14 @@ int Write2=1;
 template<class T>
 void MirroredArrayClass1D<T>::Resize(int numParticles)
 {
-  AB.resize(1,numParticles);
+  AB.resize(2,numParticles);
 }
 
 
 template <class T>
 void MirroredArrayClass1D<T>::Print()
 {
-  for (int counter=0;counter<AB.extent(1);counter++){
+  for (int counter=0;counter<AB.extent(0);counter++){
       cout<<AB(0,counter)<<" ";
     }
     cout<<endl;
@@ -112,13 +112,17 @@ template <class T>
 void MirroredArrayClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMatrix,int oldJoin, int newJoin)
 {
   if (newJoin>oldJoin){
-    for (int counter=oldJoin;counter<newJoin;counter++){
-      AB(0,counter)=AB(1,PermMatrix(counter));
+    for (int counterP=0;counterP<NumParticles();counterP++){
+      for (int counter=oldJoin;counter<newJoin;counter++){
+	AB(0,counterP,counter)=AB(1,PermMatrix(counterP),counter);
+      }
     }
   }
   else if (oldJoin>=newJoin){
-    for (int counter=newJoin;counter<oldJoin;counter++){
-      AB(0,PermMatrix(counter))=AB(1,counter);
+    for (int counterP=0;counterP<NumParticles();counterP++){
+      for (int counter=newJoin;counter<oldJoin;counter++){
+	AB(0,PermMatrix(counterP),counter)=AB(1,counterP,counter);
+      }
     }
   }
 
@@ -126,13 +130,17 @@ void MirroredArrayClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMatrix,int o
   //information into a
 
   if (newJoin>oldJoin){
-    for (int counter=oldJoin;counter<newJoin;counter++){
-      AB(1,counter)=AB(0,counter);
+    for (int counterP=0;counterP<NumParticles();counterP++){
+      for (int counter=oldJoin;counter<newJoin;counter++){
+	AB(0,counterP,counter)=AB(1,counterP,counter);
+      }
     }
   }
   else if (oldJoin>=newJoin){
-    for (int counter=newJoin;counter<oldJoin;counter++){
-      AB(1,PermMatrix(counter))=AB(0,PermMatrix(counter));
+    for (int counterP=0;counterP<NumParticles();counterP++){
+      for (int counter=newJoin;counter<oldJoin;counter++){
+	AB(0,PermMatrix(counterP),counter)=AB(1,PermMatrix(counterP),counter);
+      }
     }
   }
 

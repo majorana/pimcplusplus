@@ -16,7 +16,14 @@ public:
   /// Stores the permutation for my set of time-slices. This needs to be resized at some point!!
   MirroredArrayClass1D<int> Permutation;
   
+  void InitPermMatrix()
+    {
 
+      Permutation.Resize(NumParticles());
+      for (int counter=0;counter<NumParticles();counter++){
+	Permutation.Set(counter,counter);
+      }
+    }
 
   inline int NumParticles()
   { return Path.NumParticles(); }
@@ -34,7 +41,7 @@ public:
     Join=newJoin;
     return;
   }
-
+  
 
   inline void ShiftData(int sliceToShift, CommunicatorClass &communicator)
     {Path.ShiftData(sliceToShift,communicator);};
@@ -58,7 +65,7 @@ class ElectronsClass : public SpeciesClass
 public:
   ///When we make this work, this calculates the NodeActions
   double NodeAction (int Ptcl, int LinkNum);
-  ElectronsClass();
+  ElectronsClass(){};
   ~ElectronsClass();
 
 };
@@ -77,6 +84,7 @@ public:
     }  
   ProtonsClass()
     {
+
     }
   ~ProtonsClass()
     {
