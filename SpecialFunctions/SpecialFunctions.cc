@@ -359,6 +359,117 @@ double il_scaled(int l, double z)
 
 
 
+inline static double 
+debye_u1(const double * tpow)
+{
+  return (3.0*tpow[1] - 5.0*tpow[3])/24.0;
+}
+
+inline static double 
+debye_u2(const double * tpow)
+{
+  return (81.0*tpow[2] - 462.0*tpow[4] + 385.0*tpow[6])/1152.0;
+}
+
+inline
+static double debye_u3(const double * tpow)
+{
+  return (30375.0*tpow[3] - 369603.0*tpow[5] + 765765.0*tpow[7] - 425425.0*tpow[9])/414720.0;
+}
+
+inline
+static double debye_u4(const double * tpow)
+{
+  return (4465125.0*tpow[4] - 94121676.0*tpow[6] + 349922430.0*tpow[8] - 
+          446185740.0*tpow[10] + 185910725.0*tpow[12])/39813120.0;
+}
+
+inline
+static double debye_u5(const double * tpow)
+{
+  return (1519035525.0*tpow[5]     - 49286948607.0*tpow[7] + 
+          284499769554.0*tpow[9]   - 614135872350.0*tpow[11] + 
+          566098157625.0*tpow[13]  - 188699385875.0*tpow[15])/6688604160.0;
+}
+
+#if 0
+inline
+static double debye_u6(const double * tpow)
+{
+  return (2757049477875.0*tpow[6] - 127577298354750.0*tpow[8] + 
+          1050760774457901.0*tpow[10] - 3369032068261860.0*tpow[12] + 
+          5104696716244125.0*tpow[14] - 3685299006138750.0*tpow[16] + 
+          1023694168371875.0*tpow[18])/4815794995200.0;
+}
+#endif
+
+
+/* nu -> Inf; uniform in x > 0  [Abramowitz+Stegun, 9.7.7]
+ *
+ * error:
+ *   The error has the form u_N(t)/nu^N  where  0 <= t <= 1.
+ *   It is not hard to show that |u_N(t)| is small for such t.
+ *   We have N=6 here, and |u_6(t)| < 0.025, so the error is clearly
+ *   bounded by 0.025/nu^6. This gives the asymptotic bound on nu
+ *   seen below as nu ~ 100. For general MACH_EPS it will be 
+ *                     nu > 0.5 / MACH_EPS^(1/6)
+ *   When t is small, the bound is even better because |u_N(t)| vanishes
+ *   as t->0. In fact u_N(t) ~ C t^N as t->0, with C ~= 0.1.
+ *   We write
+ *                     err_N <= min(0.025, C(1/(1+(x/nu)^2))^3) / nu^6
+ *   therefore
+ *                     min(0.29/nu^2, 0.5/(nu^2+x^2)) < MACH_EPS^{1/3}
+ *   and this is the general form.
+ *
+ * empirical error analysis, assuming 14 digit requirement:
+ *   choose   x > 50.000 nu   ==>  nu >   3
+ *   choose   x > 10.000 nu   ==>  nu >  15
+ *   choose   x >  2.000 nu   ==>  nu >  50
+ *   choose   x >  1.000 nu   ==>  nu >  75
+ *   choose   x >  0.500 nu   ==>  nu >  80
+ *   choose   x >  0.100 nu   ==>  nu >  83
+ *
+ * This makes sense. For x << nu, the error will be of the form u_N(1)/nu^N,
+ * since the polynomial term will be evaluated near t=1, so the bound
+ * on nu will become constant for small x. Furthermore, increasing x with
+ * nu fixed will decrease the error.
+ */
+double log_il_scaled_asymp_unif_e(int l, const double x)
+{
+  double nu = (double)l + 0.5;
+  double result;
+  int i;
+  double z = x/nu;
+  double root_term = sqrt(1.0 + z*z);
+  double pre = 1.0/sqrt(2.0*M_PI*nu * root_term);
+  double eta = root_term + log(z/(1.0+root_term));
+  double ex_arg = 
+    ( z < 1.0/GSL_ROOT3_DBL_EPSILON ? nu*(-z + eta) : 
+      -0.5*nu/z*(1.0 - 1.0/(12.0*z*z)) );
+  gsl_sf_result ex_result;
+  //int stat_ex = gsl_sf_exp_e(ex_arg, &ex_result);
+  double t = 1.0/root_term;
+  double sum;
+  double tpow[16];
+  tpow[0] = 1.0;
+  for(i=1; i<16; i++) tpow[i] = t * tpow[i-1];
+  sum = 1.0 + debye_u1(tpow)/nu + debye_u2(tpow)/(nu*nu) + 
+    debye_u3(tpow)/(nu*nu*nu) + 
+    debye_u4(tpow)/(nu*nu*nu*nu) + 
+    debye_u5(tpow)/(nu*nu*nu*nu*nu);
+  
+  result = log(pre*sum) + ex_arg +0.5*log(M_PI/(2.0*x));
+    //    result->val  = pre * ex_result.val * sum;
+//   result->err  = pre * ex_result.val / (nu*nu*nu*nu*nu*nu);
+//   result->err += pre * ex_result.err * fabs(sum);
+//   result->err += 2.0 * GSL_DBL_EPSILON * fabs(result->val);
+  return result;
+}
+
+
+
+
+
 double log_il_scaled(int l, double z)
 {
   double sl = (double)l;
@@ -367,6 +478,8 @@ double log_il_scaled(int l, double z)
   /// Check for underflow;
   if (approxlog < -300.0)
     return (log_il_scaled_series_small(l,z));
+  else if ((l> 83) && (z > 8.3))
+    return (log_il_scaled_asymp_unif_e(l,z));
   else 
     {
       double il_val = il_scaled(l,z);
