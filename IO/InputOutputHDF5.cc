@@ -1329,8 +1329,8 @@ void IOTreeHDF5Class::GroupIterator(string member_name)
     newVar->Type = H5toAtomic (H5Tget_class (dataTypeID));
     H5Tclose (dataTypeID);
     newVar->DataSpaceID = H5Dget_space (newVar->DataSetID);
-    int ndims = H5Sget_simple_extent_ndims(newVar->DataSpaceID);
-    newVar->Dimensions.resize(ndims);
+    newVar->Dim = H5Sget_simple_extent_ndims(newVar->DataSpaceID);
+    newVar->Dimensions.resize(newVar->Dim);
     H5Sget_simple_extent_dims(newVar->DataSpaceID, newVar->Dimensions.data(), 
 			      NULL);
     VarList.push_back(newVar);

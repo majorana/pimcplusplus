@@ -1,4 +1,5 @@
 #include <Python.h>
+#include <numarray/libnumarray.h>
 #include "InputOutput.h"
 
 
@@ -9,18 +10,6 @@ extern "C" PyObject* IOSection_New(PyObject *self, PyObject *args)
   return Py_BuildValue("i", newSect);
 }
 
-extern "C" PyObject* IOSection_ReadVarInt(PyObject *self, PyObject *args)
-{
-  char* varName;
-  void* IOSectionPtr;
-  if (!PyArg_ParseTuple (args, "is", &IOSectionPtr,&varName))
-      return NULL;
-  else {
-    int val;
-    ((IOSectionClass*)IOSectionPtr)->ReadVar(varName,val);
-    return Py_BuildValue("i",val);
-  }    
-}
 
 
 extern "C" PyObject*
@@ -35,5 +24,317 @@ IOSection_OpenFile (PyObject *self, PyObject *args)
     bool success = ((IOSectionClass*)IOSectionPtr)->OpenFile(fileName);
     return Py_BuildValue("i",(int)success);
   }
+}
 
+
+extern "C" PyObject*
+IOSection_GetName(PyObject *self, PyObject *args)
+{
+  void *IOSectionPtr;
+
+  if (!PyArg_ParseTuple (args, "i",&IOSectionPtr))
+    return NULL;
+  else {
+    string myName;
+    myName = ((IOSectionClass*)IOSectionPtr)->GetName();
+    return Py_BuildValue("s",myName.c_str());
+  }
+}
+
+
+
+extern "C" PyObject*
+IOSection_NewFile(PyObject *self, PyObject *args)
+{
+  char *fileName;
+  void *IOSectionPtr;
+
+  if (!PyArg_ParseTuple (args, "is",&IOSectionPtr,&fileName))
+    return NULL;
+  else {
+    bool success;
+    success = ((IOSectionClass*)IOSectionPtr)->NewFile(fileName);
+    return Py_BuildValue("i",(int)success);
+  }
+}
+
+
+extern "C" PyObject*
+IOSection_CloseFile(PyObject *self, PyObject *args)
+{
+  char *fileName;
+  void *IOSectionPtr;
+
+  if (!PyArg_ParseTuple (args, "i",&IOSectionPtr))
+    return NULL;
+  else {
+    ((IOSectionClass*)IOSectionPtr)->CloseFile();
+    return NULL;
+  }
+}
+
+
+extern "C" PyObject*
+IOSection_FlushFile(PyObject *self, PyObject *args)
+{
+  void *IOSectionPtr;
+
+  if (!PyArg_ParseTuple (args, "i",&IOSectionPtr))
+    return NULL;
+  else {
+    ((IOSectionClass*)IOSectionPtr)->FlushFile();
+    return NULL;
+  }
+}
+
+extern "C" PyObject*
+IOSection_OpenSectionName (PyObject *self, PyObject *args)
+{
+  char *sectionName;
+  void *IOSectionPtr;
+
+  if (!PyArg_ParseTuple (args, "is",&IOSectionPtr,&sectionName))
+    return NULL;
+  else {
+    bool success = ((IOSectionClass*)IOSectionPtr)->OpenSection(sectionName);
+    return Py_BuildValue("i",(int)success);
+  }
+}
+
+
+extern "C" PyObject*
+IOSection_OpenSectionNameNum (PyObject *self, PyObject *args)
+{
+  char *sectionName;
+  void *IOSectionPtr;
+  int num;
+  if (!PyArg_ParseTuple (args, "isi",&IOSectionPtr,&sectionName,num))
+    return NULL;
+  else {
+    bool success = ((IOSectionClass*)IOSectionPtr)->OpenSection(sectionName,num);
+    return Py_BuildValue("i",(int)success);
+  }
+}
+
+
+extern "C" PyObject*
+IOSection_OpenSectionNum (PyObject *self, PyObject *args)
+{
+  void *IOSectionPtr;
+  int num;
+  if (!PyArg_ParseTuple (args, "ii",&IOSectionPtr,num))
+    return NULL;
+  else {
+    bool success = ((IOSectionClass*)IOSectionPtr)->OpenSection(num);
+    return Py_BuildValue("i",(int)success);
+  }
+}
+
+
+extern "C" PyObject*
+IOSection_IncludeSection (PyObject *self, PyObject *args)
+{
+  void *IOSectionPtr;
+  char *name;
+  char *fileName;
+  if (!PyArg_ParseTuple (args, "iss",&IOSectionPtr,&name,&fileName))
+    return NULL;
+  else {
+   bool success = ((IOSectionClass*)IOSectionPtr)->IncludeSection(name,fileName);
+   return Py_BuildValue("i",(int)success);
+  }
+}
+
+
+extern "C" PyObject*
+IOSection_NewSectionName(PyObject *self, PyObject *args)
+{
+  char *sectionName;
+  void *IOSectionPtr;
+
+  if (PyArg_ParseTuple (args, "is",&IOSectionPtr,&sectionName))
+    ((IOSectionClass*)IOSectionPtr)->NewSection(sectionName);
+  return NULL;
+}
+
+extern "C" PyObject*
+IOSection_NewSectionFile (PyObject *self, PyObject *args)
+{
+  void *IOSectionPtr;
+  char *name;
+  char *fileName;
+  if (!PyArg_ParseTuple (args, "iss",&IOSectionPtr,&name,&fileName))
+    return NULL;
+  else {
+   bool success = ((IOSectionClass*)IOSectionPtr)->NewSection(name,fileName);
+   return Py_BuildValue("i",(int)success);
+  }
+}
+
+extern "C" PyObject*
+IOSection_CloseSection(PyObject *self, PyObject *args)
+{
+  void *IOSectionPtr;
+  if (!PyArg_ParseTuple (args, "i",&IOSectionPtr))
+    return NULL;
+  else {
+    ((IOSectionClass*)IOSectionPtr)->CloseSection();
+    return NULL;
+  }
+}
+
+extern "C" PyObject*
+IOSection_ReadVar(PyObject *self, PyObject *args)
+{
+  char *name;
+  void *IOSectionPtr;
+  VarClass *varPtr;
+  bool success;
+  if (!PyArg_ParseTuple (args, "is",&IOSectionPtr,&name))
+    return NULL;
+  else {
+    varPtr=((IOSectionClass*)IOSectionPtr)->GetVarPtr(name);
+    if (varPtr==NULL)
+      return NULL;
+    int type=varPtr->Type;
+    int dim=varPtr->Dim;
+    if (dim == 0) {
+      if (type==INT_TYPE){
+	int val;    
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	if (success)
+	  return Py_BuildValue("i",val);
+	else
+	  return NULL;
+      }
+      else if (type==DOUBLE_TYPE){
+	double val;    
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	if (success)
+	  return Py_BuildValue("d",val);
+	else
+	  return NULL;
+      }
+      else if (type==STRING_TYPE){
+	string val;    
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	if (success)
+	  return Py_BuildValue("s",val.c_str());
+	else
+	  return NULL;
+      }
+      else if (type==BOOL_TYPE){
+	bool val;    
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	if (success)
+	  return Py_BuildValue("i",(int)val);
+	else
+	  return NULL;
+      }
+    }
+    // 1D arrays
+    else if (dim == 1) {
+      if (type==INT_TYPE){
+	blitz::Array<int,1> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int len = val.size();
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tInt32, 1, len);
+	  // Now copy data into new array
+	  for (int i=0; i<len; i++)
+	    *(((int*)array->data)+i) = val(i);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      if (type==DOUBLE_TYPE){
+	blitz::Array<double,1> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int len = val.size();
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tFloat64, 1, len);
+	  // Now copy data into new array
+	  for (int i=0; i<len; i++)
+	    *(((double*)array->data)+i) = val(i);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      if (type==BOOL_TYPE){
+	blitz::Array<bool,1> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int len = val.size();
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tBool, 1, len);
+	  // Now copy data into new array
+	  for (int i=0; i<len; i++)
+	    *(((bool*)array->data)+i) = val(i);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      else if (type==STRING_TYPE){
+	blitz::Array<string,1> val;    
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	if (success){
+	  int len=val.size();
+	  PyObject* array=PyList_New(0);
+	  for (int i=0;i<len;i++){
+	    PyList_Append(array,Py_BuildValue("s",val(i).c_str()));
+	  }
+	  return (PyObject*)array;
+	}
+	else
+	  return NULL;
+      }
+    }
+  }
+}
+
+
+
+
+static PyMethodDef IOSectionMethods[] = {
+    {"OpenFile",  IOSection_OpenFile, METH_VARARGS,
+     "Open a file for reading/writing."},
+    {"New", IOSection_New, METH_VARARGS,
+     "Create a new IOSection object."},
+    {"ReadVar", IOSection_ReadVar, METH_VARARGS,
+     "Reads a variable given its name, returning appropriate object with data."},
+    {"GetName", IOSection_GetName, METH_VARARGS,
+     "Gets the name of the current section"},
+    {"NewFile", IOSection_NewFile, METH_VARARGS,
+     "Creates a new file"},
+    {"CloseFile", IOSection_CloseFile, METH_VARARGS,
+     "Closes an open file"},
+    {"FlushFile", IOSection_FlushFile, METH_VARARGS,
+     "Flushes the file buffer"},
+    {"OpenSectionName", IOSection_OpenSectionName, METH_VARARGS,
+     "Opens the current section given the name"},
+    {"OpenSectionNum", IOSection_OpenSectionNum, METH_VARARGS,
+     "Opens the nth section"},
+    {"IncludeSection", IOSection_IncludeSection, METH_VARARGS,
+     "Includes a section"},
+    {"NewSectionName", IOSection_NewSectionName, METH_VARARGS,
+     "Creates a new section given its name"},
+    {"NewSectionFile", IOSection_NewSectionFile, METH_VARARGS,
+     "Creates a new section in a new file given the section and file name"},
+    {"CloseSection", IOSection_CloseSection, METH_VARARGS,
+     "Closes a section"},
+    {"ReadVar", IOSection_ReadVar, METH_VARARGS,
+     "Reads a variable given its name"},
+    {NULL, NULL, 0, NULL}        /* Sentinel */
+};
+
+PyMODINIT_FUNC
+initIOSection(void)
+{
+  (void) Py_InitModule("IOSection", IOSectionMethods);
+  import_libnumarray();
 }
