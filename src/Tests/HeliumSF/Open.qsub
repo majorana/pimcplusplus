@@ -1,0 +1,60 @@
+#
+# Sample Batch Queue Script
+#
+# Option: -q, which batch queue to run in
+#PBS -q batch
+#
+# Option: -l nodes, how many nodes to run on, note
+# that the ":ppn=2" directive is important. It
+# tells PBS that you want to claim both processors
+# on your nodes. ":myr2" tells PBS to find nodes
+# that are on the Myrinet2 network (other choice
+# is myr for Myrinet1)
+#PBS -l nodes=1:ppn=2:myr
+#
+# Option: -l ncpus, this line is included to remind
+# you not to use it.  This option is no longer 
+# supported.  Request nodes only as above.
+##PBS -l ncpus=20
+#
+#
+# Option: -l walltime, request this amount of wall
+# clock time for your job.  Format is hh:mm:ss
+# The default is 5 hours, the limit is 5 days.
+# The following requests 10 hours.
+#PBS -l walltime=20:00:00
+#
+#
+# Option: -j oe, combines stdout and stderr into a 
+# single file.
+#PBS -j oe
+#
+# Option: -o, specifies the name of the output file
+# which will be found in ${PBS_O_WORKDIR} after your
+# job completes.
+#PBS -o  OpenLoops.out
+#
+# Option: -N, names the job
+#PBS -N helium_test
+#
+# Change directories to the directory where the qsub 
+# command was issued.
+cd ${PBS_O_WORKDIR}
+#
+# Copy in a fresh version of the hello++.  
+##cp /turing/software/mpich-gm/examples/hello++ .
+#
+# Execute mpirun.  Note that PBS locates the nodes upon
+# which you are to run.  PBS stores the list of nodes in
+# the environment variable ${PBS_NODEFILE}.  It is very
+# important that you specify this to mpirun as the 
+# machinefile.
+# /turing/software/mpich-gm/mpirun -np 16 -machinefile ${PBS_NODEFILE} ./hello++
+#
+# We now recommend that users make use of the RJ command
+# for running batch jobs.   RJ will automatically handle 
+# vanilla MPI or Charm programs for myrinet or ethernet.
+# RJ Syntax:
+# /turing/software/bin/rj <np> <nodefile> <exe> [application arguments] 
+#
+rjq ../../pimc++ hehp.in

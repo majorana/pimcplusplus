@@ -1,0 +1,1008 @@
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Turing G5 Xserve Cluster, Computational Science and Engineering, UIUC
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Thu Feb 10 12:22:32 CST 2005
+JobID: 5255.turing-2.turing.uiuc.edu  Mother Node: [11-25]
+
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+
+rjq> Running 'pimc++' on 2 processors/1 nodes:
+
+pimc++ v. 
+pimc++ v. 
+before subset.
+before MPI_Comm_group
+MPI_Group_incl
+before  MPI_Comm_create
+ranks = 2
+ [         0         1  ]
+after  MPI_Comm_create
+after subset.
+before subset.
+before MPI_Comm_group
+MPI_Group_incl
+before  MPI_Comm_create
+ranks = 2
+ [         0         1  ]
+after  MPI_Comm_create
+after subset.
+Finished PathData Read.
+WARNING! 2.0 IS NOT A NUMBER!Using periodic boundary conditions.
+we have this many sections: 1
+Finished Path read.
+MaxLevels = 2
+Not using RPA for long range action.
+SQUARER
+10.
+7
+3
+N is 3
+I'm reading the potential
+995106
+887223
+790671
+704299
+627073
+558056
+496405
+441361
+392239
+348423
+309358
+274546
+243539
+215933
+191369
+169520
+150096
+132836
+117507
+103899
+91823.8
+81114.6
+71621.2
+63209.4
+55759.3
+49163.9
+43327.6
+38165.1
+33600.4
+29565.7
+26000.8
+22852.2
+20072.4
+17619.1
+15455.1
+13547.2
+11865.9
+10385.2
+9082
+7935.76
+6928.28
+6043.39
+5266.77
+4585.69
+3988.87
+3466.3
+3009.12
+2609.48
+2260.42
+1955.8
+1690.19
+1458.8
+1257.39
+1082.23
+930.046
+797.946
+683.391
+584.149
+498.262
+424.015
+359.901
+304.605
+256.973
+215.998
+180.8
+150.611
+124.76
+102.665
+83.815
+67.769
+54.1416
+42.5986
+32.8496
+24.6428
+17.7598
+12.0116
+7.23459
+3.28746
+0.0480489
+-2.58899
+-4.71447
+-6.40656
+-7.73246
+-8.74993
+-9.50846
+-10.0505
+-10.4122
+-10.6247
+-10.7143
+-10.7034
+-10.6112
+-10.4537
+-10.2446
+-9.99537
+-9.71564
+-9.41348
+-9.0956
+-8.76758
+-8.43399
+-8.0986
+-7.76446
+-7.43403
+-7.10925
+-6.79166
+-6.48243
+-6.18243
+-5.8923
+-5.61244
+-5.34313
+-5.08447
+-4.83646
+-4.59902
+-4.37199
+-4.15515
+-3.94823
+-3.75095
+-3.56299
+-3.38401
+-3.21366
+-3.05161
+-2.8975
+-2.75098
+-2.6117
+-2.47934
+-2.35357
+-2.23406
+-2.12051
+-2.01262
+-1.91011
+-1.81271
+-1.72016
+-1.63232
+-1.54902
+-1.46999
+-1.39499
+-1.3238
+-1.25619
+-1.19198
+-1.13096
+-1.07296
+-1.01782
+-0.965368
+-0.915466
+-0.867971
+-0.822753
+-0.779689
+-0.738662
+-0.699564
+-0.662291
+-0.626748
+-0.592843
+-0.560491
+-0.52961
+-0.500125
+-0.471963
+-0.445058
+-0.419346
+-0.394766
+-0.371261
+-0.348779
+-0.327268
+-0.30668
+-0.28697
+-0.268097
+-0.250018
+-0.232696
+-0.216095
+-0.200181
+-0.184921
+-0.170284
+-0.156242
+-0.142767
+-0.129833
+-0.117414
+-0.105488
+-0.0940327
+-0.0830261
+-0.0724484
+-0.0622807
+-0.0525047
+-0.0431032
+-0.0340599
+-0.0253592
+-0.0169862
+-0.00892691
+-0.00116787
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+done
+NumTau is7
+NumTau is7
+NumTau is7
+Finished PathData Read.
+WARNING! 2.0 IS NOT A NUMBER!Using periodic boundary conditions.
+we have this many sections: 1
+Finished Path read.
+MaxLevels = 2
+Not using RPA for long range action.
+SQUARER
+10.
+7
+3
+N is 3
+I'm reading the potential
+995106
+887223
+790671
+704299
+627073
+558056
+496405
+441361
+392239
+348423
+309358
+274546
+243539
+215933
+191369
+169520
+150096
+132836
+117507
+103899
+91823.8
+81114.6
+71621.2
+63209.4
+55759.3
+49163.9
+43327.6
+38165.1
+33600.4
+29565.7
+26000.8
+22852.2
+20072.4
+17619.1
+15455.1
+13547.2
+11865.9
+10385.2
+9082
+7935.76
+6928.28
+6043.39
+5266.77
+4585.69
+3988.87
+3466.3
+3009.12
+2609.48
+2260.42
+1955.8
+1690.19
+1458.8
+1257.39
+1082.23
+930.046
+797.946
+683.391
+584.149
+498.262
+424.015
+359.901
+304.605
+256.973
+215.998
+180.8
+150.611
+124.76
+102.665
+83.815
+67.769
+54.1416
+42.5986
+32.8496
+24.6428
+17.7598
+12.0116
+7.23459
+3.28746
+0.0480489
+-2.58899
+-4.71447
+-6.40656
+-7.73246
+-8.74993
+-9.50846
+-10.0505
+-10.4122
+-10.6247
+-10.7143
+-10.7034
+-10.6112
+-10.4537
+-10.2446
+-9.99537
+-9.71564
+-9.41348
+-9.0956
+-8.76758
+-8.43399
+-8.0986
+-7.76446
+-7.43403
+-7.10925
+-6.79166
+-6.48243
+-6.18243
+-5.8923
+-5.61244
+-5.34313
+-5.08447
+-4.83646
+-4.59902
+-4.37199
+-4.15515
+-3.94823
+-3.75095
+-3.56299
+-3.38401
+-3.21366
+-3.05161
+-2.8975
+-2.75098
+-2.6117
+-2.47934
+-2.35357
+-2.23406
+-2.12051
+-2.01262
+-1.91011
+-1.81271
+-1.72016
+-1.63232
+-1.54902
+-1.46999
+-1.39499
+-1.3238
+-1.25619
+-1.19198
+-1.13096
+-1.07296
+-1.01782
+-0.965368
+-0.915466
+-0.867971
+-0.822753
+-0.779689
+-0.738662
+-0.699564
+-0.662291
+-0.626748
+-0.592843
+-0.560491
+-0.52961
+-0.500125
+-0.471963
+-0.445058
+-0.419346
+-0.394766
+-0.371261
+-0.348779
+-0.327268
+-0.30668
+-0.28697
+-0.268097
+-0.250018
+-0.232696
+-0.216095
+-0.200181
+-0.184921
+-0.170284
+-0.156242
+-0.142767
+-0.129833
+-0.117414
+-0.105488
+-0.0940327
+-0.0830261
+-0.0724484
+-0.0622807
+-0.0525047
+-0.0431032
+-0.0340599
+-0.0253592
+-0.0169862
+-0.00892691
+-0.00116787
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+done
+NumTau is7
+NumTau is7
+NumTau is7
+NumTau is7
+The largest and smallest tau are respectively0.1 0.0015625
+NMAX is 0
+Current tau is 0.0015625 0
+Current tau is 0.003125 1
+Current tau is 0.00625 2
+Current tau NumTau is7
+The largest and smallest tau are respectively0.1 0.0015625
+NMAX is 0
+Current tau is 0.0015625 0
+Current tau is 0.003125 1
+Current tau is 0.00625 2
+Current tau is 0.0125 3
+Current tau is 0.025 4
+The tau I've chosen is 0.025Current tau is 0.05 5
+Current tau is 0.1 6
+I'm about ot actually initialize dukj now!
+My tau is 0.2
+The largest and smallest tau are respectively0.1 0.0015625
+NMAX is 1
+is 0.0125 3
+Current tau is 0.025 4
+The tau I've chosen is 0.025Current tau is 0.05 5
+Current tau is 0.1 6
+I'm about ot actually initialize dukj now!
+My tau is 0.2
+The largest and smallest tau are respectively0.1 0.0015625
+NMAX is 1
+Current tau is 0.0015625 0
+Current tau is 0.003125 1
+Current tau is 0.00625 2
+Current tau is 0.0125 3
+Current tau is 0.025 4
+The tau I've chosen is 0.025Current tau is 0.05 5
+Current tau is 0.1 6
+I'm about ot actually initialize dukj now!
+My tau is 0.2
+TCurrent tau is 0.0015625 0
+Current tau is 0.003125 1
+Current tau is 0.00625 2
+Current tau is 0.0125 3
+Current tau is 0.025 4
+The tau I've chosen is 0.025Current tau is 0.05 5
+Current tau is 0.1 6
+I'm about ot actually initialize dukj now!
+My tau is 0.2
+The largest and smallest tau are respectively0.1 0.0015625
+NMAX is 2
+Current tau is 0.0015625 0
+Current tau is 0.003125 1
+Current tau is 0.00625 2
+Current tau is 0.0125 3
+Current tau is 0.025 4
+The tau I've chosen is 0.025Current tau is 0.05 5
+Current tau is 0.1 6
+I'm about ot actually initialize dukj now!
+My tau is 0.2
+The largest and smallest tau are respectively0.1 0.0015625
+NMAX is 3
+he largest and smallest tau are respectively0.1 0.0015625
+NMAX is 2
+Current tau is 0.0015625 0
+Current tau is 0.003125 1
+Current tau is 0.00625 2
+Current tau is 0.0125 3
+Current tau is 0.025 4
+The tau I've chosen is 0.025Current tau is 0.05 5
+Current tau is 0.1 6
+I'm about ot actually initialize dukj now!
+My tau is 0.2
+The largest and smallest tau are respectively0.1 0.0015625
+NMAX is 3
+Current tau is 0.0015625 0
+Current tau is 0.003125 1
+Current tau is 0.00625 2
+Current tau is 0.0125 3
+Current tau is 0.025 4
+The tau I've chosen is 0.025Current tau is 0.05 5
+Current tau is 0.1 6
+I'm about ot actually initialize dukj now!
+My tau is 0.2
+I've FINALLY CHOSEN A TAU OF 0.025TauPos is 4
+Found PAfile for pair (He, He)
+Finished reading the action.
+kCutoff = 1
+Number of kVecs = 40
+Finished Actions read.
+Current tau is 0.0015625 0
+Current tau is 0.003125 1
+Current tau is 0.00625 2
+Current tau is 0.0125 3
+Current tau is 0.025 4
+The tau I've chosen is 0.025Current tau is 0.05 5
+Current tau is 0.1 6
+I'm about ot actually initialize dukj now!
+My tau is 0.2
+I've FINALLY CHOSEN A TAU OF 0.025TauPos is 4
+Found PAfile for pair (He, He)
+Finished reading the action.
+kCutoff = 1
+Number of kVecs = 40
+Finished Actions read.
+My paths arMy paths are of size292 96 29
+e of size292 96 29
+0 0
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+15 15
+16 16
+17 17
+18 18
+19 19
+20 20
+21 21
+22 22
+23 23
+24 24
+25 25
+26 26
+27 27
+28 28
+29 29
+30 30
+31 31
+32 32
+33 33
+34 34
+35 35
+36 36
+37 37
+38 38
+39 39
+40 40
+41 41
+42 42
+43 43
+44 44
+45 45
+46 46
+47 47
+48 48
+49 49
+50 50
+51 51
+52 52
+53 53
+54 54
+55 55
+56 56
+57 57
+58 58
+59 59
+60 60
+61 61
+62 62
+63 63
+64 64
+65 65
+66 66
+67 67
+68 68
+69 69
+70 70
+71 71
+72 72
+73 73
+74 74
+75 75
+76 76
+77 77
+78 78
+79 79
+80 80
+81 81
+82 82
+83 83
+84 84
+85 85
+86 86
+87 87
+88 88
+89 89
+90 90
+91 91
+92 92
+93 93
+94 94
+95 95
+kCutoff = 1
+Number of kVecs = 40
+Finished Observables Read.
+speciesName = He.
+Finished Moves Read.
+Starting Loop
+Size is 5
+Starting Loop
+Size is 5
+Processing move
+End move
+Ending Loop
+Processing move
+End move
+Ending Loop
+Starting Loop
+Size is 5
+Starting Loop
+Size is 5
+Processing move
+End move
+Ending Loop
+Processing observable
+Test 1
+Test 2
+Counter number is 0
+Counter number is 1
+Counter number is 2
+Counter number is 3
+Counter number is 4
+Test 3
+End Observable
+Processing observable
+Test 1
+Test 2
+Counter number is 0
+Counter number is 1
+Counter number is 2
+Counter number is 3
+Counter number is 4
+Test 3
+End Observable
+0 0
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+15 15
+16 16
+17 17
+18 18
+19 19
+20 20
+21 21
+22 22
+23 23
+24 24
+25 25
+26 26
+27 27
+28 28
+29 29
+30 30
+31 31
+32 32
+33 33
+34 34
+35 35
+36 36
+37 37
+38 38
+39 39
+40 40
+41 41
+42 42
+43 43
+44 44
+45 45
+46 46
+47 47
+48 48
+49 49
+50 50
+51 51
+52 52
+53 53
+54 54
+55 55
+56 56
+57 57
+58 58
+59 59
+60 60
+61 61
+62 62
+63 63
+64 64
+65 65
+66 66
+67 67
+68 68
+69 69
+70 70
+71 71
+72 72
+73 73
+74 74
+75 75
+76 76
+77 77
+78 78
+79 79
+80 80
+81 81
+82 82
+83 83
+84 84
+85 85
+86 86
+87 87
+88 88
+89 89
+90 90
+91 91
+92 92
+93 93
+94 94
+95 95
+kCutoff = 1
+Number of kVecs = 40
+Finished Observables Read.
+speciesName = He.
+Finished Moves Read.
+Starting Loop
+Size is 5
+Starting Loop
+Size is 5
+Processing move
+End move
+Ending Loop
+Processing move
+End move
+Ending Loop
+Starting Loop
+Size is 5Processing observable
+Test 1
+Test 2
+Counter number is 0
+Counter number is 1
+Counter number is 2
+Counter number is 3
+Counter number is 4
+Test 3
+End Observable
+Processing observable
+Test 1
+Test 2
+Counter number is 0
+Counter number is 1
+Counter number is 2
+Counter number is 3
+Counter number is 4
+Test 3
+End Observable
+Processing move
+End move
+Ending Loop
+
+Starting Loop
+Size is 5
+Processing move
+End move
+Ending Loop
+Processing observable
+Test 1
+Test 2
+Counter number is 0
+Counter number is 1
+Counter number is 2
+Counter number is 3
+Counter number is 4
+Test 3
+End Observable
+Processing observable
+Test 1
+Test 2
+Counter number is 0
+Counter number is 1
+Counter number is 2
+Counter number is 3
+Counter number is 4
+Test 3
+End Observable
+Processing observable
+Test 1
+Test 2
+Counter number is 0
+Counter number is 1
+Counter number is 2
+Counter number is 3
+Counter number is 4
+Test 3
+End Observable
+Processing observable
+Test 1
+Test 2
+Counter number is 0
+Counter number is 1
+Counter number is 2
+Counter number is 3
+Counter number is 4
+Test 3
+End Observable
+Processing move
+End move
+Ending Loop
+My new tablesize is 2000
+My new tablesize is 4000
+My new tablesize is 2000
+My new tablesize is 2000
+My new tablesize is 4000
+My new tablesize is 2000
+My new tablesize is 4000
+My new tablesize is 4000
+Killed by signal 15.
+Killed by signal 15.
+Terminated
+Thu Feb 10 12:56:16 CST 2005
+JobID 5255.turing-2.turing.uiuc.edu Status:
+N:helium_test Q:batch U:bkclark G:staff
+Resources Requested: nodes=1:ppn=2:myr,walltime=20:00:00
+Resources Utilized:  cput=00:00:00,mem=0kb,vmem=0kb,walltime=00:33:45
+1 Nodes:
+[11-25]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Turing G5 Xserve Cluster, Computational Science and Engineering, UIUC
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
