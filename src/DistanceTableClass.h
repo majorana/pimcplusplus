@@ -31,7 +31,7 @@ protected:
   inline void ArrayIndex(int ptcl1, int ptcl2, 
 			 int &index, double &sign) const;
 public:
-  virtual void Update (int timeSlice, Array<int,1> ptclArray) = 0;
+  virtual void Update (int timeSlice, const Array<int,1> &ptclArray) = 0;
   virtual void UpdateAll() = 0;
   virtual void UpdateAll(int timeSlice) = 0;
   inline void DistDisp(int timeSlice, int ptcl1, int ptcl2, 

@@ -177,7 +177,7 @@ inline double ActionClass::SampleParticles(int startSlice, int endSlice, Array<i
     double sigma=sqrt(sigma2);
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int sliceCounter=startSlice;sliceCounter<endSlice;sliceCounter+=skip){
-      //      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
+    //      dVec r =mySpeciesArray(species,ptclNum,sliceCounter);
       //      dVec rp=mySpeciesArray(species,ptclNum,sliceCounter+skip);
       //      rpp=mySpeciesArray(species,ptclNum,sliceCounter+(skip>>1));
       dVec r = Path(sliceCounter,ptcl);

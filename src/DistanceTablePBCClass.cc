@@ -85,7 +85,8 @@ void DistanceTablePBCClass::UpdateAll()
 }
 
 
-void DistanceTablePBCClass::Update(int timeSlice,Array<int,1> ptclArray)
+void DistanceTablePBCClass::Update(int timeSlice,
+				   const Array<int,1> &ptclArray)
 {
   Path.DoPtcl=true;
   dVec disp;

@@ -3,10 +3,10 @@ include /home/common/Codes/Make.include
 LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) $(G2CLIB) -lm #-lstdc++
 INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) 
 
-CCFLAGS = -c -g  -Wno-deprecated #-DBZ_DEBUG  #-pg
+CCFLAGS = -c -g  -Wno-deprecated -O3 #-DBZ_DEBUG  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DNO_COUT -DUSE_MPI -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -DUSE_MPI #-DBZ_DEBUG  -g #-DUSE_MPI 
 
 TestObjs = ObservableClass.o CubicSpline.o Grid.o InputFile.o SpeciesClass.o Common.o BisectionMoveClass.o MoveClass.o ActionClass.o PathDataClass.o  MirroredArrayClass.o CommunicatorClass.o PathClass.o test.o DistanceTablePBCClass.o DistanceTableFreeClass.o
 

@@ -16,7 +16,7 @@ private:
   inline void Displacement (int timeSlice, int ptcl1, int ptcl2,
 			    dVec &disp, double &dist, dVec vecMask);
 public:
-  void Update (int timeSlice, Array<int,1> ptclArray);
+  void Update (int timeSlice, const Array<int,1> &ptclArray);
   void UpdateAll();
   void UpdateAll(int timeSlice);
   /// Constructor

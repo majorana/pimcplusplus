@@ -1,21 +1,30 @@
 #include "ObservableClass.h"
 
+/// Fix me to accumulate data only between the two species I'm
+/// interested in.
 void PairCorrelation::Accumulate()
 {
   Array<bool,1> doPtcl2(PathData.NumParticles());
 
+  /// HACK HACK HACK
   for (int slice=0;slice<PathData.NumTimeSlices();slice++){
     for (int ptcl1=0;ptcl1<PathData.NumParticles();ptcl1++){
       for (int ptcl2=ptcl1+1;ptcl2<PathData.NumParticles();ptcl2++){
 	dVec r1=PathData(slice,ptcl1);
 	dVec r2=PathData(slice,ptcl2);
-	dVec diff=r1-r2;
+	
 	dVec disp;
-	//	PathData.DistanceTable->UpdateAll();
-	double distDummy;
-	PathData.DistanceTable->DistDisp(slice,ptcl1,ptcl2,distDummy,disp);
-	cout<<"The two things are: "<<disp<<diff<<endl;
-	double dist=sqrt(dot(diff,diff));
+	double dist;
+	PathData.DistanceTable->DistDisp(slice,ptcl1,ptcl2,dist,disp);
+#ifdef BZ_DEBUG
+	dVec dispDummy=r2-r1;
+	double distDummy=sqrt(dot(dispDummy,dispDummy));
+	for (int i=0; i<NDIM; i++)
+	  if (disp[i] != dispDummy[i])
+	    cerr << "Bad bad evil inconsistency is DistTable.\n";
+	if (dist != distDummy)
+	  cerr << "Bad bad evil inconsistency is DistTable.\n";
+#endif
 	TotalCounts++;
 	if (dist<grid.End){
 	  int index=grid.ReverseMap(dist);

@@ -49,15 +49,13 @@ public:
       Join=newJoin;
     }
   inline void Update(int startSlice,int endSlice,
-		     Array <int,1> ptclArray,int level){
-
+		     const Array <int,1> &ptclArray,int level)
+  {
     int skip = 1<<(level+1);
-    for (int slice=startSlice;slice<=endSlice;slice+=skip){
-      DistanceTable->Update(slice,ptclArray);
+    int skipo2 = skip >> 1;
+    for (int slice=startSlice;slice<endSlice;slice+=skip){
+      DistanceTable->Update(slice+skipo2,ptclArray);
     }
-
-
-
   }
 
 

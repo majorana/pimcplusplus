@@ -83,7 +83,8 @@ void DistanceTableFreeClass::UpdateAll()
 }
 
 
-void DistanceTableFreeClass::Update(int timeSlice,Array<int,1> ptclArray)
+void DistanceTableFreeClass::Update(int timeSlice, 
+				    const Array<int,1> &ptclArray)
 {
   Path.DoPtcl=true;
   dVec disp;

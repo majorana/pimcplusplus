@@ -96,7 +96,7 @@ void setupMove(BisectionMoveClass &myBisectionMove,ShiftMoveClass &myShiftMove, 
   myBisectionMove.SetActiveSpecies(ActiveSpecies);
   myBisectionMove.SetNumParticlesToMove(1);
   myBisectionMove.StartTimeSlice=0;
-  myBisectionMove.NumLevels=4;
+  myBisectionMove.NumLevels=3;
   //  myShiftMove.PathData=&thePathData;
 
 }
@@ -194,11 +194,11 @@ int main(int argc, char **argv)
       //cerr << "Doing step " << counter << endl;
       
       myBisectionMove.MakeMove();
-      if (counter > 100)
+      if (counter >= 0)
 	PC.Accumulate();
       //      myPrintConfig.Print();
     }
-    myShiftMove.MakeMove();
+    // myShiftMove.MakeMove();
   }
   PC.Print();
   cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
