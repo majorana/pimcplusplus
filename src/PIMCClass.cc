@@ -116,31 +116,40 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     if (MoveType=="Bisection") {
       OutFile.NewSection("BisectionMove");
       Moves(counter)=new BisectionMoveClass(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="OpenBisection") {
       OutFile.NewSection("OpenBisectionMove");
       Moves(counter)=new OpenBisectionMoveClass(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection(); // Whatever Move section we opened above.
+
     }
     else if (MoveType=="ShiftMove") {
       Moves(counter)=new ShiftMoveClass(PathData, OutFile);
+      Moves(counter)->Read(in);
     }
     else if (MoveType=="PrintMove") {
       Moves(counter)=new PrintMoveClass(PathData, OutFile);
+      Moves(counter)->Read(in);
     }
     else if (MoveType=="CycleBlock") {
       OutFile.NewSection("CycleBlockMove");
       Moves(counter)=new CycleBlockMoveClass(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="PermMove") {
       OutFile.NewSection("PermMove");
       Moves(counter)=new PermMove(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else {
       cerr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();
     }
-    Moves(counter)->Read(in);
-    OutFile.CloseSection(); // Whatever Move section we opened above.
     in.CloseSection();
   }
   OutFile.CloseSection (); // "Moves"
