@@ -3,7 +3,7 @@
 
 #include "EwaldBase.h"
 
-class SimpleEwaldClass : EwaldClass
+class SimpleEwaldClass : public EwaldClass
 {
 public:
   void BreakUp (double cutoff);
