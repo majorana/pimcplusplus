@@ -171,12 +171,20 @@ TinyMatrix<double,3,3> kSpacePH::Ftensor (Vec3 deltaG)
 {
   double Gmag = sqrt(dot(deltaG, deltaG));  
   Vec3 g = deltaG / Gmag;
-  double aval = a(Gmag);
-  double bPerpval = bPerp(Gmag);
-  double bParval = bPar(Gmag);
+
+  double aval, bPerpval, bParval, Vval;
+  if (UseCache)
+    Cache.GetVals (Gmag, aval, bPerpval, bParval, Vval);
+  else {
+    aval = a(Gmag);
+    bPerpval = bPerp(Gmag);
+    bParval = bPar(Gmag);
+  }
 
   TinyMatrix<double,3,3> F, G;
-  F = 0.0;
+  F(0,0)=0.0;   F(0,1)=0.0; F(0,2)=0.0;
+  F(1,0)=0.0;   F(1,1)=0.0; F(1,2)=0.0;  
+  F(2,0)=0.0;   F(2,1)=0.0; F(2,2)=0.0;
   for (int i=0; i<3; i++)
     F(i,i) += aval + bPerpval;
   for (int i=0; i<3; i++)
@@ -192,7 +200,12 @@ double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
     return 0.0;
   Vec3 deltaG = G-Gp;
   double Gmag = sqrt(dot(deltaG, deltaG));
-  double Vval = Vk(Gmag);
+
+  double aval, bPerpval, bParval, Vval;
+  if (UseCache) 
+    Cache.GetVals (Gmag, aval, bPerpval, bParval, Vval);
+  else
+    Vval = Vk(Gmag);
 
   TinyMatrix<double,3,3> F = Ftensor (deltaG);
   
@@ -200,8 +213,38 @@ double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
   Vec3 Gpk = Gp + k;
   Vec3 FGpk (0.0, 0.0, 0.0);
   FGpk[0] = F(0,0)*Gpk[0] + F(0,1)*Gpk[1] + F(0,2)*Gpk[2];
-  FGpk[1] = F(0,0)*Gpk[0] + F(1,1)*Gpk[1] + F(1,2)*Gpk[2];
-  FGpk[2] = F(0,0)*Gpk[0] + F(2,1)*Gpk[1] + F(2,2)*Gpk[2];
+  FGpk[1] = F(1,0)*Gpk[0] + F(1,1)*Gpk[1] + F(1,2)*Gpk[2];
+  FGpk[2] = F(2,0)*Gpk[0] + F(2,1)*Gpk[1] + F(2,2)*Gpk[2];
   
   return 0.5*dot(Gk, FGpk) + Vval;
+}
+
+
+void kCache::GetVals(double k, double &a, double &bPerp, double &bPar,
+		     double &V)
+{
+  int i=0;
+  while ((i<Cache.size()) && (fabs(Cache[i].k-k) > 1.0e-12))
+    i++;
+  if (i<Cache.size()) { // It's already in the cache
+    a     = Cache[i].a;
+    bPerp = Cache[i].bPerp;
+    bPar  = Cache[i].bPar;
+    V     = Cache[i].V;
+    cerr << "found cache for k = " << k << endl;
+  }
+  else {
+    a     = kPH.a(k);
+    bPerp = kPH.bPerp(k);
+    bPar  = kPH.bPar (k);
+    V     = kPH.Vk    (k);
+    kCachePoint newPoint;
+    newPoint.a = a;
+    newPoint.bPerp = bPerp;
+    newPoint.bPar  = bPar;
+    newPoint.V     = V;
+    newPoint.k = k;
+    Cache.push_back(newPoint);
+    cerr << "entering val for k = " << k << endl;
+  }
 }

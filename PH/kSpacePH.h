@@ -22,9 +22,10 @@ protected:
 public:
   void GetVals (double k, double &a, double &bPerp, double &bPar,
 		double &V);
+  void Clear();
   kCache (kSpacePH &kph) : kPH(kph)
   {
-
+    // do nothing for now
   }
 };
 
@@ -36,6 +37,7 @@ public:
 class kSpacePH
 {
 protected:
+  friend class kCache;
   Potential &PH;
   /// The tail is fit to the potential to the form: 
   /// V = Ctail/r + Ctail2/r^2 + Ctail3/r^3
@@ -53,6 +55,7 @@ protected:
   bool HaveTailCoefs;
   double R1, R2;
   kCache Cache;
+  bool UseCache;
 public:
   /// Calculates the values of Ctail1-3.  r1 and r2 specify the start
   /// and end of the region of the potential fit to the form given
@@ -67,7 +70,7 @@ public:
   
 
   kSpacePH (Potential &ph) : PH(ph), HaveTailCoefs(false),
-			     Cache (*this)
+			     Cache (*this), UseCache(true)
   {
     // do nothing else for now
   }

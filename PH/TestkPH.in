@@ -1,0 +1,3 @@
+string PHfile = "NaUnscreenedPH_Feb18_05.h5";
+double kCut = 0.35;
+Array<double,1> Box(3) = [20.0, 20.0, 20.0];
