@@ -190,3 +190,21 @@ void PairCorrelationClass::Initialize()
 
 
 
+void PathDumpClass::WriteBlock()
+{
+  if (FirstTime){
+    FirstTime=false;
+    int numPtcls = PathData.NumParticles();
+    int numTimeSlices = PathData.NumTimeSlices();
+
+    Array<double,4> pathArray(1,numPtcls,numTimeSlices,NDIM);
+    // Write the first path here
+
+    // Now get the pointer to it
+    IOVar = IOSection.GetVarPtr("path");
+  }
+  else {
+    // Append the new path here.
+    //IOVar->Append(gofrArray);
+  }
+}

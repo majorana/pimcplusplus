@@ -257,7 +257,7 @@ int main(int argc, char **argv)
 //   //  PrintConfigClass myPrintConfig(myPathData);
   ofstream outfile;
   outfile.open("ourPath.dat");
-  int steps=20000;
+  int steps=2000;
   for (int counter=0;counter<steps;counter++){
     if (counter>steps/8 && (counter % 1)==0){
       TotE.Accumulate();

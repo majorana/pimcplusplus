@@ -100,5 +100,18 @@ public:
 };
 
 
+class PathDumpClass : public ObservableClass
+{
+private:
+public:
+  void Accumulate();
+  void WriteBlock();
+  
+  PathDumpClass(PathDataClass &myPathData, IOSectionClass &IOSection)
+    : ObservableClass(myPathData, IOSection)  {  }
+};
+
+
+
 
 #endif
