@@ -1,5 +1,11 @@
 #include "ObservableClass.h"
 
+void 
+
+
+
+
+
 /// Fix me to accumulate data only between the two species I'm
 /// interested in.
 void PairCorrelation::Accumulate()
