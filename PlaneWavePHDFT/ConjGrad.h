@@ -23,6 +23,7 @@ protected:
   void PrintOverlaps();
 public:
   Array<complex<double>,2> Bands;
+  Array<double,1> Energies;
   void Iterate(int band);
   ConjGrad (Hamiltonian &h, int numBands) : 
     H(h), IsSetup(false), EtaXiLast(0.0, 0.0), iter(0), NumBands(numBands),

@@ -5,6 +5,7 @@ void ConjGrad::Setup()
 {
   int N = H.GVecs.size();
   Bands.resize (NumBands, N);
+  Energies.resize(NumBands);
   cnext.resize (N);
   Hc.resize (N);
   Phi.resize (N);
@@ -17,7 +18,7 @@ void ConjGrad::Setup()
     c.reference(Bands(band,Range::all()));
     c = 0.0;
     for (int i=0; i<N; i++) {
-      if (dot (H.GVecs(i), H.GVecs(i)) < 3.0)
+      if (dot (H.GVecs(i), H.GVecs(i)) < 1.0)
 	c(i) = drand48();
     }
     Normalize(c);
@@ -43,8 +44,9 @@ void ConjGrad::CalcPhiSD()
 
 void ConjGrad::Precondition()
 {
+  double Tinv = 1.0/T;
   for (int i=0; i<c.size(); i++) {
-    double x = 0.5*dot(H.GVecs(i), H.GVecs(i))/T;
+    double x = 0.5*dot(H.GVecs(i), H.GVecs(i))*Tinv;
     double num = 27.0 + 18.0*x +12.0*x*x + 8.0*x*x*x;
     double denom = num + 16.0*x*x*x*x;
     Eta(i) = (num/denom)* Xi(i);
@@ -53,7 +55,6 @@ void ConjGrad::Precondition()
 
 void ConjGrad::CalcPhiCG()
 {
-  cerr << "Doing band " << CurrentBand << endl;
   if (LastBand != CurrentBand) {
     LastBand = CurrentBand;
     EtaXiLast = 0.0;
@@ -61,8 +62,8 @@ void ConjGrad::CalcPhiCG()
   Hc = 0.0;
   H.Kinetic.Apply (c, Hc);
   T = realconjdot (c, Hc);
-  H.Coulomb.Apply (c, Hc);
-  //H.CoulombFFT.Apply (c, Hc);
+  //H.Coulomb.Apply (c, Hc);
+  H.CoulombFFT.Apply (c, Hc);
   //H.PH.Apply (c, Hc);
   //H.PHFFT.Apply (c,Hc);
   E0 = realconjdot (c, Hc);
@@ -70,7 +71,7 @@ void ConjGrad::CalcPhiCG()
   /// Orthonalize to other bands here
   //Xip = Xi;
   zVec &Xip = Xi;
-  Orthogonalize2 (Bands, Xip, CurrentBand);
+  Orthogonalize (Bands, Xip);
   CheckOrthog (Bands, Xip);
 
   Precondition();
@@ -79,7 +80,7 @@ void ConjGrad::CalcPhiCG()
   // Now, orthogonalize to psi
   // rename for clarity
   zVec &Etap = Eta;
-  Orthogonalize2 (Bands, Etap, -1);
+  Orthogonalize (Bands, Etap);
   CheckOrthog (Bands, Etap);
   //Etap = Eta - conjdot (c, Eta)*c;
   complex<double> etaxi = conjdot(Etap, Xip);
@@ -96,7 +97,7 @@ void ConjGrad::CalcPhiCG()
   Phip = Phipp;
   Normalize (Phip);
 
-  cerr << "E = " << E0 << endl;
+  Energies(CurrentBand) = E0;
 }
 
 
@@ -124,7 +125,6 @@ void ConjGrad::Iterate(int band)
   //  cerr << "thetaMin = " << thetaMin << endl;
 
   c = cos(thetaMin)*c + sin(thetaMin)*Phip;
-  //  Normalize(c);
 }
 
 void

@@ -152,8 +152,8 @@ void Hamiltonian::Apply(const zVec &c, zVec &Hc)
 {
   Hc = 0.0;
   Kinetic.Apply (c, Hc);
-  Coulomb.Apply (c, Hc);
-  //CoulombFFT.Apply (c, Hc);
+  //Coulomb.Apply (c, Hc);
+  CoulombFFT.Apply (c, Hc);
   //PH.Apply (c, Hc);
   //PHFFT.Apply (c, Hc);
 }

@@ -8,15 +8,21 @@ main()
     //in.OpenFile ("NaPH_US_March1_05b.h5");
   Potential *ph = ReadPotential(in);
   in.CloseFile();
-  Hamiltonian H(box, 3.0, 1.0, *ph);
+  Hamiltonian H(box, 10.0, 1.0, *ph);
   H.PHFFT.Setup();
-  ConjGrad CG(H,4);
+  int numBands = 3;
+  ConjGrad CG(H,numBands);
   clock_t start, end;
   start = clock();
-  for (int i=0; i<10; i++) 
-    for (int band=0; band<4; band++)
+  for (int i=0; i<50; i++) {
+    for (int band=0; band<numBands; band++)
       for (int j=0; j<4; j++)
 	CG.Iterate(band);
+    cerr << "Energies = ";
+    for (int band=0; band<numBands; band++)
+      fprintf (stderr, "%10.6f ", CG.Energies(band));
+    cerr << endl;
+  }
   end = clock();
 
 
@@ -24,14 +30,21 @@ main()
   Vec3 r(0.0, 0.0, 0.0);
   for (double x=-0.5*box[0]; x<=0.5*box[0]; x+=0.01) {
     r[0] = x;
-    complex<double> psi(0.0, 0.0);
-    for (int i=0; i<H.GVecs.size(); i++) {
-      double phase = dot (H.GVecs(i), r);
-      complex<double> z(cos(phase), sin(phase));
-      psi += z * CG.c(i);
+    fprintf (fout, "%1.12e ", x);
+    for (int band=0; band<numBands; band++) {
+      complex<double> psi(0.0, 0.0);
+      for (int i=0; i<H.GVecs.size(); i++) {
+	double phase = dot (H.GVecs(i), r);
+	double s,c;
+	sincos (phase,&s, &c);
+	complex<double> z(c, s);
+	psi += z * CG.Bands(band,i);
+      }
+    
+      psi /= sqrt(H.GVecs.GetBoxVol());
+      fprintf (fout, "%1.12e ", real(conj(psi)*psi));
     }
-    psi /= sqrt(H.GVecs.GetBoxVol());
-    fprintf (fout, "%1.12e %1.12e\n", x, real(conj(psi)*psi));
+    fprintf (fout, "\n");
   }
   fclose (fout);
      
