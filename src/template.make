@@ -25,11 +25,14 @@ ifeq ($(HOSTTYPE),rs6000)
     EXTRADEFS = -DNOCUSERID -DNOUNDERSCORE
     CCFLAGS = -c -g 
 endif
+
 ifeq ($(HOSTTYPE),powermac)
    include /turing/home/esler/lib/Make.include
    LIBS = $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
-          $(HDF5LIB) $(XMLLIB) $(PSPLINELIB) $(FORTRANLIB) -lm
-   INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
+          $(HDF5LIB) $(XMLLIB) $(PSPLINELIB) $(FORTRANLIB) \
+          $(FFTW3LIB) $(CBLASLIB) -lm
+   INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC) \
+          $(FFTW3INC) $(CBLASINC)
    CC = mpiCC
    LD = mpiCC
    F77 = f77

@@ -42,7 +42,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "FF_tau0.00125_beta0.25.hybrid6";
+  string OutFileBase = "FF_tau0.00125_beta0.25.hybrid7";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
