@@ -70,7 +70,7 @@ void VisualClass::MakeFrame(int frame)
  	pos[1] = PathArray(frame, ptcl, 0, 1);
  	pos[2] = PathArray(frame, ptcl, 0, 2);
 	sphere->SetPos (pos);
-	sphere->SetColor (Vec3(1.0, 0.0, 1.0));
+	sphere->SetColor (Vec3(1.0, 0.0, 0.0));
 	PathVis.Objects.push_back(sphere);
       }
   
@@ -464,6 +464,18 @@ void VisualClass::MakePaths(int frame)
 	while ((path.Path[slice+1][dim] - path.Path[slice][dim])<-0.5*Box[dim])
 	  path.Path[slice+1][dim] += Box[dim];
       }
+    // Check to see if the path is closed or is a winding path
+    path.Closed = true;
+    int last = path.Path.size()-1;
+    for (int dim=0; dim<3; dim++)
+      if (fabs(path.Path[last][dim] - path.Path[0][dim]) > 0.5*Box[dim]) {
+	cerr << "Winding path.\n";
+	path.Closed = false;
+      }
+    // If we're not close, pop off the closing point
+//   if (!path.Closed) 
+//     path.Path.pop_back();
+
     Paths.push_back (&path);
   }
   // Do Fourier smoothing if desired

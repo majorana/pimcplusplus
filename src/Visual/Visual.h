@@ -8,6 +8,8 @@
 #include "BoxClass.h"
 #include "SmoothClass.h"
 
+/// This species class stores info about the species for the path
+/// visualization.  Not the same as the pimc++ version.
 class SpeciesClass
 {
 public:
@@ -24,14 +26,24 @@ public:
 typedef enum {LINES, TUBES} PathTypeType;
 
 
-
+/// VisualClass is the main GUI interaction for the path visualization
+/// code.  It allows the user to rotate around and zoom in and out of
+/// a box containing paths and classical particles dumped from
+/// pimc++.  In includes features such as a frame slider, line or tube
+/// rendering of paths, and optional fourier smoothing with detail
+/// control.  
 class VisualClass : public Gtk::Window
 {
 protected:
   //////////
   // Data //
   //////////
+  /// This stores the raw paths from the pimc++ output file.  The 4
+  /// dimension are (frame, ptcl, slice, dim)
   Array<double,4> PathArray;
+  /// This stores the global permutations for the paths.
+  /// (frame, ptcl).  The permutation acts between the last and first
+  /// slice.  
   Array<int,2> PermArray;
   Array<SpeciesClass,1> Species;
   vector<OnePath*> Paths;

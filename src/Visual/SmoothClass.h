@@ -8,6 +8,8 @@ class SmoothClass
 private:
   int PointsPerPath;
   double SmoothLevel;
+  OnePath* SmoothClosedPath (OnePath &oldPath);
+  OnePath* SmoothOpenPath (OnePath &oldPath);
 public:
   // Set smoothness level from 0 to 1
   inline void SetLevel (double level)
