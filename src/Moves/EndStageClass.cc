@@ -36,12 +36,13 @@ void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
   else
     Open=TAIL;
     
-  
 
   if (Open==HEAD){
     slice1=(int)PathData.Path.OpenLink;
     slice2=(1<<NumLevels)+slice1;
-
+    
+    if (PathData.Path.Communicator.NumProcs()>1)
+      return;
     ///Shift the time slices so that from the head there are
     ///2^numlevels slices available  
     while (slice2>=PathData.Path.NumTimeSlices() || slice1==0){
@@ -55,6 +56,9 @@ void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
   else if (Open==TAIL){
     slice2=(int)PathData.Path.OpenLink;
     slice1=slice2-(1<<NumLevels);
+    if (PathData.Path.Communicator.NumProcs()>1)
+      return;
+
     ///Shift the time slices so that from the tail there are
     ///2^numlevels slices available  
     while (slice1<0 || slice2==PathData.Path.NumTimeSlices()-1){
@@ -69,7 +73,7 @@ void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
     cerr<<"ERROR! We don't know whether to do head or tail?"<<endl;
     assert(1==2);
   }
-  PathData.MoveJoin(slice2);
+  //  PathData.MoveJoin(slice2);
 
 }
 
@@ -84,8 +88,25 @@ double sign(double num)
 double EndStageClass::Sample(int &slice1,int &slice2, 
 	      Array<int,1> &activeParticles)
 {
+  int procWithRefSlice = PathData.Path.SliceOwner (PathData.Path.RefSlice);
+  //If you don't own the open link then just choose some slices to work with
+  if (procWithRefSlice != PathData.Path.Communicator.MyProc()) {
+    int sliceSep = 1<<NumLevels;
+    assert (sliceSep < PathData.Path.NumTimeSlices());
+    int numLeft = PathData.Path.NumTimeSlices()-sliceSep;
+    slice1 = PathData.Path.Random.LocalInt (numLeft);
+    slice2 = slice1+sliceSep;
+    return 1.0;
+  }
+
 
   ChooseTimeSlices(slice1,slice2);
+  ///if you are running with time slice parallelization it doesn't
+  ///shift the data so everyone doesn't have to know about it. It
+  ///simply returns 0 forcing the move to be rejected prematurely early
+  if ((slice1<=0 || slice2>=PathData.Path.NumTimeSlices()-1) &&
+      PathData.Path.Communicator.NumProcs()>1)
+    return 0.0;
   PathData.MoveJoin(slice2);
   ///The active particle should be a slice
   activeParticles.resize (1);

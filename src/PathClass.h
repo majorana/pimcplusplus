@@ -328,25 +328,30 @@ inline PathClass::PathClass (CommunicatorClass &communicator,
 }
 
 
-
+///Must start diagonal or this is goign to break because of where
+///you are starting the openlink at 0
 inline void PathClass::InitOpenPaths()
 {
   cerr<<"Starting to initialize"<<endl;
   if (OpenPaths){
     cerr<<"openpaths"<<endl;
     SetMode(OLDMODE);
-    OpenLink=1;
+    OpenLink=NumTimeSlices()-1;
     cerr<<"Set up the open link"<<endl;
     OpenPtcl=Species(OpenSpeciesNum).FirstPtcl;
     cerr<<"set up the open particle"<<endl;
     SetMode(NEWMODE);
-    OpenLink=3;
+    OpenLink=NumTimeSlices()-1;
     OpenPtcl=0;
     cerr<<"Preparing for moving things in path around"<<endl;
     Path[OLDMODE]((int)OpenLink,NumParticles())=Path[OLDMODE]((int)OpenLink,(int)OpenPtcl);
     cerr<<"Moved the first thing"<<endl;
     Path[NEWMODE]((int)OpenLink,NumParticles())=Path[NEWMODE]((int)OpenLink,(int)OpenPtcl);
     cerr<<"Moved the second thing"<<endl;
+    Path[OLDMODE](0,NumParticles())=Path[OLDMODE](0,(int)OpenPtcl);
+    cerr<<"Moved the first thing"<<endl;
+    Path[NEWMODE](0,NumParticles())=Path[NEWMODE](0,(int)OpenPtcl);
+
   }
   cerr<<"Initialized the open paths"<<endl;
 }

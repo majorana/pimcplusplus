@@ -54,7 +54,9 @@ MAKECC = g++
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
-DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER) -O3 -DNO_COUT -DUSE_MPI #-DBZ_DEBUG #-DDEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -DUSE_MPI -O3 #  -DBZ_DEBUG -DDEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+
 
 PIMCobjs =                            \
   Common.o                            \

@@ -25,7 +25,7 @@ void HeadLocClass::Accumulate()
   int headPtcl=PathData.Path.OpenPtcl;
   ///In non-open loops mode this particle wouldn't exist.  In open
   ///loop mood it stores the location of the tail.
-  int tailPtcl=PathData.Path.NumTimeSlices(); 				   
+  int tailPtcl=PathData.Path.NumParticles(); 				   
   dVec headLoc=PathData.Path(openSlice,headPtcl);
   dVec tailLoc=PathData.Path(openSlice,tailPtcl);
   for (int counter=0;counter<FixedLoc.size();counter++){
@@ -53,18 +53,24 @@ void HeadLocClass::WriteBlock()
 {
   double norm = 1.0/((double)NumSamples);
   Array<int,1> headLocSum(HeadLoc.size());
+  headLocSum=0;
   Array<int,1> tailLocSum(TailLoc.size());
+  tailLocSum=0;
   PathData.Path.Communicator.Sum(HeadLoc,headLocSum);
   PathData.Path.Communicator.Sum(TailLoc,tailLocSum);
   Array<double,1> headLocDouble(HeadLoc.size());
+  headLocDouble=0.0;
   Array<double,1> tailLocDouble(TailLoc.size());
+  tailLocDouble=0.0;
   for (int counter=0;counter<headLocSum.size();counter++){
     headLocDouble(counter)=headLocSum(counter)*norm;
     tailLocDouble(counter)=tailLocSum(counter)*norm;
   }
   HeadLocVar.Write(headLocDouble);
   TailLocVar.Write(tailLocDouble);
-  //  NumSamples = 0;
+  HeadLoc=0;
+  TailLoc=0;
+  NumSamples = 0;
 }
 
 void HeadLocClass::Read(IOSectionClass &in)
@@ -77,6 +83,8 @@ void HeadLocClass::Read(IOSectionClass &in)
   HeadLoc.resize(numFixedPoints);
   TailLoc.resize(numFixedPoints);
   FixedLoc.resize(numFixedPoints);
+  HeadLoc=0;
+  TailLoc=0;
   Array<double,2> positions;
   assert(in.ReadVar("LocationsToCompare",positions));
   ///Verify you used the right number of points to compare against

@@ -9,7 +9,7 @@ Section (System)
 {
   bool OpenLoops=false;
   int NumTimeSlices=16; 
-  Array<double,1> Box(3)=[14.73612599,14.73612599, 14.73612599];
+  Array<double,1> Box(3)=[16.73612599,16.73612599, 16.73612599];
   Array<bool, 1 > IsPeriodic(3)=[true,true,true];
   Section (Particles)
   {
@@ -136,7 +136,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "hehp";
+  string OutFileBase = "hehpBigBox";
   Section (Observable)
     {
       string type="StructureFactor";

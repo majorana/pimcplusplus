@@ -855,7 +855,20 @@ void PathClass::ShiftData(int slicesToShift)
   while (RefSlice < 0)
     RefSlice += TotalNumSlices;
   //  cerr<<"My ref slice at particle 0 is "<<Path(RefSlice,0)<<endl;
-
+  if (OpenPaths){
+    cerr<<"Here my open link is "<<OpenLink<<endl;
+    int openLinkOld=(int)OpenLink;
+    OpenLink=RefSlice;
+    if ((int)OpenLink==0){
+      OpenLink=NumTimeSlices()-1;
+    }
+    //  cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
+    ////    cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<" "<<slicesToShift<<endl;
+    ////    if (openLinkOld!=(int)OpenLink)
+    ////      cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<" "<<slicesToShift<<endl;
+    ////    assert(openLinkOld==(int)OpenLink);
+    OpenLink[OLDMODE]=OpenLink[NEWMODE];
+  }
 }
 
 void PathClass::ShiftRho_kData(int slicesToShift)
@@ -1039,6 +1052,15 @@ void PathClass::ShiftPathData(int slicesToShift)
       cerr<<"equal to 0"<<endl;
       OpenLink=NumTimeSlices()-1;
     }
+
+    //    OpenLink=RefSlice;
+    //    if ((int)OpenLink==0){
+    //      OpenLink=NumTimeSlices()-1;
+    //    }
+    //    cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
+    //    if (openLinkOld!=(int)OpenLink)
+    //      cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
+    //    assert(openLinkOld==(int)OpenLink);
     OpenLink[OLDMODE]=OpenLink[NEWMODE];
   }
   //  cerr<<Path(OpenLink,NumParticles())<<endl;
