@@ -48,7 +48,7 @@ public:
   double Vpp(double r);
 
   bool IsLongRange();
-  void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
+  //  void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
 
   PAclassicalFitClass()
   { 

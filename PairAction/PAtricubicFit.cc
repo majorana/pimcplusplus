@@ -20,7 +20,6 @@ void PAtricubicFitClass::ReadParams(IOSectionClass &inSection)
   assert(fabs(ygrid->End-1.0) < 1.0e-10);
   assert(fabs(tgrid->End-1.0) < 1.0e-10);
   GridsAreMine = true;
-  UsePBC = inSection.ReadVar ("Box", Box);
 }
 
 void PAtricubicFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
@@ -710,3 +709,128 @@ bool PAtricubicFitClass::Read (IOSectionClass &in,
 
 
 
+bool PAtricubicFitClass::IsLongRange()
+{
+  return true;
+}
+
+
+// double PAtricubicFitClass::Vlong_k(double boxVol, double k, int level)
+// {
+//   if (k <= 0.0)
+//     k = 1.0e-30;
+//   return 4.0*M_PI/(boxVol*k*k)*exp(-k*k/(4.0*alpha*alpha));
+// }
+
+// double PAtricubicFitClass::dVlong(double q, int level)
+// {
+//   return 0.0;
+// }
+
+
+// void PAtricubicFitClass::DoBreakup(const dVec &box, const Array<dVec,1> &kVecs)
+// {
+//   // Calculate the cutoff parameter
+//   double minL, boxVol;
+//   boxVol = minL = box[0];
+//   for (int i=1; i<NDIM; i++) {
+//     minL = min(minL, box[i]);
+//     boxVol *= box[i];
+//   }
+//   alpha = 7.0/minL;
+
+//   // First, subtract off long-ranged part from the bicubic spline to
+//   // make them short-ranged.
+//   for (int level=0; level<NumBetas; level++) {
+//     double tau = SmallestBeta * pow(2.0, level);
+//     for (int qi=0; qi<Usplines(level).Nx; qi++) {
+//       double q = (*Usplines(level).Xgrid)(qi);
+//       double v = Vlong(q, level);
+//       for (int ti=0; ti<Usplines(level).Ny; ti++) {
+// 	Usplines(level)(qi,ti) -= tau*v;
+// 	dUsplines(level)(qi,ti) -= v;
+//       }
+//     }
+//   }
+
+
+//   // Now, calculate the k-space parts
+//   Ulong_k.resize(NumBetas, kVecs.size());
+//   dUlong_k.resize(NumBetas, kVecs.size());
+//   U_RPA_long_k.resize(NumBetas, kVecs.size());
+//   dU_RPA_long_k.resize(NumBetas, kVecs.size());
+//   for (int level=0; level<NumBetas; level++) {
+//     double tau = SmallestBeta * pow(2.0, level);
+//     Ulong_0(level)  = tau*Vlong(0.0, level);
+//     dUlong_0(level) = Vlong(0.0, level);
+//     for (int ki=0; ki<kVecs.size(); ki++) {
+//       double k = sqrt(dot(kVecs(ki), kVecs(ki)));
+//       Ulong_k = tau*Vlong_k(boxVol, k, level);
+//       dUlong_k = Vlong_k(boxVol, k, level);
+//     }
+//   }
+// }
+
+double PAtricubicFitClass::Udiag (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return Usplines(level)(q, 0.0, 0.0);
+  else {
+    double beta = SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
+    return (beta*Pot->V(q));
+  }
+}
+
+double PAtricubicFitClass::Udiag_p (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return Usplines(level).d_dx(q, 0.0, 0.0);
+  else {
+    // Coulomb action is independent of z
+    double beta = SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
+    return (beta*Pot->dVdr(q));
+  }
+}
+
+double PAtricubicFitClass::Udiag_pp (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return Usplines(level).d2_dx2(q, 0.0, 0.0);
+  else {
+    // Coulomb action is independent of z
+    double beta = SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
+    return (beta*Pot->d2Vdr2(q));
+  }
+}
+
+
+
+double PAtricubicFitClass::dUdiag (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return dUsplines(level)(q, 0.0, 0.0);
+  else // Coulomb action is independent of z
+    return (Pot->V(q));
+}
+
+double PAtricubicFitClass::dUdiag_p (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return dUsplines(level).d_dx(q, 0.0, 0.0);
+  else // Coulomb action is independent of z
+    return (Pot->dVdr(q));
+}
+
+double PAtricubicFitClass::dUdiag_pp (double q, int level)
+{
+  if (q <= (qgrid->End*1.0000001)) 
+    return dUsplines(level).d2_dx2(q, 0.0, 0.0);
+  else  // Coulomb action is independent of z
+    return (Pot->d2Vdr2(q));
+}

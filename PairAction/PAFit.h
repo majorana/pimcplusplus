@@ -6,7 +6,7 @@
 #include "PAcoulombBCFit.h"
 #include "PAclassicalFit.h"
 //#include "PAsFit.h"
-//#include "PAtricubicFit.h"
+#include "PAtricubicFit.h"
 #include "PAzeroFit.h"
 #include "DavidPAClass.h"
 

@@ -13,7 +13,6 @@ void PAcoulombBCFitClass::ReadParams(IOSectionClass &inSection)
   tgrid = ReadGrid (inSection);
   inSection.CloseSection();
   GridsAreMine = true;
-  UsePBC = inSection.ReadVar ("Box", Box);
 }
 
 void PAcoulombBCFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
@@ -281,48 +280,48 @@ double PAcoulombBCFitClass::dVlong(double q, int level)
 }
 
 
-void PAcoulombBCFitClass::DoBreakup(const dVec &box, const Array<dVec,1> &kVecs)
-{
-  // Calculate the cutoff parameter
-  double minL, boxVol;
-  boxVol = minL = box[0];
-  for (int i=1; i<NDIM; i++) {
-    minL = min(minL, box[i]);
-    boxVol *= box[i];
-  }
-  alpha = 7.0/minL;
+// void PAcoulombBCFitClass::DoBreakup(const dVec &box, const Array<dVec,1> &kVecs)
+// {
+//   // Calculate the cutoff parameter
+//   double minL, boxVol;
+//   boxVol = minL = box[0];
+//   for (int i=1; i<NDIM; i++) {
+//     minL = min(minL, box[i]);
+//     boxVol *= box[i];
+//   }
+//   alpha = 7.0/minL;
 
-  // First, subtract off long-ranged part from the bicubic spline to
-  // make them short-ranged.
-  for (int level=0; level<NumBetas; level++) {
-    double tau = SmallestBeta * pow(2.0, level);
-    for (int qi=0; qi<Usplines(level).Nx; qi++) {
-      double q = (*Usplines(level).Xgrid)(qi);
-      double v = Vlong(q, level);
-      for (int ti=0; ti<Usplines(level).Ny; ti++) {
-	Usplines(level)(qi,ti) -= tau*v;
-	dUsplines(level)(qi,ti) -= v;
-      }
-    }
-  }
+//   // First, subtract off long-ranged part from the bicubic spline to
+//   // make them short-ranged.
+//   for (int level=0; level<NumBetas; level++) {
+//     double tau = SmallestBeta * pow(2.0, level);
+//     for (int qi=0; qi<Usplines(level).Nx; qi++) {
+//       double q = (*Usplines(level).Xgrid)(qi);
+//       double v = Vlong(q, level);
+//       for (int ti=0; ti<Usplines(level).Ny; ti++) {
+// 	Usplines(level)(qi,ti) -= tau*v;
+// 	dUsplines(level)(qi,ti) -= v;
+//       }
+//     }
+//   }
 
 
-  // Now, calculate the k-space parts
-  Ulong_k.resize(NumBetas, kVecs.size());
-  dUlong_k.resize(NumBetas, kVecs.size());
-  U_RPA_long_k.resize(NumBetas, kVecs.size());
-  dU_RPA_long_k.resize(NumBetas, kVecs.size());
-  for (int level=0; level<NumBetas; level++) {
-    double tau = SmallestBeta * pow(2.0, level);
-    Ulong_0(level)  = tau*Vlong(0.0, level);
-    dUlong_0(level) = Vlong(0.0, level);
-    for (int ki=0; ki<kVecs.size(); ki++) {
-      double k = sqrt(dot(kVecs(ki), kVecs(ki)));
-      Ulong_k = tau*Vlong_k(boxVol, k, level);
-      dUlong_k = Vlong_k(boxVol, k, level);
-    }
-  }
-}
+//   // Now, calculate the k-space parts
+//   Ulong_k.resize(NumBetas, kVecs.size());
+//   dUlong_k.resize(NumBetas, kVecs.size());
+//   U_RPA_long_k.resize(NumBetas, kVecs.size());
+//   dU_RPA_long_k.resize(NumBetas, kVecs.size());
+//   for (int level=0; level<NumBetas; level++) {
+//     double tau = SmallestBeta * pow(2.0, level);
+//     Ulong_0(level)  = tau*Vlong(0.0, level);
+//     dUlong_0(level) = Vlong(0.0, level);
+//     for (int ki=0; ki<kVecs.size(); ki++) {
+//       double k = sqrt(dot(kVecs(ki), kVecs(ki)));
+//       Ulong_k = tau*Vlong_k(boxVol, k, level);
+//       dUlong_k = Vlong_k(boxVol, k, level);
+//     }
+//   }
+// }
 
 double PAcoulombBCFitClass::Udiag (double q, int level)
 {

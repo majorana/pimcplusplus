@@ -6,7 +6,7 @@
 #ifdef MAKE_FIT
 void PAclassicalFitClass::ReadParams(IOSectionClass &inSection)
 {
-  UsePBC = inSection.ReadVar ("Box", Box);
+  //  UsePBC = inSection.ReadVar ("Box", Box);
 }
 
 void PAclassicalFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
@@ -110,34 +110,34 @@ double PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
 }
 
 
-void PAclassicalFitClass::DoBreakup(const dVec& box,const Array<dVec,1> &kVecs)
-{
-    // Calculate the cutoff parameter
-  double minL, boxVol;
-  boxVol = minL = box[0];
-  for (int i=1; i<NDIM; i++) {
-    minL = min(minL, box[i]);
-    boxVol *= box[i];
-  }
-  alpha = 7.0/(minL*fabs(Z1Z2));
-  // Now, calculate the k-space parts
-  Ulong_k.resize(NumBetas, kVecs.size());
-  dUlong_k.resize(NumBetas, kVecs.size());
-  Ulong_0.resize(NumBetas);
-  dUlong_0.resize(NumBetas);
-  U_RPA_long_k.resize(NumBetas, kVecs.size());
-  dU_RPA_long_k.resize(NumBetas, kVecs.size());
-  for (int level=0; level<NumBetas; level++) {
-    double tau = SmallestBeta * pow(2.0, level);
-    Ulong_0(level)  = tau*Vlong(0.0, level);
-    dUlong_0(level) = Vlong(0.0, level);
-    for (int ki=0; ki<kVecs.size(); ki++) {
-      double k = sqrt(dot(kVecs(ki), kVecs(ki)));
-      Ulong_k(level,ki) = tau*Vlong_k(boxVol, k, level);
-      dUlong_k(level,ki) = Vlong_k(boxVol, k, level);
-    }
-  }
-}
+// void PAclassicalFitClass::DoBreakup(const dVec& box,const Array<dVec,1> &kVecs)
+// {
+//     // Calculate the cutoff parameter
+//   double minL, boxVol;
+//   boxVol = minL = box[0];
+//   for (int i=1; i<NDIM; i++) {
+//     minL = min(minL, box[i]);
+//     boxVol *= box[i];
+//   }
+//   alpha = 7.0/(minL*fabs(Z1Z2));
+//   // Now, calculate the k-space parts
+//   Ulong_k.resize(NumBetas, kVecs.size());
+//   dUlong_k.resize(NumBetas, kVecs.size());
+//   Ulong_0.resize(NumBetas);
+//   dUlong_0.resize(NumBetas);
+//   U_RPA_long_k.resize(NumBetas, kVecs.size());
+//   dU_RPA_long_k.resize(NumBetas, kVecs.size());
+//   for (int level=0; level<NumBetas; level++) {
+//     double tau = SmallestBeta * pow(2.0, level);
+//     Ulong_0(level)  = tau*Vlong(0.0, level);
+//     dUlong_0(level) = Vlong(0.0, level);
+//     for (int ki=0; ki<kVecs.size(); ki++) {
+//       double k = sqrt(dot(kVecs(ki), kVecs(ki)));
+//       Ulong_k(level,ki) = tau*Vlong_k(boxVol, k, level);
+//       dUlong_k(level,ki) = Vlong_k(boxVol, k, level);
+//     }
+//   }
+// }
 
 
 

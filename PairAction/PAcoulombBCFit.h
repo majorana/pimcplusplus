@@ -46,7 +46,7 @@ public:
   /// Long-ranged stuff ///
   /////////////////////////
   bool IsLongRange();
-  void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
+  ///  void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
 
   PAcoulombBCFitClass()
   { 
