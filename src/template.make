@@ -42,8 +42,8 @@ ifeq ($(HOSTTYPE),i386-linux)
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
            $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
     INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
-    CC = mpiCC
-    LD = mpiCC  -Bstatic 
+    CC = g++
+    LD = g++  -Bstatic 
     CCFLAGS = -c -g  -Wno-deprecated  #-pg 
 endif
 
@@ -54,9 +54,7 @@ MAKECC = g++
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
-
-DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -DUSE_MPI -O3 #  -DBZ_DEBUG -DDEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
-
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -O3 #-DUSE_MPI -DBZ_DEBUG -DDEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
 
 PIMCobjs =                            \
   Common.o                            \
