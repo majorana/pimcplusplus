@@ -1,177 +1,176 @@
 #ifndef DISTANCE_TABLE_CLASS_H
 #define DISTANCE_TABLE_CLASS_H
 
-/// This class stores the distances and displacements between particles 
-/// of the same time slice
+///Particle 1 is always in the middle of the box
+///Particle 1 > Particle 2
+///Particle 1 is in the middle of the box
+///If Particle 1 < Particle 2 then you have to swap the sign of the
+///displacement
+///The imageNum is the box number of particle 2 if particle 1 is in the 
+///middle of the box. 
+///The displacement is always defined as particle 2 - particle 1
 class DistanceTableClass
 {
- private:
-#ifdef PBC
-  dVec Box;
-#endif
+protected:
   ///Pointer to the SpeciesArray
-  SpeciesArrayClass &SpeciesArray;
-  ///Table of distances.  This is stored in a two-d array where the first 
-  ///dimension of the array is indexed by an integer that you get by 
-  ///mapping two particleID's to it through our ArrayIndex Function.
-  ///(The second dimensions is timeslices).
-  MirroredArrayClass<double> DistTable; ///<(Global ptclXptcl number,timeslice)
-  ///Table of displacements. Set up in same way as distTable.
-  MirroredArrayClass<dVec> DispTable; ///< (Global ptclXptcl number, timeslice)
-
-  ///Table of Image numbers (stored 0-26)
-  MirroredArrayClass<int> ImageNumTable; ///<(Global ptclXptclnumber,timeslice)
+  PathClass &Path;
+  /// Stores the distances between all ptcls at all time slices
+  MirroredArrayClass<double> DistTable; ///<(timeslice, ptcl x ptcl)
+  /// Stores the displacements between all ptcls at all time slices
+  MirroredArrayClass<dVec> DispTable; ///<(timeslice, ptcl x ptcl)  
+  ///Table of Image numbers (stored 0-63 for 3d)
+  MirroredArrayClass<int> ImageNumTable; ///<(timeslice, ptcl x ptcl)
+  ///Stores what vectors the image numbers corresponds to
   Array<dVec,1> ImageVectors;
-  ///Maps particleID x particleID to a location in our distance or 
-  ///displacement table.
-  inline int ArrayIndex(ParticleID particle1,ParticleID particle2);
-  ///Maps particleInt x particleInt to a location in our distance 
-  ///or displacement table.
-  ///particleInt gotten from SpeciesArray.ParticleID2Int
-  inline int ArrayIndex(int particle1, int  particle2);
- public:
-  ///Constructor. Initializes the speciesArray reference
-  DistanceTableClass(SpeciesArrayClass p_speciesArray) : SpeciesArray(p_speciesArray){}
-  ///Returns the distance and displacement.
-  inline void GetDistDisp(ParticleID particle1, ParticleID particle2,
-			  int timeSlice,double &dist, dVec &disp);
-  ///Returns the distance and displacement. This is for the case where
-  ///you are calculating the disp/dist and want to make sure you have the 
-  ///same image for a pair of particles.
-  inline void GetDistDisp(ParticleID particle1, ParticleID particle2, 
-			  int timeSliceA, int timeSliceB,
-			  double &distA, dVec &dispA,
-			  double &distB, dVec &dispB);  
-  ///Updates all of the distances between "particle1 and all the other particles
-  inline void Update(ParticleID particle1, int timeSlice);
-
-  void SetBox(dVec myBox);
-  DistanceTableClass(SpeciesArrayClass &mySpeciesArray, dVec myBox) :
-    SpeciesArray(MySpeciesArray), Box(myBox)
-  {
-    int NumVectors = 1;
-    for (int i=0; i<NDIM; i++)
-      NumVectors *= 3;
-    ImageVectors.resize (NumVectors);
-    
-    if (NDIM == 2)
-      {
-	for (int i=-1; i<=1; i++)
-	  for (int j=-1; j<=1; j++)
-	    {
-	      int num = (i+1)*3+(j+1);
-	      ImageVector(num)[0] = (double)i*Box[0];
-	      ImageVector(num)[1] = (double)j*Box[1];
-	    }
-      }
-    if (NDIM == 3)
-      {
-	for (int i=-1; i<=1; i++)
-	  for (int j=-1; j<=1; j++)
-	    for (int k=-1; k<=1; k++)
-	    {
-	      int num = (i+1)*9+(j+1)*3+(k+1);
-	      ImageVector(num)[0] = (double)i*Box[0];
-	      ImageVector(num)[1] = (double)j*Box[1];
-	      ImageVector(num)[2] = (double)k*Box[2];
-	    }
-      }
-  }
-
+  inline void ArrayIndex(int ptcl1, int ptcl2, 
+			 int &index, double &sign) const;
+public:
+  virtual void Update (int timeSlice, int ptcl) = 0;
+  virtual void UpdateAll() = 0;
+  virtual void UpdateAll(int timeSlice) = 0;
+  inline void DistDisp(int timeSlice, int ptcl1, int ptcl2, 
+		       double &distance, dVec &displacement);
+  inline void DistDisp(int timeSliceA, int timeSliceB,
+		       int ptcl1, int ptcl2, double &distA, double &distB,
+		       dVec &dispA, dVec &dispB);
+  DistanceTableClass (PathClass &myPath);
 };
 
-///Updates all of the distances between "particle1 and all the other particles
-inline void DistanceTable::Update(ParticleID particle1, int timeSlice)
+
+inline void DistDisp(int timeSlice,int ptc1, int ptcl2,
+		     double &distance, dVec &displacement)
 {
-  particleID particle2;
-  int particle1Int=SpeciesArray.particleID2Int(particle1);
-  particle2Int=0;
-  for(int speciesCounter=0;speciesCounter<SpeciesArray.Size();speciesCounter++)
+  int index;
+  double sign;
+  ArrayIndex(ptcl1,ptcl2,index,sign);
+  distance=DistTable(timeSlice,index);
+  displacement=sign*DispTable(timeSlice,index);
+}
+
+inline void DistDisp(int timeSliceA, int timeSliceB,
+		     int ptcl1, int ptcl2, double &distA, double &distB,
+		     dVec &dispA, dVec &dispB)
+{
+  DistDisp(timeSliceA,ptcl1,ptcl2,distA,dispA);
+  int index;
+  double sign;
+  ArrayIndex(ptcl1,ptcl2,index,sign);
+  distA=DistTable(timeSlice,index);
+  dispA=sign*DispTable(timeSlice,index);
+  int imageNumA=ImageNum(timeSliceA,index);
+  int imageNumB=ImageNum(timeSliceB,index);
+  if (imageNumA!=imageNumB){
+    dispB=Path(timeSliceB,ptcl1)-Path(timeSliceB,ptcl2)+
+      ImageVectors(imageNumA)*sign;
+    distB=sqrt(dot(dispB,dispB));
+  }
+  else {
+    dispB=sign*DispTable(timeSlice,index);
+    distB=DistTable(timeSlice,index); 
+  }
+
+
+
+
+}
+
+
+
+/// Return the image number correspoding to the negative of the
+/// image.  Basically maps (i,j,k) into (-i,-j,-k) if
+/// {i,j,k} are all int he range [-1,1].
+inline int NegateImageNum(int imageNum)
+{
+  int mask = ~((~0)<<(2*NDIM));
+  int sub = 0x55555555;  // binary: 01010101010101
+  return (((~imageNum)-sub)&mask);
+}
+
+
+
+/// Takes a dVecInt, whose elements have the range [-1,1] and maps
+/// it into a unique integer.  Works for dimensions < 16.
+inline int ImageNum(dVecInt image)
+{
+  int imageNum;
+  image +=1;
+  if (NDIM==1)
+    imageNum = image[0];
+  else if (NDIM==2)
+    imageNum = image[0] + (image[1] << 2);
+  else if (NDIM==3)
+    imageNum = image[0] + (image[1]<<2) + (image[2]<<4);
+  return (imageNum);
+}
+
+/// Performs the reverse mapping of the previous function
+inline dVecInt Image(int ImageNum)
+{
+  dVecInt image;
+  if (NDIM==1)
+    Image[0] = ImageNum;
+  else if (NDIM==2)
     {
-      particle2[0]=speciesCounter;
-      for (int particleCounter=0;
-	   particleCounter<SpeciesArray(speciesCounter).Size();
-	   particleCounter++){
-	particle2[1]=particleCounter;
-	int distTableIndex=ArrayIndex(particle1Int,particle2Int);
-	/// Particle 1 is always in the box, 
-	/// ImageNum is box where particle 2 is in 
-	SpeciesArray.DistDisp(particle1,particle2,timeSlice,timeSlice,
-			      DistTable(distTableIndex,timeSlice),
-			      DispTable(distTableIndex,timeSlice),
-			      ImageNumTable(distTableIndex,timeSlice)); 
-	
-	/// This assumes that our mapping for particleID -> particleInt
-	/// is monotonic in particle 
-	/// number and species, so we just iterate particle2Int
-	/// instead of asking for the mapping again.
-	particle2Int++;
-      }
+      Image[0]=(ImageNum&3);
+      ImageNum >>=2;
+      Image[1]=(ImageNum&3);
+    }
+  else if (NDIM==3)
+    {
+      Image[0]=(ImageNum&3);
+      ImageNum >>=2;
+      Image[1]=(ImageNum&3);
+      ImageNum >>=2;
+      Image[2]=(ImageNum&3);
+    }
+  image -= 1;
+  return image;
+}  
+
+
+
+DistanceTableClass::DistanceTableClass (PathClass myPath) :
+  Path(myPath)
+{
+
+  int size=(Path.NumParticles()*(Path.NumParticles()+1))/2;
+  DistTable.Resize(Path.NumTimeSlices(),size);
+  DispTable.Resize(Path.NumTimeSlices(),size);
+  ImageNumTable.Resize(Path.NumTimeSlices(),size);
+  		   
+  ///Initialize the ImageVectors
+  int NumVectors = 1;
+  for (int i=0; i<NDIM; i++)
+    NumVectors >>= 2;
+  ImageVectors.resize (NumVectors);
+  
+  for (int i=0; i<NumVectors; i++)
+    {
+      dVecInt image = Image(i);
+      for (int dim=0; dim<NDIM; dim++)
+	ImageVectors(dim) = (double)image[dim]*Path.Box[dim];
     }
 }
 
-    
-
-
-
-/// Maps particleInt x particleInt to a location in our distance or
-/// displacement table. particleInt gotten from
-/// SpeciesArray.ParticleID2Int 
-inline int DistanceTable::ArrayIndex(int global1, int global2)
-{
-  //global1*(global1+1)/2+global2;  
-  int totalNum= ((global1*(global1+1))>>1)+global2;   
-  return totalNum;
-}
-
-/// Maps particleID x particleID to a location in our distance or
+/// Maps particle x particle to a location in our distance or
 /// displacement table. 
-inline int DistanceTable::ArrayIndex(ParticleID particle1,ParticleID particle2)
+inline void DistanceTableClass::ArrayIndex(int ptcl1, int ptcl2, 
+					   int &index, double &sign) const
 {
-  int global1= SpeciesArray.ParticleID2Int(particle1);
-  int global2 = SpeciesArray.ParticleID2Int(particle2);
-  int totalNum=ArrayIndex(global1,global2);
-
-  return totalNum;
-}
-
-
-/// Returns the distance and displacement.
-inline void GetDistDisp(ParticleID particle1, ParticleID particle2, 
-			int timeSlice, double &dist, dVec &disp)
-{
-  int distanceTableIndex=ArrayIndex(particle1,particle2);
-  dist=DistTable(distanceTableIndex,timeSlice);
-  disp=DispTable(distanceTableIndex,timeSlice);
-}
-
-/// Returns the distance and displacement. This is for the case where
-/// you are calculating the disp/dist and want to make sure you have the 
-/// same image for a pair of particles.
-inline void GetDistDisp(ParticleID particle1, ParticleID particle2, 
-			int timeSliceA, int timeSliceB,
-			double &distA, dVec &dispA,
-			double &distB, dVec &dispB){
-  int distanceTableIndex=ArrayIndex(particle1,particle2);
- /// We're making an implicit assumption around here that the number of
- /// time slices per particle is the same  
-  dispA=DispTable(distanceTableIndex,timeSliceA);
-  distA=DistTable(distanceTableIndex,timeSliceA);
-  if (ImageNumTable(distanceTableIndex,timeSliceB) !=
-      ImageNumTable(distanceTableIndex,timeSliceA))
+  // Make sure ptclA > ptclB
+  sign = 1.0;
+  if (ptcl1<ptcl2)
     {
-      dispB = SpeciesArray(particle1)
-
-
-  dispB=DispTable(distanceTableIndex,timeSliceB)+
-    (ImageNumTable(distanceTableIndex,timeSliceA)-
-     ImageNumTable(distanceTableIndex,timeSliceB))*
-    
-    SpeciesArray.DistDisp(particle1,particle2,timeSlice,timeSlice,
-			  DistTable(distTableIndex,timeSlice),DispTable(distTableIndex,timeSlice),
-			  ImageNumTable(distTableIndex,timeSlice)); ///< Particle 1 is always in the box, 
-			  ///<imageNum is box where particle 2 is in 
+      int temp = ptcl1;
+      ptcl1 = ptcl2;
+      ptcl2 = temp;
+      sign = -1.0;
+    }
+  //ptcl1*(ptcl1+1)/2+ptcl2;  
+  index = ((ptcl1*(ptcl1+1))>>1)+ptcl2;   
+}
 
 
 
-#endif 
+
+#endif
