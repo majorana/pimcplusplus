@@ -18,11 +18,26 @@ private:
 public:
   MirroredArrayClass1D<int> Permutation;
   dVec Box;
+  AcceptCopy(int startTimeSlice,int endTimeSlice, 
+	     const Array <int,1> &activeParticle)
+  {
+      Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticle);
+
+  }
+
+  RejectCopy(int startTimeSlice,int endTimeSlice, 
+	     const Array <int,1> &activeParticle )
+  {
+      Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticle);
+
+  }
+
+
 
   /// Shifts the data to other processors or to yourself if there 
   /// are no other processors
   inline void ShiftData(int sliceToShift, CommunicatorClass &communicator)
-  {Path.ShiftData(sliceToShift,communicator);};
+  {Path.ShiftData(sliceToShift,communicator);}
 
   /// Return what species type a particle belongs to;
   inline int ParticleSpeciesNum(int ptcl)

@@ -100,26 +100,26 @@ class MirroredArrayClass
 private:
 
   /// Array holds the A and B copies of a two dimensional array 
-  Array<T,3> AB; /// (0=A 1=B, particles, timeslice)
+  Array<T,3> AB; /// (0=A 1=B, timeslice,particles)
 
 
 
 public:
   /// Resizes the two dimensional array.
-  void Resize(int numPtcles,int numTimeSlices);
+  void Resize(int numTimeSlices,int numPtcles);
   void MoveJoin(MirroredArrayClass1D<int> &PermMatrix,int oldJoin, int newJoin);
   inline int NumParticles()
   {
-    return AB.extent(1);
+    return AB.extent(2);
   }
   inline int NumTimeSlices()
   {
-    return AB.extent(2);
+    return AB.extent(1);
   }
   /// Constructor that creates the 2d array of the correct size
-  inline MirroredArrayClass(int particleNum, int timeSliceNum)
+  inline MirroredArrayClass(int timeSliceNum, int particleNum)
   {
-    AB.resize(2,particleNum,timeSliceNum);
+    AB.resize(2,timeSliceNum,particleNum);
   }
   /// Constructor that does nothing.
   MirroredArrayClass(){};
@@ -148,20 +148,32 @@ public:
   /// In case of acceptance, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This
   /// copies from A to B.
-  inline void AcceptCopy (int particle, int startSlice, int endSlice)
+  inline void AcceptCopy (int startSlice, int endSlice, 
+			  const Array<int,1> &activeParticles)
   {
-    for (int slice=startSlice; slice<=endSlice; slice++)
-      AB(1,particle,slice) = AB(0,particle,slice);
+    for (int slice=startSlice; slice<=endSlice; slice++){
+      for (int i=0; i<activeParticles.size(); i++){
+	int ptcl=activeParticles(i);
+	AB(1,slice,ptcl) = AB(0,slice,ptcl);	
+      }
+    }
   }
 
   /// In case of rejection, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This
   /// copies from B to A.
-  inline void RejectCopy (int particle, int startSlice, int endSlice)
+  inline void RejectCopy (int startSlice, int endSlice, 
+			  const Array<int,1> &activeParticles)
   {
-    for (int slice=startSlice; slice<=endSlice; slice++)
-      AB(0,particle,slice) = AB(1,particle,slice);
+    for (int slice=startSlice; slice<=endSlice; slice++){
+      for (int i=0; i<activeParticles.size(); i++){
+	int ptcl=activeParticles(i);
+	AB(0,slice,ptcl) = AB(1,slice,ptcl);	
+      }
+    }
   }
+
+ 
 };
 
 
