@@ -26,9 +26,11 @@ void setupAction(ActionClass &myActionClass,PathDataClass &myPathData)
 
 void setupIDParticleArray(PathDataClass &myPathData)
 {
+
   SpeciesArrayClass &myIDParticles=myPathData.SpeciesArray;
   double tau=1.0; //This better be the same as in the squarer file! UGly!
   int NumTimeSlices=50;
+
   ElectronsClass *myElectronptr = new ElectronsClass;
   ProtonsClass *myProtonptr = new ProtonsClass;
   ElectronsClass &myElectrons = *myElectronptr;
