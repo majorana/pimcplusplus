@@ -1,8 +1,19 @@
 #ifndef ACTION_CLASS
 #define ACTION_CLASS
 
+#include "CubicSpline.h"
 
-/*! This is the class that controls all of the actions and is in charge of calculating them. When this is initialized a pointer needs to be sent that has the memoizedData and IdenticalParticleClass*/
+
+class PairActionClass
+{
+  
+
+
+}
+
+/*! This is the class that controls all of the actions and is in
+  charge of calculating them. When this is initialized a pointer needs
+  to be sent that has the memoizedData and IdenticalParticleClass */ 
 
 class ActionClass
 {
