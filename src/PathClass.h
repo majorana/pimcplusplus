@@ -5,7 +5,7 @@
 #include "MirroredClass.h"
 #include "SpeciesClass.h"
 #include "Common/Random/Random.h"
-#include "CommunicatorClass.h"
+#include "Common/MPI/Communication.h"
 
 ///The number of time slices is the number of slices on this processor.
 ///In all cases this processor shares a time slice with the processor 
@@ -22,7 +22,6 @@ private:
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
   int MyNumSlices;
-  PIMCCommunicatorClass &Communicator;
   
   /////////////////////
   /// Misc. Helpers ///
@@ -40,7 +39,7 @@ private:
   ///////////////////////////////////////////////
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
-private:
+
   /// This is the maximum number of k vectors in each direction
   TinyVector<int,NDIM> MaxkIndex;
   /// Stores the radius of the k-space sphere we sum over
@@ -52,6 +51,8 @@ private:
   /// This stores e^{i\vb_i \cdot r_i^\alpha}
   TinyVector<Array<complex<double>,1>,NDIM> C;
 public:
+  CommunicatorClass &Communicator;
+
   Mirrored1DClass<dVec> RefPath;
   void BroadcastRefPath();
   /// True if we need k-space sums for long range potentials.
@@ -75,7 +76,7 @@ private:
   void ShiftRho_kData(int sliceToShift);
 public:
   Mirrored1DClass<int> Permutation;
-  RandomClass Random;
+  RandomClass &Random;
   int TotalNumSlices;
   double tau; //we need to set this still
   /// A scratch array to hold a boolean indicating whether we've
@@ -149,7 +150,8 @@ public:
   void Read(IOSectionClass &inSection);
   void Allocate();
 
-  inline PathClass(PIMCCommunicatorClass &communicator);
+  inline PathClass(CommunicatorClass &communicator,
+		   RandomClass &random);
   friend void SetupPathNaCl(PathClass &path);
   friend void SetupPathZincBlend(PathClass &path);
   friend void SetupPathSimpleCubic(PathClass &path);
@@ -266,13 +268,14 @@ inline void PathClass::AddSpecies (SpeciesClass *newSpecies)
   SpeciesArray(numSpecies) = newSpecies;
 }
 
-inline PathClass::PathClass (PIMCCommunicatorClass &communicator) : 
-  Communicator(communicator), Random(Communicator)
+inline PathClass::PathClass (CommunicatorClass &communicator,
+			     RandomClass &random) : 
+  Communicator(communicator), Random(random)
 {
   //      NumSpecies = 0;
   cerr<<"In pathclass constructor"<<endl;
   TotalNumSlices=0;
-  Random.Init(314159);
+
   //  OpenPaths=true;
   OpenPaths=false; //turns off open loops (Should be read at some poitn)
 

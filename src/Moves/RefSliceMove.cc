@@ -70,7 +70,7 @@ bool RefSliceMoveClass::NodeCheck()
 
     // Do global sum over processors
     double localChange = newLocalNode - oldLocalNode;
-    double globalChange = PathData.Communicator.AllSum (localChange);
+    double globalChange = PathData.Path.Communicator.AllSum (localChange);
     bool toAccept = (-globalChange)>=log(PathData.Path.Random.Common()); 
 
 //     fprintf (stderr, "old = %1.12e\n", oldLocalNode);
@@ -91,7 +91,7 @@ bool RefSliceMoveClass::NodeCheck()
 void RefSliceMoveClass::MakeMoveMaster()
 {
   PathClass &Path = PathData.Path;
-  int myProc = PathData.Communicator.MyProc();
+  int myProc = PathData.Path.Communicator.MyProc();
 
   int firstSlice, lastSlice;
   Path.SliceRange (myProc, firstSlice, lastSlice);
@@ -120,7 +120,7 @@ void RefSliceMoveClass::MakeMoveMaster()
   }
   // Broadcast acceptance or rejection 
   int accept = toAccept ? 1 : 0;
-  PathData.Communicator.Broadcast (myProc, accept);
+  PathData.Path.Communicator.Broadcast (myProc, accept);
 
   // Now, if we accept local stages, move on to global nodal
   // decision. 
@@ -151,7 +151,7 @@ void RefSliceMoveClass::MakeMoveMaster()
 void RefSliceMoveClass::MakeMoveSlave()
 {
   PathClass &Path = PathData.Path;
-  int myProc = PathData.Communicator.MyProc();
+  int myProc = PathData.Path.Communicator.MyProc();
   int master = Path.SliceOwner (Path.GetRefSlice());
 
 //   /// Choose time slices for local bisections
@@ -166,7 +166,7 @@ void RefSliceMoveClass::MakeMoveSlave()
 
   int accept;
   /// Receive broadcast from Master.
-  PathData.Communicator.Broadcast (master, accept);
+  PathData.Path.Communicator.Broadcast (master, accept);
   if (accept==1) {
     if (NodeCheck()) 
       Path.RefPath.AcceptCopy();
@@ -180,7 +180,7 @@ void RefSliceMoveClass::MakeMove()
 {
   PathClass &Path = PathData.Path;
   MasterProc = Path.SliceOwner (Path.GetRefSlice());
-  if (PathData.Communicator.MyProc() == MasterProc)
+  if (PathData.Path.Communicator.MyProc() == MasterProc)
     MakeMoveMaster();
   else
     MakeMoveSlave();

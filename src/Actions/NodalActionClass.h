@@ -26,12 +26,20 @@ private:
   double ActionkSum (double L, double lambdaTau, double disp);
 
   Array<double,2> DetMatrix, Cofactors;
-  Array<dVec,1> GradVec;
+  Array<dVec,1> GradVec, SavePath;
   double Det(int slice);
   void GradientDet (int slice, double &det, Array<dVec,1> &gradient);
   void GradientDetFD (int slice, double &det, Array<dVec,1> &gradient);
   double NodalDist (int slice);
+  /// This returns the upper bound on the distance to a node by
+  /// returning the minimum distance to particle coincidence.
+  double MaxDist(int slice);
+  /// This calculates the distance to the node along the line in the
+  /// direction of the gradient by a bisection search
   double LineSearchDist (int slice);
+  /// This calculates the nodal distance by an iterated Newton-Raphson
+  /// approach
+  double NewtonRaphsonDist (int slice);
   int SpeciesNum;
 public:
   double Action (int slice1, int slice2,

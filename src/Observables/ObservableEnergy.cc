@@ -182,18 +182,18 @@ void TotalEnergyClass::WriteBlock()
   double mySAvg= SSum/(double)NumSamples;
   double myFAvg= FSum/(double)NumSamples;
   double myNodeAvg = NodeSum/(double)NumSamples;
-  double avg = PathData.Communicator.Sum(myAvg);
-  double vavg =PathData.Communicator.Sum(myVAvg);
-  double savg =PathData.Communicator.Sum(mySAvg);
-  double favg =PathData.Communicator.Sum(myFAvg);
-  double NodeAvg =PathData.Communicator.Sum(myNodeAvg);
+  double avg = PathData.Path.Communicator.Sum(myAvg);
+  double vavg =PathData.Path.Communicator.Sum(myVAvg);
+  double savg =PathData.Path.Communicator.Sum(mySAvg);
+  double favg =PathData.Path.Communicator.Sum(myFAvg);
+  double NodeAvg =PathData.Path.Communicator.Sum(myNodeAvg);
   avg  = avg/(double)PathData.Path.TotalNumSlices;
   vavg =vavg/(double)PathData.Path.TotalNumSlices;
   savg =savg/(double)PathData.Path.TotalNumSlices;
   favg =favg/(double)PathData.Path.TotalNumSlices;
   NodeAvg = NodeAvg/(double)(PathData.Path.TotalNumSlices);
   // Only processor 0 writes.
-  if (PathData.Communicator.MyProc()==0) {
+  if (PathData.Path.Communicator.MyProc()==0) {
     cerr << "myAvg = " << myAvg << endl;
     cerr << "avg = " << avg << endl;
     cerr << "Pot avg = " << vavg << endl;

@@ -5,10 +5,12 @@
 #include "Moves/BlockMove.h"
 #include "Moves/BisectionBlock.h"
 #include "Observables/ObservableClass.h"
-
+#include <sstream>
 
 void PIMCClass::Read(IOSectionClass &in)
 {
+  // Read the parallelization strategy
+  PathData.Read (in);
   // Read in the system information and set up the path
   assert(in.OpenSection("System"));
   PathData.Path.Read(in);
@@ -47,59 +49,67 @@ void PIMCClass::Read(IOSectionClass &in)
 
 void PIMCClass::ReadObservables(IOSectionClass &in)
 {
-  assert(in.ReadVar("OutFile",OutFileName));
-  OutFile.NewFile(OutFileName);
-  OutFile.NewSection("RunInfo");
-  RunInfo.Write(OutFile);
-  OutFile.CloseSection();
-  OutFile.NewSection("System");
-  WriteSystemInfo();
-  OutFile.CloseSection(); // "System" 
-  int numOfObservables=in.CountSections("Observable");
-  Observables.resize(numOfObservables);
-  OutFile.NewSection ("Observables");
-  for (int counter=0;counter<numOfObservables;counter++){
-    in.OpenSection("Observable",counter);
-    string theObserveType;
-    string theObserveName;
-    assert(in.ReadVar("type",theObserveType));
-    ObservableClass* tempObs;
-    if (theObserveType=="PairCorrelation"){
-      assert(in.ReadVar("Name",theObserveName));
-      OutFile.NewSection(theObserveName);
-      tempObs = new PairCorrelationClass(PathData,OutFile);
-    }
-    else if (theObserveType=="nofr"){
-      assert(in.ReadVar("Name",theObserveName));
-      OutFile.NewSection(theObserveName);
-      tempObs = new nofrClass(PathData,OutFile);
-    }
-    else if (theObserveType=="Energy"){
-      OutFile.NewSection("Energies");
-      tempObs = new TotalEnergyClass(PathData,OutFile);
-    }
-    else if (theObserveType=="PathDump"){
-      OutFile.NewSection("PathDump");
-      tempObs=new PathDumpClass(PathData,OutFile);
-    }
-    else if (theObserveType=="WindingNumber"){
-      OutFile.NewSection("WindingNumber");
-      tempObs=new WindingNumberClass(PathData,OutFile);
-    }
-    else if (theObserveType=="StructureFactor"){
-      OutFile.NewSection("StructureFactor");
-      tempObs=new StructureFactorClass(PathData,OutFile);
-    }
-    else {
-      cerr<<"We do not recognize the observable "<<theObserveType<<endl;
-      abort();
-    }
-    tempObs->Read(in);
-    Observables(counter)=tempObs;
+
+  if (PathData.Path.Communicator.MyProc()==0) {
+    string outFileBase;
+    assert(in.ReadVar("OutFileBase",outFileBase));
+    ostringstream cloneNum;
+    cloneNum << PathData.GetCloneNum();
+    OutFileName = 
+      outFileBase+ "." + cloneNum.str() + ".h5";
+    OutFile.NewFile(OutFileName);
+    OutFile.NewSection("RunInfo");
+    RunInfo.Write(OutFile);
     OutFile.CloseSection();
-    in.CloseSection();//Observable
+    OutFile.NewSection("System");
+    WriteSystemInfo();
+    OutFile.CloseSection(); // "System" 
+    int numOfObservables=in.CountSections("Observable");
+    Observables.resize(numOfObservables);
+    OutFile.NewSection ("Observables");
+    for (int counter=0;counter<numOfObservables;counter++){
+      in.OpenSection("Observable",counter);
+      string theObserveType;
+      string theObserveName;
+      assert(in.ReadVar("type",theObserveType));
+      ObservableClass* tempObs;
+      if (theObserveType=="PairCorrelation"){
+	assert(in.ReadVar("Name",theObserveName));
+	OutFile.NewSection(theObserveName);
+	tempObs = new PairCorrelationClass(PathData,OutFile);
+      }
+      else if (theObserveType=="nofr"){
+	assert(in.ReadVar("Name",theObserveName));
+	OutFile.NewSection(theObserveName);
+	tempObs = new nofrClass(PathData,OutFile);
+      }
+      else if (theObserveType=="Energy"){
+	OutFile.NewSection("Energies");
+	tempObs = new TotalEnergyClass(PathData,OutFile);
+      }
+      else if (theObserveType=="PathDump"){
+	OutFile.NewSection("PathDump");
+	tempObs=new PathDumpClass(PathData,OutFile);
+      }
+      else if (theObserveType=="WindingNumber"){
+	OutFile.NewSection("WindingNumber");
+	tempObs=new WindingNumberClass(PathData,OutFile);
+      }
+      else if (theObserveType=="StructureFactor"){
+	OutFile.NewSection("StructureFactor");
+	tempObs=new StructureFactorClass(PathData,OutFile);
+      }
+      else {
+	cerr<<"We do not recognize the observable "<<theObserveType<<endl;
+	abort();
+      }
+      tempObs->Read(in);
+      Observables(counter)=tempObs;
+      OutFile.CloseSection();
+      in.CloseSection();//Observable
+    }
+    OutFile.CloseSection(); // "Observables"
   }
-  OutFile.CloseSection(); // "Observables"
 }
 
 

@@ -1,5 +1,5 @@
 #include "WindingNumber.h"
-
+#include "../Common/MPI/Communication.h"
 
 
 
@@ -26,8 +26,8 @@ void WindingNumberClass::Accumulate()
       TotalDisp(ptcl) =TotalDisp(ptcl)+ disp;
     }
   }
-  PathData.Communicator.Sum(TotalDisp,TempDisp);
-  if (PathData.Communicator.MyProc()==0) {  
+  PathData.Path.Communicator.Sum(TotalDisp,TempDisp);
+  if (PathData.Path.Communicator.MyProc()==0) {  
     for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
       for (int dim=0;dim<NDIM;dim++){
 	TotalW2[dim] =TotalW2[dim]+TempDisp(ptcl)[dim]*TempDisp(ptcl)[dim];
@@ -52,16 +52,16 @@ void WindingNumberClass::WriteBlock()
 //   double totNumSamples;
   
 //   double myAvg = ESum/(double)NumSamples; //everybody should have the same number of samples for this to be happy
-//   double avg = PathData.Communicator.Sum(myAvg);
-//   double vavg =PathData.Communicator.Sum(myVAvg);
-//   double savg =PathData.Communicator.Sum(mySAvg);
-//   double favg =PathData.Communicator.Sum(myFAvg);
+//   double avg = PathData.Path.Communicator.Sum(myAvg);
+//   double vavg =PathData.Path.Communicator.Sum(myVAvg);
+//   double savg =PathData.Path.Communicator.Sum(mySAvg);
+//   double favg =PathData.Path.Communicator.Sum(myFAvg);
 //   avg  = avg/(double)PathData.Path.TotalNumSlices;
 //   vavg =vavg/(double)PathData.Path.TotalNumSlices;
 //   savg =savg/(double)PathData.Path.TotalNumSlices;
 //   favg =favg/(double)PathData.Path.TotalNumSlices;
 //   // Only processor 0 writes.
-  if (PathData.Communicator.MyProc()==0) {
+  if (PathData.Path.Communicator.MyProc()==0) {
 //     cerr << "myAvg = " << myAvg << endl;
 //     cerr << "avg = " << avg << endl;
 //     cerr << "Pot avg = " << vavg << endl;

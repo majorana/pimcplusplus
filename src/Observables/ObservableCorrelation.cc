@@ -82,6 +82,7 @@ void PairCorrelationClass::WriteInfo()
 
 void PairCorrelationClass::WriteBlock()
 {
+  PathClass &Path = PathData.Path;
   Array<int,1> HistSum(Histogram.size());
   double norm=0.0;
   int N1 = PathData.Species(Species1).NumParticles;
@@ -95,8 +96,8 @@ void PairCorrelationClass::WriteBlock()
     //norm = (double)PathData.Species(Species1).NumParticles/(double)(PathData.Species(Species1).NumParticles-1)*1.0/PathData.Path.GetVol();
   }
   
-  PathData.Communicator.Sum(Histogram, HistSum);
-  if (PathData.Communicator.MyProc()==0) {
+  Path.Communicator.Sum(Histogram, HistSum);
+  if (Path.Communicator.MyProc()==0) {
     if (FirstTime) {
       FirstTime=false;
       WriteInfo();
@@ -321,11 +322,12 @@ void nofrClass::WriteInfo()
 ///fact currently
 void nofrClass::WriteBlock()
 {
+  PathClass &Path = PathData.Path;
   Array<double,1> HistSum(Histogram.size());
   double norm=0.0;
   norm = TotalCounts/PathData.Path.GetVol();
-  PathData.Communicator.Sum(Histogram, HistSum);
-  if (PathData.Communicator.MyProc()==0) {
+  Path.Communicator.Sum(Histogram, HistSum);
+  if (Path.Communicator.MyProc()==0) {
     if (FirstTime) {
       FirstTime=false;
       WriteInfo();

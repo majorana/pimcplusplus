@@ -57,7 +57,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 void BisectionBlockClass::ChooseTimeSlices()
 {
   PathClass &Path = PathData.Path;
-  int myProc = PathData.Communicator.MyProc();
+  int myProc = PathData.Path.Communicator.MyProc();
   // do something special to avoid moving reference slice
   if (IsFermion &&
       Path.SliceOwner(Path.GetRefSlice()) == myProc) {

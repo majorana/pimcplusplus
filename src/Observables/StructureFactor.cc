@@ -71,8 +71,8 @@ void StructureFactorClass::WriteBlock()
   int num2 = PathData.Path.Species(Species1).NumParticles;
   norm = TotalCounts * sqrt((double)num1*num2);
   
-  PathData.Communicator.Sum(Sk, SkSum);
-  if (PathData.Communicator.MyProc()==0) {
+  PathData.Path.Communicator.Sum(Sk, SkSum);
+  if (PathData.Path.Communicator.MyProc()==0) {
     if (FirstTime) {
       FirstTime=false;
       WriteInfo();

@@ -89,7 +89,7 @@ StageClass::GlobalStageAction (const Array<int,1> &changedParticles)
   int slice1 = 0;
   int slice2 = PathData.Path.NumTimeSlices()-1;
   double localAction = StageAction (slice1, slice2, changedParticles);
-  double globalAction = PathData.Communicator.AllSum (localAction);
+  double globalAction = PathData.Path.Communicator.AllSum (localAction);
 
   return globalAction;
 }

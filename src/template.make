@@ -29,7 +29,7 @@ VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 CCFLAGS = -c -g  -Wno-deprecated  #-pg 
 
 
-DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT  -O3 #-DDEBUG -DBZ_DEBUG # -DPARALLEL -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT -O3 -DUSE_MPI#-DDEBUG -DBZ_DEBUG # -DPARALLEL -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \

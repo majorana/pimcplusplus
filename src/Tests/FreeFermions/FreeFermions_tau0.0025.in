@@ -36,7 +36,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "FreeFermions_tau0.0025new.h5";
+  string OutFile = "FreeFermions_tau0.0025LS.h5";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
@@ -99,7 +99,7 @@ Section (Algorithm) {
     Section (Move) {string name = "Shift";}
   }
   Section (Loop) { //Start Accumulating observables
-    int steps=3000000;
+    int steps=6000000;
     Section (Loop){
       int steps=3;
       Section (Move) {string name="BisectionBlock";} 

@@ -17,10 +17,20 @@
 /// between the processors.
 class PathDataClass
 {
+private:
+  int MyCloneNum;
+
 public:  
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
-  PIMCCommunicatorClass Communicator;
+  /// This is for commmunication between nodes within a clone group.
+  CommunicatorClass IntraComm;
+  /// This is for communication between the rank 0 nodes of each clone
+  /// group.  Hence, its between the clone groups.
+  CommunicatorClass InterComm;
+  /// This is the global MPIWORLD communicator.
+  CommunicatorClass WorldComm;
+  RandomClass Random;
 
   /// This object computes all actions.
   ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
@@ -86,9 +96,15 @@ public:
     Path(timeSlice,particle) = r;
   }
 
-  inline PathDataClass() : 
-    Action(*this), Actions(*this), Path(Communicator)
-  { Join = 1; }
+  inline int GetCloneNum() { return MyCloneNum; }
+
+  void Read (IOSectionClass &in);
+  PathDataClass() : 
+    Action(*this), Actions(*this), Random(WorldComm), Path(IntraComm,Random)
+  { 
+    Join = 1; 
+  }
+
 
 };
  
