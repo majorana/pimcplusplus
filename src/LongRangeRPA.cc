@@ -144,11 +144,11 @@ void ActionClass::SetupRPA()
 	  //cerr << "One component ground state analytic = " << Uanalytic 
 	  //     << endl;
 	}
-    
-    levelTau *= 2.0;
     }
+    levelTau *= 2.0;
   }
 
+  levelTau = tau;
   // Calculated RPA for dU
   RPATaskIsU = false;
   for (Level=0; Level<MaxLevels; Level++) {
@@ -168,6 +168,7 @@ void ActionClass::SetupRPA()
 	    duvec (uindex(species1, species2, Path.NumSpecies()));
 	}
     } 
+    levelTau *= 2.0;
   }
   TestRPA();
 }
