@@ -7,22 +7,22 @@ Section (System)
   
   Section (Particles)
   {
-//    Section (Species, "Species1.txt");
+    Section (Species, "Species1.txt");
     Section (Hydrogen, "hydrogen.h5");
     Section (Species)
       {
-	string Name = "electron";
+	/*	string Name = "electron";
 	double lambda = 0.5;
 	string Type = "FERMION";
 	int NumParticles = 1;
-	int NumDim = 3;
-	string InitPaths="FIXED";
+	int NumDim = 3;*/
+	strng InitPaths="FIXED"; 
 	Array<double,3> Positions(1,1,3) = [0.1, 0.0, 0.0];
       }
     Section (Species)
     {
       string Name = "proton";
-      double lambda = 0.0; // Classical particle
+      double lambda = 0.0; 
       string Type = "BOLTZMANNON";
       int NumParticles = 1;
       int NumDim = 3;

@@ -199,6 +199,10 @@ InputSectionASCIIClass::ReadWithoutComments(string fileName)
       else if (checkPair(tmpBuffer,counter,"/*")){
 	while (!checkPair(tmpBuffer,counter,"*/") && counter<tmpBuffer.size()){
 	  counter++;
+	  //	  if (tmpBuffer(counter)=='\n'){//Copy over the \n in comments anyway
+	  //	    buffer(bufferLoc)=tmpBuffer(counter);//to keep line numbers
+	  //	    bufferLoc++;//consistent
+	  }
 	}
 	counter++; //end up in the / of comment
       }
