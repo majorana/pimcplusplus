@@ -19,6 +19,8 @@ TestDFTAtomobjs =                   \
 	../PH/CoulombPot.o          \
 	../PH/QuinticPH.o           \
 	../PH/ScreenedPot.o         \
+	../PH/SplinePot.o           \
+	../PH/Potential.o           \
 	../Splines/CubicSpline.o    \
 	../Splines/QuinticSpline.o  \
 	../Splines/QuinticSplines.o \

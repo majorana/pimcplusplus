@@ -298,7 +298,8 @@ void RadialWF::Normalize()
   normVec(0) = 0.0;
   NormalizeDeriv normDeriv(*this);
   RungeKutta<NormalizeDeriv,double> integrator(normDeriv);
-  integrator.Integrate(*u.grid, 0, u.grid->NumPoints-1, normVec);
+  // The false means "don't scale" 
+  integrator.Integrate(*u.grid, 0, u.grid->NumPoints-1, normVec, false);
   
   double norm = sqrt(1.0/(4.0*M_PI*normVec(u.grid->NumPoints-1)));
   for (int i=0; i<u.grid->NumPoints; i++) {
