@@ -86,7 +86,7 @@ public:
   //  Array<IdenticalParticlesClass,1> *myIdenticalParticleArray;
   ArrayOfIdenticalParticlesClass *myIdenticalParticleArray;
   double tau;
-  bool calcTotalAction(Array<ParticleID,1> changedParticles,int level);
+  double calcTotalAction(Array<ParticleID,1> changedParticles,int level);
   MemoizedDataClass *myMemoizedData;
   inline void SampleParticles(Array<ParticleID,1> particles,int startSlice,int endSlice,int level,double&, double&);
   void calcTotalAction();
