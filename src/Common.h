@@ -4,4 +4,8 @@
 #include "Blitz.h"
 typedef enum {MOVEMODE, OBSERVABLEMODE} ModeType;
 
+///ParticleID=(species,particle number)
+
+typedef TinyVector<int,2> ParticleID;
+
 #endif

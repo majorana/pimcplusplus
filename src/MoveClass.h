@@ -3,8 +3,6 @@
 
 #include "Common.h"
 
-///ParticleID=(species,particle number)
-typedef TinyVector<int,2> ParticleID;
 
 
 class MoveClass

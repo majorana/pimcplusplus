@@ -22,23 +22,27 @@ private:
 
 void BisectionMoveClass::makeMove()
 {
-
+  bool accept=true;
+  double oldLogSampleProb;
+  double newLogSampleProb;
   Array<int,1> theParticles;
-
-    
+  double logSampleProb;
   int EndTimeSlice=1<<NumLevels+StartSlice;
-  skip=1<<NumLevels;
+
   for (int levelCounter=NumLevels;levelCounter>0;NumLevels++){
-    for (int Slice=StartTimeSlice+skip;Slice<EndTimeSlice;Slice=Slice+skip){
-      getNextParticles();
-      
+    ChooseParticles();   
+    setMode(OLD);
 
-
-      singleSliceSample(theParticles,Slice);
-    }
-
-    skip=skip>>1
+    oldAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,level);
+    setMode(NEW);
+    (*PathData).TotalAction.SampleParticles(ActiveParticles,StartSlice,EndSlice,levelCounter,newLogSampleProb,oldLogSampleProb);
+    newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,level);
+    
+    
+    
   }
+  
+
 }
 
 

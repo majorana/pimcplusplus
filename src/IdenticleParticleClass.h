@@ -21,15 +21,15 @@ public:
   double lambda;
   
   /// Returns the nodal action for fermions.  Returns 0 for bosons.
-  virtual double NodeAction (int Ptcl, int LinkNum);
+  virtual double NodeAction (int Ptcl, int LinkNum) = 0;
 }
 
 
-class ElectronsClass::IdenticalParticlesClass
+class ElectronsClass: public IdenticalParticlesClass
 {
 public:
   double NodeAction (int Ptcl. int LinkNum);
-  
+
 }
 
 #endif
