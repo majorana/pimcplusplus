@@ -141,11 +141,18 @@ void TotalEnergyClass::Accumulate()
     spring += sp;
     V += v;
   }
-  Echeck = spring + dU;
+
+  double node = 0.0;
+  for (int species=0; species<PathData.Path.NumSpecies(); species++)
+    if (PathData.Actions.NodalActions(species) != NULL)
+      node += PathData.Actions.NodalActions(species)->d_dBeta(0,numLinks,0);
+  Echeck = spring + dU + node;
   ESum += Echeck;
   VSum += V;
   SSum += spring;
   FSum += dU;
+  NodeSum += node;
+
 //   if (fabs(sum-Echeck) > 1.0e-10*max(1.0,fabs(sum))) {
 //     cerr << "sum   = " << sum << endl;
 //     cerr << "Echeck = " << Echeck << endl;
@@ -174,14 +181,17 @@ void TotalEnergyClass::WriteBlock()
   double myVAvg= VSum/(double)NumSamples;
   double mySAvg= SSum/(double)NumSamples;
   double myFAvg= FSum/(double)NumSamples;
+  double myNodeAvg = NodeSum/(double)NumSamples;
   double avg = PathData.Communicator.Sum(myAvg);
   double vavg =PathData.Communicator.Sum(myVAvg);
   double savg =PathData.Communicator.Sum(mySAvg);
   double favg =PathData.Communicator.Sum(myFAvg);
+  double NodeAvg =PathData.Communicator.Sum(myNodeAvg);
   avg  = avg/(double)PathData.Path.TotalNumSlices;
   vavg =vavg/(double)PathData.Path.TotalNumSlices;
   savg =savg/(double)PathData.Path.TotalNumSlices;
   favg =favg/(double)PathData.Path.TotalNumSlices;
+  NodeAvg = NodeAvg/(double)(PathData.Path.TotalNumSlices);
   // Only processor 0 writes.
   if (PathData.Communicator.MyProc()==0) {
     cerr << "myAvg = " << myAvg << endl;
@@ -189,6 +199,7 @@ void TotalEnergyClass::WriteBlock()
     cerr << "Pot avg = " << vavg << endl;
     cerr << "S avg = " << savg << endl;
     cerr << "U avg = " <<favg <<endl;
+    cerr << "NodeAvg = " <<NodeAvg <<endl;
     if (FirstTime) {
       FirstTime = false;
       WriteInfo();
@@ -202,23 +213,28 @@ void TotalEnergyClass::WriteBlock()
       IOSection.WriteVar ("SpringEnergy",dummy);
       dummy(0)=favg;
       IOSection.WriteVar ("DBetaEnergy",dummy);
+      dummy(0)=NodeAvg;
+      IOSection.WriteVar ("NodeEnergy",dummy);
       IOVar = IOSection.GetVarPtr("TotalEnergy");
       IOVVar= IOSection.GetVarPtr("PotentialEnergy");
       IOSVar= IOSection.GetVarPtr("SpringEnergy");
       IOUVar= IOSection.GetVarPtr("DBetaEnergy");
+      IONodeVar= IOSection.GetVarPtr("NodeEnergy");
     }
     else {
       IOVar->Append(avg);
       IOVVar->Append(vavg);
       IOSVar->Append(savg);
       IOUVar->Append(favg);
+      IONodeVar->Append(NodeAvg);
       IOSection.FlushFile();
     }
   }
-  ESum = 0.0;
-  VSum = 0.0;
-  SSum = 0.0;
-  FSum=0.0;
+  ESum       = 0.0;
+  VSum       = 0.0;
+  SSum       = 0.0;
+  FSum       = 0.0;
+  NodeSum    = 0.0;
   NumSamples = 0;
 }
 

@@ -333,7 +333,7 @@ double ActionClass::TotalAction(int startSlice, int endSlice,
 
     return UApproximateAction(startSlice, endSlice, changedParticles, level)+
       KAction(startSlice, endSlice, changedParticles, level)+
-      NodeAction (startSlice, endSlice, changedParticles, level);
+      NodeAction (startSlice, endSlice, changedParticles, level)+
       OtherAction(startSlice,endSlice,changedParticles,level);
   }
   else {

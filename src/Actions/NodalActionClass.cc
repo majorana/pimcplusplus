@@ -3,6 +3,56 @@
 #include "../Common/MatrixOps/MatrixOps.h"
 
 
+double 
+FreeNodalActionClass::ActionImageSum (double L, double lambdaBeta, 
+				      double disp)
+{
+  int numImages = 10;
+  double sum = 0.0;
+  double fourLambdaBetaInv = 1.0/(4.0*lambdaBeta);
+  for (int image=-numImages; image<numImages; image++) {
+    double x = disp + (double)image*L;
+    sum += exp (-(x*x)*fourLambdaBetaInv);
+  }
+  return (-log(sum));
+}
+
+void FreeNodalActionClass::SetupFreeActions()
+{
+  const int nPoints = 1000;
+  // Setup grids
+  for (int i=0; i<NDIM; i++)
+    ActionGrids[i].Init (-0.5*Path.GetBox()[i], 0.5*Path.GetBox()[i], nPoints);
+
+  /// DEBUG
+  FILE *fout = fopen ("FreeActions.dat", "w");
+
+  Array<double,1> actionData(nPoints);
+  // Now, setup up actions
+  int nSplines = Path.TotalNumSlices/2 + (Path.TotalNumSlices%2)+1;
+  ActionSplines.resize(nSplines);
+  double lambdaTau = Path.tau * Path.Species(SpeciesNum).lambda;
+  for (int spline=0; spline<nSplines; spline++) {
+    double lambdaBeta = lambdaTau * (double)spline;
+    for (int dim=0; dim<NDIM; dim++) {
+      double L = Path.GetBox()[dim];
+      for (int i=0; i<nPoints; i++) {
+	double disp = ActionGrids[dim](i);
+	actionData(i) = ActionImageSum (L, lambdaBeta, disp);
+	fprintf (fout, "%1.12e ", actionData(i));
+      }
+      fprintf (fout, "\n");
+      // Since the action is periodic, the slope should be zero
+      // at the boundaries
+      ActionSplines(spline)[dim].Init (&ActionGrids[dim], actionData,
+				       0.0, 0.0);
+    }
+  }
+  fclose (fout);
+}
+
+
+
 FreeNodalActionClass::FreeNodalActionClass (PathDataClass &pathData,
 					    int speciesNum) :
   ActionBaseClass (pathData), 
@@ -31,10 +81,12 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
   int refSlice = Path.GetRefSlice()-myStartSlice;
   double t = abs(refSlice-slice) * PathData.Action.tau;
   double beta = PathData.Path.TotalNumSlices * PathData.Action.tau;
+  int sliceDiff = abs(slice-refSlice);
+  sliceDiff = min (sliceDiff, Path.TotalNumSlices-sliceDiff);
+  assert (sliceDiff <= Path.TotalNumSlices);
+  assert (sliceDiff > 0);
   t = min (t, fabs(beta-t));
   assert (t <= 0.500000001*beta);
-//   cerr << "slice = " << slice << " refslice = " << PathData.Path.GetRefSlice() 
-//        << " t = " << t << " beta = " << beta << endl;
   double lambda = species.lambda;
   double C = 1.0/(4.0*M_PI * lambda * t);
 
@@ -51,7 +103,11 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
       dVec diff;
       double dist;
       Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
-      DetMatrix(refPtcl-first, ptcl-first) = exp(-C*dist*dist);
+      double action = 0.0;
+      for (int dim=0; dim<NDIM; dim++)
+	action += ActionSplines(sliceDiff)[dim](diff[dim]);
+      //DetMatrix(refPtcl-first, ptcl-first) = exp(-C*dist*dist);
+      DetMatrix(refPtcl-first, ptcl-first) = exp(-action);
     }
   }
 
@@ -81,7 +137,11 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
       dVec diff;
       double dist;
       Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
-      dVec gradPhi = -2.0*C*diff*DetMatrix(refPtcl-first,ptcl-first);
+      dVec gradPhi;
+      for (int dim=0; dim<NDIM; dim++)
+	gradPhi[dim] = ActionSplines(sliceDiff)[dim].Deriv(diff[dim]) 
+	  * DetMatrix(refPtcl-first, ptcl-first);
+      //dVec gradPhi = -2.0*C*diff*DetMatrix(refPtcl-first,ptcl-first);
 
       gradient(ptcl-first) = 
 	gradient(ptcl-first)+ gradPhi*Cofactors(refPtcl-first, ptcl-first);
@@ -192,6 +252,7 @@ double FreeNodalActionClass::NodalDist (int slice)
 void FreeNodalActionClass::Read (IOSectionClass &in)
 {
   // Do nothing for now
+  SetupFreeActions();
 }
 
 
@@ -243,7 +304,46 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
 
 
 double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
-{
-  // HACK HACK HACK HACK
-  return (0.0);
+{ 
+  SpeciesClass &species = Path.Species(SpeciesNum);
+  double lambda = species.lambda;
+  int skip = 1<<level;
+  double levelTau = PathData.Action.tau * (double)skip;
+
+  int myStart, myEnd;
+  Path.SliceRange(PathData.Communicator.MyProc(), myStart, myEnd);
+  int refSlice = Path.GetRefSlice() - myStart;
+  
+  double dist1, dist2;
+  if (slice1 != refSlice) {
+    dist1 = NodalDist (slice1);
+    if (dist1 < 0.0)
+      return 1.0e100;
+  }
+  else
+    dist1 = sqrt(-1.0);
+  
+  int totalSlices = Path.TotalNumSlices;
+  double uNode=0.0;
+  for (int slice=slice1; slice < slice2; slice+=skip) {
+    if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
+      dist2 = sqrt(-1.0);
+    else {
+      dist2 = NodalDist (slice+skip);
+      if (dist2 < 0.0)
+	return 1.0e100;
+    }
+
+    double prod;
+    if (isnan (dist1))
+      prod = dist2*dist2;
+    else if (isnan(dist2))
+      prod = dist1*dist1;
+    else
+      prod = dist1*dist2;
+
+    uNode += prod/(lambda*levelTau*levelTau)/expm1(prod/(lambda*levelTau));
+    dist1 = dist2;
+  }
+  return uNode;
 }

@@ -16,6 +16,7 @@ private:
   double VSum;
   double SSum;
   double FSum;
+  double NodeSum;
   int NumSamples;
   int TimesCalled;
   int Freq;
@@ -23,6 +24,7 @@ private:
   VarClass *IOVVar;
   VarClass *IOSVar;
   VarClass *IOUVar;
+  VarClass *IONodeVar;
 public:
   void Accumulate();
   void WriteBlock();
@@ -39,6 +41,7 @@ public:
     VSum = 0.0;
     SSum = 0.0;
     FSum = 0.0;
+    NodeSum = 0.0;
     NumSamples = 0;
     TimesCalled=0;
   }

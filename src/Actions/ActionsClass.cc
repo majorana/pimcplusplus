@@ -79,12 +79,13 @@ void ActionsClass::Read(IOSectionClass &in)
   for (int spIndex=0; spIndex<PathData.Path.NumSpecies(); spIndex++) {
     SpeciesClass &species = PathData.Path.Species(spIndex);
     if (species.GetParticleType() == FERMION) {
-      if (species.NodeType == "FREE")
+      if (species.NodeType == "FREE") 
 	NodalActions (spIndex) = new FreeNodalActionClass(PathData, spIndex);
       else {
 	cerr << "Unrecognized node type " << species.NodeType << ".\n";
 	exit(EXIT_FAILURE);
       }
+      NodalActions(spIndex)->Read(in);
     }
     else
       NodalActions(spIndex) = NULL;

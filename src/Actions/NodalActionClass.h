@@ -2,13 +2,24 @@
 #define NODAL_ACTION_CLASS_H
 
 #include "ActionBase.h"
+#include "../Common/Splines/CubicSpline.h"
 
 class PathClass;
+
 
 class FreeNodalActionClass : public ActionBaseClass
 {
 private:
   PathClass &Path;
+
+  /// These splines will hold the free-particle action for
+  /// periodic boundary conditions.  The array is over time-slice
+  /// separation from the reference slice.
+  Array<TinyVector<CubicSpline,NDIM>,1> ActionSplines;
+  TinyVector<LinearGrid,NDIM> ActionGrids;
+  void SetupFreeActions();
+  double ActionImageSum (double L, double lambdaTau, double disp);
+
   Array<double,2> DetMatrix, Cofactors;
   Array<dVec,1> GradVec;
   double Det();

@@ -61,12 +61,13 @@ bool RefSliceMoveClass::NodeCheck()
     double globalChange = PathData.Communicator.AllSum (localChange);
     bool toAccept = (-globalChange)>=log(PathData.Path.Random.Common()); 
 
-    fprintf (stderr, "old = %1.12e\n", oldLocalNode);
-    fprintf (stderr, "new = %1.12e\n", newLocalNode);
-    fprintf (stderr, "globalChange = %1.12e\n", globalChange);
+//     fprintf (stderr, "old = %1.12e\n", oldLocalNode);
+//     fprintf (stderr, "new = %1.12e\n", newLocalNode);
+//     fprintf (stderr, "globalChange = %1.12e\n", globalChange);
 //     fprintf (stderr, "localchange = %1.12e\n", localChange);
 //     fprintf (stderr, "globalchange = %1.12e\n", globalChange);
-    cerr << "toAccept = " << (toAccept ? "true\n" : "false\n");
+//     cerr << "toAccept = " << (toAccept ? "true\n" : "false\n");
+
     return toAccept;
   }
   else

@@ -5,5 +5,5 @@ double lambda = 1.0;
 int BlockSize = 100000;
 int NumBlocks = 100;
 int NumParticles = 2;
-//string Type = "FERMION";
-string Type = "BOLTZMANNON";
+string Type = "FERMION";
+//string Type = "BOLTZMANNON";
