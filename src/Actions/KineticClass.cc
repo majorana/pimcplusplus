@@ -67,8 +67,7 @@ double KineticClass::d_dBeta (int slice1, int slice2,
     SpeciesClass &species = Path.Species(speciesNum);
     double lambda = species.lambda;
     if (lambda != 0.0) {
-      double FourLambdaTauInv = 
-	1.0/(4.0*lambda*levelTau);
+      double FourLambdaTauInv = 1.0/(4.0*lambda*levelTau);
       for (int slice=slice1; slice<slice2; slice+=skip) {
 	spring += (0.5*NDIM)/levelTau;
 	dVec vel;
@@ -96,8 +95,7 @@ double KineticClass::d_dBeta (int slice1, int slice2,
 	      numProd[dim] *=  numSum[dim2];
 	  }
 	  scalarnumSum += numProd[dim];
-	}
-	//cerr << "Z = " << Z << " scalarnumSum = " << scalarnumSum << endl;
+	} //cerr << "Z = " << Z << " scalarnumSum = " << scalarnumSum << endl;
 	spring += scalarnumSum/Z; 
       }
     }
