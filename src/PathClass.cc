@@ -18,7 +18,7 @@ void PathClass::Read (IOSectionClass &inSection)
       Box(counter)=tempBox(counter);
     }
   }
-  else
+  else 
     cerr << "Using free boundary conditions.\n";
 
   assert(inSection.OpenSection("Particles"));

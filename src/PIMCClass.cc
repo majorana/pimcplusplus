@@ -1,6 +1,7 @@
 #include "PIMCClass.h"
 #include "BisectionMoveClass.h"
-#include "BisectionMoveClass2.h"
+#include "MetaMoves.h"
+#include "BlockMove.h"
 
 void PIMCClass::Read(IOSectionClass &in)
 {
@@ -38,10 +39,10 @@ void PIMCClass::Read(IOSectionClass &in)
   in.CloseSection();
 
   // Read in the Permuation info
-  assert(in.OpenSection("Permutations"));
-  ForwPermuteTable.Read(in);
-  RevPermuteTable.Read(in);
-  in.CloseSection();
+//   assert(in.OpenSection("Permutations"));
+//   ForwPermuteTable.Read(in);
+//   RevPermuteTable.Read(in);
+//   in.CloseSection();
 }
 
 
@@ -55,15 +56,14 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     in.OpenSection("Move",counter);
     string MoveType;
     assert(in.ReadVar("type",MoveType));
-    cerr<<"The name is "<<MoveType<<endl;
     if (MoveType=="Bisection")
       Moves(counter)=new BisectionMoveClass(PathData);
     else if (MoveType=="ShiftMove")
       Moves(counter)=new ShiftMoveClass(PathData);
     else if (MoveType=="PrintMove")
       Moves(counter)=new PrintMoveClass(PathData);
-    else if (MoveType=="Bisection2")
-      Moves(counter)=new BisectionMoveClass2(PathData);
+    else if (MoveType=="CycleBlock")
+      Moves(counter)=new CycleBlockMoveClass(PathData);
     else {
       cerr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();
@@ -86,7 +86,6 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     string theObserveType;
     string theObserveName;
     assert(in.ReadVar("type",theObserveType));
-    cerr<<"The observe name is "<<theObserveType<<endl;
     ObservableClass* tempObs;
     if (theObserveType=="PairCorrelation"){
       assert(in.ReadVar("name",theObserveName));
@@ -94,12 +93,15 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new PairCorrelationClass(PathData,OutFile);
     }
     else if (theObserveType=="Energy"){
-      cerr<<"We have found the energy section"<<endl;
       OutFile.NewSection("Energies");
       tempObs = new TotalEnergyClass(PathData,OutFile);
     }
+    else if (theObserveType=="PathDump"){
+      OutFile.NewSection("PathDump");
+      tempObs=new PathDumpClass(PathData,OutFile);
+    }
     else {
-      cerr<<"This is an observe type that I do not recognize"<<endl;
+      cerr<<"We do not recognize the observable "<<theObserveType<<endl;
       abort();
     }
     tempObs->Read(in);
@@ -119,5 +121,4 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 void PIMCClass::Run()
 {
   Algorithm.DoEvent();
-  OutFile.CloseFile();
 }

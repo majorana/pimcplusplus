@@ -25,6 +25,7 @@ class CycleClass
   ///particle permutes onto. 
   //  void CanonicalPermRep(Array<int,1> myArray);
   void Apply (PathClass &path, int firstPtcl, int timeSlice);
+
 };
 
 
@@ -65,6 +66,7 @@ class PermuteTableClass
   void CanonicalPermRep(Array<int,1> P);
   double AttemptPermutation();
   double CalcReverseProb(const PermuteTableClass &forwardTable);
+  Array<int,1> CurrentParticles();
   PermuteTableClass(PathDataClass &myPathData) : PathData(myPathData)
   {
     NumEntries=0;

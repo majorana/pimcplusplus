@@ -10,7 +10,8 @@
 
 class PIMCClass 
 {
-private:
+
+public:
   Array<MoveClass*,1> Moves;
   Array<ObservableClass* ,1> Observables;
   void ReadMoves(IOSectionClass &in);
@@ -20,12 +21,12 @@ private:
   IOSectionClass OutFile;
   LoopClass Algorithm;
 public:
-  PermuteTableClass ForwPermuteTable, RevPermuteTable;
+  //  PermuteTableClass ForwPermuteTable, RevPermuteTable;
   PathDataClass PathData;
   void Read(IOSectionClass &in);
   void Run();
-  PIMCClass() : Algorithm(&Moves, &Observables), 
-		ForwPermuteTable(PathData), RevPermuteTable(PathData)
+  PIMCClass() : Algorithm(&Moves, &Observables)
+		//	ForwPermuteTable(PathData), RevPermuteTable(PathData)
   { /* Do nothing for now */ }
 };
 

@@ -49,6 +49,8 @@ void TotalEnergyClass::Accumulate()
   if ((TimesCalled % Freq)!=0){
     return;
   }
+  //Move the join to the end so we don't have to worry about permutations
+  PathData.MoveJoin(PathData.NumTimeSlices()-1);
   // Loop over all links
   int numPtcls = PathData.NumParticles();
   int numLinks = PathData.NumTimeSlices()-1;
@@ -372,21 +374,29 @@ void PairCorrelationClass::Initialize()
 void PathDumpClass::Accumulate()
 {//Do nothing!
 }
+void PathDumpClass::Read(IOSectionClass &in)
+{
+  // Do nothing.
+}
+
 void PathDumpClass::WriteBlock()
 {
+  //Move the join to the end so we don't have to worry about permutations
+  PathData.MoveJoin(PathData.NumTimeSlices()-1);
+
   int numPtcls = PathData.NumParticles();
   int numTimeSlices = PathData.NumTimeSlices();
   if (FirstTime){
     FirstTime=false;
 
     Array<string,1> speciesNames(numPtcls);
-    for (int speciesIndex=0; speciesIndex<PathData.NumSpecies(); speciesIndex++) {
+    for (int speciesIndex=0;speciesIndex<PathData.NumSpecies();speciesIndex++){
       SpeciesClass &species = PathData.Path.Species(speciesIndex);
       for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++)
       	speciesNames(ptcl)=species.Name;
     }
     IOSection.WriteVar("SpeciesNames", speciesNames);
-    
+
     Array<double,4> pathArray(1,numPtcls,numTimeSlices,NDIM);
     for (int ptcl=0;ptcl<numPtcls;ptcl++){
       for (int slice=0;slice<numTimeSlices;slice++){
@@ -395,8 +405,7 @@ void PathDumpClass::WriteBlock()
 	}
       }
     }
-    
-    
+
     // Write the first path here
     IOSection.WriteVar("Path",pathArray);
     // Now get the pointer to it

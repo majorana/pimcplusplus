@@ -133,8 +133,8 @@ bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activePar
     SetMode(NEWMODE);
     newLogSampleProb = 
       SamplePaths(startSlice,endSlice,activeParticles,levelCounter);
-    double testNewLogSampleProb= PathData.Action.LogSampleProb
-      (startSlice,endSlice,activeParticles,levelCounter);
+    double testNewLogSampleProb=
+      LogSampleProb(startSlice,endSlice,activeParticles,levelCounter);
     PathData.Update(startSlice,endSlice,activeParticles,
 		    levelCounter);
 

@@ -72,8 +72,8 @@ public:
     assert(IO.ReadVar("freq",Freq));
     assert(IO.ReadVar("dumpFreq",DumpFreq));
   }
-  TotalEnergyClass(PathDataClass &myPathData, IOSectionClass &IOSection)
-    : ObservableClass(myPathData, IOSection) 
+  TotalEnergyClass(PathDataClass &myPathData, IOSectionClass &ioSection)
+    : ObservableClass(myPathData, ioSection) 
   {
     ESum = 0.0;
     NumSamples = 0;
@@ -127,9 +127,11 @@ private:
 public:
   void Accumulate();
   void WriteBlock();
-  void Read(IOSectionClass& IO) { };
-  PathDumpClass(PathDataClass &myPathData, IOSectionClass &IOSection)
-    : ObservableClass(myPathData, IOSection)  {  }
+  void Read(IOSectionClass& IO);
+  PathDumpClass(PathDataClass &myPathData, IOSectionClass &ioSection)
+    : ObservableClass(myPathData, ioSection)  { 
+    Name="PathDump";
+  }
 };
 
 

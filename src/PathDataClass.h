@@ -3,7 +3,6 @@
 
 #include "Common.h"
 #include "SpeciesClass.h"
-// #include "MemoizedDataClass.h"
 #include "ActionClass.h"
 #include "PathClass.h"
 #include "CommunicatorClass.h"
@@ -17,9 +16,6 @@
 /// between the processors.
 class PathDataClass
 {
-private:
-
-
 public:
   DistanceTableClass *DistanceTable;
 
@@ -30,7 +26,7 @@ public:
   /// This object computes all actions.
   ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
 
-  ///The constructor that initializes the action and such
+  /// The constructor that initializes the action and such
   int Join;
   PathClass Path;
   inline void ShiftData(int numTimeSlicesToShift){
@@ -38,28 +34,35 @@ public:
     DistanceTable->ShiftData(numTimeSlicesToShift, Communicator);
   }
 
-  ///We are probaby going to have to move permutation
-  ///information up here if we want it to notice
-  //the change in join.
+  /// We are probaby going to have to move permutation
+  /// information up here if we want it to notice
+  /// the change in join.
   inline void MoveJoin(int newJoin)
     {
       Path.MoveJoin(Join,newJoin);
+      DistanceTable->MoveJoin(Join,newJoin);
       Join=newJoin;
     }
+
+  inline void Update(int slice,const Array<int,1> &ptclArray)
+  {
+    DistanceTable->Update(slice,ptclArray);
+  }
+
   inline void Update(int startSlice,int endSlice,
 		     const Array <int,1> &ptclArray,int level)
   {
     int skip = 1<<(level+1);
     int skipo2 = skip >> 1;
     for (int slice=startSlice;slice<endSlice;slice+=skip){
-      DistanceTable->Update(slice+skipo2,ptclArray);
+      Update(slice+skipo2,ptclArray);
     }
   }
-
 
   /// Returns the number of time slices.
   inline int NumTimeSlices()
   {  return Path.NumTimeSlices();  }
+
   /// Do all copies necessary to accept a move.
   inline void AcceptMove(int startTimeSlice,int endTimeSlice,
 			 const Array <int,1> &activeParticles);
@@ -72,19 +75,27 @@ public:
   inline int NumSpecies(){
     return Path.NumSpecies();
   }
+
   /// Returns the total number of particles
   inline int NumParticles(){
     return Path.NumParticles();
   }
+
   /// Returns a reference to the SpeciesClass object of number species
   inline SpeciesClass& Species(int species){
     return Path.Species(species);
   }
+
+
+  inline int SpeciesNum(string speciesName);
+
+
   /// Returns the position of the particle of type species, particle
   /// number particle, and time slice timeSlice.
   inline dVec operator()(int timeSlice,int particle){
     return Path(timeSlice,particle);
   }
+
   /// Sets the position of the particle labeled by 
   /// (species, particle, timeSlice) to r and updates the time stamp
   /// of that piece of information.
@@ -97,25 +108,30 @@ public:
   }
 
 };
+ 
+inline int PathDataClass::SpeciesNum(string name)
+{
 
+  for (int spec=0;spec<NumSpecies();spec++){
+    if (Species(spec).Name==name){
+      return spec;
+    }
+  }
+  return -1;
+}
 
 inline void PathDataClass::AcceptMove(int startTimeSlice,int endTimeSlice,
 			       const Array <int,1> &activeParticles)
 {
-
   Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
   DistanceTable->AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
-  
 }
 
 inline void PathDataClass::RejectMove(int startTimeSlice,int endTimeSlice,
 			       const Array <int,1> &activeParticles)
 {
   Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticles);  
-  
   DistanceTable->RejectCopy(startTimeSlice,endTimeSlice,activeParticles);
-
-  
 }
 
 

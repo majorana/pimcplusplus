@@ -2,7 +2,7 @@ double tau=0.05;
 
 Section (System)
 {
-  int NumTimeSlices=20;
+  int NumTimeSlices=10;
   Array<double,1> Box(3)=[3.0,3.0,3.0];
   Section (Particles)
   {
@@ -23,13 +23,20 @@ Section (System)
 
 Section (Action)
 {
-  int MaxLevels = 4;
+  int MaxLevels = 3;
   Array<string,1> PairActionFiles(1) = ["zero.PairAction"];
 }
 
 Section (Observables)
 {
   string OutFile = "TestPerm.h5";
+  Section (Observable)
+    {
+      string type="PathDump";
+      string name="PathDump";
+      int freq=1;
+      int dumpFreq=1;
+    }
   Section (Observable)
     {
       string type = "Energy";

@@ -8,13 +8,14 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DNO_COUT -DDEBUG -DBZ_DEBUG  -DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                           \
   Main.o                             \
   BisectionClass.o                   \
   PIMCClass.o                        \
-  BisectionMoveClass2.o		     \
+  MetaMoves.o 			     \
+  BlockMove.o                        \
   ObservableClass.o                  \
   Common/Splines/CubicSpline.o       \
   Common/Splines/Grid.o              \
@@ -52,7 +53,8 @@ PIMCobjs =                           \
 TestPermobjs =                       \
   TestPermutation.o                  \
   BisectionClass.o                   \
-  BisectionMoveClass2.o		     \
+  BlockMove.o                        \
+  MetaMoves.o                        \
   PIMCClass.o                        \
   ObservableClass.o                  \
   Common/Splines/CubicSpline.o       \
@@ -134,7 +136,7 @@ clean:	Common_clean
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc BisectionMoveClass2.cc
+SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc
 
 newmake: Common_newmake Tests_newmake
 	make -f template.make Makefile FRC=force_rebuild

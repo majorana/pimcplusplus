@@ -11,7 +11,18 @@
 //     Perm(CycleRep(i)) = CycleRep((i+1) % Length);
 // }
     
+Array<int,1> PermuteTableClass::CurrentParticles()
+{
+  Array<int,1> tempPtcl(CurrentCycle.Length);
+  int firstPtcl=PathData.Species(SpeciesNum).FirstPtcl;
+  for (int i=0;i<CurrentCycle.Length;i++){
+    tempPtcl(i)=CurrentCycle.CycleRep(i)+firstPtcl;
+  }
+  return tempPtcl;
+    
 
+
+}
 
 void PermuteTableClass::ConstructHTable()
 {
@@ -63,7 +74,6 @@ void PermuteTableClass::ConstructHTable()
 // slice and the permutation vector in the path
 void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
 {
-  cerr<<"Applying the permutation"<<endl;
   dVec tempPos = path(slice, CycleRep(0)+firstPtcl);
   int tempPtcl = path.Permutation(CycleRep(0)+firstPtcl);
   for(int i=0;i<Length-1;i++) {
@@ -74,7 +84,6 @@ void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
   }
   path.SetPos(slice,CycleRep(Length-1)+firstPtcl,tempPos);
   path.Permutation.Set(CycleRep(Length-1)+firstPtcl,tempPtcl);
-  cerr<<"Finished Applying the permutation"<<endl;
 }
 
 
@@ -83,14 +92,21 @@ double PermuteTableClass::AttemptPermutation()
   //Get a random number number from the local processor stream.
   
   double xi=PathData.Path.Random.Local(); 
-  cerr<<"before find entry"<<endl;
   int index=FindEntry(xi);
   CurrentCycle = CycleTable(index);
   //  cerr<<"After find entry"<<endl;
   // Now, apply the permutation to the Path
   int firstPtcl=PathData.Species(SpeciesNum).FirstPtcl;
   CurrentCycle.Apply(PathData.Path,firstPtcl,Slice2);
-  //  cerr<<"exiting attempt perm"<<endl;
+  int diff = Slice2-Slice1;
+  int numLevels = 0;
+  while (diff != 1) {
+    diff >>= 1;
+    numLevels++;
+  }
+  ///Remember to update distance table after permutation
+  PathData.Update(Slice2,CurrentParticles());
+
   return (CurrentCycle.P * NormInv);
 }
 
@@ -103,10 +119,8 @@ double PermuteTableClass::CalcReverseProb(const PermuteTableClass &forwardTable)
 
   //We reconstruct things from scratch to make sure we do the right
   //thing. We can try to incrementally make this faster.
-  cerr << "Constructing Cycle Table.\n";
   ConstructCycleTable(forwardTable.SpeciesNum,
 		      forwardTable.Slice1,forwardTable.Slice2); 
-  cerr << "Done Constructing Cycle Table.\n";
   return (1.0/(forwardTable.CurrentCycle.P)*NormInv);
 	 
 	   
@@ -190,4 +204,16 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
   }
   Norm = CycleTable(NumEntries-1).C;
   NormInv = 1.0/Norm;
+  for (int i=0; i<NumEntries; i++) {
+    CycleClass &cycle = CycleTable(i);
+//     cerr << "Length = " << cycle.Length << endl;
+//     cerr << "Cycle = [";
+//     for (int j=0; j<cycle.Length; j++)
+//       cerr << cycle.CycleRep[j] << " ";
+//     cerr << "]\n";
+//     cerr << "P = " << cycle.P << " C = " << cycle.C << endl;
+//     cerr << endl;
+//   
+//   cerr<<"finished with norm!"<<Norm<<endl;
+  }
 }

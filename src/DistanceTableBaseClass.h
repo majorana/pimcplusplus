@@ -72,6 +72,10 @@ inline void DistanceTableClass::MoveJoin (int oldJoin, int newJoin)
   DistTable.MoveJoin(Path.Permutation, oldJoin, newJoin);
   DispTable.MoveJoin(Path.Permutation, oldJoin, newJoin);
   ImageNumTable.MoveJoin(Path.Permutation, oldJoin, newJoin);
+//   SetMode(OLDMODE);
+//   UpdateAll();
+//   SetMode(NEWMODE);
+//   UpdateAll();
 }
 
 

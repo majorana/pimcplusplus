@@ -68,14 +68,25 @@ public:
       AB(1,particle) = AB(0,particle);
   }
 
+  inline void AcceptCopy (const Array<int,1> &activePtcls)
+  {
+    for (int i=0; i<activePtcls.size(); i++)
+      AcceptCopy(i);
+  }
+
   /// In case of rejection, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This
   /// copies from B to A.
   inline void RejectCopy (int particle)
   {
-
       AB(0,particle) = AB(1,particle);
   }
+  inline void RejectCopy (const Array<int,1> &activePtcls)
+  {
+    for (int i=0; i<activePtcls.size(); i++)
+      RejectCopy(i);
+  }
+
 
 };
 

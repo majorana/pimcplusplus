@@ -42,14 +42,14 @@ public:
 	     const Array <int,1> &activeParticle)
   {
       Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticle);
-
+      Permutation.AcceptCopy(activeParticle);
   }
 
   inline void RejectCopy(int startTimeSlice,int endTimeSlice, 
 	     const Array <int,1> &activeParticle )
   {
       Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticle);
-
+      Permutation.RejectCopy(activeParticle);
   }
 
   inline int SpeciesNum (string name)
