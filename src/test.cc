@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 
   PathDataClass myPathData;
   InputSectionClass inSection;
-  inSection.OpenFile("hydrogen.h5");  
+  inSection.OpenFile("hydrogen.txt");  
   cerr<<"I've opened the file\n";
   inSection.OpenSection("System");
   myPathData.Path.Read(inSection);
@@ -247,38 +247,39 @@ int main(int argc, char **argv)
 //   //  cerr<<"What the action class thinks the size is: ";
 //   //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
 //   //  PrintConfigClass myPrintConfig(myPathData);
-//   ofstream outfile;
-//   outfile.open("ourPath.dat");
-//   for (int counter=0;counter<100000;counter++){
-//     if ((counter % 1000) == 0){
-//       cerr << "Step #" << counter << ":\n";
-//       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
-// 	outfile<<myPathData.Path(slice,0)[0]<<" ";
-// 	outfile<<myPathData.Path(slice,0)[1]<<" ";
-// 	outfile<<myPathData.Path(slice,0)[2]<<" ";
-// 	outfile<<endl;
-//       }
-//       outfile<<myPathData.Path(0,0)[0]<<" ";
-//       outfile<<myPathData.Path(0,0)[1]<<" ";
-//       outfile<<myPathData.Path(0,0)[2]<<" ";
-//       outfile<<endl;
-//     }
+  ofstream outfile;
+  outfile.open("ourPath.dat");
+  int steps=1000000;
+  for (int counter=0;counter<steps;counter++){
+    if ((counter % 1000) == 0){
+      cerr << "Step #" << counter << ":\n";
+      for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
+	outfile<<myPathData.Path(slice,0)[0]<<" ";
+	outfile<<myPathData.Path(slice,0)[1]<<" ";
+	outfile<<myPathData.Path(slice,0)[2]<<" ";
+	outfile<<endl;
+      }
+      outfile<<myPathData.Path(0,0)[0]<<" ";
+      outfile<<myPathData.Path(0,0)[1]<<" ";
+      outfile<<myPathData.Path(0,0)[2]<<" ";
+      outfile<<endl;
+    }
       
-//     for (int counter2=0;counter2<2;counter2++){
-//       //cerr << "Doing step " << counter << endl;
+    for (int counter2=0;counter2<2;counter2++){
+      //cerr << "Doing step " << counter << endl;
       
-//       myBisectionMove.MakeMove();
-//       if (counter >= 0)
-// 	PC.Accumulate();
-//       //      myPrintConfig.Print();
-//     }
-//     myShiftMove.MakeMove();
-//   }
-//   PC.Print();
-//   cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
-//   //cerr<<"done! done!"<<endl;
-//   MPI_Finalize();
-//   outfile.close();
+      myBisectionMove.MakeMove();
+      if (counter >= steps/10)
+	PC.Accumulate();
+      //      myPrintConfig.Print();
+    }
+    myShiftMove.MakeMove();
+  }
+  PC.Print();
+  cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
+  //cerr<<"done! done!"<<endl;
+  MPI_Finalize();
+  outfile.close();
   
 }
   
