@@ -30,7 +30,7 @@ public:
   double SecondProtonKineticEnergy(int startSlice, int endSlice, int level);
   double dotprod(dVec vec1, dVec vec2, double mag);
   int FindOtherProton(int ptcl);
-  double NewRotKinAction(int startSlice, int endSlice, const Array<int,1> &activeParticles1,const Array<int, 1> &activeParticles2, int level);
+  double NewRotKinAction(int startSlice, int endSlice, const Array<int,1> &activeParticles, int level);
   double NewRotKinEnergy(int startSlice, int endSlice, int level);
   dVec CrossProd(dVec v1, dVec v2);
   double Mag(dVec v);

@@ -176,7 +176,8 @@ double TIP5PWaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 	if (Path.DoPtcl(ptcl2)){
 //          int PairIndex = PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2));
 	  
-	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
+	  for (int slice=startSlice;slice<endSlice;slice+=skip){
+//cerr << "slice " << slice << endl;
 	    dVec r, rp;
 	    double rmag, rpmag;
 	    PathData.Path.DistDisp(slice, ptcl1, ptcl2,
@@ -200,7 +201,7 @@ double TIP5PWaterClass::d_dBeta (int startSlice, int endSlice,  int level)
       for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {///loop over protons
 //  don't compute intramolecular interactions
 	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
-	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
+	  for (int slice=startSlice;slice<endSlice;slice+=skip){
 	    double rmag;
 	    dVec r;
 	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
@@ -218,7 +219,7 @@ double TIP5PWaterClass::d_dBeta (int startSlice, int endSlice,  int level)
       for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {///loop over electrons
 //  don't compute intramolecular interactions
 	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
-	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
+	  for (int slice=startSlice;slice<endSlice;slice+=skip){
 	    double rmag;
 	    dVec r;
 	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
@@ -861,18 +862,20 @@ double TIP5PWaterClass::SecondProtonKineticEnergy(int startSlice, int endSlice, 
   return spring;
 }
 
-double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Array<int,1> &activeParticles1,const Array<int, 1> &activeParticles2, int level)
+double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
 {
   double R = O_H_moment_arm;
 //cerr << "ok here we go: R is " << R << endl;
   double RotK = 0.0;
-//cerr << "active1 is " << activeParticles1 << " and active2 is " << activeParticles2 << endl;
-  int numChangedPtcls = activeParticles1.size();
+//cerr << "active is " << activeParticles << endl;
+  int numChangedPtcls = activeParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
+  int TotalNumParticles = Path.NumParticles();
+  int numMol = TotalNumParticles/5;
   for (int ptclIndex=0; ptclIndex<numChangedPtcls; ptclIndex++){
-    int ptcl1 = activeParticles1(ptclIndex);
-    int ptcl2 = activeParticles2(ptclIndex);
+    int ptcl1 = activeParticles(ptclIndex);
+    int ptcl2 = ptcl1 + numMol;
     double FourLambdaTauInv=1.0/(4.0*lambda_p*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
 //cerr << "ptcl1 is " << ptcl1 << " and ptcl2 is " << ptcl2 << " at slice " << slice << endl;
@@ -912,8 +915,8 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
 //cerr << "nprime " << nprime << endl;
       double vel_squared;
       if (n == nprime){
-//        //cerr << "EQUAL--------------------------------" << endl;
-        vel_squared = 0.0;
+//        cerr << "EQUAL--------------------------------" << endl;
+//        vel_squared = 0.0;
       }
       else{
 //cerr << "I DECIDED THEY WEREN'T EQUAL.  WHATEVER." << endl;
@@ -946,26 +949,81 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
         double alpha = HOH_half_angle;
         double SineAlpha = sin(alpha);
         double CosAlpha = cos(alpha);
-        double l = R*CosAlpha;
+        double l = R;
+        dVec u1 = Normalize(P1 - Scale(n,CosAlpha));
+        dVec z1 = Normalize(CrossProd(P1,n));
+        dVec u2 = Normalize(P2 - Scale(n,CosAlpha));
+        dVec z2 = Normalize(CrossProd(P2,n));
+        dVec u1prime = Normalize(P1prime - Scale(nprime,CosAlpha));
+        dVec z1prime = Normalize(CrossProd(P1prime,nprime));
+        dVec u2prime = Normalize(P2prime - Scale(nprime,CosAlpha));
+        dVec z2prime = Normalize(CrossProd(P2prime,nprime));
+        double psi1u = GetAngle(u1,r);
+        double psi2u = GetAngle(u2,r);
+        double psi1z = GetAngle(z1,r);
+        double psi2z = GetAngle(z2,r);
+        double psi1uprime = GetAngle(u1prime,r);
+        double psi2uprime = GetAngle(u2prime,r);
+        double psi1zprime = GetAngle(z1prime,r);
+        double psi2zprime = GetAngle(z2prime,r);
+//cerr << "P1 " << P1 << endl;
+//cerr << "n " << n << endl;
+//cerr << "P2 " << P2 << endl;
+
+//        double psi = Mag(psi1 - psi2)/2;
+//        double psiprime = Mag(psi1prime - psi2prime)/2;
+//cerr << "psi1u " << psi1u << " psi2u " << psi2u << " psi1z " << psi1z << " psi2z " << psi2z << endl;
+//cerr << "psi1uprime " << psi1uprime << " psi2uprime " << psi2uprime << " psi1zprime " << psi1zprime << " psi2zprime " << psi2zprime << endl;
+        double psi;
+        double psiprime;
+
+        if((psi1u<psi2u) && (psi1u<psi1z) && (psi1u<psi2z)){
+          l *= CosAlpha;
+          psi = psi1u;
+        }
+        else if((psi2u<psi1z)&&(psi2u<psi2z)){
+          l *= CosAlpha;
+          psi = psi2u;
+        }
+        else if(psi1z<psi2z){
+          psi = psi1z;
+        }
+        else{
+          psi = psi2z;
+        }
 //cerr << "l " << l << endl;
+//cerr << "I chose psi " << psi << endl;
         double vel_phi_squared = 2*l*l*phi*phi;
 //cerr << "vel_phi_sq " << vel_phi_squared << endl;
+
+        if((psi1uprime<psi2uprime) && (psi1uprime<psi1zprime) && (psi1uprime<psi2zprime)){
+          psiprime = psi1uprime;
+        }
+        else if((psi2uprime<psi1zprime)&&(psi2uprime<psi2zprime)){
+          psiprime = psi2uprime;
+        }
+        else if(psi1zprime<psi2zprime){
+          psiprime = psi1zprime;
+        }
+        else{
+          psiprime = psi2zprime;
+        }
+//cerr << "I chose psiprime " << psiprime << endl;
         // Calculate angle of rotation (psi)
 //cerr << "elements : cos(theta1) is " << CosTheta1 << " and sin(alpha) is " << SineAlpha << endl;
-        double psi = CalcPsi(theta1);
-        double psiprime = CalcPsi(theta1prime);
+//        double psi = CalcPsi(theta1);
+//        double psiprime = CalcPsi(theta1prime);
         //double psi = acos(CosTheta1/SineAlpha);
         //double psiprime = acos(CosTheta1prime/SineAlpha);
-//cerr << "psi " << psi << endl;
-//cerr << "psiprime " << psiprime << endl;
         double checkdeltapsi = acos(CosTheta2/SineAlpha) - acos(CosTheta2prime/SineAlpha);  
         double deltapsi = psiprime - psi;
 //cerr << "deltapsi is " << deltapsi << " and check " << checkdeltapsi << endl;
         double lpsi = R*SineAlpha;
-        double vel_psi_squared = 2*deltapsi*deltapsi*lpsi*lpsi;
+//cerr << "lpsi " << lpsi << endl;
+        double vel_psi_squared = 2*lpsi*lpsi*(psi*psi + psiprime*psiprime);
 //cerr << "vel_psi_sq " << vel_psi_squared << endl;
-        vel_squared = vel_psi_squared + vel_phi_squared;
-        //vel_squared = vel_psi_squared;//vel_phi_squared;
+        //vel_squared = vel_psi_squared + vel_phi_squared;
+        vel_squared = vel_psi_squared;//vel_phi_squared;
       }
 //cerr << "from which I calculate vel_squared                      " << vel_squared << endl;
 
@@ -1010,8 +1068,9 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
     int speciesNum  = Path.ParticleSpeciesNum(ptcl1);
     if (speciesNum == PathData.Path.SpeciesNum("p")){
       for (int slice=startSlice; slice<endSlice; slice+=skip) {
-	spring += (0.5*3)/levelTau;
-
+//cerr << "slice " << slice << " -- " << slice+skip << endl;
+	spring += (0.5*0)/levelTau;
+//cerr << spring << endl;
         // Load coords and their corresponding oxygens (COMs)
         dVec P1 = PathData.Path(slice,ptcl1);
         dVec P2 = PathData.Path(slice,ptcl2);
@@ -1054,20 +1113,74 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
           // Calculate azimuthal angle
           double phi = GetAngle(n,nprime);
           // Calculate lever arms and kinetic energy contributions (mass contained in lambda factor)
-          double alpha = HOH_half_angle;
-          double SineAlpha = sin(alpha);
-          double CosAlpha = cos(alpha);
-          double l = R*CosAlpha;
-          double vel_phi_squared = 2*l*l*phi*phi;
-          // Calculate angle of rotation (psi)
-          double psi = CalcPsi(theta1);
-          double psiprime = CalcPsi(theta1prime);
-          double checkdeltapsi = acos(CosTheta2/SineAlpha) - acos(CosTheta2prime/SineAlpha);  
-          double deltapsi = psiprime - psi;
+        double alpha = HOH_half_angle;
+        double SineAlpha = sin(alpha);
+        double CosAlpha = cos(alpha);
+        double l = R;
+        dVec u1 = P1 - Scale(n,CosAlpha);
+        u1 = Normalize(u1);
+        dVec z1 = Normalize(CrossProd(P1,n));
+        dVec z1prime = Normalize(CrossProd(P1prime,nprime));
+        dVec u1prime = P1prime - Scale(nprime,CosAlpha);
+        u1prime = Normalize(u1prime);
+        dVec u2 = P2 - Scale(n,CosAlpha);
+        u2 = Normalize(u2);
+        dVec z2 = Normalize(CrossProd(P2,n));
+        dVec u2prime = P2prime - Scale(nprime,CosAlpha);
+        u2prime = Normalize(u2prime);
+        dVec z2prime = Normalize(CrossProd(P2prime,nprime));
+        double psi1u = GetAngle(u1,r);
+        double psi2u = GetAngle(u2,r);
+        double psi1z = GetAngle(z1,r);
+        double psi2z = GetAngle(z2,r);
+        double psi1uprime = GetAngle(u1prime,r);
+        double psi2uprime = GetAngle(u2prime,r);
+        double psi1zprime = GetAngle(z1prime,r);
+        double psi2zprime = GetAngle(z2prime,r);
+//cerr << "P1 " << P1 << endl;
+//cerr << "n " << n << endl;
+//cerr << "P2 " << P2 << endl;
+
+//        double psi = Mag(psi1 - psi2)/2;
+//        double psiprime = Mag(psi1prime - psi2prime)/2;
+//cerr << "psi1u " << psi1u << " psi2u " << psi2u << " psi1z " << psi1z << " psi2z " << psi2z << endl;
+//cerr << "psi1uprime " << psi1uprime << " psi2uprime " << psi2uprime << " psi1zprime " << psi1zprime << " psi2zprime " << psi2zprime << endl;
+        double psi;
+        double psiprime;
+        if((psi1u<psi2u) && (psi1u<psi1z) && (psi1u<psi2z)){
+          l *= CosAlpha;
+          psi = psi1u;
+        }
+        else if((psi2u<psi1z)&&(psi2u<psi2z)){
+          l *= CosAlpha;
+          psi = psi2u;
+        }
+        else if((psi1z<psi2z)){
+          psi = psi1z;
+        }
+        else{
+          psi = psi2z;
+        }
+//cerr << "l " << l << endl;
+//cerr << "I chose psi " << psi << endl;
+        double vel_phi_squared = 2*l*l*phi*phi;
+//cerr << "vel_phi_sq " << vel_phi_squared << endl;
+        if((psi1uprime<psi2uprime) && (psi1uprime<psi1zprime) && (psi1uprime<psi2zprime)){
+          psiprime = psi1uprime;
+        }
+        else if((psi2uprime<psi1zprime)&&(psi2uprime<psi2zprime)){
+          psiprime = psi2uprime;
+        }
+        else if((psi1zprime<psi2zprime)){
+          psiprime = psi1zprime;
+        }
+        else{
+          psiprime = psi2zprime;
+        }
           double lpsi = R*SineAlpha;
-          double vel_psi_squared = 2*deltapsi*deltapsi*lpsi*lpsi;
-          vel_squared = vel_psi_squared + vel_phi_squared;
-          //vel_squared = vel_psi_squared;//vel_phi_squared;
+          double vel_psi_squared = 2*lpsi*lpsi*(psi*psi + psiprime*psiprime);
+          //vel_squared = vel_psi_squared + vel_phi_squared;
+          vel_squared = vel_psi_squared;//vel_phi_squared;
         }
 
         double GaussSum;
@@ -1082,7 +1195,7 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
     }
   }
   spring = spring/Z;
-//  cerr << "spring = " << spring << endl;
+//  cerr << "returning spring = " << spring << endl;
   return spring;
 }
 
