@@ -1,7 +1,7 @@
 #include "ActionClass.h"
 #include "PathDataClass.h"
 
-double kcutoff = 35.0;
+double kcutoff = 25.0;
 
 void SetupPathNaCl (PathClass &path)
 {
@@ -160,7 +160,7 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
   action.PairMatrix(1,1)=1;
   action.PairMatrix(0,1)=2;
   action.PairMatrix(1,0)=2;
-  int numKnots=4;
+  int numKnots=20;
   double kCut=kcutoff;
   action.OptimizedBreakup(numKnots,kCut);
   FILE *fout = fopen ("p-plong.dat", "w");
@@ -185,6 +185,7 @@ void MadelungTest(ActionClass &action)
   double shortRange=action.UAction(0,1,changedParticles,0);
   cerr<<"LongRange, ShortRange, Total: "<<longRange/4.0<<", "<<shortRange/4.0;
   cerr<<", "<<(longRange+shortRange)/4.0<<endl;
+  fprintf (stderr, "Total = %1.9f\n", (longRange+shortRange)/4.0);
 }
 
 main()
@@ -201,7 +202,7 @@ main()
   }
   
   {
-     cerr << "NaCl: Ashcroft and Mermin give 1.7476\n";
+     cerr << "NaCl: Ashcroft and Mermin give 1.747558\n";
      PathDataClass pathData;
      ActionClass action(pathData);
      SetupPathNaCl(pathData.Path);
