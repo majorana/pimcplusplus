@@ -10,7 +10,7 @@
 bool VarHDF5Class::ReadInto (double &val)
 {
   assert (Type == DOUBLE_TYPE);
-  assert (Dimensions.size() == 1);
+  assert (Dimensions.size() == 1 && Dimensions(0)==1);
   herr_t status = H5Dread(DataSetID, H5T_NATIVE_DOUBLE, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, &val);
   return (status == 0);
@@ -58,7 +58,7 @@ bool VarHDF5Class::ReadInto (blitz::Array<double,4> &val)
 bool VarHDF5Class::ReadInto (int &val)
 {
   assert (Type == INT_TYPE);
-  assert (Dimensions.size() == 1);
+  assert (Dimensions.size() == 1 && Dimensions(0)==1);
   herr_t status = H5Dread(DataSetID, H5T_NATIVE_INT, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, &val);
   return (status == 0);
@@ -107,7 +107,7 @@ bool VarHDF5Class::ReadInto (blitz::Array<int,4> &val)
 bool VarHDF5Class::ReadInto (string &val)
 {
   assert (Type == STRING_TYPE);
-  assert (Dimensions.size() == 1);
+  assert (Dimensions.size() == 1 && Dimensions(0)==1);
   hid_t type = H5Dget_type(DataSetID);
   size_t length = H5Tget_size(type);
 
@@ -203,7 +203,7 @@ bool VarHDF5Class::ReadInto (blitz::Array<string,4> &val)
 bool VarHDF5Class::ReadInto (bool &val)
 { 
   assert (Type == BOOL_TYPE);
-  assert (Dimensions.size() == 1);
+  assert (Dimensions.size() == 1 && Dimensions(0)==1);
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, &val);
   return (status == 0);
@@ -1333,6 +1333,11 @@ void IOTreeHDF5Class::GroupIterator(string member_name)
     newVar->Dimensions.resize(newVar->Dim);
     H5Sget_simple_extent_dims(newVar->DataSpaceID, newVar->Dimensions.data(), 
 			      NULL);
+    // If we have a 1D array with a single element, it's really an atomic element,
+    // not an array at all.
+    if (newVar->Dim == 1 && newVar->Dimensions(0) == 1)
+      newVar->Dim = 0;
+    
     VarList.push_back(newVar);
   }
   else if (statbuf.type == H5G_TYPE) {
