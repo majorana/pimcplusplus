@@ -1,5 +1,36 @@
 #include "kSpacePH.h"
 #include "../Integration/GKIntegration.h"
+#include "../Fitting/Fitting.h"
+#include <gsl/gsl_sf_expint.h>
+
+
+void kSpacePH::CalcTailCoefs (double r1, double r2)
+{
+  R1 = r1; R2 = r2;
+  const int numPoints=1000;
+  double nInv = 1.0/(double)(numPoints-1);
+
+  Array<double,1> coefs, error;
+  Array<double,1> y(numPoints), sigma(numPoints);
+  Array<double,2> F(numPoints,3);
+  
+  // Setup basis functions:
+  for (int i=0; i<numPoints; i++) {
+    double r = r1 + (r2-r1)*(double)i*nInv;
+    F(i,0) = 1.0/r;
+    F(i,1) = 1.0/(r*r);
+    F(i,2) = 1.0/(r*r*r);
+    sigma(i) = 1.0;
+    y(i) = PH.V(r);
+    sigma(i) = 1.0;
+  }
+  LinFitSVD (y, sigma, F, coefs, error, 1.0e-15);
+  Ctail1 = coefs(0);
+  Ctail2 = coefs(1);
+  Ctail3 = coefs(2);
+  HaveTailCoefs = true;
+}
+
 
 class aIntegrand
 {
@@ -116,3 +147,30 @@ public:
   { /* do nothing for now */ }
 };
 
+
+double kSpacePH::Vk (double k)
+{
+  // First, do the part of the integral up to R1 numerically
+  VIntegrand integrand(PH);
+  integrand.Setk(k);
+  GKIntegration<VIntegrand,GK31> integrator(integrand);  
+  double result = integrator.Integrate(0.0, R1, 1.0e-10);
+
+  // Now, do the remaining part up to infinity using analytic
+  // integratio of our fitted form.
+  assert (HaveTailCoefs);
+  
+  result += 4.0*M_PI*Ctail1/(k*k) * cos(k*R1);
+  result -= 4.0*M_PI*Ctail2/k*(gsl_sf_Si(k*R1) - 0.5*M_PI);
+  result -= 4.0*M_PI*Ctail3/k*(k*gsl_sf_Ci(k*R1) - sin (k*R1)/R1);
+  return result;
+}
+
+
+double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
+{
+  Vec3 deltaG = G-Gp;
+  double Gmag = sqrt(dot(deltaG, deltaG));
+  double v = Vk(Gmag);
+
+}
