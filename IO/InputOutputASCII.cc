@@ -251,6 +251,7 @@ void InputTreeASCIIClass::ReadWithoutComments(string fileName,
     }
   }
   buffer.resizeAndPreserve(bufferLoc);
+  infile2.close();
 }
 
 
@@ -855,4 +856,49 @@ bool VarASCIIClass::ReadInto (Array<bool,3> &val)
   Array<bool,3> &myVal = *((Array<bool,3>*)Value);
   val.resize(myVal.extent(0), myVal.extent(1), myVal.extent(2));
   val = myVal;
+}
+
+
+VarASCIIClass::~VarASCIIClass()
+{
+  if (Dim==0){
+    if (Type==INT_TYPE)
+      delete ((int *)Value);   
+    else if (Type==DOUBLE_TYPE)
+      delete ((double *)Value);
+    else if (Type==BOOL_TYPE)
+      delete ((bool *)Value);
+    else if (Type==STRING_TYPE)
+      delete ((string *)Value);
+  }
+  else if (Dim==1){
+    if (Type==INT_TYPE)
+      delete ((Array<int,1> *)Value);   
+    else if (Type==DOUBLE_TYPE)
+      delete ((Array<double,1> *)Value);
+    else if (Type==BOOL_TYPE)
+      delete ((Array<bool,1> *)Value);
+    else if (Type==STRING_TYPE)
+      delete ((Array<string,1> *)Value);
+  }
+  else if (Dim==2){
+    if (Type==INT_TYPE)
+      delete ((Array<int,2> *)Value);   
+    else if (Type==DOUBLE_TYPE)
+      delete ((Array<double,2> *)Value);
+    else if (Type==BOOL_TYPE)
+      delete ((Array<bool,2> *)Value);
+    else if (Type==STRING_TYPE)
+      delete ((Array<string,2> *)Value);
+  }
+  else if (Dim==3){
+    if (Type==INT_TYPE)
+      delete ((Array<int,3> *)Value);   
+    else if (Type==DOUBLE_TYPE)
+      delete ((Array<double,3> *)Value);
+    else if (Type==BOOL_TYPE)
+      delete ((Array<bool,3> *)Value);
+    else if (Type==STRING_TYPE)
+      delete ((Array<string,3> *)Value);
+  }
 }

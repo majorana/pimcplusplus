@@ -84,8 +84,7 @@ public:
   bool ReadInto (Array<bool,1> &v);
   bool ReadInto (Array<bool,2> &v);
   bool ReadInto (Array<bool,3> &v);
-
-
+  ~VarASCIIClass();
 };
 
 #endif
