@@ -51,8 +51,12 @@ public:
   /// Calculates the total action.
   double UAction (int startSlice, int endSlice, 
 		  const Array<int,1> &changedParticles, int level);
+  double UApproximateAction (int startSlice, int endSlice, 
+			     const Array<int,1> &changedParticles,int level);
   double KAction (int startSlice, int endSlice, 
 		  const Array<int,1> &changedParticles, int level);
+  double OtherAction(int startSlice, int endSlice, 
+		     const Array<int,1> &changedParticles, int level);
   double TotalAction(int startSlice, int endSlice, 
 		     const Array<int,1> &changedParticles, int level);
 

@@ -105,6 +105,87 @@ void ActionClass::Read(IOSectionClass& inSection)
   cerr << "Finished reading the action.\n"; 
 }
 
+double ActionClass::OtherAction(int startSlice, int endSlice, 
+		   const Array<int,1> &changedParticles, int level)
+{
+
+  int openLink=PathData.Path.OpenLink;
+  int openPtcl=PathData.Path.OpenPtcl;
+  dVec disp;
+  double dist;
+  PathData.Path.DistDisp(openLink,openPtcl,PathData.Path.NumParticles(),
+			 dist,disp); //This is distance between head and tail!
+  return log(0.1+(dist*dist)*(0.94*exp(-dist*dist)+0.06));
+
+
+}
+
+
+
+double ActionClass::UApproximateAction (int startSlice, int endSlice, 
+			     const Array<int,1> &changedParticles, int level)
+{
+  // First, sum the pair actions
+  for (int counter=0;counter<Path.DoPtcl.size();counter++){
+    Path.DoPtcl(counter)=true;
+  }
+  double TotalU = 0.0;
+  int numChangedPtcls = changedParticles.size();
+  int skip = 1<<level;
+  double levelTau = tau* (1<<level);
+  for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
+    int ptcl1 = changedParticles(ptcl1Index);
+    Path.DoPtcl(ptcl1) = false;
+    int species1=Path.ParticleSpeciesNum(ptcl1);
+    for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++) {
+      if (Path.DoPtcl(ptcl2)){
+	int PairIndex = PairMatrix(species1,
+				   Path.ParticleSpeciesNum(ptcl2));
+
+	for (int slice=startSlice;slice<endSlice;slice+=skip){
+	  dVec r, rp;
+	  double rmag, rpmag;
+	  double U;
+	  PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+				 rmag, rpmag, r, rp);
+	  
+	  if (level>0){
+	    double V1=PairActionVector(PairIndex)->V(rmag);
+	    double V2=PairActionVector(PairIndex)->V(rpmag);
+	    U=(PairActionVector(PairIndex)->U(rmag,0,0,level)+
+	       PairActionVector(PairIndex)->U(rpmag,0,0,level))/2.0;
+	    
+
+	  }
+	  else{
+	    double s2 = dot (r-rp, r-rp);
+	    double q = 0.5 * (rmag + rpmag);
+	    double z = (rmag - rpmag);
+
+
+	    U = PairActionVector(PairIndex)->U(q,z,s2, level);
+	    // Subtract off long-range part from short-range action
+	    if (PairActionVector(PairIndex)->IsLongRange())
+	      U -= 0.5* (PairActionVector(PairIndex)->Ulong(level)(rmag) +
+			 PairActionVector(PairIndex)->Ulong(level)(rpmag));
+
+	  }
+	  TotalU += U;
+	}
+      }
+    }
+  }
+  if (PathData.Path.LongRange){
+    // Now add in the long-range part of the action
+    // In primitive form, end slices get weighted by 1/2.  Others by 1.
+    for (int slice=startSlice;slice<=endSlice;slice+=skip) 
+      if ((slice==startSlice) || (slice == endSlice))
+	TotalU += 0.5*LongRange_U (slice, level);
+      else
+	TotalU += LongRange_U (slice, level);
+  }
+  return (TotalU);
+}
 
 double ActionClass::UAction (int startSlice, int endSlice, 
 			     const Array<int,1> &changedParticles, int level)
@@ -148,16 +229,10 @@ double ActionClass::UAction (int startSlice, int endSlice,
       }
     }
   }
-  // Now add in the long-range part of the action
-  // In primitive form, end slices get weighted by 1/2.  Others by 1.
-  if (UseRPA) {
-    for (int slice=startSlice;slice<=endSlice;slice+=skip) 
-      if ((slice==startSlice) || (slice == endSlice))
-	TotalU += 0.5*LongRange_U_RPA (slice, level);
-      else
-	TotalU += LongRange_U_RPA (slice, level);
-  }
-  else {
+
+  if (PathData.Path.LongRange){
+    // Now add in the long-range part of the action
+    // In primitive form, end slices get weighted by 1/2.  Others by 1.
     for (int slice=startSlice;slice<=endSlice;slice+=skip) 
       if ((slice==startSlice) || (slice == endSlice))
 	TotalU += 0.5*LongRange_U (slice, level);
@@ -165,6 +240,27 @@ double ActionClass::UAction (int startSlice, int endSlice,
 	TotalU += LongRange_U (slice, level);
   }
   return (TotalU);
+
+  if (PathData.Path.LongRange){
+    // Now add in the long-range part of the action
+    // In primitive form, end slices get weighted by 1/2.  Others by 1.
+    if (UseRPA) {
+      for (int slice=startSlice;slice<=endSlice;slice+=skip) 
+	if ((slice==startSlice) || (slice == endSlice))
+	  TotalU += 0.5*LongRange_U_RPA (slice, level);
+	else
+	  TotalU += LongRange_U_RPA (slice, level);
+    }
+    else {
+      for (int slice=startSlice;slice<=endSlice;slice+=skip) 
+	if ((slice==startSlice) || (slice == endSlice))
+	  TotalU += 0.5*LongRange_U (slice, level);
+	else
+	  TotalU += LongRange_U (slice, level);
+    }
+  }
+  return (TotalU);
+    
 }
 
 double ActionClass::KAction (int startSlice, int endSlice, 
@@ -205,8 +301,17 @@ double ActionClass::TotalAction(int startSlice, int endSlice,
 				const Array<int,1> &changedParticles,
 				int level)
 {
-  return UAction(startSlice,endSlice,changedParticles,level)+
-    KAction(startSlice,endSlice,changedParticles,level);
+
+  if (OpenLoops){
+    return UApproximateAction(startSlice,endSlice,changedParticles,level)+
+      KAction(startSlice,endSlice,changedParticles,level)+
+      OtherAction(startSlice,endSlice,changedParticles,level);
+  }
+  else {
+    return UAction(startSlice,endSlice,changedParticles,level)+
+      KAction(startSlice,endSlice,changedParticles,level);
+  }
+
 }
 
 
@@ -1217,8 +1322,10 @@ void ActionClass::Energy(int slice1, int level,
 		   
     }
   }
-  // Add long range part of energy
-  dU += 0.5*(LongRange_dU (slice1, level)+LongRange_dU(slice2,level));
+  if (PathData.Path.LongRange){
+    // Add long range part of energy
+    dU += 0.5*(LongRange_dU (slice1, level)+LongRange_dU(slice2,level));
+  }
 }
 
 
@@ -1240,6 +1347,9 @@ double ActionClass::PotentialEnergy (int slice)
 	vSum -= PairActionVector(PairIndex)->Vlong(rmag);
     }
   }
-  vSum += LongRange_V(slice);
+  if (PathData.Path.LongRange){
+    vSum += LongRange_V(slice);
+  }
   return vSum;
 } 
+ 

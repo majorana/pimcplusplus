@@ -24,9 +24,16 @@ private:
   TinyVector<T,2> Data;
 public:
   inline operator T() const     { return Data[ActiveCopy]; }
+  //  inline operator T&()           { return Data[ActiveCopy]; }
   void operator= (const T &val) { Data[ActiveCopy] = val;  }
   inline void AcceptCopy()      { Data[OLDMODE] = Data[NEWMODE];       }
   inline void RejectCopy()      { Data[NEWMODE] = Data[OLDMODE];       }
+  inline const T& operator[](int i) const
+    { return Data[i]; }
+  inline T& operator[](int i) 
+    { return Data[i]; }
+
+
 };
 
 

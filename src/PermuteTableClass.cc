@@ -63,6 +63,7 @@ void PermuteTableClass::ConstructHTable()
 void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
 {
   SetMode(NEWMODE);
+  //  cerr<<CycleRep(0)<<" "<<firstPtcl<<" "<<slice<<endl;
   dVec tempPos = path(slice, CycleRep(0)+firstPtcl);
   int tempPtcl = path.Permutation(CycleRep(0)+firstPtcl);
   for(int i=0;i<Length-1;i++) {
@@ -97,10 +98,18 @@ double PermuteTableClass::AttemptPermutation()
   double xi=PathData.Path.Random.Local(); 
   int index=FindEntry(xi);
   CurrentCycle = CycleTable(index);
+  //  cerr<<"Index is "<<xi<<" "<<index<<" "<<endl;
+  //  for (int j=0; j<CurrentCycle.Length; j++)
+  //    cerr << CurrentCycle.CycleRep[j] << " ";
+  //  cerr<<"Done"<<endl;
+  if (CurrentCycle.CycleRep[0]<0 || CurrentCycle.CycleRep[0]>10000){
+    PrintTable();
+  }
   //  cerr<<"After find entry"<<endl;
   // Now, apply the permutation to the Path
   int firstPtcl=PathData.Species(SpeciesNum).FirstPtcl;
   CurrentCycle.Apply(PathData.Path,firstPtcl,Slice2);
+  
 //   int diff = Slice2-Slice1;
 //   int numLevels = 0;
 //   while (diff != 1) {
@@ -175,7 +184,7 @@ void PermuteTableClass::PrintTable() const
     cerr << endl;
   }    
 }
-
+///the Gamma's must all be greater then 1 or this won't do the correct thing
 void PermuteTableClass::ConstructCycleTable(int speciesNum,
 					    int slice1, int slice2)
 {
@@ -208,9 +217,10 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
       hprod=HTable(i,j);
       tempPerm.Length=2;
       tempPerm.P=Gamma(1)*hprod*HTable(j,i);
-      tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;      
-      if (hprod != 0.0) {
+      tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;     
+      if (tempPerm.P > epsilon)
 	AddEntry(tempPerm);
+      if (hprod * Gamma(2)*Gamma(3)>epsilon) {
 	for (int k=i+1;k<N;k++){//3 and higher cycles
 	  //3 cycle permutations
 	  if (k!=j){
@@ -219,8 +229,9 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
 	    tempPerm.Length=3;
 	    tempPerm.P=Gamma(2)*hprod2*HTable(k,i);
 	    tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
-	    if (hprod2 != 0.0) {
+	    if (tempPerm.P > epsilon)
 	      AddEntry(tempPerm);
+	    if (hprod2 *Gamma(3) > epsilon) {
 	      for (int l=i+1;l<N;l++)
 		if ((l!=j) && (l!=k)){
 		  hprod3=hprod2*HTable(k,l);
@@ -228,7 +239,7 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
 		  tempPerm.Length=4;
 		  tempPerm.P=Gamma(3)*hprod3*HTable(l,i);
 		  tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
-		  if (tempPerm.P != 0.0) 
+		  if (tempPerm.P > epsilon) 
 		    AddEntry(tempPerm);
 		}
 	    }
