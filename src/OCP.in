@@ -35,7 +35,7 @@ Section (Observables)
       string type = "Energy";
       string Name = "Energy";
       string Description="Total Energy";
-      int freq = 2;
+      int freq = 20;
       int dumpFreq = 500;
     }
   Section (Observable)
@@ -45,7 +45,7 @@ Section (Observables)
       string Species1 = "e";
       string Species2 = "e";
       string Description="Electron-Electron Pair Correlation";
-      int freq = 20;
+      int freq = 40;
       int dumpFreq=700;
       Section (Grid)
 	{
@@ -54,6 +54,11 @@ Section (Observables)
 	  double end = 5.0;
 	  int NumPoints = 50;
 	}
+    }
+  Section (Observable)
+    {
+      string type = "PathDump";
+      string Name = "PathDump";
     }
 }
 
@@ -109,6 +114,10 @@ Section (Moves) {
 
 Section (Algorithm)
 {
+  Section (Loop) {
+    int steps = 10000;
+    Section (Observe) { string name = "PathDump"; }
+  }
   Section (Loop){ // Before Accumulating Observables
     int steps=1000; 
     Section (Loop){ 
@@ -128,6 +137,5 @@ Section (Algorithm)
     Section (Move) {string name = "electronShift"; }
     Section (Observe) {string name = "eePC";}
     Section (Observe) {string name = "Energy"; }
-    //    Section (Observe) {string name = "PathDump";}
   }
 }

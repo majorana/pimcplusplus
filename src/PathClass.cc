@@ -63,7 +63,7 @@ void PathClass::Read (IOSectionClass &inSection)
 	cerr << "A cubic box is current required for cubic initilization\n";
 	abort();
       }
-      int numPerDim = (int) ceil (pow((double)num, 1.0/3.0));
+      int numPerDim = (int) ceil (pow((double)num, 1.0/3.0)-1.0e-6);
       double delta = Box[0] / numPerDim;
       for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
 	int ix, iy, iz;
