@@ -137,7 +137,9 @@ class LinearGrid : public Grid
 };
 
 
-
+/// The OptimalGrid class stores a grid which has linear spacing at
+/// the origin and exponential spacing further out.  It has the
+/// analytic form \f[r_k = a\left(e^{kb}-1\right)\f].
 class OptimalGrid : public Grid
 {
  private:
@@ -184,9 +186,11 @@ class OptimalGrid : public Grid
 	return((int)floor(log(r/a + 1.0)/b + 0.5) -1);
     }
 
+  /// Returns a parameter
   double Geta() const
     { return (a); }
 
+  /// Returns b parameter
   double Getb() const
     { return (b); }
 
@@ -195,7 +199,8 @@ class OptimalGrid : public Grid
     // Do nothing
   }
 
-
+  /// This form of the constructor takes the number of points, the
+  /// maximum radius and the value of b.
   OptimalGrid (int numpoints, scalar rmax, scalar bval)
   {
     NumPoints = numpoints;
@@ -209,6 +214,7 @@ class OptimalGrid : public Grid
       grid(i) = a*(exp(b*(i+1))-1.0);
   }
 
+  /// This form of the constructor takes a, b, and the number of points.
   OptimalGrid (scalar aval, scalar bval, int numpoints)
   {
     a = aval;
@@ -222,7 +228,9 @@ class OptimalGrid : public Grid
     for (int i=0; i<NumPoints; i++)
       grid(i) = a*(exp(b*(i+1))-1.0);
   }
-
+  /// This form of the constructor takes a nuclear charge and a
+  /// maxmimum radius and chooses an appropriate number of points for
+  /// that atom.
   OptimalGrid (scalar Z, scalar rmax)
     {
       a = 4.34e-6/Z;
@@ -250,7 +258,11 @@ class OptimalGrid : public Grid
 
 
 
-
+/// LogGrid is a function whose gridpoints increase exponentially with
+/// the index.  That is, it has the analytic form
+/// \f[ r_k = \frac{r_0}{Z} \Delta^k.\f]  It is appropriate for
+/// functions which change rapidly near the origin but vary smoothly
+/// further out.
 class LogGrid : public Grid
 {
  public:

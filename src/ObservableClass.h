@@ -4,6 +4,14 @@
 #include "Common.h"
 #include "PathDataClass.h"
 
+class OutputFileClass
+{
+public:
+  int dummy;
+  /// Current has nothing in it.
+}
+
+
 /// This is the parent class for all observables.  It contains
 /// a pointer to PathData.
 class ObservableClass 
@@ -19,10 +27,35 @@ public:
   virtual void Initialize() = 0;
   /// Print running average to screen for debugging purposes
   virtual void Print() = 0;
+  virtual void Write(OutputFileClass &outputFile);
   /// The constructor.  Sets PathData references and calls initialize.
   ObservableClass(PathDataClass &myPathData) : PathData(myPathData)
   { Initialize();  }
 };
+
+
+/// This template class will be used to construct distributed versions
+/// of many different types of observables:  scalar observables, dVec
+/// observables, array observables, array of dVec observables, etc.
+/// We will write one class functions which correctly manages
+/// collecting observables from all processors with MPI.
+template class DistributedObservableClass<T> : public ObservableClass
+{
+  int dummy;
+
+}
+
+class ScalarObservableClass : public ObservableClass
+{
+protected:
+  virtual void MyBlockAverage(double &mean, double &error) = 0;
+public:
+  /// This routine will collect averages of
+  void Write (OutputFileClass &outputFile);
+
+
+}
+
 
 /// A pair correlation function observable.
 class PairCorrelation : public ObservableClass
