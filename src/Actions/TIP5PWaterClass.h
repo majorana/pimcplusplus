@@ -24,6 +24,8 @@ public:
   dVec COMCoords (int slice, int ptcl);
   dVec Displacement(int slice1, int slice2, int ptcl1, int ptcl2);
   int FindCOM(int ptcl);
+  double ProtonKineticAction (int slice1, int slice2, const Array<int,1> &changedParticles, int level);
+  double ProtonKineticEnergy (int slice1, int slice2, int level);
   TIP5PWaterClass (PathDataClass &pathData);
 };
 

@@ -22,7 +22,7 @@ void ModifiedEnergyClass::Accumulate()
   int slice1 = 0;
   int slice2 = PathData.Path.TotalNumSlices-1;
   tip5p = PathData.Actions.TIP5PWater.d_dBeta(slice1,slice2,0);
-  rotkin = PathData.Actions.TIP5PWater.RotationalEnergy(slice1,slice2,0);
+  rotkin = PathData.Actions.TIP5PWater.ProtonKineticEnergy(slice1,slice2,0);
   
   TotalSum   += kinetic + dUShort + dULong + node + tip5p + rotkin;
   KineticSum += kinetic;
@@ -88,6 +88,12 @@ void ModifiedEnergyClass::WriteBlock()
 {
   int nslices=PathData.Path.TotalNumSlices;
   double norm = 1.0/((double)NumSamples*(double)nslices);
+
+// NORMALIZE BY NUMBER OF MOLECULES *******
+  TotalSum = TotalSum/PathData.Path.numMol;
+  KineticSum = KineticSum/PathData.Path.numMol;
+  TIP5PSum = TIP5PSum/PathData.Path.numMol;
+  RotKinSum = RotKinSum/PathData.Path.numMol;
   
   TotalVar.Write(PathData.Path.Communicator.Sum(TotalSum)*norm);
   KineticVar.Write(PathData.Path.Communicator.Sum(KineticSum)*norm);
@@ -99,10 +105,10 @@ void ModifiedEnergyClass::WriteBlock()
   TIP5PVar.Write(PathData.Path.Communicator.Sum(TIP5PSum)*norm);
   RotKinVar.Write(PathData.Path.Communicator.Sum(RotKinSum)*norm);
 
-  cerr << "Total " << TotalSum*norm << " and per molecule: " << TotalSum*norm/PathData.Path.numMol << endl;
-  cerr << "Kinetic " << KineticSum*norm << " and per molecule: " << KineticSum*norm/PathData.Path.numMol << endl;
-  cerr << "TIP5P " << TIP5PSum*norm << " and per molecule: " << TIP5PSum*norm/PathData.Path.numMol << endl;
-  cerr << "Rotational Kinetic " << RotKinSum*norm << " and per molecule: " << RotKinSum*norm/PathData.Path.numMol << endl;
+  cerr << "Total " << TotalSum*norm << " per molecule." << endl;
+  cerr << "Kinetic " << KineticSum*norm << " per molecule." << endl;
+  cerr << "TIP5P " << TIP5PSum*norm << " per molecule." << endl;
+  cerr << "Rotational Kinetic " << RotKinSum*norm << " per molecule." << endl;
   
   TotalSum   = 0.0;
   KineticSum = 0.0;

@@ -486,3 +486,100 @@ int TIP5PWaterClass::FindCOM(int ptcl)
   Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
   return Optcl;
 }
+
+double TIP5PWaterClass::ProtonKineticAction (int slice1, int slice2, const Array<int,1> &changedParticles, int level)
+{
+  double TotalK = 0.0;
+  int numChangedPtcls = changedParticles.size();
+  int skip = 1<<level;
+  double levelTau = Path.tau* (1<<level);
+  for (int ptclIndex=0; ptclIndex<numChangedPtcls; ptclIndex++){
+    int ptcl = changedParticles(ptclIndex);
+    int species=Path.ParticleSpeciesNum(ptcl);
+    double lambda = lambda_p;
+    if (lambda != 0){
+      double FourLambdaTauInv=1.0/(4.0*lambda*levelTau);
+      for (int slice=slice1; slice < slice2;slice+=skip) {
+      // This is the same as Kinetic.Action except that coordinates are WRT their COMs.
+        dVec coord1 = PathData.Path(slice,ptcl);
+        dVec coord2 = PathData.Path(slice+skip,ptcl);
+        int Optcl = FindCOM(ptcl);
+        dVec Ocoord1 = PathData.Path(slice,Optcl);
+        dVec Ocoord2 = PathData.Path(slice+skip,Optcl);
+        coord1 -= Ocoord1;
+        coord2 -= Ocoord2;
+        dVec vel;
+        vel = coord1 - coord2;
+        double GaussProd = 1.0;
+        for (int dim=0; dim<NDIM; dim++) {
+  	  int NumImage=1;
+	  double GaussSum=0.0;
+	  for (int image=-NumImage; image<=NumImage; image++) {
+	    double dist = vel[dim]+(double)image*Path.GetBox()[dim];
+	    GaussSum += exp(-dist*dist*FourLambdaTauInv);
+	  }
+	  GaussProd *= GaussSum;
+        }
+        TotalK -= log(GaussProd);    
+      }
+    }
+  }
+  return (TotalK);
+}
+
+double TIP5PWaterClass::ProtonKineticEnergy (int slice1, int slice2, int level)
+{
+  double spring=0.0;
+  double levelTau=ldexp(Path.tau, level);
+  spring  = 0.0;  
+  int skip = 1<<level;
+  const int NumImage=1;  
+  for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++) {
+    int speciesNum  = Path.ParticleSpeciesNum(ptcl);
+    SpeciesClass &species = Path.Species(speciesNum);
+    double lambda = lambda_p;
+    if (lambda != 0.0) {
+      double FourLambdaTauInv = 1.0/(4.0*lambda*levelTau);
+      for (int slice=slice1; slice<slice2; slice+=skip) {
+	spring += (0.5*NDIM)/levelTau;
+      // This is the same as Kinetic.Action except that coordinates are WRT their COMs.
+        dVec coord1 = PathData.Path(slice,ptcl);
+        dVec coord2 = PathData.Path(slice+skip,ptcl);
+        int Optcl = FindCOM(ptcl);
+        dVec Ocoord1 = PathData.Path(slice,Optcl);
+        dVec Ocoord2 = PathData.Path(slice+skip,Optcl);
+        coord1 -= Ocoord1;
+        coord2 -= Ocoord2;
+        dVec vel;
+        vel = coord1 - coord2;
+	double Z = 1.0;
+	dVec GaussSum=0.0;
+	dVec numSum=0.0;
+	for (int dim=0; dim<NDIM; dim++) {
+	  for (int image=-NumImage; image<=NumImage; image++) {
+	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
+	    double d2overFLT = dist*dist*FourLambdaTauInv;
+	    double expPart = exp(-d2overFLT);
+	    GaussSum[dim] += expPart;
+	    numSum[dim] += -d2overFLT/levelTau* expPart;
+	  }
+	  Z *= GaussSum[dim];
+	}
+	double scalarnumSum=0.0;
+	for (int dim=0;dim<NDIM;dim++) {
+	  dVec numProd=1.0;
+	  for (int dim2=0;dim2<NDIM;dim2++) {
+	    if (dim2!=dim)
+	      numProd[dim] *= GaussSum[dim2];
+	    else 
+	      numProd[dim] *=  numSum[dim2];
+	  }
+	  scalarnumSum += numProd[dim];
+	} //cerr << "Z = " << Z << " scalarnumSum = " << scalarnumSum << endl;
+	spring += scalarnumSum/Z; 
+      }
+    }
+  }
+  //  cerr << "spring = " << spring << endl;
+  return spring;
+}
