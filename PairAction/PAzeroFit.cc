@@ -37,3 +37,7 @@ bool PAzeroFitClass::Read (IOSectionClass &in,
 
 
 
+bool PAzeroFitClass::IsLongRange()
+{
+  return false;
+}

@@ -7,7 +7,7 @@
 #include "PAclassicalFit.h"
 //#include "PAsFit.h"
 //#include "PAtricubicFit.h"
-//#include "PAzeroFit.h"
+#include "PAzeroFit.h"
 //#include "DavidPAClass.h"
 
 inline PairActionFitClass *ReadPAFit (IOSectionClass &in, 
@@ -30,8 +30,8 @@ inline PairActionFitClass *ReadPAFit (IOSectionClass &in,
   //  fit = new PAsFitClass;
   //else if (type == "tricubicfit")
   //  fit = new PAtricubicFitClass;
-  //else if (type == "zerofit")
-  //  fit=new PAzeroFitClass;
+  else if (type == "zerofit")
+    fit=new PAzeroFitClass;
   //else if (type=="DavidFit")
   //  fit = new DavidPAClass;
   else {

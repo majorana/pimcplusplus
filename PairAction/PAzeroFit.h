@@ -19,6 +19,7 @@ public:
 	      int NumBetas);
   double U(double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
+  bool IsLongRange();
   PAzeroFitClass()
   { 
 
