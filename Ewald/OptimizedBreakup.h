@@ -41,7 +41,7 @@ class OptimizedBreakup
 {
 private:
   BasisClass &Basis;
-  void Addk(double k);
+  void Addk(double k, double degeracy=1.0);
 public:
   // First element is |k|, second is degeneracy of the point.
   Array<TinyVector<double,2>,1> kpoints;

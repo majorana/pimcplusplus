@@ -34,7 +34,7 @@ double BasisClass::c_numerical(int n, double k)
 }
 
 
-void OptimizedBreakup::Addk(double k)
+void OptimizedBreakup::Addk(double k, double degeneracy)
 {
   int ki=0;
   while ((ki < kpoints.size()) && (fabs(k-kpoints(ki)[0]) > 1.0e-12))
@@ -42,17 +42,17 @@ void OptimizedBreakup::Addk(double k)
   if (ki == kpoints.size()) {
     kpoints.resizeAndPreserve(kpoints.size()+1);
     kpoints(ki)[0] = k;
-    kpoints(ki)[1] = 1.0;
+    kpoints(ki)[1] = degeneracy;
   }
   else
-    kpoints(ki)[1] += 1.0;
+    kpoints(ki)[1] += degeneracy;
 }
 
 
 ///////////////////////////////////////////
 /// OptimizedBreakup Memember Functions ///
 ///////////////////////////////////////////
-void OptimizedBreakup::SetkVecs(double kc, double kcont, double kMax)
+void OptimizedBreakup::SetkVecs(double kc, double kCont, double kMax)
 {
   int numk = 0;
   TinyVector<double,3> b;
@@ -60,9 +60,9 @@ void OptimizedBreakup::SetkVecs(double kc, double kcont, double kMax)
   b[1] = 2.0*M_PI/Basis.GetBox()[1];
   b[2] = 2.0*M_PI/Basis.GetBox()[2];
   TinyVector<int,1> maxIndex;
-  maxIndex[0] = (int)ceil(kMax/b[0]);
-  maxIndex[1] = (int)ceil(kMax/b[1]);
-  maxIndex[2] = (int)ceil(kMax/b[2]);
+  maxIndex[0] = (int)ceil(kCont/b[0]);
+  maxIndex[1] = (int)ceil(kCont/b[1]);
+  maxIndex[2] = (int)ceil(kCont/b[2]);
 
   TinyVector<double,3> k;
   for (int ix=-maxIndex[0]; ix<=maxIndex[0]; ix++) {
@@ -72,13 +72,26 @@ void OptimizedBreakup::SetkVecs(double kc, double kcont, double kMax)
       for (int iz=-maxIndex[2]; iz<=maxIndex[2]; iz++) {
 	k[2] = iz*b[2];
 	double k2 = dot(k,k);
-	if ((k2 > (kc*kc)) && (k2 <= (kMax*kMax))) {
+	if ((k2 > (kc*kc)) && (k2 < (kCont*kCont))) {
 	  Addk(sqrt(k2));
 	  numk++;
 	}
       }
     }
   }
+  // Now, add kpoints to the list with approximate degeneracy.
+  double kvol = b[0]*b[1]*b[2];
+  const int N = 1000;
+  double deltak = (kMax-kCont)/N;
+  for (int i=0; i<N; i++) {
+    double k1 = kCont+deltak*i;
+    double k2 = k1+deltak;
+    double k = 0.5*(k1+k2);
+    double vol = 4.0*M_PI/3.0*(k2*k2*k2-k1*k1*k1);
+    double degeneracy = vol/kvol;
+    Addk(k, degeneracy);
+  }
+  
 
   cerr << "Total k vecs = " << numk << endl;
   cerr << "non-degenerate k vecs = " << kpoints.size() << endl;
