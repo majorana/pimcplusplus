@@ -18,7 +18,7 @@ int main()
   BisectionMoveClass myBisectionMove;
   PairActionClass myPairAction;
   CommClass myCommunicator;
-  myPairAction.ReadDavidSquarerFile("/home/common/Codes/PIMC/UPI/RUNS/He_hp/He4.95.dm");
+  myPairAction.ReadDavidSquarerFile("../inputs/testcoul.dm");
   /*  MirroredArrayClass<int> myArray(5,5);
   for (int counter=0;counter<5;counter++){
     for (int counter2=0;counter2<5;counter2++){

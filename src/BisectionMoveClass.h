@@ -2,7 +2,7 @@
 #define BISECTIONMOVE_CLASS_H
 
 #include "Common.h"
-#include "MoveClass.h";
+#include "MoveClass.h"
 #include "ActionClass.h"
 
 class BisectionMoveClass : public MoveClass
