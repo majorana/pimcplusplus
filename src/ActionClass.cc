@@ -264,7 +264,8 @@ double ActionClass::CalcXk (int paIndex, int level, double k, double rc)
     double beta = pa.SmallestBeta;
     for (int i=0; i<level; i++)
       beta *= 2.0;
-    Xk -= beta*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc);
+    //Xk -= beta*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc);
+    Xk = -beta*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc);
     return Xk;
   }
   

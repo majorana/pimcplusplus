@@ -1,7 +1,7 @@
 #include "ActionClass.h"
 #include "PathDataClass.h"
 
-double kcutoff = 35.0;
+double kcutoff = 40.0;
 
 void SetupPathNaCl (PathClass &path)
 {
