@@ -47,15 +47,14 @@ public:
   }
   inline double operator[](int i) const
   { return Box[i]; }
-  inline double& operator[](int i)
-  { return Box[i]; }
+//   inline double& operator[](int i)
+//   { return Box[i]; }
   inline operator Vec3() const
   { return Box; }
 
   bool BreakSegment (Vec3 &r1, Vec3 &r2, Vec3 &wall1, Vec3 &wall2);
 
-  void PutPathsInBox (vector<OnePath*>& inList,
-		      vector<OnePath*>& outList);
+  void PutPathsInBox (vector<OnePath*>& inList);
 };
 
 inline void BoxClass::PutInBox (Vec3 &r)
@@ -76,7 +75,7 @@ protected:
   Array<int,2> PermArray;
   Array<SpeciesClass,1> Species;
   vector<OnePath*> Paths;
-  Vec3 Box;
+  BoxClass Box;
   void MakePaths(int frame);
 
   // member widgets:

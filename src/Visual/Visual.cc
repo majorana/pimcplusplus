@@ -87,7 +87,7 @@ void VisualClass::Read(string fileName)
   Array<double,1> box;
   assert (in.OpenSection("System"));
   assert (in.ReadVar ("Box", box));
-  Box[0] = box(0); Box[1] = box(1); Box[2] = box(2);
+  Box.Set (box(0), box(1), box(2));
   cerr << "Box = " << box << endl;
 
   double maxDim = max(max(box(0), box(1)), box(2));
@@ -334,9 +334,9 @@ int main(int argc, char** argv)
             << major << "." << minor << std::endl;
 
 //   // Instantiate and run the application.
-//   VisualClass visual;
-//   visual.Read (argv[1]);
-//   kit.run(visual);
+  VisualClass visual;
+  visual.Read (argv[1]);
+  kit.run(visual);
 
   Vec3 r2 (0.99, 0.2, 0.3), r1(1.09, 0.3, 0.4), wall1, wall2;
   BoxClass box;
@@ -417,8 +417,7 @@ void VisualClass::MakePaths(int frame)
       }
     Paths.push_back (&path);
   }
-  used = false;
-  
+  Box.PutPathsInBox (Paths);
 
 }
 
@@ -435,7 +434,6 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
   PutInBox (r1);
   PutInBox (r2);
   dVec disp = r2-r1;
-  cerr << "disp = " << disp << endl;
   for (int dim=0; dim<3; dim++) 
     if (disp[dim]<-0.5*Box[dim]) { // path wraps in + direction
       double d1 = 0.5*Box[dim]-r1[dim];
@@ -465,12 +463,13 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
   return false;
 }
 
-void BoxClass::PutPathsInBox (vector<OnePath*>& inList,
-			      vector<OnePath*>& outList)
+void BoxClass::PutPathsInBox (vector<OnePath*>& inList)
 {
-  //  vector<OnePath*> outList;
-  for (int i=0; i<outList.size(); i++)
-    delete outList[i];
+  // To be perfectly correct, we need to repeat this process three
+  // times to ensure that segments that cross the box corners get
+  // properly broken up into two or three segments.
+  //  for (int iter=0; iter<3; iter++) {
+  vector<OnePath*> outList;
   outList.resize(0);
   for (int in=0; in<inList.size(); in++) {
     OnePath *newPath = new OnePath;
@@ -490,7 +489,10 @@ void BoxClass::PutPathsInBox (vector<OnePath*>& inList,
 	newPath->Path.push_back(r1);
     }
     outList.push_back (newPath);
+    delete oldPath;
   }
-      
-
+  inList.resize(outList.size());
+  for (int i=0; i<outList.size(); i++)
+    inList[i] = outList[i];
+    // }
 }
