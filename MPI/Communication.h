@@ -71,7 +71,7 @@ public:
     MPI_Send (sendBuf, count, datatype, dest, tag, MPIComm);
   }
 
-  inline void Send (int toProc, Array<double,1> buff)
+  inline void Send (int toProc, Array<double,1> &buff)
   {
     Send(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
   }
@@ -83,7 +83,7 @@ public:
     MPI_Recv (recvBuf, count, datatype, source, tag, MPIComm, &status);
   }
 
-  inline void Receive (int toProc, Array<double,1> buff)
+  inline void Receive (int toProc, Array<double,1> &buff)
   {
     Receive(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
   }
@@ -126,19 +126,46 @@ public:
   }
 
 #else   // Serial version
-  inline int MyNode()
+  inline void SetWorld()
+  {
+    // Do nothing
+  }
+  inline int MyProc()
     {
       return 0;
     }
-  inline int NumNodes()
+  inline int NumProcs()
     {
       return 1;
     }
-  inline void AllGatherVector (Array<double,1> &SendVec, 
-			       Array<double,1> &RecvVec)
+  inline void AllGather (Array<double,1> &SendVec, 
+			 Array<double,1> &RecvVec)
     {
       RecvVec = SendVec;
     }
+  inline void Split (int color, CommunicatorClass &newComm)
+  {
+    // Do nothing
+  }
+  inline void Subset (Array<int,1> ranks, CommunicatorClass &newComm)
+  {
+    if (ranks.size() !=1) {
+      cerr << "Serial verion of code does not suport nontrial "
+	   << "subsets.  Exitting.\n";
+      exit(1);
+    }
+  }
+  inline void Send (int toProc, Array<double,1> &buff)
+  {
+    cerr << "Sends not supported in serial mode.\n";
+    exit(1);
+  }
+  inline void Receive (int toProc, Array<double,1> &buff)
+  {
+    cerr << "Receives not supported in serial mode.\n";
+    exit(1);
+  }
+
 
 #endif
 };  // End class CommunicatorClass
