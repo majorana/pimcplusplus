@@ -13,5 +13,7 @@ int main()
   PathDataClass myPathData;
   BisectionMoveClass myBisectionMove;
   PairActionClass myPairAction;
-  myPairAction.ReadDavidSquarerFile("He.4.95.dm");
+  //  myPairAction.ReadDavidSquarerFile("He4.95.dm");
+  MirroredArrayClass<int> myArray(5,5);
+  myArray.Set(0,0,1);
 }

@@ -1,6 +1,8 @@
 #ifndef COMM_CLASS_H
 #define COMM_CLASS_H
 
+#include "Common.h"
+
 class CommClass
 {
  public:

@@ -15,9 +15,15 @@ class MirroredArrayClass
 {
 private:
   Array<T,3> AB; /// (0=A 1=B, particles, timeslice)
-  int Write1, Write2;
+
+
 
 public:
+  inline MirroredArrayClass(int particleNum, int timeSliceNum)
+  {
+    AB.resize(2,particleNum,timeSliceNum);
+  }
+  MirroredArrayClass(){};
   /// Returns the active value.
   inline T operator()(int x,int y) const
   {

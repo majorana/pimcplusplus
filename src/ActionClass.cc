@@ -66,10 +66,11 @@ string PairActionClass::SkipTo(ifstream &infile,string skipToString)
   string lineString;
   do{
     getline(infile,lineString);
+
   } while (lineString.find(skipToString,0)==string::npos && !infile.eof());
 
   if (infile.eof()){
-    cout<<"ERROR!!!  No NDERIV found in Davids squarer file\n";
+    cout<<"ERROR!!!  No "<<skipToString<<" found in Davids squarer file\n";
   }
   return lineString;
 
@@ -80,9 +81,9 @@ void PairActionClass::ReadFORTRAN3Tensor(ifstream &infile,Array<double,3> &tempU
 {
 
   
-  for (int counterTau=0;counterTau<tempUkj.extent(2);counterTau++){
-    for (int counterUkj=0;counterUkj<tempUkj.extent(1);counterUkj++){
-      for (int counterGridPoints=0;counterGridPoints<tempUkj.extent(0);counterGridPoints++){
+  for (int counterTau=0;counterTau<tempUkj.extent(3);counterTau++){
+    for (int counterUkj=0;counterUkj<tempUkj.extent(2);counterUkj++){
+      for (int counterGridPoints=0;counterGridPoints<tempUkj.extent(1);counterGridPoints++){
 	infile>>tempUkj(counterGridPoints,counterUkj,counterTau);
       }
     }
@@ -130,10 +131,16 @@ int GetNextInt(string &s)
 string GetNextWord(string &s)
 {
   int counter=0;
+  while (s[counter] == ' '){
+    counter++;
+  }
+  int startSpot=counter;
   while (s[counter] != ' '){
     counter++;
   }
-  return s.substr(0,counter);
+  string toReturn=s.substr(startSpot,counter-startSpot);
+  s=s.substr(counter,s.size()-counter);
+  return toReturn;
 }
 
 double GetNextDouble(string &s)
@@ -158,62 +165,82 @@ double GetNextDouble(string &s)
 void PairActionClass::ReadDavidSquarerFile(string DMFile)
 {
   ifstream infile;
+  cout <<DMFile<<endl;
   infile.open(DMFile.c_str());  
+  if (infile.fail()){
+    cerr<<"CAN'T OPEN THE FILE!!!!!!!!!!";
+  }
   
+
   string NDERIVString = SkipTo(infile,"NDERIV");
   int numOfFits=GetNextInt(NDERIVString);
+
   //  NDERIVString.erase(NDERIVString.find("NDERIV"),strlen("NDERIV"));
 
   ///  2*(NDERIV+1);
   Grid *theGrid;
+
   for (int counter=0;counter<=numOfFits;counter++){ //Get the U's 
     string RankString =SkipTo(infile,"RANK");
     int theRank=GetNextInt(RankString);
+    cout<<theRank<<endl;
+
     if (theRank!=3){
       cerr<<"ERROR! ERROR! Rank was not 3";
+      counter--;
     }
-    int NumGridPoints=GetNextInt(RankString);
-    int NumUKJ=GetNextInt(RankString);
-    int NumTau=GetNextInt(RankString);
+    else {
+      int NumGridPoints=GetNextInt(RankString);
+      int NumUKJ=GetNextInt(RankString);
+      int NumTau=GetNextInt(RankString);
+      
+      
+      string RGridString =SkipTo(infile,"GRID 1");
+      string GridType=GetNextWord(RGridString);
+      double startGrid = GetNextDouble(RGridString);
+      double endGrid = GetNextDouble(RGridString);
     
-    string RGridString =SkipTo(infile,"GRID 1");
-    string GridType=GetNextWord(RGridString);
-    double startGrid = GetNextDouble(RGridString);
-    double endGrid = GetNextDouble(RGridString);
-    
-    if (GridType=="LINEAR"){
-      theGrid=new LinearGrid(startGrid,endGrid,NumGridPoints);
+      if (GridType=="LINEAR"){
+	theGrid=new LinearGrid(startGrid,endGrid,NumGridPoints);
+      }
+      else if (GridType=="LOG"){
+	double delta=pow((endGrid/startGrid),1.0/(NumGridPoints-1.0));
+	theGrid = new LogGrid(startGrid,delta,NumGridPoints);
+      }
+      
+      string TauGridString = SkipTo(infile,"GRID   3"); //We hope this is a log grid
+      GetNextWord(TauGridString);
+      GetNextWord(TauGridString); /// takes out the Grid  3
+      string shouldBeLog;
+      if  ((shouldBeLog=GetNextWord(TauGridString))!="LOG"){
+	cerr<<"ERROR!!! ERROR!!! The tau grid is not a LOG Grid\n";
+	cerr<<shouldBeLog<<endl;
+      }
+      double smallestTau=GetNextDouble(TauGridString);
+      double largestTau=GetNextDouble(TauGridString);
+      int numTauCalc=floor(log(largestTau/smallestTau)/log(2.0)+0.5-1.0); ///I think this -1 is correct but who knows
+      if (NumTau!=numTauCalc){
+	
+	cerr<<"ERROR!!! ERROR!!! num tau inconsistency \n";
+	cerr<<NumTau<< " "<<numTauCalc<<"  "<<log(largestTau/smallestTau)/log(2.0)-1.0<< endl;
+      }
+      string beginString=SkipTo(infile,"BEGIN density matrix table");
+      int NMax=GetNextInt(beginString); //This is magically the most accurate fit i.e. NDERIV-1
+      if (GetNextInt(beginString)!=1){ //i.e. if it's not U
+	cerr<<"ERROR!!! ERROR!!! We got the beta derivative and not U\n";
+      }
+      Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
+      
+      ReadFORTRAN3Tensor(infile,tempUkj);
+      for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
+	ukj(levelCounter).Init(theGrid,tempUkj(Range::all(),Range::all(),levelCounter));
+      }
+      tau=smallestTau;
+      n=NMax;
+      
     }
-    else if (GridType=="LOG"){
-      double delta=pow((endGrid/startGrid),1.0/(NumGridPoints-1.0));
-      theGrid = new LogGrid(startGrid,delta,NumGridPoints);
-    }
-    
-    string TauGridString = SkipTo(infile,"GRID  3"); //We hope this is a log grid
-    if  (GetNextWord(TauGridString)!="LOG"){
-      cerr<<"ERROR!!! ERROR!!! The tau grid is not a LOG Grid\n";
-    }
-    double smallestTau=GetNextDouble(TauGridString);
-    double largestTau=GetNextDouble(TauGridString);
-    int numTauCalc=floor(log(largestTau/smallestTau)/log(2.0)+0.5);
-    if (NumTau!=numTauCalc){
-      cerr<<"ERROR!!! ERROR!!! num tau inconsistency \n";
-    }
-    string beginString=SkipTo(infile,"BEGIN density matrix table");
-    int NMax=GetNextInt(beginString); //This is magically the most accurate fit i.e. NDERIV-1
-    if (GetNextInt(beginString)!=1){ //i.e. if it's not U
-      cerr<<"ERROR!!! ERROR!!! We got the beta derivative and not U";
-    }
-    Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
-
-    ReadFORTRAN3Tensor(infile,tempUkj);
-    for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
-      ukj(levelCounter).Init(theGrid,tempUkj(Range::all(),Range::all(),levelCounter));
-    }
-    tau=smallestTau;
-    n=NMax;
   }
-
+  
 
 //   for (counter=0;counter<=nderiv;counter++){ // Get the Beta derivatives
 

@@ -15,6 +15,10 @@ typedef enum {MOVEMODE, OBSERVABLEMODE} ModeType;
 
 typedef TinyVector<int,2> ParticleID;
 
+int Write1=0;
+int Write2=0; //These are the variables for writing 
+
+
 int GetCurrentTimeStamp();
 dVec GuassianRandomVec(double sigma);
 dVec dVecSubtract(dVec a,dVec b); //a-b

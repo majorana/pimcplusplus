@@ -1,6 +1,23 @@
 #include "MirroredArrayClass.h"
 
-void MirroredArrayClass::shiftData(int slicesToShift, CommClass &Communicator)
+
+//template <class T>
+//MirroredArrayClass<T>::MirroredArrayClass(int dim1, int dim2)
+//{
+
+
+//}
+
+//template <class T>
+//MirroredArrayClass<T>::MirroredArrayClass()
+//{
+//  cerr<<"You've called a not very useful constructor!!! WARNING!! WARNING!!!";
+//  AB.resize(2,0,0); 
+
+//}
+
+template <class T>
+void MirroredArrayClass<T>::shiftData(int slicesToShift, CommClass &Communicator)
 {
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
