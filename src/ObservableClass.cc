@@ -1,6 +1,5 @@
 #include "ObservableClass.h"
 
-void 
 
 
 
