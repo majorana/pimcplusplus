@@ -63,14 +63,16 @@ void PathClass::Read (IOSectionClass &inSection)
       assert (Positions.rows() == species.NumParticles);
       assert (Positions.cols() == species.NumDim);
       for (int ptcl=species.FirstPtcl; 
-	   ptcl<=species.LastPtcl; ptcl++)
+	   ptcl<=species.LastPtcl; ptcl++){
 	for (int slice=0; slice<NumTimeSlices(); slice++) {
+	  cerr<<ptcl;
 	  dVec pos;
 	  pos = 0.0;
 	  for (int dim=0; dim<species.NumDim; dim++)
 	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
 	  Path(slice,ptcl) = pos;
 	}      
+      }
     }
     else {
       cerr << "Unrecognize initialization strategy " 
@@ -112,6 +114,7 @@ void PathClass::Allocate()
   
   
   int numParticles = 0;
+
   /// Set the particle range for the new species
   for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
     SpeciesArray(speciesNum)->FirstPtcl = numParticles;
@@ -134,7 +137,7 @@ void PathClass::Allocate()
   }
   
   SetupkVecs();
-  Rho_k.resize(NumSpecies(), MyNumSlices, kVecs.size());
+  Rho_k.resize(MyNumSlices, NumSpecies(),kVecs.size());
 }
 
 
@@ -224,7 +227,7 @@ void PathClass::CalcRho_ks_Fast(int slice,int species)
       complex<double> tempC;
       double phi = r[dim] * kBox[dim];
       tempC=complex<double>(cos(phi), sin(phi));
-      C[dim](MaxkIndex[dim]) = 0.0;
+      C[dim](MaxkIndex[dim]) = 1.0;
       for (int n=1; n<=MaxkIndex[dim]; n++) {
 	C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
 	C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));

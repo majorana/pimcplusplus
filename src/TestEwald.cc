@@ -13,19 +13,20 @@ void SetupPath (PathClass &path)
   
   path.kCutoff = 30.0;
   
-  FermionClass protons, electrons;
-  protons.Name = "protons";
-  protons.lambda = 0.0;
-  protons.NumParticles = 4;
-  protons.NumDim = 3;
+  FermionClass *protons=new FermionClass();
+  FermionClass *electrons=new FermionClass();
+  protons->Name = "protons";
+  protons->lambda = 0.0;
+  protons->NumParticles = 4;
+  protons->NumDim = 3;
 
-  electrons.Name = "electrons";
-  electrons.lambda = 0.5;
-  electrons.NumParticles = 4;
-  electrons.NumDim = 3;
+  electrons->Name = "electrons";
+  electrons->lambda = 0.5;
+  electrons->NumParticles = 4;
+  electrons->NumDim = 3;
 
-  path.AddSpecies (&protons);
-  path.AddSpecies (&electrons);
+  path.AddSpecies (protons);
+  path.AddSpecies (electrons);
 
   path.Allocate();
 
