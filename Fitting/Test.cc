@@ -37,7 +37,7 @@ void PolyTest()
   cerr << "Errors      = " << errors << endl;
 }
     
-      
+
 
 
 main()
