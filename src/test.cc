@@ -168,18 +168,8 @@ int main(int argc, char **argv)
 {
   MPI_Init(&argc, &argv);
 
- 
-
-
-  
-
-  
-
-
-  
-
   PathDataClass myPathData;
-  InputSectionClass inSection;
+  IOSectionClass inSection;
   inSection.OpenFile("hydrogen.txt");  
   cerr<<"I've opened the file\n";
   inSection.OpenSection("System");
@@ -191,11 +181,11 @@ int main(int argc, char **argv)
   inSection.CloseSection(); //"Action"
  
   //Observable setup Hack!
-  PairCorrelation PC(myPathData);
+  //PairCorrelation PC(myPathData);
   //  PC.PathData = &myPathData;
-  PC.Species1 = 0;
-  PC.Species2 = 1;
-  PC.Initialize();
+  //PC.Species1 = 0;
+  //PC.Species2 = 1;
+  //PC.Initialize();
   //Observable Setup Done
 
   //Move Setup Hack
@@ -219,9 +209,9 @@ int main(int argc, char **argv)
 
 //   //  ActionClass myActionClass;
 //   //  setupIDParticleArray(myPathData);
-//   InputSectionClass *theInput=new InputSectionHDF5Class();
+//   IOSectionClass *theInput=new InputSectionHDF5Class();
 //   theInput->OpenFile("inputFile","nonameyet",NULL);
-//   InputSectionClass *pathInput;
+//   IOSectionClass *pathInput;
 //   theInput->FindSection("PathInfo",pathInput,true);
 //   pathInput->Rewind();
 //   myPathData.Path.Read(pathInput);
@@ -270,12 +260,12 @@ int main(int argc, char **argv)
       
       myBisectionMove.MakeMove();
       if (counter >= steps/3)
-	PC.Accumulate();
+	;//PC.Accumulate();
       //      myPrintConfig.Print();
     }
     myShiftMove.MakeMove();
   }
-  PC.Print();
+  //PC.Print();
   cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
   //cerr<<"done! done!"<<endl;
   MPI_Finalize();

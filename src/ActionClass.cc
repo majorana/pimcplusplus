@@ -4,7 +4,7 @@
 #include <string>
 #include <fstream>
 
-void ActionClass::Read(InputSectionClass& inSection)
+void ActionClass::Read(IOSectionClass& inSection)
 { 
   inSection.ReadVar ("tau", tau);
   int numPairActions=inSection.CountSections("PairAction"); 
@@ -41,8 +41,10 @@ void ActionClass::Read(InputSectionClass& inSection)
 
 double ActionClass::calcTotalAction(int startSlice, int endSlice, 
 				    Array<int,1> changedParticles,
-				    int level, double &PE, double &KE)
+				    int level)//, double &PE, double &KE)
 {
+  double PE, KE;
+
   // First, sum the pair actions
   Path.DoPtcl = true;
   PE = 0.0;
@@ -99,7 +101,7 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 }
 
  
-void PairActionClass::Read(InputSectionClass &inSection)
+void PairActionClass::Read(IOSectionClass &inSection)
 {
   string fileName;
   assert(inSection.ReadVar("dmfile",fileName));

@@ -1,6 +1,6 @@
 #include "SpeciesClass.h"
 
-bool SpeciesClass::Read(InputSectionClass &inSection)
+bool SpeciesClass::Read(IOSectionClass &inSection)
 {
   assert(inSection.ReadVar("Name",Name));
   assert(inSection.ReadVar("lambda",lambda));
@@ -8,14 +8,14 @@ bool SpeciesClass::Read(InputSectionClass &inSection)
   assert(inSection.ReadVar("NumDim",NumDim));
   return true;
 }
-bool FermionClass::Read(InputSectionClass &inSection)
+bool FermionClass::Read(IOSectionClass &inSection)
 {
   bool success = SpeciesClass::Read(inSection);
   return success;
 }
 
 
-SpeciesClass* ReadSpecies(InputSectionClass &inSection)
+SpeciesClass* ReadSpecies(IOSectionClass &inSection)
 {
   
   string typeString;

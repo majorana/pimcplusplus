@@ -3,7 +3,7 @@
 
 
 
-void PathClass::Read (InputSectionClass &inSection)
+void PathClass::Read (IOSectionClass &inSection)
 {
   SetMode (BOTHMODE);
   double tau;

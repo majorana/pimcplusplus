@@ -72,7 +72,7 @@ Section (PIMC)
 	  int N = 100;
 	  Section (Move) { string name = "epBisection"; }
 	}
-      Section {Observe} { string name = "all"; }
+      Section (Observe) { string name = "all"; }
       Section (Move) { string name = "MoveJoin"; }
     }
       

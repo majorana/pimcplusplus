@@ -13,12 +13,11 @@ class ObservableClass
 public:
   /// A reference to the PathData I'm observing
   PathDataClass &PathData;
+  IOSectionClass &IOSection;  
   
   /// Observe the state of the present path and add it to the
   /// running sum for averages.
   virtual void Accumulate() = 0;
-
-  IOSectionClass &IOSection;  
   virtual void WriteBlock()=0;
   virtual void ShiftData(int numTimeSlices)=0;
   /// The constructor.  Sets PathData references and calls initialize.
@@ -35,14 +34,14 @@ public:
 /// observables, array observables, array of dVec observables, etc.
 /// We will write one class functions which correctly manages
 /// collecting observables from all processors with MPI.
-template<class T> 
-class DistributedObservableClass : public ObservableClass
-{
-  int dummy;
+// template<class T> 
+// class DistributedObservableClass : public ObservableClass
+// {
+//   int dummy;
 
-  DistributedObservableClass(PathDataClass &myPathData) : ObservableClass (myPathData)
-  { /* Do nothing for now. */ }
-};
+//   DistributedObservableClass(PathDataClass &myPathData) : ObservableClass (myPathData)
+//   { /* Do nothing for now. */ }
+// };
 
 
 /// This class stores observables which will be averaged over all
@@ -69,11 +68,10 @@ public:
   {  Update(0, PathData.NumTimeSlices()-1); }
   /// Initialize my data.
   virtual void Initialize() = 0;
-  IOSectionClass &IOSection;  
   virtual void WriteBlock()=0;
   void ShiftData(int numTimeSlices);
-  LinkObservableClass (PathDataClass &myPathData, IOSectionClass &IOSection) 
-    : ObservableClass(myPathData, IOSection)
+  LinkObservableClass (PathDataClass &myPathData, IOSectionClass &ioSection) 
+    : ObservableClass(myPathData, ioSection)
   { 
     LinkArray.resize(PathData.NumTimeSlices());
     NumSamples=0;
@@ -117,9 +115,10 @@ public:
   void Initialize();
   /// My specialization of the virtual function.
   void Print();
-  PairCorrelation(PathDataClass &myPathData) : ObservableClass(myPathData)
+  PairCorrelation(PathDataClass &myPathData, IOSectionClass &ioSection) : 
+    ObservableClass(myPathData, ioSection) 
   { /* Do nothing for now. */ }
-  void Write (OutputFileClass &outputFile)
+  void Write (IOSectionClass &outputFile)
     {/*Currently doesn't do anything*/};
 };
 

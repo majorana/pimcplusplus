@@ -30,7 +30,7 @@ void ShiftMoveClass::MakeMove()
     
 }
 
-void BisectionMoveClass::Read(InputSectionClass *moveInput)
+void BisectionMoveClass::Read(IOSectionClass *moveInput)
 {
   moveInput->ReadVar("NumLevels",NumLevels);
   int tempNumParticlesToMove;
