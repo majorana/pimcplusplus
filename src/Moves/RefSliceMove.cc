@@ -48,7 +48,7 @@ void RefSliceMoveClass::MakeMoveMaster()
   int localRef = Path.GetRefSlice() - firstSlice;
   int bisectSlices = (1 << NumLevels);
   int minSlice = max(0, localRef - (bisectSlices>>1));
-  int maxSlice = min (Path.NumTimeSlices-1, localRef + (bissectSlices>>1));
+  int maxSlice = min (Path.NumTimeSlices()-1, localRef + (bisectSlices>>1));
   int slice1 = Path.Random.LocalInt(minSlice-maxSlice) + minSlice;
   int slice2 = slice1 + bisectSlices;
 
@@ -72,8 +72,9 @@ void RefSliceMoveClass::MakeMoveMaster()
     PathData.Path.BroadcastRefPath();
 
     // Calculate local nodal action
-    double 
-    
+    double localNodeAction = 
+      PathData.Actions.NodalActions(SpeciesNum)->Action
+      (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
   }
   // Otherwise, reject the whole move
   else 
@@ -101,7 +102,7 @@ void RefSliceMoveClass::MakeMoveSlave()
 }
 
 
-void RevSliceMoveClass::MakeMove()
+void RefSliceMoveClass::MakeMove()
 {
   
 
