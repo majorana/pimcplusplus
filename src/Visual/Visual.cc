@@ -53,6 +53,7 @@ void VisualClass::MakeFrame(int frame)
   for (int li=0; li<Paths.size(); li++) {
     PathObject* pathObj = new PathObject;
     pathObj->SetColor (0.0, 0.0, 1.0);
+    pathObj->SetRadius (min(min(Box[0], Box[1]), Box[2])*0.005);
     if (PathType == TUBES)
       pathObj->TubesSet (Paths[li]->Path);
     else
@@ -407,8 +408,8 @@ void VisualClass::MakePaths(int frame)
   for (int li=0; li<loopList.size(); li++) {
     vector<int> &loop = loopList[li];
     OnePath &path = (*new OnePath);
-    path.Path.resize(numSlices*loop.size());
-    path.Color.resize(numSlices*loop.size());
+    path.Path.resize(numSlices*loop.size()+1);
+    path.Color.resize(numSlices*loop.size()+1);
     int offset = 0;
     for (int pi=0; pi<loop.size(); pi++) {
       int ptcl = loop[pi];
@@ -419,6 +420,10 @@ void VisualClass::MakePaths(int frame)
       }
       offset +=  numSlices;
     }
+    // Close the path!!!
+    path.Path[path.Path.size()-1][0] = PathArray(frame,loop[0],0,0);
+    path.Path[path.Path.size()-1][1] = PathArray(frame,loop[0],0,1);
+    path.Path[path.Path.size()-1][2] = PathArray(frame,loop[0],0,2);
     // Now, make sure the path doesn't have any discontinuities 
     // because having different period images.
     for (int slice=0; slice<path.Path.size()-1; slice++) 
@@ -555,6 +560,10 @@ void BoxClass::PutPathsInBox (vector<OnePath*>& inList)
       Vec3 rlast = oldPath->Path[oldPath->Path.size()-1];
       PutInBox(rlast, dim);
       newPath->Path.push_back(rlast);
+      // Close the path
+//       rlast = oldPath->Path[0];
+//       PutInBox(rlast, dim);
+//       newPath->Path.push_back(rlast);
       outList.push_back (newPath);
       delete oldPath;
     }

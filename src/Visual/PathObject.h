@@ -18,6 +18,8 @@ public:
   void LinesSet (vector<Vec3> &path);
   void TubesSet (vector<Vec3> &path);
   void SetColor (double red, double green, double blue);
+  inline void SetRadius (double radius) 
+  { Radius = radius; }
   PathObject() : Closed(true), Radius (0.1)
   {
     Color = Vec3(0.0, 0.0, 1.0);
