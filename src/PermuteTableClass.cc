@@ -79,7 +79,19 @@ void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
 double PermuteTableClass::AttemptPermutation()
 {
   //Get a random number number from the local processor stream.
-  
+//   Array<int,1> TestArray(NumEntries);
+//   TestArray=0;
+//   int index;
+//   for (int counter=0;counter<1000000;counter++){
+//     double xi=PathData.Path.Random.Local(); 
+//     index=FindEntry(xi);
+//     TestArray(index)++;
+//   }
+//   //  PrintTable();
+//   //  cerr<<"Printing stuff: "<<endl;
+//   for (int counter=0;counter<TestArray.size();counter++){
+//     cerr<<TestArray(counter)<<endl;
+//   }
   double xi=PathData.Path.Random.Local(); 
   int index=FindEntry(xi);
   CurrentCycle = CycleTable(index);
@@ -111,10 +123,23 @@ double PermuteTableClass::CalcReverseProb(const PermuteTableClass &forwardTable)
   //thing. We can try to incrementally make this faster.
   ConstructCycleTable(forwardTable.SpeciesNum,
 		      forwardTable.Slice1,forwardTable.Slice2); 
-//   cerr << "Forward Table:\n";
-//   forwardTable.PrintTable();
-//   cerr << "Reverse Table:\n";
-//   PrintTable();
+  //  cerr << "Forward Table:\n";
+  //  forwardTable.PrintTable();
+  //  cerr << "Reverse Table:\n";
+  //  PrintTable();
+  ///Correct for gamma factors here
+
+
+//   int i=0;
+//   while (!(CycleTable(i)==forwardTable.CurrentCycle))
+//     i++;
+//   if (fabs(CycleTable(i).P-
+// 	   (1.0/(forwardTable.CurrentCycle.P)))>1e-12)
+//     cerr <<"BAD! BAD! BAD! "
+// 	 << CycleTable(i).P<<" "
+// 	 <<1.0/(forwardTable.CurrentCycle.P);
+//   }
+  
   return (1.0/(forwardTable.CurrentCycle.P)*NormInv);
 	 
 	   
@@ -163,11 +188,14 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
   int N=HTable.extent(0);
   for (int i=0; i<N; i++) {
     ///Single particle move
-    CycleClass tempPerm;
+
     double hprod=1.0;
+    double hprod2=1.0;
+    double hprod3=1.0;
+    CycleClass tempPerm;
     tempPerm.Length=1;
     tempPerm.CycleRep[0]=i;
-    tempPerm.P= Gamma(0);
+    tempPerm.P=Gamma(0);
     tempPerm.C=tempPerm.P;
     if (NumEntries!=0){
       tempPerm.C+=CycleTable(NumEntries-1).C;
@@ -176,9 +204,9 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
     for (int j=i+1; j<N; j++) {// 2 and higher cycles
       //2 cycle permutations
       tempPerm.CycleRep[1]=j;
-      hprod*=HTable(i,j);
+      hprod=HTable(i,j);
       tempPerm.Length=2;
-      tempPerm.P= Gamma(1)*hprod*HTable(j,i);
+      tempPerm.P=Gamma(1)*hprod*HTable(j,i);
       tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;      
       if (hprod != 0.0) {
 	AddEntry(tempPerm);
@@ -186,18 +214,18 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
 	  //3 cycle permutations
 	  if (k!=j){
 	    tempPerm.CycleRep[2]=k;
-	    hprod*=HTable(j,k);
+	    hprod2=hprod*HTable(j,k);
 	    tempPerm.Length=3;
-	    tempPerm.P= Gamma(2)*hprod*HTable(k,i);
+	    tempPerm.P=Gamma(2)*hprod2*HTable(k,i);
 	    tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
-	    if (hprod != 0.0) {
+	    if (hprod2 != 0.0) {
 	      AddEntry(tempPerm);
 	      for (int l=i+1;l<N;l++)
 		if ((l!=j) && (l!=k)){
-		  hprod*=HTable(k,l);
+		  hprod3=hprod2*HTable(k,l);
 		  tempPerm.CycleRep[3]=l;
 		  tempPerm.Length=4;
-		  tempPerm.P=Gamma(3)*hprod*HTable(l,i);
+		  tempPerm.P=Gamma(3)*hprod3*HTable(l,i);
 		  tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
 		  if (tempPerm.P != 0.0) 
 		    AddEntry(tempPerm);

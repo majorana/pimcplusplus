@@ -27,6 +27,17 @@ class CycleClass
   void Apply (PathClass &path, int firstPtcl, int timeSlice);
 
 };
+inline bool operator==(const CycleClass &a,const CycleClass &b)
+{
+  if (a.Length!=b.Length){
+    return false;
+  }
+  for (int counter=0;counter<a.Length;counter++){
+    if (a.CycleRep[counter]!=b.CycleRep[counter])
+      return false;
+  }
+  return true;
+}
 
 
 
@@ -45,6 +56,7 @@ class PermuteTableClass
  public:
   double Norm, NormInv;
   inline int FindEntry(double xi);  
+  inline int FindEntrySlow(double xi);  
 
 
   int NumEntries;
@@ -88,27 +100,68 @@ inline void PermuteTableClass::AddEntry(const CycleClass &cycle)
   NumEntries++;
 }
 
+
+inline int PermuteTableClass::FindEntrySlow(double xi)
+{
+  xi *= Norm; 
+  int num=0;
+  while (CycleTable(num).C<xi){
+    num++;
+  }
+  return num;
+  
+}  
+
 //Pass a random number between 0 and 1 to this function and it
 //returns the index of the permutation with the appropriate
 //probability. 
 inline int PermuteTableClass::FindEntry(double xi) 
 {
   // Do a binary search
+  //  int toCheck=FindEntrySlow(xi);
   xi *= Norm; 
   int hi = NumEntries-1;
   int lo = 0;
-  if (xi < CycleTable(lo).C)
-    return (lo);
-  int attempt = (hi+lo)>>1;
-  while (attempt != lo) {
-    attempt = (hi+lo)>>1;
-    if (CycleTable(attempt).C > xi)
-      hi = attempt;
-    else
-      lo = attempt;
+
+  if (xi < CycleTable(0).C){
+//     if (0!=toCheck){
+//       cerr<<"ERROR! ERROR! We are DUMB!"<<endl;
+//     }
+    return (0);
   }
-  return (hi);
+
+
+  while (hi-lo>1){
+    int attempt = (hi+lo)>>1;
+    if (xi<CycleTable(attempt).C)
+      hi=attempt;
+    else 
+      lo=attempt;
+  }
+//   if (hi!=toCheck)
+//       cerr<<"ERROR! ERROR! We are DUMB!"<<endl;
+  return hi;
 }
+
+
+//   while (attempt != lo) {
+//     attempt = (hi+lo)/2;
+//     if (CycleTable(attempt).C > xi)
+//       hi = attempt;
+//     else
+//       lo = attempt;
+//   }
+//   if (hi!=toCheck){
+//     cerr<<"ERROR! ERROR! We are DUMB!"<<endl;
+//   }
+//   return (hi);
+  
+//   int num=0;
+//   while (CycleTable(num).C<xi){
+//     num++;
+//   }
+//   return num;
+
 
 
 #endif

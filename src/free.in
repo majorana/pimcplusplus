@@ -11,12 +11,12 @@ Section (System)
       string Name="p";
       double lambda=1.0; //classical particle
       string Type="FERMION";
-      int NumParticles=3;
+      int NumParticles=4;
       int NumDim=3;
       string InitPaths="FIXED";
-      Array<double,2> Positions(3,3)=[0.0, 0.1,0.2, 
-				      0.0, 0.1,0.2,
-                                      0.0, 0.1,0.2];
+      Array<double,2> Positions(4,3)=[0.0, 0.1,-0.1,0.2, 
+				      0.0, 0.1,-0.1,0.2,
+                                      0.0, 0.1,-0.1,0.2];
     }
   }
 }
@@ -29,7 +29,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "simplePerm.h5";
+  string OutFile = "feb27.h5";
   Section (Observable)
     {
       string type = "Energy";
@@ -127,7 +127,7 @@ Section (Moves){
 Section (Algorithm)
 {
   Section (Loop){ // Before Accumulating Observables
-    int steps=5000; 
+    int steps=10000; 
     Section (Loop){ 
 
       int steps=3;
