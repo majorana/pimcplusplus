@@ -135,6 +135,15 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel):
 
 
 
+def MeanErrorString (mean, error):
+     meanDigits = math.floor(math.log(abs(mean))/math.log(10))
+     rightDigits = -math.floor(math.log(error)/math.log(10))+1
+     formatstr = '%1.' + '%d' % rightDigits + 'f'
+     print formatstr
+     meanstr  = formatstr % mean
+     errorstr = formatstr % error
+     return (meanstr, errorstr)
+
 def ProcessScalarSection(infile,doc,currNum):
      sectionName=infile.GetName()
      doc.append(Heading(1,sectionName))
@@ -142,6 +151,7 @@ def ProcessScalarSection(infile,doc,currNum):
     #put description
      myTable=Table()
      myTable.body=[['','Mean','Variance','Error','Kappa']]
+     myTable.width='50%'
      numVars=infile.CountVars()
 #     print "Num vars is ",numVars
      for counter in range(0,numVars):
@@ -149,12 +159,33 @@ def ProcessScalarSection(infile,doc,currNum):
           if type(data)==numarray.numarraycore.NumArray:
                currNum=currNum+1
                varName=infile.GetVarName(counter)
+               baseName = varName+repr(currNum)
                toAddList.append(Name(sectionName+varName+repr(currNum)))
                toAddList.append(Heading(2,varName))
-               myImg=ProduceTracePicture(data,varName+repr(currNum),'Blocks',varName)
+               myImg=ProduceTracePicture(data, baseName,'Blocks',varName)
                toAddList.append(myImg)
+
+##   Write ASCII data to a file
+               asciiFileName = baseName + '.dat'
+               asciiFile = open (asciiFileName, "w")
+               n = len(data)
+               for i in range(0,n):
+                    asciiFile.write('%20.16e\n' % data[i])
+               asciiFile.close()
+               psFileName=baseName+'.ps'
+               doc.append(BR())
+               fileTable = Table()
+               fileTable.body = [[Href(psFileName,'PostScript'), Href(asciiFileName,'ASCII data')]]
+               fileTable.border=0
+               fileTable.width='40%'
+               fileTable.column1_align='center'
+               fileTable.cell_align='center'
+               toAddList.append(fileTable)
+               
                (mean,var,error,kappa)=stats.Stats(data)
-               myTable.body.append([Href("#"+sectionName+varName+repr(currNum),varName),mean,var,error,kappa])
+               (meanstr, errorstr) = MeanErrorString (mean, error)
+               myTable.body.append([Href("#"+sectionName+varName+repr(currNum),varName),\
+                                    meanstr,'%1.2e' % var,errorstr,'%1.2f' % kappa])
      doc.append(myTable)
      for counter in range(0,len(toAddList)):
           doc.append(toAddList[counter])
@@ -171,9 +202,9 @@ def ProcessSystemInfo(infile):
      systemTable=Table("System")
      systemTable.body=[["tau",repr(tau)]]
      systemTable.body.append(["# of Slices",repr(numTimeSlices)])
-     systemTable.body.append(["beta",repr(beta)])
-     systemTable.body.append(["temperature",repr(temp)])
-     systemTable.body.append(["Box","[ "+repr(box[0])+",  "+repr(box[1])+",  "+repr(box[2])+" ]"])
+     systemTable.body.append(["beta", '%1.2f' % beta])
+     systemTable.body.append(["temperature", '%1.4e' % temp])
+     systemTable.body.append(["Box","[ "+'%1.2f' % box[0]+",  "+ '%1.2f' % box[1]+",  "+'%1.2f' % box[2]+" ]"])
      speciesTable=Table("Species")
      speciesTable.body=[]
      speciesTable.body.append(["Name","NumParticles","lambda","Type"])
