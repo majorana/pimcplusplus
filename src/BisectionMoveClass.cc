@@ -13,17 +13,17 @@ void ShiftMoveClass::MakeMove()
   
   if (numTimeSlicesToShift > 0){
     for (int counter=0;counter<PathData.NumSpecies();counter++){
-      PathData.MoveJoin(1);
+      //      PathData.MoveJoin(1);
       PathData.ShiftData(numTimeSlicesToShift);
-      PathData.Join=1+numTimeSlicesToShift;
+      //      PathData.Join=1+numTimeSlicesToShift;
     }
   }
   else if (numTimeSlicesToShift<=0){
     for (int counter=0;counter<PathData.NumSpecies();counter++){
-      PathData.MoveJoin(PathData.NumTimeSlices()-2); //< -1 so you don't overflow and -1 again because you 
+      //      PathData.MoveJoin(PathData.NumTimeSlices()-2); //< -1 so you don't overflow and -1 again because you 
                                                               //don't actually want to be at the entire end
       PathData.ShiftData(numTimeSlicesToShift);
-      PathData.Join=PathData.NumTimeSlices()-2+numTimeSlicesToShift;
+      //      PathData.Join=PathData.NumTimeSlices()-2+numTimeSlicesToShift;
     }
   }
   
@@ -69,7 +69,10 @@ void BisectionMoveClass::MakeMove()
       -oldLogSampleProb+newLogSampleProb+currActionChange-prevActionChange;
     //cerr << "prevActionChange = " << prevActionChange << endl;
     //cerr << "logAcceptProb = " << logAcceptProb << endl;
-    //cerr<<"My new action is "<<newAction<<" and my old action was "<<oldAction<<endl;
+    //cerr<<"My new action is "<<newAction<<" and my old action was
+    //"<<oldAction<<endl;
+    //    cout<<"The log of the accept prob is " << logAcceptProb;
+    //    cout<<" "<<oldAction<<" "<<newAction<<" "<<endl;
     if (-logAcceptProb<log(sprng())){///reject conditin
       toAccept=false;
       //      break;

@@ -40,8 +40,8 @@ void setupIDParticleArray(PathDataClass &myPathData)
   (*myProtonptr).lambda=0;
   (*myElectronptr).NumParticles=1;
   (*myProtonptr).NumParticles=1;
-  myPathData.Path.AddSpecies(myProtonptr);
   myPathData.Path.AddSpecies(myElectronptr);
+  myPathData.Path.AddSpecies(myProtonptr);
   myPathData.Path.Allocate();
     
   //  (*myElectronptr).Path.Resize(1,NumTimeSlices);
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
   //  cerr<<"What the action class thinks the size is: ";
   //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
   //  PrintConfigClass myPrintConfig(myPathData);
-  for (int counter=0;counter<50000;counter++){
+  for (int counter=0;counter<1000000;counter++){
     if ((counter % 1000) == 0)
       cerr << "Step #" << counter << ":\n";
     for (int counter2=0;counter2<2;counter2++){

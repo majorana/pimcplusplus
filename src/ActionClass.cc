@@ -21,7 +21,8 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
     doptcl2(ptcl1) = false;
     int species1=Path.ParticleSpeciesNum(ptcl1);
     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
-      if (doptcl2(ptcl2))
+      if (doptcl2(ptcl2)){
+
 	for (int slice=startSlice;slice<endSlice;slice+=skip){
 	  dVec r1=Path(slice,ptcl1);
 	  dVec r2=Path(slice,ptcl2);
@@ -37,8 +38,13 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	  int PairIndex = PairMatrix(species1,
 				     Path.ParticleSpeciesNum(ptcl2));
 	  TotalU += PairActionVector(PairIndex).calcUsqz(s,q,z, level);
+	  
 	}
+      }
+      
     }
+    //    cout<<"Lambda is "<<Path.Species(species1).lambda;
+    //    cout<<"levelTau is "<<levelTau<<endl;
     double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
       dVec r1 = Path(slice,ptcl1);
@@ -96,8 +102,8 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 
   
 
-  
-  TotalU=0; 
+//  cout<<"The total potential action is "<< TotalU<<endl;
+//  cout<<"The total kinetic action is "<< TotalK<<endl;
   return (TotalK + TotalU);
 
 
