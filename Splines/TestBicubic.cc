@@ -119,7 +119,7 @@ void BCSplineTest3()
 
 main()
 {
-  BCSplineTest3();
+  BCSplineTest2();
 
 
 }
