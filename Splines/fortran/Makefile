@@ -11,4 +11,4 @@ clean:
 	rm -f *.o
 
 .f.o:
-	g77 -g -O3 -c -o $*.o $<
+	$(F77) -g -O3 -c -o $*.o $<
