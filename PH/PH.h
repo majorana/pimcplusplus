@@ -45,7 +45,7 @@ public:
   {
     assert(inSection.ReadVar("Z", Z));
     assert(inSection.OpenSection("V"));
-    //V.Read (inSection);
+    V.Read (inSection);
     inSection.CloseSection();
   }
 
@@ -156,7 +156,6 @@ public:
 
   virtual void Write (OutputSectionClass &outSection)
   {
-    outSection.WriteVar ("Type", "PH_CubicSpline");
     outSection.WriteVar ("CoreRadius", CoreRadius);
     outSection.WriteVar ("Z", Z);
     outSection.WriteVar ("Zion", Zion);
@@ -180,7 +179,26 @@ public:
 
   virtual bool Read (InputSectionClass &inSection)
   {
-    cerr << "Should never get to PseudoHamiltonian base class.\n";
+    assert (inSection.ReadVar ("CoreRadius", CoreRadius));
+    assert (inSection.ReadVar ("Z", Z));
+    assert (inSection.ReadVar ("Zion", Zion));
+    assert (inSection.ReadVar ("NumElecs", NumElecs));
+    assert (inSection.ReadVar ("Amin", Amin));
+    assert (inSection.ReadVar ("Amax", Amax));
+    assert (inSection.ReadVar ("Bmin", Bmin));
+    assert (inSection.ReadVar ("Bmax", Bmax));
+    assert (inSection.ReadVar ("Vmin", Vmin));
+    assert (inSection.ReadVar ("Vmax", Vmax));
+    assert (inSection.ReadVar ("UseVHXC", UseVHXC));
+    if (UseVHXC){
+      assert(inSection.OpenSection("VHXC"));
+      VHXC.Read (inSection);
+      inSection.CloseSection();
+    }
+    assert(inSection.OpenSection ("FullCoreV"));
+    FullCoreV = new FullCorePotential;
+    FullCoreV->Read (inSection);
+    inSection.CloseSection();
   } 
 
 
@@ -350,9 +368,60 @@ public:
 
   void Write (OutputSectionClass &outSection)
   {
+    outSection.WriteVar ("Type", "PH_CubicSpline");
     // Write common variables
     PseudoHamiltonian::Write(outSection);
+    outSection.OpenSection ("Agrid");
+    Agrid.Write(outSection);
+    outSection.CloseSection();
+    outSection.OpenSection ("Bgrid");
+    Bgrid.Write(outSection);
+    outSection.CloseSection();
+    outSection.OpenSection ("Vgrid");
+    Vgrid.Write(outSection);
+    outSection.CloseSection();
+    Array<double,1> Params;
+    Params.resize(Agrid.NumPoints);
+    for (int i=0; i<Agrid.NumPoints; i++)
+      Params(i) = PA.Params(i);
+    outSection.WriteVar ("PAparams", Params);
+
+    Params.resize(Bgrid.NumPoints);
+    for (int i=0; i<Bgrid.NumPoints; i++)
+      Params(i) = PB.Params(i);
+    outSection.WriteVar ("PBparams", Params);
+
+    Params.resize(Vgrid.NumPoints);
+    for (int i=0; i<Vgrid.NumPoints; i++)
+      Params(i) = Vfunc.Params(i);
+    outSection.WriteVar ("Vfuncparams", Params);
   }
+
+  bool Read (InputSectionClass &inSection)
+  {
+    PseudoHamiltonian::Read(inSection);
+    assert(inSection.OpenSection("Agrid"));
+    Agrid.Read(inSection);
+    inSection.CloseSection();
+    
+    assert(inSection.OpenSection("Bgrid"));
+    Bgrid.Read(inSection);
+    inSection.CloseSection();
+
+    assert(inSection.OpenSection("Vgrid"));
+    Vgrid.Read(inSection);
+    inSection.CloseSection();
+   
+    Array<double,1> Params;
+    assert(inSection.ReadVar ("PAparams", Params));
+    PA.Init (&Agrid, Params, 0.0, 0.0);
+    assert(inSection.ReadVar ("PBparams", Params));
+    PB.Init (&Bgrid, Params, 0.0, 0.0);
+    assert(inSection.ReadVar ("Vfuncparams", Params));
+    Vfunc.Init(&Vgrid, Params, 5.0e30, FullCoreV->Deriv(CoreRadius));
+    return (true);
+   }
+
 
   void Write(FILE *fout);
   void Write(char *FileName);
@@ -650,7 +719,7 @@ public:
     if (UseVHXC)
       {
 	assert(inSection.ReadVar ("NumElecs", NumElecs));
-	inSection.OpenSection("VHXC");
+	assert(inSection.OpenSection("VHXC"));
 	VHXC.Read(inSection);
 	inSection.CloseSection();
       }
@@ -755,6 +824,11 @@ public:
     FullCoreV = FullCorePot;
   }
 
+  PH_FullCore()
+  {
+
+  }
+
   void Write(FILE *fout);
   void Write(char *FileName);
   void Read (FILE *fin);
@@ -818,6 +892,11 @@ public:
   scalar d2Adr2(scalar r)
   {
     return (0.0);
+  }
+
+  void Write (OutputSectionClass &outSection)
+  {
+    outSection.WriteVar ("Type", "Zero");
   }
 
   PH_Zero()
@@ -893,11 +972,30 @@ public:
     return (0.0);
   }
 
+  void Write (OutputSectionClass &outSection)
+  {
+    outSection.WriteVar ("Type", "Gaussian");
+    outSection.WriteVar ("Amp", Amp);
+    outSection.WriteVar ("sigma", sigma);
+  }
+
+  bool Read (InputSectionClass &inSection)
+  {
+    assert (inSection.ReadVar ("Amp", Amp));
+    assert (inSection.ReadVar ("sigma", sigma));
+  }
+
   PH_Gaussian(double Amp_, double sigma_)
   {
     Amp = Amp_;
     sigma = sigma_;
     // Do nothing for now
+  }
+
+  PH_Gaussian ()
+  {
+    Amp = 0.0;
+    sigma = 1.0;
   }
 
   //void Write(char *FileName);
@@ -908,6 +1006,7 @@ public:
 
 
 PseudoHamiltonian *ReadPH (InputBuffer &SectionBuf);
+PseudoHamiltonian *ReadPH (InputSectionClass &inSection);
 PseudoHamiltonian *Read_PH(char *FileName);
 
 #endif
