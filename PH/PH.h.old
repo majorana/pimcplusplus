@@ -5,7 +5,6 @@
 #include "../Splines/Grid.h"
 #include "Chebyshev.h"
 #include "../Splines/CubicSpline.h"
-#include "../IO/InputOutput.h"
 
 enum PHType {PH_NONE, PH_CHEBYSHEV, PH_CUBIC, PH_CUBICXC, PH_NUCLEAR};
 
@@ -31,23 +30,9 @@ public:
     if (r < V.grid->End)
       return (Z/(r*r) + V.Deriv(r));
     else      
-      return (Z/(r*r));
+    return (Z/(r*r));
   }
   void Read(char *FName);
-  void Write (OutputSectionClass &outSection)
-  {
-    outSection.WriteVar ("Z", Z);
-    outSection.OpenSection("V");
-    V.Write(outSection);
-    outSection.CloseSection();
-  }
-  void Read  (InputSectionClass &inSection)
-  {
-    assert(inSection.ReadVar("Z", Z));
-    assert(inSection.OpenSection("V"));
-    V.Read (inSection);
-    inSection.CloseSection();
-  }
 
   FullCorePotential()
   {
@@ -145,7 +130,6 @@ public:
     Write (fout);
   }
   virtual void Write(FILE *fout)
-
   {
     cerr << "Should never get to PseudoHamiltonian base class.\n";
   }
@@ -154,38 +138,206 @@ public:
     cerr << "Should never get to PseudoHamiltonian base class.\n";
   }
 
-  virtual void Write (OutputSectionClass &outSection)
-  {
-    outSection.WriteVar ("Type", "PH_CubicSpline");
-    outSection.WriteVar ("CoreRadius", CoreRadius);
-    outSection.WriteVar ("Z", Z);
-    outSection.WriteVar ("Zion", Zion);
-    outSection.WriteVar ("NumElecs", NumElecs);
-    outSection.WriteVar ("Amin", Amin);
-    outSection.WriteVar ("Amax", Amax);
-    outSection.WriteVar ("Bmin", Bmin);
-    outSection.WriteVar ("Bmax", Bmax);
-    outSection.WriteVar ("Vmin", Vmin);
-    outSection.WriteVar ("Vmax", Vmax);
-    outSection.WriteVar ("UseVHXC", UseVHXC);
-
-    outSection.OpenSection ("FullCoreV");
-    FullCoreV->Write(outSection);
-    outSection.CloseSection();
-  }
-
-  virtual bool Read (InputSectionClass &inSection)
-  {
-    cerr << "Should never get to PseudoHamiltonian base class.\n";
-  } 
-
-
-
   PseudoHamiltonian()
   {
     UseVHXC = 0;
   }
 };
+
+
+///////////////////////////////////////////////////////////////////
+//                        Chebyshev PH                           //
+///////////////////////////////////////////////////////////////////
+
+
+// This class will be used to store the A potential for the
+// pseudoHamiltonian.  We have two boundary conditions, which puts
+// restrictions on the coefficients of the expansion.  A(r_CA) = 1.0
+// and A'(r_CA) = 0.
+class AFunction
+{
+private:
+  scalar rA;
+  Array<scalar,1> ChebyCoefs;
+  void Update();
+public:
+  Array<scalar,1> Parameters;
+  int UpToDate;
+  int NumParams;
+  scalar AddConst;
+  scalar &Params(int i); 
+  scalar Params(int i) const;
+  scalar operator()(scalar r);
+  scalar Deriv(scalar r);
+  scalar Deriv2(scalar r);
+  void Init(Array<scalar,1> params, scalar rmax);
+  AFunction(Array<scalar,1> params, scalar rmax);
+  AFunction()
+  {
+    AddConst = 0.25;
+    // Do nothing
+  }
+};
+
+
+
+// This class will be used to store the B potential for the
+// pseudoHamiltonian.  We have one boundary condition (for now), which
+// puts restrictions on the coefficients of the expansion,  
+// B(r_CB) = 1.0.
+
+class BFunction
+{
+private:
+  scalar rB;
+  Array<scalar,1> ChebyCoefs;
+  void Update();
+  int UpToDate;
+
+  AFunction *Afunc;
+public:
+  Array<scalar,1> Parameters;
+  scalar AddConst;
+  int NumParams;
+  scalar &Params(int i); 
+  scalar Params(int i) const;
+  scalar operator()(scalar r);
+  void Init(Array<scalar,1> params, scalar rmax, AFunction *A);
+  BFunction(Array<scalar,1> params, scalar rmax, AFunction *A);
+  BFunction()
+  {
+    AddConst = 0.25;
+    // Do nothing
+  }
+};
+
+
+
+
+class VFunction
+{
+private:
+  scalar V_at_rV, dV_at_rV;
+  Array<scalar,1> ChebyCoefs;
+  void Update();
+  int UpToDate;
+public:
+  Array<scalar,1> Parameters;
+  scalar rV;
+  int NumParams;
+  scalar &Params(int i);
+  scalar Params(int i) const;
+  scalar operator()(scalar r);
+  scalar Deriv(scalar r);
+  void Init(Array<scalar,1> params, 
+	    scalar rmax, scalar Vrmax, scalar dVrmax);
+  VFunction(Array<scalar,1> params, scalar rmax, 
+	    scalar Vrmax, scalar dVrmax);
+  VFunction()
+  {
+    // Do nothing
+  }
+};
+
+
+class PH_Chebyshev : public PseudoHamiltonian
+{
+private:
+  int LocalAlloc;
+
+public:
+  AFunction *Afunc;
+  BFunction *Bfunc;
+  VFunction *PseudoCoreV;
+
+  PHType Type()
+  {
+    return PH_CHEBYSHEV;
+  }
+  
+  int NumParams()
+  {
+    return (Afunc->NumParams+Bfunc->NumParams+PseudoCoreV->NumParams);
+  }
+
+  scalar & Params(int i)
+  {
+    if (i < Afunc->NumParams)
+      return (Afunc->Params(i));
+    else if (i < (Afunc->NumParams+Bfunc->NumParams))
+      return (Bfunc->Params(i-Afunc->NumParams));
+    else
+      return (PseudoCoreV->Params(i-Afunc->NumParams -Bfunc->NumParams));
+  }
+
+  scalar Params(int i) const
+  {
+    if (i < Afunc->NumParams)
+      return (Afunc->Params(i));
+    else if (i < (Afunc->NumParams+Bfunc->NumParams))
+      return (Bfunc->Params(i-Afunc->NumParams));
+    else
+      return (PseudoCoreV->Params(i-Afunc->NumParams -Bfunc->NumParams));
+  }
+
+  scalar V(scalar r)
+  {
+    if (r<CoreRadius)
+      return ((*PseudoCoreV)(r));
+    else
+      return (FullCoreV->Deriv(r));
+  }
+
+
+
+  scalar dVdr(scalar r)
+  {
+    if (r<CoreRadius)
+      return (PseudoCoreV->Deriv(r));
+    else
+      return (FullCoreV->Deriv(r));
+  }
+
+  
+  scalar d2Adr2(scalar r)
+  {
+    if (r<CoreRadius)
+      return (Afunc->Deriv2(r));
+    else
+      return (0.0);
+  }
+ 
+  inline void Init(AFunction *A,
+		   BFunction *B,
+		   VFunction *V,
+		   FullCorePotential *FullCorePot)
+  {
+    Afunc = A; Bfunc = B; PseudoCoreV = V; FullCoreV = FullCorePot;
+    LocalAlloc = 0;
+  }
+
+  PH_Chebyshev()
+  {
+    LocalAlloc = 0;
+  }
+
+  ~PH_Chebyshev()
+  {
+    if (LocalAlloc)
+      {
+	delete (Afunc);
+	delete (Bfunc);
+	delete (PseudoCoreV);
+	delete (FullCoreV);
+      }
+  }
+
+  void Write(FILE *fout);
+  void Write(char *FileName);
+  void Read (FILE *fin);
+};
+
+
 
 ///////////////////////////////////////////////////////////////////
 //                       Cubic Spline PH                         //
@@ -342,12 +494,6 @@ public:
   PH_CubicSpline()
   {
     // Do nothing for now
-  }
-
-  void Write (OutputSectionClass &outSection)
-  {
-    // Write common variables
-    PseudoHamiltonian::Write(outSection);
   }
 
   void Write(FILE *fout);

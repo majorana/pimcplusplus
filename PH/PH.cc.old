@@ -138,6 +138,10 @@ PseudoHamiltonian *ReadPH (InputBuffer &SectionBuf)
 	  PHFC->Zion = FullCorePot->Z;
 	  PH = PHFC;
 	}
+      else if (!strcmp (Type, "CHEBYSHEV"))
+	{
+	  Abort ("CHEBYSHEV type not yet implemented.");
+	}
       else
 	Abort ("Unrecognized PH Type in ReadPH.");
     }
@@ -147,6 +151,52 @@ PseudoHamiltonian *ReadPH (InputBuffer &SectionBuf)
   return PH;
 }
 
+
+void
+PH_Chebyshev::Write (char *FileName)
+{
+  FILE *fout;
+
+  if ((fout = fopen(FileName, "w"))==NULL)
+    {
+      cerr << "Cannot open " << FileName << " for writing.\n";
+      exit(1);
+    }
+  Write(fout);
+  fclose(fout);
+}
+
+
+void
+PH_Chebyshev::Write(FILE *fout)
+{
+  // First, write the core radius:
+  fprintf (fout, "Chebyshev\n");
+  fprintf (fout, "%1.16e\n", CoreRadius);
+  // Next, write the FullCore filename
+  fprintf (fout, "%s\n", FullCoreV->FileName);
+
+  // Now write the parameters for the A potential
+  fprintf (fout, "%d\n", Afunc->NumParams);
+  fprintf (fout, "%1.16e\n", Afunc->AddConst);
+  for (int i=0; i<Afunc->NumParams; i++)
+    fprintf (fout, "%1.16e ", Afunc->Params(i));
+  fprintf (fout, "\n");
+
+  // Now write the parameters for the B potential
+  fprintf (fout, "%d\n", Bfunc->NumParams);
+  fprintf (fout, "%1.16e\n", Bfunc->AddConst);
+  for (int i=0; i<Bfunc->NumParams; i++)
+    fprintf (fout, "%1.16e ", Bfunc->Params(i));
+  fprintf (fout, "\n");
+
+  // Now write the parameters for the V potential
+  fprintf (fout, "%d\n", PseudoCoreV->NumParams);
+  for (int i=0; i<PseudoCoreV->NumParams; i++)
+    fprintf (fout, "%1.16e ", PseudoCoreV->Params(i));
+  fprintf (fout, "\n");
+
+}
 
 
 
@@ -233,6 +283,48 @@ PH_CubicSpline::Write(char *FileName)
 */
 
 
+void
+PH_Chebyshev::Read(FILE *fin)
+{
+  LocalAlloc = 1;
+  Afunc = new AFunction;
+  Bfunc = new BFunction;
+  PseudoCoreV = new VFunction;
+  FullCoreV = new FullCorePotential;
+
+  Array<scalar,1> temp;
+
+  // First, write the core radius:
+  fscanf (fin, " %lf ", &CoreRadius);
+  fscanf (fin, " %s ", FullCoreV->FileName);
+  // Remove trailing newline from filename;
+  FullCoreV->FileName[strlen(FullCoreV->FileName)-1] = '\0';
+  FullCoreV->Read(FullCoreV->FileName);
+  scalar Vmax  = (*FullCoreV)(CoreRadius);
+  scalar dVmax = FullCoreV->Deriv(CoreRadius);
+
+  fscanf (fin, " %d ", &(Afunc->NumParams));
+  fscanf (fin, " %lf ", &(Afunc->AddConst));
+  temp.resize(Afunc->NumParams);
+  for (int i=0; i<Afunc->NumParams; i++)
+    fscanf (fin, " %lf ", &(temp(i)));
+  Afunc->Init(temp, CoreRadius);
+
+  fscanf (fin, " %d ", &(Bfunc->NumParams));
+  fscanf (fin, " %lf ", &(Bfunc->AddConst));
+  temp.resize(Bfunc->NumParams);
+  for (int i=0; i<Bfunc->NumParams; i++)
+    fscanf (fin, " %lf ", &(temp(i)));
+  Bfunc->Init(temp, CoreRadius, Afunc);
+	
+  fscanf (fin, " %d ", &(PseudoCoreV->NumParams));
+  temp.resize(PseudoCoreV->NumParams);
+  for (int i=0; i<PseudoCoreV->NumParams; i++)
+    fscanf (fin, " %lf ", &(temp(i)));
+  PseudoCoreV->Init(temp, CoreRadius, Vmax, dVmax);  
+
+  fclose (fin);
+} 
 
 
 
@@ -367,6 +459,42 @@ PH_FullCore::Read(FILE *fin)
 }
 
 
+/* PseudoHamiltonian *Read_PH(char *FileName)
+{
+  cerr << "Got to Read_PH.\n";
+
+  FILE *fin;
+
+  if ((fin = fopen (FileName, "r")) == NULL)
+    {
+      cerr << "Can't open " << FileName << " for reading.  Exitting.\n";
+      exit(1);
+    }
+  char PHtype[500];
+  
+  fscanf(fin, " %s ", PHtype);
+  
+  PseudoHamiltonian *PH;
+  if (strcmp(PHtype, "Chebyshev") == 0)
+    {
+      PH = new PH_Chebyshev;
+      PH->Read(fin);
+    }
+  else if (strcmp(PHtype, "CubicSpline") == 0)
+    {
+      PH = new PH_CubicSpline;
+      PH->Read(fin);
+    }
+  else
+    {
+      fclose(fin);
+      cerr << "Unrecognize PseudoHamiltonian type: " << PHtype <<
+	"\n";
+      cerr << "Exitting.\n";
+      exit(1);
+    }
+  return (PH);
+}*/
 
 
 
