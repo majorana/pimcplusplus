@@ -82,13 +82,13 @@ void setupMove(BisectionMoveClass &myBisectionMove,ShiftMove &myShiftMove, PathD
    
 
 
+#include <mpi.h>
 
 
-
-int main()
+int main(int argc, char **argv)
 
 {
-
+  MPI_Init(&argc, &argv);
   PathDataClass myPathData;
   ActionClass myActionClass;
   setupIDParticleArray(myPathData);
@@ -104,6 +104,6 @@ int main()
     myShiftMove.makeMove();
   }
 
-
+  MPI_Finalize();
 }
   
