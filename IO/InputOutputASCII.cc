@@ -232,6 +232,10 @@ void InputTreeASCIIClass::ReadWithoutComments(string fileName,
       else if (checkPair(tmpBuffer,counter,"/*")){
 	while (!checkPair(tmpBuffer,counter,"*/") && counter<tmpBuffer.size()){
 	  counter++;
+	  if (tmpBuffer(counter)=='\n'){
+	    buffer(bufferLoc)=tmpBuffer(counter);
+	    bufferLoc++;
+	  }		   
 	}
 	counter++; //end up in the / of comment
       }
@@ -321,7 +325,7 @@ void ReadAtomicVar(TokenClass token,int &d)
 /// is a problem.
 void ReadAtomicVar(TokenClass token,string &d)
 {
-  cerr << token.Str << endl;
+
   ReadAbort (token.Str[0] != '\"', token.LineNumber, 
 	     "Expected '\"'.");
   ReadAbort (token.Str[token.Str.length()-1] != '\"', token.LineNumber, 
