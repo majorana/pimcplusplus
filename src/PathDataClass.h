@@ -7,7 +7,7 @@
 #include "ActionClass.h"
 #include "PathClass.h"
 #include "CommunicatorClass.h"
-#include "DistanceTablePBCClass.h"
+#include "DistanceTableClass.h"
 #include "Common/Random/Random.h"
 //#include "DistanceTableFreeClass.h"
 
@@ -95,7 +95,6 @@ public:
   inline PathDataClass() : Action(Path), Path(Communicator){
     Join=1;
   }
-
 
 };
 

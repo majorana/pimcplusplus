@@ -1,7 +1,7 @@
 #ifndef DISTANCE_TABLE_PBC_CLASS_H
 #define DISTANCE_TABLE_PBC_CLASS_H
 
-#include "DistanceTableClass.h"
+#include "DistanceTableBaseClass.h"
 
 class DistanceTablePBCClass : public DistanceTableClass
 {

@@ -1,3 +1,5 @@
+#include "Common/Blitz.h"
+#include "PathDataClass.h"
 #ifndef PERMUTE_TABLE_CLASS_H
 #define PERMUTE_TABLE_CLASS_H
 
@@ -8,13 +10,24 @@
 //   double Htilde_ij;
 // };
 
-class PermClass
+/// Note:  all indices in this file are with respect to the present
+/// species only.  Thus, when accessing the actual path, we must add
+/// the PathData.Species(SpeciesNum).FirstPtcl to our indices.
+
+class CycleClass
 {
  public:
   int Ncycles;
-  TinyVector<int,4> Perm;
+  TinyVector<int,4> CycleRep;
   double P, C;
-}
+  ///Takes the number of particles you have and returns the
+  ///representation such that p(j) is the particle that the j'th
+  ///particle permutes onto. 
+  //  void CanonicalPermRep(Array<int,1> myArray);
+  void Apply (PathClass &path, int firstPtcl, int timeSlice);
+};
+
+
 
 
 class PermuteTableClass
@@ -22,47 +35,63 @@ class PermuteTableClass
  private:
   int TableSize;
   int NumEntries;
-  int 
-  inline void AddEntry(const PermClass &perm);
- public:
-  int Species;
+  int SpeciesNum;
+  int Slice1, Slice2;
+  double Norm, NormInv;
+  Array<double,2> HTable;
+  Array<CycleClass,1> PermTable;
+  inline void AddEntry(const CycleClass &cycle);
+  inline int FindEntry(double xi);  
   PathDataClass &PathData;
-  int Slice1, NumLevels;
+  void ConstructHTable();
+
+
+  /// Stores which Htable and PermTable is for the forward move
+  /// 0 or 1.  Flips when a permutation is accepted.
+ public:
+
+  //  void PermuteHTable();
+
   /// The enhancement factor for each cycle length. That is we
   /// multiply the probability of a 3-cycle by Gamma[2]  
-  TinyVector<double,4> gamma; 
-
+  TinyVector<double,4> Gamma; 
+  
   // Smallest value of exp(-s^2/(4*lambda*beta) which we will include
   // in Htable.
   double epsilon;
-  Array<double,2> HTable;
-  Array<PermClass,1> PermTable;
-
-  
-  void ConstructHTable(int slice);
-  void CalcPermProbs();
-  PermuteTableClass()
+  void Read(IOSectionClass &inSection);
+  void ConstructCycleTable(int speciesNum,int slice1,int slice2);
+  void CanonicalPermRep(Array<int,1> P);
+  double AttemptPermutation();
+  double CalcReverseProb(const CycleClass &myPerm,
+			 const PermuteTableClass &forwardTable);
+  PermuteTableClass(PathDataClass &myPathData) : PathData(myPathData)
   {
+    NumEntries=0;
     TableSize = 1000;
     PermTable.resize(TableSize);
   }
-  inline int FindEntry(double xi);
+
 };
 
-inline void PermuteTableClass::AddEntry(PermClass &perm)
+inline void PermuteTableClass::AddEntry(const CycleClass &cycle)
 {
   if (NumEntries >= (TableSize-1)) {
     TableSize *= 2;
     PermTable.resizeAndPreserve(TableSize);
   }
 
-  PermTable(NumEntries) = perm;
+  PermTable(NumEntries) = cycle;
   NumEntries++;
 }
 
-inline int PermTableClass::FindEntry(double xi)
+//Pass a random number between 0 and 1 to this function and it
+//returns the index of the permutation with the appropriate
+//probability. 
+inline int PermuteTableClass::FindEntry(double xi) 
 {
   // Do a binary search
+  xi *= Norm; 
   int hi = NumEntries;
   int lo = 0;
   int attempt;

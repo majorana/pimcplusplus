@@ -10,19 +10,21 @@ CC = mpiCC
 LD = mpiCC  -Bstatic 
 DEFS = -DNO_COUT -DDEBUG -DBZ_DEBUG  -DUSE_MPI #-DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
-TestObjs =                           \
+PIMCobjs =                           \
+  Main.o                             \
+  PIMCClass.o                        \
   ObservableClass.o                  \
   Common/Splines/CubicSpline.o       \
   Common/Splines/Grid.o              \
   SpeciesClass.o                     \
   Common.o                           \
+  PermuteTableClass.o		     \
   BisectionMoveClass.o               \
   MoveClass.o                        \
   ActionClass.o                      \
   PathDataClass.o                    \
   CommunicatorClass.o                \
   PathClass.o                        \
-  test.o                             \
   DistanceTablePBCClass.o            \
   DistanceTableFreeClass.o           \
   DistanceTableClass.o               \
@@ -45,13 +47,6 @@ TestObjs =                           \
   Common/PH/PH.o                     \
   Common/PH/Potential.o
 
-MakeInputObjs =                 \
-  Common/IO/InputOutput.o       \
-  Common/IO/InputOutputHDF5.o   \
-  Common/IO/InputOutputASCII.o  \
-  Common/IO/InputOutputXML.o  \
-  makeInput.o
-
 PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}"
 
 MAKE_ALL = $(MAKE) all $(PASS_DEFS)
@@ -59,13 +54,9 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
 
-Test: 	Common_obj Tests $(TestObjs)
+pimc++: Common_obj Tests $(PIMCobjs)
 	pushd ..; make; pushd
-	$(LD) -o $@ $(TestObjs) $(LIBS) $(PSPLINELIB)
-
-MakeInput: 	Common_obj $(MakeInputObjs)
-	pushd ..; make; pushd
-	$(LD) -o $@ $(MakeInputObjs) $(LIBS)
+	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
 
 Common_obj:
 	cd Common; ${MAKE_ALL}
@@ -95,7 +86,7 @@ clean:	Common_clean
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc WrapClass.cc TestHDF5.cc TestASCII.cc
+SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc
 
 newmake: Common_newmake Tests_newmake
 	make -f template.make Makefile FRC=force_rebuild

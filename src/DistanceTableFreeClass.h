@@ -2,11 +2,7 @@
 #define DISTANCE_TABLE_FREE_CLASS_H
 
 
-
-
-
-
-#include "DistanceTableClass.h"
+#include "DistanceTableBaseClass.h"
 
 class DistanceTableFreeClass : public DistanceTableClass
 {

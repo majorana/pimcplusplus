@@ -24,6 +24,8 @@ private:
   PIMCCommunicatorClass &Communicator;
 
 public:
+  // True if we're using periodic boundary conditions.
+  bool UsePBC;
   RandomClass Random;
   MirroredArrayClass1D<int> Permutation;
   inline void Print(){Path.Print();}

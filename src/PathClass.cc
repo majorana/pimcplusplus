@@ -10,11 +10,17 @@ void PathClass::Read (IOSectionClass &inSection)
   assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
   assert(inSection.ReadVar ("tau", tau));
   Array<double,1> tempBox;
-  assert(inSection.ReadVar ("Box",tempBox));
-  assert(tempBox.size()==NDIM);
-  for (int counter=0;counter<tempBox.size();counter++){
-    Box(counter)=tempBox(counter);
+  UsePBC = inSection.ReadVar ("Box", tempBox);
+  if (UsePBC) {
+    cerr << "Using periodic boundary conditions.\n";
+    assert(tempBox.size()==NDIM);
+    for (int counter=0;counter<tempBox.size();counter++){
+      Box(counter)=tempBox(counter);
+    }
   }
+  else
+    cerr << "Using free boundary conditions.\n";
+
   assert(inSection.OpenSection("Particles"));
   int NumSpecies = inSection.CountSections ("Species");
   cerr<<"we have this many sections: "<<NumSpecies<<endl;

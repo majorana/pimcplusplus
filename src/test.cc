@@ -12,6 +12,7 @@
 #include "WrapClass.h"
 #include "DistanceTableFreeClass.h"
 #include "Common/IO/InputOutput.h"
+#include "PermuteTableClass.h"
 // #include "InputOutputASCII.h"
 
 void setupAction(ActionClass &myActionClass)
@@ -376,7 +377,11 @@ int main(int argc, char **argv)
   inSection.CloseSection();
 
   cerr<<"The current name is "<<inSection.GetName()<<endl;
-
+  PermuteTableClass myPermutations(myPathData);
+  assert(inSection.OpenSection("Permutations"));
+  myPermutations.Read(inSection);
+  inSection.CloseSection();
+  
   LoopClass outerLoop(&theMoves,&theObservables);
   assert(inSection.OpenSection("Algorithm"));
   assert(inSection.OpenSection("Loop"));
