@@ -697,10 +697,36 @@ x_k^{1/r^4} = -\frac{4 \pi}{\Omega k}
 \frac{k \cos(k r_c)}{2 r_c} + \frac{\sin(k r_c)}{2r_c^2} + \frac{k^2}{2} \left[ \text{Si}(k r_c) - \frac{\pi}{2}\right]\right\}
 \end{equation}
 
+\subsection{RPA improvements}
+Thusfar in our discussion, the long-range parts of action has been
+treated in was is effectively a primitive approximation.  While this
+is correct in the limit that the timestep, $\tau$, goes to zero, it
+may incur a substantial error for finite $\tau$.  In this section, we
+describe a method to reduce the timestep error of the long range part
+of the action by using the Bloch equation combined with the Random
+Phase Approximation (RPA).  
+
+The Bloch equation may be written,
+\begin{equation}
+\dot{\rho} = -\mathcal{H} \rho,
+\end{equation}
+where the dot indicates differentiation with respect to $\tau$.  Now,
+we define
+\begin{equation}
+\rho = \rho_0 e^{-U_s}e^{-U_l}.
+\end{equation}
+\begin{equation}
+\mathcal{H} = \left[ -\lambda \sum_i \nabla_i^2 \right] + V_s + V_l
+\end{equation}
+The Bloch equation gives us 
+\begin{equation}
+0 = 
+\end{equation}
+
 
 \section{Adapting to PIMC}
 \subsection{Pair actions}
-\subsection{RPA improvements}
+
 
 \begin{thebibliography}{9}
   \bibitem{Natoli} V. Natoli and D.M. Ceperley, J. Chem. Phys. {\bf
