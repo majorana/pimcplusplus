@@ -48,8 +48,10 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
     const dVec &rRef = Path.RefPath(refPtcl);
     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
       const dVec &r = Path(slice, ptcl);
-      dVec diff = r-rRef;
-      DetMatrix(refPtcl-first, ptcl-first) = exp(-C*dot(diff,diff));
+      dVec diff;
+      double dist;
+      Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
+      DetMatrix(refPtcl-first, ptcl-first) = exp(-C*dist*dist);
     }
   }
 
@@ -76,7 +78,9 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
     dVec &r = Path(slice, ptcl);
     for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
       dVec &rRef = Path.RefPath(refPtcl);
-      dVec diff =  r-rRef;
+      dVec diff;
+      double dist;
+      Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
       dVec gradPhi = -2.0*C*diff*DetMatrix(refPtcl-first,ptcl-first);
 
       gradient(ptcl-first) = 
@@ -114,8 +118,11 @@ FreeNodalActionClass::GradientDetFD (int slice, double &det,
     const dVec &rRef = Path.RefPath(refPtcl);
     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
       const dVec &r = Path(slice, ptcl);
-      dVec diff = r-rRef;
-      DetMatrix(refPtcl-first, ptcl-first) = exp(-C*dot(diff,diff));
+      //      dVec diff = r-rRef;
+      dVec diff;
+      double dist;
+      Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
+      DetMatrix(refPtcl-first, ptcl-first) = exp(-C*dist*dist);
     }
   }
 
@@ -123,7 +130,9 @@ FreeNodalActionClass::GradientDetFD (int slice, double &det,
   // Compute determinant
   det = Determinant (DetMatrix);
 
-  
+  dVec disp;
+  double dist;
+
   double eps = 1.0e-5;
   for (int ptcl=first; ptcl <= last; ptcl++) {
     dVec delta = 0.0;
@@ -133,20 +142,20 @@ FreeNodalActionClass::GradientDetFD (int slice, double &det,
       delta = 0.0;
       delta[dim] = 0.5*eps;
       for (int ref=first; ref <= last; ref++) {
-	dVec &rRef = Path.RefPath(ref);
-	dVec diff = r - rRef + delta;
+	Path.RefDistDisp (slice, ref, ptcl, dist, disp);
+	dVec diff = disp + delta;
         DetMatrix(ref-first, ptcl-first) = exp(-C*dot(diff,diff));
       }
       dplus = Determinant (DetMatrix);
       for (int ref=first; ref <= last; ref++) {
-	dVec &rRef = Path.RefPath(ref);
-	dVec diff = r - rRef - delta;
+	Path.RefDistDisp (slice, ref, ptcl, dist, disp);
+	dVec diff = disp + delta;
         DetMatrix(ref-first, ptcl-first) = exp(-C*dot(diff,diff));
       }
       dminus = Determinant(DetMatrix);
       for (int ref=first; ref <= last; ref++) {
-	dVec &rRef = Path.RefPath(ref);
-	dVec diff = r - rRef;
+	Path.RefDistDisp (slice, ref, ptcl, dist, disp);
+	dVec diff = disp + delta;
         DetMatrix(ref-first, ptcl-first) = exp(-C*dot(diff,diff));
       }
       gradient(ptcl-first)[dim] = (dplus-dminus)/eps;

@@ -16,6 +16,8 @@ private:
   /// Number of bisection stage levels
   int NumLevels;
 
+  int NodeAccept, NodeReject;
+
   /// Holds the current master processor
   int MasterProc;
 
@@ -48,6 +50,7 @@ public:
   RefSliceMoveClass(PathDataClass &pathData, IOSectionClass &out) : 
     MultiStageClass(pathData, out)
   { 
+    NodeAccept = NodeReject = 0;
     // do nothing for now
   }
 };

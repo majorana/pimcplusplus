@@ -5,6 +5,9 @@
 /// exactly the free particle density matrix.
 void PathClass::LeviFlight (Array<dVec,1> &vec, double lambda, double tau)
 {
+  // HACK HACK HACK
+  tau *= 0.0001;
+
   int N = vec.size();
   for (int slice=1; slice<(N-1); slice++) {
     double di = (double)slice;

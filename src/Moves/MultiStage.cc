@@ -60,6 +60,7 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
 			      Array<int,1> &activeParticles,
 			      double &prevActionChange)
 {
+  SetMode (NEWMODE);
   double sampleRatio=Sample(slice1,slice2,activeParticles);
   SetMode(OLDMODE);
   double oldAction=StageAction(slice1,slice2,activeParticles);
@@ -79,6 +80,7 @@ bool CommonStageClass::Attempt(int &slice1, int &slice2,
 			      Array<int,1> &activeParticles,
 			      double &prevActionChange)
 {
+  SetMode (NEWMODE);
   double sampleRatio=Sample(slice1,slice2,activeParticles);
   SetMode(OLDMODE);
   double oldAction=StageAction(slice1,slice2,activeParticles);

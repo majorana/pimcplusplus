@@ -106,6 +106,8 @@ public:
 			double &dist, dVec &disp);
   inline void DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 			double &distA, double &distB,dVec &dispA, dVec &dispB);
+  inline void RefDistDisp (int slice, int refPtcl, int ptcl,
+			   double &dist, dVec &disp);
   //  inline double Distance (int slice, int ptcl1, int ptcl2);Not used?
   inline dVec Velocity (int sliceA, int sliceB, int ptcl);
   inline void PutInBox (dVec &v);
@@ -353,6 +355,32 @@ inline void PathClass::DistDisp (int slice, int ptcl1, int ptcl2,
 			       double &dist, dVec &disp)
 {
   disp = Path(slice, ptcl2) -Path(slice, ptcl1);
+  
+  for (int i=0; i<NDIM; i++) {
+    double n = -floor(disp(i)*BoxInv(i)+0.5);
+    disp(i) += n*IsPeriodic(i)*Box(i);
+  }
+  dist = sqrt(dot(disp,disp));
+
+#ifdef DEBUG
+  dVec DBdisp = Path(slice, ptcl2) -Path(slice, ptcl1);
+  for (int i=0; i<NDIM; i++) {
+    while (DBdisp(i) > 0.5*Box(i))
+      DBdisp(i) -= Box(i);
+    while (DBdisp(i) < -0.5*Box(i)) 
+      DBdisp(i) += Box(i);
+    if (fabs(DBdisp(i)-disp(i)) > 1.0e-12){ 
+      cerr<<DBdisp(i)<<" "<<disp(i)<<endl;
+    }
+    //    assert (fabs(DBdisp(i)-disp(i)) < 1.0e-12);
+  }
+#endif
+}
+
+inline void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
+				    double &dist, dVec &disp)
+{
+  disp = Path(slice, ptcl)- RefPath(refPtcl);
   
   for (int i=0; i<NDIM; i++) {
     double n = -floor(disp(i)*BoxInv(i)+0.5);

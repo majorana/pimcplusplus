@@ -53,16 +53,20 @@ bool RefSliceMoveClass::NodeCheck()
       PathData.Actions.NodalActions(SpeciesNum)->Action
       (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
     
+//     if (newLocalNode > 1.0e20) 
+//       cerr << "Local node crossing in NodeCheck().\n";
+
     // Do global sum over processors
     double localChange = newLocalNode - oldLocalNode;
     double globalChange = PathData.Communicator.AllSum (localChange);
     bool toAccept = (-globalChange)>=log(PathData.Path.Random.Common()); 
 
-//     fprintf (stderr, "old = %1.12e\n", oldLocalNode);
-//     fprintf (stderr, "old = %1.12e\n", newLocalNode);
+    fprintf (stderr, "old = %1.12e\n", oldLocalNode);
+    fprintf (stderr, "new = %1.12e\n", newLocalNode);
+    fprintf (stderr, "globalChange = %1.12e\n", globalChange);
 //     fprintf (stderr, "localchange = %1.12e\n", localChange);
 //     fprintf (stderr, "globalchange = %1.12e\n", globalChange);
-//     cerr << "toAccept = " << (toAccept ? "true\n" : "false\n");
+    cerr << "toAccept = " << (toAccept ? "true\n" : "false\n");
     return toAccept;
   }
   else
@@ -108,11 +112,16 @@ void RefSliceMoveClass::MakeMoveMaster()
   // Now, if we accept local stages, move on to global nodal
   // decision. 
   if (toAccept) {
+    if ((NodeAccept+NodeReject) % 1000 == 999)
+      fprintf (stderr, "Node accept ratio = %5.3f\n",
+	       (double)NodeAccept/(double)(NodeAccept+NodeReject));
     if (NodeCheck()) {
+      NodeAccept++;
       Accept();
       Path.RefPath.AcceptCopy();
     }
     else {
+      NodeReject++;
       Reject();
       Path.RefPath.RejectCopy();
     }
