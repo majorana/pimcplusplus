@@ -106,7 +106,7 @@ double PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
 {
   if (k <= 0.0)
     k = 1.0e-30;
-  double Vk =  4.0*M_PI/(boxVol*k*k)*exp(-k*k/(4.0*alpha*alpha));
+  double Vk =  4.0*M_PI*Z1Z2/(boxVol*k*k)*exp(-k*k/(4.0*alpha*alpha));
   //  cerr << "Vk = " << Vk << endl;
   return Vk;
 }
@@ -123,7 +123,7 @@ void PAclassicalFitClass::DoBreakup(const dVec& box,const Array<dVec,1> &kVecs)
     boxVol *= box[i];
   }
   cerr << "boxVol = " << boxVol << endl;
-  alpha = 7.0/minL;
+  alpha = 7.0/(minL*fabs(Z1Z2));
   // Now, calculate the k-space parts
   Ulong_k.resize(NumBetas, kVecs.size());
   dUlong_k.resize(NumBetas, kVecs.size());

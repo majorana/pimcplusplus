@@ -288,7 +288,7 @@ opposite screening charge of gaussian shape around each point charge.
 It then removes the charge in the long-ranged part of the potential.
 In this potential,
 \begin{equation}
-v_{\text{long}}(r) = \frac{Z_1 Z_2}{r} \text{erf}(\alpha r),
+v_{\text{long}}(r) = \frac{q_1 q_2}{r} \text{erf}(\alpha r),
 \end{equation}
 where $\alpha$ is an adjustable parameter used to control how
 short-ranged the potential should be.  If the box size is $L$, a
@@ -297,7 +297,7 @@ that this form for the long-ranged potential should also work for any
 general potential with a coulomb tail, e.g. pseudo-Hamiltonian
 potentials.  For this form of the long-ranged potential, we have in $k$-space
 \begin{equation}
-v_k = \frac{4\pi\exp\left[\frac{-k^2}{4\alpha^2}\right]}{\Omega k^2}.
+v_k = \frac{4\pi q_1 q_2 \exp\left[\frac{-k^2}{4\alpha^2}\right]}{\Omega k^2}.
 \end{equation}
 
 \subsection{Optimizing the breakup}
