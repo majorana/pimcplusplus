@@ -58,6 +58,8 @@ public:
 		    double abmin, int numA, int numB, int numV);
   void Read (IOSectionClass &in);
   void Write (IOSectionClass &out); 
+  QuinticPH() : ABmin(0.0) 
+  { /* do nothing for now */ }
 };
 
 inline double QuinticPH::GetCoreRadius()
@@ -145,7 +147,7 @@ inline void QuinticPH::SetAval (int i, double Aval, bool isNegative)
 
 inline double QuinticPH::GetBval (int i)
 {
-  return (pA(i)*pA(i) + ABmin);
+  return (pB(i+1)*pB(i+1) + ABmin);
 }
 
 inline void QuinticPH::SetBval (int i, double Bval, bool isNegative)
@@ -250,6 +252,7 @@ void QuinticPH::Init (Potential *outer, double coreRadius,
 {
   Vouter = outer;
   CoreRadius = coreRadius;
+  ABmin = abmin;
   Agrid.Init (0.0, CoreRadius, numA+1);
   Bgrid.Init (0.0, CoreRadius, numB+2);
   Vgrid.Init (0.0, CoreRadius, numV+1);
