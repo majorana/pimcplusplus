@@ -19,7 +19,7 @@ public:
   Grid *grid;
   CubicSpline u, dudr;
   int n, l, CoreNodes;
-  double Energy, Occupancy, PartialNorm, Weight;
+  double Energy, Occupancy, Weight;
   string Label;
 
   inline double NormDeriv(double r, double u);
@@ -27,6 +27,8 @@ public:
   inline Vec2 ScalarRelDerivs (double r, Vec2 &u_and_du);
   int CountNodes();
   void IntegrateOut();
+  double PartialNorm();
+  double LogDerivative();
   void Solve (double tolerance=1.0e-8);
   void Normalize();
   void SetGrid(Grid *newgrid);

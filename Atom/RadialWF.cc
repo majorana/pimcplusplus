@@ -338,6 +338,24 @@ void RadialWF::SetPotential(Potential *newPot)
   pot = newPot;
 }
 
+double RadialWF::PartialNorm()
+{
+  normVec(0) = 0.0;
+  NormalizeDeriv normDeriv(*this);
+  RungeKutta<NormalizeDeriv,double> integrator(normDeriv);
+  int N = u.grid->NumPoints;
+  integrator.Integrate(*u.grid, 0, N-1, normVec);
+  double uend = u(N-1);
+  double partNorm = normVec(N-1)/(uend*uend);
+  return (partNorm);
+}
+
+double RadialWF::LogDerivative()
+{
+  double rend = (*u.grid).End;
+  return (dudr(rend)/u(rend));
+}
+
 // This will write all the information except the potential and the
 // grid.  We assume that those are store somewhere else
 void RadialWF::Write(IOSectionClass &out)
@@ -350,7 +368,7 @@ void RadialWF::Write(IOSectionClass &out)
   out.WriteVar ("Occupancy", Occupancy);
   out.WriteVar ("Weight", Weight);
   out.WriteVar ("Energy", Energy);
-  out.WriteVar ("PartialNorm", PartialNorm);
+  //  out.WriteVar ("PartialNorm", PartialNorm);
   out.WriteVar ("Label", Label);
 }
 
@@ -369,6 +387,6 @@ void RadialWF::Read (IOSectionClass &in)
   assert(in.ReadVar("Occupancy", Occupancy));
   in.ReadVar("Energy", Energy, -1.0);
   in.ReadVar("Weight", Weight, 1.0);
-  in.ReadVar("PartialNorm",PartialNorm);
+  //in.ReadVar("PartialNorm",PartialNorm);
   assert(in.ReadVar("Label", Label));
 }
