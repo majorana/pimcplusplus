@@ -1,11 +1,11 @@
-double tau=2.0;
+double tau=1000.0;
 
 Section (System)
 {
-  int NumTimeSlices=50;
+  int NumTimeSlices=28;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
-  Array<double,1> Box(3)=[10.00,10.00,10.00];
-  double kCutoff = 2.0;
+  Array<double,1> Box(3)=[974.87, 974.87, 974.87];
+  double kCutoff = 0.04;
   Section (Particles)
   {
     Section (Species)
@@ -13,9 +13,9 @@ Section (System)
       string Name="e";
       double lambda=0.5;
       string Type="FERMION";
-      int NumParticles=27;
+      int NumParticles=54;
       int NumDim=3;
-      string InitPaths="CUBIC";
+      string InitPaths="BCC";
     }
   }
 }
@@ -23,8 +23,8 @@ Section (System)
 Section (Action)
 { 
   int MaxLevels = 2;
-  Array<string,1> PairActionFiles(1) = [ "e-e_beta8.0.coulombBCfit.h5" ];
-  int NumBreakupKnots = 20;
+  Array<string,1> PairActionFiles(1) = [ "e-e_beta8000b.coulombBC.h5" ];
+  int NumBreakupKnots = 7;
 }
 
 Section (Observables)
@@ -51,8 +51,8 @@ Section (Observables)
 	{
 	  string type = "Linear";
 	  double start = 0.0;
-	  double end = 5.0;
-	  int NumPoints = 50;
+	  double end = 487.44;
+	  int NumPoints = 100;
 	}
     }
   Section (Observable)

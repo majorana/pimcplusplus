@@ -63,7 +63,7 @@ void ActionClass::Read(IOSectionClass& inSection)
       string fname = PairActionVector(i)->Particle1.Name + "-" +
 	PairActionVector(i)->Particle2.Name + ".dat";
       FILE *fout = fopen (fname.c_str(), "w");
-      for (double q=0.0; q<15.0; q+=0.01) {
+      for (double q=0.0; q<20000.0; q+=1.0) {
 	double Udiag = PairActionVector(i)->Udiag(q, 0);
 	double Ulong = PairActionVector(i)->Ulong(0)(q);
 	fprintf (fout, "%1.16e %1.16e %1.16e\n", q, Udiag, Ulong);
@@ -125,7 +125,8 @@ double ActionClass::UAction (int startSlice, int endSlice,
 	  U = PairActionVector(PairIndex)->U(q,z,s2, level);
 	  // Subtract off long-range part from short-range action
 	  if (PairActionVector(PairIndex)->IsLongRange())
-	    U -= PairActionVector(PairIndex)->Ulong(level)(q);
+	    U -= 0.5* (PairActionVector(PairIndex)->Ulong(level)(rmag) +
+		       PairActionVector(PairIndex)->Ulong(level)(rpmag));
 	  TotalU += U;
 	}
       }
@@ -412,21 +413,27 @@ public:
 double ActionClass::CalcXk (int paIndex, int level, double k, double rc,
 			    TaskType task)
 {
-  const double tolerance = 1.0e-8;
+  double absTol = 1.0e-7;
+  double relTol = 1.0e-7;
+
   PairActionFitClass &pa = *PairActionVector(paIndex);
+  if (task == DO_U)
+    absTol *= pa.SmallestBeta*pow(2.0, (double)level);
   //  cerr << "pa.Z1Z2 = " << pa.Z1Z2 << endl;
   if (pa.Z1Z2 == 0.0) {
     XkIntegrand integrand(pa, level, k, task);
     GKIntegration<XkIntegrand, GK31> integrator(integrand);
     double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
-      integrator.Integrate(rc, 30.0*rc, tolerance,tolerance,false);
+      integrator.Integrate(rc, 30.0*rc, absTol, relTol, false);
     return Xk;
   }
   else {
     CoulombXkIntegrand integrand(pa, level, k, task);
     GKIntegration<CoulombXkIntegrand, GK31> integrator(integrand);
+    // integrator.SetRelativeErrorMode();
     double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
-      integrator.Integrate(rc, 30.0*rc, tolerance,tolerance,false);
+      //integrator.Integrate(rc, 30.0*rc, tolerance);
+      integrator.Integrate(rc, 30.0*rc, absTol, relTol, false);
     /// Add in the analytic part that I ignored
     /// Multiply analytic term by tau only for U -- do not multiply
     /// for dU or V.
@@ -463,6 +470,8 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
   // We try to pick kcont to keep reasonable number of k-vectors
   double kCont = 50.0 * kavg;
   double kMax = 150 * kavg;
+  cerr << "kCont = " << kCont 
+       << " kMax = " << kMax << endl;
 
   LPQHI_BasisClass basis;
   basis.Set_rc(rc);
@@ -827,7 +836,9 @@ void ActionClass::Energy(int slice1, int level,
       dU += PairActionVector(PairIndex)->dU(q, z, s2, level);
       // Subtract off long-range part from short-range action
       if (PairActionVector(PairIndex)->IsLongRange())
-	dU -= PairActionVector(PairIndex)->dUlong(level)(q);
+	dU -= 0.5*(PairActionVector(PairIndex)->dUlong(level)(rmag)+
+		   PairActionVector(PairIndex)->dUlong(level)(rpmag));
+		   
     }
   }
   // Add long range part of energy
