@@ -24,8 +24,8 @@ double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> pa
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int slice=startSlice;slice<endSlice;slice+=skip){
       dVec r = Path(slice,ptcl);
-      dVec rp= Path(slice+skip,ptcl);
-      dVec rpp=Path(slice+(skip>>1),ptcl);
+      //\\     dVec rp= Path(slice+skip,ptcl);
+      dVec rpp; //\\=Path(slice+(skip>>1),ptcl);
       //      Path.PutInBox(r);
       //      Path.PutInBox(rp);
       //      Path.PutInBox(rpp);
@@ -78,7 +78,7 @@ double BisectionClass::LogSampleProb(int startSlice, int endSlice,
       dVec r = Path(slice,ptcl);
       dVec rdiff = Path.Velocity(slice, slice+skip, ptcl);
       //dVec rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
-      dVec rp= Path(slice+skip,ptcl);
+      //\\      dVec rp= Path(slice+skip,ptcl);
       dVec rpp=Path(slice+(skip>>1),ptcl);
       //      Path.PutInBox(r);
       //      Path.PutInBox(rp);

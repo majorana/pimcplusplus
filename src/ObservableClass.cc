@@ -238,9 +238,16 @@ void PairCorrelationClass::WriteBlock()
 {
   Array<int,1> HistSum(Histogram.size());
   double norm=0.0;
+  int N1 = PathData.Species(Species1).NumParticles;
+  int N2 = PathData.Species(Species2).NumParticles;
+  norm = TotalCounts * N1*N2/PathData.Path.GetVol();
+
   if (Species1==Species2){//Normalizes things when species are same
-    norm=(double)PathData.Species(Species1).NumParticles/(double)(PathData.Species(Species1).NumParticles-1)*1.0/PathData.Path.GetVol();
+    norm *= 0.5;
+    // norm=(double)PathData.Species(Species1).NumParticles/(double)(PathData.Species(Species1).NumParticles-1)*1.0/PathData.Path.GetVol();
   }
+  
+
   PathData.Communicator.Sum(Histogram, HistSum);
 
   if (PathData.Communicator.MyProc()==0) {
@@ -256,8 +263,8 @@ void PairCorrelationClass::WriteBlock()
 	double r1 = grid(i);
 	double r2 = grid(i+1);
 	double r = 0.5*(r1+r2);
-	double vol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-	gofrArray(0,i) = (double) HistSum(i) / (vol*TotalCounts);
+	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
+	gofrArray(0,i) = (double) HistSum(i) / (binVol*norm);
       }
       IOSection.WriteVar("gofr",gofrArray);
       IOVar = IOSection.GetVarPtr("gofr");
@@ -268,8 +275,8 @@ void PairCorrelationClass::WriteBlock()
 	double r1 = grid(i);
 	double r2 = grid(i+1);
 	double r = 0.5*(r1+r2);
-	double vol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-	gofrArray(i) = (double) HistSum(i) / (vol*TotalCounts*norm);
+	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
+	gofrArray(i) = (double) HistSum(i) / (binVol*norm);
       }
       IOVar->Append(gofrArray);
     }
@@ -312,7 +319,8 @@ void PairCorrelationClass::Accumulate()
 
   /// HACK HACK HACK
   if (Species1==Species2) {
-    for (int slice=0;slice<PathData.NumTimeSlices();slice++) 
+    for (int slice=0;slice<PathData.NumTimeSlices();slice++) {
+      TotalCounts++;
       for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
 	for (int ptcl2=ptcl1+1;ptcl2<=species1.LastPtcl;ptcl2++){
 	  dVec r1=PathData(slice,ptcl1);
@@ -333,16 +341,17 @@ void PairCorrelationClass::Accumulate()
 	  if (dist != distDummy)
 	    cerr << "Bad bad evil inconsistency is DistTable.\n";
 	  #endif
-	  TotalCounts++;
 	  if (dist<grid.End){
 	    int index=grid.ReverseMap(dist);
 	    Histogram(index)++;
 	  } 
 	  //	  else cerr<<"Distance is outside grid"<<r1<<" "<<r2<<" "<<disp<<endl;
 	}
+    }
   }
   else {
-    for (int slice=0;slice<PathData.NumTimeSlices();slice++) 
+    for (int slice=0;slice<PathData.NumTimeSlices();slice++) {
+      TotalCounts++;
       for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
 	for (int ptcl2=species2.FirstPtcl;ptcl2<=species2.LastPtcl;ptcl2++){
 	  dVec r1=PathData(slice,ptcl1);
@@ -361,13 +370,12 @@ void PairCorrelationClass::Accumulate()
 	  if (dist != distDummy)
 	    cerr << "Bad bad evil inconsistency in DistTable.\n";
 #endif
-	  
-	  TotalCounts++;
 	  if (dist<grid.End){
 	    int index=grid.ReverseMap(dist);
 	    Histogram(index)++;
 	  }
 	}
+    }
   }
 }
 

@@ -126,22 +126,22 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
-	  for (int cnt=0;cnt<NDIM;cnt++){
-	    if (r[cnt]==-0){
-	      r[cnt]=0;
-	    }
-	    if (rp[cnt]==-0){
-	      rp[cnt]=0;
-	    }
-	  }
+// 	  for (int cnt=0;cnt<NDIM;cnt++){
+// 	    if (r[cnt]==-0){
+// 	      r[cnt]=0;
+// 	    }
+// 	    if (rp[cnt]==-0){
+// 	      rp[cnt]=0;
+// 	    }
+// 	  }
 	  ///////USEFUL	  cerr<<"r such is: "<<r<<" "<<rp<<" "<<rmag<<" "<<rpmag<<endl;
 	  //////USEFUL 	  cerr<<"Potential: "<<s2<<" "<<q<<" "<<z<<" "<<endl;
 	  double U, dU, V;
 	  U = PairActionVector(PairIndex)->U(q,z,s2, level);//, U, dU, V);
-	  if (U!=0){
-	    //	    cerr<<"q, z, s2, U: "<<q<<" "<<" "<<z<<" "<<s2<<" "<<U<<endl;
-	    //	    cerr<<r<<rp<<endl;
-	  }
+// 	  if (U!=0){
+// 	    //	    cerr<<"q, z, s2, U: "<<q<<" "<<" "<<z<<" "<<s2<<" "<<U<<endl;
+// 	    //	    cerr<<r<<rp<<endl;
+// 	  }
 	  //	  if (((ptcl1==1) && (ptcl2==2)) || ((ptcl1==0) && (ptcl2==3)))
 	  TotalU += U;
 	  PE += V;
