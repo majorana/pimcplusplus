@@ -49,9 +49,9 @@ void PairCorrelation::Accumulate()
 
 void PairCorrelation::Initialize()
 {
-  grid.Init (0.0, 5.0, 100);
+  grid.Init (0.0, 5.0, 50);
   TotalCounts = 0;
-  Histogram.resize(99);
+  Histogram.resize(49);
   Histogram = 0;
 }
 

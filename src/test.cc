@@ -111,13 +111,14 @@ int main(int argc, char **argv)
   //  cerr << (myBisectionMove.PathData)->IdenticalParticleArray.size()<<endl;
   //  cerr<<"What the action class thinks the size is: ";
   //  cerr<<  myActionClass.myIdenticalParticleArray->size()<<endl;
-  for (int counter=0;counter<100000;counter++){
-    //if ((counter % 1000) == 0)
-    //  cerr << "Step #" << counter << ":\n";
+  for (int counter=0;counter<1000000;counter++){
+    if ((counter % 1000) == 0)
+      cerr << "Step #" << counter << ":\n";
     for (int counter2=0;counter2<2;counter2++){
       //cerr << "Doing step " << counter << endl;
       
       myBisectionMove.makeMove();
+      if (counter > 50000)
       PC.Accumulate();
     }
     myShiftMove.makeMove();

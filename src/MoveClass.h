@@ -9,8 +9,10 @@
 class MoveClass 
 {
  public:
+  int NumMoves, NumAccepted;
   PathDataClass *PathData;
   virtual void makeMove()=0;
+  double AcceptanceRatio();
 };
   
 
