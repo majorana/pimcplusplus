@@ -8,7 +8,9 @@
 #endif 
 
 #include <math.h>
+#ifdef MAC
 #include <architecture/ppc/math.h>
+#endif
 
 extern "C" void FORT(mktricubw)(double x[], int *nx,
 				double y[], int *ny,

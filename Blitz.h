@@ -17,8 +17,9 @@ typedef TinyMatrix<scalar,3,3> Mat3;
 typedef TinyVector<scalar,NDIM> dVec;
 typedef TinyVector<int,NDIM> dVecInt;
 
-extern "C" double isnan (double x);
-
+#ifdef MAC
+  extern "C" double isnan (double x);
+#endif
 template <class T, int size>
 inline TinyVector<T,size> operator-(TinyVector<T,size> v)
 {
