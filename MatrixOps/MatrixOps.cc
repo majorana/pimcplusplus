@@ -61,23 +61,28 @@ double Determinant (const Array<double,2> &A)
 {
   int m = A.rows();
   int n = A.cols();
-  assert (m == n);  // Cannot take a determinant of a non-square matrix
-  Array<double,2> LU(m,m);
-  Array<int,1> ipiv(m);
-  int info;
-  LU = A;
-  // Do LU factorization
-  dgetrf_(&m, &n, LU.data(), &m, ipiv.data(), &info);
-  double det = 1.0;
-  int numPerm = 0;
-  for (int i=0; i<m; i++) {
-    det *= LU(i,i);
-    numPerm += (ipiv(i) != (i+1));
+  assert (m == n);  // Cannot take a determinant of a non-square
+		    // matrix
+  if (A.rows() == 2) 
+    return (A(0,0)*A(1,1)-A(0,1)*A(1,0));
+  else {
+    Array<double,2> LU(m,m);
+    Array<int,1> ipiv(m);
+    int info;
+    LU = A;
+    // Do LU factorization
+    dgetrf_(&m, &n, LU.data(), &m, ipiv.data(), &info);
+    double det = 1.0;
+    int numPerm = 0;
+    for (int i=0; i<m; i++) {
+      det *= LU(i,i);
+      numPerm += (ipiv(i) != (i+1));
+    }
+    if (numPerm & 1)
+      det *= -1.0;
+    
+    return det;
   }
-  if (numPerm & 1)
-    det *= -1.0;
-
-  return det;
 }
 
 // Replaces A with its inverse by gauss-jordan elimination with full pivoting
@@ -185,7 +190,6 @@ void Cofactors (const Array<double,2> &A,
       numPerm++;
     }
   }
-
 }
 
 

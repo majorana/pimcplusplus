@@ -249,6 +249,15 @@ double CommunicatorClass::AllSum (double a)
 }
 
 
+void CommunicatorClass::AllSum (Array<double,1> &in, 
+				Array<double,1> &out)
+{
+  assert (in.size() == out.size());
+  MPI_AllReduce(in.data(), out.data(), in.size(), 
+		MPI_DOUBLE, MPI_SUM, MPIComm);
+}
+
+
 #endif
 
 
