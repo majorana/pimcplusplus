@@ -12,7 +12,7 @@ TestBicubic:	CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o
 	$(LD) -o TestBiCubic CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o $(IOobjs) $(LIBS)
 
 TestMyTricubic:	CubicSpline.o Grid.o  TestMyTricubic.o MyTricubicSpline.o
-	$(LD) -o TestMyTricubic CubicSpline.o Grid.o TestMyTricubic.o MyTricubicSpline.o $(IOobjs) $(LIBS)
+	$(LD) -o TestMyTricubic CubicSpline.o Grid.o TestMyTricubic.o MyTricubicSpline.o $(IOobjs) -Lfortran -lpspline $(LIBS)
 
 
 TestTricubic:	Grid.o TestTricubic.o FortranObjs TestMyTricubic

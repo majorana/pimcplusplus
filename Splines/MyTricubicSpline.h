@@ -72,24 +72,34 @@ public:
     UpToDate = false;
   }
   
+  inline void Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
+		    const Array<double,3> &init);
+
   MyTricubicSpline(Grid *xgrid, Grid *ygrid, Grid *zgrid,
 		   const Array<double,3> &init)
   {
-    Xgrid = xgrid; Nx = xgrid->NumPoints;
-    Ygrid = ygrid; Ny = ygrid->NumPoints;
-    Zgrid = zgrid; Nz = zgrid->NumPoints;
-    
-    F.resize(Nx,Ny,Nz);
-    for (int ix=0; ix<Nx; ix++)
-      for (int iy=0; iy<Ny; iy++)
-	for (int iz=0; iz<Nz; iz++)
-	  F(ix,iy,iz)[0] = init(ix,iy,iz);
-    UpToDate = false;
+    Init (xgrid, ygrid, zgrid, init);
   }
+  MyTricubicSpline() : UpToDate(false) 
+  { /* Do nothing. */ }
 };
 
 
 
+inline void MyTricubicSpline::Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
+				    const Array<double,3> &init)
+{
+  Xgrid = xgrid; Nx = xgrid->NumPoints;
+  Ygrid = ygrid; Ny = ygrid->NumPoints;
+  Zgrid = zgrid; Nz = zgrid->NumPoints;
+  
+  F.resize(Nx,Ny,Nz);
+  for (int ix=0; ix<Nx; ix++)
+    for (int iy=0; iy<Ny; iy++)
+      for (int iz=0; iz<Nz; iz++)
+	F(ix,iy,iz)[0] = init(ix,iy,iz);
+  UpToDate = false;
+}
 
 
 
