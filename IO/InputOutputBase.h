@@ -205,17 +205,18 @@ inline int IOTreeClass::CountSections(string name)
 /// section.  Thus, one may control whether or not order is
 /// significant.  
 inline bool IOTreeClass::FindSection (string name, 
-					 IOTreeClass* &sectionPtr,
-					 int num)
+				      IOTreeClass* &sectionPtr,
+				      int num)
 {
   
   list<IOTreeClass*>::iterator Iter=SectionList.begin();
   int counter=0;
-  while(counter<num && Iter!=SectionList.end()){
+  while(counter<=num && Iter!=SectionList.end()){
     if ((*Iter)->Name==name){
       counter++;
     }
-    Iter++;
+    if (counter<=num)
+      Iter++;
   }
   bool found = Iter != SectionList.end(); 
   if (found){
