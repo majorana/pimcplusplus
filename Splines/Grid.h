@@ -29,7 +29,10 @@ class Grid
     {
       return (grid(i));
     }
-
+  inline double* Points()
+  {
+    return grid.data();
+  }
 
   /// Returns the type of the grid (i.e. linear, optimal, etc)
   virtual GridType Type()
