@@ -73,6 +73,8 @@ void VisualClass::Read(string fileName)
 
   int numSpecies = in.CountSections ("Species");  
   Species.resize(numSpecies);
+  for (int i=0; i<numSpecies; i++)
+    Species(i).FirstParticle = 0;
   for (int i=0; i<numSpecies; i++) {
     in.OpenSection("Species",i);
     assert (in.ReadVar("lambda", Species(i).lambda));
@@ -100,6 +102,7 @@ void VisualClass::Read(string fileName)
   
   in.CloseSection();
   in.CloseFile();
+  FrameScale.set_value(0.0);
   MakeFrame (0);
 }
 
@@ -126,7 +129,9 @@ VisualClass::VisualClass()
   : m_VBox(false, 0), m_ButtonQuit("Quit"), 
     FrameAdjust (0.0, 0.0, 0.0),
     PathType (LINES),
-    TubesImage("tubes.png"), LinesImage("lines.png")
+    TubesImage("tubes.png"), LinesImage("lines.png"),
+    StraightImage("straight.png"), SmoothImage("smooth.png"),
+    FileChooser ("Choose an output file")
 {
   // Top-level window.
   set_title("VisualClass");
@@ -158,8 +163,23 @@ VisualClass::VisualClass()
   TubesButton.set_group (group);
   TubesButton.set_icon_widget (TubesImage);
   LinesButton.set_icon_widget (LinesImage);
+  StraightButton.set_label("Straight");
+  StraightButton.set_icon_widget(StraightImage);
+  SmoothButton.set_label("Smooth");
+  SmoothButton.set_icon_widget(SmoothImage);
+  group = StraightButton.get_group();
+  SmoothButton.set_group(group);
   Tools.append (LinesButton);
   Tools.append (TubesButton);
+  Tools.append (ToolSep);
+  Tools.append (StraightButton);
+  Tools.append (SmoothButton);
+
+  // Setup the file chooser
+  FileChooser.set_select_multiple(false);
+  FileChooser.set_action(Gtk::FILE_CHOOSER_ACTION_OPEN);
+  FileChooser.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  FileChooser.add_button("OK", Gtk::RESPONSE_OK);
 
 
 //   Gtk::Color black ("Black");
@@ -174,7 +194,7 @@ VisualClass::VisualClass()
   Actions->add (Gtk::Action::create("Export", "_Export POV"),
 		sigc::mem_fun(*this, &VisualClass::OnExport));
   Actions->add (Gtk::Action::create("Quit", "_Quit"),
-		sigc::mem_fun(*this, &VisualClass::on_delete_event));
+		sigc::mem_fun(*this, &VisualClass::Quit));
   Actions->add (Gtk::Action::create("MenuView", "View"));
   Actions->add (Gtk::Action::create("Reset", "Reset"),
 		sigc::mem_fun(*this, &VisualClass::ResetView));
@@ -218,7 +238,21 @@ VisualClass::~VisualClass()
   
 void VisualClass::OnOpen()
 {
-  cerr << "Open called\n";
+  int result = FileChooser.run();
+  switch (result) {
+    case (Gtk::RESPONSE_OK): {
+      cerr << "Opening file " << FileChooser.get_filename() << endl;
+      Read (FileChooser.get_filename());
+      FrameChanged();
+      break;
+    }
+    case (Gtk::RESPONSE_CANCEL): {
+      cerr << "Cancel.\n";
+      break;
+    }
+  }
+  
+  FileChooser.hide();
 }
 
 void VisualClass::OnExport()
@@ -234,9 +268,16 @@ void VisualClass::ResetView()
   PathVis.Invalidate();
 }
 
-void VisualClass::on_delete_event()
+// bool VisualClass::on_delete_event()
+// {
+//   cerr << "delete event called.\n";
+//   return true;
+// }
+
+void VisualClass::Quit()
 {
-  cerr << "delete event called.\n";
+  GdkEventAny event;
+  hide();
 }
 
 void VisualClass::on_button_quit_clicked()

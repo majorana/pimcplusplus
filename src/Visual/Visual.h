@@ -37,20 +37,24 @@ protected:
   Gtk::HScale FrameScale;
   Gtk::Adjustment FrameAdjust;
   Gtk::Toolbar Tools;
-  Gtk::RadioToolButton LinesButton, TubesButton;
+  Gtk::RadioToolButton LinesButton, TubesButton, SmoothButton, StraightButton;
   void FrameChanged();
   PathTypeType PathType; 
   void LineToggle();
-  Gtk::Image TubesImage, LinesImage;
+  Gtk::Image TubesImage, LinesImage, StraightImage, SmoothImage;
+  Gtk::SeparatorToolItem ToolSep;
 
   Glib::RefPtr<Gtk::ActionGroup> Actions;
   Glib::RefPtr<Gtk::UIManager> Manager;
 
   void OnOpen();
   void OnExport();
-  void on_delete_event();
+  //  bool on_delete_event();
+  void Quit();
   void ResetView();
   void PutInBox();
+
+  Gtk::FileChooserDialog FileChooser;
 public:
   PathVisClass PathVis;
 
