@@ -1,7 +1,7 @@
 #include "PAFit.h"
 
-const double URho0Min = 1.0e-3;
-const double dURho0Min = 1.0e-3;
+const double URho0Min = 1.0e-4;
+const double dURho0Min = 1.0e-4;
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
@@ -220,13 +220,13 @@ void PAtricubicFitClass::AddFit (Rho &rho)
   int numt = tgrid->NumPoints;
   Array<double,3> Umat(numq,numy,numt), dUmat(numq,numy,numt);
   Array<double,1> Ul, dUl;
-  //USemiclassical Usemi(rho, beta);
+  USemiclassical Usemi(rho, beta);
 
   for (int qi=0; qi<numq; qi++) {
     cerr << "qi = " << qi << " of " << numq << endl;
     double q = (*qgrid)(qi);
     //    cerr << "qi = " << qi << endl;
-    double U_max, dU_max;
+    double U_max, dU_max, Usemi_max, dUsemi_max;
     for (int yi=0; yi<numy; yi++) {
       // cerr << "  yi = " << yi << endl;
       double y = (*ygrid)(yi);
@@ -246,9 +246,9 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	costheta_max = max(costheta_max, -1.0);
 
 	rho.UdU(r,rp,costheta_max, Ul, dUl, U_max, dU_max);
+	Usemi_max = Usemi.U(r,rp,costheta_max);
+	dUsemi_max = Usemi.dU(r,rp,costheta_max);
       }
-      //double Usemi_max = Usemi.U(r,rp,costheta_max);
-      //double dUsemi_max = Usemi.dU(r,rp,costheta_max);
 
       for (int ti=0; ti<numt; ti++) {
 	double t = (*tgrid)(ti);
@@ -263,19 +263,19 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	double U, dU;
 	rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
 	if (s>Usmax /*&& q>2.4*/) {
-	  //double Us = Usemi.U(r,rp,costheta);
+	  double Us = Usemi.U(r,rp,costheta);
 	  // Make the result continuous across the transition
-	  //U = Us - Usemi_max + U_max;
-	  U = U_max;
+	  U = Us - Usemi_max + U_max;
+	  //U = U_max;
 	  // HACK
-	  U = 0.0;
+	  //U = 0.0;
 	}
 	if (s>dUsmax /*&& q>2.4*/) {
-	  //double dUs = Usemi.dU(r,rp,costheta);
-	  //dU = dUs - dUsemi_max + dU_max;
-	  dU = dU_max;
+	  double dUs = Usemi.dU(r,rp,costheta);
+	  dU = dUs - dUsemi_max + dU_max;
+	  //dU = dU_max;
 	  // HACK
-	  dU = 0.0;;
+	  //dU = 0.0;;
 	}
 	  
 
