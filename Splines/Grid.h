@@ -260,6 +260,7 @@ class OptimalGrid : public Grid
     outSection.WriteVar ("Type", "Optimal");
     outSection.WriteVar ("a", a);
     outSection.WriteVar ("b", b);
+    outSection.WriteVar ("NumPoints", NumPoints);
   }
 
   void Read (InputSectionClass &inSection)
