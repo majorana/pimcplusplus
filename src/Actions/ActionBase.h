@@ -27,7 +27,7 @@ public:
 
   /// This function returns the \f$\beta\f$-derivative of the above
   /// function.  Since we are interested in total energy, it does not
-  /// take a list of particles we are moving.
+  /// take a list of particles we are moving. 
   virtual double d_dBeta (int slice1, int slice2,
 			  int level) = 0;
   // This returns the sum over all time slices, using MPI
