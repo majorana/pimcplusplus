@@ -1,6 +1,6 @@
 #include "Fitting.h"
-#include <stdlib.h>
-#include <math.h>
+#include <cstdlib>
+#include <cmath>
 
 void PolyTest()
 {

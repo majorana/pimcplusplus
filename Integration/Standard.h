@@ -56,7 +56,7 @@ extern ofstream COUT;
 
 ////////////////////////////////////////////////
 
-#include <math.h>
+#include <cmath>
 
 #ifndef pi
 const double pi=3.14159265358979323846;

@@ -398,7 +398,7 @@ const double GK61::wgk[31] =	/* weights of the 61-point kronrod rule */
 
 #ifdef _MAIN_GK_
 
-#include <math.h>
+#include <cmath>
 #include "Standard.h"
 
 class FF {

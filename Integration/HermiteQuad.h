@@ -1,7 +1,7 @@
 #ifndef HERMITE_QUAD_H
 #define HERMITE_QUAD_H
 
-#include "math.h"
+#include <cmath>
 #include "../Blitz.h"
 
 

@@ -1,5 +1,5 @@
 #include "HermiteQuad.h"
-#include <stdio.h>
+#include <cstdio>
 
 const double Hermite16::u[16] = 
   {

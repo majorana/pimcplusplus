@@ -39,7 +39,7 @@ public:
   }
 };
 
-#include <time.h>
+#include <ctime>
 void TestHermite3D()
 {
   Hermite3DQuadClass<Hermite20, TestFunc3D> Hermite;

@@ -2,10 +2,10 @@
 #define INPUTFILE_H
 //#include "../Blitz.h"
 #include <blitz/array.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stream.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <iostream>
 #include <string>
 
 using namespace std;
