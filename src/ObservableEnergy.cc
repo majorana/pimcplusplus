@@ -130,13 +130,15 @@ void TotalEnergyClass::Accumulate()
 
   /// CHECK code
   double Echeck = 0.0;
-  double spring, dU = 0.0;
+  double spring, dU, V = 0.0;
   spring = dU = 0.0;
   for (int slice=0; slice<numLinks; slice++) {
-    double sp, du;
+    double sp, du,v;
     PathData.Action.Energy(slice, 0, sp, du);
+    v=PathData.Action.PotentialEnergy(slice);
     dU += du;
     spring += sp;
+    V += v;
   }
   Echeck = spring + dU;
   if (fabs(sum-Echeck) > 1.0e-10*max(1.0,fabs(sum))) {
@@ -147,6 +149,9 @@ void TotalEnergyClass::Accumulate()
     cerr << "dU     = " << dU << endl;
     cerr << "sSum   = " << sSum << endl;
     cerr << "spring = " << spring << endl << endl;
+  }
+  if (fabs(V-vSum) >1.0e-10){
+    cerr<<"V = " <<V<<", vSum = "<<vSum<<", diff= "<<V-vSum<<endl;
   }
 }
 
