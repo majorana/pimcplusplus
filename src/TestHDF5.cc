@@ -24,6 +24,10 @@ void TestHDF5Output()
   for (int i=0; i<1; i++)
     HDF5out.AppendVar ("v", 6.0+i);
   HDF5out.WriteVar ("m", m);
+  string MyName = "Ken";
+  cerr << "Before MyName\n";
+  HDF5out.WriteVar ("MyName", "Ken");
+  cerr << "After MyName\n";
   HDF5out.AppendVar ("m", mplus);
   HDF5out.ReadVar("m", m);
   cerr << "m = " << m << endl;
