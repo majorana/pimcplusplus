@@ -7,6 +7,7 @@
 
 \newenvironment{DMatrix}{\begin{array}|{*{20}{c}}|}{\end{array}}
 \newenvironment{MyMatrix}{\begin{array}({*{20}{c}})}{\end{array}}
+\newenvironment{LMatrix}{\begin{array}({*{20}{l}})}{\end{array}}
 
 \begin{document}
 \maketitle
@@ -184,9 +185,9 @@ locate the rectangle which contains this point, such that $x_i <= x <
 x_{i+1}$ and $y_i <= x < y_{i+1}$.  Let 
 \begin{eqnarray}
 h & \equiv & x_{i+1}-x_i \\
-k & \equiv & y_{i+1}-y_i \\
+l & \equiv & y_{i+1}-y_i \\
 u & \equiv & \frac{x-x_i}{h} \\
-v & \equiv & \frac{y-y_i}{k}
+v & \equiv & \frac{y-y_i}{l}
 \end{eqnarray}
 Then, we calculate the interpolated value as
 \begin{equation}
@@ -204,8 +205,72 @@ F^x_{i+1,j} & F^x_{i+1,j+1} & F^{xy}_{i+1,j} & F^{xy}_{i+1,j+1}
 p_1(v)\\ p_2(v)\\ k q_1(v) \\ k q_2(v)
 \end{MyMatrix}
 \end{equation}
+\subsection{Construction bicubic splines}
+We now address the issue of how to compute the derivatives that are
+needed for the interpolation.  The algorithm is quite simple.  For
+every $x_i$, we perform the triadiagonal solution as we did in the 1D
+splines to compute $F^y_{ij}$.  Similarly, we perform a tridiagonal
+solve for every value of $F^x_{ij}$.  Finally, in order to compute the
+cross-derivative we may {\em either} to the tridiagonal solve in the $y$
+direction of $F^x_{ij}$, {\em or} solve in the $x$ direction for
+$F^y_{ij}$ to obtain the cross-derivatives, $F^{xy}_{ij}$.  Hence,
+only minor modifications to the $1D$ interpolations are necessary.
 
 \section{Tricubic Splines}
-
+Bicubic interpolation required two four-component vectors and a 4x4
+matrix.  By extension, tricubic interpolation requires three
+4-component vectors and a 4x4x4 tensor.  We summarize the forms of
+these vectors below.
+\begin{eqnarray}
+h & \equiv & x_{i+1}-x_i \\
+l & \equiv & y_{i+1}-y_i \\
+m & \equiv & z_{i+1}-z_i \\
+u & \equiv & \frac{x-x_i}{h} \\
+v & \equiv & \frac{y-y_i}{l} \\
+w & \equiv & \frac{z-z_i}{m}
+\end{eqnarray}
+\begin{eqnarray}
+\vec{a} & = & 
+\begin{MyMatrix}
+p_1(u) & p_2(u) & h q_1(u) & h q_2(u) 
+\end{MyMatrix}^T \\
+\vec{b} & = & 
+\begin{MyMatrix}
+p_1(v) & p_2(v) & k q_1(v) & k q_2(v) 
+\end{MyMatrix}^T \\
+\vec{c} & = & 
+\begin{MyMatrix}
+p_1(w) & p_2(w) & l q_1(w) & l q_2(w) 
+\end{MyMatrix}^T 
+\end{eqnarray}
+\begin{equation}
+\begin{LMatrix}
+A_{000} = F_{i,j,k}     & A_{001}=F_{i,j,k+1}     & A_{002}=F^z_{i,j,k}      & A_{003}=F^z_{i,j,k+1}      \\
+A_{010} = F_{i,j+1,k}   & A_{011}=F_{i,j+1,k+1}   & A_{012}=F^z_{i,j+1,k}    & A_{013}=F^z_{i,j+1,k+1}    \\
+A_{020} = F^y_{i,j,k}   & A_{021}=F^y_{i,j,k+1}   & A_{022}=F^{yz}_{i,j,k}   & A_{023}=F^{yz}_{i,j,k+1}   \\
+A_{030} = F^y_{i,j+1,k} & A_{031}=F^y_{i,j+1,k+1} & A_{032}=F^{yz}_{i,j+1,k} & A_{033}=F^{yz}_{i,j+1,k+1} \\
+                        &                         &                          &                            \\
+A_{100} = F_{i+1,j,k}     & A_{101}=F_{i+1,j,k+1}     & A_{102}=F^z_{i+1,j,k}      & A_{103}=F^z_{i+1,j,k+1}      \\
+A_{110} = F_{i+1,j+1,k}   & A_{111}=F_{i+1,j+1,k+1}   & A_{112}=F^z_{i+1,j+1,k}    & A_{113}=F^z_{i+1,j+1,k+1}    \\
+A_{120} = F^y_{i+1,j,k}   & A_{121}=F^y_{i+1,j,k+1}   & A_{122}=F^{yz}_{i+1,j,k}   & A_{123}=F^{yz}_{i+1,j,k+1}   \\
+A_{130} = F^y_{i+1,j+1,k} & A_{131}=F^y_{i+1,j+1,k+1} & A_{132}=F^{yz}_{i+1,j+1,k} & A_{133}=F^{yz}_{i+1,j+1,k+1} \\
+                        &                         &                          &                            \\
+A_{200} = F^x_{i,j,k}      & A_{201}=F^x_{i,j,k+1}      & A_{202}=F^{xz}_{i,j,k}      & A_{203}=F^{xz}_{i,j,k+1}    \\
+A_{210} = F^x_{i,j+1,k}    & A_{211}=F^x_{i,j+1,k+1}    & A_{212}=F^{xz}_{i,j+1,k}    & A_{213}=F^{xz}_{i,j+1,k+1}  \\
+A_{220} = F^{xy}_{i,j,k}   & A_{221}=F^{xy}_{i,j,k+1}   & A_{222}=F^{xyz}_{i,j,k}     & A_{223}=F^{xyz}_{i,j,k+1}   \\
+A_{230} = F^{xy}_{i,j+1,k} & A_{231}=F^{xy}_{i,j+1,k+1} & A_{232}=F^{xyz}_{i,j+1,k}   & A_{233}=F^{xyz}_{i,j+1,k+1} \\
+                        &                         &                          &                                      \\
+A_{300} = F^x_{i+1,j,k}      & A_{301}=F^x_{i+1,j,k+1}      & A_{302}=F^{xz}_{i+1,j,k}    & A_{303}=F^{xz}_{i+1,j,k+1}   \\
+A_{310} = F^x_{i+1,j+1,k}    & A_{311}=F^x_{i+1,j+1,k+1}    & A_{312}=F^{xz}_{i+1,j+1,k}  & A_{313}=F^{xz}_{i+1,j+1,k+1} \\
+A_{320} = F^{xy}_{i+1,j,k}   & A_{321}=F^{xy}_{i+1,j,k+1}   & A_{322}=F^{xyz}_{i+1,j,k}   & A_{323}=F^{xyz}_{i+1,j,k+1}  \\
+A_{330} = F^{xy}_{i+1,j+1,k} & A_{331}=F^{xy}_{i+1,j+1,k+1} & A_{332}=F^{xyz}_{i+1,j+1,k} & A_{333}=F^{xyz}_{i+1,j+1,k+1} 
+\end{LMatrix}
+\end{equation}
+Now, we can write
+\begin{equation}
+F(x,y,z) = \sum_{i=0}^3 a_i \sum_{j=0}^3 b_j \sum_{k=0}^3 c_k \ A_{i,j,k} 
+\end{equation}
+The appropriate derivatives of $F$ may be computed by a generalization
+of the method used for bicubic splines above.
 
 \end{document}
