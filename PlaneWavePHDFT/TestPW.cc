@@ -2,8 +2,8 @@
 
 main()
 {
-  Vec3 box(35.0, 35.0, 35.0);
-  Hamiltonian H(box, 4.0, 1.0);
+  Vec3 box(15.0, 15.0, 15.0);
+  Hamiltonian H(box, 12.0, 1.0);
   ConjGrad CG(H);
   clock_t start, end;
   start = clock();

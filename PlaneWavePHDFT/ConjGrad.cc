@@ -16,7 +16,11 @@ void ConjGrad::Setup()
   Xip.resize(N);
   Eta.resize(N);
   Etap.resize(N);
-  c = 1.0;
+  c = 0.0;
+  for (int i=0; i<N; i++) {
+    if (dot (H.GVecs(i), H.GVecs(i)) < 1.0)
+      c(i) = 1.0;
+  }
   Normalize (c);
   IsSetup = true;
 }
@@ -80,8 +84,8 @@ void ConjGrad::Iterate()
   if (!IsSetup)
     Setup();
   // First, calculate steepest descent vector:
-  //CalcPhiCG();
-  CalcPhiSD();
+  CalcPhiCG();
+  //CalcPhiSD();
 
   // Now, pick optimal theta for 
   // cnext = cos(theta)*c + sin(theta)*Phi;

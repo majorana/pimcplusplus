@@ -17,11 +17,12 @@ protected:
   bool IsSetup;
   void Precondition();
   double T;
+  int iter;
 public:
   zVec c;
   void Iterate();
   ConjGrad (Hamiltonian &h) : H(h), IsSetup(false),
-			      EtaXiLast(0.0, 0.0)
+			      EtaXiLast(0.0, 0.0), iter(0)
   {
     // Do nothing for now
   }
