@@ -158,7 +158,8 @@ VisualClass::VisualClass()
     StraightImage("straight.png"), SmoothImage("smooth.png"),
     NoWrapImage("nowrap2.png"), WrapImage("wrap.png"),
     FileChooser ("Choose an output file"),
-    Wrap(false)
+    Wrap(false), Smooth(false), DetailFrame ("Detail"),
+    DetailAdjust(0.1, 0.1, 1.0)
 {
   // Top-level window.
   set_title("VisualClass");
@@ -218,6 +219,15 @@ VisualClass::VisualClass()
   Tools.append (NoWrapButton);
   Tools.append (WrapButton);
 
+  // Setup detail stuff
+  DetailScale.set_adjustment(DetailAdjust);
+  DetailScale.set_digits(1);
+  DetailAdjust.set_step_increment(0.1);
+  DetailAdjust.signal_value_changed().connect
+    (sigc::mem_fun(*this, &VisualClass::OnDetailChange));
+  DetailFrame.add(DetailScale);
+  DetailScale.set_size_request(100,-1);
+
   // Setup the file chooser
   FileChooser.set_select_multiple(false);
   FileChooser.set_action(Gtk::FILE_CHOOSER_ACTION_OPEN);
@@ -267,7 +277,9 @@ VisualClass::VisualClass()
   
   Manager->add_ui_from_string (ui_info);
   m_VBox.pack_start (*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK, 0);
-  m_VBox.pack_start(Tools, Gtk::PACK_SHRINK, 0);
+  ToolBox.pack_start (Tools);
+  ToolBox.pack_start (DetailFrame, Gtk::PACK_SHRINK, 0);
+  m_VBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
   m_VBox.pack_start(PathVis);
   m_VBox.pack_start(FrameScale, Gtk::PACK_SHRINK,0);
   m_VBox.pack_start(m_ButtonQuit, Gtk::PACK_SHRINK, 0);
@@ -468,3 +480,10 @@ void VisualClass::MakePaths(int frame)
 
 
 
+void VisualClass::OnDetailChange()
+{
+  double val = DetailAdjust.get_value();
+  Smoother.SetLevel(0.5*val);
+  if (Smooth)
+    FrameChanged();
+}

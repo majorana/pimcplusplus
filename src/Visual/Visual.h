@@ -45,6 +45,7 @@ protected:
   Gtk::HScale FrameScale;
   Gtk::Adjustment FrameAdjust;
   Gtk::Toolbar Tools;
+  Gtk::HBox ToolBox;
   Gtk::RadioToolButton LinesButton, TubesButton, 
     SmoothButton, StraightButton,
     WrapButton, NoWrapButton;
@@ -53,8 +54,13 @@ protected:
   void LineToggle(), WrapToggle(), SmoothToggle();
   Gtk::Image TubesImage, LinesImage, StraightImage, SmoothImage,
     NoWrapImage, WrapImage;
-
   Gtk::SeparatorToolItem ToolSep1, ToolSep2;
+
+  // Detail control
+  Gtk::Frame DetailFrame;
+  Gtk::HScale DetailScale;
+  Gtk::Adjustment DetailAdjust;
+
 
   Glib::RefPtr<Gtk::ActionGroup> Actions;
   Glib::RefPtr<Gtk::UIManager> Manager;
@@ -65,6 +71,7 @@ protected:
   void Quit();
   void ResetView();
   void PutInBox();
+  void OnDetailChange();
 
   Gtk::FileChooserDialog FileChooser;
 

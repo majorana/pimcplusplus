@@ -10,11 +10,12 @@ private:
   double SmoothLevel;
 public:
   // Set smoothness level from 0 to 1
-  void SetLevel (double level);
+  inline void SetLevel (double level)
+  { SmoothLevel = level; }
 
   // Perform fourier smoothing of the paths
   void SmoothPaths (vector<OnePath*> &inList);
-  SmoothClass() : PointsPerPath(300), SmoothLevel (0.5)
+  SmoothClass() : PointsPerPath(300), SmoothLevel (0.05)
   {
 
   }
