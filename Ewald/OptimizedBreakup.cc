@@ -205,6 +205,7 @@ double LPQHI_BasisClass::h(int n, double r)
   double ra = delta*(i-1);
   double rb = delta*i;
   double rc = delta*(i+1);
+  rc = min(r_c, rc);
   if ((r > ra) && (r <= rb)) {
     double sum = 0.0;
     double prod = 1.0;

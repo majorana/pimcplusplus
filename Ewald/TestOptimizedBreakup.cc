@@ -30,7 +30,7 @@ void TestCoulomb()
   box = 10.0, 10.0, 10.0;
   basis.SetBox (box);
   double Omega = box[0]*box[1]*box[2];
-  basis.SetNumKnots(40);
+  basis.SetNumKnots(10);
   basis.Set_rc(5.0);
 
   cerr << "delta = " << basis.delta << endl;
@@ -56,7 +56,7 @@ void TestCoulomb()
   for (int i=0; i<breakup.kpoints.size(); i++) {
     double k = breakup.kpoints(i)[0];
     double k0 = 2.0*M_PI;
-    Vk(i) = 4.0*M_PI/(Omega*(k*k)) /** cos(k*basis.Get_rc())*/;
+    Vk(i) = 4.0*M_PI/(Omega*(k*k)) * cos(k*basis.Get_rc());
   }
   Array<double,1> t(basis.NumElements());
   t = 0.0;
