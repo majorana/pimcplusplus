@@ -107,7 +107,6 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
   FFT.PutkVec (c);
   // Now, transform to real space
   FFT.k2r();
-  FFT.rBox *= sqrt(Ninv);
   // Now, multiply by V
   FFT.rBox *= Vr;
 //   for (int i=0; i<FFT.Nx; i++)
@@ -117,7 +116,7 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
 
   // Transform back
   FFT.r2k();
-  FFT.kBox *= sqrt(Ninv);
+  FFT.kBox *= Ninv;
   // And put into Vc
   FFT.AddToVec (Vc);
 }
@@ -153,10 +152,10 @@ void Hamiltonian::Apply(const zVec &c, zVec &Hc)
 {
   Hc = 0.0;
   Kinetic.Apply (c, Hc);
-  //Coulomb.Apply (c, Hc);
+  Coulomb.Apply (c, Hc);
   //CoulombFFT.Apply (c, Hc);
   //PH.Apply (c, Hc);
-  PHFFT.Apply (c, Hc);
+  //PHFFT.Apply (c, Hc);
 }
 
 

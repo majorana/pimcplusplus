@@ -15,12 +15,20 @@ void ConjGrad::Setup()
   Bands = 0.0;
   for (int band=0; band<NumBands; band++) {
     c.reference(Bands(band,Range::all()));
+    c = 0.0;
     for (int i=0; i<N; i++) {
-      if (dot (H.GVecs(i), H.GVecs(i)) < 1.0)
+      if (dot (H.GVecs(i), H.GVecs(i)) < 3.0)
 	c(i) = drand48();
     }
+    Normalize(c);
+  }
+  Orthogonalize (Bands);
+  for (int band=0; band<NumBands; band++) {
+    c.reference(Bands(band,Range::all()));
     Normalize (c);
   }
+
+  PrintOverlaps();
   IsSetup = true;
 }
 
@@ -45,18 +53,25 @@ void ConjGrad::Precondition()
 
 void ConjGrad::CalcPhiCG()
 {
+  cerr << "Doing band " << CurrentBand << endl;
+  if (LastBand != CurrentBand) {
+    LastBand = CurrentBand;
+    EtaXiLast = 0.0;
+  }
   Hc = 0.0;
   H.Kinetic.Apply (c, Hc);
   T = realconjdot (c, Hc);
+  H.Coulomb.Apply (c, Hc);
   //H.CoulombFFT.Apply (c, Hc);
   //H.PH.Apply (c, Hc);
-  H.PHFFT.Apply (c,Hc);
+  //H.PHFFT.Apply (c,Hc);
   E0 = realconjdot (c, Hc);
   Xi = E0*c - Hc;
   /// Orthonalize to other bands here
   //Xip = Xi;
   zVec &Xip = Xi;
-  Orthogonalize (Bands, Xip);
+  Orthogonalize2 (Bands, Xip, CurrentBand);
+  CheckOrthog (Bands, Xip);
 
   Precondition();
   //Eta = Xip;
@@ -64,7 +79,9 @@ void ConjGrad::CalcPhiCG()
   // Now, orthogonalize to psi
   // rename for clarity
   zVec &Etap = Eta;
-  Etap = Eta - conjdot (c, Eta)*c;
+  Orthogonalize2 (Bands, Etap, -1);
+  CheckOrthog (Bands, Etap);
+  //Etap = Eta - conjdot (c, Eta)*c;
   complex<double> etaxi = conjdot(Etap, Xip);
   complex<double> gamma; 
   if (EtaXiLast != complex<double>(0.0, 0.0)) 
@@ -85,6 +102,7 @@ void ConjGrad::CalcPhiCG()
 
 void ConjGrad::Iterate(int band)
 {
+  //  PrintOverlaps();
   CurrentBand = band;
   if (!IsSetup)
     Setup();
@@ -106,4 +124,21 @@ void ConjGrad::Iterate(int band)
   //  cerr << "thetaMin = " << thetaMin << endl;
 
   c = cos(thetaMin)*c + sin(thetaMin)*Phip;
+  //  Normalize(c);
+}
+
+void
+ConjGrad::PrintOverlaps()
+{
+  cerr << "Overlaps = \n";
+  zVec x, y;
+  for (int i=0; i<Bands.rows(); i++) {
+    x.reference (Bands(i, Range::all()));
+    for (int j=0; j<Bands.rows(); j++) {
+      y.reference (Bands(j,Range::all()));
+      double s = realconjdot(x,y);
+      fprintf (stderr, "%12.6e ", s);
+    }
+    fprintf (stderr, "\n");
+  }
 }

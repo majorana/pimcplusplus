@@ -2,22 +2,25 @@
 
 main()
 {
-  Vec3 box(20.0, 20.0, 20.0);
+  Vec3 box(10.0, 10.0, 10.0);
   IOSectionClass in;
   in.OpenFile ("NaUnscreenedPH_Feb18_05.h5");
     //in.OpenFile ("NaPH_US_March1_05b.h5");
   Potential *ph = ReadPotential(in);
   in.CloseFile();
-  Hamiltonian H(box, 2.0, 1.0, *ph);
+  Hamiltonian H(box, 3.0, 1.0, *ph);
   H.PHFFT.Setup();
-  ConjGrad CG(H,1);
+  ConjGrad CG(H,4);
   clock_t start, end;
   start = clock();
-  for (int i=0; i<20; i++)
-    CG.Iterate(0);
+  for (int i=0; i<10; i++) 
+    for (int band=0; band<4; band++)
+      for (int j=0; j<4; j++)
+	CG.Iterate(band);
   end = clock();
 
-  FILE *fout = fopen ("NaRho_k10.0.dat", "w");
+
+  FILE *fout = fopen ("HRho_k10.0.dat", "w");
   Vec3 r(0.0, 0.0, 0.0);
   for (double x=-0.5*box[0]; x<=0.5*box[0]; x+=0.01) {
     r[0] = x;

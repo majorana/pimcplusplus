@@ -117,8 +117,8 @@ public:
 class Hamiltonian : public HamiltonianBase
 {
 private:
-  CoulombClass Coulomb;
 public:
+  CoulombClass Coulomb;
   CoulombFFTClass CoulombFFT;
   KineticClass Kinetic;
   PHPotClass PH;

@@ -19,12 +19,14 @@ protected:
   void Precondition();
   double T;
   int iter, NumBands;
-  int CurrentBand;
+  int CurrentBand, LastBand;
+  void PrintOverlaps();
 public:
   Array<complex<double>,2> Bands;
   void Iterate(int band);
   ConjGrad (Hamiltonian &h, int numBands) : 
-    H(h), IsSetup(false), EtaXiLast(0.0, 0.0), iter(0), NumBands(numBands)
+    H(h), IsSetup(false), EtaXiLast(0.0, 0.0), iter(0), NumBands(numBands),
+    LastBand(-1)
   {
     // Do nothing for now
   }

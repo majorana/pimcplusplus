@@ -77,11 +77,83 @@ Orthogonalize (const Array<complex<double>,2> &A, zVec &x)
   // conjugate of untransposed row major
   cblas_zgemv(CblasColMajor, CblasConjTrans, n, m, &one,
 	      A.data(), n, x.data(), 1, &zero, S, 1);
+
+//   for (int i=0; i<m; i++) {
+//     fprintf (stderr, "S[%d] = %18.14f + %18.14fi\n",
+// 	     real(S[i]), imag(S[i]));
     
   // Now, subtract off components * overlaps
   cblas_zgemv(CblasRowMajor, CblasTrans, m, n, &minusone,
  	      A.data(), n, S, 1, &one, x.data(), 1);
 
+}
+
+inline double mag (complex<double> x)
+{
+  return (x.real()*x.real() + x.imag()*x.imag());
+}
+
+inline void
+Orthogonalize (Array<complex<double>,2> &A);
+
+inline void 
+Orthogonalize2 (Array<complex<double>,2> &A, zVec &x,
+		int exclBand)
+{
+  int m = A.rows();
+  int n = A.cols();
+  assert (n == x.size());
+  zVec Ar;
+  complex<double> S[m];
+
+  for (int row=0; row<A.rows(); row++) {
+    Ar.reference (A(row,Range::all()));
+    S[row] = conjdot (Ar, x);
+  }
+  for (int row=0; row<A.rows(); row++) 
+    if (row != exclBand)
+      x -= S[row] * A(row,Range::all());
+  for (int row=0; row<A.rows(); row++) {
+    Ar.reference (A(row,Range::all()));
+    S[row] = conjdot (Ar, x);
+    if ((row != exclBand) && (mag(S[row]) > 1.0e-14))
+      cerr << "Error in Orthogonalize2!, s = " << S[row] << endl;
+  }
+}
+
+inline void
+Orthogonalize (Array<complex<double>,2> &A)
+{
+  zVec x, y;
+  complex<double> S[A.rows()];
+  for (int iter=0; iter < 40; iter++) {
+    for (int i=0; i<A.rows();i++) {
+      x.reference (A(i, Range::all()));
+      for (int j=i+1; j<A.rows(); j++) {
+	y.reference (A(j,Range::all()));
+	S[j] = conjdot (y, x);
+      }
+      for (int j=i+1; j<A.rows(); j++) {
+      y.reference (A(j,Range::all()));
+      x -= S[j] * y;
+      }
+      Normalize (x);
+    }
+  }
+}
+
+
+inline void CheckOrthog (const Array<complex<double>,2> &A,
+			 zVec &x)
+{
+  zVec Ai;
+  for (int i=0; i<A.rows(); i++) {
+    Ai.reference (A(i,Range::all()));
+    if (mag(conjdot(Ai, x)) > 1.0e-14) {
+      cerr << "CheckOrthog failed.\n";
+      exit(1);
+    }
+  }
 }
 
 
