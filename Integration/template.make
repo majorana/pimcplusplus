@@ -1,6 +1,9 @@
-SOURCES = Integrate.cc GKIntegration.cc HermiteQuad.cc TestHermite.cc
+SOURCES = Integrate.cc GKIntegration.cc HermiteQuad.cc TestHermite.cc TestIntegrate.cc
 
-all:	Integrate.o GKIntegration.o HermiteQuad.o TestHermite.o TestHermite
+all:	Integrate.o GKIntegration.o HermiteQuad.o TestHermite.o TestIntegrate.o TestHermite TestIntegrate
+
+TestIntegrate: TestIntegrate.o Integrate.o
+	$(LD) -o TestIntegrate TestIntegrate.o Integrate.o $(IOobjs) $(LIBS)
 
 TestHermite: TestHermite.o HermiteQuad.o
 	$(LD) -o TestHermite  HermiteQuad.o TestHermite.o $(IOobjs) $(LIBS)
