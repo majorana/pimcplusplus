@@ -145,15 +145,15 @@ public:
   virtual void WriteVar(string name, Array<int,2> &val)=0;
   virtual void WriteVar(string name, Array<int,3> &val)=0;
 
-  virtual void WriteVar(string name, bool val)=0;
-  virtual void WriteVar(string name, Array<bool,1> &val)=0;
-  virtual void WriteVar(string name, Array<bool,2> &val)=0;
-  virtual void WriteVar(string name, Array<bool,3> &val)=0;
-
   virtual void WriteVar(string name, string val)=0;
   virtual void WriteVar(string name, Array<string,1> &val)=0;
   virtual void WriteVar(string name, Array<string,2> &val)=0;
   virtual void WriteVar(string name, Array<string,3> &val)=0;
+
+  virtual void WriteVar(string name, bool val)=0;
+  virtual void WriteVar(string name, Array<bool,1> &val)=0;
+  virtual void WriteVar(string name, Array<bool,2> &val)=0;
+  virtual void WriteVar(string name, Array<bool,3> &val)=0;
 
   /// Append a value to a variable of dimension of 1 higher than val.
   /// i.e. Add a double to an Array<double,1> or add Array<double,1>
