@@ -26,8 +26,11 @@ public:
   Array<double,2> Ulong_k, dUlong_k;
   Array<double,1> Vlong_k;
   /// This stores U_long(r=0);  Index is the level number.
-  Array<double,1> Ulong_0, dUlong_0;
-  double Vlong_0;
+  Array<double,1> Ulong_r0, dUlong_r0;
+  double Vlong_r0;
+  /// This stores (U/dU/V)_long(k=0);  Index is the level number.
+  Array<double,1> Ushort_k0, dUshort_k0;
+  double Vshort_k0;
   /// Stores the RPA form of the above.  This should be computed by
   /// ActionClass, since it couples all of the species pairs together
   /// and needs to know about the number of particles.
