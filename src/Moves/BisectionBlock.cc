@@ -91,10 +91,7 @@ void BisectionBlockClass::ChooseTimeSlices()
     int numLeft = PathData.Path.NumTimeSlices()-sliceSep;
     Slice1 = PathData.Path.Random.LocalInt (numLeft);
     Slice2 = Slice1+sliceSep;
-
-    //  cerr<<"I have chosen "<<Slice1<<" and "<<Slice2<<endl;
   }
-
 }
 
 void BisectionBlockClass::MakeMove()

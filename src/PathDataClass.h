@@ -112,7 +112,7 @@ inline void PathDataClass::AcceptMove(int startTimeSlice,int endTimeSlice,
 inline void PathDataClass::RejectMove(int startTimeSlice,int endTimeSlice,
 			       const Array <int,1> &activeParticles)
 {
-  Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticles);  
+  Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticles); 
 }
 
 

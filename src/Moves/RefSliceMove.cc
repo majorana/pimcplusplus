@@ -24,7 +24,7 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
   
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level);
-    newStage->Actions.push_back(&PathData.Actions.ShortRange);
+    //newStage->Actions.push_back(&PathData.Actions.ShortRange);
     //newStage->Actions.push_back(&PathData.Actions.LongRange);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     newStage->BisectionLevel = level;
@@ -38,7 +38,6 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
 
 bool RefSliceMoveClass::NodeCheck()
 {
-  cerr << "start NodeCheck()" << endl;
   PathClass &Path = PathData.Path;
   // Broadcast the new reference path to all the other processors
   PathData.Path.BroadcastRefPath();
@@ -58,8 +57,6 @@ bool RefSliceMoveClass::NodeCheck()
   double globalChange = PathData.Communicator.AllSum (localChange);
   bool toAccept = (-globalChange)>=log(PathData.Path.Random.Common()); 
 
-  cerr << "end NodeCheck()" << endl;
-  
   return toAccept;
 }
 
@@ -67,7 +64,6 @@ bool RefSliceMoveClass::NodeCheck()
 /// This version is for the processor with the reference slice
 void RefSliceMoveClass::MakeMoveMaster()
 {
-  cerr << "start MakeMoveMaster().\n";
   PathClass &Path = PathData.Path;
   int myProc = PathData.Communicator.MyProc();
 
@@ -76,11 +72,14 @@ void RefSliceMoveClass::MakeMoveMaster()
   // Choose time slices
   int localRef = Path.GetRefSlice() - firstSlice;
   int bisectSlices = (1 << NumLevels);
-  int minStart = max(0, localRef - (bisectSlices>>1));
+  int minStart = max(0, localRef - bisectSlices);
   int maxStart = 
-    min (Path.NumTimeSlices()-1-bisectSlices, localRef + (bisectSlices>>1));
-  int slice1 = Path.Random.LocalInt(minStart-maxStart) + minStart;
-  int slice2 = slice1 + bisectSlices;
+    min (Path.NumTimeSlices()-1-bisectSlices, localRef);
+  maxStart = max (0, maxStart);
+  Slice1 = Path.Random.LocalInt(maxStart-minStart) + minStart;
+  Slice2 = Slice1 + bisectSlices;
+  assert (Slice1 >= 0);
+  assert ((localRef >= Slice1) && (localRef <= Slice2));
 
   ActiveParticles.resize(1);
   ActiveParticles(0) = -1;
@@ -89,11 +88,11 @@ void RefSliceMoveClass::MakeMoveMaster()
   list<StageClass*>::iterator stageIter=Stages.begin();
   double prevActionChange=0.0;
   while (stageIter!=Stages.end() && toAccept){
-    toAccept = (*stageIter)->Attempt(slice1,slice2,
+    toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 				     ActiveParticles,prevActionChange);
     stageIter++;
   }
-    // Broadcast acceptance or rejection 
+  // Broadcast acceptance or rejection 
   int accept = toAccept ? 1 : 0;
   PathData.Communicator.Broadcast (myProc, accept);
 
@@ -110,8 +109,9 @@ void RefSliceMoveClass::MakeMoveMaster()
     }
   }
   // Otherwise, reject the whole move
-  else 
+  else {
     Reject();
+  }
 
 }
 
@@ -137,17 +137,11 @@ void RefSliceMoveClass::MakeMoveSlave()
   /// Receive broadcast from Master.
   PathData.Communicator.Broadcast (master, accept);
   if (accept==1) {
-    if (NodeCheck()) {
-      Accept();
+    if (NodeCheck()) 
       Path.RefPath.AcceptCopy();
-    }
-    else {
-      Reject();
+    else 
       Path.RefPath.RejectCopy();
-    }
   }
-  else
-    Reject();
 }
 
 
