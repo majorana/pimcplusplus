@@ -27,7 +27,7 @@ void PathClass::Read (IOSectionClass &inSection)
   }
   else 
     cerr << "Using free boundary conditions.\n";
-
+  inSection.ReadVar("OpenLoops",OpenPaths);
   // Read in the k-space radius.  If we don't have that,
   // we're not long-ranged.
   LongRange = inSection.ReadVar("kCutoff", kCutoff);

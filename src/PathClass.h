@@ -223,7 +223,7 @@ inline PathClass::PathClass (PIMCCommunicatorClass &communicator) :
   cerr<<"In pathclass constructor"<<endl;
   TotalNumSlices=0;
   Random.Init(314159);
-  OpenPaths=true;
+  //  OpenPaths=true;
   OpenPaths=false; //turns off open loops (Should be read at some poitn)
 
   cerr<<"Out of pathclass constructor"<<endl;
