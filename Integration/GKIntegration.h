@@ -379,13 +379,15 @@ class GKIntegration {
       numIntervals++;
     }
 
-    if (numIntervals > 200)
+    if (numIntervals > 2000)
       cerr << "Number of intervals = " << numIntervals << endl;
 
     double badSum = fabs((result-sum) / sum);
-    if (badSum > 1.0e-7) {
+    if ((badSum > 1.0e-7) && (fabs(result-sum) > absError)) {
+      cerr << "absError tolerance = " << absError << endl;
       cerr << "Percent error = " << badSum*100.0 << endl;
       cerr << "Number of intervals = " << numIntervals << endl;
+      cerr << "result = " << result << " sum = " << sum << endl;
     }
 
 
