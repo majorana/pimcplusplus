@@ -2,6 +2,9 @@ SOURCES = *.cc
 
 all:	
 
+clean:
+	rm -f *.o
+
 .cc.o: $(HEADERS)
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 
 .f.o:

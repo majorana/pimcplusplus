@@ -2,6 +2,9 @@ SOURCES = "*.cc"
 
 all:	SpecialFunctions.o
 
+clean:
+	rm -f *.o
+
 .cc.o: 
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 
 .f.o:
