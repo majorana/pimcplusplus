@@ -32,11 +32,15 @@ void TimeDet()
   clock_t start, end;
 
   start  = clock();
-  for (int i=0; i<10000; i++)
+  for (int i=0; i<100000; i++) {
+    for (int j=0; j<16; j++)
+      for (int k=0; k<16; k++)
+	C(j,k) = exp(-(double)(k-j)*(k-j));
     Determinant(C);
+  }
   end = clock();
 
-  fprintf (stderr, "Time = %5.2 sec.\n", (double)(end-start)/CLOCKS_PER_SEC);
+  fprintf (stderr, "Time = %5.2f sec.\n", (double)(end-start)/CLOCKS_PER_SEC);
   fprintf (stderr, "det(C) = %1.16e\n", Determinant(C));
 }
 
