@@ -5,7 +5,7 @@ class SHO
 {
 public:
   double k;
-  inline Vec2 operator()(double t, Vec2 &x_and_dx)
+  inline Vec2 operator()(double t, const Vec2 &x_and_dx)
   {
     Vec2 deriv;
     deriv[0] = x_and_dx[1];
@@ -35,7 +35,7 @@ void RKSpeed()
 {
   SHO sho;
   sho.k = 1.0;
-  LinearGrid t(0, 25.0, 1001);
+  LinearGrid t(0, 25.0, 5001);
   Array<Vec2,1> x(t.NumPoints);
   RungeKutta<SHO,Vec2> Integrator(sho);
   x(0)[0] = 0;
@@ -58,7 +58,7 @@ void IntegrateSpeed()
 {
   SHO sho;
   sho.k = 1.0;
-  LinearGrid t(0, 25.0, 1001);
+  LinearGrid t(0, 25.0, 5001);
   Array<Vec2,1> x(t.NumPoints);
   x(0)[0] = 0;
   x(0)[1] = 1.0;
