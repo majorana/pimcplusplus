@@ -1342,6 +1342,8 @@ void IOTreeHDF5Class::WriteVar(string name,string str)
   /// Add it to the list
   VarList.push_back(newVar);
 
+  cerr << "str = " << str << endl;
+
   hsize_t dim[1];
   dim[0] = 1;
   // Create the dataspace

@@ -245,20 +245,25 @@ class IOTreeASCIIClass : public IOTreeClass
 		    bool wantEndBrace);
 
  public:
-  void FlushFile();
   void WriteSection(ofstream &outFile,int indent);
   /// Print an indented tree of section variable names.
   void PrintTree(int level);
   /// Same thing, just calls above with level 0;
   void PrintTree();
+
+  IOTreeClass* NewSection(string name);
+  void IncludeSection (IOTreeClass *);
   /// Takes the name of a file to read, the name of my section and a
   /// pointer to my parent.  Reads the file into a tree of
   /// IOTreeClass's.
   bool OpenFile (string filename, string myName, 
 		 IOTreeClass *parent);
+  bool NewFile (string fileName, string mySectionName,
+		IOTreeClass *parent);
   /// Do any file handling necessary and delete the whole tree of data.
   void CloseFile();
-  IOTreeClass* NewSection(string name);
+  void FlushFile();
+
   void WriteVar(string name, double val);
   void WriteVar(string name, Array<double,1> &val);
   void WriteVar(string name, Array<double,2> &val);
@@ -278,12 +283,6 @@ class IOTreeASCIIClass : public IOTreeClass
   void WriteVar(string name, Array<string,1> &val);
   void WriteVar(string name, Array<string,2> &val);
   void WriteVar(string name, Array<string,3> &val);
-  bool NewFile (string fileName,
-			string mySectionName,
-			IOTreeClass *parent);
-  void IncludeSection (IOTreeClass *);
-
-
 };
 
 

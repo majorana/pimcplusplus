@@ -756,7 +756,6 @@ bool IOTreeASCIIClass::NewFile (string fileName,
   FileName=fileName;
   Parent=parent;
   Name=mySectionName;
-
 }
 
 
@@ -765,9 +764,8 @@ bool IOTreeASCIIClass::NewFile (string fileName,
 /// the parent of this section.  It reads the file into a buffer,
 /// converts it to a list of tokens, then parses the tokens,
 /// constructing a tree of sections containing variables lists.  
-bool IOTreeASCIIClass::OpenFile(string fileName, 
-				   string myName, 
-				   IOTreeClass *parent)
+bool IOTreeASCIIClass::OpenFile(string fileName, string myName, 
+				IOTreeClass *parent)
 {
   Array<char,1> buffer;
   ReadWithoutComments(fileName,buffer);
