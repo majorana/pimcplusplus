@@ -58,7 +58,7 @@ public:
 		    double abmin, int numA, int numB, int numV);
   void Read (IOSectionClass &in);
   void Write (IOSectionClass &out); 
-  QuinticPH() : ABmin(0.0) 
+  QuinticPH() : ABmin(0.0), UseVcore(true)
   { /* do nothing for now */ }
 };
 
