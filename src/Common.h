@@ -9,6 +9,7 @@
 #include <sprng.h>
 #include "Blitz.h"
 
+
 /// These are the different mode types for the MirroredArrayClass
 typedef enum {OLDMODE, NEWMODE, BOTHMODE} ModeType;
 

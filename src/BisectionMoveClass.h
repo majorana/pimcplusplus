@@ -42,7 +42,7 @@ class BisectionMoveClass : public ParticleMoveClass
 ///"Pseudo-moves do not increment the monte-carlo time slice. It
 ///shifts the data in memory by numTimeSlicesToShift. We do this to
 ///shift data between processors, etc.
-class ShiftMove : public MoveClass
+class ShiftMoveClass : public MoveClass
 {
  public:
   /// Contains the number of time slices to shift at a time. We have
@@ -50,7 +50,7 @@ class ShiftMove : public MoveClass
   int numTimeSlicesToShift;
   /// Function to actually make a shift move. 
   void MakeMove();
-  ShiftMove (PathDataClass &myPathData) : MoveClass(myPathData)
+  ShiftMoveClass (PathDataClass &myPathData) : MoveClass(myPathData)
   { /* Do nothing for now. */ }
 };
 

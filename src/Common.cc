@@ -48,7 +48,7 @@ int GetCurrentTimeStamp()
 /// write to the section copy,  in OBSERVABLE
 /// mode, write to both copies.
 
-void setMode(ModeType theMode)
+void SetMode(ModeType theMode)
 {
 
   if (theMode==OLDMODE){

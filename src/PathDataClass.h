@@ -13,8 +13,13 @@
 class PathDataClass
 {
 public:
-  /// This object computes all actions.
-  ActionClass Action;
+  ///The constructor that initializes the action and such
+  inline PathDataClass() : Action(MemoizedData,SpeciesArray)
+    {
+
+
+
+    }
   /// This object holds computed data which is used multiple times.
   MemoizedDataClass MemoizedData;
   /// This object functions as an array of SpeciesClass objects.
@@ -22,6 +27,11 @@ public:
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
   CommunicatorClass Communicator;
+
+  /// This object computes all actions.
+  ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
+
+
   /// Returns the number of time slices.
   inline int NumTimeSlices()
   {  return (SpeciesArray(0).NumTimeSlices());  }

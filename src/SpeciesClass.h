@@ -16,7 +16,8 @@ public:
   /// Stores the permutation for my set of time-slices. This needs to be resized at some point!!
   MirroredArrayClass1D<int> Permutation;
   
-  
+
+
   inline int NumParticles()
   { return Path.NumParticles(); }
   inline int NumTimeSlices()
@@ -35,7 +36,8 @@ public:
   }
 
 
-  void ShiftData(int sliceToShift, CommunicatorClass &communicator);
+  inline void ShiftData(int sliceToShift, CommunicatorClass &communicator)
+    {Path.ShiftData(sliceToShift,communicator);};
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
   /// classical particle.
   double lambda;

@@ -1,12 +1,12 @@
 #include "PathDataClass.h"
 #include "BisectionMoveClass.h"
 #include "Common.h"
+#include "SpeciesClass.h"
 
 
 
 
-
-void ShiftMove::MakeMove()
+void ShiftMoveClass::MakeMove()
 {//Remember to mark Actions dirty!!!
   //int numTimeSlicesToShift=(int)floor(sprng()*PathData->NumTimeSlices);
   int numTimeSlicesToShift = 5;

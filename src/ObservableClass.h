@@ -27,11 +27,12 @@ public:
   virtual void Initialize() = 0;
   /// Print running average to screen for debugging purposes
   virtual void Print() = 0;
-  virtual void Write(OutputFileClass &outputFile);
+  virtual void Write(OutputFileClass &outputFile)=0;
   /// The constructor.  Sets PathData references and calls initialize.
   ObservableClass(PathDataClass &myPathData) : PathData(myPathData)
   {   }
 };
+
 
 
 /// This template class will be used to construct distributed versions
@@ -83,6 +84,8 @@ public:
   void Print();
   PairCorrelation(PathDataClass &myPathData) : ObservableClass(myPathData)
   { /* Do nothing for now. */ }
+  void Write (OutputFileClass &outputFile)
+    {/*Currently doesn't do anything*/};
 };
 
 
