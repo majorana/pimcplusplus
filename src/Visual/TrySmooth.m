@@ -1,7 +1,7 @@
 x = rand(100,1);
 N = length(x);
 
-numk = 40;
+numk = 20;
 
 Xc = zeros(numk,1);
 Xs = zeros(numk,1);
