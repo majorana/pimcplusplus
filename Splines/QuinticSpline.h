@@ -126,7 +126,7 @@ public:
 
 inline int QuinticSpline::NumPoints() const 
 {
-  return grid->NumPoints;
+  return Y.size();
 }
 
 void QuinticSpline::Init(Grid *NewGrid, Array<double,1> NewY,
