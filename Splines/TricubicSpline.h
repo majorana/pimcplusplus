@@ -131,9 +131,9 @@ inline double TricubicSpline::operator()(double x, double y, double z)
   int errorCode;
 
   evtricub_(&x, &y, &z, 
-	    xGrid->Points(), &Nx, 
-	    yGrid->Points(), &Ny, 
-	    zGrid->Points(), &Nz,
+	    xGrid->data(), &Nx, 
+	    yGrid->data(), &Ny, 
+	    zGrid->data(), &Nz,
 	    &xIsLin, &yIsLin, &zIsLin,
 	    f.data(), &Nx, &Ny, 
 	    iselect, fval, &errorCode);
@@ -187,9 +187,9 @@ inline void TricubicSpline::Update()
 //     cerr << (*zGrid)(i) << endl;
 
   double *wk = new double[Nwk];
-  mktricubw_(xGrid->Points(), &Nx,
-	     yGrid->Points(), &Ny,
-	     zGrid->Points(), &Nz,
+  mktricubw_(xGrid->data(), &Nx,
+	     yGrid->data(), &Ny,
+	     zGrid->data(), &Nz,
 	     f.data(), &Nx, &Ny,
 	     &IxMinBC, &dummyDouble, &IxMaxBC, &dummyDouble, &dummyInt,
 	     &IyMinBC, &dummyDouble, &IyMaxBC, &dummyDouble, &dummyInt,

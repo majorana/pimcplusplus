@@ -132,6 +132,7 @@ public:
   CubicSpline()
   {
     UpToDate = 0;
+    grid = NULL;
   }
 };
 

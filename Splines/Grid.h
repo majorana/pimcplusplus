@@ -29,9 +29,13 @@ class Grid
     {
       return (grid(i));
     }
-  inline double* Points()
+  inline double* data()
   {
     return grid.data();
+  }
+  inline Array<double,1>& Points()
+  {
+    return grid;
   }
 
   /// Returns the type of the grid (i.e. linear, optimal, etc)
