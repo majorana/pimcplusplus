@@ -27,16 +27,11 @@ private:
   double StartDeriv, StartDeriv2, EndDeriv, EndDeriv2;
   /// The coefficients of the 5th-order polynomial
   Array<double,1>  B, C, D, E, F;
-  double I, J;
-  inline GetIJ(double x);
+  int I, J;
+  inline void GetIJ(double x);
+  Grid *grid;
 public:
   int NumParams;
-  Grid *grid;
-  /// The values of the derivative of the represented function on the
-  /// boundary.  If each value is greater that 1e30, we compute
-  /// bondary conditions assuming that the second derivative is zero at
-  /// that boundary.
-  double StartDeriv, EndDeriv;
 
   /// Returns the interpolated value.
   inline double operator()(double x);
@@ -54,23 +49,8 @@ public:
   /// Initialize the cubic spline.  See notes about start and end
   /// deriv above.
   inline void Init(Grid *NewGrid, Array<double,1> NewYs,
-		   double startderiv, double startderiv2,
-		   double endderiv, double endderiv)
-  {
-    StartDeriv = startderiv; StartDeriv2 = startderiv2;
-    EndDeriv = endderiv;     EndDeriv2 = endderiv2;
-    if (NewGrid->NumPoints != NewYs.rows())
-      {
-	cerr << "Size mismatch in QuinticSpline.\n";
-	exit(1);
-      }
-    grid = NewGrid;
-    NumParams = grid->NumPoints;
-    y.resize(grid->NumPoints);
-    d2y.resize(grid->NumPoints);
-    y = NewYs;
-    Update();
-  }
+		   double startderiv, double endderiv,
+		   double startderiv2, double endderiv2);
 
   /// Simplified form which assumes that the second derivative at both
   /// boundaries are zero.
@@ -82,7 +62,6 @@ public:
   /// Simplified constructor.
   inline QuinticSpline (Grid *NewGrid, Array<double,1> NewYs)
   {
-    StartDeriv = EndDeriv = 5.0e30;
     Init (NewGrid, NewYs, NAN, NAN, NAN, NAN);
   }
 
@@ -91,39 +70,41 @@ public:
 		      double startderiv, double startderiv2,
 		      double endderiv, double endderiv2)
   {
-    Init (NewGrid, NewYs, startderiv, startdervi2, 
-	  endderiv, endderiv2);
+    Init (NewGrid, NewYs, startderiv, startderiv2, endderiv, endderiv2);
     Update();
   }
 
   /// Returns the value of the function at the ith grid point.
-  inline double Params(int i) const
+  inline double operator()(int i) const
   {
-    return (y(i));
+    return (Y(i));
   }
   /// Returns a reference to the value at the ith grid point.
-  inline double & Params(int i)
+  inline double & operator()(int i)
   {
     UpToDate = 0;
-    return (y(i));
+    return (Y(i));
   }
-  void Write(OutputSectionClass &outSection)
+  void Write(IOSectionClass &outSection)
   {
     outSection.WriteVar("StartDeriv", StartDeriv);
     outSection.WriteVar("EndDeriv", EndDeriv);
-    outSection.WriteVar("y", y);
+    outSection.WriteVar("StartDeriv2", StartDeriv);
+    outSection.WriteVar("EndDeriv2", EndDeriv);
+    outSection.WriteVar("Y", Y);
 
-    outSection.OpenSection("Grid");
+    outSection.NewSection("Grid");
     grid->Write(outSection);
     outSection.CloseSection();
   }
-  void Read(InputSectionClass &inSection)
+  void Read(IOSectionClass &inSection)
   {
     assert(inSection.ReadVar("StartDeriv", StartDeriv));
     assert(inSection.ReadVar("EndDeriv", EndDeriv));
-    assert(inSection.ReadVar("y", y));
-    NumParams = y.size();
-    d2y.resize(NumParams);
+    assert(inSection.ReadVar("StartDeriv2", StartDeriv));
+    assert(inSection.ReadVar("EndDeriv2", EndDeriv));
+    assert(inSection.ReadVar("Y", Y));
+    NumParams = Y.size();
     assert(inSection.OpenSection("Grid"));
     grid = ReadGrid(inSection);
     inSection.CloseSection();
@@ -139,10 +120,53 @@ public:
 };
 
 
-
-
-inline void GetIJ(double x)
+void QuinticSpline::Init(Grid *NewGrid, Array<double,1> NewY,
+			 double startderiv, double endderiv,
+			 double startderiv2, double endderiv2)
 {
+  StartDeriv = startderiv; StartDeriv2 = startderiv2;
+  EndDeriv = endderiv; EndDeriv2 = endderiv2;
+  grid = NewGrid;
+  if (NewGrid->NumPoints != NewY.size()) {
+    cerr << "Size mismatch in QuinticSpline.\n";
+    cerr << "Number of grid points = " << NewGrid->NumPoints << endl;
+    cerr << "Number of Y's         = " << NewY.size() << endl;
+    exit(1);
+  }
+  Y.resize(NewY.size());
+  B.resize(NewY.size());
+  C.resize(NewY.size());
+  D.resize(NewY.size());
+  E.resize(NewY.size());
+  F.resize(NewY.size());
+  Y = NewY;
+
+  int NumParams = grid->NumPoints;
+  if (!isnan(StartDeriv))
+    {
+      NumParams++;
+      if (!isnan(StartDeriv2))
+	NumParams++;
+    }
+  if (!isnan(EndDeriv))
+    {
+      NumParams++;
+      if (!isnan(EndDeriv2))
+	NumParams++;
+    }
+  FX.resize(NumParams);
+  FY.resize(NumParams);
+  FB.resize(NumParams);
+  FC.resize(NumParams);
+  FD.resize(NumParams);
+  FE.resize(NumParams);
+  FF.resize(NumParams);
+
+}
+
+
+inline void QuinticSpline::GetIJ(double x)
+{    
   Grid &X = *grid;
 #ifdef BZ_DEBUG
   if (x > X.End)
@@ -157,8 +181,8 @@ inline void GetIJ(double x)
 	}
     }
 #endif
-  int J = X.ReverseMap(x)+1;
-  int I = J-1;
+  J = X.ReverseMap(x)+1;
+  I = J-1;
   if (I<0)
     {
       I = 0;
@@ -167,7 +191,7 @@ inline void GetIJ(double x)
   if (J>(X.NumPoints-1))
     {
       J = (X.NumPoints-1);
-      I = hi-1;
+      I = J-1;
     }
 }
 
@@ -175,12 +199,16 @@ inline void GetIJ(double x)
 
 inline double QuinticSpline::operator()(double x)
 {
+  Grid &X = *grid;
   if (!UpToDate)
     Update();
 
-  GetIJ();
-
+  GetIJ(x);
+  
   double P = (x-X(I));
+
+//   cerr << "x = " << x << "I = " << I << endl;
+//   cerr << "P = " << P << endl;
 
   double S = ((((F(I)*P+E(I))*P+D(I))*P+C(I))*P+B(I))*P+Y(I);
   return (S);
@@ -190,10 +218,11 @@ inline double QuinticSpline::operator()(double x)
 
 inline double QuinticSpline::Deriv(double x)
 {
+  Grid &X = *grid;
   if (!UpToDate)
     Update();
 
-  GetIJ();
+  GetIJ(x);
   double P = x-X(I);
 
   double S = (((5.0*F(I)*P+4.0*E(I))*P+3.0*D(I))*P+2.0*C(I))*P+B(I);
@@ -204,10 +233,11 @@ inline double QuinticSpline::Deriv(double x)
 
 inline double QuinticSpline::Deriv2(double x)
 {
+  Grid &X = *grid;
   if (!UpToDate)
     Update();
 
-  GetIJ();
+  GetIJ(x);
   double P = (x-X(I));
 
   double S = ((20.0*F(I)*P+12.0*E(I))*P+6.0*D(I))*P+2.0*C(I);
@@ -219,10 +249,11 @@ inline double QuinticSpline::Deriv2(double x)
 
 inline double QuinticSpline::Deriv3(double x)
 {
+  Grid &X = *grid;
   if (!UpToDate)
     Update();
 
-  GetIJ();
+  GetIJ(x);
   double P = (x-X(I));
   double S = (60.0*F(I)*P+24.0*E(I))*P+6.0*D(I);
   return (S);
@@ -231,10 +262,11 @@ inline double QuinticSpline::Deriv3(double x)
 
 inline double QuinticSpline::Deriv4(double x)
 {
+  Grid &X = *grid;
   if (!UpToDate)
     Update();
 
-  GetIJ();
+  GetIJ(x);
   double P = (x-X(I));
   double S = 120.0*F(I)*P+24.0*E(I);
   return (S);

@@ -2,39 +2,10 @@
 
 extern "C" void quinat_ (int *N, double X[], double Y[], 
 			 double B[], double C[], double D[], 
-			 double E[] double F[]);
+			 double E[], double F[]);
 
 
 
-void QuinticSpline::Init(Grid *NewGrid, Array<double,1> NewY,
-			 double startderiv, double endderiv,
-			 double startderiv2, double enderiv2)
-{
-  StartDeriv = startderiv; StartDeriv2 = startderiv2;
-  EndDeriv = endderiv; EndDeriv2 = endderiv2;
-  int NumParams = grid->NumPoints;
-  if (!isnan(StartDeriv))
-    {
-      NumParams++;
-      if (!isnan(StartDeriv2))
-	NumParams++;
-    }
-  if (!isnan(EndDeriv))
-    {
-      NumParams++;
-      if (!isnan(EndDeriv2))
-	NumParams++;
-    }
-  FX.resize(NumParams);
-  FY.resize(NumParams);
-  FB.resize(NumParams);
-  FC.resize(NumParams);
-  FD.resize(NumParams);
-  FE.resize(NumParams);
-  FF.resize(NumParams);
-
-  Update();
-}
 
 void QuinticSpline::Update()
 {
@@ -43,12 +14,12 @@ void QuinticSpline::Update()
   /// derivatives at the boundary if we so desire.
   offset=0;
   FX(0) = (*grid)(0);
-  FY(0) = NewY(0);
+  FY(0) = Y(0);
   if (!isnan(StartDeriv)) {
     offset++;
     FX(1) = (*grid)(0);
     FY(1) = StartDeriv;
-    if (!isnan(EndDeriv)) {
+    if (!isnan(StartDeriv2)) {
       offset++;
       FX(2) = (*grid)(0);
       FY(2) = StartDeriv2;
@@ -61,7 +32,7 @@ void QuinticSpline::Update()
     FY(i) = EndDeriv;
     i++;
     if (!(isnan(EndDeriv2))) {
-      FX(i) = *(grid)(grid->NumPoints-1);
+      FX(i) = (*grid)(grid->NumPoints-1);
       FY(i) = EndDeriv2;
     }
   }
@@ -77,7 +48,18 @@ void QuinticSpline::Update()
 	   FD.data(), FE.data(), FF.data());
 
   // Now copy the data into our coefficents
-  Y(0) = FY(0);
-  
+  B(0) = FB(offset);
+  C(0) = FC(offset);
+  D(0) = FD(offset);
+  E(0) = FE(offset);
+  F(0) = FF(offset);
+  for (int i=1; i<grid->NumPoints; i++) {
+    B(i) = FB(i+offset);
+    C(i) = FC(i+offset);
+    D(i) = FD(i+offset);
+    E(i) = FE(i+offset);
+    F(i) = FF(i+offset);
+  }
 
+  UpToDate=true;
 }
