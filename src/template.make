@@ -81,7 +81,6 @@ PIMCobjs =                            \
   Common/MPI/Communication.o	      \
   Common/IO/InputOutput.o             \
   Common/IO/InputOutputHDF5.o         \
-  Common/IO/InputFile.o               \
   Common/IO/InputOutputASCII.o        \
   Common/IO/InputOutputXML.o          \
   Common/PairAction/PAcoulombBCFit.o  \
@@ -159,7 +158,6 @@ TestPermobjs =                        \
   Common/MPI/Communication.o	      \
   Common/IO/InputOutput.o             \
   Common/IO/InputOutputHDF5.o         \
-  Common/IO/InputFile.o               \
   Common/IO/InputOutputASCII.o        \
   Common/IO/InputOutputXML.o          \
   Common/PairAction/PAcoulombBCFit.o  \
@@ -207,7 +205,6 @@ TestEwaldobjs =                       \
   Common/MPI/Communication.o	      \
   Common/IO/InputOutput.o             \
   Common/IO/InputOutputHDF5.o         \
-  Common/IO/InputFile.o               \
   Common/IO/InputOutputASCII.o        \
   Common/IO/InputOutputXML.o          \
   Common/PairAction/PAcoulombBCFit.o  \
@@ -239,7 +236,6 @@ FreeParticleObjs =                   \
   FreeParticles.o                    \
   Common/IO/InputOutput.o            \
   Common/IO/InputOutputHDF5.o        \
-  Common/IO/InputFile.o              \
   Common/IO/InputOutputASCII.o       \
   Common/IO/InputOutputXML.o         \
   Common/MPI/Communication.o
