@@ -80,7 +80,7 @@ public:
   void AllGather (Array<double,1> &SendVec, 
 		  Array<double,1> &RecvVec);
   void Split (int color, CommunicatorClass &newComm);
-  void Subset (Array<int,1> ranks, CommunicatorClass &newComm);
+  void Subset (Array<int,1> &ranks, CommunicatorClass &newComm);
 
   ///Sends and receives an array of dVec
   void SendReceive (int sendProc, const Array<Vec3,1> &sendBuff,
@@ -112,6 +112,10 @@ public:
   ///Sums up the vectors in sendBuff.  Processor 0 only gets the
   ///resulting sum.
   void Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuff);
+
+
+  void Sum (Array<Vec2,1> &sendBuff, Array<Vec2,1> &recvBuff);
+  void Sum (Array<Vec3,1> &sendBuff, Array<Vec3,1> &recvBuff);
   ///Sums up all values a.  Only processor 0 gets the result.  All
   ///other processors return 0;
   double Sum (double a);
@@ -230,6 +234,16 @@ public:
   {
     recvBuff=sendBuff;
   }
+  void Sum (Array<Vec2,1> &sendBuff, Array<Vec2,1> &recvBuff)
+  {
+    recvBuff=sendBuff;
+  }
+  void Sum (Array<Vec3,1> &sendBuff, Array<Vec3,1> &recvBuff)
+  {
+    recvBuff=sendBuff;
+  }
+
+    
   
   /// Sums up all values of a on all processors.  All processors
   ///  get result.

@@ -18,9 +18,9 @@ int CommunicatorClass::MyProc()
 
 int CommunicatorClass::NumProcs()
 {
-  int NumProcs;
-  MPI_Comm_size(MPIComm, &NumProcs);
-  return NumProcs;
+  int numProcs;
+  MPI_Comm_size(MPIComm, &numProcs);
+  return numProcs;
 }
 
 void CommunicatorClass::Send (void *sendBuf, int count, MPI_Datatype datatype,
@@ -34,23 +34,23 @@ void CommunicatorClass::Send (int toProc, Array<double,1> &buff)
   Send(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
 }
 
-void CommunicatorClass::BroadCast (int root, int &val)
-{  MPI_Bcast(&val, 1, MPI_INTEGER, root, MPIComm); }
+void CommunicatorClass::Broadcast (int root, int &val)
+{  MPI_Bcast(&val, 1, MPI_INT, root, MPIComm); }
 
-void CommunicatorClass::BroadCast (int root, double &val)
+void CommunicatorClass::Broadcast (int root, double &val)
 {  MPI_Bcast(&val, 1, MPI_DOUBLE, root, MPIComm); }
 
-void CommunicatorClass::BroadCast (int root, Array<double,1> &buff)
+void CommunicatorClass::Broadcast (int root, Array<double,1> &buff)
 {
   MPI_Bcast(buff.data(), buff.size(), MPI_DOUBLE, root, MPIComm);
 }
 
-void CommunicatorClass::BroadCast (int root, Array<Vec2,1> &buff)
+void CommunicatorClass::Broadcast (int root, Array<Vec2,1> &buff)
 {
   MPI_Bcast(buff.data(), 2*buff.size(), MPI_DOUBLE, root, MPIComm);
 }
 
-void CommunicatorClass::BroadCast (int root, Array<Vec2,1> &buff)
+void CommunicatorClass::Broadcast (int root, Array<Vec3,1> &buff)
 {
   MPI_Bcast(buff.data(), 3*buff.size(), MPI_DOUBLE, root, MPIComm);
 }
@@ -110,12 +110,18 @@ void CommunicatorClass::Split (int color, CommunicatorClass &newComm)
   MPI_Comm_split(MPIComm, color, 0, &(newComm.MPIComm));
 }
 
-void CommunicatorClass::Subset (Array<int,1> ranks, CommunicatorClass &newComm)
+void CommunicatorClass::Subset (Array<int,1> &ranks, 
+				CommunicatorClass &newComm)
 {
   MPI_Group myGroup, newGroup;
+  cerr << "before MPI_Comm_group\n";
   MPI_Comm_group (MPIComm, &myGroup);
+  cerr << "MPI_Group_incl\n";
   MPI_Group_incl(myGroup, ranks.size(), ranks.data(), &newGroup);
+  cerr << "before  MPI_Comm_create\n";
+  cerr << "ranks = " << ranks << endl;
   MPI_Comm_create(MPIComm, newGroup, &(newComm.MPIComm));
+  cerr << "after  MPI_Comm_create\n";
 }
 
 
@@ -215,6 +221,31 @@ void CommunicatorClass::Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuf
 	     MPIComm);
 }
 
+
+///Sums up the vectors in sendBuff.  Processor 0 only gets the
+///resulting sum.
+void CommunicatorClass::Sum (Array<Vec2,1> &sendBuff, Array<Vec2,1> &recvBuff)
+{
+  double *sendPtr = (double*)(sendBuff.data());
+  double *recvPtr = (double*)(recvBuff.data());
+  int count = sendBuff.size();
+  
+  MPI_Reduce(sendPtr, recvPtr, 2*count, MPI_DOUBLE, MPI_SUM, 0, 
+	     MPIComm);
+}
+
+///Sums up the vectors in sendBuff.  Processor 0 only gets the
+///resulting sum.
+void CommunicatorClass::Sum (Array<Vec3,1> &sendBuff, Array<Vec3,1> &recvBuff)
+{
+  double *sendPtr = (double*)(sendBuff.data());
+  double *recvPtr = (double*)(recvBuff.data());
+  int count = sendBuff.size();
+  
+  MPI_Reduce(sendPtr, recvPtr, 3*count, MPI_DOUBLE, MPI_SUM, 0, 
+	     MPIComm);
+}
+
 ///Sums up the vectors in sendBuff.  Processor 0 only gets the
 ///resulting sum.
 void CommunicatorClass::Sum (Array<int,1> &sendBuff, Array<int,1> &recvBuff)
@@ -244,7 +275,7 @@ double CommunicatorClass::Sum (double a)
 double CommunicatorClass::AllSum (double a)
 {
   double sum;
-  MPI_AllReduce(&a, &sum, 1, MPI_DOUBLE, MPI_SUM, MPIComm);
+  MPI_Allreduce(&a, &sum, 1, MPI_DOUBLE, MPI_SUM, MPIComm);
   return sum;
 }
 
@@ -253,7 +284,7 @@ void CommunicatorClass::AllSum (Array<double,1> &in,
 				Array<double,1> &out)
 {
   assert (in.size() == out.size());
-  MPI_AllReduce(in.data(), out.data(), in.size(), 
+  MPI_Allreduce(in.data(), out.data(), in.size(), 
 		MPI_DOUBLE, MPI_SUM, MPIComm);
 }
 

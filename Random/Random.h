@@ -62,21 +62,24 @@ public:
     Init (seed);
   }
 
-  void Init(int seed)
+  void Init(int seed, int numClones=1)
   {
+    NumClones=numClones;
     int myProc=MyComm.MyProc();
     int numProcs=MyComm.NumProcs();
     int procsPerClone=numProcs/NumClones;
     CloneNumber=myProc/procsPerClone;
     int commID=numProcs+CloneNumber;
-    LocalStream = init_sprng(SPRNG_DEFAULT, myProc,numProcs+NumClones,seed,SPRNG_DEFAULT);
-    CommonStream = init_sprng(SPRNG_DEFAULT, commID,numProcs+NumClones,seed,SPRNG_DEFAULT);
+    LocalStream = 
+      init_sprng(SPRNG_DEFAULT, myProc,numProcs+NumClones,seed,SPRNG_DEFAULT);
+    CommonStream = 
+      init_sprng(SPRNG_DEFAULT, commID,numProcs+NumClones,seed,SPRNG_DEFAULT);
   }
 
 
-  RandomClass(CommunicatorClass &comm, int numClones=1) : MyComm(comm)
+  RandomClass(CommunicatorClass &comm) : MyComm(comm)
   {
-    NumClones=numClones;
+
   }
 };
 

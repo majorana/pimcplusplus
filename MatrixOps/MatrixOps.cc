@@ -93,6 +93,18 @@ void GJInverse (Array<double,2> &A)
 {
   assert (A.cols() == A.rows());
   int n = A.rows();
+
+  if (n == 2) { // Special case for 2x2
+    double a=A(0,0); double b=A(0,1);
+    double c=A(1,0); double d=A(1,1);
+    double detInv = 1.0/(a*d-b*c);
+    A(0,0) = d*detInv;
+    A(0,1) = -b*detInv;
+    A(1,0) = -c*detInv;
+    A(1,1) = a*detInv;
+    return;
+  }
+
   int colIndex[n], rowIndex[n], ipiv[n];
   double big, dum, pivInv, temp;
   int icol, irow;
@@ -114,6 +126,7 @@ void GJInverse (Array<double,2> &A)
 	  }
 	  else if (ipiv[k] > 0) {
 	    cerr << "GJInverse: Singular matrix!\n";
+	    cerr << "A = " << A << endl;
 	    abort();
 	  }
 	}
@@ -127,6 +140,7 @@ void GJInverse (Array<double,2> &A)
     colIndex[i] = icol;
     if (A(icol,icol) == 0.0) { 
       cerr << "GJInverse: Singular matrix!\n";
+      cerr << "A = " << A << endl;
       abort();
     }
     pivInv = 1.0/A(icol,icol);
