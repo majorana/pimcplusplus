@@ -1,0 +1,169 @@
+double tau=0.125;
+
+Section (Parallel)
+{
+  int ProcsPerClone = 1;
+}
+
+Section (System)
+{
+  int NumTimeSlices=1143;
+  Array<bool,1> IsPeriodic(3) = [true,true,true];
+  Array<double,1> Box(3)=[27.211, 27.211, 27.211];
+  double kCutoff = 0.9;
+  Section (Particles)
+  {
+    Section (Species)
+    {
+      string Name="eup";
+      string Type="e";
+      double lambda=0.5; 
+      string Statistics="FERMION";
+      string NodeType = "FREE";
+      int NumParticles=8;
+      int NumDim=3;
+      string InitPaths="LEVIFLIGHT";
+      Array<double,2> Positions(8,3)=[ 0.1, 0.1, 0.1,
+				       0.2, 0.2, 0.2,
+				       0.3, 0.3, 0.3,
+				       0.4, 0.4, 0.4,
+				       0.5, 0.5, 0.5,
+				       0.6, 0.6, 0.6,
+				       0.7, 0.7, 0.7,
+				       0.8, 0.8, 0.8 ];
+    }
+    Section (Species)
+    {
+      string Name="edown";
+      string Type = "e";
+      string Statistics = "FERMION";
+      double lambda=0.5; 
+      string NodeType = "FREE";
+      int NumParticles=8;
+      int NumDim=3;
+      string InitPaths="LEVIFLIGHT";
+      Array<double,2> Positions(8,3)=[ 0.2, 0.1, 0.1,
+				       0.3, 0.2, 0.2,
+				       0.4, 0.3, 0.3,
+				       0.5, 0.4, 0.4,
+				       0.6, 0.5, 0.5,
+				       0.7, 0.6, 0.6,
+				       0.8, 0.7, 0.7,
+				       0.9, 0.8, 0.8];
+    }
+    Section (Species)
+    {
+      string Name="Na";
+      string Type="Na+";
+      double lambda=0.0; 
+      string Statistics="BOLTZMANNON";
+      string NodeType = "NONE";
+      int NumParticles=16;
+      int NumDim=3;
+      string InitPaths="CUBIC";
+    }
+  }
+}
+
+
+Section (Action)
+{
+  int MaxLevels = 6;
+  bool UseRPA = false;
+  int NumBreakupKnots = 20;
+  Array<string,1> PairActionFiles(3) = ["Na-Na.PairAction",
+					"Na3_beta8.0.TC.h5",
+					"e-e_beta8.0.coulombBCfit.h5"];
+}
+
+Section (Observables)
+{
+  string OutFileBase = "Na_16_tau0.125_M1143";
+  Section (Observable) {
+    string type = "Energy";
+    string Name = "Energy";
+    int freq=2;
+    int dumpFreq=100;
+    
+  }
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "PairCorrelation";
+    string Species1 = "Na";
+    string Species2 = "eup";
+    int freq=20;
+    int dumpFreq=100;
+    Section (Grid) {
+      string type = "Linear";
+      int NumPoints = 100;
+    }
+ }
+}
+
+
+Section (Moves) {
+  Section (Move) {
+    string type="BisectionBlock";
+    string name="eupBlock";
+    string PermuteType="TABLE";
+    Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
+    int NumLevels=6;
+    string Species = "free";
+    int StepsPerBlock=1;
+    
+  }
+
+  Section (Move) {
+    string type="RefSlice";
+    string name="RefSlice";
+    string PermuteType="NONE";
+    int NumLevels=6;
+    string Species = "free";
+  }
+
+  Section (Move) {
+    string type = "Displace";
+    string name = "NaDisplace";
+    string Species = "Na";
+    double Sigma = 0.2;
+  }
+
+  Section (Move) {
+    string type="ShiftMove";
+    string name="Shift";
+  }
+}
+
+ 
+
+
+Section (Algorithm) {
+//   Section (Loop){ // Before Accumulating Observables
+//     int steps=1000; 
+//     Section (Loop){ 
+//       int steps=3;
+//       Section (Move) {string name="BisectionBlock";} 
+//       Section (Move) {string name="RefSlice";} 
+//     }
+//     //    Section (Move) {string name="Permutations";} 
+//     Section (Move) {string name = "Shift";}
+//   }
+  Section (Loop) { //Start Accumulating observables
+    int steps=6000000;
+    Section (Loop){
+      int steps=3;
+      Section (Move) { string name="BisectionBlock";} 
+      Section (Move) { string name="RefSlice";} 
+    }
+    Section (Move) { string name = "Displace";}
+    Section (Move) { string name = "Shift"; }
+    //    Section (Move) {string name="Permutations";} 
+    Section (Observe) { string name = "PairCorrelation";}
+    Section (Observe) { string name = "Energy"; }
+  }
+}
+
+
+
+
+	  
