@@ -22,7 +22,8 @@ void CycleBlockMoveClass::MakeMove()
     double forwT = Forw->AttemptPermutation();
     double revT = Rev->CalcReverseProb(*Forw);
     double Tratio = forwT/revT;
-    double actionChange = -log(Forw->CurrentCycle.P);
+    int len=Forw->CurrentCycle.Length;
+    double actionChange = -log(Forw->CurrentCycle.P/Forw->Gamma[len-1]);
     double psi = PathData.Path.Random.Local();
     Array<int,1> currentParticles=Forw->CurrentParticles();  
     if (log(psi) < (-actionChange - log(Tratio))) {
@@ -30,13 +31,15 @@ void CycleBlockMoveClass::MakeMove()
 	Bisection.Bisect(slice1, NumLevels, currentParticles, actionChange);
       if (acceptBisect){
 	PathData.AcceptMove(slice1,slice2,currentParticles);
+
 	// We don't construct a new table for single-ptcl moves!
-	if (Forw->CurrentCycle.Length!=1){
-	  NumPerms++;
-	  PermuteTableClass* tempPtr=Forw;
-	  Forw=Rev;
-	  Rev=tempPtr;
-	}
+	//Right now we are!
+// 	if (Forw->CurrentCycle.Length!=1){
+// 	  NumPerms++;
+// 	  PermuteTableClass* tempPtr=Forw;
+// 	  Forw=Rev;
+// 	  Rev=tempPtr;
+// 	}
 	NumAccepted++;
       }
       else{

@@ -120,5 +120,13 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 
 void PIMCClass::Run()
 {
+  cerr<<"Before the algorithm!!!!"<<endl;
   Algorithm.DoEvent();
+  //  Array<MoveClass*,1> Moves;
+  cerr<<"hello"<<endl;
+  for (int counter=0;counter<Moves.size();counter++){
+    cout<<"My name is "<<((MoveClass*)Moves(counter))->Name<<endl;
+    cout<<"My acceptance ratio is "<<((MoveClass*)Moves(counter))->AcceptanceRatio()<<endl;
+  }
+  
 }
