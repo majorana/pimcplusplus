@@ -36,9 +36,38 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
 }
 
 
+bool RefSliceMoveClass::NodeCheck()
+{
+  cerr << "start NodeCheck()" << endl;
+  PathClass &Path = PathData.Path;
+  // Broadcast the new reference path to all the other processors
+  PathData.Path.BroadcastRefPath();
+  
+  // Calculate local nodal action
+  SetMode(OLDMODE);
+  double oldLocalNode = 
+    PathData.Actions.NodalActions(SpeciesNum)->Action
+    (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
+  SetMode(NEWMODE);
+  double newLocalNode = 
+    PathData.Actions.NodalActions(SpeciesNum)->Action
+    (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
+  
+  // Do global sum over processors
+  double localChange = newLocalNode - oldLocalNode;
+  double globalChange = PathData.Communicator.AllSum (localChange);
+  bool toAccept = (-globalChange)>=log(PathData.Path.Random.Common()); 
+
+  cerr << "end NodeCheck()" << endl;
+  
+  return toAccept;
+}
+
+
 /// This version is for the processor with the reference slice
 void RefSliceMoveClass::MakeMoveMaster()
 {
+  cerr << "start MakeMoveMaster().\n";
   PathClass &Path = PathData.Path;
   int myProc = PathData.Communicator.MyProc();
 
@@ -53,6 +82,8 @@ void RefSliceMoveClass::MakeMoveMaster()
   int slice1 = Path.Random.LocalInt(minStart-maxStart) + minStart;
   int slice2 = slice1 + bisectSlices;
 
+  ActiveParticles.resize(1);
+  ActiveParticles(0) = -1;
   // Go through local stages
   bool toAccept=true;
   list<StageClass*>::iterator stageIter=Stages.begin();
@@ -69,14 +100,14 @@ void RefSliceMoveClass::MakeMoveMaster()
   // Now, if we accept local stages, move on to global nodal
   // decision. 
   if (toAccept) {
-    // Broadcast the new reference path to all the other processors
-    PathData.Path.BroadcastRefPath();
-
-    // Calculate local nodal action
-    double localNodeAction = 
-      PathData.Actions.NodalActions(SpeciesNum)->Action
-      (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
-    double globalNodeAction = PathData.Communicator.AllSum(localNodeAction);
+    if (NodeCheck()) {
+      Accept();
+      Path.RefPath.AcceptCopy();
+    }
+    else {
+      Reject();
+      Path.RefPath.RejectCopy();
+    }
   }
   // Otherwise, reject the whole move
   else 
@@ -105,23 +136,18 @@ void RefSliceMoveClass::MakeMoveSlave()
   int accept;
   /// Receive broadcast from Master.
   PathData.Communicator.Broadcast (master, accept);
-  if (accept) {
-    // Receive reference slice broadcast from master
-    Path.BroadcastRefPath();
-    
-    // Calculate local nodal action
-    double localNodeAction = 
-      PathData.Actions.NodalActions(SpeciesNum)->Action
-      (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
-    double globalNodeAction = PathData.Communicator.AllSum(localNodeAction);
+  if (accept==1) {
+    if (NodeCheck()) {
+      Accept();
+      Path.RefPath.AcceptCopy();
+    }
+    else {
+      Reject();
+      Path.RefPath.RejectCopy();
+    }
   }
   else
     Reject();
-  
-
-/// If master has accepted, discard my local bisection
-
-
 }
 
 

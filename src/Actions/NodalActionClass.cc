@@ -21,18 +21,15 @@ void
 FreeNodalActionClass::GradientDet (int slice, double &det, 
 				   Array<dVec,1> &gradient)
 {
-  if ((slice == Path.GetRefSlice()) || 
-      (slice == (Path.GetRefSlice()+Path.TotalNumSlices))) {
-    det = 1.0;
-    gradient = 1.0e-10;
-    return;
-  }
-
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;
   int last = species.LastPtcl;
   // Fill up determinant matrix
-  double t = abs(slice-PathData.Path.GetRefSlice()) * PathData.Action.tau;
+  int myStartSlice, myEndSlice;
+  int myProc = PathData.Communicator.MyProc();
+  Path.SliceRange (myProc, myStartSlice, myEndSlice);
+  int refSlice = Path.GetRefSlice()-myStartSlice;
+  double t = abs(refSlice-slice) * PathData.Action.tau;
   double beta = PathData.Path.TotalNumSlices * PathData.Action.tau;
   t = min (t, fabs(beta-t));
   assert (t <= 0.500000001*beta);
@@ -43,10 +40,10 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
 
   // HACK HACK HACK for now;  should work for serial mode.
   SetMode(NEWMODE);
-  if (Path.GetRefSlice() < Path.NumTimeSlices())
-    for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
-      Path.RefPath(ptcl) = Path(Path.GetRefSlice(), ptcl);
-  Path.RefPath.AcceptCopy();
+//   if (Path.GetRefSlice() < Path.NumTimeSlices())
+//     for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
+//       Path.RefPath(ptcl) = Path(Path.GetRefSlice(), ptcl);
+//   Path.RefPath.AcceptCopy();
 
   for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
     const dVec &rRef = Path.RefPath(refPtcl);
@@ -56,6 +53,7 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
       DetMatrix(refPtcl-first, ptcl-first) = exp(-C*dot(diff,diff));
     }
   }
+
 
 //   cerr << "slice = " << slice << endl;
 //   cerr << "RefSlice = " << Path.GetRefSlice() << endl;
@@ -94,26 +92,24 @@ void
 FreeNodalActionClass::GradientDetFD (int slice, double &det, 
 				     Array<dVec,1> &gradient)
 {
-  if ((slice == Path.GetRefSlice()) || 
-      (slice == (Path.GetRefSlice()+Path.TotalNumSlices))) {
-    det = 1.0;
-    gradient = 1.0e-10;
-    return;
-  }
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;
   int last = species.LastPtcl;
   // Fill up determinant matrix
-  double t = abs(slice-PathData.Path.GetRefSlice()) * PathData.Action.tau;
+  int myStartSlice, myEndSlice;
+  int myProc = PathData.Communicator.MyProc();
+  Path.SliceRange (myProc, myStartSlice, myEndSlice);
+  int refSlice = Path.GetRefSlice()-myStartSlice;
+  double t = abs(refSlice-slice) * PathData.Action.tau;
   double beta = PathData.Path.TotalNumSlices * PathData.Action.tau;
   t = min (t, fabs(beta-t));
   double lambda = species.lambda;
   double C = 1.0/(4.0*M_PI * lambda * t);
 
   // HACK HACK HACK for now;  should work for serial mode.
-  if (Path.GetRefSlice() < Path.NumTimeSlices())
-    for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
-      Path.RefPath(ptcl) = Path(Path.GetRefSlice(), ptcl);
+//   if (Path.GetRefSlice() < Path.NumTimeSlices())
+//     for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
+//       Path.RefPath(ptcl) = Path(Path.GetRefSlice(), ptcl);
 
   for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
     const dVec &rRef = Path.RefPath(refPtcl);
@@ -201,19 +197,38 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
   int skip = 1<<level;
   double levelTau = PathData.Action.tau * (double)skip;
 
+  int myStart, myEnd;
+  Path.SliceRange(PathData.Communicator.MyProc(), myStart, myEnd);
+  int refSlice = Path.GetRefSlice() - myStart;
+  
   double dist1, dist2;
-  dist1 = NodalDist (startSlice);
-  if (dist1 < 0.0)
-    return 1.0e100;
+  if (startSlice != refSlice) {
+    dist1 = NodalDist (startSlice);
+    if (dist1 < 0.0)
+      return 1.0e100;
+  }
+  else
+    dist1 = sqrt(-1.0);
+  
+  int totalSlices = Path.TotalNumSlices;
   double uNode=0.0;
   for (int slice=startSlice; slice < endSlice; slice+=skip) {
-    dist2 = NodalDist (slice+skip);
-    if (dist2 < 0.0)
-      return 1.0e100;
-    uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
+    if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
+      dist2 = sqrt(-1.0);
+    else {
+      dist2 = NodalDist (slice+skip);
+      if (dist2 < 0.0)
+	return 1.0e100;
+    }
+
+    if (isnan (dist1))
+      uNode = log1p(-exp(-dist2*dist2/(lambda*levelTau)));
+    else if (isnan(dist2))
+      uNode = log1p(-exp(-dist1*dist1/(lambda*levelTau)));
+    else
+      uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
     dist1 = dist2;
   }
-  
   return uNode;
 }
 

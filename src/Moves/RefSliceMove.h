@@ -27,6 +27,10 @@ private:
     //do nothing for now
   }
 
+  /// This function checks to see if we should accept based on the
+  /// change in the node action
+  bool NodeCheck();
+
   /// This function is called if I have the reference slice
   void MakeMoveMaster();
 

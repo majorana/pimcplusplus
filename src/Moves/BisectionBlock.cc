@@ -9,7 +9,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   assert (in.ReadVar ("name", Name));
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
-
+  IsFermion = PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION;
 
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
@@ -45,8 +45,43 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 
 void BisectionBlockClass::ChooseTimeSlices()
 {
-  if (IsFermion) {
-    // do something special to avoid moving reference slice
+  PathClass &Path = PathData.Path;
+  int myProc = PathData.Communicator.MyProc();
+  // do something special to avoid moving reference slice
+  if (IsFermion &&
+      Path.SliceOwner(Path.GetRefSlice()) == myProc) {
+    
+    int bSlices = 1<<NumLevels;
+    int myStart, myEnd;
+    Path.SliceRange (myProc, myStart, myEnd);
+    // refSlice is relative to my first slice
+    int refSlice = Path.GetRefSlice() - myStart;
+    int numSlices = Path.NumTimeSlices();
+    if (refSlice < bSlices) {
+      int numStarts = numSlices - bSlices - refSlice;
+      Slice1 = refSlice + Path.Random.LocalInt(numStarts);
+      Slice2 = Slice1 + bSlices;
+      assert (Slice2 < numSlices);
+    }
+    else if (refSlice > (numSlices-1-bSlices)) {
+      int numStarts = refSlice - bSlices + 1;
+      Slice1 = Path.Random.LocalInt(numStarts);
+      Slice2 = Slice1+bSlices;
+      assert (Slice2 <= refSlice);
+    }
+    else {
+      int numBefore = refSlice - bSlices +1;
+      int numAfter = numSlices -bSlices - refSlice;
+      int numStarts = numBefore+numAfter;
+      int start = Path.Random.LocalInt (numStarts);
+      if (start < numBefore)
+	Slice1 = start;
+      else
+	Slice1 = start-numBefore+refSlice;
+      Slice2 = Slice1+bSlices;
+      assert ((refSlice <= Slice1) || (refSlice >= Slice2));
+      assert (Slice2 < numSlices);
+    }
   }
   // Bryan should fill this part in.
   // else if (IsOpen(ptcl)) 
