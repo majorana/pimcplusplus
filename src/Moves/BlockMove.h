@@ -1,7 +1,7 @@
 #ifndef BLOCK_MOVE_H
 #define BLOCK_MOVE_H
 
-#include "MoveClass.h"
+#include "MoveBase.h"
 #include "PermuteTableClass.h"
 #include "BisectionClass.h"
 
@@ -31,7 +31,8 @@ public:
     NumAccepted=0;
     NumMoves=0;
   }
-};
+}
+;
 
 
 

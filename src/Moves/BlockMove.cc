@@ -1,4 +1,5 @@
 #include "BlockMove.h"
+
 double CycleBlockMoveClass::AcceptanceRatio()
 {
   return (double)NumAccepted/(double)NumMoves;

@@ -24,10 +24,10 @@ PIMCobjs =                           \
   SpeciesClass.o                     \
   Common.o                           \
   Moves/PermuteTableClass.o		     \
-  RandomPermClass.o                  \
+  Moves/RandomPermClass.o                  \
   Moves/OpenBisectionMoveClass.o           \
   Moves/BisectionMoveClass.o               \
-  Moves/MoveClass.o                        \
+  Moves/MoveBase.o                        \
   ActionClass.o                      \
   LongRangeRPA.o                     \
   PathDataClass.o                    \
@@ -84,10 +84,10 @@ TestPermobjs =                       \
   SpeciesClass.o                     \
   Common.o                           \
   Moves/PermuteTableClass.o		     \
-  RandomPermClass.o                  \
+  Moves/RandomPermClass.o                  \
   Moves/BisectionMoveClass.o               \
   Moves/OpenBisectionMoveClass.o           \
-  Moves/MoveClass.o                        \
+  Moves/MoveBase.o                        \
   ActionClass.o                      \
   LongRangeRPA.o                     \
   PathDataClass.o                    \
@@ -220,7 +220,7 @@ clean:	Common_clean
 
 
 
-SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc RandomPermClass.cc Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc
+SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc
 
 
 newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake

@@ -1,7 +1,7 @@
-#include "../PathDataClass.h"
+//#include "../PathDataClass.h"
 #include "OpenBisectionMoveClass.h"
-#include "../Common.h"
-#include "../SpeciesClass.h"
+//#include "../Common.h"
+//#include "../SpeciesClass.h"
 
 
 void OpenBisectionMoveClass::Read(IOSectionClass &moveInput)

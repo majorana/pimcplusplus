@@ -6,7 +6,7 @@
 #include "Observables/ObservableClass.h"
 #include "Observables/ObservableEnergy.h"
 #include "WrapClass.h"
-#include "Moves/PermuteTableClass.h"
+// #include "Moves/PermuteTableClass.h"
 #include "RunInfoClass.h"
 
 

@@ -1,4 +1,4 @@
-#include "MoveClass.h"
+#include "MoveBase.h"
 
 
 void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)

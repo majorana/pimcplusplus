@@ -1,11 +1,10 @@
-#ifndef MOVE_CLASS_H
-#define MOVE_CLASS_H
+#ifndef MOVE_BASE_H
+#define MOVE_BASE_H
 
 
-#include "../Common.h"
+//#include "../Common.h"
 #include "../PathDataClass.h"
-#include "../RandomPermClass.h"
-#include "BisectionClass.h" 
+//#include "BisectionClass.h" 
 
 /// This is the generic parent class for all moves, including "real moves"
 /// which actually move particles and "pseudo moves", which just shift around
@@ -83,8 +82,6 @@ protected:
     /* Do nothing for now.*/  
   }
 };
-
-
 
 
 
