@@ -7,7 +7,7 @@
 #define NDIM 3
 
 #include <sprng.h>
-#include "Blitz.h"
+#include "Common/Blitz.h"
 
 
 /// These are the different mode types for the MirroredArrayClass

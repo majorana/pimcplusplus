@@ -1,4 +1,4 @@
-#include "Blitz.h"
+#include "Common/Blitz.h"
 
 main()
 {

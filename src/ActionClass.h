@@ -1,7 +1,7 @@
 #ifndef ACTION_CLASS
 #define ACTION_CLASS
 
-#include "CubicSpline.h"
+#include "Common/Splines/CubicSpline.h"
 #include "SpeciesClass.h"
 #include "MemoizedDataClass.h"
 #include "PathClass.h"

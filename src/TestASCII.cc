@@ -21,5 +21,5 @@ int  main()
   inSection.OpenSection("Species");
   inSection.ReadVar ("Positions", Positions);
   cerr << "Positions = " << Positions << endl;
-
+  inSection.CloseFile();
 }
