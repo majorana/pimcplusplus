@@ -49,7 +49,7 @@ class MultiTricubicSpline
   void UpdateX (int source, int dest, int i);
   void UpdateY (int source, int dest, int i);
   void UpdateZ (int source, int dest, int i);
-  bool UpToDate;
+  bool UpToDate, Periodic;
 public:
   Array<TinyVector<double,8>,4> F;
 
@@ -94,12 +94,12 @@ public:
 
 
   inline void Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
-		    const Array<double,4> &init);
+		    const Array<double,4> &init, bool periodic=false);
 
   MultiTricubicSpline(Grid *xgrid, Grid *ygrid, Grid *zgrid,
-		   const Array<double,4> &init)
+		      const Array<double,4> &init, bool periodic=false)
   {
-    Init (xgrid, ygrid, zgrid, init);
+    Init (xgrid, ygrid, zgrid, init, periodic);
   }
   MultiTricubicSpline() : UpToDate(false) 
   { /* Do nothing. */ }
@@ -154,8 +154,11 @@ inline MultiTricubicSpline& MultiTricubicSpline::operator=(MultiTricubicSpline a
 
 
 inline void MultiTricubicSpline::Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
-				    const Array<double,4> &init)
+				       const Array<double,4> &init,
+				       bool periodic)
 {
+  Periodic = periodic;
+
   Xgrid = xgrid; Nx = xgrid->NumPoints;
   Ygrid = ygrid; Ny = ygrid->NumPoints;
   Zgrid = zgrid; Nz = zgrid->NumPoints;

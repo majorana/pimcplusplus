@@ -21,6 +21,10 @@ public:
   inline Vec3 GetIonPos(int i) { return Rions(i); }
   void Setk (Vec3 k);
   void DiagonalizeH();
+  
+  /// Gets the FFT box dimensions.
+  inline void GetBoxDims(int &nx, int &ny, int &nz)
+  { FFT.GetDims(nx, ny, nz); }
   /// This FFT's the desired band into real space.
   void SetRealSpaceBandNum(int num);
   inline complex<double> RealSpaceBand (int ix, int iy, int iz)
