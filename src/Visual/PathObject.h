@@ -3,7 +3,9 @@
 
 #include "GLObject.h"
 #include "../Common/Blitz.h"
+#include <vector>
 
+using namespace std;
 
 class PathObject : public GLObject
 {
@@ -13,8 +15,8 @@ protected:
   bool Closed;
   double Radius;
 public:
-  void LinesSet (Array<Vec3, 1> &path);
-  void TubesSet (Array<Vec3, 1> &path);
+  void LinesSet (vector<Vec3> &path);
+  void TubesSet (vector<Vec3> &path);
   void SetColor (double red, double green, double blue);
   PathObject() : Closed(true), Radius (0.1)
   {

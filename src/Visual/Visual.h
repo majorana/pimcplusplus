@@ -24,10 +24,47 @@ typedef enum {LINES, TUBES} PathTypeType;
 class OnePath
 {
 public:
-  Array<Vec3,1> Path;
-  Array<Vec3,1> Color;
+  vector<Vec3> Path;
+  vector<Vec3> Color;
   bool Closed;
 };
+
+class BoxClass
+{
+private:
+  Vec3 Box, BoxInv;
+  inline void PutInBox(Vec3 &r);
+public:
+  inline void Set (Vec3 box) 
+  { 
+    Box = box; 
+    BoxInv[0]=1.0/Box[0]; BoxInv[1]=1.0/Box[1]; BoxInv[2]=1.0/Box[2];
+  }
+  inline void Set (double lx, double ly, double lz)
+  {
+    Box[0] = lx; Box[1] = ly; Box[2] = lz;
+    BoxInv[0]=1.0/lx; BoxInv[1]=1.0/ly; BoxInv[2]=1.0/lz;
+  }
+  inline double operator[](int i) const
+  { return Box[i]; }
+  inline double& operator[](int i)
+  { return Box[i]; }
+  inline operator Vec3() const
+  { return Box; }
+
+  bool BreakSegment (Vec3 &r1, Vec3 &r2, Vec3 &wall1, Vec3 &wall2);
+
+  void PutPathsInBox (vector<OnePath*>& inList,
+		      vector<OnePath*>& outList);
+};
+
+inline void BoxClass::PutInBox (Vec3 &r)
+{
+  for (int i=0; i<3; i++) {
+    double n = -floor(r[i]*BoxInv[i]+0.5);
+    r[i] += n*Box[i];
+  }
+}
 
 class VisualClass : public Gtk::Window
 {

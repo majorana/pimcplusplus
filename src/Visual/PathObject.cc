@@ -3,7 +3,7 @@
 #include <GL/glu.h>
 #include <GL/gle.h>
 
-void PathObject::LinesSet(Array<Vec3,1> &path)
+void PathObject::LinesSet(vector<Vec3> &path)
 {
   Start();
   glColor3d (Color[0], Color[1], Color[2]);
@@ -17,13 +17,13 @@ void PathObject::LinesSet(Array<Vec3,1> &path)
 //     fcolor[1] = Color[1]*(double)i/(double)(path.size()-1);
 //     fcolor[2] = Color[2]*(double)i/(double)(path.size()-1);
 //     glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
-    glVertex3dv ((double*)&path(i));
+    glVertex3dv ((double*)&path[i]);
   }
   glEnd();
   End();
 }
 
-void PathObject::TubesSet(Array<Vec3,1> &path)
+void PathObject::TubesSet(vector<Vec3> &path)
 {
   Start();
   glColor3d (Color[0], Color[1], Color[2]);
@@ -41,22 +41,22 @@ void PathObject::TubesSet(Array<Vec3,1> &path)
   gleDouble pointArray[N+3][3];
   if (Closed) {
     for (int i=0; i<3; i++) {
-      pointArray[0][i] = path(N-2)[i];
-      pointArray[N+1][i] = path(1)[i];
-      pointArray[N+2][i] = path(2)[i];
+      pointArray[0][i] = path[N-2][i];
+      pointArray[N+1][i] = path[1][i];
+      pointArray[N+2][i] = path[2][i];
     }
   }
   else {  // Fix this
     for (int i=0; i<3; i++) {
-      pointArray[0][i] = path(N-2)[i];
-      pointArray[N+1][i] = path(1)[i];
-      pointArray[N+2][i] = path(2)[i];
+      pointArray[0][i] = path[N-2][i];
+      pointArray[N+1][i] = path[1][i];
+      pointArray[N+2][i] = path[2][i];
     }
   }
 
   for (int i=0; i<N; i++)
     for (int j=0; j<3; j++)
-      pointArray[i+1][j] = path(i)[j];
+      pointArray[i+1][j] = path[i][j];
 
   float colors[N+3][3];
   for (int i=0; i<N+3; i++) {
