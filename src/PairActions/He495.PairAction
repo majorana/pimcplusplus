@@ -1,0 +1,27 @@
+Section (Fits)
+{
+  string Type = "DavidFit";
+
+  Section (Particle1)
+  {
+    string Name = "He";
+    double lambda = 6.059615;
+    int Ndim = 3;
+    double Charge = 1;
+  }
+
+  Section (Particle2)
+  {
+    string Name = "He";
+    double lambda = 0.0;
+    int Ndim = 3;
+    double Charge = 1;
+  }
+
+  string Daviddmfile="He4.95.dm";
+  //  Section (Potential)
+  //  {
+  //    string Type = "Coulomb";
+  //    double Z1Z2 = 1;
+  //  }
+}
