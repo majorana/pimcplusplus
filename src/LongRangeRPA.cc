@@ -1,7 +1,7 @@
 #include "Common/Integration/RungeKutta.h"
 #include "ActionClass.h"
 
-inline void order (int species1, int species2)
+inline void order (int &species1, int &species2)
 {
   if (species1 > species2) {
     int tmp = species1;
@@ -35,6 +35,7 @@ Array<double,1> ActionClass::RPAIntegrand(double t,
   for (int i=0; i<Level; i++)
     levelTau *= 2.0;
 
+  double boxVol = Path.GetVol();
     Array<double,1> duwvec(uwvec.size());
   int numSpecies = Path.NumSpecies();
   dVec &k = Path.kVecs(ki);
@@ -58,7 +59,7 @@ Array<double,1> ActionClass::RPAIntegrand(double t,
 	double u13 = uwvec(uindex(species1, species3, numSpecies));
 	double w23 = uwvec(windex(species2, species3, numSpecies));
 	double w13 = uwvec(windex(species1, species3, numSpecies));
-	duwvec(i12) -= 0.5*k2*lambda3*(u23*u13 /*+ w23*u13 + u23*w13*/);
+	duwvec(i12) -= 0.5*k2*N3*lambda3*(u23*u13 + w23*u13 + u23*w13);
       }
     }
   // Next, calculate the \f$\dot{w}\f$'s.
@@ -66,16 +67,18 @@ Array<double,1> ActionClass::RPAIntegrand(double t,
     for (int species2=species1; species2<numSpecies; species2++) {
       PairActionFitClass &pa12 = 
 	*PairActionVector(PairMatrix(species1,species2));
-      double vshortk = pa12.Vk(sqrt(k2)) - pa12.Ulong_k(Level, ki)/levelTau;
+      double k = sqrt(k2);
+      double vlongk = pa12.Ulong_k(Level, ki)/levelTau;
+      double vshortk = pa12.Vk(k)/boxVol - vlongk;
       int i12 = windex(species1,species2,numSpecies);
       duwvec(i12) = 
 	-pa12.lambda*k2*uwvec(i12) + vshortk;
       for (int species3=0; species3<numSpecies; species3++) {
 	int N3 = Path.Species(species3).NumParticles;
 	double lambda3 = Path.Species(species3).lambda;
-	double u23 = uwvec(uindex(species2, species3, numSpecies));
-	double u13 = uwvec(uindex(species1, species3, numSpecies));
-	duwvec(i12) -= 0.5*k2*lambda3*(u23*u13);
+	double w23 = uwvec(windex(species2, species3, numSpecies));
+	double w13 = uwvec(windex(species1, species3, numSpecies));
+	duwvec(i12) -= 0.5*k2*N3*lambda3*(w23*w13);
       }
     }
   return duwvec;    
@@ -99,6 +102,7 @@ void ActionClass::SetupRPA()
   // Setup integrator
   RungeKutta2<ActionClass> integrator(*this);
 
+  double boxVol = Path.GetVol();
   // Calculated RPA for U
   for (Level=0; Level<MaxLevels; Level++) {
     LinearGrid tGrid(0.0, levelTau, numPoints);
@@ -114,12 +118,19 @@ void ActionClass::SetupRPA()
 	    *PairActionVector(PairMatrix(species1, species2));
 	  pa.U_RPA_long_k(Level, ki) = 
 	    uwvec(numPoints-1,uindex(species1, species2, Path.NumSpecies()));
-	  cerr << "Numerical value = " << pa.U_RPA_long_k(Level,ki) << endl;
 	  double k2 = dot(Path.kVecs(ki), Path.kVecs(ki));
+	  double k = sqrt(k2);
+	  cerr << "k = " << k << endl;
+	  cerr << "Numerical value = " << pa.U_RPA_long_k(Level,ki) << endl;
 	  double lambda = pa.lambda;
 	  double N = Path.Species(species1).NumParticles;
 	  double vklong = pa.Ulong_k(Level, ki)/levelTau;
-	  cerr << "uklong =          " << pa.Ulong_k(Level, ki) << endl;
+	  cerr << "uklong  =         " << pa.Ulong_k(Level, ki) << endl;
+	  cerr << "vshort  =         " << 
+	    pa.Vk(k)/boxVol - pa.Ulong_k(Level, ki)/levelTau << endl; 
+	  cerr << "ukshort =         " << 
+	    uwvec(numPoints-1,windex(species1,species2,Path.NumSpecies()))
+	       << endl;
 	  double Uanalytic = (-1.0+sqrt(1.0+4.0*N*vklong/(lambda*k2)))/(2.0*N);
 	  cerr << "One component ground state analytic = " << Uanalytic 
 	       << endl;
