@@ -19,6 +19,7 @@ public:
   virtual void Write(IOSectionClass &out) = 0;
   virtual void Read(IOSectionClass &in) = 0;
   virtual void SetGrid(Grid *newGrid) = 0;
+  inline Grid* GetGrid(){ return grid; }
   virtual void SetBarePot (Potential *pot) = 0;
 };
 
