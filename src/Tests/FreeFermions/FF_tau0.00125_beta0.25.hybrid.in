@@ -112,7 +112,7 @@ Section (Algorithm) {
     }
     Section (Move) {string name = "Shift"; }
     //    Section (Move) {string name="Permutations";} 
-    Section (Observe) {string name = "PairCorrelation";}
+    //Section (Observe) {string name = "PairCorrelation";}
     Section (Observe) {string name = "Energy"; }
   }
 }
