@@ -25,31 +25,34 @@ void BisectionMoveClass::makeMove()
   double oldLogSampleProb;
   double newLogSampleProb;
   Array<int,1> theParticles;
-  double logSampleProb;
-  int EndTimeSlice=1<<NumLevels+StartTimeSlice;
+  int EndTimeSlice=(1<<NumLevels)+StartTimeSlice;
   double prevActionChange=0;
   
   //  cerr<<"At the beginning fo the makeMove the size is ";
   //  cerr <<  PathData->IdenticalParticleArray.size()<<endl;
   ChooseParticles();   
   //////////  for (int levelCounter=NumLevels;levelCounter>0;levelCounter--){
-  int levelCounter=NumLevels;
+  int levelCounter=NumLevels-1;
 
-  while (levelCounter>0 && toAccept==true){
+  while (levelCounter>=0 && toAccept==true){
     //    cerr<<"At the level Counter in Bisection makeMove being  "<<levelCounter<<" the size is ";
     //    cerr <<  PathData->IdenticalParticleArray.size()<<endl;
     setMode(OLDMODE);
     toAccept=true;
-    double oldAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter-1);
+    double oldAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
+    oldLogSampleProb = (*PathData).TotalAction.LogSampleProb(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
     setMode(NEWMODE);
-    (*PathData).TotalAction.SampleParticles(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter,newLogSampleProb,oldLogSampleProb);
-    double newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter-1);
+    newLogSampleProb = (*PathData).TotalAction.SampleParticles(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
+    cerr << "newLogSampleProb = " << newLogSampleProb << endl;
+    cerr << "oldLogSampleProb = " << oldLogSampleProb << endl;
+    double newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter);
     double currActionChange=newAction-oldAction;
-    double logAcceptProb=oldLogSampleProb-newLogSampleProb+currActionChange-prevActionChange;
+    double logAcceptProb=oldLogSampleProb-newLogSampleProb-currActionChange+prevActionChange;
+    cerr << "prevActionChange = " << prevActionChange << endl;
+    cerr << "logAcceptProb = " << logAcceptProb << endl;
     cerr<<"My new action is "<<newAction<<" and my old action was "<<oldAction<<endl;
     if (-logAcceptProb<log(sprng())){///reject conditin
       toAccept=false;
-      cerr<<"REJECTION?"<<endl;
       //      break;
 
     }

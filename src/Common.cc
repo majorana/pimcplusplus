@@ -84,7 +84,7 @@ dVec GaussianRandomVec(double sigma)
 double distSqrd(dVec a, dVec b) //Did I do this right?
 {
   dVec Disp = a - b;
-  return (Disp(0)*Disp(0)+Disp(1)*Disp(1)+Disp(2)*Disp(2));
+  return (dot(Disp,Disp));
 }
 
   

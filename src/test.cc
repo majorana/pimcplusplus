@@ -73,7 +73,7 @@ void setupMove(BisectionMoveClass &myBisectionMove,ShiftMove &myShiftMove, PathD
   myBisectionMove.SetActiveSpecies(ActiveSpecies);
   myBisectionMove.SetNumParticlesToMove(1);
   myBisectionMove.StartTimeSlice=0;
-  myBisectionMove.NumLevels=3;
+  myBisectionMove.NumLevels=5;
   myShiftMove.PathData=&thePathData;
 
 }
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
       cerr << "Doing step " << counter << endl;
       myBisectionMove.makeMove();
     }
-    myShiftMove.makeMove();
+    //myShiftMove.makeMove();
   }
   cerr<<"done! done!"<<endl;
   MPI_Finalize();

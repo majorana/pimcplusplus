@@ -49,7 +49,7 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
       }
       
       // Now, sum up the kinetic action
-      double FourLambdaTauInv=1/(4*IdentPtcls(Species1).lambda*tau);
+      double FourLambdaTauInv=1.0/(4.0*IdentPtcls(Species1).lambda*levelTau);
       for (int Slice=StartSlice; Slice < EndSlice; Slice+=skip) {
 	dVec r1 = IdentPtcls(Species1).Path(Ptcl1,Slice);
 	dVec r2 = IdentPtcls(Species1).Path(Ptcl1,Slice+skip);
@@ -60,7 +60,7 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
       }
     }
     
-  return (TotalK+TotalU);
+  return (TotalK/*+TotalU*/);
 
 }
 
