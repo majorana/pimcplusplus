@@ -41,12 +41,12 @@ def PlotPaths(pathData,visualPath,visualBall,mcTime):
 
      
 
-def ProduceCorrelationPicture(data,fileBase,hlabel,vlabel):
+def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      clf()
-     infile.OpenSection("grid")
-     points=infile.ReadVar("Points")
-     infile.CloseSection()
-     plot(points,data)
+#     infile.OpenSection("grid")
+#     x=infile.ReadVar("Points")
+#     infile.CloseSection()
+     plot(x, y)
      h1=xlabel(hlabel)
      set(h1,"FontSize",20)
      v1=ylabel(vlabel)
@@ -62,19 +62,34 @@ def ProduceCorrelationPicture(data,fileBase,hlabel,vlabel):
 
 
 def ProcessCorrelationSection(infile,doc,currNum):
+     print "here"
      sectionName=infile.GetName()
-     doc.append(Heading(1,infile.GetName()))
-     numVars=infile.CountVars()
-     for counter in range(0,numVars):
-          data=infile.ReadVar(counter)
-          if type(data)==numarray.numarraycore.NumArray:
-               currNum=currNum+1
-               varName=infile.GetVarName(counter)
-               doc.append(Name(sectionName+varName+repr(currNum)))
-               doc.append(Heading(2,varName))
-               myImg=ProduceCorrelationPicture(data[-1],varName+repr(currNum),'r',varName)
-               doc.append(myImg)
+     doc.append(Heading(1,sectionName))
+     hlabel=infile.ReadVar("xlabel")
+     vlabel=infile.ReadVar("ylabel")
+     data=infile.ReadVar("y")
+     x=infile.ReadVar("x")
+     description=infile.ReadVar("Description")
+     doc.append(Heading(4,description))
+     currNum=currNum+1
+     baseName=sectionName+repr(currNum)
+     myImg=ProduceCorrelationPicture(x, data[-1],baseName,hlabel,vlabel)
+     doc.append(myImg)
+     psFileName=baseName+'.ps'
+     doc.append(Href(psFileName,'PostScript'))
      return currNum
+     
+
+     
+##      numVars=infile.CountVars()
+##      for counter in range(0,numVars):
+##           data=infile.ReadVar(counter)
+##           if type(data)==numarray.numarraycore.NumArray:
+
+##                varName=infile.GetVarName(counter)
+##                doc.append(Name(sectionName+varName+repr(currNum)))
+##                doc.append(Heading(2,varName))
+##                myImg=ProduceCorrelationPicture(data[-1],varName+repr(currNum),'r',varName)
 
 def ProduceTracePicture(data,fileBase,hlabel,vlabel):
     clf()
@@ -139,24 +154,16 @@ infile=IOSectionClass()
 infile.OpenFile(sys.argv[1])
 
 
-infile.OpenSection("PathDump")
-pathData=GetPaths(infile)
-infile.CloseSection()
+#infile.OpenSection("PathDump")
+#pathData=GetPaths(infile)
+#infile.CloseSection()
 #(visualPath,visualBall)=InitVisualPaths(pathData)
 #PlotPaths(pathData,visualPath,visualBall,0)
 
 doc=SeriesDocument()
 infile.OpenSection("RunInfo")
 ProcessRunInfo(doc,infile)
-BuildDate=infile.ReadVar("BuildDate")
-BuildTime=infile.ReadVar("BuildTime")
-HostName=infile.ReadVar("HostName")
-ProgramName=infile.ReadVar("ProgramName")
-RunTime=infile.ReadVar("RunTime")
-UserName=infile.ReadVar("UserName")
-Version=infile.ReadVar("Version")
 infile.CloseSection()
-
 
 
 currNum=0
@@ -164,9 +171,11 @@ numSections=infile.CountSections()
 print "The number of sections is ",numSections
 for counter in range(0,numSections):
      infile.OpenSection(counter)
+     print infile.GetName()
      myType=infile.ReadVar("Type")
+     print "Section Type is "
+     print myType
      if myType=="Scalar":
-          print "I'm processing"
           currNum=ProcessScalarSection(infile,doc,currNum)
      elif myType=="CorrelationFunction":
           currNum=ProcessCorrelationSection(infile,doc,currNum)
