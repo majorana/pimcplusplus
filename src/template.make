@@ -10,9 +10,15 @@ DEFS = -DNO_COUT -DUSE_MPI -DBZ_DEBUG  -g #-DUSE_MPI
 
 TestObjs = ObservableClass.o CubicSpline.o Grid.o InputFile.o SpeciesClass.o Common.o BisectionMoveClass.o MoveClass.o ActionClass.o PathDataClass.o SpeciesArrayClass.o MirroredArrayClass.o CommunicatorClass.o PathClass.o test.o
 
+TestSubarrayObjs = TestSubarrays.o
+
 Test: 	$(TestObjs)
 	pushd ..; make; pushd
 	$(LD) -o $@ $(TestObjs) $(LIBS)
+
+TestSubarrays: 	$(TestSubarrayObjs)
+	pushd ..; make; pushd
+	$(LD) -o $@ $(TestSubarrayObjs) $(LIBS)
 
 .cc.o: $(HEADERS)
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) $<
@@ -20,7 +26,7 @@ Test: 	$(TestObjs)
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc CubicSpline.cc Grid.cc InputFile.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc SpeciesArrayClass.cc MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc
+SOURCES = ObservableClass.cc CubicSpline.cc Grid.cc InputFile.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc SpeciesArrayClass.cc MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc
 
 
 newmake: 

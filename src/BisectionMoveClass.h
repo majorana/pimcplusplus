@@ -11,8 +11,8 @@ class JoinMoveClass : public MoveClass
 {
   int joinLocation;
   void moveJoin();
-  
-
+  JoinMoveClass (PathDataClass &myPathData ) : MoveClass(myPathData)
+  { /* Do nothing for now. */ }
 
 };
 
@@ -25,7 +25,7 @@ class BisectionMoveClass : public ParticleMoveClass
 
   
  public:
-  ///This is the slice in which the bisectino move starts.  It ends up
+  ///This is the slice in which the bisection move starts.  It ends up
   ///going to StartTimeSlice+2^NumLevels
   int StartTimeSlice; 
   ///Number of levels the bisection move works on 
