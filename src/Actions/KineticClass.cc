@@ -40,6 +40,8 @@ double KineticClass::Action (int slice1, int slice2,
       //TotalK += dot(vel,vel)*FourLambdaTauInv; 
     }
   }
+  if (changedParticles(0) == 30)
+    cerr << "Kinetic = " << TotalK << endl;
   //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
   return (TotalK);
 }
