@@ -1,7 +1,7 @@
 #ifndef PA_TRICUBIC_FIT_H
 #define PA_TRICUBIC_FIT_H
 #include "PAFitBase.h"
-#include "../Splines/TricubicSpline.h"
+#include "../Splines/MyTricubicSpline.h"
 #ifdef MAKE_FIT
 #include "../MPI/Communication.h"
 #endif
@@ -15,7 +15,7 @@ private:
 #endif
 public:
   Grid *qgrid, *ygrid, *tgrid;
-  Array<TricubicSpline,1> Usplines, dUsplines;
+  Array<MyTricubicSpline,1> Usplines, dUsplines;
   Array<double,1> sMax, sMaxInv;
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);

@@ -1,6 +1,6 @@
 #include "PAFit.h"
 
-const double URho0Min = 1.0e-3;
+const double URho0Min = 1.0e-4;
 const double dURho0Min = 1.0e-2;
 
 /// The following routines are used only if we are creating fits, not
@@ -209,6 +209,9 @@ void PAtricubicFitClass::AddFit (Rho &rho)
   double Usmax = sqrt(-4.0*lambda*beta*log(URho0Min));
   double dUsmax = sqrt(-4.0*lambda*beta*log(dURho0Min));
 
+  cerr << "Usmax = " << Usmax << endl;
+  cerr << "dUsmax = " << dUsmax << endl;
+
   int numq = qgrid->NumPoints;
   int numy = ygrid->NumPoints;
   int numt = tgrid->NumPoints;
@@ -243,9 +246,9 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	costheta = max(-1.0, costheta);	
 	double U, dU;
 	rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
-	if (s>Usmax && q>2.4)
+	if (s>Usmax /*&& q>2.4*/)
 	  U = Usemi.U(r,rp,costheta);
-	if (s>dUsmax && q>2.4)
+	if (s>dUsmax /*&& q>2.4*/)
 	  dU = Usemi.dU(r,rp,costheta);
 
 	if (isnan(U)) {
