@@ -945,9 +945,9 @@ double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Arra
 //cerr << "P1 " << P1 << endl;
 //cerr << "n " << n << endl;
 //cerr << "P2 " << P2 << endl;
-        double phi;
-        double psi;
-        if(phi1<phi2){
+        double phi = phi1;
+        double psi = psi1;
+/*        if(phi1<phi2){
           phi = phi1;
         }
         else{
@@ -960,6 +960,7 @@ double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Arra
         else{
           psi = psi2;
         }
+*/
 //cerr << "I chose psi " << psi << endl;
         // Calculate angle of rotation (psi)
 
@@ -996,7 +997,7 @@ double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Arra
       double GaussSum=0.0;
 //	for (int image=-NumImage; image<=NumImage; image++) {
 //	  double dist = vel[dim]+(double)image*Path.GetBox()[dim];
-      GaussSum += exp(-vel_squared*FourLambdaTauInv);
+      GaussSum += prefactor*exp(-vel_squared*FourLambdaTauInv);
 //      }
 
       GaussProd *= GaussSum;
@@ -1095,9 +1096,9 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
         double phi2 = GetAngle(z2,r);
         double psi1 = GetAngle(z1prime,r);
         double psi2 = GetAngle(z2prime,r);
-        double phi;
-        double psi;
-        if(phi1<phi2){
+        double phi = phi1;
+        double psi = psi1;
+/*        if(phi1<phi2){
           phi = phi1;
         }
         else{
@@ -1109,7 +1110,7 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
         else{
           psi = psi2;
         }
-
+*/
         // Calculate quaternions
         double chi = cos(theta/2)*cos((psi + phi)/2);
         double eta = sin(theta/2)*cos((psi - phi)/2);

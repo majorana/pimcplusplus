@@ -16,17 +16,18 @@ void ModifiedEnergyClass::Accumulate()
   
   NumSamples++;
 
-  double kinetic, dUShort, dULong, node, vShort, vLong, tip5p, rotkin, p2rotkin;
+  double kinetic, dUShort, dULong, node, vShort, vLong, tip5p, st2, rotkin, p2rotkin;
   PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong);
 
   int slice1 = 0;
   int slice2 = PathData.Path.NumTimeSlices()-1;
   tip5p = PathData.Actions.TIP5PWater.d_dBeta(slice1,slice2,0);
+  st2 = PathData.Actions.ST2Water.d_dBeta(slice1,slice2,0);
   p2rotkin = PathData.Actions.TIP5PWater.NewRotKinEnergy(slice1,slice2,0);
   rotkin = PathData.Actions.TIP5PWater.FixedAxisEnergy(slice1,slice2,0);
 //  p2rotkin = PathData.Actions.TIP5PWater.SecondProtonKineticEnergy(slice1,slice2,0);
 
-  TotalSum   += kinetic + dUShort + dULong + node + tip5p;// + rotkin;
+  TotalSum   += kinetic + dUShort + dULong + node + st2;// +tip5p + rotkin;
   KineticSum += kinetic;
   dUShortSum += dUShort;
   dULongSum  += dULong;
@@ -34,6 +35,7 @@ void ModifiedEnergyClass::Accumulate()
   VShortSum  += vShort;
   VLongSum   += vLong;
   TIP5PSum   += tip5p;
+  ST2Sum   += st2;
   RotKinSum  += rotkin;
   P2RotKinSum += p2rotkin;
 }
@@ -95,9 +97,10 @@ void ModifiedEnergyClass::WriteBlock()
 // NORMALIZE BY NUMBER OF MOLECULES *******
   KineticSum = KineticSum/PathData.Path.numMol;
   TIP5PSum = TIP5PSum/PathData.Path.numMol;
+  ST2Sum = ST2Sum/PathData.Path.numMol;
   RotKinSum = RotKinSum/PathData.Path.numMol;
 //  P2RotKinSum = P2RotKinSum/PathData.Path.numMol;
-  TotalSum = TotalSum/PathData.Path.numMol + P2RotKinSum;
+  TotalSum = TotalSum/PathData.Path.numMol + RotKinSum;
   
   TotalVar.Write(PathData.Path.Communicator.Sum(TotalSum)*norm);
   KineticVar.Write(PathData.Path.Communicator.Sum(KineticSum)*norm);
@@ -107,12 +110,14 @@ void ModifiedEnergyClass::WriteBlock()
 //  VShortVar.Write(PathData.Path.Communicator.Sum(VShortSum)*norm);
 //  VLongVar.Write(PathData.Path.Communicator.Sum(VLongSum)*norm);
   TIP5PVar.Write(PathData.Path.Communicator.Sum(TIP5PSum)*norm);
+  ST2Var.Write(PathData.Path.Communicator.Sum(ST2Sum)*norm);
   RotKinVar.Write(PathData.Path.Communicator.Sum(RotKinSum)*norm);
   P2RotKinVar.Write(PathData.Path.Communicator.Sum(P2RotKinSum)*norm);
 
   cerr << "Total " << TotalSum*norm << " per molecule." << endl;
   cerr << "Kinetic " << KineticSum*norm << " per molecule." << endl;
   cerr << "TIP5P " << TIP5PSum*norm << " per molecule." << endl;
+  cerr << "ST2 " << ST2Sum*norm << " per molecule." << endl;
   cerr << "Rotational Kinetic " << RotKinSum*norm << " per molecule." << endl;
   cerr << "Second Proton Rotational Kinetic " << P2RotKinSum*norm << " per molecule." << endl;
   
@@ -124,6 +129,7 @@ void ModifiedEnergyClass::WriteBlock()
   VShortSum  = 0.0;
   VLongSum   = 0.0;
   TIP5PSum   = 0.0;
+  ST2Sum   = 0.0;
   RotKinSum   = 0.0;
   P2RotKinSum   = 0.0;
   NumSamples = 0;

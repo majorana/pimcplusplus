@@ -10,6 +10,7 @@
 #include "NodalActionClass.h"
 #include "DavidLongRangeClass.h"
 #include "TIP5PWaterClass.h"
+#include "ST2WaterClass.h"
 #include "OpenLoopImportance.h"
 #include "StructureReject.h"
 
@@ -50,6 +51,9 @@ public:
 
   /// Action for simulations using the TIP5P water model
   TIP5PWaterClass TIP5PWater;
+
+  /// Action for simulations using the ST2 water model
+  ST2WaterClass ST2Water;
 
   /// This array of actions are used for Restricted PIMC for
   /// fermions.  These effective actions ensure that the paths do not
@@ -92,6 +96,7 @@ public:
     Kinetic(pathData),
     PathData(pathData),
     TIP5PWater(pathData),
+    ST2Water(pathData),
     StructureReject(pathData),
     NumImages(1)
   {

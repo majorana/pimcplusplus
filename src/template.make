@@ -38,12 +38,13 @@ ifeq ($(HOSTTYPE),powermac)
    MAKE = make
 endif
 ifeq ($(HOSTTYPE),i386-linux)
-    include /home/common/Codes/Make.include	
+    include /usr/lib/Make.include	
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
-           $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
-    INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
-    CC = g++
-    LD = g++  -Bstatic 
+           $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(FFTW3LIB) $(CBLASLIB) -lm 
+    INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC) \
+           $(FFTW3INC) $(CBLASINC)
+    CC = mpiCC
+    LD = mpiCC  -Bstatic 
     CCFLAGS = -c -g  -Wno-deprecated  #-pg 
 endif
 
@@ -54,7 +55,9 @@ MAKECC = g++
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
-DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -O3 #-DUSE_MPI -DBZ_DEBUG -DDEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -DUSE_MPI -O3 #  -DBZ_DEBUG -DDEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+
 
 PIMCobjs =                            \
   Common.o                            \
@@ -102,6 +105,7 @@ PIMCobjs =                            \
   Actions/ActionsClass.o              \
   Actions/NodalActionClass.o          \
   Actions/TIP5PWaterClass.o           \
+  Actions/ST2WaterClass.o           \
   Moves/MultiStage.o                  \
   LongRangeRPA.o                      \
   PathDataClass.o                     \
