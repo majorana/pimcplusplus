@@ -1,6 +1,7 @@
       subroutine herm3ev(xget,yget,zget,x,nx,y,ny,z,nz,
      >                   ilinx,iliny,ilinz,
      >                   f,inf2,inf3,ict,fval,ier)
+      implicit real*8 (A-H,O-Z)
 C
 C  evaluate a 3d cubic Hermite interpolant on a rectilinear
 C  grid -- this is C1 in all directions.
@@ -115,6 +116,7 @@ c
      >   ilinx,iliny,ilinz,
      >   i,j,k,xparam,yparam,zparam,
      >   hx,hxi,hy,hyi,hz,hzi,ier)
+      implicit real*8 (A-H,O-Z)
 c
 c  input of herm3xyz
 c  ================
@@ -312,6 +314,7 @@ C
      >   fval,ii,jj,kk,xparam,yparam,zparam,
      >   hx,hxi,hy,hyi,hz,hzi,
      >   fin,inf2,inf3,nz)
+      implicit real*8 (A-H,O-Z)
 C
       integer ict(8)                    ! requested output control
       integer ivec                      ! vector length

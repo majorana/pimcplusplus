@@ -3,6 +3,7 @@ c  bcspeval -- eval bicubic spline function and/or derivatives
 c
       subroutine bcspeval(xget,yget,iselect,fval,
      >                    x,nx,y,ny,ilinx,iliny,f,inf3,ier)
+      implicit none
 c
       integer iselect(6)
       integer ilinx,iliny,nx,ny,inf3,ier
@@ -99,6 +100,7 @@ c  this is the "first part" of bcspeval, see comments, above.
 c
       subroutine bcspevxy(xget,yget,x,nx,y,ny,ilinx,iliny,
      >   i,j,dx,dy,ier)
+      implicit real*8 (A-H,O-Z)
 c
       integer nx,ny                     ! array dimensions
 c
@@ -118,6 +120,8 @@ C
 c
 c------------------------------------
 c
+
+
       ier=0
 c
 c  range check
@@ -220,6 +224,7 @@ c------------------------------------------------------------------------
 c  bcspevfn -- OK now evaluate the bicubic spline
 c
       subroutine bcspevfn(ict,ivec,ivd,fval,iv,jv,dxv,dyv,f,inf3,ny)
+      implicit real*8 (A-H,O-Z)
 c
 c  input:
       integer ict(6)                    ! selector:

@@ -3,6 +3,7 @@ c
       subroutine tcspeval(xget,yget,zget,iselect,fval,
      >                    x,nx,y,ny,z,nz,ilinx,iliny,ilinz,f,inf4,inf5,
      >                    ier)
+      implicit real*8 (A-H,O-Z)
 c
       integer iselect(10)
       integer ilinx,iliny,ilinz,nx,ny,nz,inf4,inf5,ier
@@ -119,6 +120,7 @@ c
       subroutine tcspevxyz(xget,yget,zget,x,nx,y,ny,z,nz,
      >   ilinx,iliny,ilinz,
      >   i,j,k,dx,dy,dz,ier)
+      implicit real*8 (A-H,O-Z)
 c
       integer nx,ny,nz                  ! array dimensions
 c
@@ -288,6 +290,7 @@ c     input vectors (iv,jv,kv), (dxv,dyv,dzv)
 c
       subroutine tcspevfn(ict,ivec,ivd,fval,iv,jv,kv,dxv,dyv,dzv,
      >   f,inf4,inf5,nz)
+      implicit real*8 (A-H,O-Z)
 c
 c  input:
       integer ict(10)                   ! selector:

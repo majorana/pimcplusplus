@@ -17,6 +17,7 @@ c
      >                    ibcxmin,bcxmin,ibcxmax,bcxmax,
      >                    ibcthmin,bcthmin,ibcthmax,bcthmax,
      >                    wk,nwk,ilinx,ilinth,ier)
+      implicit real*8 (A-H,O-Z)
 c
       real*8 x(inx),th(inth),fspl(4,4,inf3,inth),wk(nwk)
       real*8 bcxmin(inth),bcxmax(inth)

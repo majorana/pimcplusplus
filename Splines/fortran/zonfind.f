@@ -1,7 +1,13 @@
       subroutine zonfind(x,nx,zxget,i)
+      implicit none
 c
+      integer nx
       real*8 x(nx),zxget
       integer i
+      
+      integer nxm,i1,i2,ii,ij
+      real*8dx
+
 c
 c  find index i such that x(i).le.zxget.le.x(i+1)
 c

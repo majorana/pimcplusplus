@@ -1,4 +1,5 @@
       subroutine ibc_ck(ibc,slbl,xlbl,imin,imax,ier)
+      implicit real*8 (A-H,O-Z)
 c
 c  check that spline routine ibc flag is in range
 c

@@ -27,6 +27,7 @@ c
      >                    ibcthmin,bcthmin,ibcthmax,bcthmax,inb1th,
      >                    ibcphmin,bcphmin,ibcphmax,bcphmax,inb1ph,
      >                    wk,nwk,ilinx,ilinth,ilinph,ier)
+      implicit real*8 (A-H,O-Z)
 c
       real*8 x(inx),th(inth),ph(inph)
       real*8 fspl(4,4,4,inf4,inf5,inph),wk(nwk)
@@ -456,6 +457,7 @@ c-----------------------------------------
       subroutine tcspcorr(x,inx,th,inth,ph,inph,fspl,inf4,inf5,
      >   ibcxmin,ibcxmax,ibcthmin,ibcthmax,
      >   ibcphmin,bcph1,ibcphmax,bcph2,ccorr,wk,nwk)
+      implicit real*8 (A-H,O-Z)
 c
 c  intermediary routine for tcspline:
 c  do correction needed to get C2 3d spline with phi bdy conditions
@@ -619,6 +621,7 @@ c-----------------------------------------
      >   ibcxmin,bcxmin,ibcxmax,bcxmax,
      >   ibcthmin,bcthmin,ibcthmax,bcthmax,
      >   fspl2,wk,nwk,ilinx,ilinth,ier)
+      implicit real*8 (A-H,O-Z)
 c
 c  intermediary routines
 c  call bcspline from tcspline loop

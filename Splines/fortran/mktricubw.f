@@ -3,6 +3,7 @@
      >                    ibcymin,bcymin,ibcymax,bcymax,inb1y,
      >                    ibczmin,bczmin,ibczmax,bczmax,inb1z,
      >                    wk,nwk,ilinx,iliny,ilinz,ier)
+      implicit real*8 (A-H,O-Z)
 c
 c  setup a tricubic spline; store coefficients in compatct form
 c  (as per suggestion of L. Zakharov, PPPL, Feb. 1999)
@@ -151,6 +152,7 @@ C----------------------------------------------------------------
 C  mktricop -- copy spline function input data
 C
       subroutine mktricop(fin,nf2,nf3,fwk,nx,ny,nz)
+      implicit real*8 (A-H,O-Z)
 C
       real*8 fin(8,nf2,nf3,nz)
       real*8 fwk(4,4,4,nx,ny,nz)
@@ -171,6 +173,7 @@ C             (bcspline) representation
 C
       subroutine mktricon(fin,nf2,nf3,fwk,nx,ny,nz,
      >   hxlast,hylast,hzlast)
+      implicit real*8 (A-H,O-Z)
 C
       real*8 fin(8,nf2,nf3,nz)
       real*8 fwk(4,4,4,nx,ny,nz)

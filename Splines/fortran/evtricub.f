@@ -1,6 +1,7 @@
       subroutine evtricub(xget,yget,zget,x,nx,y,ny,z,nz,
      >                   ilinx,iliny,ilinz,
      >                   f,inf2,inf3,ict,fval,ier)
+      implicit real*8 (A-H,O-Z)
 C
 C  use mktricub to set up spline coefficients...
 C
@@ -119,6 +120,7 @@ C
      >   fval,ii,jj,kk,xparam,yparam,zparam,
      >   hx,hxi,hy,hyi,hz,hzi,
      >   fin,inf2,inf3,nz)
+      implicit real*8 (A-H,O-Z)
 C
 C  use mktricub to set up spline coefficients...
 C

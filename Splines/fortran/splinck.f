@@ -1,4 +1,5 @@
       subroutine splinck(x,inx,ilinx,ztol,ier)
+      implicit real*8 (A-H,O-Z)
 C
 C  check if a grid is strictly ascending and if it is evenly spaced
 C  to w/in ztol
