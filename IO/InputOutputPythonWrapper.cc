@@ -633,6 +633,8 @@ static PyMethodDef IOSectionMethods[] = {
      "Opens the current section given the name"},
     {"OpenSectionNum", IOSection_OpenSectionNum, METH_VARARGS,
      "Opens the nth section"},
+    {"OpenSectionNameNum", IOSection_OpenSectionNameNum, METH_VARARGS,
+     "Opens the nth section"},
     {"IncludeSection", IOSection_IncludeSection, METH_VARARGS,
      "Includes a section"},
     {"NewSectionName", IOSection_NewSectionName, METH_VARARGS,

@@ -14,7 +14,7 @@ class IOSectionClass:
         return IOSection.CloseFile(this.handle)
     def FlushFile(this):
         return IOSection.FlushFile(this.handle)
-    def OpenSection(this,name,num):
+    def OpenSection2(this,name,num):
         return IOSection.OpenSectionNameNum(this.handle,name,num)
     def OpenSection(this,namenum):
         if type(namenum)==int:
@@ -29,8 +29,15 @@ class IOSectionClass:
         IOSection.CloseSection(this.handle)
     def ReadVar(this,name):
         return IOSection.ReadVar(this.handle,name)
-
-
+    def CountSections(this):
+        return IOSection.CountSections(this.handle)
+    def CountSections2(this,name):
+        return IOSection.CountSectionsName(this.handle,name)
+    def CountVars(this):
+        return IOSection.CountVars(this.handle)
+    def GetVarName(this,num):
+        return IOSection.GetVarName(this.handle,num)
+    
 
 
 
@@ -44,24 +51,24 @@ class IOSectionClass:
 #r = a.ReadVar ("Points");
 #print r
 
-#b = IOSectionClass()
-#b.OpenFile ("junk.dat")
-#print b.ReadVar ("string_data")
-#print b.ReadVar ("int_2");
-#print b.ReadVar ("double_2");
-#print b.ReadVar ("bool_2");
-#print b.ReadVar ("string_2");
+## b = IOSectionClass()
+## b.OpenFile ("junk.dat")
+## print b.ReadVar ("string_data")
+## print b.ReadVar ("int_2");
+## print b.ReadVar ("double_2");
+## print b.ReadVar ("bool_2");
+## print b.ReadVar ("string_2");
 
-#print b.ReadVar ("int_3");
-#print b.ReadVar ("double_3");
-#print b.ReadVar ("bool_3");
-#print b.ReadVar ("string_3");
+## print b.ReadVar ("int_3");
+## print b.ReadVar ("double_3");
+## print b.ReadVar ("bool_3");
+## print b.ReadVar ("string_3");
 
-#print 
-#print b.ReadVar ("int_4");
-#print 
-#print b.ReadVar ("double_4");
-#print 
-#print b.ReadVar ("bool_4");
-#print 
-#print b.ReadVar ("string_4");
+## print 
+## print b.ReadVar ("int_4");
+## print 
+## print b.ReadVar ("double_4");
+## print 
+## print b.ReadVar ("bool_4");
+## print 
+## print b.ReadVar ("string_4");
