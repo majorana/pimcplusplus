@@ -614,11 +614,32 @@ bool VarHDF5Class::Append(Array<bool,2> &val)
 
 /// Strips everything after and including a '.' in the string.
 /// Used to remove section numbers.
-void IOTreeHDF5Class::StripName (string str,string &newString,
-				    int &myInt)
+// void IOTreeHDF5Class::StripName (string str,string &newString,
+// 				    int &myInt)
+// {
+//   int pos = str.find(".");
+//   //  assert(pos>0);
+//   if (pos<=0){
+//     myInt=0;
+//     newString=str;
+//   }
+//   else{
+//     newString=str.substr(0,pos);
+//     string intString=str.substr(pos+1,str.length()-1);
+//     char *endptr;
+//     myInt=strtol(intString.c_str(),&endptr,10);
+//     assert (*endptr=='\0');
+//   }
+// }
+
+/// Strips everything after and including a '_' in the string.
+/// Used to remove section numbers.
+void IOTreeHDF5Class::StripName (string str, string &newString,
+				 int &myInt)
 {
-  int pos = str.find(".");
-  //  assert(pos>0);
+  int pos = str.length()-1;
+  while ((pos>0) && (str[pos]!='_'))
+    pos--;
   if (pos<=0){
     myInt=0;
     newString=str;
@@ -632,10 +653,11 @@ void IOTreeHDF5Class::StripName (string str,string &newString,
   }
 }
 
+
 /// Takes an integer and returns a string which is in the format .# 
 string NumExtension (int num)
 {
-  string retString = ".";
+  string retString = "_";
   char numstr[100];
   snprintf(numstr, 100, "%d", num);
   //int len = strlen(numstr);
