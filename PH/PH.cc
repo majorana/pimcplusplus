@@ -384,6 +384,8 @@ PseudoHamiltonian* ReadPH (IOSectionClass &inSection)
     PH = new PH_FullCore;
   else if (Type == "PH_CubicSplineXC")
     PH = new PH_CubicSplineXC;
+  else if (Type == "Coulomb3D")
+    PH = new Coulomb3D;
 
   PH->Read(inSection);
   return (PH);

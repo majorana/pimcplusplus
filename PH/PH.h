@@ -7,7 +7,8 @@
 #include "../Splines/CubicSpline.h"
 #include "../IO/InputOutput.h"
 
-enum PHType {PH_NONE, PH_CHEBYSHEV, PH_CUBIC, PH_CUBICXC, PH_NUCLEAR};
+enum PHType {PH_NONE, PH_CHEBYSHEV, PH_CUBIC, PH_CUBICXC, PH_NUCLEAR,
+PH_COULOMB3D};
 
 class FullCorePotential
 {
@@ -1075,6 +1076,138 @@ private:
 public:
 
 
+};
+
+
+// This potential provides a good primitive action for the coulomb
+// potential by making the potential linear at the origin instead of
+// divergent. 
+class Coulomb3D : public PseudoHamiltonian
+{
+public:
+  double lambda, beta, Z1Z2;
+  double U0, dU0;
+
+  // Use Pade form for short-range approximation
+  inline double V1(double r)
+  {
+    double sigma = sqrt(2.0*beta*lambda);
+    double alpha = 1.0;
+    double a,b,c,d;
+    a = (1.0-alpha*Z1Z2*beta/(sigma*U0) + alpha*Z1Z2*beta*dU0/(U0*U0))/
+      (alpha*Z1Z2*beta/U0 + sigma*(alpha-1.0));
+    b = beta/U0;
+    c = a*b - dU0/beta*b*b;
+    d = a/Z1Z2;
+    
+    return (1.0+a*r)/(b+c*r+d*r*r);
+  }
+  // The above pade has converges slowly for large r, so we use
+  // a primitive approximation for large r.
+  inline double V2(double r)
+  {
+    return (Z1Z2/r);
+  }
+  
+  // This is a mixing function to transition from V1 to V2;
+  inline double f(double r)
+  {
+    double sigma = sqrt(2.0*beta*lambda);
+    if (r < sigma)
+      return (1.0);
+    else
+      return (exp(-3.0*(r/sigma - 1.0)*(r/sigma-1.0)));
+  }
+
+  double V(double r)
+  {
+    double F = f(r);
+    return (F*V1(r) + (1.0-F)*V2(r));
+  }
+
+  PHType Type()
+  {
+    return PH_COULOMB3D;
+  }
+  
+  int NumParams()
+  {
+    return (0);
+  }
+  
+  scalar &Params(int i)
+  {
+    return Z1Z2;
+  }
+
+  scalar Params(int i) const
+  {
+    return (0.0);
+  }
+	
+  void ABV(scalar r, scalar &A, scalar &B, scalar &Vr,
+	   scalar &dAdr)
+  {
+    A = B = 1.0;
+    dAdr = 0.0;
+
+    Vr=V(r);
+  }
+  // We don't need this
+  scalar dVdr(scalar r)
+  {    return (0.0); }
+
+  scalar d2Adr2(scalar r)
+  {
+    return (0.0);
+  }
+
+  void Write (IOSectionClass &outSection)
+  {
+    outSection.WriteVar ("Type", "Coulomb3D");
+    outSection.WriteVar ("Z1Z2", Z1Z2);
+    outSection.WriteVar ("lambda", lambda);
+    outSection.WriteVar ("beta", beta);
+  }
+
+  bool Read (IOSectionClass &inSection)
+  {
+    assert (inSection.ReadVar ("Z1Z2", Z1Z2));
+    assert (inSection.ReadVar ("lambda", lambda));
+    assert (inSection.ReadVar ("beta", beta));
+    Init(lambda, beta, Z1Z2);
+  }
+
+  void Init (double lambda_, double beta_, double Z1Z2_)
+  {
+    lambda = lambda_;
+    beta = beta_;
+    Z1Z2 = Z1Z2_;
+    
+    // Calculate potential action at r=rp=0 -- U0;
+    TinyVector<double,7> Pj;
+    Pj = 1.772453851, -0.074137740, 0.005834805, -0.000382686,
+      0.000008738, 0.000002138, 0.000000356;
+    double Z = Z1Z2/lambda;
+    U0 = 0.0;
+    double gamma = lambda*beta*Z*Z;
+    double sqrtgamma = sqrt(gamma);
+    double gamma2jby2 = sqrtgamma;
+    double s = Z / fabs(Z);
+    double sign = s;
+    for (int j=0; j<7; j++) {
+      U0 += sign * Pj(j) * gamma2jby2;
+      gamma2jby2 *= sqrtgamma;
+      sign*= s;
+    }
+    // Calculate slope
+    dU0 = -Z;
+  }
+  Coulomb3D(double lambda_, double beta_, double Z1Z2_)
+  {
+    Init (lambda_, beta_, Z1Z2_);
+  }
+  Coulomb3D() { }
 };
 
 
