@@ -56,6 +56,28 @@ void PathClass::Read (IOSectionClass &inSection)
       cerr << "Don't know how to do RANDOM yet.\n";
       exit(1);
     }
+    else if (InitPaths == "CUBIC") {
+      int num = species.NumParticles;
+      bool isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
+      if (!isCubic) {
+	cerr << "A cubic box is current required for cubic initilization\n";
+	abort();
+      }
+      int numPerDim = (int) ceil (pow((double)num, 1.0/3.0));
+      double delta = Box[0] / numPerDim;
+      for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+	int ix, iy, iz;
+	ix = ptcl/(numPerDim*numPerDim);
+	iy = (ptcl-(ix*numPerDim*numPerDim))/numPerDim;
+	iz = ptcl - ix*numPerDim*numPerDim - iy*numPerDim;
+	dVec r;
+	r[0] = ix*delta;
+	r[1] = iy*delta;
+	r[2] = iz*delta;
+	for (int slice=0; slice<NumTimeSlices(); slice++) 
+	  Path(slice,ptcl) = r;
+      }
+    }
     else if (InitPaths == "FIXED") {
       Array<double,2> Positions;
       assert (inSection.ReadVar ("Positions", Positions));
