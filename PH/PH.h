@@ -32,7 +32,7 @@ public:
     else      
       return (Z/(r*r));
   }
-  void Read(char *FName);
+
   void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Z", Z);
@@ -133,26 +133,6 @@ public:
     cerr << "Should never get to PseudoHamiltonian base class.\n";
     exit(1);
     return(0.0);
-  }
-
-  virtual void Write(char *FileName)
-  {
-    FILE *fout;
-    if ((fout = fopen (FileName, "w")) == NULL)
-      {
-	cerr << "Can't open " << FileName << " for writing.  Exitting.\n";
-	exit(1);
-      }
-    Write (fout);
-  }
-  virtual void Write(FILE *fout)
-
-  {
-    cerr << "Should never get to PseudoHamiltonian base class.\n";
-  }
-  virtual void Read (FILE *fin)
-  {
-    cerr << "Should never get to PseudoHamiltonian base class.\n";
   }
 
   virtual void Write (IOSectionClass &outSection)
@@ -451,12 +431,6 @@ public:
     Vfunc.Init(&Vgrid, Params, 5.0e30, FullCoreV->Deriv(CoreRadius));
     return (true);
    }
-
-
-  void Write(FILE *fout);
-  void Write(char *FileName);
-  void Read (FILE *fin);
-  
 };
 
 
@@ -715,10 +689,6 @@ public:
   {
     // Do nothing for now
   }
-
-  void Write(FILE *fout);
-  void Write(char *FileName);
-  void Read (FILE *fin);
   
 };
 
@@ -839,9 +809,6 @@ public:
   {
     // Do nothing for now
   }
-
-  //void Write(char *FileName);
-  //void Read (FILE *fin);
   
 };
 
@@ -919,10 +886,6 @@ public:
 
   }
 
-  void Write(FILE *fout);
-  void Write(char *FileName);
-  void Read (FILE *fin);
-  
 };
 
 
@@ -997,10 +960,6 @@ public:
   {
     // Do nothing for now
   }
-
-  //void Write(char *FileName);
-  //void Read (FILE *fin);
-  
 };
 
 
@@ -1093,9 +1052,6 @@ public:
     sigma = 1.0;
   }
 
-  //void Write(char *FileName);
-  //void Read (FILE *fin);
-  
 };
 
 
@@ -1322,8 +1278,6 @@ public:
 
 
 
-PseudoHamiltonian *ReadPH (InputBuffer &SectionBuf);
 PseudoHamiltonian *ReadPH (IOSectionClass &inSection);
-PseudoHamiltonian *Read_PH(char *FileName);
 
 #endif

@@ -28,8 +28,7 @@ public:
   {
     return (Patom->PH->Params(i));
   }
-  void Write(FILE *fout);
-  void WriteStuff();
+
   scalar Cost();
 };
 
