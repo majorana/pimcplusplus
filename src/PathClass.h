@@ -11,13 +11,14 @@ private:
   /// Path stores the position of all the particles at all time
   /// slices.  The order for access is timeslice, particle
   MirroredArrayClass<dVec> Path;
+  /// Stores what species a particle belongs to
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
   int TimeSliceNumber;
 public:
   MirroredArrayClass1D<int> Permutation;
 
-  void Read(InputSectionClass *section);
+  void Read(InputSectionClass section);
   ///A scratch array to hold a boolean indicating whether we've
   ///looped over this particle yet
   Array<bool,1> DoPtcl;

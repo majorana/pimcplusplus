@@ -28,7 +28,8 @@ class SavedPairActionClass
 class PairActionClass
 {
 
-private:
+ private:
+  
   ///Holds the Ukj coefficients for a given q
   Array<double,1> TempukjArray;
   DistanceTableClass *DistanceTable;
@@ -36,8 +37,9 @@ private:
   string SkipTo(ifstream &infile, string skipToString);
   /// Reads a Fortran 3 tensor
   void ReadFORTRAN3Tensor(ifstream &infile, Array<double,3> &tempUkj);
-public:
-  void Read(InputSectionClass *theInput);
+ public:
+  string type1,type2;
+  void Read(InputSectionClass &inSection);
   /// This stores the coefficients of the expansion specified above.
   /// The array index is over the levels.  You call it with the q
   /// value and a temporary array to get all of the values in that
@@ -53,7 +55,7 @@ public:
   double tau;
   /// Function to read David's squarer file input.
   void ReadDavidSquarerFile(string DMFile);
-  
+
 };
 
 /// Calculate the U(s,q,z) value when given s,q,z and the level 

@@ -13,13 +13,14 @@ typedef enum {FERMION, BOSON, BOLTZMANNON, ANYON} ParticleType;
 class SpeciesClass
 {
 public:
-
+  string Name;
   /// FirstPtcl and LastPtcl are inclusive
   int LastPtcl;
   int FirstPtcl;
   int NumDim;
   int NumParticles;
   TinyVector <bool,NDIM> DimensionActive;
+  virtual bool Read(InputSectionClass &inSection);
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
   /// classical particle.
   double lambda;
@@ -41,6 +42,7 @@ class FermionClass : public SpeciesClass
 public:
   ///When we make this work, this calculates the NodeActions
   double NodeAction (int Ptcl, int LinkNum);
+  bool Read(InputSectionClass &inSection);
   FermionClass()  { 
     NumDim=NDIM;  
     DimensionActive=true;

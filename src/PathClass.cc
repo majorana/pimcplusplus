@@ -1,76 +1,72 @@
 #include "PathClass.h"
 
 
-void PathClass::Read(InputSectionClass *section)
+
+
+void PathClass::Read (InputSectionClass &inSection)
 {
-  int tempTimeSlices;
-  int specNum=-1;
-  Array<string,1> initPaths;
-  initPaths.resize(10); ////HACK! CAN't BE MORE THEN 10 PARTICLE TYPES
-  if (!(section->ReadVar("NumTimeSlices",tempTimeSlices))){
-    cerr<<"Error reading the Time Slice Number!!!\n";
+  SetMode (BOTHMODE);
+  double tau;
+  assert(inSection.FindVar ("NumTimeSlices", TimeSliceNumber));
+  assert(inSection.FindVar ("tau", tau));
+  Array<double,1> tempBox;
+  assert(inSection.FindVar ("Box",tempBox));
+  assert(tempBox.size()==NDIM);
+  for (int counter=0;counter<tempBox.size();counter++){
+    Box(counter)=tempBox(counter);
   }
-  SetTimeSlices(tempTimeSlices);
-  if (!(section->FindSection("Species",section,false))){
-    cerr<<"Error finding the species section!!!!\n";
-  }
-  section->Rewind();
-  cerr<<"Just rewound\n";
-  InputSectionClass* particleSection;
-  while (section->FindSection("Particle",particleSection,false)){
-    cerr<<"I've found a section!!!"<<endl;
-    specNum++;
-    string typeString;
-    particleSection->ReadVar("type",typeString);
-    cerr<<"my type string is "<<typeString<<endl;
-    if (typeString=="fermion"){
-      FermionClass *myFermionPtr = new FermionClass();
-      if (!(particleSection->ReadVar("lambda",(*myFermionPtr).lambda))){
-	cerr<<"Error reading the lambda\n";
-      }
-      if (!(particleSection->ReadVar("NumParticles",(*myFermionPtr).NumParticles))){
-	cerr<<"Error reading the number of particles\n";
-      }
-      cerr<<"Particles are "<<(*myFermionPtr).NumParticles;
-      if (!(particleSection->ReadVar("InitPath",initPaths(specNum)))){
-	cerr<<"Error reading the path initialization\n";
-      }     
-      AddSpecies(myFermionPtr);
+  assert(inSection.OpenSection("Particles"));
+  int NumSpecies = inSection.CountSections ("Species");
+  SpeciesArray.resize(NumSpecies);
+  // First loop over species and read info about species
+  for (int Species=0; Species < NumSpecies; Species++)
+    {
+      inSection.OpenSection("Species", Species);
+      SpeciesClass *newSpecies = ReadSpecies (inSection);
+      inSection.CloseSection(); // "Species"
+      AddSpecies (newSpecies);
+    }
+  // Now actually allocate the path
+  Allocate();
+  // Now initilize the Path
+  for (int speciesIndex=0; speciesIndex<NumSpecies; speciesIndex++);
+  {
+    SpeciesClass &species = *SpeciesArray(speciesIndex);
+    assert(inSection.OpenSection("Species",Species));
+    string InitPaths;
+    inSection.ReadVar ("InitPaths", InitPaths);
+    if (InitPaths == "RANDOM") {
+      cerr << "Don't know how to do RANDOM yet.\n";
+      exit(1);
+    }
+    else if (InitPaths == "FIXED") {
+      Array<double,2> Positions;
+      assert (inSection.ReadVar ("Positions", Positions));
+      
+      assert (Positions.rows() == species.NumParticles);
+      assert (Positions.cols() == species.NumDim);
+      for (int ptcl=species.FirtPtcl; 
+	   ptcl<=species.LastPtcl; ptcl++)
+	for (int slice=0; slice<NumTimeSlices; slice++) {
+	  dVec pos;
+	  pos = 0.0;
+	  for (int dim=0; dim<species.NumDim; dim++)
+	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
+	  Path.SetPos(ptcl,slice,pos);
+	}
     }
     else {
-      cerr<<"The type isn't fermion and I don't know how to deal with it\n";
-    }
-      cerr<<"and here 2\n";
-  }
-  cerr<<"and here 3\n";
-  Allocate();
-  SetMode(BOTHMODE);
-  double tau;
-  if (!(section->ReadVar("tau",tau))){
-    cerr<<"Can't read tau\n";
-  }
-  double sigma=sqrt(2*0.5*tau);
-  for (int counter3=0;counter3<SpeciesArray.size();counter3++){
-    for (int counter=SpeciesArray(counter3)->FirstPtcl;
-	 counter<=SpeciesArray(counter3)->LastPtcl;counter++){
-      for (int counter2=0;counter2<NumTimeSlices();counter2++){
-	if (initPaths(counter3)=="fixed"){ //I should probably swap loops here
-	  dVec zeroVector=0;
-	  SetPos(counter2,counter,zeroVector);
-	}
-	else if (initPaths(counter3)=="random"){
-	  dVec fermionVector=GaussianRandomVec(sigma);	  
-	  SetPos(counter2,counter,fermionVector);
-	}
-	else {
-	  cerr<<"Warning. You haven't told me how to initialize the paths.";
-	}
-      }
+      cerr << "Unrecognize initialization strategy " 
+	   << InitPaths << endl;
     }
   }
-    
 
-
+  CloseSection(); // "Particles"
+  
 }
+
+
+
+
 
 

@@ -34,7 +34,6 @@ public:
   }
 
 
-  /// This object functions as an array of SpeciesClass objects.
 
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.

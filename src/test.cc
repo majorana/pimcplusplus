@@ -173,12 +173,40 @@ int main(int argc, char **argv)
 
 
   
-  PathDataClass myPathData;
-  PairCorrelation PC(myPathData);
+
+  
+
+  ///  PairCorrelation PC(myPathData);
   //  PC.PathData = &myPathData;
-  PC.Species1 = 0;
-  PC.Species2 = 1;
-  PC.Initialize();
+  ////  PC.Species1 = 0;
+  ////  PC.Species2 = 1;
+  ///  PC.Initialize();
+
+  
+
+  PathDataClass myPathData;
+  InputSectionClass inSection;
+  inSection.OpenFile("inputFile");  
+  inSection.OpenSection("System");
+  myPathData.Path.Read(inSection);
+  inSection.CloseSection(); // "System"
+  inSection.Open("Action");
+  myPathData.Action.Read(inSection);
+  myPathData.CloseSection(); //"Action"
+
+  ///Here we are setting up distance table
+  DistanceTablePBCClass *myDistTable=
+    new DistanceTablePBCClass(myPathData.Path);
+  myPathData.DistanceTable=myDistTable;
+  myPathData.Action.DistanceTable=myDistTable;
+  myPathData.DistanceTable->UpdateAll();
+  ///Done setting up distance table
+
+#ifdef PARALLEL
+  myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
+#endif
+  
+
   //  ActionClass myActionClass;
   //  setupIDParticleArray(myPathData);
   InputSectionClass *theInput=new InputSectionHDF5Class();
@@ -187,10 +215,10 @@ int main(int argc, char **argv)
   theInput->FindSection("PathInfo",pathInput,true);
   pathInput->Rewind();
   myPathData.Path.Read(pathInput);
+  //#ifdef PARALLEL
+  //  myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
+  //#endif
 
-#ifdef PARALLEL
-  myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
-#endif
   setupAction(myPathData.Action);
   BisectionMoveClass myBisectionMove(myPathData);
   ShiftMoveClass myShiftMove(myPathData);

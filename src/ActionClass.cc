@@ -5,20 +5,39 @@
 #include <fstream>
 #include "InputOutput.h"
 
-void ActionClass::Read(InputSectionClass *theInput)
-{
-
-
-  while (theInput->FindSection("PairAction",theInput,false)){
-
-    PairActionVector.resizeAndPreserve(PairActionVector.size()+1);
-    PairMatrix.resizeAndPreserve(PairMatrix.extent(0)+1,
-				 PairMatrix.extent(1)+1);
-    PairActionVector(PairActionVector.size()-1).Read(theInput);
-				       
+void ActionClass::Read(InputSectionClass& inSection)
+{ 
+  tau = Path.tau;
+  int numPairActions=inSection.CountSections("PairAction"); 
+  PairActionVector.resize(numPairActions);
+  PairMatrix.resize(Path.NumSpecies(),Path.NumSpecies());
+  // Initialize to a nonsense value so we can later check in the table
+  // element was filled in.
+  PairMatrix = -1;
+  // Now read the pair actions into the file
+  for (int PAnum=0;PAnum<numPairActions;PAnum++){
+    inSection.OpenSection("PairAction");
+    PairActionVector(PAnum).Read(inSection);
+    inSection.Close(); //"PairAction"
+    int type1 = Path.SpeciesNum (PairActionVector(PAnum).type1);
+    int type2 = Path.SpeciesNum (PairActionVector(PAnum).type2);
+    // Now point the matrix to the vector entry.
+    PairMatrix(type1,type2)= PAnum;
+    PairMatrix(type2,type1)= PAnum;
+    assert(PairActionVector(PAnum).tau == tau);
   }
-  ///So there is a tau in each pairaction vector which is hopefully the same
-  tau=PairActionVector(0).tau;
+  // Now check to make sure all PairActions that we need are defined.
+  for (int species1=0; species1<Path.NumSpecies; species1++)
+    for (int species2=0; species2<Path.NumSpecies; species2++)
+      if (PairMatrix(species1,species2) == -1) {
+	if ((species1 != species2) || 
+	    (Path.SpeciesArray(species1)->NumParticles > 1) {
+	  cerr << "We're missing a PairAction for species1 = "
+	       << Path.SpeciesArray(species1)->Name << " and species2 = "
+	       << Path.SpeciesArray(species2)->Name << endl;
+	  exit(1);
+	}
+
 }
 
 double ActionClass::calcTotalAction(int startSlice, int endSlice, 
@@ -136,13 +155,13 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 }
 
  
-void PairActionClass::Read(InputSectionClass *theInput)
+void PairActionClass::Read(InputSectionClass &inSection)
 {
   string fileName;
-  theInput->ReadVar("file",fileName);
+  assert(inSection.ReadVar("dmfile",fileName));
   ReadDavidSquarerFile(fileName.c_str());
-  
-
+  assert(inSection.ReadVar("type1",type1));
+  assert(inSection.ReadVar("type2",type2));
 } 
      
 
