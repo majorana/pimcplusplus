@@ -324,7 +324,7 @@ int count = 0;
       SpeciesClass &species = Path.Species(speciesNum);
       for (int slice=startSlice; slice<endSlice; slice+=skip) {
 count ++;
-cerr << "particle " << ptcl << "; I've done this " << count << " times.  On slice " << slice << endl;
+//cerr << "particle " << ptcl << "; I've done this " << count << " times.  On slice " << slice << endl;
 	spring += (0.5*NDIM)/levelTau;
 	dVec vel;
 	vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
