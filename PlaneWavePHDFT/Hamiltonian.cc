@@ -225,13 +225,39 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
 }
 
 
+void PHPotClass::Setup()
+{
+  kPH.CalcTailCoefs (30.0, 80.0);
+  VGGp.resize (GVecs.size(), GVecs.size());
+  Vec3 k (0.0, 0.0, 0.0);
+  double volInv = 1.0/GVecs.GetBoxVol();
+  for (int i=0; i<GVecs.size(); i++)
+    for (int j=i; j<GVecs.size(); j++) {
+      VGGp (i,j) = kPH.V(k, GVecs(i), GVecs(j))*volInv;
+      VGGp (j,i) = conj (VGGp(i,j));
+    }
+
+  IsSetup = true;
+}
+
+void PHPotClass::Apply (const zVec &c, zVec &Hc)
+{
+  if (!IsSetup)
+    Setup();
+      
+  for (int i=0; i<c.size(); i++)
+    for (int j=0; j<c.size(); j++)
+      Hc(i) += VGGp (i,j) * c(j);
+}
+
+
 void Hamiltonian::Apply(const zVec &c, zVec &Hc)
 {
   Hc = 0.0;
   Kinetic.Apply (c, Hc);
   //Coulomb.Apply (c, Hc);
-  CoulombFFT.Apply (c, Hc);
-  
+  //CoulombFFT.Apply (c, Hc);
+  PH.Apply (c, Hc);
 }
 
 

@@ -3,6 +3,7 @@
 
 #include "../FFT/FFT.h"
 #include "VectorOps.h"
+#include "../PH/kSpacePH.h"
 
 
 class GVecsClass
@@ -139,6 +140,24 @@ public:
   }
 };
 
+class PHPotClass : public HamiltonianBase
+{
+private:
+  kSpacePH kPH;
+  void Setup();
+  bool IsSetup;
+  Array<complex<double>,2> VGGp;
+public:
+  
+  void Apply (const zVec &c, zVec &Hc);
+  PHPotClass (Potential &ph, GVecsClass &gvecs) :
+    HamiltonianBase (gvecs), kPH(ph), IsSetup(false)
+  {
+
+  }
+};
+
+
 class Hamiltonian : public HamiltonianBase
 {
 private:
@@ -146,11 +165,12 @@ private:
 public:
   CoulombFFTClass CoulombFFT;
   KineticClass Kinetic;
+  PHPotClass PH;
   GVecsClass GVecs;
   void Apply (const zVec &c, zVec &Hc);
-  Hamiltonian (Vec3 box, double kcut, double z) :
+  Hamiltonian (Vec3 box, double kcut, double z, Potential &ph) :
     Kinetic (GVecs), Coulomb(z, GVecs), HamiltonianBase(GVecs),
-    CoulombFFT(z, GVecs)
+    CoulombFFT(z, GVecs), PH(ph, GVecs)
   {
     GVecs.Set (box, kcut);
   }

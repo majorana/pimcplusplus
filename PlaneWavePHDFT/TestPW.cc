@@ -2,8 +2,12 @@
 
 main()
 {
-  Vec3 box(15.0, 15.0, 15.0);
-  Hamiltonian H(box, 12.0, 1.0);
+  Vec3 box(25.0, 25.0, 25.0);
+  IOSectionClass in;
+  in.OpenFile ("NaUnscreenedPH_Feb18_05.h5");
+  Potential *ph = ReadPotential(in);
+  in.CloseFile();
+  Hamiltonian H(box, 3.0, 1.0, *ph);
   ConjGrad CG(H);
   clock_t start, end;
   start = clock();
@@ -11,7 +15,7 @@ main()
     CG.Iterate();
   end = clock();
 
-  FILE *fout = fopen ("rho.dat", "w");
+  FILE *fout = fopen ("Narho.dat", "w");
   Vec3 r(0.0, 0.0, 0.0);
   for (double x=-0.5*box[0]; x<=0.5*box[0]; x+=0.01) {
     r[0] = x;
