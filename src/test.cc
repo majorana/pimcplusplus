@@ -27,8 +27,10 @@ void setupIDParticleArray(PathDataClass &myPathData)
   ArrayOfIdenticalParticlesClass &myIDParticles=myPathData.IdenticalParticleArray;
   double tau=0.1; //This better be the same as in the squarer file! UGly!
   int NumTimeSlices=32;
-  ElectronsClass myElectrons;
-  ProtonsClass myProtons;
+  ElectronsClass *myElectronptr = new ElectronsClass;
+  ProtonsClass *myProtonptr = new ProtonsClass;
+  ElectronsClass &myElectrons = *myElectronptr;
+  ProtonsClass &myProtons = *myProtonptr;
   myElectrons.NumParticles=1;
   myProtons.NumParticles=1;
   myElectrons.lambda=0.5;
@@ -63,8 +65,9 @@ void setupMove(BisectionMoveClass &myBisectionMove,ShiftMove &myShiftMove, PathD
 {
 
   Array<int,1> ActiveSpecies(1);
-  ActiveSpecies = 0;
+  ActiveSpecies(0) = 0;
   myBisectionMove.PathData=&thePathData;
+  cerr << "ActiveSpecies = " << ActiveSpecies << endl;
   myBisectionMove.SetActiveSpecies(ActiveSpecies);
   myBisectionMove.SetNumParticlesToMove(1);
   myBisectionMove.StartTimeSlice=0;
@@ -99,6 +102,7 @@ int main(int argc, char **argv)
   
   for (int counter=0;counter<10000;counter++){
     for (int counter2=0;counter2<2;counter2++){
+      cerr << "Doing step " << counter << endl;
       myBisectionMove.makeMove();
     }
     myShiftMove.makeMove();
