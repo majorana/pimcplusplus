@@ -686,6 +686,7 @@ public:
   bool Read (IOSectionClass &inSection)
   {
     Amin = 0.0; Bmin = 0.0;
+    NumElecs = 0.0;
     assert (inSection.ReadVar("CoreRadius", CoreRadius));
     assert (inSection.ReadVar("Zion", Zion));
     assert(inSection.OpenSection("Agrid"));
