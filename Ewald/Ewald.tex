@@ -1000,7 +1000,7 @@ Next, we symmetrize this equation w.r.t $\alpha$ and $\beta$.
 \dot{\bar{u}}_k^{\alpha \beta} - \bar{v}_k^{\alpha \beta}
  +k^2 \left(\frac{\lambda_\alpha+\lambda_\beta}{2}\right) 
 \bar{u}_k^{\alpha \beta} \rule{0cm}{0.6cm} \right.\right. \\
-& \ \ \left.\left.-\sum_\gamma \frac{k^2}{2} N^\gamma \left(
+& \ \ \left.\left.+\sum_\gamma \frac{k^2}{2} N^\gamma \left(
 \bar{u}_k^{\alpha \gamma} \bar{u}_k^{\beta \gamma} +
 \hat{u}_k^{\alpha \gamma} \bar{u}_k^{\beta \gamma} +
 \bar{u}_k^{\alpha \gamma} \hat{u}_k^{\beta \gamma}  \right)
@@ -1016,13 +1016,34 @@ $\vk$, $\alpha$, and $\beta$.  For $\vk \neq 0$,
 \begin{equation}
 \dot{\bar{u}}_k^{\alpha \beta} = \bar{v}_k^{\alpha \beta} 
 - k^2 \left(\frac{\lambda_\alpha+\lambda_\beta}{2}\right)
-\bar{u}_k^{\alpha\beta} +\frac{k^2}{2} \sum_\gamma N_\gamma
+\bar{u}_k^{\alpha\beta} -\frac{k^2}{2} \sum_\gamma N_\gamma
 \left(
 \bar{u}_k^{\alpha \gamma} \bar{u}_k^{\beta \gamma} +
 \hat{u}_k^{\alpha \gamma} \bar{u}_k^{\beta \gamma} +
 \bar{u}_k^{\alpha \gamma} \hat{u}_k^{\beta \gamma}
 \right)
 \end{equation}
+Next, we need an equation for the time propogation of
+$\hat{u}_k^{\alpha \beta}$.  Above, we assumed that $\hat{U}$ was the
+solution to the short-range problem.  Our Bloch equation for
+$\hat{mathcal{U}}$ is then given by
+\begin{equation}
+\dot{\hat{\mathcal{U}}} = \sum_i -\lambda_i
+\left\{ \frac{1}{4} (\nabla_i \hat{\mathcal{U}} 
+-\frac{1}{2} \nabla_i^2 \hat{\mathcal{U}} \right\} + \hat{V}
+\end{equation}
+Following the RPA procedure above, we arrive at the following
+equations for $\hat{u}_k^{\alpha\beta}$.
+\begin{equation}
+\dot{\hat{u}}^{\alpha \beta}_k = \hat{v}^{\alpha \beta}_k
+-k^2 \left( \frac{\lambda_\alpha + \lambda_\beta}{2} \right)
+\hat{u}^{\alpha \beta}_k - \frac{k^2}{2} \sum_\gamma N_\gamma
+\hat{u}^{\alpha \gamma}_k \hat{u}^{\beta \gamma}_k.
+\end{equation}
+Hence, for each value of $k$, we have a coupled set of differential
+equations we must solve.  We note that while the equations for
+$\bar{u}$ couple to $\hat{u}$, those for $\hat{u}$ do not couple to
+$\bar{u}$.
 %% \begin{equation}
 %% \begin{split}
 %% \sum_\vk \sum_{\alpha,\beta} 
