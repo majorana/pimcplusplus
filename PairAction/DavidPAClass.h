@@ -40,6 +40,7 @@ class DavidPAClass : public PairActionFitClass
   Array<MultiCubicSpline,1> ukj; ///<(level )
   ///Same as ukj but stores the beta derivatives.
   Array<MultiCubicSpline,1> dukj; ///<(level )
+  MultiCubicSpline Pot;
   /// Calculate the U(s,q,z) value when given s,q,z and the level 
   inline void calcUsqz(double s,double q,double z,int level,
 		       double &U, double &dU, double &V);
@@ -51,6 +52,7 @@ class DavidPAClass : public PairActionFitClass
   inline void ReadDavidSquarerFile(string DMFile);
   double U (double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
+  double VV(double q, double z, double s2, int level);
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);
   void WriteBetaIndependentInfo (IOSectionClass &outSection);
@@ -74,20 +76,23 @@ inline void DavidPAClass::calcUsqz(double s,double q,double z,int level,
   dU=0.0;
   //  level=level+4;
   // Check to make sure we're inside the grid.
-  if (q > ukj(level).grid->End) {
-    U = 0.0; dU=0.0; V = 0.0;
-    return;
-  }
-
+  //  //  if (q > ukj(level).grid->End) {
+  //  //    U = 0.0; dU=0.0; V = 0.0;
+  //  //    return;
+  //  //  }
+  
   double r=q+0.5*z;
   double rprime=q-0.5*z;
   if (r > ukj(level).grid->End) {
-    U = 0.0; dU=0.0; V = 0.0;
-    return;
+    //    U =0.0 ; dU=0.0; V = 0.0;
+    //    return;
+    r=ukj(level).grid->End;
+
   }
   if (rprime > ukj(level).grid->End) {
-    U = 0.0; dU=0.0; V = 0.0;
-    return;
+    //    U = 0.0; dU=0.0; V = 0.0;
+    //    return;
+    rprime=ukj(level).grid->End;
   }
   
   // This is the endpoint action 
@@ -114,7 +119,7 @@ inline void DavidPAClass::calcUsqz(double s,double q,double z,int level,
       (ukj(level))(q,TempukjArray); 
       (dukj(level))(q,TempdukjArray); 
       ////HACK! 
-      //      n=0;
+      n=2;
       for (int k=1;k<=n;k++){  
 	
 	double Zto2j=1;
@@ -122,11 +127,11 @@ inline void DavidPAClass::calcUsqz(double s,double q,double z,int level,
 	
 	for (int j=0;j<=k;j++){
 	  // indexing into the 2darray
-	  double Ucof  = TempukjArray(k*(k+1)/2+j+1); 
+	  double Ucof  = TempukjArray(k*(k+1)/2+j+1);
 				
 	  double dUcof = TempdukjArray(k*(k+1)/2+j+1);
 	  U+=(Ucof)*Zto2j*currS;
-	  dU+=(dUcof+V)*Zto2j*currS; //+V = HACK!
+	  dU+=(dUcof)*Zto2j*currS; //+V = HACK!
 	  Zto2j*=zsquared;
 	  currS=currS*ssquaredinverse;				
 	}				
@@ -289,7 +294,7 @@ inline void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 
   int numOfFits=GetNextInt(numOfFitsString);
   n = numOfFits;
-  cerr<<endl;
+  cerr<<"N is "<<n<<endl;
   // Read in  the potential
   Array<double,1> potential;
   string potGridString = SkipTo(infile, "RANK");
@@ -298,9 +303,12 @@ inline void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   int numPotPoints = GetNextInt(potGridString);
   potential.resize(numPotPoints);
   SkipTo(infile, "potential");
-  for (int i=0; i<numPotPoints; i++)
+  cerr<<"I'm reading the potential\n";
+  for (int i=0; i<numPotPoints; i++){
     infile >> potential(i);
-
+    cerr<<potential(i)<<endl;
+  }
+  cerr<<"done\n";
   //  string NDERIVString = SkipTo(infile,"NDERIV");
 
 
@@ -368,14 +376,16 @@ inline void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 	cerr<<"ERROR!!! ERROR!!! We got the beta derivative and not U\n";
       }
       Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
-      
+      cerr<<"NumTau is"<<NumTau<<endl;
       ukj.resize(NumTau);
       ReadFORTRAN3Tensor(infile,tempUkj);
       Array<double,3> tempUkj2(NumGridPoints,NumUKJ+1,NumTau);
-      for(int i=0; i<NumTau; i++)
+      for(int i=0; i<NumTau; i++){
 	tempUkj2(Range::all(),0,i) = potential;
+      }
       tempUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempUkj;
-      
+      tempUkj2(NumGridPoints-1,Range::all(),Range::all())=0.0;
+	
       tau=largestTau; //HACK!
       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){//the -3 here is a HACK!
 	ukj(levelCounter).Init(theGrid,tempUkj2(Range::all(),Range::all(),levelCounter));
@@ -456,6 +466,7 @@ inline void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       tau=largestTau; //HACK
       for(int i=0; i<NumTau; i++){ //HACK!
 	tempdUkj2(Range::all(),0,i) = potential;
+
 	tau=tau/2; //HACK!
       }
       tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;

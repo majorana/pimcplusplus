@@ -21,7 +21,9 @@ public:
   Potential *Pot;
   double SmallestBeta;
   double lambda;
-  
+  inline double VV(double q,double z, double s2, int level){return -3.14159;}
+
+
 #ifdef MAKE_FIT
   virtual void ReadParams  (IOSectionClass &inSection)   = 0;
   virtual void WriteBetaIndependentInfo (IOSectionClass &outSection) = 0;
