@@ -42,4 +42,21 @@ main()
       }
   cerr << (success ? "Passed Matrix Inverse Test\n" : 
     "Failed Matrix Inverse Test\n");
+
+  // SVD test
+  Array<double,2> U(3,3), V(3,3);
+  Array<double,1> S(3);
+  Array<double,2> B(4,3);
+
+  B = 1.2,  -5.6,  7.3,
+     -2.1,  -9.5,  7.1,
+      4.9,   1.6, -6.6,
+      1.3,   1.8,  9.0;
+
+  SVdecomp (B, U, S, V);
+  cerr << "B = " << B << endl;
+  cerr << "U = " << U << endl;
+  cerr << "V = " << V << endl;
+  cerr << "S = " << S << endl;
+
 }

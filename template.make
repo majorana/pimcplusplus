@@ -6,7 +6,8 @@ MAKE_NEWMAKE = ${MAKE} -f template.make newmake $(PASS_DEFS)
 MAKE_CLEAN = ${MAKE} clean
 
 all:	PH_obj Splines_obj Integration_obj IO_obj DFT_obj Random_obj \
-	MPI_obj Optimize_obj SpecialFunctions_obj
+	MPI_obj Optimize_obj SpecialFunctions_obj MatrixOps_obj \
+	Fitting_obj
 
 
 PH_obj:
@@ -35,9 +36,16 @@ Optimize_obj:
 SpecialFunctions_obj:
 	cd SpecialFunctions; $(MAKE_ALL)
 
+MatrixOps_obj:
+	cd MatrixOps; $(MAKE_ALL)
+
+Fitting_obj:
+	cd Fitting; $(MAKE_ALL)
+
 
 CLEANS = PH_clean Splines_clean Integration_clean IO_clean DFT_clean \
-	 Random_clean MPI_clean Optimize_clean SpecialFunctions_clean 
+	 Random_clean MPI_clean Optimize_clean SpecialFunctions_clean \
+	 MatrixOps_clean Fitting_clean
 
 
 clean:	$(CLEANS)
@@ -71,6 +79,14 @@ Optimize_clean:
 SpecialFunctions_clean:
 	cd SpecialFunctions; $(MAKE_CLEAN)
 
+MatrixOps_clean:
+	cd MatrixOps; $(MAKE_CLEAN)
+
+Fitting_clean:
+	cd Fitting; $(MAKE_CLEAN)
+
+
+
 
 PH_newmake:
 	cd PH; $(MAKE_NEWMAKE)
@@ -99,10 +115,17 @@ Optimize_newmake:
 SpecialFunctions_newmake:
 	cd SpecialFunctions; $(MAKE_NEWMAKE)
 
+MatrixOps_newmake:
+	cd MatrixOps; $(MAKE_NEWMAKE)
+
+Fitting_newmake:
+	cd Fitting; $(MAKE_NEWMAKE)
+
+
 
 NEW_MAKES = PH_newmake Splines_newmake Integration_newmake IO_newmake \
 DFT_newmake Random_newmake MPI_newmake Optimize_newmake \
-SpecialFunctions_newmake
+SpecialFunctions_newmake MatrixOps_newmake Fitting_newmake
 
 SOURCES = `*.cc`
 

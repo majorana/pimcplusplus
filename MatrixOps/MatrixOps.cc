@@ -1,5 +1,58 @@
 #include "MatrixOps.h"
 
+extern "C" void dgesvd_(char *JOBU, char* JOBVT, int *M, int *N,
+			double *A, int *LDA, double *S, double *U,
+			int *LDU, double *VT, int *LDVT, double *work,
+			int *LWORK, int *INFO);
+
+
+void SVdecomp (Array<double,2> &A,
+	       Array<double,2> &U, Array<double,1> &S,
+	       Array<double,2> &V)
+{
+  int M = A.rows();
+  int N = A.cols();
+  cerr << " M = " << M << " N = " << N << endl;
+  Array<double,2> Atrans(M,N);
+  // U will be Utrans after lapack call
+  U.resize(M,M);
+  V.resize(N,N);
+  
+  S.resize(min(N,M));
+  Atrans = A;
+
+  // Transpose U for FORTRAN ordering
+  Transpose(Atrans);
+  char JOBU = 'A';   // return all columns of U
+  char JOBVT = 'A'; // return all columsn of V
+  int LDA = M;
+  int LDU = M;
+  int LDVT = N;
+  int LWORK = 10 * max(3*min(M,N)+max(M,N),5*min(M,N));
+  Array<double,1> WORK(LWORK);
+  int INFO;
+
+  dgesvd_(&JOBU, &JOBVT, &M, &N, Atrans.data(), &LDA,
+	  S.data(), U.data(), &LDU, V.data(), &LDVT,
+	  WORK.data(), &LWORK, &INFO);
+  assert (INFO == 0);
+  // Transpose U to get back to C ordering
+  // V was really Vtrans so we don't need to transpose
+  Transpose(U);
+  Array<double,2> tmp(M,min(N,M));
+  for (int i=0; i<M; i++)
+    for (int j=0; j<min(N,M);j++)
+      tmp(i,j) = U(i,j);
+  U.resize(M, min(N,M));
+  U = tmp;
+  cerr << "S = " << S << endl;
+}
+
+
+
+	       
+
+      // Adapted from Numerical Recipes in C
 void LUdecomp (Array<double,2> &A, Array<int,1> &perm, 
 	       double &sign)
 {
