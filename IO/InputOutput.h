@@ -3,9 +3,10 @@
 
 #include "InputOutputBase.h"
 #include "InputOutputHDF5.h"
-//#include "InputOutputASCII.h"
+#include "InputOutputASCII.h"
 
 #include <stack>
+
 
 /// In the file name format name.extn, returns the extension.
 /// Actually returns everything after the trailing.
@@ -30,6 +31,28 @@ inline string Extension (string fileName)
 }
 
 
+inline InputTreeClass *ReadTree (string fileName, 
+			  string myName,
+			  InputTreeClass *parent)
+{
+  InputTreeClass *newTree;
+  string extn = Extension (fileName);
+  if (extn == "h5")
+    newTree = new InputTreeHDF5Class;
+  //  else if (extn == "xml")
+  //    newTree = newInputTreeXMLClass;
+  else
+    newTree = new InputTreeASCIIClass;
+  
+  bool success = newTree->OpenFile (fileName, myName, parent);
+  if (success)
+    return (newTree);
+  else
+    return (NULL);
+}
+
+
+
 
 
 ///  Wrapper class for InputTreeClass that gives a nearly identical
@@ -48,23 +71,11 @@ public:
   /// function, reading the contents of the file into the tree.
   bool OpenFile (string fileName)
   {
-    bool success;
-    string extn = Extension (fileName);
-    if (extn == "h5") 
-      CurrentSection = new InputTreeHDF5Class;
-    else {
-      cerr << "Unrecognized extension " << extn << endl;
-      exit(1);
-    }
-    //else if (extn == "xml")
-    //CurrentSection = new InputTreeXMLClass;
-    //else
-    //  CurrentSection = new InputTreeASCIIClass;
-    success = CurrentSection->OpenFile(fileName, "Root", NULL);
-    if (!success)
-      delete (CurrentSection);
-    
-    return (success);
+    CurrentSection = ReadTree (fileName, "Root", NULL);
+    if (CurrentSection == NULL)
+      return (false);
+    else
+      return (true);
   }
 
   /// Calls CurrentSections virtual PrintTree() function.  This is for

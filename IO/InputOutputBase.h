@@ -3,6 +3,7 @@
 
 #include <string>
 #include <list>
+#include <stack>
 #include "../Blitz.h"
 #include <fstream>
 
@@ -24,6 +25,7 @@ public:
   string Name;
   AtomicType Type;
   int Dim;
+  
 
   virtual bool ReadInto (double &val)              = 0;
   virtual bool ReadInto (Array<double,1> &val)     = 0;
@@ -148,8 +150,6 @@ inline bool InputTreeClass::FindSection (string name,
   }
   return (found); 
 }
-
-
 
 
 

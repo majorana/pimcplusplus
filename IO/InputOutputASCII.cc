@@ -1,147 +1,58 @@
-#include "InputOutputASCII.h"
-#include "InputOutputHDF5.h"
+#include "InputOutput.h"
 
-
-
-
-
-
-
-
-bool checkPair(Array<char,1> &buffer,int counter,char* toSee)
-{
-  if (counter+1>=buffer.size()){
-    return false;
-  }
-  if (buffer(counter)==toSee[0] && buffer(counter+1)==toSee[1]){
-    return true;
-  }
-  else return false;
-
-}
-bool isNumCharP(char theChar)
-{
-  if ((theChar>='A' && theChar<='Z') ||
-      (theChar>='a' && theChar<='z') ||
-      (theChar>='0' && theChar<='9') ||
-      theChar=='_' ||
-      theChar=='\"'||
-      theChar=='-')
-    return true;
-  return false;
-}
-
-
-string currWord(Array<char,1> &buffer,int &counter,string &secName)
-
-{
-  string tempString="";
-  int endLocExclusive=counter;
-  bool inQuotes=false;
-  while (isNumCharP(buffer(endLocExclusive)) || inQuotes){
-    tempString=tempString+buffer(endLocExclusive);
-    if (buffer(endLocExclusive)=='\"' && buffer(endLocExclusive-1)!='\\'){
-      inQuotes=!inQuotes;
-    }
-    endLocExclusive++;
-  }
-  ///We assume the section name doesn't contain bad characters inside quotes.
-  if (tempString=="Section"){
-    cerr<<"We have a section!!!"<<endl;
-    while (!isNumCharP(buffer(endLocExclusive))){
-      endLocExclusive++;
-    }
-    secName="";
-    while (isNumCharP(buffer(endLocExclusive))){
-      secName=secName+buffer(endLocExclusive);
-      endLocExclusive++;
-    }
-    cout<<"The sec name is "<<secName<<endl;
-  }
-  counter=endLocExclusive-1;
-  return tempString;
-}
-
-
-void printCharArray(Array <char,1> theArray)
-{
-  for (int counter=0;counter<theArray.size();counter++){
-    cout<<theArray(counter);
-  }
-  cout<<endl;
-}
-
-void getVariable(Array <char,1> &buffer,int &counter,string &theName,
-		 Array <char,1> &theValue)
-{
-  theName="";
-  int eqLocation=counter;
-  while ((!(isNumCharP(buffer(counter)))) &&
-	 counter>0){
-    counter--;
-  }
-
-  int endLocInclusive=counter;
-  while ((isNumCharP(buffer(counter)))
-	 && counter>0){
-    counter--;
-  }
-  int beginLocInclusive=counter+1;
-  
-  for (int strCount=beginLocInclusive;strCount<=endLocInclusive;
-       strCount++){
-    theName=theName+buffer(strCount);
-  }
-  ///Got name..now get value
-  bool inQuotes=false;
-  beginLocInclusive=eqLocation+1;
-  while (!isNumCharP(buffer(beginLocInclusive))){
-    beginLocInclusive++;
-  }
-  endLocInclusive=beginLocInclusive;
-  while (isNumCharP(buffer(endLocInclusive)) ||  inQuotes){
-    if (buffer(endLocInclusive)=='\"' && buffer(endLocInclusive-1)!='\\')
-      inQuotes=!inQuotes;    
-    endLocInclusive++;
-  }
-  endLocInclusive=endLocInclusive-1;
-  theValue.resize(endLocInclusive-beginLocInclusive+1);
-  int strCount2=0;
-  for (int strCount=beginLocInclusive;strCount<=endLocInclusive;
-       strCount++){
-    theValue(strCount2)=buffer(strCount);
-    strCount2++;
-  }
-  counter=endLocInclusive; 
-  //  cout<<"The buffer is "<<theValue;
-}
-
-
-// void InputSectionASCIIClass::PrintTree()
+// void InputTreeASCIIClass::PrintTree()
 // {
-
 //   cout<<"Section: "<<sec->Name<<endl;
-//   list<VarClass*>::iterator varIter=sec->VarList.begin();
-//   while (varIter!=sec->VarList.end()){
-//     cout<<"Variable: "<<(*varIter)->Name<<" ";
-//     VarASCIIClass *tempVar=(VarASCIIClass*)*varIter;
-//     printCharArray(tempVar->Value);
-//     //    cout<<tempVar->Value;
-//     varIter++;
-//   }
-//   list<InputSectionClass*>::iterator secIter=sec->SectionList.begin();
-//   while (secIter!=sec->SectionList.end()){
-//     //    cout<<"Section: "<<(*secIter)->Name<<endl;
-//    (*secIter). PrintTree();
-//     secIter++;
-//   }
+//    list<VarClass*>::iterator varIter=sec->VarList.begin();
+//    while (varIter!=sec->VarList.end()){
+//      cout<<"Variable: "<<(*varIter)->Name<<" ";
+//      VarASCIIClass *tempVar=(VarASCIIClass*)*varIter;
+//      printCharArray(tempVar->Value);
+//      //    cout<<tempVar->Value;
+//      varIter++;
+//    }
+//    list<InputTreeClass*>::iterator secIter=sec->SectionList.begin();
+//    while (secIter!=sec->SectionList.end()){
+//      //    cout<<"Section: "<<(*secIter)->Name<<endl;
+//      (*secIter). PrintTree();
+//      secIter++;
+//    }
 // }
 
-void InputSectionASCIIClass::CloseFile()
-{
-  return;
 
+inline void ASCIIPrintIndent(int num)
+{
+  for (int counter=0;counter<num*3;counter++){
+    cout<<' ';
+  }
 }
+
+
+void InputTreeASCIIClass::PrintTree(int indentNum)
+{
+  ASCIIPrintIndent(indentNum);
+  cout<<"Section: "<<Name<<endl;
+  list<VarClass*>::iterator varIter=VarList.begin();
+  while (varIter!=VarList.end()){
+    ASCIIPrintIndent(indentNum+1);
+    cout<<"Variable: "<<(*varIter)->Name<<" "<<endl;
+    varIter++;
+  }
+  list<InputTreeClass*>::iterator secIter=SectionList.begin();
+  while (secIter!=SectionList.end()){
+    //    cout<<"Section: "<<(*secIter)->Name<<endl;
+    (*secIter)->PrintTree(indentNum+1);
+    secIter++;
+  }
+}
+
+void InputTreeASCIIClass::PrintTree()
+{
+  PrintTree(0);
+}
+
+
+
 
 
 bool isSpecial(char theChar)
@@ -186,34 +97,46 @@ bool isNumStart(char theChar)
   return ((isDigit(theChar)) || (theChar=='.') || (theChar=='-'));
 }
 
+bool isNumChar (char ch)
+{
+  return (isDigit(ch) || (ch =='.') || (ch=='e') || (ch=='-'));
+}
 
-void Tokenize(Array<char,1> buffer, list<string>& tokenList)
+
+
+void Tokenize(Array<char,1> buffer, list<TokenClass>& tokenList)
 {
   int pos=0;
-  int lineNum=0;
+  int lineNum=1;
   while (pos<buffer.size()){
     if (isSpecial(buffer(pos))){
-      string tempString="";
-      tempString+=buffer(pos);
-      tokenList.push_back(tempString);
+      TokenClass tempToken;
+      tempToken.Str+=buffer(pos);
+      tempToken.LineNumber = lineNum;
+      tokenList.push_back(tempToken);
       pos++;
     }
     else if (buffer(pos)=='\"'){
-      string tempString="";
+      TokenClass tempToken;
+      tempToken.Str="\"";
+      pos++;
       while (buffer(pos)!='\"'){
-	tempString+=buffer(pos);
+	tempToken.Str+=buffer(pos);
 	pos++;
       }
-      tempString=tempString+'\"';
-      tokenList.push_back(tempString);
+      pos++;
+      tempToken.Str+='\"';
+      tempToken.LineNumber = lineNum;
+      tokenList.push_back(tempToken);
     }
     else if (isAlpha(buffer(pos))){
-      string tempString="";
-      while (!(isAlpha(buffer(pos)) || isDigit(buffer(pos)))){
-	tempString+=buffer(pos);
+      TokenClass tempToken;
+      while ((isAlpha(buffer(pos)) || isDigit(buffer(pos)))){
+	tempToken.Str+=buffer(pos);
 	pos++;
       }
-      tokenList.push_back(tempString);
+      tempToken.LineNumber = lineNum;
+      tokenList.push_back(tempToken);
     }
     else if (isWhiteSpace(buffer(pos))){
       if (buffer(pos)=='\n')
@@ -221,27 +144,58 @@ void Tokenize(Array<char,1> buffer, list<string>& tokenList)
       pos++;
     }
     else if (isNumStart(buffer(pos))){
-      string tempString="";
-      while (!isNumStart(buffer(pos))){
-	tempString+=buffer(pos);
+      TokenClass tempToken;
+      while (isNumChar(buffer(pos))){
+	tempToken.Str+=buffer(pos);
 	pos++;
       }
+      tempToken.LineNumber = lineNum;
+      tokenList.push_back(tempToken);
     }
+    else if (buffer(pos)=='\0')
+      break;
     else {
       cerr<<"There was a token we do not recognize in line "<<lineNum<<endl;
+      cerr <<"The rest of the file is as follows:\n";
+      while (pos<buffer.size()) {
+	cerr << (int)buffer(pos);
+	pos++;
+      }
+
       exit(1);
     }
   }
 }	     
 	  
 
+
+
+
+bool checkPair(Array<char,1> &buffer,int counter,char* toSee)
+{
+  if (counter+1>=buffer.size()){
+    return false;
+  }
+  if (buffer(counter)==toSee[0] && buffer(counter+1)==toSee[1]){
+    return true;
+  }
+  else return false;
+
+}
+
+
 void 
-InputSectionASCIIClass::ReadWithoutComments(string fileName,
-							     Array<char,1> 
-							     &buffer)
+InputTreeASCIIClass::ReadWithoutComments(string fileName,
+					 Array<char,1> 
+					 &buffer)
 {
   ifstream infile;
   infile.open(fileName.c_str());
+  if (!infile.is_open()) {
+    cerr << "Cannot open file " << fileName 
+	 << " for reading.  Exiting.\n";
+    exit(1);
+  }
   Array<char,1> tmpBuffer;
   int counter=0;
   bool inQuote=false;
@@ -304,86 +258,567 @@ InputSectionASCIIClass::ReadWithoutComments(string fileName,
 }
 
 
+inline void ReadAbort (bool isError, int lineNumber, string ErrorStr)
+{
+  if (isError) {
+    cerr << "Error in input file at line number " << lineNumber 
+	 << ":\n";
+    cerr << ErrorStr;
+    exit(1);
+  }
+}
 
 
-bool InputSectionASCIIClass::OpenFile(string fileName, InputTreeClass *parent)
+string StripQuote(string str)
+{
+  string newString;
+  int i=0;
+  assert (str[0] == '\"');
+  assert (str[str.length()-1] == '\"');
+  while (i<str.length())
+    {
+      if (str[i] != '\"')
+	newString += str[i];
+      i++;
+    }
+  return newString;
+}
+
+
+AtomicType GetType (string typeString)
+{
+  if (typeString=="double")
+    return DOUBLE_TYPE;
+  else if (typeString=="int")
+    return INT_TYPE;
+  else if (typeString=="string")
+    return STRING_TYPE;
+  else if (typeString=="bool")
+    return BOOL_TYPE;
+  else return NOT_ATOMIC;
+    
+
+
+}
+
+
+void ReadAtomicVar(TokenClass token,double &d)
 {
 
+  char* endPtr;
+  d=strtod(token.Str.c_str(),&endPtr);
+  ReadAbort(*endPtr!='\0',token.LineNumber,"Expected Double\n");
+}
 
-  InputSectionASCIIClass *sec;
-  sec=this;
-  InputSectionASCIIClass *oldSec=
-    new InputSectionASCIIClass;
-  //  oldSec=sec;
-  //  VarASCIIClass *var = new VarASCIIClass;
-  //  sec->Name = "Species";
-  //  var->Name = "Mass";
-  //  var->Value.resize(5);
-  //  var->Value(0) = '3';
-  //  var->Value(1) = '.';
-  //  var->Value(2) = '1';
-  //  var->Value(3) = '4';
-  //  var->Value(4) = '2';
-  //  sec->VarList.push_back(var);
-  //  SectionList.push_back(sec);
+void ReadAtomicVar(TokenClass token,int &d)
+{
 
-  //  return true;
-  string secName;
-  int newCounter;
+  char* endPtr;
+  d=strtol(token.Str.c_str(),&endPtr,10);
+  ReadAbort(*endPtr!='\0',token.LineNumber,"Expected Int\n");
+}
+
+void ReadAtomicVar(TokenClass token,string &d)
+{
+  d=StripQuote(token.Str);
+
+}
+
+
+void ReadAtomicVar(TokenClass token, bool &b)
+{
+      if (token.Str=="true"){
+	b=true;
+      }
+      else if (token.Str=="false"){
+	b=false;
+      }
+      else ReadAbort(true,token.LineNumber,"Expected true or false\n");
+}
+
+
+template <class T>
+void ReadArrayData(list<TokenClass>::iterator &iter,
+		   list<TokenClass> &tokenList,
+		   Array<T,1> valArray)
+{
+  ReadAbort(iter->Str != "[", iter->LineNumber, "Expected [ not found\n");
+  iter++;
+  for (int counter=0;counter<valArray.extent(0)-1;counter++){
+    ReadAtomicVar(*iter,valArray(counter));
+    iter++;
+    ReadAbort(iter->Str != ",", iter->LineNumber, "Expected , not found\n");
+    iter++;
+  }
+  //Read last value
+  ReadAtomicVar(*iter,valArray(valArray.extent(0)-1));
+  iter++;
+  ReadAbort(iter->Str != "]", iter->LineNumber, "Expected ] not found\n");
+  iter++;
+  ReadAbort(iter->Str != ";", iter->LineNumber, "Expected ; not found\n");
+  iter++;
+}
+
+
+template <class T>
+void ReadArrayData(list<TokenClass>::iterator &iter,
+		   list<TokenClass> &tokenList,
+		   Array<T,2> valArray)
+{
+  ReadAbort(iter->Str != "[", iter->LineNumber, "Expected [ not found\n");
+  iter++;
+  for (int i=0;i<valArray.extent(0);i++)
+    for (int j=0; j<valArray.extent(1); j++)
+      {
+	ReadAtomicVar(*iter,valArray(i,j));
+	iter++;
+	// Read comma if this isn't the last value.
+	if ((i!=valArray.extent(0)-1) || 
+	    (j!=valArray.extent(1)-1)) {
+	  ReadAbort(iter->Str != ",", iter->LineNumber, 
+		    "Expected , not found\n");
+	  iter++;
+	}
+      }
+  ReadAbort(iter->Str != "]", iter->LineNumber, "Expected ] not found\n");
+  iter++;
+  ReadAbort(iter->Str != ";", iter->LineNumber, "Expected ; not found\n");
+  iter++;
+}
+
+
+template <class T>
+void ReadArrayData(list<TokenClass>::iterator &iter,
+		   list<TokenClass> &tokenList,
+		   Array<T,3> valArray)
+{
+  ReadAbort(iter->Str != "[", iter->LineNumber, "Expected [ not found\n");
+  iter++;
+  for (int i=0;i<valArray.extent(0);i++)
+    for (int j=0; j<valArray.extent(1); j++)
+      for (int k=0; k<valArray.extent(2); k++)
+      {
+	ReadAtomicVar(*iter,valArray(i,j,k));
+	iter++;
+	// Read comma if this isn't the last value.
+	if ((i!=valArray.extent(0)-1) || 
+	    (j!=valArray.extent(1)-1) ||
+	    (k!=valArray.extent(2)-1)) {
+	  ReadAbort(iter->Str != ",", iter->LineNumber, 
+		    "Expected , not found\n");
+	  iter++;
+	}
+      }
+  ReadAbort(iter->Str != "]", iter->LineNumber, "Expected ] not found\n");
+  iter++;
+  ReadAbort(iter->Str != ";", iter->LineNumber, "Expected ; not found\n");
+  iter++;
+}
+
+
+
+
+void ReadArray(list<TokenClass>::iterator &iter,
+	       list<TokenClass> &tokenList,
+	       VarASCIIClass *newVar)
+{
+
+    ReadAbort(iter->Str != "<", iter->LineNumber, "Expected < not found\n");
+    iter++;
+    AtomicType myType=GetType(iter->Str);
+    ReadAbort(myType==NOT_ATOMIC,iter->LineNumber,
+	      "Array does not have atomic type\n");
+    iter++;
+    ReadAbort(iter->Str != ",", iter->LineNumber, "Expected , not found\n");
+    iter++;
+    int numDim;
+    ReadAtomicVar(*iter,numDim);
+    iter++;
+    ReadAbort(iter->Str != ">", iter->LineNumber, "Expected , not found\n");
+    iter++;
+    
+    Array<int,1> dimSize(numDim);
+    
+    string myName=iter->Str;
+    newVar->Name = myName;
+    iter++;
+    ReadAbort(iter->Str != "(", iter->LineNumber, "Expected ( not found\n");
+    iter++;
+    for (int counter=0;counter<numDim-1;counter++){
+      ReadAtomicVar(*iter,dimSize(counter));
+      iter++;
+      ReadAbort(iter->Str != ",", iter->LineNumber, "Expected , not found\n");
+      iter++;
+    }
+    //Read the last dimension
+    ReadAtomicVar(*iter,dimSize(numDim-1));
+    iter++;
+    ReadAbort(iter->Str != ")", iter->LineNumber, "Expected ) not found\n");
+    iter++;
+    ReadAbort(iter->Str!="=",iter->LineNumber,"Expected = not found\n");
+    iter++;
+    newVar->Dim=numDim;
+    newVar->Type=myType;
+    if (numDim==1){
+      if (myType==INT_TYPE){
+	Array<int,1> *valArray=new Array<int,1>(dimSize(0));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+      }
+      else if (myType==DOUBLE_TYPE){
+	Array<double,1> *valArray =new Array<double,1>(dimSize(0));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+      }
+      else if (myType==BOOL_TYPE){
+	Array<bool,1> *valArray=new Array<bool,1>(dimSize(0));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+	
+      }
+      else if (myType==STRING_TYPE){
+	Array<string,1> *valArray=new Array<string,1>(dimSize(0));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+      }
+    }
+    else if (numDim==2){
+      if (myType==INT_TYPE){
+	Array<int,2> *valArray=new Array<int,2>(dimSize(0),dimSize(1));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+      }
+      else if (myType==DOUBLE_TYPE){
+	Array<double,2> *valArray =new Array<double,2>(dimSize(0),
+						       dimSize(1));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+      }
+      else if (myType==BOOL_TYPE){
+	Array<bool,2> *valArray=new Array<bool,2>(dimSize(0),
+						  dimSize(1));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+	
+      }
+      else if (myType==STRING_TYPE){
+	Array<string,2> *valArray=new Array<string,2>(dimSize(0),
+						      dimSize(1));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+      }
+    }
+    else if (numDim==3){
+      if (myType==INT_TYPE){
+	Array<int,3> *valArray=new Array<int,3>(dimSize(0),
+						dimSize(1),
+						dimSize(2));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+      }
+      else if (myType==DOUBLE_TYPE){
+	Array<double,3> *valArray =new Array<double,3>(dimSize(0),
+						       dimSize(1),
+						       dimSize(2));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+      }
+      else if (myType==BOOL_TYPE){
+	Array<bool,3> *valArray=new Array<bool,3>(dimSize(0),
+						  dimSize(1),
+						  dimSize(2));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+	
+      }
+      else if (myType==STRING_TYPE){
+	Array<string,3> *valArray=new Array<string,3>(dimSize(0),
+						      dimSize(1),
+						      dimSize(2));
+	ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+      }
+    }
+    else if (numDim>1){
+      cerr<<"We haven't implemented this yet\n";
+    }
+}
+
+
+
+
+VarASCIIClass* ReadASCIIVar (list<TokenClass>::iterator &iter,
+			     list<TokenClass> &tokenList)
+{
+  VarASCIIClass *newVar = new VarASCIIClass;  
+  AtomicType myType=GetType(iter->Str);
+  if (myType==NOT_ATOMIC){
+    ReadAbort(iter->Str!="Array",iter->LineNumber,
+	      "Invalid Type: "+iter->Str+"\n");
+    iter++;
+    ReadArray(iter,tokenList,newVar);
+  }
+  else {
+    iter++;
+    string myName=iter->Str;
+    newVar->Name = myName;
+    iter++;
+    ReadAbort(iter->Str!="=",iter->LineNumber,"Expected equals sign\n");
+    iter++;
+    TokenClass valToken=*iter;
+    iter++;
+    ReadAbort(iter->Str!=";",iter->LineNumber,"Expected semicolon\n");
+    iter++;
+    newVar->Type=myType;
+    newVar->Dim=0;
+    if (myType==INT_TYPE){
+      newVar->Value=new int;
+      ReadAtomicVar(valToken,*((int*)newVar->Value));
+    }
+    else if (myType==DOUBLE_TYPE){
+      newVar->Value=new double;
+      ReadAtomicVar(valToken,*((double*)newVar->Value));
+    }
+    else if (myType==STRING_TYPE){
+      newVar->Value=new string;
+      ReadAtomicVar(valToken,*((string*)newVar->Value));
+    }
+    else if (myType==BOOL_TYPE){
+      newVar->Value=new bool();
+      ReadAtomicVar(valToken,*((bool*)newVar->Value));
+    }
+  }
+  return(newVar);
+      
+}
+
+
+
+bool InputTreeASCIIClass::ReadSection (InputTreeClass *parent,
+				       string myName,
+				       list<TokenClass>::iterator &iter,
+				       list<TokenClass> &tokenList,
+				       bool wantEndBrace)
+{
+  Parent = parent;
+  Name = myName;
+  while ((iter != tokenList.end()) && (iter->Str != "}")) {
+    if (iter->Str == "Section") {
+      InputTreeClass *newTree;
+      iter++;
+      ReadAbort(iter->Str != "(", iter->LineNumber, "Expected ( not found\n");
+      iter++;
+      string newName = iter->Str;
+      iter++;
+      // Check for included section
+      if (iter->Str == ",") {
+	// Get filename
+	iter++;
+	string fileName = StripQuote(iter->Str);
+	iter++;
+	ReadAbort (iter->Str!=")", iter->LineNumber, "Expected ) not found\n");
+	iter++;
+	newTree = ReadTree (fileName, newName, this);
+      }
+      else {
+	ReadAbort(iter->Str != ")", iter->LineNumber, 
+		  "Expected ) not found\n");
+	iter++;
+	ReadAbort(iter->Str != "{", iter->LineNumber, 
+		  "Expected { not found\n");
+	iter++;
+	newTree = new InputTreeASCIIClass();
+	((InputTreeASCIIClass*)newTree)->ReadSection((InputTreeClass*)this,
+						     newName,iter,tokenList,
+						     true);         
+      }
+      SectionList.push_back(newTree);
+    }
+    else {
+      VarClass *newVar =  ReadASCIIVar(iter, tokenList);
+      VarList.push_back(newVar);
+    }
+  }
+  if ((iter==tokenList.end()) && wantEndBrace) {
+    cerr << "Unexpected end of file before } \n";
+    exit (1);
+  }
+	    
+  if (iter!=tokenList.end())  
+    iter++;
+  return (true);
+}
+
+
+
+bool InputTreeASCIIClass::OpenFile(string fileName, 
+				   string myName, 
+				   InputTreeClass *parent)
+{
+  //  Name = myName;
+  //  Parent = parent;
   Array<char,1> buffer;
   ReadWithoutComments(fileName,buffer);
-  list<string> tokenList;
+  list<TokenClass> tokenList;
   Tokenize(buffer,tokenList);
-  list<string>::iterator listIt;
-  listIt=tokenList.begin();
-  while (listIt!=tokenList.end()){
-    cerr<<*listIt;
-    listIt++;
-  }
-     
-//   //  cout<<buffer;
-//   int braceLevel=0;
-//   bool inQuotes=false;
-//   sec->Name="all";
-//   sec->Parent=parent;
-//   for (int counter=0;counter<buffer.size();counter++){
-//     //    cout<<currWord(buffer,counter,secName)<<endl;
-//     if (buffer(counter)=='\"' && buffer(counter-1)!='\\'){
-//       inQuotes=!inQuotes;
-//     }
-//     else if (buffer(counter)=='S' &&
-// 	     currWord(buffer,counter,secName)=="Section" &&
-// 	     !inQuotes){
-//       InputSectionASCIIClass *newSec = 
-// 	new InputSectionASCIIClass;
-//       newSec->Name=secName;
-//       newSec->Iter=newSec->SectionList.begin();
-//       newSec->Parent=sec;
-//       sec->SectionList.push_back(newSec);
-//       sec=newSec;
-//     }
-//     else if (buffer(counter)=='}' &&
-// 	     !inQuotes){
-//       //      sec=&((SpecialSectionClass<VarASCIIClass>)(*(sec->Parent)))
-//       sec=(InputSectionASCIIClass*)(sec->Parent);
-//     }
-//     else if(buffer(counter)=='='
-// 	    && !inQuotes){
-//       string theName;
-//       Array <char,1> theValue;
-//       getVariable(buffer,counter,theName,theValue);
-//       VarASCIIClass *var = new VarASCIIClass;
-//       var->Name=theName;
-//       //      cout<<"Right here the value is "<<theValue;
-//       var->Value.resize(theValue.size());
-//       var->Value=theValue;
-//       sec->VarList.push_back(var);
-//     }
+  list<TokenClass>::iterator iter=tokenList.begin();
+  ReadSection(parent,myName,iter,tokenList, false);
+//   list<TokenClass>::iterator listIt;
+//   listIt=tokenList.begin();
+//   while (listIt!=tokenList.end()){
+//     cerr<<listIt->Str << " Line Number: " << listIt->LineNumber << endl;
+//     listIt++;
 //   }
-//   //  sec=oldSec;
-//   Iter =SectionList.begin();
+  
+
   return true;
 }
 
 
 
+void InputTreeASCIIClass::CloseFile()
+{
+  return;
+
+}
+
+
+
+//////////////////////////////////////////////////////////////////////
+//                             ReadInto's                           //
+//////////////////////////////////////////////////////////////////////
+
+bool VarASCIIClass::ReadInto (double &val)
+{
+  assert (Type == DOUBLE_TYPE);
+  assert (Dim == 0);
+  val = *((double *)Value);
+}
+
+bool VarASCIIClass::ReadInto (int &val)
+{
+  assert (Type == INT_TYPE);
+  assert (Dim == 0);
+  val = *((int *)Value);
+}
+
+bool VarASCIIClass::ReadInto (string &val)
+{
+  assert (Type == STRING_TYPE);
+  assert (Dim == 0);
+  val = *((string *)Value);
+}
+
+bool VarASCIIClass::ReadInto (bool &val)
+{
+  assert (Type == BOOL_TYPE);
+  assert (Dim == 0);
+  val = *((bool *)Value);
+}
+
+
+
+bool VarASCIIClass::ReadInto (Array<double,1> &val)
+{
+  assert (Type == DOUBLE_TYPE);
+  assert (Dim == 1);
+  Array<double,1> &myVal = *((Array<double,1>*)Value);
+  val.resize(myVal.extent(0));
+  val = myVal;
+}
+bool VarASCIIClass::ReadInto (Array<double,2> &val)
+{
+  assert (Type == DOUBLE_TYPE);
+  assert (Dim == 2);
+  Array<double,2> &myVal = *((Array<double,2>*)Value);
+  val.resize(myVal.extent(0), myVal.extent(1));
+  val = myVal;
+}
+bool VarASCIIClass::ReadInto (Array<double,3> &val)
+{
+  assert (Type == DOUBLE_TYPE);
+  assert (Dim == 3);
+  Array<double,3> &myVal = *((Array<double,3>*)Value);
+  val.resize(myVal.extent(0), myVal.extent(1), myVal.extent(2));
+  val = myVal;
+}
+
+
+bool VarASCIIClass::ReadInto (Array<int,1> &val)
+{
+  assert (Type == INT_TYPE);
+  assert (Dim == 1);
+  Array<int,1> &myVal = *((Array<int,1>*)Value);
+  val.resize(myVal.extent(0));
+  val = myVal;
+}
+bool VarASCIIClass::ReadInto (Array<int,2> &val)
+{
+  assert (Type == INT_TYPE);
+  assert (Dim == 2);
+  Array<int,2> &myVal = *((Array<int,2>*)Value);
+  val.resize(myVal.extent(0), myVal.extent(1));
+  val = myVal;
+}
+bool VarASCIIClass::ReadInto (Array<int,3> &val)
+{
+  assert (Type == INT_TYPE);
+  assert (Dim == 3);
+  Array<int,3> &myVal = *((Array<int,3>*)Value);
+  val.resize(myVal.extent(0), myVal.extent(1), myVal.extent(2));
+  val = myVal;
+}
+
+
+
+bool VarASCIIClass::ReadInto (Array<string,1> &val)
+{
+  assert (Type == STRING_TYPE);
+  assert (Dim == 1);
+  Array<string,1> &myVal = *((Array<string,1>*)Value);
+  val.resize(myVal.extent(0));
+  val = myVal;
+}
+bool VarASCIIClass::ReadInto (Array<string,2> &val)
+{
+  assert (Type == STRING_TYPE);
+  assert (Dim == 2);
+  Array<string,2> &myVal = *((Array<string,2>*)Value);
+  val.resize(myVal.extent(0), myVal.extent(1));
+  val = myVal;
+}
+bool VarASCIIClass::ReadInto (Array<string,3> &val)
+{
+  assert (Type == STRING_TYPE);
+  assert (Dim == 3);
+  Array<string,3> &myVal = *((Array<string,3>*)Value);
+  val.resize(myVal.extent(0), myVal.extent(1), myVal.extent(2));
+  val = myVal;
+}
+
+
+
+bool VarASCIIClass::ReadInto (Array<bool,1> &val)
+{
+  assert (Type == BOOL_TYPE);
+  assert (Dim == 1);
+  Array<bool,1> &myVal = *((Array<bool,1>*)Value);
+  val.resize(myVal.extent(0));
+  val = myVal;
+}
+bool VarASCIIClass::ReadInto (Array<bool,2> &val)
+{
+  assert (Type == BOOL_TYPE);
+  assert (Dim == 2);
+  Array<bool,2> &myVal = *((Array<bool,2>*)Value);
+  val.resize(myVal.extent(0), myVal.extent(1));
+  val = myVal;
+}
+bool VarASCIIClass::ReadInto (Array<bool,3> &val)
+{
+  assert (Type == BOOL_TYPE);
+  assert (Dim == 3);
+  Array<bool,3> &myVal = *((Array<bool,3>*)Value);
+  val.resize(myVal.extent(0), myVal.extent(1), myVal.extent(2));
+  val = myVal;
+}
