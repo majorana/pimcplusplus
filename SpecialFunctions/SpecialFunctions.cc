@@ -339,6 +339,8 @@ double il_scaled(int l, double z)
     }
   else if (z > 1000.0)
     return il_scaled_series_large(l,z);
+  else if (z == 0.0)
+    return (0.0);
   else
     {
       gsl_sf_result result;
