@@ -12,6 +12,7 @@ $\beta=\text{proton}$), and Roman subscripts refer to particle number
 within a species.  We can then write the total interaction energy for
 the system as,
 \newcommand{\vr}{\mathbf{r}}
+\newcommand{\vR}{\mathbf{R}}
 \newcommand{\vk}{\mathbf{k}}
 \begin{equation}
 V = \sum_\alpha \left\{\sum_{i<j} v^{\alpha\alpha}(|\vr^\alpha_i - \vr^\alpha_j|) +
@@ -732,7 +733,7 @@ If the potential $v^{\alpha \beta}(r)$ is long range, then the action,
 $u^{\alpha \beta}(\vr, \vr';\beta)$, will also be long range.  We
 note, however, that the action is not a simple function of the scalar
 $r$, as the potential is.  Experience shows, however, that at large
-distances, the action is well approximated by
+distances, the action is well-approximated by
 \begin{eqnarray}
 u^{\alpha\beta}(\vr, \vr';\tau) & \approx & 
 \frac{1}{2} \left[ u^{\alpha\beta}(\vr,\vr;\tau) +
@@ -742,18 +743,121 @@ u^{\alpha\beta}_\text{diag}(r',\tau)\right]
 \end{eqnarray}
 This is known as the {\em diagonal approximation}.  Thus, as long as
 this approximation is valid at half the minimum box dimension, we may
-break up the diagonal action as we did the potential.  The same
+break up the diagonal action as we did the potential.  This
+effectively neglects the off-diagonal parts of the action for
+particles more than a half-box length apart, but experience has shown
+that these contributions are usually quite small.  The same
 analysis follows for the $\tau$-derivative the the action, which is
 required to compute the total energy.  Note that PIMC simulation
 requires the pair action at several values of $\tau$, so that in
 practice, we need to do several optimized breakups for each
-$u_\text{diag}_{\alpha\beta}$ and $\dot{u}_\text{diag}^{\alpha\beta}$ and a single breakup for
-each $v^{\alpha\beta}.
-
+$u_\text{diag}^{\alpha\beta}$ and $\dot{u}_\text{diag}^{\alpha\beta}$ and a single breakup for
+each $v^{\alpha\beta}$.
 
 \subsection{Beyond the pair approximation: RPA improvements}
-Thusfar in our discussion, the long-range parts of action has been
-treated in was is effectively a primitive approximation.  While this
+Consider the limit of a dense gas of charged particles.  We know from
+solid state theory that collective density fluctuations, known as
+plasmons, contribute significantly to the energy spectrum of such a system.
+An approximation to the density matrix determined by considering only
+pairs of particles will neglect these contributions at finite $\tau$.
+As $\tau$ approaches zero, Trotter still guarantees we will approach
+the right limit.
+
+Nonetheless, it is possible to significantly reduce the finite-$\tau$
+timestep error by utilizing a different approximation for the long
+range part of the action.  We begin by defining our effective,
+long-range potential.  As noted above, we may perform an optimized
+breakup on the diagonal action, $u_\text{diag}^{\alpha\beta}(r)$.
+\begin{equation}
+u_\text{diag}^{\alpha\beta}(r) = \hat{u}^{\alpha\beta}_\text{diag}(r) +
+\bar{u}^{\alpha\beta}_\text{diag}(r),
+\end{equation}
+where the $\hat{u}$ and $\bar{u}$ refer to the short and long range
+diagonal actions, respectively, borrowing the notation for short and
+long vowels.
+We subtract the long range part form the total pair action in a
+quasi-primitive appoximation by defining
+\begin{equation}
+\bar{u}^{\alpha\beta}_\text{diag}(r) \equiv \tau \bar{v}^{\alpha \beta}(r).
+\end{equation}
+Let $\bar{v}^{\alpha \beta}_k$ represent the Fourier transform the the
+effective potential, $\bar{v}^{\alpha\beta}(r)$.  Finally, let its
+short-range counterpart be defined by 
+\begin{equation}
+\hat{v}^{\alpha \beta}_k \equiv v^{\alpha\beta}_k - \bar{v}^{\alpha\beta}_k
+\end{equation}
+
+Now, we wish to reintroduce a new long range action, which we will
+calculate in $k$-space within the {\em Random Phase Approximation
+  (RPA)}.   We begin with the Bloch equation,
+\begin{equation}
+\dot{\rho} = -\mathcal{H} \rho,
+\end{equation}
+where the dot refers to differentiation w.r.t. $\tau$.  The
+Hamiltonian is given by
+\begin{equation}
+\mathcal{H} = \left[\sum_\alpha \sum_{i\in \alpha} -\lambda_\alpha
+\nabla_i^2\right] + \hat{V} + \bar{V},
+\end{equation}
+where $\hat{V}$ and $\bar{V}$ are the total short and long range
+periodic potentials, respectively.
+Let us now make the partitioning that
+\begin{equation}
+\rho(\vR, \vR';\tau) = \rho_0(\vR, \vR';\tau) e^{-\hat{U}(\vR,
+  \vR';\tau)} e^{-\bar{U}(\vR, \vR';\tau)},
+\end{equation}
+We assume that $\rho_s \equiv \rho_0 e^{-\hat{U}}$ satisfies the Bloch
+equation for the short-range Hamiltonian,
+\begin{equation}
+\mathcal{H}_s = \left[\sum_\alpha \sum_{i\in \alpha} -\lambda_\alpha
+\nabla_i^2\right] + \hat{V}.
+\end{equation}
+In fact, this is only strictly true in the limit that $\tau=0$, but
+this relation will suffice for our present analysis.
+
+
+Recall that $\nabla^2(ab) = a\nabla^2 b + b\nabla^2a +2(\nabla a)
+\cdot (\nabla b)$.  Thus, we have for our Bloch equation,
+\begin{eqnarray}
+-\left [\dot{\rho_s} -\rho_s\dot{\bar{U}}\right] e^{-\bar{U}} & = &
+\sum_{\alpha,\  i\in\alpha} -\lambda_\alpha
+\left[\rho_s \nabla^2_i e^{-\bar{U}} + e^{-\bar{U}} \nabla^2_i \rho_s
+  + 2(\nabla \rho_s)\cdot (\nabla e^{-\bar{U}}) 
+\right] \nonumber \\ & & + (\hat{V} + \bar{V}) \rho_s e^{-\bar{U}}.
+\end{eqnarray} 
+Subtracting the Bloch equation for the short range part,
+we are left with
+\begin{equation}
+\left[\dot{\bar{U}}-\bar{V}\right] \rho_s e^{-\bar{U}}  = 
+\sum_{\alpha,\  i\in\alpha} -\lambda_\alpha
+\left[\rho_s \nabla^2_i e^{-\bar{U}}
+  + 2(\nabla \rho_s)\cdot (\nabla e^{-\bar{U}}) 
+\right].
+\end{equation} 
+Recall that
+\begin{eqnarray}
+\nabla e^{-\bar{U}} & = & -\nabla\bar{U}e^{-\bar{U}} \\
+\nabla \rho_0 & = & 0 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ 
+\text{ (for $\vR = \vR'$)} \\
+\nabla \rho_s & = & -\rho_s \nabla \hat{U} \\
+\nabla^2 e^{-\bar{U}} & = & 
+\left[(\nabla \bar{U})^2 - \nabla^2 \bar{U}\right] e^{-\bar{U}} \\
+\end{eqnarray} 
+We now attempt to solve the Bloch equation under the restriction that
+$\vR = \vR'$, i.e. along the diagonal of the density matrix.
+
+We recall that the long range potential, $\bar{V}$, may be written as
+\begin{equation}
+\bar{V} = \sum_{\alpha} \sum_\vk \left[ 
+\frac{1}{2} \left| \rho^\alpha_\vk\right|^2 \bar{v}^{\alpha
+  \alpha}_k + 
+\sum_{\beta < \alpha} \mathcal{R}e \left( \rho^{\alpha}_\vk
+  \rho^\beta_{-\vk} \bar{v}^{\alpha\beta}_k \right)
+\right] 
+\end{equation}
+
+While this
 is correct in the limit that the timestep, $\tau$, goes to zero, it
 may incur a substantial error for finite $\tau$.  In this section, we
 describe a method to reduce the timestep error of the long range part
