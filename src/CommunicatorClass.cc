@@ -112,4 +112,13 @@ void CommunicatorClass::SendReceive(int SendProc, const Array<int,1> &SendBuff,
   RecvBuff = SendBuff;
 }
 
+//// GRRRRRRRRRRRRRRRRRRRR!!!!!!!!!!!!!!111
+void CommunicatorClass::SendReceive(int SendProc, 
+				    const Array<ImageNumClass,1> &SendBuff,
+				    int RecvProc,       
+				    Array<ImageNumClass,1> &RecvBuff)
+{
+  RecvBuff = SendBuff;
+}
+
 #endif
