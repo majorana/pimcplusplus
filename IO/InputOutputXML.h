@@ -33,39 +33,39 @@ public:
   virtual bool ReadInto (int &val);
   virtual bool ReadInto (string &val);
   virtual bool ReadInto (bool &val);
-  virtual bool ReadInto (Array<double,1> &v);
-  virtual bool ReadInto (Array<double,2> &v);
-  virtual bool ReadInto (Array<double,3> &v);
-  virtual bool ReadInto (Array<double,4> &v);
-  virtual bool ReadInto (Array<int,1> &v);
-  virtual bool ReadInto (Array<int,2> &v);
-  virtual bool ReadInto (Array<int,3> &v);
-  virtual bool ReadInto (Array<int,4> &v);
-  virtual bool ReadInto (Array<string,1> &v);
-  virtual bool ReadInto (Array<string,2> &v);
-  virtual bool ReadInto (Array<string,3> &v);
-  virtual bool ReadInto (Array<string,4> &v);
-  virtual bool ReadInto (Array<bool,1> &v);
-  virtual bool ReadInto (Array<bool,2> &v);
-  virtual bool ReadInto (Array<bool,3> &v);
-  virtual bool ReadInto (Array<bool,4> &v);
+  virtual bool ReadInto (blitz::Array<double,1> &v);
+  virtual bool ReadInto (blitz::Array<double,2> &v);
+  virtual bool ReadInto (blitz::Array<double,3> &v);
+  virtual bool ReadInto (blitz::Array<double,4> &v);
+  virtual bool ReadInto (blitz::Array<int,1> &v);
+  virtual bool ReadInto (blitz::Array<int,2> &v);
+  virtual bool ReadInto (blitz::Array<int,3> &v);
+  virtual bool ReadInto (blitz::Array<int,4> &v);
+  virtual bool ReadInto (blitz::Array<string,1> &v);
+  virtual bool ReadInto (blitz::Array<string,2> &v);
+  virtual bool ReadInto (blitz::Array<string,3> &v);
+  virtual bool ReadInto (blitz::Array<string,4> &v);
+  virtual bool ReadInto (blitz::Array<bool,1> &v);
+  virtual bool ReadInto (blitz::Array<bool,2> &v);
+  virtual bool ReadInto (blitz::Array<bool,3> &v);
+  virtual bool ReadInto (blitz::Array<bool,4> &v);
 
   virtual bool Append (double val);
-  virtual bool Append (Array<double,1> &val);
-  virtual bool Append (Array<double,2> &val);
-  virtual bool Append (Array<double,3> &val);
+  virtual bool Append (blitz::Array<double,1> &val);
+  virtual bool Append (blitz::Array<double,2> &val);
+  virtual bool Append (blitz::Array<double,3> &val);
   virtual bool Append (int val);
-  virtual bool Append (Array<int,1> &val);
-  virtual bool Append (Array<int,2> &val);
-  virtual bool Append (Array<int,3> &val);
+  virtual bool Append (blitz::Array<int,1> &val);
+  virtual bool Append (blitz::Array<int,2> &val);
+  virtual bool Append (blitz::Array<int,3> &val);
   virtual bool Append (string val);
-  virtual bool Append (Array<string,1> &val);
-  virtual bool Append (Array<string,2> &val);
-  virtual bool Append (Array<string,3> &val);
+  virtual bool Append (blitz::Array<string,1> &val);
+  virtual bool Append (blitz::Array<string,2> &val);
+  virtual bool Append (blitz::Array<string,3> &val);
   virtual bool Append (bool val);
-  virtual bool Append (Array<bool,1> &val);
-  virtual bool Append (Array<bool,2> &val);
-  virtual bool Append (Array<bool,3> &val);
+  virtual bool Append (blitz::Array<bool,1> &val);
+  virtual bool Append (blitz::Array<bool,2> &val);
+  virtual bool Append (blitz::Array<bool,3> &val);
   
   virtual void Print(ofstream &outFile) = 0;
 
@@ -84,8 +84,8 @@ public:
 class VarXMLdouble1Class : public VarXMLClass
 {
 public:
-  Array<double,1> Value;
-  bool ReadInto (Array<double,1> &val);
+  blitz::Array<double,1> Value;
+  bool ReadInto (blitz::Array<double,1> &val);
   bool Append (double val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
@@ -94,9 +94,9 @@ public:
 class VarXMLdouble2Class : public VarXMLClass
 {
 public:
-  Array<double,2> Value;
-  bool ReadInto (Array<double,2> &val);
-  bool Append (Array<double,1> &val);
+  blitz::Array<double,2> Value;
+  bool ReadInto (blitz::Array<double,2> &val);
+  bool Append (blitz::Array<double,1> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -104,9 +104,9 @@ public:
 class VarXMLdouble3Class : public VarXMLClass
 {
 public:
-  Array<double,3> Value;
-  bool ReadInto (Array<double,3> &val);
-  bool Append (Array<double,2> &val);
+  blitz::Array<double,3> Value;
+  bool ReadInto (blitz::Array<double,3> &val);
+  bool Append (blitz::Array<double,2> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -114,9 +114,9 @@ public:
 class VarXMLdouble4Class : public VarXMLClass
 {
 public:
-  Array<double,4> Value;
-  bool ReadInto (Array<double,4> &val);
-  bool Append (Array<double,3> &val);
+  blitz::Array<double,4> Value;
+  bool ReadInto (blitz::Array<double,4> &val);
+  bool Append (blitz::Array<double,3> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -134,8 +134,8 @@ public:
 class VarXMLint1Class : public VarXMLClass
 {
 public:
-  Array<int,1> Value;
-  bool ReadInto (Array<int,1> &val);
+  blitz::Array<int,1> Value;
+  bool ReadInto (blitz::Array<int,1> &val);
   bool Append (int val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
@@ -144,9 +144,9 @@ public:
 class VarXMLint2Class : public VarXMLClass
 {
 public:
-  Array<int,2> Value;
-  bool ReadInto (Array<int,2> &val);
-  bool Append (Array<int,1> &val);
+  blitz::Array<int,2> Value;
+  bool ReadInto (blitz::Array<int,2> &val);
+  bool Append (blitz::Array<int,1> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -154,9 +154,9 @@ public:
 class VarXMLint3Class : public VarXMLClass
 {
 public:
-  Array<int,3> Value;
-  bool ReadInto (Array<int,3> &val);
-  bool Append (Array<int,2> &val);
+  blitz::Array<int,3> Value;
+  bool ReadInto (blitz::Array<int,3> &val);
+  bool Append (blitz::Array<int,2> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -165,9 +165,9 @@ public:
 class VarXMLint4Class : public VarXMLClass
 {
 public:
-  Array<int,4> Value;
-  bool ReadInto (Array<int,4> &val);
-  bool Append (Array<int,3> &val);
+  blitz::Array<int,4> Value;
+  bool ReadInto (blitz::Array<int,4> &val);
+  bool Append (blitz::Array<int,3> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -185,8 +185,8 @@ public:
 class VarXMLstring1Class : public VarXMLClass
 {
 public:
-  Array<string,1> Value;
-  bool ReadInto (Array<string,1> &val);
+  blitz::Array<string,1> Value;
+  bool ReadInto (blitz::Array<string,1> &val);
   bool Append (string val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
@@ -195,9 +195,9 @@ public:
 class VarXMLstring2Class : public VarXMLClass
 {
 public:
-  Array<string,2> Value;
-  bool ReadInto (Array<string,2> &val);
-  bool Append (Array<string,1> &val);
+  blitz::Array<string,2> Value;
+  bool ReadInto (blitz::Array<string,2> &val);
+  bool Append (blitz::Array<string,1> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -205,9 +205,9 @@ public:
 class VarXMLstring3Class : public VarXMLClass
 {
 public:
-  Array<string,3> Value;
-  bool ReadInto (Array<string,3> &val);
-  bool Append (Array<string,2> &val);
+  blitz::Array<string,3> Value;
+  bool ReadInto (blitz::Array<string,3> &val);
+  bool Append (blitz::Array<string,2> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -215,9 +215,9 @@ public:
 class VarXMLstring4Class : public VarXMLClass
 {
 public:
-  Array<string,4> Value;
-  bool ReadInto (Array<string,4> &val);
-  bool Append (Array<string,3> &val);
+  blitz::Array<string,4> Value;
+  bool ReadInto (blitz::Array<string,4> &val);
+  bool Append (blitz::Array<string,3> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -236,8 +236,8 @@ public:
 class VarXMLbool1Class : public VarXMLClass
 {
 public:
-  Array<bool,1> Value;
-  bool ReadInto (Array<bool,1> &val);
+  blitz::Array<bool,1> Value;
+  bool ReadInto (blitz::Array<bool,1> &val);
   bool Append (bool val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
@@ -246,9 +246,9 @@ public:
 class VarXMLbool2Class : public VarXMLClass
 {
 public:
-  Array<bool,2> Value;
-  bool ReadInto (Array<bool,2> &val);
-  bool Append (Array<bool,1> &val);
+  blitz::Array<bool,2> Value;
+  bool ReadInto (blitz::Array<bool,2> &val);
+  bool Append (blitz::Array<bool,1> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -256,9 +256,9 @@ public:
 class VarXMLbool3Class : public VarXMLClass
 {
 public:
-  Array<bool,3> Value;
-  bool ReadInto (Array<bool,3> &val);
-  bool Append (Array<bool,2> &val);
+  blitz::Array<bool,3> Value;
+  bool ReadInto (blitz::Array<bool,3> &val);
+  bool Append (blitz::Array<bool,2> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -266,9 +266,9 @@ public:
 class VarXMLbool4Class : public VarXMLClass
 {
 public:
-  Array<bool,4> Value;
-  bool ReadInto (Array<bool,4> &val);
-  bool Append (Array<bool,3> &val);
+  blitz::Array<bool,4> Value;
+  bool ReadInto (blitz::Array<bool,4> &val);
+  bool Append (blitz::Array<bool,3> &val);
   void Print(ofstream &outFile);
   void ReadVals(list<string> &vals);
 };
@@ -323,28 +323,28 @@ class IOTreeXMLClass : public IOTreeClass
   void FlushFile();
 
   void WriteVar(string name, double val);
-  void WriteVar(string name, Array<double,1> &val);
-  void WriteVar(string name, Array<double,2> &val);
-  void WriteVar(string name, Array<double,3> &val);
-  void WriteVar(string name, Array<double,4> &val);
+  void WriteVar(string name, blitz::Array<double,1> &val);
+  void WriteVar(string name, blitz::Array<double,2> &val);
+  void WriteVar(string name, blitz::Array<double,3> &val);
+  void WriteVar(string name, blitz::Array<double,4> &val);
 
   void WriteVar(string name, int val);
-  void WriteVar(string name, Array<int,1> &val);
-  void WriteVar(string name, Array<int,2> &val);
-  void WriteVar(string name, Array<int,3> &val);
-  void WriteVar(string name, Array<int,4> &val);
+  void WriteVar(string name, blitz::Array<int,1> &val);
+  void WriteVar(string name, blitz::Array<int,2> &val);
+  void WriteVar(string name, blitz::Array<int,3> &val);
+  void WriteVar(string name, blitz::Array<int,4> &val);
 
   void WriteVar(string name, bool val);
-  void WriteVar(string name, Array<bool,1> &val);
-  void WriteVar(string name, Array<bool,2> &val);
-  void WriteVar(string name, Array<bool,3> &val);
-  void WriteVar(string name, Array<bool,4> &val);
+  void WriteVar(string name, blitz::Array<bool,1> &val);
+  void WriteVar(string name, blitz::Array<bool,2> &val);
+  void WriteVar(string name, blitz::Array<bool,3> &val);
+  void WriteVar(string name, blitz::Array<bool,4> &val);
 
   void WriteVar(string name, string val);
-  void WriteVar(string name, Array<string,1> &val);
-  void WriteVar(string name, Array<string,2> &val);
-  void WriteVar(string name, Array<string,3> &val);
-  void WriteVar(string name, Array<string,4> &val);
+  void WriteVar(string name, blitz::Array<string,1> &val);
+  void WriteVar(string name, blitz::Array<string,2> &val);
+  void WriteVar(string name, blitz::Array<string,3> &val);
+  void WriteVar(string name, blitz::Array<string,4> &val);
   IOTreeXMLClass()
   { IsModified = false; }
 };

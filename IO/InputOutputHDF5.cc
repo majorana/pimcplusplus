@@ -16,7 +16,7 @@ bool VarHDF5Class::ReadInto (double &val)
   return (status == 0);
 }
 
-bool VarHDF5Class::ReadInto (Array<double,1> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<double,1> &val)
 {
   assert (Type == DOUBLE_TYPE);
   assert (Dimensions.size() == 1);
@@ -26,7 +26,7 @@ bool VarHDF5Class::ReadInto (Array<double,1> &val)
   return (status == 0);
 }
 
-bool VarHDF5Class::ReadInto (Array<double,2> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<double,2> &val)
 {
   assert (Type == DOUBLE_TYPE);
   assert (Dimensions.size() == 2);
@@ -36,7 +36,7 @@ bool VarHDF5Class::ReadInto (Array<double,2> &val)
   return (status == 0);
 }
 
-bool VarHDF5Class::ReadInto (Array<double,3> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<double,3> &val)
 {
   assert (Type == DOUBLE_TYPE);
   assert (Dimensions.size() == 3);
@@ -45,7 +45,7 @@ bool VarHDF5Class::ReadInto (Array<double,3> &val)
 			  H5S_ALL, H5P_DEFAULT, val.data());
   return (status == 0);
 }
-bool VarHDF5Class::ReadInto (Array<double,4> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<double,4> &val)
 {
   assert (Type == DOUBLE_TYPE);
   assert (Dimensions.size() == 4);
@@ -64,7 +64,7 @@ bool VarHDF5Class::ReadInto (int &val)
   return (status == 0);
 }
 
-bool VarHDF5Class::ReadInto (Array<int,1> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<int,1> &val)
 {
   assert (Type == INT_TYPE);
   assert (Dimensions.size() == 1);
@@ -74,7 +74,7 @@ bool VarHDF5Class::ReadInto (Array<int,1> &val)
   return (status == 0);
 }
 
-bool VarHDF5Class::ReadInto (Array<int,2> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<int,2> &val)
 {
   assert (Type == INT_TYPE);
   assert (Dimensions.size() == 2);
@@ -84,7 +84,7 @@ bool VarHDF5Class::ReadInto (Array<int,2> &val)
   return (status == 0);
 }
 
-bool VarHDF5Class::ReadInto (Array<int,3> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<int,3> &val)
 {
   assert (Type == INT_TYPE);
   assert (Dimensions.size() == 3);
@@ -94,7 +94,7 @@ bool VarHDF5Class::ReadInto (Array<int,3> &val)
   return (status == 0);
 }
 
-bool VarHDF5Class::ReadInto (Array<int,4> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<int,4> &val)
 {
   assert (Type == INT_TYPE);
   assert (Dimensions.size() == 4);
@@ -111,7 +111,7 @@ bool VarHDF5Class::ReadInto (string &val)
   hid_t type = H5Dget_type(DataSetID);
   size_t length = H5Tget_size(type);
 
-  Array<char,1> charArray(length);
+  blitz::Array<char,1> charArray(length);
   herr_t status = H5Dread(DataSetID, type, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, charArray.data());
   val = charArray.data();
@@ -120,7 +120,7 @@ bool VarHDF5Class::ReadInto (string &val)
 }
 
 
-bool VarHDF5Class::ReadInto (Array<string,1> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<string,1> &val)
 {
   assert (Type == STRING_TYPE);
   assert (Dimensions.size() == 1);
@@ -128,7 +128,7 @@ bool VarHDF5Class::ReadInto (Array<string,1> &val)
   hid_t type = H5Dget_type(DataSetID);
   size_t length = H5Tget_size(type);
 
-  Array<char,2> charArray(Dimensions(0),length);
+  blitz::Array<char,2> charArray(Dimensions(0),length);
   herr_t status = H5Dread(DataSetID, type, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, charArray.data());
   for (int i=0; i<Dimensions(0);i++)
@@ -138,7 +138,7 @@ bool VarHDF5Class::ReadInto (Array<string,1> &val)
 }
 
 
-bool VarHDF5Class::ReadInto (Array<string,2> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<string,2> &val)
 {
   assert (Type == STRING_TYPE);
   assert (Dimensions.size() == 2);
@@ -146,7 +146,7 @@ bool VarHDF5Class::ReadInto (Array<string,2> &val)
   hid_t type = H5Dget_type(DataSetID);
   size_t length = H5Tget_size(type);
 
-  Array<char,3> charArray(Dimensions(0),Dimensions(1),length);
+  blitz::Array<char,3> charArray(Dimensions(0),Dimensions(1),length);
   herr_t status = H5Dread(DataSetID, type, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, charArray.data());
   for (int i=0; i<Dimensions(0);i++)
@@ -158,7 +158,7 @@ bool VarHDF5Class::ReadInto (Array<string,2> &val)
 
 
 
-bool VarHDF5Class::ReadInto (Array<string,3> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<string,3> &val)
 {
   assert (Type == STRING_TYPE);
   assert (Dimensions.size() == 3);
@@ -166,7 +166,7 @@ bool VarHDF5Class::ReadInto (Array<string,3> &val)
   hid_t type = H5Dget_type(DataSetID);
   size_t length = H5Tget_size(type);
 
-  Array<char,4> charArray(Dimensions(0),Dimensions(1),
+  blitz::Array<char,4> charArray(Dimensions(0),Dimensions(1),
 			  Dimensions(2),length);
   herr_t status = H5Dread(DataSetID, type, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, charArray.data());
@@ -178,7 +178,7 @@ bool VarHDF5Class::ReadInto (Array<string,3> &val)
   return (status == 0);
 }
 
-bool VarHDF5Class::ReadInto (Array<string,4> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<string,4> &val)
 {
   assert (Type == STRING_TYPE);
   assert (Dimensions.size() == 4);
@@ -186,7 +186,7 @@ bool VarHDF5Class::ReadInto (Array<string,4> &val)
   hid_t type = H5Dget_type(DataSetID);
   size_t length = H5Tget_size(type);
 
-  Array<char,5> charArray(Dimensions(0),Dimensions(1),
+  blitz::Array<char,5> charArray(Dimensions(0),Dimensions(1),
 			  Dimensions(2),Dimensions(3),length);
   herr_t status = H5Dread(DataSetID, type, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, charArray.data());
@@ -203,16 +203,16 @@ bool VarHDF5Class::ReadInto (Array<string,4> &val)
 bool VarHDF5Class::ReadInto (bool &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
-bool VarHDF5Class::ReadInto (Array<bool,1> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<bool,1> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
-bool VarHDF5Class::ReadInto (Array<bool,2> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<bool,2> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
-bool VarHDF5Class::ReadInto (Array<bool,3> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<bool,3> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
-bool VarHDF5Class::ReadInto (Array<bool,4> &val)
+bool VarHDF5Class::ReadInto (blitz::Array<bool,4> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
 
@@ -225,7 +225,7 @@ bool VarHDF5Class::Append(double val)
   int RANK = 1;
 
   if ((Type != DOUBLE_TYPE) || (Dim != 1)) {
-    cerr << "Trying to append a double to a non Array<double,1>.  Exitting.\n";
+    cerr << "Trying to append a double to a non blitz::Array<double,1>.  Exitting.\n";
     return false;
   }
 
@@ -253,18 +253,18 @@ bool VarHDF5Class::Append(double val)
 
 
 
-bool VarHDF5Class::Append(Array<double,1> &val)
+bool VarHDF5Class::Append(blitz::Array<double,1> &val)
 {
   int RANK = 2;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a double to a non Array<double,1>.  Exitting.\n";
+    cerr << "Trying to append a double to a non blitz::Array<double,1>.  Exitting.\n";
     return false;
   }
 
   for (int i=1; i<RANK; i++)
     if (Dimensions(i)!=val.extent(i-1)) {
-      cerr << "Dimension mismatch in appending to Array<double,2>.\n";
+      cerr << "Dimension mismatch in appending to blitz::Array<double,2>.\n";
       return false;
     }
 
@@ -299,18 +299,18 @@ bool VarHDF5Class::Append(Array<double,1> &val)
 
 
 
-bool VarHDF5Class::Append(Array<double,2> &val)
+bool VarHDF5Class::Append(blitz::Array<double,2> &val)
 {
   int RANK = 3;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a double to a non Array<double,1>.  Exitting.\n";
+    cerr << "Trying to append a double to a non blitz::Array<double,1>.  Exitting.\n";
     return false;
   }
 
   for (int i=1; i<RANK; i++)
     if (Dimensions(i)!=val.extent(i-1)) {
-      cerr << "Dimension mismatch in appending to Array<double,2>.\n";
+      cerr << "Dimension mismatch in appending to blitz::Array<double,2>.\n";
       return false;
     }
 
@@ -344,18 +344,18 @@ bool VarHDF5Class::Append(Array<double,2> &val)
 }
 
 
-bool VarHDF5Class::Append(Array<double,3> &val)
+bool VarHDF5Class::Append(blitz::Array<double,3> &val)
 {
   int RANK = 4;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a double to a non Array<double,1>.  Exitting.\n";
+    cerr << "Trying to append a double to a non blitz::Array<double,1>.  Exitting.\n";
     return false;
   }
 
   for (int i=1; i<RANK; i++)
     if (Dimensions(i)!=val.extent(i-1)) {
-      cerr << "Dimension mismatch in appending to Array<double,2>.\n";
+      cerr << "Dimension mismatch in appending to blitz::Array<double,2>.\n";
       return false;
     }
 
@@ -397,7 +397,7 @@ bool VarHDF5Class::Append(int val)
   int RANK = 1;
 
   if ((Type != INT_TYPE) || (Dim != 1)) {
-    cerr << "Trying to append a int to a non Array<int,1>.  Exitting.\n";
+    cerr << "Trying to append a int to a non blitz::Array<int,1>.  Exitting.\n";
     return false;
   }
 
@@ -425,18 +425,18 @@ bool VarHDF5Class::Append(int val)
 
 
 
-bool VarHDF5Class::Append(Array<int,1> &val)
+bool VarHDF5Class::Append(blitz::Array<int,1> &val)
 {
   int RANK = 2;
 
   if ((Type != INT_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a int to a non Array<int,1>.  Exitting.\n";
+    cerr << "Trying to append a int to a non blitz::Array<int,1>.  Exitting.\n";
     return false;
   }
 
   for (int i=1; i<RANK; i++)
     if (Dimensions(i)!=val.extent(i-1)) {
-      cerr << "Dimension mismatch in appending to Array<int,2>.\n";
+      cerr << "Dimension mismatch in appending to blitz::Array<int,2>.\n";
       return false;
     }
 
@@ -471,18 +471,18 @@ bool VarHDF5Class::Append(Array<int,1> &val)
 
 
 
-bool VarHDF5Class::Append(Array<int,2> &val)
+bool VarHDF5Class::Append(blitz::Array<int,2> &val)
 {
   int RANK = 3;
 
   if ((Type != INT_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a int to a non Array<int,1>.  Exitting.\n";
+    cerr << "Trying to append a int to a non blitz::Array<int,1>.  Exitting.\n";
     return false;
   }
 
   for (int i=1; i<RANK; i++)
     if (Dimensions(i)!=val.extent(i-1)) {
-      cerr << "Dimension mismatch in appending to Array<int,2>.\n";
+      cerr << "Dimension mismatch in appending to blitz::Array<int,2>.\n";
       return false;
     }
 
@@ -517,18 +517,18 @@ bool VarHDF5Class::Append(Array<int,2> &val)
 
 
 
-bool VarHDF5Class::Append(Array<int,3> &val)
+bool VarHDF5Class::Append(blitz::Array<int,3> &val)
 {
   int RANK = 4;
 
   if ((Type != INT_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a int to a non Array<int,1>.  Exitting.\n";
+    cerr << "Trying to append a int to a non blitz::Array<int,1>.  Exitting.\n";
     return false;
   }
 
   for (int i=1; i<RANK; i++)
     if (Dimensions(i)!=val.extent(i-1)) {
-      cerr << "Dimension mismatch in appending to Array<int,2>.\n";
+      cerr << "Dimension mismatch in appending to blitz::Array<int,2>.\n";
       return false;
     }
 
@@ -568,7 +568,7 @@ bool VarHDF5Class::Append(string val)
   int RANK = 1;
 
   if ((Type != STRING_TYPE) || (Dim != 1)) {
-    cerr << "Trying to append a string to a non Array<string,1>.  Exitting.\n";
+    cerr << "Trying to append a string to a non blitz::Array<string,1>.  Exitting.\n";
     return false;
   }
 
@@ -600,22 +600,22 @@ bool VarHDF5Class::Append(string val)
 
 
 
-bool VarHDF5Class::Append(Array<string,1> &strs)
+bool VarHDF5Class::Append(blitz::Array<string,1> &strs)
 {
   int RANK = 2;
   if ((Type != STRING_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a string to a non Array<string,1>.  Exitting.\n";
+    cerr << "Trying to append a string to a non blitz::Array<string,1>.  Exitting.\n";
     return false;
   }
 
   for (int i=1; i<RANK; i++)
     if (Dimensions(i)!=strs.extent(i-1)) {
-      cerr << "Dimension mismatch in appending to Array<string,2>.\n";
+      cerr << "Dimension mismatch in appending to blitz::Array<string,2>.\n";
       return false;
     }
 
   // Copy strings over into a character array
-  Array<char,2> charArray(strs.extent(0), 
+  blitz::Array<char,2> charArray(strs.extent(0), 
 			  MAX_HDF5_STRING_LENGTH+1);
 
   for (int i=0; i<strs.extent(0); i++)
@@ -665,22 +665,22 @@ bool VarHDF5Class::Append(Array<string,1> &strs)
   return (true);
 }
 
-bool VarHDF5Class::Append(Array<string,2> &strs)
+bool VarHDF5Class::Append(blitz::Array<string,2> &strs)
 {
   int RANK = 3;
   if ((Type != STRING_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a string to a non Array<string,1>.  Exitting.\n";
+    cerr << "Trying to append a string to a non blitz::Array<string,1>.  Exitting.\n";
     return false;
   }
 
   for (int i=1; i<RANK; i++)
     if (Dimensions(i)!=strs.extent(i-1)) {
-      cerr << "Dimension mismatch in appending to Array<string,2>.\n";
+      cerr << "Dimension mismatch in appending to blitz::Array<string,2>.\n";
       return false;
     }
 
   // Copy strings over into a character array
-  Array<char,3> charArray(strs.extent(0),strs.extent(1),
+  blitz::Array<char,3> charArray(strs.extent(0),strs.extent(1),
 			  MAX_HDF5_STRING_LENGTH+1);
 
 
@@ -735,22 +735,22 @@ bool VarHDF5Class::Append(Array<string,2> &strs)
 }
 
 
-bool VarHDF5Class::Append(Array<string,3> &strs)
+bool VarHDF5Class::Append(blitz::Array<string,3> &strs)
 {
   int RANK = 4;
   if ((Type != STRING_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a string to a non Array<string,1>.  Exitting.\n";
+    cerr << "Trying to append a string to a non blitz::Array<string,1>.  Exitting.\n";
     return false;
   }
 
   for (int i=1; i<RANK; i++)
     if (Dimensions(i)!=strs.extent(i-1)) {
-      cerr << "Dimension mismatch in appending to Array<string,2>.\n";
+      cerr << "Dimension mismatch in appending to blitz::Array<string,2>.\n";
       return false;
     }
 
   // Copy strings over into a character array
-  Array<char,4> charArray(strs.extent(0),strs.extent(1), strs.extent(2),
+  blitz::Array<char,4> charArray(strs.extent(0),strs.extent(1), strs.extent(2),
 			  MAX_HDF5_STRING_LENGTH+1);
 
   for (int i=0; i<strs.extent(0); i++)
@@ -805,13 +805,13 @@ bool VarHDF5Class::Append(Array<string,3> &strs)
 bool VarHDF5Class::Append(bool val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
-bool VarHDF5Class::Append(Array<bool,1> &val)
+bool VarHDF5Class::Append(blitz::Array<bool,1> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
-bool VarHDF5Class::Append(Array<bool,2> &val)
+bool VarHDF5Class::Append(blitz::Array<bool,2> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
-bool VarHDF5Class::Append(Array<bool,3> &val)
+bool VarHDF5Class::Append(blitz::Array<bool,3> &val)
 { cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
 /************************************************************
@@ -1079,7 +1079,7 @@ void IOTreeHDF5Class::GroupIterator(string member_name)
       // We're including
       hid_t type = H5Dget_type(includeData);
       size_t length = H5Tget_size(type);
-      Array<char, 1> charArray(length+1);
+      blitz::Array<char, 1> charArray(length+1);
       herr_t status = H5Dread(includeData, type, H5S_ALL,
 			      H5S_ALL, H5P_DEFAULT, charArray.data());
       string fileName = charArray.data();
@@ -1210,7 +1210,7 @@ void IOTreeHDF5Class::WriteVar(string name, double T)
 }
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<double,1> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,1> &v)
 {
   int RANK=1;
   /// Create new variable
@@ -1265,7 +1265,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<double,1> &v)
 }
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<double,2> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,2> &v)
 {
   int RANK=2;
   /// Create new variable
@@ -1321,7 +1321,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<double,2> &v)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<double,3> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,3> &v)
 {
   int RANK=3;
   /// Create new variable
@@ -1377,7 +1377,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<double,3> &v)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<double,4> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,4> &v)
 {
   int RANK=4;
   /// Create new variable
@@ -1462,7 +1462,7 @@ void IOTreeHDF5Class::WriteVar(string name, int T)
 }
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<int,1> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,1> &v)
 {
   int RANK=1;
   /// Create new variable
@@ -1517,7 +1517,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<int,1> &v)
 }
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<int,2> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,2> &v)
 {
   int RANK=2;
   /// Create new variable
@@ -1573,7 +1573,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<int,2> &v)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<int,3> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,3> &v)
 {
   int RANK=3;
   /// Create new variable
@@ -1629,7 +1629,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<int,3> &v)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<int,4> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,4> &v)
 {
   int RANK=4;
   /// Create new variable
@@ -1724,7 +1724,7 @@ void IOTreeHDF5Class::WriteVar(string name,string str)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<string,1> &strs)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,1> &strs)
 {
   int RANK=1;
   /// Create new variable
@@ -1740,7 +1740,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<string,1> &strs)
   VarList.push_back(newVar);
 
   // Copy strings over into a character array
-  Array<char,2> charArray(strs.extent(0), 
+  blitz::Array<char,2> charArray(strs.extent(0), 
 			  MAX_HDF5_STRING_LENGTH+1);
   for (int i=0; i<strs.extent(0); i++)
     {
@@ -1800,7 +1800,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<string,1> &strs)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<string,2> &strs)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,2> &strs)
 {
   int RANK=2;
   /// Create new variable
@@ -1816,7 +1816,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<string,2> &strs)
   VarList.push_back(newVar);
 
   // Copy strings over into a character array
-  Array<char,3> charArray(strs.extent(0), strs.extent(1),
+  blitz::Array<char,3> charArray(strs.extent(0), strs.extent(1),
 			       MAX_HDF5_STRING_LENGTH+1);
   for (int i=0; i<strs.extent(0); i++)
     for (int j=0; j<strs.extent(1); j++)
@@ -1876,7 +1876,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<string,2> &strs)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<string,3> &strs)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,3> &strs)
 {
   int RANK=3;
   /// Create new variable
@@ -1892,7 +1892,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<string,3> &strs)
   VarList.push_back(newVar);
 
   // Copy strings over into a character array
-  Array<char,4> charArray(strs.extent(0), strs.extent(1), strs.extent(2),
+  blitz::Array<char,4> charArray(strs.extent(0), strs.extent(1), strs.extent(2),
 			  MAX_HDF5_STRING_LENGTH+1);
   for (int i=0; i<strs.extent(0); i++)
     for (int j=0; j<strs.extent(1); j++)
@@ -1952,7 +1952,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<string,3> &strs)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<string,4> &strs)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,4> &strs)
 {
   int RANK=4;
   /// Create new variable
@@ -1968,7 +1968,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<string,4> &strs)
   VarList.push_back(newVar);
 
   // Copy strings over into a character array
-  Array<char,5> charArray(strs.extent(0), strs.extent(1), strs.extent(2),
+  blitz::Array<char,5> charArray(strs.extent(0), strs.extent(1), strs.extent(2),
 			  strs.extent(3), MAX_HDF5_STRING_LENGTH+1);
   for (int i=0; i<strs.extent(0); i++)
     for (int j=0; j<strs.extent(1); j++)
@@ -2058,7 +2058,7 @@ void IOTreeHDF5Class::WriteVar(string name, bool T)
 }
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<bool,1> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,1> &v)
 {
 //   int RANK=1;
 //   /// Create new variable
@@ -2113,7 +2113,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<bool,1> &v)
 }
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<bool,2> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,2> &v)
 {
 //   int RANK=2;
 //   /// Create new variable
@@ -2169,7 +2169,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<bool,2> &v)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<bool,3> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,3> &v)
 {
 //   int RANK=3;
 //   /// Create new variable
@@ -2225,7 +2225,7 @@ void IOTreeHDF5Class::WriteVar(string name, Array<bool,3> &v)
 
 
 
-void IOTreeHDF5Class::WriteVar(string name, Array<bool,4> &v)
+void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,4> &v)
 {
 }
 

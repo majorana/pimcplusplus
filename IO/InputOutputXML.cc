@@ -198,7 +198,7 @@ inline bool StrToBool (string str)
 
 
 
-void ParseDim(string dimStr, Array<int,1> &dimensions)
+void ParseDim(string dimStr, blitz::Array<int,1> &dimensions)
 {
   StripWhiteSpace(dimStr);
   list<string> strList;
@@ -218,7 +218,7 @@ void ParseDim(string dimStr, Array<int,1> &dimensions)
 
 
 VarXMLClass *NewXMLVar (AtomicType newType, int ndim,
-			    Array<int,1> dims)
+			    blitz::Array<int,1> dims)
 {
   if (ndim == 0) {
     if (newType == DOUBLE_TYPE)
@@ -399,12 +399,12 @@ void XMLparserClass::startElement(string &name, list<XMLattribute> &attributes)
   else { // This is a variable
     int ndim;
     AtomicType type;
-    Array<int,1> dim;
+    blitz::Array<int,1> dim;
     type = StrToType(typeStr);
     if (dimStr != "") { // This is an array
       ParseDim(dimStr, dim);
       ndim = dim.size();
-      cerr << "Array variable " << name << " of type "
+      cerr << "blitz::Array variable " << name << " of type "
 	   << typeStr << " and dimensions (" << dimStr
 	   << ").\n";
     }
@@ -430,7 +430,7 @@ void XMLparserClass::startElement(string &name, list<XMLattribute> &attributes)
 }
 
 template <class T>
-void ReadArrayData(list<string> numbers, Array<T,1> valArray)
+void ReadArrayData(list<string> numbers, blitz::Array<T,1> valArray)
 {
   
 
@@ -962,37 +962,37 @@ bool VarXMLClass::ReadInto (string &val)
 { ComplainReadInto(); return false; }
 bool VarXMLClass::ReadInto (bool &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<double,1> &val)
+bool VarXMLClass::ReadInto (blitz::Array<double,1> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<double,2> &val)
+bool VarXMLClass::ReadInto (blitz::Array<double,2> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<double,3> &val)
+bool VarXMLClass::ReadInto (blitz::Array<double,3> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<double,4> &val)
+bool VarXMLClass::ReadInto (blitz::Array<double,4> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<int,1> &val)
+bool VarXMLClass::ReadInto (blitz::Array<int,1> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<int,2> &val)
+bool VarXMLClass::ReadInto (blitz::Array<int,2> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<int,3> &val)
+bool VarXMLClass::ReadInto (blitz::Array<int,3> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<int,4> &val)
+bool VarXMLClass::ReadInto (blitz::Array<int,4> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<string,1> &val)
+bool VarXMLClass::ReadInto (blitz::Array<string,1> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<string,2> &val)
+bool VarXMLClass::ReadInto (blitz::Array<string,2> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<string,3> &val)
+bool VarXMLClass::ReadInto (blitz::Array<string,3> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<string,4> &val)
+bool VarXMLClass::ReadInto (blitz::Array<string,4> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<bool,1> &val)
+bool VarXMLClass::ReadInto (blitz::Array<bool,1> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<bool,2> &val)
+bool VarXMLClass::ReadInto (blitz::Array<bool,2> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<bool,3> &val)
+bool VarXMLClass::ReadInto (blitz::Array<bool,3> &val)
 { ComplainReadInto(); return false; }
-bool VarXMLClass::ReadInto (Array<bool,4> &val)
+bool VarXMLClass::ReadInto (blitz::Array<bool,4> &val)
 { ComplainReadInto(); return false; }
 
 bool VarXMLClass::Append (double val)
@@ -1003,29 +1003,29 @@ bool VarXMLClass::Append (string val)
 { ComplainAppend(); return false; }
 bool VarXMLClass::Append (bool val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<double,1> &val)
+bool VarXMLClass::Append (blitz::Array<double,1> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<double,2> &val)
+bool VarXMLClass::Append (blitz::Array<double,2> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<double,3> &val)
+bool VarXMLClass::Append (blitz::Array<double,3> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<int,1> &val)
+bool VarXMLClass::Append (blitz::Array<int,1> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<int,2> &val)
+bool VarXMLClass::Append (blitz::Array<int,2> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<int,3> &val)
+bool VarXMLClass::Append (blitz::Array<int,3> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<string,1> &val)
+bool VarXMLClass::Append (blitz::Array<string,1> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<string,2> &val)
+bool VarXMLClass::Append (blitz::Array<string,2> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<string,3> &val)
+bool VarXMLClass::Append (blitz::Array<string,3> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<bool,1> &val)
+bool VarXMLClass::Append (blitz::Array<bool,1> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<bool,2> &val)
+bool VarXMLClass::Append (blitz::Array<bool,2> &val)
 { ComplainAppend(); return false; }
-bool VarXMLClass::Append (Array<bool,3> &val)
+bool VarXMLClass::Append (blitz::Array<bool,3> &val)
 { ComplainAppend(); return false; }
 
 
@@ -1037,44 +1037,44 @@ bool VarXMLstring0Class::ReadInto (string &val)
 {  val = Value; return true; }
 bool VarXMLbool0Class::ReadInto (bool &val)
 { val = Value; return true; }
-bool VarXMLdouble1Class::ReadInto (Array<double,1> &val)
+bool VarXMLdouble1Class::ReadInto (blitz::Array<double,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
-bool VarXMLdouble2Class::ReadInto (Array<double,2> &val)
+bool VarXMLdouble2Class::ReadInto (blitz::Array<double,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
-bool VarXMLdouble3Class::ReadInto (Array<double,3> &val)
+bool VarXMLdouble3Class::ReadInto (blitz::Array<double,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
   val = Value; return true; }
-bool VarXMLdouble4Class::ReadInto (Array<double,4> &val)
+bool VarXMLdouble4Class::ReadInto (blitz::Array<double,4> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
   val = Value; return true; }
-bool VarXMLint1Class::ReadInto (Array<int,1> &val)
+bool VarXMLint1Class::ReadInto (blitz::Array<int,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
-bool VarXMLint2Class::ReadInto (Array<int,2> &val)
+bool VarXMLint2Class::ReadInto (blitz::Array<int,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
-bool VarXMLint3Class::ReadInto (Array<int,3> &val)
+bool VarXMLint3Class::ReadInto (blitz::Array<int,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
   val = Value; return true; }
-bool VarXMLint4Class::ReadInto (Array<int,4> &val)
+bool VarXMLint4Class::ReadInto (blitz::Array<int,4> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
   val = Value; return true; }
-bool VarXMLstring1Class::ReadInto (Array<string,1> &val)
+bool VarXMLstring1Class::ReadInto (blitz::Array<string,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
-bool VarXMLstring2Class::ReadInto (Array<string,2> &val)
+bool VarXMLstring2Class::ReadInto (blitz::Array<string,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
-bool VarXMLstring3Class::ReadInto (Array<string,3> &val)
+bool VarXMLstring3Class::ReadInto (blitz::Array<string,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
  val = Value; return true; }
-bool VarXMLstring4Class::ReadInto (Array<string,4> &val)
+bool VarXMLstring4Class::ReadInto (blitz::Array<string,4> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
  val = Value; return true; }
-bool VarXMLbool1Class::ReadInto (Array<bool,1> &val)
+bool VarXMLbool1Class::ReadInto (blitz::Array<bool,1> &val)
 { val.resize(Value.extent(0)); val = Value; return true; }
-bool VarXMLbool2Class::ReadInto (Array<bool,2> &val)
+bool VarXMLbool2Class::ReadInto (blitz::Array<bool,2> &val)
 { val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
-bool VarXMLbool3Class::ReadInto (Array<bool,3> &val)
+bool VarXMLbool3Class::ReadInto (blitz::Array<bool,3> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
  val = Value; return true; }
-bool VarXMLbool4Class::ReadInto (Array<bool,4> &val)
+bool VarXMLbool4Class::ReadInto (blitz::Array<bool,4> &val)
 { val.resize(Value.extent(0),Value.extent(1),Value.extent(2),Value.extent(3)); 
  val = Value; return true; }
 
@@ -1110,24 +1110,24 @@ bool VarXMLbool1Class::Append (bool val)
   Value(n) = val;
   return(true);
 }
-bool VarXMLdouble2Class::Append (Array<double,1> &val)
+bool VarXMLdouble2Class::Append (blitz::Array<double,1> &val)
 {
   int n = Value.extent(0);  int m = Value.extent(1);
   assert(val.extent(0) == m);
   Value.resizeAndPreserve(n+1,m);
-  Value(n,Range::all()) = val;
+  Value(n,blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLdouble3Class::Append (Array<double,2> &val)
+bool VarXMLdouble3Class::Append (blitz::Array<double,2> &val)
 {
   int n=Value.extent(0); int m=Value.extent(1); int o=Value.extent(2);
   assert(val.extent(0) == m);
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
-  Value(n,Range::all(),Range::all()) = val;
+  Value(n,blitz::Range::all(),blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLdouble4Class::Append (Array<double,3> &val)
+bool VarXMLdouble4Class::Append (blitz::Array<double,3> &val)
 {
   int n=Value.extent(0); int m=Value.extent(1); 
   int o=Value.extent(2); int p=Value.extent(3);
@@ -1135,27 +1135,27 @@ bool VarXMLdouble4Class::Append (Array<double,3> &val)
   assert(val.extent(1) == o);
   assert(val.extent(2) == p);
   Value.resizeAndPreserve(n+1,m,o,p);
-  Value(n,Range::all(),Range::all(),Range::all()) = val;
+  Value(n,blitz::Range::all(),blitz::Range::all(),blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLint2Class::Append (Array<int,1> &val)
+bool VarXMLint2Class::Append (blitz::Array<int,1> &val)
 {
   int n = Value.extent(0);  int m = Value.extent(1);
   assert(val.extent(0) == m);
   Value.resizeAndPreserve(n+1,m);
-  Value(n,Range::all()) = val;
+  Value(n,blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLint3Class::Append (Array<int,2> &val)
+bool VarXMLint3Class::Append (blitz::Array<int,2> &val)
 {
   int n=Value.extent(0); int m=Value.extent(1); int o=Value.extent(2);
   assert(val.extent(0) == m);
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
-  Value(n,Range::all(),Range::all()) = val;
+  Value(n,blitz::Range::all(),blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLint4Class::Append (Array<int,3> &val)
+bool VarXMLint4Class::Append (blitz::Array<int,3> &val)
 {
   int n=Value.extent(0); int m=Value.extent(1); 
   int o=Value.extent(2); int p=Value.extent(3);
@@ -1163,27 +1163,27 @@ bool VarXMLint4Class::Append (Array<int,3> &val)
   assert(val.extent(1) == o);
   assert(val.extent(2) == p);
   Value.resizeAndPreserve(n+1,m,o,p);
-  Value(n,Range::all(),Range::all(),Range::all()) = val;
+  Value(n,blitz::Range::all(),blitz::Range::all(),blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLstring2Class::Append (Array<string,1> &val)
+bool VarXMLstring2Class::Append (blitz::Array<string,1> &val)
 {
   int n = Value.extent(0);  int m = Value.extent(1);
   assert(val.extent(0) == m);
   Value.resizeAndPreserve(n+1,m);
-  Value(n,Range::all()) = val;
+  Value(n,blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLstring3Class::Append (Array<string,2> &val)
+bool VarXMLstring3Class::Append (blitz::Array<string,2> &val)
 {
   int n=Value.extent(0); int m=Value.extent(1); int o=Value.extent(2);
   assert(val.extent(0) == m);
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
-  Value(n,Range::all(),Range::all()) = val;
+  Value(n,blitz::Range::all(),blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLstring4Class::Append (Array<string,3> &val)
+bool VarXMLstring4Class::Append (blitz::Array<string,3> &val)
 {
   int n=Value.extent(0); int m=Value.extent(1); 
   int o=Value.extent(2); int p=Value.extent(3);
@@ -1191,27 +1191,27 @@ bool VarXMLstring4Class::Append (Array<string,3> &val)
   assert(val.extent(1) == o);
   assert(val.extent(1) == p);
   Value.resizeAndPreserve(n+1,m,o,p);
-  Value(n,Range::all(),Range::all(),Range::all()) = val;
+  Value(n,blitz::Range::all(),blitz::Range::all(),blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLbool2Class::Append (Array<bool,1> &val)
+bool VarXMLbool2Class::Append (blitz::Array<bool,1> &val)
 {
   int n = Value.extent(0);  int m = Value.extent(1);
   assert(val.extent(0) == m);
   Value.resizeAndPreserve(n+1,m);
-  Value(n,Range::all()) = val;
+  Value(n,blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLbool3Class::Append (Array<bool,2> &val)
+bool VarXMLbool3Class::Append (blitz::Array<bool,2> &val)
 {
   int n=Value.extent(0); int m=Value.extent(1); int o=Value.extent(2);
   assert(val.extent(0) == m);
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
-  Value(n,Range::all(),Range::all()) = val;
+  Value(n,blitz::Range::all(),blitz::Range::all()) = val;
   return(true);
 }
-bool VarXMLbool4Class::Append (Array<bool,3> &val)
+bool VarXMLbool4Class::Append (blitz::Array<bool,3> &val)
 {
   int n=Value.extent(0); int m=Value.extent(1); 
   int o=Value.extent(2); int p=Value.extent(3);
@@ -1219,7 +1219,7 @@ bool VarXMLbool4Class::Append (Array<bool,3> &val)
   assert(val.extent(1) == o);
   assert(val.extent(2) == p);
   Value.resizeAndPreserve(n+1,m,o,p);
-  Value(n,Range::all(),Range::all(),Range::all()) = val;
+  Value(n,blitz::Range::all(),blitz::Range::all(),blitz::Range::all()) = val;
   return(true);
 }
 
@@ -1233,7 +1233,7 @@ void VarXMLbool0Class::Print (ofstream &outFile)
 { outFile << "bool " << Name <<" = "<< (Value ? "true;\n" : "false;\n"); }
 void VarXMLdouble1Class::Print (ofstream &outFile)
 { 
-  outFile << "Array<double,1> " << Name 
+  outFile << "blitz::Array<double,1> " << Name 
 	  << "(" << Value.extent(0) << ") = [";
   for (int i=0; i<(Value.extent(0)-1); i++)
     outFile << Value(i) << ", ";
@@ -1241,7 +1241,7 @@ void VarXMLdouble1Class::Print (ofstream &outFile)
 }
 void VarXMLdouble2Class::Print (ofstream &outFile)
 {
-  outFile << "Array<double,2> " << Name
+  outFile << "blitz::Array<double,2> " << Name
 	  << "(" << Value.extent(0) << "," 
 	  << Value.extent(1) << ") = [";
   for (int i=0; i<(Value.extent(0)); i++)
@@ -1252,7 +1252,7 @@ void VarXMLdouble2Class::Print (ofstream &outFile)
 }
 void VarXMLdouble3Class::Print (ofstream &outFile)
 {
-  outFile << "Array<double,3> " << Name
+  outFile << "blitz::Array<double,3> " << Name
 	  << "(" << Value.extent(0) << "," 
 	  << Value.extent(1) << "," << Value.extent(2) << ") = [";
   for (int i=0; i<(Value.extent(0)); i++)
@@ -1266,7 +1266,7 @@ void VarXMLdouble3Class::Print (ofstream &outFile)
 }
 void VarXMLdouble4Class::Print (ofstream &outFile)
 {
-  outFile << "Array<double,4> " << Name
+  outFile << "blitz::Array<double,4> " << Name
 	  << "(" << Value.extent(0) << "," 
 	  << Value.extent(1) << "," 
 	  << Value.extent(2) << ","
@@ -1284,7 +1284,7 @@ void VarXMLdouble4Class::Print (ofstream &outFile)
 }
 void VarXMLint1Class::Print (ofstream &outFile)
 {
-  outFile << "Array<int,1> " << Name 
+  outFile << "blitz::Array<int,1> " << Name 
 	  << "(" << Value.extent(0) << ") = [";
   for (int i=0; i<(Value.extent(0)-1); i++)
     outFile << Value(i) << ", ";
@@ -1292,7 +1292,7 @@ void VarXMLint1Class::Print (ofstream &outFile)
 }
 void VarXMLint2Class::Print (ofstream &outFile)
 {
-  outFile << "Array<int,2> " << Name 
+  outFile << "blitz::Array<int,2> " << Name 
 	  << "(" << Value.extent(0) << "," 
 	  << Value.extent(1) << ") = [";
   for (int i=0; i<(Value.extent(0)); i++)
@@ -1303,7 +1303,7 @@ void VarXMLint2Class::Print (ofstream &outFile)
 }
 void VarXMLint3Class::Print (ofstream &outFile)
 {
-  outFile << "Array<int,3> " << Name
+  outFile << "blitz::Array<int,3> " << Name
 	  << "(" << Value.extent(0) << "," 
 	  << Value.extent(1) << "," << Value.extent(2) << ") = [";
   for (int i=0; i<(Value.extent(0)); i++)
@@ -1317,7 +1317,7 @@ void VarXMLint3Class::Print (ofstream &outFile)
 }
 void VarXMLint4Class::Print (ofstream &outFile)
 {
-  outFile << "Array<int,4> " << Name
+  outFile << "blitz::Array<int,4> " << Name
 	  << "(" 
 	  << Value.extent(0) << "," 
 	  << Value.extent(1) << "," 
@@ -1336,7 +1336,7 @@ void VarXMLint4Class::Print (ofstream &outFile)
 }
 void VarXMLstring1Class::Print (ofstream &outFile)
 {
-  outFile << "Array<string,1> " << Name 
+  outFile << "blitz::Array<string,1> " << Name 
 	  << "(" << Value.extent(0) << ") = [";
   for (int i=0; i<(Value.extent(0)-1); i++)
     outFile << "\"" << Value(i) << "\"" << ", ";
@@ -1344,7 +1344,7 @@ void VarXMLstring1Class::Print (ofstream &outFile)
 }
 void VarXMLstring2Class::Print (ofstream &outFile)
 {
-  outFile << "Array<string,2> " << Name 
+  outFile << "blitz::Array<string,2> " << Name 
 	  << "(" << Value.extent(0) << "," 
 	  << Value.extent(1) << ") = [";
   for (int i=0; i<(Value.extent(0)); i++)
@@ -1355,7 +1355,7 @@ void VarXMLstring2Class::Print (ofstream &outFile)
 }
 void VarXMLstring3Class::Print (ofstream &outFile)
 {
-  outFile << "Array<string,3> " << Name
+  outFile << "blitz::Array<string,3> " << Name
 	  << "(" << Value.extent(0) << "," 
 	  << Value.extent(1) << "," << Value.extent(2) << ") = [";
   for (int i=0; i<(Value.extent(0)); i++)
@@ -1370,7 +1370,7 @@ void VarXMLstring3Class::Print (ofstream &outFile)
 }
 void VarXMLstring4Class::Print (ofstream &outFile)
 {
-  outFile << "Array<string,4> " << Name
+  outFile << "blitz::Array<string,4> " << Name
 	  << "(" 
 	  << Value.extent(0) << "," 
 	  << Value.extent(1) << "," 
@@ -1390,7 +1390,7 @@ void VarXMLstring4Class::Print (ofstream &outFile)
 
 void VarXMLbool1Class::Print (ofstream &outFile)
 {
-  outFile << "Array<bool,1> " << Name 
+  outFile << "blitz::Array<bool,1> " << Name 
 	  << "(" << Value.extent(0) << ") = [";
   for (int i=0; i<(Value.extent(0)-1); i++)
     outFile << (Value(i) ? "true" : "false") << ", ";
@@ -1398,7 +1398,7 @@ void VarXMLbool1Class::Print (ofstream &outFile)
 }
 void VarXMLbool2Class::Print (ofstream &outFile)
 {
-  outFile << "Array<bool,2> " << Name 
+  outFile << "blitz::Array<bool,2> " << Name 
 	  << "(" << Value.extent(0) << "," 
 	  << Value.extent(1) << ") = [";
   for (int i=0; i<(Value.extent(0)); i++)
@@ -1410,7 +1410,7 @@ void VarXMLbool2Class::Print (ofstream &outFile)
 }
 void VarXMLbool3Class::Print (ofstream &outFile)
 {
-  outFile << "Array<bool,3> " << Name
+  outFile << "blitz::Array<bool,3> " << Name
 	  << "(" << Value.extent(0) << "," 
 	  << Value.extent(1) << "," << Value.extent(2) << ") = [";
   for (int i=0; i<(Value.extent(0)); i++)
@@ -1424,7 +1424,7 @@ void VarXMLbool3Class::Print (ofstream &outFile)
 }
 void VarXMLbool4Class::Print (ofstream &outFile)
 {
-  outFile << "Array<bool,4> " << Name
+  outFile << "blitz::Array<bool,4> " << Name
 	  << "(" 
 	  << Value.extent(0) << "," 
 	  << Value.extent(1) << "," 
@@ -1457,7 +1457,7 @@ void IOTreeXMLClass::WriteVar(string name, double val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<double,1> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<double,1> &val)
 {
   VarXMLdouble1Class *newVar = new VarXMLdouble1Class;
   newVar->Name=name;
@@ -1466,7 +1466,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<double,1> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<double,2> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<double,2> &val)
 {
   VarXMLdouble2Class *newVar = new VarXMLdouble2Class;
   newVar->Name=name;
@@ -1475,7 +1475,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<double,2> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<double,3> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<double,3> &val)
 {
   VarXMLdouble3Class *newVar = new VarXMLdouble3Class;
   newVar->Name=name;
@@ -1484,7 +1484,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<double,3> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<double,4> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<double,4> &val)
 {
   VarXMLdouble4Class *newVar = new VarXMLdouble4Class;
   newVar->Name=name;
@@ -1503,7 +1503,7 @@ void IOTreeXMLClass::WriteVar(string name, int val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<int,1> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<int,1> &val)
 {
   VarXMLint1Class *newVar = new VarXMLint1Class;
   newVar->Name=name;
@@ -1512,7 +1512,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<int,1> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<int,2> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<int,2> &val)
 {
   VarXMLint2Class *newVar = new VarXMLint2Class;
   newVar->Name=name;
@@ -1521,7 +1521,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<int,2> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<int,3> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<int,3> &val)
 {
   VarXMLint3Class *newVar = new VarXMLint3Class;
   newVar->Name=name;
@@ -1530,7 +1530,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<int,3> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<int,4> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<int,4> &val)
 {
   VarXMLint4Class *newVar = new VarXMLint4Class;
   newVar->Name=name;
@@ -1549,7 +1549,7 @@ void IOTreeXMLClass::WriteVar(string name, string val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<string,1> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<string,1> &val)
 {
   VarXMLstring1Class *newVar = new VarXMLstring1Class;
   newVar->Name=name;
@@ -1558,7 +1558,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<string,1> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<string,2> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<string,2> &val)
 {
   VarXMLstring2Class *newVar = new VarXMLstring2Class;
   newVar->Name=name;
@@ -1567,7 +1567,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<string,2> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<string,3> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<string,3> &val)
 {
   VarXMLstring3Class *newVar = new VarXMLstring3Class;
   newVar->Name=name;
@@ -1576,7 +1576,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<string,3> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<string,4> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<string,4> &val)
 {
   VarXMLstring4Class *newVar = new VarXMLstring4Class;
   newVar->Name=name;
@@ -1595,7 +1595,7 @@ void IOTreeXMLClass::WriteVar(string name, bool val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<bool,1> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<bool,1> &val)
 {
   VarXMLbool1Class *newVar = new VarXMLbool1Class;
   newVar->Name=name;
@@ -1604,7 +1604,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<bool,1> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<bool,2> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<bool,2> &val)
 {
   VarXMLbool2Class *newVar = new VarXMLbool2Class;
   newVar->Name=name;
@@ -1613,7 +1613,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<bool,2> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<bool,3> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<bool,3> &val)
 {
   VarXMLbool3Class *newVar = new VarXMLbool3Class;
   newVar->Name=name;
@@ -1622,7 +1622,7 @@ void IOTreeXMLClass::WriteVar(string name, Array<bool,3> &val)
   VarList.push_back(newVar);
   MarkModified();
 }
-void IOTreeXMLClass::WriteVar(string name, Array<bool,4> &val)
+void IOTreeXMLClass::WriteVar(string name, blitz::Array<bool,4> &val)
 {
   VarXMLbool4Class *newVar = new VarXMLbool4Class;
   newVar->Name=name;
