@@ -4,7 +4,7 @@ C     JUN., 1983, P. 258-259.
       SUBROUTINE QUINAT(N, X, Y, B, C, D, E, F)                         QUI   10
 C
       INTEGER N
-      REAL X(N), Y(N), B(N), C(N), D(N), E(N), F(N)
+      REAL*8 X(N), Y(N), B(N), C(N), D(N), E(N), F(N)
 C
 C
 C
@@ -70,7 +70,7 @@ C       E(J) = S""(X(J)-0)/24    E(J+1) = 0  E(J+2) = S""(X(J)+0)/24
 C       F(J) = S""'(X(J)-0)/120  F(J+1) = 0  F(J+2) = S""'(X(J)+0)/120
 C
       INTEGER I, M
-      REAL B1, P, PQ, PQQR, PR, P2, P3, Q, QR, Q2, Q3, R, R2, S, T, U, V
+      REAL*8 B1, P, PQ, PQQR, PR, P2, P3, Q, QR, Q2, Q3, R, R2, S,T,U,V
 C
       IF (N.LE.2) GO TO 190
 C
@@ -234,7 +234,7 @@ C                                                                       QUI   20
       SUBROUTINE QUINEQ(N, Y, B, C, D, E, F)                            QUI   30
 C
       INTEGER N
-      REAL Y(N), B(N), C(N), D(N), E(N), F(N)
+      REAL*8 Y(N), B(N), C(N), D(N), E(N), F(N)
 C
 C
 C
@@ -269,7 +269,7 @@ C                NOT WANTED, THE CALL QUINEQ(N,Y,B,C,D,D,D) MAY
 C                BE USED TO SAVE STORAGE LOCATIONS.
 C
       INTEGER I, M
-      REAL P, Q, R, S, T, U, V
+      REAL*8 P, Q, R, S, T, U, V
 C
       IF (N.LE.2) GO TO 50
 C
@@ -338,7 +338,7 @@ C                                                                       QUI   40
       SUBROUTINE QUINDF(N, X, Y, B, C, D, E, F)                         QUI   50
 C
       INTEGER N
-      REAL X(N), Y(N), B(N), C(N), D(N), E(N), F(N)
+      REAL*8 X(N), Y(N), B(N), C(N), D(N), E(N), F(N)
 C
 C
 C
@@ -367,7 +367,7 @@ C         (1:N)  E(N) AND F(N) ARE NEITHER USED NOR ALTERED.
 C                THE ARRAYS C,D,E,F MUST ALWAYS BE DISTINCT.
 C
       INTEGER I, M, N1
-      REAL CC, G, H, HH, H2, P, PP, Q, QQ, R, RR
+      REAL*8 CC, G, H, HH, H2, P, PP, Q, QQ, R, RR
 C
       IF (N.LE.1) GO TO 40
       N1 = N - 1
@@ -424,8 +424,8 @@ C    DRIVER PROGRAM FOR TEST OF QUINAT, QUINEQ AND QUINDF               MAN   10
 C       FOLLOWS.                                                        MAN   20
 C                                                                       MAN   30
       INTEGER N,NM1,M,MM,MM1,I,K,J,JJ                                   MAN   40
-      REAL Z                                                            MAN   50
-      REAL X(200),Y(200),B(200),BB(200),CC(200),DD(200),EE(200),        MAN   60
+      REAL*8 Z                                                          MAN   50
+      REAL*8 X(200),Y(200),B(200),BB(200),CC(200),DD(200),EE(200),      MAN   60
      *                 FF(200),A(200,6),C(6),DIFF(5),COM(5)             MAN   70
 C                                                                       MAN   80
 C     N          NUMBER OF DATA POINTS.                                 MAN   90
@@ -434,7 +434,7 @@ C                   M = 3 ALWAYS FOR QUINTIC SPLINE.                    MAN  110
 C     NN,NM1,MM,                                                        MAN  120
 C     MM1,I,K,                                                          MAN  130
 C     J,JJ       TEMPORARY INTEGER VARIABLES.                           MAN  140
-C     Z,P        TEMPORARY REAL VARIABLES.                              MAN  150
+C     Z,P        TEMPORARY REAL*8 VARIABLES.                            MAN  150
 C     X(1:N)     THE SEQUENCE OF KNOTS.                                 MAN  160
 C     Y(1:N)     THE PRESCRIBED FUNCTION VALUES AT THE KNOTS.           MAN  170
 C     B(1:N)     THE PRESCRIBED DERIVATIVE VALUES AT THE KNOTS.         MAN  180
