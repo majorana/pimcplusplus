@@ -23,6 +23,7 @@ private:
   TinyVector<LinearGrid,NDIM> ActionGrids;
   void SetupFreeActions();
   double ActionImageSum (double L, double lambdaTau, double disp);
+  double ActionkSum (double L, double lambdaTau, double disp);
 
   Array<double,2> DetMatrix, Cofactors;
   Array<dVec,1> GradVec;

@@ -21,6 +21,23 @@ FreeNodalActionClass::ActionImageSum (double L, double lambdaBeta,
   return (-log(sum));
 }
 
+double 
+FreeNodalActionClass::ActionkSum (double L, double lambdaBeta, 
+				  double disp)
+{
+  double kmax = sqrt (50.0/lambdaBeta);
+  double kInc = 2.0*M_PI/L;
+
+  if (lambdaBeta == 0.0)
+    return (0.0);
+
+  double sum = 0.5;
+  for (double k=kInc; k<=kmax; k+=kInc)
+    sum += cos(k*disp)*exp(-lambdaBeta*k*k);
+  return (-log(sum));
+}
+
+
 void FreeNodalActionClass::SetupFreeActions()
 {
   const int nPoints = 1000;
@@ -28,21 +45,24 @@ void FreeNodalActionClass::SetupFreeActions()
   for (int i=0; i<NDIM; i++)
     ActionGrids[i].Init (-0.5*Path.GetBox()[i], 0.5*Path.GetBox()[i], nPoints);
 
-  /// DEBUG
-  FILE *fout = fopen ("FreeActions.dat", "w");
-
   Array<double,1> actionData(nPoints);
-  // Now, setup up actions
   int nSplines = Path.TotalNumSlices/2 + (Path.TotalNumSlices%2)+1;
-  ActionSplines.resize(nSplines);
   double lambdaTau = Path.tau * Path.Species(SpeciesNum).lambda;
+
+
+  /// DEBUG
+  FILE *fout;
+  fout = fopen ("FreeImageActions.dat", "w");
+  // Now, setup up actions
+  ActionSplines.resize(nSplines);
   for (int spline=0; spline<nSplines; spline++) {
     double lambdaBeta = lambdaTau * (double)spline;
     for (int dim=0; dim<NDIM; dim++) {
       double L = Path.GetBox()[dim];
       for (int i=0; i<nPoints; i++) {
 	double disp = ActionGrids[dim](i);
-	actionData(i) = ActionImageSum (L, lambdaBeta, disp);
+	actionData(i) = ActionImageSum (L, lambdaBeta, disp) -
+	  ActionImageSum(L, lambdaBeta, 0.0);
 	fprintf (fout, "%1.12e ", actionData(i));
       }
       fprintf (fout, "\n");
@@ -53,6 +73,29 @@ void FreeNodalActionClass::SetupFreeActions()
     }
   }
   fclose (fout);
+
+//   fout = fopen ("FreekActions.dat", "w");
+//   // Now, setup up actions
+//   ActionSplines.resize(nSplines);
+//   for (int spline=0; spline<nSplines; spline++) {
+//     double lambdaBeta = lambdaTau * (double)spline;
+//     for (int dim=0; dim<NDIM; dim++) {
+//       double L = Path.GetBox()[dim];
+//       for (int i=0; i<nPoints; i++) {
+// 	double disp = ActionGrids[dim](i);
+// 	actionData(i) = ActionkSum (L, lambdaBeta, disp) -
+// 	  ActionkSum (L, lambdaBeta, 0.0);
+// 	fprintf (fout, "%1.12e ", actionData(i));
+//       }
+//       fprintf (fout, "\n");
+//       // Since the action is periodic, the slope should be zero
+//       // at the boundaries
+//       ActionSplines(spline)[dim].Init (&ActionGrids[dim], actionData,
+// 				       0.0, 0.0);
+//     }
+//   }
+//   fclose (fout);
+
 }
 
 
