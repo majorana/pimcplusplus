@@ -34,6 +34,7 @@ Section (Moves)
 {
   Section (Move){
     string type="Bisection";
+    string name="Electron Bisection Move"
     Array<string,1> ActiveSpecies=["electron"];   
     int NumParticlesToMove=1;
     int NumLevels=3;
@@ -58,5 +59,34 @@ Section (Action)
       string dmfile="../inputs/ep_beta1.0.dm";    
   }
       
+
+}
+
+Section (PIMC)
+{
+  Section (Loop){
+    int n=1000;
+    Section (Loop)
+      {
+	int n = 50;
+	Section (Move){ string name="eBisect";}
+	Section (Move){ string name="pBisect";}
+	Section (WriteBlock) {string name = "PairCorrelation"};
+	Section (WriteBlock) (string name = "Energies");
+      }     
+    }
+    Section (Move){
+      name="Displace Move";
+    }
+    Section (Observable){
+      name="Pair Correlation";
+    }
+  }
+
+
+
+  }
+
+
 
 }

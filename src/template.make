@@ -42,8 +42,6 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
 
-TestSubarrayObjs = TestSubarrays.o
-
 Test: 	Common_obj $(TestObjs)
 	pushd ..; make; pushd
 	$(LD) -o $@ $(TestObjs) $(LIBS)
@@ -58,12 +56,15 @@ Common_obj:
 Common_clean:
 	cd Common; ${MAKE} clean
 
-TestHDF5:	TestHDF5.o InputOutput.o InputOutputHDF5.o
-	$(LD) -o $@ TestHDF5.o InputOutput.o InputOutputHDF5.o $(LIBS)
+TestHDF5:	TestHDF5.o Common/IO/InputOutput.o Common/IO/InputOutputHDF5.o
+	$(LD) -o $@ TestHDF5.o Common/IO/InputOutput.o Common/IO/InputOutputHDF5.o $(LIBS)
 
-TestSubarrays: 	$(TestSubarrayObjs)
-	pushd ..; make; pushd
-	$(LD) -o $@ $(TestSubarrayObjs) $(LIBS)
+TestASCII:	TestASCII.o Common/IO/InputOutput.o Common/IO/InputOutputASCII.o
+	$(LD) -o $@ TestASCII.o Common/IO/InputOutput.o Common/IO/InputOutputASCII.o $(LIBS)
+
+#TestSubarrays: 	$(TestSubarrayObjs)
+#	pushd ..; make; pushd
+#	$(LD) -o $@ $(TestSubarrayObjs) $(LIBS)
 
 clean:	Common_clean
 	rm *.o
@@ -74,8 +75,7 @@ clean:	Common_clean
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc TestHDF5.cc
-
+SOURCES = ObservableClass.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc TestHDF5.cc TestASCII.cc
 
 newmake: Common_newmake
 	make -f template.make Makefile FRC=force_rebuild

@@ -175,11 +175,6 @@ int main(int argc, char **argv)
 
   
 
-  ///  PairCorrelation PC(myPathData);
-  //  PC.PathData = &myPathData;
-  ////  PC.Species1 = 0;
-  ////  PC.Species2 = 1;
-  ///  PC.Initialize();
 
   
 
@@ -193,14 +188,28 @@ int main(int argc, char **argv)
   cerr<<"I'm right before the action\n";
   inSection.OpenSection("Action");
   myPathData.Action.Read(inSection);
-  inSection.CloseSection(); //"Action"
+  myPathData.CloseSection(); //"Action"
+ 
+  //Observable setup Hack!
+  PairCorrelation PC(myPathData);
+  PC.PathData = &myPathData;
+  PC.Species1 = 0;
+  PC.Species2 = 1;
+  PC.Initialize();
+  //Observable Setup Done
 
-  //  ///Here we are setting up distance table
-  //  DistanceTablePBCClass *myDistTable=
-  //    new DistanceTablePBCClass(myPathData.Path);
-  //  myPathData.DistanceTable=myDistTable;
-  //  myPathData.Action.DistanceTable=myDistTable;
-  //  myPathData.DistanceTable->UpdateAll();
+  //Move Setup Hack
+  BisectionMoveClass myBisectionMove(myPathData);
+  ShiftMoveClass myShiftMove(myPathData);
+  setupMove(myBisectionMove,myShiftMove,myPathData);
+  //Move Setup Done
+  
+  ///Here we are setting up distance table
+  DistanceTablePBCClass *myDistTable=
+    new DistanceTablePBCClass(myPathData.Path);
+  myPathData.DistanceTable=myDistTable;
+  myPathData.Action.DistanceTable=myDistTable;
+  myPathData.DistanceTable->UpdateAll();
   ///Done setting up distance table
 
 #ifdef PARALLEL
