@@ -333,6 +333,7 @@ inline bool IOSectionClass::NewSection (string name, string fileName)
 
 inline void IOSectionClass::CloseSection ()
 {
+  //cerr << "Closing Section " << CurrentSection->Name << endl;
   assert (CurrentSection->Parent != NULL);
   CurrentSection = CurrentSection->Parent;
 }

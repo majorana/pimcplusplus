@@ -1106,7 +1106,7 @@ bool IOTreeHDF5Class::OpenFile(string fileName,
 
   IsOpen = true;
   Parent = parent;
-  ReadGroup (GroupID, "/", NULL);
+  ReadGroup (GroupID, "/", parent);
   Name = mySectionName;
   FileName=fileName;
   return true;
