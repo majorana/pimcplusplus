@@ -28,7 +28,7 @@ void PAsFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
   outSection.NewSection("qGrid");
   qgrid->Write(outSection);
   outSection.CloseSection();
-  outSection.NewSection("ygrid");
+  outSection.NewSection("yGrid");
   ygrid->Write(outSection);
   outSection.CloseSection();
   outSection.WriteVar("Order", Order);
@@ -258,19 +258,21 @@ double PAsFitClass::U(double q, double z, double s2, int level)
   double qmax = qgrid->End*1.000001;
   double zmax = 1.000001*min (2.0*q, sMax(level));
   double smax = 1.000001*min (2.0*q, sMax(level));
+  double smin = z;
   double s=sqrt(s2);
+  double x;
 
   if ((q<=qmax)&&(z<=zmax)&&(s<=smax)) {
-    if (q == 0) 
+    if (q == 0) {
       Usplines(level)(0.0,0.0,Coefs);
+      x = 0.0;
+    }
     else {
-      double zmax = min(2.0*q, sMax(level));
       double y = z/zmax;
       Usplines(level)(q,y, Coefs);
+      x = (s-smin)/(smax-smin)*2.0 - 1.0;
     }
-    double smin = z;
-    double smax = min (2.0*q, sMax(NumBetas-1));
-    double x = (s-smin)/(smax-smin)*2.0 - 1.0;
+
     LegendrePoly(x, Pn);
     // Now do summation
     double sum=0.0;
@@ -288,26 +290,27 @@ double PAsFitClass::U(double q, double z, double s2, int level)
   }
 }
 
-
 double PAsFitClass::dU(double q, double z, double s2, int level)
 {
   z = fabs(z);
   double qmax = qgrid->End*1.000001;
   double zmax = 1.000001*min (2.0*q, sMax(level));
   double smax = 1.000001*min (2.0*q, sMax(level));
+  double smin = z;
   double s=sqrt(s2);
+  double x;
 
   if ((q<=qmax)&&(z<=zmax)&&(s<=smax)) {
-    if (q == 0) 
+    if (q == 0) {
       dUsplines(level)(0.0,0.0,Coefs);
+      x = 0.0;
+    }
     else {
-      double zmax = min(2.0*q, sMax(level));
       double y = z/zmax;
       dUsplines(level)(q,y, Coefs);
+      x = (s-smin)/(smax-smin)*2.0 - 1.0;
     }
-    double smin = z;
-    double smax = min (2.0*q, sMax(NumBetas-1));
-    double x = (s-smin)/(smax-smin)*2.0 - 1.0;
+
     LegendrePoly(x, Pn);
     // Now do summation
     double sum=0.0;
@@ -316,6 +319,9 @@ double PAsFitClass::dU(double q, double z, double s2, int level)
     return (sum);
   }
   else {
+    double beta = SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
     double r = q+0.5*z;
     double rp = q-0.5*z;
     return (0.5*(Potential->V(r)+Potential->V(rp)));
@@ -324,10 +330,10 @@ double PAsFitClass::dU(double q, double z, double s2, int level)
 
 
 
-
 bool PAsFitClass::Read (IOSectionClass &in,
-				double smallestBeta, int NumBetas)
+			double smallestBeta, int numBetas)
 {
+  NumBetas = numBetas;
   SmallestBeta = smallestBeta;
   // Resize
   Usplines.resize(NumBetas);
