@@ -48,18 +48,21 @@ public:
   
   void Init()
   {
-    cerr<<"Initing"<<endl;
+    int seed = make_sprng_seed();
+    Init (seed);
+  }
+
+  void Init(int seed)
+  {
     int myProc=MyComm.MyProc();
     int numProcs=MyComm.NumProcs();
     int procsPerClone=numProcs/NumClones;
     CloneNumber=myProc/procsPerClone;
     int commID=numProcs+CloneNumber;
-    int seed = make_sprng_seed();
-    cerr<<"Pre local stream"<<endl;
     LocalStream = init_sprng(SPRNG_DEFAULT, myProc,numProcs+NumClones,seed,SPRNG_DEFAULT);
-    cerr<<"Post local stream"<<endl;
     CommonStream = init_sprng(SPRNG_DEFAULT, commID,numProcs+NumClones,seed,SPRNG_DEFAULT);    
   }
+
 
   RandomClass(CommunicatorClass &comm, int numClones=1) : MyComm(comm)
   {
