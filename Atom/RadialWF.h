@@ -112,9 +112,9 @@ inline Vec2 RadialWF::PseudoDerivs (double r, Vec2 &u_and_du)
   double V = pot->V(r);
   double dAdr = pot->dAdr(r);
   
-  derivs[1] = 1.0/A*(-dAdr*u_and_du[1] + 
-		    (dAdr/r + (double)(l*(l+1))*B/(r*r) 
-		     + 2.0*(V-Energy))*u_and_du[0]);
+  derivs[1] =  1.0/A*
+    (-dAdr*u_and_du[1] + (dAdr/r + (double)(l*(l+1))*B/(r*r) 
+			  + 2.0*(V-Energy))*u_and_du[0]);
   return derivs;
 }
 
@@ -124,7 +124,7 @@ inline Vec2 RadialWF::NormalDerivs(double r, Vec2 &u_and_du)
   Vec2 derivs;
   double V = pot->V(r);
   derivs[0] = u_and_du[1];
-  derivs[1] = ((double)(l+(l+1))/(r*r) + 2.0*(V-Energy))*u_and_du[0];
+  derivs[1] = ((double)(l*(l+1))/(r*r) + 2.0*(V-Energy))*u_and_du[0];
   return derivs;
 }
 

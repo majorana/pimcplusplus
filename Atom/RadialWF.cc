@@ -35,55 +35,51 @@ int RadialWF::TurningIndex()
 void 
 RadialWF::OriginBC(double r0, double &u0, double &du0)
 {
-  if (!pot->IsPH())
-    {  // Use relativistic equations
-      const double alpha = 1.0/137.036;
-      double Z = -pot->V(r0)*r0;
-      double a2Z2 = alpha*alpha*(double)Z*(double)Z;
-
-      double sl = (double) l;
-      double gamma = 
-	(sl+1.0)*sqrt((sl+1.0)*(sl+1.0)-a2Z2) /
-	(2.0*sl + 1.0); 
-      if (l!=0)
-	gamma += sl*sqrt(sl*sl-a2Z2)/(2.0*sl+1.0);
-      
-      u0 = pow(r0, gamma);
-      du0 = gamma * pow(r0,gamma-1.0);
-    }
-  else
-    {  // Use pseudoHamiltonian equations
-      if (l == 0)
-	{
-	  double E = Energy;
-	  double A = pot->A(r0);
-	  double B = pot->B(r0);
-	  double V = pot->V(r0);
-	  if (V > Energy)
-	    {
-	      double kappa = sqrt(2.0 * (V-E)/A);
-	      u0 = sinh(kappa * r0);
-	      du0 = kappa * cosh (kappa * r0);
-	    }
-	  else
-	    {
-	      double k = sqrt(2.0 * (E-V)/A);
-	      u0 = sin(k * r0);
-	      du0 = k * cos(k * r0);
-	    }
-	}
-      else {  // l != 0
-	u0 = 1.0;
-	du0 = (double)(l+1)/r0;
+  if (pot->NeedsRel()) {  // Use relativistic equations
+    const double alpha = 1.0/137.036;
+    double Z = -pot->V(r0)*r0;
+    double a2Z2 = alpha*alpha*(double)Z*(double)Z;
+    
+    double sl = (double) l;
+    double gamma = 
+      (sl+1.0)*sqrt((sl+1.0)*(sl+1.0)-a2Z2) /
+      (2.0*sl + 1.0); 
+    if (l!=0)
+      gamma += sl*sqrt(sl*sl-a2Z2)/(2.0*sl+1.0);
+    
+    u0 = pow(r0, gamma);
+    du0 = gamma * pow(r0,gamma-1.0);
+  }
+  else  {  // Use pseudoHamiltonian equations
+    if (l == 0)
+      {
+	double E = Energy;
+	double A = pot->A(r0);
+	double B = pot->B(r0);
+	double V = pot->V(r0);
+	if (V > Energy)
+	  {
+	    double kappa = sqrt(2.0 * (V-E)/A);
+	    u0 = sinh(kappa * r0);
+	    du0 = kappa * cosh (kappa * r0);
+	  }
+	else
+	  {
+	    double k = sqrt(2.0 * (E-V)/A);
+	    u0 = sin(k * r0);
+	    du0 = k * cos(k * r0);
+	  }
       }
-    }  
-  // Flip sign for odd number of nodes
-  if (((n-l-1) % 2) == 1)
-    {
-      u0 *= -1.0;
-      du0 *= -1.0;
+    else {  // l != 0
+      u0 = 1.0;
+      du0 = (double)(l+1)/r0;
     }
-
+  }  
+  // Flip sign for odd number of nodes
+  if (((n-l-1) % 2) == 1)  {
+    u0 *= -1.0;
+    du0 *= -1.0;
+  }
 }
 
 
@@ -127,8 +123,8 @@ double RadialWF::IntegrateInOut (int &tindex)
   Grid &grid = *u.grid;
   // Find classical turning point
   tindex = TurningIndex();
-//   cerr << "TurningIndex = " << tindex << endl;
-//   cerr << "Turning Point = " << (*u.grid)(tindex) << endl;
+  //cerr << "TurningIndex = " << tindex << endl;
+  //cerr << "Turning Point = " << (*u.grid)(tindex) << endl;
   // Compute starting value and derivative at origin
   double r0 = grid(0);
   OriginBC (r0, uduVec(0)[0], uduVec(0)[1]);
@@ -225,8 +221,6 @@ void RadialWF::Solve(double tolerance)
   Grid &grid = *u.grid;
   int TotalNodes = n-l-1;
 
-  //  cerr << "n=" << n << " l=" << l << " TotalNodes=" << TotalNodes <<endl;
-
 //   char fname[100];
 //   snprintf (fname, 100, "WFn%dl%d.h5", n, l);
 //   IOSectionClass out;
@@ -237,7 +231,7 @@ void RadialWF::Solve(double tolerance)
 //   out.WriteVar ("u", tmp);
 //   VarClass *varPtr = out.GetVarPtr("u");
 
-  if (!pot->IsPH()){
+  if (pot->NeedsRel()){
     double N = n;
     double Z = -pot->V(grid(0))*grid(0);
     Elow = -1.5*Z*Z/(N*N);
