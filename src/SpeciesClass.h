@@ -24,6 +24,7 @@ public:
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
   /// classical particle.
   double lambda;
+  double Charge;
   
   /// Returns the nodal action for fermions.  Returns 0 for bosons.
   virtual double NodeAction (int Ptcl, int LinkNum) = 0;

@@ -138,9 +138,10 @@ void PIMCClass::WriteSystemInfo()
 {
   dVec box = PathData.Path.GetBox();
   Array<double,1> boxArray(3);
-  boxArray[0] = box[0];   boxArray[1] = box[1];   boxArray[2] = box[2];
+  boxArray(0) = box[0];   boxArray(1) = box[1];   boxArray(2) = box[2];
   OutFile.WriteVar ("Box", boxArray);
-
+  OutFile.WriteVar("tau",PathData.Action.tau);
+  OutFile.WriteVar("NumTimeSlices",PathData.Path.TotalNumSlices);
   for (int speciesIndex=0; speciesIndex < PathData.Path.NumSpecies(); 
        speciesIndex++) {
     SpeciesClass &species = PathData.Path.Species(speciesIndex);
