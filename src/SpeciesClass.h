@@ -1,25 +1,22 @@
-#ifndef IDENTICAL_PARTICLES_CLASS
-#define IDENTICAL_PARTICLES_CLASS
+#ifndef SPECIES_CLASS
+#define SPECIES_CLASS
 
 #include "PathClass.h"
+#include "PermutationClass.h"
 
-class PermutationClass
-{
-
-
-
-};
-
-
-/*! This is an base class that holds all the information about
-identical particles.  It may be specialized to hold specialized
-information about particular types of particles. */
+/// This is an base class that holds all the information about
+/// identical particles.  It may be specialized to hold specialized
+/// information about particular types of particles.
 class SpeciesClass
 {
 public:
-  int NumParticles;
+  /// Stores the positions and timestamp for all particles and TimeSlices
   PathClass Path;
+  /// Stores the permutation for my set of time-slices
   PermutationClass Permutation;
+  
+  inline int NumParticles()
+  { return Path.NumParticles(); }
 
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
   /// classical particle.
