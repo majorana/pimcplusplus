@@ -83,7 +83,9 @@ Then we may rearrage,
 \end{equation}
 This equation holds for all $0<i<(N-1)$, so we have a tridiagonal set of
 equations.  The equations for $i=0$ and $i=N-1$ depend on the boundary
-conditions we are using.  For periodic boundary conditions, we have
+conditions we are using.  
+\subsection{Periodic boundary conditions}
+For periodic boundary conditions, we have
 \begin{equation}
 \begin{matrix}
 y'_0           & +  & \mu_0 y'_1     &   &                   &            & \dots                   & +  \lambda_0 y'_{N-1} & = & d_0 \\
@@ -101,11 +103,109 @@ Or, in matrix form, we have,
 0         & \lambda_2 &   1    & \mu_2         & \dots         &      0        &     0     \\
 \vdots    & \vdots    & \vdots & \vdots        & \ddots        &   \vdots      &  \vdots   \\
 0         &   0       &   0    & \lambda_{N-3} &      1        & \mu_{N-3}     &    0      \\
-0         &   0       &   0    &   0    & \lambda_{N-2} &      1        & \mu_{N-2} \\
-\mu_{N-1} &   0       &   0    &   0    &   0           & \lambda_{N-1} &  1     
+0         &   0       &   0    &   0           & \lambda_{N-2} &      1        & \mu_{N-2} \\
+\mu_{N-1} &   0       &   0    &   0           &   0           & \lambda_{N-1} &  1     
 \end{MyMatrix}
 \begin{MyMatrix} y'_0 \\ y'_1 \\ y'_2 \\ \vdots \\ y'_{N-3} \\ y'_{N-2} \\ y'_{N-1} \end{MyMatrix} =
 \begin{MyMatrix} d_0  \\  d_1 \\  d_2 \\ \vdots \\  d_{N-3} \\  d_{N-2} \\  d_{N-1} \end{MyMatrix} .
 \end{equation}
+The system is tridiagonal except for the two elements in the upper
+right and lower left corners.  These terms complicate the solution a
+bit, although it can still be done in $\mathcal{O}(N)$ time.  We first
+proceed down the rows, eliminating the the first non-zero term in each
+row by subtracting the appropriate multiple of the previous row.  At
+the same time, we also eliminate the first element in the last row,
+shifting the position of the first non-zero element to the right with
+each iteration.  When we get to the final row, we will have the value
+for $y'_{N-1}$.  We can then procede back upward, backstubstituting
+values from the rows below to calculate all the derivatives.
+
+\subsection{Complete boundary conditions}
+If we specify the first derivatives of our function at the end points,
+we have what is known as {\em complete} boundary conditions.  The
+equations in that case are trivial to solve:
+\begin{equation}
+\begin{MyMatrix}
+1         &  0        &    0   &   0           & \dots         &      0        &     0     \\
+\lambda_1 &  1        & \mu_1  &   0           & \dots         &      0        &     0     \\
+0         & \lambda_2 &   1    & \mu_2         & \dots         &      0        &     0     \\
+\vdots    & \vdots    & \vdots & \vdots        & \ddots        &   \vdots      &  \vdots   \\
+0         &   0       &   0    & \lambda_{N-3} &      1        & \mu_{N-3}     &    0      \\
+0         &   0       &   0    &   0           & \lambda_{N-2} &      1        & \mu_{N-2} \\
+0         &   0       &   0    &   0           &   0           &      0        &  1     
+\end{MyMatrix}
+\begin{MyMatrix} y'_0 \\ y'_1 \\ y'_2 \\ \vdots \\ y'_{N-3} \\ y'_{N-2} \\ y'_{N-1} \end{MyMatrix} =
+\begin{MyMatrix} d_0  \\  d_1 \\  d_2 \\ \vdots \\  d_{N-3} \\  d_{N-2} \\  d_{N-1} \end{MyMatrix} .
+\end{equation}
+This system is completely tridiagonal and we may solve trivially by
+performing row eliminations downward, then proceeding upward as
+before.
+
+\subsection{Natural boundary conditions}
+If we do not have information about the derivatives at the boundary
+conditions, we may construct a {\em natural spline}, which assumes the
+the second derivatives are zero at the end points of our spline.  In
+this case our system of equations is the following:
+\begin{equation}
+\begin{MyMatrix}
+1         & \frac{1}{2} &    0   &   0           & \dots         &      0        &     0     \\
+\lambda_1 &  1          & \mu_1  &   0           & \dots         &      0        &     0     \\
+0         & \lambda_2   &   1    & \mu_2         & \dots         &      0        &     0     \\
+\vdots    & \vdots      & \vdots & \vdots        & \ddots        &   \vdots      &  \vdots   \\
+0         &   0         &   0    & \lambda_{N-3} &      1        & \mu_{N-3}     &    0      \\
+0         &   0         &   0    &   0           & \lambda_{N-2} &      1        & \mu_{N-2} \\
+0         &   0         &   0    &   0           &   0           &  \frac{1}{2}  &  1     
+\end{MyMatrix}
+\begin{MyMatrix} y'_0 \\ y'_1 \\ y'_2 \\ \vdots \\ y'_{N-3} \\ y'_{N-2} \\ y'_{N-1} \end{MyMatrix} =
+\begin{MyMatrix} d_0  \\  d_1 \\  d_2 \\ \vdots \\  d_{N-3} \\  d_{N-2} \\  d_{N-1} \end{MyMatrix} ,
+\end{equation}
+with
+\begin{equation}
+d_0 = \frac{3}{2} \frac{y_1-y_1}{h_0}, \ \ \ \ \ d_{N-1} = \frac{3}{2} \frac{y_{N-1}-y_{N-2}}{h_{N-1}}.
+\end{equation}
+
+\section{Bicubic Splines}
+It is possible to extend the cubic spline interpolation method to
+functions of two variables, i.e. $F(x,y)$.  In this case, we have a
+rectangular mesh of points given by $F_{ij} \equiv F(x_i,y_j)$.  In
+the case of 1D splines, we needed to store the value of the first
+derivative of the function at each point, in addition to the value.
+In the case of {\em bicubic splines}, we need to store four
+quantities for each mesh point:  
+\begin{eqnarray}
+F_{ij}    & \equiv & F(x_i, y_i)            \\
+F^x_{ij}  & \equiv & \partial_x F(x_i, y_i) \\
+F^y_{ij}  & \equiv & \partial_y F(x_i, y_i) \\
+F^{xy}    & \equiv & \partial_x \partial_y F(x_i, y_i)
+\end{eqnarray}
+
+Consider the point $(x,y)$ at which we wish to interpolate $F$.  We
+locate the rectangle which contains this point, such that $x_i <= x <
+x_{i+1}$ and $y_i <= x < y_{i+1}$.  Let 
+\begin{eqnarray}
+h & \equiv & x_{i+1}-x_i \\
+k & \equiv & y_{i+1}-y_i \\
+u & \equiv & \frac{x-x_i}{h} \\
+v & \equiv & \frac{y-y_i}{k}
+\end{eqnarray}
+Then, we calculate the interpolated value as
+\begin{equation}
+F(x,y) = 
+\begin{MyMatrix}
+p_1(u) \\ p_2(u) \\ h q_1(u) \\ h q_2(u) 
+\end{MyMatrix}^T
+\begin{MyMatrix}
+F_{i,j}     & F_{i+1,j}     & F^y_{i,j}      & F^y_{i,j+1}     \\
+F_{i+1,j}   & F_{i+1,j+1}   & F^y_{i+1,j}    & F^y_{i+1,j+1}   \\
+F^x_{i,j}   & F^x_{i,j+1}   & F^{xy}_{i,j}   & F^{xy}_{i,j+1}  \\
+F^x_{i+1,j} & F^x_{i+1,j+1} & F^{xy}_{i+1,j} & F^{xy}_{i+1,j+1} 
+\end{MyMatrix}
+\begin{MyMatrix}
+p_1(v)\\ p_2(v)\\ k q_1(v) \\ k q_2(v)
+\end{MyMatrix}
+\end{equation}
+
+\section{Tricubic Splines}
+
 
 \end{document}
