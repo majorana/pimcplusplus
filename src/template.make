@@ -39,10 +39,7 @@ MAKECC = g++
 
 # Gets the subversion revision number
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
-
-
-
-
+COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
 DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 

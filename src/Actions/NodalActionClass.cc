@@ -374,6 +374,9 @@ double FreeNodalActionClass::NodalDist (int slice)
 
 double FreeNodalActionClass::MaxDist(int slice)
 {
+  if (Det(slice) < 0.0)
+    return (-1.0);
+
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;
   int last = species.LastPtcl;
@@ -384,11 +387,9 @@ double FreeNodalActionClass::MaxDist(int slice)
   for (int ptcl1=first; ptcl1<last; ptcl1++)
     for (int ptcl2=ptcl1+1; ptcl2<=last; ptcl2++) {
       Path.DistDisp (slice, ptcl1, ptcl2, dist, disp);
-      if (dist < minDist)
-	minDist = dist;
+      minDist = (dist < minDist) ? dist : minDist;
     }
-
-  return minDist/M_SQRT2;
+  return minDist*M_SQRT1_2;
 }
 
 
@@ -575,68 +576,76 @@ void FreeNodalActionClass::Read (IOSectionClass &in)
 }
 
 
+/// Return essentiall 0 or infinity
+double FreeNodalActionClass::SimpleAction (int startSlice, int endSlice,
+					   const Array<int,1> &changePtcls,
+					   int level)
+{
+  int skip = 1<<level;
+  int myStart, myEnd;
+  Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
+  int refSlice = Path.GetRefSlice() - myStart;
+
+  double uNode=0.0;
+  for (int slice=startSlice; slice <= endSlice; slice+=skip) {
+    if ((slice != refSlice) && (slice != refSlice+Path.TotalNumSlices))
+      if (Det(slice) < 0.0)
+	uNode += 1.0e50;
+  }
+  return uNode;
+}
+
 
 double FreeNodalActionClass::Action (int startSlice, int endSlice,
 				     const Array<int,1> &changePtcls, 
 				     int level)
 { 
-//   SpeciesClass &species = Path.Species(SpeciesNum);
-//   double lambda = species.lambda;
+  SpeciesClass &species = Path.Species(SpeciesNum);
+  double lambda = species.lambda;
   int skip = 1<<level;
-//   double levelTau = PathData.Action.tau * (double)skip;
+  double levelTau = PathData.Action.tau * (double)skip;
 
   int myStart, myEnd;
   Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
   int refSlice = Path.GetRefSlice() - myStart;
   
-//   double dist1, dist2;
-//   if (startSlice != refSlice) {
-//     dist1 = LineSearchDist (startSlice);
-//     if (dist1 < 0.0) {
-//       return 1.0e100;
-//     }
-//   }
-//   else
-//     dist1 = sqrt(-1.0);
+  double dist1, dist2;
+  if (startSlice != refSlice) {
+    dist1 = MaxDist (startSlice);
+    if (dist1 < 0.0) {
+      return 1.0e100;
+    }
+  }
+  else
+    dist1 = sqrt(-1.0);
   
-//   int totalSlices = Path.TotalNumSlices;
+  int totalSlices = Path.TotalNumSlices;
   double uNode=0.0;
-  //  for (int slice=startSlice; slice < endSlice; slice+=skip) {
-  for (int slice=startSlice; slice <= endSlice; slice+=skip) {
+  for (int slice=startSlice; slice < endSlice; slice+=skip) {
     if ((slice != refSlice) && (slice != refSlice+Path.TotalNumSlices))
       if (Det(slice) < 0.0)
 	uNode += 1.0e50;
-  //   if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
-//       dist2 = sqrt(-1.0);
-//     else {
-//       //      double lineDist = LineSearchDist (slice+skip);
-//       dist2 = LineSearchDist (slice+skip);
-//       //fprintf (stderr, "%1.12e %1.12e\n", lineDist, dist2);
-//       if (dist2 < 0.0) {
-// 	return 1.0e100;
-//       }
-//     }
+    if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
+      dist2 = sqrt(-1.0);
+    else {
+      dist2 = MaxDist(slice+skip);//LineSearchDist (slice+skip);
+      //fprintf (stderr, "%1.12e %1.12e\n", lineDist, dist2);
+      if (dist2 < 0.0) {
+	return 1.0e100;
+      }
+    }
     
-    
-    
-//     int myStartSlice, myEndSlice;
-//     int myProc = PathData.Path.Communicator.MyProc();
-//     Path.SliceRange (myProc, myStartSlice, myEndSlice);
-//     int refSlice = Path.GetRefSlice()-myStartSlice;
-//     int sliceDiff = abs(slice-refSlice);
-//     sliceDiff = min (sliceDiff, Path.TotalNumSlices-sliceDiff);
-
-//     if (!isnan(dist1) && (dist1<0.0))
-//       uNode += 1.0e100;
-//     else if (!isnan(dist2) && (dist2 < 0.0))
-//       uNode += 1.0e100;
-//     else if (isnan (dist1) || (dist1==0.0))
-//       uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
-//     else if (isnan(dist2) || (dist2==0.0))
-//       uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
-//     else 
-//       uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
-//     dist1 = dist2;
+    if (!isnan(dist1) && (dist1<0.0))
+      uNode += 1.0e100;
+    else if (!isnan(dist2) && (dist2 < 0.0))
+      uNode += 1.0e100;
+    else if (isnan (dist1) || (dist1==0.0))
+      uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
+    else if (isnan(dist2) || (dist2==0.0))
+      uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
+    else 
+      uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
+    dist1 = dist2;
   }
   return uNode;
 }
@@ -645,47 +654,46 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
 
 double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
 { 
-//   SpeciesClass &species = Path.Species(SpeciesNum);
-//   double lambda = species.lambda;
-//   int skip = 1<<level;
-//   double levelTau = PathData.Action.tau * (double)skip;
+  SpeciesClass &species = Path.Species(SpeciesNum);
+  double lambda = species.lambda;
+  int skip = 1<<level;
+  double levelTau = PathData.Action.tau * (double)skip;
 
-//   int myStart, myEnd;
-//   Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
-//   int refSlice = Path.GetRefSlice() - myStart;
+  int myStart, myEnd;
+  Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
+  int refSlice = Path.GetRefSlice() - myStart;
   
-//   double dist1, dist2;
-//   if (slice1 != refSlice) {
-//     dist1 = LineSearchDist (slice1);
-//     if (dist1 < 0.0)
-//       return 1.0e100;
-//   }
-//   else
-//     dist1 = sqrt(-1.0);
+  double dist1, dist2;
+  if (slice1 != refSlice) {
+    dist1 = MaxDist (slice1);
+    if (dist1 < 0.0)
+      return 1.0e100;
+  }
+  else
+    dist1 = sqrt(-1.0);
   
-//   int totalSlices = Path.TotalNumSlices;
-//   double uNode=0.0;
-//   for (int slice=slice1; slice < slice2; slice+=skip) {
-//     if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
-//       dist2 = sqrt(-1.0);
-//     else {
-//       dist2 = LineSearchDist (slice+skip);
-//       if (dist2 < 0.0)
-// 	return 1.0e100;
-//     }
+  int totalSlices = Path.TotalNumSlices;
+  double uNode=0.0;
+  for (int slice=slice1; slice < slice2; slice+=skip) {
+    if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
+      dist2 = sqrt(-1.0);
+    else {
+      dist2 = MaxDist (slice+skip);
+      if (dist2 < 0.0)
+	return 1.0e100;
+    }
 
-//     double prod;
-//     if (isnan (dist1) || (dist1==0.0))
-//       prod = dist2*dist2;
-//     else if (isnan(dist2) || (dist2==0.0))
-//       prod = dist1*dist1;
-//     else
-//       prod = dist1*dist2;
+    double prod;
+    if (isnan (dist1) || (dist1==0.0))
+      prod = dist2*dist2;
+    else if (isnan(dist2) || (dist2==0.0))
+      prod = dist1*dist1;
+    else
+      prod = dist1*dist2;
 
-//     uNode += prod/(lambda*levelTau*levelTau)/expm1(prod/(lambda*levelTau));
-//     dist1 = dist2;
-//   }
-//   //  return 0.0;
-//   return uNode/(double)Path.TotalNumSlices;
-  return 0.0;
+    uNode += prod/(lambda*levelTau*levelTau)/expm1(prod/(lambda*levelTau));
+    dist1 = dist2;
+  }
+  //  return 0.0;
+  return uNode/(double)Path.TotalNumSlices;
 }

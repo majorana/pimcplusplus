@@ -146,10 +146,29 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
     set(labels, 'fontsize', 16)
     labels = get(gca(), 'yticklabels')
     set(labels, 'fontsize', 16)
-    savefig(fileBase+".png",dpi=60)
+    savefig(fileBase+".png",dpi=45)
     savefig(fileBase+".ps")
     myImg=Image(fileBase+".png")
-    return myImg
+
+    asciiFileName = fileBase + '.dat'
+    asciiFile = open (asciiFileName, "w")
+    n = len(data)
+    for i in range(0,len(data)):
+         asciiFile.write('%20.16e\n' % data[i])
+    asciiFile.close()
+
+    myTable = Table()
+    myTable.border = 0
+    myTable.body = [[myImg]]
+    fileTable = Table()
+    fileTable.body = [[Href(fileBase+".ps",'Postscript'),Href(asciiFileName,'ASCII data')]]
+    fileTable.width='100%'
+    fileTable.border=0
+    fileTable.column1_align='center'
+    myTable.cell_align='center'
+    myTable.body.append([fileTable])
+    return myTable
+#    return myImg
 
 
 
@@ -192,7 +211,8 @@ def BuildScalarTracePage(data,baseName,varName):
      doc=SimpleDocument()
      #wrong
      picTable = Table()
-     picTable.width = 500*len(data)
+     picTable.width = 350*len(data)
+     picTable.border = 0
      picTable.body = [[]]
      row = []
      for i in range(0,len(data)):
@@ -230,7 +250,7 @@ def ProcessScalarSection(infiles,doc,currNum):
 #               myFrame.scrolling='no'
                myFrame.src=pageName
                myFrame.width="100%"
-               myFrame.height="450"
+               myFrame.height="375"
 #               myImg=ProduceTracePicture(data[0], baseName,'Blocks',varName)
                toAddList.append(myFrame)
 
@@ -416,8 +436,8 @@ infiles.CloseSection() # "Observables"
 #doc.append(myFrame)
 doc.logo=""
 doc.author="Ken and Bryan"
-doc.email="bkclark@uiuc.edu"
-doc.banner=("../analysis/pimcLogo.png")
+doc.email="esler@uiuc.edu and bkclark@uiuc.edu"
+doc.banner=("http://esler.physics.uiuc.edu/pimcLogo.png")
 doc.place_nav_buttons=0
 doc.header()
 
