@@ -56,15 +56,16 @@ integrating this into a Path Integral Monte Carlo simulation.
 
 \section{Reciporical-Space Sums}
 \subsection{Heterologous terms}
-We begin with (\ref{eq:direct}), starting with the heterologous (same
-species) terms.
+We begin with (\ref{eq:direct}), starting with the heterologous terms,
+i.e. the terms involving particles of different species.  The
+short-range terms are trivial, so we neglect them here.
 \begin{equation}
-\text{hetero} = \frac{1}{2} \sum_{\alpha \neq \beta} \sum_{i,j} \sum_\vL
+\text{heterologous} = \frac{1}{2} \sum_{\alpha \neq \beta} \sum_{i,j} \sum_\vL
 v^{\alpha\beta}_l(\vr_i^\alpha - \vr_j^\beta + \vL)
 \end{equation}
 We insert the resolution of unity in real space twice,
 \begin{eqnarray}
-\text{hetero} & = & \frac{1}{2}\sum_{\alpha \neq \beta} \int_\text{cell} d\vr \, d\vr' \, \sum_{i,j}
+\text{heterologous} & = & \frac{1}{2}\sum_{\alpha \neq \beta} \int_\text{cell} d\vr \, d\vr' \, \sum_{i,j}
 \delta(\vr_i^\alpha - \vr) \delta(\vr_j^\beta-\vr') \sum_\vL
 v^{\alpha\beta}_l(|\vr - \vr' + \vL|) \\
 & = & \frac{1}{2\Omega^2}\sum_{\alpha \neq \beta} \int_\text{cell} d\vr \, d\vr' \, \sum_{\vk, \vk', i, j} e^{i\vk\cdot(\vr_i^\alpha
@@ -129,10 +130,64 @@ Summing over $\vk$ and $\vk'$, we have
 \text{hetero} = \frac{1}{2} \sum_{\alpha \neq \beta} \sum_{\vk''}
 \rho_{\vk''}^\alpha \, \rho_{-\vk''}^\beta v_{k''}^{\alpha \beta}.
 \end{equation}
+We can simplify the calculation a bit further by rearranging the
+sums over species,
+\begin{eqnarray}
+\text{hetero} & = & \frac{1}{2} \sum_{\alpha > \beta} \sum_{\vk}
+\left(\rho^\alpha_\vk \rho^\beta_{-\vk} + \rho^\alpha_{-\vk}
+\rho^\beta_\vk\right) v_{k''}^{\alpha\beta} \\
+& = & \sum_{\alpha > \beta} \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
+\rho_{-\vk}^\beta\right)v_k^{\alpha\beta} .
+\end{eqnarray}
+
 
 \subsection{Homologous Terms}
+We now consider the terms involving particles of the same species
+interacting with each other.  The algebra is very similar to that
+above, with the slight difficulty of avoiding the self-interaction term.
+\begin{eqnarray}
+\text{homologous} & = & \sum_\alpha \sum_L \sum_{i<j} v_l^{\alpha
+  \alpha}(|\vr_i^\alpha - \vr_j^\alpha + \vL|) \\
+ & = & \frac{1}{2} \sum_\alpha \sum_L \sum_{i\neq j} v_l^{\alpha
+  \alpha}(|\vr_i^\alpha - \vr_j^\alpha + \vL|) 
+\end{eqnarray}
+\begin{eqnarray}
+\text{homologous} & = & \frac{1}{2} \sum_\alpha \sum_L 
+\left[
+-N^\alpha v_l^{\alpha \alpha}(|\vL|)  + \sum_{i,j} v^{\alpha \alpha}(|\vr_i^\alpha - \vr_j^\alpha + \vL|)
+  \right] \\
+& = & \frac{1}{2} \sum_\alpha \sum_\vk \left(|\rho_k^\alpha|^2 - N
+\right) v_k^{\alpha \alpha}
+\end{eqnarray}
 
 \subsection{Madelung Terms}
+Let us now consider the Madelung term for a single particle of species
+$\alpha$.  This term corresponds to the interaction of a particle with
+all of its periodic images.  
+\begin{eqnarray}
+v_M^{\alpha} & = & \frac{1}{2} \sum_{\vL \neq \mathbf{0}} v^{\alpha
+  \alpha}(|vL|) \\
+& = & \frac{1}{2} \left[ -v_l^{\alpha \alpha}(0) + \sum_\vL v^{\alpha
+  \alpha}(|\vL|) \right] \\
+& = & \frac{1}{2} \left[ -v_l^{\alpha \alpha}(0) + \sum_\vk v^{\alpha
+  \alpha}_\vk \right]  
+\end{eqnarray}
+
+\section{Combining Terms}
+Here, we sum all of the terms we computed in the sections above,
+\begin{eqnarray}
+V & = & \sum_{\alpha > \beta} \left[\sum_{i,j} v_s(|\vr_i^\alpha
+  -\vr_j^\beta|) + \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
+  \rho_{-\vk}^\beta\right)    \right] \nonumber \\
+& + & \sum_\alpha \left[ N^\alpha v_M^\alpha + \sum_{i>j} v_s(|\vr_i^\alpha -
+  \vr_j^\alpha|) + \sum_\vk \left( |\rho_\vk^\alpha|^2 -
+  N\right) v^{\alpha\alpha}_\vk \right] \nonumber \\
+& = & \sum_{\alpha > \beta} \left[\sum_{i,j} v_s(|\vr_i^\alpha
+  -\vr_j^\beta|) + \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
+  \rho_{-\vk}^\beta\right)    \right] \nonumber \\
+& + & \sum_\alpha \left[ -\frac{N^\alpha v_l^{\alpha \alpha}(0)}{2}  + \sum_{i>j} v_s(|\vr_i^\alpha -
+  \vr_j^\alpha|) + \frac{1}{2} \sum_\vk |\rho_\vk^\alpha|^2 v^{\alpha\alpha}_\vk \right] 
+\end{eqnarray}
 
 \section {Computing the Reciporical Potential}
 Now we return to (\ref{eq:vk}).  Without loss of generality, we define
@@ -173,11 +228,12 @@ v_k^{\alpha \beta} = \frac{4\pi}{\Omega}
   \frac{q_1 q_2}{r} \right] \right\}
 \end{equation}
 
-\section{Madelung Constants}
-
 \section{Adapting to PIMC}
-\subsection{Adapting to Pair Actions}
-\subsection{RPA Improvements}
+\subsection{Pair actions}
+\subsection{RPA improvements}
+\section{Breakup Methods}
+\subsection{Gaussian charge screening}
+\subsection{Optimizing the breakup}
 
 
 
