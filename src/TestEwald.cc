@@ -1,7 +1,7 @@
 #include "ActionClass.h"
 #include "PathDataClass.h"
 
-void SetupPath (PathClass &path)
+void SetupPathNaCl (PathClass &path)
 {
   SetMode (NEWMODE);
   path.TotalNumSlices = 10;
@@ -47,6 +47,53 @@ void SetupPath (PathClass &path)
 }
 
 
+void SetupPathZincBlend (PathClass &path)
+{
+  SetMode (NEWMODE);
+  path.TotalNumSlices = 10;
+  TinyVector<bool,3> periodic;
+  periodic = true, true, true;
+  path.SetPeriodic (periodic);
+  dVec box;
+  double L = 2.0/sqrt(0.75);
+  box = L,L,L;
+  path.SetBox(box);
+  
+  path.kCutoff = 35.0;
+  
+  FermionClass *protons=new FermionClass();
+  FermionClass *electrons=new FermionClass();
+  protons->Name = "protons";
+  protons->lambda = 0.0;
+  protons->NumParticles = 4;
+  protons->NumDim = 3;
+
+  electrons->Name = "electrons";
+  electrons->lambda = 0.5;
+  electrons->NumParticles = 4;
+  electrons->NumDim = 3;
+
+  path.AddSpecies (protons);
+  path.AddSpecies (electrons);
+
+  path.Allocate();
+
+  /// Initialize the path positions for NaCl structure.
+  for (int slice=0; slice <= path.TotalNumSlices; slice++) {
+    path(slice, 0) = 0.0*L, 0.0*L, 0.0*L;
+    path(slice, 1) = 0.5*L, 0.5*L, 0.0*L;
+    path(slice, 2) = 0.0*L, 0.5*L, 0.5*L;
+    path(slice, 3) = 0.5*L, 0.0*L, 0.5*L;
+    path(slice, 4) = 0.25*L, 0.25*L, 0.25*L;
+    path(slice, 5) = 0.75*L, 0.75*L, 0.25*L;
+    path(slice, 6) = 0.25*L, 0.75*L, 0.75*L;
+    path(slice, 7) = 0.75*L, 0.25*L, 0.75*L;
+  }
+
+  path.Path.AcceptCopy();
+}
+
+
 void TestRho_k(PathClass &path)
 {
   #include <time.h>
@@ -55,22 +102,22 @@ void TestRho_k(PathClass &path)
 
   SetMode(NEWMODE);
   start = clock();
-  for (int i=0; i<10; i++) 
+  for (int i=0; i<100; i++) 
     for (int slice=0; slice<path.NumTimeSlices(); slice++) 
       for (int species=0; species<path.NumSpecies(); species++)
 	path.CalcRho_ks_Fast(slice,species);
   end = clock();
   deltat = (double)(end-start)/1.0e6;
-  cerr << "Fast speed = " << 1.0e1/deltat << endl;
+  cerr << "Fast speed = " << 1.0e2/deltat << endl;
   SetMode(OLDMODE);
   start = clock();
-  for (int i=0; i<10; i++) 
+  for (int i=0; i<100; i++) 
     for (int slice=0; slice<path.NumTimeSlices(); slice++) 
       for (int species=0; species<path.NumSpecies(); species++)
 	path.CalcRho_ks_Slow(slice,species);
   end = clock();
   deltat = (double)(end-start)/1.0e6;
-  cerr << "Slow speed = " << 1.0e1/deltat << endl;
+  cerr << "Slow speed = " << 1.0e2/deltat << endl;
   for (int slice=0; slice<path.NumTimeSlices(); slice++) 
     for (int species=0; species<path.NumSpecies(); species++)
       for (int ki=0; ki<path.kVecs.size(); ki++) {
@@ -101,7 +148,6 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
     action.PairActionVector(i) = new PAclassicalFitClass;
     assert(PAIO.OpenFile(PAFiles(i)));
     action.PairActionVector(i)=ReadPAFit(PAIO,action.tau,action.MaxLevels);
-    cerr<<"Kvecs size: "<<pathData.Path.kVecs.size()<<endl;
     action.PairActionVector(i)->DoBreakup(pathData.Path.GetBox(),
 					  pathData.Path.kVecs);
     PAIO.CloseFile();
@@ -125,17 +171,33 @@ void MadelungTest(ActionClass &action)
   //  changedParticles=0,1,2,3;
 
   double shortRange=action.calcTotalAction(0,1,changedParticles,0);
-  cerr<<"LongRange, ShortRange, Total: "<<longRange<<", "<<shortRange;
-  cerr<<", "<<longRange+shortRange<<endl;
+  cerr<<"LongRange, ShortRange, Total: "<<longRange/4.0<<", "<<shortRange/4.0;
+  cerr<<", "<<(longRange+shortRange)/4.0<<endl;
 }
 
 main()
 {
-  PathDataClass pathData;
-  SetupPath(pathData.Path);
-  ActionClass action(pathData);
-  SetupAction (action,pathData);
-  TestRho_k(pathData.Path);
-  MadelungTest(action);
+
+  {
+    cerr << "ZincBlend: Ashcroft and Mermin give 1.6381\n";
+    PathDataClass pathData;
+    ActionClass action(pathData);
+    SetupPathZincBlend(pathData.Path);
+    SetupAction (action,pathData);
+    TestRho_k(pathData.Path);
+    MadelungTest(action);
+  }
+  
+  {
+    cerr << "NaCl: Ashcroft and Mermin give 1.7476\n";
+    PathDataClass pathData;
+    ActionClass action(pathData);
+    SetupPathNaCl(pathData.Path);
+    SetupAction (action,pathData);
+    TestRho_k(pathData.Path);
+    MadelungTest(action);
+  }
+
+
 
 }

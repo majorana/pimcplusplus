@@ -113,8 +113,8 @@ void PathClass::Allocate()
   ///until we run out of extra slices.
   ///The last slice on processor i is the first slices on processor i+1
   MyNumSlices=TotalNumSlices/numProcs+1+(myProc<(TotalNumSlices % numProcs));
-  cerr<<"Numprocs is "<<numProcs<<endl;
-  cerr<<"mynumslices: "<<MyNumSlices<<endl;
+//   cerr<<"Numprocs is "<<numProcs<<endl;
+//   cerr<<"mynumslices: "<<MyNumSlices<<endl;
   
   
   int numParticles = 0;
@@ -159,10 +159,9 @@ void PathClass::SetupkVecs()
 
   assert (NDIM == 3);
 
-  cerr << "kBox = " << kBox << endl;
   for (int i=0;i<NDIM;i++){
     MaxkIndex[i]= (int) ceil(1.1*kCutoff/kBox[i]);
-    cerr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
+    // cerr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
   }
 
 

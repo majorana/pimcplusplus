@@ -24,7 +24,7 @@ void ActionClass::Read(IOSectionClass& inSection)
   // Read pair actions files
   IOSectionClass PAIO;
   for (int i=0; i<numPairActions; i++) {
-    cerr << "i = " << i << endl;
+    // cerr << "i = " << i << endl;
     assert(PAIO.OpenFile (PAFiles(i)));
     PairActionVector(i) = ReadPAFit (PAIO, tau, MaxLevels);
     int type1 = Path.SpeciesNum(PairActionVector(i)->Particle1.Name);
@@ -213,7 +213,6 @@ double ActionClass::CalcLRAction(int slice, int level)
     }
     // We can't forget the Madelung term.
     homo -= 0.5 * Path.Species(species).NumParticles * PA.Ulong_0(level);
-    cerr<<"This thing is "<<PA.Ulong_0(level)<<endl;
   }
 
   // Now do the heterologous terms
@@ -232,6 +231,5 @@ double ActionClass::CalcLRAction(int slice, int level)
 	}
       }
     }
-  cerr<<"Homo: "<<homo<<" Hetero: "<<hetero<<endl;
   return (homo+hetero);
 }
