@@ -1,8 +1,8 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include "Blitz.h"
-#include "InputFile.h"
+#include "../Blitz.h"
+#include "../IO/InputFile.h"
 #include "../IO/InputOutput.h"
 
 //Ken's Grid Class
@@ -65,11 +65,10 @@ class Grid
     return (0);
   }
 
-  virtual void Write (OutputSectionClas &out)
+  virtual void Write (OutputSectionClass &out)
   {
     cerr << "Should never get here. Grid::Write()\n";
     exit(1);
-    return (0);
   }
 
 };

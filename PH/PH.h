@@ -1,10 +1,10 @@
 #ifndef PH_H
 #define PH_H
 
-#include "Integrate.h"
-#include "Grid.h"
+#include "../Integration/Integrate.h"
+#include "../Splines/Grid.h"
 #include "Chebyshev.h"
-#include "CubicSpline.h"
+#include "../Splines/CubicSpline.h"
 
 enum PHType {PH_NONE, PH_CHEBYSHEV, PH_CUBIC, PH_CUBICXC, PH_NUCLEAR};
 

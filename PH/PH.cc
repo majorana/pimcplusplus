@@ -1,5 +1,5 @@
 #include "PH.h"
-#include "InputFile.h"
+#include "../IO/InputFile.h"
 
 
 PseudoHamiltonian *ReadPH (InputBuffer &SectionBuf)
