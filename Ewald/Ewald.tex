@@ -174,20 +174,45 @@ v_M^{\alpha} & = & \frac{1}{2} \sum_{\vL \neq \mathbf{0}} v^{\alpha
   \alpha}_\vk \right]  
 \end{eqnarray}
 
+\subsection{Neutralizing Background Terms}
+For systems with a net charge, such as the one-component plasma
+(jellium), we add a uniform background charge which makes the system
+neutral.  When we do this, we must add a term which comes from the
+interaction of the particle with the neutral background.  It is a
+constant term, indendent of the particle positions.  In general, we
+have a compensating background for each species, which largely cancels
+out for neutral systems.
+\begin{equation}
+V_\text{background} = -\frac{1}{2} \sum_\alpha \left(N^\alpha\right)^2 
+v^{\alpha \alpha}_{s\mathbf{0}}
+-\sum_{\alpha > \beta} N_\alpha N_\beta
+v^{\alpha\beta}_{s\mathbf{0}},
+\end{equation}
+where $v^{\alpha \beta}_\mathbf{0}$ is given by
+\begin{eqnarray}
+v^{\alpha \beta}_{s\mathbf{0}} & = & \frac{1}{\Omega} \int_0^{r_c} d^3 r\ 
+v^{\alpha \beta}_s(r) \\
+& = & \frac{4 \pi}{\Omega} \int_0^{r_c} r^2 v_s(r) \ dr \nonumber
+\end{eqnarray}
+
+
 \section{Combining Terms}
 Here, we sum all of the terms we computed in the sections above,
 \begin{eqnarray}
 V & = & \sum_{\alpha > \beta} \left[\sum_{i,j} v_s(|\vr_i^\alpha
   -\vr_j^\beta|) + \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
-  \rho_{-\vk}^\beta\right)v^{\alpha\beta}_k    \right] \nonumber \\
+  \rho_{-\vk}^\beta\right)v^{\alpha\beta}_k  -N^\alpha N^\beta
+  v^{\alpha \beta}_{s\mathbf{0}}  \right] \nonumber \\
 & + & \sum_\alpha \left[ N^\alpha v_M^\alpha + \sum_{i>j} v_s(|\vr_i^\alpha -
-  \vr_j^\alpha|) + \sum_\vk \left( |\rho_\vk^\alpha|^2 -
-  N\right) v^{\alpha\alpha}_\vk \right] \nonumber \\
+  \vr_j^\alpha|) + \frac{1}{2} \sum_\vk \left( |\rho_\vk^\alpha|^2 -
+  N\right) v^{\alpha\alpha}_\vk -\frac{1}{2}\left(N_\alpha\right)^2 v_{s\mathbf{0}}^{\alpha\alpha}\right] \nonumber \\
 & = & \sum_{\alpha > \beta} \left[\sum_{i,j} v_s(|\vr_i^\alpha
   -\vr_j^\beta|) + \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
-  \rho_{-\vk}^\beta\right) v^{\alpha \beta}_k   \right] \nonumber \\
+  \rho_{-\vk}^\beta\right) v^{\alpha \beta}_k   -N^\alpha N^\beta
+  v^{\alpha \beta}_\mathbf{0}  \right] \\
 & + & \sum_\alpha \left[ -\frac{N^\alpha v_l^{\alpha \alpha}(0)}{2}  + \sum_{i>j} v_s(|\vr_i^\alpha -
-  \vr_j^\alpha|) + \frac{1}{2} \sum_\vk |\rho_\vk^\alpha|^2 v^{\alpha\alpha}_\vk \right] 
+  \vr_j^\alpha|) + \frac{1}{2} \sum_\vk |\rho_\vk^\alpha|^2 v^{\alpha\alpha}_\vk - \frac{1}{2}\left(N_\alpha\right)^2
+  v_{s\mathbf{0}}^{\alpha\alpha} \right]  \nonumber
 \end{eqnarray}
 
 \section {Computing the Reciprocal Potential}
