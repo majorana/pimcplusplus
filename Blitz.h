@@ -123,5 +123,44 @@ inline double distSqrd(Vec3 a,Vec3 b)
 }
 
 
+template<class T> class SymmArray
+{
+private:
+  Array<T,1> A;
+  int N;
+  inline int index(int row, int col) const 
+  { return ((row > col) ? ((row*(row+1)>>1)+col) : ((col*(col+1)>>1)+row)); }
+public:
+
+  inline void resize(int n) 
+  {
+    N = (n*(n+1))>>1;
+    A.resize(N);
+  }
+
+  inline int rows() const
+  { return N; }
+  
+  inline T operator()(int i, int j) const
+  { return (A(index(i,j))); }
+
+  inline T& operator()(int i, int j)
+  { return (A(index(i,j))); }
+
+  inline SymmArray<T> (const SymmArray<T> &B)
+  {
+    resize(B.N);
+    A=B.A;
+  }
+  inline SymmArray<T>& operator=(const SymmArray<T>& B)
+  {
+    A=B.A;
+  }
+  inline SymmArray<T>()
+  { N=0; }
+};
+
+
+
 
 #endif
