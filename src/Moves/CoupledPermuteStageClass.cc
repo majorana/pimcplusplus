@@ -17,145 +17,89 @@ void CoupledPermuteStageClass::InitBlock()
 
 void CoupledPermuteStageClass::Read (IOSectionClass &in)
 {
+  double epsilon;
   Array<double,1> gamma;
   assert (in.ReadVar("Gamma", gamma));
   assert (gamma.size()==4);
+  assert(in.ReadVar("epsilon",epsilon));
   for (int i=0; i<4; i++) {
     Table1.Gamma[i] = gamma(i);
     Table2.Gamma[i] = gamma(i);
   }
+  Table1.epsilon=epsilon;
+  Table2.epsilon=epsilon;
 }
+
+void CoupledPermuteStageClass::OnlyOdd()
+{
+  Forw->OnlyOdd=true;
+  Rev->OnlyOdd=true;
+  Forw->OnlyEven=false;
+  Rev->OnlyEven=false;
+}
+
+void CoupledPermuteStageClass::OnlyEven()
+{
+  Forw->OnlyOdd=false;
+  Rev->OnlyOdd=false;
+  Forw->OnlyEven=true;
+  Rev->OnlyEven=true;
+}
+
 
 bool CoupledPermuteStageClass::Attempt (int &slice1, int &slice2, 
 				      Array<int,1> &activeParticles, double &prevActionChange)
 {
 
   if (activeParticles(0)==-1){
-  //   int sendProc;
-//     int recvProc;
-//     int numProcs=PathData.InterComm.NumProcs();
-//     int myProc=PathData.InterComm.MyProc();
-//     sendProc=(myProc+1) % numProcs;
-//     recvProc=((myProc-1) + numProcs) % numProcs;
-    //    Array<int,1> dummy(1);
-    //    dummy(0)=0;
-    //    Array<int,1> dummy2(1);
-    //    dummy2(0)=0;
-    //    PathData.InterComm.SendReceive(sendProc,dummy,recvProc,dummy2);
-
-  
-//   /////   cerr<<"Attempting the coupled permute stage "<<PathData.InterComm.MyProc()<<endl;
     Array<int,1> coupledWeight(1);
     Array<int,1> coupledWeightSend(1);
     coupledWeightSend(0)=PathData.Path.Weight;
-    coupledWeight(0)=0;
-    int sendProc;
-    int recvProc;
-    int numProcs=PathData.InterComm.NumProcs();
     int myProc=PathData.InterComm.MyProc();
-    sendProc=(myProc+1) % numProcs;
-    recvProc=((myProc-1) + numProcs) % numProcs;
-//   Array<int,1> dummy(1);
-//   dummy(0)=0;
-//   Array<int,1> dummy2(1);
-//   dummy2(0)=0;
+    int numProcs=PathData.InterComm.NumProcs();
+    int sendProc=(myProc+1) % numProcs;
+    int recvProc=((myProc-1) + numProcs) % numProcs;
     PathData.InterComm.SendReceive (sendProc, coupledWeightSend,
 				    recvProc, coupledWeight);
-//   PathData.InterComm.SendReceive(sendProc,dummy,recvProc,dummy2);
-//   //  //  cerr<<"I am "<<myProc<<" Send is "<<sendProc<<" Receive is "<<recvProc<<endl;
-//   //  sleep(5);
-//   //  cerr<<"My weight is "<<coupledWeightSend(0)<<" and my friends weight is "<<coupledWeight(0)<<endl;
-  
-    Array<int,1> doEven;
-    Array<int,1> dummy;
-    doEven.resize(1);
-    doEven=0;
-    dummy.resize(1);
-    if (coupledWeightSend(0)*coupledWeight(0)==1){
-// //     //    cerr<<"Currently the same!"<<endl;
-      if (0==myProc){
-	double myRand=PathData.Path.Random.Local();
-	if (myRand>0.5)
-	  doEven=1;
-	else 
-	  doEven=0;
-// //       //      PathData.InterComm.Send(sendProc,doEven);
+    Array<int,1> doEven(1);
+    Array<int,1> dummy(1);
+    double myRand=PathData.Path.Random.Local();
+    if (myRand>0.5)
+      doEven=1;
+    else 
+      doEven=0;
+    if (coupledWeightSend(0)*coupledWeight(0)==1){//Same sign
+      if (myProc==0){
 	PathData.InterComm.SendReceive(sendProc,doEven,recvProc,dummy);
-	if (doEven(0)==1){
-	  Forw->OnlyOdd=false;
-	  Rev->OnlyOdd=false;
-	  Forw->OnlyEven=true;
-	  Rev->OnlyEven=true;
-	}
-	else {
-	  Forw->OnlyOdd=true;
-	  Rev->OnlyOdd=true;
-	  Forw->OnlyEven=false;
-	  Rev->OnlyEven=false;
-	}
+	if (doEven(0)==1)
+	  OnlyOdd();
+	else 
+	  OnlyEven();
       }
-      if (1==myProc){
-// ///      //      PathData.InterComm.Receive(sendProc,doEven);
+      else if (myProc==1){
 	PathData.InterComm.SendReceive(sendProc,dummy,recvProc,doEven);
-	if (doEven(0)==0){
-	  Forw->OnlyOdd=false;
-	  Rev->OnlyOdd=false;
-	  Forw->OnlyEven=true;
-	  Rev->OnlyEven=true;
-	}
-	else {
-	  Forw->OnlyOdd=true;
-	  Rev->OnlyOdd=true;
-	  Forw->OnlyEven=false;
-	  Rev->OnlyEven=false;
-	}
+	if (doEven(0)==1)
+	  OnlyEven();
+	else 
+	  OnlyOdd();
       }
     }
-    else {
-// //     //    cerr<<"Currently different"<<endl;
-      if (0==myProc){
-	double myRand=PathData.Path.Random.Local();
-	if (myRand>0.5)
-	  doEven=1;
-	else 
-	  doEven=0;
-// //       //      PathData.InterComm.Send(sendProc,doEven);
+    else {//different sign
+      if (myProc==0){
 	PathData.InterComm.SendReceive(sendProc,doEven,recvProc,dummy);
-	if (doEven(0)==0){
-	  Forw->OnlyOdd=false;
-	  Rev->OnlyOdd=false;
-	  Forw->OnlyEven=true;
-	  Rev->OnlyEven=true;
-	}
-	else {
-	  Forw->OnlyOdd=true;
-	  Rev->OnlyOdd=true;
-	  Forw->OnlyEven=false;
-	  Rev->OnlyEven=false;
-	}
+	if (doEven(0)==1)
+	  OnlyOdd();
+	else 
+	  OnlyEven();
       }
-      if (1==myProc){
-// //       //      PathData.InterComm.Receive(sendProc,doEven);
+      if (myProc==1){
 	PathData.InterComm.SendReceive(sendProc,dummy,recvProc,doEven);
-	if (doEven(0)==0){
-	  Forw->OnlyOdd=false;
-	  Rev->OnlyOdd=false;
-	  Forw->OnlyEven=true;
-	  Rev->OnlyEven=true;
-	}
-	else {
-	  Forw->OnlyOdd=true;
-	  Rev->OnlyOdd=true;
-	  Forw->OnlyEven=false;
-	  Rev->OnlyEven=false;
-	}
+	if (doEven(0)==1)
+	  OnlyOdd();
+	else 
+	  OnlyEven();
       }
     }
-  
-
-
-
-
     Forw->ConstructCycleTable(SpeciesNum, slice1, slice2);
     int NumPerms = 0;
     // Choose a permutation cycle

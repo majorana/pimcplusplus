@@ -100,6 +100,7 @@ inline void PermuteTableClass::AddEntry(const CycleClass &cycle)
 {
   if (NumEntries >= (TableSize-1)) {
     TableSize *= 2;
+    cerr<<"My new tablesize is "<<TableSize<<endl;
     CycleTable.resizeAndPreserve(TableSize);
   }
 

@@ -4,7 +4,7 @@
 // Fix to include final link between link M and 0
 void WeightClass::Accumulate()
 {
-  cerr<<PathData.InterComm.MyProc()<<": I have been called "<<TimesCalled<<endl;
+  //  cerr<<PathData.InterComm.MyProc()<<": I have been called "<<TimesCalled<<endl;
   TimesCalled++;
   if (TimesCalled % DumpFreq==0)
     WriteBlock();
@@ -13,7 +13,7 @@ void WeightClass::Accumulate()
     return;
   }
   NumSamples++;
-  cerr<<"Accumulating the obseravble"<<endl;
+  //  cerr<<"Accumulating the obseravble"<<endl;
   //  cerr<<"Attempting the coupled permute stage "<<PathData.InterComm.MyProc()<<endl;
   Array<int,1> coupledWeight(1);
   Array<int,1> coupledWeightSend(1);
@@ -27,16 +27,24 @@ void WeightClass::Accumulate()
   PathData.InterComm.SendReceive (sendProc, coupledWeightSend,
 				  recvProc, coupledWeight);
   //  cerr<<"I am "<<recvProc<<" and my friend is "<<sendProc<<endl;
-  cerr<<myProc<<": My weight is "<<coupledWeightSend(0)<<" and my friends weight is "<<coupledWeight(0)<<endl;
-  if (abs(coupledWeight(0)*coupledWeightSend(0)-1)<=1e-10){
-    //    cerr<<myProc<<":add 1 "<<endl;
+  //  cerr<<myProc<<": My weight is "<<coupledWeightSend(0)<<" and my friends weight is "<<coupledWeight(0)<<endl;
+
+//   if (abs(coupledWeight(0)*coupledWeightSend(0)-1)<=1e-10){
+//     Weight(0)=Weight(0)+1.0;
+//   }
+//   else {
+//     Weight(1)=Weight(1)+1.0;
+//   }
+  if (coupledWeight(0)==1 && coupledWeightSend(0)==1)
     Weight(0)=Weight(0)+1.0;
-  }
-  else {
+  else if (coupledWeight(0)==-1 && coupledWeightSend(0)==-1)
     Weight(1)=Weight(1)+1.0;
-  }
-  cerr<<myProc<<" "<<Weight(0)/NumSamples<<" "<<Weight(1)/NumSamples<<" "<<NumSamples<<endl;
-  sleep(5);
+  else if (coupledWeight(0)==1 && coupledWeightSend(0)==-1)
+    Weight(2)=Weight(2)+1.0;
+  else if (coupledWeight(0)==-1 && coupledWeightSend(0)==1)
+    Weight(3)=Weight(3)+1.0;
+
+  //  cerr<<myProc<<" "<<Weight(0)/NumSamples<<" "<<Weight(1)/NumSamples<<" "<<NumSamples<<endl;
 }
 
 void WeightClass::ShiftData (int NumTimeSlices)

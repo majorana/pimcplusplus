@@ -1,4 +1,10 @@
 double tau=.025;
+Section (Parallel)
+{
+  int ProcsPerClone=1;
+
+}
+
 Section (System)
 {
   bool OpenLoops=false;
@@ -10,8 +16,9 @@ Section (System)
     Section (Species)
     {
       string Name="He";
+      string Type="He";
       double lambda=6.059615; 
-      string Type="BOSON";
+      string Statistics="BOSON";
       int NumParticles=96;
       int NumDim=3;
       string InitPaths="FIXED";
@@ -123,7 +130,7 @@ Section (System)
 Section (Action)
 {
   int MaxLevels = 2;
-  Array<string,1> PairActionFiles(1) = ["../../../PairActions/He495.PairAction"];
+  Array<string,1> PairActionFiles(1) = ["../../PairActions/He495.PairAction"];
 }
 
 Section (Observables)
@@ -187,6 +194,7 @@ Section (Moves){
       ///here should be electron
       int NumParticlesToMove=1;
       string NumLevels="Max";
+
             
     }
   Section (Move)

@@ -396,6 +396,7 @@ void PathClass::SetupkVecs2D()
       //	k[2] = iz*kBox[2];
       //	ki[2]= iz+MaxkIndex[2];
 	if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
+	  cerr<<"This k vec is "<<k[0]<<" "<<k[1]<<endl;
 	  kVecs(numVecs) = k;
 	  kIndices(numVecs)=ki;
 	  numVecs++;
@@ -513,7 +514,7 @@ void PathClass::SetupkVecs3D()
 
 void PathClass::CalcRho_ks_Slow(int slice, int species)
 {
-
+  cerr<<"My size is "<< kVecs.size()<<endl;
   for (int ki=0; ki<kVecs.size(); ki++) {
     complex<double> rho;
     rho = 0.0;
@@ -529,6 +530,7 @@ void PathClass::CalcRho_ks_Slow(int slice, int species)
 
 void PathClass::CalcRho_ks_Fast(int slice,int species)
 {
+  cerr<<"My size is "<< kVecs.size()<<endl;
   //  cerr<<"Beginning the calcrhok stuff"<<endl;
   // Zero out Rho_k array
   for (int ki=0;ki<kIndices.size();ki++)

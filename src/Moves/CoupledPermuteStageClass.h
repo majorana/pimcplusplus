@@ -11,6 +11,11 @@ class CoupledPermuteStageClass : public PermuteStageClass
 private:
   PermuteTableClass Table1, Table2;
   PermuteTableClass *Forw, *Rev;
+
+  ///Only allow odd permutations to be chosen
+  void OnlyOdd();
+  ///Only allow even permutations to be chosen
+  void OnlyEven();
 public:
   /// This function will construct a new permutation if
   /// activeParticles is set to the array, [ -1 ];  In this case,
