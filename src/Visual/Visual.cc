@@ -155,7 +155,8 @@ VisualClass::VisualClass()
     PathType (LINES),
     TubesImage("tubes.png"), LinesImage("lines.png"),
     StraightImage("straight.png"), SmoothImage("smooth.png"),
-    FileChooser ("Choose an output file")
+    FileChooser ("Choose an output file"),
+    Wrap(false)
 {
   // Top-level window.
   set_title("VisualClass");
@@ -180,24 +181,36 @@ VisualClass::VisualClass()
 
   // Setup tool bar
   Gtk::RadioButtonGroup group = LinesButton.get_group();
-  LinesButton.set_label("Lines");
-  TubesButton.set_label("Tubes");
-  LinesButton.signal_toggled().connect
-    (sigc::mem_fun(*this, &VisualClass::LineToggle));
   TubesButton.set_group (group);
-  TubesButton.set_icon_widget (TubesImage);
-  LinesButton.set_icon_widget (LinesImage);
-  StraightButton.set_label("Straight");
-  StraightButton.set_icon_widget(StraightImage);
-  SmoothButton.set_label("Smooth");
-  SmoothButton.set_icon_widget(SmoothImage);
   group = StraightButton.get_group();
   SmoothButton.set_group(group);
+  group = NoWrapButton.get_group();
+  WrapButton.set_group(group);
+
+  LinesButton.set_label("Lines");
+  TubesButton.set_label("Tubes");
+  StraightButton.set_label("Straight");
+  SmoothButton.set_label("Smooth");
+  NoWrapButton.set_label("No Wrap");
+  WrapButton.set_label("Wrap");
+
+  LinesButton.signal_toggled().connect
+    (sigc::mem_fun(*this, &VisualClass::LineToggle));
+  WrapButton.signal_toggled().connect
+    (sigc::mem_fun(*this, &VisualClass::WrapToggle));
+
+  TubesButton.set_icon_widget (TubesImage);
+  LinesButton.set_icon_widget (LinesImage);
+  StraightButton.set_icon_widget(StraightImage);
+  SmoothButton.set_icon_widget(SmoothImage);
   Tools.append (LinesButton);
   Tools.append (TubesButton);
-  Tools.append (ToolSep);
+  Tools.append (ToolSep1);
   Tools.append (StraightButton);
   Tools.append (SmoothButton);
+  Tools.append (ToolSep2);
+  Tools.append (NoWrapButton);
+  Tools.append (WrapButton);
 
   // Setup the file chooser
   FileChooser.set_select_multiple(false);
@@ -338,15 +351,15 @@ int main(int argc, char** argv)
   visual.Read (argv[1]);
   kit.run(visual);
 
-  Vec3 r2 (0.99, 0.2, 0.3), r1(1.09, 0.3, 0.4), wall1, wall2;
-  BoxClass box;
-  box.Set(2.0, 2.0, 2.0);
-  if (box.BreakSegment(r1, r2, wall1, wall2)) {
-    cerr << "r1    = " << r1 << endl;
-    cerr << "r2    = " << r2 << endl;
-    cerr << "wall1 = " << wall1 << endl;
-    cerr << "wall2 = " << wall2 << endl;
-  }
+//   Vec3 r2 (0.99, 0.2, 0.3), r1(1.09, 0.3, 0.4), wall1, wall2;
+//   BoxClass box;
+//   box.Set(2.0, 2.0, 2.0);
+//   if (box.BreakSegment(r1, r2, wall1, wall2)) {
+//     cerr << "r1    = " << r1 << endl;
+//     cerr << "r2    = " << r2 << endl;
+//     cerr << "wall1 = " << wall1 << endl;
+//     cerr << "wall2 = " << wall2 << endl;
+//   }
 
   return 0;
 }
@@ -417,7 +430,9 @@ void VisualClass::MakePaths(int frame)
       }
     Paths.push_back (&path);
   }
-  Box.PutPathsInBox (Paths);
+  if (Wrap)
+    for (int i=0; i<3; i++)
+      Box.PutPathsInBox (Paths);
 
 }
 
@@ -434,6 +449,7 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
   PutInBox (r1);
   PutInBox (r2);
   dVec disp = r2-r1;
+  double eps = 1.0e-12;
   for (int dim=0; dim<3; dim++) 
     if (disp[dim]<-0.5*Box[dim]) { // path wraps in + direction
       double d1 = 0.5*Box[dim]-r1[dim];
@@ -446,6 +462,8 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
       wall1 = s1*r1 + s2*rshift;
       wall2 = wall1;
       wall2[dim] -= Box[dim];
+      wall1[dim] -= eps;
+      wall2[dim] += eps;
       return true;
     }
     else if (disp[dim]>0.5*Box[dim]) {
@@ -458,41 +476,97 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
       wall1 = s1*r1 + s2*rshift;
       wall2 = wall1;
       wall2[dim] += Box[dim];
+      wall1[dim] += eps;
+      wall2[dim] -= eps;
       return true;
     }
   return false;
 }
+
+
+bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
+			     Vec3 &wall1, Vec3 &wall2,
+			     int dim)
+{
+  PutInBox (r1, dim);
+  PutInBox (r2, dim);
+  dVec disp = r2-r1;
+  double eps = 1.0e-12;
+  if (disp[dim]<-0.5*Box[dim]) { // path wraps in + direction
+    double d1 = 0.5*Box[dim]-r1[dim];
+    double d2 = r2[dim] + 0.5*Box[dim];
+    
+    double s1 = d2/(d1+d2);
+    double s2 = 1.0-s1;
+    Vec3 rshift = r2;
+    rshift[dim] += Box[dim];
+    wall1 = s1*r1 + s2*rshift;
+    wall2 = wall1;
+    wall2[dim] -= Box[dim];
+    wall1[dim] -= eps;
+    wall2[dim] += eps;
+    return true;
+  }
+  else if (disp[dim]>0.5*Box[dim]) {
+    double d2 = 0.5*Box[dim] - r2[dim];
+    double d1 = r1[dim] + 0.5*Box[dim];
+    double s1 = d2/(d1+d2);
+    double s2 = 1.0-s1;
+    Vec3 rshift = r2;
+    rshift[dim] -= Box[dim];
+    wall1 = s1*r1 + s2*rshift;
+    wall2 = wall1;
+    wall2[dim] += Box[dim];
+    wall1[dim] += eps;
+    wall2[dim] -= eps;
+    return true;
+  }
+  return false;
+}
+
+
 
 void BoxClass::PutPathsInBox (vector<OnePath*>& inList)
 {
   // To be perfectly correct, we need to repeat this process three
   // times to ensure that segments that cross the box corners get
   // properly broken up into two or three segments.
-  //  for (int iter=0; iter<3; iter++) {
-  vector<OnePath*> outList;
-  outList.resize(0);
-  for (int in=0; in<inList.size(); in++) {
-    OnePath *newPath = new OnePath;
-    OnePath *oldPath = inList[in];
-    for (int slice=0; slice<oldPath->Path.size()-1; slice++) {
-      Vec3 r1, r2, wall1, wall2;
-      r1 = oldPath->Path[slice];
-      r2 = oldPath->Path[slice+1];
-      if (BreakSegment (r1, r2, wall1, wall2)) {
-	newPath->Path.push_back(r1);
-	newPath->Path.push_back(wall1);
-	outList.push_back(newPath);
-	newPath = new OnePath;
-	newPath->Path.push_back(wall2);
-      } 
-      else
-	newPath->Path.push_back(r1);
+  for (int dim=0; dim<3; dim++) {
+    vector<OnePath*> outList;
+    outList.resize(0);
+    for (int in=0; in<inList.size(); in++) {
+      OnePath *newPath = new OnePath;
+      OnePath *oldPath = inList[in];
+      for (int slice=0; slice<(oldPath->Path.size()-1); slice++) {
+	Vec3 r1, r2, wall1, wall2;
+	r1 = oldPath->Path[slice];
+	r2 = oldPath->Path[slice+1];
+	if (BreakSegment (r1, r2, wall1, wall2, dim)) {
+	  newPath->Path.push_back(r1);
+	  newPath->Path.push_back(wall1);
+	  outList.push_back(newPath);
+	  newPath = new OnePath;
+	  newPath->Path.push_back(wall2);
+	} 
+	else
+	  newPath->Path.push_back(r1);
+      }
+      // Push last coordinate onto new path
+      Vec3 rlast = oldPath->Path[oldPath->Path.size()-1];
+      PutInBox(rlast, dim);
+      newPath->Path.push_back(rlast);
+      outList.push_back (newPath);
+      delete oldPath;
     }
-    outList.push_back (newPath);
-    delete oldPath;
+    inList.resize(outList.size());
+    for (int i=0; i<outList.size(); i++)
+      inList[i] = outList[i];
   }
-  inList.resize(outList.size());
-  for (int i=0; i<outList.size(); i++)
-    inList[i] = outList[i];
-    // }
+}
+
+
+void VisualClass::WrapToggle()
+{
+  Wrap = WrapButton.get_active();
+  FrameChanged();
 }

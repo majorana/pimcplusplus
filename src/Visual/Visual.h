@@ -34,6 +34,9 @@ class BoxClass
 private:
   Vec3 Box, BoxInv;
   inline void PutInBox(Vec3 &r);
+  inline void PutInBox(Vec3 &r, int dim);
+  bool BreakSegment (Vec3 &r1, Vec3 &r2, Vec3 &wall1, Vec3 &wall2);
+  bool BreakSegment (Vec3 &r1, Vec3 &r2, Vec3 &wall1, Vec3 &wall2, int dim);
 public:
   inline void Set (Vec3 box) 
   { 
@@ -52,8 +55,6 @@ public:
   inline operator Vec3() const
   { return Box; }
 
-  bool BreakSegment (Vec3 &r1, Vec3 &r2, Vec3 &wall1, Vec3 &wall2);
-
   void PutPathsInBox (vector<OnePath*>& inList);
 };
 
@@ -64,6 +65,13 @@ inline void BoxClass::PutInBox (Vec3 &r)
     r[i] += n*Box[i];
   }
 }
+
+inline void BoxClass::PutInBox (Vec3 &r, int dim)
+{
+  double n = -floor(r[dim]*BoxInv[dim]+0.5);
+  r[dim] += n*Box[dim];
+}
+
 
 class VisualClass : public Gtk::Window
 {
@@ -84,12 +92,16 @@ protected:
   Gtk::HScale FrameScale;
   Gtk::Adjustment FrameAdjust;
   Gtk::Toolbar Tools;
-  Gtk::RadioToolButton LinesButton, TubesButton, SmoothButton, StraightButton;
+  Gtk::RadioToolButton LinesButton, TubesButton, 
+    SmoothButton, StraightButton,
+    WrapButton, NoWrapButton;
   void FrameChanged();
   PathTypeType PathType; 
   void LineToggle();
+  void WrapToggle();
   Gtk::Image TubesImage, LinesImage, StraightImage, SmoothImage;
-  Gtk::SeparatorToolItem ToolSep;
+
+  Gtk::SeparatorToolItem ToolSep1, ToolSep2;
 
   Glib::RefPtr<Gtk::ActionGroup> Actions;
   Glib::RefPtr<Gtk::UIManager> Manager;
@@ -103,8 +115,7 @@ protected:
 
   Gtk::FileChooserDialog FileChooser;
 
-  
-
+  bool Wrap;
 public:
   PathVisClass PathVis;
 
