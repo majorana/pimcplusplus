@@ -50,7 +50,8 @@ void ConjGrad::CalcPhiCG()
   H.Kinetic.Apply (c, Hc);
   T = realconjdot (c, Hc);
   //H.CoulombFFT.Apply (c, Hc);
-  H.PH.Apply (c, Hc);
+  //H.PH.Apply (c, Hc);
+  H.PHFFT.Apply (c,Hc);
   E0 = realconjdot (c, Hc);
   Xi = E0*c - Hc;
   /// Orthonalize to other bands here

@@ -7,7 +7,7 @@ main()
   in.OpenFile ("NaUnscreenedPH_Feb18_05.h5");
   Potential *ph = ReadPotential(in);
   in.CloseFile();
-  Hamiltonian H(box, 3.0, 1.0, *ph);
+  Hamiltonian H(box, 5.0, 1.0, *ph);
   ConjGrad CG(H);
   clock_t start, end;
   start = clock();

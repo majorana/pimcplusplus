@@ -1,195 +1,6 @@
 #include "Hamiltonian.h"
 #include "../PH/kSpacePH.h"
 
-void GVecsClass::Set (Vec3 box, double kcut)
-{
-  Box = box;
-  kCut = kcut;
-  kBox[0]=2.0*M_PI/box[0]; kBox[1]=2.0*M_PI/box[1]; kBox[2]=2.0*M_PI/box[2];
-
-  int maxX, maxY, maxZ;
-  maxX = (int) ceil(kcut/kBox[0]);
-  maxY = (int) ceil(kcut/kBox[1]);
-  maxZ = (int) ceil(kcut/kBox[2]);
-
-  // The FFT box must be twice the size as the maximum G in each direction.
-  Nx = 4*maxX+1;
-  Ny = 4*maxY+1;
-  Nz = 4*maxZ+1;
-
-  ////////////////////////////////////////////
-  // First, set up G-vectors and difference //
-  ////////////////////////////////////////////
-  int numG = 0;
-  Vec3 G;
-  /// First, count k-vectors
-  for (int ix=-maxX; ix<=maxX; ix++) {
-    G[0] = ix*kBox[0];
-    for (int iy=-maxY; iy<=maxY; iy++) {
-      G[1] = iy*kBox[1];
-      for (int iz=-maxZ; iz<=maxZ; iz++) {
-	G[2] = iz*kBox[2];
-	if (dot(G,G) < (kcut*kcut))
-	  numG++;
-      }
-    }
-  }
-  GVecs.resize(numG);
-  Indices.resize(numG);
-  numG = 0;
-  /// Now assign
-  for (int ix=-maxX; ix<=maxX; ix++) {
-    G[0] = ix*kBox[0];
-    for (int iy=-maxY; iy<=maxY; iy++) {
-      G[1] = iy*kBox[1];
-      for (int iz=-maxZ; iz<=maxZ; iz++) {
-	G[2] = iz*kBox[2];
-	if (dot(G,G) < (kcut*kcut)) {
-	  GVecs(numG) = G;
-	  Indices(numG) = Int3(ix,iy,iz);
-	  numG++;
-	}
-      }
-    }
-  }
-  cerr << "Using " << numG << " G-vectors.\n";
-  ////////////////////////////////////////////
-  // Now, set up G-vector differences.      //
-  ////////////////////////////////////////////
-  numG = 0;
-  /// First, count k-vectors
-  for (int ix=-2*maxX; ix<=2*maxX; ix++) {
-    G[0] = ix*kBox[0];
-    for (int iy=-2*maxY; iy<=2*maxY; iy++) {
-      G[1] = iy*kBox[1];
-      for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
-	G[2] = iz*kBox[2];
-	if (dot(G,G) < (4.0*kcut*kcut))
-	  numG++;
-      }
-    }
-  }
-  GDiff.resize(numG);
-  IDiff.resize(numG);
-  numG = 0;
-  /// Now assign
-  for (int ix=-2*maxX; ix<=2*maxX; ix++) {
-    G[0] = ix*kBox[0];
-    for (int iy=-2*maxY; iy<=2*maxY; iy++) {
-      G[1] = iy*kBox[1];
-      for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
-	G[2] = iz*kBox[2];
-	if (dot(G,G) < (4.0*kcut*kcut)) {
-	  GDiff(numG) = G;
-	  IDiff(numG) = Int3(ix,iy,iz);
-	  numG++;
-	}
-      }
-    }
-  }
-}
-
-
-void GVecsClass::GetFFTBoxSize(int &nx, int &ny, int &nz)
-{
-  nx=Nx; ny=Ny; nz=Nz;
-}
-
-void
-FFTBox::PutkVec (const zVec &c)
-{
-  kBox = 0.0;
-  if (c.size() == GVecs.size()) 
-    for (int n=0; n<c.size(); n++) {
-      int i = (GVecs.Index(n)[0]+Nx)%Nx;
-      int j = (GVecs.Index(n)[1]+Ny)%Ny;
-      int k = (GVecs.Index(n)[2]+Nz)%Nz;
-      kBox(i,j,k) = c(n);
-    }
-  else if (c.size() == GVecs.DeltaSize()) 
-    for (int n=0; n<c.size(); n++) {
-      int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-      int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-      int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-      kBox(i,j,k) = c(n);
-    }
-  else {
-    cerr << "Incommensurate dimensions in PutkVec.\n";
-    abort();
-  }
-}
-
-void 
-FFTBox::GetkVec (zVec &c)
-{
-  if (c.size() == GVecs.size()) 
-    for (int n=0; n<c.size(); n++) {
-      int i = (GVecs.Index(n)[0]+Nx)%Nx;
-      int j = (GVecs.Index(n)[1]+Ny)%Ny;
-      int k = (GVecs.Index(n)[2]+Nz)%Nz;
-      c(n) = kBox(i,j,k);
-    }
-  else if (c.size() == GVecs.DeltaSize()) 
-    for (int n=0; n<c.size(); n++) {
-      int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-      int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-      int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-      c(n) = kBox(i,j,k);
-    }
-  else {
-    cerr << "Incommensurate dimensions in GetkVec.\n";
-    abort();
-  }
-}
-
-
-void
-FFTBox::AddFromVec (const zVec &c)
-{
-  if (c.size() == GVecs.size()) 
-    for (int n=0; n<c.size(); n++) {
-      int i = (GVecs.Index(n)[0]+Nx)%Nx;
-      int j = (GVecs.Index(n)[1]+Ny)%Ny;
-      int k = (GVecs.Index(n)[2]+Nz)%Nz;
-      kBox(i,j,k) += c(n);
-    }
-  else if (c.size() == GVecs.DeltaSize()) 
-    for (int n=0; n<c.size(); n++) {
-      int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-      int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-      int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-      kBox(i,j,k) += c(n);
-    }
-  else {
-    cerr << "Incommensurate dimensions in AddFromVec.\n";
-    abort();
-  }
-}
-
-void 
-FFTBox::AddToVec (zVec &c)
-{
-  if (c.size() == GVecs.size()) 
-    for (int n=0; n<c.size(); n++) {
-      int i = (GVecs.Index(n)[0]+Nx)%Nx;
-      int j = (GVecs.Index(n)[1]+Ny)%Ny;
-      int k = (GVecs.Index(n)[2]+Nz)%Nz;
-      c(n) += kBox(i,j,k);
-    }
-  else if (c.size() == GVecs.DeltaSize()) 
-    for (int n=0; n<c.size(); n++) {
-      int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-      int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-      int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-      c(n) += kBox(i,j,k);
-    }
-  else {
-    cerr << "Incommensurate dimensions in GetkVec.\n";
-    abort();
-  }
-}
-
-
 void KineticClass::Setup()
 {
   halfG2.resize(GVecs.size());
@@ -242,7 +53,8 @@ void CoulombFFTClass::Setup()
 //       FFT.kBox(i,j,k) = val;
 //     }
   Vec3 Gdiff;
-  int Nx=FFT.Nx; int Ny=FFT.Ny; int Nz=FFT.Nz;
+  int Nx, Ny, Nz;
+  FFT.GetDims(Nx, Ny, Nz);
   cerr << "Nx=" << Nx << " Ny=" << Ny << " Nz=" << Nz << endl;
   int mx = (Nx-1)/2;
   int my = (Ny-1)/2;
@@ -270,13 +82,13 @@ void CoulombFFTClass::Setup()
     
   FFT.k2r();
   FILE *fout = fopen ("Vr.dat", "w");
-  for (int i=0; i<FFT.Nx; i++) {
-    for (int j=0; j<FFT.Ny; j++)
+  for (int i=0; i<Nx; i++) {
+    for (int j=0; j<Ny; j++)
       fprintf (fout, "%1.15e ", FFT.rBox(i,j,0).real());
     fprintf (fout, "\n");
   }
   fclose (fout);
-  Vr.resize(FFT.Nx, FFT.Ny, FFT.Nz);
+  Vr.resize(Nx, Ny, Nz);
   Vr = FFT.rBox;
   IsSetup = true;
   cerr << "Finished CoulombFFT setup.\n";
@@ -288,7 +100,9 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
   if (!IsSetup)
     Setup();
 
-  double Ninv = 1.0/(FFT.Nx*FFT.Ny*FFT.Nz);
+  int Nx, Ny, Nz;
+  FFT.GetDims(Nx, Ny, Nz);
+  double Ninv = 1.0/(Nx*Ny*Nz);
   // First, put c into FFTbox
   FFT.PutkVec (c);
   // Now, transform to real space
@@ -341,7 +155,100 @@ void Hamiltonian::Apply(const zVec &c, zVec &Hc)
   Kinetic.Apply (c, Hc);
   //Coulomb.Apply (c, Hc);
   //CoulombFFT.Apply (c, Hc);
-  PH.Apply (c, Hc);
+  //PH.Apply (c, Hc);
+  PHFFT.Apply (c, Hc);
 }
 
 
+void PHPotFFTClass::Setup()
+{
+  kPH.CalcTailCoefs (30.0, 60.0);
+  int nx, ny, nz;
+  cFFT.Setup();
+  VecFFT.Setup();
+  MatFFT.Setup();
+  MatFFT.GetDims(nx,ny,nz);
+  Fr.resize(nx,ny,nz);
+  Vr.resize(nx,ny,nz);
+  Gc.resize(GVecs.size());
+  Vc.resize(GVecs.size());
+  Vk.resize(GVecs.DeltaSize());
+  Fk.resize(GVecs.DeltaSize());
+  StructureFactor.resize(GVecs.DeltaSize());
+  StructureFactor = complex<double>(1.0, 0.0);
+
+  double volInv = 1.0/GVecs.GetBoxVol();
+
+  /// FFT to calculate V in real space
+  for (int i=0; i<GVecs.DeltaSize(); i++) {
+    Vec3 dG = GVecs.DeltaG(i);
+    double dGmag = sqrt (dot(dG,dG));
+    Vk(i) = StructureFactor(i)*kPH.V(dGmag)*volInv;
+  }
+  cFFT.PutkVec (Vk);
+  cFFT.k2r();
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	Vr(ix,iy,iz) = cFFT.rBox(ix,iy,iz);
+
+  /// FFT to calculate F tensor in real space
+  /// dummy structure factor for now
+  complex<double> structFact(1.0, 0.0);
+  for (int i=0; i<GVecs.DeltaSize(); i++) 
+    Fk(i) = volInv*StructureFactor(i)*kPH.Ftensor(GVecs.DeltaG(i));
+  MatFFT.PutkVec(Fk);
+  MatFFT.k2r();
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	Fr(ix,iy,iz) = MatFFT.rBox(ix,iy,iz);
+  IsSetup = true;
+}
+  
+void PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
+{
+  if (!IsSetup)
+    Setup();
+  int nx, ny, nz;
+  cFFT.GetDims(nx, ny, nz);
+  double nInv = 1.0/(double)(nx*ny*nz);
+
+  /////////////////////////
+  // Pseudo-kinetic part //
+  /////////////////////////
+  // First, build G*c vector in VecFFT  
+  for (int i=0; i<GVecs.size(); i++) 
+    Gc(i) = c(i)*(k+GVecs(i));
+  VecFFT.PutkVec (Gc);
+  VecFFT.k2r();
+  
+  // Now, muliply by F(r)
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	VecFFT.rBox(ix,iy,iz) = Fr(ix,iy,iz)*VecFFT.rBox(ix,iy,iz);
+  // Transform back;
+  VecFFT.r2k();
+  // Rename for clarity
+  zVecVec& FGc = Gc;
+  VecFFT.GetkVec (FGc);
+  for (int i=0; i<GVecs.size(); i++)
+    Hc(i) += 0.5*nInv*dot(GVecs(i), FGc(i));
+
+  ////////////////////
+  // Potential part //
+  ////////////////////
+  // Transform c into real space
+  cFFT.PutkVec (c);
+  cFFT.k2r();
+  // Multiply by V
+  cFFT.rBox *= Vr;
+  // Transform back
+  cFFT.r2k();
+
+  // Get vector
+  cFFT.GetkVec (Vc);
+  for (int i=0; i<GVecs.size(); i++)
+    Hc(i) += nInv*Vc(i);
+}
