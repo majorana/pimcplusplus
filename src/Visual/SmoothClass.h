@@ -10,6 +10,7 @@ private:
   double SmoothLevel;
   OnePath* SmoothClosedPath (OnePath &oldPath);
   OnePath* SmoothOpenPath (OnePath &oldPath);
+  OnePath* SmoothOpenPath2 (OnePath &oldPath);
 public:
   // Set smoothness level from 0 to 1
   inline void SetLevel (double level)
