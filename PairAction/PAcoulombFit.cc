@@ -2,15 +2,6 @@
 #include "../SpecialFunctions/HermitePoly.h"
 #include "../Fitting/Fitting.h"
 
-void PAcoulombFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
-{
-  outSection.WriteVar ("Type", "coulombfit");
-  outSection.WriteVar ("Order", Order);
-  outSection.NewSection("qGrid");
-  qgrid->Write(outSection);
-  outSection.CloseSection();
-}
-
 
 void PAcoulombFitClass::ReadParams(IOSectionClass &inSection)
 {
@@ -21,6 +12,20 @@ void PAcoulombFitClass::ReadParams(IOSectionClass &inSection)
   Ucoefs.resize(Order+1);
   UsePBC = inSection.ReadVar ("Box", Box);
 }
+
+
+#ifdef MAKE_FITS
+
+void PAcoulombFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
+{
+  outSection.WriteVar ("Type", "coulombfit");
+  outSection.WriteVar ("Order", Order);
+  outSection.NewSection("qGrid");
+  qgrid->Write(outSection);
+  outSection.CloseSection();
+}
+
+
 
 void PAcoulombFitClass::AddFit (Rho &rho)
 {
@@ -104,48 +109,6 @@ void PAcoulombFitClass::AddFit (Rho &rho)
   dUj(NumBetas-1).Init(qgrid, dUCoefs);  
 }
 
-double PAcoulombFitClass::U(double r, double rp, double costheta, int level)
-{
-  double q = 0.5*(r+rp);
-  if (q < qgrid->End) {
-    double s2 = r*r + r*rp - 2.0*r*rp*costheta;
-    Uj(level)(q, Ucoefs);
-    double s2j = 1.0;
-    double Usum = 0.0;
-    for (int j=0; j<=Order; j++){
-      Usum += Ucoefs(j)*s2j;
-      s2j *= s2;
-    }
-    return (Usum);
-  }
-  else {
-    double beta = SmallestBeta;
-    for (int i=0; i<level; i++)
-      beta *= 2.0;
-    return (0.5*beta*(Potential->V(r) + Potential->V(rp)));
-  }
-}
-
-double PAcoulombFitClass::dU(double r, double rp, double costheta, int level)
-{
-  double q = 0.5*(r+rp);
-  if (q < qgrid->End) {
-    double s2 = r*r + r*rp - 2.0*r*rp*costheta;
-    dUj(level)(q, Ucoefs);
-    double s2j = 1.0;
-    double dUsum = 0.0;
-    for (int j=0; j<=Order; j++){
-      dUsum += Ucoefs(j)*s2j;
-      s2j *= s2;
-    }
-    return (dUsum);
-  }
-  else
-    return 0.0;
-}
-
-
-
 void PAcoulombFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 {
   int level = (int)floor(log(rho.Beta()/SmallestBeta)/log(2.0)+ 0.5);
@@ -210,6 +173,51 @@ void PAcoulombFitClass::WriteFits (IOSectionClass &outSection)
     beta *= 2.0;
   }
 }
+
+#endif
+
+double PAcoulombFitClass::U(double r, double rp, double costheta, int level)
+{
+  double q = 0.5*(r+rp);
+  if (q < qgrid->End) {
+    double s2 = r*r + r*rp - 2.0*r*rp*costheta;
+    Uj(level)(q, Ucoefs);
+    double s2j = 1.0;
+    double Usum = 0.0;
+    for (int j=0; j<=Order; j++){
+      Usum += Ucoefs(j)*s2j;
+      s2j *= s2;
+    }
+    return (Usum);
+  }
+  else {
+    double beta = SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
+    return (0.5*beta*(Potential->V(r) + Potential->V(rp)));
+  }
+}
+
+double PAcoulombFitClass::dU(double r, double rp, double costheta, int level)
+{
+  double q = 0.5*(r+rp);
+  if (q < qgrid->End) {
+    double s2 = r*r + r*rp - 2.0*r*rp*costheta;
+    dUj(level)(q, Ucoefs);
+    double s2j = 1.0;
+    double dUsum = 0.0;
+    for (int j=0; j<=Order; j++){
+      dUsum += Ucoefs(j)*s2j;
+      s2j *= s2;
+    }
+    return (dUsum);
+  }
+  else
+    return 0.0;
+}
+
+
+
 
 bool PAcoulombFitClass::Read (IOSectionClass &in,
 			      double smallestBeta, int NumBetas)

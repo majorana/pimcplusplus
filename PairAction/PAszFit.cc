@@ -1,13 +1,5 @@
 #include "PAFit.h"
 
-void PAszFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
-{
-  outSection.WriteVar ("Type", "szfit");
-  outSection.WriteVar ("Order", Order);
-  outSection.NewSection("qGrid");
-  qgrid->Write(outSection);
-  outSection.CloseSection();
-}
 
 
 void PAszFitClass::ReadParams(IOSectionClass &inSection)
@@ -18,6 +10,18 @@ void PAszFitClass::ReadParams(IOSectionClass &inSection)
   assert(inSection.ReadVar ("Order", Order));
   UsePBC = inSection.ReadVar ("Box", Box);
 }
+
+#ifdef MAKE_FIT
+
+void PAszFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
+{
+  outSection.WriteVar ("Type", "szfit");
+  outSection.WriteVar ("Order", Order);
+  outSection.NewSection("qGrid");
+  qgrid->Write(outSection);
+  outSection.CloseSection();
+}
+
 
 void PAszFitClass::AddFit (Rho &rho)
 {
@@ -59,6 +63,13 @@ void PAszFitClass::WriteFits (IOSectionClass &outSection)
   }
 }
 
+void PAszFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
+{
+}
+
+#endif
+
+
 bool PAszFitClass::Read (IOSectionClass &inSection,
 			 double lowestBeta, int NumBetas)
 {
@@ -78,9 +89,6 @@ double PAszFitClass::dU(double r, double rp, double costheta, int level)
 
 
 
-void PAszFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
-{
-}
 
 // void Rho::WriteFit (string fileName)
 // {
