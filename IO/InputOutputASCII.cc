@@ -1,6 +1,6 @@
 #include "InputOutput.h"
 
-#include <fstream.h>
+#include <fstream>
 
 /// Simply prints 3*num spaces
 inline void ASCIIPrintIndent(int num)

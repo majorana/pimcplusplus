@@ -8,7 +8,7 @@ clean:
 .cc.o: 
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 
 .f.o:
-	g77 -c -o $*.o $<
+	$(F77) -c -o $*.o $<
 
 newmake:
 	$(MAKE) -f template.make Makefile FRC=force_rebuild
