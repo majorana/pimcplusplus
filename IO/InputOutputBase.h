@@ -99,6 +99,7 @@ public:
   inline bool FindSection (string name, IOTreeClass * &sectionPtr, 
 			   int num=0);
   inline int CountSections(string name);
+  inline int CountVars();
 
   template<class T>
   bool ReadVar(string name, T &var)
@@ -136,6 +137,25 @@ public:
       return *iter;
     }
   }
+  inline VarClass* GetVarPtr(int num)
+  {
+    list<VarClass *>::iterator iter = VarList.begin();
+    int i=0;
+    while ((iter != VarList.end()) && (i != num)){
+      iter++;
+      i++;
+    }
+    if (iter == VarList.end())
+      return NULL;
+    else {
+      MarkModified();  // If we're getting the pointer, we're probably 
+                       // gonna modify the variable.
+      return *iter;
+    }
+  }
+
+
+
 
   /// Write me!
   virtual IOTreeClass* NewSection(string name)=0;
@@ -218,6 +238,18 @@ inline int IOTreeClass::CountSections(string name)
     sectionIter++;
   }
   return numSections;
+}
+
+inline int IOTreeClass::CountVars()
+{
+  list<VarClass*>::iterator varIter;
+  varIter=VarList.begin();
+  int numVars=0;
+  while (varIter!=VarList.end()){
+    numVars++;
+    varIter++;
+  }
+  return numVars;
 }
 
 

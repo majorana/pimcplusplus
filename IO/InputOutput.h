@@ -102,6 +102,7 @@ public:
   /// function, reading the contents of the file into the tree.
   bool OpenFile (string fileName);
   string GetName(){ return CurrentSection->Name;}
+  string GetVarName(int num){ return GetVarPtr(num)->Name;}
   /// Creates a file at the top level, choosing the appropriate type
   /// based on the file extension.
   bool NewFile (string fileName);
@@ -216,12 +217,20 @@ public:
     return (CurrentSection->GetVarPtr(name));
   }
 
+  inline VarClass *GetVarPtr(int num)
+  {
+    return (CurrentSection->GetVarPtr(num));
+  }
+
+
+
   /// Returns the number of subsections within the present section
   /// which have the name name.  If called without a name, it returns
   /// the total number of sections.
   inline int CountSections(string name="")
   { return (CurrentSection->CountSections(name)); }
-
+  inline int CountVars()
+  {return (CurrentSection->CountVars());}
   /// Calls CurrentSections virtual PrintTree() function.  This is for
   /// debugging purposes.  It spits out a hierarchy of the sections
   /// and variable names.
