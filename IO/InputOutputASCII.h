@@ -1,23 +1,26 @@
 #ifndef INPUT_OUTPUT_ASCII_H
 #define INPUT_OUTPUT_ASCII_H
-
-
 #include "InputOutputBase.h"
+#include <iostream>
+#include <stack>
+#include <string>
+#include <list>
 
 
 
-class InputSectionASCIIClass : public InputSectionClass
+
+class InputSectionASCIIClass : public InputTreeClass
 {
 
   void ReadWithoutComments(string fileName, Array<char,1> &buffer);
 
  public:
-  void PrintTree(InputSectionClass *sec);
+  void PrintTree(InputTreeClass *sec);
   void PrintTree() { }
   void PrintTree(int index) { }
-  bool OpenFile (string fileName, InputSectionClass *parent);
+  bool OpenFile (string fileName, InputTreeClass *parent);
   bool OpenFile (string filename, string parentName, 
-		 InputSectionClass *parent) { }
+		 InputTreeClass *parent) { }
   void Close() { };
   void CloseFile();
 

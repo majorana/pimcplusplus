@@ -117,25 +117,25 @@ void getVariable(Array <char,1> &buffer,int &counter,string &theName,
 }
 
 
-void InputSectionASCIIClass::PrintTree(InputSectionClass *sec )
-{
+// void InputSectionASCIIClass::PrintTree()
+// {
 
-  cout<<"Section: "<<sec->Name<<endl;
-  list<VarClass*>::iterator varIter=sec->VarList.begin();
-  while (varIter!=sec->VarList.end()){
-    cout<<"Variable: "<<(*varIter)->Name<<" ";
-    VarASCIIClass *tempVar=(VarASCIIClass*)*varIter;
-    printCharArray(tempVar->Value);
-    //    cout<<tempVar->Value;
-    varIter++;
-  }
-  list<InputSectionClass*>::iterator secIter=sec->SectionList.begin();
-  while (secIter!=sec->SectionList.end()){
-    //    cout<<"Section: "<<(*secIter)->Name<<endl;
-    PrintTree(*secIter);
-    secIter++;
-  }
-}
+//   cout<<"Section: "<<sec->Name<<endl;
+//   list<VarClass*>::iterator varIter=sec->VarList.begin();
+//   while (varIter!=sec->VarList.end()){
+//     cout<<"Variable: "<<(*varIter)->Name<<" ";
+//     VarASCIIClass *tempVar=(VarASCIIClass*)*varIter;
+//     printCharArray(tempVar->Value);
+//     //    cout<<tempVar->Value;
+//     varIter++;
+//   }
+//   list<InputSectionClass*>::iterator secIter=sec->SectionList.begin();
+//   while (secIter!=sec->SectionList.end()){
+//     //    cout<<"Section: "<<(*secIter)->Name<<endl;
+//    (*secIter). PrintTree();
+//     secIter++;
+//   }
+// }
 
 void InputSectionASCIIClass::CloseFile()
 {
@@ -183,7 +183,7 @@ bool isDigit(char theChar)
 
 bool isNumStart(char theChar)
 {
-  return ((isNumber(theChar)) || (theChar=='.') || (theChar=='-'));
+  return ((isDigit(theChar)) || (theChar=='.') || (theChar=='-'));
 }
 
 
@@ -193,7 +193,9 @@ void Tokenize(Array<char,1> buffer, list<string>& tokenList)
   int lineNum=0;
   while (pos<buffer.size()){
     if (isSpecial(buffer(pos))){
-      tokenList.push_back(buffer(pos));
+      string tempString="";
+      tempString+=buffer(pos);
+      tokenList.push_back(tempString);
       pos++;
     }
     else if (buffer(pos)=='\"'){
@@ -207,7 +209,7 @@ void Tokenize(Array<char,1> buffer, list<string>& tokenList)
     }
     else if (isAlpha(buffer(pos))){
       string tempString="";
-      while (!(isAlpha(buffer(pos)) || isNumeric(buffer(pos)))){
+      while (!(isAlpha(buffer(pos)) || isDigit(buffer(pos)))){
 	tempString+=buffer(pos);
 	pos++;
       }
@@ -304,7 +306,7 @@ InputSectionASCIIClass::ReadWithoutComments(string fileName,
 
 
 
-bool InputSectionASCIIClass::OpenFile(string fileName, InputSectionClass *parent)
+bool InputSectionASCIIClass::OpenFile(string fileName, InputTreeClass *parent)
 {
 
 
