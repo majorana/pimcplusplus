@@ -14,12 +14,42 @@ void VisualClass::Read(string fileName)
   boxObject->SetColor (0.5, 0.5, 1.0);
   double maxDim = max(max(box(0), box(1)), box(2));
   PathVis.Objects.push_back(boxObject);
-  PathVis.View.SetDistance (1.2*maxDim);
+  //  PathVis.View.SetDistance (1.2*maxDim);
+  PathVis.View.SetDistance (0.2*maxDim);
 
-
-  int numSpecies = in.CountSections ("Species");
-  
+  int numSpecies = in.CountSections ("Species");  
   in.CloseSection (); // "System"
+
+  assert(in.OpenSection("Observables"));
+  assert(in.OpenSection("PathDump"));
+  Array<double,4> paths;
+  assert(in.ReadVar ("Path", paths));
+  
+  int numPtcls = paths.extent(1);
+  int numSlices = paths.extent(2);
+
+  cerr << "numPtcls = " << numPtcls << endl;
+  cerr << "numSlices = " << numSlices << endl;
+
+  Array<Vec3,1> onePath(numSlices);
+  for (int ptcl=0; ptcl<numPtcls; ptcl++) {
+    for (int slice=0; slice<numSlices; slice++) {
+//       fprintf (stderr, "[ %8.5f %8.5f %8.5f ]\n",
+// 	       paths(0,ptcl,slice,0),
+// 	       paths(0,ptcl,slice,1),
+// 	       paths(0,ptcl,slice,2));
+      onePath(slice)[0] = paths(500,ptcl,slice,0);
+      onePath(slice)[1] = paths(500,ptcl,slice,1);
+      onePath(slice)[2] = paths(500,ptcl,slice,2);
+    }
+    PathObject* pathObj = new PathObject;
+    pathObj->Set (onePath);
+    pathObj->SetColor (0.3, 0.3, 1.0);
+    PathVis.Objects.push_back(pathObj);
+  }
+
+  in.CloseSection();
+
   in.CloseFile();
 }
 
