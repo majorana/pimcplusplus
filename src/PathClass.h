@@ -103,6 +103,10 @@ private:
   void ShiftRho_kData(int sliceToShift);
 public:
   Mirrored1DClass<int> Permutation;
+  /// This function accumulates the total permutation vector
+  /// from all of the processors individual permutation vector.
+  /// Only processor 0 gets the result
+  void TotalPermutation (Array<int,1> &permVec);
   RandomClass &Random;
   int TotalNumSlices;
   double tau; //we need to set this still

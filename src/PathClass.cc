@@ -1074,3 +1074,25 @@ void PathClass::BroadcastRefPath()
   for (int ptcl=0; ptcl<NumParticles(); ptcl++)
     RefPath(ptcl) = buffer(ptcl);
 }
+
+
+void PathClass::TotalPermutation(Array<int,1> &permVec)
+{
+  int myProc = Communicator.MyProc();
+  int numProcs = Communicator.NumProcs();
+  int numPtcls = NumParticles();
+  permVec.resize(Permutation.size());
+  for (int i=0; i<permVec.size(); i++)
+    permVec(i) = Permutation(i);
+  Array<int,2> permMat(numProcs, permVec.size());
+
+  // First, collect all the individual permutation vectors
+  Communicator.Gather (permVec, permMat, 0);
+  // Now apply them in sequence.
+  for (int pi=0; pi < numPtcls; pi++) {
+    int ptcl = pi;
+    for (int proc=0; proc<numProcs; proc++)
+      ptcl = permMat(proc, ptcl);
+    permVec(pi) = ptcl;
+  }
+}
