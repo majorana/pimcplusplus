@@ -45,11 +45,6 @@ PeriodicSpline::Update()
   }
   // last row
   // mu is really on top of lambda in the last row
-  cerr << "gamma[N-1]  = " << gamma[N-1] << endl;
-  cerr << "d[N-1]      = " << d[N-1] << endl;
-  cerr << "lambda[N-1] = " << lambda[N-1] << endl;
-  cerr << "mu[N-1]     = " << mu[N-1] << endl;
-
   lambda[N-1] += mu[N-1];
   d[N-1] -= lambda[N-1] * d[N-2];
   gamma[N-1] -= lambda[N-1] * (gamma[N-2]+ mu[N-2]);
@@ -65,8 +60,8 @@ PeriodicSpline::Update()
   
   //  F(3)[1] = 1.455;
 
-  for (int i=0; i<=N; i++)
-    fprintf (stderr, "slope(%d) = %1.8e\n", i, F(i)[1]);
+//   for (int i=0; i<=N; i++)
+//     fprintf (stderr, "slope(%d) = %1.8e\n", i, F(i)[1]);
 
   IsUp2Date = true;
 }

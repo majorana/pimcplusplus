@@ -13,7 +13,7 @@ void TestPeriodic()
   PeriodicSpline spline;
   spline.Init (&xGrid, vals);
 
-  for (double x=0.0; x < 4.0; x+= 0.01)
+  for (double x=0.0; x < 4.0; x+= 0.001)
     fprintf (stdout, "%1.16e %1.16e %1.16e\n", x, spline(x), spline.Deriv(x));
 
 }
