@@ -3,7 +3,7 @@
 #include "../SpecialFunctions/LegendrePoly.h"
 #include "../Distributed/DistributedMat.h"
 
-const double Rho0Min = 1.0e-4;
+const double Rho0Min = 1.0e-3;
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
@@ -127,8 +127,8 @@ void PAsFitClass::AddFit (Rho &rho)
     int tempqi;
     Umat.MyElement(i, tempqi, yi);
     if (tempqi != qi) {
-      cerr << "qi = " << qi+1 << " of " << numq << ".\n";      
       qi = tempqi;
+      cerr << "qi = " << (qi+1) << " of " << numq << ".\n";      
     }
     double q = (*qgrid)(qi);    
     double zmax = 0.999999*min(2.0*q, sMax(NumBetas-1));
@@ -186,7 +186,8 @@ void PAsFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
       double z = zgrid(zi);
       double y = z/zmax;
       double smax = 0.9999*min(2.0*q,sMax(level));
-      LinearGrid sgrid(z, smax, 20);
+      //cerr << "smin = "  << z << " smax = " << smax << endl;
+      LinearGrid sgrid(z, smax, 100);
       for (int si=0; si<sgrid.NumPoints; si++) {
 	double s = sgrid(si);
 	//cerr << "q = " << q << " z = " << z << " s = " << s << endl;
@@ -200,6 +201,9 @@ void PAsFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 	  costheta = 1.0;
 	else
 	  costheta = (r*r + rp*rp - s*s)/(2.0*r*rp); 
+	
+	//cerr << "costheta = " << costheta << endl;
+
 	costheta = min(costheta,1.0);
 	costheta = max(costheta,-1.0);
 
@@ -276,7 +280,7 @@ double PAsFitClass::U(double q, double z, double s2, int level)
   double x;
 
   if ((q<=qmax)&&(z<=zmax)&&(s<=smax)) {
-    if (q == 0) {
+    if (q == 0.0) {
       Usplines(level)(0.0,0.0,Coefs);
       x = 0.0;
     }
