@@ -39,6 +39,16 @@ namespace COMM
 }  
 
 
+class CommStatusClass
+{
+public:
+  int Source;
+  int Tag;
+  int Error;
+  int Length;
+};
+
+
 class CommunicatorClass
 {
 public:
@@ -92,30 +102,41 @@ public:
     Receive(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
   }
 
+  inline bool Probe(int source, int tag, CommStatusClass &status)
+  {
+    int flag;
+    MPI_Status mpiStat;
 
+    MPI_Iprobe(source, tag, MPIComm, &flag, &mpiStat);
+    status.Source = mpiStat.MPI_SOURCE;
+    status.Tag    = mpiStat.MPI_TAG;
+    status.Error  = mpiStat.MPI_ERROR;
+    status.Length = mpiStat.st_length;
+    return (flag != 0);
+  }
 
 
   inline void AllGather(void *sendbuf, int sendcount, 
 		       MPI_Datatype sendtype, 
 		       void* recvbuf, int recvcount,
 		       MPI_Datatype recvtype)
-    {
-      MPI_Allgather (sendbuf, sendcount, sendtype, 
-		     recvbuf, recvcount, recvtype, MPIComm);
-    }
+  {
+    MPI_Allgather (sendbuf, sendcount, sendtype, 
+		   recvbuf, recvcount, recvtype, MPIComm);
+  }
 
   inline void AllGather (Array<double,1> &SendVec, 
 			 Array<double,1> &RecvVec)
-    {
-      int numProcs = NumProcs();
-      assert ((RecvVec.size()/SendVec.size())==numProcs);	
-      int count = SendVec.size();
-      double *sendbuf = SendVec.data();
-      double *recvbuf = RecvVec.data();
-
-      AllGather(sendbuf, count, MPI_DOUBLE,
-		recvbuf, count, MPI_DOUBLE);
-    }
+  {
+    int numProcs = NumProcs();
+    assert ((RecvVec.size()/SendVec.size())==numProcs);	
+    int count = SendVec.size();
+    double *sendbuf = SendVec.data();
+    double *recvbuf = RecvVec.data();
+    
+    AllGather(sendbuf, count, MPI_DOUBLE,
+	      recvbuf, count, MPI_DOUBLE);
+  }
 
   inline void Split (int color, CommunicatorClass &newComm)
   {
