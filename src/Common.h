@@ -3,6 +3,7 @@
 
 #define SIMPLE_SPRNG
 
+
 #define NDIM 3
 #define OLD 0
 #define NEW 1
