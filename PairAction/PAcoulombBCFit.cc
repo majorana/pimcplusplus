@@ -70,7 +70,7 @@ void PAcoulombBCFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 
   double U2err = 0.0;
   double dU2err = 0.0;
-  double weight;
+  double weight = 0.0;
   FILE *Uxdat = fopen ("Ux.dat", "w");
   FILE *Ufdat = fopen ("Uf.dat", "w");
   FILE *dUxdat = fopen ("dUx.dat", "w");
