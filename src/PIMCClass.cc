@@ -113,6 +113,10 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       OutFile.NewSection("WindingNumber");
       tempObs=new WindingNumberClass(PathData,OutFile);
     }
+    else if (theObserveType=="StructureFactor"){
+      OutFile.NewSection("StructureFactor");
+      tempObs=new StructureFactorClass(PathData,OutFile);
+    }
     else {
       cerr<<"We do not recognize the observable "<<theObserveType<<endl;
       abort();

@@ -5,7 +5,7 @@
 #include "ObservableCorrelation.h"
 #include "PathDump.h"
 #include "WindingNumber.h"
-     
+#include "StructureFactor.h"     
 
 /// This template class will be used to construct distributed versions
 /// of many different types of observables:  scalar observables, dVec

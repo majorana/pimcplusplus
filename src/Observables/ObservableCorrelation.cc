@@ -86,7 +86,7 @@ void PairCorrelationClass::WriteBlock()
   double norm=0.0;
   int N1 = PathData.Species(Species1).NumParticles;
   int N2 = PathData.Species(Species2).NumParticles;
-  norm = TotalCounts * N1*N2/PathData.Path.GetVol();
+  norm = (double)TotalCounts * (double)(N1*N2)/PathData.Path.GetVol();
 
   if (Species1==Species2){//Normalizes things when species are same
     norm *= 0.5;
@@ -119,6 +119,13 @@ void PairCorrelationClass::WriteBlock()
 	double r = 0.5*(r1+r2);
 	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
 	gofrArray(i) = (double) HistSum(i) / (binVol*norm);
+	if (gofrArray(i) < 0.0) {
+	  cerr << "binVol = " << binVol << endl;
+	  cerr << "norm = " << norm << endl;
+	  cerr << "N1 = " << N1 << endl;
+	  cerr << "N2 = " << N2 << endl;
+	  cerr << "TotalCounts = " << TotalCounts << endl;
+	}
       }
       IOVar->Append(gofrArray);
     }
@@ -226,11 +233,8 @@ void PairCorrelationClass::Accumulate()
 
 void PairCorrelationClass::Initialize()
 {
-  int numTimeSlices=PathData.Path.NumTimeSlices();//<--What is that there for...it's not used
-  grid.Init (0.0, 12.0, 100);
   TotalCounts = 0;
-  Histogram.resize(100);
-  Histogram = 0;
+  TimesCalled=0;
 }
 
 
@@ -247,10 +251,8 @@ void PairCorrelationClass::Initialize()
 ///some other size. 
 void nofrClass::Initialize()
 {
-  grid.Init (0.0, 12.0, 100);
-  TotalCounts = 0;
-  Histogram.resize(100);
-  Histogram = 0.0;
+  TotalCounts=0;
+  TimesCalled=0;
 }
 
 

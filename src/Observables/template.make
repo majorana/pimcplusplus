@@ -1,6 +1,6 @@
-SOURCES = ObservableCorrelation.cc ObservableEnergy.cc ObservableBase.cc PathDump.cc WindingNumber.cc
+SOURCES = ObservableCorrelation.cc ObservableEnergy.cc ObservableBase.cc PathDump.cc WindingNumber.cc StructureFactor.cc
 
-objs = ObservableCorrelation.o ObservableEnergy.o ObservableBase.o PathDump.o WindingNumber.o
+objs = ObservableCorrelation.o ObservableEnergy.o ObservableBase.o PathDump.o WindingNumber.o StructureFactor.o
 
 all:	Observables	
 
