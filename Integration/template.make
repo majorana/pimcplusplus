@@ -1,6 +1,10 @@
 SOURCES = "*.cc"
 
-all:	Integrate.o GKIntegration.o
+all:	Integrate.o GKIntegration.o HermiteQuad.o
+
+clean:
+	rm -f *.o
+
 
 .cc.o: $(HEADERS)
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 
