@@ -8,7 +8,7 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DNO_COUT -O3 -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                           \
   Main.o                             \
@@ -31,9 +31,6 @@ PIMCobjs =                           \
   PathDataClass.o                    \
   CommunicatorClass.o                \
   PathClass.o                        \
-  DistanceTablePBCClass.o            \
-  DistanceTableFreeClass.o           \
-  DistanceTableClass.o               \
   MirroredArrayClass.o               \
   WrapClass.o			     \
   Common/MPI/Communication.o	     \
@@ -79,9 +76,6 @@ TestPermobjs =                       \
   PathDataClass.o                    \
   CommunicatorClass.o                \
   PathClass.o                        \
-  DistanceTablePBCClass.o            \
-  DistanceTableFreeClass.o           \
-  DistanceTableClass.o               \
   MirroredArrayClass.o               \
   WrapClass.o			     \
   Common/MPI/Communication.o	     \

@@ -1,3 +1,5 @@
+#ifndef BCCLASS_H
+#define BCCLASS_H
 #include "Common.h"
 
 class BCClass 
@@ -107,3 +109,5 @@ inline dVec BCClass::Velocity (int sliceA, int sliceB, int ptcl)
   return Path(sliceB, ptcl) - Path(sliceA,ptcl);
 }
 
+
+#endif

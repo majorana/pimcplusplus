@@ -10,7 +10,6 @@
 */
 double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> particles, int level)
 {
-  DistanceTableClass &distanceTable = *PathData.DistanceTable;
   dVec rpp;
   int skip = 1<<(level+1);
   double logNewSampleProb=0.0;
@@ -27,27 +26,31 @@ double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> pa
       dVec r = Path(slice,ptcl);
       dVec rp= Path(slice+skip,ptcl);
       dVec rpp=Path(slice+(skip>>1),ptcl);
-      dVec rdiff=distanceTable.Velocity(slice, slice+skip, ptcl);
+      //      Path.PutInBox(r);
+      //      Path.PutInBox(rp);
+      //      Path.PutInBox(rpp);
+      dVec rdiff=Path.Velocity(slice, slice+skip, ptcl);
       //dVec rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
       dVec rbar = r + 0.5*rdiff;
       dVec newDelta;
       Path.Random.LocalGaussianVec(sigma,newDelta);
       double GaussProd=1.0;
       for (int dim=0; dim<NDIM; dim++) {
-	  while (newDelta[dim] > (0.5*Path.Box[dim]))
-	    newDelta[dim] -= Path.Box[dim];
-	  while (newDelta[dim] < (-(0.5*Path.Box[dim])))
-	    newDelta[dim] += Path.Box[dim];
+	  while (newDelta[dim] > (0.5*Path.GetBox()[dim]))
+	    newDelta[dim] -= Path.GetBox()[dim];
+	  while (newDelta[dim] < (-(0.5*Path.GetBox()[dim])))
+	    newDelta[dim] += Path.GetBox()[dim];
 	  double GaussSum = 0.0;
 	  int NumImage = 4;
 	  for (int image=-NumImage; image <= NumImage; image++) {
-	    double dist = newDelta[dim]+(double)image*Path.Box[dim];
+	    double dist = newDelta[dim]+(double)image*Path.GetBox()[dim];
 	    GaussSum += exp(-0.5*dist*dist/sigma2);
 	  }
 	  GaussProd *= GaussSum;
       }
       logNewSampleProb += prefactorOfSampleProb + log(GaussProd);
       //distanceTable.PutInBox(newDelta);
+      PathData.Path.PutInBox(newDelta);
       rpp=rbar+newDelta;
       //logNewSampleProb=logNewSampleProb+
       //	(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
@@ -55,6 +58,7 @@ double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> pa
       Path.SetPos(slice+(skip>>1),ptcl,rpp);
     }
   }
+  //  cerr<<"My logNewSampleProb is "<<logNewSampleProb<<endl;
   return logNewSampleProb;
 }
 
@@ -65,7 +69,6 @@ double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> pa
 double BisectionClass::LogSampleProb(int startSlice, int endSlice, 
 				     Array<int,1> particles, int level)
 {
-  DistanceTableClass &distanceTable = *PathData.DistanceTable;
   PathClass &Path = PathData.Path;
   dVec rpp;
   int skip = 1<<(level+1);
@@ -80,21 +83,25 @@ double BisectionClass::LogSampleProb(int startSlice, int endSlice,
     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
     for (int slice=startSlice;slice<endSlice;slice+=skip){
       dVec r = Path(slice,ptcl);
-      dVec rdiff = distanceTable.Velocity(slice, slice+skip, ptcl);
+      dVec rdiff = Path.Velocity(slice, slice+skip, ptcl);
       //dVec rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
       dVec rp= Path(slice+skip,ptcl);
       dVec rpp=Path(slice+(skip>>1),ptcl);
+      //      Path.PutInBox(r);
+      //      Path.PutInBox(rp);
+      //      Path.PutInBox(rpp);
+      
       ///We've ignored boundary conditions here (well we think this is fixed but we're not sure)
       dVec rbar=r + 0.5*rdiff;
       dVec Delta= rpp - rbar;
-      distanceTable.PutInBox(Delta);
+      Path.PutInBox(Delta);
       
       double GaussProd=1.0;
       for (int dim=0; dim<NDIM; dim++) {
 	double GaussSum = 0.0;
 	int NumImage = 4;
 	for (int image=-NumImage; image <= NumImage; image++) {
-	  double dist = Delta[dim]+(double)image*Path.Box[dim];
+	  double dist = Delta[dim]+(double)image*Path.GetBox()[dim];
 	  GaussSum += exp(-0.5*dist*dist/sigma2);
 	}
 	GaussProd *= GaussSum;
@@ -105,7 +112,7 @@ double BisectionClass::LogSampleProb(int startSlice, int endSlice,
       //	(prefactorOfSampleProb-0.5*dot(Delta,Delta)/(sigma2));
     }
   }
-
+  //  cerr<<"My logSampleProb is "<<logSampleProb<<endl;
   return logSampleProb;
 }
 
@@ -137,8 +144,6 @@ bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activePar
     double testNewLogSampleProb=
       LogSampleProb(startSlice,endSlice,activeParticles,levelCounter);
     assert(fabs(newLogSampleProb-testNewLogSampleProb)<1e-12);
-    PathData.Update(startSlice,endSlice,activeParticles,
-		    levelCounter);
 
     double newAction = PathData.Action.calcTotalAction
       (startSlice,endSlice, activeParticles,levelCounter);

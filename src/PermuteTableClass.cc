@@ -24,10 +24,10 @@ void PermuteTableClass::ConstructHTable()
   for (int i=0; i<N; i++) {
     for (int j=0; j<N; j++) {
       dVec disp_ij = PathData(Slice2,j+firstPtcl)-PathData(Slice1,i+firstPtcl);
-      PathData.DistanceTable->PutInBox(disp_ij);
+      PathData.Path.PutInBox(disp_ij);
       double dist_ij = dot (disp_ij,disp_ij);
       dVec disp_ii = PathData(Slice2,i+firstPtcl)-PathData(Slice1,i+firstPtcl);
-      PathData.DistanceTable->PutInBox(disp_ii);
+      PathData.Path.PutInBox(disp_ii);
       double dist_ii = dot (disp_ii,disp_ii);
       HTable(i,j) = exp((-dist_ij + dist_ii)*fourLambdaBetaInv);
       if (HTable(i,j) < epsilon)
@@ -99,7 +99,6 @@ double PermuteTableClass::AttemptPermutation()
   // Now, apply the permutation to the Path
   int firstPtcl=PathData.Species(SpeciesNum).FirstPtcl;
   CurrentCycle.Apply(PathData.Path,firstPtcl,Slice2);
-  PathData.Update(Slice2,CurrentParticles());
 //   int diff = Slice2-Slice1;
 //   int numLevels = 0;
 //   while (diff != 1) {

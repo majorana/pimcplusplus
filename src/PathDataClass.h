@@ -6,11 +6,8 @@
 #include "ActionClass.h"
 #include "PathClass.h"
 #include "CommunicatorClass.h"
-#include "DistanceTableClass.h"
-#include "BCClass.h"
 
 #include "Common/Random/Random.h"
-//#include "DistanceTableFreeClass.h"
 
 /// This is the class that holds all of the information about the paths 
 /// including all of the particles, the momized data, and the action.
@@ -18,11 +15,7 @@
 /// between the processors.
 class PathDataClass
 {
-public:
-  BCClass BC;
-  DistanceTableClass *DistanceTable;
-  
-
+public:  
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
   PIMCCommunicatorClass Communicator;
@@ -35,7 +28,6 @@ public:
   PathClass Path;
   inline void ShiftData(int numTimeSlicesToShift){
     Path.ShiftData(numTimeSlicesToShift);
-    DistanceTable->ShiftData(numTimeSlicesToShift, Communicator);
   }
 
   /// We are probaby going to have to move permutation
@@ -44,25 +36,9 @@ public:
   inline void MoveJoin(int newJoin)
   {
     Path.MoveJoin(Join,newJoin);
-    DistanceTable->MoveJoin(Join,newJoin);
     Join=newJoin;
   }
   
-  inline void Update(int slice,const Array<int,1> &ptclArray)
-  {
-    DistanceTable->Update(slice,ptclArray);
-  }
-
-  inline void Update(int startSlice,int endSlice,
-		     const Array <int,1> &ptclArray,int level)
-  {
-    int skip = 1<<(level+1);
-    int skipo2 = skip >> 1;
-    for (int slice=startSlice;slice<endSlice;slice+=skip){
-      Update(slice+skipo2,ptclArray);
-    }
-  }
-
   /// Returns the number of time slices.
   inline int NumTimeSlices()
   {  return Path.NumTimeSlices();  }
@@ -108,7 +84,7 @@ public:
   }
 
   inline PathDataClass() : 
-    Action(Path), Path(Communicator), BC(Path)
+    Action(*this), Path(Communicator)
   { Join = 1; }
 
 };
@@ -128,14 +104,12 @@ inline void PathDataClass::AcceptMove(int startTimeSlice,int endTimeSlice,
 			       const Array <int,1> &activeParticles)
 {
   Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
-  DistanceTable->AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
 }
 
 inline void PathDataClass::RejectMove(int startTimeSlice,int endTimeSlice,
 			       const Array <int,1> &activeParticles)
 {
   Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticles);  
-  DistanceTable->RejectCopy(startTimeSlice,endTimeSlice,activeParticles);
 }
 
 

@@ -15,14 +15,6 @@ void PIMCClass::Read(IOSectionClass &in)
   PathData.Action.Read(in);
   in.CloseSection();
 
-  // Setup the distance table
-  if (PathData.Path.UsePBC)
-    PathData.DistanceTable = new DistanceTablePBCClass(PathData.Path);
-  else
-    PathData.DistanceTable = new DistanceTableFreeClass(PathData.Path);
-  PathData.Action.DistanceTable = PathData.DistanceTable;
-  PathData.DistanceTable->UpdateAll();
-
   // Read in the Moves
   assert(in.OpenSection("Moves"));
   ReadMoves(in);
@@ -121,6 +113,7 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 void PIMCClass::Run()
 {
   cerr<<"Before the algorithm!!!!"<<endl;
+  PathData.Action.PrintDensityMatrix();
   Algorithm.DoEvent();
   //  Array<MoveClass*,1> Moves;
   cerr<<"hello"<<endl;

@@ -3,6 +3,7 @@ double tau=0.05;
 Section (System)
 {
   int NumTimeSlices=20;
+  Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[3.0,3.0,3.0];
   Section (Particles)
   {
@@ -30,7 +31,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "feb27.h5";
+  string OutFile = "grr.h5";
   Section (Observable)
     {
       string type = "Energy";
@@ -145,7 +146,7 @@ Section (Algorithm)
       //      Section (Move) {string name="eBisection";} 
     }
     Section (Move) {string name = "electronShift"; }
-    //    Section (Observe) {string name = "ppPC";}
+    Section (Observe) {string name = "ppPC";}
     Section (Observe) {string name = "Energy"; }
     //    Section (Observe) {string name = "PathDump";}
   }

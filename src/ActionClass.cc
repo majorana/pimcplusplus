@@ -1,9 +1,10 @@
-#include "ActionClass.h"
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <fstream>
-#include "Common/PairAction/DavidPAClass.h"
+#include "PathDataClass.h"
+
+ActionClass::ActionClass(PathDataClass  &pathdata) : 
+  PathData(pathdata), Path(pathdata.Path)
+{
+}
+
 
 void ActionClass::Read(IOSectionClass& inSection)
 { 
@@ -97,26 +98,36 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 				   Path.ParticleSpeciesNum(ptcl2));
 	//cerr<<"PairIndex: "<<PairIndex<<endl;
 	for (int slice=startSlice;slice<endSlice;slice+=skip){
-	  dVec r1=Path(slice,ptcl1);
-	  dVec r2=Path(slice,ptcl2);
-	  dVec rp1=Path(slice+skip,ptcl1);
-	  dVec rp2=Path(slice+skip,ptcl2);
+// 	  dVec r1=Path(slice,ptcl1);
+// 	  dVec r2=Path(slice,ptcl2);
+// 	  dVec rp1=Path(slice+skip,ptcl1);
+// 	  dVec rp2=Path(slice+skip,ptcl2);
 
 	  dVec r, rp;
 	  double rmag, rpmag;
 
-	  DistanceTable->DistDisp(slice, slice+skip, ptcl1, ptcl2,
-				  rmag, rpmag, r, rp);
+	  PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+				 rmag, rpmag, r, rp);
 	  //	  //	  r=r2-r1;
 	  //	  //	  rp=rp2-rp1;
 	  //	  //	  rmag=sqrt(dot(r,r));
 	  //	  //	  rpmag=sqrt(dot(rp,rp));
 	  //	  cerr<<"rmag "<<rmag<<endl;
 	  //	  cerr<<"rpmag "<<rpmag<<endl;
- 
+
 	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
+	  for (int cnt=0;cnt<NDIM;cnt++){
+	    if (r[cnt]==-0){
+	      r[cnt]=0;
+	    }
+	    if (rp[cnt]==-0){
+	      rp[cnt]=0;
+	    }
+	  }
+	  ///////USEFUL	  cerr<<"r such is: "<<r<<" "<<rp<<" "<<rmag<<" "<<rpmag<<endl;
+	  //////USEFUL 	  cerr<<"Potential: "<<s2<<" "<<q<<" "<<z<<" "<<endl;
 	  double U, dU, V;
 	  U = PairActionVector(PairIndex)->U(q,z,s2, level);//, U, dU, V);
 	  if (U!=0){
@@ -135,13 +146,14 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
     double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
       dVec vel;
-      vel = DistanceTable->Velocity(slice, slice+skip, ptcl1);
+      vel = PathData.Path.Velocity(slice, slice+skip, ptcl1);
+      /////USEFUL (kindof)      cerr<<"vel is "<<vel<<endl;
       double GaussProd = 1.0;
       for (int dim=0; dim<NDIM; dim++) {
 	int NumImage=1;
 	double GaussSum=0.0;
 	for (int image=-NumImage; image<=NumImage; image++) {
-	  double dist = vel[dim]+(double)image*Path.Box[dim];
+	  double dist = vel[dim]+(double)image*Path.GetBox()[dim];
 	  GaussSum += exp(-dist*dist*FourLambdaTauInv);
 	}
 	GaussProd *= GaussSum;
@@ -159,10 +171,20 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
   //    cerr<<"TotalK:  "<<TotalK<<endl;
   //    cerr<<"TotalU:  "<<TotalU<<endl;
   //  }
+  //  cerr<<"My Action is "<<(TotalK + TotalU)<<endl;
   return (TotalK + TotalU);
   
   
 }
 
+void ActionClass::PrintDensityMatrix()
+{
 
+  for (int counter=0;counter<100;counter++){
+    double q=counter/10.0;
+    cerr<<q<<" "<<PairActionVector(0)->U(q,0.0,0.0,0)<<endl;
+  }
+
+}
+  
   

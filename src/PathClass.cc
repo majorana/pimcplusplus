@@ -10,13 +10,23 @@ void PathClass::Read (IOSectionClass &inSection)
   assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
   assert(inSection.ReadVar ("tau", tau));
   Array<double,1> tempBox;
-  UsePBC = inSection.ReadVar ("Box", tempBox);
-  if (UsePBC) {
+  Array<bool,1> tempPeriodic;
+  TinyVector<bool,NDIM> periodic;
+  assert (inSection.ReadVar ("IsPeriodic", tempPeriodic));
+  assert (tempPeriodic.size() == NDIM);
+  bool needBox = false;
+  for (int i=0; i<NDIM; i++) {
+    needBox = needBox || tempPeriodic(i);
+    periodic(i) = tempPeriodic(i);
+  }
+  SetPeriodic (periodic);
+  if (needBox) {
+    assert(inSection.ReadVar ("Box", tempBox));
     cerr << "Using periodic boundary conditions.\n";
     assert(tempBox.size()==NDIM);
-    for (int counter=0;counter<tempBox.size();counter++){
+    for (int counter=0;counter<tempBox.size();counter++)
       Box(counter)=tempBox(counter);
-    }
+    SetBox (Box);
   }
   else 
     cerr << "Using free boundary conditions.\n";

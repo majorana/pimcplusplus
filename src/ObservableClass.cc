@@ -71,12 +71,12 @@ void TotalEnergyClass::Accumulate()
       if (lambda != 0.0) {
 	double FourLambdaTauInv=1.0/(4.0*PathData.Path.Species(species1).lambda*tau);
 	dVec vel;
-	vel = PathData.DistanceTable->Velocity(link, link+1, ptcl1);
+	vel = PathData.Path.Velocity(link, link+1, ptcl1);
 	double Z = 1.0;
 	dVec GaussSum=0.0;
 	for (int dim=0; dim<NDIM; dim++) {
 	  for (int image=-NumImage; image<=NumImage; image++) {
-	    double dist = vel[dim]+(double)image*PathData.Path.Box[dim];
+	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
 	    GaussSum[dim] += exp(-dist*dist*FourLambdaTauInv);
 	  }
 	  Z *= GaussSum[dim];
@@ -84,7 +84,7 @@ void TotalEnergyClass::Accumulate()
 	dVec numSum=0.0;
 	for (int dim=0;dim<NDIM;dim++){
 	  for (int image=-NumImage;image<=NumImage;image++){
-	    double dist = vel[dim]+(double)image*PathData.Path.Box[dim];
+	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
 	    numSum[dim] += 
 	      (-dist*dist*FourLambdaTauInv/tau)*exp(-dist*dist*FourLambdaTauInv);
 	  }
@@ -114,7 +114,7 @@ void TotalEnergyClass::Accumulate()
       for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
 	dVec r, rp;
 	double rmag, rpmag;
-	PathData.DistanceTable->DistDisp(link, link+1, ptcl1, ptcl2,
+	PathData.Path.DistDisp(link, link+1, ptcl1, ptcl2,
 					 rmag, rpmag, r, rp); 
 // 		dVec r1 = PathData(link,ptcl1);
 // 		dVec r2 = PathData(link,ptcl2);
@@ -146,7 +146,7 @@ void TotalEnergyClass::Accumulate()
 	// 	cerr << "PA species1 = " << PA.Particle1.Name << endl;
 	// 	cerr << "PA species2 = " << PA.Particle2.Name << endl;
 	//       	if (((ptcl1==2) && (ptcl2==1)) || ((ptcl1==3) && (ptcl2==0)))
-	/////	sum += dU; // HACK!
+	sum += dU; // HACK!
       }
     }
   }
@@ -237,7 +237,10 @@ void PairCorrelationClass::Read(IOSectionClass& IO)
 void PairCorrelationClass::WriteBlock()
 {
   Array<int,1> HistSum(Histogram.size());
-
+  double norm=0.0;
+  if (Species1==Species2){//Normalizes things when species are same
+    norm=(double)PathData.Species(Species1).NumParticles/(double)(PathData.Species(Species1).NumParticles-1)*1.0/PathData.Path.GetVol();
+  }
   PathData.Communicator.Sum(Histogram, HistSum);
 
   if (PathData.Communicator.MyProc()==0) {
@@ -249,7 +252,7 @@ void PairCorrelationClass::WriteBlock()
       IOSection.WriteVar("Species1", PathData.Species(Species1).Name);
       IOSection.WriteVar("Species2", PathData.Species(Species2).Name);
       Array<double,2> gofrArray(1,HistSum.size());
-      for (int i=0; i<(grid.NumPoints-1); i++){
+      for (int i=0; i<(grid.NumPoints-2); i++){
 	double r1 = grid(i);
 	double r2 = grid(i+1);
 	double r = 0.5*(r1+r2);
@@ -261,12 +264,12 @@ void PairCorrelationClass::WriteBlock()
     }
     else {
       Array<double,1> gofrArray(HistSum.size());
-      for (int i=0; i<(grid.NumPoints-1); i++){
+      for (int i=0; i<(grid.NumPoints-2); i++){
 	double r1 = grid(i);
 	double r2 = grid(i+1);
 	double r = 0.5*(r1+r2);
 	double vol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-	gofrArray(i) = (double) HistSum(i) / (vol*TotalCounts);
+	gofrArray(i) = (double) HistSum(i) / (vol*TotalCounts*norm);
       }
       IOVar->Append(gofrArray);
     }
@@ -317,7 +320,7 @@ void PairCorrelationClass::Accumulate()
 	  
 	  dVec disp;
 	  double dist;
-	  PathData.DistanceTable->DistDisp(slice,ptcl1,ptcl2,dist,disp);
+	  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
 	
 	  #ifdef OLDDEBUG
 	  dVec dispDummy=r2-r1;
@@ -335,7 +338,7 @@ void PairCorrelationClass::Accumulate()
 	    int index=grid.ReverseMap(dist);
 	    Histogram(index)++;
 	  } 
-	  else cerr<<"Distance is outside grid"<<endl;
+	  //	  else cerr<<"Distance is outside grid"<<r1<<" "<<r2<<" "<<disp<<endl;
 	}
   }
   else {
@@ -347,16 +350,16 @@ void PairCorrelationClass::Accumulate()
 	  
 	  dVec disp;
 	  double dist;
-	  PathData.DistanceTable->DistDisp(slice,ptcl1,ptcl2,dist,disp);
+	  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
 	  
 #ifdef OLDDEBUG
 	  dVec dispDummy=r2-r1;
 	  double distDummy=sqrt(dot(dispDummy,dispDummy));
 	  for (int i=0; i<NDIM; i++)
 	    if (disp[i] != dispDummy[i])
-	      cerr << "Bad bad evil inconsistency is DistTable.\n";
+	      cerr << "Bad bad evil inconsistency in DistTable.\n";
 	  if (dist != distDummy)
-	    cerr << "Bad bad evil inconsistency is DistTable.\n";
+	    cerr << "Bad bad evil inconsistency in DistTable.\n";
 #endif
 	  
 	  TotalCounts++;
@@ -383,9 +386,9 @@ void PairCorrelationClass::Initialize()
 void PathDumpClass::Accumulate()
 {
   TimesCalled++;
-  if (TimesCalled % 50==0){
-    WriteBlock();
-  }
+  //  if (TimesCalled % 50==0){
+  WriteBlock();
+  //}
 }
 void PathDumpClass::Read(IOSectionClass &in)
 {
