@@ -72,6 +72,7 @@ void BisectionMoveClass::MakeMove()
     double currActionChange=newAction-oldAction;
     double logAcceptProb=
       -oldLogSampleProb+newLogSampleProb+currActionChange-prevActionChange;
+
     //    cerr << "prevActionChange = " << prevActionChange << endl;
     //    cerr << "logAcceptProb = " << logAcceptProb << " "<<oldLogSampleProb<<endl;
     //    cerr<<"My new action is "<<newAction<<" and my old action was ";

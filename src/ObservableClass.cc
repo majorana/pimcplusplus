@@ -20,7 +20,7 @@ void PairCorrelation::Accumulate()
 	//PathData.Path.MinDistance(PathData(slice,ptcl1),
 	//			  PathData(slice,ptcl2),dist,disp);
 	//cout<<disp<<endl;
-#ifdef DEBUG
+#ifdef OLDDEBUG
 	dVec dispDummy=r2-r1;
 	double distDummy=sqrt(dot(dispDummy,dispDummy));
 	for (int i=0; i<NDIM; i++)

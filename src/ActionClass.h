@@ -123,7 +123,9 @@ public:
   Array<int,2> PairMatrix;
   /// This indexes into the non-existent Saved Pair Actions
   Array<SavedPairActionClass,2> SavedPairActionArray;
-  ActionClass(PathClass  &p_path) : Path(p_path) {};
+  ActionClass(PathClass  &p_path) : Path(p_path) 
+  {
+  }
   /// This holds a reference to the Array of Species
   PathClass &Path;
   /// Temperature

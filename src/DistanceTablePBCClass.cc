@@ -259,8 +259,8 @@ void DistanceTablePBCClass::PutInBox (dVec &r)
   for (int dim=0; dim<NDIM; dim++)
     {
       while (r[dim] > (0.5*Path.Box[dim]))
-	r -= Path.Box[dim];
-      while (r[dim] < -(0.5*Path.Box[dim]))
-	r += Path.Box[dim];
+	r[dim] -= Path.Box[dim];
+      while (r[dim] < (-(0.5*Path.Box[dim])))
+	r[dim] += Path.Box[dim];
     }
 }

@@ -22,8 +22,6 @@ class JoinMoveClass : public MoveClass
 /// by D.M. Ceperley  (Review of Modern Physics 1995) section V.H
 class BisectionMoveClass : public ParticleMoveClass
 {
-
-  
  public:
   ///This is the slice in which the bisection move starts.  It ends up
   ///going to StartTimeSlice+2^NumLevels
@@ -34,7 +32,9 @@ class BisectionMoveClass : public ParticleMoveClass
   /// Function to actually make a bisection move.
   void MakeMove();
   BisectionMoveClass(PathDataClass &myPathData ) : ParticleMoveClass(myPathData)
-  { /* Do nothing for now. */ }
+  { 
+    /* Do nothing for now. */ 
+  }
 };
 
 
