@@ -4,8 +4,8 @@ import stats
 import numarray
 from matplotlib.matlab import *
 from HTMLgen import *
-import povexport
-from visual import *
+#import povexport
+#from visual import *
 
 
 def GetPaths(infile):
@@ -142,8 +142,8 @@ infile.OpenFile(sys.argv[1])
 infile.OpenSection("PathDump")
 pathData=GetPaths(infile)
 infile.CloseSection()
-(visualPath,visualBall)=InitVisualPaths(pathData)
-PlotPaths(pathData,visualPath,visualBall,0)
+#(visualPath,visualBall)=InitVisualPaths(pathData)
+#PlotPaths(pathData,visualPath,visualBall,0)
 
 doc=SeriesDocument()
 infile.OpenSection("RunInfo")
