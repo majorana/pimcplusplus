@@ -283,8 +283,8 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
     kvol *= Path.GetkBox()[i];
   double kavg = pow(kvol,1.0/3.0);
   /// We try to pick kcont to keep reasonable number of k-vectors
-  double kCont = 40.0 * kavg;
-  double kMax = 800 * kavg;
+  double kCont = 50.0 * kavg;
+  double kMax = 150 * kavg;
 
   LPQHI_BasisClass basis;
   basis.Set_rc(rc);
@@ -358,6 +358,20 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
 	/// Now add on part from rc to infinity
 	pa.Ulong_k(level,ki) -= CalcXk(paIndex, level, k, rc);
       }
+      // HACK HACK HACK HACK
+      FILE *fout = fopen ("Vlongk.dat", "w");
+      for (double k=0; k<50.0; k+=0.01) {
+	double U = 0.0;
+	/// Sum over basis functions
+	for (int n=0; n<N; n++)
+	  U += t(n) * basis.c(n,k);
+	fprintf (fout, "%1.16e %1.16e ", k, U);
+	/// Now add on part from rc to infinity
+	U -= CalcXk(paIndex, level, k, rc);
+	fprintf (fout, "%1.16e \n", U);
+      }
+      fclose (fout);
+
     }
   }
 }

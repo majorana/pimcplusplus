@@ -1,7 +1,7 @@
 #include "ActionClass.h"
 #include "PathDataClass.h"
 
-double kcutoff = 40.0;
+double kcutoff = 25.0;
 
 void SetupPathNaCl (PathClass &path)
 {
@@ -160,7 +160,7 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
   action.PairMatrix(1,1)=1;
   action.PairMatrix(0,1)=2;
   action.PairMatrix(1,0)=2;
-  int numKnots=10;
+  int numKnots=7;
   double kCut=kcutoff;
   action.OptimizedBreakup(numKnots,kCut);
   FILE *fout = fopen ("p-plong.dat", "w");
