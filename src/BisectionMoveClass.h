@@ -28,7 +28,7 @@ class BisectionMoveClass : public ParticleMoveClass
   int StartTimeSlice; 
   ///Number of levels the bisection move works on 
   int NumLevels;
-
+  void Read(InputSectionClass *moveInput);
   /// Function to actually make a bisection move.
   void MakeMove();
   BisectionMoveClass(PathDataClass &myPathData ) : ParticleMoveClass(myPathData)

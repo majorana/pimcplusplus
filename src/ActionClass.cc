@@ -3,6 +3,25 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "InputOutput.h"
+
+void ActionClass::Read(InputSectionClass *theInput)
+{
+  cerr<<"I AM PRINTING A TREE NOW!!!\n";
+  theInput->printTree(theInput);
+  cerr<<endl<<endl<<endl;
+
+  while (theInput->FindSection("PairAction",theInput,false)){
+
+    PairActionVector.resizeAndPreserve(PairActionVector.size()+1);
+    PairMatrix.resizeAndPreserve(PairMatrix.extent(0)+1,
+				 PairMatrix.extent(1)+1);
+    PairActionVector(PairActionVector.size()-1).Read(theInput);
+				       
+  }
+  ///So there is a tau in each pairaction vector which is hopefully the same
+  tau=PairActionVector(0).tau;
+}
 
 double ActionClass::calcTotalAction(int startSlice, int endSlice, 
 				    Array<int,1> changedParticles,
@@ -118,6 +137,16 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 
 }
 
+ 
+void PairActionClass::Read(InputSectionClass *theInput)
+{
+  string fileName;
+  theInput->ReadVar("file",fileName);
+  ReadDavidSquarerFile(fileName.c_str());
+  
+
+} 
+     
 
 string PairActionClass::SkipTo(ifstream &infile,string skipToString)
 {

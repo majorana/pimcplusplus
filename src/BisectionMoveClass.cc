@@ -30,6 +30,22 @@ void ShiftMoveClass::MakeMove()
     
 }
 
+void BisectionMoveClass::Read(InputSectionClass *moveInput)
+{
+  moveInput->ReadVar("NumLevels",NumLevels);
+  int tempNumParticlesToMove;
+  moveInput->ReadVar("NumParticlesToMove",tempNumParticlesToMove);
+  SetNumParticlesToMove(tempNumParticlesToMove);
+  StartTimeSlice=0;
+
+  ///HACK! HACK! HACK! HACK! Have to Find right way to input this.
+  Array<int,1> activeSpecies(1);
+  activeSpecies(0) = 0;
+  SetActiveSpecies(activeSpecies);
+
+
+}
+
     
 
 void BisectionMoveClass::MakeMove()

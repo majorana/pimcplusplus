@@ -1,7 +1,7 @@
 #ifndef PATH_CLASS_H
 #define PATH_CLASS_H
 
-
+#include "InputOutput.h"
 #include "MirroredArrayClass.h"
 #include "SpeciesClass.h"
 
@@ -16,6 +16,8 @@ private:
   int TimeSliceNumber;
 public:
   MirroredArrayClass1D<int> Permutation;
+
+  void Read(InputSectionClass *section);
   ///A scratch array to hold a boolean indicating whether we've
   ///looped over this particle yet
   Array<bool,1> DoPtcl;
@@ -92,6 +94,7 @@ public:
       SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
     }
     Path.Resize(TimeSliceNumber,numParticles);
+    cerr<<"I've resized to "<<TimeSliceNumber<<" "<<numParticles<<endl;
     Permutation.Resize(numParticles);
     SpeciesNumber.resize(numParticles);
     DoPtcl.resize(numParticles);

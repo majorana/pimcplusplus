@@ -9,7 +9,8 @@
 #include "ObservableClass.h"
 #include "DistanceTablePBCClass.h"
 #include "DistanceTableFreeClass.h"
-
+#include "InputOutput.h"
+#include "InputOutputASCII.h"
 
 
 void setupAction(ActionClass &myActionClass)
@@ -28,65 +29,69 @@ void setupAction(ActionClass &myActionClass)
 }
 
 
-void setupIDParticleArray(PathDataClass &myPathData)
-{
 
-  //  SpeciesArrayClass &myIDParticles=myPathData.SpeciesArray;
-  double tau=1.0; //This better be the same as in the squarer file! UGly!
-  int NumTimeSlices=50;
 
-  FermionClass *myElectronptr = new FermionClass;
-  FermionClass *myProtonptr = new FermionClass;
-  myPathData.Path.SetTimeSlices(NumTimeSlices);
-  //  (*myElectronptr).NumParticles=1;
-  //  (*myProtonptr).NumParticles=1;
-  (*myElectronptr).lambda=0.5;
-  (*myProtonptr).lambda=0;
-  (*myElectronptr).NumParticles=1;
-  (*myProtonptr).NumParticles=1;
-  myPathData.Path.AddSpecies(myElectronptr);
-  myPathData.Path.AddSpecies(myProtonptr);
-  myPathData.Path.Allocate();
+
+
+// void setupIDParticleArray(PathDataClass &myPathData)
+// {
+
+//   //  SpeciesArrayClass &myIDParticles=myPathData.SpeciesArray;
+//   double tau=1.0; //This better be the same as in the squarer file! UGly!
+//   int NumTimeSlices=50;
+
+//   FermionClass *myElectronptr = new FermionClass;
+//   FermionClass *myProtonptr = new FermionClass;
+//   myPathData.Path.SetTimeSlices(NumTimeSlices);
+//   //  (*myElectronptr).NumParticles=1;
+//   //  (*myProtonptr).NumParticles=1;
+//   (*myElectronptr).lambda=0.5;
+//   (*myProtonptr).lambda=0;
+//   (*myElectronptr).NumParticles=1;
+//   (*myProtonptr).NumParticles=1;
+//   myPathData.Path.AddSpecies(myElectronptr);
+//   myPathData.Path.AddSpecies(myProtonptr);
+//   myPathData.Path.Allocate();
     
-  //  (*myElectronptr).Path.Resize(1,NumTimeSlices);
-  //  (*myProtonptr).Path.Resize(1,NumTimeSlices);
-  SetMode(BOTHMODE);
-  dVec zeroVector=0;
-  for (int counter=(*myProtonptr).FirstPtcl;counter<=(*myProtonptr).LastPtcl;counter++){
-    for (int counter2=0;counter2<NumTimeSlices;counter2++){
-      myPathData.Path.SetPos(counter2,counter,zeroVector);
-    }
-  }
-  //  for  (int counter=0;counter<(*myProtonptr).NumParticles();counter++){
-  //    for (int counter2=0;counter2<NumTimeSlices;counter2++){
-  //      (*myProtonptr).Path.SetPos(counter,counter2,zeroVector);
-  //    }
-  //  }
-  double sigma=sqrt(2*0.5*tau);
-  dVec electronVector;
-  for (int counter=(*myElectronptr).FirstPtcl;counter<=(*myElectronptr).LastPtcl;counter++){
-    for (int counter2=0;counter2<NumTimeSlices;counter2++){
-      electronVector=GaussianRandomVec(sigma);
-      myPathData.Path.SetPos(counter2,counter,electronVector);
-    }
-  }
-  //  for (int counter=0;counter<(*myElectronptr).NumParticles();counter++){
-  //    for (int counter2=0;counter2<NumTimeSlices;counter2++){
-  //a      electronVector=GaussianRandomVec(sigma);
-  //      (*myElectronptr).Path.SetPos(counter,counter2,electronVector);
-  //    }
-  //  }
-  //  (*myElectronptr).InitPermMatrix();
-  //  (*myProtonptr).InitPermMatrix();
+//   //  (*myElectronptr).Path.Resize(1,NumTimeSlices);
+//   //  (*myProtonptr).Path.Resize(1,NumTimeSlices);
+//   SetMode(BOTHMODE);
+//   dVec zeroVector=0;
+//   for (int counter=(*myProtonptr).FirstPtcl;counter<=(*myProtonptr).LastPtcl;counter++){
+//     for (int counter2=0;counter2<NumTimeSlices;counter2++){
+//       myPathData.Path.SetPos(counter2,counter,zeroVector);
+//     }
+//   }
+//   //  for  (int counter=0;counter<(*myProtonptr).NumParticles();counter++){
+//   //    for (int counter2=0;counter2<NumTimeSlices;counter2++){
+//   //      (*myProtonptr).Path.SetPos(counter,counter2,zeroVector);
+//   //    }
+//   //  }
+//   double sigma=sqrt(2*0.5*tau);
+//   dVec electronVector;
+//   for (int counter=(*myElectronptr).FirstPtcl;counter<=(*myElectronptr).LastPtcl;counter++){
+//     for (int counter2=0;counter2<NumTimeSlices;counter2++){
+//       electronVector=GaussianRandomVec(sigma);
+//       myPathData.Path.SetPos(counter2,counter,electronVector);
+//     }
+//   }
+//   //  for (int counter=0;counter<(*myElectronptr).NumParticles();counter++){
+//   //    for (int counter2=0;counter2<NumTimeSlices;counter2++){
+//   //a      electronVector=GaussianRandomVec(sigma);
+//   //      (*myElectronptr).Path.SetPos(counter,counter2,electronVector);
+//   //    }
+//   //  }
+//   //  (*myElectronptr).InitPermMatrix();
+//   //  (*myProtonptr).InitPermMatrix();
 
 
-  //  ProtonsClass &myProtons = *myProtonptr;
-  //  ElectronsClass &myElectrons= *myElectronptr;
-  //  myPathData.Path.SpeciesArray.Resize(2);
-  //  myPathData.Path.SpeciesArray.Set(0,myElectrons);
-  //  myPathData.Path.SpeciesArray.Set(1,myProtons);
-  //  myPathData.NumTimeSlices=NumTimeSlices;
-}
+//   //  ProtonsClass &myProtons = *myProtonptr;
+//   //  ElectronsClass &myElectrons= *myElectronptr;
+//   //  myPathData.Path.SpeciesArray.Resize(2);
+//   //  myPathData.Path.SpeciesArray.Set(0,myElectrons);
+//   //  myPathData.Path.SpeciesArray.Set(1,myProtons);
+//   //  myPathData.NumTimeSlices=NumTimeSlices;
+// }
   
 
 void setupMove(BisectionMoveClass &myBisectionMove,ShiftMoveClass &myShiftMove, PathDataClass &thePathData)
@@ -172,7 +177,14 @@ int main(int argc, char **argv)
   PC.Species2 = 1;
   PC.Initialize();
   //  ActionClass myActionClass;
-  setupIDParticleArray(myPathData);
+  //  setupIDParticleArray(myPathData);
+  InputSectionClass *theInput=new SpecialInputSectionClass<VarASCIIClass>();
+  theInput->ReadFile("inputFile");
+  InputSectionClass *pathInput;
+  theInput->FindSection("PathInfo",pathInput,true);
+  pathInput->Rewind();
+  myPathData.Path.Read(pathInput);
+
 #ifdef PARALLEL
   myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
 #endif

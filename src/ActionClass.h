@@ -37,6 +37,7 @@ private:
   /// Reads a Fortran 3 tensor
   void ReadFORTRAN3Tensor(ifstream &infile, Array<double,3> &tempUkj);
 public:
+  void Read(InputSectionClass *theInput);
   /// This stores the coefficients of the expansion specified above.
   /// The array index is over the levels.  You call it with the q
   /// value and a temporary array to get all of the values in that
@@ -114,6 +115,7 @@ class ActionClass
 {
 private:
 public:
+  void Read(InputSectionClass *theInput);
   DistanceTableClass *DistanceTable;
   /// This holds all of the Pair Action Classes
   Array<PairActionClass,1> PairActionVector;
