@@ -97,7 +97,6 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
   //   Path.RefPath.AcceptCopy();
 
   for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
-    const dVec &rRef = Path.RefPath(refPtcl);
     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
       const dVec &r = Path(slice, ptcl);
       dVec diff;
@@ -133,13 +132,12 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
     gradient(ptcl-first) = 0.0;
     dVec &r = Path(slice, ptcl);
     for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
-      dVec &rRef = Path.RefPath(refPtcl);
       dVec diff;
       double dist;
       Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
       dVec gradPhi;
       for (int dim=0; dim<NDIM; dim++)
-	gradPhi[dim] = ActionSplines(sliceDiff)[dim].Deriv(diff[dim]) 
+	gradPhi[dim] = -ActionSplines(sliceDiff)[dim].Deriv(diff[dim]) 
 	  * DetMatrix(refPtcl-first, ptcl-first);
       //dVec gradPhi = -2.0*C*diff*DetMatrix(refPtcl-first,ptcl-first);
 
@@ -345,5 +343,5 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
     uNode += prod/(lambda*levelTau*levelTau)/expm1(prod/(lambda*levelTau));
     dist1 = dist2;
   }
-  return uNode;
+  return uNode/(double)Path.TotalNumSlices;
 }
