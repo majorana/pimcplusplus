@@ -27,6 +27,7 @@ protected:
   Array<dVecInt,2> LowerDimImageMasks;
   Array<dVec,2> LowerDimVectorMasks;
   int FirstLowerDimSpecies;
+  int FirstLowerDimPtcl;
   inline void ArrayIndex(int ptcl1, int ptcl2, 
 			 int &index, double &sign) const;
 public:
@@ -198,7 +199,7 @@ inline DistanceTableClass::DistanceTableClass (PathClass &myPath) :
   ///Initialize the ImageVectors
   int NumVectors = 1;
   for (int i=0; i<NDIM; i++)
-    NumVectors >>= 2;
+    NumVectors <<= 2;
   ImageVectors.resize (NumVectors);
   
   for (int i=0; i<NumVectors; i++)
@@ -235,6 +236,13 @@ inline DistanceTableClass::DistanceTableClass (PathClass &myPath) :
 	LowerDimVectorMasks(species1,species2) = vectorMask;
       }
   }  
+  if (FirstLowerDimSpecies<Path.NumSpecies()){
+    FirstLowerDimPtcl=Path.Species(FirstLowerDimSpecies).FirstPtcl;
+  }
+  else {
+    FirstLowerDimPtcl=Path.NumParticles();
+  }
+
 }
 
 

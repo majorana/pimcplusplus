@@ -180,7 +180,8 @@ int main(int argc, char **argv)
   DistanceTableFreeClass *myDistTable=
     new DistanceTableFreeClass(myPathData.Path);
   myPathData.DistanceTable=myDistTable;
-  
+  myPathData.Action.DistanceTable=myDistTable;
+  myPathData.DistanceTable->UpdateAll();
   //  cerr<<"The size of the SpeciesArray is ";
   //  cerr << (myBisectionMove.PathData)->SpeciesArray.size()<<endl;
   //  cerr<<"What the action class thinks the size is: ";

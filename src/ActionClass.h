@@ -5,6 +5,10 @@
 #include "SpeciesClass.h"
 #include "MemoizedDataClass.h"
 #include "PathClass.h"
+//#include "DistanceTablePBCClass.h"
+//#include "DistanceTableFreeClass.h"
+#include "DistanceTableClass.h"
+
 // #include "SpeciesArrayClass.h"
 // #include "ObservableClass.h"
 
@@ -27,7 +31,7 @@ class PairActionClass
 private:
   ///Holds the Ukj coefficients for a given q
   Array<double,1> TempukjArray;
-
+  DistanceTableClass *DistanceTable;
   /// Skips to the next string in the file whose substring matches skipToString
   string SkipTo(ifstream &infile, string skipToString);
   /// Reads a Fortran 3 tensor
@@ -112,6 +116,8 @@ class ActionClass
 
 private:
 public:
+  DistanceTableClass *DistanceTable;
+
   /// This holds all of the Pair Action Classes
   Array<PairActionClass,1> PairActionVector;
   /// Holds indices to which PairActionClass in the PairAcctionVector

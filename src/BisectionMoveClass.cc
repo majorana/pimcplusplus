@@ -40,7 +40,7 @@ void BisectionMoveClass::MakeMove()
   Array<int,1> theParticles;
   int EndTimeSlice=(1<<NumLevels)+StartTimeSlice;
   double prevActionChange=0;
-  
+
   //  cerr<<"At the beginning fo the makeMove the size is ";
   //  cerr <<  PathData->SpeciesArray.size()<<endl;
   ChooseParticles();   
@@ -60,6 +60,9 @@ void BisectionMoveClass::MakeMove()
     SetMode(NEWMODE);
     newLogSampleProb = PathData.Action.SampleParticles
       (StartTimeSlice,EndTimeSlice,ActiveParticles,levelCounter);
+    PathData.Update(StartTimeSlice,EndTimeSlice,ActiveParticles,
+		    levelCounter);
+		      
     //cerr << "newLogSampleProb = " << newLogSampleProb << endl;
     //cerr << "oldLogSampleProb = " << oldLogSampleProb << endl;
     double newAction = PathData.Action.calcTotalAction
@@ -86,11 +89,11 @@ void BisectionMoveClass::MakeMove()
     PathData.AcceptMove(StartTimeSlice,EndTimeSlice,ActiveParticles);
     NumAccepted++;
     
-    //cout<<"I'm accepting! I'm accepting!"<<endl;
+    cout<<"I'm accepting! I'm accepting!"<<endl;
   }
   else {
     PathData.RejectMove(StartTimeSlice,EndTimeSlice,ActiveParticles);
-    //  cout<<"I'm rejecting! I'm rejecting!"<<endl;
+    cout<<"I'm rejecting! I'm rejecting!"<<endl;
   }
   NumMoves++;
     

@@ -10,6 +10,11 @@ void PairCorrelation::Accumulate()
 	dVec r1=PathData(slice,ptcl1);
 	dVec r2=PathData(slice,ptcl2);
 	dVec diff=r1-r2;
+	dVec disp;
+	//	PathData.DistanceTable->UpdateAll();
+	double distDummy;
+	PathData.DistanceTable->DistDisp(slice,ptcl1,ptcl2,distDummy,disp);
+	cout<<"The two things are: "<<disp<<diff<<endl;
 	double dist=sqrt(dot(diff,diff));
 	TotalCounts++;
 	if (dist<grid.End){

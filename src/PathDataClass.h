@@ -29,8 +29,8 @@ public:
   inline void ShiftData(int numTimeSlicesToShift){
     Path.ShiftData(numTimeSlicesToShift,Communicator);
   }
-
   DistanceTableClass *DistanceTable;
+
   /// This object functions as an array of SpeciesClass objects.
 
   /// This defines a communicator for the group of processors working
@@ -48,8 +48,16 @@ public:
       Path.MoveJoin(Join,newJoin);
       Join=newJoin;
     }
-  inline void Update(int timeSlice,Array <int,1> ptclArray){
-    DistanceTable->Update(timeSlice,ptclArray);
+  inline void Update(int startSlice,int endSlice,
+		     Array <int,1> ptclArray,int level){
+
+    int skip = 1<<(level+1);
+    for (int slice=startSlice;slice<=endSlice;slice+=skip){
+      DistanceTable->Update(slice,ptclArray);
+    }
+
+
+
   }
 
 
