@@ -105,7 +105,7 @@ public:
       readVarSuccess=Parent->ReadVar(name,var);
     }
     else {
-      cerr<<"Couldn't find variable "<<name<<endl;
+      //cerr<<"Couldn't find variable "<<name<<endl;
       return false;
     }  
     return readVarSuccess;	 
