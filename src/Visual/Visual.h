@@ -21,15 +21,26 @@ public:
 
 typedef enum {LINES, TUBES} PathTypeType;
 
+class OnePath
+{
+public:
+  Array<Vec3,1> Path;
+  Array<Vec3,1> Color;
+  bool Closed;
+};
+
 class VisualClass : public Gtk::Window
 {
 protected:
-  // signal handlers:
-  void on_button_quit_clicked();
-
-  Array<double,4> Paths;
+  //////////
+  // Data //
+  //////////
+  Array<double,4> PathArray;
+  Array<int,2> PermArray;
   Array<SpeciesClass,1> Species;
+  vector<OnePath*> Paths;
   Vec3 Box;
+  void MakePaths(int frame);
 
   // member widgets:
   Gtk::VBox m_VBox;
@@ -55,6 +66,9 @@ protected:
   void PutInBox();
 
   Gtk::FileChooserDialog FileChooser;
+
+  
+
 public:
   PathVisClass PathVis;
 

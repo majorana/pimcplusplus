@@ -9,8 +9,8 @@ void VisualClass::MakeFrame(int frame)
   
   PathVis.Objects.resize(0);
 
-  int numPtcls = Paths.extent(1);
-  int numSlices = Paths.extent(2);
+  int numPtcls = PathArray.extent(1);
+  int numSlices = PathArray.extent(2);
 
 
   Array<Vec3,1> onePath(numSlices);
@@ -19,9 +19,9 @@ void VisualClass::MakeFrame(int frame)
 	 ptcl<=Species(si).LastParticle; ptcl++) {
       if (Species(si).lambda != 0.0) {
 	for (int slice=0; slice<numSlices; slice++) {
-	  onePath(slice)[0] = Paths(frame,ptcl,slice,0);
-	  onePath(slice)[1] = Paths(frame,ptcl,slice,1);
-	  onePath(slice)[2] = Paths(frame,ptcl,slice,2);
+	  onePath(slice)[0] = PathArray(frame,ptcl,slice,0);
+	  onePath(slice)[1] = PathArray(frame,ptcl,slice,1);
+	  onePath(slice)[2] = PathArray(frame,ptcl,slice,2);
 	}
 	PathObject* pathObj = new PathObject;
 	if (si == 0)
@@ -36,16 +36,13 @@ void VisualClass::MakeFrame(int frame)
       }
       else {
 	Vec3 pos;
-	pos[0] = Paths(frame, ptcl, 0, 0);
-	pos[1] = Paths(frame, ptcl, 0, 1);
-	pos[2] = Paths(frame, ptcl, 0, 2);
+	pos[0] = PathArray(frame, ptcl, 0, 0);
+	pos[1] = PathArray(frame, ptcl, 0, 1);
+	pos[2] = PathArray(frame, ptcl, 0, 2);
 
 	SphereObject* sphere = new SphereObject;
 	sphere->SetPos (pos);
-	if (ptcl != 30)
-	  sphere->SetColor (Vec3(1.0, 0.0, 0.0));
-	else
-	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
+	sphere->SetColor (Vec3(1.0, 0.0, 1.0));
 	PathVis.Objects.push_back(sphere);
       }
     }
@@ -95,10 +92,11 @@ void VisualClass::Read(string fileName)
 
   assert(in.OpenSection("Observables"));
   assert(in.OpenSection("PathDump"));
-  assert(in.ReadVar ("Path", Paths));
+  assert(in.ReadVar ("Path", PathArray));
+  assert(in.ReadVar ("Permutation", PermArray));
   PutInBox();
 
-  FrameAdjust.set_upper(Paths.extent(0)-1);
+  FrameAdjust.set_upper(PathArray.extent(0)-1);
   
   in.CloseSection();
   in.CloseFile();
@@ -108,15 +106,15 @@ void VisualClass::Read(string fileName)
 
 void VisualClass::PutInBox()
 {
-  for (int frame=0; frame<Paths.extent(0); frame++) 
-    for (int ptcl=0; ptcl<Paths.extent(1); ptcl++) 
+  for (int frame=0; frame<PathArray.extent(0); frame++) 
+    for (int ptcl=0; ptcl<PathArray.extent(1); ptcl++) 
       for (int dim=0; dim<3; dim++) {
-	while (Paths(frame,ptcl,0,dim) > 0.5*Box[dim])
-	  for (int slice=0; slice<Paths.extent(2); slice++)
-	    Paths(frame,ptcl,slice,dim) -= Box[dim];
-	while (Paths(frame,ptcl,0,dim) < -0.5*Box[dim])
-	  for (int slice=0; slice<Paths.extent(2); slice++)
-	    Paths(frame,ptcl,slice,dim) += Box[dim];
+	while (PathArray(frame,ptcl,0,dim) > 0.5*Box[dim])
+	  for (int slice=0; slice<PathArray.extent(2); slice++)
+	    PathArray(frame,ptcl,slice,dim) -= Box[dim];
+	while (PathArray(frame,ptcl,0,dim) < -0.5*Box[dim])
+	  for (int slice=0; slice<PathArray.extent(2); slice++)
+	    PathArray(frame,ptcl,slice,dim) += Box[dim];
       }
 	  
 }
@@ -146,8 +144,8 @@ VisualClass::VisualClass()
 
   // VisualClass quit button.
 
-  m_ButtonQuit.signal_clicked().connect(
-    sigc::mem_fun(*this, &VisualClass::on_button_quit_clicked));
+  m_ButtonQuit.signal_clicked().connect
+    (sigc::mem_fun(*this, &VisualClass::Quit));
   FrameScale.set_adjustment (FrameAdjust);
   FrameScale.signal_value_changed().connect
     (sigc::mem_fun(*this, &VisualClass::FrameChanged));
@@ -276,12 +274,6 @@ void VisualClass::ResetView()
 
 void VisualClass::Quit()
 {
-  GdkEventAny event;
-  hide();
-}
-
-void VisualClass::on_button_quit_clicked()
-{
   Gtk::Main::quit();
 }
 
@@ -332,4 +324,54 @@ void VisualClass::LineToggle()
     PathType = TUBES;
 
   FrameChanged();
+}
+
+
+void VisualClass::MakePaths(int frame)
+{
+  int numPtcls  = PathArray.extent(1);
+  int numSlices = PathArray.extent(2);
+  Array<bool,1> used(numPtcls);
+  used = false;
+
+  for (int i=0; i<Paths.size(); i++)
+    delete Paths[i];
+  Paths.resize(0);
+
+  vector<vector<int> > loopList;
+
+  // Constuct list of permuting loops.
+  for (int ptcl=0; ptcl<numPtcls; ptcl++) 
+    if (!used(ptcl)) {
+      vector<int> loop;
+      int permPtcl = ptcl;
+      while (permPtcl != ptcl) {
+	loop.push_back(ptcl);
+	used(permPtcl) = true;
+	permPtcl = PermArray(frame, permPtcl);
+      }
+      loopList.push_back(loop);
+    }
+
+  Paths.resize(loopList.size());
+  for (int li=0; li<loopList.size(); li++) {
+    vector<int> &loop = loopList[li];
+    OnePath &path = (*new OnePath);
+    path.Path.resize(numSlices*loop.size());
+    path.Color.resize(numSlices*loop.size());
+    int offset = 0;
+    for (int pi=0; pi<loop.size(); pi++) {
+      int ptcl = loop[pi];
+      for (int slice=0; slice < numSlices; slice++) {
+	path.Path(slice+offset)[0] = PathArray(frame,ptcl,slice,0);
+	path.Path(slice+offset)[1] = PathArray(frame,ptcl,slice,1);
+	path.Path(slice+offset)[2] = PathArray(frame,ptcl,slice,2);
+      }
+      offset +=  numSlices;
+    }
+    Paths.push_back (&path);
+  }
+  used = false;
+  
+
 }

@@ -12,8 +12,13 @@ void PathObject::LinesSet(Array<Vec3,1> &path)
   fcolor[3] = 1.0;
   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
   glBegin(GL_LINE_STRIP);
-  for (int i=0; i<path.size(); i++)
+  for (int i=0; i<path.size(); i++) {
+//     fcolor[0] = Color[0]*(double)i/(double)(path.size()-1);
+//     fcolor[1] = Color[1]*(double)i/(double)(path.size()-1);
+//     fcolor[2] = Color[2]*(double)i/(double)(path.size()-1);
+//     glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
     glVertex3dv ((double*)&path(i));
+  }
   glEnd();
   End();
 }
@@ -55,9 +60,9 @@ void PathObject::TubesSet(Array<Vec3,1> &path)
 
   float colors[N+3][3];
   for (int i=0; i<N+3; i++) {
-    colors[i][0] = Color[0];    
-    colors[i][1] = Color[1];
-    colors[i][2] = Color[2];
+    colors[i][0] = Color[0];//*(double)i/(double)(path.size()-1);
+    colors[i][1] = Color[1];//*(double)i/(double)(path.size()-1);
+    colors[i][2] = Color[2];//*(double)i/(double)(path.size()-1);
   }
   glePolyCylinder (N+3, pointArray,
 		   colors, Radius);

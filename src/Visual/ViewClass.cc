@@ -98,17 +98,17 @@ void ViewClass::GLtransform()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   //  gluPerspective(40.0, 1.0, 1.0, 10.0);
-  gluPerspective(40.0, 1.0, 1.0, 3.0*Distance);
+  gluPerspective(40.0, 1.0, 1.0, 8.0*Distance/Scale);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  gluLookAt(0.0, 0.0, Distance,
+  gluLookAt(0.0, 0.0, Distance/Scale,
             0.0, 0.0, 0.0,
             0.0, 1.0, 0.0);
   
-  glTranslatef(0.0, 0.0, -Distance);
-  glScaled(Scale, Scale, Scale);
+  glTranslatef(0.0, 0.0, -Distance/Scale);
+  //  glScaled(Scale, Scale, Scale);
   glMultMatrixd(&RotMat[0][0]);
 }
 
