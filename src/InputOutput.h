@@ -151,6 +151,10 @@ public:
   virtual void WriteVar(string name, Array<double,1> &v) = 0;
   virtual void WriteVar(string name, Array<double,2> &v) = 0;
   virtual void WriteVar(string name, Array<double,3> &v) = 0;
+  virtual void WriteVar(string name, int T)=0;
+  virtual void WriteVar(string name, Array<int,1> &v) = 0;
+  virtual void WriteVar(string name, Array<int,2> &v) = 0;
+  virtual void WriteVar(string name, Array<int,3> &v) = 0;
 };
 
 

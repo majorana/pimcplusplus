@@ -459,3 +459,138 @@ void OutputSectionHDF5Class::WriteVar(string name, Array<double,3> &v)
 }
 
 
+
+void OutputSectionHDF5Class::WriteVar(string name, int T)
+{
+  hid_t dataspace_id, dataset_id, loc_id;
+
+  if (IsOpen)
+    {
+      if (SectionStack.empty()) 
+	cerr << "Error in WriteVar:  No open sections.\n";
+      else
+	{
+	  loc_id = SectionStack.top().GroupID;
+	  
+	  hsize_t dim[1];
+	  dim[0] = 1;
+	  dataspace_id = H5Screate_simple(1, dim, NULL);
+	  dataset_id =   H5Dcreate(loc_id, name.c_str(),
+				   H5T_NATIVE_INT, dataspace_id,
+				   H5P_DEFAULT);
+	  herr_t status = H5Dwrite(dataset_id, H5T_NATIVE_INT, 
+				   H5S_ALL, H5S_ALL, H5P_DEFAULT, &T);
+	  if (status < 0)
+	    cerr << "Error writing int to HDF5 file in WriteVar.\n";
+	  H5Dclose (dataset_id);
+	  H5Sclose (dataspace_id);
+	}
+    }
+  else
+    cerr << "File not open in OutputSectionHDF5Class::WriteVar.\n";
+}
+
+
+
+
+void OutputSectionHDF5Class::WriteVar(string name, Array<int,1> &v)
+{
+  hid_t dataspace_id, dataset_id, loc_id;
+
+  if (IsOpen)
+    {
+      if (SectionStack.empty()) 
+	cerr << "Error in WriteVar:  No open sections.\n";
+      else
+	{
+	  loc_id = SectionStack.top().GroupID;
+	  
+	  hsize_t dim[1];
+	  for(int i=0; i<1; i++)
+	    dim[i] = v.extent(i);
+	  dataspace_id = H5Screate_simple(1, dim, NULL);
+	  dataset_id =   H5Dcreate(loc_id, name.c_str(),
+				   H5T_NATIVE_INT, dataspace_id,
+				   H5P_DEFAULT);
+	  herr_t status = H5Dwrite(dataset_id, H5T_NATIVE_INT, 
+				   H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+				   v.data());
+	  if (status < 0)
+	    cerr << "Error writing int to HDF5 file in WriteVar.\n";
+	  H5Dclose (dataset_id);
+	  H5Sclose (dataspace_id);
+	}
+    }
+  else
+    cerr << "File not open in OutputSectionHDF5Class::WriteVar.\n";
+}
+
+
+
+void OutputSectionHDF5Class::WriteVar(string name, Array<int,2> &v)
+{
+  hid_t dataspace_id, dataset_id, loc_id;
+
+  if (IsOpen)
+    {
+      if (SectionStack.empty()) 
+	cerr << "Error in WriteVar:  No open sections.\n";
+      else
+	{
+	  loc_id = SectionStack.top().GroupID;
+	  
+	  hsize_t dim[2];
+	  for(int i=0; i<2; i++)
+	    dim[i] = v.extent(i);
+	  dataspace_id = H5Screate_simple(2, dim, NULL);
+	  dataset_id =   H5Dcreate(loc_id, name.c_str(),
+				   H5T_NATIVE_INT, dataspace_id,
+				   H5P_DEFAULT);
+	  herr_t status = H5Dwrite(dataset_id, H5T_NATIVE_INT, 
+				   H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+				   v.data());
+	  if (status < 0)
+	    cerr << "Error writing int to HDF5 file in WriteVar.\n";
+	  H5Dclose (dataset_id);
+	  H5Sclose (dataspace_id);
+	}
+    }
+  else
+    cerr << "File not open in OutputSectionHDF5Class::WriteVar.\n";
+}
+
+
+
+void OutputSectionHDF5Class::WriteVar(string name, Array<int,3> &v)
+{
+  hid_t dataspace_id, dataset_id, loc_id;
+
+  if (IsOpen)
+    {
+      if (SectionStack.empty()) 
+	cerr << "Error in WriteVar:  No open sections.\n";
+      else
+	{
+	  loc_id = SectionStack.top().GroupID;
+	  
+	  hsize_t dim[3];
+	  for(int i=0; i<3; i++)
+	    dim[i] = v.extent(i);
+	  dataspace_id = H5Screate_simple(3, dim, NULL);
+	  dataset_id =   H5Dcreate(loc_id, name.c_str(),
+				   H5T_NATIVE_INT, dataspace_id,
+				   H5P_DEFAULT);
+	  herr_t status = H5Dwrite(dataset_id, H5T_NATIVE_INT, 
+				   H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+				   v.data());
+	  if (status < 0)
+	    cerr << "Error writing int to HDF5 file in WriteVar.\n";
+	  H5Dclose (dataset_id);
+	  H5Sclose (dataspace_id);
+	}
+    }
+  else
+    cerr << "File not open in OutputSectionHDF5Class::WriteVar.\n";
+}
+
+
