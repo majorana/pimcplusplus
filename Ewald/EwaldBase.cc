@@ -1,16 +1,16 @@
 #include "EwaldBase.h"
 
-void Ewald::SetPot (Potential &pot)
+void EwaldClass::SetPot (Potential &pot)
 {
   Pot = &pot;
 }
 
-void Ewald::SetBox(TinyMatrix<double,3,3> latvecs)
+void EwaldClass::SetBox(TinyMatrix<double,3,3> latvecs)
 {
   LatVecs = latvecs;
 }
 
-void Ewald::SetBox(TinyVector<double,3> box)
+void EwaldClass::SetBox(TinyVector<double,3> box)
 {
   LatVecs = 0.0;
   LatVecs(0,0) = box(0);
@@ -18,12 +18,12 @@ void Ewald::SetBox(TinyVector<double,3> box)
   LatVecs(2,2) = box(2);
 }
 
-void Ewald::SetZ(double Z)
+void EwaldClass::SetZ(double Z)
 {
   Z = 0.0;
 }
 
-Ewald::Ewald()
+EwaldClass::EwaldClass()
 {
   LatVecs = 0.0;
   CutOff = 0.0;

@@ -3,7 +3,7 @@
 
 #include "../PH/Potential.h"
 
-class Ewald
+class EwaldClass
 {
 protected:
   Potential *Pot;
@@ -21,7 +21,7 @@ public:
   virtual double Vshort(double r) = 0;
   virtual void BreakUp (double rcutoff) = 0;
   virtual double Vlong_k (double k) = 0;
-  Ewald();
+  EwaldClass();
 };
 
 
