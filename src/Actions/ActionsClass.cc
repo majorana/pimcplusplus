@@ -146,18 +146,21 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 	new FreeNodalActionClass (PathData, species);
     }
     else if (type == "GROUNDSTATE") {
-      string speciesString;
-      assert (in.ReadVar ("IonSpecies",  speciesString));
-      int ionSpeciesNum  = PathData.Path.SpeciesNum (speciesString);
-      assert (in.ReadVar ("UpSpecies",   speciesString));
-      int upSpeciesNum   = PathData.Path.SpeciesNum (speciesString);
-      assert (in.ReadVar ("DownSpecies", speciesString));
-      int downSpeciesNum = PathData.Path.SpeciesNum (speciesString);
-      double kCut;
-      assert (in.ReadVar ("kCut", kCut));
-      int numUp   = PathData.Path.Species(upSpeciesNum).NumParticles;
-      int numDown = PathData.Path.Species(downSpeciesNum).NumParticles;
-      assert (numUp == numDown);
+      GroundStateNodalActionClass &nodeAction = *new GroundStateNodalActionClass(PathData);
+      nodeAction.Read (in);
+      NodalActions(nodeSection) = &nodeAction;
+//       string speciesString;
+//       assert (in.ReadVar ("IonSpecies",  speciesString));
+//       int ionSpeciesNum  = PathData.Path.SpeciesNum (speciesString);
+//       assert (in.ReadVar ("UpSpecies",   speciesString));
+//       int upSpeciesNum   = PathData.Path.SpeciesNum (speciesString);
+//       assert (in.ReadVar ("DownSpecies", speciesString));
+//       int downSpeciesNum = PathData.Path.SpeciesNum (speciesString);
+//       double kCut;
+//       assert (in.ReadVar ("kCut", kCut));
+//       int numUp   = PathData.Path.Species(upSpeciesNum).NumParticles;
+//       int numDown = PathData.Path.Species(downSpeciesNum).NumParticles;
+//       assert (numUp == numDown);
       
 
     }

@@ -117,9 +117,9 @@ GroundStateNodalActionClass::Action (int slice1, int slice2,
   assert (level == 0);
   bool doUp   = false;
   bool doDown = false;
-  if (IonsHaveMoved()) {
+  if (IonsHaveMoved()) 
     UpdateBands();
-  }
+
   for (int i=0; i<activeParticles.size(); i++) 
     if (Path.ParticleSpeciesNum(activeParticles(i)) == UpSpeciesNum)
       doUp = true;
@@ -196,10 +196,9 @@ GroundStateNodalActionClass::Read(IOSectionClass &in)
   /////////////////////////////////
   NumBands = max(NumUp, NumDown);
   System = new SystemClass (NumBands);
-  Potential &ph = 
-    PathData.Actions.GetPotential (IonSpeciesNum, UpSpeciesNum);
+  PH = &PathData.Actions.GetPotential (IonSpeciesNum, UpSpeciesNum);
   Vec3 gamma (0.0, 0.0, 0.0);
-  System->Setup (PathData.Path.GetBox(), gamma, kCut, ph);
+  System->Setup (PathData.Path.GetBox(), gamma, kCut, *PH);
 
   ////////////////////////////////////////
   // Setup real space grids and splines //
@@ -213,7 +212,9 @@ GroundStateNodalActionClass::Read(IOSectionClass &in)
   xGrid.Init (-0.5*box[0], 0.5*box[0], nx);
   yGrid.Init (-0.5*box[1], 0.5*box[1], nx);
   zGrid.Init (-0.5*box[2], 0.5*box[2], nx);
-
+  Array<double,4> initData(nx,ny,nz,NumBands);
+  initData = 0.0;
+  BandSplines.Init (&xGrid, &yGrid, &zGrid, initData, true);
 }
 
 double
@@ -268,6 +269,55 @@ GroundStateNodalActionClass::GradientDet(int slice, int speciesNum)
     for (int j=0; j<N; j++)
       Gradient(j) += Cofactors(i,j)*Temp(j);
   }
+  cerr << "Analytic gradient = " << Gradient << endl;
+  GradientDetFD(slice, speciesNum);
+  cerr << "FD gradient = " << Gradient << endl;
+  return det;
+}
+
+
+double
+GroundStateNodalActionClass::GradientDetFD(int slice, int speciesNum)
+{
+  SpeciesClass &species = PathData.Path.Species(speciesNum);
+  int N = species.NumParticles;
+  int first = species.FirstPtcl;
+  assert (N == Matrix.rows());
+
+  const double eps = 1.0e-6;
+
+  // First, fill up determinant matrix
+  Array<double,1> vals;
+  for (int j=0; j<N; j++) {
+    Vec3 r_j = PathData.Path(slice, first+j);
+    vals.reference(Matrix(j,Range::all()));
+    BandSplines(r_j[0], r_j[1], r_j[2], vals);
+  }
+
+  double det = Determinant (Matrix);
+
+  for (int i=0; i<N; i++) {
+    Vec3 plus, minus;
+    plus = 0.0; minus = 0.0;
+    for (int dim=0; dim<NDIM; dim++) {
+      for (int j=0; j<N; j++) {
+	Vec3 r_j = PathData.Path(slice, first+j);
+	r_j[dim] += eps;
+	vals.reference(Matrix(j,Range::all()));
+	BandSplines(r_j[0], r_j[1], r_j[2], vals);
+      }
+      plus[dim] = Determinant (Matrix);
+
+      for (int j=0; j<N; j++) {
+	Vec3 r_j = PathData.Path(slice, first+j);
+	r_j[dim] -= eps;
+	vals.reference(Matrix(j,Range::all()));
+	BandSplines(r_j[0], r_j[1], r_j[2], vals);
+      }
+      minus[dim] = Determinant (Matrix);
+    }
+    Gradient(i) = (plus-minus)/(2.0*eps);
+  }
   return det;
 }
 
@@ -282,12 +332,54 @@ GroundStateNodalActionClass::UpdateBands()
   System->SetIons (Rions);
   System->DiagonalizeH();
   // Now, make bands real and put into splines
+  Array<double,4> data(xGrid.NumPoints, yGrid.NumPoints, zGrid.NumPoints, NumBands);
   for (int band=0; band<NumBands; band++) {
     System->SetRealSpaceBandNum(band);
-    
-    for (int ix=0; ix<xGrid.NumPoints; ix++)
-      for (int iy=0; iy<yGrid.NumPoints; iy++)
-	for (int iz=0; iz<zGrid.NumPoints; iz++)
-	/* do nothing */ ;
+    complex<double> c0 = System->RealSpaceBand(xGrid.NumPoints/2, yGrid.NumPoints/2, zGrid.NumPoints/2);
+    double phi = -atan2 (c0.imag(), c0.real());
+    complex<double> c(cos(phi), sin(phi));
+    for (int ix=0; ix<xGrid.NumPoints-1; ix++)
+      for (int iy=0; iy<yGrid.NumPoints-1; iy++)
+	for (int iz=0; iz<zGrid.NumPoints-1; iz++)
+	  data(ix,iy,iz,band) = real(c*System->RealSpaceBand(ix,iy,iz));
   }
+  MakePeriodic (data);
+  BandSplines.Init (&xGrid, &yGrid, &zGrid, data);
+}
+
+
+bool
+GroundStateNodalActionClass::IsPositive (int slice)
+{
+  if (IonsHaveMoved()) 
+    UpdateBands();
+
+  double upDet, downDet;
+  SpeciesClass& upSpecies = PathData.Path.Species(UpSpeciesNum);
+  SpeciesClass& downSpecies = PathData.Path.Species(DownSpeciesNum);
+  int first = upSpecies.FirstPtcl;
+  int N = upSpecies.NumParticles;
+
+  // First, fill up determinant matrix
+  Array<double,1> vals;
+  for (int j=0; j<N; j++) {
+    Vec3 r_j = PathData.Path(slice, first+j);
+    vals.reference(Matrix(j,Range::all()));
+    BandSplines(r_j[0], r_j[1], r_j[2], vals);
+  }
+  upDet = Determinant (Matrix);
+
+  if (upDet > 0.0) {
+    first = downSpecies.FirstPtcl; 
+    for (int j=0; j<N; j++) {
+      Vec3 r_j = PathData.Path(slice, first+j);
+      vals.reference(Matrix(j,Range::all()));
+      BandSplines(r_j[0], r_j[1], r_j[2], vals);
+    }
+    downDet = Determinant (Matrix);
+    return (downDet > 0.0);
+  }
+  else
+    return false;
+  
 }
