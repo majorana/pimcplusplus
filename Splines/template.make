@@ -1,6 +1,9 @@
-SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc
+SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc
 
-all:	CubicSpline.o Grid.o BicubicSpline.o
+IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o ../IO/InputFile.o
+
+all:	CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o 
+	$(LD) -o TestBiCubic CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o $(IOobjs) $(LIBS)
 
 clean:
 	rm -f *.o

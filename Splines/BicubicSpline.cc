@@ -1,7 +1,117 @@
 #include "BicubicSpline.h"
 
 
-void
+void BicubicSpline::XUpdate(int iy)
+{
+  Grid &x = *Xgrid;
+  Array<double,1> mu(Nx);
+  
+  // Set up tridiagonal set of equations
+  // Initialize RHS of equations
+  F(0,iy).dzdx = 1.5*(F(1,iy).z-F(0,iy).z)/(x(1)-x(0));
+  F(Nx-1,iy).dzdx = 1.5*(F(Nx-1,iy).z-F(Nx-2,iy).z)/(x(Nx-1)-x(Nx-2));
+  mu(0) = 0.5;
+
+  // Solve tri-diagonal set of equations.  First eliminate lower
+  // elements.
+  for (int j=1; j<(Nx-1); j++) {
+    double lambda = 0.5*(x(j+1)-x(j))/(x(j+1)-x(j-1));
+    mu(j) = 0.5 - lambda;
+    F(j,iy).dzdx = 3.0*(lambda*(F(j,iy).z-F(j-1,iy).z)/(x(j)-x(j-1)) + 
+			mu(j) *(F(j+1,iy).z-F(j,iy).z)/(x(j+1)-x(j)));
+    double cj = 1.0 - lambda * mu(j-1);
+    F(j,iy).dzdx -= lambda * F(j-1,iy).dzdx;
+    mu(j) /= cj;
+    F(j,iy).dzdx /= cj;
+  }
+  // Last element
+  int j = Nx-1;
+  double lambda = 0.5;
+  mu(j) = 0.5 - lambda;
+  F(j,iy).dzdx = 3.0*(lambda*(F(j,iy).z-F(j-1,iy).z)/(x(j)-x(j-1)) +
+		      mu(j) *(F(j+1,iy).z-F(j,iy).z)/(x(j+1)-x(j)));
+  double cj = 1.0 - lambda * mu(j-1);
+  F(j,iy).dzdx -= lambda * F(j-1,iy).dzdx;
+  mu(j) /= cj;
+  F(j,iy).dzdx /= cj;
+
+  // Now last dzdx is correct.  We proceed upward, back substituting.
+  for (j=Nx-2; j>=0; j--) {
+    F(j,iy).dzdx -= mu(j) * F(j+1,iy).dzdx;
+  }
+  XUpToDate(iy) = true;
+}
+
+
+
+
+
+void BicubicSpline::YUpdate(int ix)
+{
+  Grid &y = *Ygrid;
+  Array<double,1> mu(Ny);
+  
+  // Set up tridiagonal set of equations
+  // Initialize RHS of equations
+  F(ix,0).dzdy = 1.5*(F(ix,1).z-F(ix,0).z)/(y(1)-y(0));
+  F(ix,Ny-1).dzdy = 1.5*(F(ix,Ny-1).z-F(ix,Ny-2).z)/(y(Ny-1)-y(Ny-2));
+  mu(0) = 0.5;
+
+  // Solve tri-diagonal set of equations.  First eliminate lower
+  // elements.
+  for (int j=1; j<(Ny-1); j++) {
+    double lambda = 0.5*(y(j+1)-y(j))/(y(j+1)-y(j-1));
+    mu(j) = 0.5 - lambda;
+    F(ix,j).dzdy = 3.0*(lambda*(F(ix,j).z-F(ix,j-1).z)/(y(j)-y(j-1)) + 
+			mu(j) *(F(ix,j+1).z-F(ix,j).z)/(y(j+1)-y(j)));
+    double cj = 1.0 - lambda * mu(j-1);
+    F(ix,j).dzdy -= lambda * F(ix,j-1).dzdy;
+    mu(j) /= cj;
+    F(ix,j).dzdy /= cj;
+  }
+  // Last element
+  int j = Ny-1;
+  double lambda = 0.5;
+  mu(j) = 0.5 - lambda;
+  F(ix,j).dzdy = 3.0*(lambda*(F(ix,j).z-F(ix,j-1).z)/(y(j)-y(j-1)) +
+		      mu(j) *(F(ix,j+1).z-F(ix,j).z)/(y(j+1)-y(j)));
+  double cj = 1.0 - lambda * mu(j-1);
+  F(ix,j).dzdy -= lambda * F(ix,j-1).dzdy;
+  mu(j) /= cj;
+  F(ix,j).dzdy /= cj;
+
+  // Now last dzdy is correct.  We proceed upward, back substituting.
+  for (j=Ny-2; j>=0; j--) {
+    F(ix,j).dzdy -= mu(j) * F(ix,j+1).dzdy;
+  }
+  YUpToDate(ix) = true;
+}
+
+
+
+
+void BicubicSpline::BiUpdate()
+{
+  // First, update X and Y splines
+  for (int i=0; i<Nx; i++)
+    if (!XUpToDate(i)) XUpdate(i);
+  for (int i=0; i<Ny; i++)
+    if (!XUpToDate(i)) YUpdate(i);
+  
+}
+  
+
+
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+
+/*void
 BicubicSpline::XUpdate(int i)
 {
   Grid &x = *Xgrid;
@@ -51,10 +161,10 @@ BicubicSpline::XUpdate(int i)
 
   XUpToDate(i) = true;
 }
+*/
 
 
-
-
+/*
 void
 BicubicSpline::YUpdate(int i)
 {
@@ -106,15 +216,4 @@ BicubicSpline::YUpdate(int i)
   YUpToDate(i) = true;
 }
 
-
-void BicubicSpline::BiUpdate()
-{
-  // First, update X and Y splines
-  for (int i=0; i<Nx; i++)
-    if (!XUpToDate(i)) XUpdate(i);
-  for (int i=0; i<Ny; i++)
-    if (!XUpToDate(i)) YUpdate(i);
-}
-  
-
-
+*/
