@@ -65,6 +65,10 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      set(labels, 'fontsize', 16)
      labels = get(gca(), 'yticklabels')
      set(labels, 'fontsize', 16)
+     currAxis=axis()
+     currAxis[0]=cutoff
+     print "Curr axis is ",currAxis
+     axis(currAxis)
      savefig(fileBase+".png",dpi=60)
      savefig(fileBase+".ps")
      myImg=Image(fileBase+".png")
@@ -136,8 +140,14 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel):
 
 
 def MeanErrorString (mean, error):
-     meanDigits = math.floor(math.log(abs(mean))/math.log(10))
-     rightDigits = -math.floor(math.log(error)/math.log(10))+1
+     if (mean!=0.0):
+          meanDigits = math.floor(math.log(abs(mean))/math.log(10))
+     else:
+          meanDigits=2
+     if (error!=0.0):
+          rightDigits = -math.floor(math.log(error)/math.log(10))+1
+     else:
+          rightDigits=2
      formatstr = '%1.' + '%d' % rightDigits + 'f'
      meanstr  = formatstr % mean
      errorstr = formatstr % error
@@ -254,11 +264,52 @@ def ProcessTopTable(doc,infile):
      doc.append(HR())
      return doc
 
+
+def ProcessMove(doc,infile):
+     doc.append(Heading(1,"Moves"))
+     myTable=Table()
+     myTable.body=[['Moves','Acceptance']]
+     myTable.width='50%'
+     infile.OpenSection("Moves")
+     numMoves=infile.CountSections()
+     for i in range (0, numMoves):
+          infile.OpenSection(i)
+          name=infile.GetName()
+          print name
+          ar = infile.ReadVar("AcceptRatio")
+          if (ar!=None):
+               totAccept=ar[0]
+               numAccept=0
+               for counter in range(1,len(ar)):
+                    totAccept=totAccept+ar[counter]
+                    numAccept=numAccept+1
+               print ar
+               print totAccept/numAccept
+               myTable.body.append([name+" ",totAccept/numAccept])
+          else:
+               myTable.body.append([name,"No acceptance available"])
+          infile.CloseSection()
+     infile.CloseSection() # "Moves"
+     doc.append(myTable)
+
+
+
 infile=IOSectionClass()
 infile.OpenFile(sys.argv[1])
+prefFile=IOSectionClass()
 fileString=sys.argv[1]
 dotLoc=string.rfind(fileString,'.')
 dirName=fileString[0:dotLoc]
+cutoff=None
+if (os.access(dirName+".pref",os.F_OK)):
+     print dirName+".pref"
+     prefFile.OpenFile(dirName+".pref")
+#     prefFile.OpenSection("Test")
+     print prefFile.ReadVar("cutoff")
+     cutoff=prefFile.ReadVar("cutoff")
+#     prefFile.CloseFile() closing having issue?
+if cutoff==None:
+     cutoff=0
 if not(os.access(dirName,os.F_OK)):
      os.mkdir(dirName)
 os.chdir(dirName)
@@ -270,7 +321,7 @@ os.chdir(dirName)
 
 doc=SeriesDocument()
 ProcessTopTable(doc,infile)
-
+ProcessMove(doc,infile)
 
 currNum=0
 infile.OpenSection("Observables")
@@ -289,16 +340,6 @@ for counter in range(0,numSections):
      infile.CloseSection()
 infile.CloseSection() # "Observables"
 
-infile.OpenSection("Moves")
-numMoves=infile.CountSections()
-for i in range (0, numMoves):
-     infile.OpenSection(i)
-     print infile.GetName()
-     ar = infile.ReadVar("AcceptRatio")
-     print ar
-     infile.CloseSection()
-
-infile.CloseSection() # "Moves"
 
 doc.logo=""
 doc.author="Ken and Bryan"
