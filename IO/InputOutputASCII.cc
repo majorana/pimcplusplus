@@ -186,17 +186,14 @@ bool checkPair(blitz::Array<char,1> &buffer,int counter,char* toSee)
 
 /// Reads a file into a character array, removing C and C++ style
 /// comments. 
-void IOTreeASCIIClass::ReadWithoutComments(string fileName,
-					      blitz::Array<char,1> 
-					      &buffer)
+bool IOTreeASCIIClass::ReadWithoutComments(string fileName,
+					   blitz::Array<char,1> 
+					   &buffer)
 {
   ifstream infile;
   infile.open(fileName.c_str());
-  if (!infile.is_open()) {
-    cerr << "Cannot open file " << fileName 
-	 << " for reading.  Exiting.\n";
-    exit(1);
-  }
+  if (!infile.is_open()) 
+    return false;
   blitz::Array<char,1> tmpBuffer;
   int counter=0;
   bool inQuote=false;
@@ -261,6 +258,7 @@ void IOTreeASCIIClass::ReadWithoutComments(string fileName,
   }
   buffer.resizeAndPreserve(bufferLoc);
   infile2.close();
+  return (true);
 }
 
 
@@ -844,7 +842,9 @@ bool IOTreeASCIIClass::OpenFile(string fileName, string myName,
 				IOTreeClass *parent)
 {
   blitz::Array<char,1> buffer;
-  ReadWithoutComments(fileName,buffer);
+  bool success = ReadWithoutComments(fileName,buffer);
+  if (!success)
+    return false;
   list<TokenClass> tokenList;
   Tokenize(buffer,tokenList);
   list<TokenClass>::iterator iter=tokenList.begin();
