@@ -37,28 +37,28 @@ double PAclassicalFitClass::U(double q, double z, double s2, int level)
   for (int i=0; i<level; i++)
     beta *= 2.0;
 
-  double r = q+0.5*z;
-  double rp = q-0.5*z;
-  return (0.5*beta*(Pot->V(r)+Pot->V(rp)));
+  double V = Pot->V(q);
+  if (IsLongRange())
+    V -= Vlong(q, level);
+  cerr<<"V is "<<V<<endl;
+  return (beta*V);
 }
 
 double PAclassicalFitClass::dU(double q, double z, double s2, int level)
 {
-  double beta = SmallestBeta;
-  for (int i=0; i<level; i++)
-    beta *= 2.0;
-
-  double r = q+0.5*z;
-  double rp = q-0.5*z;
-  return (0.5*(Pot->V(r)+Pot->V(rp)));
+  double V = Pot->V(q);
+  if (IsLongRange())
+    V -= Vlong(q, level);
+  return (V);
 }
 
 
 
 bool PAclassicalFitClass::Read (IOSectionClass &in,
-				double smallestBeta, int NumBetas)
+				double smallestBeta, int numBetas)
 {
   SmallestBeta = smallestBeta;
+  NumBetas=numBetas;
   // Read Particles;
   assert(in.OpenSection("Fits"));
   assert(in.OpenSection("Particle1"));
@@ -72,6 +72,9 @@ bool PAclassicalFitClass::Read (IOSectionClass &in,
 
   // Read Potential;
   assert(in.OpenSection("Potential"));
+  if (!in.ReadVar ("Z1Z2", Z1Z2))
+    Z1Z2 = 0.0;
+  cerr<<"Z1Z2="<<Z1Z2<<endl;
   Pot = ReadPotential(in);
   in.CloseSection();
   in.CloseSection();
@@ -87,7 +90,7 @@ bool PAclassicalFitClass::IsLongRange()
 {
   // This needs to be fixed.  We need to add this kind of function to
   // the potential base class. 
-  return true;
+  return (Z1Z2 != 0.0);
 }
 
 double PAclassicalFitClass::Vlong(double q, int level)
@@ -102,13 +105,40 @@ double PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
 {
   if (k <= 0.0)
     k = 1.0e-30;
-  return 4.0*M_PI/(boxVol*k*k)*exp(-k*k/(4.0*alpha*alpha));
+  double Vk =  4.0*M_PI/(boxVol*k*k)*exp(-k*k/(4.0*alpha*alpha));
+  cerr << "Vk = " << Vk << endl;
+  return Vk;
 }
 
 
 void PAclassicalFitClass::DoBreakup(const dVec& box,const Array<dVec,1> &kVecs)
 {
-  
-
-
+    // Calculate the cutoff parameter
+  double minL, boxVol;
+  boxVol = minL = box[0];
+  for (int i=1; i<NDIM; i++) {
+    minL = min(minL, box[i]);
+    boxVol *= box[i];
+  }
+  cerr << "boxVol = " << boxVol << endl;
+  alpha = 7.0/minL;
+  // Now, calculate the k-space parts
+  Ulong_k.resize(NumBetas, kVecs.size());
+  dUlong_k.resize(NumBetas, kVecs.size());
+  Ulong_0.resize(NumBetas);
+  dUlong_0.resize(NumBetas);
+  U_RPA_long_k.resize(NumBetas, kVecs.size());
+  dU_RPA_long_k.resize(NumBetas, kVecs.size());
+  for (int level=0; level<NumBetas; level++) {
+    double tau = SmallestBeta * pow(2.0, level);
+    Ulong_0(level)  = tau*Vlong(0.0, level);
+    dUlong_0(level) = Vlong(0.0, level);
+    for (int ki=0; ki<kVecs.size(); ki++) {
+      double k = sqrt(dot(kVecs(ki), kVecs(ki)));
+      Ulong_k = tau*Vlong_k(boxVol, k, level);
+      dUlong_k = Vlong_k(boxVol, k, level);
+    }
+  }
 }
+
+
