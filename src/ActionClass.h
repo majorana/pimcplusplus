@@ -33,13 +33,23 @@ public:
   /// The maximum number of levels we can have in a bisection move.
   int MaxLevels;
   void Read(IOSectionClass &IOSection);
+
   /// Calculates the total action.
   double UAction (int startSlice, int endSlice, 
 		  const Array<int,1> &changedParticles, int level);
+
   double KAction (int startSlice, int endSlice, 
 		  const Array<int,1> &changedParticles, int level);
+
   double TotalAction(int startSlice, int endSlice, 
 		     const Array<int,1> &changedParticles, int level);
+
+  /// This computes the optimized breakups for the pair actions stored
+  /// in PairActionVector.  The parameters are the number of knots in
+  /// the "spline" representation of the long-range action and the
+  /// k-space cutoff.  
+  /// Only \f$\mathbf{k}\f$ with \f$|\mathbf{k}| < k_c$\f will be
+  /// included in the simulation sum.
   void OptimizedBreakup(int numKnots, double kcut);
   ActionClass(PathDataClass  &pathdata);
 };

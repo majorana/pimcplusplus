@@ -271,7 +271,12 @@ double ActionClass::CalcXk (int paIndex, int level, double k, double rc)
   
 }
 
-
+/// This computes the optimized breakups for the pair actions stored
+/// in PairActionVector.  The parameters are the number of knots in
+/// the "spline" representation of the long-range action and the
+/// k-space cutoff.  
+/// Only \f$\mathbf{k}\f$ with \f$|\mathbf{k}| < k_c$\f will be
+/// included in the simulation sum.
 void ActionClass::OptimizedBreakup(int numKnots, double kCut)
 {
   dVec box = Path.GetBox();
@@ -282,7 +287,7 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
   for (int i=1; i<NDIM; i++)
     kvol *= Path.GetkBox()[i];
   double kavg = pow(kvol,1.0/3.0);
-  /// We try to pick kcont to keep reasonable number of k-vectors
+  // We try to pick kcont to keep reasonable number of k-vectors
   double kCont = 50.0 * kavg;
   double kMax = 150 * kavg;
 
@@ -313,33 +318,33 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
     pa.Ulong_0.resize(MaxLevels);
     for (int level=0; level<MaxLevels; level++) {
       Ulong_r = 0.0;
-      /// Calculate Xk's
+      // Calculate Xk's
       for (int ki=0; ki<numk; ki++)
 	Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc);
 
-      /// Set boundary conditions at rc:  Force value and first and
-      /// second derivatives of long-range potential to match the full
-      /// potential at rc.
+      // Set boundary conditions at rc:  Force value and first and
+      // second derivatives of long-range potential to match the full
+      // potential at rc.
       adjust = true;
       t(N-3) = pa.Udiag(rc, level);     adjust(N-3) = false;
       t(N-2) = pa.Udiag_p(rc, level);   adjust(N-2) = false;
       t(N-1) = pa.Udiag_pp(rc, level);  adjust(N-1) = false;
       //      t(1) = 0.0;                       adjust(1)   = false;
 
-      /// Now, do the optimal breakup:  this gives me the coefficents
-      /// of the basis functions, h_n in the array t.
+      // Now, do the optimal breakup:  this gives me the coefficents
+      // of the basis functions, h_n in the array t.
       breakup.DoBreakup (Xk, t, adjust);
       
       cerr << "t = " << t << endl;
-      /// Now, we must put this information into the pair action
-      /// object.  First do real space part
+      // Now, we must put this information into the pair action
+      // object.  First do real space part
       pa.Ulong_0(level)=0.0;
       for (int n=0; n<N; n++)
 	pa.Ulong_0(level) += t(n)*basis.h(n,0.0);
       for (int i=0; i<UlongGrid.NumPoints; i++) {
 	double r = UlongGrid(i);
 	if (r <= rc) {
-	  /// Sum over basis functions
+	  // Sum over basis functions
 	  for (int n=0; n<N; n++) 
 	    Ulong_r(i) += t(n) * basis.h(n, r);
 	}
@@ -352,26 +357,25 @@ void ActionClass::OptimizedBreakup(int numKnots, double kCut)
       for (int ki=0; ki < Path.kVecs.size(); ki++) {
 	const dVec &kv = Path.kVecs(ki);
 	double k = sqrt (dot(kv,kv));
-	/// Sum over basis functions
+	// Sum over basis functions
 	for (int n=0; n<N; n++)
 	  pa.Ulong_k(level,ki) += t(n) * basis.c(n,k);
-	/// Now add on part from rc to infinity
+	// Now add on part from rc to infinity
 	pa.Ulong_k(level,ki) -= CalcXk(paIndex, level, k, rc);
       }
-      // HACK HACK HACK HACK
-      FILE *fout = fopen ("Vlongk.dat", "w");
-      for (double k=0; k<50.0; k+=0.01) {
-	double U = 0.0;
-	/// Sum over basis functions
-	for (int n=0; n<N; n++)
-	  U += t(n) * basis.c(n,k);
-	fprintf (fout, "%1.16e %1.16e ", k, U);
-	/// Now add on part from rc to infinity
-	U -= CalcXk(paIndex, level, k, rc);
-	fprintf (fout, "%1.16e \n", U);
-      }
-      fclose (fout);
-
+//       // HACK HACK HACK HACK
+//       FILE *fout = fopen ("Vlongk.dat", "w");
+//       for (double k=0; k<50.0; k+=0.01) {
+// 	double U = 0.0;
+// 	// Sum over basis functions
+// 	for (int n=0; n<N; n++)
+// 	  U += t(n) * basis.c(n,k);
+// 	fprintf (fout, "%1.16e %1.16e ", k, U);
+// 	// Now add on part from rc to infinity
+// 	U -= CalcXk(paIndex, level, k, rc);
+// 	fprintf (fout, "%1.16e \n", U);
+//       }
+//       fclose (fout);
     }
   }
 }
