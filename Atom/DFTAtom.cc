@@ -192,13 +192,16 @@ void DFTAtom::Read(IOSectionClass &in)
   int numRadialWFs = in.CountSections("RadialWF");
   RadialWFs.resize(numRadialWFs);
   SetGrid(grid);
+  double charge = 0.0;
   for (int i=0; i<numRadialWFs; i++) {
     RadialWFs(i).SetGrid (grid);
     RadialWFs(i).SetPotential (&V);
     assert (in.OpenSection("RadialWF", i));
     RadialWFs(i).Read(in);
+    charge += RadialWFs(i).Occupancy;
     in.CloseSection();
   }
+  V.Charge = charge;
   assert (in.ReadVar("NewMix", NewMix));
 }
 

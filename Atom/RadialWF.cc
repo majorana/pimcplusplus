@@ -39,7 +39,6 @@ RadialWF::OriginBC(double r0, double &u0, double &du0)
     {  // Use relativistic equations
       const double alpha = 1.0/137.036;
       double Z = -pot->V(r0)*r0;
-      //      cerr << "Z = " << Z << endl;
       double a2Z2 = alpha*alpha*(double)Z*(double)Z;
 
       double sl = (double) l;
@@ -123,8 +122,8 @@ double RadialWF::IntegrateInOut (int &tindex)
   Grid &grid = *u.grid;
   // Find classical turning point
   tindex = TurningIndex();
-  //  cerr << "TurningIndex = " << tindex << endl;
-  // cerr << "Turning Point = " << (*u.grid)(tindex) << endl;
+//   cerr << "TurningIndex = " << tindex << endl;
+//   cerr << "Turning Point = " << (*u.grid)(tindex) << endl;
   // Compute starting value and derivative at origin
   double r0 = grid(0);
   OriginBC (r0, uduVec(0)[0], uduVec(0)[1]);
@@ -191,6 +190,11 @@ RadialWF::InfinityBC(double rend, double &uend, double &duend)
   double k = sqrt(l*(l+1.0)/(rend*rend) + (Vend-E));
   uend = 1.0;
   duend = -uend * (k + 0.5*rend/k*(dVdrend - 2.0*l*(l+1.0)/(rend*rend*rend)));
+//   cerr << "duend = " << duend << endl;
+//   cerr << "rend = " << rend << endl;
+//   cerr << "k = " << k << endl;
+//   cerr << "Vend = " << Vend << endl;
+//   cerr << "dVend = " << dVdrend << endl;
 }
 
 
@@ -204,6 +208,8 @@ void RadialWF::Solve(double tolerance)
   Ehigh = 0.0;
   Grid &grid = *u.grid;
   int TotalNodes = n-l-1;
+
+  //  cerr << "n=" << n << " l=" << l << " TotalNodes=" << TotalNodes <<endl;
 
 //   char fname[100];
 //   snprintf (fname, 100, "WFn%dl%d.h5", n, l);
@@ -342,7 +348,7 @@ void RadialWF::Write(IOSectionClass &out)
   out.WriteVar ("CoreNodes", CoreNodes);
   out.WriteVar ("Occupancy", Occupancy);
   out.WriteVar ("Weight", Weight);
-  out.WriteVar ("Energy", Weight);
+  out.WriteVar ("Energy", Energy);
   out.WriteVar ("PartialNorm", PartialNorm);
   out.WriteVar ("Label", Label);
 }
