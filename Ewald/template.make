@@ -3,8 +3,10 @@ SOURCES = EwaldBase.cc SimpleEwald.cc NaClTest.cc OptimizedBreakup.cc TestOptimi
 all:	EwaldBase.o SimpleEwald.o OptimizedBreakup.o TestOptimizedBreakup.o \
         TestOptimizedBreakup #NaClTest
 
-TestOptimizedBreakup: OptimizedBreakup.o TestOptimizedBreakup.o
-	$(LD) -o TestOptimizedBreakup TestOptimizedBreakup.o OptimizedBreakup.o $(LIBS)
+TestOptimizedBreakup: OptimizedBreakup.o TestOptimizedBreakup.o \
+                      ../MatrixOps/MatrixOps.o
+	$(LD) -o TestOptimizedBreakup TestOptimizedBreakup.o \
+                 OptimizedBreakup.o ../MatrixOps/MatrixOps.o $(LIBS)
 
 NaClTest: NaClTest.o EwaldBase.o SimpleEwald.o 
 	$(LD) -o NaClTest NaClTest.o EwaldBase.o SimpleEwald.o $(IOobjs) $(LIBS)

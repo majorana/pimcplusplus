@@ -16,6 +16,7 @@ public:
   virtual void Set_rc(double rc) = 0;
   inline double Get_rc() { return r_c; }
   inline void SetBox (TinyVector<double,3> box);
+  inline TinyVector<double,3> GetBox ();
   /// Returns the number of basis elements
   virtual int NumElements() = 0;
   /// Returns the basis element n evaluated in real space at r
@@ -23,15 +24,37 @@ public:
   /// Returns the basis element n evaluated in k space at k
   virtual double c(int n, double k) = 0;
   /// This returns the coefficent of the nth basis function
-  virtual double  Get_t(int n) const     = 0;
+  //virtual double  Get_t(int n) const     = 0;
   /// This sets the coefficent of the nth basis function
-  virtual void    Set_t(int n, double t) = 0;
+  //virtual void    Set_t(int n, double t) = 0;
   /// This returns the linear combination of the basis functions with
   /// coefficients t_n
-  virtual double f (double r) = 0;
+  //virtual double f (double r) = 0;
   BasisClass() : r_c (0.0)
   { /* do nothing */ }
 };
+
+
+class OptimizedBreakup
+{
+private:
+  BasisClass &Basis;
+public:
+  Array<TinyVector<double,3>,1> kVecs;  
+  void SetkVecs(double kc, double kMax);
+  /// kc is the k-space cutoff for the Ewald sum.  
+  /// kMax is largest k we use in determining the error in the breakup.  
+  /// t is the set of coefficients of the breakup.
+  /// inFit is a boolean array telling whether t_n should be optimized
+  /// or left at its initial value.
+  void DoBreakup (const Array<double,1> &Vk, Array<double,1> &t, 
+		  const Array<bool,1> &adjust);
+  /// Same as above, but we assume that all t's are adjusted.
+  void DoBreakup (const Array<double,1> &Vk, Array<double,1> &t);
+  OptimizedBreakup (BasisClass &basis) : Basis(basis)
+  { /* Do nothing */ }
+};
+
 
 inline void BasisClass::SetBox (TinyVector<double,3> box)
 {
@@ -39,11 +62,18 @@ inline void BasisClass::SetBox (TinyVector<double,3> box)
   Omega = box[0]*box[1]*box[2];
 }
 
+inline TinyVector<double,3> BasisClass::GetBox ()
+{
+  return Box;
+}
+
 
 /// Locally Piecewise Quintic Hermite Interpolant
 class LPQHI_BasisClass : public BasisClass
 {
-private:
+  /// public is HACK
+  //private:
+public:
   int NumKnots;
   double delta, deltaInv;
   TinyMatrix<double,3,6> S;
@@ -58,7 +88,6 @@ public:
   // n must be at least 2;
   void SetNumKnots(int n);
   void Set_rc(double rc);
-  double Get_rc();
   int NumElements();
   double h(int n, double r);
   double c(int n, double k);
