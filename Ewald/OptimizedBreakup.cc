@@ -100,7 +100,8 @@ void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
 double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk, 
 					Array<double,1> &t)
 {
-  const double tolerance = 1.0e-16;
+  //  const double tolerance = 1.0e-16;
+  const double tolerance = 0.0;
   assert(t.rows()==Basis.NumElements());
   Array<double,2> A;
   Array<double,1> b;
@@ -177,7 +178,8 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
 					Array<double,1> &t,
 					const Array<bool,1> &adjust)
 {
-  const double tolerance = 1.0e-16;
+  //  const double tolerance = 1.0e-16;
+  const double tolerance = 0.0;
   assert(t.rows()==adjust.rows());
   assert(t.rows()==Basis.NumElements());
   Array<double,2> A;
