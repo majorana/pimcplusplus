@@ -31,7 +31,7 @@ PIMCobjs =                           \
   ActionClass.o                      \
   PathDataClass.o                    \
   CommunicatorClass.o                \
-  NewPathClass.o                     \
+  PathClass.o                        \
   MirroredArrayClass.o               \
   WrapClass.o			     \
   Common/MPI/Communication.o	     \
@@ -40,14 +40,9 @@ PIMCobjs =                           \
   Common/IO/InputFile.o              \
   Common/IO/InputOutputASCII.o       \
   Common/IO/InputOutputXML.o         \
-  Common/PairAction/PAcoulombFit.o   \
   Common/PairAction/PAcoulombBCFit.o \
   Common/PairAction/PAclassicalFit.o \
-  Common/PairAction/PAszFit.o        \
-  Common/PairAction/PAsFit.o         \
-  Common/PairAction/PAtricubicFit.o  \
   Common/PairAction/PAzeroFit.o      \
-  Common/PairAction/DavidPAClass.o   \
   Common/Splines/BicubicSpline.o     \
   Common/PH/Potential.o              \
   Common/PH/QuinticPH.o              \
@@ -56,6 +51,11 @@ PIMCobjs =                           \
   Common/PH/SplinePot.o              \
   Common/PH/HeAzizPot.o              \
   MirroredClass.o
+#  Common/PairAction/PAcoulombFit.o   \
+#  Common/PairAction/PAszFit.o        \
+#  Common/PairAction/PAsFit.o         \
+#  Common/PairAction/PAtricubicFit.o  \
+#  Common/PairAction/DavidPAClass.o   \
 
 TestPermobjs =                       \
   TestPermutation.o                  \
@@ -78,7 +78,7 @@ TestPermobjs =                       \
   ActionClass.o                      \
   PathDataClass.o                    \
   CommunicatorClass.o                \
-  NewPathClass.o                     \
+  PathClass.o                        \
   MirroredArrayClass.o               \
   WrapClass.o			     \
   Common/MPI/Communication.o	     \
@@ -87,14 +87,9 @@ TestPermobjs =                       \
   Common/IO/InputFile.o              \
   Common/IO/InputOutputASCII.o       \
   Common/IO/InputOutputXML.o         \
-  Common/PairAction/PAcoulombFit.o   \
   Common/PairAction/PAcoulombBCFit.o \
   Common/PairAction/PAclassicalFit.o \
-  Common/PairAction/PAszFit.o        \
-  Common/PairAction/PAsFit.o         \
-  Common/PairAction/PAtricubicFit.o  \
   Common/PairAction/PAzeroFit.o      \
-  Common/PairAction/DavidPAClass.o   \
   Common/Splines/BicubicSpline.o     \
   Common/PH/Potential.o              \
   Common/PH/QuinticPH.o              \
@@ -103,6 +98,11 @@ TestPermobjs =                       \
   Common/PH/SplinePot.o              \
   Common/PH/HeAzizPot.o              \
   MirroredClass.o  
+#  Common/PairAction/PAcoulombFit.o   \
+#  Common/PairAction/PAszFit.o        \
+#  Common/PairAction/PAsFit.o         \
+#  Common/PairAction/PAtricubicFit.o  \
+#  Common/PairAction/DavidPAClass.o   \
 
 
 

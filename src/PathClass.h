@@ -33,22 +33,26 @@ private:
   ///////////////////////////////////////////////
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
+private:
   /// True if we need k-space sums for long range potentials.
   bool LongRange;
-  /// This holds the density of particles in k-space.  Indexed by
-  /// (species, slice, k-vector).  Defined as
-  /// \rho^\alpha_k = \sum_i e^{i\mathbf{k}\cdot\mathbf{r}_i^\alpha}
-  Mirrored3DClass<complex<double> > Rho_k;
-  /// Stores the kvectors needed for the reciporical space sum.
-  /// Stores only half the vectors because of k/-k symmetry.
-  Array<dVec,1> kVecs;
   /// Stores the radius of the k-space sphere we sum over
   double kCutoff;
   /// Allocates and sets up the k-vectors.
   void SetupkVecs();
-  void CalcRho_ks();
+public:
+  Array<dVec,1> kVecs;
+  /// This holds the density of particles in k-space.  Indexed by
+  /// (slice, species, k-vector).  Defined as
+  /// \rho^\alpha_k = \sum_i e^{i\mathbf{k}\cdot\mathbf{r}_i^\alpha}
+  /// Stores the kvectors needed for the reciporical space sum.
+  /// Stores only half the vectors because of k/-k symmetry.
+  Mirrored3DClass< complex<double> > Rho_k;
+  void CalcRho_ks(int slice);  
 
+private:
   void ShiftPathData(int sliceToShift);
+  void ShiftRho_kData(int sliceToShift);
 public:
   Mirrored1DClass<int> Permutation;
   RandomClass Random;
@@ -77,7 +81,7 @@ public:
   //////////////////////////
   /// Data manipulations ///
   //////////////////////////
-  inline dVec& operator() (int slice, int ptcl) const;
+  inline const dVec& operator() (int slice, int ptcl) const;
   inline dVec& operator() (int slice, int ptcl);
   inline void SetPos (int slice, int ptcl, const dVec& r);
   inline int NumParticles();
@@ -165,7 +169,7 @@ inline int PathClass::NumTimeSlices()
 
 
 /// Returns the position of particle ptcl at time slice timeSlice
-inline dVec& PathClass::operator() (int slice, int ptcl) const
+inline const dVec& PathClass::operator() (int slice, int ptcl) const
 { 
   return Path(slice, ptcl); 
 }
@@ -263,9 +267,9 @@ inline void PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 {  
   dispA = Path(sliceA, ptcl2) - Path(sliceA,ptcl1);
   dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
-  dVec tempDispB;
-  dVec tempDispBN;
-  dVec dispBNew;
+  //  dVec tempDispB;
+  //  dVec tempDispBN;
+  //  dVec dispBNew;
 //   cerr << "A1 = " << Path(sliceA,ptcl1) << endl;
 //   cerr << "A2 = " << Path(sliceA,ptcl2) << endl;
 //   cerr << "B1 = " << Path(sliceB,ptcl1) << endl;
@@ -274,12 +278,10 @@ inline void PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
   for (int i=0; i<NDIM; i++) {
     double n = -floor(dispA(i)*BoxInv(i)+0.5);
     dispA(i) += n*IsPeriodic(i)*Box(i);
-    double m = -floor(dispB(i)*BoxInv(i)+0.5);
-    dispB(i) += m*IsPeriodic(i)*Box(i);
-
-
-//     double mNew=-floor((dispA(i)-dispB(i))*BoxInv(i)+0.5);
-//     dispBNew(i)=dispB(i)-mNew*IsPeriodic(i)*Box(i);
+//     double m = -floor(dispB(i)*BoxInv(i)+0.5);
+//     dispB(i) += m*IsPeriodic(i)*Box(i);
+    double mNew=-floor((dispA(i)-dispB(i))*BoxInv(i)+0.5);
+    dispB(i)-= mNew*IsPeriodic(i)*Box(i);
 //     // HACK HACK HACK
 //     m=0;
 //     tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
@@ -311,14 +313,14 @@ inline void PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
   dVec DBdispA = Path(sliceA, ptcl2) -Path(sliceA, ptcl1);
   dVec DBdispB = Path(sliceB, ptcl2) -Path(sliceB, ptcl1);
   for (int i=0; i<NDIM; i++) {
-    while (DBdispA(i) > 0.5*Box(i)) {
+    while (DBdispA(i) > 0.5*Box(i)) 
       DBdispA(i) -= Box(i);
-      DBdispB(i) -= Box(i);
-    }
-    while (DBdispA(i) < -0.5*Box(i)) {
+    while (DBdispA(i) < -0.5*Box(i)) 
       DBdispA(i) += Box(i);
-      DBdispB(i) += Box(i);
-    }
+    while ((DBdispB-DBdispA) > 0.5*Box(i))
+      DBdispB -= Box(i);
+    while ((DBdispB-DBdispA) < -0.5*Box(i))
+      DBdispB += Box(i);
   }
 //   cerr << "DBdispA = " << DBdispA << endl;
 //   cerr << "DBdispB = " << DBdispB << endl;

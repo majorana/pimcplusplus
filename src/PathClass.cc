@@ -1,4 +1,4 @@
-#include "NewPathClass.h"
+#include "PathClass.h"
 
 void PathClass::Read (IOSectionClass &inSection)
 {
@@ -181,22 +181,22 @@ void PathClass::SetupkVecs()
 }
 
 
-void PathClass::CalcRho_ks()
+void PathClass::CalcRho_ks(int slice)
 {
-  for (int speciesIndex=0; speciesIndex<NumSpecies(); speciesIndex++)
-    for (int slice=0; slice<MyNumSlices; slice++)
-      for (int ki=0; ki<kVecs.size(); ki++) {
-	complex<double> rho;
-	rho = 0.0;
-	for (int ptcl=Species(speciesIndex).FirstPtcl; 
-	     ptcl <= Species(speciesIndex).LastPtcl; ptcl++) {
-	  const dVec &r = (*this)(slice, ptcl);
-	  double phase = dot(r, kVecs(ki));
-	  // The 2 accounts for the k/-k optimization
-	  rho += 2.0 * complex<double> (cos(phase), sin(phase));
-	}
-	Rho_k(speciesIndex, slice, ki) = rho;
+
+  for (int species=0; species<NumSpecies(); species++)
+    for (int ki=0; ki<kVecs.size(); ki++) {
+      complex<double> rho;
+      rho = 0.0;
+      for (int ptcl=Species(species).FirstPtcl; 
+	   ptcl <= Species(species).LastPtcl; ptcl++) {
+	const dVec &r = (*this)(slice, ptcl);
+	double phase = dot(r, kVecs(ki));
+	// The 2 accounts for the k/-k optimization
+	rho += 2.0 * complex<double> (cos(phase), sin(phase));
       }
+      Rho_k(slice, species, ki) = rho;
+    }
 }
 
 
@@ -205,14 +205,14 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
   if (newJoin>oldJoin){
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path.Data[0](timeSlice,ptcl)=Path.Data[1](timeSlice,Permutation(ptcl));
+	Path[0](timeSlice,ptcl)=Path[1](timeSlice,Permutation(ptcl));
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){ 
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path.Data[1](timeSlice,ptcl)=Path.Data[0](timeSlice,ptcl);
+	Path[1](timeSlice,ptcl)=Path[0](timeSlice,ptcl);
       }
     }
   }
@@ -220,14 +220,14 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     //  else if (oldJoin>=newJoin){//CHANGED!
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path.Data[0](timeSlice,Permutation(ptcl))=Path.Data[1](timeSlice,ptcl);
+	Path[0](timeSlice,Permutation(ptcl))=Path[1](timeSlice,ptcl);
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path.Data[1](timeSlice,ptcl)=Path.Data[0](timeSlice,ptcl);
+	Path[1](timeSlice,ptcl)=Path[0](timeSlice,ptcl);
       }
     }
   }
@@ -240,8 +240,8 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
 {
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
-    Path.Data[1](Range(startSlice, endSlice), ptcl) = 
-      Path.Data[0](Range(startSlice, endSlice), ptcl);
+    Path[1](Range(startSlice, endSlice), ptcl) = 
+      Path[0](Range(startSlice, endSlice), ptcl);
     Permutation.AcceptCopy(ptcl);
   }
 }
@@ -251,8 +251,8 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
 {
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
-    Path.Data[0](Range(startSlice, endSlice), ptcl) = 
-      Path.Data[1](Range(startSlice, endSlice), ptcl);
+    Path[0](Range(startSlice, endSlice), ptcl) = 
+      Path[1](Range(startSlice, endSlice), ptcl);
     Permutation.RejectCopy(ptcl);
   }
 }
@@ -261,16 +261,104 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
 void PathClass::ShiftData(int slicesToShift)
 {
   ShiftPathData(slicesToShift);
+  ShiftRho_kData(slicesToShift);
+}
+
+void PathClass::ShiftRho_kData(int slicesToShift)
+{
+  int numProcs=Communicator.NumProcs();
+  int myProc=Communicator.MyProc();
+  int recvProc, sendProc;
+  int numSlices  = Rho_k.extent(0);
+  int numSpecies = Rho_k.extent(1);
+  int numk       = Rho_k.extent(2);
+  assert(abs(slicesToShift)<numSlices);
+  sendProc=(myProc+1) % numProcs;
+  recvProc=((myProc-1) + numProcs) % numProcs;
+  if (slicesToShift<0){
+    int tempProc=sendProc;
+    sendProc=recvProc;
+    recvProc=tempProc;
+  }
+
+  /// First shifts the data in the A copy left or right by the
+  /// appropriate amount 
+  if (slicesToShift>0) {
+    for (int slice=numSlices-1; slice>=slicesToShift;slice--)
+      for (int species=0; species<numSpecies; species++)
+	for (int ki=0; ki<numk; ki++)
+	  Rho_k[0](slice,species,ki)=Rho_k[0](slice-slicesToShift,species,ki);
+  }
+  else {
+    for (int slice=0; slice<numSlices+slicesToShift;slice++)
+      for (int species=0; species<numSpecies; species++)
+	for (int ki=0; ki<numk; ki++)
+	  Rho_k[0](slice,species,ki)=Rho_k[0](slice-slicesToShift,species,ki);
+  }
+  
+
+  /// Now bundle up the data to send to adjacent processor
+  int bufferSize=abs(slicesToShift)*numSpecies*numk;
+  Array<complex<double>,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
+  int startSlice;
+  int buffIndex=0;
+  if (slicesToShift>0) {
+    startSlice=numSlices-slicesToShift;
+    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++)
+      for (int species=0; species<numSpecies; species++)
+	for (int ki=0; ki<numk; ki++) {
+	  /// If shifting forward, don't send the last time slice (so always)
+	  /// send slice-1
+	  sendBuffer(buffIndex)=Rho_k[1](slice-1,species,ki);
+	  buffIndex++;
+	}
+  }
+  else {
+    startSlice=0;
+    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++)
+      for (int species=0; species<numSpecies; species++)
+	for (int ki=0; ki<numk; ki++) {
+	  /// If shifting backward, don't send the first time slice (so always)
+	  /// send slice+1
+	  sendBuffer(buffIndex)=Rho_k[1](slice+1,species,ki);
+	  buffIndex++;
+	}
+  }
+
+  /// Send and receive data to/from neighbors.
+  Communicator.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
+  
+  if (slicesToShift>0)
+    startSlice=0;
+  else 
+    startSlice=numSlices+slicesToShift;
+
+  /// Copy the data into the A copy
+  buffIndex=0;
+  for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++)
+    for (int species=0; species<numSpecies; species++)
+      for (int ki=0; ki<numk; ki++) {
+	Rho_k[0](slice,species,ki)=receiveBuffer(buffIndex);
+	buffIndex++;
+      }
+  
+  // Now copy A into B, since A has all the good, shifted data now.
+  for (int slice=0; slice<numSlices; slice++)
+    for (int species=0; species<numSpecies; species++)
+      for (int ki=0; ki<numk; ki++) 
+	Rho_k[1](slice,species,ki) = Rho_k[0](slice,species,ki);
+
+  // And we're done! 
+      
 }
 
 void PathClass::ShiftPathData(int slicesToShift)
 {
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
-  int recvProc;
-  int sendProc;
-  int numPtcls=Path.cols();
-  int numSlices=Path.rows();
+  int recvProc, sendProc;
+  int numPtcls=NumParticles();
+  int numSlices=NumTimeSlices();
   assert(abs(slicesToShift)<numSlices);
   sendProc=(myProc+1) % numProcs;
   recvProc=((myProc-1) + numProcs) % numProcs;
@@ -283,76 +371,66 @@ void PathClass::ShiftPathData(int slicesToShift)
   ///First shifts the data in the A copy left 
   ///or right by the appropriate amount   
   if (slicesToShift>0){
-    for (int ptcl=0;ptcl<numPtcls;ptcl++){
-      for (int slice=numSlices-1;
-	   slice>=slicesToShift;slice--){
-	Path.Data[0](slice,ptcl)=
-	  Path.Data[0](slice-slicesToShift,ptcl);
-      }
-    }
+    for (int slice=numSlices-1; slice>=slicesToShift;slice--)
+      for (int ptcl=0;ptcl<numPtcls;ptcl++)
+	Path[0](slice,ptcl) = Path[0](slice-slicesToShift,ptcl);
   }
-  else{
-    for (int ptcl=0;ptcl<numPtcls;ptcl++){
-      for (int slice=0;
-	   slice<numSlices+slicesToShift;slice++){
-	Path.Data[0](slice,ptcl)=
-	  Path.Data[0](slice-slicesToShift,ptcl);
-      }
-    }
+  else {
+    for (int slice=0; slice<numSlices+slicesToShift;slice++)
+      for (int ptcl=0;ptcl<numPtcls;ptcl++)
+	Path[0](slice,ptcl) = Path[0](slice-slicesToShift,ptcl);
   }
   
+
+  /// Now bundle up the data to send to adjacent processor
   int bufferSize=abs(slicesToShift)*numPtcls;
   Array<dVec,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
-  int startTimeSlice;
+  int startSlice;
   int buffIndex=0;
   if (slicesToShift>0){
-    startTimeSlice=numSlices-slicesToShift;
-
-    for (int ptcl=0;ptcl<numPtcls;ptcl++){
-      for (int slice=startTimeSlice;
-	   slice<startTimeSlice+abs(slicesToShift);slice++){
+    startSlice=numSlices-slicesToShift;
+    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+      for (int ptcl=0;ptcl<numPtcls;ptcl++){
 	///If shifting forward, don't send the last time slice (so always)
 	///send slice-1
-	sendBuffer(buffIndex)=Path.Data[1](slice-1,ptcl);
+	sendBuffer(buffIndex)=Path[1](slice-1,ptcl);
 	buffIndex++;
       }
     }
   }
   else {
-    startTimeSlice=0;
-    for (int ptcl=0;ptcl<numPtcls;ptcl++){
-      for (int slice=startTimeSlice;
-	   slice<startTimeSlice+abs(slicesToShift);slice++){
+    startSlice=0;
+    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+      for (int ptcl=0;ptcl<numPtcls;ptcl++){
 	///If shifting backward, don't send the first time slice (so always)
 	///send slice+1
-	sendBuffer(buffIndex)=Path.Data[1](slice+1,ptcl);
+	sendBuffer(buffIndex)=Path[1](slice+1,ptcl);
 	buffIndex++;
       }
     }
-    
   }
 
+  /// Send and receive data to/from neighbors.
   Communicator.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
   
   if (slicesToShift>0)
-    startTimeSlice=0;
+    startSlice=0;
   else 
-    startTimeSlice=numSlices+slicesToShift;
+    startSlice=numSlices+slicesToShift;
 
+  /// Copy the data into the A copy
   buffIndex=0;
-  for (int ptcl=0;ptcl<numPtcls;ptcl++){
-    for (int slice=startTimeSlice;
-	 slice<startTimeSlice+abs(slicesToShift);slice++){
+  for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+    for (int ptcl=0;ptcl<numPtcls;ptcl++){
       Path[0](slice,ptcl)=receiveBuffer(buffIndex);
       buffIndex++;
     }
   }
   
   // Now copy A into B, since A has all the good, shifted data now.
-  for (int ptcl=0;ptcl<numPtcls;ptcl++)
-    for (int slice=0; slice<numSlices; slice++)
+  for (int slice=0; slice<numSlices; slice++)
+    for (int ptcl=0; ptcl<numPtcls; ptcl++)
       Path[1](slice,ptcl) = Path[0](slice,ptcl);
 
   // And we're done!
-
 }

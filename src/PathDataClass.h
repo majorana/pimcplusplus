@@ -4,7 +4,7 @@
 #include "Common.h"
 #include "SpeciesClass.h"
 #include "ActionClass.h"
-#include "NewPathClass.h"
+#include "PathClass.h"
 #include "CommunicatorClass.h"
 
 #include "Common/Random/Random.h"

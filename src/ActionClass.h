@@ -1,7 +1,7 @@
 #ifndef ACTION_CLASS
 #define ACTION_CLASS
 
-#include "NewPathClass.h"
+#include "PathClass.h"
 #include "Common/PairAction/PAFit.h"
 #include "Common/Ewald/Ewald.h"
 
@@ -15,6 +15,7 @@ class ActionClass
 private:
   PathDataClass &PathData;
   PathClass &Path;
+  double CalcLRAction(int slice, int level);
 public:
   /// This holds all of the Pair Action Classes
   Array<PairActionFitClass*,1> PairActionVector;

@@ -197,4 +197,49 @@ void ActionClass::PrintDensityMatrix()
   cerr<<"I'm done printing!"<<endl;
 }
   
-  
+
+inline double mag2 (const complex<double> &z)
+{
+  return (z.real()*z.real() - z.imag()*z.imag());
+}
+
+
+/// Calculates the long-range part of the action at a given timeslice  
+double ActionClass::CalcLRAction(int slice, int level)
+{
+  double homo = 0.0;
+  double hetero = 0.0;
+
+  // First, do the homologous (same species) terms
+  for (int species=0; species<Path.NumSpecies(); species++) {
+    Path.CalcRho_ks(slice);
+    int paIndex = PairMatrix(species,species);
+    PairActionFitClass &PA = *PairActionVector(paIndex);
+    if (PA.IsLongRange()) {
+      for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
+	homo += 0.5 * rhok2 * PA.Ulong_k(level,ki);
+      }
+    }
+    // We can't forget the Madelung term.
+    homo -= 0.5 * Path.Species(species).NumParticles * PA.Ulong_0(level);
+  }
+
+  // Now do the heterologous terms
+  for (int species1=0; species1<Path.NumSpecies(); species1++)
+    for (int species2=species1+1; species2<Path.NumSpecies(); species2++) {
+      int paIndex = PairMatrix(species1, species2);
+      PairActionFitClass &PA = *PairActionVector(paIndex);
+      if (PA.IsLongRange()) {
+	for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	  double rhorho = 
+	    Path.Rho_k(slice, species1, ki).real() *
+	    Path.Rho_k(slice, species2, ki).real() - 
+	    Path.Rho_k(slice, species1, ki).imag() *
+	    Path.Rho_k(slice, species2, ki).imag();
+	  hetero += rhorho * PA.Ulong_k(level,ki);
+	}
+      }
+    }
+  return (homo+hetero);
+}
