@@ -76,6 +76,10 @@ public:
   void Receive (int toProc, Array<double,1> &buff);
   void Receive (int toProc, Array<int,1> &buff);
   bool Probe(int source, int tag, CommStatusClass &status);
+  void Gather (Array<double,1> &sendVec, Array<double,2> &recvMat,
+	       int root=0);
+  void Gather (Array<int,1> &sendVec, Array<int,2> &recvMat,
+	       int root=0);
   void AllGather(void *sendbuf, int sendcount, 
 		 MPI_Datatype sendtype, 
 		       void* recvbuf, int recvcount,
@@ -147,6 +151,23 @@ public:
   {
     return 1;
   }
+  inline void Gather (Array<double,1> &sendVec, 
+		      Array<double,2> &recvMat,
+		      int root = 0)
+  {
+    assert (recvMat.rows() == NumProcs());
+    assert (recvMat.cols() == sendVec.size());
+    recvMat(0,Range::all()) = sendVec;
+  }
+  inline void Gather (Array<int,1> &sendVec, 
+		      Array<int,2> &recvMat,
+		      int root = 0)
+  {
+    assert (recvMat.rows() == NumProcs());
+    assert (recvMat.cols() == sendVec.size());
+    recvMat(0,Range::all()) = sendVec;
+  }
+
   inline void AllGather (Array<double,1> &SendVec, 
 			 Array<double,1> &RecvVec)
   {

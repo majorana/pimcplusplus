@@ -122,6 +122,28 @@ void CommunicatorClass::AllGather (Array<double,1> &SendVec,
 	    recvbuf, count, MPI_DOUBLE);
 }
 
+void CommunicatorClass::Gather (Array<double,1> &sendVec,
+				Array<double,2> &recvMat,
+				int root)
+{
+  assert (recvMat.rows() == NumProcs());
+  assert (recvMat.cols() == sendVec.size());
+  MPI_Gather (sendVec.data(), sendVec.size(), MPI_DOUBLE,
+	      recvMat.data(), sendVec.size(), MPI_DOUBLE, root,
+	      MPIComm);
+}
+
+void CommunicatorClass::Gather (Array<int,1> &sendVec,
+				Array<int,2> &recvMat,
+				int root)
+{
+  assert (recvMat.rows() == NumProcs());
+  assert (recvMat.cols() == sendVec.size());
+  MPI_Gather (sendVec.data(), sendVec.size(), MPI_INT,
+	      recvMat.data(), sendVec.size(), MPI_INT, root,
+	      MPIComm);
+}
+
 void CommunicatorClass::Split (int color, CommunicatorClass &newComm)
 {
   MPI_Comm_split(MPIComm, color, 0, &(newComm.MPIComm));
