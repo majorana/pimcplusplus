@@ -197,7 +197,7 @@ void PHPotFFTClass::Setup()
       numCalls++;
     }
     Vk(i) = volInv*StructureFactor(i)*V;
-    Fk(i) = volInv * StructureFactor(i) * 
+    Fk(i) = volInv *  StructureFactor(i) * 
       kPH.Ftensor (GVecs.DeltaG(i), a, bPerp, bPar);
   }
   cerr << "Number of GetVals calls = " << numCalls << endl;

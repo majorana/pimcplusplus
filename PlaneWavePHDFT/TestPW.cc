@@ -2,16 +2,17 @@
 
 main()
 {
-  Vec3 box(25.0, 25.0, 25.0);
+  Vec3 box(20.0, 20.0, 20.0);
   IOSectionClass in;
   in.OpenFile ("NaUnscreenedPH_Feb18_05.h5");
   Potential *ph = ReadPotential(in);
   in.CloseFile();
-  Hamiltonian H(box, 5.0, 1.0, *ph);
+  Hamiltonian H(box, 9.0, 1.0, *ph);
+  H.PHFFT.Setup();
   ConjGrad CG(H);
   clock_t start, end;
   start = clock();
-  for (int i=0; i<30; i++)
+  for (int i=0; i<10; i++)
     CG.Iterate();
   end = clock();
 

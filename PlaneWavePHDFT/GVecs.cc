@@ -43,13 +43,13 @@ void GVecsClass::Set (Vec3 box, double kcut)
   /// First, count k-vectors
   for (int ix=-maxX; ix<=maxX; ix++) {
     vec.G[0] = ix*kBox[0];
-    vec.I[0] = ix;
+    vec.I[0] = (ix+Nx)%Nx;
     for (int iy=-maxY; iy<=maxY; iy++) {
       vec.G[1] = iy*kBox[1];
-      vec.I[1] = iy;
+      vec.I[1] = (iy+Ny)%Ny;
       for (int iz=-maxZ; iz<=maxZ; iz++) {
 	vec.G[2] = iz*kBox[2];
-	vec.I[2] = iz;
+	vec.I[2] = (iz+Nz)%Nz;
 	if (dot(vec.G,vec.G) < (kcut*kcut)) 
 	  vecs.push_back(vec);
       }
@@ -75,13 +75,13 @@ void GVecsClass::Set (Vec3 box, double kcut)
   /// First, count k-vectors
   for (int ix=-2*maxX; ix<=2*maxX; ix++) {
     vec.G[0] = ix*kBox[0];
-    vec.I[0] = ix;
+    vec.I[0] = (ix+Nx)%Nx;
     for (int iy=-2*maxY; iy<=2*maxY; iy++) {
       vec.G[1] = iy*kBox[1];
-      vec.I[1] = iy;
+      vec.I[1] = (iy+Ny)%Ny;
       for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
 	vec.G[2] = iz*kBox[2];
-	vec.I[2] = iz;
+	vec.I[2] = (iz+Nz)%Nz;
 	if (dot(vec.G,vec.G) < (4.0*kcut*kcut))
 	  vecs.push_back(vec);
       }

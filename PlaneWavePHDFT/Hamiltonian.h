@@ -88,7 +88,6 @@ class PHPotFFTClass : public HamiltonianBase
 {
 private:
   kSpacePH kPH;
-  void Setup();
   bool IsSetup;
   Array<cMat3,3> Fr;
   zVec Vc;
@@ -101,6 +100,8 @@ private:
   FFTMatBox MatFFT;
   Vec3 k;
 public:
+  void Setup();
+
   void Setk (Vec3 kvec);
   void Apply (const zVec &c, zVec &Hc);
   PHPotFFTClass (Potential &ph, GVecsClass &gvecs) :
