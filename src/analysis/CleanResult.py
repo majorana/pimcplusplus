@@ -41,6 +41,11 @@ def PlotPaths(pathData,visualPath,visualBall,mcTime):
                visualPath[pathNum].append(pos=(pathData[mcTime][pathNum][slice]))
      
 
+def IsMonotonic (x):
+     isMono = True
+     for i in range(0,x.size()-2):
+          isMono = isMono and (x[i+1] > x[i])
+     return isMono
      
 
 def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
@@ -48,7 +53,10 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
 #     infile.OpenSection("grid")
 #     x=infile.ReadVar("Points")
 #     infile.CloseSection()
-     plot(x, y)
+     if (IsMonotonic(x)):
+          plot(x, y)
+     else:
+          plot(x, y, 'o')
      h1=xlabel(hlabel)
      set(h1,"FontSize",20)
      v1=ylabel(vlabel)
