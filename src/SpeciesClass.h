@@ -27,22 +27,34 @@ public:
 };
 
 
+
+
+///This is the inherited class that holds the information about
+///the electrons. Eventually this will probably be turned into
+///a fermion class.  Currently, no actual information about the electrons
+///are actually included.
 class ElectronsClass : public SpeciesClass
 {
 public:
+  ///When we make this work, this calculates the NodeActions
   double NodeAction (int Ptcl, int LinkNum);
   ElectronsClass();
   ~ElectronsClass();
 
 };
 
+
+///This is the inherited class that holds the information about
+///the protons.  Currently no useful information about protons is contained
+///here
 class ProtonsClass : public SpeciesClass
 {
 public:
+  ///Just returns 0 until we do something more intelligble.
   double NodeAction (int Ptcl, int LinkNum)
     {
       return (0.0);
-    }
+    }  
   ProtonsClass()
     {
     }

@@ -6,22 +6,29 @@
 #include "MemoizedDataClass.h"
 #include "SpeciesArrayClass.h"
 
+/// Doesn't do anything right now but saves the pair action class
+/// eventually 
 class SavedPairActionClass
 {
-
+  ///This is a test comment
 
 
 };
 
-/*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n \sum_{j=1}^k
-u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f] */
-
+///This is the pair action class. It uses the following formula in
+///order to calculate the pair action
+/*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
+  \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */
 class PairActionClass
 {
 
 private:
-  Array<double,1> tempukjArray;
+  ///Holds the Ukj coefficients for a given q
+  Array<double,1> TempukjArray;
+
+  /// Skips to the next string in the file whose substring matches skipToString
   string SkipTo(ifstream &infile, string skipToString);
+  /// Reads a Fortran 3 tensor
   void ReadFORTRAN3Tensor(ifstream &infile, Array<double,3> &tempUkj);
 public:
   /// This stores the coefficients of the expansion specified above.
@@ -29,19 +36,22 @@ public:
   /// value and a temporary array to get all of the values in that
   /// column. 
   Array<MultiCubicSpline,1> ukj; ///<(level )
+  ///Same as ukj but stores the beta derivatives.
   Array<MultiCubicSpline,1> dukj; ///<(level )
+  /// Calculate the U(s,q,z) value when given s,q,z and the level 
   inline double calcUsqz(double s,double q,double z,int level);
+  /// This is the order of the fit to use. 
   int n;
+  /// This is the temperature 
   double tau;
+  /// Function to read David's squarer file input.
   void ReadDavidSquarerFile(string DMFile);
-  
-
-  
-  
-  
   
 };
 
+/// Calculate the U(s,q,z) value when given s,q,z and the level 
+/*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
+  \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */
 inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
 {
   double sum=0.0;
@@ -59,10 +69,8 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
     return (0.0);
 
 
-///I'm about to change this line to make it work  sum=sum+(ukj(level,0))(r)+(ukj(level,0))(rprime);//this is the endpoint action
-  //cerr << "r = " << r << "\n";
-  //cerr << "rp = " << rprime << "\n";
-  sum=sum+0.5*((ukj(level))(0,r)+(ukj(level))(0,rprime));//this is the endpoint action
+
+  sum=sum+0.5*((ukj(level))(0,r)+(ukj(level))(0,rprime)); //This is the endpoint action 
 
 
   if (s > 0.0)
@@ -90,46 +98,59 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
       }
     }
   
-  return sum; //I hope this is the right thing to return 
+  return sum; 
 }
 
-/*! This is the class that controls all of the actions and is in
-  charge of calculating them. When this is initialized a pointer needs
-  to be sent that has the memoizedData and SpeciesClass */ 
-
+/// This is the class that controls all of the actions and is in
+/// charge of calculating them. When this is initialized a pointer needs
+/// to be sent that has the memoizedData and SpeciesClass 
 class ActionClass
 {
 
 
 private:
 public:
+  /// This holds all of the Pair Action Classes
   Array<PairActionClass,1> PairActionVector;
+  /// Holds indices to which PairActionClass in the PairAcctionVector
+  /// you use for a given pair of particles indexed by
+  /// (species1,species2) 
   Array<int,2> PairMatrix;
+  /// This indexes into the non-existent Saved Pair Actions
   Array<SavedPairActionClass,2> SavedPairActionArray;
-  //  Array<SpeciesClass,1> *mySpeciesArray;
-  SpeciesArrayClass *mySpeciesArray;
+
+  /// This holds a reference to the Array of Species
+  SpeciesArrayClass &mySpeciesArray;
+  /// Temperature
   double tau;
+  /// Calculates the total action.
   double calcTotalAction(Array<ParticleID,1> changedParticles,int startSlice, int endSlice,int level);
-  MemoizedDataClass *myMemoizedData;
+  /// This is a reference to the memoized data class
+  MemoizedDataClass &myMemoizedData;
+  ///This picks a new location in space for the particles in the
+  ///particles Array at all of the time slices between startSlice and
+  ///endSlice (at the appropriate skip for the level)
   inline double SampleParticles(Array<ParticleID,1> particles,int startSlice,int endSlice,int level);
+  /// This calculates the sample probability for going from the state
+  /// that is currently in the newMode of MirroredArrayClass to the
+  /// state that is currently in oldMode of MirroredArrayClass 
   inline double LogSampleProb(Array<ParticleID,1> particles,int startSlice,int endSlice,int level);
+  /// Function to calculate the total action.
   void calcTotalAction();
 
 
 
 };
 
-/*! 
-Samples the particles in "particles" and the time slices between
-startSlice and endSlice (not inclusive). Samples from a free gaussian
-of variance \$\sigma=\sqrt{2*\lambda*\tau} \$. Return 
-the logarithm of the total sampling probability of the density (i.e \$
+
+/*! Samples the particles in "particles" and the time slices between
+ startSlice and endSlice (not inclusive). Samples from a free gaussian
+ of variance \f[$\sigma=\sqrt{2*\lambda*\tau} \$]. Return 
+ the logarithm of the total sampling probability of the density (i.e \f[\$
 \frac{-NDIM}{2}*\log{2*\pi*\sigma^2}-0.5*\frac{\delta \cdot
-\delta}{\sigma * \sigma}  \$ )
+\delta}{\sigma * \sigma}  \$] )
 
-!*/
-
-
+*/
 inline double ActionClass::SampleParticles(Array<ParticleID,1> particles,
 					   int startSlice,int endSlice, int level)
 {
@@ -163,6 +184,9 @@ inline double ActionClass::SampleParticles(Array<ParticleID,1> particles,
 }
 
 
+  /// This calculates the sample probability for going from the state
+  /// that is currently in the newMode of MirroredArrayClass to the
+  /// state that is currently in oldMode of MirroredArrayClass 
 inline double ActionClass::LogSampleProb(Array<ParticleID,1> particles,
 				      int startSlice,int endSlice,int level)
 {

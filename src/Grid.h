@@ -4,219 +4,83 @@
 #include "Blitz.h"
 #include "InputFile.h"
 
+//Ken's Grid Class
+
+/// The different types of grids that we currently allow
 typedef enum {NONE, LINEAR, OPTIMAL, LOG} GridType;
 
+
+/// Parent class for all grids
 class Grid
 {
  protected:
+  /// Contains the grid points 
   Array<scalar,1> grid;
  public:
+  /// First and last grid points
   scalar Start, End;
+
+  /// Number of points in the grid
   int NumPoints;
 
+  /// The i'th point in the grid
   inline scalar operator()(int i) const
     {
       return (grid(i));
     }
 
+
+  /// Returns the type of the grid (i.e. linear, optimal, etc)
   virtual GridType Type()
     { return (NONE); }
 
+  /// Reads the parameters in the file.
   virtual void ReadParams (FILE *fin)
   {
     cerr << "Should never get here.\n";
     exit(1);
   }
-  
+   
+  ///Write the parameters in the file
   virtual void WriteParams (FILE *fout)
   {
     cerr << "Should never get here.\n";
     exit(1);
   }
 
+ 
+  /// Writes the grid paramaters in inputfile format
   virtual void WriteInput (FILE *fout)
   {
     cerr << "Should never get here.\n";
     exit(1);
   }
 
+  ///Returns the index of the nearest point below r. 
   virtual int ReverseMap (scalar r)
   {
     cerr << "Should never get here.\n";
     exit(1);
     return (0);
   }
-  inline scalar Interp(const Array<scalar,1> &Vals, scalar r, int order)
-    {
-      if (/*(r<Start) ||*/ (r>(End*1.0000000001)))
-	{
-	  cerr << "r = " << r << "outside grid range in Interp.\n";
-	  exit(1);
-	}
-      int NumVals = order+1;
-      int StartIndex, EndIndex;
-      if (NumPoints&1)
-	StartIndex = ReverseMap(r) - NumVals/2;
-      else
-	StartIndex = ReverseMap(r) - NumVals/2 + 1;
-      EndIndex = StartIndex + order;
-      if (StartIndex < 0)
-	{
-	  EndIndex -= StartIndex;
-	  StartIndex = 0;
-	}
-      if (EndIndex >= NumPoints)
-	{
-	  StartIndex -= (EndIndex-(NumPoints-1));
-	  EndIndex = NumPoints-1;
-	}
 
-      scalar delta =  grid(StartIndex) - grid(EndIndex);
-      for (int i=StartIndex; i<=EndIndex; i++)
-	if (fabs((grid(i)-r)/delta) < 1.0e-7)
-	  return (Vals(i));
 
-      // Now do a standard, nth order interpolation
-      scalar Sum=0.0;
 
-      for (int i=StartIndex; i<=EndIndex; i++)
-	{
-	  scalar Numer, Denom;
-	  Numer = Denom = 1.0;
-	  for (int j=StartIndex; j<=EndIndex; j++)
-	    if (i!=j) 
-	      {
-		Numer *= (r-grid(j));
-		Denom *= (grid(i) - grid(j));
-	      }
-	  Sum += Numer/Denom * Vals(i);
-	}
-      return(Sum);
-    }  
-
-  inline scalar Deriv (const Array<scalar,1> &Vals, scalar r, int order)
-    {
-      if (/*(r<Start) ||*/ (r>(End*1.000001)))
-	{
-	  cerr << "r = " << r << "outside grid range in Interp.\n";
-	  // exit(1);
-	}
-
-      
-      int index = ReverseMap(r);
-      //cerr << "r = " << r << " grid(index) = " << grid(index) << "  index = " << index << "\n";
-      if (index < 0)
-	index = 0;
-      if (index > (NumPoints-2))
-	index = NumPoints-2;
-      
-      return ((Vals(index+1)-Vals(index)) / (grid(index+1)-grid(index)));
-    
-
-      //  int NumVals = order+1;
-//        int StartIndex, EndIndex;
-//        if (NumPoints&1)
-//  	StartIndex = ReverseMap(r) - NumVals/2;
-//        else
-//  	StartIndex = ReverseMap(r) - NumVals/2 + 1;
-//        EndIndex = StartIndex + order;
-//        if (StartIndex < 0)
-//  	{
-//  	  EndIndex -= StartIndex;
-//  	  StartIndex = 0;
-//  	}
-//        if (EndIndex >= NumPoints)
-//  	{
-//  	  StartIndex -= (EndIndex-(NumPoints-1));
-//  	  EndIndex = NumPoints-1;
-//  	}
-
-//        scalar delta =  grid(StartIndex) - grid(EndIndex);
-
-      /*for (int m=StartIndex; m<=EndIndex; m++)
-	      if (fabs((grid(m)-r)/delta) < 1.0e-3)
-	  {
-	    //cerr << m << "\n";
-	    scalar Sum=0.0;
-	    for (int i=StartIndex; i<=EndIndex; i++)
-	      {
-		if (i == m)
-		  {
-		    scalar Numer, Denom;
-		    Numer = 0.0;
-		    Denom = 1.0;
-		    for (int j=StartIndex; j<=EndIndex; j++)
-		      {
-			scalar NumerFact = 1.0;
-			for (int k=StartIndex; k<=EndIndex; k++)
-			  if (k!=i)
-			    if (k!=j)
-			      NumerFact *= (r-grid(j));
-			if (i!=j) 
-			  {
-			    Numer += NumerFact;
-			    Denom *= (grid(i) - grid(j));
-			  }
-		      }
-		    Sum += Numer/Denom * Vals(i);
-		  }
-		else
-		  {
-		    scalar Numer = 1.0;
-		    scalar Denom = 1.0;
-		    for (int j=StartIndex; j<=EndIndex; j++)
-		      {
-			if (i!=j)
-			  {
-			    if (j != m)
-			      Numer *= -(r - grid(j));
-			    Denom *= (grid(j) - grid(i));
-			  }
-		      }
-		    Sum += (Numer/Denom) * Vals(i);
-		  } 
-	      }
-	    return (Sum);
-	    }*/
-		  
-            
-
-      // Now do a standard, nth order interpolation
-
-      //  scalar Sum=0.0;
-//        for (int i=StartIndex; i<=EndIndex; i++)
-//  	{
-//  	  scalar Numer, Denom;
-//  	  Numer = 0.0;
-//  	  Denom = 1.0;
-//  	  for (int j=StartIndex; j<=EndIndex; j++)
-//  	    {
-//  	      scalar NumerFact = 1.0;
-//  	      for (int k=StartIndex; k<=EndIndex; k++)
-//  		if (k!=i)
-//  		  if (k!=j)
-//  		    NumerFact *= (r-grid(j));
-//  	      if (i!=j) 
-//  		{
-//  		  Numer += NumerFact;
-//  		  Denom *= -(grid(i) - grid(j));
-//  		}
-//  	    }
-//  	  Sum += Numer/Denom * Vals(i);
-//  	}
-//        return(Sum);
-    }
 };
 
+
+/// Linear Grid inherets from Grid.  
 class LinearGrid : public Grid
 {
  private:
+  /// The value between successive grid points.
   scalar delta;
  public:
-
+  /// Returns the type of the grid (in this case LINEAR)
   GridType Type()
     { return (LINEAR); }
 
+  /// Reads the paramaters from the file.
   void ReadParams (FILE *fin)
     {
       fscanf (fin, " %lf  %lf %d ", &Start, &End, &NumPoints);
@@ -225,12 +89,13 @@ class LinearGrid : public Grid
       for (int i=0; i<NumPoints; i++)
 	grid(i) = Start + (scalar)i*delta;
     }
-
+  ///Writes the paramaters to the file.
   void WriteParams (FILE *fout)
     {
       fprintf (fout, "%1.16e %1.16e %d\n", Start, End, NumPoints);
     }
 
+  /// Writes the grid paramaters in inputfile format  
   void WriteInput (FILE *fout)
   {
     fprintf (fout, "  {\n");
@@ -241,11 +106,13 @@ class LinearGrid : public Grid
     fprintf (fout, "  }\n");
   }
 
+  /// Returns the index of the nearest point below r. 
   int ReverseMap(scalar r)
     {
       return ((int)floor((r-Start)/delta));
     }
 
+  /// Initializes the linear grid.
   inline void Init(scalar start, scalar end, int numpoints)
   {
       Start=start; End=end; NumPoints=numpoints;
@@ -255,15 +122,20 @@ class LinearGrid : public Grid
 	grid(i) = Start + (scalar)i*delta;
   }
 
+  /// Useless constructor
   LinearGrid ()
   {
     // Do nothing
   }
+
+  /// Constructor that sets the number of points, start and end point
+  /// of the original grid 
   LinearGrid (scalar start, scalar end, int numpoints)
     {
       Init (start, end, numpoints);
     }
 };
+
 
 
 class OptimalGrid : public Grid

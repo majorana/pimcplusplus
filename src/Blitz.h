@@ -88,5 +88,16 @@ inline Mat3 operator*(scalar s, const Mat3 &M)
   return (sM);
 }
 
+inline double distSqrd(Vec2 a,Vec2 b)
+{
+  return dot(a-b,a-b);
+}
+
+inline double distSqrd(Vec3 a,Vec3 b)
+{
+  return dot(a-b,a-b);
+}
+
+
 
 #endif

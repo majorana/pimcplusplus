@@ -5,23 +5,39 @@
 #include "MoveClass.h"
 #include "ActionClass.h"
 
+
+/// This is the bisection move class inherited from ParticleMoveClass
+/// Explanation of how bisection moves work is in  
+/// Path Integrals in the theory of condensed helium
+/// by D.M. Ceperley  (Review of Modern Physics 1995) section V.H
 class BisectionMoveClass : public ParticleMoveClass
 {
 
   
  public:
-  int StartTimeSlice;
+  ///This is the slice in which the bisectino move starts.  It ends up
+  ///going to StartTimeSlice+2^NumLevels
+  int StartTimeSlice; 
+  ///Number of levels the bisection move works on 
   int NumLevels;
 
+  /// Function to actually make a bisection move.
   void makeMove();
   BisectionMoveClass();
 };
 
 
+///This is a "psuedo-move" that is inherited from MoveClass.
+///"Pseudo-moves do not increment the monte-carlo time slice. It
+///shifts the data in memory by numTimeSlicesToShift. We do this to
+///shift data between processors, etc.
 class ShiftMove : public MoveClass
 {
  public:
+  /// Contains the number of time slices to shift at a time. We have
+///this change itself randomly from other objects.
   int numTimeSlicesToShift;
+  /// Function to actually make a shift move. 
   void makeMove();
 };
 

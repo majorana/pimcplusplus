@@ -7,6 +7,8 @@
 #include <stream.h>
 #include <string>
 
+///Ken's input file reader
+
 inline void Abort (char *str)
 {
   cerr << str << "\nAborting.\n";
