@@ -98,11 +98,11 @@ void Atom::Read (IOSectionClass &IO)
   PH = ReadPH(IO);
   IO.CloseSection();
   assert (IO.OpenSection("RadialWFs"));
-  assert (IO.OpenSectoin("Grid"));
+  assert (IO.OpenSection("Grid"));
   grid = ReadGrid(IO);
   IO.CloseSection();
   bool IsPseudo;
-  int NumWFs;
+
   assert(IO.ReadVar("NumRadialWFs", NumRadialWFs));
   assert(IO.ReadVar("IsPseudo", IsPseudo));
 
@@ -118,11 +118,12 @@ void Atom::Read (IOSectionClass &IO)
   bool HaveCoreNodeNums  = IO.ReadVar("CoreNodeNums", CoreNodeNums);
   bool HaveTotalNodeNums = IO.ReadVar("TotalNodeNums", TotalNodeNums);
   bool HaveLabels        = IO.ReadVar("Labels", Labels);
+  IO.CloseSection();
   
-  RadialWFs.resize(NumWFs);
+  RadialWFs.resize(NumRadialWFs);
   Array<double,1> temp(grid->NumPoints);
   temp = 0.0;
-  for (int i=0; i<NumWFs; i++) {
+  for (int i=0; i<NumRadialWFs; i++) {
     RadialWFs(i).IsRelativistic = !IsPseudo;
     RadialWFs(i).grid = grid;
     RadialWFs(i).PH = PH;
@@ -557,6 +558,8 @@ RadialWF::SolveRadialEquation()
   double A, B, V, dAdr;
   while (!done)
     {
+      //cerr << "Etrial = " << Etrial << endl;
+      //cerr << "Ehigh = " << Ehigh << " Elow = " << Elow << endl;
       double CuspValue = IntegrateInwardOutward(Tindex);
       //cerr << "Cusp value = " << CuspValue << "\n";
       

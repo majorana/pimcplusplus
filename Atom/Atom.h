@@ -15,10 +15,19 @@ inline double SmoothStep (double x, double CutOff, double Width)
 
 class RadialWF
 {
+private:
+  int TurningIndex();
+  double IntegrateInwardOutward(int &Tindex);
+  int CountNodes();
+  double KineticEnergy();
+  void OriginBC(double r0, double &u0, double &du0);
+  void InfinityBC(double r0, double &u0, double &du0);
+
 public:
-  bool IsRelativistic;
   Grid *grid;
   PseudoHamiltonian *PH;
+
+  bool IsRelativistic;
   double Energy, PartialNorm;
   int l;
   int CoreNodeNum;
@@ -59,18 +68,11 @@ public:
     return (weight);
   }
 
-  int CountNodes();
-  int TurningIndex();
   void IntegrateOutward();
-  double IntegrateInwardOutward(int &Tindex);
   void SolveRadialEquation();
-  double KineticEnergy();
   void Normalize();
-  void OriginBC(double r0, double &u0, double &du0);
-  void InfinityBC(double r0, double &u0, double &du0);
 
-  inline void Init(int L, double E, PseudoHamiltonian *PseudoH, 
-		   Grid *NewGrid) 
+  inline void Init(int L, double E, PseudoHamiltonian *PseudoH, Grid *NewGrid) 
   {
     grid = NewGrid;
     l = L;
