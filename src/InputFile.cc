@@ -342,6 +342,7 @@ InputBuffer::FindQuoteBlock (InputBuffer &BlockBuffer)
   if ((pos == size) || (buffer(pos) != '\"'))
     {
       pos = SavePos;
+
       return (0);
     }
   
