@@ -258,7 +258,7 @@ bool VarHDF5Class::ReadInto (blitz::Array<bool,4> &val)
 
 bool VarHDF5Class::Append(double val)
 {
-  int RANK = 1;
+  const int RANK = 1;
 
   if ((Type != DOUBLE_TYPE) || (Dim != 1)) {
     cerr << "Trying to append a double to a non blitz::Array<double,1>.  Exitting.\n";
@@ -291,7 +291,7 @@ bool VarHDF5Class::Append(double val)
 
 bool VarHDF5Class::Append(blitz::Array<double,1> &val)
 {
-  int RANK = 2;
+  const int RANK = 2;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<double,1> to a non blitz::Array<double,2>.  Exitting.\n";
@@ -337,7 +337,7 @@ bool VarHDF5Class::Append(blitz::Array<double,1> &val)
 
 bool VarHDF5Class::Append(blitz::Array<double,2> &val)
 {
-  int RANK = 3;
+  const int RANK = 3;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<double,2> to a non blitz::Array<double,3>.  Exitting.\n";
@@ -382,7 +382,7 @@ bool VarHDF5Class::Append(blitz::Array<double,2> &val)
 
 bool VarHDF5Class::Append(blitz::Array<double,3> &val)
 {
-  int RANK = 4;
+  const int RANK = 4;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<double,3> to a non blitz::Array<double,4>.  Exitting.\n";
@@ -430,7 +430,7 @@ bool VarHDF5Class::Append(blitz::Array<double,3> &val)
 
 bool VarHDF5Class::Append(int val)
 {
-  int RANK = 1;
+  const int RANK = 1;
 
   if ((Type != INT_TYPE) || (Dim != 1)) {
     cerr << "Trying to append a int to a non blitz::Array<int,1>.  Exitting.\n";
@@ -463,7 +463,7 @@ bool VarHDF5Class::Append(int val)
 
 bool VarHDF5Class::Append(blitz::Array<int,1> &val)
 {
-  int RANK = 2;
+  const int RANK = 2;
 
   if ((Type != INT_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<int,1> to a non blitz::Array<int,2>.  Exitting.\n";
@@ -509,7 +509,7 @@ bool VarHDF5Class::Append(blitz::Array<int,1> &val)
 
 bool VarHDF5Class::Append(blitz::Array<int,2> &val)
 {
-  int RANK = 3;
+  const int RANK = 3;
 
   if ((Type != INT_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<int,2> to a non blitz::Array<int,3>.  Exitting.\n";
@@ -555,7 +555,7 @@ bool VarHDF5Class::Append(blitz::Array<int,2> &val)
 
 bool VarHDF5Class::Append(blitz::Array<int,3> &val)
 {
-  int RANK = 4;
+  const int RANK = 4;
 
   if ((Type != INT_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<int,3> to a non blitz::Array<int,4>.  Exitting.\n";
@@ -601,7 +601,7 @@ bool VarHDF5Class::Append(blitz::Array<int,3> &val)
 
 bool VarHDF5Class::Append(string val)
 {
-  int RANK = 1;
+  const int RANK = 1;
 
   if ((Type != STRING_TYPE) || (Dim != 1)) {
     cerr << "Trying to append a string to a non blitz::Array<string,1>.  Exitting.\n";
@@ -638,7 +638,7 @@ bool VarHDF5Class::Append(string val)
 
 bool VarHDF5Class::Append(blitz::Array<string,1> &strs)
 {
-  int RANK = 2;
+  const int RANK = 2;
   if ((Type != STRING_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<string,1> to a non blitz::Array<string,2>.  Exitting.\n";
     return false;
@@ -703,7 +703,7 @@ bool VarHDF5Class::Append(blitz::Array<string,1> &strs)
 
 bool VarHDF5Class::Append(blitz::Array<string,2> &strs)
 {
-  int RANK = 3;
+  const int RANK = 3;
   if ((Type != STRING_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<string,2> to a non blitz::Array<string,3>.  Exitting.\n";
     return false;
@@ -773,7 +773,7 @@ bool VarHDF5Class::Append(blitz::Array<string,2> &strs)
 
 bool VarHDF5Class::Append(blitz::Array<string,3> &strs)
 {
-  int RANK = 4;
+  const int RANK = 4;
   if ((Type != STRING_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<string,3> to a non blitz::Array<string,4>.  Exitting.\n";
     return false;
@@ -840,7 +840,7 @@ bool VarHDF5Class::Append(blitz::Array<string,3> &strs)
 
 bool VarHDF5Class::Append(bool val)
 {
-  int RANK = 1;
+  const int RANK = 1;
 
   if ((Type != BOOL_TYPE) || (Dim != 1)) {
     cerr << 
@@ -872,7 +872,7 @@ bool VarHDF5Class::Append(bool val)
 
 bool VarHDF5Class::Append(blitz::Array<bool,1> &val)
 {
-  int RANK = 2;
+  const int RANK = 2;
 
   if ((Type != BOOL_TYPE) || (Dim != RANK)) {
     cerr << 
@@ -918,7 +918,7 @@ bool VarHDF5Class::Append(blitz::Array<bool,1> &val)
 
 bool VarHDF5Class::Append(blitz::Array<bool,2> &val)
 {
-  int RANK = 3;
+  const int RANK = 3;
 
   if ((Type != BOOL_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<bool,2> " 
@@ -963,7 +963,7 @@ bool VarHDF5Class::Append(blitz::Array<bool,2> &val)
 
 bool VarHDF5Class::Append(blitz::Array<bool,3> &val)
 {
-  int RANK = 4;
+  const int RANK = 4;
 
   if ((Type != BOOL_TYPE) || (Dim != RANK)) {
     cerr << "Trying to append an Array<bool,3> "
@@ -1447,7 +1447,7 @@ void IOTreeHDF5Class::WriteVar(string name, double T)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,1> &v)
 {
-  int RANK=1;
+  const int RANK=1;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -1505,7 +1505,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,1> &v)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,2> &v)
 {
-  int RANK=2;
+  const int RANK=2;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -1565,7 +1565,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,2> &v)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,3> &v)
 {
-  int RANK=3;
+  const int RANK=3;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -1625,7 +1625,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,3> &v)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<double,4> &v)
 {
-  int RANK=4;
+  const int RANK=4;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -1714,7 +1714,7 @@ void IOTreeHDF5Class::WriteVar(string name, int T)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,1> &v)
 {
-  int RANK=1;
+  const int RANK=1;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -1773,7 +1773,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,1> &v)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,2> &v)
 {
-  int RANK=2;
+  const int RANK=2;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -1833,7 +1833,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,2> &v)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,3> &v)
 {
-  int RANK=3;
+  const int RANK=3;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -1893,7 +1893,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,3> &v)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<int,4> &v)
 {
-  int RANK=4;
+  const int RANK=4;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -1992,7 +1992,7 @@ void IOTreeHDF5Class::WriteVar(string name,string str)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,1> &strs)
 {
-  int RANK=1;
+  const int RANK=1;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -2071,7 +2071,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,1> &strs)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,2> &strs)
 {
-  int RANK=2;
+  const int RANK=2;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -2150,7 +2150,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,2> &strs)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,3> &strs)
 {
-  int RANK=3;
+  const int RANK=3;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -2229,7 +2229,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,3> &strs)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<string,4> &strs)
 {
-  int RANK=4;
+  const int RANK=4;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->Name = name;
@@ -2339,7 +2339,7 @@ void IOTreeHDF5Class::WriteVar(string name, bool T)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,1> &v)
 {
-  int RANK=1;
+  const int RANK=1;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->BoolType = BoolType;
@@ -2399,7 +2399,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,1> &v)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,2> &v)
 {
-  int RANK=2;
+  const int RANK=2;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->BoolType = BoolType;
@@ -2459,7 +2459,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,2> &v)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,3> &v)
 {
-  int RANK=3;
+  const int RANK=3;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->BoolType = BoolType;
@@ -2519,7 +2519,7 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,3> &v)
 
 void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,4> &v)
 {
-  int RANK=4;
+  const int RANK=4;
   /// Create new variable
   VarHDF5Class *newVar = new VarHDF5Class;
   newVar->BoolType = BoolType;
