@@ -53,6 +53,7 @@ private:
   TinyVector<Array<complex<double>,1>,NDIM> C;
 public:
   Mirrored1DClass<dVec> RefPath;
+  void BroadcastRefPath();
   /// True if we need k-space sums for long range potentials.
   bool LongRange;
   /// Stores the actual k vectors
@@ -87,6 +88,16 @@ public:
   inline const double GetVol();
   inline const double Getkc();
   inline void  SetPeriodic(TinyVector<bool,NDIM> period);
+
+  //////////////////////////////////
+  /// TimeSlice parallelism stuff //
+  //////////////////////////////////
+
+  /// Returns the range of time slices that a processor holds.
+  inline void SliceRange (int proc, int &slice1, int &slice2);
+  /// Returns which processor owns the given slice
+  inline int SliceOwner (int slice);
+
 
   /////////////////////////////////
   /// Displacements / Distances ///
@@ -506,5 +517,31 @@ inline void PathClass::PutInBox (dVec &v)
 /* #endif  */
   
 }
+
+
+inline void PathClass::SliceRange(int proc, int &start, int &end)
+{
+  end = 0;
+  int nProcs = Communicator.NumProcs();
+  for (int i=0; i<=proc; i++) {
+    start = end;
+    int numSlices = TotalNumSlices/nProcs+(i<(TotalNumSlices % nProcs));
+    end = start + numSlices;
+  }
+}
+
+inline int PathClass::SliceOwner(int slice)
+{
+  int proc = 0;
+  int nProcs = Communicator.NumProcs();
+  for (int i=0; i<Communicator.NumProcs(); i++) {
+    int slice1, slice2;
+    SliceRange (i, slice1, slice2);
+    if ((slice1 <= slice) && (slice2 >= slice))
+      proc = i;
+  }
+  return proc;
+}
+
 
 #endif

@@ -150,6 +150,8 @@ void PathClass::Read (IOSectionClass &inSection)
       }
     }    
     else if (InitPaths == "LEVIFLIGHT") {
+      int myStart, myEnd;
+      SliceRange (Communicator.MyProc(), myStart, myEnd);
       Array<double,2> Positions;
       assert (inSection.ReadVar ("Positions", Positions));
       assert (Positions.rows() == species.NumParticles);
@@ -163,8 +165,10 @@ void PathClass::Read (IOSectionClass &inSection)
 	  flight(TotalNumSlices)[dim] = Positions(ptcl-species.FirstPtcl,dim);
 	}
 	LeviFlight (flight, species.lambda, tau);
-	for (int i=0; i<MyNumSlices; i++)
-	  Path(i, ptcl) = flight(i-RefSlice);
+// 	for (int i=0; i<MyNumSlices; i++)
+// 	  Path(i, ptcl) = flight(i-RefSlice);
+	for (int slice=myStart; slice<myEnd; slice++)
+	  Path(slice-myStart, ptcl) = flight(slice);
       }
     }
 
@@ -181,6 +185,8 @@ void PathClass::Read (IOSectionClass &inSection)
   Path.AcceptCopy();
   Permutation.AcceptCopy();
   Rho_k.AcceptCopy();
+  BroadcastRefPath();
+  RefPath.AcceptCopy();
 }
 
 
@@ -213,10 +219,10 @@ void PathClass::Allocate()
   // Initialize reference slice position to be 0 on processor 0.  
   RefSlice = 0;
   // Calculate correct position for other processors.
-  for (int proc=0; proc < myProc; proc++) {
-    int numSlices = TotalNumSlices/numProcs+(proc<(TotalNumSlices % numProcs));
-    RefSlice -= numSlices;
-  }
+//   for (int proc=0; proc < myProc; proc++) {
+//     int numSlices = TotalNumSlices/numProcs+(proc<(TotalNumSlices % numProcs));
+//     RefSlice -= numSlices;
+//   }
     
 //   cerr<<"Numprocs is "<<numProcs<<endl;
 //   cerr<<"mynumslices: "<<MyNumSlices<<endl;
@@ -472,8 +478,8 @@ void PathClass::ShiftData(int slicesToShift)
   RefSlice += slicesToShift;
   while (RefSlice >= TotalNumSlices)
     RefSlice -= TotalNumSlices;
-//   while (RefSlice <= -TotalNumSlices)
-//     RefSlice += TotalNumSlices;
+  while (RefSlice < 0)
+    RefSlice += TotalNumSlices;
 }
 
 void PathClass::ShiftRho_kData(int slicesToShift)
@@ -658,4 +664,34 @@ void PathClass::ShiftPathData(int slicesToShift)
     OpenLink[OLDMODE]=OpenLink[NEWMODE];
   }
   //  cerr<<Path(OpenLink,NumParticles())<<endl;
+}
+
+
+/// This function sends the reference slice from whatever processor is
+/// currently holding it to all the other processors.  Note that only
+/// the NEW copy is updated.  If we want the OLD copy to be updated,
+/// we must use RefPath.AcceptCopy().
+void PathClass::BroadcastRefPath()
+{
+  SetMode (NEWMODE);
+  // Figure which processor has the reference slice
+  int procWithRefSlice = SliceOwner (RefSlice);
+  
+  Array<dVec,1> buffer(NumParticles());
+  if (procWithRefSlice == Communicator.MyProc()) {
+    int myStart, myEnd;
+    SliceRange (Communicator.MyProc(), myStart, myEnd);
+    for (int ptcl=0; ptcl<NumParticles(); ptcl++)
+      buffer(ptcl) = Path(RefSlice-myStart, ptcl);
+  }
+  // Do broadcast
+  Communicator.BroadCast(procWithRefSlice, buffer);
+
+  // Now, all processors have reference slice.  Note that the 
+  // labeling of particles may not be right since with haven't
+  // propogated the permuation matrices.
+  
+  // Now, copy into path
+  for (int ptcl=0; ptcl<NumParticles(); ptcl++)
+    RefPath(ptcl) = buffer(ptcl);
 }

@@ -29,9 +29,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     newStage->Actions.push_back(&PathData.Actions.ShortRange);
     //newStage->Actions.push_back(&PathData.Actions.LongRange);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
-    if (level == 0)
-      for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
-	newStage->Actions.push_back(PathData.Actions.NodalActions(i));
+    if ((level == 0) && (PathData.Actions.NodalActions(SpeciesNum)!=NULL))
+      newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
     newStage->BisectionLevel = level;
     Stages.push_back (newStage);
   }

@@ -75,18 +75,19 @@ void ActionsClass::Read(IOSectionClass &in)
       }
 
   // Create nodal action objects
+  NodalActions.resize(PathData.Path.NumSpecies());
   for (int spIndex=0; spIndex<PathData.Path.NumSpecies(); spIndex++) {
     SpeciesClass &species = PathData.Path.Species(spIndex);
     if (species.GetParticleType() == FERMION) {
-      NodalActions.resizeAndPreserve (NodalActions.size()+1);
       if (species.NodeType == "FREE")
-	NodalActions (NodalActions.size()-1) = 
-	  new FreeNodalActionClass(PathData, spIndex);
+	NodalActions (spIndex) = new FreeNodalActionClass(PathData, spIndex);
       else {
 	cerr << "Unrecognized node type " << species.NodeType << ".\n";
 	exit(EXIT_FAILURE);
       }
     }
+    else
+      NodalActions(spIndex) = NULL;
   }
 
 //   // Now create nodal actions for Fermions
