@@ -80,3 +80,35 @@ bool PAclassicalFitClass::Read (IOSectionClass &in,
 
 
 
+/////////////////////////
+/// Long-ranged stuff ///
+/////////////////////////
+bool PAclassicalFitClass::IsLongRange()
+{
+  // This needs to be fixed.  We need to add this kind of function to
+  // the potential base class. 
+  return true;
+}
+
+double PAclassicalFitClass::Vlong(double q, int level)
+{
+  if (q <= 0.0)
+    return 2.0/sqrt(M_PI)*Z1Z2*alpha;
+  else 
+    return Z1Z2/q*erf(alpha*q);
+}
+
+double PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
+{
+  if (k <= 0.0)
+    k = 1.0e-30;
+  return 4.0*M_PI/(boxVol*k*k)*exp(-k*k/(4.0*alpha*alpha));
+}
+
+
+void PAclassicalFitClass::DoBreakup(const dVec& box,const Array<dVec,1> &kVecs)
+{
+  
+
+
+}

@@ -251,4 +251,70 @@ bool PAcoulombBCFitClass::Read (IOSectionClass &in,
 }
 
 
+bool PAcoulombBCFitClass::IsLongRange()
+{
+  return true;
+}
+
+
+double PAcoulombBCFitClass::Vlong(double q, int level)
+{
+  if (q <= 0.0)
+    return 2.0/sqrt(M_PI)*Z1Z2*alpha;
+  else 
+    return Z1Z2/q*erf(alpha*q);
+}
+
+double PAcoulombBCFitClass::Vlong_k(double boxVol, double k, int level)
+{
+  if (k <= 0.0)
+    k = 1.0e-30;
+  return 4.0*M_PI/(boxVol*k*k)*exp(-k*k/(4.0*alpha*alpha));
+}
+
+double PAcoulombBCFitClass::dVlong(double q, int level)
+{
+  return 0.0;
+}
+
+
+void PAcoulombBCFitClass::DoBreakup(const dVec &box, const Array<dVec,1> &kVecs)
+{
+  // Calculate the cutoff parameter
+  double minL, boxVol;
+  boxVol = minL = box[0];
+  for (int i=1; i<NDIM; i++) {
+    minL = min(minL, box[i]);
+    boxVol *= box[i];
+  }
+  alpha = 7.0/minL;
+
+  // First, subtract off long-ranged part from the bicubic spline to
+  // make them short-ranged.
+  for (int level=0; level<NumBetas; level++) {
+    double tau = SmallestBeta * pow(2.0, level);
+    for (int qi=0; qi<Usplines(level).Nx; qi++) {
+      double q = (*Usplines(level).Xgrid)(qi);
+      double v = Vlong(q, level);
+      for (int ti=0; ti<Usplines(level).Ny; ti++) {
+	Usplines(level)(qi,ti) -= tau*v;
+	dUsplines(level)(qi,ti) -= v;
+      }
+    }
+  }
+
+  // Now, calculate the k-space parts
+  Ulong_k.resize(NumBetas, kVecs.size());
+  dUlong_k.resize(NumBetas, kVecs.size());
+  U_RPA_long_k.resize(NumBetas, kVecs.size());
+  dU_RPA_long_k.resize(NumBetas, kVecs.size());
+  for (int level=0; level<NumBetas; level++) {
+    double tau = SmallestBeta * pow(2.0, level);
+    for (int ki=0; ki<kVecs.size(); ki++) {
+      double k = sqrt(dot(kVecs(ki), kVecs(ki)));
+      Ulong_k = tau*Vlong_k(boxVol, k, level);
+      dUlong_k = Vlong_k(boxVol, k, level);
+    }
+  }
+}
 

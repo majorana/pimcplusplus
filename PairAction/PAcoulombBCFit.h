@@ -7,6 +7,14 @@ class PAcoulombBCFitClass : public PairActionFitClass
 {
 private:
   bool GridsAreMine;
+  double Vlong_k (double boxVol, double k, int level);
+  double dVlong_k (double boxVol, double k, int level);
+  double Vlong (double q, int level);
+  double dVlong (double q, int level);
+  // Product of the two charges.
+  double Z1Z2;
+  // Real space cutoff parameter;
+  double alpha;
 public:
   Grid *qgrid, *tgrid;
   Array<BicubicSpline,1> Usplines, dUsplines;
@@ -23,6 +31,13 @@ public:
 	      int NumBetas);
   double U(double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
+
+  /////////////////////////
+  /// Long-ranged stuff ///
+  /////////////////////////
+  bool IsLongRange();
+  void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
+
   PAcoulombBCFitClass()
   { 
     GridsAreMine = false; 

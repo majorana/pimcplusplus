@@ -15,14 +15,20 @@ protected:
   void ReadHeader(IOSectionClass &inSection);
 public:
   ParticleClass Particle1, Particle2;
+  /// This stores the long-ranged part of the potential in k-space.  
+  /// Indices: (level, k-point).  dVlong_k stores the beta-derivative.
+  Array<double,2> Ulong_k, dUlong_k;
+  /// Stores the RPA form of the above.  This should be computed by
+  /// ActionClass, since it couples all of the species pairs together
+  /// and needs to know about the number of particles.
+  Array<double,2> U_RPA_long_k, dU_RPA_long_k;
+  /// This stores the beta-derivative of the above.
   bool UsePBC;
   int NumBetas;
-  Array<double,1> Box;
+  
   Potential *Pot;
   double SmallestBeta;
   double lambda;
-
-
 
 #ifdef MAKE_FIT
   virtual void ReadParams  (IOSectionClass &inSection)   = 0;
@@ -33,9 +39,22 @@ public:
 #endif
   virtual bool Read (IOSectionClass &inSection,
 		     double smallestBeta, int NumBetas) = 0;
+  /// In the case of a long-ranged breakup, this should return Ushort
   virtual double U(double q, double z, double s2, int level) = 0;
   virtual double dU(double q, double z, double s2, int level) = 0;
   virtual double V(double r) {return -3.14159;}
+
+  /////////////////////////
+  /// Long-ranged stuff ///
+  /////////////////////////
+  virtual bool IsLongRange() = 0;
+  // Fills in the Vlong_k and dVlong_k array.
+  virtual void DoBreakup (const dVec &box, const Array<dVec,1> &kVecs) 
+  { }
+  /// We break up the diagonal part of the action.  Hence, this is
+  /// only a function of q.
+  //virtual double Vlong   (double q, int level) { return 0.0; }
+  //virtual double dVlong   (double q, int level) { return 0.0; }
 };
 
 
