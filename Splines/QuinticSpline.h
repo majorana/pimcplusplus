@@ -43,6 +43,10 @@ public:
   inline double Deriv3(double x);
   /// Returns the interpolated fourth derivative.
   inline double Deriv4(double x);
+  /// Returns the number of points;
+  inline int NumPoints() const;
+
+  inline Array<double,1>& Data();
   /// Recompute the quintic polynomial coefficients
   void Update();
   
@@ -119,6 +123,11 @@ public:
   }
 };
 
+
+inline int QuinticSpline::NumPoints() const 
+{
+  return grid->NumPoints;
+}
 
 void QuinticSpline::Init(Grid *NewGrid, Array<double,1> NewY,
 			 double startderiv, double endderiv,
@@ -272,7 +281,11 @@ inline double QuinticSpline::Deriv4(double x)
   return (S);
 }
 
-
+inline Array<double,1>& QuinticSpline::Data()
+{
+  UpToDate = false;
+  return (Y);
+}
 
 
 #endif

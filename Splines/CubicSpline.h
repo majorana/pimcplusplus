@@ -30,6 +30,7 @@ public:
   /// that boundary.
   double StartDeriv, EndDeriv;
 
+  inline Array<double,1>& Data();
   /// Returns the interpolated value.
   inline double operator()(double x);
   /// Returns the interpolated first derivative.
@@ -86,16 +87,23 @@ public:
   }
 
   /// Returns the value of the function at the ith grid point.
-  inline double Params(int i) const
+  inline double operator()(int i) const
   {
     return (y(i));
   }
   /// Returns a reference to the value at the ith grid point.
-  inline double & Params(int i)
+  inline double & operator()(int i)
   {
     UpToDate = 0;
     return (y(i));
   }
+
+  /// Returns the value of the function at the ith grid point.
+  inline double Params(int i) const
+  {  return (y(i));  }
+  /// Returns a reference to the value at the ith grid point.
+  inline double & Params(int i)
+  {  return ((*this)(i));   }
   void Write(IOSectionClass &outSection)
   {
     outSection.WriteVar("StartDeriv", StartDeriv);
@@ -128,7 +136,11 @@ public:
 };
 
 
-
+inline Array<double,1>& CubicSpline::Data()
+{
+  UpToDate = false;
+  return y;
+}
 
 
 
@@ -154,16 +166,14 @@ inline double CubicSpline::operator()(double x)
 #endif
   int hi = X.ReverseMap(x)+1;
   int low = hi-1;
-  if (low<0)
-    {
-      low = 0;
-      hi = 1;
-    }
-  if (hi>(X.NumPoints-1))
-    {
-      hi = (X.NumPoints-1);
-      low = hi-1;
-    }
+  if (low<0) {
+    low = 0;
+    hi = 1;
+  }
+  if (hi>(X.NumPoints-1)) {
+    hi = (X.NumPoints-1);
+    low = hi-1;
+  }
 
   double h = X(hi) - X(low);
   double hinv = 1.0/h;
@@ -183,11 +193,14 @@ double CubicSpline::Deriv(double x)
   Grid &X = *grid;
   int hi = X.ReverseMap(x)+1;
   int low = hi-1;
-  if (low<0)
-    {
+  if (low<0) {
       low = 0;
       hi = 1;
-    }
+  }
+  if (hi>(X.NumPoints-1)) {
+    hi = (X.NumPoints-1);
+    low = hi-1;
+  }
   
   double h = X(hi) - X(low);
   double hinv = 1.0/h;
@@ -206,11 +219,15 @@ inline double CubicSpline::Deriv2(double x)
   Grid &X = *grid;
   int hi = X.ReverseMap(x)+1;
   int low = hi-1;
-  if (low<0)
-    {
-      low = 0;
-      hi = 1;
-    }
+  if (low<0) {
+    low = 0;
+    hi = 1;
+  }
+  if (hi>(X.NumPoints-1)) {
+    hi = (X.NumPoints-1);
+    low = hi-1;
+  }
+
   
   double h = X(hi) - X(low);
   double hinv = 1.0/h;
@@ -227,11 +244,15 @@ inline double CubicSpline::Deriv3(double x)
   Grid &X = *grid;
   int hi = X.ReverseMap(x)+1;
   int low = hi-1;
-  if (low<0)
-    {
-      low = 0;
-      hi = 1;
-    }
+  if (low<0) {
+    low = 0;
+    hi = 1;
+  }
+  if (hi>(X.NumPoints-1)) {
+    hi = (X.NumPoints-1);
+    low = hi-1;
+  }
+
   double h = X(hi)-X(low);
   
   return ((d2y(hi)-d2y(low))/h);

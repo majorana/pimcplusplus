@@ -225,7 +225,7 @@ class OptimalGrid : public Grid
 
   /// This form of the constructor takes the number of points, the
   /// maximum radius and the value of b.
-  OptimalGrid (int numpoints, scalar rmax, scalar bval)
+  void Init (int numpoints, scalar rmax, scalar bval)
   {
     NumPoints = numpoints;
     b = bval;
@@ -237,6 +237,9 @@ class OptimalGrid : public Grid
     for (int i=0; i<NumPoints; i++)
       grid(i) = a*(exp(b*(i+1))-1.0);
   }
+
+  OptimalGrid (int numPoints, scalar rmax, scalar bval)
+  { Init (numPoints, rmax, bval); }
 
   void Init (scalar aval, scalar bval, int numPoints)
   {
@@ -272,17 +275,24 @@ class OptimalGrid : public Grid
   {
     double aval, bval;
     int numPoints;
-    assert(inSection.ReadVar("a", aval));
-    assert(inSection.ReadVar("b", bval));
-    assert(inSection.ReadVar("NumPoints", numPoints));
-    Init (aval,bval,numPoints);
+    if (inSection.ReadVar("a", aval)) {
+      assert(inSection.ReadVar("b", bval));
+      assert(inSection.ReadVar("NumPoints", numPoints));
+      Init (aval,bval,numPoints);
+    }
+    else {
+      double Z, rmax;
+      assert(inSection.ReadVar("Z", Z));
+      assert(inSection.ReadVar("rmax", rmax));
+      Init (Z, rmax);
+    }
   }
 
 
   /// This form of the constructor takes a nuclear charge and a
   /// maxmimum radius and chooses an appropriate number of points for
   /// that atom.
-  OptimalGrid (scalar Z, scalar rmax)
+  void Init (scalar Z, scalar rmax)
     {
       a = 4.34e-6/Z;
       //a = 4.0e-2;
@@ -290,7 +300,6 @@ class OptimalGrid : public Grid
       //b = 0.004;
 
       NumPoints = (int)ceil(log(rmax/a+1.0)/b);
-      cerr << "NumPoints = " << NumPoints << "\n";
       b = log(rmax/a+1.0)/(scalar)NumPoints;
       Start = a * (exp(b) - 1.0);
       End = rmax;
@@ -304,6 +313,9 @@ class OptimalGrid : public Grid
 	  //fprintf (stdout, "%1.12e\n", grid(i));
 	}
     }
+  OptimalGrid (scalar Z, scalar rmax)
+  { Init (Z, rmax); }
+
 };
 
 
