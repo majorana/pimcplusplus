@@ -6,7 +6,7 @@
 #include "BisectionMoveClass.h"
 #include "MirroredArrayClass.h"
 #include "ObservableClass.h"
-#include "DistanceTableFreeClass.h"
+#include "DistanceTablePBCClass.h"
 
 
 void setupAction(ActionClass &myActionClass)
@@ -177,9 +177,13 @@ int main(int argc, char **argv)
   BisectionMoveClass myBisectionMove(myPathData);
   ShiftMoveClass myShiftMove(myPathData);
   setupMove(myBisectionMove,myShiftMove,myPathData);
-  DistanceTableFreeClass *myDistTable=
-    new DistanceTableFreeClass(myPathData.Path);
+  DistanceTablePBCClass *myDistTable=
+    new DistanceTablePBCClass(myPathData.Path);
   myPathData.DistanceTable=myDistTable;
+  myPathData.Path.Box[0]=3.14159265358979323846;
+  myPathData.Path.Box[1]=3.14159265358979323846;
+  myPathData.Path.Box[2]=3.14159265358979323846;
+
   myPathData.Action.DistanceTable=myDistTable;
   myPathData.DistanceTable->UpdateAll();
   //  cerr<<"The size of the SpeciesArray is ";
