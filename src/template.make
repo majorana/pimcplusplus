@@ -30,7 +30,10 @@ PIMCobjs =                            \
   Moves/OpenBisectionMoveClass.o      \
   Moves/BisectionMoveClass.o          \
   Moves/MoveBase.o                    \
+  Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
+  Actions/LongRangeClass.o            \
+  Actions/LongRangeRPAClass.o         \
   Actions/ActionsClass.o              \
   Moves/MultiStage.o                  \
   ActionClass.o                       \
@@ -81,8 +84,11 @@ TestPermobjs =                        \
   Moves/BisectionClass.o              \
   Moves/BlockMove.o                   \
   Moves/MetaMoves.o                   \
+  Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
   Actions/ActionsClass.o              \
+  Actions/LongRangeClass.o            \
+  Actions/LongRangeRPAClass.o         \
   Moves/MultiStage.o                  \
   PIMCClass.o                         \
   Observables/ObservableBase.o        \
@@ -141,44 +147,47 @@ TestPermobjs =                        \
 #  Common/PairAction/PAtricubicFit.o  \
 
 
-TestEwaldobjs =                      \
-  TestEwald.o                        \
-  PathClass.o                        \
-  MirroredClass.o                    \
-  SpeciesClass.o                     \
-  ActionClass.o                      \
-  NodalAction.o                      \
-  PathDataClass.o                    \
-  LongRangeRPA.o                     \
-  Actions/ShortRangeClass.o          \
-  Common/MPI/Communication.o	     \
-  Common/IO/InputOutput.o            \
-  Common/IO/InputOutputHDF5.o        \
-  Common/IO/InputFile.o              \
-  Common/IO/InputOutputASCII.o       \
-  Common/IO/InputOutputXML.o         \
-  Common/PairAction/PAcoulombBCFit.o \
-  Common/PairAction/PACoulombFit.o   \
-  Common/PairAction/PADipoleFit.o    \
-  Common/PairAction/PATripoleFit.o   \
-  Common/PairAction/PAclassicalFit.o \
-  Common/PairAction/PAzeroFit.o      \
-  Common/PairAction/DavidPAClass.o   \
-  Common/Splines/BicubicSpline.o     \
-  Common/PH/Potential.o              \
-  Common/PH/QuinticPH.o              \
-  Common/PH/CoulombPot.o             \
-  Common/PH/ScreenedPot.o            \
-  Common/PH/SplinePot.o              \
-  Common/PH/HeAzizPot.o              \
-  Common/Splines/CubicSpline.o       \
-  Common/Splines/MyTricubicSpline.o  \
-  Common/Splines/Grid.o              \
-  Common/Splines/QuinticSpline.o     \
-  Common/Ewald/OptimizedBreakup.o    \
-  Common/MatrixOps/MatrixOps.o       \
-  Common/Integration/GKIntegration.o \
-  Common/Fitting/Fitting.o           \
+TestEwaldobjs =                       \
+  TestEwald.o                         \
+  PathClass.o                         \
+  MirroredClass.o                     \
+  SpeciesClass.o                      \
+  ActionClass.o                       \
+  NodalAction.o                       \
+  PathDataClass.o                     \
+  LongRangeRPA.o                      \
+  Actions/ActionBase.o                \
+  Actions/ShortRangeClass.o           \
+  Actions/LongRangeClass.o            \
+  Actions/LongRangeRPAClass.o         \
+  Common/MPI/Communication.o	      \
+  Common/IO/InputOutput.o             \
+  Common/IO/InputOutputHDF5.o         \
+  Common/IO/InputFile.o               \
+  Common/IO/InputOutputASCII.o        \
+  Common/IO/InputOutputXML.o          \
+  Common/PairAction/PAcoulombBCFit.o  \
+  Common/PairAction/PACoulombFit.o    \
+  Common/PairAction/PADipoleFit.o     \
+  Common/PairAction/PATripoleFit.o    \
+  Common/PairAction/PAclassicalFit.o  \
+  Common/PairAction/PAzeroFit.o       \
+  Common/PairAction/DavidPAClass.o    \
+  Common/Splines/BicubicSpline.o      \
+  Common/PH/Potential.o               \
+  Common/PH/QuinticPH.o               \
+  Common/PH/CoulombPot.o              \
+  Common/PH/ScreenedPot.o             \
+  Common/PH/SplinePot.o               \
+  Common/PH/HeAzizPot.o               \
+  Common/Splines/CubicSpline.o        \
+  Common/Splines/MyTricubicSpline.o   \
+  Common/Splines/Grid.o               \
+  Common/Splines/QuinticSpline.o      \
+  Common/Ewald/OptimizedBreakup.o     \
+  Common/MatrixOps/MatrixOps.o        \
+  Common/Integration/GKIntegration.o  \
+  Common/Fitting/Fitting.o            \
   Common/Splines/QuinticSplines.o    
 
 
