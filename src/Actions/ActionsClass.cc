@@ -29,8 +29,9 @@ void ActionsClass::Read(IOSectionClass &in)
   PairMatrix.resize(Path.NumSpecies(),Path.NumSpecies());
   // Initialize to a nonsense value so we can later check in the table
   // element was filled in.
-
-  PairMatrix = (PairActionFitClass*)NULL;
+  for (int i=0; i<Path.NumSpecies(); i++)
+    for (int j=0; j<Path.NumSpecies(); j++)
+      PairMatrix(i,j) = (PairActionFitClass*)NULL;
   // Read pair actions files
   IOSectionClass PAIO;
   bool longRange = false;
@@ -41,14 +42,17 @@ void ActionsClass::Read(IOSectionClass &in)
     bool paUsed=false;
     for (int spec1=0;spec1<Path.NumSpecies();spec1++)
       if (Path.Species(spec1).Type==PairArray(i)->Particle1.Name)
-	for (int spec2=0;spec2<Path.NumSpecies();spec2++) 
+	for (int spec2=spec1;spec2<Path.NumSpecies();spec2++) 
 	  if (Path.Species(spec2).Type==PairArray(i)->Particle2.Name) {
 	    if (PairMatrix(spec1,spec2) != NULL) {
 	      cerr << "More than one pair action for species types (" 
 		   << PairArray(i)->Particle1.Name << ", "
-		   << PairArray(i)->Particle1.Name << ")." << endl;
+		   << PairArray(i)->Particle2.Name << ")." << endl;
 	      exit(-1);
 	    }
+	    cerr << "Found PAfile for pair (" 
+		 << Path.Species(spec1).Name << ", "
+		 << Path.Species(spec2).Name << ")\n";
 	    PairMatrix(spec1,spec2) = PairArray(i);
 	    PairMatrix(spec2,spec1) = PairArray(i);
 	    paUsed = true;

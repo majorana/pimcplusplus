@@ -39,14 +39,17 @@ void ActionClass::Read(IOSectionClass& inSection)
     bool paUsed=false;
     for (int spec1=0;spec1<Path.NumSpecies();spec1++)
       if (Path.Species(spec1).Type==PairActionVector(i)->Particle1.Name)
-	for (int spec2=0;spec2<Path.NumSpecies();spec2++) 
+	for (int spec2=spec1;spec2<Path.NumSpecies();spec2++) 
 	  if (Path.Species(spec2).Type==PairActionVector(i)->Particle2.Name) {
 	    if (PairMatrix(spec1,spec2) != -1) {
 	      cerr << "More than one pair action for species types (" 
 		   << PairActionVector(i)->Particle1.Name << ", "
-		   << PairActionVector(i)->Particle1.Name << ")." << endl;
+		   << PairActionVector(i)->Particle2.Name << ")." << endl;
 	      exit(-1);
 	    }
+	    cerr << "Found PAfile for pair (" 
+		 << Path.Species(spec1).Name << ", "
+		 << Path.Species(spec2).Name << ")\n";
 	    PairMatrix(spec1,spec2) = i;
 	    PairMatrix(spec2,spec1) = i;
 	    paUsed = true;

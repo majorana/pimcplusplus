@@ -390,6 +390,9 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots)
   Array<double,1> Ulong_r(numPoints);
 
   for (int paIndex=0; paIndex<PairArray.size(); paIndex++) {
+    cerr << "Doing long range breakpus for species types (" 
+	 << PairArray(paIndex)->Particle1.Name << ", " 
+	 << PairArray(paIndex)->Particle2.Name << endl;
     PairActionFitClass &pa = *PairArray(paIndex);
     pa.Setrc (rc);
     pa.Ulong.resize(pa.NumBetas);

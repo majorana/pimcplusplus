@@ -7,7 +7,7 @@ Section (Fits)
     string Name = "He";
     double lambda = 6.059615;
     int Ndim = 3;
-    double Charge = 1;
+//    double Charge = 1;
   }
 
   Section (Particle2)
@@ -15,7 +15,7 @@ Section (Fits)
     string Name = "He";
     double lambda = 0.0;
     int Ndim = 3;
-    double Charge = 1;
+//    double Charge = 1;
   }
 
   string Daviddmfile="He4.95.dm";

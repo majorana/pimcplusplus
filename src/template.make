@@ -41,7 +41,7 @@ MAKECC = g++
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
-DEFS = $(EXTRADEFS) -DNDIM=2 -DVERSION=$(VER)  -DNO_COUT -DUSE_MPI  -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -DUSE_MPI  -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
 
 PIMCobjs =                            \
   Common.o                            \
@@ -100,6 +100,7 @@ PIMCobjs =                            \
   Common/IO/InputOutputASCII.o        \
   Common/IO/InputOutputXML.o          \
   Common/PairAction/PAcoulombBCFit.o  \
+  Common/PairAction/PAtricubicFit.o   \
   Common/PairAction/PACoulombFit.o    \
   Common/PairAction/PADipoleFit.o     \
   Common/PairAction/PATripoleFit.o    \
@@ -181,6 +182,7 @@ TestPermobjs =                        \
   Common/IO/InputOutputASCII.o        \
   Common/IO/InputOutputXML.o          \
   Common/PairAction/PAcoulombBCFit.o  \
+  Common/PairAction/PAtricubicFit.o   \
   Common/PairAction/PACoulombFit.o    \
   Common/PairAction/PADipoleFit.o     \
   Common/PairAction/PATripoleFit.o    \
@@ -228,6 +230,7 @@ TestEwaldobjs =                       \
   Common/IO/InputOutputHDF5.o         \
   Common/IO/InputOutputASCII.o        \
   Common/IO/InputOutputXML.o          \
+  Common/PairAction/PAtricubicFit.o   \
   Common/PairAction/PAcoulombBCFit.o  \
   Common/PairAction/PACoulombFit.o    \
   Common/PairAction/PADipoleFit.o     \

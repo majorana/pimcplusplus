@@ -1,28 +1,28 @@
 #include "DisplaceMove.h"
 
 double DisplaceStageClass::Sample (int &slice1, int &slice2,
-				 Array<int,1> &activeParticles)
+				   Array<int,1> &activeParticles)
 {
-  // First pick timeslices and particle
-  slice1 = 0;
-  slice2 = PathData.NumTimeSlices()-1;
-  activeParticles.resize(1);
-
-  
   /// Now, choose a random displacement 
   dVec disp;
   PathData.Path.Random.CommonGaussianVec (Sigma, disp);
 
   // Actually displace the path
+  SetMode(NEWMODE);
+  int ptcl = activeParticles(0);
+  for (int slice=0; slice<PathData.NumTimeSlices(); slice++)
+    PathData.Path(slice, ptcl) = PathData.Path(slice, ptcl) + disp;
 
-  // And return sample ratio
-
+  // And return sample probability ratio
+  return 1.0;
 }
 
 void
 DisplaceMoveClass::Read (IOSectionClass &in)
 {
   assert(in.ReadVar ("Sigma", Sigma));
+  DisplaceStage.Sigma = Sigma;
+  assert(in.ReadVar("name",Name));
   Array<string,1> activeSpeciesNames;
 
   // Read in the active species.
@@ -62,6 +62,8 @@ DisplaceMoveClass::MakeMove ()
   for (int i=0; i<ActiveSpecies.size(); i++)
     numActive += PathData.Path.Species(i).NumParticles;
   ActiveParticles.resize(1);
+
+
   int index = PathData.Path.Random.CommonInt(numActive);
   bool done = false;
   int speciesIndex = 0;

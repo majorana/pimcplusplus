@@ -77,15 +77,18 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
 }
 
 bool CommonStageClass::Attempt(int &slice1, int &slice2, 
-			      Array<int,1> &activeParticles,
-			      double &prevActionChange)
+			       Array<int,1> &activeParticles,
+			       double &prevActionChange)
 {
+  assert (slice1 == 0);
+  assert (slice2 == PathData.NumTimeSlices()-1);
+
   SetMode (NEWMODE);
   double sampleRatio=Sample(slice1,slice2,activeParticles);
   SetMode(OLDMODE);
-  double oldAction=StageAction(slice1,slice2,activeParticles);
+  double oldAction= GlobalStageAction(activeParticles);
   SetMode(NEWMODE);
-  double newAction =StageAction(slice1,slice2,activeParticles);
+  double newAction = GlobalStageAction(activeParticles);
   double currActionChange=newAction-oldAction;
   double logAcceptProb=log(sampleRatio)-currActionChange+prevActionChange;
   bool toAccept = logAcceptProb>=log(PathData.Path.Random.Common()); /// Accept condition

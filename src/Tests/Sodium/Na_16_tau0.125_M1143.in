@@ -5,6 +5,9 @@ Section (Parallel)
   int ProcsPerClone = 1;
 }
 
+
+// This system contains 16 sodium atoms at T = 2210 Kevin 
+// and rs=5.90 bohr
 Section (System)
 {
   int NumTimeSlices=1143;

@@ -49,10 +49,8 @@ protected:
 
   /// Scratch Array holding a random subset of particles
   Array<int,1> MyParticleIndices; 
-  ////  /// A mapping from integers to particle ids
-  //  Array<ParticleID,1> MyParticles;
- ///Our move class takes the number of particles to move at a
-/// time. This is stored here. 
+  /// Our move class takes the number of particles to move at a
+  /// time. This is stored here. 
   int NumParticlesToMove;
 
  public:

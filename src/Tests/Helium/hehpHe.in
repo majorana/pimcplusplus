@@ -8,7 +8,7 @@ Section (Parallel)
 Section (System)
 {
   bool OpenLoops=false;
-  int NumTimeSlices=28; 
+  int NumTimeSlices=16; 
   Array<double,1> Box(3)=[14.73612599,14.73612599, 14.73612599];
   Array<bool, 1 > IsPeriodic(3)=[true,true,true];
   Section (Particles)
@@ -18,6 +18,7 @@ Section (System)
       string Name="He";
       string Type="He";
       double lambda=6.059615; 
+      //      string Type="BOLTZMANNON";
       string Statistics="BOSON";
       int NumParticles=96;
       int NumDim=3;
@@ -154,7 +155,7 @@ Section (Observables)
       string Name = "Energy";
       string Description="Total Energy";
       int freq=20;
-      int dumpFreq=2000;
+      int dumpFreq=200;
       	
     }
   Section (Observable)
@@ -165,7 +166,7 @@ Section (Observables)
       string Species2 = "He";
       string Description="Helium-Helium Pair Correlation";
       int freq=20;
-      int dumpFreq=2000;
+      int dumpFreq=200;
       Section (Grid)
 	{
 	  string type = "Linear";
@@ -186,6 +187,14 @@ Section (Observables)
 
 Section (Moves){
 
+  Section (Move)
+    {
+      string type="Displace";
+      string name="Displace";
+      double Sigma=0.2;
+      Array<string,1> ActiveSpecies(1)=["He"];
+    }
+	
   Section (Move)
     {
       string type="Bisection";
@@ -218,11 +227,11 @@ Section (Moves){
 Section (Algorithm)
 {
   Section (Loop){ // Before Accumulating Observables
-    int steps=6000; 
+    int steps=600; 
     Section (Loop){ 
 
       int steps=3;
-      Section (Move) {string name="Permutation";} 
+      //      Section (Move) {string name="Displace";} 
       Section (Loop){
 	int steps=8; 
 	Section (Move) {string name="NormalBisection";}
@@ -236,7 +245,7 @@ Section (Algorithm)
     int steps=3000000000;
     Section (Loop){
       int steps=3;
-      Section (Move) {string name="Permutation";}
+      //      Section (Move) {string name="Displace";}
       Section (Loop){
 	int steps=8; 
 	Section (Move) {string name="NormalBisection";} 
@@ -245,8 +254,8 @@ Section (Algorithm)
     }
     Section (Observe) {string name = "HeHePC";}
     Section (Observe) {string name = "Energy"; }
-    Section (Observe) {string name = "PathDump"; }
-    Section (Observe) {string name = "StructureFactor"; }
+    //    Section (Observe) {string name = "PathDump"; }
+    //    Section (Observe) {string name = "StructureFactor"; }
     Section (Move) {string name = "Shift"; }
   }
 }

@@ -76,6 +76,17 @@ inline int ParticleMoveClass::RandInt (int Max) //Hopefully this didn't break an
 }
 
 
+//void ParticleMoveClass::ChooseParticles()
+//{
+//  for (int i=0;i<NumParticlesToMove;i++){
+//    bool Redundant;
+//    do {
+//      MyParticleIndices(i)=PathData.Path.Random.CommonInt(TotalParticles);
+      
+
+
+//}
+
 /// So do we still want to choose particles by dumping everything
 /// into some mapping array from teh active particles and dealing 
 // with it that way? I think this is doing duplicate stuff in here.
