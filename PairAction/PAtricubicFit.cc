@@ -218,9 +218,9 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 
   for (int qi=0; qi<numq; qi++) {
     double q = (*qgrid)(qi);
-    cerr << "qi = " << qi << endl;
+    //    cerr << "qi = " << qi << endl;
     for (int yi=0; yi<numy; yi++) {
-      cerr << "  yi = " << yi << endl;
+      // cerr << "  yi = " << yi << endl;
       double y = (*ygrid)(yi);
       double z = 2.0*q*y;
       double r = q+0.5*z; 
