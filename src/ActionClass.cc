@@ -43,17 +43,6 @@ void ActionClass::Read(IOSectionClass& inSection)
     PairMatrix(type2,type1) = i;
     PAIO.CloseFile();
   }
-  string fileName;
-  //  if(inSection.ReadVar("Daviddmfile",fileName)){
-  //    DavidPAClass myPAClass;
-  //    myPAClass.Print();
-  //    myPAClass.ReadDavidSquarerFile(fileName.c_str());
-    //    assert(inSection.ReadVar("type1",type1));
-    //    assert(inSection.ReadVar("type2",type2));
-  //  }
-
-  
-  
 
 
 
@@ -181,7 +170,8 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
   //    cerr<<"TotalU:  "<<TotalU<<endl;
   //  }
   //  cerr<<"My Action is "<<(TotalK + TotalU)<<endl;
-  return (TotalK + TotalU);
+  //  return (TotalK + TotalU);
+  return TotalU; //HACK! HACK!
   
   
 }
@@ -200,7 +190,7 @@ void ActionClass::PrintDensityMatrix()
 
 inline double mag2 (const complex<double> &z)
 {
-  return (z.real()*z.real() - z.imag()*z.imag());
+  return (z.real()*z.real() + z.imag()*z.imag());
 }
 
 
@@ -223,6 +213,7 @@ double ActionClass::CalcLRAction(int slice, int level)
     }
     // We can't forget the Madelung term.
     homo -= 0.5 * Path.Species(species).NumParticles * PA.Ulong_0(level);
+    cerr<<"This thing is "<<PA.Ulong_0(level)<<endl;
   }
 
   // Now do the heterologous terms
@@ -234,12 +225,13 @@ double ActionClass::CalcLRAction(int slice, int level)
 	for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	  double rhorho = 
 	    Path.Rho_k(slice, species1, ki).real() *
-	    Path.Rho_k(slice, species2, ki).real() - 
+	    Path.Rho_k(slice, species2, ki).real() + 
 	    Path.Rho_k(slice, species1, ki).imag() *
 	    Path.Rho_k(slice, species2, ki).imag();
 	  hetero += rhorho * PA.Ulong_k(level,ki);
 	}
       }
     }
+  cerr<<"Homo: "<<homo<<" Hetero: "<<hetero<<endl;
   return (homo+hetero);
 }

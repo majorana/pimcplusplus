@@ -235,12 +235,14 @@ void PathClass::CalcRho_ks_Fast(int slice,int species)
     }
     // Now, loop over k-vector indices;
     for (int ki=0; ki<kIndices.size(); ki++) {
-      complex<double> rho_k;
       const TinyVector<int,NDIM> &kIndex = kIndices(ki);
-      rho_k = C[0](kIndex[0]);
-      for (int i=1; i<NDIM; i++)
-	rho_k *= C[i](kIndex[i]);
-      Rho_k(slice,species,ki) += rho_k;
+#ifdef THREE_D
+      Rho_k(slice,species,ki) += 
+	2.0*C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
+#endif
+#ifdef TWO_D
+      Rho_k(slice,species,ki) += 2.0*C[0](kIndex[0])*C[1](kIndex[1]);
+#endif
     }
   }
 }

@@ -15,11 +15,12 @@ class ActionClass
 private:
   PathDataClass &PathData;
   PathClass &Path;
-  double CalcLRAction(int slice, int level);
+
 public:
+  double CalcLRAction(int slice, int level);
   /// This holds all of the Pair Action Classes
   Array<PairActionFitClass*,1> PairActionVector;
-  Array<EwaldClass*,1> EwaldVector;
+
   /// Holds indices to which PairActionClass in the PairAcctionVector
   /// you use for a given pair of particles indexed by
   /// (species1,species2) 

@@ -8,7 +8,7 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DNO_COUT -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DTHREE_D -DNO_COUT -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                           \
   Main.o                             \
@@ -109,13 +109,29 @@ TestEwaldobjs =                      \
   PathClass.o                        \
   MirroredClass.o                    \
   SpeciesClass.o                     \
+  ActionClass.o                      \
+  PathDataClass.o                    \
   Common/MPI/Communication.o	     \
   Common/IO/InputOutput.o            \
   Common/IO/InputOutputHDF5.o        \
   Common/IO/InputFile.o              \
   Common/IO/InputOutputASCII.o       \
-  Common/IO/InputOutputXML.o         
- 
+  Common/IO/InputOutputXML.o         \
+  Common/PairAction/PAcoulombBCFit.o \
+  Common/PairAction/PAclassicalFit.o \
+  Common/PairAction/PAzeroFit.o      \
+  Common/Splines/BicubicSpline.o     \
+  Common/PH/Potential.o              \
+  Common/PH/QuinticPH.o              \
+  Common/PH/CoulombPot.o             \
+  Common/PH/ScreenedPot.o            \
+  Common/PH/SplinePot.o              \
+  Common/PH/HeAzizPot.o              \
+  Common/Splines/CubicSpline.o       \
+  Common/Splines/MyTricubicSpline.o  \
+  Common/Splines/Grid.o              \
+  Common/Splines/QuinticSpline.o     \
+  Common/Splines/QuinticSplines.o    
 
 
 PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}"

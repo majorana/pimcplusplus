@@ -319,7 +319,7 @@ inline void PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
   distA = sqrt(dot(dispA,dispA));
   distB = sqrt(dot(dispB,dispB));
 
-#ifdef DEBUG
+#ifdef GARBAGEDEBUG
   dVec DBdispA = Path(sliceA, ptcl2) -Path(sliceA, ptcl1);
   dVec DBdispB = Path(sliceB, ptcl2) -Path(sliceB, ptcl1);
   for (int i=0; i<NDIM; i++) {
