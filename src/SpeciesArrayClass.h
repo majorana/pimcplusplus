@@ -12,8 +12,20 @@ class SpeciesArrayClass
  public:
   /// Calculates the distance and displacement betweeen
   ///two particles and their respective timeslices
-  inline void Distance(ParticleID particle1, ParticleID particle2,int timeSlice1, int timeSlice2,
-	   double &dist,dVec &disp );
+  inline void DistDisp(ParticleID particle1, ParticleID particle2,int timeSlice1, int timeSlice2,
+	   double &dist,dVec &disp,int ImageNum){
+    disp=SpeciesArray(particle1(0),particle1(1),timeSlice1)-SpeciesArray(particle2(0),particle2(1),timeSlice2);
+    ImageNum=0;
+    dist=sqrt(dot(disp,disp));
+    return;
+
+    ///      SpeciesArray.DistDisp(particle1,particle2,timeSlice,timeSlice,
+    ///			    DistTable(distTableIndex,timeSlice),DispTable(distTableIndex,timeSlice),
+    ///			    ImageNumTable(distTableIndex,timeSlice); ///< Particle 1 is always in the box, 
+                                              ///<imageNum is box where particle 2 is in 
+
+  }
+
   
   /// Returns the size of the array
   inline int Size(){

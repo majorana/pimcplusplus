@@ -55,7 +55,7 @@ inline void DistanceTable::Update(ParticleID particle1, int timeSlice)
       int distTableIndex=ArrayIndex(particle1Int,particle2Int);
       SpeciesArray.DistDisp(particle1,particle2,timeSlice,timeSlice,
 			    DistTable(distTableIndex,timeSlice),DispTable(distTableIndex,timeSlice),
-			    ImageNumTable(distTableIndex,timeSlice); ///< Particle 1 is always in the box, 
+			    ImageNumTable(distTableIndex,timeSlice)); ///< Particle 1 is always in the box, 
                                               ///<imageNum is box where particle 2 is in 
       ///This assumes that our mapping for particleID -> particleInt is monotonic in particle
       ///number and species, so we just iterate particle2Int instead of asking
@@ -66,6 +66,11 @@ inline void DistanceTable::Update(ParticleID particle1, int timeSlice)
 
 
 }
+
+    
+
+
+
 ///Maps particleInt x particleInt to a location in our distance or displacement table.
 ///particleInt gotten from SpeciesArray.ParticleID2Int
 inline int DistanceTable::ArrayIndex(int global1, int global2)
@@ -92,6 +97,29 @@ inline void GetDistDisp(ParticleID particle1, ParticleID particle2,
   dist=DistTable(distanceTableIndex,timeSlice);
   disp=DispTable(distanceTableIndex,timeSlice);
 }
+
+  ///Returns the distance and displacement. This is for the case where
+  ///you are calculating the disp/dist and want to make sure you have the 
+  ///same image for a pair of particles.
+
+  inline void GetDistDisp(ParticleID particle1, ParticleID particle2, 
+			  int timeSliceA, int timeSliceB,
+			  double &distA, dVec &dispA,
+			  double &distB, dVec &dispB){
+    int distanceTableIndex=ArrayIndex(particle1,particle2); ///We're making an implicit
+							   ///assumption around here 
+                                                           ///that the number of time 
+                                                          ///slices per particle is the same 
+    dispA=DispTable(distanceTableIndex,timeSliceA);
+    distA=DistTable(distanceTableIndex,timeSliceA);
+    dispB=DistTable(distanceTableIndex,timeSliceB)+
+      (ImageNumTable(distanceTableIndex,timeSliceA)-ImageNumTable(distanceTableIndex,timeSliceB))*
+      
+    SpeciesArray.DistDisp(particle1,particle2,timeSlice,timeSlice,
+			  DistTable(distTableIndex,timeSlice),DispTable(distTableIndex,timeSlice),
+			  ImageNumTable(distTableIndex,timeSlice)); ///< Particle 1 is always in the box, 
+			  ///<imageNum is box where particle 2 is in 
+
 
 
 #endif 

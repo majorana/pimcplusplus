@@ -164,6 +164,7 @@ int main(int argc, char **argv)
   //  cerr << (myBisectionMove.PathData)->SpeciesArray.size()<<endl;
   //  cerr<<"What the action class thinks the size is: ";
   //  cerr<<  myActionClass.mySpeciesArray->size()<<endl;
+  PrintConfigClass myPrintConfig(myPathData);
   for (int counter=0;counter<1000000;counter++){
     if ((counter % 1000) == 0)
       cerr << "Step #" << counter << ":\n";
@@ -171,8 +172,9 @@ int main(int argc, char **argv)
       //cerr << "Doing step " << counter << endl;
       
       myBisectionMove.MakeMove();
-      if (counter > 100000)
+      if (counter > 100)
       PC.Accumulate();
+      myPrintConfig.Print();
     }
     myShiftMove.MakeMove();
   }
