@@ -46,7 +46,7 @@ void CommunicatorClass::Broadcast (int root, bool &val)
 {  
   int intval = val ? 1 : 0;
   MPI_Bcast(&intval, 1, MPI_INT, root, MPIComm); 
-  return (intval == 1);
+  val = (intval == 1);
 }
 
 void CommunicatorClass::Broadcast (int root, double &val)
