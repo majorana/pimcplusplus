@@ -3,10 +3,10 @@ PSPLINELIB = -L$(PWD)/Common/Splines/fortran -lpspline
 ifeq ($(HOSTTYPE),alpha)
 include /usr/users/0/kesler/lib/Make.include
   MPILIB = -lmpi -lelan
-#  LIBS = $(MPILIB) $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
-#         $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
-  LIBS = $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
+  LIBS = $(MPILIB) $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
          $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
+#  LIBS = $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
+#         $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
   INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
   MAKE = gmake
   CC = g++
@@ -26,7 +26,7 @@ endif
 CCFLAGS = -c -g  -Wno-deprecated  #-pg 
 
 
-DEFS = $(EXTRADEFS) -DTHREE_D -DNO_COUT  -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = $(EXTRADEFS) -DTHREE_D -DNO_COUT  -O3 -DPARALLEL -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \
@@ -238,7 +238,8 @@ FreeParticleObjs =                   \
   Common/IO/InputOutputHDF5.o        \
   Common/IO/InputFile.o              \
   Common/IO/InputOutputASCII.o       \
-  Common/IO/InputOutputXML.o         
+  Common/IO/InputOutputXML.o         \
+  Common/MPI/Communication.o
 
 
 PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}" "F77=${F77}"
@@ -248,8 +249,7 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
 all:   pimc++ TestPerm TestEwald FreeParticles
-	
-	
+
 pimc++: Common_obj observables moves actions Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
 

@@ -9,7 +9,7 @@ FreeNodalActionClass::ActionImageSum (double L, double lambdaBeta,
 {
   int numImages = 10;
   double sum = 0.0;
-  double fourLambdaBetaInv = 1.0/(4.0*lambdaBeta);
+  double fourLambdaBetaInv = (lambdaBeta!=0.0) ?  1.0/(4.0*lambdaBeta) : 0.0;
   for (int image=-numImages; image<numImages; image++) {
     double x = disp + (double)image*L;
     sum += exp (-(x*x)*fourLambdaBetaInv);
@@ -290,9 +290,9 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
 	return 1.0e100;
     }
 
-    if (isnan (dist1))
+    if (isnan (dist1) || (dist1==0.0))
       uNode = log1p(-exp(-dist2*dist2/(lambda*levelTau)));
-    else if (isnan(dist2))
+    else if (isnan(dist2) || (dist2==0.0))
       uNode = log1p(-exp(-dist1*dist1/(lambda*levelTau)));
     else
       uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
@@ -335,9 +335,9 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
     }
 
     double prod;
-    if (isnan (dist1))
+    if (isnan (dist1) || (dist1==0.0))
       prod = dist2*dist2;
-    else if (isnan(dist2))
+    else if (isnan(dist2) || (dist2==0.0))
       prod = dist1*dist1;
     else
       prod = dist1*dist2;

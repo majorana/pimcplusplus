@@ -24,8 +24,8 @@ void PIMCCommunicatorClass::SendReceive(int SendProc,
 ///resulting sum.
 void PIMCCommunicatorClass::Sum (Array<dVec,1> &sendBuff, Array<dVec,1> &recvBuff)
 {
-  double *sendPtr = sendBuff.data();
-  double *recvPtr = recvBuff.data();
+  double *sendPtr = (double *)sendBuff.data();
+  double *recvPtr = (double *)recvBuff.data();
   int count = sendBuff.size()*NDIM;
   
   MPI_Reduce(sendPtr, recvPtr, count, MPI_DOUBLE, MPI_SUM, 0, 
