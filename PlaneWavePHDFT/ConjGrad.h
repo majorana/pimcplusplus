@@ -7,7 +7,7 @@ class ConjGrad
 {
 protected:
   Hamiltonian &H;
-  zVec c, cnext, Hc, Hcnext, Phi, LastPhi;
+  zVec cnext, Hc, Hcnext, Phi, LastPhi;
   zVec Phip, Phipp, Xi, Xip, Eta, Etap;
   complex<double> EtaXiLast;
   double E0;
@@ -18,7 +18,7 @@ protected:
   void Precondition();
   double T;
 public:
-
+  zVec c;
   void Iterate();
   ConjGrad (Hamiltonian &h) : H(h), IsSetup(false),
 			      EtaXiLast(0.0, 0.0)

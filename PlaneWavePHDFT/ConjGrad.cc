@@ -80,7 +80,8 @@ void ConjGrad::Iterate()
   if (!IsSetup)
     Setup();
   // First, calculate steepest descent vector:
-  CalcPhiCG();
+  //CalcPhiCG();
+  CalcPhiSD();
 
   // Now, pick optimal theta for 
   // cnext = cos(theta)*c + sin(theta)*Phi;
