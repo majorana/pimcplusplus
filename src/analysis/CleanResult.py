@@ -34,7 +34,10 @@ def ProduceTracePicture(data,fileName):
     savefig(fileName)
     myImg=Image(fileName)
     return myImg
-    
+
+
+
+
 def Energy(infile,doc):
 
     myTable=Table("Energy Table")
@@ -85,8 +88,11 @@ infile.OpenFile(sys.argv[1])
 doc=SeriesDocument()
 
 numSections=infile.CountSections()
-for counter in range(0,numSections+1):
+print "The number of sections is ",numSections
+for counter in range(0,numSections):
      infile.OpenSection(counter)
+     getType=infile.ReadVar("Type")
+     print "My type is ",getType
      data=infile.ReadVar("gofr")
      if data!=None:
          Gofr(infile,data,doc)

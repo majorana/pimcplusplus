@@ -72,7 +72,9 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 {
   assert(in.ReadVar("OutFile",OutFileName));
   OutFile.NewFile(OutFileName);
-
+  OutFile.NewSection("RunInfo");
+  RunInfo.Write(OutFile);
+  OutFile.CloseSection();
   int numOfObservables=in.CountSections("Observable");
   Observables.resize(numOfObservables);
   for (int counter=0;counter<numOfObservables;counter++){
@@ -128,3 +130,4 @@ void PIMCClass::Run()
   }
   
 }
+

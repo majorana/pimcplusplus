@@ -7,6 +7,7 @@
 #include "ObservableEnergy.h"
 #include "WrapClass.h"
 #include "PermuteTableClass.h"
+#include "RunInfoClass.h"
 
 
 class PIMCClass 
@@ -18,9 +19,11 @@ public:
   void ReadMoves(IOSectionClass &in);
   void ReadObservables(IOSectionClass &in);
   void ReadAlgorithm(IOSectionClass &in);
+  void WriteRunInfo(IOSectionClass &out);
   string OutFileName;
   IOSectionClass OutFile;
   LoopClass Algorithm;
+  RunInfoClass RunInfo;
 public:
   //  PermuteTableClass ForwPermuteTable, RevPermuteTable;
   PathDataClass PathData;
@@ -28,7 +31,11 @@ public:
   void Run();
   PIMCClass() : Algorithm(&Moves, &Observables)
 		//	ForwPermuteTable(PathData), RevPermuteTable(PathData)
-  { /* Do nothing for now */ }
+    {
+
+    RunInfo.ProgramName="pimc++";
+    RunInfo.Version="0.1";
+    }
 };
 
 
