@@ -44,10 +44,10 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
     newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
       if (PathData.Path.LongRange) 
-      if (PathData.Actions.UseRPA)
-      newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-      else
-      newStage->Actions.push_back(&PathData.Actions.LongRange);
+	if (PathData.Actions.UseRPA)
+	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+	else
+	  newStage->Actions.push_back(&PathData.Actions.LongRange);
       
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
 	cerr << "Adding fermion node action for species " 
@@ -58,7 +58,7 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
     newStage->BisectionLevel = level;
     Stages.push_back (newStage);
   }
-
+  
   // Add the second stage of the permutation step
   Stages.push_back (permuteStage);
 }
@@ -129,9 +129,11 @@ void RefSliceMoveClass::MakeMoveMaster()
   bool toAccept=true;
   list<StageClass*>::iterator stageIter=Stages.begin();
   double prevActionChange=0.0;
+  int stageCounter = 0;
   while (stageIter!=Stages.end() && toAccept){
     toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 				     ActiveParticles,prevActionChange);
+    stageCounter++;
     stageIter++;
   }
   // Broadcast acceptance or rejection 

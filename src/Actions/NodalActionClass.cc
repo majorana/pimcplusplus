@@ -395,6 +395,7 @@ double FreeNodalActionClass::MaxDist(int slice)
 double FreeNodalActionClass::LineSearchDist (int slice)
 {
   SpeciesClass &species = Path.Species(SpeciesNum);
+  double epsilon = 1.0e-4 * sqrt (4.0*species.lambda*Path.tau);
   int first = species.FirstPtcl;
   int last = species.LastPtcl;
 
@@ -437,11 +438,12 @@ double FreeNodalActionClass::LineSearchDist (int slice)
     det = Det(slice);
   }
 
-  if (det*det0 > 0.0)
+  if (det*det0 >= 0.0)
     retVal = maxDist;
   else {
     // Now, do a bisection search for the sign change.
-    while ((maxFactor - minFactor) > 1.0e-3) {
+    while (((maxFactor-minFactor)*dist > epsilon) 
+	   && (minFactor*dist < maxDist)) {
       tryFactor = 0.5*(maxFactor+minFactor);
       for (int i=0; i<N; i++)
 	Path (slice, i+first) = SavePath(i) - tryFactor*dist*GradVec(i);
@@ -451,10 +453,11 @@ double FreeNodalActionClass::LineSearchDist (int slice)
       else
 	maxFactor = tryFactor;
     }
-    retVal = dist * tryFactor;
+    if (minFactor*dist >= maxDist)
+      retVal = maxDist;
+    else 
+      retVal = dist * tryFactor;
   }
-
-  //cerr << "tryFactor = " << tryFactor << endl;
 
   // Restore original Path position
   for (int i=0; i<N; i++)
@@ -589,8 +592,9 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
   double dist1, dist2;
   if (startSlice != refSlice) {
     dist1 = LineSearchDist (startSlice);
-    if (dist1 < 0.0)
+    if (dist1 < 0.0) {
       return 1.0e100;
+    }
   }
   else
     dist1 = sqrt(-1.0);
@@ -604,8 +608,9 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
       //      double lineDist = LineSearchDist (slice+skip);
       dist2 = LineSearchDist (slice+skip);
       //fprintf (stderr, "%1.12e %1.12e\n", lineDist, dist2);
-      if (dist2 < 0.0)
+      if (dist2 < 0.0) {
 	return 1.0e100;
+      }
     }
     
     

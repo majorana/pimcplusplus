@@ -70,7 +70,7 @@ public:
 
 
 inline double StageClass::StageAction(int startSlice,int endSlice,
-		   const Array<int,1> &changedParticles)
+				      const Array<int,1> &changedParticles)
 {
   double TotalAction=0.0;
   list<ActionBaseClass*>::iterator actionIter=Actions.begin();

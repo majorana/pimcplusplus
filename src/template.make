@@ -4,14 +4,14 @@ ifeq ($(HOSTTYPE),alpha)
 include /usr/users/0/kesler/lib/Make.include
     MPILIB = -lmpi -lelan
     LIBS =  $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
-         $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
+         $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(MPILIB) -lm 
     INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
     MAKE = gmake
     CC = g++
     LD = g++ #-static
     F77 = g77
     EXTRADEFS = -DNOCUSERID
-    CCFLAGS = -c -g  -Wno-deprecated  #-pg 
+    CCFLAGS = -c -g  -Wno-deprecated  -O3 #-pg 
 endif
 ifeq ($(HOSTTYPE),rs6000)
     include /users/uiuc/ux455254/lib/Make.include
@@ -44,7 +44,7 @@ VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 
 
 
-DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT  -DDEBUG -DBZ_DEBUG # -DPARALLEL -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = $(EXTRADEFS) -DVERSION=$(VER) -DTHREE_D -DNO_COUT -DUSE_MPI # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \

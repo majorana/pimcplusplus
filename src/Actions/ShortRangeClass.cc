@@ -5,9 +5,7 @@
 ///particles it has
 void ShortRangeClass::Read(IOSectionClass& in)
 {
-  cerr<<"I'm about to resize things now"<<endl;
   DoPtcl.resize(PathData.Path.NumParticles());
-  cerr<<"I've finished resizing things"<<endl;
 }
 
 ShortRangeClass::ShortRangeClass(PathDataClass &pathData,
