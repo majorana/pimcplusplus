@@ -15,7 +15,8 @@ private:
   int NumLevels;
   
   void makeMove();
- 
+ public:
+  BisectionMoveClass();
 };
 
 
