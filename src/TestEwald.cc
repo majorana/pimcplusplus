@@ -3,7 +3,8 @@
 
 //double kcutoff = 40.0;
 //double kcutoff = 0.08;
-double kcutoff = 40.0;
+//double kcutoff = 20.0;
+double kcutoff = 0.02;
 
 void SetupPathNaCl (PathClass &path)
 {
@@ -15,8 +16,9 @@ void SetupPathNaCl (PathClass &path)
   dVec box;
   //  box = 2.0, 2.0, 2.0;
   //box = 974.87, 974.87, 974.87;
-  box = 0.97487, 0.97487, 0.97487;
+  //  box = 0.97487, 0.97487, 0.97487;
   //box = 2.0, 2.0, 2.0;
+  box = 2000.0, 2000.0, 2000.0;
   path.SetBox(box);
   
   path.kCutoff = kcutoff;
@@ -148,7 +150,9 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
   action.tau = 1.0;
   action.MaxLevels=1;
   Array<string,1> PAFiles(3);
-  PAFiles="p-p.PairAction","e-e.PairAction","p-e.PairAction";
+  //PAFiles="p-p.PairAction","e-e.PairAction","p-e.PairAction";
+  //PAFiles="p-p.Dipole","e-e.Dipole","p-e.Dipole";
+  PAFiles="p-p.Tripole","e-e.Tripole","p-e.Tripole";
   int numPairActions=3;
   action.PairActionVector.resize(3);
   IOSectionClass PAIO;
@@ -166,17 +170,17 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
   action.PairMatrix(1,1)=1;
   action.PairMatrix(0,1)=2;
   action.PairMatrix(1,0)=2;
-  int numKnots=20;
+  int numKnots=10;
   double kCut=kcutoff;
   action.OptimizedBreakup_U(numKnots);
   action.OptimizedBreakup_dU(numKnots);
   action.OptimizedBreakup_V(numKnots);
-  FILE *fout = fopen ("p-plong.dat", "w");
+  FILE *fout = fopen ("p-elong.dat", "w");
   //for (double r=0.0; r<947.0; r+=1.0)
-  for (double r=0.0; r<1.000; r+=0.001)
+  for (double r=0.0; r<1000.000; r+=1.0)
     fprintf (fout, "%1.12e %1.12e %1.12e\n", r, 
-	     action.PairActionVector(1)->Ulong(0)(r),
-	     action.PairActionVector(1)->U(r, 0.0, 0.0, 0));
+	     action.PairActionVector(2)->dUlong(0)(r),
+	     action.PairActionVector(2)->dU(r, 0.0, 0.0, 0));
   fclose(fout);
   cerr << "PA(2).Z1Z2 = " << action.PairActionVector(2)->Z1Z2 << endl;
 

@@ -64,11 +64,14 @@ void ActionClass::Read(IOSectionClass& inSection)
 	PairActionVector(i)->Particle2.Name + ".dat";
       FILE *fout = fopen (fname.c_str(), "w");
       for (double q=0.0; q<20000.0; q+=1.0) {
-	double Udiag = PairActionVector(i)->dUdiag(q, 0);
-	double Ulong = PairActionVector(i)->dUlong(0)(q);
+	double Udiag = PairActionVector(i)->Udiag(q, 0);
+	double Ulong = PairActionVector(i)->Ulong(0)(q);
+	double dUdiag = PairActionVector(i)->dUdiag(q, 0);
+	double dUlong = PairActionVector(i)->dUlong(0)(q);
 	double V = PairActionVector(i)->V(q);
 	double Vlong = PairActionVector(i)->Vlong(q);
-	fprintf (fout, "%1.16e %1.16e %1.16e\n", q, V, Vlong);
+	fprintf (fout, "%1.16e %1.16e %1.16e %1.16e %1.16e %1.16e %1.16e\n", 
+		 q, Udiag, Ulong, dUdiag, dUlong, V, Vlong);
       }
       fclose (fout);
     }
@@ -136,13 +139,12 @@ double ActionClass::UAction (int startSlice, int endSlice,
   }
   // Now add in the long-range part of the action
   // In primitive form, end slices get weighted by 1/2.  Others by 1.
-  for (int slice=startSlice;slice<=endSlice;slice+=skip) 
-    if ((slice==startSlice) || (slice == endSlice))
-      TotalU += 0.5*LongRange_U (slice, level);
-    else
-      TotalU += LongRange_U (slice, level);
-
-  return (TotalU);
+   for (int slice=startSlice;slice<=endSlice;slice+=skip) 
+     if ((slice==startSlice) || (slice == endSlice))
+       TotalU += 0.5*LongRange_U (slice, level);
+     else
+       TotalU += LongRange_U (slice, level);
+ return (TotalU);
 }
 
 double ActionClass::KAction (int startSlice, int endSlice, 
@@ -233,6 +235,8 @@ double ActionClass::LongRange_U(int slice, int level)
 	}
       }
     }
+  cerr << "homo = " << homo << endl;
+  cerr << "hetero = " << hetero << endl;
   return (homo+hetero);
 }
 
@@ -420,38 +424,39 @@ double ActionClass::CalcXk (int paIndex, int level, double k, double rc,
 			    TaskType task)
 {
   double absTol = 1.0e-7;
-  double relTol = 1.0e-7;
+  double relTol = 1.0e-5;
 
   PairActionFitClass &pa = *PairActionVector(paIndex);
   if (task == DO_U)
     absTol *= pa.SmallestBeta*pow(2.0, (double)level);
-  //  cerr << "pa.Z1Z2 = " << pa.Z1Z2 << endl;
+
+  double Xk;
   if (pa.Z1Z2 == 0.0) {
     XkIntegrand integrand(pa, level, k, task);
     GKIntegration<XkIntegrand, GK31> integrator(integrand);
-    double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
-      integrator.Integrate(rc, 30.0*rc, absTol, relTol, false);
-    cerr << "Shouldn't be getting here!\n";
+    Xk = 4.0*M_PI/(Path.GetVol()*k) * 
+      integrator.Integrate(rc, 20.0*rc, absTol, relTol, false);
     return Xk;
   }
   else {
     CoulombXkIntegrand integrand(pa, level, k, task);
     GKIntegration<CoulombXkIntegrand, GK31> integrator(integrand);
     // integrator.SetRelativeErrorMode();
-   
-    /// HACK HACK HACK HACK
-    /// HACK HACK HACK HACK    
-    /// HACK HACK HACK HACK    
-    /// HACK HACK HACK HACK    
-    /// HACK HACK HACK HACK
-//     double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
-//       integrator.Integrate(rc, 30.0*rc, absTol, relTol, false);
-    double Xk = 0.0;
-
+    
+    
+    if (false/*task != DO_V*/) {
+      integrator.SetRelativeErrorMode();
+      Xk = -4.0*M_PI/(Path.GetVol()*k) * 
+	integrator.Integrate (rc, 20.0*rc, relTol);    
+    }
+    else
+      Xk = -4.0*M_PI/(Path.GetVol()*k) * 
+	integrator.Integrate(rc, 20.0*rc, absTol, relTol, false);
+    
     /// Add in the analytic part that I ignored
     /// Multiply analytic term by tau only for U -- do not multiply
     /// for dU or V.
-    //cerr << "Numerical part = " << Xk << endl;
+    
     double coef;
     if (task == DO_U) {
       coef = pa.SmallestBeta;
@@ -460,10 +465,9 @@ double ActionClass::CalcXk (int paIndex, int level, double k, double rc,
     }
     else
       coef = 1.0;
-    // cerr << "Analytic part = " 
-// 	 << coef*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc) << endl; 
+
     Xk -= coef*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc);
-    return Xk;
+    return (Xk);
   }
 }
 
@@ -477,6 +481,7 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
 {
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
+  double boxVol = box[0]*box[1]*box[2];
   double rc = 0.5*box[0];
   for (int i=1; i<NDIM; i++)
     rc = min (rc, 0.5*box[i]);
@@ -484,16 +489,20 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
   for (int i=1; i<NDIM; i++)
     kvol *= Path.GetkBox()[i];
   double kavg = pow(kvol,1.0/3.0);
-  // We try to pick kcont to keep reasonable number of k-vectors
-  double kCont = 50.0 * kavg;
-  double kMax = 150 * kavg;
-  cerr << "kCont = " << kCont 
-       << " kMax = " << kMax << endl;
+
+  
 
   LPQHI_BasisClass basis;
   basis.Set_rc(rc);
   basis.SetBox(box);
   basis.SetNumKnots (numKnots);
+
+  // We try to pick kcont to keep reasonable number of k-vectors
+  double kCont = 50.0 * kavg;
+  double delta = basis.GetDelta();
+  double kMax = 20.0*M_PI/delta;
+  cerr << "kCont = " << kCont 
+       << " kMax = " << kMax << endl;
 
   OptimizedBreakupClass breakup(basis);
   breakup.SetkVecs (kCut, kCont, kMax);
@@ -512,6 +521,7 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
 
   for (int paIndex=0; paIndex<PairActionVector.size(); paIndex++) {
     PairActionFitClass &pa = *PairActionVector(paIndex);
+    pa.Setrc (rc);
     pa.Ulong.resize(MaxLevels);
     pa.Ulong_k.resize(MaxLevels,Path.kVecs.size());
     pa.Ulong_k = 0.0;
@@ -519,22 +529,30 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
     for (int level=0; level<MaxLevels; level++) {
       Ulong_r = 0.0;
       // Calculate Xk's
-      for (int ki=0; ki<numk; ki++)
-	Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc, DO_U);
+      cerr << "Calculating Xk's for U...\n";
+      for (int ki=0; ki<numk; ki++) {
+	//Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc, DO_U);
+	//double oldXk = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc, DO_U);
+	double k = breakup.kpoints(ki)[0];
+	Xk(ki) = pa.Xk_U (k, level) / boxVol;
+      }
+      cerr << "Done.\n";
+      
 
       // Set boundary conditions at rc:  Force value and first and
       // second derivatives of long-range potential to match the full
       // potential at rc.
       adjust = true;
-      double delta = basis.GetDelta();
-      t(N-3) = pa.Udiag(rc, level);                 adjust(N-3) = false;
-      t(N-2) = pa.Udiag_p(rc, level)*delta;         adjust(N-2) = false;
-      t(N-1) = pa.Udiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
-      t(1) = 0.0;                                   adjust(1)   = false;
+//       t(N-3) = pa.Udiag(rc, level);                 adjust(N-3) = false;
+//       t(N-2) = pa.Udiag_p(rc, level)*delta;         adjust(N-2) = false;
+//       t(N-1) = pa.Udiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
+//       t(1) = 0.0;                                   adjust(1)   = false;
 
       // Now, do the optimal breakup:  this gives me the coefficents
       // of the basis functions, h_n in the array t.
+      cerr << "Doing U breakup...\n";
       breakup.DoBreakup (Xk, t, adjust);
+      cerr << "Done.\n";
       
       // Now, we must put this information into the pair action
       // object.  First do real space part
@@ -561,7 +579,8 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
 	for (int n=0; n<N; n++)
 	  pa.Ulong_k(level,ki) += t(n) * basis.c(n,k);
 	// Now add on part from rc to infinity
-	pa.Ulong_k(level,ki) -= CalcXk(paIndex, level, k, rc, DO_U);
+	// pa.Ulong_k(level,ki) -= CalcXk(paIndex, level, k, rc, DO_U);
+	pa.Ulong_k(level,ki) -= pa.Xk_U(k, level)/boxVol;
       }
 //       // HACK HACK HACK HACK
 //       FILE *fout = fopen ("Vlongk.dat", "w");
@@ -580,13 +599,11 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
   }
 }
 
-
-
-
 void ActionClass::OptimizedBreakup_dU(int numKnots)
 {
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
+  double boxVol = box[0]*box[1]*box[2];
   double rc = 0.5*box[0];
   for (int i=1; i<NDIM; i++)
     rc = min (rc, 0.5*box[i]);
@@ -594,14 +611,18 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
   for (int i=1; i<NDIM; i++)
     kvol *= Path.GetkBox()[i];
   double kavg = pow(kvol,1.0/3.0);
-  // We try to pick kcont to keep reasonable number of k-vectors
-  double kCont = 50.0 * kavg;
-  double kMax = 150 * kavg;
 
   LPQHI_BasisClass basis;
   basis.Set_rc(rc);
   basis.SetBox(box);
   basis.SetNumKnots (numKnots);
+
+  // We try to pick kcont to keep reasonable number of k-vectors
+  double kCont = 50.0 * kavg;
+  double delta = basis.GetDelta();
+  double kMax = 20.0*M_PI/delta;
+  cerr << "kCont = " << kCont 
+       << " kMax = " << kMax << endl;
 
   OptimizedBreakupClass breakup(basis);
   breakup.SetkVecs (kCut, kCont, kMax);
@@ -620,6 +641,7 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
 
   for (int paIndex=0; paIndex<PairActionVector.size(); paIndex++) {
     PairActionFitClass &pa = *PairActionVector(paIndex);
+    pa.Setrc (rc);
     pa.dUlong.resize(MaxLevels);
     pa.dUlong_k.resize(MaxLevels,Path.kVecs.size());
     pa.dUlong_k = 0.0;
@@ -627,10 +649,13 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
     for (int level=0; level<MaxLevels; level++) {
       dUlong_r = 0.0;
       // Calculate Xk's
-      for (int ki=0; ki<numk; ki++)
-	Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc,
-			DO_DU);
-
+      cerr << "Calculating Xk's for dU...\n";
+      for (int ki=0; ki<numk; ki++) {	
+	// Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc, DO_DU);
+	double k = breakup.kpoints(ki)[0];
+	Xk(ki) = pa.Xk_dU (k, level) / boxVol;
+      }
+      cerr << "Done.\n";
       // Set boundary conditions at rc:  Force value and first and
       // second derivatives of long-range potential to match the full
       // potential at rc.
@@ -641,14 +666,11 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
       t(N-1) = pa.dUdiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
       t(1) = 0.0;                                    adjust(1)   = false;
 
-//       t(N-3) = pa.dUdiag(rc, level);     adjust(N-3) = false;
-//       t(N-2) = pa.dUdiag_p(rc, level);   adjust(N-2) = false;
-//       t(N-1) = pa.dUdiag_pp(rc, level);  adjust(N-1) = false;
-//       t(1) = 0.0;                        adjust(1)   = false;
-
       // Now, do the optimal breakup:  this gives me the coefficents
       // of the basis functions, h_n in the array t.
+      cerr << "Doing dU breakup...\n";
       breakup.DoBreakup (Xk, t, adjust);
+      cerr << "Done.\n";
       
       // Now, we must put this information into the pair action
       // object.  First do real space part
@@ -675,30 +697,128 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
 	for (int n=0; n<N; n++)
 	  pa.dUlong_k(level,ki) += t(n) * basis.c(n,k);
 	// Now add on part from rc to infinity
-	pa.dUlong_k(level,ki) -= CalcXk(paIndex, level, k, rc, DO_DU);
+	//pa.dUlong_k(level,ki) -= CalcXk(paIndex, level, k, rc, DO_DU);
+	pa.dUlong_k(level,ki) -= pa.Xk_dU(k, level) / boxVol;
       }
-//       // HACK HACK HACK HACK
-//       FILE *fout = fopen ("Vlongk.dat", "w");
-//       for (double k=0; k<50.0; k+=0.01) {
-// 	double U = 0.0;
-// 	// Sum over basis functions
-// 	for (int n=0; n<N; n++)
-// 	  U += t(n) * basis.c(n,k);
-// 	fprintf (fout, "%1.16e %1.16e ", k, U);
-// 	// Now add on part from rc to infinity
-// 	U -= CalcXk(paIndex, level, k, rc);
-// 	fprintf (fout, "%1.16e \n", U);
-//       }
-//       fclose (fout);
     }
   }
 }
+
+
+
+// void ActionClass::OptimizedBreakup_dU(int numKnots)
+// {
+//   double kCut = Path.Getkc();
+//   dVec box = Path.GetBox();
+//   double rc = 0.5*box[0];
+//   for (int i=1; i<NDIM; i++)
+//     rc = min (rc, 0.5*box[i]);
+//   double kvol = Path.GetkBox()[0];
+//   for (int i=1; i<NDIM; i++)
+//     kvol *= Path.GetkBox()[i];
+//   double kavg = pow(kvol,1.0/3.0);
+//   // We try to pick kcont to keep reasonable number of k-vectors
+//   double kCont = 50.0 * kavg;
+//   double kMax = 100 * kavg;
+//   cerr << "kCont = " << kCont 
+//        << " kMax = " << kMax << endl;
+
+//   LPQHI_BasisClass basis;
+//   basis.Set_rc(rc);
+//   basis.SetBox(box);
+//   basis.SetNumKnots (numKnots);
+
+//   OptimizedBreakupClass breakup(basis);
+//   breakup.SetkVecs (kCut, kCont, kMax);
+//   int numk = breakup.kpoints.size();
+//   int N = basis.NumElements();
+//   Array<double,1> t(N);
+//   Array<bool,1>   adjust (N);
+//   Array<double,1> Xk(numk);
+
+//   // Would be 0.5, but with two timeslice distdisp, it could be a
+//   // little longer
+//   double rmax = 0.75 * sqrt (dot(box,box));
+//   const int numPoints = 1000;
+//   LongGrid.Init (0.0, rmax, numPoints);
+//   Array<double,1> dUlong_r(numPoints);
+
+//   for (int paIndex=0; paIndex<PairActionVector.size(); paIndex++) {
+//     PairActionFitClass &pa = *PairActionVector(paIndex);
+//     pa.dUlong.resize(MaxLevels);
+//     pa.dUlong_k.resize(MaxLevels,Path.kVecs.size());
+//     pa.dUlong_k = 0.0;
+//     pa.dUlong_0.resize(MaxLevels);
+//     for (int level=0; level<MaxLevels; level++) {
+//       dUlong_r = 0.0;
+//       // Calculate Xk's
+//       for (int ki=0; ki<numk; ki++)
+// 	Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc,
+// 			DO_DU);
+
+//       // Set boundary conditions at rc:  Force value and first and
+//       // second derivatives of long-range potential to match the full
+//       // potential at rc.
+//       adjust = true;
+//       double delta = basis.GetDelta();
+//       cerr << "dUdiag(rc) = " << pa.dUdiag(rc, level) << endl;
+//       cerr << "V(rc) = " << pa.V(rc) << endl;
+//       cerr << "dUdiag_p(rc) = " << pa.dUdiag_p(rc, level) << endl;
+//       cerr << "Vp(rc) = " << pa.Vp(rc) << endl;
+//       cerr << "dUdiag_pp(rc) = " << pa.dUdiag_pp(rc, level) << endl;
+//       cerr << "Vpp(rc) = " << pa.Vpp(rc) << endl;
+
+//       // t(N-3) = pa.dUdiag(rc, level);                 adjust(N-3) = false;
+//       //t(N-2) = pa.dUdiag_p(rc, level)*delta;         adjust(N-2) = false;
+//       //t(N-1) = pa.Vpp(rc)*delta*delta;  adjust(N-1) = false;
+//       //t(1) = 0.0;                                    adjust(1)   = false;
+
+// //       t(N-3) = pa.dUdiag(rc, level);     adjust(N-3) = false;
+// //       t(N-2) = pa.dUdiag_p(rc, level);   adjust(N-2) = false;
+// //       t(N-1) = pa.dUdiag_pp(rc, level);  adjust(N-1) = false;
+// //       t(1) = 0.0;                        adjust(1)   = false;
+
+//       // Now, do the optimal breakup:  this gives me the coefficents
+//       // of the basis functions, h_n in the array t.
+//       breakup.DoBreakup (Xk, t, adjust);
+      
+//       // Now, we must put this information into the pair action
+//       // object.  First do real space part
+//       pa.dUlong_0(level)=0.0;
+//       for (int n=0; n<N; n++)
+// 	pa.dUlong_0(level) += t(n)*basis.h(n,0.0);
+//       for (int i=0; i<LongGrid.NumPoints; i++) {
+// 	double r = LongGrid(i);
+// 	if (r <= rc) {
+// 	  // Sum over basis functions
+// 	  for (int n=0; n<N; n++) 
+// 	    dUlong_r(i) += t(n) * basis.h(n, r);
+// 	}
+// 	else
+// 	  dUlong_r(i) = pa.dUdiag (r, level);
+//       }
+//       pa.dUlong(level).Init(&LongGrid, dUlong_r);
+
+//       // Now do k-space part
+//       for (int ki=0; ki < Path.kVecs.size(); ki++) {
+// 	const dVec &kv = Path.kVecs(ki);
+// 	double k = sqrt (dot(kv,kv));
+// 	// Sum over basis functions
+// 	for (int n=0; n<N; n++)
+// 	  pa.dUlong_k(level,ki) += t(n) * basis.c(n,k);
+// 	// Now add on part from rc to infinity
+// 	pa.dUlong_k(level,ki) -= CalcXk(paIndex, level, k, rc, DO_DU);
+//       }
+//     }
+//   }
+// }
 
 
 void ActionClass::OptimizedBreakup_V(int numKnots)
 {
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
+  double boxVol = box[0]*box[1]*box[2];
   double rc = 0.5*box[0];
   for (int i=1; i<NDIM; i++)
     rc = min (rc, 0.5*box[i]);
@@ -706,14 +826,24 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
   for (int i=1; i<NDIM; i++)
     kvol *= Path.GetkBox()[i];
   double kavg = pow(kvol,1.0/3.0);
-  // We try to pick kcont to keep reasonable number of k-vectors
-  double kCont = 50.0 * kavg;
-  double kMax = 150 * kavg;
+//   // We try to pick kcont to keep reasonable number of k-vectors
+//   double kCont = 50.0 * kavg;
+//   double kMax = 100 * kavg;
+//   cerr << "kCont = " << kCont 
+//        << " kMax = " << kMax << endl;
 
   LPQHI_BasisClass basis;
   basis.Set_rc(rc);
   basis.SetBox(box);
   basis.SetNumKnots (numKnots);
+
+  // We try to pick kcont to keep reasonable number of k-vectors
+  double kCont = 50.0 * kavg;
+  double delta = basis.GetDelta();
+  double kMax = 20.0*M_PI/delta;
+  cerr << "kCont = " << kCont 
+       << " kMax = " << kMax << endl;
+
 
   OptimizedBreakupClass breakup(basis);
   breakup.SetkVecs (kCut, kCont, kMax);
@@ -732,31 +862,32 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
 
   for (int paIndex=0; paIndex<PairActionVector.size(); paIndex++) {
     PairActionFitClass &pa = *PairActionVector(paIndex);
+    pa.Setrc (rc);
     pa.Vlong_k.resize(Path.kVecs.size());
     pa.Vlong_k = 0.0;
     Vlong_r = 0.0;
     // Calculate Xk's
-    for (int ki=0; ki<numk; ki++)
+    for (int ki=0; ki<numk; ki++) {
       Xk(ki) = CalcXk(paIndex, 0, breakup.kpoints(ki)[0], rc, DO_V);
+      double k = breakup.kpoints(ki)[0];
+      Xk(ki) = pa.Xk_V (k) / boxVol;
+    }
     
     // Set boundary conditions at rc:  Force value and first and
     // second derivatives of long-range potential to match the full
     // potential at rc.
     adjust = true;
     double delta = basis.GetDelta();
-    t(N-3) = pa.V(rc);                adjust(N-3) = false;
-    t(N-2) = pa.Vp(rc)*delta;         adjust(N-2) = false;
-    t(N-1) = pa.Vpp(rc)*delta*delta;  adjust(N-1) = false;
-    t(1) = 0.0;                       adjust(1)   = false;
-
-//     t(N-3) = pa.V(rc);     adjust(N-3) = false;
-//     t(N-2) = pa.Vp(rc);    adjust(N-2) = false;
-//     t(N-1) = pa.Vpp(rc);   adjust(N-1) = false;
-//     t(1) = 0.0;            adjust(1)   = false;
+    t(N-3) = pa.V(rc);                 adjust(N-3) = false;
+    t(N-2) = pa.Vp(rc)*delta;          adjust(N-2) = false;
+    t(N-1) = pa.Vpp(rc)*delta*delta;   adjust(N-1) = false;
+    t(1) = 0.0;                        adjust(1)   = false;
     
     // Now, do the optimal breakup:  this gives me the coefficents
     // of the basis functions, h_n in the array t.
+    cerr << "Doing V breakup...\n";
     breakup.DoBreakup (Xk, t, adjust);
+    cerr << "Done.\n";
     
     // Now, we must put this information into the pair action
     // object.  First do real space part
@@ -783,7 +914,8 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
       for (int n=0; n<N; n++)
 	pa.Vlong_k(ki) += t(n) * basis.c(n,k);
       // Now add on part from rc to infinity
-      pa.Vlong_k(ki) -= CalcXk(paIndex, 0, k, rc, DO_V);
+      //pa.Vlong_k(ki) -= CalcXk(paIndex, 0, k, rc, DO_V);
+      pa.Vlong_k(ki) -= pa.Xk_V(k) / boxVol;
     }
   }
 }
