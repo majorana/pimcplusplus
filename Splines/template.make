@@ -1,4 +1,4 @@
-SOURCES = "*.cc"
+SOURCES = CubicSpline.cc Grid.cc
 
 all:	CubicSpline.o Grid.o
 
