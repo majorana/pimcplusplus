@@ -1,7 +1,9 @@
 #include "ActionClass.h"
 #include "PathDataClass.h"
 
-double kcutoff = 15.0;
+//double kcutoff = 40.0;
+//double kcutoff = 0.08;
+double kcutoff = 40.0;
 
 void SetupPathNaCl (PathClass &path)
 {
@@ -11,7 +13,10 @@ void SetupPathNaCl (PathClass &path)
   periodic = true, true, true;
   path.SetPeriodic (periodic);
   dVec box;
-  box = 2.0, 2.0, 2.0;
+  //  box = 2.0, 2.0, 2.0;
+  //box = 974.87, 974.87, 974.87;
+  box = 0.97487, 0.97487, 0.97487;
+  //box = 2.0, 2.0, 2.0;
   path.SetBox(box);
   
   path.kCutoff = kcutoff;
@@ -34,15 +39,16 @@ void SetupPathNaCl (PathClass &path)
   path.Allocate();
 
   /// Initialize the path positions for NaCl structure.
+  double d = 0.5*box[0];
   for (int slice=0; slice <= path.TotalNumSlices; slice++) {
-    path(slice, 0) = 0.0, 1.0, 1.0;
-    path(slice, 1) = 1.0, 0.0, 1.0;
+    path(slice, 0) = 0.0,   d,   d;
+    path(slice, 1) =   d, 0.0,   d;
     path(slice, 2) = 0.0, 0.0, 0.0;
-    path(slice, 3) = 1.0, 1.0, 0.0;
-    path(slice, 4) = 0.0, 1.0, 0.0;
-    path(slice, 5) = 1.0, 0.0, 0.0;
-    path(slice, 6) = 0.0, 0.0, 1.0;
-    path(slice, 7) = 1.0, 1.0, 1.0;
+    path(slice, 3) =   d,   d, 0.0;
+    path(slice, 4) = 0.0,   d, 0.0;
+    path(slice, 5) =   d, 0.0, 0.0;
+    path(slice, 6) = 0.0, 0.0,   d;
+    path(slice, 7) =   d,   d,   d;
   }
 
   path.Path.AcceptCopy();
@@ -160,16 +166,17 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
   action.PairMatrix(1,1)=1;
   action.PairMatrix(0,1)=2;
   action.PairMatrix(1,0)=2;
-  int numKnots=10;
+  int numKnots=20;
   double kCut=kcutoff;
   action.OptimizedBreakup_U(numKnots);
   action.OptimizedBreakup_dU(numKnots);
   action.OptimizedBreakup_V(numKnots);
   FILE *fout = fopen ("p-plong.dat", "w");
-  for (double r=0.0; r<2.5; r+=0.001)
+  //for (double r=0.0; r<947.0; r+=1.0)
+  for (double r=0.0; r<1.000; r+=0.001)
     fprintf (fout, "%1.12e %1.12e %1.12e\n", r, 
-	     action.PairActionVector(2)->Ulong(0)(r),
-	     action.PairActionVector(2)->U(r, 0.0, 0.0, 0));
+	     action.PairActionVector(1)->Ulong(0)(r),
+	     action.PairActionVector(1)->U(r, 0.0, 0.0, 0));
   fclose(fout);
   cerr << "PA(2).Z1Z2 = " << action.PairActionVector(2)->Z1Z2 << endl;
 

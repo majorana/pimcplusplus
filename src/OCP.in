@@ -1,12 +1,11 @@
-double tau = 250.0;
+double tau = 1000.0;
 
 Section (System)
 {
-//  int NumTimeSlices=112;
-  int NumTimeSlices=12;
+  int NumTimeSlices=28;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[974.87, 974.87, 974.87];
-  double kCutoff = 0.04;
+  double kCutoff = 0.08;
   Section (Particles)
   {
     Section (Species)
@@ -23,14 +22,14 @@ Section (System)
 
 Section (Action)
 { 
-  int MaxLevels = 2;
+  int MaxLevels = 3;
   Array<string,1> PairActionFiles(1) = [ "e-e_beta8000b.coulombBC.h5" ];
   int NumBreakupKnots = 7;
 }
 
 Section (Observables)
 {
-  string OutFile = "OCPoutput_tau250b.h5";
+  string OutFile = "OCPoutput_tau1000c.h5";
   Section (Observable)
     {
       string type = "Energy";

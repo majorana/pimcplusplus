@@ -64,9 +64,11 @@ void ActionClass::Read(IOSectionClass& inSection)
 	PairActionVector(i)->Particle2.Name + ".dat";
       FILE *fout = fopen (fname.c_str(), "w");
       for (double q=0.0; q<20000.0; q+=1.0) {
-	double Udiag = PairActionVector(i)->Udiag(q, 0);
-	double Ulong = PairActionVector(i)->Ulong(0)(q);
-	fprintf (fout, "%1.16e %1.16e %1.16e\n", q, Udiag, Ulong);
+	double Udiag = PairActionVector(i)->dUdiag(q, 0);
+	double Ulong = PairActionVector(i)->dUlong(0)(q);
+	double V = PairActionVector(i)->V(q);
+	double Vlong = PairActionVector(i)->Vlong(q);
+	fprintf (fout, "%1.16e %1.16e %1.16e\n", q, V, Vlong);
       }
       fclose (fout);
     }
@@ -134,7 +136,7 @@ double ActionClass::UAction (int startSlice, int endSlice,
   }
   // Now add in the long-range part of the action
   // In primitive form, end slices get weighted by 1/2.  Others by 1.
-  for (int slice=startSlice;slice<endSlice;slice+=skip) 
+  for (int slice=startSlice;slice<=endSlice;slice+=skip) 
     if ((slice==startSlice) || (slice == endSlice))
       TotalU += 0.5*LongRange_U (slice, level);
     else
@@ -429,18 +431,27 @@ double ActionClass::CalcXk (int paIndex, int level, double k, double rc,
     GKIntegration<XkIntegrand, GK31> integrator(integrand);
     double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
       integrator.Integrate(rc, 30.0*rc, absTol, relTol, false);
+    cerr << "Shouldn't be getting here!\n";
     return Xk;
   }
   else {
     CoulombXkIntegrand integrand(pa, level, k, task);
     GKIntegration<CoulombXkIntegrand, GK31> integrator(integrand);
     // integrator.SetRelativeErrorMode();
-    double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
-      //integrator.Integrate(rc, 30.0*rc, tolerance);
-      integrator.Integrate(rc, 30.0*rc, absTol, relTol, false);
+   
+    /// HACK HACK HACK HACK
+    /// HACK HACK HACK HACK    
+    /// HACK HACK HACK HACK    
+    /// HACK HACK HACK HACK    
+    /// HACK HACK HACK HACK
+//     double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
+//       integrator.Integrate(rc, 30.0*rc, absTol, relTol, false);
+    double Xk = 0.0;
+
     /// Add in the analytic part that I ignored
     /// Multiply analytic term by tau only for U -- do not multiply
     /// for dU or V.
+    //cerr << "Numerical part = " << Xk << endl;
     double coef;
     if (task == DO_U) {
       coef = pa.SmallestBeta;
@@ -449,6 +460,8 @@ double ActionClass::CalcXk (int paIndex, int level, double k, double rc,
     }
     else
       coef = 1.0;
+    // cerr << "Analytic part = " 
+// 	 << coef*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc) << endl; 
     Xk -= coef*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc);
     return Xk;
   }
@@ -513,10 +526,11 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
       // second derivatives of long-range potential to match the full
       // potential at rc.
       adjust = true;
-      t(N-3) = pa.Udiag(rc, level);     adjust(N-3) = false;
-      t(N-2) = pa.Udiag_p(rc, level);   adjust(N-2) = false;
-      t(N-1) = pa.Udiag_pp(rc, level);  adjust(N-1) = false;
-      t(1) = 0.0;                       adjust(1)   = false;
+      double delta = basis.GetDelta();
+      t(N-3) = pa.Udiag(rc, level);                 adjust(N-3) = false;
+      t(N-2) = pa.Udiag_p(rc, level)*delta;         adjust(N-2) = false;
+      t(N-1) = pa.Udiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
+      t(1) = 0.0;                                   adjust(1)   = false;
 
       // Now, do the optimal breakup:  this gives me the coefficents
       // of the basis functions, h_n in the array t.
@@ -621,10 +635,16 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
       // second derivatives of long-range potential to match the full
       // potential at rc.
       adjust = true;
-      t(N-3) = pa.dUdiag(rc, level);     adjust(N-3) = false;
-      t(N-2) = pa.dUdiag_p(rc, level);   adjust(N-2) = false;
-      t(N-1) = pa.dUdiag_pp(rc, level);  adjust(N-1) = false;
-      t(1) = 0.0;                       adjust(1)   = false;
+      double delta = basis.GetDelta();
+      t(N-3) = pa.dUdiag(rc, level);                 adjust(N-3) = false;
+      t(N-2) = pa.dUdiag_p(rc, level)*delta;         adjust(N-2) = false;
+      t(N-1) = pa.dUdiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
+      t(1) = 0.0;                                    adjust(1)   = false;
+
+//       t(N-3) = pa.dUdiag(rc, level);     adjust(N-3) = false;
+//       t(N-2) = pa.dUdiag_p(rc, level);   adjust(N-2) = false;
+//       t(N-1) = pa.dUdiag_pp(rc, level);  adjust(N-1) = false;
+//       t(1) = 0.0;                        adjust(1)   = false;
 
       // Now, do the optimal breakup:  this gives me the coefficents
       // of the basis functions, h_n in the array t.
@@ -723,10 +743,16 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
     // second derivatives of long-range potential to match the full
     // potential at rc.
     adjust = true;
-    t(N-3) = pa.V(rc);     adjust(N-3) = false;
-    t(N-2) = pa.Vp(rc);   adjust(N-2) = false;
-    t(N-1) = pa.Vpp(rc);  adjust(N-1) = false;
-    t(1) = 0.0;                adjust(1)   = false;
+    double delta = basis.GetDelta();
+    t(N-3) = pa.V(rc);                adjust(N-3) = false;
+    t(N-2) = pa.Vp(rc)*delta;         adjust(N-2) = false;
+    t(N-1) = pa.Vpp(rc)*delta*delta;  adjust(N-1) = false;
+    t(1) = 0.0;                       adjust(1)   = false;
+
+//     t(N-3) = pa.V(rc);     adjust(N-3) = false;
+//     t(N-2) = pa.Vp(rc);    adjust(N-2) = false;
+//     t(N-1) = pa.Vpp(rc);   adjust(N-1) = false;
+//     t(1) = 0.0;            adjust(1)   = false;
     
     // Now, do the optimal breakup:  this gives me the coefficents
     // of the basis functions, h_n in the array t.
@@ -769,17 +795,18 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
 void ActionClass::Energy(int slice1, int level,
 			 double &spring, double &dU)
 {
+  double levelTau=tau;
   int numPtcls = PathData.NumParticles();
   int slice2 = slice1 + (1<<level);
   for (int i=0; i<level; i++) 
-    tau *= 2.0;
+    levelTau *= 2.0;
   // Add constant part.  Note: we should really check the number of
   // dimensions. 
   spring = dU = 0.0;
   const int NumImage=1;
   for (int ptcl=0; ptcl<numPtcls; ptcl++)
     if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
-      spring += 1.5/tau;
+      spring += 1.5/levelTau;
 
   for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
     // Do free-particle part
@@ -787,7 +814,7 @@ void ActionClass::Energy(int slice1, int level,
     double lambda = PathData.Path.ParticleSpecies(ptcl1).lambda;
     if (lambda != 0.0) {
       double FourLambdaTauInv = 
-	1.0/(4.0*PathData.Path.Species(species1).lambda*tau);
+	1.0/(4.0*PathData.Path.Species(species1).lambda*levelTau);
       dVec vel;
       vel = PathData.Path.Velocity(slice1, slice2, ptcl1);
       double Z = 1.0;
@@ -804,7 +831,7 @@ void ActionClass::Energy(int slice1, int level,
 	for (int image=-NumImage;image<=NumImage;image++){
 	  double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
 	  numSum[dim] += 
-	    (-dist*dist*FourLambdaTauInv/tau)*exp(-dist*dist*FourLambdaTauInv);
+	    (-dist*dist*FourLambdaTauInv/levelTau)*exp(-dist*dist*FourLambdaTauInv);
 	}
       }
       double scalarnumSum=0.0;
