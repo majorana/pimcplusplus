@@ -38,26 +38,35 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
 
 bool RefSliceMoveClass::NodeCheck()
 {
-  PathClass &Path = PathData.Path;
-  // Broadcast the new reference path to all the other processors
-  PathData.Path.BroadcastRefPath();
-  
-  // Calculate local nodal action
-  SetMode(OLDMODE);
-  double oldLocalNode = 
-    PathData.Actions.NodalActions(SpeciesNum)->Action
-    (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
-  SetMode(NEWMODE);
-  double newLocalNode = 
-    PathData.Actions.NodalActions(SpeciesNum)->Action
-    (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
-  
-  // Do global sum over processors
-  double localChange = newLocalNode - oldLocalNode;
-  double globalChange = PathData.Communicator.AllSum (localChange);
-  bool toAccept = (-globalChange)>=log(PathData.Path.Random.Common()); 
+  if (PathData.Actions.NodalActions(SpeciesNum) != NULL) {
+    PathClass &Path = PathData.Path;
+    // Broadcast the new reference path to all the other processors
+    PathData.Path.BroadcastRefPath();
+    
+    // Calculate local nodal action
+    SetMode(OLDMODE);
+    double oldLocalNode = 
+      PathData.Actions.NodalActions(SpeciesNum)->Action
+      (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
+    SetMode(NEWMODE);
+    double newLocalNode = 
+      PathData.Actions.NodalActions(SpeciesNum)->Action
+      (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
+    
+    // Do global sum over processors
+    double localChange = newLocalNode - oldLocalNode;
+    double globalChange = PathData.Communicator.AllSum (localChange);
+    bool toAccept = (-globalChange)>=log(PathData.Path.Random.Common()); 
 
-  return toAccept;
+//     fprintf (stderr, "old = %1.12e\n", oldLocalNode);
+//     fprintf (stderr, "old = %1.12e\n", newLocalNode);
+//     fprintf (stderr, "localchange = %1.12e\n", localChange);
+//     fprintf (stderr, "globalchange = %1.12e\n", globalChange);
+//     cerr << "toAccept = " << (toAccept ? "true\n" : "false\n");
+    return toAccept;
+  }
+  else
+    return true;
 }
 
 

@@ -1,8 +1,9 @@
-Array<double,1> Box(3) = [5.0, 5.0, 5.0];
-double kCut = 15.0;
-double beta = 2.0;
+Array<double,1> Box(3) = [2.0, 2.0, 2.0];
+double kCut = 20.0;
+double beta = 4.0;
 double lambda = 1.0;
 int BlockSize = 100000;
 int NumBlocks = 100;
 int NumParticles = 2;
-string Type = "FERMION";
+//string Type = "FERMION";
+string Type = "BOLTZMANNON";

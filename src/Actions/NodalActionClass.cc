@@ -39,11 +39,10 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
   double C = 1.0/(4.0*M_PI * lambda * t);
 
   // HACK HACK HACK for now;  should work for serial mode.
-  SetMode(NEWMODE);
-//   if (Path.GetRefSlice() < Path.NumTimeSlices())
-//     for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
-//       Path.RefPath(ptcl) = Path(Path.GetRefSlice(), ptcl);
-//   Path.RefPath.AcceptCopy();
+  //   if (Path.GetRefSlice() < Path.NumTimeSlices())
+  //     for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
+  //       Path.RefPath(ptcl) = Path(Path.GetRefSlice(), ptcl);
+  //   Path.RefPath.AcceptCopy();
 
   for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
     const dVec &rRef = Path.RefPath(refPtcl);
@@ -158,7 +157,7 @@ FreeNodalActionClass::GradientDetFD (int slice, double &det,
 
 double FreeNodalActionClass::NodalDist (int slice)
 {
-  double grad2;
+  double grad2 = 0.0;
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;
   int last = species.LastPtcl;
