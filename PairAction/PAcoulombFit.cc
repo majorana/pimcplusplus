@@ -132,8 +132,8 @@ void PAcoulombFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
       else
 	costheta = 1.0 - s*s/(2.0*q*q); 
       rho.UdU_Coulomb(q, q, costheta, Uex, dUex);
-      Ufit = U(q, q, costheta, level);
-      dUfit = dU(q, q, costheta, level);
+      Ufit = U(q, 0.0, s*s, level);
+      dUfit = dU(q, 0.0, s*s, level);
       U2err += w*(Uex-Ufit)*(Uex-Ufit);
       dU2err += w*(dUex-dUfit)*(dUex-dUfit);
       weight += w;
@@ -247,7 +247,7 @@ bool PAcoulombFitClass::Read (IOSectionClass &in,
   // Read Order
   assert (in.ReadVar ("Order", Order));
   Ucoefs.resize(Order+1);
-  
+  dUcoefs.resize(Order+1);
 
   double desiredBeta = smallestBeta;
   for (int betaIndex=0; betaIndex<NumBetas; betaIndex++) {
