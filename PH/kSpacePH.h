@@ -4,6 +4,30 @@
 #include "../Blitz.h"
 
 #include "PotentialBase.h"
+#include <vector>
+
+class kCachePoint
+{
+public:
+  double a, bPerp, bPar, V, k;
+};
+
+class kSpacePH;
+
+class kCache
+{
+protected:
+  vector<kCachePoint> Cache;
+  kSpacePH &kPH;
+public:
+  void GetVals (double k, double &a, double &bPerp, double &bPar,
+		double &V);
+  kCache (kSpacePH &kph) : kPH(kph)
+  {
+
+  }
+};
+
 
 /// kSpacePH class takes a PH as its constructor argument.  Its only
 /// public member function, V, returns the k-space component.  The
@@ -28,6 +52,7 @@ protected:
   TinyMatrix<double,3,3> Ftensor (Vec3 deltaG);
   bool HaveTailCoefs;
   double R1, R2;
+  kCache Cache;
 public:
   /// Calculates the values of Ctail1-3.  r1 and r2 specify the start
   /// and end of the region of the potential fit to the form given
@@ -41,7 +66,8 @@ public:
   double V (Vec3 k, Vec3 G, Vec3 Gp);
   
 
-  kSpacePH (Potential &ph) : PH(ph), HaveTailCoefs(false)
+  kSpacePH (Potential &ph) : PH(ph), HaveTailCoefs(false),
+			     Cache (*this)
   {
     // do nothing else for now
   }

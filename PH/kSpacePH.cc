@@ -188,6 +188,8 @@ TinyMatrix<double,3,3> kSpacePH::Ftensor (Vec3 deltaG)
 
 double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
 {
+  if (G == Gp)
+    return 0.0;
   Vec3 deltaG = G-Gp;
   double Gmag = sqrt(dot(deltaG, deltaG));
   double Vval = Vk(Gmag);
