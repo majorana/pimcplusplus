@@ -12,7 +12,7 @@ main()
   Potential *ph = ReadPotential(in);
   in.CloseFile();
 
-  SystemClass system(10);
+  SystemClass system(16);
   Vec3 k(0.0, 0.0, 0.0);
   system.Setup (box, k, kcut, *ph, true); 
   //system.Setup (box, k, kcut, 1.0, true);
