@@ -201,6 +201,9 @@ int main(int argc, char **argv)
   out.NewSection("gofr");
   PairCorrelationClass gofr(myPathData,out);
   out.CloseSection();
+  out.NewSection("Paths");
+  PathDumpClass pathDump(myPathData,out);
+  out.CloseSection();
   //Observable setup Hack!
   //PairCorrelation PC(myPathData);
   //  PC.PathData = &myPathData;
@@ -277,14 +280,14 @@ int main(int argc, char **argv)
 //       outfile<<myPathData.Path(0,0)[2]<<" ";
 //       outfile<<endl;
     }
+    if (counter >= steps/3 && ((counter % 100) == 0))
+      pathDump.WriteBlock();
+      
       
     for (int counter2=0;counter2<200;counter2++){
       //cerr << "Doing step " << counter << endl;
       
       myBisectionMove.MakeMove();
-      if (counter >= steps/3)
-	;//PC.Accumulate();
-      //      myPrintConfig.Print();
     }
     myShiftMove.MakeMove();
   }

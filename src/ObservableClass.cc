@@ -189,22 +189,46 @@ void PairCorrelationClass::Initialize()
 }
 
 
-
+void PathDumpClass::Accumulate()
+{//Do nothing!
+}
 void PathDumpClass::WriteBlock()
 {
+  int numPtcls = PathData.NumParticles();
+  int numTimeSlices = PathData.NumTimeSlices();
   if (FirstTime){
     FirstTime=false;
-    int numPtcls = PathData.NumParticles();
-    int numTimeSlices = PathData.NumTimeSlices();
 
+    Array<string,1> speciesNames(numPtcls);
+    for (int speciesIndex=0; speciesIndex<PathData.NumSpecies(); speciesIndex++) {
+      SpeciesClass &species = PathData.Path.Species(speciesIndex);
+      for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++)
+      	speciesNames(ptcl)=species.Name;
+    }
+    IOSection.WriteVar("SpeciesNames", speciesNames);
+    
     Array<double,4> pathArray(1,numPtcls,numTimeSlices,NDIM);
+    for (int ptcl=0;ptcl<numPtcls;ptcl++){
+      for (int slice=0;slice<numTimeSlices;slice++){
+	for (int dim=0;dim<NDIM;dim++){
+	  pathArray(0,ptcl,slice,dim)=PathData(slice,ptcl)[dim];
+	}
+      }
+    }
+    
+    
     // Write the first path here
-
+    IOSection.WriteVar("Path",pathArray);
     // Now get the pointer to it
-    IOVar = IOSection.GetVarPtr("path");
+    IOVar = IOSection.GetVarPtr("Path");
   }
   else {
     // Append the new path here.
-    //IOVar->Append(gofrArray);
+    Array<double,3> pathArray(numPtcls,numTimeSlices,NDIM);
+    for (int ptcl=0;ptcl<numPtcls;ptcl++)
+      for (int slice=0;slice<numTimeSlices;slice++)
+	for (int dim=0;dim<NDIM;dim++)
+	  pathArray(ptcl,slice,dim)=PathData(slice,ptcl)[dim];
+    IOVar->Append(pathArray);
   }
 }
