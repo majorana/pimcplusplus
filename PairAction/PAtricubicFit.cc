@@ -1,7 +1,7 @@
 #include "PAFit.h"
 
-const double URho0Min = 1.0e-4;
-const double dURho0Min = 1.0e-2;
+const double URho0Min = 5.0e-5;
+const double dURho0Min = 1.0e-4;
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
@@ -220,6 +220,7 @@ void PAtricubicFitClass::AddFit (Rho &rho)
   USemiclassical Usemi(rho, beta);
 
   for (int qi=0; qi<numq; qi++) {
+    cerr << "qi = " << qi << " of " << numq << endl;
     double q = (*qgrid)(qi);
     //    cerr << "qi = " << qi << endl;
     for (int yi=0; yi<numy; yi++) {
@@ -234,6 +235,15 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	rp = 1.0e-8;
       
       rho.U_lArray(r,rp,Ul,dUl);
+
+      double costheta_max = (r*r + rp*rp - Usmax*Usmax)/(2.0*r*rp);
+      costheta_max = min(costheta_max, 1.0);
+      costheta_max = max(costheta_max, -1.0);
+      double U_max, dU_max;
+      rho.UdU(r,rp,costheta_max, Ul, dUl, U_max, dU_max);
+      double Usemi_max = Usemi.U(r,rp,costheta_max);
+      double dUsemi_max = Usemi.dU(r,rp,costheta_max);
+
       for (int ti=0; ti<numt; ti++) {
 	double t = (*tgrid)(ti);
 	double s = z + (2.0*q-z)*t;
@@ -246,12 +256,19 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	costheta = max(-1.0, costheta);	
 	double U, dU;
 	rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
-	if (s>Usmax /*&& q>2.4*/)
-	  U = Usemi.U(r,rp,costheta);
-	if (s>dUsmax /*&& q>2.4*/)
-	  dU = Usemi.dU(r,rp,costheta);
+	if (s>Usmax /*&& q>2.4*/) {
+	  double Us = Usemi.U(r,rp,costheta);
+	  // Make the result continuous across the transition
+	  U = Us - Usemi_max + U_max;
+	}
+	if (s>dUsmax /*&& q>2.4*/) {
+	  double dUs = Usemi.dU(r,rp,costheta);
+	  dU = dUs - dUsemi_max + dU_max;
+	}
+	  
 
 	if (isnan(U)) {
+	  U = Usemi.U(r,rp,costheta);
 	  fprintf (stderr, "NAN in U at (qi,yi,ti) = (%d,%d,%d)\n",
 		   qi, yi, ti); 
 	  fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
@@ -260,6 +277,7 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 		   exp(-s*s/(4.0*lambda*beta)));
 	}
 	if (isnan(dU)) {
+	  dU = Usemi.dU(r,rp,costheta);
 	  fprintf (stderr, "NAN in dU at (qi,yi,ti) = (%d,%d,%d)\n",
 		   qi, yi, ti);
 	  fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
@@ -393,12 +411,12 @@ void PAtricubicFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
   for (int qi=0; qi<qgrid2.NumPoints; qi++) {
     double q = qgrid2(qi);
     double zmax = 0.9999999*2.0*q;
-    LinearGrid zgrid(0.0, zmax, 20);
+    LinearGrid zgrid(0.0, zmax, 21);
     for (int zi=0; zi<zgrid.NumPoints; zi++) {
       double z = zgrid(zi);
       double y = z/zmax;
        double smax = 0.9999999*2.0*q;
-       LinearGrid sgrid(z, smax, 100);
+       LinearGrid sgrid(z, smax, 21);
       for (int si=0; si<sgrid.NumPoints; si++) {
 	double s = sgrid(si);
 	double t = s/smax;
