@@ -1,4 +1,4 @@
-double tau=0.5;
+double tau=0.25;
 
 Section (System)
 {
@@ -26,7 +26,7 @@ Section (System)
       int NumParticles=2;
       int NumDim=3;
       string InitPaths="FIXED";
-      Array<double,2> Positions(2,3)=[-5.05, 5.05,
+      Array<double,2> Positions(2,3)=[-0.70055, 0.70055,
 				      0.0, 0.0,
                                       0.0, 0.0];
     }
@@ -38,13 +38,12 @@ Section (Action)
   int MaxLevels = 4;
   Array<string,1> PairActionFiles(3) = ["e-p_beta8.0.coulombBCfit.h5",
                                         "e-e_beta8.0.coulombBCfit.h5",
-//					"e-e.fake",
                                         "p-p.PairAction"];
 }
 
 Section (Observables)
 {
-  string outFile = "H2_bservables.h5";
+  string outFile = "H2_tau0.25_beta25.h5";
   Section (Observable)
     {
       string type = "Energies";
@@ -68,6 +67,7 @@ Section (Observables)
 
 Section (PIMC)
 {
+  int steps = 1000000;
   Section (Loop)
     {
       int n = 10000;

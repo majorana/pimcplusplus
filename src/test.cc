@@ -205,23 +205,14 @@ int main(int argc, char **argv)
   IOSectionClass inSection;
   assert(inSection.OpenFile(argv[1]));  
   //  inSection.PrintTree();
-  cerr<<"I've opened the file\n";
   assert(inSection.OpenSection("System"));
   myPathData.Path.Read(inSection);
   inSection.CloseSection(); // "System"
-  cerr<<"I'm right before the action\n";
   inSection.OpenSection("Action");
   myPathData.Action.Read(inSection);
   inSection.CloseSection(); //"Action"
 
   // Let's test the action
-  LinearGrid qgrid(0.0, 3.0, 31);
-  for (int i=0; i<qgrid.NumPoints; i++) {
-    double q = qgrid(i);
-    double U = myPathData.Action.PairActionVector(0)->U(q,0.0, 4.0*q*q, 0);
-    cerr << q << " " << U << endl;
-  }
-  cerr << "Before Observables.\n";
   IOSectionClass out;
   inSection.OpenSection("Observables");
   string outFileName;
@@ -304,14 +295,18 @@ int main(int argc, char **argv)
 //  pathDump.WriteBlock();
   ofstream outfile;
   outfile.open("ourPath.dat");
-  int steps=5000000;
+  
+  int steps;
+  inSection.OpenSection("PIMC");
+  assert(inSection.ReadVar("steps", steps));
+  inSection.CloseSection();
   for (int counter=0;counter<steps;counter++){
-    if (counter>steps/4 && (counter % 1)==0){
+    if (counter>steps/20 && (counter % 1)==0){
       TotE.Accumulate();
       ep.Accumulate();
       ee.Accumulate();
     }
-    if (counter>steps/4 && (counter % 100) == 0){
+    if (counter>steps/20 && (counter % 1000) == 0){
       TotE.WriteBlock();
       cerr << "Step #" << counter << ":\n";
 //       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
@@ -325,11 +320,10 @@ int main(int argc, char **argv)
 //       outfile<<myPathData.Path(0,0)[2]<<" ";
 //       outfile<<endl;
     }
-    if (counter >= steps/3 && ((counter % 100) == 0))
+    if (counter >= steps/20 && ((counter % 100) == 0))
       pathDump.WriteBlock();
       
-      
-    for (int counter2=0;counter2<50;counter2++){
+    for (int counter2=0;counter2<20;counter2++){
       //cerr << "Doing step " << counter << endl;
       
       myBisectionMove.MakeMove();
