@@ -31,3 +31,10 @@ dVec dVecSubtract(dVec c,dVec d)
   return b;
 
 }
+double distSqrd(dVec a, dVec b) //Did I do this right?
+{
+  dVec Dist= distSqrd(a,b);
+  return (Dist(0)*Dist(0)+Dist(1)*Dist(1)+Dist(2)*Dist(2));
+}
+
+  

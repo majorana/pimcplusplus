@@ -1,5 +1,8 @@
+#include "PathDataClass.h"
 #include "BisectionMoveClass.h"
 #include "Common.h"
+
+
 
 BisectionMoveClass::BisectionMoveClass()
 {
@@ -22,10 +25,10 @@ void BisectionMoveClass::makeMove()
 
     setMode(OLD);
     bool toAccept=true;
-    double oldAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,levelCounter-1);
+    double oldAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter-1);
     setMode(NEW);
     (*PathData).TotalAction.SampleParticles(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter,newLogSampleProb,oldLogSampleProb);
-    double newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,levelCounter-1);
+    double newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter-1);
     double currActionChange=newAction-oldAction;
     double logAcceptProb=oldLogSampleProb-newLogSampleProb+currActionChange-prevActionChange;
     if (-logAcceptProb<log(sprng())){///reject conditin

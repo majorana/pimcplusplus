@@ -21,7 +21,8 @@ class PairActionClass
 
 private:
   Array<double,1> tempukjArray;
-
+  string SkipTo(ifstream &infile, string skipToString);
+  void ReadFORTRAN3Tensor(ifstream &infile, Array<double,3> &tempUkj);
 public:
   /// This stores the coefficients of the expansion specified above.
   /// The array index is over the levels.  You call it with the q
@@ -32,6 +33,7 @@ public:
   int n;
   double tau;
   void ReadDavidSquarerFile(string DMFile);
+  
 
   
   
@@ -87,7 +89,7 @@ public:
   //  Array<IdenticalParticlesClass,1> *myIdenticalParticleArray;
   ArrayOfIdenticalParticlesClass *myIdenticalParticleArray;
   double tau;
-  double calcTotalAction(Array<ParticleID,1> changedParticles,int level);
+  double calcTotalAction(Array<ParticleID,1> changedParticles,int startSlice, int endSlice,int level);
   MemoizedDataClass *myMemoizedData;
   inline void SampleParticles(Array<ParticleID,1> particles,int startSlice,int endSlice,int level,double&, double&);
   void calcTotalAction();

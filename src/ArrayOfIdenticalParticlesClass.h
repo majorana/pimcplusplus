@@ -7,7 +7,7 @@ class ArrayOfIdenticalParticlesClass
 {
   Array<IdenticalParticlesClass*,1> IdenticalParticlesArray;
  public:
-
+  int size();
   inline IdenticalParticlesClass& operator()(int i){
     return (*(IdenticalParticlesArray(i)));
   }

@@ -1,6 +1,6 @@
 #include "MirroredArrayClass.h"
 
-void MirroredArrayClass::shiftData(int slicesToShift, CommunicatorClass &Communicator)
+void MirroredArrayClass::shiftData(int slicesToShift, CommClass &Communicator)
 {
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();

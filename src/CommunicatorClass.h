@@ -1,7 +1,7 @@
-#ifndef COMMUNICATOR_CLASS_H
-#define COMMUNICATOR_CLASS_H
+#ifndef COMM_CLASS_H
+#define COMM_CLASS_H
 
-class CommunicatorClass
+class CommClass
 {
  public:
   int NumProcs() const;

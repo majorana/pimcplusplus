@@ -1,4 +1,6 @@
 #include "CubicSpline.h"
+#include <iostream>
+
 
 double CubicSpline::operator()(double x)
 {

@@ -24,7 +24,7 @@ public:
     return AB(0,x,y);
   }
   ///This shifts slicesToShift time slices to the next (if positive) or previous (if negative) processor
-  void shiftData(int slicesToShift,CommunicatorClass &Communicator); 
+  void shiftData(int slicesToShift,CommClass &Communicator); 
   /// Returns the backup value.
   inline T Backup (int x, int y) const
   {

@@ -19,4 +19,5 @@ int GetCurrentTimeStamp();
 dVec GuassianRandomVec(double sigma);
 dVec dVecSubtract(dVec a,dVec b); //a-b
 void setMode(int);
+double distSqrd(dVec a,dVec b); 
 #endif
