@@ -149,7 +149,7 @@ def ProcessRunInfo(doc,infile):
      doc.append(Heading(2,"Run information"))
      myTable=Table()
      myTable.body=[]
-     myTable.width=50
+     myTable.width=400
      numVars=infile.CountVars()
      for counter in range(0,numVars):
           data=infile.ReadVar(counter)
@@ -191,10 +191,12 @@ for counter in range(0,numSections):
 #     elif infile.GetName()=="Energies":
 #         Energy(infile,doc)
      infile.CloseSection()
-doc.logo="beach.jpg"
+#doc.logo="beach.jpg"
+doc.logo=""
 doc.author="Ken and Bryan"
 doc.email="bkclark@uiuc.edu"
-doc.banner=("PICT0067.JPG",640,300)
+#doc.banner=("PICT0067.JPG",640,300)
+doc.banner=("pimcLogo.png")
 doc.place_nav_buttons=0
 doc.header()
 
