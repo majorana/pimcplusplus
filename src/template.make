@@ -2,7 +2,7 @@ include /home/common/Codes/Make.include
 
 PSPLINELIB = -L$(PWD)/Common/Splines/fortran -lpspline
 LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
-       $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(PSPLINELIB) -lm 
+       $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
 INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 
 CCFLAGS = -c -g  -O3 -Wno-deprecated  #-pg
@@ -58,7 +58,7 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 Test: 	Common_obj Tests $(TestObjs)
 	pushd ..; make; pushd
-	$(LD) -o $@ $(TestObjs) $(LIBS)
+	$(LD) -o $@ $(TestObjs) $(LIBS) $(PSPLINELIB)
 
 MakeInput: 	Common_obj $(MakeInputObjs)
 	pushd ..; make; pushd
