@@ -81,7 +81,7 @@ void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
   }
   // Now, add kpoints to the list with approximate degeneracy.
   double kvol = b[0]*b[1]*b[2];
-  const int N = 1000;
+  const int N = 10000;
   double deltak = (kMax-kCont)/N;
   for (int i=0; i<N; i++) {
     double k1 = kCont+deltak*i;
