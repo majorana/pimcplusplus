@@ -235,8 +235,8 @@ double ActionClass::LongRange_U(int slice, int level)
 	}
       }
     }
-  cerr << "homo = " << homo << endl;
-  cerr << "hetero = " << hetero << endl;
+//   cerr << "homo = " << homo << endl;
+//   cerr << "hetero = " << hetero << endl;
   return (homo+hetero);
 }
 
@@ -543,6 +543,7 @@ void ActionClass::OptimizedBreakup_U(int numKnots)
       // second derivatives of long-range potential to match the full
       // potential at rc.
       adjust = true;
+      /// Warning:  the following constraints may cause instabilities!!!!
 //       t(N-3) = pa.Udiag(rc, level);                 adjust(N-3) = false;
 //       t(N-2) = pa.Udiag_p(rc, level)*delta;         adjust(N-2) = false;
 //       t(N-1) = pa.Udiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
@@ -661,10 +662,11 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
       // potential at rc.
       adjust = true;
       double delta = basis.GetDelta();
-      t(N-3) = pa.dUdiag(rc, level);                 adjust(N-3) = false;
-      t(N-2) = pa.dUdiag_p(rc, level)*delta;         adjust(N-2) = false;
-      t(N-1) = pa.dUdiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
-      t(1) = 0.0;                                    adjust(1)   = false;
+      /// Warning:  the following constraints may cause instabilities!!!!
+//       t(N-3) = pa.dUdiag(rc, level);                 adjust(N-3) = false;
+//       t(N-2) = pa.dUdiag_p(rc, level)*delta;         adjust(N-2) = false;
+//       t(N-1) = pa.dUdiag_pp(rc, level)*delta*delta;  adjust(N-1) = false;
+//       t(1) = 0.0;                                    adjust(1)   = false;
 
       // Now, do the optimal breakup:  this gives me the coefficents
       // of the basis functions, h_n in the array t.
@@ -768,6 +770,7 @@ void ActionClass::OptimizedBreakup_dU(int numKnots)
 //       cerr << "dUdiag_pp(rc) = " << pa.dUdiag_pp(rc, level) << endl;
 //       cerr << "Vpp(rc) = " << pa.Vpp(rc) << endl;
 
+      /// Warning:  the following constraints may cause instabilities!!!!
 //       // t(N-3) = pa.dUdiag(rc, level);                 adjust(N-3) = false;
 //       //t(N-2) = pa.dUdiag_p(rc, level)*delta;         adjust(N-2) = false;
 //       //t(N-1) = pa.Vpp(rc)*delta*delta;  adjust(N-1) = false;
