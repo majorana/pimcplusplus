@@ -3,6 +3,7 @@ double tau=0.25;
 Section (System)
 {
   int NumTimeSlices=200;
+  Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[125.0,125.0,125.0];
   Section (Particles)
   {
@@ -14,9 +15,8 @@ Section (System)
       int NumParticles=2;
       int NumDim=3;
       string InitPaths="FIXED";
-      Array<double,2> Positions(2,3)=[-5.0,5.0,
-                                      0.0,0.0,
-                                      0.0,0.0];
+      Array<double,2> Positions(2,3)=[-5.0, 0.0, 0.0,
+				       5.0, 0.0, 0.0 ];
     }
     Section (Species)
     {
@@ -26,9 +26,8 @@ Section (System)
       int NumParticles=2;
       int NumDim=3;
       string InitPaths="FIXED";
-      Array<double,2> Positions(2,3)=[-0.70055, 0.70055,
-				      0.0, 0.0,
-                                      0.0, 0.0];
+      Array<double,2> Positions(2,3)=[-0.70055, 0.0, 0.0, 
+				       0.70055, 0.0, 0.0 ];
     }
   }
 }
@@ -43,20 +42,43 @@ Section (Action)
 
 Section (Observables)
 {
-  string outFile = "H2_tau0.25_beta25.h5";
+  string OutFile = "H2_tau0.25_beta25.h5";
+  Section (Observable)
+  {
+    string type = "Energy";
+    string Name = "Energy";
+    string Description="Total Energy";
+    int freq = 2;
+    int dumpFreq = 500;
+  }
   Section (Observable)
     {
-      string type = "Energies";
-      string name = "Energies";
+      string type = "PairCorrelation";
+      string Name = "epPC";
+      string Species1 = "e";
+      string Species2 = "p";
+      string Description="Electron-Proton Pair Correlation";
+      int freq = 20;
+      int dumpFreq=700;
+      Section (Grid)
+	{	  
+	  string type = "Linear";
+	  double start = 0.0;
+	  double end = 3.0;
+	  int NumPoints = 100;
+	}
     }
   Section (Observable)
     {
       string type = "PairCorrelation";
-      string name = "epPC";
-      string type1 = "electron";
-      string type2 = "proton";
+      string Name = "eePC";
+      string Species1 = "e";
+      string Species2 = "e";
+      string Description="Electron-Eroton Pair Correlation";
+      int freq = 20;
+      int dumpFreq=700;
       Section (Grid)
-	{
+	{	  
 	  string type = "Linear";
 	  double start = 0.0;
 	  double end = 3.0;
@@ -64,37 +86,79 @@ Section (Observables)
 	}
     }
 }
-Section (Moves){
+
+Section (Moves) {
   Section (Move)
     {
       string type="Bisection";
-      string name="electronBisection";
-      string<int,5> ActiveParticles=[5,4,3];
+      string name="eBisection";
+      
+      Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
+      ///here should be electron
+      int NumParticlesToMove=1;
+      int StartTimeSlice=0; //Not sure if this is always set the same now?
+      string NumLevels="Max";
     }
   Section (Move)
     {
-      string type = "Displacement";
-      string name = "asdf";
+      string type="ShiftMove";
+      string name="electronShift";
     }
-}
-
-
-Section (Program)
-{
-  int steps = 1000000;
-  Section (Loop)
+  Section (Move)
     {
-      int n = 10000;
-      Section (Loop)
-	{
-	  int N = 100;
-	  Section (Move) { string name = "epBisection"; }
-	}
-      Section (Observe) { string name = "all"; }
-      Section (Move) { string name = "MoveJoin"; }
+      string type="PrintMove";
+      string name="Loop1";
+      string toprint="This is loop1";
     }
-      
-
-
+  Section (Move)
+    {
+      string type="PrintMove";
+      string name="Loop2";
+      string toprint="This is loop2";
+    }
+  Section (Move)
+    {
+      string type="PrintMove";
+      string name="Loop3";
+      string toprint="This is loop3";
+    }
+  Section (Move)
+    {
+      string type="CycleBlock";
+      string name="BlockCycleMove";
+      int NumLevels=3;
+      Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 0.0];
+      double epsilon=0.0;
+      int Steps=9;
+      string Species="e";
+    }
 }
-	  
+
+
+
+Section (Algorithm)
+{
+  Section (Loop){ // Before Accumulating Observables
+    int steps=1000; 
+    Section (Loop){ 
+
+      int steps=3;
+      //Section (Move) {string name="BlockCycleMove";} 
+      Section (Move) {string name="eBisection";}
+    }
+    Section (Move) {string name = "electronShift";}
+  }
+  Section (Loop){ //Start Accumulating observables
+    int steps=3000000;
+    Section (Loop){
+      int steps=3;
+      //Section (Move) {string name="BlockCycleMove";} 
+      Section (Move) {string name="eBisection";} 
+    }
+    Section (Move) {string name = "electronShift"; }
+    Section (Observe) {string name = "epPC";}
+    Section (Observe) {string name = "eePC";}
+    Section (Observe) {string name = "Energy"; }
+    //    Section (Observe) {string name = "PathDump";}
+  }
+}
