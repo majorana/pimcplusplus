@@ -85,7 +85,7 @@ public:
   virtual bool OpenFile(string fileName)=0;
   virtual void OpenSection(string name)=0;
   virtual void CloseSection()=0;
-  virtual void WriteVar(string name, double &T)=0;
+  virtual void WriteVar(string name, double T)=0;
  
 };
 
