@@ -1,5 +1,7 @@
-#ifndef BACKUP_ARRAY_CLASS_H
-#define BACKUP_ARRAY_CLASS_H
+#ifndef MIRRORED_ARRAY_CLASS_H
+#define MIRRORED_ARRAY_CLASS_H
+
+#include "CommunicatorClass.h"
 
 /*! This is our magic backup array class.  It stores two copies of a
 two-dimensional array in a three-dimensional internal array, an active
@@ -12,7 +14,7 @@ template<class T>
 class MirroredArrayClass
 {
 private:
-  Array<T,3> AB;
+  Array<T,3> AB; /// (0=A 1=B, particles, timeslice)
   int Write1, Write2;
 
 public:
@@ -21,7 +23,8 @@ public:
   {
     return AB(0,x,y);
   }
-
+  ///This shifts slicesToShift time slices to the next (if positive) or previous (if negative) processor
+  void shiftData(int slicesToShift,CommunicatorClass &Communicator); 
   /// Returns the backup value.
   inline T Backup (int x, int y) const
   {

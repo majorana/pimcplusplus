@@ -28,7 +28,7 @@ public:
   /// value and a temporary array to get all of the values in that
   /// column. 
   Array<MultiCubicSpline,1> ukj; //(level )
-  inline double calcUrrptau(double s,double q,double z,int level);
+  inline double calcUsqz(double s,double q,double z,int level);
   int n;
   double tau;
   void ReadDavidSquarerFile(string DMFile);
@@ -39,7 +39,7 @@ public:
   
 };
 
-inline double PairActionClass::calcUrrptau(double s,double q,double z,int level)
+inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
 {
   double sum=0;
   double r=0.5*(q+z);

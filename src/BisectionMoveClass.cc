@@ -1,6 +1,11 @@
 #include "BisectionMoveClass.h"
 #include "Common.h"
 
+BisectionMoveClass::BisectionMoveClass()
+{
+
+}
+
 void BisectionMoveClass::makeMove()
 {
   bool toAccept=true;

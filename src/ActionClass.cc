@@ -38,7 +38,7 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
 	    double z = (rmag - rpmag);
 	    int PairIndex = PairMatrix(Species1, Species2);
 	    TotalU += NotMyself*
-	      PairActionVector(PairIndex).calcUrrptau(s,q,z, level);
+	      PairActionVector(PairIndex).calcUsqz(s,q,z, level);
 	  }
 	}
       }
@@ -75,6 +75,19 @@ string PairActionClass::SkipTo(ifsteam &infile,string skipToString)
 }
 
 
+void PairActionClass::ReadFORTRAN3Tensor(ifstream &infile,Array<double,3> &tempUkj)
+{
+
+  
+  for (int counterTau=0;counterTau<tempUkj.size(3);counterTau++){
+    for (int counterUkj=0;counterUkj<tempUkj.size(2);counterUkj++){
+      for (int counterGridPoints;counterGridPoints<tempUkj.size(1);counterGridPoints++){
+	infile>>tempUkj(counterGridPoints,counterUkj,counterTau);
+      }
+    }
+  }
+
+}
 
 void PairActionClass::ReadDavidSquarerFile(string DMFile)
 {
@@ -124,11 +137,17 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
     String beginString=SkipTo("BEGIN density matrix table");
     NMax=GetNextInt(beginString); //This is magically the most accurate fit i.e. NDERIV-1
     if (GetNextInt(beginString)!=1){ //i.e. if it's not U
-      cerr<<"ERROR!!! ERROR!!! We got the beta derivative and not U;
+      cerr<<"ERROR!!! ERROR!!! We got the beta derivative and not U";
     }
-    
-    
-    
+    Array<double,3> tempUkj(NumGridPoints,NumUkj,NumTau);
+
+    ReadFORTRAN3Tensor(infile,tempUkj);
+    for (levelCounter=0;levelCounter<numTau;levelCounter++){
+      ukj(levelCounter).Init(theGrid,tempUkj(Range::all(),Range::all(),levelCounter));
+    }
+    tau=smallestTau;
+    n=NMax;
+	
     
     
   }
