@@ -249,7 +249,7 @@ for counter in range(0,numSections):
 doc.logo=""
 doc.author="Ken and Bryan"
 doc.email="bkclark@uiuc.edu"
-doc.banner=("pimcLogo.png")
+doc.banner=("../analysis/pimcLogo.png")
 doc.place_nav_buttons=0
 doc.header()
 
