@@ -1,4 +1,9 @@
 double tau=.025;
+Section (Parallel)
+{
+  int ProcsPerClone=1;
+}
+
 Section (System)
 {
   int NumTimeSlices=40;
@@ -38,6 +43,7 @@ Section (Action)
 
 Section (Observables)
 {
+
   string OutFileBase = "OpenLoopsFreeBuggy";
   Section (Observable)
     {

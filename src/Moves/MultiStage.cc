@@ -4,7 +4,10 @@ void StageClass::Read(IOSectionClass &in)
 {
   ///Do nothing for now
 }
-
+void StageClass::WriteRatio()
+{
+  //try this
+}
 
 void StageClass::Accept()
 {
@@ -21,6 +24,15 @@ void MultiStageClass::Read(IOSectionClass& in)
   ///do nothing for now
 }
 
+void MultiStageClass::WriteRatio()
+{
+  list<StageClass*>::iterator stageIter=Stages.begin();
+  double prevActionChange=0.0;
+  while (stageIter!=Stages.end()){
+    (*stageIter)->WriteRatio();
+    stageIter++;
+  }  
+}
 
 // void MultiStageLocalClass::MakeMove()
 // {

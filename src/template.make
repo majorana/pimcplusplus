@@ -1,7 +1,7 @@
 PSPLINELIB = -L$(PWD)/Common/Splines/fortran -lpspline
 
 ifeq ($(HOSTTYPE),alpha)
-include /usr/users/0/kesler/lib/Make.include
+    include /usr/users/0/kesler/lib/Make.include
     MPILIB = -lmpi -lelan
     LIBS =  $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
          $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(MPILIB) -lm 
@@ -25,6 +25,18 @@ ifeq ($(HOSTTYPE),rs6000)
     EXTRADEFS = -DNOCUSERID -DNOUNDERSCORE
     CCFLAGS = -c -g 
 endif
+ifeq ($(HOSTTYPE),powermac)
+   include /turing/home/esler/lib/Make.include
+   LIBS = $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
+          $(HDF5LIB) $(XMLLIB) $(PSPLINELIB) $(FORTRANLIB) -lm
+   INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
+   CC = mpiCC
+   LD = mpiCC
+   F77 = f77
+   CCFLAGS = -c -g  -Wno-long-double
+   EXTRADEFS = -DNOUNDERSCORE -DNOCUSERID
+   MAKE = make
+endif
 ifeq ($(HOSTTYPE),i386-linux)
     include /home/common/Codes/Make.include	
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
@@ -35,13 +47,14 @@ ifeq ($(HOSTTYPE),i386-linux)
     CCFLAGS = -c -g  -Wno-deprecated  #-pg 
 endif
 
+
 MAKECC = g++
 
 # Gets the subversion revision number
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
-DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -O3 #-DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -DUSE_MPI -O3 #-DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
 
 PIMCobjs =                            \
   Common.o                            \
@@ -56,6 +69,7 @@ PIMCobjs =                            \
   Moves/BisectionBlock.o              \
   Moves/RefSliceMove.o                \
   Moves/BisectionStageClass.o         \
+  Moves/StructureReject.o             \
   PIMCClass.o                         \
   Moves/MetaMoves.o 	              \
   Observables/ObservableBase.o        \
@@ -71,6 +85,7 @@ PIMCobjs =                            \
   Moves/MoveBase.o                    \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
+  Actions/OpenLoopImportance.o        \
   Actions/ShortRangeApproximateClass.o           \
   Actions/LongRangeClass.o            \
   Actions/ShortRangePotClass.o        \
@@ -281,9 +296,9 @@ MAKE_ALL = $(MAKE) all $(PASS_DEFS)
 MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
-all:    pimc++ TestPerm FreeParticles #TestEwald 
+all:    pimc++  FreeParticles #Visual_obj TestPerm TestEwald 
 
-pimc++: Common_obj Visual_obj observables moves actions Tests $(PIMCobjs)
+pimc++: Common_obj observables moves actions Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
 
 TestPerm: Common_obj Tests $(TestPermobjs)

@@ -1,9 +1,4 @@
 #include "PIMCClass.h"
-// #include "Moves/BisectionMoveClass.h"
-// #include "Moves/OpenBisectionMoveClass.h"
-// #include "Moves/MetaMoves.h"
-// #include "Moves/BlockMove.h"
-// #include "Moves/BisectionBlock.h"
 #include "Moves/MoveClass.h"
 #include "Observables/ObservableClass.h"
 #include <sstream>
@@ -102,6 +97,12 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection("Energies");
       tempObs = new EnergyClass(PathData,OutFile);
     }
+    else if (theObserveType=="EnergySign"){
+      if (iAmRoot)
+	OutFile.NewSection("Energies");
+      tempObs = new EnergySignClass(PathData,OutFile);
+    }
+
     else if (theObserveType=="PathDump"){
       if (iAmRoot)
 	OutFile.NewSection("PathDump");
@@ -196,6 +197,11 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)=new BisectionBlockClass(PathData,OutFile);
       Moves(counter)->Read(in); 
     }
+    //    else if (MoveType=="StructureReject"){
+    //      moveName="StructureReject";
+    //      Moves(counter)=new StructureRejectClass(PathData,OutFile);
+    //      Moves(counter)->Read(in);
+    //    }
     else if (MoveType=="OpenEnd"){
       moveName="OpenEnd";
       Moves(counter)=new OpenEndMoveClass(PathData,OutFile);

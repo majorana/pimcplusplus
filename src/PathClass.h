@@ -47,7 +47,7 @@ private:
   ///////////////////////////////////////////////
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
-
+ public:
   /// This is the maximum number of k vectors in each direction
   TinyVector<int,NDIM> MaxkIndex;
   /// Stores the radius of the k-space sphere we sum over
@@ -56,7 +56,7 @@ private:
   void SetupkVecs3D();
 
   void SetupkVecs2D();
-
+ private:
   ///These two preceding function/array only need to be used in order to
   ///make the readings of David's file work correctly (sorry,
   ///Ken...I'll find out how to make it more transparent in a bit)

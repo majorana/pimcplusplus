@@ -39,7 +39,8 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
   Stages.push_back (permuteStage);
   
   for (int level=NumLevels-1; level>=0; level--) {
-    BisectionStageClass *newStage = new BisectionStageClass (PathData, level);
+    BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
+							     OutSection);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {

@@ -20,8 +20,11 @@ void OpenEndMoveClass::Read(IOSectionClass &in)
   endStage->Read(in);
   Stages.push_back (endStage);
   for (int level=NumLevels-1; level>=0; level--) {
-    BisectionStageClass *newStage = new BisectionStageClass (PathData, level);
+    BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
+							     OutSection);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
+    if (level==0)
+      newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
     if (level>0)
       newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
     else

@@ -22,15 +22,17 @@ public:
   virtual void Read (IOSectionClass &in);
   virtual void Accept();
   virtual void Reject();
+  virtual void WriteRatio();
   inline double StageAction(int startSlice,int endSlice,
 			    const Array<int,1> &changedParticles);
   inline double GlobalStageAction (const Array<int,1> &changeParticles);
   inline double AcceptRatio () 
   { return (double)NumAccepted / (double) NumAttempted; }
-
+  
   virtual bool Attempt(int &slice1, int &slice2, 
 		       Array<int,1> &activeParticles,
 		       double &prevActionChange) = 0;
+
 
   StageClass(PathDataClass &pathData) :
     PathData(pathData), NumAccepted(0), NumAttempted(0),
@@ -38,6 +40,9 @@ public:
   {
     // Do nothing for now
   }
+
+
+
 
 };
 
@@ -106,10 +111,10 @@ public:
   void Read(IOSectionClass &io);
   void Accept();
   void Reject();
-  virtual void WriteRatio()=0;
+  virtual void WriteRatio();
 
   ///Why was this MakeMove()=0 and virtual?
-  void MakeMove();
+  virtual void MakeMove();
   MultiStageClass(PathDataClass &pathData, IOSectionClass &outSection) : 
     ParticleMoveClass(pathData,outSection) 
   {

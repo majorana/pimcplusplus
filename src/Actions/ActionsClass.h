@@ -9,6 +9,7 @@
 #include "KineticClass.h"
 #include "NodalActionClass.h"
 #include "DavidLongRangeClass.h"
+#include "OpenLoopImportance.h"
 
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
@@ -25,7 +26,7 @@ private:
 public:
 
   // Actions
-
+  OpenLoopImportanceClass OpenLoopImportance;
   /// The Kinetic action
   KineticClass Kinetic;
 
@@ -81,6 +82,7 @@ public:
     DavidLongRange(pathData),
     LongRangeRPA(pathData, PairMatrix, PairArray),
     LongRangePot(pathData, PairMatrix),
+    OpenLoopImportance(pathData),
     Kinetic(pathData),
     PathData(pathData),
     NumImages(1)

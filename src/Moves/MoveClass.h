@@ -12,5 +12,5 @@
 #include "RefSliceMove.h"
 #include "DisplaceMove.h"
 #include "OpenEndMove.h"
-
+//#include "StructureReject.h"
 #endif

@@ -1,4 +1,5 @@
 #include "BisectionBlock.h"
+#include "StructureReject.h"
 
 void BisectionBlockClass::WriteRatio()
 {
@@ -34,8 +35,11 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   Stages.push_back (permuteStage);
   
   for (int level=NumLevels-1; level>=0; level--) {
-    BisectionStageClass *newStage = new BisectionStageClass (PathData, level);
+    BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
+							     OutSection);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
+    if (PathData.Path.OpenPaths && level==0)
+      newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
     if (PathData.Path.OpenPaths && level>0)
       newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
     else
@@ -66,6 +70,12 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   // Add the second stage of the permutation step
   Stages.push_back (permuteStage);
 
+//   ///HACK! Addding a stage that will reject the move if the structure
+//   //factor gets too large
+//   StructureRejectStageClass* structureReject =
+//     new StructureRejectStageClass(PathData,in);
+//   structureReject->Read(in);
+//   Stages.push_back(structureReject);
   // Add the nodal action stage, if necessary
   
 }

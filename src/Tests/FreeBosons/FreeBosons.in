@@ -1,4 +1,10 @@
 double tau=0.1;
+Section (Parallel)
+{
+  int ProcsPerClone = 1;
+}
+
+
 
 Section (System)
 {
@@ -10,15 +16,32 @@ Section (System)
     Section (Species)
     {
       string Name="free";
+      string Type="free";
       double lambda=1.0; 
-      string Type="BOSON";
-      int NumParticles=4;
+      string Statistics="BOSON";
+      int NumParticles=16;
       int NumDim=3;
       string InitPaths="FIXED";
-      Array<double,2> Positions(4,3)=[ 0.0, 0.0, 0.0 ,
-				       4.1, 4.1, 4.1 , 
-				       2.2, -2.2, 0.2 ,
-				       -4.1,-4.1,-4.1];
+      Array<double,2> Positions(16,3)=[
+ 0.0, 0.0, 0.0 ,
+4.1, 4.1, 4.1 , 
+2.2, -2.2, 0.2 ,
+-4.1,-4.1,-4.1,
+ 0.0, 0.0, 0.0 ,
+4.1, 4.1, 4.1 , 
+2.2, -2.2, 0.2 ,
+-4.1,-4.1,-4.1,
+ 0.0, 0.0, 0.0 ,
+4.1, 4.1, 4.1 , 
+2.2, -2.2, 0.2 ,
+-4.1,-4.1,-4.1,
+ 0.0, 0.0, 0.0 ,
+4.1, 4.1, 4.1 , 
+2.2, -2.2, 0.2 ,
+-4.1,-4.1,-4.1
+
+
+];
     }
   }
 }
@@ -32,7 +55,15 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "FreeBosons.h5";
+  string OutFileBase = "FreeBosons";
+  Section (Observable)
+    {
+      string type = "EnergySign";
+      string Name = "EnergySign";
+      int freq=2;
+      int dumpFreq=500;
+      
+    }
   Section (Observable)
     {
       string type = "Energy";
@@ -41,6 +72,7 @@ Section (Observables)
       int dumpFreq=500;
       
     }
+
   Section (Observable)
     {
       string type = "PairCorrelation";
@@ -60,30 +92,22 @@ Section (Observables)
 
 
 Section (Moves){
-  Section (Move)
-    {
-      string type="Bisection";
-      string name="Bisection";
-      
-      Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
-      ///here should be electron
-      int NumParticlesToMove=1;
-      string NumLevels="Max";      
-    }
+
+  Section (Move) {
+    string type="BisectionBlock";
+    string name="Bisection";
+    string PermuteType="TABLE";
+    string Species="free";
+    Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
+    double epsilon=1e-5;
+    int NumLevels=2;
+    int StepsPerBlock=64;
+  }
+
   Section (Move)
     {
       string type="ShiftMove";
       string name="Shift";
-    }
-  Section (Move)
-    {
-      string type="CycleBlock";
-      string name="Permutations";
-      int NumLevels=3;
-      Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 0.0];
-      double epsilon=0.0;
-      int Steps=9;
-      string Species="free";
     }
 }
 
@@ -94,22 +118,15 @@ Section (Algorithm)
 {
   Section (Loop){ // Before Accumulating Observables
     int steps=1000; 
-    Section (Loop){ 
-      int steps=3;
-      Section (Move) {string name="Bisection";} 
-    }
-    Section (Move) {string name="Permutations";} 
+    Section (Move) {string name="Bisection";} 
     Section (Move) {string name = "Shift";}
   }
   Section (Loop){ //Start Accumulating observables
     int steps=3000000;
-    Section (Loop){
-      int steps=3;
-      Section (Move) {string name="Bisection";} 
-    }
+    Section (Move) {string name="Bisection";} 
     Section (Move) {string name = "Shift"; }
-    Section (Move) {string name="Permutations";} 
     Section (Observe) {string name = "PairCorrelation";}
+    Section (Observe) {string name = "EnergySign"; }
     Section (Observe) {string name = "Energy"; }
   }
 }

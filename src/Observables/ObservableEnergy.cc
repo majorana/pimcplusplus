@@ -177,3 +177,79 @@ void EnergyClass::Read(IOSectionClass &in)
     IOSection.WriteVar("Type","Scalar");
   }
 }
+
+
+////Code for energy sign class
+
+
+// Fix to include final link between link M and 0
+void EnergySignClass::Accumulate()
+{
+  TimesCalled++;
+  if (TimesCalled % DumpFreq==0)
+    WriteBlock();
+
+  if ((TimesCalled % Freq)!=0){
+    return;
+  }
+  //Move the join to the end so we don't have to worry about permutations
+  PathData.MoveJoin(PathData.NumTimeSlices()-1);
+  
+  NumSamples++;
+
+  double kinetic, dUShort, dULong, node, vShort, vLong;
+  PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong);
+  
+  TotalSum   += (kinetic + dUShort + dULong + node)*PathData.Path.Weight;
+  KineticSum += kinetic * PathData.Path.Weight;
+  dUShortSum += dUShort * PathData.Path.Weight;
+  dULongSum  += dULong * PathData.Path.Weight;
+  NodeSum    += node * PathData.Path.Weight;
+  VShortSum  += vShort * PathData.Path.Weight;
+  VLongSum   += vLong * PathData.Path.Weight;
+}
+
+
+
+void EnergySignClass::ShiftData (int NumTimeSlices)
+{
+  // Do nothing
+}
+
+void EnergySignClass::WriteBlock()
+{
+  int nslices=PathData.Path.TotalNumSlices;
+  double norm = 1.0/((double)NumSamples*(double)nslices);
+  
+  TotalVar.Write(PathData.Path.Communicator.Sum(TotalSum)*norm);
+  KineticVar.Write(PathData.Path.Communicator.Sum(KineticSum)*norm);
+  dUShortVar.Write(PathData.Path.Communicator.Sum(dUShortSum)*norm);
+  dULongVar.Write(PathData.Path.Communicator.Sum(dULongSum)*norm);
+  NodeVar.Write(PathData.Path.Communicator.Sum(NodeSum)*norm);
+  VShortVar.Write(PathData.Path.Communicator.Sum(VShortSum)*norm);
+  VLongVar.Write(PathData.Path.Communicator.Sum(VLongSum)*norm);
+
+  if (PathData.Path.Communicator.MyProc()==0)
+    IOSection.FlushFile();
+  
+  TotalSum   = 0.0;
+  KineticSum = 0.0;
+  dUShortSum = 0.0;
+  dULongSum  = 0.0;
+  NodeSum    = 0.0;
+  VShortSum  = 0.0;
+  VLongSum   = 0.0;
+  NumSamples = 0;
+}
+
+
+void EnergySignClass::Read(IOSectionClass &in)
+{  
+  ObservableClass::Read(in);
+  assert(in.ReadVar("freq",Freq));
+  assert(in.ReadVar("dumpFreq",DumpFreq));
+  if (PathData.Path.Communicator.MyProc()==0){
+    WriteInfo();
+    IOSection.WriteVar("Type","Scalar");
+  }
+}

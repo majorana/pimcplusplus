@@ -66,7 +66,7 @@ void CycleBlockMoveClass::MakeMove()
 	  PermuteTableClass* tempPtr=Forw;
 	  Forw=Rev;
 	  Rev=tempPtr;
-	  cerr<<"I've accepted a move of "<<Forw->CurrentCycle.Length<<" size"<<endl;
+	  //	  cerr<<"I've accepted a move of "<<Forw->CurrentCycle.Length<<" size"<<endl;
 
 	}
 

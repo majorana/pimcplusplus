@@ -29,6 +29,22 @@ void StructureFactorClass::Read(IOSectionClass& in)
   assert(Species2!=-1);
 
   TotalCounts=0;
+  ///if it's not long range you haven't set the kvecs up yet and need to
+  if (!PathData.Path.LongRange){//This is hackish..we use kcutoff
+    ///to tell if you are long range and now we have to read 
+    ///it in to get the structure factor corret.
+    assert(in.ReadVar("kCutoff",PathData.Path.kCutoff));
+  
+#if NDIM==3    
+    PathData.Path.SetupkVecs3D();
+#endif
+#if NDIM==2
+    PathData.Path.SetupkVecs2D();
+#endif
+    PathData.Path.Rho_k.resize(PathData.Path.NumTimeSlices(), PathData.Path.NumSpecies(), PathData.Path.kVecs.size());
+  }
+  
+
   Sk.resize(PathData.Path.kVecs.size());
   Sk=0;
 }
@@ -130,8 +146,37 @@ void StructureFactorClass::Accumulate()
     }
   }
 }
+void StructureFactorClass::Clear()
+{
+  Sk=0;
+  TotalCounts=0;
+}
 
+void StructureFactorClass::Calculate()
+{
+  Array<dVec,1> &kVecs = PathData.Path.kVecs;
+  TotalCounts++;
+  if (!PathData.Path.LongRange) {
+    for (int slice=0; slice < PathData.NumTimeSlices()-1; slice++)
+      PathData.Path.CalcRho_ks_Fast(slice, Species1);
+    if (Species2 != Species1)
+      for (int slice=0; slice < PathData.NumTimeSlices()-1; slice++)
+	PathData.Path.CalcRho_ks_Fast(slice, Species2);
+  }
 
+  for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
+    for (int ki=0; ki<kVecs.size(); ki++) {
+      double a = PathData.Path.Rho_k(slice, Species1, ki).real();
+      double b = PathData.Path.Rho_k(slice, Species1, ki).imag();
+      double c = PathData.Path.Rho_k(slice, Species2, ki).real();
+      double d = PathData.Path.Rho_k(slice, Species2, ki).imag();
+      // \f$ Sk(ki) :=  Sk(ki) + \Re(rho^1_k * rho^2_{-k}) \f
+      Sk(ki) += a*c + b*d;	
+    }
+  }
+
+  
+}
 void StructureFactorClass::Initialize()
 {
   TotalCounts = 0;

@@ -94,9 +94,35 @@
 //   return logNewSampleProb;
 // }
 
+void BisectionStageClass::WriteRatio()
+{ 
+ if (FirstTime) {
+    FirstTime = false;
+    OutSection.NewSection("BisectionStageClass");
+    OutSection.WriteVar("BisectionLevel",BisectionLevel);
+    Array<double,1> ratios(1);
+    ratios(0) = (double)NumAccepted/(double)NumAttempted;
+    OutSection.WriteVar("AcceptRatio", ratios);
+    IOVar = OutSection.GetVarPtr("AcceptRatio");
+  }
+  else {
+    double ratio = (double)NumAccepted/(double)NumAttempted;
+    IOVar->Append(ratio);
+  }
+  OutSection.FlushFile();
+}
 
+void BisectionStageClass::Accept()
+{
+  NumAccepted++;
+  NumAttempted++;
+}
 
+void BisectionStageClass::Reject()
+{
+  NumAttempted++;
 
+}
 
 double BisectionStageClass::Sample(int &slice1,int &slice2,
 				   Array<int,1> &activeParticles)
