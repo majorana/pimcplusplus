@@ -85,7 +85,7 @@ public:
   Array<double, 1> StartDeriv, EndDeriv;
 
   double operator()(int, double x);
-  void Vals (double x, Array<double,1> &yVec);
+  void operator()(double x, Array<double,1> &yVec);
   double Deriv(int i, double x);
   void   Deriv (double x, Array<double,1> &deriv);
   double Deriv2(int i, double x);

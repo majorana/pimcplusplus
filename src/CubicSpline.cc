@@ -197,7 +197,7 @@ double MultiCubicSpline::operator()(int i, double x)
 }
 
 
-void MultiCubicSpline::Vals(double x, Array<double,1> &yVec)
+void MultiCubicSpline::Operator()(double x, Array<double,1> &yVec)
 {
   for (int i=0; i<NumSplines; i++)
     if (!UpToDate(i))

@@ -8,12 +8,14 @@ index of 0 and the second by 1.  It has two modes, MOVE and
 OBSERVABLE.  In MOVE mode, it writes only to the first copy, while in
 observable mode, it writes to both copies.  The AcceptCopy and
 RejectCopy member functions are used to accept or reject moves. */
-class MirroredArrayClass<T>
+template<class T>
+class MirroredArrayClass
 {
 private:
   Array<T,3> AB;
   int Write1, Write2;
 
+public:
   /// Returns the active value.
   inline T operator()(int x,int y) const
   {
@@ -36,22 +38,23 @@ private:
 
   /// In MOVE mode, write only to the first copy, while in OBSERVABLE
   /// mode, write to both copies.
-  inline SetMode(ModeType Mode)
+  inline void SetMode(ModeType Mode)
   {
     /// Write only to the first copy
-    if (ModeType == MOVEMODE) 
+    if (Mode == MOVEMODE) 
       {
 	Write1 = 0;
 	Write2 = 0;
       }
-    else if (ModeType == OBSERVABLEMODE)
+    else if (Mode == OBSERVABLEMODE)
       {
 	Write1 = 0;
 	Write2 = 1;
       }
     else
       {
-	abort ("Undefined mode type!");
+      ///This needs to be put back in when somebody tells me what abort does
+//	abort ("Undefined mode type!");
       }
   }
 
@@ -77,3 +80,4 @@ private:
 
 
 };
+#endif

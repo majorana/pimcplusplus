@@ -1,17 +1,17 @@
 #ifndef MOVE_CLASS_H
 #define MOVE_CLASS_H
 
-#include "Common.h";
+#include "Common.h"
 
 ///ParticleID=(species,particle number)
-typedef TinyVec<int,2> ParticleID;
+typedef TinyVector<int,2> ParticleID;
 
 
 class MoveClass
 {
 private:
   /// Stores which species of particles this moves will work on
-  Array<int,i> ActiveSpecies;
+  Array<int,1> ActiveSpecies;
   ///Total number of particles in the active species
   int TotalParticles;
   ///Scratch Array holding a random subset of particles
