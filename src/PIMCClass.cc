@@ -112,8 +112,7 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 
 void PIMCClass::Run()
 {
-  cerr<<"Before the algorithm!!!!"<<endl;
-  PathData.Action.PrintDensityMatrix();
+  // PathData.Action.PrintDensityMatrix();
   Algorithm.DoEvent();
   //  Array<MoveClass*,1> Moves;
   cerr<<"hello"<<endl;

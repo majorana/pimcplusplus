@@ -24,6 +24,7 @@ void ActionClass::Read(IOSectionClass& inSection)
   // Read pair actions files
   IOSectionClass PAIO;
   for (int i=0; i<numPairActions; i++) {
+    cerr << "i = " << i << endl;
     assert(PAIO.OpenFile (PAFiles(i)));
     PairActionVector(i) = ReadPAFit (PAIO, tau, MaxLevels);
     int type1 = Path.SpeciesNum(PairActionVector(i)->Particle1.Name);
