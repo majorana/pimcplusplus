@@ -116,11 +116,11 @@ void PAsFitClass::AddFit (Rho &rho)
   Array<double,3> Umat(numq, numy,Order+1), dUmat(numq, numy, Order+1);
   sFitIntegrand integrand(rho);
   for (int qi=0; qi<numq; qi++) {
-    cerr << "qi = " << qi << " of " << numq << ".\n";
+    cerr << "qi = " << qi+1 << " of " << numq << ".\n";
     double q = (*qgrid)(qi);
     double zmax = 0.999999*min(2.0*q, sMax(NumBetas-1));
     for (int yi=0; yi<numy; yi++) {
-      cerr << "  yi = " << yi << " of " << numy << ".\n";
+      //cerr << "  yi = " << yi+1 << " of " << numy << ".\n";
       double z = zmax*(*ygrid)(yi);
       double smin = z;
       double smax = min (2.0*q, sMax(NumBetas-1));
@@ -231,8 +231,11 @@ void PAsFitClass::WriteFits (IOSectionClass &outSection)
   Array<double,3> dUmat(qgrid->NumPoints, ygrid->NumPoints,Order+1); 
   double beta = SmallestBeta;
   for (int bi=0; bi<NumBetas; bi++) {
+    cerr << "Writing Beta "<< bi+1 << " of " << NumBetas << ":\n";
     outSection.NewSection("Fit");
     outSection.WriteVar ("beta", beta);
+    double smax = sMax(bi);
+    outSection.WriteVar ("sMax", smax);
     for (int qi=0; qi<qgrid->NumPoints; qi++)
       for (int yi=0; yi<ygrid->NumPoints; yi++) 
 	for (int j=0; j<=Order; j++) {
@@ -359,6 +362,7 @@ bool PAsFitClass::Read (IOSectionClass &in,
   assert(in.ReadVar("Order", Order));
   Coefs.resize(Order+1);
   Pn.resize(Order+1);
+  sMax.resize(NumBetas);
 
   double desiredBeta = smallestBeta;
   for (int betaIndex=0; betaIndex<NumBetas; betaIndex++) {
@@ -382,6 +386,9 @@ bool PAsFitClass::Read (IOSectionClass &in,
     exit(1);
     }
     // Now read the fit coefficents
+    double smax;
+    assert(in.ReadVar("sMax", smax));
+    sMax(betaIndex) = smax;
     assert(in.ReadVar("Umat", temp));
     Usplines(betaIndex).Init(qgrid,ygrid,temp);
     assert(in.ReadVar("dUmat", temp));
