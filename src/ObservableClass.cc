@@ -8,7 +8,10 @@ void TotalEnergyClass::Accumulate()
   double tau = PathData.Action.tau;
   // Add constant part.  Note: we should really check the number of
   // dimensions. 
-  double sum = 1.5/tau * (double)(numPtcls*numLinks);
+  double sum = 0.0;
+  for (int ptcl=0; ptcl<numPtcls; ptcl++)
+    if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
+      sum += 1.5/tau * (double)numLinks;
   for (int link=0; link<numLinks; link++) {
     for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
       // Do free-particle part
@@ -32,7 +35,7 @@ void TotalEnergyClass::Accumulate()
 	double dU;
 
 	dU=PathData.Action.PairActionVector(PairIndex)->dU(q, z, s2, 0);
-	sum -= dU;
+	sum += dU;
       }
     }
   }

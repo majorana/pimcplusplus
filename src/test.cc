@@ -181,6 +181,14 @@ int main(int argc, char **argv)
   myPathData.Action.Read(inSection);
   inSection.CloseSection(); //"Action"
 
+  // Let's test the action
+  LinearGrid qgrid(0.0, 3.0, 31);
+  for (int i=0; i<qgrid.NumPoints; i++) {
+    double q = qgrid(i);
+    double U = myPathData.Action.PairActionVector(0)->U(q,0.0, 4.0*q*q, 3);
+    cerr << q << " " << U << endl;
+  }
+
   IOSectionClass out;
   out.NewFile ("Observables.h5");
   out.NewSection("Energies");
@@ -250,23 +258,23 @@ int main(int argc, char **argv)
   outfile.open("ourPath.dat");
   int steps=100000;
   for (int counter=0;counter<steps;counter++){
-    if (counter>steps/2 && (counter % 10)==0){
+    if (counter>steps/2 && (counter % 100)==0){
       TotE.Accumulate();
       gofr.Accumulate();
     }
     if (counter>steps/2 && (counter % 1000) == 0){
       TotE.WriteBlock();
       cerr << "Step #" << counter << ":\n";
-      for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
-	outfile<<myPathData.Path(slice,0)[0]<<" ";
-	outfile<<myPathData.Path(slice,0)[1]<<" ";
-	outfile<<myPathData.Path(slice,0)[2]<<" ";
-	outfile<<endl;
-      }
-      outfile<<myPathData.Path(0,0)[0]<<" ";
-      outfile<<myPathData.Path(0,0)[1]<<" ";
-      outfile<<myPathData.Path(0,0)[2]<<" ";
-      outfile<<endl;
+//       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
+// 	outfile<<myPathData.Path(slice,0)[0]<<" ";
+// 	outfile<<myPathData.Path(slice,0)[1]<<" ";
+// 	outfile<<myPathData.Path(slice,0)[2]<<" ";
+// 	outfile<<endl;
+//       }
+//       outfile<<myPathData.Path(0,0)[0]<<" ";
+//       outfile<<myPathData.Path(0,0)[1]<<" ";
+//       outfile<<myPathData.Path(0,0)[2]<<" ";
+//       outfile<<endl;
     }
       
     for (int counter2=0;counter2<2;counter2++){
