@@ -386,6 +386,12 @@ PseudoHamiltonian* ReadPH (IOSectionClass &inSection)
     PH = new PH_CubicSplineXC;
   else if (Type == "Coulomb3D")
     PH = new Coulomb3D;
+  else if (Type == "Coulomb")
+    PH = new CoulombPot;
+  else {
+    cerr << "Unrecognized PH type \"" << Type << "\".  Aborting.\n";
+    abort();
+  }
 
   PH->Read(inSection);
   return (PH);

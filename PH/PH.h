@@ -8,7 +8,7 @@
 #include "../IO/InputOutput.h"
 
 enum PHType {PH_NONE, PH_CHEBYSHEV, PH_CUBIC, PH_CUBICXC, PH_NUCLEAR,
-PH_COULOMB3D};
+PH_COULOMB3D, PH_COULOMB};
 
 class FullCorePotential
 {
@@ -1240,6 +1240,74 @@ public:
   }
   Coulomb3D() { }
 };
+
+
+
+
+
+class CoulombPot : public PseudoHamiltonian
+{
+public:
+  double Z1Z2;
+
+  double V(double r)
+  {
+    return (Z1Z2/r);
+  }
+
+  PHType Type()
+  {
+    return PH_COULOMB;
+  }
+  
+  int NumParams()
+  {
+    return (0);
+  }
+  
+  double &Params(int i)
+  {
+    return Z1Z2;
+  }
+
+  double Params(int i) const
+  {
+    return (0.0);
+  }
+	
+  void ABV(double r, double &A, double &B, double &Vr,
+	   double &dAdr)
+  {
+    A = B = 1.0;
+    dAdr = 0.0;
+
+    Vr=V(r);
+  }
+  // We don't need this
+  double dVdr(double r)
+  {    return (0.0); }
+
+  double d2Adr2(double r)
+  {
+    return (0.0);
+  }
+
+  void Write (IOSectionClass &outSection)
+  {
+    outSection.WriteVar ("Type", "Coulomb");
+    outSection.WriteVar ("Z1Z2", Z1Z2);
+  }
+
+  bool Read (IOSectionClass &inSection)
+  {
+    assert (inSection.ReadVar ("Z1Z2", Z1Z2));
+    return (true);
+  }
+
+  CoulombPot() { }
+};
+
+
 
 
 
