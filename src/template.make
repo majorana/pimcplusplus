@@ -4,10 +4,10 @@ LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
        $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
 INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 
-CCFLAGS = -c -g  -Wno-deprecated  #-pg
+CCFLAGS = -c -g  -O3 -Wno-deprecated  #-pg
 CC = mpicc
 LD = mpicc  -Bstatic 
-DEFS = -DNO_COUT -DUSE_MPI -DPARALLEL  -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -DUSE_MPI -DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 TestObjs =                         \
   ObservableClass.o                \

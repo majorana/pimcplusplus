@@ -168,7 +168,13 @@ int main(int argc, char **argv)
 {
   MPI_Init(&argc, &argv);
 
+
+
   PathDataClass myPathData;
+#ifdef PARALLEL
+  myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
+#endif
+
   IOSectionClass inSection;
   assert(inSection.OpenFile("hydrogen.in"));  
   //  inSection.PrintTree();
@@ -219,9 +225,6 @@ int main(int argc, char **argv)
   myPathData.DistanceTable->UpdateAll();
   ///Done setting up distance table
 
-#ifdef PARALLEL
-  myPathData.Communicator.my_mpi_comm = MPI_COMM_WORLD;
-#endif
   
 
 //   //  ActionClass myActionClass;
@@ -256,7 +259,7 @@ int main(int argc, char **argv)
 //   //  PrintConfigClass myPrintConfig(myPathData);
   ofstream outfile;
   outfile.open("ourPath.dat");
-  int steps=2000000;
+  int steps=20000;
   for (int counter=0;counter<steps;counter++){
     if (counter>steps/8 && (counter % 100)==0){
       TotE.Accumulate();

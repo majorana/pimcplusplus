@@ -9,6 +9,8 @@ template class MirroredArrayClass1D<int>;
 template class MirroredSymmetricMatrixClass<double>;
 template class MirroredAntiSymmetricMatrixClass<dVec>;
 template class MirroredAntiSymmetricMatrixClass<ImageNumClass>; 
+template class MirroredAntiSymmetricMatrixClass<int>; 
+template class MirroredSymmetricMatrixClass<int>; 
 
 int Write1=0;
 int Write2=1;
@@ -182,6 +184,18 @@ void MirroredArrayClass<T>::ShiftData(int slicesToShift, CommunicatorClass &Comm
 /****************************************************************/
 
 template <class T>
+void MirroredSymmetricMatrixClass<T>::Print()
+{
+  for (int counter=0;counter<AB.extent(1);counter++){
+    for (int counter2=0;counter2<AB.extent(2);counter2++){
+      cout<<AB(0,counter,counter2)<<" ";
+    }
+    cout<<endl;
+  }
+}
+
+
+template <class T>
 void MirroredSymmetricMatrixClass<T>::ShiftData(int slicesToShift, CommunicatorClass &Communicator)
 {
   int numProcs=Communicator.NumProcs();
@@ -222,19 +236,29 @@ void MirroredSymmetricMatrixClass<T>::ShiftData(int slicesToShift, CommunicatorC
   
   int bufferSize=abs(slicesToShift)*NumIndices;
   Array<T,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
-  int startTimeSlice;
-  if (slicesToShift>0)
-    startTimeSlice=NumSlices-slicesToShift;
-  else 
-    startTimeSlice=0;
-
   int BufferCounter=0;
-  for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-    for (int sliceCounter=startTimeSlice;
-	 sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-      sendBuffer(BufferCounter)=AB(1,sliceCounter,pairIndex);
-      BufferCounter++;
+  int startTimeSlice;
+  if (slicesToShift>0){
+    startTimeSlice=NumSlices-slicesToShift;
+    for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
+      for (int sliceCounter=startTimeSlice;
+	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
+	sendBuffer(BufferCounter)=AB(1,sliceCounter-1,pairIndex);
+	BufferCounter++;
+      }
     }
+
+  }
+  else {
+    startTimeSlice=0;
+    for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
+      for (int sliceCounter=startTimeSlice;
+	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
+	sendBuffer(BufferCounter)=AB(1,sliceCounter+1,pairIndex);
+	BufferCounter++;
+      }
+    }
+    
   }
   
   Communicator.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
@@ -319,6 +343,18 @@ void MirroredSymmetricMatrixClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMa
 /*               MirroredAntiSymmetricMatrixClass               */            
 /****************************************************************/
 
+
+template <class T>
+void MirroredAntiSymmetricMatrixClass<T>::Print()
+{
+  for (int counter=0;counter<AB.extent(1);counter++){
+    for (int counter2=0;counter2<AB.extent(2);counter2++){
+      cout<<AB(0,counter,counter2)<<" ";
+    }
+    cout<<endl;
+  }
+}
+
 template <class T>
 void MirroredAntiSymmetricMatrixClass<T>::ShiftData(int slicesToShift, 
 						    CommunicatorClass 
@@ -363,19 +399,31 @@ void MirroredAntiSymmetricMatrixClass<T>::ShiftData(int slicesToShift,
   int bufferSize=abs(slicesToShift)*NumIndices;
   Array<T,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
   int startTimeSlice;
-  if (slicesToShift>0)
-    startTimeSlice=NumSlices-slicesToShift;
-  else 
-    startTimeSlice=0;
-
   int BufferCounter=0;
-  for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-    for (int sliceCounter=startTimeSlice;
-	 sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-      sendBuffer(BufferCounter)=AB(1,sliceCounter,pairIndex);
-      BufferCounter++;
+  if (slicesToShift>0){
+    startTimeSlice=NumSlices-slicesToShift;
+    for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
+      for (int sliceCounter=startTimeSlice;
+	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
+	sendBuffer(BufferCounter)=AB(1,sliceCounter-1,pairIndex);
+	BufferCounter++;
+      }
     }
+    
   }
+  else {
+    startTimeSlice=0;
+    for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
+      for (int sliceCounter=startTimeSlice;
+	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
+	sendBuffer(BufferCounter)=AB(1,sliceCounter+1,pairIndex);
+	BufferCounter++;
+      }
+    }
+    
+  }
+
+
   
   Communicator.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
   

@@ -97,7 +97,7 @@ void PairCorrelationClass::WriteBlock()
 	double vol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
 	gofrArray(0,i) = (double) Histogram(i) / (vol*TotalCounts);
     }
-    IOSection.WriteVar("gofr",gofrArray);
+    //IOSection.WriteVar("gofr",gofrArray);
     IOVar = IOSection.GetVarPtr("gofr");
   }
   else {
@@ -109,7 +109,7 @@ void PairCorrelationClass::WriteBlock()
 	double vol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
 	gofrArray(i) = (double) Histogram(i) / (vol*TotalCounts);
     }
-    IOVar->Append(gofrArray);
+    //IOVar->Append(gofrArray);
   }
   
 

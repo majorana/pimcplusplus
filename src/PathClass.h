@@ -114,8 +114,9 @@ public:
     ///until we run out of extra slices.
     ///The last slice on processor i is the first slices on processor i+1
     MyNumSlices=TotalNumSlices/numProcs+1+(myProc<(TotalNumSlices % numProcs));
+    cerr<<"Numprocs is "<<numProcs<<endl;
+    cerr<<"mynumslices: "<<MyNumSlices<<endl;
     
-
 
     int numParticles = 0;
     /// Set the particle range for the new species

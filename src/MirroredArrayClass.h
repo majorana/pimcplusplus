@@ -49,9 +49,6 @@ public:
     return AB(Write1,x);
   }
 
-  ///This shifts slicesToShift time slices to the next (if positive)
-  ///or previous (if negative) processor 
-  void ShiftData(int slicesToShift,CommunicatorClass &communicator); 
 
   
   /// Write to the mirrored array in the way specified by the present
