@@ -228,7 +228,10 @@ void VisualClass::OnExport()
 
 void VisualClass::ResetView()
 {
-  cerr << "Reset View.\n";
+  PathVis.View.Reset();
+  double maxDim = max(max(Box[0], Box[1]), Box[2]);
+  PathVis.View.SetDistance (1.2*maxDim);
+  PathVis.Invalidate();
 }
 
 void VisualClass::on_delete_event()
@@ -272,39 +275,8 @@ int main(int argc, char** argv)
             << major << "." << minor << std::endl;
 
   // Instantiate and run the application.
-
   VisualClass visual;
-
   visual.Read (argv[1]);
-
-  Array<Vec3, 1> path(5);
-  path(0) = Vec3(-0.5,  0.5, -0.5);
-  path(1) = Vec3( 0.5,  0.5, -0.5);
-  path(2) = Vec3( 0.5, -0.5, -0.5);
-  path(3) = Vec3(-0.5, -0.5, -0.5);
-  path(4) = Vec3(-0.5,  0.5, -0.5);
-
-  PathObject *p1 = new PathObject();
-  p1->SetColor (0.0, 0.0, 1.0);
-  p1->TubesSet (path);
-
-  visual.PathVis.Objects.push_back(p1);
-
-  // visual.PathVis.AddPath (path);
-  for (int i=0; i<5; i++)
-    path(i) += Vec3(0.0, 0.0, 1.0);
-  //  visual.PathVis.AddPath (path);
-  
-  PathObject *p2 = new PathObject();
-  p2->SetColor (1.0, 0.0, 0.0);
-  p2->TubesSet (path);
-  visual.PathVis.Objects.push_back(p2);
-  
-  BoxObject *box = new BoxObject;
-  box->Set (2.0, 1.0, 0.5);
-  visual.PathVis.Objects.push_back(box);
-
-
   kit.run(visual);
 
   return 0;

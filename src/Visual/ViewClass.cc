@@ -117,3 +117,14 @@ void ViewClass::SetDistance (double dist)
 {
   Distance = dist;
 }
+
+
+void ViewClass::Reset()
+{
+  for (int i=0; i<4; i++)
+    for (int j=0; j<4; j++)
+      RotMat[i][j] = (i==j) ? 1.0 : 0.0;
+  Quaternion[0] = 0.0;  Quaternion[1] = 0.0;
+  Quaternion[2] = 0.0;  Quaternion[3] = 1.0;
+  Scale = 1.0;
+}

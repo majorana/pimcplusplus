@@ -36,6 +36,7 @@ public:
   void SetDistance (double dist);
 
   void GLtransform();
+  void Reset();
 
   ViewClass (PathVisClass &pathVis);
 };
