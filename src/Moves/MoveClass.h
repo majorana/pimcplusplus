@@ -9,5 +9,6 @@
 #include "RandomPermMove.h"
 #include "MultiStage.h"
 #include "BisectionBlock.h"
+#include "RefSliceMove.h"
 
 #endif

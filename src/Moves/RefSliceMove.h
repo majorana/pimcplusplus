@@ -16,6 +16,9 @@ private:
   /// Number of bisection stage levels
   int NumLevels;
 
+  /// Holds the current master processor
+  int MasterProc;
+
   /// The species this particular instance is working on
   int SpeciesNum;
 

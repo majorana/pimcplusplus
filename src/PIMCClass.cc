@@ -153,6 +153,12 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)->Read(in); 
       OutFile.CloseSection(); //Whatever Move section we openned above
     }
+    else if (MoveType=="RefSlice"){
+      OutFile.NewSection("RefSlice");
+      Moves(counter)=new RefSliceMoveClass(PathData,OutFile);
+      Moves(counter)->Read(in); 
+      OutFile.CloseSection(); //Whatever Move section we openned above
+    }
     else {
       cerr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();

@@ -684,8 +684,9 @@ void PathClass::BroadcastRefPath()
     for (int ptcl=0; ptcl<NumParticles(); ptcl++)
       buffer(ptcl) = Path(RefSlice-myStart, ptcl);
   }
+
   // Do broadcast
-  Communicator.BroadCast(procWithRefSlice, buffer);
+  Communicator.Broadcast(procWithRefSlice, buffer);
 
   // Now, all processors have reference slice.  Note that the 
   // labeling of particles may not be right since with haven't

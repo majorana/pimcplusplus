@@ -47,9 +47,10 @@ void RefSliceMoveClass::MakeMoveMaster()
   // Choose time slices
   int localRef = Path.GetRefSlice() - firstSlice;
   int bisectSlices = (1 << NumLevels);
-  int minSlice = max(0, localRef - (bisectSlices>>1));
-  int maxSlice = min (Path.NumTimeSlices()-1, localRef + (bisectSlices>>1));
-  int slice1 = Path.Random.LocalInt(minSlice-maxSlice) + minSlice;
+  int minStart = max(0, localRef - (bisectSlices>>1));
+  int maxStart = 
+    min (Path.NumTimeSlices()-1-bisectSlices, localRef + (bisectSlices>>1));
+  int slice1 = Path.Random.LocalInt(minStart-maxStart) + minStart;
   int slice2 = slice1 + bisectSlices;
 
   // Go through local stages
@@ -57,13 +58,13 @@ void RefSliceMoveClass::MakeMoveMaster()
   list<StageClass*>::iterator stageIter=Stages.begin();
   double prevActionChange=0.0;
   while (stageIter!=Stages.end() && toAccept){
-    toAccept = (*stageIter)->Attempt(Slice1,Slice2,
+    toAccept = (*stageIter)->Attempt(slice1,slice2,
 				     ActiveParticles,prevActionChange);
     stageIter++;
   }
     // Broadcast acceptance or rejection 
   int accept = toAccept ? 1 : 0;
-  PathData.Communicator.BroadCast (myProc, accept);
+  PathData.Communicator.Broadcast (myProc, accept);
 
   // Now, if we accept local stages, move on to global nodal
   // decision. 
@@ -75,6 +76,7 @@ void RefSliceMoveClass::MakeMoveMaster()
     double localNodeAction = 
       PathData.Actions.NodalActions(SpeciesNum)->Action
       (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
+    double globalNodeAction = PathData.Communicator.AllSum(localNodeAction);
   }
   // Otherwise, reject the whole move
   else 
@@ -86,17 +88,38 @@ void RefSliceMoveClass::MakeMoveMaster()
 /// This version is for processors that do no own the reference slice 
 void RefSliceMoveClass::MakeMoveSlave()
 {
-  /// Choose time slices for local bisections
+  PathClass &Path = PathData.Path;
+  int myProc = PathData.Communicator.MyProc();
+  int master = Path.SliceOwner (Path.GetRefSlice());
 
-  /// Choose local permuation
-  
-  /// Bisect locally
+//   /// Choose time slices for local bisections
+//   /// We don't have the reference slice, so we can be cavalier
+//   int firstSlice, lastSlice;
+//   Path.SliceRange (myProc, firstSlice, lastSlice);
+//   // Choose time slices
+//   int bisectSlices = (1 << NumLevels);
+//   int maxStart = Path.NumTimeSlices()-bisectSlices;
+//   int slice1 = Path.Random.LocalInt(maxSlice);
+//   int slice2 = slice1 + bisectSlices;
 
+  int accept;
   /// Receive broadcast from Master.
+  PathData.Communicator.Broadcast (master, accept);
+  if (accept) {
+    // Receive reference slice broadcast from master
+    Path.BroadcastRefPath();
+    
+    // Calculate local nodal action
+    double localNodeAction = 
+      PathData.Actions.NodalActions(SpeciesNum)->Action
+      (0, Path.NumTimeSlices()-1, ActiveParticles, 0);
+    double globalNodeAction = PathData.Communicator.AllSum(localNodeAction);
+  }
+  else
+    Reject();
+  
 
-  /// 
-
-  /// If master has accepted, discard my local bisection
+/// If master has accepted, discard my local bisection
 
 
 }
@@ -104,7 +127,10 @@ void RefSliceMoveClass::MakeMoveSlave()
 
 void RefSliceMoveClass::MakeMove()
 {
-  
-
-
+  PathClass &Path = PathData.Path;
+  MasterProc = Path.SliceOwner (Path.GetRefSlice());
+  if (PathData.Communicator.MyProc() == MasterProc)
+    MakeMoveMaster();
+  else
+    MakeMoveSlave();
 }

@@ -19,6 +19,7 @@ PIMCobjs =                            \
   Moves/NoPermuteClass.o              \
   Moves/PermuteStageClass.o           \
   Moves/BisectionBlock.o              \
+  Moves/RefSliceMove.o                \
   Moves/BisectionStageClass.o         \
   PIMCClass.o                         \
   Moves/MetaMoves.o 	              \
@@ -93,6 +94,7 @@ TestPermobjs =                        \
   Moves/BisectionClass.o              \
   Moves/PermuteStageClass.o           \
   Moves/BisectionBlock.o              \
+  Moves/RefSliceMove.o                \
   Moves/NoPermuteClass.o              \
   Moves/BlockMove.o                   \
   Moves/MetaMoves.o                   \
