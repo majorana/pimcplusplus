@@ -68,11 +68,11 @@ void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
   for(int i=0;i<Length-1;i++) {
     path.SetPos(slice, CycleRep(i)+firstPtcl, 
 		path(slice,CycleRep(i+1)+firstPtcl));
-    path.Permutation.Set(CycleRep(i)+firstPtcl,
-			 path.Permutation(CycleRep(i+1)+firstPtcl));
+    path.Permutation(CycleRep(i)+firstPtcl) = 
+      path.Permutation(CycleRep(i+1)+firstPtcl);
   }
   path.SetPos(slice,CycleRep(Length-1)+firstPtcl,tempPos);
-  path.Permutation.Set(CycleRep(Length-1)+firstPtcl,tempPtcl);
+  path.Permutation(CycleRep(Length-1)+firstPtcl) = tempPtcl;
 }
 
 

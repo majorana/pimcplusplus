@@ -1,7 +1,7 @@
 #ifndef ACTION_CLASS
 #define ACTION_CLASS
 
-#include "PathClass.h"
+#include "NewPathClass.h"
 #include "Common/PairAction/PAFit.h"
 #include "Common/Ewald/Ewald.h"
 

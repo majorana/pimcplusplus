@@ -11,7 +11,7 @@
 
 
 /// These are the different mode types for the MirroredArrayClass
-typedef enum {OLDMODE, NEWMODE, BOTHMODE} ModeType;
+//typedef enum {OLDMODE, NEWMODE, BOTHMODE} ModeType;
 
 ///ParticleID=(species,particle number)
 
@@ -25,7 +25,7 @@ extern int Write2;
 
 
 /// Changes the mode the entire code is running in.
-void SetMode(ModeType);
+//void SetMode(ModeType);
 
 
 

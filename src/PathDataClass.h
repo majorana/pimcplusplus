@@ -4,7 +4,7 @@
 #include "Common.h"
 #include "SpeciesClass.h"
 #include "ActionClass.h"
-#include "PathClass.h"
+#include "NewPathClass.h"
 #include "CommunicatorClass.h"
 
 #include "Common/Random/Random.h"
@@ -80,7 +80,8 @@ public:
   /// (species, particle, timeSlice) to r and updates the time stamp
   /// of that piece of information.
   inline void SetPos(int timeSlice, int particle, const dVec& r){
-    Path.SetPos(timeSlice,particle,r);
+    //    Path.SetPos(timeSlice,particle,r);
+    Path(timeSlice,particle) = r;
   }
 
   inline PathDataClass() : 

@@ -31,7 +31,7 @@ PIMCobjs =                           \
   ActionClass.o                      \
   PathDataClass.o                    \
   CommunicatorClass.o                \
-  PathClass.o                        \
+  NewPathClass.o                     \
   MirroredArrayClass.o               \
   WrapClass.o			     \
   Common/MPI/Communication.o	     \
@@ -54,7 +54,8 @@ PIMCobjs =                           \
   Common/PH/CoulombPot.o             \
   Common/PH/ScreenedPot.o            \
   Common/PH/SplinePot.o              \
-  Common/PH/HeAzizPot.o    
+  Common/PH/HeAzizPot.o              \
+  MirroredClass.o
 
 TestPermobjs =                       \
   TestPermutation.o                  \
@@ -77,7 +78,7 @@ TestPermobjs =                       \
   ActionClass.o                      \
   PathDataClass.o                    \
   CommunicatorClass.o                \
-  PathClass.o                        \
+  NewPathClass.o                     \
   MirroredArrayClass.o               \
   WrapClass.o			     \
   Common/MPI/Communication.o	     \
@@ -100,7 +101,8 @@ TestPermobjs =                       \
   Common/PH/CoulombPot.o             \
   Common/PH/ScreenedPot.o            \
   Common/PH/SplinePot.o              \
-  Common/PH/HeAzizPot.o    
+  Common/PH/HeAzizPot.o              \
+  MirroredClass.o  
 
 
 
@@ -146,7 +148,7 @@ clean:	Common_clean
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc ObservableEnergy.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc 
+SOURCES = ObservableClass.cc ObservableEnergy.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc MirroredClass.cc
 
 newmake: Common_newmake Tests_newmake
 	make -f template.make Makefile FRC=force_rebuild

@@ -41,31 +41,31 @@ void MirroredArrayClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMatrix,
 				     int oldJoin, int newJoin)
 {
   if (newJoin>oldJoin){
-    for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
+    for (int slice=oldJoin+1;slice<=newJoin;slice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	AB(0,timeSlice,ptcl)=AB(1,timeSlice,PermMatrix(ptcl));
+	AB(0,slice,ptcl)=AB(1,slice,PermMatrix(ptcl));
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
-    for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){ 
+    for (int slice=oldJoin+1;slice<=newJoin;slice++){ 
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	AB(1,timeSlice,ptcl)=AB(0,timeSlice,ptcl);
+	AB(1,slice,ptcl)=AB(0,slice,ptcl);
       }
     }
   }
   else if (oldJoin>newJoin){
     //  else if (oldJoin>=newJoin){//CHANGED!
-    for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
+    for (int slice=newJoin+1;slice<=oldJoin;slice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	AB(0,timeSlice,PermMatrix(ptcl))=AB(1,timeSlice,ptcl);
+	AB(0,slice,PermMatrix(ptcl))=AB(1,slice,ptcl);
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
-    for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
+    for (int slice=newJoin+1;slice<=oldJoin;slice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	AB(1,timeSlice,ptcl)=AB(0,timeSlice,ptcl);
+	AB(1,slice,ptcl)=AB(0,slice,ptcl);
       }
     }
   }
@@ -104,20 +104,20 @@ void MirroredArrayClass<T>::ShiftData(int slicesToShift, PIMCCommunicatorClass &
   ///First shifts the data in the A copy left 
   ///or right by the appropriate amount   
   if (slicesToShift>0){
-    for (int ptclCounter=0;ptclCounter<NumPtcls;ptclCounter++){
-      for (int sliceCounter=NumSlices-1;
-	   sliceCounter>=slicesToShift;sliceCounter--){
-	AB(0,sliceCounter,ptclCounter)=
-	  AB(0,sliceCounter-slicesToShift,ptclCounter);
+    for (int ptcl=0;ptcl<NumPtcls;ptcl++){
+      for (int slice=NumSlices-1;
+	   slice>=slicesToShift;slice--){
+	AB(0,slice,ptcl)=
+	  AB(0,slice-slicesToShift,ptcl);
       }
     }
   }
   else{
-    for (int ptclCounter=0;ptclCounter<NumPtcls;ptclCounter++){
-      for (int sliceCounter=0;
-	   sliceCounter<NumSlices+slicesToShift;sliceCounter++){
-	AB(0,sliceCounter,ptclCounter)=
-	  AB(0,sliceCounter-slicesToShift,ptclCounter);
+    for (int ptcl=0;ptcl<NumPtcls;ptcl++){
+      for (int slice=0;
+	   slice<NumSlices+slicesToShift;slice++){
+	AB(0,slice,ptcl)=
+	  AB(0,slice-slicesToShift,ptcl);
       }
     }
   }
@@ -125,29 +125,29 @@ void MirroredArrayClass<T>::ShiftData(int slicesToShift, PIMCCommunicatorClass &
   int bufferSize=abs(slicesToShift)*NumPtcls;
   Array<T,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
   int startTimeSlice;
-  int BufferCounter=0;
+  int buffIndex=0;
   if (slicesToShift>0){
     startTimeSlice=NumSlices-slicesToShift;
 
-    for (int ptclCounter=0;ptclCounter<NumPtcls;ptclCounter++){
-      for (int sliceCounter=startTimeSlice;
-	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
+    for (int ptcl=0;ptcl<NumPtcls;ptcl++){
+      for (int slice=startTimeSlice;
+	   slice<startTimeSlice+abs(slicesToShift);slice++){
 	///If shifting forward, don't send the last time slice (so always)
-	///send sliceCounter-1
-	sendBuffer(BufferCounter)=AB(1,sliceCounter-1,ptclCounter);
-	BufferCounter++;
+	///send slice-1
+	sendBuffer(buffIndex)=AB(1,slice-1,ptcl);
+	buffIndex++;
       }
     }
   }
   else {
     startTimeSlice=0;
-    for (int ptclCounter=0;ptclCounter<NumPtcls;ptclCounter++){
-      for (int sliceCounter=startTimeSlice;
-	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
+    for (int ptcl=0;ptcl<NumPtcls;ptcl++){
+      for (int slice=startTimeSlice;
+	   slice<startTimeSlice+abs(slicesToShift);slice++){
 	///If shifting backward, don't send the first time slice (so always)
-	///send sliceCounter+1
-	sendBuffer(BufferCounter)=AB(1,sliceCounter+1,ptclCounter);
-	BufferCounter++;
+	///send slice+1
+	sendBuffer(buffIndex)=AB(1,slice+1,ptcl);
+	buffIndex++;
       }
     }
     
@@ -161,19 +161,19 @@ void MirroredArrayClass<T>::ShiftData(int slicesToShift, PIMCCommunicatorClass &
   else 
     startTimeSlice=NumSlices+slicesToShift;
 
-  BufferCounter=0;
-  for (int ptclCounter=0;ptclCounter<NumPtcls;ptclCounter++){
-    for (int sliceCounter=startTimeSlice;
-	 sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-      AB(0,sliceCounter,ptclCounter)=receiveBuffer(BufferCounter);
-      BufferCounter++;
+  buffIndex=0;
+  for (int ptcl=0;ptcl<NumPtcls;ptcl++){
+    for (int slice=startTimeSlice;
+	 slice<startTimeSlice+abs(slicesToShift);slice++){
+      AB(0,slice,ptcl)=receiveBuffer(buffIndex);
+      buffIndex++;
     }
   }
   
   // Now copy A into B, since A has all the good, shifted data now.
-  for (int ptclCounter=0;ptclCounter<NumPtcls;ptclCounter++)
-    for (int sliceCounter=0; sliceCounter<NumSlices; sliceCounter++)
-      AB(1,sliceCounter,ptclCounter) = AB(0,sliceCounter,ptclCounter);
+  for (int ptcl=0;ptcl<NumPtcls;ptcl++)
+    for (int slice=0; slice<NumSlices; slice++)
+      AB(1,slice,ptcl) = AB(0,slice,ptcl);
 
   // And we're done!
 
@@ -218,34 +218,34 @@ void MirroredSymmetricMatrixClass<T>::ShiftData(int slicesToShift, PIMCCommunica
   ///or right by the appropriate amount   
   if (slicesToShift>0){
     for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-      for (int sliceCounter=NumSlices-1;
-	   sliceCounter>=slicesToShift;sliceCounter--){
-	AB(0,sliceCounter,pairIndex)=
-	  AB(0,sliceCounter-slicesToShift,pairIndex);
+      for (int slice=NumSlices-1;
+	   slice>=slicesToShift;slice--){
+	AB(0,slice,pairIndex)=
+	  AB(0,slice-slicesToShift,pairIndex);
       }
     }
   }
   else{
     for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-      for (int sliceCounter=0;
-	   sliceCounter<NumSlices+slicesToShift;sliceCounter++){
-	AB(0,sliceCounter,pairIndex)=
-	  AB(0,sliceCounter-slicesToShift,pairIndex);
+      for (int slice=0;
+	   slice<NumSlices+slicesToShift;slice++){
+	AB(0,slice,pairIndex)=
+	  AB(0,slice-slicesToShift,pairIndex);
       }
     }
   }
   
   int bufferSize=abs(slicesToShift)*NumIndices;
   Array<T,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
-  int BufferCounter=0;
+  int buffIndex=0;
   int startTimeSlice;
   if (slicesToShift>0){
     startTimeSlice=NumSlices-slicesToShift;
     for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-      for (int sliceCounter=startTimeSlice;
-	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-	sendBuffer(BufferCounter)=AB(1,sliceCounter-1,pairIndex);
-	BufferCounter++;
+      for (int slice=startTimeSlice;
+	   slice<startTimeSlice+abs(slicesToShift);slice++){
+	sendBuffer(buffIndex)=AB(1,slice-1,pairIndex);
+	buffIndex++;
       }
     }
 
@@ -253,10 +253,10 @@ void MirroredSymmetricMatrixClass<T>::ShiftData(int slicesToShift, PIMCCommunica
   else {
     startTimeSlice=0;
     for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-      for (int sliceCounter=startTimeSlice;
-	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-	sendBuffer(BufferCounter)=AB(1,sliceCounter+1,pairIndex);
-	BufferCounter++;
+      for (int slice=startTimeSlice;
+	   slice<startTimeSlice+abs(slicesToShift);slice++){
+	sendBuffer(buffIndex)=AB(1,slice+1,pairIndex);
+	buffIndex++;
       }
     }
     
@@ -269,19 +269,19 @@ void MirroredSymmetricMatrixClass<T>::ShiftData(int slicesToShift, PIMCCommunica
   else 
     startTimeSlice=NumSlices+slicesToShift;
 
-  BufferCounter=0;
+  buffIndex=0;
   for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-    for (int sliceCounter=startTimeSlice;
-	 sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-      AB(0,sliceCounter,pairIndex)=receiveBuffer(BufferCounter);
-      BufferCounter++;
+    for (int slice=startTimeSlice;
+	 slice<startTimeSlice+abs(slicesToShift);slice++){
+      AB(0,slice,pairIndex)=receiveBuffer(buffIndex);
+      buffIndex++;
     }
   }
   
   // Now copy A into B, since A has all the good, shifted data now.
   for (int pairIndex=0;pairIndex<NumIndices;pairIndex++)
-    for (int sliceCounter=0; sliceCounter<NumSlices; sliceCounter++)
-      AB(1,sliceCounter,pairIndex) = AB(0,sliceCounter,pairIndex);
+    for (int slice=0; slice<NumSlices; slice++)
+      AB(1,slice,pairIndex) = AB(0,slice,pairIndex);
 
   // And we're done!
 
@@ -307,30 +307,30 @@ void MirroredSymmetricMatrixClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMa
     }
   }
   if (newJoin>oldJoin){
-    for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
+    for (int slice=oldJoin+1;slice<=newJoin;slice++){
       for (int index=0;index<AB.extent(2);index++){
-	AB(0,timeSlice,index)=AB(1,timeSlice,PermPairIndex(index));
+	AB(0,slice,index)=AB(1,slice,PermPairIndex(index));
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
-    for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
+    for (int slice=oldJoin+1;slice<=newJoin;slice++){
       for (int index=0;index<AB.extent(2);index++){
-	AB(1,timeSlice,index)=AB(0,timeSlice,index);
+	AB(1,slice,index)=AB(0,slice,index);
       }
     }
   }
   else if (oldJoin>newJoin){ //CHANGED!!
-    for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
+    for (int slice=newJoin+1;slice<=oldJoin;slice++){
       for (int index=0;index<AB.extent(2);index++){
-	AB(0,timeSlice,PermPairIndex(index))=AB(1,timeSlice,index);
+	AB(0,slice,PermPairIndex(index))=AB(1,slice,index);
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
-    for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
+    for (int slice=newJoin+1;slice<=oldJoin;slice++){
       for (int index=0;index<NumParticles();index++){
-	AB(1,timeSlice,index)=AB(0,timeSlice,index);
+	AB(1,slice,index)=AB(0,slice,index);
       }
     }
   }
@@ -380,19 +380,19 @@ void MirroredAntiSymmetricMatrixClass<T>::ShiftData(int slicesToShift,
   ///or right by the appropriate amount   
   if (slicesToShift>0){
     for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-      for (int sliceCounter=NumSlices-1;
-	   sliceCounter>=slicesToShift;sliceCounter--){
-	AB(0,sliceCounter,pairIndex)=
-	  AB(0,sliceCounter-slicesToShift,pairIndex);
+      for (int slice=NumSlices-1;
+	   slice>=slicesToShift;slice--){
+	AB(0,slice,pairIndex)=
+	  AB(0,slice-slicesToShift,pairIndex);
       }
     }
   }
   else{
     for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-      for (int sliceCounter=0;
-	   sliceCounter<NumSlices+slicesToShift;sliceCounter++){
-	AB(0,sliceCounter,pairIndex)=
-	  AB(0,sliceCounter-slicesToShift,pairIndex);
+      for (int slice=0;
+	   slice<NumSlices+slicesToShift;slice++){
+	AB(0,slice,pairIndex)=
+	  AB(0,slice-slicesToShift,pairIndex);
       }
     }
   }
@@ -400,14 +400,14 @@ void MirroredAntiSymmetricMatrixClass<T>::ShiftData(int slicesToShift,
   int bufferSize=abs(slicesToShift)*NumIndices;
   Array<T,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
   int startTimeSlice;
-  int BufferCounter=0;
+  int buffIndex=0;
   if (slicesToShift>0){
     startTimeSlice=NumSlices-slicesToShift;
     for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-      for (int sliceCounter=startTimeSlice;
-	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-	sendBuffer(BufferCounter)=AB(1,sliceCounter-1,pairIndex);
-	BufferCounter++;
+      for (int slice=startTimeSlice;
+	   slice<startTimeSlice+abs(slicesToShift);slice++){
+	sendBuffer(buffIndex)=AB(1,slice-1,pairIndex);
+	buffIndex++;
       }
     }
     
@@ -415,10 +415,10 @@ void MirroredAntiSymmetricMatrixClass<T>::ShiftData(int slicesToShift,
   else {
     startTimeSlice=0;
     for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-      for (int sliceCounter=startTimeSlice;
-	   sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-	sendBuffer(BufferCounter)=AB(1,sliceCounter+1,pairIndex);
-	BufferCounter++;
+      for (int slice=startTimeSlice;
+	   slice<startTimeSlice+abs(slicesToShift);slice++){
+	sendBuffer(buffIndex)=AB(1,slice+1,pairIndex);
+	buffIndex++;
       }
     }
     
@@ -433,19 +433,19 @@ void MirroredAntiSymmetricMatrixClass<T>::ShiftData(int slicesToShift,
   else 
     startTimeSlice=NumSlices+slicesToShift;
 
-  BufferCounter=0;
+  buffIndex=0;
   for (int pairIndex=0;pairIndex<NumIndices;pairIndex++){
-    for (int sliceCounter=startTimeSlice;
-	 sliceCounter<startTimeSlice+abs(slicesToShift);sliceCounter++){
-      AB(0,sliceCounter,pairIndex)=receiveBuffer(BufferCounter);
-      BufferCounter++;
+    for (int slice=startTimeSlice;
+	 slice<startTimeSlice+abs(slicesToShift);slice++){
+      AB(0,slice,pairIndex)=receiveBuffer(buffIndex);
+      buffIndex++;
     }
   }
   
   // Now copy A into B, since A has all the good, shifted data now.
   for (int pairIndex=0;pairIndex<NumIndices;pairIndex++)
-    for (int sliceCounter=0; sliceCounter<NumSlices; sliceCounter++)
-      AB(1,sliceCounter,pairIndex) = AB(0,sliceCounter,pairIndex);
+    for (int slice=0; slice<NumSlices; slice++)
+      AB(1,slice,pairIndex) = AB(0,slice,pairIndex);
 
   // And we're done!
 
@@ -474,36 +474,36 @@ void MirroredAntiSymmetricMatrixClass<T>::MoveJoin
     }
   }
   if (newJoin>oldJoin){
-    for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
+    for (int slice=oldJoin+1;slice<=newJoin;slice++){
       for (int index=0;index<AB.extent(2);index++){
 	if (FlipSign(index))
-	  AB(0,timeSlice,index) = -AB(1,timeSlice,PermPairIndex(index));
+	  AB(0,slice,index) = -AB(1,slice,PermPairIndex(index));
 	else
-	  AB(0,timeSlice,index) =  AB(1,timeSlice,PermPairIndex(index));
+	  AB(0,slice,index) =  AB(1,slice,PermPairIndex(index));
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
-    for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
+    for (int slice=oldJoin+1;slice<=newJoin;slice++){
       for (int index=0;index<AB.extent(2);index++){
-	AB(1,timeSlice,index)=AB(0,timeSlice,index);
+	AB(1,slice,index)=AB(0,slice,index);
       }
     }
   }
   else if (oldJoin>newJoin){ //CHANGED!
-    for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
+    for (int slice=newJoin+1;slice<=oldJoin;slice++){
       for (int index=0;index<AB.extent(2);index++){
 	if (FlipSign(index))
-	  AB(0,timeSlice,PermPairIndex(index))=-AB(1,timeSlice,index);
+	  AB(0,slice,PermPairIndex(index))=-AB(1,slice,index);
 	else
-	  AB(0,timeSlice,PermPairIndex(index))=AB(1,timeSlice,index);
+	  AB(0,slice,PermPairIndex(index))=AB(1,slice,index);
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
-    for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
+    for (int slice=newJoin+1;slice<=oldJoin;slice++){
       for (int index=0;index<NumParticles();index++){
-	AB(1,timeSlice,index)=AB(0,timeSlice,index);
+	AB(1,slice,index)=AB(0,slice,index);
       }
     }
   }
