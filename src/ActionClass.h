@@ -31,6 +31,7 @@ public:
   inline double calcUrrptau(double s,double q,double z,int level);
   int n;
   double tau;
+  void ReadDavidSquarerFile(string DMFile);
 
   
   
