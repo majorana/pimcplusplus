@@ -3,7 +3,7 @@ import tables
 from visual import *
 import stats
 #import Numeric
-h5file = tables.openFile("../Na-_tau0.25_beta150.h5")
+h5file = tables.openFile("../free_tau0.25_beta25.h5")
 data = h5file.root.Paths_2.Path.read()
 names=h5file.root.Paths_2.SpeciesNames.read()
 
