@@ -1,7 +1,7 @@
 #include "PAFit.h"
 
-const double URho0Min = 5.0e-5;
-const double dURho0Min = 1.0e-4;
+const double URho0Min = 1.0e-3;
+const double dURho0Min = 1.0e-3;
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
@@ -54,10 +54,12 @@ public:
     rpp = r + x*(rp-r);
     double dist = sqrt(rpp[0]*rpp[0]+rpp[1]*rpp[1]);
     //    return (PH->V(dist));
-    if (IsdU)
-      return (dUdiag(dist));
-    else
-      return (Udiag(dist));
+    if ((dist >= rho.grid->Start) && (dist <= rho.grid->End)) 
+      return (IsdU ? dUdiag(dist) : Udiag(dist));
+    else {
+      double V = rho.Pot->V(dist);
+      return (IsdU ? V : rho.Beta()*V);
+    }
   }
   void Set (double rmag, double rpmag, double costheta)
   {
@@ -69,9 +71,10 @@ public:
   SCintegrand(Rho &rho_) : rho(rho_)
   {
     int N=300;
+    double qmin = rho.grid->Start;
     double qmax = rho.grid->End;
     Array<double,1> Ud(N), dUd(N);
-    qgrid.Init(1.0e-6, qmax, N);
+    qgrid.Init(qmin, qmax, N);
     for (int i=0; i<N; i++) {
       double q = qgrid(i);
       double U, dU;
@@ -217,12 +220,13 @@ void PAtricubicFitClass::AddFit (Rho &rho)
   int numt = tgrid->NumPoints;
   Array<double,3> Umat(numq,numy,numt), dUmat(numq,numy,numt);
   Array<double,1> Ul, dUl;
-  USemiclassical Usemi(rho, beta);
+  //USemiclassical Usemi(rho, beta);
 
   for (int qi=0; qi<numq; qi++) {
     cerr << "qi = " << qi << " of " << numq << endl;
     double q = (*qgrid)(qi);
     //    cerr << "qi = " << qi << endl;
+    double U_max, dU_max;
     for (int yi=0; yi<numy; yi++) {
       // cerr << "  yi = " << yi << endl;
       double y = (*ygrid)(yi);
@@ -236,13 +240,15 @@ void PAtricubicFitClass::AddFit (Rho &rho)
       
       rho.U_lArray(r,rp,Ul,dUl);
 
-      double costheta_max = (r*r + rp*rp - Usmax*Usmax)/(2.0*r*rp);
-      costheta_max = min(costheta_max, 1.0);
-      costheta_max = max(costheta_max, -1.0);
-      double U_max, dU_max;
-      rho.UdU(r,rp,costheta_max, Ul, dUl, U_max, dU_max);
-      double Usemi_max = Usemi.U(r,rp,costheta_max);
-      double dUsemi_max = Usemi.dU(r,rp,costheta_max);
+      if (z < Usmax) {
+	double costheta_max = (r*r + rp*rp - Usmax*Usmax)/(2.0*r*rp);
+	costheta_max = min(costheta_max, 1.0);
+	costheta_max = max(costheta_max, -1.0);
+
+	rho.UdU(r,rp,costheta_max, Ul, dUl, U_max, dU_max);
+      }
+      //double Usemi_max = Usemi.U(r,rp,costheta_max);
+      //double dUsemi_max = Usemi.dU(r,rp,costheta_max);
 
       for (int ti=0; ti<numt; ti++) {
 	double t = (*tgrid)(ti);
@@ -257,18 +263,24 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	double U, dU;
 	rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
 	if (s>Usmax /*&& q>2.4*/) {
-	  double Us = Usemi.U(r,rp,costheta);
+	  //double Us = Usemi.U(r,rp,costheta);
 	  // Make the result continuous across the transition
-	  U = Us - Usemi_max + U_max;
+	  //U = Us - Usemi_max + U_max;
+	  U = U_max;
+	  // HACK
+	  U = 0.0;
 	}
 	if (s>dUsmax /*&& q>2.4*/) {
-	  double dUs = Usemi.dU(r,rp,costheta);
-	  dU = dUs - dUsemi_max + dU_max;
+	  //double dUs = Usemi.dU(r,rp,costheta);
+	  //dU = dUs - dUsemi_max + dU_max;
+	  dU = dU_max;
+	  // HACK
+	  dU = 0.0;;
 	}
 	  
 
 	if (isnan(U)) {
-	  U = Usemi.U(r,rp,costheta);
+	  //U = Usemi.U(r,rp,costheta);
 	  fprintf (stderr, "NAN in U at (qi,yi,ti) = (%d,%d,%d)\n",
 		   qi, yi, ti); 
 	  fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
@@ -277,7 +289,7 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 		   exp(-s*s/(4.0*lambda*beta)));
 	}
 	if (isnan(dU)) {
-	  dU = Usemi.dU(r,rp,costheta);
+	  //dU = Usemi.dU(r,rp,costheta);
 	  fprintf (stderr, "NAN in dU at (qi,yi,ti) = (%d,%d,%d)\n",
 		   qi, yi, ti);
 	  fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
