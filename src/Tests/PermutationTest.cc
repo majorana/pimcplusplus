@@ -5,10 +5,8 @@
 #include "../ActionClass.h"
 #include "../PathDataClass.h"
 #include "../BisectionMoveClass.h"
-#include "../MirroredArrayClass.h"
-#include "../ObservableClass.h"
-#include "../DistanceTablePBCClass.h"
-#include "../DistanceTableFreeClass.h"
+//#include "../MirroredArrayClass.h"
+#include "../Observables/ObservableClass.h"
 #include "../Common/IO/InputOutput.h"
 
 

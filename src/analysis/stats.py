@@ -1,6 +1,8 @@
 from numarray import *
 def c(i,x,mean,var):
     N=len(x)
+    if var==0:#if the variance is 0 return an effectively infinity corr
+        return 1e100
     corr=1.0/var*1.0/(N-i)*sum((x[0:N-i]-mean)*(x[i:N]-mean))
     return corr
                          

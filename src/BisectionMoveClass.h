@@ -27,7 +27,9 @@ class BisectionMoveClass : public ParticleMoveClass
   BisectionMoveClass(PathDataClass &myPathData ) : ParticleMoveClass(myPathData), 
     Bisection(myPathData)
   { 
-    /* Do nothing for now. */ 
+    ///Defaults to the 0'th time slice but shouldn't matter because it
+    ///chooses a different time slice each time.
+    StartTimeSlice=0;
   }
 };
 

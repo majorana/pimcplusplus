@@ -3,8 +3,8 @@
 #include "OpenBisectionMoveClass.h"
 #include "MetaMoves.h"
 #include "BlockMove.h"
-#include "ObservableClass.h"
-#include "ObservableEnergy.h"
+#include "Observables/ObservableClass.h"
+#include "Observables/ObservableEnergy.h"
 
 void PIMCClass::Read(IOSectionClass &in)
 {

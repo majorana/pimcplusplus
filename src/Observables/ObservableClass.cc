@@ -1,5 +1,5 @@
 #include "ObservableClass.h"
-#include "Common/IO/InputOutput.h"
+#include "../Common/IO/InputOutput.h"
 
 
 
@@ -48,8 +48,19 @@ void PairCorrelationClass::Read(IOSectionClass& in)
   int numGridPoints;
   assert(in.ReadVar("type",gridType));
   assert(gridType=="Linear");
-  assert(in.ReadVar("start",gridStart));
-  assert(in.ReadVar("end",gridEnd));
+  bool readStartGrid=in.ReadVar("start",gridStart);
+  bool readEndGrid=in.ReadVar("end",gridEnd);
+  if (!readStartGrid)
+    gridStart=0.0;
+  if (!readEndGrid){
+    if (PathData.Path.IsPeriodic(0)){
+      gridEnd=PathData.Path.GetBox()[0];
+    }
+    else {
+      cerr<<"I don't know where you want me to end this grid"<<endl;
+      assert(1==2);
+    }
+  }
   assert(in.ReadVar("NumPoints",numGridPoints));
   grid.Init(gridStart,gridEnd,numGridPoints);
   TotalCounts=0;

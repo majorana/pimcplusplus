@@ -99,7 +99,6 @@ class PermMove : public ParticleMoveClass
     int numSlices=PathData.NumTimeSlices();
     
     if (!PathData.Path.OpenPaths){
-      cerr<<"wrong path!"<<endl;
       double xi=PathData.Path.Random.Local();
       slice2=(int)(xi*(double)(numSlices-(1<<NumLevels)))+(1<<NumLevels);
       slice1=slice2-(1<<NumLevels);

@@ -1,9 +1,9 @@
 #ifndef OBSERVABLE_CLASS_H
 #define OBSERVABLE_CLASS_H
 
-#include "Common.h"
-#include "PathDataClass.h"
-#include "Common/IO/InputOutput.h"
+#include "../Common.h"
+#include "../PathDataClass.h"
+#include "../Common/IO/InputOutput.h"
 
 
 /// This is the parent class for all observables.  It contains

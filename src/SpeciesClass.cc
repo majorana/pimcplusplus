@@ -21,14 +21,15 @@ SpeciesClass* ReadSpecies(IOSectionClass &inSection)
   string typeString;
   SpeciesClass *mySpecies;
   assert(inSection.ReadVar("Type",typeString));
+  //  cerr<<"My type string is "<<typeString<<endl;
   if (typeString=="FERMION")
     mySpecies=new FermionClass();
-  //  else if (typeString=="BOSON"){
-  //    mySpecies=new BosonClass();
-  //  }
-  //  else if (typeString=="BOLTZMANON"){
-  //    mySpecies=new BoltzmanonClass();
-  //  }
+  else if (typeString=="BOSON"){
+    mySpecies=new BosonClass();
+  }
+  else if (typeString=="BOLTZMANNON"){
+    mySpecies=new BoltzmannonClass();
+  }
   else {
     cerr<<"Species Type Unknown "<<typeString<<endl;
     exit(1);

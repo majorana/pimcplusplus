@@ -88,7 +88,8 @@ public:
     }  
   BoltzmannonClass()
     {
-
+      NumDim=NDIM;  
+      DimensionActive=true;
     }
   ~BoltzmannonClass()
     {

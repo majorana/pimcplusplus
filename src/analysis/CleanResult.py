@@ -75,6 +75,7 @@ def ProcessCorrelationSection(infile,doc,currNum):
      currNum=currNum+1
      baseName=sectionName+repr(currNum)
      myImg=ProduceCorrelationPicture(x, data[-1],baseName,hlabel,vlabel)
+####     myImg=ProduceCorrelationPicture(x, data[-1000],baseName,hlabel,vlabel)
      doc.append(myImg)
 ##   Write ASCII data to a file
      asciiFileName = baseName + '.dat'

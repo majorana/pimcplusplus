@@ -3,8 +3,8 @@
 
 #include "PathDataClass.h"
 #include "MoveClass.h"
-#include "ObservableClass.h"
-#include "ObservableEnergy.h"
+#include "Observables/ObservableClass.h"
+#include "Observables/ObservableEnergy.h"
 #include "WrapClass.h"
 #include "PermuteTableClass.h"
 #include "RunInfoClass.h"

@@ -16,7 +16,7 @@ void BisectionMoveClass::Read(IOSectionClass &moveInput)
   int tempNumParticlesToMove;
   assert(moveInput.ReadVar("NumParticlesToMove",tempNumParticlesToMove));
   SetNumParticlesToMove(tempNumParticlesToMove);
-  assert(moveInput.ReadVar("StartTimeSlice",StartTimeSlice));
+  moveInput.ReadVar("StartTimeSlice",StartTimeSlice);
   string tempNumLevels="";
   assert(moveInput.ReadVar("NumLevels",tempNumLevels));
   if (tempNumLevels=="Max"){

@@ -12,12 +12,12 @@ DEFS = -DTHREE_D -DNO_COUT  -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ
 
 PIMCobjs =                           \
   Main.o                             \
-  ObservableEnergy.o		     \
+  Observables/ObservableEnergy.o     \
   BisectionClass.o                   \
   PIMCClass.o                        \
   MetaMoves.o 			     \
   BlockMove.o                        \
-  ObservableClass.o                  \
+  Observables/ObservableClass.o      \
   SpeciesClass.o                     \
   Common.o                           \
   PermuteTableClass.o		     \
@@ -30,7 +30,6 @@ PIMCobjs =                           \
   PathDataClass.o                    \
   CommunicatorClass.o                \
   PathClass.o                        \
-  MirroredArrayClass.o               \
   WrapClass.o			     \
   Common/Splines/CubicSpline.o       \
   Common/Splines/MyTricubicSpline.o  \
@@ -74,8 +73,8 @@ TestPermobjs =                       \
   BlockMove.o                        \
   MetaMoves.o                        \
   PIMCClass.o                        \
-  ObservableClass.o                  \
-  ObservableEnergy.o                 \
+  Observables/ObservableClass.o      \
+  Observables/ObservableEnergy.o     \
   SpeciesClass.o                     \
   Common.o                           \
   PermuteTableClass.o		     \
@@ -88,7 +87,6 @@ TestPermobjs =                       \
   PathDataClass.o                    \
   CommunicatorClass.o                \
   PathClass.o                        \
-  MirroredArrayClass.o               \
   WrapClass.o			     \
   Common/Splines/CubicSpline.o       \
   Common/Splines/MyTricubicSpline.o  \
@@ -173,7 +171,7 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 all:   pimc++ TestPerm TestEwald
 	
-pimc++: Common_obj Tests $(PIMCobjs)
+pimc++: Common_obj observables Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
 
 TestPerm: Common_obj Tests $(TestPermobjs)
@@ -184,6 +182,9 @@ TestEwald: Common_obj Tests $(TestEwaldobjs)
 
 Common_obj:
 	cd Common; ${MAKE_ALL}
+
+observables:
+	cd Observables; ${MAKE_ALL}
 
 Common_clean:
 	cd Common; ${MAKE} clean
@@ -211,10 +212,10 @@ clean:	Common_clean
 
 
 
-SOURCES = ObservableClass.cc ObservableEnergy.cc myprog.cc SpeciesClass.cc Common.cc OpenBisectionMoveClass.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc RandomPermClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc
+SOURCES =  myprog.cc SpeciesClass.cc Common.cc OpenBisectionMoveClass.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc PermuteTableClass.cc RandomPermClass.cc Main.cc PIMCClass.cc TestPermutation.cc BisectionClass.cc  MetaMoves.cc BlockMove.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc
 
 
-newmake: Common_newmake Tests_newmake
+newmake: Common_newmake Tests_newmake Observables_newmake
 	make -f template.make Makefile FRC=force_rebuild
 
 Common_newmake:
@@ -222,6 +223,9 @@ Common_newmake:
 
 Tests_newmake:
 	cd Tests; $(MAKE_NEWMAKE)
+
+Observables_newmake:
+	cd Observables; ${MAKE_NEWMAKE}
 
 Makefile:	$(FRC)
 	rm -f $@
