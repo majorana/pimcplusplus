@@ -179,7 +179,7 @@ IOSection_CloseSection(PyObject *self, PyObject *args)
     return NULL;
   else {
     ((IOSectionClass*)IOSectionPtr)->CloseSection();
-    return NULL;
+    return Py_BuildValue("()");
   }
 }
 
@@ -294,6 +294,79 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	  return NULL;
       }
     }
+    // 2D arrays
+    else if (dim == 2) {
+      if (type==INT_TYPE){
+	blitz::Array<int,2> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0);
+	int d1 = val.extent(1);
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tInt32, 2, d0, d1);
+	  // Now copy data into new array
+	  for (int i=0; i<d0; i++)
+	    for (int j=0; j<d1; j++)
+	      *(((int*)array->data)+(i*d1)+j) = val(i,j);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      if (type==DOUBLE_TYPE) {
+	blitz::Array<double,2> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0);
+	int d1 = val.extent(1);
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tFloat64, 2, d0, d1);
+	  // Now copy data into new array
+	  for (int i=0; i<d0; i++)
+	    for (int j=0; j<d1; j++)
+	      *(((double*)array->data)+(i*d1)+j) = val(i,j);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      if (type==BOOL_TYPE){
+	blitz::Array<bool,2> val;
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	int d0 = val.extent(0);
+	int d1 = val.extent(1);
+	if (success) {
+	  PyArrayObject *array;
+	  array = NA_NewArray (NULL, tBool, 2, d0, d1);
+	  // Now copy data into new array
+	  for (int i=0; i<d0; i++)
+	    for (int j=0; j<d1; j++)
+	      *(((bool*)array->data)+(i*d1)+j) = val(i,j);
+	  return (PyObject *) array;
+	}
+	else
+	  return NULL;
+      }
+      else if (type==STRING_TYPE){
+	blitz::Array<string,1> val;    
+	success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
+	if (success){
+	  int d0=val.extent(0);
+	  int d1=val.extent(1);
+	  PyObject* totalArray=PyList_New(0);
+	  for (int i=0;i<d0;i++){
+	    PyObject* array=PyList_New(0);
+	    for (int j=0;j<d1;j++){
+	      PyList_Append(array,Py_BuildValue("s",val(i,j).c_str()));
+	    }
+	    PyList_Append(totalArray,array);
+	  }
+	  return (PyObject*)totalArray;
+	}
+	else
+	  return NULL;
+      }
+    }
   }
 }
 
@@ -306,7 +379,7 @@ static PyMethodDef IOSectionMethods[] = {
     {"New", IOSection_New, METH_VARARGS,
      "Create a new IOSection object."},
     {"ReadVar", IOSection_ReadVar, METH_VARARGS,
-     "Reads a variable given its name, returning appropriate object with data."},
+     "Reads the named variable, returning appropriate object with data."},
     {"GetName", IOSection_GetName, METH_VARARGS,
      "Gets the name of the current section"},
     {"NewFile", IOSection_NewFile, METH_VARARGS,
@@ -327,8 +400,6 @@ static PyMethodDef IOSectionMethods[] = {
      "Creates a new section in a new file given the section and file name"},
     {"CloseSection", IOSection_CloseSection, METH_VARARGS,
      "Closes a section"},
-    {"ReadVar", IOSection_ReadVar, METH_VARARGS,
-     "Reads a variable given its name"},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 

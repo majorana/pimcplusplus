@@ -25,8 +25,8 @@ class IOSectionClass:
         return IOSection.IncludeSection(this.handle,name,fileName)
     def NewSection(this,name):
         return IOSection.IncludeSection(this.handle,name,fileName)
-    def CloseSection():
-        return IOSection.CloseSection(this.handle)
+    def CloseSection(this):
+        IOSection.CloseSection(this.handle)
     def ReadVar(this,name):
         return IOSection.ReadVar(this.handle,name)
 
@@ -38,3 +38,16 @@ a=IOSectionClass()
 a.OpenFile("grr.h5")
 a.OpenSection("Energies")
 print len(a.ReadVar("PotentialEnergy"))
+a.CloseSection()
+a.OpenSection("ppPC");
+a.OpenSection("grid");
+r = a.ReadVar ("Points");
+print r
+
+b = IOSectionClass()
+b.OpenFile ("junk.dat")
+print b.ReadVar ("string_data")
+print b.ReadVar ("int_2");
+print b.ReadVar ("double_2");
+print b.ReadVar ("bool_2");
+print b.ReadVar ("string_2");

@@ -392,19 +392,18 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 {
   ReadAbort(iter->Str != "[", iter->LineNumber, "Expected [ not found\n");
   iter++;
-  for (int i=0;i<valArray.extent(1);i++)
-    for (int j=0; j<valArray.extent(0); j++)
-      {
-	ReadAtomicVar(*iter,valArray(j,i));
+  for (int j=0; j<valArray.extent(0); j++)
+    for (int i=0;i<valArray.extent(1);i++) {
+      ReadAtomicVar(*iter,valArray(j,i));
+      iter++;
+      // Read comma if this isn't the last value.
+      if ((i!=valArray.extent(1)-1) || 
+	  (j!=valArray.extent(0)-1)) {
+	ReadAbort(iter->Str != ",", iter->LineNumber, 
+		  "Expected , not found\n");
 	iter++;
-	// Read comma if this isn't the last value.
-	if ((i!=valArray.extent(1)-1) || 
-	    (j!=valArray.extent(0)-1)) {
-	  ReadAbort(iter->Str != ",", iter->LineNumber, 
-		    "Expected , not found\n");
-	  iter++;
-	}
       }
+    }
   ReadAbort(iter->Str != "]", iter->LineNumber, "Expected ] not found\n");
   iter++;
   ReadAbort(iter->Str != ";", iter->LineNumber, "Expected ; not found\n");
@@ -424,10 +423,9 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 {
   ReadAbort(iter->Str != "[", iter->LineNumber, "Expected [ not found\n");
   iter++;
-  for (int i=0;i<valArray.extent(2);i++)
+  for (int k=0; k<valArray.extent(0); k++)
     for (int j=0; j<valArray.extent(1); j++)
-      for (int k=0; k<valArray.extent(0); k++)
-      {
+      for (int i=0;i<valArray.extent(2);i++) {
 	ReadAtomicVar(*iter,valArray(k,j,i));
 	iter++;
 	// Read comma if this isn't the last value.
@@ -458,10 +456,10 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 {
   ReadAbort(iter->Str != "[", iter->LineNumber, "Expected [ not found\n");
   iter++;
-  for (int h=0;h<valArray.extent(3);h++)
-    for (int i=0;i<valArray.extent(2);i++)
-      for (int j=0; j<valArray.extent(1); j++)
-	for (int k=0; k<valArray.extent(0); k++) {
+  for (int k=0; k<valArray.extent(0); k++) 
+    for (int j=0; j<valArray.extent(1); j++)
+      for (int i=0;i<valArray.extent(2);i++) 
+	for (int h=0;h<valArray.extent(3);h++) {
 	  ReadAtomicVar(*iter,valArray(k,j,i,h));
 	  iter++;
 	  // Read comma if this isn't the last value.
