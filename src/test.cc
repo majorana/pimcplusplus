@@ -1,6 +1,6 @@
 #include "Common.h"
 #include "PathClass.h"
-#include "IdenticleParticleClass.h"
+#include "IdenticalParticlesClass.h"
 #include "ActionClass.h"
 #include "PathDataClass.h"
 #include "BisectionMoveClass.h"
@@ -22,13 +22,11 @@ void setupAction(ActionClass &myActionClass,ArrayOfIdenticalParticlesClass &myID
 }
 
 
-void setupIDParticleArray(PathData &myPathData){
-
-ArrayOfIdenticalParticlesClass &myIDParticles)
+void setupIDParticleArray(PathDataClass &myPathData)
 {
-
-  double tau=0.1 //This better be the same as in the squarer file! UGly!
-  int numTimeSlices=32;
+  ArrayOfIdenticalParticlesClass &myIDParticles=myPathData.IdenticalParticleArray;
+  double tau=0.1; //This better be the same as in the squarer file! UGly!
+  int NumTimeSlices=32;
   ElectronsClass myElectrons;
   ProtonsClass myProtons;
   myElectrons.NumParticles=1;
@@ -36,35 +34,36 @@ ArrayOfIdenticalParticlesClass &myIDParticles)
   myElectrons.lambda=0.5;
   myProtons.lambda=0;
    
-  myElectrons.Path.resize(1,numTimeSlices);
-  myProtons.Path.resize(1,numTimeSlices);
-  setMode(OBSERVABLEMODE);
+  myElectrons.Path.resize(1,NumTimeSlices);
+  myProtons.Path.resize(1,NumTimeSlices);
+  setMode(BOTHMODE);
   dVec zeroVector=0;
-  for  (int counter=0;counter<myProtons.numParticles;counter++){
-    for (int counter2=0;counter<numTimeSlices;counter2++){
-      myProtons.Path.setPos(counter,counter2,zeroVector);
+  for  (int counter=0;counter<myProtons.NumParticles;counter++){
+    for (int counter2=0;counter2<NumTimeSlices;counter2++){
+      myProtons.Path.SetPos(counter,counter2,zeroVector);
     }
   }
   double sigma=sqrt(2*0.5*tau);
   dVec electronVector;
-  for (int counter=0;counter<myElectrons.numParticles;counter++){
-    for (int counter2=0;counter2<numParticles;counter2++){
-      electronVector=GaussianRandomVector;
-      myElectrons.Path.setPos(counter,counter2,electronVector);
+  for (int counter=0;counter<myElectrons.NumParticles;counter++){
+    for (int counter2=0;counter2<NumTimeSlices;counter2++){
+      electronVector=GaussianRandomVec(sigma);
+      myElectrons.Path.SetPos(counter,counter2,electronVector);
     }
   }
 
-  myPathData.IdenticalParticlesArray.IdenticalParticleArray.resize(2);
-  myPathData.IdenticalParticlesArray.IdenticalParticleArray(0)=&myElectrons;
-  myPathData.IdenticalParticlesArray.IdenticalParticleArray(1)=&myProtons;
-  myPathData.NumTimeSlices=numTimeSlices;
+  myPathData.IdenticalParticleArray.resize(2);
+  myPathData.IdenticalParticleArray.Set(0,myElectrons);
+  myPathData.IdenticalParticleArray.Set(1,myProtons);
+  myPathData.NumTimeSlices=NumTimeSlices;
 }
   
 
-void setupMove(BisectionMoveClass &myBisectionMove,ShiftMove &myShiftMove, PathData &thePathData)
+void setupMove(BisectionMoveClass &myBisectionMove,ShiftMove &myShiftMove, PathDataClass &thePathData)
 {
 
-  Array<int,1> ActiveSpecies=0;
+  Array<int,1> ActiveSpecies(1);
+  ActiveSpecies = 0;
   myBisectionMove.PathData=&thePathData;
   myBisectionMove.SetActiveSpecies(ActiveSpecies);
   myBisectionMove.SetNumParticlesToMove(1);

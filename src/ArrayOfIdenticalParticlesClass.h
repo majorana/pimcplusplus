@@ -1,7 +1,7 @@
 #ifndef ARRAYOFIDENTICALPARTICLECLASS_H
 #define ARRAYOFIDENTICALPARTICLECLASS_H
 
-#include "IdenticleParticleClass.h"
+#include "IdenticalParticlesClass.h"
 
 class ArrayOfIdenticalParticlesClass
 {
@@ -10,6 +10,14 @@ class ArrayOfIdenticalParticlesClass
   inline int size(){
     return IdenticalParticlesArray.size();
   }
+  inline void resize(int newsize)
+    {
+      IdenticalParticlesArray.resize(newsize);
+    }
+  inline void Set(int i, IdenticalParticlesClass &IDptcls)
+    {
+      IdenticalParticlesArray(i) = &IDptcls;
+    }
   inline IdenticalParticlesClass& operator()(int i){
     return (*(IdenticalParticlesArray(i)));
   }

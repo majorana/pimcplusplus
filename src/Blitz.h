@@ -32,6 +32,16 @@ inline Vec2 operator+(const Vec2 &v1, const Vec2 &v2)
   return (result);
 }
 
+
+inline Vec2 operator-(const Vec2 &v1, const Vec2 &v2)
+{
+  Vec2 result;
+  result[0] = v1[0]-v2[0];
+  result[1] = v1[1]-v2[1];
+  return (result);
+}
+
+
 inline Vec3 operator*(scalar s, const Vec3 &v)
 {
   Vec3 result;
@@ -57,6 +67,15 @@ inline Vec3 operator+(const Vec3 &v1, const Vec3 &v2)
   result[0] = v1[0]+v2[0];
   result[1] = v1[1]+v2[1];
   result[2] = v1[2]+v2[2];
+  return (result);
+}
+
+inline Vec3 operator-(const Vec3 &v1, const Vec3 &v2)
+{
+  Vec3 result;
+  result[0] = v1[0]-v2[0];
+  result[1] = v1[1]-v2[1];
+  result[2] = v1[2]-v2[2];
   return (result);
 }
 

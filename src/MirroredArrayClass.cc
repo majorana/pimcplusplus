@@ -119,5 +119,9 @@ void foo()
   CommClass myCommunicator;
   myArray.Print();
   myArray.shiftData(3,myCommunicator);
+  MirroredArrayClass<dVec> myArray2;
+  myArray2.resize(1,1);
+  myArray.resize(1,1);
+  myArray2.shiftData(3,myCommunicator);
 
 }

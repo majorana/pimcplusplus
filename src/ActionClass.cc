@@ -32,12 +32,12 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
 	    dVec r2 = IdentPtcls(Species2).Path(Ptcl2,Slice);
 	    dVec rp1 = IdentPtcls(Species1).Path(Ptcl1,Slice+skip);
 	    dVec rp2 = IdentPtcls(Species2).Path(Ptcl2,Slice+skip);
-	    dVec r = dVecSubtract(r1, r2);
-	    dVec rp = dVecSubtract(rp1, rp2);
+	    dVec r = r1 - r2;
+	    dVec rp = (rp1 -rp2);
 	    double rmag = sqrt(dot(r,r));
 	    double rpmag = sqrt(dot(rp,rp));
 	    
-	    double s = sqrt(dot (dVecSubtract(r,rp), dVecSubtract(r,rp)));
+	    double s = sqrt(dot (r-rp, r-rp));
 	    double q = 0.5 * (rmag + rpmag);
 	    double z = (rmag - rpmag);
 	    int PairIndex = PairMatrix(Species1, Species2);

@@ -2,7 +2,7 @@
 #define ACTION_CLASS
 
 #include "CubicSpline.h"
-#include "IdenticleParticleClass.h"
+#include "IdenticalParticlesClass.h"
 #include "MemoizedDataClass.h"
 #include "ArrayOfIdenticalParticlesClass.h"
 
@@ -136,9 +136,9 @@ inline void ActionClass::SampleParticles(Array<ParticleID,1> particles,int start
       rpp=(*myIdenticalParticleArray)(species).Path(ptclNum,sliceCounter+skip>>1);
       ///We've ignored boundary conditions here
       dVec rbar=0.5*(r+rp);
-      dVec newDelta=GuassianRandomVec(sigma);
+      dVec newDelta=GaussianRandomVec(sigma);
       
-      dVec oldDelta=dVecSubtract(rpp,rbar);
+      dVec oldDelta= rpp - rbar;
       rpp=rbar+newDelta;
       logNewSampleProb=logNewSampleProb+(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
       logOldSampleProb=logOldSampleProb+(prefactorOfSampleProb-0.5*dot(oldDelta,oldDelta)/(sigma2));

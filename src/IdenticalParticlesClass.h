@@ -1,5 +1,5 @@
-#ifndef IDENTICLE_PARTICLES_CLASS
-#define IDENTICLE_PARTICLES_CLASS
+#ifndef IDENTICAL_PARTICLES_CLASS
+#define IDENTICAL_PARTICLES_CLASS
 
 #include "PathClass.h"
 
@@ -42,10 +42,17 @@ public:
 class ProtonsClass : public IdenticalParticlesClass
 {
 public:
-  double NodeAction (int Ptcl, int LinkNum);
-  ElectronsClass();
-  ~ElectronsClass();
-
+  double NodeAction (int Ptcl, int LinkNum)
+    {
+      return (0.0);
+    }
+  ProtonsClass()
+    {
+    }
+  ~ProtonsClass()
+    {
+    }
+  
 };
 
 #endif

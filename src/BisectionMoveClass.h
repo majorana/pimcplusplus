@@ -7,27 +7,23 @@
 
 class BisectionMoveClass : public ParticleMoveClass
 {
-private:
 
-
-
+  
+ public:
   int StartTimeSlice;
   int NumLevels;
-  
+
   void makeMove();
- public:
   BisectionMoveClass();
 };
 
 
 class ShiftMove : public MoveClass
 {
+ public:
   int numTimeSlicesToShift;
   void makeMove();
-  
-
-
-}
+};
 
 
 

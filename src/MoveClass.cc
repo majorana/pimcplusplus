@@ -1,13 +1,7 @@
 #include "MoveClass.h"
 
-void MoveClass:SetNumParticlesToMove(int passed_NumParticlesToMove)
-{
-  NumParticlesToMove=passed_NumParticlesToMove;
-  MyParticleIndices.resize(NumParticlesToMove);
-}
 
-
-void MoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
+void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
 {
   ActiveSpecies.resize(ActSpecies.size());
   ActiveSpecies = ActSpecies;
@@ -36,7 +30,7 @@ void MoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
 }
 
 
-inline int MoveClass::RandInt (int Max) //Hopefully this didn't break anything
+inline int RandInt (int Max) //Hopefully this didn't break anything
 {
   double myRandNum;
   double myNum;
@@ -44,14 +38,11 @@ inline int MoveClass::RandInt (int Max) //Hopefully this didn't break anything
   myNum=(double)Max * myRandNum;
     
   return ((int)floor(myNum));
-
-  //  sprng(myInt);
-  //  return *myInt;
 }
 
 
 
-void MoveClass::ChooseParticles()
+void ParticleMoveClass::ChooseParticles()
 {
   for (int i=0; i<NumParticlesToMove; i++) { 
     bool Redundant;

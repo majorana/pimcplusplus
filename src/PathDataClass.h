@@ -2,7 +2,7 @@
 #define PATH_DATA_CLASS
 
 #include "Common.h"
-#include "IdenticleParticleClass.h"
+#include "IdenticalParticlesClass.h"
 #include "MemoizedDataClass.h"
 #include "ActionClass.h"
 

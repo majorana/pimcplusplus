@@ -23,7 +23,7 @@ class PathClass
   inline void resize(int numPtcles,int numTimeSlices)
     {
       Positions.resize(numPtcles,numTimeSlices);
-      TimeStamp.resize(numPtlces,numTimeSlices);
+      TimeStamp.resize(numPtcles,numTimeSlices);
     }
   
   /// Operator to access by value.

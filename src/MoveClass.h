@@ -8,9 +8,10 @@
 
 class MoveClass 
 {
+ public:
   PathDataClass *PathData;
   virtual void makeMove()=0;
-}
+};
   
 
 class ParticleMoveClass : public MoveClass
@@ -25,17 +26,11 @@ class ParticleMoveClass : public MoveClass
   Array<int,1> MyParticleIndices; 
   ///A mapping from integers to particle ids
   Array<ParticleID,1> MyParticles;
-  inline int RandInt (int Max);
 
  public:
   virtual void makeMove()=0;
   int NumParticlesToMove;
-  SetNumParticlesToMove(int passed_NumParticlesToMove)
   Array<ParticleID,1> ActiveParticles;
-
-
-
-
   void SetActiveSpecies(Array<int,1> ActSpecies);
   inline void SetNumParticlesToMove(int i)
   {

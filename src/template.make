@@ -8,7 +8,7 @@ CC = mpiCC
 LD = mpiCC  -Bstatic 
 DEFS = -DNO_COUT -DUSE_MPI -DBZ_DEBUG -g #-DUSE_MPI 
 
-TestObjs = CubicSpline.o Grid.o InputFile.o myprog.o IdenticleParticleClass.o Common.o BisectionMoveClass.o MoveClass.o ActionClass.o PathDataClass.o ArrayOfIdenticalParticlesClass.o MirroredArrayClass.o CommunicatorClass.o PathClass.o
+TestObjs = CubicSpline.o Grid.o InputFile.o IdenticalParticlesClass.o Common.o BisectionMoveClass.o MoveClass.o ActionClass.o PathDataClass.o ArrayOfIdenticalParticlesClass.o MirroredArrayClass.o CommunicatorClass.o PathClass.o test.o
 
 Test: 	$(TestObjs)
 	pushd ..; make; pushd
@@ -20,7 +20,7 @@ Test: 	$(TestObjs)
 	g77 -c $<
 
 
-SOURCES = CubicSpline.cc Grid.cc InputFile.cc myprog.cc IdenticleParticleClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc ArrayOfIdenticalParticlesClass.cc MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc
+SOURCES = CubicSpline.cc Grid.cc InputFile.cc myprog.cc IdenticalParticlesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc ArrayOfIdenticalParticlesClass.cc MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc
 
 
 newmake: 

@@ -1,6 +1,6 @@
 #include "Common.h"
 #include "PathClass.h"
-#include "IdenticleParticleClass.h"
+#include "IdenticalParticlesClass.h"
 #include "ActionClass.h"
 #include "PathDataClass.h"
 #include "BisectionMoveClass.h"

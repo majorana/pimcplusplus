@@ -9,7 +9,7 @@
 #define NEW 1
 #include <sprng.h>
 #include "Blitz.h"
-typedef enum {MOVEMODE, OBSERVABLEMODE} ModeType;
+typedef enum {OLDMODE, NEWMODE, BOTHMODE} ModeType;
 
 ///ParticleID=(species,particle number)
 
@@ -20,8 +20,7 @@ extern int Write2; //These are the variables for writing
 
 
 int GetCurrentTimeStamp();
-dVec GuassianRandomVec(double sigma);
-dVec dVecSubtract(dVec a,dVec b); //a-b
-void setMode(int);
+dVec GaussianRandomVec(double sigma);
+void setMode(ModeType);
 double distSqrd(dVec a,dVec b); 
 #endif

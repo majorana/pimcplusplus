@@ -5,10 +5,11 @@
 
 void ShiftMove::makeMove()
 {//Remember to mark Actions dirty!!!
-  int numTimeSlicesToShift=floor(sprng()*PathData.NumTimeSlices);
-  for (counter=0;counter<PathData.IdenticalParticleArray.size();counter++){
-    (*PathData.IdenticalParticleArray(counter)).Path.shiftData(numTimeSlicesToShift,PathData.Communicator);
-  }
+  int numTimeSlicesToShift=(int)floor(sprng()*PathData->NumTimeSlices);
+  for (int counter=0;counter<PathData->IdenticalParticleArray.size();counter++)
+    {
+      (PathData->IdenticalParticleArray)(counter).Path.shiftData(numTimeSlicesToShift,PathData->Communicator);
+    }
 }
 
     
@@ -32,10 +33,10 @@ void BisectionMoveClass::makeMove()
   ChooseParticles();   
   for (int levelCounter=NumLevels;levelCounter>0;levelCounter--){
 
-    setMode(OLD);
+    setMode(OLDMODE);
     bool toAccept=true;
     double oldAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter-1);
-    setMode(NEW);
+    setMode(NEWMODE);
     (*PathData).TotalAction.SampleParticles(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter,newLogSampleProb,oldLogSampleProb);
     double newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter-1);
     double currActionChange=newAction-oldAction;

@@ -29,7 +29,7 @@ public:
   /// Returns the active value.
   inline T operator()(int x,int y) const
   {
-    return AB(0,x,y);
+    return AB(Write1,x,y);
   }
   ///This shifts slicesToShift time slices to the next (if positive) or previous (if negative) processor
   void shiftData(int slicesToShift,CommClass &Communicator); 
@@ -47,29 +47,6 @@ public:
     AB(Write2,x,y)=NewVal;
   }
 
-  /// In NEW mode, write only to the first copy,in OLD MODE 
-  /// write to the section copy,  in OBSERVABLE
-  /// mode, write to both copies.
-  inline void SetMode(ModeType Mode)
-  {
-    /// Write only to the first copy
-    if (Mode == NEW) {
-	Write1 = 0;
-	Write2 = 0;
-    }
-    else if (Mode == OLD){
-      Write1 = 1;
-      Write1 = 1;
-    }
-    else if (Mode == OBSERVABLEMODE){
-	Write1 = 0;
-	Write2 = 1;
-    }
-    else{
-      ///This needs to be put back in when somebody tells me what abort does
-//	abort ("Undefined mode type!");
-    }
-  }
 
   /// In case of acceptance, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This

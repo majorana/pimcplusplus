@@ -1,6 +1,40 @@
 #include "Common.h"
 
 
+/* normal random variate generator */
+// Returns a random number distributed according to
+// P(x) = 1/sqrt(2*pi * sigma) * exp ((x - mean)^2 /(2*sigma^2))
+scalar GaussianRandNum(scalar mean, scalar sigma)
+{                                      
+  scalar V1, V2, S, X1;
+  static scalar X2;
+  static int OneLeft = 0;
+  scalar temp;
+
+  if (OneLeft)                   // Use second number from last computation
+    {
+      X1 = X2;
+      OneLeft = 0;
+    }
+  else
+    {
+      do
+        {
+          V1 = 2.0 * sprng() - 1.0;
+          V2 = 2.0 * sprng() - 1.0;
+          S = V1 * V1 + V2 * V2;
+        } while ( S >= 1.0 );
+      
+      temp = sqrt( (-2.0 * log((double) S ) ) / S );
+      X1 = V1 * temp;
+      X2 = V2 * temp;
+      OneLeft = 1;
+    }  
+  return( mean + X1 * sigma );
+}
+
+
+
 
 
 
@@ -10,16 +44,23 @@ int GetCurrentTimeStamp()
 }
 
 
+/// In NEW mode, write only to the first copy,in OLD MODE 
+/// write to the section copy,  in OBSERVABLE
+/// mode, write to both copies.
 
 void setMode(ModeType theMode)
 {
 
-  if (theMode==MOVEMODE){
-    Write1=0;
-    Write2=0;
+  if (theMode==OLDMODE){
+    Write1=1;
+    Write2=1;
   }
-
-  else  if (theMode==OBSERVABLEMODE){
+  else if (theMode==NEWMODE)
+    {
+      Write1=0;
+      Write2=0;
+    }
+  else  if (theMode==BOTHMODE){
     Write1=0;
     Write2=1;
   }
@@ -27,30 +68,23 @@ void setMode(ModeType theMode)
 
 }
 
-dVec GuassianRandomVec(double sigma)
+dVec GaussianRandomVec(double sigma)
 {
   dVec c;
-  c(0)=0;
-  c(1)=1;
-  c(2)=2;
+  c(0)=GaussianRandNum(0.0,sigma);
+  c(1)=GaussianRandNum(0.0,sigma);
+  c(2)=GaussianRandNum(0.0,sigma);
   return c;
 
 }
 
-dVec dVecSubtract(dVec c,dVec d)
-{
 
-  dVec b;
-  b(0)=0;
-  b(1)=1;
-  b(2)=2;
-  return b;
 
-}
+
 double distSqrd(dVec a, dVec b) //Did I do this right?
 {
-  dVec Dist= distSqrd(a,b);
-  return (Dist(0)*Dist(0)+Dist(1)*Dist(1)+Dist(2)*Dist(2));
+  dVec Disp = a - b;
+  return (Disp(0)*Disp(0)+Disp(1)*Disp(1)+Disp(2)*Disp(2));
 }
 
   
