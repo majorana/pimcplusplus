@@ -96,7 +96,8 @@ bool isNumStart(char theChar)
 /// Returns true if ch is a valid character comprising a number.
 bool isNumChar (char ch)
 {
-  return (isDigit(ch) || (ch =='.') || (ch=='e') || (ch=='-'));
+  return (isDigit(ch) || (ch =='.') || (ch=='e') 
+	  || (ch=='-') || (ch=='+'));
 }
 
 
