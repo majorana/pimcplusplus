@@ -35,6 +35,7 @@ TestObjs =                           \
   Common/PairAction/PAcoulombBCFit.o \
   Common/PairAction/PAclassicalFit.o \
   Common/PairAction/PAszFit.o        \
+  Common/PairAction/PAsFit.o        \
   Common/Splines/BicubicSpline.o     \
   Common/PH/PH.o                     \
   Common/PH/Potential.o

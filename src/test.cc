@@ -213,6 +213,15 @@ int main(int argc, char **argv)
   inSection.CloseSection(); //"Action"
 
   // Let's test the action
+   LinearGrid qgrid (0.0, 3.0, 61);
+   for (int i=0; i<qgrid.NumPoints; i++) {
+     double q = qgrid(i);
+     double z = 0.0;
+     double s2 = q*q;
+     double U = myPathData.Action.PairActionVector(0)->U(q,z,s2,0);
+     fprintf (stderr, "%1.2f %1.5e\n", q, U);
+   }
+
   IOSectionClass out;
   inSection.OpenSection("Observables");
   string outFileName;
