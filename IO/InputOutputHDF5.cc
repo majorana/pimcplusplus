@@ -883,7 +883,16 @@ bool IOTreeHDF5Class::OpenFile(string fileName,
 			       string mySectionName,
 			       IOTreeClass *parent)
 {
+  // Turn off error printing
+  H5E_auto_t func;
+  void *client_data;
+  H5Eget_auto(&func, &client_data);
+  H5Eset_auto(NULL, NULL);
+
   GroupID = H5Fopen(fileName.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+  // And turn it back on;
+  H5Eset_auto(func, client_data);
+  
   if (GroupID < 0)
     {
       cerr << "Cannot open file " << fileName << endl;
