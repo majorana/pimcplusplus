@@ -178,16 +178,18 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
 
 void MadelungTest(ActionClass &action)
 {
-  double longRange=action.LongRangeAction(0,0);
+  double longRange=action.LongRange_U(0,0);
   Array<int,1> changedParticles(8);
   changedParticles=0,1,2,3,4,5,6,7;
   //  Array<int,1> changedParticles(4);
   //  changedParticles=0,1,2,3;
 
-  double shortRange=action.UAction(0,1,changedParticles,0);
-  cerr<<"LongRange, ShortRange, Total: "<<longRange/4.0<<", "<<shortRange/4.0;
-  cerr<<", "<<(longRange+shortRange)/4.0<<endl;
-  fprintf (stderr, "Total = %1.9f\n", (longRange+shortRange)/4.0);
+  double totalAction = action.UAction(0, 1, changedParticles, 0);
+  double dU,spring;
+  action.Energy(0,0,spring,dU);
+  fprintf (stderr, "Total = %1.9f\n", totalAction/4.0);
+  fprintf (stderr, "dU = %1.9f\n", dU/4.0);
+  fprintf (stderr, "Spring = %1.9f\n", spring/4.0);
 }
 
 main()

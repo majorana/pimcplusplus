@@ -250,7 +250,10 @@ inline const double PathClass::GetVol()
 
 inline const double PathClass::Getkc()
 {
-  return kCutoff;
+  if (LongRange)
+    return kCutoff;
+  else
+    return 0.0;
 }
 
 

@@ -1,10 +1,11 @@
-double tau=0.25;
+double tau=0.5;
 
 Section (System)
 {
-  int NumTimeSlices=200;
+  int NumTimeSlices=100;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
-  Array<double,1> Box(3)=[125.0,125.0,125.0];
+  Array<double,1> Box(3)=[10.0,10.0,10.0];
+  double kCutoff = 2.0;
   Section (Particles)
   {
     Section (Species)
@@ -38,6 +39,7 @@ Section (Action)
   Array<string,1> PairActionFiles(3) = ["e-p_beta8.0.coulombBCfit.h5",
                                         "e-e_beta8.0.coulombBCfit.h5",
                                         "p-p.PairAction"];
+  int NumBreakupKnots = 10;
 }
 
 Section (Observables)
@@ -65,7 +67,7 @@ Section (Observables)
 	  string type = "Linear";
 	  double start = 0.0;
 	  double end = 3.0;
-	  int NumPoints = 100;
+	  int NumPoints = 50;
 	}
     }
   Section (Observable)
@@ -82,7 +84,7 @@ Section (Observables)
 	  string type = "Linear";
 	  double start = 0.0;
 	  double end = 3.0;
-	  int NumPoints = 100;
+	  int NumPoints = 50;
 	}
     }
 }

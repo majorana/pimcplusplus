@@ -179,6 +179,8 @@ void PathClass::SetupkVecs()
     }
   }
   kIndices.resize(numVecs);
+  cerr << "kCutoff = " << kCutoff << endl;
+  cerr << "Number of kVecs = " << numVecs << endl;
   kVecs.resize(numVecs);
   for (int i=0; i<NDIM; i++)
     C[i].resize(2*MaxkIndex[i]+1);

@@ -22,7 +22,9 @@ private:
   double CalcXk (int paIndex, int level, double k, double rc,
 		 TaskType type);
 public:
-  double LongRangeAction(int slice, int level);
+  double LongRange_U(int slice, int level);
+  double LongRange_dU(int slice, int level);
+  double LongRange_V(int slice);
   /// This holds all of the Pair Action Classes
   Array<PairActionFitClass*,1> PairActionVector;
 
