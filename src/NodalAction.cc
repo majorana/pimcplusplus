@@ -22,9 +22,11 @@ FPNodalActionClass::GradientDet (int slice, double &det,
   double C = 1.0/(4.0*M_PI * lambda * t);
 
   // HACK HACK HACK for now;  should work for serial mode.
+  SetMode(NEWMODE);
   if (Path.GetRefSlice() < Path.NumTimeSlices())
     for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
       Path.RefPath(ptcl) = Path(Path.GetRefSlice(), ptcl);
+  Path.RefPath.AcceptCopy();
 
   for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
     const dVec &rRef = Path.RefPath(refPtcl);
@@ -62,7 +64,28 @@ FPNodalActionClass::GradientDet (int slice, double &det,
       dVec &rRef = Path.RefPath(refPtcl);
       dVec diff =  r-rRef;
       dVec gradPhi = -2.0*C*diff*DetMatrix(refPtcl-first,ptcl-first);
-      gradient(ptcl-first) += Cofactors(refPtcl-first, ptcl-first)*gradPhi;
+
+      ///////////////////
+      /// HACK HACK HACK
+      dVec gradPhiFD;
+      dVec delta = 0.0;
+      delta[0] = 1.0e-6; delta[1] = 0.0; delta[2] = 0.0;
+      gradPhiFD[0] = 
+	(exp(-C*(dot(diff+delta,diff+delta))) - exp(-C*dot(diff-delta,diff-delta)))/(2.0e-6);
+      delta[0] = 0.0; delta[1] = 1.0e-6; delta[2] = 0.0;
+      gradPhiFD[1] = 
+	(exp(-C*(dot(diff+delta,diff+delta))) - exp(-C*dot(diff-delta,diff-delta)))/(2.0e-6);
+      delta[0] = 0.0; delta[1] = 0.0; delta[2] = 1.0e-6;
+      gradPhiFD[2] = 
+	(exp(-C*(dot(diff+delta,diff+delta))) - exp(-C*dot(diff-delta,diff-delta)))/(2.0e-6);
+      cerr << "gradPhi   = " << gradPhi << endl;
+      cerr << "gradPhiFD = " << gradPhiFD << endl;
+      /// END HACK HACK HACK
+      ///////////////////////
+
+      gradient(ptcl-first) = 
+	gradient(ptcl-first)+ gradPhi*Cofactors(refPtcl-first, ptcl-first);
+      //gradient(ptcl-first)+ gradPhi*Cofactors(ptcl-first, refPtcl-first);
     }
   }
 }
@@ -113,6 +136,7 @@ FPNodalActionClass::GradientDetFD (int slice, double &det,
     for (int dim=0; dim<NDIM; dim++) {
       delta = 0.0;
       delta[dim] = 0.5*eps;
+      cerr << "delta = " << delta << endl;
       for (int ref=first; ref <= last; ref++) {
 	dVec &rRef = Path.RefPath(ref);
 	dVec diff = r - rRef + delta;

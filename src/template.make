@@ -9,7 +9,7 @@ CCFLAGS = -c -g  -Wno-deprecated  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
 
-DEFS = -DTHREE_D -DNO_COUT  -O3 #-DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DTHREE_D -DNO_COUT  -DDEBUG -DBZ_DEBUG #-O3 #-DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \
@@ -73,61 +73,61 @@ PIMCobjs =                            \
 #  Common/PairAction/PAtricubicFit.o  \
 
 
-TestPermobjs =                       \
-  TestPermutation.o                  \
-  Moves/BisectionClass.o                   \
-  Moves/BlockMove.o                        \
-  Moves/MetaMoves.o                        \
-  PIMCClass.o                        \
-  Observables/ObservableBase.o      \
-  Observables/ObservableEnergy.o     \
-  Observables/ObservableCorrelation.o     \
-  Observables/StructureFactor.o      \
-  Observables/PathDump.o             \
-  Observables/WindingNumber.o        \
-  SpeciesClass.o                     \
-  Common.o                           \
-  Moves/PermuteTableClass.o		     \
-  Moves/RandomPermClass.o                  \
-  Moves/BisectionMoveClass.o               \
-  Moves/OpenBisectionMoveClass.o           \
-  Moves/MoveBase.o                        \
-  ActionClass.o                      \
-  LongRangeRPA.o                     \
-  PathDataClass.o                    \
-  CommunicatorClass.o                \
-  PathClass.o                        \
-  WrapClass.o			     \
+TestPermobjs =                        \
+  TestPermutation.o                   \
+  Moves/BisectionClass.o              \
+  Moves/BlockMove.o                   \
+  Moves/MetaMoves.o                   \
+  PIMCClass.o                         \
+  Observables/ObservableBase.o        \
+  Observables/ObservableEnergy.o      \
+  Observables/ObservableCorrelation.o \
+  Observables/StructureFactor.o       \
+  Observables/PathDump.o              \
+  Observables/WindingNumber.o         \
+  SpeciesClass.o                      \
+  Common.o                            \
+  Moves/PermuteTableClass.o	      \
+  Moves/RandomPermClass.o             \
+  Moves/BisectionMoveClass.o          \
+  Moves/OpenBisectionMoveClass.o      \
+  Moves/MoveBase.o                    \
+  ActionClass.o                       \
+  LongRangeRPA.o                      \
+  PathDataClass.o                     \
+  CommunicatorClass.o                 \
+  PathClass.o                         \
+  WrapClass.o			      \
   NodalAction.o                       \
-  Common/Splines/CubicSpline.o       \
-  Common/Splines/MyTricubicSpline.o  \
-  Common/Splines/Grid.o              \
-  Common/Splines/QuinticSpline.o     \
-  Common/Splines/QuinticSplines.o    \
-  Common/MPI/Communication.o	     \
-  Common/IO/InputOutput.o            \
-  Common/IO/InputOutputHDF5.o        \
-  Common/IO/InputFile.o              \
-  Common/IO/InputOutputASCII.o       \
-  Common/IO/InputOutputXML.o         \
-  Common/PairAction/PAcoulombBCFit.o \
-  Common/PairAction/PACoulombFit.o   \
-  Common/PairAction/PADipoleFit.o    \
-  Common/PairAction/PATripoleFit.o   \
-  Common/PairAction/PAclassicalFit.o \
-  Common/PairAction/PAzeroFit.o      \
-  Common/Splines/BicubicSpline.o     \
-  Common/PH/Potential.o              \
-  Common/PH/QuinticPH.o              \
-  Common/PH/CoulombPot.o             \
-  Common/PH/ScreenedPot.o            \
-  Common/PH/SplinePot.o              \
-  Common/PH/HeAzizPot.o              \
-  Common/PairAction/DavidPAClass.o   \
-  Common/Ewald/OptimizedBreakup.o    \
-  Common/MatrixOps/MatrixOps.o       \
-  Common/Integration/GKIntegration.o \
-  Common/Fitting/Fitting.o           \
+  Common/Splines/CubicSpline.o        \
+  Common/Splines/MyTricubicSpline.o   \
+  Common/Splines/Grid.o               \
+  Common/Splines/QuinticSpline.o      \
+  Common/Splines/QuinticSplines.o     \
+  Common/MPI/Communication.o	      \
+  Common/IO/InputOutput.o             \
+  Common/IO/InputOutputHDF5.o         \
+  Common/IO/InputFile.o               \
+  Common/IO/InputOutputASCII.o        \
+  Common/IO/InputOutputXML.o          \
+  Common/PairAction/PAcoulombBCFit.o  \
+  Common/PairAction/PACoulombFit.o    \
+  Common/PairAction/PADipoleFit.o     \
+  Common/PairAction/PATripoleFit.o    \
+  Common/PairAction/PAclassicalFit.o  \
+  Common/PairAction/PAzeroFit.o       \
+  Common/Splines/BicubicSpline.o      \
+  Common/PH/Potential.o               \
+  Common/PH/QuinticPH.o               \
+  Common/PH/CoulombPot.o              \
+  Common/PH/ScreenedPot.o             \
+  Common/PH/SplinePot.o               \
+  Common/PH/HeAzizPot.o               \
+  Common/PairAction/DavidPAClass.o    \
+  Common/Ewald/OptimizedBreakup.o     \
+  Common/MatrixOps/MatrixOps.o        \
+  Common/Integration/GKIntegration.o  \
+  Common/Fitting/Fitting.o            \
   MirroredClass.o  
 #  Common/PairAction/PAcoulombFit.o   \
 #  Common/PairAction/PAszFit.o        \
@@ -141,7 +141,7 @@ TestEwaldobjs =                      \
   MirroredClass.o                    \
   SpeciesClass.o                     \
   ActionClass.o                      \
-  NodalAction.o                       \
+  NodalAction.o                      \
   PathDataClass.o                    \
   LongRangeRPA.o                     \
   Common/MPI/Communication.o	     \

@@ -162,7 +162,7 @@ void PathClass::Read (IOSectionClass &inSection)
 	  flight(TotalNumSlices-1)[dim] = Positions(ptcl-species.FirstPtcl,dim);
 	}
 	LeviFlight (flight, species.lambda, tau);
-	for (int i=0; i<MyNumSlices; i++)
+	for (int i=0; i<(MyNumSlices-1); i++)
 	  Path(i, ptcl) = flight(i-RefSlice);
         Path(MyNumSlices-1,ptcl) = flight(MyNumSlices-2-RefSlice);
       }
