@@ -245,7 +245,8 @@ void WaterRotate::MakeMove()
 //  oldAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
 //  oldAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
 //  oldAction += PathData.Actions.TIP5PWater.SecondProtonKineticAction(startSlice,endSlice,p2ActiveParticles,0);
-  oldAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
+//  oldAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
+  oldAction += PathData.Actions.TIP5PWater.FixedAxisAction(startSlice,endSlice,HActiveParticles,0);
 
   int x,y;
   int z = (int)floor(3*PathData.Path.Random.Local());
@@ -284,7 +285,8 @@ void WaterRotate::MakeMove()
 //  newAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
 //  newAction += PathData.Actions.TIP5PWater.ProtonKineticAction(startSlice,endSlice,HActiveParticles,0);
 //  newAction += PathData.Actions.TIP5PWater.SecondProtonKineticAction(startSlice,endSlice,p2ActiveParticles,0);
-  newAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
+//  newAction += PathData.Actions.TIP5PWater.NewRotKinAction(startSlice,endSlice,HActiveParticles,0);
+  newAction += PathData.Actions.TIP5PWater.FixedAxisAction(startSlice,endSlice,HActiveParticles,0);
 
   //cerr<<"ROTATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
  

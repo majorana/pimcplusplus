@@ -32,6 +32,8 @@ public:
   int FindOtherProton(int ptcl);
   double NewRotKinAction(int startSlice, int endSlice, const Array<int,1> &activeParticles, int level);
   double NewRotKinEnergy(int startSlice, int endSlice, int level);
+  double FixedAxisAction(int startSlice, int endSlice, const Array<int,1> &activeParticles, int level);
+  double FixedAxisEnergy(int startSlice, int endSlice, int level);
   dVec CrossProd(dVec v1, dVec v2);
   double Mag(dVec v);
   double GetAngle(dVec v1, dVec v2);

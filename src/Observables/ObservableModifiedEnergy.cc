@@ -23,7 +23,7 @@ void ModifiedEnergyClass::Accumulate()
   int slice2 = PathData.Path.NumTimeSlices()-1;
   tip5p = PathData.Actions.TIP5PWater.d_dBeta(slice1,slice2,0);
   p2rotkin = PathData.Actions.TIP5PWater.NewRotKinEnergy(slice1,slice2,0);
-  rotkin = PathData.Actions.TIP5PWater.ProtonKineticEnergy(slice1,slice2,0);
+  rotkin = PathData.Actions.TIP5PWater.FixedAxisEnergy(slice1,slice2,0);
 //  p2rotkin = PathData.Actions.TIP5PWater.SecondProtonKineticEnergy(slice1,slice2,0);
 
   TotalSum   += kinetic + dUShort + dULong + node + tip5p;// + rotkin;

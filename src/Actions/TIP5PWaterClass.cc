@@ -862,6 +862,303 @@ double TIP5PWaterClass::SecondProtonKineticEnergy(int startSlice, int endSlice, 
   return spring;
 }
 
+double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
+{
+  double R = O_H_moment_arm;
+//cerr << "ok here we go: R is " << R << endl;
+  double RotK = 0.0;
+//cerr << "active is " << activeParticles << endl;
+  int numChangedPtcls = activeParticles.size();
+  int skip = 1<<level;
+  double levelTau = Path.tau* (1<<level);
+  int TotalNumParticles = Path.NumParticles();
+  int numMol = TotalNumParticles/5;
+  for (int ptclIndex=0; ptclIndex<numChangedPtcls; ptclIndex++){
+    int ptcl1 = activeParticles(ptclIndex);
+    int ptcl2 = ptcl1 + numMol;
+    double FourLambdaTauInv=1.0/(4.0*lambda_p*levelTau);
+    for (int slice=startSlice; slice < endSlice;slice+=skip) {
+//cerr << "ptcl1 is " << ptcl1 << " and ptcl2 is " << ptcl2 << " at slice " << slice << endl;
+      // Load coords and their corresponding oxygens (COMs)
+      dVec P1 = PathData.Path(slice,ptcl1);
+      dVec P2 = PathData.Path(slice,ptcl2);
+      dVec P1prime = PathData.Path(slice+skip,ptcl1);
+      dVec P2prime = PathData.Path(slice+skip,ptcl2);
+//cerr << "P1 " << P1 << endl;
+//cerr << "P2 " << P2 << endl;
+//cerr << "P1prime " << P1prime << endl;
+//cerr << "P2prime " << P2prime << endl;
+      int Optcl = FindCOM(ptcl1);
+      dVec O = PathData.Path(slice,Optcl);
+      dVec Oprime = PathData.Path(slice+skip,Optcl);
+//cerr << "identified COM " << Optcl << " with coords " << O << " and " << Oprime << endl;
+      // Redefine coordinates WRT COM
+      P1 -= O;
+      P2 -= O;
+      P1prime -= Oprime;
+      P2prime -= Oprime;
+      P1 = Normalize(P1);
+      P2 = Normalize(P2);
+      P1prime = Normalize(P1prime);
+      P2prime = Normalize(P2prime);
+//cerr << "now WRT COM coords are " << endl;
+//cerr << "P1 " << P1 << endl;
+//cerr << "P2 " << P2 << endl;
+//cerr << "P1prime " << P1prime << endl;
+//cerr << "P2prime " << P2prime << endl;
+      // Calculate bisectors for each configuration
+      dVec n = GetBisector(P1,P2);
+      dVec nprime = GetBisector(P1prime,P2prime);
+      n = Normalize(n);
+      nprime = Normalize(nprime);
+//cerr << "n " << n << endl;
+//cerr << "nprime " << nprime << endl;
+      double vel_squared;
+      double prefactor;
+      if (n == nprime){
+//        cerr << "EQUAL--------------------------------" << endl;
+//        vel_squared = 0.0;
+      }
+      else{
+//cerr << "I DECIDED THEY WEREN'T EQUAL.  WHATEVER." << endl;
+        // Calculate the cross product - the axis of rotation
+        dVec r = Normalize(CrossProd(n,nprime));
+//cerr << "r " << r << endl;
+        // Calculate polar angles and trig functions
+        // Calculate azimuthal angle
+        double theta = GetAngle(n,nprime);
+//cerr << "theta " << theta << endl;
+        // Calculate lever arms and kinetic energy contributions (mass contained in lambda factor)
+        double alpha = HOH_half_angle;
+        double SinAlpha = sin(alpha);
+        double CosAlpha = cos(alpha);
+        double l = R;
+        dVec u1 = Normalize(P1 - Scale(n,CosAlpha));
+        dVec z1 = Normalize(CrossProd(P1,n));
+        dVec u2 = Normalize(P2 - Scale(n,CosAlpha));
+        dVec z2 = Normalize(CrossProd(P2,n));
+        dVec u1prime = Normalize(P1prime - Scale(nprime,CosAlpha));
+        dVec z1prime = Normalize(CrossProd(P1prime,nprime));
+        dVec u2prime = Normalize(P2prime - Scale(nprime,CosAlpha));
+        dVec z2prime = Normalize(CrossProd(P2prime,nprime));
+        double phi1 = GetAngle(z1,r);
+        double phi2 = GetAngle(z2,r);
+        double psi1 = GetAngle(z1prime,r);
+        double psi2 = GetAngle(z2prime,r);
+//cerr << "P1 " << P1 << endl;
+//cerr << "n " << n << endl;
+//cerr << "P2 " << P2 << endl;
+        double phi;
+        double psi;
+        if(phi1<phi2){
+          phi = phi1;
+        }
+        else{
+          phi = phi2;
+        }
+//cerr << "l " << l << endl;
+//cerr << "I chose psi " << psi << endl;
+        double vel_theta_squared = 2*l*l*theta*theta;
+//cerr << "vel_theta_sq " << vel_theta_squared << endl;
+        if(psi1<psi2){
+          psi = psi1;
+        }
+        else{
+          psi = psi2;
+        }
+//cerr << "I chose psi " << psi << endl;
+        // Calculate angle of rotation (psi)
+
+        // Calculate quaternions
+        double chi = cos(theta/2)*cos((psi + phi)/2);
+        double eta = sin(theta/2)*cos((psi - phi)/2);
+        double xi = sin(theta/2)*sin((psi - phi)/2);
+        double zeta = cos(theta/2)*sin((psi + phi)/2);
+
+        // Calculate Fixed-Axis Approximation parameters
+        double gamma = 2*acos(chi);
+        double SinHalfGamma = sin(gamma/2);
+        // Rotation Moment Matrix
+        double Lx = R*R*CosAlpha*CosAlpha;
+        double Ly = R*R;
+        double Lz = R*R*SinAlpha*SinAlpha;
+        // Axis of Rotation;
+        double ex = eta/SinHalfGamma;
+        double ey = -xi/SinHalfGamma;
+        double ez = zeta/SinHalfGamma;
+        // Rotation Matrix Elements <e|L|e>
+        double Mx = Lx*Lx*ex;
+        double My = Ly*Ly*ey;
+        double Mz = Lz*Lz*ez;
+        double MSum = Mx + My + Mz;
+        vel_squared = MSum*gamma*gamma;
+        prefactor = gamma/(2*SinHalfGamma);
+      }
+//cerr << "from which I calculate vel_squared                      " << vel_squared << endl;
+
+      double GaussProd = 1.0;
+//    for (int dim=0; dim<NDIM; dim++) {
+//  	int NumImage=1;
+      double GaussSum=0.0;
+//	for (int image=-NumImage; image<=NumImage; image++) {
+//	  double dist = vel[dim]+(double)image*Path.GetBox()[dim];
+      GaussSum += exp(-vel_squared*FourLambdaTauInv);
+//      }
+
+      GaussProd *= GaussSum;
+//      }
+      RotK -= log(GaussProd);    
+    //RotK += dot(vel,vel)*FourLambdaTauInv; 
+    }
+  }
+  //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+//cerr << "I'm returning kinetic action " << RotK << endl;
+//cerr << "*************************************" << endl;
+  return (RotK);
+}
+
+double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
+{
+  double R = O_H_moment_arm;
+  double spring=0.0;
+  double levelTau=ldexp(Path.tau, level);
+  spring  = 0.0;  
+  int skip = 1<<level;
+  const int NumImage=1;  
+  double Z = 0.0;
+  double FourLambdaTauInv = 1.0/(4.0*lambda_p*levelTau);
+  int TotalNumParticles = Path.NumParticles();
+  int numMol = TotalNumParticles/5;
+  int startparticle = 3*numMol;
+  int endparticle = 4*numMol;
+  for (int ptcl1=startparticle; ptcl1<endparticle; ptcl1++) {
+    int ptcl2 = ptcl1 + numMol;
+//cerr << "I'm working with particles " << ptcl1 << " and " << ptcl2 << endl;
+    int speciesNum  = Path.ParticleSpeciesNum(ptcl1);
+    if (speciesNum == PathData.Path.SpeciesNum("p")){
+      for (int slice=startSlice; slice<endSlice; slice+=skip) {
+//cerr << "slice " << slice << " -- " << slice+skip << endl;
+	spring += (0.5*3)/levelTau;
+//cerr << spring << endl;
+        // Load coords and their corresponding oxygens (COMs)
+        dVec P1 = PathData.Path(slice,ptcl1);
+        dVec P2 = PathData.Path(slice,ptcl2);
+        dVec P1prime = PathData.Path(slice+skip,ptcl1);
+        dVec P2prime = PathData.Path(slice+skip,ptcl2);
+        int Optcl = FindCOM(ptcl1);
+        dVec O = PathData.Path(slice,Optcl);
+        dVec Oprime = PathData.Path(slice+skip,Optcl);
+        // Redefine coordinates WRT COM
+        P1 -= O;
+        P2 -= O;
+        P1prime -= Oprime;
+        P2prime -= Oprime;
+        P1 = Normalize(P1);
+        P2 = Normalize(P2);
+        P1prime = Normalize(P1prime);
+        P2prime = Normalize(P2prime);
+        // Calculate bisectors for each configuration
+        dVec n = GetBisector(P1,P2);
+        dVec nprime = GetBisector(P1prime,P2prime);
+        n = Normalize(n);
+        nprime = Normalize(nprime);
+        double vel_squared;
+        double prefactor;
+        double D;
+        double C = 1.0;
+        if (n == nprime){
+          vel_squared = 0.0;
+        }
+        else{
+          // Calculate the cross product - the axis of rotation
+          dVec r = CrossProd(n,nprime);
+          r = Normalize(r);
+          // Calculate polar angles and trig functions
+          double theta1 = GetAngle(P1,r);
+          double theta1prime = GetAngle(P1prime,r);
+          double theta2 = GetAngle(P2,r);
+          double theta2prime = GetAngle(P2prime,r);
+          double CosTheta1 = cos(theta1);
+          double CosTheta2 = cos(theta2);
+          double CosTheta1prime = cos(theta1prime);
+          double CosTheta2prime = cos(theta2prime);
+          // Calculate azimuthal angle
+          double theta = GetAngle(n,nprime);
+          // Calculate lever arms and kinetic energy contributions (mass contained in lambda factor)
+        double alpha = HOH_half_angle;
+        double SinAlpha = sin(alpha);
+        double CosAlpha = cos(alpha);
+        double l = R;
+        dVec u1 = Normalize(P1 - Scale(n,CosAlpha));
+        dVec z1 = Normalize(CrossProd(P1,n));
+        dVec u2 = Normalize(P2 - Scale(n,CosAlpha));
+        dVec z2 = Normalize(CrossProd(P2,n));
+        dVec u1prime = Normalize(P1prime - Scale(nprime,CosAlpha));
+        dVec z1prime = Normalize(CrossProd(P1prime,nprime));
+        dVec u2prime = Normalize(P2prime - Scale(nprime,CosAlpha));
+        dVec z2prime = Normalize(CrossProd(P2prime,nprime));
+        double phi1 = GetAngle(z1,r);
+        double phi2 = GetAngle(z2,r);
+        double psi1 = GetAngle(z1prime,r);
+        double psi2 = GetAngle(z2prime,r);
+        double phi;
+        double psi;
+        if(phi1<phi2){
+          phi = phi1;
+        }
+        else{
+          phi = phi2;
+        }
+        if(psi1<psi2){
+          psi = psi1;
+        }
+        else{
+          psi = psi2;
+        }
+
+        // Calculate quaternions
+        double chi = cos(theta/2)*cos((psi + phi)/2);
+        double eta = sin(theta/2)*cos((psi - phi)/2);
+        double xi = sin(theta/2)*sin((psi - phi)/2);
+        double zeta = cos(theta/2)*sin((psi + phi)/2);
+
+        // Calculate Fixed-Axis Approximation parameters
+        double gamma = 2*acos(chi);
+        double SinHalfGamma = sin(gamma/2);
+        // Rotation Moment Matrix
+        double Lx = R*R*CosAlpha*CosAlpha;
+        double Ly = R*R;
+        double Lz = R*R*SinAlpha*SinAlpha;
+        // Axis of Rotation;
+        double ex = eta/SinHalfGamma;
+        double ey = -xi/SinHalfGamma;
+        double ez = zeta/SinHalfGamma;
+        // Rotation Matrix Elements <e|L|e>
+        double Mx = Lx*Lx*ex;
+        double My = Ly*Ly*ey;
+        double Mz = Lz*Lz*ez;
+        double MSum = Mx + My + Mz;
+        vel_squared = MSum*gamma*gamma;
+        prefactor = gamma/(2*SinHalfGamma);
+        D = 1.0;
+        }
+
+        double GaussSum;
+        double numSum;
+	double d2overFLT = vel_squared*FourLambdaTauInv;
+	double expPart = exp(-d2overFLT);
+        GaussSum = expPart;
+        numSum = -d2overFLT/levelTau* expPart; 
+        Z += GaussSum;
+        spring += numSum; 
+      }
+    }
+  }
+  spring = spring/Z;
+//  cerr << "returning spring = " << spring << endl;
+  return spring;
+}
+
 double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
 {
   double R = O_H_moment_arm;
@@ -943,11 +1240,11 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
 //cerr << "CosTheta1 " << CosTheta1 << endl;
 //cerr << "CosTheta2 " << CosTheta2 << endl;
         // Calculate azimuthal angle
-        double phi = GetAngle(n,nprime);
-//cerr << "phi " << phi << endl;
+        double theta = GetAngle(n,nprime);
+//cerr << "theta " << theta << endl;
         // Calculate lever arms and kinetic energy contributions (mass contained in lambda factor)
         double alpha = HOH_half_angle;
-        double SineAlpha = sin(alpha);
+        double SinAlpha = sin(alpha);
         double CosAlpha = cos(alpha);
         double l = R;
         dVec u1 = Normalize(P1 - Scale(n,CosAlpha));
@@ -993,8 +1290,8 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
         }
 //cerr << "l " << l << endl;
 //cerr << "I chose psi " << psi << endl;
-        double vel_phi_squared = 2*l*l*phi*phi;
-//cerr << "vel_phi_sq " << vel_phi_squared << endl;
+        double vel_theta_squared = 2*l*l*theta*theta;
+//cerr << "vel_theta_sq " << vel_theta_squared << endl;
 
         if((psi1uprime<psi2uprime) && (psi1uprime<psi1zprime) && (psi1uprime<psi2zprime)){
           psiprime = psi1uprime;
@@ -1010,20 +1307,20 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
         }
 //cerr << "I chose psiprime " << psiprime << endl;
         // Calculate angle of rotation (psi)
-//cerr << "elements : cos(theta1) is " << CosTheta1 << " and sin(alpha) is " << SineAlpha << endl;
+//cerr << "elements : cos(theta1) is " << CosTheta1 << " and sin(alpha) is " << SinAlpha << endl;
 //        double psi = CalcPsi(theta1);
 //        double psiprime = CalcPsi(theta1prime);
-        //double psi = acos(CosTheta1/SineAlpha);
-        //double psiprime = acos(CosTheta1prime/SineAlpha);
-        double checkdeltapsi = acos(CosTheta2/SineAlpha) - acos(CosTheta2prime/SineAlpha);  
+        //double psi = acos(CosTheta1/SinAlpha);
+        //double psiprime = acos(CosTheta1prime/SinAlpha);
+        double checkdeltapsi = acos(CosTheta2/SinAlpha) - acos(CosTheta2prime/SinAlpha);  
         double deltapsi = psiprime - psi;
 //cerr << "deltapsi is " << deltapsi << " and check " << checkdeltapsi << endl;
-        double lpsi = R*SineAlpha;
+        double lpsi = R*SinAlpha;
 //cerr << "lpsi " << lpsi << endl;
         double vel_psi_squared = 2*lpsi*lpsi*(psi*psi + psiprime*psiprime);
 //cerr << "vel_psi_sq " << vel_psi_squared << endl;
-        //vel_squared = vel_psi_squared + vel_phi_squared;
-        vel_squared = vel_psi_squared;//vel_phi_squared;
+        vel_squared = vel_psi_squared + vel_theta_squared;
+        //vel_squared = vel_theta_squared;//vel_theta_squared;
       }
 //cerr << "from which I calculate vel_squared                      " << vel_squared << endl;
 
@@ -1069,7 +1366,7 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
     if (speciesNum == PathData.Path.SpeciesNum("p")){
       for (int slice=startSlice; slice<endSlice; slice+=skip) {
 //cerr << "slice " << slice << " -- " << slice+skip << endl;
-	spring += (0.5*0)/levelTau;
+	spring += (0.5*3)/levelTau;
 //cerr << spring << endl;
         // Load coords and their corresponding oxygens (COMs)
         dVec P1 = PathData.Path(slice,ptcl1);
@@ -1114,7 +1411,7 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
           double phi = GetAngle(n,nprime);
           // Calculate lever arms and kinetic energy contributions (mass contained in lambda factor)
         double alpha = HOH_half_angle;
-        double SineAlpha = sin(alpha);
+        double SinAlpha = sin(alpha);
         double CosAlpha = cos(alpha);
         double l = R;
         dVec u1 = P1 - Scale(n,CosAlpha);
@@ -1177,10 +1474,10 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
         else{
           psiprime = psi2zprime;
         }
-          double lpsi = R*SineAlpha;
+          double lpsi = R*SinAlpha;
           double vel_psi_squared = 2*lpsi*lpsi*(psi*psi + psiprime*psiprime);
-          //vel_squared = vel_psi_squared + vel_phi_squared;
-          vel_squared = vel_psi_squared;//vel_phi_squared;
+          vel_squared = vel_psi_squared + vel_phi_squared;
+          //vel_squared = vel_phi_squared;//vel_phi_squared;
         }
 
         double GaussSum;
