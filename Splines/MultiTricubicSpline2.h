@@ -211,196 +211,70 @@ MultiTricubicSpline<N>::operator() (double x, double y, double z,
   vals = 0.0;
 
     bSum = 0.0; 
-      cSum = 0.0;
       for (int i=0; i<N; i++)
-        cSum[i] += c0*F(ix,iy,iz)(0,i);
+        bSum[i] += b0*(c0*F(ix,iy,iz)(0,i) + c1*F(ix,iy,iz+1)(0,i) + 
+		       c2*F(ix,iy,iz)(3,i) + c3*F(ix,iy,iz+1)(3,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix,iy,iz+1)(0,i);
+	bSum[i] += b1*(c0*F(ix,iy+1,iz)(0,i) + c1*F(ix,iy+1,iz+1)(0,i) + 
+		       c2*F(ix,iy+1,iz)(3,i) + c3*F(ix,iy+1,iz+1)(3,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix,iy,iz)(3,i);
+	bSum[i] += b2*(c0*F(ix,iy,iz)(2,i) + c1*F(ix,iy,iz+1)(2,i) +
+		       c2*F(ix,iy,iz)(6,i) + c3*F(ix,iy,iz+1)(6,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix,iy,iz+1)(3,i);
-    bSum += b0*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix,iy+1,iz)(0,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix,iy+1,iz+1)(0,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix,iy+1,iz)(3,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix,iy+1,iz+1)(3,i);
-    bSum += b1*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix,iy,iz)(2,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix,iy,iz+1)(2,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix,iy,iz)(6,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix,iy,iz+1)(6,i);
-    bSum += b2*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix,iy+1,iz)(2,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix,iy+1,iz+1)(2,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix,iy+1,iz)(6,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix,iy+1,iz+1)(6,i);
-    bSum += b3*cSum;
-  vals += a0*bSum;
-
-
+	bSum[i] += b3*(c0*F(ix,iy+1,iz)(2,i) + c1*F(ix,iy+1,iz+1)(2,i) +
+		       c2*F(ix,iy+1,iz)(6,i) + c3*F(ix,iy+1,iz+1)(6,i));
+    vals += a0*bSum;
 
     bSum = 0.0; 
-      cSum = 0.0;
       for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix+1,iy,iz)(0,i);
+	bSum[i] += b0*(c0*F(ix+1,iy,iz)(0,i) + c1*F(ix+1,iy,iz+1)(0,i) +
+		       c2*F(ix+1,iy,iz)(3,i) + c3*F(ix+1,iy,iz+1)(3,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix+1,iy,iz+1)(0,i);
+	bSum[i] += b1*(c0*F(ix+1,iy+1,iz)(0,i) + c1*F(ix+1,iy+1,iz+1)(0,i) +
+		       c2*F(ix+1,iy+1,iz)(3,i) + c3*F(ix+1,iy+1,iz+1)(3,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix+1,iy,iz)(3,i);
+	bSum[i] += b2*(c0*F(ix+1,iy,iz)(2,i) + c1*F(ix+1,iy,iz+1)(2,i) +
+		       c2*F(ix+1,iy,iz)(6,i) + c3*F(ix+1,iy,iz+1)(6,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix+1,iy,iz+1)(3,i);
-    bSum += b0*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix+1,iy+1,iz)(0,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix+1,iy+1,iz+1)(0,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix+1,iy+1,iz)(3,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix+1,iy+1,iz+1)(3,i);
-    bSum += b1*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix+1,iy,iz)(2,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix+1,iy,iz+1)(2,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix+1,iy,iz)(6,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix+1,iy,iz+1)(6,i);
-    bSum += b2*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix+1,iy+1,iz)(2,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix+1,iy+1,iz+1)(2,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix+1,iy+1,iz)(6,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix+1,iy+1,iz+1)(6,i);
-    bSum += b3*cSum;
-  vals += a1*bSum;
+	bSum[i] += b3*(c0*F(ix+1,iy+1,iz)(2,i) + c1*F(ix+1,iy+1,iz+1)(2,i) +
+		       c2*F(ix+1,iy+1,iz)(6,i) + c3*F(ix+1,iy+1,iz+1)(6,i));
+      vals += a1*bSum;
 
   ////////////
   // a2 sum //
   ////////////
     bSum = 0.0; 
-      cSum = 0.0;
       for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix,iy,iz)(1,i);
+	bSum[i] += b0*(c0*F(ix,iy,iz)(1,i) + c1*F(ix,iy,iz+1)(1,i)+
+		       c2*F(ix,iy,iz)(5,i) + c3*F(ix,iy,iz+1)(5,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix,iy,iz+1)(1,i);
+	bSum[i] += b1*(c0*F(ix,iy+1,iz)(1,i) + c1*F(ix,iy+1,iz+1)(1,i) +
+		       c2*F(ix,iy+1,iz)(5,i) + c3*F(ix,iy+1,iz+1)(5,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix,iy,iz)(5,i);
+	bSum[i] += b2*(c0*F(ix,iy,iz)(4,i) + c1*F(ix,iy,iz+1)(4,i) +
+		       c2*F(ix,iy,iz)(7,i) + c3*F(ix,iy,iz+1)(7,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix,iy,iz+1)(5,i);
-    bSum += b0*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix,iy+1,iz)(1,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix,iy+1,iz+1)(1,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix,iy+1,iz)(5,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix,iy+1,iz+1)(5,i);
-    bSum += b1*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix,iy,iz)(4,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix,iy,iz+1)(4,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix,iy,iz)(7,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix,iy,iz+1)(7,i);
-    bSum += b2*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix,iy+1,iz)(4,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix,iy+1,iz+1)(4,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix,iy+1,iz)(7,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix,iy+1,iz+1)(7,i);
-    bSum += b3*cSum;
-  vals += a2*bSum;
+	bSum[i] += b3*(c0*F(ix,iy+1,iz)(4,i) + c1*F(ix,iy+1,iz+1)(4,i) +
+		       c2*F(ix,iy+1,iz)(7,i) + c3*F(ix,iy+1,iz+1)(7,i));
+    vals += a2*bSum;
 
 
   ////////////
   // a3 sum //
   ////////////
     bSum = 0.0; 
-      cSum = 0.0;
       for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix+1,iy,iz)(1,i);
+	bSum[i] += b0*(c0*F(ix+1,iy,iz)(1,i) + c1*F(ix+1,iy,iz+1)(1,i) +
+		       c2*F(ix+1,iy,iz)(5,i) + c3*F(ix+1,iy,iz+1)(5,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix+1,iy,iz+1)(1,i);
+	bSum[i] += b1*(c0*F(ix+1,iy+1,iz)(1,i) + c1*F(ix+1,iy+1,iz+1)(1,i) +
+		       c2*F(ix+1,iy+1,iz)(5,i) + c3*F(ix+1,iy+1,iz+1)(5,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix+1,iy,iz)(5,i);
+	bSum[i] += b2*(c0*F(ix+1,iy,iz)(4,i) + c1*F(ix+1,iy,iz+1)(4,i) +
+		       c2*F(ix+1,iy,iz)(7,i) + c3*F(ix+1,iy,iz+1)(7,i));
       for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix+1,iy,iz+1)(5,i);
-    bSum += b0*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix+1,iy+1,iz)(1,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix+1,iy+1,iz+1)(1,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix+1,iy+1,iz)(5,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix+1,iy+1,iz+1)(5,i);
-    bSum += b1*cSum;
-
-      cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix+1,iy,iz)(4,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix+1,iy,iz+1)(4,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix+1,iy,iz)(7,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix+1,iy,iz+1)(7,i);
-    bSum += b2*cSum;
-
-    cSum = 0.0;
-      for (int i=0; i<N; i++)
-	cSum[i] += c0*F(ix+1,iy+1,iz)(4,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c1*F(ix+1,iy+1,iz+1)(4,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c2*F(ix+1,iy+1,iz)(7,i);
-      for (int i=0; i<N; i++)
-	cSum[i] += c3*F(ix+1,iy+1,iz+1)(7,i);
-    bSum += b3*cSum;
+	bSum[i] += b3*(c0*F(ix+1,iy+1,iz)(4,i) + c1*F(ix+1,iy+1,iz+1)(4,i) +
+		       c2*F(ix+1,iy+1,iz)(7,i) + c3*F(ix+1,iy+1,iz+1)(7,i));
     vals += a3*bSum;
 
 //   double& Y000 = F(ix,iy,iz)[0];      //   F
