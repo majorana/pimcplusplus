@@ -38,12 +38,12 @@ public:
   Grid *xGrid, *yGrid, *zGrid;
   inline double operator()(int ix, int iy, int iz) const
   {
-    return (f(iz,iy,iz,0));
+    return (f(iz,iy,ix,0));
   }
   inline double& operator()(int ix, int iy, int iz) 
   {
     UpToDate=false;
-    return (f(iz,iy,iz,0));
+    return (f(iz,iy,ix,0));
   }
   inline double operator()(double x, double y, double z); 
   inline void Update();
@@ -106,10 +106,9 @@ inline void TricubicSpline::Init (Grid *xGrid_, Grid *yGrid_, Grid *zGrid_,
       for (int iz=0; iz<Nz; iz++)
 	f(iz, iy, ix, 0) = f_(ix, iy, iz);
   Nwk = 80*Nx*Ny*Nz;
-  wk.resize(Nwk);
-  IxMinBC=6; IxMaxBC=6;
-  IyMinBC=6; IyMaxBC=6;
-  IzMinBC=6; IzMaxBC=6;
+  IxMinBC=5; IxMaxBC=5;
+  IyMinBC=5; IyMaxBC=5;
+  IzMinBC=5; IzMaxBC=5;
   xIsLin = (xGrid->Type() == LINEAR);
   yIsLin = (yGrid->Type() == LINEAR);
   zIsLin = (zGrid->Type() == LINEAR);
@@ -132,7 +131,7 @@ inline void TricubicSpline::Update()
 //   for (int i=0; i<Nz; i++)
 //     cerr << (*zGrid)(i) << endl;
 
-
+  wk.resize(Nwk);
   mktricubw_(xGrid->Points(), &Nx,
 	     yGrid->Points(), &Ny,
 	     zGrid->Points(), &Nz,
@@ -141,6 +140,7 @@ inline void TricubicSpline::Update()
 	     &IyMinBC, &dummyDouble, &IyMaxBC, &dummyDouble, &dummyInt,
 	     &IzMinBC, &dummyDouble, &IzMaxBC, &dummyDouble, &dummyInt,
 	     wk.data(), &Nwk, &xIsLin, &yIsLin, &zIsLin, &errorCode);
+  wk.resize(1);
   for (int ix=0; ix<Nx; ix++)
     for (int iy=0; iy<Ny; iy++)
       for (int iz=0; iz<Nz; iz++)

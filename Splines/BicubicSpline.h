@@ -618,7 +618,10 @@ inline double BicubicSpline::d2_dy2 (double x, double y)
 
 
 
-
+//////////////////////////////////////////////////////////////////
+// THIS IS HIGHLY BROKEN!!!!!!!!!!!!!!!!!!                      //
+// DO NOT USE UNDER ANY CIRCUMSTANCES!!!!!!!!!!!!!!!!!!!!!      //
+//////////////////////////////////////////////////////////////////
 /// This class is used to interpolate a function z(x,y) in two
 /// dimensions.  It is of cubic order in both directions.  It
 /// currently uses only "natural" boundary conditions:  all second
@@ -643,6 +646,23 @@ private:
 public:
   int Nx, Ny;
   Grid *Xgrid, *Ygrid;
+
+  inline double z(int ix, int iy) const
+  { return (F(ix,iy).z); }
+  inline double &z(int ix, int iy)
+  { return (F(ix,iy).z); }
+  inline double dx(int ix, int iy) const
+  { return ((iy>ix) ? F(iy,ix).dzdy : F(ix,iy).dzdx); }
+  inline double& dx(int ix, int iy) 
+  { return ((iy>ix) ? F(iy,ix).dzdy : F(ix,iy).dzdx); }
+  inline double dy(int ix, int iy) const
+  { return ((iy>ix) ? F(iy,ix).dzdx : F(ix,iy).dzdy); }
+  inline double &dy(int ix, int iy) 
+  { return ((iy>ix) ? F(iy,ix).dzdx : F(ix,iy).dzdy); }
+  inline double dxdy (int ix, int iy) const
+  { return (F(ix,iy).d2zdxdy); }
+  inline double& dxdy (int ix, int iy)
+  { return (F(ix,iy).d2zdxdy); }
 
   /// Interpolates in y at a given row
   inline double  operator() (int ix,   double y);
@@ -732,7 +752,7 @@ inline void SymmBicubicSpline::Init(Grid *xgrid, Grid *ygrid, Array<double,2> &f
   F.resize(f.rows());
   for (int i=0; i<Nx; i++)
     for (int j=0; j<Ny; j++)
-      F(i,j).z = f(i,j);
+      z(i,j) = f(i,j);
   for (int i=0; i<Ny; i++)
     XUpdate(i);
   for (int i=0; i<Nx; i++)
@@ -742,14 +762,14 @@ inline void SymmBicubicSpline::Init(Grid *xgrid, Grid *ygrid, Array<double,2> &f
 }
 
 inline double SymmBicubicSpline::operator() (int ix, int iy) const
-{ return (F(ix,iy).z);}
+{ return (z(ix,iy));}
 
 inline double& SymmBicubicSpline::operator() (int ix, int iy)
 { 
   XUpToDate(iy) = false;
   YUpToDate(ix) = false;
   BiUpToDate = false;
-  return (F(ix,iy).z);
+  return (z(ix,iy));
 }
 
 inline double SymmBicubicSpline::operator() (double x, int iy)
@@ -769,8 +789,8 @@ inline double SymmBicubicSpline::operator() (double x, int iy)
   double q2 = t*t*tm1;
   double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
 
-  return (F(ix,iy).z*p1 + F(ix+1,iy).z*p2 + 
-	  h*(F(ix,iy).dzdx*q1 + F(ix+1,iy).dzdx*q2));
+  return (z(ix,iy)*p1 + z(ix+1,iy)*p2 + 
+	  h*(dx(ix,iy)*q1 + dx(ix+1,iy)*q2));
 }
 
 
@@ -791,8 +811,8 @@ inline double SymmBicubicSpline::operator() (int ix, double y)
   double q2 = t*t*tm1;
   double h = (*Ygrid)(iy+1) - (*Ygrid)(iy);
 
-  return (F(ix,iy).z*p1 + F(ix,iy+1).z*p2 + 
-	  h*(F(ix,iy).dzdy*q1 + F(ix,iy+1).dzdy*q2));
+  return (z(ix,iy)*p1 + z(ix,iy+1)*p2 + 
+	  h*(dy(ix,iy)*q1 + dy(ix,iy+1)*q2));
 }
 
 
@@ -814,8 +834,8 @@ inline double SymmBicubicSpline::Deriv (int ix, double y)
   double dp2 = -dp1;  
   double dq2 = 3.0*t*t - 2.0*t;
 
-  return (hinv*(F(ix,iy).z*dp1 + F(ix,iy+1).z*dp2) + 
-	  (F(ix,iy).dzdy*dq1 + F(ix,iy+1).dzdy*dq2));
+  return (hinv*(z(ix,iy)*dp1 + z(ix,iy+1)*dp2) + 
+	  (dy(ix,iy)*dq1 + dy(ix,iy+1)*dq2));
 }
 
 inline double SymmBicubicSpline::Deriv2 (int ix, double y)
@@ -830,8 +850,8 @@ inline double SymmBicubicSpline::Deriv2 (int ix, double y)
   double h = (*Ygrid)(iy+1) - (*Ygrid)(iy);
   double hinv = 1.0/h;
 
-  return (hinv*((12.0*t-6.0)*hinv*(F(ix,iy).z -F(ix,iy+1).z)
-		+(6.0*t-4.0)*F(ix,iy).dzdy + (6.0*t-2.0)*F(ix,iy+1).dzdy));
+  return (hinv*((12.0*t-6.0)*hinv*(z(ix,iy) -z(ix,iy+1))
+		+(6.0*t-4.0)*dy(ix,iy) + (6.0*t-2.0)*dy(ix,iy+1)));
 }
 
 inline double SymmBicubicSpline::Deriv3 (int ix, double y)
@@ -846,14 +866,20 @@ inline double SymmBicubicSpline::Deriv3 (int ix, double y)
   double h = (*Ygrid)(iy+1) - (*Ygrid)(iy);
   double hinv = 1.0/h;
 
-  return (hinv*hinv*(12.0*hinv*(F(ix,iy).z -F(ix,iy+1).z)
-		+6.0*(F(ix,iy).dzdy + F(ix,iy+1).dzdy)));
+  return (hinv*hinv*(12.0*hinv*(z(ix,iy) -z(ix,iy+1))
+		+6.0*(dy(ix,iy) + dy(ix,iy+1))));
 }
 
 
 
 inline double SymmBicubicSpline::operator() (double x, double y)
 {
+  if (y < x) {
+    double t = y;
+    y = x; 
+    x = t;
+  }
+
   if (!BiUpToDate)
     BiUpdate();
   TinyMatrix<double,4,4> Z;
@@ -879,22 +905,22 @@ inline double SymmBicubicSpline::operator() (double x, double y)
   b(2) = k*q1(v);
   b(3) = k*q2(v);
   
-  Z(0,0) = F(ix,iy).z;
-  Z(0,1) = F(ix,iy+1).z;
-  Z(0,2) = F(ix,iy).dzdy;
-  Z(0,3) = F(ix,iy+1).dzdy;
-  Z(1,0) = F(ix+1,iy).z;
-  Z(1,1) = F(ix+1,iy+1).z;
-  Z(1,2) = F(ix+1,iy).dzdy;
-  Z(1,3) = F(ix+1,iy+1).dzdy;
-  Z(2,0) = F(ix,iy).dzdx;
-  Z(2,1) = F(ix,iy+1).dzdx;
-  Z(2,2) = F(ix,iy).d2zdxdy;
-  Z(2,3) = F(ix,iy+1).d2zdxdy;
-  Z(3,0) = F(ix+1,iy).dzdx;
-  Z(3,1) = F(ix+1,iy+1).dzdx;
-  Z(3,2) = F(ix+1,iy).d2zdxdy;
-  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  Z(0,0) = z(ix,iy);
+  Z(0,1) = z(ix,iy+1);
+  Z(0,2) = dy(ix,iy);
+  Z(0,3) = dy(ix,iy+1);
+  Z(1,0) = z(ix+1,iy);
+  Z(1,1) = z(ix+1,iy+1);
+  Z(1,2) = dy(ix+1,iy);
+  Z(1,3) = dy(ix+1,iy+1);
+  Z(2,0) = dx(ix,iy);
+  Z(2,1) = dx(ix,iy+1);
+  Z(2,2) = dxdy(ix,iy);
+  Z(2,3) = dxdy(ix,iy+1);
+  Z(3,0) = dx(ix+1,iy);
+  Z(3,1) = dx(ix+1,iy+1);
+  Z(3,2) = dxdy(ix+1,iy);
+  Z(3,3) = dxdy(ix+1,iy+1);
   
   double val = 0.0;
   for (int m=0; m<4; m++) {
@@ -934,22 +960,22 @@ inline double SymmBicubicSpline::d_dx (double x, double y)
   b(2) = k*q1(v);
   b(3) = k*q2(v);
   
-  Z(0,0) = F(ix,iy).z;
-  Z(0,1) = F(ix,iy+1).z;
-  Z(0,2) = F(ix,iy).dzdy;
-  Z(0,3) = F(ix,iy+1).dzdy;
-  Z(1,0) = F(ix+1,iy).z;
-  Z(1,1) = F(ix+1,iy+1).z;
-  Z(1,2) = F(ix+1,iy).dzdy;
-  Z(1,3) = F(ix+1,iy+1).dzdy;
-  Z(2,0) = F(ix,iy).dzdx;
-  Z(2,1) = F(ix,iy+1).dzdx;
-  Z(2,2) = F(ix,iy).d2zdxdy;
-  Z(2,3) = F(ix,iy+1).d2zdxdy;
-  Z(3,0) = F(ix+1,iy).dzdx;
-  Z(3,1) = F(ix+1,iy+1).dzdx;
-  Z(3,2) = F(ix+1,iy).d2zdxdy;
-  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  Z(0,0) = z(ix,iy);
+  Z(0,1) = z(ix,iy+1);
+  Z(0,2) = dy(ix,iy);
+  Z(0,3) = dy(ix,iy+1);
+  Z(1,0) = z(ix+1,iy);
+  Z(1,1) = z(ix+1,iy+1);
+  Z(1,2) = dy(ix+1,iy);
+  Z(1,3) = dy(ix+1,iy+1);
+  Z(2,0) = dx(ix,iy);
+  Z(2,1) = dx(ix,iy+1);
+  Z(2,2) = dxdy(ix,iy);
+  Z(2,3) = dxdy(ix,iy+1);
+  Z(3,0) = dx(ix+1,iy);
+  Z(3,1) = dx(ix+1,iy+1);
+  Z(3,2) = dxdy(ix+1,iy);
+  Z(3,3) = dxdy(ix+1,iy+1);
   
   double val = 0.0;
   for (int m=0; m<4; m++) {
@@ -990,22 +1016,22 @@ inline double SymmBicubicSpline::d_dy (double x, double y)
   b(2) = dq1(v);
   b(3) = dq2(v);
   
-  Z(0,0) = F(ix,iy).z;
-  Z(0,1) = F(ix,iy+1).z;
-  Z(0,2) = F(ix,iy).dzdy;
-  Z(0,3) = F(ix,iy+1).dzdy;
-  Z(1,0) = F(ix+1,iy).z;
-  Z(1,1) = F(ix+1,iy+1).z;
-  Z(1,2) = F(ix+1,iy).dzdy;
-  Z(1,3) = F(ix+1,iy+1).dzdy;
-  Z(2,0) = F(ix,iy).dzdx;
-  Z(2,1) = F(ix,iy+1).dzdx;
-  Z(2,2) = F(ix,iy).d2zdxdy;
-  Z(2,3) = F(ix,iy+1).d2zdxdy;
-  Z(3,0) = F(ix+1,iy).dzdx;
-  Z(3,1) = F(ix+1,iy+1).dzdx;
-  Z(3,2) = F(ix+1,iy).d2zdxdy;
-  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  Z(0,0) = z(ix,iy);
+  Z(0,1) = z(ix,iy+1);
+  Z(0,2) = dy(ix,iy);
+  Z(0,3) = dy(ix,iy+1);
+  Z(1,0) = z(ix+1,iy);
+  Z(1,1) = z(ix+1,iy+1);
+  Z(1,2) = dy(ix+1,iy);
+  Z(1,3) = dy(ix+1,iy+1);
+  Z(2,0) = dx(ix,iy);
+  Z(2,1) = dx(ix,iy+1);
+  Z(2,2) = dxdy(ix,iy);
+  Z(2,3) = dxdy(ix,iy+1);
+  Z(3,0) = dx(ix+1,iy);
+  Z(3,1) = dx(ix+1,iy+1);
+  Z(3,2) = dxdy(ix+1,iy);
+  Z(3,3) = dxdy(ix+1,iy+1);
   
   double val = 0.0;
   for (int m=0; m<4; m++) {
@@ -1046,22 +1072,22 @@ inline double SymmBicubicSpline::d2_dxdy (double x, double y)
   b(2) = dq1(v);
   b(3) = dq2(v);
   
-  Z(0,0) = F(ix,iy).z;
-  Z(0,1) = F(ix,iy+1).z;
-  Z(0,2) = F(ix,iy).dzdy;
-  Z(0,3) = F(ix,iy+1).dzdy;
-  Z(1,0) = F(ix+1,iy).z;
-  Z(1,1) = F(ix+1,iy+1).z;
-  Z(1,2) = F(ix+1,iy).dzdy;
-  Z(1,3) = F(ix+1,iy+1).dzdy;
-  Z(2,0) = F(ix,iy).dzdx;
-  Z(2,1) = F(ix,iy+1).dzdx;
-  Z(2,2) = F(ix,iy).d2zdxdy;
-  Z(2,3) = F(ix,iy+1).d2zdxdy;
-  Z(3,0) = F(ix+1,iy).dzdx;
-  Z(3,1) = F(ix+1,iy+1).dzdx;
-  Z(3,2) = F(ix+1,iy).d2zdxdy;
-  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  Z(0,0) = z(ix,iy);
+  Z(0,1) = z(ix,iy+1);
+  Z(0,2) = dy(ix,iy);
+  Z(0,3) = dy(ix,iy+1);
+  Z(1,0) = z(ix+1,iy);
+  Z(1,1) = z(ix+1,iy+1);
+  Z(1,2) = dy(ix+1,iy);
+  Z(1,3) = dy(ix+1,iy+1);
+  Z(2,0) = dx(ix,iy);
+  Z(2,1) = dx(ix,iy+1);
+  Z(2,2) = dxdy(ix,iy);
+  Z(2,3) = dxdy(ix,iy+1);
+  Z(3,0) = dx(ix+1,iy);
+  Z(3,1) = dx(ix+1,iy+1);
+  Z(3,2) = dxdy(ix+1,iy);
+  Z(3,3) = dxdy(ix+1,iy+1);
   
   double val = 0.0;
   for (int m=0; m<4; m++) {
@@ -1101,22 +1127,22 @@ inline double SymmBicubicSpline::d2_dx2 (double x, double y)
   b(2) = k*q1(v);
   b(3) = k*q2(v);
   
-  Z(0,0) = F(ix,iy).z;
-  Z(0,1) = F(ix,iy+1).z;
-  Z(0,2) = F(ix,iy).dzdy;
-  Z(0,3) = F(ix,iy+1).dzdy;
-  Z(1,0) = F(ix+1,iy).z;
-  Z(1,1) = F(ix+1,iy+1).z;
-  Z(1,2) = F(ix+1,iy).dzdy;
-  Z(1,3) = F(ix+1,iy+1).dzdy;
-  Z(2,0) = F(ix,iy).dzdx;
-  Z(2,1) = F(ix,iy+1).dzdx;
-  Z(2,2) = F(ix,iy).d2zdxdy;
-  Z(2,3) = F(ix,iy+1).d2zdxdy;
-  Z(3,0) = F(ix+1,iy).dzdx;
-  Z(3,1) = F(ix+1,iy+1).dzdx;
-  Z(3,2) = F(ix+1,iy).d2zdxdy;
-  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  Z(0,0) = z(ix,iy);
+  Z(0,1) = z(ix,iy+1);
+  Z(0,2) = dy(ix,iy);
+  Z(0,3) = dy(ix,iy+1);
+  Z(1,0) = z(ix+1,iy);
+  Z(1,1) = z(ix+1,iy+1);
+  Z(1,2) = dy(ix+1,iy);
+  Z(1,3) = dy(ix+1,iy+1);
+  Z(2,0) = dx(ix,iy);
+  Z(2,1) = dx(ix,iy+1);
+  Z(2,2) = dxdy(ix,iy);
+  Z(2,3) = dxdy(ix,iy+1);
+  Z(3,0) = dx(ix+1,iy);
+  Z(3,1) = dx(ix+1,iy+1);
+  Z(3,2) = dxdy(ix+1,iy);
+  Z(3,3) = dxdy(ix+1,iy+1);
   
   double val = 0.0;
   for (int m=0; m<4; m++) {
@@ -1160,22 +1186,22 @@ inline double SymmBicubicSpline::d2_dy2 (double x, double y)
   b(2) = kinv*d2q1(v);
   b(3) = kinv*d2q2(v);
   
-  Z(0,0) = F(ix,iy).z;
-  Z(0,1) = F(ix,iy+1).z;
-  Z(0,2) = F(ix,iy).dzdy;
-  Z(0,3) = F(ix,iy+1).dzdy;
-  Z(1,0) = F(ix+1,iy).z;
-  Z(1,1) = F(ix+1,iy+1).z;
-  Z(1,2) = F(ix+1,iy).dzdy;
-  Z(1,3) = F(ix+1,iy+1).dzdy;
-  Z(2,0) = F(ix,iy).dzdx;
-  Z(2,1) = F(ix,iy+1).dzdx;
-  Z(2,2) = F(ix,iy).d2zdxdy;
-  Z(2,3) = F(ix,iy+1).d2zdxdy;
-  Z(3,0) = F(ix+1,iy).dzdx;
-  Z(3,1) = F(ix+1,iy+1).dzdx;
-  Z(3,2) = F(ix+1,iy).d2zdxdy;
-  Z(3,3) = F(ix+1,iy+1).d2zdxdy;
+  Z(0,0) = z(ix,iy);
+  Z(0,1) = z(ix,iy+1);
+  Z(0,2) = dy(ix,iy);
+  Z(0,3) = dy(ix,iy+1);
+  Z(1,0) = z(ix+1,iy);
+  Z(1,1) = z(ix+1,iy+1);
+  Z(1,2) = dy(ix+1,iy);
+  Z(1,3) = dy(ix+1,iy+1);
+  Z(2,0) = dx(ix,iy);
+  Z(2,1) = dx(ix,iy+1);
+  Z(2,2) = dxdy(ix,iy);
+  Z(2,3) = dxdy(ix,iy+1);
+  Z(3,0) = dx(ix+1,iy);
+  Z(3,1) = dx(ix+1,iy+1);
+  Z(3,2) = dxdy(ix+1,iy);
+  Z(3,3) = dxdy(ix+1,iy+1);
   
   double val = 0.0;
   for (int m=0; m<4; m++) {
