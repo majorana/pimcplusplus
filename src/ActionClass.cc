@@ -133,8 +133,12 @@ double ActionClass::UAction (int startSlice, int endSlice,
     }
   }
   // Now add in the long-range part of the action
+  // In primitive form, end slices get weighted by 1/2.  Others by 1.
   for (int slice=startSlice;slice<endSlice;slice+=skip) 
-    TotalU += LongRange_U (slice, level);
+    if ((slice==startSlice) || (slice == endSlice))
+      TotalU += 0.5*LongRange_U (slice, level);
+    else
+      TotalU += LongRange_U (slice, level);
 
   return (TotalU);
 }
@@ -842,7 +846,7 @@ void ActionClass::Energy(int slice1, int level,
     }
   }
   // Add long range part of energy
-  dU += LongRange_dU (slice1, level);
+  dU += 0.5*(LongRange_dU (slice1, level)+LongRange_dU(slice2,level));
 }
 
 

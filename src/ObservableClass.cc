@@ -53,7 +53,7 @@ void PairCorrelationClass::Read(IOSectionClass& in)
   assert(in.ReadVar("NumPoints",numGridPoints));
   grid.Init(gridStart,gridEnd,numGridPoints);
   TotalCounts=0;
-  Histogram.resize(numGridPoints);
+  Histogram.resize(numGridPoints-1);
   Histogram=0;
   in.CloseSection();
 }
@@ -65,6 +65,17 @@ void PairCorrelationClass::WriteInfo()
   IOSection.NewSection("grid");
   grid.Write(IOSection);
   IOSection.CloseSection();
+
+  int numBins = grid.NumPoints-1;
+  Array<double,1> r(numBins);
+  for (int i=0; i<numBins; i++) {
+    double ra = grid(i);
+    double rb = grid(i+1);
+    r(i) = 0.75 * (rb*rb*rb*rb-ra*ra*ra*ra)/(rb*rb*rb-ra*ra*ra);
+  }
+  IOSection.WriteVar("x", r);
+  IOSection.WriteVar("xlabel", "r");
+  IOSection.WriteVar("ylabel", "g(r)");
   IOSection.WriteVar("Species1", PathData.Species(Species1).Name);
   IOSection.WriteVar("Species2", PathData.Species(Species2).Name);
   IOSection.WriteVar("Type","CorrelationFunction");
@@ -81,28 +92,30 @@ void PairCorrelationClass::WriteBlock()
 
   if (Species1==Species2){//Normalizes things when species are same
     norm *= 0.5;
-    // norm=(double)PathData.Species(Species1).NumParticles/(double)(PathData.Species(Species1).NumParticles-1)*1.0/PathData.Path.GetVol();
+    //double N = (double)PathData.Species(Species1).NumParticles;
+    //norm = N/(N-1.0)/PathData.Path.GetVol();
+    //norm = (double)PathData.Species(Species1).NumParticles/(double)(PathData.Species(Species1).NumParticles-1)*1.0/PathData.Path.GetVol();
   }
   
   PathData.Communicator.Sum(Histogram, HistSum);
   if (PathData.Communicator.MyProc()==0) {
-    if (FirstTime){
+    if (FirstTime) {
       FirstTime=false;
       WriteInfo();
       Array<double,2> gofrArray(1,HistSum.size());
-      for (int i=0; i<grid.NumPoints; i++){
+      for (int i=0; i<grid.NumPoints-1; i++){
 	double r1 = grid(i);
 	double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
 	double r = 0.5*(r1+r2);
 	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
 	gofrArray(0,i) = (double) HistSum(i) / (binVol*norm);
       }
-      IOSection.WriteVar("gofr",gofrArray);
-      IOVar = IOSection.GetVarPtr("gofr");
+      IOSection.WriteVar("y",gofrArray);
+      IOVar = IOSection.GetVarPtr("y");
     }
     else {
       Array<double,1> gofrArray(HistSum.size());
-      for (int i=0; i<grid.NumPoints; i++){
+      for (int i=0; i<grid.NumPoints-1; i++){
 	double r1 = grid(i);
 	double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
 	double r = 0.5*(r1+r2);

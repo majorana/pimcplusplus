@@ -19,7 +19,7 @@ public:
   void ReadMoves(IOSectionClass &in);
   void ReadObservables(IOSectionClass &in);
   void ReadAlgorithm(IOSectionClass &in);
-  void WriteRunInfo(IOSectionClass &out);
+  void WriteSystemInfo();
   string OutFileName;
   IOSectionClass OutFile;
   LoopClass Algorithm;

@@ -75,6 +75,9 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
   OutFile.NewSection("RunInfo");
   RunInfo.Write(OutFile);
   OutFile.CloseSection();
+  OutFile.NewSection("System");
+  WriteSystemInfo();
+  OutFile.CloseSection(); // "System" 
   int numOfObservables=in.CountSections("Observable");
   Observables.resize(numOfObservables);
   for (int counter=0;counter<numOfObservables;counter++){
@@ -131,3 +134,27 @@ void PIMCClass::Run()
   
 }
 
+void PIMCClass::WriteSystemInfo()
+{
+  dVec box = PathData.Path.GetBox();
+  Array<double,1> boxArray(3);
+  boxArray[0] = box[0];   boxArray[1] = box[1];   boxArray[2] = box[2];
+  OutFile.WriteVar ("Box", boxArray);
+
+  for (int speciesIndex=0; speciesIndex < PathData.Path.NumSpecies(); 
+       speciesIndex++) {
+    SpeciesClass &species = PathData.Path.Species(speciesIndex);
+    OutFile.NewSection("Species");
+    OutFile.WriteVar ("Name", species.Name);
+    OutFile.WriteVar ("NumParticles", species.NumParticles);
+    OutFile.WriteVar ("lambda", species.lambda);
+    ParticleType type = species.GetParticleType();
+    if (type == FERMION)
+      OutFile.WriteVar ("ParticleType", "Fermion");
+    if (type == BOSON)
+      OutFile.WriteVar ("ParticleType", "Boson");
+    if (type == BOLTZMANNON)
+      OutFile.WriteVar ("ParticleType", "Boltzmannon");
+    OutFile.CloseSection(); //"Species"
+  }
+}

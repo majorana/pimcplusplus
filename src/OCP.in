@@ -1,8 +1,9 @@
-double tau=1000.0;
+double tau = 250.0;
 
 Section (System)
 {
-  int NumTimeSlices=28;
+//  int NumTimeSlices=112;
+  int NumTimeSlices=12;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[974.87, 974.87, 974.87];
   double kCutoff = 0.04;
@@ -29,7 +30,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "OCPoutput.h5";
+  string OutFile = "OCPoutput_tau250b.h5";
   Section (Observable)
     {
       string type = "Energy";
