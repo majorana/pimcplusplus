@@ -42,7 +42,7 @@ OnePath* SmoothClass::SmoothClosedPath (OnePath &oldPath)
   double scale = sqrt(2.0*realPower/kPower);
   
   // Now, create new path, taking real part of inverse transform. 
-  N = 20*Numk+1;
+  N = 15*Numk+1;
   Ninv = 1.0/(N-1);
   newPath.Path.resize(N);
   for (int n=0; n<N; n++) 

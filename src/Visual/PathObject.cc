@@ -61,6 +61,7 @@ void PathObject::TubesSet(vector<Vec3> &path)
   glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);
   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30.0);
 
+  gleSetNumSides(10);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
   if (Closed)
@@ -160,7 +161,11 @@ void PathObject::DrawPOV(FILE *fout, string rotString)
   // Write th color
   fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
 	   Color[0], Color[1], Color[2]);
-  fprintf (fout, "  finish { specular 0.9 roughness 0.05 }\n");
+  fprintf (fout, "  finish { \n");
+  fprintf (fout, "  specular 0.6 roughness 0.075\n");
+  fprintf (fout, "  ambient  0.3\n");
+  fprintf (fout, "  diffuse  0.6\n");
+  fprintf (fout, "}\n");
   fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "}\n\n");
 }

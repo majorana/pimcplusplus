@@ -43,8 +43,8 @@ ifeq ($(HOSTTYPE),i386-linux)
            $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(FFTW3LIB) $(CBLASLIB) -lm 
     INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC) \
            $(FFTW3INC) $(CBLASINC)
-    CC = mpiCC
-    LD = mpiCC  -Bstatic 
+    CC = g++
+    LD = g++  -Bstatic 
     CCFLAGS = -c -g  -Wno-deprecated  #-pg 
 endif
 

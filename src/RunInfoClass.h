@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <pwd.h>
 #include <time.h>
 class RunInfoClass
 {
@@ -38,13 +39,8 @@ public:
   }
   inline RunInfoClass()
   {
-#ifndef NOCUSERID
-    char username[L_cuserid];
-    cuserid(username);
-#else
-    string username = "Not Available";
-#endif
-    UserName = username;
+    struct passwd* pwInfo = getpwuid(getuid());
+    UserName = pwInfo->pw_name;
     BuildDate = __DATE__;
     BuildTime = __TIME__;
     char hostname[300];

@@ -59,7 +59,7 @@ void
 BoxObject::DrawPOV (FILE *fout, string rotString)
 {
   double minDim = min(min(Lx,Ly),Lz);
-  double radius = minDim/250.0;
+  double radius = minDim/450.0;
   POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
 	          0.5*Lx ,-0.5*Ly, -0.5*Lz, radius, rotString);
   POVLine (fout, -0.5*Lx,  0.5*Ly, -0.5*Lz,
