@@ -95,7 +95,8 @@ double ActionClass::UAction (int startSlice, int endSlice,
 
 	  double U;
 	  U = PairActionVector(PairIndex)->U(q,z,s2, level);
-	  U -= PairActionVector(PairIndex)->Ulong(level)(q);
+	  // HACK HACK HACK HACK HACK HACK HACK HACK HACK 
+	  //U -= PairActionVector(PairIndex)->Ulong(level)(q);
 	  TotalU += U;
 	}
       }
@@ -631,3 +632,104 @@ void ActionClass::OptimizedBreakup_V(int numKnots)
     }
   }
 }
+
+
+
+/// Make sure you move the join to the end so we don't have to worry
+/// about permutations before calling this.
+void ActionClass::Energy(int slice1, int level,
+			 double &spring, double &dU)
+{
+  int numPtcls = PathData.NumParticles();
+  double tau = PathData.Action.tau;
+  int slice2 = slice1 + (1<<level);
+  for (int i=0; i<level; i++) 
+    tau *= 2.0;
+  // Add constant part.  Note: we should really check the number of
+  // dimensions. 
+  spring = dU = 0.0;
+  const int NumImage=1;
+  for (int ptcl=0; ptcl<numPtcls; ptcl++)
+    if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
+      spring += 1.5/tau;
+
+  for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
+    // Do free-particle part
+    int species1 = PathData.Path.ParticleSpeciesNum(ptcl1);
+    double lambda = PathData.Path.ParticleSpecies(ptcl1).lambda;
+    if (lambda != 0.0) {
+      double FourLambdaTauInv = 
+	1.0/(4.0*PathData.Path.Species(species1).lambda*tau);
+      dVec vel;
+      vel = PathData.Path.Velocity(slice1, slice2, ptcl1);
+      double Z = 1.0;
+      dVec GaussSum=0.0;
+      for (int dim=0; dim<NDIM; dim++) {
+	for (int image=-NumImage; image<=NumImage; image++) {
+	  double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
+	    GaussSum[dim] += exp(-dist*dist*FourLambdaTauInv);
+	}
+	Z *= GaussSum[dim];
+      }
+      dVec numSum=0.0;
+      for (int dim=0;dim<NDIM;dim++){
+	for (int image=-NumImage;image<=NumImage;image++){
+	  double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
+	  numSum[dim] += 
+	    (-dist*dist*FourLambdaTauInv/tau)*exp(-dist*dist*FourLambdaTauInv);
+	}
+      }
+      double scalarnumSum=0.0;
+      for (int dim=0;dim<NDIM;dim++){
+	dVec numProd=1.0;
+	for (int dim2=0;dim2<NDIM;dim2++){
+	  if (dim2!=dim){
+	    numProd[dim] *= GaussSum[dim2];
+	  }
+	  else {
+	    numProd[dim] *=  numSum[dim2];
+	  }
+	  
+	}
+	scalarnumSum += numProd[dim];
+      }
+      spring += scalarnumSum/Z; 
+    }
+    
+    
+    for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
+      dVec r, rp;
+      double rmag, rpmag;
+      PathData.Path.DistDisp(slice1, slice2, ptcl1, ptcl2, rmag,rpmag,r,rp); 
+      
+      double s2 = dot(r-rp, r-rp);
+      double q = 0.5*(rmag+rpmag);
+      double z = (rmag-rpmag);
+
+      int PairIndex = 
+	PathData.Action.PairMatrix(species1, 
+				   PathData.Path.ParticleSpeciesNum(ptcl2));
+      dU += PathData.Action.PairActionVector(PairIndex)->dU(q, z, s2, level);
+    }
+  }
+}
+
+
+
+
+double ActionClass::PotentialEnergy (int slice)
+{
+  double vSum=0.0;
+  for (int ptcl1=0; ptcl1<Path.NumParticles(); ptcl1++){
+    int species1=PathData.Path.ParticleSpeciesNum(ptcl1);
+    for (int ptcl2=0;ptcl2<ptcl1;ptcl2++){
+      int species2=PathData.Path.ParticleSpeciesNum(ptcl2);
+      int PairIndex =PathData.Action.PairMatrix(species1,species2);
+      dVec r;
+      double rmag;
+      PathData.Path.DistDisp(slice, ptcl1, ptcl2,rmag, r); 
+      vSum +=(PathData.Action.PairActionVector(PairIndex))->V(rmag);
+    }
+  }
+  return vSum;
+} 

@@ -121,13 +121,33 @@ void TotalEnergyClass::Accumulate()
     }
   }
   
-
   
   ESum += sum; //HACK!
   VSum += vSum;
   SSum += sSum;
   FSum += fSum; 
   NumSamples++;
+
+  /// CHECK code
+  double Echeck = 0.0;
+  double spring, dU = 0.0;
+  spring = dU = 0.0;
+  for (int slice=0; slice<numLinks; slice++) {
+    double sp, du;
+    PathData.Action.Energy(slice, 0, sp, du);
+    dU += du;
+    spring += sp;
+  }
+  Echeck = spring + dU;
+  if (fabs(sum-Echeck) > 1.0e-10*max(1.0,fabs(sum))) {
+    cerr << "sum   = " << sum << endl;
+    cerr << "Echeck = " << Echeck << endl;
+    cerr << "diff   = " << sum-Echeck << endl;
+    cerr << "fSum   = " << fSum << endl;
+    cerr << "dU     = " << dU << endl;
+    cerr << "sSum   = " << sSum << endl;
+    cerr << "spring = " << spring << endl << endl;
+  }
 }
 
 void TotalEnergyClass::ShiftData (int NumTimeSlices)

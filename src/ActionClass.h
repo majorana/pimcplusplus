@@ -39,12 +39,14 @@ public:
   /// Calculates the total action.
   double UAction (int startSlice, int endSlice, 
 		  const Array<int,1> &changedParticles, int level);
-
   double KAction (int startSlice, int endSlice, 
 		  const Array<int,1> &changedParticles, int level);
-
   double TotalAction(int startSlice, int endSlice, 
 		     const Array<int,1> &changedParticles, int level);
+
+  void Energy (int slice1, int level,
+	       double &spring, double &dU);
+  double PotentialEnergy (int slice);
 
   /// This computes the optimized breakups for the pair actions stored
   /// in PairActionVector.  The parameters are the number of knots in

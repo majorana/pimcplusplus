@@ -129,7 +129,7 @@ Section (Moves){
 Section (Algorithm)
 {
   Section (Loop){ // Before Accumulating Observables
-    int steps=10000; 
+    int steps=1000; 
     Section (Loop){ 
 
       int steps=3;
