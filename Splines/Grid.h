@@ -291,6 +291,21 @@ class OptimalGrid : public Grid
       Init (Z, rmax);
     }
   }
+  
+  void InitRatio (double end, double ratio, int numpoints)
+  {
+    End = end; 
+    NumPoints = numpoints;
+    
+    b = log(ratio)/(double)(numpoints-2);
+    a = end/(exp(b*(double)(numpoints-1)) - 1);
+      
+    grid.resize(NumPoints);
+      
+    for (int i=0; i<NumPoints; i++)
+      grid(i) = a*(exp(b*i)-1.0);
+  }
+
 
 
   /// This form of the constructor takes a nuclear charge and a

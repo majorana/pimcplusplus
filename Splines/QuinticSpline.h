@@ -47,6 +47,7 @@ public:
   inline int NumPoints() const;
 
   inline Array<double,1>& Data();
+  inline const Array<double,1>& Data() const;
   /// Recompute the quintic polynomial coefficients
   void Update();
   
@@ -284,6 +285,11 @@ inline double QuinticSpline::Deriv4(double x)
 inline Array<double,1>& QuinticSpline::Data()
 {
   UpToDate = false;
+  return (Y);
+}
+
+inline const Array<double,1>& QuinticSpline::Data() const
+{
   return (Y);
 }
 
