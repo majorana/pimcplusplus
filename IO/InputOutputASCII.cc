@@ -346,13 +346,13 @@ void ReadAtomicVar(TokenClass token,string &d)
 /// is a problem.
 void ReadAtomicVar(TokenClass token, bool &b)
 {
-      if (token.Str=="true"){
-	b=true;
-      }
-      else if (token.Str=="false"){
-	b=false;
-      }
-      else ReadAbort(true,token.LineNumber,"Expected true or false\n");
+  if (token.Str=="true"){
+    b=true;
+  }
+  else if (token.Str=="false"){
+    b=false;
+  }
+  else ReadAbort(true,token.LineNumber,"Expected true or false\n");
 }
 
 /// This template function reads a 1-D array from a token list into

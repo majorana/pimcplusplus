@@ -12,11 +12,12 @@ void startElementWrapper(void *parserPtr, const xmlChar *name,
   string nameStr = (const char *)name;
   int i=0;
   XMLattribute myAttr;
-  while (attr[2*i] != NULL) {
-    myAttr.Name = (const char *)(attr[i]);
-    myAttr.Value = (const char *)(attr[i+1]);
-    attributes.push_back(myAttr);
-  }
+  if (attr != NULL)
+    while (attr[i] != NULL) {
+      myAttr.Name = (const char *)(attr[i++]);
+      myAttr.Value = (const char *)(attr[i++]);
+      attributes.push_back(myAttr);
+    }
   XMLparserClass &parser = *((XMLparserClass *) parserPtr);
   parser.startElement(nameStr, attributes);
 }
@@ -70,94 +71,149 @@ void XMLparserClass::SetHandler()
 
 bool XMLparserClass::ParseFile(string fileName, IOTreeXMLClass *rootNode)
 {
+  FileName = fileName;
+  CurrTree = rootNode;
   // set up the handler functions
   SetHandler();
   // store our filename
-  currTree->FileName = fileName;
+  CurrTree->FileName = fileName;
   
   int retval = xmlSAXUserParseFile(&handler, this, fileName.c_str());
   // don't know if this is right.
   return (retval == 0);
 }
 
-
-void XMLparserClass::startElement(string &name, list<XMLattribute> &attributes)
+inline bool IsWhiteSpace(char ch)
 {
-  cerr << "Element name:  " << name << endl;
-  cerr << "Attributes:  " << endl;
-  list<XMLattribute>::iterator iter = attributes.begin();
-  while (iter != attributes.end()) {
-    cerr << iter->Name << "=\"" << iter->Value << "\"\n";
+  return ((ch==' ') || (ch=='\t') || (ch=='\n'));
+}
+
+void StripWhiteSpace(string &str)
+{
+  int i=0;
+  while (i<str.length()) {
+    if (IsWhiteSpace(str[i]))
+      str.erase(i,1);
+    else
+      i++;
+  }
+}
+
+void CommaSplit(string &str, list<string> &strList)
+{
+  int len=0;
+  int start=0;
+  string tmpString;
+  while ((len+start)<str.length()) {
+    if (str[len+start] == ',') {
+      tmpString = str.substr(start,len);
+      strList.push_back(tmpString);
+      start+=len+1;
+      len=0;
+    }
+    else
+      len++;
+  }
+  tmpString = str.substr(start,len);
+  strList.push_back(tmpString);
+}
+
+void TestCommaSplit()
+{
+  string s = "abc,def, 123";
+  list<string> strList;
+  CommaSplit(s, strList);
+  list<string>::iterator iter = strList.begin();
+  while (iter != strList.end()) {
+    cerr << "\"" << *iter << "\"\n";
     iter++;
   }
 }
 
-void XMLparserClass::endElement(string &name)
+void TestStripWhiteSpace()
 {
-  cerr << "End element " << name << endl;
-}
-
-void XMLparserClass::characters(string &newChars)
-{
-  cerr << newChars;
+  string s = " abcdef 123456 ";
+  StripWhiteSpace(s);
+  cerr << s <<endl;
 }
 
 
-
-bool IOTreeXMLClass::OpenFile(string fileName, string myName,
-			      IOTreeClass *parent)
+inline int StrToInt (string &str)
 {
-  Parent = parent;
-  Name = myName;
-  XMLparserClass parser;
-  return parser.ParseFile (fileName, this);
-}
-
-
-
-
-/// Simply prints 3*num spaces
-inline void XMLPrintIndent(int num)
-{
-  for (int counter=0;counter<num*2;counter++)
-    cout<<' ';
-}
-
-/// Simply prints 3*num spaces
-inline void XMLPrintIndent(int num,ofstream &outFile)
-{
-  for (int counter=0;counter<num*2;counter++)
-    outFile<<' ';
-}
-
-
-/// Prints an indented hierarchy of sections and variable names to
-/// cout. 
-void IOTreeXMLClass::PrintTree(int indentNum)
-{
-  XMLPrintIndent(indentNum);
-  cout<<"Section: "<<Name<<endl;
-  list<VarClass*>::iterator varIter=VarList.begin();
-  while (varIter!=VarList.end()){
-    XMLPrintIndent(indentNum+1);
-    cout<<"Variable: "<<(*varIter)->Name<<" "<<endl;
-    varIter++;
+  char *endPtr;
+  int d = strtol(str.c_str(), &endPtr,10);
+  if (*endPtr!='\0') {
+    cerr << "Error reading integer in XML parser.\n";
+    abort();
   }
-  list<IOTreeClass*>::iterator secIter=SectionList.begin();
-  while (secIter!=SectionList.end()){
-    //    cout<<"Section: "<<(*secIter)->Name<<endl;
-    (*secIter)->PrintTree(indentNum+1);
-    secIter++;
+  return (d);
+}
+
+inline double StrToDouble(string str)
+{
+  double val;
+  char *endPtr;
+  val = strtod(str.c_str(), &endPtr);
+  if (*endPtr!='\0') {
+    cerr << "Badly formed double in XML parser.\n";
+    abort();
+  }
+  return (val);
+}
+
+inline string StrToString(string str)
+{
+  string val;
+  int len = str.length();
+  if ((str[0] == '\"') && (str[len-1] == '\"')) {
+    val = str;
+    val.erase(len-1,1);
+    val.erase(0,1);
+    return (val);
+  }
+  else {
+    cerr << "Badly formed string in XML parser.\n";
+    abort();
+  } 
+}
+
+void Lower (string &str)
+{
+  for (int i=0; i<str.length(); i++)
+    str[i] = tolower(str[i]);
+}
+
+inline bool StrToBool (string str)
+{
+  Lower (str);
+  if (str == "true")
+    return (true);
+  else if (str == "false")
+    return (false);
+  else {
+    cerr << "Badly formed bool in XML parser.\n";
+    abort();
   }
 }
 
-/// Calls PrintTree(0)
-void IOTreeXMLClass::PrintTree()
+
+
+void ParseDim(string dimStr, Array<int,1> &dimensions)
 {
-  PrintTree(0);
+  StripWhiteSpace(dimStr);
+  list<string> strList;
+  CommaSplit(dimStr, strList);
+  list<string>::iterator iter = strList.begin();
+  int numDim = 0;
+  while (iter != strList.end()) {
+    iter++;
+    numDim++;
+  }
+  dimensions.resize(numDim);
+  iter = strList.begin();
+  for (int i=0; i<numDim; i++)
+    dimensions(i) = StrToInt(*iter);
 }
-
-
 
 
 
@@ -255,6 +311,263 @@ VarXMLClass *NewXMLVar (AtomicType newType, int ndim,
 }
 
 
+AtomicType StrToType (string &str)
+{
+  if (str == "double")
+    return DOUBLE_TYPE;
+  else if (str == "int")
+    return INT_TYPE;
+  else if (str == "string")
+    return STRING_TYPE;
+  else if (str == "bool")
+    return BOOL_TYPE;
+  else { 
+    cerr << "Unknown Atomic type " << str << endl;
+    abort();
+  }
+}
+
+void XMLparserClass::startElement(string &name, list<XMLattribute> &attributes)
+{
+  // First, check to see if we have a section or variable
+  ElementIsSection = true;
+  // Push a new character buffer onto the stack
+  string s;
+  charBuffers.push(s);
+
+  string typeStr, dimStr, file;
+  list<XMLattribute>::iterator iter = attributes.begin();
+  while (iter != attributes.end()) {
+    cerr << "Atrribute = " << iter->Name << endl;
+    if (iter->Name == "type") {
+      typeStr = iter->Value;
+      ElementIsSection = false;
+    }
+    else if (iter->Name == "dim")
+      dimStr = iter->Value;
+    else if (iter->Name == "file")
+      file = iter->Value;
+    else {
+      cerr << "Unrecognized attribute " << iter->Name 
+	   << " in file " << FileName << ".  Exitting\n";
+      abort();
+    }
+    iter++;
+  }
+
+  if (ElementIsSection) {
+    if (file != "") { // We're including another file
+      cerr << "Section (" << name << ") is including "
+	   << file << ".\n";
+    }
+    else {  // This is a new section
+      IOTreeXMLClass *newTree = new IOTreeXMLClass;
+      newTree->Name = name;
+      newTree->Parent = CurrTree;
+      CurrTree->SectionList.push_back(newTree);
+      CurrTree = newTree;
+      cerr << "New Section (" << name << ")\n";
+    }
+  }
+  else { // This is a variable
+    int ndim;
+    AtomicType type;
+    Array<int,1> dim;
+    type = StrToType(typeStr);
+    if (dimStr != "") { // This is an array
+      ParseDim(dimStr, dim);
+      ndim = dim.size();
+      cerr << "Array variable " << name << " of type "
+	   << typeStr << " and dimensions (" << dimStr
+	   << ").\n";
+    }
+    else { // This is a scalar variable
+      ndim = 0;
+      cerr << "Scalar variable " << name << " of type " 
+	   << typeStr << ".\n";
+    }
+    CurrVar = NewXMLVar(type, ndim, dim);
+    CurrVar->Name = name;
+    CurrVar->Type = type;
+    CurrVar->Dim = ndim;
+  }
+
+
+//   cerr << "Element name:  " << name << endl;
+//   cerr << "Attributes:  " << endl;
+//   list<XMLattribute>::iterator iter = attributes.begin();
+//   while (iter != attributes.end()) {
+//     cerr << iter->Name << "=\"" << iter->Value << "\"\n";
+//     iter++;
+//   }
+}
+
+template <class T>
+void ReadArrayData(list<string> numbers, Array<T,1> valArray)
+{
+  
+
+
+}
+
+
+void VarXMLdouble0Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=1) {
+    cerr << "Wrong number of doubles in XML parser for variable "
+	 << Name << endl;
+    abort();
+  }
+  Value = StrToDouble (vals.front());
+}
+
+void VarXMLdouble1Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of doubles in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) {
+    Value(i) = StrToDouble(*iter);
+    iter++;
+  }
+}
+
+void VarXMLdouble2Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of doubles in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) {
+      Value(i,j) = StrToDouble(*iter);
+      iter++;
+    }
+}
+
+void VarXMLdouble3Class::ReadVals(list<string> &vals)
+{
+  if (vals.size()!=Value.size()) {
+    cerr << "Wrong number of doubles in XML parser for variable "
+	 << Name << endl;
+    cerr << "Expected " << Value.size() << ", but got " 
+	 << vals.size() << ".\n";
+    abort();
+  }
+  list<string>::iterator iter = vals.begin();
+  for (int i=0; i<Value.extent(0); i++) 
+    for (int j=0; j<Value.extent(1); j++) 
+      for (int k=0; k<Value.extend(2); k++){
+	Value(i,j,k) = StrToDouble(*iter);
+	iter++;
+      }
+}
+
+
+void VarXMLdouble2Class::ReadVals(list<string> &vals) {}
+void VarXMLdouble3Class::ReadVals(list<string> &vals) {}
+void VarXMLint0Class::ReadVals(list<string> &vals) {}
+void VarXMLint1Class::ReadVals(list<string> &vals) {}
+void VarXMLint2Class::ReadVals(list<string> &vals) {}
+void VarXMLint3Class::ReadVals(list<string> &vals) {}
+void VarXMLstring0Class::ReadVals(list<string> &vals) {}
+void VarXMLstring1Class::ReadVals(list<string> &vals) {}
+void VarXMLstring2Class::ReadVals(list<string> &vals) {}
+void VarXMLstring3Class::ReadVals(list<string> &vals) {}
+void VarXMLbool0Class::ReadVals(list<string> &vals) {}
+void VarXMLbool1Class::ReadVals(list<string> &vals) {}
+void VarXMLbool2Class::ReadVals(list<string> &vals) {}
+void VarXMLbool3Class::ReadVals(list<string> &vals) {}
+
+
+
+void XMLparserClass::endElement(string &name)
+{
+  string buffer=charBuffers.top();
+  charBuffers.pop();
+  if (ElementIsSection)
+    CurrTree = CurrTree->Parent;
+  else {
+    // Parse variable character data here.
+    list<string> numbers;
+    StripWhiteSpace(buffer);
+    CommaSplit(buffer,numbers);
+    CurrVar->ReadVals(numbers);
+    CurrTree->VarList.push_back(CurrVar);
+    
+    ElementIsSection = true;
+  }
+  cerr << "End element " << name << endl;
+}
+
+void XMLparserClass::characters(string &newChars)
+{
+  charBuffers.top() += newChars;
+}
+
+
+
+bool IOTreeXMLClass::OpenFile(string fileName, string myName,
+			      IOTreeClass *parent)
+{
+  Parent = parent;
+  Name = myName;
+  XMLparserClass parser;
+  return parser.ParseFile (fileName, this);
+}
+
+
+
+
+/// Simply prints 3*num spaces
+inline void XMLPrintIndent(int num)
+{
+  for (int counter=0;counter<num*2;counter++)
+    cout<<' ';
+}
+
+/// Simply prints 3*num spaces
+inline void XMLPrintIndent(int num,ofstream &outFile)
+{
+  for (int counter=0;counter<num*2;counter++)
+    outFile<<' ';
+}
+
+
+/// Prints an indented hierarchy of sections and variable names to
+/// cout. 
+void IOTreeXMLClass::PrintTree(int indentNum)
+{
+  XMLPrintIndent(indentNum);
+  cout<<"Section: "<<Name<<endl;
+  list<VarClass*>::iterator varIter=VarList.begin();
+  while (varIter!=VarList.end()){
+    XMLPrintIndent(indentNum+1);
+    cout<<"Variable: "<<(*varIter)->Name<<" "<<endl;
+    varIter++;
+  }
+  list<IOTreeClass*>::iterator secIter=SectionList.begin();
+  while (secIter!=SectionList.end()){
+    //    cout<<"Section: "<<(*secIter)->Name<<endl;
+    (*secIter)->PrintTree(indentNum+1);
+    secIter++;
+  }
+}
+
+/// Calls PrintTree(0)
+void IOTreeXMLClass::PrintTree()
+{
+  PrintTree(0);
+}
 
 
 

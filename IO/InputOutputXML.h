@@ -58,9 +58,10 @@ public:
   virtual bool Append (bool val);
   virtual bool Append (Array<bool,1> &val);
   virtual bool Append (Array<bool,2> &val);
-
-
+  
   virtual void Print(ofstream &outFile) = 0;
+
+  virtual void ReadVals(list<string> &vals) = 0;
 };
 
 class VarXMLdouble0Class : public VarXMLClass
@@ -69,6 +70,7 @@ public:
   double Value;
   bool ReadInto (double &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLdouble1Class : public VarXMLClass
@@ -78,6 +80,7 @@ public:
   bool ReadInto (Array<double,1> &val);
   bool Append (double val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLdouble2Class : public VarXMLClass
@@ -87,6 +90,7 @@ public:
   bool ReadInto (Array<double,2> &val);
   bool Append (Array<double,1> &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLdouble3Class : public VarXMLClass
@@ -96,6 +100,7 @@ public:
   bool ReadInto (Array<double,3> &val);
   bool Append (Array<double,2> &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 
@@ -105,6 +110,7 @@ public:
   int Value;
   bool ReadInto (int &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLint1Class : public VarXMLClass
@@ -114,6 +120,7 @@ public:
   bool ReadInto (Array<int,1> &val);
   bool Append (int val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLint2Class : public VarXMLClass
@@ -123,6 +130,7 @@ public:
   bool ReadInto (Array<int,2> &val);
   bool Append (Array<int,1> &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLint3Class : public VarXMLClass
@@ -132,6 +140,7 @@ public:
   bool ReadInto (Array<int,3> &val);
   bool Append (Array<int,2> &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
  
@@ -141,6 +150,7 @@ public:
   string Value;
   bool ReadInto (string &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLstring1Class : public VarXMLClass
@@ -150,6 +160,7 @@ public:
   bool ReadInto (Array<string,1> &val);
   bool Append (string val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLstring2Class : public VarXMLClass
@@ -159,6 +170,7 @@ public:
   bool ReadInto (Array<string,2> &val);
   bool Append (Array<string,1> &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLstring3Class : public VarXMLClass
@@ -168,6 +180,7 @@ public:
   bool ReadInto (Array<string,3> &val);
   bool Append (Array<string,2> &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
  
@@ -178,6 +191,7 @@ public:
   bool Value;
   bool ReadInto (bool &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLbool1Class : public VarXMLClass
@@ -187,6 +201,7 @@ public:
   bool ReadInto (Array<bool,1> &val);
   bool Append (bool val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLbool2Class : public VarXMLClass
@@ -196,6 +211,7 @@ public:
   bool ReadInto (Array<bool,2> &val);
   bool Append (Array<bool,1> &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 class VarXMLbool3Class : public VarXMLClass
@@ -205,6 +221,7 @@ public:
   bool ReadInto (Array<bool,3> &val);
   bool Append (Array<bool,2> &val);
   void Print(ofstream &outFile);
+  void ReadVals(list<string> &vals);
 };
 
 
@@ -282,10 +299,13 @@ class IOTreeXMLClass : public IOTreeClass
 class XMLparserClass
 {
 private:
-  IOTreeXMLClass *currTree;
+  IOTreeClass *CurrTree;
+  VarXMLClass *CurrVar;
   xmlSAXHandler handler;
   stack<string> charBuffers;
   void SetHandler();
+  bool ElementIsSection;
+  string FileName;
 public:
   bool ParseFile (string fileName, IOTreeXMLClass *rootNode);
   void startElement(string &name, list<XMLattribute> &attributes);

@@ -69,8 +69,10 @@ class IOTreeClass
 protected:
   // USE ME!  I'm not being used yet.
   bool IsModified;
-  list<VarClass*> VarList;
 public:
+  list<VarClass*> VarList;
+  list<IOTreeClass*> SectionList;
+
   inline void MarkModified();
   /// This is used to ensure proper ordering of sections in the HDF
   /// version in which there is no guarantee that the sections will
@@ -79,7 +81,6 @@ public:
   virtual void PrintTree()=0;
   virtual void PrintTree(int numIndent)=0;
 
-  list<IOTreeClass*> SectionList;
   IOTreeClass* Parent;
   /// This is the empty string unless I'm the root node of some file. 
   string FileName;
