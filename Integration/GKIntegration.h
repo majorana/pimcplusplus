@@ -3,7 +3,8 @@
 // Adaptive Gauss-Kronrod integration                                      //
 //                                                                         //
 // This C++ version was written by Burkhard Militzer  Livermore 02-20-02   //
-// Based on the GNU scientific library                                     //                                           //                                                                         //
+// Based on the GNU scientific library                                     //
+//                                                                         //
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _GKINTEGRATION_
@@ -377,6 +378,10 @@ class GKIntegration {
       sum += p->result;
       numIntervals++;
     }
+
+    if (numIntervals > 200)
+      cerr << "Number of intervals = " << numIntervals << endl;
+
     double badSum = fabs((result-sum) / sum);
     if (badSum > 1.0e-7) {
       cerr << "Percent error = " << badSum*100.0 << endl;
