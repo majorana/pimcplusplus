@@ -7,7 +7,7 @@ MAKE_CLEAN = ${MAKE} clean
 
 all:	IO_obj PH_obj Integration_obj Splines_obj DFT_obj Random_obj \
 	MPI_obj Optimize_obj SpecialFunctions_obj MatrixOps_obj \
-	Fitting_obj
+	Fitting_obj PairAction_obj
 
 
 PH_obj:
@@ -42,10 +42,13 @@ MatrixOps_obj:
 Fitting_obj:
 	cd Fitting; $(MAKE_ALL)
 
+PairAction_obj:
+	cd PairAction; $(MAKE_ALL)
+
 
 CLEANS = PH_clean Splines_clean Integration_clean IO_clean DFT_clean \
 	 Random_clean MPI_clean Optimize_clean SpecialFunctions_clean \
-	 MatrixOps_clean Fitting_clean
+	 MatrixOps_clean Fitting_clean PairAction_clean
 
 
 clean:	$(CLEANS)
@@ -85,6 +88,9 @@ MatrixOps_clean:
 Fitting_clean:
 	cd Fitting; $(MAKE_CLEAN)
 
+PairAction_clean:
+	cd PairAction; $(MAKE_CLEAN)
+
 
 
 
@@ -121,11 +127,14 @@ MatrixOps_newmake:
 Fitting_newmake:
 	cd Fitting; $(MAKE_NEWMAKE)
 
+PairAction_newmake:
+	cd PairAction; $(MAKE_NEWMAKE)
+
 
 
 NEW_MAKES = PH_newmake Splines_newmake Integration_newmake IO_newmake \
 DFT_newmake Random_newmake MPI_newmake Optimize_newmake \
-SpecialFunctions_newmake MatrixOps_newmake Fitting_newmake
+SpecialFunctions_newmake MatrixOps_newmake Fitting_newmake PairAction_newmake
 
 SOURCES = `*.cc`
 
