@@ -243,7 +243,6 @@ class IOTreeASCIIClass : public IOTreeClass
 		    list<TokenClass>::iterator &iter,
 		    list<TokenClass> &tokenList,
 		    bool wantEndBrace);
-
  public:
   void WriteSection(ofstream &outFile,int indent);
   /// Print an indented tree of section variable names.
@@ -283,6 +282,8 @@ class IOTreeASCIIClass : public IOTreeClass
   void WriteVar(string name, Array<string,1> &val);
   void WriteVar(string name, Array<string,2> &val);
   void WriteVar(string name, Array<string,3> &val);
+  IOTreeASCIIClass()
+  { IsModified = false; }
 };
 
 

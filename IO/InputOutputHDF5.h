@@ -32,10 +32,10 @@ public:
   bool ReadInto (Array<string,1> &val);
   bool ReadInto (Array<string,2> &val);
   bool ReadInto (Array<string,3> &val);
-  /*  bool ReadInto (bool &val);
+  bool ReadInto (bool &val);
   bool ReadInto (Array<bool,1> &val);
   bool ReadInto (Array<bool,2> &val);
-  bool ReadInto (Array<bool,3> &val); */
+  bool ReadInto (Array<bool,3> &val); 
   bool Append (double val);
   bool Append (Array<double,1> &val);
   bool Append (Array<double,2> &val);
@@ -45,6 +45,9 @@ public:
   bool Append (string val);
   bool Append (Array<string,1> &strs);
   bool Append (Array<string,2> &strs);
+  bool Append (bool val);
+  bool Append (Array<bool,1> &val);
+  bool Append (Array<bool,2> &val);
 //   bool Append (int val);
 //   bool Append (Array<int,1> val);
 //   bool Append (Array<int,2 val);

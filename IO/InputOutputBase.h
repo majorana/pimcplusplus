@@ -39,10 +39,10 @@ public:
   virtual bool ReadInto (Array<string,1> &val)     = 0;
   virtual bool ReadInto (Array<string,2> &val)     = 0;
   virtual bool ReadInto (Array<string,3> &val)     = 0; 
-  //virtual bool ReadInto (bool &val)                = 0;
-  //virtual bool ReadInto (Array<bool,1> &val)       = 0;
-  //virtual bool ReadInto (Array<bool,2> &val)       = 0;
-  //virtual bool ReadInto (Array<bool,3> &val)       = 0;
+  virtual bool ReadInto (bool &val)                = 0;
+  virtual bool ReadInto (Array<bool,1> &val)       = 0;
+  virtual bool ReadInto (Array<bool,2> &val)       = 0;
+  virtual bool ReadInto (Array<bool,3> &val)       = 0;
 
   virtual bool Append (double val) = 0;
   virtual bool Append (Array<double,1> &val) = 0;
@@ -53,9 +53,9 @@ public:
   virtual bool Append (string val) = 0;
   virtual bool Append (Array<string,1> &val) = 0;
   virtual bool Append (Array<string,2> &val) = 0;
-  //virtual bool Append (bool val) = 0;
-  //virtual bool Append (Array<bool,1> &val) = 0;
-  //virtual bool Append (Array<bool,2> &val) = 0;
+  virtual bool Append (bool val) = 0;
+  virtual bool Append (Array<bool,1> &val) = 0;
+  virtual bool Append (Array<bool,2> &val) = 0;
 };
 
 
@@ -71,6 +71,7 @@ protected:
   bool IsModified;
   list<VarClass*> VarList;
 public:
+  inline void MarkModified();
   /// This is used to ensure proper ordering of sections in the HDF
   /// version in which there is no guarantee that the sections will
   /// come out of the file in the same order you put them in.
@@ -118,8 +119,11 @@ public:
       iter++;
     if (iter == VarList.end())
       return NULL;
-    else
+    else {
+      MarkModified();  // If we're getting the pointer, we're probably 
+                       // gonna modify the variable.
       return *iter;
+    }
   }
 
   /// Write me!
@@ -164,6 +168,14 @@ public:
   inline IOTreeClass(){ FileName="";}
 };
 
+void IOTreeClass::MarkModified()
+{
+  if (FileName != "")
+    IsModified = true;
+  else if (Parent!=NULL)
+    Parent->MarkModified();
+}
+
 
 template<class T>
 inline bool IOTreeClass::AppendVar(string name, T val)
@@ -171,7 +183,7 @@ inline bool IOTreeClass::AppendVar(string name, T val)
   VarClass *var = GetVarPtr(name);
   if (var == NULL)
     return false;
-  
+  MarkModified();
   return var->Append(val);
 }
 

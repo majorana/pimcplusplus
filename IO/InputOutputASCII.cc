@@ -738,6 +738,7 @@ IOTreeClass* IOTreeASCIIClass::NewSection(string name)
   tempSection->MyNumber=CurrSecNum;
   CurrSecNum++;
   SectionList.push_back(tempSection);
+  MarkModified();
   return tempSection;
 }
 
@@ -745,6 +746,7 @@ void IOTreeASCIIClass::IncludeSection(IOTreeClass *newSection)
 {
   newSection->MyNumber=CurrSecNum++;
   SectionList.push_back(newSection);
+  MarkModified();
 }
 
 
@@ -809,14 +811,19 @@ void IOTreeASCIIClass::WriteSection(ofstream &outFile,int indentNum)
 
 
 
-
 void IOTreeASCIIClass::FlushFile()
 {
   ofstream outfile;
-  if (FileName!=""){
+  if ((FileName!="") && IsModified){
     outfile.open(FileName.c_str());
+    WriteSection(outfile,0);
   }
-  WriteSection(outfile,0);
+
+  list<IOTreeClass*>::iterator iter = SectionList.begin();
+  while (iter != SectionList.end()) {
+    (*iter)->FlushFile();
+    iter++;
+  }
 }
 
 /// CloseFile recursively destroys the tree of data we constructed.
@@ -844,96 +851,99 @@ void IOTreeASCIIClass::CloseFile()
 //////////////////////////////////////////////////////////////////////
 
 bool VarASCIIClass::ReadInto (double &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (int &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (string &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (bool &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<double,1> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<double,2> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<double,3> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<int,1> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<int,2> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<int,3> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<string,1> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<string,2> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<string,3> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<bool,1> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<bool,2> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 bool VarASCIIClass::ReadInto (Array<bool,3> &val)
-{ ComplainReadInto(); }
+{ ComplainReadInto(); return false; }
 
 bool VarASCIIClass::Append (double val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (int val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (string val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (bool val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<double,1> &val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<double,2> &val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<int,1> &val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<int,2> &val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<string,1> &val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<string,2> &val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<bool,1> &val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 bool VarASCIIClass::Append (Array<bool,2> &val)
-{ ComplainAppend(); }
+{ ComplainAppend(); return false; }
 
 
 bool VarASCIIdouble0Class::ReadInto (double &val)
-{ val = Value; }
+{ val = Value; return true;}
 bool VarASCIIint0Class::ReadInto (int &val)
-{  val = Value; }
+{  val = Value; return true; }
 bool VarASCIIstring0Class::ReadInto (string &val)
-{  val = Value; }
+{  val = Value; return true; }
 bool VarASCIIbool0Class::ReadInto (bool &val)
-{ val = Value; }
+{ val = Value; return true; }
 bool VarASCIIdouble1Class::ReadInto (Array<double,1> &val)
-{ val.resize(Value.extent(0)); val = Value; }
+{ val.resize(Value.extent(0)); val = Value; return true; }
 bool VarASCIIdouble2Class::ReadInto (Array<double,2> &val)
-{ val.resize(Value.extent(0),Value.extent(1)); val = Value; }
+{ val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarASCIIdouble3Class::ReadInto (Array<double,3> &val)
-{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; }
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; return true; }
 bool VarASCIIint1Class::ReadInto (Array<int,1> &val)
-{ val.resize(Value.extent(0)); val = Value; }
+{ val.resize(Value.extent(0)); val = Value; return true; }
 bool VarASCIIint2Class::ReadInto (Array<int,2> &val)
-{ val.resize(Value.extent(0),Value.extent(1)); val = Value; }
+{ val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarASCIIint3Class::ReadInto (Array<int,3> &val)
-{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; }
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
+ val = Value; return true; }
 bool VarASCIIstring1Class::ReadInto (Array<string,1> &val)
-{ val.resize(Value.extent(0)); val = Value; }
+{ val.resize(Value.extent(0)); val = Value; return true; }
 bool VarASCIIstring2Class::ReadInto (Array<string,2> &val)
-{ val.resize(Value.extent(0),Value.extent(1)); val = Value; }
+{ val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarASCIIstring3Class::ReadInto (Array<string,3> &val)
-{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; }
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
+ val = Value; return true; }
 bool VarASCIIbool1Class::ReadInto (Array<bool,1> &val)
-{ val.resize(Value.extent(0)); val = Value; }
+{ val.resize(Value.extent(0)); val = Value; return true; }
 bool VarASCIIbool2Class::ReadInto (Array<bool,2> &val)
-{ val.resize(Value.extent(0),Value.extent(1)); val = Value; }
+{ val.resize(Value.extent(0),Value.extent(1)); val = Value; return true; }
 bool VarASCIIbool3Class::ReadInto (Array<bool,3> &val)
-{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); val = Value; }
+{ val.resize(Value.extent(0),Value.extent(1),Value.extent(2)); 
+ val = Value; return true; }
 
 
 /*****************************************************************
@@ -944,24 +954,28 @@ bool VarASCIIdouble1Class::Append (double val)
   int n = Value.extent(0);
   Value.resizeAndPreserve(n+1);
   Value(n) = val;
+  return(true);
 }
 bool VarASCIIint1Class::Append (int val)
 {
   int n = Value.extent(0);
   Value.resizeAndPreserve(n+1);
   Value(n) = val;
+  return(true);
 }
 bool VarASCIIstring1Class::Append (string val)
 {
   int n = Value.extent(0);
   Value.resizeAndPreserve(n+1);
   Value(n) = val;
+  return(true);
 }
 bool VarASCIIbool1Class::Append (bool val)
 {
   int n = Value.extent(0);
   Value.resizeAndPreserve(n+1);
   Value(n) = val;
+  return(true);
 }
 bool VarASCIIdouble2Class::Append (Array<double,1> &val)
 {
@@ -969,6 +983,7 @@ bool VarASCIIdouble2Class::Append (Array<double,1> &val)
   assert(val.extent(0) == m);
   Value.resizeAndPreserve(n+1,m);
   Value(n,Range::all()) = val;
+  return(true);
 }
 bool VarASCIIdouble3Class::Append (Array<double,2> &val)
 {
@@ -977,6 +992,7 @@ bool VarASCIIdouble3Class::Append (Array<double,2> &val)
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
   Value(n,Range::all(),Range::all()) = val;
+  return(true);
 }
 bool VarASCIIint2Class::Append (Array<int,1> &val)
 {
@@ -984,6 +1000,7 @@ bool VarASCIIint2Class::Append (Array<int,1> &val)
   assert(val.extent(0) == m);
   Value.resizeAndPreserve(n+1,m);
   Value(n,Range::all()) = val;
+  return(true);
 }
 bool VarASCIIint3Class::Append (Array<int,2> &val)
 {
@@ -992,6 +1009,7 @@ bool VarASCIIint3Class::Append (Array<int,2> &val)
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
   Value(n,Range::all(),Range::all()) = val;
+  return(true);
 }
 bool VarASCIIstring2Class::Append (Array<string,1> &val)
 {
@@ -999,6 +1017,7 @@ bool VarASCIIstring2Class::Append (Array<string,1> &val)
   assert(val.extent(0) == m);
   Value.resizeAndPreserve(n+1,m);
   Value(n,Range::all()) = val;
+  return(true);
 }
 bool VarASCIIstring3Class::Append (Array<string,2> &val)
 {
@@ -1007,6 +1026,7 @@ bool VarASCIIstring3Class::Append (Array<string,2> &val)
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
   Value(n,Range::all(),Range::all()) = val;
+  return(true);
 }
 bool VarASCIIbool2Class::Append (Array<bool,1> &val)
 {
@@ -1014,6 +1034,7 @@ bool VarASCIIbool2Class::Append (Array<bool,1> &val)
   assert(val.extent(0) == m);
   Value.resizeAndPreserve(n+1,m);
   Value(n,Range::all()) = val;
+  return(true);
 }
 bool VarASCIIbool3Class::Append (Array<bool,2> &val)
 {
@@ -1022,6 +1043,7 @@ bool VarASCIIbool3Class::Append (Array<bool,2> &val)
   assert(val.extent(1) == o);
   Value.resizeAndPreserve(n+1,m,o);
   Value(n,Range::all(),Range::all()) = val;
+  return(true);
 }
 
 void VarASCIIdouble0Class::Print (ofstream &outFile)
@@ -1181,6 +1203,7 @@ void IOTreeASCIIClass::WriteVar(string name, double val)
   newVar->Name=name;
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<double,1> &val)
 {
@@ -1189,6 +1212,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<double,1> &val)
   newVar->Value.resize(val.extent(0));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<double,2> &val)
 {
@@ -1197,6 +1221,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<double,2> &val)
   newVar->Value.resize(val.extent(0), val.extent(1));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<double,3> &val)
 {
@@ -1205,6 +1230,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<double,3> &val)
   newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 
 void IOTreeASCIIClass::WriteVar(string name, int val)
@@ -1213,6 +1239,7 @@ void IOTreeASCIIClass::WriteVar(string name, int val)
   newVar->Name=name;
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<int,1> &val)
 {
@@ -1221,6 +1248,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<int,1> &val)
   newVar->Value.resize(val.extent(0));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<int,2> &val)
 {
@@ -1229,6 +1257,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<int,2> &val)
   newVar->Value.resize(val.extent(0), val.extent(1));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<int,3> &val)
 {
@@ -1237,6 +1266,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<int,3> &val)
   newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 
 void IOTreeASCIIClass::WriteVar(string name, string val)
@@ -1245,6 +1275,7 @@ void IOTreeASCIIClass::WriteVar(string name, string val)
   newVar->Name=name;
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<string,1> &val)
 {
@@ -1253,6 +1284,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<string,1> &val)
   newVar->Value.resize(val.extent(0));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<string,2> &val)
 {
@@ -1261,6 +1293,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<string,2> &val)
   newVar->Value.resize(val.extent(0), val.extent(1));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<string,3> &val)
 {
@@ -1269,6 +1302,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<string,3> &val)
   newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
  
 void IOTreeASCIIClass::WriteVar(string name, bool val)
@@ -1277,6 +1311,7 @@ void IOTreeASCIIClass::WriteVar(string name, bool val)
   newVar->Name=name;
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<bool,1> &val)
 {
@@ -1285,6 +1320,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<bool,1> &val)
   newVar->Value.resize(val.extent(0));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<bool,2> &val)
 {
@@ -1293,6 +1329,7 @@ void IOTreeASCIIClass::WriteVar(string name, Array<bool,2> &val)
   newVar->Value.resize(val.extent(0), val.extent(1));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }
 void IOTreeASCIIClass::WriteVar(string name, Array<bool,3> &val)
 {
@@ -1301,4 +1338,5 @@ void IOTreeASCIIClass::WriteVar(string name, Array<bool,3> &val)
   newVar->Value.resize(val.extent(0), val.extent(1), val.extent(2));
   newVar->Value=val;
   VarList.push_back(newVar);
+  MarkModified();
 }

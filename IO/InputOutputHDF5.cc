@@ -160,6 +160,19 @@ bool VarHDF5Class::ReadInto (Array<string,3> &val)
 }
 
 
+bool VarHDF5Class::ReadInto (bool &val)
+{ cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
+
+bool VarHDF5Class::ReadInto (Array<bool,1> &val)
+{ cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
+
+bool VarHDF5Class::ReadInto (Array<bool,2> &val)
+{ cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
+
+bool VarHDF5Class::ReadInto (Array<bool,3> &val)
+{ cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
+
+
 /************************************************************
  *                    Append Functions                      *
  ************************************************************/
@@ -585,6 +598,15 @@ bool VarHDF5Class::Append(Array<string,2> &strs)
   return (true);
 }
 
+
+bool VarHDF5Class::Append(bool val)
+{ cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
+
+bool VarHDF5Class::Append(Array<bool,1> &val)
+{ cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
+
+bool VarHDF5Class::Append(Array<bool,2> &val)
+{ cerr << "Bools not yet implemented in VarHDF5Class.\n"; return false; }
 
 /************************************************************
  *                     Helper Functions                     *
