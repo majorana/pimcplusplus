@@ -308,9 +308,10 @@ void PathClass::InitPaths (IOSectionClass &in)
       double delta = Box[0] / numPerDim;
       for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
 	int ix, iy, iz;
-	ix = ptcl/(numPerDim*numPerDim);
-	iy = (ptcl-(ix*numPerDim*numPerDim))/numPerDim;
-	iz = ptcl - ix*numPerDim*numPerDim - iy*numPerDim;
+	int ip = ptcl-species.FirstPtcl;
+	ix = ip/(numPerDim*numPerDim);
+	iy = (ip-(ix*numPerDim*numPerDim))/numPerDim;
+	iz = ip - ix*numPerDim*numPerDim - iy*numPerDim;
 	dVec r;
 	r[0] = ix*delta;
 	r[1] = iy*delta;
@@ -329,15 +330,17 @@ void PathClass::InitPaths (IOSectionClass &in)
       int numPerDim = (int) ceil (pow(0.5*(double)num, 1.0/3.0)-1.0e-6);
       double delta = Box[0] / numPerDim;
       for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
-	int ip = ptcl/2;
+	int ip = (ptcl-species.FirstPtcl)/2;
 	int ix, iy, iz;
 	ix = ip/(numPerDim*numPerDim);
 	iy = (ip-(ix*numPerDim*numPerDim))/numPerDim;
 	iz = ip - ix*numPerDim*numPerDim - iy*numPerDim;
 	dVec r;
-	r[0] = ix*delta;
-	r[1] = iy*delta;
-	r[2] = iz*delta;
+	r[0] = ix*delta-0.5*Box[0];
+	r[1] = iy*delta-0.5*Box[1];
+	r[2] = iz*delta-0.5*Box[2];
+// 	cerr << "r = " << r << "  ix=" << ix << " iy=" << iy << " iz=" 
+// 	     << iz << endl;
 	if (ptcl % 2) 
 	  r += 0.5*delta;
 	for (int slice=0; slice<NumTimeSlices(); slice++) 

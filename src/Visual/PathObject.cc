@@ -11,6 +11,10 @@ void PathObject::Set(Array<Vec3,1> &path)
   fcolor[0] = Color[0]; fcolor[1] = Color[1]; fcolor[2] = Color[2];
   fcolor[3] = 1.0;
   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
+  float spec[4] = { 1.0, 1.0, 1.0, 1.0 };
+  glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);
+  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30.0);
+
   gleSetJoinStyle (TUBE_JN_ROUND /* | TUBE_JN_CAP */ | TUBE_CONTOUR_CLOSED);
 //   glBegin(GL_LINE_STRIP);
 //   for (int i=0; i<path.size(); i++)

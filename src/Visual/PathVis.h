@@ -11,6 +11,7 @@
 #include "GLObject.h"
 #include "PathObject.h"
 #include "BoxObject.h"
+#include "SphereObject.h"
 
 
 class PathVisClass;

@@ -69,6 +69,7 @@ void PathVisClass::on_realize()
   glShadeModel(GL_SMOOTH);
   glEnable (GL_LIGHTING);
   glEnable (GL_LINE_SMOOTH);
+  glEnable (GL_POLYGON_SMOOTH);
 
   // Get GL::Window.
   GLwindow = get_gl_window();
@@ -78,13 +79,17 @@ void PathVisClass::on_realize()
     return;
 
   static GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};
-  static GLfloat light_ambient[] = {1.0, 1.0, 1.0, 1.0};
+  static GLfloat light_ambient[] = {0.2, 0.2, 0.2, 1.0};
+  static GLfloat light_specular[]= {1.0, 1.0, 1.0, 1.0};
   static GLfloat light_position[] = {1.0, 1.0, 1.0, 0.0};
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+  glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
+  glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 
   glClearColor(1.0, 1.0, 1.0, 1.0);
   glClearDepth(1.0);
