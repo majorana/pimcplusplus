@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{amsmath,algorithmic,algorithm}
+\usepackage{amsmath,algorithmic,algorithm,epsfig}
 \title{Ewald Breakup for Long-Range Potentials in PIMC}
 \author{Kenneth P. Esler Jr.}
 \date{\today}
@@ -361,11 +361,11 @@ we define,
 \begin{equation}
 \vl(r) \equiv
 \begin{cases}
- \sum_{n=0}^{M-1} c_n t_n(r) & \text{for } r \le r_c \\
+ \sum_{n=0}^{J-1} c_n t_n(r) & \text{for } r \le r_c \\
  v(r) & \text{for } r > r_c.
 \end{cases}
 \end{equation}
-where the $t_n(r)$ are a set of $M$ basis functions.  We require that
+where the $t_n(r)$ are a set of $J$ basis functions.  We require that
 the two cases agree on the value and first two derivatves at $r_c$.
 We may then define
 \begin{equation}
@@ -377,7 +377,7 @@ x_k \equiv -\int_{r_c}^\infty d^3\vr \ e^{-i\vk\cdot\vr} v(r)
 \end{equation}
 Therefore,
 \begin{equation}
-\vl_k = -x_k + \sum_{n=0}^{M-1} t_n c_{nk} 
+\vl_k = -x_k + \sum_{n=0}^{J-1} t_n c_{nk} 
 \end{equation}
 Because $\vs(r)$ goes identically to zero at the box edge, inside the
 cell we may write
@@ -407,7 +407,7 @@ which then cancels out all terms for $|\vk| < k_c$.  Then we have
 \left|\sum_{|\vk|>k_c} e^{i\vk\cdot\vr} \vl_k \right|^2 \\ 
 & = & 
 \frac{1}{\Omega} \int_\Omega d^3 \vr
-\left|\sum_{|\vk|>k_c} e^{i\vk\cdot\vr}\left( -x_k + \sum_{n=0}^{M-1} t_n
+\left|\sum_{|\vk|>k_c} e^{i\vk\cdot\vr}\left( -x_k + \sum_{n=0}^{J-1} t_n
 c_{nk}\right) \right|^2
 \end{eqnarray}
 We expand the summation,
@@ -416,8 +416,8 @@ We expand the summation,
 \chi^2 = \frac{1}{\Omega} \int_\Omega d^3 \vr \ns \ns \ns
 \sum_{\{|\vk|,|\vk'|\}>k_c} \ns\ns\ns\ns\ns
  e^{i(\vk-\vk')\cdot \vr}
-\left(x_k -\sum_{n=0}^{M-1} t_n c_{nk} \right)
-\left(x_k -\sum_{m=0}^{M-1} t_{m} c_{mk'} \right)
+\left(x_k -\sum_{n=0}^{J-1} t_n c_{nk} \right)
+\left(x_k -\sum_{m=0}^{J-1} t_{m} c_{mk'} \right)
 \end{equation}
 We take the derivative w.r.t. $t_{m}$,
 \begin{equation}
@@ -425,19 +425,19 @@ We take the derivative w.r.t. $t_{m}$,
 \frac{2}{\Omega}\int_\Omega d^3 \vr \ns \ns \ns
 \sum_{\{|\vk|,|\vk'|\}>k_c} \ns\ns\ns\ns\ns
  e^{i(\vk-\vk')\cdot \vr}
-\left(x_k -\sum_{n=0}^{M-1} t_n c_{nk} \right) c_{mk'}
+\left(x_k -\sum_{n=0}^{J-1} t_n c_{nk} \right) c_{mk'}
 \end{equation}
 We integrate w.r.t. $\vr$, yielding a kroneker $\delta$.
 \begin{equation}
 \frac{\partial (\chi^2)}{\partial t_{m}} =
 2 \ns\ns\ns\ns\ns\ns\ns 
 \sum_{\ \ \ \ \{|\vk|,|\vk'|\}>k_c} \ns\ns\ns\ns\ns\ns\ns \delta_{\vk, \vk'} 
-\left(x_k -\sum_{n=0}^{M-1} t_n c_{nk} \right) c_{mk'}
+\left(x_k -\sum_{n=0}^{J-1} t_n c_{nk} \right) c_{mk'}
 \end{equation}
 Summing over $\vk'$ and equating the derivative to zero, we find the
 minimum of our error function is given by
 \begin{equation}
-\sum_{n=1}^{M-1} \sum_{|\vk|>k_c} c_{mk}c_{nk} t_n = 
+\sum_{n=1}^{J-1} \sum_{|\vk|>k_c} c_{mk}c_{nk} t_n = 
 \sum_{|\vk|>k_c} x_k c_{mk},
 \end{equation}
 which is equivalent in form to equation (19) in \cite{Natoli}, where
@@ -450,13 +450,190 @@ b_{m} & \equiv & \sum_{|\vk|>k_c} x_k c_{mk}
 \end{eqnarray}
 Thus, it becomes clear that our minimization equations can be cast in
 the canonical linear form,
+\newcommand{\bA}{\mathbf{A}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\bV}{\mathbf{V}}
+\newcommand{\bb}{\mathbf{b}}
+\newcommand{\bS}{\mathbf{S}}
 \begin{equation}
-A\mathbf{t} = \mathbf{b}.
+\bA\mathbf{t} = \mathbf{b}.
 \end{equation}
 \subsection{Solution by SVD}
-In practice, we note that the matrix $A$ frequently becomes singular
+In practice, we note that the matrix $\bA$ frequently becomes singular
 in practice.  For this reason, we use the singular value decomposition
-to solve for $t_n$.  
+to solve for $t_n$.  This factorization decomposes $A$ as
+\begin{equation}
+\bA = \bU \bS \bV^T,
+\end{equation}
+where $\bU^T\bU = \bV^T\bV = 1$ and $\bS$ is diagonal.  In this form, we have
+\begin{equation}
+\mathbf{t} = \sum_{i=0}^{J-1} \left( \frac{\bU_{(i)} \cdot
+  \bb}{\bS_{ii}} \right) \bV_{(i)},
+\end{equation}
+where the parethesized subscripts refer to columns.  The advantage of
+this form is that if $\bS_{ii}$ is zero or very near zero, the
+contribution of the $i^{\text{th}}$ of $\bV$, may be neglected, since
+it represents a numerical instability and has little physical
+meaning.  It represents the fact that the system cannot distinguish
+between two linear combinations of the basis functions.  Using the SVD
+in this manner is guaranteed to be stable.  This decomposition is
+available in LAPACK in the DGESVD subroutine.
+\subsection{Constraining Values}
+Often, we wish to constrain the value of $t_n$ to have a fixed value
+to enforce a boundary condition, for example.  To do this, we define
+\begin{equation}
+\bb' \equiv \vb - t_n \bA_{(n)}.
+\end{equation}
+We then define $\bA^*$ as $\bA$ with the $n^\text{th}$ row and column
+removed, and $\bb^*$ as $\vb'$ with the $n^\text{th}$ element removed.  Then
+we solve the reduced equation $\bA^* \mathbf{t}^* = \bb^*$, and
+finally insert $t_n$ back into the appropriate place in $\mathbf{t}^*$
+to recover the complete, constrained vector $\mathbf{t}$.  This may be
+trivially generalized to an arbitray number of constraints.
+\label{sec:contraints}
+\subsection{The LPQHI basis}
+The above discussion was general and independent of the basis used to
+represent $\vl(r)$.  In this section, we introduce a convenient basis
+of localized interpolant functions, similar to those used for
+splines, which have a number of properties which are convenient for
+our purposes.  
+
+First, we divide the region from 0 to $r_c$ into $M-1$ subregions,
+bounded above and below by points we term {\em knots}, defined by $r_j
+\equiv j\Delta$, where $\Delta \equiv r_c/(M-1)$.  We then define
+compact basis elements, $h_{j\alpha}$ which span the region
+$[r_{j-1},r_{j+1}]$, except for $j=0$ and $j=M$.  For $j=0$, only the
+region $[r_0,r_1]$, while for $j=M$, only $[r_{M-1}, r_M]$.  Thus the
+index $j$ identify the knot the element is centered on, while $\alpha$
+is an integer from 0 to 2 indicating one of three function shapes.
+The dual index can be mapped to the single index above by the
+relation, $n = 3j + \alpha$.  The basis functions are then defined as
+\begin{equation}
+h_{j\alpha}(r) = 
+\begin{cases}
+\ \ \ \, \Delta^\alpha \, \, \sum_{n=0}^5 S_{\alpha n} 
+\left( \frac{r-r_j}{\Delta}\right)^n,    & r_j < r \le r_{j+1} \\
+(-\Delta)^\alpha \sum_{n=0}^5 S_{\alpha n} 
+\left( \frac{r_j-r}{\Delta}\right)^n,    & r_{j-1} < r \le r_j \\
+\quad\quad\quad\quad\quad 0, & \text{otherwise},
+\end{cases}
+\end{equation}
+where the matrix $S_{\alpha n}$ is given by
+\begin{equation}
+S = 
+\left[\begin{matrix}
+1 & 0 & 0 & -10 & 15 & -6 \\
+0 & 1 & 0 & -6  &  8 & -3 \\
+0 & 0 & \frac{1}{2} & -\frac{3}{2} & \frac{3}{2} & -\frac{1}{2}
+\end{matrix}\right].
+\end{equation}
+\begin{figure}
+\begin{center}
+\epsfig{figure=LPQHI.eps,width=3.5in}
+\caption{Basis functions $h_{j0}$, $h_{j1}$, and $h_{j2}$ are shown.
+We note at the left and right extremes, the values and first two
+derivatives of the functions are zero, while at the center, $h_{j0}$
+has a value of 1, $h_{j1}$ has a first derivative of 1, and $h_{j2}$
+has a second derivative of 1.}
+\end{center}
+\label{fig:LPQHI}
+\end{figure}
+Figure~\ref{fig:LPQHI} shows plots of these function shapes.
+
+The basis functions have the property that at the left and right
+extremes, i.e. $r_{j-1}$ and $r_{j+1}$, their values and first two
+derivatives are zero.  At the center, $r_j$, we have the properties,
+\begin{eqnarray}
+h_{j0}(r_j)=1, & h'_{j0}(r_j)=0, & h''_{j0}(r_j)= 0 \\
+h_{j1}(r_j)=0, & h'_{j1}(r_j)=1, & h''_{j1}(r_j)= 0 \\
+h_{j2}(r_j)=0, & h'_{j2}(r_j)=0, & h''_{j2}(r_j)= 1 
+\end{eqnarray}
+These properties allow the control of the value and first two derivatives
+of the represented function at any knot value simply by setting the
+coefficients of the basis functions centered around that knot.  Used
+in combination with the method discribed in
+section~\ref{sec:contraints} above, boundary conditions can easily be
+enforced.  In our case, we wish require that
+\begin{equation}
+h_{M0} = v(r_c), \ \ h_{M1} = v'(r_c), \ \ \text{and} \ \  h_{M2} = v''(r_c).
+\end{equation}
+This ensures that $\vs$ and its first two derivatives vanish at $r_c$.
+\subsubsection{Fourier coefficients}
+We wish now to calculate the Fourier transforms of the basis
+functions, defined as
+\begin{equation}
+c_{j\alpha k} \equiv \frac{1}{\Omega} \int_0^{r_c} d^3 \vr 
+e^{-i \vk \cdot \vr} h_{j\alpha}(r)
+\end{equation}
+We then may write,
+\begin{equation}
+c_{j\alpha k} = 
+\begin{cases}
+\Delta^\alpha \sum_{n=0}^5 S_{\alpha n} D^+_{0 k n}, & j = 0 \\
+\Delta^\alpha \sum_{n=0}^5 S_{\alpha n} (-1)^{\alpha+n} D^-_{M k n}, &
+j = M \\
+\Delta^\alpha \sum_{n=0}^5 S_{\alpha n} 
+\left[ D^+_{j k n} + (-1)^{\alpha+n}D^-_{j k n} \right] & \text{otherwise},
+\end{cases}
+\end{equation}
+where
+\begin{equation}
+D^{\pm}_{jkn} \equiv \frac{1}{\Omega} \int_{r_j}^{r_{j\pm1}} d^3\!\vr \ 
+e^{-i\vk \cdot \vr} \left( \frac{r-r_j}{\Delta}\right)^n.
+\end{equation}
+We then further make the definition that
+\renewcommand{\Im}{\text{Im}}
+\begin{equation}
+D^{\pm}_{jkn} = \pm \frac{4\pi}{k \Omega} 
+\left[ \Delta \Im \left(E^{\pm}_{jk(n+1)}\right) + 
+r_j \Im \left(E^{\pm}_{jkn}\right)\right]
+\end{equation}
+It can then be shown that 
+\begin{equation}
+E^{\pm}_{jkn} =
+\begin{cases}
+-\frac{i}{k} e^{ikr_j} \left( e^{\pm i k \Delta} - 1 \right) &
+\text{if } n=0, \\
+-\frac{i}{k} 
+\left[ \left(\pm1\right)^n e^{i k (r_j \pm \Delta)} - \frac{n}{\Delta}
+E^\pm_{jk(n-1)}  \right] & \text{otherwise}.
+\end{cases}
+\end{equation}
+Note that these equations correct typographical errors present in \cite{Natoli}.
+\subsection{Enumerating $k$-points}
+We note that the summations over $k$ which have been ubiquitous in
+this paper requires enumeration of the $k$-vectors.  In particular, we
+should sum over all $|\vk| > k_c$.  In practice, we must limit our
+summation to some finite cutoff value $k_c < |\vk| < k_\text{max}$,
+where $k_\text{max}$ should be of order $3000/L$, where $L$ is the
+minimum box dimension.  Enumerating these vectors in a naive fashion
+even for this finite cutoff would prove quite prohibitive, as it
+requires $\sim 10^9$ vectors.
+
+Our first optimization come in realizing that all quantities in this
+calculation require only $|\vk|$, and not $\vk$ itself.  Thus, we may
+take advantage of the great degeneracy of $|\vk|$.  We create a list
+of $(k,N)$ pairs, where $N$ is the number of vectors with magnitude $k$.
+We make nested loops over
+$n_1$, $n_2$, and $n_3$, yielding $\vk = n_1 \vb_1 + n_2 \vb_2 + n_3
+\vb_3$. If $|\vk|$ is in the required range, we check to see if there
+is already an entry with that magnitude on our list, incrementing the
+corresponding $N$ if there is, or creating a new entry if not.  Doing
+so typically saves a factor of $\sim 200$ in storage and computation.
+
+This reduction is still not sufficent for large $k_max$, since it
+requires that we still look over $10^9$ entries.  To further reduce
+cost, we may pick an intermediate cutoff, $k_\text{cont}$, above which
+we will approximate the degeneracy assuming a continuum of
+$k$-points.  We stop our exact enumeration at $k_\text{cont}$, and
+then add $\sim 1000$ points, $k_i$, uniformly spaced between $k_\text{cont}$
+and $k_\text{max}$. We then approximate the degeneray by
+\begin{equation}
+N_i = \frac{4 \pi}{3} \frac{\left( k_b^3 -k_a^3\right)}{(2\pi)^3/\Omega},
+\end{equation}
+where $k_b = (k_i + k_{i+1})/2$ and $k_a = (k_i + k_{i-1})$.  In doing
+so, we typically reduce our total number of k-points to sum over $\sim
+2500$ from the $10^9$ we had to start.
 
 
 \section{Adapting to PIMC}

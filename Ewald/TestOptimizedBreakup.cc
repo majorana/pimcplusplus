@@ -5,7 +5,8 @@
 void WriteBasis(BasisClass &basis)
 {
   FILE *fout = fopen ("LPQHI.dat", "w");
-  for (double r=0.0; r<=basis.Get_rc(); r+=0.01) {
+  for (double r=0.0; r<=basis.Get_rc(); r+=0.001) {
+    fprintf (fout, "%1.12e ", r);
     for (int n=0; n<basis.NumElements(); n++)
       fprintf (fout, "%1.12e ", basis.h(n, r));
     fprintf (fout, "\n");
@@ -30,7 +31,7 @@ void TestCoulomb()
   box = 10.0, 10.0, 10.0;
   basis.SetBox (box);
   double Omega = box[0]*box[1]*box[2];
-  basis.SetNumKnots(40);
+  basis.SetNumKnots(20);
   basis.Set_rc(5.0);
 
 //   double k = 1;
@@ -81,6 +82,6 @@ void TestCoulomb()
 
 main()
 {
-  //  TestLPQHI();
+  TestLPQHI();
   TestCoulomb();
 }
