@@ -56,6 +56,7 @@ public:
   {
     Init(xGrid_, yGrid_, zGrid_, f_);
   }
+  TricubicSpline() {};
 
 };
 
@@ -140,6 +141,13 @@ inline void TricubicSpline::Update()
 	     &IyMinBC, &dummyDouble, &IyMaxBC, &dummyDouble, &dummyInt,
 	     &IzMinBC, &dummyDouble, &IzMaxBC, &dummyDouble, &dummyInt,
 	     wk.data(), &Nwk, &xIsLin, &yIsLin, &zIsLin, &errorCode);
+  for (int ix=0; ix<Nx; ix++)
+    for (int iy=0; iy<Ny; iy++)
+      for (int iz=0; iz<Nz; iz++)
+	for (int k=0; k<8; k++)
+	  if (isnan(f(iz,iy,ix,k)))
+	    fprintf (stderr, "Error at (x,y,z,k) = (%d,%d,%d,%d)\n", 
+		     ix, iy, iz, k); 
   UpToDate = true;
 }
 	     

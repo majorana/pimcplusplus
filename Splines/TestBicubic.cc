@@ -86,9 +86,40 @@ void BCSplineTest2()
 
 
 
+void BCSplineTest3()
+{
+  LinearGrid xgrid(0.0, 4.0*M_PI, 200);
+  LinearGrid ygrid(0.0, 4.0*M_PI, 200);
+  
+  Array<double,2> F(200,200);
+  for (int i=0; i<200; i++) {
+    double x = xgrid(i);
+    for (int j=0; j<200; j++) {
+      double y = ygrid(j);
+      F(i,j) = sin(x)*sin(y);
+    }
+  }
+  BicubicSpline BCspline;   
+  BCspline.Init(&xgrid, &ygrid, F);
+
+  
+  // Speed test
+  clock_t start, end;
+  start = clock();
+  for (int i=0; i<10000000; i++)
+    double a = BCspline(1.0, 1.2);
+  end = clock();
+
+  double rate = 1.0e7/((double)(end-start)/1.0e6);
+  cerr << "Rate = " << rate << " per second.\n";
+
+}
+
+
+
 main()
 {
-  BCSplineTest2();
+  BCSplineTest3();
 
 
 }
