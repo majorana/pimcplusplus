@@ -294,7 +294,7 @@ bool VarHDF5Class::Append(blitz::Array<double,1> &val)
   int RANK = 2;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a double to a non blitz::Array<double,1>.  Exitting.\n";
+    cerr << "Trying to append an Array<double,1> to a non blitz::Array<double,2>.  Exitting.\n";
     return false;
   }
 
@@ -340,7 +340,7 @@ bool VarHDF5Class::Append(blitz::Array<double,2> &val)
   int RANK = 3;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a double to a non blitz::Array<double,1>.  Exitting.\n";
+    cerr << "Trying to append an Array<double,2> to a non blitz::Array<double,3>.  Exitting.\n";
     return false;
   }
 
@@ -385,7 +385,7 @@ bool VarHDF5Class::Append(blitz::Array<double,3> &val)
   int RANK = 4;
 
   if ((Type != DOUBLE_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a double to a non blitz::Array<double,1>.  Exitting.\n";
+    cerr << "Trying to append an Array<double,3> to a non blitz::Array<double,4>.  Exitting.\n";
     return false;
   }
 
@@ -466,7 +466,7 @@ bool VarHDF5Class::Append(blitz::Array<int,1> &val)
   int RANK = 2;
 
   if ((Type != INT_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a int to a non blitz::Array<int,1>.  Exitting.\n";
+    cerr << "Trying to append an Array<int,1> to a non blitz::Array<int,2>.  Exitting.\n";
     return false;
   }
 
@@ -512,7 +512,7 @@ bool VarHDF5Class::Append(blitz::Array<int,2> &val)
   int RANK = 3;
 
   if ((Type != INT_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a int to a non blitz::Array<int,1>.  Exitting.\n";
+    cerr << "Trying to append an Array<int,2> to a non blitz::Array<int,3>.  Exitting.\n";
     return false;
   }
 
@@ -558,7 +558,7 @@ bool VarHDF5Class::Append(blitz::Array<int,3> &val)
   int RANK = 4;
 
   if ((Type != INT_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a int to a non blitz::Array<int,1>.  Exitting.\n";
+    cerr << "Trying to append an Array<int,3> to a non blitz::Array<int,4>.  Exitting.\n";
     return false;
   }
 
@@ -640,7 +640,7 @@ bool VarHDF5Class::Append(blitz::Array<string,1> &strs)
 {
   int RANK = 2;
   if ((Type != STRING_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a string to a non blitz::Array<string,1>.  Exitting.\n";
+    cerr << "Trying to append an Array<string,1> to a non blitz::Array<string,2>.  Exitting.\n";
     return false;
   }
 
@@ -705,7 +705,7 @@ bool VarHDF5Class::Append(blitz::Array<string,2> &strs)
 {
   int RANK = 3;
   if ((Type != STRING_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a string to a non blitz::Array<string,1>.  Exitting.\n";
+    cerr << "Trying to append an Array<string,2> to a non blitz::Array<string,3>.  Exitting.\n";
     return false;
   }
 
@@ -775,7 +775,7 @@ bool VarHDF5Class::Append(blitz::Array<string,3> &strs)
 {
   int RANK = 4;
   if ((Type != STRING_TYPE) || (Dim != RANK)) {
-    cerr << "Trying to append a string to a non blitz::Array<string,1>.  Exitting.\n";
+    cerr << "Trying to append an Array<string,3> to a non blitz::Array<string,4>.  Exitting.\n";
     return false;
   }
 
@@ -876,7 +876,7 @@ bool VarHDF5Class::Append(blitz::Array<bool,1> &val)
 
   if ((Type != BOOL_TYPE) || (Dim != RANK)) {
     cerr << 
-      "Trying to append a bool to a non blitz::Array<int,2>.  Exitting.\n";
+      "Trying to append an Array<bool,1> to a non blitz::Array<int,2>.  Exitting.\n";
     return false;
   }
 
