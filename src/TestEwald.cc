@@ -1,6 +1,8 @@
 #include "ActionClass.h"
 #include "PathDataClass.h"
 
+double kcutoff = 35.0;
+
 void SetupPathNaCl (PathClass &path)
 {
   SetMode (NEWMODE);
@@ -12,7 +14,7 @@ void SetupPathNaCl (PathClass &path)
   box = 2.0, 2.0, 2.0;
   path.SetBox(box);
   
-  path.kCutoff = 35.0;
+  path.kCutoff = kcutoff;
   
   FermionClass *protons=new FermionClass();
   FermionClass *electrons=new FermionClass();
@@ -59,7 +61,7 @@ void SetupPathZincBlend (PathClass &path)
   box = L,L,L;
   path.SetBox(box);
   
-  path.kCutoff = 35.0;
+  path.kCutoff = kcutoff;
   
   FermionClass *protons=new FermionClass();
   FermionClass *electrons=new FermionClass();
@@ -138,7 +140,7 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
   IOSectionClass in;
   in.OpenFile ("EwaldTest.in");
   action.tau = 1.0;
-  action.MaxLevels=3;
+  action.MaxLevels=1;
   Array<string,1> PAFiles(3);
   PAFiles="p-p.PairAction","e-e.PairAction","p-e.PairAction";
   int numPairActions=3;
@@ -148,29 +150,39 @@ void SetupAction(ActionClass &action,PathDataClass &pathData)
     action.PairActionVector(i) = new PAclassicalFitClass;
     assert(PAIO.OpenFile(PAFiles(i)));
     action.PairActionVector(i)=ReadPAFit(PAIO,action.tau,action.MaxLevels);
-    action.PairActionVector(i)->DoBreakup(pathData.Path.GetBox(),
-					  pathData.Path.kVecs);
+    //    action.PairActionVector(i)->DoBreakup(pathData.Path.GetBox(),
+    //					  pathData.Path.kVecs);
     PAIO.CloseFile();
   }
+
   action.PairMatrix.resize(2,2);  
   action.PairMatrix(0,0)=0;
   action.PairMatrix(1,1)=1;
   action.PairMatrix(0,1)=2;
   action.PairMatrix(1,0)=2;
+  int numKnots=10;
+  double kCut=kcutoff;
+  action.OptimizedBreakup(numKnots,kCut);
+  FILE *fout = fopen ("p-plong.dat", "w");
+  for (double r=0.0; r<2.5; r+=0.001)
+    fprintf (fout, "%1.12e %1.12e %1.12e\n", r, 
+	     action.PairActionVector(2)->Ulong(0)(r),
+	     action.PairActionVector(2)->U(r, 0.0, 0.0, 0));
+  fclose(fout);
+  cerr << "PA(2).Z1Z2 = " << action.PairActionVector(2)->Z1Z2 << endl;
 
-  
 }
 
 
 void MadelungTest(ActionClass &action)
 {
-  double longRange=action.CalcLRAction(0,0);
+  double longRange=action.LongRangeAction(0,0);
   Array<int,1> changedParticles(8);
   changedParticles=0,1,2,3,4,5,6,7;
   //  Array<int,1> changedParticles(4);
   //  changedParticles=0,1,2,3;
 
-  double shortRange=action.calcTotalAction(0,1,changedParticles,0);
+  double shortRange=action.UAction(0,1,changedParticles,0);
   cerr<<"LongRange, ShortRange, Total: "<<longRange/4.0<<", "<<shortRange/4.0;
   cerr<<", "<<(longRange+shortRange)/4.0<<endl;
 }
@@ -179,23 +191,23 @@ main()
 {
 
   {
-    cerr << "ZincBlend: Ashcroft and Mermin give 1.6381\n";
-    PathDataClass pathData;
-    ActionClass action(pathData);
-    SetupPathZincBlend(pathData.Path);
-    SetupAction (action,pathData);
-    TestRho_k(pathData.Path);
-    MadelungTest(action);
+//     cerr << "ZincBlend: Ashcroft and Mermin give 1.6381\n";
+//     PathDataClass pathData;
+//     ActionClass action(pathData);
+//     SetupPathZincBlend(pathData.Path);
+//    SetupAction (action,pathData);
+    //TestRho_k(pathData.Path);
+    //MadelungTest(action);
   }
   
   {
-    cerr << "NaCl: Ashcroft and Mermin give 1.7476\n";
-    PathDataClass pathData;
-    ActionClass action(pathData);
-    SetupPathNaCl(pathData.Path);
-    SetupAction (action,pathData);
-    TestRho_k(pathData.Path);
-    MadelungTest(action);
+     cerr << "NaCl: Ashcroft and Mermin give 1.7476\n";
+     PathDataClass pathData;
+     ActionClass action(pathData);
+     SetupPathNaCl(pathData.Path);
+     SetupAction (action,pathData);
+     TestRho_k(pathData.Path);
+     MadelungTest(action);
   }
 
 

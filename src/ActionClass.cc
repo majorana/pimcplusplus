@@ -61,20 +61,15 @@ void ActionClass::Read(IOSectionClass& inSection)
   cerr << "Finished reading the action.\n"; 
 }
 
-double ActionClass::calcTotalAction(int startSlice, int endSlice, 
-				    Array<int,1> changedParticles,
-				    int level)//, double &PE, double &KE)
+
+double ActionClass::UAction (int startSlice, int endSlice, 
+			     const Array<int,1> &changedParticles, int level)
 {
-  double PE, KE;
-  //  cerr<<"My changed particle is "<<changedParticles(0)<<endl;
   // First, sum the pair actions
   for (int counter=0;counter<Path.DoPtcl.size();counter++){
     Path.DoPtcl(counter)=true;
   }
-  PE = 0.0;
-  KE = 0.0;
   double TotalU = 0.0;
-  double TotalK = 0.0;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = tau* (1<<level);
@@ -86,66 +81,44 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
       if (Path.DoPtcl(ptcl2)){
 	int PairIndex = PairMatrix(species1,
 				   Path.ParticleSpeciesNum(ptcl2));
-	//cerr<<"PairIndex: "<<PairIndex<<endl;
-	for (int slice=startSlice;slice<endSlice;slice+=skip){
-// 	  dVec r1=Path(slice,ptcl1);
-// 	  dVec r2=Path(slice,ptcl2);
-// 	  dVec rp1=Path(slice+skip,ptcl1);
-// 	  dVec rp2=Path(slice+skip,ptcl2);
 
+	for (int slice=startSlice;slice<endSlice;slice+=skip){
 	  dVec r, rp;
 	  double rmag, rpmag;
 
 	  PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
 				 rmag, rpmag, r, rp);
-	  //	  //	  r=r2-r1;
-	  //	  //	  rp=rp2-rp1;
-	  //	  //	  rmag=sqrt(dot(r,r));
-	  //	  //	  rpmag=sqrt(dot(rp,rp));
-	  //	  cerr<<"rmag "<<rmag<<endl;
-	  //	  cerr<<"rpmag "<<rpmag<<endl;
-	  //	  Array<double,1> rmrp(NDIM);
-	  //dVec inBoxrmrp=r-rp;
-	  //	  for (int q=0;q<NDIM;q++){
-	  //	    rmrp(q)=dvecrmrp(q);
-	  //	  }
-	  //	  PathData.Path.PutInBox(inBoxrmrp);
-	  //	  if (fabs(dot(inBoxrmrp,inBoxrmrp)-dot(r-rp,r-rp))>1e-12){
-	  //	    cerr<<r-rp<<" "<<" "<<inBoxrmrp<<" "<<level<<" "<<endl;
-	  //	  }
+
 	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
-// 	  for (int cnt=0;cnt<NDIM;cnt++){
-// 	    if (r[cnt]==-0){
-// 	      r[cnt]=0;
-// 	    }
-// 	    if (rp[cnt]==-0){
-// 	      rp[cnt]=0;
-// 	    }
-// 	  }
-	  ///////USEFUL	  cerr<<"r such is: "<<r<<" "<<rp<<" "<<rmag<<" "<<rpmag<<endl;
-	  //////USEFUL 	  cerr<<"Potential: "<<s2<<" "<<q<<" "<<z<<" "<<endl;
-	  double U, dU, V;
-	  U = PairActionVector(PairIndex)->U(q,z,s2, level);//, U, dU, V);
-// 	  if (U!=0){
-// 	    //	    cerr<<"q, z, s2, U: "<<q<<" "<<" "<<z<<" "<<s2<<" "<<U<<endl;
-// 	    //	    cerr<<r<<rp<<endl;
-// 	  }
-	  //	  if (((ptcl1==1) && (ptcl2==2)) || ((ptcl1==0) && (ptcl2==3)))
-	  TotalU += U;
-	  PE += V;
-	  KE -= dU;
 
+	  double U;
+	  U = PairActionVector(PairIndex)->U(q,z,s2, level);
+	  U -= PairActionVector(PairIndex)->Ulong(level)(q);
+	  TotalU += U;
 	}
       }
-      
     }
-    double FourLambdaTauInv=1.0/(4.0*Path.Species(species1).lambda*levelTau);
+  }
+  return (TotalU);
+}
+
+double ActionClass::KAction (int startSlice, int endSlice, 
+			     const Array<int,1> &changedParticles, int level)
+{
+  double TotalK = 0.0;
+  int numChangedPtcls = changedParticles.size();
+  int skip = 1<<level;
+  double levelTau = tau* (1<<level);
+
+  for (int ptclIndex=0; ptclIndex<numChangedPtcls; ptclIndex++){
+    int ptcl = changedParticles(ptclIndex);
+    int species=Path.ParticleSpeciesNum(ptcl);
+    double FourLambdaTauInv=1.0/(4.0*Path.Species(species).lambda*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
       dVec vel;
-      vel = PathData.Path.Velocity(slice, slice+skip, ptcl1);
-      /////USEFUL (kindof)      cerr<<"vel is "<<vel<<endl;
+      vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
       double GaussProd = 1.0;
       for (int dim=0; dim<NDIM; dim++) {
 	int NumImage=1;
@@ -156,36 +129,24 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	}
 	GaussProd *= GaussSum;
       }
-      TotalK -= log(GaussProd);
-      //vel = Path(slice+skip,ptcl1) - Path(slice,ptcl1);
-      //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+      TotalK -= log(GaussProd);    
       //TotalK += dot(vel,vel)*FourLambdaTauInv; 
     }
   }
-  KE += TotalK / levelTau;
-  //  static int count=0;
-  //  count++;
-  //  if (count % 5000==0){
-  //    cerr<<"TotalK:  "<<TotalK<<endl;
-  //    cerr<<"TotalU:  "<<TotalU<<endl;
-  //  }
-  //  cerr<<"My Action is "<<(TotalK + TotalU)<<endl;
-  return (TotalK + TotalU);
-  //  return TotalU; //HACK! HACK!
-  
-  
+  //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+  return (TotalK);
 }
 
-void ActionClass::PrintDensityMatrix()
+
+double ActionClass::TotalAction(int startSlice, int endSlice, 
+				const Array<int,1> &changedParticles,
+				int level)
 {
-
-  cerr<<"I'm printing now!"<<endl;
-  for (int counter=0;counter<1000;counter++){
-    //    double q=counter/100.0;
-    //    cerr<<q<<" "<<((DavidPAClass*)(PairActionVector(0)))->VV(q,0.0,0.0,0)<<endl;
-  }
-  cerr<<"I'm done printing!"<<endl;
+  return UAction(startSlice,endSlice,changedParticles,level)+
+    KAction(startSlice,endSlice,changedParticles,level);
 }
+
+
   
 
 inline double mag2 (const complex<double> &z)
@@ -195,7 +156,7 @@ inline double mag2 (const complex<double> &z)
 
 
 /// Calculates the long-range part of the action at a given timeslice  
-double ActionClass::CalcLRAction(int slice, int level)
+double ActionClass::LongRangeAction(int slice, int level)
 {
   double homo = 0.0;
   double hetero = 0.0;
@@ -232,4 +193,170 @@ double ActionClass::CalcLRAction(int slice, int level)
       }
     }
   return (homo+hetero);
+}
+
+
+#include "Common/Ewald/OptimizedBreakup.h"
+#include "Common/Integration/GKIntegration.h"
+
+class CoulombXkIntegrand
+{
+private:
+  PairActionFitClass &PA;
+  int Level;
+  double k;
+  double beta;
+public:
+  inline double operator()(double r)
+  {
+    double U = PA.Udiag(r, Level);
+    U -= beta * PA.Z1Z2/r;
+    return r * sin(k*r)*U;
+  }
+  CoulombXkIntegrand (PairActionFitClass &pa, int level, double k_) :
+    PA(pa), Level(level), k(k_)
+  { 
+    beta = pa.SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
+  }
+};
+
+class XkIntegrand
+{
+private:
+  PairActionFitClass &PA;
+  int Level;
+  double k;
+public:
+  inline double operator()(double r) 
+  {
+    return r * sin(k*r) * PA.Udiag(r, Level);
+  }
+  XkIntegrand (PairActionFitClass &pa, int level, double k_) :
+    PA(pa), Level(level), k(k_)
+  { /* do nothing else*/  }
+};
+
+
+
+/// This calculates the quantity 
+/// \f$ X_k \equiv -\frac{4 \pi}{\Omega k} \int_{r_c}^\infty dr \, r \sin(kr) V(r).\f$
+double ActionClass::CalcXk (int paIndex, int level, double k, double rc)
+{
+  const double tolerance = 1.0e-10;
+  PairActionFitClass &pa = *PairActionVector(paIndex);
+  if (pa.Z1Z2 == 0.0) {
+    XkIntegrand integrand(pa, level, k);
+    GKIntegration<XkIntegrand, GK31> integrator(integrand);
+    integrator.SetRelativeErrorMode();
+    double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
+      integrator.Integrate(rc, 30.0*rc, tolerance,tolerance,false);
+    return Xk;
+  }
+  else {
+    CoulombXkIntegrand integrand(pa, level, k);
+    GKIntegration<CoulombXkIntegrand, GK31> integrator(integrand);
+    integrator.SetRelativeErrorMode();
+    double Xk = -4.0*M_PI/(Path.GetVol()*k) * 
+      integrator.Integrate(rc, 30.0*rc, tolerance,tolerance,false);
+    /// Add in the analytic part that I ignored
+    double beta = pa.SmallestBeta;
+    for (int i=0; i<level; i++)
+      beta *= 2.0;
+    Xk -= beta*4.0*M_PI*pa.Z1Z2/(Path.GetVol()*k*k)*cos(k*rc);
+    return Xk;
+  }
+  
+}
+
+
+void ActionClass::OptimizedBreakup(int numKnots, double kCut)
+{
+  dVec box = Path.GetBox();
+  double rc = 0.5*box[0];
+  for (int i=1; i<NDIM; i++)
+    rc = min (rc, 0.5*box[i]);
+  double kvol = Path.GetkBox()[0];
+  for (int i=1; i<NDIM; i++)
+    kvol *= Path.GetkBox()[i];
+  double kavg = pow(kvol,1.0/3.0);
+  /// We try to pick kcont to keep reasonable number of k-vectors
+  double kCont = 40.0 * kavg;
+  double kMax = 800 * kavg;
+
+  LPQHI_BasisClass basis;
+  basis.Set_rc(rc);
+  basis.SetBox(box);
+  basis.SetNumKnots (numKnots);
+
+  OptimizedBreakupClass breakup(basis);
+  breakup.SetkVecs (kCut, kCont, kMax);
+  int numk = breakup.kpoints.size();
+  int N = basis.NumElements();
+  Array<double,1> t(N);
+  Array<bool,1>   adjust (N);
+  Array<double,1> Xk(numk);
+
+  // Would be 0.5, but with two timeslice distdisp, it could be a
+  // little longer
+  double rmax = 0.75 * sqrt (dot(box,box));
+  UlongGrid.Init (0.0, rmax, 1000);
+  Array<double,1> Ulong_r(1000);
+
+  for (int paIndex=0; paIndex<PairActionVector.size(); paIndex++) {
+    PairActionFitClass &pa = *PairActionVector(paIndex);
+    pa.Ulong.resize(MaxLevels);
+    pa.Ulong_k.resize(MaxLevels,Path.kVecs.size());
+    pa.Ulong_k = 0.0;
+    pa.Ulong_0.resize(MaxLevels);
+    for (int level=0; level<MaxLevels; level++) {
+      Ulong_r = 0.0;
+      /// Calculate Xk's
+      for (int ki=0; ki<numk; ki++)
+	Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc);
+
+      /// Set boundary conditions at rc:  Force value and first and
+      /// second derivatives of long-range potential to match the full
+      /// potential at rc.
+      adjust = true;
+      t(N-3) = pa.Udiag(rc, level);     adjust(N-3) = false;
+      t(N-2) = pa.Udiag_p(rc, level);   adjust(N-2) = false;
+      t(N-1) = pa.Udiag_pp(rc, level);  adjust(N-1) = false;
+      t(1) = 0.0;                       adjust(1)   = false;
+
+      /// Now, do the optimal breakup:  this gives me the coefficents
+      /// of the basis functions, h_n in the array t.
+      breakup.DoBreakup (Xk, t, adjust);
+      
+      cerr << "t = " << t << endl;
+      /// Now, we must put this information into the pair action
+      /// object.  First do real space part
+      pa.Ulong_0(level)=0.0;
+      for (int n=0; n<N; n++)
+	pa.Ulong_0(level) += t(n)*basis.h(n,0.0);
+      for (int i=0; i<UlongGrid.NumPoints; i++) {
+	double r = UlongGrid(i);
+	if (r <= rc) {
+	  /// Sum over basis functions
+	  for (int n=0; n<N; n++) 
+	    Ulong_r(i) += t(n) * basis.h(n, r);
+	}
+	else
+	  Ulong_r(i) = pa.Udiag (r, level);
+      }
+      pa.Ulong(level).Init(&UlongGrid, Ulong_r);
+
+      // Now do k-space part
+      for (int ki=0; ki < Path.kVecs.size(); ki++) {
+	const dVec &kv = Path.kVecs(ki);
+	double k = sqrt (dot(kv,kv));
+	/// Sum over basis functions
+	for (int n=0; n<N; n++)
+	  pa.Ulong_k(level,ki) += t(n) * basis.c(n,k);
+	/// Now add on part from rc to infinity
+	pa.Ulong_k(level,ki) -= CalcXk(paIndex, level, k, rc);
+      }
+    }
+  }
 }

@@ -125,7 +125,7 @@ bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activePar
   while (levelCounter>=0 && toAccept==true){
     SetMode(OLDMODE);
     toAccept=true;
-    double oldAction = PathData.Action.calcTotalAction
+    double oldAction = PathData.Action.TotalAction
       (startSlice,endSlice,activeParticles,levelCounter);
     oldLogSampleProb = LogSampleProb
       (startSlice,endSlice,activeParticles,levelCounter);
@@ -139,7 +139,7 @@ bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activePar
     }
     assert(fabs(newLogSampleProb-testNewLogSampleProb)<1e-10);
 
-    double newAction = PathData.Action.calcTotalAction
+    double newAction = PathData.Action.TotalAction
       (startSlice,endSlice, activeParticles,levelCounter);
     double currActionChange=newAction-oldAction;
     double logAcceptProb=

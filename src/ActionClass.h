@@ -5,19 +5,22 @@
 #include "Common/PairAction/PAFit.h"
 #include "Common/Ewald/Ewald.h"
 
+class PathDataClass;
+
 /// This is the class that controls all of the actions and is in
 /// charge of calculating them. When this is initialized a pointer needs
 /// to be sent that has the memoizedData and SpeciesClass 
-class PathDataClass;
-
 class ActionClass
 {
 private:
   PathDataClass &PathData;
   PathClass &Path;
-
+  LinearGrid UlongGrid;
+  /// This calculates the quantity 
+  /// \f$ X_k \equiv -\frac{4\pi}{\Omega k} \int_{r_c}^\infty dr \, r \sin(kr) V(r).\f$
+  double CalcXk (int paIndex, int level, double k, double rc);
 public:
-  double CalcLRAction(int slice, int level);
+  double LongRangeAction(int slice, int level);
   /// This holds all of the Pair Action Classes
   Array<PairActionFitClass*,1> PairActionVector;
 
@@ -31,13 +34,13 @@ public:
   int MaxLevels;
   void Read(IOSectionClass &IOSection);
   /// Calculates the total action.
-  double calcTotalAction(int startSlice, int endSlice, 
-			 Array<int,1> changedParticles,
-			 int level);
-
-  /// Function to calculate the total action.
-  void calcTotalAction();
-  void PrintDensityMatrix();
+  double UAction (int startSlice, int endSlice, 
+		  const Array<int,1> &changedParticles, int level);
+  double KAction (int startSlice, int endSlice, 
+		  const Array<int,1> &changedParticles, int level);
+  double TotalAction(int startSlice, int endSlice, 
+		     const Array<int,1> &changedParticles, int level);
+  void OptimizedBreakup(int numKnots, double kcut);
   ActionClass(PathDataClass  &pathdata);
 };
 
