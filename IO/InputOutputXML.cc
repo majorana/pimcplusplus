@@ -466,15 +466,13 @@ void VarXMLdouble3Class::ReadVals(list<string> &vals)
   list<string>::iterator iter = vals.begin();
   for (int i=0; i<Value.extent(0); i++) 
     for (int j=0; j<Value.extent(1); j++) 
-      for (int k=0; k<Value.extend(2); k++){
+      for (int k=0; k<Value.extent(2); k++){
 	Value(i,j,k) = StrToDouble(*iter);
 	iter++;
       }
 }
 
 
-void VarXMLdouble2Class::ReadVals(list<string> &vals) {}
-void VarXMLdouble3Class::ReadVals(list<string> &vals) {}
 void VarXMLint0Class::ReadVals(list<string> &vals) {}
 void VarXMLint1Class::ReadVals(list<string> &vals) {}
 void VarXMLint2Class::ReadVals(list<string> &vals) {}
