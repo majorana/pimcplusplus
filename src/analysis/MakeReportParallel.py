@@ -92,8 +92,8 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      vlabel=infiles.ReadVar("ylabel")[0]
      data=infiles.ReadVar("y")
      print "My data is ",data
-     if data==[None]:
-          return
+     if data==[None] or [None,None]:
+          return currNum
      y = AvgLastVec(data)
      x=infiles.ReadVar("x")[0]
      description=infiles.ReadVar("Description")[0]
@@ -192,6 +192,8 @@ def MeanErrorString (mean, error):
 def Avg (x):
      if x[0] == None:
           return None
+     elif (type(x)==type([])):
+          return map(lambda y:sum(y)/len(y),x)
      else:
           return sum(x)/len(x)
 
@@ -367,10 +369,11 @@ def ProcessMove(doc,infiles):
      for i in range (0, numMoves):
           infiles.OpenSection(i)
           name=infiles.GetName()
+          print "they are ",infiles.ReadVar("AcceptRatio")
           ar = Avg(infiles.ReadVar("AcceptRatio"))
           if (ar!=None):
                totAccept=ar[0]
-               numAccept=0
+               numAccept=1
                for counter in range(1,len(ar)):
                     totAccept=totAccept+ar[counter]
                     numAccept=numAccept+1
@@ -389,7 +392,7 @@ def ProcessMove(doc,infiles):
                ar = Avg(infiles.ReadVar("AcceptRatio"))
                if (ar!=None):
                     totAccept=ar[0]
-                    numAccept=0
+                    numAccept=1
                     for counter in range(1,len(ar)):
                          totAccept=totAccept+ar[counter]
                          numAccept=numAccept+1
@@ -398,7 +401,7 @@ def ProcessMove(doc,infiles):
                     ar=Avg(infiles.ReadVar("Acceptance Ratio"))
                     if (ar!=None):
                          totAccept=ar[0]
-                         numAccept=0
+                         numAccept=1
                          for counter in range(1,len(ar)):
                               totAccept=totAccept+ar[counter]
                               numAccept=numAccept+1
@@ -469,6 +472,8 @@ for counter in range(0,numSections):
      elif myType=="CorrelationFunction":
           currNum=ProcessCorrelationSection(infiles,doc,currNum)
           doc.append(HR())
+     else:
+          a=5
      infiles.CloseSection()
 infiles.CloseSection() # "Observables"
 
