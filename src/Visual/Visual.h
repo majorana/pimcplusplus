@@ -99,7 +99,8 @@ protected:
   PathTypeType PathType; 
   void LineToggle();
   void WrapToggle();
-  Gtk::Image TubesImage, LinesImage, StraightImage, SmoothImage;
+  Gtk::Image TubesImage, LinesImage, StraightImage, SmoothImage,
+    NoWrapImage, WrapImage;
 
   Gtk::SeparatorToolItem ToolSep1, ToolSep2;
 

@@ -156,6 +156,7 @@ VisualClass::VisualClass()
     PathType (LINES),
     TubesImage("tubes.png"), LinesImage("lines.png"),
     StraightImage("straight.png"), SmoothImage("smooth.png"),
+    NoWrapImage("nowrap2.png"), WrapImage("wrap.png"),
     FileChooser ("Choose an output file"),
     Wrap(false)
 {
@@ -204,6 +205,8 @@ VisualClass::VisualClass()
   LinesButton.set_icon_widget (LinesImage);
   StraightButton.set_icon_widget(StraightImage);
   SmoothButton.set_icon_widget(SmoothImage);
+  NoWrapButton.set_icon_widget(NoWrapImage);
+  WrapButton.set_icon_widget(WrapImage);
   Tools.append (LinesButton);
   Tools.append (TubesButton);
   Tools.append (ToolSep1);
@@ -496,7 +499,6 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
   PutInBox (r1, dim);
   PutInBox (r2, dim);
   dVec disp = r2-r1;
-  double eps = 1.0e-12;
   if (disp[dim]<-0.5*Box[dim]) { // path wraps in + direction
     double d1 = 0.5*Box[dim]-r1[dim];
     double d2 = r2[dim] + 0.5*Box[dim];
@@ -508,8 +510,6 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
     wall1 = s1*r1 + s2*rshift;
     wall2 = wall1;
     wall2[dim] -= Box[dim];
-    wall1[dim] -= eps;
-    wall2[dim] += eps;
     return true;
   }
   else if (disp[dim]>0.5*Box[dim]) {
@@ -522,8 +522,6 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
     wall1 = s1*r1 + s2*rshift;
     wall2 = wall1;
     wall2[dim] += Box[dim];
-    wall1[dim] += eps;
-    wall2[dim] -= eps;
     return true;
   }
   return false;
