@@ -16,6 +16,7 @@ private:
   Array<double,1> normVec;
   Potential *pot;  
 public:
+  Grid *grid;
   CubicSpline u, dudr;
   int n, l, CoreNodes;
   double Energy, Occupancy, PartialNorm, Weight;
@@ -28,7 +29,7 @@ public:
   void IntegrateOut();
   void Solve (double tolerance=1.0e-8);
   void Normalize();
-  void SetGrid(Grid *grid);
+  void SetGrid(Grid *newgrid);
   void SetPotential (Potential *newPot);
   void Write (IOSectionClass &out);
   void Read  (IOSectionClass &in);
@@ -57,7 +58,7 @@ private:
   RadialWF &WF;
 public:
   inline Vec2 operator() (double r, Vec2& u_and_du)
-  { return WF.ScalarRelDerivs(r, u_and_du); }
+  { return WF.PseudoDerivs(r, u_and_du); }
   PHDerivs (RadialWF &wf) : WF(wf)
   { /* Do nothing */ }
 };

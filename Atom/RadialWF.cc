@@ -321,8 +321,9 @@ int RadialWF::CountNodes()
   return (nodes);
 }
 
-void RadialWF::SetGrid(Grid *grid)
+void RadialWF::SetGrid(Grid *newgrid)
 {
+  grid = newgrid;
   int N = grid->NumPoints;
   uduVec.resize(N);
   normVec.resize(N);
