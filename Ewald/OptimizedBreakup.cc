@@ -54,7 +54,7 @@ void OptimizedBreakupClass::Addk(double k, double degeneracy)
 ///////////////////////////////////////////
 void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
 {
-  int numk = 0;
+  double numk = 0;
   TinyVector<double,3> b;
   b[0] = 2.0*M_PI/Basis.GetBox()[0];
   b[1] = 2.0*M_PI/Basis.GetBox()[1];
@@ -81,7 +81,7 @@ void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
   }
   // Now, add kpoints to the list with approximate degeneracy.
   double kvol = b[0]*b[1]*b[2];
-  const int N = 2000;
+  const int N = 4000;
   double deltak = (kMax-kCont)/N;
   for (int i=0; i<N; i++) {
     double k1 = kCont+deltak*i;
@@ -90,6 +90,7 @@ void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
     double vol = 4.0*M_PI/3.0*(k2*k2*k2-k1*k1*k1);
     double degeneracy = vol/kvol;
     Addk(k, degeneracy);
+    numk += degeneracy;
   }
   
 
@@ -263,7 +264,7 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
     if (S(i) < 0.0)
       cerr << "negative singlar value.\n";
 
-  cerr << "Smax = " << Smax << endl;
+  //  cerr << "Smax = " << Smax << endl;
 
   for (int i=0; i<M; i++)
     Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
@@ -343,6 +344,8 @@ double LPQHI_BasisClass::h(int n, double r)
   double rb = delta*i;
   double rc = delta*(i+1);
   rc = min(r_c, rc);
+  TinyVector<double,3> prefactor;
+  prefactor =  1.0, 0.2, 0.02;
   if ((r > ra) && (r <= rb)) {
     double sum = 0.0;
     double prod = 1.0;
@@ -354,6 +357,7 @@ double LPQHI_BasisClass::h(int n, double r)
     //  sum *= (-delta);
     for (int j=0; j<alpha; j++)
       sum *= -1.0;
+    //sum *= prefactor[alpha];
     return (sum);
   }
   else if ((r > rb) && (r <= rc)) {
@@ -365,6 +369,7 @@ double LPQHI_BasisClass::h(int n, double r)
     }
     //for (int j=0; j<alpha; j++)
     //  sum *= delta;
+    //sum *= prefactor[alpha];
     return sum;
   }
   return 0.0;
@@ -394,6 +399,8 @@ double LPQHI_BasisClass::c(int m, double k)
     }
   //for (int j=0; j<alpha; j++)
   //  sum *= delta;
-
+  TinyVector<double,3> prefactor;
+  prefactor = 1.0, 0.2, 0.02;
+  //sum *= prefactor[alpha];
   return (sum);
 };

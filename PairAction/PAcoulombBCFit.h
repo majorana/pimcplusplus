@@ -13,6 +13,17 @@ private:
   double dVlong (double q, int level);
   // Real space cutoff parameter;
   double alpha;
+  void DoFits();
+  /** These arrays hold the coefficients of the expansion of the tail
+      of the diagonal part of the action/potential in inverse powers
+      of q or r.  The first index is for the inverse power, and the
+      second gives the level.  That is, outside rcut, 
+      \f[ U_\text{diag}(q, \text{level}) \approx Ucoef(0,level)/q +
+      Ucoef(1,level)/r^2 + Ucoef(2,leve)/r^3 \f] */
+  Array<double,2> Ucoefs, dUcoefs;
+  Array<double,1> Vcoefs;
+  /// The cutoff radius for the long range breakup.
+  double rcut;  
 public:
   Grid *qgrid, *tgrid;
   Array<BicubicSpline,1> Usplines, dUsplines;
@@ -41,6 +52,11 @@ public:
   double dUdiag_p  (double q, int level);
   /// The q-derivative of the above
   double dUdiag_pp (double q, int level);
+  /// Set the cutoff radius for the long range breakup
+  void Setrc(double rc);
+  double Xk_U  (double k, int level);
+  double Xk_dU (double k, int level);
+  double Xk_V  (double k, int level);
 
   /////////////////////////
   /// Long-ranged stuff ///

@@ -1,5 +1,6 @@
 #include "PAFit.h"
 #include "../Splines/BicubicSpline.h"
+#include "../Fitting/Fitting.h"
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
@@ -403,3 +404,89 @@ double PAcoulombBCFitClass::dUdiag_pp (double r, int level)
     return (Pot->d2Vdr2(r));
 }
 
+void PAcoulombBCFitClass::Setrc (double rc)
+{
+  rcut = rc;
+  const int numPoints=1000;
+
+  int numLevels = Usplines.size();
+  
+  Array<double,1> coefs, error;
+  Array<double,1> y(numPoints), sigma(numPoints);
+  Array<double,2> F(numPoints,3);
+  double deltar = (qgrid->End - rcut)/(numPoints-1);
+  
+  // Setup basis functions:
+  for (int i=0; i<numPoints; i++) {
+    double r = rcut + i*deltar;
+    F(i,0) = 1.0/r;
+    F(i,1) = 1.0/(r*r);
+    F(i,2) = 1.0/(r*r*r);
+    sigma(i) = 1.0;
+  }
+
+  // Do U fits;
+  Ucoefs.resize(3, numLevels);
+  for (int level=0; level<numLevels; level++) {
+    cerr << "level = " << level << endl;
+    for (int i=0; i<numPoints; i++) {
+      double r = rcut + i*deltar;
+      y(i) = Udiag (r, level);
+    }
+    LinFitSVD (y, sigma, F, coefs, error, 1.0e-15);
+    for (int i=0; i<coefs.size(); i++)
+      Ucoefs(i, level) = coefs(i);
+    cerr << "Ucoefs = " << coefs << endl;
+  }
+
+  // Do dU fits;
+  dUcoefs.resize(3, numLevels);
+  for (int level=0; level<numLevels; level++) {
+    for (int i=0; i<numPoints; i++) {
+      double r = rcut + i*deltar;
+      y(i) = dUdiag (r, level);
+    }
+    LinFitSVD (y, sigma, F, coefs, error, 1.0e-15);
+    for (int i=0; i<coefs.size(); i++)
+      dUcoefs(i, level) = coefs(i);
+  }
+
+  // Do V fits;
+  Vcoefs.resize(3);
+  for (int i=0; i<numPoints; i++) {
+    double r = rcut + i*deltar;
+    y(i) = V(r);
+  }
+  LinFitSVD (y, sigma, F, coefs, error, 1.0e-15);
+  for (int i=0; i<coefs.size(); i++)
+    Vcoefs(i) = coefs(i);
+}
+
+#include <gsl/gsl_sf.h>
+
+double PAcoulombBCFitClass::Xk_U (double k, int level)
+{
+  double C0 = -4.0*M_PI/(k*k) * cos(k*rcut);
+  double C1 =  4.0*M_PI/k * (gsl_sf_Si(k*rcut) - 0.5*M_PI);
+  double C2 =  4.0*M_PI/k * (k*gsl_sf_Ci(k*rcut) - sin(k*rcut)/rcut);
+
+  return (Ucoefs(0,level)*C0 + Ucoefs(1,level)*C1 + Ucoefs(2,level)*C2);
+}
+
+double PAcoulombBCFitClass::Xk_dU (double k, int level)
+{
+  double C0 = -4.0*M_PI/(k*k) * cos(k*rcut);
+  double C1 =  4.0*M_PI/k * (gsl_sf_Si(k*rcut) - 0.5*M_PI);
+  double C2 =  4.0*M_PI/k * (k*gsl_sf_Ci(k*rcut) - sin(k*rcut)/rcut);
+
+  return (dUcoefs(0,level)*C0 + dUcoefs(1,level)*C1 + dUcoefs(2,level)*C2);
+}
+ 
+double PAcoulombBCFitClass::Xk_V (double k, int level)
+{
+  double C0 = -4.0*M_PI/(k*k) * cos(k*rcut);
+  double C1 =  4.0*M_PI/k * (gsl_sf_Si(k*rcut) - 0.5*M_PI);
+  double C2 =  4.0*M_PI/k * (k*gsl_sf_Ci(k*rcut) - sin(k*rcut)/rcut);
+
+  return (Vcoefs(0,level)*C0 + Vcoefs(1,level)*C1 + Vcoefs(2,level)*C2);
+}
