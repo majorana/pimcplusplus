@@ -27,7 +27,7 @@ public:
   /// column. 
   Array<MultiCubicSpline,1> ukj; //(level )
   double calcUrrptau(double s,double q,double z,int level);
-
+  int n;
 
 
   
@@ -48,8 +48,8 @@ double PairActionClass::calcUrrptau(double s,double q,double z,int level)
   double ssquaredinverse=1/ssquared;
   double Sto2k=2;
   (ukj(level))(q,tempukjArray); 
-  for (int k=1;k<=999999;k++){  ///THE 99999 USED TO BE n BUT I COULDNT FIGURE
-				//  OUT WHAT THAT WAS
+  for (int k=1;k<=n;k++){  
+				
     double Zto2j=1;
     double currS=Sto2k;
 
