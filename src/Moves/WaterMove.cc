@@ -197,7 +197,7 @@ void WaterTranslate::MakeMove()
 
 void WaterRotate::MakeMove()
 {
-  double dtheta = 2*M_PI*0.05;
+  double dtheta = 2*M_PI*0.1;
   int speciesO = PathData.Path.SpeciesNum("O");
   int  numWater=PathData.Path.Species(speciesO).LastPtcl-
     PathData.Path.Species(speciesO).FirstPtcl+1;

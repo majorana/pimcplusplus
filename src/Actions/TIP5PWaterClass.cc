@@ -907,10 +907,8 @@ double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Arra
 //cerr << "P1prime " << P1prime << endl;
 //cerr << "P2prime " << P2prime << endl;
       // Calculate bisectors for each configuration
-      dVec n = GetBisector(P1,P2);
-      dVec nprime = GetBisector(P1prime,P2prime);
-      n = Normalize(n);
-      nprime = Normalize(nprime);
+      dVec n = Normalize(GetBisector(P1,P2));
+      dVec nprime = Normalize(GetBisector(P1prime,P2prime));
 //cerr << "n " << n << endl;
 //cerr << "nprime " << nprime << endl;
       double vel_squared;
@@ -932,7 +930,6 @@ double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Arra
         double alpha = HOH_half_angle;
         double SinAlpha = sin(alpha);
         double CosAlpha = cos(alpha);
-        double l = R;
         dVec u1 = Normalize(P1 - Scale(n,CosAlpha));
         dVec z1 = Normalize(CrossProd(P1,n));
         dVec u2 = Normalize(P2 - Scale(n,CosAlpha));
@@ -956,10 +953,7 @@ double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Arra
         else{
           phi = phi2;
         }
-//cerr << "l " << l << endl;
 //cerr << "I chose psi " << psi << endl;
-        double vel_theta_squared = 2*l*l*theta*theta;
-//cerr << "vel_theta_sq " << vel_theta_squared << endl;
         if(psi1<psi2){
           psi = psi1;
         }
@@ -979,8 +973,8 @@ double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Arra
         double gamma = 2*acos(chi);
         double SinHalfGamma = sin(gamma/2);
         // Rotation Moment Matrix
-        double Lx = R*R*CosAlpha*CosAlpha;
-        double Ly = R*R;
+        double Lx = R*R;
+        double Ly = R*R*CosAlpha*CosAlpha;
         double Lz = R*R*SinAlpha*SinAlpha;
         // Axis of Rotation;
         double ex = eta/SinHalfGamma;
@@ -1026,7 +1020,8 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
   int skip = 1<<level;
   const int NumImage=1;  
   double Z = 0.0;
-  double FourLambdaTauInv = 1.0/(4.0*lambda_p*levelTau);
+  double lambda = lambda_p;
+  double FourLambdaTauInv = 1.0/(4.0*lambda*levelTau);
   int TotalNumParticles = Path.NumParticles();
   int numMol = TotalNumParticles/5;
   int startparticle = 3*numMol;
@@ -1038,7 +1033,7 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
     if (speciesNum == PathData.Path.SpeciesNum("p")){
       for (int slice=startSlice; slice<endSlice; slice+=skip) {
 //cerr << "slice " << slice << " -- " << slice+skip << endl;
-	spring += (0.5*3)/levelTau;
+//	spring += (0.5*3)/levelTau;
 //cerr << spring << endl;
         // Load coords and their corresponding oxygens (COMs)
         dVec P1 = PathData.Path(slice,ptcl1);
@@ -1064,10 +1059,9 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
         nprime = Normalize(nprime);
         double vel_squared;
         double prefactor;
-        double D;
-        double C = 1.0;
+        double CDsqrt;
         if (n == nprime){
-          vel_squared = 0.0;
+ //         vel_squared = 0.0;
         }
         else{
           // Calculate the cross product - the axis of rotation
@@ -1126,8 +1120,8 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
         double gamma = 2*acos(chi);
         double SinHalfGamma = sin(gamma/2);
         // Rotation Moment Matrix
-        double Lx = R*R*CosAlpha*CosAlpha;
-        double Ly = R*R;
+        double Lx = R*R;
+        double Ly = R*R*CosAlpha*CosAlpha;
         double Lz = R*R*SinAlpha*SinAlpha;
         // Axis of Rotation;
         double ex = eta/SinHalfGamma;
@@ -1140,7 +1134,7 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
         double MSum = Mx + My + Mz;
         vel_squared = MSum*gamma*gamma;
         prefactor = gamma/(2*SinHalfGamma);
-        D = 1.0;
+        CDsqrt = sqrt(Lx*Ly*Lz)*gamma/(4*sqrt(2.0)*pow((lambda*levelTau),1.5)*SinHalfGamma);
         }
 
         double GaussSum;
@@ -1148,14 +1142,14 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
 	double d2overFLT = vel_squared*FourLambdaTauInv;
 	double expPart = exp(-d2overFLT);
         GaussSum = expPart;
-        numSum = -d2overFLT/levelTau* expPart; 
+        numSum = (1.5 - d2overFLT)*CDsqrt/(endSlice*levelTau)*expPart; 
         Z += GaussSum;
         spring += numSum; 
       }
     }
   }
   spring = spring/Z;
-//  cerr << "returning spring = " << spring << endl;
+  //cerr << "returning spring = " << spring << endl;
   return spring;
 }
 
