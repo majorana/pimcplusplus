@@ -302,7 +302,7 @@ double ActionClass::TotalAction(int startSlice, int endSlice,
 				int level)
 {
 
-  if (OpenLoops){
+  if (PathData.Path.OpenPaths){
     return UApproximateAction(startSlice,endSlice,changedParticles,level)+
       KAction(startSlice,endSlice,changedParticles,level)+
       OtherAction(startSlice,endSlice,changedParticles,level);

@@ -60,7 +60,7 @@ void ParticleMoveClass::ChooseParticles()
     bool Redundant;
     do {
       MyParticleIndices(i) = RandInt(TotalParticles);
-      while (MyParticleIndices(i)==(int)(PathData.Path.OpenPtcl)){ //HACK!HACK!
+      while (PathData.Path.OpenPaths && MyParticleIndices(i)==(int)(PathData.Path.OpenPtcl)){ //HACK!HACK!
 	MyParticleIndices(i) = RandInt(TotalParticles);
       } 
       Redundant = false;
