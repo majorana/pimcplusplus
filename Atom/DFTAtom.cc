@@ -2,6 +2,11 @@
 #include "../Integration/RungeKutta.h"
 #include "../DFT/Functionals.h"
 
+AtomType DFTAtom::Type()
+{
+  return (DFTType);
+}
+
 void DFTAtom::UpdateVHXC()
 {
   UpdateChargeDensity();
@@ -192,6 +197,11 @@ void DFTAtom::Read(IOSectionClass &in)
   int numRadialWFs = in.CountSections("RadialWF");
   RadialWFs.resize(numRadialWFs);
   SetGrid(grid);
+  in.ReadVar ("ChargeDensity", ChargeDensity.Data());
+  in.ReadVar ("Hartree", Hartree.Data());
+  in.ReadVar ("ExCorr", ExCorr.Data());
+  V.HXC.Data() = Hartree.Data()+ExCorr.Data();
+
   double charge = 0.0;
   for (int i=0; i<numRadialWFs; i++) {
     RadialWFs(i).SetGrid (grid);

@@ -3,12 +3,15 @@
 
 #include "RadialWF.h"
 
+typedef enum {DFTType, HFType, OEPType} AtomType;
+
 class Atom
 {
 protected:
   Grid *grid;
 public:
   Array<RadialWF,1> RadialWFs;
+  virtual AtomType Type() = 0;
   virtual void UpdateVHXC() = 0;
   virtual void CalcEnergies (double &kinetic, double &potential,
 			     double &hartree, double &HXC) = 0;

@@ -18,6 +18,7 @@ public:
   ScreenedPot V;
   double NewMix;
   
+  AtomType Type();
   /// This function calculates the charge density, hartree and exchange
   /// potentials and places them in pot.
   void UpdateVHXC();
