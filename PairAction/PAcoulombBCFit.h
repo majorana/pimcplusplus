@@ -1,6 +1,5 @@
 #ifndef PA_COULOMBBC_FIT_H
 #define PA_COULOMBBC_FIT_H
-
 #include "PAFitBase.h"
 #include "../Splines/BicubicSpline.h"
 

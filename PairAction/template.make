@@ -1,6 +1,6 @@
-SOURCES = PAszFit.cc PAcoulombFit.cc PAcoulombBCFit.cc
+SOURCES = PAszFit.cc PAcoulombFit.cc PAcoulombBCFit.cc PAclassicalFit.cc
 
-all:	PAszFit.o PAcoulombFit.o PAcoulombBCFit.o
+all:	PAszFit.o PAcoulombFit.o PAcoulombBCFit.o PAclassicalFit.o
 
 clean:
 	rm -f *.o

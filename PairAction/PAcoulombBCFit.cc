@@ -172,7 +172,7 @@ double PAcoulombBCFitClass::dU(double q, double z, double s2, int level)
   }
   else {
     // Coulomb action is independent of z
-    return (0.0);
+    return (Potential->V(q));
   }
 }
 
