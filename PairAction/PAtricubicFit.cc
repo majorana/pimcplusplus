@@ -108,10 +108,10 @@ public:
   double dU(double r, double rp, double costheta)
   {
     SC.Set(r, rp, costheta);
-    SC.IsdU = false;
+    SC.IsdU = true;
     GKIntegration<SCintegrand,GK15> Integrator(SC);
     double dUavg = Integrator.Integrate(0.0, 1.0, 1.0e-7,
-				       1.0e-7, false);
+					1.0e-7, false);
     return (dUavg);
   }
   USemiclassical (Rho &rho, double beta_) : SC(rho)
