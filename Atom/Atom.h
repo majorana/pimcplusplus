@@ -41,6 +41,8 @@ public:
   //Array<double,1> R;
   //Array<double,1> dRdr;
 
+  void Write (IOSectionClass &out);
+  void Read  (IOSectionClass &in);
 
   inline double operator()(double r)
   {
@@ -122,6 +124,8 @@ public:
   void IntegrateRadialEquations();
   void NormalizeRadialWFs();
   void Read (IOSectionClass &IO);
+  void ReadInput (IOSectionClass &in);
+  void Write(IOSectionClass &out);
   void WritePH (char *FileName, Grid *OutputGrid);
   void WriteDavidsPH(char *FileName);
   void WriteWFs(char *FileName);

@@ -272,6 +272,10 @@ void RadialWF::Normalize()
   integrator.Integrate(*u.grid, 0, u.grid->NumPoints-1, normVec);
   
   double norm = sqrt(1.0/(4.0*M_PI*normVec(u.grid->NumPoints-1)));
+  for (int i=0; i<u.grid->NumPoints; i++) {
+    u(i) *= norm;
+    dudr(i) *= norm;
+  }
 }
 
 

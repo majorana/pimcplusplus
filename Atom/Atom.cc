@@ -92,7 +92,7 @@ Vec2 ModeDerivs (double r, Vec2 Sum,
 //////////////////////////////////////////////////////////////////
 //                 Input and output routines                    //
 //////////////////////////////////////////////////////////////////
-void Atom::Read (IOSectionClass &IO)
+void Atom::ReadInput (IOSectionClass &IO)
 {
   assert (IO.OpenSection("Potential"));
   PH = ReadPH(IO);
@@ -944,4 +944,87 @@ Atom::CalcPH_XC(Grid *Agrid, Grid *Bgrid, Grid *Vgrid)
 
   return (&PHXC);
 
+}
+
+
+void RadialWF::Write(IOSectionClass &out)
+{
+  out.WriteVar ("IsRelativistic", IsRelativistic);
+  out.WriteVar ("Energy", Energy);
+  out.WriteVar ("l", l);
+  out.WriteVar ("CoreNodeNum", CoreNodeNum);
+  out.WriteVar ("DesiredNodeNum", DesiredNodeNum);
+  out.WriteVar ("Weight", Weight);
+  out.WriteVar ("CutOffRadius", CutOffRadius);
+  out.WriteVar ("Occupancy", Occupancy);
+  out.WriteVar ("MaxCurve", MaxCurve);
+  out.WriteVar ("Label", Label);
+  Array<double,1> uVec(grid->NumPoints), duVec(grid->NumPoints);
+  for (int i=0; i<grid->NumPoints; i++) {
+    uVec(i) = u(i);
+    duVec(i) = dudr(i);
+  } 
+  out.WriteVar ("u", uVec);
+  out.WriteVar ("dudr", duVec);
+}
+
+
+// Nota bene:  grid must be set before calling this function
+void RadialWF::Read (IOSectionClass &in)
+{
+  assert(in.ReadVar("IsRelativistic", IsRelativistic));
+  assert(in.ReadVar("Energy", Energy));
+  assert(in.ReadVar("l", l));
+  assert(in.ReadVar("CoreNodeNum", CoreNodeNum));
+  assert(in.ReadVar("DesiredNodeNum", DesiredNodeNum));
+  assert(in.ReadVar("Weight", Weight));
+  assert(in.ReadVar("CutOffRadius", CutOffRadius));
+  assert(in.ReadVar("Occupancy", Occupancy));
+  assert(in.ReadVar("MaxCurve", MaxCurve));
+  assert(in.ReadVar("Label", Label));
+  Array<double,1> uVec, duVec;
+  assert(in.ReadVar ("u", uVec));
+  assert(in.ReadVar ("dudr", duVec));
+  u.Init(grid, uVec);
+  dudr.Init(grid, duVec);
+}
+
+
+void Atom::Write(IOSectionClass &out)
+{
+  out.NewSection("PH");
+  PH->Write(out);
+  out.CloseSection();
+
+  out.NewSection("Grid");
+  grid->Write(out);
+  out.CloseSection();
+
+  for (int i=0; i<NumRadialWFs; i++) {
+    out.NewSection ("RadialWF");
+    RadialWFs(i).Write(out);
+    out.CloseSection();
+  }
+}
+
+
+void Atom::Read(IOSectionClass &in)
+{
+  in.OpenSection("PH");
+  PH = ReadPH (in);
+  in.CloseSection();
+
+  in.OpenSection("Grid");
+  grid = ReadGrid (in);
+  in.CloseSection();
+
+  NumRadialWFs = in.CountSections("RadialWF");
+  RadialWFs.resize(NumRadialWFs);
+  for (int i=0; i<NumRadialWFs; i++) {
+    RadialWFs(i).PH = PH;
+    RadialWFs(i).grid = grid;
+    in.OpenSection ("RadialWF", i);
+    RadialWFs(i).Read(in);
+    in.CloseSection();
+  }
 }

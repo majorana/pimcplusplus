@@ -1,11 +1,16 @@
-SOURCES = Atom.cc RadialWF.cc TestRadialWF.cc NewAtom.cc
+SOURCES = Atom.cc RadialWF.cc TestRadialWF.cc DFTAtom.cc TestDFTAtom.cc
 
-all:	Atom.o RadialWF.o TestRadialWF NewAtom.o
+all:	Atom.o RadialWF.o TestRadialWF DFTAtom.o TestDFTAtom
 
 TestWFobjs = TestRadialWF.o RadialWF.o ../PH/CoulombPot.o ../Splines/CubicSpline.o 
 
+TestDFTAtomobjs = RadialWF.o ../PH/CoulombPot.o ../Splines/CubicSpline.o TestDFTAtom.o DFTAtom.o ../PH/ScreenedPot.o ../DFT/Functionals.o ../DFT/ExCorr.o
+
 TestRadialWF:  $(TestWFobjs)
 	$(LD) -o TestRadialWF $(TestWFobjs) $(LIBS)
+
+TestDFTAtom:  $(TestDFTAtomobjs)
+	$(LD) -o TestDFTAtom $(TestDFTAtomobjs) $(LIBS)
 
 clean:
 	rm -f *.o

@@ -9,13 +9,14 @@ protected:
   Grid *grid;
 public:
   Array<RadialWF,1> RadialWFs;
-  virtual void CalcVHXC() = 0;
+  virtual void UpdateVHXC() = 0;
   virtual void CalcEnergies (double &kinetic, double &potential,
-			     double &exCorr);
+			     double &hartree, double &HXC) = 0;
+  virtual void SolveSC() = 0;
   virtual void Write(IOSectionClass &out) = 0;
   virtual void Read(IOSectionClass &in) = 0;
   virtual void SetGrid(Grid *newGrid) = 0;
-  virtual void SetBarePot (Potential *pot);
+  virtual void SetBarePot (Potential *pot) = 0;
 };
 
 class DFTAtom : public Atom
@@ -27,14 +28,18 @@ private:
   void UpdateChargeDensity();
   void UpdateHartree();
   void UpdateExCorr();
-  Array<double,1> temp;
+  Array<double,1> temp, temp2;
   Potential *BarePot;
 public:
-  XCPot xcpot;
+  ScreenedPot V;
+  double newMix;
   
   /// This function calculates the charge density, hartree and exchange
   /// potentials and places them in pot.
-  void CalcVHXC();
+  void UpdateVHXC();
+  void CalcEnergies (double &kinetic, double &potential, 
+		     double &hartree, double &XC);
+  void SolveSC();
   void Write (IOSectionClass &out);
   void Read  (IOSectionClass &in);
   void SetGrid (Grid *newGrid);
