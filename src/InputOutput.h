@@ -23,14 +23,14 @@ public:
   virtual bool ReadInto (Array<int,2> &val)        = 0;
   virtual bool ReadInto (Array<int,3> &val)        = 0;
   virtual bool ReadInto (string &val)              = 0;
+  virtual bool ReadInto (Array<string,1> &val)     = 0;
+  virtual bool ReadInto (Array<string,2> &val)     = 0;
+  virtual bool ReadInto (Array<string,3> &val)     = 0; 
   /*virtual bool ReadInto (bool &val)                = 0;
   virtual bool ReadInto (Array<bool,1> &val)       = 0;
   virtual bool ReadInto (Array<bool,2> &val)       = 0;
-  virtual bool ReadInto (Array<bool,3> &val)       = 0;
+  virtual bool ReadInto (Array<bool,3> &val)       = 0;*/
 
-  virtual bool ReadInto (Array<string,1> &val)     = 0;
-  virtual bool ReadInto (Array<string,2> &val)     = 0;
-  virtual bool ReadInto (Array<string,3> &val)     = 0; */
 };
 
 
@@ -144,17 +144,22 @@ inline bool InputSectionClass::FindSection (string name,
 class OutputSectionClass
 {
 public:
-  virtual bool OpenFile(string fileName)=0;
-  virtual void OpenSection(string name)=0;
-  virtual void CloseSection()=0;
-  virtual void WriteVar(string name, double T)=0;
+  virtual bool OpenFile(string fileName)                 = 0;
+  virtual void OpenSection(string name)                  = 0;
+  virtual void CloseSection()                            = 0;
+  virtual void WriteVar(string name, double T)           = 0;
   virtual void WriteVar(string name, Array<double,1> &v) = 0;
   virtual void WriteVar(string name, Array<double,2> &v) = 0;
   virtual void WriteVar(string name, Array<double,3> &v) = 0;
-  virtual void WriteVar(string name, int T)=0;
-  virtual void WriteVar(string name, Array<int,1> &v) = 0;
-  virtual void WriteVar(string name, Array<int,2> &v) = 0;
-  virtual void WriteVar(string name, Array<int,3> &v) = 0;
+  virtual void WriteVar(string name, int T)              = 0;
+  virtual void WriteVar(string name, Array<int,1> &v)    = 0;
+  virtual void WriteVar(string name, Array<int,2> &v)    = 0;
+  virtual void WriteVar(string name, Array<int,3> &v)    = 0;
+  virtual void WriteVar(string name, string str)         = 0;
+  virtual void WriteVar(string name, Array<string,1> &v) = 0;
+  virtual void WriteVar(string name, Array<string,2> &v) = 0;
+  virtual void WriteVar(string name, Array<string,3> &v) = 0;
+
 };
 
 

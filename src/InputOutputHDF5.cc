@@ -83,6 +83,80 @@ bool VarHDF5Class::ReadInto (Array<int,3> &val)
   return (status == 0);
 }
 
+bool VarHDF5Class::ReadInto (string &val)
+{
+  assert (TypeClass == H5T_STRING);
+  assert (Dimensions.size() == 1);
+  hid_t type = H5Dget_type(DataSetID);
+  size_t length = H5Tget_size(type);
+
+  Array<char,1> charArray(length);
+  herr_t status = H5Dread(DataSetID, type, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, charArray.data());
+  val = charArray.data();
+  H5Tclose(type);
+  return (status == 0);
+}
+
+
+bool VarHDF5Class::ReadInto (Array<string,1> &val)
+{
+  assert (TypeClass == H5T_STRING);
+  assert (Dimensions.size() == 1);
+  val.resize(Dimensions(0));
+  hid_t type = H5Dget_type(DataSetID);
+  size_t length = H5Tget_size(type);
+
+  Array<char,2> charArray(Dimensions(0),length);
+  herr_t status = H5Dread(DataSetID, type, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, charArray.data());
+  for (int i=0; i<Dimensions(0);i++)
+    val(i) = &(charArray(i,0));
+  H5Tclose(type);
+  return (status == 0);
+}
+
+
+bool VarHDF5Class::ReadInto (Array<string,2> &val)
+{
+  assert (TypeClass == H5T_STRING);
+  assert (Dimensions.size() == 2);
+  val.resize(Dimensions(0), Dimensions(1));
+  hid_t type = H5Dget_type(DataSetID);
+  size_t length = H5Tget_size(type);
+
+  Array<char,3> charArray(Dimensions(0),Dimensions(1),length);
+  herr_t status = H5Dread(DataSetID, type, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, charArray.data());
+  for (int i=0; i<Dimensions(0);i++)
+    for (int j=0; j<Dimensions(1);j++)
+      val(i,j) = &(charArray(i,j,0));
+  H5Tclose(type);
+  return (status == 0);
+}
+
+
+
+bool VarHDF5Class::ReadInto (Array<string,3> &val)
+{
+  assert (TypeClass == H5T_STRING);
+  assert (Dimensions.size() == 3);
+  val.resize(Dimensions(0), Dimensions(1), Dimensions(2));
+  hid_t type = H5Dget_type(DataSetID);
+  size_t length = H5Tget_size(type);
+
+  Array<char,4> charArray(Dimensions(0),Dimensions(1),
+			  Dimensions(3),length);
+  herr_t status = H5Dread(DataSetID, type, H5S_ALL,
+			  H5S_ALL, H5P_DEFAULT, charArray.data());
+  for (int i=0; i<Dimensions(0);i++)
+    for (int j=0; j<Dimensions(1);j++)
+      for (int k=0; k<Dimensions(2);k++)
+	val(i,j,k) = &(charArray(i,j,k,0));
+  H5Tclose(type);
+  return (status == 0);
+}
+
 
 
 /// Strips everything after and including a '.' in the string.
@@ -573,6 +647,7 @@ void OutputSectionHDF5Class::WriteVar(string name, Array<int,3> &v)
 	{
 	  loc_id = SectionStack.top().GroupID;
 	  
+
 	  hsize_t dim[3];
 	  for(int i=0; i<3; i++)
 	    dim[i] = v.extent(i);
@@ -593,4 +668,207 @@ void OutputSectionHDF5Class::WriteVar(string name, Array<int,3> &v)
     cerr << "File not open in OutputSectionHDF5Class::WriteVar.\n";
 }
 
+
+void OutputSectionHDF5Class::WriteVar(string name,string str)
+{
+  hid_t dataspace_id, dataset_id, loc_id;
+
+  if (IsOpen)
+    {
+      if (SectionStack.empty()) 
+	cerr << "Error in WriteVar:  No open sections.\n";
+      else
+	{
+	  loc_id = SectionStack.top().GroupID;
+
+	  hsize_t dim[1];
+	  for(int i=0; i<1; i++)
+	    dim[i] = 1;
+	  dataspace_id = H5Screate_simple(1, dim, NULL);
+	  hid_t strType = H5Tcopy (H5T_C_S1);
+	  H5Tset_size (strType, str.length()+1);
+	    
+	  dataset_id =   H5Dcreate(loc_id, name.c_str(),
+				   strType, dataspace_id,
+				   H5P_DEFAULT);
+	  herr_t status = H5Dwrite(dataset_id, strType, 
+				   H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+				   str.c_str());
+	  if (status < 0)
+	    cerr << "Error writing int to HDF5 file in WriteVar.\n";
+	  H5Dclose (dataset_id);
+	  H5Sclose (dataspace_id);
+	  H5Tclose (strType);
+	}
+    }
+  else
+    cerr << "File not open in OutputSectionHDF5Class::WriteVar.\n";
+}
+
+
+
+void OutputSectionHDF5Class::WriteVar(string name,Array<string,1> &strs)
+{
+  hid_t dataspace_id, dataset_id, loc_id;
+
+  if (IsOpen)
+    {
+      if (SectionStack.empty()) 
+	cerr << "Error in WriteVar:  No open sections.\n";
+      else
+	{
+	  loc_id = SectionStack.top().GroupID;
+
+	  int maxLength = 0;
+	  for (int i=0; i<strs.extent(0);i++)
+	    if (strs(i).length() > maxLength)
+		maxLength = strs(i).length();
+	  maxLength++;
+	  Array<char,2> charArray(strs.extent(0), maxLength);
+	  for (int i=0; i<strs.extent(0); i++)
+	    {
+	      for (int x=0; x<strs(i).length(); x++)
+		charArray(i,x) = (strs(i))[x];
+	      int x = strs(i).length();
+	      charArray(i,x) = '\0';
+	    }
+
+	  hsize_t dim[1];
+	  for(int i=0; i<1; i++)
+	    dim[i] = strs.extent(i);
+	  dataspace_id = H5Screate_simple(1, dim, NULL);
+	  hid_t strType = H5Tcopy (H5T_C_S1);
+	  H5Tset_size (strType, maxLength);
+	    
+	  dataset_id =   H5Dcreate(loc_id, name.c_str(),
+				   strType, dataspace_id,
+				   H5P_DEFAULT);
+	  herr_t status = H5Dwrite(dataset_id, strType, 
+				   H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+				   charArray.data());
+	  if (status < 0)
+	    cerr << "Error writing int to HDF5 file in WriteVar.\n";
+	  H5Dclose (dataset_id);
+	  H5Sclose (dataspace_id);
+	  H5Tclose (strType);
+	}
+    }
+  else
+    cerr << "File not open in OutputSectionHDF5Class::WriteVar.\n";
+}
+
+
+
+
+
+void OutputSectionHDF5Class::WriteVar(string name,Array<string,2> &strs)
+{
+  hid_t dataspace_id, dataset_id, loc_id;
+
+  if (IsOpen)
+    {
+      if (SectionStack.empty()) 
+	cerr << "Error in WriteVar:  No open sections.\n";
+      else
+	{
+	  loc_id = SectionStack.top().GroupID;
+
+	  int maxLength = 0;
+	  for (int i=0; i<strs.extent(0);i++)
+	    for (int j=0; j<strs.extent(1);j++)
+	      if (strs(i,j).length() > maxLength)
+		maxLength = strs(i,j).length();
+	  maxLength++;
+	  Array<char,3> charArray(strs.extent(0), strs.extent(1),
+				  maxLength);
+	  for (int i=0; i<strs.extent(0); i++)
+	    for (int j=0; j<strs.extent(1);j++)
+	      {
+		for (int x=0; x<strs(i,j).length(); x++)
+		  charArray(i,j,x) = (strs(i,j))[x];
+		int x = strs(i,j).length();
+		charArray(i,j,x) = '\0';
+	    }
+
+	  hsize_t dim[2];
+	  for(int i=0; i<2; i++)
+	    dim[i] = strs.extent(i);
+	  dataspace_id = H5Screate_simple(2, dim, NULL);
+	  hid_t strType = H5Tcopy (H5T_C_S1);
+	  H5Tset_size (strType, maxLength);
+	    
+	  dataset_id =   H5Dcreate(loc_id, name.c_str(),
+				   strType, dataspace_id,
+				   H5P_DEFAULT);
+	  herr_t status = H5Dwrite(dataset_id, strType, 
+				   H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+				   charArray.data());
+	  if (status < 0)
+	    cerr << "Error writing int to HDF5 file in WriteVar.\n";
+	  H5Dclose (dataset_id);
+	  H5Sclose (dataspace_id);
+	  H5Tclose (strType);
+	}
+    }
+  else
+    cerr << "File not open in OutputSectionHDF5Class::WriteVar.\n";
+}
+
+
+
+
+void OutputSectionHDF5Class::WriteVar(string name,Array<string,3> &strs)
+{
+  hid_t dataspace_id, dataset_id, loc_id;
+
+  if (IsOpen)
+    {
+      if (SectionStack.empty()) 
+	cerr << "Error in WriteVar:  No open sections.\n";
+      else
+	{
+	  loc_id = SectionStack.top().GroupID;
+
+	  int maxLength = 0;
+	  for (int i=0; i<strs.extent(0);i++)
+	    for (int j=0; j<strs.extent(1);j++)
+	      for (int k=0; k<strs.extent(2);k++)
+	      if (strs(i,j,k).length() > maxLength)
+		maxLength = strs(i,j,k).length();
+	  maxLength++;
+	  Array<char,4> charArray(strs.extent(0), strs.extent(1),
+				  strs.extent(2), maxLength);
+	  for (int i=0; i<strs.extent(0); i++)
+	    for (int j=0; j<strs.extent(1);j++)
+	      for (int k=0; k<strs.extent(2);k++)
+	      {
+		for (int x=0; x<strs(i,j,k).length(); x++)
+		  charArray(i,j,k,x) = (strs(i,j,k))[x];
+		int x = strs(i,j,k).length();
+		charArray(i,j,k,x) = '\0';
+	    }
+
+	  hsize_t dim[3];
+	  for(int i=0; i<3; i++)
+	    dim[i] = strs.extent(i);
+	  dataspace_id = H5Screate_simple(3, dim, NULL);
+	  hid_t strType = H5Tcopy (H5T_C_S1);
+	  H5Tset_size (strType, maxLength);
+	    
+	  dataset_id =   H5Dcreate(loc_id, name.c_str(),
+				   strType, dataspace_id,
+				   H5P_DEFAULT);
+	  herr_t status = H5Dwrite(dataset_id, strType, 
+				   H5S_ALL, H5S_ALL, H5P_DEFAULT, 
+				   charArray.data());
+	  if (status < 0)
+	    cerr << "Error writing int to HDF5 file in WriteVar.\n";
+	  H5Dclose (dataset_id);
+	  H5Sclose (dataspace_id);
+	  H5Tclose (strType);
+	}
+    }
+  else
+    cerr << "File not open in OutputSectionHDF5Class::WriteVar.\n";
+}
 

@@ -28,7 +28,15 @@ public:
   bool ReadInto (Array<int,1> &v);
   bool ReadInto (Array<int,2> &v);
   bool ReadInto (Array<int,3> &v);
-  bool ReadInto (string &val) {return true; }
+  bool ReadInto (string &val);
+  bool ReadInto (Array<string,1> &val);
+  bool ReadInto (Array<string,2> &val);
+  bool ReadInto (Array<string,3> &val);
+  /*  bool ReadInto (bool &val);
+  bool ReadInto (Array<bool,1> &val);
+  bool ReadInto (Array<bool,2> &val);
+  bool ReadInto (Array<bool,3> &val); */
+
 
   ~VarHDF5Class()
   {
@@ -151,6 +159,16 @@ public:
   void WriteVar(string name, Array<double,1> &v);
   void WriteVar(string name, Array<double,2> &v);
   void WriteVar(string name, Array<double,3> &v);
+  void WriteVar(string name, int T);
+  void WriteVar(string name, Array<int,1> &v);
+  void WriteVar(string name, Array<int,2> &v);
+  void WriteVar(string name, Array<int,3> &v);
+  void WriteVar(string name, string str);
+  void WriteVar(string name, Array<string,1> &v);
+  void WriteVar(string name, Array<string,2> &v);
+  void WriteVar(string name, Array<string,3> &v);
+
+
   //void WriteVar (string name, Array<double,2> &m);
   void CloseFile();
   OutputSectionHDF5Class() : IsOpen(false)
