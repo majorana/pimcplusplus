@@ -98,9 +98,9 @@ void ModifiedEnergyClass::WriteBlock()
   KineticSum = KineticSum/PathData.Path.numMol;
   TIP5PSum = TIP5PSum/PathData.Path.numMol;
   ST2Sum = ST2Sum/PathData.Path.numMol;
-  RotKinSum = RotKinSum/PathData.Path.numMol;
+//  RotKinSum = RotKinSum/PathData.Path.numMol;
 //  P2RotKinSum = P2RotKinSum/PathData.Path.numMol;
-  TotalSum = TotalSum/PathData.Path.numMol + RotKinSum;
+  TotalSum = TotalSum/PathData.Path.numMol;// + RotKinSum;
   
   TotalVar.Write(PathData.Path.Communicator.Sum(TotalSum)*norm);
   KineticVar.Write(PathData.Path.Communicator.Sum(KineticSum)*norm);

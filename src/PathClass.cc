@@ -434,7 +434,7 @@ void PathClass::InitPaths (IOSectionClass &in)
       ref -= numMol;
     MolRef(m) = ref;
     }
-//    cerr << m << " " << MolRef(m) << endl;
+    cerr << m << " " << MolRef(m) << endl;
   } 
   string openSpeciesName;
   if (OpenPaths) {

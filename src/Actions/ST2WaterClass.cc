@@ -57,6 +57,12 @@ double ST2WaterClass::Action (int startSlice, int endSlice,
               double offset = pow(sigma_over_cutoff,12) - pow(sigma_over_cutoff,6);
 	      double lj = 4*PathData.Species(species1).Epsilon*(pow(sigma_over_r,12)-pow(sigma_over_r,6) - offset); // this is in kcal/mol 
 	      TotalU += lj;
+              // harmonic potential for dimer tesing!!
+              double omega = 2.6*pow(10.0,13);
+              double mass = 0.036;
+              double x = (rmag-2.85)*angstrom_to_m;
+              double quad = -0.5*mass*omega*omega*x*x;
+          //    TotalU += quad;
 //	      cerr << "lj  " << lj << " at distance " << rmag << endl;
             }
 	  }
@@ -72,7 +78,6 @@ double ST2WaterClass::Action (int startSlice, int endSlice,
 //  don't compute intramolecular interactions
 	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
 	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
-//cerr << "slice " << slice << " w/ ptcl " << ptcl1 << " and " << ptcl2 << ".  ";
 	    double rmag;
 	    dVec r;
 	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
@@ -80,7 +85,8 @@ double ST2WaterClass::Action (int startSlice, int endSlice,
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
 	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciesp).Charge*N_Avogadro/kcal_to_joule;
-              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);// - 1.0/CUTOFF);
+              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/CUTOFF);
+              //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
 	      TotalU += coulomb;
 //	      cerr << "protons " << coulomb << " at distance " << rmag  << " with offset " << coulomb_const/CUTOFF << endl;
             }
@@ -99,7 +105,8 @@ double ST2WaterClass::Action (int startSlice, int endSlice,
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
 	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciese).Charge*N_Avogadro/kcal_to_joule;
-              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);// - 1.0/CUTOFF);
+              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/CUTOFF);
+              //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
 	      TotalU += coulomb;
 //	      cerr << "electrons " << coulomb << " at distance " << rmag << " with offset " << coulomb_const/CUTOFF << endl;
             }
@@ -180,6 +187,12 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
               double sigma_over_r = PathData.Species(species1).Sigma/rmag;
 	      double lj = 4*PathData.Species(species1).Epsilon*(pow(sigma_over_r,12)-pow(sigma_over_r,6)); // this is in kcal/mol 
 	      TotalU += lj;
+              // harmonic potential for dimer tesing!!
+              double omega = 2.6*pow(10.0,13);
+              double mass = 0.036;
+              double x = (rmag - 2.85)/angstrom_to_m;
+              double quad = -0.5*mass*omega*omega*x*x/kcal_to_joule;
+         //     TotalU += quad;
 //	      cerr << "lj  " << lj << " at distance " << rmag << endl;
             }
 	  }
@@ -264,7 +277,7 @@ double ST2WaterClass::S(double r)
   double mod;
   if(r<RL){
     mod = 0.0;
-cerr << "returning S = " << mod << " at distance " << r << endl;
+//cerr << "returning S = " << mod << " at distance " << r << " for ";
   }
   else if(r>RU){
     mod = 1.0;
@@ -273,7 +286,7 @@ cerr << "returning S = " << mod << " at distance " << r << endl;
     double diff1 = r - RL;
     double diff2 = 3*RU - RL - 2*r;
     double diff3 = RU - RL;
-    mod = diff1*diff1*diff2/(diff3*diff3);
+    mod = diff1*diff1*diff2/(diff3*diff3*diff3);
   }
 //cerr << "returning S = " << mod << " at distance " << r << endl;
   return mod;

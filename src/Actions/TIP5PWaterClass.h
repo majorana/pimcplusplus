@@ -44,7 +44,7 @@ public:
   TIP5PWaterClass (PathDataClass &pathData);
 };
 
-const double O_H_moment_arm = 0.9572;
+const double O_H_moment_arm = 1.0;
 const double lambda_p = 0.047848;
 //const double HOH_angle = 104.52;
 const double HOH_angle = 1.8242;

@@ -129,11 +129,11 @@ void WaterTranslate::MakeMove()
   int  numWater=PathData.Path.Species(speciesO).LastPtcl-
     PathData.Path.Species(speciesO).FirstPtcl+1;
   int choosemol = (int)floor(PathData.Path.Random.Local()*numWater);
-// We want to evaluate the kinetic action only between oxygens (i.e. COMs)
+  // We want to evaluate the kinetic action only between oxygens (i.e. COMs)
   Array<int,1> OActiveParticles;
   OActiveParticles.resize(1);
   
-// choose a time slice to move
+  // choose a time slice to move
   int numSlices = PathData.Path.TotalNumSlices;
 //cerr << "numSlices is " << numSlices;
   int slice=0;
@@ -157,8 +157,9 @@ void WaterTranslate::MakeMove()
   OActiveParticles(0) = ActiveParticles(0);
 
   double oldAction = 0.0;
+// oldAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
  oldAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
-//  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+// oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
   dVec move = Translate(step); 
   double move_mag = sqrt(move(0)*move(0) + move(1)*move(1) + move(2)*move(2));
 //cerr << "going to move " << move << " with magnitude " << move_mag << endl;
@@ -170,9 +171,10 @@ void WaterTranslate::MakeMove()
   }
  
   double newAction = 0.0;
+// newAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
  newAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
 //cerr << "Potential returned " << newAction;
-//  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
+// newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //cerr << " and with kinetic the action is " << newAction << endl;
   //cerr<<"TRANSLATE:  The actions are "<<newAction<<" "<<oldAction<<endl;
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
@@ -197,7 +199,7 @@ void WaterTranslate::MakeMove()
 
 void WaterRotate::MakeMove()
 {
-  double dtheta = 2*M_PI*0.1;
+  double dtheta = 2*M_PI*0.3;
   int speciesO = PathData.Path.SpeciesNum("O");
   int  numWater=PathData.Path.Species(speciesO).LastPtcl-
     PathData.Path.Species(speciesO).FirstPtcl+1;
@@ -234,12 +236,17 @@ void WaterRotate::MakeMove()
 /*  these lines are just here for testing the rotation move ****
   int oxy = 0;
   int check = 3;
+  int check2 = 4;
   double old_dist;
   dVec r;
   PathData.Path.DistDisp(slice,coord_loc(oxy),coord_loc(check),old_dist,r);
-  cerr << "BEFORE " << check << " " << PathData.Path(slice,coord_loc(check)) << old_dist << " ";
-*************************************************************/
+cerr << "BEFORE " << check << " " << PathData.Path(slice,coord_loc(check)) << old_dist << " ";
+dVec v1 = PathData.Path(slice,coord_loc(check)) - PathData.Path(slice,coord_loc(0));
+dVec v2 = PathData.Path(slice,coord_loc(check2)) - PathData.Path(slice,coord_loc(0));
+cerr << "test angle is " << PathData.Actions.TIP5PWater.GetAngle(v1,v2) << endl;
+***********************************************************/
   double oldAction = 0.0;
+//  oldAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
   oldAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
 //  oldAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //  oldAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
@@ -263,9 +270,10 @@ void WaterRotate::MakeMove()
     x = 0;
     y = 1;
   }
-//  cerr << "ROTATE " << theta/M_PI << " pi rad about " << z << endl;
+//cerr << "ROTATE " << theta/M_PI << " pi rad about " << z << endl;
   // error statement?
   for(int i=1;i<coord_loc.size();i++){
+//cerr << "MOVING PTCL " << coord_loc(i) << " which is of species " <<  PathData.Path.ParticleSpeciesNum(coord_loc(i)) << endl;
     dVec old_coord=PathData.Path(slice,coord_loc(i));
     old_coord=old_coord-PathData.Path(slice,coord_loc(0));
     dVec new_coord = Rotate(old_coord,x,y,z,theta);
@@ -277,9 +285,13 @@ void WaterRotate::MakeMove()
   double new_dist;
   dVec r2;
   PathData.Path.DistDisp(slice,coord_loc(oxy),coord_loc(check),new_dist,r2);
-  cerr << "AFTER " << check << " " << PathData.Path(slice,coord_loc(check)) << old_dist << endl;
+  cerr << "AFTER " << check << " " << PathData.Path(slice,coord_loc(check)) << old_dist ;
+v1 = PathData.Path(slice,coord_loc(check)) - PathData.Path(slice,coord_loc(0));
+v2 = PathData.Path(slice,coord_loc(check2)) - PathData.Path(slice,coord_loc(0));
+cerr << "test angle is " << PathData.Actions.TIP5PWater.GetAngle(v1,v2) << endl;
  *************************************************************/
   double newAction = 0.0;
+//  newAction += PathData.Actions.TIP5PWater.Action(slice,slice,ActiveParticles,0);
   newAction += PathData.Actions.ST2Water.Action(slice,slice,ActiveParticles,0);
 //  newAction += PathData.Actions.Kinetic.Action(startSlice,endSlice,ActiveParticles,0); 
 //  newAction += PathData.Actions.TIP5PWater.RotationalKinetic(startSlice,endSlice,HActiveParticles,0);
