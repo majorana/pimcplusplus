@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdio.h>
+#include <iostream.h>
 
-#include <iostream>
 main()
 {
   double L=3.0;

@@ -1,0 +1,1180 @@
+%!PS
+%% Created by matplotlib http://matplotlib.sourceforge.net
+%
+%%EndComments
+/inch {72 mul} def
+%%EndProlog
+
+/gsr {gsave stroke grestore} def
+
+/l { newpath moveto lineto } def
+
+% http://www.mactech.com/articles/mactech/Vol.09/09.04/PostscriptTutorial/
+
+/box %called as: leftx bottomy xdimension ydimension box
+{
+/yval exch def 
+/xval exch def
+newpath
+moveto
+0 yval rlineto
+xval 0 rlineto
+0 yval neg rlineto
+closepath
+}
+bind def
+
+/clipbox %called as: leftx bottomy xdimension ydimension box
+{
+/yval exch def
+/xval exch def
+newpath
+moveto
+0 yval rlineto
+xval 0 rlineto
+0 yval neg rlineto
+closepath
+clip
+}
+bind def
+
+
+
+
+/make-polygon
+{
+3 dict
+begin
+  /a exch def
+  /n a length def
+  n 1 gt
+    {
+    a 0 get 0 get a 0 get 1 get moveto
+    1 1 n 1 sub     {
+     /i exch def
+     a i get 0 get   a i get 1 get lineto
+    }
+    for
+    }
+  if
+ closepath
+end
+
+}
+def
+
+/mtrx matrix def                            % Allocate a matrix for the save
+					    % matrix operation below.
+/ellipse                                    % ellipse adds a counter-clockwise
+  { /endangle exch def                      % segment of an elliptical arc to
+    /startangle exch def                    % the current path. The ellipse
+    /yrad exch def                          % procedure takes six operands:
+    /xrad exch def                          % the x and y coordinates of the
+    /y exch def                             % center of the ellipse (the
+    /x exch def                             % center is defined as the point
+					    % of intersection of the major and
+					    % minor axes), the ``radius'' of
+					    % the ellipse in the x direction,
+					    % the ``radius'' of the ellipse in
+					    % the y direction, the starting
+					    % angle of the elliptical arc and
+					    % the ending angle of the
+					    % elliptical arc.
+							     
+					    % The basic strategy used in
+					    % drawing the ellipse is to
+					    % translate to the center of the
+					    % ellipse, scale the user
+					    % coordinate system by the x and y
+					    % radius values, and then add a
+					    % circular arc, centered at the
+					    % origin with a 1 unit radius to
+					    % the current path. We will be
+					    % transforming the user coordinate
+					    % system with the translate and
+					    % rotate operators to add the
+					    % elliptical arc segment but we
+					    % don't want these transformations
+					    % to affect other parts of the
+					    % program. In other words, we
+					    % would like to localize the
+					    % effect of the transformations.
+					    % Usually the gsave and grestore
+					    % operators would be ideal
+					    % candidates for this task.
+					    % Unfortunately gsave and grestore
+					    % are inappropriate for this
+					    % situation because we cannot save
+					    % the arc segment that we have
+					    % added to the path. Instead we
+					    % will localize the effect of the
+					    % transformations by saving the
+					    % current transformation matrix
+					    % and restoring it explicitly
+					    % after we have added the
+					    % elliptical arc to the path.
+									 
+    /savematrix mtrx currentmatrix def      % Save the current transformation.
+    x y translate                           % Translate to the center of the
+					    % ellipse.
+    xrad yrad scale                         % Scale by the x and y radius
+					    % values.
+    0 0 1 startangle endangle arc           % Add the arc segment to the path.
+    savematrix setmatrix                    % Restore the transformation.
+  } def
+
+18.000 180.000 translate
+0 rotate
+/figure_clip {0 0 576.000 432.000 clipbox} def
+figure_clip
+
+gsave
+ 
+ newpath [ [ 0 0 ] [  0 432 ] [  576 432 ] [  576 0 ] ] make-polygon
+ 1.000 1.000 1.000 setrgbcolor
+1.00000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 1.000 1.000 1.000 setrgbcolor fill
+grestore
+
+gsave
+ 
+ newpath [ [ 72 47.520 ] [  72 388.800 ] [  518.400 388.800 ] [  518.400 47.520 ] ] make-polygon
+ 0.000 0.000 0.000 setrgbcolor
+1.00000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 1.000 1.000 1.000 setrgbcolor fill
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+67.552 32.576 moveto
+0.0 rotate
+(0)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 127.800 47.520 moveto
+127.800 47.520 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 127.800 47.520 127.800 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 127.800 47.520 127.800 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 127.800 388.800 moveto
+127.800 388.800 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 127.800 384.800 127.800 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 127.800 384.800 127.800 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+116.680 32.576 moveto
+0.0 rotate
+(0.5)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 183.600 47.520 moveto
+183.600 47.520 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 183.600 47.520 183.600 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 183.600 47.520 183.600 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 183.600 388.800 moveto
+183.600 388.800 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 183.600 384.800 183.600 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 183.600 384.800 183.600 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+179.152 32.272 moveto
+0.0 rotate
+(1)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 239.400 47.520 moveto
+239.400 47.520 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 239.400 47.520 239.400 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 239.400 47.520 239.400 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 239.400 388.800 moveto
+239.400 388.800 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 239.400 384.800 239.400 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 239.400 384.800 239.400 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+228.280 32.272 moveto
+0.0 rotate
+(1.5)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 295.200 47.520 moveto
+295.200 47.520 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 295.200 47.520 295.200 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 295.200 47.520 295.200 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 295.200 388.800 moveto
+295.200 388.800 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 295.200 384.800 295.200 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 295.200 384.800 295.200 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+290.752 32.272 moveto
+0.0 rotate
+(2)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 351 47.520 moveto
+351 47.520 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 351 47.520 351 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 351 47.520 351 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 351 388.800 moveto
+351 388.800 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 351 384.800 351 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 351 384.800 351 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+339.880 32.272 moveto
+0.0 rotate
+(2.5)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 406.800 47.520 moveto
+406.800 47.520 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 406.800 47.520 406.800 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 406.800 47.520 406.800 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 406.800 388.800 moveto
+406.800 388.800 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 406.800 384.800 406.800 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 406.800 384.800 406.800 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+402.352 32.576 moveto
+0.0 rotate
+(3)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 462.600 47.520 moveto
+462.600 47.520 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 462.600 47.520 462.600 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 462.600 47.520 462.600 51.520 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 462.600 388.800 moveto
+462.600 388.800 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 462.600 384.800 462.600 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 462.600 384.800 462.600 388.800 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+451.480 32.576 moveto
+0.0 rotate
+(3.5)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+513.952 32.272 moveto
+0.0 rotate
+(4)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+gsave
+/Helvetica findfont
+20.0 scalefont
+setfont
+291.870 16.208 moveto
+0.0 rotate
+(r)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+40.432 42.048 moveto
+0.0 rotate
+(-2.5)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 72 115.776 moveto
+72 115.776 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 72 115.776 76 115.776 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 72 115.776 76 115.776 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 518.400 115.776 moveto
+518.400 115.776 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 514.400 115.776 518.400 115.776 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 514.400 115.776 518.400 115.776 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+53.776 110.152 moveto
+0.0 rotate
+(-2)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 72 184.032 moveto
+72 184.032 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 72 184.032 76 184.032 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 72 184.032 76 184.032 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 518.400 184.032 moveto
+518.400 184.032 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 514.400 184.032 518.400 184.032 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 514.400 184.032 518.400 184.032 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+40.432 178.560 moveto
+0.0 rotate
+(-1.5)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 72 252.288 moveto
+72 252.288 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 72 252.288 76 252.288 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 72 252.288 76 252.288 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 518.400 252.288 moveto
+518.400 252.288 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 514.400 252.288 518.400 252.288 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 514.400 252.288 518.400 252.288 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+53.776 246.664 moveto
+0.0 rotate
+(-1)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 
+ newpath 72 320.544 moveto
+72 320.544 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 72 320.544 76 320.544 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 72 320.544 76 320.544 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ newpath 518.400 320.544 moveto
+518.400 320.544 lineto
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 514.400 320.544 518.400 320.544 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+
+gsave
+ 
+ 514.400 320.544 518.400 320.544 l
+ 0.000 0.000 0.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+0 setlinecap
+ gsr
+ 
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+40.432 315.224 moveto
+0.0 rotate
+(-0.5)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+gsave
+/Helvetica findfont
+16.0 scalefont
+setfont
+59.104 383.480 moveto
+0.0 rotate
+(0)
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+gsave
+/Helvetica findfont
+20.0 scalefont
+setfont
+31.032 202.610 moveto
+90.0 rotate
+(g(r))
+0.000 0.000 0.000 setrgbcolor
+show
+grestore
+
+gsave
+ 72.00000 47.52000 446.40000 341.28000 clipbox
+ newpath 75.382 64.944 moveto
+79.247 75.485 lineto
+83.569 75.571 lineto
+87.995 77.708 lineto
+92.457 79.956 lineto
+96.936 83.877 lineto
+101.424 87.813 lineto
+105.918 92.352 lineto
+110.416 97.316 lineto
+114.915 103.298 lineto
+119.417 108.941 lineto
+123.920 114.652 lineto
+128.424 120.648 lineto
+132.928 127.212 lineto
+137.434 133.501 lineto
+141.939 139.998 lineto
+146.446 146.245 lineto
+150.952 152.203 lineto
+155.459 158.217 lineto
+159.966 163.878 lineto
+164.473 169.509 lineto
+168.980 174.720 lineto
+173.488 179.519 lineto
+177.996 184.267 lineto
+182.503 188.564 lineto
+187.011 192.452 lineto
+191.519 196.232 lineto
+196.027 199.705 lineto
+200.535 202.680 lineto
+205.044 205.404 lineto
+209.552 208.017 lineto
+214.060 210.177 lineto
+218.569 212.129 lineto
+223.077 214.008 lineto
+227.585 215.644 lineto
+232.094 217.093 lineto
+236.602 218.383 lineto
+241.111 219.475 lineto
+245.620 220.432 lineto
+250.128 221.369 lineto
+254.637 222.207 lineto
+259.145 222.877 lineto
+263.654 223.561 lineto
+268.163 224.081 lineto
+272.671 224.566 lineto
+277.180 225.058 lineto
+281.689 225.452 lineto
+286.198 225.797 lineto
+290.706 226.099 lineto
+295.215 227.600 lineto
+299.724 236.281 lineto
+304.233 245.809 lineto
+308.742 254.945 lineto
+313.250 263.717 lineto
+317.759 272.072 lineto
+322.268 280.090 lineto
+326.777 287.769 lineto
+331.286 295.212 lineto
+335.795 302.302 lineto
+340.304 309.168 lineto
+344.812 315.794 lineto
+349.321 322.169 lineto
+353.830 328.380 lineto
+358.339 334.353 lineto
+362.848 340.163 lineto
+367.357 345.755 lineto
+371.866 351.216 lineto
+376.375 356.525 lineto
+380.884 361.651 lineto
+385.393 366.667 lineto
+389.902 371.135 lineto
+394.411 374.499 lineto
+398.919 377.210 lineto
+403.428 379.446 lineto
+407.937 381.338 lineto
+412.446 382.911 lineto
+416.955 384.224 lineto
+421.464 385.325 lineto
+425.973 386.227 lineto
+430.482 386.969 lineto
+434.991 387.560 lineto
+439.500 388.019 lineto
+444.009 388.360 lineto
+448.518 388.596 lineto
+453.027 388.737 lineto
+457.536 388.795 lineto
+462.045 388.800 lineto
+466.554 388.800 lineto
+471.063 388.800 lineto
+475.572 388.800 lineto
+480.081 388.800 lineto
+484.590 388.800 lineto
+489.099 388.800 lineto
+493.608 388.800 lineto
+498.117 388.800 lineto
+502.626 388.800 lineto
+507.135 388.800 lineto
+511.644 388.800 lineto
+516.153 388.800 lineto
+ 0.000 0.000 1.000 setrgbcolor
+0.50000 setlinewidth
+0 setlinejoin
+2 setlinecap
+ gsr
+ 
+grestore
+showpage
+

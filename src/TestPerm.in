@@ -1,5 +1,5 @@
 double tau=0.05;
-
+Array<bool,1> IsPeriodic(3) = [true,true,true];
 Section (System)
 {
   int NumTimeSlices=10;
@@ -33,14 +33,14 @@ Section (Observables)
   Section (Observable)
     {
       string type="PathDump";
-      string name="PathDump";
+      string Name="PathDump";
       int freq=1;
       int dumpFreq=1;
     }
   Section (Observable)
     {
       string type = "Energy";
-      string name = "Energy";
+      string Name = "Energy";
       int freq=20;
       int dumpFreq=500;
       
@@ -48,9 +48,9 @@ Section (Observables)
   Section (Observable)
     {
       string type = "PairCorrelation";
-      string name = "ppPC";
-      string type1 = "p";
-      string type2 = "p";
+      string Name = "ppPC";
+      string Species1 = "p";
+      string Species2 = "p";
       int freq=2000;
       int dumpFreq=7000;
       
@@ -169,6 +169,7 @@ Section (PIMC)
 	Section (Loop)
 	  {
 	    int N = 100;
+	    Section (Move) { string name = "PathDump"; }
 	    Section (Move) { string name = "epBisection"; }
 	  }
 	Section (Observe) { string name = "all"; }

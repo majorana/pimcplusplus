@@ -17,7 +17,10 @@ PIMCobjs =                           \
   PIMCClass.o                        \
   MetaMoves.o 			     \
   BlockMove.o                        \
-  Observables/ObservableClass.o      \
+  Observables/ObservableBase.o      \
+  Observables/ObservableCorrelation.o      \
+  Observables/PathDump.o             \
+  Observables/WindingNumber.o        \
   SpeciesClass.o                     \
   Common.o                           \
   PermuteTableClass.o		     \
@@ -73,8 +76,11 @@ TestPermobjs =                       \
   BlockMove.o                        \
   MetaMoves.o                        \
   PIMCClass.o                        \
-  Observables/ObservableClass.o      \
+  Observables/ObservableBase.o      \
   Observables/ObservableEnergy.o     \
+  Observables/ObservableCorrelation.o     \
+  Observables/PathDump.o             \
+  Observables/WindingNumber.o        \
   SpeciesClass.o                     \
   Common.o                           \
   PermuteTableClass.o		     \

@@ -44,7 +44,8 @@ public:
 
 
 
-/// A pair correlation function observable.
+///Creates a histogram of the end to end distance between the head and
+///tail of the open loop.
 class nofrClass : public ObservableClass
 {
   /// Stores number of counts in each bin
@@ -55,9 +56,6 @@ class nofrClass : public ObservableClass
   int Freq;
   int DumpFreq;
 public:
-  /// The species between which I am calculating the pair correlation
-  /// function.
-  int Species1, Species2;
   /// This grid defines the bins.  Bin 0 is bounded by 0 on the 
   /// bottom and grid(0) on the top.
   LinearGrid grid;
@@ -68,6 +66,7 @@ public:
   /// My specialization of the virtual function.
   void Print();
   void WriteBlock();
+  ///Writes Info about the observable when writing for the first time
   void WriteInfo();
   void Read(IOSectionClass& IO);
   nofrClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
@@ -76,55 +75,11 @@ public:
   }
   nofrClass(PathDataClass &myPathData, IOSectionClass &ioSection,
 		       int species1, int species2) : 
-    ObservableClass(myPathData, ioSection), 
-    Species1(species1), Species2(species2) 
+    ObservableClass(myPathData, ioSection)
   { Initialize(); }
 
 };
 
-///Need to be moved out in a minute or two
-class WindingNumberClass : public ObservableClass
-{
- private:
-  int Freq;
-  int DumpFreq;
-  dVec TotalW2;
-  Array<dVec,1> TotalDisp;
-  Array<dVec,1> TempDisp;
- public:
-  int TimesCalled;
-  int NumSamples;
-  void Accumulate();
-  void WriteBlock();
-  void Read(IOSectionClass& IO);
-  WindingNumberClass(PathDataClass &myPathData,IOSectionClass &ioSection):
-    ObservableClass(myPathData,ioSection) {
-    TimesCalled=0;
-    NumSamples=0;
-    TotalDisp.resize(PathData.Path.NumParticles());
-    TempDisp.resize(PathData.Path.NumParticles());
-    TotalW2=0.0;
-  }
-
-
-
-
-};
-
-class PathDumpClass : public ObservableClass
-{
-private:
-public:
-  int TimesCalled;
-  void Accumulate();
-  void WriteBlock();
-  void Read(IOSectionClass& IO);
-  PathDumpClass(PathDataClass &myPathData, IOSectionClass &ioSection)
-    : ObservableClass(myPathData, ioSection)  { 
-    Name="PathDump";
-    TimesCalled=0;
-  }
-};
 
 
 

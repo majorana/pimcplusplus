@@ -4,7 +4,7 @@
 #include "MetaMoves.h"
 #include "BlockMove.h"
 #include "Observables/ObservableClass.h"
-#include "Observables/ObservableEnergy.h"
+
 
 void PIMCClass::Read(IOSectionClass &in)
 {

@@ -27,7 +27,7 @@ Section (System)
 Section (Action)
 {
   int MaxLevels = 3;
-  Array<string,1> PairActionFiles(1) = ["zero.PairAction"];
+  Array<string,1> PairActionFiles(1) = ["../../PairActions/zero.PairAction"];
 }
 
 Section (Observables)

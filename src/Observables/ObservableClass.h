@@ -3,8 +3,8 @@
 
 #include "ObservableEnergy.h"
 #include "ObservableCorrelation.h"
-
-
+#include "PathDump.h"
+#include "WindingNumber.h"
      
 
 /// This template class will be used to construct distributed versions
