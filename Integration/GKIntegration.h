@@ -74,7 +74,7 @@ class GKIntegration {
     double a,b,result,err, delta;
 
     double ErrorL() const {
-      return (lenth) ? err/length : err;
+      return (length ? err/length : err);
     }
 
     friend ostream& operator<<(ostream &os, const IntervalResult & ir) {
@@ -147,7 +147,8 @@ class GKIntegration {
     resultKronrod *= halfLength;
     
     r.result = resultKronrod;
-    r.err = pow(200.0 * fabs(resultKronrod - resultGauss), 1.5);
+    r.err = fabs(resultKronrod - resultGauss);
+    //r.err = pow(200.0 * fabs(resultKronrod - resultGauss), 1.5);
     //    BMWrite(r);
   }
 
@@ -370,6 +371,19 @@ class GKIntegration {
 #ifdef PRINT_IT
     cout << "End integration" << endl;
 #endif
+    double sum = 0.0;
+    int numIntervals = 0;
+    for(typename list<IntervalResult>::iterator p=ir.begin();p!=ir.end();p++) {
+      sum += p->result;
+      numIntervals++;
+    }
+    double badSum = fabs((result-sum) / sum);
+    if (badSum > 1.0e-7) {
+      cerr << "Percent error = " << badSum*100.0 << endl;
+      cerr << "Number of intervals = " << numIntervals << endl;
+    }
+
+
     return result;
   }
 
