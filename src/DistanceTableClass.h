@@ -45,6 +45,16 @@ public:
   inline void DistDisp(int timeSliceA, int timeSliceB,
 		       int ptcl1, int ptcl2, double &distA, double &distB,
 		       dVec &dispA, dVec &dispB);
+
+  ///Slow! Debugging purposes only!
+  virtual void DistDispTest(int timeSlice, int ptcl1, int ptcl2, 
+		       double &distance, dVec &displacement)=0;
+  ///Slow! Debugging purposes only!
+  virtual void DistDispTest (int timeSliceA, int timeSliceB,
+			    int ptcl1, int ptcl2, double &distA, double &distB,
+			    dVec &dispA, dVec &dispB) = 0;
+
+
   virtual dVec Velocity(int timeSliceA, int timeSliceB, int ptcl) = 0;
   inline DistanceTableClass (PathClass &myPath);
   inline void AcceptCopy(int startTimeSlice, int endTimeSlice,
@@ -53,7 +63,9 @@ public:
   inline void RejectCopy(int startTimeSlice, int endTimeSlice,
 			 const Array<int,1> &activeParticles);
   inline void MoveJoin (int oldJoin, int newJoin);
-  
+
+
+
 };
 
 inline void DistanceTableClass::MoveJoin (int oldJoin, int newJoin)
@@ -182,6 +194,22 @@ inline void DistanceTableClass::DistDisp(int timeSlice,int ptcl1, int ptcl2,
   ArrayIndex(ptcl1,ptcl2,index,sign);
   distance=DistTable(timeSlice,index);
   displacement=sign*DispTable(timeSlice,index);
+  
+#ifdef DEBUG
+  dVec dispTest;
+  double distTest;
+  DistDispTest(timeSlice,ptcl1,ptcl2,distTest,dispTest);
+  if (!(dispTest==displacement)){
+    cerr<<"Broken: "<<dispTest<<" "<<displacement<<endl;
+  }
+  if (!(distTest==distance)){
+    cerr<<"Broken dist: "<<dispTest<<" "<<displacement<<endl;
+    cerr<<"Broken dist: "<<distTest<<" "<<distance<<endl;
+  }
+  assert(dispTest==displacement);
+  assert(distTest==distance);
+    
+#endif
 }
 
 inline void DistanceTableClass::DistDisp(int timeSliceA, int timeSliceB,
@@ -207,7 +235,17 @@ inline void DistanceTableClass::DistDisp(int timeSliceA, int timeSliceB,
   }
 
 
+#ifdef DEBUG
+  dVec dispATest, dispBTest;
+  double distATest, distBTest;
+  DistDispTest(timeSliceA,timeSliceB,ptcl1,ptcl2,distATest,distBTest,
+	       dispATest,dispBTest);
+  assert(dispATest==dispA);
+  assert(dispBTest==dispB);
+  assert(distATest==distA);
+  assert(distBTest==distB);
 
+#endif
 
 }
 

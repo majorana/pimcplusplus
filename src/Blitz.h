@@ -24,6 +24,17 @@ inline TinyVector<T,size> operator-(TinyVector<T,size> v)
   return (minusv);
 }
 
+template <class T, int size>
+inline bool operator==(TinyVector<T,size> v1,TinyVector<T,size> v2)
+{
+  bool equals=true;
+
+
+  for (int i=0; i<size; i++)
+    equals = (v1[i]==v2[i]) && equals;
+  return (equals);
+}
+
 inline Vec2 operator*(const Vec2 &v, scalar s)
 {
   Vec2 result;

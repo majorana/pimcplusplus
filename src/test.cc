@@ -7,8 +7,9 @@
 #include "MirroredArrayClass.h"
 #include "ObservableClass.h"
 #include "DistanceTablePBCClass.h"
+#include "DistanceTableFreeClass.h"
 
-template class MirroredAntiSymmetricMatrixClass<ImageNumClass>;
+
 
 void setupAction(ActionClass &myActionClass)
 
@@ -181,8 +182,8 @@ int main(int argc, char **argv)
   myPathData.Path.Box[0]=3.14159265358979323846;
   myPathData.Path.Box[1]=3.14159265358979323846;
   myPathData.Path.Box[2]=3.14159265358979323846;
-  DistanceTablePBCClass *myDistTable=
-    new DistanceTablePBCClass(myPathData.Path);
+  DistanceTableFreeClass *myDistTable=
+    new DistanceTableFreeClass(myPathData.Path);
   myPathData.DistanceTable=myDistTable;
 
   myPathData.Action.DistanceTable=myDistTable;

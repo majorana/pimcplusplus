@@ -6,7 +6,7 @@ INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC)
 CCFLAGS = -c -g  -Wno-deprecated -O3 #-DBZ_DEBUG  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
-DEFS = -DNO_COUT -DUSE_MPI #-DBZ_DEBUG  -g #-DUSE_MPI 
+DEFS = -DNO_COUT -DUSE_MPI # -DDEBUG #-DBZ_DEBUG  -g #-DUSE_MPI 
 
 TestObjs = ObservableClass.o CubicSpline.o Grid.o InputFile.o SpeciesClass.o Common.o BisectionMoveClass.o MoveClass.o ActionClass.o PathDataClass.o   CommunicatorClass.o PathClass.o test.o DistanceTablePBCClass.o DistanceTableFreeClass.o DistanceTableClass.o MirroredArrayClass.o
 

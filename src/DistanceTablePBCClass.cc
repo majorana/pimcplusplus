@@ -1,5 +1,58 @@
 #include "DistanceTablePBCClass.h"
 
+void DistanceTablePBCClass::TestDistDisp(int timeSlice, int ptcl1, int ptcl2, 
+		       double &dist, dVec &disp)
+{
+  dVec p1=Path(timeSlice,ptcl1);
+  dVec p2=Path(timeSlice,ptcl2);
+  
+    
+  dVec normalDisplace=p2-p1;
+  for (int dim=0;dim<NDIM;dim++){
+    while (normalDisplace(dim)>Path.Box(dim)/2){
+      normalDisplace(dim)=normalDisplace(dim)-Path.Box(dim)/2;
+    }
+    while (normalDisplace(dim)< -Path.Box(dim)/2){
+      normalDisplace(dim)=normalDisplace(dim)+Path.Box(dim)/2;
+    }
+    
+  }
+  disp=normalDisplace;
+  dist=sqrt(dot(disp,disp));
+  
+}
+
+void DistanceTablePBCClass::TestDistDisp(int timeSliceA, int timeSliceB,
+		       int ptcl1, int ptcl2, double &distA, double &distB,
+		       dVec &dispA, dVec &dispB)
+{
+  dVec p1A=Path(timeSliceA,ptcl1);
+  dVec p1B=Path(timeSliceB,ptcl1);
+  dVec p2A=Path(timeSliceA,ptcl2);
+  dVec p2B=Path(timeSliceB,ptcl2); 
+    
+  dVec normalDisplaceA=p2A-p1A;
+  dVec normalDisplaceB=p2B-p1B;
+  
+  for (int dim=0;dim<NDIM;dim++){
+    while (normalDisplaceA(dim)>Path.Box(dim)/2){
+      normalDisplaceA(dim)=normalDisplaceA(dim)-Path.Box(dim)/2;
+      normalDisplaceB(dim)=normalDisplaceB(dim)-Path.Box(dim)/2;
+    }
+    while (normalDisplaceA(dim)< -Path.Box(dim)/2){
+      normalDisplaceA(dim)=normalDisplaceA(dim)+Path.Box(dim)/2;
+      normalDisplaceB(dim)=normalDisplaceB(dim)+Path.Box(dim)/2;
+    }
+    
+  }
+  dispA=normalDisplaceA;
+  distA=sqrt(dot(dispA,dispA));
+  dispB=normalDisplaceB;
+  distB=sqrt(dot(dispB,dispB));
+  
+}
+
+
 void DistanceTablePBCClass::UpdateAll(int timeSlice)
 {
   /// First, force all particles back into the box.

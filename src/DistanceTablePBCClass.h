@@ -16,6 +16,17 @@ public:
   void Update (int timeSlice, const Array<int,1> &ptclArray);
   void UpdateAll();
   void UpdateAll(int timeSlice);
+
+  /// Test functions
+  void TestDistDisp(int timeSlice, int ptcl1, int ptcl2, 
+		       double &dist, dVec &disp);
+
+
+  void TestDistDisp(int timeSliceA, int timeSliceB,
+		       int ptcl1, int ptcl2, double &distA, double &distB,
+		       dVec &dispA, dVec &dispB);
+
+
   /// Constructor
   DistanceTablePBCClass (PathClass &myPath) : DistanceTableClass(myPath)
   { /* Currently DistanceTable constructor does everything */ }
@@ -66,6 +77,7 @@ inline void DistanceTablePBCClass::Displacement(int timeSlice,
   disp = disp + ImageVectors(imageNum);
   dist = sqrt(dot(disp,disp));
 }
+
 
 
 

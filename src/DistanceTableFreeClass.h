@@ -16,13 +16,29 @@ private:
   inline void Displacement (int timeSlice, int ptcl1, int ptcl2,
 			    dVec &disp, double &dist, dVec vecMask);
 public:
+
+  void DistDispTest(int timeSlice, int ptcl1, int ptcl2, 
+		       double &dist, dVec &disp);
+
+
+  void DistDispTest(int timeSliceA, int timeSliceB,
+		       int ptcl1, int ptcl2, double &distA, double &distB,
+		       dVec &dispA, dVec &dispB);
+  
+
   dVec Velocity (int timeSliceA, int timeSliceB, int ptcl);
   void Update (int timeSlice, const Array<int,1> &ptclArray);
   void UpdateAll();
   void UpdateAll(int timeSlice);
   /// Constructor
   DistanceTableFreeClass (PathClass &myPath) : DistanceTableClass(myPath)
-  { /* Currently DistanceTable constructor does everything */ }
+  { 
+    // Set all ImageNum's to be     int numIndices = Path.Num
+    int numIndices = Path.NumParticles()*(Path.NumParticles()+1)/2;
+    for (int slice=0; slice<Path.NumTimeSlices(); slice++)
+      for (int index=0; index<numIndices; index++)
+	ImageNumTable.Set(slice,index, 0);
+  }
 };
 
 
@@ -57,8 +73,6 @@ inline void DistanceTableFreeClass::Displacement(int timeSlice,
   
   dist = sqrt(dist2);
 }
-
-
 
 
 

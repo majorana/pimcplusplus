@@ -1,5 +1,41 @@
 #include "DistanceTableFreeClass.h"
 
+
+
+void DistanceTableFreeClass::DistDispTest(int timeSlice, int ptcl1, int ptcl2, 
+		       double &dist, dVec &disp)
+{
+  dVec p1=Path(timeSlice,ptcl1);
+  dVec p2=Path(timeSlice,ptcl2);
+  
+    
+
+
+  disp=p2-p1;
+  dist=sqrt(dot(disp,disp));
+  
+}
+
+void DistanceTableFreeClass::DistDispTest(int timeSliceA, int timeSliceB,
+		       int ptcl1, int ptcl2, double &distA, double &distB,
+		       dVec &dispA, dVec &dispB)
+{
+  dVec p1A=Path(timeSliceA,ptcl1);
+  dVec p1B=Path(timeSliceB,ptcl1);
+  dVec p2A=Path(timeSliceA,ptcl2);
+  dVec p2B=Path(timeSliceB,ptcl2); 
+    
+
+  
+  dispA=p2A-p1A;
+  distA=sqrt(dot(dispA,dispA));
+  dispB=p2B-p1B;
+  distB=sqrt(dot(dispB,dispB));
+  
+  
+}
+
+
 void DistanceTableFreeClass::UpdateAll(int timeSlice)
 {
   int index=0;
