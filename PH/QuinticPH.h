@@ -57,6 +57,7 @@ public:
   inline void Init (Potential *outer, double coreRadius,
 		    double abmin, int numA, int numB, int numV);
   void Read (IOSectionClass &in);
+  void WriteWithoutVouter (IOSectionClass &out);
   void Write (IOSectionClass &out); 
   QuinticPH() : ABmin(0.0), UseVcore(true)
   { /* do nothing for now */ }

@@ -92,7 +92,7 @@ double QuinticPH::d2Vdr2(double r)
 }
 
 
-void QuinticPH::Write(IOSectionClass &out)
+void QuinticPH::WriteWithoutVouter(IOSectionClass &out)
 {
   out.WriteVar ("Type", "QuinticPH");
   out.NewSection("Agrid");  Agrid.Write(out);  out.CloseSection();
@@ -105,6 +105,13 @@ void QuinticPH::Write(IOSectionClass &out)
   out.WriteVar ("Vcore", Vcore.Data());
 }
 
+void QuinticPH::Write(IOSectionClass &out)
+{
+  WriteWithoutVouter(out);
+  out.NewSection ("Vouter");
+  Vouter->Write(out);
+  out.WriteVar ("UseVcore", UseVcore);
+}
 
 /// Note:  Vouter must be set before calling "Read".
 void QuinticPH::Read(IOSectionClass &in)
