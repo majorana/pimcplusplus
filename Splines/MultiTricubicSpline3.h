@@ -49,6 +49,9 @@ class MultiTricubicSpline
   void UpdateX (int source, int dest, int i);
   void UpdateY (int source, int dest, int i);
   void UpdateZ (int source, int dest, int i);
+  void UpdateXPeriodic (int source, int dest, int i);
+  void UpdateYPeriodic (int source, int dest, int i);
+  void UpdateZPeriodic (int source, int dest, int i);
   bool UpToDate, Periodic;
 public:
   Array<TinyVector<double,8>,4> F;
@@ -168,13 +171,14 @@ inline void MultiTricubicSpline::Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
   assert (init.extent(2) == Nz);
   N = init.extent(3);
 
-  F.resize(Nx,Ny,Nz);
+  F.resize(Nx,Ny,Nz,N);
   for (int ix=0; ix<Nx; ix++)
     for (int iy=0; iy<Ny; iy++)
       for (int iz=0; iz<Nz; iz++)
 	for (int i=0; i<N; i++)
 	  F(ix,iy,iz,i)[0] = init(ix,iy,iz,i);
   UpToDate = false;
+  Update();
 }
 
 
@@ -1875,6 +1879,8 @@ MultiTricubicSpline::d2_dydz (double x, double y, double z, Array<double,1> &val
   }
 }
 
-
+/// This replicates the first points of the 3D array to the last
+/// points, making the function periodic
+void MakePeriodic(Array<double,4> &A);
 
 #endif

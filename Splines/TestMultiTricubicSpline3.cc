@@ -51,6 +51,47 @@ void ValTest()
 }
 
 
+void PeriodicTest()
+{
+  int N = 10;
+  const int numSplines = 4;
+  MultiTricubicSpline MultiSpline;
+  LinearGrid xGrid, yGrid, zGrid;
+  
+  xGrid.Init(0.0, 4.0, N);
+  yGrid.Init(0.0, 5.0, N);
+  zGrid.Init(0.0, 6.0, N);
+  
+  Array<double,4> initData(N,N,N,numSplines);
+  for (int ix=0; ix<N-1; ix++)
+    for (int iy=0; iy<N-1; iy++)
+      for (int iz=0; iz<N-1; iz++) 
+	for (int n=0; n<numSplines; n++) 
+	  initData(ix,iy,iz,n) = drand48();
+
+  MakePeriodic (initData);
+
+  cerr << "periodic initData filled.\n";
+
+  MultiSpline.Init (&xGrid, &yGrid, &zGrid, initData, true);
+
+  FILE *fout = fopen ("MultiPeriodic.dat", "w");
+
+  Array<double,1> vals(numSplines);
+  for (double u=0.0; u<=1.0; u+=0.001) {
+    double x = xGrid.Start + u*(xGrid.End-xGrid.Start);
+    double y = xGrid.Start + u*(yGrid.End-yGrid.Start);
+    double z = xGrid.Start + u*(zGrid.End-zGrid.Start);
+    fprintf (fout, "%1.12f ", u);
+    MultiSpline(x,y,z,vals);
+    for (int n=0; n<numSplines; n++) 
+      fprintf (fout, "%1.16e ", vals(n));
+    fprintf (fout, "\n");
+  }
+  fclose(fout);
+}
+
+
 void SpeedTest()
 {
   int N = 30;
@@ -112,7 +153,9 @@ void SpeedTest()
 
 main()
 {
-  ValTest();
-  SpeedTest();
+  PeriodicTest();
+  //ValTest();
+  //SpeedTest();
+
 }
   

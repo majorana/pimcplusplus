@@ -58,11 +58,6 @@ PeriodicSpline::Update()
   // Finally, assign repeated last element for PBC
   F(N) = F(0);
   
-  //  F(3)[1] = 1.455;
-
-//   for (int i=0; i<=N; i++)
-//     fprintf (stderr, "slope(%d) = %1.8e\n", i, F(i)[1]);
-
   IsUp2Date = true;
 }
 
