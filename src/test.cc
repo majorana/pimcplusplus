@@ -302,21 +302,22 @@ int main(int argc, char **argv)
 
 //  debug(myPathData);
 //  pathDump.WriteBlock();
-  ofstream outfile;
-  outfile.open("ourPath.dat");
-  
   int steps;
   inSection.OpenSection("PIMC");
   assert(inSection.ReadVar("steps", steps));
   inSection.CloseSection();
   for (int counter=0;counter<steps;counter++){
-    if (counter>steps/20 && (counter % 1)==0){
+    if (counter>10000 && (counter % 20)==0) {
       TotE.Accumulate();
+    }
+    if (counter>10000 && (counter % 200)==0) {    
       ep.Accumulate();
       ee.Accumulate();
     }
-    if (counter>steps/20 && (counter % 1000) == 0){
+
+    if (counter>10000 && (counter % 10000) == 0){
       TotE.WriteBlock();
+      out.FlushFile();
       cerr << "Step #" << counter << ":\n";
 //       for (int slice=0;slice<myPathData.Path.NumTimeSlices();slice++){
 // 	outfile<<myPathData.Path(slice,0)[0]<<" ";
@@ -329,12 +330,11 @@ int main(int argc, char **argv)
 //       outfile<<myPathData.Path(0,0)[2]<<" ";
 //       outfile<<endl;
     }
-    if (counter >= steps/20 && ((counter % 100) == 0))
+    if (counter > 10000 && ((counter % 100000) == 0))
       pathDump.WriteBlock();
       
-    for (int counter2=0;counter2<20;counter2++){
+    for (int counter2=0;counter2<3;counter2++){
       //cerr << "Doing step " << counter << endl;
-      
       myBisectionMove.MakeMove();
     }
     myShiftMove.MakeMove();
@@ -346,7 +346,6 @@ int main(int argc, char **argv)
   cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
   //cerr<<"done! done!"<<endl;
   MPI_Finalize();
-  outfile.close();
   
 }
   

@@ -205,7 +205,10 @@ private:
   }
 
   inline int PairIndex(int ptcl1, int ptcl2) const
-  { return (((ptcl1*(ptcl1+1))>>1)+ptcl2); }
+    { 
+      Order(ptcl1, ptcl2);
+      return (((ptcl1*(ptcl1+1))>>1)+ptcl2); 
+    }
 public:
   /// Resizes the two dimensional array.
   inline void Resize(int numTimeSlices,int numPtcls)
@@ -340,7 +343,21 @@ private:
   }
 
   inline int PairIndex(int ptcl1, int ptcl2) const
-  { return (((ptcl1*(ptcl1+1))>>1)+ptcl2); }
+  { 
+    if (ptcl2 > ptcl1)
+      swap(ptcl1,ptcl2);
+    return (((ptcl1*(ptcl1+1))>>1)+ptcl2); 
+  }
+  inline int PairIndex(int ptcl1, int ptcl2, bool swapSign) const
+  { 
+    if (ptcl2 > ptcl1) {
+      swap(ptcl1,ptcl2);
+      swapSign = true;
+    }
+    else
+      swapSign=false;     
+    return (((ptcl1*(ptcl1+1))>>1)+ptcl2); 
+  }
 public:
   /// Resizes the two dimensional array.
   inline void Resize(int numTimeSlices,int numPtcls)
@@ -363,17 +380,12 @@ public:
   /// Returns the active value. 
   inline T operator()(int timeSlice, int ptcl1, int ptcl2) const
   {
-    if (ptcl2 > ptcl1)
-      {
-	swap (ptcl1, ptcl2);
-	int index = PairIndex(ptcl1, ptcl2);
-	return (-AB(Write1, timeSlice, index));
-      }
-    else
-      {
-	int index = PairIndex(ptcl1, ptcl2);
-	return AB(Write1,timeSlice,index);
-      }
+    bool swapSign;
+    int index = PairIndex(ptcl1, ptcl2, swapSign);
+    if (swapSign)
+      return (-AB(Write1, timeSlice, index));
+    else 
+      return (AB(Write1, timeSlice, index));
   }
 
   inline T operator()(int timeSlice, int pairIndex) const

@@ -4,7 +4,6 @@ import sys
 from visual import *
 import stats
 #import Numeric
-
 h5file = tables.openFile(sys.argv[1])
 #data = h5file.root.Paths_2.Path.read()
 #names=h5file.root.Paths_2.SpeciesNames.read()
