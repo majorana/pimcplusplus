@@ -41,11 +41,12 @@ void ActionClass::Read(InputSectionClass& inSection)
 
 double ActionClass::calcTotalAction(int startSlice, int endSlice, 
 				    Array<int,1> changedParticles,
-				    // double &PE, double &KE,
-				    int level)
+				    int level, double &PE, double &KE)
 {
   // First, sum the pair actions
   Path.DoPtcl = true;
+  PE = 0.0;
+  KE = 0.0;
   double TotalU = 0.0;
   double TotalK = 0.0;
   int numChangedPtcls = changedParticles.size();
@@ -57,7 +58,6 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
     int species1=Path.ParticleSpeciesNum(ptcl1);
     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
       if (Path.DoPtcl(ptcl2)){
-
 	for (int slice=startSlice;slice<endSlice;slice+=skip){
 	  dVec r1=Path(slice,ptcl1);
 	  dVec r2=Path(slice,ptcl2);
@@ -74,8 +74,11 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	  double z = (rmag - rpmag);
 	  int PairIndex = PairMatrix(species1,
 				     Path.ParticleSpeciesNum(ptcl2));
-	  TotalU += PairActionVector(PairIndex).calcUsqz(s,q,z, level);
-	  
+	  double U, dU, V;
+	  PairActionVector(PairIndex).calcUsqz(s,q,z, level, U, dU, V);
+	  TotalU += U;
+	  PE += V;
+	  KE -= dU;
 	}
       }
       
@@ -88,7 +91,7 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
       TotalK += dot(vel,vel)*FourLambdaTauInv; 
     }
   }
-  
+  KE += TotalK / levelTau;
   
   return (TotalK + TotalU);
   
@@ -389,6 +392,7 @@ void PairActionClass::ReadDavidSquarerFile(string DMFile)
       Array<double,3> tempdUkj(NumGridPoints,NumUKJ,NumTau);
       Array<double,3> tempdUkj2(NumGridPoints,NumUKJ+1,NumTau);
       TempukjArray.resize(NumUKJ+1);      
+      TempdukjArray.resize(NumUKJ+1);      
       dukj.resize(NumTau);
       ReadFORTRAN3Tensor(infile,tempdUkj);
       for(int i=0; i<NumTau; i++)

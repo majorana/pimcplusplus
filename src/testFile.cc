@@ -200,7 +200,8 @@ bool SectionClass::ReadVar(string name, T &var)
     readVarSuccess=parent->ReadVar(name,var);
   }
   else {
-    cerr<<"Couldn't find variable "<<name;
+    cerr<<"Couldn't find variable "<<name<<endl;
+    cerr<<"Why am I getting called!"<<endl;
     return false;
   }  
   return readVarSuccess;	 

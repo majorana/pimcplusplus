@@ -32,6 +32,7 @@ class PairActionClass
   
   ///Holds the Ukj coefficients for a given q
   Array<double,1> TempukjArray;
+  Array<double,1> TempdukjArray;
   DistanceTableClass *DistanceTable;
   /// Skips to the next string in the file whose substring matches skipToString
   string SkipTo(ifstream &infile, string skipToString);
@@ -51,7 +52,8 @@ class PairActionClass
   ///Same as ukj but stores the beta derivatives.
   Array<MultiCubicSpline,1> dukj; ///<(level )
   /// Calculate the U(s,q,z) value when given s,q,z and the level 
-  inline double calcUsqz(double s,double q,double z,int level);
+  inline void calcUsqz(double s,double q,double z,int level,
+		       double &U, double &dU, double &V);
   /// This is the order of the fit to use. 
   int n;
   /// This is the temperature 
@@ -64,26 +66,32 @@ class PairActionClass
 /// Calculate the U(s,q,z) value when given s,q,z and the level 
 /*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
   \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */
-inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
+inline void PairActionClass::calcUsqz(double s,double q,double z,int level,
+				      double &U, double &dU, double &V)
 {
-  double sum=0.0;
+  U=0.0;
+  dU=0.0;
   double r=q+0.5*z;
   double rprime=q-0.5*z;
 
-  if (q > ukj(level).grid->End)
-    return (0.0);
+  // Check to make sure we're inside the grid.
+  if (q > ukj(level).grid->End) {
+    U = 0.0; dU=0.0; V = 0.0;
+    return;
+  }
+  if (r > ukj(level).grid->End) {
+    U = 0.0; dU=0.0; V = 0.0;
+    return;
+  }
+  if (rprime > ukj(level).grid->End) {
+    U = 0.0; dU=0.0; V = 0.0;
+    return;
+  }
 
-
-  if (r > ukj(level).grid->End)
-    return (0.0);
-
-  if (rprime > ukj(level).grid->End)
-    return (0.0);
-
-
-
-  sum=sum+0.5*((ukj(level))(1,r)+(ukj(level))(1,rprime)); //This is the endpoint action 
-
+  // This is the endpoint action 
+  V = 0.5*(ukj(level)(0,r) + ukj(level)(0,rprime));
+  U+=0.5*((ukj(level))(1,r)+(ukj(level))(1,rprime)); 
+  dU+=0.5*((dukj(level))(1,r)+(dukj(level))(1,rprime)); 
 
   if (s > 0.0)
     {
@@ -92,25 +100,25 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
       double ssquaredinverse=1.0/ssquared;
       double Sto2k=ssquared;
       (ukj(level))(q,TempukjArray); 
+      (dukj(level))(q,TempdukjArray); 
       for (int k=1;k<=n;k++){  
 	
 	double Zto2j=1;
 	double currS=Sto2k;
 	
 	for (int j=0;j<=k;j++){
-	  
-	  double cof=TempukjArray(k*(k+1)/2+j+1); //indexing into the 2darray
-	  sum=sum+cof*Zto2j*currS;
-	  
-	  
+	  // indexing into the 2darray
+	  double Ucof  = TempukjArray(k*(k+1)/2+j+1); 
+				
+	  double dUcof = TempdukjArray(k*(k+1)/2+j+1);
+	  U+=Ucof*Zto2j*currS;
+	  dU+=dUcof*Zto2j*currS;
 	  Zto2j*=zsquared;
 	  currS=currS*ssquaredinverse;				
 	}				
 	Sto2k=Sto2k*ssquared;
       }
     }
-  
-  return sum; 
 }
 
 /// This is the class that controls all of the actions and is in
