@@ -17,11 +17,17 @@ private:
   /// Path stores the position of all the particles at all time
   /// slices.  The order for access is timeslice, particle
   Mirrored2DClass<dVec> Path;
-   /// Stores what species a particle belongs to
+  /// This stores the path at the reference slice.
+  /// Stores what species a particle belongs to
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
   int MyNumSlices;
   PIMCCommunicatorClass &Communicator;
+
+  /////////////////////
+  /// Misc. Helpers ///
+  /////////////////////
+  void LeviFlight (Array<dVec,1> &vec, double lambda, double tau);
 
   ////////////////////////////////
   /// Boundary conditions stuff //
@@ -45,7 +51,10 @@ private:
   Array<TinyVector<int,NDIM>,1> kIndices;
   /// This stores e^{i\vb_i \cdot r_i^\alpha}
   TinyVector<Array<complex<double>,1>,NDIM> C;
+  /// Stores the position of the reference slice w.r.t. time slice 0
+  /// on this processor
 public:
+  Mirrored1DClass<dVec> RefPath;
   /// True if we need k-space sums for long range potentials.
   bool LongRange;
   /// Stores the actual k vectors
@@ -60,6 +69,7 @@ public:
   void CalcRho_ks_Fast(int slice, int species);  
 
 private:
+  int RefSlice;
   void ShiftPathData(int sliceToShift);
   void ShiftRho_kData(int sliceToShift);
 public:
@@ -97,6 +107,7 @@ public:
   inline void SetPos (int slice, int ptcl, const dVec& r);
   inline int NumParticles();
   inline int NumTimeSlices();
+  inline int GetRefSlice() const;
 
   void MoveJoin(int oldJoin, int newJoin);      
   void ShiftData(int sliceToShift);
@@ -188,6 +199,13 @@ inline int PathClass::NumParticles()
 inline int PathClass::NumTimeSlices() 
 { 
   return Path.rows();
+}
+
+/// Returns the position of the reference slice w.r.t. slice 0 on this
+/// processor.  
+inline int PathClass::GetRefSlice() const
+{
+  return RefSlice;
 }
 
 

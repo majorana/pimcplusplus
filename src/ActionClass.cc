@@ -1,4 +1,5 @@
 #include "PathDataClass.h"
+#include "NodalAction.h"
 
 ActionClass::ActionClass(PathDataClass  &pathdata) : 
   PathData(pathdata), Path(pathdata.Path), UseRPA(false)
@@ -102,6 +103,15 @@ void ActionClass::Read(IOSectionClass& inSection)
 	  exit(1);
 	}
       }
+
+  // Now create nodal actions for Fermions
+  NodalActions.resize(PathData.Path.NumSpecies());
+  for (int species=0; species<PathData.Path.NumSpecies(); species++) 
+    if (PathData.Path.Species(species).GetParticleType() == FERMION)
+      NodalActions(species) = new FPNodalActionClass(PathData, species);
+    else
+      NodalActions(species) = NULL;
+
   cerr << "Finished reading the action.\n"; 
 }
 
@@ -296,6 +306,18 @@ double ActionClass::KAction (int startSlice, int endSlice,
   return (TotalK);
 }
 
+double ActionClass::NodeAction (int startSlice, int endSlice, 
+				const Array<int,1> &changedParticles, 
+				int level)
+{
+  double nodeAction = 0.0;
+  for (int species=0; species < PathData.Path.NumSpecies(); species++)
+    if (NodalActions(species) != NULL)
+      nodeAction += NodalActions(species)->Action (startSlice, endSlice,
+						   changedParticles, level);
+  return nodeAction;
+}
+
 
 double ActionClass::TotalAction(int startSlice, int endSlice, 
 				const Array<int,1> &changedParticles,
@@ -303,13 +325,15 @@ double ActionClass::TotalAction(int startSlice, int endSlice,
 {
 
   if (PathData.Path.OpenPaths){
-    return UApproximateAction(startSlice,endSlice,changedParticles,level)+
-      KAction(startSlice,endSlice,changedParticles,level)+
+    return UApproximateAction(startSlice, endSlice, changedParticles, level)+
+      KAction(startSlice, endSlice, changedParticles, level)+
+      NodeAction (startSlice, endSlice, changedParticles, level);
       OtherAction(startSlice,endSlice,changedParticles,level);
   }
   else {
-    return UAction(startSlice,endSlice,changedParticles,level)+
-      KAction(startSlice,endSlice,changedParticles,level);
+    return UAction(startSlice, endSlice, changedParticles, level)+
+      KAction(startSlice, endSlice, changedParticles, level) +
+      NodeAction (startSlice, endSlice, changedParticles, level);
   }
 
 }

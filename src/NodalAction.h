@@ -15,9 +15,9 @@ protected:
   int SpeciesNum;
   PathDataClass &PathData;
 public:
-  virtual double Action (int startSlice, int endSlice, int level,
-			 Array<int,1> &changePtcls) = 0;
-  virtual void Update (int slice, int ptcl, dVec newPos, dVec oldPos) = 0;
+  virtual double Action (int startSlice, int endSlice,
+			 const Array<int,1> &changePtcls, int level) = 0;
+  //virtual void Update (int slice, int ptcl, dVec newPos, dVec oldPos) = 0;
   NodalActionClass (PathDataClass &pathData, int speciesNum) : 
     PathData(pathData), SpeciesNum (speciesNum)
   {
@@ -36,9 +36,9 @@ private:
   void GradientDetFD (int slice, double &det, Array<dVec,1> &gradient);
   double NodalDist (int slice);
 public:
-  double Action (int startSlice, int endSlice, int level,
-		 Array<int,1> &changePtcls) = 0;
-  void Update (int slice, int ptcl, dVec newPos, dVec oldPos);
+  double Action (int startSlice, int endSlice,
+		 const Array<int,1> &changedPtcls, int level);
+  //void Update (int slice, int ptcl, dVec newPos, dVec oldPos);
   FPNodalActionClass(PathDataClass &pathData, int speciesNum) :
     NodalActionClass (pathData, speciesNum), Path(pathData.Path) 
   {

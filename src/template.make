@@ -98,6 +98,7 @@ TestPermobjs =                       \
   CommunicatorClass.o                \
   PathClass.o                        \
   WrapClass.o			     \
+  NodalAction.o                       \
   Common/Splines/CubicSpline.o       \
   Common/Splines/MyTricubicSpline.o  \
   Common/Splines/Grid.o              \
@@ -140,6 +141,7 @@ TestEwaldobjs =                      \
   MirroredClass.o                    \
   SpeciesClass.o                     \
   ActionClass.o                      \
+  NodalAction.o                       \
   PathDataClass.o                    \
   LongRangeRPA.o                     \
   Common/MPI/Communication.o	     \

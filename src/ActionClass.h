@@ -1,11 +1,12 @@
-#ifndef ACTION_CLASS
-#define ACTION_CLASS
+#ifndef ACTION_CLASS_H
+#define ACTION_CLASS_H
 
 #include "PathClass.h"
 #include "Common/PairAction/PAFit.h"
 #include "Common/Ewald/Ewald.h"
 
 class PathDataClass;
+class NodalActionClass;
 typedef enum {DO_U, DO_DU, DO_V} TaskType; 
 
 /// This is the class that controls all of the actions and is in
@@ -17,6 +18,7 @@ private:
   PathDataClass &PathData;
   PathClass &Path;
   LinearGrid LongGrid;
+  Array<NodalActionClass*,1> NodalActions;
   /// This calculates the quantity 
   /// \f$ X_k \equiv -\frac{4\pi}{\Omega k} \int_{r_c}^\infty dr \, r \sin(kr) V(r).\f$
   double CalcXk (int paIndex, int level, double k, double rc, TaskType type);
@@ -51,6 +53,8 @@ public:
   /// Calculates the total action.
   double UAction (int startSlice, int endSlice, 
 		  const Array<int,1> &changedParticles, int level);
+  double NodeAction (int startSlice, int endSlice, 
+		     const Array<int,1> &changedParticles, int level);
   double UApproximateAction (int startSlice, int endSlice, 
 			     const Array<int,1> &changedParticles,int level);
   double KAction (int startSlice, int endSlice, 

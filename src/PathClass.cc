@@ -1,5 +1,32 @@
 #include "PathClass.h"
 
+/// Constructs a Levi flight beginning in the vec(0) and ending
+/// in vec(N-1) if vec has length N.  This is a path which samples
+/// exactly the free particle density matrix.
+void PathClass::LeviFlight (Array<dVec,1> &vec, double lambda, double tau)
+{
+  int N = vec.size();
+  for (int slice=1; slice<(N-1); slice++) {
+    double di = (double)slice;
+    double delta = (double)(N-slice-1);
+    dVec center = (1.0/(delta+1.0))*(delta*vec(slice-1) + vec(N-1));
+    double taueff = tau*(1.0 - 1.0/delta);
+    double sigma = sqrt (2.0*lambda*taueff);
+    for (int j=0; j < NDIM; j++) {
+      Random.CommonGaussianVec(sigma, vec(slice));
+      vec(slice) += center;
+    }
+  }
+  // DEBUG DEBUG DEBUG DEBUG DEBUG!!!!
+  FILE *fout = fopen ("Levi.dat", "w");
+  for (int i=0; i<N; i++) {
+    for (int dim=0; dim<NDIM; dim++) 
+      fprintf (fout, "%1.12e ", vec(i)[dim]);
+    fprintf (fout, "\n");
+  }
+  fclose (fout);
+}
+
 void PathClass::Read (IOSectionClass &inSection)
 {
   SetMode (NEWMODE);
@@ -120,7 +147,27 @@ void PathClass::Read (IOSectionClass &inSection)
 	  Path(slice,ptcl) = pos;
 	}      
       }
+    }    
+    else if (InitPaths == "LEVIFLIGHT") {
+      Array<double,2> Positions;
+      assert (inSection.ReadVar ("Positions", Positions));
+      assert (Positions.rows() == species.NumParticles);
+      assert (Positions.cols() == species.NumDim);
+      Array<dVec,1> flight(TotalNumSlices);
+      double tau;
+      assert (inSection.ReadVar ("tau", tau));
+      for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+	for (int dim=0; dim<NDIM; dim++) {
+	  flight(0)[dim] = Positions(ptcl-species.FirstPtcl,dim);
+	  flight(TotalNumSlices-1)[dim] = Positions(ptcl-species.FirstPtcl,dim);
+	}
+	LeviFlight (flight, species.lambda, tau);
+	for (int i=0; i<MyNumSlices; i++)
+	  Path(i, ptcl) = flight(i-RefSlice);
+        Path(MyNumSlices-1,ptcl) = flight(MyNumSlices-2-RefSlice);
+      }
     }
+
     else {
       cerr << "Unrecognize initialization strategy " 
 	   << InitPaths << endl;
@@ -162,6 +209,15 @@ void PathClass::Allocate()
   ///until we run out of extra slices.
   ///The last slice on processor i is the first slices on processor i+1
   MyNumSlices=TotalNumSlices/numProcs+1+(myProc<(TotalNumSlices % numProcs));
+  
+  // Initialize reference slice position to be 0 on processor 0.  
+  RefSlice = 0;
+  // Calculate correct position for other processors.
+  for (int proc=0; proc < myProc; proc++) {
+    int numSlices = TotalNumSlices/numProcs+(proc<(TotalNumSlices % numProcs));
+    RefSlice -= numSlices;
+  }
+    
 //   cerr<<"Numprocs is "<<numProcs<<endl;
 //   cerr<<"mynumslices: "<<MyNumSlices<<endl;
   
@@ -176,6 +232,7 @@ void PathClass::Allocate()
   }
   cerr<<"my number of particles is "<<numParticles<<endl;
   Path.resize(MyNumSlices,numParticles+OpenPaths);
+  RefPath.resize(numParticles);
   Permutation.resize(numParticles+OpenPaths);
   SpeciesNumber.resize(numParticles+OpenPaths);
   DoPtcl.resize(numParticles+OpenPaths);
@@ -411,7 +468,12 @@ void PathClass::ShiftData(int slicesToShift)
   ShiftPathData(slicesToShift);
   if (LongRange)
     ShiftRho_kData(slicesToShift);
-  OpenLink.AcceptCopy(); ///the open link has changed and youw ant to accept it
+  OpenLink.AcceptCopy(); ///the open link has changed and you want to accept it
+  RefSlice += slicesToShift;
+  while (RefSlice >= TotalNumSlices)
+    RefSlice -= TotalNumSlices;
+//   while (RefSlice <= -TotalNumSlices)
+//     RefSlice += TotalNumSlices;
 }
 
 void PathClass::ShiftRho_kData(int slicesToShift)
