@@ -1,6 +1,6 @@
 SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc
 
-IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o ../IO/InputFile.o
+IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o ../IO/InputFile.o ../IO/InputOutputXML.o
 
 all:	TestBicubic TestGrid
 TestBicubic:	CubicSpline.o Grid.o BicubicSpline.o TestBicubic.o 
