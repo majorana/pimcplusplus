@@ -13,6 +13,17 @@ private:
 #ifdef MAKE_FIT
   CommunicatorClass Comm;
 #endif
+
+  /** These arrays hold the coefficients of the expansion of the tail
+      of the diagonal part of the action/potential in inverse powers
+      of q or r.  The first index is for the inverse power, and the
+      second gives the level.  That is, outside rcut, 
+      \f[ U_\text{diag}(q, \text{level}) \approx Ucoef(0,level)/q +
+      Ucoef(1,level)/r^2 + Ucoef(2,leve)/r^3 \f] */
+  Array<double,2> Ucoefs, dUcoefs;
+  Array<double,1> Vcoefs;
+  /// The cutoff radius for the long range breakup.
+  double rcut;  
 public:
   Grid *qgrid, *ygrid, *tgrid;
   Array<MyTricubicSpline,1> Usplines, dUsplines;
@@ -44,6 +55,13 @@ public:
   double dUdiag_pp (double q, int level);
 
   bool IsLongRange();
+
+
+  double Xk_U  (double k, int level);
+  double Xk_dU (double k, int level);
+  double Xk_V  (double k);
+  double Vk    (double k);
+  void Setrc (double rc);
 
   PAtricubicFitClass()
   { 

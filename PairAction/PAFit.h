@@ -37,8 +37,8 @@ inline PairActionFitClass *ReadPAFit (IOSectionClass &in,
     fit = new PATripoleFitClass;
   //else if (type == "sfit")
   //  fit = new PAsFitClass;
-  //else if (type == "tricubicfit")
-  //  fit = new PAtricubicFitClass;
+  else if (type == "tricubicfit")
+    fit = new PAtricubicFitClass;
   else if (type == "zerofit")
     fit=new PAzeroFitClass;
   else if (type=="DavidFit")
