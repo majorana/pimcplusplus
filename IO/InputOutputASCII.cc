@@ -1,33 +1,16 @@
 #include "InputOutput.h"
 
-// void InputTreeASCIIClass::PrintTree()
-// {
-//   cout<<"Section: "<<sec->Name<<endl;
-//    list<VarClass*>::iterator varIter=sec->VarList.begin();
-//    while (varIter!=sec->VarList.end()){
-//      cout<<"Variable: "<<(*varIter)->Name<<" ";
-//      VarASCIIClass *tempVar=(VarASCIIClass*)*varIter;
-//      printCharArray(tempVar->Value);
-//      //    cout<<tempVar->Value;
-//      varIter++;
-//    }
-//    list<InputTreeClass*>::iterator secIter=sec->SectionList.begin();
-//    while (secIter!=sec->SectionList.end()){
-//      //    cout<<"Section: "<<(*secIter)->Name<<endl;
-//      (*secIter). PrintTree();
-//      secIter++;
-//    }
-// }
 
-
+/// Simply prints 3*num spaces
 inline void ASCIIPrintIndent(int num)
 {
-  for (int counter=0;counter<num*3;counter++){
+  for (int counter=0;counter<num*3;counter++)
     cout<<' ';
-  }
 }
 
 
+/// Prints an indented hierarchy of sections and variable names to
+/// cout. 
 void InputTreeASCIIClass::PrintTree(int indentNum)
 {
   ASCIIPrintIndent(indentNum);
@@ -46,6 +29,7 @@ void InputTreeASCIIClass::PrintTree(int indentNum)
   }
 }
 
+/// Calls PrintTree(0)
 void InputTreeASCIIClass::PrintTree()
 {
   PrintTree(0);
@@ -54,7 +38,8 @@ void InputTreeASCIIClass::PrintTree()
 
 
 
-
+/// Returns true if theChar is a special character that should be
+/// parsed into its own token.
 bool isSpecial(char theChar)
 {
   return ( (theChar=='(') ||
@@ -70,7 +55,7 @@ bool isSpecial(char theChar)
 	   (theChar==','));
 }
 	   
-      
+/// Returns true if theChar is a space, newline, tab, or carriage return.      
 bool isWhiteSpace(char theChar)
 {
   return ( (theChar=='\n') ||
@@ -80,30 +65,38 @@ bool isWhiteSpace(char theChar)
 }
       
 
-		      
+/// Returns true if theChar is a letter or underscore		      
 bool isAlpha(char theChar)
 {
   return ((theChar>='a' && theChar<='z') || (theChar>='A' && theChar<='Z')
 	  ||theChar=='_');
 }
 
+/// Returns true if theChar is a digit
 bool isDigit(char theChar)
 {
   return (theChar>='0' && theChar<='9');
 }
 
+/// Returns true if theChar is the a valid character for starting a
+/// number.  Includes a digit, a '.' or a '-'
 bool isNumStart(char theChar)
 {
   return ((isDigit(theChar)) || (theChar=='.') || (theChar=='-'));
 }
 
+/// Returns true if ch is a valid character comprising a number.
 bool isNumChar (char ch)
 {
   return (isDigit(ch) || (ch =='.') || (ch=='e') || (ch=='-'));
 }
 
 
-
+/// Tokenize takes an array of characters and constructs a list of
+/// TokenClass objects.  Each token has a string and a line number.
+/// Valid tokens are special characters: "(){}[]<>,", quoted strings,
+/// words, or numbers.  White space is not significant, except in
+/// separating tokens.
 void Tokenize(Array<char,1> buffer, list<TokenClass>& tokenList)
 {
   int pos=0;
@@ -161,7 +154,6 @@ void Tokenize(Array<char,1> buffer, list<TokenClass>& tokenList)
 	cerr << (int)buffer(pos);
 	pos++;
       }
-
       exit(1);
     }
   }
@@ -170,7 +162,7 @@ void Tokenize(Array<char,1> buffer, list<TokenClass>& tokenList)
 
 
 
-
+/// Just a shortcut to look at two characters at a time.
 bool checkPair(Array<char,1> &buffer,int counter,char* toSee)
 {
   if (counter+1>=buffer.size()){
@@ -183,11 +175,11 @@ bool checkPair(Array<char,1> &buffer,int counter,char* toSee)
 
 }
 
-
-void 
-InputTreeASCIIClass::ReadWithoutComments(string fileName,
-					 Array<char,1> 
-					 &buffer)
+/// Reads a file into a character array, removing C and C++ style
+/// comments. 
+void InputTreeASCIIClass::ReadWithoutComments(string fileName,
+					      Array<char,1> 
+					      &buffer)
 {
   ifstream infile;
   infile.open(fileName.c_str());
@@ -258,6 +250,9 @@ InputTreeASCIIClass::ReadWithoutComments(string fileName,
 }
 
 
+
+/// If isError is true, then we print out an error message giving the
+/// line number and the string passed to us in ErrorStr.
 inline void ReadAbort (bool isError, int lineNumber, string ErrorStr)
 {
   if (isError) {
@@ -268,7 +263,7 @@ inline void ReadAbort (bool isError, int lineNumber, string ErrorStr)
   }
 }
 
-
+/// Removes all double quotes from the input string and return it.
 string StripQuote(string str)
 {
   string newString;
@@ -285,6 +280,9 @@ string StripQuote(string str)
 }
 
 
+/// Looks at the string passed to it and returns the corresponding
+/// enumerated type.  If the type is not recognized, it returns
+/// NOT_ATOMIC.  
 AtomicType GetType (string typeString)
 {
   if (typeString=="double")
@@ -296,12 +294,11 @@ AtomicType GetType (string typeString)
   else if (typeString=="bool")
     return BOOL_TYPE;
   else return NOT_ATOMIC;
-    
-
-
 }
 
 
+/// Takes a token and reads its value into a double, aborting if there
+/// is a problem.
 void ReadAtomicVar(TokenClass token,double &d)
 {
 
@@ -310,6 +307,8 @@ void ReadAtomicVar(TokenClass token,double &d)
   ReadAbort(*endPtr!='\0',token.LineNumber,"Expected Double\n");
 }
 
+/// Takes a token and reads its value into an int, aborting if there
+/// is a problem.
 void ReadAtomicVar(TokenClass token,int &d)
 {
 
@@ -318,13 +317,19 @@ void ReadAtomicVar(TokenClass token,int &d)
   ReadAbort(*endPtr!='\0',token.LineNumber,"Expected Int\n");
 }
 
+/// Takes a token and reads its value into a string, aborting if there
+/// is a problem.
 void ReadAtomicVar(TokenClass token,string &d)
 {
+  ReadAbort (token.Str[0] == '\"', token.LineNumber, 
+	     "Expected '\"'.");
+  ReadAbort (token.Str[token.Str.length()-1] == '\"', token.LineNumber, 
+	     "Expected '\"'.");
   d=StripQuote(token.Str);
-
 }
 
-
+/// Takes a token and reads its value into a bool, aborting if there
+/// is a problem.
 void ReadAtomicVar(TokenClass token, bool &b)
 {
       if (token.Str=="true"){
@@ -336,7 +341,9 @@ void ReadAtomicVar(TokenClass token, bool &b)
       else ReadAbort(true,token.LineNumber,"Expected true or false\n");
 }
 
-
+/// This template function reads a 1-D array from a token list into
+/// the array.  The syntax requires an opening '[' the a
+/// comma-separated list of values, then a closing ']'.
 template <class T>
 void ReadArrayData(list<TokenClass>::iterator &iter,
 		   list<TokenClass> &tokenList,
@@ -360,6 +367,11 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 }
 
 
+/// This template function reads a 2-D array from a token list into
+/// the array.  The syntax requires an opening '[' the a
+/// comma-separated list of values, then a closing ']'.  The data is
+/// read row-ordered, i.e. the first index changes fastests as we read
+/// in the values.
 template <class T>
 void ReadArrayData(list<TokenClass>::iterator &iter,
 		   list<TokenClass> &tokenList,
@@ -367,14 +379,14 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 {
   ReadAbort(iter->Str != "[", iter->LineNumber, "Expected [ not found\n");
   iter++;
-  for (int i=0;i<valArray.extent(0);i++)
-    for (int j=0; j<valArray.extent(1); j++)
+  for (int i=0;i<valArray.extent(1);i++)
+    for (int j=0; j<valArray.extent(0); j++)
       {
-	ReadAtomicVar(*iter,valArray(i,j));
+	ReadAtomicVar(*iter,valArray(j,i));
 	iter++;
 	// Read comma if this isn't the last value.
-	if ((i!=valArray.extent(0)-1) || 
-	    (j!=valArray.extent(1)-1)) {
+	if ((i!=valArray.extent(1)-1) || 
+	    (j!=valArray.extent(0)-1)) {
 	  ReadAbort(iter->Str != ",", iter->LineNumber, 
 		    "Expected , not found\n");
 	  iter++;
@@ -387,6 +399,11 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 }
 
 
+/// This template function reads a 3-D array from a token list into
+/// the array.  The syntax requires an opening '[' the a
+/// comma-separated list of values, then a closing ']'.  The data is
+/// read row-ordered, i.e. the first index changes fastests as we read
+/// in the values.
 template <class T>
 void ReadArrayData(list<TokenClass>::iterator &iter,
 		   list<TokenClass> &tokenList,
@@ -394,16 +411,16 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 {
   ReadAbort(iter->Str != "[", iter->LineNumber, "Expected [ not found\n");
   iter++;
-  for (int i=0;i<valArray.extent(0);i++)
+  for (int i=0;i<valArray.extent(2);i++)
     for (int j=0; j<valArray.extent(1); j++)
-      for (int k=0; k<valArray.extent(2); k++)
+      for (int k=0; k<valArray.extent(0); k++)
       {
-	ReadAtomicVar(*iter,valArray(i,j,k));
+	ReadAtomicVar(*iter,valArray(k,j,i));
 	iter++;
 	// Read comma if this isn't the last value.
-	if ((i!=valArray.extent(0)-1) || 
+	if ((i!=valArray.extent(2)-1) || 
 	    (j!=valArray.extent(1)-1) ||
-	    (k!=valArray.extent(2)-1)) {
+	    (k!=valArray.extent(0)-1)) {
 	  ReadAbort(iter->Str != ",", iter->LineNumber, 
 		    "Expected , not found\n");
 	  iter++;
@@ -417,136 +434,138 @@ void ReadArrayData(list<TokenClass>::iterator &iter,
 
 
 
-
+/// Reads an array from a list of tokens, starting at the token
+/// pointed to by iter.  It places the array into the newVar object.
+/// It expects to begin reading after the word "Array".
 void ReadArray(list<TokenClass>::iterator &iter,
 	       list<TokenClass> &tokenList,
 	       VarASCIIClass *newVar)
 {
-
-    ReadAbort(iter->Str != "<", iter->LineNumber, "Expected < not found\n");
-    iter++;
-    AtomicType myType=GetType(iter->Str);
-    ReadAbort(myType==NOT_ATOMIC,iter->LineNumber,
-	      "Array does not have atomic type\n");
+  ReadAbort(iter->Str != "<", iter->LineNumber, "Expected < not found\n");
+  iter++;
+  AtomicType myType=GetType(iter->Str);
+  ReadAbort(myType==NOT_ATOMIC,iter->LineNumber,
+	    "Array does not have atomic type\n");
+  iter++;
+  ReadAbort(iter->Str != ",", iter->LineNumber, "Expected , not found\n");
+  iter++;
+  int numDim;
+  ReadAtomicVar(*iter,numDim);
+  iter++;
+  ReadAbort(iter->Str != ">", iter->LineNumber, "Expected , not found\n");
+  iter++;
+  
+  Array<int,1> dimSize(numDim);
+  
+  string myName=iter->Str;
+  newVar->Name = myName;
+  iter++;
+  ReadAbort(iter->Str != "(", iter->LineNumber, "Expected ( not found\n");
+  iter++;
+  for (int counter=0;counter<numDim-1;counter++){
+    ReadAtomicVar(*iter,dimSize(counter));
     iter++;
     ReadAbort(iter->Str != ",", iter->LineNumber, "Expected , not found\n");
     iter++;
-    int numDim;
-    ReadAtomicVar(*iter,numDim);
-    iter++;
-    ReadAbort(iter->Str != ">", iter->LineNumber, "Expected , not found\n");
-    iter++;
-    
-    Array<int,1> dimSize(numDim);
-    
-    string myName=iter->Str;
-    newVar->Name = myName;
-    iter++;
-    ReadAbort(iter->Str != "(", iter->LineNumber, "Expected ( not found\n");
-    iter++;
-    for (int counter=0;counter<numDim-1;counter++){
-      ReadAtomicVar(*iter,dimSize(counter));
-      iter++;
-      ReadAbort(iter->Str != ",", iter->LineNumber, "Expected , not found\n");
-      iter++;
+  }
+  //Read the last dimension
+  ReadAtomicVar(*iter,dimSize(numDim-1));
+  iter++;
+  ReadAbort(iter->Str != ")", iter->LineNumber, "Expected ) not found\n");
+  iter++;
+  ReadAbort(iter->Str!="=",iter->LineNumber,"Expected = not found\n");
+  iter++;
+  newVar->Dim=numDim;
+  newVar->Type=myType;
+  if (numDim==1){
+    if (myType==INT_TYPE){
+      Array<int,1> *valArray=new Array<int,1>(dimSize(0));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
     }
-    //Read the last dimension
-    ReadAtomicVar(*iter,dimSize(numDim-1));
-    iter++;
-    ReadAbort(iter->Str != ")", iter->LineNumber, "Expected ) not found\n");
-    iter++;
-    ReadAbort(iter->Str!="=",iter->LineNumber,"Expected = not found\n");
-    iter++;
-    newVar->Dim=numDim;
-    newVar->Type=myType;
-    if (numDim==1){
-      if (myType==INT_TYPE){
-	Array<int,1> *valArray=new Array<int,1>(dimSize(0));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-      }
-      else if (myType==DOUBLE_TYPE){
-	Array<double,1> *valArray =new Array<double,1>(dimSize(0));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-      }
-      else if (myType==BOOL_TYPE){
-	Array<bool,1> *valArray=new Array<bool,1>(dimSize(0));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-	
-      }
-      else if (myType==STRING_TYPE){
-	Array<string,1> *valArray=new Array<string,1>(dimSize(0));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-      }
+    else if (myType==DOUBLE_TYPE){
+      Array<double,1> *valArray =new Array<double,1>(dimSize(0));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
     }
-    else if (numDim==2){
-      if (myType==INT_TYPE){
-	Array<int,2> *valArray=new Array<int,2>(dimSize(0),dimSize(1));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-      }
-      else if (myType==DOUBLE_TYPE){
-	Array<double,2> *valArray =new Array<double,2>(dimSize(0),
-						       dimSize(1));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-      }
-      else if (myType==BOOL_TYPE){
-	Array<bool,2> *valArray=new Array<bool,2>(dimSize(0),
-						  dimSize(1));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-	
-      }
-      else if (myType==STRING_TYPE){
-	Array<string,2> *valArray=new Array<string,2>(dimSize(0),
-						      dimSize(1));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-      }
+    else if (myType==BOOL_TYPE){
+      Array<bool,1> *valArray=new Array<bool,1>(dimSize(0));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
     }
-    else if (numDim==3){
-      if (myType==INT_TYPE){
-	Array<int,3> *valArray=new Array<int,3>(dimSize(0),
+    else if (myType==STRING_TYPE){
+      Array<string,1> *valArray=new Array<string,1>(dimSize(0));
+      ReadArrayData(iter,tokenList,*valArray);
+	newVar->Value=valArray;
+    }
+  }
+  else if (numDim==2){
+    if (myType==INT_TYPE){
+      Array<int,2> *valArray=new Array<int,2>(dimSize(0),dimSize(1));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
+    }
+    else if (myType==DOUBLE_TYPE){
+      Array<double,2> *valArray =new Array<double,2>(dimSize(0),
+						     dimSize(1));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
+    }
+    else if (myType==BOOL_TYPE){
+      Array<bool,2> *valArray=new Array<bool,2>(dimSize(0),
+						dimSize(1));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
+    }
+    else if (myType==STRING_TYPE){
+      Array<string,2> *valArray=new Array<string,2>(dimSize(0),
+						    dimSize(1));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
+    }
+  }
+  else if (numDim==3){
+    if (myType==INT_TYPE){
+      Array<int,3> *valArray=new Array<int,3>(dimSize(0),
+					      dimSize(1),
+					      dimSize(2));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
+    }
+    else if (myType==DOUBLE_TYPE){
+      Array<double,3> *valArray =new Array<double,3>(dimSize(0),
+						     dimSize(1),
+						     dimSize(2));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
+    }
+    else if (myType==BOOL_TYPE){
+      Array<bool,3> *valArray=new Array<bool,3>(dimSize(0),
 						dimSize(1),
 						dimSize(2));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-      }
-      else if (myType==DOUBLE_TYPE){
-	Array<double,3> *valArray =new Array<double,3>(dimSize(0),
-						       dimSize(1),
-						       dimSize(2));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-      }
-      else if (myType==BOOL_TYPE){
-	Array<bool,3> *valArray=new Array<bool,3>(dimSize(0),
-						  dimSize(1),
-						  dimSize(2));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-	
-      }
-      else if (myType==STRING_TYPE){
-	Array<string,3> *valArray=new Array<string,3>(dimSize(0),
-						      dimSize(1),
-						      dimSize(2));
-	ReadArrayData(iter,tokenList,*valArray);
-	newVar->Value=valArray;
-      }
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
+      
     }
-    else if (numDim>1){
-      cerr<<"We haven't implemented this yet\n";
+    else if (myType==STRING_TYPE){
+      Array<string,3> *valArray=new Array<string,3>(dimSize(0),
+						    dimSize(1),
+						    dimSize(2));
+      ReadArrayData(iter,tokenList,*valArray);
+      newVar->Value=valArray;
     }
+  }
+  else if (numDim>1){
+    cerr<<"We haven't implemented this yet\n";
+  }
 }
 
 
 
-
+/// This function parses a variable assigment from the list of tokens,
+/// creates a new VarASCIIClass object and puts the appropriate value
+/// in that object.  It recognizes any of the atomic types or arrays
+/// of theose atomic types.
 VarASCIIClass* ReadASCIIVar (list<TokenClass>::iterator &iter,
 			     list<TokenClass> &tokenList)
 {
@@ -589,11 +608,12 @@ VarASCIIClass* ReadASCIIVar (list<TokenClass>::iterator &iter,
     }
   }
   return(newVar);
-      
 }
 
 
-
+/// ReadSection parses a section in the input file.  It takes as
+/// arguments this sections parent, its name, a tokenlist iterator,
+/// the tokenlist, and a bool
 bool InputTreeASCIIClass::ReadSection (InputTreeClass *parent,
 				       string myName,
 				       list<TokenClass>::iterator &iter,

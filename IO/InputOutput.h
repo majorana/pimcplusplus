@@ -31,9 +31,16 @@ inline string Extension (string fileName)
 }
 
 
+/// This function takes a filename, determines it extension, creates a
+/// new InputTreeASCIIClass or InputTreeHDF5Class based on the
+/// extension, and calls OpenFile on the new object.
+/// Extensions:  
+/// .h5:            HDF5
+/// .xml:           XML
+/// .anything_else  ASCII
 inline InputTreeClass *ReadTree (string fileName, 
-			  string myName,
-			  InputTreeClass *parent)
+				 string myName,
+				 InputTreeClass *parent)
 {
   InputTreeClass *newTree;
   string extn = Extension (fileName);
