@@ -2,8 +2,6 @@
 #define PH_H
 
 #include "../Integration/Integrate.h"
-#include "../Splines/Grid.h"
-#include "Chebyshev.h"
 #include "../Splines/CubicSpline.h"
 #include "../IO/InputOutput.h"
 
@@ -74,13 +72,13 @@ public:
   FullCorePotential *FullCoreV;
   CubicSpline VHXC;  // The Hartree, exchange, and correlation potentials
   double NumElecs;
-  int UseVHXC;
+  bool UseVHXC;
 
   inline void UpdateVHXC (CubicSpline NewVHXC, double Nelecs)
   {
     NumElecs = Nelecs;
     VHXC = NewVHXC;
-    UseVHXC = 1;
+    UseVHXC = true;
   }
 
   virtual PHType Type()
@@ -209,7 +207,7 @@ public:
 
   PseudoHamiltonian()
   {
-    UseVHXC = 0;
+    UseVHXC = false;
   }
 };
 
@@ -600,7 +598,7 @@ public:
 		    Grid *vgrid, double zion,
 		    double coreradius)
   {
-    UseVHXC = 0;
+    UseVHXC = false;
     NumElecs = 0;
     CoreRadius = coreradius;
     Agrid = agrid;
