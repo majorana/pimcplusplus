@@ -1,15 +1,32 @@
-include /home/common/Codes/Make.include
-
 PSPLINELIB = -L$(PWD)/Common/Splines/fortran -lpspline
-LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
-       $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
-INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
 
-CCFLAGS = -c -g  -Wno-deprecated  #-pg
-CC = mpiCC
-LD = mpiCC  -Bstatic 
+ifeq ($(HOSTTYPE),alpha)
+include /usr/users/0/kesler/lib/Make.include
+  MPILIB = -lmpi -lelan
+#  LIBS = $(MPILIB) $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
+#         $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
+  LIBS = $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
+         $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
+  INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
+  MAKE = gmake
+  CC = g++
+  LD = g++ #-static
+  F77 = g77
+  EXTRADEFS = -DNOCUSERID
+else
+	include /home/common/Codes/Make.include	
+	LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
+	       $(G2CLIB) $(HDF5LIB) $(XMLLIB) -lm 
+	INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC)
+	CC = mpiCC
+	LD = mpiCC  -Bstatic 
+endif
 
-DEFS = -DTHREE_D -DNO_COUT  -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
+
+CCFLAGS = -c -g  -Wno-deprecated  #-pg 
+
+
+DEFS = $(EXTRADEFS) -DTHREE_D -DNO_COUT  -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI 
 
 PIMCobjs =                            \
   Main.o                              \
@@ -224,13 +241,14 @@ FreeParticleObjs =                   \
   Common/IO/InputOutputXML.o         
 
 
-PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}"
+PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}" "F77=${F77}"
 
 MAKE_ALL = $(MAKE) all $(PASS_DEFS)
 MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
 all:   pimc++ TestPerm TestEwald FreeParticles
+	
 	
 pimc++: Common_obj observables moves actions Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
@@ -288,7 +306,7 @@ SOURCES =  myprog.cc SpeciesClass.cc Common.cc ActionClass.cc PathDataClass.cc  
 
 
 newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake
-	make -f template.make Makefile FRC=force_rebuild
+	$(MAKE) -f template.make Makefile FRC=force_rebuild
 
 Common_newmake:
 	cd Common; $(MAKE_NEWMAKE)

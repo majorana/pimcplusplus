@@ -38,7 +38,7 @@ void PairCorrelationClass::Read(IOSectionClass& in)
   if (!readStartGrid)
     gridStart=0.0;
   if (!readEndGrid){
-    if (PathData.Path.IsPeriodic(0)){
+    if (PathData.Path.GetPeriodic()[0]){
       gridEnd=PathData.Path.GetBox()[0];
     }
     else {
@@ -276,7 +276,7 @@ void nofrClass::Read(IOSectionClass& in)
   if (!readStartGrid)
     gridStart=0.0;
   if (!readEndGrid){
-    if (PathData.Path.IsPeriodic(0)){
+    if (PathData.Path.GetPeriodic()[0]){
       gridEnd=PathData.Path.GetBox()[0];
     }
     else {

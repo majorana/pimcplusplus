@@ -88,6 +88,7 @@ public:
   inline const double GetVol();
   inline const double Getkc();
   inline void  SetPeriodic(TinyVector<bool,NDIM> period);
+  inline dVec  GetPeriodic() const { return IsPeriodic; }
 
   //////////////////////////////////
   /// TimeSlice parallelism stuff //

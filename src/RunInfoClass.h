@@ -38,8 +38,12 @@ public:
   }
   inline RunInfoClass()
   {
+#ifndef NOCUSERID
     char username[L_cuserid];
     cuserid(username);
+#else
+    string username = "Not Available";
+#endif
     UserName = username;
     BuildDate = __DATE__;
     BuildTime = __TIME__;
