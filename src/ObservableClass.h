@@ -20,18 +20,21 @@ public:
   /// behind our backs
   IOSectionClass IOSection;  
   string Name;
+  string Description;
   /// Observe the state of the present path and add it to the
   /// running sum for averages.
   virtual void Accumulate() = 0;
   virtual void WriteBlock()=0;
-  virtual void Read(IOSectionClass& IO)=0;
+  virtual void Read(IOSectionClass& IO);
   virtual void ShiftData(int numTimeSlices) {;}
+  virtual void WriteInfo();
   /// The constructor.  Sets PathData references and calls initialize.
   ObservableClass(PathDataClass &myPathData,IOSectionClass ioSection) 
     : PathData(myPathData), IOSection(ioSection)
   {
     FirstTime = true;
     Name="";
+    Description="";
   }
 };
 
@@ -79,6 +82,7 @@ public:
   /// My specialization of the virtual function.
   void Print();
   void WriteBlock();
+  void WriteInfo();
   void Read(IOSectionClass& IO);
   PairCorrelationClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
     ObservableClass(myPathData,ioSection){

@@ -186,6 +186,8 @@ void TotalEnergyClass::WriteBlock()
     cerr << "U avg = " <<favg <<endl;
     if (FirstTime) {
       FirstTime = false;
+      WriteInfo();
+      IOSection.WriteVar("Type","Scalar");
       Array<double,1> dummy(1);
       dummy(0)=avg;
       IOSection.WriteVar ("TotalEnergy", dummy);

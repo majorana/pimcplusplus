@@ -70,7 +70,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
 
 void PIMCClass::ReadObservables(IOSectionClass &in)
 {
-  in.ReadVar("OutFile",OutFileName);
+  assert(in.ReadVar("OutFile",OutFileName));
   OutFile.NewFile(OutFileName);
 
   int numOfObservables=in.CountSections("Observable");
@@ -82,7 +82,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     assert(in.ReadVar("type",theObserveType));
     ObservableClass* tempObs;
     if (theObserveType=="PairCorrelation"){
-      assert(in.ReadVar("name",theObserveName));
+      assert(in.ReadVar("Name",theObserveName));
       OutFile.NewSection(theObserveName);
       tempObs = new PairCorrelationClass(PathData,OutFile);
     }

@@ -27,10 +27,10 @@ public:
   void Accumulate();
   void WriteBlock();
   void ShiftData(int numTimeSlices);
-  void Read(IOSectionClass& IO) {  
-    assert(IO.ReadVar("name",Name));
-    assert(IO.ReadVar("freq",Freq));
-    assert(IO.ReadVar("dumpFreq",DumpFreq));
+  void Read(IOSectionClass& in) {  
+    ObservableClass::Read(in);
+    assert(in.ReadVar("freq",Freq));
+    assert(in.ReadVar("dumpFreq",DumpFreq));
   }
   TotalEnergyClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) 

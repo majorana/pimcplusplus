@@ -31,27 +31,29 @@ Section (System)
 }
 
 Section (Action)
-{
+{ 
   int MaxLevels = 2;
   Array<string,1> PairActionFiles(1) = ["e-p_beta8.0.coulombBCfit.h5"];
 }
 
 Section (Observables)
 {
-  string outFile = "H_observables.h5";
+  string OutFile = "H_observables.h5";
   Section (Observable)
     {
       string type = "Energy";
-      string name = "Energy";
+      string Name = "Energy";
+      string Description="Total Energy";
       int freq = 2;
       int dumpFreq = 500;
     }
   Section (Observable)
     {
       string type = "PairCorrelation";
-      string name = "epPC";
-      string type1 = "e";
-      string type2 = "p";
+      string Name = "epPC";
+      string Species1 = "e";
+      string Species2 = "p";
+      string Description="Electron-Proton Pair Correlation";
       int freq = 20;
       int dumpFreq=700;
       Section (Grid)
