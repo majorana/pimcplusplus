@@ -1,4 +1,4 @@
-SOURCES = PathVis.cc GLObject.cc PathObject.cc trackball.c ViewClass.cc BoxObject.cc Visual.cc SphereObject.cc BoxClass.cc SmoothClass.cc
+SOURCES = PathVis.cc GLObject.cc PathObject.cc trackball.c ViewClass.cc BoxObject.cc Visual.cc SphereObject.cc BoxClass.cc SmoothClass.cc Export.cc
 
 GLINC = `pkg-config gtkglextmm-1.2 --cflags`
 GLLIBS = `pkg-config gtkglextmm-1.2 --libs` -lgle -lglut
@@ -6,7 +6,7 @@ GLLIBS = `pkg-config gtkglextmm-1.2 --libs` -lgle -lglut
 IOobjs = ../Common/IO/InputOutput.o ../Common/IO/InputOutputHDF5.o \
          ../Common/IO/InputOutputASCII.o  ../Common/IO/InputOutputXML.o
 
-Objs =	PathVis.o GLObject.o PathObject.o trackball.o ViewClass.o BoxObject.o Visual.o SphereObject.o BoxClass.o SmoothClass.o
+Objs =	PathVis.o GLObject.o PathObject.o trackball.o ViewClass.o BoxObject.o Visual.o SphereObject.o BoxClass.o SmoothClass.o Export.o
 
 all:	PathVis
 

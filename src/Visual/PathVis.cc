@@ -130,12 +130,10 @@ bool PathVisClass::on_configure_event(GdkEventConfigure* event)
   return true;
 }
 
-bool PathVisClass::on_expose_event(GdkEventExpose* event)
-{
-  // *** OpenGL BEGIN ***
-  if (!GLwindow->gl_begin(get_gl_context()))
-    return false;
-
+void PathVisClass::GLRender()
+{  
+  glClearColor(1.0, 1.0, 1.0, 1.0);
+  glClearDepth(1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   View.GLtransform();
@@ -148,6 +146,17 @@ bool PathVisClass::on_expose_event(GdkEventExpose* event)
     (*iter)->Draw();
     iter++;
   }
+}
+
+
+bool PathVisClass::on_expose_event(GdkEventExpose* event)
+{
+  // *** OpenGL BEGIN ***
+  if (!GLwindow->gl_begin(get_gl_context()))
+    return false;
+
+  GLRender();
+
   // Swap buffers.
   if (GLwindow->is_double_buffered())
     GLwindow->swap_buffers();

@@ -159,7 +159,8 @@ VisualClass::VisualClass()
     NoWrapImage("nowrap2.png"), WrapImage("wrap.png"),
     FileChooser ("Choose an output file"),
     Wrap(false), Smooth(false), DetailFrame ("Detail"),
-    DetailAdjust(0.1, 0.1, 1.0)
+    DetailAdjust(0.1, 0.1, 1.0),
+    Export(*this)
 {
   // Top-level window.
   set_title("VisualClass");
@@ -244,7 +245,7 @@ VisualClass::VisualClass()
   Actions->add (Gtk::Action::create("MenuFile", "_File"));
   Actions->add (Gtk::Action::create("Open", "_Open"),
 		sigc::mem_fun(*this, &VisualClass::OnOpen));
-  Actions->add (Gtk::Action::create("Export", "_Export POV"),
+  Actions->add (Gtk::Action::create("Export", "_Export Image"),
 		sigc::mem_fun(*this, &VisualClass::OnExport));
   Actions->add (Gtk::Action::create("Quit", "_Quit"),
 		sigc::mem_fun(*this, &VisualClass::Quit));
@@ -312,7 +313,7 @@ void VisualClass::OnOpen()
 
 void VisualClass::OnExport()
 {
-  cerr << "Export called.\n";
+  Export.Export ("frame.png");
 }
 
 void VisualClass::ResetView()

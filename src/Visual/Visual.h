@@ -7,6 +7,7 @@
 #include "OnePath.h"
 #include "BoxClass.h"
 #include "SmoothClass.h"
+#include "Export.h"
 
 /// This species class stores info about the species for the path
 /// visualization.  Not the same as the pimc++ version.
@@ -35,6 +36,7 @@ typedef enum {LINES, TUBES} PathTypeType;
 class VisualClass : public Gtk::Window
 {
 protected:
+  friend class ExportClass;
   //////////
   // Data //
   //////////
@@ -88,6 +90,7 @@ protected:
   Gtk::FileChooserDialog FileChooser;
 
   bool Wrap, Smooth;
+  ExportClass Export;
 public:
   PathVisClass PathVis;
 
