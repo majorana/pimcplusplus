@@ -1,3 +1,5 @@
+#ifndef RANDOM_CLASS
+#define RANDOM_CLASS
 #include "sprng.h"
 #include "../MPI/Communication.h"
 
@@ -94,3 +96,4 @@ inline double RandomClass::LocalGaussian(double mean, double sigma)
   return( mean + X1 * sigma );
 }
 
+#endif
