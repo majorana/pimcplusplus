@@ -203,6 +203,16 @@ void RadialWF::Solve(double tolerance)
   Grid &grid = *u.grid;
   int TotalNodes = n-l-1;
 
+  char fname[100];
+  snprintf ("WFn%dl%d.h5", 100, n, l);
+  IOSectionClass out;
+  out.NewFile(fname);    
+  out.WriteVar ("x", u.grid->Points());
+  Array<double,2> tmp(u.grid->NumPoints,1);
+  tmp(Range::all,0) = u.Data();
+  out.WriteVar ("u", tmp);
+  VarClass *varPtr = out.GetVarPtr("u");
+
   if (!pot->IsPH()){
     double N = n;
     double Z = -pot->V(grid(0))*grid(0);
@@ -243,6 +253,7 @@ void RadialWF::Solve(double tolerance)
       Elow = Etrial;
     
     Normalize();
+    varPtr->Append(u.Data());
     double A = pot->A(grid(tindex));
     double C = 0.5 * A * CuspValue;
     double u0 = u(tindex);
@@ -264,13 +275,13 @@ void RadialWF::Solve(double tolerance)
   if (NumNodes != TotalNodes) {
     cerr << "Node number error!  We have " << NumNodes 
 	 << " nodes and want " << TotalNodes << ".\n";
-    IOSectionClass out;
-    out.NewFile ("BadWF.h5");
-    out.WriteVar ("u", u.Data());
-    out.WriteVar ("x", u.grid->Points());
-    out.CloseFile();
+//     IOSectionClass out;
+//     out.NewFile ("BadWF.h5");
+//     out.WriteVar ("u", u.Data());
+//     out.CloseFile();
     cerr << "Energy = " << Energy << endl;
   }
+  out.CloseFile();
 }
 
 
