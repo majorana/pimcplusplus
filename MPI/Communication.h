@@ -58,97 +58,61 @@ public:
   
   /// Sets this communicator to be that of all the processes
   /// (i.e. MPI_WORLD)
-  inline void SetWorld()
-  {
-    MPIComm = MPI_COMM_WORLD;
-  }
-
-  inline int MyProc()
-  {
-    int MyRank;
-    MPI_Comm_rank(MPIComm, &MyRank);
-    return MyRank;
-  }
-  inline int NumProcs()
-  {
-    int NumProcs;
-    MPI_Comm_size(MPIComm, &NumProcs);
-    return NumProcs;
-  }
-  inline void Send (void *sendBuf, int count, MPI_Datatype datatype,
-		    int dest, int tag)
-  {
-    MPI_Send (sendBuf, count, datatype, dest, tag, MPIComm);
-  }
-
-  inline void Send (int toProc, Array<double,1> &buff)
-  {
-    Send(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
-  }
-
-  inline void BroadCast (int root, Array<double,1> &buff)
-  {
-    MPI_Bcast(buff.data(), buff.size(), MPI_DOUBLE, root, MPIComm);
-  }
-  inline void Receive (void *recvBuf, int count, MPI_Datatype datatype,
-		       int source, int tag)
-  {
-    MPI_Status status;
-    MPI_Recv (recvBuf, count, datatype, source, tag, MPIComm, &status);
-  }
-
-  inline void Receive (int toProc, Array<double,1> &buff)
-  {
-    Receive(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
-  }
-
-  inline bool Probe(int source, int tag, CommStatusClass &status)
-  {
-    int flag;
-    MPI_Status mpiStat;
-
-    MPI_Iprobe(source, tag, MPIComm, &flag, &mpiStat);
-    status.Source = mpiStat.MPI_SOURCE;
-    status.Tag    = mpiStat.MPI_TAG;
-    status.Error  = mpiStat.MPI_ERROR;
-    status.Length = mpiStat.st_length;
-    return (flag != 0);
-  }
-
-
-  inline void AllGather(void *sendbuf, int sendcount, 
-		       MPI_Datatype sendtype, 
+  void SetWorld();
+  int MyProc();
+  int NumProcs();
+  void Send (void *sendBuf, int count, MPI_Datatype datatype,
+	     int dest, int tag);
+  void Send (int toProc, Array<double,1> &buff);
+  void BroadCast (int root, Array<double,1> &buff);
+  void Receive (void *recvBuf, int count, MPI_Datatype datatype,
+		int source, int tag);
+  void Receive (int toProc, Array<double,1> &buff);
+  bool Probe(int source, int tag, CommStatusClass &status);
+  void AllGather(void *sendbuf, int sendcount, 
+		 MPI_Datatype sendtype, 
 		       void* recvbuf, int recvcount,
-		       MPI_Datatype recvtype)
-  {
-    MPI_Allgather (sendbuf, sendcount, sendtype, 
-		   recvbuf, recvcount, recvtype, MPIComm);
-  }
+		 MPI_Datatype recvtype);
+  void AllGather (Array<double,1> &SendVec, 
+		  Array<double,1> &RecvVec);
+  void Split (int color, CommunicatorClass &newComm);
+  void Subset (Array<int,1> ranks, CommunicatorClass &newComm);
 
-  inline void AllGather (Array<double,1> &SendVec, 
-			 Array<double,1> &RecvVec)
-  {
-    int numProcs = NumProcs();
-    assert ((RecvVec.size()/SendVec.size())==numProcs);	
-    int count = SendVec.size();
-    double *sendbuf = SendVec.data();
-    double *recvbuf = RecvVec.data();
-    
-    AllGather(sendbuf, count, MPI_DOUBLE,
-	      recvbuf, count, MPI_DOUBLE);
-  }
+  ///Sends and receives an array of dVec
+  void SendReceive (int sendProc, const Array<Vec3,1> &sendBuff,
+		    int recvProc,       Array<Vec3,1> &recvBuff);
 
-  inline void Split (int color, CommunicatorClass &newComm)
+  ///Sends and receives an array of dVec
+  void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
+		    int recvProc,       Array<Vec2,1> &recvBuff);
+
+
+  ///Sends and receives an array of double
+  void SendReceive (int sendProc, const Array<double,1> &sendBuff,
+		    int recvProc,       Array<double,1> &recvBuff);
+  
+  ///Sends and receives an array of int
+  void SendReceive (int sendProc, const Array<int,1> &sendBuff,
+		    int recvProc,       Array<int,1> &recvBuff);
+
+
+
+  ///Sums up the vectors in sendBuff.  Processor 0 only gets the
+  ///resulting sum.
+  void Sum (Array<int,1> &sendBuff, Array<int,1> &recvBuff);
+
+  ///Sums up the vectors in sendBuff.  Processor 0 only gets the
+  ///resulting sum.
+  void Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuff);
+  ///Sums up all values a.  Only processor 0 gets the result.  All
+  ///other processors return 0;
+  double Sum (double a);
+
+  CommunicatorClass()
   {
-    MPI_Comm_split(MPIComm, color, 0, &(newComm.MPIComm));
+    SetWorld();
   }
-  inline void Subset (Array<int,1> ranks, CommunicatorClass &newComm)
-  {
-    MPI_Group myGroup, newGroup;
-    MPI_Comm_group (MPIComm, &myGroup);
-    MPI_Group_incl(myGroup, ranks.size(), ranks.data(), &newGroup);
-    MPI_Comm_create(MPIComm, newGroup, &(newComm.MPIComm));
-  }
+  
 
 #else   // Serial version
   inline void SetWorld()
@@ -192,6 +156,53 @@ public:
     cerr << "Receives not supported in serial mode.\n";
     exit(1);
   }
+
+
+  ///Sends and receives an array of dVec
+  void SendReceive (int sendProc, const Array<Vec3,1> &sendBuff,
+		    int recvProc,       Array<Vec3,1> &recvBuff)
+    {
+      recvBuff=sendBuff;
+    }
+
+  ///Sends and receives an array of dVec
+  void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
+		    int recvProc,       Array<Vec2,1> &recvBuff)
+    {
+      recvBuff=sendBuff;
+    }
+
+
+  ///Sends and receives an array of double
+  void SendReceive (int sendProc, const Array<double,1> &sendBuff,
+		    int recvProc,       Array<double,1> &recvBuff)
+    {
+      recvBuff=sendBuff;
+    }
+  
+  ///Sends and receives an array of int
+  void SendReceive (int sendProc, const Array<int,1> &sendBuff,
+		    int recvProc,       Array<int,1> &recvBuff)
+    {
+      recvBuff=sendBuff;
+    }
+
+
+
+  ///Sums up all values a.  Only processor 0 gets the result.  All
+  ///other processors return 0;
+  double Sum (double a)
+    {
+      return a;
+    }
+
+  ///Sums up the vectors in sendBuff.  Processor 0 only gets the
+  ///resulting sum.
+  void Sum (Array<int,1> &sendBuff, Array<int,1> &recvBuff)
+  {
+    recvBuff=sendBuff;
+  }
+  
 
 
 #endif

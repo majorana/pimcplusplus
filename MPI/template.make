@@ -1,6 +1,6 @@
-SOURCES = "*.cc"
+SOURCES = Communication.cc
 
-all:
+all:  Communication.o
 
 clean:
 	rm -f *.o
