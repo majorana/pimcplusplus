@@ -284,18 +284,34 @@ inline void PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 {  
   dispA = Path(sliceA, ptcl2) - Path(sliceA,ptcl1);
   dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
-  
+  dVec tempDispB;
+  dVec tempDispBN;
 //   cerr << "A1 = " << Path(sliceA,ptcl1) << endl;
 //   cerr << "A2 = " << Path(sliceA,ptcl2) << endl;
 //   cerr << "B1 = " << Path(sliceB,ptcl1) << endl;
 //   cerr << "B2 = " << Path(sliceB,ptcl2) << endl;
- 
+  int m;
   for (int i=0; i<NDIM; i++) {
     double n = -floor(dispA(i)*BoxInv(i)+0.5);
     dispA(i) += n*IsPeriodic(i)*Box(i);
     // HACK HACK HACK
-    double m = -floor(dispB(i)*BoxInv(i)+0.5);
-    dispB(i) += n*IsPeriodic(i)*Box(i);
+    m=0;
+    tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
+    tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
+    while (fabs(dispA(i)-tempDispB(i))>Box(i)/2.0 &&
+	   fabs(dispA(i)-tempDispBN(i))>Box(i)/2.0){
+      m=m+1;
+      tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
+      tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
+    }
+    if (fabs(dispA(i)-tempDispB(i))<=Box(i)/2.0)
+      dispB(i)=tempDispB(i);
+    else if (fabs(dispA(i)-tempDispBN(i))<=Box(i)/2.0)
+      dispB(i)=tempDispBN(i);
+    else cerr<<"ERROR! ERROR! ERROR!"<<endl;
+
+    //    double m = -floor(dispB(i)*BoxInv(i)+0.5);
+    //    dispB(i) += m*IsPeriodic(i)*Box(i);
     //    cerr << "n = " << n << endl;
   }
 //   cerr << "dispA = " << dispA << endl;

@@ -386,9 +386,9 @@ void PairCorrelationClass::Initialize()
 void PathDumpClass::Accumulate()
 {
   TimesCalled++;
-  //  if (TimesCalled % 50==0){
-  WriteBlock();
-  //}
+  if (TimesCalled % 5000==0){
+    WriteBlock();
+  }
 }
 void PathDumpClass::Read(IOSectionClass &in)
 {

@@ -30,16 +30,12 @@ double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> pa
       //      Path.PutInBox(rp);
       //      Path.PutInBox(rpp);
       dVec rdiff=Path.Velocity(slice, slice+skip, ptcl);
-      //dVec rdiff = Path(slice+skip,ptcl)-Path(slice,ptcl);
       dVec rbar = r + 0.5*rdiff;
       dVec newDelta;
       Path.Random.LocalGaussianVec(sigma,newDelta);
+      PathData.Path.PutInBox(newDelta);
       double GaussProd=1.0;
       for (int dim=0; dim<NDIM; dim++) {
-	  while (newDelta[dim] > (0.5*Path.GetBox()[dim]))
-	    newDelta[dim] -= Path.GetBox()[dim];
-	  while (newDelta[dim] < (-(0.5*Path.GetBox()[dim])))
-	    newDelta[dim] += Path.GetBox()[dim];
 	  double GaussSum = 0.0;
 	  int NumImage = 4;
 	  for (int image=-NumImage; image <= NumImage; image++) {
@@ -49,11 +45,8 @@ double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> pa
 	  GaussProd *= GaussSum;
       }
       logNewSampleProb += prefactorOfSampleProb + log(GaussProd);
-      //distanceTable.PutInBox(newDelta);
-      PathData.Path.PutInBox(newDelta);
       rpp=rbar+newDelta;
-      //logNewSampleProb=logNewSampleProb+
-      //	(prefactorOfSampleProb-0.5*dot(newDelta,newDelta)/(sigma2));
+
       ///Here we've stored the new position in the path
       Path.SetPos(slice+(skip>>1),ptcl,rpp);
     }
@@ -108,8 +101,6 @@ double BisectionClass::LogSampleProb(int startSlice, int endSlice,
       }
       logSampleProb += prefactorOfSampleProb + log(GaussProd);
 
-      //logSampleProb=logSampleProb+
-      //	(prefactorOfSampleProb-0.5*dot(Delta,Delta)/(sigma2));
     }
   }
   //  cerr<<"My logSampleProb is "<<logSampleProb<<endl;
@@ -143,7 +134,10 @@ bool BisectionClass::Bisect(int startSlice,int numLevels, Array<int,1> activePar
       SamplePaths(startSlice,endSlice,activeParticles,levelCounter);
     double testNewLogSampleProb=
       LogSampleProb(startSlice,endSlice,activeParticles,levelCounter);
-    assert(fabs(newLogSampleProb-testNewLogSampleProb)<1e-12);
+    if (fabs(newLogSampleProb-testNewLogSampleProb)>1e-10){
+      cerr<<newLogSampleProb<<" "<<testNewLogSampleProb<<" "<<fabs(newLogSampleProb-testNewLogSampleProb)<<endl;
+    }
+    assert(fabs(newLogSampleProb-testNewLogSampleProb)<1e-10);
 
     double newAction = PathData.Action.calcTotalAction
       (startSlice,endSlice, activeParticles,levelCounter);

@@ -114,7 +114,15 @@ double ActionClass::calcTotalAction(int startSlice, int endSlice,
 	  //	  //	  rpmag=sqrt(dot(rp,rp));
 	  //	  cerr<<"rmag "<<rmag<<endl;
 	  //	  cerr<<"rpmag "<<rpmag<<endl;
-
+	  //	  Array<double,1> rmrp(NDIM);
+	  dVec inBoxrmrp=r-rp;
+	  //	  for (int q=0;q<NDIM;q++){
+	  //	    rmrp(q)=dvecrmrp(q);
+	  //	  }
+	  //	  PathData.Path.PutInBox(inBoxrmrp);
+	  //	  if (fabs(dot(inBoxrmrp,inBoxrmrp)-dot(r-rp,r-rp))>1e-12){
+	  //	    cerr<<r-rp<<" "<<" "<<inBoxrmrp<<" "<<level<<" "<<endl;
+	  //	  }
 	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
