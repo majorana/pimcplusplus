@@ -7,6 +7,7 @@ SystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   Box = box;
   GVecs.Set (box, k, kcut);
   H.SetIonPot (ph, useFFT);
+  H.Setk(k);
   Bands.resize (NumBands, GVecs.size());
 }
 
@@ -19,7 +20,6 @@ SystemClass::Setup (Vec3 box, Vec3 k, double kcut, double z,
   GVecs.Set (box, k, kcut);
   H.SetIonPot (z, useFFT);
   H.Setk(k);
-  cerr << "NumBands = " << NumBands << endl;
   Bands.resize (NumBands, GVecs.size());
 }
 

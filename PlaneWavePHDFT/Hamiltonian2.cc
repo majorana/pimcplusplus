@@ -221,12 +221,22 @@ PHPotClass::SetIons (const Array<Vec3,1> &rions)
 void
 PHPotClass::Vmatrix (Array<complex<double>,2> &vmat)
 {
-  if (!IsSetup)
+  if (!IsSetup) {
+    cerr << "Calling PHPotClass::Setup.\n";
     Setup();
+  }
   double volInv = 1.0/GVecs.GetBoxVol();
   for (int i=0; i<vmat.rows(); i++) 
     for (int j=0; j<=i; j++) {
-      vmat (i,j) = kPH.V(kPoint, GVecs(i), GVecs(j))*volInv;
+      Vec3 diff = GVecs(i) - GVecs(j);
+      complex<double> s(0.0,0.0);
+      for (int zi=0; zi<Rions.size(); zi++) {
+	double cosVal, sinVal, phase;
+	phase = dot (diff, Rions(zi));
+	sincos(phase, &sinVal, &cosVal);
+	s += complex<double> (cosVal,sinVal);
+      }
+      vmat (i,j) = s*kPH.V(kPoint, GVecs(i), GVecs(j))*volInv;
       vmat (j,i) = conj(vmat(i,j));
     }
 }
@@ -248,6 +258,7 @@ void
 PHPotClass::Setk(Vec3 k)
 {
   kPoint = k;
+  kPH.CalcTailCoefs (30.0, 80.0);
   SetVmat();
 }
 
@@ -284,11 +295,21 @@ PHPotFFTClass::Vmatrix (Array<complex<double>,2> &vmat)
   double volInv = 1.0/GVecs.GetBoxVol();
   for (int i=0; i<vmat.rows(); i++) 
     for (int j=0; j<=i; j++) {
-      vmat (i,j) = kPH.V(kPoint, GVecs(i), GVecs(j))*volInv;
+      Vec3 diff = GVecs(i) - GVecs(j);
+      complex<double> s(0.0,0.0);
+      for (int zi=0; zi<Rions.size(); zi++) {
+	double cosVal, sinVal, phase;
+	phase = dot (diff, Rions(zi));
+	sincos(phase, &sinVal, &cosVal);
+	s += complex<double> (cosVal,sinVal);
+      }
+      vmat (i,j) = s*kPH.V(kPoint, GVecs(i), GVecs(j))*volInv;
       vmat (j,i) = conj(vmat(i,j));
     }
-  for (int i=0; i<vmat.rows(); i++)
-    cerr << "vmat(" << i << "," << i << ") = " << vmat(i,i) << endl;
+//   for (int i=0; i<vmat.rows(); i++)
+//     cerr << "vmat(" << i << "," << i << ") = " << vmat(i,i) <<
+//     endl;
+//  cerr << "vmat = " << vmat << endl;
 }
 
 
