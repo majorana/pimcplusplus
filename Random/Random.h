@@ -49,6 +49,7 @@ public:
   void Init()
   {
     int seed = make_sprng_seed();
+    cerr<<"My seed is "<<seed<<endl;
     Init (seed);
   }
 
