@@ -94,6 +94,7 @@ public:
   virtual double Xk_U  (double k, int level)     { return 0.0; }
   virtual double Xk_dU (double k, int level)     { return 0.0; }
   virtual double Xk_V  (double k)                { return 0.0; }
+  virtual double Vk    (double k)                { return 0.0; }
 
   // Fills in the Vlong_k and dVlong_k array.
   virtual void DoBreakup (const dVec &box, const Array<dVec,1> &kVecs) 

@@ -490,3 +490,10 @@ double PAcoulombBCFitClass::Xk_V (double k)
 
   return (Z1Z2*C0); 
 }
+
+
+double PAcoulombBCFitClass::Vk (double k)
+{
+  double C0 = -4.0*M_PI/(k*k);
+  return (Z1Z2*C0); 
+}

@@ -170,3 +170,8 @@ double PACoulombFitClass::Xk_V(double k)
 {
   return -4.0*M_PI*Z1Z2/(k*k)*cos(k*rcut);
 }
+
+double PACoulombFitClass::Vk(double k)
+{
+  return -4.0*M_PI*Z1Z2/(k*k);
+}
