@@ -26,6 +26,7 @@ public:
   int FindCOM(int ptcl);
   double ProtonKineticAction (int slice1, int slice2, const Array<int,1> &changedParticles, int level);
   double ProtonKineticEnergy (int slice1, int slice2, int level);
+  double dotprod(dVec vec1, dVec vec2, double mag);
   TIP5PWaterClass (PathDataClass &pathData);
 };
 

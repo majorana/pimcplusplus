@@ -337,7 +337,8 @@ double TIP5PWaterClass::RotationalEnergy(int startSlice, int endSlice, int level
   const int NumImage=1;  
   double Z = 0.0;
   double FourLambdaTauInv = 1.0/(4.0*lambda_p*levelTau);
-  for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++) {
+//  for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++) {
+int ptcl = 3;
     // Do free-particle part
     int speciesNum  = Path.ParticleSpeciesNum(ptcl);
     if (speciesNum == PathData.Path.SpeciesNum("p")){
@@ -400,11 +401,11 @@ double TIP5PWaterClass::RotationalEnergy(int startSlice, int endSlice, int level
 	  scalarnumSum += numProd[dim];
         }
 */
-	//cerr << "Z = " << Z << " scalarnumSum = " << scalarnumSum << endl;
+	//cerr << "Z = " << Z << endl;
         spring += numSum; 
       }
     }
-  }
+//  }
   spring = spring/Z;
 //  cerr << "spring = " << spring << endl;
   return spring;
@@ -487,6 +488,110 @@ int TIP5PWaterClass::FindCOM(int ptcl)
   return Optcl;
 }
 
+double TIP5PWaterClass::dotprod(dVec vec1, dVec vec2, double mag)
+{
+  double total = 0;
+  for(int i = 0; i<2; i++){
+    total += vec1[i]*vec2[i];
+  }
+  double norm = 1.0/(mag*mag);
+  return total*norm;
+}
+
+double TIP5PWaterClass::ProtonKineticAction (int slice1, int slice2, const Array<int,1> &changedParticles, int level)
+{
+  double R = O_H_moment_arm;
+  double TotalK = 0.0;
+  int numChangedPtcls = changedParticles.size();
+  int skip = 1<<level;
+  double levelTau = Path.tau* (1<<level);
+  for (int ptclIndex=0; ptclIndex<numChangedPtcls; ptclIndex++){
+    int ptcl = changedParticles(ptclIndex);
+    int species=Path.ParticleSpeciesNum(ptcl);
+    double lambda = lambda_p;
+//    double lambda = Path.Species(species).lambda;
+    if (lambda != 0){
+      double FourLambdaTauInv=1.0/(4.0*lambda*levelTau);
+      for (int slice=slice1; slice < slice2;slice+=skip) {
+      // This is the same as Kinetic.Action except that coordinates are WRT their COMs.
+        dVec coord1 = PathData.Path(slice,ptcl);
+        dVec coord2 = PathData.Path(slice+skip,ptcl);
+        int Optcl = FindCOM(ptcl);
+        dVec Ocoord1 = PathData.Path(slice,Optcl);
+        dVec Ocoord2 = PathData.Path(slice+skip,Optcl);
+        coord1 -= Ocoord1;
+        coord2 -= Ocoord2;
+// now calculate the dotprod between these UNIT vectors
+        double dot = dotprod(coord1,coord2,R);
+// theta = arccos[dotprod of unit vectors]
+        double theta = acos(dot);
+        double vel_squared = R*R*theta*theta;
+//cerr << "from which I calculate vel_squared " << vel_squared << endl;
+
+        double GaussProd = 1.0;
+        double GaussSum=0.0;
+        GaussSum += exp(-vel_squared*FourLambdaTauInv);
+        GaussProd *= GaussSum;
+        TotalK -= log(GaussProd);    
+      }
+    }
+  }
+  //cerr << "I'm returning kinetic action " << RotK << endl;
+  return (TotalK);
+}
+
+double TIP5PWaterClass::ProtonKineticEnergy (int slice1, int slice2, int level)
+{
+  double R = O_H_moment_arm;
+  double spring=0.0;
+  double Z = 0.0;
+  double levelTau=ldexp(Path.tau, level);
+  spring  = 0.0;  
+  int skip = 1<<level;
+  const int NumImage=1;  
+  for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++) {
+    int speciesNum  = Path.ParticleSpeciesNum(ptcl);
+    SpeciesClass &species = Path.Species(speciesNum);
+    double lambda = lambda_p;
+//    double lambda = species.lambda;
+    if (speciesNum == PathData.Path.SpeciesNum("p")) {
+      double FourLambdaTauInv = 1.0/(4.0*lambda*levelTau);
+      for (int slice=slice1; slice<slice2; slice+=skip) {
+	spring += (0.5*NDIM)/levelTau;
+      // This is the same as Kinetic.Action except that coordinates are WRT their COMs.
+        dVec coord1 = PathData.Path(slice,ptcl);
+        dVec coord2 = PathData.Path(slice+skip,ptcl);
+        int Optcl = FindCOM(ptcl);
+        dVec Ocoord1 = PathData.Path(slice,Optcl);
+        dVec Ocoord2 = PathData.Path(slice+skip,Optcl);
+        coord1 -= Ocoord1;
+        coord2 -= Ocoord2;
+// now calculate the dotprod between these UNIT vectors
+        double dot = dotprod(coord1,coord2,R);
+// theta = arccos[dotprod of unit vectors]
+        double theta = acos(dot);
+        double vel_squared = R*R*theta*theta;
+//cerr << "from which I calculate vel_squared " << vel_squared << endl;
+      
+        double GaussSum;
+        double numSum;
+	double d2overFLT = vel_squared*FourLambdaTauInv;
+	double expPart = exp(-d2overFLT);
+        GaussSum = expPart;
+        numSum = -d2overFLT/levelTau* expPart; 
+        Z += GaussSum;
+	//cerr << "Z = " << Z << endl;
+        spring += numSum; 
+      }
+    }
+  }
+  spring = spring/Z;
+//  cerr << "spring = " << spring << endl;
+  return spring;
+}
+
+//  Original versions of these functions
+/*
 double TIP5PWaterClass::ProtonKineticAction (int slice1, int slice2, const Array<int,1> &changedParticles, int level)
 {
   double TotalK = 0.0;
@@ -497,6 +602,7 @@ double TIP5PWaterClass::ProtonKineticAction (int slice1, int slice2, const Array
     int ptcl = changedParticles(ptclIndex);
     int species=Path.ParticleSpeciesNum(ptcl);
     double lambda = lambda_p;
+//    double lambda = Path.Species(species).lambda;
     if (lambda != 0){
       double FourLambdaTauInv=1.0/(4.0*lambda*levelTau);
       for (int slice=slice1; slice < slice2;slice+=skip) {
@@ -538,7 +644,8 @@ double TIP5PWaterClass::ProtonKineticEnergy (int slice1, int slice2, int level)
     int speciesNum  = Path.ParticleSpeciesNum(ptcl);
     SpeciesClass &species = Path.Species(speciesNum);
     double lambda = lambda_p;
-    if (lambda != 0.0) {
+//    double lambda = species.lambda;
+    if (speciesNum == PathData.Path.SpeciesNum("p")) {
       double FourLambdaTauInv = 1.0/(4.0*lambda*levelTau);
       for (int slice=slice1; slice<slice2; slice+=skip) {
 	spring += (0.5*NDIM)/levelTau;
@@ -583,3 +690,4 @@ double TIP5PWaterClass::ProtonKineticEnergy (int slice1, int slice2, int level)
   //  cerr << "spring = " << spring << endl;
   return spring;
 }
+*/
