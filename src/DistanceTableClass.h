@@ -17,7 +17,7 @@ protected:
   ///Pointer to the SpeciesArray
   PathClass &Path;
   /// Stores the distances between all ptcls at all time slices
-  MirroredArrayClass<double> DistTable; ///<(timeslice, ptcl x ptcl)
+  MirroredSymmetricMatrixClass<double> DistTable; ///<(timeslice, ptcl x ptcl)
   /// Stores the displacements between all ptcls at all time slices
   MirroredArrayClass<dVec> DispTable; ///<(timeslice, ptcl x ptcl)  
   ///Table of Image numbers (stored 0-63 for 3d)
@@ -53,6 +53,8 @@ inline void DistanceTableClass::AcceptCopy(int startTimeSlice,
 					   int endTimeSlice, 
 					   const Array<int,1> &activeParticles)
 {
+  DistTable.AcceptCopy(startTimeSlice, endTimeSlice,
+		       activeParticles);
 
 
   for (int slice=startTimeSlice;slice<=endTimeSlice;slice++){
@@ -62,7 +64,7 @@ inline void DistanceTableClass::AcceptCopy(int startTimeSlice,
 	double dummySign;
 	int index;
 	ArrayIndex(ptcl1,ptcl2,index,dummySign);
-	DistTable.AcceptCopy(slice,index);
+	//DistTable.AcceptCopy(slice,index);
 	DispTable.AcceptCopy(slice,index);
 	ImageNumTable.AcceptCopy(slice,index);
 	
@@ -76,6 +78,8 @@ inline void DistanceTableClass::RejectCopy(int startTimeSlice,
 					   const Array<int,1> &activeParticles)
 {
 
+  DistTable.RejectCopy(startTimeSlice, endTimeSlice,
+		       activeParticles);
 
   for (int slice=startTimeSlice;slice<=endTimeSlice;slice++){
     for (int ptcl1Index=0;ptcl1Index<activeParticles.size();ptcl1Index++){
@@ -84,7 +88,7 @@ inline void DistanceTableClass::RejectCopy(int startTimeSlice,
 	double dummySign;
 	int index;
 	ArrayIndex(ptcl1,ptcl2,index,dummySign);
-	DistTable.RejectCopy(slice,index);
+	//DistTable.RejectCopy(slice,index);
 	DispTable.RejectCopy(slice,index);
 	ImageNumTable.RejectCopy(slice,index);
 	
@@ -194,7 +198,7 @@ inline DistanceTableClass::DistanceTableClass (PathClass &myPath) :
   Path(myPath)
 {
   int size=(Path.NumParticles()*(Path.NumParticles()+1))/2;
-  DistTable.Resize(Path.NumTimeSlices(),size);
+  DistTable.Resize(Path.NumTimeSlices(),Path.NumParticles());
   DispTable.Resize(Path.NumTimeSlices(),size);
   ImageNumTable.Resize(Path.NumTimeSlices(),size);
   		   
