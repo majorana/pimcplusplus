@@ -1,7 +1,7 @@
 SOURCES = DistributedMat.cc TestDistributedMat.cc
 
-all:	DistributedMat.o TestDistributedMat.o
-	$(CC) -o Test TestDistributedMat.o DistributedMat.o $(LIBS)
+all:	DistributedMat.o TestDistributedMat.o ../MPI/Communication.o
+	$(CC) -o Test TestDistributedMat.o DistributedMat.o ../MPI/Communication.o $(LIBS)
 
 clean:
 	rm -f *.o

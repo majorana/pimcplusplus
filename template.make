@@ -24,11 +24,11 @@ IO_obj:
 DFT_obj:
 	cd DFT; $(MAKE_ALL)
 
-Random_obj:
-	cd Random; $(MAKE_ALL)
-
 MPI_obj:
 	cd MPI; $(MAKE_ALL)
+
+Random_obj:
+	cd Random; $(MAKE_ALL)
 
 Optimize_obj:
 	cd Optimize; $(MAKE_ALL)
