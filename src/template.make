@@ -49,6 +49,7 @@ PIMCobjs =                           \
   Common/PairAction/PAsFit.o         \
   Common/PairAction/PAtricubicFit.o  \
   Common/PairAction/PAzeroFit.o      \
+  Common/PairAction/DavidPAClass.o   \
   Common/Splines/BicubicSpline.o     \
   Common/PH/Potential.o              \
   Common/PH/QuinticPH.o              \
@@ -96,6 +97,7 @@ TestPermobjs =                       \
   Common/PairAction/PAsFit.o         \
   Common/PairAction/PAtricubicFit.o  \
   Common/PairAction/PAzeroFit.o      \
+  Common/PairAction/DavidPAClass.o   \
   Common/Splines/BicubicSpline.o     \
   Common/PH/Potential.o              \
   Common/PH/QuinticPH.o              \

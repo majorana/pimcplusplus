@@ -42,8 +42,6 @@ public:
   ActionClass(PathClass  &p_path) : Path(p_path) 
   {
   }
-
-
 };
 
 

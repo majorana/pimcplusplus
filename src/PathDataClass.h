@@ -7,6 +7,8 @@
 #include "PathClass.h"
 #include "CommunicatorClass.h"
 #include "DistanceTableClass.h"
+#include "BCClass.h"
+
 #include "Common/Random/Random.h"
 //#include "DistanceTableFreeClass.h"
 
@@ -17,7 +19,9 @@
 class PathDataClass
 {
 public:
+  BCClass BC;
   DistanceTableClass *DistanceTable;
+  
 
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
@@ -38,12 +42,12 @@ public:
   /// information up here if we want it to notice
   /// the change in join.
   inline void MoveJoin(int newJoin)
-    {
-      Path.MoveJoin(Join,newJoin);
-      DistanceTable->MoveJoin(Join,newJoin);
-      Join=newJoin;
-    }
-
+  {
+    Path.MoveJoin(Join,newJoin);
+    DistanceTable->MoveJoin(Join,newJoin);
+    Join=newJoin;
+  }
+  
   inline void Update(int slice,const Array<int,1> &ptclArray)
   {
     DistanceTable->Update(slice,ptclArray);
@@ -103,9 +107,9 @@ public:
     Path.SetPos(timeSlice,particle,r);
   }
 
-  inline PathDataClass() : Action(Path), Path(Communicator){
-    Join=1;
-  }
+  inline PathDataClass() : 
+    Action(Path), Path(Communicator), BC(Path)
+  { Join = 1; }
 
 };
  
