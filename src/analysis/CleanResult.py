@@ -1,5 +1,6 @@
 from IO import *
 import sys
+import os
 import stats
 import numarray
 from matplotlib.matlab import *
@@ -74,8 +75,23 @@ def ProcessCorrelationSection(infile,doc,currNum):
      baseName=sectionName+repr(currNum)
      myImg=ProduceCorrelationPicture(x, data[-1],baseName,hlabel,vlabel)
      doc.append(myImg)
+##   Write ASCII data to a file
+     asciiFileName = baseName + '.dat'
+     asciiFile = open (asciiFileName, "w")
+     n = len(x)
+     for i in range(0,n):
+##          asciiFile.write(repr(x[i]) + ' ' + repr(data[-1,i]) +'\n')
+          asciiFile.write('%20.16e %20.16e\n' % (x[i], data[-1,i]))
+     asciiFile.close()
      psFileName=baseName+'.ps'
-     doc.append(Href(psFileName,'PostScript'))
+     doc.append(BR())
+     fileTable = Table()
+     fileTable.body = [[Href(psFileName,'PostScript'), Href(asciiFileName,'ASCII data')]]
+     fileTable.border=0
+     fileTable.width='40%'
+     fileTable.column1_align='center'
+     fileTable.cell_align='center'
+     doc.append(fileTable)
      return currNum
      
 
@@ -200,8 +216,12 @@ def ProcessTopTable(doc,infile):
 
 infile=IOSectionClass()
 infile.OpenFile(sys.argv[1])
-
-
+fileString=sys.argv[1]
+dotLoc=string.rfind(fileString,'.')
+dirName=fileString[0:dotLoc]
+if not(os.access(dirName,os.F_OK)):
+     os.mkdir(dirName)
+os.chdir(dirName)
 #infile.OpenSection("PathDump")
 #pathData=GetPaths(infile)
 #infile.CloseSection()
@@ -233,4 +253,4 @@ doc.banner=("pimcLogo.png")
 doc.place_nav_buttons=0
 doc.header()
 
-doc.write("out.html")
+doc.write("index.html")
