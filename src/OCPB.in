@@ -1,14 +1,14 @@
-double tau = 2000.0;
+double tau = 500.0;
 
 Section (System)
 {
-  int NumTimeSlices=75;
+  int NumTimeSlices=50;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   //Array<double,1> Box(3)=[974.87, 974.87, 974.87];
-  //Array<double,1> Box(3)=[1218.6, 1218.6, 1218.6];
-  Array<double,1> Box(3)=[7311.5, 7311.5, 7311.5];
+  Array<double,1> Box(3)=[1218.6, 1218.6, 1218.6];
+  //Array<double,1> Box(3)=[7311.5, 7311.5, 7311.5];
   //Array<double,1> Box(3)=[1200.0, 1200.0, 1200.0];
-  double kCutoff = 0.005;
+  double kCutoff = 0.03;
   Section (Particles)
   {
     Section (Species)
@@ -32,7 +32,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "OCPoutput_beta150000.h5";
+  string OutFile = "OCPBoutput.h5";
   Section (Observable)
     {
       string type = "Energy";

@@ -32,7 +32,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "OCPoutput_beta150000.h5";
+  string OutFile = "OCPAoutput.h5";
   Section (Observable)
     {
       string type = "Energy";
