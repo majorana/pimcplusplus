@@ -129,6 +129,9 @@ void DFTAtom::Solve()
     oldEnergies(i) = RadialWFs(i).Energy;
   }
 
+  if (NewMix < 1.0e-8) // We don't want to do self-consistent
+    return;
+
   UpdateChargeDensity();
   oldCharge = 0.0;
   newCharge = ChargeDensity.Data();

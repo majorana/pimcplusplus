@@ -102,9 +102,14 @@ RadialWF::IntegrateOut()
     RungeKutta<PHDerivs,Vec2> integrator(derivs);
     integrator.Integrate(grid, 0, grid.NumPoints-1, Temp);
   }
-  else {
+  else if (pot->NeedsRel()) {
     NonPHDerivs derivs(*this);
     RungeKutta<NonPHDerivs,Vec2> integrator(derivs);
+    integrator.Integrate(grid, 0, grid.NumPoints-1, Temp);    
+  }
+  else {
+    RegularDerivs derivs(*this);
+    RungeKutta<RegularDerivs,Vec2> integrator(derivs);
     integrator.Integrate(grid, 0, grid.NumPoints-1, Temp);    
   }
 
@@ -134,9 +139,14 @@ double RadialWF::IntegrateInOut (int &tindex)
     RungeKutta<PHDerivs,Vec2> integrator(derivs);
     integrator.Integrate(grid, 0, tindex, uduVec);
   }
-  else {
+  else if (pot->NeedsRel()) {
     NonPHDerivs derivs(*this);
     RungeKutta<NonPHDerivs,Vec2> integrator(derivs);
+    integrator.Integrate(grid, 0, tindex, uduVec);    
+  }
+  else {
+    RegularDerivs derivs(*this);
+    RungeKutta<RegularDerivs,Vec2> integrator(derivs);
     integrator.Integrate(grid, 0, tindex, uduVec);    
   } 
 
@@ -156,11 +166,17 @@ double RadialWF::IntegrateInOut (int &tindex)
     RungeKutta<PHDerivs,Vec2> integrator(derivs);
     integrator.Integrate(grid, endPoint, tindex, uduVec);
   }
-  else {
+  else if (pot->NeedsRel()) {
     NonPHDerivs derivs(*this);
     RungeKutta<NonPHDerivs,Vec2> integrator(derivs);
+    integrator.Integrate(grid, endPoint, tindex, uduVec);
+  }
+  else {
+    RegularDerivs derivs(*this);
+    RungeKutta<RegularDerivs,Vec2> integrator(derivs);
     integrator.Integrate(grid, endPoint, tindex, uduVec);    
   } 
+
   if ((u(tindex)*uduVec(tindex)[0]) < 0.0)
     for (int i=tindex; i<=endPoint; i++)
       uduVec(i) *= -1.0;

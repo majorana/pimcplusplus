@@ -24,6 +24,7 @@ public:
 
   inline double NormDeriv(double r, double u);
   inline Vec2 PseudoDerivs (double r, Vec2 &u_and_du);
+  inline Vec2 NormalDerivs (double r, Vec2 &u_and_du);
   inline Vec2 ScalarRelDerivs (double r, Vec2 &u_and_du);
   int CountNodes();
   void IntegrateOut();
@@ -65,6 +66,20 @@ public:
   { /* Do nothing */ }
 };
 
+/// Derivatives for the radial equation given a pseudoHamiltonian  
+class RegularDerivs 
+{
+private:
+  RadialWF &WF;
+public:
+  inline Vec2 operator() (double r, Vec2& u_and_du)
+  { return WF.NormalDerivs(r, u_and_du); }
+  RegularDerivs (RadialWF &wf) : WF(wf)
+  { /* Do nothing */ }
+};
+
+
+
 /// Derivatives for the scalar relativistic radial equation
 class NonPHDerivs
 {
@@ -100,6 +115,16 @@ inline Vec2 RadialWF::PseudoDerivs (double r, Vec2 &u_and_du)
   derivs[1] = 1.0/A*(-dAdr*u_and_du[1] + 
 		    (dAdr/r + (double)(l*(l+1))*B/(r*r) 
 		     + 2.0*(V-Energy))*u_and_du[0]);
+  return derivs;
+}
+
+
+inline Vec2 RadialWF::NormalDerivs(double r, Vec2 &u_and_du)
+{
+  Vec2 derivs;
+  double V = pot->V(r);
+  derivs[0] = u_and_du[1];
+  derivs[1] = ((double)(l+(l+1))/(r*r) + 2.0*(V-Energy))*u_and_du[0];
   return derivs;
 }
 
