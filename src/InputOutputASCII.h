@@ -9,10 +9,21 @@
 class InputSectionASCIIClass : public InputSectionClass
 {
   void ReadWithoutComments(string fileName, Array<char,1> &buffer);
-  void PrintTree(InputSectionClass *sec);
+  void PrintTree();
+  void PrintTree(int num);
+  bool ReadSection(string sectionName,
+					 InputSectionClass* parent,
+					   bool findBrace=true)
+    ;
+
  public:
-  bool OpenFile (string fileName, InputSectionClass *parent);
+  //mySectionName isn't actually implemented here at all
+  bool OpenFile (string fileName, string mySectionName,
+		 InputSectionClass *parent);
+
   void CloseFile();
+  ///Notice this doesn't do anything yet
+  void Close(){; }
   
  
 };
@@ -22,6 +33,23 @@ class VarASCIIClass : public VarClass
 {  
 public:
   Array<char,1> Value;
+  void* PtrValue;
+
+
+
+  bool ReadInto (Array<double,1> &val) {return true;}
+  bool ReadInto (Array<double,2> &val) {return true;}
+  bool ReadInto (Array<double,3> &val) {return true;}
+  bool ReadInto (Array<int,1> &val)    {return true;}
+  bool ReadInto (Array<int,2> &val)    {return true;}    
+  bool ReadInto (Array<int,3> &val)    {return true;}
+  //  virtual bool ReadInto (string &val) {return true;}
+  bool ReadInto (Array<string,1> &val){return true;}
+  bool ReadInto (Array<string,2> &val){return true;}
+  bool ReadInto (Array<string,3> &val) {return true;}
+
+
+
   bool ReadInto (double &val)
   {
     int l = Value.size();

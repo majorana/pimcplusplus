@@ -8,7 +8,7 @@ CC = mpiCC
 LD = mpiCC  -Bstatic 
 DEFS = -DNO_COUT -DUSE_MPI  -DDEBUG #-DBZ_DEBUG  -g #-DUSE_MPI 
 
-TestObjs = ObservableClass.o CubicSpline.o Grid.o InputFile.o SpeciesClass.o Common.o BisectionMoveClass.o MoveClass.o ActionClass.o PathDataClass.o   CommunicatorClass.o PathClass.o test.o DistanceTablePBCClass.o DistanceTableFreeClass.o DistanceTableClass.o MirroredArrayClass.o InputOutput.o InputOutputASCII.o InputOutputHDF5.o
+TestObjs = ObservableClass.o CubicSpline.o Grid.o InputFile.o SpeciesClass.o Common.o BisectionMoveClass.o MoveClass.o ActionClass.o PathDataClass.o   CommunicatorClass.o PathClass.o test.o DistanceTablePBCClass.o DistanceTableFreeClass.o DistanceTableClass.o MirroredArrayClass.o InputOutput.o InputOutputHDF5.o
 
 TestSubarrayObjs = TestSubarrays.o
 
@@ -29,7 +29,7 @@ TestSubarrays: 	$(TestSubarrayObjs)
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc CubicSpline.cc Grid.cc InputFile.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc InputOutput.cc InputOutputASCII.cc InputOutputHDF5.cc TestHDF5.cc
+SOURCES = ObservableClass.cc CubicSpline.cc Grid.cc InputFile.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc InputOutput.cc InputOutputHDF5.cc TestHDF5.cc
 
 
 newmake: 

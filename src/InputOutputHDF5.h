@@ -169,7 +169,6 @@ public:
   void WriteVar(string name, Array<string,3> &v);
 
 
-  //void WriteVar (string name, Array<double,2> &m);
   void CloseFile();
   OutputSectionHDF5Class() : IsOpen(false)
   { }

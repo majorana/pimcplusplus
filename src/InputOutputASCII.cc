@@ -26,12 +26,14 @@ bool isNumCharP(char theChar)
       (theChar>='0' && theChar<='9') ||
       theChar=='_' ||
       theChar=='\"'||
-      theChar=='-')
+      theChar=='-' ||
+      theChar=='.')
     return true;
   return false;
 }
 
-
+//Gets the current word and puts the counter at the end of it if it is not
+//section. Otherwise puts the counter at the end after the section name.
 string currWord(Array<char,1> &buffer,int &counter,string &secName)
 
 {
@@ -58,7 +60,7 @@ string currWord(Array<char,1> &buffer,int &counter,string &secName)
     }
     cout<<"The sec name is "<<secName<<endl;
   }
-  counter=endLocExclusive-1;
+  counter=endLocExclusive;
   return tempString;
 }
 
@@ -116,23 +118,27 @@ void getVariable(Array <char,1> &buffer,int &counter,string &theName,
   //  cout<<"The buffer is "<<theValue;
 }
 
+void InputSectionASCIIClass::PrintTree(int num)
+{
+  cerr<<"This shouldn't be called yet!"<<endl;
+}
 
-void InputSectionASCIIClass::PrintTree(InputSectionClass *sec )
+void InputSectionASCIIClass::PrintTree()
 {
 
-  cout<<"Section: "<<sec->Name<<endl;
-  list<VarClass*>::iterator varIter=sec->VarList.begin();
-  while (varIter!=sec->VarList.end()){
+  cout<<"Section: "<<Name<<endl;
+  list<VarClass*>::iterator varIter=VarList.begin();
+  while (varIter!=VarList.end()){
     cout<<"Variable: "<<(*varIter)->Name<<" ";
     VarASCIIClass *tempVar=(VarASCIIClass*)*varIter;
     printCharArray(tempVar->Value);
     //    cout<<tempVar->Value;
     varIter++;
   }
-  list<InputSectionClass*>::iterator secIter=sec->SectionList.begin();
-  while (secIter!=sec->SectionList.end()){
+  list<InputSectionClass*>::iterator secIter=SectionList.begin();
+  while (secIter!=SectionList.end()){
     //    cout<<"Section: "<<(*secIter)->Name<<endl;
-    PrintTree(*secIter);
+    (*secIter)->PrintTree();
     secIter++;
   }
 }
@@ -143,14 +149,14 @@ void InputSectionASCIIClass::CloseFile()
 
 }
 void 
-InputSectionASCIIClass::ReadWithoutComments(string fileName,
-							     Array<char,1> 
-							     &buffer)
+InputSectionASCIIClass::ReadWithoutComments(string fileName)
+							    
 {
   ifstream infile;
   infile.open(fileName.c_str());
   Array<char,1> tmpBuffer;
   int counter=0;
+  pos=0;
   bool inQuote=false;
   char dummyChar;
   while (!infile.eof()){
@@ -208,15 +214,232 @@ InputSectionASCIIClass::ReadWithoutComments(string fileName,
     }
   }
   buffer.resizeAndPreserve(bufferLoc+1);
+  infile2.close();
 }
 
 
 
+bool isWhiteSpace(char testChar)
+{
+  if (testChar==' ' || 
+      testChar=='\n' ||
+      testChar=='\t' ||
+      testChar=='\r')
+    return true;
+  return false;
+}
 
-bool InputSectionASCIIClass::OpenFile(string fileName, InputSectionClass *parent)
+//Leaves at the first character that's not white space
+void InputSectionASCIIClass::SkipWhiteSpace()
+{
+  while (isWhiteSpace(buffer(pos))){
+    pos++;
+  }
+  return;
+}
+
+bool isNameChar(char testChar)
+{
+  return false ||
+    (testChar>='0' && testChar<='9') ||
+    (testChar>='a' && testChar<='z') ||
+    (testChar>='A' && testChar<='Z') ||
+    (testChar=='_');   
+}
+
+
+///Leaves pos at the first point outside the word
+string InputSectionASCIIClass::ReadCurrWord()
+{
+  SkipWhiteSpace();
+  string returnString="";
+  while (pos<buffer.size() &&
+	 isNameChar(buffer(pos))){
+    returnString=returnString+buffer(pos);
+    pos++;
+  }
+  return returnString;
+}
+
+
+
+string InputSectionASCIIClass::ReadValueString()
+{
+  bool inQuotes=false;
+  string returnString;
+  while (pos<buffer.size() &&
+	 (inQuotes ||
+	 buffer(pos)!=';')){
+    if (buffer(pos)=='\"'){
+      inQuotes=!inQuotes;
+    }
+    returnString=returnString+buffer(pos);
+    pos++;
+  }
+  assert(pos>=buffer.size());
+  return returnString;
+}
+
+
+AtomicType NameToType (string typeName)
+{
+  switch (typeName) {
+  case "int":
+    return (INT_TYPE);
+  case "double":
+    return (DOUBLE_TYPE);
+  case "string":
+    return (STRING_TYPE);
+  case: "bool":
+    return (BOOL_TYPE);
+  default:
+    return (NOT_ATOMIC);
+  }
+}
+
+
+class ASCIIVarTypeClass
+{
+  virtual StringToValue
+
+
+}
+
+void ReadVal(string buf, int &A)
+{
+
+}
+
+template <class T>
+void ReadVal (string buf, Array<T,1> &destArray)
 {
 
 
+}
+
+ReadVal (buf, Array<Array<int,1>,1> myarray)
+{
+  
+  
+
+}
+
+InputSectionASCIIClass::ParseArray()
+{
+  SkipWhiteSpace();
+  assert(buffer(pos)=='<');
+  string typeName=GetCurrWord();
+  AtomicType myType=NameToType(typeName);
+  assert (myType!=NOT_ATOMIC);
+  SkipWhiteSpace();
+  assert(buffer(pos)==',');
+  SkipWhiteSpace();
+  string intString=GetCurrWord();
+  char *ptr;
+  int dim=strtol(intString.c_str(),&ptr,10);
+  assert  (*ptr==NULL);
+  SkipWhiteSpace();
+  assert(buffer(pos)=='>');
+  string myName=GetCurrWord();
+  SkipWhiteSpace();
+  assert(buffer(pos)=='=');
+  SkipWhiteSpace();
+  string buf=ReadValueString();
+  
+  ASCIIVarClass *newVar=new ASCIIVarClass();
+  newVar->Dim=dim;
+  newVar->Type=myType;
+  switch(myType){
+  case INT_TYPE:
+    if (dim==1){
+      Array<int,1> *tempArray=new Array<int,1>();
+      
+      ReadVal(
+    }
+    else if (dim==2){
+    }
+    else if (dim==3){
+    }
+
+  
+}
+
+
+InputSectionASCIIClass::ReadVariableInfo(string theType)
+{
+  if (NameToType(theType)==NOT_ATOMIC){
+    assert(theType=="Array");
+    ParseArray()
+      SkipWhiteSpace();
+    assert(buffer(pos)=='<');
+    SkipWhiteSpace();
+    
+    
+      
+  }
+  else {
+  }
+    
+
+
+}
+
+
+bool InputSectionASCIIClass::ReadSection(string sectionName,
+					 InputSectionClass* parent,
+					 bool findBrace)
+{
+  Name=sectionName;
+  Parent=parent;
+  while (!done){
+    string myCurrWord=ReadCurrWord();
+    SkipWhiteSpace();
+    if (myCurrWord=="Section" &&
+	buffer(pos)=='('){
+      pos++;
+      string theName=ReadCurrWord();
+      SkipWhiteSpace();
+      assert(buffer(pos)==')');
+      pos++;
+      SkipWhiteSpace();
+      assert(buffer(pos)=='{');
+      pos++;
+      InputSectionClass *newSec= new InputSectionASCIIClass();
+      SectionList.push_back(newSec);
+      (*newSec)->ReadSection(theName,this);
+      
+    }
+    else {
+      ReadVariableInfo(myCurrWord);
+    }
+}
+    
+    
+
+
+
+
+
+}
+
+bool InputSectionASCIIClass::OpenFile(string fileName,
+				      string sectionName,
+				      InputSectionClass* parent)
+{
+  
+  ReadWithoutComments(fileName);
+  ReadSection(sectionName,parent,false);
+  return true;
+
+
+}
+
+
+////Section Name PArt not implemented yet
+bool InputSectionASCIIClass::OpenFile(string fileName, 
+				      string sectionName, 
+				      InputSectionClass *parent)
+{
   InputSectionASCIIClass *sec;
   sec=this;
   InputSectionASCIIClass *oldSec=
@@ -226,7 +449,7 @@ bool InputSectionASCIIClass::OpenFile(string fileName, InputSectionClass *parent
   //  sec->Name = "Species";
   //  var->Name = "Mass";
   //  var->Value.resize(5);
-  //  var->Value(0) = '3';
+  //  var->Value(0) = '3';                                        
   //  var->Value(1) = '.';
   //  var->Value(2) = '1';
   //  var->Value(3) = '4';
@@ -265,6 +488,47 @@ bool InputSectionASCIIClass::OpenFile(string fileName, InputSectionClass *parent
       //      sec=&((SpecialSectionClass<VarASCIIClass>)(*(sec->Parent)))
       sec=(InputSectionASCIIClass*)(sec->Parent);
     }
+    else if (buffer(counter)=='d' &&
+	     currWord(buffer,counter,secName)=="double" &&
+	     !inQuotes){
+      string dummyString;
+      VarASCIIClass *var =new VarASCIIClass();
+      while (!isNumCharP(buffer(counter))){
+	counter++;
+      }
+      var->Name=currWord(buffer,counter,dummyString);
+      cerr<<"My name is "<<var->Name<<endl;
+      while (!isNumCharP(buffer(counter))){
+	counter++;
+      }
+
+      string tempValue;
+      tempValue=currWord(buffer,counter,dummyString);
+      cerr<<"The string of my double is "<<tempValue<<endl;
+      var->PtrValue=new double(atof(tempValue.c_str()));
+      sec->VarList.push_back(var);
+    } 
+    else if (buffer(counter)=='i' &&
+	     currWord(buffer,counter,secName)=="int" &&
+	     !inQuotes){
+      string dummyString;
+      VarASCIIClass *var =new VarASCIIClass();
+      while (!isNumCharP(buffer(counter))){
+	counter++;
+      }
+      var->Name=currWord(buffer,counter,dummyString);
+      cerr<<"My name is "<<var->Name<<endl;
+      while (!isNumCharP(buffer(counter))){
+	counter++;
+      }
+
+      string tempValue;
+      tempValue=currWord(buffer,counter,dummyString);
+      cerr<<"The string of my int is "<<tempValue<<endl;
+      var->PtrValue=new double(atoi(tempValue.c_str()));
+      sec->VarList.push_back(var);
+    } 
+
     else if(buffer(counter)=='='
 	    && !inQuotes){
       string theName;

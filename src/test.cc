@@ -10,8 +10,8 @@
 #include "DistanceTablePBCClass.h"
 #include "DistanceTableFreeClass.h"
 #include "InputOutput.h"
-#include "InputOutputASCII.h"
-
+// #include "InputOutputASCII.h"
+#include "InputOutputHDF5.h"
 
 void setupAction(ActionClass &myActionClass)
 
@@ -181,8 +181,8 @@ int main(int argc, char **argv)
   PC.Initialize();
   //  ActionClass myActionClass;
   //  setupIDParticleArray(myPathData);
-  InputSectionClass *theInput=new InputSectionASCIIClass();
-  theInput->OpenFile("inputFile",NULL);
+  InputSectionClass *theInput=new InputSectionHDF5Class();
+  theInput->OpenFile("inputFile","nonameyet",NULL);
   InputSectionClass *pathInput;
   theInput->FindSection("PathInfo",pathInput,true);
   pathInput->Rewind();

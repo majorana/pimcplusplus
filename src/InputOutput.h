@@ -7,13 +7,14 @@
 #include <fstream>
 
 using namespace std;
-
+typedef enum {NOT_ATOMIC, INT_TYPE, DOUBLE_TYPE,STRING_TYPE,BOOL_TYPE} AtomicType;
 
 class VarClass 
 {  
 public:
   string Name;
-
+  AtomicType Type;
+  int Dim;
   virtual bool ReadInto (double &val)              = 0;
   virtual bool ReadInto (Array<double,1> &val)     = 0;
   virtual bool ReadInto (Array<double,2> &val)     = 0;
