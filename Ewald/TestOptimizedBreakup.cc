@@ -30,7 +30,7 @@ void TestCoulomb()
   box = 10.0, 10.0, 10.0;
   basis.SetBox (box);
   double Omega = box[0]*box[1]*box[2];
-  basis.SetNumKnots(11);
+  basis.SetNumKnots(40);
   basis.Set_rc(5.0);
 
 //   double k = 1;
