@@ -16,7 +16,7 @@ public:
   int BisectionLevel;
   list<ActionBaseClass*> Actions;
   ///The first stage will set the slices and activeParticles
-  ///This returns transition probability T(new->old)/T(old->new)
+  ///This returns transition probability ratio T(new->old)/T(old->new)
   virtual double Sample (int &slice1,int &slice2,
 			 Array<int,1> &activeParticles) = 0; 
   virtual void Read (IOSectionClass &in);
@@ -33,7 +33,8 @@ public:
 		       double &prevActionChange) = 0;
 
   StageClass(PathDataClass &pathData) :
-    PathData(pathData), NumAccepted(0), NumAttempted(0)
+    PathData(pathData), NumAccepted(0), NumAttempted(0),
+    BisectionLevel(0)
   {
     // Do nothing for now
   }
@@ -106,7 +107,9 @@ public:
   void Accept();
   void Reject();
   virtual void WriteRatio()=0;
-  virtual void MakeMove()=0;
+
+  ///Why was this MakeMove()=0 and virtual?
+  void MakeMove();
   MultiStageClass(PathDataClass &pathData, IOSectionClass &outSection) : 
     ParticleMoveClass(pathData,outSection) 
   {

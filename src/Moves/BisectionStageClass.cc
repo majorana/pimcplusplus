@@ -102,9 +102,8 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
 				   Array<int,1> &activeParticles)
 {
   PathClass &Path = PathData.Path;
-  ActionClass &Action = PathData.Action;
   int skip = 1<<(BisectionLevel+1);
-  double levelTau = 0.5*PathData.Action.tau*skip;
+  double levelTau = 0.5*PathData.Path.tau*skip;
 
   double logSampleProb=0.0;
   double logOldSampleProb=0.0;

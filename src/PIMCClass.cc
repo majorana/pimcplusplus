@@ -1,9 +1,10 @@
 #include "PIMCClass.h"
-#include "Moves/BisectionMoveClass.h"
-#include "Moves/OpenBisectionMoveClass.h"
-#include "Moves/MetaMoves.h"
-#include "Moves/BlockMove.h"
-#include "Moves/BisectionBlock.h"
+// #include "Moves/BisectionMoveClass.h"
+// #include "Moves/OpenBisectionMoveClass.h"
+// #include "Moves/MetaMoves.h"
+// #include "Moves/BlockMove.h"
+// #include "Moves/BisectionBlock.h"
+#include "Moves/MoveClass.h"
 #include "Observables/ObservableClass.h"
 #include <sstream>
 
@@ -12,18 +13,26 @@ void PIMCClass::Read(IOSectionClass &in)
   // Read the parallelization strategy
   PathData.Read (in);
   cerr << "Finished PathData Read.\n";
-  // Read in the system information and set up the path
+
+  // Read in the system information and allocate the path
   assert(in.OpenSection("System"));
   PathData.Path.Read(in);
   in.CloseSection();
   cerr << "Finished Path read.\n";
+
   // Read in the action information
   assert(in.OpenSection("Action"));
-  PathData.Action.Read(in);
-  cerr << "Finished Action read.\n";
+//   PathData.Action.Read(in);
+//   cerr << "Finished Action read.\n";
   PathData.Actions.Read(in);
-  cerr << "Finished Actions read.\n";
   in.CloseSection();
+  cerr << "Finished Actions read.\n";
+
+  // Now actually initialize the paths
+  assert(in.OpenSection("System"));
+  PathData.Path.InitPaths(in);
+  in.CloseSection();
+  
   // Read in the Observables
   assert(in.OpenSection("Observables"));
   ReadObservables(in);
@@ -42,12 +51,6 @@ void PIMCClass::Read(IOSectionClass &in)
   assert(in.OpenSection("Algorithm"));
   ReadAlgorithm(in);
   in.CloseSection();
-
-  // Read in the Permuation info
-//   assert(in.OpenSection("Permutations"));
-//   ForwPermuteTable.Read(in);
-//   RevPermuteTable.Read(in);
-//   in.CloseSection();
 }
 
 
@@ -154,38 +157,49 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     assert(in.ReadVar("type",MoveType));
     if (iAmRoot)
       OutFile.NewSection(MoveType);
-    if (MoveType=="Bisection") {
-      moveName = "BisectionMove";
-      Moves(counter)=new BisectionMoveClass(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="OpenBisection") {
+//     if (MoveType=="Bisection") {
+//       moveName = "BisectionMove";
+//       Moves(counter)=new BisectionMoveClass(PathData, OutFile);
+//       Moves(counter)->Read(in);
+//     }
+//     else 
+/*    if (MoveType=="OpenBisection") {
       moveName = "OpenBisectionMove";
       Moves(counter)=new OpenBisectionMoveClass(PathData, OutFile);
       Moves(counter)->Read(in);
     }
-    else if (MoveType=="ShiftMove") {
+    else*/
+    if (MoveType=="ShiftMove") {
       Moves(counter)=new ShiftMoveClass(PathData, OutFile);
       Moves(counter)->Read(in);
     }
+    //    else if (MoveType=="EndSTage"){
+    //      Moves(counter)=new OpenBisectionMoveClass(PathData,OutFile);
+    //      Moves(counter)->Read(in);
+    //    }
     else if (MoveType=="PrintMove") {
       Moves(counter)=new PrintMoveClass(PathData, OutFile);
       Moves(counter)->Read(in);
     }
-    else if (MoveType=="CycleBlock") {
-      moveName = "CycleBlockMove";
-      Moves(counter)=new CycleBlockMoveClass(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="PermMove") {
-      moveName= "PermMove";
-      Moves(counter)=new PermMove(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
+//     else if (MoveType=="CycleBlock") {
+//       moveName = "CycleBlockMove";
+//       Moves(counter)=new CycleBlockMoveClass(PathData, OutFile);
+//       Moves(counter)->Read(in);
+//     }
+//     else if (MoveType=="PermMove") {
+//       moveName= "PermMove";
+//       Moves(counter)=new PermMove(PathData, OutFile);
+//       Moves(counter)->Read(in);
+//     }
     else if (MoveType=="BisectionBlock"){
       moveName="BisectionBlock";
       Moves(counter)=new BisectionBlockClass(PathData,OutFile);
       Moves(counter)->Read(in); 
+    }
+    else if (MoveType=="OpenEnd"){
+      moveName="OpenEnd";
+      Moves(counter)=new OpenEndMoveClass(PathData,OutFile);
+      Moves(counter)->Read(in);
     }
     else if (MoveType=="RefSlice"){
       moveName="RefSlice";
@@ -236,7 +250,7 @@ void PIMCClass::WriteSystemInfo()
   Array<double,1> boxArray(3);
   boxArray(0) = box[0];   boxArray(1) = box[1];   boxArray(2) = box[2];
   OutFile.WriteVar ("Box", boxArray);
-  OutFile.WriteVar("tau",PathData.Action.tau);
+  OutFile.WriteVar("tau",PathData.Path.tau);
   OutFile.WriteVar("NumTimeSlices",PathData.Path.TotalNumSlices);
   for (int speciesIndex=0; speciesIndex < PathData.Path.NumSpecies(); 
        speciesIndex++) {

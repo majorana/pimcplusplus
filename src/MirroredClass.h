@@ -3,8 +3,9 @@
 
 #include <blitz/array.h>
 
-extern int ActiveCopy;
 typedef enum {OLDMODE, NEWMODE} ModeType;
+extern ModeType ActiveCopy;
+
 inline void SetMode (ModeType type)
 {
   ActiveCopy=type;
@@ -13,6 +14,11 @@ inline void SetMode (ModeType type)
   //    ActiveCopy = 0;
   //  else 
   //    ActiveCopy = 1;
+}
+
+inline ModeType GetMode()
+{
+  return ActiveCopy;
 }
 
 using namespace blitz;

@@ -49,7 +49,7 @@ void RandomPermClass::Apply()
 }
 void RandomPermClass::GetActionPairs()
 {
-  double beta = PathData.Action.tau * (double) (Slice2-Slice1);
+  double beta = PathData.Path.tau * (double) (Slice2-Slice1);
   double lambda = PathData.Species(SpeciesNum).lambda;
   //  cerr<<"Beta is "<<beta<<endl;
 

@@ -50,8 +50,8 @@ class nofrClass : public ObservableClass
 {
   /// Stores number of counts in each bin
   Array<double,1> Histogram;
-  Array<double,3> Histogram3d;
-  ObservableVecDouble3 HistSum3d;
+  //  //  Array<double,3> Histogram3d;
+  //  //  ObservableVecDouble3 HistSum3d;
   /// Stores the total number of counts
   int TotalCounts;
   int TimesCalled;
@@ -72,15 +72,15 @@ public:
   void WriteInfo();
   void Read(IOSectionClass& IO);
   nofrClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
-    ObservableClass(myPathData,ioSection),
-    HistSum3d("3dSum",  IOSection,myPathData.Path.Communicator)
+    ObservableClass(myPathData,ioSection)
+    ////    HistSum3d("3dSum",  IOSection,myPathData.Path.Communicator)
   {
     TimesCalled=0;
   }
   nofrClass(PathDataClass &myPathData, IOSectionClass &ioSection,
 		       int species1, int species2) : 
-    ObservableClass(myPathData, ioSection),
-    HistSum3d("3dSum",  IOSection,myPathData.Path.Communicator)
+    ObservableClass(myPathData, ioSection)
+    ///    HistSum3d("3dSum",  IOSection,myPathData.Path.Communicator)
   { Initialize(); }
 
 };

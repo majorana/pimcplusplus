@@ -1,39 +1,22 @@
 #ifndef OBSERVABLE_ENERGY_H
 #define OBSERVABLE_ENERGY_H
 
-
-
 #include "ObservableBase.h"
-
-
-
 
 class EnergyClass : public ObservableClass
 {
 
 private:
-  double ESum;
-  double VSum;
-  double SSum;
-  double FSum;
-  double NodeSum;
+  double TotalSum, KineticSum, dUShortSum, dULongSum, NodeSum, 
+    VShortSum, VLongSum;
 
-  ObservableDouble TotAvg;
-  ObservableDouble VAvg;
-  ObservableDouble SAvg;
-  ObservableDouble FAvg;
-  ObservableDouble NAvg;
-
-
+  ObservableDouble TotalVar, KineticVar, dUShortVar, dULongVar, NodeVar,
+    VShortVar, VLongVar;
 
   int NumSamples;
   int TimesCalled;
   int Freq;
   int DumpFreq;
-  VarClass *IOVVar;
-  VarClass *IOSVar;
-  VarClass *IOUVar;
-  VarClass *IONodeVar;
 public:
   void Accumulate();
   void WriteBlock();
@@ -41,17 +24,21 @@ public:
   void Read(IOSectionClass& in);
   EnergyClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) , 
-      TotAvg("Total",  IOSection,myPathData.Path.Communicator),
-      VAvg("Potential",IOSection,myPathData.Path.Communicator), 
-      SAvg("Spring",   IOSection,myPathData.Path.Communicator) , 
-      FAvg("dUdBeta",  IOSection,myPathData.Path.Communicator),
-      NAvg("Node",     IOSection,myPathData.Path.Communicator)
+      TotalVar  ("Total",  IOSection,myPathData.Path.Communicator),
+      KineticVar("Kinetic",IOSection,myPathData.Path.Communicator), 
+      dUShortVar("dUShort",IOSection,myPathData.Path.Communicator), 
+      dULongVar ("dULong", IOSection,myPathData.Path.Communicator), 
+      NodeVar   ("Node",   IOSection,myPathData.Path.Communicator), 
+      VShortVar ("VShort",IOSection,myPathData.Path.Communicator), 
+      VLongVar  ("VLong",IOSection,myPathData.Path.Communicator)
   {
-    ESum = 0.0;
-    VSum = 0.0;
-    SSum = 0.0;
-    FSum = 0.0;
-    NodeSum = 0.0;
+    TotalSum   = 0.0;
+    KineticSum = 0.0;
+    dUShortSum = 0.0;
+    dULongSum  = 0.0;
+    NodeSum    = 0.0;
+    VShortSum  = 0.0;
+    VLongSum   = 0.0;
     NumSamples = 0;
     TimesCalled=0;
   }

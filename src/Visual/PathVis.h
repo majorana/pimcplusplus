@@ -1,0 +1,61 @@
+#include "../Common/IO/InputOutput.h"
+#include <iostream>
+#include <cstdlib>
+
+#include <gtkmm.h>
+
+#include <gtkglmm.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include "../Common/Blitz.h"
+#include "GLObject.h"
+
+
+class PathVisClass;
+
+class ViewClass : public sigc::trackable
+{
+private:
+  friend class PathVisClass;
+  double StartX, StartY;
+  bool Button1Pressed; 
+  double MinScale, MaxScale;
+  PathVisClass &PathVis;
+public:
+  double Scale;
+  double Quaternion[4];
+  double RotMat[4][4];
+
+  bool OnButtonPress   (GdkEventButton* event);
+  bool OnButtonRelease (GdkEventButton* event);
+  bool OnMotion        (GdkEventMotion* event);
+
+  void GLtransform();
+
+  ViewClass (PathVisClass &pathVis);
+};
+
+class PathVisClass : public Gtk::DrawingArea,
+		     public Gtk::GL::Widget<PathVisClass>
+{
+  friend class ViewClass;
+protected:
+  Glib::RefPtr<Gdk::GL::Window> GLwindow;
+
+  virtual void on_realize();
+  virtual bool on_configure_event(GdkEventConfigure* event);
+  virtual bool on_expose_event(GdkEventExpose* event);
+  int NumLists;
+  void Invalidate();
+public:
+  ViewClass View;
+  list<GLObject *> Objects;
+  void AddBox  (double xSize, double ySize, double zSize);
+  void AddPath (Array<Vec3,1> &path, bool closed=true);
+
+  // Constructor
+  PathVisClass();
+  // Destructor
+  virtual ~PathVisClass();
+};
+

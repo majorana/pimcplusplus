@@ -21,7 +21,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
-    permuteStage = new TablePermuteStageClass (PathData, SpeciesNum, NumLevels);
+    permuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels);
   else if (permuteType=="COUPLE")
     permuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels);
   else if (permuteType == "NONE") 
@@ -36,7 +36,10 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
-    newStage->Actions.push_back(&PathData.Actions.ShortRange);
+    if (PathData.Path.OpenPaths && level>0)
+      newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
+    else
+      newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
       ///If it's David's long range class then do this
       if (PathData.Path.DavidLongRange){
@@ -47,13 +50,11 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
 	else
 	  newStage->Actions.push_back(&PathData.Actions.LongRange);
-
-	
       }
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
 	cerr << "Adding fermion node action for species " 
 	     << speciesName << endl;
-
+	
 	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
       }
     }
@@ -90,8 +91,9 @@ void BisectionBlockClass::ChooseTimeSlices()
       Slice1 = refSlice + Path.Random.LocalInt(numStarts);
       Slice2 = Slice1 + bSlices;
       if (Slice2>=numSlices){
-	cerr<<"(Slice 2, numSlices): ("<<Slice2<<", "<<numSlices<<")"<<" "<<bSlices<<" "
-	    <<numStarts<<" "<<refSlice<<endl;
+	cerr << "(Slice 2, numSlices): (" << Slice2 << ", " 
+	     << numSlices << ")" << " "<< bSlices << " "
+	     << numStarts << " " << refSlice << endl;
       }
       assert (Slice2 < numSlices);
     }
@@ -116,7 +118,10 @@ void BisectionBlockClass::ChooseTimeSlices()
     }
   }
   // Bryan should fill this part in.
-  // else if (IsOpen(ptcl)) 
+  //  else if (PathData.Path.OpenPtcl) {
+    
+
+  //  }
   else {
     int sliceSep = 1<<NumLevels;
     assert (sliceSep < PathData.Path.NumTimeSlices());

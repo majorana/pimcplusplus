@@ -49,7 +49,7 @@ class PermuteTableClass
   int SpeciesNum;
   int Slice1, Slice2;
   inline void AddEntry(const CycleClass &cycle);
-
+  int ExcludeParticle;
   PathDataClass &PathData;
   void ConstructHTable();
 
@@ -76,6 +76,8 @@ public:
   double epsilon;
 
   void ConstructCycleTable(int speciesNum,int slice1,int slice2);
+  void ConstructCycleTable(int speciesNum,int slice1,int slice2,
+			   int excludeParticle);
   void CanonicalPermRep(Array<int,1> P);
   double AttemptPermutation();
   double CalcReverseProb(const PermuteTableClass &forwardTable);
@@ -92,6 +94,7 @@ public:
     CycleTable.resize(TableSize);
     OnlyOdd=false;
     OnlyEven=false;
+    ExcludeParticle=-1;
   }
 
 };

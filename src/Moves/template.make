@@ -1,6 +1,8 @@
-SOURCES = BisectionClass.cc BlockMove.cc OpenBisectionMoveClass.cc  MetaMoves.cc PermuteTableClass.cc BisectionMoveClass.cc MoveBase.cc RandomPermClass.cc  MultiStage.cc NoPermuteClass.cc BisectionBlock.cc PermuteStageClass.cc CoupledPermuteStageClass.cc TablePermuteStageClass.cc BisectionStageClass.cc RefSliceMove.cc DisplaceMove.cc
+SOURCES = BisectionClass.cc BlockMove.cc OpenBisectionMoveClass.cc OpenEndMove.cc  MetaMoves.cc PermuteTableClass.cc BisectionMoveClass.cc MoveBase.cc RandomPermClass.cc  MultiStage.cc NoPermuteClass.cc BisectionBlock.cc PermuteStageClass.cc CoupledPermuteStageClass.cc TablePermuteStageClass.cc BisectionStageClass.cc RefSliceMove.cc DisplaceMove.cc EndStageClass.cc
 
-objs = BisectionClass.o BlockMove.o OpenBisectionMoveClass.o MetaMoves.o PermuteTableClass.o BisectionMoveClass.o  MoveBase.o RandomPermClass.o  MultiStage.o NoPermuteClass.o BisectionBlock.o PermuteStageClass.o CoupledPermuteStageClass.o TablePermuteStageClass.o BisectionStageClass.o RefSliceMove.o DisplaceMove.o
+objs =  MetaMoves.o PermuteTableClass.o MoveBase.o RandomPermClass.o  MultiStage.o NoPermuteClass.o BisectionBlock.o PermuteStageClass.o CoupledPermuteStageClass.o TablePermuteStageClass.o BisectionStageClass.o RefSliceMove.o DisplaceMove.o EndStageClass.o  OpenEndMove.o
+
+oldobjs = BisectionClass.o BisectionMoveClass.o  BlockMove.o OpenBisectionMoveClass.o
 
 
 all:	Moves	

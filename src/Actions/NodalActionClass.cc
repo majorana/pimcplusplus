@@ -102,7 +102,7 @@ void FreeNodalActionClass::SetupFreeActions()
 
 FreeNodalActionClass::FreeNodalActionClass (PathDataClass &pathData,
 					    int speciesNum) :
-  ActionBaseClass (pathData), 
+  NodalActionClass (pathData), 
   Path (pathData.Path), 
   SpeciesNum (speciesNum)
 {
@@ -146,6 +146,19 @@ FreeNodalActionClass::Det (int slice)
   }
 
   return Determinant (DetMatrix);
+}
+
+bool
+FreeNodalActionClass::IsPositive (int slice)
+{
+  int myStartSlice, myEndSlice;
+  int myProc = PathData.Path.Communicator.MyProc();
+  Path.SliceRange (myProc, myStartSlice, myEndSlice);
+  int refSlice = Path.GetRefSlice()-myStartSlice;
+  if (refSlice == slice)
+    return (true);
+  else
+    return (Det(slice) > 0.0);
 }
 
 
@@ -247,8 +260,8 @@ FreeNodalActionClass::GradientDetFD (int slice, double &det,
   int myProc = PathData.Path.Communicator.MyProc();
   Path.SliceRange (myProc, myStartSlice, myEndSlice);
   int refSlice = Path.GetRefSlice()-myStartSlice;
-  double t = abs(refSlice-slice) * PathData.Action.tau;
-  double beta = PathData.Path.TotalNumSlices * PathData.Action.tau;
+  double t = abs(refSlice-slice) * PathData.Path.tau;
+  double beta = PathData.Path.TotalNumSlices * PathData.Path.tau;
   t = min (t, fabs(beta-t));
   double lambda = species.lambda;
   double C = 1.0/(4.0*M_PI * lambda * t);
@@ -647,10 +660,17 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
 				     const Array<int,1> &changePtcls, 
 				     int level)
 { 
+  /// HACK HACK HACK HACK
+  startSlice = 0;
+  endSlice = Path.NumTimeSlices()-1;
+  string mode = GetMode()==OLDMODE ? " Old mode" : " New mode";
+
+  double uNode=0.0;
+
   SpeciesClass &species = Path.Species(SpeciesNum);
   double lambda = species.lambda;
   int skip = 1<<level;
-  double levelTau = PathData.Action.tau * (double)skip;
+  double levelTau = PathData.Path.tau * (double)skip;
 
   int myStart, myEnd;
   Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
@@ -660,6 +680,9 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
   if (startSlice != refSlice) {
     dist1 = HybridDist (startSlice, lambda*levelTau);
     if (dist1 < 0.0) {
+      // cerr << "node cross in species = " << species.Name << endl;
+//       uNode = 1.0e100;
+//       cerr << species.Name << " " << mode << " uNode = " << uNode << endl;
       return 1.0e100;
     }
   }
@@ -667,7 +690,6 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
     dist1 = sqrt(-1.0);
   
   int totalSlices = Path.TotalNumSlices;
-  double uNode=0.0;
   for (int slice=startSlice; slice < endSlice; slice+=skip) {
     if ((slice != refSlice) && (slice != refSlice+Path.TotalNumSlices))
       if (Det(slice) < 0.0)
@@ -679,6 +701,10 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
       dist2 = HybridDist (slice+skip, lambda*levelTau);
       //fprintf (stderr, "%1.12e %1.12e\n", lineDist, dist2);
       if (dist2 < 0.0) {
+	//	cerr << "node cross in species = " << species.Name <<
+	//	endl;
+// 	uNode = 1.0e100;
+// 	cerr << species.Name << " " << mode << " uNode = " << uNode << endl;
 	return 1.0e100;
       }
     }
@@ -695,6 +721,7 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
       uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
     dist1 = dist2;
   }
+//   cerr << species.Name << " " << mode << " uNode = " << uNode << endl;
   return uNode;
 }
 
@@ -702,10 +729,21 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
 
 double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
 { 
+  Array<int,1> changedPtcls(1);
+  
+
+//   SetMode (OLDMODE);
+//   double oldAction = Action (slice1, slice2, changedPtcls, level);
+//   cerr << "oldAction = " << oldAction << endl;
+//   SetMode (NEWMODE);
+//   double newAction = Action (slice1, slice2, changedPtcls, level);
+//   cerr << "newAction = " << newAction << endl;
+
+
   SpeciesClass &species = Path.Species(SpeciesNum);
   double lambda = species.lambda;
   int skip = 1<<level;
-  double levelTau = PathData.Action.tau * (double)skip;
+  double levelTau = PathData.Path.tau * (double)skip;
 
   int myStart, myEnd;
   Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
@@ -714,8 +752,10 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
   double dist1, dist2;
   if (slice1 != refSlice) {
     dist1 = HybridDist (slice1, lambda*levelTau);
-    if (dist1 < 0.0)
+    if (dist1 < 0.0) {
+      cerr << "slice1 = " << slice1 << " refSlice = " << refSlice << endl;
       return 1.0e100;
+    }
   }
   else
     dist1 = sqrt(-1.0);
@@ -727,8 +767,11 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
       dist2 = sqrt(-1.0);
     else {
       dist2 = HybridDist (slice+skip, lambda*levelTau);
-      if (dist2 < 0.0)
+      if (dist2 < 0.0){
+	cerr << "slice2 = " << slice+skip << " refSlice = " << refSlice
+	     << " species = " << species.Name << endl;
 	return 1.0e100;
+      }
     }
 
     double prod;
@@ -741,8 +784,11 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
 
     double prod_llt = prod/(lambda*levelTau);
     double exp_m1 = expm1 (prod_llt);
-    if ((!isnan(prod_llt)) && (exp_m1 != 0.0))
-      uNode += prod_llt / (levelTau*exp_m1);
+    if (isnormal(exp_m1))
+      if ((!isnan(prod_llt)) && (exp_m1 != 0.0))
+	uNode += prod_llt / (levelTau*exp_m1);
+    if (isnan(uNode))
+      cerr << "uNode broken again!\n";
     dist1 = dist2;
   }
   //  return 0.0;

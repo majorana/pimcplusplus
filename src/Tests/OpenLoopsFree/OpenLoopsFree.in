@@ -5,13 +5,15 @@ Section (System)
   Array<double,1> Box(3)=[4.0,4.0,4.0];
   Array<bool, 1 > IsPeriodic(3)=[true,true,true];
   bool OpenLoops=true;
+  string OpenSpecies="free";
   Section (Particles)
   {
     Section (Species)
     {
       string Name="free";
+      string Type="free";
       double lambda=0.25; 
-      string Type="BOSON";
+      string Statistics="BOSON";
       int NumParticles=8;
       int NumDim=3;
       string InitPaths="FIXED";
@@ -36,14 +38,14 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFile = "OpenLoopsFree.h5";
+  string OutFileBase = "OpenLoopsFreeBuggy";
   Section (Observable)
     {
       string type = "Energy";
       string Name = "Energy";
       string Description="Total Energy";
-      int freq=2000;
-      int dumpFreq=20000;
+      int freq=4;
+      int dumpFreq=20;
       	
     }
   Section (Observable)
@@ -54,7 +56,7 @@ Section (Observables)
       string Species2 = "free";
       string Description="Free-Free Pair CorrelationFunction";
       int freq=4;
-      int dumpFreq=2000;
+      int dumpFreq=20;
       Section (Grid)
 	{
 	  string type = "Linear";
@@ -70,66 +72,92 @@ Section (Observables)
       string Species2 = "free";
       string Description="nofr correlation";
       int freq=4;
-      int dumpFreq=2000;
+      int dumpFreq=20;
       Section (Grid)
 	{
 	  string type = "Linear";
 	  double start = 0.0;
-	  int NumPoints = 400;
+	  int NumPoints = 100;
 	}
     }    
 
 }
 
 Section (Moves){
-  Section (Move)
-    {
-      string type="OpenBisection";
-      string name="HeadBisection";
-      string open="head";
-      Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
-      ///here should be electron
-      int NumParticlesToMove=1;
-      string NumLevels="Max";
+  //  Section (Move)
+  //    {
+  //      string type="OpenBisection";
+  //      string name="HeadBisection";
+  //      string open="head";
+  //      Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
+  //      ///here should be electron
+  //      int NumParticlesToMove=1;
+  //      string NumLevels="Max";
 
       
-    }
+  //    }
+
+  Section (Move) {
+    string type="BisectionBlock";
+    string name="BisectionBlock";
+    string PermuteType="TABLE";
+    string Species="free";
+    Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
+    double epsilon=1e-5;
+    int NumLevels=2;
+    int StepsPerBlock=8;
+  }
+
+  Section (Move) {
+    string type="BisectionBlock";
+    string name="NormalBisection";
+    string PermuteType="NONE";
+    string Species="free";
+    Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
+    double epsilon=1e-5;
+    int NumLevels=2;
+    int StepsPerBlock=2;
+  }
+       
   Section (Move)
     {
-      string type="OpenBisection";
-      string name="TailBisection";
-      string open="tail";
-      Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
+      string type="OpenEnd";
+      string name="OpenEndMove";
+      //      string open="tail";
+      //      Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier
+      //					 //input
+      //      string ActiveSpecies="free"
+	//      Array<int,1> ActiveSpecies(1)=[0]; 
       ///here should be electron
-      int NumParticlesToMove=1;
-      string NumLevels="Max";
+      //      int NumParticlesToMove=1;
+      int NumLevels=2;
     }
 
-  Section (Move)
-    {
-      string type="Bisection";
-      string name="NormalBisection";
-      Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
-      ///here should be electron
-      int NumParticlesToMove=1;
-      string NumLevels="Max";
-    }
+//   Section (Move)
+//     {
+//       string type="Bisection";
+//       string name="NormalBisection";
+//       Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
+//       ///here should be electron
+//       int NumParticlesToMove=1;
+//       string NumLevels="Max";
+//     }
 
   Section (Move)
     {
       string type="ShiftMove";
       string name="Shift";
     }
-  Section (Move)
-    {
-      string type="CycleBlock";
-      string name="Permutations";
-      int NumLevels=2;
-      Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-      double epsilon=0.0;
-      int Steps=4;
-      string Species="free";
-    }
+//   Section (Move)
+//     {
+//       string type="CycleBlock";
+//       string name="Permutations";
+//       int NumLevels=2;
+//       Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
+//       double epsilon=0.0;
+//       int Steps=4;
+//       string Species="free";
+//     }
 }
 
 
@@ -140,12 +168,12 @@ Section (Algorithm)
     Section (Loop){ 
 
       int steps=3;
-      Section (Move) {string name="Permutations";} 
+      Section (Move) {string name="BisectionBlock";} 
       Section (Loop){
-	int steps=8; 
-	Section (Move) {string name="HeadBisection";}
-	Section (Move) {string name="TailBisection";}
-	Section (Move) {string name="NormalBisection";}
+      	int steps=8; 
+	Section (Move) {string name="OpenEndMove";}
+	Section (Move) {string name="OpenEndMove";}
+	Section (Move) {string name="BisectionBlock";}
 	
       }
 
@@ -156,12 +184,12 @@ Section (Algorithm)
     int steps=3000000000;
     Section (Loop){
       int steps=3;
-      Section (Move) {string name="Permutations";}
+      Section (Move) {string name="BisectionBlock";}
       Section (Loop){
 	int steps=8; 
-	Section (Move) {string name="HeadBisection";}
-	Section (Move) {string name="TailBisection";}
-	Section (Move) {string name="NormalBisection";} 
+	Section (Move) {string name="OpenEndMove";}
+	Section (Move) {string name="OpenEndMove";}
+	Section (Move) {string name="BisectionBlock";} 
       }
 
     }

@@ -3,7 +3,7 @@
 
 #include "Common.h"
 #include "SpeciesClass.h"
-#include "ActionClass.h"
+//#include "ActionClass.h"
 #include "PathClass.h"
 #include "Common/MPI/Communication.h"
 #include "Actions/ActionsClass.h"
@@ -33,7 +33,7 @@ public:
   RandomClass Random;
 
   /// This object computes all actions.
-  ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
+  //  ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
   ActionsClass Actions;
   /// The constructor that initializes the action and such
   int Join;
@@ -100,7 +100,7 @@ public:
 
   void Read (IOSectionClass &in);
   PathDataClass() : 
-    Action(*this), Actions(*this), Random(WorldComm), Path(IntraComm,Random)
+    /* Action(*this), */Actions(*this), Random(WorldComm), Path(IntraComm,Random, Actions)
   { 
     Join = 1; 
   }

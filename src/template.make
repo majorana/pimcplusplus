@@ -41,7 +41,7 @@ MAKECC = g++
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
-DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -DUSE_MPI  -O3 # -DDEBUG -DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -O3 #-DBZ_DEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
 
 PIMCobjs =                            \
   Common.o                            \
@@ -49,8 +49,8 @@ PIMCobjs =                            \
   Observables/ObservableEnergy.o      \
   Observables/Weight.o                \
   Observables/StructureFactor.o       \
-  Moves/BisectionClass.o              \
   Moves/NoPermuteClass.o              \
+  Moves/EndStageClass.o               \
   Moves/PermuteStageClass.o           \
   Moves/CoupledPermuteStageClass.o    \
   Moves/BisectionBlock.o              \
@@ -58,7 +58,6 @@ PIMCobjs =                            \
   Moves/BisectionStageClass.o         \
   PIMCClass.o                         \
   Moves/MetaMoves.o 	              \
-  Moves/BlockMove.o                   \
   Observables/ObservableBase.o        \
   Observables/ObservableCorrelation.o \
   Observables/PathDump.o              \
@@ -67,12 +66,12 @@ PIMCobjs =                            \
   Moves/PermuteTableClass.o	      \
   Moves/TablePermuteStageClass.o      \
   Moves/RandomPermClass.o             \
-  Moves/OpenBisectionMoveClass.o      \
-  Moves/BisectionMoveClass.o          \
   Moves/DisplaceMove.o                \
+  Moves/OpenEndMove.o                 \
   Moves/MoveBase.o                    \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
+  Actions/ShortRangeApproximateClass.o           \
   Actions/LongRangeClass.o            \
   Actions/ShortRangePotClass.o        \
   Actions/LongRangePotClass.o         \
@@ -82,13 +81,11 @@ PIMCobjs =                            \
   Actions/ActionsClass.o              \
   Actions/NodalActionClass.o          \
   Moves/MultiStage.o                  \
-  ActionClass.o                       \
   LongRangeRPA.o                      \
   PathDataClass.o                     \
   CommunicatorClass.o                 \
   PathClass.o                         \
   WrapClass.o			      \
-  NodalAction.o                       \
   Common/Splines/CubicSpline.o        \
   Common/Splines/MyTricubicSpline.o   \
   Common/Splines/Grid.o               \
@@ -123,24 +120,31 @@ PIMCobjs =                            \
 #  Common/PairAction/PAszFit.o        \
 #  Common/PairAction/PAsFit.o         \
 #  Common/PairAction/PAtricubicFit.o  \
+#  Moves/BisectionClass.o              \
+#  Moves/BlockMove.o                   \
+#  Moves/OpenBisectionMoveClass.o      \
+#  Moves/BisectionMoveClass.o          \
+#  ActionClass.o                       \
+#  NodalAction.o                       \
 
 
 TestPermobjs =                        \
   Common.o                            \
   TestPermutation.o                   \
-  Moves/BisectionClass.o              \
   Moves/PermuteStageClass.o           \
+  Moves/EndStageClass.o               \
   Moves/BisectionBlock.o              \
   Moves/DisplaceMove.o                \
   Moves/RefSliceMove.o                \
   Moves/NoPermuteClass.o              \
-  Moves/BlockMove.o                   \
   Moves/MetaMoves.o                   \
   Moves/TablePermuteStageClass.o      \
   Moves/CoupledPermuteStageClass.o    \
   Moves/BisectionStageClass.o         \
+  Moves/OpenEndMove.o                 \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
+  Actions/ShortRangeApproximateClass.o           \
   Actions/ActionsClass.o              \
   Actions/LongRangeClass.o            \
   Actions/LongRangeRPAClass.o         \
@@ -161,16 +165,12 @@ TestPermobjs =                        \
   SpeciesClass.o                      \
   Moves/PermuteTableClass.o	      \
   Moves/RandomPermClass.o             \
-  Moves/BisectionMoveClass.o          \
-  Moves/OpenBisectionMoveClass.o      \
   Moves/MoveBase.o                    \
-  ActionClass.o                       \
   LongRangeRPA.o                      \
   PathDataClass.o                     \
   CommunicatorClass.o                 \
   PathClass.o                         \
   WrapClass.o			      \
-  NodalAction.o                       \
   Common/Splines/CubicSpline.o        \
   Common/Splines/MyTricubicSpline.o   \
   Common/Splines/Grid.o               \
@@ -201,10 +201,17 @@ TestPermobjs =                        \
   Common/Integration/GKIntegration.o  \
   Common/Fitting/Fitting.o            \
   MirroredClass.o  
+#  Moves/BlockMove.o                   \
+#  Moves/BisectionMoveClass.o          \
+#  Moves/OpenBisectionMoveClass.o      \
+#  Moves/BisectionClass.o              \
 #  Common/PairAction/PAcoulombFit.o   \
 #  Common/PairAction/PAszFit.o        \
 #  Common/PairAction/PAsFit.o         \
 #  Common/PairAction/PAtricubicFit.o  \
+#  ActionClass.o                       \
+#  NodalAction.o                       \
+
 
 
 TestEwaldobjs =                       \
@@ -212,12 +219,11 @@ TestEwaldobjs =                       \
   PathClass.o                         \
   MirroredClass.o                     \
   SpeciesClass.o                      \
-  ActionClass.o                       \
-  NodalAction.o                       \
   PathDataClass.o                     \
   LongRangeRPA.o                      \
   Actions/ActionBase.o                \
   Actions/ShortRangeClass.o           \
+  Actions/ShortRangeApproximateClass.o           \
   Actions/LongRangeClass.o            \
   Actions/DavidLongRangeClass.o       \
   Actions/LongRangeRPAClass.o         \
@@ -254,6 +260,9 @@ TestEwaldobjs =                       \
   Common/Integration/GKIntegration.o  \
   Common/Fitting/Fitting.o            \
   Common/Splines/QuinticSplines.o    
+#  ActionClass.o                       \
+#  NodalAction.o                       \
+
 
 
 FreeParticleObjs =                   \
@@ -272,9 +281,9 @@ MAKE_ALL = $(MAKE) all $(PASS_DEFS)
 MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
-all:    pimc++ TestPerm TestEwald FreeParticles
+all:    pimc++ TestPerm FreeParticles #TestEwald 
 
-pimc++: Common_obj observables moves actions Tests $(PIMCobjs)
+pimc++: Common_obj Visual_obj observables moves actions Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
 
 TestPerm: Common_obj Tests $(TestPermobjs)
@@ -289,6 +298,9 @@ FreeParticles: Common_obj $(FreeParticleObjs)
 Common_obj:
 	cd Common; ${MAKE_ALL}
 
+Visual_obj:
+	cd Visual; ${MAKE_ALL}
+
 observables:
 	cd Observables; ${MAKE_ALL}
 
@@ -300,6 +312,9 @@ actions:
 
 Common_clean:
 	cd Common; ${MAKE} clean
+
+Visual_clean:
+	cd Visual; ${MAKE} clean
 
 Tests_clean:
 	cd Tests; ${MAKE} clean
@@ -328,7 +343,7 @@ TestASCII:	Common_obj TestASCII.o Common/IO/InputOutput.o Common/IO/InputOutputA
 #	pushd ..; make; pushd
 #	$(LD) -o $@ $(TestSubarrayObjs) $(LIBS)
 
-clean:	Common_clean Tests_clean Actions_clean Moves_clean Observables_clean
+clean:	Common_clean Tests_clean Actions_clean Moves_clean Observables_clean Visual_clean
 	rm *.o
 
 .cc.o: $(HEADERS)
@@ -341,11 +356,14 @@ clean:	Common_clean Tests_clean Actions_clean Moves_clean Observables_clean
 SOURCES =  Common.cc myprog.cc SpeciesClass.cc  ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc
 
 
-newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake
+newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake Visual_newmake
 	$(MAKE) -f template.make Makefile FRC=force_rebuild
 
 Common_newmake:
 	cd Common; $(MAKE_NEWMAKE)
+
+Visual_newmake:
+	cd Visual; $(MAKE_NEWMAKE)
 
 Tests_newmake:
 	cd Tests; $(MAKE_NEWMAKE)

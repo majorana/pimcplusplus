@@ -47,59 +47,57 @@ double KineticClass::Action (int slice1, int slice2,
 
 
 double KineticClass::d_dBeta (int slice1, int slice2,
-				 int level)
+			      int level)
 {
   double spring=0.0;
-  double levelTau=Path.tau;
-  for (int i=0; i<level; i++) 
-    levelTau *= 2.0;
-  spring  = 0.0;
-  const int NumImage=1;
-  for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++)
-    if (PathData.Path.ParticleSpecies(ptcl).lambda != 0.0)
-      spring += 1.5/levelTau;
-  
+  // ldexp(double x, int n) = x*2^n
+  double levelTau=ldexp(Path.tau, level);
+//   for (int i=0; i<level; i++) 
+//     levelTau *= 2.0;
+  spring  = 0.0;  
+  int skip = 1<<level;
+  const int NumImage=1;  
   for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++) {
     // Do free-particle part
-    int species1 = PathData.Path.ParticleSpeciesNum(ptcl);
-    double lambda = PathData.Path.ParticleSpecies(ptcl).lambda;
+    int speciesNum  = Path.ParticleSpeciesNum(ptcl);
+    SpeciesClass &species = Path.Species(speciesNum);
+    double lambda = species.lambda;
     if (lambda != 0.0) {
       double FourLambdaTauInv = 
-	1.0/(4.0*PathData.Path.Species(species1).lambda*levelTau);
-      dVec vel;
-      vel = PathData.Path.Velocity(slice1, slice2, ptcl);
-      double Z = 1.0;
-      dVec GaussSum=0.0;
-      for (int dim=0; dim<NDIM; dim++) {
-	for (int image=-NumImage; image<=NumImage; image++) {
-	  double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
-	  GaussSum[dim] += exp(-dist*dist*FourLambdaTauInv);
+	1.0/(4.0*lambda*levelTau);
+      for (int slice=slice1; slice<slice2; slice+=skip) {
+	spring += (0.5*NDIM)/levelTau;
+	dVec vel;
+	vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
+	double Z = 1.0;
+	dVec GaussSum=0.0;
+	dVec numSum=0.0;
+	for (int dim=0; dim<NDIM; dim++) {
+	  for (int image=-NumImage; image<=NumImage; image++) {
+	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
+	    double d2overFLT = dist*dist*FourLambdaTauInv;
+	    double expPart = exp(-d2overFLT);
+	    GaussSum[dim] += expPart;
+	    numSum[dim] += -d2overFLT/levelTau* expPart;
+	  }
+	  Z *= GaussSum[dim];
 	}
-	Z *= GaussSum[dim];
-      }
-      dVec numSum=0.0;
-      for (int dim=0;dim<NDIM;dim++){
-	for (int image=-NumImage;image<=NumImage;image++){
-	  double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
-	  numSum[dim] += 
-	    (-dist*dist*FourLambdaTauInv/levelTau)*
-	    exp(-dist*dist*FourLambdaTauInv);
+	double scalarnumSum=0.0;
+	for (int dim=0;dim<NDIM;dim++) {
+	  dVec numProd=1.0;
+	  for (int dim2=0;dim2<NDIM;dim2++) {
+	    if (dim2!=dim)
+	      numProd[dim] *= GaussSum[dim2];
+	    else 
+	      numProd[dim] *=  numSum[dim2];
+	  }
+	  scalarnumSum += numProd[dim];
 	}
+	//cerr << "Z = " << Z << " scalarnumSum = " << scalarnumSum << endl;
+	spring += scalarnumSum/Z; 
       }
-      double scalarnumSum=0.0;
-      for (int dim=0;dim<NDIM;dim++) {
-	dVec numProd=1.0;
-	for (int dim2=0;dim2<NDIM;dim2++) {
-	  if (dim2!=dim)
-	    numProd[dim] *= GaussSum[dim2];
-	  else 
-	    numProd[dim] *=  numSum[dim2];
-	}
-	scalarnumSum += numProd[dim];
-      }
-      spring += scalarnumSum/Z; 
     }
   }
-  
+  //  cerr << "spring = " << spring << endl;
   return spring;
 }

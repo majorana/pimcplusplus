@@ -91,16 +91,64 @@ Section (Observables)
   }
   Section (Observable) {
     string type = "PairCorrelation";
-    string Name = "PairCorrelation";
+    string Name = "Na-eup";
     string Species1 = "Na";
     string Species2 = "eup";
     int freq=20;
     int dumpFreq=100;
     Section (Grid) {
       string type = "Linear";
-      int NumPoints = 100;
+      int NumPoints = 200;
     }
- }
+  }
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "Na-edown";
+    string Species1 = "Na";
+    string Species2 = "edown";
+    int freq=20;
+    int dumpFreq=100;
+    Section (Grid) {
+      string type = "Linear";
+      int NumPoints = 200;
+    }
+  }
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "eup-eup";
+    string Species1 = "eup";
+    string Species2 = "eup";
+    int freq=20;
+    int dumpFreq=100;
+    Section (Grid) {
+      string type = "Linear";
+      int NumPoints = 200;
+    }
+  }
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "eup-edown";
+    string Species1 = "eup";
+    string Species2 = "edown";
+    int freq=20;
+    int dumpFreq=100;
+    Section (Grid) {
+      string type = "Linear";
+      int NumPoints = 200;
+    }
+  }
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "edown-edown";
+    string Species1 = "edown";
+    string Species2 = "edown";
+    int freq=20;
+    int dumpFreq=100;
+    Section (Grid) {
+      string type = "Linear";
+      int NumPoints = 200;
+    }
+  }
 }
 
 
@@ -111,24 +159,40 @@ Section (Moves) {
     string PermuteType="TABLE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
     int NumLevels=6;
-    string Species = "free";
+    string Species = "eup";
     int StepsPerBlock=1;
-    
+  }
+  Section (Move) {
+    string type="BisectionBlock";
+    string name="edownBlock";
+    string PermuteType="TABLE";
+    Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
+    int NumLevels=6;
+    string Species = "edown";
+    int StepsPerBlock=1;
   }
 
   Section (Move) {
     string type="RefSlice";
-    string name="RefSlice";
+    string name="upRefSlice";
     string PermuteType="NONE";
     int NumLevels=6;
-    string Species = "free";
+    string Species = "eup";
+  }
+
+  Section (Move) {
+    string type="RefSlice";
+    string name="downRefSlice";
+    string PermuteType="NONE";
+    int NumLevels=6;
+    string Species = "edown";
   }
 
   Section (Move) {
     string type = "Displace";
     string name = "NaDisplace";
-    string Species = "Na";
-    double Sigma = 0.2;
+    Array<string,1> ActiveSpecies(1) = ["Na"];
+    double Sigma = 1.0;
   }
 
   Section (Move) {
@@ -154,14 +218,23 @@ Section (Algorithm) {
   Section (Loop) { //Start Accumulating observables
     int steps=6000000;
     Section (Loop){
-      int steps=3;
-      Section (Move) { string name="BisectionBlock";} 
-      Section (Move) { string name="RefSlice";} 
+      int steps=10;
+      Section (Loop){
+        int steps=3;
+        Section (Move) { string name="eupBlock";} 
+        Section (Move) { string name="edownBlock";} 
+        Section (Move) { string name="upRefSlice";} 
+        Section (Move) { string name="downRefSlice";} 
+      }
+      Section (Move) { string name = "Shift"; }
     }
-    Section (Move) { string name = "Displace";}
-    Section (Move) { string name = "Shift"; }
+    Section (Move) { string name = "NaDisplace";}
     //    Section (Move) {string name="Permutations";} 
-    Section (Observe) { string name = "PairCorrelation";}
+    Section (Observe) { string name = "Na-eup";}
+    Section (Observe) { string name = "Na-edown";}
+    Section (Observe) { string name = "eup-eup";}
+    Section (Observe) { string name = "edown-edown";}
+    Section (Observe) { string name = "eup-edown";}
     Section (Observe) { string name = "Energy"; }
   }
 }

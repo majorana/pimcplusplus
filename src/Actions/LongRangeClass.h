@@ -36,7 +36,7 @@ public:
 		   const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2,  int level);
   LongRangeClass (PathDataClass &pathData,
-		   Array<PairActionFitClass*, 2> &pairMatrix,
+		  Array<PairActionFitClass*, 2> &pairMatrix,
 		  Array<PairActionFitClass*, 1> &pairArray);
 
 };

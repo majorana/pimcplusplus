@@ -1,6 +1,7 @@
 #ifndef ACTIONS_CLASS_H
 #define ACTIONS_CLASS_H
 #include "ShortRangeClass.h"
+#include "ShortRangeApproximateClass.h"
 #include "LongRangeClass.h"
 #include "LongRangeRPAClass.h"
 #include "ShortRangePotClass.h"
@@ -22,6 +23,7 @@ private:
   PathDataClass &PathData;
   int MaxLevels; //is this the right place for this?
 public:
+
   // Actions
 
   /// The Kinetic action
@@ -31,6 +33,7 @@ public:
   /// pair action in the case of short-range potententials.  The
   /// short-range action is summed in real space. 
   ShortRangeClass ShortRange;
+  ShortRangeApproximateClass ShortRangeApproximate;
 
   /// The long range part of the action, which is summed in k-space.  
   LongRangeClass LongRange;
@@ -45,7 +48,7 @@ public:
   /// fermions.  These effective actions ensure that the paths do not
   /// cross the nodes of some trial density matrix with respective to
   /// the reference slice.
-  Array<ActionBaseClass *,1> NodalActions;
+  Array<NodalActionClass *,1> NodalActions;
   //DiagonalClass Diagonal;
   //ImportanceSampleClass ImportanceSample;
 
@@ -57,19 +60,30 @@ public:
   /// the long range action.
   bool UseRPA;
 
+  /// Stores number of images to sum over for kinetic action and energy.
+  int NumImages;
+
+
+  /// Return the all the energies for this processor's segment of
+  /// the path.  Must do global sum to get total energy.
+  void Energy (double& kinetic, double &duShort, double &duLong, 
+	       double &node, double &vShort, double &vLong);
+
   /// Read the action parameters from the input file and do the
   /// necessary initialization.  This reads the pair actions, and does
   /// long range breakups and RPA corrections if necessary.
   void Read(IOSectionClass &in);
   ActionsClass(PathDataClass &pathData) : 
     ShortRange(pathData,PairMatrix),
+    ShortRangeApproximate(pathData,PairMatrix),
     ShortRangePot(pathData, PairMatrix),
     LongRange(pathData,PairMatrix,PairArray), 
     DavidLongRange(pathData),
     LongRangeRPA(pathData, PairMatrix, PairArray),
     LongRangePot(pathData, PairMatrix),
     Kinetic(pathData),
-    PathData(pathData)
+    PathData(pathData),
+    NumImages(1)
   {
     ///Do nothing for now
   }

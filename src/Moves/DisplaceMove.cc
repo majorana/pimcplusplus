@@ -68,7 +68,7 @@ DisplaceMoveClass::MakeMove ()
   bool done = false;
   int speciesIndex = 0;
   while ((speciesIndex < ActiveSpecies.size()) && (!done)) {
-    SpeciesClass &species = PathData.Path.Species(speciesIndex);
+    SpeciesClass &species = PathData.Path.Species(ActiveSpecies(speciesIndex));
     if (index < species.NumParticles) {
       ActiveParticles(0) = index+species.FirstPtcl;
       done = true;

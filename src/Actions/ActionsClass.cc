@@ -120,3 +120,119 @@ void ActionsClass::Read(IOSectionClass &in)
 }
 
 
+void
+ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong, 
+		      double &node, double &vShort, double &vLong)
+{
+  int M = PathData.Path.NumTimeSlices()-1;
+  kinetic = Kinetic.d_dBeta (0, M, 0);
+  dUShort = ShortRange.d_dBeta (0, M, 0);
+  dULong=0.0;
+  if (PathData.Path.LongRange){
+    if (UseRPA)
+      dULong = LongRangeRPA.d_dBeta (0, M, 0);
+    else
+      dULong = LongRange.d_dBeta (0, M, 0);
+  }
+  node = 0.0;
+  for (int species=0; species<PathData.Path.NumSpecies(); species++)
+    if (NodalActions(species) != NULL)
+      node += NodalActions(species)->d_dBeta(0, M, 0);
+
+  vShort  = 0.0; vLong   = 0.0;  
+  for (int slice=0; slice <= M; slice++) {
+    double factor = ((slice==0)||(slice==M)) ? 0.5 : 1.0;
+    vShort += factor * ShortRangePot.V(slice);
+    vLong  += factor *  LongRangePot.V(slice);
+  }
+}
+
+
+//   PathClass &Path = PathData.Path;
+//   for (int link=0; link<Path.NumTimeSlices()-1; link++) {    
+//     for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
+//       int specNum1 = Path.ParticleSpeciesNum(ptcl1);
+//       SpeciesClass &spec1 = Path.Species(specNum1);
+//       if (spec1.lambda != 0.0) {
+// 	// Compute kinetic energy
+// 	/// Add constant part to kinetic part of energy
+// 	kinetic += (NDIM*0.5)/tau;
+// 	// Now do spring part
+// 	double fourLambdaTauInv = 1.0/(4.0*spec1.lambda*tau);
+// 	dVec vel;
+// 	vel = Path.Velocity (link, link+1, ptcl1);
+// 	double Z = 1.0;
+// 	dVec gaussSum = 0.0;
+// 	dVec numSum = 0.0;
+// 	for (int dim=0; dim<NDIM; dim++) {
+// 	  for (int image=-NumImages; image<=NumImages; image++) {
+// 	    double dist = vel[dim]+(double)image*Path.GetBox()[dim];
+// 	    double dist2OverFLT = dist*dist*fourLambdaTauInv;
+// 	    double expPart = exp(-dist2OverFLT);
+// 	    gaussSum[dim] += expPart;
+// 	    numSum[dim]   += dist2OverFLT*expPart/tau;
+// 	  }
+// 	  Z *= gaussSum[dim];
+// 	}
+      
+// 	double scalarnumSum = 0.0;
+// 	for (int dim=0;dim<NDIM;dim++){
+// 	  dVec numProd=1.0;
+// 	  for (int dim2=0;dim2<NDIM;dim2++)
+// 	    if (dim2!=dim)
+// 	      numProd[dim] *= gaussSum[dim2];
+// 	    else 
+// 	      numProd[dim] *=  numSum[dim2];
+// 	  scalarnumSum += numProd[dim];
+// 	}
+// 	kinetic += scalarnumSum/Z; 
+//       }
+    
+//       // Now do short-range part of energy
+//       for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
+// 	int specNum2 = Path.ParticleSpeciesNum(ptcl2);
+// 	dVec r, rp;
+// 	double rmag, rpmag;
+// 	Path.DistDisp(link, link+1, ptcl1, ptcl2, rmag,rpmag,r,rp); 
+	
+// 	double s2 = dot(r-rp, r-rp);
+// 	double q = 0.5*(rmag+rpmag);
+// 	double z = (rmag-rpmag);
+	
+// 	PairActionFitClass &pa = *PairMatrix(specNum1,specNum2);
+// 	duShort += pa.dU(q, z, s2, 0);
+// 	// Subtract off long-range part from short-range action
+// 	if (pa.IsLongRange())
+// 	  duShort -= 0.5*(pa.dUlong(0)(rmag)+pa.dUlong(0)(rpmag));
+//       }
+//     }
+//   }
+
+//   if (UseRPA)
+//     dULong = LongRangeRPA.d_dBeta (0, Path.NumTimeSlices()-1, 0);
+//   else
+//     dULong = LongRange.d_dBeta (0, Path.NumTimeSlices()-1, 0);
+
+
+//    // Now, calculate potential
+//    for (int slice=0; slice < Path.NumTimeSlices; slice++) {
+//      double factor = ((slice==0)||(slice==Path.NumTimesSlices()-1)) ? 0.5 : 1.0;
+//      for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
+//        int specNum1 = Path.ParticleSpeciesNum(ptcl1);
+//        for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
+// 	 int specNum2 = Path.ParticleSpeciesNum(ptcl2);
+// 	 double dist;
+// 	 dVec disp;
+// 	 Path.DistDisp (slice, ptcl1, ptcl2, dist, disp);
+// 	 PairActionFitClass &pa = *PairMatrix(specNum1,specNum2);
+// 	 vShort += factor * pa.V(dist);
+// 	 if (pa.IsLongRange())
+// 	   vShort -= factor * pa.Vlong(dist);
+//        }
+//      }
+//    }
+
+     
+	 
+
+// }

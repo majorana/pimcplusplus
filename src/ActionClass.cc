@@ -1316,7 +1316,7 @@ void ActionClass::Energy(int slice1, int level,
       for (int dim=0; dim<NDIM; dim++) {
 	for (int image=-NumImage; image<=NumImage; image++) {
 	  double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
-	    GaussSum[dim] += exp(-dist*dist*FourLambdaTauInv);
+	  GaussSum[dim] += exp(-dist*dist*FourLambdaTauInv);
 	}
 	Z *= GaussSum[dim];
       }

@@ -16,7 +16,8 @@ Section (System)
     {
       string Name="free";
       double lambda=1.0; 
-      string Type="FERMION";
+      string Type="free";
+      string Statistics="FERMION";
       //      string Type="BOLTZMANNON";
       string NodeType = "FREE";
       int NumParticles=2;

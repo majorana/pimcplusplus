@@ -8,6 +8,8 @@
 #include "Common/MPI/Communication.h"
 
 
+class ActionsClass;
+
 ///The number of time slices is the number of slices on this processor.
 ///In all cases this processor shares a time slice with the processor 
 ///ahead of it and behind it. The convention for the shared slices
@@ -23,10 +25,16 @@ private:
   Array<int,1> SpeciesNumber;
   Array<SpeciesClass *,1> SpeciesArray;
   int MyNumSlices;
+
+  ////////////////////////
+  /// Class References ///
+  ////////////////////////
+  ActionsClass &Actions;
+
   /////////////////////
   /// Misc. Helpers ///
   /////////////////////
-  void LeviFlight (Array<dVec,1> &vec, double lambda, double tau);
+  void LeviFlight (Array<dVec,1> &vec, double lambda);
   void ReadOld(string fileName);
   ////////////////////////////////
   /// Boundary conditions stuff //
@@ -58,6 +66,11 @@ private:
   Array<TinyVector<int,NDIM>,1> kIndices;
   /// This stores e^{i\vb_i \cdot r_i^\alpha}
   TinyVector<Array<complex<double>,1>,NDIM> C;
+
+  /// Thus function finds the two closest particles in species
+  /// speciesNum and swaps their positions.  This is used to flip the
+  /// sign of the nodal determinant.
+  void SwapClosest(int speciesNum);
 public:
   Array<int,1> MagKint;
   Array<double,1> MagK;
@@ -163,9 +176,17 @@ public:
   //////////////////////////
   void Read(IOSectionClass &inSection);
   void Allocate();
+  void InitPaths(IOSectionClass &inSection);
+
+  /// This class will create a new brownian random walk for
+  /// species(speciesNum).  If the species is fermion, it will do its
+  /// best to construct a node-avoiding walk that is reasonable.
+  void NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &initialPoints);
+
   void SetupClones();
   inline PathClass(CommunicatorClass &communicator,
-		   RandomClass &random);
+		   RandomClass &random,
+		   ActionsClass &actions);
   friend void SetupPathNaCl(PathClass &path);
   friend void SetupPathZincBlend(PathClass &path);
   friend void SetupPathSimpleCubic(PathClass &path);
@@ -182,6 +203,7 @@ public:
   MirroredClass<int> OpenPtcl;
   MirroredClass<int> OpenLink;
   bool OpenPaths;
+  int OpenSpeciesNum;
   void InitOpenPaths();
   void DistanceToTail();
   MirroredClass<int> Weight;
@@ -284,18 +306,16 @@ inline void PathClass::AddSpecies (SpeciesClass *newSpecies)
 }
 
 inline PathClass::PathClass (CommunicatorClass &communicator,
-			     RandomClass &random) : 
-  Communicator(communicator), Random(random)
+			     RandomClass &random,
+			     ActionsClass &actions) : 
+  Communicator(communicator), Random(random), Actions(actions)
 {
   //      NumSpecies = 0;
-  cerr<<"In pathclass constructor"<<endl;
   TotalNumSlices=0;
 
   //  OpenPaths=true;
   OpenPaths=false; //turns off open loops (Should be read at some poitn)
   Weight=1;
-
-  cerr<<"Out of pathclass constructor"<<endl;
 }
 
 
@@ -306,9 +326,9 @@ inline void PathClass::InitOpenPaths()
   if (OpenPaths){
     cerr<<"openpaths"<<endl;
     SetMode(OLDMODE);
-    OpenLink=3;
+    OpenLink=1;
     cerr<<"Set up the open link"<<endl;
-    OpenPtcl=0;
+    OpenPtcl=Species(OpenSpeciesNum).FirstPtcl;
     cerr<<"set up the open particle"<<endl;
     SetMode(NEWMODE);
     OpenLink=3;

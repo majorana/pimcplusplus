@@ -1,6 +1,6 @@
 #include "MirroredClass.h"
 
-int ActiveCopy=0;
+ModeType ActiveCopy=OLDMODE;
 
 void MirroredClassTest()
 {

@@ -38,7 +38,7 @@ void PermuteTableClass::ConstructHTable()
   int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
   int lastPtcl = PathData.Species(SpeciesNum).LastPtcl;
   double lambda = PathData.Species(SpeciesNum).lambda;
-  double beta = PathData.Action.tau * (double) (Slice2-Slice1);
+  double beta = PathData.Path.tau * (double) (Slice2-Slice1);
   double fourLambdaBetaInv = 1.0/(4.0*lambda*beta);
   int N = lastPtcl-firstPtcl+1;
   HTable.resize(N,N);
@@ -153,7 +153,8 @@ double PermuteTableClass::CalcReverseProb(const PermuteTableClass &forwardTable)
   //We reconstruct things from scratch to make sure we do the right
   //thing. We can try to incrementally make this faster.
   ConstructCycleTable(forwardTable.SpeciesNum,
-		      forwardTable.Slice1,forwardTable.Slice2); 
+		      forwardTable.Slice1,forwardTable.Slice2,
+		      forwardTable.ExcludeParticle); 
   //  cerr << "Forward Table:\n";
   //  forwardTable.PrintTable();
   //  cerr << "Reverse Table:\n";
@@ -205,13 +206,26 @@ void PermuteTableClass::PrintTable() const
     cerr << endl;
   }    
 }
-///the Gamma's must all be greater then 1 or this won't do the correct thing
+
 void PermuteTableClass::ConstructCycleTable(int speciesNum,
 					    int slice1, int slice2)
+{
+  ConstructCycleTable(speciesNum,slice1,slice2,-1);
+
+}
+
+
+///the Gamma's must all be greater then 1 or this won't do the correct
+///thing.  Allows you to exclude a particle when producing the table
+///(say for example the open particle).
+void PermuteTableClass::ConstructCycleTable(int speciesNum,
+					    int slice1, int slice2,
+					    int particleExclude)
 {
   Slice1=slice1;
   Slice2=slice2;
   SpeciesNum=speciesNum;
+  ExcludeParticle=particleExclude;
   ConstructHTable();
   int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
   CycleTable.resize(TableSize);
@@ -219,50 +233,55 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
   int N=HTable.extent(0);
   for (int i=0; i<N; i++) {
     ///Single particle move
-
-    double hprod=1.0;
-    double hprod2=1.0;
-    double hprod3=1.0;
-    CycleClass tempPerm;
-    tempPerm.Length=1;
-    tempPerm.CycleRep[0]=i;
-    tempPerm.P=Gamma(0);
-    tempPerm.C=tempPerm.P;
-    if (NumEntries!=0){
-      tempPerm.C+=CycleTable(NumEntries-1).C;
-    }
-    AddEntry(tempPerm);
-    for (int j=i+1; j<N; j++) {// 2 and higher cycles
-      //2 cycle permutations
-      tempPerm.CycleRep[1]=j;
-      hprod=HTable(i,j);
-      tempPerm.Length=2;
-      tempPerm.P=Gamma(1)*hprod*HTable(j,i);
-      tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;     
-      if (tempPerm.P > epsilon)
-	AddEntry(tempPerm);
-      if (hprod * Gamma(2)*Gamma(3)>epsilon) {
-	for (int k=i+1;k<N;k++){//3 and higher cycles
-	  //3 cycle permutations
-	  if (k!=j){
-	    tempPerm.CycleRep[2]=k;
-	    hprod2=hprod*HTable(j,k);
-	    tempPerm.Length=3;
-	    tempPerm.P=Gamma(2)*hprod2*HTable(k,i);
-	    tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
-	    if (tempPerm.P > epsilon)
-	      AddEntry(tempPerm);
-	    if (hprod2 *Gamma(3) > epsilon) {
-	      for (int l=i+1;l<N;l++)
-		if ((l!=j) && (l!=k)){
-		  hprod3=hprod2*HTable(k,l);
-		  tempPerm.CycleRep[3]=l;
-		  tempPerm.Length=4;
-		  tempPerm.P=Gamma(3)*hprod3*HTable(l,i);
+    if (i!=particleExclude){
+      double hprod=1.0;
+      double hprod2=1.0;
+      double hprod3=1.0;
+      CycleClass tempPerm;
+      tempPerm.Length=1;
+      tempPerm.CycleRep[0]=i;
+      tempPerm.P=Gamma(0);
+      tempPerm.C=tempPerm.P;
+      if (NumEntries!=0){
+	tempPerm.C+=CycleTable(NumEntries-1).C;
+      }
+      AddEntry(tempPerm);
+      for (int j=i+1; j<N; j++) {// 2 and higher cycles
+	if (j!=particleExclude){
+	  //2 cycle permutations
+	  tempPerm.CycleRep[1]=j;
+	  hprod=HTable(i,j);
+	  tempPerm.Length=2;
+	  tempPerm.P=Gamma(1)*hprod*HTable(j,i);
+	  tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;     
+	  if (tempPerm.P > epsilon)
+	    AddEntry(tempPerm);
+	  if (hprod * Gamma(2)*Gamma(3)>epsilon) {
+	    for (int k=i+1;k<N;k++){//3 and higher cycles
+	      if (k!=particleExclude){
+		//3 cycle permutations
+		if (k!=j){
+		  tempPerm.CycleRep[2]=k;
+		  hprod2=hprod*HTable(j,k);
+		  tempPerm.Length=3;
+		  tempPerm.P=Gamma(2)*hprod2*HTable(k,i);
 		  tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
-		  if (tempPerm.P > epsilon) 
+		  if (tempPerm.P > epsilon)
 		    AddEntry(tempPerm);
+		  if (hprod2 *Gamma(3) > epsilon) {
+		    for (int l=i+1;l<N;l++)
+		      if (l!=particleExclude && (l!=j) && (l!=k)){
+			hprod3=hprod2*HTable(k,l);
+			tempPerm.CycleRep[3]=l;
+			tempPerm.Length=4;
+			tempPerm.P=Gamma(3)*hprod3*HTable(l,i);
+			tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
+			if (tempPerm.P > epsilon) 
+			  AddEntry(tempPerm);
+		      }
+		  }
 		}
+	      }
 	    }
 	  }
 	}
