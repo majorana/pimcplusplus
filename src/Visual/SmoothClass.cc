@@ -10,7 +10,8 @@ void SmoothClass::SmoothPaths(vector<OnePath*> &inList)
     int N = oldPath.Path.size()-1;
     double Ninv = 1.0/(double)N;
     /// HACK
-    Numk = N/5;
+    int Numk = (int) floor (SmoothLevel * N);
+    double NumkInv = 1.0/Numk;
     // First, compute fourier coefficients
     vector<TinyVector<complex<double>,3> > Fk(Numk);
     for (int k=0; k<Numk; k++) 
@@ -25,11 +26,25 @@ void SmoothClass::SmoothPaths(vector<OnePath*> &inList)
 	}
       }
     
+    // Figure out the appropriate scale factor by computing
+    // power in real and fourier spectrum;
+    Vec3 ravg(0.0, 0.0, 0.0);
+    double realPower = 0.0;
+    for (int i=0; i<N; i++)
+      ravg += Ninv * oldPath.Path[i];
+    for (int i=0; i<N; i++)
+      realPower += Ninv*dot (oldPath.Path[i]-ravg, oldPath.Path[i]-ravg);
+    
+    double kPower = 0.0;
+    for (int k=1; k<Numk; k++)
+      for (int dim=0; dim<3; dim++)
+	kPower += real(Fk[k][dim]*conj(Fk[k][dim]));
+    
+    double scale = sqrt(2.0*realPower/kPower);
+
     // Now, create new path, taking real part of inverse transform. 
-    double scale = sqrt((double)N / (double)Numk);
     N = 20*Numk+1;
     Ninv = 1.0/(N-1);
-    double NumkInv = 1.0/Numk;
     newPath.Path.resize(N);
     for (int n=0; n<N; n++) 
       for (int dim=0; dim<3; dim++) {
