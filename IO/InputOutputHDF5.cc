@@ -273,7 +273,7 @@ bool VarHDF5Class::Append(double val)
   H5Dextend(DataSetID, Dimensions.data());
   H5Sset_extent_simple(DataSpaceID, RANK, Dimensions.data(), maxdim);
   hsize_t size[1];
-  hssize_t offset[1];
+  hsize_t offset[1];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
 
@@ -309,7 +309,7 @@ bool VarHDF5Class::Append(blitz::Array<double,1> &val)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -355,7 +355,7 @@ bool VarHDF5Class::Append(blitz::Array<double,2> &val)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -400,7 +400,7 @@ bool VarHDF5Class::Append(blitz::Array<double,3> &val)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -445,7 +445,7 @@ bool VarHDF5Class::Append(int val)
   H5Dextend(DataSetID, Dimensions.data());
   H5Sset_extent_simple(DataSpaceID, RANK, Dimensions.data(), maxdim);
   hsize_t size[1];
-  hssize_t offset[1];
+  hsize_t offset[1];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
 
@@ -481,7 +481,7 @@ bool VarHDF5Class::Append(blitz::Array<int,1> &val)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -527,7 +527,7 @@ bool VarHDF5Class::Append(blitz::Array<int,2> &val)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -573,7 +573,7 @@ bool VarHDF5Class::Append(blitz::Array<int,3> &val)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -616,7 +616,7 @@ bool VarHDF5Class::Append(string val)
   H5Dextend(DataSetID, Dimensions.data());
   H5Sset_extent_simple(DataSpaceID, RANK, Dimensions.data(), maxdim);
   hsize_t size[1];
-  hssize_t offset[1];
+  hsize_t offset[1];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
 
@@ -676,7 +676,7 @@ bool VarHDF5Class::Append(blitz::Array<string,1> &strs)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -745,7 +745,7 @@ bool VarHDF5Class::Append(blitz::Array<string,2> &strs)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -812,7 +812,7 @@ bool VarHDF5Class::Append(blitz::Array<string,3> &strs)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -856,7 +856,7 @@ bool VarHDF5Class::Append(bool val)
   H5Dextend(DataSetID, Dimensions.data());
   H5Sset_extent_simple(DataSpaceID, RANK, Dimensions.data(), maxdim);
   hsize_t size[1];
-  hssize_t offset[1];
+  hsize_t offset[1];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
 
@@ -891,7 +891,7 @@ bool VarHDF5Class::Append(blitz::Array<bool,1> &val)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -937,7 +937,7 @@ bool VarHDF5Class::Append(blitz::Array<bool,2> &val)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
@@ -982,7 +982,7 @@ bool VarHDF5Class::Append(blitz::Array<bool,3> &val)
   Dimensions(0)++;
 
   hsize_t maxdim[RANK], size[RANK];
-  hssize_t offset[RANK];
+  hsize_t offset[RANK];
   offset[0] = Dimensions(0)-1;
   size[0] = 1;
   maxdim[0] = H5S_UNLIMITED;
