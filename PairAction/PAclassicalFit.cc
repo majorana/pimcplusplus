@@ -37,16 +37,16 @@ double PAclassicalFitClass::U(double q, double z, double s2, int level)
   for (int i=0; i<level; i++)
     beta *= 2.0;
   double V = Pot->V(q);
-  if (IsLongRange())
-    V -= Vlong(q, level);
+  //if (IsLongRange())
+  //  V -= Vlong(q, level);
   return (beta*V);
 }
 
 double PAclassicalFitClass::dU(double q, double z, double s2, int level)
 {
   double V = Pot->V(q);
-  if (IsLongRange())
-    V -= Vlong(q, level);
+  // if (IsLongRange())
+  //  V -= Vlong(q, level);
   return (V);
 }
 
@@ -89,6 +89,8 @@ bool PAclassicalFitClass::IsLongRange()
   // the potential base class. 
   return (Z1Z2 != 0.0);
 }
+
+
 
 double PAclassicalFitClass::Vlong(double q, int level)
 {
@@ -138,3 +140,67 @@ void PAclassicalFitClass::DoBreakup(const dVec& box,const Array<dVec,1> &kVecs)
 }
 
 
+
+
+/// The diagonal action only -- used for long-range breakup
+double PAclassicalFitClass::Udiag(double q, int level)
+{  
+  double beta = SmallestBeta;
+  for (int i=0; i<level; i++)
+    beta *= 2.0;
+  return beta*Pot->V(q);
+}
+
+/// The q-derivative of the above
+double PAclassicalFitClass::Udiag_p(double q, int level) 
+{  
+  double beta = SmallestBeta;
+  for (int i=0; i<level; i++)
+    beta *= 2.0;
+  return beta*Pot->dVdr(q);
+}
+
+/// The q-derivative of the above
+double PAclassicalFitClass::Udiag_pp(double q, int level) 
+{  
+  double beta = SmallestBeta;
+  for (int i=0; i<level; i++)
+    beta *= 2.0;
+  return beta*Pot->d2Vdr2(q);
+}
+
+/// The beta-derivative of the diagonal action
+double PAclassicalFitClass::dUdiag    (double q, int level) 
+{
+  return Pot->V(q);
+}
+
+/// The q-derivative of the above
+double PAclassicalFitClass::dUdiag_p  (double q, int level) 
+{
+  return Pot->dVdr(q);
+}
+
+/// The q-derivative of the above
+double PAclassicalFitClass::dUdiag_pp (double q, int level) 
+{
+  return Pot->d2Vdr2(q);
+}
+
+/// The potential to which this action corresponds.
+double PAclassicalFitClass::V  (double r) 
+{
+  return Pot->V(r);
+}
+
+/// The q-derivative of the above
+double PAclassicalFitClass::Vp (double r)
+{
+  return Pot->dVdr(r);
+}
+
+/// The q-derivative of the above
+double PAclassicalFitClass::Vpp(double r) 
+{
+  return Pot->d2Vdr2(r);
+}

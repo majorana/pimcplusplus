@@ -37,7 +37,7 @@ public:
 };
 
 
-class OptimizedBreakup
+class OptimizedBreakupClass
 {
 private:
   BasisClass &Basis;
@@ -55,7 +55,7 @@ public:
 		    const Array<bool,1> &adjust);
   /// Same as above, but we assume that all t's are adjusted.
   double DoBreakup (const Array<double,1> &Vk, Array<double,1> &t);
-  OptimizedBreakup (BasisClass &basis) : Basis(basis)
+  OptimizedBreakupClass (BasisClass &basis) : Basis(basis)
   { /* Do nothing */ }
 };
 

@@ -34,7 +34,7 @@ double BasisClass::c_numerical(int n, double k)
 }
 
 
-void OptimizedBreakup::Addk(double k, double degeneracy)
+void OptimizedBreakupClass::Addk(double k, double degeneracy)
 {
   int ki=0;
   while ((ki < kpoints.size()) && (fabs(k-kpoints(ki)[0]) > 1.0e-12))
@@ -50,9 +50,9 @@ void OptimizedBreakup::Addk(double k, double degeneracy)
 
 
 ///////////////////////////////////////////
-/// OptimizedBreakup Memember Functions ///
+/// OptimizedBreakupClass Memember Functions ///
 ///////////////////////////////////////////
-void OptimizedBreakup::SetkVecs(double kc, double kCont, double kMax)
+void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
 {
   int numk = 0;
   TinyVector<double,3> b;
@@ -97,8 +97,8 @@ void OptimizedBreakup::SetkVecs(double kc, double kCont, double kMax)
   cerr << "non-degenerate k vecs = " << kpoints.size() << endl;
 }
 
-double OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, 
-				   Array<double,1> &t)
+double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk, 
+					Array<double,1> &t)
 {
   const double tolerance = 1.0e-12;
   assert(t.rows()==Basis.NumElements());
@@ -167,9 +167,9 @@ double OptimizedBreakup::DoBreakup(const Array<double,1> &Vk,
   return (chi2);
 }
 
-double OptimizedBreakup::DoBreakup(const Array<double,1> &Vk, 
-				   Array<double,1> &t,
-				   const Array<bool,1> &adjust)
+double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk, 
+					Array<double,1> &t,
+					const Array<bool,1> &adjust)
 {
   const double tolerance = 1.0e-9;
   assert(t.rows()==adjust.rows());

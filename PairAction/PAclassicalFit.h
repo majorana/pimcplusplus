@@ -8,8 +8,6 @@ class PAclassicalFitClass : public PairActionFitClass
 private:
   double Vlong_k (double boxVol, double k, int level);
   double Vlong (double q, int level);
-  // Product of the two charges.
-  double Z1Z2;
   // Real space cutoff parameter;
   double alpha;
 public:
@@ -30,6 +28,25 @@ public:
   /////////////////////////
   /// Long-ranged stuff ///
   /////////////////////////
+  /// The diagonal action only -- used for long-range breakup
+  double Udiag(double q, int level);
+  /// The q-derivative of the above
+  double Udiag_p(double q, int level);
+  /// The q-derivative of the above
+  double Udiag_pp(double q, int level);
+  /// The beta-derivative of the diagonal action
+  double dUdiag    (double q, int level);
+  /// The q-derivative of the above
+  double dUdiag_p  (double q, int level);
+  /// The q-derivative of the above
+  double dUdiag_pp (double q, int level);
+  /// The potential to which this action corresponds.
+  double V  (double r);
+  /// The q-derivative of the above
+  double Vp (double r);
+  /// The q-derivative of the above
+  double Vpp(double r);
+
   bool IsLongRange();
   void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
 

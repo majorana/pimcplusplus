@@ -42,7 +42,7 @@ void TestCoulomb()
 //     fprintf (stderr, "c_numerical = %1.12e\n", c_numerical);
 //   }
 
-  OptimizedBreakup breakup(basis);
+  OptimizedBreakupClass breakup(basis);
   breakup.SetkVecs (2.0, 25.0, 1000.0);
 
   Array<double,1> Vk(breakup.kpoints.size());

@@ -15,16 +15,24 @@ protected:
   void ReadHeader(IOSectionClass &inSection);
 public:
   ParticleClass Particle1, Particle2;
+  /// These store the long-range part of the action/potential in real
+  /// space.  This will be subtracted from the total U to get the
+  /// short-range part.
+  Array<QuinticSpline,1> Ulong, dUlong, Vlong;
   /// This stores the long-ranged part of the potential in k-space.  
   /// Indices: (level, k-point).  dVlong_k stores the beta-derivative.
-  Array<double,2> Ulong_k, dUlong_k;
+  Array<double,2> Ulong_k, dUlong_k, Vlong_k;
   /// This stores U_long(r=0);  Index is the level number.
-  Array<double,1> Ulong_0, dUlong_0;
+  Array<double,1> Ulong_0, dUlong_0, Vlong_0;
   /// Stores the RPA form of the above.  This should be computed by
   /// ActionClass, since it couples all of the species pairs together
   /// and needs to know about the number of particles.
   Array<double,2> U_RPA_long_k, dU_RPA_long_k;
   /// This stores the beta-derivative of the above.
+
+  // Product of the two charges.  Zero if not coulomb or not charged.
+  double Z1Z2;
+
   bool UsePBC;
   int NumBetas;
   
@@ -43,20 +51,37 @@ public:
 		     double smallestBeta, int NumBetas) = 0;
   /// In the case of a long-ranged breakup, this should return Ushort
   virtual double U(double q, double z, double s2, int level) = 0;
+  /// The beta-derivative of the action
   virtual double dU(double q, double z, double s2, int level) = 0;
-  virtual double V(double r) {return -3.14159;}
+  /// The potential to which this action corresponds.
+  virtual double V  (double r) { return 0.0; }
+  /// The q-derivative of the above
+  virtual double Vp (double r) { return 0.0; }
+  /// The q-derivative of the above
+  virtual double Vpp(double r) { return 0.0; }
 
   /////////////////////////
   /// Long-ranged stuff ///
   /////////////////////////
   virtual bool IsLongRange() = 0;
+  /// The diagonal action only -- used for long-range breakup
+  virtual double Udiag(double q, int level) { return 0.0; }
+  /// The q-derivative of the above
+  virtual double Udiag_p(double q, int level) { return 0.0; }
+  /// The q-derivative of the above
+  virtual double Udiag_pp(double q, int level) { return 0.0; }
+  /// The beta-derivative of the diagonal action
+  virtual double dUdiag    (double q, int level) { return 0.0; }
+  /// The q-derivative of the above
+  virtual double dUdiag_p  (double q, int level) { return 0.0; }
+  /// The q-derivative of the above
+  virtual double dUdiag_pp (double q, int level) { return 0.0; }
+
   // Fills in the Vlong_k and dVlong_k array.
   virtual void DoBreakup (const dVec &box, const Array<dVec,1> &kVecs) 
   { }
-  /// We break up the diagonal part of the action.  Hence, this is
-  /// only a function of q.
-  //virtual double Vlong   (double q, int level) { return 0.0; }
-  //virtual double dVlong   (double q, int level) { return 0.0; }
+  PairActionFitClass() : Z1Z2(0.0)
+  { /* Do nothing */ }
 };
 
 
