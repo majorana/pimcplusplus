@@ -1082,7 +1082,7 @@ bool IOTreeHDF5Class::OpenFile(string fileName,
   H5Eset_auto(NULL, NULL);
 
   GroupID = H5Fopen(fileName.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-  // And turn it back on;
+
   BoolType = H5Topen(GroupID, "BOOL");
   // If we don't already have this in here (old version of this
   // library created this file), create a new one and stick it in the
@@ -1095,14 +1095,14 @@ bool IOTreeHDF5Class::OpenFile(string fileName,
       H5Tenum_insert(BoolType, "TRUE", &val);
       H5Tcommit (GroupID, "BOOL", BoolType);
   }
+  // And turn it back on;
   H5Eset_auto(func, client_data);
 
 
-  if (GroupID < 0)
-    {
-      cerr << "Cannot open file " << fileName << endl;
-      return false;
-    }
+  if (GroupID < 0) {
+    cerr << "Cannot open file " << fileName << endl;
+    return false;
+  }
 
   IsOpen = true;
   Parent = parent;
