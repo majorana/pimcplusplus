@@ -1,4 +1,23 @@
 #include "GVecs.h"
+#include <vector>
+#include <algorithm>
+
+class GVec
+{
+public:
+  Vec3 G;
+  Int3 I;
+};
+
+inline bool operator<(const GVec &g1, const GVec &g2)
+{
+  return (dot(g1.G, g1.G) < dot(g2.G, g2.G));
+}
+
+inline bool operator==(const GVec &g1, const GVec &g2)
+{
+  return (fabs(dot(g1.G,g1.G)-dot(g2.G,g2.G)) < 1.0e-12);
+}
 
 void GVecsClass::Set (Vec3 box, double kcut)
 {
@@ -19,73 +38,68 @@ void GVecsClass::Set (Vec3 box, double kcut)
   ////////////////////////////////////////////
   // First, set up G-vectors and difference //
   ////////////////////////////////////////////
-  int numG = 0;
-  Vec3 G;
+  vector<GVec> vecs;
+  GVec vec;
   /// First, count k-vectors
   for (int ix=-maxX; ix<=maxX; ix++) {
-    G[0] = ix*kBox[0];
+    vec.G[0] = ix*kBox[0];
+    vec.I[0] = ix;
     for (int iy=-maxY; iy<=maxY; iy++) {
-      G[1] = iy*kBox[1];
+      vec.G[1] = iy*kBox[1];
+      vec.I[1] = iy;
       for (int iz=-maxZ; iz<=maxZ; iz++) {
-	G[2] = iz*kBox[2];
-	if (dot(G,G) < (kcut*kcut))
-	  numG++;
+	vec.G[2] = iz*kBox[2];
+	vec.I[2] = iz;
+	if (dot(vec.G,vec.G) < (kcut*kcut)) 
+	  vecs.push_back(vec);
       }
     }
   }
-  GVecs.resize(numG);
-  Indices.resize(numG);
-  numG = 0;
-  /// Now assign
-  for (int ix=-maxX; ix<=maxX; ix++) {
-    G[0] = ix*kBox[0];
-    for (int iy=-maxY; iy<=maxY; iy++) {
-      G[1] = iy*kBox[1];
-      for (int iz=-maxZ; iz<=maxZ; iz++) {
-	G[2] = iz*kBox[2];
-	if (dot(G,G) < (kcut*kcut)) {
-	  GVecs(numG) = G;
-	  Indices(numG) = Int3(ix,iy,iz);
-	  numG++;
-	}
-      }
-    }
+  sort (vecs.begin(), vecs.end());
+  GVecs.resize(vecs.size());
+  Indices.resize(vecs.size());
+  int numUnique = 0;
+  for (int i=0; i<vecs.size(); i++) {
+    GVecs(i) = vecs[i].G;
+    Indices(i) = vecs[i].I;
+    if (i>0)
+      if (!(vecs[i] == vecs[i-1]))
+	numUnique++;
   }
-  cerr << "Using " << numG << " G-vectors.\n";
+  cerr << "Using " << vecs.size() << " G-vectors, of which " 
+       << numUnique << " have unique magnitudes.\n";
   ////////////////////////////////////////////
   // Now, set up G-vector differences.      //
   ////////////////////////////////////////////
-  numG = 0;
+  vecs.resize(0);
   /// First, count k-vectors
   for (int ix=-2*maxX; ix<=2*maxX; ix++) {
-    G[0] = ix*kBox[0];
+    vec.G[0] = ix*kBox[0];
+    vec.I[0] = ix;
     for (int iy=-2*maxY; iy<=2*maxY; iy++) {
-      G[1] = iy*kBox[1];
+      vec.G[1] = iy*kBox[1];
+      vec.I[1] = iy;
       for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
-	G[2] = iz*kBox[2];
-	if (dot(G,G) < (4.0*kcut*kcut))
-	  numG++;
+	vec.G[2] = iz*kBox[2];
+	vec.I[2] = iz;
+	if (dot(vec.G,vec.G) < (4.0*kcut*kcut))
+	  vecs.push_back(vec);
       }
     }
   }
-  GDiff.resize(numG);
-  IDiff.resize(numG);
-  numG = 0;
-  /// Now assign
-  for (int ix=-2*maxX; ix<=2*maxX; ix++) {
-    G[0] = ix*kBox[0];
-    for (int iy=-2*maxY; iy<=2*maxY; iy++) {
-      G[1] = iy*kBox[1];
-      for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
-	G[2] = iz*kBox[2];
-	if (dot(G,G) < (4.0*kcut*kcut)) {
-	  GDiff(numG) = G;
-	  IDiff(numG) = Int3(ix,iy,iz);
-	  numG++;
-	}
-      }
-    }
+  sort (vecs.begin(), vecs.end());
+  GDiff.resize(vecs.size());
+  IDiff.resize(vecs.size());
+  numUnique = 0;
+  for (int i=0; i<vecs.size(); i++) {
+    GDiff(i) = vecs[i].G;
+    IDiff(i) = vecs[i].I;
+    if (i>0)
+      if (!(vecs[i] == vecs[i-1]))
+	numUnique++;
   }
+  cerr << "Using " << vecs.size() << " G-difference vectors, of which "
+       << numUnique << " have unqiue magnitudes.\n";
 }
 
 

@@ -162,10 +162,14 @@ void Hamiltonian::Apply(const zVec &c, zVec &Hc)
 
 void PHPotFFTClass::Setup()
 {
+  cerr << "In PHPotFFTClass::Setup().\n";
   kPH.CalcTailCoefs (30.0, 60.0);
   int nx, ny, nz;
+  cerr << "Before cFFT Setup.\n";
   cFFT.Setup();
+  cerr << "Before VecFFT Setup.\n";
   VecFFT.Setup();
+  cerr << "Before MatFFT Setup.\n";
   MatFFT.Setup();
   MatFFT.GetDims(nx,ny,nz);
   Fr.resize(nx,ny,nz);
@@ -179,12 +183,31 @@ void PHPotFFTClass::Setup()
 
   double volInv = 1.0/GVecs.GetBoxVol();
 
-  /// FFT to calculate V in real space
+  // First, setup V and F tensors in k-space
+  double gMag, lastMag2;
+  lastMag2 = -1.0;
+  double a, bPerp, bPar, V;
+  int numCalls = 0;
   for (int i=0; i<GVecs.DeltaSize(); i++) {
-    Vec3 dG = GVecs.DeltaG(i);
-    double dGmag = sqrt (dot(dG,dG));
-    Vk(i) = StructureFactor(i)*kPH.V(dGmag)*volInv;
+    double gMag2 = dot(GVecs.DeltaG(i), GVecs.DeltaG(i));
+    if (fabs(gMag2-lastMag2) > 1.0e-12) {
+      lastMag2 = gMag2;
+      gMag  = sqrt(lastMag2);
+      kPH.GetVals(gMag, a, bPerp, bPar, V);
+      numCalls++;
+    }
+    Vk(i) = volInv*StructureFactor(i)*V;
+    Fk(i) = volInv * StructureFactor(i) * 
+      kPH.Ftensor (GVecs.DeltaG(i), a, bPerp, bPar);
   }
+  cerr << "Number of GetVals calls = " << numCalls << endl;
+
+//   /// FFT to calculate V in real space
+//   for (int i=0; i<GVecs.DeltaSize(); i++) {
+//     Vec3 dG = GVecs.DeltaG(i);
+//     double dGmag = sqrt (dot(dG,dG));
+//     Vk(i) = StructureFactor(i)*kPH.V(dGmag)*volInv;
+//   }
   cFFT.PutkVec (Vk);
   cFFT.k2r();
   for (int ix=0; ix<nx; ix++)
@@ -193,10 +216,8 @@ void PHPotFFTClass::Setup()
 	Vr(ix,iy,iz) = cFFT.rBox(ix,iy,iz);
 
   /// FFT to calculate F tensor in real space
-  /// dummy structure factor for now
-  complex<double> structFact(1.0, 0.0);
-  for (int i=0; i<GVecs.DeltaSize(); i++) 
-    Fk(i) = volInv*StructureFactor(i)*kPH.Ftensor(GVecs.DeltaG(i));
+//   for (int i=0; i<GVecs.DeltaSize(); i++) 
+//     Fk(i) = volInv*StructureFactor(i)*kPH.Ftensor(GVecs.DeltaG(i));
   MatFFT.PutkVec(Fk);
   MatFFT.k2r();
   for (int ix=0; ix<nx; ix++)
