@@ -486,3 +486,105 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   cerr<<"TauPos is "<<TauPos<<endl;
 }
 
+double DavidPAClass::Udiag(double q, int level)
+{
+  level=level+TauPos;
+  double rmin = ukj(level).grid->Start;
+  
+  if (q > ukj(level).grid->End)
+    q = ukj(level).grid->End;
+
+  // This is the endpoint action   
+  if (q < rmin) 
+    return 5000.0;
+  
+  return ukj(level)(1,q); 
+}
+
+double DavidPAClass::Udiag_p(double q, int level)
+{
+  level=level+TauPos;
+  double rmin = ukj(level).grid->Start;
+  
+  if (q > ukj(level).grid->End)
+    q = ukj(level).grid->End;
+
+  // This is the endpoint action   
+  if (q < rmin) 
+    return 5000.0;
+  
+  return ukj(level).Deriv(1,q); 
+}
+
+double DavidPAClass::Udiag_pp(double q, int level)
+{
+  level=level+TauPos;
+  double rmin = ukj(level).grid->Start;
+  
+  if (q > ukj(level).grid->End)
+    q = ukj(level).grid->End;
+
+  // This is the endpoint action   
+  if (q < rmin) 
+    return 5000.0;
+  
+  return ukj(level).Deriv2(1,q); 
+}
+
+
+double DavidPAClass::dUdiag(double q, int level)
+{
+  level=level+TauPos;
+  double rmin = ukj(level).grid->Start;
+  
+  if (q > ukj(level).grid->End)
+    q = ukj(level).grid->End;
+
+  if (q < rmin) 
+    return 5000.0;
+  
+  // This is the endpoint action
+  //                            this is V(q)
+  //                             |
+  //                             v   
+  return dukj(level)(1,q) + ukj(level)(0,q);
+}
+
+
+double DavidPAClass::dUdiag_p(double q, int level)
+{
+  level=level+TauPos;
+  double rmin = ukj(level).grid->Start;
+  
+  if (q > ukj(level).grid->End)
+    q = ukj(level).grid->End;
+
+  if (q < rmin) 
+    return 5000.0;
+  
+  // This is the endpoint action
+  //                            this is V(q)
+  //                             |
+  //                             v   
+  return dukj(level).Deriv(1,q) + ukj(level).Deriv(0,q);
+}
+
+
+double DavidPAClass::dUdiag_pp(double q, int level)
+{
+  level=level+TauPos;
+  double rmin = ukj(level).grid->Start;
+  
+  if (q > ukj(level).grid->End)
+    q = ukj(level).grid->End;
+
+  if (q < rmin) 
+    return 5000.0;
+  
+  // This is the endpoint action
+  //                            this is V(q)
+  //                             |
+  //                             v   
+  return dukj(level).Deriv2(1,q) + ukj(level).Deriv2(0,q);
+}
+

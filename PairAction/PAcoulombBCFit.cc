@@ -323,68 +323,68 @@ double PAcoulombBCFitClass::dVlong(double q, int level)
 //   }
 // }
 
-double PAcoulombBCFitClass::Udiag (double q, int level)
+double PAcoulombBCFitClass::Udiag (double r, int level)
 {
-  if (q <= (qgrid->End*1.0000001)) 
-    return Usplines(level)(q, 0.0);
+  if (r <= (qgrid->End*1.0000001)) 
+    return Usplines(level)(r, 0.0);
   else {
     // Coulomb action is independent of z
     double beta = SmallestBeta;
     for (int i=0; i<level; i++)
       beta *= 2.0;
-    return (beta*Pot->V(q));
+    return (beta*Pot->V(r));
   }
 }
 
-double PAcoulombBCFitClass::Udiag_p (double q, int level)
+double PAcoulombBCFitClass::Udiag_p (double r, int level)
 {
-  if (q <= (qgrid->End*1.0000001)) 
-    return Usplines(level).d_dx(q, 0.0);
+  if (r <= (qgrid->End*1.0000001)) 
+    return Usplines(level).d_dx(r, 0.0);
   else {
     // Coulomb action is independent of z
     double beta = SmallestBeta;
     for (int i=0; i<level; i++)
       beta *= 2.0;
-    return (beta*Pot->dVdr(q));
+    return (beta*Pot->dVdr(r));
   }
 }
 
-double PAcoulombBCFitClass::Udiag_pp (double q, int level)
+double PAcoulombBCFitClass::Udiag_pp (double r, int level)
 {
-  if (q <= (qgrid->End*1.0000001)) 
-    return Usplines(level).d2_dx2(q, 0.0);
+  if (r <= (qgrid->End*1.0000001)) 
+    return Usplines(level).d2_dx2(r, 0.0);
   else {
     // Coulomb action is independent of z
     double beta = SmallestBeta;
     for (int i=0; i<level; i++)
       beta *= 2.0;
-    return (beta*Pot->d2Vdr2(q));
+    return (beta*Pot->d2Vdr2(r));
   }
 }
 
 
 
-double PAcoulombBCFitClass::dUdiag (double q, int level)
+double PAcoulombBCFitClass::dUdiag (double r, int level)
 {
-  if (q <= (qgrid->End*1.0000001)) 
-    return dUsplines(level)(q, 0.0);
+  if (r <= (qgrid->End*1.0000001)) 
+    return dUsplines(level)(r, 0.0);
   else // Coulomb action is independent of z
-    return (Pot->V(q));
+    return (Pot->V(r));
 }
 
-double PAcoulombBCFitClass::dUdiag_p (double q, int level)
+double PAcoulombBCFitClass::dUdiag_p (double r, int level)
 {
-  if (q <= (qgrid->End*1.0000001)) 
-    return dUsplines(level).d_dx(q, 0.0);
+  if (r <= (qgrid->End*1.0000001)) 
+    return dUsplines(level).d_dx(r, 0.0);
   else // Coulomb action is independent of z
-    return (Pot->dVdr(q));
+    return (Pot->dVdr(r));
 }
 
-double PAcoulombBCFitClass::dUdiag_pp (double q, int level)
+double PAcoulombBCFitClass::dUdiag_pp (double r, int level)
 {
-  if (q <= (qgrid->End*1.0000001)) 
-    return dUsplines(level).d2_dx2(q, 0.0);
+  if (r <= (qgrid->End*1.0000001)) 
+    return dUsplines(level).d2_dx2(r, 0.0);
   else  // Coulomb action is independent of z
-    return (Pot->d2Vdr2(q));
+    return (Pot->d2Vdr2(r));
 }
 

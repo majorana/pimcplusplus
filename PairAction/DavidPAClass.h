@@ -55,6 +55,18 @@ class DavidPAClass : public PairActionFitClass
   double U (double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
   double V(double r);
+  /// The diagonal action only -- used for long-range breakup
+  double Udiag(double q, int level);
+  /// The q-derivative of the above
+  double Udiag_p(double q, int level);
+  /// The q-derivative of the above
+  double Udiag_pp(double q, int level);
+  /// The beta-derivative of the diagonal action
+  double dUdiag    (double q, int level);
+  /// The q-derivative of the above
+  double dUdiag_p  (double q, int level);
+  /// The q-derivative of the above
+  double dUdiag_pp (double q, int level);
   bool IsLongRange(); 
   void DoBreakup (const dVec &box, const Array<dVec,1> &kVecs);
 #ifdef MAKE_FIT
