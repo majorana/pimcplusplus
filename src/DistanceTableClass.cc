@@ -1,4 +1,7 @@
-#include "DistanceTable.h"
+#include "DistanceTableClass.h"
+
+template class MirroredAntiSymmetricMatrixClass<ImageNumClass>;
+
 
 void DistanceTableClass::ShiftData(int slicesToShift,
 				   CommunicatorClass &Communicator)
@@ -8,7 +11,7 @@ void DistanceTableClass::ShiftData(int slicesToShift,
   DispTable.ShiftData(slicesToShift,Communicator);
   ImageNumTable.ShiftData(slicesToShift,Communicator);
 
-
+  /*
   if (slicesToShift>0){
     for (int slice=0;slice<slicesToShift;slice++){
       UpdateAll(slice);
@@ -19,13 +22,7 @@ void DistanceTableClass::ShiftData(int slicesToShift,
 	 slice>Path.NumTimeSlices()+slicesToShift;slice--){
       UpdateAll(slice);
     }
-  }
+    }*/
 
 }
 
-void DistanceTableClass::MoveJoin(MirroredArrayClass1D<int> &PermMatrix,
-				  int oldJoin, int newJoin)
-{
-  
-
-}

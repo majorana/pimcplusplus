@@ -15,6 +15,15 @@ typedef TinyMatrix<scalar,3,3> Mat3;
 typedef TinyVector<scalar,NDIM> dVec;
 typedef TinyVector<int,NDIM> dVecInt;
 
+template <class T, int size>
+inline TinyVector<T,size> operator-(TinyVector<T,size> v)
+{
+  TinyVector<T,size> minusv;
+  for (int i=0; i<size; i++)
+    minusv[i] = -v[i];
+  return (minusv);
+}
+
 inline Vec2 operator*(const Vec2 &v, scalar s)
 {
   Vec2 result;

@@ -3,6 +3,9 @@
 
 #include "PathClass.h"
 
+
+
+
 ///Particle 1 is always in the middle of the box
 ///Particle 1 > Particle 2
 ///Particle 1 is in the middle of the box
@@ -19,9 +22,11 @@ protected:
   /// Stores the distances between all ptcls at all time slices
   MirroredSymmetricMatrixClass<double> DistTable; ///<(timeslice, ptcl x ptcl)
   /// Stores the displacements between all ptcls at all time slices
-  MirroredArrayClass<dVec> DispTable; ///<(timeslice, ptcl x ptcl)  
+  /// (timeslice, ptcl x ptcl)  
+  MirroredAntiSymmetricMatrixClass<dVec> DispTable; 
   ///Table of Image numbers (stored 0-63 for 3d)
-  MirroredArrayClass<int> ImageNumTable; ///<(timeslice, ptcl x ptcl)
+  ///(timeslice, ptcl x ptcl)
+  MirroredAntiSymmetricMatrixClass<ImageNumClass> ImageNumTable; 
   ///Stores what vectors the image numbers corresponds to
   Array<dVec,1> ImageVectors;
   Array<dVecInt,2> LowerDimImageMasks;
@@ -47,14 +52,25 @@ public:
   
   inline void RejectCopy(int startTimeSlice, int endTimeSlice,
 			 const Array<int,1> &activeParticles);
+  inline void MoveJoin (int oldJoin, int newJoin);
+  
 };
+
+inline void DistanceTableClass::MoveJoin (int oldJoin, int newJoin)
+{
+  DistTable.MoveJoin(Path.Permutation, oldJoin, newJoin);
+  DispTable.MoveJoin(Path.Permutation, oldJoin, newJoin);
+  ImageNumTable.MoveJoin(Path.Permutation, oldJoin, newJoin);
+}
+
 
 inline void DistanceTableClass::AcceptCopy(int startTimeSlice, 
 					   int endTimeSlice, 
 					   const Array<int,1> &activeParticles)
 {
-  DistTable.AcceptCopy(startTimeSlice, endTimeSlice,
-		       activeParticles);
+  DistTable.AcceptCopy(startTimeSlice, endTimeSlice, activeParticles);
+  DispTable.AcceptCopy(startTimeSlice, endTimeSlice, activeParticles);
+  ImageNumTable.AcceptCopy(startTimeSlice, endTimeSlice, activeParticles);
 
 
   for (int slice=startTimeSlice;slice<=endTimeSlice;slice++){
@@ -65,8 +81,8 @@ inline void DistanceTableClass::AcceptCopy(int startTimeSlice,
 	int index;
 	ArrayIndex(ptcl1,ptcl2,index,dummySign);
 	//DistTable.AcceptCopy(slice,index);
-	DispTable.AcceptCopy(slice,index);
-	ImageNumTable.AcceptCopy(slice,index);
+	//DispTable.AcceptCopy(slice,index);
+	//ImageNumTable.AcceptCopy(slice,index);
 	
       }
     }
@@ -78,8 +94,10 @@ inline void DistanceTableClass::RejectCopy(int startTimeSlice,
 					   const Array<int,1> &activeParticles)
 {
 
-  DistTable.RejectCopy(startTimeSlice, endTimeSlice,
-		       activeParticles);
+  DistTable.RejectCopy(startTimeSlice, endTimeSlice, activeParticles);
+  DispTable.RejectCopy(startTimeSlice, endTimeSlice, activeParticles);
+  ImageNumTable.RejectCopy(startTimeSlice, endTimeSlice, activeParticles);
+
 
   for (int slice=startTimeSlice;slice<=endTimeSlice;slice++){
     for (int ptcl1Index=0;ptcl1Index<activeParticles.size();ptcl1Index++){
@@ -89,8 +107,8 @@ inline void DistanceTableClass::RejectCopy(int startTimeSlice,
 	int index;
 	ArrayIndex(ptcl1,ptcl2,index,dummySign);
 	//DistTable.RejectCopy(slice,index);
-	DispTable.RejectCopy(slice,index);
-	ImageNumTable.RejectCopy(slice,index);
+	//DispTable.RejectCopy(slice,index);
+	//ImageNumTable.RejectCopy(slice,index);
 	
       }
     }
@@ -130,8 +148,9 @@ inline int ImageNum(dVecInt image)
 }
 
 /// Performs the reverse mapping of the previous function
-inline dVecInt Image(int imageNum)
+inline dVecInt Image(ImageNumClass myImageNum)
 {
+  int imageNum = myImageNum.ImageNum;
   dVecInt image;
   if (NDIM==1)
     image[0] = imageNum;
@@ -199,8 +218,8 @@ inline DistanceTableClass::DistanceTableClass (PathClass &myPath) :
 {
   int size=(Path.NumParticles()*(Path.NumParticles()+1))/2;
   DistTable.Resize(Path.NumTimeSlices(),Path.NumParticles());
-  DispTable.Resize(Path.NumTimeSlices(),size);
-  ImageNumTable.Resize(Path.NumTimeSlices(),size);
+  DispTable.Resize(Path.NumTimeSlices(),Path.NumParticles());
+  ImageNumTable.Resize(Path.NumTimeSlices(),Path.NumParticles());
   		   
   ///Initialize the ImageVectors
   int NumVectors = 1;

@@ -1,12 +1,14 @@
-
+#include "Common.h"
 #include "MirroredArrayClass.h"
-
+#include "ImageNumClass.h"
 
 template class MirroredArrayClass<int>;
 template class MirroredArrayClass<double>;
 template class MirroredArrayClass<dVec>;
 template class MirroredArrayClass1D<int>;
-
+template class MirroredSymmetricMatrixClass<double>;
+template class MirroredAntiSymmetricMatrixClass<dVec>;
+template class MirroredAntiSymmetricMatrixClass<ImageNumClass>; 
 
 int Write1=0;
 int Write2=1;
@@ -256,7 +258,7 @@ void MirroredSymmetricMatrixClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMa
   Array <int,1> PermPairIndex(AB.extent(2));
   ///Here we construct the permutations on the pairs
   int pairIndex=0;
-  for (int ptcl1=0;ptcl<NumPtcls;ptcl1++){
+  for (int ptcl1=0;ptcl1<NumPtcls;ptcl1++){
     int permPtcl1=PermMatrix(ptcl1);
     for (int ptcl2=0;ptcl2<=ptcl1;ptcl2++){
       int permPtcl2=PermMatrix(ptcl2);
@@ -389,8 +391,8 @@ void MirroredAntiSymmetricMatrixClass<T>::ShiftData(int slicesToShift,
 ///between the time slice the join is on and the time slice after
 ///the join (i.e. a(join+1)=a(p(join)), but a(join) = a(join)
 template <class T>
-void MirroredSymmetricMatrixClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMatrix,
-				     int oldJoin, int newJoin)
+void MirroredAntiSymmetricMatrixClass<T>::MoveJoin
+(MirroredArrayClass1D<int> &PermMatrix, int oldJoin, int newJoin)
 {
   
   Array <int,1> PermPairIndex(AB.extent(2));
@@ -398,7 +400,7 @@ void MirroredSymmetricMatrixClass<T>::MoveJoin(MirroredArrayClass1D<int> &PermMa
   Array <bool,1> FlipSign(AB.extent(2));
   ///Here we construct the permutations on the pairs
   int pairIndex=0;
-  for (int ptcl1=0;ptcl<NumPtcls;ptcl1++){
+  for (int ptcl1=0;ptcl1<NumPtcls;ptcl1++){
     int permPtcl1=PermMatrix(ptcl1);
     for (int ptcl2=0;ptcl2<=ptcl1;ptcl2++){
       int permPtcl2=PermMatrix(ptcl2);

@@ -3,12 +3,12 @@ include /home/common/Codes/Make.include
 LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) $(G2CLIB) -lm #-lstdc++
 INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) 
 
-CCFLAGS = -c -g  -Wno-deprecated -O3 #-DBZ_DEBUG  #-pg
+CCFLAGS = -c -g  -Wno-deprecated # -O3 #-DBZ_DEBUG  #-pg
 CC = mpiCC
 LD = mpiCC  -Bstatic 
 DEFS = -DNO_COUT -DUSE_MPI #-DBZ_DEBUG  -g #-DUSE_MPI 
 
-TestObjs = ObservableClass.o CubicSpline.o Grid.o InputFile.o SpeciesClass.o Common.o BisectionMoveClass.o MoveClass.o ActionClass.o PathDataClass.o  MirroredArrayClass.o CommunicatorClass.o PathClass.o test.o DistanceTablePBCClass.o DistanceTableFreeClass.o
+TestObjs = ObservableClass.o CubicSpline.o Grid.o InputFile.o SpeciesClass.o Common.o BisectionMoveClass.o MoveClass.o ActionClass.o PathDataClass.o  MirroredArrayClass.o CommunicatorClass.o PathClass.o test.o DistanceTablePBCClass.o DistanceTableFreeClass.o DistanceTableClass.o
 
 TestSubarrayObjs = TestSubarrays.o
 
@@ -26,7 +26,7 @@ TestSubarrays: 	$(TestSubarrayObjs)
 	g77 -c $<
 
 
-SOURCES = ObservableClass.cc CubicSpline.cc Grid.cc InputFile.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc
+SOURCES = ObservableClass.cc CubicSpline.cc Grid.cc InputFile.cc myprog.cc SpeciesClass.cc Common.cc BisectionMoveClass.cc MoveClass.cc ActionClass.cc PathDataClass.cc  MirroredArrayClass.cc CommunicatorClass.cc PathClass.cc test.cc TestSubarrays.cc DistanceTablePBCClass.cc DistanceTableFreeClass.cc DistanceTableClass.cc
 
 
 newmake: 

@@ -197,7 +197,7 @@ private:
   /// into a single integer
   int CurrentPairNum;
   int NumPtcls;
-  inline void Order (int &i1, int &i2)
+  inline void Order (int &i1, int &i2) const
   {
     if (i2 > i1)
       {
@@ -207,7 +207,7 @@ private:
       }
   }
 
-  inline int PairIndex(int ptcl1, int ptcl2)
+  inline int PairIndex(int ptcl1, int ptcl2) const
   { return (((ptcl1*(ptcl1+1))>>1)+ptcl2); }
 public:
   /// Resizes the two dimensional array.
@@ -335,14 +335,14 @@ private:
   int CurrentPairNum;
   int NumPtcls;
   
-  inline swap (int &ptcl1, int &ptcl2)
+  inline void swap (int &ptcl1, int &ptcl2) const
   {
     int temp = ptcl1;
     ptcl1 = ptcl2;
     ptcl2 = temp;
   }
 
-  inline int PairIndex(int ptcl1, int ptcl2)
+  inline int PairIndex(int ptcl1, int ptcl2) const
   { return (((ptcl1*(ptcl1+1))>>1)+ptcl2); }
 public:
   /// Resizes the two dimensional array.

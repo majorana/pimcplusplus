@@ -2,6 +2,7 @@
 #define COMM_CLASS_H
 
 #include "Common.h"
+#include "ImageNumClass.h"
 
 ///Here we include mpi if we are doing parallel runs
 #ifdef PARALLEL
@@ -35,6 +36,11 @@ class CommunicatorClass
   ///Sends and receives an array of int
   void SendReceive (int sendProc, const Array<int,1> &sendBuff,
 		    int recvProc,       Array<int,1> &recvBuff);
+
+  ///Sends and receives an array of ImageNumClass
+  void SendReceive (int sendProc, const Array<ImageNumClass,1> &sendBuff,
+		    int recvProc,       Array<ImageNumClass,1> &recvBuff);
+
 };
 
 

@@ -32,4 +32,29 @@ dVec GaussianRandomVec(double sigma);
 /// Changes the mode the entire code is running in.
 void SetMode(ModeType);
 
+class ImageNumClass
+{
+public:
+  int ImageNum;
+  inline ImageNumClass operator-() const
+  {
+    ImageNumClass minusNum;
+    int mask = ~((~0)<<(2*NDIM));
+    int sub = 0x55555555;  // binary: 01010101010101
+    minusNum.ImageNum= (((~ImageNum)-sub)&mask);
+    return minusNum;
+  }
+  inline operator int() 
+  {
+    return (ImageNum);
+  }
+  inline ImageNumClass(int i)
+  {
+    ImageNum = i;
+  }
+  inline ImageNumClass()
+  { }
+};
+
+
 #endif

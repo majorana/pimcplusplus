@@ -1,5 +1,6 @@
 #include "CommunicatorClass.h"
 
+
 // Parallel MPI Communicator functions definitions
 #ifdef PARALLEL
 
@@ -50,6 +51,23 @@ void CommunicatorClass::SendReceive(int SendProc, const Array<double,1> &SendBuf
 void CommunicatorClass::SendReceive(int SendProc, const Array<int,1> &SendBuff,
 			    int RecvProc, Array<int,1> &RecvBuff)
 {
+  int *SendPtr = (int *) SendBuff.data();
+  int *RecvPtr = RecvBuff.data();
+  int NumSend = SendBuff.size();
+  int NumRecv = RecvBuff.size();
+  MPI_Status status;
+  MPI_Sendrecv (SendPtr, NumSend, MPI_INT, SendProc, 3, 
+		RecvPtr, NumRecv, MPI_INT, RecvProc, 3,
+		my_mpi_comm, &status);
+}
+
+
+void CommunicatorClass::SendReceive(int SendProc, 
+				    const Array<ImageNumClass,1> &SendBuff,
+				    int RecvProc, 
+				    Array<ImageNumClass,1> &RecvBuff)
+{
+  int a = SendProc + RecvProc;
   int *SendPtr = (int *) SendBuff.data();
   int *RecvPtr = RecvBuff.data();
   int NumSend = SendBuff.size();

@@ -20,6 +20,8 @@ private:
 
 
 public:
+  DistanceTableClass *DistanceTable;
+
   ///The constructor that initializes the action and such
   int Join;
   PathClass Path;
@@ -28,8 +30,9 @@ public:
   }
   inline void ShiftData(int numTimeSlicesToShift){
     Path.ShiftData(numTimeSlicesToShift,Communicator);
+    DistanceTable->ShiftData(numTimeSlicesToShift, Communicator);
   }
-  DistanceTableClass *DistanceTable;
+
 
   /// This object functions as an array of SpeciesClass objects.
 

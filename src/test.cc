@@ -8,6 +8,7 @@
 #include "ObservableClass.h"
 #include "DistanceTablePBCClass.h"
 
+template class MirroredAntiSymmetricMatrixClass<ImageNumClass>;
 
 void setupAction(ActionClass &myActionClass)
 
@@ -202,7 +203,7 @@ int main(int argc, char **argv)
 	PC.Accumulate();
       //      myPrintConfig.Print();
     }
-    // myShiftMove.MakeMove();
+    myShiftMove.MakeMove();
   }
   PC.Print();
   cout<<"My acceptance ratio is "<<myBisectionMove.AcceptanceRatio()<<endl;
