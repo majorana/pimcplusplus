@@ -47,10 +47,23 @@ inline double PairActionClass::calcUsqz(double s,double q,double z,int level)
   double sum=0.0;
   double r=q+0.5*z;
   double rprime=q-0.5*z;
+
+  if (q > ukj(level).grid->End)
+    return (0.0);
+
+
+  if (r > ukj(level).grid->End)
+    return (0.0);
+
+  if (rprime > ukj(level).grid->End)
+    return (0.0);
+
+
 ///I'm about to change this line to make it work  sum=sum+(ukj(level,0))(r)+(ukj(level,0))(rprime);//this is the endpoint action
   //cerr << "r = " << r << "\n";
   //cerr << "rp = " << rprime << "\n";
   sum=sum+0.5*((ukj(level))(0,r)+(ukj(level))(0,rprime));//this is the endpoint action
+
 
   if (s > 0.0)
     {

@@ -14,10 +14,11 @@ void setupAction(ActionClass &myActionClass,PathDataClass &myPathData)
 
 {
   myActionClass.PairActionVector.resize(1);
-  myActionClass.PairActionVector(0).ReadDavidSquarerFile("../inputs/testcoul.dm");
+  myActionClass.PairActionVector(0).ReadDavidSquarerFile("../inputs/ep_beta1.0.dm");
   myActionClass.PairMatrix.resize(2,2);
   myActionClass.PairMatrix=0;
   myActionClass.tau=myActionClass.PairActionVector(0).tau;
+  cerr << "Tau = " << myActionClass.tau << endl;
   myActionClass.myIdenticalParticleArray=&(myPathData.IdenticalParticleArray);
 
      
@@ -27,8 +28,8 @@ void setupAction(ActionClass &myActionClass,PathDataClass &myPathData)
 void setupIDParticleArray(PathDataClass &myPathData)
 {
   ArrayOfIdenticalParticlesClass &myIDParticles=myPathData.IdenticalParticleArray;
-  double tau=0.1; //This better be the same as in the squarer file! UGly!
-  int NumTimeSlices=32;
+  double tau=1.0; //This better be the same as in the squarer file! UGly!
+  int NumTimeSlices=50;
   ElectronsClass *myElectronptr = new ElectronsClass;
   ProtonsClass *myProtonptr = new ProtonsClass;
   ElectronsClass &myElectrons = *myElectronptr;
@@ -97,6 +98,8 @@ int main(int argc, char **argv)
   PathDataClass myPathData;
   PairCorrelation PC;
   PC.PathData = &myPathData;
+  PC.Species1 = 0;
+  PC.Species2 = 1;
   PC.Initialize();
   //  ActionClass myActionClass;
   setupIDParticleArray(myPathData);
@@ -108,16 +111,19 @@ int main(int argc, char **argv)
   //  cerr << (myBisectionMove.PathData)->IdenticalParticleArray.size()<<endl;
   //  cerr<<"What the action class thinks the size is: ";
   //  cerr<<  myActionClass.myIdenticalParticleArray->size()<<endl;
-  for (int counter=0;counter<10000;counter++){
+  for (int counter=0;counter<100000;counter++){
+    //if ((counter % 1000) == 0)
+    //  cerr << "Step #" << counter << ":\n";
     for (int counter2=0;counter2<2;counter2++){
-      cerr << "Doing step " << counter << endl;
+      //cerr << "Doing step " << counter << endl;
+      
       myBisectionMove.makeMove();
       PC.Accumulate();
     }
     myShiftMove.makeMove();
   }
   PC.Print();
-  cerr<<"done! done!"<<endl;
+  //cerr<<"done! done!"<<endl;
   MPI_Finalize();
 }
   

@@ -60,7 +60,7 @@ double ActionClass::calcTotalAction(Array<ParticleID,1> changedParticles,
       }
     }
     
-  return (TotalK/*+TotalU*/);
+  return (TotalK - TotalU);
 
 }
 

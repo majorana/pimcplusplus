@@ -17,10 +17,11 @@ public:
 
 class PairCorrelation : public ObservableClass
 {
-  int Species1, Species2;
+
   Array<int,1> Histogram;
   int TotalCounts;
 public:
+  int Species1, Species2;
   LinearGrid grid;
   void Accumulate();
   void Initialize();

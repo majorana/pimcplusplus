@@ -43,14 +43,14 @@ void BisectionMoveClass::makeMove()
     oldLogSampleProb = (*PathData).TotalAction.LogSampleProb(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
     setMode(NEWMODE);
     newLogSampleProb = (*PathData).TotalAction.SampleParticles(ActiveParticles,StartTimeSlice,EndTimeSlice,levelCounter);
-    cerr << "newLogSampleProb = " << newLogSampleProb << endl;
-    cerr << "oldLogSampleProb = " << oldLogSampleProb << endl;
+    //cerr << "newLogSampleProb = " << newLogSampleProb << endl;
+    //cerr << "oldLogSampleProb = " << oldLogSampleProb << endl;
     double newAction = (*PathData).TotalAction.calcTotalAction(ActiveParticles,StartTimeSlice,EndTimeSlice, levelCounter);
     double currActionChange=newAction-oldAction;
     double logAcceptProb=oldLogSampleProb-newLogSampleProb-currActionChange+prevActionChange;
-    cerr << "prevActionChange = " << prevActionChange << endl;
-    cerr << "logAcceptProb = " << logAcceptProb << endl;
-    cerr<<"My new action is "<<newAction<<" and my old action was "<<oldAction<<endl;
+    //cerr << "prevActionChange = " << prevActionChange << endl;
+    //cerr << "logAcceptProb = " << logAcceptProb << endl;
+    //cerr<<"My new action is "<<newAction<<" and my old action was "<<oldAction<<endl;
     if (-logAcceptProb<log(sprng())){///reject conditin
       toAccept=false;
       //      break;
@@ -62,11 +62,11 @@ void BisectionMoveClass::makeMove()
   }
   if (toAccept ==true ){
     (*PathData).acceptMove(ActiveParticles,StartTimeSlice,EndTimeSlice);
-      cout<<"I'm accepting! I'm accepting!"<<endl;
+    //cout<<"I'm accepting! I'm accepting!"<<endl;
   }
   else {
     (*PathData).rejectMove(ActiveParticles,StartTimeSlice,EndTimeSlice);
-      cout<<"I'm rejecting! I'm rejecting!"<<endl;
+    //  cout<<"I'm rejecting! I'm rejecting!"<<endl;
   }
     
 
