@@ -1,6 +1,6 @@
-SOURCES = CubicSpline.cc Grid.cc
+SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc
 
-all:	CubicSpline.o Grid.o
+all:	CubicSpline.o Grid.o BicubicSpline.o
 
 clean:
 	rm -f *.o
