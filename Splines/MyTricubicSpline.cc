@@ -72,7 +72,7 @@ void MyTricubicSpline::UpdateY(int source, int dest)
   Grid &y = *Ygrid;
   Array<double,1> mu(Ny);
   
-  // Loop over all y and z
+  // Loop over all x and z
   for (int ix=0; ix<Nx; ix++)
     for (int iz=0; iz<Nz; iz++) {
       // Set up tridiagonal set of equations
@@ -120,7 +120,7 @@ void MyTricubicSpline::UpdateZ(int source, int dest)
   Grid &z = *Zgrid;
   Array<double,1> mu(Nz);
   
-  // Loop over all y and z
+  // Loop over all x and y
   for (int ix=0; ix<Nx; ix++)
     for (int iy=0; iy<Ny; iy++) {
       // Set up tridiagonal set of equations
