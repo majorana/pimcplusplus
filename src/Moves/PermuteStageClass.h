@@ -95,6 +95,8 @@ public:
     Rev  = &Table2;
     NumAccepted.resize(4);
     NumAttempted.resize(4);
+    NumAccepted=0;
+    NumAttempted=0;
   }
 };
 
