@@ -9,10 +9,10 @@ class QuinticPH : public Potential
 private:
   QuinticSpline pA, pB, Vcore;
   double CoreRadius;
-  LinearGrid Agrid, Bgrid, Vgrid;
   // The minimum value of A and B
   double ABmin;
 public:
+  LinearGrid Agrid, Bgrid, Vgrid;
   Potential *Vouter;
   // This is true if this represents a bare potential.  Otherwise, it
   // represents a total potential:  Total = Bare + XC
@@ -139,7 +139,7 @@ inline void QuinticPH::SetAval (int i, double Aval, bool isNegative)
   if (isNegative)
     pAval = -pAval;
 
-  pA(i) = Aval;
+  pA(i) = pAval;
 }
 
 
@@ -154,7 +154,7 @@ inline void QuinticPH::SetBval (int i, double Bval, bool isNegative)
   if (isNegative)
     pBval = -pBval;
 
-  pB(i+1) = Bval;
+  pB(i+1) = pBval;
 }
 
 inline double QuinticPH::GetVval (int i)
