@@ -83,16 +83,16 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
   int myProc = PathData.Communicator.MyProc();
   Path.SliceRange (myProc, myStartSlice, myEndSlice);
   int refSlice = Path.GetRefSlice()-myStartSlice;
-  double t = abs(refSlice-slice) * PathData.Action.tau;
-  double beta = PathData.Path.TotalNumSlices * PathData.Action.tau;
+  //double t = abs(refSlice-slice) * PathData.Action.tau;
+  //double beta = PathData.Path.TotalNumSlices * PathData.Action.tau;
   int sliceDiff = abs(slice-refSlice);
   sliceDiff = min (sliceDiff, Path.TotalNumSlices-sliceDiff);
   assert (sliceDiff <= Path.TotalNumSlices);
   assert (sliceDiff > 0);
-  t = min (t, fabs(beta-t));
-  assert (t <= 0.500000001*beta);
-  double lambda = species.lambda;
-  double C = 1.0/(4.0*M_PI * lambda * t);
+  //t = min (t, fabs(beta-t));
+  //assert (t <= 0.500000001*beta);
+  //double lambda = species.lambda;
+  //double C = 1.0/(4.0*M_PI * lambda * t);
 
   // HACK HACK HACK for now;  should work for serial mode.
   //   if (Path.GetRefSlice() < Path.NumTimeSlices())
@@ -238,7 +238,6 @@ FreeNodalActionClass::GradientDetFD (int slice, double &det,
 
 double FreeNodalActionClass::NodalDist (int slice)
 {
-  double grad2 = 0.0;
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;
   int last = species.LastPtcl;
@@ -258,14 +257,33 @@ double FreeNodalActionClass::NodalDist (int slice)
 //     for (int dim=0; dim<NDIM; dim++) 
 //       assert (fabs(gradFD(i)[dim] - GradVec(i)[dim]) < 1.0e-7);
 //   }
-    
+
+  double grad2 = 0.0;    
   for (int i=0; i<N; i++)
     grad2 += dot (GradVec(i), GradVec(i));
   double dist = det/sqrt(grad2);
-  //cerr << "grad = " << GradVec << endl;
+  //   cerr << "grad = " << GradVec << endl;
+  //   cerr << "dist = " << dist << endl;
+//   dVec delta, deltaStar;
+//   double d, dStar;
+//   deltaStar = Path.RefPath(1) - Path.RefPath(0);
+//   delta = Path(slice,1) - Path(slice,0);
+//   Path.PutInBox (deltaStar);
+//   Path.PutInBox (delta);
+//   double trueDist = dot(delta, deltaStar)/sqrt(dot(deltaStar,deltaStar));
+
+
+//   int myStartSlice, myEndSlice;
+//   int myProc = PathData.Communicator.MyProc();
+//   Path.SliceRange (myProc, myStartSlice, myEndSlice);
+//   int refSlice = Path.GetRefSlice()-myStartSlice;
+//   int sliceDiff = abs(slice-refSlice);
+//   sliceDiff = min (sliceDiff, Path.TotalNumSlices-sliceDiff);
   
-  //cerr << "dist = " << dist << endl;
-  return (det/sqrt(grad2));
+//   if (sliceDiff < -2000000000)
+//     return (trueDist);
+//   else 
+    return (dist);  
 }
 
 
@@ -310,15 +328,24 @@ double FreeNodalActionClass::Action (int startSlice, int endSlice,
 	return 1.0e100;
     }
     
+    
+    
+    int myStartSlice, myEndSlice;
+    int myProc = PathData.Communicator.MyProc();
+    Path.SliceRange (myProc, myStartSlice, myEndSlice);
+    int refSlice = Path.GetRefSlice()-myStartSlice;
+    int sliceDiff = abs(slice-refSlice);
+    sliceDiff = min (sliceDiff, Path.TotalNumSlices-sliceDiff);
+
     if (!isnan(dist1) && (dist1<0.0))
       uNode += 1.0e100;
     else if (!isnan(dist2) && (dist2 < 0.0))
       uNode += 1.0e100;
-//     else if (isnan (dist1) || (dist1==0.0))
-//       uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
-//     else if (isnan(dist2) || (dist2==0.0))
-//       uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
-//     else
+    else if (isnan (dist1) || (dist1==0.0))
+      ;//uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
+    else if (isnan(dist2) || (dist2==0.0))
+      ;// uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
+//     else 
 //       uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
     dist1 = dist2;
   }
@@ -369,5 +396,6 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
     uNode += prod/(lambda*levelTau*levelTau)/expm1(prod/(lambda*levelTau));
     dist1 = dist2;
   }
+  return 0.0;
   return uNode/(double)Path.TotalNumSlices;
 }
