@@ -29,10 +29,12 @@ class DavidPAClass : public PairActionFitClass
  public:
   Array<double,1> Potential; 
   string type1,type2;
-  inline bool Read(IOSectionClass &IOSection,double x, int y);
+  inline bool Read(IOSectionClass &IOSection,double desiredTau, int numLevels);
   inline void Print();
-  /// This stores the interaction potential
-  CubicSpline V;
+  double DesiredTau;
+  int TauPos;
+  int NumLevels;
+  int NumTau;
   /// This stores the coefficients of the expansion specified above.
   /// The array index is over the levels.  You call it with the q
   /// value and a temporary array to get all of the values in that
@@ -40,19 +42,19 @@ class DavidPAClass : public PairActionFitClass
   Array<MultiCubicSpline,1> ukj; ///<(level )
   ///Same as ukj but stores the beta derivatives.
   Array<MultiCubicSpline,1> dukj; ///<(level )
-  MultiCubicSpline Pot;
+  /////  MultiCubicSpline Pot;
   /// Calculate the U(s,q,z) value when given s,q,z and the level 
-  inline void calcUsqz(double s,double q,double z,int level,
+  void calcUsqz(double s,double q,double z,int level,
 		       double &U, double &dU, double &V);
   /// This is the order of the fit to use. 
   int n;
   /// This is the temperature 
   double tau;
   /// Function to read David's squarer file input.
-  inline void ReadDavidSquarerFile(string DMFile);
+  void ReadDavidSquarerFile(string DMFile);
   double U (double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
-  double VV(double q, double z, double s2, int level);
+  double V(double r);
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);
   void WriteBetaIndependentInfo (IOSectionClass &outSection);
@@ -64,86 +66,12 @@ class DavidPAClass : public PairActionFitClass
 };
 
 
-/// Calculate the U(s,q,z) value when given s,q,z and the level 
-/*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
-  \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */
-inline void DavidPAClass::calcUsqz(double s,double q,double z,int level,
-				      double &U, double &dU, double &V)
-{
-  double rmin = ukj(level).grid->Start;
-  //  level=level+2;
-  U=0.0;
-  dU=0.0;
-  //  level=level+4;
-  // Check to make sure we're inside the grid.
-  //  //  if (q > ukj(level).grid->End) {
-  //  //    U = 0.0; dU=0.0; V = 0.0;
-  //  //    return;
-  //  //  }
-  
-  double r=q+0.5*z;
-  double rprime=q-0.5*z;
-  if (r > ukj(level).grid->End) {
-    //    U =0.0 ; dU=0.0; V = 0.0;
-    //    return;
-    r=ukj(level).grid->End;
-
-  }
-  if (rprime > ukj(level).grid->End) {
-    //    U = 0.0; dU=0.0; V = 0.0;
-    //    return;
-    rprime=ukj(level).grid->End;
-  }
-  
-  // This is the endpoint action 
-  
-  
-  if ((rprime < rmin) || (r < rmin)){
-    U = 5000.0; dU = 0.0;
-    return;
-  }
-
-  // Compensate for potential, which is subtracted from diaganal action in
-  // dm file.
-  V = 0.5*(ukj(level)(0,r) + ukj(level)(0,rprime));
-  U+= 0.5*(ukj(level)(1,r)+ukj(level)(1,rprime));
-  dU+=0.5*((dukj(level))(1,r)+(dukj(level))(1,rprime));
-  dU+=V;
-  return;
-  if (s > 0.0)
-    {
-      double zsquared=z*z;
-      double ssquared=s*s; 
-      double ssquaredinverse=1.0/ssquared;
-      double Sto2k=ssquared;
-      (ukj(level))(q,TempukjArray); 
-      (dukj(level))(q,TempdukjArray); 
-      ////HACK! 
-      n=2;
-      for (int k=1;k<=n;k++){  
-	
-	double Zto2j=1;
-	double currS=Sto2k;
-	
-	for (int j=0;j<=k;j++){
-	  // indexing into the 2darray
-	  double Ucof  = TempukjArray(k*(k+1)/2+j+1);
-				
-	  double dUcof = TempdukjArray(k*(k+1)/2+j+1);
-	  U+=(Ucof)*Zto2j*currS;
-	  dU+=(dUcof)*Zto2j*currS; //+V = HACK!
-	  Zto2j*=zsquared;
-	  currS=currS*ssquaredinverse;				
-	}				
-	Sto2k=Sto2k*ssquared;
-      }
-    }
-  //  cerr<<dU<<" "<<V<<" "<<r<<" "<<rprime<<" "<<s<<" "<<z<<" "<<q<<endl;
-}
 
 inline bool DavidPAClass::Read(IOSectionClass &in,double x, int y)
 {
   string fileName;
+  DesiredTau=x;
+  NumLevels=y;
   // Read Particles;
   assert(in.OpenSection("Fits"));
   assert(in.OpenSection("Particle1"));
@@ -155,8 +83,8 @@ inline bool DavidPAClass::Read(IOSectionClass &in,double x, int y)
   lambda = Particle1.lambda + Particle2.lambda;
   
 
-
-
+  //  assert(in.ReadVar("tau",DesiredTau));
+  //  assert(in.ReadVar("MaxLevels",NumLevels));
   assert(in.ReadVar("Daviddmfile",fileName));
   ReadDavidSquarerFile(fileName.c_str());
   //  assert(in.ReadVar("type1",type1));
@@ -277,379 +205,7 @@ inline double GetNextDouble(string &s)
 inline void DavidPAClass::Print()
 { cerr<<"hi\n";}
             
-inline void DavidPAClass::ReadDavidSquarerFile(string DMFile)
-{
-  ifstream infile;
-  //cout <<DMFile<<endl;
-  infile.open(DMFile.c_str());  
-  if (infile.fail()){
-    cerr<<"CAN'T OPEN THE FILE!!!!!!!!!!";
-  }
-  
-  string numOfFitsString=SkipTo(infile,"SQUARER");
-  cerr<<GetNextWord(numOfFitsString)<<endl;
-  cerr<<GetNextWord(numOfFitsString)<<endl;
-  cerr<<GetNextWord(numOfFitsString)<<endl;
-  cerr<<GetNextWord(numOfFitsString)<<endl;
-
-  int numOfFits=GetNextInt(numOfFitsString);
-  n = numOfFits;
-  cerr<<"N is "<<n<<endl;
-  // Read in  the potential
-  Array<double,1> potential;
-  string potGridString = SkipTo(infile, "RANK");
-  GetNextWord(potGridString);
-  GetNextWord(potGridString);//HACK?
-  int numPotPoints = GetNextInt(potGridString);
-  potential.resize(numPotPoints);
-  SkipTo(infile, "potential");
-  cerr<<"I'm reading the potential\n";
-  for (int i=0; i<numPotPoints; i++){
-    infile >> potential(i);
-    cerr<<potential(i)<<endl;
-  }
-  cerr<<"done\n";
-  //  string NDERIVString = SkipTo(infile,"NDERIV");
-
-
-  //  NDERIVString.erase(NDERIVString.find("NDERIV"),strlen("NDERIV"));
-
-  ///  2*(NDERIV+1);
-  Grid *theGrid;
-
-  for (int counter=0;counter<=numOfFits;counter++){ //Get the U's 
-    string RankString =SkipTo(infile,"RANK");
-    int theRank=GetNextInt(RankString);
-    //cout<<theRank<<endl;
-
-    if (theRank!=3){
-      //cerr<<"ERROR! ERROR! Rank was not 3" << endl;
-      counter--;
-    }
-    else {
-      int NumGridPoints=GetNextInt(RankString);
-      int NumUKJ=GetNextInt(RankString);
-      int NumTau=GetNextInt(RankString);
-      
-      
-      string RGridString =SkipTo(infile,"GRID 1");
-      string GridType=GetNextWord(RGridString);
-      GridType=GetNextWord(RGridString);
-      GridType=GetNextWord(RGridString);
-      double startGrid = GetNextDouble(RGridString);
-      double endGrid = GetNextDouble(RGridString);
-    
-      if (GridType=="LINEAR"){
-	theGrid=new LinearGrid(startGrid,endGrid,NumGridPoints);
-      }
-      else if (GridType=="LOG"){
-	//cout<<"We're really in log grid here\n";
-	double delta=pow((endGrid/startGrid),1.0/(NumGridPoints-1.0));
-	//cerr << "delta = " << delta << endl;
-	theGrid = new LogGrid(startGrid,delta,NumGridPoints);
-      }
-      else {
-	cerr << "Unrecognized grid type in ReadDavidSquarerFile.\n";
-	cerr << "GridType = \"" << GridType << "\"\n";
-      }
-	  
-      
-      string TauGridString = SkipTo(infile,"GRID   3"); //We hope this is a log grid
-      GetNextWord(TauGridString);
-      GetNextWord(TauGridString); /// takes out the Grid  3
-      string shouldBeLog;
-      if  ((shouldBeLog=GetNextWord(TauGridString))!="LOG"){
-	cerr<<"ERROR!!! ERROR!!! The tau grid is not a LOG Grid\n";
-	cerr<<shouldBeLog<<endl;
-      }
-      double smallestTau=GetNextDouble(TauGridString);
-      double largestTau=GetNextDouble(TauGridString);
-      int numTauCalc=(int)floor(log(largestTau/smallestTau)/log(2.0)+0.5+1.0); ///I think this -1 is correct but who knows
-      if (NumTau!=numTauCalc){
-	
-	cerr<<"ERROR!!! ERROR!!! num tau inconsistency \n";
-	cerr<<NumTau<< " "<<numTauCalc<<"  "<<log(largestTau/smallestTau)/log(2.0) + 1.0<< endl;
-      }
-      string beginString=SkipTo(infile,"BEGIN density matrix table");
-      int NMax=GetNextInt(beginString); //This is magically the most accurate fit i.e. NDERIV-1
-      if (GetNextInt(beginString)!=1){ //i.e. if it's not U
-	cerr<<"ERROR!!! ERROR!!! We got the beta derivative and not U\n";
-      }
-      Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
-      cerr<<"NumTau is"<<NumTau<<endl;
-      ukj.resize(NumTau);
-      ReadFORTRAN3Tensor(infile,tempUkj);
-      Array<double,3> tempUkj2(NumGridPoints,NumUKJ+1,NumTau);
-      for(int i=0; i<NumTau; i++){
-	tempUkj2(Range::all(),0,i) = potential;
-      }
-      tempUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempUkj;
-      tempUkj2(NumGridPoints-1,Range::all(),Range::all())=0.0;
-	
-      tau=largestTau; //HACK!
-      for (int levelCounter=0;levelCounter<NumTau;levelCounter++){//the -3 here is a HACK!
-	ukj(levelCounter).Init(theGrid,tempUkj2(Range::all(),Range::all(),levelCounter));
-	tau=tau/2; //HACK!
-      }
-      //      tau=smallestTau; HACK REMOVAL!
-      n=NMax;
-      
-    }
-  }
 
 
 
-  for (int counter=0;counter<=numOfFits;counter++){ //Get the beta derivative of U's 
-    string RankString =SkipTo(infile,"RANK");
-    int theRank=GetNextInt(RankString);
-    //cout<<theRank<<endl;
-
-    if (theRank!=3){
-      //cerr<<"ERROR! ERROR! Rank was not 3" << endl;
-      counter--;
-    }
-    else {
-      int NumGridPoints=GetNextInt(RankString);
-      int NumUKJ=GetNextInt(RankString);
-      int NumTau=GetNextInt(RankString);
-      
-      
-      string RGridString =SkipTo(infile,"GRID 1");
-      string GridType=GetNextWord(RGridString);
-      GridType=GetNextWord(RGridString);
-      GridType=GetNextWord(RGridString);
-      double startGrid = GetNextDouble(RGridString);
-      double endGrid = GetNextDouble(RGridString);
-    
-      if (GridType=="LINEAR"){
-	theGrid=new LinearGrid(startGrid,endGrid,NumGridPoints);
-      }
-      else if (GridType=="LOG"){
-	//cout<<"We're really in log grid here\n";
-	double delta=pow((endGrid/startGrid),1.0/(NumGridPoints-1.0));
-	//cerr << "delta = " << delta << endl;
-	theGrid = new LogGrid(startGrid,delta,NumGridPoints);
-      }
-      else {
-	cerr << "Unrecognized grid type in ReadDavidSquarerFile.\n";
-	cerr << "GridType = \"" << GridType << "\"\n";
-      }
-	  
-      
-      string TauGridString = SkipTo(infile,"GRID   3"); //We hope this is a log grid
-      GetNextWord(TauGridString);
-      GetNextWord(TauGridString); /// takes out the Grid  3
-      string shouldBeLog;
-      if  ((shouldBeLog=GetNextWord(TauGridString))!="LOG"){
-	cerr<<"ERROR!!! ERROR!!! The tau grid is not a LOG Grid\n";
-	cerr<<shouldBeLog<<endl;
-      }
-      double smallestTau=GetNextDouble(TauGridString);
-      double largestTau=GetNextDouble(TauGridString);
-      int numTauCalc=(int)floor(log(largestTau/smallestTau)/log(2.0)+0.5+1.0); ///I think this -1 is correct but who knows
-      if (NumTau!=numTauCalc){
-	
-	cerr<<"ERROR!!! ERROR!!! num tau inconsistency \n";
-	cerr<<NumTau<< " "<<numTauCalc<<"  "<<log(largestTau/smallestTau)/log(2.0) + 1.0<< endl;
-      }
-      string beginString=SkipTo(infile,"BEGIN density matrix table");
-      int NMax=GetNextInt(beginString); //This is magically the most accurate fit i.e. NDERIV-1
-      if (GetNextInt(beginString)!=2){ //i.e. if it's not U
-	cerr<<"ERROR!!! ERROR!!! We didn't get the beta derivative.\n";
-      }
-      Array<double,3> tempdUkj(NumGridPoints,NumUKJ,NumTau);
-      Array<double,3> tempdUkj2(NumGridPoints,NumUKJ+1,NumTau);
-      TempukjArray.resize(NumUKJ+1);      
-      TempdukjArray.resize(NumUKJ+1);      
-      dukj.resize(NumTau);
-      ReadFORTRAN3Tensor(infile,tempdUkj);
-      tau=largestTau; //HACK
-      for(int i=0; i<NumTau; i++){ //HACK!
-	tempdUkj2(Range::all(),0,i) = potential;
-
-	tau=tau/2; //HACK!
-      }
-      tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
-      for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
-	dukj(levelCounter).Init(theGrid,tempdUkj2(Range::all(),Range::all(),levelCounter));
-      }
-      //      tau=smallestTau; HACK REMOVAL!
-      cerr<<"My tau is "<<tau<<endl;
-      n=NMax;
-      
-    }
-  }
-  Potential.resize(potential.size());
-  for (int counter=0;counter<potential.size();counter++){
-    Potential(counter)=potential(counter);
-  }
-
-
-
-// inline void DavidPAClass::ReadDavidSquarerFile2(string DMFile)
-// {
-//   ifstream infile;
-//   //cout <<DMFile<<endl;
-//   infile.open(DMFile.c_str());  
-//   if (infile.fail()){
-//     cerr<<"CAN'T OPEN THE FILE!!!!!!!!!!";
-//   }
-  
-//   // Read in  the potential
-//   Array<double,1> potential;
-//   string potGridString = SkipTo(infile, "RANK");
-//   GetNextWord(potGridString);
-//   GetNextWord(potGridString);//HACK?
-//   int numPotPoints = GetNextInt(potGridString);
-//   potential.resize(numPotPoints);
-//   SkipTo(infile, "potential");
-//   for (int i=0; i<numPotPoints; i++)
-//     infile >> potential(i);
-//   cerr<<"The number of points in my potential was "<<numPotPoints<<endl;
-
-//   Grid *theGrid;
-  
-//   string RankString =SkipTo(infile,"RANK");
-//   int theRank=GetNextInt(RankString);
-//   cout<<"The rank is "<<theRank<<endl;
-//   if (theRank!=3){
-//     cerr<<"ERROR! ERROR! Rank was not 3" << endl;
-//   }
-//   else {
-//     int NumGridPoints=GetNextInt(RankString);
-//     int NumUKJ=GetNextInt(RankString);
-//     int NumTau=GetNextInt(RankString);
-        
-//     string RGridString =SkipTo(infile,"GRID 1");
-//     string GridType=GetNextWord(RGridString);
-//     GridType=GetNextWord(RGridString);
-//     GridType=GetNextWord(RGridString);
-//     double startGrid = GetNextDouble(RGridString);
-//     double endGrid = GetNextDouble(RGridString);
-    
-//     if (GridType=="LINEAR"){
-//       theGrid=new LinearGrid(startGrid,endGrid,NumGridPoints);
-//     }
-//     else if (GridType=="LOG"){
-//       //cout<<"We're really in log grid here\n";
-//       double delta=pow((endGrid/startGrid),1.0/(NumGridPoints-1.0));
-//       //cerr << "delta = " << delta << endl;
-//       theGrid = new LogGrid(startGrid,delta,NumGridPoints);
-//     }
-//     else {
-//       cerr << "Unrecognized grid type in ReadDavidSquarerFile.\n";
-//       cerr << "GridType = \"" << GridType << "\"\n";
-//     }
-	  
-//     string beginString=SkipTo(infile,"BEGIN density matrix table");
-//     int NMax=GetNextInt(beginString); //This is magically the most accurate fit i.e. NDERIV-1
-//     if (GetNextInt(beginString)!=1){ //i.e. if it's not U
-//       cerr<<"ERROR!!! ERROR!!! We got the beta derivative and not U\n";
-//     }
-//     Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
-      
-//     ukj.resize(NumTau);
-//     ReadFORTRAN3Tensor(infile,tempUkj);
-//     Array<double,3> tempUkj2(NumGridPoints,NumUKJ+1,NumTau);
-//     for(int i=0; i<NumTau; i++)
-//       tempUkj2(Range::all(),0,i) = potential;
-//     tempUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempUkj;
-      
-//     tau=.025; //HACK!
-//     for (int levelCounter=0;levelCounter<NumTau;levelCounter++){//the -3 here is a HACK!
-// 	ukj(levelCounter).Init(theGrid,tempUkj2(Range::all(),Range::all(),levelCounter));
-// 	tau=tau/2; //HACK!
-//       }
-//       //      tau=smallestTau; HACK REMOVAL!
-//       n=NMax;
-      
-//     }
-//   }
-
-
-
-//   for (int counter=0;counter<=numOfFits;counter++){ //Get the beta derivative of U's 
-//     string RankString =SkipTo(infile,"RANK");
-//     int theRank=GetNextInt(RankString);
-//     //cout<<theRank<<endl;
-
-//     if (theRank!=3){
-//       //cerr<<"ERROR! ERROR! Rank was not 3" << endl;
-//       counter--;
-//     }
-//     else {
-//       int NumGridPoints=GetNextInt(RankString);
-//       int NumUKJ=GetNextInt(RankString);
-//       int NumTau=GetNextInt(RankString);
-      
-      
-//       string RGridString =SkipTo(infile,"GRID 1");
-//       string GridType=GetNextWord(RGridString);
-//       GridType=GetNextWord(RGridString);
-//       GridType=GetNextWord(RGridString);
-//       double startGrid = GetNextDouble(RGridString);
-//       double endGrid = GetNextDouble(RGridString);
-    
-//       if (GridType=="LINEAR"){
-// 	theGrid=new LinearGrid(startGrid,endGrid,NumGridPoints);
-//       }
-//       else if (GridType=="LOG"){
-// 	//cout<<"We're really in log grid here\n";
-// 	double delta=pow((endGrid/startGrid),1.0/(NumGridPoints-1.0));
-// 	//cerr << "delta = " << delta << endl;
-// 	theGrid = new LogGrid(startGrid,delta,NumGridPoints);
-//       }
-//       else {
-// 	cerr << "Unrecognized grid type in ReadDavidSquarerFile.\n";
-// 	cerr << "GridType = \"" << GridType << "\"\n";
-//       }
-	  
-      
-//       string TauGridString = SkipTo(infile,"GRID   3"); //We hope this is a log grid
-//       GetNextWord(TauGridString);
-//       GetNextWord(TauGridString); /// takes out the Grid  3
-//       string shouldBeLog;
-//       if  ((shouldBeLog=GetNextWord(TauGridString))!="LOG"){
-// 	cerr<<"ERROR!!! ERROR!!! The tau grid is not a LOG Grid\n";
-// 	cerr<<shouldBeLog<<endl;
-//       }
-//       double smallestTau=GetNextDouble(TauGridString);
-//       double largestTau=GetNextDouble(TauGridString);
-//       int numTauCalc=(int)floor(log(largestTau/smallestTau)/log(2.0)+0.5+1.0); ///I think this -1 is correct but who knows
-//       if (NumTau!=numTauCalc){
-	
-// 	cerr<<"ERROR!!! ERROR!!! num tau inconsistency \n";
-// 	cerr<<NumTau<< " "<<numTauCalc<<"  "<<log(largestTau/smallestTau)/log(2.0) + 1.0<< endl;
-//       }
-//       string beginString=SkipTo(infile,"BEGIN density matrix table");
-//       int NMax=GetNextInt(beginString); //This is magically the most accurate fit i.e. NDERIV-1
-//       if (GetNextInt(beginString)!=2){ //i.e. if it's not U
-// 	cerr<<"ERROR!!! ERROR!!! We didn't get the beta derivative.\n";
-//       }
-//       Array<double,3> tempdUkj(NumGridPoints,NumUKJ,NumTau);
-//       Array<double,3> tempdUkj2(NumGridPoints,NumUKJ+1,NumTau);
-//       TempukjArray.resize(NumUKJ+1);      
-//       TempdukjArray.resize(NumUKJ+1);      
-//       dukj.resize(NumTau);
-//       ReadFORTRAN3Tensor(infile,tempdUkj);
-//       tau=largestTau; //HACK
-//       for(int i=0; i<NumTau; i++){ //HACK!
-// 	tempdUkj2(Range::all(),0,i) = potential;
-// 	tau=tau/2; //HACK!
-//       }
-//       tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
-//       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
-// 	dukj(levelCounter).Init(theGrid,tempdUkj2(Range::all(),Range::all(),levelCounter));
-//       }
-//       //      tau=smallestTau; HACK REMOVAL!
-//       cerr<<"My tau is "<<tau<<endl;
-//       n=NMax;
-      
-//     }
-//   }
-//   Potential.resize(potential.size());
-//   for (int counter=0;counter<potential.size();counter++){
-//     Potential(counter)=potential(counter);
-//   }
-}
 #endif

@@ -21,7 +21,7 @@ public:
   Potential *Pot;
   double SmallestBeta;
   double lambda;
-  inline double VV(double q,double z, double s2, int level){return -3.14159;}
+
 
 
 #ifdef MAKE_FIT
@@ -35,6 +35,7 @@ public:
 		     double smallestBeta, int NumBetas) = 0;
   virtual double U(double q, double z, double s2, int level) = 0;
   virtual double dU(double q, double z, double s2, int level) = 0;
+  virtual double V(double r) {return -3.14159;}
 };
 
 
