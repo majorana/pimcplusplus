@@ -7,5 +7,6 @@
 #include "PermuteTableClass.h"
 #include "OpenBisectionMoveClass.h"
 #include "RandomPermMove.h"
+#include "MultiStage.h"
 
 #endif

@@ -1,6 +1,6 @@
-SOURCES = BisectionClass.cc BlockMove.cc OpenBisectionMoveClass.cc  MetaMoves.cc PermuteTableClass.cc BisectionMoveClass.cc MoveBase.cc RandomPermClass.cc
+SOURCES = BisectionClass.cc BlockMove.cc OpenBisectionMoveClass.cc  MetaMoves.cc PermuteTableClass.cc BisectionMoveClass.cc MoveBase.cc RandomPermClass.cc 
 
-objs = BisectionClass.o BlockMove.o OpenBisectionMoveClass.o MetaMoves.o PermuteTableClass.o BisectionMoveClass.o  MoveBase.o RandomPermClass.o
+objs = BisectionClass.o BlockMove.o OpenBisectionMoveClass.o MetaMoves.o PermuteTableClass.o BisectionMoveClass.o  MoveBase.o RandomPermClass.o 
 
 
 all:	Moves	

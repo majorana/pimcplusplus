@@ -125,7 +125,8 @@ double ActionClass::OtherAction(int startSlice, int endSlice,
   double dist;
   PathData.Path.DistDisp(openLink,openPtcl,PathData.Path.NumParticles(),
 			 dist,disp); //This is distance between head and tail!
-  return log(0.1+(dist*dist)*(0.94*exp(-dist*dist)+0.06));
+  //  return -log(0.01+(dist*dist)*(0.94*exp(-dist*dist)+0.06));
+  return -log(dist*dist*exp(-(dist-3.5)*(dist-3.5)));
 
 
 }
@@ -329,6 +330,7 @@ double ActionClass::TotalAction(int startSlice, int endSlice,
 {
 
   if (PathData.Path.OpenPaths){
+
     return UApproximateAction(startSlice, endSlice, changedParticles, level)+
       KAction(startSlice, endSlice, changedParticles, level)+
       NodeAction (startSlice, endSlice, changedParticles, level);
@@ -339,7 +341,7 @@ double ActionClass::TotalAction(int startSlice, int endSlice,
       KAction(startSlice, endSlice, changedParticles, level) +
       NodeAction (startSlice, endSlice, changedParticles, level);
   }
-
+  
 }
 
 

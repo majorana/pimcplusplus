@@ -23,7 +23,7 @@ private:
   Array<SpeciesClass *,1> SpeciesArray;
   int MyNumSlices;
   PIMCCommunicatorClass &Communicator;
-
+  
   /////////////////////
   /// Misc. Helpers ///
   /////////////////////
@@ -140,7 +140,13 @@ public:
   friend void SetupPathSimpleCubic(PathClass &path);
 
   //////////////////////////
-  /// IO and allocations ///
+  /// Fermions           ///
+  //////////////////////////
+  inline bool HasFermions(const Array<int,1>& activeParticles);
+
+
+  //////////////////////////
+  /// Open Loops         ///
   //////////////////////////
   MirroredClass<int> OpenPtcl;
   MirroredClass<int> OpenLink;
@@ -148,6 +154,17 @@ public:
   void InitOpenPaths();
   void DistanceToTail();
 };
+
+inline bool PathClass::HasFermions(const Array<int,1>& activeParticles)
+{
+  bool HasFermion=false;
+  for (int ptclIndex=0;ptclIndex<activeParticles.size();ptclIndex++){
+    int ptcl=activeParticles(ptclIndex);
+    HasFermion = HasFermion || ParticleSpecies(ptcl).GetParticleType();
+  }
+  return HasFermion;
+}
+
 
 
 
