@@ -7,60 +7,70 @@
 /*! A primitive class holding the postions of a group of identicle
   particles.  In addition, it holds the time in which each particle
   and timeslice was moved. */
-
-
-
 class PathClass
 {
  private:
   
-  MirroredArrayClass<dVec> Positions;
-  MirroredArrayClass<int> TimeStamp;
+  MirroredArrayClass<dVec> Positions; ///< The particle positions
+  /// Holds the MC step number each particle/timeslice was last updated.
+  MirroredArrayClass<int> TimeStamp;  
   
  public:
-  /// Holds the MC step number each particle/timeslice was last updated.
-  void shiftData(int slicesToShift,CommunicatorClass &Communicator);
-  inline void resize(int numPtcles,int numTimeSlices)
+  /// Uses a Communicator to shift the date between processors so that
+  /// the timeslices that each processor holds shifts by slicesToShift.
+  void ShiftData(int slicesToShift,CommunicatorClass &communicator);
+  /// Changes number of particles and timeslices;
+  inline void Resize(int numPtcles,int numTimeSlices)
     {
       Positions.resize(numPtcles,numTimeSlices);
       TimeStamp.resize(numPtcles,numTimeSlices);
     }
-  
+  /// Returns the number of particles stored
+  inline int NumParticles()
+  {
+    return Positions.NumParticles();
+  }
+  /// Returns the number of time slices
+  inline int NumTimeSlices()
+  {
+    return Positions.NumTimeSlices();
+  }
   /// Operator to access by value.
-  inline dVec operator()(int Ptcl, int TimeSlice) const
+  inline dVec operator()(int ptcl, int timeSlice) const
     {
-      return Positions(Ptcl, TimeSlice);
+      return Positions(ptcl, timeSlice);
     }
   
   /// Write access function.
-  inline void SetPos (int Ptcl, int TimeSlice, const dVec &NewPos)
+  inline void SetPos (int ptcl, int timeSlice, const dVec &newPos)
     {
       
-      Positions.Set(Ptcl,TimeSlice,NewPos);
-      TimeStamp.Set(Ptcl,TimeSlice,GetCurrentTimeStamp());
+      Positions.Set(ptcl,timeSlice,newPos);
+      TimeStamp.Set(ptcl,timeSlice,getCurrentTimeStamp());
     }
-  
-  inline int GetTimeStamp (int Ptcl, int TimeSlice)
+  /// Returns the MC stepnum in which ptcl/timeslice was last
+  /// updated.
+  inline int GetTimeStamp (int ptcl, int timeSlice)
     {
-      return TimeStamp(Ptcl, TimeSlice);
+      return TimeStamp(ptcl, timeSlice);
     }
   
 
   /// In case of acceptance, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This
   /// copies from A to B.
-  void AcceptCopy (int Ptcl, int StartSlice, int EndSlice)
+  void AcceptCopy (int ptcl, int startSlice, int endSlice)
     {
-      Positions.AcceptCopy(Ptcl,StartSlice,EndSlice);
-      TimeStamp.AcceptCopy(Ptcl,StartSlice,EndSlice);
+      Positions.AcceptCopy(ptcl,startSlice,endSlice);
+      TimeStamp.AcceptCopy(ptcl,startSlice,endSlice);
     }
   /// In case of rejection, this is called to copy the new path over
   /// the backup copy.  StartSlice and EndSlice are inclusive.  This
   /// copies from B to A.
-  void RejectCopy (int Ptcl, int StartSlice, int EndSlice)
+  void RejectCopy (int ptcl, int startSlice, int endSlice)
     {
-      Positions.RejectCopy(Ptcl,StartSlice,EndSlice);
-      TimeStamp.RejectCopy(Ptcl,StartSlice,EndSlice);
+      Positions.RejectCopy(ptcl,startSlice,endSlice);
+      TimeStamp.RejectCopy(ptcl,startSlice,endSlice);
       
     }
 };
