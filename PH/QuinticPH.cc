@@ -110,6 +110,7 @@ void QuinticPH::Write(IOSectionClass &out)
   WriteWithoutVouter(out);
   out.NewSection ("Vouter");
   Vouter->Write(out);
+  out.CloseSection();
   out.WriteVar ("UseVcore", UseVcore);
 }
 
