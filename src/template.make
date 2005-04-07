@@ -43,8 +43,10 @@ endif
 ifeq ($(HOSTTYPE),i386-linux)
     ifeq ($(GROUP),tvi)
        include /u/ac/esler/lib/Make.include
-       CC = cmpic++
-       LD = cmpic++
+#       CC = cmpic++
+#       LD = cmpic++
+       CC = icc
+       LD = icc
        F77 = ifort
        EXTRADEFS = -DUSE_MKL -w1 -wr654,1011
     else
@@ -75,7 +77,7 @@ VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
 
-DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT -DUSE_MPI -O3 #-DBZ_DEBUG -DDEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT  -O3 #-DUSE_MPI #-DBZ_DEBUG -DDEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
 
 
 PIMCobjs =                                \
