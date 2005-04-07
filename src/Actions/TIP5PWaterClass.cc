@@ -918,7 +918,7 @@ double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Arra
       dVec z1prime = Normalize(CrossProd(P1prime,P2prime));
       dVec r;
 //cerr << "Well I calculate that the angle between n and nprime is " << acos(dotprod(n,nprime,1.0)) << endl;
-      if (n == nprime){
+      if (dot(n-nprime,n-nprime) < 1.0e-10) {
         theta = 0.0;
         r = z1; 
 //cerr << "axis of rotation is z (theta = 0)" << r << endl;
@@ -945,10 +945,10 @@ double TIP5PWaterClass::FixedAxisAction(int startSlice, int endSlice, const Arra
       double psi = psi1;
 //cerr << "phi " << phi << endl;
 //cerr << "psi " << psi << endl;
-      if (phi = 3.14159)
-        phi = 0.0;
-      if (psi = 3.14159)
-        psi = 0.0;
+      if (phi >= M_PI)
+        phi -= M_PI;
+      if (psi >= M_PI)
+        psi -= M_PI;
 //cerr << "phi " << phi << endl;
 //cerr << "psi " << psi << endl;
 
@@ -1074,7 +1074,7 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
         double theta;
         dVec r;
         double CDsqrt;
-        if (n == nprime){
+        if (dot(n-nprime,n-nprime) < 1.0e-10){
           theta = 0.0;
           r = Normalize(CrossProd(P1,P2));
         }
@@ -1223,7 +1223,7 @@ double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Arra
       dVec z1prime = Normalize(CrossProd(P1prime,P2prime));
       dVec r;
 //cerr << "Well I calculate that the angle between n and nprime is " << acos(dotprod(n,nprime,1.0)) << endl;
-      if (n == nprime){
+      if (dot(n-nprime, n-nprime) < 1.0e-10){
         theta = 0.0;
         r = z1; 
 //cerr << "axis of rotation is z (theta = 0)" << r << endl;
@@ -1347,7 +1347,7 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
       dVec z1prime = Normalize(CrossProd(P1prime,P2prime));
       dVec r;
 //cerr << "Well I calculate that the angle between n and nprime is " << acos(dotprod(n,nprime,1.0)) << endl;
-      if (n == nprime){
+      if (dot (n-nprime, n-nprime) < 1.0e-10) {
         theta = 0.0;
         r = z1; 
 //cerr << "axis of rotation is z (theta = 0)" << r << endl;

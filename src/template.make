@@ -41,19 +41,34 @@ ifeq ($(HOSTTYPE),powermac)
    MAKE = make
 endif
 ifeq ($(HOSTTYPE),i386-linux)
-    include /usr/lib/Make.include	
+    ifeq ($(GROUP),tvi)
+       include /u/ac/esler/lib/Make.include
+       CC = cmpic++
+       LD = cmpic++
+       F77 = ifort
+       EXTRADEFS = -DUSE_MKL -w1 -wr654,1011
+    else
+       include /usr/lib/Make.include	
+       CC = distcc mpiCC
+       LD = mpiCC  -Bstatic 
+       EXTRADEFS = -Wno-deprecated
+    endif
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
-           $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(FFTW3LIB) $(CBLASLIB) -lm 
+           $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(FFTW3LIB) $(CBLASLIB) \
+           $(FORTLIB) -lm 
     INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC) \
            $(FFTW3INC) $(CBLASINC)
 #    CC = mpiCC
-    CC = distcc mpiCC
-    LD = mpiCC  -Bstatic 
-    CCFLAGS = -c -g  -Wno-deprecated  #-pg 
+
+
+    CCFLAGS = -c -g  #-pg 
 endif
 
-
-MAKECC = g++
+ifeq ($(GROUP),tvi)
+   MAKECC = icc
+else
+  MAKECC = g++
+endif
 
 # Gets the subversion revision number
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
@@ -412,7 +427,7 @@ clean:	Common_clean Tests_clean Actions_clean Moves_clean Observables_clean Visu
 SOURCES =  Common.cc myprog.cc SpeciesClass.cc  ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc
 
 
-newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake Visual_newmake
+newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake 
 	$(MAKE) -f template.make Makefile FRC=force_rebuild
 
 Common_newmake:
@@ -437,7 +452,7 @@ Makefile:	$(FRC)
 	rm -f $@
 	cp template.make $@
 	echo 'Automatically generated dependency list:' >> $@
-	$(MAKECC) $(CCFLAGS) $(INCL) -MM $(SOURCES) >> $@
+	$(MAKECC) $(CCFLAGS) $(DEFS) $(INCL) -MM $(SOURCES) >> $@
 	chmod -w $@
 
 

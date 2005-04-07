@@ -7,6 +7,15 @@
 typedef TinyVector<int,NDIM> State;
 typedef TinyVector<double,NDIM> dVec;
 
+inline bool
+equal (const State& st1, const State& st2)
+{
+  bool eq = true;
+  for (int i=0; i<NDIM; i++)
+    eq = eq && (st1[i] == st2[i]);
+  return eq;
+}
+
 class ParticleClass
 {
 protected:
@@ -214,7 +223,7 @@ void FermionClass::FillStates()
 	    if (E < Ecut) {
 	      bool occupied = false;
 	      for (int i=0; i<n; i++)
-		occupied = occupied || (tryState==OccupiedStates(i));
+		occupied = occupied || equal(tryState,OccupiedStates(i));
 	      if (!occupied) {
 		OccupiedStates(n) = tryState;
 		n++;
@@ -231,13 +240,12 @@ void FermionClass::FillStates()
 
 
 
-
 double FermionClass::AcceptProb (int ptclToMove, State &newState)
 {
   // First, reject if new state is already occupied -- Pauli exclusion.
   for (int ptcl=0; ptcl<NumParticles; ptcl++)
     if (ptcl != ptclToMove)
-      if (newState == OccupiedStates(ptcl))
+      if (equal(newState,OccupiedStates(ptcl)))
 	return 0.0;
 
   double newEnergy, oldEnergy;
@@ -284,9 +292,9 @@ double BosonClass::AcceptProb (int ptclToMove, State &newState)
   int Nold = 0;
   int Nnew = 0;
   for (int i=0; i<NumParticles; i++) {
-    if (OccupiedStates(i) == newState)
+    if (equal(OccupiedStates(i),newState))
       Nnew++;
-    if (OccupiedStates(i) == OccupiedStates(ptclToMove))
+    if (equal(OccupiedStates(i),OccupiedStates(ptclToMove)))
       Nold++;
   }
 

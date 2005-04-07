@@ -944,7 +944,7 @@ double ST2WaterClass::FixedAxisAction(int startSlice, int endSlice, const Array<
 //cerr << "nprime " << nprime << endl;
       double vel_squared;
       double prefactor;
-      if (n == nprime){
+      if (dot(n-nprime,n-nprime)<1.0e-10) {
 //        cerr << "EQUAL--------------------------------" << endl;
 //        vel_squared = 0.0;
       }
@@ -1092,7 +1092,7 @@ double ST2WaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
         double vel_squared;
         double prefactor;
         double CDsqrt;
-        if (n == nprime){
+        if (dot (n-nprime, n-nprime) < 1.0e-10){
  //         vel_squared = 0.0;
         }
         else{
@@ -1237,7 +1237,7 @@ double ST2WaterClass::NewRotKinAction(int startSlice, int endSlice, const Array<
 //cerr << "n " << n << endl;
 //cerr << "nprime " << nprime << endl;
       double vel_squared;
-      if (n == nprime){
+      if (dot (n-nprime, n-nprime) < 1.0e-10) { 
 //        cerr << "EQUAL--------------------------------" << endl;
 //        vel_squared = 0.0;
       }
@@ -1417,7 +1417,7 @@ double ST2WaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
         n = Normalize(n);
         nprime = Normalize(nprime);
         double vel_squared;
-        if (n == nprime){
+        if (dot (n-nprime, n-nprime) < 1.0e-10) {
           vel_squared = 0.0;
         }
         else{

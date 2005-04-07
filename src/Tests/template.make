@@ -54,7 +54,7 @@ Makefile:	$(FRC)
 	rm -f $@
 	cp template.make $@
 	echo 'Automatically generated dependency list:' >> $@
-	$(MAKECC) $(CCFLAGS) $(INCL) -M $(SOURCES) >> $@
+	$(MAKECC) $(CCFLAGS) $(INCL) $(DEFS) -M $(SOURCES) >> $@
 	chmod -w $@
 
 

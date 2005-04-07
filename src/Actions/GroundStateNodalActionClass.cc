@@ -11,7 +11,8 @@ GroundStateNodalActionClass::IonsHaveMoved()
   int ptcl = first;
   bool changed = false;
   for (int ptcl=first; ptcl<=last; ptcl++) {
-    if (!(PathData.Path(0,ptcl) == System->GetIonPos(ptcl-first)))
+    dVec diff = PathData.Path(0,ptcl) - System->GetIonPos(ptcl-first);
+    if (dot (diff,diff) > 1.0e-16)
       changed = true;
   }
   return changed;
@@ -46,7 +47,7 @@ GroundStateNodalActionClass::LineSearchDistance (int slice, int speciesNum)
   for (int i=0; i < N; i++)
     Temp(i) = Path(slice,i+first);
 
-  GradientDet (slice, speciesNum);
+  det0 = GradientDet (slice, speciesNum);
   if (det0 < 0.0)
     return -1.0;
 
