@@ -44,14 +44,17 @@ clean:
 .f.o:
 	g77 -c -o $*.o $<
 
+PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}" "F77=${F77}"\
+  "MAKECC=${MAKECC}"
+
 newmake:
-	$(MAKE) -f template.make Makefile FRC=force_rebuild
+	$(MAKE) -f template.make Makefile FRC=force_rebuild $(PASS_DEFS)
 
 Makefile:	$(FRC)
 	rm -f $@
 	cp template.make $@
 	echo 'Automatically generated dependency list:' >> $@
-	$(MAKECC) $(CCFLAGS) $(INCL) -MM $(SOURCES) >> $@
+	$(MAKECC) $(CCFLAGS) $(INCL) $(DEFS) -MM $(SOURCES) >> $@
 	chmod -w $@
 
 

@@ -1,8 +1,12 @@
 #ifndef VECTOR_OPS_H
 #define VECTOR_OPS_H
 
-extern "C"{  
-#include <cblas.h> 
+extern "C"{
+#ifdef USE_MKL
+  #include <mkl_cblas.h>
+#else  
+  #include <cblas.h> 
+#endif
 }
 #include "../Blitz.h"
 
@@ -75,13 +79,13 @@ Orthogonalize (const Array<complex<double>,2> &A, zVec &x)
   complex<double> zero(0.0, 0.0);
   complex<double> one (1.0, 0.0);
   complex<double> minusone (-1.0, 0.0);
-  complex<double> S[m];
+  Array<complex<double>,1> S(m);
   
   // Calculate overlaps
   // Calling with column major and ConjTrans is equivalent to
   // conjugate of untransposed row major
   cblas_zgemv(CblasColMajor, CblasConjTrans, n, m, &one,
-	      A.data(), n, x.data(), 1, &zero, S, 1);
+	      A.data(), n, x.data(), 1, &zero, S.data(), 1);
 
 //   for (int i=0; i<m; i++) {
 //     fprintf (stderr, "S[%d] = %18.14f + %18.14fi\n",
@@ -89,7 +93,7 @@ Orthogonalize (const Array<complex<double>,2> &A, zVec &x)
     
   // Now, subtract off components * overlaps
   cblas_zgemv(CblasRowMajor, CblasTrans, m, n, &minusone,
- 	      A.data(), n, S, 1, &one, x.data(), 1);
+ 	      A.data(), n, S.data(), 1, &one, x.data(), 1);
 
 }
 
@@ -105,20 +109,20 @@ Orthogonalize2 (Array<complex<double>,2> &A, zVec &x, int lastBand)
   int n = A.cols();
   assert (n == x.size());
   zVec Ar;
-  complex<double> S[m];
+  Array<complex<double>,1> S(m);
 
   for (int row=0; row<=lastBand; row++) {
     Ar.reference (A(row,Range::all()));
-    S[row] = conjdot (Ar, x);
+    S(row) = conjdot (Ar, x);
   }
   for (int row=0; row<=lastBand; row++) 
-    x -= S[row] * A(row,Range::all());
+    x -= S(row) * A(row,Range::all());
   for (int row=0; row<=lastBand; row++) {
     Ar.reference (A(row,Range::all()));
-    S[row] = conjdot (Ar, x);
-    if (mag(S[row]) > 1.0e-14) {
+    S(row) = conjdot (Ar, x);
+    if (mag(S(row)) > 1.0e-14) {
       cerr << "row = " << row << " lastband = " << lastBand << endl;
-      cerr << "Error in Orthogonalize2!, s = " << S[row] << endl;
+      cerr << "Error in Orthogonalize2!, s = " << S(row) << endl;
       double norm = realconjdot (Ar, Ar);
       cerr << "norm = " << norm << endl;
     }
@@ -129,17 +133,17 @@ inline void
 Orthogonalize (Array<complex<double>,2> &A)
 {
   zVec x, y;
-  complex<double> S[A.rows()];
+  Array<complex<double>,1> S(A.rows());
   for (int iter=0; iter < 40; iter++) {
     for (int i=0; i<A.rows();i++) {
       x.reference (A(i, Range::all()));
       for (int j=i+1; j<A.rows(); j++) {
 	y.reference (A(j,Range::all()));
-	S[j] = conjdot (y, x);
+	S(j) = conjdot (y, x);
       }
       for (int j=i+1; j<A.rows(); j++) {
       y.reference (A(j,Range::all()));
-      x -= S[j] * y;
+      x -= S(j) * y;
       }
       Normalize (x);
     }

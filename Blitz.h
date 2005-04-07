@@ -36,16 +36,16 @@ inline TinyVector<T,size> operator-(TinyVector<T,size> v)
   return (minusv);
 }
 
-template <class T, int size>
-inline bool operator==(TinyVector<T,size> v1,TinyVector<T,size> v2)
-{
-  bool equals=true;
+// template <class T, int size>
+// inline bool operator==(TinyVector<T,size> v1,TinyVector<T,size> v2)
+// {
+//   bool equals=true;
 
 
-  for (int i=0; i<size; i++)
-    equals = (v1[i]==v2[i]) && equals;
-  return (equals);
-}
+//   for (int i=0; i<size; i++)
+//     equals = (v1[i]==v2[i]) && equals;
+//   return (equals);
+// }
 
 inline Vec2 operator*(const Vec2 &v, scalar s)
 {
@@ -222,6 +222,7 @@ inline cMat3 operator-(const cMat3 &A, const cMat3 &B)
   AmB(0,0)=A(0,0)-B(0,0); AmB(0,1)=A(0,1)-B(0,1); AmB(0,2)=A(0,2)-B(0,2);
   AmB(1,0)=A(1,0)-B(1,0); AmB(1,1)=A(1,1)-B(1,1); AmB(1,2)=A(1,2)-B(1,2);
   AmB(2,0)=A(2,0)-B(2,0); AmB(2,1)=A(2,1)-B(2,1); AmB(2,2)=A(2,2)-B(2,2);
+  return AmB;
 }
 
 inline cMat3& operator+=(cMat3 &A, const cMat3 &B)
