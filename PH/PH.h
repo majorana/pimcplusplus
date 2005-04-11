@@ -209,7 +209,7 @@ public:
   double &Params(int i) 
   { return CoreRadius; }
   
-  void ABV(double r, double A, double B, double Vval, double dAdr)
+  void ABV(double r, double &A, double &B, double &Vval, double &dAdr)
   {
     A = 1.0; B = 1.0; dAdr = 0.0;
     Vval = V(r);
