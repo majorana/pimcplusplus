@@ -59,7 +59,7 @@ double kSpacePH::a(double k)
   integrand.Setk(k);
   GKIntegration<aIntegrand,GK31> integrator(integrand);
   
-  return (integrator.Integrate(0.0, PH.GetCoreRadius(), 1.0e-10));
+  return (integrator.Integrate(0.0, PH.GetCoreRadius(), 1.0e-8));
 }
 
 
@@ -102,7 +102,7 @@ double kSpacePH::bPerp(double k)
   integrand.Setk(k);
   GKIntegration<bPerpIntegrand,GK31> integrator(integrand);
   
-  return (integrator.Integrate(0.0, PH.GetCoreRadius(), 1.0e-10));
+  return (integrator.Integrate(0.0, PH.GetCoreRadius(), 1.0e-8));
 }
 
 
@@ -146,7 +146,7 @@ double kSpacePH::bPar(double k)
   integrand.Setk(k);
   GKIntegration<bParIntegrand,GK31> integrator(integrand);
   
-  return (integrator.Integrate(0.0, PH.GetCoreRadius(), 1.0e-10));
+  return (integrator.Integrate(0.0, PH.GetCoreRadius(), 1.0e-8));
 }
 
 
@@ -175,7 +175,7 @@ double kSpacePH::Vk (double k)
   VIntegrand integrand(PH);
   integrand.Setk(k);
   GKIntegration<VIntegrand,GK31> integrator(integrand);  
-  double result = integrator.Integrate(0.0, R1, 1.0e-10);
+  double result = integrator.Integrate(0.0, R1, 1.0e-8);
 
   // Now, do the remaining part up to infinity using analytic
   // integratio of our fitted form.

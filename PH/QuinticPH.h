@@ -7,12 +7,12 @@
 class QuinticPH : public Potential
 {
 private:
-  QuinticSpline pA, pB, Vcore;
   double CoreRadius;
   // The minimum value of A and B
   double ABmin;
   inline void Copy (const QuinticPH &ph);
 public:
+  QuinticSpline pA, pB, Vcore;
   LinearGrid Agrid, Bgrid, Vgrid;
   Potential *Vouter;
   // This is true if this represents a bare potential.  Otherwise, it
@@ -297,6 +297,7 @@ void QuinticPH::Init (Potential *outer, double coreRadius,
   initB = sqrt(1.0-ABmin);
   initV = 0.0;
   double Vend = Vouter->V(CoreRadius);
+  cerr << "Vend = " << Vend << endl;
   double dVend = Vouter->dVdr(CoreRadius);
   double d2Vend = Vouter->d2Vdr2(CoreRadius);
   initV(numV) = Vend;

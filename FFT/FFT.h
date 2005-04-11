@@ -9,7 +9,7 @@ class FFT3D
 private:
   complex<double> *rData, *kData;
   fftw_plan r2kPlan, k2rPlan;
-  bool Allocated;
+  bool Allocated, InPlace;
   double sqrtNinv;
 public:
   Array<complex<double>,3> rBox, kBox;
@@ -20,7 +20,7 @@ public:
   void r2k();
   void k2r();
 
-  FFT3D() : Allocated(false)
+  FFT3D(bool inPlace=true) : Allocated(false), InPlace(inPlace)
   {
     // Do nothing for now
   }
@@ -28,7 +28,8 @@ public:
   {
     if (Allocated) {
       fftw_free(rData);
-      fftw_free(kData);
+      if (!InPlace)
+	fftw_free(kData);
       fftw_destroy_plan(r2kPlan);
       fftw_destroy_plan(k2rPlan);
     }
@@ -43,7 +44,7 @@ class FFTVec3D
 private:
   cVec3 *rData, *kData;
   fftw_plan r2kPlan, k2rPlan;
-  bool Allocated;
+  bool Allocated, InPlace;
   double sqrtNinv;
 public:
   Array<cVec3,3> rBox, kBox;
@@ -54,7 +55,7 @@ public:
   void r2k();
   void k2r();
 
-  FFTVec3D() : Allocated(false)
+  FFTVec3D(bool inPlace=true) : Allocated(false), InPlace(inPlace)
   {
     // Do nothing for now
   }
@@ -62,7 +63,8 @@ public:
   {
     if (Allocated) {
       fftw_free(rData);
-      fftw_free(kData);
+      if (!InPlace)
+	fftw_free(kData);
       fftw_destroy_plan(r2kPlan);
       fftw_destroy_plan(k2rPlan);
     }
@@ -74,7 +76,7 @@ class FFTMat3D
 private:
   cMat3 *rData, *kData;
   fftw_plan r2kPlan, k2rPlan;
-  bool Allocated;
+  bool Allocated, InPlace;
   double sqrtNinv;
 public:
   Array<cMat3,3> rBox, kBox;
@@ -85,15 +87,17 @@ public:
   void r2k();
   void k2r();
 
-  FFTMat3D() : Allocated(false)
+  FFTMat3D(bool inPlace=true) : Allocated(false), InPlace(inPlace)
   {
     // Do nothing for now
   }
   ~FFTMat3D()
   {
     if (Allocated) {
+      cerr << "Deallocating FFTMat3D.\n";
       fftw_free(rData);
-      fftw_free(kData);
+      if (!InPlace)
+	fftw_free(kData);
       fftw_destroy_plan(r2kPlan);
       fftw_destroy_plan(k2rPlan);
     }

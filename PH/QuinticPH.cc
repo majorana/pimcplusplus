@@ -130,14 +130,15 @@ void QuinticPH::Read(IOSectionClass &in)
   pB.Init (&Bgrid, temp, 0.0, 0.0, 0.0, 0.0);
 
   bool success = in.OpenSection ("Vouter");
+  double dVend, d2Vend;
   if (success) {
     Vouter = ReadPotential(in);
     in.CloseSection();
+    dVend  = Vouter->dVdr(CoreRadius);
+    d2Vend = Vouter->d2Vdr2(CoreRadius);
   }
   in.ReadVar ("UseVcore", UseVcore);
 
-  double dVend  = Vouter->dVdr(CoreRadius);
-  double d2Vend = Vouter->d2Vdr2(CoreRadius);
   assert (in.ReadVar ("Vcore", temp));
   Vcore.Init (&Vgrid, temp, NAN, dVend, NAN, d2Vend);
 

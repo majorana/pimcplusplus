@@ -4,12 +4,16 @@ void FFT3D::resize(int nx, int ny, int nz)
 {
   if (Allocated) {
     fftw_free(rData);
-    fftw_free(kData);
+    if (!InPlace)
+      fftw_free(kData);
     fftw_destroy_plan(r2kPlan);
     fftw_destroy_plan(k2rPlan);
   }
   rData = (complex<double>*) fftw_malloc(sizeof(fftw_complex)*nx*ny*nz);
-  kData = (complex<double>*) fftw_malloc(sizeof(fftw_complex)*nx*ny*nz);
+  if (!InPlace)
+    kData = (complex<double>*) fftw_malloc(sizeof(fftw_complex)*nx*ny*nz);
+  else
+    kData = rData;
 
   Array<complex<double>,3> *temp;
   temp = new Array<complex<double>,3>(rData, shape(nx,ny,nz), neverDeleteData);
@@ -51,12 +55,16 @@ void FFTVec3D::resize(int nx, int ny, int nz)
 {
   if (Allocated) {
     fftw_free(rData);
-    fftw_free(kData);
+    if (!InPlace)
+      fftw_free(kData);
     fftw_destroy_plan(r2kPlan);
     fftw_destroy_plan(k2rPlan);
   }
   rData = (cVec3*) fftw_malloc(3*sizeof(fftw_complex)*nx*ny*nz);
-  kData = (cVec3*) fftw_malloc(3*sizeof(fftw_complex)*nx*ny*nz);
+  if (!InPlace)
+    kData = (cVec3*) fftw_malloc(3*sizeof(fftw_complex)*nx*ny*nz);
+  else
+    kData = rData;
 
   Array<cVec3,3> *temp;
   temp = new Array<cVec3,3>(rData, shape(nx,ny,nz), neverDeleteData);
@@ -112,12 +120,16 @@ void FFTMat3D::resize(int nx, int ny, int nz)
 {
   if (Allocated) {
     fftw_free(rData);
-    fftw_free(kData);
+    if (!InPlace)
+      fftw_free(kData);
     fftw_destroy_plan(r2kPlan);
     fftw_destroy_plan(k2rPlan);
   }
   rData = (cMat3*) fftw_malloc(9*sizeof(fftw_complex)*nx*ny*nz);
-  kData = (cMat3*) fftw_malloc(9*sizeof(fftw_complex)*nx*ny*nz);
+  if (!InPlace)
+    kData = (cMat3*) fftw_malloc(9*sizeof(fftw_complex)*nx*ny*nz);
+  else
+    kData = rData;
 
   Array<cMat3,3> *temp;
   temp = new Array<cMat3,3>(rData, shape(nx,ny,nz), neverDeleteData);

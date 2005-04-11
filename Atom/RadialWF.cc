@@ -1,7 +1,8 @@
 #include "RadialWF.h"
 #include "../Integration/RungeKutta.h"
 
-int RadialWF::TurningIndex()
+int 
+RadialWF::TurningIndex()
 {
   // Start in classically forbidden region and search inward toward
   // origin looking for classically allowed region
@@ -118,7 +119,8 @@ RadialWF::IntegrateOut()
 }
 
 
-double RadialWF::IntegrateInOut (int &tindex)
+double 
+RadialWF::IntegrateInOut (int &tindex)
 {
   Grid &grid = *u.grid;
   // Find classical turning point
@@ -211,7 +213,8 @@ RadialWF::InfinityBC(double rend, double &uend, double &duend)
 
 
 
-void RadialWF::Solve(double tolerance)
+void 
+RadialWF::Solve(double tolerance)
 {
   int tindex;
   IntegrateInOut(tindex);
@@ -303,7 +306,8 @@ void RadialWF::Solve(double tolerance)
 }
 
 
-void RadialWF::Normalize()
+void 
+RadialWF::Normalize()
 {
   normVec(0) = 0.0;
   NormalizeDeriv normDeriv(*this);
@@ -319,7 +323,8 @@ void RadialWF::Normalize()
 }
 
 
-int RadialWF::CountNodes()
+int 
+RadialWF::CountNodes()
 {
   int nodes=0;
   double sign = u(0);
@@ -332,7 +337,8 @@ int RadialWF::CountNodes()
   return (nodes);
 }
 
-void RadialWF::SetGrid(Grid *newgrid)
+void 
+RadialWF::SetGrid(Grid *newgrid)
 {
   grid = newgrid;
   int N = grid->NumPoints;
@@ -344,12 +350,20 @@ void RadialWF::SetGrid(Grid *newgrid)
   dudr.Init(grid, normVec);
 }
 
-void RadialWF::SetPotential(Potential *newPot)
+void 
+RadialWF::SetPotential(Potential *newPot)
 {
   pot = newPot;
 }
 
-double RadialWF::PartialNorm()
+Potential* 
+RadialWF::GetPotential()
+{
+  return pot;
+}
+
+double 
+RadialWF::PartialNorm()
 {
   normVec(0) = 0.0;
   NormalizeDeriv normDeriv(*this);
@@ -361,7 +375,8 @@ double RadialWF::PartialNorm()
   return (partNorm);
 }
 
-double RadialWF::LogDerivative()
+double 
+RadialWF::LogDerivative()
 {
   double rend = (*u.grid).End;
   return (dudr(rend)/u(rend));
@@ -369,7 +384,8 @@ double RadialWF::LogDerivative()
 
 // This will write all the information except the potential and the
 // grid.  We assume that those are store somewhere else
-void RadialWF::Write(IOSectionClass &out)
+void 
+RadialWF::Write(IOSectionClass &out)
 {
   out.WriteVar ("u", u.Data());
   out.WriteVar ("dudr", dudr.Data());
@@ -384,7 +400,8 @@ void RadialWF::Write(IOSectionClass &out)
 }
 
 // This function assumes the grid has already been set.
-void RadialWF::Read (IOSectionClass &in)
+void 
+RadialWF::Read (IOSectionClass &in)
 {
   bool succ;
   if (u.grid == NULL) {

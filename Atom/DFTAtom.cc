@@ -203,7 +203,8 @@ void DFTAtom::Read(IOSectionClass &in)
   in.ReadVar ("ChargeDensity", ChargeDensity.Data());
   in.ReadVar ("Hartree", Hartree.Data());
   in.ReadVar ("ExCorr", ExCorr.Data());
-  V.HXC.Data() = Hartree.Data()+ExCorr.Data();
+  for (int i=0; i<V.HXC.size(); i++)
+    V.HXC(i) = Hartree(i)+ExCorr(i);
 
   double charge = 0.0;
   for (int i=0; i<numRadialWFs; i++) {

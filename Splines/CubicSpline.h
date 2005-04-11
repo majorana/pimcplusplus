@@ -32,6 +32,7 @@ public:
 
   inline Array<double,1>& Data();
   /// Returns the interpolated value.
+  inline int size() { return grid->NumPoints; }
   inline double operator()(double x);
   /// Returns the interpolated first derivative.
   inline double Deriv(double x);

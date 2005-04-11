@@ -34,6 +34,7 @@ public:
   void Normalize();
   void SetGrid(Grid *newgrid);
   void SetPotential (Potential *newPot);
+  Potential *GetPotential ();
   void Write (IOSectionClass &out);
   void Read  (IOSectionClass &in);
 };
