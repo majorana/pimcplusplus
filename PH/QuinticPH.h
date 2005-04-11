@@ -245,7 +245,9 @@ inline int QuinticPH::GetNumVParams()
 inline void QuinticPH::SetNumVParams(int num)
 {
   int oldNum = Vcore.NumPoints();
+  cerr << "CoreRadius = " << CoreRadius << endl;
   double Vend = Vouter->V(CoreRadius);
+  cerr << "Vend = " << Vend << endl;
   double dVend = Vouter->dVdr(CoreRadius);
   double d2Vend = Vouter->d2Vdr2(CoreRadius);
   Array<double,1> newV(num+1);
@@ -253,6 +255,7 @@ inline void QuinticPH::SetNumVParams(int num)
     newV(i) = Vcore(i);
   for (int i=oldNum; i<num+1; i++)
     newV(i) = Vend;
+  newV(num) = Vend;
   Vgrid.Init(0.0, CoreRadius, num+1);
   Vcore.Init(&Vgrid, newV, NAN, dVend, NAN, d2Vend);
 }
