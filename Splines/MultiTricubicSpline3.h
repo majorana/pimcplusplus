@@ -686,28 +686,27 @@ inline void MultiTricubicSpline::d_dz (double x, double y, double z, Array<doubl
     double& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
     double& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
 
-    for (int i=0; i<N; i++)
-      vals(i) = 
-	a0*
-	(b0*(Y000*dc0+Y001*dc1+Y002*dc2+Y003*dc3) +
-	 b1*(Y010*dc0+Y011*dc1+Y012*dc2+Y013*dc3) +
-	 b2*(Y020*dc0+Y021*dc1+Y022*dc2+Y023*dc3) +
-	 b3*(Y030*dc0+Y031*dc1+Y032*dc2+Y033*dc3))+
-	a1 *
-	(b0*(Y100*dc0+Y101*dc1+Y102*dc2+Y103*dc3) +
-	 b1*(Y110*dc0+Y111*dc1+Y112*dc2+Y113*dc3) +
-	 b2*(Y120*dc0+Y121*dc1+Y122*dc2+Y123*dc3) +
-	 b3*(Y130*dc0+Y131*dc1+Y132*dc2+Y133*dc3))+
-	a2 *
-	(b0*(Y200*dc0+Y201*dc1+Y202*dc2+Y203*dc3) +
-	 b1*(Y210*dc0+Y211*dc1+Y212*dc2+Y213*dc3) +
-	 b2*(Y220*dc0+Y221*dc1+Y222*dc2+Y223*dc3) +
-	 b3*(Y230*dc0+Y231*dc1+Y232*dc2+Y233*dc3))+
-	a3 *
-	(b0*(Y300*dc0+Y301*dc1+Y302*dc2+Y303*dc3) +
-	 b1*(Y310*dc0+Y311*dc1+Y312*dc2+Y313*dc3) +
-	 b2*(Y320*dc0+Y321*dc1+Y322*dc2+Y323*dc3) +
-	 b3*(Y330*dc0+Y331*dc1+Y332*dc2+Y333*dc3));
+    vals(i) = 
+      a0*
+      (b0*(Y000*dc0+Y001*dc1+Y002*dc2+Y003*dc3) +
+       b1*(Y010*dc0+Y011*dc1+Y012*dc2+Y013*dc3) +
+       b2*(Y020*dc0+Y021*dc1+Y022*dc2+Y023*dc3) +
+       b3*(Y030*dc0+Y031*dc1+Y032*dc2+Y033*dc3))+
+      a1 *
+      (b0*(Y100*dc0+Y101*dc1+Y102*dc2+Y103*dc3) +
+       b1*(Y110*dc0+Y111*dc1+Y112*dc2+Y113*dc3) +
+       b2*(Y120*dc0+Y121*dc1+Y122*dc2+Y123*dc3) +
+       b3*(Y130*dc0+Y131*dc1+Y132*dc2+Y133*dc3))+
+      a2 *
+      (b0*(Y200*dc0+Y201*dc1+Y202*dc2+Y203*dc3) +
+       b1*(Y210*dc0+Y211*dc1+Y212*dc2+Y213*dc3) +
+       b2*(Y220*dc0+Y221*dc1+Y222*dc2+Y223*dc3) +
+       b3*(Y230*dc0+Y231*dc1+Y232*dc2+Y233*dc3))+
+      a3 *
+      (b0*(Y300*dc0+Y301*dc1+Y302*dc2+Y303*dc3) +
+       b1*(Y310*dc0+Y311*dc1+Y312*dc2+Y313*dc3) +
+       b2*(Y320*dc0+Y321*dc1+Y322*dc2+Y323*dc3) +
+       b3*(Y330*dc0+Y331*dc1+Y332*dc2+Y333*dc3));
   }
 }
 
@@ -1221,7 +1220,7 @@ MultiTricubicSpline::d2_dx2 (double x, double y, double z, Array<double,1> &vals
     double& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
     double& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
   
-    double val = 
+    vals(i) = 
       d2a0*
       (b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
        b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
