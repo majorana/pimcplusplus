@@ -151,10 +151,72 @@ void SpeedTest()
 }
 
 
+void GradSpeedTest()
+{
+  int N = 30;
+  const int numSplines = 16;
+  Array<MyTricubicSpline,1> MySplines(numSplines);
+  MultiTricubicSpline MultiSpline;
+  LinearGrid xGrid, yGrid, zGrid;
+  
+  xGrid.Init(0.0, 4.0, N);
+  yGrid.Init(0.0, 5.0, N);
+  zGrid.Init(0.0, 6.0, N);
+  
+  Array<double,4> initData(N,N,N,numSplines);
+  for (int ix=0; ix<N; ix++)
+    for (int iy=0; iy<N; iy++)
+      for (int iz=0; iz<N; iz++) 
+	for (int n=0; n<numSplines; n++) 
+	  initData(ix,iy,iz,n) = drand48();
+
+  for (int n=0; n<numSplines; n++) {
+    Array<double,3> temp;
+    temp.reference (initData(Range::all(),Range::all(),Range::all(),n));
+    MySplines(n).Init (&xGrid, &yGrid, &zGrid, temp);
+  }
+  MultiSpline.Init (&xGrid, &yGrid, &zGrid, initData);
+
+  Array<double,1> vals(numSplines);
+  Array<Vec3,1>   grads(numSplines);
+  int numEvals = 16*100000;
+  clock_t start, end;
+
+  for (int j=0; j<numSplines; j++)
+    vals(j) = MySplines(j)(0.1,0.2,0.3);
+
+  start = clock();
+  for (int i=0; i<numEvals; i++) {
+    double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
+    double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
+    double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
+    for (int j=0; j<numSplines; j++) {
+      vals(j) = MySplines(j)(x,y,z);
+      grads(j) = MySplines(j).Grad(x,y,z);
+    }
+  }
+  end = clock();
+  fprintf (stderr, "MySplines value and gradient time = %1.3f sec\n", 
+	   (double)(end-start)/CLOCKS_PER_SEC);
+
+  MultiSpline(0.1, 0.2, 0.3, vals);
+  start = clock();
+  for (int i=0; i<numEvals; i++) {
+    double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
+    double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
+    double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
+    MultiSpline.ValGrad(x,y,z,vals,grads);
+  }
+  end = clock();
+  fprintf (stderr, "MultiSpline value and gradient time = %1.3f sec\n", 
+	   (double)(end-start)/CLOCKS_PER_SEC);
+}
+
+
 main()
 {
   PeriodicTest();
   ValTest();
-  SpeedTest();
+  GradSpeedTest();
 }
   
