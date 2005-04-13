@@ -2,7 +2,7 @@
 #include "../Fitting/Fitting.h"
 #include <gsl/gsl_sf.h>
 
-const double URho0Min = 1.0e-4;
+const double URho0Min  = 1.0e-4;
 const double dURho0Min = 1.0e-4;
 
 /// The following routines are used only if we are creating fits, not
@@ -71,7 +71,7 @@ public:
   }
   SCintegrand(Rho &rho_) : rho(rho_)
   {
-    int N=300;
+    int N=1000;
     double qmin = rho.grid->Start;
     double qmax = rho.grid->End;
     Array<double,1> Ud(N), dUd(N);
@@ -224,8 +224,8 @@ void PAtricubicFitClass::AddFit (Rho &rho)
   USemiclassical Usemi(rho, beta);
 
   for (int qi=0; qi<numq; qi++) {
-    cerr << "qi = " << qi << " of " << numq << endl;
     double q = (*qgrid)(qi);
+    cerr << "qi = " << qi << " of " << numq << " q = " << q << endl;
     //    cerr << "qi = " << qi << endl;
     double U_max, dU_max, Usemi_max, dUsemi_max;
     for (int yi=0; yi<numy; yi++) {
@@ -246,9 +246,14 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	costheta_max = min(costheta_max, 1.0);
 	costheta_max = max(costheta_max, -1.0);
 
-	rho.UdU(r,rp,costheta_max, Ul, dUl, U_max, dU_max);
-	Usemi_max = Usemi.U(r,rp,costheta_max);
-	dUsemi_max = Usemi.dU(r,rp,costheta_max);
+	double tmpU_max, tmpdU_max;
+	rho.UdU(r,rp,costheta_max, Ul, dUl, tmpU_max, tmpdU_max);
+	if (isnormal(tmpU_max) && isnormal(tmpdU_max)) {
+	  U_max = tmpU_max;
+	  dU_max = tmpdU_max;
+	  Usemi_max = Usemi.U(r,rp,costheta_max);
+	  dUsemi_max = Usemi.dU(r,rp,costheta_max);
+	}
       }
 
       for (int ti=0; ti<numt; ti++) {
@@ -288,6 +293,7 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 		   q, z, s);
 	  fprintf (stderr, "exp(-s^2/4lb) = %1.4e\n", 
 		   exp(-s*s/(4.0*lambda*beta)));
+	  fprintf (stderr, "U_max = %1.5e\n", U_max);
 	}
 	if (isnan(dU)) {
 	  //dU = Usemi.dU(r,rp,costheta);
@@ -295,6 +301,7 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 		   qi, yi, ti);
 	  fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
 		   q, z, s);
+	  fprintf (stderr, "dU_max = %1.5e\n", dU_max);
 	}
 
 	Umat(qi,yi,ti) = U;
