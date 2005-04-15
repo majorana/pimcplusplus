@@ -70,9 +70,9 @@ public:
   TinyVector<Grid*,3> Grids;
   void Update();
   inline complex<double> operator()(int ix, int iy, int iz, int i) const
-  { return complex<double> (F(ix,iy,ix, i)[0], F(ix,iy,iz,i)[8]); }
+  { return complex<double> (F(ix,iy,ix, i)[0][0], F(ix,iy,iz,i)[0][1]); }
   inline void Set (int ix, int iy, int iz, int i, complex<double> val)
-    { UpToDate=false; F(ix, iy, iz, i)[0] = val.real(); F(ix,iy,iz,i)[1] = val.imag(); }
+    { UpToDate=false; F(ix, iy, iz, i)[0][0] = val.real(); F(ix,iy,iz,i)[0][1] = val.imag(); }
   inline void operator()(double x, double y, double z, 
 			 Array<complex<double>,1> &vals);
   inline void d_dx      (double x, double y, double z, 
@@ -255,190 +255,97 @@ inline void ComplexMultiTricubicSpline::operator()
     //////////////////
     /// Real parts ///
     //////////////////
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
-
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    double re, im;
-    re = 
+    TinyVector<double,2> Val;
+    Val = 
       a0*
-      (b0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       b1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       b2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       b3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       a1 *
-      (b0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       b1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       b2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       b3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       a2 *
-      (b0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       b1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       b2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       b3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       a3 *
-      (b0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       b1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       b2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       b3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    im = 
-      a0*
-      (b0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       b1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       b2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       b3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      a1 *
-      (b0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       b1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       b2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       b3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      a2 *
-      (b0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       b1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       b2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       b3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      a3 *
-      (b0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       b1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       b2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       b3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
-    vals(i) = complex<double>(re,im);
+      (b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
+    vals(i) = complex<double>(Val[0],Val[1]);
   }
 }
 
@@ -482,191 +389,99 @@ ComplexMultiTricubicSpline::d_dx (double x, double y, double z,
   register double c3 = l*q2(w);
   
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
 
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
     
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    double re, im;
-    re = 
+    TinyVector<double,2> Val;
+    Val = 
       da0*
-      (b0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       b1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       b2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       b3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       da1 *
-      (b0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       b1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       b2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       b3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       da2 *
-      (b0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       b1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       b2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       b3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       da3 *
-      (b0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       b1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       b2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       b3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
+      (b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
 
-    im = 
-      da0*
-      (b0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       b1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       b2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       b3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      da1 *
-      (b0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       b1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       b2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       b3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      da2 *
-      (b0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       b1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       b2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       b3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      da3 *
-      (b0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       b1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       b2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       b3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
-    vals(i) = complex<double>(re,im);
+    vals(i) = complex<double>(Val[0],Val[1]);
   }
 }
 
@@ -711,190 +526,97 @@ ComplexMultiTricubicSpline::d_dy (double x, double y, double z,
   register double c3 = l*q2(w);
 
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
 
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-
-    double re, im;
-    re =
+    TinyVector<double,2> Val =
       a0*
-      (db0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       db1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       db2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       db3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (db0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       db1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       db2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       db3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       a1 *
-      (db0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       db1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       db2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       db3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (db0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       db1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       db2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       db3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       a2 *
-      (db0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       db1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       db2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       db3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (db0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       db1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       db2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       db3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       a3 *
-      (db0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       db1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       db2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       db3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    im =
-      a0*
-      (db0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       db1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       db2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       db3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      a1 *
-      (db0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       db1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       db2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       db3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      a2 *
-      (db0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       db1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       db2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       db3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      a3 *
-      (db0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       db1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       db2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       db3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
-    vals(i) = complex<double> (re, im);
+      (db0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       db1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       db2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       db3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
+
+    vals(i) = complex<double> (Val[0], Val[1]);
   }
 }
 
@@ -939,190 +661,97 @@ ComplexMultiTricubicSpline::d_dz (double x, double y, double z,
   
 
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
 
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-
-    double re, im;
-    re =
+    TinyVector<double,2> Val = 
       a0*
-      (b0*(rY000*dc0+rY001*dc1+rY002*dc2+rY003*dc3) +
-       b1*(rY010*dc0+rY011*dc1+rY012*dc2+rY013*dc3) +
-       b2*(rY020*dc0+rY021*dc1+rY022*dc2+rY023*dc3) +
-       b3*(rY030*dc0+rY031*dc1+rY032*dc2+rY033*dc3))+
+      (b0*(Y000*dc0+Y001*dc1+Y002*dc2+Y003*dc3) +
+       b1*(Y010*dc0+Y011*dc1+Y012*dc2+Y013*dc3) +
+       b2*(Y020*dc0+Y021*dc1+Y022*dc2+Y023*dc3) +
+       b3*(Y030*dc0+Y031*dc1+Y032*dc2+Y033*dc3))+
       a1 *
-      (b0*(rY100*dc0+rY101*dc1+rY102*dc2+rY103*dc3) +
-       b1*(rY110*dc0+rY111*dc1+rY112*dc2+rY113*dc3) +
-       b2*(rY120*dc0+rY121*dc1+rY122*dc2+rY123*dc3) +
-       b3*(rY130*dc0+rY131*dc1+rY132*dc2+rY133*dc3))+
+      (b0*(Y100*dc0+Y101*dc1+Y102*dc2+Y103*dc3) +
+       b1*(Y110*dc0+Y111*dc1+Y112*dc2+Y113*dc3) +
+       b2*(Y120*dc0+Y121*dc1+Y122*dc2+Y123*dc3) +
+       b3*(Y130*dc0+Y131*dc1+Y132*dc2+Y133*dc3))+
       a2 *
-      (b0*(rY200*dc0+rY201*dc1+rY202*dc2+rY203*dc3) +
-       b1*(rY210*dc0+rY211*dc1+rY212*dc2+rY213*dc3) +
-       b2*(rY220*dc0+rY221*dc1+rY222*dc2+rY223*dc3) +
-       b3*(rY230*dc0+rY231*dc1+rY232*dc2+rY233*dc3))+
+      (b0*(Y200*dc0+Y201*dc1+Y202*dc2+Y203*dc3) +
+       b1*(Y210*dc0+Y211*dc1+Y212*dc2+Y213*dc3) +
+       b2*(Y220*dc0+Y221*dc1+Y222*dc2+Y223*dc3) +
+       b3*(Y230*dc0+Y231*dc1+Y232*dc2+Y233*dc3))+
       a3 *
-      (b0*(rY300*dc0+rY301*dc1+rY302*dc2+rY303*dc3) +
-       b1*(rY310*dc0+rY311*dc1+rY312*dc2+rY313*dc3) +
-       b2*(rY320*dc0+rY321*dc1+rY322*dc2+rY323*dc3) +
-       b3*(rY330*dc0+rY331*dc1+rY332*dc2+rY333*dc3));
-    im = 
-      a0*
-      (b0*(iY000*dc0+iY001*dc1+iY002*dc2+iY003*dc3) +
-       b1*(iY010*dc0+iY011*dc1+iY012*dc2+iY013*dc3) +
-       b2*(iY020*dc0+iY021*dc1+iY022*dc2+iY023*dc3) +
-       b3*(iY030*dc0+iY031*dc1+iY032*dc2+iY033*dc3))+
-      a1 *
-      (b0*(iY100*dc0+iY101*dc1+iY102*dc2+iY103*dc3) +
-       b1*(iY110*dc0+iY111*dc1+iY112*dc2+iY113*dc3) +
-       b2*(iY120*dc0+iY121*dc1+iY122*dc2+iY123*dc3) +
-       b3*(iY130*dc0+iY131*dc1+iY132*dc2+iY133*dc3))+
-      a2 *
-      (b0*(iY200*dc0+iY201*dc1+iY202*dc2+iY203*dc3) +
-       b1*(iY210*dc0+iY211*dc1+iY212*dc2+iY213*dc3) +
-       b2*(iY220*dc0+iY221*dc1+iY222*dc2+iY223*dc3) +
-       b3*(iY230*dc0+iY231*dc1+iY232*dc2+iY233*dc3))+
-      a3 *
-      (b0*(iY300*dc0+iY301*dc1+iY302*dc2+iY303*dc3) +
-       b1*(iY310*dc0+iY311*dc1+iY312*dc2+iY313*dc3) +
-       b2*(iY320*dc0+iY321*dc1+iY322*dc2+iY323*dc3) +
-       b3*(iY330*dc0+iY331*dc1+iY332*dc2+iY333*dc3));
-    vals(i) = complex<double> (re, im);
+      (b0*(Y300*dc0+Y301*dc1+Y302*dc2+Y303*dc3) +
+       b1*(Y310*dc0+Y311*dc1+Y312*dc2+Y313*dc3) +
+       b2*(Y320*dc0+Y321*dc1+Y322*dc2+Y323*dc3) +
+       b3*(Y330*dc0+Y331*dc1+Y332*dc2+Y333*dc3));
+
+    vals(i) = complex<double> (Val[0], Val[1]);
   }
 }
 
@@ -1180,278 +809,144 @@ ComplexMultiTricubicSpline::Grad (double x, double y, double z,
   register double dc3 = dq2(w);
   
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
 
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-
-    TinyVector<double,3> reGrad, imGrad;
-    reGrad[0] = 
+    TinyVector<TinyVector<double,2>,3> Grad;
+    Grad[0] = 
       da0*
-      (b0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       b1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       b2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       b3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       da1 *
-      (b0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       b1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       b2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       b3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       da2 *
-      (b0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       b1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       b2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       b3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       da3 *
-      (b0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       b1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       b2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       b3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    imGrad[0] = 
-      da0*
-      (b0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       b1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       b2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       b3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      da1 *
-      (b0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       b1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       b2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       b3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      da2 *
-      (b0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       b1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       b2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       b3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      da3 *
-      (b0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       b1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       b2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       b3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
+      (b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
 
-    reGrad[1] = 
+    Grad[1] = 
       a0*
-      (db0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       db1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       db2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       db3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (db0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       db1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       db2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       db3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       a1 *
-      (db0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       db1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       db2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       db3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (db0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       db1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       db2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       db3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       a2 *
-      (db0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       db1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       db2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       db3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (db0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       db1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       db2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       db3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       a3 *
-      (db0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       db1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       db2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       db3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    imGrad[1] = 
-      a0*
-      (db0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       db1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       db2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       db3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      a1 *
-      (db0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       db1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       db2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       db3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      a2 *
-      (db0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       db1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       db2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       db3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      a3 *
-      (db0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       db1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       db2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       db3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
+      (db0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       db1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       db2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       db3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
 
-    reGrad[2] = 
+    Grad[2] = 
       a0*
-      (b0*(rY000*dc0+rY001*dc1+rY002*dc2+rY003*dc3) +
-       b1*(rY010*dc0+rY011*dc1+rY012*dc2+rY013*dc3) +
-       b2*(rY020*dc0+rY021*dc1+rY022*dc2+rY023*dc3) +
-       b3*(rY030*dc0+rY031*dc1+rY032*dc2+rY033*dc3))+
+      (b0*(Y000*dc0+Y001*dc1+Y002*dc2+Y003*dc3) +
+       b1*(Y010*dc0+Y011*dc1+Y012*dc2+Y013*dc3) +
+       b2*(Y020*dc0+Y021*dc1+Y022*dc2+Y023*dc3) +
+       b3*(Y030*dc0+Y031*dc1+Y032*dc2+Y033*dc3))+
       a1 *
-      (b0*(rY100*dc0+rY101*dc1+rY102*dc2+rY103*dc3) +
-       b1*(rY110*dc0+rY111*dc1+rY112*dc2+rY113*dc3) +
-       b2*(rY120*dc0+rY121*dc1+rY122*dc2+rY123*dc3) +
-       b3*(rY130*dc0+rY131*dc1+rY132*dc2+rY133*dc3))+
+      (b0*(Y100*dc0+Y101*dc1+Y102*dc2+Y103*dc3) +
+       b1*(Y110*dc0+Y111*dc1+Y112*dc2+Y113*dc3) +
+       b2*(Y120*dc0+Y121*dc1+Y122*dc2+Y123*dc3) +
+       b3*(Y130*dc0+Y131*dc1+Y132*dc2+Y133*dc3))+
       a2 *
-      (b0*(rY200*dc0+rY201*dc1+rY202*dc2+rY203*dc3) +
-       b1*(rY210*dc0+rY211*dc1+rY212*dc2+rY213*dc3) +
-       b2*(rY220*dc0+rY221*dc1+rY222*dc2+rY223*dc3) +
-       b3*(rY230*dc0+rY231*dc1+rY232*dc2+rY233*dc3))+
+      (b0*(Y200*dc0+Y201*dc1+Y202*dc2+Y203*dc3) +
+       b1*(Y210*dc0+Y211*dc1+Y212*dc2+Y213*dc3) +
+       b2*(Y220*dc0+Y221*dc1+Y222*dc2+Y223*dc3) +
+       b3*(Y230*dc0+Y231*dc1+Y232*dc2+Y233*dc3))+
       a3 *
-      (b0*(rY300*dc0+rY301*dc1+rY302*dc2+rY303*dc3) +
-       b1*(rY310*dc0+rY311*dc1+rY312*dc2+rY313*dc3) +
-       b2*(rY320*dc0+rY321*dc1+rY322*dc2+rY323*dc3) +
-       b3*(rY330*dc0+rY331*dc1+rY332*dc2+rY333*dc3));
-    reGrad[2] = 
-      a0*
-      (b0*(iY000*dc0+iY001*dc1+iY002*dc2+iY003*dc3) +
-       b1*(iY010*dc0+iY011*dc1+iY012*dc2+iY013*dc3) +
-       b2*(iY020*dc0+iY021*dc1+iY022*dc2+iY023*dc3) +
-       b3*(iY030*dc0+iY031*dc1+iY032*dc2+iY033*dc3))+
-      a1 *
-      (b0*(iY100*dc0+iY101*dc1+iY102*dc2+iY103*dc3) +
-       b1*(iY110*dc0+iY111*dc1+iY112*dc2+iY113*dc3) +
-       b2*(iY120*dc0+iY121*dc1+iY122*dc2+iY123*dc3) +
-       b3*(iY130*dc0+iY131*dc1+iY132*dc2+iY133*dc3))+
-      a2 *
-      (b0*(iY200*dc0+iY201*dc1+iY202*dc2+iY203*dc3) +
-       b1*(iY210*dc0+iY211*dc1+iY212*dc2+iY213*dc3) +
-       b2*(iY220*dc0+iY221*dc1+iY222*dc2+iY223*dc3) +
-       b3*(iY230*dc0+iY231*dc1+iY232*dc2+iY233*dc3))+
-      a3 *
-      (b0*(iY300*dc0+iY301*dc1+iY302*dc2+iY303*dc3) +
-       b1*(iY310*dc0+iY311*dc1+iY312*dc2+iY313*dc3) +
-       b2*(iY320*dc0+iY321*dc1+iY322*dc2+iY323*dc3) +
-       b3*(iY330*dc0+iY331*dc1+iY332*dc2+iY333*dc3));
-    grads(i)[0] = complex<double> (reGrad[0], imGrad[0]);
-    grads(i)[1] = complex<double> (reGrad[1], imGrad[1]);
-    grads(i)[2] = complex<double> (reGrad[2], imGrad[2]);
+      (b0*(Y300*dc0+Y301*dc1+Y302*dc2+Y303*dc3) +
+       b1*(Y310*dc0+Y311*dc1+Y312*dc2+Y313*dc3) +
+       b2*(Y320*dc0+Y321*dc1+Y322*dc2+Y323*dc3) +
+       b3*(Y330*dc0+Y331*dc1+Y332*dc2+Y333*dc3));
+
+    grads(i)[0] = complex<double> (Grad[0][0], Grad[0][1]);
+    grads(i)[1] = complex<double> (Grad[1][0], Grad[1][1]);
+    grads(i)[2] = complex<double> (Grad[2][0], Grad[2][1]);
   }
 }
 
@@ -1511,327 +1006,169 @@ ComplexMultiTricubicSpline::ValGrad(double x, double y, double z,
   register double dc3 = dq2(w);
   
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
-
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
   
-    double re, im;
-    Vec3 reGrad, imGrad;
-
-    re = 
+    TinyVector<double,2> Val;
+    TinyVector<TinyVector<double,2>,3> Grad;
+    Val = 
       a0*
-      (b0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       b1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       b2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       b3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       a1 *
-      (b0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       b1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       b2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       b3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       a2 *
-      (b0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       b1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       b2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       b3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       a3 *
-      (b0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       b1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       b2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       b3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
+      (b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
 
-    im = 
-      a0*
-      (b0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       b1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       b2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       b3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      a1 *
-      (b0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       b1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       b2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       b3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      a2 *
-      (b0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       b1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       b2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       b3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      a3 *
-      (b0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       b1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       b2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       b3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
-
-    vals(i) = complex<double> (re, im);
+    vals(i) = complex<double> (Val[0], Val[1]);
 
 
-    reGrad[0] = 
+    Grad[0] = 
       da0*
-      (b0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       b1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       b2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       b3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       da1 *
-      (b0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       b1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       b2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       b3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       da2 *
-      (b0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       b1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       b2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       b3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       da3 *
-      (b0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       b1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       b2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       b3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    imGrad[0] = 
-      da0*
-      (b0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       b1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       b2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       b3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      da1 *
-      (b0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       b1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       b2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       b3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      da2 *
-      (b0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       b1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       b2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       b3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      da3 *
-      (b0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       b1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       b2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       b3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
+      (b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
 
-    reGrad[1] = 
+    Grad[1] = 
       a0*
-      (db0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       db1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       db2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       db3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (db0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       db1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       db2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       db3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       a1 *
-      (db0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       db1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       db2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       db3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (db0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       db1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       db2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       db3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       a2 *
-      (db0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       db1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       db2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       db3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (db0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       db1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       db2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       db3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       a3 *
-      (db0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       db1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       db2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       db3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    imGrad[1] = 
-      a0*
-      (db0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       db1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       db2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       db3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      a1 *
-      (db0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       db1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       db2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       db3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      a2 *
-      (db0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       db1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       db2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       db3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      a3 *
-      (db0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       db1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       db2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       db3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
+      (db0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       db1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       db2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       db3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
 
-    reGrad[2] = 
+    Grad[2] = 
       a0*
-      (b0*(rY000*dc0+rY001*dc1+rY002*dc2+rY003*dc3) +
-       b1*(rY010*dc0+rY011*dc1+rY012*dc2+rY013*dc3) +
-       b2*(rY020*dc0+rY021*dc1+rY022*dc2+rY023*dc3) +
-       b3*(rY030*dc0+rY031*dc1+rY032*dc2+rY033*dc3))+
+      (b0*(Y000*dc0+Y001*dc1+Y002*dc2+Y003*dc3) +
+       b1*(Y010*dc0+Y011*dc1+Y012*dc2+Y013*dc3) +
+       b2*(Y020*dc0+Y021*dc1+Y022*dc2+Y023*dc3) +
+       b3*(Y030*dc0+Y031*dc1+Y032*dc2+Y033*dc3))+
       a1 *
-      (b0*(rY100*dc0+rY101*dc1+rY102*dc2+rY103*dc3) +
-       b1*(rY110*dc0+rY111*dc1+rY112*dc2+rY113*dc3) +
-       b2*(rY120*dc0+rY121*dc1+rY122*dc2+rY123*dc3) +
-       b3*(rY130*dc0+rY131*dc1+rY132*dc2+rY133*dc3))+
+      (b0*(Y100*dc0+Y101*dc1+Y102*dc2+Y103*dc3) +
+       b1*(Y110*dc0+Y111*dc1+Y112*dc2+Y113*dc3) +
+       b2*(Y120*dc0+Y121*dc1+Y122*dc2+Y123*dc3) +
+       b3*(Y130*dc0+Y131*dc1+Y132*dc2+Y133*dc3))+
       a2 *
-      (b0*(rY200*dc0+rY201*dc1+rY202*dc2+rY203*dc3) +
-       b1*(rY210*dc0+rY211*dc1+rY212*dc2+rY213*dc3) +
-       b2*(rY220*dc0+rY221*dc1+rY222*dc2+rY223*dc3) +
-       b3*(rY230*dc0+rY231*dc1+rY232*dc2+rY233*dc3))+
+      (b0*(Y200*dc0+Y201*dc1+Y202*dc2+Y203*dc3) +
+       b1*(Y210*dc0+Y211*dc1+Y212*dc2+Y213*dc3) +
+       b2*(Y220*dc0+Y221*dc1+Y222*dc2+Y223*dc3) +
+       b3*(Y230*dc0+Y231*dc1+Y232*dc2+Y233*dc3))+
       a3 *
-      (b0*(rY300*dc0+rY301*dc1+rY302*dc2+rY303*dc3) +
-       b1*(rY310*dc0+rY311*dc1+rY312*dc2+rY313*dc3) +
-       b2*(rY320*dc0+rY321*dc1+rY322*dc2+rY323*dc3) +
-       b3*(rY330*dc0+rY331*dc1+rY332*dc2+rY333*dc3));
-    imGrad[2] = 
-      a0*
-      (b0*(iY000*dc0+iY001*dc1+iY002*dc2+iY003*dc3) +
-       b1*(iY010*dc0+iY011*dc1+iY012*dc2+iY013*dc3) +
-       b2*(iY020*dc0+iY021*dc1+iY022*dc2+iY023*dc3) +
-       b3*(iY030*dc0+iY031*dc1+iY032*dc2+iY033*dc3))+
-      a1 *
-      (b0*(iY100*dc0+iY101*dc1+iY102*dc2+iY103*dc3) +
-       b1*(iY110*dc0+iY111*dc1+iY112*dc2+iY113*dc3) +
-       b2*(iY120*dc0+iY121*dc1+iY122*dc2+iY123*dc3) +
-       b3*(iY130*dc0+iY131*dc1+iY132*dc2+iY133*dc3))+
-      a2 *
-      (b0*(iY200*dc0+iY201*dc1+iY202*dc2+iY203*dc3) +
-       b1*(iY210*dc0+iY211*dc1+iY212*dc2+iY213*dc3) +
-       b2*(iY220*dc0+iY221*dc1+iY222*dc2+iY223*dc3) +
-       b3*(iY230*dc0+iY231*dc1+iY232*dc2+iY233*dc3))+
-      a3 *
-      (b0*(iY300*dc0+iY301*dc1+iY302*dc2+iY303*dc3) +
-       b1*(iY310*dc0+iY311*dc1+iY312*dc2+iY313*dc3) +
-       b2*(iY320*dc0+iY321*dc1+iY322*dc2+iY323*dc3) +
-       b3*(iY330*dc0+iY331*dc1+iY332*dc2+iY333*dc3));
-    grads(i)[0] = complex<double>(reGrad[0], imGrad[0]);
-    grads(i)[1] = complex<double>(reGrad[1], imGrad[1]);
-    grads(i)[2] = complex<double>(reGrad[2], imGrad[2]);
+      (b0*(Y300*dc0+Y301*dc1+Y302*dc2+Y303*dc3) +
+       b1*(Y310*dc0+Y311*dc1+Y312*dc2+Y313*dc3) +
+       b2*(Y320*dc0+Y321*dc1+Y322*dc2+Y323*dc3) +
+       b3*(Y330*dc0+Y331*dc1+Y332*dc2+Y333*dc3));
+    grads(i)[0] = complex<double>(Grad[0][0], Grad[0][1]);
+    grads(i)[1] = complex<double>(Grad[1][0], Grad[1][1]);
+    grads(i)[2] = complex<double>(Grad[2][0], Grad[2][1]);
   }
 }
 
@@ -1875,193 +1212,97 @@ ComplexMultiTricubicSpline::d2_dx2 (double x, double y, double z,
   register double c3 = l*q2(w);
   
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
-
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
   
-    double re, im;
-
-    re = 
+    TinyVector<double,2> Val =
       d2a0*
-      (b0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       b1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       b2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       b3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       d2a1 *
-      (b0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       b1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       b2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       b3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       d2a2 *
-      (b0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       b1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       b2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       b3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       d2a3 *
-      (b0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       b1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       b2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       b3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
+      (b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
 
-    im = 
-      d2a0*
-      (b0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       b1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       b2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       b3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      d2a1 *
-      (b0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       b1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       b2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       b3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      d2a2 *
-      (b0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       b1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       b2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       b3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      d2a3 *
-      (b0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       b1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       b2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       b3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
-
-    vals(i) = complex<double> (re, im);
+    vals(i) = complex<double> (Val[0], Val[1]);
   }
 }
 
@@ -2105,190 +1346,98 @@ ComplexMultiTricubicSpline::d2_dy2 (double x, double y, double z,
   register double c3 = l*q2(w);
   
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
 
 
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-  
-    double re, im;
-    re = 
+    TinyVector<double,2> Val = 
       a0*
-      (d2b0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       d2b1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       d2b2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       d2b3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (d2b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       d2b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       d2b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       d2b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       a1 *
-      (d2b0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       d2b1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       d2b2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       d2b3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (d2b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       d2b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       d2b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       d2b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       a2 *
-      (d2b0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       d2b1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       d2b2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       d2b3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (d2b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       d2b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       d2b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       d2b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       a3 *
-      (d2b0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       d2b1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       d2b2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       d2b3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    im = 
-      a0*
-      (d2b0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       d2b1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       d2b2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       d2b3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      a1 *
-      (d2b0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       d2b1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       d2b2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       d2b3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      a2 *
-      (d2b0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       d2b1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       d2b2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       d2b3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      a3 *
-      (d2b0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       d2b1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       d2b2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       d2b3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
-      vals(i) = complex<double> (re, im);
+      (d2b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       d2b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       d2b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       d2b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
+
+      vals(i) = complex<double> (Val[0], Val[1]);
   }
 }
 
@@ -2333,190 +1482,97 @@ ComplexMultiTricubicSpline::d2_dz2 (double x, double y, double z,
   register double d2c3 = linv*d2q2(w);
   
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
-
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
   
-    double re, im;
-    re = 
+    TinyVector<double,2> Val = 
       a0*
-      (b0*(rY000*d2c0+rY001*d2c1+rY002*d2c2+rY003*d2c3) +
-       b1*(rY010*d2c0+rY011*d2c1+rY012*d2c2+rY013*d2c3) +
-       b2*(rY020*d2c0+rY021*d2c1+rY022*d2c2+rY023*d2c3) +
-       b3*(rY030*d2c0+rY031*d2c1+rY032*d2c2+rY033*d2c3))+
+      (b0*(Y000*d2c0+Y001*d2c1+Y002*d2c2+Y003*d2c3) +
+       b1*(Y010*d2c0+Y011*d2c1+Y012*d2c2+Y013*d2c3) +
+       b2*(Y020*d2c0+Y021*d2c1+Y022*d2c2+Y023*d2c3) +
+       b3*(Y030*d2c0+Y031*d2c1+Y032*d2c2+Y033*d2c3))+
       a1 *
-      (b0*(rY100*d2c0+rY101*d2c1+rY102*d2c2+rY103*d2c3) +
-       b1*(rY110*d2c0+rY111*d2c1+rY112*d2c2+rY113*d2c3) +
-       b2*(rY120*d2c0+rY121*d2c1+rY122*d2c2+rY123*d2c3) +
-       b3*(rY130*d2c0+rY131*d2c1+rY132*d2c2+rY133*d2c3))+
+      (b0*(Y100*d2c0+Y101*d2c1+Y102*d2c2+Y103*d2c3) +
+       b1*(Y110*d2c0+Y111*d2c1+Y112*d2c2+Y113*d2c3) +
+       b2*(Y120*d2c0+Y121*d2c1+Y122*d2c2+Y123*d2c3) +
+       b3*(Y130*d2c0+Y131*d2c1+Y132*d2c2+Y133*d2c3))+
       a2 *
-      (b0*(rY200*d2c0+rY201*d2c1+rY202*d2c2+rY203*d2c3) +
-       b1*(rY210*d2c0+rY211*d2c1+rY212*d2c2+rY213*d2c3) +
-       b2*(rY220*d2c0+rY221*d2c1+rY222*d2c2+rY223*d2c3) +
-       b3*(rY230*d2c0+rY231*d2c1+rY232*d2c2+rY233*d2c3))+
+      (b0*(Y200*d2c0+Y201*d2c1+Y202*d2c2+Y203*d2c3) +
+       b1*(Y210*d2c0+Y211*d2c1+Y212*d2c2+Y213*d2c3) +
+       b2*(Y220*d2c0+Y221*d2c1+Y222*d2c2+Y223*d2c3) +
+       b3*(Y230*d2c0+Y231*d2c1+Y232*d2c2+Y233*d2c3))+
       a3 *
-      (b0*(rY300*d2c0+rY301*d2c1+rY302*d2c2+rY303*d2c3) +
-       b1*(rY310*d2c0+rY311*d2c1+rY312*d2c2+rY313*d2c3) +
-       b2*(rY320*d2c0+rY321*d2c1+rY322*d2c2+rY323*d2c3) +
-       b3*(rY330*d2c0+rY331*d2c1+rY332*d2c2+rY333*d2c3));
-    im = 
-      a0*
-      (b0*(iY000*d2c0+iY001*d2c1+iY002*d2c2+iY003*d2c3) +
-       b1*(iY010*d2c0+iY011*d2c1+iY012*d2c2+iY013*d2c3) +
-       b2*(iY020*d2c0+iY021*d2c1+iY022*d2c2+iY023*d2c3) +
-       b3*(iY030*d2c0+iY031*d2c1+iY032*d2c2+iY033*d2c3))+
-      a1 *
-      (b0*(iY100*d2c0+iY101*d2c1+iY102*d2c2+iY103*d2c3) +
-       b1*(iY110*d2c0+iY111*d2c1+iY112*d2c2+iY113*d2c3) +
-       b2*(iY120*d2c0+iY121*d2c1+iY122*d2c2+iY123*d2c3) +
-       b3*(iY130*d2c0+iY131*d2c1+iY132*d2c2+iY133*d2c3))+
-      a2 *
-      (b0*(iY200*d2c0+iY201*d2c1+iY202*d2c2+iY203*d2c3) +
-       b1*(iY210*d2c0+iY211*d2c1+iY212*d2c2+iY213*d2c3) +
-       b2*(iY220*d2c0+iY221*d2c1+iY222*d2c2+iY223*d2c3) +
-       b3*(iY230*d2c0+iY231*d2c1+iY232*d2c2+iY233*d2c3))+
-      a3 *
-      (b0*(iY300*d2c0+iY301*d2c1+iY302*d2c2+iY303*d2c3) +
-       b1*(iY310*d2c0+iY311*d2c1+iY312*d2c2+iY313*d2c3) +
-       b2*(iY320*d2c0+iY321*d2c1+iY322*d2c2+iY323*d2c3) +
-       b3*(iY330*d2c0+iY331*d2c1+iY332*d2c2+iY333*d2c3));
-    vals(i) = complex<double>(re, im);
+      (b0*(Y300*d2c0+Y301*d2c1+Y302*d2c2+Y303*d2c3) +
+       b1*(Y310*d2c0+Y311*d2c1+Y312*d2c2+Y313*d2c3) +
+       b2*(Y320*d2c0+Y321*d2c1+Y322*d2c2+Y323*d2c3) +
+       b3*(Y330*d2c0+Y331*d2c1+Y332*d2c2+Y333*d2c3));
+
+    vals(i) = complex<double>(Val[0], Val[1]);
   }
 }
 
@@ -2575,277 +1631,141 @@ ComplexMultiTricubicSpline::Laplacian (double x, double y, double z,
   register double d2c3 = linv*d2q2(w);
   
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
 
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-  
-    double re, im;
-
-    re = 
+    TinyVector<double,2> Val =
       d2a0*
-      (b0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       b1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       b2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       b3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       d2a1 *
-      (b0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       b1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       b2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       b3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       d2a2 *
-      (b0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       b1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       b2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       b3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       d2a3 *
-      (b0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       b1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       b2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       b3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    im = 
-      d2a0*
-      (b0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       b1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       b2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       b3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      d2a1 *
-      (b0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       b1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       b2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       b3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      d2a2 *
-      (b0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       b1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       b2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       b3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      d2a3 *
-      (b0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       b1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       b2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       b3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
+      (b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
   
-    re +=
+    Val +=
       a0*
-      (d2b0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       d2b1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       d2b2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       d2b3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (d2b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       d2b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       d2b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       d2b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       a1 *
-      (d2b0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       d2b1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       d2b2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       d2b3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (d2b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       d2b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       d2b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       d2b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       a2 *
-      (d2b0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       d2b1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       d2b2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       d2b3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (d2b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       d2b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       d2b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       d2b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       a3 *
-      (d2b0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       d2b1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       d2b2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       d2b3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    im +=
-      a0*
-      (d2b0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       d2b1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       d2b2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       d2b3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      a1 *
-      (d2b0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       d2b1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       d2b2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       d2b3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      a2 *
-      (d2b0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       d2b1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       d2b2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       d2b3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      a3 *
-      (d2b0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       d2b1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       d2b2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       d2b3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
+      (d2b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       d2b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       d2b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       d2b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
 
-    re += 
+    Val += 
       a0*
-      (b0*(rY000*d2c0+rY001*d2c1+rY002*d2c2+rY003*d2c3) +
-       b1*(rY010*d2c0+rY011*d2c1+rY012*d2c2+rY013*d2c3) +
-       b2*(rY020*d2c0+rY021*d2c1+rY022*d2c2+rY023*d2c3) +
-       b3*(rY030*d2c0+rY031*d2c1+rY032*d2c2+rY033*d2c3))+
+      (b0*(Y000*d2c0+Y001*d2c1+Y002*d2c2+Y003*d2c3) +
+       b1*(Y010*d2c0+Y011*d2c1+Y012*d2c2+Y013*d2c3) +
+       b2*(Y020*d2c0+Y021*d2c1+Y022*d2c2+Y023*d2c3) +
+       b3*(Y030*d2c0+Y031*d2c1+Y032*d2c2+Y033*d2c3))+
       a1 *
-      (b0*(rY100*d2c0+rY101*d2c1+rY102*d2c2+rY103*d2c3) +
-       b1*(rY110*d2c0+rY111*d2c1+rY112*d2c2+rY113*d2c3) +
-       b2*(rY120*d2c0+rY121*d2c1+rY122*d2c2+rY123*d2c3) +
-       b3*(rY130*d2c0+rY131*d2c1+rY132*d2c2+rY133*d2c3))+
+      (b0*(Y100*d2c0+Y101*d2c1+Y102*d2c2+Y103*d2c3) +
+       b1*(Y110*d2c0+Y111*d2c1+Y112*d2c2+Y113*d2c3) +
+       b2*(Y120*d2c0+Y121*d2c1+Y122*d2c2+Y123*d2c3) +
+       b3*(Y130*d2c0+Y131*d2c1+Y132*d2c2+Y133*d2c3))+
       a2 *
-      (b0*(rY200*d2c0+rY201*d2c1+rY202*d2c2+rY203*d2c3) +
-       b1*(rY210*d2c0+rY211*d2c1+rY212*d2c2+rY213*d2c3) +
-       b2*(rY220*d2c0+rY221*d2c1+rY222*d2c2+rY223*d2c3) +
-       b3*(rY230*d2c0+rY231*d2c1+rY232*d2c2+rY233*d2c3))+
+      (b0*(Y200*d2c0+Y201*d2c1+Y202*d2c2+Y203*d2c3) +
+       b1*(Y210*d2c0+Y211*d2c1+Y212*d2c2+Y213*d2c3) +
+       b2*(Y220*d2c0+Y221*d2c1+Y222*d2c2+Y223*d2c3) +
+       b3*(Y230*d2c0+Y231*d2c1+Y232*d2c2+Y233*d2c3))+
       a3 *
-      (b0*(rY300*d2c0+rY301*d2c1+rY302*d2c2+rY303*d2c3) +
-       b1*(rY310*d2c0+rY311*d2c1+rY312*d2c2+rY313*d2c3) +
-       b2*(rY320*d2c0+rY321*d2c1+rY322*d2c2+rY323*d2c3) +
-       b3*(rY330*d2c0+rY331*d2c1+rY332*d2c2+rY333*d2c3));
-    im += 
-      a0*
-      (b0*(iY000*d2c0+iY001*d2c1+iY002*d2c2+iY003*d2c3) +
-       b1*(iY010*d2c0+iY011*d2c1+iY012*d2c2+iY013*d2c3) +
-       b2*(iY020*d2c0+iY021*d2c1+iY022*d2c2+iY023*d2c3) +
-       b3*(iY030*d2c0+iY031*d2c1+iY032*d2c2+iY033*d2c3))+
-      a1 *
-      (b0*(iY100*d2c0+iY101*d2c1+iY102*d2c2+iY103*d2c3) +
-       b1*(iY110*d2c0+iY111*d2c1+iY112*d2c2+iY113*d2c3) +
-       b2*(iY120*d2c0+iY121*d2c1+iY122*d2c2+iY123*d2c3) +
-       b3*(iY130*d2c0+iY131*d2c1+iY132*d2c2+iY133*d2c3))+
-      a2 *
-      (b0*(iY200*d2c0+iY201*d2c1+iY202*d2c2+iY203*d2c3) +
-       b1*(iY210*d2c0+iY211*d2c1+iY212*d2c2+iY213*d2c3) +
-       b2*(iY220*d2c0+iY221*d2c1+iY222*d2c2+iY223*d2c3) +
-       b3*(iY230*d2c0+iY231*d2c1+iY232*d2c2+iY233*d2c3))+
-      a3 *
-      (b0*(iY300*d2c0+iY301*d2c1+iY302*d2c2+iY303*d2c3) +
-       b1*(iY310*d2c0+iY311*d2c1+iY312*d2c2+iY313*d2c3) +
-       b2*(iY320*d2c0+iY321*d2c1+iY322*d2c2+iY323*d2c3) +
-       b3*(iY330*d2c0+iY331*d2c1+iY332*d2c2+iY333*d2c3));
-    vals(i) = complex<double>(re,im);
+      (b0*(Y300*d2c0+Y301*d2c1+Y302*d2c2+Y303*d2c3) +
+       b1*(Y310*d2c0+Y311*d2c1+Y312*d2c2+Y313*d2c3) +
+       b2*(Y320*d2c0+Y321*d2c1+Y322*d2c2+Y323*d2c3) +
+       b3*(Y330*d2c0+Y331*d2c1+Y332*d2c2+Y333*d2c3));
+
+    vals(i) = complex<double>(Val[0],Val[1]);
   }
 }
 
@@ -2889,190 +1809,97 @@ ComplexMultiTricubicSpline::d2_dxdy (double x, double y, double z,
   register double c3 = l*q2(w);
   
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
-
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    double re, im;
-    re =
+    TinyVector<double,2> Val =
       da0*
-      (db0*(rY000*c0+rY001*c1+rY002*c2+rY003*c3) +
-       db1*(rY010*c0+rY011*c1+rY012*c2+rY013*c3) +
-       db2*(rY020*c0+rY021*c1+rY022*c2+rY023*c3) +
-       db3*(rY030*c0+rY031*c1+rY032*c2+rY033*c3))+
+      (db0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+       db1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+       db2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+       db3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
       da1 *
-      (db0*(rY100*c0+rY101*c1+rY102*c2+rY103*c3) +
-       db1*(rY110*c0+rY111*c1+rY112*c2+rY113*c3) +
-       db2*(rY120*c0+rY121*c1+rY122*c2+rY123*c3) +
-       db3*(rY130*c0+rY131*c1+rY132*c2+rY133*c3))+
+      (db0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+       db1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+       db2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+       db3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
       da2 *
-      (db0*(rY200*c0+rY201*c1+rY202*c2+rY203*c3) +
-       db1*(rY210*c0+rY211*c1+rY212*c2+rY213*c3) +
-       db2*(rY220*c0+rY221*c1+rY222*c2+rY223*c3) +
-       db3*(rY230*c0+rY231*c1+rY232*c2+rY233*c3))+
+      (db0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+       db1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+       db2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+       db3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
       da3 *
-      (db0*(rY300*c0+rY301*c1+rY302*c2+rY303*c3) +
-       db1*(rY310*c0+rY311*c1+rY312*c2+rY313*c3) +
-       db2*(rY320*c0+rY321*c1+rY322*c2+rY323*c3) +
-       db3*(rY330*c0+rY331*c1+rY332*c2+rY333*c3));
-    im =
-      da0*
-      (db0*(iY000*c0+iY001*c1+iY002*c2+iY003*c3) +
-       db1*(iY010*c0+iY011*c1+iY012*c2+iY013*c3) +
-       db2*(iY020*c0+iY021*c1+iY022*c2+iY023*c3) +
-       db3*(iY030*c0+iY031*c1+iY032*c2+iY033*c3))+
-      da1 *
-      (db0*(iY100*c0+iY101*c1+iY102*c2+iY103*c3) +
-       db1*(iY110*c0+iY111*c1+iY112*c2+iY113*c3) +
-       db2*(iY120*c0+iY121*c1+iY122*c2+iY123*c3) +
-       db3*(iY130*c0+iY131*c1+iY132*c2+iY133*c3))+
-      da2 *
-      (db0*(iY200*c0+iY201*c1+iY202*c2+iY203*c3) +
-       db1*(iY210*c0+iY211*c1+iY212*c2+iY213*c3) +
-       db2*(iY220*c0+iY221*c1+iY222*c2+iY223*c3) +
-       db3*(iY230*c0+iY231*c1+iY232*c2+iY233*c3))+
-      da3 *
-      (db0*(iY300*c0+iY301*c1+iY302*c2+iY303*c3) +
-       db1*(iY310*c0+iY311*c1+iY312*c2+iY313*c3) +
-       db2*(iY320*c0+iY321*c1+iY322*c2+iY323*c3) +
-       db3*(iY330*c0+iY331*c1+iY332*c2+iY333*c3));
-    vals(i) = complex<double>(re,im);
+      (db0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+       db1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+       db2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+       db3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
+
+    vals(i) = complex<double>(Val[0], Val[1]);
   }
 }
 
@@ -3117,191 +1944,96 @@ ComplexMultiTricubicSpline::d2_dxdz (double x, double y, double z,
 
 
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
 
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-  
-
-    double re, im;
-    re = 
+    TinyVector<double,2> Val = 
       da0*
-      (b0*(rY000*dc0+rY001*dc1+rY002*dc2+rY003*dc3) +
-       b1*(rY010*dc0+rY011*dc1+rY012*dc2+rY013*dc3) +
-       b2*(rY020*dc0+rY021*dc1+rY022*dc2+rY023*dc3) +
-       b3*(rY030*dc0+rY031*dc1+rY032*dc2+rY033*dc3))+
+      (b0*(Y000*dc0+Y001*dc1+Y002*dc2+Y003*dc3) +
+       b1*(Y010*dc0+Y011*dc1+Y012*dc2+Y013*dc3) +
+       b2*(Y020*dc0+Y021*dc1+Y022*dc2+Y023*dc3) +
+       b3*(Y030*dc0+Y031*dc1+Y032*dc2+Y033*dc3))+
       da1 *
-      (b0*(rY100*dc0+rY101*dc1+rY102*dc2+rY103*dc3) +
-       b1*(rY110*dc0+rY111*dc1+rY112*dc2+rY113*dc3) +
-       b2*(rY120*dc0+rY121*dc1+rY122*dc2+rY123*dc3) +
-       b3*(rY130*dc0+rY131*dc1+rY132*dc2+rY133*dc3))+
+      (b0*(Y100*dc0+Y101*dc1+Y102*dc2+Y103*dc3) +
+       b1*(Y110*dc0+Y111*dc1+Y112*dc2+Y113*dc3) +
+       b2*(Y120*dc0+Y121*dc1+Y122*dc2+Y123*dc3) +
+       b3*(Y130*dc0+Y131*dc1+Y132*dc2+Y133*dc3))+
       da2 *
-      (b0*(rY200*dc0+rY201*dc1+rY202*dc2+rY203*dc3) +
-       b1*(rY210*dc0+rY211*dc1+rY212*dc2+rY213*dc3) +
-       b2*(rY220*dc0+rY221*dc1+rY222*dc2+rY223*dc3) +
-       b3*(rY230*dc0+rY231*dc1+rY232*dc2+rY233*dc3))+
+      (b0*(Y200*dc0+Y201*dc1+Y202*dc2+Y203*dc3) +
+       b1*(Y210*dc0+Y211*dc1+Y212*dc2+Y213*dc3) +
+       b2*(Y220*dc0+Y221*dc1+Y222*dc2+Y223*dc3) +
+       b3*(Y230*dc0+Y231*dc1+Y232*dc2+Y233*dc3))+
       da3 *
-      (b0*(rY300*dc0+rY301*dc1+rY302*dc2+rY303*dc3) +
-       b1*(rY310*dc0+rY311*dc1+rY312*dc2+rY313*dc3) +
-       b2*(rY320*dc0+rY321*dc1+rY322*dc2+rY323*dc3) +
-       b3*(rY330*dc0+rY331*dc1+rY332*dc2+rY333*dc3));
-    im = 
-      da0*
-      (b0*(iY000*dc0+iY001*dc1+iY002*dc2+iY003*dc3) +
-       b1*(iY010*dc0+iY011*dc1+iY012*dc2+iY013*dc3) +
-       b2*(iY020*dc0+iY021*dc1+iY022*dc2+iY023*dc3) +
-       b3*(iY030*dc0+iY031*dc1+iY032*dc2+iY033*dc3))+
-      da1 *
-      (b0*(iY100*dc0+iY101*dc1+iY102*dc2+iY103*dc3) +
-       b1*(iY110*dc0+iY111*dc1+iY112*dc2+iY113*dc3) +
-       b2*(iY120*dc0+iY121*dc1+iY122*dc2+iY123*dc3) +
-       b3*(iY130*dc0+iY131*dc1+iY132*dc2+iY133*dc3))+
-      da2 *
-      (b0*(iY200*dc0+iY201*dc1+iY202*dc2+iY203*dc3) +
-       b1*(iY210*dc0+iY211*dc1+iY212*dc2+iY213*dc3) +
-       b2*(iY220*dc0+iY221*dc1+iY222*dc2+iY223*dc3) +
-       b3*(iY230*dc0+iY231*dc1+iY232*dc2+iY233*dc3))+
-      da3 *
-      (b0*(iY300*dc0+iY301*dc1+iY302*dc2+iY303*dc3) +
-       b1*(iY310*dc0+iY311*dc1+iY312*dc2+iY313*dc3) +
-       b2*(iY320*dc0+iY321*dc1+iY322*dc2+iY323*dc3) +
-       b3*(iY330*dc0+iY331*dc1+iY332*dc2+iY333*dc3));
-    vals(i) = complex<double>(re,im);
+      (b0*(Y300*dc0+Y301*dc1+Y302*dc2+Y303*dc3) +
+       b1*(Y310*dc0+Y311*dc1+Y312*dc2+Y313*dc3) +
+       b2*(Y320*dc0+Y321*dc1+Y322*dc2+Y323*dc3) +
+       b3*(Y330*dc0+Y331*dc1+Y332*dc2+Y333*dc3));
+    vals(i) = complex<double>(Val[0], Val[1]);
   }
 }
 
@@ -3346,191 +2078,96 @@ ComplexMultiTricubicSpline::d2_dydz (double x, double y, double z,
   register double dc3 = dq2(w);
 
   for (int i=0; i<N; i++) {
-    TinyVector<double,2>& rY000 = F(ix,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY001 = F(ix,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY002 = F(ix,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY010 = F(ix,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY011 = F(ix,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY020 = F(ix,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY022 = F(ix,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y001 = F(ix,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y002 = F(ix,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y003 = F(ix,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y010 = F(ix,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y011 = F(ix,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y012 = F(ix,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y013 = F(ix,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y020 = F(ix,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y021 = F(ix,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y022 = F(ix,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y023 = F(ix,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y030 = F(ix,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y031 = F(ix,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y032 = F(ix,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y033 = F(ix,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY100 = F(ix+1,iy,iz,i)[0];      //   F
-    TinyVector<double,2>& rY101 = F(ix+1,iy,iz+1,i)[0];    //   F
-    TinyVector<double,2>& rY102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
-    TinyVector<double,2>& rY103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY110 = F(ix+1,iy+1,iz,i)[0];    //   F
-    TinyVector<double,2>& rY111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
-    TinyVector<double,2>& rY112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
-    TinyVector<double,2>& rY113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
-    TinyVector<double,2>& rY120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
-    TinyVector<double,2>& rY121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
-    TinyVector<double,2>& rY123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
-    TinyVector<double,2>& rY131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
-    TinyVector<double,2>& rY132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
-    TinyVector<double,2>& rY133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
+    TinyVector<double,2>& Y100 = F(ix+1,iy,iz,i)[0];      //   F
+    TinyVector<double,2>& Y101 = F(ix+1,iy,iz+1,i)[0];    //   F
+    TinyVector<double,2>& Y102 = F(ix+1,iy,iz,i)[3];      //  dF/dz
+    TinyVector<double,2>& Y103 = F(ix+1,iy,iz+1,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y110 = F(ix+1,iy+1,iz,i)[0];    //   F
+    TinyVector<double,2>& Y111 = F(ix+1,iy+1,iz+1,i)[0];  //   F
+    TinyVector<double,2>& Y112 = F(ix+1,iy+1,iz,i)[3];    //  dF/dz
+    TinyVector<double,2>& Y113 = F(ix+1,iy+1,iz+1,i)[3];  //  dF/dz
+    TinyVector<double,2>& Y120 = F(ix+1,iy,iz,i)[2];      //  dF/dy
+    TinyVector<double,2>& Y121 = F(ix+1,iy,iz+1,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y122 = F(ix+1,iy,iz,i)[6];      // d2F/dydz
+    TinyVector<double,2>& Y123 = F(ix+1,iy,iz+1,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y130 = F(ix+1,iy+1,iz,i)[2];    //  dF/dy
+    TinyVector<double,2>& Y131 = F(ix+1,iy+1,iz+1,i)[2];  //  dF/dy
+    TinyVector<double,2>& Y132 = F(ix+1,iy+1,iz,i)[6];    // d2F/dydz
+    TinyVector<double,2>& Y133 = F(ix+1,iy+1,iz+1,i)[6];  // d2F/dydz
     
-    TinyVector<double,2>& rY200 = F(ix,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y200 = F(ix,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y201 = F(ix,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y202 = F(ix,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y203 = F(ix,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y210 = F(ix,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y211 = F(ix,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y212 = F(ix,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y213 = F(ix,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y220 = F(ix,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y221 = F(ix,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y222 = F(ix,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y223 = F(ix,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y230 = F(ix,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y231 = F(ix,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y232 = F(ix,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y233 = F(ix,iy+1,iz+1,i)[7];  // d3F/dxdydz
     
-    TinyVector<double,2>& rY300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
-    TinyVector<double,2>& rY301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
-    TinyVector<double,2>& rY303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
-    TinyVector<double,2>& rY311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
-    TinyVector<double,2>& rY312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
-    TinyVector<double,2>& rY313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
-    TinyVector<double,2>& rY320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
-    TinyVector<double,2>& rY321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
-    TinyVector<double,2>& rY323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
-    TinyVector<double,2>& rY331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
-    TinyVector<double,2>& rY332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
-    TinyVector<double,2>& rY333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
+    TinyVector<double,2>& Y300 = F(ix+1,iy,iz,i)[1];      //  dF/dx
+    TinyVector<double,2>& Y301 = F(ix+1,iy,iz+1,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y302 = F(ix+1,iy,iz,i)[5];      // d2F/dxdz
+    TinyVector<double,2>& Y303 = F(ix+1,iy,iz+1,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y310 = F(ix+1,iy+1,iz,i)[1];    //  dF/dx
+    TinyVector<double,2>& Y311 = F(ix+1,iy+1,iz+1,i)[1];  //  dF/dx
+    TinyVector<double,2>& Y312 = F(ix+1,iy+1,iz,i)[5];    // d2F/dxdz
+    TinyVector<double,2>& Y313 = F(ix+1,iy+1,iz+1,i)[5];  // d2F/dxdz
+    TinyVector<double,2>& Y320 = F(ix+1,iy,iz,i)[4];      // d2F/dxdy
+    TinyVector<double,2>& Y321 = F(ix+1,iy,iz+1,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y322 = F(ix+1,iy,iz,i)[7];      // d3F/dxdydz
+    TinyVector<double,2>& Y323 = F(ix+1,iy,iz+1,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y330 = F(ix+1,iy+1,iz,i)[4];    // d2F/dxdy
+    TinyVector<double,2>& Y331 = F(ix+1,iy+1,iz+1,i)[4];  // d2F/dxdy
+    TinyVector<double,2>& Y332 = F(ix+1,iy+1,iz,i)[7];    // d3F/dxdydz
+    TinyVector<double,2>& Y333 = F(ix+1,iy+1,iz+1,i)[7];  // d3F/dxdydz
 
-
-    ///////////////////////
-    /// Imaginary parts ///
-    ///////////////////////
-    TinyVector<double,2>& iY000 = F(ix,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY001 = F(ix,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY002 = F(ix,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY003 = F(ix,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY010 = F(ix,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY011 = F(ix,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY012 = F(ix,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY013 = F(ix,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY020 = F(ix,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY021 = F(ix,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY022 = F(ix,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY023 = F(ix,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY030 = F(ix,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY031 = F(ix,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY032 = F(ix,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY033 = F(ix,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY100 = F(ix+1,iy,iz,i)[8];      //   F
-    TinyVector<double,2>& iY101 = F(ix+1,iy,iz+1,i)[8];    //   F
-    TinyVector<double,2>& iY102 = F(ix+1,iy,iz,i)[11];      //  dF/dz
-    TinyVector<double,2>& iY103 = F(ix+1,iy,iz+1,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY110 = F(ix+1,iy+1,iz,i)[8];    //   F
-    TinyVector<double,2>& iY111 = F(ix+1,iy+1,iz+1,i)[8];  //   F
-    TinyVector<double,2>& iY112 = F(ix+1,iy+1,iz,i)[11];    //  dF/dz
-    TinyVector<double,2>& iY113 = F(ix+1,iy+1,iz+1,i)[11];  //  dF/dz
-    TinyVector<double,2>& iY120 = F(ix+1,iy,iz,i)[10];      //  dF/dy
-    TinyVector<double,2>& iY121 = F(ix+1,iy,iz+1,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY122 = F(ix+1,iy,iz,i)[14];      // d2F/dydz
-    TinyVector<double,2>& iY123 = F(ix+1,iy,iz+1,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY130 = F(ix+1,iy+1,iz,i)[10];    //  dF/dy
-    TinyVector<double,2>& iY131 = F(ix+1,iy+1,iz+1,i)[10];  //  dF/dy
-    TinyVector<double,2>& iY132 = F(ix+1,iy+1,iz,i)[14];    // d2F/dydz
-    TinyVector<double,2>& iY133 = F(ix+1,iy+1,iz+1,i)[14];  // d2F/dydz
-    
-    TinyVector<double,2>& iY200 = F(ix,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY201 = F(ix,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY202 = F(ix,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY203 = F(ix,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY210 = F(ix,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY211 = F(ix,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY212 = F(ix,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY213 = F(ix,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY220 = F(ix,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY221 = F(ix,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY222 = F(ix,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY223 = F(ix,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY230 = F(ix,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY231 = F(ix,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY232 = F(ix,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY233 = F(ix,iy+1,iz+1,i)[15];  // d3F/dxdydz
-    
-    TinyVector<double,2>& iY300 = F(ix+1,iy,iz,i)[9];      //  dF/dx
-    TinyVector<double,2>& iY301 = F(ix+1,iy,iz+1,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY302 = F(ix+1,iy,iz,i)[13];      // d2F/dxdz
-    TinyVector<double,2>& iY303 = F(ix+1,iy,iz+1,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY310 = F(ix+1,iy+1,iz,i)[9];    //  dF/dx
-    TinyVector<double,2>& iY311 = F(ix+1,iy+1,iz+1,i)[9];  //  dF/dx
-    TinyVector<double,2>& iY312 = F(ix+1,iy+1,iz,i)[13];    // d2F/dxdz
-    TinyVector<double,2>& iY313 = F(ix+1,iy+1,iz+1,i)[13];  // d2F/dxdz
-    TinyVector<double,2>& iY320 = F(ix+1,iy,iz,i)[12];      // d2F/dxdy
-    TinyVector<double,2>& iY321 = F(ix+1,iy,iz+1,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY322 = F(ix+1,iy,iz,i)[15];      // d3F/dxdydz
-    TinyVector<double,2>& iY323 = F(ix+1,iy,iz+1,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY330 = F(ix+1,iy+1,iz,i)[12];    // d2F/dxdy
-    TinyVector<double,2>& iY331 = F(ix+1,iy+1,iz+1,i)[12];  // d2F/dxdy
-    TinyVector<double,2>& iY332 = F(ix+1,iy+1,iz,i)[15];    // d3F/dxdydz
-    TinyVector<double,2>& iY333 = F(ix+1,iy+1,iz+1,i)[15];  // d3F/dxdydz
-
-    double re, im;
-    re = 
+    TinyVector<double,2> Val = 
       a0*
-      (db0*(rY000*dc0+rY001*dc1+rY002*dc2+rY003*dc3) +
-       db1*(rY010*dc0+rY011*dc1+rY012*dc2+rY013*dc3) +
-       db2*(rY020*dc0+rY021*dc1+rY022*dc2+rY023*dc3) +
-       db3*(rY030*dc0+rY031*dc1+rY032*dc2+rY033*dc3))+
+      (db0*(Y000*dc0+Y001*dc1+Y002*dc2+Y003*dc3) +
+       db1*(Y010*dc0+Y011*dc1+Y012*dc2+Y013*dc3) +
+       db2*(Y020*dc0+Y021*dc1+Y022*dc2+Y023*dc3) +
+       db3*(Y030*dc0+Y031*dc1+Y032*dc2+Y033*dc3))+
       a1 *
-      (db0*(rY100*dc0+rY101*dc1+rY102*dc2+rY103*dc3) +
-       db1*(rY110*dc0+rY111*dc1+rY112*dc2+rY113*dc3) +
-       db2*(rY120*dc0+rY121*dc1+rY122*dc2+rY123*dc3) +
-       db3*(rY130*dc0+rY131*dc1+rY132*dc2+rY133*dc3))+
+      (db0*(Y100*dc0+Y101*dc1+Y102*dc2+Y103*dc3) +
+       db1*(Y110*dc0+Y111*dc1+Y112*dc2+Y113*dc3) +
+       db2*(Y120*dc0+Y121*dc1+Y122*dc2+Y123*dc3) +
+       db3*(Y130*dc0+Y131*dc1+Y132*dc2+Y133*dc3))+
       a2 *
-      (db0*(rY200*dc0+rY201*dc1+rY202*dc2+rY203*dc3) +
-       db1*(rY210*dc0+rY211*dc1+rY212*dc2+rY213*dc3) +
-       db2*(rY220*dc0+rY221*dc1+rY222*dc2+rY223*dc3) +
-       db3*(rY230*dc0+rY231*dc1+rY232*dc2+rY233*dc3))+
+      (db0*(Y200*dc0+Y201*dc1+Y202*dc2+Y203*dc3) +
+       db1*(Y210*dc0+Y211*dc1+Y212*dc2+Y213*dc3) +
+       db2*(Y220*dc0+Y221*dc1+Y222*dc2+Y223*dc3) +
+       db3*(Y230*dc0+Y231*dc1+Y232*dc2+Y233*dc3))+
       a3 *
-      (db0*(rY300*dc0+rY301*dc1+rY302*dc2+rY303*dc3) +
-       db1*(rY310*dc0+rY311*dc1+rY312*dc2+rY313*dc3) +
-       db2*(rY320*dc0+rY321*dc1+rY322*dc2+rY323*dc3) +
-       db3*(rY330*dc0+rY331*dc1+rY332*dc2+rY333*dc3));
-    im = 
-      a0*
-      (db0*(iY000*dc0+iY001*dc1+iY002*dc2+iY003*dc3) +
-       db1*(iY010*dc0+iY011*dc1+iY012*dc2+iY013*dc3) +
-       db2*(iY020*dc0+iY021*dc1+iY022*dc2+iY023*dc3) +
-       db3*(iY030*dc0+iY031*dc1+iY032*dc2+iY033*dc3))+
-      a1 *
-      (db0*(iY100*dc0+iY101*dc1+iY102*dc2+iY103*dc3) +
-       db1*(iY110*dc0+iY111*dc1+iY112*dc2+iY113*dc3) +
-       db2*(iY120*dc0+iY121*dc1+iY122*dc2+iY123*dc3) +
-       db3*(iY130*dc0+iY131*dc1+iY132*dc2+iY133*dc3))+
-      a2 *
-      (db0*(iY200*dc0+iY201*dc1+iY202*dc2+iY203*dc3) +
-       db1*(iY210*dc0+iY211*dc1+iY212*dc2+iY213*dc3) +
-       db2*(iY220*dc0+iY221*dc1+iY222*dc2+iY223*dc3) +
-       db3*(iY230*dc0+iY231*dc1+iY232*dc2+iY233*dc3))+
-      a3 *
-      (db0*(iY300*dc0+iY301*dc1+iY302*dc2+iY303*dc3) +
-       db1*(iY310*dc0+iY311*dc1+iY312*dc2+iY313*dc3) +
-       db2*(iY320*dc0+iY321*dc1+iY322*dc2+iY323*dc3) +
-       db3*(iY330*dc0+iY331*dc1+iY332*dc2+iY333*dc3));
-      vals(i) = complex<double>(re,im);
-
+      (db0*(Y300*dc0+Y301*dc1+Y302*dc2+Y303*dc3) +
+       db1*(Y310*dc0+Y311*dc1+Y312*dc2+Y313*dc3) +
+       db2*(Y320*dc0+Y321*dc1+Y322*dc2+Y323*dc3) +
+       db3*(Y330*dc0+Y331*dc1+Y332*dc2+Y333*dc3));
+    vals(i) = complex<double>(Val[0], Val[1]);
   }
 }
 

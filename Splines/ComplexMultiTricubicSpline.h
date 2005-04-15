@@ -72,7 +72,7 @@ public:
   inline complex<double> operator()(int ix, int iy, int iz, int i) const
   { return complex<double> (F(ix,iy,ix, i)[0], F(ix,iy,iz,i)[8]); }
   inline void Set (int ix, int iy, int iz, int i, complex<double> val)
-    { UpToDate=false; F(ix, iy, iz, i)[0] = val.real(); F(ix,iy,iz,i)[1] = val.imag(); }
+    { UpToDate=false; F(ix, iy, iz, i)[0] = val.real(); F(ix,iy,iz,i)[8] = val.imag(); }
   inline void operator()(double x, double y, double z, 
 			 Array<complex<double>,1> &vals);
   inline void d_dx      (double x, double y, double z, 
@@ -1428,7 +1428,7 @@ ComplexMultiTricubicSpline::Grad (double x, double y, double z,
        b1*(rY310*dc0+rY311*dc1+rY312*dc2+rY313*dc3) +
        b2*(rY320*dc0+rY321*dc1+rY322*dc2+rY323*dc3) +
        b3*(rY330*dc0+rY331*dc1+rY332*dc2+rY333*dc3));
-    reGrad[2] = 
+    imGrad[2] = 
       a0*
       (b0*(iY000*dc0+iY001*dc1+iY002*dc2+iY003*dc3) +
        b1*(iY010*dc0+iY011*dc1+iY012*dc2+iY013*dc3) +
