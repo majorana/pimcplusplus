@@ -100,6 +100,7 @@ public:
 			 Array<cVec3,  1> &grads);
   inline void Laplacian (double x, double y, double z, 
 			 Array<complex<double>,1> &vals);
+  inline void* Data () { return F.data(); }
 
   ComplexMultiTricubicSpline(Grid *xgrid, Grid *ygrid, Grid *zgrid, int n)
   {

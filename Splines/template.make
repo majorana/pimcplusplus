@@ -1,4 +1,4 @@
-SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc TestTricubic.cc MyTricubicSpline.cc TestMyTricubic.cc QuinticSpline.cc TestQuintic.cc DyutimanTest.cc MultiTricubicSpline.cc TestMultiTricubicSpline.cc TestMultiTricubicSpline2.cc MultiTricubicSpline3.cc TestMultiTricubicSpline3.cc PeriodicSpline.cc TestPeriodic.cc ComplexMultiTricubicSpline.cc TestComplexMultiTricubicSpline.cc ComplexMultiTricubicSpline2.cc TestComplexMultiTricubicSpline2.cc
+SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc TestTricubic.cc MyTricubicSpline.cc TestMyTricubic.cc QuinticSpline.cc TestQuintic.cc DyutimanTest.cc MultiTricubicSpline.cc TestMultiTricubicSpline.cc TestMultiTricubicSpline2.cc MultiTricubicSpline3.cc TestMultiTricubicSpline3.cc PeriodicSpline.cc TestPeriodic.cc ComplexMultiTricubicSpline.cc TestComplexMultiTricubicSpline.cc ComplexMultiTricubicSpline2.cc TestComplexMultiTricubicSpline2.cc z3spline.f
 
 IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o  ../IO/InputOutputXML.o
 
@@ -33,8 +33,8 @@ TestMultiTricubicSpline3:	Grid.o  TestMultiTricubicSpline3.o MyTricubicSpline.o 
 TestComplexMultiTricubicSpline:	Grid.o  TestComplexMultiTricubicSpline.o MyTricubicSpline.o ComplexMultiTricubicSpline.o
 	$(LD) -o TestComplexMultiTricubicSpline Grid.o MyTricubicSpline.o ComplexMultiTricubicSpline.o TestComplexMultiTricubicSpline.o $(IOobjs) $(LIBS)
 
-TestComplexMultiTricubicSpline2:	Grid.o  TestComplexMultiTricubicSpline2.o MyTricubicSpline.o ComplexMultiTricubicSpline.o
-	$(LD) -o TestComplexMultiTricubicSpline2 Grid.o MyTricubicSpline.o ComplexMultiTricubicSpline.o TestComplexMultiTricubicSpline2.o $(IOobjs) $(LIBS)
+TestComplexMultiTricubicSpline2:	Grid.o  TestComplexMultiTricubicSpline2.o MyTricubicSpline.o ComplexMultiTricubicSpline.o z3spline.o
+	$(LD) -o TestComplexMultiTricubicSpline2 Grid.o MyTricubicSpline.o ComplexMultiTricubicSpline.o TestComplexMultiTricubicSpline2.o z3spline.o $(IOobjs) $(LIBS)
 
 
 DyutimanTest:	CubicSpline.o Grid.o  TestMyTricubic.o MyTricubicSpline.o

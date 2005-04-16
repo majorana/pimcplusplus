@@ -109,6 +109,7 @@ void SpeedTest()
   end = clock();
   fprintf (stderr, "MultiSpline time = %1.3f sec\n", 
 	   (double)(end-start)/CLOCKS_PER_SEC);
+
 }
 
 

@@ -32,15 +32,15 @@
       complex*16 F(8,num,nz,ny,nx)
       complex*16 vals(num)
       
-      ixl = int((x-x0)/dx)
+      ixl = int((x-x0)/dx)+1
       ixh = ixl+1
-      xlo = dx*ixl
-      iyl = int((y-y0)/dy)
+      xlo = dx*(ixl-1)
+      iyl = int((y-y0)/dy)+1
       iyh = iyl+1
-      ylo = dx*iyl
-      izl = int((z-z0)/dx)
+      ylo = dx*(iyl-1)
+      izl = int((z-z0)/dx)+1
       izh = izl + 1
-      zlo = dz*izl
+      zlo = dz*(izl-1)
 
       u = (x-xlo)/dx
       v = (y-ylo)/dy
