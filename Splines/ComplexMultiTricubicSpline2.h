@@ -83,7 +83,7 @@ public:
   TinyVector<Grid*,3> Grids;
   void Update();
   inline complex<double> operator()(int ix, int iy, int iz, int i) const
-  { return complex<double> (F(ix,iy,ix, i)[0][0], F(ix,iy,iz,i)[0][1]); }
+  { return complex<double> (F(ix,iy,iz, i)[0][0], F(ix,iy,iz,i)[0][1]); }
   inline void Set (int ix, int iy, int iz, int i, complex<double> val)
     { UpToDate=false; F(ix, iy, iz, i)[0][0] = val.real(); F(ix,iy,iz,i)[0][1] = val.imag(); }
   inline void operator()(double x, double y, double z, 
@@ -223,7 +223,7 @@ ComplexMultiTricubicSpline::Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
       for (int iz=0; iz<Nz; iz++)
 	for (int i=0; i<N; i++) {
 	  F(ix,iy,iz,i)[0][0] = init(ix,iy,iz,i).real();
-	  F(ix,iy,iz,i)[8][1] = init(ix,iy,iz,i).imag();
+	  F(ix,iy,iz,i)[0][1] = init(ix,iy,iz,i).imag();
 	}
   UpToDate = false;
   Update();
@@ -999,6 +999,8 @@ ComplexMultiTricubicSpline::ValGrad(double x, double y, double z,
   iy = max(0,iy); iy = min(iy, Ny-2);
   iz = max(0,iz); iz = min(iz, Nz-2);
 
+
+
   double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
   double hinv = 1.0/h;
   double k = (*Ygrid)(iy+1) - (*Ygrid)(iy);
@@ -1010,7 +1012,8 @@ ComplexMultiTricubicSpline::ValGrad(double x, double y, double z,
   double v = (y - (*Ygrid)(iy))/k;
   double w = (z - (*Zgrid)(iz))/l;
 
-  double a0 = p1(u);
+
+  double a0 = p1(u); 
   double a1 = p2(u);
   double a2 = h*q1(u);
   double a3 = h*q2(u);
@@ -1036,6 +1039,15 @@ ComplexMultiTricubicSpline::ValGrad(double x, double y, double z,
   register double dc1 = linv*dp2(w);
   register double dc2 = dq1(w);
   register double dc3 = dq2(w);
+
+//   fprintf (stdout, "ix=%d iy=%d iz=%d\n", ix,iy,iz);
+//   fprintf (stdout, "u=%1.15f v=%1.15f w=%1.15f\n", u,v,w);
+//   fprintf (stdout, "a0=%1.6f a1=%1.6f a2=%1.6f a3=%1.6f\n", a0,a1,a2,a3);
+//   fprintf (stdout, "b0=%1.6f b1=%1.6f b2=%1.6f b3=%1.6f\n", b0,b1,b2,b3);
+//   fprintf (stdout, "c0=%1.6f c1=%1.6f c2=%1.6f c3=%1.6f\n", c0,c1,c2,c3);
+//   fprintf (stdout, "F(9,9,9,9,7)=(%1.6f, %1.6f)\n", F(9,9,9,9)[7][0],
+// 	   F(9,9,9,9)[7][1]);
+
   
   for (int i=0; i<N; i++) {
     TinyVector<double,2>& Y000 = F(ix,iy,iz,i)[0];      //   F

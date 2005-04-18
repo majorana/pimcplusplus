@@ -33,8 +33,8 @@ TestMultiTricubicSpline3:	Grid.o  TestMultiTricubicSpline3.o MyTricubicSpline.o 
 TestComplexMultiTricubicSpline:	Grid.o  TestComplexMultiTricubicSpline.o MyTricubicSpline.o ComplexMultiTricubicSpline.o
 	$(LD) -o TestComplexMultiTricubicSpline Grid.o MyTricubicSpline.o ComplexMultiTricubicSpline.o TestComplexMultiTricubicSpline.o $(IOobjs) $(LIBS)
 
-TestComplexMultiTricubicSpline2:	Grid.o  TestComplexMultiTricubicSpline2.o MyTricubicSpline.o ComplexMultiTricubicSpline.o z3spline.o
-	$(LD) -o TestComplexMultiTricubicSpline2 Grid.o MyTricubicSpline.o ComplexMultiTricubicSpline.o TestComplexMultiTricubicSpline2.o z3spline.o $(IOobjs) $(LIBS)
+TestComplexMultiTricubicSpline2:	Grid.o  TestComplexMultiTricubicSpline2.o MyTricubicSpline.o ComplexMultiTricubicSpline2.o z3spline.o
+	$(LD) -o TestComplexMultiTricubicSpline2 Grid.o MyTricubicSpline.o ComplexMultiTricubicSpline2.o TestComplexMultiTricubicSpline2.o z3spline.o $(IOobjs) $(LIBS)
 
 
 DyutimanTest:	CubicSpline.o Grid.o  TestMyTricubic.o MyTricubicSpline.o

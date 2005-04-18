@@ -9,19 +9,19 @@ ComplexMultiTricubicSpline::Update()
       // Real part //         // Imaginary part //
       ///////////////         ////////////////////
       // Do dF/dx
-      UpdateX(0, 1, i);  
+      UpdateX(0, 1, i);
       // Do dF/dy
-      UpdateY(0, 2, i);  
+      UpdateY(0, 2, i);
       // Do dF/dy
-      UpdateZ(0, 3, i);  
+      UpdateZ(0, 3, i);
       // Do d2F/dxdy
-      UpdateY(1, 4, i);  
+      UpdateY(1, 4, i);
       // Do d2F/dxdz
-      UpdateZ(1, 5, i);  
+      UpdateZ(1, 5, i);
       // Do d2F/dydz
-      UpdateZ(2, 6, i);  
+      UpdateZ(2, 6, i);
       // Do d3F/dxdydz
-      UpdateZ(4, 7, i);  
+      UpdateZ(4, 7, i);
     }
   else
     for (int i=0; i<N; i++) {
@@ -29,19 +29,19 @@ ComplexMultiTricubicSpline::Update()
       // Real part //                // Imaginary part //
       ///////////////                ////////////////////
       // Do dF/dx
-      UpdateXPeriodic(0, 1, i); 
+      UpdateXPeriodic(0, 1, i);
       // Do dF/dy
-      UpdateYPeriodic(0, 2, i); 
+      UpdateYPeriodic(0, 2, i);
       // Do dF/dy
-      UpdateZPeriodic(0, 3, i); 
+      UpdateZPeriodic(0, 3, i);
       // Do d2F/dxdy
-      UpdateYPeriodic(1, 4, i); 
+      UpdateYPeriodic(1, 4, i);
       // Do d2F/dxdz
-      UpdateZPeriodic(1, 5, i); 
+      UpdateZPeriodic(1, 5, i);
       // Do d2F/dydz
-      UpdateZPeriodic(2, 6, i); 
+      UpdateZPeriodic(2, 6, i);
       // Do d3F/dxdydz
-      UpdateZPeriodic(4, 7, i); 
+      UpdateZPeriodic(4, 7, i);
     }
   UpToDate=true;
 }
@@ -353,7 +353,7 @@ ComplexMultiTricubicSpline::UpdateZPeriodic(int source, int dest, int i)
   ///////////////
   for (int ix=0; ix<Nx; ix++) 
     for (int iy=0; iy<Nz; iy++) {
-      assert (F(ix,iy,0,i)[source][0] == F(ix,iy,M,i)[source][0]);      
+      assert (F(ix,iy,0,i)[source][0] == F(ix,iy,M,i)[source][0]);
       assert (F(ix,iy,0,i)[source][1] == F(ix,iy,M,i)[source][1]);
   
       // Setup lambdas, mus, and d's
