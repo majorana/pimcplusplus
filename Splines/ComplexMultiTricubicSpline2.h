@@ -66,6 +66,7 @@ public:
   Array<TinyVector<TinyVector<double,2>,8>,4> F;
 
   int Nx, Ny, Nz, N;
+  //  double dx, dy,dz, dxInv, dyInv, dzInv;
   Grid *Xgrid, *Ygrid, *Zgrid;
   TinyVector<Grid*,3> Grids;
   void Update();
@@ -98,6 +99,9 @@ public:
   inline void ValGrad   (double x, double y, double z, 
 			 Array<complex<double>,1> &vals, 
 			 Array<cVec3,  1> &grads);
+  inline void FValGrad   (double x, double y, double z, 
+			  Array<complex<double>,1> &vals, 
+			  Array<cVec3,  1> &grads);
   inline void Laplacian (double x, double y, double z, 
 			 Array<complex<double>,1> &vals);
   inline void* Data () { return F.data(); }
@@ -950,6 +954,22 @@ ComplexMultiTricubicSpline::Grad (double x, double y, double z,
     grads(i)[2] = complex<double> (Grad[2][0], Grad[2][1]);
   }
 }
+
+inline void
+ComplexMultiTricubicSpline::FValGrad(double x, double y, double z, 
+				     Array<complex<double>,1> &vals, 
+				     Array<cVec3,1> &grads)
+{
+  double x0=xGrid.Start; double y0=yGrid.Start; double z0=zGrid.Start;
+  double dx=xGrid(1)-xGrid(0);
+  double dy=yGrid(1)-yGrid(0);
+  double dz=zGrid(1)-zGrid(0);
+  z3valgrad_(&x,&y,&z,&x0,&dx,&Nx,&y0,&dy,&Ny,&z0,&dz,&Nz,
+	     MultiSpline.F.data(), &N, vals.data(),
+	     grads.data());
+  
+}
+
 
 /// Returns the value and computes the gradient
 inline void
