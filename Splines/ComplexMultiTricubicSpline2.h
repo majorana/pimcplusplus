@@ -1,6 +1,18 @@
 #ifndef COMPLEX_MULTI_TRICUBIC_SPLINE_H
 #define COMPLEX_MULTI_TRICUBIC_SPLINE_H
 
+extern "C" void z3spline_ (double *x, double *y, double *z,
+			   double *x0, double *dx, int *nx,
+			   double *y0, double *dy, int *ny,
+			   double *z0, double *dz, int *nz,
+			   void *F, int *num, void *vals);
+
+extern "C" void z3valgrad_ (double *x, double *y, double *z,
+			   double *x0, double *dx, int *nx,
+			   double *y0, double *dy, int *ny,
+			   double *z0, double *dz, int *nz,
+			   void *F, int *num, void *vals, void *grads);
+
 #include "Grid.h"
 #include <cmath>
 //#include <blitz/array.h>
@@ -960,13 +972,12 @@ ComplexMultiTricubicSpline::FValGrad(double x, double y, double z,
 				     Array<complex<double>,1> &vals, 
 				     Array<cVec3,1> &grads)
 {
-  double x0=xGrid.Start; double y0=yGrid.Start; double z0=zGrid.Start;
-  double dx=xGrid(1)-xGrid(0);
-  double dy=yGrid(1)-yGrid(0);
-  double dz=zGrid(1)-zGrid(0);
+  double x0=Xgrid->Start; double y0=Ygrid->Start; double z0=Zgrid->Start;
+  double dx=(*Xgrid)(1)-(*Xgrid)(0);
+  double dy=(*Ygrid)(1)-(*Ygrid)(0);
+  double dz=(*Zgrid)(1)-(*Zgrid)(0);
   z3valgrad_(&x,&y,&z,&x0,&dx,&Nx,&y0,&dy,&Ny,&z0,&dz,&Nz,
-	     MultiSpline.F.data(), &N, vals.data(),
-	     grads.data());
+	     F.data(), &N, vals.data(), grads.data());
   
 }
 

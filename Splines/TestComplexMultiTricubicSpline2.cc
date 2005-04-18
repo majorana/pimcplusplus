@@ -171,11 +171,16 @@ void SpeedTest()
 }
 
 
-extern "C" void z3spline_ (double *x, double *y, double *z,
-			   double *x0, double *dx, int *nx,
-			   double *y0, double *dy, int *ny,
-			   double *z0, double *dz, int *nz,
-			   void *F, int *num, void *vals);
+// extern "C" void z3spline_ (double *x, double *y, double *z,
+// 			   double *x0, double *dx, int *nx,
+// 			   double *y0, double *dy, int *ny,
+// 			   double *z0, double *dz, int *nz,
+// 			   void *F, int *num, void *vals);
+// extern "C" void z3valgrad_ (double *x, double *y, double *z,
+// 			   double *x0, double *dx, int *nx,
+// 			   double *y0, double *dy, int *ny,
+// 			   double *z0, double *dz, int *nz,
+// 			   void *F, int *num, void *vals, void *grads);
 
 
 
@@ -239,16 +244,16 @@ void GradSpeedTest()
 	   (double)(end-start)/CLOCKS_PER_SEC);
 
   MultiSpline(0.1, 0.2, 0.3, vals);
-//   start = clock();
-//   for (int i=0; i<numEvals; i++) {
-//     double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
-//     double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
-//     double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
-//     MultiSpline.ValGrad(x,y,z,vals,grads);
-//   }
-//   end = clock();
-//   fprintf (stderr, "MultiSpline value and gradient time = %1.3f sec\n", 
-// 	   (double)(end-start)/CLOCKS_PER_SEC);
+  start = clock();
+  for (int i=0; i<numEvals; i++) {
+    double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
+    double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
+    double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
+    MultiSpline.FValGrad(x,y,z,vals,grads);
+  }
+  end = clock();
+  fprintf (stderr, "MultiSpline value and gradient time = %1.3f sec\n", 
+	   (double)(end-start)/CLOCKS_PER_SEC);
 
   double x0, y0, z0, dx, dy, dz;
   x0 = xGrid.Start; y0 = yGrid.Start; z0 = zGrid.Start;
@@ -260,8 +265,9 @@ void GradSpeedTest()
     double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
     double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
     double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
-    z3spline_(&x,&y,&z,&x0,&dx,&nx,&y0,&dy,&ny,&z0,&dz,&nz,
-	      MultiSpline.F.data(), (int *)&numSplines, vals.data());
+    z3valgrad_(&x,&y,&z,&x0,&dx,&nx,&y0,&dy,&ny,&z0,&dz,&nz,
+	       MultiSpline.F.data(), (int *)&numSplines, vals.data(),
+	       grads.data());
   }
   end = clock();
   fprintf (stderr, "fortran MultiSpline time = %1.3f sec\n", 
