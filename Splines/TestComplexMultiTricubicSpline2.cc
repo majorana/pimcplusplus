@@ -245,18 +245,18 @@ void GradSpeedTest()
 //  MultiSpline(0.1, 0.2, 0.3, vals);
 
 
-  for (int i=0; i<N; i++)
-    for (int j=0; j<N; j++)
-      for (int k=0; k<N; k++)
-	for (int n=0; n<numSplines; n++)
-	  for (int m=0; m<8; m++) {
-	    fprintf (stderr, "My   (%d) = (%1.8f, %1.8f)\n", m,
-		     MySplines(2*n).F(i,j,k)[m],
-		     MySplines(2*n+1).F(i,j,k)[m]);
-	    fprintf (stderr, "Multi(%d) = (%1.8f, %1.8f)\n", m,
-		     MultiSpline.F(i,j,k,n)[m][0],		     
-		     MultiSpline.F(i,j,k,n)[m][1]);
-	  }
+//   for (int i=0; i<N; i++)
+//     for (int j=0; j<N; j++)
+//       for (int k=0; k<N; k++)
+// 	for (int n=0; n<numSplines; n++)
+// 	  for (int m=0; m<8; m++) {
+// 	    fprintf (stderr, "My   (%d) = (%1.8f, %1.8f)\n", m,
+// 		     MySplines(2*n).F(i,j,k)[m],
+// 		     MySplines(2*n+1).F(i,j,k)[m]);
+// 	    fprintf (stderr, "Multi(%d) = (%1.8f, %1.8f)\n", m,
+// 		     MultiSpline.F(i,j,k,n)[m][0],		     
+// 		     MultiSpline.F(i,j,k,n)[m][1]);
+// 	  }
 
 
   start = clock();
