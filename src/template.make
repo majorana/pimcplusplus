@@ -53,7 +53,8 @@ ifeq ($(HOSTTYPE),i386-linux)
        include /usr/lib/Make.include	
        CC = distcc mpiCC
        LD = mpiCC  -Bstatic 
-       EXTRADEFS = -Wno-deprecated
+       F77 = g77 
+       EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math
     endif
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
            $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(FFTW3LIB) $(CBLASLIB) \
@@ -77,7 +78,7 @@ VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
 
-DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT  -O3 -DUSE_MPI #-DBZ_DEBUG -DDEBUG #-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT  -O3 -DUSE_MPI #-DBZ_DEBUG -DDEBUG ##-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
 
 
 PIMCobjs =                                \

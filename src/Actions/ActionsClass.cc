@@ -87,23 +87,23 @@ ActionsClass::Read(IOSectionClass &in)
       }
 
   // Create nodal action objects
-  NodalActions.resize(PathData.Path.NumSpecies());
-  for (int spIndex=0; spIndex<PathData.Path.NumSpecies(); spIndex++) {
-    SpeciesClass &species = PathData.Path.Species(spIndex);
-    if (species.GetParticleType() == FERMION) {
-      if (species.NodeType == "FREE") 
-	NodalActions (spIndex) = new FreeNodalActionClass(PathData, spIndex);
-      else {
-	cerr << "Unrecognized node type " << species.NodeType << ".\n";
-	exit(EXIT_FAILURE);
-      }
-      NodalActions(spIndex)->Read(in);
-    }
-    else
-      NodalActions(spIndex) = NULL;
-  }
+//   NodalActions.resize(PathData.Path.NumSpecies());
+//   for (int spIndex=0; spIndex<PathData.Path.NumSpecies(); spIndex++) {
+//     SpeciesClass &species = PathData.Path.Species(spIndex);
+//     if (species.GetParticleType() == FERMION) {
+//       if (species.NodeType == "FREE") 
+// 	NodalActions (spIndex) = new FreeNodalActionClass(PathData, spIndex);
+//       else {
+// 	cerr << "Unrecognized node type " << species.NodeType << ".\n";
+// 	exit(EXIT_FAILURE);
+//       }
+//       NodalActions(spIndex)->Read(in);
+//     }
+//     else
+//       NodalActions(spIndex) = NULL;
+//   }
   
-  //ReadNodalActions (in);
+  ReadNodalActions (in);
 
 //   // Now create nodal actions for Fermions
 //   NodalActions.resize(PathData.Path.NumSpecies());
@@ -134,6 +134,7 @@ void
 ActionsClass::ReadNodalActions(IOSectionClass &in)
 {
   int numNodeSections=in.CountSections("NodalAction");
+  NodalActions.resize (numNodeSections);
   for (int nodeSection=0; nodeSection<numNodeSections; nodeSection++) {
     in.OpenSection("NodalAction", nodeSection);
     string type, speciesString;
@@ -141,8 +142,7 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
     if (type == "FREE") {
       assert (in.ReadVar("Species", speciesString));
       int species = PathData.Path.SpeciesNum(speciesString);
-      NodalActions.resizeAndPreserve(NodalActions.size()+1);
-      NodalActions(species) = 
+      NodalActions(nodeSection) = 
 	new FreeNodalActionClass (PathData, species);
     }
     else if (type == "GROUNDSTATE") {

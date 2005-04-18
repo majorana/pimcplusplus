@@ -43,6 +43,9 @@ DisplaceMoveClass::Read (IOSectionClass &in)
     else
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRange);
 
+  for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
+    DisplaceStage.Actions.push_back(PathData.Actions.NodalActions(i));
+
   // HACK HACK HACK
   //  if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
   //    cerr << "Adding fermion node action for species " 

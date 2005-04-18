@@ -64,12 +64,14 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	else
 	  newStage->Actions.push_back(&PathData.Actions.LongRange);
       }
-      if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-	cerr << "Adding fermion node action for species " 
-	     << speciesName << endl;
+//       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
+// 	cerr << "Adding fermion node action for species " 
+// 	     << speciesName << endl;
 	
-	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
-      }
+// 	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+//       }
+      for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
+	newStage->Actions.push_back(PathData.Actions.NodalActions(i));
     }
 
     newStage->BisectionLevel = level;
