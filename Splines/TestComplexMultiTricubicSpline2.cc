@@ -183,6 +183,86 @@ void SpeedTest()
 // 			   void *F, int *num, void *vals, void *grads);
 
 
+void GradValTest()
+{
+  int N = 30;
+  const int numSplines = 16;
+  Array<MyTricubicSpline,1> MySplines(2*numSplines);
+  ComplexMultiTricubicSpline MultiSpline;
+  LinearGrid xGrid, yGrid, zGrid;
+  
+  xGrid.Init(0.0, 4.0, N);
+  yGrid.Init(0.0, 5.0, N);
+  zGrid.Init(0.0, 6.0, N);
+  
+  Array<complex<double>,4> initData(N,N,N,numSplines);
+  for (int ix=0; ix<N; ix++)
+    for (int iy=0; iy<N; iy++)
+      for (int iz=0; iz<N; iz++) 
+	for (int n=0; n<numSplines; n++) 
+	  initData(ix,iy,iz,n) = complex<double>(drand48(), drand48());
+
+  for (int n=0; n<numSplines; n++) {
+    Array<double,3> temp(N,N,N);
+    for (int ix=0; ix<N; ix++)
+      for (int iy=0; iy<N; iy++)
+	for (int iz=0; iz<N; iz++)
+	  temp(ix,iy,iz) = initData(ix,iy,iz,n).real();
+    MySplines(2*n).Init (&xGrid, &yGrid, &zGrid, temp);
+    for (int ix=0; ix<N; ix++)
+      for (int iy=0; iy<N; iy++)
+	for (int iz=0; iz<N; iz++)
+	  temp(ix,iy,iz) = initData(ix,iy,iz,n).imag();
+    MySplines(2*n+1).Init (&xGrid, &yGrid, &zGrid, temp);
+  }
+
+  MultiSpline.Init (&xGrid, &yGrid, &zGrid, initData);
+
+  Array<complex<double>,1> vals(numSplines), fvals(numSplines);
+  Array<cVec3,1>          grads(numSplines), fgrads(numSplines);
+  int numTests = 1000;
+
+  for (int i=0; i<numTests; i++) {
+    double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
+    double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
+    double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
+    MultiSpline.ValGrad(x,y,z,vals,grads);
+    MultiSpline.FValGrad(x,y,z,fvals,fgrads);
+    for (int j=0; j<numSplines; j++) {
+      complex<double> diff = vals(j) - fvals(j);
+      complex<double> v2 = 
+	complex<double>(MySplines(2*j)(x,y,z),MySplines(2*j+1)(x,y,z));
+      complex<double> diff2 = v2-vals(j);
+      if (fabs(real(diff*conj(diff))) > 1.e-14) {
+	cerr << "x=" << x << " y=" << y << " z=" << z << endl;
+	cerr << "C++ = " << vals(j) << endl;
+	cerr << "F77 = " << fvals(j) << endl;
+      }
+      if (fabs(real(diff*conj(diff2))) > 1.e-14) {
+	cerr << "x=" << x << " y=" << y << " z=" << z << endl;
+	cerr << "Multi= " << vals(j) << endl;
+	cerr << "My   = " << v2 << endl;
+      }
+    }
+    for (int j=0; j<numSplines; j++) 
+      for (int k=0; k<3; k++) {
+	complex<double> diff = grads(j)[k] - fgrads(j)[k];
+	if (fabs(real(diff*conj(diff))) > 1.e-14) {
+	  cerr << "x=" << x << " y=" << y << " z=" << z << endl;
+	  cerr << "C++ = " << grads(j)[k] << endl;
+	  cerr << "F77 = " << fgrads(j)[k] << endl;
+	}
+	complex<double> v2(MySplines(2*j).Grad(x,y,z)[k],
+			   MySplines(2*j+1).Grad(x,y,z)[k]);
+	complex<double> diff2 = grads(j)[k] - v2;
+	if (fabs(real(diff*conj(diff))) > 1.e-14) {
+	  cerr << "x=" << x << " y=" << y << " z=" << z << endl;
+	  cerr << "Multi = " << grads(j)[k] << endl;
+	  cerr << "My    = " << v2          << endl;
+	}
+      }
+  }
+}
 
 void GradSpeedTest()
 {
@@ -228,21 +308,21 @@ void GradSpeedTest()
     vals(j) = complex<double>(MySplines(2*j)(0.1,0.2,0.3), 
 			      MySplines(2*j+1)(0.1,0.2,0.3));
 
-//   start = clock();
-//   for (int i=0; i<numEvals; i++) {
-//     double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
-//     double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
-//     double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
-//     for (int j=0; j<numSplines; j++) {
-//       vals(j)  = 
-// 	complex<double>(MySplines(2*j)(x,y,z),MySplines(2*j+1)(x,y,z));
-//     }
-//   }
-//   end = clock();
-//   fprintf (stderr, "MySplines value and gradient time = %1.3f sec\n", 
-// 	   (double)(end-start)/CLOCKS_PER_SEC);
+  start = clock();
+  for (int i=0; i<numEvals; i++) {
+    double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
+    double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
+    double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
+    for (int j=0; j<numSplines; j++) {
+      vals(j)  = 
+	complex<double>(MySplines(2*j)(x,y,z),MySplines(2*j+1)(x,y,z));
+    }
+  }
+  end = clock();
+  fprintf (stderr, "MySplines value and gradient time = %1.3f sec\n", 
+	   (double)(end-start)/CLOCKS_PER_SEC);
 
-//  MultiSpline(0.1, 0.2, 0.3, vals);
+  MultiSpline(0.1, 0.2, 0.3, vals);
 
 
 //   for (int i=0; i<N; i++)
@@ -265,34 +345,6 @@ void GradSpeedTest()
     double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
     double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
     MultiSpline.ValGrad(x,y,z,vals,grads);
-    MultiSpline.FValGrad(x,y,z,fvals,fgrads);
-    for (int j=0; j<numSplines; j++) {
-      complex<double> diff = vals(j) - fvals(j);
-      complex<double> v2 = 
-	complex<double>(MySplines(2*j)(x,y,z),MySplines(2*j+1)(x,y,z));
-      complex<double> diff2 = v2-vals(j);
-      if (fabs(real(diff*conj(diff))) > 1.e-14) {
-	cerr << "x=" << x << " y=" << y << " z=" << z << endl;
-	cerr << "C++ = " << vals(j) << endl;
-	cerr << "F77 = " << fvals(j) << endl;
-      }
-      if (fabs(real(diff*conj(diff2))) > 1.e-14) {
-	cerr << "x=" << x << " y=" << y << " z=" << z << endl;
-	cerr << "Multi= " << vals(j) << endl;
-	cerr << "My   = " << v2 << endl;
-      }
-    }
-    
-    for (int j=0; j<numSplines; j++) 
-      for (int k=0; k<3; k++) {
-	complex<double> z = grads(j)[k] - fgrads(j)[k];
-	if (fabs(real(z*conj(z))) > 1.e-14) {
-	  cerr << "x=" << x << " y=" << y << " z=" << z << endl;
-	  cerr << "C++ = " << grads(j)[k] << endl;
-	  cerr << "F77 = " << fgrads(j)[k] << endl;
-	}
-      }
-    
   }
   end = clock();
   fprintf (stderr, "MultiSpline value and gradient time = %1.3f sec\n", 
@@ -308,9 +360,10 @@ void GradSpeedTest()
     double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
     double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
     double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
-    z3valgrad_(&x,&y,&z,&x0,&dx,&nx,&y0,&dy,&ny,&z0,&dz,&nz,
-	       MultiSpline.F.data(), (int *)&numSplines, vals.data(),
-	       grads.data());
+//     z3valgrad_(&x,&y,&z,&x0,&dx,&nx,&y0,&dy,&ny,&z0,&dz,&nz,
+// 	       MultiSpline.F.data(), (int *)&numSplines, vals.data(),
+// 	       grads.data());
+    MultiSpline.FValGrad(x,y,z,vals,grads);
   }
   end = clock();
   fprintf (stderr, "fortran ComplexMultiSpline val + grad time = %1.3f sec\n", 
@@ -323,6 +376,7 @@ main()
 {
   PeriodicTest();
   ValTest();
+  GradValTest();
   GradSpeedTest();
 }
   
