@@ -16,7 +16,7 @@ clean:
 
 
 newmake:
-	$(MAKE) -f template.make Makefile FRC=force_rebuild
+	+$(MAKE) -f template.make Makefile FRC=force_rebuild
 
 Makefile:	$(FRC)
 	rm -f $@
