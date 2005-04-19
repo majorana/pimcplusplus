@@ -12,57 +12,57 @@ all:	IO_obj Splines_obj Integration_obj DFT_obj MPI_obj Random_obj \
 
 
 PH_obj:
-	cd PH; $(MAKE_ALL) 
+	+cd PH; $(MAKE_ALL) 
 Splines_obj:
-	cd Splines; $(MAKE_ALL)
+	+cd Splines; $(MAKE_ALL)
 
 Integration_obj:
-	cd Integration; $(MAKE_ALL)
+	+cd Integration; $(MAKE_ALL)
 
 IO_obj:
-	cd IO; $(MAKE_ALL)
+	+cd IO; $(MAKE_ALL)
 
 DFT_obj:
-	cd DFT; $(MAKE_ALL)
+	+cd DFT; $(MAKE_ALL)
 
 MPI_obj:
-	cd MPI; $(MAKE_ALL)
+	+cd MPI; $(MAKE_ALL)
 
 Random_obj:
-	cd Random; $(MAKE_ALL)
+	+cd Random; $(MAKE_ALL)
 
 Optimize_obj:
-	cd Optimize; $(MAKE_ALL)
+	+cd Optimize; $(MAKE_ALL)
 
 SpecialFunctions_obj:
-	cd SpecialFunctions; $(MAKE_ALL)
+	+cd SpecialFunctions; $(MAKE_ALL)
 
 MatrixOps_obj:
-	cd MatrixOps; $(MAKE_ALL)
+	+cd MatrixOps; $(MAKE_ALL)
 
 Fitting_obj:
-	cd Fitting; $(MAKE_ALL)
+	+cd Fitting; $(MAKE_ALL)
 
 PairAction_obj:
-	cd PairAction; $(MAKE_ALL)
+	+cd PairAction; $(MAKE_ALL)
 
 Distributed_obj:
-	cd Distributed; $(MAKE_ALL)
+	+cd Distributed; $(MAKE_ALL)
 
 Atom_obj:
-	cd Atom; $(MAKE_ALL)
+	+cd Atom; $(MAKE_ALL)
 
 Ewald_obj:
-	cd Ewald; $(MAKE_ALL)
+	+cd Ewald; $(MAKE_ALL)
 
 Plotting_obj:
-	cd Plotting; $(MAKE_ALL)
+	+cd Plotting; $(MAKE_ALL)
 
 FFT_obj:
-	cd FFT; $(MAKE_ALL)
+	+cd FFT; $(MAKE_ALL)
 
 PW_obj:
-	cd PlaneWavePHDFT; $(MAKE_ALL)
+	+cd PlaneWavePHDFT; $(MAKE_ALL)
 
 
 CLEANS = PH_clean Splines_clean Integration_clean IO_clean DFT_clean \
@@ -75,114 +75,114 @@ clean:	$(CLEANS)
 
 
 PH_clean:
-	cd PH; $(MAKE_CLEAN)
+	+cd PH; $(MAKE_CLEAN)
 
 Splines_clean:
-	cd Splines; $(MAKE_CLEAN)
+	+cd Splines; $(MAKE_CLEAN)
 
 Integration_clean:
-	cd Integration; $(MAKE_CLEAN)
+	+cd Integration; $(MAKE_CLEAN)
 
 IO_clean:
-	cd IO; $(MAKE_CLEAN)
+	+cd IO; $(MAKE_CLEAN)
 
 DFT_clean:
-	cd DFT; $(MAKE_CLEAN)
+	+cd DFT; $(MAKE_CLEAN)
 
 Random_clean:
-	cd Random; $(MAKE_CLEAN)
+	+cd Random; $(MAKE_CLEAN)
 
 MPI_clean:
-	cd MPI; $(MAKE_CLEAN)
+	+cd MPI; $(MAKE_CLEAN)
 
 Optimize_clean:
-	cd Optimize; $(MAKE_CLEAN)
+	+cd Optimize; $(MAKE_CLEAN)
 
 SpecialFunctions_clean:
-	cd SpecialFunctions; $(MAKE_CLEAN)
+	+cd SpecialFunctions; $(MAKE_CLEAN)
 
 MatrixOps_clean:
-	cd MatrixOps; $(MAKE_CLEAN)
+	+cd MatrixOps; $(MAKE_CLEAN)
 
 Fitting_clean:
-	cd Fitting; $(MAKE_CLEAN)
+	+cd Fitting; $(MAKE_CLEAN)
 
 PairAction_clean:
-	cd PairAction; $(MAKE_CLEAN)
+	+cd PairAction; $(MAKE_CLEAN)
 
 Distributed_clean:
-	cd Distributed; $(MAKE_CLEAN)
+	+cd Distributed; $(MAKE_CLEAN)
 
 Atom_clean:
-	cd Atom; $(MAKE_CLEAN)
+	+cd Atom; $(MAKE_CLEAN)
 
 Ewald_clean:
-	cd Ewald; $(MAKE_CLEAN)
+	+cd Ewald; $(MAKE_CLEAN)
 
 Plotting_clean:
-	cd Plotting; $(MAKE_CLEAN)
+	+cd Plotting; $(MAKE_CLEAN)
 
 FFT_clean:
-	cd FFT; $(MAKE_CLEAN)
+	+cd FFT; $(MAKE_CLEAN)
 
 PW_clean:
-	cd PlaneWavePHDFT; $(MAKE_CLEAN)
+	+cd PlaneWavePHDFT; $(MAKE_CLEAN)
 
 
 
 PH_newmake:
-	cd PH; $(MAKE_NEWMAKE)
+	+cd PH; $(MAKE_NEWMAKE)
 
 Splines_newmake:
-	cd Splines; $(MAKE_NEWMAKE)
+	+cd Splines; $(MAKE_NEWMAKE)
 
 Integration_newmake:
-	cd Integration; $(MAKE_NEWMAKE)
+	+cd Integration; $(MAKE_NEWMAKE)
 
 IO_newmake:
-	cd IO; $(MAKE_NEWMAKE)
+	+cd IO; $(MAKE_NEWMAKE)
 
 DFT_newmake:
-	cd DFT; $(MAKE_NEWMAKE)
+	+cd DFT; $(MAKE_NEWMAKE)
 
 Random_newmake:
-	cd Random; $(MAKE_NEWMAKE)
+	+cd Random; $(MAKE_NEWMAKE)
 
 MPI_newmake:
-	cd MPI; $(MAKE_NEWMAKE)
+	+cd MPI; $(MAKE_NEWMAKE)
 
 Optimize_newmake:
-	cd Optimize; $(MAKE_NEWMAKE)
+	+cd Optimize; $(MAKE_NEWMAKE)
 
 SpecialFunctions_newmake:
-	cd SpecialFunctions; $(MAKE_NEWMAKE)
+	+cd SpecialFunctions; $(MAKE_NEWMAKE)
 
 MatrixOps_newmake:
-	cd MatrixOps; $(MAKE_NEWMAKE)
+	+cd MatrixOps; $(MAKE_NEWMAKE)
 
 Fitting_newmake:
-	cd Fitting; $(MAKE_NEWMAKE)
+	+cd Fitting; $(MAKE_NEWMAKE)
 
 PairAction_newmake:
-	cd PairAction; $(MAKE_NEWMAKE)
+	+cd PairAction; $(MAKE_NEWMAKE)
 
 Distributed_newmake:
-	cd Distributed; $(MAKE_NEWMAKE)
+	+cd Distributed; $(MAKE_NEWMAKE)
 
 Atom_newmake:
-	cd Atom; $(MAKE_NEWMAKE)
+	+cd Atom; $(MAKE_NEWMAKE)
 
 Ewald_newmake:
-	cd Ewald; $(MAKE_NEWMAKE)
+	+cd Ewald; $(MAKE_NEWMAKE)
 
 Plotting_newmake:
-	cd Plotting; $(MAKE_NEWMAKE)
+	+cd Plotting; $(MAKE_NEWMAKE)
 
 FFT_newmake:
-	cd FFT; $(MAKE_NEWMAKE)
+	+cd FFT; $(MAKE_NEWMAKE)
 
 PW_newmake:
-	cd PlaneWavePHDFT; $(MAKE_NEWMAKE)
+	+cd PlaneWavePHDFT; $(MAKE_NEWMAKE)
 
 
 NEW_MAKES = PH_newmake Splines_newmake Integration_newmake IO_newmake         \
@@ -201,7 +201,7 @@ endif
 
 
 newmake: $(NEW_MAKES)
-	$(MAKE) -f template.make Makefile FRC=force_rebuild
+	+$(MAKE) -f template.make Makefile FRC=force_rebuild
 
 Makefile:	$(FRC)
 	rm -f $@

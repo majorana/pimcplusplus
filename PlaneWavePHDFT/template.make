@@ -48,7 +48,7 @@ PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${IN
   "MAKECC=${MAKECC}"
 
 newmake:
-	$(MAKE) -f template.make Makefile FRC=force_rebuild $(PASS_DEFS)
+	+$(MAKE) -f template.make Makefile FRC=force_rebuild $(PASS_DEFS)
 
 Makefile:	$(FRC)
 	rm -f $@
