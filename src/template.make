@@ -357,7 +357,7 @@ MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 all:    pimc++  FreeParticles # Visual_obj #TestPerm TestEwald 
 
-pimc++: Common_obj observables moves actions Tests $(PIMCobjs)
+pimc++: Common_obj Observables_obj Moves_obj Actions_obj Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
 
 TestPerm: Common_obj Tests $(TestPermobjs)
@@ -370,40 +370,40 @@ FreeParticles: Common_obj $(FreeParticleObjs)
 	$(LD) -o $@ $(FreeParticleObjs) $(LIBS) $(PSPLINELIB)
 
 Common_obj:
-	cd Common; ${MAKE_ALL}
+	+cd Common; ${MAKE_ALL}
 
 Visual_obj:
-	cd Visual; ${MAKE_ALL}
+	+cd Visual; ${MAKE_ALL}
 
-observables:
-	cd Observables; ${MAKE_ALL}
+Observables_obj:
+	+cd Observables; ${MAKE_ALL}
 
-moves:
-	cd Moves; ${MAKE_ALL}
+Moves_obj:
+	+cd Moves; ${MAKE_ALL}
 
-actions:
-	cd Actions; ${MAKE_ALL}
+Actions_obj:
+	+cd Actions; ${MAKE_ALL}
 
 Common_clean:
-	cd Common; ${MAKE} clean
+	+cd Common; ${MAKE} clean
 
 Visual_clean:
-	cd Visual; ${MAKE} clean
+	+cd Visual; ${MAKE} clean
 
 Tests_clean:
-	cd Tests; ${MAKE} clean
+	+cd Tests; ${MAKE} clean
 
 Actions_clean:
-	cd Actions; ${MAKE} clean
+	+cd Actions; ${MAKE} clean
 
 Moves_clean:
-	cd Moves; ${MAKE} clean
+	+cd Moves; ${MAKE} clean
 
 Observables_clean:
-	cd Observables; ${MAKE} clean
+	+cd Observables; ${MAKE} clean
 
 CodeTests:    
-	cd Tests; ${MAKE_ALL}
+	+cd Tests; ${MAKE_ALL}
 
 
 
@@ -431,25 +431,25 @@ SOURCES =  Common.cc myprog.cc SpeciesClass.cc  ActionClass.cc PathDataClass.cc 
 
 
 newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake 
-	$(MAKE) -f template.make Makefile FRC=force_rebuild
+	+$(MAKE) -f template.make Makefile FRC=force_rebuild
 
 Common_newmake:
-	cd Common; $(MAKE_NEWMAKE)
+	+cd Common; $(MAKE_NEWMAKE)
 
 Visual_newmake:
-	cd Visual; $(MAKE_NEWMAKE)
+	+cd Visual; $(MAKE_NEWMAKE)
 
 Tests_newmake:
-	cd Tests; $(MAKE_NEWMAKE)
+	+cd Tests; $(MAKE_NEWMAKE)
 
 Observables_newmake:
-	cd Observables; ${MAKE_NEWMAKE}
+	+cd Observables; ${MAKE_NEWMAKE}
 
 Moves_newmake:
-	cd Moves; ${MAKE_NEWMAKE}
+	+cd Moves; ${MAKE_NEWMAKE}
 
 Actions_newmake:
-	cd Actions; ${MAKE_NEWMAKE}
+	+cd Actions; ${MAKE_NEWMAKE}
 
 Makefile:	$(FRC)
 	rm -f $@
