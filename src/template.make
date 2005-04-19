@@ -36,8 +36,9 @@ ifeq ($(HOSTTYPE),powermac)
    CC = mpiCC
    LD = mpiCC
    F77 = f77
-   CCFLAGS = -c -g  -Wno-long-double
+   CCFLAGS = -c -g  -Wno-long-double -ffast-math
    EXTRADEFS = -DNOUNDERSCORE -DNOCUSERID -DMAC
+   MAKECC = mpiCC
    MAKE = make
 endif
 ifeq ($(HOSTTYPE),i386-linux)
@@ -49,12 +50,14 @@ ifeq ($(HOSTTYPE),i386-linux)
 #       LD = icc
        F77 = ifort
        EXTRADEFS = -DUSE_MKL -w1 -wr654,1011
+       MAKECC = g++
     else
        include /usr/lib/Make.include	
        CC = distcc mpiCC
        LD = mpiCC  -Bstatic 
        F77 = g77 
        EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math
+       MAKECC = g++
     endif
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
            $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(FFTW3LIB) $(CBLASLIB) \
@@ -62,16 +65,14 @@ ifeq ($(HOSTTYPE),i386-linux)
     INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC) \
            $(FFTW3INC) $(CBLASINC)
 #    CC = mpiCC
-
-
     CCFLAGS = -c -g  #-pg 
 endif
 
-ifeq ($(GROUP),tvi)
-   MAKECC = icc
-else
-  MAKECC = g++
-endif
+#ifeq ($(GROUP),tvi)
+#   MAKECC = icc
+#else
+#  MAKECC = g++
+#endif
 
 # Gets the subversion revision number
 VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
