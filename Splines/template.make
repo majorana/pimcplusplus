@@ -1,4 +1,4 @@
-SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc TestTricubic.cc MyTricubicSpline.cc TestMyTricubic.cc QuinticSpline.cc TestQuintic.cc DyutimanTest.cc MultiTricubicSpline.cc TestMultiTricubicSpline.cc TestMultiTricubicSpline2.cc MultiTricubicSpline3.cc TestMultiTricubicSpline3.cc PeriodicSpline.cc TestPeriodic.cc ComplexMultiTricubicSpline.cc TestComplexMultiTricubicSpline.cc ComplexMultiTricubicSpline2.cc TestComplexMultiTricubicSpline2.cc z3spline.f
+SOURCES = CubicSpline.cc Grid.cc BicubicSpline.cc TestBicubic.cc TestGrid.cc TestTricubic.cc MyTricubicSpline.cc TestMyTricubic.cc QuinticSpline.cc TestQuintic.cc DyutimanTest.cc MultiTricubicSpline.cc TestMultiTricubicSpline.cc TestMultiTricubicSpline2.cc MultiTricubicSpline3.cc TestMultiTricubicSpline3.cc PeriodicSpline.cc TestPeriodic.cc ComplexMultiTricubicSpline.cc TestComplexMultiTricubicSpline.cc ComplexMultiTricubicSpline2.cc TestComplexMultiTricubicSpline2.cc 
 
 IOobjs = ../IO/InputOutput.o ../IO/InputOutputHDF5.o ../IO/InputOutputASCII.o  ../IO/InputOutputXML.o
 
@@ -57,7 +57,7 @@ clean:
 .cc.o: 
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 
 .f.o:
-	$(F77) -c -O3 $(DEFS) -o $*.o $<
+	$(F77) -c -O3 -o $*.o $<
 
 newmake:
 	+$(MAKE) -f template.make Makefile FRC=force_rebuild

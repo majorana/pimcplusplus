@@ -316,6 +316,12 @@ void GradSpeedTest()
     for (int j=0; j<numSplines; j++) {
       vals(j)  = 
 	complex<double>(MySplines(2*j)(x,y,z),MySplines(2*j+1)(x,y,z));
+      Vec3 rGrad, iGrad;
+      rGrad = MySplines(2*j).Grad(x,y,z);
+      iGrad = MySplines(2*j+1).Grad(x,y,z);
+      grads(j)[0] = complex<double>(rGrad[0],iGrad[0]);
+      grads(j)[1] = complex<double>(rGrad[0],iGrad[1]);
+      grads(j)[2] = complex<double>(rGrad[0],iGrad[2]);
     }
   }
   end = clock();
