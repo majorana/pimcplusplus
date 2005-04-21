@@ -43,22 +43,24 @@ ActionsClass::Read(IOSectionClass &in)
     longRange |= PairArray(i)->IsLongRange();
     bool paUsed=false;
     for (int spec1=0;spec1<Path.NumSpecies();spec1++)
-      if (Path.Species(spec1).Type==PairArray(i)->Particle1.Name)
-	for (int spec2=spec1;spec2<Path.NumSpecies();spec2++) 
-	  if (Path.Species(spec2).Type==PairArray(i)->Particle2.Name) {
-	    if (PairMatrix(spec1,spec2) != NULL) {
-	      cerr << "More than one pair action for species types (" 
-		   << PairArray(i)->Particle1.Name << ", "
-		   << PairArray(i)->Particle2.Name << ")." << endl;
-	      exit(-1);
-	    }
-	    cerr << "Found PAfile for pair (" 
-		 << Path.Species(spec1).Name << ", "
-		 << Path.Species(spec2).Name << ")\n";
-	    PairMatrix(spec1,spec2) = PairArray(i);
-	    PairMatrix(spec2,spec1) = PairArray(i);
-	    paUsed = true;
+      for (int spec2=spec1;spec2<Path.NumSpecies();spec2++) 
+	if (((Path.Species(spec1).Type==PairArray(i)->Particle1.Name)&&
+	     (Path.Species(spec2).Type==PairArray(i)->Particle2.Name)) ||
+	    ((Path.Species(spec2).Type==PairArray(i)->Particle1.Name)&&
+	     (Path.Species(spec1).Type==PairArray(i)->Particle2.Name))) {
+	  if (PairMatrix(spec1,spec2) != NULL) {
+	    cerr << "More than one pair action for species types (" 
+		 << PairArray(i)->Particle1.Name << ", "
+		 << PairArray(i)->Particle2.Name << ")." << endl;
+	    exit(-1);
 	  }
+	  cerr << "Found PAfile for pair (" 
+	       << Path.Species(spec1).Name << ", "
+	       << Path.Species(spec2).Name << ")\n";
+	  PairMatrix(spec1,spec2) = PairArray(i);
+	  PairMatrix(spec2,spec1) = PairArray(i);
+	  paUsed = true;
+	}
     if (!paUsed) {
       cerr << "Warning:  Pair action for species types (" 
 	   << PairArray(i)->Particle1.Name << ", "
@@ -67,11 +69,6 @@ ActionsClass::Read(IOSectionClass &in)
     PAIO.CloseFile();
   }
 
-  if (longRange){
-    LongRange.Init(in);
-    if (UseRPA)
-      LongRangeRPA.Init(in);
-  }
    
   // Now check to make sure all PairActions that we need are defined.
   for (int species1=0; species1<Path.NumSpecies(); species1++)
@@ -85,6 +82,11 @@ ActionsClass::Read(IOSectionClass &in)
 	  exit(1);
 	}
       }
+  if (longRange){
+    LongRange.Init(in);
+    if (UseRPA)
+      LongRangeRPA.Init(in);
+  }
 
   // Create nodal action objects
 //   NodalActions.resize(PathData.Path.NumSpecies());

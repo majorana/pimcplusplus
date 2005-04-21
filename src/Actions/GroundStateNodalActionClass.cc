@@ -21,6 +21,8 @@ GroundStateClass::IonsHaveMoved()
     if (dot (diff,diff) > 1.0e-16)
       changed = true;
   }
+  if (changed)
+    cerr << "Ions have moved.\n";
   return changed;
 }
 
@@ -290,9 +292,9 @@ GroundStateClass::GradientDet(int slice, int speciesNum)
     for (int j=0; j<N; j++)
       Gradient(i) += Cofactors(i,j)*GradMat(i,j);
   }
-  cerr << "Analytic gradient = " << Gradient << endl;
-  GradientDetFD(slice, speciesNum);
-  cerr << "FD gradient = " << Gradient << endl;
+  //  cerr << "Analytic gradient = " << Gradient << endl;
+//   GradientDetFD(slice, speciesNum);
+//   cerr << "FD gradient = " << Gradient << endl;
   return det;
 }
 
@@ -347,6 +349,7 @@ GroundStateClass::GradientDetFD(int slice, int speciesNum)
 void
 GroundStateClass::UpdateBands()
 {
+  cerr << "Updating bands.\n";
   SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
   int first = ionSpecies.FirstPtcl;
   for (int i=0; i<NumIons; i++)
