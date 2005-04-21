@@ -288,7 +288,7 @@ GroundStateClass::GradientDet(int slice, int speciesNum)
 //     Vec3 r_i = Path(slice, first+i);
 //     BandSplines.Grad(r_i[0], r_i[1], r_i[2], Temp);
     for (int j=0; j<N; j++)
-      Gradient(j) += Cofactors(i,j)*GradMat(i,j);
+      Gradient(i) += Cofactors(i,j)*GradMat(i,j);
   }
   cerr << "Analytic gradient = " << Gradient << endl;
   GradientDetFD(slice, speciesNum);
@@ -308,11 +308,11 @@ GroundStateClass::GradientDetFD(int slice, int speciesNum)
   const double eps = 1.0e-6;
 
   // First, fill up determinant matrix
-  Array<double,1> vals;
+  Array<double,1> row;
   for (int j=0; j<N; j++) {
     Vec3 r_j = Path(slice, first+j);
-    vals.reference(Matrix(j,Range::all()));
-    BandSplines(r_j[0], r_j[1], r_j[2], vals);
+    row.reference(Matrix(j,Range::all()));
+    BandSplines(r_j[0], r_j[1], r_j[2], row);
   }
 
   double det = Determinant (Matrix);
@@ -320,23 +320,24 @@ GroundStateClass::GradientDetFD(int slice, int speciesNum)
   for (int i=0; i<N; i++) {
     Vec3 plus, minus;
     plus = 0.0; minus = 0.0;
+    Vec3 r_i = Path(slice, first+i);
+    Vec3 r;
+    row.reference(Matrix(i,Range::all()));
     for (int dim=0; dim<NDIM; dim++) {
-      for (int j=0; j<N; j++) {
-	Vec3 r_j = Path(slice, first+j);
-	r_j[dim] += eps;
-	vals.reference(Matrix(j,Range::all()));
-	BandSplines(r_j[0], r_j[1], r_j[2], vals);
-      }
+      r = r_i;
+      r[dim] += eps;
+      BandSplines(r[0], r[1], r[2], row);
       plus[dim] = Determinant (Matrix);
-
-      for (int j=0; j<N; j++) {
-	Vec3 r_j = Path(slice, first+j);
-	r_j[dim] -= eps;
-	vals.reference(Matrix(j,Range::all()));
-	BandSplines(r_j[0], r_j[1], r_j[2], vals);
-      }
+      
+      r = r_i;
+      r[dim] -= eps;
+      BandSplines(r[0], r[1], r[2], row);
       minus[dim] = Determinant (Matrix);
     }
+    // Reset row to orignal value
+    r = r_i;
+    BandSplines(r[0], r[1], r[2], row);
+    // And compute gradient
     Gradient(i) = (plus-minus)/(2.0*eps);
   }
   return det;
