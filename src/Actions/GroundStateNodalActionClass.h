@@ -5,17 +5,19 @@
 #include "../Common/PlaneWavePHDFT/PlaneWaves.h"
 #include "../Common/Splines/MultiTricubicSpline3.h"
 
-class GroundStateNodalActionClass : public NodalActionClass
+class GroundStateClass 
 {
 private:
   SystemClass *System;
-  int IonSpeciesNum, UpSpeciesNum, DownSpeciesNum;
+  PathDataClass &PathData;
+  PathClass &Path;
   double kCut;
   MultiTricubicSpline BandSplines;
   Potential *PH;
 
   Array<double,1> Workspace;
   Array<double,2> Matrix, Cofactors;
+  Array<Vec3,2>   GradMat;
   Array<double,1> UpDists, DownDists;
 
   Array<Vec3,1> Gradient, Temp, Rions;
@@ -30,6 +32,28 @@ private:
   double SimpleDistance (int slice, int species);
   double LineSearchDistance (int slice, int species);
 public:
+  int IonSpeciesNum, UpSpeciesNum, DownSpeciesNum;
+  double Action (int slice1, int slice2,
+		 const Array<int,1> &activeParticles, 
+		 int level, int speciesNum);
+  
+  double d_dBeta(int slice1, int slice2, int level, int speciesNum);
+
+  bool IsPositive (int slice, int speciesNum);
+  
+  void Read (IOSectionClass &in);
+  GroundStateClass (PathDataClass &pathData);
+
+};
+
+
+// This is a wrapper for the above class.
+class GroundStateNodalActionClass : public NodalActionClass
+{
+private:
+  GroundStateClass &GroundState;
+  int SpeciesNum;
+public:
   double Action (int slice1, int slice2,
 		 const Array<int,1> &activeParticles, int level);
   
@@ -37,12 +61,13 @@ public:
 
   bool IsPositive (int slice);
   
-  void Read (IOSectionClass &in);
-  GroundStateNodalActionClass (PathDataClass &pathData) :
-    NodalActionClass (pathData)
+  GroundStateNodalActionClass (PathDataClass &pathData, GroundStateClass &GS,
+			       int speciesNum) :
+    GroundState(GS), NodalActionClass (pathData), SpeciesNum(speciesNum)
   {
     
   }
+
 };
 
 

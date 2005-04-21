@@ -134,7 +134,7 @@ void
 ActionsClass::ReadNodalActions(IOSectionClass &in)
 {
   int numNodeSections=in.CountSections("NodalAction");
-  NodalActions.resize (numNodeSections);
+  NodalActions.resize (PathData.Path.NumSpecies());
   for (int nodeSection=0; nodeSection<numNodeSections; nodeSection++) {
     in.OpenSection("NodalAction", nodeSection);
     string type, speciesString;
@@ -142,27 +142,18 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
     if (type == "FREE") {
       assert (in.ReadVar("Species", speciesString));
       int species = PathData.Path.SpeciesNum(speciesString);
-      NodalActions(nodeSection) = 
+      NodalActions(species) = 
 	new FreeNodalActionClass (PathData, species);
     }
     else if (type == "GROUNDSTATE") {
-      GroundStateNodalActionClass &nodeAction = *new GroundStateNodalActionClass(PathData);
-      nodeAction.Read (in);
-      NodalActions(nodeSection) = &nodeAction;
-//       string speciesString;
-//       assert (in.ReadVar ("IonSpecies",  speciesString));
-//       int ionSpeciesNum  = PathData.Path.SpeciesNum (speciesString);
-//       assert (in.ReadVar ("UpSpecies",   speciesString));
-//       int upSpeciesNum   = PathData.Path.SpeciesNum (speciesString);
-//       assert (in.ReadVar ("DownSpecies", speciesString));
-//       int downSpeciesNum = PathData.Path.SpeciesNum (speciesString);
-//       double kCut;
-//       assert (in.ReadVar ("kCut", kCut));
-//       int numUp   = PathData.Path.Species(upSpeciesNum).NumParticles;
-//       int numDown = PathData.Path.Species(downSpeciesNum).NumParticles;
-//       assert (numUp == numDown);
-      
-
+      GroundStateClass &groundState = *new GroundStateClass(PathData);
+      groundState.Read (in);
+      NodalActions(groundState.UpSpeciesNum) = 
+	new GroundStateNodalActionClass (PathData, groundState, groundState.UpSpeciesNum);
+      NodalActions(groundState.DownSpeciesNum) = 
+	new GroundStateNodalActionClass (PathData, groundState, groundState.DownSpeciesNum);
+      NodalActions(groundState.IonSpeciesNum) = 
+	new GroundStateNodalActionClass (PathData, groundState, groundState.IonSpeciesNum);
     }
     in.CloseSection();
   }

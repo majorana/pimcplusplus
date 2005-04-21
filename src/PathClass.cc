@@ -120,6 +120,14 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     RefPath(ptcl+species.FirstPtcl) = R0(ptcl);
   }
 
+  /// Check slice 0
+  bool positive = true;
+  for (int actionNum=0; actionNum<Actions.NodalActions.size(); actionNum++) {
+     positive = positive && 
+       Actions.NodalActions(actionNum)->IsPositive(0);
+     cerr << "nodeaction(" << actionNum << ") = " << (positive ? "positive\n" : "negative\n");
+  }
+
 
   int N = TotalNumSlices+1;
   for (int slice=1; slice<N; slice++) {
@@ -133,6 +141,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     
     
     bool positive = false;
+    
     
     do {
       // Randomly construct new slice
@@ -156,7 +165,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	// Now broadcast whether or not I'm positive to everyone
 	Communicator.Broadcast(sliceOwner, positive);
       }
-    } while (!positive);
+  } while (!positive);
 //       if (!positive){
 // 	cerr << "Negative sign at slice " << slice << "\n";
 // 	// Find two closest particles in species.
@@ -389,7 +398,6 @@ void PathClass::InitPaths (IOSectionClass &in)
       for (int ptcl=0l; ptcl<species.NumParticles; ptcl++) 
 	for (int dim=0; dim<NDIM; dim++)
 	  R0(ptcl)[dim] = Positions(ptcl,dim);
-	
       NodeAvoidingLeviFlight (speciesIndex,R0);
     }
 //     else if (InitPaths == "LEVIFLIGHT") {

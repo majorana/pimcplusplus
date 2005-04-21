@@ -28,9 +28,11 @@ void PIMCClass::Read(IOSectionClass &in)
   cerr << "Finished Actions read.\n";
 
   // Now actually initialize the paths
+  cerr << "Before InitPaths.\n";
   assert(in.OpenSection("System"));
   PathData.Path.InitPaths(in);
   in.CloseSection();
+  cerr << "Done InitPaths.\n";
   
   // Read in the Observables
   assert(in.OpenSection("Observables"));

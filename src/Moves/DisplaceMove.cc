@@ -43,16 +43,18 @@ DisplaceMoveClass::Read (IOSectionClass &in)
     else
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRange);
 
-  for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
-    DisplaceStage.Actions.push_back(PathData.Actions.NodalActions(i));
-
-  // HACK HACK HACK
-  //  if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-  //    cerr << "Adding fermion node action for species " 
-  //  << speciesName << endl;
-  //    newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
-  //   }
-
+//   for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
+//     DisplaceStage.Actions.push_back(PathData.Actions.NodalActions(i));
+  for (int i=0; i<activeSpecies.size(); i++) {
+    int speciesNum = activeSpecies(i);
+    if ((PathData.Actions.NodalActions(speciesNum)!=NULL)) {
+      cerr << "Adding fermion node action for species " 
+	   << activeSpeciesNames(i) << endl;
+      DisplaceStage.Actions.push_back
+	(PathData.Actions.NodalActions(speciesNum));
+    }
+  }
+    
   // Now construct stage list
   Stages.push_back(&DisplaceStage);
 }
