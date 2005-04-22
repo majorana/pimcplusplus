@@ -35,7 +35,10 @@ GroundStateClass::SimpleDistance (int slice, int speciesNum)
     gradMag += dot (Gradient(i), Gradient(i));
 
   // Newton Raphson approximation to distance to node 
-  return (det/sqrt(gradMag));
+  double simpleDist = det/sqrt(gradMag);
+//   double lineDist = LineSearchDistance(slice, speciesNum);
+//   fprintf (stdout, "%1.16e %1.16e\n", simpleDist, lineDist);
+  return (simpleDist);
 }
 
 double 
@@ -117,8 +120,8 @@ GroundStateClass::LineSearchDistance (int slice, int speciesNum)
 
 double
 GroundStateClass::Action (int slice1, int slice2, 
-				     const Array<int,1> &activeParticles, 
-				     int level, int speciesNum)
+			  const Array<int,1> &activeParticles, 
+			  int level, int speciesNum)
 {
   double lambdaTauInv = 1.0/(Path.tau*Path.Species(UpSpeciesNum).lambda);
 
@@ -140,7 +143,9 @@ GroundStateClass::Action (int slice1, int slice2,
     doUp   = true;
     doDown = true;
   }
-
+  
+  if (!(doUp || doDown))
+    cerr << "No doing either up or down.  Hmmm...\n";
 
   double action = 0.0;
   if (doUp) {
@@ -154,12 +159,7 @@ GroundStateClass::Action (int slice1, int slice2,
   }
   if (doDown) {
     for (int slice=slice1; slice <= slice2; slice++) {
-      double det = GradientDet (slice, UpSpeciesNum);
-      double gradMag = 0.0;
-      for (int i=0; i<Path.Species(UpSpeciesNum).NumParticles; i++)
-	gradMag += dot (Gradient(i), Gradient(i));
-      // Newton Raphson approximation to distance to node
-      DownDists(slice) = det/sqrt(gradMag);
+      DownDists(slice) = SimpleDistance(slice, DownSpeciesNum);
       if (DownDists(slice) < 0.0)
 	return 1.0e100;
     }
@@ -250,6 +250,7 @@ GroundStateClass::Det(int slice, int speciesNum)
   Array<double,1> vals;
   for (int j=0; j<N; j++) {
     Vec3 r_j = Path(slice, first+j);
+    Path.PutInBox(r_j);
     vals.reference(Matrix(j,Range::all()));
     BandSplines(r_j[0], r_j[1], r_j[2], vals);
   }
@@ -275,6 +276,7 @@ GroundStateClass::GradientDet(int slice, int speciesNum)
   Array<Vec3,1> grads;
   for (int j=0; j<N; j++) {
     Vec3 r_j = Path(slice, first+j);
+    Path.PutInBox(r_j);
     vals.reference(Matrix(j,Range::all()));
     grads.reference(GradMat(j,Range::all()));
     BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
@@ -313,6 +315,7 @@ GroundStateClass::GradientDetFD(int slice, int speciesNum)
   Array<double,1> row;
   for (int j=0; j<N; j++) {
     Vec3 r_j = Path(slice, first+j);
+    Path.PutInBox(r_j);
     row.reference(Matrix(j,Range::all()));
     BandSplines(r_j[0], r_j[1], r_j[2], row);
   }
@@ -328,16 +331,19 @@ GroundStateClass::GradientDetFD(int slice, int speciesNum)
     for (int dim=0; dim<NDIM; dim++) {
       r = r_i;
       r[dim] += eps;
+      Path.PutInBox(r);
       BandSplines(r[0], r[1], r[2], row);
       plus[dim] = Determinant (Matrix);
       
       r = r_i;
       r[dim] -= eps;
+      Path.PutInBox(r);
       BandSplines(r[0], r[1], r[2], row);
       minus[dim] = Determinant (Matrix);
     }
     // Reset row to orignal value
     r = r_i;
+    Path.PutInBox(r);
     BandSplines(r[0], r[1], r[2], row);
     // And compute gradient
     Gradient(i) = (plus-minus)/(2.0*eps);
@@ -387,6 +393,7 @@ GroundStateClass::IsPositive (int slice, int speciesNum)
   Array<double,1> vals;
   for (int j=0; j<N; j++) {
     Vec3 r_j = Path(slice, first+j);
+    Path.PutInBox(r_j);
     vals.reference(Matrix(j,Range::all()));
     BandSplines(r_j[0], r_j[1], r_j[2], vals);
   }
@@ -408,8 +415,10 @@ GroundStateNodalActionClass::Action (int slice1, int slice2,
 				     const Array<int,1> &activeParticles,
 				     int level)
 {
-  return GroundState.Action (slice1, slice2, activeParticles, level,
-			     SpeciesNum);
+  double action = GroundState.Action (slice1, slice2, activeParticles, level,
+				      SpeciesNum);
+  cerr << "NodalAction = " <<  action << endl;
+  return action;
 }
 
 double

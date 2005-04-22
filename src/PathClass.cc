@@ -11,10 +11,9 @@ void PathClass::ReadOld(string fileName,bool replicate)
   Array<double,4> oldPaths; //(58,2560,2,3);
   
   assert(inFile.ReadVar("Path",oldPaths));
-  cerr<<"My paths are of size"<<oldPaths.extent(0)<<" "<<oldPaths.extent(1)<<" "<<oldPaths.extent(2)<<endl;
+  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
+       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
   
-
-
   for (int ptcl=0;ptcl<NumParticles();ptcl++){
     for (int slice=0; slice<NumTimeSlices(); slice++) {
       dVec pos;
@@ -29,12 +28,9 @@ void PathClass::ReadOld(string fileName,bool replicate)
       Path(slice,ptcl) = pos;
     }      
   }
-  
   inFile.CloseSection();
   inFile.CloseSection();
   inFile.CloseFile();
-
-
 }
 
 void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
@@ -121,13 +117,15 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
   }
 
   /// Check slice 0
-  bool positive = true;
-  for (int actionNum=0; actionNum<Actions.NodalActions.size(); actionNum++) {
-     positive = positive && 
-       Actions.NodalActions(actionNum)->IsPositive(0);
-     cerr << "nodeaction(" << actionNum << ") = " << (positive ? "positive\n" : "negative\n");
-  }
-
+  if (myProc == 0)
+    if (! Actions.NodalActions(speciesNum)->IsPositive(0)) {
+      cerr << "Initially negative node action.  Swapping two particles "
+	   << "for species " << species.Name << ".\n";
+      dVec tmp;
+      tmp = (*this)(0,species.FirstPtcl);
+      (*this)(0,species.FirstPtcl) = (*this)(0,species.FirstPtcl+1);
+      (*this)(0,species.FirstPtcl+1) = tmp;
+    }
 
   int N = TotalNumSlices+1;
   for (int slice=1; slice<N; slice++) {
