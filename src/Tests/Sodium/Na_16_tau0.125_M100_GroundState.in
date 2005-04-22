@@ -236,8 +236,8 @@ Section (Algorithm) {
         int steps=2;
         Section (Move) { string name="eupBlock";} 
         Section (Move) { string name="edownBlock";} 
-	Section (Move) { string name="upRefSlice";} 
-	Section (Move) { string name="downRefSlice";} 
+// 	Section (Move) { string name="upRefSlice";} 
+// 	Section (Move) { string name="downRefSlice";} 
       }
       Section (Move) { string name = "Shift"; }
     }
@@ -253,8 +253,8 @@ Section (Algorithm) {
         int steps=2;
         Section (Move) { string name="eupBlock";} 
         Section (Move) { string name="edownBlock";} 
-        Section (Move) { string name="upRefSlice";} 
-        Section (Move) { string name="downRefSlice";} 
+//         Section (Move) { string name="upRefSlice";} 
+//         Section (Move) { string name="downRefSlice";} 
       }
       Section (Move) { string name = "Shift"; }
     }

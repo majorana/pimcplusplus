@@ -91,15 +91,16 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      hlabel=infiles.ReadVar("xlabel")[0]
      vlabel=infiles.ReadVar("ylabel")[0]
      data=infiles.ReadVar("y")
-     print "My data is ",data
-     if data==[None] or [None,None]:
-          return currNum
+###     print "My data is ",data
+#     if data==[None] or [None,None]:
+#          return currNum
      y = AvgLastVec(data)
      x=infiles.ReadVar("x")[0]
      description=infiles.ReadVar("Description")[0]
      doc.append(Heading(4,description))
      currNum=currNum+1
      baseName=sectionName+repr(currNum)
+     print 'y = ', y
      myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel)
 ####     myImg=ProduceCorrelationPicture(x, data[-1000],baseName,hlabel,vlabel)
      doc.append(myImg)
@@ -156,9 +157,9 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
     asciiFileName = fileBase + '.dat'
     asciiFile = open (asciiFileName, "w")
     n = len(data)
-    print "MY data is",data
+##    print "MY data is",data
     for i in range(0,len(data)):
-         print "Data ",i,"is ",data[i]
+##         print "Data ",i,"is ",data[i]
          asciiFile.write('%20.16e\n' % data[i])
     asciiFile.close()
 
@@ -192,13 +193,13 @@ def MeanErrorString (mean, error):
      return (meanstr, errorstr)
 
 def Avg (x):
-     print "My x is ",x
+#     print "My x is ",x
      if x[0] == None:
           return None
      else:
           return sum(x)/len(x)
 def VecAvg (x):
-     print "My x is ",x
+#     print "My x is ",x
      if x[0] == None:
           return None
      else:
@@ -251,8 +252,8 @@ def ProcessScalarSection(infiles,doc,currNum):
 #     print "Num vars is ",numVars
      for counter in range(0,numVars):
           data = infiles.ReadVar(counter)
-          print "data is ",data
-          print type(data[0])
+##          print "data is ",data
+##          print type(data[0])
           if type(data[0])==numarray.numarraycore.NumArray:
                currNum=currNum+1
                varName=infiles.GetVarName(counter)

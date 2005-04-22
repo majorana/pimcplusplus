@@ -125,6 +125,8 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
       tmp = (*this)(0,species.FirstPtcl);
       (*this)(0,species.FirstPtcl) = (*this)(0,species.FirstPtcl+1);
       (*this)(0,species.FirstPtcl+1) = tmp;
+      RefPath(species.FirstPtcl)   = (*this)(0,species.FirstPtcl);
+      RefPath(species.FirstPtcl+1) = (*this)(0,species.FirstPtcl+1);
     }
 
   int N = TotalNumSlices+1;

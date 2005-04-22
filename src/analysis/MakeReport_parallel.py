@@ -76,6 +76,7 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
 
 
 def ProcessCorrelationSection(infile,doc,currNum):
+     print 'found corelation section.'
      sectionName=infile.GetName()
      doc.append(Heading(1,sectionName))
      hlabel=infile.ReadVar("xlabel")

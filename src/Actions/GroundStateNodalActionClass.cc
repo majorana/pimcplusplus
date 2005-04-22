@@ -417,7 +417,8 @@ GroundStateNodalActionClass::Action (int slice1, int slice2,
 {
   double action = GroundState.Action (slice1, slice2, activeParticles, level,
 				      SpeciesNum);
-  cerr << "NodalAction = " <<  action << endl;
+//   cerr << "species = " << Path.Species(SpeciesNum).Name 
+//        << " NodalAction = " <<  action << endl;
   return action;
 }
 
