@@ -70,7 +70,7 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      set(labels, 'fontsize', 16)
      currAxis=axis()
      currAxis[0]=cutoff
-     print "Curr axis is ",currAxis
+#     print "Curr axis is ",currAxis
      axis(currAxis)
      savefig(fileBase+".png",dpi=60)
      savefig(fileBase+".ps")
@@ -92,15 +92,14 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      vlabel=infiles.ReadVar("ylabel")[0]
      data=infiles.ReadVar("y")
 ###     print "My data is ",data
-#     if data==[None] or [None,None]:
-#          return currNum
+     if (data==[None]) or (data==[None,None]):
+          return currNum
      y = AvgLastVec(data)
      x=infiles.ReadVar("x")[0]
      description=infiles.ReadVar("Description")[0]
      doc.append(Heading(4,description))
      currNum=currNum+1
      baseName=sectionName+repr(currNum)
-     print 'y = ', y
      myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel)
 ####     myImg=ProduceCorrelationPicture(x, data[-1000],baseName,hlabel,vlabel)
      doc.append(myImg)
