@@ -114,7 +114,7 @@ public:
 inline SpeciesClass& VisualClass::PtclSpecies (int ptcl)
 {
   int si = 0;
-  while (si < Species.size() && (Species(si).FirstParticle > ptcl))
+  while (si < Species.size() && (Species(si).LastParticle < ptcl))
     si++;
   return Species(si);
 }
