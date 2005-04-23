@@ -115,9 +115,6 @@ void VisualClass::Read(string fileName)
     in.CloseSection(); // Species
   }
 
-  for (int i=0; i<numSpecies; i++)
-    cerr << "FirstParticle = " << Species(i).FirstParticle << endl;
-
   for (int i=0; i<numSpecies; i++) 
     cerr << "Species:  Name = " << Species(i).Name << "    First Ptcl = " 
 	 << Species(i).FirstParticle 
@@ -476,9 +473,7 @@ void VisualClass::MakePaths(int frame)
   cerr << "NumParticles =" << numPtcls << endl;
   // Constuct list of permuting loops.  Ignore classical particles.
   for (int ptcl=0; ptcl<numPtcls; ptcl++) {
-    cerr << "PtclSpecies(ptcl).lambda = " << PtclSpecies(ptcl).lambda <<endl;
     if (!used(ptcl) && (PtclSpecies(ptcl).lambda!=0.0)) {
-      cerr << "inside ptcl loop.\n";
       vector<int> loop;
       int permPtcl = ptcl;
       bool haveOpen = false;

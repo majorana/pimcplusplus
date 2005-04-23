@@ -102,6 +102,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 {
   SpeciesClass &species = Species(speciesNum);
   double lambda = species.lambda;
+  bool haveNodeAction = Actions.NodalActions(speciesNum)!=NULL;
 
   int myFirstSlice, myLastSlice, myProc;
   myProc = Communicator.MyProc();
@@ -116,19 +117,28 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     RefPath(ptcl+species.FirstPtcl) = R0(ptcl);
   }
 
-  /// Check slice 0
+  /// Check slice 0 -- important for ground state nodes
+  bool swapFirst = false;
   if (myProc == 0)
-    if (! Actions.NodalActions(speciesNum)->IsPositive(0)) {
-      cerr << "Initially negative node action.  Swapping two particles "
-	   << "for species " << species.Name << ".\n";
-      dVec tmp;
-      tmp = (*this)(0,species.FirstPtcl);
-      (*this)(0,species.FirstPtcl) = (*this)(0,species.FirstPtcl+1);
-      (*this)(0,species.FirstPtcl+1) = tmp;
-      RefPath(species.FirstPtcl)   = (*this)(0,species.FirstPtcl);
-      RefPath(species.FirstPtcl+1) = (*this)(0,species.FirstPtcl+1);
+    if (haveNodeAction)
+      if (! Actions.NodalActions(speciesNum)->IsPositive(0)) {
+	cerr << "Initially negative node action.  Swapping two particles "
+	     << "for species " << species.Name << ".\n";
+	swapFirst = true;
+      }
+  Communicator.Broadcast (0,swapFirst);
+  if (swapFirst) {
+    swap (R0(0), R0(1));
+    RefPath(species.FirstPtcl)     = R0(0);
+    RefPath(species.FirstPtcl+1)   = R0(1);
+    prevSlice(0)                   = R0(0);
+    prevSlice(1)                   = R0(1);
+    if (myProc==0) {
+      (*this)(0,species.FirstPtcl)   = R0(0);
+      (*this)(0,species.FirstPtcl+1) = R0(1);  
     }
-
+  }
+  
   int N = TotalNumSlices+1;
   for (int slice=1; slice<N; slice++) {
     int sliceOwner = SliceOwner(slice);
@@ -138,10 +148,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     double delta = (double)(N-slice-1);
     double taueff = tau*(1.0 - 1.0/(delta+1.0));
     double sigma = sqrt (2.0*lambda*taueff);
-    
-    
     bool positive = false;
-    
     
     do {
       // Randomly construct new slice
@@ -214,9 +221,13 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     prevSlice = newSlice;
   }
   Array<int,1> changedParticles(1);
-  double action = 
-    Actions.NodalActions(speciesNum)->Action(0, N-1, 
-					     changedParticles,0);
+  if (haveNodeAction) {
+    double action = 
+      Actions.NodalActions(speciesNum)->Action(0, N-1, 
+					       changedParticles,0);
+    cerr << "Nodal Action after Levi flight = " << action << endl;
+  }
+
   char fname[100];
   snprintf (fname, 100, "%s.dat", species.Name.c_str());
   FILE *fout = fopen (fname, "w");
@@ -227,7 +238,6 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     fprintf (fout, "\n");
   }
   fclose(fout);
-  cerr << "Nodal Action after Levi flight = " << action << endl;
   cerr << "My first particle = " << species.FirstPtcl << endl;
 }
 
