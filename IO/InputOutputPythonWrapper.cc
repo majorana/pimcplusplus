@@ -20,8 +20,8 @@ IOSection_CountSectionsName (PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple (args, "is",&IOSectionPtr,&name))
     return NULL;
   else {
-    bool success = ((IOSectionClass*)IOSectionPtr)->CountSections(name);
-    return Py_BuildValue("i",(int)success);
+    int num = ((IOSectionClass*)IOSectionPtr)->CountSections(name);
+    return Py_BuildValue("i",(int)num);
   }
 }
 
