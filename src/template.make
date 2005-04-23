@@ -51,6 +51,7 @@ ifeq ($(HOSTTYPE),i386-linux)
        F77 = ifort
        EXTRADEFS = -DUSE_MKL -w1 -wr654,1011 -DUSE_MPI
        MAKECC = g++
+       CCFLAGS = -c -g  #-pg 
     else
        include /usr/lib/Make.include	
        CC = distcc g++
@@ -58,6 +59,7 @@ ifeq ($(HOSTTYPE),i386-linux)
        F77 = g77 
        EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math
        MAKECC = g++
+       CCFLAGS = -c -g  -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops -ffast-math -O3 #-pg 
     endif
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
            $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(FFTW3LIB) $(CBLASLIB) \
@@ -65,7 +67,7 @@ ifeq ($(HOSTTYPE),i386-linux)
     INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC) \
            $(FFTW3INC) $(CBLASINC)
 #    CC = mpiCC
-    CCFLAGS = -c -g  #-pg 
+
 endif
 
 #ifeq ($(GROUP),tvi)

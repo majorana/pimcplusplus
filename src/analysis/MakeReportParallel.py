@@ -323,6 +323,7 @@ def ProcessSystemInfo(infiles):
      speciesTable.body=[]
      speciesTable.body.append(["Name","NumParticles","lambda","Type"])
      numSections=infiles.CountSections2("Species")
+     print 'NumSpecies = ', numSections
      for spec in range(0,numSections):
           infiles.OpenSection2("Species",spec)
           name=infiles.ReadVar("Name")[0]
