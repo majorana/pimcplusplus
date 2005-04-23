@@ -210,6 +210,18 @@ void GradSpeedTest()
   end = clock();
   fprintf (stderr, "MultiSpline value and gradient time = %1.3f sec\n", 
 	   (double)(end-start)/CLOCKS_PER_SEC);
+
+  MultiSpline(0.1, 0.2, 0.3, vals);
+  start = clock();
+  for (int i=0; i<numEvals; i++) {
+    double x = xGrid.Start+drand48()*(xGrid.End-xGrid.Start);
+    double y = yGrid.Start+drand48()*(yGrid.End-xGrid.Start);
+    double z = zGrid.Start+drand48()*(zGrid.End-xGrid.Start);
+    MultiSpline.FValGrad(x,y,z,vals,grads);
+  }
+  end = clock();
+  fprintf (stderr,"MultiSpline fortran value and gradient time = %1.3f sec\n",
+	   (double)(end-start)/CLOCKS_PER_SEC);
 }
 
 

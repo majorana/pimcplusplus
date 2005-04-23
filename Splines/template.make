@@ -27,8 +27,8 @@ TestMultiTricubicSpline:	Grid.o  TestMultiTricubicSpline.o MyTricubicSpline.o Mu
 TestMultiTricubicSpline2:	Grid.o  TestMultiTricubicSpline2.o MyTricubicSpline.o
 	$(LD) -o TestMultiTricubicSpline2 Grid.o MyTricubicSpline.o TestMultiTricubicSpline2.o $(IOobjs) $(LIBS)
 
-TestMultiTricubicSpline3:	Grid.o  TestMultiTricubicSpline3.o MyTricubicSpline.o MultiTricubicSpline3.o
-	$(LD) -o TestMultiTricubicSpline3 Grid.o MyTricubicSpline.o MultiTricubicSpline3.o TestMultiTricubicSpline3.o $(IOobjs) $(LIBS)
+TestMultiTricubicSpline3:	Grid.o  TestMultiTricubicSpline3.o MyTricubicSpline.o MultiTricubicSpline3.o r3spline.o
+	$(LD) -o TestMultiTricubicSpline3 Grid.o MyTricubicSpline.o MultiTricubicSpline3.o TestMultiTricubicSpline3.o r3spline.o $(IOobjs) $(LIBS)
 
 TestComplexMultiTricubicSpline:	Grid.o  TestComplexMultiTricubicSpline.o MyTricubicSpline.o ComplexMultiTricubicSpline.o
 	$(LD) -o TestComplexMultiTricubicSpline Grid.o MyTricubicSpline.o ComplexMultiTricubicSpline.o TestComplexMultiTricubicSpline.o $(IOobjs) $(LIBS)
@@ -57,7 +57,7 @@ clean:
 .cc.o: 
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) -o $*.o $< 
 .f.o:
-	$(F77) -c -O3 -o $*.o $<
+	$(F77) $(CCFLAGS) -o $*.o $<
 
 newmake:
 	+$(MAKE) -f template.make Makefile FRC=force_rebuild
