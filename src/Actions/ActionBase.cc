@@ -12,6 +12,11 @@ ActionBaseClass::ActionBaseClass(PathDataClass &pathData) :
   /* Do nothing */
 }
 
+void ActionBaseClass::ShiftData (int slicesToShift)
+{
+  // Do nothing 
+}
+
 PotentialBaseClass::PotentialBaseClass(PathDataClass &pathData) : 
   PathData(pathData), Path(pathData.Path)
 {

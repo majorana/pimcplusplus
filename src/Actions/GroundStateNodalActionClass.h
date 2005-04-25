@@ -4,6 +4,7 @@
 #include "NodalActionClass.h"
 #include "../Common/PlaneWavePHDFT/PlaneWaves.h"
 #include "../Common/Splines/MultiTricubicSpline3.h"
+#include "../MirroredClass.h"
 
 class GroundStateClass 
 {
@@ -18,7 +19,7 @@ private:
   Array<double,1> Workspace;
   Array<double,2> Matrix, Cofactors;
   Array<Vec3,2>   GradMat;
-  Array<double,1> UpDists, DownDists;
+  Mirrored1DClass<double> UpDists, DownDists;
 
   Array<Vec3,1> Gradient, Temp, Rions;
   int NumUp, NumDown, NumIons, NumBands;
@@ -42,6 +43,10 @@ public:
   bool IsPositive (int slice, int speciesNum);
   
   void Read (IOSectionClass &in);
+  void ShiftData (int slices2Shift, int speciesNum);
+  void AcceptCopy (int slice1, int slice2);
+  void RejectCopy (int slice1, int slice2);
+  void Init(int speciesNum);
   GroundStateClass (PathDataClass &pathData);
 
 };
@@ -60,7 +65,11 @@ public:
   double d_dBeta(int slice1, int slice2, int level);
 
   bool IsPositive (int slice);
-  
+  void ShiftData (int slices2Shift);  
+  void AcceptCopy (int slice1, int slice2);
+  void RejectCopy (int slice1, int slice2);
+  void Init();
+
   GroundStateNodalActionClass (PathDataClass &pathData, GroundStateClass &GS,
 			       int speciesNum) :
     GroundState(GS), NodalActionClass (pathData), SpeciesNum(speciesNum)

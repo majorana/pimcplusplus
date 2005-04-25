@@ -54,7 +54,7 @@ ifeq ($(HOSTTYPE),i386-linux)
        CCFLAGS = -c -g  #-pg 
     else
        include /usr/lib/Make.include	
-       CC = distcc g++
+       CC = g++
        LD = g++  -Bstatic -g
        F77 = g77 
        EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math

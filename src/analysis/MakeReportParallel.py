@@ -380,7 +380,7 @@ def ProcessMove(doc,infiles):
      for i in range (0, numMoves):
           infiles.OpenSection(i)
           name=infiles.GetName()
-          print "they are ",infiles.ReadVar("AcceptRatio")
+##          print "they are ",infiles.ReadVar("AcceptRatio")
           ar = VecAvg(infiles.ReadVar("AcceptRatio"))
           if (ar!=None):
                totAccept=ar[0]
@@ -448,12 +448,13 @@ print 'Found ' +repr(infiles.len()) + ' output files.'
 
 dirName=basename 
 cutoff=None
-if (os.access(dirName+".pref",os.F_OK)):
-     print dirName+".pref"
+if (os.access(dirName+"/.pref",os.F_OK)):
+     print dirName+"/.pref"
      prefFile=IOSectionClass()
-     prefFile.OpenFile(dirName+".pref")
+     prefFile.OpenFile(dirName+"/.pref")
      print prefFile.ReadVar("cutoff")
      cutoff=prefFile.ReadVar("cutoff")
+     print "cutoff = ", cutoff
 #     prefFile.CloseFile() 
 if cutoff==None:
      cutoff=0

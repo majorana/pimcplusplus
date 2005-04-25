@@ -34,6 +34,10 @@ void PIMCClass::Read(IOSectionClass &in)
   in.CloseSection();
   cerr << "Done InitPaths.\n";
   
+  cerr << "Initializing Actions caches.\n";
+  PathData.Actions.Init();
+  cerr << "done.\n";
+
   // Read in the Observables
   assert(in.OpenSection("Observables"));
   ReadObservables(in);

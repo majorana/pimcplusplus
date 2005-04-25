@@ -57,6 +57,10 @@ public:
   inline operator Array<T,1>&()       { return Data[ActiveCopy];           }
   inline T  operator()(int i) const   { return Data[ActiveCopy](i);        }
   inline T& operator()(int i)         { return Data[ActiveCopy](i);        }
+  inline const Array<T,1>& operator[](int i) const 
+  { return Data[i]; }
+  inline Array<T,1>& operator[](int i) 
+  { return Data[i]; }
   inline void AcceptCopy ()           { Data[OLDMODE] = Data[NEWMODE];     }
   inline void RejectCopy ()           { Data[NEWMODE] = Data[OLDMODE];     }
   inline void AcceptCopy (int i)

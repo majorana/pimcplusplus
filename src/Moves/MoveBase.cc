@@ -88,7 +88,7 @@ inline int ParticleMoveClass::RandInt (int Max) //Hopefully this didn't break an
 //}
 
 /// So do we still want to choose particles by dumping everything
-/// into some mapping array from teh active particles and dealing 
+/// into some mapping array from the active particles and dealing 
 // with it that way? I think this is doing duplicate stuff in here.
 void ParticleMoveClass::ChooseParticles()
 {
@@ -96,7 +96,9 @@ void ParticleMoveClass::ChooseParticles()
     bool Redundant;
     do {
       MyParticleIndices(i) = RandInt(TotalParticles);
-      while (PathData.Path.OpenPaths && MyParticleIndices(i)==(int)(PathData.Path.OpenPtcl)){ //HACK!HACK!
+      while (PathData.Path.OpenPaths && 
+	     MyParticleIndices(i)==(int)(PathData.Path.OpenPtcl)){ 
+	//HACK!HACK!
 	MyParticleIndices(i) = RandInt(TotalParticles);
       } 
       Redundant = false;

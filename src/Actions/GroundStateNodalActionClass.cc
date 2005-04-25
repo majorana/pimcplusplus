@@ -152,7 +152,7 @@ GroundStateClass::Action (int slice1, int slice2,
     for (int slice=slice1; slice <= slice2; slice++) {
       UpDists(slice) = SimpleDistance(slice, UpSpeciesNum);
       if (UpDists(slice) < 0.0)
-	return 1.0e100;
+	action += 1.0e100;
     }
     for (int link=slice1; link < slice2; link++) 
       action -= log1p(-exp(-UpDists(link)*UpDists(link+1)*lambdaTauInv));
@@ -161,7 +161,7 @@ GroundStateClass::Action (int slice1, int slice2,
     for (int slice=slice1; slice <= slice2; slice++) {
       DownDists(slice) = SimpleDistance(slice, DownSpeciesNum);
       if (DownDists(slice) < 0.0)
-	return 1.0e100;
+	action += 1.0e100;
     }
     for (int link=slice1; link < slice2; link++) 
       action -= log1p(-exp(-DownDists(link)*DownDists(link+1)*lambdaTauInv));
@@ -171,9 +171,48 @@ GroundStateClass::Action (int slice1, int slice2,
 
 double
 GroundStateClass::d_dBeta (int slice1, int slice2, int level,
-				      int speciesNum)
+			   int speciesNum)
 {
-  return 0.0;
+//   bool error = false;
+//   for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
+//     double upDist = SimpleDistance (slice, UpSpeciesNum);
+//     if (fabs(upDist -UpDists(slice)) > 1.0e-12) {
+//       fprintf (stderr, 
+// 	       "Cached updist = %1.12e  Actual updist = %1.12e slice=%d\n",
+// 	       UpDists(slice), upDist, slice);
+//       error = true;
+//     }
+//     double downDist = SimpleDistance (slice, DownSpeciesNum);
+//     if (fabs(downDist - DownDists(slice))> 1.0e-12){
+//       fprintf (stderr, 
+// 	       "Cached downdist = %1.12e  Actual downdist = %1.12e slice=%d",
+// 	       DownDists(slice), downDist, slice);
+//       error = true;
+//     }
+//   }
+//   if (!error)
+//     cerr << "No errors detected in GroundStateClass:;d_dBeta.\n";
+  double du = 0.0;
+  int skip = 1<<level;
+  double levelTau =(double)skip * Path.tau;
+  double lambdaTauInv = 1.0/(levelTau*Path.Species(UpSpeciesNum).lambda);
+  if (speciesNum == UpSpeciesNum)
+    for (int slice=slice1; slice<slice2; slice+=skip) {
+      double prod = UpDists(slice)*UpDists(slice+skip);
+      double prod_llt = prod * lambdaTauInv;
+      double exp_m1 = expm1 (prod_llt);
+      if (isnormal(exp_m1))
+	du += prod_llt / (levelTau*exp_m1);
+    }
+  if (speciesNum == DownSpeciesNum)
+    for (int slice=slice1; slice<slice2; slice+=skip) {
+      double prod = DownDists(slice)*DownDists(slice+skip);
+      double prod_llt = prod * lambdaTauInv;
+      double exp_m1 = expm1 (prod_llt);
+      if (isnormal(exp_m1))
+	du += prod_llt / (levelTau*exp_m1);
+    }
+  return du/(double)Path.TotalNumSlices;
 }
 
 void 
@@ -426,4 +465,138 @@ double
 GroundStateNodalActionClass::d_dBeta(int slice1, int slice2, int level)
 {
   return GroundState.d_dBeta (slice1, slice2, level, SpeciesNum);
+}
+
+void GroundStateClass::ShiftData(int slicesToShift, int speciesNum)
+{
+  if ((speciesNum == UpSpeciesNum) || (speciesNum==DownSpeciesNum)) {
+//     if (speciesNum == UpSpeciesNum) 
+//       cerr << "Shifting up species by " << slicesToShift << endl;
+//     if (speciesNum == DownSpeciesNum) 
+//       cerr << "Shifting down species by " << slicesToShift << endl;
+    Mirrored1DClass<double>& dists=
+      ((speciesNum==UpSpeciesNum) ? UpDists : DownDists);
+    CommunicatorClass &comm = Path.Communicator;
+
+    int numProcs=comm.NumProcs();
+    int myProc=comm.MyProc();
+    int recvProc, sendProc;
+    int numSlices  = Path.NumTimeSlices();
+    assert(abs(slicesToShift)<numSlices);
+    sendProc=(myProc+1) % numProcs;
+    recvProc=((myProc-1) + numProcs) % numProcs;
+    if (slicesToShift<0)
+      swap (sendProc, recvProc);
+    
+    /// First shifts the data in the A copy left or right by the
+    /// appropriate amount 
+    if (slicesToShift>0)
+      for (int slice=numSlices-1; slice>=slicesToShift;slice--)
+	dists[0](slice)=dists[0](slice-slicesToShift);
+    else 
+      for (int slice=0; slice<numSlices+slicesToShift;slice++)
+	dists[0](slice)=dists[0](slice-slicesToShift);
+    
+    
+    /// Now bundle up the data to send to adjacent processor
+    int bufferSize=abs(slicesToShift);
+    Array<double,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
+    int startSlice;
+    int buffIndex=0;
+    if (slicesToShift>0) {
+      startSlice=numSlices-slicesToShift;
+      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
+	/// If shifting forward, don't send the last time slice (so always)
+	/// send slice-1
+	sendBuffer(buffIndex)=dists[1](slice-1);
+	buffIndex++;
+      }
+    }
+    else {
+      startSlice=0;
+      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+	/// If shifting backward, don't send the first time slice (so always)
+	/// send slice+1
+	sendBuffer(buffIndex)=dists[1](slice+1);
+	buffIndex++;
+      }
+    }
+    
+    /// Send and receive data to/from neighbors.
+    comm.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
+    
+    if (slicesToShift>0)
+      startSlice=0;
+    else 
+      startSlice=numSlices+slicesToShift;
+    
+    /// Copy the data into the A copy
+    buffIndex=0;
+    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+      dists[0](slice)=receiveBuffer(buffIndex);
+      buffIndex++;
+    }
+    
+    // Now copy A into B, since A has all the good, shifted data now.
+    for (int slice=0; slice<numSlices; slice++)
+      dists[1](slice) = dists[0](slice);
+    // And we're done! 
+  } 
+}
+
+void 
+GroundStateClass::AcceptCopy (int slice1, int slice2)
+{
+  UpDists.AcceptCopy (slice1, slice2);
+  DownDists.AcceptCopy (slice1, slice2);
+}
+
+void 
+GroundStateClass::RejectCopy (int slice1, int slice2)
+{
+  UpDists.RejectCopy (slice1, slice2);
+  DownDists.RejectCopy (slice1, slice2);
+}
+
+void
+GroundStateNodalActionClass::ShiftData (int slices2Shift)
+{
+  GroundState.ShiftData (slices2Shift, SpeciesNum);
+}
+
+void
+GroundStateNodalActionClass::AcceptCopy (int slice1, int slice2)
+{
+  GroundState.AcceptCopy (slice1, slice2);
+}
+
+void
+GroundStateNodalActionClass::RejectCopy (int slice1, int slice2)
+{
+  GroundState.RejectCopy (slice1, slice2);
+}
+
+
+void GroundStateClass::Init(int speciesNum)
+{
+  if (speciesNum == UpSpeciesNum) {
+    for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
+      UpDists[0](slice) = SimpleDistance(slice, speciesNum);
+      UpDists[1](slice) = UpDists[0](slice);
+    }
+    cerr << "Initializing up species.\n";
+  }
+
+  if (speciesNum == DownSpeciesNum) {
+    for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
+      DownDists[0](slice) = SimpleDistance(slice, speciesNum);
+      DownDists[1](slice) = DownDists[0](slice);
+    }
+    cerr << "Initializing down species.\n";
+  }
+}
+
+void GroundStateNodalActionClass::Init()
+{
+  GroundState.Init (SpeciesNum);
 }

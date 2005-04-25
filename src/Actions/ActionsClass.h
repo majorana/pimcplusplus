@@ -88,6 +88,19 @@ public:
   /// necessary initialization.  This reads the pair actions, and does
   /// long range breakups and RPA corrections if necessary.
   void Read(IOSectionClass &in);
+
+  /// This routine does any necessary shifting of stored data for the
+  /// paths.  It just calls the ShiftData
+  void ShiftData (int slicesToShift);
+
+  void AcceptCopy (int startSlice, int endSlice,
+		   const Array<int,1> &activeParticles);
+  void RejectCopy (int startSlice, int endSlice,
+		   const Array<int,1> &activeParticles);
+  /// This should be called after the paths have been constructed to
+  /// initialize any cached data;
+  void Init();
+
   ActionsClass(PathDataClass &pathData) : 
     ShortRange(pathData,PairMatrix),
     ShortRangeApproximate(pathData,PairMatrix),

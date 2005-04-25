@@ -33,6 +33,7 @@ public:
   // This returns the sum over all time slices, using MPI
   // to sum over processors if necessary.
   virtual void Read (IOSectionClass &in);
+  virtual void ShiftData (int slices2Shift);
   ActionBaseClass(PathDataClass &pathData);				   
 };
 

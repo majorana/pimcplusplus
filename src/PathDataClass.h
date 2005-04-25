@@ -40,6 +40,7 @@ public:
   PathClass Path;
   inline void ShiftData(int numTimeSlicesToShift){
     Path.ShiftData(numTimeSlicesToShift);
+    Actions.ShiftData(numTimeSlicesToShift);
   }
 
   /// We are probaby going to have to move permutation
@@ -128,12 +129,14 @@ inline int PathDataClass::SpeciesNum(string name)
 inline void PathDataClass::AcceptMove(int startTimeSlice,int endTimeSlice,
 			       const Array <int,1> &activeParticles)
 {
+  Actions.AcceptCopy (startTimeSlice, endTimeSlice, activeParticles);
   Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
 }
 
 inline void PathDataClass::RejectMove(int startTimeSlice,int endTimeSlice,
 			       const Array <int,1> &activeParticles)
 {
+  Actions.RejectCopy (startTimeSlice, endTimeSlice, activeParticles);
   Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticles); 
 }
 

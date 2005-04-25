@@ -10,6 +10,9 @@ class NodalActionClass : public ActionBaseClass
 {
 public:
   virtual bool IsPositive (int slice) = 0;
+  virtual void AcceptCopy (int slice1, int slice2);
+  virtual void RejectCopy (int slice1, int slice2);
+  virtual void Init();
   NodalActionClass (PathDataClass &pathData) :
     ActionBaseClass (pathData)
   {

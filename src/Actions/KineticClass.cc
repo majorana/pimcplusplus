@@ -30,9 +30,8 @@ double KineticClass::Action (int slice1, int slice2,
         vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
         double GaussProd = 1.0;
         for (int dim=0; dim<NDIM; dim++) {
-  	  int NumImage=1;
 	  double GaussSum=0.0;
-	  for (int image=-NumImage; image<=NumImage; image++) {
+	  for (int image=-NumImages; image<=NumImages; image++) {
 	    double dist = vel[dim]+(double)image*Path.GetBox()[dim];
 	    GaussSum += exp(-dist*dist*FourLambdaTauInv);
 	  }
@@ -60,7 +59,6 @@ double KineticClass::d_dBeta (int slice1, int slice2,
 //     levelTau *= 2.0;
   spring  = 0.0;  
   int skip = 1<<level;
-  const int NumImage=1;  
   for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++) {
     // Do free-particle part
     int speciesNum  = Path.ParticleSpeciesNum(ptcl);
@@ -76,7 +74,7 @@ double KineticClass::d_dBeta (int slice1, int slice2,
 	dVec GaussSum=0.0;
 	dVec numSum=0.0;
 	for (int dim=0; dim<NDIM; dim++) {
-	  for (int image=-NumImage; image<=NumImage; image++) {
+	  for (int image=-NumImages; image<=NumImages; image++) {
 	    double dist = vel[dim]+(double)image*PathData.Path.GetBox()[dim];
 	    double d2overFLT = dist*dist*FourLambdaTauInv;
 	    double expPart = exp(-d2overFLT);

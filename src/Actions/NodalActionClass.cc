@@ -795,3 +795,23 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
   //  return 0.0;
   return uNode/(double)Path.TotalNumSlices;
 }
+
+
+void 
+NodalActionClass::AcceptCopy (int slice1, int slice2)
+{
+
+}
+
+void 
+NodalActionClass::RejectCopy (int slice1, int slice2)
+{
+
+}
+
+
+void 
+NodalActionClass::Init()
+{
+
+}

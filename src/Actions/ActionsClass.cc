@@ -1,9 +1,5 @@
 #include "ActionsClass.h"
-
 #include "../PathDataClass.h"
-
-
-
 #include "../Common/Ewald/OptimizedBreakup.h"
 #include "../Common/Integration/GKIntegration.h"
 
@@ -14,6 +10,8 @@ ActionsClass::Read(IOSectionClass &in)
   PathClass &Path=PathData.Path;
   assert(in.ReadVar ("tau", Path.tau));
   assert(in.ReadVar ("MaxLevels", MaxLevels));
+  assert(in.ReadVar ("NumImages", NumImages));
+  Kinetic.SetNumImages (NumImages);
   cerr << "MaxLevels = " << MaxLevels << endl;
 
   if (!in.ReadVar ("UseRPA", UseRPA))
@@ -285,4 +283,50 @@ Potential&
 ActionsClass::GetPotential (int species1, int species2)
 {
   return *(PairMatrix(species1, species2)->Pot);
+}
+
+
+void 
+ActionsClass::ShiftData (int slicesToShift)
+{
+  OpenLoopImportance.ShiftData(slicesToShift);
+  StructureReject.ShiftData(slicesToShift);
+  ShortRange.ShiftData(slicesToShift);
+  ShortRangeApproximate.ShiftData(slicesToShift);
+  LongRange.ShiftData(slicesToShift);
+  LongRangeRPA.ShiftData(slicesToShift);
+  DavidLongRange.ShiftData(slicesToShift);
+  TIP5PWater.ShiftData(slicesToShift);
+  ST2Water.ShiftData(slicesToShift);
+  for (int i=0; i<NodalActions.size(); i++)
+    if (NodalActions(i)!=NULL)
+      NodalActions(i)->ShiftData(slicesToShift);
+}
+
+
+void 
+ActionsClass::AcceptCopy (int startSlice, int endSlice,
+			       const Array<int,1> &activeParticles)
+{
+  for (int i=0; i<NodalActions.size(); i++)
+    if (NodalActions(i) != NULL)
+      NodalActions(i)->AcceptCopy (startSlice, endSlice);
+}
+
+
+void 
+ActionsClass::RejectCopy (int startSlice, int endSlice,
+			       const Array<int,1> &activeParticles)
+{
+  for (int i=0; i<NodalActions.size(); i++)
+    if (NodalActions(i) != NULL)
+      NodalActions(i)->RejectCopy (startSlice, endSlice);
+}
+
+void
+ActionsClass::Init()
+{
+  for (int i=0; i<NodalActions.size(); i++)
+    if (NodalActions(i) != NULL)
+      NodalActions(i)->Init();
 }
