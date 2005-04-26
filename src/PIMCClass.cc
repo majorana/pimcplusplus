@@ -49,7 +49,7 @@ void PIMCClass::Read(IOSectionClass &in)
     PathData.Actions.LongRange.Init (in, OutFile);
     if (PathData.Actions.UseRPA)
       PathData.Actions.LongRangeRPA.Init(in);
-    in.CloseFile();
+    in.CloseSection();
   }
 
 
