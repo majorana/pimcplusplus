@@ -10,6 +10,7 @@ private:
   double Vlong (double q, int level);
   // Real space cutoff parameter;
   double alpha;
+  double rCut;
 public:
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);
@@ -49,6 +50,12 @@ public:
 
   bool IsLongRange();
   //  void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
+
+  double Xk_U  (double k, int level);
+  double Xk_dU (double k, int level);
+  double Xk_V  (double k);
+  double Vk    (double k);
+  void Setrc (double rc);
 
   PAclassicalFitClass()
   { 

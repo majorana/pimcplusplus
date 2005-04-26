@@ -5,34 +5,40 @@
 /// The following routines are used only if we are creating fits, not
 /// using them.
 #ifdef MAKE_FIT
-void PAclassicalFitClass::ReadParams(IOSectionClass &inSection)
+void 
+PAclassicalFitClass::ReadParams(IOSectionClass &inSection)
 {
   //  UsePBC = inSection.ReadVar ("Box", Box);
 }
 
-void PAclassicalFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
+void 
+PAclassicalFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 { }
 
 
-void PAclassicalFitClass::AddFit (Rho &rho)
+void 
+PAclassicalFitClass::AddFit (Rho &rho)
 {
 }
 
 
-void PAclassicalFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
+void 
+PAclassicalFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 {
   Uerror = 0.0;
   dUerror = 0.0;
 }
 
 
-void PAclassicalFitClass::WriteFits (IOSectionClass &outSection)
+void 
+PAclassicalFitClass::WriteFits (IOSectionClass &outSection)
 {
 }
 #endif
 
 
-double PAclassicalFitClass::U(double q, double z, double s2, int level)
+double 
+PAclassicalFitClass::U(double q, double z, double s2, int level)
 {
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
@@ -43,7 +49,8 @@ double PAclassicalFitClass::U(double q, double z, double s2, int level)
   return (beta*V);
 }
 
-double PAclassicalFitClass::dU(double q, double z, double s2, int level)
+double 
+PAclassicalFitClass::dU(double q, double z, double s2, int level)
 {
   double V = Pot->V(q);
   // if (IsLongRange())
@@ -53,7 +60,8 @@ double PAclassicalFitClass::dU(double q, double z, double s2, int level)
 
 
 
-bool PAclassicalFitClass::Read (IOSectionClass &in,
+bool 
+PAclassicalFitClass::Read (IOSectionClass &in,
 				double smallestBeta, int numBetas)
 {
   SmallestBeta = smallestBeta;
@@ -84,7 +92,8 @@ bool PAclassicalFitClass::Read (IOSectionClass &in,
 /////////////////////////
 /// Long-ranged stuff ///
 /////////////////////////
-bool PAclassicalFitClass::IsLongRange()
+bool 
+PAclassicalFitClass::IsLongRange()
 {
   // This needs to be fixed.  We need to add this kind of function to
   // the potential base class. 
@@ -93,7 +102,8 @@ bool PAclassicalFitClass::IsLongRange()
 
 
 
-double PAclassicalFitClass::Vlong(double q, int level)
+double 
+PAclassicalFitClass::Vlong(double q, int level)
 {
   if (q <= 0.0)
     return 2.0/sqrt(M_PI)*Z1Z2*alpha;
@@ -101,7 +111,8 @@ double PAclassicalFitClass::Vlong(double q, int level)
     return Z1Z2/q*erf(alpha*q);
 }
 
-double PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
+double 
+PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
 {
   if (k <= 0.0)
     k = 1.0e-30;
@@ -144,7 +155,8 @@ double PAclassicalFitClass::Vlong_k(double boxVol, double k, int level)
 
 
 /// The diagonal action only -- used for long-range breakup
-double PAclassicalFitClass::Udiag(double q, int level)
+double 
+PAclassicalFitClass::Udiag(double q, int level)
 {  
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
@@ -153,7 +165,8 @@ double PAclassicalFitClass::Udiag(double q, int level)
 }
 
 /// The q-derivative of the above
-double PAclassicalFitClass::Udiag_p(double q, int level) 
+double 
+PAclassicalFitClass::Udiag_p(double q, int level) 
 {  
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
@@ -162,7 +175,8 @@ double PAclassicalFitClass::Udiag_p(double q, int level)
 }
 
 /// The q-derivative of the above
-double PAclassicalFitClass::Udiag_pp(double q, int level) 
+double 
+PAclassicalFitClass::Udiag_pp(double q, int level) 
 {  
   double beta = SmallestBeta;
   for (int i=0; i<level; i++)
@@ -171,37 +185,84 @@ double PAclassicalFitClass::Udiag_pp(double q, int level)
 }
 
 /// The beta-derivative of the diagonal action
-double PAclassicalFitClass::dUdiag    (double q, int level) 
+double 
+PAclassicalFitClass::dUdiag    (double q, int level) 
 {
   return Pot->V(q);
 }
 
 /// The q-derivative of the above
-double PAclassicalFitClass::dUdiag_p  (double q, int level) 
+double 
+PAclassicalFitClass::dUdiag_p  (double q, int level) 
 {
   return Pot->dVdr(q);
 }
 
 /// The q-derivative of the above
-double PAclassicalFitClass::dUdiag_pp (double q, int level) 
+double 
+PAclassicalFitClass::dUdiag_pp (double q, int level) 
 {
   return Pot->d2Vdr2(q);
 }
 
 /// The potential to which this action corresponds.
-double PAclassicalFitClass::V  (double r) 
+double 
+PAclassicalFitClass::V  (double r) 
 {
   return Pot->V(r);
 }
 
 /// The q-derivative of the above
-double PAclassicalFitClass::Vp (double r)
+double 
+PAclassicalFitClass::Vp (double r)
 {
   return Pot->dVdr(r);
 }
 
 /// The q-derivative of the above
-double PAclassicalFitClass::Vpp(double r) 
+double 
+PAclassicalFitClass::Vpp(double r) 
 {
   return Pot->d2Vdr2(r);
+}
+
+/// HACK HACK HACK
+/// This assumes we have a coulomb potential
+double
+PAclassicalFitClass::Xk_U(double k, int level)
+{
+  double beta = SmallestBeta;
+  for (int i=0; i<level; i++)
+    beta *= 2.0;
+  return -4.0*M_PI*beta*Z1Z2/(k*k) * cos(k*rCut);
+}
+
+/// HACK HACK HACK
+/// This assumes we have a coulomb potential
+double
+PAclassicalFitClass::Xk_dU(double k, int level)
+{
+  return -4.0*M_PI*Z1Z2/(k*k) *cos(k*rCut);
+}
+
+/// HACK HACK HACK
+/// This assumes we have a coulomb potential
+double
+PAclassicalFitClass::Xk_V(double k)
+{
+  return -4.0*M_PI*Z1Z2/(k*k) *cos(k*rCut);
+}
+
+/// HACK HACK HACK
+/// This assumes we have a coulomb potential
+double
+PAclassicalFitClass::Vk (double k)
+{
+  return 4.0*M_PI*Z1Z2/(k*k);
+}
+
+void
+PAclassicalFitClass::Setrc( double rc)
+{
+  rCut = rc;
 }
