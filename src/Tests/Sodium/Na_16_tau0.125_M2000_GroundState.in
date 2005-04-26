@@ -96,7 +96,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "/localscratch/esler/NaRuns/Na_16_tau0.125_M2000_GroundStateLS";
+  string OutFileBase = "/localscratch/esler/NaRuns/Na_16_tau0.125_M2000_GroundStateLS2";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";

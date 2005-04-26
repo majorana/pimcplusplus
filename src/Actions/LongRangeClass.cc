@@ -390,7 +390,7 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
   double rmax = 0.75 * sqrt (dot(box,box));
   const int numPoints = 1000;
   LongGrid.Init (0.0, rmax, numPoints);
-  Array<double,1> Ulong_r(numPoints), r(numPoints);
+  Array<double,1> Ulong_r(numPoints), r(numPoints), Ushort_r(numPoints);
   for (int i=0; i<numPoints; i++)
     r(i) = LongGrid(i);
 
@@ -400,11 +400,11 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
     cerr << "Doing long range breakpus for species types (" 
 	 << PairArray(paIndex)->Particle1.Name << ", " 
 	 << PairArray(paIndex)->Particle2.Name << ")\n";
-    out.NewSection("PairAction");
-    out.WriteVar ("Particle1", PairArray(paIndex)->Particle1.Name);
-    out.WriteVar ("Particle2", PairArray(paIndex)->Particle2.Name);
-
     PairActionFitClass &pa = *PairArray(paIndex);
+    out.NewSection("PairAction");
+    out.WriteVar ("Particle1", pa.Particle1.Name);
+    out.WriteVar ("Particle2", pa.Particle2.Name);
+
     pa.Setrc (rc);
     pa.Ulong.resize(pa.NumBetas);
     pa.Ulong_k.resize(pa.NumBetas,Path.kVecs.size());
@@ -461,7 +461,6 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
 
       // Now write to outfile
       out.WriteVar ("Ulong", Ulong_r);
-      Array<double,1> Ushort_r(numPoints);
       for (int i=0; i<numPoints; i++)
 	Ushort_r(i) = pa.Udiag(LongGrid(i), level) - Ulong_r(i);
       out.WriteVar ("Ushort", Ushort_r);
@@ -551,10 +550,18 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
   double rmax = 0.75 * sqrt (dot(box,box));
   const int numPoints = 1000;
   LongGrid.Init (0.0, rmax, numPoints);
-  Array<double,1> dUlong_r(numPoints);
+  Array<double,1> dUlong_r(numPoints), r(numPoints), dUshort_r(numPoints);
+  for (int i=0; i<numPoints; i++)
+    r(i) = LongGrid(i);
 
+  out.NewSection ("dU");
+  out.WriteVar ("r", r);
   for (int paIndex=0; paIndex<PairArray.size(); paIndex++) {
     PairActionFitClass &pa = *PairArray(paIndex);
+    out.NewSection("PairAction");
+    out.WriteVar ("Particle1", pa.Particle1.Name);
+    out.WriteVar ("Particle2", pa.Particle2.Name);
+
     pa.Setrc (rc);
     pa.dUlong.resize(pa.NumBetas);
     pa.dUlong_k.resize(pa.NumBetas,Path.kVecs.size());
@@ -562,6 +569,7 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
     pa.dUlong_r0.resize(pa.NumBetas);
     pa.dUshort_k0.resize(pa.NumBetas);
     for (int level=0; level<pa.NumBetas; level++) {
+      out.NewSection ("Level");
       dUlong_r = 0.0;
 
       // Calculate Xk's
@@ -605,6 +613,12 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 	  dUlong_r(i) = pa.dUdiag (r, level);
       }
       pa.dUlong(level).Init(&LongGrid, dUlong_r);
+      // Now write to outfile
+      out.WriteVar ("dUlong", dUlong_r);
+      for (int i=0; i<numPoints; i++)
+	dUshort_r(i) = pa.dUdiag(LongGrid(i), level) - dUlong_r(i);
+      out.WriteVar ("dUshort", dUshort_r);
+
 
       // Calculate FT of Ushort at k=0
       UshortIntegrand integrand(pa, level, JOB_DU);
@@ -625,8 +639,12 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 	//pa.dUlong_k(level,ki) -= CalcXk(paIndex, level, k, rc, JOB_DU);
 	pa.dUlong_k(level,ki) -= pa.Xk_dU(k, level) / boxVol;
       }
+      out.CloseSection (); // "Level"
     }
+    out.CloseSection (); // "PairAction"
   }
+  out.CloseSection (); // "dU"
+  out.FlushFile();
 #endif
 }
 
