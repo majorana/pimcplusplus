@@ -6,9 +6,6 @@
 
 class BisectionStageClass : public LocalStageClass
 {
-private:
-  int NumImage;
-
 public:
   void WriteRatio();
   ObservableDouble AcceptRatioVar;
@@ -19,7 +16,6 @@ public:
   BisectionStageClass(PathDataClass &pathData, int level,
 		      IOSectionClass outSection) : 
     LocalStageClass(pathData,outSection),
-    NumImage(1),
     AcceptRatioVar("AcceptRatio",OutSection,pathData.Path.Communicator) 
   { 
     //do nothing for now

@@ -44,6 +44,14 @@ void PIMCClass::Read(IOSectionClass &in)
   cerr << "Finished Observables Read.\n";
   in.CloseSection();
 
+  if (PathData.Actions.HaveLongRange()) {
+    assert (in.OpenSection ("Action"));
+    PathData.Actions.LongRange.Init (in, OutFile);
+    if (PathData.Actions.UseRPA)
+      PathData.Actions.LongRangeRPA.Init(in);
+    in.CloseFile();
+  }
+
 
   // Read in the Moves
   assert(in.OpenSection("Moves"));

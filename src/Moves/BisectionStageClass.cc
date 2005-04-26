@@ -119,6 +119,8 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
   int skip = 1<<(BisectionLevel+1);
   double levelTau = 0.5*PathData.Path.tau*skip;
 
+  int numImages = PathData.Actions.NumImages;
+
   double logSampleProb=0.0;
   double logOldSampleProb=0.0;
 
@@ -152,7 +154,7 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
       for (int dim=0; dim<NDIM; dim++) {
 	double GaussSum = 0.0;
 	double GaussSumOld =0.0;
-	for (int image=-NumImage; image <= NumImage; image++) {
+	for (int image=-numImages; image <= numImages; image++) {
 	  double dist = Delta[dim]+(double)image*Path.GetBox()[dim];
 	  double distOld=DeltaOld[dim]+(double)image*Path.GetBox()[dim];
 	  GaussSum += exp(-0.5*dist*dist/sigma2);

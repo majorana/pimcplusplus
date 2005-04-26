@@ -34,11 +34,10 @@ ActionsClass::Read(IOSectionClass &in)
       PairMatrix(i,j) = (PairActionFitClass*)NULL;
   // Read pair actions files
   IOSectionClass PAIO;
-  bool longRange = false;
+
   for (int i=0; i<numPairActions; i++) {
     assert(PAIO.OpenFile (PAFiles(i)));
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
-    longRange |= PairArray(i)->IsLongRange();
     bool paUsed=false;
     for (int spec1=0;spec1<Path.NumSpecies();spec1++)
       for (int spec2=spec1;spec2<Path.NumSpecies();spec2++) 
@@ -80,11 +79,11 @@ ActionsClass::Read(IOSectionClass &in)
 	  exit(1);
 	}
       }
-  if (longRange){
-    LongRange.Init(in);
-    if (UseRPA)
-      LongRangeRPA.Init(in);
-  }
+//   if (longRange){
+//     LongRange.Init(in);
+//     if (UseRPA)
+//       LongRangeRPA.Init(in);
+//   }
 
   // Create nodal action objects
 //   NodalActions.resize(PathData.Path.NumSpecies());
@@ -329,4 +328,13 @@ ActionsClass::Init()
   for (int i=0; i<NodalActions.size(); i++)
     if (NodalActions(i) != NULL)
       NodalActions(i)->Init();
+}
+
+
+bool ActionsClass::HaveLongRange()
+{
+  bool longRange = false;
+  for (int i=0; i<PairArray.size(); i++)
+    longRange = longRange || PairArray(i)->IsLongRange();
+  return longRange;
 }

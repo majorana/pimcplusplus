@@ -320,7 +320,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
     
 }
 
-void LongRangeClass::Init(IOSectionClass &in)
+void LongRangeClass::Init(IOSectionClass &in, IOSectionClass &out)
 {
   if (PathData.Path.Getkc() == 0.0) {
     cerr << "Missing kCutoff in System section.  Aborting.\n";
@@ -329,9 +329,11 @@ void LongRangeClass::Init(IOSectionClass &in)
   int numKnots;
   assert(in.ReadVar ("NumBreakupKnots", numKnots));
   cerr << "Doing optimized long range breakups...\n";
-  OptimizedBreakup_U(numKnots);
-  OptimizedBreakup_dU(numKnots);
-  OptimizedBreakup_V(numKnots);
+  out.NewSection ("LongRangeAction");
+  OptimizedBreakup_U(numKnots, out);
+  OptimizedBreakup_dU(numKnots, out);
+  OptimizedBreakup_V(numKnots, out);
+  out.CloseSection();
 }
 
 
@@ -343,7 +345,8 @@ void LongRangeClass::Init(IOSectionClass &in)
 /// k-space cutoff.  
 /// Only \f$\mathbf{k}\f$ with \f$|\mathbf{k}| < k_c$\f will be
 /// included in the simulation sum.
-void LongRangeClass::OptimizedBreakup_U(int numKnots)
+void LongRangeClass::OptimizedBreakup_U(int numKnots, 
+					IOSectionClass &out)
 {
   /// BUG: Long Range Optimized Breakups only work for NDIM=3
 #if NDIM==3
@@ -387,12 +390,20 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots)
   double rmax = 0.75 * sqrt (dot(box,box));
   const int numPoints = 1000;
   LongGrid.Init (0.0, rmax, numPoints);
-  Array<double,1> Ulong_r(numPoints);
+  Array<double,1> Ulong_r(numPoints), r(numPoints);
+  for (int i=0; i<numPoints; i++)
+    r(i) = LongGrid(i);
 
+  out.NewSection ("U");
+  out.WriteVar ("r", r);
   for (int paIndex=0; paIndex<PairArray.size(); paIndex++) {
     cerr << "Doing long range breakpus for species types (" 
 	 << PairArray(paIndex)->Particle1.Name << ", " 
 	 << PairArray(paIndex)->Particle2.Name << ")\n";
+    out.NewSection("PairAction");
+    out.WriteVar ("Particle1", PairArray(paIndex)->Particle1.Name);
+    out.WriteVar ("Particle2", PairArray(paIndex)->Particle2.Name);
+
     PairActionFitClass &pa = *PairArray(paIndex);
     pa.Setrc (rc);
     pa.Ulong.resize(pa.NumBetas);
@@ -401,6 +412,7 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots)
     pa.Ulong_r0.resize(pa.NumBetas);
     pa.Ushort_k0.resize(pa.NumBetas);
     for (int level=0; level<pa.NumBetas; level++) {
+      out.NewSection ("Level");
       Ulong_r = 0.0;
       
       // Calculate Xk's
@@ -447,6 +459,14 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots)
       }
       pa.Ulong(level).Init(&LongGrid, Ulong_r);
 
+      // Now write to outfile
+      out.WriteVar ("Ulong", Ulong_r);
+      Array<double,1> Ushort_r(numPoints);
+      for (int i=0; i<numPoints; i++)
+	Ushort_r(i) = pa.Udiag(LongGrid(i), level) - Ulong_r(i);
+      out.WriteVar ("Ushort", Ushort_r);
+      
+
       // Calculate FT of Ushort at k=0
       UshortIntegrand integrand(pa, level, JOB_U);
       GKIntegration<UshortIntegrand, GK31> integrator(integrand);
@@ -479,12 +499,17 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots)
 // 	fprintf (fout, "%1.16e \n", U);
 //       }
 //       fclose (fout);
+      out.CloseSection (); // "Level"
     }
+    out.CloseSection (); // "PairAction"
   }
+  out.CloseSection (); // "U"
+  out.FlushFile();
 #endif
 }
 
-void LongRangeClass::OptimizedBreakup_dU(int numKnots)
+void LongRangeClass::OptimizedBreakup_dU(int numKnots,
+					 IOSectionClass &out)
 {
   ///BUG: Optimized Breakup only works when NDIM==3
 #if NDIM==3
@@ -716,7 +741,8 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots)
 // }
 
 
-void LongRangeClass::OptimizedBreakup_V(int numKnots)
+void LongRangeClass::OptimizedBreakup_V(int numKnots,
+					IOSectionClass &out)
 {
   ///BUG: Optimized breakup only works when NDIM==3
 #if NDIM==3

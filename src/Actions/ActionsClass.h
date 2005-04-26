@@ -101,6 +101,8 @@ public:
   /// initialize any cached data;
   void Init();
 
+  bool HaveLongRange();
+
   ActionsClass(PathDataClass &pathData) : 
     ShortRange(pathData,PairMatrix),
     ShortRangeApproximate(pathData,PairMatrix),

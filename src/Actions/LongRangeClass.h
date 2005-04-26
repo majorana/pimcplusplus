@@ -18,9 +18,9 @@ protected:
   Array<PairActionFitClass*,2> &PairMatrix;
   Array<PairActionFitClass*,1> &PairArray;
   LinearGrid LongGrid;
-  void OptimizedBreakup_U(int numKnots);
-  void OptimizedBreakup_dU(int numKnots);
-  void OptimizedBreakup_V(int numKnots);
+  void OptimizedBreakup_U(int numKnots,  IOSectionClass &out);
+  void OptimizedBreakup_dU(int numKnots, IOSectionClass &out);
+  void OptimizedBreakup_V(int numKnots,  IOSectionClass &out);
 
 
   /// This calculates the quantity 
@@ -30,7 +30,7 @@ protected:
 
   int Level, ki;
 public:
-  void Init(IOSectionClass &in);
+  void Init(IOSectionClass &in, IOSectionClass &out);
   void Read (IOSectionClass &in);
   double Action (int slice1, int slice2, 
 		   const Array<int,1> &activeParticles, int level);

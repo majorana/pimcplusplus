@@ -150,7 +150,7 @@ GroundStateClass::Action (int slice1, int slice2,
   double action = 0.0;
   if (doUp) {
     for (int slice=slice1; slice <= slice2; slice++) {
-      UpDists(slice) = SimpleDistance(slice, UpSpeciesNum);
+      UpDists(slice) = LineSearchDistance(slice, UpSpeciesNum);
       if (UpDists(slice) < 0.0)
 	action += 1.0e100;
     }
@@ -159,7 +159,7 @@ GroundStateClass::Action (int slice1, int slice2,
   }
   if (doDown) {
     for (int slice=slice1; slice <= slice2; slice++) {
-      DownDists(slice) = SimpleDistance(slice, DownSpeciesNum);
+      DownDists(slice) = LineSearchDistance(slice, DownSpeciesNum);
       if (DownDists(slice) < 0.0)
 	action += 1.0e100;
     }
@@ -175,14 +175,14 @@ GroundStateClass::d_dBeta (int slice1, int slice2, int level,
 {
 //   bool error = false;
 //   for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
-//     double upDist = SimpleDistance (slice, UpSpeciesNum);
+//     double upDist = LineSearchDistance (slice, UpSpeciesNum);
 //     if (fabs(upDist -UpDists(slice)) > 1.0e-12) {
 //       fprintf (stderr, 
 // 	       "Cached updist = %1.12e  Actual updist = %1.12e slice=%d\n",
 // 	       UpDists(slice), upDist, slice);
 //       error = true;
 //     }
-//     double downDist = SimpleDistance (slice, DownSpeciesNum);
+//     double downDist = LineSearchDistance (slice, DownSpeciesNum);
 //     if (fabs(downDist - DownDists(slice))> 1.0e-12){
 //       fprintf (stderr, 
 // 	       "Cached downdist = %1.12e  Actual downdist = %1.12e slice=%d",
@@ -437,8 +437,8 @@ GroundStateClass::IsPositive (int slice, int speciesNum)
     BandSplines(r_j[0], r_j[1], r_j[2], vals);
   }
   double det = Determinant (Matrix);
-  cerr << "slice=" << slice 
-       << " species=" << speciesNum << " det = " << det << endl;
+//   cerr << "slice=" << slice 
+//        << " species=" << speciesNum << " det = " << det << endl;
   return (det > 0.0);  
 }
 
@@ -581,7 +581,7 @@ void GroundStateClass::Init(int speciesNum)
 {
   if (speciesNum == UpSpeciesNum) {
     for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
-      UpDists[0](slice) = SimpleDistance(slice, speciesNum);
+      UpDists[0](slice) = LineSearchDistance(slice, speciesNum);
       UpDists[1](slice) = UpDists[0](slice);
     }
     cerr << "Initializing up species.\n";
@@ -589,7 +589,7 @@ void GroundStateClass::Init(int speciesNum)
 
   if (speciesNum == DownSpeciesNum) {
     for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
-      DownDists[0](slice) = SimpleDistance(slice, speciesNum);
+      DownDists[0](slice) = LineSearchDistance(slice, speciesNum);
       DownDists[1](slice) = DownDists[0](slice);
     }
     cerr << "Initializing down species.\n";
