@@ -34,7 +34,7 @@ Section (System)
       string Type = "e";
       string Statistics = "FERMION";
       double lambda=0.5; 
-      string NodeType = "FREE";
+      string NodeType = "GROUNDSTATE";
       int NumParticles=8;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
@@ -55,7 +55,7 @@ Section (System)
       string Type="e";
       double lambda=0.5; 
       string Statistics="FERMION";
-      string NodeType = "FREE";
+      string NodeType = "GROUNDSTATE";
       int NumParticles=8;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";

@@ -134,6 +134,7 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 {
   int numNodeSections=in.CountSections("NodalAction");
   NodalActions.resize (PathData.Path.NumSpecies());
+  NodalActions = NULL;
   for (int nodeSection=0; nodeSection<numNodeSections; nodeSection++) {
     in.OpenSection("NodalAction", nodeSection);
     string type, speciesString;
@@ -148,11 +149,14 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
       GroundStateClass &groundState = *new GroundStateClass(PathData);
       groundState.Read (in);
       NodalActions(groundState.UpSpeciesNum) = 
-	new GroundStateNodalActionClass (PathData, groundState, groundState.UpSpeciesNum);
+	new GroundStateNodalActionClass 
+	(PathData, groundState, groundState.UpSpeciesNum);
       NodalActions(groundState.DownSpeciesNum) = 
-	new GroundStateNodalActionClass (PathData, groundState, groundState.DownSpeciesNum);
+	new GroundStateNodalActionClass 
+	(PathData, groundState, groundState.DownSpeciesNum);
       NodalActions(groundState.IonSpeciesNum) = 
-	new GroundStateNodalActionClass (PathData, groundState, groundState.IonSpeciesNum);
+	new GroundStateNodalActionClass 
+	(PathData, groundState, groundState.IonSpeciesNum);
     }
     in.CloseSection();
   }
