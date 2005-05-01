@@ -76,13 +76,24 @@ public:
     double qmax = rho.grid->End;
     Array<double,1> Ud(N), dUd(N);
     qgrid.Init(qmin, qmax, N);
+    double sigma = sqrt (2.0*rho.lambda*rho.Beta());
     for (int i=0; i<N; i++) {
       double q = qgrid(i);
-      double U, dU;
-      // Calculate diagonal action
-      rho.UdU(q, q, 1.0, U, dU);
-      Ud(i) = U;
-      dUd(i) = dU;
+      /// HACK HACK HACK
+      /// We correct for poor extrapolation of the tail for
+      /// PH's at small beta.  The 22 is empirically determined.
+      if ((q > 5.0) && (q/sigma > 22.0)) {
+	double V = rho.Pot->V(q);
+	Ud(i)  = rho.Beta()*V;
+	dUd(i) = V;
+      }
+      else {
+	double U, dU;
+	// Calculate diagonal action
+	rho.UdU(q, q, 1.0, U, dU);
+	Ud(i) = U;
+	dUd(i) = dU;
+      }
     }
     Udiag.Init(&qgrid, Ud);
     dUdiag.Init(&qgrid, dUd);
@@ -223,6 +234,9 @@ void PAtricubicFitClass::AddFit (Rho &rho)
   Array<double,1> Ul, dUl;
   USemiclassical Usemi(rho, beta);
 
+  double qmax = min (5.0, 22.0*sqrt(2.0*beta*lambda));
+  cerr << "qmax = " << qmax << endl;
+
   for (int qi=0; qi<numq; qi++) {
     double q = (*qgrid)(qi);
     cerr << "qi = " << qi << " of " << numq << " q = " << q << endl;
@@ -260,31 +274,36 @@ void PAtricubicFitClass::AddFit (Rho &rho)
 	double t = (*tgrid)(ti);
 	double s = z + (2.0*q-z)*t;
 	double costheta;
-	if ((r*rp)==0.0)
+	if ((r*rp)==0.0)	
 	  costheta = 1.0;
 	else
 	  costheta = (r*r + rp*rp - s*s)/(2.0*r*rp);
 	costheta = min(1.0, costheta);
 	costheta = max(-1.0, costheta);	
 	double U, dU;
-	rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
-	if (s>Usmax /*&& q>2.4*/) {
-	  double Us = Usemi.U(r,rp,costheta);
-	  // Make the result continuous across the transition
-	  U = Us - Usemi_max + U_max;
-	  //U = U_max;
-	  // HACK
-	  //U = 0.0;
+	// HACK HACK HACK
+	if (q > qmax) {
+	  U  = Usemi.U (r,rp,costheta);
+	  dU = Usemi.dU(r,rp,costheta);
 	}
-	if (s>dUsmax /*&& q>2.4*/) {
-	  double dUs = Usemi.dU(r,rp,costheta);
-	  dU = dUs - dUsemi_max + dU_max;
-	  //dU = dU_max;
-	  // HACK
-	  //dU = 0.0;;
+	else {
+	  rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
+	  if (s>Usmax /*&& q>2.4*/) {
+	    double Us = Usemi.U(r,rp,costheta);
+	    // Make the result continuous across the transition
+	    U = Us - Usemi_max + U_max;
+	    //U = U_max;
+	    // HACK
+	    //U = 0.0;
+	  }
+	  if (s>dUsmax /*&& q>2.4*/) {
+	    double dUs = Usemi.dU(r,rp,costheta);
+	    dU = dUs - dUsemi_max + dU_max;
+	    //dU = dU_max;
+	    // HACK
+	    //dU = 0.0;;
+	  }
 	}
-	  
-
 	if (isnan(U)) {
 	  //U = Usemi.U(r,rp,costheta);
 	  fprintf (stderr, "NAN in U at (qi,yi,ti) = (%d,%d,%d)\n",
