@@ -234,7 +234,7 @@ void PAtricubicFitClass::AddFit (Rho &rho)
   Array<double,1> Ul, dUl;
   USemiclassical Usemi(rho, beta);
 
-  double qmax = min (5.0, 22.0*sqrt(2.0*beta*lambda));
+  double qmax = max (5.0, 22.0*sqrt(2.0*beta*lambda));
   cerr << "qmax = " << qmax << endl;
 
   for (int qi=0; qi<numq; qi++) {
