@@ -11,8 +11,8 @@ public:
     void WriteBetaIndependentInfo (IOSectionClass &outSection) {};
     /// Returns weighter RMS error
     void Error (Rho &rho, double &Uerror, double &dUerror) {};
-    void AddFit (Rho &rho) {};
-    void WriteFits(IOSectionClass &outSection) {};
+    void DoFit (Rho &rho) {};
+    void WriteFit(IOSectionClass &outSection) {};
     void ReadInput (IOSectionClass &inSection) {};
   #endif
   bool Read  (IOSectionClass &inSection, double lowestBeta,

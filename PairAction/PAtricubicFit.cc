@@ -211,16 +211,14 @@ public:
 
 
 
-void PAtricubicFitClass::AddFit (Rho &rho)
+void PAtricubicFitClass::DoFit (Rho &rho)
 {
-  NumBetas++;
-  Usplines.resizeAndPreserve(NumBetas);
-  dUsplines.resizeAndPreserve(NumBetas);
-  sMax.resizeAndPreserve(NumBetas);
-  sMaxInv.resizeAndPreserve(NumBetas);
+  Usplines.resize(1);
+  dUsplines.resize(1);
 
   double lambda = Particle1.lambda + Particle2.lambda;
-  double beta = rho.Beta();
+  SmallestBeta = rho.Beta();
+  double beta = SmallestBeta;
   double Usmax = sqrt(-4.0*lambda*beta*log(URho0Min));
   double dUsmax = sqrt(-4.0*lambda*beta*log(dURho0Min));
 
@@ -328,8 +326,8 @@ void PAtricubicFitClass::AddFit (Rho &rho)
       }
     }
   } 
-  Usplines(NumBetas-1).Init(qgrid,ygrid,tgrid,Umat);
-  dUsplines(NumBetas-1).Init(qgrid,ygrid,tgrid,dUmat);
+  Usplines(0).Init(qgrid,ygrid,tgrid,Umat);
+  dUsplines(0).Init(qgrid,ygrid,tgrid,dUmat);
 }
 
 
@@ -513,29 +511,23 @@ void PAtricubicFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 }
 
 
-void PAtricubicFitClass::WriteFits (IOSectionClass &outSection)
+void PAtricubicFitClass::WriteFit(IOSectionClass &outSection)
 {
   if (Comm.MyProc() == 0) {
     Array<double,3> Umat(qgrid->NumPoints,ygrid->NumPoints,tgrid->NumPoints); 
     Array<double,3> dUmat(qgrid->NumPoints,ygrid->NumPoints,tgrid->NumPoints); 
     double beta = SmallestBeta;
-    for (int bi=0; bi<NumBetas; bi++) {
-      cerr << "Writing Beta "<< bi+1 << " of " << NumBetas << ":\n";
-      outSection.NewSection("Fit");
-      outSection.WriteVar ("beta", beta);
-      double smax = sMax(bi);
-      outSection.WriteVar ("sMax", smax);
-      for (int qi=0; qi<qgrid->NumPoints; qi++)
-	for (int yi=0; yi<ygrid->NumPoints; yi++) 
-	  for (int ti=0; ti<tgrid->NumPoints; ti++) {
-	    Umat(qi,yi,ti)  =  Usplines(bi)(qi,yi,ti);
-	    dUmat(qi,yi,ti) = dUsplines(bi)(qi,yi,ti);
-	  }
-      outSection.WriteVar ("Umat", Umat);
-      outSection.WriteVar ("dUmat", dUmat);
-      outSection.CloseSection();
-      beta *= 2.0;
-    }
+    outSection.NewSection("Fit");
+    outSection.WriteVar ("beta", beta);
+    for (int qi=0; qi<qgrid->NumPoints; qi++)
+      for (int yi=0; yi<ygrid->NumPoints; yi++) 
+	for (int ti=0; ti<tgrid->NumPoints; ti++) {
+	  Umat(qi,yi,ti)  =  Usplines(0)(qi,yi,ti);
+	  dUmat(qi,yi,ti) = dUsplines(0)(qi,yi,ti);
+	}
+    outSection.WriteVar ("Umat", Umat);
+    outSection.WriteVar ("dUmat", dUmat);
+    outSection.CloseSection();
   }
 }
 
@@ -729,10 +721,6 @@ bool PAtricubicFitClass::Read (IOSectionClass &in,
     exit(1);
     }
     // Now read the fit coefficents
-    double smax;
-    assert(in.ReadVar("sMax", smax));
-    sMax(betaIndex) = smax;
-    sMaxInv(betaIndex) = 1.0/smax;
     assert(in.ReadVar("Umat", temp));
     Usplines(betaIndex).Init(qgrid,ygrid,tgrid,temp);
     assert(in.ReadVar("dUmat", temp));

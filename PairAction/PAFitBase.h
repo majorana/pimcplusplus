@@ -49,9 +49,9 @@ public:
 #ifdef MAKE_FIT
   virtual void ReadParams  (IOSectionClass &inSection)   = 0;
   virtual void WriteBetaIndependentInfo (IOSectionClass &outSection) = 0;
-  virtual void AddFit (Rho &rho) = 0;
+  virtual void DoFit (Rho &rho) = 0;
   virtual void Error (Rho &rho, double &Uerror, double &dUerror)=0;
-  virtual void WriteFits(IOSectionClass &outSection) = 0;
+  virtual void WriteFit(IOSectionClass &outSection) = 0;
 #endif
   virtual bool Read (IOSectionClass &inSection,
 		     double smallestBeta, int NumBetas) = 0;

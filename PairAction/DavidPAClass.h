@@ -74,8 +74,8 @@ class DavidPAClass : public PairActionFitClass
   void WriteBetaIndependentInfo (IOSectionClass &outSection);
   /// Returns weighter RMS error
   void Error (Rho &rho, double &Uerror, double &dUerror);
-  void AddFit (Rho &rho);
-  void WriteFits(IOSectionClass &outSection);
+  void DoFit (Rho &rho);
+  void WriteFit(IOSectionClass &outSection);
 #endif
 };
 

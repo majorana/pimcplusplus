@@ -11,7 +11,7 @@ void PATripoleFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 { }
 
 
-void PATripoleFitClass::AddFit (Rho &rho)
+void PATripoleFitClass::DoFit (Rho &rho)
 {
 }
 
@@ -23,7 +23,7 @@ void PATripoleFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 }
 
 
-void PATripoleFitClass::WriteFits (IOSectionClass &outSection)
+void PATripoleFitClass::WriteFit (IOSectionClass &outSection)
 {
 }
 #endif

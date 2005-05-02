@@ -17,12 +17,12 @@ void DavidPAClass::Error (Rho &rho, double &Uerror, double &dUerror)
 
 }
 
-void DavidPAClass::AddFit (Rho &rho)
+void DavidPAClass::DoFit (Rho &rho)
 {
 
 }
 
-void DavidPAClass::WriteFits(IOSectionClass &out)
+void DavidPAClass::WriteFit(IOSectionClass &out)
 {
 
 

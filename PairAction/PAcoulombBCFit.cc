@@ -29,11 +29,11 @@ void PAcoulombBCFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 
 
 
-void PAcoulombBCFitClass::AddFit (Rho &rho)
+void PAcoulombBCFitClass::DoFit (Rho &rho)
 {
-  NumBetas++;
-  Usplines.resizeAndPreserve(NumBetas);
-  dUsplines.resizeAndPreserve(NumBetas);
+  NumBetas = 1;
+  Usplines.resize(1);
+  dUsplines.resize(1);
 
   int numq = qgrid->NumPoints;
   int numt = tgrid->NumPoints;
@@ -59,8 +59,8 @@ void PAcoulombBCFitClass::AddFit (Rho &rho)
     }
   }
   // Initialize the bicubic splines
-  Usplines(NumBetas-1).Init(qgrid,tgrid,Umat);
-  dUsplines(NumBetas-1).Init(qgrid,tgrid,dUmat);
+  Usplines(0).Init(qgrid,tgrid,Umat);
+  dUsplines(0).Init(qgrid,tgrid,dUmat);
 }
 
 
@@ -121,24 +121,21 @@ void PAcoulombBCFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 }
 
 
-void PAcoulombBCFitClass::WriteFits (IOSectionClass &outSection)
+void PAcoulombBCFitClass::WriteFit (IOSectionClass &outSection)
 {
   Array<double,2> Umat(qgrid->NumPoints, tgrid->NumPoints); 
   Array<double,2> dUmat(qgrid->NumPoints, tgrid->NumPoints); 
   double beta = SmallestBeta;
-  for (int bi=0; bi<NumBetas; bi++) {
-    outSection.NewSection("Fit");
-    outSection.WriteVar ("beta", beta);
-    for (int qi=0; qi<qgrid->NumPoints; qi++)
-      for (int ti=0; ti<tgrid->NumPoints; ti++) {
-	Umat(qi,ti) = Usplines(bi)(qi,ti);
-	dUmat(qi,ti) = dUsplines(bi)(qi,ti);
-      }
-    outSection.WriteVar ("Umat", Umat);
-    outSection.WriteVar ("dUmat", dUmat);
-    outSection.CloseSection();
-    beta *= 2.0;
-  }
+  outSection.NewSection("Fit");
+  outSection.WriteVar ("beta", beta);
+  for (int qi=0; qi<qgrid->NumPoints; qi++)
+    for (int ti=0; ti<tgrid->NumPoints; ti++) {
+      Umat(qi,ti) = Usplines(0)(qi,ti);
+      dUmat(qi,ti) = dUsplines(0)(qi,ti);
+    }
+  outSection.WriteVar ("Umat", Umat);
+  outSection.WriteVar ("dUmat", dUmat);
+  outSection.CloseSection();
 }
 
 #endif

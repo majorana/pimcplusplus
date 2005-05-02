@@ -17,7 +17,7 @@ PAclassicalFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 
 
 void 
-PAclassicalFitClass::AddFit (Rho &rho)
+PAclassicalFitClass::DoFit (Rho &rho)
 {
 }
 
@@ -31,7 +31,7 @@ PAclassicalFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 
 
 void 
-PAclassicalFitClass::WriteFits (IOSectionClass &outSection)
+PAclassicalFitClass::WriteFit (IOSectionClass &outSection)
 {
 }
 #endif

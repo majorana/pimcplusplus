@@ -11,7 +11,7 @@ void PADipoleFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 { }
 
 
-void PADipoleFitClass::AddFit (Rho &rho)
+void PADipoleFitClass::DoFit (Rho &rho)
 {
 }
 
@@ -23,7 +23,7 @@ void PADipoleFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 }
 
 
-void PADipoleFitClass::WriteFits (IOSectionClass &outSection)
+void PADipoleFitClass::WriteFit (IOSectionClass &outSection)
 {
 }
 #endif

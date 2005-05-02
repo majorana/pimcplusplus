@@ -22,44 +22,41 @@ void PAszFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 }
 
 
-void PAszFitClass::AddFit (Rho &rho)
+void PAszFitClass::DoFit (Rho &rho)
 {
   int NumCoefs = (Order+1)*(Order+2)/2 - 1;
-  NumBetas++;
+  NumBetas = 1;
   Array<double,2>  UCoefs(qgrid->NumPoints, NumCoefs);
   Array<double,2> dUCoefs(qgrid->NumPoints, NumCoefs);
   UCoefs = 0.0;
   dUCoefs = 0.0;
 
-  Ukj.resizeAndPreserve(NumBetas);
-  dUkj.resizeAndPreserve(NumBetas);
-  sMax.resizeAndPreserve(NumBetas);
+  Ukj.resize(1);
+  dUkj.resize(1);
+  sMax.resize(1);
 
-  Ukj(NumBetas-1).Init(qgrid, UCoefs);
-  dUkj(NumBetas-1).Init(qgrid, dUCoefs);
+  Ukj(0).Init(qgrid, UCoefs);
+  dUkj(0).Init(qgrid, dUCoefs);
 
 }
 
-void PAszFitClass::WriteFits (IOSectionClass &outSection)
+void PAszFitClass::WriteFit (IOSectionClass &outSection)
 {
   int NumCoefs = (Order+1)*(Order+2)/2 - 1;
   Array<double,2> UCoefs(qgrid->NumPoints, NumCoefs); 
   Array<double,2> dUCoefs(qgrid->NumPoints, NumCoefs); 
   double beta = SmallestBeta;
-  for (int i=0; i<NumBetas; i++) {
-    outSection.NewSection("Fit");
-    outSection.WriteVar ("beta", beta);
-    for (int j=0; j<qgrid->NumPoints; j++)
-      for (int k=0; k<NumCoefs; k++) {
-	UCoefs(j,k) = Ukj(i)(j,k);
-	dUCoefs(j,k) = Ukj(i)(j,k);
-      }
-    outSection.WriteVar ("UCoefs", UCoefs);
-    outSection.WriteVar ("dUCoefs", dUCoefs);
-    outSection.WriteVar ("sMax", sMax(i));
-    outSection.CloseSection();
-    beta *= 2.0;
-  }
+  outSection.NewSection("Fit");
+  outSection.WriteVar ("beta", beta);
+  for (int j=0; j<qgrid->NumPoints; j++)
+    for (int k=0; k<NumCoefs; k++) {
+      UCoefs(j,k) = Ukj(i)(j,k);
+      dUCoefs(j,k) = Ukj(i)(j,k);
+    }
+  outSection.WriteVar ("UCoefs", UCoefs);
+  outSection.WriteVar ("dUCoefs", dUCoefs);
+  outSection.WriteVar ("sMax", sMax(0));
+  outSection.CloseSection();
 }
 
 void PAszFitClass::Error(Rho &rho, double &Uerror, double &dUerror)

@@ -17,8 +17,8 @@ public:
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);
   void WriteBetaIndependentInfo (IOSectionClass &outSection);
-  void AddFit (Rho &rho);
-  void WriteFits(IOSectionClass &outSection);
+  void DoFit (Rho &rho);
+  void WriteFit(IOSectionClass &outSection);
   void Error(Rho &rho, double &Uerror, double &dUerror);
 #endif
   void Write (IOSectionClass &outSection);

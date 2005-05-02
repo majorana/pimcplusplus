@@ -11,7 +11,7 @@ void PACoulombFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 { }
 
 
-void PACoulombFitClass::AddFit (Rho &rho)
+void PACoulombFitClass::DoFit (Rho &rho)
 {
 }
 
@@ -23,7 +23,7 @@ void PACoulombFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 }
 
 
-void PACoulombFitClass::WriteFits (IOSectionClass &outSection)
+void PACoulombFitClass::WriteFit (IOSectionClass &outSection)
 {
 }
 #endif
