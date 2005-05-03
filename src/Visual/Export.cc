@@ -88,7 +88,33 @@ void ExportClass::Export (string filename)
 
 
 void
-ExportClass::ExportPOV(string filename)
+ExportClass::ExportPOV(string basename)
 {
+  string filename = basename;
+  filename.append(".pov");
   Visual.PathVis.POVRender (filename);
+}
+
+void
+ExportClass::OnExportButton()
+{
+  string basename = BaseNameChooser.get_filename();
+  if (TypeCombo.get_active_text() == "POVray") 
+    ExportPOV(basename);
+  else {
+    basename.append(".png");
+    Export(basename);
+  }
+}
+
+void
+ExportClass::OnCancelButton()
+{
+  hide();
+}
+
+void
+ExportClass::OnBrowseButton()
+{
+  BaseNameChooser.run();
 }

@@ -347,12 +347,13 @@ void VisualClass::OnOpen()
 
 void VisualClass::OnExport()
 {
-  Export.Export ("frame.png");
+  Export.show_all();
+  //  Export.Export ("frame.png");
 }
 
 void VisualClass::OnExportPOV()
 {
-  Export.ExportPOV("frame.pov");
+  //  Export.ExportPOV("frame.pov");
 }
 
 void VisualClass::ResetView()
@@ -490,7 +491,7 @@ void VisualClass::MakePaths(int frame)
 	   cerr << loop[i] << " ";
 	 cerr << endl;
 	 if (loop.size()==2)
-	   swap (loop[0], loop[1]);
+	   std::swap (loop[0], loop[1]);
 // 	 while (loop[loop.size()-1] != OpenPtcl(frame) {
 // 	   // cyclic permute
 // 	 }
