@@ -118,3 +118,24 @@ ExportClass::OnBrowseButton()
 {
   BaseNameChooser.run();
 }
+
+void 
+ExportClass::OnHeightAdjust()
+{
+  if (RatioButton.get_active()) 
+    WidthButton.set_value(HeightButton.get_value()*Ratio);
+}
+
+void 
+ExportClass::OnWidthAdjust()
+{
+  if (RatioButton.get_active()) 
+    HeightButton.set_value(WidthButton.get_value()/Ratio);
+}
+
+void 
+ExportClass::OnRatioToggle()
+{
+  if (RatioButton.get_active())
+    Ratio = WidthButton.get_value()/HeightButton.get_value();
+}
