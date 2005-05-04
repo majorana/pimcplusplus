@@ -568,10 +568,11 @@ for counter in range(0,numSections):
      infiles.CloseSection()
 infiles.CloseSection() # "Observables"
 
-infiles.OpenSection("LongRangeAction")
-LRsection = ProcessLongRangeAction (infiles)
-doc.append(LRsection)
-infiles.CloseSection() # "LongRangeAction"
+if (infiles.CountSections2("LongRangeAction") > 0):
+     infiles.OpenSection("LongRangeAction")
+     LRsection = ProcessLongRangeAction (infiles)
+     doc.append(LRsection)
+     infiles.CloseSection() # "LongRangeAction"
 
 #myFrame=IFrame("index.html","blah")
 #myFrame.src="hi"
