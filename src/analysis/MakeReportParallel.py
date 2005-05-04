@@ -123,6 +123,84 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      return currNum
      
 
+def LongRangeImage(basename,r,long,short,myTitle,labelY):
+     clf()
+     hold ("off")
+     l1 = plot (r, long)
+     a = axis()
+     hold ("on")
+     l2 = plot (r[1:-1], long[1:-1]+short[1:-1], 'r-')
+     set (l1, 'linewidth', 2);
+     set (l2, 'linewidth', 2);
+     h1 = xlabel("r")
+     axis(a)
+     set (h1, "FontSize", 20)
+     h2 = ylabel (labelY)
+     set (h2, "FontSize", 20)
+     labels = get(gca(), 'xticklabels')
+     set(labels, 'fontsize', 16)
+     labels = get(gca(), 'yticklabels')
+     set(labels, 'fontsize', 16)
+     h3 = legend ('Ulong')
+     h4 = title (myTitle)
+     set (h4, "FontSize", 20)
+     savefig(basename+".png",dpi=60)
+     return Image(basename+".png")
+
+
+def ProcessLongRangeAction(infiles):
+     doc = SeriesDocument()
+     doc.logo=""
+     doc.author="Ken and Bryan"
+     doc.email="esler@uiuc.edu and bkclark@uiuc.edu"
+     doc.banner=("http://esler.physics.uiuc.edu/pimcLogo.png")
+     doc.place_nav_buttons=0
+     doc.header()
+
+     infiles.OpenSection("U");
+     r = infiles.ReadVar ("r")[0]
+     numActions = infiles.CountSections2("PairAction")
+     for i in range (0,numActions):
+          infiles.OpenSection2("PairAction", i)
+          ptcl1 = infiles.ReadVar("Particle1")[0]
+          ptcl2 = infiles.ReadVar("Particle2")[0]
+          print "Found long range breakup for ", ptcl1, " and ", ptcl2
+          numLevels = infiles.CountSections2("Level")
+          for level in range(0,numLevels):
+               basename = "LongRangeU(" + ptcl1 + "," + ptcl2 + ")_" +repr(level)
+               infiles.OpenSection2("Level", level)
+               Ulong  = infiles.ReadVar("Ulong")[0]
+               Ushort = infiles.ReadVar("Ushort")[0]
+               myTitle = "Ulong for (" + ptcl1 + "," + ptcl2 +") level " + repr(level)
+               doc.append(LongRangeImage(basename, r, Ulong, Ushort, myTitle, 'U(r)'))
+               infiles.CloseSection() # "Level"
+          infiles.CloseSection()      # "PairAction"
+     infiles.CloseSection()           # "U"
+
+     infiles.OpenSection("dU");
+     r = infiles.ReadVar ("r")[0]
+     numActions = infiles.CountSections2("PairAction")
+     for i in range (0,numActions):
+          infiles.OpenSection2("PairAction", i)
+          ptcl1 = infiles.ReadVar("Particle1")[0]
+          ptcl2 = infiles.ReadVar("Particle2")[0]
+          print "Found long range breakup for ", ptcl1, " and ", ptcl2
+          numLevels = infiles.CountSections2("Level")
+          for level in range(0,numLevels):
+               basename = "LongRangedU(" + ptcl1 + "," + ptcl2 + ")_" +repr(level)
+               infiles.OpenSection2("Level", level)
+               dUlong  = infiles.ReadVar("dUlong")[0]
+               dUshort = infiles.ReadVar("dUshort")[0]
+               myTitle = "dUlong for (" + ptcl1 + "," + ptcl2 +") level " + repr(level)
+               doc.append(LongRangeImage(basename, r, dUlong, dUshort, myTitle, 'dU(r)'))
+               infiles.CloseSection() # "Level"
+          infiles.CloseSection()      # "PairAction"
+     infiles.CloseSection()           # "dU"
+
+     
+     doc.write("longrange.html")               
+     return Href("longrange.html", "Long Range Breakups")
+
      
 ##      numVars=infiles.CountVars()
 ##      for counter in range(0,numVars):
@@ -489,6 +567,11 @@ for counter in range(0,numSections):
           a=5
      infiles.CloseSection()
 infiles.CloseSection() # "Observables"
+
+infiles.OpenSection("LongRangeAction")
+LRsection = ProcessLongRangeAction (infiles)
+doc.append(LRsection)
+infiles.CloseSection() # "LongRangeAction"
 
 #myFrame=IFrame("index.html","blah")
 #myFrame.src="hi"
