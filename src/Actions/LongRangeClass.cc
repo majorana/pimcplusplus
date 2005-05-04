@@ -292,9 +292,9 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
       }
       int N = Path.Species(species).NumParticles;
       // We can't forget the Madelung term.
-      homo -= 0.5 * N * PA.dUlong_r0(level);
+      homo -= factor * 0.5 * N * PA.dUlong_r0(level);
       // Or the neutralizing background term
-      homo -= 0.5*N*N*PA.dUshort_k0(level);
+      homo -= factor * 0.5*N*N*PA.dUshort_k0(level);
     }
     
     // Now do the heterologous terms
@@ -312,7 +312,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 	  }
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
-	  hetero -= N1*N2*PA.dUshort_k0(level);
+	  hetero -= factor * N1*N2*PA.dUshort_k0(level);
 	}
       }
   }
