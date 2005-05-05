@@ -127,8 +127,11 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	swapFirst = true;
       }
   Communicator.Broadcast (0,swapFirst);
+
   if (swapFirst) {
-    swap (R0(0), R0(1));
+    dVec tmp = R0(0);
+    R0(0) = R0(1);
+    R0(1) = tmp;
     RefPath(species.FirstPtcl)     = R0(0);
     RefPath(species.FirstPtcl+1)   = R0(1);
     prevSlice(0)                   = R0(0);
@@ -138,7 +141,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
       (*this)(0,species.FirstPtcl+1) = R0(1);  
     }
   }
-  
+
   int N = TotalNumSlices+1;
   for (int slice=1; slice<N; slice++) {
     int sliceOwner = SliceOwner(slice);

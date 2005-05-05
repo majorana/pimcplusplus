@@ -151,20 +151,36 @@ GroundStateClass::Action (int slice1, int slice2,
   if (doUp) {
     for (int slice=slice1; slice <= slice2; slice++) {
       UpDists(slice) = LineSearchDistance(slice, UpSpeciesNum);
-      if (UpDists(slice) < 0.0)
+      if (UpDists(slice) <= 0.0)
 	action += 1.0e100;
     }
-    for (int link=slice1; link < slice2; link++) 
-      action -= log1p(-exp(-UpDists(link)*UpDists(link+1)*lambdaTauInv));
+    for (int link=slice1; link < slice2; link++) {
+      double expval = exp(-UpDists(link)*UpDists(link+1)*lambdaTauInv);
+      if (expval < 1.0)
+	action -= log1p(-expval);
+      else {
+	action += 1.0e100;
+	cerr << "UpDists(" << link << ")="<< UpDists(link) 
+	     << "UpDists(" << link+1 << ")=" << UpDists(link+1) << endl;
+      }
+    }
   }
   if (doDown) {
     for (int slice=slice1; slice <= slice2; slice++) {
       DownDists(slice) = LineSearchDistance(slice, DownSpeciesNum);
-      if (DownDists(slice) < 0.0)
+      if (DownDists(slice) <= 0.0)
 	action += 1.0e100;
     }
-    for (int link=slice1; link < slice2; link++) 
-      action -= log1p(-exp(-DownDists(link)*DownDists(link+1)*lambdaTauInv));
+    for (int link=slice1; link < slice2; link++) {
+      double expval = exp(-DownDists(link)*DownDists(link+1)*lambdaTauInv);
+      if (expval < 1.0)
+	action -= log1p(-expval);
+      else{
+	action += 1.0e100;
+	cerr << "DownDists(" << link << ")="   << DownDists(link) 
+	     << "DownDists(" << link+1 << ")=" << DownDists(link+1) << endl;
+      }
+    }
   }
   return action;
 }
