@@ -21,7 +21,10 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("name", Name));
   cerr << "speciesName = " << speciesName << ".\n";
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
-  IsFermion = PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION;
+  HaveRefslice = 
+    ((PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION) &&
+     (PathData.Actions.NodalActions(SpeciesNum) != NULL) &&
+     (!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
 
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
@@ -97,7 +100,7 @@ void BisectionBlockClass::ChooseTimeSlices()
   PathClass &Path = PathData.Path;
   int myProc = PathData.Path.Communicator.MyProc();
   // do something special to avoid moving reference slice
-  if (IsFermion &&
+  if (HaveRefslice &&
       Path.SliceOwner(Path.GetRefSlice()) == myProc) {
     
     int bSlices = 1<<NumLevels;

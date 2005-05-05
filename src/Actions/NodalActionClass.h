@@ -13,6 +13,7 @@ public:
   virtual void AcceptCopy (int slice1, int slice2);
   virtual void RejectCopy (int slice1, int slice2);
   virtual void Init();
+  virtual bool IsGroundState() = 0;
   NodalActionClass (PathDataClass &pathData) :
     ActionBaseClass (pathData)
   {
@@ -71,6 +72,7 @@ public:
   /// returns true.
   bool IsPositive (int slice);
   void Read (IOSectionClass &in);
+  bool IsGroundState();
   FreeNodalActionClass (PathDataClass &pathData, int speciesNum);
 };
 

@@ -577,7 +577,8 @@ GroundStateNodalActionClass::RejectCopy (int slice1, int slice2)
 }
 
 
-void GroundStateClass::Init(int speciesNum)
+void 
+GroundStateClass::Init(int speciesNum)
 {
   if (speciesNum == UpSpeciesNum) {
     for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
@@ -596,7 +597,14 @@ void GroundStateClass::Init(int speciesNum)
   }
 }
 
-void GroundStateNodalActionClass::Init()
+void 
+GroundStateNodalActionClass::Init()
 {
   GroundState.Init (SpeciesNum);
+}
+
+bool
+GroundStateNodalActionClass::IsGroundState()
+{
+  return true;
 }

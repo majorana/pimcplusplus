@@ -797,6 +797,14 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
 }
 
 
+bool
+FreeNodalActionClass::IsGroundState()
+{
+  return (false);
+}
+
+
+
 void 
 NodalActionClass::AcceptCopy (int slice1, int slice2)
 {
@@ -815,3 +823,4 @@ NodalActionClass::Init()
 {
 
 }
+

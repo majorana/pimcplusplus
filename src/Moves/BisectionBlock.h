@@ -18,7 +18,7 @@ class BisectionBlockClass : public MultiStageClass
 private:
   int NumLevels;
   int StepsPerBlock;
-  bool IsFermion;
+  bool HaveRefslice;
   int SpeciesNum;
   void ChooseTimeSlices();
   //  void WriteRatio();
