@@ -98,6 +98,8 @@ ExportClass::ExportPOV(string basename)
 void
 ExportClass::OnExportButton()
 {
+  Width  = WidthButton.get_value();
+  Height = HeightButton.get_value();
   string basename = BaseNameChooser.get_filename();
   if (TypeCombo.get_active_text() == "POVray") 
     ExportPOV(basename);

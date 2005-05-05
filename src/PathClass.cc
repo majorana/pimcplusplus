@@ -380,7 +380,6 @@ void PathClass::InitPaths (IOSectionClass &in)
       for (int ptcl=species.FirstPtcl; 
 	   ptcl<=species.LastPtcl; ptcl++){
 	for (int slice=0; slice<NumTimeSlices(); slice++) {
-	  cerr<<ptcl;
 	  dVec pos;
 	  pos = 0.0;
 	  for (int dim=0; dim<species.NumDim; dim++)

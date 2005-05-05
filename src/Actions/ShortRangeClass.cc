@@ -112,7 +112,6 @@ double ShortRangeClass::d_dBeta (int slice1, int slice2,
   // Add constant part.  Note: we should really check the number of
   // dimensions. 
   double dU = 0.0;
-  const int NumImage=1;
   for (int ptcl1=0; ptcl1<PathData.NumParticles(); ptcl1++) {
     int species1=Path.ParticleSpeciesNum(ptcl1);
     for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {

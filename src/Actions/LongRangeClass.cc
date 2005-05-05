@@ -242,7 +242,7 @@ double LongRangeClass::Action (int slice1, int slice2,
       // We can't forget the Madelung term.
       homo -= factor * 0.5 * N * pa.Ulong_r0(level);
       // Or the neutralizing background term
-      homo -= factor * 0.5*N*N*pa.Ushort_k0(level);
+      //homo -= factor * 0.5*N*N*pa.Ushort_k0(level);
     }
     
     // Now do the heterologous terms
@@ -260,7 +260,7 @@ double LongRangeClass::Action (int slice1, int slice2,
 	  }
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
-	  hetero -= factor * N1*N2*pa.Ushort_k0(level);
+	  //hetero -= factor * N1*N2*pa.Ushort_k0(level);
 	}
       }
   }
@@ -294,7 +294,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
       // We can't forget the Madelung term.
       homo -= factor * 0.5 * N * PA.dUlong_r0(level);
       // Or the neutralizing background term
-      homo -= factor * 0.5*N*N*PA.dUshort_k0(level);
+      //homo -= factor * 0.5*N*N*PA.dUshort_k0(level);
     }
     
     // Now do the heterologous terms
@@ -312,7 +312,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 	  }
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
-	  hetero -= factor * N1*N2*PA.dUshort_k0(level);
+	  //hetero -= factor * N1*N2*PA.dUshort_k0(level);
 	}
       }
   }
@@ -818,7 +818,7 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
 
     // Calculate Xk's
     for (int ki=0; ki<numk; ki++) {
-      Xk(ki) = CalcXk(paIndex, 0, breakup.kpoints(ki)[0], rc, JOB_V);
+      // Xk(ki) = CalcXk(paIndex, 0, breakup.kpoints(ki)[0], rc, JOB_V);
       double k = breakup.kpoints(ki)[0];
       Xk(ki) = pa.Xk_V (k) / boxVol;
     }
