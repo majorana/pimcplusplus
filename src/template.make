@@ -11,7 +11,8 @@ ifeq ($(HOSTTYPE),alpha)
     LD = g++ #-static
     F77 = g77
     EXTRADEFS = -DNOCUSERID
-    CCFLAGS = -c -g  -Wno-deprecated  -O3 #-pg 
+    CCFLAGS  = -c -g  -Wno-deprecated  -O3 #-pg 
+    F77FLAGS = -c -g -O3
 endif
 ifeq ($(HOSTTYPE),rs6000)
     include /users/uiuc/ux455254/lib/Make.include
@@ -24,6 +25,7 @@ ifeq ($(HOSTTYPE),rs6000)
     F77 = f77
     EXTRADEFS = -DNOCUSERID -DNOUNDERSCORE
     CCFLAGS = -c -g 
+    F77FLAGS = -c -g -O3
 endif
 
 ifeq ($(HOSTTYPE),powermac)
@@ -37,7 +39,8 @@ ifeq ($(HOSTTYPE),powermac)
    LD = mpiCC
    F77 = f77
    CCFLAGS = -c -g  -Wno-long-double -ffast-math
-   EXTRADEFS = -DNOUNDERSCORE -DNOCUSERID -DMAC
+   F77FLAGS = -c -g -O3
+   EXTRADEFS = -DNOUNDERSCORE -DNOCUSERID -DMAC -DUSE_MPI
    MAKECC = mpiCC
    MAKE = make
 endif
@@ -52,6 +55,7 @@ ifeq ($(HOSTTYPE),i386-linux)
        EXTRADEFS = -DUSE_MKL -w1 -wr654,1011 -DUSE_MPI
        MAKECC = g++
        CCFLAGS = -c -g  #-pg 
+       F77FLAGS = -c -g -O3
     else
        include /usr/lib/Make.include	
        CC = g++
@@ -60,6 +64,7 @@ ifeq ($(HOSTTYPE),i386-linux)
        EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math
        MAKECC = g++
        CCFLAGS = -c -g  -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops -ffast-math -O3 #-pg 
+       F77FLAGS = -c -g -O3 -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops -ffath-math 
     endif
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
            $(G2CLIB) $(HDF5LIB) $(XMLLIB) $(FFTW3LIB) $(CBLASLIB) \
@@ -351,7 +356,7 @@ FreeParticleObjs =                       \
   Common/MPI/Communication.o
 
 
-PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}" "F77=${F77}"\
+PASS_DEFS = "CC=${CC}" "LD=${LD}" "CCFLAGS=${CCFLAGS}" "DEFS=${DEFS}" "INCL=${INCL}" "LIBS=${LIBS}" "F77=${F77}" "F77FLAGS=${F77FLAGS}"\
   "MAKECC=${MAKECC}"
 
 MAKE_ALL = $(MAKE) all $(PASS_DEFS)

@@ -97,7 +97,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "Na_16_tau0.125_M500_GroundState";
+  string OutFileBase = "Na_16_tau0.125_M512_GroundState";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
