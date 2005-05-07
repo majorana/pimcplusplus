@@ -49,7 +49,7 @@ void ConjGrad::Setup()
 void ConjGrad::InitBands()
 {
   int numBands = Bands.rows();
-  int numVecs = 4 * numBands;
+  int numVecs = 6 * numBands;
   assert (numVecs <= H.GVecs.size());
   Array<complex<double>,2> Hmat(numVecs, numVecs);
   Array<complex<double>,2> EigVecs(numBands, numVecs);

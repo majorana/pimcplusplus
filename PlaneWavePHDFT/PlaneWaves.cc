@@ -38,6 +38,7 @@ SystemClass::SetIons (const Array<Vec3,1> &rions)
 void 
 SystemClass::DiagonalizeH ()
 {
+  CG.InitBands();
   for (int i=0; i<Bands.rows(); i++) {
     CG.Solve(i);
     fprintf (stderr, "Energy(%d) = %15.12f\n", i, CG.Energies(i)* 27.211383);
