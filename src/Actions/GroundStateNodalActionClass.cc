@@ -155,13 +155,9 @@ GroundStateClass::Action (int slice1, int slice2,
 	action += 1.0e100;
     }
     for (int link=slice1; link < slice2; link++) {
-      double expval = exp(-UpDists(link)*UpDists(link+1)*lambdaTauInv);
-      if (expval < 1.0)
+      if ((UpDists(link)>0.0) && (UpDists(link+1)>0.0)) {
+	double expval = exp(-UpDists(link)*UpDists(link+1)*lambdaTauInv);
 	action -= log1p(-expval);
-      else {
-	action += 1.0e100;
-	cerr << "UpDists(" << link << ")="<< UpDists(link) 
-	     << "UpDists(" << link+1 << ")=" << UpDists(link+1) << endl;
       }
     }
   }
@@ -172,13 +168,9 @@ GroundStateClass::Action (int slice1, int slice2,
 	action += 1.0e100;
     }
     for (int link=slice1; link < slice2; link++) {
-      double expval = exp(-DownDists(link)*DownDists(link+1)*lambdaTauInv);
-      if (expval < 1.0)
+      if ((DownDists(link)>0.0) && (DownDists(link+1)>0.0)) {
+	double expval = exp(-DownDists(link)*DownDists(link+1)*lambdaTauInv);
 	action -= log1p(-expval);
-      else{
-	action += 1.0e100;
-	cerr << "DownDists(" << link << ")="   << DownDists(link) 
-	     << "DownDists(" << link+1 << ")=" << DownDists(link+1) << endl;
       }
     }
   }
@@ -215,6 +207,9 @@ GroundStateClass::d_dBeta (int slice1, int slice2, int level,
   if (speciesNum == UpSpeciesNum)
     for (int slice=slice1; slice<slice2; slice+=skip) {
       double prod = UpDists(slice)*UpDists(slice+skip);
+      if (prod <= 0.0)
+	cerr << "We have an invalid node-crossing path in "
+	     << "GroundStateNodalActionClass::d_dBeta";
       double prod_llt = prod * lambdaTauInv;
       double exp_m1 = expm1 (prod_llt);
       if (isnormal(exp_m1))
@@ -223,6 +218,9 @@ GroundStateClass::d_dBeta (int slice1, int slice2, int level,
   if (speciesNum == DownSpeciesNum)
     for (int slice=slice1; slice<slice2; slice+=skip) {
       double prod = DownDists(slice)*DownDists(slice+skip);
+      if (prod <= 0.0)
+	cerr << "We have an invalid node-crossing path in "
+	     << "GroundStateNodalActionClass::d_dBeta";
       double prod_llt = prod * lambdaTauInv;
       double exp_m1 = expm1 (prod_llt);
       if (isnormal(exp_m1))
@@ -284,8 +282,8 @@ GroundStateClass::Read(IOSectionClass &in)
   Vec3 box;
   box = Path.GetBox();
   xGrid.Init (-0.5*box[0], 0.5*box[0], nx);
-  yGrid.Init (-0.5*box[1], 0.5*box[1], nx);
-  zGrid.Init (-0.5*box[2], 0.5*box[2], nx);
+  yGrid.Init (-0.5*box[1], 0.5*box[1], ny);
+  zGrid.Init (-0.5*box[2], 0.5*box[2], nz);
   Array<double,4> initData(nx,ny,nz,NumBands);
   initData = 0.0;
   BandSplines.Init (&xGrid, &yGrid, &zGrid, initData, true);
@@ -430,6 +428,18 @@ GroundStateClass::UpdateBands()
 	  data(ix,iy,iz,band) = real(c*System->RealSpaceBand(ix,iy,iz));
   }
   MakePeriodic (data);
+  /// DEBUG DEBUG DEBUG DEBUG
+  for (int band=0; band<NumBands; band++) {
+    char fname[100];
+    snprintf (fname, 100, "band%d.dat", band);
+    FILE *fout = fopen (fname, "w");
+    for (int ix=0; ix<xGrid.NumPoints; ix++)
+      for (int iy=0; iy<yGrid.NumPoints; iy++)
+	for (int iz=0; iz<zGrid.NumPoints; iz++)
+	  fprintf (fout, "%1.12e\n", data(ix,iy,iz,band));
+    fclose (fout);
+  }
+
   BandSplines.Init (&xGrid, &yGrid, &zGrid, data);
 }
 

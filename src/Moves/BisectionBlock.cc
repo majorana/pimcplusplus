@@ -103,6 +103,7 @@ void BisectionBlockClass::ChooseTimeSlices()
   if (HaveRefslice &&
       Path.SliceOwner(Path.GetRefSlice()) == myProc) {
     
+    cerr << "Avoid reference slice.\n";
     int bSlices = 1<<NumLevels;
     int myStart, myEnd;
     Path.SliceRange (myProc, myStart, myEnd);
