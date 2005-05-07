@@ -61,7 +61,7 @@ double kSpacePH::a(double k)
   aIntegrand integrand(PH);
   integrand.Setk(k);
   GKIntegration<aIntegrand,GK31> integrator(integrand);
-  
+  integrator.SetRelativeErrorMode();
   return (integrator.Integrate(0.0, PH.GetCoreRadius(), 1.0e-10));
 }
 
@@ -104,7 +104,7 @@ double kSpacePH::bPerp(double k)
   bPerpIntegrand integrand(PH);
   integrand.Setk(k);
   GKIntegration<bPerpIntegrand,GK31> integrator(integrand);
-  
+  integrator.SetRelativeErrorMode();
   return (integrator.Integrate(0.0, PH.GetCoreRadius(), 1.0e-10));
 }
 
@@ -148,7 +148,7 @@ double kSpacePH::bPar(double k)
   bParIntegrand integrand(PH);
   integrand.Setk(k);
   GKIntegration<bParIntegrand,GK31> integrator(integrand);
-  
+  integrator.SetRelativeErrorMode();
   return (integrator.Integrate(0.0, PH.GetCoreRadius(), 1.0e-10));
 }
 
@@ -178,6 +178,7 @@ double kSpacePH::Vk (double k)
   VIntegrand integrand(PH);
   integrand.Setk(k);
   GKIntegration<VIntegrand,GK31> integrator(integrand);  
+  integrator.SetRelativeErrorMode();
   double result = integrator.Integrate(0.0, R1, 1.0e-10);
 
   // Now, do the remaining part up to infinity using analytic
