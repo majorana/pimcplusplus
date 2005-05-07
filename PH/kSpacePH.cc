@@ -185,9 +185,9 @@ double kSpacePH::Vk (double k)
   // integratio of our fitted form.
   assert (HaveTailCoefs);
   
-  result += 4.0*M_PI*Ctail1/(k*k) * cos(k*R1);
-  result -= 4.0*M_PI*Ctail2/k*(gsl_sf_Si(k*R1) - 0.5*M_PI);
-  result -= 4.0*M_PI*Ctail3/k*(k*gsl_sf_Ci(k*R1) - sin (k*R1)/R1);
+//   result += 4.0*M_PI*Ctail1/(k*k) * cos(k*R1);
+//   result -= 4.0*M_PI*Ctail2/k*(gsl_sf_Si(k*R1) - 0.5*M_PI);
+//   result -= 4.0*M_PI*Ctail3/k*(k*gsl_sf_Ci(k*R1) - sin (k*R1)/R1);
   fprintf (stderr, "k = %1.5e, Vk = %1.12e\n",
 	   k, result);
   return result;
