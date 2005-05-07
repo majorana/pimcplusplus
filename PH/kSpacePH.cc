@@ -28,6 +28,9 @@ void kSpacePH::CalcTailCoefs (double r1, double r2)
   Ctail1 = coefs(0);
   Ctail2 = coefs(1);
   Ctail3 = coefs(2);
+  fprintf (stderr, "Ctail1 = %1.12e\n", Ctail1);
+  fprintf (stderr, "Ctail2 = %1.12e\n", Ctail2);
+  fprintf (stderr, "Ctail3 = %1.12e\n", Ctail3);
   HaveTailCoefs = true;
 }
 
