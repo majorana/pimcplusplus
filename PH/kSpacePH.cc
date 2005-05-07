@@ -242,6 +242,14 @@ kSpacePH::Ftensor (Vec3 deltaG, double aVal, double bPerpVal,
   G(1,0)=g[1]*g[0]; G(1,1)=g[1]*g[1]; G(1,2)=g[1]*g[2];
   G(2,0)=g[2]*g[0]; G(2,1)=g[2]*g[1]; G(2,2)=g[2]*g[2];
   F = F + (bParVal - bPerpVal)*G;
+
+  // HACK HACK HACK
+  F(0,0)=1.0; F(0,1)=0.0; F(0,2)=0.0;
+  F(1,0)=0.0; F(1,1)=1.0; F(1,2)=0.0;
+  F(2,0)=0.0; F(2,1)=0.0; F(2,2)=1.0;
+  // END HACK HACK HACK
+
+
   return F;
 }
 
