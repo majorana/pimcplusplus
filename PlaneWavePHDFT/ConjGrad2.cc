@@ -63,7 +63,7 @@ void ConjGrad::InitBands()
     Vec3 Gpk = H.GVecs(i) + H.kPoint;
     Hmat(i,i) += 0.5 * dot (Gpk,Gpk);
   }
-  //  cerr << "Hmat = " << Hmat << endl;
+  cerr << "Hmat = " << Hmat << endl;
   // Now diagonalize
   SymmEigenPairs (Hmat, numBands, EigVals, EigVecs);
 
