@@ -180,7 +180,7 @@ double kSpacePH::Vk (double k)
   GKIntegration<VIntegrand,GK31> integrator(integrand);  
   integrator.SetRelativeErrorMode();
   // HACK HACK HACK HACK
-  double result = integrator.Integrate(1.0, R1, 1.0e-10);
+  double result = 0.0;
   //double result = integrator.Integrate(0.0, R1, 1.0e-10);
 
   // Now, do the remaining part up to infinity using analytic
