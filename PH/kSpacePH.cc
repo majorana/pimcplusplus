@@ -177,7 +177,7 @@ double kSpacePH::Vk (double k)
   // First, do the part of the integral up to R1 numerically
   VIntegrand integrand(PH);
   integrand.Setk(k);
-  GKIntegration<VIntegrand,GK15> integrator(integrand);  
+  GKIntegration<VIntegrand,GK31> integrator(integrand);  
   integrator.SetRelativeErrorMode();
   double result = integrator.Integrate(0.0, R1, 1.0e-10);
 
@@ -188,6 +188,8 @@ double kSpacePH::Vk (double k)
   result += 4.0*M_PI*Ctail1/(k*k) * cos(k*R1);
   result -= 4.0*M_PI*Ctail2/k*(gsl_sf_Si(k*R1) - 0.5*M_PI);
   result -= 4.0*M_PI*Ctail3/k*(k*gsl_sf_Ci(k*R1) - sin (k*R1)/R1);
+  fprintf (stderr, "k = %1.5e, Vk = %1.12e\n",
+	   k, result);
   return result;
 }
 
