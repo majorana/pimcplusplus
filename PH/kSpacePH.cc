@@ -172,7 +172,7 @@ public:
 
 double kSpacePH::Vk (double k)
 {
-  if (k == 0.0)
+  if (fabs(k) < 1.0e-10)
     return 0.0;
   // First, do the part of the integral up to R1 numerically
   VIntegrand integrand(PH);
@@ -243,13 +243,6 @@ kSpacePH::Ftensor (Vec3 deltaG, double aVal, double bPerpVal,
   G(2,0)=g[2]*g[0]; G(2,1)=g[2]*g[1]; G(2,2)=g[2]*g[2];
   F = F + (bParVal - bPerpVal)*G;
 
-  // HACK HACK HACK
-  F(0,0)=1.0; F(0,1)=0.0; F(0,2)=0.0;
-  F(1,0)=0.0; F(1,1)=1.0; F(1,2)=0.0;
-  F(2,0)=0.0; F(2,1)=0.0; F(2,2)=1.0;
-  // END HACK HACK HACK
-
-
   return F;
 }
 
@@ -297,8 +290,7 @@ double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
   FGpk[1] = F(1,0)*Gpk[0] + F(1,1)*Gpk[1] + F(1,2)*Gpk[2];
   FGpk[2] = F(2,0)*Gpk[0] + F(2,1)*Gpk[1] + F(2,2)*Gpk[2];
   
-  /// HACK HACK HACK HACK
-  return 0.5*dot(Gk, FGpk) /*+ Vval*/;
+  return 0.5*dot(Gk, FGpk) + Vval;
 }
 
 
