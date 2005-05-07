@@ -82,7 +82,7 @@ public:
     double krInv = 1.0/kr;
     double b = PH.B(r) - 1.0;
     double j0, j2;
-    if (k < 1.0e-12) {
+    if (kr < 1.0e-10) {
       j0 = 1.0;
       j2 = 0.0;
     }
@@ -126,7 +126,7 @@ public:
     double krInv = 1.0/kr;
     double b = PH.B(r) - 1.0;
     double j0, j2;
-    if (k < 1.0e-12) {
+    if (kr < 1.0e-10) {
       j0 = 1.0;
       j2 = 0.0;
     }
