@@ -297,7 +297,8 @@ double kSpacePH::V (Vec3 k, Vec3 G, Vec3 Gp)
   FGpk[1] = F(1,0)*Gpk[0] + F(1,1)*Gpk[1] + F(1,2)*Gpk[2];
   FGpk[2] = F(2,0)*Gpk[0] + F(2,1)*Gpk[1] + F(2,2)*Gpk[2];
   
-  return 0.5*dot(Gk, FGpk) + Vval;
+  /// HACK HACK HACK HACK
+  return 0.5*dot(Gk, FGpk) /*+ Vval*/;
 }
 
 
