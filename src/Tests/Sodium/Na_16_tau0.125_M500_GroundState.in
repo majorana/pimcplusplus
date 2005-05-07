@@ -1,4 +1,4 @@
-double tau=0.03125;
+double tau=0.125;
 
 Section (Parallel)
 {
@@ -11,7 +11,7 @@ Section (Parallel)
 // Note:  energy per isolated atom for this PH is -0.1950864451427349 hartrees.
 Section (System)
 {
-  int NumTimeSlices=2000;
+  int NumTimeSlices=500;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[16.006, 16.006,16.006];
   double kCutoff = 1.2;
@@ -76,7 +76,7 @@ Section (System)
 
 Section (Action)
 {
-  int MaxLevels = 7;
+  int MaxLevels = 5;
   bool UseRPA = false;
   int NumBreakupKnots = 20;
   int NumImages = 1;
@@ -97,7 +97,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "/localscratch/esler/NaRuns/Na_16_tau0.03125_M2000_plotWF";
+  string OutFileBase = "/localscratch/esler/NaRuns/Na_16_tau0.125_M500_GroundState";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
@@ -180,7 +180,7 @@ Section (Moves) {
     //string PermuteType="TABLE";
     string PermuteType="NONE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-    int NumLevels=7;
+    int NumLevels=5;
     string Species = "eup";
     int StepsPerBlock=8;
   }
@@ -190,7 +190,7 @@ Section (Moves) {
     string PermuteType="NONE";
     //string PermuteType="TABLE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-    int NumLevels=7;
+    int NumLevels=5;
     string Species = "edown";
     int StepsPerBlock=8;
   }
@@ -199,7 +199,7 @@ Section (Moves) {
     string type="RefSlice";
     string name="upRefSlice";
     string PermuteType="NONE";
-    int NumLevels=7;
+    int NumLevels=5;
     string Species = "eup";
   }
 
@@ -207,7 +207,7 @@ Section (Moves) {
     string type="RefSlice";
     string name="downRefSlice";
     string PermuteType="NONE";
-    int NumLevels=7;
+    int NumLevels=5;
     string Species = "edown";
   }
 
