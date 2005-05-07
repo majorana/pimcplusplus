@@ -316,7 +316,7 @@ PHPotFFTClass::Vmatrix (Array<complex<double>,2> &vmat)
 void 
 PHPotFFTClass::SetupkPotentials()
 {
-  kPH.CalcTailCoefs (15.0, 60.0);
+  kPH.CalcTailCoefs (30.0, 60.0);
 
   double volInv = 1.0/GVecs.GetBoxVol();
   // Setup V and F tensors in k-space
