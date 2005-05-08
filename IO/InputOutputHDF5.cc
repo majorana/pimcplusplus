@@ -204,6 +204,7 @@ bool VarHDF5Class::ReadInto (bool &val)
 { 
   assert (Type == BOOL_TYPE);
   assert (Dimensions.size() == 1 && Dimensions(0)==1);
+  val = false;
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, &val);
   return (status == 0);
@@ -214,6 +215,7 @@ bool VarHDF5Class::ReadInto (blitz::Array<bool,1> &val)
   assert (Type == BOOL_TYPE);
   assert (Dimensions.size() == 1);
   val.resize(Dimensions(0));
+  val = false;
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, val.data());
   return (status == 0);
@@ -225,6 +227,7 @@ bool VarHDF5Class::ReadInto (blitz::Array<bool,2> &val)
   assert (Type == INT_TYPE);
   assert (Dimensions.size() == 2);
   val.resize(Dimensions(0), Dimensions(1));
+  val = false;
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, val.data());
   return (status == 0);
@@ -235,6 +238,7 @@ bool VarHDF5Class::ReadInto (blitz::Array<bool,3> &val)
   assert (Type == INT_TYPE);
   assert (Dimensions.size() == 3);
   val.resize(Dimensions(0), Dimensions(1), Dimensions(2));
+  val = false;
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, val.data());
   return (status == 0);
@@ -245,6 +249,7 @@ bool VarHDF5Class::ReadInto (blitz::Array<bool,4> &val)
   assert (Type == BOOL_TYPE);
   assert (Dimensions.size() == 4);
   val.resize(Dimensions(0), Dimensions(1), Dimensions(2), Dimensions(3));
+  val = false;
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
 			  H5S_ALL, H5P_DEFAULT, val.data());
   return (status == 0);
