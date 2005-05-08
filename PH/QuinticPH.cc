@@ -139,6 +139,7 @@ void QuinticPH::Read(IOSectionClass &in)
   }
   in.ReadVar ("UseVcore", UseVcore);
   cerr << "UseVcore = " << ( UseVcore ? "true" : "false") << endl;
+  cerr << "sizeof(bool) = " << sizeof(bool) << endl;
 
   assert (in.ReadVar ("Vcore", temp));
   Vcore.Init (&Vgrid, temp, NAN, dVend, NAN, d2Vend);
