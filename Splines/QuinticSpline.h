@@ -131,7 +131,7 @@ void QuinticSpline::Init(Grid *NewGrid, Array<double,1> NewY,
   F.resize(NewY.size());
   Y = NewY;
 
-  int NumParams = grid->NumPoints;
+  NumParams = grid->NumPoints;
   if (isnormal(StartDeriv))
     {
       NumParams++;

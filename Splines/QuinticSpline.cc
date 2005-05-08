@@ -31,7 +31,7 @@ void QuinticSpline::Update()
     offset++;
     FX(1) = (*grid)(0);
     FY(1) = StartDeriv;
-    if (isnormal(StartDeriv2)) {
+    if (isnormal(StartDeriv2)) { 
       offset++;
       FX(2) = (*grid)(0);
       FY(2) = StartDeriv2;

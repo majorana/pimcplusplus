@@ -138,6 +138,7 @@ void QuinticPH::Read(IOSectionClass &in)
     d2Vend = Vouter->d2Vdr2(CoreRadius);
   }
   in.ReadVar ("UseVcore", UseVcore);
+  cerr << "UseVcore = " << ( UseVcore ? "true" : "false") << endl;
 
   assert (in.ReadVar ("Vcore", temp));
   Vcore.Init (&Vgrid, temp, NAN, dVend, NAN, d2Vend);
