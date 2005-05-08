@@ -95,10 +95,11 @@ void QuinticSpline::Read(IOSectionClass &inSection)
   assert(inSection.ReadVar("EndDeriv", EndDeriv));
   assert(inSection.ReadVar("StartDeriv2", StartDeriv2));
   assert(inSection.ReadVar("EndDeriv2", EndDeriv2));
-  assert(inSection.ReadVar("Y", Y));
-  NumParams = Y.size();
+  Array<double,1> newY;
+  assert(inSection.ReadVar("Y", newY));
   assert(inSection.OpenSection("Grid"));
-  grid = ReadGrid(inSection);
+  Grid *newGrid = ReadGrid(inSection);
   inSection.CloseSection();
+  Init (newGrid, newY, StartDeriv, EndDeriv, StartDeriv2, EndDeriv2);
   Update();
 }
