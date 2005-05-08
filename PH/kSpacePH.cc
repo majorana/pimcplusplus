@@ -28,9 +28,6 @@ void kSpacePH::CalcTailCoefs (double r1, double r2)
   Ctail1 = coefs(0);
   Ctail2 = coefs(1);
   Ctail3 = coefs(2);
-  fprintf (stderr, "Ctail1 = %1.12e\n", Ctail1);
-  fprintf (stderr, "Ctail2 = %1.12e\n", Ctail2);
-  fprintf (stderr, "Ctail3 = %1.12e\n", Ctail3);
   HaveTailCoefs = true;
 }
 
@@ -180,12 +177,12 @@ double kSpacePH::Vk (double k)
   ///////////
   // DEBUG //
   ///////////
-  if (k < 0.4) {
-    FILE *fout = fopen ("Vint.dat", "w");
-    for (double r=0; r<R1; r+=0.001)
-      fprintf (fout, "%1.12e %1.12e %1.12e\n", k, r, integrand(r));
-    fclose (fout);
-  }
+//   if (k < 0.4) {
+//     FILE *fout = fopen ("Vint.dat", "w");
+//     for (double r=0; r<R1; r+=0.001)
+//       fprintf (fout, "%1.12e %1.12e %1.12e\n", k, r, integrand(r));
+//     fclose (fout);
+//   }
 
   GKIntegration<VIntegrand,GK31> integrator(integrand);  
   integrator.SetRelativeErrorMode();
@@ -198,8 +195,8 @@ double kSpacePH::Vk (double k)
   result += 4.0*M_PI*Ctail1/(k*k) * cos(k*R1);
   result -= 4.0*M_PI*Ctail2/k*(gsl_sf_Si(k*R1) - 0.5*M_PI);
   result -= 4.0*M_PI*Ctail3/k*(k*gsl_sf_Ci(k*R1) - sin (k*R1)/R1);
-  fprintf (stderr, "k = %1.5e, Vk = %1.12e\n",
-	   k, result);
+//   fprintf (stderr, "k = %1.5e, Vk = %1.12e\n",
+// 	   k, result);
   return result;
 }
 

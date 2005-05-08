@@ -49,15 +49,13 @@ void ConjGrad::Setup()
 void ConjGrad::InitBands()
 {
   int numBands = Bands.rows();
-  int numVecs = 4 * numBands;
+  int numVecs = 6 * numBands;
   assert (numVecs <= H.GVecs.size());
   Array<complex<double>,2> Hmat(numVecs, numVecs);
   Array<complex<double>,2> EigVecs(numBands, numVecs);
   Array<double,1> EigVals (numBands);
 
-  cerr << "Before Vmatrix.\n";
   H.Vion->Vmatrix(Hmat);
-  cerr << "After Vmatrix.\n";
   cerr << "kPoint = " << H.kPoint << endl;
   for (int i=0; i<numVecs; i++) {
     Vec3 Gpk = H.GVecs(i) + H.kPoint;
