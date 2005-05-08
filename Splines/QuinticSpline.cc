@@ -20,7 +20,7 @@ void QuinticSpline::Update()
   cerr << "StartDeriv2 = " << StartDeriv2 << endl;
   cerr << "EndDeriv    = " << EndDeriv    << endl;
   cerr << "EndDeriv2   = " << EndDeriv2   << endl;
-  cerr << "NumParams   = " << NumParams   << endl;
+  cerr << "NumParams   = " << FY.size()   << endl;
 
   /// First, use double and triple knots to specify first and second
   /// derivatives at the boundary if we so desire.
