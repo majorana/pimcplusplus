@@ -370,6 +370,8 @@ void PathClass::InitPaths (IOSectionClass &in)
 	r[2] = iz*delta-0.5*Box[2];
 	if (ptcl % 2) 
 	  r += 0.5*delta;
+	fprintf (stderr, "BCC ptcl %d position = [%8.4f %8.4f %8.4f]\n",
+		 r[0], r[1], r[2]);
 	for (int slice=0; slice<NumTimeSlices(); slice++) 
 	  Path(slice,ptcl) = r;
       }

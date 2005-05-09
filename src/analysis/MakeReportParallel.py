@@ -526,10 +526,13 @@ print 'Found ' +repr(infiles.len()) + ' output files.'
 
 dirName=basename 
 cutoff=None
+StartCut = None
 if (os.access(dirName+"/.pref",os.F_OK)):
      print dirName+"/.pref"
      prefFile=IOSectionClass()
      prefFile.OpenFile(dirName+"/.pref")
+     prefFile.ReadVar("StartCut")
+     print "StartCut = ", StartCut
      print prefFile.ReadVar("cutoff")
      cutoff=prefFile.ReadVar("cutoff")
      print "cutoff = ", cutoff

@@ -2,7 +2,7 @@ double tau=0.125;
 
 Section (Parallel)
 {
-  int ProcsPerClone = 8;
+  int ProcsPerClone = 1;
 }
 
 
@@ -39,14 +39,14 @@ Section (System)
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
       Array<double,2> Positions(8,3)=
-        [ -8.103005, -8.50300, -8.60300,
-	  -8.303008, -8.60300,   0.90000,
-	  -8.203001,   0.30000, -8.50300,
-            0.400003, -8.10300, -8.10300,
-	  -8.503004,   0.80000,   0.20000,
-            0.600007, -8.10300,   0.70000,
-            0.700003,   0.60000, -8.20300,
-            0.800001,   0.20000,   0.50000 ];
+        [ -8.73103005, -8.5150300, -8.630300,
+	  -8.3303008, -8.2660300,   0.920000,
+	  -8.2303001,   0.7330000, -8.5420300,
+            0.4700003, -8.9460300, -8.1340300,
+	  -8.5303004,   0.8260000,   0.2520000,
+            0.63500007, -8.1260300,   0.721067000,
+            0.71200003,   0.6026000, -8.230300,
+            0.80780001,   0.22012000,   0.5520000 ];
       
     }
     Section (Species)
@@ -60,14 +60,14 @@ Section (System)
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
       Array<double,2> Positions(8,3)=
-	[ -4.30146, -4.3014, -4.2014,
-          -4.10141,  4.9014, -4.3014,
-          -4.40143, -4.7014,  4.8014,
-          -4.10148,  4.9014,  4.4014,
-           4.50142, -4.8014, -4.6014,
-           4.90145, -4.5014,  4.2014,
-           4.20145,  4.3014, -4.6014,
-           4.60141,  4.5014,  4.4014 ];
+	[ -4.350146, -4.332014, -4.262014,
+          -4.120141,  4.923014, -4.336014,
+          -4.410143, -4.73014,  4.808414,
+          -4.160148,  4.9123014,  4.544014,
+           4.580142, -4.832014, -4.366014,
+           4.920145, -4.563014,  4.732014,
+           4.250145,  4.345014, -4.2866014,
+           4.620141,  4.53014,  4.784014 ];
     }
 
   }
@@ -82,8 +82,8 @@ Section (Action)
   int NumImages = 1;
   Array<string,1> PairActionFiles(3) = 
     ["Na-Na.PairAction",
-     "NaPH_US_April11_05.fixfit.beta8.0.h5",
-     "e-e.fit.beta8.0.h5"];
+     "/localscratch/esler/NaPH_US_April11_05.fixfit.beta8.0.h5",
+     "/localscratch/esler/e-e.fit.beta8.0.h5"];
   //     "e-e_beta8.0.coulombBCfit.h5"];
   Section (NodalAction)
   {
@@ -97,7 +97,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "Na_16_tau0.125_M512_GroundState";
+  string OutFileBase = "/localscratch/esler/NaRuns/Na_16_tau0.125_M512_GroundState";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
