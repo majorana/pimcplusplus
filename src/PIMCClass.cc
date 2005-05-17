@@ -3,6 +3,7 @@
 #include "Observables/ObservableClass.h"
 #include <sstream>
 #include "Common/Blitz.h"
+#include <wordexp.h>
 
 void PIMCClass::Read(IOSectionClass &in)
 {
@@ -76,6 +77,12 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
   if (iAmRoot) {
     string outFileBase;
     assert(in.ReadVar("OutFileBase",outFileBase));
+    // Allow for tilde-expansion in these files
+    wordexp_t words;
+    wordexp (outFileBase.c_str(), &words, 0);
+    outFileBase = words.we_wordv[0];
+    wordfree(&words);
+
     ostringstream cloneNum;
     cloneNum << PathData.GetCloneNum();
     OutFileName = 
