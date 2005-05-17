@@ -264,6 +264,8 @@ def MeanErrorString (mean, error):
           rightDigits = -math.floor(math.log(error)/math.log(10))+1
      else:
           rightDigits=2
+     if (rightDigits < 0):
+          rightDigits = 0
      formatstr = '%1.' + '%d' % rightDigits + 'f'
      meanstr  = formatstr % mean
      errorstr = formatstr % error

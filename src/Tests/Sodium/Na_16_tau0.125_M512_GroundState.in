@@ -82,9 +82,8 @@ Section (Action)
   int NumImages = 1;
   Array<string,1> PairActionFiles(3) = 
     ["Na-Na.PairAction",
-     "/localscratch/esler/NaPH_US_April11_05.fixfit.beta8.0.h5",
+     "/localscratch/esler/NaPH_US_April11_05.fit.beta8.0.h5",
      "/localscratch/esler/e-e.fit.beta8.0.h5"];
-  //     "e-e_beta8.0.coulombBCfit.h5"];
   Section (NodalAction)
   {
     string Type = "GROUNDSTATE";

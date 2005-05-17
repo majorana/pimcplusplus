@@ -272,6 +272,15 @@ GroundStateClass::Read(IOSectionClass &in)
   Vec3 gamma (0.0, 0.0, 0.0);
   System->Setup (Path.GetBox(), gamma, kCut, *PH);
 
+  /////////////////////////////
+  // Setup the ion positions //
+  /////////////////////////////
+  SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
+  int first = ionSpecies.FirstPtcl;
+  for (int i=0; i<NumIons; i++)
+    Rions(i) = Path(0,i+first);
+  System->SetIons (Rions);
+
   ////////////////////////////////////////
   // Setup real space grids and splines //
   ////////////////////////////////////////
@@ -287,8 +296,7 @@ GroundStateClass::Read(IOSectionClass &in)
   Array<double,4> initData(nx,ny,nz,NumBands);
   initData = 0.0;
   BandSplines.Init (&xGrid, &yGrid, &zGrid, initData, true);
-  UpdateBands();
-
+  //  UpdateBands();
 }
 
 double

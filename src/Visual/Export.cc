@@ -99,6 +99,10 @@ ExportClass::ExportClass(VisualClass &visual) :
     (sigc::mem_fun(*this, &ExportClass::OnHeightAdjust));
   StillButton.signal_toggled().connect
     (sigc::mem_fun(*this, &ExportClass::OnStillMovie));
+  BaseNameChooser.signal_selection_changed().connect
+    (sigc::mem_fun(*this, &ExportClass::OnChooserChange));
+  BaseNameEntry.signal_activate().connect
+    (sigc::mem_fun(*this, &ExportClass::OnEntryChange));
 }
 
 
@@ -367,4 +371,16 @@ ExportClass::OnStillMovie()
 {
   bool do_movie = !StillButton.get_active();
   MovieParamFrame.set_sensitive(do_movie);
+}
+
+void
+ExportClass::OnChooserChange()
+{
+  BaseNameEntry.set_text(BaseNameChooser.get_filename());
+}
+
+void
+ExportClass::OnEntryChange()
+{
+  BaseNameChooser.select_filename(BaseNameEntry.get_text());
 }

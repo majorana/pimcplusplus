@@ -68,7 +68,7 @@ private:
   /// Signal handlers
   void OnExportButton(), OnCancelButton(), OnBrowseButton();
   void OnWidthAdjust(), OnHeightAdjust(), OnRatioToggle();
-  void OnStillMovie();
+  void OnStillMovie(), OnChooserChange(), OnEntryChange();
 
   int Width, Height;
   double Ratio;

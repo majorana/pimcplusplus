@@ -272,6 +272,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 {
   double homo = 0.0;
   double hetero = 0.0;
+  double background = 0.0;
   int skip = (1<<level);
   double levelTau = Path.tau * (double)skip;
   for (int slice=slice1; slice<=slice2; slice+=skip) {
@@ -294,7 +295,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
       // We can't forget the Madelung term.
       homo -= factor * 0.5 * N * PA.dUlong_r0(level);
       // Or the neutralizing background term
-      //homo -= factor * 0.5*N*N*PA.dUshort_k0(level);
+      background -= factor * 0.5*N*N*PA.dUshort_k0(level);
     }
     
     // Now do the heterologous terms
@@ -312,12 +313,11 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 	  }
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
-	  //hetero -= factor * N1*N2*PA.dUshort_k0(level);
+	  background -= factor * N1*N2*PA.dUshort_k0(level);
 	}
       }
   }
-  return (homo+hetero);
-    
+  return (homo+hetero+background);
 }
 
 void LongRangeClass::Init(IOSectionClass &in, IOSectionClass &out)

@@ -107,8 +107,6 @@ double ShortRangeClass::d_dBeta (int slice1, int slice2,
   double levelTau=Path.tau;
   int skip = 1<<level;
   //  int slice2 = slice1 + (1<<level);
-  for (int i=0; i<level; i++) 
-    levelTau *= 2.0;
   // Add constant part.  Note: we should really check the number of
   // dimensions. 
   double dU = 0.0;
@@ -118,13 +116,14 @@ double ShortRangeClass::d_dBeta (int slice1, int slice2,
       for (int slice=slice1;slice<slice2;slice+=skip){
 	dVec r, rp;
 	double rmag, rpmag;
-	PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2, rmag,rpmag,r,rp); 
+	PathData.Path.DistDisp(slice,slice+skip,ptcl1,ptcl2,rmag,rpmag,r,rp);
 	
 	double s2 = dot(r-rp, r-rp);
 	double q = 0.5*(rmag+rpmag);
 	double z = (rmag-rpmag);
 	
-	PairActionFitClass& pa=*(PairMatrix(species1, PathData.Path.ParticleSpeciesNum(ptcl2)));
+	PairActionFitClass& pa=
+	  *(PairMatrix(species1, PathData.Path.ParticleSpeciesNum(ptcl2)));
 	dU += pa.dU(q, z, s2, level);
 	// Subtract off long-range part from short-range action
 	if (pa.IsLongRange())
