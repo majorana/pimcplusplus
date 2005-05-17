@@ -347,6 +347,7 @@ void VisualClass::OnOpen()
 
 void VisualClass::OnExport()
 {
+  Export.SetupWidgets();
   Export.show_all();
   //  Export.Export ("frame.png");
 }

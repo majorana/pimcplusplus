@@ -1,17 +1,21 @@
-SOURCES = PathVis.cc GLObject.cc PathObject.cc trackball.c ViewClass.cc BoxObject.cc Visual.cc SphereObject.cc BoxClass.cc SmoothClass.cc Export.cc
+SOURCES = PathVis.cc GLObject.cc PathObject.cc trackball.c ViewClass.cc BoxObject.cc Visual.cc SphereObject.cc BoxClass.cc SmoothClass.cc Export.cc ExportVideo.cc
 
 GLINC = `pkg-config gtkglextmm-1.2 --cflags`
 GLLIBS = `pkg-config gtkglextmm-1.2 --libs` -lgle -lglut
+XVIDLIBS = -lxvidcore
+REVELLIBS = -lrevel
 
 IOobjs = ../Common/IO/InputOutput.o ../Common/IO/InputOutputHDF5.o \
          ../Common/IO/InputOutputASCII.o  ../Common/IO/InputOutputXML.o
 
-Objs =	PathVis.o GLObject.o PathObject.o trackball.o ViewClass.o BoxObject.o Visual.o SphereObject.o BoxClass.o SmoothClass.o Export.o
+SplineObjs = ../Common/Splines/CubicSpline.o ../Common/Splines/Grid.o
+
+Objs =	PathVis.o GLObject.o PathObject.o trackball.o ViewClass.o BoxObject.o Visual.o SphereObject.o BoxClass.o SmoothClass.o Export.o ExportVideo.o 
 
 all:	PathVis
 
-PathVis:  $(IOobjs) $(Objs)
-	$(LD) -o PathVis $(Objs) $(IOobjs) $(LIBS) $(GLLIBS)
+PathVis:  $(IOobjs) $(Objs) $(SplineObjs)
+	$(LD) -o PathVis $(Objs) $(IOobjs) $(SplineObjs) $(LIBS) $(GLLIBS) $(REVELLIBS) $(XVIDLIBS) 
 
 clean:
 	rm -f *.o
