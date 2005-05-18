@@ -104,6 +104,11 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
   double lambda = species.lambda;
   bool haveNodeAction = Actions.NodalActions(speciesNum)!=NULL;
 
+  // HACK to get ground state plane wave calculations to happen
+  // simultaneously rather than sequentially.
+  if (haveNodeAction)
+    Actions.NodalActions(speciesNum)->IsPositive(0);
+
   int myFirstSlice, myLastSlice, myProc;
   myProc = Communicator.MyProc();
   SliceRange (myProc, myFirstSlice, myLastSlice);
@@ -174,34 +179,8 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	}
 	// Now broadcast whether or not I'm positive to everyone
 	Communicator.Broadcast(sliceOwner, positive);
-	cerr << "slice = " << slice << " positive = "
-	     << (positive ? "true" : "false") << endl;
       }
-  } while (!positive);
-//       if (!positive){
-// 	cerr << "Negative sign at slice " << slice << "\n";
-// 	// Find two closest particles in species.
-// 	double  minDist = 1.0e300;
-// 	int min1, min2;
-// 	for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) 
-// 	  for (int ptcl2=ptcl1+1; ptcl2<numPtcls; ptcl2++) {
-// 	    double dist;
-// 	    dVec disp;
-// 	    DistDisp(slice, ptcl1+species.FirstPtcl, ptcl2+species.LastPtcl, dist, disp);
-// 	    if (dist < minDist) {
-// 	      minDist = dist;
-// 	      min1 = ptcl1; 
-// 	      min2 = ptcl2;
-// 	    }
-// 	  }
-// 	// Now, swap them
-// 	cerr << "  Swapping ptcl #" << min1 << " and #" << min2 << endl;
-// 	dVec tmp = newSlice(min1);
-// 	newSlice(min1) = newSlice(min2);
-// 	newSlice(min2) = tmp;
-// 	// Swap in path if I'm the slice owner
-//       }
-//     }
+    } while (!positive);
     // Copy slice into Path if I'm the slice owner.
     if ((slice>=myFirstSlice) && (slice<=myLastSlice)) 
       for (int ptcl=0; ptcl<numPtcls; ptcl++) {
@@ -221,21 +200,20 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	}
       }
     }
-    
     // continue on to next slice
     prevSlice = newSlice;
   }
   Array<int,1> changedParticles(1);
   if (haveNodeAction) {
     double localAction = 
-      Actions.NodalActions(speciesNum)->Action(myFirstSlice, myLastSlice, 
+      Actions.NodalActions(speciesNum)->Action(0, NumTimeSlices()-1, 
 					       changedParticles,0);
     double globalAction = localAction;
     Communicator.AllSum (globalAction);
     cerr << "Nodal Action after Levi flight = " << globalAction << endl;
   }
 
-  if (Communicator.MyProc == 0) {
+  if (Communicator.MyProc() == 0) {
     char fname[100];
     snprintf (fname, 100, "%s.dat", species.Name.c_str());
     FILE *fout = fopen (fname, "w");
@@ -247,7 +225,6 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     }
     fclose(fout);
   }
-  cerr << "My first particle = " << species.FirstPtcl << endl;
 }
 
 void PathClass::Read (IOSectionClass &inSection)
