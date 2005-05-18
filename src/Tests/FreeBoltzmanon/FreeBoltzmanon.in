@@ -1,5 +1,10 @@
 double tau=0.05;
 
+Section (Parallel)
+{
+  int ProcsPerClone = 1;
+}
+
 Section (System)
 {
   int NumTimeSlices=20;
@@ -11,10 +16,11 @@ Section (System)
     {
       string Name="free";
       double lambda=1.0; 
-      string Type="BOLTZMANNON";
+      string Type="free";
+      string Statistics = "BOLTZMANNON";
       int NumParticles=4;
       int NumDim=3;
-      string InitPaths="FIXED";
+      string InitPaths="LEVIFLIGHT";
       Array<double,2> Positions(4,3)=[ 0.0, 0.0, 0.0 ,
 				       0.1, 0.1, 0.1 , 
 				       0.2, 0.2, 0.2 ,
@@ -28,11 +34,12 @@ Section (Action)
 {
   int MaxLevels = 3;
   Array<string,1> PairActionFiles(1) = ["../../PairActions/zero.PairAction"];
+  int NumImages = 1;
 }
 
 Section (Observables)
 {
-  string OutFile = "FreeBoltzmanon.h5";
+  string OutFileBase = "FreeBoltzmanon1";
   Section (Observable)
     {
       string type = "Energy";
@@ -64,13 +71,13 @@ Section (Observables)
 Section (Moves){
   Section (Move)
     {
-      string type="Bisection";
+      string type="BisectionBlock";
       string name="Bisection";
-      
-      Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
-      ///here should be electron
+      string PermuteType = "NONE";
+      string Species = "free"; 
       int NumParticlesToMove=1;
-      string NumLevels="Max";      
+      int NumLevels = 3;
+      int StepsPerBlock = 2;
     }
   Section (Move)
     {

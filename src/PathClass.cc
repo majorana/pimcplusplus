@@ -174,6 +174,8 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	}
 	// Now broadcast whether or not I'm positive to everyone
 	Communicator.Broadcast(sliceOwner, positive);
+	cerr << "slice = " << slice << " positive = "
+	     << (positive ? "true" : "false") << endl;
       }
   } while (!positive);
 //       if (!positive){
@@ -207,7 +209,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	//cerr << "setting slice " << relSlice 
 	//     << " for species " << species.Name << endl;
       }
-
+    
     // Check to make sure we're positive now.
     if ((Actions.NodalActions(speciesNum) != NULL) && (slice!=(N-1))) {
       bool positive;
@@ -219,28 +221,32 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	}
       }
     }
-
+    
     // continue on to next slice
     prevSlice = newSlice;
   }
   Array<int,1> changedParticles(1);
   if (haveNodeAction) {
-    double action = 
-      Actions.NodalActions(speciesNum)->Action(0, N-1, 
+    double localAction = 
+      Actions.NodalActions(speciesNum)->Action(myFirstSlice, myLastSlice, 
 					       changedParticles,0);
-    cerr << "Nodal Action after Levi flight = " << action << endl;
+    double globalAction = localAction;
+    Communicator.AllSum (globalAction);
+    cerr << "Nodal Action after Levi flight = " << globalAction << endl;
   }
 
-  char fname[100];
-  snprintf (fname, 100, "%s.dat", species.Name.c_str());
-  FILE *fout = fopen (fname, "w");
-  for (int slice=0; slice<N; slice++) {
-    for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) 
-      for (int i=0; i<NDIM; i++)
-	fprintf (fout, "%1.12e ", (*this)(slice, ptcl)[i]);
-    fprintf (fout, "\n");
+  if (Communicator.MyProc == 0) {
+    char fname[100];
+    snprintf (fname, 100, "%s.dat", species.Name.c_str());
+    FILE *fout = fopen (fname, "w");
+    for (int slice=0; slice<N; slice++) {
+      for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) 
+	for (int i=0; i<NDIM; i++)
+	  fprintf (fout, "%1.12e ", (*this)(slice, ptcl)[i]);
+      fprintf (fout, "\n");
+    }
+    fclose(fout);
   }
-  fclose(fout);
   cerr << "My first particle = " << species.FirstPtcl << endl;
 }
 

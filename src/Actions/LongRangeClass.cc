@@ -329,11 +329,13 @@ void LongRangeClass::Init(IOSectionClass &in, IOSectionClass &out)
   int numKnots;
   assert(in.ReadVar ("NumBreakupKnots", numKnots));
   cerr << "Doing optimized long range breakups...\n";
-  out.NewSection ("LongRangeAction");
+  if (PathData.Path.Communicator.MyProc() == 0) 
+    out.NewSection ("LongRangeAction");
   OptimizedBreakup_U(numKnots, out);
   OptimizedBreakup_dU(numKnots, out);
   OptimizedBreakup_V(numKnots, out);
-  out.CloseSection();
+  if (PathData.Path.Communicator.MyProc() == 0) 
+    out.CloseSection();
 }
 
 
@@ -394,17 +396,21 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
   for (int i=0; i<numPoints; i++)
     r(i) = LongGrid(i);
 
-  out.NewSection ("U");
-  out.WriteVar ("r", r);
+  bool iAmRoot = PathData.Path.Communicator.MyProc() == 0;
+  if (iAmRoot) {
+    out.NewSection ("U");
+    out.WriteVar ("r", r);
+  }
   for (int paIndex=0; paIndex<PairArray.size(); paIndex++) {
-    cerr << "Doing long range breakpus for species types (" 
-	 << PairArray(paIndex)->Particle1.Name << ", " 
-	 << PairArray(paIndex)->Particle2.Name << ")\n";
     PairActionFitClass &pa = *PairArray(paIndex);
-    out.NewSection("PairAction");
-    out.WriteVar ("Particle1", pa.Particle1.Name);
-    out.WriteVar ("Particle2", pa.Particle2.Name);
-
+    if (iAmRoot) {
+      cerr << "Doing long range breakpus for species types (" 
+	   << PairArray(paIndex)->Particle1.Name << ", " 
+	   << PairArray(paIndex)->Particle2.Name << ")\n";
+      out.NewSection("PairAction");
+      out.WriteVar ("Particle1", pa.Particle1.Name);
+      out.WriteVar ("Particle2", pa.Particle2.Name);
+    }
     pa.Setrc (rc);
     pa.Ulong.resize(pa.NumBetas);
     pa.Ulong_k.resize(pa.NumBetas,Path.kVecs.size());
@@ -412,7 +418,8 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
     pa.Ulong_r0.resize(pa.NumBetas);
     pa.Ushort_k0.resize(pa.NumBetas);
     for (int level=0; level<pa.NumBetas; level++) {
-      out.NewSection ("Level");
+      if (iAmRoot)
+	out.NewSection ("Level");
       Ulong_r = 0.0;
       
       // Calculate Xk's
@@ -459,11 +466,13 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
       }
       pa.Ulong(level).Init(&LongGrid, Ulong_r);
 
-      // Now write to outfile
-      out.WriteVar ("Ulong", Ulong_r);
-      for (int i=0; i<numPoints; i++)
-	Ushort_r(i) = pa.Udiag(LongGrid(i), level) - Ulong_r(i);
-      out.WriteVar ("Ushort", Ushort_r);
+      if (iAmRoot) {
+	// Now write to outfile
+	out.WriteVar ("Ulong", Ulong_r);
+	for (int i=0; i<numPoints; i++)
+	  Ushort_r(i) = pa.Udiag(LongGrid(i), level) - Ulong_r(i);
+	out.WriteVar ("Ushort", Ushort_r);
+      }
       
 
       // Calculate FT of Ushort at k=0
@@ -498,18 +507,24 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
 // 	fprintf (fout, "%1.16e \n", U);
 //       }
 //       fclose (fout);
-      out.CloseSection (); // "Level"
+      if (iAmRoot)
+	out.CloseSection (); // "Level"
     }
-    out.CloseSection (); // "PairAction"
+    if (iAmRoot)
+      out.CloseSection (); // "PairAction"
   }
-  out.CloseSection (); // "U"
-  out.FlushFile();
+  if (iAmRoot) {
+    out.CloseSection (); // "U"
+    out.FlushFile();
+  }
 #endif
 }
 
 void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 					 IOSectionClass &out)
 {
+  bool iAmRoot = PathData.Path.Communicator.MyProc() == 0;
+
   ///BUG: Optimized Breakup only works when NDIM==3
 #if NDIM==3
   PathClass &Path=PathData.Path;
@@ -554,13 +569,17 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
   for (int i=0; i<numPoints; i++)
     r(i) = LongGrid(i);
 
-  out.NewSection ("dU");
-  out.WriteVar ("r", r);
+  if (iAmRoot) {
+    out.NewSection ("dU");
+    out.WriteVar ("r", r);
+  }
   for (int paIndex=0; paIndex<PairArray.size(); paIndex++) {
     PairActionFitClass &pa = *PairArray(paIndex);
-    out.NewSection("PairAction");
-    out.WriteVar ("Particle1", pa.Particle1.Name);
-    out.WriteVar ("Particle2", pa.Particle2.Name);
+    if (iAmRoot) {
+      out.NewSection("PairAction");
+      out.WriteVar ("Particle1", pa.Particle1.Name);
+      out.WriteVar ("Particle2", pa.Particle2.Name);
+    }
 
     pa.Setrc (rc);
     pa.dUlong.resize(pa.NumBetas);
@@ -569,7 +588,8 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
     pa.dUlong_r0.resize(pa.NumBetas);
     pa.dUshort_k0.resize(pa.NumBetas);
     for (int level=0; level<pa.NumBetas; level++) {
-      out.NewSection ("Level");
+      if (iAmRoot) 
+	out.NewSection ("Level");
       dUlong_r = 0.0;
 
       // Calculate Xk's
@@ -613,11 +633,13 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 	  dUlong_r(i) = pa.dUdiag (r, level);
       }
       pa.dUlong(level).Init(&LongGrid, dUlong_r);
-      // Now write to outfile
-      out.WriteVar ("dUlong", dUlong_r);
-      for (int i=0; i<numPoints; i++)
-	dUshort_r(i) = pa.dUdiag(LongGrid(i), level) - dUlong_r(i);
-      out.WriteVar ("dUshort", dUshort_r);
+      if (iAmRoot) {
+	// Now write to outfile
+	out.WriteVar ("dUlong", dUlong_r);
+	for (int i=0; i<numPoints; i++)
+	  dUshort_r(i) = pa.dUdiag(LongGrid(i), level) - dUlong_r(i);
+	out.WriteVar ("dUshort", dUshort_r);
+      }
 
 
       // Calculate FT of Ushort at k=0
@@ -639,12 +661,16 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 	//pa.dUlong_k(level,ki) -= CalcXk(paIndex, level, k, rc, JOB_DU);
 	pa.dUlong_k(level,ki) -= pa.Xk_dU(k, level) / boxVol;
       }
-      out.CloseSection (); // "Level"
+      if (iAmRoot) 
+	out.CloseSection (); // "Level"
     }
-    out.CloseSection (); // "PairAction"
+    if (iAmRoot) 
+      out.CloseSection (); // "PairAction"
   }
-  out.CloseSection (); // "dU"
-  out.FlushFile();
+  if (iAmRoot) {
+    out.CloseSection (); // "dU"
+    out.FlushFile();
+  }
 #endif
 }
 
