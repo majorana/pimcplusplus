@@ -20,11 +20,11 @@ void QuinticSpline::Update()
   offset=0;
   FX(0) = (*grid)(0);
   FY(0) = Y(0);
-  if (isnormal(StartDeriv)) {
+  if (!isnan(StartDeriv) && !isinf(StartDeriv)) {
     offset++;
     FX(1) = (*grid)(0);
     FY(1) = StartDeriv;
-    if (isnormal(StartDeriv2)) { 
+    if (!isnan(StartDeriv2) && !isinf(StartDeriv2)) { 
       offset++;
       FX(2) = (*grid)(0);
       FY(2) = StartDeriv2;
@@ -32,11 +32,11 @@ void QuinticSpline::Update()
   }
   
   int i = grid->NumPoints + offset;
-  if (isnormal(EndDeriv)) {
+  if (!isnan(EndDeriv) && !isinf(EndDeriv)) {
     FX(i) = (*grid)(grid->NumPoints-1);
     FY(i) = EndDeriv;
     i++;
-    if (isnormal(EndDeriv2)) {
+    if (!isnan(EndDeriv2) && !isinf(EndDeriv)) {
       FX(i) = (*grid)(grid->NumPoints-1);
       FY(i) = EndDeriv2;
     }
@@ -65,7 +65,6 @@ void QuinticSpline::Update()
     E(i) = FE(i+offset);
     F(i) = FF(i+offset);
   }
-
   UpToDate=true;
 }
 

@@ -132,16 +132,16 @@ void QuinticSpline::Init(Grid *NewGrid, Array<double,1> NewY,
   Y = NewY;
 
   NumParams = grid->NumPoints;
-  if (isnormal(StartDeriv))
+  if (!isnan(StartDeriv) && !isinf(StartDeriv))
     {
       NumParams++;
-      if (isnormal(StartDeriv2))
+      if (!isnan(StartDeriv2) && !isinf(StartDeriv2))
 	NumParams++;
     }
-  if (isnormal(EndDeriv))
+  if (!isnan(EndDeriv) && !isinf(EndDeriv))
     {
       NumParams++;
-      if (isnormal(EndDeriv2))
+      if (!isnan(EndDeriv2) && !isinf(EndDeriv2))
 	NumParams++;
     }
   FX.resize(NumParams);
