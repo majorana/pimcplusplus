@@ -34,7 +34,7 @@ public:
   /// MoveClass constructor. Sets reference to the PathData object
   MoveClass(PathDataClass &myPathData, IOSectionClass outSection) : 
     PathData(myPathData), FirstTime(true), OutSection(outSection),
-    TimesCalled(0), DumpFreq(100)
+    TimesCalled(0), DumpFreq(100), SecondsInMove(0.0)
     {Name="";}
 };
   

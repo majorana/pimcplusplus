@@ -263,7 +263,8 @@ public:
   /// any ObservableVar classes, we should do with our local IOSection
   /// variable, NOT the reference passed to derived classes.
   ObservableClass(PathDataClass &myPathData,IOSectionClass ioSection) 
-    : PathData(myPathData), IOSection(ioSection), FirstTime(true)
+    : PathData(myPathData), IOSection(ioSection), FirstTime(true),
+      SecondsInObservable(0.0)
   {
 
     Name="";

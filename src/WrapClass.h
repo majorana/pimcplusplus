@@ -12,14 +12,12 @@ class MoveWrap : public EventClass
   MoveClass* Move;
   void DoEvent() 
   {
-
     int start=clock();
     Move->MakeMove();
     int end=clock();
-    Move->SecondsInMove+=(double)(end-start)/(double)CLOCKS_PER_SEC;
+    Move->SecondsInMove += (double)(end-start)/(double)CLOCKS_PER_SEC;
   }
   void Read(IOSectionClass &IO) {Move->Read(IO);}
-
 };
 
 
@@ -30,7 +28,6 @@ class ObserveWrap : public EventClass
   ///Need to implement the do event here
   void DoEvent() 
   {
-
     int start=clock();
     Observe->Accumulate();
     int end=clock();
@@ -38,7 +35,6 @@ class ObserveWrap : public EventClass
       (double)(end-start)/(double)CLOCKS_PER_SEC;
   }
   void Read(IOSectionClass &IO) {Observe->Read(IO);}
-
 };
 
 class LoopClass : public EventClass 

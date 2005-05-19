@@ -759,10 +759,12 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
 	Path[OLDMODE](timeSlice,ptcl)=Path[NEWMODE](timeSlice,Permutation(ptcl));
-	if (timeSlice==(int)OpenLink && Permutation(ptcl)==(int)OpenPtcl && !swappedAlready){
-	  OpenPtcl[OLDMODE]=ptcl;
-	  OpenPtcl[NEWMODE]=ptcl;
-	  swappedAlready=true;
+	if (OpenPaths) {
+	  if (timeSlice==(int)OpenLink && Permutation(ptcl)==(int)OpenPtcl && !swappedAlready){
+	    OpenPtcl[OLDMODE]=ptcl;
+	    OpenPtcl[NEWMODE]=ptcl;
+	    swappedAlready=true;
+	  }
 	}
       }
     }
@@ -779,21 +781,20 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     //  else if (oldJoin>=newJoin){//CHANGED!
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	if (timeSlice==(int)OpenLink && ptcl==(int)OpenPtcl && !swappedAlready){
-	  OpenPtcl[OLDMODE]=Permutation(ptcl);
-	  OpenPtcl[NEWMODE]=Permutation(ptcl);
-	  swappedAlready=true;
-	}
+	if (OpenPaths)
+	  if (timeSlice==(int)OpenLink && ptcl==(int)OpenPtcl && !swappedAlready){
+	    OpenPtcl[OLDMODE]=Permutation(ptcl);
+	    OpenPtcl[NEWMODE]=Permutation(ptcl);
+	    swappedAlready=true;
+	  }
 	Path[OLDMODE](timeSlice,Permutation(ptcl))=Path[NEWMODE](timeSlice,ptcl);
       }
     }
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
-      for (int ptcl=0;ptcl<NumParticles();ptcl++){
+      for (int ptcl=0;ptcl<NumParticles();ptcl++)
 	Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
-	
-      }
     }
   }
   //  cerr<<Path(OpenLink,OpenPtcl)<<endl;
