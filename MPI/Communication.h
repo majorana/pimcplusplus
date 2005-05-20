@@ -131,6 +131,7 @@ public:
   ///  get result.
   double AllSum (double a);
   void AllSum (Array<double,1> &in, Array<double,1> &out);
+  void PrintSync();
 
   CommunicatorClass()
   {
@@ -286,7 +287,7 @@ public:
   inline double AllSum (double a)
   {  return a; } 
 
-
+  inline void PrintSync() {}
 
 #endif
 };  // End class CommunicatorClass

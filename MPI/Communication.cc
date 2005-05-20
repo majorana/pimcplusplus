@@ -328,6 +328,16 @@ void CommunicatorClass::AllSum (Array<double,1> &in,
 }
 
 
+#include <unistd.h>
+void 
+CommunicatorClass::PrintSync()
+{
+  MPI_Barrier (MPIComm);
+  int myProc = MyProc();
+  unsigned long usecs = 30000*myProc;
+  usleep (usecs);
+}
+
 #endif
 
 
