@@ -106,18 +106,17 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
   double lambda = species.lambda;
   bool haveNodeAction = Actions.NodalActions(speciesNum)!=NULL;
 
-  // HACK to get ground state plane wave calculations to happen
-  // simultaneously rather than sequentially.
-  if (haveNodeAction)
-    Actions.NodalActions(speciesNum)->IsPositive(0);
-
   int myFirstSlice, myLastSlice, myProc;
   myProc = Communicator.MyProc();
   SliceRange (myProc, myFirstSlice, myLastSlice);
-  Communicator.PrintSync();
-//   cerr << "MyProc = " << myProc << " first=" << myFirstSlice 
-//        << " last=" << myLastSlice << " NumTimeSlices()=" << NumTimeSlices()
-//        << endl;
+
+  // HACK to get ground state plane wave calculations to happen
+  // simultaneously rather than sequentially.
+  if (haveNodeAction) {
+    for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++)
+      (*this)(0,ptcl) = R0(ptcl-species.FirstPtcl);
+    Actions.NodalActions(speciesNum)->IsPositive(0);
+  }
 
   int numPtcls = species.NumParticles;
   Array<dVec,1> prevSlice (numPtcls), newSlice(numPtcls);
@@ -252,7 +251,7 @@ void PathClass::Read (IOSectionClass &inSection)
   bool needBox = false;
   for (int i=0; i<NDIM; i++) {
     needBox = needBox || tempPeriodic(i);
-    periodic(i) = tempPeriodic(i);
+    periodic[i] = tempPeriodic(i);
   }
   SetPeriodic (periodic);
   if (needBox) {
