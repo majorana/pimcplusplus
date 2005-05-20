@@ -283,6 +283,7 @@ GroundStateClass::Read(IOSectionClass &in)
   int first = ionSpecies.FirstPtcl;
   for (int i=0; i<NumIons; i++)
     Rions(i) = Path(0,i+first);
+  Rions = Vec3(0.0, 0.0, 0.0);
   System->SetIons (Rions);
 
   ////////////////////////////////////////
@@ -452,7 +453,7 @@ GroundStateClass::UpdateBands()
     fclose (fout);
   }
 
-  BandSplines.Init (&xGrid, &yGrid, &zGrid, data);
+  BandSplines.Init (&xGrid, &yGrid, &zGrid, data, true);
 }
 
 
@@ -465,7 +466,6 @@ GroundStateClass::IsPositive (int slice, int speciesNum)
   SpeciesClass& species = Path.Species(speciesNum);
   int first = species.FirstPtcl;
   int N = species.NumParticles;
-
   // First, fill up determinant matrix
   Array<double,1> vals;
   for (int j=0; j<N; j++) {
