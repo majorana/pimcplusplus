@@ -97,6 +97,8 @@ void PathClass::LeviFlight (Array<dVec,1> &vec, double lambda)
   fclose (fout);
 }
 
+#include <unistd.h>
+
 void 
 PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 {
@@ -112,6 +114,10 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
   int myFirstSlice, myLastSlice, myProc;
   myProc = Communicator.MyProc();
   SliceRange (myProc, myFirstSlice, myLastSlice);
+  Communicator.PrintSync();
+//   cerr << "MyProc = " << myProc << " first=" << myFirstSlice 
+//        << " last=" << myLastSlice << " NumTimeSlices()=" << NumTimeSlices()
+//        << endl;
 
   int numPtcls = species.NumParticles;
   Array<dVec,1> prevSlice (numPtcls), newSlice(numPtcls);
@@ -144,13 +150,16 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     if (myProc==0) {
       (*this)(0,species.FirstPtcl)   = R0(0);
       (*this)(0,species.FirstPtcl+1) = R0(1);  
+      if (!Actions.NodalActions(speciesNum)->IsPositive(0)) {
+	cerr << "Still not positive after swap!!!!!!!!!!!!\n";
+	abort();
+      }
     }
   }
-
+  
   int N = TotalNumSlices+1;
   for (int slice=1; slice<N; slice++) {
     int sliceOwner = SliceOwner(slice);
-    int myProc = Communicator.MyProc();
     int relSlice = slice-myFirstSlice;
     
     double delta = (double)(N-slice-1);
@@ -165,13 +174,15 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	Random.CommonGaussianVec(sigma, newSlice(ptcl));
 	newSlice(ptcl) += center;
       }
-      
+//       if (myProc==0)
+// 	cerr << "slice = " << slice 
+// 	     << " sliceOwner=" << sliceOwner << endl;
       // Now check the nodal sign if we're a fermion species
-      if ((Actions.NodalActions(speciesNum) == NULL) || (slice == (N-1)))
+      if (!haveNodeAction)
 	positive = true;
       else {
+	// Now assign to Path
 	if (sliceOwner == myProc ) {
-	  // Now assign to Path
 	  for (int ptcl=0; ptcl<numPtcls; ptcl++)
 	    (*this)(relSlice, ptcl+species.FirstPtcl) = newSlice(ptcl);
 	  positive = 
@@ -179,52 +190,51 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	}
 	// Now broadcast whether or not I'm positive to everyone
 	Communicator.Broadcast(sliceOwner, positive);
-      }
+      }      
     } while (!positive);
     // Copy slice into Path if I'm the slice owner.
-    if ((slice>=myFirstSlice) && (slice<=myLastSlice)) 
-      for (int ptcl=0; ptcl<numPtcls; ptcl++) {
+    if ((slice>=myFirstSlice) && (slice<=myLastSlice)) {
+      for (int ptcl=0; ptcl<numPtcls; ptcl++) 
 	(*this)(relSlice, ptcl+species.FirstPtcl) = newSlice(ptcl);
-	//cerr << "setting slice " << relSlice 
-	//     << " for species " << species.Name << endl;
-      }
-    
-    // Check to make sure we're positive now.
-    if ((Actions.NodalActions(speciesNum) != NULL) && (slice!=(N-1))) {
-      bool positive;
-      if (sliceOwner == myProc) {
-	positive = Actions.NodalActions(speciesNum)->IsPositive(relSlice);
-	if (!positive) {
-	  cerr << "Still not postive at slice " << slice << ".\n";
+      // Check to make sure we're positive now.
+      if (haveNodeAction)
+	if (!Actions.NodalActions(speciesNum)->IsPositive(relSlice)) {
+	  cerr << "Still not postive at slice " << slice 
+	       << " myProc = " << myProc << "relslice=" << relSlice <<endl;
 	  abort();
-	}
-      }
+	}	
     }
     // continue on to next slice
     prevSlice = newSlice;
   }
-  Array<int,1> changedParticles(1);
+
   if (haveNodeAction) {
+    Array<int,1> changedParticles(1);
     double localAction = 
       Actions.NodalActions(speciesNum)->Action(0, NumTimeSlices()-1, 
 					       changedParticles,0);
-    double globalAction = localAction;
-    Communicator.AllSum (globalAction);
+    Communicator.PrintSync();
+    cerr << "myProc = " << myProc << " localAction = " 
+	 << localAction << " NumTimeSlices = " << NumTimeSlices() << endl;
+    double globalAction = Communicator.AllSum(localAction);
     cerr << "Nodal Action after Levi flight = " << globalAction << endl;
   }
-
-  if (Communicator.MyProc() == 0) {
-    char fname[100];
-    snprintf (fname, 100, "%s.dat", species.Name.c_str());
-    FILE *fout = fopen (fname, "w");
-    for (int slice=0; slice<N; slice++) {
-      for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) 
-	for (int i=0; i<NDIM; i++)
-	  fprintf (fout, "%1.12e ", (*this)(slice, ptcl)[i]);
-      fprintf (fout, "\n");
-    }
-    fclose(fout);
+  
+  Communicator.PrintSync();
+  char fname[100];
+  snprintf (fname, 100, "%s.dat", species.Name.c_str());
+  FILE *fout;
+  if (myProc == 0)
+    fout = fopen (fname, "w");
+  else
+    fout = fopen (fname, "a");
+  for (int slice=0; slice<(NumTimeSlices()-1); slice++) {
+    for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) 
+      for (int i=0; i<NDIM; i++)
+	fprintf (fout, "%1.12e ", (*this)(slice, ptcl)[i]);
+    fprintf (fout, "\n");
   }
+  fclose(fout);
 }
 
 void PathClass::Read (IOSectionClass &inSection)
@@ -353,8 +363,8 @@ void PathClass::InitPaths (IOSectionClass &in)
 	r[2] = iz*delta-0.5*Box[2];
 	if (ptcl % 2) 
 	  r += 0.5*delta;
-	fprintf (stderr, "BCC ptcl %d position = [%8.4f %8.4f %8.4f]\n",
-		 ptcl, r[0], r[1], r[2]);
+// 	fprintf (stderr, "BCC ptcl %d position = [%8.4f %8.4f %8.4f]\n",
+// 		 ptcl, r[0], r[1], r[2]);
 	for (int slice=0; slice<NumTimeSlices(); slice++) 
 	  Path(slice,ptcl) = r;
       }
