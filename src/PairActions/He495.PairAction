@@ -18,7 +18,8 @@ Section (Fits)
 //    double Charge = 1;
   }
 
-  string Daviddmfile="He4.95.dm";
+//  string Daviddmfile="He4.95.dm";
+  string Daviddmfile="He4_old.dm";
   //  Section (Potential)
   //  {
   //    string Type = "Coulomb";
