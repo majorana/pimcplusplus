@@ -67,6 +67,12 @@ void CommunicatorClass::Broadcast (int root, Array<Vec3,1> &buff)
   MPI_Bcast(buff.data(), 3*buff.size(), MPI_DOUBLE, root, MPIComm);
 }
 
+void CommunicatorClass::Broadcast (int root, Array<double,4> &buff)
+{
+  int num = buff.extent(0)*buff.extent(1)*buff.extent(2)*buff.extent(3);
+  MPI_Bcast(buff.data(), num, MPI_DOUBLE, root, MPIComm);
+}
+
 void CommunicatorClass::Receive (void *recvBuf, int count, 
 				 MPI_Datatype datatype, int source, int tag)
 {
