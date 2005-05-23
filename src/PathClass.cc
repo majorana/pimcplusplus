@@ -196,25 +196,25 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	(*this)(relSlice, ptcl+species.FirstPtcl) = newSlice(ptcl);
       // Check to make sure we're positive now.
       if (haveNodeAction) {
-	if ((slice==myFirstSlice)||(slice==myLastSlice)) {
-	  fprintf (stderr, "myProc=%d slice=%d det=%1.8e\n", myProc, slice, 
-		   Actions.NodalActions(speciesNum)->Det(relSlice));
-	  Array<double,2> matrix(numPtcls,numPtcls);
-	  matrix = Actions.NodalActions(speciesNum)->GetMatrix(relSlice);
-	  char fname[100];
-	  snprintf (fname, 100, "matrix%d-%d.dat", slice, myProc);
-	  FILE *fout=fopen (fname, "w");
-	  for (int i=0; i<numPtcls; i++) {
-	    for (int j=0; j<numPtcls; j++) 
-	      fprintf (fout, "%1.16e ", matrix(i,j));
-	    fprintf (fout, "\n");
-	  }
-	  fclose(fout);
+// 	if ((slice==myFirstSlice)||(slice==myLastSlice)) {
+// 	  fprintf (stderr, "myProc=%d slice=%d det=%1.8e\n", myProc, slice, 
+// 		   Actions.NodalActions(speciesNum)->Det(relSlice));
+// 	  Array<double,2> matrix(numPtcls,numPtcls);
+// 	  matrix = Actions.NodalActions(speciesNum)->GetMatrix(relSlice);
+// 	  char fname[100];
+// 	  snprintf (fname, 100, "matrix%d-%d.dat", slice, myProc);
+// 	  FILE *fout=fopen (fname, "w");
+// 	  for (int i=0; i<numPtcls; i++) {
+// 	    for (int j=0; j<numPtcls; j++) 
+// 	      fprintf (fout, "%1.16e ", matrix(i,j));
+// 	    fprintf (fout, "\n");
+// 	  }
+// 	  fclose(fout);
 // 	  for (int ptcl=0; ptcl<numPtcls; ptcl++) 
 // 	    fprintf (stderr, "myProc=%d newSlice(%d)=[%10.7e %10.7e %10.7e]\n",
 // 		     myProc, ptcl, 
 // 		     newSlice(ptcl)[0], newSlice(ptcl)[1], newSlice(ptcl)[2]);
-	}
+// 	}
 	if (!Actions.NodalActions(speciesNum)->IsPositive(relSlice)) {
 	  cerr << "Still not postive at slice " << slice 
 	       << " myProc = " << myProc << "relslice=" << relSlice <<endl;
@@ -232,27 +232,28 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
       Actions.NodalActions(speciesNum)->Action(0, NumTimeSlices()-1, 
 					       changedParticles,0);
     Communicator.PrintSync();
-    cerr << "myProc = " << myProc << " localAction = " 
-	 << localAction << " NumTimeSlices = " << NumTimeSlices() << endl;
+//     cerr << "myProc = " << myProc << " localAction = " 
+// 	 << localAction << " NumTimeSlices = " << NumTimeSlices() << endl;
     double globalAction = Communicator.AllSum(localAction);
-    cerr << "Nodal Action after Levi flight = " << globalAction << endl;
+    if (Communicator.MyProc()==0)
+      cerr << "Nodal Action after Levi flight = " << globalAction << endl;
   }
   
-  Communicator.PrintSync();
-  char fname[100];
-  snprintf (fname, 100, "%s.dat", species.Name.c_str());
-  FILE *fout;
-  if (myProc == 0)
-    fout = fopen (fname, "w");
-  else
-    fout = fopen (fname, "a");
-  for (int slice=0; slice<(NumTimeSlices()-1); slice++) {
-    for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) 
-      for (int i=0; i<NDIM; i++)
-	fprintf (fout, "%1.12e ", (*this)(slice, ptcl)[i]);
-    fprintf (fout, "\n");
-  }
-  fclose(fout);
+//   Communicator.PrintSync();
+//   char fname[100];
+//   snprintf (fname, 100, "%s.dat", species.Name.c_str());
+//   FILE *fout;
+//   if (myProc == 0)
+//     fout = fopen (fname, "w");
+//   else
+//     fout = fopen (fname, "a");
+//   for (int slice=0; slice<(NumTimeSlices()-1); slice++) {
+//     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) 
+//       for (int i=0; i<NDIM; i++)
+// 	fprintf (fout, "%1.12e ", (*this)(slice, ptcl)[i]);
+//     fprintf (fout, "\n");
+//   }
+//   fclose(fout);
 }
 
 void PathClass::Read (IOSectionClass &inSection)

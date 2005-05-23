@@ -429,17 +429,17 @@ GroundStateClass::UpdateBands()
   Path.Communicator.Broadcast(0, data);
   
   /// DEBUG DEBUG DEBUG DEBUG
-  for (int band=0; band<NumBands; band++) {
-    char fname[100];
-    int proc = 
-    snprintf (fname, 100, "band%d-%d.dat", band, Path.Communicator.MyProc());
-    FILE *fout = fopen (fname, "w");
-    for (int ix=0; ix<xGrid.NumPoints; ix++)
-      for (int iy=0; iy<yGrid.NumPoints; iy++)
-	for (int iz=0; iz<zGrid.NumPoints; iz++)
-	  fprintf (fout, "%1.12e\n", data(ix,iy,iz,band));
-    fclose (fout);
-  }
+//   for (int band=0; band<NumBands; band++) {
+//     char fname[100];
+//     int proc = 
+//     snprintf (fname, 100, "band%d-%d.dat", band, Path.Communicator.MyProc());
+//     FILE *fout = fopen (fname, "w");
+//     for (int ix=0; ix<xGrid.NumPoints; ix++)
+//       for (int iy=0; iy<yGrid.NumPoints; iy++)
+// 	for (int iz=0; iz<zGrid.NumPoints; iz++)
+// 	  fprintf (fout, "%1.12e\n", data(ix,iy,iz,band));
+//     fclose (fout);
+//   }
 
   BandSplines.Init (&xGrid, &yGrid, &zGrid, data, true);
 }
