@@ -400,15 +400,15 @@ GroundStateClass::UpdateBands()
 {
   // Now, make bands real and put into splines
   Array<double,4> data(xGrid.NumPoints, yGrid.NumPoints, zGrid.NumPoints, NumBands);
+  SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
+  int first = ionSpecies.FirstPtcl;
+  for (int i=0; i<NumIons; i++)
+    Rions(i) = Path(0,i+first);
+  System->SetIons (Rions);
 
   // Only do calcualtion if I'm proc 0
   if (Path.Communicator.MyProc() == 0) {
     cerr << "Updating bands.\n";
-    SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
-    int first = ionSpecies.FirstPtcl;
-    for (int i=0; i<NumIons; i++)
-      Rions(i) = Path(0,i+first);
-    System->SetIons (Rions);
     System->DiagonalizeH();
 
     for (int band=0; band<NumBands; band++) {
