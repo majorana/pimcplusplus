@@ -54,7 +54,7 @@ void PIMCClass::Read(IOSectionClass &in)
 
   // Read in the Observables
   assert(in.OpenSection("Observables"));
-  ReadObservables(in,fileCopy);
+  ReadObservables(in);
   cerr << "Finished Observables Read.\n";
   in.CloseSection();
   //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
