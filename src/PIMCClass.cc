@@ -5,7 +5,7 @@
 #include "Common/Blitz.h"
 #include <wordexp.h>
 
-void PIMCClass::Read(IOSectionClass &in,string fileCopy)
+void PIMCClass::Read(IOSectionClass &in)
 {
   // Read the parallelization strategy
   PathData.Read (in);
@@ -87,8 +87,7 @@ void PIMCClass::Read(IOSectionClass &in,string fileCopy)
 
 
 
-void PIMCClass::ReadObservables(IOSectionClass &in,
-				string fileCopy)
+void PIMCClass::ReadObservables(IOSectionClass &in)
 {
   int myProc=PathData.Path.Communicator.MyProc();
   bool iAmRoot= myProc==0;
@@ -106,7 +105,23 @@ void PIMCClass::ReadObservables(IOSectionClass &in,
     OutFileName = 
       outFileBase+ "." + cloneNum.str() + ".h5";
     OutFile.NewFile(OutFileName);
-    OutFile.WriteVar("Input file",fileCopy);
+
+    /////////////////////////////////////
+    // Write input file to output file //
+    /////////////////////////////////////
+    ifstream infile;
+    infile.open(in.GetFileName());
+    infile.seekg(0,ios::end);
+    int length=infile.tellg();
+    infile.seekg(0,ios::beg);
+    char *buffer=new char[length];
+    infile.read(buffer,length);
+    infile.close(); 
+    string fileCopy(buffer);   
+    delete buffer;
+    OutFile.WriteVar("InputFile",fileCopy);
+
+
     OutFile.NewSection("RunInfo");
     RunInfo.Write(OutFile);
     OutFile.CloseSection();
