@@ -5,6 +5,7 @@
 
 #include "../Common/Ewald/OptimizedBreakup.h"
 #include "../Common/Integration/GKIntegration.h"
+#include "../Common/MPI/Communication.h"
 
 class CoulombXkIntegrand
 {
