@@ -7,7 +7,7 @@
 #include <mpi.h>
 #endif
 
-extern ofstream perr;
+extern ostream perr;
 
 namespace COMM
 {
@@ -18,9 +18,9 @@ namespace COMM
     int proc;
     MPI_Comm_rank(MPI_COMM_WORLD, &proc);
     if (proc == 0)
-      perr.open("/dev/stderr", ios::out);
-    else
-      perr.open("/dev/null", ios::out);
+      perr.rdbuf(cerr.rdbuf());
+//      else 
+//        perr.open("/dev/null", ios::out); 
   }
   inline void Finalize ()
   {
