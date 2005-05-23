@@ -54,8 +54,8 @@ ifeq ($(HOSTTYPE),i386-linux)
        F77 = ifort
        EXTRADEFS = -DUSE_MKL -w1 -wr654,1011 -DUSE_MPI
        MAKECC = g++
-       CCFLAGS = -c -g  #-pg 
-       F77FLAGS = -c -g -O3
+       CCFLAGS = -c -g  -mp -prec_div #-pg 
+       F77FLAGS = -c -g 
     else
        include /usr/lib/Make.include	
        CC = mpiCC
@@ -87,7 +87,7 @@ VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
 
-DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT  -O3 #-DBZ_DEBUG -DDEBUG ##-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT  #-DBZ_DEBUG -DDEBUG ##-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
 
 
 PIMCobjs =                                \

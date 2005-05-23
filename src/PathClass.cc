@@ -158,6 +158,8 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
   
   int N = TotalNumSlices+1;
   for (int slice=1; slice<N; slice++) {
+    if (myProc==0)
+      cerr << "Slice=" << slice << endl;
     int sliceOwner = SliceOwner(slice);
     int relSlice = slice-myFirstSlice;
     
@@ -173,9 +175,6 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	Random.CommonGaussianVec(sigma, newSlice(ptcl));
 	newSlice(ptcl) += center;
       }
-//       if (myProc==0)
-// 	cerr << "slice = " << slice 
-// 	     << " sliceOwner=" << sliceOwner << endl;
       // Now check the nodal sign if we're a fermion species
       if (!haveNodeAction)
 	positive = true;
@@ -196,12 +195,32 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
       for (int ptcl=0; ptcl<numPtcls; ptcl++) 
 	(*this)(relSlice, ptcl+species.FirstPtcl) = newSlice(ptcl);
       // Check to make sure we're positive now.
-      if (haveNodeAction)
+      if (haveNodeAction) {
+	if ((slice==myFirstSlice)||(slice==myLastSlice)) {
+	  fprintf (stderr, "myProc=%d slice=%d det=%1.8e\n", myProc, slice, 
+		   Actions.NodalActions(speciesNum)->Det(relSlice));
+	  Array<double,2> matrix(numPtcls,numPtcls);
+	  matrix = Actions.NodalActions(speciesNum)->GetMatrix(relSlice);
+	  char fname[100];
+	  snprintf (fname, 100, "matrix%d-%d.dat", slice, myProc);
+	  FILE *fout=fopen (fname, "w");
+	  for (int i=0; i<numPtcls; i++) {
+	    for (int j=0; j<numPtcls; j++) 
+	      fprintf (fout, "%1.16e ", matrix(i,j));
+	    fprintf (fout, "\n");
+	  }
+	  fclose(fout);
+// 	  for (int ptcl=0; ptcl<numPtcls; ptcl++) 
+// 	    fprintf (stderr, "myProc=%d newSlice(%d)=[%10.7e %10.7e %10.7e]\n",
+// 		     myProc, ptcl, 
+// 		     newSlice(ptcl)[0], newSlice(ptcl)[1], newSlice(ptcl)[2]);
+	}
 	if (!Actions.NodalActions(speciesNum)->IsPositive(relSlice)) {
 	  cerr << "Still not postive at slice " << slice 
 	       << " myProc = " << myProc << "relslice=" << relSlice <<endl;
 	  abort();
 	}	
+      }
     }
     // continue on to next slice
     prevSlice = newSlice;
@@ -401,7 +420,7 @@ void PathClass::InitPaths (IOSectionClass &in)
       assert (Positions.rows() == species.NumParticles);
       assert (Positions.cols() == species.NumDim);
       Array<dVec,1> R0(species.NumParticles);
-      for (int ptcl=0l; ptcl<species.NumParticles; ptcl++) 
+      for (int ptcl=0; ptcl<species.NumParticles; ptcl++) 
 	for (int dim=0; dim<NDIM; dim++)
 	  R0(ptcl)[dim] = Positions(ptcl,dim);
       NodeAvoidingLeviFlight (speciesIndex,R0);

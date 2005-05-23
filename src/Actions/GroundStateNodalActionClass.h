@@ -25,7 +25,6 @@ private:
   int NumUp, NumDown, NumIons, NumBands;
   // This stores the real space grid dimensions
   LinearGrid xGrid, yGrid, zGrid;
-  double Det         (int slice, int speciesNum);
   double GradientDet   (int slice, int speciesNum);
   double GradientDetFD (int slice, int speciesNum);
   bool IonsHaveMoved();
@@ -41,7 +40,8 @@ public:
   double d_dBeta(int slice1, int slice2, int level, int speciesNum);
 
   bool IsPositive (int slice, int speciesNum);
-  
+  double Det (int slice, int speciesNum);
+  Array<double,2> GetMatrix (int slice, int speciesNum);
   void Read (IOSectionClass &in);
   void ShiftData (int slices2Shift, int speciesNum);
   void AcceptCopy (int slice1, int slice2);
@@ -65,6 +65,8 @@ public:
   double d_dBeta(int slice1, int slice2, int level);
 
   bool IsPositive (int slice);
+  double Det (int slice);
+  Array<double,2> GetMatrix (int slice);
   void ShiftData (int slices2Shift);  
   void AcceptCopy (int slice1, int slice2);
   void RejectCopy (int slice1, int slice2);

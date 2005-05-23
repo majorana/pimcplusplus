@@ -304,29 +304,6 @@ GroundStateClass::Read(IOSectionClass &in)
   //  UpdateBands();
 }
 
-double
-GroundStateClass::Det(int slice, int speciesNum)
-{
-  SpeciesClass &species = Path.Species(speciesNum);
-  int N = species.NumParticles;
-  int first = species.FirstPtcl;
-  assert (N == Matrix.rows());
-
-  // First, fill up determinant matrix
-  Array<double,1> vals;
-  for (int j=0; j<N; j++) {
-    Vec3 r_j = Path(slice, first+j);
-    Path.PutInBox(r_j);
-    vals.reference(Matrix(j,Range::all()));
-    BandSplines(r_j[0], r_j[1], r_j[2], vals);
-  }
-
-  // Compute determinant and cofactors
-  Cofactors = Matrix;
-  double det = Determinant (Cofactors);
-
-  return det;
-}
 
 
 double
@@ -418,9 +395,16 @@ GroundStateClass::GradientDetFD(int slice, int speciesNum)
 }
 
 
+#include "../Common/MPI/Communication.h"
+
 void
 GroundStateClass::UpdateBands()
 {
+  CommunicatorClass comm;
+  comm.SetWorld();
+  int myProc = comm.MyProc();
+
+
   cerr << "Updating bands.\n";
   SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
   int first = ionSpecies.FirstPtcl;
@@ -432,7 +416,12 @@ GroundStateClass::UpdateBands()
   Array<double,4> data(xGrid.NumPoints, yGrid.NumPoints, zGrid.NumPoints, NumBands);
   for (int band=0; band<NumBands; band++) {
     System->SetRealSpaceBandNum(band);
-    complex<double> c0 = System->RealSpaceBand(xGrid.NumPoints/2, yGrid.NumPoints/2, zGrid.NumPoints/2);
+    complex<double> c0 = 
+      System->RealSpaceBand(xGrid.NumPoints/2, 
+			    yGrid.NumPoints/2, 
+			    zGrid.NumPoints/2);
+    fprintf (stderr, "myProc=%d band=%d c0=(%1.16e, %1.16e)\n",
+	    myProc, band, c0.real(), c0.imag());
     double phi = -atan2 (c0.imag(), c0.real());
     complex<double> c(cos(phi), sin(phi));
     for (int ix=0; ix<xGrid.NumPoints-1; ix++)
@@ -444,7 +433,8 @@ GroundStateClass::UpdateBands()
   /// DEBUG DEBUG DEBUG DEBUG
   for (int band=0; band<NumBands; band++) {
     char fname[100];
-    snprintf (fname, 100, "band%d.dat", band);
+    int proc = 
+    snprintf (fname, 100, "band%d-%d.dat", band, myProc);
     FILE *fout = fopen (fname, "w");
     for (int ix=0; ix<xGrid.NumPoints; ix++)
       for (int iy=0; iy<yGrid.NumPoints; iy++)
@@ -460,6 +450,12 @@ GroundStateClass::UpdateBands()
 bool
 GroundStateClass::IsPositive (int slice, int speciesNum)
 {
+  return (Det(slice, speciesNum) > 0.0);  
+}
+
+double
+GroundStateClass::Det (int slice, int speciesNum)
+{
   if (IonsHaveMoved()) 
     UpdateBands();
 
@@ -474,10 +470,28 @@ GroundStateClass::IsPositive (int slice, int speciesNum)
     vals.reference(Matrix(j,Range::all()));
     BandSplines(r_j[0], r_j[1], r_j[2], vals);
   }
-  double det = Determinant (Matrix);
-//   cerr << "slice=" << slice 
-//        << " species=" << speciesNum << " det = " << det << endl;
-  return (det > 0.0);  
+  return Determinant (Matrix);
+}
+
+
+Array<double,2>
+GroundStateClass::GetMatrix (int slice, int speciesNum)
+{
+  if (IonsHaveMoved()) 
+    UpdateBands();
+
+  SpeciesClass& species = Path.Species(speciesNum);
+  int first = species.FirstPtcl;
+  int N = species.NumParticles;
+  // First, fill up determinant matrix
+  Array<double,1> vals;
+  for (int j=0; j<N; j++) {
+    Vec3 r_j = Path(slice, first+j);
+    Path.PutInBox(r_j);
+    vals.reference(Matrix(j,Range::all()));
+    BandSplines(r_j[0], r_j[1], r_j[2], vals);
+  }
+  return Matrix;
 }
 
 
@@ -485,6 +499,18 @@ bool
 GroundStateNodalActionClass::IsPositive (int slice)
 {
   return GroundState.IsPositive(slice, SpeciesNum);
+}
+
+double
+GroundStateNodalActionClass::Det (int slice)
+{
+  return GroundState.Det(slice, SpeciesNum);
+}
+
+Array<double,2>
+GroundStateNodalActionClass::GetMatrix (int slice)
+{
+  return GroundState.GetMatrix(slice, SpeciesNum);
 }
 
 double
