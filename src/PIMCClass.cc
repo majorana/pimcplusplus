@@ -2,6 +2,7 @@
 #include "Moves/MoveClass.h"
 #include "Observables/ObservableClass.h"
 #include <sstream>
+#include <fstream>
 #include "Common/Blitz.h"
 #include "FileExpand.h"
 
@@ -9,56 +10,36 @@ void PIMCClass::Read(IOSectionClass &in)
 {
   // Read the parallelization strategy
   PathData.Read (in);
-  cerr << "Finished PathData Read.\n";
-  double dummy=2.0;
-  if (isnan(dummy)){
-    cerr<<"WARNING! 2.0 IS NOT A NUMBER!";
-  }
-  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
-  //      <<PathData.Path.Random.Common()<<endl;
-
+  perr << "Finished PathData Read.\n";
 
   // Read in the system information and allocate the path
   assert(in.OpenSection("System"));
   PathData.Path.Read(in);
   in.CloseSection();
-  cerr << "Finished Path read.\n";
-  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
-  //      <<PathData.Path.Random.Common()<<endl;
+  perr << "Finished Path read.\n";
 
   // Read in the action information
   assert(in.OpenSection("Action"));
-//   PathData.Action.Read(in);
-//   cerr << "Finished Action read.\n";
   PathData.Actions.Read(in);
   in.CloseSection();
-  cerr << "Finished Actions read.\n";
-  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
-  //      <<PathData.Path.Random.Common()<<endl;
+  perr << "Finished Actions read.\n";
 
   // Now actually initialize the paths
-  cerr << "Before InitPaths.\n";
+  perr << "Before InitPaths.\n";
   assert(in.OpenSection("System"));
   PathData.Path.InitPaths(in);
   in.CloseSection();
-
-  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
-      <<PathData.Path.Random.Common()<<endl;
-
-  cerr << "Done InitPaths.\n";
-
+  perr << "Done InitPaths.\n";
   
-  cerr << "Initializing Actions caches.\n";
+  perr << "Initializing Actions caches.\n";
   PathData.Actions.Init();
-  cerr << "done.\n";
+  perr << "done.\n";
 
   // Read in the Observables
   assert(in.OpenSection("Observables"));
   ReadObservables(in);
-  cerr << "Finished Observables Read.\n";
+  perr << "Finished Observables Read.\n";
   in.CloseSection();
-  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
-  //      <<PathData.Path.Random.Common()<<endl;
 
   if (PathData.Actions.HaveLongRange()) {
     assert (in.OpenSection ("Action"));
@@ -72,11 +53,8 @@ void PIMCClass::Read(IOSectionClass &in)
   // Read in the Moves
   assert(in.OpenSection("Moves"));
   ReadMoves(in);
-  cerr << "Finished Moves Read.\n";
+  perr << "Finished Moves Read.\n";
   in.CloseSection();
-  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
-  //      <<PathData.Path.Random.Common()<<endl;
-
 
   // Read in the Algorithm
   assert(in.OpenSection("Algorithm"));
@@ -107,7 +85,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     // Write input file to output file //
     /////////////////////////////////////
     ifstream infile;
-    infile.open(in.GetFileName());
+    infile.open(in.GetFileName().c_str());
     infile.seekg(0,ios::end);
     int length=infile.tellg();
     infile.seekg(0,ios::beg);
@@ -194,7 +172,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs=new WeightClass(PathData,OutFile);
     }
     else {
-      cerr<<"We do not recognize the observable "<<theObserveType<<endl;
+      perr<<"We do not recognize the observable "<<theObserveType<<endl;
 	abort();
     }
     tempObs->Read(in);
@@ -306,7 +284,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else {
-      cerr<<"This type of move is not recognized: "<< MoveType <<endl;
+      perr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();
     }
     if (iAmRoot)
@@ -328,11 +306,8 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 
 void PIMCClass::Run()
 {
-  cerr<<"My random number before algorithm "<<PathData.Path.Communicator.MyProc()<<" "
-      <<PathData.Random.Common()<<endl;
   Algorithm.DoEvent();
   //  Array<MoveClass*,1> Moves;
-  cerr<<"hello"<<endl;
   for (int counter=0;counter<Moves.size();counter++){
     cout<<"My name is "<<((MoveClass*)Moves(counter))->Name<<endl;
     cout<<"My acceptance ratio is "<<((MoveClass*)Moves(counter))->AcceptanceRatio()<<endl;
