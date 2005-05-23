@@ -4,6 +4,7 @@
 #include "../Common/Integration/GKIntegration.h"
 #include "../FileExpand.h"
 
+
 ///Actionsclass. Stores all the actsion
 void 
 ActionsClass::Read(IOSectionClass &in)
@@ -126,7 +127,7 @@ ActionsClass::Read(IOSectionClass &in)
   if (PathData.Path.DavidLongRange){
     DavidLongRange.Read(in);
   }
-
+  OpenLoopImportance.Read(in);
 }
 
 /// Read in the nodal actions.

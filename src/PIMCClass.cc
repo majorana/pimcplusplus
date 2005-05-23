@@ -74,7 +74,6 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     assert(in.ReadVar("OutFileBase",outFileBase));
     // Allow for tilde-expansion in these files
     outFileBase = ExpandFileName (outFileBase);
-
     ostringstream cloneNum;
     cloneNum << PathData.GetCloneNum();
     OutFileName = 
