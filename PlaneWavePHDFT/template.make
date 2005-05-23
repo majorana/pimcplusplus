@@ -21,7 +21,7 @@ SplineObjs = ../Splines/BicubicSpline.o ../Splines/CubicSpline.o              \
              ../Splines/QuinticSpline.o ../Splines/QuinticSplines.o 
 
 MiscObjs =   ../Integration/GKIntegration.o ../Fitting/Fitting.o              \
-             ../MatrixOps/MatrixOps.o ../FFT/FFT.o
+             ../MatrixOps/MatrixOps.o ../FFT/FFT.o ../MPI/Communication.o
 
 all:    $(Objs) $(Objs2) TestPW TestPW2 Hamiltonian.s
 

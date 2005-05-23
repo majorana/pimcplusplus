@@ -46,10 +46,13 @@ void ConjGrad::Setup()
 }
 
 
+#include "../MPI/Communication.h"
+
 void ConjGrad::InitBands()
 {
   int numBands = Bands.rows();
-  int numVecs = 6 * numBands;
+  //  int numVecs = 6 * numBands;
+  int numVecs = 4 * numBands;
   assert (numVecs <= H.GVecs.size());
   Array<complex<double>,2> Hmat(numVecs, numVecs);
   Array<complex<double>,2> EigVecs(numBands, numVecs);
@@ -61,15 +64,33 @@ void ConjGrad::InitBands()
     Vec3 Gpk = H.GVecs(i) + H.kPoint;
     Hmat(i,i) += 0.5 * dot (Gpk,Gpk);
   }
-  FILE *fout = fopen ("Hmat.dat", "w");
+  /// DEBUG DEBUG DEBUG
+  CommunicatorClass comm;
+  comm.SetWorld();
+  int myProc = comm.MyProc();
+  char fname[100];
+  snprintf (fname, 100, "Hmat%d.dat", myProc);
+
+  FILE *fout = fopen (fname, "w");
   for (int i=0; i<numVecs; i++) {
     for (int j=0; j<numVecs; j++) 
-      fprintf (fout, "%1.13e %1.13e ", Hmat(i,j).real(), Hmat(i,j).imag());
+      fprintf (fout, "%1.16e %1.16e ", Hmat(i,j).real(), Hmat(i,j).imag());
     fprintf (fout, "\n");
   }
   fclose(fout);
   // Now diagonalize
   SymmEigenPairs (Hmat, numBands, EigVals, EigVecs);
+
+  snprintf (fname, 100, "InitBand%d.dat", myProc);
+  fout = fopen (fname, "w");
+  for (int i=0; i<numVecs; i++) {
+    for (int band=0; band<numBands; band++) 
+      fprintf (fout, "%1.16e ", EigVecs(band, i));
+    fprintf (fout, "\n");
+  }
+  fclose (fout);
+
+	     
 
   for (int i=0; i<numBands; i++)
     cerr << "Mini energy(" << i << ") = " << 27.211383*EigVals(i) << endl;

@@ -205,7 +205,7 @@ TinyMatrix<double,3,3> kSpacePH::Ftensor (Vec3 deltaG)
 {
   double Gmag = sqrt(dot(deltaG, deltaG));
   Vec3 g; 
-  if (Gmag == 0.0)
+  if (fabs(Gmag) < 1.0e-13)
     g = Vec3 (1.0, 0.0, 0.0);
   else
     g = deltaG / Gmag;
@@ -238,7 +238,7 @@ kSpacePH::Ftensor (Vec3 deltaG, double aVal, double bPerpVal,
 {
   Vec3 g;
   double Gmag = sqrt (dot(deltaG, deltaG));
-  if (Gmag == 0.0)
+  if (fabs(Gmag) < 1.0e-13)
     g = Vec3 (1.0, 0.0, 0.0);
   else
     g = deltaG / Gmag;
