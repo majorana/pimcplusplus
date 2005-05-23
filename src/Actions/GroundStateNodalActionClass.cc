@@ -22,7 +22,7 @@ GroundStateClass::IonsHaveMoved()
       changed = true;
   }
   if (changed)
-    cerr << "Ions have moved.\n";
+    perr << "Ions have moved.\n";
   return changed;
 }
 
@@ -145,14 +145,14 @@ GroundStateClass::Action (int slice1, int slice2,
   }
   
   if (!(doUp || doDown))
-    cerr << "No doing either up or down.  Hmmm...\n";
+    perr << "No doing either up or down.  Hmmm...\n";
 
   double action = 0.0;
   if (doUp) {
     for (int slice=slice1; slice <= slice2; slice++) {
       UpDists(slice) = LineSearchDistance(slice, UpSpeciesNum);
       if (UpDists(slice) <= 0.0) {
-	cerr << "negative distance at slice " << slice << endl;
+	perr << "negative distance at slice " << slice << endl;
 	action += 1.0e100;
       }
     }
@@ -167,7 +167,7 @@ GroundStateClass::Action (int slice1, int slice2,
     for (int slice=slice1; slice <= slice2; slice++) {
       DownDists(slice) = LineSearchDistance(slice, DownSpeciesNum);
       if (DownDists(slice) <= 0.0) {
-	cerr << "negative distance at slice " << slice << endl;
+	perr << "negative distance at slice " << slice << endl;
 	action += 1.0e100;
       }
     }
@@ -203,7 +203,7 @@ GroundStateClass::d_dBeta (int slice1, int slice2, int level,
 //     }
 //   }
 //   if (!error)
-//     cerr << "No errors detected in GroundStateClass:;d_dBeta.\n";
+//     perr << "No errors detected in GroundStateClass:;d_dBeta.\n";
   double du = 0.0;
   int skip = 1<<level;
   double levelTau =(double)skip * Path.tau;
@@ -212,7 +212,7 @@ GroundStateClass::d_dBeta (int slice1, int slice2, int level,
     for (int slice=slice1; slice<slice2; slice+=skip) {
       double prod = UpDists(slice)*UpDists(slice+skip);
       if (prod <= 0.0)
-	cerr << "We have an invalid node-crossing path in "
+	perr << "We have an invalid node-crossing path in "
 	     << "GroundStateNodalActionClass::d_dBeta";
       double prod_llt = prod * lambdaTauInv;
       double exp_m1 = expm1 (prod_llt);
@@ -223,7 +223,7 @@ GroundStateClass::d_dBeta (int slice1, int slice2, int level,
     for (int slice=slice1; slice<slice2; slice+=skip) {
       double prod = DownDists(slice)*DownDists(slice+skip);
       if (prod <= 0.0)
-	cerr << "We have an invalid node-crossing path in "
+	perr << "We have an invalid node-crossing path in "
 	     << "GroundStateNodalActionClass::d_dBeta";
       double prod_llt = prod * lambdaTauInv;
       double exp_m1 = expm1 (prod_llt);
@@ -337,9 +337,9 @@ GroundStateClass::GradientDet(int slice, int speciesNum)
     for (int j=0; j<N; j++)
       Gradient(i) += Cofactors(i,j)*GradMat(i,j);
   }
-  //  cerr << "Analytic gradient = " << Gradient << endl;
+  //  perr << "Analytic gradient = " << Gradient << endl;
 //   GradientDetFD(slice, speciesNum);
-//   cerr << "FD gradient = " << Gradient << endl;
+//   perr << "FD gradient = " << Gradient << endl;
   return det;
 }
 
@@ -408,7 +408,7 @@ GroundStateClass::UpdateBands()
 
   // Only do calcualtion if I'm proc 0
   if (Path.Communicator.MyProc() == 0) {
-    cerr << "Updating bands.\n";
+    perr << "Updating bands.\n";
     System->DiagonalizeH();
 
     for (int band=0; band<NumBands; band++) {
@@ -518,7 +518,7 @@ GroundStateNodalActionClass::Action (int slice1, int slice2,
 {
   double action = GroundState.Action (slice1, slice2, activeParticles, level,
 				      SpeciesNum);
-//   cerr << "species = " << Path.Species(SpeciesNum).Name 
+//   perr << "species = " << Path.Species(SpeciesNum).Name 
 //        << " NodalAction = " <<  action << endl;
   return action;
 }
@@ -533,9 +533,9 @@ void GroundStateClass::ShiftData(int slicesToShift, int speciesNum)
 {
   if ((speciesNum == UpSpeciesNum) || (speciesNum==DownSpeciesNum)) {
 //     if (speciesNum == UpSpeciesNum) 
-//       cerr << "Shifting up species by " << slicesToShift << endl;
+//       perr << "Shifting up species by " << slicesToShift << endl;
 //     if (speciesNum == DownSpeciesNum) 
-//       cerr << "Shifting down species by " << slicesToShift << endl;
+//       perr << "Shifting down species by " << slicesToShift << endl;
     Mirrored1DClass<double>& dists=
       ((speciesNum==UpSpeciesNum) ? UpDists : DownDists);
     CommunicatorClass &comm = Path.Communicator;
@@ -647,7 +647,7 @@ GroundStateClass::Init(int speciesNum)
       UpDists[0](slice) = LineSearchDistance(slice, speciesNum);
       UpDists[1](slice) = UpDists[0](slice);
     }
-    cerr << "Initializing up species.\n";
+    perr << "Initializing up species.\n";
   }
 
   if (speciesNum == DownSpeciesNum) {
@@ -655,7 +655,7 @@ GroundStateClass::Init(int speciesNum)
       DownDists[0](slice) = LineSearchDistance(slice, speciesNum);
       DownDists[1](slice) = DownDists[0](slice);
     }
-    cerr << "Initializing down species.\n";
+    perr << "Initializing down species.\n";
   }
 }
 

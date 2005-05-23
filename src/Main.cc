@@ -4,11 +4,11 @@
 
 main(int argc, char **argv)
 {
+  //  MirroredClassTest();
+  COMM::Init(argc, argv);
   string version = VERSION;
   perr << "pimc++ v. " << version << endl;
 
-  //  MirroredClassTest();
-  COMM::Init(argc, argv);
   if (argc < 2) {
     cout << "Usage:\n";
     cout << "pimc++ myfile.in\n"; 
