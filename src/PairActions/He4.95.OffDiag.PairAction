@@ -1,7 +1,7 @@
 Section (Fits)
 {
   string Type = "DavidFit";
-  string NumOffDiagonalTerms=2;
+  int NumOffDiagonalTerms=2;
   Section (Particle1)
   {
     string Name = "He";
