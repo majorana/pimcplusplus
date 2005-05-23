@@ -102,6 +102,7 @@ public:
   /// function, reading the contents of the file into the tree.
   bool OpenFile (string fileName);
   string GetName(){ return CurrentSection->Name;}
+  inline string GetFileName();
   string GetVarName(int num){ return GetVarPtr(num)->Name;}
   /// Creates a file at the top level, choosing the appropriate type
   /// based on the file extension.
@@ -347,6 +348,15 @@ inline void IOSectionClass::CloseSection ()
   CurrentSection = CurrentSection->Parent;
 }
 
+
+inline string
+IOSectionClass::GetFileName()
+{
+  IOTreeClass *tree = CurrentSection;
+  while (tree->Parent != NULL)
+    tree = tree->Parent;
+  return tree->FileName;
+}
 
 
 #endif
