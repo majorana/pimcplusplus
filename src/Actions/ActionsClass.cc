@@ -2,7 +2,7 @@
 #include "../PathDataClass.h"
 #include "../Common/Ewald/OptimizedBreakup.h"
 #include "../Common/Integration/GKIntegration.h"
-#include "FileExpand.h"
+#include "../FileExpand.h"
 
 ///Actionsclass. Stores all the actsion
 void 
@@ -13,14 +13,14 @@ ActionsClass::Read(IOSectionClass &in)
   assert(in.ReadVar ("MaxLevels", MaxLevels));
   assert(in.ReadVar ("NumImages", NumImages));
   Kinetic.SetNumImages (NumImages);
-  cerr << "MaxLevels = " << MaxLevels << endl;
+  perr << "MaxLevels = " << MaxLevels << endl;
 
   if (!in.ReadVar ("UseRPA", UseRPA))
     UseRPA = false;
   if (UseRPA) 
-    cerr << "Using RPA for long range action.\n";
+    perr << "Using RPA for long range action.\n";
   else      
-    cerr << "Not using RPA for long range action.\n";
+    perr << "Not using RPA for long range action.\n";
 
 
   Array<string,1> PAFiles;
@@ -49,12 +49,12 @@ ActionsClass::Read(IOSectionClass &in)
 	    ((Path.Species(spec2).Type==PairArray(i)->Particle1.Name)&&
 	     (Path.Species(spec1).Type==PairArray(i)->Particle2.Name))) {
 	  if (PairMatrix(spec1,spec2) != NULL) {
-	    cerr << "More than one pair action for species types (" 
+	    perr << "More than one pair action for species types (" 
 		 << PairArray(i)->Particle1.Name << ", "
 		 << PairArray(i)->Particle2.Name << ")." << endl;
 	    exit(-1);
 	  }
-	  cerr << "Found PAfile for pair (" 
+	  perr << "Found PAfile for pair (" 
 	       << Path.Species(spec1).Name << ", "
 	       << Path.Species(spec2).Name << ")\n";
 	  PairMatrix(spec1,spec2) = PairArray(i);
@@ -62,7 +62,7 @@ ActionsClass::Read(IOSectionClass &in)
 	  paUsed = true;
 	}
     if (!paUsed) {
-      cerr << "Warning:  Pair action for species types (" 
+      perr << "Warning:  Pair action for species types (" 
 	   << PairArray(i)->Particle1.Name << ", "
  	   << PairArray(i)->Particle1.Name << ") not used.\n";
     }
@@ -76,7 +76,7 @@ ActionsClass::Read(IOSectionClass &in)
       if (PairMatrix(species1,species2) == NULL) {
 	if ((species1 != species2) || 
 	    (Path.Species(species1).NumParticles > 1)) {
-	  cerr << "We're missing a PairAction for species1 = "
+	  perr << "We're missing a PairAction for species1 = "
 	       << Path.Species(species1).Name << " and species2 = "
 	       << Path.Species(species2).Name << endl;
 	  exit(1);
@@ -115,7 +115,7 @@ ActionsClass::Read(IOSectionClass &in)
 //     else
 //       NodalActions(species) = NULL;
   
-  cerr << "Finished reading the action.\n"; 
+  perr << "Finished reading the action.\n"; 
 
   if (in.OpenSection("StructureReject")){
     StructureReject.Read(in);
