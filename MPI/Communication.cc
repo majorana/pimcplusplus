@@ -166,6 +166,7 @@ void CommunicatorClass::Subset (Array<int,1> &ranks,
   cerr << "before  MPI_Comm_create\n";
   cerr << "ranks = " << ranks << endl;
   MPI_Comm_create(MPIComm, newGroup, &(newComm.MPIComm));
+  cerr << "Subset communicator = " << newComm.MPIComm << endl;
   cerr << "after  MPI_Comm_create\n";
 }
 

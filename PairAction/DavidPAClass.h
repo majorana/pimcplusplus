@@ -20,7 +20,7 @@ class DavidPAClass : public PairActionFitClass
   ///Holds the Ukj coefficients for a given q
   Array<double,1> TempukjArray;
   Array<double,1> TempdukjArray;
-
+  int NumTerms;
   //  DistanceTableClass *DistanceTable;
   /// Skips to the next string in the file whose substring matches skipToString
   inline string SkipTo(ifstream &infile, string skipToString);
@@ -88,6 +88,7 @@ inline bool DavidPAClass::Read(IOSectionClass &in,double x, int y)
   NumLevels=y;
   // Read Particles;
   assert(in.OpenSection("Fits"));
+  assert(in.ReadVar("NumOffDiagonalTerms",NumTerms));
   assert(in.OpenSection("Particle1"));
   Particle1.Read(in);
   in.CloseSection();

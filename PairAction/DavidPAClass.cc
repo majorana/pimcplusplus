@@ -97,6 +97,15 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
   
   double r=q+0.5*z;
   double rprime=q-0.5*z;
+
+
+ //  ///HACK! HACK! HACK! HACK!
+//   if (r > ukj(level).grid->End) {
+//     U =0.0 ; dU=0.0; V = 0.0;
+//     return;
+//   }
+//     ///END HACK! END HACK! END HACK!
+
   if (r > ukj(level).grid->End) {
     //    U =0.0 ; dU=0.0; V = 0.0;
     //    return;
@@ -126,6 +135,7 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
   
   
   if ((rprime < rmin) || (r < rmin)){
+    cerr<<"I'm less then the min. Maybe this is messing me up\n";
     U = 5000.0; dU = 0.0;
     return;
   }
@@ -212,8 +222,8 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
     (ukj(level))(q,TempukjArray); 
     (dukj(level))(q,TempdukjArray); 
     ////HACK! 
-    n=2;
-    for (int k=1;k<=n;k++){  
+    //    n=0;
+    for (int k=1;k<=NumTerms;k++){  
      
       double Zto2j=1;
       double currS=Sto2k;
