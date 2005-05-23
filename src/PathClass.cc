@@ -11,7 +11,7 @@ void PathClass::ReadOld(string fileName,bool replicate)
   Array<double,4> oldPaths; //(58,2560,2,3);
   
   assert(inFile.ReadVar("Path",oldPaths));
-  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
+  perr << "My paths are of size"  << oldPaths.extent(0) << " "
        << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
   
   for (int ptcl=0;ptcl<NumParticles();ptcl++){
@@ -42,7 +42,7 @@ void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
     double n = -floor(disp(i)*BoxInv(i)+0.5);
     disp(i) += n*IsPeriodic(i)*Box(i);
     if (!(-Box(i)/2.0<=disp(i))){
-      cerr<<"ERROR: "<<Box(i)<<" "<<disp(i)<<" "
+      perr<<"ERROR: "<<Box(i)<<" "<<disp(i)<<" "
 	  <<slice<<" "<<ptcl<<" "<<refPtcl<<" "
 	  <<BoxInv(i)<<Path(slice,ptcl)<<" "<<endl;
 //      sleep(5000);
@@ -60,7 +60,7 @@ void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
     while (DBdisp(i) < -0.5*Box(i)) 
       DBdisp(i) += Box(i);
     if (fabs(DBdisp(i)-disp(i)) > 1.0e-12){ 
-      cerr<<DBdisp(i)<<" "<<disp(i)<<endl;
+      perr<<DBdisp(i)<<" "<<disp(i)<<endl;
     }
     //    assert (fabs(DBdisp(i)-disp(i)) < 1.0e-12);
   }
@@ -132,7 +132,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
   if (myProc == 0)
     if (haveNodeAction)
       if (! Actions.NodalActions(speciesNum)->IsPositive(0)) {
-	cerr << "Initially negative node action.  Swapping two particles "
+	perr << "Initially negative node action.  Swapping two particles "
 	     << "for species " << species.Name << ".\n";
 	swapFirst = true;
       }
@@ -150,7 +150,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
       (*this)(0,species.FirstPtcl)   = R0(0);
       (*this)(0,species.FirstPtcl+1) = R0(1);  
       if (!Actions.NodalActions(speciesNum)->IsPositive(0)) {
-	cerr << "Still not positive after swap!!!!!!!!!!!!\n";
+	perr << "Still not positive after swap!!!!!!!!!!!!\n";
 	abort();
       }
     }
@@ -158,8 +158,6 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
   
   int N = TotalNumSlices+1;
   for (int slice=1; slice<N; slice++) {
-    if (myProc==0)
-      cerr << "Slice=" << slice << endl;
     int sliceOwner = SliceOwner(slice);
     int relSlice = slice-myFirstSlice;
     
@@ -216,7 +214,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 // 		     newSlice(ptcl)[0], newSlice(ptcl)[1], newSlice(ptcl)[2]);
 // 	}
 	if (!Actions.NodalActions(speciesNum)->IsPositive(relSlice)) {
-	  cerr << "Still not postive at slice " << slice 
+	  perr << "Still not postive at slice " << slice 
 	       << " myProc = " << myProc << "relslice=" << relSlice <<endl;
 	  abort();
 	}	
@@ -232,11 +230,11 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
       Actions.NodalActions(speciesNum)->Action(0, NumTimeSlices()-1, 
 					       changedParticles,0);
     Communicator.PrintSync();
-//     cerr << "myProc = " << myProc << " localAction = " 
+//     perr << "myProc = " << myProc << " localAction = " 
 // 	 << localAction << " NumTimeSlices = " << NumTimeSlices() << endl;
     double globalAction = Communicator.AllSum(localAction);
     if (Communicator.MyProc()==0)
-      cerr << "Nodal Action after Levi flight = " << globalAction << endl;
+      perr << "Nodal Action after Levi flight = " << globalAction << endl;
   }
   
 //   Communicator.PrintSync();
@@ -276,14 +274,14 @@ void PathClass::Read (IOSectionClass &inSection)
   SetPeriodic (periodic);
   if (needBox) {
     assert(inSection.ReadVar ("Box", tempBox));
-    cerr << "Using periodic boundary conditions.\n";
+    perr << "Using periodic boundary conditions.\n";
     assert(tempBox.size()==NDIM);
     for (int counter=0;counter<tempBox.size();counter++)
       Box(counter)=tempBox(counter);
     SetBox (Box);
   }
   else 
-    cerr << "Using free boundary conditions.\n";
+    perr << "Using free boundary conditions.\n";
   if (!inSection.ReadVar("OpenLoops",OpenPaths))
     OpenPaths=false;
 
@@ -294,10 +292,10 @@ void PathClass::Read (IOSectionClass &inSection)
     DavidLongRange=false;
   }
   if (DavidLongRange)
-    cerr<<"I am doing DAVID LONG RANGE!"<<endl;
+    perr<<"I am doing DAVID LONG RANGE!"<<endl;
   assert(inSection.OpenSection("Particles"));
   int numSpecies = inSection.CountSections ("Species");
-  cerr<<"we have this many sections: "<<numSpecies<<endl;
+  perr<<"we have this many sections: "<<numSpecies<<endl;
    // First loop over species and read info about species
   for (int Species=0; Species < numSpecies; Species++) {
     inSection.OpenSection("Species", Species);
@@ -335,14 +333,14 @@ void PathClass::InitPaths (IOSectionClass &in)
     string Replicate;
     in.ReadVar ("Replicate", Replicate);
     if (InitPaths == "RANDOM") {
-      cerr << "Don't know how to do RANDOM yet.\n";
+      perr << "Don't know how to do RANDOM yet.\n";
       exit(1);
     }
     else if (InitPaths == "CUBIC") {
       int num = species.NumParticles;
       bool isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
       if (!isCubic) {
-	cerr << "A cubic box is current required for cubic initilization\n";
+	perr << "A cubic box is current required for cubic initilization\n";
 	abort();
       }
       int numPerDim = (int) ceil (pow((double)num, 1.0/3.0)-1.0e-6);
@@ -365,7 +363,7 @@ void PathClass::InitPaths (IOSectionClass &in)
       int num = species.NumParticles;
       bool isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
       if (!isCubic) {
-	cerr << "A cubic box is current required for cubic initilization\n";
+	perr << "A cubic box is current required for cubic initilization\n";
 	abort();
       }
       int numPerDim = (int) ceil (pow(0.5*(double)num, 1.0/3.0)-1.0e-6);
@@ -408,14 +406,14 @@ void PathClass::InitPaths (IOSectionClass &in)
     else if (InitPaths == "ALLPATHS") {
       Array<double,3> Positions;
       assert (in.ReadVar ("Positions", Positions));
-      cerr<<"NumTimeSlices: "<<TotalNumSlices<<" "<<Positions.extent(0);
+      perr<<"NumTimeSlices: "<<TotalNumSlices<<" "<<Positions.extent(0);
       assert (Positions.extent(0) == species.NumParticles);
       assert (Positions.extent(1) == TotalNumSlices);
       assert (Positions.extent(2) == species.NumDim);
       for (int ptcl=species.FirstPtcl; 
 	   ptcl<=species.LastPtcl; ptcl++){
 	for (int slice=0; slice<TotalNumSlices; slice++) {
-	  cerr<<ptcl;
+	  perr<<ptcl;
 	  dVec pos;
 	  pos = 0.0;
 	  for (int dim=0; dim<species.NumDim; dim++)
@@ -436,7 +434,7 @@ void PathClass::InitPaths (IOSectionClass &in)
       bool replicate = false;
       if (Replicate == "ON"){
         replicate = true;
-        cerr << "Replicate 'ON'; Using time slice 0 for all time slices." << endl;
+        perr << "Replicate 'ON'; Using time slice 0 for all time slices." << endl;
       }
       string pathFile;
       assert(in.ReadVar("File",pathFile));
@@ -475,7 +473,7 @@ void PathClass::InitPaths (IOSectionClass &in)
 //     }
 
     else {
-      cerr << "Unrecognize initialization strategy " 
+      perr << "Unrecognize initialization strategy " 
 	   << InitPaths << endl;
       abort();
     }
@@ -488,14 +486,14 @@ void PathClass::InitPaths (IOSectionClass &in)
   in.CloseSection(); // "Particles"
 
 // jgadd: correct entries where necessary
-//  cerr << "PRINT MolRef corrected" << endl;
+//  perr << "PRINT MolRef corrected" << endl;
   for(int m = 0;m < MolRef.size(); m++){
     int ref = MolRef(m);
     while(ref >= numMol){
       ref -= numMol;
     MolRef(m) = ref;
     }
-    cerr << m << " " << MolRef(m) << endl;
+    perr << m << " " << MolRef(m) << endl;
   } 
   string openSpeciesName;
   if (OpenPaths) {
@@ -577,10 +575,10 @@ void PathClass::Allocate()
   }
   // jgadd
   MolRef.resize(numParticles);
-//  cerr << "PRINT MolRef Initialized" << endl;
+//  perr << "PRINT MolRef Initialized" << endl;
   for(int q = 0;q < MolRef.size();q++){
     MolRef(q) = q;
-//    cerr << q << " " << MolRef(q) << endl;
+//    perr << q << " " << MolRef(q) << endl;
   }
 }
 
@@ -596,7 +594,7 @@ void PathClass::SetupkVecs2D()
 
   for (int i=0;i<NDIM;i++){
     MaxkIndex[i]= (int) ceil(1.1*kCutoff/kBox[i]);
-    // cerr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
+    // perr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
   }
 
 
@@ -614,8 +612,8 @@ void PathClass::SetupkVecs2D()
     }
   }
   kIndices.resize(numVecs);
-  cerr << "kCutoff = " << kCutoff << endl;
-  cerr << "Number of kVecs = " << numVecs << endl;
+  perr << "kCutoff = " << kCutoff << endl;
+  perr << "Number of kVecs = " << numVecs << endl;
   kVecs.resize(numVecs);
   for (int i=0; i<NDIM; i++)
     C[i].resize(2*MaxkIndex[i]+1);
@@ -630,7 +628,7 @@ void PathClass::SetupkVecs2D()
       //	k[2] = iz*kBox[2];
       //	ki[2]= iz+MaxkIndex[2];
 	if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
-	  cerr<<"This k vec is "<<k[0]<<" "<<k[1]<<endl;
+	  perr<<"This k vec is "<<k[0]<<" "<<k[1]<<endl;
 	  kVecs(numVecs) = k;
 	  kIndices(numVecs)=ki;
 	  numVecs++;
@@ -684,7 +682,7 @@ void PathClass::SortRhoK()
       currentNum=kVecs.size()+1;
   }
   for (int counter=0;counter<MagKint.size();counter++){
-    cerr<<"My mag K int is "<<MagKint(counter)<<endl;
+    perr<<"My mag K int is "<<MagKint(counter)<<endl;
   }
 
 }
@@ -702,7 +700,7 @@ void PathClass::SetupkVecs3D()
 
   for (int i=0;i<NDIM;i++){
     MaxkIndex[i]= (int) ceil(1.1*kCutoff/kBox[i]);
-    // cerr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
+    // perr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
   }
 
 
@@ -720,8 +718,8 @@ void PathClass::SetupkVecs3D()
     }
   }
   kIndices.resize(numVecs);
-  cerr << "kCutoff = " << kCutoff << endl;
-  cerr << "Number of kVecs = " << numVecs << endl;
+  perr << "kCutoff = " << kCutoff << endl;
+  perr << "Number of kVecs = " << numVecs << endl;
   kVecs.resize(numVecs);
   for (int i=0; i<NDIM; i++)
     C[i].resize(2*MaxkIndex[i]+1);
@@ -763,7 +761,7 @@ void PathClass::CalcRho_ks_Slow(int slice, int species)
 
 void PathClass::CalcRho_ks_Fast(int slice,int species)
 {
-  //  cerr<<"Beginning the calcrhok stuff"<<endl;
+  //  perr<<"Beginning the calcrhok stuff"<<endl;
   // Zero out Rho_k array
   for (int ki=0;ki<kIndices.size();ki++)
     Rho_k(slice,species,ki)=0.0;
@@ -796,20 +794,20 @@ void PathClass::CalcRho_ks_Fast(int slice,int species)
 #endif
     }
   }
-  //  cerr<<"ending the calcrhok stuff"<<endl;
+  //  perr<<"ending the calcrhok stuff"<<endl;
 }
       
 
 
 void PathClass::MoveJoin(int oldJoin, int newJoin)
 {
-  //  cerr<<"My time slices is "<<NumTimeSlices()<<endl;
+  //  perr<<"My time slices is "<<NumTimeSlices()<<endl;
   //  for (int ptcl=0;ptcl<NumParticles();ptcl++){
-    //    cerr<<Permutation(ptcl)<<endl;
+    //    perr<<Permutation(ptcl)<<endl;
   //  }
-  //  cerr<<oldJoin<<" "<<newJoin<<" "<<endl;
-  //  cerr<<"Starting"<<endl;
-  //  cerr<<Path(OpenLink,OpenPtcl)<<endl;
+  //  perr<<oldJoin<<" "<<newJoin<<" "<<endl;
+  //  perr<<"Starting"<<endl;
+  //  perr<<Path(OpenLink,OpenPtcl)<<endl;
   bool swappedAlready=false;
   if (newJoin>oldJoin){
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
@@ -853,8 +851,8 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
 	Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
     }
   }
-  //  cerr<<Path(OpenLink,OpenPtcl)<<endl;
-  //  cerr<<"Ending"<<endl;
+  //  perr<<Path(OpenLink,OpenPtcl)<<endl;
+  //  perr<<"Ending"<<endl;
 }
 
 
@@ -916,18 +914,18 @@ void PathClass::ShiftData(int slicesToShift)
     RefSlice -= TotalNumSlices;
   while (RefSlice < 0)
     RefSlice += TotalNumSlices;
-  //  cerr<<"My ref slice at particle 0 is "<<Path(RefSlice,0)<<endl;
+  //  perr<<"My ref slice at particle 0 is "<<Path(RefSlice,0)<<endl;
   if (OpenPaths){
-    //    cerr<<"Here my open link is "<<OpenLink<<endl;
+    //    perr<<"Here my open link is "<<OpenLink<<endl;
     int openLinkOld=(int)OpenLink;
     OpenLink=RefSlice;
     if ((int)OpenLink==0){
       OpenLink=NumTimeSlices()-1;
     }
-    //  cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
-    ////    cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<" "<<slicesToShift<<endl;
+    //  perr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
+    ////    perr<<"My links are "<<openLinkOld<<" "<<OpenLink<<" "<<slicesToShift<<endl;
     ////    if (openLinkOld!=(int)OpenLink)
-    ////      cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<" "<<slicesToShift<<endl;
+    ////      perr<<"My links are "<<openLinkOld<<" "<<OpenLink<<" "<<slicesToShift<<endl;
     ////    assert(openLinkOld==(int)OpenLink);
     OpenLink[OLDMODE]=OpenLink[NEWMODE];
   }
@@ -1024,8 +1022,8 @@ void PathClass::ShiftRho_kData(int slicesToShift)
 
 void PathClass::ShiftPathData(int slicesToShift)
 {
-  //  cerr<<"Slices to shift are "<<slicesToShift<<endl;
-  //  cerr<<"I'm in shiftpathdata with numparticles "<<NumParticles()+OpenPaths<<"and Openpaths being "<<OpenPaths<<"and slicesToShift is "<<slicesToShift<<endl;
+  //  perr<<"Slices to shift are "<<slicesToShift<<endl;
+  //  perr<<"I'm in shiftpathdata with numparticles "<<NumParticles()+OpenPaths<<"and Openpaths being "<<OpenPaths<<"and slicesToShift is "<<slicesToShift<<endl;
   //  sleep(10);
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
@@ -1113,7 +1111,7 @@ void PathClass::ShiftPathData(int slicesToShift)
       OpenLink=OpenLink-1;
     OpenLink=((int)OpenLink+slicesToShift+NumTimeSlices()) % NumTimeSlices();
     if ((int)OpenLink==0){
-      cerr<<"equal to 0"<<endl;
+      perr<<"equal to 0"<<endl;
       OpenLink=NumTimeSlices()-1;
     }
 
@@ -1121,14 +1119,14 @@ void PathClass::ShiftPathData(int slicesToShift)
     //    if ((int)OpenLink==0){
     //      OpenLink=NumTimeSlices()-1;
     //    }
-    //    cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
+    //    perr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
     //    if (openLinkOld!=(int)OpenLink)
-    //      cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
+    //      perr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
     //    assert(openLinkOld==(int)OpenLink);
     OpenLink[OLDMODE]=OpenLink[NEWMODE];
   }
-  //  cerr<<Path(OpenLink,NumParticles())<<endl;
-  //  cerr<<"I leave shiftpathdata"<<endl;
+  //  perr<<Path(OpenLink,NumParticles())<<endl;
+  //  perr<<"I leave shiftpathdata"<<endl;
   //  sleep(10);
 
 }
@@ -1152,7 +1150,7 @@ void PathClass::BroadcastRefPath()
       buffer(ptcl) = Path(RefSlice-myStart, ptcl);
   }
   
-  //  cerr << "procWithRefSlice = " << procWithRefSlice << endl;
+  //  perr << "procWithRefSlice = " << procWithRefSlice << endl;
 
   // Do broadcast
   Communicator.Broadcast(procWithRefSlice, buffer);
@@ -1192,17 +1190,17 @@ void PathClass::TotalPermutation(Array<int,1> &permVec)
 ///you are starting the openlink at 0
 void PathClass::InitOpenPaths()
 {
-  cerr<<"Starting to initialize"<<endl;
+  perr<<"Starting to initialize"<<endl;
   if (OpenPaths){
-    cerr<<"openpaths"<<endl;
+    perr<<"openpaths"<<endl;
     SetMode(OLDMODE);
     if (Communicator.MyProc()==0)
       OpenLink=NumTimeSlices()-1;
     else
       OpenLink=-1;
-    cerr<<"Set up the open link"<<endl;
+    perr<<"Set up the open link"<<endl;
     OpenPtcl=Species(OpenSpeciesNum).FirstPtcl;
-    cerr<<"set up the open particle"<<endl;
+    perr<<"set up the open particle"<<endl;
     SetMode(NEWMODE);
     if (Communicator.MyProc()==0)
       OpenLink=NumTimeSlices()-1;
@@ -1210,16 +1208,16 @@ void PathClass::InitOpenPaths()
       OpenLink=-1;
     OpenPtcl=0;
     if (Communicator.MyProc()==0){
-      cerr<<"Preparing for moving things in path around"<<endl;
+      perr<<"Preparing for moving things in path around"<<endl;
       Path[OLDMODE]((int)OpenLink,NumParticles())=Path[OLDMODE]((int)OpenLink,(int)OpenPtcl);
-      cerr<<"Moved the first thing"<<endl;
+      perr<<"Moved the first thing"<<endl;
       Path[NEWMODE]((int)OpenLink,NumParticles())=Path[NEWMODE]((int)OpenLink,(int)OpenPtcl);
-      cerr<<"Moved the second thing"<<endl;
+      perr<<"Moved the second thing"<<endl;
       Path[OLDMODE](0,NumParticles())=Path[OLDMODE](0,(int)OpenPtcl);
-      cerr<<"Moved the first thing"<<endl;
+      perr<<"Moved the first thing"<<endl;
       Path[NEWMODE](0,NumParticles())=Path[NEWMODE](0,(int)OpenPtcl);
     }
   }
-  cerr<<"Initialized the open paths"<<endl;
+  perr<<"Initialized the open paths"<<endl;
 }
 
