@@ -1,5 +1,7 @@
 #include "Communication.h"
 
+ofstream perr;
+
 #ifdef USE_MPI
 
 /// Sets this communicator to be that of all the processes

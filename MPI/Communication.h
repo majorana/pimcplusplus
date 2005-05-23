@@ -1,22 +1,31 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 #include "../../Common/Blitz.h"
+#include <fstream>
 
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
 
+extern ofstream perr;
+
 namespace COMM
 {
 #ifdef USE_MPI
   inline void Init (int argc, char **argv)
-    {
-      MPI_Init(&argc, &argv);
-    }
+  {
+    MPI_Init(&argc, &argv);
+    int proc;
+    MPI_Comm_rank(MPI_COMM_WORLD, &proc);
+    if (proc == 0)
+      perr.open("/dev/stderr", ios::out);
+    else
+      perr.open("/dev/null", ios::out);
+  }
   inline void Finalize ()
-    {
-      MPI_Finalize();
-    }
+  {
+    MPI_Finalize();
+  }
   inline int WorldProc()
   {
     int proc;
@@ -25,11 +34,12 @@ namespace COMM
   }
 #else // Serial version
   inline void Init (int argc, char **argv)
-    {
-    }
+  {
+    perr.open ("/dev/stderr", ios::out);
+  }
   inline void Finalize ()
-    {
-    }
+  {
+  }
   inline int WorldProc()
   {
     return (0);
