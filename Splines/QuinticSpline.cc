@@ -63,8 +63,12 @@ void QuinticSpline::Update()
     C(i) = FC(i+offset);
     D(i) = FD(i+offset);
     E(i) = FE(i+offset);
-    F(i) = FF(i+offset);
   }
+  /// Last FF(N-1) is not set by quinat, so we don't copy to avoid a
+  /// valgrind error.
+  for (int i=1; i<(grid->NumPoints-1); i++)
+    F(i) = FF(i+offset);
+  F(grid->NumPoints-1) = 0.0;
   UpToDate=true;
 }
 
