@@ -507,7 +507,7 @@ void VisualClass::MakePaths(int frame)
 // 	 }
        }
        //>>>>>>> .r523
-       ///      loopList.push_back(loop);
+       loopList.push_back(loop);
     }
   }
   //  Paths.resize(loopList.size());
