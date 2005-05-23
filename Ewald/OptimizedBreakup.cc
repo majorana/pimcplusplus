@@ -1,6 +1,7 @@
 #include "OptimizedBreakup.h"
 #include "../MatrixOps/MatrixOps.h"
 #include "../Integration/GKIntegration.h"
+#include "../MPI/Communication.h"
 
 class cIntegrand
 {
@@ -94,8 +95,8 @@ void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
   }
   
 
-  cerr << "Total k vecs = " << numk << endl;
-  cerr << "non-degenerate k vecs = " << kpoints.size() << endl;
+  perr << "Total k vecs = " << numk << endl;
+  perr << "non-degenerate k vecs = " << kpoints.size() << endl;
 }
 
 double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk, 
@@ -132,8 +133,8 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
     }
   }
 
-  //  cerr << "A = " << A << endl;
-  //cerr << "b = " << b << endl;
+  //  perr << "A = " << A << endl;
+  //perr << "b = " << b << endl;
 
   // Now do SVD decomposition:
   Array<double,2> U(numElem, numElem), V(numElem, numElem);
@@ -152,7 +153,7 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
     if (Sinv(i) == 0.0)
       numSingular++;
   if (numSingular > 0)
-    cerr << "There were " << numSingular << " singular values.\n";
+    perr << "There were " << numSingular << " singular values.\n";
   t = 0.0;
   // Compute t_n, removing singular values
   for (int i=0; i<numElem; i++) {
@@ -211,7 +212,7 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
 	A(l,n) += kpoints(ki)[1]*cnk(l,ki)*cnk(n,ki);
     }
   }
-  // cerr << "A = " << A << endl;
+  // perr << "A = " << A << endl;
 
 
   // Now reduce for constraints
@@ -262,9 +263,9 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
 
   for (int i=0; i<M; i++)
     if (S(i) < 0.0)
-      cerr << "negative singlar value.\n";
+      perr << "negative singlar value.\n";
 
-  //  cerr << "Smax = " << Smax << endl;
+  //  perr << "Smax = " << Smax << endl;
 
   for (int i=0; i<M; i++)
     Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
@@ -273,7 +274,7 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
     if (Sinv(i) == 0.0)
       numSingular++;
   if (numSingular > 0)
-    cerr << "There were " << numSingular << " singular values.\n";
+    perr << "There were " << numSingular << " singular values.\n";
   tc = 0.0;
   // Compute t_n, removing singular values
   for (int i=0; i<M; i++) {
@@ -332,7 +333,7 @@ void LPQHI_BasisClass::Set_rc(double rc)
     delta = r_c / (NumKnots - 1);
     deltaInv = 1.0/delta;
   }
-  cerr << "delta = " << delta << endl;
+  perr << "delta = " << delta << endl;
 }
 
 
