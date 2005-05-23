@@ -2,7 +2,7 @@
 #include "../PathDataClass.h"
 #include "../Common/Ewald/OptimizedBreakup.h"
 #include "../Common/Integration/GKIntegration.h"
-#include <wordexp.h>
+#include "FileExpand.h"
 
 ///Actionsclass. Stores all the actsion
 void 
@@ -38,10 +38,7 @@ ActionsClass::Read(IOSectionClass &in)
 
   for (int i=0; i<numPairActions; i++) {
     // Allow for tilde-expansion in these files
-    wordexp_t words;
-    wordexp (PAFiles(i).c_str(), &words, 0);
-    string name = words.we_wordv[0];
-    wordfree(&words);
+    string name = ExpandFileName(PAFiles(i));
     assert(PAIO.OpenFile (name));
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
     bool paUsed=false;
