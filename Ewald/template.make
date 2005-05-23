@@ -4,15 +4,19 @@ all:	EwaldBase.o SimpleEwald.o OptimizedBreakup.o TestOptimizedBreakup.o \
         TestOptimizedBreakup #NaClTest
 
 TestOptimizedBreakup: OptimizedBreakup.o TestOptimizedBreakup.o \
-                      ../MatrixOps/MatrixOps.o ../Integration/GKIntegration.o
+                      ../MatrixOps/MatrixOps.o ../Integration/GKIntegration.o\
+                      ../MPI/Communication.o
 	$(LD) -o TestOptimizedBreakup TestOptimizedBreakup.o \
                  OptimizedBreakup.o ../MatrixOps/MatrixOps.o \
-                 ../Integration/GKIntegration.o $(LIBS)
+                 ../Integration/GKIntegration.o ../MPI/Communication.o $(LIBS)
 
 NaClTest: NaClTest.o EwaldBase.o SimpleEwald.o 
-	$(LD) -o NaClTest NaClTest.o EwaldBase.o SimpleEwald.o $(IOobjs) $(LIBS)
+	$(LD) -o NaClTest NaClTest.o EwaldBase.o SimpleEwald.o \
+                 ../MPI/Communication.o $(IOobjs) $(LIBS)
+
 TestHermite: TestHermite.o HermiteQuad.o
-	$(LD) -o TestHermite  HermiteQuad.o TestHermite.o $(IOobjs) $(LIBS)
+	$(LD) -o TestHermite  HermiteQuad.o TestHermite.o \
+               ../MPI/Communication.o $(IOobjs) $(LIBS)
 
 clean:
 	rm -f *.o
