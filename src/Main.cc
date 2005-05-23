@@ -17,7 +17,7 @@ main(int argc, char **argv)
     IOSectionClass in;
     assert (in.OpenFile(argv[1]));
     PIMCClass PIMC;
-    PIMC.Read(in,fileCopy);
+    PIMC.Read(in);
     PIMC.Run();
   }
 }

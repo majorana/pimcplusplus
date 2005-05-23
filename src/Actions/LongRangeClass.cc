@@ -323,12 +323,12 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 void LongRangeClass::Init(IOSectionClass &in, IOSectionClass &out)
 {
   if (PathData.Path.Getkc() == 0.0) {
-    cerr << "Missing kCutoff in System section.  Aborting.\n";
+    perr << "Missing kCutoff in System section.  Aborting.\n";
     abort();
   }
   int numKnots;
   assert(in.ReadVar ("NumBreakupKnots", numKnots));
-  cerr << "Doing optimized long range breakups...\n";
+  perr << "Doing optimized long range breakups...\n";
   if (PathData.Path.Communicator.MyProc() == 0) 
     out.NewSection ("LongRangeAction");
   OptimizedBreakup_U(numKnots, out);
@@ -376,7 +376,7 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
   double kCont = 50.0 * kavg;
   double delta = basis.GetDelta();
   double kMax = 20.0*M_PI/delta;
-  cerr << "kCont = " << kCont 
+  perr << "kCont = " << kCont 
        << " kMax = " << kMax << endl;
 
   OptimizedBreakupClass breakup(basis);
@@ -404,7 +404,7 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
   for (int paIndex=0; paIndex<PairArray.size(); paIndex++) {
     PairActionFitClass &pa = *PairArray(paIndex);
     if (iAmRoot) {
-      cerr << "Doing long range breakpus for species types (" 
+      perr << "Doing long range breakpus for species types (" 
 	   << PairArray(paIndex)->Particle1.Name << ", " 
 	   << PairArray(paIndex)->Particle2.Name << ")\n";
       out.NewSection("PairAction");
@@ -423,14 +423,14 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
       Ulong_r = 0.0;
       
       // Calculate Xk's
-      cerr << "Calculating Xk's for U...\n";
+      perr << "Calculating Xk's for U...\n";
       for (int ki=0; ki<numk; ki++) {
 	//Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc, JOB_U);
 	//double oldXk = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc, JOB_U);
 	double k = breakup.kpoints(ki)[0];
 	Xk(ki) = pa.Xk_U (k, level) / boxVol;
       }
-      cerr << "Done.\n";
+      perr << "Done.\n";
       
 
       // Set boundary conditions at rc:  Force value and first and
@@ -445,9 +445,9 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
       
       // Now, do the optimal breakup:  this gives me the coefficents
       // of the basis functions, h_n in the array t.
-      cerr << "Doing U breakup...\n";
+      perr << "Doing U breakup...\n";
       breakup.DoBreakup (Xk, t, adjust);
-      cerr << "Done.\n";
+      perr << "Done.\n";
       
       // Now, we must put this information into the pair action
       // object.  First do real space part
@@ -481,7 +481,7 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
       integrator.SetRelativeErrorMode();
       pa.Ushort_k0(level) = 4.0*M_PI/boxVol * 
 	integrator.Integrate(0.0, rc, tolerance);
-      cerr << "Ushort_k0(" << level << ") = " << pa.Ushort_k0(level) << endl;
+      perr << "Ushort_k0(" << level << ") = " << pa.Ushort_k0(level) << endl;
 
       // Now do k-space part
       for (int ki=0; ki < Path.kVecs.size(); ki++) {
@@ -549,7 +549,7 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
   double kCont = 50.0 * kavg;
   double delta = basis.GetDelta();
   double kMax = 20.0*M_PI/delta;
-  cerr << "kCont = " << kCont 
+  perr << "kCont = " << kCont 
        << " kMax = " << kMax << endl;
 
   OptimizedBreakupClass breakup(basis);
@@ -593,13 +593,13 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
       dUlong_r = 0.0;
 
       // Calculate Xk's
-      cerr << "Calculating Xk's for dU...\n";
+      perr << "Calculating Xk's for dU...\n";
       for (int ki=0; ki<numk; ki++) {	
 	// Xk(ki) = CalcXk(paIndex, level, breakup.kpoints(ki)[0], rc, JOB_DU);
 	double k = breakup.kpoints(ki)[0];
 	Xk(ki) = pa.Xk_dU (k, level) / boxVol;
       }
-      cerr << "Done.\n";
+      perr << "Done.\n";
       // Set boundary conditions at rc:  Force value and first and
       // second derivatives of long-range potential to match the full
       // potential at rc.
@@ -613,9 +613,9 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 
       // Now, do the optimal breakup:  this gives me the coefficents
       // of the basis functions, h_n in the array t.
-      cerr << "Doing dU breakup...\n";
+      perr << "Doing dU breakup...\n";
       breakup.DoBreakup (Xk, t, adjust);
-      cerr << "Done.\n";
+      perr << "Done.\n";
       
       // Now, we must put this information into the pair action
       // object.  First do real space part
@@ -648,7 +648,7 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
       integrator.SetRelativeErrorMode();
       pa.dUshort_k0(level) = 4.0*M_PI/boxVol * 
 	integrator.Integrate(0.0, rc, tolerance);
-      cerr << "dUshort_k0(" << level << ") = " << pa.dUshort_k0(level) << endl;
+      perr << "dUshort_k0(" << level << ") = " << pa.dUshort_k0(level) << endl;
 
       // Now do k-space part
       for (int ki=0; ki < Path.kVecs.size(); ki++) {
@@ -690,7 +690,7 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 //   // We try to pick kcont to keep reasonable number of k-vectors
 //   double kCont = 50.0 * kavg;
 //   double kMax = 100 * kavg;
-//   cerr << "kCont = " << kCont 
+//   perr << "kCont = " << kCont 
 //        << " kMax = " << kMax << endl;
 
 //   LPQHI_BasisClass basis;
@@ -731,12 +731,12 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 //       // potential at rc.
 //       adjust = true;
 //       double delta = basis.GetDelta();
-//       cerr << "dUdiag(rc) = " << pa.dUdiag(rc, level) << endl;
-//       cerr << "V(rc) = " << pa.V(rc) << endl;
-//       cerr << "dUdiag_p(rc) = " << pa.dUdiag_p(rc, level) << endl;
-//       cerr << "Vp(rc) = " << pa.Vp(rc) << endl;
-//       cerr << "dUdiag_pp(rc) = " << pa.dUdiag_pp(rc, level) << endl;
-//       cerr << "Vpp(rc) = " << pa.Vpp(rc) << endl;
+//       perr << "dUdiag(rc) = " << pa.dUdiag(rc, level) << endl;
+//       perr << "V(rc) = " << pa.V(rc) << endl;
+//       perr << "dUdiag_p(rc) = " << pa.dUdiag_p(rc, level) << endl;
+//       perr << "Vp(rc) = " << pa.Vp(rc) << endl;
+//       perr << "dUdiag_pp(rc) = " << pa.dUdiag_pp(rc, level) << endl;
+//       perr << "Vpp(rc) = " << pa.Vpp(rc) << endl;
 
       /// Warning:  the following constraints may cause instabilities!!!!
 //       // t(N-3) = pa.dUdiag(rc, level);                 adjust(N-3) = false;
@@ -804,7 +804,7 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
 //   // We try to pick kcont to keep reasonable number of k-vectors
 //   double kCont = 50.0 * kavg;
 //   double kMax = 100 * kavg;
-//   cerr << "kCont = " << kCont 
+//   perr << "kCont = " << kCont 
 //        << " kMax = " << kMax << endl;
 
   LPQHI_BasisClass basis;
@@ -816,7 +816,7 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
   double kCont = 50.0 * kavg;
   double delta = basis.GetDelta();
   double kMax = 20.0*M_PI/delta;
-  cerr << "kCont = " << kCont 
+  perr << "kCont = " << kCont 
        << " kMax = " << kMax << endl;
 
 
@@ -861,9 +861,9 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
     
     // Now, do the optimal breakup:  this gives me the coefficents
     // of the basis functions, h_n in the array t.
-    cerr << "Doing V breakup...\n";
+    perr << "Doing V breakup...\n";
     breakup.DoBreakup (Xk, t, adjust);
-    cerr << "Done.\n";
+    perr << "Done.\n";
     
     // Now, we must put this information into the pair action
     // object.  First do real space part
@@ -887,7 +887,7 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
     integrator.SetRelativeErrorMode();
     pa.Vshort_k0 = 4.0*M_PI/boxVol * 
       integrator.Integrate(0.0, rc, tolerance);
-    cerr << "Vshort_k0 = " << pa.Vshort_k0 << endl;
+    perr << "Vshort_k0 = " << pa.Vshort_k0 << endl;
 
 
     // Now do k-space part
