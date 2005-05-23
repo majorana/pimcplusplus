@@ -5,7 +5,7 @@
 main(int argc, char **argv)
 {
   string version = VERSION;
-  cerr << "pimc++ v. " << version << endl;
+  perr << "pimc++ v. " << version << endl;
 
   //  MirroredClassTest();
   COMM::Init(argc, argv);
