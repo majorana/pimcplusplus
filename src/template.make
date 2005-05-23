@@ -54,7 +54,7 @@ ifeq ($(HOSTTYPE),i386-linux)
        F77 = ifort
        EXTRADEFS = -DUSE_MKL -w1 -wr654,1011 -DUSE_MPI
        MAKECC = g++
-       CCFLAGS = -c -g  -mp -prec_div #-pg 
+       CCFLAGS = -c -g -O3 #-pg 
        F77FLAGS = -c -g 
     else
        include /usr/lib/Make.include	
