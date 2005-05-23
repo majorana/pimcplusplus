@@ -88,9 +88,14 @@ double sign(double num)
 double EndStageClass::Sample(int &slice1,int &slice2, 
 	      Array<int,1> &activeParticles)
 {
+//   cerr<<"About to sleep"<<endl;
+//   sleep(2000);
+//   cerr<<"Done to sleep"<<endl;
   int procWithRefSlice = PathData.Path.SliceOwner (PathData.Path.RefSlice);
+  //  cerr<<"Here I am "<<endl;
   //If you don't own the open link then just choose some slices to work with
   if (procWithRefSlice != PathData.Path.Communicator.MyProc()) {
+    //    cerr<<"In here"<<endl;
     int sliceSep = 1<<NumLevels;
     assert (sliceSep < PathData.Path.NumTimeSlices());
     int numLeft = PathData.Path.NumTimeSlices()-sliceSep;
@@ -98,9 +103,11 @@ double EndStageClass::Sample(int &slice1,int &slice2,
     slice2 = slice1+sliceSep;
     return 1.0;
   }
-
+//   sleep(200);
+//   cerr<<"Before choose time slices"<<endl;
 
   ChooseTimeSlices(slice1,slice2);
+  //  cerr<<"Ending choose time slice"<<endl;
   ///if you are running with time slice parallelization it doesn't
   ///shift the data so everyone doesn't have to know about it. It
   ///simply returns 0 forcing the move to be rejected prematurely early

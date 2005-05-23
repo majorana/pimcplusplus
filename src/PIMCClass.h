@@ -18,7 +18,7 @@ public:
   Array<MoveClass*,1> Moves;
   Array<ObservableClass* ,1> Observables;
   void ReadMoves(IOSectionClass &in);
-  void ReadObservables(IOSectionClass &in);
+  void ReadObservables(IOSectionClass &in,string fileCopy);
   void ReadAlgorithm(IOSectionClass &in);
   void WriteSystemInfo();
   string OutFileName;
@@ -28,7 +28,7 @@ public:
 public:
   //  PermuteTableClass ForwPermuteTable, RevPermuteTable;
   PathDataClass PathData;
-  void Read(IOSectionClass &in);
+  void Read(IOSectionClass &in,string fileCopy);
   void Run();
   PIMCClass() : Algorithm(&Moves, &Observables)
 		//	ForwPermuteTable(PathData), RevPermuteTable(PathData)

@@ -43,6 +43,7 @@ double OpenLoopImportanceClass::Action (int slice1, int slice2,
   //  int myProc=(PathData.InterComm.MyProc() % 16);
   int myProc=PathData.GetCloneNum();
   double shift=(myProc%16)+0.5;
+  shift=10.5;
   if (ImpChoice==NOIMP)  
     return 0.0;
   else if (ImpChoice==DISTIMP)
@@ -53,6 +54,7 @@ double OpenLoopImportanceClass::Action (int slice1, int slice2,
     cerr<<"You haven't give a valid choice!"<<endl;
     assert(1==2);
   }
+
   //  cerr<<"MY shift is "<<shift<<endl;
   //  return -log(0.01+(dist*dist)*(0.94*exp(-dist*dist)+0.06));
 

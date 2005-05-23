@@ -1,7 +1,7 @@
 double tau=0.1;
 Section (Parallel)
 {
-  int ProcsPerClone = 1;
+  int ProcsPerClone = 2;
 }
 
 
@@ -10,7 +10,7 @@ Section (System)
 {
   int NumTimeSlices=20;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
-  Array<double,1> Box(3)=[5,5,5];
+  Array<double,1> Box(3)=[2.5,2.5,2.5];
   Section (Particles)
   {
     Section (Species)
@@ -19,26 +19,14 @@ Section (System)
       string Type="free";
       double lambda=1.0; 
       string Statistics="BOSON";
-      int NumParticles=16;
+      int NumParticles=4;
       int NumDim=3;
       string InitPaths="FIXED";
-      Array<double,2> Positions(16,3)=[
+      Array<double,2> Positions(4,3)=[
  0.0, 0.0, 0.0 ,
-4.1, 4.1, 4.1 , 
 2.2, -2.2, 0.2 ,
--4.1,-4.1,-4.1,
- 0.0, 0.0, 0.0 ,
-4.1, 4.1, 4.1 , 
-2.2, -2.2, 0.2 ,
--4.1,-4.1,-4.1,
- 0.0, 0.0, 0.0 ,
-4.1, 4.1, 4.1 , 
-2.2, -2.2, 0.2 ,
--4.1,-4.1,-4.1,
- 0.0, 0.0, 0.0 ,
-4.1, 4.1, 4.1 , 
-2.2, -2.2, 0.2 ,
--4.1,-4.1,-4.1
+ 4.1, 4.1, 4.1 ,
+-2.2, 2.2, 0.2 
 
 
 ];
@@ -55,15 +43,15 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "FreeBosons";
-  Section (Observable)
-    {
-      string type = "EnergySign";
-      string Name = "EnergySign";
-      int freq=2;
-      int dumpFreq=500;
+  string OutFileBase = "FreeBosons2";
+//   Section (Observable)
+//     {
+//       string type = "EnergySign";
+//       string Name = "EnergySign";
+//       int freq=2;
+//       int dumpFreq=500;
       
-    }
+//     }
   Section (Observable)
     {
       string type = "Energy";
@@ -126,7 +114,7 @@ Section (Algorithm)
     Section (Move) {string name="Bisection";} 
     Section (Move) {string name = "Shift"; }
     Section (Observe) {string name = "PairCorrelation";}
-    Section (Observe) {string name = "EnergySign"; }
+    //   Section (Observe) {string name = "EnergySign"; }
     Section (Observe) {string name = "Energy"; }
   }
 }

@@ -5,7 +5,7 @@
 #include "Common/Blitz.h"
 #include <wordexp.h>
 
-void PIMCClass::Read(IOSectionClass &in)
+void PIMCClass::Read(IOSectionClass &in,string fileCopy)
 {
   // Read the parallelization strategy
   PathData.Read (in);
@@ -14,11 +14,17 @@ void PIMCClass::Read(IOSectionClass &in)
   if (isnan(dummy)){
     cerr<<"WARNING! 2.0 IS NOT A NUMBER!";
   }
+  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
+  //      <<PathData.Path.Random.Common()<<endl;
+
+
   // Read in the system information and allocate the path
   assert(in.OpenSection("System"));
   PathData.Path.Read(in);
   in.CloseSection();
   cerr << "Finished Path read.\n";
+  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
+  //      <<PathData.Path.Random.Common()<<endl;
 
   // Read in the action information
   assert(in.OpenSection("Action"));
@@ -27,13 +33,20 @@ void PIMCClass::Read(IOSectionClass &in)
   PathData.Actions.Read(in);
   in.CloseSection();
   cerr << "Finished Actions read.\n";
+  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
+  //      <<PathData.Path.Random.Common()<<endl;
 
   // Now actually initialize the paths
   cerr << "Before InitPaths.\n";
   assert(in.OpenSection("System"));
   PathData.Path.InitPaths(in);
   in.CloseSection();
+
+  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
+      <<PathData.Path.Random.Common()<<endl;
+
   cerr << "Done InitPaths.\n";
+
   
   cerr << "Initializing Actions caches.\n";
   PathData.Actions.Init();
@@ -41,9 +54,11 @@ void PIMCClass::Read(IOSectionClass &in)
 
   // Read in the Observables
   assert(in.OpenSection("Observables"));
-  ReadObservables(in);
+  ReadObservables(in,fileCopy);
   cerr << "Finished Observables Read.\n";
   in.CloseSection();
+  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
+  //      <<PathData.Path.Random.Common()<<endl;
 
   if (PathData.Actions.HaveLongRange()) {
     assert (in.OpenSection ("Action"));
@@ -59,6 +74,8 @@ void PIMCClass::Read(IOSectionClass &in)
   ReadMoves(in);
   cerr << "Finished Moves Read.\n";
   in.CloseSection();
+  //  cerr<<"My random number here is  "<<PathData.Path.Communicator.MyProc()<<" "
+  //      <<PathData.Path.Random.Common()<<endl;
 
 
   // Read in the Algorithm
@@ -70,7 +87,8 @@ void PIMCClass::Read(IOSectionClass &in)
 
 
 
-void PIMCClass::ReadObservables(IOSectionClass &in)
+void PIMCClass::ReadObservables(IOSectionClass &in,
+				string fileCopy)
 {
   int myProc=PathData.Path.Communicator.MyProc();
   bool iAmRoot= myProc==0;
@@ -88,6 +106,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     OutFileName = 
       outFileBase+ "." + cloneNum.str() + ".h5";
     OutFile.NewFile(OutFileName);
+    OutFile.WriteVar("Input file",fileCopy);
     OutFile.NewSection("RunInfo");
     RunInfo.Write(OutFile);
     OutFile.CloseSection();
@@ -297,6 +316,8 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 
 void PIMCClass::Run()
 {
+  cerr<<"My random number before algorithm "<<PathData.Path.Communicator.MyProc()<<" "
+      <<PathData.Random.Common()<<endl;
   Algorithm.DoEvent();
   //  Array<MoveClass*,1> Moves;
   cerr<<"hello"<<endl;

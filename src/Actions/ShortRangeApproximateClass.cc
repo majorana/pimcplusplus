@@ -25,6 +25,8 @@ double ShortRangeApproximateClass::Action (int slice1, int slice2,
     Path.DoPtcl(ptcl)=true;
 
   double TotalU = 0.0;
+  Array<double,1> TotalUArray(PathData.Path.NumTimeSlices());
+  TotalUArray=0.0;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
@@ -48,12 +50,17 @@ double ShortRangeApproximateClass::Action (int slice1, int slice2,
 
 	  double U;
 	  U=(PA.U(rmag,0,0,level)+PA.U(rpmag,0,0,level))/2.0;
+	  //	  if (ptcl2==4 && ptcl1==0 && slice==8)
+	  //	    cerr<<"MY approximate U is "<<U<<endl;
 
 	  //	  U = PA.U(q,z,s2, level);
 	  // Subtract off long-range part from short-range action
 	  if (PA.IsLongRange())
 	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
 	  TotalU += U;
+	  //	  TotalUArray(slice)+=U;
+	  TotalUArray(slice)+=0.5*PA.U(rmag,0,0,level);
+	  TotalUArray(slice+skip)+=0.5*PA.U(rpmag,0,0,level);
 	}
       }
     }
@@ -88,6 +95,11 @@ double ShortRangeApproximateClass::Action (int slice1, int slice2,
 // 	  TotalU += LongRange_U (slice, level);
 //     }
 //   }
+//  for (int counter=0;counter<TotalUArray.size();counter++){
+    //    cerr<<"My approximate link "<<counter+1<<" "<<counter+2<<" is "
+  //    cerr <<TotalUArray(counter)<<endl;
+  //  }
+
   return (TotalU);
 }
 

@@ -23,6 +23,7 @@ class OpenEndMoveClass : public MultiStageClass
   int NumLevels;
   void Read(IOSectionClass &moveInput);
   void WriteRatio();
+  void MakeMove();
   OpenEndMoveClass(PathDataClass &myPathData, IOSectionClass iosection) :
     MultiStageClass(myPathData,iosection) 
   { 

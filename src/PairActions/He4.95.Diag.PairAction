@@ -1,13 +1,12 @@
 Section (Fits)
 {
   string Type = "DavidFit";
-
+  int NumOffDiagonalTerms=0;
   Section (Particle1)
   {
     string Name = "He";
     double lambda = 6.059615;
     int Ndim = 3;
-//    double Charge = 1;
   }
 
   Section (Particle2)
@@ -15,14 +14,9 @@ Section (Fits)
     string Name = "He";
     double lambda = 0.0;
     int Ndim = 3;
-//    double Charge = 1;
   }
 
-//  string Daviddmfile="He4.95.dm";
-  string Daviddmfile="He4_old.dm";
-  //  Section (Potential)
-  //  {
-  //    string Type = "Coulomb";
-  //    double Z1Z2 = 1;
-  //  }
+  string Daviddmfile="He4.95.dm";
+
+
 }

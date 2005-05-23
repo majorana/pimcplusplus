@@ -120,7 +120,6 @@ ActionsClass::Read(IOSectionClass &in)
   
   cerr << "Finished reading the action.\n"; 
 
-
   if (in.OpenSection("StructureReject")){
     StructureReject.Read(in);
     in.CloseSection();

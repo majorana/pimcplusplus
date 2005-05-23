@@ -405,6 +405,33 @@ void PathClass::InitPaths (IOSectionClass &in)
 	}      
       }
     }    
+    else if (InitPaths == "ALLPATHS") {
+      Array<double,3> Positions;
+      assert (in.ReadVar ("Positions", Positions));
+      cerr<<"NumTimeSlices: "<<TotalNumSlices<<" "<<Positions.extent(0);
+      assert (Positions.extent(0) == species.NumParticles);
+      assert (Positions.extent(1) == TotalNumSlices);
+      assert (Positions.extent(2) == species.NumDim);
+      for (int ptcl=species.FirstPtcl; 
+	   ptcl<=species.LastPtcl; ptcl++){
+	for (int slice=0; slice<TotalNumSlices; slice++) {
+	  cerr<<ptcl;
+	  dVec pos;
+	  pos = 0.0;
+	  for (int dim=0; dim<species.NumDim; dim++)
+	    pos(dim) = Positions(ptcl-species.FirstPtcl,slice,dim);
+	  Path(slice,ptcl) = pos;
+	}      
+	int slice=NumTimeSlices()-1;
+	dVec pos;
+	pos = 0.0;
+	for (int dim=0; dim<species.NumDim; dim++)
+	  pos(dim) = Positions(ptcl-species.FirstPtcl,0,dim);
+	Path(slice,ptcl) = pos;
+	
+	
+      }
+    }    
     else if (InitPaths == "FILE"){
       bool replicate = false;
       if (Replicate == "ON"){
@@ -525,7 +552,7 @@ void PathClass::Allocate()
     SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
   }
   Path.resize(MyNumSlices,numParticles+OpenPaths);
-  RefPath.resize(numParticles);
+  RefPath.resize(numParticles+OpenPaths);
   Permutation.resize(numParticles+OpenPaths);
   SpeciesNumber.resize(numParticles+OpenPaths);
   DoPtcl.resize(numParticles+OpenPaths);
@@ -891,7 +918,7 @@ void PathClass::ShiftData(int slicesToShift)
     RefSlice += TotalNumSlices;
   //  cerr<<"My ref slice at particle 0 is "<<Path(RefSlice,0)<<endl;
   if (OpenPaths){
-    cerr<<"Here my open link is "<<OpenLink<<endl;
+    //    cerr<<"Here my open link is "<<OpenLink<<endl;
     int openLinkOld=(int)OpenLink;
     OpenLink=RefSlice;
     if ((int)OpenLink==0){
@@ -998,6 +1025,8 @@ void PathClass::ShiftRho_kData(int slicesToShift)
 void PathClass::ShiftPathData(int slicesToShift)
 {
   //  cerr<<"Slices to shift are "<<slicesToShift<<endl;
+  //  cerr<<"I'm in shiftpathdata with numparticles "<<NumParticles()+OpenPaths<<"and Openpaths being "<<OpenPaths<<"and slicesToShift is "<<slicesToShift<<endl;
+  //  sleep(10);
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
   int recvProc, sendProc;
@@ -1099,6 +1128,9 @@ void PathClass::ShiftPathData(int slicesToShift)
     OpenLink[OLDMODE]=OpenLink[NEWMODE];
   }
   //  cerr<<Path(OpenLink,NumParticles())<<endl;
+  //  cerr<<"I leave shiftpathdata"<<endl;
+  //  sleep(10);
+
 }
 
 
@@ -1155,3 +1187,39 @@ void PathClass::TotalPermutation(Array<int,1> &permVec)
     permVec(pi) = ptcl;
   }
 }
+
+///Must start diagonal or this is goign to break because of where
+///you are starting the openlink at 0
+void PathClass::InitOpenPaths()
+{
+  cerr<<"Starting to initialize"<<endl;
+  if (OpenPaths){
+    cerr<<"openpaths"<<endl;
+    SetMode(OLDMODE);
+    if (Communicator.MyProc()==0)
+      OpenLink=NumTimeSlices()-1;
+    else
+      OpenLink=-1;
+    cerr<<"Set up the open link"<<endl;
+    OpenPtcl=Species(OpenSpeciesNum).FirstPtcl;
+    cerr<<"set up the open particle"<<endl;
+    SetMode(NEWMODE);
+    if (Communicator.MyProc()==0)
+      OpenLink=NumTimeSlices()-1;
+    else 
+      OpenLink=-1;
+    OpenPtcl=0;
+    if (Communicator.MyProc()==0){
+      cerr<<"Preparing for moving things in path around"<<endl;
+      Path[OLDMODE]((int)OpenLink,NumParticles())=Path[OLDMODE]((int)OpenLink,(int)OpenPtcl);
+      cerr<<"Moved the first thing"<<endl;
+      Path[NEWMODE]((int)OpenLink,NumParticles())=Path[NEWMODE]((int)OpenLink,(int)OpenPtcl);
+      cerr<<"Moved the second thing"<<endl;
+      Path[OLDMODE](0,NumParticles())=Path[OLDMODE](0,(int)OpenPtcl);
+      cerr<<"Moved the first thing"<<endl;
+      Path[NEWMODE](0,NumParticles())=Path[NEWMODE](0,(int)OpenPtcl);
+    }
+  }
+  cerr<<"Initialized the open paths"<<endl;
+}
+

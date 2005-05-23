@@ -8,7 +8,7 @@
 #include "BoxClass.h"
 #include "SmoothClass.h"
 #include "Export.h"
-#include "ExportVideo.h"
+// #include "ExportVideo.h"
 
 /// This species class stores info about the species for the path
 /// visualization.  Not the same as the pimc++ version.
@@ -99,7 +99,7 @@ protected:
 
   bool Wrap, Smooth;
   ExportClass Export;
-  ExportVideoClass ExportVideo;
+  //  ExportVideoClass ExportVideo;
 public:
   PathVisClass PathVis;
 

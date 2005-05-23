@@ -327,6 +327,7 @@ main(int argc, char **argv)
     cout << "FreeParticles myfile.in\n"; 
   }
   else {
+    MPI_Init(&argc, &argv);
     ParticleClass *particle;
     IOSectionClass in;
     assert (in.OpenFile(argv[1]));

@@ -16,10 +16,22 @@ main(int argc, char **argv)
     cout << "pimc++ myfile.in\n"; 
  }
   else {
+    ifstream infile;
+    infile.open(argv[1]);
+
+    infile.seekg(0,ios::end);
+    int length=infile.tellg();
+    infile.seekg(0,ios::beg);
+    char *buffer=new char[length];
+    infile.read(buffer,length);
+    infile.close(); 
+    string fileCopy(buffer);   
+    delete buffer;
+    cerr<<"My buffer is "<<fileCopy<<endl;
     IOSectionClass in;
     assert (in.OpenFile(argv[1]));
     PIMCClass PIMC;
-    PIMC.Read(in);
+    PIMC.Read(in,fileCopy);
     PIMC.Run();
   }
 }

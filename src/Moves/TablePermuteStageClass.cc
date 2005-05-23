@@ -113,6 +113,8 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
 // //   int step = 0;
 // //   // Now, construct the Forward table
 
+//  cerr<<"Starting TablePermuteStageClass"<<endl;
+  //  sleep(10);
   if (activeParticles(0)==-1){
     if ((PathData.Path.OpenPaths && slice1<=PathData.Path.OpenLink && 
 	PathData.Path.OpenLink<=slice2) || 
@@ -123,6 +125,9 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
     
     else
       Forw->ConstructCycleTable(SpeciesNum, slice1, slice2);
+    //    cerr<<"Time slices chosen"<<endl;
+    //    sleep(10);
+
     int NumPerms = 0;
     // Choose a permutation cycle
     double forwT = Forw->AttemptPermutation();
@@ -141,8 +146,15 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
     double pi_ratio = exp(-actionChange+prevActionChange);
     double acceptProb = min(1.0, pi_ratio/Tratio);
     prevActionChange = actionChange;
+    //    cerr<<"Ending TablePermuteStageClass"<<endl;
+    //    sleep(10);
+
     return (acceptProb > psi);
   }
-  else
+  else{
+    //    cerr<<"Ending at an odd spot"<<endl;
+    //    sleep(10);
+
     return true;    
+  }
 }

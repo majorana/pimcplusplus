@@ -52,11 +52,19 @@ void VisualClass::MakeFrame(int frame)
   cerr << "Paths.size() = " << Paths.size() << endl;
   for (int li=0; li<Paths.size(); li++) {
     PathObject* pathObj = new PathObject;
+// // <<<<<<< .mine
+// //     pathObj->Closed = Paths[li]->Closed;
+// //     if (Paths[li]->Closed)
+// //       pathObj->SetColor (0.0, 0.0, 1.0);
+// //     else
+// //       pathObj->SetColor (1.0, 0.0, 0.0);
+// =======
     pathObj->Closed = Paths[li]->Closed;
     if (li < 8)
       pathObj->SetColor (0.0, 0.0, 1.0);
     else
       pathObj->SetColor (0.7, 0.7, 0.0);
+// >>>>>>> .r523
     pathObj->SetRadius (min(min(Box[0], Box[1]), Box[2])*0.005);
     if (PathType == TUBES)
       pathObj->TubesSet (Paths[li]->Path);
@@ -486,6 +494,7 @@ void VisualClass::MakePaths(int frame)
 	 used(permPtcl) = true;
 	 permPtcl = PermArray(frame, permPtcl);
        } while (permPtcl != ptcl);
+
        if (haveOpen) {  // make sure open ptcl is las
 	 cerr << "open cycle loop = ";
 	 for (int i=0; i<loop.size(); i++)
@@ -497,7 +506,8 @@ void VisualClass::MakePaths(int frame)
 // 	   // cyclic permute
 // 	 }
        }
-      loopList.push_back(loop);
+       //>>>>>>> .r523
+       ///      loopList.push_back(loop);
     }
   }
   //  Paths.resize(loopList.size());

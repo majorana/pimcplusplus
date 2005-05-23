@@ -8,6 +8,25 @@ void OpenEndMoveClass::WriteRatio()
   //Do nothing for now
 }
 
+void OpenEndMoveClass::MakeMove()
+{
+  //  cerr<<"GRR!!  I'm HERE!"<<endl;
+  //  sleep(1000);
+  bool toAccept=true;
+  list<StageClass*>::iterator stageIter=Stages.begin();
+  double prevActionChange=0.0;
+  while (stageIter!=Stages.end() && toAccept){
+    toAccept = (*stageIter)->Attempt(Slice1,Slice2,
+				     ActiveParticles,prevActionChange);
+    stageIter++;
+  }
+  if (toAccept)
+    MultiStageClass::Accept();
+  else 
+    MultiStageClass::Reject();
+  //GRR!  MultiStageClass::MoveClass::MakeMove();
+}
+
 void OpenEndMoveClass::Read(IOSectionClass &in)
 {
   string speciesName;

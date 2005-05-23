@@ -23,8 +23,9 @@ double ShortRangeClass::Action (int slice1, int slice2,
   // First, sum the pair actions
   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
     Path.DoPtcl(ptcl)=true;
-
   double TotalU = 0.0;
+  Array<double,1> TotalUArray(PathData.Path.TotalNumSlices);
+  TotalUArray=0.0;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
@@ -48,6 +49,8 @@ double ShortRangeClass::Action (int slice1, int slice2,
 
 	  double U;
 	  U = PA.U(q,z,s2, level);
+	  //	  if (ptcl2==4 && ptcl1==0 && slice==8)
+	    //	    cerr<<"MY real U is "<<U<<endl;
 	  //	  if (isnan(U)){
 	  //	    cerr << "Before long range sub:  ptcl1=" << ptcl1
 	  //		 << " ptcl2=" << ptcl2 << " slice="<< slice 
@@ -62,6 +65,7 @@ double ShortRangeClass::Action (int slice1, int slice2,
 	    //		 << " ptcl2=" << ptcl2 << " slice="<< slice << endl;
 
 	  TotalU += U;
+	  TotalUArray(slice)+=U;
 	}
       }
     }
@@ -96,6 +100,10 @@ double ShortRangeClass::Action (int slice1, int slice2,
 // 	  TotalU += LongRange_U (slice, level);
 //     }
 //   }
+//  for (int counter=0;counter<TotalUArray.size();counter++){
+//    cerr<<"My link "<<counter+1<<" "<<counter+2<<" is "
+//	<<TotalUArray(counter)<<endl;
+//  }
   return (TotalU);
 }
 

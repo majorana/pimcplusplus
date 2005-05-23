@@ -38,6 +38,18 @@ void PathDumpClass::WriteBlock()
   int refSave = PathData.Path.GetRefSlice();
   PathData.MoveRefSlice(0);
 
+  if (PathData.Path.OpenPaths){
+    Array<double,1> tailLoc(NDIM);
+    OpenLinkVar.Write((int)PathData.Path.OpenLink);
+    for (int dim=0;dim<NDIM;dim++){
+      tailLoc(dim)=PathData.Path(PathData.Path.OpenLink,
+				 PathData.Path.NumParticles())[dim];
+    }
+    TailLocVar.Write(tailLoc);
+    RefLinkVar.Write(PathData.Path.RefSlice);
+    OpenLinkPtclVar.Write(PathData.Path.OpenPtcl);
+  }
+
   int start, end, numProcs, myProc;
   numProcs = Path.Communicator.NumProcs();
   myProc   = Path.Communicator.MyProc();
@@ -86,17 +98,6 @@ void PathDumpClass::WriteBlock()
   PathVar.Write (pathArray);
   PermVar.Write (permVec);
 
-  if (PathData.Path.OpenPaths){
-    Array<double,1> tailLoc(NDIM);
-    OpenLinkVar.Write((int)PathData.Path.OpenLink);
-    for (int dim=0;dim<NDIM;dim++){
-      tailLoc(dim)=PathData.Path(PathData.Path.OpenLink,
-				 PathData.Path.NumParticles())[dim];
-    }
-    TailLocVar.Write(tailLoc);
-    RefLinkVar.Write(PathData.Path.RefSlice);
-    OpenLinkPtclVar.Write(PathData.Path.OpenPtcl);
-  }
 
   if (FirstTime && (myProc == 0)) {
     WriteInfo();

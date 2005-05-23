@@ -121,6 +121,13 @@ void ActionClass::Read(IOSectionClass& inSection)
       NodalActions(species) = NULL;
 
   cerr << "Finished reading the action.\n"; 
+  cerr << "Hello!"<<endl;
+  Array<int,1> changedParticles(NumParticles());
+  for (int counter=0;counter<changedParticles.size();counter++){
+    changedParticles(counter)=counter;
+  }
+  cerr<<"My current kinetic action is "<<KAction(0,NumTimeSlices(),
+						 changedParticles,0)<<endl;
 }
 
 double ActionClass::OtherAction(int startSlice, int endSlice, 

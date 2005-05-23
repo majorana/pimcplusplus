@@ -13,13 +13,19 @@ def GetPaths(infile):
      paths=infile.ReadVar("Path")
      return paths
 
+def GetOpen(infile):
+     theOpen=infile.ReadVar("OpenPtcl")
+     theSlice=infile.ReadVar("OpenLinkSlice")
+     theTail=infile.ReadVar("TailLocation")
+     return theOpen
+
 def InitVisualPaths(pathData):
      visualPath=[]
      visualBall=[]
 #     print "Path Data is ",pathData
      numPaths=len(pathData[0])
      for pathNum in range(0,numPaths):
-          visualPath.append(curve(color=color.blue,radius=0.02))
+          visualPath.append(curve(color=color.green,radius=0.02))
           visualBall.append(sphere(pos=pathData[0,0,0], radius=0.05, color=color.red))
      return (visualPath,visualBall)
 
@@ -52,7 +58,10 @@ def PlotPaths(pathData,visualPath,visualBall,mcTime,ballTime):
           mcTime=maxMCTime-1
      numPaths=len(pathData[mcTime])
      for pathNum in range(0,numPaths):
-          visualPath[pathNum]=(curve(color=color.blue,radius=0.02))
+          if openData[mcTime]!=pathNum:
+               visualPath[pathNum]=(curve(color=color.green,radius=0.02))
+          else:
+               visualPath[pathNum]=(curve(color=color.red,radius=0.02))
           visualBall[pathNum]=sphere(pos=(Id(pathData,mcTime,pathNum,ballTime)), radius=0.1, color=color.red)
 #          visualBall[pathNum]=sphere(pos=(pathData[mcTime,pathNum,ballTime]), radius=2.1, color=color.red)
           numSlices=len(pathData[mcTime][pathNum])
@@ -75,6 +84,8 @@ os.chdir(dirName)
 infile.OpenSection("Observables")
 infile.OpenSection("PathDump")
 pathData=GetPaths(infile)
+openData=GetOpen(infile)
+print openData
 infile.CloseSection()
 infile.CloseSection()
 ##c = controls() # Create controls window

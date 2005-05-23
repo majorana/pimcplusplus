@@ -87,7 +87,10 @@ VER = \"`svn info | grep Revision | sed -e 's/Revision: //'`\"
 COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
 
+
 DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER)  -DNO_COUT  #-DBZ_DEBUG -DDEBUG ##-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+
+
 
 
 PIMCobjs =                                \
@@ -364,7 +367,7 @@ MAKE_ALL = $(MAKE) all $(PASS_DEFS)
 MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
-all:    pimc++  FreeParticles # Visual_obj #TestPerm TestEwald 
+all:    pimc++  FreeParticles  Visual_obj #TestPerm TestEwald 
 
 pimc++: Common_obj Observables_obj Moves_obj Actions_obj Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)
