@@ -398,18 +398,19 @@ GroundStateClass::GradientDetFD(int slice, int speciesNum)
 void
 GroundStateClass::UpdateBands()
 {
-  cerr << "Updating bands.\n";
-  SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
-  int first = ionSpecies.FirstPtcl;
-  for (int i=0; i<NumIons; i++)
-    Rions(i) = Path(0,i+first);
-  System->SetIons (Rions);
-  System->DiagonalizeH();
   // Now, make bands real and put into splines
   Array<double,4> data(xGrid.NumPoints, yGrid.NumPoints, zGrid.NumPoints, NumBands);
 
   // Only do calcualtion if I'm proc 0
   if (Path.Communicator.MyProc() == 0) {
+    cerr << "Updating bands.\n";
+    SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
+    int first = ionSpecies.FirstPtcl;
+    for (int i=0; i<NumIons; i++)
+      Rions(i) = Path(0,i+first);
+    System->SetIons (Rions);
+    System->DiagonalizeH();
+
     for (int band=0; band<NumBands; band++) {
       System->SetRealSpaceBandNum(band);
       complex<double> c0 = 
