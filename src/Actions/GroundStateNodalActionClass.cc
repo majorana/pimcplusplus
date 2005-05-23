@@ -395,16 +395,9 @@ GroundStateClass::GradientDetFD(int slice, int speciesNum)
 }
 
 
-#include "../Common/MPI/Communication.h"
-
 void
 GroundStateClass::UpdateBands()
 {
-  CommunicatorClass comm;
-  comm.SetWorld();
-  int myProc = comm.MyProc();
-
-
   cerr << "Updating bands.\n";
   SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
   int first = ionSpecies.FirstPtcl;
@@ -414,27 +407,31 @@ GroundStateClass::UpdateBands()
   System->DiagonalizeH();
   // Now, make bands real and put into splines
   Array<double,4> data(xGrid.NumPoints, yGrid.NumPoints, zGrid.NumPoints, NumBands);
-  for (int band=0; band<NumBands; band++) {
-    System->SetRealSpaceBandNum(band);
-    complex<double> c0 = 
-      System->RealSpaceBand(xGrid.NumPoints/2, 
-			    yGrid.NumPoints/2, 
-			    zGrid.NumPoints/2);
-    fprintf (stderr, "myProc=%d band=%d c0=(%1.16e, %1.16e)\n",
-	    myProc, band, c0.real(), c0.imag());
-    double phi = -atan2 (c0.imag(), c0.real());
-    complex<double> c(cos(phi), sin(phi));
-    for (int ix=0; ix<xGrid.NumPoints-1; ix++)
-      for (int iy=0; iy<yGrid.NumPoints-1; iy++)
-	for (int iz=0; iz<zGrid.NumPoints-1; iz++)
-	  data(ix,iy,iz,band) = real(c*System->RealSpaceBand(ix,iy,iz));
+
+  // Only do calcualtion if I'm proc 0
+  if (Path.Communicator.MyProc() == 0) {
+    for (int band=0; band<NumBands; band++) {
+      System->SetRealSpaceBandNum(band);
+      complex<double> c0 = 
+	System->RealSpaceBand(xGrid.NumPoints/2, 
+			      yGrid.NumPoints/2, 
+			      zGrid.NumPoints/2);
+      double phi = -atan2 (c0.imag(), c0.real());
+      complex<double> c(cos(phi), sin(phi));
+      for (int ix=0; ix<xGrid.NumPoints-1; ix++)
+	for (int iy=0; iy<yGrid.NumPoints-1; iy++)
+	  for (int iz=0; iz<zGrid.NumPoints-1; iz++)
+	    data(ix,iy,iz,band) = real(c*System->RealSpaceBand(ix,iy,iz));
+    }
+    MakePeriodic (data);
   }
-  MakePeriodic (data);
+  Path.Communicator.Broadcast(0, data);
+  
   /// DEBUG DEBUG DEBUG DEBUG
   for (int band=0; band<NumBands; band++) {
     char fname[100];
     int proc = 
-    snprintf (fname, 100, "band%d-%d.dat", band, myProc);
+    snprintf (fname, 100, "band%d-%d.dat", band, Path.Communicator.MyProc());
     FILE *fout = fopen (fname, "w");
     for (int ix=0; ix<xGrid.NumPoints; ix++)
       for (int iy=0; iy<yGrid.NumPoints; iy++)

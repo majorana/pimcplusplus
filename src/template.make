@@ -64,7 +64,7 @@ ifeq ($(HOSTTYPE),i386-linux)
        EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math \
                    -DUSE_MPI
        MAKECC = g++
-       CCFLAGS = -c -g  -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops -ffast-math -O3 #-pg 
+       CCFLAGS = -c -g  -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops -ffast-math #-pg 
        F77FLAGS = -c -g -O3 -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops 
     endif
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
