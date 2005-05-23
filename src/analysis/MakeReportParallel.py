@@ -10,52 +10,16 @@ from HTMLgen import *
 #from visual import *
 
  
-
-
-
-def GetPaths(infiles):
-     paths=infiles.ReadVar("Path")
-     return paths
-
-def InitVisualPaths(pathData):
-     visualPath=[]
-     visualBall=[]
-     numPaths=len(pathData[0])
-     for pathNum in range(0,numPaths):
-          visualPath.append(curve(color=color.blue,radius=0.2))
-          visualBall.append(sphere(pos=pathData[0,0,0], radius=0.05, color=color.red))
-     return (visualPath,visualBall)
-
-
-def PlotPaths(pathData,visualPath,visualBall,mcTime):
-     maxMCTime=len(pathData)
-     if mcTime>=maxMCTime:
-          mcTime=maxMCTime-1
-     numPaths=len(pathData[mcTime])
-     for pathNum in range(0,numPaths):
-          visualPath[pathNum]=(curve(color=color.blue,radius=0.2))
-          visualBall[pathNum].visible=0
-          visualBall[pathNum]=sphere(pos=(pathData[0,pathNum,0]), radius=0.1, color=color.red)
-          visualBall[pathNum].visible=1
-          print pathNum,numPaths
-          numSlices=len(pathData[mcTime][pathNum])
-          for slice in range(0,numSlices):
-               print pathNum,numPaths,numSlices,slice
-               visualPath[pathNum].append(pos=(pathData[mcTime][pathNum][slice]))
-     
-
 def IsMonotonic (x):
      isMono = True
-     for i in range(0,x.size()-2):
+#     for i in range(0,x.size()-2):
+     for i in range(0,len(x)-2):
           isMono = isMono and (x[i+1] > x[i])
      return isMono
      
 
 def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      clf()
-#     infiles.OpenSection("grid")
-#     x=infiles.ReadVar("Points")
-#     infiles.CloseSection()
      if (IsMonotonic(x)):
           plot(x, y)
      else:
@@ -70,12 +34,12 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      set(labels, 'fontsize', 16)
      currAxis=axis()
      currAxis[0]=cutoff
-#     print "Curr axis is ",currAxis
      axis(currAxis)
      savefig(fileBase+".png",dpi=60)
      savefig(fileBase+".ps")
      myImg=Image(fileBase+".png")
      return myImg
+
 
 # Takes a list of 2D arrays and returns the average of the
 # last row.
@@ -85,43 +49,126 @@ def AvgLastVec (data):
           s = s+data[i][-1]
      return s/len(data)
 
-def ProcessCorrelationSection(infiles,doc,currNum):
-     sectionName=infiles.GetName()
-     doc.append(Heading(1,sectionName))
-     hlabel=infiles.ReadVar("xlabel")[0]
-     vlabel=infiles.ReadVar("ylabel")[0]
-     data=infiles.ReadVar("y")
-###     print "My data is ",data
-     if (data==[None]) or (data==[None,None]):
-          return currNum
-     y = AvgLastVec(data)
-     x=infiles.ReadVar("x")[0]
-     description=infiles.ReadVar("Description")[0]
-     doc.append(Heading(4,description))
-     currNum=currNum+1
-     baseName=sectionName+repr(currNum)
-     myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel)
-####     myImg=ProduceCorrelationPicture(x, data[-1000],baseName,hlabel,vlabel)
-     doc.append(myImg)
-##   Write ASCII data to a file
-     asciiFileName = baseName + '.dat'
+def WriteAsciiFile (asciiFileName,x,y):
      asciiFile = open (asciiFileName, "w")
      n = len(x)
      for i in range(0,n):
 ##          asciiFile.write(repr(x[i]) + ' ' + repr(data[-1,i]) +'\n')
           asciiFile.write('%20.16e %20.16e\n' % (x[i], y[i]))
      asciiFile.close()
+     return
+
+def BuildTable():
+     myTable=Table()
+     myTable.border=0
+     myTable.width='40%'
+     myTable.column1_align='center'
+     myTable.cell_align='center'
+     return myTable
+
+def ProcessCorrelationSection(infiles,doc,currNum):
+     #acquire data about the correlation section
+     sectionName=infiles.GetName()
+     hlabel=infiles.ReadVar("xlabel")[0]
+     vlabel=infiles.ReadVar("ylabel")[0]
+     data=infiles.ReadVar("y")
+     if (data==[None]):
+          return currNum
+     y = AvgLastVec(data)
+     x=infiles.ReadVar("x")[0]
+     description=infiles.ReadVar("Description")[0]
+
+     currNum=currNum+1
+     baseName=sectionName+repr(currNum)
+
+##Produce Image
+     myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel)
+     doc.append(myImg)
+##Produce Ascii file
+     asciiFileName = baseName + '.dat'
+     WriteAsciiFile(asciiFileName,x,y)
      psFileName=baseName+'.ps'
-     doc.append(BR())
-     fileTable = Table()
+
+##create table with file names in it
+     fileTable=BuildTable()
      fileTable.body = [[Href(psFileName,'PostScript'), Href(asciiFileName,'ASCII data')]]
-     fileTable.border=0
-     fileTable.width='40%'
-     fileTable.column1_align='center'
-     fileTable.cell_align='center'
+##Write things to document
+     doc.append(Heading(1,sectionName))
+     doc.append(Heading(4,description))
+     doc.append(BR())
      doc.append(fileTable)
      return currNum
+
+def compare(a):
+     return a[0]
+
+def ProcessStructureFactor(infiles,doc,currNum):
+     #acquire data about the structure factor
+     sectionName=infiles.GetName()
+     hlabel=infiles.ReadVar("xlabel")[0]
+     vlabel=infiles.ReadVar("ylabel")[0]
+     data=infiles.ReadVar("y")
+     if (data==[None]):
+          return currNum
+     y = AvgLastVec(data)
+
+     x=infiles.ReadVar("x")[0]
+     toSort=[]
+     for counter in range(0,len(x)):
+          toSort.append((x[counter],y[counter]))
+     toSort.sort()
+     for counter in range(0,len(x)):
+          x[counter]=toSort[counter][0]
+          y[counter]=toSort[counter][1]
+
+     xNew=[]
+     yNew=[]
+     counter=1
+#     xNew.append(x[0])
+#     yNew.append(y[0])
+     while (counter<len(x)):
+          totalY=y[counter]
+          numY=1
+          counter=counter+1
+          while (counter<len(x) and x[counter]-x[counter-1]<1e-10):
+               totalY=totalY+y[counter]
+               numY=numY+1
+               counter=counter+1
+          xNew.append(x[counter-1])
+          yNew.append(totalY/(numY+0.0))
+     description=infiles.ReadVar("Description")[0]
      
+     currNum=currNum+1
+     baseName=sectionName+repr(currNum)
+
+##Produce Image
+     myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel)
+     myImg_avg=ProduceCorrelationPicture(xNew,yNew,baseName+"_avg",hlabel,vlabel)
+##Produce Ascii file
+     asciiFileName = baseName + '.dat'
+     asciiFileName_avg = baseName + '_avg.dat'
+     WriteAsciiFile(asciiFileName,x,y)
+     WriteAsciiFile(asciiFileName_avg,xNew,yNew)
+     psFileName=baseName+'.ps'
+     psFileName_avg=baseName+'_avg.ps'
+
+##create table with file names in it
+     fileTable=BuildTable()
+     fileTable.body = [[Href(psFileName,'PostScript'), Href(asciiFileName,'ASCII data')]]
+     fileTable_avg=BuildTable()
+     fileTable_avg.body = [[Href(psFileName_avg,'PostScript'), Href(asciiFileName_avg,'ASCII data')]]
+     
+##Write things to document
+     doc.append(Heading(1,sectionName))
+     doc.append(Heading(4,description))
+     doc.append(myImg)
+     doc.append(BR())
+     doc.append(fileTable)
+     doc.append(myImg_avg)
+     doc.append(BR())
+     doc.append(fileTable_avg)
+     return currNum
+
 
 def LongRangeImage(basename,r,long,short,myTitle,labelY):
      clf()
@@ -234,9 +281,7 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
     asciiFileName = fileBase + '.dat'
     asciiFile = open (asciiFileName, "w")
     n = len(data)
-##    print "MY data is",data
     for i in range(0,len(data)):
-##         print "Data ",i,"is ",data[i]
          asciiFile.write('%20.16e\n' % data[i])
     asciiFile.close()
 
@@ -544,7 +589,6 @@ if cutoff==None:
 if not(os.access(dirName,os.F_OK)):
      os.mkdir(dirName)
 os.chdir(dirName)
-
 doc=SeriesDocument()
 ProcessTopTable(doc,infiles)
 ProcessMove(doc,infiles)
@@ -559,10 +603,12 @@ numSections=infiles.CountSections()
 #print "The number of sections is ",numSections
 for counter in range(0,numSections):
      infiles.OpenSection(counter)
-     print infiles.GetName()
+     myName= infiles.GetName()
      myType=infiles.ReadVar("Type")[0]
-#     print "myType = " + myType
-     if myType=="Scalar":
+     if myName=="StructureFactor":
+          currNum=ProcessStructureFactor(infiles,doc,currNum)
+          doc.append(HR())
+     elif myType=="Scalar":
           currNum=ProcessScalarSection(infiles,doc,currNum)
           doc.append(HR())
      elif myType=="CorrelationFunction":
