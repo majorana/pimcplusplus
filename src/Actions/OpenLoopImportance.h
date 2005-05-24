@@ -14,6 +14,7 @@ public:
   double d_dBeta (int slice1, int slice2, int level);
   OpenLoopImportanceClass (PathDataClass &pathData);
   SampleChoice ImpChoice;
+  double Shift;
 };
 
 

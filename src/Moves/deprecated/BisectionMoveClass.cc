@@ -1,3 +1,4 @@
+/// \cond
 //#include "../PathDataClass.h"
 #include "BisectionMoveClass.h"
 //#include "../Common.h"
@@ -85,3 +86,4 @@ void BisectionMoveClass::MakeMove()
   NumMoves++;
   MoveClass::MakeMove();
 }
+/// \endcond

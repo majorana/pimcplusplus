@@ -1,3 +1,4 @@
+/// \cond deprecated
 #ifndef BISECTIONMOVE_CLASS2_H
 #define BISECTIONMOVE_CLASS2_H
 
@@ -38,3 +39,4 @@ class BisectionMoveClass : public ParticleMoveClass
 
 
 #endif
+/// \endcond

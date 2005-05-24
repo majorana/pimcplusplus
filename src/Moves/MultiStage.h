@@ -6,6 +6,12 @@
 #include "MoveBase.h"
 #include "../Actions/ActionBase.h"
 
+///Some moves are built out of stages.  This class is the parent class
+///for a stage.  If it is the first stage it will typically need to
+///set the slices adn the activeparticles for the other stages to
+///perform correctly. Each stage has a list of actions that lets it
+///calculate its total action by summing the value of each action in
+///its list.
 class StageClass
 {
 protected:
@@ -15,6 +21,7 @@ public:
   int NumAccepted, NumAttempted;
   int BisectionLevel;
   list<ActionBaseClass*> Actions;
+
   ///The first stage will set the slices and activeParticles
   ///This returns transition probability ratio T(new->old)/T(old->new)
   virtual double Sample (int &slice1,int &slice2,
@@ -102,7 +109,13 @@ StageClass::GlobalStageAction (const Array<int,1> &changedParticles)
   return globalAction;
 }
 
-
+///One method of making a move is to build it out of a set of
+///stages. This class allows for such a construct. There is a list of
+///stages (in the variable Stages).  By default, this moves iterates
+///over the stages, running each one sequentially. Each stage must
+///return true or false indicating
+// whether or not that stage is accepted. If the stage is
+///accepted then the next stage is run. 
 class MultiStageClass : public ParticleMoveClass
 {
 protected:

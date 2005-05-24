@@ -18,6 +18,47 @@ def IsMonotonic (x):
      return isMono
      
 
+#takes a vector and returns the unweighted average
+def Avg (x):
+     if x[0] == None:
+          return None
+     else:
+          return sum(x)/len(x)
+
+#Takes a vector of means and erros and returns the weighted average and error
+def WeightedAvg (means, errors):
+     if (errors[0] != 0.0):
+          weights = map (lambda x: 1.0/(x*x), errors)
+          norm = 1.0/sum(weights)
+          weights = map(lambda x: x*norm, weights)
+          avg = 0.0
+          error2 = 0.0
+          for i in range (0,len(means)):
+               avg = avg + means[i]*weights[i]
+               error2 = error2 + weights[i]**2*errors[i]*errors[i]
+          return (avg, math.sqrt(error2))
+     else:
+          return (Avg(means), 0.0)
+
+
+
+#takes a vector of vectors and returns a vector of unweighted averages
+def VecAvg (x):
+     if x[0] == None:
+          return None
+     else:
+          return map(lambda y:sum(y)/len(y),x)
+
+# Takes a list of 2D arrays and returns the unweighted average of the
+# last row.
+def AvgLastVec (data):
+     s = data[0][-1]
+     for i in range(0,len(data)):
+          s = s+data[i][-1]
+     return s/len(data)
+
+
+
 def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      clf()
      if (IsMonotonic(x)):
@@ -41,13 +82,6 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      return myImg
 
 
-# Takes a list of 2D arrays and returns the average of the
-# last row.
-def AvgLastVec (data):
-     s = data[0][-1]
-     for i in range(0,len(data)):
-          s = s+data[i][-1]
-     return s/len(data)
 
 def WriteAsciiFile (asciiFileName,x,y):
      asciiFile = open (asciiFileName, "w")
@@ -260,6 +294,7 @@ def ProcessLongRangeAction(infiles):
 ##                myImg=ProduceCorrelationPicture(data[-1],varName+repr(currNum),'r',varName)
 
 def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
+#produce scalar trace image and ps with data as a function of index
     clf()
     x=fromfunction(lambda i:i,(len(data),))
     plot(x,data)
@@ -278,6 +313,7 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
     savefig(fileBase+".ps")
     myImg=Image(fileBase+".png")
 
+#produce asciiFile
     asciiFileName = fileBase + '.dat'
     asciiFile = open (asciiFileName, "w")
     n = len(data)
@@ -285,19 +321,14 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
          asciiFile.write('%20.16e\n' % data[i])
     asciiFile.close()
 
-    myTable = Table()
-    myTable.border = 0
-    myTable.body = [[myImg]]
-    fileTable = Table()
-    fileTable.body = [[Href(fileBase+".ps",'Postscript'),Href(asciiFileName,'ASCII data')]]
+#build table with image, ps, and ascii file in it
+    fileTable=BuildTable()
     fileTable.width='100%'
-    fileTable.border=0
-    fileTable.column1_align='center'
-    myTable.cell_align='center'
+    fileTable.body= [[Href(fileBase+".ps",'Postscript'),Href(asciiFileName,'ASCII data')]]
+    myTable=BuildTable()
+    myTable.body=[[myImg]]
     myTable.body.append([fileTable])
     return myTable
-#    return myImg
-
 
 
 def MeanErrorString (mean, error):
@@ -315,35 +346,6 @@ def MeanErrorString (mean, error):
      meanstr  = formatstr % mean
      errorstr = formatstr % error
      return (meanstr, errorstr)
-
-def Avg (x):
-#     print "My x is ",x
-     if x[0] == None:
-          return None
-     else:
-          return sum(x)/len(x)
-def VecAvg (x):
-#     print "My x is ",x
-     if x[0] == None:
-          return None
-     else:
-          return map(lambda y:sum(y)/len(y),x)
-
-
-def WeightedAvg (means, errors):
-     if (errors[0] != 0.0):
-          weights = map (lambda x: 1.0/(x*x), errors)
-          norm = 1.0/sum(weights)
-          weights = map(lambda x: x*norm, weights)
-          avg = 0.0
-          error2 = 0.0
-          for i in range (0,len(means)):
-               avg = avg + means[i]*weights[i]
-               error2 = error2 + weights[i]**2*errors[i]*errors[i]
-          return (avg, math.sqrt(error2))
-     else:
-          return (Avg(means), 0.0)
-
 
 def BuildScalarTracePage(data,baseName,varName):
      doc=SimpleDocument()

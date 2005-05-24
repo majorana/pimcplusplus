@@ -1,4 +1,4 @@
-SOURCES = BisectionClass.cc BlockMove.cc OpenBisectionMoveClass.cc OpenEndMove.cc  MetaMoves.cc PermuteTableClass.cc BisectionMoveClass.cc MoveBase.cc RandomPermClass.cc  MultiStage.cc NoPermuteClass.cc BisectionBlock.cc PermuteStageClass.cc CoupledPermuteStageClass.cc TablePermuteStageClass.cc BisectionStageClass.cc RefSliceMove.cc DisplaceMove.cc EndStageClass.cc WaterMove.cc WaterMoveRing.cc StructureReject.cc
+SOURCES = BisectionClass.cc BlockMove.cc  OpenEndMove.cc  MetaMoves.cc PermuteTableClass.cc  MoveBase.cc RandomPermClass.cc  MultiStage.cc NoPermuteClass.cc BisectionBlock.cc PermuteStageClass.cc CoupledPermuteStageClass.cc TablePermuteStageClass.cc BisectionStageClass.cc RefSliceMove.cc DisplaceMove.cc EndStageClass.cc WaterMove.cc WaterMoveRing.cc StructureReject.cc
 
 
 objs =  MetaMoves.o PermuteTableClass.o MoveBase.o RandomPermClass.o  MultiStage.o NoPermuteClass.o BisectionBlock.o PermuteStageClass.o CoupledPermuteStageClass.o TablePermuteStageClass.o BisectionStageClass.o RefSliceMove.o DisplaceMove.o EndStageClass.o  OpenEndMove.o WaterMove.o WaterMoveRing.o StructureReject.o

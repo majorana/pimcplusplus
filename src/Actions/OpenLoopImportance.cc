@@ -11,7 +11,20 @@ void OpenLoopImportanceClass::Read(IOSectionClass& in)
   string impChoiceString;
   if (PathData.Path.OpenPaths){
     assert(in.OpenSection("OpenLoop"));
+    string shiftTypeString;
+    assert(in.ReadVar("ShiftType",shiftTypeString));
+    if (shiftTypeString=="FixedShift")
+      assert(in.ReadVar("ShiftAmount",Shift));
+    else if (shiftTypeString=="ProcShift"){
+      int myProc=PathData.GetCloneNum();
+      Shift=(myProc%16)+0.5;
+    }
+    else {
+      cerr<<"I don't know what shift you want me to use"<<endl;
+      assert(1==2);
+    }
     assert(in.ReadVar("ImportanceSample",impChoiceString));
+    cerr<<"The ImportanceSampling string was "<<impChoiceString<<endl;
     if (impChoiceString=="None")
       ImpChoice=NOIMP;
     else if (impChoiceString=="Distance")
@@ -41,9 +54,9 @@ double OpenLoopImportanceClass::Action (int slice1, int slice2,
   PathData.Path.DistDisp(openLink,openPtcl,PathData.Path.NumParticles(),
 			 dist,disp); //This is distance between head and tail!
   //  int myProc=(PathData.InterComm.MyProc() % 16);
-  int myProc=PathData.GetCloneNum();
-  double shift=(myProc%16)+0.5;
-  shift=6.5;
+  //  int myProc=PathData.GetCloneNum();
+  //  double shift=(myProc%16)+0.5;
+  //  shift=6.5;
   if (ImpChoice==NOIMP){ 
     cerr<<"I have chosen no importance function"<<endl;
     assert(1==3);
@@ -51,11 +64,11 @@ double OpenLoopImportanceClass::Action (int slice1, int slice2,
   }
   else if (ImpChoice==DISTIMP){
     cerr<<"I have chosen a distance importance function"<<endl;
-    return -log(exp(-(dist-shift)*(dist-shift)));
+    return -log(exp(-(dist-Shift)*(dist-Shift)));
   }
   else if (ImpChoice==DISPXIMP){
     cerr<<"I have chosen a displacement importance function"<<endl;
-    return -log(exp(-(disp(0)-shift)*(disp(0)-shift)));
+    return -log(exp(-(disp(0)-Shift)*(disp(0)-Shift)));
   }
   else {
     cerr<<"You haven't give a valid choice!"<<endl;
