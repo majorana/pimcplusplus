@@ -1,4 +1,4 @@
-SOURCES = ShiftTest.cc PermutationTest.cc
+SOURCES = ShiftTest.cc
 
 
 permobjs =                            \
@@ -31,7 +31,7 @@ permobjs =                            \
 
 myobjs = ShiftTest.o 
 objs = $(myobjs) ../MirroredArrayClass.o ../CommunicatorClass.o
-all:	$(objs) ShiftTest PermTest
+all:	$(objs) ShiftTest 
 
 ShiftTest:	$(myobjs) 
 	$(LD) -o $@ $(objs)  $(LIBS)

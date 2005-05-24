@@ -431,7 +431,7 @@ TestASCII:	Common_obj TestASCII.o Common/IO/InputOutput.o Common/IO/InputOutputA
 #	$(LD) -o $@ $(TestSubarrayObjs) $(LIBS)
 
 clean:	Common_clean Tests_clean Actions_clean Moves_clean Observables_clean Visual_clean
-	rm *.o
+	rm -f *.o
 
 .cc.o: $(HEADERS)
 	$(CC) $(CCFLAGS) $(DEFS) $(INCL) $<
@@ -440,7 +440,7 @@ clean:	Common_clean Tests_clean Actions_clean Moves_clean Observables_clean Visu
 
 
 
-SOURCES =  Common.cc myprog.cc SpeciesClass.cc  ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc
+SOURCES =  Common.cc SpeciesClass.cc  ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc
 
 
 newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake 
