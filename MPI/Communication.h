@@ -35,7 +35,7 @@ namespace COMM
 #else // Serial version
   inline void Init (int argc, char **argv)
   {
-    perr.open ("/dev/stderr", ios::out);
+    perr.rdbuf(cerr.rdbuf());
   }
   inline void Finalize ()
   {

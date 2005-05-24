@@ -204,9 +204,10 @@ bool VarHDF5Class::ReadInto (bool &val)
 { 
   assert (Type == BOOL_TYPE);
   assert (Dimensions.size() == 1 && Dimensions(0)==1);
-  val = false;
+  unsigned char rval;
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
-			  H5S_ALL, H5P_DEFAULT, &val);
+			  H5S_ALL, H5P_DEFAULT, &rval);
+  val = (rval != 0);
   return (status == 0);
 }
 
@@ -216,8 +217,11 @@ bool VarHDF5Class::ReadInto (blitz::Array<bool,1> &val)
   assert (Dimensions.size() == 1);
   val.resize(Dimensions(0));
   val = false;
+  blitz::Array<unsigned char,1> rval(val.size());
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
-			  H5S_ALL, H5P_DEFAULT, val.data());
+			  H5S_ALL, H5P_DEFAULT, rval.data());
+  for (int i=0; i<val.size(); i++)
+    val(i) = (rval(i) != 0);
   return (status == 0);
 }
 
@@ -228,8 +232,12 @@ bool VarHDF5Class::ReadInto (blitz::Array<bool,2> &val)
   assert (Dimensions.size() == 2);
   val.resize(Dimensions(0), Dimensions(1));
   val = false;
+  blitz::Array<unsigned char,2> rval(Dimensions(0), Dimensions(1));
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
-			  H5S_ALL, H5P_DEFAULT, val.data());
+			  H5S_ALL, H5P_DEFAULT, rval.data());
+  for (int i=0; i<Dimensions(0); i++)
+    for (int j=0; j<Dimensions(1); j++)
+      val(i,j) = (rval(i,j) != 0);
   return (status == 0);
 }
 
@@ -238,9 +246,14 @@ bool VarHDF5Class::ReadInto (blitz::Array<bool,3> &val)
   assert (Type == INT_TYPE);
   assert (Dimensions.size() == 3);
   val.resize(Dimensions(0), Dimensions(1), Dimensions(2));
+  blitz::Array<unsigned char,3> rval(Dimensions(0), Dimensions(1), Dimensions(2));
   val = false;
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
-			  H5S_ALL, H5P_DEFAULT, val.data());
+			  H5S_ALL, H5P_DEFAULT, rval.data());
+  for (int i=0; i<Dimensions(0); i++)
+    for (int j=0; j<Dimensions(1); j++)
+      for (int k=0; k<Dimensions(2); k++)
+	val(i,j,k) = (rval(i,j,k) != 0);
   return (status == 0);
 }
 
@@ -249,9 +262,16 @@ bool VarHDF5Class::ReadInto (blitz::Array<bool,4> &val)
   assert (Type == BOOL_TYPE);
   assert (Dimensions.size() == 4);
   val.resize(Dimensions(0), Dimensions(1), Dimensions(2), Dimensions(3));
+  blitz::Array<unsigned char,4> rval(Dimensions(0), Dimensions(1),
+			      Dimensions(2), Dimensions(3));
   val = false;
   herr_t status = H5Dread(DataSetID, BoolType, H5S_ALL,
-			  H5S_ALL, H5P_DEFAULT, val.data());
+			  H5S_ALL, H5P_DEFAULT, rval.data());
+  for (int i=0; i<Dimensions(0); i++)
+    for (int j=0; j<Dimensions(1); j++)
+      for (int k=0; k<Dimensions(2); k++)
+	for (int l=0; l<Dimensions(3); l++)
+	  val(i,j,k,l) = (rval(i,j,k,l) != 0);
   return (status == 0);
 }
 
@@ -869,8 +889,9 @@ bool VarHDF5Class::Append(bool val)
   H5Sselect_hyperslab(DataSpaceID, H5S_SELECT_SET, offset, NULL,
 		      size, NULL);
   memSpace = H5Screate_simple (RANK, size, NULL);
+  unsigned char wval = val ? (unsigned char) 1 : (unsigned char)0;
   H5Dwrite (DataSetID, BoolType, memSpace, DataSpaceID,
-  	    H5P_DEFAULT, &val);
+  	    H5P_DEFAULT, &wval);
   H5Sclose (memSpace);
   return (true);
 }
@@ -914,8 +935,11 @@ bool VarHDF5Class::Append(blitz::Array<bool,1> &val)
 		      size, NULL);
   memSpace = H5Screate_simple (RANK, size, NULL);
   /// Write the new data
+  blitz::Array<unsigned char,1> wval(val.extent(0));
+  for (int i=0; i<val.extent(0); i++)
+    wval(i) = val(i) ? (unsigned char) 1 : (unsigned char) 0;
   H5Dwrite (DataSetID, BoolType, memSpace, DataSpaceID,
-  	    H5P_DEFAULT, val.data());
+  	    H5P_DEFAULT, wval.data());
   H5Sclose (memSpace);
   return (true);
 }
@@ -960,8 +984,12 @@ bool VarHDF5Class::Append(blitz::Array<bool,2> &val)
 		      size, NULL);
   memSpace = H5Screate_simple (RANK, size, NULL);
   /// Write the new data
+  blitz::Array<unsigned char,2> wval(val.extent(0),val.extent(1));
+  for (int i=0; i<val.extent(0); i++)
+    for (int j=0; j<val.extent(1); j++)
+      wval(i,j) = val(i,j) ? (unsigned char) 1 : (unsigned char) 0;
   H5Dwrite (DataSetID, BoolType, memSpace, DataSpaceID,
-  	    H5P_DEFAULT, val.data());
+  	    H5P_DEFAULT, wval.data());
   H5Sclose (memSpace);
   return (true);
 }
@@ -1005,8 +1033,13 @@ bool VarHDF5Class::Append(blitz::Array<bool,3> &val)
 		      size, NULL);
   memSpace = H5Screate_simple (RANK, size, NULL);
   /// Write the new data
+  blitz::Array<unsigned char,3> wval(val.extent(0),val.extent(1),val.extent(2));
+  for (int i=0; i<val.extent(0); i++)
+    for (int j=0; j<val.extent(1); j++)
+      for (int k=0; k<val.extent(2); k++)
+	wval(i,j,k) = val(i,j,k) ? (unsigned char) 1 : (unsigned char) 0;
   H5Dwrite (DataSetID, BoolType, memSpace, DataSpaceID,
-  	    H5P_DEFAULT, val.data());
+  	    H5P_DEFAULT, wval.data());
   H5Sclose (memSpace);
   return (true);
 }
@@ -1093,10 +1126,10 @@ bool IOTreeHDF5Class::OpenFile(string fileName,
   // library created this file), create a new one and stick it in the
   // file. 
   if (BoolType < 0) {
-      BoolType = H5Tcreate(H5T_ENUM, sizeof(bool));
-      bool val = false;
+      BoolType = H5Tcreate(H5T_ENUM, sizeof(unsigned char));
+      unsigned char val = 0;
       H5Tenum_insert(BoolType, "FALSE", &val);
-      val = true;
+      val = 1;
       H5Tenum_insert(BoolType, "TRUE", &val);
       H5Tcommit (GroupID, "BOOL", BoolType);
   }
@@ -2335,8 +2368,9 @@ void IOTreeHDF5Class::WriteVar(string name, bool T)
 				BoolType, newVar->DataSpaceID,
 				H5P_DEFAULT);
   // Write the dataset to the file.
+  unsigned char wval = T ? (unsigned char)1 : (unsigned char)0;
   herr_t status = H5Dwrite(newVar->DataSetID, BoolType, 
-			   H5S_ALL, H5S_ALL, H5P_DEFAULT, &T);
+			   H5S_ALL, H5S_ALL, H5P_DEFAULT, &wval);
   if (status < 0)
     cerr << "Error writing bool to HDF5 file in WriteVar.\n";
 }
@@ -2391,8 +2425,11 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,1> &v)
   status=H5Dextend(newVar->DataSetID,dim); 
   assert(status>=0);
   // Do the writing.
+  blitz::Array<unsigned char,1> wval(v.extent(0));
+  for (int i=0; i<v.extent(0); i++)
+    wval(i) = v(i) ? (unsigned char)1 : (unsigned char)0;
   status = H5Dwrite(newVar->DataSetID, BoolType, 
-		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+		    H5S_ALL, H5S_ALL, H5P_DEFAULT, wval.data());
   if (status < 0)
     cerr << "Error writing bool to HDF5 file in WriteVar.\n";
 
@@ -2451,8 +2488,12 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,2> &v)
   status=H5Dextend(newVar->DataSetID,dim); 
   assert(status>=0);
   // Do the writing.
+  blitz::Array<unsigned char,2> wval(v.extent(0),v.extent(1));
+  for (int i=0; i<v.extent(0); i++)
+    for (int j=0; j<v.extent(1); j++)
+      wval(i,j) = v(i,j) ? (unsigned char)1 : (unsigned char)0;
   status = H5Dwrite(newVar->DataSetID, BoolType, 
-		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+		    H5S_ALL, H5S_ALL, H5P_DEFAULT, wval.data());
   if (status < 0)
     cerr << "Error writing bool to HDF5 file in WriteVar.\n";
 
@@ -2511,8 +2552,13 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,3> &v)
   status=H5Dextend(newVar->DataSetID,dim); 
   assert(status>=0);
   // Do the writing.
+  blitz::Array<unsigned char,3> wval(v.extent(0), v.extent(1), v.extent(2));
+  for (int i=0; i<v.extent(0); i++)
+    for (int j=0; j<v.extent(1); j++)
+      for (int k=0; k<v.extent(2); k++)
+	wval(i,j,k) = v(i,j,k) ? (unsigned char)1 : (unsigned char)0;
   status = H5Dwrite(newVar->DataSetID, BoolType, 
-		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+		    H5S_ALL, H5S_ALL, H5P_DEFAULT, wval.data());
   if (status < 0)
     cerr << "Error writing bool to HDF5 file in WriteVar.\n";
 
@@ -2571,8 +2617,15 @@ void IOTreeHDF5Class::WriteVar(string name, blitz::Array<bool,4> &v)
   status=H5Dextend(newVar->DataSetID,dim); 
   assert(status>=0);
   // Do the writing.
+  blitz::Array<unsigned char,4> wval(v.extent(0), v.extent(1), 
+			      v.extent(2), v.extent(3));
+  for (int i=0; i<v.extent(0); i++)
+    for (int j=0; j<v.extent(1); j++)
+      for (int k=0; k<v.extent(2); k++)
+	for (int l=0; l<v.extent(3); l++)
+	  wval(i,j,k,l) = v(i,j,k,l) ? (unsigned char)1 : (unsigned char)0;
   status = H5Dwrite(newVar->DataSetID, BoolType, 
-		    H5S_ALL, H5S_ALL, H5P_DEFAULT, v.data());
+		    H5S_ALL, H5S_ALL, H5P_DEFAULT, wval.data());
   if (status < 0)
     cerr << "Error writing int to HDF5 file in WriteVar.\n";
 

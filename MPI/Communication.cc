@@ -1,6 +1,7 @@
 #include "Communication.h"
 
-ofstream perr;
+filebuf fbuf;
+ostream perr(&fbuf);
 
 #ifdef USE_MPI
 
