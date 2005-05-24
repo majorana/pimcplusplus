@@ -152,7 +152,6 @@ GroundStateClass::Action (int slice1, int slice2,
     for (int slice=slice1; slice <= slice2; slice++) {
       UpDists(slice) = LineSearchDistance(slice, UpSpeciesNum);
       if (UpDists(slice) <= 0.0) {
-	perr << "negative distance at slice " << slice << endl;
 	action += 1.0e100;
       }
     }
@@ -167,7 +166,6 @@ GroundStateClass::Action (int slice1, int slice2,
     for (int slice=slice1; slice <= slice2; slice++) {
       DownDists(slice) = LineSearchDistance(slice, DownSpeciesNum);
       if (DownDists(slice) <= 0.0) {
-	perr << "negative distance at slice " << slice << endl;
 	action += 1.0e100;
       }
     }
