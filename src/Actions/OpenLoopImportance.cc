@@ -43,13 +43,20 @@ double OpenLoopImportanceClass::Action (int slice1, int slice2,
   //  int myProc=(PathData.InterComm.MyProc() % 16);
   int myProc=PathData.GetCloneNum();
   double shift=(myProc%16)+0.5;
-  shift=10.5;
-  if (ImpChoice==NOIMP)  
+  shift=6.5;
+  if (ImpChoice==NOIMP){ 
+    cerr<<"I have chosen no importance function"<<endl;
+    assert(1==3);
     return 0.0;
-  else if (ImpChoice==DISTIMP)
+  }
+  else if (ImpChoice==DISTIMP){
+    cerr<<"I have chosen a distance importance function"<<endl;
     return -log(exp(-(dist-shift)*(dist-shift)));
-  else if (ImpChoice==DISPXIMP)
+  }
+  else if (ImpChoice==DISPXIMP){
+    cerr<<"I have chosen a displacement importance function"<<endl;
     return -log(exp(-(disp(0)-shift)*(disp(0)-shift)));
+  }
   else {
     cerr<<"You haven't give a valid choice!"<<endl;
     assert(1==2);
