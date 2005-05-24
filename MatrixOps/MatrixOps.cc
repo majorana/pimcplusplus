@@ -420,8 +420,6 @@ void SymmEigenPairs (const Array<scalar,2> &A, int NumPairs,
 		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
 		&LDEigVecs, ISuppZ, &WorkSize, &Lwork, &IWorkSize, &LIwork, 
 		&Info);
-   fprintf (stderr, "WorkSize = %1.8f\n", WorkSize);
-   fprintf (stderr, "IWorkSize = %d\n", IWorkSize);
 
    // Now allocate WorkSpace;
    Lwork = (int) floor(WorkSize+0.5);
@@ -513,9 +511,9 @@ void SymmEigenPairs (const Array<complex<double>,2> &A, int NumPairs,
 		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
 		&LDEigVecs, ISuppZ, &WorkSize, &Lwork, &RWorkSize, &LRwork, &IWorkSize, &LIwork, 
 		&Info);
-   fprintf (stderr, "WorkSize  = %1.8f\n", WorkSize.real());
-   fprintf (stderr, "RWorkSize = %1.8f\n", RWorkSize);
-   fprintf (stderr, "IWorkSize = %d\n", IWorkSize);
+//    fprintf (stderr, "WorkSize  = %1.8f\n", WorkSize.real());
+//    fprintf (stderr, "RWorkSize = %1.8f\n", RWorkSize);
+//    fprintf (stderr, "IWorkSize = %d\n", IWorkSize);
 
    // Now allocate WorkSpace;
    Lwork = (int) floor(WorkSize.real()+0.5);
@@ -530,12 +528,10 @@ void SymmEigenPairs (const Array<complex<double>,2> &A, int NumPairs,
      for (int col=0; col<N; col++)
        *(Amat+(col*N)+row) = A(row,col);
    
-   cerr << "Before zheevr.\n";
    FORT(zheevr)(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
 		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
 		&LDEigVecs, ISuppZ, WorkSpace, &Lwork, RWorkSpace, &LRwork, IWorkSpace, &LIwork, 
 		&Info);
-   cerr << "After zheevr.\n";
 
    if (Info !=0) {
      fprintf (stderr, "Lapack error in zheevr.  Exitting.\n");
