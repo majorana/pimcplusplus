@@ -266,6 +266,7 @@ GroundStateClass::Read(IOSectionClass &in)
   UpDists.resize(PathData.NumTimeSlices());
   DownDists.resize(PathData.NumTimeSlices());
   Rions.resize(NumIons);
+  Rions = Vec3(0.0, 0.0, 0.0);
 
   /////////////////////////////////
   // Setup the plane wave system //
