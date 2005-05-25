@@ -268,7 +268,7 @@ Section (Algorithm) {
     Section (Observe) { string name = "edown-edown";}
     Section (Observe) { string name = "eup-edown";}
     Section (Observe) { string name = "Energy"; }
-    Section (Observe) { string name = "PathDump"; }
+//    Section (Observe) { string name = "PathDump"; }
   }
 }
 
