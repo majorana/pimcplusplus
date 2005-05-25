@@ -58,7 +58,7 @@ void PathDumpClass::WriteBlock()
   int totalSlices = Path.TotalNumSlices;
 
   Path.SliceRange(numProcs-1, start,end);
-  int maxShift = end-start+1;
+  int maxShift = end-start;
   int slicesLeft = totalSlices;
   int offset = 0;
   int numPtcls = PathData.NumParticles();

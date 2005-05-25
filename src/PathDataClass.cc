@@ -35,7 +35,7 @@ void PathDataClass::MoveRefSlice (int absSlice)
   Path.SliceRange(numProcs-1, first, last);
   /// Min slices is the minimum number of slices owned by a processor
   /// It is the maximum we can shift the path at a time.
-  int minSlices = last - first + 1;
+  int minSlices = last - first;
 
   Path.SliceRange(myProc, first, last);
 

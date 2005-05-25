@@ -167,7 +167,7 @@ Section (Observables)
   Section (Observable) {
     string type = "PathDump";
     string Name = "PathDump";
-    int dumpFreq = 500;
+    int dumpFreq = 2;
   }
 }
 

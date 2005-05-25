@@ -2,7 +2,7 @@ double tau=0.0625;
 
 Section (Parallel)
 {
-  int ProcsPerClone = 8;
+  int ProcsPerClone = 1;
 }
 
 

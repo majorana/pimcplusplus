@@ -38,7 +38,7 @@ ifeq ($(HOSTTYPE),powermac)
    CC = mpiCC
    LD = mpiCC
    F77 = f77
-   CCFLAGS = -c -g  -Wno-long-double -ffast-math
+   CCFLAGS = -c -g  -Wno-long-double -ffast-math -O3
    F77FLAGS = -c -g -O3
    EXTRADEFS = -DNOUNDERSCORE -DNOCUSERID -DMAC -DUSE_MPI
    MAKECC = mpiCC
