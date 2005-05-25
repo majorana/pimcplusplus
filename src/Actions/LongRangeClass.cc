@@ -550,8 +550,8 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
   double kCont = 50.0 * kavg;
   double delta = basis.GetDelta();
   double kMax = 20.0*M_PI/delta;
-  perr << "kCont = " << kCont 
-       << " kMax = " << kMax << endl;
+//   perr << "kCont = " << kCont 
+//        << " kMax = " << kMax << endl;
 
   OptimizedBreakupClass breakup(basis);
   breakup.SetkVecs (kCut, kCont, kMax);
@@ -817,8 +817,8 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
   double kCont = 50.0 * kavg;
   double delta = basis.GetDelta();
   double kMax = 20.0*M_PI/delta;
-  perr << "kCont = " << kCont 
-       << " kMax = " << kMax << endl;
+//   perr << "kCont = " << kCont 
+//        << " kMax = " << kMax << endl;
 
 
   OptimizedBreakupClass breakup(basis);

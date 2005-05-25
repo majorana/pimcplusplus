@@ -158,6 +158,7 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
+  //  perr << "BisectionBlock MakeMove.\n";
   //  cerr<<"Starting my bisection block"<<endl;
   ChooseTimeSlices();
   //  cerr<<"Choosing Time slices"<<endl;
