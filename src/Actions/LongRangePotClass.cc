@@ -36,7 +36,7 @@ double LongRangePotClass::V(int slice)
       homo -= 0.5 * N * pa.Vlong_r0;
       // Or the neutralizing background term
       background -= 0.5*N*N*pa.Vshort_k0;
-      k0Terms += 0.5*N*pa.Vlong_k0;
+      k0Terms += 0.5*N*N*pa.Vlong_k0;
     }
     
     // Now do the heterologous terms
