@@ -203,17 +203,17 @@ private:
   JobType Task;
   inline double Uintegrand(double r)
   {
-    double Ulong = PA.Udiag(r, Level) - PA.Ulong(Level)(r);
+    double Ulong = PA.Ulong(Level)(r);
     return r*r*Ulong;
   }
   inline double dUintegrand(double r)
   {
-    double dUlong = PA.dUdiag(r, Level) - PA.dUlong(Level)(r);
+    double dUlong = PA.dUlong(Level)(r);
     return r*r*dUlong;
   }
   inline double Vintegrand(double r)
   {
-    double Vlong = PA.V(r) - PA.Vlong(r);
+    double Vlong = PA.Vlong(r);
     return r*r*Vlong;
   } 
 
@@ -341,7 +341,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
       // Or the neutralizing background term
       background -= factor * 0.5*N*N*PA.dUshort_k0(level);
       // Or the k=0 terms
-      k0Homo += 0.5*N*N*PA.dUlong_k0(level);
+      k0Homo += factor*0.5*N*N*PA.dUlong_k0(level);
     }
     
     // Now do the heterologous terms
@@ -360,7 +360,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
 	  background -= factor * N1*N2*PA.dUshort_k0(level);
-	  k0Hetero += N1*N2*PA.dUlong_k0(level);
+	  k0Hetero += factor*N1*N2*PA.dUlong_k0(level);
 	}
       }
   }
