@@ -464,6 +464,7 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
     pa.Ulong_k = 0.0;
     pa.Ulong_r0.resize(pa.NumBetas);
     pa.Ushort_k0.resize(pa.NumBetas);
+    pa.Ulong_k0.resize(pa.NumBetas);
     for (int level=0; level<pa.NumBetas; level++) {
       if (iAmRoot)
 	out.NewSection ("Level");
@@ -643,6 +644,7 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
     pa.dUlong_k = 0.0;
     pa.dUlong_r0.resize(pa.NumBetas);
     pa.dUshort_k0.resize(pa.NumBetas);
+    pa.dUlong_k0.resize(pa.NumBetas);
     for (int level=0; level<pa.NumBetas; level++) {
       if (iAmRoot) 
 	out.NewSection ("Level");
