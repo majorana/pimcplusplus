@@ -195,6 +195,47 @@ public:
 
 
 
+class UlongIntegrand
+{
+private:
+  PairActionFitClass &PA;
+  int Level;
+  JobType Task;
+  inline double Uintegrand(double r)
+  {
+    double Ulong = PA.Udiag(r, Level) - PA.Ulong(Level)(r);
+    return r*r*Ulong;
+  }
+  inline double dUintegrand(double r)
+  {
+    double dUlong = PA.dUdiag(r, Level) - PA.dUlong(Level)(r);
+    return r*r*dUlong;
+  }
+  inline double Vintegrand(double r)
+  {
+    double Vlong = PA.V(r) - PA.Vlong(r);
+    return r*r*Vlong;
+  } 
+
+public:
+  inline double operator()(double r) 
+  {
+    if (Task == JOB_U)
+      return Uintegrand(r);
+    else if (Task == JOB_DU)
+      return dUintegrand(r);
+    else
+      return Vintegrand(r);
+ 
+  }
+  UlongIntegrand (PairActionFitClass &pa, int level,
+	       JobType task) :
+    PA(pa), Level(level), Task(task)
+  { /* do nothing else*/  }
+};
+
+
+
 void LongRangeClass::Read(IOSectionClass& in)
 {
   //do nothing for now
@@ -274,6 +315,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
   double homo = 0.0;
   double hetero = 0.0;
   double background = 0.0;
+  double k0Terms = 0.0;
   int skip = (1<<level);
   double levelTau = Path.tau * (double)skip;
   for (int slice=slice1; slice<=slice2; slice+=skip) {
@@ -297,6 +339,8 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
       homo -= factor * 0.5 * N * PA.dUlong_r0(level);
       // Or the neutralizing background term
       background -= factor * 0.5*N*N*PA.dUshort_k0(level);
+      // Or the k=0 terms
+      k0Terms += 0.5*N*PA.dUlong_k0(level);
     }
     
     // Now do the heterologous terms
@@ -315,10 +359,12 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
 	  background -= factor * N1*N2*PA.dUshort_k0(level);
+	  k0Terms += N1*N2*PA.dUlong_k0(level);
 	}
       }
   }
-  return (homo+hetero/*+background*/);
+  cerr << "k0Terms = " << k0Terms << endl;
+  return (homo+hetero+k0Terms/*+background*/);
 }
 
 void LongRangeClass::Init(IOSectionClass &in, IOSectionClass &out)
@@ -483,6 +529,15 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
       pa.Ushort_k0(level) = 4.0*M_PI/boxVol * 
 	integrator.Integrate(0.0, rc, tolerance);
       perr << "Ushort_k0(" << level << ") = " << pa.Ushort_k0(level) << endl;
+
+      // Calculate FT of Ulong at k=0
+      UlongIntegrand integrand(pa, level, JOB_U);
+      GKIntegration<UlongIntegrand, GK31> integrator(integrand);
+      integrator.SetRelativeErrorMode();
+      pa.Ulong_k0(level) = 4.0*M_PI/boxVol * 
+	integrator.Integrate(0.0, rmax, tolerance);
+      perr << "Ulong_k0(" << level << ") = " << pa.Ulong_k0(level) << endl;
+
 
       // Now do k-space part
       for (int ki=0; ki < Path.kVecs.size(); ki++) {
@@ -650,6 +705,14 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
       pa.dUshort_k0(level) = 4.0*M_PI/boxVol * 
 	integrator.Integrate(0.0, rc, tolerance);
       perr << "dUshort_k0(" << level << ") = " << pa.dUshort_k0(level) << endl;
+
+      // Calculate FT of dUlong at k=0
+      UlongIntegrand integrand(pa, level, JOB_DU);
+      GKIntegration<UlongIntegrand, GK31> integrator(integrand);
+      integrator.SetRelativeErrorMode();
+      pa.dUlong_k0(level) = 4.0*M_PI/boxVol * 
+	integrator.Integrate(0.0, rmax, tolerance);
+      perr << "dUlong_k0(" << level << ") = " << pa.dUlong_k0(level) << endl;
 
       // Now do k-space part
       for (int ki=0; ki < Path.kVecs.size(); ki++) {
@@ -889,6 +952,14 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
     pa.Vshort_k0 = 4.0*M_PI/boxVol * 
       integrator.Integrate(0.0, rc, tolerance);
     perr << "Vshort_k0 = " << pa.Vshort_k0 << endl;
+
+    // Calculate FT of Vlong at k=0
+    UlongIntegrand integrand(pa, level, JOB_V);
+    GKIntegration<UlongIntegrand, GK31> integrator(integrand);
+    integrator.SetRelativeErrorMode();
+    pa.Vlong_k0 = 4.0*M_PI/boxVol * 
+      integrator.Integrate(0.0, rmax, tolerance);
+    perr << "Vlong_k0 = " << pa.Vlong_k0(level) << endl;
 
 
     // Now do k-space part
