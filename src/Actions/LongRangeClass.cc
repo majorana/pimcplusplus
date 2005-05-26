@@ -523,19 +523,19 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
       
 
       // Calculate FT of Ushort at k=0
-      UshortIntegrand integrand(pa, level, JOB_U);
-      GKIntegration<UshortIntegrand, GK31> integrator(integrand);
-      integrator.SetRelativeErrorMode();
+      UshortIntegrand shortIntegrand(pa, level, JOB_U);
+      GKIntegration<UshortIntegrand, GK31> shortIntegrator(shortIntegrand);
+      shortIntegrator.SetRelativeErrorMode();
       pa.Ushort_k0(level) = 4.0*M_PI/boxVol * 
-	integrator.Integrate(0.0, rc, tolerance);
+	shortIntegrator.Integrate(0.0, rc, tolerance);
       perr << "Ushort_k0(" << level << ") = " << pa.Ushort_k0(level) << endl;
 
       // Calculate FT of Ulong at k=0
-      UlongIntegrand integrand(pa, level, JOB_U);
-      GKIntegration<UlongIntegrand, GK31> integrator(integrand);
-      integrator.SetRelativeErrorMode();
+      UlongIntegrand longIntegrand(pa, level, JOB_U);
+      GKIntegration<UlongIntegrand, GK31> longIntegrator(longIntegrand);
+      longIntegrator.SetRelativeErrorMode();
       pa.Ulong_k0(level) = 4.0*M_PI/boxVol * 
-	integrator.Integrate(0.0, rmax, tolerance);
+	longIntegrator.Integrate(0.0, rmax, tolerance);
       perr << "Ulong_k0(" << level << ") = " << pa.Ulong_k0(level) << endl;
 
 
@@ -699,19 +699,19 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 
 
       // Calculate FT of Ushort at k=0
-      UshortIntegrand integrand(pa, level, JOB_DU);
-      GKIntegration<UshortIntegrand, GK31> integrator(integrand);
-      integrator.SetRelativeErrorMode();
+      UshortIntegrand shortIntegrand(pa, level, JOB_DU);
+      GKIntegration<UshortIntegrand, GK31> shortIntegrator(shortIntegrand);
+      shortIntegrator.SetRelativeErrorMode();
       pa.dUshort_k0(level) = 4.0*M_PI/boxVol * 
-	integrator.Integrate(0.0, rc, tolerance);
+	shortIntegrator.Integrate(0.0, rc, tolerance);
       perr << "dUshort_k0(" << level << ") = " << pa.dUshort_k0(level) << endl;
 
       // Calculate FT of dUlong at k=0
-      UlongIntegrand integrand(pa, level, JOB_DU);
-      GKIntegration<UlongIntegrand, GK31> integrator(integrand);
-      integrator.SetRelativeErrorMode();
+      UlongIntegrand longIntegrand(pa, level, JOB_DU);
+      GKIntegration<UlongIntegrand, GK31> longIntegrator(longIntegrand);
+      longIntegrator.SetRelativeErrorMode();
       pa.dUlong_k0(level) = 4.0*M_PI/boxVol * 
-	integrator.Integrate(0.0, rmax, tolerance);
+	longIntegrator.Integrate(0.0, rmax, tolerance);
       perr << "dUlong_k0(" << level << ") = " << pa.dUlong_k0(level) << endl;
 
       // Now do k-space part
@@ -946,20 +946,20 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
     }
     pa.Vlong.Init(&LongGrid, Vlong_r);
     // Calculate FT of Ushort at k=0
-    UshortIntegrand integrand(pa, 0, JOB_V);
-    GKIntegration<UshortIntegrand, GK31> integrator(integrand);
-    integrator.SetRelativeErrorMode();
+    UshortIntegrand shortIntegrand(pa, 0, JOB_V);
+    GKIntegration<UshortIntegrand, GK31> shortIntegrator(shortIntegrand);
+    shortIntegrator.SetRelativeErrorMode();
     pa.Vshort_k0 = 4.0*M_PI/boxVol * 
-      integrator.Integrate(0.0, rc, tolerance);
+      shortIntegrator.Integrate(0.0, rc, tolerance);
     perr << "Vshort_k0 = " << pa.Vshort_k0 << endl;
 
     // Calculate FT of Vlong at k=0
-    UlongIntegrand integrand(pa, level, JOB_V);
-    GKIntegration<UlongIntegrand, GK31> integrator(integrand);
-    integrator.SetRelativeErrorMode();
+    UlongIntegrand longIntegrand(pa, 0, JOB_V);
+    GKIntegration<UlongIntegrand, GK31> longIntegrator(longIntegrand);
+    longIntegrator.SetRelativeErrorMode();
     pa.Vlong_k0 = 4.0*M_PI/boxVol * 
-      integrator.Integrate(0.0, rmax, tolerance);
-    perr << "Vlong_k0 = " << pa.Vlong_k0(level) << endl;
+      longIntegrator.Integrate(0.0, rmax, tolerance);
+    perr << "Vlong_k0 = " << pa.Vlong_k0 << endl;
 
 
     // Now do k-space part
