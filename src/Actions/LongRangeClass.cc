@@ -318,7 +318,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 	}
       }
   }
-  return (homo+hetero+background);
+  return (homo+hetero/*+background*/);
 }
 
 void LongRangeClass::Init(IOSectionClass &in, IOSectionClass &out)
