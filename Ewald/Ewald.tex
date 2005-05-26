@@ -177,6 +177,39 @@ v_M^{\alpha} & = & \frac{1}{2} \sum_{\vL \neq \mathbf{0}} v^{\alpha
   \alpha}_\vk \right]  
 \end{eqnarray}
 
+\subsection{$\vk=\mathbf{0}$ terms}
+Thusfar, we have neglected what happens at the special point $\vk =
+\mathbf{0}$.  For many long-range potentials, such as the coulomb
+potential, $v_k^{\alpha \alpha}$ diverges for $k=0$.  However, we
+recognize that for a charge-neutral system, the divergent part of the
+terms cancel each other.  If all the potential in the system were
+precisely coulomb, the $\vk=\mathbf{0}$ terms would cancel precisely,
+yielding zero.  For systems involving pseudopotentials, however, it
+may be the case the resulting term is finite, but nonzero.  Consider
+the terms from $\vk=\mathbf{0}$,
+\begin{eqnarray}
+V_{k=0} & = & \sum_{\alpha>\beta} N^\alpha N^\beta v^{\alpha \beta}_{k=0}
++ \frac{1}{2} \sum_\alpha N^{\alpha\alpha} v^{\alpha\alpha}_{k=0} \\
+& = & \frac{1}{2} \sum_{\alpha,\beta} N^\alpha N^\beta v^{\alpha
+  \beta}_{k=0}.
+\label{eq:kzero}
+\end{eqnarray}
+Next, we must compute $v^{\alpha \beta}_{k=0}$.  
+\begin{equation}
+v^{\alpha \beta}_{k=0} = \frac{4 \pi}{\Omega} \int_0^\infty dr\ r^2
+v_l^{\alpha \beta}(r)
+\end{equation}
+We recognize that this integral will not converge because of the
+large-$r$ behavior.  However, we recognize that when we do the sum in
+(\ref{eq:kzero}), the large-$r$ parts of the integrals will cancel
+precisely.  Therefore, we define
+\begin{equation}
+\tilde{v}^{\alpha \beta}_{k=0} = \frac{4 \pi}{\Omega} 
+\int_0^{r_\text{end}} dr\ r^2 v_l^{\alpha \beta}(r),
+\end{equation}
+where $r_\text{end}$ is some cutoff value after which the potential
+tails precisely cancel.
+
 \subsection{Neutralizing Background Terms}
 For systems with a net charge, such as the one-component plasma
 (jellium), we add a uniform background charge which makes the system
@@ -212,10 +245,10 @@ V & = & \sum_{\alpha > \beta} \left[\sum_{i,j} v_s(|\vr_i^\alpha
 & = & \sum_{\alpha > \beta} \left[\sum_{i,j} v_s(|\vr_i^\alpha
   -\vr_j^\beta|) + \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
   \rho_{-\vk}^\beta\right) v^{\alpha \beta}_k   -N^\alpha N^\beta
-  v^{\alpha \beta}_{s\mathbf{0}}  \right] \\
+  v^{\alpha \beta}_{s\mathbf{0}}  +\tilde{V}_{k=0} \right] \\
 & + & \sum_\alpha \left[ -\frac{N^\alpha v_l^{\alpha \alpha}(0)}{2}  + \sum_{i>j} v_s(|\vr_i^\alpha -
   \vr_j^\alpha|) + \frac{1}{2} \sum_\vk |\rho_\vk^\alpha|^2 v^{\alpha\alpha}_\vk - \frac{1}{2}\left(N_\alpha\right)^2
-  v_{s\mathbf{0}}^{\alpha\alpha} \right]  \nonumber
+  v_{s\mathbf{0}}^{\alpha\alpha} +\tilde{V}_{k=0}\right]  \nonumber
 \end{eqnarray}
 
 \section {Computing the Reciprocal Potential}
