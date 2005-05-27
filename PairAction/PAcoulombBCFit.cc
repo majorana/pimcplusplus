@@ -426,7 +426,6 @@ void PAcoulombBCFitClass::Setrc (double rc)
   // Do U fits;
   Ucoefs.resize(3, numLevels);
   for (int level=0; level<numLevels; level++) {
-    cerr << "level = " << level << endl;
     for (int i=0; i<numPoints; i++) {
       double r = rcut + i*deltar;
       y(i) = Udiag (r, level);
