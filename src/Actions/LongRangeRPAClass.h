@@ -28,6 +28,7 @@ public:
   { return Integrand(t, uwvec); }
 
 public:
+  bool UseBackground;
   /// NOTE: this can only be called after LongRangeClass's Init has
   /// been called.
   void Init(IOSectionClass &in);

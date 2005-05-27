@@ -18,7 +18,8 @@ double LongRangePotClass::V(int slice)
   double homo = 0.0;
   double hetero = 0.0;
   double background = 0.0;
-  double k0Terms = 0.0;
+  double k0Homo = 0.0;
+  double k0Hetero = 0.0;
   if (PathData.Actions.HaveLongRange()) {
     PathClass &Path = PathData.Path;
     // First, do the homologous (same species) terms
@@ -36,7 +37,7 @@ double LongRangePotClass::V(int slice)
       homo -= 0.5 * N * pa.Vlong_r0;
       // Or the neutralizing background term
       background -= 0.5*N*N*pa.Vshort_k0;
-      k0Terms += 0.5*N*N*pa.Vlong_k0;
+      k0Homo += 0.5*N*N*pa.Vlong_k0;
     }
     
     // Now do the heterologous terms
@@ -55,9 +56,14 @@ double LongRangePotClass::V(int slice)
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
 	  background -= N1*N2*pa.Vshort_k0;
-	  k0Terms += N1*N2*pa.Vlong_k0;
+	  k0Hetero += N1*N2*pa.Vlong_k0;
 	}
       }
   }
-  return (homo+hetero+k0Terms/*+background*/);
+  double Vlong = homo+hetero;
+  if (UseBackground)
+    Vlong += background;
+  else
+    Vlong += (k0Homo+k0Hetero);
+  return Vlong;
 }

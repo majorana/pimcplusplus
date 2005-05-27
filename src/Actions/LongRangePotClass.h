@@ -9,6 +9,7 @@ class LongRangePotClass : public PotentialBaseClass
 private:
   Array<PairActionFitClass*,2> &PairMatrix;
 public:
+  bool UseBackground;
   double V (int slice);
 
   LongRangePotClass (PathDataClass &pathData,

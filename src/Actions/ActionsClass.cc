@@ -83,6 +83,12 @@ ActionsClass::Read(IOSectionClass &in)
 	  exit(1);
 	}
       }
+  if (HaveLongRange()) {
+    assert (in.ReadVar("UseBackground", LongRange.UseBackground));
+    LongRangePot.UseBackground = LongRange.UseBackground;
+    LongRangeRPA.UseBackground = LongRange.UseBackground;
+  }
+
 //   if (longRange){
 //     LongRange.Init(in);
 //     if (UseRPA)

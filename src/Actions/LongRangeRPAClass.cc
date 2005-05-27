@@ -286,7 +286,7 @@ double LongRangeRPAClass::Action (int slice1, int slice2,
       // We can't forget the Madelung term.
       homo -= factor * 0.5 * N * pa.Ulong_r0(level);
       // Or the neutralizing background term
-      homo -= factor * 0.5*N*N*pa.Ushort_k0(level);
+      //background -= factor * 0.5*N*N*pa.Ushort_k0(level);
     }
     
     // Now do the heterologous terms
@@ -304,10 +304,13 @@ double LongRangeRPAClass::Action (int slice1, int slice2,
 	  }
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
-	  hetero -= factor * N1*N2*pa.Ushort_k0(level);
+	  //background -= factor * N1*N2*pa.Ushort_k0(level);
 	}
       }
   }
+  double U;
+  U = homo + hetero;
+
   return (homo+hetero);
 }
 
@@ -316,6 +319,9 @@ double LongRangeRPAClass::d_dBeta (int slice1, int slice2,  int level)
 {
   double homo = 0.0;
   double hetero = 0.0;
+  double background = 0.0;
+  double k0Homo = 0.0;
+  double k0Hetero = 0.0;
   int skip = (1<<level);
   double levelTau = Path.tau * (double)skip;
   for (int slice=slice1; slice<=slice2; slice1+=skip) {
@@ -336,9 +342,11 @@ double LongRangeRPAClass::d_dBeta (int slice1, int slice2,  int level)
       }
       int N = Path.Species(species).NumParticles;
       // We can't forget the Madelung term.
-      homo -= 0.5 * N * pa.dUlong_r0(level);
+      homo -= factor* 0.5 * N * pa.dUlong_r0(level);
       // Or the neutralizing background term
-      homo -= 0.5*N*N*pa.dUshort_k0(level);
+      background -= factor*0.5*N*N*pa.dUshort_k0(level);
+      // Or the k=0 terms
+      k0Homo += factor*0.5*N*N*pa.dUlong_k0(level);
     }
     
     // Now do the heterologous terms
@@ -356,10 +364,16 @@ double LongRangeRPAClass::d_dBeta (int slice1, int slice2,  int level)
 	  }
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
-	  hetero -= N1*N2*pa.dUshort_k0(level);
+	  background -= factor*N1*N2*pa.dUshort_k0(level);
+	  k0Hetero += factor*N1*N2*pa.dUlong_k0(level);
 	}
       }
   }
-  return (homo+hetero);
-    
+
+  double dU = homo+hetero;
+  if (UseBackground)
+    dU += background;
+  else
+    dU += (k0Homo+k0Hetero);
+  return dU;
 }

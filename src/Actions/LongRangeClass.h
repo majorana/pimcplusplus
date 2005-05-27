@@ -30,6 +30,7 @@ protected:
 
   int Level, ki;
 public:
+  bool UseBackground;
   void Init(IOSectionClass &in, IOSectionClass &out);
   void Read (IOSectionClass &in);
   double Action (int slice1, int slice2, 

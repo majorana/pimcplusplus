@@ -339,7 +339,11 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
       // We can't forget the Madelung term.
       homo -= factor * 0.5 * N * PA.dUlong_r0(level);
       // Or the neutralizing background term
-      background -= factor * 0.5*N*N*PA.dUshort_k0(level);
+      //background -= factor * 0.5*N*N*PA.dUshort_k0(level);
+      // The background term is a constant and should be
+      // independent of level.  Therefore, I'm using Vshort
+      // instead of dUshort.
+      background -= factor * 0.5*N*N*PA.Vshort_k0;
       // Or the k=0 terms
       k0Homo += factor*0.5*N*N*PA.dUlong_k0(level);
     }
@@ -359,14 +363,21 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 	  }
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
-	  background -= factor * N1*N2*PA.dUshort_k0(level);
+	  //	  background -= factor * N1*N2*PA.dUshort_k0(level);
+	  // The background term is a constant and should be
+	  // independent of level.  Therefore, I'm using Vshort
+	  // instead of dUshort.
+	  background -= factor * N1*N2*PA.Vshort_k0;
 	  k0Hetero += factor*N1*N2*PA.dUlong_k0(level);
 	}
       }
   }
-  cerr << "k0Homo=" << k0Homo 
-       << " k0Hetero=" << k0Hetero << " Sum=" << k0Homo+k0Hetero << endl;
-  return (homo+hetero+k0Homo+k0Hetero/*+background*/);
+  double dU = homo+hetero;
+  if (UseBackground)
+    dU += background;
+  else
+    dU += (k0Homo+k0Hetero);
+  return dU;
 }
 
 void LongRangeClass::Init(IOSectionClass &in, IOSectionClass &out)
@@ -954,7 +965,7 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
     GKIntegration<UshortIntegrand, GK31> shortIntegrator(shortIntegrand);
     shortIntegrator.SetRelativeErrorMode();
     pa.Vshort_k0 = 4.0*M_PI/boxVol * 
-      shortIntegrator.Integrate(0.0, rc, tolerance);
+      shortIntegrator.Integrate(1.0e-100, rc, tolerance);
     perr << "Vshort_k0 = " << pa.Vshort_k0 << endl;
 
     // Calculate FT of Vlong at k=0
@@ -962,7 +973,7 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
     GKIntegration<UlongIntegrand, GK31> longIntegrator(longIntegrand);
     longIntegrator.SetRelativeErrorMode();
     pa.Vlong_k0 = 4.0*M_PI/boxVol * 
-      longIntegrator.Integrate(0.0, rmax, tolerance);
+      longIntegrator.Integrate(1.0e-100, rmax, tolerance);
     perr << "Vlong_k0 = " << pa.Vlong_k0 << endl;
 
 
