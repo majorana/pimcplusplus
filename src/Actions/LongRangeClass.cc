@@ -167,7 +167,8 @@ private:
   }
   inline double dUintegrand(double r)
   {
-    double dUshort = PA.dUdiag(r, Level) - PA.dUlong(Level)(r);
+    // This is a new attempt, using V instead of dU.
+    double dUshort = PA.V(r) - PA.dUlong(Level)(r);
     return r*r*dUshort;
   }
   inline double Vintegrand(double r)
@@ -343,7 +344,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
       // The background term is a constant and should be
       // independent of level.  Therefore, I'm using Vshort
       // instead of dUshort.
-      background -= factor * 0.5*N*N*PA.Vshort_k0;
+      background -= factor * 0.5*N*N*PA.dUshort_k0(level);
       // Or the k=0 terms
       k0Homo += factor*0.5*N*N*PA.dUlong_k0(level);
     }
@@ -367,7 +368,7 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 	  // The background term is a constant and should be
 	  // independent of level.  Therefore, I'm using Vshort
 	  // instead of dUshort.
-	  background -= factor * N1*N2*PA.Vshort_k0;
+	  background -= factor * N1*N2*PA.dUshort_k0(level);
 	  k0Hetero += factor*N1*N2*PA.dUlong_k0(level);
 	}
       }
@@ -713,12 +714,12 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
       }
 
 
-      // Calculate FT of Ushort at k=0
+      // Calculate FT of dUshort at k=0
       UshortIntegrand shortIntegrand(pa, level, JOB_DU);
       GKIntegration<UshortIntegrand, GK31> shortIntegrator(shortIntegrand);
       shortIntegrator.SetRelativeErrorMode();
       pa.dUshort_k0(level) = 4.0*M_PI/boxVol * 
-	shortIntegrator.Integrate(0.0, rc, tolerance);
+	shortIntegrator.Integrate(0.0, rmax, tolerance);
       perr << "dUshort_k0(" << level << ") = " << pa.dUshort_k0(level) << endl;
 
       // Calculate FT of dUlong at k=0
