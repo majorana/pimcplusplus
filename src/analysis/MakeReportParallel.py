@@ -492,6 +492,14 @@ def ProcessTopTable(doc,infiles):
      infiles.OpenSection("System")
      speciesTable=ProcessSystemInfo(infiles)
      infiles.CloseSection()
+     
+     # Write the input file to the output directory
+     InputFile = infiles.ReadVar("InputFile")[0]
+     file = open ("pimc.in", "w")
+     file.write(InputFile)
+     file.close()
+
+     runTable.body.append (["Input File", Href("pimc.in", "pimc.in")])
      largeTable.body.append([runTable,speciesTable])
      doc.append(largeTable)
      doc.append(HR())
@@ -593,6 +601,7 @@ if not(os.access(dirName,os.F_OK)):
 os.chdir(dirName)
 doc=SeriesDocument()
 ProcessTopTable(doc,infiles)
+
 ProcessMove(doc,infiles)
 
 currNum=0
@@ -626,6 +635,8 @@ if (infiles.CountSections2("LongRangeAction") > 0):
      LRsection = ProcessLongRangeAction (infiles)
      doc.append(LRsection)
      infiles.CloseSection() # "LongRangeAction"
+
+
 
 #myFrame=IFrame("index.html","blah")
 #myFrame.src="hi"
