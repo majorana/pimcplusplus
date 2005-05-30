@@ -88,8 +88,9 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     infile.seekg(0,ios::end);
     int length=infile.tellg();
     infile.seekg(0,ios::beg);
-    char *buffer=new char[length];
+    char *buffer=new char[length+1];
     infile.read(buffer,length);
+    buffer[length] = '\0';
     infile.close(); 
     string fileCopy(buffer);   
     delete buffer;
