@@ -117,7 +117,6 @@ def ProcessCorrelationSection(infiles,doc,currNum):
 
 ##Produce Image
      myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel)
-     doc.append(myImg)
 ##Produce Ascii file
      asciiFileName = baseName + '.dat'
      WriteAsciiFile(asciiFileName,x,y)
@@ -129,6 +128,7 @@ def ProcessCorrelationSection(infiles,doc,currNum):
 ##Write things to document
      doc.append(Heading(1,sectionName))
      doc.append(Heading(4,description))
+     doc.append(myImg)
      doc.append(BR())
      doc.append(fileTable)
      return currNum
