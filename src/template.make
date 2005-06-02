@@ -58,12 +58,12 @@ ifeq ($(HOSTTYPE),i386-linux)
        F77FLAGS = -c -g 
     else
        include /usr/lib/Make.include	
-#       CC = mpiCC
-#       LD = mpiCC  -Bstatic -g
-       CC = g++
-       LD = g++  -Bstatic -g
+       CC = mpiCC
+       LD = mpiCC  -Bstatic -g
+#       CC = g++
+#       LD = g++  -Bstatic -g
        F77 = g77 
-       EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math
+       EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math -DUSE_MPI
        MAKECC = g++
        CCFLAGS = -c -g  -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops -ffast-math -O3 #-pg 
        F77FLAGS = -c -g -O3 -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops 

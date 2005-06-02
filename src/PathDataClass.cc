@@ -36,11 +36,9 @@ void PathDataClass::MoveRefSlice (int absSlice)
   /// Min slices is the minimum number of slices owned by a processor
   /// It is the maximum we can shift the path at a time.
   int minSlices = last - first;
-
   Path.SliceRange(myProc, first, last);
-
   if (absSlice < Path.GetRefSlice()) { // Shift to left
-    while ((Path.GetRefSlice()-absSlice) >= minSlices) {
+    while ((Path.GetRefSlice()-absSlice) > minSlices) {
       MoveJoin(minSlices);
       ShiftData (-minSlices);
       Join = 0;
@@ -61,6 +59,6 @@ void PathDataClass::MoveRefSlice (int absSlice)
     ShiftData(shift);
     Join = shift;
   }
-  MoveJoin (last);
+  MoveJoin (Path.NumTimeSlices()-1);
   assert (Path.GetRefSlice() == absSlice);
 }

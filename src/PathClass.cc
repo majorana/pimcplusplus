@@ -1165,6 +1165,8 @@ void PathClass::BroadcastRefPath()
 }
 
 
+// Combines the permutation vectors of all the processors.  Note:
+// only processor 0 gets the result.  All others get junk.
 void PathClass::TotalPermutation(Array<int,1> &permVec)
 {
   int myProc = Communicator.MyProc();
@@ -1176,13 +1178,18 @@ void PathClass::TotalPermutation(Array<int,1> &permVec)
   Array<int,2> permMat(numProcs, permVec.size());
 
   // First, collect all the individual permutation vectors
+  cerr << "Before Gather, myProc = " << Communicator.MyProc() << endl;
   Communicator.Gather (permVec, permMat, 0);
+  cerr << "After Gather, myProc = " << Communicator.MyProc() << endl;
   // Now apply them in sequence.
-  for (int pi=0; pi < numPtcls; pi++) {
-    int ptcl = pi;
-    for (int proc=0; proc<numProcs; proc++)
-      ptcl = permMat(proc, ptcl);
-    permVec(pi) = ptcl;
+  if (Communicator.MyProc() == 0) {
+    for (int pi=0; pi < numPtcls; pi++) {
+      int ptcl = pi;
+      for (int proc=0; proc<numProcs; proc++)
+	ptcl = permMat(proc, ptcl);
+      permVec(pi) = ptcl;
+    }
+    cerr << "permVec = " << permVec << endl;
   }
 }
 
