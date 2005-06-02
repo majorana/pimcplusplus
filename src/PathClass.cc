@@ -1178,9 +1178,7 @@ void PathClass::TotalPermutation(Array<int,1> &permVec)
   Array<int,2> permMat(numProcs, permVec.size());
 
   // First, collect all the individual permutation vectors
-  cerr << "Before Gather, myProc = " << Communicator.MyProc() << endl;
   Communicator.Gather (permVec, permMat, 0);
-  cerr << "After Gather, myProc = " << Communicator.MyProc() << endl;
   // Now apply them in sequence.
   if (Communicator.MyProc() == 0) {
     for (int pi=0; pi < numPtcls; pi++) {
@@ -1189,7 +1187,6 @@ void PathClass::TotalPermutation(Array<int,1> &permVec)
 	ptcl = permMat(proc, ptcl);
       permVec(pi) = ptcl;
     }
-    cerr << "permVec = " << permVec << endl;
   }
 }
 
