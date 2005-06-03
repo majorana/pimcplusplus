@@ -27,8 +27,11 @@ void ShiftMoveClass::MakeMove()
 {
   //  cerr<<"My random number begin is "<<PathData.Path.Communicator.MyProc()<<" "
   //      <<PathData.Path.Random.Common()<<endl;
+  PathData.Path.SliceRange(PathData.Path.Communicator.NumProcs()-1,
+			   slice1, slice2);
+  int maxSlices = slice2-slice1;
 
-  int numTimeSlicesToShift =(int)floor((PathData.NumTimeSlices()-1)*PathData.Path.Random.Common()); 
+  int numTimeSlicesToShift = Random.CommonInt(maxSlices);
 
   //  HACK! HACK! HACK!!NEED THESE LINES
 

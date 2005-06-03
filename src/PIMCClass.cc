@@ -168,7 +168,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     }
     else if (theObserveType=="Sign"){
       if (iAmRoot)
-	OutFile.NewSection("Sigh");
+	OutFile.NewSection("Sign");
       tempObs=new WeightClass(PathData,OutFile);
     }
     else {

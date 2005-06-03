@@ -32,7 +32,7 @@ Section (System)
     {
       string Name="e";
       string Type = "e";
-      string Statistics = "BOLTMANNON";
+      string Statistics = "BOLTZMANNON";
       double lambda=0.5; 
       int NumParticles=1;
       int NumDim=3;
@@ -61,7 +61,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/Na_1_tau0.03125_M4096.turing";
+  string OutFileBase="~/Runs/NaRuns/Na_1_tau0.03125_M4096";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
