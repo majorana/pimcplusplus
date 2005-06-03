@@ -129,7 +129,7 @@ Section (Algorithm) {
       int steps=1;
       Section (Loop){
         int steps=2;
-        Section (Move) { string name="edownBlock";} 
+        Section (Move) { string name="eBlock";} 
       }
       Section (Move) { string name = "Shift"; }
     }
