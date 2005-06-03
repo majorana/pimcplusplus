@@ -30,7 +30,7 @@ void ShiftMoveClass::MakeMove()
 			   slice1, slice2);
   int maxSlices = slice2-slice1;
 
-  int numTimeSlicesToShift = Random.CommonInt(maxSlices);
+  int numTimeSlicesToShift = PathData.Path.Random.CommonInt(maxSlices);
 
   //  HACK! HACK! HACK!!NEED THESE LINES
 
