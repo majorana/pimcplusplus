@@ -82,7 +82,7 @@ public:
       /// HACK HACK HACK
       /// We correct for poor extrapolation of the tail for
       /// PH's at small beta.  The 22 is empirically determined.
-      if ((q > 5.0) && (q/sigma > 22.0)) {
+      if ((q > 3.5) && (q/sigma > 22.0)) {
 	double V = rho.Pot->V(q);
 	Ud(i)  = rho.Beta()*V;
 	dUd(i) = V;
@@ -232,7 +232,7 @@ void PAtricubicFitClass::DoFit (Rho &rho)
   Array<double,1> Ul, dUl;
   USemiclassical Usemi(rho, beta);
 
-  double qmax = max (8.0, 22.0*sqrt(2.0*beta*lambda));
+  double qmax = max (3.5, 22.0*sqrt(2.0*beta*lambda));
   cerr << "qmax = " << qmax << endl;
 
   for (int qi=0; qi<numq; qi++) {
