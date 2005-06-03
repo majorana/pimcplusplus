@@ -25,8 +25,7 @@ void ShiftMoveClass::Read(IOSectionClass &theInput)
 
 void ShiftMoveClass::MakeMove()
 {
-  //  cerr<<"My random number begin is "<<PathData.Path.Communicator.MyProc()<<" "
-  //      <<PathData.Path.Random.Common()<<endl;
+  int slice1, slice2;
   PathData.Path.SliceRange(PathData.Path.Communicator.NumProcs()-1,
 			   slice1, slice2);
   int maxSlices = slice2-slice1;
