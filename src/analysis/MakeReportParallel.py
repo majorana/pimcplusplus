@@ -52,6 +52,8 @@ def VecAvg (x):
 # Takes a list of 2D arrays and returns the unweighted average of the
 # last row.
 def AvgLastVec (data):
+     if data==None or data[0]==None:
+          return 0
      s = data[0][-1]
      for i in range(0,len(data)):
           s = s+data[i][-1]
@@ -108,8 +110,15 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      data=infiles.ReadVar("y")
      if (data==[None]):
           return currNum
-     y = AvgLastVec(data)
+     isCumulative=infiles.ReadVar("Cumulative")
+     print "My cumulativeness is",isCumulative
+     if (isCumulative=="false"):
+          y = Avg(VecAvg(data))
+     else:
+          y = AvgLastVec(data)
      x=infiles.ReadVar("x")[0]
+     if (x==None):
+          return currNum
      description=infiles.ReadVar("Description")[0]
 
      currNum=currNum+1
@@ -147,6 +156,8 @@ def ProcessStructureFactor(infiles,doc,currNum):
      y = AvgLastVec(data)
 
      x=infiles.ReadVar("x")[0]
+     if (x==None):
+          return currNum
      toSort=[]
      for counter in range(0,len(x)):
           toSort.append((x[counter],y[counter]))
@@ -380,6 +391,7 @@ def ProcessScalarSection(infiles,doc,currNum):
           data = infiles.ReadVar(counter)
 ##          print "data is ",data
 ##          print type(data[0])
+          data=data[scalarCutoff:len(data)]
           if type(data[0])==numarray.numarraycore.NumArray:
                currNum=currNum+1
                varName=infiles.GetVarName(counter)
@@ -596,6 +608,8 @@ if (os.access(dirName+"/.pref",os.F_OK)):
 #     prefFile.CloseFile() 
 if cutoff==None:
      cutoff=0
+if scalarCutoff==None:
+     scalarCutoff=0
 if not(os.access(dirName,os.F_OK)):
      os.mkdir(dirName)
 os.chdir(dirName)
