@@ -52,6 +52,8 @@ void PairCorrelationClass::Read(IOSectionClass& in)
   Histogram.resize(numGridPoints-1);
   Histogram=0;
   in.CloseSection();
+  /// Now write the one-time output variables
+  WriteInfo();
 }
 
 
@@ -76,6 +78,7 @@ void PairCorrelationClass::WriteInfo()
   IOSection.WriteVar("Species1", PathData.Species(Species1).Name);
   IOSection.WriteVar("Species2", PathData.Species(Species2).Name);
   IOSection.WriteVar("Type","CorrelationFunction");
+  IOSection.WriteVar("Cumulative", false);
 }
 
 
@@ -239,8 +242,6 @@ void nofrClass::Read(IOSectionClass& in)
   Histogram.resize(numGridPoints-1);
   Histogram=0;
   in.CloseSection();
-  /// Now write the one-time output variables
-  WriteInfo();
 }
 
 ///Writes the data relevant for this classes output including its
