@@ -6,6 +6,8 @@
 /// A pair correlation function observable.
 class PairCorrelationClass : public ObservableClass
 {
+private:
+  ObservableVecDouble1 gofrVar;
   /// Stores number of counts in each bin
   Array<int,1> Histogram;
   /// Stores the total number of counts
@@ -30,13 +32,16 @@ public:
   void WriteInfo();
   void Read(IOSectionClass& IO);
   PairCorrelationClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
-    ObservableClass(myPathData,ioSection){
+    ObservableClass(myPathData,ioSection), 
+    gofrVar("y", IOSection, myPathData.Path.Communicator)
+  {
     TimesCalled=0;
   }
   PairCorrelationClass(PathDataClass &myPathData, IOSectionClass &ioSection,
 		       int species1, int species2) : 
     ObservableClass(myPathData, ioSection), 
-    Species1(species1), Species2(species2) 
+    Species1(species1), Species2(species2),
+    gofrVar("y", IOSection, myPathData.Path.Communicator)
   { Initialize(); }
 
 

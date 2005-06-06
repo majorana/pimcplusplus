@@ -87,52 +87,26 @@ void PairCorrelationClass::WriteBlock()
   double norm=0.0;
   int N1 = PathData.Species(Species1).NumParticles;
   int N2 = PathData.Species(Species2).NumParticles;
-  norm = (double)TotalCounts * PathData.Path.TotalNumSlices*
-    (double)(N1*N2)/PathData.Path.GetVol();
+  if (Species1==Species2) //Normalizes things when species are same
+    norm = 0.5*(double)TotalCounts * PathData.Path.TotalNumSlices*
+      (double)(N1*(N1-1.0))/PathData.Path.GetVol();
+  else
+    norm = (double)TotalCounts * PathData.Path.TotalNumSlices*
+      (double)(N1*N2)/PathData.Path.GetVol();
 
-  if (Species1==Species2){//Normalizes things when species are same
-    norm *= 0.5;
-    //double N = (double)PathData.Species(Species1).NumParticles;
-    //norm = N/(N-1.0)/PathData.Path.GetVol();
-    //norm = (double)PathData.Species(Species1).NumParticles/(double)(PathData.Species(Species1).NumParticles-1)*1.0/PathData.Path.GetVol();
-  }
-  
   Path.Communicator.Sum(Histogram, HistSum);
-  if (Path.Communicator.MyProc()==0) {
-    if (FirstTime) {
-      FirstTime=false;
-      WriteInfo();
-      Array<double,2> gofrArray(1,HistSum.size());
-      for (int i=0; i<grid.NumPoints-1; i++){
-	double r1 = grid(i);
-	double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
-	double r = 0.5*(r1+r2);
-	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-	gofrArray(0,i) = (double) HistSum(i) / (binVol*norm);
-      }
-      IOSection.WriteVar("y",gofrArray);
-      IOVar = IOSection.GetVarPtr("y");
-    }
-    else {
-      Array<double,1> gofrArray(HistSum.size());
-      for (int i=0; i<grid.NumPoints-1; i++){
-	double r1 = grid(i);
-	double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
-	double r = 0.5*(r1+r2);
-	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-	gofrArray(i) = (double) HistSum(i) / (binVol*norm);
-	if (gofrArray(i) < 0.0) {
-	  cerr << "binVol = " << binVol << endl;
-	  cerr << "norm = " << norm << endl;
-	  cerr << "N1 = " << N1 << endl;
-	  cerr << "N2 = " << N2 << endl;
-	  cerr << "TotalCounts = " << TotalCounts << endl;
-	}
-      }
-      IOVar->Append(gofrArray);
-    }
-    IOSection.FlushFile();
+  Array<double,1> gofrArray(HistSum.size());
+  for (int i=0; i<grid.NumPoints-1; i++){
+    double r1 = grid(i);
+    double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
+    double r = 0.5*(r1+r2);
+    double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
+    gofrArray(i) = (double) HistSum(i) / (binVol*norm);
   }
+  gofrVar.Write(gofrArray);
+  gofrVar.Flush();
+  Histogram = 0;
+  TotalCounts = 0;
 }
 
 
@@ -170,75 +144,39 @@ void PairCorrelationClass::Accumulate()
   }
 
   TotalCounts++;
-  /// HACK HACK HACK
   if (Species1==Species2) {
-    for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
-
+    /// Note:  we make sure we don't count that last times slice
+    /// we have.  This prevents double counting "shared" slices.
+    for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) 
       for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
-	for (int ptcl2=ptcl1+1;ptcl2<=species1.LastPtcl;ptcl2++){
-	  //	  if (PathData.Path.MolRef(ptcl1)!=PathData.Path.MolRef(ptcl2)){
-	    dVec disp;
-	    double dist;
-	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
-	
-	    #ifdef OLDDEBUG
-	    dVec r1=PathData(slice,ptcl1);
-	    dVec r2=PathData(slice,ptcl2);
-	    dVec dispDummy=r2-r1;
-	    double distDummy=sqrt(dot(dispDummy,dispDummy));
-	    for (int i=0; i<NDIM; i++)
-	      if (disp[i] != dispDummy[i]){
-	        cerr << "Bad bad evil inconsistency is DispTable.\n";
-	        cerr<<r1<<" "<<r2<<" "<<dispDummy<<" "<<disp<<endl;
-	      }
-	    if (dist != distDummy)
-	      cerr << "Bad bad evil inconsistency is DistTable.\n";
-	    #endif
-	    if (dist<grid.End){
-	      int index=grid.ReverseMap(dist);
-	      Histogram(index)++;
-	    } 
-	    //	  }
+	for (int ptcl2=ptcl1+1;ptcl2<=species1.LastPtcl;ptcl2++) {
+	  // if (PathData.Path.MolRef(ptcl1)!=PathData.Path.MolRef(ptcl2)){
+	  dVec disp;
+	  double dist;
+	  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
+	  if (dist<grid.End) {
+	    int index=grid.ReverseMap(dist);
+	    Histogram(index)++;
+	  } 
         }
-    }
   }
   else {
-    for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
-      TotalCounts++;
+    /// Note:  we make sure we don't count that last times slice
+    /// we have.  This prevents double counting "shared" slices.
+    for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) 
       for (int ptcl1=species1.FirstPtcl;ptcl1<=species1.LastPtcl;ptcl1++)
 	for (int ptcl2=species2.FirstPtcl;ptcl2<=species2.LastPtcl;ptcl2++){
-	  
-	  //	  if (PathData.Path.MolRef(ptcl1)!=PathData.Path.MolRef(ptcl2)){
-	    dVec disp;
-	    double dist;
-	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
-	  
-#ifdef OLDDEBUG
-	    dVec r1=PathData(slice,ptcl1);
-	    dVec r2=PathData(slice,ptcl2);
-	    dVec dispDummy=r2-r1;
-	    double distDummy=sqrt(dot(dispDummy,dispDummy));
-	    for (int i=0; i<NDIM; i++)
-	      if (disp[i] != dispDummy[i])
-	        cerr << "Bad bad evil inconsistency in DistTable.\n";
-	    if (dist != distDummy)
-	      cerr << "Bad bad evil inconsistency in DistTable.\n";
-#endif
-  	    if (dist<grid.End){
-	      int index=grid.ReverseMap(dist);
-	      Histogram(index)++;
-	    }
-	    //}
+	  //  if (PathData.Path.MolRef(ptcl1)!=PathData.Path.MolRef(ptcl2)){
+	  dVec disp;
+	  double dist;
+	  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
+	  if (dist<grid.End) {
+	    int index=grid.ReverseMap(dist);
+	    Histogram(index)++;
+	  }
 	}
-    }
   }
-
-
 }
-
-
-
-
 
 
 void PairCorrelationClass::Initialize()
@@ -300,9 +238,9 @@ void nofrClass::Read(IOSectionClass& in)
   TotalCounts=0;
   Histogram.resize(numGridPoints-1);
   Histogram=0;
-  //\\  Histogram3d.resize(numGridPoints-1,numGridPoints-1,numGridPoints-1);
-  //\\  Histogram3d=0;
   in.CloseSection();
+  /// Now write the one-time output variables
+  WriteInfo();
 }
 
 ///Writes the data relevant for this classes output including its
@@ -325,6 +263,7 @@ void nofrClass::WriteInfo()
   IOSection.WriteVar("xlabel", "r");
   IOSection.WriteVar("ylabel", "n(r)");
   IOSection.WriteVar("Type","CorrelationFunction");
+  IOSection.WriteVar("Cumulative", false);
 }
   
 
