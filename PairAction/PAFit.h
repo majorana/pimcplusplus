@@ -4,12 +4,13 @@
 //#include "PAszFit.h"
 //#include "PAcoulombFit.h"
 #include "PAcoulombBCFit.h"
-#include "PACoulombFit.h"
+#include "PAMonopoleFit.h"
 #include "PADipoleFit.h"
 #include "PATripoleFit.h"
 #include "PAclassicalFit.h"
 //#include "PAsFit.h"
 #include "PAtricubicFit.h"
+#include "PAtricubicFit2.h"
 #include "PAzeroFit.h"
 #include "DavidPAClass.h"
 
@@ -38,6 +39,8 @@ inline PairActionFitClass *ReadPAFit (IOSectionClass &in,
   //else if (type == "sfit")
   //  fit = new PAsFitClass;
   else if (type == "tricubicfit")
+    fit = new PAtricubicFitClass;
+  else if (type == "tricubicfit2")
     fit = new PAtricubicFitClass;
   else if (type == "zerofit")
     fit=new PAzeroFitClass;
