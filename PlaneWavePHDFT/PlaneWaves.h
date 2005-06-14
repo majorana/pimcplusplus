@@ -12,7 +12,10 @@ protected:
   Array<complex<double>,2> Bands;
   ConjGrad CG;
   Vec3 Box;
+  double kCut;
   int NumBands;
+  Potential *PH;
+  bool UseFFT;
 public:
   GVecsClass GVecs;
   void Setup(Vec3 box, Vec3 k, double kcut, Potential &ph, bool useFFT=true);
@@ -21,6 +24,7 @@ public:
   inline Vec3 GetIonPos(int i) { return Rions(i); }
   void Setk (Vec3 k);
   void DiagonalizeH();
+  inline double GetEnergy(int band) { return CG.Energies(band); }
   
   /// Gets the FFT box dimensions.
   inline void GetBoxDims(int &nx, int &ny, int &nz)

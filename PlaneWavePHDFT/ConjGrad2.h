@@ -14,7 +14,6 @@ protected:
   double E0;
   double CalcPhiSD();
   double CalcPhiCG();
-  void Setup();
   bool IsSetup;
   void Precondition();
   double T;
@@ -24,6 +23,7 @@ protected:
   double Tolerance;
 
 public:
+  void Setup();
   Array<double,1> Energies;
   void InitBands();
   void Solve(int band);

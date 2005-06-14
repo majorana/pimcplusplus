@@ -5,11 +5,14 @@ SystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
 		    bool useFFT)
 {
   Box = box;
+  kCut = kcut;
   GVecs.Set (box, k, kcut);
   FFT.Setup();
   H.SetIonPot (ph, useFFT);
   H.Setk(k);
   Bands.resize (NumBands, GVecs.size());
+  PH = &ph;
+  UseFFT = useFFT;
 }
 
 
@@ -23,6 +26,7 @@ SystemClass::Setup (Vec3 box, Vec3 k, double kcut, double z,
   H.SetIonPot (z, useFFT);
   H.Setk(k);
   Bands.resize (NumBands, GVecs.size());
+  UseFFT = useFFT;
 }
 
 void
@@ -153,4 +157,17 @@ SystemClass::SetRealSpaceBandNum(int num)
   c.reference (Bands(num,Range::all()));
   FFT.PutkVec (c);
   FFT.k2r();
+}
+
+
+void 
+SystemClass::Setk(Vec3 k)
+{
+  GVecs.Set (Box, k, kCut);
+  FFT.Setup();
+  H.SetIonPot (*PH, UseFFT);
+  H.Setk(k);
+  H.SetIons(Rions);
+  Bands.resize (NumBands, GVecs.size());
+  CG.Setup();
 }

@@ -1,9 +1,13 @@
-SOURCES = Hamiltonian.cc ConjGrad.cc TestPW.cc GVecs.cc                      \
-          FFTBox.cc Hamiltonian2.cc TestPW2.cc PlaneWaves.cc ConjGrad2.cc
+SOURCES = Hamiltonian.cc ConjGrad.cc TestPW.cc GVecs.cc                       \
+          FFTBox.cc Hamiltonian2.cc TestPW2.cc PlaneWaves.cc ConjGrad2.cc     \
+          BandStructure.cc
+
 
 Objs = Hamiltonian.o ConjGrad.o GVecs.o FFTBox.o 
 
 Objs2 = Hamiltonian2.o ConjGrad2.o GVecs.o FFTBox.o PlaneWaves.o
+
+BSObjs = BandStructure.o
 
 TestObjs  = TestPW.o
 
@@ -23,7 +27,7 @@ SplineObjs = ../Splines/BicubicSpline.o ../Splines/CubicSpline.o              \
 MiscObjs =   ../Integration/GKIntegration.o ../Fitting/Fitting.o              \
              ../MatrixOps/MatrixOps.o ../FFT/FFT.o ../MPI/Communication.o
 
-all:    $(Objs) $(Objs2) TestPW TestPW2 Hamiltonian.s
+all:    $(Objs) $(Objs2) TestPW TestPW2 BandStructure Hamiltonian.s
 
 TestPW:  $(TestObjs) $(Objs) $(PHObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)
 	$(LD) -o $@ $(TestObjs) $(Objs) $(PHObjs) $(IOObjs) $(SplineObjs) \
@@ -32,6 +36,17 @@ TestPW:  $(TestObjs) $(Objs) $(PHObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)
 TestPW2:  $(TestObjs2) $(Objs2) $(PHObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)
 	$(LD) -o $@ $(TestObjs2) $(Objs2) $(PHObjs) $(IOObjs) $(SplineObjs) \
         $(MiscObjs) $(LIBS)
+
+TestPW2:  $(TestObjs2) $(Objs2) $(PHObjs) $(IOObjs) $(SplineObjs) $(MiscObjs)
+	$(LD) -o $@ $(TestObjs2) $(Objs2) $(PHObjs) $(IOObjs) $(SplineObjs) \
+        $(MiscObjs) $(LIBS)
+
+BandStructure:  $(BSObjs) $(Objs2) $(PHObjs) $(IOObjs) $(SplineObjs) \
+                $(MiscObjs)
+	$(LD) -o $@ $(BSObjs) $(Objs2) $(PHObjs) $(IOObjs) $(SplineObjs) \
+        $(MiscObjs) $(LIBS)
+
+
 
 Hamiltonian.s:  Hamiltonian.cc
 	$(CC) -S -O3 -ffast-math -g  $(DEFS) $(INCL) -o $*.s $<
