@@ -2,7 +2,7 @@
 #include "../Fitting/Fitting.h"
 #include <gsl/gsl_sf.h>
 
-const double URho0Min  = 1.0e-4;
+const double Rho0Min  = 1.0e-4;
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
@@ -143,7 +143,7 @@ void PAtricubicFit2Class::DoFit (Rho &rho)
   double lambda = Particle1.lambda + Particle2.lambda;
   SmallestBeta = rho.Beta();
   double beta = SmallestBeta;
-  double sMax(0)  = sqrt(-4.0*lambda*beta*log(URho0Min));
+  sMax(0)  = sqrt(-4.0*lambda*beta*log(Rho0Min));
   sMaxInv(0) = 1.0/sMax(0);
 
   cerr << "sMax = "  << sMax(0) << endl;
@@ -231,8 +231,6 @@ PAtricubicFit2Class::Error(Rho &rho, double &Uerror, double &dUerror)
 
   double lambda = Particle1.lambda + Particle2.lambda;
   double beta = rho.Beta();
-  double sMax = sqrt(-4.0*lambda*beta*log(URho0Min));
-  double dsMax = sqrt(-4.0*lambda*beta*log(dURho0Min));
 
   double U2err = 0.0;
   double dU2err = 0.0;
@@ -280,7 +278,7 @@ PAtricubicFit2Class::Error(Rho &rho, double &Uerror, double &dUerror)
 	Ufit = U(q, z, s*s, level);
 	dUfit = dU(q, z, s*s, level);
 	if (!isnan(Uex) && !isnan(dUex)) {
-	  if (s <= sMax) {
+	  if (s <= sMax() {
 	    U2err += w*(Uex-Ufit)*(Uex-Ufit);
 	    dU2err += w*(dUex-dUfit)*(dUex-dUfit);
 	    weight += w;
