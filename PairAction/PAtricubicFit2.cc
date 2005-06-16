@@ -42,10 +42,9 @@ PAtricubicFit2Class::WriteBetaIndependentInfo (IOSectionClass &outSection)
 }
 
 
-class SCintegrand
+class SCintegrand2
 {
   Vec2 r, rp, rpp;
-  Potential *Pot;
   Rho &rho;
   LinearGrid qgrid;
   CubicSpline Udiag, dUdiag;
@@ -70,7 +69,7 @@ public:
     rp[0] = rpmag * costheta;
     rp[1] = rpmag * sqrt(1.0-costheta*costheta);
   }
-  SCintegrand(Rho &rho_) : rho(rho_)
+  SCintegrand2(Rho &rho_) : rho(rho_)
   {
     int N=1000;
     double qmin = rho.grid->Start;
@@ -95,17 +94,17 @@ public:
 	Ud(i) = U;
 	dUd(i) = dU;
       }
-    }
+   }
     Udiag.Init(&qgrid, Ud);
     dUdiag.Init(&qgrid, dUd);
   }
 };
 
-class USemiclassical
+class USemiclassical2
 {
 private:
 
-  SCintegrand SC;
+  SCintegrand2 SC;
   double beta;
 public:
 
@@ -113,7 +112,7 @@ public:
   {
     SC.Set(r, rp, costheta);
     SC.IsdU = false;
-    GKIntegration<SCintegrand,GK15> Integrator(SC);
+    GKIntegration<SCintegrand2,GK15> Integrator(SC);
     double Uavg = Integrator.Integrate(0.0, 1.0, 1.0e-7,
 				       1.0e-7, false);
     return (Uavg);
@@ -122,12 +121,12 @@ public:
   {
     SC.Set(r, rp, costheta);
     SC.IsdU = true;
-    GKIntegration<SCintegrand,GK15> Integrator(SC);
+    GKIntegration<SCintegrand2,GK15> Integrator(SC);
     double dUavg = Integrator.Integrate(0.0, 1.0, 1.0e-7,
 					1.0e-7, false);
     return (dUavg);
   }
-  USemiclassical (Rho &rho, double beta_) : SC(rho)
+  USemiclassical2 (Rho &rho, double beta_) : SC(rho)
   {
     beta = beta_;
   }
@@ -153,7 +152,7 @@ void PAtricubicFit2Class::DoFit (Rho &rho)
   int numt = tgrid->NumPoints;
   Array<double,3> Umat(numq,numy,numt), dUmat(numq,numy,numt);
   Array<double,1> Ul, dUl;
-  USemiclassical Usemi(rho, beta);
+  USemiclassical2 Usemi(rho, beta);
 
   double qmax = max (3.5, 22.0*sqrt(2.0*beta*lambda));
   cerr << "qmax = " << qmax << endl;
@@ -161,7 +160,6 @@ void PAtricubicFit2Class::DoFit (Rho &rho)
   for (int qi=0; qi<numq; qi++) {
     double q = (*qgrid)(qi);
     cerr << "qi = " << qi << " of " << numq << " q = " << q << endl;
-    double U_max, dU_max, Usemi_max, dUsemi_max;
     for (int yi=0; yi<numy; yi++) {
       double y = (*ygrid)(yi);
       double z, s;
@@ -174,8 +172,7 @@ void PAtricubicFit2Class::DoFit (Rho &rho)
 	rp = 1.0e-8;
       
       rho.U_lArray(r,rp,Ul,dUl);
-
-      // FIX HERE!!!
+      
       for (int ti=0; ti<numt; ti++) {
 	double t = (*tgrid)(ti);
 	yt2zs (q, y, t, 0, z, s);
@@ -194,30 +191,29 @@ void PAtricubicFit2Class::DoFit (Rho &rho)
 	}
 	else {
 	  rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
-	if (isnan(U)) {
-	  //U = Usemi.U(r,rp,costheta);
-	  fprintf (stderr, "NAN in U at (qi,yi,ti) = (%d,%d,%d)\n",
-		   qi, yi, ti); 
-	  fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
-		   q, z, s);
-	  fprintf (stderr, "exp(-s^2/4lb) = %1.4e\n", 
-		   exp(-s*s/(4.0*lambda*beta)));
-	  fprintf (stderr, "U_max = %1.5e\n", U_max);
+	  if (isnan(U)) {
+	    //U = Usemi.U(r,rp,costheta);
+	    fprintf (stderr, "NAN in U at (qi,yi,ti) = (%d,%d,%d)\n",
+		     qi, yi, ti); 
+	    fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
+		     q, z, s);
+	    fprintf (stderr, "exp(-s^2/4lb) = %1.4e\n", 
+		     exp(-s*s/(4.0*lambda*beta)));
+	  }
+	  if (isnan(dU)) {
+	    //dU = Usemi.dU(r,rp,costheta);
+	    fprintf (stderr, "NAN in dU at (qi,yi,ti) = (%d,%d,%d)\n",
+		     qi, yi, ti);
+	    fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
+		     q, z, s);
+	  }
+	  
+	  Umat(qi,yi,ti) = U;
+	  dUmat(qi,yi,ti) = dU;
 	}
-	if (isnan(dU)) {
-	  //dU = Usemi.dU(r,rp,costheta);
-	  fprintf (stderr, "NAN in dU at (qi,yi,ti) = (%d,%d,%d)\n",
-		   qi, yi, ti);
-	  fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
-		   q, z, s);
-	  fprintf (stderr, "dU_max = %1.5e\n", dU_max);
-	}
-
-	Umat(qi,yi,ti) = U;
-	dUmat(qi,yi,ti) = dU;
       }
-    }
-  } 
+    } 
+  }
   Usplines(0).Init(qgrid,ygrid,tgrid,Umat);
   dUsplines(0).Init(qgrid,ygrid,tgrid,dUmat);
 }
@@ -247,28 +243,25 @@ PAtricubicFit2Class::Error(Rho &rho, double &Uerror, double &dUerror)
   Array<double,1> Ul, dUl;
   for (int qi=0; qi<qgrid2.NumPoints; qi++) {
     double q = qgrid2(qi);
-    double zmax = 0.9999999*2.0*q;
+    double zmax = min(sMax(0),2.0*q);
     LinearGrid zgrid(0.0, zmax, 21);
     for (int zi=0; zi<zgrid.NumPoints; zi++) {
       double z = zgrid(zi);
-      double y = z/zmax;
-       double smax = 0.9999999*2.0*q;
-       LinearGrid sgrid(z, smax, 21);
+      LinearGrid sgrid(z, zmax, 21);
       for (int si=0; si<sgrid.NumPoints; si++) {
 	double s = sgrid(si);
-	double t = s/smax;
+	double y, t;
+	zs2yt(q,z,s,0,y,t);
 	double w = exp(-s*s/(4.0*rho.lambda*rho.Beta()));
 	double Uex, dUex, Ufit, dUfit;
 	double r, rp, costheta;
 	r  = q+0.5*z;
 	rp = q-0.5*z;
-	if (q == 0.0)
+	if ((r*rp)==0.0)
 	  costheta = 1.0;
 	else
 	  costheta = (r*r + rp*rp - s*s)/(2.0*r*rp); 
 	
-	//cerr << "costheta = " << costheta << endl;
-
 	costheta = min(costheta,1.0);
 	costheta = max(costheta,-1.0);
 
@@ -278,7 +271,7 @@ PAtricubicFit2Class::Error(Rho &rho, double &Uerror, double &dUerror)
 	Ufit = U(q, z, s*s, level);
 	dUfit = dU(q, z, s*s, level);
 	if (!isnan(Uex) && !isnan(dUex)) {
-	  if (s <= sMax() {
+	  if (s <= zmax) {
 	    U2err += w*(Uex-Ufit)*(Uex-Ufit);
 	    dU2err += w*(dUex-dUfit)*(dUex-dUfit);
 	    weight += w;
@@ -328,7 +321,7 @@ PAtricubicFit2Class::WriteFit(IOSectionClass &outSection)
 	}
     outSection.WriteVar ("Umat", Umat);
     outSection.WriteVar ("dUmat", dUmat);
-    outSection.WriteVar ("sMax", Ussmax(0));
+    outSection.WriteVar ("sMax", sMax(0));
     outSection.CloseSection();
   }
 }

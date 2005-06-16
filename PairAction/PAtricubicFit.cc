@@ -44,11 +44,11 @@ void PAtricubicFitClass::WriteBetaIndependentInfo (IOSectionClass &outSection)
 class SCintegrand
 {
   Vec2 r, rp, rpp;
-  Potential *Pot;
-  Rho &rho;
   LinearGrid qgrid;
   CubicSpline Udiag, dUdiag;
+  Rho &rho;
 public:
+
   bool IsdU;
   double operator()(double x)
   {
@@ -103,9 +103,11 @@ public:
 class USemiclassical
 {
 private:
-
   SCintegrand SC;
   double beta;
+  inline Mat3 Cmat(double r, double costheta);
+  inline double KineticCorrection (double r, double rp, double costheta);
+  Rho &rho;
 public:
 
   double U(double r, double rp, double costheta)
@@ -115,7 +117,8 @@ public:
     GKIntegration<SCintegrand,GK15> Integrator(SC);
     double Uavg = Integrator.Integrate(0.0, 1.0, 1.0e-7,
 				       1.0e-7, false);
-    return (Uavg);
+    double Kcorrection = KineticCorrection (r, rp, costheta);
+    return (Uavg/*+Kcorrection*/);
   }
   double dU(double r, double rp, double costheta)
   {
@@ -126,12 +129,72 @@ public:
 					1.0e-7, false);
     return (dUavg);
   }
-  USemiclassical (Rho &rho, double beta_) : SC(rho)
+  USemiclassical (Rho &rho_, double beta_) : 
+    SC(rho_), rho(rho_), beta(beta_)
   {
-    beta = beta_;
   }
 };
 
+
+/// Returns the 3x3 tensor for the kinetic action at beta/2.
+inline Mat3
+USemiclassical::Cmat(double r, double costheta)
+{
+  Potential &PH = (*rho.Pot);
+  double lambda = rho.lambda;
+  double sintheta = sqrt(1-costheta*costheta);
+
+  Vec3 rhat = Vec3(costheta, sintheta, 0.0);
+  Vec3 zhat = Vec3(0.0, 0.0, 1.0);
+  Vec3 thetahat = cross (zhat, rhat);
+
+  Mat3 U, Ud, Q;
+  for (int i=0; i<3; i++)
+    Ud(0,i) = rhat(i);
+  for (int i=0; i<3; i++)
+    Ud(1,i) = zhat(i);
+  for (int i=0; i<3; i++)
+    Ud(2,i) = thetahat(i);
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++)
+      U(i,j) = Ud(j,i);
+  Q = 0.0;
+  
+  double A = PH.A(r);
+  double B = PH.B(r);
+  Q(0,0) = 1.0/(2.0*rho.lambda*A*beta);
+  Q(1,1) = 1.0/(2.0*rho.lambda*B*beta);
+  Q(2,2) = 1.0/(2.0*rho.lambda*B*beta);
+  Mat3 C = U * Q * Ud;
+  return (C);
+}
+
+/// This corrects the semiclassical approximation for the
+/// position-dependent masses when we are inside the core.
+inline double
+USemiclassical::KineticCorrection (double r, double rp, double costheta)
+{
+  Mat3 C  = Cmat(r, 0.0);
+  Mat3 Cp = Cmat(rp, costheta);
+  Mat3 CplusCp = C+Cp;
+  Mat3 Ctilde = C*Inverse(CplusCp)*Cp;
+
+  double sintheta = sqrt(1.0-costheta*costheta);
+  Vec3 rVec  = Vec3(r, 0.0, 0.0);
+  Vec3 rpVec = Vec3(rp*costheta, rp*costheta, 0.0);
+  Vec3 dr = rVec-rpVec;
+  
+  double s2 = dot(dr, dr);
+  double KPH = /* -0.5*log(det(Ctilde)) + 1.5*log(M_PI) + */
+    dot (dr, Ctilde*dr);
+  double Knormal =/* 1.5*log(4.0*M_PI*rho.lambda*beta) 
+		     + */ s2/(4.0*rho.lambda*beta);
+
+//   if ((r>2.0) && (rp>2.0))
+//     cerr << "KPH=" << KPH << " Knormal=" << Knormal << endl;
+
+  return KPH-Knormal;
+}
 
 // /// y = |z/z_max|
 // /// z_max = 
@@ -253,20 +316,20 @@ void PAtricubicFitClass::DoFit (Rho &rho)
       
       rho.U_lArray(r,rp,Ul,dUl);
 
-      if (z < Usmax) {
-	double costheta_max = (r*r + rp*rp - Usmax*Usmax)/(2.0*r*rp);
-	costheta_max = min(costheta_max, 1.0);
-	costheta_max = max(costheta_max, -1.0);
+//       if (z < Usmax) {
+// 	double costheta_max = (r*r + rp*rp - Usmax*Usmax)/(2.0*r*rp);
+// 	costheta_max = min(costheta_max, 1.0);
+// 	costheta_max = max(costheta_max, -1.0);
 
-	double tmpU_max, tmpdU_max;
-	rho.UdU(r,rp,costheta_max, Ul, dUl, tmpU_max, tmpdU_max);
-	if (isnormal(tmpU_max) && isnormal(tmpdU_max)) {
-	  U_max = tmpU_max;
-	  dU_max = tmpdU_max;
-	  Usemi_max = Usemi.U(r,rp,costheta_max);
-	  dUsemi_max = Usemi.dU(r,rp,costheta_max);
-	}
-      }
+// 	double tmpU_max, tmpdU_max;
+// 	rho.UdU(r,rp,costheta_max, Ul, dUl, tmpU_max, tmpdU_max);
+// 	if (isnormal(tmpU_max) && isnormal(tmpdU_max)) {
+// 	  U_max = tmpU_max;
+// 	  dU_max = tmpdU_max;
+// 	  Usemi_max = Usemi.U(r,rp,costheta_max);
+// 	  dUsemi_max = Usemi.dU(r,rp,costheta_max);
+// 	}
+//       }
 
       for (int ti=0; ti<numt; ti++) {
 	double t = (*tgrid)(ti);
@@ -278,6 +341,20 @@ void PAtricubicFitClass::DoFit (Rho &rho)
 	  costheta = (r*r + rp*rp - s*s)/(2.0*r*rp);
 	costheta = min(1.0, costheta);
 	costheta = max(-1.0, costheta);	
+
+	if ((q<qmax) && (s<Usmax)) {
+	  double tmpU_max, tmpdU_max;
+	  rho.UdU(r,rp,costheta, Ul, dUl, tmpU_max, tmpdU_max);
+	  if (isnormal(tmpU_max)) {
+	    U_max = tmpU_max;
+	    Usemi_max = Usemi.U(r,rp,costheta);
+	  }
+	  if (isnormal(tmpdU_max)) {
+	    dU_max = tmpdU_max;
+	    dUsemi_max = Usemi.dU(r,rp,costheta);
+	  }
+	}
+
 	double U, dU;
 	// HACK HACK HACK
 	if (q > qmax) {
