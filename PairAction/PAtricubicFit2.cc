@@ -94,7 +94,7 @@ public:
 	Ud(i) = U;
 	dUd(i) = dU;
       }
-   }
+    }
     Udiag.Init(&qgrid, Ud);
     dUdiag.Init(&qgrid, dUd);
   }
@@ -207,10 +207,9 @@ void PAtricubicFit2Class::DoFit (Rho &rho)
 	    fprintf (stderr, "(q, z, s) = (%1.5e %1.5e %1.5e)\n", 
 		     q, z, s);
 	  }
-	  
-	  Umat(qi,yi,ti) = U;
-	  dUmat(qi,yi,ti) = dU;
 	}
+	Umat(qi,yi,ti) = U;
+	dUmat(qi,yi,ti) = dU;
       }
     } 
   }
