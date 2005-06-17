@@ -97,7 +97,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.03125_M4096b";
+  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.03125_M4096.new";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
