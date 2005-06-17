@@ -63,9 +63,9 @@ ifeq ($(HOSTTYPE),i386-linux)
        CC = g++
        LD = g++  -Bstatic -g
        F77 = g77 
-       EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math
+       EXTRADEFS = -Wno-deprecated -march=athlon -mcpu=athlon -ffast-math 
        MAKECC = g++
-       CCFLAGS = -c -g  -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops -ffast-math -O3 #-pg 
+       CCFLAGS = -c -g  -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops -ffast-math  -O3 #-pg 
        F77FLAGS = -c -g -O3 -march=athlon -mcpu=athlon -mmmx -msse -m3dnow -funroll-loops 
     endif
     LIBS = $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) $(G2CLIB) $(LAPACKLIB) \
@@ -161,7 +161,8 @@ PIMCobjs =                                \
   Common/IO/InputOutputXML.o              \
   Common/PairAction/PAcoulombBCFit.o      \
   Common/PairAction/PAtricubicFit.o       \
-  Common/PairAction/PACoulombFit.o        \
+  Common/PairAction/PAtricubicFit2.o      \
+  Common/PairAction/PAMonopoleFit.o        \
   Common/PairAction/PADipoleFit.o         \
   Common/PairAction/PATripoleFit.o        \
   Common/PairAction/PAclassicalFit.o      \
@@ -255,7 +256,8 @@ TestPermobjs =                            \
   Common/IO/InputOutputXML.o              \
   Common/PairAction/PAcoulombBCFit.o      \
   Common/PairAction/PAtricubicFit.o       \
-  Common/PairAction/PACoulombFit.o        \
+  Common/PairAction/PAtricubicFit2.o      \
+  Common/PairAction/PAMonopoleFit.o       \
   Common/PairAction/PADipoleFit.o         \
   Common/PairAction/PATripoleFit.o        \
   Common/PairAction/PAclassicalFit.o      \
@@ -317,8 +319,9 @@ TestEwaldobjs =                           \
   Common/IO/InputOutputASCII.o            \
   Common/IO/InputOutputXML.o              \
   Common/PairAction/PAtricubicFit.o       \
+  Common/PairAction/PAtricubicFit2.o      \
   Common/PairAction/PAcoulombBCFit.o      \
-  Common/PairAction/PACoulombFit.o        \
+  Common/PairAction/PAMonopoleFit.o       \
   Common/PairAction/PADipoleFit.o         \
   Common/PairAction/PATripoleFit.o        \
   Common/PairAction/PAclassicalFit.o      \
