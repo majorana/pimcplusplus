@@ -427,6 +427,7 @@ double PAtricubicFit2Class::dU(double q, double z, double s2, int level)
 	double deriv = dUsplines (level).d_dy(q,1.0,1.0);
 	return (val + deriv*(y-1.0));
       }
+    }
   }
   else {
     double r = q+0.5*z;
