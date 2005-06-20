@@ -369,12 +369,24 @@ PAtricubicFit2Class::U(double q, double z, double s2, int level)
     if (q == 0.0) 
       return(Usplines(level)(0.0,0.0,0.0));
     else {
-      double spline = Usplines(level)(q,y,t);
-      if (isnan (spline)) {
-	cerr << "q = " << q << " s = " << s << " z = " << z << endl;
-	cerr << "NAN in spline!!!!!!!!\n";
+      if (t < 1.0) {
+	double spline = Usplines(level)(q,y,t);
+	if (isnan (spline)) {
+	  cerr << "q = " << q << " s = " << s << " z = " << z << endl;
+	  cerr << "NAN in spline!!!!!!!!\n";
+	}
+	return(spline);
       }
-      return(spline);
+      else if (y < 1.0) {
+	double val   = Usplines(level)(q, y, 1.0);
+	double deriv = Usplines(level).d_dz(q,y,1.0);
+	return (val + deriv*(t-1.0));
+      }
+      else {
+	double val   = Usplines (level)(q, 1.0, 1.0);
+	double deriv = Usplines (level).d_dy(q,1.0,1.0);
+	return (val + deriv*(y-1.0));
+      }
     }
   }
   else {
@@ -401,8 +413,20 @@ double PAtricubicFit2Class::dU(double q, double z, double s2, int level)
     if (q == 0.0) 
       return(dUsplines(level)(0.0,0.0,0.0));
     else {
-      return(dUsplines(level)(q,y,t));
-    }
+      if (t < 1.0) {
+	double spline = dUsplines(level)(q,y,t);
+	return(spline);
+      }
+      else if (y < 1.0) {
+	double val   = dUsplines(level)(q, y, 1.0);
+	double deriv = dUsplines(level).d_dz(q,y,1.0);
+	return (val + deriv*(t-1.0));
+      }
+      else {
+	double val   = dUsplines (level)(q, 1.0, 1.0);
+	double deriv = dUsplines (level).d_dy(q,1.0,1.0);
+	return (val + deriv*(y-1.0));
+      }
   }
   else {
     double r = q+0.5*z;
@@ -451,7 +475,6 @@ bool PAtricubicFit2Class::Read (IOSectionClass &in,
   // Resize
   Usplines.resize(NumBetas);
   dUsplines.resize(NumBetas);
-  sMax.resize(NumBetas);
   Array<double,3> temp;
 
   // Read Particles;
