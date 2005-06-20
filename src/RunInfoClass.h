@@ -12,6 +12,7 @@ class RunInfoClass
 public:
   string ProgramName;
   string Version;
+  string CommonVersion;
   string UserName;
   string RunTime;
   string BuildDate;
@@ -21,6 +22,7 @@ public:
   {
     outSec.WriteVar("ProgramName", ProgramName);
     outSec.WriteVar("Version", Version);
+    outSec.WriteVar("CommonVersion", CommonVersion);
     outSec.WriteVar("UserName", UserName);
     outSec.WriteVar("RunTime", RunTime);
     outSec.WriteVar("BuildDate", BuildDate);
@@ -31,6 +33,8 @@ public:
   {
     assert (inSec.ReadVar("ProgramName", ProgramName));
     assert (inSec.ReadVar("Version", Version));
+    if (!inSec.ReadVar ("CommonVersion", CommonVersion))
+      CommonVersion = "unknown";
     assert (inSec.ReadVar("UserName", UserName));
     assert (inSec.ReadVar("RunTime", RunTime));
     assert (inSec.ReadVar("BuildDate", BuildDate));
@@ -49,6 +53,7 @@ public:
     time_t seconds = time(NULL);
     RunTime = ctime(&seconds);
     Version = VERSION;
+    CommonVersion = COMMONVERSION;
   }
 };
 

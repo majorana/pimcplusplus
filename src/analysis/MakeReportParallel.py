@@ -368,7 +368,7 @@ def BuildScalarTracePage(data,baseName,varName):
      row = []
      for i in range(0,len(data)):
           d = data[i];
-          row.append(ProduceTracePicture(d, baseName+"_"+repr(i), 'Blocks', varName,"Proc "+repr(i)))
+          row.append(ProduceTracePicture(d[StartCut:-1], baseName+"_"+repr(i), 'Blocks', varName,"Proc "+repr(i)))
      picTable.body.append(row)
      doc.append(picTable)
      doc.write(baseName+'.html')
@@ -429,7 +429,7 @@ def ProcessScalarSection(infiles,doc,currNum):
                errorlist = []
                kappalist = []
                for d in data:
-                    (mean,var,error,kappa)=stats.Stats(d)
+                    (mean,var,error,kappa)=stats.Stats(d[StartCut:-1])
                     meanlist.append(mean)
                     errorlist.append(error)
                     varlist.append(var)
@@ -600,7 +600,7 @@ if (os.access(dirName+"/.pref",os.F_OK)):
      print dirName+"/.pref"
      prefFile=IOSectionClass()
      prefFile.OpenFile(dirName+"/.pref")
-     prefFile.ReadVar("StartCut")
+     StartCut = prefFile.ReadVar("StartCut")
      print "StartCut = ", StartCut
      print prefFile.ReadVar("cutoff")
      cutoff=prefFile.ReadVar("cutoff")
