@@ -110,9 +110,9 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      data=infiles.ReadVar("y")
      if (data==[None]):
           return currNum
-     isCumulative=infiles.ReadVar("Cumulative")
-     print "My cumulativeness is",isCumulative
-     if (isCumulative=="false"):
+     isCumulative=infiles.ReadVar("Cumulative")[0]
+     if (isCumulative==False):
+          data = map (lambda y: y[StartCut:-1],data)
           y = Avg(VecAvg(data))
      else:
           y = AvgLastVec(data)
@@ -391,7 +391,6 @@ def ProcessScalarSection(infiles,doc,currNum):
           data = infiles.ReadVar(counter)
 ##          print "data is ",data
 ##          print type(data[0])
-          data=data[scalarCutoff:len(data)]
           if type(data[0])==numarray.numarraycore.NumArray:
                currNum=currNum+1
                varName=infiles.GetVarName(counter)
@@ -608,8 +607,6 @@ if (os.access(dirName+"/.pref",os.F_OK)):
 #     prefFile.CloseFile() 
 if cutoff==None:
      cutoff=0
-if scalarCutoff==None:
-     scalarCutoff=0
 if not(os.access(dirName,os.F_OK)):
      os.mkdir(dirName)
 os.chdir(dirName)
