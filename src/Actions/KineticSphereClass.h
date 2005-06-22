@@ -17,7 +17,7 @@ public:
   double d_dBeta (int slice1, int slice2, int level);
   inline void SetNumImages (int num) { NumImages = num; }
   KineticSphereClass (PathDataClass &pathData);
-  double K(int slice,int nextSlice,int ptcl,int level);
+  double K(int slice,int nextSlice,int ptcl,int level,double lambda);
 
 };
 
