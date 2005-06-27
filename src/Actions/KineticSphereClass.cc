@@ -147,7 +147,7 @@ double KineticSphereClass::d_dBeta (int slice1, int slice2,
       for (int slice=slice1; slice<slice2; slice+=skip) {
 	////HACK FOR HELIUM SPHERE!
 	//	spring += (0.5*(NDIM-1))/levelTau;
-	spring += K(slice1,slice1+1,ptcl,level,lambda);
+	spring += K(slice,slice+1,ptcl,level,lambda)*lambda/(31*31);
 	  //	spring += scalarnumSum/Z; 
       }
     }
