@@ -300,6 +300,15 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
 
 void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 {
+  int maxWallTime;
+  if (in.ReadVar("MaxWallTime", maxWallTime)) {
+    PathData.SetMaxWallTime(maxWallTime);
+    int hours = maxWallTime/3600;
+    int minutes = (maxWallTime-3600*hours)/60;
+    int seconds = maxWallTime%60;
+    perr << "Maximum wall time is " << hours << " hours, " << minutes
+	 << " minutes, and " << seconds << " seconds.\n";
+  }
   Algorithm.Read(in,1);
 }
 

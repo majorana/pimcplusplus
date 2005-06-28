@@ -12,6 +12,8 @@ class MoveWrap : public EventClass
   MoveClass* Move;
   void DoEvent() 
   {
+    if (Move->PathData.ExceededWallTime())
+      return;
     int start=clock();
     Move->MakeMove();
     int end=clock();
@@ -28,6 +30,8 @@ class ObserveWrap : public EventClass
   ///Need to implement the do event here
   void DoEvent() 
   {
+    if (Observe->PathData.ExceededWallTime())
+      return;
     int start=clock();
     Observe->Accumulate();
     int end=clock();
@@ -47,6 +51,9 @@ class LoopClass : public EventClass
   Array<EventClass*,1> Events;
  public:
   void DoEvent() {
+    if ((MoveList->size()>0))
+      if ((*MoveList)(0)->PathData.ExceededWallTime())
+      return;
     //    cerr<<"The number of events are "<<Events.size()<<" "<<Steps<<endl;
     //    cerr<<"Steps are "<<Steps<<endl;
     //    cerr<<"The line after"<<endl;

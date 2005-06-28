@@ -62,3 +62,30 @@ void PathDataClass::MoveRefSlice (int absSlice)
   MoveJoin (Path.NumTimeSlices()-1);
   assert (Path.GetRefSlice() == absSlice);
 }
+
+
+#include <sys/time.h>
+
+int
+PathDataClass::GetWallTime()
+{
+  struct timeval tv;
+  struct timezone tz;
+  gettimeofday(&tv, &tz);
+  return (int)tv.tv_sec;
+}
+
+
+bool
+PathDataClass::ExceededWallTime()
+{
+  if (MaxWallTime == -1)
+    return false;
+  return ((GetWallTime()-StartWallTime) > MaxWallTime);
+}
+
+void
+PathDataClass::SetMaxWallTime(int maxWallTime)
+{
+  MaxWallTime = maxWallTime;
+}

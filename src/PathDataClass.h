@@ -19,7 +19,9 @@ class PathDataClass
 {
 private:
   int MyCloneNum;
-
+  /// These store the time of start and the maximum wall time in seconds.
+  int StartWallTime, MaxWallTime;
+  int GetWallTime();
 public:  
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
@@ -32,6 +34,10 @@ public:
   CommunicatorClass WorldComm;
   RandomClass Random;
 
+  /// This function returns true if we have exceeded the maximum wall
+  /// time.
+  void SetMaxWallTime(int maxWallTime);
+  bool ExceededWallTime();
   /// This object computes all actions.
   //  ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
   ActionsClass Actions;
@@ -107,9 +113,11 @@ public:
 
   void Read (IOSectionClass &in);
   PathDataClass() : 
-    /* Action(*this), */Actions(*this), Random(WorldComm), Path(IntraComm,Random, Actions)
+    /* Action(*this), */Actions(*this), Random(WorldComm), 
+			Path(IntraComm,Random, Actions), MaxWallTime(-1)
   { 
     Join = 1; 
+    StartWallTime = GetWallTime();
   }
 
 
