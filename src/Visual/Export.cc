@@ -316,7 +316,8 @@ ExportClass::OnExportButton()
 {
   Width  = (int)round(WidthButton.get_value());
   Height = (int)round(HeightButton.get_value());
-  string basename = BaseNameChooser.get_filename();
+  //  string basename = BaseNameChooser.get_filename();
+  string basename = BaseNameEntry.get_text();
   if (MovieButton.get_active()) {
     int firstFrame   = (int)round(FirstFrameButton.get_value())-1;
     int lastFrame    = (int)round(LastFrameButton.get_value())-1;

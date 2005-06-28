@@ -53,7 +53,8 @@ void PairCorrelationClass::Read(IOSectionClass& in)
   Histogram=0;
   in.CloseSection();
   /// Now write the one-time output variables
-  WriteInfo();
+  if (PathData.Path.Communicator.MyProc()==0)
+    WriteInfo();
 }
 
 
