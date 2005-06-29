@@ -6,10 +6,47 @@
 \begin{document}
 \maketitle
 \chapter{Introduction}
+{\em pimc++} is a general, high-performance tool to perform
+fully-correlated simulations of quantum systems at finite temperature.
+In essense, it samples the many-body thermal density matrix to compute
+thermal equilibrium averages of quantum observables.  Written in very
+object-oriented C++, it is intended to be a nearly universal tool that
+can be easily extended to perform novel simulations.  Its current
+features include:
+\begin{itemize}
+  \item Arbitrary number of particles, species, and timeslices,
+        limited only by memory requirements.
+  \item Time-slices can be distributed across processors using MPI to
+        communicate, making possible efficient simulations with
+        thousands of time-slices.
+  \item Multiple ``clones'' of the same simulation may be run with
+        automatic generation of different random number seeds.  This
+        can be used to improve statistics.
+  \item Very high-accuracy pair-actions can be used.  These are
+        generated with the coupled squarer++/fitter++ package.
+  \item Bose, Fermi, and Boltzmann statistics are supported.
+  \item Output is efficiently and accurately stored in HDF5 format.
+  \item Extremely flexible input file format allows specification of
+        the Monte Carlo algorithm in the input.
+  \item Free and periodic boundary conditions are specified
+        independently for each dimension allowing slab and column
+        geometries. 
+  \item Statistical analysis and HTML report generation with
+        automatic creation of embedded plots.
+  \item 3D OpenGL-based visualization tool can be used for debugging
+        and pedagogy.  Supports exporting to the POVray ray-tracer for 
+        photo-realistic rendering.  Also supports MPEG4 movie generation.
+\end{itemize}
 
 \chapter{Installing}
+Suffice it to say that installing {\em pimc++} can be a quite a pain
+in the caboose.
 
 \chapter{Input Files}
+\section{Introduction}
+\section{Defining variables}
+\section{Creating hierachy with sections}
+
 \section{Format}
 \section{Global parameters}
 \section{The ``System'' section}
@@ -20,7 +57,10 @@
 
 \chapter{Analysis Tools}
 \section{MakeReport}
-
 \section{pathvis++}
+
+\chapter{Modifing pimc++}
+\section{Adding a new ``Move''}
+\section{Adding a new ``Observable''}
 
 \end{document}
