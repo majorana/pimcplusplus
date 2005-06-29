@@ -62,5 +62,38 @@ in the caboose.
 \chapter{Modifing pimc++}
 \section{Adding a new ``Move''}
 \section{Adding a new ``Observable''}
+There are two steps to adding a new observable. First, the observable
+needs to be created and then appropriate files need to be changed to
+allow the observable to be ``glued'' into the rest of the code.
+\subsection{Creating an observable}
+All observables are located in the Observables directory underneath
+the src directory. All observables inherit from the function
+ObservableClass (located in ObservableBase.h). Every observable has a
+``name'' and a ``description'' and all
+observables must implement the functions: \\
+void Accumulate() \\
+void WriteBlock() \\ 
+The following functions may be overwritten by an observable, but need
+not be: \\
+void Read(IOSectionClass& IO) \\
+void WriteInfo() \\
+A standard observable should also have two variables called Freq and
+DumpFreq that are read in from the input file and respectively
+establish how many times the observable must be called before it
+accumulates its running average and how many times it must be called
+before it outputs its running average to the output file.
+Each of these functions will be discussed later.  First we examine how
+the ObservableVariables are created.
+\subsubsection{Accumulate()}
+The accumulate function gets called each time that an observable is
+told to accumulate in the code's algorithm.  A correctly implemented
+accumulate should call WriteBlock() every DumpFreq amount of times and
+should perform the functions inside of itself every Freq amount of
+times it is called.  The functions inside of itself should add onto
+its running average the value of the observable it is in charge
+of. For example if it was an energy observable, it might accumulate
+the running sum of the kinetic and potential energies.
+
+\subsubsection{
 
 \end{document}
