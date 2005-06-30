@@ -1,10 +1,12 @@
 check_PROGRAMS = TestXML TestHDF5
 
 TestXML_SOURCES = TestXML.cc
-TestXML_LIBS = ciao
+TestXML_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
 
 TestHDF5_SOURCES = TestHDF5.cc
-TestHDF5_LIBS = ciao
+TestHDF5_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
+
+includedir=$(prefix)/include/Common/IO
 
 lib_LTLIBRARIES = libciao.la
 libciao_la_SOURCES = FileExpand.h        \
@@ -17,12 +19,12 @@ libciao_la_SOURCES = FileExpand.h        \
                      InputOutputHDF5.cc  \
                      InputOutputXML.h    \
                      InputOutputXML.cc   
+
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
-
-libciao_la_CFLAGS = $(MPI_DEF) $(ENABLE_F77) $(MPI_CFLAGS) 
-libciao_la_LIBADD = $(GMP_LIBS)
+libciao_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)
+libciao_la_LIBADD = $(GMP_LIBS) 
 
 #if HAVE_GMP
 #     libsprng_la_SOURCES += pmlcg/pmlcg.h pmlcg/pmlcg.c pmlcg/info.h pmlcg/basic.h 
