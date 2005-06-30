@@ -61,6 +61,77 @@ in the caboose.
 
 \chapter{Modifing pimc++}
 \section{Adding a new ``Move''}
+There are two steps to adding a new move. First, the move needs to be
+created and then the appropriate files need to be changed to allow the
+move to be ``glued'' into the rest of the code.
+
+There are two types of moves. There are normal moves and then
+multistage moves. We will start by discussion normal moves.
+
+All normal moves must inheret from the class ParticleMoveClass and 
+create the following four functions: a
+constructor, MakeMove(), Read(IOSectionClass &in),  and WriteRatio().
+
+The constructor of a move must look like the following:\\
+  NameOfMyMoveClass(PathDataClass &myPathData,IOSectionClass outSection) :
+  ParticleMoveClass(myPathData,outSection)
+    {
+      /* Add code you want here */
+    }
+It is important to remember to send a pathdata reference and an
+  IOSectionClass to ParticleMoveClass as is done above. This is so the
+  move has access to the pathdata and an ability to write out data
+  like its acceptance ratio
+
+The function MakeMove() is in charge of the entire move.  At the end
+of the move, it is mandatory that the function either accepts or
+rejects the move by calling either
+PathData.Path.AcceptMove(startSlice,endSlice,ActiveParticles) if the
+move is accepted or by calling 
+PathData.Path.RejectMove(startSlice,endSlice,ActiveParticles) if the
+move is rejected.  The parameters that are sent to these function
+include the range (inclusive) of slices that the move has altered as
+well as a Array<int,1> of particles that the move has changed.  By
+accepting the move, all knowledge of the previous state of the path
+will be erased. By rejecting the move all changes the move made in the
+slice ranges defined by [startSlice:endSlice] on the particles defined
+by the array ActiveParticles will be overwritten by the previous state
+of the path at these locations.  Therefore, the move needs to do all
+the metropolis steps by itself. It is also responsible for ensuring
+that it calls and uses the correct actions.
+
+We will not worry about WriteRatio() for the time being other then to
+say that it is relevant for getting the acceptance ratio outputs
+correctly.
+
+The function Read(IOSectionClass &in) is called immediately after the
+move is created so that the move has the opportunity to read relevant
+input information.  When it is called, the IOSectionClass object
+``in'' will be located inside the section of the input class relevant
+to this move.  The move is then responsible for doing the appropriate
+in.Readvar(``varString'',var) to read the appropriate variables. Note,
+that the Read function is responsible for closing any sections it
+opens, but NOT for closing the section it is in (i.e. there needs to
+be exactly the same number of OpenSection and CloseSection calls in
+your Read function).
+
+To glue the read function into your code, there are currently four
+steps. First, you must add the move to the src/Moves/template.make and
+src/template.make file in the appropriate places (i.e. anyplace that
+MultiStage.* shows up, you need to add YourMove.*).  Your move needs
+to be added to the .h file of MovesClass.h. This ensures that it will
+get included when other files #include other moves. Finally, inside
+PIMCClass.cc, there is a ReadMoves() file which will need to have your
+move added to it.  In the series of ``if'' statements, you need to add
+\\
+    else if (MoveType==''MyMoveType''){
+      moveName=''MyMoveName'';
+      Moves(counter)=new MyMoveClass(PathData,OutFile);
+      Moves(counter)->Read(in);
+    }
+
+
+
 \section{Adding a new ``Observable''}
 There are two steps to adding a new observable. First, the observable
 needs to be created and then appropriate files need to be changed to
@@ -94,6 +165,6 @@ its running average the value of the observable it is in charge
 of. For example if it was an energy observable, it might accumulate
 the running sum of the kinetic and potential energies.
 
-\subsubsection{
+
 
 \end{document}
