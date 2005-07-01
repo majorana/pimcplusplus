@@ -1,5 +1,5 @@
 #include "MyTricubicSpline.h"
-#include "ComplexMultiTricubicSpline2.h"
+#include "ComplexMultiTricubicSpline.h"
 
 void ValTest()
 {

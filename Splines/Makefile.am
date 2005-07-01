@@ -9,7 +9,7 @@ TestPeriodic_SOURCES = TestPeriodic.cc
 TestQuintic_SOURCES = TestQuintic.cc
 
 
-LDADD = ../IO/libciao.la libspline.la $(XML2_LIBS) $(HDF5_LIBS)
+LDADD = ../IO/libciao.la libspline.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS)
 CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
 
 lib_LTLIBRARIES = libspline.la
@@ -31,7 +31,18 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        QuinticSpline.cc               \
                        QuinticSplines.f               \
                        r3spline.f                     \
-                       z3spline.f          
+                       z3spline.f                     \
+                       bcspeval.f                     \
+                       bcspline.f                     \
+                       evtricub.f                     \
+                       herm3ev.f                      \
+                       ibc_ck.f                       \
+                       mktricubw.f                    \
+                       splinck.f                      \
+                       tcspeval.f                     \
+                       tcspline.f                     \
+                       v_spline.f                     \
+                       zonfind.f
 
 #TestXML_SOURCES = TestXML.cc
 #TestXML_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
