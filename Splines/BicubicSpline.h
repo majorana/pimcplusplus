@@ -1,7 +1,7 @@
 #ifndef BICUBIC_SPLINE_H
 #define BICUBIC_SPLINE_H
 
-#include "CubicSpline.h"
+#include <Grid.h>
 
 /// This structure holds the required data for a grid point, which
 /// includes the value of z at (xi,yj), dz/dx, dz/dy, and d^2/dxdy.

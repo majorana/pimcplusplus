@@ -4,7 +4,6 @@
 #include "../IO/InputOutput.h"
 #include "../Blitz.h"
 
-
 //Ken's Grid Class
 
 /// The different types of grids that we currently allow
