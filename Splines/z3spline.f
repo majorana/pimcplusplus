@@ -1,50 +1,50 @@
-      function p1 (t)
+      function p1z (t)
       implicit none
-      real*8 p1,t
-      p1 = ((t-1.0)*(t-1.0)*(1.0+2.0*t))
-      end function p1
+      real*8 p1z,t
+      p1z = ((t-1.0)*(t-1.0)*(1.0+2.0*t))
+      end function p1z
 
-      function p2 (t)
+      function p2z (t)
       implicit none
-      real*8 p2,t
-      p2 = (t*t*(3.0-2.0*t))
-      end function p2
+      real*8 p2z,t
+      p2z = (t*t*(3.0-2.0*t))
+      end function p2z
 
-      function q1 (t)
+      function q1z (t)
       implicit none
-      real*8 q1,t
-      q1 = (t*(t-1.0)*(t-1.0))
-      end function q1
+      real*8 q1z,t
+      q1z = (t*(t-1.0)*(t-1.0))
+      end function q1z
 
-      function q2 (t)
+      function q2z (t)
       implicit none
-      real*8 q2,t
-      q2 = (t*t*(t-1.0))
-      end function q2
+      real*8 q2z,t
+      q2z = (t*t*(t-1.0))
+      end function q2z
 
-      function dp1 (t)
+      function dp1z (t)
       implicit none
-      real *8 dp1, t
-      dp1 = 6.0*t*(t-1.0)
-      end function dp1
+      real *8 dp1z, t
+      dp1z = 6.0*t*(t-1.0)
+      end function dp1z
 
-      function dp2 (t)
+      function dp2z (t)
       implicit none
-      real *8 dp1,dp2, t
-      dp2 = -dp1(t)
-      end function dp2
+      real *8 dp1z,dp2z, t
+      dp2z = -dp1z(t)
+      end function dp2z
 
-      function dq1 (t)
+      function dq1z (t)
       implicit none
-      real *8 dq1, t
-      dq1 = (t-1.0)*(3.0*t-1.0)
-      end function dq1
+      real *8 dq1z, t
+      dq1z = (t-1.0)*(3.0*t-1.0)
+      end function dq1z
 
-      function dq2 (t)
+      function dq2z (t)
       implicit none
-      real *8 dq2, t
-      dq2 = (3.0*t*t - 2.0*t)
-      end function dq2
+      real *8 dq2z, t
+      dq2z = (3.0*t*t - 2.0*t)
+      end function dq2z
 
 
 
@@ -52,7 +52,7 @@
       implicit none
       real*8 x,x0,dx,y,y0,dy,z,z0,dz,xlo,ylo,zlo,u,v,w,
      +       a0,a1,a2,a3,b0,b1,b2,b3,c0,c1,c2,c3
-      real*8 p1,p2,q1,q2
+      real*8 p1z,p2z,q1z,q2z
       integer nx,ny,nz, ixl,ixh,iyl,iyh,izl,izh,num,i
       complex*16 F(8,num,nz,ny,nx)
       complex*16 vals(num)
@@ -71,20 +71,20 @@
       v = (y-ylo)/dy
       w = (z-zlo)/dz
 
-      a0 = p1(u)
-      a1 = p2(u)
-      a2 = dx*q1(u)
-      a3 = dx*q2(u)
+      a0 = p1z(u)
+      a1 = p2z(u)
+      a2 = dx*q1z(u)
+      a3 = dx*q2z(u)
 
-      b0 = p1(v)
-      b1 = p2(v)
-      b2 = dy*q1(v)
-      b3 = dy*q2(v)
+      b0 = p1z(v)
+      b1 = p2z(v)
+      b2 = dy*q1z(v)
+      b3 = dy*q2z(v)
 
-      c0 = p1(w)
-      c1 = p2(w)
-      c2 = dz*q1(w)
-      c3 = dz*q2(w)
+      c0 = p1z(w)
+      c1 = p2z(w)
+      c2 = dz*q1z(w)
+      c3 = dz*q2z(w)
 
       do i = 1,num
          vals(i) =a0*(b0*(c0*F(1,i,izl,iyl,ixl)+c1*F(1,i,izh,iyl,ixl)+
@@ -134,7 +134,7 @@
      +       a0,a1,a2,a3,b0,b1,b2,b3,c0,c1,c2,c3,
      +       da0,da1,da2,da3,db0,db1,db2,db3,dc0,dc1,dc2,dc3,
      +       dxInv,dyInv,dzInv
-      real*8 p1,p2,q1,q2,dp1,dp2,dq1,dq2
+      real*8 p1z,p2z,q1z,q2z,dp1z,dp2z,dq1z,dq2z
       integer nx,ny,nz, ixl,ixh,iyl,iyh,izl,izh,num,i
       complex*16 F(8,num,nz,ny,nx), vals(num), grads(3,num)
       
@@ -159,20 +159,20 @@
 c      print *,"u = ",u," v = ",v, " w = ", w
 c      print *,"F77: ixl=",ixl, " iyl=",iyl, " izl=",izl
       
-      a0 = p1(u)
-      a1 = p2(u)
-      a2 = dx*q1(u)
-      a3 = dx*q2(u)
+      a0 = p1z(u)
+      a1 = p2z(u)
+      a2 = dx*q1z(u)
+      a3 = dx*q2z(u)
 
-      b0 = p1(v)
-      b1 = p2(v)
-      b2 = dy*q1(v)
-      b3 = dy*q2(v)
+      b0 = p1z(v)
+      b1 = p2z(v)
+      b2 = dy*q1z(v)
+      b3 = dy*q2z(v)
 
-      c0 = p1(w)
-      c1 = p2(w)
-      c2 = dz*q1(w)
-      c3 = dz*q2(w)
+      c0 = p1z(w)
+      c1 = p2z(w)
+      c2 = dz*q1z(w)
+      c3 = dz*q2z(w)
 
 c      print *,"a0=",a0,"a1=",a1,"a2=",a2,"a3=",a3
 c      print *,"b0=",b0,"b1=",b1,"b2=",b2,"b3=",b3
@@ -180,20 +180,20 @@ c      print *,"c0=",c0,"c1=",c1,"c2=",c2,"c3=",c3
 c      print *,"nx=",nx, "ny=", ny, "nz=", nz, "num=",num
 
 
-      da0 = dxInv*dp1(u)
-      da1 = dxInv*dp2(u)
-      da2 = dq1(u)
-      da3 = dq2(u)
+      da0 = dxInv*dp1z(u)
+      da1 = dxInv*dp2z(u)
+      da2 = dq1z(u)
+      da3 = dq2z(u)
 
-      db0 = dyInv*dp1(v)
-      db1 = dyInv*dp2(v)
-      db2 = dq1(v)
-      db3 = dq2(v)
+      db0 = dyInv*dp1z(v)
+      db1 = dyInv*dp2z(v)
+      db2 = dq1z(v)
+      db3 = dq2z(v)
 
-      dc0 = dzInv*dp1(w)
-      dc1 = dzInv*dp2(w)
-      dc2 = dq1(w)
-      dc3 = dq2(w)
+      dc0 = dzInv*dp1z(w)
+      dc1 = dzInv*dp2z(w)
+      dc2 = dq1z(w)
+      dc3 = dq2z(w)
 
 c      print *,"F(10,10,10,10,10)=",F(8,10,10,10,10)
 

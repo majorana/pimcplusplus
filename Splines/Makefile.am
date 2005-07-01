@@ -1,4 +1,16 @@
-check_PROGRAMS = TestBicubic TestComplexMultiTricubicSpline TestComplexMultiTricubicSpline2 TestGrid TestMultiTricubicSpline TestMultiTricubicSpline2 TestMultiTricubicSpline2 TestMyTricubic TestPeriodic TestQuintic
+check_PROGRAMS = TestBicubic TestComplexMultiTricubicSpline TestGrid TestMultiTricubicSpline TestMyTricubic TestPeriodic TestQuintic
+
+TestBicubic_SOURCES = TestBicubic.cc 
+TestComplexMultiTricubicSpline_SOURCES = TestComplexMultiTricubicSpline.cc
+TestGrid_SOURCES = TestGrid.cc
+TestMultiTricubicSpline_SOURCES = TestMultiTricubicSpline.cc
+TestMyTricubic_SOURCES = TestMyTricubic.cc
+TestPeriodic_SOURCES = TestPeriodic.cc
+TestQuintic_SOURCES = TestQuintic.cc
+
+
+LDADD = ../IO/libciao.la libspline.la $(XML2_LIBS) $(HDF5_LIBS)
+CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
 
 lib_LTLIBRARIES = libspline.la
 libspline_la_SOURCES = BicubicSpline.h                \
@@ -9,8 +21,6 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        Grid.cc                        \
                        ComplexMulitTricubicSpline.h   \
                        ComplexMultiTricubicSpline.cc  \
-                       ComplexMulitTricubicSpline2.h  \
-                       ComplexMultiTricubicSpline2.cc \
                        MultiTricubicSpline.h          \
                        MultiTricubicSpline.cc         \
                        MyTricubicSpline.h             \
@@ -43,5 +53,5 @@ libspline_la_LIBADD   =
 #endif
 
 
-include_HEADERS = BicubicSpline.h ComplexMultiTricubicSpline.h ComplexMultiTricubicSpline2.h CubicSpline.h Grid.h MultiTricubicSpline.h MultiTricubicSpline2.h MultiTricubicSpline3.h MyTricubicSpline.h PeriodicSpline.h QuinticSpline.h 
+include_HEADERS = BicubicSpline.h ComplexMultiTricubicSpline.h CubicSpline.h Grid.h MultiTricubicSpline.h MyTricubicSpline.h PeriodicSpline.h QuinticSpline.h 
 
