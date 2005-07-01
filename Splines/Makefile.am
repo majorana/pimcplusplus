@@ -13,16 +13,15 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        ComplexMultiTricubicSpline2.cc \
                        MultiTricubicSpline.h          \
                        MultiTricubicSpline.cc         \
-                       MultiTricubicSpline2.h         \
-                       MultiTricubicSpline2.cc        \
-                       MultiTricubicSpline3.h         \
-                       MultiTricubicSpline3.cc        \
                        MyTricubicSpline.h             \
                        MyTricubicSpline.cc            \
                        PeriodicSpline.h               \
                        PeriodicSpline.cc              \
                        QuinticSpline.h                \
-                       QuinticSpline.cc 
+                       QuinticSpline.cc               \
+                       QuinticSplines.f               \
+                       r3spline.f                     \
+                       z3spline.f          
 
 #TestXML_SOURCES = TestXML.cc
 #TestXML_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)

@@ -1,4 +1,4 @@
-#include "MultiTricubicSpline3.h"
+#include "MultiTricubicSpline.h"
 
 void MultiTricubicSpline::Update()
 {
