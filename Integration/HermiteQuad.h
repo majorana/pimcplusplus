@@ -2,8 +2,9 @@
 #define HERMITE_QUAD_H
 
 #include <cmath>
-#include "../Blitz.h"
+#include <blitz/array.h>
 
+using namespace blitz;
 
 class Hermite16
 {
@@ -45,20 +46,20 @@ class HermiteQuadClass
   double sigma;
  public:
   void SetSigma(double mysigma)
-    {
-      sigma = mysigma;
-      for (int i=0; i<Rule.n; i++)
-	Rule.x[i] = Rule.u[i]*M_SQRT2*sigma;
-    }  
-
+  {
+    sigma = mysigma;
+    for (int i=0; i<Rule.n; i++)
+      Rule.x[i] = Rule.u[i]*M_SQRT2*sigma;
+  }  
+  
   inline double Integrate(ScaledIntegrand &Integrand)
-    {
-      double sum=0; 
-      for (int i=0; i<Rule.n; i++)
-	sum += Rule.w[i]*Integrand(Rule.x[i]);
-      sum *= M_SQRT2*sigma;
-      return (sum);
-    }
+  {
+    double sum=0; 
+    for (int i=0; i<Rule.n; i++)
+      sum += Rule.w[i]*Integrand(Rule.x[i]);
+    sum *= M_SQRT2*sigma;
+    return (sum);
+  }
   HermiteQuadClass()
   {
     for (int i=0; i<Rule.n; i++)
@@ -76,36 +77,37 @@ class Hermite3DQuadClass
   double sigma;
   Array<double,2> Points;
  public:
-  void SetSigma(double mysigma)
-    {
-      int n = Rule.n;
-      Points.resize(n*n*n,4);
-
-      sigma = mysigma;
-      for (int i=0; i<Rule.n; i++)
-	Rule.x[i] = Rule.u[i]*M_SQRT2*sigma;
-      for (int i=0; i<n; i++)
-	for (int j=0; j<n; j++)
-	  for (int k=0; k<n; k++) {
-	    int index = k+(j+i*n)*n;
-	    Points(index,0) = Rule.x[i];
-	    Points(index,1) = Rule.x[j];
-	    Points(index,2) = Rule.x[k];
-	    Points(index,3) = Rule.w[i]*Rule.w[j]*Rule.w[k];
-	  }
-    }  
-
+  void SetSigma(double mysigma) 
+  {
+    int n = Rule.n;
+    Points.resize(n*n*n,4);
+    
+    sigma = mysigma;
+    for (int i=0; i<Rule.n; i++)
+      Rule.x[i] = Rule.u[i]*M_SQRT2*sigma;
+    for (int i=0; i<n; i++)
+      for (int j=0; j<n; j++)
+	for (int k=0; k<n; k++) {
+	  int index = k+(j+i*n)*n;
+	  Points(index,0) = Rule.x[i];
+	  Points(index,1) = Rule.x[j];
+	  Points(index,2) = Rule.x[k];
+	  Points(index,3) = Rule.w[i]*Rule.w[j]*Rule.w[k];
+	}
+  }  
+  
   inline double Integrate(ScaledIntegrand &Integrand)
-    {
-      int n = Rule.n;
-      int N = n*n*n;
-      double sum=0; 
-      for (int i=0; i<N; i++)
-	sum += Points(i,3)*Integrand(Points(i,0), Points(i,1), Points(i,2));
-      double a = M_SQRT2*sigma;
-      sum *= (a*a*a);
-      return (sum);
-    }
+  {
+    int n = Rule.n;
+    int N = n*n*n;
+    double sum=0; 
+    for (int i=0; i<N; i++)
+      sum += Points(i,3)*Integrand(Points(i,0), Points(i,1), Points(i,2));
+    double a = M_SQRT2*sigma;
+    sum *= (a*a*a);
+    return (sum);
+  }
+
   Hermite3DQuadClass()
   {
     for (int i=0; i<Rule.n; i++)

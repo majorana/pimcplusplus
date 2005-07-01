@@ -1,10 +1,13 @@
-#include "../Blitz.h"
+#ifndef FUNCTIONALS_H
+#define FUNCTIONALS_H
 
-void ExchangePotential (scalar nup, scalar ndown,
-			scalar &Vup, scalar &Vdown);
-void CorrelationPotential(scalar  nup, scalar ndown,
-			  scalar &Vup, scalar &Vdown);
-void FortranExCorr(scalar  nup, scalar  ndown,
-		   scalar &Vup, scalar &Vdown);
+void ExchangePotential (double nup, double ndown,
+			double &Vup, double &Vdown);
+void CorrelationPotential(double  nup, double ndown,
+			  double &Vup, double &Vdown);
+void FortranExCorr(double  nup, double  ndown,
+		   double &Vup, double &Vdown);
 
-double FortranXCE (scalar nup, scalar ndown);
+double FortranXCE (double nup, double ndown);
+
+#endif

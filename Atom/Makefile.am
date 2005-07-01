@@ -1,10 +1,13 @@
 check_PROGRAMS = TestDFTAtom TestRadialWF
 
 TestDFTAtom_SOURCES  = TestDFTAtom.cc
-TestDFTAtom_LDADD    = ../IO/libciao.la ../Splines/libspline.la libatom.la $(XML2_LIBS) $(BLITZ_LIBS)
 
 TestRadialWF_SOURCES = TestRadialWF.cc
-TestRadialWF_LDADD   = ../IO/libciao.la ../Splines/libspline.la libatom.la $(XML2_LIBS) $(BLITZ_LIBS)
+
+LDADD   = ../IO/libciao.la ../Splines/libspline.la ../DFT/libdft.la ../PH/libPH.la libatom.la \
+          ../Integration/libquad.la ../Fitting/libfitting.la ../MatrixOps/libmatops.la        \
+          $(XML2_LIBS) $(BLITZ_LIBS) $(GSL_LIBS)
+CXXFLAGS = $(XML2_CFLAGS) $(BLITZ_CFLAGS) $(HDF5_CFLAGS) $(AM_CXXFLAGS)
 
 includedir=$(prefix)/include/Common/Atom
 
@@ -16,15 +19,9 @@ libatom_la_SOURCES = AtomBase.h          \
                      RadialWF.h          \
                      RadialWF.cc
 
-#if WITH_F77
-#     libsprng_la_SOURCES += common/fwrap_mpi.c
-#endif
-libatom_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)
-libatom_la_LIBADD = $(GMP_LIBS) 
+libatom_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
+#libatom_la_LIBADD = $(GMP_LIBS) 
 
-#if HAVE_GMP
-#     libsprng_la_SOURCES += pmlcg/pmlcg.h pmlcg/pmlcg.c pmlcg/info.h pmlcg/basic.h 
-#endif
 
 
 include_HEADERS = AtomBase.h DFTAtom.h RadialWF.h

@@ -16,8 +16,8 @@ typedef TinyMatrix<scalar,3,3> Mat3;
 typedef TinyVector<complex<double>,3>   cVec3;
 typedef TinyMatrix<complex<double>,3,3> cMat3;
 
-typedef TinyVector<scalar,NDIM> dVec;
-typedef TinyVector<int,NDIM> dVecInt;
+//typedef TinyVector<scalar,NDIM> dVec;
+//typedef TinyVector<int,NDIM> dVecInt;
 
 #ifdef MAC
 //  extern "C" double isnan (double x);

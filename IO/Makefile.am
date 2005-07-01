@@ -2,9 +2,11 @@ check_PROGRAMS = TestXML TestHDF5
 
 TestXML_SOURCES = TestXML.cc
 TestXML_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
+TestXML_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
 
 TestHDF5_SOURCES = TestHDF5.cc
 TestHDF5_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
+TestHDF5_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
 
 includedir=$(prefix)/include/Common/IO
 

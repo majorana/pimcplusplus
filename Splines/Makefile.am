@@ -56,7 +56,7 @@ includedir=$(prefix)/include/Common/Splines
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
-libspline_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)
+libspline_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
 libspline_la_LIBADD   =
 
 #if HAVE_GMP

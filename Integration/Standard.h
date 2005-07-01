@@ -49,10 +49,10 @@ inline bool getline(ifstream & is, string & s) {
 #endif
 
 ////////// redefine cout to write to a file //////////////
-#ifndef NO_COUT
-#define cout COUT
-extern ofstream COUT;
-#endif // NO_COUT
+// #ifndef NO_COUT
+// #define cout COUT
+// extern ofstream COUT;
+// #endif // NO_COUT
 
 ////////////////////////////////////////////////
 

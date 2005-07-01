@@ -1,51 +1,56 @@
 #include "Functionals.h"
+#include <cmath>
+#include <iostream>
+
+using namespace std;
+
 
 /////////////////////////////////////////////////////////////////
 //                    LSDA Exchange Functions                  //
 /////////////////////////////////////////////////////////////////
 
-inline scalar f(scalar zeta)
+inline double f(double zeta)
 {
-  const scalar FourThirds = 4.0/3.0;
-  const scalar TwoToOneThird = 1.25992104989487;//pow(2.0,1.0/3.0);
+  const double FourThirds = 4.0/3.0;
+  const double TwoToOneThird = 1.25992104989487;//pow(2.0,1.0/3.0);
   return ((pow(1.0+zeta, FourThirds) + pow(1.0-zeta, FourThirds)
 	   - 2.0) / (2.0 * (TwoToOneThird-1.0)));
 }
 
-inline scalar df_dzeta(scalar zeta)
+inline double df_dzeta(double zeta)
 {
-  scalar numer = (4.0/3.0)*(pow(1.0+zeta,1.0/3.0)-pow(1.0-zeta,1.0/3.0));
-  scalar denom = 2.0*(pow(2.0,1.0/3.0)-1.0);
+  double numer = (4.0/3.0)*(pow(1.0+zeta,1.0/3.0)-pow(1.0-zeta,1.0/3.0));
+  double denom = 2.0*(pow(2.0,1.0/3.0)-1.0);
   return (numer/denom);
 }
 
 
-void ExchangePotential (scalar nup, scalar ndown,
-			scalar &Vup, scalar &Vdown)
+void ExchangePotential (double nup, double ndown,
+			double &Vup, double &Vdown)
 {
-  scalar n = nup+ndown;
-  scalar zeta = (nup-ndown)/n;
+  double n = nup+ndown;
+  double zeta = (nup-ndown)/n;
   
-  const scalar Third = 1.0/3.0;
-  const scalar TwoToOneThird = 1.25992104989487;//pow(2.0,Third);
+  const double Third = 1.0/3.0;
+  const double TwoToOneThird = 1.25992104989487;//pow(2.0,Third);
   
-    scalar ExP = -3.0*pow(3.0*n/(8.0*M_PI), Third);
-  //scalar ExP = -3.0/2.0*pow(3.0*n/(8.0*M_PI), Third);
-  scalar ExF = TwoToOneThird * ExP;
+    double ExP = -3.0*pow(3.0*n/(8.0*M_PI), Third);
+  //double ExP = -3.0/2.0*pow(3.0*n/(8.0*M_PI), Third);
+  double ExF = TwoToOneThird * ExP;
 
-  const scalar FourThirds = 4.0/3.0;
-  scalar f = (pow(1.0+zeta, FourThirds) + pow(1.0-zeta, FourThirds)
+  const double FourThirds = 4.0/3.0;
+  double f = (pow(1.0+zeta, FourThirds) + pow(1.0-zeta, FourThirds)
 	      - 2.0) / (2.0 * (TwoToOneThird-1.0));
 
-  scalar dExP_dn = -pow(3.0/(8.0*M_PI*n*n), Third);
-  scalar dExF_dn = TwoToOneThird * dExP_dn;
+  double dExP_dn = -pow(3.0/(8.0*M_PI*n*n), Third);
+  double dExF_dn = TwoToOneThird * dExP_dn;
 
-  scalar dEx_dn = dExP_dn + (dExF_dn - dExP_dn) * f;
-  scalar df_dzeta =
+  double dEx_dn = dExP_dn + (dExF_dn - dExP_dn) * f;
+  double df_dzeta =
     4.0*Third*(pow(1.0+zeta,Third)-pow(1.0-zeta,Third))/
     (2.0*(TwoToOneThird-1.0));
 
-  scalar Ex = ExP + (ExF - ExP)*f;
+  double Ex = ExP + (ExF - ExP)*f;
   
   //fprintf (stderr, "C++ f = %1.12f\n", f);
   //fprintf (stderr, "C++ zeta = %1.12f\n", zeta);
@@ -68,40 +73,40 @@ void ExchangePotential (scalar nup, scalar ndown,
 }
   
 
-inline scalar F(scalar n, scalar A, scalar x0, scalar b, scalar c)
+inline double F(double n, double A, double x0, double b, double c)
 {
-  const scalar sixth = 1.0/6.0;
-  scalar x = pow(3.0/(4.0*M_PI*n),sixth);
-  scalar X = x*(x+b) + c;
-  scalar X0 = x0*(x0+b) + c;
-  scalar Q = sqrt(4.0*c-b*b);
-  scalar atanQ = atan(Q/(2.0*x+b));
+  const double sixth = 1.0/6.0;
+  double x = pow(3.0/(4.0*M_PI*n),sixth);
+  double X = x*(x+b) + c;
+  double X0 = x0*(x0+b) + c;
+  double Q = sqrt(4.0*c-b*b);
+  double atanQ = atan(Q/(2.0*x+b));
 
-  scalar term1 = log(x*x/X);
-  scalar term2 = (2.0*b/Q)*atanQ;
-  scalar term3 = -(b*x0/X0)*log((x-x0)*(x-x0)/X);
-  scalar term4 = -(b*x0/X0)*(2.0*(b+2.0*x0)/Q)*atanQ;
+  double term1 = log(x*x/X);
+  double term2 = (2.0*b/Q)*atanQ;
+  double term3 = -(b*x0/X0)*log((x-x0)*(x-x0)/X);
+  double term4 = -(b*x0/X0)*(2.0*(b+2.0*x0)/Q)*atanQ;
 
   return (A*(term1+term2+term3+term4));
 }
 
 
-scalar dFterms(scalar n, scalar A, scalar x0, scalar b, scalar c)
+double dFterms(double n, double A, double x0, double b, double c)
 {
-  scalar eps = 1.0e-6;
-  scalar np = n+eps;
-  scalar nm = n-eps;
-  const scalar sixth = 1.0/6.0;
-  scalar x = pow(3.0/(4.0*M_PI*np),sixth);
-  scalar X = x*(x+b) + c;
-  scalar X0 = x0*(x0+b) + c;
-  scalar Q = sqrt(4.0*c-b*b);
-  scalar atanQ = atan(Q/(2.0*x+b));
+  double eps = 1.0e-6;
+  double np = n+eps;
+  double nm = n-eps;
+  const double sixth = 1.0/6.0;
+  double x = pow(3.0/(4.0*M_PI*np),sixth);
+  double X = x*(x+b) + c;
+  double X0 = x0*(x0+b) + c;
+  double Q = sqrt(4.0*c-b*b);
+  double atanQ = atan(Q/(2.0*x+b));
 
-  scalar term1p = log(x*x/X);
-  scalar term2p = (2.0*b/Q)*atanQ;
-  scalar term3p = -(b*x0/X0)*log((x-x0)*(x-x0)/X);
-  scalar term4p = -(b*x0/X0)*(2.0*(b+2.0*x0)/Q)*atanQ;
+  double term1p = log(x*x/X);
+  double term2p = (2.0*b/Q)*atanQ;
+  double term3p = -(b*x0/X0)*log((x-x0)*(x-x0)/X);
+  double term4p = -(b*x0/X0)*(2.0*(b+2.0*x0)/Q)*atanQ;
 
   x = pow(3.0/(4.0*M_PI*nm),sixth);
   X = x*(x+b) + c;
@@ -109,10 +114,10 @@ scalar dFterms(scalar n, scalar A, scalar x0, scalar b, scalar c)
   Q = sqrt(4.0*c-b*b);
   atanQ = atan(Q/(2.0*x+b));
 
-  scalar term1m = log(x*x/X);
-  scalar term2m = (2.0*b/Q)*atanQ;
-  scalar term3m = -(b*x0/X0)*log((x-x0)*(x-x0)/X);
-  scalar term4m = -(b*x0/X0)*(2.0*(b+2.0*x0)/Q)*atanQ;
+  double term1m = log(x*x/X);
+  double term2m = (2.0*b/Q)*atanQ;
+  double term3m = -(b*x0/X0)*log((x-x0)*(x-x0)/X);
+  double term4m = -(b*x0/X0)*(2.0*(b+2.0*x0)/Q)*atanQ;
 
   //fprintf (stderr, "dterm1 = %1.12f\n", A*(term1p-term1m)/(2.0*eps));
   //fprintf (stderr, "dterm2 = %1.12f\n", A*(term2p-term2m)/(2.0*eps));
@@ -124,27 +129,27 @@ scalar dFterms(scalar n, scalar A, scalar x0, scalar b, scalar c)
 
 
 
-scalar dF_dn(scalar n, scalar A, scalar x0, scalar b, scalar c)
+double dF_dn(double n, double A, double x0, double b, double c)
 {
-  const scalar sixth = 1.0/6.0;
-  scalar x = pow(3.0/(4.0*M_PI*n),sixth);
-  scalar X = x*(x+b) + c;
-  scalar X0 = x0*(x0+b) + c;
-  scalar Q = sqrt(4.0*c-b*b);
+  const double sixth = 1.0/6.0;
+  double x = pow(3.0/(4.0*M_PI*n),sixth);
+  double X = x*(x+b) + c;
+  double X0 = x0*(x0+b) + c;
+  double Q = sqrt(4.0*c-b*b);
  
   //fprintf (stderr, "C++ x = %1.12f\n", x);
   //fprintf (stderr, "Q = %1.12f\n", Q);
  
-  scalar n3 = n*n*n;
-  scalar n7 = n3*n3*n;
-  scalar prefactor = -(A/6.0) * pow(3.0/(4.0*M_PI*n7),sixth);
-  scalar bp2x = 2.0*x + b;
-  scalar term1 = 2.0/x - (bp2x)/X;
-  scalar Q2m_bp2x_2_inv = 1.0/(Q*Q + (bp2x*bp2x));
-  scalar term2 = -4.0 * b * Q2m_bp2x_2_inv;
-  scalar term34pre = -b*x0/X0;
-  scalar term3 = 2.0/(x-x0) - bp2x/X;
-  scalar term4 = -4.0*(b+2.0*x0)*Q2m_bp2x_2_inv;
+  double n3 = n*n*n;
+  double n7 = n3*n3*n;
+  double prefactor = -(A/6.0) * pow(3.0/(4.0*M_PI*n7),sixth);
+  double bp2x = 2.0*x + b;
+  double term1 = 2.0/x - (bp2x)/X;
+  double Q2m_bp2x_2_inv = 1.0/(Q*Q + (bp2x*bp2x));
+  double term2 = -4.0 * b * Q2m_bp2x_2_inv;
+  double term34pre = -b*x0/X0;
+  double term3 = 2.0/(x-x0) - bp2x/X;
+  double term4 = -4.0*(b+2.0*x0)*Q2m_bp2x_2_inv;
 
   //dFterms (n, A, x0, b, c);
   //fprintf (stderr, "term1 = %1.12f\n", prefactor*term1);
@@ -156,89 +161,89 @@ scalar dF_dn(scalar n, scalar A, scalar x0, scalar b, scalar c)
 }
 
 
-scalar dF_dn_FD (scalar n, scalar A, scalar x0, scalar b, scalar c)
+double dF_dn_FD (double n, double A, double x0, double b, double c)
 {
-  const scalar eps = 1.0e-6;
-  scalar Fp = F(n+eps, A, x0, b, c);
-  scalar Fm = F(n-eps, A, x0, b, c);
+  const double eps = 1.0e-6;
+  double Fp = F(n+eps, A, x0, b, c);
+  double Fm = F(n-eps, A, x0, b, c);
   return ((Fp-Fm)/(2.0*eps));
 }
 
 
 
-scalar Ec(scalar nup, scalar ndown)
+double Ec(double nup, double ndown)
 {
-  scalar n = nup + ndown;
-  scalar zeta = (nup-ndown)/n;
+  double n = nup + ndown;
+  double zeta = (nup-ndown)/n;
   
-  scalar EcP =    F(n, 0.0310907, -0.10498, 3.72744, 12.9352);
+  double EcP =    F(n, 0.0310907, -0.10498, 3.72744, 12.9352);
   //fprintf (stderr, "EcP = %1.12f\n", EcP);
-  scalar EcF =    F(n, 0.01554535, -0.325, 7.06042, 18.0578);
+  double EcF =    F(n, 0.01554535, -0.325, 7.06042, 18.0578);
   //fprintf (stderr, "EcF = %1.12f\n", EcF);
-  scalar alphac = F(n, -1.0/(6.0*M_PI*M_PI), -0.00475840,
+  double alphac = F(n, -1.0/(6.0*M_PI*M_PI), -0.00475840,
 		    1.13107, 13.0045);
   //fprintf (stderr, "alphac = %1.12f\n", alphac);
 
-  scalar f_zeta = f(zeta);
-  scalar f_doubleprime = 4.0/(9*(pow(2,1.0/3.0)-1.0));
-  scalar beta = f_doubleprime*(EcF-EcP)/alphac -1.0;
-  scalar zeta2 = zeta*zeta;
-  scalar zeta4 = zeta2*zeta2;
-  scalar deltaEc = (alphac*f_zeta/f_doubleprime) * (1.0 + beta * zeta4);
+  double f_zeta = f(zeta);
+  double f_doubleprime = 4.0/(9*(pow(2,1.0/3.0)-1.0));
+  double beta = f_doubleprime*(EcF-EcP)/alphac -1.0;
+  double zeta2 = zeta*zeta;
+  double zeta4 = zeta2*zeta2;
+  double deltaEc = (alphac*f_zeta/f_doubleprime) * (1.0 + beta * zeta4);
   
   return (EcP + deltaEc);
 }
 
 
-void CheckCorrelationPotential (scalar  nup, scalar ndown)
+void CheckCorrelationPotential (double  nup, double ndown)
 {
-  scalar eps = 1.0e-4;
+  double eps = 1.0e-4;
   
-  scalar n = nup + ndown;
-  scalar zeta = (nup - ndown) / n;
+  double n = nup + ndown;
+  double zeta = (nup - ndown) / n;
 
-  scalar np = n+eps;
-  scalar nm = n-eps;
-  scalar zetap = zeta + eps;
-  scalar zetam = zeta - eps;
+  double np = n+eps;
+  double nm = n-eps;
+  double zetap = zeta + eps;
+  double zetam = zeta - eps;
 
-  scalar nupp   = 0.5*(np + np * zeta);
-  scalar ndownp = 0.5*(np - np*zeta);
-  scalar nupm   = 0.5*(nm + nm*zeta);
-  scalar ndownm = 0.5*(nm - nm*zeta); 
+  double nupp   = 0.5*(np + np * zeta);
+  double ndownp = 0.5*(np - np*zeta);
+  double nupm   = 0.5*(nm + nm*zeta);
+  double ndownm = 0.5*(nm - nm*zeta); 
 
-  scalar Ecplus =  Ec(nupp, ndownp);
-  scalar Ecminus = Ec(nupm, ndownm);
+  double Ecplus =  Ec(nupp, ndownp);
+  double Ecminus = Ec(nupm, ndownm);
 
-  scalar dEc_dn = (Ecplus - Ecminus)/(2.0*eps);
+  double dEc_dn = (Ecplus - Ecminus)/(2.0*eps);
 
-  scalar dEcP_dn = dF_dn(n, 0.0310907, -0.10498, 3.72744, 12.9352); 
-  scalar ddeltaEc_dn = dEc_dn - dEcP_dn;
+  double dEcP_dn = dF_dn(n, 0.0310907, -0.10498, 3.72744, 12.9352); 
+  double ddeltaEc_dn = dEc_dn - dEcP_dn;
   
   //fprintf (stderr, "FD: ddeltaEc_dn = %1.12f\n", ddeltaEc_dn);
 
 
 
 
-  scalar EcPp =    F(np, 0.0310907, -0.10498, 3.72744, 12.9352);
-  scalar EcFp =    F(np, 0.01554535, -0.325, 7.06042, 18.0578);
-  scalar alphacp = F(np, -1.0/(6.0*M_PI*M_PI), -0.00475840,
+  double EcPp =    F(np, 0.0310907, -0.10498, 3.72744, 12.9352);
+  double EcFp =    F(np, 0.01554535, -0.325, 7.06042, 18.0578);
+  double alphacp = F(np, -1.0/(6.0*M_PI*M_PI), -0.00475840,
 		     1.13107, 13.0045);
 
-  scalar EcPm =    F(nm, 0.0310907, -0.10498, 3.72744, 12.9352);
-  scalar EcFm =    F(nm, 0.01554535, -0.325, 7.06042, 18.0578);
-  scalar alphacm = F(nm, -1.0/(6.0*M_PI*M_PI), -0.00475840,
+  double EcPm =    F(nm, 0.0310907, -0.10498, 3.72744, 12.9352);
+  double EcFm =    F(nm, 0.01554535, -0.325, 7.06042, 18.0578);
+  double alphacm = F(nm, -1.0/(6.0*M_PI*M_PI), -0.00475840,
 		     1.13107, 13.0045);
 
-  scalar f_doubleprime = 4.0/(9*(pow(2.0,1.0/3.0)-1.0));
+  double f_doubleprime = 4.0/(9*(pow(2.0,1.0/3.0)-1.0));
 
-  scalar betap = f_doubleprime*(EcFp-EcPp)/alphacp -1.0;
-  scalar betam = f_doubleprime*(EcFm-EcPm)/alphacm -1.0;
+  double betap = f_doubleprime*(EcFp-EcPp)/alphacp -1.0;
+  double betam = f_doubleprime*(EcFm-EcPm)/alphacm -1.0;
 
-  scalar zeta2 = zeta*zeta;
-  scalar zeta4 = zeta2*zeta2;
-  scalar deltaEcp = alphacp*f(zeta)/f_doubleprime * (1.0+betap*zeta4);
-  scalar deltaEcm = alphacm*f(zeta)/f_doubleprime * (1.0+betam*zeta4);
+  double zeta2 = zeta*zeta;
+  double zeta4 = zeta2*zeta2;
+  double deltaEcp = alphacp*f(zeta)/f_doubleprime * (1.0+betap*zeta4);
+  double deltaEcm = alphacm*f(zeta)/f_doubleprime * (1.0+betam*zeta4);
 
   fprintf (stderr, "FD2: ddeltaEc_dn = %1.12f\n",
 	   (deltaEcp-deltaEcm)/(2.0*eps)); 
@@ -249,44 +254,44 @@ void CheckCorrelationPotential (scalar  nup, scalar ndown)
 
 
 
-void CorrelationPotential(scalar  nup, scalar ndown,
-			  scalar &Vup, scalar &Vdown)
+void CorrelationPotential(double  nup, double ndown,
+			  double &Vup, double &Vdown)
 {
-  scalar EC = Ec(nup, ndown);
+  double EC = Ec(nup, ndown);
   //fprintf (stderr, "C++ EC = %1.12f\n", EC);
-  scalar n = nup + ndown;
-  scalar zeta = (nup - ndown)/n;
-  scalar zeta2 = zeta*zeta;
-  scalar zeta3 = zeta * zeta2;
-  scalar zeta4 = zeta2*zeta2;
+  double n = nup + ndown;
+  double zeta = (nup - ndown)/n;
+  double zeta2 = zeta*zeta;
+  double zeta3 = zeta * zeta2;
+  double zeta4 = zeta2*zeta2;
 
-  scalar EcP =    F(n, 0.0310907, -0.10498, 3.72744, 12.9352);
-  scalar EcF =    F(n, 0.01554535, -0.325, 7.06042, 18.0578);
-  scalar alphac = F(n, -1.0/(6.0*M_PI*M_PI), -0.00475840,
+  double EcP =    F(n, 0.0310907, -0.10498, 3.72744, 12.9352);
+  double EcF =    F(n, 0.01554535, -0.325, 7.06042, 18.0578);
+  double alphac = F(n, -1.0/(6.0*M_PI*M_PI), -0.00475840,
 		    1.13107, 13.0045);
-  scalar dEcP_dn = dF_dn(n, 0.0310907, -0.10498, 3.72744, 12.9352); 
-  //scalar dEcP_dn = dF_dn_FD(n, 0.0310907, -0.10498, 3.72744, 12.9352); 
-  scalar dEcF_dn = dF_dn(n, 0.01554535, -0.325, 7.06042, 18.0578);
-  scalar dalphac_dn = dF_dn(n, -1.0/(6.0*M_PI*M_PI), -0.00475840,
+  double dEcP_dn = dF_dn(n, 0.0310907, -0.10498, 3.72744, 12.9352); 
+  //double dEcP_dn = dF_dn_FD(n, 0.0310907, -0.10498, 3.72744, 12.9352); 
+  double dEcF_dn = dF_dn(n, 0.01554535, -0.325, 7.06042, 18.0578);
+  double dalphac_dn = dF_dn(n, -1.0/(6.0*M_PI*M_PI), -0.00475840,
 			    1.13107, 13.0045);  
 
-  scalar f_zeta = f(zeta);
-  scalar f_prime = df_dzeta(zeta);
+  double f_zeta = f(zeta);
+  double f_prime = df_dzeta(zeta);
   //fprintf (stderr, "f_prime = %1.12f\n", f_prime);
-  scalar f_doubleprime = 4.0/(9.0*(pow(2.0,1.0/3.0)-1.0));
-  scalar beta = f_doubleprime*(EcF - EcP)/alphac -1.0;
-  scalar dbeta_dn = f_doubleprime * ((dEcF_dn -dEcP_dn)/alphac -
+  double f_doubleprime = 4.0/(9.0*(pow(2.0,1.0/3.0)-1.0));
+  double beta = f_doubleprime*(EcF - EcP)/alphac -1.0;
+  double dbeta_dn = f_doubleprime * ((dEcF_dn -dEcP_dn)/alphac -
 				     (EcF-EcP)*dalphac_dn/(alphac*alphac));
 
   //fprintf (stderr, "dbeta_dn     = %1.12f\n", dbeta_dn);
-  scalar ddeltaEc_dn = 
+  double ddeltaEc_dn = 
     dalphac_dn * f_zeta/f_doubleprime *  (1.0+beta*zeta4) +
     alphac * (f_zeta/f_doubleprime) * dbeta_dn * zeta4;
 
   //fprintf (stderr, "ddeltaEc_dn =     %1.12f\n", ddeltaEc_dn);
   //CheckCorrelationPotential(nup, ndown);
 
-  scalar ddeltaEc_dzeta =
+  double ddeltaEc_dzeta =
     alphac/f_doubleprime*((1.0+beta*zeta4)*f_prime + 4.0*beta*f_zeta*zeta3);
   
   //fprintf (stderr, "ddeltaEc_dzeta = %1.12f\n", ddeltaEc_dzeta);
@@ -309,8 +314,8 @@ void CorrelationPotential(scalar  nup, scalar ndown,
 extern "C" void FORT(exccor)(double &n, double &zeta, double &exc, double &vxc, 
 			     double &vpol, int &type, int &Macdonald_Vosko);
 
-void FortranExCorr(scalar  nup, scalar  ndown,
-		   scalar &Vup, scalar &Vdown)
+void FortranExCorr(double  nup, double  ndown,
+		   double &Vup, double &Vdown)
 {
   double n = nup + ndown;
   double zeta = (nup-ndown)/n;
@@ -329,7 +334,7 @@ void FortranExCorr(scalar  nup, scalar  ndown,
   
 
 
-double FortranXCE (scalar nup, scalar ndown)
+double FortranXCE (double nup, double ndown)
 {
   double n = nup + ndown;
   double zeta = (nup-ndown)/n;
@@ -346,16 +351,16 @@ double FortranXCE (scalar nup, scalar ndown)
 
 
 
-//  scalar
-//  LDA::ExchangePot(scalar r, const Array<RadialWF,1> &WFs)
+//  double
+//  LDA::ExchangePot(double r, const Array<RadialWF,1> &WFs)
 //  {
 
 //    return (0.0);
 //  }
 
 
-//  scalar 
-//  LDA::CorrelationPot(scalar r, const Array<RadialWF,1> &WFs)
+//  double 
+//  LDA::CorrelationPot(double r, const Array<RadialWF,1> &WFs)
 //  {
 
 //    return (0.0);
