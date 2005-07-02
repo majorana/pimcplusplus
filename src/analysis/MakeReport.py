@@ -331,10 +331,10 @@ for counter in range(0,numSections):
      infile.OpenSection(counter)
      print infile.GetName()
      myType=infile.ReadVar("Type")
-     if myType=="Scalar":
-          currNum=ProcessScalarSection(infile,doc,currNum)
-          doc.append(HR())
-     elif myType=="CorrelationFunction":
+#     if myType=="Scalar":
+#          currNum=ProcessScalarSection(infile,doc,currNum)
+#          doc.append(HR())
+     if myType=="CorrelationFunction":
           currNum=ProcessCorrelationSection(infile,doc,currNum)
           doc.append(HR())
      infile.CloseSection()
