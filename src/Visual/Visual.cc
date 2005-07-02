@@ -85,6 +85,18 @@ void VisualClass::MakeFrame(int frame)
 	sphere->SetColor (Vec3(1.0, 0.0, 0.0));
 	PathVis.Objects.push_back(sphere);
       }
+
+  ///Addition of sphere for helium droplets
+  SphereObject* sphere = new SphereObject;
+  dVec pos;
+  pos[0] = 0;
+  pos[1] = 0;
+  pos[2] = 0;
+  sphere->SetPos (pos);
+  sphere->SetColor (Vec3(1.0, 0.0, 0.0));
+  sphere->SetRadius(31.0);
+  //  PathVis.Objects.push_back(sphere);
+  ///end addition of sphere for helium droplets
   
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
@@ -196,6 +208,7 @@ VisualClass::VisualClass()
   add(m_VBox);
 
   // VisualClass OpenGL scene.
+  // PathVis.set_size_request(400, 400);
   PathVis.set_size_request(700, 700);
 
 

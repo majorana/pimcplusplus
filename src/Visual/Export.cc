@@ -278,7 +278,7 @@ ExportClass::ExportMovie (string basename,
   Array<double,1> pathData(numPaths);
   for (int frame=0; frame<numFrames; frame++) {
     /// First interpolate
-    for (int ptcl=0; ptcl<PathArray.extent(1); ptcl++)
+    for (int ptcl=0; ptcl<PathArray.extent(1); ptcl++){
       for (int slice=0; slice<PathArray.extent(2); slice++)
 	for (int dim=0; dim<3; dim++) {
 	  for (int path=0; path<numPaths; path++) 
@@ -288,6 +288,17 @@ ExportClass::ExportMovie (string basename,
 	  PathArray(numPaths, ptcl, slice, dim) = 
 	    interpSpline((double)frame/(double)interpFactor+firstFrame);
 	}
+    }
+    if (Visual.OpenPtcl(frame)!=-1)
+	for (int dim=0; dim<3; dim++) {
+	  for (int path=0; path<numPaths; path++) 
+	    pathData(path) = Visual.Tail(path, dim);
+	  interpSpline.Init (&tGrid, pathData);
+	  // Put interpolation in last slice
+	  Visual.Tail(numPaths, dim) = 
+	    interpSpline((double)frame/(double)interpFactor+firstFrame);
+	}
+      
     /// Now, create image from interpolated frame
     MakePixmap(numPaths);
     Glib::RefPtr<Gdk::Image> image = GdkPixmap->get_image(0,0,Width,Height);
