@@ -11,5 +11,6 @@ SUBDIRS =                \
           Ewald          \
           FFT            \
           PairAction     \
+          PlaneWavePHDFT \
           Atom           
 
