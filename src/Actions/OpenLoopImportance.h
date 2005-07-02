@@ -3,7 +3,7 @@
 
 #include "ActionBase.h"
 
-typedef enum {NOIMP,DISTIMP,DISPXIMP,CONSTSHIFT} SampleChoice;
+typedef enum {NOIMP,DISTIMP,DISPXIMP,CONSTSHIFT,TUNEDFUNCTION} SampleChoice;
 
 class OpenLoopImportanceClass : public ActionBaseClass
 {
