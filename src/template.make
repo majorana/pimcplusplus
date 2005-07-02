@@ -52,9 +52,9 @@ ifeq ($(HOSTTYPE),i386-linux)
 #       CC = icc
 #       LD = icc
        F77 = ifort
-       EXTRADEFS = -DUSE_MKL -w1 -wr654,1011 -DUSE_MPI
+       EXTRADEFS = -DUSE_MKL -w1 -wr654,1011 #-DUSE_MPI
        MAKECC = g++
-       CCFLAGS = -c -g -O3 #-pg 
+       CCFLAGS = -c -g #-pg 
        F77FLAGS = -c -g 
     else
        include /usr/lib/Make.include	
@@ -94,6 +94,7 @@ DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER) -DCOMMONVERSION=$(COMMONVER) -DNO_
 
 
 
+
 PIMCobjs =                                \
   Common.o                                \
   Main.o                                  \
@@ -108,8 +109,10 @@ PIMCobjs =                                \
   Moves/PermuteStageClass.o               \
   Moves/CoupledPermuteStageClass.o        \
   Moves/BisectionBlock.o                  \
+  Moves/BisectionSphereBlock.o                  \
   Moves/RefSliceMove.o                    \
   Moves/BisectionStageClass.o             \
+  Moves/BisectionStageSphereClass.o        \
   Moves/StructureReject.o                 \
   PIMCClass.o                             \
   Moves/MetaMoves.o 	                  \
@@ -137,6 +140,7 @@ PIMCobjs =                                \
   Actions/LongRangeRPAClass.o             \
   Actions/DavidLongRangeClass.o           \
   Actions/KineticClass.o                  \
+  Actions/KineticSphereClass.o            \
   Actions/ActionsClass.o                  \
   Actions/NodalActionClass.o              \
   Actions/GroundStateNodalActionClass.o   \
@@ -159,6 +163,7 @@ PIMCobjs =                                \
   Common/IO/InputOutputHDF5.o             \
   Common/IO/InputOutputASCII.o            \
   Common/IO/InputOutputXML.o              \
+  Common/SpecialFunctions/SpecialFunctions.o      \
   Common/PairAction/PAcoulombBCFit.o      \
   Common/PairAction/PAtricubicFit.o       \
   Common/PairAction/PAtricubicFit2.o      \
@@ -212,6 +217,7 @@ TestPermobjs =                            \
   Moves/TablePermuteStageClass.o          \
   Moves/CoupledPermuteStageClass.o        \
   Moves/BisectionStageClass.o             \
+  Moves/BisectionStageSphereClass.o       \
   Moves/OpenEndMove.o                     \
   Actions/ActionBase.o                    \
   Actions/ShortRangeClass.o               \
@@ -371,7 +377,7 @@ MAKE_ALL = $(MAKE) all $(PASS_DEFS)
 MAKE_NEWMAKE = $(MAKE) -f template.make newmake $(PASS_DEFS)
 
 
-all:    pimc++  FreeParticles  #TestPerm TestEwald 
+all:    pimc++  FreeParticles Visual_obj  #TestPerm TestEwald 
 
 pimc++: Common_obj Observables_obj Moves_obj Actions_obj Tests $(PIMCobjs)
 	$(LD) -o $@ $(PIMCobjs) $(LIBS) $(PSPLINELIB)

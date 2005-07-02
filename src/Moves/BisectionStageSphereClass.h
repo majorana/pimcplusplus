@@ -16,6 +16,8 @@ public:
   void Accept();
   void Reject();
   void CartesianToSpherical(dVec &r, double &theta,double &phi);
+  void BisectionStageSphereClass::SurfaceUnitVectors(dVec &Er,dVec &Etheta, dVec &Ephi, double theta, double phi);
+
   TinyVector<double,3> SphericalToCartesian(double &a,double &theta, double &phi);
   void ProjectOntoSphere(dVec &r, double a);
   void RotateAroundX(dVec &vec, double theta);

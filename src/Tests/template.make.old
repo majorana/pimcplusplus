@@ -1,9 +1,8 @@
-SOURCES = ShiftTest.cc
-
+SOURCES = ShiftTest.cc PermutationTest.cc
 
 
 permobjs =                            \
-#  PermutationTest.o 		      \
+  PermutationTest.o 		      \
   ../ObservableClass.o                \
   ../Common/Splines/CubicSpline.o     \
   ../Common/Splines/Grid.o            \
@@ -32,7 +31,7 @@ permobjs =                            \
 
 myobjs = ShiftTest.o 
 objs = $(myobjs) ../MirroredArrayClass.o ../CommunicatorClass.o
-all:	$(objs) ShiftTest 
+all:	$(objs) ShiftTest PermTest
 
 ShiftTest:	$(myobjs) 
 	$(LD) -o $@ $(objs)  $(LIBS)
