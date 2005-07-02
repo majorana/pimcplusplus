@@ -15,6 +15,7 @@ KineticClass::KineticClass(PathDataClass &pathData ) :
 double KineticClass::Action (int slice1, int slice2,
 			     const Array<int,1> &changedParticles, int level)
 {
+  //  cerr<<"I'm in the action"<<endl;
   double TotalK = 0.0;
   Array<double,1> KineticVal(PathData.Path.NumTimeSlices());
   KineticVal=0.0;
@@ -61,8 +62,7 @@ double KineticClass::Action (int slice1, int slice2,
 double KineticClass::d_dBeta (int slice1, int slice2,
 			      int level)
 {
-  Array<double,1> KineticVal(PathData.Path.NumTimeSlices());
-  KineticVal=0.0;
+
 
   double spring=0.0;
   // ldexp(double x, int n) = x*2^n
@@ -80,7 +80,6 @@ double KineticClass::d_dBeta (int slice1, int slice2,
       double FourLambdaTauInv = 1.0/(4.0*lambda*levelTau);
       for (int slice=slice1; slice<slice2; slice+=skip) {
 	spring += (0.5*NDIM)/levelTau;
-	KineticVal(slice)+=(0.5*NDIM)/levelTau;
 	dVec vel;
 	vel = PathData.Path.Velocity(slice, slice+skip, ptcl);
 	double Z = 1.0;
@@ -108,7 +107,6 @@ double KineticClass::d_dBeta (int slice1, int slice2,
 	  scalarnumSum += numProd[dim];
 	} //cerr << "Z = " << Z << " scalarnumSum = " << scalarnumSum << endl;
 	spring += scalarnumSum/Z; 
-	KineticVal(slice)+=scalarnumSum/Z;
       }
     }
   }
