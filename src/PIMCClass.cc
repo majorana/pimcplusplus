@@ -245,6 +245,11 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)=new BisectionBlockClass(PathData,OutFile);
       Moves(counter)->Read(in); 
     }
+    else if (MoveType=="BisectionSphereBlock"){
+      moveName="BisectionSphereBlock";
+      Moves(counter)=new BisectionSphereBlockClass(PathData,OutFile);
+      Moves(counter)->Read(in);
+    }
     //    else if (MoveType=="StructureReject"){
     //      moveName="StructureReject";
     //      Moves(counter)=new StructureRejectClass(PathData,OutFile);
