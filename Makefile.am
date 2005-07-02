@@ -8,5 +8,6 @@ SUBDIRS =                \
           PH             \
           MPI            \
           Distributed    \
+          Ewald          \
           Atom           
 

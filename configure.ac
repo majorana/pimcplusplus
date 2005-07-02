@@ -82,6 +82,7 @@ AC_CONFIG_FILES([ Makefile IO/Makefile \
                   PH/Makefile          \
                   Integration/Makefile \
                   MatrixOps/Makefile   \
-                  MPI/Makefile ]       \
-                  Distributed/Makefile )
+                  MPI/Makefile        \
+                  Distributed/Makefile \
+                  Ewald/Makefile ] )
 AC_OUTPUT
