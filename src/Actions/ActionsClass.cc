@@ -14,6 +14,7 @@ ActionsClass::Read(IOSectionClass &in)
   assert(in.ReadVar ("MaxLevels", MaxLevels));
   assert(in.ReadVar ("NumImages", NumImages));
   Kinetic.SetNumImages (NumImages);
+  KineticSphere.SetNumImages(NumImages);
   perr << "MaxLevels = " << MaxLevels << endl;
 
   if (!in.ReadVar ("UseRPA", UseRPA))

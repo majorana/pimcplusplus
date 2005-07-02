@@ -15,6 +15,7 @@
 #include "ST2WaterClass.h"
 #include "OpenLoopImportance.h"
 #include "StructureReject.h"
+#include "KineticSphereClass.h"
 
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
@@ -36,6 +37,7 @@ public:
   StructureRejectClass StructureReject;
   /// The Kinetic action
   KineticClass Kinetic;
+  KineticSphereClass KineticSphere;
 
   /// The short range part of the pair action.  This is the complete
   /// pair action in the case of short-range potententials.  The
@@ -113,6 +115,7 @@ public:
     LongRangePot(pathData, PairMatrix),
     OpenLoopImportance(pathData),
     Kinetic(pathData),
+    KineticSphere(pathData),
     PathData(pathData),
     TIP5PWater(pathData),
     ST2Water(pathData),
