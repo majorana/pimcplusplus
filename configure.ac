@@ -28,6 +28,41 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_LIBTOOL
 
+# Checks if we want MPI support
+AC_ARG_ENABLE(mpi,    [  --enable-mpi            enable MPI support (default=no)])
+AC_ARG_WITH(mpi-inc,  [  --with-mpi-cflags=FLAGS specify MPI compliler flags])
+AC_ARG_WITH(mpi-libs, [  --with-mpi-libs=LIBS    specify MPI linker flags])
+AC_ARG_WITH(mpi-run,  [  --with-mpi-run=cmd      specify MPI run command (default=mpirun)])
+
+if test "$enable_mpi" = "yes"; then
+    MPI_DEF="-DUSE_MPI"
+    if test "X$with_mpi_libs" = "X"; then
+        MPI_LIBS="-lmpi"
+    else
+        MPI_LIBS="$with_mpi_libs"
+    fi
+  
+    if test "X$with_mpi_cflags" = "X"; then
+        MPI_CFLAGS=""
+    else
+        MPI_CFLAGS="$with_mpi_cflags"
+    fi
+
+    if test "X$with_mpi_run" = "X"; then
+        MPI_RUN="mpirun"
+    else
+        MPI_RUN="$with_mpi_run"
+    fi
+else
+    MPI_DEF=" "
+fi
+
+AC_SUBST(MPI_DEF)
+AC_SUBST(MPI_LIBS)
+AC_SUBST(MPI_CFLAGS)
+AC_SUBST(MPI_RUN)
+
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST
@@ -46,5 +81,7 @@ AC_CONFIG_FILES([ Makefile IO/Makefile \
                   DFT/Makefile         \
                   PH/Makefile          \
                   Integration/Makefile \
-                  MatrixOps/Makefile ])
+                  MatrixOps/Makefile   \
+                  MPI/Makefile ]       \
+                  Distributed/Makefile )
 AC_OUTPUT

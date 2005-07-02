@@ -1,1 +1,18 @@
+lib_LTLIBRARIES = libcomm.la
+libcomm_la_SOURCES = Communication.cc
+
+includedir=$(prefix)/include/Common/MPI
+
+#if WITH_F77
+#     libsprng_la_SOURCES += common/fwrap_mpi.c
+#endif
+libcomm_la_CXXFLAGS = $(BLITZ_CFLAGS) $(MPI_CFLAGS) $(MPI_DEF) $(AM_CXXFLAGS)
+libcomm_la_LIBADD   =
+
+#if HAVE_GMP
+#     libsprng_la_SOURCES += pmlcg/pmlcg.h pmlcg/pmlcg.c pmlcg/info.h pmlcg/basic.h 
+#endif
+
+
+include_HEADERS = Communication.h
 

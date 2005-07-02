@@ -6,5 +6,7 @@ SUBDIRS =                \
           Fitting        \
           DFT            \
           PH             \
+          MPI            \
+          Distributed    \
           Atom           
 
