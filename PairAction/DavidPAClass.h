@@ -68,7 +68,6 @@ class DavidPAClass : public PairActionFitClass
   /// The q-derivative of the above
   double dUdiag_pp (double q, int level);
   bool IsLongRange(); 
-  void DoBreakup (const dVec &box, const Array<dVec,1> &kVecs);
 #ifdef MAKE_FIT
   void ReadParams  (IOSectionClass &inSection);
   void WriteBetaIndependentInfo (IOSectionClass &outSection);

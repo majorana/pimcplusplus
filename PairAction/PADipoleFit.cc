@@ -1,4 +1,4 @@
-#include "PAFit.h"
+#include "PADipoleFit.h"
 
 /// The following routines are used only if we are creating fits, not
 /// using them.

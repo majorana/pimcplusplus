@@ -68,12 +68,6 @@ bool DavidPAClass::IsLongRange()
   return false;
 }
 
-
-void DavidPAClass::DoBreakup (const dVec &box, const Array<dVec,1> &kVecs)
-{
-  return;
-}
-
 /// Calculate the U(s,q,z) value when given s,q,z and the level 
 /*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
   \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */

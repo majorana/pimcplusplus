@@ -1,14 +1,11 @@
 #ifndef PA_FIT_H
 #define PA_FIT_H
 
-//#include "PAszFit.h"
-//#include "PAcoulombFit.h"
 #include "PAcoulombBCFit.h"
 #include "PAMonopoleFit.h"
 #include "PADipoleFit.h"
 #include "PATripoleFit.h"
 #include "PAclassicalFit.h"
-//#include "PAsFit.h"
 #include "PAtricubicFit.h"
 #include "PAtricubicFit2.h"
 #include "PAzeroFit.h"

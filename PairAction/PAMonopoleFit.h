@@ -54,7 +54,7 @@ public:
   double Vk    (double k);
 
   bool IsLongRange();
-  //  void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
+  //  void DoBreakup(const Vec3 &box, const Array<Vec3,1> &kVecs);
 
   PACoulombFitClass()
   { 

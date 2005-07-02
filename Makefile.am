@@ -9,5 +9,7 @@ SUBDIRS =                \
           MPI            \
           Distributed    \
           Ewald          \
+          FFT            \
+          PairAction     \
           Atom           
 

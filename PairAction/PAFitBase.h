@@ -100,7 +100,7 @@ public:
   virtual double Vk    (double k)                { return 0.0; }
 
   // Fills in the Vlong_k and dVlong_k array.
-  virtual void DoBreakup (const dVec &box, const Array<dVec,1> &kVecs) 
+  virtual void DoBreakup (const Vec3 &box, const Array<Vec3,1> &kVecs) 
   { }
   PairActionFitClass() : Z1Z2(0.0)
   { /* Do nothing */ }

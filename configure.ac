@@ -12,6 +12,9 @@ AC_CONFIG_HEADER([config.h])
 PKG_CHECK_MODULES(BLITZ, blitz, blitz_ok=yes, blitz_ok=no)
 # this creates and AC_SUBST's vars XML2_CFLAGS and XML2_LIBS
 PKG_CHECK_MODULES(XML2, xml2, xml2_ok=yes, xml2_ok=no)
+# this creates and AC_SUBST's vars FFTW3_CFLAGS and FFTW3_LIBS
+PKG_CHECK_MODULES(FFTW3, fftw3, fftw3_ok=yes, fftw3_ok=no)
+
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([hdf5], [H5open])
 AC_CHECK_LIB([g2c],[do_lio])
@@ -84,5 +87,7 @@ AC_CONFIG_FILES([ Makefile IO/Makefile \
                   MatrixOps/Makefile   \
                   MPI/Makefile        \
                   Distributed/Makefile \
-                  Ewald/Makefile ] )
+                  Ewald/Makefile \
+                  FFT/Makefile 
+                  PairAction/Makefile ] )
 AC_OUTPUT

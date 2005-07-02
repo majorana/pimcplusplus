@@ -49,7 +49,7 @@ public:
   double Vpp(double r);
 
   bool IsLongRange();
-  //  void DoBreakup(const dVec &box, const Array<dVec,1> &kVecs);
+  //  void DoBreakup(const Vec3 &box, const Array<Vec3,1> &kVecs);
 
   double Xk_U  (double k, int level);
   double Xk_dU (double k, int level);
