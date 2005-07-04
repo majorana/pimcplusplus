@@ -77,18 +77,19 @@ AC_FUNC_ERROR_AT_LINE
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([clock_gettime floor pow sqrt strtol])
 
-AC_CONFIG_FILES([ Makefile IO/Makefile    \
-                  Splines/Makefile        \
-                  Fitting/Makefile        \
-                  Atom/Makefile           \
-                  DFT/Makefile            \
-                  PH/Makefile             \
-                  Integration/Makefile    \
-                  MatrixOps/Makefile      \
-                  MPI/Makefile            \
-                  Distributed/Makefile    \
-                  Ewald/Makefile          \
-                  FFT/Makefile            \
-                  PairAction/Makefile     \
-                  PlaneWavePHDFT/Makefile   ] )
+AC_CONFIG_FILES([ Makefile IO/Makefile      \
+                  Splines/Makefile          \
+                  SpecialFunctions/Makefile \
+                  Fitting/Makefile          \
+                  Atom/Makefile             \
+                  DFT/Makefile              \
+                  PH/Makefile               \
+                  Integration/Makefile      \
+                  MatrixOps/Makefile        \
+                  MPI/Makefile              \
+                  Distributed/Makefile      \
+                  Ewald/Makefile            \
+                  FFT/Makefile              \
+                  PairAction/Makefile       \
+                  PlaneWavePHDFT/Makefile ] )
 AC_OUTPUT

@@ -1,9 +1,26 @@
-bin_PROGRAMS = TestHermite TestLegendre TestPoly TestPolySet
+check_PROGRAMS = TestHermite TestLegendre TestPoly TestPolySet
 
-TestHermite_SOURCES = HermitePoly.cc
+TestHermite_SOURCES = TestHermite.cc
 
-TestLegendre_SOURCES = TestLegendre.cc SpecialFunctions.cc
+TestLegendre_SOURCES = TestLegendre.cc 
 
 TestPoly_SOURCES = TestPoly.cc
 
-TestPolySet_SOURCES = TestPolySet.cc PolynomialSet.cc
+TestPolySet_SOURCES = TestPolySet.cc 
+
+LDADD = ../Integration/libquad.la libspecfun.la $(GSL_LIBS)
+CXX_FLAGS = $(BLITZ_CFLAGS) $(GSL_CFLAGS) $(AM_CXXFLAGS)
+
+lib_LTLIBRARIES = libspecfun.la
+libspecfun_la_SOURCES = HermitePoly.h       \
+                        SpecialFunctions.h  \
+                        SpecialFunctions.cc \
+                        Polynomial.h        \
+                        PolynomialSet.h     \
+                        PolynomialSet.cc    \
+                        LegendrePoly.h      
+
+includedir=$(prefix)/include/Common/SpecialFunctions
+
+include_HEADERS = HermitePoly.h LegendrePoly.h   SpecialFunctions.h \
+                  Polynomial.h  PolynomialSet.h 
