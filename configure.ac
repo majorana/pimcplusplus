@@ -14,6 +14,8 @@ PKG_CHECK_MODULES(BLITZ, blitz, blitz_ok=yes, blitz_ok=no)
 PKG_CHECK_MODULES(XML2, xml2, xml2_ok=yes, xml2_ok=no)
 # this creates and AC_SUBST's vars FFTW3_CFLAGS and FFTW3_LIBS
 PKG_CHECK_MODULES(FFTW3, fftw3, fftw3_ok=yes, fftw3_ok=no)
+# this creates and AC_SUBST's vars SPRNG2_CFLAGS and SPRNG2_LIBS
+PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
 
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([hdf5], [H5open])
@@ -80,6 +82,7 @@ AC_CHECK_FUNCS([clock_gettime floor pow sqrt strtol])
 AC_CONFIG_FILES([ Makefile IO/Makefile      \
                   Splines/Makefile          \
                   SpecialFunctions/Makefile \
+                  Random/Makefile           \
                   Fitting/Makefile          \
                   Atom/Makefile             \
                   DFT/Makefile              \

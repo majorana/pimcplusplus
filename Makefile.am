@@ -2,6 +2,7 @@ SUBDIRS =                  \
 	  IO               \
           Splines          \
           SpecialFunctions \
+          Random           \
           Integration      \
           MatrixOps        \
           Fitting          \
