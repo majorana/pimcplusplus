@@ -36,3 +36,11 @@ libcommon_la_LIBADD = IO/libciao.la                  \
 
 includedir=$(prefix)/include/Common
 include_HEADERS = Blitz.h config.h
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = common.pc
+
+install-data-local:
+	$(INSTALL_DATA) common.pc $(pkgconfigdir)
+
+EXTRA_DIST = common.pc.in

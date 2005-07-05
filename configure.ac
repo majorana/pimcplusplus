@@ -80,7 +80,9 @@ AC_FUNC_ERROR_AT_LINE
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([clock_gettime floor pow sqrt strtol])
 
-AC_CONFIG_FILES([ Makefile IO/Makefile      \
+AC_CONFIG_FILES([ Makefile                  \
+                  common.pc                 \
+                  IO/Makefile               \
                   Splines/Makefile          \
                   SpecialFunctions/Makefile \
                   Random/Makefile           \

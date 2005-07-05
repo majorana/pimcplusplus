@@ -9,8 +9,8 @@ LDADD = ../IO/libciao.la ../Splines/libspline.la ../FFT/libfft.la         \
         $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(FFTW3_LIBS) \
         $(LAPACK_LIBS) $(CBLAS_LIBS) $(GSL_LIBS)
 
-CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
-           $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(AM_CXXFLAGS)
+AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
+              $(HDF5_CFLAGS)  $(CBLAS_CFLAGS)
 
 noinst_LTLIBRARIES = libpw.la
 libpw_la_SOURCES = ConjGrad2.h       \
