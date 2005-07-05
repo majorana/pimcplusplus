@@ -4,7 +4,7 @@
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
-#ifdef MAKE_FIT
+
 void 
 PAclassicalFitClass::ReadParams(IOSectionClass &inSection)
 {
@@ -34,7 +34,7 @@ void
 PAclassicalFitClass::WriteFit (IOSectionClass &outSection)
 {
 }
-#endif
+
 
 
 double 

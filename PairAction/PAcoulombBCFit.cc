@@ -4,7 +4,7 @@
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
-#ifdef MAKE_FIT
+
 void PAcoulombBCFitClass::ReadParams(IOSectionClass &inSection)
 {
   assert(inSection.OpenSection ("qGrid"));
@@ -138,7 +138,6 @@ void PAcoulombBCFitClass::WriteFit (IOSectionClass &outSection)
   outSection.CloseSection();
 }
 
-#endif
 
 
 double PAcoulombBCFitClass::U(double q, double z, double s2, int level)

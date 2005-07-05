@@ -2,7 +2,7 @@
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
-#ifdef MAKE_FIT
+
 void PADipoleFitClass::ReadParams(IOSectionClass &inSection)
 {
 }
@@ -26,7 +26,7 @@ void PADipoleFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 void PADipoleFitClass::WriteFit (IOSectionClass &outSection)
 {
 }
-#endif
+
 
 
 double PADipoleFitClass::U(double q, double z, double s2, int level)

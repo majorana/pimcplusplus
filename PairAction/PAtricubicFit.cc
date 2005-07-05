@@ -7,7 +7,7 @@ const double dURho0Min = 1.0e-4;
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
-#ifdef MAKE_FIT
+
 void PAtricubicFitClass::ReadParams(IOSectionClass &inSection)
 {
   assert(inSection.OpenSection ("qGrid"));
@@ -608,7 +608,7 @@ void PAtricubicFitClass::WriteFit(IOSectionClass &outSection)
   }
 }
 
-#endif
+
 
 
 // double PAtricubicFitClass::U(double q, double z, double s2, int level)

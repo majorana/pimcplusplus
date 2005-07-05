@@ -1,8 +1,8 @@
-#include "PAFit.h"
+#include "PAMonopoleFit.h"
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
-#ifdef MAKE_FIT
+
 void PACoulombFitClass::ReadParams(IOSectionClass &inSection)
 {
 }
@@ -26,7 +26,7 @@ void PACoulombFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 void PACoulombFitClass::WriteFit (IOSectionClass &outSection)
 {
 }
-#endif
+
 
 
 double PACoulombFitClass::U(double q, double z, double s2, int level)

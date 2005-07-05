@@ -10,7 +10,7 @@ private:
   // The cutoff radius
   double rcut;  
 public:
-#ifdef MAKE_FIT
+
   void ReadParams  (IOSectionClass &inSection);
   void WriteBetaIndependentInfo (IOSectionClass &outSection);
   /// Returns weighter RMS error
@@ -18,7 +18,7 @@ public:
   void DoFit (Rho &rho);
   void WriteFit(IOSectionClass &outSection);
   void ReadInput (IOSectionClass &inSection);
-#endif
+
   bool Read  (IOSectionClass &inSection, double lowestBeta,
 	      int NumBetas);
   double U(double q, double z, double s2, int level);

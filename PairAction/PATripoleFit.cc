@@ -1,8 +1,8 @@
-#include "PAFit.h"
+#include "PATripoleFit.h"
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
-#ifdef MAKE_FIT
+
 void PATripoleFitClass::ReadParams(IOSectionClass &inSection)
 {
 }
@@ -26,7 +26,7 @@ void PATripoleFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 void PATripoleFitClass::WriteFit (IOSectionClass &outSection)
 {
 }
-#endif
+
 
 
 double PATripoleFitClass::U(double q, double z, double s2, int level)

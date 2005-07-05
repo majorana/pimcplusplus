@@ -1,7 +1,5 @@
 #include "DavidPAClass.h"
 
-#ifdef MAKE_FIT
-
 void DavidPAClass::ReadParams(IOSectionClass &in)
 {
 
@@ -27,7 +25,6 @@ void DavidPAClass::WriteFit(IOSectionClass &out)
 
 
 }
-#endif
 
 double DavidPAClass::U (double q, double z, double s2, int level)
 {

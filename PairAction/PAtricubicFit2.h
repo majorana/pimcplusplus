@@ -10,9 +10,7 @@ class PAtricubicFit2Class : public PairActionFitClass
 {
 private:
   bool GridsAreMine;
-#ifdef MAKE_FIT
   CommunicatorClass Comm;
-#endif
 
   /** These arrays hold the coefficients of the expansion of the tail
       of the diagonal part of the action/potential in inverse powers
@@ -32,14 +30,14 @@ private:
 public:
   Grid *qgrid, *ygrid, *tgrid;
   Array<MyTricubicSpline,1> Usplines, dUsplines;
-#ifdef MAKE_FIT
+
   void ReadParams  (IOSectionClass &inSection);
   void WriteBetaIndependentInfo (IOSectionClass &outSection);
   /// Returns weighter RMS error
   void Error (Rho &rho, double &Uerror, double &dUerror);
   void DoFit (Rho &rho);
   void WriteFit(IOSectionClass &outSection);
-#endif
+
   void Write (IOSectionClass &outSection);
   bool Read  (IOSectionClass &inSection, double lowestBeta,
 	      int NumBetas);

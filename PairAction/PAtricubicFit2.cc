@@ -6,7 +6,7 @@ const double Rho0Min  = 1.0e-4;
 
 /// The following routines are used only if we are creating fits, not
 /// using them.
-#ifdef MAKE_FIT
+
 void 
 PAtricubicFit2Class::ReadParams(IOSectionClass &inSection)
 {
@@ -325,7 +325,7 @@ PAtricubicFit2Class::WriteFit(IOSectionClass &outSection)
   }
 }
 
-#endif
+
 
 
 // double PAtricubicFit2Class::U(double q, double z, double s2, int level)

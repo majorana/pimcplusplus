@@ -5,9 +5,7 @@
 #include "../PH/Potential.h"
 #include "../Splines/CubicSpline.h"
 #include "Particle.h"
-#ifdef MAKE_FIT
-#include "../../Rho.h"
-#endif
+#include "Rho.h"
 
 /// Base class for pair actions
 class PairActionFitClass
@@ -49,13 +47,12 @@ public:
   double SmallestBeta;
   double lambda;
 
-#ifdef MAKE_FIT
   virtual void ReadParams  (IOSectionClass &inSection)   = 0;
   virtual void WriteBetaIndependentInfo (IOSectionClass &outSection) = 0;
   virtual void DoFit (Rho &rho) = 0;
   virtual void Error (Rho &rho, double &Uerror, double &dUerror)=0;
   virtual void WriteFit(IOSectionClass &outSection) = 0;
-#endif
+
   virtual bool Read (IOSectionClass &inSection,
 		     double smallestBeta, int NumBetas) = 0;
   /// In the case of a long-ranged breakup, this should return Ushort

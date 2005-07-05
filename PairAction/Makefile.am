@@ -19,7 +19,13 @@ libpairact_la_SOURCES = DavidPAClass.cc    \
                         PAtricubicFit2.h   \
                         PAzeroFit.cc       \
                         PAzeroFit.h        \
-                        Particle.h
+                        Particle.h         \
+                        FreeParticles.h    \
+                        FreeParticles.cc   \
+                        U_l.h              \
+                        U_l.cc             \
+                        Rho.h              \
+                        Rho.cc 
 
 
 includedir=$(prefix)/include/Common/PairAction
@@ -39,6 +45,7 @@ libpairact_la_LIBADD   =
 include_HEADERS = DavidPAClass.h    PAMonopoleFit.h   PAtricubicFit2.h \
                   PADipoleFit.h     PATripoleFit.h    PAzeroFit.h      \
                   PAFit.h           PAclassicalFit.h  Particle.h       \
-                  PAFitBase.h       PAcoulombBCFit.h  PAtricubicFit.h
+                  PAFitBase.h       PAcoulombBCFit.h  PAtricubicFit.h  \
+                  U_l.h             Rho.h             FreeParticles.h
 
 
