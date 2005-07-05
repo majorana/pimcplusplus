@@ -630,9 +630,9 @@ for counter in range(0,numSections):
      if myName=="StructureFactor":
           currNum=ProcessStructureFactor(infiles,doc,currNum)
           doc.append(HR())
-#     elif myType=="Scalar":
-#          currNum=ProcessScalarSection(infiles,doc,currNum)
-#          doc.append(HR())
+     elif myType=="Scalar":
+          currNum=ProcessScalarSection(infiles,doc,currNum)
+          doc.append(HR())
      elif myType=="CorrelationFunction":
           currNum=ProcessCorrelationSection(infiles,doc,currNum)
           doc.append(HR()) 
