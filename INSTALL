@@ -1,0 +1,36 @@
+Installation directions for libcommon
+-------------------------------------
+
+Prerequisites:
+  blitz++ (http://www.oonumerics.org/blitz/)
+  GSL     (http://sources.redhat.com/gsl/)
+  HDF5    (http://hdf.ncsa.uiuc.edu/HDF5/)
+  XML2    (http://dan.egnor.name/xml2/)
+  SPRNG2  (http://pathintegrals.info/sprng2)
+  LAPACK  (http://www.netlib.org/lapack/)
+  BLAS    (http://www.netlib.org/blas/)
+  CBLAS   (http://www.intel.com/software/products/mkl/docs/mklqref/cblas.htm)
+  FFTW3   (http://www.fftw.org/)
+  MPI     (http://www.lam-mpi.org/, http://www-unix.mcs.anl.gov/mpi/mpich/)
+
+Quick setup
+-----------
+
+  - Unpack:
+      tar xvzpf libcommon-x.x.tar.gz
+  - configure:
+      cd libcommon-x.x
+      ./configure --prefix=/usr --enable-mpi --with-mpi-libs="..." 
+    Here, the ... are the linker commands necessary to link in the
+    mpi libraries.  For example, these can be found when using LAM/MPI
+    by doing "mpic++ --showme" and copying everything after the "g++".
+
+  - Compile:
+    If everything when well with configure, do
+       make
+
+  - Install:
+    If everything compiled, all that's left to do is
+       make install
+
+

@@ -19,7 +19,7 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        CubicSpline.cc                 \
                        Grid.h                         \
                        Grid.cc                        \
-                       ComplexMulitTricubicSpline.h   \
+                       ComplexMultiTricubicSpline.h   \
                        ComplexMultiTricubicSpline.cc  \
                        MultiTricubicSpline.h          \
                        MultiTricubicSpline.cc         \
