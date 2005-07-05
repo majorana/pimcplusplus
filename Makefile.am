@@ -16,6 +16,15 @@ SUBDIRS =                  \
           PlaneWavePHDFT   \
           Atom           
 
+AUX_DIST              = $(ac_aux_dir)/config.guess \
+                        $(ac_aux_dir)/config.sub \
+                        $(ac_aux_dir)/install-sh \
+                        $(ac_aux_dir)/ltconfig \
+                        $(ac_aux_dir)/ltmain.sh \
+                        $(ac_aux_dir)/mdate-sh \
+                        $(ac_aux_dir)/missing \
+                        $(ac_aux_dir)/mkinstalldirs
+
 lib_LTLIBRARIES = libcommon.la
 libcommon_la_SOURCES =
 libcommon_la_LIBADD = IO/libciao.la                  \

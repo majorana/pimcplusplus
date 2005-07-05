@@ -422,7 +422,7 @@ we define,
 \begin{equation}
 \vl(r) \equiv
 \begin{cases}
- \sum_{n=0}^{J-1} c_n t_n(r) & \text{for } r \le r_c \\
+ \sum_{n=0}^{J-1} t_n h_n(r) & \text{for } r \le r_c \\
  v(r) & \text{for } r > r_c.
 \end{cases}
 \end{equation}
@@ -498,7 +498,7 @@ We integrate w.r.t. $\vr$, yielding a kroneker $\delta$.
 Summing over $\vk'$ and equating the derivative to zero, we find the
 minimum of our error function is given by
 \begin{equation}
-\sum_{n=1}^{J-1} \sum_{|\vk|>k_c} c_{mk}c_{nk} t_n = 
+\sum_{n=0}^{J-1} \sum_{|\vk|>k_c} c_{mk}c_{nk} t_n = 
 \sum_{|\vk|>k_c} x_k c_{mk},
 \end{equation}
 which is equivalent in form to equation (19) in \cite{Natoli}, where

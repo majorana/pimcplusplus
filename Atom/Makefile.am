@@ -7,7 +7,7 @@ TestRadialWF_SOURCES = TestRadialWF.cc
 LDADD   = ../IO/libciao.la ../Splines/libspline.la ../DFT/libdft.la ../PH/libPH.la libatom.la \
           ../Integration/libquad.la ../Fitting/libfitting.la ../MatrixOps/libmatops.la        \
           $(XML2_LIBS) $(BLITZ_LIBS) $(GSL_LIBS)
-AM_CXXFLAGS = $(XML2_CFLAGS) $(BLITZ_CFLAGS) $(HDF5_CFLAGS) $(AM_CXXFLAGS)
+AM_CXXFLAGS = $(XML2_CFLAGS) $(BLITZ_CFLAGS) $(HDF5_CFLAGS)
 
 includedir=$(prefix)/include/Common/Atom
 
