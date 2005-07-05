@@ -5,6 +5,7 @@
 ///particles it has
 void KineticSphereClass::Read(IOSectionClass& in)
 {
+  assert(in.ReadVar("SphereRadius",SphereRadius));
 }
 
 KineticSphereClass::KineticSphereClass(PathDataClass &pathData ) : 
@@ -34,7 +35,7 @@ double KineticSphereClass::Action (int slice1, int slice2,
 	vel= PathData.Path(slice+skip,ptcl)-PathData.Path(slice,ptcl);
 	dVec r1=PathData.Path(slice,ptcl);
 	dVec r2=PathData.Path(slice+skip,ptcl);
-	double a=31;
+	double a=SphereRadius;
 	double angle;
 	if (dot(r1,r2)/(a*a)<=1)
 	  angle= acos(dot(r1,r2)/(a*a));
@@ -111,7 +112,7 @@ double KineticSphereClass::d_dBeta (int slice1, int slice2,
 	//	double vel2=dot(vel,vel);
 	dVec r1=PathData.Path(slice,ptcl);
 	dVec r2=PathData.Path(slice+skip,ptcl);
-	double a=31;
+	double a=SphereRadius;
 	double angle= acos(dot(r1,r2)/(a*a));
 	double vel2=angle*angle*a*a;
 	//	cerr<<"My angle is "<<angle<<" ";
@@ -120,7 +121,7 @@ double KineticSphereClass::d_dBeta (int slice1, int slice2,
 	//	cerr<<acos(dot(r1,r2)/(a*a))<<" ";
 	//	cerr<<(1==1)<<" "<<(dot(r1,r2)/(a*a)<=1)<<" ";
 	//	cerr<<r1<<" "<<r2<<endl;
-	///////	//	double oldEnergy=K2(slice,slice+skip,ptcl,level,lambda)*lambda/(31*31);
+	///////	//	double oldEnergy=K2(slice,slice+skip,ptcl,level,lambda)*lambda/(SphereRadius*SphereRadius);
 	//////	//	double newEnergy=(0.5*(NDIM-1))/levelTau-vel2*FourLambdaTauInv/levelTau;
 	/////	//      double newestEnergy=0.5*(NDIM-1)/levelTau-2*vel2*FourLambdaTauInv/levelTau;
 	//	cerr<<newEnergy<<" "<<oldEnergy<<" "<<newEnergy-oldEnergy<<" "<<newEnergy/oldEnergy<<" "<<newestEnergy<<" "<<newestEnergy/oldEnergy<<endl;
@@ -188,7 +189,8 @@ double KineticSphereClass::d_dBeta_old (int slice1, int slice2,
       for (int slice=slice1; slice<slice2; slice+=skip) {
 	////HACK FOR HELIUM SPHERE!
  	//	spring += (0.5*(NDIM-1))/levelTau;
- 	spring += K2(slice,slice+skip,ptcl,level,lambda)*lambda/(31*31);
+ 	spring += K2(slice,slice+skip,ptcl,level,lambda)*
+	  lambda/(SphereRadius*SphereRadius);
 	//	spring += scalarnumSum/Z; 
       }
     }
@@ -216,7 +218,8 @@ double KineticSphereClass::K(int slice,int nextSlice,int ptcl, int level,double 
   for (int l=0;l<=maxl;l++)
     {
       num=l*(l+1);
-      dnum=(2*l+1)*Legendre(l,cosGamma)*exp(-levelTau*num*lambda/(31*31));
+      dnum=(2*l+1)*Legendre(l,cosGamma)*
+	exp(-levelTau*num*lambda/(SphereRadius*SphereRadius));
       num*=dnum;
 	
       numerator+=num;
@@ -249,7 +252,8 @@ double KineticSphereClass::K2(int slice,int nextSlice,int ptcl, int level,double
   for (int l=0;l<=maxl;l++)
     {
       num=l*(l+1);
-      dnum=(2*l+1)*Legendre(l,cosGamma)*exp(-levelTau*num*lambda/(31*31));
+      dnum=(2*l+1)*Legendre(l,cosGamma)*
+	exp(-levelTau*num*lambda/(SphereRadius*SphereRadius));
       num*=dnum;
 	
       numerator+=num;

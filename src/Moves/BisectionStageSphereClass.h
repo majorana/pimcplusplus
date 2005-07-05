@@ -24,6 +24,7 @@ public:
   void RotateAroundY(dVec &vec, double theta);
   void RotateAroundZ(dVec &vec, double theta);
   double angleInBetween(dVec &r1, dVec &r2);
+  void Read(IOSectionClass &in);
   BisectionStageSphereClass(PathDataClass &pathData, int level,
 		      IOSectionClass outSection) : 
     LocalStageClass(pathData,outSection),
@@ -31,7 +32,7 @@ public:
   { 
     //do nothing for now
     BisectionLevel = level;
-    SphereRadius=31.0;
+    SphereRadius=2.0;
   }
 };
 

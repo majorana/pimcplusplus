@@ -1,4 +1,12 @@
 #include "BisectionStageSphereClass.h"
+
+void BisectionStageSphereClass::Read(IOSectionClass &in)
+{
+  assert(in.ReadVar("SphereRadius",SphereRadius));
+
+
+}
+
 void BisectionStageSphereClass::CartesianToSpherical(dVec &r,double &theta,double &phi)
 {
   //double a=sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);
@@ -143,7 +151,7 @@ double BisectionStageSphereClass::Sample(int &slice1,int &slice2,
       dVec samVec=rn1*Etheta+rn2*Ephi;
       rpp=a*cosRandTheta*Er+a*sinRandTheta*(samVec)/sqrt(dot(samVec,samVec));
 
-      if (abs(sqrt(dot(rpp,rpp)) -31)>pow(10.0,-5)) 
+      if (abs(sqrt(dot(rpp,rpp)) -SphereRadius)>pow(10.0,-5)) 
 	cerr <<"Inside sphere!! "<<sqrt(dot(rpp,rpp))<<endl;
       ProjectOntoSphere(rpp,a);  
       

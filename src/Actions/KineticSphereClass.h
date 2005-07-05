@@ -10,6 +10,7 @@
 class KineticSphereClass : public ActionBaseClass
 {
   int NumImages;
+  double SphereRadius;
 public:
   void Read (IOSectionClass &in);
   double Action (int slice1, int slice2, 
