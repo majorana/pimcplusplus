@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libcomm.la
+noinst_LTLIBRARIES = libcomm.la
 libcomm_la_SOURCES = Communication.cc
 
 includedir=$(prefix)/include/Common/MPI

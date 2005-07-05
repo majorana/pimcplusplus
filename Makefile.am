@@ -19,7 +19,7 @@ SUBDIRS =                  \
 lib_LTLIBRARIES = libcommon.la
 libcommon_la_SOURCES =
 libcommon_la_LIBADD = IO/libciao.la                  \
-                      Splines/libspline.la          \
+                      Splines/libspline.la           \
                       SpecialFunctions/libspecfun.la \
                       Integration/libquad.la         \
                       MatrixOps/libmatops.la         \

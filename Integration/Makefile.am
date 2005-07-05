@@ -4,9 +4,9 @@ TestIntegrate_SOURCES = TestIntegrate.cc
 TestHermite_SOURCES = TestHermite.cc 
 
 LDADD = libquad.la ../IO/libciao.la  $(XML2_LIBS) $(BLITZ_LIBS)
-CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
+AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)
 
-lib_LTLIBRARIES = libquad.la
+noinst_LTLIBRARIES = libquad.la
 libquad_la_SOURCES = GKIntegration.h    \
                      GKIntegration.cc   \
                      HermiteQuad.h      \

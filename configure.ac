@@ -67,6 +67,7 @@ AC_SUBST(MPI_LIBS)
 AC_SUBST(MPI_CFLAGS)
 AC_SUBST(MPI_RUN)
 
+AC_F77_WRAPPERS
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

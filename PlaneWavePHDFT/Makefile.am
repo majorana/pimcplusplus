@@ -12,7 +12,7 @@ LDADD = ../IO/libciao.la ../Splines/libspline.la ../FFT/libfft.la         \
 CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
            $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(AM_CXXFLAGS)
 
-lib_LTLIBRARIES = libpw.la
+noinst_LTLIBRARIES = libpw.la
 libpw_la_SOURCES = ConjGrad2.h       \
                    ConjGrad2.cc      \
                    FFTBox.h          \

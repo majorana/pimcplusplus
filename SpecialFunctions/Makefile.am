@@ -11,7 +11,7 @@ TestPolySet_SOURCES = TestPolySet.cc
 LDADD = ../Integration/libquad.la libspecfun.la $(GSL_LIBS)
 CXX_FLAGS = $(BLITZ_CFLAGS) $(GSL_CFLAGS) $(AM_CXXFLAGS)
 
-lib_LTLIBRARIES = libspecfun.la
+noinst_LTLIBRARIES = libspecfun.la
 libspecfun_la_SOURCES = HermitePoly.h       \
                         SpecialFunctions.h  \
                         SpecialFunctions.cc \

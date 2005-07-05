@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libdft.la
+noinst_LTLIBRARIES = libdft.la
 libdft_la_SOURCES = ExCorr.f        \
                     Functionals.cc  \
                     Functionals.h   

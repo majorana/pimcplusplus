@@ -1,6 +1,6 @@
 #include "MatrixOps.h"
 #include <blitz/mstruct.h>
-
+#include "../config.h"
 
 //#ifdef NOUNDERSCORE 
 //#define FORT(name) name
@@ -9,23 +9,57 @@
 //#endif 
 
 
-
-
-extern "C" void FORT(dgesvd)(char *JOBU, char* JOBVT, int *M, int *N,
-			     double *A, int *LDA, double *S, double *U,
-			     int *LDU, double *VT, int *LDVT, double *work,
-			     int *LWORK, int *INFO);
+#define F77_DGESVD F77_FUNC(dgesvd,DGESVD)
+#define F77_DGETRF F77_FUNC(dgetrf,DGETRF)
+#define F77_DGETRI F77_FUNC(dgetri,DGETRI)
+#define F77_DGEMM  F77_FUNC(dgemm,DGEMM)
+#define F77_DSYEVR F77_FUNC(dsyevr,DSYEVR)
+#define F77_ZHEEVR F77_FUNC(zheevr,ZHEEVR)
 
 extern "C" void 
-FORT(dgetrf)(int *m, int *n, double A[], int *lda, int ipiv[],
-			int *info);
+F77_DGESVD (char *JOBU, char* JOBVT, int *M, int *N,
+	    double *A, int *LDA, double *S, double *U,
+	    int *LDU, double *VT, int *LDVT, double *work,
+	    int *LWORK, int *INFO);
+
 extern "C" void 
-FORT(dgetri)(int *N, double A[], int *lda, int ipiv[], double work[], 
+F77_DGETRF(int *m, int *n, double A[], int *lda, int ipiv[], int *info);
+
+extern "C" void 
+F77_DGETRI (int *N, double A[], int *lda, int ipiv[], double work[], 
 	     int *lwork, int *info);
 
-extern "C" void FORT(dgemm)(char *transA, char *transB, int *m, int *n, int *k,
-			    double *alpha, const double *A, int *lda, const double *B, int *ldb,
-			    double *beta,  double *C, int *ldc);
+extern "C" void 
+F77_DGEMM (char *transA, char *transB, int *m, int *n, int *k,
+	   double *alpha, const double *A, int *lda, const double *B, int *ldb,
+	   double *beta,  double *C, int *ldc);
+
+extern "C" void 
+F77_DSYEVR (char *JobType, char *Range, char *UpperLower, 
+	    int *N, double *Amat, int *LDA,
+	    double *VL, double *VU,
+	    int *IL, int *IU, 
+	    double *AbsTolerance, int *M,
+	    double *EigVals, 
+	    double *EigVecs, int *LDEigVecs, int *ISuppZ,
+	    double *Work, int *Lwork, 
+	    int *IWorkSpace, int *LIwork,
+	    int *Info);
+
+extern "C" void 
+F77_ZHEEVR (char *JobType, char *Range, char *UpperLower, 
+	    int *N, complex<double> *Amat, int *LDA,
+	    double *VL, double *VU,
+	    int *IL, int *IU, 
+	    double *AbsTolerance, int *M,
+	    double *EigVals, 
+	    complex<double> *EigVecs, int *LDEigVecs, 
+	    int *ISuppZ,
+	    complex<double> *Work, int *Lwork, 
+	    double *Rwork, int *LRwork,
+	    int *IWorkSpace, int *LIwork,
+	    int *Info);
+
 
 const Array<double,2> operator*(const Array<double,2> &A,
 				const Array<double,2> &B)
@@ -43,9 +77,8 @@ const Array<double,2> operator*(const Array<double,2> &A,
   GeneralArrayStorage<2> colMajor;
   colMajor.ordering() = firstDim, secondDim;
   Array<double,2> C(m,n,colMajor);
-  FORT(dgemm)(&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
-	 B.data(), &n,
-	 &beta, C.data(), &m);
+  F77_DGEMM (&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
+	     B.data(), &n, &beta, C.data(), &m);
   return C;
 }
 
@@ -65,9 +98,8 @@ void MatMult (const Array<double,2> &A, const Array<double,2> &B,
   double beta = 0.0;
   GeneralArrayStorage<2> colMajor;
   colMajor.ordering() = firstDim, secondDim;
-  FORT(dgemm)(&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
-	      B.data(), &n,
-	      &beta, C.data(), &m);
+  F77_DGEMM (&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
+	     B.data(), &n, &beta, C.data(), &m);
 }
 
 
@@ -87,7 +119,7 @@ double Determinant (const Array<double,2> &A)
     int info;
     LU = A;
     // Do LU factorization
-    FORT(dgetrf)(&m, &n, LU.data(), &m, ipiv.data(), &info);
+    F77_DGETRF (&m, &n, LU.data(), &m, ipiv.data(), &info);
     double det = 1.0;
     int numPerm = 0;
     for (int i=0; i<m; i++) {
@@ -210,7 +242,7 @@ void Cofactors (const Array<double,2> &A,
     for (int j=0; j<m; j++)
       scratch(i,j) = A(j,i);
   // Do LU decomposition
-  FORT(dgetrf) (&m, &n, scratch.data(), &m, ipiv, &info);
+  F77_DGETRF (&m, &n, scratch.data(), &m, ipiv, &info);
   // Now scratch contains LU matrix in fortran ordering with pivots in ipiv
   // Put identity matrix in cof
   cof = 0.0;
@@ -253,9 +285,9 @@ void SVdecomp (Array<double,2> &A,
   Array<double,1> WORK(LWORK);
   int INFO;
 
-  FORT(dgesvd)(&JOBU, &JOBVT, &M, &N, Atrans.data(), &LDA,
-	       S.data(), U.data(), &LDU, V.data(), &LDVT,
-	       WORK.data(), &LWORK, &INFO);
+  F77_DGESVD (&JOBU, &JOBVT, &M, &N, Atrans.data(), &LDA,
+	      S.data(), U.data(), &LDU, V.data(), &LDVT,
+	      WORK.data(), &LWORK, &INFO);
   assert (INFO == 0);
   // Transpose U to get back to C ordering
   // V was really Vtrans so we don't need to transpose
@@ -375,17 +407,6 @@ Array<double,2> Inverse (Array<double,2> &A)
 }
 
   
-extern "C" void FORT(dsyevr)(char *JobType, char *Range, char *UpperLower, 
-			     int *N, double *Amat, int *LDA,
-			     double *VL, double *VU,
-			     int *IL, int *IU, 
-			     double *AbsTolerance, int *M,
-			     double *EigVals, 
-			     double *EigVecs, int *LDEigVecs, int *ISuppZ,
-			     double *Work, int *Lwork, 
-			     int *IWorkSpace, int *LIwork,
-			     int *Info);
-
 void SymmEigenPairs (const Array<scalar,2> &A, int NumPairs,
 		     Array<scalar,1> &Vals,
 		     Array<scalar,2> &Vectors)
@@ -416,10 +437,10 @@ void SymmEigenPairs (const Array<scalar,2> &A, int NumPairs,
   int IWorkSize;
   
   
-   FORT(dsyevr)(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
-		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
-		&LDEigVecs, ISuppZ, &WorkSize, &Lwork, &IWorkSize, &LIwork, 
-		&Info);
+   F77_DSYEVR (&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
+	       &IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
+	       &LDEigVecs, ISuppZ, &WorkSize, &Lwork, &IWorkSize, &LIwork, 
+	       &Info);
 
    // Now allocate WorkSpace;
    Lwork = (int) floor(WorkSize+0.5);
@@ -432,10 +453,10 @@ void SymmEigenPairs (const Array<scalar,2> &A, int NumPairs,
      for (int col=0; col<N; col++)
        *(Amat+(col*N)+row) = A(row,col);
   
-   FORT(dsyevr)(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
-		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
-		&LDEigVecs, ISuppZ, WorkSpace, &Lwork, IWorkSpace, &LIwork, 
-		&Info);
+   F77_DSYEVR (&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
+	       &IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
+	       &LDEigVecs, ISuppZ, WorkSpace, &Lwork, IWorkSpace, &LIwork, 
+	       &Info);
 
    if (Info !=0) 
      {
@@ -461,18 +482,6 @@ void SymmEigenPairs (const Array<scalar,2> &A, int NumPairs,
 }
 
 
-extern "C" void FORT(zheevr)(char *JobType, char *Range, char *UpperLower, 
-			     int *N, complex<double> *Amat, int *LDA,
-			     double *VL, double *VU,
-			     int *IL, int *IU, 
-			     double *AbsTolerance, int *M,
-			     double *EigVals, 
-			     complex<double> *EigVecs, int *LDEigVecs, 
-			     int *ISuppZ,
-			     complex<double> *Work, int *Lwork, 
-			     double *Rwork, int *LRwork,
-			     int *IWorkSpace, int *LIwork,
-			     int *Info);
 
 
 void SymmEigenPairs (const Array<complex<double>,2> &A, int NumPairs,
@@ -507,10 +516,10 @@ void SymmEigenPairs (const Array<complex<double>,2> &A, int NumPairs,
   int IWorkSize;
   
   
-   FORT(zheevr)(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
-		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
-		&LDEigVecs, ISuppZ, &WorkSize, &Lwork, &RWorkSize, &LRwork, &IWorkSize, &LIwork, 
-		&Info);
+   F77_ZHEEVR(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
+	      &IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
+	      &LDEigVecs, ISuppZ, &WorkSize, &Lwork, &RWorkSize, &LRwork, 
+	      &IWorkSize, &LIwork, &Info);
 //    fprintf (stderr, "WorkSize  = %1.8f\n", WorkSize.real());
 //    fprintf (stderr, "RWorkSize = %1.8f\n", RWorkSize);
 //    fprintf (stderr, "IWorkSize = %d\n", IWorkSize);
@@ -528,10 +537,10 @@ void SymmEigenPairs (const Array<complex<double>,2> &A, int NumPairs,
      for (int col=0; col<N; col++)
        *(Amat+(col*N)+row) = A(row,col);
    
-   FORT(zheevr)(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
-		&IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
-		&LDEigVecs, ISuppZ, WorkSpace, &Lwork, RWorkSpace, &LRwork, IWorkSpace, &LIwork, 
-		&Info);
+   F77_ZHEEVR(&JobType, &Range, &UpperLower, &N, Amat, &LDA, &VL, &VU,
+	      &IL, &IU, &AbsTolerance, &NumComputed, EigVals, EigVecs,
+	      &LDEigVecs, ISuppZ, WorkSpace, &Lwork, RWorkSpace, &LRwork, 
+	      IWorkSpace, &LIwork, &Info);
 
    if (Info !=0) {
      fprintf (stderr, "Lapack error in zheevr.  Exitting.\n");
@@ -577,7 +586,7 @@ DetCofactors (Array<double,2> &A, Array<double,1> &work)
   
   int info;
   // Do LU factorization
-  FORT(dgetrf)(&N, &M, A.data(), &N, ipiv, &info);
+  F77_DGETRF (&N, &M, A.data(), &N, ipiv, &info);
   double det = 1.0;
   int numPerm = 0;
   for (int i=0; i<N; i++) {
@@ -589,7 +598,7 @@ DetCofactors (Array<double,2> &A, Array<double,1> &work)
   
   int lwork = work.size();
   // Now, do inverse
-  FORT(dgetri)(&N, A.data(), &N, ipiv, work.data(), &lwork, &info);
+  F77_DGETRI (&N, A.data(), &N, ipiv, work.data(), &lwork, &info);
 
   // Now, we have the transpose of Ainv.  Now, just multiply by det:
   A = det * A;
@@ -606,7 +615,7 @@ DetCofactorsWorksize(int N)
   int ipiv;
   int lwork = -1;
   
-  FORT (dgetri)(&N, &dummy, &N, &ipiv, &work, &lwork, &info);
+  F77_DGETRI(&N, &dummy, &N, &ipiv, &work, &lwork, &info);
 
   return ((int)ceil(work));
 }

@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libpairact.la
+noinst_LTLIBRARIES = libpairact.la
 libpairact_la_SOURCES = DavidPAClass.cc    \
                         DavidPAClass.h     \
                         PADipoleFit.cc     \

@@ -10,7 +10,7 @@ TestHDF5_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
 
 includedir=$(prefix)/include/Common/IO
 
-lib_LTLIBRARIES = libciao.la
+noinst_LTLIBRARIES = libciao.la
 libciao_la_SOURCES = FileExpand.h        \
                      InputOutput.h       \
                      InputOutput.cc      \

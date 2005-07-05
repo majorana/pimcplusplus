@@ -3,9 +3,9 @@ check_PROGRAMS = TestkSpacePH
 TestkSpacePH_SOURCES = TestkSpacePH.cc
 
 LDADD = ../IO/libciao.la ../Integration/libquad.la ../Splines/libspline.la ../MatrixOps/libmatops.la ../Fitting/libfitting.la libPH.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(GSL_LIBS) -lgsl -lgslcblas
-CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS) $(GSL_CFLAGS)
+AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(GSL_CFLAGS)
 
-lib_LTLIBRARIES = libPH.la
+noinst_LTLIBRARIES = libPH.la
 libPH_la_SOURCES = CoreTransform.h    \
                    CoreTransform.cc   \
                    CoulombPot.h       \
