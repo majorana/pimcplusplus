@@ -1,4 +1,5 @@
 #include "Functionals.h"
+#include "../config.h"
 #include <cmath>
 #include <iostream>
 
@@ -305,14 +306,11 @@ void CorrelationPotential(double  nup, double ndown,
     Vdown = 0.0;
 }
 
-#ifdef NOUNDERSCORE 
-#define FORT(name) name
-#else
-#define FORT(name) name ## _
-#endif 
+#define F77_EXCCOR F77_FUNC(exccor,EXCCOR)
 
-extern "C" void FORT(exccor)(double &n, double &zeta, double &exc, double &vxc, 
-			     double &vpol, int &type, int &Macdonald_Vosko);
+extern "C" void 
+F77_EXCCOR(double &n, double &zeta, double &exc, double &vxc, 
+	   double &vpol, int &type, int &Macdonald_Vosko);
 
 void FortranExCorr(double  nup, double  ndown,
 		   double &Vup, double &Vdown)
@@ -324,7 +322,7 @@ void FortranExCorr(double  nup, double  ndown,
   int Macdonald_Vosko=/*0*/1;
   
   double exc, vxc, vpol;
-  FORT(exccor)(n, zeta, exc, vxc, vpol, type, Macdonald_Vosko);
+  F77_EXCCOR(n, zeta, exc, vxc, vpol, type, Macdonald_Vosko);
 
   //  fprintf (stderr, "Fortran Exc = %12.8f\n", exc);
 
@@ -343,7 +341,7 @@ double FortranXCE (double nup, double ndown)
   int Macdonald_Vosko=/*0*/1;
   
   double exc, vxc, vpol;
-  FORT(exccor)(n, zeta, exc, vxc, vpol, type, Macdonald_Vosko);
+  F77_EXCCOR(n, zeta, exc, vxc, vpol, type, Macdonald_Vosko);
   return (exc);
 }
   

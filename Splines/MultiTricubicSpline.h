@@ -1,23 +1,30 @@
 #ifndef MULTI_TRICUBIC_SPLINE_H
 #define MULTI_TRICUBIC_SPLINE_H
 
+#include "../config.h"
+
 #ifndef NOUNDERSCORE
 #define FORT(name) name ## _
 #else
 #define FORT(name) name
 #endif
 
-extern "C" void FORT(r3spline) (double *x, double *y, double *z,
-				double *x0, double *dx, int *nx,
-				double *y0, double *dy, int *ny,
-				double *z0, double *dz, int *nz,
-				void *F, int *num, void *vals);
+#define F77_R3SPLINE  F77_FUNC(r3spline,R3SPLINE)
+#define F77_R3VALGRAD F77_FUNC(r3valgrad,R3VALGRAD)
 
-extern "C" void FORT(r3valgrad) (double *x, double *y, double *z,
-				 double *x0, double *dx, int *nx,
-				 double *y0, double *dy, int *ny,
-				 double *z0, double *dz, int *nz,
-				 void *F, int *num, void *vals, void *grads);
+extern "C" void 
+F77_R3SPLINE (double *x, double *y, double *z,
+	      double *x0, double *dx, int *nx,
+	      double *y0, double *dy, int *ny,
+	      double *z0, double *dz, int *nz,
+	      void *F, int *num, void *vals);
+
+extern "C" void 
+F77_R3VALGRAD (double *x, double *y, double *z,
+	       double *x0, double *dx, int *nx,
+	       double *y0, double *dy, int *ny,
+	       double *z0, double *dz, int *nz,
+	       void *F, int *num, void *vals, void *grads);
 
 #include "Grid.h"
 #include <cmath>
@@ -1141,8 +1148,8 @@ MultiTricubicSpline::FValGrad(double x, double y, double z,
   double dx=(*Xgrid)(1)-(*Xgrid)(0);
   double dy=(*Ygrid)(1)-(*Ygrid)(0);
   double dz=(*Zgrid)(1)-(*Zgrid)(0);
-  FORT(r3valgrad)(&x,&y,&z,&x0,&dx,&Nx,&y0,&dy,&Ny,&z0,&dz,&Nz,
-		  F.data(), &N, vals.data(), grads.data());
+  F77_R3VALGRAD(&x,&y,&z,&x0,&dx,&Nx,&y0,&dy,&Ny,&z0,&dz,&Nz,
+		F.data(), &N, vals.data(), grads.data());
   
 }
 

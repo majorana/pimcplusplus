@@ -1,5 +1,6 @@
 #include "Grid.h"
 #include <cmath>
+#include "../config.h"
 
 #ifdef NOUNDERSCORE 
 #define FORT(name) name
@@ -9,27 +10,32 @@
 
 #include <math.h>
 
-extern "C" void FORT(mktricubw)(double x[], int *nx,
-				double y[], int *ny,
-				double z[], int *nz,
-				double *f, int *nf2, int *nf3,
-				int *ibcxmin, double *bcxmin, 
-				int *ibcxmax, double *bcxmax, int *inb1x,
-				int *ibcymin, double *bcymin, 
-				int *ibcymax, double *bcymax, int *inb1y,
-				int *ibczmin, double *bczmin,
-				int *ibczmax, double *bczmax, int *inb1z,
-				double *wk, int *nwk, 
-				int *ilinx, int *iliny, int *ilinz, int *ier);
+#define F77_MKTRICUBW F77_FUNC(mktricubw,MKTRICUBW)
+#define F77_EVTRICUB F77_FUNC(evtricubw,EVTRICUB)
 
-extern "C" void FORT(evtricub)(double *xget, double *yget, double *zget,
-			       double *x, int *nx,
-			       double *y, int *ny,
-			       double *z, int *nz,
-			       int *ilinx, int *iliny, int *ilinz,
-			       double *f, int *inf2, int *inf3,
-			       int *iselect, double *fval,
-			       int *ier);
+extern "C" void 
+F77_MKTRICUBW(double x[], int *nx,
+	      double y[], int *ny,
+	      double z[], int *nz,
+	      double *f, int *nf2, int *nf3,
+	      int *ibcxmin, double *bcxmin, 
+	      int *ibcxmax, double *bcxmax, int *inb1x,
+	      int *ibcymin, double *bcymin, 
+	      int *ibcymax, double *bcymax, int *inb1y,
+	      int *ibczmin, double *bczmin,
+	      int *ibczmax, double *bczmax, int *inb1z,
+	      double *wk, int *nwk, 
+	      int *ilinx, int *iliny, int *ilinz, int *ier);
+
+extern "C" void 
+F77_EVTRICUB(double *xget, double *yget, double *zget,
+	     double *x, int *nx,
+	     double *y, int *ny,
+	     double *z, int *nz,
+	     int *ilinx, int *iliny, int *ilinz,
+	     double *f, int *inf2, int *inf3,
+	     int *iselect, double *fval,
+	     int *ier);
 
 
 class TricubicSpline
@@ -151,13 +157,13 @@ inline double TricubicSpline::operator()(double x, double y, double z)
     iselect[i] = 0;
   int errorCode;
 
-  FORT(evtricub)(&x, &y, &z, 
-		 xGrid->data(), &Nx, 
-		 yGrid->data(), &Ny, 
-		 zGrid->data(), &Nz,
-		 &xIsLin, &yIsLin, &zIsLin,
-		 f.data(), &Nx, &Ny, 
-		 iselect, fval, &errorCode);
+  F77_EVTRICUB(&x, &y, &z, 
+	       xGrid->data(), &Nx, 
+	       yGrid->data(), &Ny, 
+	       zGrid->data(), &Nz,
+	       &xIsLin, &yIsLin, &zIsLin,
+	       f.data(), &Nx, &Ny, 
+	       iselect, fval, &errorCode);
   if (errorCode != 0 || isnan(fval[0])){
     cerr << "x = " << x << endl;
     cerr << "y = " << y << endl;
@@ -208,14 +214,14 @@ inline void TricubicSpline::Update()
 //     cerr << (*zGrid)(i) << endl;
 
   double *wk = new double[Nwk];
-  FORT(mktricubw)(xGrid->data(), &Nx,
-		  yGrid->data(), &Ny,
-		  zGrid->data(), &Nz,
-		  f.data(), &Nx, &Ny,
-		  &IxMinBC, &dummyDouble, &IxMaxBC, &dummyDouble, &dummyInt,
-		  &IyMinBC, &dummyDouble, &IyMaxBC, &dummyDouble, &dummyInt,
-		  &IzMinBC, &dummyDouble, &IzMaxBC, &dummyDouble, &dummyInt,
-		  wk, &Nwk, &xIsLin, &yIsLin, &zIsLin, &errorCode);
+  F77_MKTRICUBW(xGrid->data(), &Nx,
+		yGrid->data(), &Ny,
+		zGrid->data(), &Nz,
+		f.data(), &Nx, &Ny,
+		&IxMinBC, &dummyDouble, &IxMaxBC, &dummyDouble, &dummyInt,
+		&IyMinBC, &dummyDouble, &IyMaxBC, &dummyDouble, &dummyInt,
+		&IzMinBC, &dummyDouble, &IzMaxBC, &dummyDouble, &dummyInt,
+		wk, &Nwk, &xIsLin, &yIsLin, &zIsLin, &errorCode);
   delete wk;
   for (int ix=0; ix<Nx; ix++)
     for (int iy=0; iy<Ny; iy++)

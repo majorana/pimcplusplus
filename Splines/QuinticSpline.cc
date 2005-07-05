@@ -1,14 +1,11 @@
 #include "QuinticSpline.h"
+#include "../config.h"
 
-#ifdef NOUNDERSCORE 
-#define FORT(name) name
-#else
-#define FORT(name) name ## _
-#endif 
-
-extern "C" void FORT(quinat) (int *N, double X[], double Y[], 
-			      double B[], double C[], double D[], 
-			      double E[], double F[]);
+#define F77_QUINAT F77_FUNC(quinat,QUINAT)
+extern "C" void 
+F77_QUINAT (int *N, double X[], double Y[], 
+	    double B[], double C[], double D[], 
+	    double E[], double F[]);
 
 
 
@@ -49,7 +46,7 @@ void QuinticSpline::Update()
   }
   int Fpoints = FX.size();
   // Call FORTRAN routine
-  FORT(quinat) (&Fpoints, FX.data(), FY.data(), FB.data(), FC.data(),
+  F77_QUINAT (&Fpoints, FX.data(), FY.data(), FB.data(), FC.data(),
 		FD.data(), FE.data(), FF.data());
 
   // Now copy the data into our coefficents

@@ -33,3 +33,6 @@ libcommon_la_LIBADD = IO/libciao.la                  \
                       PairAction/libpairact.la       \
                       PlaneWavePHDFT/libpw.la        \
                       Atom/libatom.la 
+
+includedir=$(prefix)/include/Common
+include_HEADERS = Blitz.h config.h
