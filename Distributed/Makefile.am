@@ -8,7 +8,7 @@ noinst_LTLIBRARIES = libdistrib.la
 libdistrib_la_SOURCES = DistributedMat.cc
 libdistrib_la_CXXFLAGS = $(BLITZ_CFLAGS)  $(MPI_CFLAGS) $(MPI_DEF) $(AM_CXXFLAGS)
 
-includedir = $(prefix)/Common/Distributed
+includedir = $(prefix)/include/Common/Distributed
 
 include_HEADERS = DistributedMat.h
 
