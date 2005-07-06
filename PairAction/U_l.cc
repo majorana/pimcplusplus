@@ -1,7 +1,7 @@
 #include "U_l.h"
-#include "Common/Integration/GKIntegration.h"
-#include "Common/Integration/HermiteQuad.h"
-#include "Common/Distributed/DistributedMat.h"
+#include "../Integration/GKIntegration.h"
+#include "../Integration/HermiteQuad.h"
+#include "../Distributed/DistributedMat.h"
 
 void
 U_l::Initialize(int l_, double lambda_, double FinalBeta, int NumSquares, 

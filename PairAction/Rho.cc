@@ -1,5 +1,5 @@
 #include "Rho.h"
-#include "Common/SpecialFunctions/SpecialFunctions.h"
+#include "../SpecialFunctions/SpecialFunctions.h"
 #include <unistd.h>
 
 

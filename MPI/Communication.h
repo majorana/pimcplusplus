@@ -1,6 +1,6 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
-#include "../../Common/Blitz.h"
+#include "../Blitz.h"
 #include <fstream>
 
 #ifdef USE_MPI

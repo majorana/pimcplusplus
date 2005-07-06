@@ -24,6 +24,7 @@ PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
 
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([hdf5], [H5open], hdf5_ok=yes, hdf5_ok=no)
+AC_CHECK_LIB([cblas],[cblas_dgemm], cblas_ok=yes, cblas_ok=no)
 AC_CHECK_LIB([g2c],[do_lio])
 AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
 AC_CHECK_LIB([lapack], [dgesvd_])
@@ -84,6 +85,20 @@ if test "x$hdf5_ok" = "xno"; then
        AC_MSG_ERROR([HDF5 library could not be found.  Please specify location with --with-hdf5-libs=])
    fi
 fi
+
+AC_ARG_WITH(cblas-cflags,[  --with-cblas-cflags=FLAGS specify CBLAS linker flags])
+AC_ARG_WITH(cblas-libs, [  --with-cblas-libs=LIBS    specify CBLAS linker flags])
+CBLAS_CFLAGS="$with_cblas_cflags"
+CBLAS_LIBS="$with_cblas_libs"
+AC_SUBST(CBLAS_CFLAGS)
+AC_SUBST(CBLAS_LIBS)
+if test "x$cblas_ok" = "xno"; then
+   AC_MSG_WARN([Didn't find libcblas in standard place.])
+   if test "x$with_cblas_libs" = "x"; then
+       AC_MSG_ERROR([CBLAS library could not be found.  Please specify location with --with-cblas-libs=])
+   fi
+fi
+
 
 
 AC_F77_WRAPPERS
