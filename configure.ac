@@ -7,6 +7,11 @@ AM_INIT_AUTOMAKE(libcommon, 1.0)
 AC_CONFIG_SRCDIR([Blitz.h])
 AC_CONFIG_HEADER([config.h])
 
+AC_CANONICAL_HOST
+if test "x$host" = "xpowerpc-apple-darwin7.7.0"; then
+   CPPFLAGS="-DMAC $CPPFLAGS"
+fi
+
 # Checks for libraries.
 # this creates and AC_SUBST's vars BLITZ_CFLAGS and BLITZ_LIBS
 PKG_CHECK_MODULES(BLITZ, blitz, blitz_ok=yes, blitz_ok=no)
@@ -26,7 +31,6 @@ AC_CHECK_LIB([blas],[daxp])
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h sys/time.h unistd.h])
-
 
 # Checks for programs.
 AC_PROG_CXX
