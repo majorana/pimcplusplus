@@ -1,6 +1,6 @@
 #ifndef SPECFUNC_H
 #define SPECFUNC_H
-#include "../../Common/Blitz.h"
+#include "../Blitz.h"
 
 double ModBesselScaled(int l, double x);
 double RegModBesselFracScaled(double nu, double x);

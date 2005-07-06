@@ -25,8 +25,7 @@ libciao_la_SOURCES = FileExpand.h        \
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
-libciao_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)
-libciao_la_LIBADD = $(GMP_LIBS) 
+libciao_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
 
 #if HAVE_GMP
 #     libsprng_la_SOURCES += pmlcg/pmlcg.h pmlcg/pmlcg.c pmlcg/info.h pmlcg/basic.h 

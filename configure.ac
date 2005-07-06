@@ -18,7 +18,7 @@ PKG_CHECK_MODULES(FFTW3, fftw3, fftw3_ok=yes, fftw3_ok=no)
 PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
 
 AC_CHECK_LIB([m], [sqrt])
-AC_CHECK_LIB([hdf5], [H5open])
+AC_CHECK_LIB([hdf5], [H5open], hdf5_ok=yes, hdf5_ok=no)
 AC_CHECK_LIB([g2c],[do_lio])
 AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
 AC_CHECK_LIB([lapack], [dgesvd_])
@@ -34,10 +34,10 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 
 # Checks if we want MPI support
-AC_ARG_ENABLE(mpi,    [  --enable-mpi            enable MPI support (default=no)])
-AC_ARG_WITH(mpi-inc,  [  --with-mpi-cflags=FLAGS specify MPI compliler flags])
-AC_ARG_WITH(mpi-libs, [  --with-mpi-libs=LIBS    specify MPI linker flags])
-AC_ARG_WITH(mpi-run,  [  --with-mpi-run=cmd      specify MPI run command (default=mpirun)])
+AC_ARG_ENABLE(mpi,    [  --enable-mpi              enable MPI support (default=no)])
+AC_ARG_WITH(mpi-inc,  [  --with-mpi-cflags=FLAGS   specify MPI compliler flags])
+AC_ARG_WITH(mpi-libs, [  --with-mpi-libs=LIBS      specify MPI linker flags])
+AC_ARG_WITH(mpi-run,  [  --with-mpi-run=cmd        specify MPI run command (default=mpirun)])
 
 if test "$enable_mpi" = "yes"; then
     MPI_DEF="-DUSE_MPI"
@@ -61,11 +61,26 @@ if test "$enable_mpi" = "yes"; then
 else
     MPI_DEF=" "
 fi
-
 AC_SUBST(MPI_DEF)
 AC_SUBST(MPI_LIBS)
 AC_SUBST(MPI_CFLAGS)
 AC_SUBST(MPI_RUN)
+
+
+AC_ARG_WITH(hdf5-cflags,[  --with-hdf5-cflags=FLAGS specify HDF5 linker flags])
+AC_ARG_WITH(hdf5-libs, [  --with-hdf5-libs=LIBS    specify HDF5 linker flags])
+HDF5_CFLAGS="$with_hdf5_cflags"
+HDF5_LIBS="$with_hdf5_libs"
+AC_SUBST(HDF5_CFLAGS)
+AC_SUBST(HDF5_LIBS)
+
+if test "x$hdf5_ok" = "xno"; then
+   AC_MSG_WARN([Didn't find libhdf5 in standard place.])
+   if test "x$with_hdf5_libs" = "x"; then
+       AC_MSG_ERROR([HDF5 library could not be found.  Please specify location with --with-hdf5-libs=])
+   fi
+fi
+
 
 AC_F77_WRAPPERS
 

@@ -2,6 +2,7 @@
 #include "../config.h"
 #include <cmath>
 #include <iostream>
+#include "../Blitz.h"
 
 using namespace std;
 
