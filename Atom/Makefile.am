@@ -4,7 +4,7 @@ TestDFTAtom_SOURCES  = TestDFTAtom.cc
 
 TestRadialWF_SOURCES = TestRadialWF.cc
 
-LDADD   = ../IO/libciao.la ../Splines/libspline.la ../DFT/libdft.la ../PH/libPH.la libatom.la \
+LDADD   = libatom.la ../IO/libciao.la ../Splines/libspline.la ../DFT/libdft.la ../PH/libPH.la ../Splines/libspline.la \
           ../Integration/libquad.la ../Fitting/libfitting.la ../MatrixOps/libmatops.la        \
           $(XML2_LIBS) $(BLITZ_LIBS) $(GSL_LIBS)
 AM_CXXFLAGS = $(XML2_CFLAGS) $(BLITZ_CFLAGS) $(HDF5_CFLAGS)

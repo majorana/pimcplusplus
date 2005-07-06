@@ -3,9 +3,10 @@ check_PROGRAMS = TestPW2 BandStructure
 TestPW2_SOURCES = TestPW2.cc
 BandStructure_SOURCES = BandStructure.cc
 
-LDADD = ../IO/libciao.la ../Splines/libspline.la ../FFT/libfft.la         \
-        ../MatrixOps/libmatops.la ../PH/libPH.la ../Fitting/libfitting.la \
-        ../Integration/libquad.la libpw.la                                \
+LDADD = libpw.la                 ../IO/libciao.la                         \
+        ../FFT/libfft.la       ../PH/libPH.la                             \
+        ../MatrixOps/libmatops.la ../Splines/libspline.la                 \
+        ../Fitting/libfitting.la ../Integration/libquad.la                \
         $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(FFTW3_LIBS) \
         $(LAPACK_LIBS) $(CBLAS_LIBS) $(GSL_LIBS)
 

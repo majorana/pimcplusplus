@@ -11,7 +11,7 @@
 #include <math.h>
 
 #define F77_MKTRICUBW F77_FUNC(mktricubw,MKTRICUBW)
-#define F77_EVTRICUB F77_FUNC(evtricubw,EVTRICUB)
+#define F77_EVTRICUB F77_FUNC(evtricub,EVTRICUB)
 
 extern "C" void 
 F77_MKTRICUBW(double x[], int *nx,

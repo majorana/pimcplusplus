@@ -74,8 +74,12 @@ AC_SUBST(MPI_RUN)
 
 AC_ARG_WITH(hdf5-cflags,[  --with-hdf5-cflags=FLAGS specify HDF5 linker flags])
 AC_ARG_WITH(hdf5-libs, [  --with-hdf5-libs=LIBS    specify HDF5 linker flags])
-HDF5_CFLAGS="$with_hdf5_cflags"
-HDF5_LIBS="$with_hdf5_libs"
+if test "x$with_hdf5_cflags" != "x"; then
+   HDF5_CFLAGS="$with_hdf5_cflags"
+fi
+if test "x$with_hdf5_libs" != "x"; then
+   HDF5_LIBS="$with_hdf5_libs"
+fi
 AC_SUBST(HDF5_CFLAGS)
 AC_SUBST(HDF5_LIBS)
 
@@ -88,8 +92,12 @@ fi
 
 AC_ARG_WITH(cblas-cflags,[  --with-cblas-cflags=FLAGS specify CBLAS linker flags])
 AC_ARG_WITH(cblas-libs, [  --with-cblas-libs=LIBS    specify CBLAS linker flags])
-CBLAS_CFLAGS="$with_cblas_cflags"
-CBLAS_LIBS="$with_cblas_libs"
+if test "x$with_cblas_cflags" != "x"; then
+   CBLAS_CFLAGS="$with_cblas_cflags"
+fi
+if test "x$with_cblas_libs" != "x"; then
+   CBLAS_LIBS="$with_cblas_libs"
+fi
 AC_SUBST(CBLAS_CFLAGS)
 AC_SUBST(CBLAS_LIBS)
 if test "x$cblas_ok" = "xno"; then
@@ -132,4 +140,6 @@ AC_CONFIG_FILES([ Makefile                  \
                   FFT/Makefile              \
                   PairAction/Makefile       \
                   PlaneWavePHDFT/Makefile ] )
+AC_MSG_RESULT([ HDF5_LIBS = $HDF5_LIBS ])
+AC_MSG_RESULT([ XML2_LIBS = $XML2_LIBS ])
 AC_OUTPUT
