@@ -1,7 +1,7 @@
 check_PROGRAMS = TestPW2 BandStructure
 
 TestPW2_SOURCES = TestPW2.cc
-BandStructure_SOURCES = BandStructure.cc
+BandStructure_SOURCES = BandStructure.cc BandStructure.h
 
 LDADD = libpw.la                 ../IO/libciao.la                         \
         ../FFT/libfft.la       ../PH/libPH.la                             \
