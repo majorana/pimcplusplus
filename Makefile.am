@@ -52,4 +52,4 @@ pkgconfig_DATA = common.pc
 install-data-local:
 	$(INSTALL_DATA) common.pc $(pkgconfigdir)
 
-EXTRA_DIST = common.pc.in
+EXTRA_DIST = common.pc.in turing.conf

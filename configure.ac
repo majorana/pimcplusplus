@@ -114,6 +114,23 @@ if test "x$cblas_ok" = "xno"; then
    fi
 fi
 
+AC_ARG_WITH(lapack-cflags,[  --with-lapack-cflags=FLAGS specify LAPACK linker flags])
+AC_ARG_WITH(lapack-libs, [  --with-lapack-libs=LIBS    specify LAPACK linker flags])
+if test "x$with_lapack_cflags" != "x"; then
+   LAPACK_CFLAGS="$with_lapack_cflags"
+fi
+if test "x$with_lapack_libs" != "x"; then
+   LAPACK_LIBS="$with_lapack_libs"
+fi
+AC_SUBST(LAPACK_CFLAGS)
+AC_SUBST(LAPACK_LIBS)
+if test "x$lapack_ok" = "xno"; then
+   AC_MSG_WARN([Didn't find liblapack in standard place.])
+   if test "x$with_lapack_libs" = "x"; then
+       AC_MSG_ERROR([LAPACK library could not be found.  Please specify location with --with-lapack-libs=])
+   fi
+fi
+
 AC_ARG_WITH(xml2-cflags,[  --with-xml2-cflags=FLAGS specify XML2 linker flags])
 AC_ARG_WITH(xml2-libs, [  --with-xml2-libs=LIBS    specify XML2 linker flags])
 if test "x$with_xml2_cflags" != "x"; then
@@ -164,6 +181,8 @@ AC_CONFIG_FILES([ Makefile                  \
                   FFT/Makefile              \
                   PairAction/Makefile       \
                   PlaneWavePHDFT/Makefile ] )
-AC_MSG_RESULT([ HDF5_LIBS = $HDF5_LIBS ])
-AC_MSG_RESULT([ XML2_LIBS = $XML2_LIBS ])
+AC_MSG_RESULT([ HDF5_LIBS   = $HDF5_LIBS ])
+AC_MSG_RESULT([ XML2_LIBS   = $XML2_LIBS ])
+AC_MSG_RESULT([ LAPACK_LIBS = $LAPACK_LIBS ])
+AC_MSG_RESULT([ CBLAS_LIBS  = $CBLAS_LIBS ])
 AC_OUTPUT

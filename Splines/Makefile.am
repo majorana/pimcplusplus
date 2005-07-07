@@ -30,6 +30,7 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        QuinticSpline.h                \
                        QuinticSpline.cc               \
                        QuinticSplines.f               \
+                       TricubicSpline.h               \
                        r3spline.f                     \
                        z3spline.f                     \
                        bcspeval.f                     \
@@ -43,6 +44,8 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        tcspline.f                     \
                        v_spline.f                     \
                        zonfind.f
+
+
 
 #TestXML_SOURCES = TestXML.cc
 #TestXML_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
@@ -64,5 +67,5 @@ libspline_la_LIBADD   =
 #endif
 
 
-include_HEADERS = BicubicSpline.h ComplexMultiTricubicSpline.h CubicSpline.h Grid.h MultiTricubicSpline.h MyTricubicSpline.h PeriodicSpline.h QuinticSpline.h 
+include_HEADERS = BicubicSpline.h ComplexMultiTricubicSpline.h CubicSpline.h Grid.h MultiTricubicSpline.h MyTricubicSpline.h PeriodicSpline.h QuinticSpline.h TricubicSpline.h
 
