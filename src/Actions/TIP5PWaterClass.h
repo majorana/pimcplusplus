@@ -36,19 +36,25 @@ public:
   double FixedAxisEnergy(int startSlice, int endSlice, int level);
   dVec CrossProd(dVec v1, dVec v2);
   double Mag(dVec v);
+  double CalcCutoff(int ptcl1, int ptcl2, int slice,double Rcmag);
   double GetAngle(dVec v1, dVec v2);
   dVec Normalize(dVec v);
   dVec Scale(dVec v, double scale);
+  dVec Strip(dVec R, dVec u);
   dVec GetBisector(dVec v1, dVec v2);
   double CalcPsi(double theta);
+  bool dVecsEqual(dVec u,dVec v);
   TIP5PWaterClass (PathDataClass &pathData);
 };
 
-const double O_H_moment_arm = 1.0;
+const double O_H_moment_arm = 1.0;//st2
+//const double O_H_moment_arm = 0.9572;//tip5p
 const double lambda_p = 0.047848;
 //const double HOH_angle = 104.52;
-// tip5p const double HOH_angle = 1.8242;
-const double HOH_angle = 1.9073; //st2
+//const double HOH_angle = 1.8242; //tip5p
+const double HOH_angle = 1.9106; //st2
 const double HOH_half_angle = HOH_angle/2;
+const double hbar = 9.5425095602294465*pow(10.0,-14);
+
 
 #endif

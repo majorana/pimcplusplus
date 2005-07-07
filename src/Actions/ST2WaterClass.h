@@ -14,6 +14,11 @@ public:
   double Action (int slice1, int slice2, 
 		 const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
+  double EField (Array<int,1> &activeMol, int startSlice, int endSlice,  int level);
+  void EFieldVec (int molIndex, dVec &Efield, double &Emag, int slice, int level);
+  void BackSub(Array<double,2> &A,Array<double,1> &X,int N, int C);
+  void RowScale(Array<double,2> &A,int n,double scale,int C);
+  void Diff(Array<double,2> &A,int n,int m, double s, int C);
   double OOSeparation (int slice,int ptcl1,int ptcl2);
   double S(double r);
 

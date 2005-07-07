@@ -122,6 +122,7 @@ PIMCobjs =                                \
   Observables/Time.o                      \
   Observables/DistanceToHead.o            \
   Observables/ObservableModifiedEnergy.o  \
+  Observables/AutoCorr.o                  \
   Observables/Weight.o                    \
   Observables/StructureFactor.o           \
   Moves/NoPermuteClass.o                  \
@@ -256,6 +257,7 @@ TestPermobjs =                            \
   Observables/ObservableBase.o            \
   Observables/ObservableEnergy.o          \
   Observables/ObservableModifiedEnergy.o  \
+  Observables/AutoCorr.o                  \
   Observables/Weight.o                    \
   Observables/ObservableCorrelation.o     \
   Observables/StructureFactor.o           \

@@ -141,6 +141,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection("Energies(modified)");
       tempObs = new ModifiedEnergyClass(PathData,OutFile);
     }
+    else if (theObserveType=="AutoCorr"){
+      if (iAmRoot)
+	OutFile.NewSection("Autocorrelation");
+      tempObs = new AutoCorrClass(PathData,OutFile);
+    }
     else if (theObserveType=="DistanceToOpen"){
       if (iAmRoot)
 	OutFile.NewSection("DistanceToOpen");

@@ -10,6 +10,8 @@
 #include "ObservableModifiedEnergy.h"
 #include "DistanceToHead.h"
 #include "Time.h"
+#include "AutoCorr.h"
+
 /// This template class will be used to construct distributed versions
 /// of many different types of observables:  scalar observables, dVec
 /// observables, array observables, array of dVec observables, etc.
