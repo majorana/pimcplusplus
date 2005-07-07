@@ -6,7 +6,7 @@ includedir=$(prefix)/include/Common/MPI
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
-libcomm_la_CXXFLAGS = $(BLITZ_CFLAGS) $(MPI_CFLAGS) $(MPI_DEF) $(AM_CXXFLAGS)
+libcomm_la_CXXFLAGS = $(MPI_CFLAGS) $(MPI_DEF) $(BLITZ_CFLAGS)  $(AM_CXXFLAGS)
 libcomm_la_LIBADD   =
 
 #if HAVE_GMP

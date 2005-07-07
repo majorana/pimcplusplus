@@ -23,12 +23,19 @@ PKG_CHECK_MODULES(FFTW3, fftw3, fftw3_ok=yes, fftw3_ok=no)
 PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
 
 AC_CHECK_LIB([m], [sqrt])
-AC_CHECK_LIB([hdf5], [H5open], hdf5_ok=yes, hdf5_ok=no)
+AC_CHECK_LIB([hdf5], [H5open],[hdf5_ok=yes], hdf5_ok=no)
+if test "x$hdf5_ok" = "xyes"; then
+   LIBS="-lhdf5 $LIBS"
+fi
 AC_CHECK_LIB([cblas],[cblas_dgemm], cblas_ok=yes, cblas_ok=no)
+if test "x$cblas_okay" = "xyes"; then
+   LIBS="-lcblas $LIBS"
+fi
 AC_CHECK_LIB([g2c],[do_lio])
 AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
 AC_CHECK_LIB([lapack], [dgesvd_])
 AC_CHECK_LIB([blas],[daxp])
+AC_MSG_CHECKING([LIBS = $LIBS])
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h sys/time.h unistd.h])
@@ -104,6 +111,23 @@ if test "x$cblas_ok" = "xno"; then
    AC_MSG_WARN([Didn't find libcblas in standard place.])
    if test "x$with_cblas_libs" = "x"; then
        AC_MSG_ERROR([CBLAS library could not be found.  Please specify location with --with-cblas-libs=])
+   fi
+fi
+
+AC_ARG_WITH(xml2-cflags,[  --with-xml2-cflags=FLAGS specify XML2 linker flags])
+AC_ARG_WITH(xml2-libs, [  --with-xml2-libs=LIBS    specify XML2 linker flags])
+if test "x$with_xml2_cflags" != "x"; then
+   XML2_CFLAGS="$with_xml2_cflags"
+fi
+if test "x$with_xml2_libs" != "x"; then
+   XML2_LIBS="$with_xml2_libs"
+fi
+AC_SUBST(XML2_CFLAGS)
+AC_SUBST(XML2_LIBS)
+if test "x$xml2_ok" = "xno"; then
+   AC_MSG_WARN([Didn't find libxml2 in standard place.])
+   if test "x$with_xml2_libs" = "x"; then
+       AC_MSG_ERROR([XML2 library could not be found.  Please specify location with --with-xml2-libs=])
    fi
 fi
 
