@@ -2,7 +2,7 @@ check_PROGRAMS = TestkSpacePH
 
 TestkSpacePH_SOURCES = TestkSpacePH.cc
 
-LDADD = libPH.la ../IO/libciao.la   ../MatrixOps/libmatops.la ../Fitting/libfitting.la ../Integration/libquad.la ../Splines/libspline.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(GSL_LIBS) 
+LDADD = libPH.la ../IO/libciao.la   ../MatrixOps/libmatops.la ../Fitting/libfitting.la ../Integration/libquad.la ../Splines/libspline.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(GSL_LIBS) $(LAPACK_LIBS)
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(GSL_CFLAGS)
 
 noinst_LTLIBRARIES = libPH.la
