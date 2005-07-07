@@ -29,21 +29,41 @@ ifeq ($(HOSTTYPE),rs6000)
 endif
 
 ifeq ($(HOSTTYPE),powermac)
-   include /turing/home/esler/lib/Make.include
+   ifneq ($(HOST),lunchbox.local)
+       include /turing/home/esler/lib/Make.include
+
+       LIBS = $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
+              $(HDF5LIB) $(XMLLIB) $(PSPLINELIB) $(FORTRANLIB) \
+              $(FFTW3LIB) $(CBLASLIB) -lm
+       INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC) \
+              $(FFTW3INC) $(CBLASINC)
+      # CC = g++
+      # LD = g++
+       CC = mpiCC
+       LD = mpiCC
+       F77 = f77
+       CCFLAGS = -c -g  -Wno-long-double
+       EXTRADEFS = -DNOUNDERSCORE -DNOCUSERID -DMAC
+       MAKE = make
+   endif
+endif
+
+ifeq ($(HOST),lunchbox.local)
+   include /Users/gergely/turing/lib/Make.include
    LIBS = $(LAPACKLIB) $(BLITZLIB) $(SPRNGLIB) $(GSLLIB) \
           $(HDF5LIB) $(XMLLIB) $(PSPLINELIB) $(FORTRANLIB) \
-          $(FFTW3LIB) $(CBLASLIB) -lm
+          $(FFTW3LIB) $(CBLASLIB) -lm -lg2c
    INCL = $(BLITZINC) $(SPRNGINC) $(GSLINC) $(HDF5INC) $(XMLINC) \
           $(FFTW3INC) $(CBLASINC)
-   CC = mpiCC
-   LD = mpiCC
-   F77 = f77
-   CCFLAGS = -c -g  -Wno-long-double -ffast-math -O3
+   CC = g++
+   LD = g++
+   F77 = g77
+   CCFLAGS = -c -g  -Wno-long-double
    F77FLAGS = -c -g -O3
-   EXTRADEFS = -DNOUNDERSCORE -DNOCUSERID -DMAC -DUSE_MPI
-   MAKECC = mpiCC
+   EXTRADEFS = -DNOCUSERID -DMAC
    MAKE = make
 endif
+
 ifeq ($(HOSTTYPE),i386-linux)
     ifeq ($(GROUP),tvi)
        include /u/ac/esler/lib/Make.include
