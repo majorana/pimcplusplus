@@ -1,12 +1,11 @@
 #ifndef PATH_CLASS_H
 #define PATH_CLASS_H
 
-#include "Common/IO/InputOutput.h"
+#include <Common/IO/InputOutput.h>
 #include "MirroredClass.h"
 #include "SpeciesClass.h"
-#include "Common/Random/Random.h"
-#include "Common/MPI/Communication.h"
-
+#include <Common/Random/Random.h>
+#include <Common/MPI/Communication.h>
 
 class ActionsClass;
 

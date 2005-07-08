@@ -5,9 +5,9 @@
 #include "SpeciesClass.h"
 //#include "ActionClass.h"
 #include "PathClass.h"
-#include "Common/MPI/Communication.h"
+#include <Common/MPI/Communication.h>
 #include "Actions/ActionsClass.h"
-#include "Common/Random/Random.h"
+#include <Common/Random/Random.h>
 
 
 

@@ -4,7 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include "Common/Blitz.h"
-#include "FileExpand.h"
+#include <Common/IO/FileExpand.h>
 
 void PIMCClass::Read(IOSectionClass &in)
 {

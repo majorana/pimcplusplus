@@ -7,8 +7,9 @@
 // #define NDIM 3
 
 #include <sprng.h>
-#include "Common/Blitz.h"
+#include <Common/Blitz.h>
 
+typedef TinyVector<double,NDIM> dVec;
 
 /// These are the different mode types for the MirroredArrayClass
 //typedef enum {OLDMODE, NEWMODE, BOTHMODE} ModeType;

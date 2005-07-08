@@ -1,176 +1,33 @@
-SUBDIRS = Common
-bin_PROGRAMS = pimc++2D pimc++3D TestPerm TestEwald
+if WANT_PATHVIS
+   MAYBE_PATHVIS = Visual
+endif
 
-pimc++2D_CFLAGS = -DTWO_D
-pimc++3D_CFLAGS = -DTHREE_D
-pimc++2D_SOURCES =                    \
-  Main.cc                             \
-  ObservableEnergy.cc                 \
-  BisectionClass.cc                   \
-  PIMCClass.cc                        \
-  MetaMoves.cc                        \
-  BlockMove.cc                        \
-  ObservableClass.cc                  \
-  Common/Splines/CubicSpline.cc       \
-  Common/Splines/MyTricubicSpline.cc  \
-  Common/Splines/Grid.cc              \
-  Common/Splines/QuinticSpline.cc     \
-  Common/Splines/QuinticSplines.cc    \
-  SpeciesClass.cc                     \
-  Common.cc                           \
-  PermuteTableClass.cc                \
-  BisectionMoveClass.cc               \
-  MoveClass.cc                        \
-  ActionClass.cc                      \
-  PathDataClass.cc                    \
-  CommunicatorClass.cc                \
-  PathClass.cc                        \
-  MirroredArrayClass.cc               \
-  WrapClass.cc                        \
-  Common/MPI/Communication.cc         \
-  Common/IO/InputOutput.cc            \
-  Common/IO/InputOutputHDF5.cc        \
-  Common/IO/InputFile.cc              \
-  Common/IO/InputOutputASCII.cc       \
-  Common/IO/InputOutputXML.cc         \
-  Common/PairAction/PAcoulombBCFit.cc \
-  Common/PairAction/PAclassicalFit.cc \
-  Common/PairAction/PAzeroFit.cc      \
-  Common/Splines/BicubicSpline.cc     \
-  Common/PH/Potential.cc              \
-  Common/PH/QuinticPH.cc              \
-  Common/PH/CoulombPot.cc             \
-  Common/PH/ScreenedPot.cc            \
-  Common/PH/SplinePot.cc              \
-  Common/PH/HeAzizPot.cc              \
-  Common/PairAction/DavidPAClass.cc   \
-  Common/Ewald/OptimizedBreakup.cc    \
-  Common/MatrixOps/MatrixOps.cc       \
-  Common/Integration/GKIntegration.cc \
-  MirroredClass.cc
-
-pimc++3D_SOURCES =                    \
-  Main.cc                             \
-  ObservableEnergy.cc                 \
-  BisectionClass.cc                   \
-  PIMCClass.cc                        \
-  MetaMoves.cc                        \
-  BlockMove.cc                        \
-  ObservableClass.cc                  \
-  Common/Splines/CubicSpline.cc       \
-  Common/Splines/MyTricubicSpline.cc  \
-  Common/Splines/Grid.cc              \
-  Common/Splines/QuinticSpline.cc     \
-  Common/Splines/QuinticSplines.cc    \
-  SpeciesClass.cc                     \
-  Common.cc                           \
-  PermuteTableClass.cc                \
-  BisectionMoveClass.cc               \
-  MoveClass.cc                        \
-  ActionClass.cc                      \
-  PathDataClass.cc                    \
-  CommunicatorClass.cc                \
-  PathClass.cc                        \
-  MirroredArrayClass.cc               \
-  WrapClass.cc                        \
-  Common/MPI/Communication.cc         \
-  Common/IO/InputOutput.cc            \
-  Common/IO/InputOutputHDF5.cc        \
-  Common/IO/InputFile.cc              \
-  Common/IO/InputOutputASCII.cc       \
-  Common/IO/InputOutputXML.cc         \
-  Common/PairAction/PAcoulombBCFit.cc \
-  Common/PairAction/PAclassicalFit.cc \
-  Common/PairAction/PAzeroFit.cc      \
-  Common/Splines/BicubicSpline.cc     \
-  Common/PH/Potential.cc              \
-  Common/PH/QuinticPH.cc              \
-  Common/PH/CoulombPot.cc             \
-  Common/PH/ScreenedPot.cc            \
-  Common/PH/SplinePot.cc              \
-  Common/PH/HeAzizPot.cc              \
-  Common/PairAction/DavidPAClass.cc   \
-  Common/Ewald/OptimizedBreakup.cc    \
-  Common/MatrixOps/MatrixOps.cc       \
-  Common/Integration/GKIntegration.cc \
-  MirroredClass.cc
+SUBDIRS = Actions Moves Observables $(MAYBE_PATHVIS)
+bin_PROGRAMS = pimc FreeParticles
 
 
-TestPerm_SOURCES =                    \
-  TestPermutation.cc                  \
-  BisectionClass.cc                   \
-  BlockMove.cc                        \
-  MetaMoves.cc                        \
-  PIMCClass.cc                        \
-  ObservableClass.cc                  \
-  ObservableEnergy.cc                 \
-  Common/Splines/CubicSpline.cc       \
-  Common/Splines/MyTricubicSpline.cc  \
-  Common/Splines/Grid.cc              \
-  Common/Splines/QuinticSpline.cc     \
-  Common/Splines/QuinticSplines.cc    \
-  SpeciesClass.cc                     \
-  Common.cc                           \
-  PermuteTableClass.cc                \
-  BisectionMoveClass.cc               \
-  MoveClass.cc                        \
-  ActionClass.cc                      \
-  PathDataClass.cc                    \
-  CommunicatorClass.cc                \
-  PathClass.cc                        \
-  MirroredArrayClass.cc               \
-  WrapClass.cc                        \
-  Common/MPI/Communication.cc         \
-  Common/IO/InputOutput.cc            \
-  Common/IO/InputOutputHDF5.cc        \
-  Common/IO/InputFile.cc              \
-  Common/IO/InputOutputASCII.cc       \
-  Common/IO/InputOutputXML.cc         \
-  Common/PairAction/PAcoulombBCFit.cc \
-  Common/PairAction/PAclassicalFit.cc \
-  Common/PairAction/PAzeroFit.cc      \
-  Common/Splines/BicubicSpline.cc     \
-  Common/PH/Potential.cc              \
-  Common/PH/QuinticPH.cc              \
-  Common/PH/CoulombPot.cc             \
-  Common/PH/ScreenedPot.cc            \
-  Common/PH/SplinePot.cc              \
-  Common/PH/HeAzizPot.cc              \
-  Common/PairAction/DavidPAClass.cc   \
-  Common/Ewald/OptimizedBreakup.cc    \
-  Common/MatrixOps/MatrixOps.cc       \
-  Common/Integration/GKIntegration.cc \
-  MirroredClass.cc
+AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF)
 
-TestEwald_SOURCES =                   \
-  TestEwald.cc                        \
-  PathClass.cc                        \
-  MirroredClass.cc                    \
-  SpeciesClass.cc                     \
-  ActionClass.cc                      \
-  PathDataClass.cc                    \
-  Common/MPI/Communication.cc         \
-  Common/IO/InputOutput.cc            \
-  Common/IO/InputOutputHDF5.cc        \
-  Common/IO/InputFile.cc              \
-  Common/IO/InputOutputASCII.cc       \
-  Common/IO/InputOutputXML.cc         \
-  Common/PairAction/PAcoulombBCFit.cc \
-  Common/PairAction/PAclassicalFit.cc \
-  Common/PairAction/PAzeroFit.cc      \
-  Common/PairAction/DavidPAClass.cc   \
-  Common/Splines/BicubicSpline.cc     \
-  Common/PH/Potential.cc              \
-  Common/PH/QuinticPH.cc              \
-  Common/PH/CoulombPot.cc             \
-  Common/PH/ScreenedPot.cc            \
-  Common/PH/SplinePot.cc              \
-  Common/PH/HeAzizPot.cc              \
-  Common/Splines/CubicSpline.cc       \
-  Common/Splines/MyTricubicSpline.cc  \
-  Common/Splines/Grid.cc              \
-  Common/Splines/QuinticSpline.cc     \
-  Common/Ewald/OptimizedBreakup.cc    \
-  Common/MatrixOps/MatrixOps.cc       \
-  Common/Integration/GKIntegration.cc \
-  Common/Splines/QuinticSplines.cc
+pimc_SOURCES =            \
+    EventClass.h          \
+    Main.cc               \
+    MirroredClass.cc      \
+    MirroredClass.h       \
+    PIMCClass.cc          \
+    PIMCClass.h           \
+    PathClass.cc          \
+    PathClass.h           \
+    PathDataClass.cc      \
+    PathDataClass.h       \
+    RunInfoClass.h        \
+    SpeciesClass.cc       \
+    SpeciesClass.h        \
+    WrapClass.cc          \
+    WrapClass.h
+pimc_LDADD = Moves/libmoves.la Actions/libactions.la \
+             Observables/libobservables.la $(COMMON_LIBS)
+
+
+
+FreeParticles_SOURCES =  FreeParticles.cc 
+FreeParticles_LDADD = $(COMMON_LIBS)

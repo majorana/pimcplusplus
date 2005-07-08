@@ -1,7 +1,7 @@
 #ifndef EVENT_CLASS_H
 #define EVENT_CLASS_H
 
-#include "Common/IO/InputOutput.h"
+#include <Common/IO/InputOutput.h>
 
 
 class EventClass

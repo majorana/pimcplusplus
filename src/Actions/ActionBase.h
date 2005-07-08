@@ -2,7 +2,7 @@
 #define ACTION_BASE_H
 
 #include "../Common.h"
-#include "../Common/IO/InputOutput.h"
+#include <Common/IO/InputOutput.h>
 
 class PathDataClass;
 class PathClass;

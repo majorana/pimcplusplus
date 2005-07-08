@@ -78,7 +78,7 @@ void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
 }
 
 ///HACK! HACK! HACK!
-double sign(double num)
+double mysign(double num)
 {
   if (num<0)
     return -1.0;
@@ -138,13 +138,13 @@ double EndStageClass::Sample(int &slice1,int &slice2,
   dVec newPos;///was /10 instead of /40 for the free particles
   newPos(0)= oldPos[0]+
     PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/40.0)*
-    sign(PathData.Path.Random.Local()-0.5);
+    mysign(PathData.Path.Random.Local()-0.5);
   newPos(1)= oldPos[1]+
     PathData.Path.Random.Local()*(PathData.Path.GetBox()(1)/40.0)*
-    sign(PathData.Path.Random.Local()-0.5);
+    mysign(PathData.Path.Random.Local()-0.5);
   newPos(2)=  oldPos[2]+
     PathData.Path.Random.Local()*(PathData.Path.GetBox()(2)/40.0)*
-    sign(PathData.Path.Random.Local()-0.5);
+    mysign(PathData.Path.Random.Local()-0.5);
   if (fabs(newPos(0))>500 || fabs(newPos(1))>500 || fabs(newPos(2))>500){
     cerr<<"ERROR! ERROR! ERROR!"<<newPos(0)<<" "<<newPos(1)<<" "<<newPos(2)<<endl;
   } 

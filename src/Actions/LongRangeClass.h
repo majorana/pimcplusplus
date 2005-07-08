@@ -2,7 +2,7 @@
 #define LONG_RANGE_CLASS_H
 
 #include "ActionBase.h"
-#include "../Common/PairAction/PAFit.h"
+#include <Common/PairAction/PAFit.h>
 
 typedef enum {JOB_U, JOB_DU, JOB_V} JobType; 
 

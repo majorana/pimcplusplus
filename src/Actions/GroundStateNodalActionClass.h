@@ -2,8 +2,8 @@
 #define GROUND_STATE_NODAL_ACTION_CLASS_H
 
 #include "NodalActionClass.h"
-#include "../Common/PlaneWavePHDFT/PlaneWaves.h"
-#include "../Common/Splines/MultiTricubicSpline3.h"
+#include <Common/PlaneWavePHDFT/PlaneWaves.h>
+#include <Common/Splines/MultiTricubicSpline.h>
 #include "../MirroredClass.h"
 
 class GroundStateClass 

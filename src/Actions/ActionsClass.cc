@@ -1,8 +1,8 @@
 #include "ActionsClass.h"
 #include "../PathDataClass.h"
-#include "../Common/Ewald/OptimizedBreakup.h"
-#include "../Common/Integration/GKIntegration.h"
-#include "../FileExpand.h"
+#include <Common/Ewald/OptimizedBreakup.h>
+#include <Common/Integration/GKIntegration.h>
+#include <Common/IO/FileExpand.h>
 
 
 ///Actionsclass. Stores all the actsion

@@ -2,7 +2,7 @@
 #define SHORT_RANGE_APPROXIMATE_CLASS_H
 
 #include "ActionBase.h"
-#include "../Common/PairAction/PAFit.h"
+#include <Common/PairAction/PAFit.h>
 
 /// The ShortRangeApproximateClass is an action class which stores the part of
 /// the potential pair action that is summed in real space.  If the
