@@ -28,10 +28,18 @@ AC_PROG_LIBTOOL
 AC_ARG_ENABLE(pathvis, [  --enable-pathvis         compile path visualization GUI])
 AM_CONDITIONAL([WANT_PATHVIS], [test "$enable_pathvis" = "yes"])
 if test "x$enable_pathvis" = "xyes"; then
-  PKG_CHECK_MODULES(GTKMM, gtkmm, gtkmm_ok=yes, gtkmm_ok=no)
+  PKG_CHECK_MODULES(GTKMM, gtkmm-2.4, gtkmm_ok=yes, gtkmm_ok=no)
   if test "x$gtkmm_ok" != "xyes"; then
      AC_MSG_ERROR([gtkmm libraries missing.  Please install.])
   fi
+  PKG_CHECK_MODULES(GTKGLEXTMM, gtkglextmm-1.2, gtkglextmm_ok=yes, gtglextkmm_ok=no)
+  if test "x$gtkglextmm_ok" != "xyes"; then
+     AC_MSG_ERROR([gtkglextmm libraries missing.  Please install.])
+  fi
+  AC_CHECK_LIB([xvidcore],[decoder_create])
+  AC_CHECK_LIB([revel],[main])
+  AC_CHECK_LIB([glut],[glutSolidTeapot])
+  AC_CHECK_LIB([gle],[gleSetNumSides])
 fi
 
 

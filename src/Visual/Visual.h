@@ -1,8 +1,9 @@
 #ifndef VISUAL_H
 #define VISUAL_H
 
+#include "../Common.h"
 #include "PathVis.h"
-#include "../Common/IO/InputOutput.h"
+#include <Common/IO/InputOutput.h>
 #include <gtkmm/adjustment.h>
 #include "OnePath.h"
 #include "BoxClass.h"
