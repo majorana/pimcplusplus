@@ -38,6 +38,7 @@ Section (System)
 Section (Action)
 {
   int MaxLevels = 3;
+  int NumImages = 1;
   Array<string,1> PairActionFiles(1) = ["../../PairActions/zero.PairAction"];
 }
 
@@ -104,6 +105,7 @@ Section (Moves){
 
 Section (Algorithm)
 {
+  int MaxWallTime = 5;
   Section (Loop){ // Before Accumulating Observables
     int steps=1000; 
     Section (Move) {string name="Bisection";} 

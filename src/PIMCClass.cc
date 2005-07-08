@@ -316,8 +316,10 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
     int hours = maxWallTime/3600;
     int minutes = (maxWallTime-3600*hours)/60;
     int seconds = maxWallTime%60;
-    perr << "Maximum wall time is " << hours << " hours, " << minutes
-	 << " minutes, and " << seconds << " seconds.\n";
+    perr << "Maximum wall time is " << hours 
+	 << ((hours != 1) ? " hours, " : " hour, ") << minutes
+	 << ((minutes != 1) ? " minutes, and " : " minute, and ") << seconds 
+	 << ((seconds != 1) ? " seconds.\n" : " second.\n");
   }
   Algorithm.Read(in,1);
 }
