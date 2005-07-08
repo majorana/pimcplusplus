@@ -3,12 +3,12 @@ if WANT_PATHVIS
 endif
 
 SUBDIRS = Actions Moves Observables $(MAYBE_PATHVIS)
-bin_PROGRAMS = pimc FreeParticles
+bin_PROGRAMS = pimc++ FreeParticles
 
 
 AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF)
 
-pimc_SOURCES =            \
+pimc___SOURCES =          \
     EventClass.h          \
     Main.cc               \
     MirroredClass.cc      \
@@ -24,8 +24,8 @@ pimc_SOURCES =            \
     SpeciesClass.h        \
     WrapClass.cc          \
     WrapClass.h
-pimc_LDADD = Moves/libmoves.la Actions/libactions.la \
-             Observables/libobservables.la $(COMMON_LIBS)
+pimc___LDADD = Moves/libmoves.la Actions/libactions.la \
+               Observables/libobservables.la $(COMMON_LIBS)
 
 
 

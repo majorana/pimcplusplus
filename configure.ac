@@ -70,6 +70,7 @@ AC_CONFIG_FILES([ Makefile                  \
                   src/Actions/Makefile      \
                   src/Moves/Makefile        \
                   src/Observables/Makefile  \
+                  src/Visual/Makefile       \
                   doc/Makefile               ])
 AC_MSG_RESULT([ COMMON_LIBS  = $COMMON_LIBS ])
 AC_OUTPUT
