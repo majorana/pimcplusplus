@@ -45,6 +45,7 @@ void TestCoulomb()
 
   OptimizedBreakupClass breakup(basis);
   breakup.SetkVecs (2.0, 25.0, 1000.0);
+  double delta = basis.GetDelta();
 
   Array<double,1> Vk(breakup.kpoints.size());
   for (int i=0; i<breakup.kpoints.size(); i++) {
@@ -58,8 +59,8 @@ void TestCoulomb()
   adjust = true;
   t = 0.0;
   adjust(N-3) = false; t(N-3) = -0.2;
-  adjust(N-2) = false; t(N-2) = 1.0/25.0;
-  adjust(N-1) = false; t(N-1) = -1/125.0;
+  adjust(N-2) = false; t(N-2) = 1.0/25.0*delta;
+  adjust(N-1) = false; t(N-1) = -1/125.0*delta*delta;
   adjust(1)   = false; t(1) = 0.0;
 
   double chi2 = breakup.DoBreakup(Vk, t, adjust);
