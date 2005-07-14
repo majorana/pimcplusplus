@@ -19,6 +19,7 @@ libatom_la_SOURCES = AtomBase.h          \
                      DFTAtom.cc          \
                      NewAtom.h           \
                      RadialWF.h          \
+                     NewAtom.h           \
                      RadialWF.cc
 
 libatom_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
@@ -26,6 +27,6 @@ libatom_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
 
 
 
-include_HEADERS = AtomBase.h DFTAtom.h RadialWF.h
+include_HEADERS = AtomBase.h DFTAtom.h RadialWF.h NewAtom.h
 
 
