@@ -27,10 +27,10 @@ AC_CHECK_LIB([hdf5], [H5open],[hdf5_ok=yes], hdf5_ok=no)
 if test "x$hdf5_ok" = "xyes"; then
    LIBS="-lhdf5 $LIBS"
 fi
-AC_CHECK_LIB([cblas],[cblas_dgemm], cblas_ok=yes, cblas_ok=no)
-if test "x$cblas_okay" = "xyes"; then
-   LIBS="-lcblas $LIBS"
-fi
+#AC_CHECK_LIB([cblas],[cblas_dgemm], cblas_ok=yes, cblas_ok=no)
+#if test "x$cblas_okay" = "xyes"; then
+#   LIBS="-lcblas $LIBS"
+#fi
 #AC_CHECK_LIB([g2c],[do_lio],[],[],[frtbegin])
 #AC_CHECK_LIB([gfortran],[do_lio])
 AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
@@ -187,5 +187,5 @@ AC_CONFIG_FILES([ Makefile                  \
 AC_MSG_RESULT([ HDF5_LIBS   = $HDF5_LIBS ])
 AC_MSG_RESULT([ XML2_LIBS   = $XML2_LIBS ])
 AC_MSG_RESULT([ LAPACK_LIBS = $LAPACK_LIBS ])
-AC_MSG_RESULT([ CBLAS_LIBS  = $CBLAS_LIBS ])
+#AC_MSG_RESULT([ CBLAS_LIBS  = $CBLAS_LIBS ])
 AC_OUTPUT
