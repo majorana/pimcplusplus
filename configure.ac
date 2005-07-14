@@ -31,10 +31,11 @@ AC_CHECK_LIB([cblas],[cblas_dgemm], cblas_ok=yes, cblas_ok=no)
 if test "x$cblas_okay" = "xyes"; then
    LIBS="-lcblas $LIBS"
 fi
-AC_CHECK_LIB([g2c],[do_lio])
+#AC_CHECK_LIB([g2c],[do_lio],[],[],[frtbegin])
+#AC_CHECK_LIB([gfortran],[do_lio])
 AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
 AC_CHECK_LIB([lapack], [dgesvd_])
-AC_CHECK_LIB([blas],[daxp])
+AC_CHECK_LIB([blas],[dgemv_])
 AC_MSG_CHECKING([LIBS = $LIBS])
 # Checks for header files.
 AC_HEADER_STDC
@@ -43,6 +44,8 @@ AC_CHECK_HEADERS([stdlib.h sys/time.h unistd.h])
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_F77
+AC_F77_LIBRARY_LDFLAGS
 AC_PROG_LIBTOOL
 
 # Checks if we want MPI support
@@ -97,22 +100,22 @@ if test "x$hdf5_ok" = "xno"; then
    fi
 fi
 
-AC_ARG_WITH(cblas-cflags,[  --with-cblas-cflags=FLAGS specify CBLAS linker flags])
-AC_ARG_WITH(cblas-libs, [  --with-cblas-libs=LIBS    specify CBLAS linker flags])
-if test "x$with_cblas_cflags" != "x"; then
-   CBLAS_CFLAGS="$with_cblas_cflags"
-fi
-if test "x$with_cblas_libs" != "x"; then
-   CBLAS_LIBS="$with_cblas_libs"
-fi
-AC_SUBST(CBLAS_CFLAGS)
-AC_SUBST(CBLAS_LIBS)
-if test "x$cblas_ok" = "xno"; then
-   AC_MSG_WARN([Didn't find libcblas in standard place.])
-   if test "x$with_cblas_libs" = "x"; then
-       AC_MSG_ERROR([CBLAS library could not be found.  Please specify location with --with-cblas-libs=])
-   fi
-fi
+#AC_ARG_WITH(cblas-cflags,[  --with-cblas-cflags=FLAGS specify CBLAS linker flags])
+#AC_ARG_WITH(cblas-libs, [  --with-cblas-libs=LIBS    specify CBLAS linker flags])
+#if test "x$with_cblas_cflags" != "x"; then
+#   CBLAS_CFLAGS="$with_cblas_cflags"
+#fi
+#if test "x$with_cblas_libs" != "x"; then
+#   CBLAS_LIBS="$with_cblas_libs"
+#fi
+#AC_SUBST(CBLAS_CFLAGS)
+#AC_SUBST(CBLAS_LIBS)
+#if test "x$cblas_ok" = "xno"; then
+#   AC_MSG_WARN([Didn't find libcblas in standard place.])
+#   if test "x$with_cblas_libs" = "x"; then
+#       AC_MSG_ERROR([CBLAS library could not be found.  Please specify location with --with-cblas-libs=])
+#   fi
+#fi
 
 AC_ARG_WITH(lapack-cflags,[  --with-lapack-cflags=FLAGS specify LAPACK linker flags])
 AC_ARG_WITH(lapack-libs, [  --with-lapack-libs=LIBS    specify LAPACK linker flags])

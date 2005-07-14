@@ -1,19 +1,37 @@
 #ifndef VECTOR_OPS_H
 #define VECTOR_OPS_H
 
-extern "C"{
-#ifdef USE_MKL
-  #include <mkl_cblas.h>
-#else  
-  #include <cblas.h> 
-#endif
-}
+// extern "C"{
+// #ifdef USE_MKL
+//   #include <mkl_cblas.h>
+// #else  
+//   #include <cblas.h> 
+// #endif
+// }
 #include "../Blitz.h"
+#include "../config.h"
 
 typedef TinyVector<int,3> Int3;
 typedef Array<complex<double>,1> zVec;
 typedef Array<cVec3,1> zVecVec;
 typedef Array<cMat3,1> zMatVec;
+
+#define F77_DZNRM2 F77_FUNC(dznrm2,DZNRM2)
+#define F77_ZDSCAL F77_FUNC(zdscal,ZDSCAL)
+#define F77_ZDOTC  F77_FUNC(zdotc,ZDOTC)
+#define F77_ZGEMV  F77_FUNC(zgemv,ZGEMV)
+
+extern "C" double F77_DZNRM2(const int *N, const void *X, const int *INC);
+extern "C" void   F77_ZDSCAL(const int *N, double *ALPHA, const void *X, 
+			     const int *INC);
+extern "C" complex<double> F77_ZDOTC (const int *N, 
+				      const void *X, const int *INCX, 
+				      const void *Y, const int *INCY);
+extern "C" void   F77_ZGEMV (char *TRANS, const int *M, const int *N, 
+			     complex<double> *alpha, const void *A, 
+			     const int *LDA, const void *X, 
+			     const int *INCX, complex<double> *beta, 
+			     const void *Y, const int *INCY);
 
 inline void Normalize (zVec &c)
 {
@@ -24,13 +42,24 @@ inline void Normalize (zVec &c)
 //   norm = 1.0/sqrt(norm);
 //   for (int i=0; i<c.size(); i++)
 //     c(i) *= norm;
-  double norm = cblas_dznrm2(c.size(), c.data(), 1);
-  cblas_zdscal(c.size(), 1.0/norm, c.data(), 1);
+
+//   double norm = cblas_dznrm2(c.size(), c.data(), 1);
+//   cblas_zdscal(c.size(), 1.0/norm, c.data(), 1);
+
+  const int inc=1;
+  int n = c.size();
+  double norm = F77_DZNRM2(&n, c.data(), &inc);
+  norm = 1.0/norm;
+  F77_ZDSCAL(&n, &norm, c.data(), &inc);
 }
 
 inline double norm (const zVec &c)
 {
-  return cblas_dznrm2(c.size(), c.data(), 1);
+  double norm;
+  int n = c.size();
+  const int inc=1;
+  return F77_DZNRM2(&n, c.data(), &inc);
+    //  return cblas_dznrm2(c.size(), c.data(), 1);
 }
 
 inline complex<double> conjdot(zVec &cA, zVec &cB)
@@ -39,9 +68,12 @@ inline complex<double> conjdot(zVec &cA, zVec &cB)
 //   for (int i=0; i<cA.size(); i++)
 //     z += conj(cA(i))*cB(i);
 //   return z;
+  const int n = cA.size();
+  const int inc = 1;
   complex<double> z;
-  cblas_zdotc_sub (cA.size(), cA.data(), 1, cB.data(), 1, &z);
-  return z;
+  return F77_ZDOTC (&n, cA.data(), &inc, cB.data(), &inc);
+//   cblas_zdotc_sub (cA.size(), cA.data(), 1, cB.data(), 1, &z);
+//  return z;
 }
 
 inline double realconjdot(zVec &cA, zVec &cB)
@@ -50,9 +82,11 @@ inline double realconjdot(zVec &cA, zVec &cB)
 //   for (int i=0; i<cA.size(); i++)
 //     re += real(conj(cA(i))*cB(i));
 //   return re;
-  complex<double> z;
-  cblas_zdotc_sub (cA.size(), cA.data(), 1, cB.data(), 1, &z);
-  return z.real();
+
+  // complex<double> z;
+//   cblas_zdotc_sub (cA.size(), cA.data(), 1, cB.data(), 1, &z);
+//   return z.real();
+  return conjdot(cA,cB).real();
 }
 
 // inline Array<complex<double>,3>& operator*=
@@ -84,16 +118,25 @@ Orthogonalize (const Array<complex<double>,2> &A, zVec &x)
   // Calculate overlaps
   // Calling with column major and ConjTrans is equivalent to
   // conjugate of untransposed row major
-  cblas_zgemv(CblasColMajor, CblasConjTrans, n, m, &one,
-	      A.data(), n, x.data(), 1, &zero, S.data(), 1);
+  char trans='C';
+  const int inc=1;
+
+  F77_ZGEMV(&trans, &n, &m, &one, A.data(), &n, x.data(), &inc,
+	    &zero, S.data(), &inc);
+
+//   cblas_zgemv(CblasColMajor, CblasConjTrans, n, m, &one,
+// 	      A.data(), n, x.data(), 1, &zero, S.data(), 1);
 
 //   for (int i=0; i<m; i++) {
 //     fprintf (stderr, "S[%d] = %18.14f + %18.14fi\n",
 // 	     real(S[i]), imag(S[i]));
     
   // Now, subtract off components * overlaps
-  cblas_zgemv(CblasRowMajor, CblasTrans, m, n, &minusone,
- 	      A.data(), n, S.data(), 1, &one, x.data(), 1);
+  trans='T';
+  F77_ZGEMV(&trans, &m, &n, &minusone, A.data(), &n,
+	    S.data(), &inc, &one, x.data(), &inc);
+//   cblas_zgemv(CblasRowMajor, CblasTrans, m, n, &minusone,
+//  	      A.data(), n, S.data(), 1, &one, x.data(), 1);
 
 }
 

@@ -9,7 +9,7 @@ TestPeriodic_SOURCES = TestPeriodic.cc
 TestQuintic_SOURCES = TestQuintic.cc
 
 
-LDADD = ../IO/libciao.la libspline.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS)
+LDADD = ../IO/libciao.la libspline.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(FLIBS) 
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)
 
 noinst_LTLIBRARIES = libspline.la

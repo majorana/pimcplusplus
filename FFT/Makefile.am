@@ -8,7 +8,7 @@ noinst_LTLIBRARIES = libfft.la
 libfft_la_SOURCES = FFT.cc
 libfft_la_CXXFLAGS = $(BLITZ_CFLAGS)  $(FFTW3_CFLAGS) $(AM_CXXFLAGS)
 
-includedir = $(prefix)/Common/FFT/
+includedir = $(prefix)/include/Common/FFT/
 
 include_HEADERS = FFT.h
 

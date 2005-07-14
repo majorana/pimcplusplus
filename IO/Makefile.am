@@ -35,5 +35,5 @@ libciao_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
 #endif
 
 
-include_HEADERS = InputOutput.h InputOutputASCII.h InputOutputBase.h InputOutputHDF5.h InputOutputXML.h
+include_HEADERS = InputOutput.h InputOutputASCII.h InputOutputBase.h InputOutputHDF5.h InputOutputXML.h FileExpand.h
 

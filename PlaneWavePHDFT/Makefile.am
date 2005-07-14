@@ -8,7 +8,7 @@ LDADD = libpw.la                 ../IO/libciao.la                         \
         ../MatrixOps/libmatops.la ../Splines/libspline.la                 \
         ../Fitting/libfitting.la ../Integration/libquad.la                \
         $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(FFTW3_LIBS) \
-        $(LAPACK_LIBS) $(CBLAS_LIBS) $(GSL_LIBS)
+        $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS)
 
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
               $(HDF5_CFLAGS)  $(CBLAS_CFLAGS)
