@@ -14,6 +14,7 @@ private:
   void UpdateExCorr();
   Array<double,1> temp, temp2;
   Potential *BarePot;
+  Array<double,1> OldEnergies;
 public:
   ScreenedPot V;
   double NewMix;
@@ -25,6 +26,8 @@ public:
   void CalcEnergies (double &kinetic, double &potential, 
 		     double &hartree, double &XC);
   void Solve();
+  void SolveInit();
+  double SolveIter();
   void Write (IOSectionClass &out);
   void Read  (IOSectionClass &in);
   void SetGrid (Grid *newGrid);
