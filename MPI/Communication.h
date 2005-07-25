@@ -82,6 +82,7 @@ public:
   void Broadcast (int root, Array<Vec2,1> &buff);
   void Broadcast (int root, Array<Vec3,1> &buff);
   void Broadcast (int root, Array<double,4> &buff);
+  void Broadcast (int root, Array<complex<double>,4> &buff);
   void Receive (void *recvBuf, int count, MPI_Datatype datatype,
 		int source, int tag);
   void Receive (int toProc, Array<double,1> &buff);
@@ -213,11 +214,12 @@ public:
   inline void Broadcast(int root, double &val) {}
   inline void Broadcast(int root, Array<double,1> &buff)
   { /* Do nothing in serial mode */ }
-  void Broadcast (int root, Array<Vec2,1> &buff)
+  inline void Broadcast (int root, Array<Vec2,1> &buff)
   { /* Do nothing in serial mode */ }
-  void Broadcast (int root, Array<Vec3,1> &buff)
+  inline void Broadcast (int root, Array<Vec3,1> &buff)
   { /* Do nothing in serial mode */ }
   inline void Broadcast(int root, Array<double,4> &buff) {}
+  inline void Broadcast (int root, Array<complex<double>,4> &buff) {}
   inline void Receive (int toProc, Array<double,1> &buff)
   {
     cerr << "Receives not supported in serial mode.\n";

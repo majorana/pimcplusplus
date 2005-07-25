@@ -143,6 +143,37 @@ double Determinant (const Array<double,2> &A)
   }
 }
 
+complex<double> 
+Determinant (const Array<complex<double>,2> &A)
+{
+  int m = A.rows();
+  int n = A.cols();
+  assert (m == n);  // Cannot take a determinant of a non-square
+		    // matrix
+  if (A.rows() == 1)
+    return (A(0,0));
+  if (A.rows() == 2) 
+    return (A(0,0)*A(1,1)-A(0,1)*A(1,0));
+  else {
+    Array<complex<double>,2> LU(m,m);
+    Array<int,1> ipiv(m);
+    int info;
+    LU = A;
+    // Do LU factorization
+    F77_ZGETRF (&m, &n, LU.data(), &m, ipiv.data(), &info);
+    complex<double> det = 1.0;
+    int numPerm = 0;
+    for (int i=0; i<m; i++) {
+      det *= LU(i,i);
+      numPerm += (ipiv(i) != (i+1));
+    }
+    if (numPerm & 1)
+      det *= -1.0;
+    
+    return det;
+  }
+}
+
 // Replaces A with its inverse by gauss-jordan elimination with full pivoting
 // Adapted from Numerical Recipes in C
 void GJInverse (Array<double,2> &A)

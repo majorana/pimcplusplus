@@ -27,6 +27,7 @@ void MatMult (const Array<double,2> &A, const Array<double,2> &B,
 	      Array<double,2> &C);
 
 double Determinant (const Array<double,2> &A);
+complex<double> Determinant (const Array<complex<double>,2> &A);
 
 /// This function returns the determinant of A and replaces A with its
 /// cofactors.
