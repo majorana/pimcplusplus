@@ -11,7 +11,9 @@
 
 #define F77_DGESVD F77_FUNC(dgesvd,DGESVD)
 #define F77_DGETRF F77_FUNC(dgetrf,DGETRF)
+#define F77_ZGETRF F77_FUNC(zgetrf,ZGETRF)
 #define F77_DGETRI F77_FUNC(dgetri,DGETRI)
+#define F77_ZGETRI F77_FUNC(zgetri,ZGETRI)
 #define F77_DGEMM  F77_FUNC(dgemm,DGEMM)
 #define F77_DSYEVR F77_FUNC(dsyevr,DSYEVR)
 #define F77_ZHEEVR F77_FUNC(zheevr,ZHEEVR)
@@ -26,8 +28,16 @@ extern "C" void
 F77_DGETRF(int *m, int *n, double A[], int *lda, int ipiv[], int *info);
 
 extern "C" void 
+F77_ZGETRF(int *m, int *n, complex<double> A[], 
+	   int *lda, int ipiv[], int *info);
+
+extern "C" void 
 F77_DGETRI (int *N, double A[], int *lda, int ipiv[], double work[], 
-	     int *lwork, int *info);
+	    int *lwork, int *info);
+
+extern "C" void 
+F77_ZGETRI (int *N, complex<double> A[], int *lda, int ipiv[], 
+	    complex<double> work[], int *lwork, int *info);
 
 extern "C" void 
 F77_DGEMM (char *transA, char *transB, int *m, int *n, int *k,
@@ -618,4 +628,63 @@ DetCofactorsWorksize(int N)
   F77_DGETRI(&N, &dummy, &N, &ipiv, &work, &lwork, &info);
 
   return ((int)ceil(work));
+}
+
+
+
+/// This function returns the determinant of A and replaces A with its
+/// cofactors.
+complex<double>
+ComplexDetCofactors (Array<complex<double>,2> &A, 
+		     Array<complex<double>,1> &work)
+{
+  const int maxN = 2000;
+  int ipiv[maxN];
+  int N = A.rows();
+  int M = A.cols();
+  assert (N == M);
+  assert (N <= maxN);
+  // First, transpose A for fortran ordering
+//   for (int i=0; i<N; i++)
+//     for (int j=0; j<i; j++) {
+//       double tmp = A(i,j);
+//       A(i,j) = A(j,i);
+//       A(j,i) = tmp;
+//     }
+  Transpose(A);
+  
+  int info;
+  // Do LU factorization
+  F77_ZGETRF (&N, &M, A.data(), &N, ipiv, &info);
+  complex<double> det = 1.0;
+  int numPerm = 0;
+  for (int i=0; i<N; i++) {
+    det *= A(i,i);
+    numPerm += (ipiv[i] != (i+1));
+  }
+  if (numPerm & 1)
+    det = -det;
+  
+  int lwork = work.size();
+  // Now, do inverse
+  F77_ZGETRI (&N, A.data(), &N, ipiv, work.data(), &lwork, &info);
+
+  // Now, we have the transpose of Ainv.  Now, just multiply by det:
+  A = det * A;
+  // And we're done!
+  return det;
+}
+
+int 
+ComplexDetCofactorsWorksize(int N)
+{
+  complex<double> work;
+  complex<double> dummy;
+  int info;
+  int ipiv;
+  int lwork = -1;
+  
+  F77_ZGETRI(&N, &dummy, &N, &ipiv, &work, &lwork, &info);
+
+  return ((int)ceil(work.real()));
 }

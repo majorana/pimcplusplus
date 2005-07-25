@@ -35,6 +35,12 @@ double DetCofactors (Array<double,2> &A, Array<double,1> &work);
 /// This function returns the worksize needed by the previous function.
 int DetCofactorsWorksize(int N);
 
+
+/// Complex versions of the functions above
+complex<double> ComplexDetCofactors (Array<complex<double>,2> &A, 
+				     Array<complex<double>,1> &work);
+int ComplexDetCofactorsWorksize(int N);
+
 void GJInverse (Array<double,2> &A);
 
 Array<double,2> Inverse (Array<double,2> &A);
@@ -51,7 +57,32 @@ inline void OutOfPlaceTranspose (Array<double,2> &A)
   A = Atrans;
 }
 
+inline void OutOfPlaceTranspose (Array<complex<double>,2> &A)
+{
+  int m = A.rows();
+  int n = A.cols();
+  Array<complex<double>,2> Atrans (n,m);
+  for (int i=0; i<m; i++)
+    for (int j=0; j<n; j++)
+      Atrans(j,i) = A(i,j);
+  A.resize(n,m);
+  A = Atrans;
+}
+
 inline void Transpose (Array<double,2> &A)
+{
+  int m = A.rows();
+  int n = A.cols();
+  if (m != n)
+    OutOfPlaceTranspose (A);
+  else {
+    for (int i=0; i<m; i++)
+      for (int j=i+1; j<m; j++) 
+	swap (A(i,j), A(j,i));
+  }
+}
+
+inline void Transpose (Array<complex<double>,2> &A)
 {
   int m = A.rows();
   int n = A.cols();
