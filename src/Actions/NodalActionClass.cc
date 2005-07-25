@@ -148,36 +148,36 @@ FreeNodalActionClass::Det (int slice)
   return Determinant (DetMatrix);
 }
 
-Array<double,2>
-FreeNodalActionClass::GetMatrix (int slice)
-{
-  SpeciesClass &species = Path.Species(SpeciesNum);
-  int first = species.FirstPtcl;
-  int last = species.LastPtcl;
+// Array<double,2>
+// FreeNodalActionClass::GetMatrix (int slice)
+// {
+//   SpeciesClass &species = Path.Species(SpeciesNum);
+//   int first = species.FirstPtcl;
+//   int last = species.LastPtcl;
 
-  int myStartSlice, myEndSlice;
-  int myProc = PathData.Path.Communicator.MyProc();
-  Path.SliceRange (myProc, myStartSlice, myEndSlice);
-  int refSlice = Path.GetRefSlice()-myStartSlice;
-  int sliceDiff = abs(slice-refSlice);
-  sliceDiff = min (sliceDiff, Path.TotalNumSlices-sliceDiff);
-  assert (sliceDiff <= Path.TotalNumSlices);
-  assert (sliceDiff > 0);
+//   int myStartSlice, myEndSlice;
+//   int myProc = PathData.Path.Communicator.MyProc();
+//   Path.SliceRange (myProc, myStartSlice, myEndSlice);
+//   int refSlice = Path.GetRefSlice()-myStartSlice;
+//   int sliceDiff = abs(slice-refSlice);
+//   sliceDiff = min (sliceDiff, Path.TotalNumSlices-sliceDiff);
+//   assert (sliceDiff <= Path.TotalNumSlices);
+//   assert (sliceDiff > 0);
 
-  // Fill up determinant matrix
-  for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
-    for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
-      dVec diff;
-      double dist;
-      Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
-      double action = 0.0;
-      for (int dim=0; dim<NDIM; dim++)
-	action += ActionSplines(sliceDiff)[dim](diff[dim]);
-      DetMatrix(refPtcl-first, ptcl-first) = exp(-action);
-    }
-  }
-  return DetMatrix;
-}
+//   // Fill up determinant matrix
+//   for (int refPtcl=species.FirstPtcl; refPtcl<=species.LastPtcl; refPtcl++) {
+//     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+//       dVec diff;
+//       double dist;
+//       Path.RefDistDisp (slice, refPtcl, ptcl, dist, diff);
+//       double action = 0.0;
+//       for (int dim=0; dim<NDIM; dim++)
+// 	action += ActionSplines(sliceDiff)[dim](diff[dim]);
+//       DetMatrix(refPtcl-first, ptcl-first) = exp(-action);
+//     }
+//   }
+//   return DetMatrix;
+// }
 
 bool
 FreeNodalActionClass::IsPositive (int slice)

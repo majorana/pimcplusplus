@@ -8,6 +8,8 @@ libactions_la_SOURCES =            \
     ActionsClass.h                 \
     DavidLongRangeClass.cc         \
     DavidLongRangeClass.h          \
+    FixedPhaseActionClass.cc       \
+    FixedPhaseActionClass.h        \
     GroundStateNodalActionClass.cc \
     GroundStateNodalActionClass.h  \
     KineticClass.cc                \

@@ -11,7 +11,7 @@ class NodalActionClass : public ActionBaseClass
 public:
   virtual bool IsPositive (int slice) = 0;
   virtual double Det(int slice)       = 0;
-  virtual Array<double,2> GetMatrix (int slice=0) = 0;
+  //  virtual Array<double,2> GetMatrix (int slice=0) = 0;
   virtual void AcceptCopy (int slice1, int slice2);
   virtual void RejectCopy (int slice1, int slice2);
   virtual void Init();
@@ -73,7 +73,7 @@ public:
   /// returns true.
   bool IsPositive (int slice);
   double Det (int slice);
-  Array<double,2> GetMatrix(int slice);
+  //  Array<double,2> GetMatrix(int slice);
   void Read (IOSectionClass &in);
   bool IsGroundState();
   FreeNodalActionClass (PathDataClass &pathData, int speciesNum);
