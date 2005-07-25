@@ -67,8 +67,6 @@ void PAcoulombBCFitClass::DoFit (Rho &rho)
 
 void PAcoulombBCFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
 {
-  int level = (int)floor(log(rho.Beta()/SmallestBeta)/log(2.0)+ 0.5);
-
   double U2err = 0.0;
   double dU2err = 0.0;
   double weight = 0.0;
@@ -93,8 +91,8 @@ void PAcoulombBCFitClass::Error(Rho &rho, double &Uerror, double &dUerror)
       else
 	costheta = 1.0 - s*s/(2.0*q*q); 
       rho.UdU_Coulomb(q, q, costheta, Uex, dUex);
-      Ufit = U(q, 0.0, s*s, level);
-      dUfit = dU(q, 0.0, s*s, level);
+      Ufit = U(q, 0.0, s*s, 0);
+      dUfit = dU(q, 0.0, s*s, 0);
       U2err += w*(Uex-Ufit)*(Uex-Ufit);
       dU2err += w*(dUex-dUfit)*(dUex-dUfit);
       weight += w;
