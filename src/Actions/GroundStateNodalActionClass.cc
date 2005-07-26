@@ -1,6 +1,6 @@
 #include "GroundStateNodalActionClass.h"
 #include "../PathDataClass.h"
-#include "../Common/MatrixOps/MatrixOps.h"
+#include <Common/MatrixOps/MatrixOps.h>
 
 GroundStateClass::GroundStateClass(PathDataClass &pathData) :
 PathData (pathData), Path(pathData.Path)

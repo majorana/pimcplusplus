@@ -1,6 +1,6 @@
 #include "FixedPhaseActionClass.h"
 #include "../PathDataClass.h"
-#include "../Common/MatrixOps/MatrixOps.h"
+#include <Common/MatrixOps/MatrixOps.h>
 
 FixedPhaseClass::FixedPhaseClass(PathDataClass &pathData) :
 PathData (pathData), Path(pathData.Path)
@@ -27,6 +27,12 @@ FixedPhaseClass::IonsHaveMoved()
 }
 
 
+void
+FixedPhaseClass::CalcValues (int slice, int species)
+{
+
+
+}
 
 
 double
@@ -56,13 +62,13 @@ FixedPhaseClass::Action (int slice1, int slice2,
   double action = 0.0;
   if (doUp) {
     for (int slice=slice1; slice <= slice2; slice++) 
-      CalcVals (slice, UpSpeciesNum);
+      CalcValues (slice, UpSpeciesNum);
     for (int link=slice1; link < slice2; link++) 
       action += 0.0;
   }
   if (doDown) {
     for (int slice=slice1; slice <= slice2; slice++) 
-      CalcVals (slice, DownSpeciesNum);
+      CalcValues (slice, DownSpeciesNum);
     for (int link=slice1; link < slice2; link++) 
       action += 0.0;
   }
@@ -105,7 +111,6 @@ FixedPhaseClass::Read(IOSectionClass &in)
   Cofactors.resize(NumUp, NumUp);
   GradMat.resize(NumUp, NumUp);
   Gradient.resize(NumUp);
-  Temp.resize(NumUp);
   GUp.resize(PathData.NumTimeSlices());
   gUp.resize(PathData.NumTimeSlices());
   vUp.resize(PathData.NumTimeSlices());
@@ -154,7 +159,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
 
 
 
-double
+complex<double>
 FixedPhaseClass::GradientDet(int slice, int speciesNum)
 {
   SpeciesClass &species = Path.Species(speciesNum);
@@ -163,8 +168,8 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
   assert (N == Matrix.rows());
 
   // First, fill up determinant matrix
-  Array<double,1> vals;
-  Array<Vec3,1> grads;
+  Array<complex<double>,1> vals;
+  Array<cVec3,1> grads;
   for (int j=0; j<N; j++) {
     Vec3 r_j = Path(slice, first+j);
     Path.PutInBox(r_j);
@@ -175,10 +180,10 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
 
   // Compute determinant and cofactors
   Cofactors = Matrix;
-  double det = DetCofactors (Cofactors, Workspace);
+  complex<double> det = ComplexDetCofactors (Cofactors, Workspace);
 
   // Now, compute gradient
-  Gradient = Vec3(0.0, 0.0, 0.0);
+  Gradient = cVec3(0.0, 0.0, 0.0);
   for (int i=0; i<N; i++) {
 //     Vec3 r_i = Path(slice, first+i);
 //     BandSplines.Grad(r_i[0], r_i[1], r_i[2], Temp);
@@ -192,7 +197,7 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
 }
 
 
-double
+complex<double>
 FixedPhaseClass::GradientDetFD(int slice, int speciesNum)
 {
   SpeciesClass &species = Path.Species(speciesNum);
@@ -203,7 +208,7 @@ FixedPhaseClass::GradientDetFD(int slice, int speciesNum)
   const double eps = 1.0e-6;
 
   // First, fill up determinant matrix
-  Array<double,1> row;
+  Array<complex<double>,1> row;
   for (int j=0; j<N; j++) {
     Vec3 r_j = Path(slice, first+j);
     Path.PutInBox(r_j);
@@ -211,10 +216,10 @@ FixedPhaseClass::GradientDetFD(int slice, int speciesNum)
     BandSplines(r_j[0], r_j[1], r_j[2], row);
   }
 
-  double det = Determinant (Matrix);
+  complex<double> det = Determinant (Matrix);
 
   for (int i=0; i<N; i++) {
-    Vec3 plus, minus;
+    cVec3 plus, minus;
     plus = 0.0; minus = 0.0;
     Vec3 r_i = Path(slice, first+i);
     Vec3 r;
@@ -247,7 +252,9 @@ void
 FixedPhaseClass::UpdateBands()
 {
   // Now, make bands real and put into splines
-  Array<double,4> data(xGrid.NumPoints, yGrid.NumPoints, zGrid.NumPoints, NumBands);
+  Array<complex<double>,4> data(xGrid.NumPoints, 
+				yGrid.NumPoints, 
+				zGrid.NumPoints, NumBands);
   SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
   int first = ionSpecies.FirstPtcl;
   for (int i=0; i<NumIons; i++)
@@ -290,10 +297,11 @@ FixedPhaseClass::UpdateBands()
 bool
 FixedPhaseClass::IsPositive (int slice, int speciesNum)
 {
-  return (Det(slice, speciesNum) > 0.0);  
+  //  return (Det(slice, speciesNum) > 0.0);  
+  return true;
 }
 
-double
+complex<double>
 FixedPhaseClass::Det (int slice, int speciesNum)
 {
   if (IonsHaveMoved()) 
@@ -303,7 +311,7 @@ FixedPhaseClass::Det (int slice, int speciesNum)
   int first = species.FirstPtcl;
   int N = species.NumParticles;
   // First, fill up determinant matrix
-  Array<double,1> vals;
+  Array<complex<double>,1> vals;
   for (int j=0; j<N; j++) {
     Vec3 r_j = Path(slice, first+j);
     Path.PutInBox(r_j);
@@ -314,25 +322,25 @@ FixedPhaseClass::Det (int slice, int speciesNum)
 }
 
 
-Array<double,2>
-FixedPhaseClass::GetMatrix (int slice, int speciesNum)
-{
-  if (IonsHaveMoved()) 
-    UpdateBands();
+// Array<double,2>
+// FixedPhaseClass::GetMatrix (int slice, int speciesNum)
+// {
+//   if (IonsHaveMoved()) 
+//     UpdateBands();
 
-  SpeciesClass& species = Path.Species(speciesNum);
-  int first = species.FirstPtcl;
-  int N = species.NumParticles;
-  // First, fill up determinant matrix
-  Array<double,1> vals;
-  for (int j=0; j<N; j++) {
-    Vec3 r_j = Path(slice, first+j);
-    Path.PutInBox(r_j);
-    vals.reference(Matrix(j,Range::all()));
-    BandSplines(r_j[0], r_j[1], r_j[2], vals);
-  }
-  return Matrix;
-}
+//   SpeciesClass& species = Path.Species(speciesNum);
+//   int first = species.FirstPtcl;
+//   int N = species.NumParticles;
+//   // First, fill up determinant matrix
+//   Array<double,1> vals;
+//   for (int j=0; j<N; j++) {
+//     Vec3 r_j = Path(slice, first+j);
+//     Path.PutInBox(r_j);
+//     vals.reference(Matrix(j,Range::all()));
+//     BandSplines(r_j[0], r_j[1], r_j[2], vals);
+//   }
+//   return Matrix;
+// }
 
 
 bool
@@ -341,22 +349,22 @@ FixedPhaseActionClass::IsPositive (int slice)
   return FixedPhase.IsPositive(slice, SpeciesNum);
 }
 
-double
+complex<double>
 FixedPhaseActionClass::Det (int slice)
 {
   return FixedPhase.Det(slice, SpeciesNum);
 }
 
-Array<double,2>
-FixedPhaseActionClass::GetMatrix (int slice)
-{
-  return FixedPhase.GetMatrix(slice, SpeciesNum);
-}
+// Array<double,2>
+// FixedPhaseActionClass::GetMatrix (int slice)
+// {
+//   return FixedPhase.GetMatrix(slice, SpeciesNum);
+//}
 
 double
 FixedPhaseActionClass::Action (int slice1, int slice2, 
-				     const Array<int,1> &activeParticles,
-				     int level)
+			       const Array<int,1> &activeParticles,
+			       int level)
 {
   double action = FixedPhase.Action (slice1, slice2, activeParticles, level,
 				      SpeciesNum);
@@ -371,93 +379,95 @@ FixedPhaseActionClass::d_dBeta(int slice1, int slice2, int level)
 
 void FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
 {
-  if ((speciesNum == UpSpeciesNum) || (speciesNum==DownSpeciesNum)) {
-//     if (speciesNum == UpSpeciesNum) 
-//       perr << "Shifting up species by " << slicesToShift << endl;
-//     if (speciesNum == DownSpeciesNum) 
-//       perr << "Shifting down species by " << slicesToShift << endl;
-    Mirrored1DClass<double>& dists=
-      ((speciesNum==UpSpeciesNum) ? UpDists : DownDists);
-    CommunicatorClass &comm = Path.Communicator;
+//   if ((speciesNum == UpSpeciesNum) || (speciesNum==DownSpeciesNum)) {
+// //     if (speciesNum == UpSpeciesNum) 
+// //       perr << "Shifting up species by " << slicesToShift << endl;
+// //     if (speciesNum == DownSpeciesNum) 
+// //       perr << "Shifting down species by " << slicesToShift << endl;
+//     Mirrored1DClass<double>& dists=
+//       ((speciesNum==UpSpeciesNum) ? UpDists : DownDists);
+//     CommunicatorClass &comm = Path.Communicator;
 
-    int numProcs=comm.NumProcs();
-    int myProc=comm.MyProc();
-    int recvProc, sendProc;
-    int numSlices  = Path.NumTimeSlices();
-    assert(abs(slicesToShift)<numSlices);
-    sendProc=(myProc+1) % numProcs;
-    recvProc=((myProc-1) + numProcs) % numProcs;
-    if (slicesToShift<0)
-      swap (sendProc, recvProc);
+//     int numProcs=comm.NumProcs();
+//     int myProc=comm.MyProc();
+//     int recvProc, sendProc;
+//     int numSlices  = Path.NumTimeSlices();
+//     assert(abs(slicesToShift)<numSlices);
+//     sendProc=(myProc+1) % numProcs;
+//     recvProc=((myProc-1) + numProcs) % numProcs;
+//     if (slicesToShift<0)
+//       swap (sendProc, recvProc);
     
-    /// First shifts the data in the A copy left or right by the
-    /// appropriate amount 
-    if (slicesToShift>0)
-      for (int slice=numSlices-1; slice>=slicesToShift;slice--)
-	dists[0](slice)=dists[0](slice-slicesToShift);
-    else 
-      for (int slice=0; slice<numSlices+slicesToShift;slice++)
-	dists[0](slice)=dists[0](slice-slicesToShift);
+//     /// First shifts the data in the A copy left or right by the
+//     /// appropriate amount 
+//     if (slicesToShift>0)
+//       for (int slice=numSlices-1; slice>=slicesToShift;slice--)
+// 	dists[0](slice)=dists[0](slice-slicesToShift);
+//     else 
+//       for (int slice=0; slice<numSlices+slicesToShift;slice++)
+// 	dists[0](slice)=dists[0](slice-slicesToShift);
     
     
-    /// Now bundle up the data to send to adjacent processor
-    int bufferSize=abs(slicesToShift);
-    Array<double,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
-    int startSlice;
-    int buffIndex=0;
-    if (slicesToShift>0) {
-      startSlice=numSlices-slicesToShift;
-      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
-	/// If shifting forward, don't send the last time slice (so always)
-	/// send slice-1
-	sendBuffer(buffIndex)=dists[1](slice-1);
-	buffIndex++;
-      }
-    }
-    else {
-      startSlice=0;
-      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
-	/// If shifting backward, don't send the first time slice (so always)
-	/// send slice+1
-	sendBuffer(buffIndex)=dists[1](slice+1);
-	buffIndex++;
-      }
-    }
+//     /// Now bundle up the data to send to adjacent processor
+//     int bufferSize=abs(slicesToShift);
+//     Array<double,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
+//     int startSlice;
+//     int buffIndex=0;
+//     if (slicesToShift>0) {
+//       startSlice=numSlices-slicesToShift;
+//       for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
+// 	/// If shifting forward, don't send the last time slice (so always)
+// 	/// send slice-1
+// 	sendBuffer(buffIndex)=dists[1](slice-1);
+// 	buffIndex++;
+//       }
+//     }
+//     else {
+//       startSlice=0;
+//       for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+// 	/// If shifting backward, don't send the first time slice (so always)
+// 	/// send slice+1
+// 	sendBuffer(buffIndex)=dists[1](slice+1);
+// 	buffIndex++;
+//       }
+//     }
     
-    /// Send and receive data to/from neighbors.
-    comm.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
+//     /// Send and receive data to/from neighbors.
+//     comm.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
     
-    if (slicesToShift>0)
-      startSlice=0;
-    else 
-      startSlice=numSlices+slicesToShift;
+//     if (slicesToShift>0)
+//       startSlice=0;
+//     else 
+//       startSlice=numSlices+slicesToShift;
     
-    /// Copy the data into the A copy
-    buffIndex=0;
-    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
-      dists[0](slice)=receiveBuffer(buffIndex);
-      buffIndex++;
-    }
+//     /// Copy the data into the A copy
+//     buffIndex=0;
+//     for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+//       dists[0](slice)=receiveBuffer(buffIndex);
+//       buffIndex++;
+//     }
     
-    // Now copy A into B, since A has all the good, shifted data now.
-    for (int slice=0; slice<numSlices; slice++)
-      dists[1](slice) = dists[0](slice);
-    // And we're done! 
-  } 
+//     // Now copy A into B, since A has all the good, shifted data now.
+//     for (int slice=0; slice<numSlices; slice++)
+//       dists[1](slice) = dists[0](slice);
+//     // And we're done! 
+//   } 
 }
 
 void 
 FixedPhaseClass::AcceptCopy (int slice1, int slice2)
 {
-  UpDists.AcceptCopy (slice1, slice2);
-  DownDists.AcceptCopy (slice1, slice2);
+  GUp.AcceptCopy(slice1, slice2); GDown.AcceptCopy (slice1, slice2);
+  gUp.AcceptCopy(slice1, slice2); gDown.AcceptCopy (slice1, slice2);
+  vUp.AcceptCopy(slice1, slice2); vDown.AcceptCopy (slice1, slice2);
 }
 
 void 
 FixedPhaseClass::RejectCopy (int slice1, int slice2)
 {
-  UpDists.RejectCopy (slice1, slice2);
-  DownDists.RejectCopy (slice1, slice2);
+  GUp.RejectCopy(slice1, slice2); GDown.RejectCopy (slice1, slice2);
+  gUp.RejectCopy(slice1, slice2); gDown.RejectCopy (slice1, slice2);
+  vUp.RejectCopy(slice1, slice2); vDown.RejectCopy (slice1, slice2);
 }
 
 void
@@ -479,24 +489,21 @@ FixedPhaseActionClass::RejectCopy (int slice1, int slice2)
 }
 
 
+
+
 void 
 FixedPhaseClass::Init(int speciesNum)
 {
-  if (speciesNum == UpSpeciesNum) {
-    for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
-      UpDists[0](slice) = LineSearchDistance(slice, speciesNum);
-      UpDists[1](slice) = UpDists[0](slice);
-    }
-    perr << "Initializing up species.\n";
-  }
+  SetMode(NEWMODE);
 
-  if (speciesNum == DownSpeciesNum) {
-    for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
-      DownDists[0](slice) = LineSearchDistance(slice, speciesNum);
-      DownDists[1](slice) = DownDists[0](slice);
-    }
+  for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
+    CalcValues(slice, speciesNum);
+  AcceptCopy (0, Path.NumTimeSlices()-1);
+
+  if (speciesNum == UpSpeciesNum) 
+    perr << "Initializing up species.\n";  
+  else if (speciesNum == DownSpeciesNum) 
     perr << "Initializing down species.\n";
-  }
 }
 
 void 

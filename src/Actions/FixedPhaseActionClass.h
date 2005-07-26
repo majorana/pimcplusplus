@@ -18,10 +18,11 @@ private:
 
   Array<complex<double>,1> Workspace;
   Array<complex<double>,2> Matrix, Cofactors;
-  Array<Vec3,2>   GradMat;
+  Array<cVec3,2>   GradMat;
   Mirrored1DClass<double> GUp, gUp, vUp, GDown, gDown, vDown;
 
-  Array<zVec3,1> Gradient, Temp, Rions;
+  Array<cVec3,1> Gradient;
+  Array<Vec3,1> Rions;
   int NumUp, NumDown, NumIons, NumBands;
   // This stores the real space grid dimensions
   LinearGrid xGrid, yGrid, zGrid;
@@ -31,7 +32,7 @@ private:
   void UpdateBands();
   /// This updates GUp, gUp, and vUp, or GDown, gDown, and vDown,
   /// depending on the species.
-  void CalcVals (int slice, int species);
+  void CalcValues (int slice, int species);
 public:
   int IonSpeciesNum, UpSpeciesNum, DownSpeciesNum;
   double Action (int slice1, int slice2,
@@ -64,8 +65,8 @@ public:
   double d_dBeta(int slice1, int slice2, int level);
 
   bool IsPositive (int slice);
-  double Det (int slice);
-  Array<double,2> GetMatrix (int slice);
+  complex<double> Det (int slice);
+  //  Array<double,2> GetMatrix (int slice);
   void ShiftData (int slices2Shift);  
   void AcceptCopy (int slice1, int slice2);
   void RejectCopy (int slice1, int slice2);

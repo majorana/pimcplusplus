@@ -8,6 +8,8 @@ libactions_la_SOURCES =            \
     ActionsClass.h                 \
     DavidLongRangeClass.cc         \
     DavidLongRangeClass.h          \
+    FixedPhaseActionClass.cc       \
+    FixedPhaseActionClass.h        \
     GroundStateNodalActionClass.cc \
     GroundStateNodalActionClass.h  \
     KineticClass.cc                \
@@ -36,3 +38,5 @@ libactions_la_SOURCES =            \
     StructureReject.h              \
     TIP5PWaterClass.cc             \
     TIP5PWaterClass.h
+
+EXTRA_DIST = FixedPhase.tex
