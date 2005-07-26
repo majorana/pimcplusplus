@@ -168,6 +168,19 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 	new GroundStateNodalActionClass 
 	(PathData, groundState, groundState.IonSpeciesNum);
     }
+    else if (type == "FIXEDPHASE") {
+      FixedPhaseClass &fixedPhase = *new FixedPhaseClass(PathData);
+      fixedPhase.Read (in);
+      NodalActions(fixedPhase.UpSpeciesNum) = 
+	new FixedPhaseActionClass 
+	(PathData, fixedPhase, fixedPhase.UpSpeciesNum);
+      NodalActions(fixedPhase.DownSpeciesNum) = 
+	new FixedPhaseActionClass 
+	(PathData, fixedPhase, fixedPhase.DownSpeciesNum);
+      NodalActions(fixedPhase.IonSpeciesNum) = 
+	new FixedPhaseActionClass 
+	(PathData, fixedPhase, fixedPhase.IonSpeciesNum);
+    }
     in.CloseSection();
   }
 }

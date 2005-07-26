@@ -19,7 +19,7 @@ private:
   Array<complex<double>,1> Workspace;
   Array<complex<double>,2> Matrix, Cofactors;
   Array<cVec3,2>   GradMat;
-  Mirrored1DClass<double> GUp, gUp, vUp, GDown, gDown, vDown;
+  Mirrored1DClass<double> UpGrad2, DownGrad2;
 
   Array<cVec3,1> Gradient;
   Array<Vec3,1> Rions;
@@ -32,7 +32,7 @@ private:
   void UpdateBands();
   /// This updates GUp, gUp, and vUp, or GDown, gDown, and vDown,
   /// depending on the species.
-  void CalcValues (int slice, int species);
+  double CalcGrad2 (int slice, int species);
 public:
   int IonSpeciesNum, UpSpeciesNum, DownSpeciesNum;
   double Action (int slice1, int slice2,

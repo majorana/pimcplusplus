@@ -9,7 +9,7 @@
 #include "KineticClass.h"
 #include "NodalActionClass.h"
 #include "GroundStateNodalActionClass.h"
-#include "GroundStateNodalActionClass.h"
+#include "FixedPhaseActionClass.h"
 #include "DavidLongRangeClass.h"
 #include "TIP5PWaterClass.h"
 #include "ST2WaterClass.h"

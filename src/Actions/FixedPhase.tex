@@ -37,7 +37,7 @@ Then the action may be written as
 \begin{equation}
 \mathcal{S}_{\text{FP}}(R_1,R_2;\tau) = 
 -\ln \left\langle
-\exp\left[-\int_0^\tau dt\ |\nabla \Phi^{k}(R(t))|^2 \right]
+\exp\left[-\lambda\int_0^\tau dt\ |\nabla \Phi^{k}(R(t))|^2 \right]
 \right\rangle_\text{B.R.W},
 \end{equation}
 where the average is over all brownian random walks which start at
@@ -48,8 +48,8 @@ In the simplest approximation, we may assume that the gradient changes
 very little within the range of the brownian random walks.  In this
 case, we approximate
 \begin{equation}
-\mathcal{S}_\text{FP}^\text{prim} = \frac{\tau}{2} 
-\left[ \left|\nabla^2 \Phi\right|_{R_1}^2 + \left|\nabla^2 \Phi\right|_{R_2}^2 
+\mathcal{S}_\text{FP}^\text{prim} = \frac{\lambda\tau}{2} 
+\left[ \left|\nabla \Phi\right|_{R_1}^2 + \left|\nabla \Phi\right|_{R_2}^2 
 \rule{0cm}{0.5cm}\right]
 \end{equation}
 
@@ -131,20 +131,20 @@ G_u(u) & = & \frac{1}{|R_2-R_1|} \frac{d\phi}{du} \\
 We write our our corrected approximation as 
 \begin{eqnarray}
 \mathcal{S}(R_1,R_2;\tau)_\text{FP}^\text{corr} & = &
-\frac{\tau}{2} \left[\tilde{G}_1^2 + \tilde{G}_2^2 \right]
-+ \tau \int_0^1 du \, G_u(u)^2 \\
- & = & \frac{\tau}{2} \left[\tilde{G}_1^2 + \tilde{G}_2^2 \right]
+\frac{\lambda\tau}{2} \left[\tilde{G}_1^2 + \tilde{G}_2^2 \right]
++ \lambda\tau \int_0^1 du \, G_u(u)^2 \\
+ & = & \frac{\lambda\tau}{2} \left[\tilde{G}_1^2 + \tilde{G}_2^2 \right]
 + \\
-& & \frac{\tau}{|R_2-R_1|^2} \int_0^1 du\, 
+& & \frac{\lambda\tau}{|R_2-R_1|^2} \int_0^1 du\, 
 \left[9c_3^2u^4 + 6c_2c_3u^3 +(4c_2^2 + 3c_1c_3)u^2 + 2c_1c_2u +
   c_1^2\right] \nonumber \\ 
-& = & \tau \left\{ \frac{1}{2} \left[\tilde{G}_1^2 + \tilde{G}_2^2 \right] + \frac{\left[\frac{9}{5} c_3^2 + \frac{3}{2} c_2 c_3 + 
+& = & \lambda \tau \left\{ \frac{1}{2} \left[\tilde{G}_1^2 + \tilde{G}_2^2 \right] + \frac{\left[\frac{9}{5} c_3^2 + \frac{3}{2} c_2 c_3 + 
 \frac{4}{3} c_2^2 + c_1 c_3 + c_1c_2 + c_1 ^2 \right]}{|R_2-R_1|^2} \right\}
 \end{eqnarray}
 Expanding this, we have
 \begin{equation}
 \mathcal{S}^\text{corr}_\phi(R_1, R_2; \tau)
-= \tau \left\{
+= \lambda \tau \left\{
 \frac{1}{2}\left[\tilde{G}_1^2 + \tilde{G}_2^2 \right]
 + \frac{2(\tilde{g}_1^2+\tilde{g}_2^2) + 3(\tilde{g}_1 +
   \tilde{g}_2)(v_1-v_2) + 18(v_1-v_2)^2 - g_1
