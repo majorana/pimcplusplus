@@ -49,9 +49,12 @@ FixedPhaseClass::CalcGrad2 (int slice, int species)
   complex<double> detu = GradientDet(slice, species);
   double detu2 = mag2(detu);
   
+  //  cerr << "detu2 = " << detu2 << endl;
+
   double grad2 = 0.0;
   for (int i=0; i<N; i++) {
     Vec3 grad = detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i));
+    //    cerr << "grad(" << i << ") = " << grad << endl;
     grad2 += dot(grad,grad);
   }
   grad2 /= (detu2*detu2);
@@ -89,7 +92,7 @@ FixedPhaseClass::Action (int slice1, int slice2,
   if (doUp) {
     for (int slice=slice1; slice <= slice2; slice+=skip) 
       UpGrad2(slice) = CalcGrad2 (slice, UpSpeciesNum);
-    for (int link=slice1; link < slice2; link+skip) 
+    for (int link=slice1; link < slice2; link+=skip) 
       action += 0.5*lambda*levelTau*(UpGrad2(link)+UpGrad2(link+skip));
   }
   if (doDown) {
@@ -220,6 +223,10 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
   SpeciesClass &species = Path.Species(speciesNum);
   int N = species.NumParticles;
   int first = species.FirstPtcl;
+  if (N != Matrix.rows()) {
+    cerr << "N = " << N << endl;
+    cerr << "Matrix.rows() = " << Matrix.rows() << endl;
+  }
   assert (N == Matrix.rows());
 
   // First, fill up determinant matrix
@@ -350,8 +357,34 @@ FixedPhaseClass::UpdateBands()
 bool
 FixedPhaseClass::IsPositive (int slice, int speciesNum)
 {
-  //  return (Det(slice, speciesNum) > 0.0);  
-  return true;
+  if (IonsHaveMoved()) 
+    UpdateBands();
+
+
+  // HACK HACK HACK
+//   const int N=200;
+//   Array<double,3> grad2Array(N, N, N);
+//   Vec3 pos;
+//   for (int ix=0; ix<N; ix++) {
+//     pos[0] = ((double)ix/(N-1) -0.5)*Path.GetBox()[0];
+//     for (int iy=0; iy<N; iy++){
+//       pos[1] = ((double)iy/(N-1) -0.5)*Path.GetBox()[1];
+//       for (int iz=0; iz<N; iz++) {
+// 	pos[2] = ((double)iz/(N-1) -0.5)*Path.GetBox()[2];
+// 	Path(slice,Path.Species(speciesNum).FirstPtcl) = pos;
+// 	grad2Array(ix,iy,iz) = CalcGrad2 (slice, speciesNum);
+//       }
+//     }
+//   }
+//   IOSectionClass out;
+//   out.NewFile ("PhaseDump.h5");
+//   out.WriteVar("Grad2", grad2Array);
+//   out.CloseFile();
+   
+  double grad2 = CalcGrad2 (slice, speciesNum);
+  //  cerr << "grad2 = " << grad2 << endl;
+  double lambda = Path.Species(speciesNum).lambda;
+  return ((lambda*grad2) < 100.0);
 }
 
 complex<double>
@@ -420,7 +453,7 @@ FixedPhaseActionClass::Action (int slice1, int slice2,
 			       int level)
 {
   double action = FixedPhase.Action (slice1, slice2, activeParticles, level,
-				      SpeciesNum);
+				     SpeciesNum);
   return action;
 }
 
@@ -547,14 +580,18 @@ FixedPhaseClass::Init(int speciesNum)
 {
   SetMode(NEWMODE);
 
-  for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
-    CalcGrad2(slice, speciesNum);
-  AcceptCopy (0, Path.NumTimeSlices()-1);
-
-  if (speciesNum == UpSpeciesNum) 
+  if (speciesNum == UpSpeciesNum) {
     perr << "Initializing up species.\n";  
-  else if (speciesNum == DownSpeciesNum) 
+    for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
+      CalcGrad2(slice, UpSpeciesNum);
+    AcceptCopy (0, Path.NumTimeSlices()-1);
+  }
+  else if (speciesNum == DownSpeciesNum) {
     perr << "Initializing down species.\n";
+    for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
+      CalcGrad2(slice, DownSpeciesNum);
+    AcceptCopy (0, Path.NumTimeSlices()-1);
+  }
 }
 
 void 

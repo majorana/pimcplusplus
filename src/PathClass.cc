@@ -151,7 +151,9 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
       (*this)(0,species.FirstPtcl+1) = R0(1);  
       if (!Actions.NodalActions(speciesNum)->IsPositive(0)) {
 	perr << "Still not positive after swap!!!!!!!!!!!!\n";
-	abort();
+	/// HACK HACK HACK -- commenting out abort for now to allow
+	/// fixed-phase to continue.
+	// abort();
       }
     }
   }
@@ -166,6 +168,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     double sigma = sqrt (2.0*lambda*taueff);
     bool positive = false;
     
+    int numRejects = 0;
     do {
       // Randomly construct new slice
       for (int ptcl=0; ptcl<numPtcls; ptcl++) {
@@ -186,7 +189,12 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	}
 	// Now broadcast whether or not I'm positive to everyone
 	Communicator.Broadcast(sliceOwner, positive);
-      }      
+      }
+      if (!positive) {
+	numRejects++;
+	if ((numRejects%50)==0)
+	  cerr << "numRejects = " << numRejects << endl;
+      }
     } while (!positive);
     // Copy slice into Path if I'm the slice owner.
     if ((slice>=myFirstSlice) && (slice<=myLastSlice)) {
@@ -223,7 +231,6 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     // continue on to next slice
     prevSlice = newSlice;
   }
-
   if (haveNodeAction) {
     Array<int,1> changedParticles(1);
     double localAction = 
@@ -233,6 +240,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 //     perr << "myProc = " << myProc << " localAction = " 
 // 	 << localAction << " NumTimeSlices = " << NumTimeSlices() << endl;
     double globalAction = Communicator.AllSum(localAction);
+    cerr << "After AllSum.\n";
     if (Communicator.MyProc()==0)
       perr << "Nodal Action after Levi flight = " << globalAction << endl;
   }
