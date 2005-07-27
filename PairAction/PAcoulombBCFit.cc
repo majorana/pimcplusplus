@@ -35,6 +35,8 @@ void PAcoulombBCFitClass::DoFit (Rho &rho)
   Usplines.resize(1);
   dUsplines.resize(1);
 
+  SmallestBeta = rho.Beta();
+
   int numq = qgrid->NumPoints;
   int numt = tgrid->NumPoints;
   Array<double,2> Umat(numq, numt), dUmat(numq, numt);

@@ -12,3 +12,4 @@ includedir = $(prefix)/include/Common/Ewald/
 
 include_HEADERS = OptimizedBreakup.h
 
+EXTRA_DIST = Ewald.tex Simone_long_range_notes.tex
