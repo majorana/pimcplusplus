@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: common
 Description: Common routines for QMC simulation
 Version: @VERSION@
-Libs: -L${libdir} -lcommon @SPRNG2_LIBS@ @MPI_LIBS@ @XML2_LIBS@ @LIBS@ @FFTW3_LIBS@ @BLITZ_LIBS@ @GSL_LIBS@ @FLIBS@
-Cflags: -I${includedir} @MPI_CFLAGS@ @MPI_DEF@ @XML2_CFLAGS@ @SPRNG2_CFLAGS@ @MPI_CFLAGS@ @FFTW3_CFLAGS@ @BLITZ_CFLAGS@ @GSL_CFLAGS@
+Libs: -L${libdir} -lcommon @SPRNG2_LIBS@ @MPI_LIBS@ @XML2_LIBS@ @LIBS@ @FFTW3_LIBS@ @BLITZ_LIBS@ @GSL_LIBS@ @FLIBS@ @LAPACK_LIBS@
+Cflags: -I${includedir} @MPI_CFLAGS@ @MPI_DEF@ @XML2_CFLAGS@ @SPRNG2_CFLAGS@ @MPI_CFLAGS@ @FFTW3_CFLAGS@ @BLITZ_CFLAGS@ @GSL_CFLAGS@ @LAPACK_CFLAGS@
