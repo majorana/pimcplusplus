@@ -20,6 +20,8 @@ libspecfun_la_SOURCES = HermitePoly.h       \
                         PolynomialSet.cc    \
                         LegendrePoly.h      
 
+libspecfun_la_CXXFLAGS = $(GSL_CFLAGS)
+
 includedir=$(prefix)/include/Common/SpecialFunctions
 
 include_HEADERS = HermitePoly.h LegendrePoly.h   SpecialFunctions.h \

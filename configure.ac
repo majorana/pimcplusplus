@@ -21,6 +21,9 @@ PKG_CHECK_MODULES(XML2, xml2, xml2_ok=yes, xml2_ok=no)
 PKG_CHECK_MODULES(FFTW3, fftw3, fftw3_ok=yes, fftw3_ok=no)
 # this creates and AC_SUBST's vars SPRNG2_CFLAGS and SPRNG2_LIBS
 PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
+# this creates and AC_SUBST's vars GSL_CFLAGS and GSL_LIBS
+PKG_CHECK_MODULES(GSL, gsl, gsl_ok=yes, gsl_ok=no)
+
 
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([hdf5], [H5open],[hdf5_ok=yes], hdf5_ok=no)
@@ -33,7 +36,7 @@ fi
 #fi
 #AC_CHECK_LIB([g2c],[do_lio],[],[],[frtbegin])
 #AC_CHECK_LIB([gfortran],[do_lio])
-AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
+#AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
 AC_CHECK_LIB([lapack], [dgesvd_])
 AC_CHECK_LIB([blas],[dgemv_])
 AC_MSG_CHECKING([LIBS = $LIBS])
@@ -151,6 +154,23 @@ if test "x$xml2_ok" = "xno"; then
    fi
 fi
 
+AC_ARG_WITH(gsl-cflags,[  --with-gsl-cflags=FLAGS specify GSL linker flags])
+AC_ARG_WITH(gsl-libs,  [  --with-gsl-libs=LIBS    specify GSL linker flags])
+if test "x$with_gsl_cflags" != "x"; then
+   GSL_CFLAGS="$with_gsl_cflags"
+fi
+if test "x$with_gsl_libs" != "x"; then
+   GSL_LIBS="$with_gsl_libs"
+fi
+AC_SUBST(GSL_CFLAGS)
+AC_SUBST(GSL_LIBS)
+if test "x$gsl_ok" = "xno"; then
+   AC_MSG_WARN([Didn't find libgsl in standard place.])
+   if test "x$with_gsl_libs" = "x"; then
+       AC_MSG_ERROR([GSL library could not be found.  Please specify location with --with-gsl-libs=])
+   fi
+fi
+
 
 
 AC_F77_WRAPPERS
@@ -186,6 +206,7 @@ AC_CONFIG_FILES([ Makefile                  \
                   PlaneWavePHDFT/Makefile ] )
 AC_MSG_RESULT([ HDF5_LIBS   = $HDF5_LIBS ])
 AC_MSG_RESULT([ XML2_LIBS   = $XML2_LIBS ])
+AC_MSG_RESULT([ GSL_LIBS    = $GSL_LIBS  ])
 AC_MSG_RESULT([ LAPACK_LIBS = $LAPACK_LIBS ])
 #AC_MSG_RESULT([ CBLAS_LIBS  = $CBLAS_LIBS ])
 AC_OUTPUT
