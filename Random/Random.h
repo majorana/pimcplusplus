@@ -1,6 +1,6 @@
 #ifndef RANDOM_CLASS
 #define RANDOM_CLASS
-#include "sprng.h"
+#include <sprng.h>
 #include "../MPI/Communication.h"
 
 

@@ -5,7 +5,7 @@ libdft_la_SOURCES = ExCorr.f        \
 
 includedir=$(prefix)/include/Common/DFT
 
-libdft_la_CXXFLAGS = $(AM_CXXFLAGS)
+libdft_la_CXXFLAGS = $(AM_CXXFLAGS) $(BLITZ_CFLAGS)
 libdft_la_LIBADD   =
 
 include_HEADERS = Functionals.h

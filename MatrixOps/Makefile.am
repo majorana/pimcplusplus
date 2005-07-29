@@ -3,7 +3,7 @@ check_PROGRAMS = Test
 Test_SOURCES = Test.cc 
 
 LDADD = libmatops.la $(LAPACK_LIBS) $(BLAS_LIBS)
-AM_CXXFLAGS = $(LAPACK_LIBS) $(BLAS_LIBS)
+AM_CXXFLAGS = $(LAPACK_LIBS) $(BLAS_LIBS) $(BLITZ_CFLAGS)
 
 noinst_LTLIBRARIES = libmatops.la
 libmatops_la_SOURCES = MatrixOps.h MatrixOps.cc
