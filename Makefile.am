@@ -46,7 +46,7 @@ libcommon_la_LIBADD = IO/libciao.la                  \
 includedir=$(prefix)/include/Common
 include_HEADERS = Blitz.h config.h
 
-pkgconfigdir = $(libdir)/pkgconfig
+pkgconfigdir = $(libdir)/pkgconfig/
 pkgconfig_DATA = common.pc
 
 install-data-local:
