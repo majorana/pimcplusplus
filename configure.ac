@@ -36,7 +36,9 @@ fi
 #fi
 #AC_CHECK_LIB([g2c],[do_lio],[],[],[frtbegin])
 #AC_CHECK_LIB([gfortran],[do_lio])
-#AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
+if test "x$gsl_ok" = "xno"; then
+   AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
+fi
 AC_CHECK_LIB([lapack], [dgesvd_])
 AC_CHECK_LIB([blas],[dgemv_])
 AC_MSG_CHECKING([LIBS = $LIBS])
