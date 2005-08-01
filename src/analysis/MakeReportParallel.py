@@ -2,9 +2,11 @@
 from IO import *
 import sys
 import os
+import math
 import stats
 import numarray
-from matplotlib.matlab import *
+#from matplotlib.matlab import *
+from pylab import *
 from HTMLgen import *
 #import povexport
 #from visual import *
@@ -68,13 +70,13 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      else:
           plot(x, y, 'o')
      h1=xlabel(hlabel)
-     set(h1,"FontSize",20)
+     setp(h1,"FontSize",20)
      v1=ylabel(vlabel)
-     set(v1,"FontSize",20)
+     setp(v1,"FontSize",20)
      labels = get(gca(), 'xticklabels')
-     set(labels, 'fontsize', 16)
+     setp(labels, 'fontsize', 16)
      labels = get(gca(), 'yticklabels')
-     set(labels, 'fontsize', 16)
+     setp(labels, 'fontsize', 16)
      currAxis=axis()
      currAxis[0]=cutoff
      axis(currAxis)
@@ -103,6 +105,7 @@ def BuildTable():
      return myTable
 
 def ProcessCorrelationSection(infiles,doc,currNum):
+     print 'In ProcessCorrelationSection'
      #acquire data about the correlation section
      sectionName=infiles.GetName()
      hlabel=infiles.ReadVar("xlabel")[0]
@@ -110,7 +113,11 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      data=infiles.ReadVar("y")
      if (data==[None]):
           return currNum
+     print '1:'
+     infiles.ReadVar("Cumulative")
+     print "2"
      isCumulative=infiles.ReadVar("Cumulative")[0]
+     print '1a'
      if (isCumulative==False):
           data = map (lambda y: y[StartCut:-1],data)
           y = Avg(VecAvg(data))
@@ -119,6 +126,7 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      x=infiles.ReadVar("x")[0]
      if (x==None):
           return currNum
+     print '2:'
      description=infiles.ReadVar("Description")[0]
 
      currNum=currNum+1
@@ -140,6 +148,7 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      doc.append(myImg)
      doc.append(BR())
      doc.append(fileTable)
+     print 'After ProcessCorrelationSection'
      return currNum
 
 def compare(a):
@@ -222,20 +231,20 @@ def LongRangeImage(basename,r,long,short,myTitle,labelY):
      a = axis()
      hold ("on")
      l2 = plot (r[1:-1], long[1:-1]+short[1:-1], 'r-')
-     set (l1, 'linewidth', 2);
-     set (l2, 'linewidth', 2);
+     setp (l1, 'linewidth', 2);
+     setp (l2, 'linewidth', 2);
      h1 = xlabel("r")
      axis(a)
-     set (h1, "FontSize", 20)
+     setp (h1, "FontSize", 20)
      h2 = ylabel (labelY)
-     set (h2, "FontSize", 20)
+     setp (h2, "FontSize", 20)
      labels = get(gca(), 'xticklabels')
-     set(labels, 'fontsize', 16)
+     setp(labels, 'fontsize', 16)
      labels = get(gca(), 'yticklabels')
-     set(labels, 'fontsize', 16)
+     setp(labels, 'fontsize', 16)
      h3 = legend ('Ulong')
      h4 = title (myTitle)
-     set (h4, "FontSize", 20)
+     setp (h4, "FontSize", 20)
      savefig(basename+".png",dpi=60)
      return Image(basename+".png")
 
@@ -310,16 +319,16 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
     x=fromfunction(lambda i:i,(len(data),))
     plot(x,data)
     h1=xlabel(hlabel)
-    set(h1,"FontSize",20)
+    setp(h1,"FontSize",20)
     v1=ylabel(vlabel)
-    set(v1,"FontSize",20)
+    setp(v1,"FontSize",20)
     if len(myTitle) != 0:
          t1=title(myTitle)
-         set(t1,"FontSize",20)
+         setp(t1,"FontSize",20)
     labels = get(gca(), 'xticklabels')
-    set(labels, 'fontsize', 16)
+    setp(labels, 'fontsize', 16)
     labels = get(gca(), 'yticklabels')
-    set(labels, 'fontsize', 16)
+    setp(labels, 'fontsize', 16)
     savefig(fileBase+".png",dpi=45)
     savefig(fileBase+".ps")
     myImg=Image(fileBase+".png")

@@ -22,8 +22,13 @@ void PathDataClass::Read (IOSectionClass &in)
     ranks(clone) = clone*procsPerClone;
   WorldComm.Subset (ranks, InterComm);
   
+  int seed;
+  bool haveSeed = in.ReadVar ("Seed", seed);
   // Now, set up random number generator
-  Random.Init (314159, numClones);
+  if (haveSeed)
+    Random.Init (Seed, numClones);
+  else
+    Random.InitWithRandomSeed(numClones);
 }
 
 
