@@ -384,7 +384,10 @@ FixedPhaseClass::IsPositive (int slice, int speciesNum)
   double grad2 = CalcGrad2 (slice, speciesNum);
   //  cerr << "grad2 = " << grad2 << endl;
   double lambda = Path.Species(speciesNum).lambda;
-  return ((lambda*grad2) < 100.0);
+
+  /// HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+  //return ((lambda*grad2) < 100.0);
+  return true;
 }
 
 complex<double>
