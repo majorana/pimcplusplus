@@ -94,9 +94,9 @@ void ParticleClass::Read(IOSectionClass &in)
   bool haveSeed = in.ReadVar ("Seed", seed);
   // Now, set up random number generator
   if (haveSeed)
-    Random.Init (seed, numClones);
+    Random.Init (seed);
   else
-    Random.InitWithRandomSeed(numClones);
+    Random.InitWithRandomSeed();
 
 
   Esum = 0.0;
