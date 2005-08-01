@@ -78,11 +78,11 @@ public:
   }
   
   
-  void Init()
+  void InitWithRandomSeed(int numClones=1)
   {
     int seed = make_sprng_seed();
     //cerr<<"My seed is "<<seed<<endl;
-    Init (seed);
+    Init (seed, numClones);
   }
  
   void Init(int seed, int numClones=1)
