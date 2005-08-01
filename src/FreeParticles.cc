@@ -46,7 +46,7 @@ public:
   ParticleClass() :
     Random(Communicator)
   {
-    Random.Init();
+    //    Random.Init();
   }
 };
 
@@ -89,6 +89,15 @@ void ParticleClass::Read(IOSectionClass &in)
   assert(in.ReadVar ("BlockSize", BlockSize));
   assert(in.ReadVar ("NumBlocks", NumBlocks));
   assert(in.ReadVar ("lambda", lambda));
+
+  int seed;
+  bool haveSeed = in.ReadVar ("Seed", seed);
+  // Now, set up random number generator
+  if (haveSeed)
+    Random.Init (seed, numClones);
+  else
+    Random.InitWithRandomSeed(numClones);
+
 
   Esum = 0.0;
   E2sum = 0.0;
