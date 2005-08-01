@@ -34,7 +34,7 @@ Section (System)
       string Type = "e";
       string Statistics = "FERMION";
       double lambda=0.5; 
-      string NodeType = "GROUNDSTATE";
+      string NodeType = "FIXEDPHASE";
       int NumParticles=8;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
@@ -55,7 +55,7 @@ Section (System)
       string Type="e";
       double lambda=0.5; 
       string Statistics="FERMION";
-      string NodeType = "GROUNDSTATE";
+      string NodeType = "FIXEDPHASE";
       int NumParticles=8;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
@@ -69,7 +69,6 @@ Section (System)
            4.250145,  4.345014, -4.2866014,
            4.620141,  4.53014,  4.784014 ];
     }
-
   }
 }
 
@@ -86,18 +85,19 @@ Section (Action)
      "~/PairActions/e-e.fit.beta8.0.h5"];
   Section (NodalAction)
   {
-    string Type = "GROUNDSTATE";
+    string Type = "FIXEDPHASE";
     string IonSpecies  = "Na";
     string UpSpecies   = "eup";
     string DownSpecies = "edown";
     double kCut = 4.0;
+    Array<double,1> kVec(3) = [ 0.04, 0.04, 0.04 ];
   }
   bool UseBackground = false;
 }
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.03125_M4096.new.turing";
+  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.03125_M4096.FP.turing";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
