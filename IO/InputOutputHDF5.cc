@@ -1158,7 +1158,7 @@ bool IOTreeHDF5Class::NewFile(string fileName,string myName,IOTreeClass* parent)
   hid_t FileID = H5Fcreate(fileName.c_str(), H5F_ACC_TRUNC, 
 			   H5P_DEFAULT, H5P_DEFAULT);
   // Create a bool enum type
-  BoolType = H5Tcreate(H5T_ENUM, sizeof(bool));
+  BoolType = H5Tcreate(H5T_ENUM, sizeof(unsigned char));
   bool val = false;
   H5Tenum_insert(BoolType, "FALSE", &val);
   val = true;
