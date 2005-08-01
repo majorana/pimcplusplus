@@ -2,7 +2,7 @@ double tau=0.03125;
 
 Section (Parallel)
 {
-  int ProcsPerClone = 2;
+  int ProcsPerClone = 16;
 }
 
 
@@ -97,7 +97,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.03125_M4096.FP.turing";
+  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.03125_M4096.FP.turing2";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
