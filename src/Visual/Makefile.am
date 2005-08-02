@@ -1,29 +1,32 @@
 bin_PROGRAMS = pathvis
 
-LDADD = $(GTKMM_LIBS) $(GTKGLEXTMM_LIBS) $(COMMON_LIBS)
-AM_CXXFLAGS = $(GTKMM_CFLAGS) $(GTKGLEXTMM_CFLAGS) $(COMMON_CFLAGS) -DPKG_DATA_DIR=\"$(pkgdatadir)/\"
-pathvis_SOURCES =    \
-    BoxClass.cc      \
-    BoxClass.h       \
-    BoxObject.cc     \
-    BoxObject.h      \
-    Export.cc        \
-    Export.h         \
-    GLObject.cc      \
-    GLObject.h       \
-    OnePath.h        \
-    PathObject.cc    \
-    PathObject.h     \
-    PathVis.cc       \
-    PathVis.h        \
-    SmoothClass.cc   \
-    SmoothClass.h    \
-    SphereObject.cc  \
-    SphereObject.h   \
-    ViewClass.cc     \
-    Visual.cc        \
-    Visual.h         \
-    trackball.h      \
+LDADD = $(GTKMM_LIBS) $(GTKGLEXTMM_LIBS) $(COMMON_LIBS) $(GTS_LIBS)
+AM_CXXFLAGS = $(GTKMM_CFLAGS) $(GTKGLEXTMM_CFLAGS) $(COMMON_CFLAGS)\
+              $(GTS_CFLAGS) -DPKG_DATA_DIR=\"$(pkgdatadir)/\"
+pathvis_SOURCES =       \
+    BoxClass.cc         \
+    BoxClass.h          \
+    BoxObject.cc        \
+    BoxObject.h         \
+    Export.cc           \
+    Export.h            \
+    GLObject.cc         \
+    GLObject.h          \
+    OnePath.h           \
+    PathObject.cc       \
+    PathObject.h        \
+    PathVis.cc          \
+    PathVis.h           \
+    SmoothClass.cc      \
+    SmoothClass.h       \
+    SphereObject.cc     \
+    SphereObject.h      \
+    ViewClass.cc        \
+    Visual.cc           \
+    Visual.h            \
+    IsosurfaceObject.cc \
+    IsosurfaceObject.h  \
+    trackball.h         \
     trackball.c    
 
 dist_pkgdata_DATA = tubes.png lines.png straight.png smooth.png nowrap2.png \
