@@ -25,10 +25,11 @@ void PathDataClass::Read (IOSectionClass &in)
   int seed;
   bool haveSeed = in.ReadVar ("Seed", seed);
   // Now, set up random number generator
-  if (haveSeed)
-    Random.Init (seed, numClones);
-  else
-    Random.InitWithRandomSeed(numClones);
+//   if (haveSeed)
+//     Random.Init (seed, numClones);
+//   else
+//     Random.InitWithRandomSeed(numClones);
+  Random.Init (314159, numClones);
 }
 
 
