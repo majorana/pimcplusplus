@@ -120,10 +120,12 @@ FixedPhaseClass::d_dBeta (int slice1, int slice2, int level,
 
   doUp   = (speciesNum == UpSpeciesNum);
   doDown = (speciesNum == DownSpeciesNum);
-  if (speciesNum == IonSpeciesNum) {
-    doUp   = true;
-    doDown = true;
-  }
+  // I think the follow was causing the nodal energy to be
+  // double-counted:
+  //   if (speciesNum == IonSpeciesNum) {
+  //     doUp   = true;
+  //     doDown = true;
+  //   }
   
   if (!(doUp || doDown))
     perr << "Not doing either up or down.  Hmmm...\n";

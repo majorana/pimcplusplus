@@ -105,7 +105,6 @@ def BuildTable():
      return myTable
 
 def ProcessCorrelationSection(infiles,doc,currNum):
-     print 'In ProcessCorrelationSection'
      #acquire data about the correlation section
      sectionName=infiles.GetName()
      hlabel=infiles.ReadVar("xlabel")[0]
@@ -113,11 +112,8 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      data=infiles.ReadVar("y")
      if (data==[None]):
           return currNum
-     print '1:'
      infiles.ReadVar("Cumulative")
-     print "2"
      isCumulative=infiles.ReadVar("Cumulative")[0]
-     print '1a'
      if (isCumulative==False):
           data = map (lambda y: y[StartCut:-1],data)
           y = Avg(VecAvg(data))
@@ -126,7 +122,6 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      x=infiles.ReadVar("x")[0]
      if (x==None):
           return currNum
-     print '2:'
      description=infiles.ReadVar("Description")[0]
 
      currNum=currNum+1
@@ -148,7 +143,6 @@ def ProcessCorrelationSection(infiles,doc,currNum):
      doc.append(myImg)
      doc.append(BR())
      doc.append(fileTable)
-     print 'After ProcessCorrelationSection'
      return currNum
 
 def compare(a):
