@@ -71,7 +71,7 @@ void PathObject::TubesSet(vector<Vec3> &path)
     alpha = 1.0;
 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBlendEquation(GL_FUNC_ADD);
+  //  glBlendEquation(GL_FUNC_ADD);
   fcolor[0]=Color[0]; fcolor[1]=Color[1]; fcolor[2]=Color[2]; 
 
 

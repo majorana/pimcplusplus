@@ -1,4 +1,12 @@
 \documentclass{book}
+%\usepackage{verbatim}
+%\usepackage{moreverb}
+%\usepackage{boxedminipage}
+%\usepackage{shadow}
+\usepackage{fancybox}
+\usepackage{float}
+
+\renewcommand{\shadowsize}{2pt}
 \author{Kenneth P. Esler, Jr.}
 \title{pimc++}
 %\subtitle{Path Integral Monte Carlo Simulation Tool}
@@ -44,7 +52,81 @@ in the caboose.
 
 \chapter{Input Files}
 \section{Introduction}
+All of the file input and output in pimc++ is done through our 
+C++ Input And Output ({\em CIAO}) library.  This library is designed
+to provide a common programming interface to several hierachical data
+formats.  In particular, we currently implement a custom ASCII format,
+HDF5, and XML.  For input files, we use the ASCII format almost
+exclusively.  For files which store heavy numeric data, such as the
+pair action spline tables, we use HDF5.  XML is appealing for some
+compatibility reasons, but we do not currently use it for anything.
+The following sections will explain the use of our ASCII format.  
+
 \section{Defining variables}
+Upon looking at a sample input file, the reader will note a strong
+resemblence to C++.  This was an intentional choice on the part of the
+developers, since those who were familiar enough with C++ to extend
+the code should feel quite at-home with this format.  There are very
+few constructs to learn in the input files, yet we have found them to
+be very versatile.  
+
+Before diving into the details of the file format, let us begin with
+an example.  In Figure~\ref{fig:InputEx}, we have a fictitious input
+file in the {\em CIAO} ASCII format.
+\begin{figure}
+\shadowbox{\begin{minipage}{5in}
+\begin{verbatim}
+Section(System) {
+  int NumParticles = 6;
+  Array<double,1> Masses(6) = [ 0.5, 0.5, 0.5, 1.0, 1.0, 1.0 ];
+}
+
+Section(Potentials) {
+  Section(Potential) {
+    string Type = "Coulomb";
+    double q1 = 1.0;
+    double q2 = -1.0;
+  }
+
+  Section(Potential) {
+    string Type = "Lennard-Jones";
+    double sigma = 5.0;    // this is in units of bohr radii
+    double epsilon = 3.2;  // and this is in Hartrees
+  }
+}
+\end{verbatim}
+\end{minipage}}
+\caption{Example {\em CIAO} input file.}
+\label{fig:InputEx}
+\end{figure}
+
+The most basic construct is a named variable to which a value is
+assigned.  An example is \\
+\rule{0.6cm}{0cm}\shadowbox{\parbox{4.4in}{\texttt{int NumParticles = 6;}}} \\
+In this case, \texttt{NumParticles} is an {\em atomic} variable.
+Currently, {\em CIAO} supports the atomic types {\texttt int, double,
+  bool and string}.  It also supports array variables.  We have taken
+the syntax for our array variables from the popular {\em blitz++}
+template array package. \\
+\rule{0.6cm}{0cm}\shadowbox{\parbox{4.4in}{\texttt{Array<double,1>
+      Masses(6) = [0.5, 0.5, 0.5, 1.0, 1.0, 1.0]; }}} \\
+Here, the \texttt{Array<double,1>} indicates a one-dimensional array
+of doubles.  {\emCIAO} supports up to four-dimensional arrays.  The
+\texttt{(6)} after the variable name, \texttt{Masses}, gives the size
+of the array.  For a multidimensional array, the dimensions are
+separated by commas, such as\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+Array<double,2> Ident(3,3) = [ 1.0, 0.0, 0.0,
+                               0.0, 1.0, 0.0,
+                               0.0, 0.0, 1.0 ];
+\end{verbatim}
+\end{minipage}}\\
+The blank lines are not required -- they are included only for
+clarity.  
+
+
+
 \section{Creating hierachy with sections}
 
 \section{Format}

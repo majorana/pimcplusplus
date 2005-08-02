@@ -100,6 +100,7 @@ protected:
 
   bool Wrap, Smooth;
   ExportClass Export;
+  string FindFullPath(string filename);
   //  ExportVideoClass ExportVideo;
 public:
   PathVisClass PathVis;

@@ -1,8 +1,7 @@
 bin_PROGRAMS = pathvis
 
 LDADD = $(GTKMM_LIBS) $(GTKGLEXTMM_LIBS) $(COMMON_LIBS)
-AM_CXXFLAGS = $(GTKMM_CFLAGS) $(GTKGLEXTMM_CFLAGS) $(COMMON_CFLAGS)
-
+AM_CXXFLAGS = $(GTKMM_CFLAGS) $(GTKGLEXTMM_CFLAGS) $(COMMON_CFLAGS) -DPKG_DATA_DIR=\"$(pkgdatadir)/\"
 pathvis_SOURCES =    \
     BoxClass.cc      \
     BoxClass.h       \
@@ -26,3 +25,6 @@ pathvis_SOURCES =    \
     Visual.h         \
     trackball.h      \
     trackball.c    
+
+dist_pkgdata_DATA = tubes.png lines.png straight.png smooth.png nowrap2.png \
+                    wrap.png orthographic.png perspective.png

@@ -189,19 +189,47 @@ void VisualClass::PutInBox()
 #include "tubes.xpm"
 #include "lines.xpm"
 
+string VisualClass::FindFullPath(string filename)
+{
+  string fullName;
+
+  fullName = filename;
+  if (Glib::file_test(fullName, Glib::FILE_TEST_EXISTS))
+    return fullName;
+  else {
+    fullName = PKG_DATA_DIR + filename;
+    if (Glib::file_test(fullName, Glib::FILE_TEST_EXISTS))
+      return fullName;
+    else {
+      cerr << "Cannot find \"" << filename << "\" anywhere.\n";
+      return filename;
+    }
+  }
+}
+
+
 VisualClass::VisualClass()
   : m_VBox(false, 0), m_ButtonQuit("Quit"), 
     FrameAdjust (0.0, 0.0, 0.0),
     PathType (LINES),
-    TubesImage("tubes.png"), LinesImage("lines.png"),
-    StraightImage("straight.png"), SmoothImage("smooth.png"),
-    NoWrapImage("nowrap2.png"), WrapImage("wrap.png"),
-    OrthoImage("orthographic.png"), PerspectImage("perspective.png"),
+//     TubesImage("tubes.png"), LinesImage("lines.png"),
+//     StraightImage("straight.png"), SmoothImage("smooth.png"),
+//     NoWrapImage("nowrap2.png"), WrapImage("wrap.png"),
+//     OrthoImage("orthographic.png"), PerspectImage("perspective.png"),
     FileChooser ("Choose an output file"),
     Wrap(false), Smooth(false), DetailFrame ("Detail"),
     DetailAdjust(1.0, 1.0, 2.0),
     Export(*this)
 {
+  TubesImage.property_file().set_value(FindFullPath("tubes.png"));
+  LinesImage.property_file().set_value(FindFullPath("lines.png"));
+  StraightImage.property_file().set_value(FindFullPath("straight.png"));
+  SmoothImage.property_file().set_value(FindFullPath("smooth.png"));
+  NoWrapImage.property_file().set_value(FindFullPath("nowrap2.png"));
+  WrapImage.property_file().set_value(FindFullPath("wrap.png"));
+  OrthoImage.property_file().set_value(FindFullPath("orthographic.png"));
+  PerspectImage.property_file().set_value(FindFullPath("perspective.png"));
+
   // Top-level window.
   set_title("VisualClass");
 

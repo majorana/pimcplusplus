@@ -11,7 +11,7 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
 {
   PutInBox (r1);
   PutInBox (r2);
-  dVec disp = r2-r1;
+  Vec3 disp = r2-r1;
   double eps = 1.0e-12;
   for (int dim=0; dim<3; dim++) 
     if (disp[dim]<-0.5*Box[dim]) { // path wraps in + direction
@@ -53,7 +53,7 @@ bool BoxClass::BreakSegment (Vec3 &r1, Vec3 &r2,
 {
   PutInBox (r1, dim);
   PutInBox (r2, dim);
-  dVec disp = r2-r1;
+  Vec3 disp = r2-r1;
   if (disp[dim]<-0.5*Box[dim]) { // path wraps in + direction
     double d1 = 0.5*Box[dim]-r1[dim];
     double d2 = r2[dim] + 0.5*Box[dim];
