@@ -22,10 +22,10 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
       ///Currently hard coded for 20. Ugly 
       for (int kVec=0;kVec<20;kVec++){
 	infile>>myNum;
-	if (lvl==1 && isEnergy==1){
+	if (lvl==0 && isEnergy==1){
 	  uk(kVec)=myNum;
 	}
-	if (lvl==1 && isEnergy==2){
+	if (lvl==0 && isEnergy==2){
 	  duk(kVec)+=myNum;
 	  cout<<"My energy is "<<myNum<<endl;
 	}
