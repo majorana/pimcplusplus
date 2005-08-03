@@ -104,6 +104,29 @@ void VisualClass::MakeFrame(int frame)
   boxObject->SetColor (0.5, 0.5, 1.0);
   boxObject->Set (Box[0], Box[1], Box[2]);
   PathVis.Objects.push_back(boxObject);
+
+
+  /// HACKED IN ISOSURFACE OBJECT
+  Isosurface *isoPtr = new Isosurface;
+  Isosurface &iso = *(isoPtr);
+  LinearGrid xgrid(-8.0, 8.0, 10);
+  LinearGrid ygrid(-8.0, 8.0, 10);
+  LinearGrid zgrid(-8.0, 8.0, 10);
+  Array<double,3> initData(10,10,10);
+  for (int ix=0; ix<10; ix++) {
+    double x = xgrid(ix);
+    for (int iy=0; iy<10; iy++) {
+      double y = ygrid(iy);
+      for (int iz=0; iz<10; iz++) {
+	double z = zgrid(iz);
+	initData(ix,iy,iz) = x*x+y*y+z*z;
+      }
+    }
+  }
+  iso.Init (&xgrid, &ygrid, &zgrid, initData);
+  iso.SetIsoval (36.0);
+
+  PathVis.Objects.push_back(isoPtr);
 }
 
 void VisualClass::Read(string fileName)

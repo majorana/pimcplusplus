@@ -24,6 +24,8 @@ pathvis_SOURCES =       \
     ViewClass.cc        \
     Visual.cc           \
     Visual.h            \
+    Isosurface.cc       \
+    Isosurface.h        \
     IsosurfaceObject.cc \
     IsosurfaceObject.h  \
     trackball.h         \
