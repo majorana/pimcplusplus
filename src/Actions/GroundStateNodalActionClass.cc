@@ -44,6 +44,7 @@ GroundStateClass::SimpleDistance (int slice, int speciesNum)
 double 
 GroundStateClass::LineSearchDistance (int slice, int speciesNum)
 {
+#if NDIM==3
   SpeciesClass &species = Path.Species(speciesNum);
   double epsilon = 1.0e-4 * sqrt (4.0*species.lambda*Path.tau);
   int first = species.FirstPtcl;
@@ -113,6 +114,7 @@ GroundStateClass::LineSearchDistance (int slice, int speciesNum)
   for (int i=0; i<N; i++)
     Path (slice, i+first) = Temp(i);
   return retVal; //min (maxDist, retVal);
+#endif
 }
 
 
@@ -234,6 +236,7 @@ GroundStateClass::d_dBeta (int slice1, int slice2, int level,
 void 
 GroundStateClass::Read(IOSectionClass &in)
 {
+#if NDIM==3
   string speciesString;
   assert (in.ReadVar ("UpSpecies", speciesString));
   UpSpeciesNum = Path.SpeciesNum (speciesString);
@@ -301,6 +304,7 @@ GroundStateClass::Read(IOSectionClass &in)
   initData = 0.0;
   BandSplines.Init (&xGrid, &yGrid, &zGrid, initData, true);
   //  UpdateBands();
+#endif
 }
 
 
@@ -308,6 +312,7 @@ GroundStateClass::Read(IOSectionClass &in)
 double
 GroundStateClass::GradientDet(int slice, int speciesNum)
 {
+#if NDIM==3
   SpeciesClass &species = Path.Species(speciesNum);
   int N = species.NumParticles;
   int first = species.FirstPtcl;
@@ -340,12 +345,14 @@ GroundStateClass::GradientDet(int slice, int speciesNum)
 //   GradientDetFD(slice, speciesNum);
 //   perr << "FD gradient = " << Gradient << endl;
   return det;
+#endif
 }
 
 
 double
 GroundStateClass::GradientDetFD(int slice, int speciesNum)
 {
+#if NDIM==3
   SpeciesClass &species = Path.Species(speciesNum);
   int N = species.NumParticles;
   int first = species.FirstPtcl;
@@ -391,12 +398,14 @@ GroundStateClass::GradientDetFD(int slice, int speciesNum)
     Gradient(i) = (plus-minus)/(2.0*eps);
   }
   return det;
+#endif
 }
 
 
 void
 GroundStateClass::UpdateBands()
 {
+#if NDIM==3
   // Now, make bands real and put into splines
   Array<double,4> data(xGrid.NumPoints, yGrid.NumPoints, zGrid.NumPoints, NumBands);
   SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
@@ -441,6 +450,7 @@ GroundStateClass::UpdateBands()
 //   }
 
   BandSplines.Init (&xGrid, &yGrid, &zGrid, data, true);
+#endif
 }
 
 
@@ -453,6 +463,7 @@ GroundStateClass::IsPositive (int slice, int speciesNum)
 double
 GroundStateClass::Det (int slice, int speciesNum)
 {
+#if NDIM==3
   if (IonsHaveMoved()) 
     UpdateBands();
 
@@ -468,12 +479,14 @@ GroundStateClass::Det (int slice, int speciesNum)
     BandSplines(r_j[0], r_j[1], r_j[2], vals);
   }
   return Determinant (Matrix);
+#endif
 }
 
 
 Array<double,2>
 GroundStateClass::GetMatrix (int slice, int speciesNum)
 {
+#if NDIM==3
   if (IonsHaveMoved()) 
     UpdateBands();
 
@@ -489,6 +502,7 @@ GroundStateClass::GetMatrix (int slice, int speciesNum)
     BandSplines(r_j[0], r_j[1], r_j[2], vals);
   }
   return Matrix;
+#endif
 }
 
 
