@@ -145,7 +145,7 @@ PathDumpClass::NodeDump()
       for (int iz=0; iz<nz; iz++) {
 	newPos[2] = Zgrid(iz);
 	Path(NodeSlice,NodePtcl) = newPos;
-	nodeDump(ix,iy,iz) = FP.CalcGrad2(NodeSlice);
+	nodeDump(ix,iy,iz) = log10(FP.CalcGrad2(NodeSlice));
       }
     }
   }
