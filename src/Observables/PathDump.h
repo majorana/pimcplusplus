@@ -13,6 +13,13 @@ private:
   ObservableInt OpenLinkPtclVar;
   ObservableInt RefLinkVar;
   ObservableVecDouble1 TailLocVar;
+  // Variables for node dumps.
+  ObservableVecDouble3 NodeVar;
+  bool DumpNodes;
+  int  NodePtcl;
+  int  NodeSlice;
+  LinearGrid Xgrid, Ygrid, Zgrid;
+  void NodeDump();
 public:
   int TimesCalled;
   void Accumulate();
@@ -26,7 +33,8 @@ public:
     OpenLinkVar("OpenLinkSlice",IOSection,myPathData.Path.Communicator),
     TailLocVar("TailLocation",IOSection,myPathData.Path.Communicator),
     OpenLinkPtclVar("OpenPtcl",IOSection,myPathData.Path.Communicator),
-    RefLinkVar("RefLink",IOSection,myPathData.Path.Communicator)
+    RefLinkVar("RefLink",IOSection,myPathData.Path.Communicator),
+    NodeVar("Nodes",IOSection,myPathData.Path.Communicator)
   
   { 
     Name="PathDump";

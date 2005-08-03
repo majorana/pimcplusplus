@@ -32,8 +32,8 @@ private:
   void UpdateBands();
   /// This updates GUp, gUp, and vUp, or GDown, gDown, and vDown,
   /// depending on the species.
-  double CalcGrad2 (int slice, int species);
 public:
+  double CalcGrad2 (int slice, int species);
   int IonSpeciesNum, UpSpeciesNum, DownSpeciesNum;
   double Action (int slice1, int slice2,
 		 const Array<int,1> &activeParticles, 
@@ -59,6 +59,8 @@ private:
   FixedPhaseClass &FixedPhase;
   int SpeciesNum;
 public:
+  inline double CalcGrad2 (int slice) 
+  { return FixedPhase.CalcGrad2(slice, SpeciesNum); }
   double Action (int slice1, int slice2,
 		 const Array<int,1> &activeParticles, int level);
   

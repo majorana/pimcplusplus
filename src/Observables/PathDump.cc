@@ -13,6 +13,29 @@ void PathDumpClass::Read(IOSectionClass &in)
 {
   ObservableClass::Read(in);
   assert (in.ReadVar ("dumpFreq", DumpFreq));
+  DumpNodes = in.OpenSection("NodeDump");
+  if (DumpNodes) {
+    assert(in.ReadVar("Ptcl", NodePtcl));
+    assert(in.ReadVar("NodeSlice", NodeSlice));
+    int nx, ny, nz;
+    assert(in.ReadVar("Nx", nx));
+    assert(in.ReadVar("Ny", ny));
+    assert(in.ReadVar("Nz", nz));
+    dVec box = PathData.Path.GetBox();
+    Xgrid.Init(-0.5*box[0], 0.5*box[0], nx);
+    Ygrid.Init(-0.5*box[1], 0.5*box[1], ny);
+    Zgrid.Init(-0.5*box[2], 0.5*box[2], nz);
+    IOSection.NewSection("Xgrid");
+    Xgrid.Write(IOSection);
+    IOSection.CloseSection();
+    IOSection.NewSection("Ygrid");
+    Ygrid.Write(IOSection);
+    IOSection.CloseSection();
+    IOSection.NewSection("Zgrid");
+    Zgrid.Write(IOSection);
+    IOSection.CloseSection();
+    in.CloseSection();
+  }
 }
 
 void PathDumpClass::WriteBlock()
@@ -24,6 +47,9 @@ void PathDumpClass::WriteBlock()
 
   int refSave = PathData.Path.GetRefSlice();
   PathData.MoveRefSlice(0);
+
+  if (DumpNodes)
+    NodeDump();
 
   if (PathData.Path.OpenPaths){
     Array<double,1> tailLoc(NDIM);
@@ -96,3 +122,33 @@ void PathDumpClass::WriteBlock()
   FirstTime = false;
 }
 
+
+void
+PathDumpClass::NodeDump()
+{
+  int nx = Xgrid.NumPoints;
+  int ny = Ygrid.NumPoints;
+  int nz = Zgrid.NumPoints;
+
+  Array<double,3> nodeDump(nx,ny,nz);
+  int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
+  FixedPhaseActionClass &FP = 
+    *((FixedPhaseActionClass*)PathData.Actions.NodalActions(speciesNum));
+
+  PathClass &Path = PathData.Path;
+  dVec savePos = Path(NodeSlice,NodePtcl);
+  dVec newPos;
+  for (int ix=0; ix<nx; ix++) {
+    newPos[0] = Xgrid(ix);
+    for (int iy=0; iy<ny; iy++) {
+      newPos[1] = Ygrid(iy);
+      for (int iz=0; iz<nz; iz++) {
+	newPos[2] = Zgrid(iz);
+	Path(NodeSlice,NodePtcl) = newPos;
+	nodeDump(ix,iy,iz) = FP.CalcGrad2(NodeSlice);
+      }
+    }
+  }
+  Path(NodeSlice,NodePtcl) = savePos;
+  NodeVar.Write(nodeDump);
+}
