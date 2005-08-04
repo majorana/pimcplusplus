@@ -46,6 +46,15 @@ protected:
   /// dimension are (frame, ptcl, slice, dim)
   Array<double,4> PathArray;
 
+  ///////////////
+  // Node data //
+  ///////////////
+  bool HaveNodeData;
+  /// This stores raw node data from the pimc++ output file.  The 4
+  /// dimensions are (frame, x, y, z)
+  Array<double,4> NodeData;
+  LinearGrid Xgrid, Ygrid, Zgrid;
+
   /// These are used only for open loops.
   Array<int,1>    OpenPtcl;
   Array<double,2>   Tail;
@@ -83,6 +92,11 @@ protected:
   Gtk::HScale DetailScale;
   Gtk::Adjustment DetailAdjust;
 
+  // Isosurface control
+  Gtk::Frame IsoFrame;
+  Gtk::HScale IsoScale;
+  Gtk::Adjustment IsoAdjust;
+
 
   Glib::RefPtr<Gtk::ActionGroup> Actions;
   Glib::RefPtr<Gtk::UIManager> Manager;
@@ -95,6 +109,7 @@ protected:
   void ResetView();
   void PutInBox();
   void OnDetailChange();
+  void OnIsoChange();
 
   Gtk::FileChooserDialog FileChooser;
 

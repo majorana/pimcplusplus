@@ -25,15 +25,17 @@ void PathDumpClass::Read(IOSectionClass &in)
     Xgrid.Init(-0.5*box[0], 0.5*box[0], nx);
     Ygrid.Init(-0.5*box[1], 0.5*box[1], ny);
     Zgrid.Init(-0.5*box[2], 0.5*box[2], nz);
-    IOSection.NewSection("Xgrid");
-    Xgrid.Write(IOSection);
-    IOSection.CloseSection();
-    IOSection.NewSection("Ygrid");
-    Ygrid.Write(IOSection);
-    IOSection.CloseSection();
-    IOSection.NewSection("Zgrid");
-    Zgrid.Write(IOSection);
-    IOSection.CloseSection();
+    if (PathData.Path.Communicator.MyProc()==0) {
+      IOSection.NewSection("Xgrid");
+      Xgrid.Write(IOSection);
+      IOSection.CloseSection();
+      IOSection.NewSection("Ygrid");
+      Ygrid.Write(IOSection);
+      IOSection.CloseSection();
+      IOSection.NewSection("Zgrid");
+      Zgrid.Write(IOSection);
+      IOSection.CloseSection();
+    }
     in.CloseSection();
   }
 }

@@ -107,26 +107,35 @@ void VisualClass::MakeFrame(int frame)
 
 
   /// HACKED IN ISOSURFACE OBJECT
-  Isosurface *isoPtr = new Isosurface;
-  Isosurface &iso = *(isoPtr);
-  LinearGrid *xgrid = new LinearGrid(-8.0, 8.0, 10);
-  LinearGrid *ygrid = new LinearGrid(-8.0, 8.0, 10);
-  LinearGrid *zgrid = new LinearGrid(-8.0, 8.0, 10);
-  Array<double,3> initData(10,10,10);
-  for (int ix=0; ix<10; ix++) {
-    double x = (*xgrid)(ix);
-    for (int iy=0; iy<10; iy++) {
-      double y = (*ygrid)(iy);
-      for (int iz=0; iz<10; iz++) {
-	double z = (*zgrid)(iz);
-	initData(ix,iy,iz) = x*x+y*y+z*z;
-      }
-    }
-  }
-  iso.Init (xgrid, ygrid, zgrid, initData);
-  iso.SetIsoval (36.0);
+//   Isosurface *isoPtr = new Isosurface;
+//   Isosurface &iso = *(isoPtr);
+//   LinearGrid *xgrid = new LinearGrid(-8.0, 8.0, 10);
+//   LinearGrid *ygrid = new LinearGrid(-8.0, 8.0, 10);
+//   LinearGrid *zgrid = new LinearGrid(-8.0, 8.0, 10);
+//   Array<double,3> initData(10,10,10);
+//   for (int ix=0; ix<10; ix++) {
+//     double x = (*xgrid)(ix);
+//     for (int iy=0; iy<10; iy++) {
+//       double y = (*ygrid)(iy);
+//       for (int iz=0; iz<10; iz++) {
+// 	double z = (*zgrid)(iz);
+// 	initData(ix,iy,iz) = x*x+y*y+z*z;
+//       }
+//     }
+//   }
+//   iso.Init (xgrid, ygrid, zgrid, initData);
+//   iso.SetIsoval (36.0);
 
-  PathVis.Objects.push_back(isoPtr);
+//   PathVis.Objects.push_back(isoPtr);
+  if (HaveNodeData) {
+    Array<double,3> arrayRef;
+    arrayRef.reference(NodeData(frame,Range::all(),Range::all(),Range::all()));
+    Isosurface *isoPtr = new Isosurface;
+    Isosurface &iso = *isoPtr;
+    iso.Init (&Xgrid, &Ygrid, &Zgrid, arrayRef);
+    iso.SetIsoval(IsoAdjust.get_value());
+    PathVis.Objects.push_back(isoPtr);
+  }
 }
 
 void VisualClass::Read(string fileName)
@@ -182,7 +191,30 @@ void VisualClass::Read(string fileName)
     OpenPtcl.resize (PathArray.extent(0));
     OpenPtcl = -1;
   }
-
+  
+  HaveNodeData = in.OpenSection("Xgrid");
+  if (HaveNodeData) {
+    Xgrid.Read(in);
+    in.CloseSection();
+    assert(in.OpenSection("Ygrid"));
+    Ygrid.Read(in);
+    in.CloseSection();
+    assert(in.OpenSection("Zgrid"));
+    Zgrid.Read(in);
+    in.CloseSection();
+    assert(in.ReadVar("Nodes", NodeData));
+    double maxVal = -1.0e100;
+    double minVal = 1.0e100;
+    for (int frame=0; frame<NodeData.extent(0); frame++)
+      for (int ix=0; ix<NodeData.extent(1); ix++)
+	for (int iy=0; iy<NodeData.extent(2); iy++)
+	  for (int iz=0; iz<NodeData.extent(3); iz++) {
+	    maxVal = max(maxVal, NodeData(frame,ix,iy,iz));
+	    minVal = min(minVal, NodeData(frame,ix,iy,iz));
+	  }
+    IsoAdjust.set_lower(minVal);
+    IsoAdjust.set_upper(maxVal);
+  }
 
   FrameAdjust.set_upper(PathArray.extent(0)-1);
   DetailAdjust.set_upper(PathArray.extent(2)/2);
@@ -240,8 +272,9 @@ VisualClass::VisualClass()
 //     NoWrapImage("nowrap2.png"), WrapImage("wrap.png"),
 //     OrthoImage("orthographic.png"), PerspectImage("perspective.png"),
     FileChooser ("Choose an output file"),
-    Wrap(false), Smooth(false), DetailFrame ("Detail"),
-    DetailAdjust(1.0, 1.0, 2.0),
+    Wrap(false), Smooth(false), 
+    DetailFrame ("Detail"),  DetailAdjust (1.0, 1.0, 2.0), 
+    IsoFrame    ("Isosurf"),    IsoAdjust (0.0, 0.0, 5.0, 0.1),
     Export(*this)
 {
   TubesImage.property_file().set_value(FindFullPath("tubes.png"));
@@ -334,6 +367,17 @@ VisualClass::VisualClass()
   DetailFrame.add(DetailScale);
   DetailScale.set_size_request(100,-1);
 
+  // Setup iso stuff
+  IsoScale.set_adjustment(IsoAdjust);
+  IsoScale.set_digits(1);
+  IsoAdjust.set_step_increment(0.1);
+  IsoAdjust.signal_value_changed().connect
+    (sigc::mem_fun(*this, &VisualClass::OnIsoChange));
+  IsoFrame.add(IsoScale);
+  IsoScale.set_size_request(100,-1);
+
+
+
   // Setup the file chooser
   FileChooser.set_select_multiple(false);
   FileChooser.set_action(Gtk::FILE_CHOOSER_ACTION_OPEN);
@@ -388,6 +432,7 @@ VisualClass::VisualClass()
   m_VBox.pack_start (*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK, 0);
   ToolBox.pack_start (Tools);
   ToolBox.pack_start (DetailFrame, Gtk::PACK_SHRINK, 0);
+  ToolBox.pack_start (IsoFrame, Gtk::PACK_SHRINK, 0);
   m_VBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
   m_VBox.pack_start(PathVis);
   m_VBox.pack_start(FrameScale, Gtk::PACK_SHRINK,0);
@@ -649,4 +694,10 @@ void VisualClass::OnDetailChange()
   Smoother.SetLevel(val);
   if (Smooth)
     FrameChanged();
+}
+
+void
+VisualClass::OnIsoChange()
+{
+  FrameChanged();
 }
