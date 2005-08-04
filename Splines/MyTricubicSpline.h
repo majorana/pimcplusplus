@@ -18,6 +18,7 @@
 
 class MyTricubicSpline
 {
+protected:
   inline double p1(double t)
   { return ((t-1.0)*(t-1.0)*(1.0+2.0*t)); }
   inline double p2(double t)
@@ -48,8 +49,12 @@ class MyTricubicSpline
   // dest:    where to put result
   void UpdateX (int source, int dest);
   void UpdateY (int source, int dest);
-  void UpdateZ (int source, int dest);
-  bool UpToDate;
+  void UpdateZ (int source, int dest);  
+  void UpdateXPeriodic (int source, int dest);
+  void UpdateYPeriodic (int source, int dest);
+  void UpdateZPeriodic (int source, int dest);
+
+  bool UpToDate, Periodic;
 public:
   Array<TinyVector<double,8>,3> F;
 
@@ -93,12 +98,12 @@ public:
 
 
   inline void Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
-		    const Array<double,3> &init);
+		    const Array<double,3> &init, bool periodic=false);
 
   MyTricubicSpline(Grid *xgrid, Grid *ygrid, Grid *zgrid,
-		   const Array<double,3> &init)
+		   const Array<double,3> &init, bool periodic=false)
   {
-    Init (xgrid, ygrid, zgrid, init);
+    Init (xgrid, ygrid, zgrid, init, periodic);
   }
   MyTricubicSpline() : UpToDate(false) 
   { /* Do nothing. */ }
@@ -150,8 +155,9 @@ inline MyTricubicSpline& MyTricubicSpline::operator=(MyTricubicSpline a)
 
 
 inline void MyTricubicSpline::Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
-				    const Array<double,3> &init)
+				    const Array<double,3> &init, bool periodic)
 {
+  Periodic = periodic;
   Xgrid = xgrid; Nx = xgrid->NumPoints;
   Ygrid = ygrid; Ny = ygrid->NumPoints;
   Zgrid = zgrid; Nz = zgrid->NumPoints;
