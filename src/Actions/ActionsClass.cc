@@ -198,6 +198,8 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
   if (PathData.Path.LongRange){
     if (UseRPA)
       dULong = LongRangeRPA.d_dBeta (0, M, 0);
+    else if (PathData.Path.DavidLongRange)
+      dULong = DavidLongRange.d_dBeta(0,M,0);
     else
       dULong = LongRange.d_dBeta (0, M, 0);
   }
