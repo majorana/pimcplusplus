@@ -264,6 +264,34 @@
 //   { 0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  /// 11111111
 // };
 
+
+void 
+Isosurface::CubicFormula (double a, double b, double c, double d,
+			  double &x1, double &x2, double &x3)
+{
+  double A = b/a;
+  double B = c/a;
+  double C = d/a;
+  double Q = (A*A - 3.0*B)/9.0;
+  double R = (2.0*A*A*A - 9.0*A*B + 27.0*C)/54.0;
+  //cerr << "Q = " << Q << " R = " << R << "\n";
+  if ((R*R) < (Q*Q*Q)) {
+    double theta = acos(R/sqrt(Q*Q*Q));
+    double twosqrtQ = 2.0*sqrt(Q);
+    double third = 1.0/3.0;
+    double thirdA = third * A;
+    x1 = -twosqrtQ*cos(third*theta) - thirdA;
+    x2 = -twosqrtQ*cos(third*(theta + 2.0*M_PI)) - thirdA;
+    x3 = -twosqrtQ*cos(third*(theta - 2.0*M_PI)) - thirdA;
+  }
+  else {
+    cerr << "Complex roots detected in CubicFormula.\n";
+    exit(1);
+  }
+}
+
+
+
 Vec3
 Isosurface::FindEdge (int ix, int iy, int iz, int edgeNum)
 {

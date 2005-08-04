@@ -132,7 +132,7 @@ void VisualClass::MakeFrame(int frame)
     arrayRef.reference(NodeData(frame,Range::all(),Range::all(),Range::all()));
     Isosurface *isoPtr = new Isosurface;
     Isosurface &iso = *isoPtr;
-    iso.Init (&Xgrid, &Ygrid, &Zgrid, arrayRef);
+    iso.Init (&Xgrid, &Ygrid, &Zgrid, arrayRef, true);
     iso.SetIsoval(IsoAdjust.get_value());
     PathVis.Objects.push_back(isoPtr);
   }
@@ -295,7 +295,7 @@ VisualClass::VisualClass()
 
   // VisualClass OpenGL scene.
   // PathVis.set_size_request(400, 400);
-  PathVis.set_size_request(700, 700);
+  PathVis.set_size_request(800, 800);
 
 
   // VisualClass quit button.
