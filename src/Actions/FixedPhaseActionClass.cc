@@ -86,7 +86,8 @@ FixedPhaseClass::Action (int slice1, int slice2,
   }
   
   if (!(doUp || doDown))
-    perr << "Not doing either up or down.  Hmmm...\n";
+    perr << "Not doing either up or down.  Hmmm... " 
+	 << " speciesNum = " << speciesNum << endl;
 
   double action = 0.0;
   if (doUp) {
@@ -127,9 +128,6 @@ FixedPhaseClass::d_dBeta (int slice1, int slice2, int level,
   //     doDown = true;
   //   }
   
-  if (!(doUp || doDown))
-    perr << "Not doing either up or down.  Hmmm...\n";
-
   double dU = 0.0;
   if (doUp) {
     for (int link=slice1; link < slice2; link+=skip) 
