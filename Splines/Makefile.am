@@ -10,7 +10,7 @@ TestQuintic_SOURCES = TestQuintic.cc
 
 
 LDADD = ../IO/libciao.la libspline.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(FLIBS) 
-AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)
+AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
 
 noinst_LTLIBRARIES = libspline.la
 libspline_la_SOURCES = BicubicSpline.h                \

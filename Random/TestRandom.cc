@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 
   comm.SetWorld();
   RandomClass rand(comm);
-  rand.Init();
+  rand.Init(314159);
   int numLocal;
   if (comm.MyProc()==0) 
     numLocal = 4;
