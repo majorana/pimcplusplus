@@ -265,7 +265,7 @@
 // };
 
 
-void 
+int
 Isosurface::CubicFormula (double a, double b, double c, double d,
 			  double &x1, double &x2, double &x3)
 {
@@ -274,19 +274,26 @@ Isosurface::CubicFormula (double a, double b, double c, double d,
   double C = d/a;
   double Q = (A*A - 3.0*B)/9.0;
   double R = (2.0*A*A*A - 9.0*A*B + 27.0*C)/54.0;
+  const double third = 1.0/3.0;
+  const double thirdA = third * A;
   //cerr << "Q = " << Q << " R = " << R << "\n";
   if ((R*R) < (Q*Q*Q)) {
     double theta = acos(R/sqrt(Q*Q*Q));
     double twosqrtQ = 2.0*sqrt(Q);
-    double third = 1.0/3.0;
-    double thirdA = third * A;
     x1 = -twosqrtQ*cos(third*theta) - thirdA;
     x2 = -twosqrtQ*cos(third*(theta + 2.0*M_PI)) - thirdA;
     x3 = -twosqrtQ*cos(third*(theta - 2.0*M_PI)) - thirdA;
+    return 3;
   }
   else {
-    cerr << "Complex roots detected in CubicFormula.\n";
-    exit(1);
+    double sign = (R>0.0) ? 1.0 : -1.0;
+    double alpha = -sign*cbrt(fabs(R) + sqrt((R*R)-(Q*Q*Q)));
+    double beta = (alpha == 0.0) ? 0.0 : (Q/alpha);
+    x1 = (alpha + beta) - thirdA;
+    double check = a*(x1*x1*x1)+b*(x1*x1)+c*x1+d;
+    double maxcoef = max(fabs(a),max(fabs(b),max(fabs(c),fabs(d))));
+    assert (fabs(check) < (1e-12*maxcoef));
+    return 1;
   }
 }
 
@@ -295,7 +302,6 @@ Isosurface::CubicFormula (double a, double b, double c, double d,
 Vec3
 Isosurface::FindEdge (int ix, int iy, int iz, int edgeNum)
 {
-  Vec3 r1,r2;
   int ix1, ix2, iy1, iy2, iz1, iz2;
   int dim;
   dim = EdgeTable[edgeNum][0];
@@ -303,18 +309,38 @@ Isosurface::FindEdge (int ix, int iy, int iz, int edgeNum)
   iy1 = iy+EdgeTable[edgeNum][3];   iy2 = iy+EdgeTable[edgeNum][4];
   iz1 = iz+EdgeTable[edgeNum][5];   iz2 = iz+EdgeTable[edgeNum][6];
 
+  Vec3 r1((*Xgrid)(ix1),(*Ygrid)(iy1),(*Zgrid)(iz1));
+  Vec3 r2((*Xgrid)(ix2),(*Ygrid)(iy2),(*Zgrid)(iz2));
+  Vec3 delta  = r2-r1;
+  
   double v1  = F(ix1,iy1,iz1)[0] - Isoval; 
   double v2  = F(ix2,iy2,iz2)[0] - Isoval;
+
+  assert ((v1*v2) < 0.0);
+  double u;
   if (UseCubicInterp) {
-    double dv1 = F(ix1,iy1,iz1)[dim+1];
-    double dv2 = F(ix2,iy2,iz2)[dim+1];
+    double dvdu1 = F(ix1,iy1,iz1)[dim+1] * delta[dim];
+    double dvdu2 = F(ix2,iy2,iz2)[dim+1] * delta[dim];
+    double a, b, c, d, u1, u2, u3;
+    a = dvdu1 + dvdu2 + 2.0*(v1-v2);
+    b = 3.0*(v2-v1) - 2.0*dvdu1 - dvdu2;
+    c = dvdu1;
+    d = v1;
+    int numSols = CubicFormula (a, b, c, d, u1, u2, u3);
+    if (numSols == 1)
+      u = u1;
+    else if ((u1>=0.0) && (u1<=1.0))
+      u = u1;
+    else if ((u2>=0.0) && (u2<=1.0))
+      u = u2;
+    else 
+      u = u3;
+    assert ((u>=0.0) && (u<=1.0));
   }
-  else {  // Linear interpolation
-    r1[0]=(*Xgrid)(ix1); r1[1]=(*Ygrid)(iy1); r1[2]=(*Zgrid)(iz1);
-    r2[0]=(*Xgrid)(ix2); r2[1]=(*Ygrid)(iy2); r2[2]=(*Zgrid)(iz2);
-    double u = fabs(v2/(v2-v1));
-    return (u*r1+(1.0-u)*r2);
-  }
+  else   // Linear interpolation
+    u = fabs(v1/(v2-v1));
+  
+  return r1 + u*delta;
 }
 
 void
@@ -368,6 +394,7 @@ Isosurface::Set()
     }
   }
   glEnd();
+
   End();
 }
 
@@ -396,7 +423,7 @@ Isosurface::DrawPOV (FILE *fout, string rotString)
 	  if (triCounter == 0)
 	    fprintf (fout, "  smooth_triangle {\n");
 	  Vec3 vertex = FindEdge (ix, iy, iz, edge);
-	  Vec3 normal = Grad(vertex[0], vertex[1], vertex[2]);
+	  Vec3 normal = -1.0*Grad(vertex[0], vertex[1], vertex[2]);
 	  fprintf (fout, "    <%14.10f, %14.10f, %14.10f>, ",
 		   vertex[0], vertex[1], vertex[2]);
 	  fprintf (fout, " <%14.10f, %14.10f, %14.10f>",

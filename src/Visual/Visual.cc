@@ -135,6 +135,22 @@ void VisualClass::MakeFrame(int frame)
     iso.Init (&Xgrid, &Ygrid, &Zgrid, arrayRef, true);
     iso.SetIsoval(IsoAdjust.get_value());
     PathVis.Objects.push_back(isoPtr);
+    // HACK HACK HACK 
+    // Draw electron positions
+    for (int ptcl=16; ptcl<24; ptcl++) {
+      	SphereObject* sphere = new SphereObject;
+	dVec pos;
+	pos[0] = PathArray(frame, ptcl, 0, 0);
+ 	pos[1] = PathArray(frame, ptcl, 0, 1);
+ 	pos[2] = PathArray(frame, ptcl, 0, 2);
+	sphere->SetPos (pos);
+	if (ptcl == 16)
+	  sphere->SetColor (Vec3(0.9, 0.0, 0.9));
+	else
+	  sphere->SetColor (Vec3(0.0, 0.0, 0.9));
+	sphere->SetRadius(0.25);
+	PathVis.Objects.push_back(sphere);
+    }
   }
 }
 

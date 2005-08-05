@@ -24,6 +24,7 @@ SphereObject::Set()
   glTranslated (Pos[0], Pos[1], Pos[2]);
   gluSphere(qobj, Radius, 20, 20);
   glPopMatrix();
+  gluDeleteQuadric (qobj);
   End();
 }
 

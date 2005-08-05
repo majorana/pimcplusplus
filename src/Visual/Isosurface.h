@@ -14,6 +14,9 @@ class Isosurface : public MyTricubicSpline, public GLObject
 private:
   static int EdgeData[256][13];
   static int EdgeTable[12][7];
+  /// Returns the number of real solutions
+  int CubicFormula (double a, double b, double c, double d,
+		     double &x1, double &x2, double &x3);
   Vec3 FindEdge(int ix, int iy, int iz, int edgeNum);
   bool UseCubicInterp;
   bool UseNormals;
@@ -23,7 +26,7 @@ private:
 public:
   inline void SetIsoval (double val) { Isoval = val; Set(); }
   void DrawPOV(FILE* out, string rotMatrix);
-  Isosurface() : UseCubicInterp(false), UseNormals(true)
+  Isosurface() : UseCubicInterp(true), UseNormals(true)
   {
     Color[0] = 0.0; Color[1] = 0.8; Color[2] = 0.0;
   }
