@@ -1,9 +1,9 @@
-bin_PROGRAMS = pathvis
+bin_PROGRAMS = pathvis++
 
 LDADD = $(GTKMM_LIBS) $(GTKGLEXTMM_LIBS) $(COMMON_LIBS) $(GTS_LIBS)
 AM_CXXFLAGS = $(GTKMM_CFLAGS) $(GTKGLEXTMM_CFLAGS) $(COMMON_CFLAGS)\
               $(GTS_CFLAGS) -DPKG_DATA_DIR=\"$(pkgdatadir)/\"
-pathvis_SOURCES =       \
+pathvis___SOURCES =       \
     BoxClass.cc         \
     BoxClass.h          \
     BoxObject.cc        \

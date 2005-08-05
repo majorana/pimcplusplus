@@ -36,10 +36,10 @@ if test "x$enable_pathvis" = "xyes"; then
   if test "x$gtkglextmm_ok" != "xyes"; then
      AC_MSG_ERROR([gtkglextmm libraries missing.  Please install.])
   fi
-  PKG_CHECK_MODULES(GTS, gts, gts_ok=yes, gts_ok=no)
-  if test "x$gts_ok" != "xyes"; then
-     AC_MSG_ERROR([GTS libraries missing.  Please install. (http://gts.sourceforge.net)])
-  fi
+#  PKG_CHECK_MODULES(GTS, gts, gts_ok=yes, gts_ok=no)
+#  if test "x$gts_ok" != "xyes"; then
+#     AC_MSG_ERROR([GTS libraries missing.  Please install. (http://gts.sourceforge.net)])
+#  fi
   AC_CHECK_LIB([xvidcore],[decoder_create])
   AC_CHECK_LIB([revel],[main])
   AC_CHECK_LIB([glut],[glutSolidTeapot])
