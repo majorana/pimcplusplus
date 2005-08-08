@@ -10,6 +10,11 @@ AC_CONFIG_HEADER([config.h])
 AC_CANONICAL_HOST
 if test "x$host" = "xpowerpc-apple-darwin7.7.0"; then
    CPPFLAGS="-DMAC $CPPFLAGS"
+   CXXFLAGS="-O3 -mcpu=970 -mtun=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
+fi
+
+if test "x$host" = "xi686-pc-linux-gnu"; then
+   CXXFLAGS="-O3 -mtune=athlon-xp -march=athlon-xp -ffast-math -msse -m3dnow -g"
 fi
 
 # Checks for libraries.
