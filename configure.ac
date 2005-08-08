@@ -11,10 +11,14 @@ AC_CANONICAL_HOST
 if test "x$host" = "xpowerpc-apple-darwin7.7.0"; then
    CPPFLAGS="-DMAC $CPPFLAGS"
    CXXFLAGS="-O3 -mcpu=970 -mtun=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
+   F77FLAGS="-O3 -mcpu=970 -mtun=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
 fi
 
 if test "x$host" = "xi686-pc-linux-gnu"; then
-   CXXFLAGS="-O3 -mtune=athlon-xp -march=athlon-xp -ffast-math -msse -m3dnow -g"
+   AX_GCC_OPTION(TUNEOPT, [-mtune=athlon-xp test.c], [-mtune=athlon-xp], [-mtune=athlon])
+   AX_GCC_OPTION(ARCHOPT, [-march=athlon-xp test.c], [-march=athlon-xp], [-march=athlon])
+   CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -msse -m3dnow -g"
+   F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
 fi
 
 # Checks for libraries.
