@@ -21,6 +21,7 @@ private:
   bool HaveRefslice;
   int SpeciesNum;
   void ChooseTimeSlices();
+  StageClass* PermuteStage;
   //  void WriteRatio();
   //  ObservableDouble AcceptanceRatioVar;
 public:
