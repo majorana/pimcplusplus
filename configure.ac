@@ -15,8 +15,8 @@ if test "x$host" = "xpowerpc-apple-darwin7.7.0"; then
 fi
 
 if test "x$host" = "xi686-pc-linux-gnu"; then
-   AX_GCC_OPTION(TUNEOPT, [-mtune=athlon-xp test.c], [-mtune=athlon-xp], [-mcpu=athlon-xp])
-   AX_GCC_OPTION(ARCHOPT, [-march=athlon-xp test.c], [-march=athlon-xp], [-march=athlon])
+   AX_CC_OPTION(TUNEOPT, [-mtune=athlon-xp], [-mtune=athlon-xp], [-mcpu=athlon-xp])
+   AX_CC_OPTION(ARCHOPT, [-march=athlon-xp], [-march=athlon-xp], [-march=athlon])
    CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -msse -m3dnow -g"
    F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
 fi
