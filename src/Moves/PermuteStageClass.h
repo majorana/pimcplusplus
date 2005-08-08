@@ -65,6 +65,7 @@ private:
   ObservableVecInt1 AcceptanceTotalVar;
   Array<int,1> NumAccepted;
   Array<int,1> NumAttempted;
+  bool NeedToRebuildTable;
 public:
   /// This function will construct a new permutation if
   /// activeParticles is set to the array, [ -1 ];  In this case,
@@ -97,6 +98,7 @@ public:
     NumAttempted.resize(4);
     NumAccepted=0;
     NumAttempted=0;
+    NeedToRebuildTable=true;
   }
 };
 

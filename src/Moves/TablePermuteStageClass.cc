@@ -10,55 +10,68 @@ double TablePermuteStageClass::Sample(int &slice1,int &slice2,
 void TablePermuteStageClass::Accept()
 {
   int myLen=Forw->CurrentCycle.Length;
-  assert(myLen<=4);
-  assert(myLen>0);
+  //  assert(myLen<=4);
+  //  assert(myLen>0);
   NumAccepted(myLen-1)++;
   NumAttempted(myLen-1)++;
+  PermuteTableClass* temp;
+  if (myLen!=1){
+    temp=Forw;
+    Forw=Rev;
+    Rev=temp;
+  }
+  NeedToRebuildTable=false;
 }
 
 void TablePermuteStageClass::Reject()
 {
   int myLen=Forw->CurrentCycle.Length;
-  assert(myLen<=4);
-  assert(myLen>0);
+  //  assert(myLen<=4);
+  //  assert(myLen>0);
   NumAttempted(myLen-1)++;
+  NeedToRebuildTable=false;
 
 }
 
+
 void TablePermuteStageClass::WriteRatio()
 {
-  Array<int,1> numAttemptTotal(4);
-  Array<int,1> numAcceptTotal(4);
-  Array<double,1> ratioTotal(4);
-  int totalAttempts=0;
-  PathData.Path.Communicator.Sum(NumAttempted,numAttemptTotal);
-  PathData.Path.Communicator.Sum(NumAccepted,numAcceptTotal);
-  for (int len=0;len<4;len++){
-    totalAttempts=totalAttempts+numAcceptTotal(len);
-    if (numAttemptTotal(len)!=0)
+//   cerr<<"Writing my permtute stage ratio"<<PathData.Path.Communicator.MyProc()<<endl;
+//   Array<int,1> numAttemptTotal(4);
+//   Array<int,1> numAcceptTotal(4);
+//   Array<double,1> ratioTotal(4);
+//   int totalAttempts=0;
+//   cerr<<"A"<<endl;
+//   PathData.Path.Communicator.Sum(NumAttempted,numAttemptTotal);
+//   cerr<<"A2"<<endl;
+//   PathData.Path.Communicator.Sum(NumAccepted,numAcceptTotal);
+//   for (int len=0;len<4;len++){
+//     totalAttempts=totalAttempts+numAcceptTotal(len);
+//     if (numAttemptTotal(len)!=0)
 
-      ratioTotal(len)=(double)numAcceptTotal(len)/((double)numAttemptTotal(len));
-    else
-      ratioTotal(len)=0.0;
-  }
-      ///divides by 2because accept gets called twice in acepting stages
-  for (int i=0;i<numAttemptTotal.size();i++)
-    numAttemptTotal(i)=(int)(numAttemptTotal(i)/2);
-      
+//       ratioTotal(len)=(double)numAcceptTotal(len)/((double)numAttemptTotal(len));
+//     else
+//       ratioTotal(len)=0.0;
+//   }
+//   cerr<<"B"<<endl;
+//       ///divides by 2because accept gets called twice in acepting stages
+//   for (int i=0;i<numAttemptTotal.size();i++)
+//     numAttemptTotal(i)=(int)(numAttemptTotal(i)/2);
+//   cerr<<"C"<<endl;
  
-  if (totalAttempts!=0){
-    AcceptanceRatioVar.Write(ratioTotal);
-    AcceptanceTotalVar.Write(numAttemptTotal);
-    NumAttempted=0;
-    NumAccepted=0;
-  }
-  
+//   if (totalAttempts!=0){
+//     AcceptanceRatioVar.Write(ratioTotal);
+//     AcceptanceTotalVar.Write(numAttemptTotal);
+//     NumAttempted=0;
+//     NumAccepted=0;
+//   }
+//   cerr<<"out of my permute stage ratio"<<endl;
 
 }
 
 void TablePermuteStageClass::InitBlock()
 {
-
+  NeedToRebuildTable=true;
 
 }
 
@@ -119,15 +132,17 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
     if ((PathData.Path.OpenPaths && slice1<=PathData.Path.OpenLink && 
 	PathData.Path.OpenLink<=slice2) || 
 	(PathData.Path.OpenLink==PathData.Path.NumTimeSlices()-1 &&
-	 (slice1==0 || slice2==0)))
-      Forw->ConstructCycleTable(SpeciesNum, slice1, slice2,
-				PathData.Path.OpenPtcl);
-    
-    else
-      Forw->ConstructCycleTable(SpeciesNum, slice1, slice2);
+	 (slice1==0 || slice2==0))){
+      if (NeedToRebuildTable)
+	Forw->ConstructCycleTable(SpeciesNum, slice1, slice2,
+				  PathData.Path.OpenPtcl);
+    }
+    else {
+      if (NeedToRebuildTable)
+	Forw->ConstructCycleTable(SpeciesNum, slice1, slice2);
     //    cerr<<"Time slices chosen"<<endl;
     //    sleep(10);
-
+    }
     int NumPerms = 0;
     // Choose a permutation cycle
     double forwT = Forw->AttemptPermutation();

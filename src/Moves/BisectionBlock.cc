@@ -14,7 +14,7 @@
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
   string permuteType, speciesName;
-  StageClass *permuteStage;
+  //  StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
@@ -29,20 +29,20 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
-    permuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels,
+    PermuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels,
 					      OutSection);
   else if (permuteType=="COUPLE")
-    permuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,
+    PermuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,
 					       OutSection);
   else if (permuteType == "NONE") 
-    permuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
+    PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
 					   OutSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);
   }
-  permuteStage->Read (in);
-  Stages.push_back (permuteStage);
+  PermuteStage->Read (in);
+  Stages.push_back (PermuteStage);
   
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
@@ -82,7 +82,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   }
 
   // Add the second stage of the permutation step
-  Stages.push_back (permuteStage);
+  Stages.push_back (PermuteStage);
 
 //   ///HACK! Addding a stage that will reject the move if the structure
 //   //factor gets too large
@@ -97,6 +97,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 
 void BisectionBlockClass::ChooseTimeSlices()
 {
+  //  if (PathData.Path.Communicator.MyProc()==0)
+    //    cerr<<"Choosing time slices"<<endl;
   PathClass &Path = PathData.Path;
   int myProc = PathData.Path.Communicator.MyProc();
   // do something special to avoid moving reference slice
@@ -154,10 +156,14 @@ void BisectionBlockClass::ChooseTimeSlices()
     Slice1 = PathData.Path.Random.LocalInt (numLeft);
     Slice2 = Slice1+sliceSep;
   }
+  //  if (PathData.Path.Communicator.MyProc()==0)
+    //    cerr<<"Ending Choosing time slices"<<endl;
 }
 
 void BisectionBlockClass::MakeMove()
 {
+  // if (PathData.Path.Communicator.MyProc()==0)
+  //    cerr<<"Entering Bisection Block class "<<PathData.Path.Communicator.MyProc()<<endl;
   //  perr << "BisectionBlock MakeMove.\n";
   //  cerr<<"Starting my bisection block"<<endl;
   ChooseTimeSlices();
@@ -165,17 +171,20 @@ void BisectionBlockClass::MakeMove()
   PathData.MoveJoin(Slice2);
   //  cerr<<"Moving Join"<<endl;
   //  sleep(10);
-  
+  ((PermuteStageClass*)PermuteStage)->InitBlock();
   ActiveParticles.resize(1);
   for (int step=0; step<StepsPerBlock; step++) {
-    //    cerr<<"Step number "<<step<<endl;
+    //    if (PathData.Path.Communicator.MyProc()==0)
+    //      cerr<<"Step number "<<step<<endl;
     //    sleep(10);
     ActiveParticles(0)=-1;
     MultiStageClass::MakeMove();
-    //    cerr<<"Step number "<<step<<" done"<<endl;
+    //    if (PathData.Path.Communicator.MyProc()==0)
+    //      cerr<<"Step number "<<step<<" done"<<endl;
     //    sleep(10);
   }
   //  cerr<<"Ending my bisection block"<<endl;
   //  sleep(10);
-  
+  //  if (PathData.Path.Communicator.MyProc()==0)
+  //    cerr<<"Exiting Bisection Stage Class "<<PathData.Path.Communicator.MyProc()<<endl;
 }
