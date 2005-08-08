@@ -7,19 +7,6 @@ AM_INIT_AUTOMAKE(libcommon, 1.0)
 AC_CONFIG_SRCDIR([Blitz.h])
 AC_CONFIG_HEADER([config.h])
 
-AC_CANONICAL_HOST
-if test "x$host" = "xpowerpc-apple-darwin7.7.0"; then
-   CPPFLAGS="-DMAC $CPPFLAGS"
-   CXXFLAGS="-O3 -mcpu=970 -mtun=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
-   F77FLAGS="-O3 -mcpu=970 -mtun=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
-fi
-
-if test "x$host" = "xi686-pc-linux-gnu"; then
-   AX_CC_OPTION(TUNEOPT, [-mtune=athlon-xp], [-mtune=athlon-xp], [-mcpu=athlon-xp])
-   AX_CC_OPTION(ARCHOPT, [-march=athlon-xp], [-march=athlon-xp], [-march=athlon])
-   CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -msse -m3dnow -g"
-   F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
-fi
 
 # Checks for libraries.
 # this creates and AC_SUBST's vars BLITZ_CFLAGS and BLITZ_LIBS
@@ -61,6 +48,23 @@ AC_PROG_CC
 AC_PROG_F77
 AC_F77_LIBRARY_LDFLAGS
 AC_PROG_LIBTOOL
+
+# Optimization settings.
+AC_CANONICAL_HOST
+AC_MSG_CHECKING([host cpu = ])
+AC_MSG_RESULT([${host_cpu}])
+case "${host_cpu}" in
+   "powerpc")
+      CPPFLAGS="-DMAC $CPPFLAGS"
+      CXXFLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
+      F77FLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
+
+   "i686")
+      AX_CC_OPTION(TUNEOPT, [-mtune=athlon-xp], [-mtune=athlon-xp], [-mcpu=athlon-xp])
+      AX_CC_OPTION(ARCHOPT, [-march=athlon-xp], [-march=athlon-xp], [-march=athlon])
+      CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -msse -m3dnow -g"
+      F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g";;
+esac
 
 # Checks if we want MPI support
 AC_ARG_ENABLE(mpi,    [  --enable-mpi              enable MPI support (default=no)])
