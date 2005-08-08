@@ -24,8 +24,8 @@ double ShortRangeClass::Action (int slice1, int slice2,
   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
     Path.DoPtcl(ptcl)=true;
   double TotalU = 0.0;
-  Array<double,1> TotalUArray(PathData.Path.TotalNumSlices);
-  TotalUArray=0.0;
+//   Array<double,1> TotalUArray(PathData.Path.TotalNumSlices);
+//   TotalUArray=0.0;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
@@ -65,7 +65,7 @@ double ShortRangeClass::Action (int slice1, int slice2,
 	    //		 << " ptcl2=" << ptcl2 << " slice="<< slice << endl;
 
 	  TotalU += U;
-	  TotalUArray(slice)+=U;
+// 	  TotalUArray(slice)+=U;
 	}
       }
     }
