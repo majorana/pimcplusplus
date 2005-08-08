@@ -6,10 +6,7 @@ AM_INIT_AUTOMAKE(pimc, 1.0)
 AC_CONFIG_SRCDIR([src/PathClass.h])
 AC_CONFIG_HEADER([config.h])
 
-AC_CANONICAL_HOST
-if test "x$host" = "xpowerpc-apple-darwin7.7.0"; then
-   CPPFLAGS="-DMAC $CPPFLAGS"
-fi
+
 
 PKG_CHECK_MODULES(COMMON, common, common_ok=yes, common_ok=no)
 
@@ -23,6 +20,24 @@ AC_CHECK_HEADERS([stdlib.h sys/time.h unistd.h])
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_LIBTOOL
+
+
+AC_CANONICAL_HOST
+AC_MSG_CHECKING([host cpu = ])
+AC_MSG_RESULT([${host_cpu}])
+case "${host_cpu}" in
+   "powerpc")
+      CPPFLAGS="-DMAC $CPPFLAGS"
+      CXXFLAGS="-O3 -mcpu=970 -mtun=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
+      F77FLAGS="-O3 -mcpu=970 -mtun=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
+
+   "i686")
+      AX_CC_OPTION(TUNEOPT, [-mtune=athlon-xp], [-mtune=athlon-xp], [-mcpu=athlon-xp])
+      AX_CC_OPTION(ARCHOPT, [-march=athlon-xp], [-march=athlon-xp], [-march=athlon])
+      CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -msse -m3dnow -g"
+      F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g";;
+esac
+
 
 # Optionally compile visual
 AC_ARG_ENABLE(pathvis, [  --enable-pathvis         compile path visualization GUI])
