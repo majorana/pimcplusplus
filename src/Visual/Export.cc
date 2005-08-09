@@ -271,6 +271,7 @@ ExportClass::ExportMovie (string basename,
   // Data Setup //
   ////////////////
   Array<double,4> &PathArray = Visual.PathArray;
+  Array<double,4> &NodeData = Visual.NodeData;
   int numPaths = Visual.PathArray.extent(0) - 1;
   LinearGrid tGrid (0.0, (double)(numPaths-1), numPaths);
   CubicSpline interpSpline;
@@ -298,7 +299,19 @@ ExportClass::ExportMovie (string basename,
 	  Visual.Tail(numPaths, dim) = 
 	    interpSpline((double)frame/(double)interpFactor+firstFrame);
 	}
-      
+    
+    /// Interpolate node data
+    for (int ix=0; ix<NodeData.extent(0); ix++)
+      for (int iy=0; iy<NodeData.extent(1); iy++)
+	for (int iz=0; iz<NodeData.extent(2); iz++) {
+	  for (int path=0; path<numPaths; path++) 
+	    pathData(path) = NodeData(path,ix,iy,iz);
+	  interpSpline.Init(&tGrid,pathData);
+	  // Put interpolation in last slice
+	  NodeData(numPaths, ix, iy, iz) =
+	    interpSpline((double)frame/(double)interpFactor+firstFrame);
+	}
+
     /// Now, create image from interpolated frame
     MakePixmap(numPaths);
     Glib::RefPtr<Gdk::Image> image = GdkPixmap->get_image(0,0,Width,Height);
