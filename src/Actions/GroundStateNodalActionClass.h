@@ -72,6 +72,8 @@ public:
   void RejectCopy (int slice1, int slice2);
   void Init();
   bool IsGroundState();
+  NodeType Type();
+
 
   GroundStateNodalActionClass (PathDataClass &pathData, GroundStateClass &GS,
 			       int speciesNum) :

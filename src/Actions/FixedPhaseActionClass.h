@@ -74,6 +74,7 @@ public:
   void RejectCopy (int slice1, int slice2);
   void Init();
   bool IsGroundState();
+  NodeType Type();
 
   FixedPhaseActionClass (PathDataClass &pathData, FixedPhaseClass &FP,
 			 int speciesNum) :

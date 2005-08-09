@@ -608,3 +608,10 @@ FixedPhaseActionClass::IsGroundState()
 {
   return true;
 }
+
+
+NodeType
+FixedPhaseActionClass::Type()
+{
+  return GROUND_STATE_FP;
+}

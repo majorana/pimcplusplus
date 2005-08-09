@@ -6,6 +6,8 @@
 
 class PathClass;
 
+typedef enum { FREE_PARTICLE, GROUND_STATE, GROUND_STATE_FP } NodeType;
+
 class NodalActionClass : public ActionBaseClass
 {
 public:
@@ -16,6 +18,7 @@ public:
   virtual void RejectCopy (int slice1, int slice2);
   virtual void Init();
   virtual bool IsGroundState() = 0;
+  virtual NodeType Type() = 0;
   NodalActionClass (PathDataClass &pathData) :
     ActionBaseClass (pathData)
   {
@@ -76,6 +79,7 @@ public:
   //  Array<double,2> GetMatrix(int slice);
   void Read (IOSectionClass &in);
   bool IsGroundState();
+  NodeType Type();
   FreeNodalActionClass (PathDataClass &pathData, int speciesNum);
 };
 

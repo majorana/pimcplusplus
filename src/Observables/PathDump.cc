@@ -16,7 +16,7 @@ void PathDumpClass::Read(IOSectionClass &in)
   DumpNodes = in.OpenSection("NodeDump");
   if (DumpNodes) {
     assert(in.ReadVar("Ptcl", NodePtcl));
-    assert(in.ReadVar("NodeSlice", NodeSlice));
+    assert(in.ReadVar("Slice", NodeSlice));
     int nx, ny, nz;
     assert(in.ReadVar("Nx", nx));
     assert(in.ReadVar("Ny", ny));
@@ -26,6 +26,8 @@ void PathDumpClass::Read(IOSectionClass &in)
     Ygrid.Init(-0.5*box[1], 0.5*box[1], ny);
     Zgrid.Init(-0.5*box[2], 0.5*box[2], nz);
     if (PathData.Path.Communicator.MyProc()==0) {
+      IOSection.WriteVar("NodeSlice", NodeSlice);
+      IOSection.WriteVar("NodePtcl", NodePtcl);
       IOSection.NewSection("Xgrid");
       Xgrid.Write(IOSection);
       IOSection.CloseSection();
@@ -50,8 +52,9 @@ void PathDumpClass::WriteBlock()
   int refSave = PathData.Path.GetRefSlice();
   PathData.MoveRefSlice(0);
 
-  if (DumpNodes)
+  if (DumpNodes) 
     NodeDump();
+
 
   if (PathData.Path.OpenPaths){
     Array<double,1> tailLoc(NDIM);
@@ -128,6 +131,21 @@ void PathDumpClass::WriteBlock()
 void
 PathDumpClass::NodeDump()
 {
+  int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
+  if (PathData.Actions.NodalActions(speciesNum) != NULL) {
+    NodeType nodeType = PathData.Actions.NodalActions(speciesNum)->Type();
+    if (nodeType == GROUND_STATE)
+      GroundStateNodeDump();
+    else if (nodeType == GROUND_STATE_FP)
+      FixedPhaseNodeDump();
+    else if (nodeType == FREE_PARTICLE)
+      FreeParticleNodeDump();
+  }
+}
+
+void
+PathDumpClass::FixedPhaseNodeDump()
+{
   int nx = Xgrid.NumPoints;
   int ny = Ygrid.NumPoints;
   int nz = Zgrid.NumPoints;
@@ -148,6 +166,68 @@ PathDumpClass::NodeDump()
 	newPos[2] = Zgrid(iz);
 	Path(NodeSlice,NodePtcl) = newPos;
 	nodeDump(ix,iy,iz) = log10(FP.CalcGrad2(NodeSlice));
+      }
+    }
+  }
+  Path(NodeSlice,NodePtcl) = savePos;
+  NodeVar.Write(nodeDump);
+}
+
+
+void
+PathDumpClass::GroundStateNodeDump()
+{
+  int nx = Xgrid.NumPoints;
+  int ny = Ygrid.NumPoints;
+  int nz = Zgrid.NumPoints;
+
+  Array<double,3> nodeDump(nx,ny,nz);
+  int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
+  GroundStateNodalActionClass &GS = 
+    *((GroundStateNodalActionClass*)PathData.Actions.NodalActions(speciesNum));
+
+  PathClass &Path = PathData.Path;
+  dVec savePos = Path(NodeSlice,NodePtcl);
+  dVec newPos;
+  for (int ix=0; ix<nx; ix++) {
+    newPos[0] = Xgrid(ix);
+    for (int iy=0; iy<ny; iy++) {
+      newPos[1] = Ygrid(iy);
+      for (int iz=0; iz<nz; iz++) {
+	newPos[2] = Zgrid(iz);
+	Path(NodeSlice,NodePtcl) = newPos;
+	nodeDump(ix,iy,iz) = GS.Det(NodeSlice);
+      }
+    }
+  }
+  Path(NodeSlice,NodePtcl) = savePos;
+  NodeVar.Write(nodeDump);
+}
+
+
+void
+PathDumpClass::FreeParticleNodeDump()
+{
+  int nx = Xgrid.NumPoints;
+  int ny = Ygrid.NumPoints;
+  int nz = Zgrid.NumPoints;
+
+  Array<double,3> nodeDump(nx,ny,nz);
+  int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
+  FreeNodalActionClass &GS = 
+    *((FreeNodalActionClass*)PathData.Actions.NodalActions(speciesNum));
+
+  PathClass &Path = PathData.Path;
+  dVec savePos = Path(NodeSlice,NodePtcl);
+  dVec newPos;
+  for (int ix=0; ix<nx; ix++) {
+    newPos[0] = Xgrid(ix);
+    for (int iy=0; iy<ny; iy++) {
+      newPos[1] = Ygrid(iy);
+      for (int iz=0; iz<nz; iz++) {
+	newPos[2] = Zgrid(iz);
+	Path(NodeSlice,NodePtcl) = newPos;
+	nodeDump(ix,iy,iz) = GS.Det(NodeSlice);
       }
     }
   }

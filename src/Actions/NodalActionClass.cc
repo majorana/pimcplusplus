@@ -827,6 +827,11 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
   return uNode/(double)Path.TotalNumSlices;
 }
 
+NodeType FreeNodalActionClass::Type()
+{
+  return FREE_PARTICLE;
+}
+
 
 bool
 FreeNodalActionClass::IsGroundState()

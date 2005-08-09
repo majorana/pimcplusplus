@@ -20,6 +20,9 @@ private:
   int  NodeSlice;
   LinearGrid Xgrid, Ygrid, Zgrid;
   void NodeDump();
+  void FreeParticleNodeDump();
+  void GroundStateNodeDump();
+  void FixedPhaseNodeDump();
 public:
   int TimesCalled;
   void Accumulate();

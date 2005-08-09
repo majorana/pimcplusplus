@@ -683,3 +683,10 @@ GroundStateNodalActionClass::IsGroundState()
 {
   return true;
 }
+
+
+NodeType
+GroundStateNodalActionClass::Type()
+{
+  return GROUND_STATE;
+}
