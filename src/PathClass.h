@@ -99,7 +99,7 @@ private:
   void ShiftRho_kData(int sliceToShift);
 public:
   /// Stores the position of the reference slice w.r.t. time slice 0
-  /// on this processor
+  /// on processor 0.
   int RefSlice;
 
   Mirrored1DClass<int> Permutation;
@@ -287,7 +287,7 @@ PathClass::NumTimeSlices()
 }
 
 /// Returns the position of the reference slice w.r.t. slice 0 on this
-/// processor.  
+/// processor 0.
 inline int 
 PathClass::GetRefSlice() const
 {
