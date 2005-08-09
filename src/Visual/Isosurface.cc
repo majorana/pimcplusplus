@@ -346,6 +346,8 @@ Isosurface::FindEdge (int ix, int iy, int iz, int edgeNum)
 void
 Isosurface::Set()
 {
+  if (!UpToDate)
+    Update();
   Start();
   float fcolor[4];
   fcolor[0] = Color[0];

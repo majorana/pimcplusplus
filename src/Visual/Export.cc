@@ -290,7 +290,7 @@ ExportClass::ExportMovie (string basename,
 	    interpSpline((double)frame/(double)interpFactor+firstFrame);
 	}
     }
-    if (Visual.OpenPtcl(frame)!=-1)
+    if (Visual.OpenPtcl(0)!=-1)
 	for (int dim=0; dim<3; dim++) {
 	  for (int path=0; path<numPaths; path++) 
 	    pathData(path) = Visual.Tail(path, dim);
