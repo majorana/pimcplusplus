@@ -94,7 +94,9 @@ MyTricubicSpline::UpdateXPeriodic(int source, int dest)
   
   for (int iy=0; iy<Ny; iy++) 
     for (int iz=0; iz<Nz; iz++) {
-      assert (F(0,iy,iz)[source] == F(M,iy,iz)[source]);
+      // Make sure first and last values are identical
+      F(0,iy,iz)[source] = F(M,iy,iz)[source];
+	
       // Setup lambdas, mus, and d's
       lambda(0) = 0.5*(x(1)-x(0))/(x(M)-x(M-2));
       mu(0)     = 0.5-lambda(0);
@@ -204,7 +206,7 @@ MyTricubicSpline::UpdateYPeriodic(int source, int dest)
   
   for (int ix=0; ix<Nx; ix++) 
     for (int iz=0; iz<Nz; iz++) {
-      assert (F(ix,0,iz)[source] == F(ix,M,iz)[source]);
+      F(ix,M,iz)[source] = F(ix,0,iz)[source];
   
       // Setup lambdas, mus, and d's
       lambda(0) = 0.5*(y(1)-y(0))/(y(M)-y(M-2));
@@ -316,7 +318,7 @@ MyTricubicSpline::UpdateZPeriodic(int source, int dest)
   
   for (int ix=0; ix<Nx; ix++) 
     for (int iy=0; iy<Nz; iy++) {
-      assert (F(ix,iy,0)[source] == F(ix,iy,M)[source]);
+      F(ix,iy,M)[source] = F(ix,iy,0)[source];
   
       // Setup lambdas, mus, and d's
       lambda(0) = 0.5*(z(1)-z(0))/(z(M)-z(M-2));
