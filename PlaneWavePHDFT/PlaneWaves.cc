@@ -165,7 +165,7 @@ SystemClass::Setk(Vec3 k)
 {
   GVecs.Set (Box, k, kCut);
   FFT.Setup();
-  H.SetIonPot (*PH, UseFFT);
+  //  H.SetIonPot (*PH, UseFFT);
   H.Setk(k);
   H.SetIons(Rions);
   Bands.resize (NumBands, GVecs.size());

@@ -259,10 +259,21 @@ void
 kSpacePH::GetVals (double dGmag, double &aVal, 
 		   double &bPerpVal, double &bParVal, double &VVal)
 {
-  aVal     = a(dGmag);
-  bPerpVal = bPerp(dGmag);
-  bParVal  = bPar (dGmag);
-  VVal     = Vk (dGmag);
+  map<double,kMapPoint,FuzzyLess>::iterator iter=kMap.find(dGmag);
+  if (iter == kMap.end()) {
+    aVal     = a(dGmag);
+    bPerpVal = bPerp(dGmag);
+    bParVal  = bPar (dGmag);
+    VVal     = Vk (dGmag);
+    kMap[dGmag] = kMapPoint(aVal, bPerpVal, bParVal, VVal);
+    cerr << "Adding new val.  Map size = " << kMap.size() << endl;
+  }
+  else {
+    aVal     = (*iter).second.a;
+    bPerpVal = (*iter).second.bPerp;
+    bParVal  = (*iter).second.bPar;
+    VVal     = (*iter).second.V;
+  }
 }
 
 double 

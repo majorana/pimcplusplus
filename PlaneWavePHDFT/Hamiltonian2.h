@@ -137,6 +137,7 @@ public:
   void Setup();
   void SetIons (const Array<Vec3, 1>& rions);
   void Vmatrix (Array<complex<double>,2> &vmat);
+  void Setk(Vec3 k);
 
   void Apply (const zVec &c, zVec &Hc);
   PHPotFFTClass (Potential &ph, GVecsClass &gvecs, FFTBox &fft) :

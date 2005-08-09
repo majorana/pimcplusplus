@@ -5,12 +5,51 @@
 
 #include "PotentialBase.h"
 #include <vector>
+#include <map>
 
 class kCachePoint
 {
 public:
   double a, bPerp, bPar, V, k;
 };
+
+struct kMapPoint
+{
+  double a, bPerp, bPar, V;
+  kMapPoint(double aVal, double bPerpVal, double bParVal, double VVal)
+  {
+    a = aVal; bPerp=bPerpVal; bPar=bParVal; V=VVal;
+  }
+  kMapPoint() {}
+};
+
+struct FuzzyLess
+{
+  bool operator()(const double v1, const double v2) const
+  {
+    return ((v1+1.0e-12)<v2);
+  }
+};
+
+// class FuzzyDouble
+// {
+// private:
+//   static const Tolerance=1.0e-12;
+//   double val;
+// public:
+//   inline bool operator==(FuzzyDouble b) const
+//   { return (fabs(val-b)<Tolerance); }
+//   inline bool operator!=(FuzzyDouble b) const
+//   { return (fabs(val-b)>=Tolerance); }
+//   inline bool operator<(FuzzyDouble b) const
+//   { return ((val+Tolerance)<b); }
+//   inline operator=(double b)
+//   { val = b; }
+//   inline double operator(double)()
+//   { return val; }
+// };
+
+
 
 class kSpacePH;
 
@@ -38,6 +77,7 @@ class kSpacePH
 {
 protected:
   friend class kCache;
+  map<double,kMapPoint,FuzzyLess> kMap;
   Potential &PH;
   /// The tail is fit to the potential to the form: 
   /// V = Ctail/r + Ctail2/r^2 + Ctail3/r^3

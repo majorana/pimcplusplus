@@ -320,6 +320,7 @@ PHPotFFTClass::SetupkPotentials()
 
   double volInv = 1.0/GVecs.GetBoxVol();
   // Setup V and F tensors in k-space
+  //  double gMag, lastMag2;
   double gMag, lastMag2;
   lastMag2 = -1.0;
   double a, bPerp, bPar, V;
@@ -394,6 +395,27 @@ PHPotFFTClass::Setup()
   IsSetup = true;
 }
   
+void
+PHPotFFTClass::Setk (Vec3 k)
+{
+  kPoint = k;
+  VecFFT.Setup();
+  MatFFT.Setup();
+  
+  int nx, ny, nz;
+  MatFFT.GetDims(nx,ny,nz);
+  Fr.resize(nx,ny,nz);
+  Vr.resize(nx,ny,nz);
+  Gc.resize(GVecs.size());
+  Vc.resize(GVecs.size());
+  Vk.resize(GVecs.DeltaSize());
+  Fk.resize(GVecs.DeltaSize());
+
+  SetupkPotentials();
+  SetIons(Rions);
+}
+
+
 void 
 PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
 {
