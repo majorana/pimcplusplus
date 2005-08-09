@@ -13,6 +13,9 @@ public:
   double a, bPerp, bPar, V, k;
 };
 
+/// This just stores the fourier transforms of the pseudeohamiltonian
+/// functions for a single k point.  Used for caching these values in
+/// an STL map.
 struct kMapPoint
 {
   double a, bPerp, bPar, V;
@@ -23,6 +26,10 @@ struct kMapPoint
   kMapPoint() {}
 };
 
+/// This is a simple replacement for the "less than" operator to be
+/// used in the map cache of fourier transforms.  It essentially says
+/// that two doubles are the same if they are within 1e-12 of each
+/// other. 
 struct FuzzyLess
 {
   bool operator()(const double v1, const double v2) const
@@ -31,28 +38,12 @@ struct FuzzyLess
   }
 };
 
-// class FuzzyDouble
-// {
-// private:
-//   static const Tolerance=1.0e-12;
-//   double val;
-// public:
-//   inline bool operator==(FuzzyDouble b) const
-//   { return (fabs(val-b)<Tolerance); }
-//   inline bool operator!=(FuzzyDouble b) const
-//   { return (fabs(val-b)>=Tolerance); }
-//   inline bool operator<(FuzzyDouble b) const
-//   { return ((val+Tolerance)<b); }
-//   inline operator=(double b)
-//   { val = b; }
-//   inline double operator(double)()
-//   { return val; }
-// };
-
 
 
 class kSpacePH;
 
+
+/// Deprecated.  We use the STL map instead.
 class kCache
 {
 protected:
