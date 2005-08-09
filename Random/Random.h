@@ -87,21 +87,19 @@ public:
  
   void Init(int seed, int numClones=1)
   {
-    cerr<<"I am "<<MyComm.MyProc()<<endl;
-    cerr<<"I'm initing now"<<endl;
     NumClones=numClones;
     int myProc=MyComm.MyProc();
     int numProcs=MyComm.NumProcs();
     int procsPerClone=numProcs/NumClones;
     CloneNumber=myProc/procsPerClone;
     int commID=numProcs+CloneNumber;
-    cerr<<"my data is "
-	<<"my proc: "<<myProc<<" "
-	<<"num clones: "<<NumClones<<" "
-	<<"num procs: "<<numProcs<<" "
-	<<"procs per clone: "<<procsPerClone<<" "
-	<<"clone number: "<<CloneNumber<<" "
-	<<"commID: "<<commID<<endl;
+//     cerr<<"my data is "
+// 	<<"my proc: "<<myProc<<" "
+// 	<<"num clones: "<<NumClones<<" "
+// 	<<"num procs: "<<numProcs<<" "
+// 	<<"procs per clone: "<<procsPerClone<<" "
+// 	<<"clone number: "<<CloneNumber<<" "
+// 	<<"commID: "<<commID<<endl;
     ///LocalStream is a stream of random numbers unique to the node
     LocalStream = 
       init_sprng(SPRNG_DEFAULT, myProc,numProcs+NumClones,seed,SPRNG_DEFAULT);

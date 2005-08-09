@@ -192,15 +192,9 @@ CommunicatorClass::Subset (Array<int,1> &ranks,
 			   CommunicatorClass &newComm)
 {
   MPI_Group myGroup, newGroup;
-  cerr << "before MPI_Comm_group\n";
   MPI_Comm_group (MPIComm, &myGroup);
-  cerr << "MPI_Group_incl\n";
   MPI_Group_incl(myGroup, ranks.size(), ranks.data(), &newGroup);
-  cerr << "before  MPI_Comm_create\n";
-  cerr << "ranks = " << ranks << endl;
   MPI_Comm_create(MPIComm, newGroup, &(newComm.MPIComm));
-  cerr << "Subset communicator = " << newComm.MPIComm << endl;
-  cerr << "after  MPI_Comm_create\n";
 }
 
 
