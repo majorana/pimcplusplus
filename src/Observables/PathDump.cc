@@ -79,6 +79,10 @@ void PathDumpClass::WriteBlock()
   if (myProc == 0)
     pathArray.resize(numPtcls,totalSlices,NDIM);
   while (slicesLeft > maxShift) {
+    int relNodeSlice = NodeSlice - offset;
+    if ((relNodeSlice>=0) && (relNodeSlice<Path.NumTimeSlices())
+	&& (myProc == 0))
+      NodeDump ();
     // First copy
     PathData.MoveJoin(maxShift);
     if (myProc == 0)
@@ -150,13 +154,17 @@ PathDumpClass::FixedPhaseNodeDump()
   int ny = Ygrid.NumPoints;
   int nz = Zgrid.NumPoints;
 
+  PathClass &Path = PathData.Path;
   Array<double,3> nodeDump(nx,ny,nz);
   int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
   FixedPhaseActionClass &FP = 
     *((FixedPhaseActionClass*)PathData.Actions.NodalActions(speciesNum));
 
-  PathClass &Path = PathData.Path;
-  dVec savePos = Path(NodeSlice,NodePtcl);
+  int relNodeSlice = NodeSlice + Path.GetRefSlice();
+  if (relNodeSlice > Path.TotalNumSlices)
+    relNodeSlice -= Path.TotalNumSlices;
+
+  dVec savePos = Path(relNodeSlice,NodePtcl);
   dVec newPos;
   for (int ix=0; ix<nx; ix++) {
     newPos[0] = Xgrid(ix);
@@ -164,12 +172,12 @@ PathDumpClass::FixedPhaseNodeDump()
       newPos[1] = Ygrid(iy);
       for (int iz=0; iz<nz; iz++) {
 	newPos[2] = Zgrid(iz);
-	Path(NodeSlice,NodePtcl) = newPos;
-	nodeDump(ix,iy,iz) = log10(FP.CalcGrad2(NodeSlice));
+	Path(relNodeSlice,NodePtcl) = newPos;
+	nodeDump(ix,iy,iz) = log10(FP.CalcGrad2(relNodeSlice));
       }
     }
   }
-  Path(NodeSlice,NodePtcl) = savePos;
+  Path(relNodeSlice,NodePtcl) = savePos;
   NodeVar.Write(nodeDump);
 }
 
@@ -181,13 +189,17 @@ PathDumpClass::GroundStateNodeDump()
   int ny = Ygrid.NumPoints;
   int nz = Zgrid.NumPoints;
 
+  PathClass &Path = PathData.Path;
   Array<double,3> nodeDump(nx,ny,nz);
-  int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
+  int speciesNum = Path.ParticleSpeciesNum(NodePtcl);
   GroundStateNodalActionClass &GS = 
     *((GroundStateNodalActionClass*)PathData.Actions.NodalActions(speciesNum));
 
-  PathClass &Path = PathData.Path;
-  dVec savePos = Path(NodeSlice,NodePtcl);
+  int relNodeSlice = NodeSlice + Path.GetRefSlice();
+  if (relNodeSlice > PathData.Path.TotalNumSlices)
+    relNodeSlice -= Path.TotalNumSlices;
+
+  dVec savePos = Path(relNodeSlice,NodePtcl);
   dVec newPos;
   for (int ix=0; ix<nx; ix++) {
     newPos[0] = Xgrid(ix);
@@ -195,12 +207,12 @@ PathDumpClass::GroundStateNodeDump()
       newPos[1] = Ygrid(iy);
       for (int iz=0; iz<nz; iz++) {
 	newPos[2] = Zgrid(iz);
-	Path(NodeSlice,NodePtcl) = newPos;
-	nodeDump(ix,iy,iz) = GS.Det(NodeSlice);
+	Path(relNodeSlice,NodePtcl) = newPos;
+	nodeDump(ix,iy,iz) = GS.Det(relNodeSlice);
       }
     }
   }
-  Path(NodeSlice,NodePtcl) = savePos;
+  Path(relNodeSlice,NodePtcl) = savePos;
   NodeVar.Write(nodeDump);
 }
 
@@ -212,13 +224,17 @@ PathDumpClass::FreeParticleNodeDump()
   int ny = Ygrid.NumPoints;
   int nz = Zgrid.NumPoints;
 
+  PathClass &Path = PathData.Path;
   Array<double,3> nodeDump(nx,ny,nz);
   int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
   FreeNodalActionClass &GS = 
     *((FreeNodalActionClass*)PathData.Actions.NodalActions(speciesNum));
 
-  PathClass &Path = PathData.Path;
-  dVec savePos = Path(NodeSlice,NodePtcl);
+  int relNodeSlice = NodeSlice + Path.GetRefSlice();
+  if (relNodeSlice > Path.TotalNumSlices)
+    relNodeSlice -= Path.TotalNumSlices;
+
+  dVec savePos = Path(relNodeSlice,NodePtcl);
   dVec newPos;
   for (int ix=0; ix<nx; ix++) {
     newPos[0] = Xgrid(ix);
@@ -226,11 +242,11 @@ PathDumpClass::FreeParticleNodeDump()
       newPos[1] = Ygrid(iy);
       for (int iz=0; iz<nz; iz++) {
 	newPos[2] = Zgrid(iz);
-	Path(NodeSlice,NodePtcl) = newPos;
-	nodeDump(ix,iy,iz) = GS.Det(NodeSlice);
+	Path(relNodeSlice,NodePtcl) = newPos;
+	nodeDump(ix,iy,iz) = GS.Det(relNodeSlice);
       }
     }
   }
-  Path(NodeSlice,NodePtcl) = savePos;
+  Path(relNodeSlice,NodePtcl) = savePos;
   NodeVar.Write(nodeDump);
 }
