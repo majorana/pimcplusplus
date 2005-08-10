@@ -19,6 +19,7 @@ public:
   virtual void Init();
   virtual bool IsGroundState() = 0;
   virtual NodeType Type() = 0;
+  virtual void Setk (Vec3 kVec);
   NodalActionClass (PathDataClass &pathData) :
     ActionBaseClass (pathData)
   {

@@ -127,18 +127,23 @@ FixedPhaseClass::d_dBeta (int slice1, int slice2, int level,
   //     doUp   = true;
   //     doDown = true;
   //   }
-  
+
   double dU = 0.0;
   if (doUp) {
-    for (int link=slice1; link < slice2; link+=skip) 
+    int numPtcls = Path.Species(UpSpeciesNum).NumParticles;
+    for (int link=slice1; link < slice2; link+=skip) {
       dU += 0.5*lambda*(UpGrad2(link)+UpGrad2(link+skip));
+      dU += numPtcls*lambda*dot(kVec, kVec);
+    }
   }
   if (doDown) {
-    for (int link=slice1; link < slice2; link+=skip) 
+    int numPtcls = Path.Species(DownSpeciesNum).NumParticles;
+    for (int link=slice1; link < slice2; link+=skip) {
       dU += 0.5*lambda*(DownGrad2(link)+DownGrad2(link+skip));
+      dU += numPtcls*lambda*dot(kVec,kVec);
+    }
   }
   return dU;
-
 }
 
 void 
@@ -614,4 +619,18 @@ NodeType
 FixedPhaseActionClass::Type()
 {
   return GROUND_STATE_FP;
+}
+
+void
+FixedPhaseActionClass::Setk(Vec3 k)
+{
+  FixedPhase.Setk(k);
+}
+
+void
+FixedPhaseClass::Setk(Vec3 k)
+{
+  kVec = k;
+  System->Setk(k);
+  UpdateBands();
 }

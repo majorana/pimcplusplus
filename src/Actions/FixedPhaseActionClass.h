@@ -15,6 +15,7 @@ private:
   double kCut;
   ComplexMultiTricubicSpline BandSplines;
   Potential *PH;
+  Vec3 kVec;
 
   Array<complex<double>,1> Workspace;
   Array<complex<double>,2> Matrix, Cofactors;
@@ -48,6 +49,7 @@ public:
   void AcceptCopy (int slice1, int slice2);
   void RejectCopy (int slice1, int slice2);
   void Init(int speciesNum);
+  void Setk(Vec3 k);
   FixedPhaseClass (PathDataClass &pathData);
 };
 
@@ -69,12 +71,22 @@ public:
   bool IsPositive (int slice);
   complex<double> Det (int slice);
   //  Array<double,2> GetMatrix (int slice);
+  /// Shifts internal time-slice dependent data
   void ShiftData (int slices2Shift);  
   void AcceptCopy (int slice1, int slice2);
   void RejectCopy (int slice1, int slice2);
+
+  /// Initializes internals.
   void Init();
+
+  /// Returns true
   bool IsGroundState();
+
+  /// Returns FIXED_PHASE
   NodeType Type();
+
+  /// Sets the k-vector or "twist angle"
+  void Setk (Vec3 k);
 
   FixedPhaseActionClass (PathDataClass &pathData, FixedPhaseClass &FP,
 			 int speciesNum) :

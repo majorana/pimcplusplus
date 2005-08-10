@@ -860,3 +860,9 @@ NodalActionClass::Init()
 
 }
 
+void
+NodalActionClass::Setk (Vec3 k)
+{
+
+
+}

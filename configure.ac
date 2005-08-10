@@ -40,7 +40,7 @@ esac
 
 
 # Optionally compile visual
-AC_ARG_ENABLE(pathvis, [  --enable-pathvis         compile path visualization GUI])
+AC_ARG_ENABLE(pathvis, [  --enable-pathvis        compile path visualization GUI])
 AM_CONDITIONAL([WANT_PATHVIS], [test "$enable_pathvis" = "yes"])
 if test "x$enable_pathvis" = "xyes"; then
   PKG_CHECK_MODULES(GTKMM, gtkmm-2.4, gtkmm_ok=yes, gtkmm_ok=no)
@@ -61,9 +61,15 @@ if test "x$enable_pathvis" = "xyes"; then
   AC_CHECK_LIB([gle],[gleSetNumSides])
 fi
 
+AC_ARG_ENABLE(profile,[  --enable-profile        instrument code with profiling information])
+if test "x$enable_profile" = "xyes"; then
+   CXXFLAGS="-pg $CXXFLAGS"
+   F77FLAGS="-pg $F77FLAGS"
+   LDFLAGS="-pg $LDFLAGS"
+fi
 
 # Optionally set dimensionality
-AC_ARG_WITH(ndim, [  --with-ndim=N            specify simulation dimensionality])
+AC_ARG_WITH(ndim, [  --with-ndim=N           specify simulation dimensionality])
 if (test "x$with_ndim" != "x"); then
    CPPFLAGS="-DNDIM=$with_ndim $CPPFLAGS"
 else # Default to 3D
@@ -71,7 +77,7 @@ else # Default to 3D
 fi
 
 # Checks if we want MPI support
-AC_ARG_ENABLE(mpi,    [  --enable-mpi              enable MPI support (default=no)])
+AC_ARG_ENABLE(mpi,    [  --enable-mpi            enable MPI support (default=no)])
 
 if test "$enable_mpi" = "yes"; then
     MPI_DEF="-DUSE_MPI"

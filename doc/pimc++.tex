@@ -5,9 +5,10 @@
 %\usepackage{shadow}
 \usepackage{fancybox}
 \usepackage{float}
+\usepackage{amsmath}
 
 \renewcommand{\shadowsize}{2pt}
-\author{Kenneth P. Esler, Jr.}
+\author{Kenneth P. Esler, Jr. and Bryan K. Clark}
 \title{pimc++}
 %\subtitle{Path Integral Monte Carlo Simulation Tool}
 
@@ -111,7 +112,7 @@ template array package. \\
 \rule{0.6cm}{0cm}\shadowbox{\parbox{4.4in}{\texttt{Array<double,1>
       Masses(6) = [0.5, 0.5, 0.5, 1.0, 1.0, 1.0]; }}} \\
 Here, the \texttt{Array<double,1>} indicates a one-dimensional array
-of doubles.  {\emCIAO} supports up to four-dimensional arrays.  The
+of doubles.  {\em CIAO} supports up to four-dimensional arrays.  The
 \texttt{(6)} after the variable name, \texttt{Masses}, gives the size
 of the array.  For a multidimensional array, the dimensions are
 separated by commas, such as\\
@@ -125,13 +126,49 @@ Array<double,2> Ident(3,3) = [ 1.0, 0.0, 0.0,
 The blank lines are not required -- they are included only for
 clarity.  
 
-
-
 \section{Creating hierachy with sections}
+Following the object-oriented paradigm, we find it to be extremely
+useful to allow hierarchy in our input files.  We do this through the
+use of {\em sections}.  A section is defined in the following way:\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+  Section (Cattle) {
+    Section (Cows) {
+      Array<string,1> Names(2) = ["Bessie", "Bovina"];
+      Array<int,1> NumSpots(2) = [1, 47];
+    }
+    Section (Bulls) {
+      Array<string,1> Names(2) = ["Charger", "Red"];
+      Array<int,1> NumSpots(2) = [13, 5];
+    }
+  }
+\end{verbatim}
+\end{minipage}}
 
 \section{Format}
 \section{Global parameters}
 \section{The ``System'' section}
+   The section descibes the system to be studied.  It specifies the
+   size of the paths, the species and numbers of particles, the size
+   of the box, etc.  Here, we will describe the required parameters
+\begin{itemize}
+   \item \texttt{NumTimeSlices}:  Integer variable giving the total
+   number of time slices to use.  Thus
+   $\texttt{tau}*\texttt{NumTimeSlices}$ gives the $\beta$ for the
+   system.
+   \item \texttt{Array<bool,1> IsPeriodic(NDIM)}:  This is an array of
+   booleans of length 2 or 3, dependending on the dimensionality of
+   the system, of whether the system is periodic in each of the
+   cardinal directions, $\hat{x},\hat{y},\text{and } \had{z}$
+   \item \texttt{Section (Particles)}  This section describes all the
+   particles in the system.  It is comprised of one or more
+   \texttt{Species} sections.
+     \subitem \texttt{Section (Species)}  Describes a group of
+        identicle particles.  Examples include electrons, protons,
+        or helium atoms.
+        \subsubitem acdkajdf
+\end{itemize}
+
 \section{The ``Action'' section}
 \section{The ``Moves'' section}
 \section{The ``Observables'' section}
@@ -150,9 +187,9 @@ move to be ``glued'' into the rest of the code.
 There are two types of moves. There are normal moves and then
 multistage moves. We will start by discussion normal moves.
 
-All normal moves must inheret from the class ParticleMoveClass and 
+All normal moves must inherit from the class ParticleMoveClass and 
 create the following four functions: a
-constructor, MakeMove(), Read(IOSectionClass &in),  and WriteRatio().
+constructor, \texttt{MakeMove()}, Read(IOSectionClass \&in),  and WriteRatio().
 
 The constructor of a move must look like the following:\\
   NameOfMyMoveClass(PathDataClass &myPathData,IOSectionClass outSection) :
