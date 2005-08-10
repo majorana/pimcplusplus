@@ -99,6 +99,13 @@ AC_SUBST(MPI_LIBS)
 AC_SUBST(MPI_CFLAGS)
 AC_SUBST(MPI_RUN)
 
+AC_ARG_ENABLE(profile,[  --enable-profile        instrument code with profiling information])
+if test "x$enable_profile" = "xyes"; then
+   CXXFLAGS="-pg $CXXFLAGS"
+   F77FLAGS="-pg $F77FLAGS"
+   LDFLAGS="-pg $LDFLAGS"
+fi
+
 
 AC_ARG_WITH(hdf5-cflags,[  --with-hdf5-cflags=FLAGS specify HDF5 linker flags])
 AC_ARG_WITH(hdf5-libs, [  --with-hdf5-libs=LIBS    specify HDF5 linker flags])
