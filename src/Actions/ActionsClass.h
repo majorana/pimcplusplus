@@ -103,6 +103,8 @@ public:
   /// initialize any cached data;
   void Init();
 
+  void Setk(Vec3 k);
+
   bool HaveLongRange();
 
   ActionsClass(PathDataClass &pathData) : 

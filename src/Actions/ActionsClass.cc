@@ -367,3 +367,12 @@ bool ActionsClass::HaveLongRange()
     longRange = longRange || PairArray(i)->IsLongRange();
   return longRange;
 }
+
+void 
+ActionsClass::Setk(Vec3 k)
+{
+  for (int i=0; i<PathData.Path.NumSpecies(); i++) {
+    if (NodalActions(i) != NULL)
+      NodalActions(i)->Setk(k);
+  }
+}
