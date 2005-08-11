@@ -53,8 +53,8 @@ FixedPhaseClass::CalcGrad2 (int slice, int species)
 
   double grad2 = 0.0;
   for (int i=0; i<N; i++) {
-    Vec3 grad = detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i));
-    //    cerr << "grad(" << i << ") = " << grad << endl;
+    Vec3 grad = 
+      (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i))) + kVec;
     grad2 += dot(grad,grad);
   }
   grad2 /= (detu2*detu2);
@@ -131,17 +131,13 @@ FixedPhaseClass::d_dBeta (int slice1, int slice2, int level,
   double dU = 0.0;
   if (doUp) {
     int numPtcls = Path.Species(UpSpeciesNum).NumParticles;
-    for (int link=slice1; link < slice2; link+=skip) {
+    for (int link=slice1; link < slice2; link+=skip) 
       dU += 0.5*lambda*(UpGrad2(link)+UpGrad2(link+skip));
-      dU += numPtcls*lambda*dot(kVec, kVec);
-    }
   }
   if (doDown) {
     int numPtcls = Path.Species(DownSpeciesNum).NumParticles;
-    for (int link=slice1; link < slice2; link+=skip) {
+    for (int link=slice1; link < slice2; link+=skip)
       dU += 0.5*lambda*(DownGrad2(link)+DownGrad2(link+skip));
-      dU += numPtcls*lambda*dot(kVec,kVec);
-    }
   }
   return dU;
 }
