@@ -50,6 +50,7 @@ public:
   void RejectCopy (int slice1, int slice2);
   void Init(int speciesNum);
   void Setk(Vec3 k);
+  Vec3 Getk();
   FixedPhaseClass (PathDataClass &pathData);
 };
 
@@ -87,6 +88,7 @@ public:
 
   /// Sets the k-vector or "twist angle"
   void Setk (Vec3 k);
+  inline Vec3 Getk() { return FixedPhase.Getk(); }
 
   FixedPhaseActionClass (PathDataClass &pathData, FixedPhaseClass &FP,
 			 int speciesNum) :

@@ -2,7 +2,7 @@ double tau=0.05;
 
 Section (Parallel)
 {
-  int ProcsPerClone = 2;
+  int ProcsPerClone = 1;
 }
 
 Section (System)
@@ -100,7 +100,7 @@ Section (Algorithm)
     Section (Move) {string name = "Shift";}
   }
   Section (Loop){ //Start Accumulating observables
-    int steps=3000000;
+    int steps=30000;
     Section (Loop){
       int steps=3;
       Section (Move) {string name="Bisection";} 

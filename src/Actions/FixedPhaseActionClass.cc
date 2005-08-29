@@ -157,9 +157,26 @@ FixedPhaseClass::Read(IOSectionClass &in)
   IonSpeciesNum = Path.SpeciesNum (speciesString);
 
   assert (in.ReadVar ("kCut", kCut));
-  Array<double,1> kVec;
-  assert(in.ReadVar ("kVec", kVec));
-  Vec3 k(kVec(0), kVec(1), kVec(2));
+  /// Note that the twist angles are defined between 0 and 1.  Hence,
+  /// k_x = pi*twist_angle_x/L_x
+  Array<double,2> twistAngles;
+  if (in.ReadVar ("TwistAngles", twistAngles)) {
+    if (twistAngles.extent(0) != PathData.InterComm.NumProcs()) {
+      cerr << "Error:  Number of twist angles must match number of clones.\n" 
+	   << "        Number of twist angles:  "  << twistAngles.size() << endl 
+	   << "        Number of clones:        "  << PathData.InterComm.NumProcs() << endl;
+      abort();
+    }
+    assert (twistAngles.extent(1) == 3);
+    kVec[0] = twistAngles(PathData.GetCloneNum(),0) * M_PI/PathData.Path.GetBox()[0];
+    kVec[1] = twistAngles(PathData.GetCloneNum(),1) * M_PI/PathData.Path.GetBox()[1];
+    kVec[2] = twistAngles(PathData.GetCloneNum(),2) * M_PI/PathData.Path.GetBox()[2];
+  }
+  else {
+    Array<double,1> tmpkVec;
+    assert(in.ReadVar ("kVec", tmpkVec));
+    kVec = Vec3 (tmpkVec(0), tmpkVec(1), tmpkVec(2));
+  }
   
   NumIons =  Path.Species(IonSpeciesNum).NumParticles;
   NumUp   =  Path.Species(UpSpeciesNum).NumParticles;
@@ -186,7 +203,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
   System = new SystemClass (NumBands);
   PH = &PathData.Actions.GetPotential (IonSpeciesNum, UpSpeciesNum);
   //  Vec3 gamma (0.0, 0.0, 0.0);
-  System->Setup (Path.GetBox(), k, kCut, *PH);
+  System->Setup (Path.GetBox(), kVec, kCut, *PH);
 
   /////////////////////////////
   // Setup the ion positions //
