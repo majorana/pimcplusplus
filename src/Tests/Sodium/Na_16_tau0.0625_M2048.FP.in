@@ -1,4 +1,4 @@
-double tau=0.03125;
+double tau=0.0625;
 
 Section (Parallel)
 {
@@ -11,7 +11,7 @@ Section (Parallel)
 // Note:  energy per isolated atom for this PH is -0.195113 hartrees.
 Section (System)
 {
-  int NumTimeSlices=4096;
+  int NumTimeSlices=2048;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[16.006, 16.006,16.006];
   double kCutoff = 1.3;
@@ -75,7 +75,7 @@ Section (System)
 
 Section (Action)
 {
-  int MaxLevels = 7;
+  int MaxLevels = 6;
   bool UseRPA = false;
   int NumBreakupKnots = 20;
   int NumImages = 0;
@@ -97,7 +97,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.03125_M4096.FP.turing4";
+  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.0625_M2048.FP.turing";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
@@ -180,7 +180,7 @@ Section (Moves) {
     //string PermuteType="TABLE";
     string PermuteType="NONE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-    int NumLevels=7;
+    int NumLevels=6;
     string Species = "eup";
     int StepsPerBlock=8;
   }
@@ -190,7 +190,7 @@ Section (Moves) {
     string PermuteType="NONE";
     //string PermuteType="TABLE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-    int NumLevels=7;
+    int NumLevels=6;
     string Species = "edown";
     int StepsPerBlock=8;
   }
