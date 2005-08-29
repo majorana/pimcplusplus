@@ -159,7 +159,7 @@ use of {\em sections}.  A section is defined in the following way:\\
    \item \texttt{Array<bool,1> IsPeriodic(NDIM)}:  This is an array of
    booleans of length 2 or 3, dependending on the dimensionality of
    the system, of whether the system is periodic in each of the
-   cardinal directions, $\hat{x},\hat{y},\text{and } \had{z}$
+   cardinal directions, $\hat{x},\hat{y},\text{and } \hat{z}$
    \item \texttt{Section (Particles)}  This section describes all the
    particles in the system.  It is comprised of one or more
    \texttt{Species} sections.
@@ -215,7 +215,7 @@ over when the moves happen during the PIMC run.
      
    \item \texttt{epsilon}: a cutoff that forbids sampling permutations with
      a probability (as determined by the kinetic action) smaller then epsilon 
-     of being accepted.  Only to be used with \textt{PermuteType} of
+     of being accepted.  Only to be used with \texttt{PermuteType} of
      \texttt{Table}. Epsilon significantly increases the 
      effeciency of the permutation algorithm moving it from
      approximately a $n^4$ to a $n^2$ algorithm. 
@@ -245,7 +245,7 @@ create the following four functions: \\
 a constructor,\\
 \texttt{MakeMove()},\\
 \texttt{Read(IOSectionClass \&in)},  \\
-texttt{WriteRatio()}.
+\texttt{WriteRatio()}.
 
 The constructor of a move must look like the following:\\
 
@@ -265,12 +265,12 @@ It is important to remember to send a pathdata reference and an
   move has access to the pathdata and an ability to write out data
   like its acceptance ratio
 
-The function \textt{{MakeMove()} will be called by the algorithm 
+The function \texttt{MakeMove()} will be called by the algorithm 
 and is in charge of the entire move. This means that it is in charge
 of performing the metropolis proceudure by itself (This includes calling
 the appropriate actions and then using a random number to decide on 
 acceptance or rejection)
-At the end of the move, it is {\em mandatory} that \textt{MakeMove()} 
+At the end of the move, it is {\em mandatory} that \texttt{MakeMove()} 
 either accepts or
 rejects the move by calling either \\
 \rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
@@ -288,7 +288,7 @@ PathData.Path.RejectMove(startSlice,endSlice,ActiveParticles)
 The parameters sent to these functions
 include the range (inclusive) of slices that the move has altered as
 well as an array of particle indices 
-(of type  \textt{Array<int,1>}) that the move has changed.  
+(of type  \texttt{Array<int,1>}) that the move has changed.  
 By accepting the move, all knowledge of the previous state of the path
 will be erased. By rejecting the move all changes the move made in the
 slice ranges defined by \texttt{[startSlice:endSlice]} on the particles defined
@@ -296,30 +296,30 @@ by the array \texttt{ActiveParticles} will be overwritten by the previous state
 of the path at these locations.  
 
 
-We will not worry about \textt{WriteRatio()} for the time being other then to
+We will not worry about \texttt{WriteRatio()} for the time being other then to
 say that it is relevant for getting the acceptance ratio outputs
 correctly.
 
-The function \textt{Read(IOSectionClass \&in)} is called immediately after the
+The function \texttt{Read(IOSectionClass \&in)} is called immediately after the
 move is created so that the move has the opportunity to read relevant
 input information.  When it is called, the IOSectionClass object
-\textt{in} will be located inside the \textt{Section (Move)} that 
+\texttt{in} will be located inside the \texttt{Section (Move)} that 
 has the name of your move which
-will be inside \textt{Section (Moves)}.
+will be inside \texttt{Section (Moves)}.
  The move is then responsible for reading the input parameters it needs
-by calling \textt{in.Readvar(``varString'',var)}. For example, it might read the 
+by calling \texttt{in.Readvar(``varString'',var)}. For example, it might read the 
 number of levels it is to operate on by calling 
-\text{in.ReadVar(``NumLevels'',numLevels)} Note,
+\texttt{in.ReadVar(``NumLevels'',numLevels)} Note,
 that the Read function is responsible for closing any sections it
 opens, but {\em NOT} for closing the section it is in (i.e. there needs to
-be exactly the same number of \textt{OpenSection} and 
-\textt{CloseSection} calls in
-your \textt{Read} function).
+be exactly the same number of \texttt{OpenSection} and 
+\texttt{CloseSection} calls in
+your \texttt{Read} function).
 
 To glue the read function into your code, there are currently three
 steps. First, perform the appropriate incanation on the configuration scripts.
 Secondly,  your move needs
-to be added to the .h file of \textt{MovesClass.h}. This ensures that it will
+to be added to the .h file of \texttt{MovesClass.h}. This ensures that it will
 get included when other files \#include the moves. Finally, inside
 PIMCClass.cc, there is a ReadMoves() function which will need to have your
 move added to it.  In the series of ``if'' statements, you need to add
@@ -334,7 +334,7 @@ move added to it.  In the series of ``if'' statements, you need to add
 \end{verbatim}
 \end{minipage}}\\
 The moveType will have to be the type the user must type under
-\textt{Section (Move)} for your move.
+\texttt{Section (Move)} for your move.
 
 
 
@@ -349,22 +349,22 @@ the src directory. All observables inherit from the function
 ObservableClass (located in ObservableBase.h). Every observable has a
 ``name'' and a ``description'' and all
 observables must implement the functions: \\
-\textt{void Accumulate()} \\
-\textt{void WriteBlock()} \\ 
+\texttt{void Accumulate()} \\
+\texttt{void WriteBlock()} \\ 
 The following functions may be overwritten by an observable, but need
 not be: \\
-\textt{void Read(IOSectionClass\& IO)} \\
-\textt{void WriteInfo()} \\
-A standard observable should also have two variables called \textt{Freq} and
-\textt{DumpFreq} that are read in from the input file and respectively
+\texttt{void Read(IOSectionClass\& IO)} \\
+\texttt{void WriteInfo()} \\
+A standard observable should also have two variables called \texttt{Freq} and
+\texttt{DumpFreq} that are read in from the input file and respectively
 establish how many times the observable must be called before it
 accumulates its running average and how many times it must be called
 before it outputs its running average to the output file.
 
 To simplify the writing of observables, one should use 
-the children of the \textt{ObservableVar} class. (Such children include 
-\textt{ObservableDouble},\textt{ObservableVecDouble1},
-\textt{ObsservableInt},etc.) One of these should be used for each
+the children of the \texttt{ObservableVar} class. (Such children include 
+\texttt{ObservableDouble},\texttt{ObservableVecDouble1},
+\texttt{ObsservableInt},etc.) One of these should be used for each
 variable you write (recurringly) to your hdf file.  
 To use them you must call their constructor with three parameters:
 the name of the variable to be used in the output file, a reference to 
@@ -384,4 +384,6 @@ its running average the value of the observable it is in charge
 of. For example if it was an energy observable, it might accumulate
 the running sum of the kinetic and potential energies.
 
-\chapter{Code Verifica
+\chapter{Code Verification}
+abcdef
+\end{document}
