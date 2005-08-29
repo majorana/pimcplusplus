@@ -171,6 +171,56 @@ use of {\em sections}.  A section is defined in the following way:\\
 
 \section{The ``Action'' section}
 \section{The ``Moves'' section}
+PIMC++ deals with moves and observables in a two steps. First, in this
+section of the input file, the possible moves (observables) are
+defined and given their appropriate parameters (i.e. what species they
+will work on, how many levels the bisection has, etc).  Then, in the
+algorithms section these moves are called.  This gives you flexibility
+over when the moves happen during the PIMC run.  
+
+\begin{itemize}
+   \item \texttt{type}:  Type of move that is being
+   defined.  For example, if you are defining a BisectionBlock move
+   then your type will be BisectionBlock.
+
+   \item \texttt{name}:  The name of your move. This may be anything
+   but must be unique for each move in your Input File (the code should
+   really check for this, btw).  This is the name you will use in the
+   algorithm in specifying that this move is to be called.
+\end{itemize}
+
+\subsection{BisectionBlock Moves}
+ 
+\begin{itemize}
+
+   \item \texttt{Species}: string variable that contains the name of
+   the species that the Move operates on.  This name should correspond
+   to the value given to \texttt{Name} in the \texttt{Species}
+   section.
+
+
+   \item \texttt{PermuteType}: Indicates how (and whether) this move
+   does permutations.  Note that this currently is a better indicator
+   of whether the system is acting Bosonic then the statistics type of
+   the species.  Choices include \texttt{Table} which performs up to 4
+   particle permutations and \texttt{None} which indicates no
+   permutations will happen.
+
+   \item \texttt{Array<double,1> Gamma(4)}: Array of enhancement
+     factors for 1,2,3, and 4 particle
+     permutations when using a \texttt{PermuteType} of \texttt{Table}.
+     These {\em must} be greater then 1.  Each factor will
+     multiplicatively enhance the
+     probability a permutation (of the appropriate size) will be chosen.
+     
+   \item \texttt{epsilon}: a cutoff that forbids sampling permutations with
+     a probability (as determined by the kinetic action) smaller then epsilon 
+     of being accepted.  Only to be used with \textt{PermuteType} of
+     \texttt{Table}. Epsilon significantly increases the 
+     effeciency of the permutation algorithm moving it from
+     approximately a $n^4$ to a $n^2$ algorithm. 
+
+\end{itemize}
 \section{The ``Observables'' section}
 \section{The ``Algorithm'' section}
 
@@ -178,7 +228,10 @@ use of {\em sections}.  A section is defined in the following way:\\
 \section{MakeReport}
 \section{pathvis++}
 
+
 \chapter{Modifing pimc++}
+\section{Useful things to know}
+Each particle in PIMC++ is indexed by a unique integer. 
 \section{Adding a new ``Move''}
 There are two steps to adding a new move. First, the move needs to be
 created and then the appropriate files need to be changed to allow the
@@ -188,66 +241,101 @@ There are two types of moves. There are normal moves and then
 multistage moves. We will start by discussion normal moves.
 
 All normal moves must inherit from the class ParticleMoveClass and 
-create the following four functions: a
-constructor, \texttt{MakeMove()}, Read(IOSectionClass \&in),  and WriteRatio().
+create the following four functions: \\
+a constructor,\\
+\texttt{MakeMove()},\\
+\texttt{Read(IOSectionClass \&in)},  \\
+texttt{WriteRatio()}.
 
 The constructor of a move must look like the following:\\
-  NameOfMyMoveClass(PathDataClass &myPathData,IOSectionClass outSection) :
+
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+  NameOfMyMoveClass(PathDataClass &myPathData, 
+  IOSectionClass outSection) :
   ParticleMoveClass(myPathData,outSection)
     {
       /* Add code you want here */
     }
+\end{verbatim}
+\end{minipage}}
+
 It is important to remember to send a pathdata reference and an
   IOSectionClass to ParticleMoveClass as is done above. This is so the
   move has access to the pathdata and an ability to write out data
   like its acceptance ratio
 
-The function MakeMove() is in charge of the entire move.  At the end
-of the move, it is mandatory that the function either accepts or
-rejects the move by calling either
-PathData.Path.AcceptMove(startSlice,endSlice,ActiveParticles) if the
-move is accepted or by calling 
-PathData.Path.RejectMove(startSlice,endSlice,ActiveParticles) if the
-move is rejected.  The parameters that are sent to these function
+The function \textt{{MakeMove()} will be called by the algorithm 
+and is in charge of the entire move. This means that it is in charge
+of performing the metropolis proceudure by itself (This includes calling
+the appropriate actions and then using a random number to decide on 
+acceptance or rejection)
+At the end of the move, it is {\em mandatory} that \textt{MakeMove()} 
+either accepts or
+rejects the move by calling either \\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+PathData.Path.AcceptMove(startSlice,endSlice,ActiveParticles)
+\end{verbatim}
+\end{minipage}}\\
+if the move is accepted or by calling\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+PathData.Path.RejectMove(startSlice,endSlice,ActiveParticles) 
+\end{verbatim}
+\end{minipage}}\\
+ if the move is rejected.  
+The parameters sent to these functions
 include the range (inclusive) of slices that the move has altered as
-well as a Array<int,1> of particles that the move has changed.  By
-accepting the move, all knowledge of the previous state of the path
+well as an array of particle indices 
+(of type  \textt{Array<int,1>}) that the move has changed.  
+By accepting the move, all knowledge of the previous state of the path
 will be erased. By rejecting the move all changes the move made in the
-slice ranges defined by [startSlice:endSlice] on the particles defined
-by the array ActiveParticles will be overwritten by the previous state
-of the path at these locations.  Therefore, the move needs to do all
-the metropolis steps by itself. It is also responsible for ensuring
-that it calls and uses the correct actions.
+slice ranges defined by \texttt{[startSlice:endSlice]} on the particles defined
+by the array \texttt{ActiveParticles} will be overwritten by the previous state
+of the path at these locations.  
 
-We will not worry about WriteRatio() for the time being other then to
+
+We will not worry about \textt{WriteRatio()} for the time being other then to
 say that it is relevant for getting the acceptance ratio outputs
 correctly.
 
-The function Read(IOSectionClass &in) is called immediately after the
+The function \textt{Read(IOSectionClass \&in)} is called immediately after the
 move is created so that the move has the opportunity to read relevant
 input information.  When it is called, the IOSectionClass object
-``in'' will be located inside the section of the input class relevant
-to this move.  The move is then responsible for doing the appropriate
-in.Readvar(``varString'',var) to read the appropriate variables. Note,
+\textt{in} will be located inside the \textt{Section (Move)} that 
+has the name of your move which
+will be inside \textt{Section (Moves)}.
+ The move is then responsible for reading the input parameters it needs
+by calling \textt{in.Readvar(``varString'',var)}. For example, it might read the 
+number of levels it is to operate on by calling 
+\text{in.ReadVar(``NumLevels'',numLevels)} Note,
 that the Read function is responsible for closing any sections it
-opens, but NOT for closing the section it is in (i.e. there needs to
-be exactly the same number of OpenSection and CloseSection calls in
-your Read function).
+opens, but {\em NOT} for closing the section it is in (i.e. there needs to
+be exactly the same number of \textt{OpenSection} and 
+\textt{CloseSection} calls in
+your \textt{Read} function).
 
-To glue the read function into your code, there are currently four
-steps. First, you must add the move to the src/Moves/template.make and
-src/template.make file in the appropriate places (i.e. anyplace that
-MultiStage.* shows up, you need to add YourMove.*).  Your move needs
-to be added to the .h file of MovesClass.h. This ensures that it will
-get included when other files #include other moves. Finally, inside
-PIMCClass.cc, there is a ReadMoves() file which will need to have your
+To glue the read function into your code, there are currently three
+steps. First, perform the appropriate incanation on the configuration scripts.
+Secondly,  your move needs
+to be added to the .h file of \textt{MovesClass.h}. This ensures that it will
+get included when other files \#include the moves. Finally, inside
+PIMCClass.cc, there is a ReadMoves() function which will need to have your
 move added to it.  In the series of ``if'' statements, you need to add
 \\
-    else if (MoveType==''MyMoveType''){
-      moveName=''MyMoveName'';
-      Moves(counter)=new MyMoveClass(PathData,OutFile);
-      Moves(counter)->Read(in);
-    }
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+ else if (MoveType==''MyMoveType''){
+    moveName=''MyMoveName'';
+    Moves(counter)=new MyMoveClass(PathData,OutFile);
+    Moves(counter)->Read(in);
+}
+\end{verbatim}
+\end{minipage}}\\
+The moveType will have to be the type the user must type under
+\textt{Section (Move)} for your move.
+
 
 
 
@@ -261,19 +349,31 @@ the src directory. All observables inherit from the function
 ObservableClass (located in ObservableBase.h). Every observable has a
 ``name'' and a ``description'' and all
 observables must implement the functions: \\
-void Accumulate() \\
-void WriteBlock() \\ 
+\textt{void Accumulate()} \\
+\textt{void WriteBlock()} \\ 
 The following functions may be overwritten by an observable, but need
 not be: \\
-void Read(IOSectionClass& IO) \\
-void WriteInfo() \\
-A standard observable should also have two variables called Freq and
-DumpFreq that are read in from the input file and respectively
+\textt{void Read(IOSectionClass\& IO)} \\
+\textt{void WriteInfo()} \\
+A standard observable should also have two variables called \textt{Freq} and
+\textt{DumpFreq} that are read in from the input file and respectively
 establish how many times the observable must be called before it
 accumulates its running average and how many times it must be called
 before it outputs its running average to the output file.
-Each of these functions will be discussed later.  First we examine how
-the ObservableVariables are created.
+
+To simplify the writing of observables, one should use 
+the children of the \textt{ObservableVar} class. (Such children include 
+\textt{ObservableDouble},\textt{ObservableVecDouble1},
+\textt{ObsservableInt},etc.) One of these should be used for each
+variable you write (recurringly) to your hdf file.  
+To use them you must call their constructor with three parameters:
+the name of the variable to be used in the output file, a reference to 
+an IOSectionClass that will NOT be deleted upon exiting the constructor
+(concretely this means that you need to call it with the capatilized and not
+lowercase version of IOSection), and I reference to a communicator that 
+will be used among the time slice parallel versions of the ...
+
+First we examine how the ObservableVariables are created.
 \subsubsection{Accumulate()}
 The accumulate function gets called each time that an observable is
 told to accumulate in the code's algorithm.  A correctly implemented
@@ -284,6 +384,4 @@ its running average the value of the observable it is in charge
 of. For example if it was an energy observable, it might accumulate
 the running sum of the kinetic and potential energies.
 
-
-
-\end{document}
+\chapter{Code Verifica
