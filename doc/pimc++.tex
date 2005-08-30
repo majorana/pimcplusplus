@@ -187,12 +187,27 @@ over when the moves happen during the PIMC run.
    but must be unique for each move in your Input File (the code should
    really check for this, btw).  This is the name you will use in the
    algorithm in specifying that this move is to be called.
+
+   \item \texttt{freq}:  asdf
 \end{itemize}
 
 \subsection{BisectionBlock Moves}
  
 \begin{itemize}
 
+  \item \texttt{NumLevels}: integer that is the number of levels the
+  bisection should use.
+   
+  \item \texttt{ActiveSpecies}: Should be deprecated. Please remove
+  from your input file. 
+
+  \item \texttt{StepsPerBlock}: integer representing how many steps
+  the BisectionBlock takes.  All steps of the bisectionblock are done
+  with the same subset of time slices.  When permutations are on, doing $n$
+  \textttt{StepsPerBlock} is more effecient then running the move $n$
+  times, because it takes advantages of previous computation.  
+
+  
    \item \texttt{Species}: string variable that contains the name of
    the species that the Move operates on.  This name should correspond
    to the value given to \texttt{Name} in the \texttt{Species}
