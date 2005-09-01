@@ -1,6 +1,9 @@
+#!/usr/bin/python 
 from matplotlib.axes import Subplot
 from matplotlib.figure import Figure
 from matplotlib.numerix import arange, sin, pi
+from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
+from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
 
 import gtk
 import math
@@ -16,13 +19,13 @@ class HelloWorld:
 
     def create_tree(self, name):
         self.treestore = gtk.TreeStore(str)
-        for parent in range(4):
-            piter = self.treestore.append(None, ['parent %i' % parent])
-            for child in range(3):
-                self.treestore.append(piter,['child %i of parent %i' % (child, parent)])
+#        for parent in range(4):
+#            piter = self.treestore.append(None, ['parent %i' % parent])
+#            for child in range(3):
+#                self.treestore.append(piter,['child %i of parent %i' % (child, parent)])
 
         self.treeview = gtk.TreeView(self.treestore)
-        self.tvcolumn = gtk.TreeViewColumn('Column 0')
+        self.tvcolumn = gtk.TreeViewColumn('Observables')
         self.treeview.append_column(self.tvcolumn)
         self.cell = gtk.CellRendererText()
         self.tvcolumn.pack_start(self.cell, True)
@@ -115,11 +118,30 @@ class HelloWorld:
             print 'Cannot open file ' + name
         else:
             print 'Opened file successfully'
-            n = self.infile.CountSections()
-            for i in range(n):
+            self.infile.OpenSection("Observables")
+            numSecs = self.infile.CountSections()
+            gofrRows = self.treestore.append(None, ["g(r)"])
+            for i in range(numSecs):
                 self.infile.OpenSection(i)
-                self.treestore.append(None, [self.infile.GetName()])
+                myType = self.infile.ReadVar("Type")
+
+                if (myType == "CorrelationFunction"):
+                    iter = self.treestore.append(gofrRows, [self.infile.GetName()])
+                    gofr = gofrClass(self.infile, self.treestore.get_path(iter))
+                    self.treeview.connect_object("row-activated", gofrClass.tv_callback, gofr)
+                elif (myType == "Scalar"):
+                    iter = self.treestore.append(None, [self.infile.GetName()])
+                    numVars = self.infile.CountVars()
+                    for j in range (numVars):
+                        varName = self.infile.GetVarName(j)
+                        if ((varName != "Description") & (varName != "Type")):
+                            variter = self.treestore.append (iter, [varName])
+                            scalar = scalarClass(self.infile, varName, self.treestore.get_path(variter))
+                            self.treeview.connect_object("row-activated", scalarClass.tv_callback, scalar)
+                elif (myType == "Path"):
+                    iter = self.treestore.append(None, ["Path Dump"])
                 self.infile.CloseSection()
+            self.infile.CloseSection() # Observables
         return True
         
     def open_cb(self, b):
@@ -129,6 +151,72 @@ class HelloWorld:
         self.chooser.hide()
         return False
 
+
+class ScalarVar:
+    def __init__(self, infile, varname):
+        self.name = varname
+
+class gofrClass:
+    def __init__(self, infile, rowNum):
+        self.rowNum = rowNum
+        self.name = infile.GetName()
+        self.x = infile.ReadVar("x")
+        self.y = infile.ReadVar("y")
+        if (infile.ReadVar("Cumulative") == False):
+            n = self.y.shape[0]
+            self.y = sum(self.y) / n
+        print "New g(r) class with name " + self.name
+
+    def tv_callback (self, path, view_column):
+        if (path == self.rowNum):
+            self.plot()
+    
+    def plot(self):
+        win = gtk.Window()
+        vbox = gtk.VBox()
+        win.add (vbox)
+        fig = Figure(figsize=(5,4), dpi=100)
+        ax = fig.add_subplot(111)
+        ax.plot(self.x,self.y)
+        ax.set_title(self.name)
+        ax.set_xlabel("r")
+        ax.set_ylabel(r'$g(r)$')
+#        ax.title = self.name
+        canvas = FigureCanvas(fig)
+        vbox.pack_start(canvas)
+        toolbar = NavigationToolbar(canvas, win)
+        vbox.pack_start(toolbar, False, False)
+        win.set_size_request(520,500)
+        win.show_all()
+
+class scalarClass:
+    def __init__(self, infile, varName, rowNum):
+        self.rowNum = rowNum
+        self.name = varName
+        self.y = infile.ReadVar(varName)
+        self.x = arange(0,self.y.size())
+        print "New scalar class with name " + self.name
+
+    def tv_callback (self, path, view_column):
+        if (path == self.rowNum):
+            self.plot()
+    
+    def plot(self):
+        win = gtk.Window()
+        vbox = gtk.VBox()
+        win.add (vbox)
+        fig = Figure(figsize=(5,4), dpi=100)
+        ax = fig.add_subplot(111)
+        ax.plot(self.x,self.y)
+        ax.set_title(self.name)
+        ax.set_xlabel("block")
+        ax.set_ylabel("Energy")
+        canvas = FigureCanvas(fig)
+        vbox.pack_start(canvas)
+        toolbar = NavigationToolbar(canvas, win)
+        vbox.pack_start(toolbar, False, False)
+        win.set_size_request(520,500)
+        win.show_all()
 
 if __name__ == '__main__':
     ba = HelloWorld()
