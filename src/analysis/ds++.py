@@ -90,16 +90,44 @@ class HelloWorld:
         toolbar.insert(opentoolitem, 0)
         toolbar.insert(quittoolitem, 0)
         self.create_tree('abc')
+        self.window.set_size_request(400,500)
         self.window.show_all()
 
+        self.chooser = gtk.FileChooserDialog(title='Select a file', action=gtk.FILE_CHOOSER_ACTION_OPEN, buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        filter = gtk.FileFilter()
+        filter.set_name ("HDF5 files")
+        filter.add_pattern("*.h5")
+        self.chooser.add_filter(filter)
+        filter = gtk.FileFilter()
+        filter.set_name ("All files")
+        filter.add_pattern("*")
+        self.chooser.add_filter(filter)
 
     def quit_cb(self, b):
         print 'Quitting program'
         gtk.main_quit()
 
-    def open_cb(self, b):
-        print 'Open callback'
+    def open_file (self, name):
+        print 'Opening file ' + name
+        self.infile = IOSectionClass()
+        success = self.infile.OpenFile(name)
+        if (success != True):
+            print 'Cannot open file ' + name
+        else:
+            print 'Opened file successfully'
+            n = self.infile.CountSections()
+            for i in range(n):
+                self.infile.OpenSection(i)
+                self.treestore.append(None, [self.infile.GetName()])
+                self.infile.CloseSection()
         return True
+        
+    def open_cb(self, b):
+        response = self.chooser.run()
+        if response == gtk.RESPONSE_OK:
+            self.open_file (self.chooser.get_filename())
+        self.chooser.hide()
+        return False
 
 
 if __name__ == '__main__':
