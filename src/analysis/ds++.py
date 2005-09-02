@@ -219,7 +219,7 @@ class scalarClass:
         ax.hold(True)
         xMean = array([0.0, self.y.size()]) 
         yMean = array([self.mean, self.mean])
-        ax.plot(xMean, yMean, 'g')
+        ax.plot(xMean, yMean, 'g', 'LineWidth', 2.0)
         ax.set_title(self.name)
         ax.set_xlabel("block")
         ax.set_ylabel("Energy")
