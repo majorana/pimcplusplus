@@ -1,13 +1,14 @@
 #!/usr/bin/python 
 from matplotlib.axes import Subplot
 from matplotlib.figure import Figure
-from matplotlib.numerix import arange, sin, pi
+from matplotlib.numerix import arange, sin, pi, array
 from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
 from matplotlib.backends.backend_gtkagg import NavigationToolbar2GTKAgg as NavigationToolbar
-
+import sys
 import gtk
 import math
 from IO import *
+import stats
 
 class HelloWorld:
     def delete_event(self, widget, event, data=None):
@@ -29,6 +30,7 @@ class HelloWorld:
         self.treeview.append_column(self.tvcolumn)
         self.cell = gtk.CellRendererText()
         self.tvcolumn.pack_start(self.cell, True)
+#        self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.treeview.set_search_column(0)
         self.treeview.set_reorderable(True)
@@ -50,14 +52,14 @@ class HelloWorld:
         actiongroup = gtk.ActionGroup('MyActionGroup') 
 
         # Create an action for quitting the program using a stock item
-        quitaction = gtk.Action('Quit', '_Quit me!', 'Quit the Program',
+        quitaction = gtk.Action('Quit', '_Quit', 'Quit the Program',
                             gtk.STOCK_QUIT)
         quitaction.set_property('short-label', '_Quit')
         # Connect a callback to the action
         quitaction.connect('activate', self.quit_cb)
 
         # Create an action for openting the program using a stock item
-        openaction = gtk.Action('Open', '_Open me!', 'Open the Program',
+        openaction = gtk.Action('Open', '_Open', 'Open the Program',
                             gtk.STOCK_OPEN)
         openaction.set_property('short-label', '_Open')
         # Connect a callback to the action
@@ -107,17 +109,15 @@ class HelloWorld:
         self.chooser.add_filter(filter)
 
     def quit_cb(self, b):
-        print 'Quitting program'
         gtk.main_quit()
 
     def open_file (self, name):
-        print 'Opening file ' + name
+#        print 'Opening file ' + name
         self.infile = IOSectionClass()
         success = self.infile.OpenFile(name)
         if (success != True):
             print 'Cannot open file ' + name
         else:
-            print 'Opened file successfully'
             self.infile.OpenSection("Observables")
             numSecs = self.infile.CountSections()
             gofrRows = self.treestore.append(None, ["g(r)"])
@@ -157,18 +157,18 @@ class ScalarVar:
         self.name = varname
 
 class gofrClass:
-    def __init__(self, infile, rowNum):
-        self.rowNum = rowNum
+    def __init__(self, infile, path):
+        self.path = path
         self.name = infile.GetName()
         self.x = infile.ReadVar("x")
         self.y = infile.ReadVar("y")
         if (infile.ReadVar("Cumulative") == False):
             n = self.y.shape[0]
             self.y = sum(self.y) / n
-        print "New g(r) class with name " + self.name
+#        print "New g(r) class with name " + self.name
 
     def tv_callback (self, path, view_column):
-        if (path == self.rowNum):
+        if (path == self.path):
             self.plot()
     
     def plot(self):
@@ -181,7 +181,6 @@ class gofrClass:
         ax.set_title(self.name)
         ax.set_xlabel("r")
         ax.set_ylabel(r'$g(r)$')
-#        ax.title = self.name
         canvas = FigureCanvas(fig)
         vbox.pack_start(canvas)
         toolbar = NavigationToolbar(canvas, win)
@@ -195,7 +194,8 @@ class scalarClass:
         self.name = varName
         self.y = infile.ReadVar(varName)
         self.x = arange(0,self.y.size())
-        print "New scalar class with name " + self.name
+        (self.mean, self.var, self.error, self.kappa) = stats.Stats(self.y)
+#        print "New scalar class with name " + self.name
 
     def tv_callback (self, path, view_column):
         if (path == self.rowNum):
@@ -203,24 +203,78 @@ class scalarClass:
     
     def plot(self):
         win = gtk.Window()
-        vbox = gtk.VBox()
-        win.add (vbox)
+        winBox = gtk.HBox()
+        plotBox = gtk.VBox()
+        rightBox = gtk.VBox()
+        statFrame = gtk.Frame()
+        statBox = gtk.VBox()
+        winBox.pack_start(plotBox)
+        rightBox.pack_start(statFrame, True, False)
+        winBox.pack_start(rightBox, False, False)
+#        statFrame.add (statBox)
+        win.add (winBox)
         fig = Figure(figsize=(5,4), dpi=100)
         ax = fig.add_subplot(111)
         ax.plot(self.x,self.y)
+        ax.hold(True)
+        xMean = array([0.0, self.y.size()]) 
+        yMean = array([self.mean, self.mean])
+        ax.plot(xMean, yMean, 'g')
         ax.set_title(self.name)
         ax.set_xlabel("block")
         ax.set_ylabel("Energy")
         canvas = FigureCanvas(fig)
-        vbox.pack_start(canvas)
+        plotBox.pack_start(canvas)
         toolbar = NavigationToolbar(canvas, win)
-        vbox.pack_start(toolbar, False, False)
-        win.set_size_request(520,500)
+        plotBox.pack_start(toolbar, False, False)
+        # Make statistics box
+        statFrame.set_label("Statistics")
+        statTable = gtk.Table(3, 2, False)
+        statFrame.add(statTable)
+
+        (meanStr, errorStr) = MeanErrorString(self.mean, self.error)
+        meanLabel1 = gtk.Label("Mean: ")
+        meanLabel2 = gtk.Label(meanStr + " +/- " + errorStr)
+        statTable.attach(meanLabel1, 0, 1, 0, 1, gtk.SHRINK)
+        statTable.attach(meanLabel2, 1, 2, 0, 1, gtk.SHRINK)
+
+        varStr   = '%1.2f' % self.var
+        varLabel1 = gtk.Label("Variance:")
+        varLabel2 = gtk.Label(varStr)
+        statTable.attach(varLabel1, 0, 1, 1, 2, gtk.SHRINK)
+        statTable.attach(varLabel2, 1, 2, 1, 2, gtk.SHRINK)
+
+        kappaStr= '%1.2f' % self.kappa
+        kappaLabel1=gtk.Label("Kappa: ")
+        kappaLabel2=gtk.Label(kappaStr)
+        statTable.attach(kappaLabel1, 0, 1, 2, 3, gtk.SHRINK)
+        statTable.attach(kappaLabel2, 1, 2, 2, 3, gtk.SHRINK)
+        
+        win.set_size_request(650,500)
         win.show_all()
 
-if __name__ == '__main__':
-    ba = HelloWorld()
-    gtk.main()
+def MeanErrorString (mean, error):
+     if (mean!=0.0):
+          meanDigits = math.floor(math.log(abs(mean))/math.log(10))
+     else:
+          meanDigits=2
+     if (error!=0.0):
+          rightDigits = -math.floor(math.log(error)/math.log(10))+1
+     else:
+          rightDigits=2
+     if (rightDigits < 0):
+          rightDigits = 0
+     formatstr = '%1.' + '%d' % rightDigits + 'f'
+     meanstr  = formatstr % mean
+     errorstr = formatstr % error
+     return (meanstr, errorstr)
 
+if __name__ == '__main__':
+    fileName = sys.argv[1]
+    ba = HelloWorld()
+    if fileName!="":
+        ba.open_file(fileName)
+    gtk.main()
+    
 
 
