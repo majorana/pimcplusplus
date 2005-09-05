@@ -161,12 +161,13 @@ FixedPhaseClass::Read(IOSectionClass &in)
   /// k_x = pi*twist_angle_x/L_x
   Array<double,2> twistAngles;
   if (in.ReadVar ("TwistAngles", twistAngles)) {
-    if (twistAngles.extent(0) != PathData.InterComm.NumProcs()) {
-      cerr << "Error:  Number of twist angles must match number of clones.\n" 
-	   << "        Number of twist angles:  "  << twistAngles.size() << endl 
-	   << "        Number of clones:        "  << PathData.InterComm.NumProcs() << endl;
-      abort();
-    }
+    if (PathData.IntraComm.MyProc()==0)
+      if (twistAngles.extent(0) != PathData.InterComm.NumProcs()) {
+	cerr << "Error:  Number of twist angles must match number of clones.\n" 
+	     << "        Number of twist angles:  "  << twistAngles.size() << endl 
+	     << "        Number of clones:        "  << PathData.InterComm.NumProcs() << endl;
+	abort();
+      }
     assert (twistAngles.extent(1) == 3);
     kVec[0] = twistAngles(PathData.GetCloneNum(),0) * M_PI/PathData.Path.GetBox()[0];
     kVec[1] = twistAngles(PathData.GetCloneNum(),1) * M_PI/PathData.Path.GetBox()[1];

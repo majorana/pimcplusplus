@@ -72,10 +72,13 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
   if (iAmRoot) {
     string outFileBase;
     assert(in.ReadVar("OutFileBase",outFileBase));
+    int fileStart;
+    if (!in.ReadVar("FileStart", fileStart))
+      fileStart = 0;
     // Allow for tilde-expansion in these files
     outFileBase = ExpandFileName (outFileBase);
     ostringstream cloneNum;
-    cloneNum << PathData.GetCloneNum();
+    cloneNum << (PathData.GetCloneNum() + fileStart);
     OutFileName = 
       outFileBase+ "." + cloneNum.str() + ".h5";
     OutFile.NewFile(OutFileName);

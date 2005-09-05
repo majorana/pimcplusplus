@@ -29,7 +29,7 @@ void PathDataClass::Read (IOSectionClass &in)
 //     Random.Init (seed, numClones);
 //   else
 //     Random.InitWithRandomSeed(numClones);
-  Random.Init (314159, numClones);
+  Random.Init (12314159, numClones);
 }
 
 
