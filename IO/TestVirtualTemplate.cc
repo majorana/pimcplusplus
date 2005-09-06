@@ -182,10 +182,15 @@ private:
   TinyVector<MyRange,RANK> DiscRanges;
   TinyVector<int,RANK> Indices;
 
-  template<typename T1, typename T2, typename T3, typename T4,  typename T5, typename T6,
-	   typename T7, typename T8, typename T9, typename T10, typename T11>
-  typename HDF5SliceMaker<T,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>::SliceType 
-  Slice(T1 r1, T2 r2, T3 r3, T4 r4, T5 r5, T6 r6);
+  ////////////////////////////////////////////////////////////////////////
+  /// We use the Slice function to construct a subslice of the current ///
+  /// variable.  This is called by the Read function.                  ///
+  ////////////////////////////////////////////////////////////////////////
+  template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
+	   typename T6, typename T7, typename T8, typename T9, typename T10>
+  typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType &
+  Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10);
+
 
 public:
   int rank() { return RANK; }
@@ -263,15 +268,6 @@ public:
 	    T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9) 
   { nilArraySection n0;
     return Read(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, n0); }
-
-  ////////////////////////////////////////////////////////////////////////
-  /// We use the Slice function to construct a subslice of the current ///
-  /// variable.  This is called by the Read function.                  ///
-  ////////////////////////////////////////////////////////////////////////
-  template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
-	   typename T6, typename T7, typename T8, typename T9, typename T10>
-  typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType &
-  Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10);
 
   void Write(const blitz::Array<T,RANK> &data);
   /// The following Write functions write subarrays and slices of the
@@ -491,6 +487,18 @@ VarHDF5<double,4>::Write(const blitz::Array<double,4> &data)
 
 }
 
+template<typename T>
+class SliceNum {
+public:
+  static const int isSlice = 0;
+};
+
+template<>
+class SliceNum<int> {
+public:
+  static const int isSlice = 1;
+};
+
 template<class T, int RANK>
 bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val)
 {
@@ -509,6 +517,118 @@ bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val)
     newVar->Read(val);
 }
 
+template<class T, int RANK, typename T0, typename T1, typename T2, typename T3, typename T4,
+	 typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10)
+{
+  string types[4] = {"double", "int", "string", "bool"};
+  static const int numSlices = SliceNum<T0>::isSlice+SliceNum<T1>::isSlice+SliceNum<T2>::isSlice+
+    SliceNum<T3>::isSlice+SliceNum<T4>::isSlice+SliceNum<T5>::isSlice+SliceNum<T6>::isSlice+
+    SliceNum<T7>::isSlice+SliceNum<T7>::isSlice+SliceNum<T8>::isSlice+SliceNum<T9>::isSlice+
+    SliceNum<T10>::isSlice;
+  /// The rank of the array must be the rank of the IO variable minus
+  /// the number of slices by integer singlet ranges.
+  static const int rank=numSlices+RANK;
+  Var<T,RANK> *newVar = dynamic_cast<Var<T,rank>*>(var);
+  if (newVar == NULL) {
+    T a;
+    cerr << "Type mismatch in ReadVar:\n"
+	 << "Variable has rank " << var->GetRank() 
+	 << " and type " << var->GetTypeString() << ".\n"
+	 << "Array    has rank " << RANK << " and type " << TypeString(a) 
+	 << ".\n";
+    abort();
+  }
+  else
+    newVar->Read(val);
+}
+
+
+template<class T, int RANK, typename T0, typename T1, typename T2, typename T3, typename T4,
+	 typename T5, typename T6, typename T7, typename T8, typename T9>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, n0);
+}
+
+template<class T, int RANK, typename T0, typename T1, typename T2, typename T3, typename T4,
+	 typename T5, typename T6, typename T7, typename T8>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, s1, s2, s3, s4, s5, s6, s7, s8, n0, n0);
+}
+
+template<class T, int RANK, typename T0, typename T1, typename T2, typename T3, typename T4,
+	 typename T5, typename T6, typename T7>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, s1, s2, s3, s4, s5, s6, s7, n0, n0, n0);
+}
+
+template<class T, int RANK, typename T0, typename T1, typename T2, typename T3, typename T4,
+	 typename T5, typename T6>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, s1, s2, s3, s4, s5, s6, n0, n0, n0, n0);
+}
+
+template<class T, int RANK, typename T0, typename T1, typename T2, typename T3, typename T4,
+	 typename T5>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, s1, s2, s3, s4, s5, n0, n0, n0, n0, n0);
+}
+
+template<class T, int RANK, typename T0, typename T1, typename T2, typename T3, typename T4>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1, T2 s2, T3 s3, T4 s4)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, s1, s2, s3, s4, n0, n0, n0, n0, n0, n0);
+}
+
+template<class T, int RANK, typename T0, typename T1, typename T2, typename T3>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1, T2 s2, T3 s3)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, s1, s2, s3, n0, n0, n0, n0, n0, n0, n0);
+}
+
+template<class T, int RANK, typename T0, typename T1, typename T2>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1, T2 s2)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, s1, s2, n0, n0, n0, n0, n0, n0, n0, n0);
+}
+
+template<class T, int RANK, typename T0, typename T1>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0, T1 s1)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, s1, n0, n0, n0, n0, n0, n0, n0, n0, n0);
+}
+
+template<class T, int RANK, typename T0>
+bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val, 
+	     T0 s0)
+{
+  nilArraySection n0;
+  return ReadVar(var, s0, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0);
+}
 
 // template<class T, int RANK>
 // bool VarHDF5<T,RANK>::Read(Array<T,RANK> &val, TinyVector<Range,RANK> ranges=Range::all())
@@ -527,49 +647,6 @@ bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val)
 //   }
 //   H5selectHyperslab(H5S_select, count, start, stride, NULL);
 // }
-
-
-
-template<class T, int RANK>
-template<typename T1, typename T2, typename T3, typename T4,  typename T5, typename T6,
-	 typename T7, typename T8, typename T9, typename T10, typename T11>
-typename HDF5SliceMaker<T,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>::SliceType 
-VarHDF5<T,RANK>::Slice(T1 r1, T2 r2, T3 r3, T4 r4, T5 r5, T6 r6)
-{
-  static const int numValid = SliceInfo<T,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>::numValidTypes;
-  assert(numValid <= RANK);
-  int i=0;
-  if(ArraySectionInfo<T1>::rank==0) {
-  }
-      
-      
-
-}
-
-template<typename T>
-class SubrangeType {
-public:
-  static const bool isInt=false, isRange=false, isNil=false;
-};
-
-template<>
-class SubrangeType<Range> {
-public:
-  static const bool isInt=false, isRange=true, isNil=false;
-};
-
-template<>
-class SubrangeType<int> {
-public:
-  static const bool isInt=true, isRange=false, isNil=false;
-};
-
-template<>
-class SubrangeType<nilArraySection> {
-public:
-  static const bool isInt=false, isRange=false, isNil=false;
-};
-
 
 template<class T, int RANK>
 template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -630,7 +707,77 @@ VarHDF5<T,RANK>::Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T
       memDimsIndex++;
     }
   }
-  
+  if (RANK > 4) {
+    Range r4(s4);
+    start[4] = r4.first(4);
+    count[4] = (r4.last(dims[4]-1)-start[4])/r4.stride + 1;
+    stride[4] = r4.stride();
+    if (ArraySectionInfo<T0>::rank==1) {
+      memDims[memDimsIndex]=count[4];
+      memDimsIndex++;
+    }
+  }
+  if (RANK > 5) {
+    Range r5(s5);
+    start[5] = r5.first(5);
+    count[5] = (r5.last(dims[5]-1)-start[5])/r5.stride + 1;
+    stride[5] = r5.stride();
+    if (ArraySectionInfo<T0>::rank==1) {
+      memDims[memDimsIndex]=count[5];
+      memDimsIndex++;
+    }
+  }
+  if (RANK > 6) {
+    Range r6(s6);
+    start[6] = r6.first(6);
+    count[6] = (r6.last(dims[6]-1)-start[6])/r6.stride + 1;
+    stride[6] = r6.stride();
+    if (ArraySectionInfo<T0>::rank==1) {
+      memDims[memDimsIndex]=count[6];
+      memDimsIndex++;
+    }
+  }
+  if (RANK > 7) {
+    Range r7(s7);
+    start[7] = r7.first(7);
+    count[7] = (r7.last(dims[7]-1)-start[7])/r7.stride + 1;
+    stride[7] = r7.stride();
+    if (ArraySectionInfo<T0>::rank==1) {
+      memDims[memDimsIndex]=count[7];
+      memDimsIndex++;
+    }
+  }
+  if (RANK > 8) {
+    Range r8(s8);
+    start[8] = r8.first(8);
+    count[8] = (r8.last(dims[8]-1)-start[8])/r8.stride + 1;
+    stride[8] = r8.stride();
+    if (ArraySectionInfo<T0>::rank==1) {
+      memDims[memDimsIndex]=count[8];
+      memDimsIndex++;
+    }
+  }
+  if (RANK > 9) {
+    Range r9(s9);
+    start[9] = r9.first(9);
+    count[9] = (r9.last(dims[9]-1)-start[9])/r9.stride + 1;
+    stride[9] = r9.stride();
+    if (ArraySectionInfo<T0>::rank==1) {
+      memDims[memDimsIndex]=count[9];
+      memDimsIndex++;
+    }
+  }
+  if (RANK > 10) {
+    Range r10(s10);
+    start[10] = r10.first(10);
+    count[10] = (r10.last(dims[10]-1)-start[10])/r10.stride + 1;
+    stride[10] = r10.stride();
+    if (ArraySectionInfo<T0>::rank==1) {
+      memDims[memDimsIndex]=count[10];
+      memDimsIndex++;
+    }
+  }
+
   newVar.MemSpaceID = H5Screate_simple(SliceInfo<T,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank,
 				       memDims, memDims);
 
