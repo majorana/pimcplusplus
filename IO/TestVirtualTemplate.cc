@@ -499,6 +499,19 @@ public:
   static const int isSlice = 1;
 };
 
+
+template<typename T0, typename T1, typename T2, typename T3, typename T4>
+int CountIntParams(T0 v0, T1 v1, T2 v2, T3 v3, T4 v4)
+{
+  static const int numInt = 
+    SliceNum<T0>::isSlice +
+    SliceNum<T1>::isSlice +
+    SliceNum<T2>::isSlice +
+    SliceNum<T3>::isSlice +
+    SliceNum<T4>::isSlice;
+  return numInt;
+}
+
 template<class T, int RANK>
 bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val)
 {
@@ -543,6 +556,7 @@ bool ReadVar(VarBase *var, blitz::Array<T,RANK> &val,
   else
     newVar->Read(val);
 }
+
 
 
 template<class T, int RANK, typename T0, typename T1, typename T2, typename T3, typename T4,
