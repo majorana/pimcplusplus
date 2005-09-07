@@ -803,6 +803,11 @@ VarHDF5<T,RANK>::Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T
 
 main()
 {
+  double d;
+  int i;
+  cerr << "CountIntParams = " << CountIntParams(d,d,d,i,i) << endl;
+
+
   Var<double,4> *mydouble4Var;
   VarBase *myVar;
   
