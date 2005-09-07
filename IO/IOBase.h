@@ -5,7 +5,7 @@
 #include <hdf5.h>
 using namespace blitz;
 
-typedef enum { DOUBLE_TYPE, INT_TYPE, STRING_TYPE, BOOL_TYPE } IODataType;
+typedef enum { DOUBLE_TYPE, INT_TYPE, STRING_TYPE, BOOL_TYPE, INVALID } IODataType;
 typedef enum { HDF5_TYPE, ASCII_TYPE} IOFileType;
 
 class IOVarBase
@@ -77,6 +77,72 @@ public:
 };
 
 
+template<typename T> class TypeConvert
+{ public: static const IODataType Type = INVALID; };
+
+template<> class TypeConvert<double>
+{ public: static const IODataType Type = DOUBLE_TYPE; };
+
+template<> class TypeConvert<int>
+{ public: static const IODataType Type = INT_TYPE; };
+
+template<> class TypeConvert<string>
+{ public: static const IODataType Type = STRING_TYPE; };
+
+template<> class TypeConvert<bool>
+{ public: static const IODataType Type = BOOL_TYPE; };
+  
+
+
+
+template<typename T, int RANK>
+class IOVarASCII : public IOVarBase
+{
+protected:
+  Array<T,RANK> MyValue;
+public:
+  int GetRank();
+  IODataType GetType();
+  IOFileType GetFileType();
+  string GetTypeString();
+  template<typename T0, typename T1, typename T2, typename T3, typename T4,
+	   typename T5, typename T6, typename T7, typename T8, typename T9,
+	   typename T10>
+  bool VarRead(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
+	       T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10);
+};
+
+
+template<typename T, int RANK> int
+IOVarASCII<T,RANK>::GetRank()
+{
+  return RANK;
+}
+
+template<typename T, int RANK> IODataType
+IOVarASCII<T,RANK>::GetType()
+{
+  return TypeConvert<T>::IODataType;
+}
+
+template<typename T, int RANK> IOFileType
+IOVarASCII<T,RANK>::GetFileType()
+{
+  return ASCII_TYPE;
+}
+
+
+
+
+template<typename T, int RANK> 
+template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
+	 typename T6, typename T7, typename T8, typename T9, typename T10> bool
+IOVarASCII<T,RANK>::VarRead(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
+			    T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10)
+{
+  val = MyValue(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10);
+}
+
 // template<typename T,  typename T0, typename T1, typename T2, typename T3, 
 // 	 typename T4, typename T5, typename T6, typename T7, typename T8, 
 // 	 typename T9, typename T10> bool
@@ -85,6 +151,9 @@ public:
 // {
 
 // }	
+
+
+
 
 template<typename T>
 class SliceCheck
@@ -99,8 +168,6 @@ class SliceCheck<int>
 public:
   static const int isSlice = 1;
 };
-
-
 
 
 template<typename T,  int RANK, typename T0, typename T1, typename T2, 
@@ -124,10 +191,10 @@ IOVarBase::Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4,
       
       newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
     }
-//     else if (GetFileType() == ASCII_TYPE) {
-//       IOVarASCII<T,varRank>* newVar = dynamic_cast<VarASCII<T,varRank>*>(this); 
-//       newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
-//     }
+    else if (GetFileType() == ASCII_TYPE) {
+      IOVarASCII<T,varRank>* newVar = dynamic_cast<IOVarASCII<T,varRank>*>(this); 
+      newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+    }
 
 }	
 
