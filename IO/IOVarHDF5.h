@@ -63,12 +63,13 @@ namespace IO {
     }
     
     IOVarHDF5(hid_t datasetID, hid_t diskSpaceID, hid_t memSpaceID, 
-	      hid_t boolType, bool ownDataset=false)
+	      hid_t boolTypeID, bool ownDataset=false)
     {
       DatasetID   = datasetID;
       DiskSpaceID = diskSpaceID;
       MemSpaceID  = memSpaceID;
       OwnDataset  = ownDataset;
+      BoolTypeID  = boolTypeID;
     }
     ~IOVarHDF5()
     {
