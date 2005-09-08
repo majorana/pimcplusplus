@@ -4,7 +4,10 @@
 
 #include "IOVarBase.h"
 
+
+
 namespace IO {
+#define MAX_HDF5_STRING_LENGTH 200
   ///////////////////////////////////////////////////////////
   ///                HDF5 Specializations                 ///  
   ///////////////////////////////////////////////////////////
@@ -27,7 +30,7 @@ namespace IO {
   class IOVarHDF5 : public IOVarBase
   {
   protected:
-    hid_t DatasetID, DiskSpaceID, MemSpaceID;
+    hid_t DatasetID, DiskSpaceID, MemSpaceID, BoolTypeID;
     template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
 	     typename T6, typename T7, typename T8, typename T9, typename T10>
     typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType &
@@ -59,7 +62,8 @@ namespace IO {
 
     }
     
-    IOVarHDF5(hid_t datasetID, hid_t diskSpaceID, hid_t memSpaceID, bool ownDataset=false)
+    IOVarHDF5(hid_t datasetID, hid_t diskSpaceID, hid_t memSpaceID, 
+	      hid_t boolType, bool ownDataset=false)
     {
       DatasetID   = datasetID;
       DiskSpaceID = diskSpaceID;
@@ -77,100 +81,49 @@ namespace IO {
 
   };
 
-  IOVarBase *NewHDF5Var(hid_t dataSetID)
+  ////////////////////////////////////////////////////////////////
+  /// This function creates a new IOVarHDF5 from a dataset id. /// 
+  ////////////////////////////////////////////////////////////////
+  IOVarBase *NewIOVarHDF5(hid_t dataSetID, hid_t boolType);
+  
+
+  ////////////////////////////////////////////////////////////////
+  /// This function creates a new HDF5 dataset from a group id ///
+  /// and a variable.                                          ///
+  ////////////////////////////////////////////////////////////////
+  template<typename T, int RANK>
+  IOVarBase *NewIOVarHDF5(hid_t groupID, string name, Array<T,RANK> &val,
+			  hid_t boolType)
   {
-    /// First, figure out the rank
-    hid_t diskSpaceID = H5Dget_space(dataSetID);
-    hid_t memSpaceID  = H5Scopy(diskSpaceID);
-    int rank = H5Sget_simple_extent_ndims(diskSpaceID);
+    /// First, create a new DataSpace.
+    TinyVector<hsize_t, RANK> h5Dims, h5MaxDims;
+    h5Dims = val.shape();
+    h5MaxDims = val.shape();
+    h5MaxDims[0] = H5S_UNLIMITED;
+    hid_t diskSpaceID = H5Screate_simple(RANK, &(h5Dims[0]), &(h5MaxDims));
+    hid_t typeID;
+    bool mustCloseType = false;
+    if (TypeConvert<T>::Type == DOUBLE_TYPE)
+      typeID = H5T_NATIVE_DOUBLE;
+    if (TypeConvert<T>::Type == INT_TYPE)
+      typeID = H5T_NATIVE_INT;
+    if (TypeConvert<T>::Type == STRING_TYPE) {
+      typeID = H5Tcopy (H5T_C_S1);
+      H5Tset_size (typeID, MAX_HDF5_STRING_LENGTH+1);
+      mustCloseType = true;
+    }
+    else if (TypeConvert<T>::Type == BOOL_TYPE) {
+      typeID = boolType;
+    }
+    
+    hid_t datasetID = H5Dcreate (groupID, name.c_str(), typeID, diskSpaceID, H5P_DEFAULT);
 
-    /// First, figure out what type it is.
-    hid_t typeID = H5Dget_type(dataSetID);
-    H5T_class_t classID = H5Tget_class(dataSetID);
-    H5Tclose (typeID);
-    if (classID == H5T_FLOAT) {
-      if (rank == 1) 
-	return new IOVarHDF5<double,1> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 2) 
-	return new IOVarHDF5<double,2> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 3) 
-	return new IOVarHDF5<double,3> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 4) 
-	return new IOVarHDF5<double,4> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 5) 
-	return new IOVarHDF5<double,5> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 6) 
-	return new IOVarHDF5<double,6> (dataSetID, diskSpaceID, memSpaceID, true);
-    }
-    if (classID == H5T_INTEGER) {
-      if (rank == 1) 
-	return  new IOVarHDF5<int,1> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 2) 
-	return new IOVarHDF5<int,2> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 3) 
-	return new IOVarHDF5<int,3> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 4) 
-	return new IOVarHDF5<int,4> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 5) 
-	return new IOVarHDF5<int,5> (dataSetID, diskSpaceID, memSpaceID, true);
-      else if (rank == 6) 
-	return new IOVarHDF5<int,6> (dataSetID, diskSpaceID, memSpaceID, true);
-    }
-    if (classID == H5T_STRING) {
-      if (rank == 1) {
-	IOVarHDF5<string,1> *newVar = new IOVarHDF5<string,1> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 2) {
-	IOVarHDF5<string,2> *newVar = new IOVarHDF5<string,2> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 3) {
-	IOVarHDF5<string,3> *newVar = new IOVarHDF5<string,3> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 4) {
-	IOVarHDF5<string,4> *newVar = new IOVarHDF5<string,4> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 5) {
-	IOVarHDF5<string,5> *newVar = new IOVarHDF5<string,5> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 6) {
-	IOVarHDF5<string,6> *newVar = new IOVarHDF5<string,6> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-    }
-    if (classID == H5T_ENUM){
-      if (rank == 1) {
-	IOVarHDF5<bool,1> *newVar = new IOVarHDF5<bool,1> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 2) {
-	IOVarHDF5<bool,2> *newVar = new IOVarHDF5<bool,2> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 3) {
-	IOVarHDF5<bool,3> *newVar = new IOVarHDF5<bool,3> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 4) {
-	IOVarHDF5<bool,4> *newVar = new IOVarHDF5<bool,4> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 5) {
-	IOVarHDF5<bool,5> *newVar = new IOVarHDF5<bool,5> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-      else if (rank == 6) {
-	IOVarHDF5<bool,6> *newVar = new IOVarHDF5<bool,6> (dataSetID, diskSpaceID, memSpaceID, true);
-	return newVar;
-      }
-    }
+    if (mustCloseType)
+      H5Tclose (typeID);
+    H5Sclose(diskSpaceID);
+
+    return NewIOVarHDF5(datasetID, boolType);
   }
-
-
 
   template<typename T, int RANK> 
   template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
@@ -316,6 +269,7 @@ namespace IO {
 
   }
 
+
   /// This routine should cover double and int types.  Strings and bools
   /// need to be handled explicitly
   template<class T, int RANK> bool
@@ -330,9 +284,44 @@ namespace IO {
       cerr << "Unknown data type in IOVarHDF5<" << TypeString(a) << ", " 
 	   << RANK << ">" << endl;
     }
+
+    /// Resize val to appropriate size
+    TinyVector<hsize_t,1> h5dims;
+    TinyVector<int,1> dims;
+    H5Sget_simple_extent_dims(MemSpaceID, &(h5dims[0]), NULL);
+    dims = h5dims;
+    val.resize(dims);
+   
     /// Now, call HDF5 to do the actual reading.
     herr_t status = 
       H5Dread (DatasetID, memType, MemSpaceID, DiskSpaceID, H5P_DEFAULT, val.data());
+
+  }
+
+  /// This routine should cover double and int types.  Strings and bools
+  /// need to be handled explicitly
+  template<class T, int RANK> bool
+  IOVarHDF5<T,RANK>::VarWrite(Array<T,RANK> &val)
+  {
+    /// Check to see if we have the write dimensions.
+    assert (H5Sget_simple_extent_ndims(MemSpaceID) == RANK);
+    TinyVector<hsize_t,RANK> dims;
+    H5S_get_simple_extent_dims(MemSpaceID, &(dims[0]), NULL);			      
+    for (int i=0; i < RANK; i++)
+      assert (dims[i] == val.extent(i));
+
+    IODataType dataType = TypeConvert<T>::Type;
+    hid_t memType;
+    if      (dataType == DOUBLE_TYPE) memType = H5T_NATIVE_DOUBLE;
+    else if (dataType == INT_TYPE)    memType = H5T_NATIVE_INT;
+    else {
+      T a;
+      cerr << "Unknown data type in IOVarHDF5<" << TypeString(a) << ", " 
+	   << RANK << ">" << endl;
+    }
+    /// Now, call HDF5 to do the actual writing.
+    herr_t status = 
+      H5Dwrite (DatasetID, memType, MemSpaceID, DiskSpaceID, H5P_DEFAULT, val.data());
 
   }
 
