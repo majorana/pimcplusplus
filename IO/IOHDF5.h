@@ -43,6 +43,7 @@ namespace IO {
     void IncludeSection (IOTreeClass *);
     void CloseFile();
     void FlushFile();
+    hid_t GetBoolType() { return BoolType; }
     IOTreeHDF5Class() : IOTreeClass()
     {
       IsOpen=false;

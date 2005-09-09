@@ -19,7 +19,7 @@ namespace IO {
     virtual int GetRank()            = 0;
     virtual IODataType GetType()     = 0;
     virtual IOFileType GetFileType() = 0;
-    virtual string GetTypeString()   = 0;
+    //    virtual string GetTypeString()   = 0;
     string GetName () const
     { return Name; }
     virtual int GetExtent(int dim)   = 0;
@@ -176,11 +176,11 @@ namespace IO {
 
 
 
-  template<typename T> string TypeString(T val) {  return "unknown"; }
-  template<> string TypeString(double val)      {  return "double";  }
-  template<> string TypeString(int val)         {  return "int";     }
-  template<> string TypeString(string val)      {  return "string";  }
-  template<> string TypeString(bool val)        {  return "bool";    }
+  template<typename T> inline string TypeString(T val) {  return "unknown"; }
+  template<> string inline TypeString(double val)      {  return "double";  }
+  template<> string inline TypeString(int val)         {  return "int";     }
+  template<> string inline TypeString(string val)      {  return "string";  }
+  template<> string inline TypeString(bool val)        {  return "bool";    }
 
 
 }

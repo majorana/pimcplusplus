@@ -1,64 +1,64 @@
 #include "IOVarHDF5.h"
 
-using namespace IO;
+namespace IO {
 
-template<> bool
-IOVarHDF5<string,1>::VarRead(Array<string,1> &val)
-{
+  template<> bool
+  IOVarHDF5<string,1>::VarRead(Array<string,1> &val)
+  {
+    
+  }
   
-}
-
-template<> bool
-IOVarHDF5<string,2>::VarRead(Array<string,2> &val)
-{
+  template<> bool
+  IOVarHDF5<string,2>::VarRead(Array<string,2> &val)
+  {
+    
+  }
   
-}
-
-template<> bool
-IOVarHDF5<string,3>::VarRead(Array<string,3> &val)
-{
+  template<> bool
+  IOVarHDF5<string,3>::VarRead(Array<string,3> &val)
+  {
+    
+  }
   
-}
-
-template<> bool
-IOVarHDF5<string,4>::VarRead(Array<string,4> &val)
-{
+  template<> bool
+  IOVarHDF5<string,4>::VarRead(Array<string,4> &val)
+  {
+    
+  }
   
-}
-
-
-template<> bool
-IOVarHDF5<bool,1>::VarRead(Array<bool,1> &val)
-{
   
-}
-
-template<> bool
-IOVarHDF5<bool,2>::VarRead(Array<bool,2> &val)
-{
+  template<> bool
+  IOVarHDF5<bool,1>::VarRead(Array<bool,1> &val)
+  {
+    
+  }
   
-}
-
-template<> bool
-IOVarHDF5<bool,3>::VarRead(Array<bool,3> &val)
-{
+  template<> bool
+  IOVarHDF5<bool,2>::VarRead(Array<bool,2> &val)
+  {
+    
+  }
   
-}
-
-template<> bool
-IOVarHDF5<bool,4>::VarRead(Array<bool,4> &val)
-{
+  template<> bool
+  IOVarHDF5<bool,3>::VarRead(Array<bool,3> &val)
+  {
+    
+  }
   
-}
-
-
-IOVarBase *NewIOVarHDF5(hid_t dataSetID, hid_t boolType)
+  template<> bool
+  IOVarHDF5<bool,4>::VarRead(Array<bool,4> &val)
+  {
+    
+  }
+  
+  
+  IOVarBase *NewIOVarHDF5(hid_t dataSetID, hid_t boolType)
   {
     /// First, figure out the rank
     hid_t diskSpaceID = H5Dget_space(dataSetID);
     hid_t memSpaceID  = H5Scopy(diskSpaceID);
     int rank = H5Sget_simple_extent_ndims(diskSpaceID);
-
+    
     /// First, figure out what type it is.
     hid_t typeID = H5Dget_type(dataSetID);
     H5T_class_t classID = H5Tget_class(dataSetID);
@@ -120,3 +120,4 @@ IOVarBase *NewIOVarHDF5(hid_t dataSetID, hid_t boolType)
 	return new IOVarHDF5<bool,6> (dataSetID, diskSpaceID, memSpaceID, boolType, true);
     }
   }
+}

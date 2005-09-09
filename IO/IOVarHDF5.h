@@ -37,7 +37,7 @@ namespace IO {
     int GetRank();
     IODataType GetType();
     IOFileType GetFileType();
-    string GetTypeString();
+    //    string GetTypeString();
 
     int GetExtent (int dim);
     void Resize(int n);
@@ -115,7 +115,7 @@ namespace IO {
   /// variable for writing.                                    ///
   ////////////////////////////////////////////////////////////////
   template<typename T, int RANK>
-  IOVarBase *NewIOVarHDF5(hid_t groupID, string name, Array<T,RANK> &val,
+  IOVarBase *NewIOVarHDF5(hid_t groupID, string name, const Array<T,RANK> &val,
 			  hid_t boolType)
   {
     /// First, create a new DataSpace.
@@ -123,7 +123,7 @@ namespace IO {
     h5Dims = val.shape();
     h5MaxDims = val.shape();
     h5MaxDims[0] = H5S_UNLIMITED;
-    hid_t diskSpaceID = H5Screate_simple(RANK, &(h5Dims[0]), &(h5MaxDims));
+    hid_t diskSpaceID = H5Screate_simple(RANK, &(h5Dims[0]), &(h5MaxDims[0]));
     hid_t typeID;
     bool mustCloseType = false;
     if (TypeConvert<T>::Type == DOUBLE_TYPE)
@@ -349,6 +349,23 @@ namespace IO {
     
     return (status == 0);
   }
+
+
+  template<typename T, int RANK> IOFileType
+  IOVarHDF5<T,RANK>::GetFileType() 
+  { return HDF5_TYPE; }
+  
+  template<typename T, int RANK> int 
+  IOVarHDF5<T,RANK>::GetRank()
+  { return RANK; }
+
+  template<typename T, int RANK> IODataType 
+  IOVarHDF5<T,RANK>::GetType()
+  { 
+    return TypeConvert<T>::Type;
+  }
+
+  IOVarBase *NewIOVarHDF5(hid_t dataSetID, hid_t boolType);
 
   template<> bool IOVarHDF5<string,0>::VarRead(string &val);
   template<> bool IOVarHDF5<string,1>::VarRead(Array<string,1> &val);

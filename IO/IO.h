@@ -16,7 +16,7 @@ namespace IO {
 	abort();
       }
       hid_t groupID = h5Tree->GroupID;
-      hid_t boolType = h5Tree->BoolType;
+      hid_t boolType = h5Tree->GetBoolType();
       IOVarBase *newVar = NewIOVarHDF5(groupID, name, val, boolType);
       VarList.push_back(newVar);
     }
@@ -39,7 +39,7 @@ namespace IO {
 	abort();
       }
       hid_t groupID = h5Tree->GroupID;
-      hid_t boolType = h5Tree->BoolType;
+      hid_t boolType = h5Tree->GetBoolType();
       IOVarBase *newVar = NewIOVarHDF5(groupID, name, val, boolType);
       VarList.push_back(newVar);
     }
