@@ -7,7 +7,7 @@
 #include <blitz/array.h>
 #include <fstream>
 
-#include "IOVarBase.h"
+#include "IOVar.h"
 
 using namespace std;
 namespace IO 
@@ -31,6 +31,7 @@ namespace IO
     int MyNumber, CurrSecNum;
     virtual void PrintTree()=0;
     virtual void PrintTree(int numIndent)=0;
+    virtual IOFileType GetFileType() = 0;
 
     IOTreeClass* Parent;
     /// This is the empty string unless I'm the root node of some file. 
@@ -108,29 +109,10 @@ namespace IO
     virtual void IncludeSection (IOTreeClass *) = 0;
     virtual void CloseFile() = 0;
     virtual void FlushFile() = 0;
-    virtual void WriteVar(string name, double val)=0;
-    virtual void WriteVar(string name, blitz::Array<double,1> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<double,2> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<double,3> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<double,4> &val)=0;
 
-    virtual void WriteVar(string name, int val)=0;
-    virtual void WriteVar(string name, blitz::Array<int,1> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<int,2> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<int,3> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<int,4> &val)=0;
-
-    virtual void WriteVar(string name, string val)=0;
-    virtual void WriteVar(string name, blitz::Array<string,1> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<string,2> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<string,3> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<string,4> &val)=0;
-
-    virtual void WriteVar(string name, bool val)=0;
-    virtual void WriteVar(string name, blitz::Array<bool,1> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<bool,2> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<bool,3> &val)=0;
-    virtual void WriteVar(string name, blitz::Array<bool,4> &val)=0;
+    /// These create a new variable with the given name and value:
+    template<typename T> bool WriteVar (string name, T val);
+    template<typename T, int RANK> bool WriteVar (string name, Array<T,RANK> &val);
 
     /// Append a value to a variable of dimension of 1 higher than val.
     /// i.e. Add a double to an blitz::Array<double,1> or add blitz::Array<double,1>
@@ -247,30 +229,6 @@ namespace IO
   }
 
 
-
-
-
-  class OutputSectionClass
-  {
-  public:
-    virtual bool OpenFile(string fileName)                 = 0;
-    virtual void CloseFile()                               = 0;
-    virtual void OpenSection(string name)                  = 0;
-    virtual void CloseSection()                            = 0;
-    virtual void WriteVar(string name, double T)           = 0;
-    virtual void WriteVar(string name, blitz::Array<double,1> &v) = 0;
-    virtual void WriteVar(string name, blitz::Array<double,2> &v) = 0;
-    virtual void WriteVar(string name, blitz::Array<double,3> &v) = 0;
-    virtual void WriteVar(string name, int T)              = 0;
-    virtual void WriteVar(string name, blitz::Array<int,1> &v)    = 0;
-    virtual void WriteVar(string name, blitz::Array<int,2> &v)    = 0;
-    virtual void WriteVar(string name, blitz::Array<int,3> &v)    = 0;
-    virtual void WriteVar(string name, string str)         = 0;
-    virtual void WriteVar(string name, blitz::Array<string,1> &v) = 0;
-    virtual void WriteVar(string name, blitz::Array<string,2> &v) = 0;
-    virtual void WriteVar(string name, blitz::Array<string,3> &v) = 0;
-
-  };
 }
 
 #endif
