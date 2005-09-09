@@ -1,7 +1,7 @@
 #include "IOASCII.h"
 
 namespace IO {
-  IOFileType IOTreeASCIIClass::GetType()
+  IOFileType IOTreeASCIIClass::GetFileType()
   {
     return ASCII_TYPE;
   }

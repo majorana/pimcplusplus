@@ -34,7 +34,7 @@ namespace IO {
     /// This prints the variables and sections below me, mostly for
     /// debugging purposes.
   
-    IOFileType GetType();
+    IOFileType GetFileType();
     void PrintTree();
     void GroupIterator (string member_name);
     bool OpenFile (string fileName, string mySectionName,

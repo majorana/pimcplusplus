@@ -112,7 +112,7 @@ namespace IO
 
     /// These create a new variable with the given name and value:
     template<typename T> bool WriteVar (string name, T val);
-    template<typename T, int RANK> bool WriteVar (string name, Array<T,RANK> &val);
+    template<typename T, int RANK> bool WriteVar (string name, const Array<T,RANK> &val);
 
     /// Append a value to a variable of dimension of 1 higher than val.
     /// i.e. Add a double to an blitz::Array<double,1> or add blitz::Array<double,1>

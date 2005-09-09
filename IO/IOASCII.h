@@ -45,7 +45,7 @@ namespace IO {
 		      bool wantEndBrace);
   public:
     void WriteSection(ofstream &outFile,int indent);
-    IOFileType GetType();
+    IOFileType GetFileType();
     /// Print an indented tree of section variable names.
     void PrintTree(int level);
     /// Same thing, just calls above with level 0;
