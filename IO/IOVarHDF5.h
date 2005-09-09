@@ -1,10 +1,7 @@
 #ifndef IO_VAR_HDF5_H
 #define IO_VAR_HDF5_H
 
-
 #include "IOVarBase.h"
-
-
 
 namespace IO {
 #define MAX_HDF5_STRING_LENGTH 200
@@ -41,6 +38,9 @@ namespace IO {
     IODataType GetType();
     IOFileType GetFileType();
     string GetTypeString();
+
+    int GetExtent (int dim);
+    void Resize(int n);
 
     bool VarRead(T &val);
     bool VarRead(Array<T,RANK> &val);
@@ -82,6 +82,27 @@ namespace IO {
 
   };
 
+  template<typename T, int RANK> void
+  IOVarHDF5<T,RANK>::Resize(int n) {
+    hsize_t dims[RANK];
+    H5Sget_simple_extent_dims(DiskSpaceID, dims, NULL);
+    if (n < dims[0]) {
+      cerr << "Cannot resize and HDF5 dataset to a smaller size.\n";
+      abort();
+    }
+    dims[0] = n;
+    herr_t status = H5Dextend (DatasetID, dims);
+  }
+
+
+  template<typename T, int RANK> int
+  IOVarHDF5<T,RANK>::GetExtent(int n) {
+    assert (n < RANK);
+    hsize_t dims[RANK];
+    H5Sget_simple_extent_dims(DiskSpaceID, dims, NULL);
+    return dims[n];
+  }
+    
   ////////////////////////////////////////////////////////////////
   /// This function creates a new IOVarHDF5 from a dataset id. /// 
   ////////////////////////////////////////////////////////////////
@@ -90,7 +111,8 @@ namespace IO {
 
   ////////////////////////////////////////////////////////////////
   /// This function creates a new HDF5 dataset from a group id ///
-  /// and a variable.                                          ///
+  /// and a variable.  This is used for creating a new         ///
+  /// variable for writing.                                    ///
   ////////////////////////////////////////////////////////////////
   template<typename T, int RANK>
   IOVarBase *NewIOVarHDF5(hid_t groupID, string name, Array<T,RANK> &val,
@@ -169,7 +191,7 @@ namespace IO {
       start[1] = r1.first(1);
       count[1] = (r1.last(dims[1]-1)-start[1])/r1.stride + 1;
       stride[1] = r1.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T1>::rank==1) {
 	memDims[memDimsIndex]=count[1];
 	memDimsIndex++;
       }
@@ -179,7 +201,7 @@ namespace IO {
       start[2] = r2.first(2);
       count[2] = (r2.last(dims[2]-1)-start[2])/r2.stride + 1;
       stride[2] = r2.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T2>::rank==1) {
 	memDims[memDimsIndex]=count[2];
 	memDimsIndex++;
       }
@@ -189,7 +211,7 @@ namespace IO {
       start[3] = r3.first(3);
       count[3] = (r3.last(dims[3]-1)-start[3])/r3.stride + 1;
       stride[3] = r3.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T3>::rank==1) {
 	memDims[memDimsIndex]=count[3];
 	memDimsIndex++;
       }
@@ -199,7 +221,7 @@ namespace IO {
       start[4] = r4.first(4);
       count[4] = (r4.last(dims[4]-1)-start[4])/r4.stride + 1;
       stride[4] = r4.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T4>::rank==1) {
 	memDims[memDimsIndex]=count[4];
 	memDimsIndex++;
       }
@@ -209,7 +231,7 @@ namespace IO {
       start[5] = r5.first(5);
       count[5] = (r5.last(dims[5]-1)-start[5])/r5.stride + 1;
       stride[5] = r5.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T5>::rank==1) {
 	memDims[memDimsIndex]=count[5];
 	memDimsIndex++;
       }
@@ -219,7 +241,7 @@ namespace IO {
       start[6] = r6.first(6);
       count[6] = (r6.last(dims[6]-1)-start[6])/r6.stride + 1;
       stride[6] = r6.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T6>::rank==1) {
 	memDims[memDimsIndex]=count[6];
 	memDimsIndex++;
       }
@@ -229,7 +251,7 @@ namespace IO {
       start[7] = r7.first(7);
       count[7] = (r7.last(dims[7]-1)-start[7])/r7.stride + 1;
       stride[7] = r7.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T7>::rank==1) {
 	memDims[memDimsIndex]=count[7];
 	memDimsIndex++;
       }
@@ -239,7 +261,7 @@ namespace IO {
       start[8] = r8.first(8);
       count[8] = (r8.last(dims[8]-1)-start[8])/r8.stride + 1;
       stride[8] = r8.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T8>::rank==1) {
 	memDims[memDimsIndex]=count[8];
 	memDimsIndex++;
       }
@@ -249,7 +271,7 @@ namespace IO {
       start[9] = r9.first(9);
       count[9] = (r9.last(dims[9]-1)-start[9])/r9.stride + 1;
       stride[9] = r9.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T9>::rank==1) {
 	memDims[memDimsIndex]=count[9];
 	memDimsIndex++;
       }
@@ -259,7 +281,7 @@ namespace IO {
       start[10] = r10.first(10);
       count[10] = (r10.last(dims[10]-1)-start[10])/r10.stride + 1;
       stride[10] = r10.stride();
-      if (ArraySectionInfo<T0>::rank==1) {
+      if (ArraySectionInfo<T10>::rank==1) {
 	memDims[memDimsIndex]=count[10];
 	memDimsIndex++;
       }
@@ -296,7 +318,8 @@ namespace IO {
     /// Now, call HDF5 to do the actual reading.
     herr_t status = 
       H5Dread (DatasetID, memType, MemSpaceID, DiskSpaceID, H5P_DEFAULT, val.data());
-
+    
+    return (status == 0);
   }
 
   /// This routine should cover double and int types.  Strings and bools
@@ -323,7 +346,8 @@ namespace IO {
     /// Now, call HDF5 to do the actual writing.
     herr_t status = 
       H5Dwrite (DatasetID, memType, MemSpaceID, DiskSpaceID, H5P_DEFAULT, val.data());
-
+    
+    return (status == 0);
   }
 
   template<> bool IOVarHDF5<string,0>::VarRead(string &val);

@@ -1,201 +1,276 @@
-#ifndef IO_BASE_H
-#define IO_BASE_H
+#ifndef INPUT_OUTPUT_BASE_H
+#define INPUT_OUTPUT_BASE_H
 
+#include <string>
+#include <list>
+#include <stack>
 #include <blitz/array.h>
-#include <hdf5.h>
-using namespace blitz;
+#include <fstream>
 
-typedef enum { DOUBLE_TYPE, INT_TYPE, STRING_TYPE, BOOL_TYPE, INVALID } IODataType;
-typedef enum { HDF5_TYPE, ASCII_TYPE} IOFileType;
+#include "IOVarBase.h"
 
-class IOVarBase
+using namespace std;
+namespace IO 
 {
-private:
-  nilArraySection n0;
-public:
-  virtual int GetRank()            = 0;
-  virtual IODataType GetType()     = 0;
-  virtual IOFileType GetFileType() = 0;
-  virtual string GetTypeString()   = 0;
-  template<typename T, int RANK> bool Read(Array<T,RANK> &val);
-//   template<typename T,  typename T0, typename T1, typename T2,
-// 	   typename T3, typename T4, typename T5, typename T6,
-// 	   typename T7, typename T8, typename T9, typename T10>
-//   bool Read(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val, 
-// 	    T0 s0,T1 s1,T2 s2,T3 s3,T4 s4,T5 s5,T6 s6,T7 s7,T8 s8,T9
-// s9,T10 s10);
-  template<typename T,  int RANK,    typename T0, typename T1, typename T2,
-	   typename T3, typename T4, typename T5, typename T6, typename T7,
-	   typename T8, typename T9, typename T10>
-  bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6,
-	    T7 s7, T8 s8, T9 s9, T10 s10);
-  template<typename T,  int RANK,    typename T0, typename T1, typename T2,
-	   typename T3, typename T4, typename T5, typename T6, typename T7,
-	   typename T8, typename T9>
-  bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6,
-	    T7 s7, T8 s8, T9 s9) 
-  { Read(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, n0); }
-  
-};
+  /// This class stores a tree of input file sections.  Each member of
+  /// the tree contains a list of tree nodes below it and a list of
+  /// variables contained in the present node.
+  class IOTreeClass
+  {
+  protected:
+    // USE ME!  I'm not being used yet.
+    bool IsModified;
+  public:
+    list<IOVarBase*> VarList;
+    list<IOTreeClass*> SectionList;
 
+    inline void MarkModified();
+    /// This is used to ensure proper ordering of sections in the HDF
+    /// version in which there is no guarantee that the sections will
+    /// come out of the file in the same order you put them in.
+    int MyNumber, CurrSecNum;
+    virtual void PrintTree()=0;
+    virtual void PrintTree(int numIndent)=0;
 
-template<typename T, int RANK> class IOVarHDF5;
+    IOTreeClass* Parent;
+    /// This is the empty string unless I'm the root node of some file. 
+    string FileName;
+    string Name;
+    inline void InsertSection (IOTreeClass *newSec);
+    inline bool FindSection (string name, IOTreeClass * &sectionPtr, 
+			     int num=0);
+    inline int CountSections(string name);
+    inline int CountVars();
 
-template<typename T,  typename T0, typename T1, typename T2, typename T3, typename T4,  
-         typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
-class HDF5SliceMaker
-{
-public:
-  static const int rank =      ArraySectionInfo<T0>::rank + ArraySectionInfo<T1>::rank + 
-  ArraySectionInfo<T2>::rank + ArraySectionInfo<T3>::rank + ArraySectionInfo<T4>::rank + 
-  ArraySectionInfo<T5>::rank + ArraySectionInfo<T6>::rank + ArraySectionInfo<T7>::rank + 
-  ArraySectionInfo<T8>::rank + ArraySectionInfo<T9>::rank + ArraySectionInfo<T10>::rank;
+    template<class T>
+    bool ReadVar(string name, T &var)
+    {
+      bool readVarSuccess;
+      list<IOVarBase*>::iterator varIter=VarList.begin();
+      while ((varIter!=VarList.end()) && ((*varIter)->Name!=name)) 
+	varIter++;
 
-  typedef IOVarHDF5<T,rank> SliceType;
-};
-
-template<typename T, int RANK>
-class IOVarHDF5 : public IOVarBase
-{
-protected:
-  hid_t DatasetID, DiskSpaceID, MemSpaceID;
-  template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
-	   typename T6, typename T7, typename T8, typename T9, typename T10>
-  typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType &
-  Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10);
-public:
-  int GetRank();
-  IODataType GetType();
-  IOFileType GetFileType();
-  string GetTypeString();
-  template<typename T0, typename T1, typename T2, typename T3, typename T4,
-	   typename T5, typename T6, typename T7, typename T8, typename T9,
-	   typename T10>
-  bool VarRead(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
-	       T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10);
-
-};
-
-
-template<typename T> class TypeConvert
-{ public: static const IODataType Type = INVALID; };
-
-template<> class TypeConvert<double>
-{ public: static const IODataType Type = DOUBLE_TYPE; };
-
-template<> class TypeConvert<int>
-{ public: static const IODataType Type = INT_TYPE; };
-
-template<> class TypeConvert<string>
-{ public: static const IODataType Type = STRING_TYPE; };
-
-template<> class TypeConvert<bool>
-{ public: static const IODataType Type = BOOL_TYPE; };
-  
-
-
-
-template<typename T, int RANK>
-class IOVarASCII : public IOVarBase
-{
-protected:
-  Array<T,RANK> MyValue;
-public:
-  int GetRank();
-  IODataType GetType();
-  IOFileType GetFileType();
-  string GetTypeString();
-  template<typename T0, typename T1, typename T2, typename T3, typename T4,
-	   typename T5, typename T6, typename T7, typename T8, typename T9,
-	   typename T10>
-  bool VarRead(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
-	       T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10);
-};
-
-
-template<typename T, int RANK> int
-IOVarASCII<T,RANK>::GetRank()
-{
-  return RANK;
-}
-
-template<typename T, int RANK> IODataType
-IOVarASCII<T,RANK>::GetType()
-{
-  return TypeConvert<T>::IODataType;
-}
-
-template<typename T, int RANK> IOFileType
-IOVarASCII<T,RANK>::GetFileType()
-{
-  return ASCII_TYPE;
-}
-
-
-
-
-template<typename T, int RANK> 
-template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
-	 typename T6, typename T7, typename T8, typename T9, typename T10> bool
-IOVarASCII<T,RANK>::VarRead(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
-			    T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10)
-{
-  val = MyValue(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10);
-}
-
-// template<typename T,  typename T0, typename T1, typename T2, typename T3, 
-// 	 typename T4, typename T5, typename T6, typename T7, typename T8, 
-// 	 typename T9, typename T10> bool
-// IOVarBase::Read(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
-// 		T0 s0,T1 s1,T2 s2,T3 s3,T4 s4,T5 s5,T6 s6,T7 s7,T8 s8,T9 s9,T10 s10)
-// {
-
-// }	
-
-
-
-
-template<typename T>
-class SliceCheck
-{
-public:
-  static const int isSlice = 0;
-};
-
-template<>
-class SliceCheck<int>
-{
-public:
-  static const int isSlice = 1;
-};
-
-
-template<typename T,  int RANK, typename T0, typename T1, typename T2, 
-	 typename T3, typename T4, typename T5, typename T6, typename T7, 
-	 typename T8, typename T9, typename T10> bool
-IOVarBase::Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4,
-		T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10)
-{
-    static const int numSlices = 
-      SliceCheck<T0>::isSlice+SliceCheck<T1>::isSlice+SliceCheck<T2>::isSlice+
-      SliceCheck<T3>::isSlice+SliceCheck<T4>::isSlice+SliceCheck<T5>::isSlice+
-      SliceCheck<T6>::isSlice+SliceCheck<T7>::isSlice+SliceCheck<T7>::isSlice+
-      SliceCheck<T8>::isSlice+SliceCheck<T9>::isSlice+SliceCheck<T10>::isSlice;
+      bool found = varIter != VarList.end();
+      if (found)
+	readVarSuccess=(*varIter)->Read(var);
+      else if (Parent!=NULL)
+	readVarSuccess=Parent->ReadVar(name,var);
+      else 
+	return false;
     
-    /// The rank of the array must be the rank of the IO variable minus
-    /// the number of slices by integer singlet ranges.
-    static const int varRank=numSlices+RANK;
-
-    if (GetFileType() == HDF5_TYPE) {
-      IOVarHDF5<T,varRank>* newVar = dynamic_cast<IOVarHDF5<T,varRank>*>(this);
-      
-      newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
-    }
-    else if (GetFileType() == ASCII_TYPE) {
-      IOVarASCII<T,varRank>* newVar = dynamic_cast<IOVarASCII<T,varRank>*>(this); 
-      newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+      return readVarSuccess;	 
     }
 
-}	
+    inline IOVarBase* GetVarPtr(string name)
+    {
+      list<IOVarBase *>::iterator iter = VarList.begin();
+      while ((iter != VarList.end()) && ((*iter)->GetName() != name)){
+	iter++;
+      }
+      if (iter == VarList.end())
+	return NULL;
+      else {
+	MarkModified();  // If we're getting the pointer, we're probably 
+	// gonna modify the variable.
+	return *iter;
+      }
+    }
+    inline IOVarBase* GetVarPtr(int num)
+    {
+      list<IOVarBase *>::iterator iter = VarList.begin();
+      int i=0;
+      while ((iter != VarList.end()) && (i != num)){
+	iter++;
+	i++;
+      }
+      if (iter == VarList.end())
+	return NULL;
+      else {
+	MarkModified();  // If we're getting the pointer, we're probably 
+	// gonna modify the variable.
+	return *iter;
+      }
+    }
 
-#endif // ifndef IO_BASE_H
+
+
+
+    /// Write me!
+    virtual IOTreeClass* NewSection(string name)=0;
+  
+    virtual bool OpenFile (string fileName, 
+			   string mySectionName, 
+			   IOTreeClass *parent) = 0;
+    virtual bool NewFile (string fileName,
+			  string mySectionName,
+			  IOTreeClass *parent) = 0;
+    /// Inserts a new Include directive in the present section.
+    virtual void IncludeSection (IOTreeClass *) = 0;
+    virtual void CloseFile() = 0;
+    virtual void FlushFile() = 0;
+    virtual void WriteVar(string name, double val)=0;
+    virtual void WriteVar(string name, blitz::Array<double,1> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<double,2> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<double,3> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<double,4> &val)=0;
+
+    virtual void WriteVar(string name, int val)=0;
+    virtual void WriteVar(string name, blitz::Array<int,1> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<int,2> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<int,3> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<int,4> &val)=0;
+
+    virtual void WriteVar(string name, string val)=0;
+    virtual void WriteVar(string name, blitz::Array<string,1> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<string,2> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<string,3> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<string,4> &val)=0;
+
+    virtual void WriteVar(string name, bool val)=0;
+    virtual void WriteVar(string name, blitz::Array<bool,1> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<bool,2> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<bool,3> &val)=0;
+    virtual void WriteVar(string name, blitz::Array<bool,4> &val)=0;
+
+    /// Append a value to a variable of dimension of 1 higher than val.
+    /// i.e. Add a double to an blitz::Array<double,1> or add blitz::Array<double,1>
+    /// to an blitz::Array<double,2>, etc.
+    template<class T>
+    inline bool AppendVar(string name, T val);
+
+    inline IOTreeClass(){ FileName="";}
+  };
+
+  void IOTreeClass::MarkModified()
+  {
+    if (FileName != "")
+      IsModified = true;
+    else if (Parent!=NULL)
+      Parent->MarkModified();
+  }
+
+
+  template<class T>
+  inline bool IOTreeClass::AppendVar(string name, T val)
+  { 
+    IOVarBase *var = GetVarPtr(name);
+    if (var == NULL)
+      return false;
+    MarkModified();
+    int dim0 = var->GetExtent(0);
+    var->Resize(dim0+1);
+    return var->Write(val, 0);
+    //    return var->Append(val);
+  }
+
+
+
+  /// Returns the number of subsections with the given name within the
+  /// present section.
+  inline int IOTreeClass::CountSections(string name)
+  {
+    list<IOTreeClass*>::iterator sectionIter;
+    sectionIter=SectionList.begin();
+    int numSections=0;
+    while (sectionIter!=SectionList.end()){
+      if ((name==(*sectionIter)->Name) || (name == "")){
+	numSections++;
+      }
+      sectionIter++;
+    }
+    return numSections;
+  }
+
+  inline int IOTreeClass::CountVars()
+  {
+    list<IOVarBase*>::iterator varIter;
+    varIter=VarList.begin();
+    int numVars=0;
+    while (varIter!=VarList.end()){
+      numVars++;
+      varIter++;
+    }
+    return numVars;
+  }
+
+
+
+
+
+  /// FindSection locates a subsection with the given name within the
+  /// section in contains and returns it in the pointer, sectionPtr,
+  /// which is passed a reference.  Returns true if the section is
+  /// found.  The final parameter, which default value "true",
+  /// optionally resets the section iterator to the beginning of the
+  /// section.  Thus, one may control whether or not order is
+  /// significant.  
+  inline bool IOTreeClass::FindSection (string name, 
+					IOTreeClass* &sectionPtr,
+					int num)
+  {
+  
+    list<IOTreeClass*>::iterator Iter=SectionList.begin();
+    int counter=0;
+    while(counter<=num && Iter!=SectionList.end()){
+      if ((*Iter)->Name==name){
+	counter++;
+      }
+      if (counter<=num)
+	Iter++;
+    }
+    bool found = Iter != SectionList.end(); 
+    if (found){
+      sectionPtr = *Iter;
+    }
+    return (found); 
+  }
+
+
+
+  inline void IOTreeClass::InsertSection(IOTreeClass *newSec)
+  {
+    list<IOTreeClass *>::iterator iter;
+  
+    if (SectionList.empty())
+      SectionList.push_back(newSec);
+    else
+      {
+	iter = SectionList.begin();
+	while ((iter != SectionList.end()) && 
+	       ((*iter)->MyNumber < newSec->MyNumber))
+	  iter++;
+	if (iter!=SectionList.end())
+	  SectionList.insert(iter, newSec);
+	else
+	  SectionList.push_back(newSec);
+      }
+  }
+
+
+
+
+
+  class OutputSectionClass
+  {
+  public:
+    virtual bool OpenFile(string fileName)                 = 0;
+    virtual void CloseFile()                               = 0;
+    virtual void OpenSection(string name)                  = 0;
+    virtual void CloseSection()                            = 0;
+    virtual void WriteVar(string name, double T)           = 0;
+    virtual void WriteVar(string name, blitz::Array<double,1> &v) = 0;
+    virtual void WriteVar(string name, blitz::Array<double,2> &v) = 0;
+    virtual void WriteVar(string name, blitz::Array<double,3> &v) = 0;
+    virtual void WriteVar(string name, int T)              = 0;
+    virtual void WriteVar(string name, blitz::Array<int,1> &v)    = 0;
+    virtual void WriteVar(string name, blitz::Array<int,2> &v)    = 0;
+    virtual void WriteVar(string name, blitz::Array<int,3> &v)    = 0;
+    virtual void WriteVar(string name, string str)         = 0;
+    virtual void WriteVar(string name, blitz::Array<string,1> &v) = 0;
+    virtual void WriteVar(string name, blitz::Array<string,2> &v) = 0;
+    virtual void WriteVar(string name, blitz::Array<string,3> &v) = 0;
+
+  };
+}
+
+#endif

@@ -1,10 +1,9 @@
 #ifndef IO_VAR_ASCII_H
 #define IO_VAR_ASCII_H
 
+#include "IOVarBase.h"
+
 namespace IO {
-
-
-
 
   template<typename T, int RANK>
   class IOVarASCII : public IOVarBase
@@ -16,6 +15,9 @@ namespace IO {
     IODataType GetType();
     IOFileType GetFileType();
     string GetTypeString();
+
+    int GetExtent(int dim);
+    void Resize(int n);
 
     bool VarRead(Array<T,RANK> &val);
     template<typename T0, typename T1, typename T2, typename T3, typename T4,
@@ -52,7 +54,18 @@ namespace IO {
   }
 
 
+  template<typename T, int RANK> int
+  IOVarASCII<T,RANK>::GetExtent(int dim) {
+    return MyValue.extent(dim);
+  }
 
+
+  template<typename T, int RANK> void
+  IOVarASCII<T,RANK>::Resize(int n) {
+    TinyVector<int,RANK> dims = MyValue.shape();
+    dims[0] = n;
+    MyValue.resizeAndPreserve(dims);
+  }
 
   template<typename T, int RANK> 
   template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,

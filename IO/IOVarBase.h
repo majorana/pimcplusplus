@@ -13,18 +13,24 @@ namespace IO {
   {
   private:
     nilArraySection n0;
+  protected:
+    string Name;
   public:
     virtual int GetRank()            = 0;
     virtual IODataType GetType()     = 0;
     virtual IOFileType GetFileType() = 0;
     virtual string GetTypeString()   = 0;
+    string GetName () const
+    { return Name; }
+    virtual int GetExtent(int dim)   = 0;
+
+    /// Resizes the first dimension of the variable
+    virtual void Resize(int n)       = 0;
+
+    //////////////////////
+    /// Read functions ///
+    //////////////////////
     template<typename T, int RANK> bool Read(Array<T,RANK> &val);
-    //   template<typename T,  typename T0, typename T1, typename T2,
-    // 	   typename T3, typename T4, typename T5, typename T6,
-    // 	   typename T7, typename T8, typename T9, typename T10>
-    //   bool Read(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val, 
-    // 	    T0 s0,T1 s1,T2 s2,T3 s3,T4 s4,T5 s5,T6 s6,T7 s7,T8 s8,T9
-    // s9,T10 s10);
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6, typename T7,
 	     typename T8, typename T9, typename T10>
@@ -83,7 +89,10 @@ namespace IO {
     bool Read(Array<T,RANK> &val, T0 s0) 
     { Read(val, s0, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
     
-    
+
+    ///////////////////////
+    /// Write functions ///
+    ///////////////////////    
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6, typename T7,
 	     typename T8, typename T9, typename T10>
