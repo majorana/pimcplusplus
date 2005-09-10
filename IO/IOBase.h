@@ -48,7 +48,7 @@ namespace IO
     {
       bool readVarSuccess;
       list<IOVarBase*>::iterator varIter=VarList.begin();
-      while ((varIter!=VarList.end()) && ((*varIter)->Name!=name)) 
+      while ((varIter!=VarList.end()) && ((*varIter)->GetName()!=name)) 
 	varIter++;
 
       bool found = varIter != VarList.end();

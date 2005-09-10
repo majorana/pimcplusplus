@@ -78,6 +78,7 @@ namespace IO {
 				 string mySectionName,
 				 IOTreeClass *parent)
   {
+    cerr << "In HDF5 OpenFile.\n";
     // Turn off error printing
     H5E_auto_t func;
     void *client_data;
@@ -306,8 +307,9 @@ namespace IO {
       }
     }
     else if (statbuf.type == H5G_DATASET) {
+      cerr << "Found HDF5 dataset:  " << member_name << endl;
       hid_t datasetID = H5Dopen(GroupID, member_name.c_str());
-      VarList.push_back (NewIOVarHDF5(datasetID, BoolType));
+      VarList.push_back (NewIOVarHDF5(datasetID, member_name, BoolType));
     }
     else if (statbuf.type == H5G_TYPE) {
       if (member_name != "BOOL")

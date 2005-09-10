@@ -17,6 +17,31 @@ namespace IO {
   template<> class SliceCheck<int>
   { public:  static const int isSlice = 1; };
 
+  template<typename T, int RANK> bool
+  IOVarBase::Read(Array<T,RANK> &val)
+  {
+    if (GetFileType() == HDF5_TYPE) {
+      IOVarHDF5<T,RANK>* newVar = dynamic_cast<IOVarHDF5<T,RANK>*>(this);
+      if (newVar == NULL) {
+	cerr << "Error in dynamic cast to IOVarHDF5.\n";
+	abort();
+      }
+      return newVar->VarRead(val);
+    }
+    else if (GetFileType() == ASCII_TYPE) {
+      IOVarASCII<T,RANK>* newVar = dynamic_cast<IOVarASCII<T,RANK>*>(this); 
+      if (newVar == NULL) {
+	cerr << "Error in dynamic cast to IOVarHDF5.\n";
+	abort();
+      }
+      return newVar->VarRead(val);
+    }
+    else {
+      cerr << "Error:  unknown type in IOVarBase::Read().\n";
+      abort();
+    }
+  }	
+
 
   template<typename T,  int RANK, typename T0, typename T1, typename T2, 
 	   typename T3, typename T4, typename T5, typename T6, typename T7, 
@@ -40,7 +65,7 @@ namespace IO {
 	cerr << "Error in dynamic cast to IOVarHDF5.\n";
 	abort();
       }
-      newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+      return newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
     }
     else if (GetFileType() == ASCII_TYPE) {
       IOVarASCII<T,varRank>* newVar = dynamic_cast<IOVarASCII<T,varRank>*>(this); 
@@ -48,7 +73,7 @@ namespace IO {
 	cerr << "Error in dynamic cast to IOVarHDF5.\n";
 	abort();
       }
-      newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+      return newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
     }
   }	
 
@@ -75,11 +100,11 @@ namespace IO {
 	cerr << "Error in dynamic cast to IOVarHDF5.\n";
 	abort();
       }
-      newVar->VarWrite(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+      return newVar->VarWrite(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
     }
     else if (GetFileType() == ASCII_TYPE) {
       IOVarASCII<T,varRank>* newVar = dynamic_cast<IOVarASCII<T,varRank>*>(this); 
-      newVar->VarWrite(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+      return newVar->VarWrite(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
     }
 
   }	

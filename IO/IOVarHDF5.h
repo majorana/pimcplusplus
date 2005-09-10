@@ -50,21 +50,23 @@ namespace IO {
     bool VarRead(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
 		 T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10);
 
-    bool VarWrite(T &val);
-    bool VarWrite(Array<T,RANK> &val);
+
+    bool VarWrite(const T &val);
+    bool VarWrite(const Array<T,RANK> &val);
     template<typename T0, typename T1, typename T2, typename T3, typename T4,
 	     typename T5, typename T6, typename T7, typename T8, typename T9,
 	     typename T10>
-    bool VarWrite(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
+    bool VarWrite(const typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
 		  T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10);
     IOVarHDF5() : OwnDataset(false)
     {
 
     }
     
-    IOVarHDF5(hid_t datasetID, hid_t diskSpaceID, hid_t memSpaceID, 
+    IOVarHDF5(string name, hid_t datasetID, hid_t diskSpaceID, hid_t memSpaceID, 
 	      hid_t boolTypeID, bool ownDataset=false)
     {
+      Name        = name;
       DatasetID   = datasetID;
       DiskSpaceID = diskSpaceID;
       MemSpaceID  = memSpaceID;
@@ -106,7 +108,7 @@ namespace IO {
   ////////////////////////////////////////////////////////////////
   /// This function creates a new IOVarHDF5 from a dataset id. /// 
   ////////////////////////////////////////////////////////////////
-  IOVarBase *NewIOVarHDF5(hid_t dataSetID, hid_t boolType);
+  IOVarBase *NewIOVarHDF5(hid_t dataSetID, string name, hid_t boolType);
   
 
   ////////////////////////////////////////////////////////////////
@@ -139,13 +141,36 @@ namespace IO {
       typeID = boolType;
     }
     
-    hid_t datasetID = H5Dcreate (groupID, name.c_str(), typeID, diskSpaceID, H5P_DEFAULT);
+    hid_t chunkProp = H5Pcreate(H5P_DATASET_CREATE);
+    /// Chunk_dims tells us how big of chunks to allocate in the file at
+    /// a time.
+    hsize_t chunk_dims[RANK];
+    if (RANK < 3)
+      chunk_dims[0]=30;
+    else
+      chunk_dims[0]=3;
+    for (int i=1;i<RANK;i++)
+      chunk_dims[i]=val.extent(i);
+
+    herr_t status = H5Pset_chunk(chunkProp, RANK, chunk_dims);  
+    assert(status>=0);
+
+    hid_t datasetID = 
+      H5Dcreate (groupID, name.c_str(), typeID, diskSpaceID, chunkProp);
 
     if (mustCloseType)
       H5Tclose (typeID);
     H5Sclose(diskSpaceID);
 
-    return NewIOVarHDF5(datasetID, boolType);
+    IOVarHDF5<T,RANK> *newVar = 
+      dynamic_cast<IOVarHDF5<T,RANK>*> (NewIOVarHDF5(datasetID, name, boolType));
+    if (newVar == NULL) {
+      cerr << "Error in dynamic_cast in NewIOVarHDF5.\n";
+      abort();
+    }
+    newVar->VarWrite(val);
+    
+    return newVar;
   }
 
   template<typename T, int RANK> 
@@ -309,8 +334,8 @@ namespace IO {
     }
 
     /// Resize val to appropriate size
-    TinyVector<hsize_t,1> h5dims;
-    TinyVector<int,1> dims;
+    TinyVector<hsize_t,RANK> h5dims;
+    TinyVector<int,RANK> dims;
     H5Sget_simple_extent_dims(MemSpaceID, &(h5dims[0]), NULL);
     dims = h5dims;
     val.resize(dims);
@@ -318,6 +343,7 @@ namespace IO {
     /// Now, call HDF5 to do the actual reading.
     herr_t status = 
       H5Dread (DatasetID, memType, MemSpaceID, DiskSpaceID, H5P_DEFAULT, val.data());
+    cerr << "Status = " << status << endl;
     
     return (status == 0);
   }
@@ -325,12 +351,14 @@ namespace IO {
   /// This routine should cover double and int types.  Strings and bools
   /// need to be handled explicitly
   template<class T, int RANK> bool
-  IOVarHDF5<T,RANK>::VarWrite(Array<T,RANK> &val)
+  IOVarHDF5<T,RANK>::VarWrite(const Array<T,RANK> &val)
   {
+    cerr << "Got to VarWrite.\n";
+
     /// Check to see if we have the write dimensions.
     assert (H5Sget_simple_extent_ndims(MemSpaceID) == RANK);
     TinyVector<hsize_t,RANK> dims;
-    H5S_get_simple_extent_dims(MemSpaceID, &(dims[0]), NULL);			      
+    H5Sget_simple_extent_dims(MemSpaceID, &(dims[0]), NULL);			      
     for (int i=0; i < RANK; i++)
       assert (dims[i] == val.extent(i));
 
@@ -347,6 +375,8 @@ namespace IO {
     herr_t status = 
       H5Dwrite (DatasetID, memType, MemSpaceID, DiskSpaceID, H5P_DEFAULT, val.data());
     
+    cerr << "val = " << val << endl;
+    cerr << "H5Dwrite status = " << status << endl;
     return (status == 0);
   }
 
@@ -377,16 +407,16 @@ namespace IO {
   template<> bool IOVarHDF5<bool,  2>::VarRead(Array<bool,2> &val);
   template<> bool IOVarHDF5<bool,  3>::VarRead(Array<bool,3> &val);
   template<> bool IOVarHDF5<bool,  4>::VarRead(Array<bool,4> &val);
-  template<> bool IOVarHDF5<string,0>::VarWrite(string &val);
-  template<> bool IOVarHDF5<string,1>::VarWrite(Array<string,1> &val);
-  template<> bool IOVarHDF5<string,2>::VarWrite(Array<string,2> &val);
-  template<> bool IOVarHDF5<string,3>::VarWrite(Array<string,3> &val);
-  template<> bool IOVarHDF5<string,4>::VarWrite(Array<string,4> &val);
-  template<> bool IOVarHDF5<bool,  0>::VarWrite(bool &val);
-  template<> bool IOVarHDF5<bool,  1>::VarWrite(Array<bool,1> &val);
-  template<> bool IOVarHDF5<bool,  2>::VarWrite(Array<bool,2> &val);
-  template<> bool IOVarHDF5<bool,  3>::VarWrite(Array<bool,3> &val);
-  template<> bool IOVarHDF5<bool,  4>::VarWrite(Array<bool,4> &val);
+  template<> bool IOVarHDF5<string,0>::VarWrite(const string &val);
+  template<> bool IOVarHDF5<string,1>::VarWrite(const Array<string,1> &val);
+  template<> bool IOVarHDF5<string,2>::VarWrite(const Array<string,2> &val);
+  template<> bool IOVarHDF5<string,3>::VarWrite(const Array<string,3> &val);
+  template<> bool IOVarHDF5<string,4>::VarWrite(const Array<string,4> &val);
+  template<> bool IOVarHDF5<bool,  0>::VarWrite(const bool &val);
+  template<> bool IOVarHDF5<bool,  1>::VarWrite(const Array<bool,1> &val);
+  template<> bool IOVarHDF5<bool,  2>::VarWrite(const Array<bool,2> &val);
+  template<> bool IOVarHDF5<bool,  3>::VarWrite(const Array<bool,3> &val);
+  template<> bool IOVarHDF5<bool,  4>::VarWrite(const Array<bool,4> &val);
 
 
 }      // namespace IO
