@@ -48,16 +48,17 @@ FixedPhaseClass::CalcGrad2 (int slice, int species)
   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
   complex<double> detu = GradientDet(slice, species);
   double detu2 = mag2(detu);
+  double detu2Inv = 1.0/detu2;
   
   //  cerr << "detu2 = " << detu2 << endl;
 
   double grad2 = 0.0;
   for (int i=0; i<N; i++) {
     Vec3 grad = 
-      (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i))) + kVec;
+      (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i)))*detu2Inv + kVec;
     grad2 += dot(grad,grad);
   }
-  grad2 /= (detu2*detu2);
+  //  grad2 /= (detu2*detu2);
   return grad2;
 }
 
