@@ -51,6 +51,14 @@ namespace IO {
 	     typename T10>
     bool VarWrite(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
 		  T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10);
+
+    /// Assignment operator
+    IOVarASCII<T,RANK>& operator=(const IOVarASCII<T,RANK> &var)
+    {
+      /// This references var's value.
+      ArrayValue.reference(var.ArrayValue);
+    }
+
     IOVarASCII(string name, const Array<T,RANK> &val) {
       Name = name;
       ArrayValue.resize(val.shape());
@@ -225,7 +233,12 @@ namespace IO {
 
   template<typename T, int RANK> bool
   IOVarASCII<T,RANK>::VarWrite(Array<T,RANK> &val) {
-    ArrayValue.resize(val.shape());
+    bool mustReshape = false;
+    for (int i=0; i<RANK; i++)
+      if (ArrayValue.extent(i) != val.extent(i))
+	mustReshape = true;
+    if (mustReshape)
+      ArrayValue.resize(val.shape());
     ArrayValue = val;
     return true;
   }

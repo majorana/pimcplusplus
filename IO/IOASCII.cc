@@ -766,7 +766,6 @@ namespace IO {
       }
       else {
 	IOVarBase *newVar =  ReadASCIIVar(iter, tokenList);
-	cerr << "Pushing back new ASCII var of name " << newVar->GetName() << endl;
 	VarList.push_back(newVar);
       }
     }
