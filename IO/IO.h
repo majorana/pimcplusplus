@@ -1,6 +1,7 @@
 #ifndef IO_H
 #define IO_H
 
+#include "IOVar.h"
 #include "IOHDF5.h"
 #include "IOASCII.h"
 

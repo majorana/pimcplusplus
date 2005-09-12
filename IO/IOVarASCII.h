@@ -5,12 +5,31 @@
 
 namespace IO {
 
+  template<typename T, int RANK> class IOVarASCII;
+
+  template<typename T,  typename T0, typename T1, typename T2, typename T3, typename T4,  
+	   typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
+  class ASCIISliceMaker
+  {
+  public:
+    static const int rank =      ArraySectionInfo<T0>::rank + ArraySectionInfo<T1>::rank + 
+    ArraySectionInfo<T2>::rank + ArraySectionInfo<T3>::rank + ArraySectionInfo<T4>::rank + 
+    ArraySectionInfo<T5>::rank + ArraySectionInfo<T6>::rank + ArraySectionInfo<T7>::rank + 
+    ArraySectionInfo<T8>::rank + ArraySectionInfo<T9>::rank + ArraySectionInfo<T10>::rank;
+
+    typedef IOVarASCII<T,rank> SliceType;
+  };
+
   template<typename T, int RANK>
   class IOVarASCII : public IOVarBase
   {
   public:
     Array<T,RANK> ArrayValue;
-    
+    template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
+	     typename T6, typename T7, typename T8, typename T9, typename T10>
+    typename ASCIISliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType     
+    Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10);
+
     int GetRank();
     IODataType GetType();
     IOFileType GetFileType();
@@ -40,6 +59,11 @@ namespace IO {
     /// Default constructor
     IOVarASCII(string name) {
       Name = name;
+    }
+    /// Copy constructor
+    IOVarASCII(const IOVarASCII<T,RANK> &var) : ArrayValue(var.ArrayValue)
+    {
+      /// This references the arguments array value.
     }
   };
 
@@ -215,7 +239,20 @@ namespace IO {
     ArrayValue(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10) = val;
     return true;
   }
-}
 
+
+  template<class T, int RANK>
+  template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
+	   typename T6, typename T7, typename T8, typename T9, typename T10>
+  typename ASCIISliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType 
+  IOVarASCII<T,RANK>::Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10)
+  {
+    typedef typename ASCIISliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType newSliceType;
+    newSliceType newVar(Name);
+    newVar.ArrayValue.reference(ArrayValue(s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10));
+    return newVar;
+  }
+
+}
 
 #endif

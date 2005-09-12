@@ -27,13 +27,16 @@ namespace IO {
   class IOVarHDF5 : public IOVarBase
   {
   protected:
-    hid_t DatasetID, DiskSpaceID, MemSpaceID, BoolTypeID;
-    template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
-	     typename T6, typename T7, typename T8, typename T9, typename T10>
-    typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType &
-    Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10);
+
     bool OwnDataset;
   public:
+    hid_t DatasetID, DiskSpaceID, MemSpaceID, BoolTypeID;
+
+    template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
+	     typename T6, typename T7, typename T8, typename T9, typename T10>
+    typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType     
+    Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10);
+    
     int GetRank();
     IODataType GetType();
     IOFileType GetFileType();
@@ -53,11 +56,15 @@ namespace IO {
 
     bool VarWrite(const T &val);
     bool VarWrite(const Array<T,RANK> &val);
-    template<typename T0, typename T1, typename T2, typename T3, typename T4,
+    template<typename TVAL, typename T0, typename T1, typename T2, typename T3, typename T4,
 	     typename T5, typename T6, typename T7, typename T8, typename T9,
 	     typename T10>
-    bool VarWrite(const typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
-		  T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10);
+    bool VarWriteSlice(TVAL val,
+		       T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10)
+    {
+      cerr << "val = " << val << endl;
+      Slice(val, s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10).VarWrite(val);
+    }
     IOVarHDF5() : OwnDataset(false)
     {
 
@@ -182,16 +189,55 @@ namespace IO {
     return Slice(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10).VarRead(val);
   }
 
+
+//   template<typename T, int RANK> 
+//   template<typename TVAL, typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
+// 	   typename T6, typename T7, typename T8, typename T9, typename T10> bool
+//   IOVarHDF5<T,RANK>::VarWriteSlice(TVAL val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10)
+//   {
+//     return Slice(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10).VarWrite(val);
+//   }
+
+  template<typename T>
+  class RangeConvert
+  {
+  public:
+    static Range GetRange (T r) {
+      return Range();
+    }
+  };
+  
+  template<>
+  class RangeConvert<int>
+  {
+  public:
+    static Range GetRange(int r)
+    {
+      return Range(r);
+    }
+  };
+
+  template<>
+  class RangeConvert<Range>
+  {
+  public:
+    static Range GetRange(Range r)
+    {
+      return Range(r);
+    }
+  };
+
   template<class T, int RANK>
   template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
 	   typename T6, typename T7, typename T8, typename T9, typename T10>
-  typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType &
+  typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType 
   IOVarHDF5<T,RANK>::Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10)
   {
-    typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType newVar;
+    typedef typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType newSliceType;
+    newSliceType newVar;
 
     newVar.DatasetID = DatasetID;
-    newVar.DiskSpaceID = H5Dget_space(DatasetID);
+    newVar.DiskSpaceID = H5Scopy(H5Dget_space(DatasetID));
   
     hsize_t start[RANK], count[RANK], stride[RANK], dims[RANK], maxdims[RANK];
     hsize_t memDims[SliceInfo<T,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank];
@@ -202,9 +248,9 @@ namespace IO {
   
     /// Select the disk space hyperslab
     if (RANK > 0) {
-      Range r0(s0);
+      Range r0 = RangeConvert<T0>::GetRange(s0);
       start[0]  = r0.first(0);
-      count[0]  = (r0.last(dims[0]-1)-start[0])/r0.stride + 1;
+      count[0]  = (r0.last(dims[0]-1)-start[0])/r0.stride() + 1;
       stride[0] = r0.stride();
       if (ArraySectionInfo<T0>::rank==1) {
 	memDims[memDimsIndex]=count[0];
@@ -212,9 +258,9 @@ namespace IO {
       }
     }
     if (RANK > 1) {
-      Range r1(s1);
-      start[1] = r1.first(1);
-      count[1] = (r1.last(dims[1]-1)-start[1])/r1.stride + 1;
+      Range r1 = RangeConvert<T1>::GetRange(s1);
+      start[1] = r1.first(0);
+      count[1] = (r1.last(dims[1]-1)-start[1])/r1.stride() + 1;
       stride[1] = r1.stride();
       if (ArraySectionInfo<T1>::rank==1) {
 	memDims[memDimsIndex]=count[1];
@@ -222,9 +268,9 @@ namespace IO {
       }
     }
     if (RANK > 2) {
-      Range r2(s2);
-      start[2] = r2.first(2);
-      count[2] = (r2.last(dims[2]-1)-start[2])/r2.stride + 1;
+      Range r2 = RangeConvert<T2>::GetRange(s2);
+      start[2] = r2.first(0);
+      count[2] = (r2.last(dims[2]-1)-start[2])/r2.stride() + 1;
       stride[2] = r2.stride();
       if (ArraySectionInfo<T2>::rank==1) {
 	memDims[memDimsIndex]=count[2];
@@ -232,9 +278,9 @@ namespace IO {
       }
     }
     if (RANK > 3) {
-      Range r3(s3);
-      start[3] = r3.first(3);
-      count[3] = (r3.last(dims[3]-1)-start[3])/r3.stride + 1;
+      Range r3 = RangeConvert<T3>::GetRange(s3);
+      start[3] = r3.first(0);
+      count[3] = (r3.last(dims[3]-1)-start[3])/r3.stride() + 1;
       stride[3] = r3.stride();
       if (ArraySectionInfo<T3>::rank==1) {
 	memDims[memDimsIndex]=count[3];
@@ -242,9 +288,9 @@ namespace IO {
       }
     }
     if (RANK > 4) {
-      Range r4(s4);
-      start[4] = r4.first(4);
-      count[4] = (r4.last(dims[4]-1)-start[4])/r4.stride + 1;
+      Range r4 = RangeConvert<T4>::GetRange(s4);
+      start[4] = r4.first(0);
+      count[4] = (r4.last(dims[4]-1)-start[4])/r4.stride() + 1;
       stride[4] = r4.stride();
       if (ArraySectionInfo<T4>::rank==1) {
 	memDims[memDimsIndex]=count[4];
@@ -252,9 +298,9 @@ namespace IO {
       }
     }
     if (RANK > 5) {
-      Range r5(s5);
-      start[5] = r5.first(5);
-      count[5] = (r5.last(dims[5]-1)-start[5])/r5.stride + 1;
+      Range r5 = RangeConvert<T5>::GetRange(s5);
+      start[5] = r5.first(0);
+      count[5] = (r5.last(dims[5]-1)-start[5])/r5.stride() + 1;
       stride[5] = r5.stride();
       if (ArraySectionInfo<T5>::rank==1) {
 	memDims[memDimsIndex]=count[5];
@@ -262,9 +308,9 @@ namespace IO {
       }
     }
     if (RANK > 6) {
-      Range r6(s6);
-      start[6] = r6.first(6);
-      count[6] = (r6.last(dims[6]-1)-start[6])/r6.stride + 1;
+      Range r6 = RangeConvert<T6>::GetRange(s6);
+      start[6] = r6.first(0);
+      count[6] = (r6.last(dims[6]-1)-start[6])/r6.stride() + 1;
       stride[6] = r6.stride();
       if (ArraySectionInfo<T6>::rank==1) {
 	memDims[memDimsIndex]=count[6];
@@ -272,9 +318,9 @@ namespace IO {
       }
     }
     if (RANK > 7) {
-      Range r7(s7);
-      start[7] = r7.first(7);
-      count[7] = (r7.last(dims[7]-1)-start[7])/r7.stride + 1;
+      Range r7 = RangeConvert<T7>::GetRange(s7);
+      start[7] = r7.first(0);
+      count[7] = (r7.last(dims[7]-1)-start[7])/r7.stride() + 1;
       stride[7] = r7.stride();
       if (ArraySectionInfo<T7>::rank==1) {
 	memDims[memDimsIndex]=count[7];
@@ -282,9 +328,9 @@ namespace IO {
       }
     }
     if (RANK > 8) {
-      Range r8(s8);
-      start[8] = r8.first(8);
-      count[8] = (r8.last(dims[8]-1)-start[8])/r8.stride + 1;
+      Range r8 = RangeConvert<T8>::GetRange(s8);
+      start[8] = r8.first(0);
+      count[8] = (r8.last(dims[8]-1)-start[8])/r8.stride() + 1;
       stride[8] = r8.stride();
       if (ArraySectionInfo<T8>::rank==1) {
 	memDims[memDimsIndex]=count[8];
@@ -292,9 +338,9 @@ namespace IO {
       }
     }
     if (RANK > 9) {
-      Range r9(s9);
-      start[9] = r9.first(9);
-      count[9] = (r9.last(dims[9]-1)-start[9])/r9.stride + 1;
+      Range r9 = RangeConvert<T9>::GetRange(s9);
+      start[9] = r9.first(0);
+      count[9] = (r9.last(dims[9]-1)-start[9])/r9.stride() + 1;
       stride[9] = r9.stride();
       if (ArraySectionInfo<T9>::rank==1) {
 	memDims[memDimsIndex]=count[9];
@@ -302,9 +348,9 @@ namespace IO {
       }
     }
     if (RANK > 10) {
-      Range r10(s10);
-      start[10] = r10.first(10);
-      count[10] = (r10.last(dims[10]-1)-start[10])/r10.stride + 1;
+      Range r10 = RangeConvert<T10>::GetRange(s10);
+      start[10] = r10.first(0);
+      count[10] = (r10.last(dims[10]-1)-start[10])/r10.stride() + 1;
       stride[10] = r10.stride();
       if (ArraySectionInfo<T10>::rank==1) {
 	memDims[memDimsIndex]=count[10];
@@ -312,9 +358,13 @@ namespace IO {
       }
     }
 
-    newVar.MemSpaceID = H5Screate_simple(SliceInfo<T,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank,
+//     for (int i=0; i<RANK; i++)
+//       cerr << "memDims[" << i << "] = " << memDims[i] << endl;
+//     cerr << "slice rank = " << SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank << endl;
+    newVar.MemSpaceID = H5Screate_simple(SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank,
 					 memDims, memDims);
-
+    H5Sselect_hyperslab(newVar.DiskSpaceID, H5S_SELECT_SET, start, stride, count, NULL);
+    return newVar;
   }
 
 

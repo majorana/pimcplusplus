@@ -65,7 +65,7 @@ namespace IO {
 	cerr << "Error in dynamic cast to IOVarHDF5.\n";
 	abort();
       }
-      return newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+      return newVar->Slice(s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10).VarRead(val);
     }
     else if (GetFileType() == ASCII_TYPE) {
       IOVarASCII<T,varRank>* newVar = dynamic_cast<IOVarASCII<T,varRank>*>(this); 
@@ -73,7 +73,7 @@ namespace IO {
 	cerr << "Error in dynamic cast to IOVarHDF5.\n";
 	abort();
       }
-      return newVar->VarRead(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+      return newVar->Slice(s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10).VarRead(val);
     }
   }	
 
@@ -100,11 +100,16 @@ namespace IO {
 	cerr << "Error in dynamic cast to IOVarHDF5.\n";
 	abort();
       }
-      return newVar->VarWrite(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+      return newVar->Slice(s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10).VarWrite(val);
+      //      return newVar->VarWriteSlice(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10);
     }
     else if (GetFileType() == ASCII_TYPE) {
       IOVarASCII<T,varRank>* newVar = dynamic_cast<IOVarASCII<T,varRank>*>(this); 
-      return newVar->VarWrite(val, s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10);
+      if (newVar == NULL) {
+	cerr << "Error in dynamic cast to IOVarASCII.\n";
+	abort();
+      }
+      return newVar->Slice(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10).VarWrite(val);;
     }
 
   }	
