@@ -13,19 +13,21 @@
 
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
+
   string permuteType, speciesName;
   //  StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   assert (in.ReadVar ("name", Name));
-  cerr << "speciesName = " << speciesName << ".\n";
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
-  HaveRefslice = 
+  if    (PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION){
+    HaveRefslice=true;
+  }
+ HaveRefslice = 
     ((PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION) &&
      (PathData.Actions.NodalActions(SpeciesNum) != NULL) &&
      (!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
-
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
@@ -43,7 +45,6 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   }
   PermuteStage->Read (in);
   Stages.push_back (PermuteStage);
-  
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
 							     OutSection);
@@ -70,17 +71,14 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
 	cerr << "Adding fermion node action for species " 
 	     << speciesName << endl;
-	
 	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
       }
 //       for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
 // 	newStage->Actions.push_back(PathData.Actions.NodalActions(i));
     }
-
     newStage->BisectionLevel = level;
     Stages.push_back (newStage);
   }
-
   // Add the second stage of the permutation step
   Stages.push_back (PermuteStage);
 
@@ -104,7 +102,6 @@ void BisectionBlockClass::ChooseTimeSlices()
   // do something special to avoid moving reference slice
   if (HaveRefslice &&
       Path.SliceOwner(Path.GetRefSlice()) == myProc) {
-    
     cerr << "Avoid reference slice.\n";
     int bSlices = 1<<NumLevels;
     int myStart, myEnd;
@@ -163,7 +160,7 @@ void BisectionBlockClass::ChooseTimeSlices()
 void BisectionBlockClass::MakeMove()
 {
   // if (PathData.Path.Communicator.MyProc()==0)
-  //    cerr<<"Entering Bisection Block class "<<PathData.Path.Communicator.MyProc()<<endl;
+  //cerr<<"Entering Bisection Block class "<<PathData.Path.Communicator.MyProc()<<endl;
   //  perr << "BisectionBlock MakeMove.\n";
   //  cerr<<"Starting my bisection block"<<endl;
   ChooseTimeSlices();
@@ -187,4 +184,5 @@ void BisectionBlockClass::MakeMove()
   //  sleep(10);
   //  if (PathData.Path.Communicator.MyProc()==0)
   //    cerr<<"Exiting Bisection Stage Class "<<PathData.Path.Communicator.MyProc()<<endl;
+  //  cerr<<"LEaving Bisection Block"<<endl;
 }
