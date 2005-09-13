@@ -146,6 +146,7 @@ FixedPhaseClass::d_dBeta (int slice1, int slice2, int level,
 void 
 FixedPhaseClass::Read(IOSectionClass &in)
 {
+#if NDIM==3
   string speciesString;
   assert (in.ReadVar ("UpSpecies", speciesString));
   UpSpeciesNum = Path.SpeciesNum (speciesString);
@@ -233,6 +234,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
   initData = 0.0;
   BandSplines.Init (&xGrid, &yGrid, &zGrid, initData, true);
   //  UpdateBands();
+#endif
 }
 
 
@@ -240,6 +242,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
 complex<double>
 FixedPhaseClass::GradientDet(int slice, int speciesNum)
 {
+#if NDIM==3
   SpeciesClass &species = Path.Species(speciesNum);
   int N = species.NumParticles;
   int first = species.FirstPtcl;
@@ -274,12 +277,14 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
 //   GradientDetFD(slice, speciesNum);
 //   perr << "FD gradient = " << Gradient << endl;
   return det;
+#endif
 }
 
 
 complex<double>
 FixedPhaseClass::GradientDetFD(int slice, int speciesNum)
 {
+#if NDIM==3
   SpeciesClass &species = Path.Species(speciesNum);
   int N = species.NumParticles;
   int first = species.FirstPtcl;
@@ -325,12 +330,14 @@ FixedPhaseClass::GradientDetFD(int slice, int speciesNum)
     Gradient(i) = (plus-minus)/(2.0*eps);
   }
   return det;
+#endif
 }
 
 
 void
 FixedPhaseClass::UpdateBands()
 {
+#if NDIM==3
   // Now, make bands real and put into splines
   Array<complex<double>,4> data(xGrid.NumPoints, 
 				yGrid.NumPoints, 
@@ -371,6 +378,7 @@ FixedPhaseClass::UpdateBands()
 //   }
 
   BandSplines.Init (&xGrid, &yGrid, &zGrid, data, true);
+#endif
 }
 
 
@@ -413,6 +421,7 @@ FixedPhaseClass::IsPositive (int slice, int speciesNum)
 complex<double>
 FixedPhaseClass::Det (int slice, int speciesNum)
 {
+#if NDIM==3
   if (IonsHaveMoved()) 
     UpdateBands();
 
@@ -428,6 +437,7 @@ FixedPhaseClass::Det (int slice, int speciesNum)
     BandSplines(r_j[0], r_j[1], r_j[2], vals);
   }
   return Determinant (Matrix);
+#endif
 }
 
 
