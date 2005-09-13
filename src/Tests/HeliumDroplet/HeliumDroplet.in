@@ -1,4 +1,5 @@
-double tau=.05;
+double tau=.025;
+double SphereRadius=6.0;
 Section (Parallel)
 { 
   int ProcsPerClone=1;
@@ -8,8 +9,8 @@ Section (Parallel)
 Section (System)
 {
   bool OpenLoops=false;
-  int NumTimeSlices=10; 
-  Array<double,1> Box(3)=[200, 200, 200];
+  int NumTimeSlices=100; 
+  Array<double,1> Box(3)=[16.0, 16.0, 16.0];
   Array<bool, 1 > IsPeriodic(3)=[true,true,true];
   Section (Particles)
   {
@@ -21,16 +22,18 @@ Section (System)
       //string Type="BOLTZMANNON";
       string Statistics="BOSON";
       //      string Statistics="BOLTZMANNON";
-      int NumParticles=1;
+      //      int NumParticles=33;
+      int NumParticles=20;
       int NumDim=3;
-      string InitPaths="FIXED";
-      Array<double,2> Positions(1,3)=
-[
- 31.0,0.0,0.0
- // 0.0,31.0,0.0,
- // 0.0,0.0,31.0
+      string InitPaths="UniformSphere";
+      //      string InitPaths="FIXED";
+      //      Array<double,2> Positions(1,3)=
+      //[
+      // 16.0,0.0,0.0
+      // // 0.0,31.0,0.0,
+      // /// 0.0,0.0,31.0
  // 6.3508529610858835,6.3508529610858835,6.3508529610858835
-]; 
+      //]; 
 
 	
     }
@@ -45,7 +48,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "HeLowTemp4";
+  string OutFileBase = "HeLowTemp6";
   //  Section (Observable)
   //    {
   //      string type="StructureFactor";
@@ -70,22 +73,33 @@ Section (Observables)
 //       int dumpFreq=500;
       	
     }
-//   Section (Observable)
-//     {
-//       string type = "PairCorrelation";
-//       string Name = "HeHePC";
-//       string Species1 = "He";
-//       string Species2 = "He";
-//       string Description="Helium-Helium Pair Correlation";
-//       int freq=10;
-//       int dumpFreq=100;
-//       Section (Grid)
-// 	{
-// 	  string type = "Linear";
-// 	  double start = 0.0;
-// 	  int NumPoints = 100;
-// 	}
-//     }
+  Section (Observable)
+    {
+      string type = "PairCorrelation";
+      string Name = "HeHePC";
+      string Species1 = "He";
+      string Species2 = "He";
+      string Description="Helium-Helium Pair Correlation";
+      int freq=10;
+      int dumpFreq=100;
+      Section (Grid)
+	{
+	  string type = "Linear";
+	  double start = 0.0;
+	  int NumPoints = 100;
+	}
+    }
+  Section (Observable)
+    {
+      string type = "Angular";
+      string Name = "Angular";
+      string Species1 = "He";
+      string Description="Helium-Helium Pair Correlation";
+      int freq=10;
+      int dumpFreq=100;
+
+    }
+
   Section (Observable)
     {
       string type="PathDump";
@@ -155,10 +169,11 @@ Section (Algorithm)
 
     Section (Move) {string name="NormalBisection";} 
 
-    //    Section (Observe) {string name = "HeHePC";}
+    Section (Observe) {string name = "HeHePC";}
+    Section (Observe) {string name = "Angular";}
     Section (Observe) {string name = "Energy"; }
     Section (Observe) {string name = "PathDump"; }
-    //    Section (Observe) {string name = "StructureFactor"; }
+    // Section (Observe) {string name = "StructureFactor"; }
     Section (Move) {string name = "Shift"; }
   }
 }
