@@ -89,7 +89,7 @@ namespace IO {
     int GetExtent(int dim);
     void Resize(int n);
 
-    bool VarRead(double &val);
+    bool VarRead(double &val) { val = Value; return true; }
     bool VarWrite(double &val);
     IOVarASCII(string name, double val) {
       Name = name;
@@ -115,7 +115,7 @@ namespace IO {
     int GetExtent(int dim);
     void Resize(int n);
 
-    bool VarRead(int &val);
+    bool VarRead(int &val) { val = Value; return true; }
     bool VarWrite(int &val);
     IOVarASCII(string name, int val) {
       Name = name;
@@ -141,8 +141,8 @@ namespace IO {
     int GetExtent(int dim);
     void Resize(int n);
 
-    bool VarRead(string &val);
-    bool VarWrite(string &val);
+    bool VarRead(string &val) { val = Value; return true; }
+    bool VarWrite(string val);
     IOVarASCII(string name, string val) {
       Name = name;
       Value = val;
@@ -167,7 +167,7 @@ namespace IO {
     int GetExtent(int dim);
     void Resize(int n);
 
-    bool VarRead(bool &val);
+    bool VarRead(bool &val) { val = Value; return true; }
     bool VarWrite(bool &val);
     IOVarASCII(string name, bool val) {
       Name = name;

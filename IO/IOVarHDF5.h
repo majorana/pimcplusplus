@@ -311,7 +311,7 @@ namespace IO {
     newVar.DiskSpaceID = H5Scopy(H5Dget_space(DatasetID));
   
     hsize_t start[RANK], count[RANK], stride[RANK], dims[RANK], maxdims[RANK];
-    hsize_t memDims[SliceInfo<T,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank];
+    hsize_t memDims[SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank];
     H5Sget_simple_extent_dims(newVar.DiskSpaceID, dims, maxdims);
   
     int memDimsIndex=0;
@@ -432,6 +432,34 @@ namespace IO {
 					 memDims, memDims);
     H5Sselect_hyperslab(newVar.DiskSpaceID, H5S_SELECT_SET, start, stride, count, NULL);
     return newVar;
+  }
+
+  /// This routine should cover double and int types.  Strings and bools
+  /// need to be handled explicitly
+  template<class T, int RANK> bool
+  IOVarHDF5<T,RANK>::VarRead(T &val)
+  {
+    assert (RANK == 0);
+    IODataType dataType = TypeConvert<T>::Type;
+    hid_t memType;
+    if      (dataType == DOUBLE_TYPE) memType = H5T_NATIVE_DOUBLE;
+    else if (dataType == INT_TYPE)    memType = H5T_NATIVE_INT;
+    else {
+      T a;
+      cerr << "Unknown data type in IOVarHDF5<" << TypeString(a) << ", " 
+	   << RANK << ">" << endl;
+    }
+
+    /// Resize val to appropriate size
+    hsize_t h5dim;
+    H5Sget_simple_extent_dims(MemSpaceID, &h5dim, NULL);
+    assert(h5dim == 1);
+   
+    /// Now, call HDF5 to do the actual reading.
+    herr_t status = 
+      H5Dread (DatasetID, memType, MemSpaceID, DiskSpaceID, H5P_DEFAULT, &val);
+    
+    return (status == 0);
   }
 
 

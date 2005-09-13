@@ -17,6 +17,32 @@ namespace IO {
   template<> class SliceCheck<int>
   { public:  static const int isSlice = 1; };
 
+
+  template<typename T> bool
+  IOVarBase::Read(T &val)
+  {
+    if (GetFileType() == HDF5_TYPE) {
+      IOVarHDF5<T,0>* newVar = dynamic_cast<IOVarHDF5<T,0>*>(this);
+      if (newVar == NULL) {
+	cerr << "Error in dynamic cast to IOVarHDF5.\n";
+	abort();
+      }
+      return newVar->VarRead(val);
+    }
+    else if (GetFileType() == ASCII_TYPE) {
+      IOVarASCII<T,0>* newVar = dynamic_cast<IOVarASCII<T,0>*>(this); 
+      if (newVar == NULL) {
+	cerr << "Error in dynamic cast to IOVarASCII.\n";
+	abort();
+      }
+      return newVar->VarRead(val);
+    }
+    else {
+      cerr << "Error:  unknown type in IOVarBase::Read().\n";
+      abort();
+    }
+  }	
+
   template<typename T, int RANK> bool
   IOVarBase::Read(Array<T,RANK> &val)
   {
@@ -31,7 +57,7 @@ namespace IO {
     else if (GetFileType() == ASCII_TYPE) {
       IOVarASCII<T,RANK>* newVar = dynamic_cast<IOVarASCII<T,RANK>*>(this); 
       if (newVar == NULL) {
-	cerr << "Error in dynamic cast to IOVarHDF5.\n";
+	cerr << "Error in dynamic cast to IOVarASCII.\n";
 	abort();
       }
       return newVar->VarRead(val);
