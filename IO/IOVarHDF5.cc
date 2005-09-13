@@ -36,50 +36,145 @@ namespace IO {
   template<> bool
   IOVarHDF5<string,2>::VarRead(Array<string,2> &val)
   {
-    
+    hid_t type = H5Dget_type(DatasetID);
+    TinyVector<hsize_t,2> hdims;
+    TinyVector<int,2> dims;
+    H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+    dims = hdims;
+    val.resize(dims);
+    hsize_t length = H5Tget_size(type);
+    blitz::Array<char,3> charArray(dims[0],dims[1],length);
+    herr_t status = H5Dread(DatasetID, type, MemSpaceID,
+			    DiskSpaceID, H5P_DEFAULT, charArray.data());
+    for (int i=0; i<dims[0]; i++)
+      for (int j=0; j<dims[1]; j++)
+	val(i,j) = &(charArray(i,j,0));
+    H5Tclose(type);
+    return (status == 0);
   }
   
   template<> bool
   IOVarHDF5<string,3>::VarRead(Array<string,3> &val)
   {
-    
+    hid_t type = H5Dget_type(DatasetID);
+    TinyVector<hsize_t,3> hdims;
+    TinyVector<int,3> dims;
+    H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+    dims = hdims;
+    val.resize(dims);
+    hsize_t length = H5Tget_size(type);
+    blitz::Array<char,4> charArray(dims[0],dims[1],dims[2],length);
+    herr_t status = H5Dread(DatasetID, type, MemSpaceID,
+			    DiskSpaceID, H5P_DEFAULT, charArray.data());
+    for (int i=0; i<dims[0]; i++)
+      for (int j=0; j<dims[1]; j++)
+	for (int k=0; k<dims[2]; k++)
+	  val(i,j,k) = &(charArray(i,j,k,0));
+    H5Tclose(type);
+    return (status == 0);
   }
   
   template<> bool
   IOVarHDF5<string,4>::VarRead(Array<string,4> &val)
   {
-    
+    hid_t type = H5Dget_type(DatasetID);
+    TinyVector<hsize_t,4> hdims;
+    TinyVector<int,4> dims;
+    H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+    dims = hdims;
+    val.resize(dims);
+    hsize_t length = H5Tget_size(type);
+    blitz::Array<char,5> charArray(dims[0],dims[1],dims[2],dims[3],length);
+    herr_t status = H5Dread(DatasetID, type, MemSpaceID,
+			    DiskSpaceID, H5P_DEFAULT, charArray.data());
+    for (int i=0; i<dims[0]; i++)
+      for (int j=0; j<dims[1]; j++)
+	for (int k=0; k<dims[2]; k++)
+	  for (int l=0; l<dims[3]; l++)
+	    val(i,j,k,l) = &(charArray(i,j,k,l,0));
+    H5Tclose(type);
+    return (status == 0);    
   }
 
 
   template<> bool
   IOVarHDF5<bool,0>::VarRead(bool &val)
   {
-    
+    unsigned char cval;
+    herr_t status = H5Dread(DatasetID, BoolTypeID, MemSpaceID, 
+			    DiskSpaceID, H5P_DEFAULT, &cval);
+    val = (cval == (unsigned char)1);
+    return (status == 0);
   }  
   
   template<> bool
   IOVarHDF5<bool,1>::VarRead(Array<bool,1> &val)
   {
-    
+    TinyVector<hsize_t,1> hdims;
+    TinyVector<int,1> dims;
+    H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+    dims = hdims;
+    Array<unsigned char,1> cval(dims);
+    val.resize(dims);
+    herr_t status = H5Dread(DatasetID, BoolTypeID, MemSpaceID, DiskSpaceID,
+			     H5P_DEFAULT, val.data());
+    for (int i=0; i<dims[0]; i++)
+      val(i) = (cval(i) == 1);
+    return (status == 0);
   }
   
   template<> bool
   IOVarHDF5<bool,2>::VarRead(Array<bool,2> &val)
   {
-    
+    TinyVector<hsize_t,2> hdims;
+    TinyVector<int,2> dims;
+    H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+    dims = hdims;
+    Array<unsigned char,2> cval(dims);
+    val.resize(dims);
+    herr_t status = H5Dread(DatasetID, BoolTypeID, MemSpaceID, DiskSpaceID,
+			     H5P_DEFAULT, val.data());
+    for (int i=0; i<dims[0]; i++)
+      for (int j=0; j<dims[1]; j++)
+	val(i,j) = (cval(i,j) == 1);
+    return (status == 0); 
   }
   
   template<> bool
   IOVarHDF5<bool,3>::VarRead(Array<bool,3> &val)
   {
-    
+    TinyVector<hsize_t,3> hdims;
+    TinyVector<int,3> dims;
+    H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+    dims = hdims;
+    Array<unsigned char,3> cval(dims);
+    val.resize(dims);
+    herr_t status = H5Dread(DatasetID, BoolTypeID, MemSpaceID, DiskSpaceID,
+			     H5P_DEFAULT, val.data());
+    for (int i=0; i<dims[0]; i++)
+      for (int j=0; j<dims[1]; j++)
+	for (int k=0; k<dims[2]; k++)
+	  val(i,j,k) = (cval(i,j,k) == 1);
+    return (status == 0); 
   }
   
   template<> bool
   IOVarHDF5<bool,4>::VarRead(Array<bool,4> &val)
   {
-    
+    TinyVector<hsize_t,4> hdims;
+    TinyVector<int,4> dims;
+    H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+    dims = hdims;
+    Array<unsigned char,4> cval(dims);
+    val.resize(dims);
+    herr_t status = H5Dread(DatasetID, BoolTypeID, MemSpaceID, DiskSpaceID,
+			     H5P_DEFAULT, val.data());
+    for (int i=0; i<dims[0]; i++)
+      for (int j=0; j<dims[1]; j++)
+	for (int k=0; k<dims[2]; k++)
+	  for (int l=0; l<dims[3]; l++)
+	    val(i,j,k,k) = (cval(i,j,k,l) == 1);
+    return (status == 0);     
   }
   
   //////////////////////////////////////////
