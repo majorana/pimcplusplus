@@ -18,11 +18,11 @@ namespace IO {
       }
       hid_t groupID = h5Tree->GroupID;
       hid_t boolType = h5Tree->GetBoolType();
-      IOVarBase *newVar = NewIOVarHDF5(groupID, name, val, boolType);
+      IOVarBase *newVar = NewIOVar0HDF5(groupID, name, val, boolType);
       VarList.push_back(newVar);
     }
     else if (GetFileType() == ASCII_TYPE) {
-      
+      VarList.push_back(new IOVarASCII<T,0>(name,val));
     }
     else {
       cerr << "Unknown file type in WriteVar.\n";

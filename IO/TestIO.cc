@@ -11,7 +11,12 @@ void TestHDF5()
   myVar(0,0)=1.0; myVar(0,1)=2.0; myVar(0,2)=3.0;
   myVar(1,0)=4.0; myVar(1,1)=5.0; myVar(1,2)=6.0;
 
+  string TestString = "Hello World";
+  out.WriteVar("TestString", TestString);
+
   out.WriteVar("Test", myVar);
+  double a = 3.0;
+  out.WriteVar ("a", a);
 
   out.CloseFile();
 
@@ -20,9 +25,8 @@ void TestHDF5()
 
   IOSectionClass in;
   assert(in.OpenFile ("IOtest.h5"));
-  IOVarHDF5<double,2> *test = (IOVarHDF5<double,2>*)in.GetVarPtr("Test");
+  IOVarBase *test = in.GetVarPtr("Test");
   nilArraySection n;
-  test->Slice(1,Range::all(),n,n,n,n,n,n,n,n,n).VarWrite(x);
   test->Write(x,0,Range::all());
   in.PrintTree();
   in.ReadVar("Test", myVar2);

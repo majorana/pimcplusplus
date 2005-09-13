@@ -78,7 +78,6 @@ namespace IO {
 				 string mySectionName,
 				 IOTreeClass *parent)
   {
-    cerr << "In HDF5 OpenFile.\n";
     // Turn off error printing
     H5E_auto_t func;
     void *client_data;
@@ -256,8 +255,6 @@ namespace IO {
 
   void IOTreeHDF5Class::GroupIterator(string member_name)
   {
-    //cerr << "GroupIterator( " << member_name << ")\n";
-
     H5G_stat_t statbuf;
   
     H5Gget_objinfo(GroupID, member_name.c_str(), 0, &statbuf);
@@ -307,7 +304,6 @@ namespace IO {
       }
     }
     else if (statbuf.type == H5G_DATASET) {
-      cerr << "Found HDF5 dataset:  " << member_name << endl;
       hid_t datasetID = H5Dopen(GroupID, member_name.c_str());
       VarList.push_back (NewIOVarHDF5(datasetID, member_name, BoolType));
     }
