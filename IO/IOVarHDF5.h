@@ -40,7 +40,6 @@ namespace IO {
     int GetRank();
     IODataType GetType();
     IOFileType GetFileType();
-    //    string GetTypeString();
 
     int GetExtent (int dim);
     void Resize(int n);

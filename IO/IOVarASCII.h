@@ -2,6 +2,7 @@
 #define IO_VAR_ASCII_H
 
 #include "IOVarBase.h"
+#include <fstream>
 
 namespace IO {
 
@@ -33,7 +34,8 @@ namespace IO {
     int GetRank();
     IODataType GetType();
     IOFileType GetFileType();
-    string GetTypeString();
+
+    void Print(ofstream &out);
 
     int GetExtent(int dim);
     void Resize(int n);
@@ -84,7 +86,6 @@ namespace IO {
     int GetRank();
     IODataType GetType();
     IOFileType GetFileType();
-    string GetTypeString();
 
     int GetExtent(int dim);
     void Resize(int n);
@@ -110,7 +111,6 @@ namespace IO {
     int GetRank();
     IODataType GetType();
     IOFileType GetFileType();
-    string GetTypeString();
 
     int GetExtent(int dim);
     void Resize(int n);
@@ -136,7 +136,6 @@ namespace IO {
     int GetRank();
     IODataType GetType();
     IOFileType GetFileType();
-    string GetTypeString();
 
     int GetExtent(int dim);
     void Resize(int n);
@@ -162,7 +161,6 @@ namespace IO {
     int GetRank();
     IODataType GetType();
     IOFileType GetFileType();
-    string GetTypeString();
 
     int GetExtent(int dim);
     void Resize(int n);
@@ -264,6 +262,30 @@ namespace IO {
     newSliceType newVar(Name);
     newVar.ArrayValue.reference(ArrayValue(s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10));
     return newVar;
+  }
+
+  template<class T, int RANK> void
+  IOVarASCII<T,RANK>::Print(ofstream &out)
+  {
+    T a;
+    if (GetRank() == 0) {
+      out << TypeString(a) << " " << Name << " = " << endl;
+    }
+    else {
+      out << "Array<" << TypeString(a) << "," << GetRank() << ">(";
+      for (int i=0; i<RANK; i++) {
+	out << ArrayValue.extent(i);
+	if (i < (RANK-1))
+	  out << ",";
+      }
+      out << ") = [ ";
+      for (int i=0; i<ArrayValue.size(); i++) {
+	out << *(ArrayValue.data()+i);
+	if (i < (ArrayValue.size()-1))
+	  out << ", ";
+      }
+      out << " ];" << endl;
+    }
   }
 
 }

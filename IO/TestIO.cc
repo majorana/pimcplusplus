@@ -137,9 +137,14 @@ main()
 {
 //   TestHDF5();
 //   TestASCII();
-  IOSectionClass io;
-  io.NewFile ("TestHDF5.h5");
-  TestDoubleWrite(io);
-  TestDoubleRead(io);
+  IOSectionClass ioHDF5;
+  ioHDF5.NewFile ("TestHDF5.h5");
+  TestDoubleWrite(ioHDF5);
+  TestDoubleRead(ioHDF5);
+
+  IOSectionClass ioASCII;
+  ioASCII.NewFile ("TestASCII.txt");
+  TestDoubleWrite(ioASCII);
+  TestDoubleRead(ioASCII);
 
 }

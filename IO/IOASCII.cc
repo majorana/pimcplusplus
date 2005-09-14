@@ -837,7 +837,7 @@ namespace IO {
     list<IOVarBase*>::iterator varIter=VarList.begin();
     while (varIter!=VarList.end()){
       ASCIIPrintIndent(indentNum,outFile);
-      //      ((VarASCIIClass*)(*varIter))->Print(outFile);    
+      (*varIter)->Print(outFile);    
       varIter++;
     }
     list<IOTreeClass*>::iterator secIter=SectionList.begin();

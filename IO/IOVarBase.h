@@ -3,6 +3,7 @@
 
 #include <blitz/array.h>
 #include <hdf5.h>
+#include <iostream>
 using namespace blitz;
 
 namespace IO {
@@ -19,6 +20,7 @@ namespace IO {
     virtual int GetRank()            = 0;
     virtual IODataType GetType()     = 0;
     virtual IOFileType GetFileType() = 0;
+    virtual void Print(std::ofstream &out) { /* do nothing */ }
     //    virtual string GetTypeString()   = 0;
     string GetName () const
     { return Name; }
