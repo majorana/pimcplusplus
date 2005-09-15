@@ -33,6 +33,43 @@ void PathClass::ReadOld(string fileName,bool replicate)
   inFile.CloseFile();
 }
 
+void PathClass::ReadSqueeze(string fileName,bool replicate)
+{
+// This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
+  IOSectionClass inFile;
+  assert (inFile.OpenFile(fileName.c_str()));
+  inFile.OpenSection("System");
+  Array<double,3> oldBox;
+  inFile.ReadVar("Box",oldBox);
+  inFile.CloseSection();
+  inFile.OpenSection("Observables");
+  inFile.OpenSection("PathDump");
+  Array<double,4> oldPaths; //(58,2560,2,3);
+  
+  assert(inFile.ReadVar("Path",oldPaths));
+  perr << "My paths are of size"  << oldPaths.extent(0) << " "
+       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
+  
+  for (int ptcl=0;ptcl<NumParticles();ptcl++){
+    for (int slice=0; slice<NumTimeSlices(); slice++) {
+      dVec pos;
+      pos = 0.0;
+      for (int dim=0; dim<NDIM; dim++)
+	if (replicate){
+          pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim)*(Box[dim]/oldBox(dim));
+        }
+        else{
+	  pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim)*(Box[dim]/oldBox(dim));
+        }
+      cerr<<"I'm putting the slice "<<slice<<" and the ptcl "<<ptcl<<"as "<<Path(slice,ptcl)<<endl;
+      Path(slice,ptcl) = pos;
+    }      
+  }
+  inFile.CloseSection();
+  inFile.CloseSection();
+  inFile.CloseFile();
+}
+
 void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
 			     double &dist, dVec &disp)
 {
@@ -162,7 +199,7 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
   for (int slice=1; slice<N; slice++) {
     int sliceOwner = SliceOwner(slice);
     int relSlice = slice-myFirstSlice;
-    
+     
     double delta = (double)(N-slice-1);
     double taueff = tau*(1.0 - 1.0/(delta+1.0));
     double sigma = sqrt (2.0*lambda*taueff);
@@ -314,6 +351,7 @@ void PathClass::Read (IOSectionClass &inSection)
   inSection.CloseSection(); // Particles
   // Now actually allocate the path
   Allocate();
+  cerr<<"My time slices is "<<NumTimeSlices()<<endl;
 
 
 }
@@ -365,6 +403,38 @@ void PathClass::InitPaths (IOSectionClass &in)
 	r[2] = iz*delta;
 	for (int slice=0; slice<NumTimeSlices(); slice++) 
 	  Path(slice,ptcl) = r;
+      }
+    }
+    else if(InitPaths=="UniformSphere") {
+      dVec r0,r;
+      double SphereRadius;
+      assert(in.ReadVar("SphereRadius",SphereRadius));
+      //      double SphereRadius=31;
+      SpeciesClass &species = *SpeciesArray(0);
+      double sigma=sqrt(2*species.lambda*tau);
+      for (int ptcl =0;ptcl<NumParticles();ptcl++){
+        Random.LocalGaussianVec(1,r0);//under common
+        cerr<<"in PathClass"<<r0*SphereRadius/sqrt(r0[0]*r0[0]+r0[1]*r0[1]+r0[2]*r0[2])<<endl;
+	for (int slice=0;slice <NumTimeSlices();slice++){
+          SetPos(slice,ptcl,r0*SphereRadius/sqrt(r0[0]*r0[0]+r0[1]*r0[1]+r0[2]*r0[2]));                      
+	}
+      }
+    }
+    else if(InitPaths=="UniformPointsSphere") {
+      dVec r0,r;
+      SpeciesClass &species = *SpeciesArray(0);
+      double SphereRadius;
+      assert(in.ReadVar("SphereRadius",SphereRadius));
+      //      double SphereRadius=31;
+      double sigma=sqrt(2*species.lambda*tau);
+      for (int ptcl =0;ptcl<NumParticles();ptcl++){
+        Random.LocalGaussianVec(1,r0);//under common
+        for (int slice=0;slice <NumTimeSlices();slice++){
+          Random.LocalGaussianVec(sigma,r);
+          r=r0+r;
+          SetPos(slice,ptcl,r*SphereRadius/sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]));
+                                                                                
+        }
       }
     }
     else if (InitPaths == "BCC") {
@@ -446,7 +516,11 @@ void PathClass::InitPaths (IOSectionClass &in)
       }
       string pathFile;
       assert(in.ReadVar("File",pathFile));
-      ReadOld(pathFile,replicate);
+      ReadSqueeze(pathFile,replicate);
+    }
+    else if (InitPaths == "SQUEEZE"){
+      string pathFile;
+      assert(in.ReadVar("File",pathFile));
     }
     else if (InitPaths == "LEVIFLIGHT") {
       Array<double,2> Positions;
@@ -509,6 +583,18 @@ void PathClass::InitPaths (IOSectionClass &in)
     OpenSpeciesNum=SpeciesNum(openSpeciesName);
     InitOpenPaths();
   }  
+  Array<int,1>  numGrid(3);
+  numGrid(0)=6;
+  numGrid(1)=6;
+  numGrid(2)=5;
+  //  Cell=new GridClass(*this);
+  Cell.Init(Box,numGrid);
+  Cell.BuildNeighborGrids();
+  cerr<<"I am now printing neighbor grids"<<endl;
+  //  Cell.PrintNeighborGrids();
+  Cell.BinParticles(0);
+  cerr<<"I have binned them"<<endl;
+  Cell.PrintParticles(0);
 
   //Everything needs to be accepted
   Path.AcceptCopy();
@@ -751,6 +837,11 @@ void PathClass::SetupkVecs3D()
   }
 }
 
+// void PathClas::Calc_Ylm(int slice,int species)
+// {
+
+
+// }
 
 void PathClass::CalcRho_ks_Slow(int slice, int species)
 {
