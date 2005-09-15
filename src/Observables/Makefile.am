@@ -2,6 +2,8 @@ noinst_LTLIBRARIES = libobservables.la
 
 libobservables_la_CXXFLAGS = $(COMMON_CFLAGS)
 libobservables_la_SOURCES  =     \
+    Angular.h                    \
+    Angular.cc                   \
     AutoCorr.cc                  \
     AutoCorr.h                   \
     DistanceToHead.cc            \
@@ -21,6 +23,8 @@ libobservables_la_SOURCES  =     \
     StructureFactor.h            \
     Time.cc                      \
     Time.h                       \
+    VacancyLocation.h            \
+    VacancyLocation.cc           \
     Weight.cc                    \
     Weight.h                     \
     WindingNumber.cc             \
