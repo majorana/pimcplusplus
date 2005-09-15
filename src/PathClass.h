@@ -6,8 +6,10 @@
 #include "SpeciesClass.h"
 #include <Common/Random/Random.h>
 #include <Common/MPI/Communication.h>
-
+#include "GridClass.h"
 class ActionsClass;
+
+
 
 ///The number of time slices is the number of slices on this processor.
 ///In all cases this processor shares a time slice with the processor 
@@ -16,6 +18,7 @@ class ActionsClass;
 class PathClass
 {
 private:  
+  CellMethodClass Cell;
   /// Path stores the position of all the particles at all time
   /// slices.  The order for access is timeslice, particle
   Mirrored2DClass<dVec> Path;
@@ -35,6 +38,7 @@ private:
   /////////////////////
   void LeviFlight (Array<dVec,1> &vec, double lambda);
   void ReadOld(string fileName, bool replicate);
+  void ReadSqueeze(string fileName, bool replicate);
   ////////////////////////////////
   /// Boundary conditions stuff //
   ////////////////////////////////
@@ -328,7 +332,7 @@ inline
 PathClass::PathClass (CommunicatorClass &communicator,
 			     RandomClass &random,
 			     ActionsClass &actions) : 
-  Communicator(communicator), Random(random), Actions(actions)
+  Communicator(communicator), Random(random), Actions(actions),Cell(*this)
 {
   //      NumSpecies = 0;
   TotalNumSlices=0;
