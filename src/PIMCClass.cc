@@ -154,10 +154,20 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection("DistanceToOpen");
       tempObs = new HeadLocClass(PathData,OutFile);
     }
+    else if (theObserveType=="VacancyLocation"){
+      if (iAmRoot)
+	OutFile.NewSection("VacancyLocation");
+      tempObs=new VacancyLocClass(PathData,OutFile);
+    }
     else if (theObserveType=="TimeAnalysis"){
       if (iAmRoot)
 	OutFile.NewSection("TimeAnalysis");
       tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables);
+    }
+    else if (theObserveType=="Angular"){
+      if (iAmRoot)
+	OutFile.NewSection("Angular");
+      tempObs= new AngularClass(PathData,OutFile);
     }
     else if (theObserveType=="PathDump"){
       if (iAmRoot)
@@ -168,6 +178,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       if (iAmRoot)
 	OutFile.NewSection("WindingNumber");
       tempObs=new WindingNumberClass(PathData,OutFile);
+    }
+    else if (theObserveType=="Vacancy"){
+      if (iAmRoot)
+	OutFile.NewSection("Vacancy");
+      tempObs=new VacancyLocClass(PathData,OutFile);
     }
     else if (theObserveType=="StructureFactor"){
       if (iAmRoot)
