@@ -2,7 +2,7 @@
 #define ISOSURFACE_H
 
 #include "GLObject.h"
-#include <gts.h>
+// #include <gts.h>
 #include <Common/Splines/MyTricubicSpline.h>
 
 extern "C" void 
