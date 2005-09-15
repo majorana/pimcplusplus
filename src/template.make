@@ -109,7 +109,7 @@ COMMONVER = \"`svn info Common | grep Revision | sed -e 's/Revision: //'`\"
 
 
 
-DEFS = $(EXTRADEFS) -DNDIM=3 -DVERSION=$(VER) -DCOMMONVERSION=$(COMMONVER) -DNO_COUT  #-DBZ_DEBUG -DDEBUG ##-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
+DEFS = $(EXTRADEFS) -DNDIM=2 -DVERSION=$(VER) -DCOMMONVERSION=$(COMMONVER) -DNO_COUT  #-DBZ_DEBUG -DDEBUG ##-ffast-math#  -DDEBUG -DBZ_DEBUG  # -DUSE_MPI #  DPARALLEL  # -DDEBUG -DBZ_DEBUG  -g #-DUSE_MPI -DTHREE_D 
 
 
 
@@ -136,6 +136,7 @@ PIMCobjs =                                \
   Moves/BisectionStageSphereClass.o        \
   Moves/StructureReject.o                 \
   PIMCClass.o                             \
+  GridClass.o                            \
   Moves/MetaMoves.o 	                  \
   Observables/ObservableBase.o            \
   Observables/ObservableCorrelation.o     \
@@ -471,7 +472,7 @@ clean:	Common_clean Tests_clean Actions_clean Moves_clean Observables_clean Visu
 
 
 
-SOURCES =  Common.cc SpeciesClass.cc  ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc
+SOURCES =  Common.cc SpeciesClass.cc  ActionClass.cc PathDataClass.cc  CommunicatorClass.cc PathClass.cc TestSubarrays.cc  WrapClass.cc TestHDF5.cc TestASCII.cc  Main.cc PIMCClass.cc TestPermutation.cc MirroredClass.cc TestEwald.cc LongRangeRPA.cc NodalAction.cc FreeParticles.cc GridClass.cc
 
 
 newmake: Common_newmake Tests_newmake Observables_newmake Moves_newmake Actions_newmake 
