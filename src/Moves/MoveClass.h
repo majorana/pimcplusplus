@@ -16,5 +16,5 @@
 #include "WaterMoveRing.h"
 #include "StructureReject.h"
 #include "BisectionSphereBlock.h"
-
+#include "CenterDroplet.h"
 #endif
