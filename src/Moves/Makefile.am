@@ -10,6 +10,8 @@ libmoves_la_SOURCES  =            \
     BisectionStageClass.h        \
     BisectionStageSphereClass.cc \
     BisectionStageSphereClass.h  \
+    CenterDroplet.h              \
+    CenterDroplet.cc             \
     CoupledPermuteStageClass.cc  \
     CoupledPermuteStageClass.h   \
     DisplaceMove.cc              \
