@@ -25,6 +25,9 @@ public:
 class CellMethodClass
 {
 public:
+  int Xeffect;
+  int Yeffect;
+  int Zeffect;
   PathClass &Path;
   double CutoffDistance;
   Array<int,1> NumGrid;
@@ -38,7 +41,7 @@ public:
   void FindBox(dVec myPoint,int &x,int &y,int &z);
   bool InBox(CellInfoClass &theGrid,dVec thePoint);
 CellMethodClass(PathClass &path) : Path(path){
-    CutoffDistance=7.0;
+    CutoffDistance=8.0;
     //do nothing for now
 }
   

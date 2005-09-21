@@ -18,7 +18,7 @@ class ActionsClass;
 class PathClass
 {
 private:  
-  CellMethodClass Cell;
+
   /// Path stores the position of all the particles at all time
   /// slices.  The order for access is timeslice, particle
   Mirrored2DClass<dVec> Path;
@@ -51,6 +51,7 @@ private:
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
  public:
+  CellMethodClass Cell;
   /// This is the maximum number of k vectors in each direction
   TinyVector<int,NDIM> MaxkIndex;
   /// Stores the radius of the k-space sphere we sum over

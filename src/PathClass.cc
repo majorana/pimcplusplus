@@ -584,17 +584,22 @@ void PathClass::InitPaths (IOSectionClass &in)
     InitOpenPaths();
   }  
   Array<int,1>  numGrid(3);
-  numGrid(0)=6;
-  numGrid(1)=6;
-  numGrid(2)=5;
+  //  numGrid(0)=6*2;
+  //  numGrid(1)=6*2;
+  //  numGrid(2)=5*2;
+  numGrid(0)=10;
+  numGrid(1)=10;
+  numGrid(2)=10;
+  
   //  Cell=new GridClass(*this);
   Cell.Init(Box,numGrid);
   Cell.BuildNeighborGrids();
-  cerr<<"I am now printing neighbor grids"<<endl;
+  //  cerr<<"I am now printing neighbor grids"<<endl;
   //  Cell.PrintNeighborGrids();
-  Cell.BinParticles(0);
-  cerr<<"I have binned them"<<endl;
-  Cell.PrintParticles(0);
+  for (int slice=0;slice<NumTimeSlices();slice++)
+    Cell.BinParticles(slice);
+  //  cerr<<"I have binned them"<<endl;
+  //  Cell.PrintParticles(0);
 
   //Everything needs to be accepted
   Path.AcceptCopy();
