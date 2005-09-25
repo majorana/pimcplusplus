@@ -13,6 +13,9 @@ class StructureFactorClass : public ObservableClass
   int DumpFreq;
 public:
   int TotalCounts;
+  ObservableDouble SkMaxVar;
+  double SkMax;
+  dVec MaxkVec;
   /// Stores number of counts in each bin
   Array<double,1> Sk;
   /// The species between which I am calculating the pair correlation
@@ -29,13 +32,16 @@ public:
   void Calculate();
   void Clear();
   StructureFactorClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
-    ObservableClass(myPathData,ioSection){
-    TimesCalled=0;
-  }
+    ObservableClass(myPathData,ioSection),
+    SkMaxVar("SkMax",IOSection,myPathData.Path.Communicator)
+    {
+      TimesCalled=0;
+    }
   StructureFactorClass(PathDataClass &myPathData, IOSectionClass &ioSection,
 		       int species1, int species2) : 
     ObservableClass(myPathData, ioSection), 
-    Species1(species1), Species2(species2) 
+    Species1(species1), Species2(species2),
+    SkMaxVar("SkMax",IOSection,myPathData.Path.Communicator)
   { Initialize(); }
 };
 
