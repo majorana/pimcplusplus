@@ -67,7 +67,8 @@ void StructureFactorClass::WriteInfo()
   }
 
   IOSection.WriteVar("kVecs", kVecArray);
-  
+  ///We now accumulate the structure factor one at a time
+  IOSection.WriteVar("Cumulative","False");
   /// Output data for plotting in analysis code
   IOSection.WriteVar("x", kMagArray);
   IOSection.WriteVar("xlabel", "|k|");
@@ -86,7 +87,9 @@ void StructureFactorClass::WriteBlock()
   int num1 = PathData.Path.Species(Species1).NumParticles;
   int num2 = PathData.Path.Species(Species1).NumParticles;
   norm = TotalCounts * sqrt((double)num1*num2);
-  
+  ///This variable currently doesn't work in parallel. Have to
+  ///actually take the  max of all the structure factors
+  SkMaxVar.Write(SkMax);
   PathData.Path.Communicator.Sum(Sk, SkSum);
   if (PathData.Path.Communicator.MyProc()==0) {
     if (FirstTime) {
@@ -105,6 +108,12 @@ void StructureFactorClass::WriteBlock()
       IOVar->Append(SofkArray);
     }
   }
+  ///Clear the structure factor counts
+  Sk=0;
+  TotalCounts=0;
+  SkMax=0;
+  MaxkVec=0;
+
 }
 
 
@@ -142,7 +151,12 @@ void StructureFactorClass::Accumulate()
       double c = PathData.Path.Rho_k(slice, Species2, ki).real();
       double d = PathData.Path.Rho_k(slice, Species2, ki).imag();
       // \f$ Sk(ki) :=  Sk(ki) + \Re(rho^1_k * rho^2_{-k}) \f
-      Sk(ki) += a*c + b*d;	
+      double sk=a*c+b*d;
+      if (sk>SkMax){
+	SkMax=sk;
+	MaxkVec=kVecs(ki);
+      }
+      Sk(ki) += sk;
     }
   }
 }
@@ -181,6 +195,9 @@ void StructureFactorClass::Initialize()
 {
   TotalCounts = 0;
   TimesCalled=0;
+  SkMax=0;
+  MaxkVec=0;
+  
 
 }
 
