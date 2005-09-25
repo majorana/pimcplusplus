@@ -3,6 +3,7 @@
 
 #include "MultiStage.h"
 #include "../Observables/ObservableBase.h"
+
 typedef enum {HEAD,TAIL} EndType;
 
 class EndStageClass : public LocalStageClass
@@ -16,9 +17,11 @@ private:
   int EndAttempts;
   ObservableVecDouble1 AcceptRatioVar;
 public:
+  bool OnlyX;
   void WriteRatio();
   void Accept();
   void Reject();
+  void Read(IOSectionClass  &in);
   double Sample(int &slice1,int &slice2, 
 		Array<int,1> &activeParticles);
   EndStageClass(PathDataClass &pathData, int numLevels,
