@@ -16,13 +16,14 @@
 class BisectionBlockClass : public MultiStageClass
 {
 private:
+  int StepNum;
   int NumLevels;
   int StepsPerBlock;
   bool HaveRefslice;
   int SpeciesNum;
   void ChooseTimeSlices();
   StageClass* PermuteStage;
-  //  void WriteRatio();
+  void WriteRatio();
   //  ObservableDouble AcceptanceRatioVar;
 public:
 
@@ -34,7 +35,7 @@ public:
   void MakeMove();
 
   BisectionBlockClass(PathDataClass &pathData, IOSectionClass &out) : 
-    MultiStageClass(pathData, out)
+    MultiStageClass(pathData, out),StepNum(0)
 
   { 
     // do nothing for now
