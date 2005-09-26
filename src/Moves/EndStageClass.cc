@@ -1,12 +1,20 @@
 #include "EndStageClass.h"
+void EndStageClass::Read(IOSectionClass &in)
+{
+  OnlyX=false;
+  in.ReadVar("OnlyX",OnlyX);
+  LocalStageClass::Read(in);
+}
 
 void EndStageClass::WriteRatio()
 {
+  //  cerr<<"About to write my ratio"<<endl;
   Array<double,1> acceptRatio(2);
   acceptRatio(0)=(double)AcceptRatio(0)/EndAttempts;
   acceptRatio(1)=(double)AcceptRatio(1)/EndAttempts;
   AcceptRatioVar.Write(acceptRatio);
   AcceptRatioVar.Flush();
+  //  cerr<<"done writing my ratio"<<endl;
 }
 
 
@@ -77,6 +85,7 @@ void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
 
 }
 
+
 ///HACK! HACK! HACK!
 double mysign(double num)
 {
@@ -88,32 +97,48 @@ double mysign(double num)
 double EndStageClass::Sample(int &slice1,int &slice2, 
 	      Array<int,1> &activeParticles)
 {
-//   cerr<<"About to sleep"<<endl;
-//   sleep(2000);
-//   cerr<<"Done to sleep"<<endl;
+
   int procWithRefSlice = PathData.Path.SliceOwner (PathData.Path.RefSlice);
-  //  cerr<<"Here I am "<<endl;
-  //If you don't own the open link then just choose some slices to work with
+  //  cerr<<"Entering end stage class" <<procWithRefSlice<<" "
+  //      <<PathData.Path.RefSlice<<" "
+  //      <<PathData.Path.Communicator.MyProc()<<endl;
+  
+  ///If you don't own the open link  
+  ///then just choose some slices to work with
   if (procWithRefSlice != PathData.Path.Communicator.MyProc()) {
-    //    cerr<<"In here"<<endl;
     int sliceSep = 1<<NumLevels;
     assert (sliceSep < PathData.Path.NumTimeSlices());
     int numLeft = PathData.Path.NumTimeSlices()-sliceSep;
     slice1 = PathData.Path.Random.LocalInt (numLeft);
     slice2 = slice1+sliceSep;
+    ///BUG: Will only work for one species
+    activeParticles.resize(1);
+    activeParticles(0)=
+      PathData.Path.Random.LocalInt(PathData.Path.NumParticles());
+    PathData.MoveJoin(slice2);
+    //    cerr<<"Exiting as an incorrect processor"<<endl;
     return 1.0;
   }
-//   sleep(200);
-//   cerr<<"Before choose time slices"<<endl;
-
   ChooseTimeSlices(slice1,slice2);
-  //  cerr<<"Ending choose time slice"<<endl;
+    
   ///if you are running with time slice parallelization it doesn't
-  ///shift the data so everyone doesn't have to know about it. It
-  ///simply returns 0 forcing the move to be rejected prematurely early
+  ///shift the data since everyone doesn't have to know about it. It
+  ///simply returns 1 allowing everyone to do their own bisection
   if ((slice1<=0 || slice2>=PathData.Path.NumTimeSlices()-1) &&
-      PathData.Path.Communicator.NumProcs()>1)
-    return 0.0;
+      PathData.Path.Communicator.NumProcs()>1){
+        int sliceSep = 1<<NumLevels;
+    assert (sliceSep < PathData.Path.NumTimeSlices());
+    int numLeft = PathData.Path.NumTimeSlices()-sliceSep;
+    slice1 = PathData.Path.Random.LocalInt (numLeft);
+    slice2 = slice1+sliceSep;
+    ///BUG: Will only work for one species
+    activeParticles.resize(1);
+    activeParticles(0)=
+      PathData.Path.Random.LocalInt(PathData.Path.NumParticles());
+    PathData.MoveJoin(slice2);
+    //    cerr<<"Exiting as a correct processor with bad time slices"<<endl;
+    return 1.0;
+  }
   PathData.MoveJoin(slice2);
   ///The active particle should be a slice
   activeParticles.resize (1);
@@ -130,7 +155,8 @@ double EndStageClass::Sample(int &slice1,int &slice2,
     changePtcl=PathData.Path.NumParticles();
   }
   else {
-    cerr<<"I'm neither seeing a head or tail here! Warning! Warning!"<<endl;
+    cerr<<
+      "I'm neither seeing a head or tail here! Warning! Warning!"<<endl;
     abort();
   }
 
@@ -145,9 +171,15 @@ double EndStageClass::Sample(int &slice1,int &slice2,
   newPos(2)=  oldPos[2]+
     PathData.Path.Random.Local()*(PathData.Path.GetBox()(2)/40.0)*
     mysign(PathData.Path.Random.Local()-0.5);
+  if (OnlyX){
+    newPos(1)=oldPos[1];
+    newPos(2)=oldPos[2];
+  }
   if (fabs(newPos(0))>500 || fabs(newPos(1))>500 || fabs(newPos(2))>500){
-    cerr<<"ERROR! ERROR! ERROR!"<<newPos(0)<<" "<<newPos(1)<<" "<<newPos(2)<<endl;
+    cerr<<"ERROR! ERROR! ERROR!"<<newPos(0)
+	<<" "<<newPos(1)<<" "<<newPos(2)<<endl;
   } 
   PathData.Path.SetPos(PathData.Path.OpenLink,changePtcl,newPos);
+  //  cerr<<"Existing as a correct processor with correct time slices"<<endl;
   return 1.0;
 }
