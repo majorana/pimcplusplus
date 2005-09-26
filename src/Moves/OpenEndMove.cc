@@ -73,7 +73,7 @@ void OpenEndMoveClass::Read(IOSectionClass &in)
     newStage->BisectionLevel = level;
     Stages.push_back (newStage);
   }
- 
+
 }
 
 
