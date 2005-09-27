@@ -4,6 +4,7 @@
 void PathClass::ReadOld(string fileName,bool replicate)
 {
 // This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
+  cerr<<"Trying to read old"<<endl;
   IOSectionClass inFile;
   assert (inFile.OpenFile(fileName.c_str()));
   inFile.OpenSection("Observables");
@@ -303,6 +304,14 @@ void PathClass::Read (IOSectionClass &inSection)
 {
   SetMode (NEWMODE);
   Weight=1;
+  double tempExistsCoupling;
+  if (!inSection.ReadVar("ExistsCoupling",tempExistsCoupling)){
+    ExistsCoupling=-1.0;
+  }
+  else{
+    ExistsCoupling=tempExistsCoupling;
+    ExistsCoupling=(double)(Communicator.MyProc())/100.0;
+  }
   double tau;
   assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
   assert(inSection.ReadVar ("tau", tau));
@@ -367,6 +376,8 @@ void PathClass::Read (IOSectionClass &inSection)
 void PathClass::InitPaths (IOSectionClass &in)
 {
   SetMode (NEWMODE);
+  //  cerr<<"Hello"<<endl;
+  //  assert(1==2);
   assert(in.OpenSection ("Particles"));
   int numSpecies = NumSpecies();
   // Now initialize the Path
@@ -375,7 +386,9 @@ void PathClass::InitPaths (IOSectionClass &in)
     SpeciesClass &species = *SpeciesArray(speciesIndex);
     assert(in.OpenSection("Species", speciesIndex));
     string InitPaths;
+    cerr<<"about to read the string"<<endl;
     in.ReadVar ("InitPaths", InitPaths);
+    cerr<<"Read "<<InitPaths<<endl;
     string Replicate;
     in.ReadVar ("Replicate", Replicate);
     if (InitPaths == "RANDOM") {
@@ -464,10 +477,30 @@ void PathClass::InitPaths (IOSectionClass &in)
 	  Path(slice,ptcl) = r;
       }
     }
+    else if (InitPaths=="ALLFIXED"){
+      Array<double,3> Positions;
+      assert(in.ReadVar("Positions",Positions));
+      cerr<<"My time slices are "<<NumTimeSlices()<<endl;
+      assert(Positions.extent(0)==NumTimeSlices()-1);
+      assert(Positions.extent(1)==species.NumParticles);
+      for (int ptcl=species.FirstPtcl;
+	   ptcl<=species.LastPtcl;ptcl++){
+	for (int slice=0;slice<NumTimeSlices()-1;slice++){
+	  dVec pos;
+	  pos=0.0;
+	  for (int dim=0; dim<species.NumDim; dim++)
+	    pos(dim) = Positions(slice,ptcl-species.FirstPtcl,dim);
+	  Path(slice,ptcl) = pos;	  
+	}
+	dVec pos;
+	for (int dim=0; dim<species.NumDim; dim++)
+	  pos(dim) = Positions(0,ptcl-species.FirstPtcl,dim);
+	Path(NumTimeSlices()-1,ptcl)=pos;
+      }
+    }
     else if (InitPaths == "FIXED") {
       Array<double,2> Positions;
       assert (in.ReadVar ("Positions", Positions));
-      
       assert (Positions.rows() == species.NumParticles);
       assert (Positions.cols() == species.NumDim);
       for (int ptcl=species.FirstPtcl; 
@@ -509,6 +542,7 @@ void PathClass::InitPaths (IOSectionClass &in)
       }
     }    
     else if (InitPaths == "FILE"){
+      cerr<<"I'm going to read the file now"<<endl;
       bool replicate = false;
       if (Replicate == "ON"){
         replicate = true;
@@ -608,6 +642,7 @@ void PathClass::InitPaths (IOSectionClass &in)
   BroadcastRefPath();
   RefPath.AcceptCopy();
   Weight.AcceptCopy();
+  ExistsCoupling.AcceptCopy();
 }
 
 
@@ -964,6 +999,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
 void PathClass::AcceptCopy(int startSlice,int endSlice, 
 				  const Array <int,1> &activeParticles)
 {
+  ExistsCoupling.AcceptCopy();
   Weight.AcceptCopy();
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
@@ -988,6 +1024,7 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
 void PathClass::RejectCopy(int startSlice,int endSlice, 
 				  const Array <int,1> &activeParticles)
 {
+  ExistsCoupling.RejectCopy();
   Weight.RejectCopy();
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
@@ -1022,15 +1059,20 @@ void PathClass::ShiftData(int slicesToShift)
   if (OpenPaths){
     //    perr<<"Here my open link is "<<OpenLink<<endl;
     int openLinkOld=(int)OpenLink;
-    OpenLink=RefSlice;
+    int startSliceOpenLinkProc;
+    int endSliceOpenLinkProc;
+    SliceRange(SliceOwner(RefSlice),startSliceOpenLinkProc,
+	       endSliceOpenLinkProc);
+    
+    OpenLink=RefSlice-startSliceOpenLinkProc;
     if ((int)OpenLink==0){
       OpenLink=NumTimeSlices()-1;
     }
     //  perr<<"My links are "<<openLinkOld<<" "<<OpenLink<<endl;
     ////    perr<<"My links are "<<openLinkOld<<" "<<OpenLink<<" "<<slicesToShift<<endl;
-    ////    if (openLinkOld!=(int)OpenLink)
-    ////      perr<<"My links are "<<openLinkOld<<" "<<OpenLink<<" "<<slicesToShift<<endl;
-    ////    assert(openLinkOld==(int)OpenLink);
+    //    if (openLinkOld!=(int)OpenLink)
+    //      cerr<<"My links are "<<openLinkOld<<" "<<OpenLink<<" "<<slicesToShift<<endl<<Communicator.MyProc()<<" "<<SliceOwner(RefSlice)<<endl;
+    //    assert(openLinkOld==(int)OpenLink);
     OpenLink[OLDMODE]=OpenLink[NEWMODE];
   }
 }
