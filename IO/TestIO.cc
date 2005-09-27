@@ -10,21 +10,40 @@ void TestDoubleWrite(IOSectionClass &io)
   double x0 = 2.0;
   io.WriteVar("x0", x0);
 
-  Array<double,1> x1(5);
-  x1 =  1.0, 2.0, 3.0, 4.0, 5.0 ;
-  io.WriteVar("x1", x1);
+  Array<double,1> x1write(5), x1read(5);
+  x1write =  1.0, 2.0, 3.0, 4.0, 5.0 ;
+  io.WriteVar("x1", x1write);
+  io.ReadVar ("x1", x1read);
+  for (int i=0; i<5; i++)
+    assert (x1read(i) == x1write(i));
 
-  Array<double,2> x2(5,3);
-  x2 =  
+  Array<double,2> x2write(5,3), x2read(5,3);
+  x2write =  
     1.0,   2.0,  3.0, 
     4.0,   5.0,  5.0,
     7.0,   8.0,  9.0,
     10.0, 11.0, 12.0,
     23.0, 14.0, 15.0;
-  io.WriteVar("x2", x2);
+  io.WriteVar("x2", x2write);
+  io.ReadVar ("x2", x2read);
+  for (int i=0; i<5; i++)
+    for (int j=0; j<3; j++)
+      assert(x2read(i,j) == x2write(i,j));
   
   IOVarBase* ioVar = io.GetVarPtr("x2");
-  ioVar->Write(x1,Range::all(), 0);
+  ioVar->Write(x1write,Range::all(), 0);
+  x2write(Range::all(),0) = x1write;
+  io.ReadVar("x2", x2read);
+  for (int i=0; i<5; i++)
+    for (int j=0; j<3; j++)
+      assert(x2read(i,j) == x2write(i,j));
+  
+  ioVar->Resize(6);
+  Array<double,1> x3write(3);
+  x3write = 1.0, 2.0, 3.0;
+  ioVar->Write(x3write,5,Range::all());
+  io.ReadVar("x2", x2read);
+  cerr << "extended x2 = " << x2read << endl;
 
   io.CloseSection();
 

@@ -101,6 +101,9 @@ namespace IO {
     }
     dims[0] = n;
     herr_t status = H5Dextend (DatasetID, dims);
+    H5Sclose (DiskSpaceID);
+    DiskSpaceID = H5Dget_space(DatasetID);
+    MemSpaceID = H5Scopy(DiskSpaceID);
   }
 
   template<typename T, int RANK> int
@@ -482,6 +485,7 @@ namespace IO {
     TinyVector<int,RANK> dims;
     H5Sget_simple_extent_dims(MemSpaceID, &(h5dims[0]), NULL);
     dims = h5dims;
+    cerr << "resizing val to " << dims << endl;
     val.resize(dims);
    
     /// Now, call HDF5 to do the actual reading.
