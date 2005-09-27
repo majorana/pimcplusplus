@@ -220,6 +220,11 @@ public:
   void InitOpenPaths();
   void DistanceToTail();
   MirroredClass<int> Weight;
+  //////////////////////////
+  ////Vacancy Project /////
+  ////////////////////////
+  MirroredClass<double> ExistsCoupling;
+
 };
 
 inline bool PathClass::HasFermions(const Array<int,1>& activeParticles)
