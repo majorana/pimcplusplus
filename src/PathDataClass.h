@@ -23,6 +23,7 @@ private:
   int StartWallTime, MaxWallTime;
   int GetWallTime();
 public:  
+  int Seed;
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
   /// This is for commmunication between nodes within a clone group.
