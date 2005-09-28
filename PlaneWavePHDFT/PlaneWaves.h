@@ -25,7 +25,8 @@ public:
   void Setk (Vec3 k);
   void DiagonalizeH();
   inline double GetEnergy(int band) { return CG.Energies(band); }
-  
+  inline int GetNumBands() { return NumBands; }
+
   /// Gets the FFT box dimensions.
   inline void GetBoxDims(int &nx, int &ny, int &nz)
   { FFT.GetDims(nx, ny, nz); }
