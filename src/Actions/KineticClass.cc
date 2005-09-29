@@ -17,8 +17,6 @@ double KineticClass::Action (int slice1, int slice2,
 {
   //  cerr<<"I'm in the action"<<endl;
   double TotalK = 0.0;
-  Array<double,1> KineticVal(PathData.Path.NumTimeSlices());
-  KineticVal=0.0;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
@@ -43,7 +41,6 @@ double KineticClass::Action (int slice1, int slice2,
 	  GaussProd *= GaussSum;
         }
 	TotalK -= log(GaussProd);    
-	KineticVal(slice)-=log(GaussProd);
 	//TotalK += dot(vel,vel)*FourLambdaTauInv; 
 	//	KineticVal(slice)+=dot(vel,vel)*FourLambdaTauInv; 
       }
@@ -54,6 +51,9 @@ double KineticClass::Action (int slice1, int slice2,
   //  for (int counter=0;counter<KineticVal.size();counter++){
   //    cerr<<"My kinetic link "<<counter<<" is "<<KineticVal(counter)<<endl;
   //  }
+  //  if (PathData.Path.ExistsCoupling>0)
+  //    TotalK-=100*PathData.Path.ExistsCoupling*log(0.9);
+    //    TotalK+=pow(0.8,100*PathData.Path.ExistsCoupling);
   return (TotalK);
 }
 
