@@ -385,11 +385,17 @@ def ProcessScalarSection(infiles,doc,currNum):
      doc.append(Heading(1,sectionName))
      toAddList=[]
     #put description
+     procScalarTable=Table()
+     procScalarTable.body=[["Proc Num"]]
+     procScalarTable.width='50%'
      myTable=Table()
      myTable.body=[['','Mean','Error','Variance', 'Kappa']]
      myTable.width='50%'
      numVars=infiles.CountVars()
-#     print "Num vars is ",numVars
+     data=infiles.ReadVar(0)
+     for procNum in range(0,len(data)):
+          procScalarTable.body.append([repr(procNum)])
+          
      for counter in range(0,numVars):
           data = infiles.ReadVar(counter)
 ##          print "data is ",data
@@ -397,6 +403,8 @@ def ProcessScalarSection(infiles,doc,currNum):
           if type(data[0])==numarray.numarraycore.NumArray:
                currNum=currNum+1
                varName=infiles.GetVarName(counter)
+               procScalarTable.body[0].append(varName+" Mean")
+               procScalarTable.body[0].append(varName+" Error")
                baseName = varName+repr(currNum)
                toAddList.append(Name(sectionName+varName+repr(currNum)))
                toAddList.append(Heading(2,varName))
@@ -438,11 +446,15 @@ def ProcessScalarSection(infiles,doc,currNum):
                     kappalist.append(kappa)
                (mean,error) = WeightedAvg(meanlist, errorlist)
                print repr(mean) + "+/-" + repr(error)
-                    
+               for procNum in range(0,len(mean)):
+                    (meanstr, errorstr) = MeanErrorString (meanlist[procNum], errorlist[procNum])
+                    procScalarTable.body[procNum+1][counter*2]=meanstr
+                    procScalarTable.body[procNum+1][counter*2+1]=errorstr
                (meanstr, errorstr) = MeanErrorString (mean, error)
                myTable.body.append([Href("#"+sectionName+varName+repr(currNum),varName),\
                                     meanstr,errorstr, '%1.2e' % var ,'%1.2f' % kappa])
      doc.append(myTable)
+     doc.append(procScalarTable)
      for counter in range(0,len(toAddList)):
           doc.append(toAddList[counter])
      return currNum
@@ -616,7 +628,7 @@ os.chdir(dirName)
 doc=SeriesDocument()
 ProcessTopTable(doc,infiles)
 
-ProcessMove(doc,infiles)
+#ProcessMove(doc,infiles)
 
 currNum=0
 infiles.OpenSection("Observables")
@@ -630,9 +642,12 @@ for counter in range(0,numSections):
      infiles.OpenSection(counter)
      myName= infiles.GetName()
      myType=infiles.ReadVar("Type")[0]
+     print "Currently processing ",myName
      if myName=="StructureFactor":
           currNum=ProcessStructureFactor(infiles,doc,currNum)
           doc.append(HR())
+     elif myName=="TimeAnalysis":
+          dummy=5
      elif myType=="Scalar":
           currNum=ProcessScalarSection(infiles,doc,currNum)
           doc.append(HR())
