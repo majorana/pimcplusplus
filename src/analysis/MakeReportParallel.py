@@ -446,10 +446,10 @@ def ProcessScalarSection(infiles,doc,currNum):
                     kappalist.append(kappa)
                (mean,error) = WeightedAvg(meanlist, errorlist)
                print repr(mean) + "+/-" + repr(error)
-               for procNum in range(0,len(mean)):
+               for procNum in range(0,len(meanlist)):
                     (meanstr, errorstr) = MeanErrorString (meanlist[procNum], errorlist[procNum])
-                    procScalarTable.body[procNum+1][counter*2]=meanstr
-                    procScalarTable.body[procNum+1][counter*2+1]=errorstr
+                    procScalarTable.body[procNum+1].append(meanstr)
+                    procScalarTable.body[procNum+1].append(errorstr)
                (meanstr, errorstr) = MeanErrorString (mean, error)
                myTable.body.append([Href("#"+sectionName+varName+repr(currNum),varName),\
                                     meanstr,errorstr, '%1.2e' % var ,'%1.2f' % kappa])
