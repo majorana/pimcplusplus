@@ -13,21 +13,23 @@ private:
   ///the location of the head and the tail
   Array<dVec,1> FixedLoc;
   ObservableVecDouble1 VacancyLocVar;
-  ObservableDouble R2Var;
+  //  ObservableDouble R2Var;
   double R2Dist;
+  Array<int,2> VacancyPair;
   int NumSamples;
   int TimesCalled;
   int Freq;
   int DumpFreq;
 public:
+  double VacancyDistance();
   void WriteInfo();
   void Accumulate();
   void WriteBlock();
   void Read(IOSectionClass& in);
   VacancyLocClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) , 
-    VacancyLocVar("y",IOSection,myPathData.Path.Communicator),
-    R2Var("R2",IOSection,myPathData.Path.Communicator)
+    VacancyLocVar("y",IOSection,myPathData.Path.Communicator)//,
+    //    R2Var("R2",IOSection,myPathData.Path.Communicator)
   {
     NumSamples = 0;
     TimesCalled=0;
