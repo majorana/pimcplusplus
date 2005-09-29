@@ -23,7 +23,7 @@ private:
   int SpeciesNum;
   void ChooseTimeSlices();
   StageClass* PermuteStage;
-  ObservableDouble AcceptanceRatioVar;
+  //  ObservableDouble AcceptanceRatioVar;
 public:
   /// Number of levels the bisection move works on 
   void Read(IOSectionClass &in);
