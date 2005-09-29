@@ -137,6 +137,18 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection(theObserveName);
       tempObs = new nofrClass(PathData,OutFile);
     }
+    else if (theObserveType=="Vacancy"){
+      assert(in.ReadVar("Name",theObserveName));
+      if (iAmRoot)
+	OutFile.NewSection(theObserveName);
+      tempObs=new VacancyLocClass(PathData,OutFile);
+    }
+    else if (theObserveType=="Coupling"){
+      assert(in.ReadVar("Name",theObserveName));
+      if (iAmRoot)
+	OutFile.NewSection(theObserveName);
+      tempObs=new CouplingClass(PathData,OutFile);
+    }
     else if (theObserveType=="Energy"){
       if (iAmRoot)
 	OutFile.NewSection("Energies");
@@ -276,6 +288,11 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)=new BisectionBlockClass(PathData,OutFile);
       Moves(counter)->Read(in); 
     }
+    else if (MoveType=="CouplingMove"){
+      moveName="CouplingMove";
+      Moves(counter)=new CouplingMoveClass(PathData,OutFile);
+      Moves(counter)->Read(in);
+    }
     else if (MoveType=="BisectionSphereBlock"){
       moveName="BisectionSphereBlock";
       Moves(counter)=new BisectionSphereBlockClass(PathData,OutFile);
@@ -370,6 +387,7 @@ void PIMCClass::WriteSystemInfo()
   OutFile.WriteVar ("Box", boxArray);
   OutFile.WriteVar("tau",PathData.Path.tau);
   OutFile.WriteVar("NumTimeSlices",PathData.Path.TotalNumSlices);
+  OutFile.WriteVar("seed",PathData.Seed);
   for (int speciesIndex=0; speciesIndex < PathData.Path.NumSpecies(); 
        speciesIndex++) {
     SpeciesClass &species = PathData.Path.Species(speciesIndex);
