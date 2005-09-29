@@ -79,7 +79,6 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 //   structureReject->Read(in);
 //   Stages.push_back(structureReject);
   // Add the nodal action stage, if necessary
-  
 }
 
 
