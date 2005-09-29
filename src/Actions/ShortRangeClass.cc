@@ -24,8 +24,6 @@ double ShortRangeClass::Action (int slice1, int slice2,
   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
     Path.DoPtcl(ptcl)=true;
   double TotalU = 0.0;
-//   Array<double,1> TotalUArray(PathData.Path.TotalNumSlices);
-//   TotalUArray=0.0;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
@@ -36,7 +34,8 @@ double ShortRangeClass::Action (int slice1, int slice2,
 
     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++) {
       if (Path.DoPtcl(ptcl2)){
-	PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
+	int species2=Path.ParticleSpeciesNum(ptcl2);
+	PairActionFitClass &PA = *(PairMatrix(species1, species2));
 	for (int slice=slice1;slice<slice2;slice+=skip){
 	  dVec r, rp;
 	  double rmag, rpmag;
@@ -46,7 +45,6 @@ double ShortRangeClass::Action (int slice1, int slice2,
 	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
-
 	  double U;
 	  U = PA.U(q,z,s2, level);
 	  //	  if (ptcl2==4 && ptcl1==0 && slice==8)
@@ -64,8 +62,14 @@ double ShortRangeClass::Action (int slice1, int slice2,
 	    //	    cerr << "After  long range sub:  ptcl1=" << ptcl1
 	    //		 << " ptcl2=" << ptcl2 << " slice="<< slice << endl;
 
+	   // Code for vancacy project commented out
+// 	  if (PathData.Path.ExistsCoupling>=-0.05 &&
+// 	      (species1==1 || species2==1))
+// 	    TotalU += sqrt(PathData.Path.ExistsCoupling)*U;
+// 	  else
+// 	    TotalU += U;
+
 	  TotalU += U;
-// 	  TotalUArray(slice)+=U;
 	}
       }
     }
