@@ -468,14 +468,33 @@ The open end move works by choosing at random one of the two open ends
 of the open loops and displacing it randomly within a box (currently
 the size of the box is some percent of the total box size. For certain
 applications this will not be effective).  It then rebuilds a brownian
-bridge between the new ``end'' and the time slice $2
+bridge between the new ``end'' and the time slice  $2^{\texttt{NumLevels}}$ before the end  using the bisection algorithm.   It is currently IMPORTANT that this move be commented out (both in the moves section and the algorithm) if the code is running in non-OpenLoops mode. Otherwise illegal memory access will happen (we should edit the code to enforce this constraint).
 \begin{itemize}
 \item The \texttt{type} for this move must be OpenEnd
-\item \texttt{NumLevels} 
-
+\item \texttt{NumLevels} This variable designates how many levels are used in the bisection used to rebuild a brownian bridge to the open time slice.
 \end{itemize}
 
+\subsection{ShiftMove}
+All code in PIMC++ follows the invariant that the initial and final time slice in memory are not to be altered.   Notice, without time slice parallelization these two time slices will be permutations of one another. With time slice parallelization, the last time slice of processor i will be a permutation of the first time slice of processor i+1 (modulo the number of processors).  Keeping this invariant is crucial to the proper functioning of time slice parallelization. Because of this, shift moves are occassionally done. A shift move, shifts all of the time slices in memory a random amount. This allows time slices that used to be unmovable (because of the above invariant) to be moved.  Without doing this, we would not be able to ensure ergodicity for the entire path. 
+\begin{itemize}
+\item The \texttt{type} for this move must be ShiftMove.
+\end{itemize}
 \section{The ``Observables'' section}
+\subsection{Time Analysis}
+There are internal clocks in PIMC++ that measure that amount of time spent in every move and observable.  The time analysis observable summarizes this information and outputs it to the hdf5 file. It is recommended that all runs include a time analysis observable (by doing so, the algorithm can be tuned to spend a reasonable amount of time in each section of the code)
+The input parameters for the time analysis observables are 
+\begin{itemize}
+\item The \texttt{type} of this observable must be ``TimeAnalysis''
+\end{itemize}
+\subsection{Energy}
+The energy observable calculates the Kinetic, Short Range, Long Range, Potential, and Nodal energies. Note that the bulk of this calculation is done by querying the ActionClasses. At some point in the near future, it wil be able to be specified what energies are used in the observable energy but this feature is currently not implemented.  (PUT HERE THE FORMULAS FOR THESE DIFFERENT ENERGIES)
+The input parameters for the Energy observable are
+\begin{itemize}
+\item The \texttt{type} of this observable must be ``Energy''
+\end{itemize}
+\subsection{Pair Correlation}
+The pair correlation observable calculates the pair correlation   
+$$g(r)=$$
 \section{The ``Algorithm'' section}
 
 \chapter{Analysis Tools}
