@@ -626,12 +626,12 @@ void PathClass::InitPaths (IOSectionClass &in)
   numGrid(2)=10;
   
   //  Cell=new GridClass(*this);
-  Cell.Init(Box,numGrid);
-  Cell.BuildNeighborGrids();
+  //  Cell.Init(Box,numGrid);
+  // Cell.BuildNeighborGrids();
   //  cerr<<"I am now printing neighbor grids"<<endl;
   //  Cell.PrintNeighborGrids();
-  for (int slice=0;slice<NumTimeSlices();slice++)
-    Cell.BinParticles(slice);
+  //   for (int slice=0;slice<NumTimeSlices();slice++)
+  //     Cell.BinParticles(slice);
   //  cerr<<"I have binned them"<<endl;
   //  Cell.PrintParticles(0);
 
