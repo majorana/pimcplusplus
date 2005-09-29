@@ -6,6 +6,8 @@
 #include <Common/Splines/ComplexMultiTricubicSpline.h>
 #include "../MirroredClass.h"
 
+class FixedPhaseActionClass;
+
 class FixedPhaseClass
 {
 private:
@@ -33,6 +35,7 @@ private:
   void UpdateBands();
   /// This updates GUp, gUp, and vUp, or GDown, gDown, and vDown,
   /// depending on the species.
+  friend class FixedPhaseActionClass;
 public:
   double CalcGrad2 (int slice, int species);
   int IonSpeciesNum, UpSpeciesNum, DownSpeciesNum;
@@ -50,7 +53,7 @@ public:
   void RejectCopy (int slice1, int slice2);
   void Init(int speciesNum);
   void Setk(Vec3 k);
-  Vec3 Getk();
+  inline Vec3 Getk() { return kVec; }
   FixedPhaseClass (PathDataClass &pathData);
 };
 
@@ -89,6 +92,7 @@ public:
   /// Sets the k-vector or "twist angle"
   void Setk (Vec3 k);
   inline Vec3 Getk() { return FixedPhase.Getk(); }
+  void WriteInfo (IOSectionClass &out);
 
   FixedPhaseActionClass (PathDataClass &pathData, FixedPhaseClass &FP,
 			 int speciesNum) :

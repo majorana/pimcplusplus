@@ -376,3 +376,29 @@ ActionsClass::Setk(Vec3 k)
       NodalActions(i)->Setk(k);
   }
 }
+
+void
+ActionsClass::WriteInfo(IOSectionClass &out)
+{
+  /// If we have nodal actions, have them write any pertinent info to
+  /// the output file.
+  bool haveNodeActions = false;
+  for (int i=0; i<PathData.Path.NumSpecies(); i++) 
+    if (NodalActions(i) != NULL)
+      haveNodeActions = true;
+  if (haveNodeActions) {
+    if (PathData.IntraComm.MyProc() == 0) {
+      out.NewSection("NodalActions");
+      for (int i=0; i<PathData.Path.NumSpecies(); i++) {
+	out.NewSection ("NodeAction");
+	if (NodalActions(i) == NULL) 
+	  out.WriteVar("Type", "NONE");
+	else 
+	  NodalActions(i)->WriteInfo(out);
+	
+	out.CloseSection();
+      }
+      out.CloseSection();
+    }
+  }
+}

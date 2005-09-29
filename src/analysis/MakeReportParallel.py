@@ -386,7 +386,7 @@ def ProcessScalarSection(infiles,doc,currNum):
      toAddList=[]
     #put description
      procScalarTable=Table()
-     procScalarTable.body=[["Proc Num"]]
+     procScalarTable.body=[["Clone Num"]]
      procScalarTable.width='50%'
      myTable=Table()
      myTable.body=[['','Mean','Error','Variance', 'Kappa']]
@@ -398,8 +398,6 @@ def ProcessScalarSection(infiles,doc,currNum):
           
      for counter in range(0,numVars):
           data = infiles.ReadVar(counter)
-##          print "data is ",data
-##          print type(data[0])
           if type(data[0])==numarray.numarraycore.NumArray:
                currNum=currNum+1
                varName=infiles.GetVarName(counter)
@@ -453,7 +451,27 @@ def ProcessScalarSection(infiles,doc,currNum):
                (meanstr, errorstr) = MeanErrorString (mean, error)
                myTable.body.append([Href("#"+sectionName+varName+repr(currNum),varName),\
                                     meanstr,errorstr, '%1.2e' % var ,'%1.2f' % kappa])
+     infiles.CloseSection() # sectionName
+     sectionName2 = infiles.GetName()
+     infiles.CloseSection() # sectionName2
+     if (infiles.OpenSection("Actions")):
+          procScalarTable.body[0].append("Band")
+          nodeIndex = 0;
+          BandEnergies=[]
+          while (infiles.OpenSection2("NodalAction",i)):
+               Elist = infiles.ReadVar("Energy")
+               if (Elist != []):
+                    BandEnergies = BandEnergies + Elist
+               nodeIndex = nodeIndex+1
+               infiles.CloseSection()
+          infiles.CloseSection() # Actions
+          for procNum in range(0,len(BandEnergies)):
+               procScalarTable.body[procNum+1].append(repr(BandEnergies[procNum]))
+     infiles.OpenSection(sectionName2)
+     infiles.OpenSection(sectionName)
+               
      doc.append(myTable)
+     doc.append(Heading(2,sectionName+" Clone Averages"))
      doc.append(procScalarTable)
      for counter in range(0,len(toAddList)):
           doc.append(toAddList[counter])

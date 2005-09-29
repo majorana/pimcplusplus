@@ -107,6 +107,10 @@ public:
 
   bool HaveLongRange();
 
+  /// This function writes any pertinent information related to the
+  /// actions to the output file.
+  void WriteInfo (IOSectionClass &out);
+
   ActionsClass(PathDataClass &pathData) : 
     ShortRange(pathData,PairMatrix),
     ShortRangeApproximate(pathData,PairMatrix),

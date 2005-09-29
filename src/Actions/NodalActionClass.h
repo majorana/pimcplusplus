@@ -20,6 +20,7 @@ public:
   virtual bool IsGroundState() = 0;
   virtual NodeType Type() = 0;
   virtual void Setk (Vec3 kVec);
+  virtual void WriteInfo(IOSectionClass &out) = 0;
   NodalActionClass (PathDataClass &pathData) :
     ActionBaseClass (pathData)
   {
@@ -81,6 +82,7 @@ public:
   void Read (IOSectionClass &in);
   bool IsGroundState();
   NodeType Type();
+  void WriteInfo (IOSectionClass &out);
   FreeNodalActionClass (PathDataClass &pathData, int speciesNum);
 };
 

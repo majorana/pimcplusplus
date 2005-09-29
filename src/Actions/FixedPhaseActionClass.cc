@@ -50,15 +50,12 @@ FixedPhaseClass::CalcGrad2 (int slice, int species)
   double detu2 = mag2(detu);
   double detu2Inv = 1.0/detu2;
   
-  //  cerr << "detu2 = " << detu2 << endl;
-
   double grad2 = 0.0;
   for (int i=0; i<N; i++) {
     Vec3 grad = 
       (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i)))*detu2Inv + kVec;
     grad2 += dot(grad,grad);
   }
-  //  grad2 /= (detu2*detu2);
   return grad2;
 }
 
@@ -647,6 +644,20 @@ FixedPhaseActionClass::Type()
 }
 
 void
+FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
+{
+  out.WriteVar ("Type", "GROUND_STATE_FP");
+  Array<double,1> outkVec(3);
+  outkVec(0) = Getk()[0];  outkVec(1) = Getk()[1];  outkVec(2) = Getk()[2];
+  out.WriteVar ("kVec", outkVec);
+  double energy = 0.0;
+  if ((SpeciesNum==FixedPhase.UpSpeciesNum) || (SpeciesNum == FixedPhase.DownSpeciesNum))
+    for (int i=0; i<FixedPhase.System->GetNumBands(); i++)
+      energy += FixedPhase.System->GetEnergy(i);
+  out.WriteVar ("Energy", energy);
+}
+
+void
 FixedPhaseActionClass::Setk(Vec3 k)
 {
   FixedPhase.Setk(k);
@@ -659,3 +670,5 @@ FixedPhaseClass::Setk(Vec3 k)
   System->Setk(k);
   UpdateBands();
 }
+
+

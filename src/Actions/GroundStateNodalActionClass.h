@@ -73,7 +73,7 @@ public:
   void Init();
   bool IsGroundState();
   NodeType Type();
-
+  void WriteInfo(IOSectionClass &out);
 
   GroundStateNodalActionClass (PathDataClass &pathData, GroundStateClass &GS,
 			       int speciesNum) :

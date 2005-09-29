@@ -97,7 +97,7 @@
 void BisectionStageClass::WriteRatio()
 { 
   AcceptRatioVar.Write((double)NumAccepted/(double)NumAttempted);
-  OutSection.FlushFile();
+  AcceptRatioVar.Flush();
 }
 
 void BisectionStageClass::Accept()

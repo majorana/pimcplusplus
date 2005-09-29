@@ -866,3 +866,10 @@ NodalActionClass::Setk (Vec3 k)
 
 
 }
+
+
+void
+FreeNodalActionClass::WriteInfo (IOSectionClass &out)
+{
+  out.WriteVar ("Type", "FREE_PARTICLE");
+}

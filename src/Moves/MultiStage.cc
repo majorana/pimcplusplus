@@ -26,20 +26,14 @@ void MultiStageClass::Read(IOSectionClass& in)
 
 void MultiStageClass::WriteRatio()
 {
-  ///I have this commented out because it was wrecking havoc with the
-  ///code in parallel.  This needs to be thought about and fixed.
-
-  //  cerr<<"The multistage is about to write the ratio"<<endl;
-  ///  list<StageClass*>::iterator stageIter=Stages.begin();
-  ///  double prevActionChange=0.0;
-  ///  while (stageIter!=Stages.end()){
-  ///    //    cerr<<"Some stage is writing their ratio"<<endl;
-  ///    (*stageIter)->WriteRatio();
-  ///    stageIter++;
-  ///  }  
-  //  cerr<<"Moveclass is about to write"<<endl;
-  ///  MoveClass::WriteRatio();
-  //  cerr<<"Done with this writing"<<endl;
+   list<StageClass*>::iterator stageIter=Stages.begin();
+   double prevActionChange=0.0;
+   while (stageIter!=Stages.end()){
+     //    cerr<<"Some stage is writing their ratio"<<endl;
+     (*stageIter)->WriteRatio();
+     stageIter++;
+   }  
+   MoveClass::WriteRatio();
 }
 
 // void MultiStageLocalClass::MakeMove()

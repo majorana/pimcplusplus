@@ -690,3 +690,9 @@ GroundStateNodalActionClass::Type()
 {
   return GROUND_STATE;
 }
+
+void
+GroundStateNodalActionClass::WriteInfo (IOSectionClass &out)
+{
+  out.WriteVar ("Type", "GROUND_STATE");
+}

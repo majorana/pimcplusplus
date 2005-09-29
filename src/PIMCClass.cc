@@ -8,6 +8,8 @@
 
 void PIMCClass::Read(IOSectionClass &in)
 {
+  bool iAmRootProc = (PathData.Path.Communicator.MyProc()==0);
+
   // Read the parallelization strategy
   PathData.Read (in);
   perr << "Finished PathData Read.\n";
@@ -41,6 +43,8 @@ void PIMCClass::Read(IOSectionClass &in)
   perr << "Finished Observables Read.\n";
   in.CloseSection();
 
+  if (iAmRootProc)
+    OutFile.NewSection("Actions");
   if (PathData.Actions.HaveLongRange()) {
     assert (in.OpenSection ("Action"));
     PathData.Actions.LongRange.Init (in, OutFile);
@@ -49,6 +53,10 @@ void PIMCClass::Read(IOSectionClass &in)
     in.CloseSection();
   }
 
+  if (iAmRootProc) {
+    PathData.Actions.WriteInfo(OutFile);
+    OutFile.CloseSection(); // "Actions"
+  }
 
   // Read in the Moves
   assert(in.OpenSection("Moves"));

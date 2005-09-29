@@ -1,16 +1,6 @@
 #include "BisectionBlock.h"
 #include "StructureReject.h"
 
-//void BisectionBlockClass::WriteRatio()
-//{
-//  double AcceptanceRatio=(double)NumAccepted/(double)NumAttempted;
-//  double SumAcceptance=PathData.Path.Communicator.Sum(AcceptanceRatio);
-//  AcceptanceRatioVar.Write(SumAcceptance);
-//  MultiStageClass::WriteRatio();
-
-
-//}
-
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
 
