@@ -266,7 +266,7 @@ kSpacePH::GetVals (double dGmag, double &aVal,
     bParVal  = bPar (dGmag);
     VVal     = Vk (dGmag);
     kMap[dGmag] = kMapPoint(aVal, bPerpVal, bParVal, VVal);
-    cerr << "Adding new val.  Map size = " << kMap.size() << endl;
+    //    cerr << "Adding new val.  Map size = " << kMap.size() << endl;
   }
   else {
     aVal     = (*iter).second.a;
