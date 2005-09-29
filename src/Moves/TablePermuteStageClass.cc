@@ -36,7 +36,6 @@ void TablePermuteStageClass::Reject()
 
 void TablePermuteStageClass::WriteRatio()
 {
-//   cerr<<"Writing my permtute stage ratio"<<PathData.Path.Communicator.MyProc()<<endl;
 //   Array<int,1> numAttemptTotal(4);
 //   Array<int,1> numAcceptTotal(4);
 //   Array<double,1> ratioTotal(4);
@@ -125,8 +124,6 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
   
 // //   int step = 0;
 // //   // Now, construct the Forward table
-
-//  cerr<<"Starting TablePermuteStageClass"<<endl;
   //  sleep(10);
   if (activeParticles(0)==-1){
     if ((PathData.Path.OpenPaths && slice1<=PathData.Path.OpenLink && 
@@ -161,13 +158,11 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
     double pi_ratio = exp(-actionChange+prevActionChange);
     double acceptProb = min(1.0, pi_ratio/Tratio);
     prevActionChange = actionChange;
-    //    cerr<<"Ending TablePermuteStageClass"<<endl;
     //    sleep(10);
 
     return (acceptProb > psi);
   }
   else{
-    //    cerr<<"Ending at an odd spot"<<endl;
     //    sleep(10);
 
     return true;    
