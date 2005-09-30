@@ -14,6 +14,7 @@ void VacancyLocClass::Accumulate()
   dVec displaceAmount;
   double distanceAmount;
   for (int slice=0;slice<PathData.NumTimeSlices();slice++){
+    TempLoc=0;
     for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
       double closestAmount=5*dot(PathData.Path.GetBox(),PathData.Path.GetBox());
       int closestLoc=0;
@@ -27,10 +28,21 @@ void VacancyLocClass::Accumulate()
 	}
       }
       Loc(closestLoc)++;
+      TempLoc(closestLoc)++;
       R2Dist+=closestAmount;
     }
+    for (int counter=0;counter<TempLoc.size();counter++)
+      for (int counter2=0;counter2<TempLoc.size();counter2++)
+	if (TempLoc[counter]==0 && TempLoc[counter2]==0){
+	  dVec disp=FixedLoc[counter]-FixedLoc[counter2];
+	  PathData.Path.PutInBox(disp);
+	  dist=sqrt(dot(disp,disp));
+	  if (dist<grid.End){
+	    int index=grid.ReverseMap(dist);
+	    Histogram(index)++;
+	  }
+	}
   }
-
   NumSamples++;
 }
 
@@ -50,9 +62,13 @@ void VacancyLocClass::WriteBlock()
     locWrite(counter)=locSum(counter)*norm;
   }
   VacancyLocVar.Write(locWrite);
-
-
+  Array<double,1> histogramWrite(Histogram.size());
+  for (int counter=0;counter<histogramWrite.size();counter++)
+    histogramWrite(counter)=Histogram(counter)*norm;
+  HistogramVar.Write(histogramWrite);
+  HistogramVar.Flush();
   Loc=0;
+  TempLoc=0;
   NumSamples = 0;
   R2Dist=0.0;
   //  cerr<<"I'm done with that"<<endl;
@@ -63,22 +79,16 @@ void VacancyLocClass::Read(IOSectionClass &in)
 
 
   int numFixedPoints;
-  //  cerr<<"My num samples A  here is "<<NumSamples<<endl;
   ObservableClass::Read(in);
-  //  cerr<<"My num samples here B  is "<<NumSamples<<endl;
   assert(in.ReadVar("freq",Freq));
-  //  cerr<<"My num samples C here is "<<NumSamples<<endl;
   assert(in.ReadVar("dumpFreq",DumpFreq));
-  //  cerr<<"My num samples D  here is "<<NumSamples<<endl;
   assert(in.ReadVar("NumFixedPoints",numFixedPoints));
-  //  cerr<<"My num samples E here is "<<NumSamples<<" "<<numFixedPoints<<" "<<Loc<<endl;
   Loc.resize(numFixedPoints);
-  //  cerr<<"My num samples F here is "<<NumSamples<<" "<<numFixedPoints<<" "<<Loc<<endl;
   Loc=0;
-  //  cerr<<"My num samples here is "<<NumSamples<<endl;
+  TempLoc.resize(numFixedPoints);
+  TempLoc=0;
   FixedLoc.resize(numFixedPoints);
   Array<double,2> positions;
-  //  cerr<<"My num samples there is "<<NumSamples<<endl;
   assert(in.ReadVar("LocationsToCompare",positions));
 
   ///Verify you used the right number of points to compare against

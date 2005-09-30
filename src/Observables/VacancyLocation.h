@@ -8,14 +8,17 @@ class VacancyLocClass : public ObservableClass
 
 private:
   //Must be initialized
+  Array<int,1> Histogram;
   Array<int,1> Loc;
+  Array<int,1> TempLoc;
+  LinearGrid Grid;
   ///This is the set of locations you should compare against to decide
   ///the location of the head and the tail
   Array<dVec,1> FixedLoc;
   ObservableVecDouble1 VacancyLocVar;
+  ObservableVecDouble1 HistogramVar;
   //  ObservableDouble R2Var;
   double R2Dist;
-  Array<int,2> VacancyPair;
   int NumSamples;
   int TimesCalled;
   int Freq;
@@ -28,12 +31,17 @@ public:
   void Read(IOSectionClass& in);
   VacancyLocClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) , 
-    VacancyLocVar("y",IOSection,myPathData.Path.Communicator)//,
+      VacancyLocVar("y",IOSection,myPathData.Path.Communicator),//,
+      HistogramVar("g(r)",IOSection,myPathData.Path.Communicator)
     //    R2Var("R2",IOSection,myPathData.Path.Communicator)
   {
-    NumSamples = 0;
+    NumSamples = 0; 
     TimesCalled=0;
     R2Dist=0.0;
+    int numPoints=100;
+    Grid.Init(0,PathData.Path.GetBox()[0],numPoints);
+    Histogram.resize(numPoints);
+    Histogram=0;
   }
 };
 
