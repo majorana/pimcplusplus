@@ -657,6 +657,7 @@ FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
       energy += FixedPhase.System->GetEnergy(i);
     }
   out.WriteVar ("Energy", energy);
+  out.FlushFile();
 }
 
 void
