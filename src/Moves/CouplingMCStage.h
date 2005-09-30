@@ -13,7 +13,7 @@ private:
   Array<int,1> AcceptRatio;
   ObservableVecDouble1 AcceptRatioVar;
 public:
-  void WriteRatio();
+  //  void WriteRatio();
   void Accept();
   void Reject();
   void Read(IOSectionClass  &in);

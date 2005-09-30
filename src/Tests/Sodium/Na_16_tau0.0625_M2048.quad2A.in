@@ -131,7 +131,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.0625_M2048.quad2A.turing";
+  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.0625_M2048.quad2ABand.turing";
   int FileStart = 0;
   Section (Observable) {
     string type = "Energy";

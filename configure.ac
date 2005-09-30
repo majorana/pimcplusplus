@@ -28,8 +28,8 @@ AC_MSG_RESULT([${host_cpu}])
 case "${host_cpu}" in
    "powerpc")
       CPPFLAGS="-DMAC $CPPFLAGS"
-      CXXFLAGS="-O3 -mcpu=970 -mtun=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
-      F77FLAGS="-O3 -mcpu=970 -mtun=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
+      CXXFLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
+      F77FLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
 
    "i686")
       AX_CC_OPTION(TUNEOPT, [-mtune=athlon-xp], [-mtune=athlon-xp], [-mcpu=athlon-xp])

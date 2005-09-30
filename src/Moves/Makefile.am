@@ -14,6 +14,10 @@ libmoves_la_SOURCES  =            \
     CenterDroplet.cc             \
     CoupledPermuteStageClass.cc  \
     CoupledPermuteStageClass.h   \
+    CouplingMove.cc              \
+    CouplingMove.h               \
+    CouplingStage.h              \
+    CouplingStage.cc             \
     DisplaceMove.cc              \
     DisplaceMove.h               \
     EndStageClass.cc             \

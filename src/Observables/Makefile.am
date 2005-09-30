@@ -6,6 +6,8 @@ libobservables_la_SOURCES  =     \
     Angular.cc                   \
     AutoCorr.cc                  \
     AutoCorr.h                   \
+    Coupling.cc                  \
+    Coupling.h                   \
     DistanceToHead.cc            \
     DistanceToHead.h             \
     ObservableBase.cc            \
