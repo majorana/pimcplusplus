@@ -264,8 +264,8 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
     ikVec[1] = complex<double>(0.0, kVec[1]);
     ikVec[2] = complex<double>(0.0, kVec[2]);
     for (int k=0; k<N; k++) {
-      GradMat(j,k) = e2iphi*(GradMat(j,k) + Matrix(j,k)* ikVec);
-      Matrix(j,k) *= e2iphi;
+      grads(k) = e2iphi*(grads(k) + vals(k)* ikVec);
+      vals(k) *= e2iphi;
     }
   }
 
