@@ -360,9 +360,6 @@ void PathClass::Read (IOSectionClass &inSection)
   inSection.CloseSection(); // Particles
   // Now actually allocate the path
   Allocate();
-  cerr<<"My time slices is "<<NumTimeSlices()<<endl;
-
-
 }
 
 /// This function initializes the paths depending on how they are

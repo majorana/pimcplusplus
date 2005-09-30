@@ -8,8 +8,6 @@
 
 void PIMCClass::Read(IOSectionClass &in)
 {
-  bool iAmRootProc = (PathData.Path.Communicator.MyProc()==0);
-
   // Read the parallelization strategy
   PathData.Read (in);
   perr << "Finished PathData Read.\n";
@@ -42,6 +40,8 @@ void PIMCClass::Read(IOSectionClass &in)
   ReadObservables(in);
   perr << "Finished Observables Read.\n";
   in.CloseSection();
+
+  bool iAmRootProc = (PathData.Path.Communicator.MyProc()==0);
 
   if (iAmRootProc)
     OutFile.NewSection("Actions");
