@@ -652,8 +652,10 @@ FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
   out.WriteVar ("kVec", outkVec);
   double energy = 0.0;
   if ((SpeciesNum==FixedPhase.UpSpeciesNum) || (SpeciesNum == FixedPhase.DownSpeciesNum))
-    for (int i=0; i<FixedPhase.System->GetNumBands(); i++)
+    for (int i=0; i<FixedPhase.System->GetNumBands(); i++) {
+      cerr << "Band Energy = " << FixedPhase.System->GetEnergy(i) << endl;
       energy += FixedPhase.System->GetEnergy(i);
+    }
   out.WriteVar ("Energy", energy);
 }
 
