@@ -8,6 +8,7 @@
 \usepackage{amsmath}
 \usepackage{hyperref}
 
+
 \renewcommand{\shadowsize}{2pt}
 \author{Kenneth P. Esler, Jr. and Bryan K. Clark}
 \title{pimc++}
@@ -125,21 +126,21 @@ file in the {\em CIAO} ASCII format.
 Section(System) {
   int NumParticles = 6;
   Array<double,1> Masses(6) = [ 0.5, 0.5, 0.5, 1.0, 1.0, 1.0 ];
-}
+\}
 
 Section(Potentials) {
   Section(Potential) {
     string Type = "Coulomb";
     double q1 = 1.0;
     double q2 = -1.0;
-  }
+  \}
 
   Section(Potential) {
     string Type = "Lennard-Jones";
     double sigma = 5.0;    // this is in units of bohr radii
     double epsilon = 3.2;  // and this is in Hartrees
-  }
-}
+  \}
+\}
 \end{verbatim}
 \end{minipage}}
 \caption{Example {\em CIAO} input file.}
@@ -213,6 +214,7 @@ use of {\em sections}.  A section is defined in the following way:\\
         or helium atoms.
         \subsubitem acdkajdf
 \end{itemize}
+
 
 \section{The ``Action'' section}
 \subsection{Pair Actions}
@@ -398,6 +400,7 @@ neutralizing charge background.  This should only be used for systems
 which are not charge-neutral, such as jellium.
 
 \section{The ``Moves'' section}
+
 PIMC++ deals with moves and observables in a two steps. First, in this
 section of the input file, the possible moves (observables) are
 defined and given their appropriate parameters (i.e. what species they
@@ -430,7 +433,7 @@ over when the moves happen during the PIMC run.
   \item \texttt{StepsPerBlock}: integer representing how many steps
   the BisectionBlock takes.  All steps of the bisectionblock are done
   with the same subset of time slices.  When permutations are on, doing $n$
-  \textttt{StepsPerBlock} is more effecient then running the move $n$
+  \texttt{StepsPerBlock} is more effecient then running the move $n$
   times, because it takes advantages of previous computation.  
 
   
@@ -475,10 +478,22 @@ bridge between the new ``end'' and the time slice  $2^{\texttt{NumLevels}}$ befo
 \end{itemize}
 
 \subsection{ShiftMove}
-All code in PIMC++ follows the invariant that the initial and final time slice in memory are not to be altered.   Notice, without time slice parallelization these two time slices will be permutations of one another. With time slice parallelization, the last time slice of processor i will be a permutation of the first time slice of processor i+1 (modulo the number of processors).  Keeping this invariant is crucial to the proper functioning of time slice parallelization. Because of this, shift moves are occassionally done. A shift move, shifts all of the time slices in memory a random amount. This allows time slices that used to be unmovable (because of the above invariant) to be moved.  Without doing this, we would not be able to ensure ergodicity for the entire path. 
+All code in PIMC++ follows the invariant that the initial and final
+time slice in memory are not to be altered.   Notice, without time
+slice parallelization these two time slices will be permutations of
+one another. With time slice parallelization, the last time slice of
+processor i will be a permutation of the first time slice of processor
+i+1 (modulo the number of processors).  Keeping this invariant is
+crucial to the proper functioning of time slice
+parallelization. Because of this, shift moves are occassionally
+done. A shift move, shifts all of the time slices in memory a random
+amount. This allows time slices that used to be unmovable (because of
+the above invariant) to be moved.  Without doing this, we would not be
+able to ensure ergodicity for the entire path.   
 \begin{itemize}
 \item The \texttt{type} for this move must be ShiftMove.
 \end{itemize}
+
 
 
 
@@ -494,7 +509,7 @@ All observables have the following variables:
    really check for this, btw).  This is the name you will use in the
    algorithm in specifying that this observable to be called.
 
-\item \textt{freq}:  The observable will accumulate its statistics
+\item \texttt{freq}:  The observable will accumulate its statistics
   after being called ``freq'' number of times.  
 \item \texttt{dumpFreq}: The observable will write data to the output
   file after being called ``dumpFreq'' number of times. Soon to be
@@ -505,14 +520,24 @@ All observables have the following variables:
 
 \end{itemize}
 \subsection{Time Analysis}
-There are internal clocks in PIMC++ that measure that amount of time spent in every move and observable.  The time analysis observable summarizes this information and outputs it to the hdf5 file. It is recommended that all runs include a time analysis observable (by doing so, the algorithm can be tuned to spend a reasonable amount of time in each section of the code)
+There are internal clocks in PIMC++ that measure that amount of time
+spent in every move and observable.  The time analysis observable
+summarizes this information and outputs it to the hdf5 file. It is
+recommended that all runs include a time analysis observable (by doing
+so, the algorithm can be tuned to spend a reasonable amount of time in
+each section of the code) 
 The input parameters for the time analysis observables are 
 \begin{itemize}
 \item The \texttt{type} of this observable must be ``TimeAnalysis''
 \end{itemize}
 \subsection{Energy}
-The energy observable calculates the Kinetic, Short Range, Long Range, Potential, and Nodal energies. Note that the bulk of this calculation is done by querying the ActionClasses. At some point in the near future, it wil be able to be specified what energies are used in the observable energy but this feature is currently not implemented.  (PUT HERE THE FORMULAS FOR THESE DIFFERENT ENERGIES)
-The input parameters for the Energy observable are
+The energy observable calculates the Kinetic, Short Range, Long Range,
+Potential, and Nodal energies. Note that the bulk of this calculation
+is done by querying the ActionClasses. At some point in the near
+future, it wil be able to be specified what energies are used in the
+observable energy but this feature is currently not implemented.  (PUT
+HERE THE FORMULAS FOR THESE DIFFERENT ENERGIES) 
+The input parameters for the Energy observable are 
 \begin{itemize}
 \item The \texttt{type} of this observable must be ``Energy''
 \end{itemize}
@@ -523,7 +548,7 @@ $$g(r)=\frac{3}{4\Pi}\frac{\Omega}{N1*N2}$$ where $N1$ and $N2$ are
 the total number of particles in each species. In the case where
 species 1 and species 2 are the same, $N2=N1-1$ 
 \begin{itemize}
-\item The \textt{type} of this observable must be
+\item The \texttt{type} of this observable must be
 `''PairCorrelation''
 \item \texttt{Species1}: String variable indication one of the two species used to calculate the
   pair correlation. Must be consistently the same string as used in
@@ -571,7 +596,7 @@ establishing condensate fractions, the existence of Off Diagonal Long
 Range Order, etc. It will only work property when the \texttt{OpenLoops}
 variable is set to true.
 \begin{itemize}
-\item The \textt{type} of this observable must be ``nofr''
+\item The \texttt{type} of this observable must be ``nofr''
 \item \texttt{Species1}: String variable indication one of the two species used to calculate the
   pair correlation. Must be consistently the same string as used in
   other parts of the code.
@@ -646,12 +671,14 @@ move to be ``glued'' into the rest of the code.
 There are two types of moves. There are normal moves and then
 multistage moves. We will start by discussion normal moves.
 
+
 All normal moves must inherit from the class ParticleMoveClass and 
 create the following four functions: \\
 a constructor,\\
 \texttt{MakeMove()},\\
 \texttt{Read(IOSectionClass \&in)},  \\
-\texttt{WriteRatio()}.
+texttt{WriteRatio()}.
+
 
 The constructor of a move must look like the following:\\
 
@@ -671,6 +698,7 @@ It is important to remember to send a pathdata reference and an
   move has access to the pathdata and an ability to write out data
   like its acceptance ratio
 
+<<<<<<< .mine
 The function \texttt{MakeMove()} will be called by the algorithm 
 and is in charge of the entire move. This means that it is in charge
 of performing the metropolis proceudure by itself (This includes calling
@@ -694,7 +722,7 @@ PathData.Path.RejectMove(startSlice,endSlice,ActiveParticles)
 The parameters sent to these functions
 include the range (inclusive) of slices that the move has altered as
 well as an array of particle indices 
-(of type  \texttt{Array<int,1>}) that the move has changed.  
+(of type  \texttt{Array<int,1>} ) that the move has changed.  
 By accepting the move, all knowledge of the previous state of the path
 will be erased. By rejecting the move all changes the move made in the
 slice ranges defined by \texttt{[startSlice:endSlice]} on the particles defined
@@ -709,14 +737,13 @@ correctly.
 The function \texttt{Read(IOSectionClass \&in)} is called immediately after the
 move is created so that the move has the opportunity to read relevant
 input information.  When it is called, the IOSectionClass object
-\texttt{in} will be located inside the \texttt{Section (Move)} that 
 has the name of your move which
 will be inside \texttt{Section (Moves)}.
  The move is then responsible for reading the input parameters it needs
 by calling \texttt{in.Readvar(``varString'',var)}. For example, it might read the 
 number of levels it is to operate on by calling 
 \texttt{in.ReadVar(``NumLevels'',numLevels)} Note,
-that the Read function is responsible for closing any sections it
+
 opens, but {\em NOT} for closing the section it is in (i.e. there needs to
 be exactly the same number of \texttt{OpenSection} and 
 \texttt{CloseSection} calls in
@@ -729,7 +756,6 @@ to be added to the .h file of \texttt{MovesClass.h}. This ensures that it will
 get included when other files \#include the moves. Finally, inside
 PIMCClass.cc, there is a ReadMoves() function which will need to have your
 move added to it.  In the series of ``if'' statements, you need to add
-\\
 \rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
 \begin{verbatim}
  else if (MoveType==''MyMoveType''){
@@ -741,6 +767,7 @@ move added to it.  In the series of ``if'' statements, you need to add
 \end{minipage}}\\
 The moveType will have to be the type the user must type under
 \texttt{Section (Move)} for your move.
+
 
 
 
@@ -767,6 +794,7 @@ establish how many times the observable must be called before it
 accumulates its running average and how many times it must be called
 before it outputs its running average to the output file.
 
+
 To simplify the writing of observables, one should use 
 the children of the \texttt{ObservableVar} class. (Such children include 
 \texttt{ObservableDouble},\texttt{ObservableVecDouble1},
@@ -780,6 +808,21 @@ lowercase version of IOSection), and I reference to a communicator that
 will be used among the time slice parallel versions of the ...
 
 First we examine how the ObservableVariables are created.
+
+
+To simplify the writing of observables, one should use 
+the children of the \texttt{ObservableVar} class. (Such children include 
+\texttt{ObservableDouble},\texttt{ObservableVecDouble1},
+\texttt{ObsservableInt},etc.) One of these should be used for each
+variable you write (recurringly) to your hdf file.  
+To use them you must call their constructor with three parameters:
+the name of the variable to be used in the output file, a reference to 
+an IOSectionClass that will NOT be deleted upon exiting the constructor
+(concretely this means that you need to call it with the capatilized and not
+lowercase version of IOSection), and I reference to a communicator that 
+will be used among the time slice parallel versions of the ...
+
+
 \subsubsection{Accumulate()}
 The accumulate function gets called each time that an observable is
 told to accumulate in the code's algorithm.  A correctly implemented
@@ -790,6 +833,16 @@ its running average the value of the observable it is in charge
 of. For example if it was an energy observable, it might accumulate
 the running sum of the kinetic and potential energies.
 
+
 \chapter{Code Verification}
-abcdef
+As with any computational physics code, it is important to
+authenticate that the code produces accurate results. We do that by
+verifying the results of calculations against analytical results,
+other Path Integral codes (such as UPI) and general sanity checks. In
+this chapter we document many of these tests to increase confidence in
+the code's use.  We encourage other quantum monte carlo codes to
+perform a similar exercise (ideally with similar systems to allow
+comparison among different codes.
+
+
 \end{document}
