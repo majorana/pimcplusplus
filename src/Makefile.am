@@ -10,8 +10,6 @@ AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF)
 
 pimc___SOURCES =          \
     EventClass.h          \
-    GridClass.h           \
-    GridClass.cc          \
     Main.cc               \
     MirroredClass.cc      \
     MirroredClass.h       \
@@ -26,6 +24,7 @@ pimc___SOURCES =          \
     SpeciesClass.h        \
     WrapClass.cc          \
     WrapClass.h
+
 pimc___LDADD = Moves/libmoves.la Actions/libactions.la \
                Observables/libobservables.la $(COMMON_LIBS)
 

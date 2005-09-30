@@ -14,6 +14,7 @@
 #include "OpenEndMove.h"
 #include "WaterMove.h"
 #include "WaterMoveRing.h"
+#include "ClusterMove.h"
 #include "StructureReject.h"
 #include "CouplingMove.h"
 #include "BisectionSphereBlock.h"

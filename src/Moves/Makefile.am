@@ -45,6 +45,8 @@ libmoves_la_SOURCES  =            \
     StructureReject.h            \
     TablePermuteStageClass.cc    \
     TablePermuteStageClass.h     \
+    ClusterMove.cc               \
+    ClusterMove.h                \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \

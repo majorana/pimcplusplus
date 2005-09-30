@@ -336,6 +336,18 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)->Read(in);
       OutFile.CloseSection(); // Whatever Move section we opened above.
     }
+    else if (MoveType=="LocalFlip") {
+      OutFile.NewSection("LocalFlip");
+      Moves(counter)=new LocalFlip(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection(); // Whatever Move section we opened above.
+    }
+    else if (MoveType=="GlobalFlip") {
+      OutFile.NewSection("GlobalFlip");
+      Moves(counter)=new GlobalFlip(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection(); // Whatever Move section we opened above.
+    }
     else {
       perr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();

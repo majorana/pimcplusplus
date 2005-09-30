@@ -77,7 +77,8 @@ ifeq ($(HOSTTYPE),i386-linux)
        CCFLAGS = -c -g #-pg 
        F77FLAGS = -c -g 
     else
-       include /usr/lib/Make.include	
+       #include /usr/lib/Make.include	
+       include /home/gergely/Make.include	
 #       CC = mpiCC
 #       LD = mpiCC  -Bstatic -g
        CC = g++

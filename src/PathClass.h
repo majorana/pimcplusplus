@@ -6,7 +6,7 @@
 #include "SpeciesClass.h"
 #include <Common/Random/Random.h>
 #include <Common/MPI/Communication.h>
-#include "GridClass.h"
+//#include "GridClass.h"
 class ActionsClass;
 
 
@@ -51,7 +51,7 @@ private:
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
  public:
-  CellMethodClass Cell;
+  //CellMethodClass Cell;
   /// This is the maximum number of k vectors in each direction
   TinyVector<int,NDIM> MaxkIndex;
   /// Stores the radius of the k-space sphere we sum over
@@ -338,7 +338,7 @@ inline
 PathClass::PathClass (CommunicatorClass &communicator,
 			     RandomClass &random,
 			     ActionsClass &actions) : 
-  Communicator(communicator), Random(random), Actions(actions),Cell(*this)
+  Communicator(communicator), Random(random), Actions(actions)//,Cell(*this)
 {
   //      NumSpecies = 0;
   TotalNumSlices=0;

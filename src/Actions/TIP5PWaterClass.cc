@@ -1446,6 +1446,185 @@ double TIP5PWaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
   return spring;
 }
 
+// This is the newly modifed version from staticPIMC++ -- see log for 20050711
+double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
+{
+  double R = O_H_moment_arm;
+  double lambda = lambda_p;
+  double RotK = 0.0;
+  int numChangedPtcls = activeParticles.size();
+  int skip = 1<<level;
+  double levelTau = Path.tau* (1<<level);
+  int TotalNumParticles = Path.NumParticles();
+  int numMol = TotalNumParticles/5;
+  for (int ptclIndex=0; ptclIndex<numChangedPtcls; ptclIndex++){
+    int ptcl1 = activeParticles(ptclIndex);
+    int ptcl2 = ptcl1 + numMol;
+    double FourLambdaTauInv=1.0/(4.0*lambda*levelTau);
+    for (int slice=startSlice; slice < endSlice;slice+=skip) {
+      // Load coords and their corresponding oxygens (COMs)
+      dVec P1 = PathData.Path(slice,ptcl1);
+      dVec P2 = PathData.Path(slice,ptcl2);
+      dVec P1prime = PathData.Path(slice+skip,ptcl1);
+      dVec P2prime = PathData.Path(slice+skip,ptcl2);
+      int Optcl = FindCOM(ptcl1);
+      dVec O = PathData.Path(slice,Optcl);
+      dVec Oprime = PathData.Path(slice+skip,Optcl);
+      // Redefine coordinates WRT COM
+      P1 -= O;
+      P2 -= O;
+      P1prime -= Oprime;
+      P2prime -= Oprime;
+      P1 = Normalize(P1);
+      P2 = Normalize(P2);
+      P1prime = Normalize(P1prime);
+      P2prime = Normalize(P2prime);
+      // Calculate bisectors for each configuration
+      dVec n = Normalize(GetBisector(P1,P2));
+      dVec nprime = Normalize(GetBisector(P1prime,P2prime));
+//cerr << "n " << n << endl;
+//cerr << "nprime " << nprime << endl;
+      double vel_squared;
+      double prefactor;
+      double theta;
+      dVec z1 = Normalize(CrossProd(P1,P2));
+      dVec z1prime = Normalize(CrossProd(P1prime,P2prime));
+      dVec r;
+      //if (n == nprime){
+      if (dVecsEqual(n,nprime)){
+        r = z1; 
+        theta = 0.0;
+      }
+      else{
+        r = Normalize(CrossProd(n,nprime));
+        theta = GetAngle(n,nprime);
+      }
+      // Calculate the cross product - the axis of rotation
+      // Calculate polar angles and trig functions
+      // Calculate azimuthal angle
+      // Calculate lever arms and kinetic energy contributions (mass contained in lambda factor)
+      double alpha = HOH_half_angle;
+      double SinAlpha = sin(alpha);
+      double CosAlpha = cos(alpha);
+      double phi = GetAngle(z1,r);
+      double psi = GetAngle(z1prime,r);
+
+      double lpsi = R*SinAlpha;
+      double I_theta = R*R*(cos(phi)*cos(phi) + CosAlpha*CosAlpha*sin(phi)*sin(phi));
+      double vel_theta_squared = R*R*theta*theta;
+//cerr << "lpsi " << lpsi << endl;
+        double vel_psi_squared = lpsi*lpsi*(psi*psi + phi*phi);
+//cerr << "vel_psi_sq " << vel_psi_squared << endl;
+        vel_squared = vel_psi_squared + vel_theta_squared;
+        //vel_squared = vel_psi_squared;//vel_theta_squared;
+//cerr << "from which I calculate vel_squared                      " << vel_squared << endl;
+
+      double GaussProd = 1.0;
+      double GaussSum=0.0;
+      GaussSum += exp(-vel_squared*FourLambdaTauInv);
+
+      GaussProd *= GaussSum;
+      RotK -= log(GaussProd);    
+      //RotK += dot(vel,vel)*FourLambdaTauInv; 
+    }
+  }
+  //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+//cerr << "I'm returning kinetic action " << RotK << endl;
+//cerr << "*************************************" << endl;
+  return (RotK);
+}
+
+double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
+{
+  double R = O_H_moment_arm;
+  double spring=0.0;
+  double levelTau=ldexp(Path.tau, level);
+  int skip = 1<<level;
+  const int NumImage=1;  
+  double Z = 0.0;
+  double lambda = lambda_p;
+  double FourLambdaTauInv = 1.0/(4.0*lambda*levelTau);
+  int TotalNumParticles = Path.NumParticles();
+  int numMol = TotalNumParticles/5;
+  int startparticle = 3*numMol;
+  int endparticle = 4*numMol;
+  for (int ptcl1=startparticle; ptcl1<endparticle; ptcl1++) {
+    int ptcl2 = ptcl1 + numMol;
+    int speciesNum = Path.ParticleSpeciesNum(ptcl1);
+    if (speciesNum == PathData.Path.SpeciesNum("p")){
+      for (int slice=startSlice; slice<endSlice; slice+=skip) {
+        // Load coords and their corresponding oxygens (COMs)
+      dVec P1 = PathData.Path(slice,ptcl1);
+      dVec P2 = PathData.Path(slice,ptcl2);
+      dVec P1prime = PathData.Path(slice+skip,ptcl1);
+      dVec P2prime = PathData.Path(slice+skip,ptcl2);
+      int Optcl = FindCOM(ptcl1);
+      dVec O = PathData.Path(slice,Optcl);
+      dVec Oprime = PathData.Path(slice+skip,Optcl);
+      // Redefine coordinates WRT COM
+      P1 -= O;
+      P2 -= O;
+      P1prime -= Oprime;
+      P2prime -= Oprime;
+      P1 = Normalize(P1);
+      P2 = Normalize(P2);
+      P1prime = Normalize(P1prime);
+      P2prime = Normalize(P2prime);
+      // Calculate bisectors for each configuration
+      dVec n = Normalize(GetBisector(P1,P2));
+      dVec nprime = Normalize(GetBisector(P1prime,P2prime));
+      double vel_squared;
+      double prefactor;
+      double theta;
+      dVec z1 = Normalize(CrossProd(P1,P2));
+      dVec z1prime = Normalize(CrossProd(P1prime,P2prime));
+      dVec r;
+      //if (n == nprime){
+      if (dVecsEqual(n,nprime)){
+        r = z1; 
+        theta = 0.0;
+      }
+      else{
+        r = Normalize(CrossProd(n,nprime));
+        theta = GetAngle(n,nprime);
+      }
+      // Calculate the cross product - the axis of rotation
+      // Calculate polar angles and trig functions
+      // Calculate azimuthal angle
+      // Calculate lever arms and kinetic energy contributions (mass contained in lambda factor)
+        double alpha = HOH_half_angle;
+        double SinAlpha = sin(alpha);
+        double CosAlpha = cos(alpha);
+        double phi = GetAngle(z1,r);
+        double psi = GetAngle(z1prime,r);
+
+        double lpsi = R*SinAlpha;
+        double I_theta = R*R*(cos(phi)*cos(phi) + CosAlpha*CosAlpha*sin(phi)*sin(phi));
+        double vel_theta_squared = R*R*theta*theta;
+//cerr << "lpsi " << lpsi << endl;
+        double vel_psi_squared = lpsi*lpsi*(psi*psi + phi*phi);
+//cerr << "vel_psi_sq " << vel_psi_squared << endl;
+        vel_squared = vel_psi_squared + vel_theta_squared;
+        double CDsqrt = R*lpsi*lpsi/(pow((lambda*levelTau),1.5));
+
+        double GaussSum;
+        double numSum;
+        double d2overFLT = vel_squared*FourLambdaTauInv;
+        double expPart = exp(-d2overFLT);
+        GaussSum = expPart;
+        numSum = (1.5 - d2overFLT)/levelTau*CDsqrt*expPart; 
+        Z += GaussSum;
+        spring += numSum; 
+      }
+    }
+  }
+  spring = spring/Z;
+//  cerr << "returning spring = " << spring << endl;
+  return spring;
+}
+
+// The old version; not really sure what it's supposed to do.
+/*
 double TIP5PWaterClass::NewRotKinAction(int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
 {
   double R = O_H_moment_arm;
@@ -1656,6 +1835,8 @@ double TIP5PWaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
 //  cerr << "returning spring = " << spring << endl;
   return spring;
 }
+*/
+
 
 dVec TIP5PWaterClass::CrossProd(dVec v1, dVec v2)
 {
