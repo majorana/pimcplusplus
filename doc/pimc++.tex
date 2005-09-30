@@ -479,7 +479,31 @@ All code in PIMC++ follows the invariant that the initial and final time slice i
 \begin{itemize}
 \item The \texttt{type} for this move must be ShiftMove.
 \end{itemize}
+
+
+
 \section{The ``Observables'' section}
+All observables have the following variables:
+\begin{itemize}
+\item \texttt{type}: The type of the observable is unique for each
+  type of observable.  It indicates to the code what observable is being
+  defined and specified below in the individual sections.
+
+\item \texttt{Name}: The name of your observable. This may be anything
+   but must be unique for each observable in your Input File (the code should
+   really check for this, btw).  This is the name you will use in the
+   algorithm in specifying that this observable to be called.
+
+\item \textt{freq}:  The observable will accumulate its statistics
+  after being called ``freq'' number of times.  
+\item \texttt{dumpFreq}: The observable will write data to the output
+  file after being called ``dumpFreq'' number of times. Soon to be
+  deprecated.
+\item \texttt {Description}: Variable to add comments about your
+  observable. Information will be stored in the output file but not
+  specifically used for anything.
+
+\end{itemize}
 \subsection{Time Analysis}
 There are internal clocks in PIMC++ that measure that amount of time spent in every move and observable.  The time analysis observable summarizes this information and outputs it to the hdf5 file. It is recommended that all runs include a time analysis observable (by doing so, the algorithm can be tuned to spend a reasonable amount of time in each section of the code)
 The input parameters for the time analysis observables are 
@@ -492,11 +516,120 @@ The input parameters for the Energy observable are
 \begin{itemize}
 \item The \texttt{type} of this observable must be ``Energy''
 \end{itemize}
+
 \subsection{Pair Correlation}
 The pair correlation observable calculates the pair correlation   
-$$g(r)=$$
+$$g(r)=\frac{3}{4\Pi}\frac{\Omega}{N1*N2}$$ where $N1$ and $N2$ are
+the total number of particles in each species. In the case where
+species 1 and species 2 are the same, $N2=N1-1$ 
+\begin{itemize}
+\item The \textt{type} of this observable must be
+`''PairCorrelation''
+\item \texttt{Species1}: String variable indication one of the two species used to calculate the
+  pair correlation. Must be consistently the same string as used in
+  other parts of the code.
+\item \texttt{Species2}: String variable indication one of the two species used to calculate the
+  pair correlation. Must be consistently the same string as used in
+  other parts of the code.
+\end{itemize}
+The pair correlation observable has a grid subsection. This means that
+your pair correlation observable will look like
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+ Section (Observable)
+    {
+      string type = "PairCorrelation";
+      string Name = "HeHePC";
+      string Species1 = "He";
+      string Species2 = "He";
+      string Description="Helium-Helium Pair Correlation";
+      int freq=2;
+      int dumpFreq=20;
+      Section (Grid)
+        {
+          string type = "Linear";
+          double start = 0.0;
+          int NumPoints = 100;
+        }
+    }
+\end{verbatim}
+\end{minipage}}
+The grid section allows for the following variables:
+\begin{itemize}
+\item \texttt{type}: string variable specifies whether the grid is
+  ``Linear'' or of some other type. I've never tested a non-linear
+  grid so don't guarentee it works with this observable correctly.
+\item \texttt{start}: double variable specifying what gridpoint the grid
+  starts at. Typically should be 0.0.
+\item \texttt{end}: double variable specificying what gridpoint the
+  grid ends at. Will default to something reasonable if omitted.
+\item \texttt{NumPoints}: Indicates how many points are used in the grid.
+\end{itemize}
+\subsection{$n(r)$}
+The $n(r)$ observable is an off diagonal observable used for
+establishing condensate fractions, the existence of Off Diagonal Long
+Range Order, etc. It will only work property when the \texttt{OpenLoops}
+variable is set to true.
+\begin{itemize}
+\item The \textt{type} of this observable must be ``nofr''
+\item \texttt{Species1}: String variable indication one of the two species used to calculate the
+  pair correlation. Must be consistently the same string as used in
+  other parts of the code.
+\item \texttt{Species2}: String variable indication one of the two species used to calculate the
+  pair correlation. Must be consistently the same string as used in
+  other parts of the code.
+\end{itemize}
+Like the pair correlation observable, the $n(r)$ observable has a
+grid. The parameters for the grid are identical (as follows):
+\begin{itemize}
+\item \texttt{type}: string variable specifies whether the grid is
+  ``Linear'' or of some other type. I've never tested a non-linear
+  grid so don't guarentee it works with this observable correctly.
+\item \texttt{start}: double variable specifying what gridpoint the grid
+  starts at. Typically should be 0.0.
+\item \texttt{end}: double variable specificying what gridpoint the
+  grid ends at. Will default to something reasonable if omitted.
+\item \texttt{NumPoints}: Indicates how many points are used in the grid.
+\end{itemize}
+\subsection{PathDump}
+The PathDump observable outputs the the current state of the path
+including the cooridinates of all particles at all points in time as
+well as the current permutation.  
+\begin{itemize}
+\item The \texttt{type} of this observable must be ``PathDump''
+\end{itemize}
 \section{The ``Algorithm'' section}
+In the algorithm section, the specific procedure to be followed in the
+PIMC++ run is specified.  There are three basic constructs in this
+section: the loop, the move, and the observe. The overlying structure
+is a set of loops that are iterated a specified number of times.
+Inside these loops, moves and observables are called.  The use of
+these constructs are clear from the following example:
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
 
+ Section (Loop){ 
+    int steps=20; //This loop will run 20 times
+    Section (Move) {string name="BisectHelium";} //Each time this
+                                                 // move is called.
+    Section (Loop){
+      int steps=500;
+      Section (Move) {string name="OpenEndMove";}
+    }
+    Section (Move) {string name = "Shift";}
+    Section (Observe) {string name = "TimeObservable"; }
+    Section (Observe) {string name = ``HeHePairCorrelation"; }
+  }
+
+\end{verbatim}
+\end{minipage}}
+This piece of code would run 20 times.  It first runs the move that
+has the variable name BisectHelium. It then runs the move that has the
+variable name OpenEndMove 500 times in another loop.  Finally it runs
+the move named shift and calls two observables named TimeObservable
+and HeHePairCorrelation. Notice, that calling these observable may do
+nothing substational if they haven't been called some modulo or freq
+or dumpfreq times.
 \chapter{Analysis Tools}
 \section{MakeReport}
 \section{pathvis++}
