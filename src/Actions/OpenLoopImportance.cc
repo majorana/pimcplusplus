@@ -104,8 +104,18 @@ double OpenLoopImportanceClass::Action (int slice1, int slice2,
     //    cerr<<"I have chosen a displacement importance function"<<endl;
     //    if (PathData.Path.Communicator.MyProc()==1)
     //      cerr<<"Into dispximp action"<<endl;
-
-    return -log(exp(-(disp(0)-Shift)*(disp(0)-Shift)));
+    int numLinks=PathData.Path.NumTimeSlices()-1;
+    disp=0.0;
+    for (int slice=0;slice<numLinks;slice++) {
+      int realSlice=(openLink+slice) % numLinks;
+      int realSlicep1=(openLink+slice+1) % numLinks;
+      dVec linkDisp;
+      linkDisp=PathData.Path.Velocity(realSlice,realSlicep1,openPtcl);
+      disp =disp+linkDisp;
+    }
+    double  dist=sqrt(dot(disp,disp));
+    return -6*dist;
+    //    return -log(exp(-(disp(0)-Shift)*(disp(0)-Shift)));
   }
   else if (ImpChoice==TUNEDFUNCTION){
     //    if (PathData.Path.Communicator.MyProc()==1)
