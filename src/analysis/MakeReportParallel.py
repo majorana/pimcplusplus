@@ -455,18 +455,32 @@ def ProcessScalarSection(infiles,doc,currNum):
      sectionName2 = infiles.GetName()
      infiles.CloseSection() # sectionName2
      if (infiles.OpenSection("Actions")):
-          procScalarTable.body[0].append("Band")
-          nodeIndex = 0;
-          BandEnergies=[]
-          while (infiles.OpenSection2("NodalAction",i)):
-               Elist = infiles.ReadVar("Energy")
-               if (Elist != []):
-                    BandEnergies = BandEnergies + Elist
-               nodeIndex = nodeIndex+1
-               infiles.CloseSection()
+          print 'Found Actions'
+          if (infiles.OpenSection("NodalActions")):
+               print 'Found NodalActions'
+               procScalarTable.body[0].append("Band")
+               nodeIndex = 0;
+               BandEnergies=[]
+               nodeIndex = 0
+               while (infiles.OpenSection2("NodeAction",nodeIndex)):
+                    print "Found NodeAction"
+                    Elist = infiles.ReadVar("Energy")
+                    print "Elist = " + repr(Elist)
+                    if (Elist != []):
+                         if (BandEnergies == []):
+                              BandEnergies = Elist
+                         else:
+                              for i in range(0,len(Elist)):
+                                   BandEnergies[i] = BandEnergies[i] + Elist[i]
+                    nodeIndex = nodeIndex+1
+                    infiles.CloseSection() # NodalAction
+               infiles.CloseSection() # NodalActions
           infiles.CloseSection() # Actions
+          print "BandEnergies = " + repr(BandEnergies)
           for procNum in range(0,len(BandEnergies)):
+               print "procNum = " + repr(procNum)
                procScalarTable.body[procNum+1].append(repr(BandEnergies[procNum]))
+               
      infiles.OpenSection(sectionName2)
      infiles.OpenSection(sectionName)
                

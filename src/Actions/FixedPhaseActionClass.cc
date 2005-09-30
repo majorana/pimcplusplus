@@ -53,7 +53,7 @@ FixedPhaseClass::CalcGrad2 (int slice, int species)
   double grad2 = 0.0;
   for (int i=0; i<N; i++) {
     Vec3 grad = 
-      (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i)))*detu2Inv + kVec;
+      (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i)))*detu2Inv/* + kVec*/;
     grad2 += dot(grad,grad);
   }
   return grad2;
@@ -127,16 +127,12 @@ FixedPhaseClass::d_dBeta (int slice1, int slice2, int level,
   //   }
 
   double dU = 0.0;
-  if (doUp) {
-    int numPtcls = Path.Species(UpSpeciesNum).NumParticles;
+  if (doUp) 
     for (int link=slice1; link < slice2; link+=skip) 
       dU += 0.5*lambda*(UpGrad2(link)+UpGrad2(link+skip));
-  }
-  if (doDown) {
-    int numPtcls = Path.Species(DownSpeciesNum).NumParticles;
+  if (doDown) 
     for (int link=slice1; link < slice2; link+=skip)
       dU += 0.5*lambda*(DownGrad2(link)+DownGrad2(link+skip));
-  }
   return dU;
 }
 
@@ -258,6 +254,19 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
     vals.reference(Matrix(j,Range::all()));
     grads.reference(GradMat(j,Range::all()));
     BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+    // New way of adding twist term
+    double phi = dot (kVec, r_j);
+    double sinphi, cosphi;
+    sincos (phi, &sinphi, &cosphi);
+    complex<double> e2iphi = complex<double>(cosphi, sinphi);
+    cVec3 ikVec;
+    ikVec[0] = complex<double>(0.0, kVec[0]);
+    ikVec[1] = complex<double>(0.0, kVec[1]);
+    ikVec[2] = complex<double>(0.0, kVec[2]);
+    for (int k=0; k<N; k++) {
+      GradMat(j,k) = e2iphi*(GradMat(j,k) + Matrix(j,k)* ikVec);
+      Matrix(j,k) *= e2iphi;
+    }
   }
 
   // Compute determinant and cofactors
