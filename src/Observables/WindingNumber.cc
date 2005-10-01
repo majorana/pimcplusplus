@@ -1,5 +1,5 @@
 #include "WindingNumber.h"
-#include "../Common/MPI/Communication.h"
+#include <Common/MPI/Communication.h>
 
 
 

@@ -33,12 +33,12 @@ void VacancyLocClass::Accumulate()
     }
     for (int counter=0;counter<TempLoc.size();counter++)
       for (int counter2=0;counter2<TempLoc.size();counter2++)
-	if (TempLoc[counter]==0 && TempLoc[counter2]==0){
-	  dVec disp=FixedLoc[counter]-FixedLoc[counter2];
+	if (TempLoc(counter)==0 && TempLoc(counter2)==0){
+	  dVec disp=FixedLoc(counter)-FixedLoc(counter2);
 	  PathData.Path.PutInBox(disp);
-	  dist=sqrt(dot(disp,disp));
-	  if (dist<grid.End){
-	    int index=grid.ReverseMap(dist);
+	  double dist=sqrt(dot(disp,disp));
+	  if (dist<Grid.End){
+	    int index=Grid.ReverseMap(dist);
 	    Histogram(index)++;
 	  }
 	}

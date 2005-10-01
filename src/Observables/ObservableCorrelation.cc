@@ -378,16 +378,18 @@ void nofrClass::Accumulate()
       //      else {
 	//    Histogram(index)=Histogram(index)+(0.5)/(dist*dist)+(0.9*exp(-dist*dist)+0.1);
 	Histogram(index)=Histogram(index)+1.0;
-      }
+	//   }
     //      if (disp(0)<grid.End && disp(1)<grid.End && disp(2)<grid.End){
     //	int index0=grid.ReverseMap(disp(0));
     //	int index1=grid.ReverseMap(disp(1));
     //	int index2=grid.ReverseMap(disp(2));
 	//\\      Histogram3d(index0,index1,index2)=Histogram3d(index0,index1,index2)+1.0;
 	//      }
-    }  
+    }
+    TotalCounts++;  
   }
-  TotalCounts++;  
+  
   //  cerr<<"done accumulating"<<endl;
   return; 
 }
+  
