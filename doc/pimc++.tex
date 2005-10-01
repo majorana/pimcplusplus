@@ -649,7 +649,7 @@ species 1 and species 2 are the same, $N2=N1-1$
   other parts of the code.
 \end{itemize}
 The pair correlation observable has a grid subsection. This means that
-your pair correlation observable will look like
+your pair correlation observable will look like \\
 \rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
 \begin{verbatim}
  Section (Observable)
@@ -669,7 +669,7 @@ your pair correlation observable will look like
         }
     }
 \end{verbatim}
-\end{minipage}}
+\end{minipage}}\\
 The grid section allows for the following variables:
 \begin{itemize}
 \item \texttt{type}: string variable specifies whether the grid is
@@ -786,7 +786,7 @@ create the following four functions: \\
 a constructor,\\
 \texttt{MakeMove()},\\
 \texttt{Read(IOSectionClass \&in)},  \\
-texttt{WriteRatio()}.
+\texttt{WriteRatio()}.
 
 
 The constructor of a move must look like the following:\\
@@ -803,9 +803,9 @@ The constructor of a move must look like the following:\\
 \end{minipage}}
 
 It is important to remember to send a pathdata reference and an
-  IOSectionClass to ParticleMoveClass as is done above. This is so the
-  move has access to the pathdata and an ability to write out data
-  like its acceptance ratio
+  IOSectionClass (so acceptance ratios can be written out)  to ParticleMoveClass 
+  as is done above. Note the 
+  capatilization used in this example. It is important. 
 
 
 The function \texttt{MakeMove()} will be called by the algorithm 
@@ -846,24 +846,22 @@ correctly.
 The function \texttt{Read(IOSectionClass \&in)} is called immediately after the
 move is created so that the move has the opportunity to read relevant
 input information.  When it is called, the IOSectionClass object
-has the name of your move which
-will be inside \texttt{Section (Moves)}.
+will be inside \texttt{Section (Moves)} for the appropriate move. 
+(it is neither responsible for call \texttt{infile.OpenSection(``Move'')}, not
+ for closing the section it is in (i.e. there needs to
+be exactly the same number of \texttt{OpenSection} and  \texttt{CloseSection} calls in
+the \texttt{Read} function).
  The move is then responsible for reading the input parameters it needs
 by calling \texttt{in.Readvar(``varString'',var)}. For example, it might read the 
 number of levels it is to operate on by calling 
 \texttt{in.ReadVar(``NumLevels'',numLevels)} Note,
 
-opens, but {\em NOT} for closing the section it is in (i.e. there needs to
-be exactly the same number of \texttt{OpenSection} and 
-\texttt{CloseSection} calls in
-your \texttt{Read} function).
-
 To glue the read function into your code, there are currently three
-steps. First, perform the appropriate incanation on the configuration scripts.
+steps. First, add the name of the .h and .cc files to the Makefile.am in the Moves directory. 
 Secondly,  your move needs
 to be added to the .h file of \texttt{MovesClass.h}. This ensures that it will
 get included when other files \#include the moves. Finally, inside
-PIMCClass.cc, there is a ReadMoves() function which will need to have your
+PIMCClass.cc, there is a ReadMoves() function which will need to have the
 move added to it.  In the series of ``if'' statements, you need to add
 \rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
 \begin{verbatim}
@@ -875,7 +873,7 @@ move added to it.  In the series of ``if'' statements, you need to add
 \end{verbatim}
 \end{minipage}}\\
 The moveType will have to be the type the user must type under
-\texttt{Section (Move)} for your move.
+\texttt{Section (Move)} for the move.
 
 
 
