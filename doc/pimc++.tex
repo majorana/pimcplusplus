@@ -193,6 +193,31 @@ use of {\em sections}.  A section is defined in the following way:\\
 
 \section{Format}
 \section{Global parameters}
+\begin{itemize}
+\item \texttt{tau}: double variable specifies the time step to be used
+  for the simulation.  This time step needs to be in the pairaction
+  files that are being used. Moreover, note that
+  $\frac{1}{\tau*\texttt{NumTimeSlices}}$ gives the temperature of the
+  system.
+\end{itemize}
+\section{The ``Parallel'' section}
+PIMC++ currently allows two modes of parallelization: cloning
+parallelization and time slice parallelization.  Cloning
+parallelization is the ``trivial'' form where  many copies of the same
+simulation are run.  Nothing needs to be done for cloning
+parallelization to happen.  PIMC++ will simply ``cloning parallelize''
+over the number of processors on which it is run.  In this case,
+different output files (each 
+appended with .ProcNumber.h5) are created.  In time slice
+parallelization, each processor is assigned some percent of the time
+slices in the entire system and operates on those time slices.  The \\
+\begin{itemize}
+\item \texttt{ProcsPerClone}: integer variable specifies how many
+  processors to divide the time slices over. If this does not evenly
+  divide the number of time slices, then some processors get an extra
+  time slice.  It is required that the number of processors PIMC++ is
+  being run on evenly divides ProcsPerClone.  
+\end{itemize}
 \section{The ``System'' section}
    The section descibes the system to be studied.  It specifies the
    size of the paths, the species and numbers of particles, the size
@@ -206,13 +231,59 @@ use of {\em sections}.  A section is defined in the following way:\\
    booleans of length 2 or 3, dependending on the dimensionality of
    the system, of whether the system is periodic in each of the
    cardinal directions, $\hat{x},\hat{y},\text{and } \hat{z}$
-   \item \texttt{Section (Particles)}  This section describes all the
-   particles in the system.  It is comprised of one or more
+   \item \texttt{Section (Particles)}  Inside the System section there
+   is a hiearchal section call the particles section.  The particle
+   section  describes properties of the  particles in the system.  It is comprised of one or more
    \texttt{Species} sections.
-     \subitem \texttt{Section (Species)}  Describes a group of
+     \subitem \texttt{Section (Species)} A heiarchal section inside
+   the particles section.  Describes a group of
         identicle particles.  Examples include electrons, protons,
         or helium atoms.
-        \subsubitem acdkajdf
+        \subsubitem \texttt{Name} string variable which gives the name
+   of the particle. This name may be arbitrarily chosen.  For example,
+   in a simulation of an atom, one of your variables might be
+   ``UpElectrons''
+       \subsubitem \texttt{Type} string variable that identifies the
+   type of the particle. This must match the types that are used in
+   the Pair Action files.  In the above example, the type might be
+   ``electron''
+       \subsubitem \texttt{lambda} double variable that specifies the
+   value of $\lambda=\frac{\hbar^2}{2m}$ of the particle. (We should
+   check that this is consistent with the data read in from the
+   pairaction file)
+       \subsubitem \texttt{Statistics}: string variable that must take
+   one of the following strings: BOSON, FERMION, BOLTZMANNON.
+   Indicates the statistics for this particle. Currently, there is no
+   distinction between the boson and boltzmannon statistics (to turn
+   on permutations, you must change the value of \texttt{TABLE} inside the
+   BisectionBlock move).  Using fermions, will not allow odd
+   permutations and will turn on some features associated with nodes.
+       \subsubitem \texttt{NumParticles}: integer variable specifies
+   the number of particles of this type in your simulation.
+       \subsubitem \texttt{NumDim}: specifies the dimensionality of
+   your particle.  This is effectively always equal to NDIM.
+   Different dimensional particles would be useful for vortex rings
+   and lines but haven't been imlemented.
+       \subsubitem \texttt{InitPaths}: string variable specifies how
+   the particles in your system should be initialized. Current choices
+   are ``FIXED'',''ALLFIXED'',''CUBIC'',''FILE''.  ``FIXED'' (add
+   information about Levi-Flight and squeeze..soon how initialization of the
+   particles works is going to be redone a little) requires
+   the addition of variable Positions that is  Array<double,2> of size
+   NumParticles X dimensions that explicitly specifies the location of
+   all the particles.  All time slices will start at the same
+   poisitions.  ``ALLFIXED'' is similar to fixed except it requires
+   the addition of a variable Positions that is Array<double,3> of
+   size NumTimeSlices x NumParticles x NumDim.  In this situation all
+   time slices are explicitly specified. ``CUBIC'' places all the
+   particles in a cubic array filling the box. All time slices are at
+   the same point.  ``FILE''  requires the specification of an
+   additional string variable ``File'' that specifies the name of the
+   file. This file must have a PathDump observable in it. The last
+   configuration from this pathdump will be read in as the initial
+   configuration. This file MUST be different from the BASE file you
+   specify. 
+     
 \end{itemize}
 
 
@@ -287,6 +358,14 @@ file.  E.g.\\
 int MaxLevels = 6;
 \end{verbatim}
 \end{minipage}}
+\subsection{NumImages}
+In the Kinetic action, the minimum image convention is used in its
+calculation. In a regime where $\sqrt{*\lambda*\tau}$ is on the order
+of the box size, this is not an accurate approximation. In that case,
+more images need to be used. By setting this integer variable to 1,
+you use the nearest 27 images (6 in 2 dimensions).  This will
+contribute to a reasonably significant spped loss in the code and so
+should be avoided when possible.
 \subsection{Long-range variables}
 For systems containing particles with long-range (e.g. coulomb)
 interactions, there are several variables which are required:
@@ -498,7 +577,19 @@ able to ensure ergodicity for the entire path.
 
 
 \section{The ``Observables'' section}
-All observables have the following variables:
+The observable section contains a series of ``observe'' sections that
+specify paramaters for each observable.  It also contains the
+variable \\
+\begin{itemize}
+\item \texttt{OutFileBase}:  string observable that specifies the base
+  of the output file name. It is important to note that when doing
+  ``cloning'' parallelization each clone produces its own unique
+  output file. Because of this, the base file name will be added a .xxx.h5
+  where xxx specifies the ``clone'' number that produced this output
+  file. In the case in which the code is running in serial mode, the
+  addition is .0.h5.
+\end{itemize}
+Each observable section mus have the following variables:
 \begin{itemize}
 \item \texttt{type}: The type of the observable is unique for each
   type of observable.  It indicates to the code what observable is being
@@ -654,7 +745,15 @@ variable name OpenEndMove 500 times in another loop.  Finally it runs
 the move named shift and calls two observables named TimeObservable
 and HeHePairCorrelation. Notice, that calling these observable may do
 nothing substational if they haven't been called some modulo or freq
-or dumpfreq times.
+or dumpfreq times. The algorithm section may also contain the variable
+\begin{itemize}
+\item \texttt{MaxWallTime}: integer variable which specifies the
+  maximum amount of time the code runs before aborting. This ensures
+  the code finishes oni a supercomputer before being abnormally
+  terminated.  The unit of time this is specified in is minutes (I
+  think although Ken is free to tell me otherwise).
+\end{itemize}
+
 \chapter{Analysis Tools}
 \section{MakeReport}
 \section{pathvis++}
@@ -662,7 +761,17 @@ or dumpfreq times.
 
 \chapter{Modifing pimc++}
 \section{Useful things to know}
-Each particle in PIMC++ is indexed by a unique integer. 
+Each particle in PIMC++ is indexed by a unique integer.  To access the
+location of a particle in a move or observable, use
+PathData.Path(slice,ptclNumber). Each species in PIMC++ has a unique
+species number and a unique species name.  To get the species number
+given the species name call PathData.Path.SpeciesNum(SpeciesName).
+The $\lambda$ of a given species is accessed by
+PathData.Path.Species(speciesNum).lambda.   It is assumed
+that a given species is allocated a continuous range of particle
+numbers.  To access the beginning of this range call
+PathData.Path.Species(speciesNum).FirstPtcl (respectively use LastPtcl
+to acess the end of this range).  These number are inclusive.
 \section{Adding a new ``Move''}
 There are two steps to adding a new move. First, the move needs to be
 created and then the appropriate files need to be changed to allow the
@@ -698,7 +807,7 @@ It is important to remember to send a pathdata reference and an
   move has access to the pathdata and an ability to write out data
   like its acceptance ratio
 
-<<<<<<< .mine
+
 The function \texttt{MakeMove()} will be called by the algorithm 
 and is in charge of the entire move. This means that it is in charge
 of performing the metropolis proceudure by itself (This includes calling
