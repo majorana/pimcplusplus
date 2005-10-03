@@ -53,7 +53,7 @@ FixedPhaseClass::CalcGrad2 (int slice, int species)
   double grad2 = 0.0;
   for (int i=0; i<N; i++) {
     Vec3 grad = 
-      (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i)))*detu2Inv/* + kVec*/;
+      (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i)))*detu2Inv - kVec;
     grad2 += dot(grad,grad);
   }
   return grad2;
@@ -254,19 +254,19 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
     vals.reference(Matrix(j,Range::all()));
     grads.reference(GradMat(j,Range::all()));
     BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
-    // New way of adding twist term
-    double phi = -dot (kVec, r_j);
-    double sinphi, cosphi;
-    sincos (phi, &sinphi, &cosphi);
-    complex<double> e2iphi = complex<double>(cosphi, sinphi);
-    cVec3 ikVec;
-    ikVec[0] = complex<double>(0.0, kVec[0]);
-    ikVec[1] = complex<double>(0.0, kVec[1]);
-    ikVec[2] = complex<double>(0.0, kVec[2]);
-    for (int k=0; k<N; k++) {
-      grads(k) = e2iphi*(grads(k) + vals(k)* ikVec);
-      vals(k) *= e2iphi;
-    }
+//     // New way of adding twist term
+//     double phi = -dot (kVec, r_j);
+//     double sinphi, cosphi;
+//     sincos (phi, &sinphi, &cosphi);
+//     complex<double> e2iphi = complex<double>(cosphi, sinphi);
+//     cVec3 ikVec;
+//     ikVec[0] = complex<double>(0.0, kVec[0]);
+//     ikVec[1] = complex<double>(0.0, kVec[1]);
+//     ikVec[2] = complex<double>(0.0, kVec[2]);
+//     for (int k=0; k<N; k++) {
+//       grads(k) = e2iphi*(grads(k) - vals(k)* ikVec);
+//       vals(k) *= e2iphi;
+//    }
   }
 
   // Compute determinant and cofactors
@@ -666,35 +666,35 @@ FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
       energy += FixedPhase.System->GetEnergy(i);
     }
   out.WriteVar ("Energy", energy);
-  int nx = FixedPhase.BandSplines.Nx;
-  int ny = FixedPhase.BandSplines.Nx;
-  int nz = FixedPhase.BandSplines.Nx;
-  int n  = FixedPhase.BandSplines.N;
-  Array<double,4> Bands(nx, ny, nz, 2*n);
-  for (int ix=0; ix<nx; ix++)
-    for (int iy=0; iy<ny; iy++)
-      for (int iz=0; iz<nz; iz++)
-	for (int i=0; i<n; i++) {
-	  Bands(ix,iy,iz,2*i)   = FixedPhase.BandSplines(ix,iy,iz,i).real();
-	  Bands(ix,iy,iz,2*i+1) = FixedPhase.BandSplines(ix,iy,iz,i).imag();
-	}
-  out.WriteVar("Bands", Bands);
-  Vec3 r;
-  for (int ix=0; ix<nx; ix++) {
-    r[0] = (*FixedPhase.BandSplines.Xgrid)(ix);
-    for (int iy=0; iy<ny; iy++) {
-      r[1] = (*FixedPhase.BandSplines.Ygrid)(iy);
-      for (int iz=0; iz<nz; iz++) {
-	r[2] = (*FixedPhase.BandSplines.Zgrid)(iz);
-	double phi = dot(Getk(), r);
-	for (int i=0; i<n; i++) {
-	  Bands(ix,iy,iz,2*i)   = cos(phi);
-	  Bands(ix,iy,iz,2*i+1) = sin(phi);
-	}
-      }
-    }
-  }
-  out.WriteVar("e2ikr", Bands);
+//   int nx = FixedPhase.BandSplines.Nx;
+//   int ny = FixedPhase.BandSplines.Nx;
+//   int nz = FixedPhase.BandSplines.Nx;
+//   int n  = FixedPhase.BandSplines.N;
+//   Array<double,4> Bands(nx, ny, nz, 2*n);
+//   for (int ix=0; ix<nx; ix++)
+//     for (int iy=0; iy<ny; iy++)
+//       for (int iz=0; iz<nz; iz++)
+// 	for (int i=0; i<n; i++) {
+// 	  Bands(ix,iy,iz,2*i)   = FixedPhase.BandSplines(ix,iy,iz,i).real();
+// 	  Bands(ix,iy,iz,2*i+1) = FixedPhase.BandSplines(ix,iy,iz,i).imag();
+// 	}
+//   out.WriteVar("Bands", Bands);
+//   Vec3 r;
+//   for (int ix=0; ix<nx; ix++) {
+//     r[0] = (*FixedPhase.BandSplines.Xgrid)(ix);
+//     for (int iy=0; iy<ny; iy++) {
+//       r[1] = (*FixedPhase.BandSplines.Ygrid)(iy);
+//       for (int iz=0; iz<nz; iz++) {
+// 	r[2] = (*FixedPhase.BandSplines.Zgrid)(iz);
+// 	double phi = dot(Getk(), r);
+// 	for (int i=0; i<n; i++) {
+// 	  Bands(ix,iy,iz,2*i)   = cos(phi);
+// 	  Bands(ix,iy,iz,2*i+1) = sin(phi);
+// 	}
+//       }
+//     }
+//   }
+//   out.WriteVar("e2ikr", Bands);
   out.FlushFile();
 }
 
