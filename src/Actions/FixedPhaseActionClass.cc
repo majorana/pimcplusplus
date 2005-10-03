@@ -255,7 +255,7 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
     grads.reference(GradMat(j,Range::all()));
     BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
     // New way of adding twist term
-    double phi = dot (kVec, r_j);
+    double phi = -dot (kVec, r_j);
     double sinphi, cosphi;
     sincos (phi, &sinphi, &cosphi);
     complex<double> e2iphi = complex<double>(cosphi, sinphi);
@@ -679,7 +679,22 @@ FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
 	  Bands(ix,iy,iz,2*i+1) = FixedPhase.BandSplines(ix,iy,iz,i).imag();
 	}
   out.WriteVar("Bands", Bands);
-
+  Vec3 r;
+  for (int ix=0; ix<nx; ix++) {
+    r[0] = (*FixedPhase.BandSplines.Xgrid)(ix);
+    for (int iy=0; iy<ny; iy++) {
+      r[1] = (*FixedPhase.BandSplines.Ygrid)(iy);
+      for (int iz=0; iz<nz; iz++) {
+	r[2] = (*FixedPhase.BandSplines.Zgrid)(iz);
+	double phi = dot(Getk(), r);
+	for (int i=0; i<n; i++) {
+	  Bands(ix,iy,iz,2*i)   = cos(phi);
+	  Bands(ix,iy,iz,2*i+1) = sin(phi);
+	}
+      }
+    }
+  }
+  out.WriteVar("e2ikr", Bands);
   out.FlushFile();
 }
 
