@@ -666,6 +666,20 @@ FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
       energy += FixedPhase.System->GetEnergy(i);
     }
   out.WriteVar ("Energy", energy);
+  int nx = FixedPhase.BandSplines.Nx;
+  int ny = FixedPhase.BandSplines.Nx;
+  int nz = FixedPhase.BandSplines.Nx;
+  int n  = FixedPhase.BandSplines.N;
+  Array<double,4> Bands(nx, ny, nz, 2*n);
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	for (int i=0; i<n; i++) {
+	  Bands(ix,iy,iz,2*i)   = FixedPhase.BandSplines(ix,iy,iz,i).real();
+	  Bands(ix,iy,iz,2*i+1) = FixedPhase.BandSplines(ix,iy,iz,i).imag();
+	}
+  out.WriteVar("Bands", Bands);
+
   out.FlushFile();
 }
 
