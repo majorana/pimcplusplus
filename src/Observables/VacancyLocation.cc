@@ -107,9 +107,20 @@ void VacancyLocClass::Read(IOSectionClass &in)
     WriteInfo();
     IOSection.WriteVar("Type","Scalar");
   }
-
-
-
+  Array<int,1> toDivide(Histogram.size());
+  for (int counter=0;counter<FixedLoc.size();counter++){
+    for (int counter2=0;counter<FixedLoc.size();counter2++){
+      disp=PathData.Path(slice,ptcl)-FixedLoc(counter);
+      PathData.Path.PutInBox(disp);
+      double dist=sqrt(dot(disp,disp));
+      if (dist<Grid.End){
+	int index=Grid.ReverseMap(dist);
+	toDivide(index)++;
+      }
+    }
+    IOSection.WriteVar("Multiplicity",toDivide);
+    
+    
   
 }
 
