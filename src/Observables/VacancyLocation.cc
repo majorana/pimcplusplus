@@ -110,7 +110,7 @@ void VacancyLocClass::Read(IOSectionClass &in)
   Array<int,1> toDivide(Histogram.size());
   for (int counter=0;counter<FixedLoc.size();counter++){
     for (int counter2=0;counter<FixedLoc.size();counter2++){
-      disp=PathData.Path(slice,ptcl)-FixedLoc(counter);
+      dVec disp=FixedLoc(counter)-FixedLoc(counter2);
       PathData.Path.PutInBox(disp);
       double dist=sqrt(dot(disp,disp));
       if (dist<Grid.End){
@@ -118,9 +118,10 @@ void VacancyLocClass::Read(IOSectionClass &in)
 	toDivide(index)++;
       }
     }
-    IOSection.WriteVar("Multiplicity",toDivide);
-    
-    
+  }
+  IOSection.WriteVar("Multiplicity",toDivide);
+  
+  
   
 }
 
