@@ -370,7 +370,8 @@ def BuildScalarTracePage(data,baseName,varName):
      picTable.body = [[]]
      row = []
      for i in range(0,len(data)):
-          d = data[i];
+          d = data[i]
+          print "i=" + repr(i)
           row.append(ProduceTracePicture(d[StartCut:-1], baseName+"_"+repr(i), 'Blocks', varName,"Proc "+repr(i)))
      picTable.body.append(row)
      doc.append(picTable)

@@ -94,8 +94,34 @@ make
 make install
 \end{verbatim}
 \end{minipage}}\\
+\subsection{Building from the subversion repository}
+If you have checked out the code from subversion, the
+\texttt{configure} script will not yet exist in the code directory.
+It can be generated with the autoconf command\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+autoreconf --install
+\end{verbatim}
+\end{minipage}}\\
+This will generate the necessary autoconf and automake scripts.
+Problems at this stage usually come from having out-of-date autoconf
+and/or automake installations.  Upgrade these packages and try again.
+
 The \texttt{configure} script has numerous options.  They may be
-listed by doing ``\texttt{./configure --help}''.
+listed by doing ``\texttt{./configure~--help}''.  For systems on which
+you have root access, it is often preferable to install in the
+\texttt{/usr} directory (instead of \texttt{/usr/local}), which can be
+done with the option \texttt{--prefix=/usr} to \texttt{configure}.  
+\subsection{Compiling with MPI support}
+In order to include MPI support for parallel runs, we must use the
+following options to \texttt{configure} when building both libsprng and libcommon:
+\begin{itemize}
+\item \texttt{--enable-mpi}
+\item \texttt{--with-mpi-cflags=-I/path/to/mpi/headers}
+\item \texttt{--with-mpi-libs="}{\em flags needed to link mpi libs}\texttt{"}
+\end{itemize}
+The necessary \texttt{cflags} and \texttt{libs} can often be found by
+typing something like \texttt{mpic++ --show}.
 
 \chapter{Input Files}
 \section{Introduction}

@@ -115,6 +115,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     WriteSystemInfo();
     OutFile.CloseSection(); // "System" 
     OutFile.NewSection ("Observables");
+    Array<double,1> weights;
+    if (in.ReadVar("Weights", weights)) {
+      double myWeight = weights(PathData.GetCloneNum());
+      OutFile.WriteVar("Weight", myWeight);
+    }
   }
   int numOfObservables=in.CountSections("Observable");
   Observables.resize(numOfObservables);
