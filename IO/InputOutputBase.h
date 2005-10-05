@@ -200,7 +200,8 @@ public:
   template<class T>
   inline bool AppendVar(string name, T val);
 
-  inline IOTreeClass(){ FileName="";}
+  inline IOTreeClass() : Parent(NULL)
+  { FileName="";}
 };
 
 void IOTreeClass::MarkModified()

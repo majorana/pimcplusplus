@@ -8,6 +8,43 @@ F77_QUINAT (int *N, double X[], double Y[],
 	    double E[], double F[]);
 
 
+// bool myIsNAN(double x)
+// {
+//   union doublechar {
+//     double d;
+//     unsigned char bytes[8];
+//   } y;
+//   y.d = x;
+//   unsigned int exponent = ((y.bytes[1]&0x0f)<<8) | (y.bytes[0] & 0xfe);
+//   if (exponent == 2047) {
+//     unsigned long f0 = ((y.bytes[1]&0xf0)>>4) | (y.bytes[2] &0x0f);
+//     unsigned long f1 = ((y.bytes[2]&0xf0)>>4) | (y.bytes[3] &0x0f);
+//     unsigned long f2 = ((y.bytes[3]&0xf0)>>4) | (y.bytes[4] &0x0f);
+//     unsigned long f3 = ((y.bytes[4]&0xf0)>>4) | (y.bytes[5] &0x0f);
+//     unsigned long f4 = ((y.bytes[5]&0xf0)>>4) | (y.bytes[6] &0x0f);
+//     unsigned long f5 = ((y.bytes[6]&0xf0)>>4) | (y.bytes[7] &0x0f);
+//     unsigned long f6 = ((y.bytes[7]&0xf0)>>4);
+//     unsigned long F = f0 | (f1<<8) | (f2<<16) | (f3<<24) | (f4<<32)
+//       | (f5<<40) | (f6<<48);
+//     if (F != 0)
+//       return true;
+//     else
+//       return false;
+//   }
+//   else
+//     return false;
+// }
+
+
+bool myIsNormal (double x)
+{
+  char out[100];
+  snprintf (out, 50, "%f", x);
+  bool notNormal = ((out[0]=='n') || (out[0]=='N')||
+		    (out[0]=='i') || (out[1]=='i')||
+		    (out[0]=='I') || (out[1]=='I'));
+  return (!notNormal);
+}
 
 
 void QuinticSpline::Update()
@@ -17,11 +54,14 @@ void QuinticSpline::Update()
   offset=0;
   FX(0) = (*grid)(0);
   FY(0) = Y(0);
-  if (!isnan(StartDeriv) && !isinf(StartDeriv)) {
+//   cerr << "isnan(StartDeriv) = " << isnan(StartDeriv) << endl;
+//   cerr << "isnnormal(StartDeriv) = " << isnormal(StartDeriv) << endl;
+//   cerr << "StartDeriv        = " << StartDeriv << endl;
+  if (myIsNormal(StartDeriv)){
     offset++;
     FX(1) = (*grid)(0);
     FY(1) = StartDeriv;
-    if (!isnan(StartDeriv2) && !isinf(StartDeriv2)) { 
+    if (myIsNormal(StartDeriv2)) {
       offset++;
       FX(2) = (*grid)(0);
       FY(2) = StartDeriv2;
@@ -29,7 +69,7 @@ void QuinticSpline::Update()
   }
   
   int i = grid->NumPoints + offset;
-  if (!isnan(EndDeriv) && !isinf(EndDeriv)) {
+  if (myIsNormal(EndDeriv)) {
     FX(i) = (*grid)(grid->NumPoints-1);
     FY(i) = EndDeriv;
     i++;
