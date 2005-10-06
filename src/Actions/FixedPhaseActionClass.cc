@@ -667,8 +667,8 @@ FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
     }
   out.WriteVar ("Energy", energy);
 //   int nx = FixedPhase.BandSplines.Nx;
-//   int ny = FixedPhase.BandSplines.Nx;
-//   int nz = FixedPhase.BandSplines.Nx;
+//   int ny = FixedPhase.BandSplines.Ny;
+//   int nz = FixedPhase.BandSplines.Nz;
 //   int n  = FixedPhase.BandSplines.N;
 //   Array<double,4> Bands(nx, ny, nz, 2*n);
 //   for (int ix=0; ix<nx; ix++)

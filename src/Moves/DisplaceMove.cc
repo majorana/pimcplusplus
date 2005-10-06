@@ -4,14 +4,16 @@ double DisplaceStageClass::Sample (int &slice1, int &slice2,
 				   Array<int,1> &activeParticles)
 {
   /// Now, choose a random displacement 
-  dVec disp;
-  PathData.Path.Random.CommonGaussianVec (Sigma, disp);
+  for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
+    int ptcl = activeParticles(ptclIndex);
+    dVec disp;
+    PathData.Path.Random.CommonGaussianVec (Sigma, disp);
 
-  // Actually displace the path
-  SetMode(NEWMODE);
-  int ptcl = activeParticles(0);
-  for (int slice=0; slice<PathData.NumTimeSlices(); slice++)
-    PathData.Path(slice, ptcl) = PathData.Path(slice, ptcl) + disp;
+    // Actually displace the path
+    SetMode(NEWMODE);
+    for (int slice=0; slice<PathData.NumTimeSlices(); slice++)
+      PathData.Path(slice, ptcl) = PathData.Path(slice, ptcl) + disp;
+  }
 
   // And return sample probability ratio
   return 1.0;
@@ -32,8 +34,11 @@ DisplaceMoveClass::Read (IOSectionClass &in)
     activeSpecies(i) = PathData.Path.SpeciesNum(activeSpeciesNames(i));
   SetActiveSpecies (activeSpecies);
 
-  // Only move 1 particle at a time.
-  SetNumParticlesToMove(1);
+  // Move all particles at the same time.
+  int totalNum = 0;
+  for (int si=0; si<activeSpecies.size(); si++)
+    totalNum += PathData.Path.Species(activeSpecies(si)).NumParticles;
+  SetNumParticlesToMove(totalNum);
 
   // Construct action list
   DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
@@ -43,12 +48,10 @@ DisplaceMoveClass::Read (IOSectionClass &in)
     else
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRange);
 
-//   for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
-//     DisplaceStage.Actions.push_back(PathData.Actions.NodalActions(i));
   for (int i=0; i<activeSpecies.size(); i++) {
     int speciesNum = activeSpecies(i);
     if ((PathData.Actions.NodalActions(speciesNum)!=NULL)) {
-      cerr << "Adding fermion node action for species " 
+      cerr << "DisplaceMove adding fermion node action for species " 
 	   << activeSpeciesNames(i) << endl;
       DisplaceStage.Actions.push_back
 	(PathData.Actions.NodalActions(speciesNum));
@@ -69,23 +72,17 @@ DisplaceMoveClass::MakeMove ()
   int numActive = 0;
   for (int i=0; i<ActiveSpecies.size(); i++)
     numActive += PathData.Path.Species(ActiveSpecies(i)).NumParticles;
-  ActiveParticles.resize(1);
+  ActiveParticles.resize(numActive);
 
 
-  int index = PathData.Path.Random.CommonInt(numActive);
-  bool done = false;
-  int speciesIndex = 0;
-  while ((speciesIndex < ActiveSpecies.size()) && (!done)) {
-    SpeciesClass &species = PathData.Path.Species(ActiveSpecies(speciesIndex));
-    if (index < species.NumParticles) {
-      ActiveParticles(0) = index+species.FirstPtcl;
-      done = true;
+  int ptclIndex = 0;
+  for (int si=0; si < ActiveSpecies.size(); si++) {
+    SpeciesClass &species = PathData.Path.Species(ActiveSpecies(si));
+    for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+      ActiveParticles(ptclIndex) = ptcl;
+      ptclIndex++;
     }
-    else
-      index -= species.NumParticles;
-    speciesIndex++;
   }
-
   // Next, set timeslices
   Slice1 = 0;
   Slice2 = PathData.Path.NumTimeSlices()-1;
@@ -98,5 +95,4 @@ void
 DisplaceMoveClass::WriteRatio()
 {
   MultiStageClass::WriteRatio();
-
 }

@@ -32,36 +32,11 @@ void ParticleMoveClass::SetActiveSpecies (Array<int,1> ActSpecies)
   ActiveSpecies = ActSpecies;
   ///This calculates the total number of particles
   TotalParticles = 0;
-  int CurrentNumPtcls = 1234567;
   for (int i=0; i<ActSpecies.size(); i++) {
-    CurrentNumPtcls = 
+    int CurrentNumPtcls = 
       PathData.Path.Species(i).NumParticles; 
     TotalParticles += CurrentNumPtcls;
   }
-
-
-  ///This proceeds to calculate the pieces necessary for
-  ///the particle id mapping..I don't think this is necessary 
-  ///any longer,  but I'm not sure. 
-
-  /*
-
-  //  cerr << "TotalParticles = " << TotalParticles << endl;
-  MyParticles.resize(TotalParticles);
-  ///This sets the total number of particles 
-  TotalParticles = 0;
-  for (int i=0; i<ActSpecies.size(); i++) {
-    int CurrentNumPtcls = 
-      PathData.SpeciesArray(ActSpecies(i)).NumParticles(); 
-    //    cerr << "CurrentNumPtcls = " << CurrentNumPtcls << endl;
-    for (int j=0; j<CurrentNumPtcls; j++) {
-      MyParticles(j+TotalParticles)[0] = ActSpecies(i);
-      MyParticles(j+TotalParticles)[1] = j;
-    }
-    TotalParticles += CurrentNumPtcls;
-  }
-
-  */
 }
 
 
