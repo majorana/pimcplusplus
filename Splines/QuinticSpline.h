@@ -102,7 +102,17 @@ public:
 
 
 
-
+inline bool myIsNAN (double x)
+{
+  union 
+  {
+    double d;
+    unsigned long long int l;
+  } val;
+  val.d = x;
+  return ((val.l == (unsigned long long int)0xfff8000000000000ULL) ||
+	  (val.l == (unsigned long long int)0x7ff8000000000000ULL));
+}
 
 
 inline int QuinticSpline::NumPoints() const 
@@ -132,16 +142,16 @@ void QuinticSpline::Init(Grid *NewGrid, Array<double,1> NewY,
   Y = NewY;
 
   NumParams = grid->NumPoints;
-  if (!isnan(StartDeriv) && !isinf(StartDeriv))
+  if (!myIsNAN(StartDeriv) && !isinf(StartDeriv))
     {
       NumParams++;
-      if (!isnan(StartDeriv2) && !isinf(StartDeriv2))
+      if (!myIsNAN(StartDeriv2) && !isinf(StartDeriv2))
 	NumParams++;
     }
-  if (!isnan(EndDeriv) && !isinf(EndDeriv))
+  if (!myIsNAN(EndDeriv) && !isinf(EndDeriv))
     {
       NumParams++;
-      if (!isnan(EndDeriv2) && !isinf(EndDeriv2))
+      if (!myIsNAN(EndDeriv2) && !isinf(EndDeriv2))
 	NumParams++;
     }
   FX.resize(NumParams);

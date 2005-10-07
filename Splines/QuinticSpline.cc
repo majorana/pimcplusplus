@@ -47,6 +47,10 @@ bool myIsNormal (double x)
 }
 
 
+
+	  
+
+
 void QuinticSpline::Update()
 {
   /// First, use double and triple knots to specify first and second
@@ -57,11 +61,11 @@ void QuinticSpline::Update()
 //   cerr << "isnan(StartDeriv) = " << isnan(StartDeriv) << endl;
 //   cerr << "isnnormal(StartDeriv) = " << isnormal(StartDeriv) << endl;
 //   cerr << "StartDeriv        = " << StartDeriv << endl;
-  if (myIsNormal(StartDeriv)){
+  if (!myIsNAN(StartDeriv)){
     offset++;
     FX(1) = (*grid)(0);
     FY(1) = StartDeriv;
-    if (myIsNormal(StartDeriv2)) {
+    if (!myIsNAN(StartDeriv2)) {
       offset++;
       FX(2) = (*grid)(0);
       FY(2) = StartDeriv2;
@@ -69,11 +73,11 @@ void QuinticSpline::Update()
   }
   
   int i = grid->NumPoints + offset;
-  if (myIsNormal(EndDeriv)) {
+  if (!myIsNAN(EndDeriv)) {
     FX(i) = (*grid)(grid->NumPoints-1);
     FY(i) = EndDeriv;
     i++;
-    if (!isnan(EndDeriv2) && !isinf(EndDeriv)) {
+    if (!myIsNAN(EndDeriv2)) {
       FX(i) = (*grid)(grid->NumPoints-1);
       FY(i) = EndDeriv2;
     }

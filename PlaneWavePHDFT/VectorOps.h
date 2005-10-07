@@ -160,16 +160,16 @@ Orthogonalize2 (Array<complex<double>,2> &A, zVec &x, int lastBand)
   }
   for (int row=0; row<=lastBand; row++) 
     x -= S(row) * A(row,Range::all());
-  for (int row=0; row<=lastBand; row++) {
-    Ar.reference (A(row,Range::all()));
-    S(row) = conjdot (Ar, x);
-    if (mag(S(row)) > 1.0e-14) {
-      cerr << "row = " << row << " lastband = " << lastBand << endl;
-      cerr << "Error in Orthogonalize2!, s = " << S(row) << endl;
-      double norm = realconjdot (Ar, Ar);
-      cerr << "norm = " << norm << endl;
-    }
-  }
+//   for (int row=0; row<=lastBand; row++) {
+//     Ar.reference (A(row,Range::all()));
+//     S(row) = conjdot (Ar, x);
+//     if (mag(S(row)) > 1.0e-14) {
+//       cerr << "row = " << row << " lastband = " << lastBand << endl;
+//       cerr << "Error in Orthogonalize2!, s = " << S(row) << endl;
+//       double norm = realconjdot (Ar, Ar);
+//       cerr << "norm = " << norm << endl;
+//     }
+//   }
 }
 
 inline void
