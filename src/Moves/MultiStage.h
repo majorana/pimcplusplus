@@ -4,6 +4,7 @@
 
 #include <list>
 #include "MoveBase.h"
+#include "../Observables/ObservableBase.h"
 #include "../Actions/ActionBase.h"
 
 ///Some moves are built out of stages.  This class is the parent class
@@ -17,6 +18,7 @@ class StageClass
 protected:
   PathDataClass &PathData;
   IOSectionClass OutSection;
+  ObservableDouble AcceptRatioVar;
 public:
   int NumAccepted, NumAttempted;
   int BisectionLevel;
@@ -44,15 +46,12 @@ public:
   StageClass(PathDataClass &pathData,IOSectionClass outSection) :
     PathData(pathData), NumAccepted(0), NumAttempted(0),
     BisectionLevel(0),
-    OutSection(outSection)
+    OutSection(outSection),
+    AcceptRatioVar("AcceptRatio",OutSection,pathData.Path.Communicator)
   {
     if (PathData.Path.Communicator.MyProc()==0)
       OutSection.NewSection("Stage");
   }
-
-
-
-
 };
 
 class CommonStageClass : public StageClass

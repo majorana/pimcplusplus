@@ -6,17 +6,19 @@ void StageClass::Read(IOSectionClass &in)
 }
 void StageClass::WriteRatio()
 {
-  //try this
+  AcceptRatioVar.Write((double)NumAccepted/(double)NumAttempted);
+  AcceptRatioVar.Flush();
 }
 
 void StageClass::Accept()
 {
-  // Do nothing for now
+  NumAccepted++;
+  NumAttempted++;
 }
 
 void StageClass::Reject()
 {
-  ///Do nothing for now
+  NumAttempted++;
 }
 
 void MultiStageClass::Read(IOSectionClass& in)
