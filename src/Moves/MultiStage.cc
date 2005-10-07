@@ -103,6 +103,8 @@ bool CommonStageClass::Attempt(int &slice1, int &slice2,
   double oldAction= GlobalStageAction(activeParticles);
   SetMode(NEWMODE);
   double newAction = GlobalStageAction(activeParticles);
+  perr << "oldAction = " << oldAction
+       << "newAction = " << newAction << endl;
   double currActionChange=newAction-oldAction;
   double logAcceptProb=log(sampleRatio)-currActionChange+prevActionChange;
   bool toAccept = logAcceptProb>=log(PathData.Path.Random.Common()); /// Accept condition
