@@ -37,8 +37,6 @@ private:
 public:
   // Read the parameters from the input file
   void Read (IOSectionClass &in);
-  // Writes the acceptance ratio
-  void WriteRatio();
   // Actually attempts the move and accepts or rejects
   void MakeMove();
   DisplaceMoveClass (PathDataClass &pathData, IOSectionClass &outSection) :
