@@ -90,9 +90,3 @@ DisplaceMoveClass::MakeMove ()
   // Now call MultiStageClass' MakeMove
   MultiStageClass::MakeMove();
 }
-
-void
-DisplaceMoveClass::WriteRatio()
-{
-  MultiStageClass::WriteRatio();
-}
