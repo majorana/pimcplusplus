@@ -35,8 +35,7 @@ fi
 if test "x$gsl_ok" = "xno"; then
    AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
 fi
-AC_CHECK_LIB([lapack], [dgesvd_])
-AC_CHECK_LIB([blas],[dgemv_])
+
 AC_MSG_CHECKING([LIBS = $LIBS])
 # Checks for header files.
 AC_HEADER_STDC
@@ -142,6 +141,14 @@ fi
 #   fi
 #fi
 
+AC_ARG_WITH(blas-libs,   [  --with-blas-libs=LIBS      specify BLAS linker flags ])
+if test "x$with_blas_libs" != "x"; then
+   BLAS_LIBS="$with_blas_libs"
+else
+   AC_CHECK_LIB([blas],[dgemv_])
+fi
+AC_SUBST(BLAS_LIBS)
+
 AC_ARG_WITH(lapack-cflags,[  --with-lapack-cflags=FLAGS specify LAPACK linker flags])
 AC_ARG_WITH(lapack-libs, [  --with-lapack-libs=LIBS    specify LAPACK linker flags])
 if test "x$with_lapack_cflags" != "x"; then
@@ -149,6 +156,8 @@ if test "x$with_lapack_cflags" != "x"; then
 fi
 if test "x$with_lapack_libs" != "x"; then
    LAPACK_LIBS="$with_lapack_libs"
+else
+   AC_CHECK_LIB([lapack], [dgesvd_])
 fi
 AC_SUBST(LAPACK_CFLAGS)
 AC_SUBST(LAPACK_LIBS)
@@ -229,6 +238,7 @@ AC_CONFIG_FILES([ Makefile                  \
 AC_MSG_RESULT([ HDF5_LIBS   = $HDF5_LIBS ])
 AC_MSG_RESULT([ XML2_LIBS   = $XML2_LIBS ])
 AC_MSG_RESULT([ GSL_LIBS    = $GSL_LIBS  ])
+AC_MSG_RESULT([ BLAS_LIBS   = $BLAS_LIBS ])
 AC_MSG_RESULT([ LAPACK_LIBS = $LAPACK_LIBS ])
 #AC_MSG_RESULT([ CBLAS_LIBS  = $CBLAS_LIBS ])
 AC_OUTPUT

@@ -1,0 +1,40 @@
+\documentclass{article}
+\title{Plane wave band structure calculations with pseudohamiltonians}
+\author{Kenneth P. Esler Jr.}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+In order to perform use a fixed-phase nodal restriction for our PIMC
+simulation, we need a method to compute reasonable electronic wave
+functions, parameterized by the positions of the ions,
+$\{\mathbf{R_i}\}$ and the ``twist vector'', $\mathbf{k}$.  By
+``reasonable'', we mean to say that we wish the wave functions to have
+the appropriate symmetries and capture the dominant effects of the ion
+positions.  These goals can be achieved by working in a mean-field
+approximation, in which the wave functions can be written as a
+Slater-determinant of single-particle orbitals.
+\begin{equation}
+\Psi_k(\mathbf{R}) = \det \dots
+\end{equation}
+In order to determine the orbitals, $u_\mathbf{k}^n(\mathbf(r))$, we
+expand the functions in a complete basis, which we truncate at an
+appropriate size to retain both accuracy and computational tractability.
+
+For decades, the plane-wave basis has been the physicist's tool of
+choice for small to medium problems.  This basis fits very naturally
+with the periodic simulation cell, is systematically improvable, and
+can be utilized with great efficiency, thanks to the development of
+the Fast Fourier Transform (FFT).  Plane-wave methods are extremely
+mature and well-understood in the condensed matter community.
+
+
+\section{The conjugate gradient method}
+
+\section{Using FFTs}
+
+\section{Results}
+
+
+\end{document}

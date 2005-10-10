@@ -157,8 +157,8 @@ double ConjGrad::CalcPhiCG()
   Phi = Etap + gamma * Phi;
   
   // Orthogonalize to present band
-  Phipp = Phi - conjdot(c, Phi) * c;
-  Phip = Phipp;
+  complex<double> cPhi = conjdot(c,Phi);
+  Phip = Phi - cPhi * c;
   Normalize (Phip);
   Energies(CurrentBand) = E0;
   return residualNorm;
@@ -199,8 +199,9 @@ void ConjGrad::Solve(int band)
 //     double A1=(E0 - E1 + 0.5*sin(2.0*theta1)*dE_dtheta)/(1.0-cos(2.0*theta1));
 //     double B1 = 0.5*dE_dtheta;
 //     double thetaMin = 0.5*atan (B1/A1);
-
-    c = cos(thetaMin)*c + sin(thetaMin)*Phip;
+    double costhetaMin, sinthetaMin;
+    sincos(thetaMin, &sinthetaMin, &costhetaMin);
+    c = costhetaMin*c + sinthetaMin*Phip;
     iter++;
   }
   if (residualNorm > 1.0e-8)

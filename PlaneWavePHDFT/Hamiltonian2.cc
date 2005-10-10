@@ -437,8 +437,38 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
   // Now, muliply by F(r)
   for (int ix=0; ix<nx; ix++)
     for (int iy=0; iy<ny; iy++)
-      for (int iz=0; iz<nz; iz++)
-	VecFFT.rBox(ix,iy,iz) = Fr(ix,iy,iz)*VecFFT.rBox(ix,iy,iz);
+      for (int iz=0; iz<nz; iz++) {
+	register complex<double> vx = VecFFT.rBox(ix,iy,iz)[0];
+	register complex<double> vy = VecFFT.rBox(ix,iy,iz)[1];
+	register complex<double> vz = VecFFT.rBox(ix,iy,iz)[2];
+	register complex<double> Fvx, Fvy, Fvz;
+	Fvx  = Fr(ix,iy,iz)(0,0) * vx;
+	Fvy  = Fr(ix,iy,iz)(1,0) * vx;
+	Fvz  = Fr(ix,iy,iz)(2,0) * vx;
+	Fvx += Fr(ix,iy,iz)(0,1) * vy;
+	Fvy += Fr(ix,iy,iz)(1,1) * vy;
+	Fvz += Fr(ix,iy,iz)(2,1) * vy;
+	Fvx += Fr(ix,iy,iz)(0,2) * vz;
+	Fvy += Fr(ix,iy,iz)(1,2) * vz;
+	Fvz += Fr(ix,iy,iz)(2,2) * vz;
+	VecFFT.rBox(ix,iy,iz) =
+	TinyVector<complex<double>,3>(Fvx,Fvy,Fvz);
+
+//	VecFFT.rBox(ix,iy,iz) = Fr(ix,iy,iz)*VecFFT.rBox(ix,iy,iz);
+
+// 	VecFFT.rBox(ix,iy,iz)[0] = 
+// 	  Fr(ix,iy,iz)(0,0)*VecFFT.rBox(ix,iy,iz)[0] + 
+// 	  Fr(ix,iy,iz)(0,1)*VecFFT.rBox(ix,iy,iz)[1] + 
+// 	  Fr(ix,iy,iz)(0,2)*VecFFT.rBox(ix,iy,iz)[2];
+// 	VecFFT.rBox(ix,iy,iz)[1] = 
+// 	  Fr(ix,iy,iz)(1,0)*VecFFT.rBox(ix,iy,iz)[0] + 
+// 	  Fr(ix,iy,iz)(1,1)*VecFFT.rBox(ix,iy,iz)[1] + 
+// 	  Fr(ix,iy,iz)(1,2)*VecFFT.rBox(ix,iy,iz)[2];
+// 	VecFFT.rBox(ix,iy,iz)[2] = 
+// 	  Fr(ix,iy,iz)(2,0)*VecFFT.rBox(ix,iy,iz)[0] + 
+// 	  Fr(ix,iy,iz)(2,1)*VecFFT.rBox(ix,iy,iz)[1] + 
+// 	  Fr(ix,iy,iz)(2,2)*VecFFT.rBox(ix,iy,iz)[2];
+      }
   // Transform back;
   VecFFT.r2k();
   // Rename for clarity

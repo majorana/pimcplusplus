@@ -20,6 +20,7 @@ typedef Array<cMat3,1> zMatVec;
 #define F77_ZDSCAL F77_FUNC(zdscal,ZDSCAL)
 #define F77_ZDOTC  F77_FUNC(zdotc,ZDOTC)
 #define F77_ZGEMV  F77_FUNC(zgemv,ZGEMV)
+#define F77_ZAXPY  F77_FUNC(zaxpy,ZAXPY)
 
 extern "C" double F77_DZNRM2(const int *N, const void *X, const int *INC);
 extern "C" void   F77_ZDSCAL(const int *N, double *ALPHA, const void *X, 
@@ -32,6 +33,9 @@ extern "C" void   F77_ZGEMV (char *TRANS, const int *M, const int *N,
 			     const int *LDA, const void *X, 
 			     const int *INCX, complex<double> *beta, 
 			     const void *Y, const int *INCY);
+
+extern "C" void   F77_ZAXPY (const int *N, complex<double> *ALPHA,
+			     void *X, int *INCX, void *Y, int *INCY);
 
 inline void Normalize (zVec &c)
 {
@@ -205,6 +209,13 @@ inline void CheckOrthog (const Array<complex<double>,2> &A,
       exit(1);
     }
   }
+}
+
+inline void
+zaxpy (complex<double> alpha, const Array<complex<double>,1> &x,
+       const complex<double> y, Array<complex<double>,1> &axpy)
+{
+
 }
 
 
