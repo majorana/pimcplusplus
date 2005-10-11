@@ -1,3 +1,10 @@
+check_PROGRAMS = TestComm
+
+TestComm_SOURCES = TestComm.cc
+
+AM_CXXFLAGS = $(MPI_CFLAGS) $(MPI_DEF)  $(BLITZ_CFLAGS) 
+LDADD = libcomm.la $(MPI_LIBS) 
+
 noinst_LTLIBRARIES = libcomm.la
 libcomm_la_SOURCES = Communication.cc
 
