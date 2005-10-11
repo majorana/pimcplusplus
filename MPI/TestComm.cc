@@ -34,6 +34,34 @@ bool TestAllGatherRows()
 }
 
 
+bool TestAllGatherVec()
+{
+  CommunicatorClass Comm;
+  Comm.SetWorld();
+
+  int elems = 2*Comm.NumProcs()+1;
+  Array<double,1> vec(elems);
+  vec = 0.0;
+  int currElem = 0;
+  for (int proc=0; proc<Comm.NumProcs(); proc++) {
+    int procElems = elems/Comm.NumProcs() + ((elems%Comm.NumProcs())>proc);
+    if (proc == Comm.MyProc()) {
+      for (int elem=currElem; elem<(currElem+procElems); elem++)
+	  vec(elem) = (double)elem;
+    }
+    currElem += procElems;
+  }
+
+  Comm.AllGatherVec(vec);
+  bool passed = true;
+  for (int elem=0; elem<elems; elem++)
+    passed = passed && 
+      (fabs(vec(elem)-(double)elem) < 1.0e-12);
+
+  return passed;
+}
+
+
 main(int argc, char *argv[])
 {
   COMM::Init(argc, argv);
@@ -43,5 +71,10 @@ main(int argc, char *argv[])
   bool passed = TestAllGatherRows();  
   if (comm.MyProc()==0)
     cerr << "AllGatherRows() check:  " 
+	 << (passed ? "passed." : "failed.") << endl;
+
+  passed = TestAllGatherVec();  
+  if (comm.MyProc()==0)
+    cerr << "AllGatherVec() check:   " 
 	 << (passed ? "passed." : "failed.") << endl;
 }

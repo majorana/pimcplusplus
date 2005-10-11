@@ -105,6 +105,10 @@ public:
   /// and 1 would get 3 rows and proc 2 would get 2 rows.
   void AllGatherRows (Array<complex<double>,2> &mat);
 
+  /// This function uses the same division stragegy as above, but
+  /// gathers single elements, instead.
+  void AllGatherVec (Array<double,1> &vec);
+
   void Split (int color, CommunicatorClass &newComm);
   void Subset (Array<int,1> &ranks, CommunicatorClass &newComm);
 
