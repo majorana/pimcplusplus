@@ -27,6 +27,8 @@ DisplaceMoveClass::Read (IOSectionClass &in)
   assert(in.ReadVar("name",Name));
   Array<string,1> activeSpeciesNames;
 
+  assert(in.ReadVar("NumToMove", NumParticlesToMove));
+
   // Read in the active species.
   assert(in.ReadVar ("ActiveSpecies", activeSpeciesNames));
   Array<int,1> activeSpecies(activeSpeciesNames.size());
@@ -60,6 +62,8 @@ DisplaceMoveClass::Read (IOSectionClass &in)
     
   // Now construct stage list
   Stages.push_back(&DisplaceStage);
+
+  ActiveParticles.resize(NumParticlesToMove);
 }
 
 void
@@ -68,21 +72,35 @@ DisplaceMoveClass::MakeMove ()
   // Move the Join out of the way.
   PathData.MoveJoin (PathData.Path.NumTimeSlices()-1);
 
-  // First, choose particle to move
-  int numActive = 0;
-  for (int i=0; i<ActiveSpecies.size(); i++)
-    numActive += PathData.Path.Species(ActiveSpecies(i)).NumParticles;
-  ActiveParticles.resize(numActive);
-
-
-  int ptclIndex = 0;
-  for (int si=0; si < ActiveSpecies.size(); si++) {
-    SpeciesClass &species = PathData.Path.Species(ActiveSpecies(si));
+  vector<int> ptclList;
+  int numLeft=0;
+  for (int i=0; i<ActiveSpecies.size(); i++) {
+    SpeciesClass &species = PathData.Path.Species(ActiveSpecies(i));
     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
-      ActiveParticles(ptclIndex) = ptcl;
-      ptclIndex++;
+      ptclList.push_back(ptcl);
+      numLeft++;
     }
   }
+  
+  // First, choose particle to move
+  for (int i=0; i<NumParticlesToMove; i++) {
+    int index = PathData.Path.Random.CommonInt(numLeft);
+    vector<int>::iterator iter = ptclList.begin();
+    ActiveParticles(i) = ptclList[index];
+    for (int j=0; j<index; j++)
+      iter++;
+    ptclList.erase(iter);
+    numLeft--;
+  }
+
+//   int ptclIndex = 0;
+//   for (int si=0; si < ActiveSpecies.size(); si++) {
+//     SpeciesClass &species = PathData.Path.Species(ActiveSpecies(si));
+//     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+//       ActiveParticles(ptclIndex) = ptcl;
+//       ptclIndex++;
+//     }
+//   }
   // Next, set timeslices
   Slice1 = 0;
   Slice2 = PathData.Path.NumTimeSlices()-1;
