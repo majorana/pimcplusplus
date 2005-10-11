@@ -16,6 +16,8 @@ AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
 noinst_LTLIBRARIES = libpw.la
 libpw_la_SOURCES = ConjGrad2.h       \
                    ConjGrad2.cc      \
+                   ConjGradMPI.h     \
+                   ConjGradMPI.cc    \
                    FFTBox.h          \
                    FFTBox.cc         \
                    GVecs.h           \

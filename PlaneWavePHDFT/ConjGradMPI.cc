@@ -1,4 +1,4 @@
-#include "ConjGrad2.h"
+#include "ConjGradMPI.h"
 #include "../MatrixOps/MatrixOps.h"
 #include "../MPI/Communication.h"
 
@@ -22,7 +22,11 @@ void ConjGradMPI::Setup()
 
   // Now allocate memory for everything
   Bands.resize (numBands, N);
+  lastPhis.resize(numBands, N);
   Energies.resize(numBands);
+  Residuals.resize(numBands);
+  EtaXiLast.resize(numBands);
+  EtaXiLast = complex<double>(0.0, 0.0);
   cnext.resize (N);
   Hc.resize (N);
   Phi.resize (N);
@@ -101,7 +105,8 @@ void ConjGradMPI::Precondition()
 
 
 // Returns the norm of the residual Hc - Ec
-double ConjGradMPI::CalcPhiCG()
+double 
+ConjGradMPI::CalcPhiCG()
 {
   Hc = 0.0;
   H.Kinetic.Apply (c, Hc);
@@ -125,14 +130,15 @@ double ConjGradMPI::CalcPhiCG()
   // Compute conjugate direction
   complex<double> etaxi = conjdot(Etap, Xip);
   complex<double> gamma; 
-  if (EtaXiLast != complex<double>(0.0, 0.0)) 
-    gamma = etaxi/EtaXiLast;
+  if (EtaXiLast(CurrentBand) != complex<double>(0.0, 0.0)) 
+    gamma = etaxi/EtaXiLast(CurrentBand);
   else
     gamma = 0.0;
-  EtaXiLast = etaxi;
+  EtaXiLast(CurrentBand) = etaxi;
   
-  Phi = Etap + gamma * Phi;
-  
+  Phi = Etap + gamma * lastPhis(CurrentBand,Range::all());
+  lastPhis(CurrentBand,Range::all()) = Phi;
+
   // Orthogonalize to present band
   complex<double> cPhi = conjdot(c,Phi);
   Phip = Phi - cPhi * c;
@@ -141,9 +147,42 @@ double ConjGradMPI::CalcPhiCG()
   return residualNorm;
 }
 
-
-void ConjGradMPI::Solve(int band)
+inline double max (const Array<double,1> &v)
 {
+  double mval = v(0);
+  for (int i=1; i<v.size(); i++)
+    if (v(i) > mval)
+      mval = v(i);
+  return mval;
+}
+
+double
+ConjGradMPI::Iterate()
+{
+  if (!IsSetup)
+    Setup();
+  Orthogonalize(Bands);
+  for (int band=MyFirstBand; band<=MyLastBand; band++) {
+    CurrentBand = band;
+    c.reference     (Bands(band, Range::all()));
+    Residuals(band) = CalcPhiCG();
+    // Now, pick optimal theta for 
+    double dE_dtheta = 2.0*realconjdot(Phip, Hc);
+    H.Apply (Phip, Hc);
+    double d2E_dtheta2 = 2.0*(realconjdot(Phip, Hc) - E0);
+    double thetaMin = 0.5*atan(-dE_dtheta/(0.5*d2E_dtheta2));
+
+    double costhetaMin, sinthetaMin;
+    sincos(thetaMin, &sinthetaMin, &costhetaMin);
+    c = costhetaMin*c + sinthetaMin*Phip;
+  }
+  CollectBands();
+  return max(Residuals);
+}
+
+void ConjGradMPI::Solve()
+{
+  int band = 0;
   CurrentBand = band;
   if (!IsSetup)
     Setup();
@@ -200,4 +239,5 @@ void
 ConjGradMPI::CollectBands()
 {
   Communicator.AllGatherRows(Bands);
+  Communicator.AllGatherVec(Residuals);
 }
