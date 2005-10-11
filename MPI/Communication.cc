@@ -145,7 +145,7 @@ CommunicatorClass::AllGather(void *sendbuf, int sendcount,
 
 void 
 CommunicatorClass::AllGather (Array<double,1> &SendVec, 
-				   Array<double,1> &RecvVec)
+			      Array<double,1> &RecvVec)
 {
   int numProcs = NumProcs();
   assert ((RecvVec.size()/SendVec.size())==numProcs);	
@@ -155,6 +155,35 @@ CommunicatorClass::AllGather (Array<double,1> &SendVec,
   
   AllGather(sendbuf, count, MPI_DOUBLE,
 	    recvbuf, count, MPI_DOUBLE);
+}
+
+void
+CommunicatorClass::AllGatherRows(Array<complex<double>,2> &mat)
+{
+  int numProcs = NumProcs();
+  int myProc   = MyProc();
+  int rows = mat.rows();
+  int cols = mat.cols();
+  int displacements[numProcs];
+  int receiveCounts[numProcs];
+  int sendCount;
+  double *sendbuf, *receivebuf;
+
+  int currRow = 0;
+  for (int proc=0; proc<numProcs; proc++) {
+    int procRows = rows/numProcs + ((rows%numProcs)>proc);
+    displacements[proc] = 2*cols*currRow;
+    receiveCounts[proc] = 2*cols*procRows;
+    if (proc == myProc) {
+      sendbuf = &(mat(currRow,0));
+      sendCount = 2*cols*procRows;
+    }
+    currRow += procRows;
+  }
+  receivebuf = mat.data();
+  MPI_Allgatherv(sendbuf, sendcount, MPI_DOUBLE, receivebuf, receiveCounts,
+		 displacements, MPI_DOUBLE, MPIComm);
+
 }
 
 void 

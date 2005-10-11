@@ -98,6 +98,13 @@ public:
 		 MPI_Datatype recvtype);
   void AllGather (Array<double,1> &SendVec, 
 		  Array<double,1> &RecvVec);
+  /// This function gathers all rows of a matrix to all processors.
+  /// It assumes that each processor receives an equal number of rows,
+  /// with any left over being distributed to the low number
+  /// processors. E.g. If there are 8 rows and 3 processors, procs 0
+  /// and 1 would get 3 rows and proc 2 would get 2 rows.
+  void AllGatherRows (Array<double,2> &mat);
+
   void Split (int color, CommunicatorClass &newComm);
   void Subset (Array<int,1> &ranks, CommunicatorClass &newComm);
 
@@ -186,6 +193,16 @@ public:
   {
     RecvVec = SendVec;
   }
+  /// This function gathers all rows of a matrix to all processors.
+  /// It assumes that each processor receives an equal number of rows,
+  /// with any left over being distributed to the low number
+  /// processors. E.g. If there are 8 rows and 3 processors, procs 0
+  /// and 1 would get 3 rows and proc 2 would get 2 rows.
+  inline void AllGatherRows (Array<double,2> &mat) 
+  {
+    // Do nothing
+  }
+
   inline void Split (int color, CommunicatorClass &newComm)
   {
     // Do nothing
