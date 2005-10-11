@@ -20,6 +20,7 @@ public:
   DisplaceStageClass (PathDataClass &pathData,IOSectionClass &outSection) :
     CommonStageClass (pathData,outSection) 
   {
+    DumpFreq = 20;
     // Do nothing for now.
   }
 };
