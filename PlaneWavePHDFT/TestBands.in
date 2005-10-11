@@ -15,6 +15,6 @@ Array<double,2> kPoints(8,3) = [ 0.0,     0.0,     0.0,
                                  0.0,     0.39255, 0.0 ];
 
 int InterpPoints = 2;
-double kCut = 7.7460;
-
+//double kCut = 7.7460;
+double kCut = 1.5;
 string OutFilename = "TestBands2.dat";

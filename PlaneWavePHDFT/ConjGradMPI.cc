@@ -113,21 +113,22 @@ ConjGradMPI::CalcPhiCG()
   T = realconjdot (c, Hc);
   H.Vion->Apply (c, Hc);
   E0 = realconjdot (c, Hc);
+  // Steepest descent direction: (5.10)
   Xi = E0*c - Hc;
   double residualNorm = norm (Xi);
-  /// Orthonalize to other bands here
+  /// Orthonalize to other bands here (5.12)
   zVec &Xip = Xi;
-  Orthogonalize2 (Bands, Xip, CurrentBand);
+  OrthogExcluding (Bands, Xip, CurrentBand);
 
   Precondition();
 
-  // Now, orthogonalize to all bands
-  // rename for clarity
+  // Now, orthogonalize to all bands, (including present band);
+  // rename for clarity (5.18)
   zVec &Etap = Eta;
-  Orthogonalize2 (Bands, Etap, CurrentBand);
-  // Etap = Eta - conjdot (c, Eta)*c;
+  OrthogExcluding (Bands, Etap, -1);
+  //  Etap = Etap - conjdot (c, Eta)*c;
 
-  // Compute conjugate direction
+  // Compute conjugate direction (5.20)
   complex<double> etaxi = conjdot(Etap, Xip);
   complex<double> gamma; 
   if (EtaXiLast(CurrentBand) != complex<double>(0.0, 0.0)) 
@@ -136,12 +137,14 @@ ConjGradMPI::CalcPhiCG()
     gamma = 0.0;
   EtaXiLast(CurrentBand) = etaxi;
   
+  // (5.19)
   Phi = Etap + gamma * lastPhis(CurrentBand,Range::all());
   lastPhis(CurrentBand,Range::all()) = Phi;
 
-  // Orthogonalize to present band
+  // Orthogonalize to present band: (5.21)
   complex<double> cPhi = conjdot(c,Phi);
   Phip = Phi - cPhi * c;
+  // (5.22)
   Normalize (Phip);
   Energies(CurrentBand) = E0;
   return residualNorm;
@@ -182,39 +185,46 @@ ConjGradMPI::Iterate()
 
 void ConjGradMPI::Solve()
 {
-  int band = 0;
-  CurrentBand = band;
-  if (!IsSetup)
-    Setup();
-  c.reference (Bands(band,Range::all()));
-  EtaXiLast = 0.0;
-  Orthogonalize2 (Bands, c, band-1);
-  Normalize(c);
-
-  double Elast = 1.0e100;
-  double residualNorm = 1.0;
-  //  while (fabs (Elast - Energies(band)) > Tolerance) {
-  int iter=0;
-  while ((residualNorm > 1.0e-8) && (iter < 50)) {
-    Elast = Energies(band);
-    // First, calculate conjugate gradient direction
-    residualNorm = CalcPhiCG();
-    
-    // Now, pick optimal theta for 
-    double dE_dtheta = 2.0*realconjdot(Phip, Hc);
-
-    H.Apply (Phip, Hc);
-    double d2E_dtheta2 = 2.0*(realconjdot(Phip, Hc) - E0);
-    double thetaMin = 0.5*atan(-dE_dtheta/(0.5*d2E_dtheta2));
-
-    double costhetaMin, sinthetaMin;
-    sincos(thetaMin, &sinthetaMin, &costhetaMin);
-    c = costhetaMin*c + sinthetaMin*Phip;
+  int iter = 0;
+  double residual = 1.0;
+  while ((iter < 50) && (residual > 1.0e-8)) {
+    residual = Iterate();
     iter++;
   }
-  if (residualNorm > 1.0e-8)
+
+//   int band = 0;
+//   CurrentBand = band;
+//   if (!IsSetup)
+//     Setup();
+//   c.reference (Bands(band,Range::all()));
+//   EtaXiLast = 0.0;
+//   Orthogonalize2 (Bands, c, band-1);
+//   Normalize(c);
+
+//   double Elast = 1.0e100;
+//   double residualNorm = 1.0;
+//   //  while (fabs (Elast - Energies(band)) > Tolerance) {
+//   int iter=0;
+//   while ((residualNorm > 1.0e-8) && (iter < 50)) {
+//     Elast = Energies(band);
+//     // First, calculate conjugate gradient direction
+//     residualNorm = CalcPhiCG();
+    
+//     // Now, pick optimal theta for 
+//     double dE_dtheta = 2.0*realconjdot(Phip, Hc);
+
+//     H.Apply (Phip, Hc);
+//     double d2E_dtheta2 = 2.0*(realconjdot(Phip, Hc) - E0);
+//     double thetaMin = 0.5*atan(-dE_dtheta/(0.5*d2E_dtheta2));
+
+//     double costhetaMin, sinthetaMin;
+//     sincos(thetaMin, &sinthetaMin, &costhetaMin);
+//     c = costhetaMin*c + sinthetaMin*Phip;
+//     iter++;
+//   }
+  if (residual > 1.0e-8)
     cerr << "Warning:  conjugate gradient residual norm = " 
-	 << residualNorm << endl;
+	 << residual << endl;
   cerr << "# of iterations = " << iter << endl;
 }
 

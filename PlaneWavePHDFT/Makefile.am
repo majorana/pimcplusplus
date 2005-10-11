@@ -1,17 +1,19 @@
-check_PROGRAMS = TestPW2 BandStructure
+check_PROGRAMS = TestPW2 BandStructure MPIBandStructure
 
 TestPW2_SOURCES = TestPW2.cc
 BandStructure_SOURCES = BandStructure.cc BandStructure.h
+MPIBandStructure_SOURCES = MPIBandStructure.cc MPIBandStructure.h
 
 LDADD = libpw.la                 ../IO/libciao.la                         \
         ../FFT/libfft.la       ../PH/libPH.la                             \
         ../MatrixOps/libmatops.la ../Splines/libspline.la                 \
         ../Fitting/libfitting.la ../Integration/libquad.la                \
+        ../MPI/libcomm.la                                                 \
         $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(FFTW3_LIBS) \
-        $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS)
+        $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS)
 
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
-              $(HDF5_CFLAGS)  $(CBLAS_CFLAGS)
+              $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)
 
 noinst_LTLIBRARIES = libpw.la
 libpw_la_SOURCES = ConjGrad2.h       \
@@ -26,6 +28,8 @@ libpw_la_SOURCES = ConjGrad2.h       \
                    Hamiltonian2.cc   \
                    PlaneWaves.h      \
                    PlaneWaves.cc     \
+                   PlaneWavesMPI.h   \
+                   PlaneWavesMPI.cc  \
                    VectorOps.h
 
 #TestXML_SOURCES = TestXML.cc

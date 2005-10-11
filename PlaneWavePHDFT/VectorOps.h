@@ -177,6 +177,26 @@ Orthogonalize2 (Array<complex<double>,2> &A, zVec &x, int lastBand)
 }
 
 inline void
+OrthogExcluding(const Array<complex<double>,2> &A, zVec &x,
+		int excluding)
+{
+  int m = A.rows();
+  int n = A.cols();
+  assert (n == x.size());
+  zVec Ar;
+  complex<double> S[m];
+
+  for (int row=0; row<m; row++) {
+    Ar.reference (A(row,Range::all()));
+    S[row] = conjdot (Ar, x);
+  }
+  for (int row=0; row<m; row++) 
+    if (row != excluding)
+      x -= S[row] * A(row,Range::all());
+}
+
+
+inline void
 Orthogonalize (Array<complex<double>,2> &A)
 {
   zVec x, y;
