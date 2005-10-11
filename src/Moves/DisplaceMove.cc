@@ -27,7 +27,9 @@ DisplaceMoveClass::Read (IOSectionClass &in)
   assert(in.ReadVar("name",Name));
   Array<string,1> activeSpeciesNames;
 
-  assert(in.ReadVar("NumToMove", NumParticlesToMove));
+  int numToMove;
+  assert(in.ReadVar("NumToMove", numToMove));
+  SetNumParticlesToMove(numToMove);
 
   // Read in the active species.
   assert(in.ReadVar ("ActiveSpecies", activeSpeciesNames));
@@ -36,11 +38,11 @@ DisplaceMoveClass::Read (IOSectionClass &in)
     activeSpecies(i) = PathData.Path.SpeciesNum(activeSpeciesNames(i));
   SetActiveSpecies (activeSpecies);
 
-  // Move all particles at the same time.
-  int totalNum = 0;
-  for (int si=0; si<activeSpecies.size(); si++)
-    totalNum += PathData.Path.Species(activeSpecies(si)).NumParticles;
-  SetNumParticlesToMove(totalNum);
+//   // Move all particles at the same time.
+//   int totalNum = 0;
+//   for (int si=0; si<activeSpecies.size(); si++)
+//     totalNum += PathData.Path.Species(activeSpecies(si)).NumParticles;
+//   SetNumParticlesToMove(totalNum);
 
   // Construct action list
   DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
