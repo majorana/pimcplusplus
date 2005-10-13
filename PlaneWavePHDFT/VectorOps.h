@@ -197,6 +197,39 @@ OrthogExcluding(const Array<complex<double>,2> &A, zVec &x,
 
 
 inline void
+OrthogLower(const Array<complex<double>,2> &A, zVec &x,
+	    int currBand)
+{
+  int m = currBand;
+  int n = A.cols();
+  assert (n == x.size());
+  zVec Ar;
+  complex<double> S;
+
+  for (int row=0; row<m; row++) {
+    Ar.reference (A(row,Range::all()));
+    S = conjdot (Ar, x);
+    x -= S * A(row,Range::all());
+  }
+}
+
+
+inline void
+GramSchmidt (Array<complex<double>,2> &A)
+{
+  zVec a, b;
+  for (int i=0; i<A.rows(); i++) {
+    a.reference (A(i,Range::all()));
+    Normalize(a);
+    for (int j=i+1; j<A.rows(); j++) {
+      b.reference(A(j,Range::all()));
+      b = b - (conjdot(a,b)*a);
+      Normalize(b);
+    }
+  }
+}
+
+inline void
 Orthogonalize (Array<complex<double>,2> &A)
 {
   zVec x, y;
@@ -222,10 +255,11 @@ inline void CheckOrthog (const Array<complex<double>,2> &A,
 			 zVec &x)
 {
   zVec Ai;
+  double normInv = 1.0/norm(x);
   for (int i=0; i<A.rows(); i++) {
     Ai.reference (A(i,Range::all()));
-    if (mag(conjdot(Ai, x)) > 1.0e-14) {
-      cerr << "CheckOrthog failed.\n";
+    if (normInv*mag(conjdot(Ai, x)) > 1.0e-13) {
+      cerr << "CheckOrthog failed for i=" << i << ".\n";
       exit(1);
     }
   }

@@ -1,4 +1,5 @@
 #include "PlaneWavesMPI.h"
+#include "../MPI/Communication.h"
 
 void
 MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
@@ -42,10 +43,11 @@ MPISystemClass::SetIons (const Array<Vec3,1> &rions)
 void 
 MPISystemClass::DiagonalizeH ()
 {
-  CG.InitBands();
+  //  CG.InitBands();
   CG.Solve();
-  for (int i=0; i<Bands.rows(); i++) 
-    fprintf (stderr, "Energy(%d) = %15.12f\n", i, CG.Energies(i)* 27.211383);
+  if (Communicator.MyProc()==0)
+    for (int i=0; i<Bands.rows(); i++) 
+      fprintf (stderr, "Energy(%d) = %15.12f\n", i, CG.Energies(i)* 27.211383);
 }
 
 

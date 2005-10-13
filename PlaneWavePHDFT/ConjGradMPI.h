@@ -18,18 +18,20 @@ protected:
   double CalcPhiCG();
   bool IsSetup;
   void Precondition();
-  double T;
+  Array<double,1> T;
   int iter;
   int CurrentBand, LastBand;
   Array<complex<double>,2> &Bands;
-  Array<complex<double>,2> lastPhis;
+  Array<complex<double>,2> SD, lastPhis, Phips, Hcs;
   double Tolerance;
   CommunicatorClass &Communicator;
   /// Returns the maximum residual of all the bands
   double Iterate();
   void CollectBands();
+  void CalcSDs();
   int MyFirstBand, MyLastBand;
   Array<double,1> Residuals;
+  void CheckOverlaps();
 public:
   void Setup();
   Array<double,1> Energies;

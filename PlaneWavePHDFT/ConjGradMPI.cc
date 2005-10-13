@@ -16,13 +16,16 @@ void ConjGradMPI::Setup()
     if (proc==myProc) {
       MyFirstBand = band;
       MyLastBand = band + procBands-1;
-      band += procBands;
     }
+    band += procBands;
   }
 
   // Now allocate memory for everything
   Bands.resize (numBands, N);
+  SD.resize(numBands, N);
   lastPhis.resize(numBands, N);
+  Phips.resize(numBands, N);
+  Hcs.resize(numBands, N);
   Energies.resize(numBands);
   Residuals.resize(numBands);
   EtaXiLast.resize(numBands);
@@ -34,6 +37,7 @@ void ConjGradMPI::Setup()
   Phipp.resize(N);
   Xi.resize(N);
   Eta.resize(N);
+  T.resize(N);
   Bands = 0.0;
   Vec3 kBox = H.GVecs.GetkBox();
   double maxk = max(kBox[0], max(kBox[1], kBox[2]));
@@ -56,7 +60,6 @@ void ConjGradMPI::Setup()
 void ConjGradMPI::InitBands()
 {
   int numBands = Bands.rows();
-  //  int numVecs = 6 * numBands;
   int numVecs = 4 * numBands;
   assert (numVecs <= H.GVecs.size());
   Array<complex<double>,2> Hmat(numVecs, numVecs);
@@ -70,15 +73,22 @@ void ConjGradMPI::InitBands()
     Hmat(i,i) += 0.5 * dot (Gpk,Gpk);
   }
   SymmEigenPairs (Hmat, numBands, EigVals, EigVecs);
-  
-  for (int i=0; i<numBands; i++)
-    cerr << "Mini energy(" << i << ") = " << 27.211383*EigVals(i) << endl;
+
+  if (Communicator.MyProc() == 0)
+    for (int i=0; i<numBands; i++)
+      cerr << "Mini energy(" << i << ") = " << 27.211383*EigVals(i) << endl;
 
   // Now put results in Bands
-  Bands = 0.0;
+  for (int band=0; band<numBands; band++)
+    for (int vec=0; vec<Bands.cols(); vec++)
+      Bands(band,vec) = 0.0;//1.0e-8*drand48();
   for (int band=0; band<numBands; band++) 
     for (int i=0; i<numVecs; i++)
       Bands(band, i) = EigVecs(band, i);
+  //  GramSchmidt(Bands);
+  // We have to broadcast in order to make sure everyone is starting
+  // with the exact same bands.
+  Communicator.Broadcast(0,Bands);
 }
 
 double ConjGradMPI::CalcPhiSD()
@@ -94,7 +104,7 @@ double ConjGradMPI::CalcPhiSD()
 
 void ConjGradMPI::Precondition()
 {
-  double Tinv = 1.0/T;
+  double Tinv = 1.0/T(CurrentBand);
   for (int i=0; i<c.size(); i++) {
     double x = 0.5*dot(H.GVecs(i), H.GVecs(i))*Tinv;
     double num = 27.0 + 18.0*x +12.0*x*x + 8.0*x*x*x;
@@ -104,10 +114,37 @@ void ConjGradMPI::Precondition()
 }
 
 
+void
+ConjGradMPI::CalcSDs()
+{
+  for (int band=MyFirstBand; band<=MyLastBand; band++) {
+    c.reference(Bands(band,Range::all()));
+    Hc.reference(Hcs(band,Range::all()));
+    Hc = 0.0;
+    H.Kinetic.Apply (c, Hc);
+    T(band) = realconjdot (c, Hc);
+    H.Vion->Apply (c, Hc);
+    Energies(band) = realconjdot (c, Hc);
+    // Steepest descent direction: (5.10)
+    SD(band,Range::all()) = E0*c - Hc;
+    zVec tmp;
+    tmp.reference(SD(band,Range::all()));
+    Residuals(band) = norm(tmp);
+  }
+  Communicator.AllGatherRows(SD);
+  Communicator.AllGatherVec(T);
+  Communicator.AllGatherVec(Energies);
+  Communicator.AllGatherVec(Residuals);
+  cerr << "Residuals = " << Residuals << endl;
+  /// Orthogonalize the search directions:
+  //  GramSchmidt(SD);
+}  
+
 // Returns the norm of the residual Hc - Ec
 double 
 ConjGradMPI::CalcPhiCG()
 {
+  //  Hc.reference(Hcs(CurrentBand, Range::all()));
   Hc = 0.0;
   H.Kinetic.Apply (c, Hc);
   T = realconjdot (c, Hc);
@@ -115,17 +152,24 @@ ConjGradMPI::CalcPhiCG()
   E0 = realconjdot (c, Hc);
   // Steepest descent direction: (5.10)
   Xi = E0*c - Hc;
+//   Xi.reference(SD(CurrentBand, Range::all()));
+//   Hc.reference(Hcs(CurrentBand, Range::all()));
   double residualNorm = norm (Xi);
   /// Orthonalize to other bands here (5.12)
   zVec &Xip = Xi;
-  OrthogExcluding (Bands, Xip, CurrentBand);
+  //  OrthogExcluding (Bands, Xip, CurrentBand);
+  OrthogLower (Bands, Xip, CurrentBand);
 
   Precondition();
 
   // Now, orthogonalize to all bands, (including present band);
   // rename for clarity (5.18)
   zVec &Etap = Eta;
-  OrthogExcluding (Bands, Etap, -1);
+  //  OrthogExcluding (Bands, Etap, -1);
+  OrthogLower(Bands, Etap, CurrentBand+1);
+
+//   cerr << "Checking Etap orthog.\n";
+//   CheckOrthog(Bands, Etap);
   //  Etap = Etap - conjdot (c, Eta)*c;
 
   // Compute conjugate direction (5.20)
@@ -135,6 +179,7 @@ ConjGradMPI::CalcPhiCG()
     gamma = etaxi/EtaXiLast(CurrentBand);
   else
     gamma = 0.0;
+
   EtaXiLast(CurrentBand) = etaxi;
   
   // (5.19)
@@ -142,10 +187,18 @@ ConjGradMPI::CalcPhiCG()
   lastPhis(CurrentBand,Range::all()) = Phi;
 
   // Orthogonalize to present band: (5.21)
-  complex<double> cPhi = conjdot(c,Phi);
-  Phip = Phi - cPhi * c;
+  // complex<double> cPhi = conjdot(c,Phi);
+  //   Phip = Phi - cPhi * c;
+  /// Orthogonalize to all bands again.
+  Phip = Phi;
+  //  OrthogExcluding(Bands, Phip, -1);
+  OrthogLower(Bands, Phip, CurrentBand+1);
   // (5.22)
   Normalize (Phip);
+
+//   cerr << "Checking Phip orthog for band " << CurrentBand << endl;
+//   CheckOrthog(Bands,Phip);
+
   Energies(CurrentBand) = E0;
   return residualNorm;
 }
@@ -164,11 +217,23 @@ ConjGradMPI::Iterate()
 {
   if (!IsSetup)
     Setup();
-  Orthogonalize(Bands);
+  //  CalcSDs();
   for (int band=MyFirstBand; band<=MyLastBand; band++) {
     CurrentBand = band;
     c.reference     (Bands(band, Range::all()));
     Residuals(band) = CalcPhiCG();
+//     Phips(band,Range::all()) = Phip;
+//     Hcs(band,Range::all()) = Hc;
+//   }
+
+//   // Now orthogonalize all the Phips
+//   Communicator.AllGatherRows(Phips);
+//   Orthogonalize(Phips);
+
+//   for (int band=MyFirstBand; band<=MyLastBand; band++) {
+//     Hc = Hcs(band,Range::all());
+//     Phip = Phips(band,Range::all());
+//     c.reference     (Bands(band, Range::all()));
     // Now, pick optimal theta for 
     double dE_dtheta = 2.0*realconjdot(Phip, Hc);
     H.Apply (Phip, Hc);
@@ -180,6 +245,9 @@ ConjGradMPI::Iterate()
     c = costhetaMin*c + sinthetaMin*Phip;
   }
   CollectBands();
+  cerr << "Residuals = " << Residuals << endl;
+  GramSchmidt(Bands);
+  CheckOverlaps();
   return max(Residuals);
 }
 
@@ -187,7 +255,8 @@ void ConjGradMPI::Solve()
 {
   int iter = 0;
   double residual = 1.0;
-  while ((iter < 50) && (residual > 1.0e-8)) {
+  while ((iter < 100) && (residual > 1.0e-8)) {
+    //    cerr << "Iteration #" << (iter+1) << endl;
     residual = Iterate();
     iter++;
   }
@@ -244,10 +313,30 @@ ConjGradMPI::PrintOverlaps()
   }
 }
 
+void 
+ConjGradMPI::CheckOverlaps()
+{
+  zVec x, y;
+  for (int i=0; i<Bands.rows(); i++) {
+    x.reference (Bands(i, Range::all()));
+    for (int j=0; j<Bands.rows(); j++) {
+      y.reference (Bands(j,Range::all()));
+      double s = realconjdot(x,y);
+      if (i==j)
+	assert (fabs(s-1.0)<1.0e-12);
+      else
+	if (fabs(s) > 1.0e-12) {
+	  cerr << "Overlap(" << i << "," << j << ") = " << s << endl;
+	  abort();
+	}
+     }
+   }
+}
 
 void
 ConjGradMPI::CollectBands()
 {
   Communicator.AllGatherRows(Bands);
   Communicator.AllGatherVec(Residuals);
+  Communicator.AllGatherVec(Energies);
 }

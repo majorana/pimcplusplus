@@ -54,22 +54,29 @@ MPIBandStructureClass::Read(IOSectionClass &in)
 void
 MPIBandStructureClass::CalcBands()
 {
-  FILE *fout = fopen (OutFilename.c_str(), "w");
-  assert (fout != NULL);
+  FILE *fout;
+  if (Communicator.MyProc()==0) {
+    fout = fopen (OutFilename.c_str(), "w");
+    assert (fout != NULL);
+  }
  
   for (int ki=0; ki<kPoints.size()-1; ki++) 
     for (int i=0; i<InterpPoints; i++) {
       double alpha = (double)i/(double)InterpPoints;
       Vec3 k = (1.0-alpha)*kPoints(ki) + alpha*kPoints(ki+1);
-      fprintf (fout, "%1.6e %1.6e %1.6e ", k[0], k[1], k[2]);
+      if (Communicator.MyProc()==0) 
+	fprintf (fout, "%1.6e %1.6e %1.6e ", k[0], k[1], k[2]);
       System->Setk(k);
       System->DiagonalizeH();
-      for (int band=0; band<NumBands; band++)
-	fprintf (fout, "%1.16e ", System->GetEnergy(band));
-      fprintf (fout, "\n");
-      fflush (fout);
+      if (Communicator.MyProc()==0) {
+	for (int band=0; band<NumBands; band++)
+	  fprintf (fout, "%1.16e ", System->GetEnergy(band));
+	fprintf (fout, "\n");
+	fflush (fout);
+      }
     }
-  fclose(fout);
+  if (Communicator.MyProc()==0)
+    fclose(fout);
 }
 
 
