@@ -17,4 +17,4 @@ Array<double,2> kPoints(8,3) = [ 0.0,     0.0,     0.0,
 int InterpPoints = 4;
 //double kCut = 7.7460;
 double kCut = 4.0;
-string OutFilename = "TestBands.dat";
+string OutFilename = "TestBandsMPI.dat";

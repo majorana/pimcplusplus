@@ -71,7 +71,7 @@ BandStructureClass::CalcBands()
   fclose(fout);
 }
 
-
+#include <time.h>
 main(int argc, char **argv)
 {
   if (argc < 2) {
@@ -79,11 +79,16 @@ main(int argc, char **argv)
     cout << "BandStructure myfile.in\n"; 
   }
   else {
+    clock_t start, end;
+
     IOSectionClass in;
     assert (in.OpenFile(argv[1]));
     BandStructureClass BandStructure;
     BandStructure.Read(in);
     in.CloseFile();
+    start = clock();
     BandStructure.CalcBands();
+    end = clock();
+    cerr << "Time = " << ((double)(end-start)/(double)CLOCKS_PER_SEC) << endl;
   }
 }

@@ -79,6 +79,7 @@ MPIBandStructureClass::CalcBands()
     fclose(fout);
 }
 
+#include <time.h>
 
 main(int argc, char **argv)
 {
@@ -88,11 +89,18 @@ main(int argc, char **argv)
     cout << "BandStructure myfile.in\n"; 
   }
   else {
+  clock_t start, end;
+
+
+
     IOSectionClass in;
     assert (in.OpenFile(argv[1]));
     MPIBandStructureClass BandStructure;
     BandStructure.Read(in);
     in.CloseFile();
+    start = clock();
     BandStructure.CalcBands();
+    end = clock();
+    cerr << "Time = " << ((double)(end-start)/(double)CLOCKS_PER_SEC) << endl;
   }
 }
