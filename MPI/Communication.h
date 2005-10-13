@@ -79,6 +79,7 @@ public:
   void Broadcast (int root, bool &val);
   void Broadcast (int root, double &val);
   void Broadcast (int root, Array<double,1> &buff);
+  void Broadcast (int root, Array<complex<double>,2> &buff);
   void Broadcast (int root, Array<Vec2,1> &buff);
   void Broadcast (int root, Array<Vec3,1> &buff);
   void Broadcast (int root, Array<double,4> &buff);
@@ -197,6 +198,7 @@ public:
   {
     RecvVec = SendVec;
   }
+
   /// This function gathers all rows of a matrix to all processors.
   /// It assumes that each processor receives an equal number of rows,
   /// with any left over being distributed to the low number
@@ -205,6 +207,13 @@ public:
   inline void AllGatherRows (Array<complex<double>,2> &mat) 
   {
     // Do nothing
+  }
+
+  /// This function uses the same division stragegy as above, but
+  /// gathers single elements, instead.
+  void AllGatherVec (Array<double,1> &vec) 
+  {
+    // do nothing
   }
 
   inline void Split (int color, CommunicatorClass &newComm)
@@ -235,6 +244,7 @@ public:
   inline void Broadcast(int root, double &val) {}
   inline void Broadcast(int root, Array<double,1> &buff)
   { /* Do nothing in serial mode */ }
+  void Broadcast (int root, Array<complex<double>,2> &buff) {}
   inline void Broadcast (int root, Array<Vec2,1> &buff)
   { /* Do nothing in serial mode */ }
   inline void Broadcast (int root, Array<Vec3,1> &buff)
