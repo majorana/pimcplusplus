@@ -22,13 +22,12 @@ protected:
   int iter;
   int CurrentBand, LastBand;
   Array<complex<double>,2> &Bands;
-  Array<complex<double>,2> SD, lastPhis, Phips, Hcs;
+  Array<complex<double>,2> lastPhis;
   double Tolerance;
   CommunicatorClass &Communicator;
   /// Returns the maximum residual of all the bands
   double Iterate();
   void CollectBands();
-  void CalcSDs();
   int MyFirstBand, MyLastBand;
   Array<double,1> Residuals;
   void CheckOverlaps();
