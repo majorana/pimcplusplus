@@ -28,6 +28,7 @@ public:
   int Xeffect;
   int Yeffect;
   int Zeffect;
+  Array<TinyVector<int,3>,1> AffectedCells;
   PathClass &Path;
   double CutoffDistance;
   Array<int,1> NumGrid;
@@ -39,6 +40,7 @@ public:
   void BinParticles(int slice);
   void PrintParticles(int slice);
   void FindBox(dVec myPoint,int &x,int &y,int &z);
+  void ReGrid(int slice,int ptcl);
   bool InBox(CellInfoClass &theGrid,dVec thePoint);
 CellMethodClass(PathClass &path) : Path(path){
     CutoffDistance=8.0;

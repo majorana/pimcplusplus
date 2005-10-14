@@ -41,22 +41,84 @@ void CellMethodClass::Init(dVec box,Array<int,1> numGrid)
       }
     }
   }
+  int numAffected=0;
+  for (int xCnt=0;xCnt<numGrid(0);xCnt++){
+    for (int yCnt=0;yCnt<numGrid(1);yCnt++){
+      for (int zCnt=0;zCnt<numGrid(2);zCnt++){
+	if (GridsAffect(GridsArray(xCnt,yCnt,zCnt),GridsArray(0,0,0)))
+	  numAffected++;
+      }
+    }
+  }
+  cerr<<"HELLO! I'M HERE!!!!"<<endl;
+  AffectedCells.resize(numAffected);
+  int onVal=0;
+  for (int xCnt=0;xCnt<numGrid(0);xCnt++){
+    for (int yCnt=0;yCnt<numGrid(1);yCnt++){
+      for (int zCnt=0;zCnt<numGrid(2);zCnt++){
+	if (GridsAffect(GridsArray(xCnt,yCnt,zCnt),GridsArray(0,0,0))){
+	  AffectedCells(onVal)[0]=xCnt;
+	  AffectedCells(onVal)[1]=yCnt;
+	  AffectedCells(onVal)[2]=zCnt;
+	  onVal++;
+	  cerr<<"Affected: "<<xCnt<<" "<<yCnt<<" "<<zCnt<<endl;
+	}
+      }
+    }
+  }
+	
+
+
+
   cerr<<"Ending my initialization"<<endl;
 }
+
+//bool CellMethodClass::GridsAffect(CellInfoClass &grid1,CellInfoClass &grid2)
+//{
+//  dVec diff1=grid1.left-grid2.right;
+//  dVec diff2=grid1.right-grid2.left;
+//  Path.PutInBox(diff1);
+//  Path.PutInBox(diff2);
+//  return (
+//	  (diff1[0]<CutoffDistance || 
+//	   diff1[1]<CutoffDistance ||
+//	   diff1[2]<CutoffDistance ||
+//	   diff2[0]<CutoffDistance ||
+//	   diff2[1]<CutoffDistance ||
+//	   diff2[2]<CutoffDistance)
+//	  );
+//}
+
+double minAbs(double d1, double d2)
+{
+  if (abs(d1)<abs(d2))
+    return d1;
+  else 
+    return d2;
+
+}
+
 bool CellMethodClass::GridsAffect(CellInfoClass &grid1,CellInfoClass &grid2)
 {
+  
   dVec diff1=grid1.left-grid2.right;
   dVec diff2=grid1.right-grid2.left;
   Path.PutInBox(diff1);
   Path.PutInBox(diff2);
-  return (
-	  (diff1[0]<CutoffDistance || 
-	   diff1[1]<CutoffDistance ||
-	   diff1[2]<CutoffDistance ||
-	   diff2[0]<CutoffDistance ||
-	   diff2[1]<CutoffDistance ||
-	   diff2[2]<CutoffDistance)
-	  );
+  //  dVec dA=diff1+Path.GetBox()/2;
+  //  dVec dB=diff2+Path.GetBox()/2;
+  //  cerr<<"dA: "<<dA<<endl;
+  //  cerr<<"dV: "<<dB<<endl;
+  dVec minDisp;
+  minDisp[0]=minAbs(diff1[0],diff2[0]);
+  minDisp[1]=minAbs(diff1[1],diff2[1]);
+  minDisp[2]=minAbs(diff1[2],diff2[2]);
+
+  //  minDisp[0]=min(dA[0],dB[0]);
+  //  minDisp[1]=min(dA[1],dB[1]);
+  //  minDisp[2]=min(dA[2],dB[2]);
+  //  minDisp=minDisp-Path.GetBox()/2;
+  return (sqrt(dot(minDisp,minDisp))<CutoffDistance);
 }
 
 
@@ -74,7 +136,8 @@ void CellMethodClass::BuildNeighborGrids()
 	      //	      cerr<<x2<<" "<<y2<<" "<<z2<<endl;
 	      if (GridsAffect(GridsArray(x,y,z),GridsArray(x2,y2,z2))){
 		//cerr<<"Printing"<<x<<" "<<y<<" "<<z<<endl;
-		GridsArray(x,y,z).NeighborGrids.push_back(&GridsArray(x2,y2,z2));
+		//		GridsArray(x,y,z).NeighborGrids.push_back(&GridsArray(x2,y2,z2));
+		int dummyVar=5;
 	      }
 	    }
 	  }
@@ -98,14 +161,8 @@ bool CellMethodClass::InBox(CellInfoClass &theGrid,dVec thePoint)
 ///This needs to be rewritten to be a reasonable speed!!
 void CellMethodClass::FindBox(dVec myPoint,int &x,int &y,int &z)
 {
-  x=0;
-  y=0;
-  z=0;
-  //  cerr<<"Starting"<<endl;
   Path.PutInBox(myPoint);
-  //  cerr<<myPoint<<endl;
   dVec box=Path.GetBox();
-  //  cerr<<"My box is "<<box<<endl;
   double xStart=-box[0]/2.0;
   double yStart=-box[1]/2.0;
   double zStart=-box[2]/2.0;
@@ -115,7 +172,10 @@ void CellMethodClass::FindBox(dVec myPoint,int &x,int &y,int &z)
   x=(int)floor((myPoint[0]-xStart-0.001)/xSize);
   y=(int)floor((myPoint[1]-yStart-0.001)/ySize);
   z=(int)floor((myPoint[2]-zStart-0.001)/zSize);
-  //  cerr<<"Ending"<<endl;
+  x=x+(x<0);
+  y=y+(y<0);
+  z=z+(z<0);
+
 }
   
 
@@ -127,17 +187,26 @@ void CellMethodClass::BinParticles(int slice)
     for (int y=0;y<NumGrid(1);y++)
       for (int z=0;z<NumGrid(2);z++)
 	GridsArray(x,y,z).Particles(slice).clear();
-  //  cerr<<"My grid is"<<GridsArray.extent(0)<<" "<<GridsArray.extent(1)<<" "<<GridsArray.extent(2)<<endl;
-  //  cerr<<"My grid has size "<<GridsArray(0,0,0).Particles.size()<<" "<<slice<<endl;
   for (int ptcl=0;ptcl<Path.NumParticles();ptcl++){
-    //    cerr<<"about to find box"<<endl;
     FindBox(Path(slice,ptcl),x,y,z);
-    //    cerr<<"I am particle "<<ptcl<<" and have decided to be in grid "<<x<<" "<<y<<" "<<z<<endl;
     GridsArray(x,y,z).Particles(slice).push_back(ptcl);
-    //    cerr<<"And pushed back"<<endl;
   }	    
-  //  cerr<<"Done"<<endl;
 }
+
+void CellMethodClass::ReGrid(int slice,int ptcl)
+{
+
+  int currX,currY,currZ;
+  int newX,newY,newZ;
+  SetMode(OLDMODE);
+  FindBox(Path(slice,ptcl),currX,currY,currZ);
+  SetMode(NEWMODE);
+  FindBox(Path(slice,ptcl),newX,newY,newZ);
+  if (newX!=currX || newY!=currY || newZ!=currZ){
+    GridsArray(currX,currY,currZ).Particles(slice).remove(ptcl);
+    GridsArray(newX,newY,newZ).Particles(slice).push_back(ptcl);
+  }
+} 
 
 void CellMethodClass::PrintParticles(int slice)
 {
@@ -162,9 +231,10 @@ void CellMethodClass::PrintNeighborGrids()
     for (int y=0;y<NumGrid(1);y++){
       for (int z=0;z<NumGrid(2);z++){
 	cerr<<"I am grid: "<<x<<" "<<y<<" "<<z;
-	for (list<CellInfoClass*>::iterator i=GridsArray(x,y,z).NeighborGrids.begin();i!=GridsArray(x,y,z).NeighborGrids.end();i++){
-	  cerr<<(*i)->MyLoc<<endl;
-	}
+	int dummyVar=5;
+	//	for (list<CellInfoClass*>::iterator i=GridsArray(x,y,z).NeighborGrids.begin();i!=GridsArray(x,y,z).NeighborGrids.end();i++){
+	//	  cerr<<(*i)->MyLoc<<endl;
+	//	}
       }
     }
   }
