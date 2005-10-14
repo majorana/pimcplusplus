@@ -32,6 +32,8 @@ libactions_la_SOURCES =            \
     ShortRangeApproximateClass.h   \
     ShortRangeClass.cc             \
     ShortRangeClass.h              \
+    ShortRangeOnClass.h            \
+    ShortRangeOnClass.cc           \
     ShortRangePotClass.cc          \
     ShortRangePotClass.h           \
     StructureReject.cc             \

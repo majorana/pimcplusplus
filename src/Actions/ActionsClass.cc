@@ -320,6 +320,7 @@ ActionsClass::ShiftData (int slicesToShift)
   OpenLoopImportance.ShiftData(slicesToShift);
   StructureReject.ShiftData(slicesToShift);
   ShortRange.ShiftData(slicesToShift);
+  ShortRangeOn.ShiftData(slicesToShift);
   ShortRangeApproximate.ShiftData(slicesToShift);
   LongRange.ShiftData(slicesToShift);
   LongRangeRPA.ShiftData(slicesToShift);
