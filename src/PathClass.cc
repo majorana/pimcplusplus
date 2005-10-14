@@ -1,75 +1,6 @@
 #include "PathClass.h"
 #include "Actions/ActionsClass.h"
 
-void PathClass::ReadOld(string fileName,bool replicate)
-{
-// This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
-  cerr<<"Trying to read old"<<endl;
-  IOSectionClass inFile;
-  assert (inFile.OpenFile(fileName.c_str()));
-  inFile.OpenSection("Observables");
-  inFile.OpenSection("PathDump");
-  Array<double,4> oldPaths; //(58,2560,2,3);
-  
-  assert(inFile.ReadVar("Path",oldPaths));
-  perr << "My paths are of size"  << oldPaths.extent(0) << " "
-       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
-  
-  for (int ptcl=0;ptcl<NumParticles();ptcl++){
-    for (int slice=0; slice<NumTimeSlices(); slice++) {
-      dVec pos;
-      pos = 0.0;
-      for (int dim=0; dim<NDIM; dim++)
-	if (replicate){
-          pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim);
-        }
-        else{
-	  pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim);
-        }
-      Path(slice,ptcl) = pos;
-    }      
-  }
-  inFile.CloseSection();
-  inFile.CloseSection();
-  inFile.CloseFile();
-}
-
-void PathClass::ReadSqueeze(string fileName,bool replicate)
-{
-// This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
-  IOSectionClass inFile;
-  assert (inFile.OpenFile(fileName.c_str()));
-  inFile.OpenSection("System");
-  Array<double,3> oldBox;
-  inFile.ReadVar("Box",oldBox);
-  inFile.CloseSection();
-  inFile.OpenSection("Observables");
-  inFile.OpenSection("PathDump");
-  Array<double,4> oldPaths; //(58,2560,2,3);
-  
-  assert(inFile.ReadVar("Path",oldPaths));
-  perr << "My paths are of size"  << oldPaths.extent(0) << " "
-       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
-  
-  for (int ptcl=0;ptcl<NumParticles();ptcl++){
-    for (int slice=0; slice<NumTimeSlices(); slice++) {
-      dVec pos;
-      pos = 0.0;
-      for (int dim=0; dim<NDIM; dim++)
-	if (replicate){
-          pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim)*(Box[dim]/oldBox(dim));
-        }
-        else{
-	  pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim)*(Box[dim]/oldBox(dim));
-        }
-      cerr<<"I'm putting the slice "<<slice<<" and the ptcl "<<ptcl<<"as "<<Path(slice,ptcl)<<endl;
-      Path(slice,ptcl) = pos;
-    }      
-  }
-  inFile.CloseSection();
-  inFile.CloseSection();
-  inFile.CloseFile();
-}
 
 void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
 			     double &dist, dVec &disp)
@@ -336,6 +267,7 @@ void PathClass::Read (IOSectionClass &inSection)
   }
   else 
     perr << "Using free boundary conditions.\n";
+  inSection.ReadVar("OrderN",OrderN);
   if (!inSection.ReadVar("OpenLoops",OpenPaths))
     OpenPaths=false;
 
@@ -614,24 +546,25 @@ void PathClass::InitPaths (IOSectionClass &in)
     OpenSpeciesNum=SpeciesNum(openSpeciesName);
     InitOpenPaths();
   }  
-  Array<int,1>  numGrid(3);
-  //  numGrid(0)=6*2;
-  //  numGrid(1)=6*2;
-  //  numGrid(2)=5*2;
-  numGrid(0)=10;
-  numGrid(1)=10;
-  numGrid(2)=10;
-  
-  //  Cell=new GridClass(*this);
-  //  Cell.Init(Box,numGrid);
-  // Cell.BuildNeighborGrids();
-  //  cerr<<"I am now printing neighbor grids"<<endl;
-  //  Cell.PrintNeighborGrids();
-  //   for (int slice=0;slice<NumTimeSlices();slice++)
-  //     Cell.BinParticles(slice);
-  //  cerr<<"I have binned them"<<endl;
-  //  Cell.PrintParticles(0);
-
+  if (OrderN){
+    Array<int,1>  numGrid(3);
+    //  numGrid(0)=6*2;
+    //  numGrid(1)=6*2;
+    //  numGrid(2)=5*2;
+    numGrid(0)=10;
+    numGrid(1)=10;
+    numGrid(2)=10;
+    
+    //  Cell=new GridClass(*this);
+    Cell.Init(Box,numGrid);
+    //  Cell.BuildNeighborGrids();
+    //  cerr<<"I am now printing neighbor grids"<<endl;
+    //  Cell.PrintNeighborGrids();
+    for (int slice=0;slice<NumTimeSlices();slice++)
+      Cell.BinParticles(slice);
+    //  cerr<<"I have binned them"<<endl;
+    //Cell.PrintParticles(0);
+  }
   //Everything needs to be accepted
   Path.AcceptCopy();
   Permutation.AcceptCopy();
@@ -1014,8 +947,16 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
     //    Path[OLDMODE](Range(startSlice,endSlice),NumParticles())=
     //      Path[NEWMODE](Range(startSlice,endSlice),NumParticles());
   }
-    
-  
+  //  cerr<<"I am binning from "<<startSlice<<" to "<<endSlice<<endl;
+  if (OrderN){
+    for (int slice=startSlice;slice<=endSlice;slice++){
+      for (int ptclIndex=0;ptclIndex<activeParticles.size();ptclIndex++){
+	int ptcl=activeParticles(ptclIndex);
+	Cell.ReGrid(slice,ptcl);
+	//      Cell.BinParticles(slice);
+      }
+    }
+  }
 }
 
 void PathClass::RejectCopy(int startSlice,int endSlice, 

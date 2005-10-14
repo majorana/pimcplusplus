@@ -6,7 +6,7 @@
 #include "SpeciesClass.h"
 #include <Common/Random/Random.h>
 #include <Common/MPI/Communication.h>
-//#include "GridClass.h"
+#include "GridClass.h"
 class ActionsClass;
 
 
@@ -51,7 +51,7 @@ private:
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
  public:
-  //CellMethodClass Cell;
+  CellMethodClass Cell;
   /// This is the maximum number of k vectors in each direction
   TinyVector<int,NDIM> MaxkIndex;
   /// Stores the radius of the k-space sphere we sum over
@@ -216,6 +216,7 @@ public:
   MirroredClass<int> OpenPtcl;
   MirroredClass<int> OpenLink;
   bool OpenPaths;
+  bool OrderN;
   int OpenSpeciesNum;
   void InitOpenPaths();
   void DistanceToTail();
@@ -338,7 +339,7 @@ inline
 PathClass::PathClass (CommunicatorClass &communicator,
 			     RandomClass &random,
 			     ActionsClass &actions) : 
-  Communicator(communicator), Random(random), Actions(actions)//,Cell(*this)
+  Communicator(communicator), Random(random), Actions(actions),Cell(*this)
 {
   //      NumSpecies = 0;
   TotalNumSlices=0;
@@ -458,16 +459,11 @@ PathClass::DistDisp (int slice, int ptcl1, int ptcl2,
 #endif
 }
 
-
 inline void 
 PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 		     double &distA, double &distB, 
 		     dVec &dispA, dVec &dispB)
 {  
-  //  //  bool changePtcl1=(OpenPaths && sliceB==(int)OpenLink && ptcl1==(int)OpenPtcl);
-  //  //  ptcl1=ptcl1*!changePtcl1+NumParticles()*changePtcl1;
-  //  //  bool changePtcl2=(OpenPaths && sliceB==(int)OpenLink && ptcl2==(int)OpenPtcl);
-  //  //  ptcl2=ptcl2*!changePtcl2+NumParticles()*changePtcl2;
   dispA = Path(sliceA, ptcl2) - Path(sliceA,ptcl1);
   if (OpenPaths && sliceB==(int)OpenLink && ptcl1==(int)OpenPtcl){
     dispB=Path(sliceB,ptcl2)-Path(sliceB,NumParticles());
@@ -478,69 +474,98 @@ PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
   else{
     dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
   }
-  //  dVec tempDispB;
-  //  dVec tempDispBN;
-  //  dVec dispBNew;
-//   cerr << "A1 = " << Path(sliceA,ptcl1) << endl;
-//   cerr << "A2 = " << Path(sliceA,ptcl2) << endl;
-//   cerr << "B1 = " << Path(sliceB,ptcl1) << endl;
-//   cerr << "B2 = " << Path(sliceB,ptcl2) << endl;
-  int m;
   for (int i=0; i<NDIM; i++) {
-    double n = -floor(dispA(i)*BoxInv(i)+0.5);
+    double n = -nearbyint(dispA(i)*BoxInv(i));
     dispA(i) += n*IsPeriodic(i)*Box(i);
-//     double m = -floor(dispB(i)*BoxInv(i)+0.5);
-//     dispB(i) += m*IsPeriodic(i)*Box(i);
-    double mNew=-floor((dispA(i)-dispB(i))*BoxInv(i)+0.5);
+    double mNew=-nearbyint((dispA(i)-dispB(i))*BoxInv(i));
     dispB(i)-= mNew*IsPeriodic(i)*Box(i);
-//     // HACK HACK HACK
-//     m=0;
-//     tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
-//     tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
-//     while (fabs(dispA(i)-tempDispB(i))>Box(i)/2.0 &&
-// 	   fabs(dispA(i)-tempDispBN(i))>Box(i)/2.0){
-//       m=m+1;
-//       tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
-//       tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
-//     }
-//     if (fabs(dispA(i)-tempDispB(i))<=Box(i)/2.0)
-//       dispB(i)=tempDispB(i);
-//     else if (fabs(dispA(i)-tempDispBN(i))<=Box(i)/2.0)
-//       dispB(i)=tempDispBN(i);
-//     else cerr<<"ERROR! ERROR! ERROR!"<<endl;
-//     if (fabs(dispBNew(i)-dispB(i))>1e-12){
-//       cerr<<"dispBNew and dispB are not the same!\n";
-//     }
-//     //    double m = -floor(dispB(i)*BoxInv(i)+0.5);
-//     //    dispB(i) += m*IsPeriodic(i)*Box(i);
-//     //    cerr << "n = " << n << endl;
   }
-//   cerr << "dispA = " << dispA << endl;
-//   cerr << "dispB = " << dispB << endl;
   distA = sqrt(dot(dispA,dispA));
   distB = sqrt(dot(dispB,dispB));
-
-#ifdef GARBAGEDEBUG
-  dVec DBdispA = Path(sliceA, ptcl2) -Path(sliceA, ptcl1);
-  dVec DBdispB = Path(sliceB, ptcl2) -Path(sliceB, ptcl1);
-  for (int i=0; i<NDIM; i++) {
-    while (DBdispA(i) > 0.5*Box(i)) 
-      DBdispA(i) -= Box(i);
-    while (DBdispA(i) < -0.5*Box(i)) 
-      DBdispA(i) += Box(i);
-    while ((DBdispB(i)-DBdispA(i)) > 0.5*Box(i))
-      DBdispB -= Box(i);
-    while ((DBdispB(i)-DBdispA(i)) < -0.5*Box(i))
-      DBdispB += Box(i);
-  }
-//   cerr << "DBdispA = " << DBdispA << endl;
-//   cerr << "DBdispB = " << DBdispB << endl;
-  for (int i=0; i<NDIM; i++) {
-    assert (fabs(DBdispA(i)-dispA(i)) < 1.0e-12);
-    assert (fabs(DBdispB(i)-dispB(i)) < 1.0e-12);
-  }
-#endif
 }
+
+// inline void 
+// PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
+// 		     double &distA, double &distB, 
+// 		     dVec &dispA, dVec &dispB)
+// {  
+//   //  //  bool changePtcl1=(OpenPaths && sliceB==(int)OpenLink && ptcl1==(int)OpenPtcl);
+//   //  //  ptcl1=ptcl1*!changePtcl1+NumParticles()*changePtcl1;
+//   //  //  bool changePtcl2=(OpenPaths && sliceB==(int)OpenLink && ptcl2==(int)OpenPtcl);
+//   //  //  ptcl2=ptcl2*!changePtcl2+NumParticles()*changePtcl2;
+//   dispA = Path(sliceA, ptcl2) - Path(sliceA,ptcl1);
+//   if (OpenPaths && sliceB==(int)OpenLink && ptcl1==(int)OpenPtcl){
+//     dispB=Path(sliceB,ptcl2)-Path(sliceB,NumParticles());
+//   }
+//   else if (OpenPaths && sliceB==(int)OpenLink && ptcl2==(int)OpenPtcl){
+//     dispB=Path(sliceB,NumParticles())-Path(sliceB,ptcl1);
+//   }
+//   else{
+//     dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
+//   }
+//   //  dVec tempDispB;
+//   //  dVec tempDispBN;
+//   //  dVec dispBNew;
+// //   cerr << "A1 = " << Path(sliceA,ptcl1) << endl;
+// //   cerr << "A2 = " << Path(sliceA,ptcl2) << endl;
+// //   cerr << "B1 = " << Path(sliceB,ptcl1) << endl;
+// //   cerr << "B2 = " << Path(sliceB,ptcl2) << endl;
+//   int m;
+//   for (int i=0; i<NDIM; i++) {
+//     double n = -floor(dispA(i)*BoxInv(i)+0.5);
+//     dispA(i) += n*IsPeriodic(i)*Box(i);
+// //     double m = -floor(dispB(i)*BoxInv(i)+0.5);
+// //     dispB(i) += m*IsPeriodic(i)*Box(i);
+//     double mNew=-floor((dispA(i)-dispB(i))*BoxInv(i)+0.5);
+//     dispB(i)-= mNew*IsPeriodic(i)*Box(i);
+// //     // HACK HACK HACK
+// //     m=0;
+// //     tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
+// //     tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
+// //     while (fabs(dispA(i)-tempDispB(i))>Box(i)/2.0 &&
+// // 	   fabs(dispA(i)-tempDispBN(i))>Box(i)/2.0){
+// //       m=m+1;
+// //       tempDispB(i) = dispB(i)+m*IsPeriodic(i)*Box(i);
+// //       tempDispBN(i)=dispB(i)-m*IsPeriodic(i)*Box(i);
+// //     }
+// //     if (fabs(dispA(i)-tempDispB(i))<=Box(i)/2.0)
+// //       dispB(i)=tempDispB(i);
+// //     else if (fabs(dispA(i)-tempDispBN(i))<=Box(i)/2.0)
+// //       dispB(i)=tempDispBN(i);
+// //     else cerr<<"ERROR! ERROR! ERROR!"<<endl;
+// //     if (fabs(dispBNew(i)-dispB(i))>1e-12){
+// //       cerr<<"dispBNew and dispB are not the same!\n";
+// //     }
+// //     //    double m = -floor(dispB(i)*BoxInv(i)+0.5);
+// //     //    dispB(i) += m*IsPeriodic(i)*Box(i);
+// //     //    cerr << "n = " << n << endl;
+//   }
+// //   cerr << "dispA = " << dispA << endl;
+// //   cerr << "dispB = " << dispB << endl;
+//   distA = sqrt(dot(dispA,dispA));
+//   distB = sqrt(dot(dispB,dispB));
+
+// #ifdef GARBAGEDEBUG
+//   dVec DBdispA = Path(sliceA, ptcl2) -Path(sliceA, ptcl1);
+//   dVec DBdispB = Path(sliceB, ptcl2) -Path(sliceB, ptcl1);
+//   for (int i=0; i<NDIM; i++) {
+//     while (DBdispA(i) > 0.5*Box(i)) 
+//       DBdispA(i) -= Box(i);
+//     while (DBdispA(i) < -0.5*Box(i)) 
+//       DBdispA(i) += Box(i);
+//     while ((DBdispB(i)-DBdispA(i)) > 0.5*Box(i))
+//       DBdispB -= Box(i);
+//     while ((DBdispB(i)-DBdispA(i)) < -0.5*Box(i))
+//       DBdispB += Box(i);
+//   }
+// //   cerr << "DBdispA = " << DBdispA << endl;
+// //   cerr << "DBdispB = " << DBdispB << endl;
+//   for (int i=0; i<NDIM; i++) {
+//     assert (fabs(DBdispA(i)-dispA(i)) < 1.0e-12);
+//     assert (fabs(DBdispB(i)-dispB(i)) < 1.0e-12);
+//   }
+// #endif
+// }
 
 inline dVec 
 PathClass::Velocity (int sliceA, int sliceB, int ptcl)
