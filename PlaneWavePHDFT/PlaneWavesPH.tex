@@ -121,19 +121,23 @@ masses, however, the pseudo-kinetic energy operator is not diagonal in
 reciporical space.  With the appropriate use of FFTs, however, its
 application can be done in $\mathcal{O}(N \ln N)$ operators, just as
 the potential, but with a significantly larger prefactor.  Applying
-$\mathbf{F}$ to a vector $\mathbf{c}$ can be accomplished through the
-following steps:
+the pseudo-kinetic operator, $\hat{K}^\text{PH} \equiv \frac{1}{2}
+(\vk + \vG) \cdot F(\vG-\vG')\cdot (\vk+\vGp)$ to a vector
+$\mathbf{c}$ can be accomplished through the following steps:
 \begin{enumerate}
-\item Compute the $F(\vG-\vGp)$ tensor in reciporical space.
-\item FFT the tensor into real space.
-\item Multiply each element, $c_\mathbf{G}$ by $(\vk + \vG)$, yielding
+\item Compute the $F(\vG-\vGp)$ tensor in reciporical space. \label{computeF}
+\item FFT the tensor into real space. \label{FFTF}
+\item Multiply each element, $c_\mathbf{G}$ by $(\vk + \vGp)$, yielding
   a $3\times N$ component vector.
 \item FFT to real space.  Call this $(\nabla c)(\vr)$.
 \item Apply the $3\times 3$ tensor $F(\vr)$ to $(\nabla c)(\vr)$.
 \item Inverse FFT back into reciporical space.  Call this
   $(\mathbf{F}c)_\vG$.
-\item Finally dot with $\frac{1}{2}(\vk + \vGp)$.
+\item Finally dot with $\frac{1}{2}(\vk + \vG)$ to yield
+  $(\hat{K}^\text{PH} \mathbf{c})_\vG$. 
 \end{enumerate}
+Note that steps \ref{computeF} and \ref{FFTF} need only done each time
+the ion positions or $\vk$-point are changed.
 
 
 \subsection{Parallelization}
