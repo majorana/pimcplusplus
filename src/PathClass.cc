@@ -267,6 +267,7 @@ void PathClass::Read (IOSectionClass &inSection)
   }
   else 
     perr << "Using free boundary conditions.\n";
+  OrderN=false;
   inSection.ReadVar("OrderN",OrderN);
   if (!inSection.ReadVar("OpenLoops",OpenPaths))
     OpenPaths=false;
