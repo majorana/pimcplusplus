@@ -4,6 +4,8 @@ libobservables_la_CXXFLAGS = $(COMMON_CFLAGS)
 libobservables_la_SOURCES  =     \
     Angular.h                    \
     Angular.cc                   \
+    AngularMomCor.h              \
+    AngularMomCor.cc             \
     AutoCorr.cc                  \
     AutoCorr.h                   \
     Coupling.cc                  \
@@ -21,6 +23,10 @@ libobservables_la_SOURCES  =     \
     ObservableModifiedEnergy.h   \
     PathDump.cc                  \
     PathDump.h                   \
+    PermutationCount.h           \
+    PermutationCount.cc          \
+    SuperfluiDrop.h              \
+    SuperfluiDrop.cc             \
     StructureFactor.cc           \
     StructureFactor.h            \
     Time.cc                      \
