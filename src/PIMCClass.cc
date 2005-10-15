@@ -142,6 +142,16 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection(theObserveName);
       tempObs = new nofrClass(PathData,OutFile);
     }
+    else if (theObserveType=="AngularMomentumCorrelation"){
+      if (iAmRoot)
+	OutFile.NewSection("AngularMomentumCorrelation");
+      tempObs = new AngularMomCor(PathData,OutFile);
+    }
+    else if (theObserveType=="DropletSuperfluidity"){
+      if (iAmRoot)
+	OutFile.NewSection("DropletSuperfluidity");
+      tempObs = new SuperfluiDrop(PathData,OutFile);
+    }
     else if (theObserveType=="Vacancy"){
       assert(in.ReadVar("Name",theObserveName));
       if (iAmRoot)
@@ -208,6 +218,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       if (iAmRoot)
 	OutFile.NewSection("Vacancy");
       tempObs=new VacancyLocClass(PathData,OutFile);
+    }
+    else if (theObserveType=="CycleCount"){
+      if (iAmRoot)
+	OutFile.NewSection("CycleCount");
+      tempObs=new PermutationCountClass(PathData,OutFile);
     }
     else if (theObserveType=="StructureFactor"){
       if (iAmRoot)
@@ -301,6 +316,11 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     else if (MoveType=="BisectionSphereBlock"){
       moveName="BisectionSphereBlock";
       Moves(counter)=new BisectionSphereBlockClass(PathData,OutFile);
+      Moves(counter)->Read(in);
+    }
+    else if (MoveType=="CenterDroplet"){
+      moveName="CenterDroplet";
+      Moves(counter)=new CenterDropletClass(PathData,OutFile);
       Moves(counter)->Read(in);
     }
     //    else if (MoveType=="StructureReject"){
