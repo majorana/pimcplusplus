@@ -1,6 +1,7 @@
 #ifndef ACTIONS_CLASS_H
 #define ACTIONS_CLASS_H
 #include "ShortRangeClass.h"
+#include "ShortRangeOnClass.h"
 #include "ShortRangeApproximateClass.h"
 #include "LongRangeClass.h"
 #include "LongRangeRPAClass.h"
@@ -43,6 +44,7 @@ public:
   /// pair action in the case of short-range potententials.  The
   /// short-range action is summed in real space. 
   ShortRangeClass ShortRange;
+  ShortRangeOnClass ShortRangeOn;
   ShortRangeApproximateClass ShortRangeApproximate;
 
   /// The long range part of the action, which is summed in k-space.  
@@ -117,6 +119,7 @@ public:
 
   ActionsClass(PathDataClass &pathData) : 
     ShortRange(pathData,PairMatrix),
+    ShortRangeOn(pathData,PairMatrix),
     ShortRangeApproximate(pathData,PairMatrix),
     ShortRangePot(pathData, PairMatrix),
     LongRange(pathData,PairMatrix,PairArray), 
