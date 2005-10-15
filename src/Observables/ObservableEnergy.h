@@ -8,10 +8,10 @@ class EnergyClass : public ObservableClass
 
 private:
   double TotalSum, KineticSum, dUShortSum, dULongSum, NodeSum, 
-    VShortSum, VLongSum; //, TIP5PSum;
+    VShortSum, VLongSum, TotalActionSum; //, TIP5PSum;
 
   ObservableDouble TotalVar, KineticVar, dUShortVar, dULongVar, NodeVar,
-    VShortVar, VLongVar; //, TIP5PVar;
+    VShortVar, VLongVar, TotalActionVar; //, TIP5PVar;
 
   int NumSamples;
   int TimesCalled;
@@ -30,7 +30,8 @@ public:
       dULongVar ("dULong", IOSection,myPathData.Path.Communicator), 
       NodeVar   ("Node",   IOSection,myPathData.Path.Communicator), 
       VShortVar ("VShort",IOSection,myPathData.Path.Communicator), 
-      VLongVar  ("VLong",IOSection,myPathData.Path.Communicator)
+      VLongVar  ("VLong",IOSection,myPathData.Path.Communicator),
+      TotalActionVar ("TotalAction",IOSection,myPathData.Path.Communicator)
     //      TIP5PVar  ("TIP5P",IOSection,myPathData.Path.Communicator)
   {
     TotalSum   = 0.0;
@@ -40,6 +41,7 @@ public:
     NodeSum    = 0.0;
     VShortSum  = 0.0;
     VLongSum   = 0.0;
+    TotalActionSum = 0.0;
     NumSamples = 0;
     TimesCalled=0;
     //    TIP5PSum = 0;

@@ -30,6 +30,11 @@ void EnergyClass::Accumulate()
   NodeSum    += node;
   VShortSum  += vShort;
   VLongSum   += vLong;
+
+  double kAction, uShortAction, uLongAction, nodeAction;
+  PathData.Actions.GetActions(kAction, uShortAction, uLongAction, nodeAction);
+  TotalActionSum += (kAction + uShortAction + uLongAction + nodeAction);
+
   //  TIP5PSum   += tip5p;
 }
 
@@ -94,19 +99,21 @@ void EnergyClass::WriteBlock()
   NodeVar.Write(PathData.Path.Communicator.Sum(NodeSum)*norm);
   VShortVar.Write(PathData.Path.Communicator.Sum(VShortSum)*norm);
   VLongVar.Write(PathData.Path.Communicator.Sum(VLongSum)*norm);
+  TotalActionVar.Write(PathData.Path.Communicator.Sum(TotalActionSum)*norm);
   //  TIP5PVar.Write(PathData.Path.Communicator.Sum(TIP5PSum)*norm);
 
   //  cerr << "Total " << TotalSum*norm << " and per molecule: " << TotalSum*norm/PathData.Path.numMol << endl;
   //  cerr << "Kinetic " << KineticSum*norm << " and per molecule: " << KineticSum*norm/PathData.Path.numMol << endl;
   //  cerr << "TIP5P " << TIP5PSum*norm << " and per molecule: " << TIP5PSum*norm/PathData.Path.numMol << endl;
   
-  TotalSum   = 0.0;
-  KineticSum = 0.0;
-  dUShortSum = 0.0;
-  dULongSum  = 0.0;
-  NodeSum    = 0.0;
-  VShortSum  = 0.0;
-  VLongSum   = 0.0;
+  TotalSum       = 0.0;
+  KineticSum     = 0.0;
+  dUShortSum     = 0.0;
+  dULongSum      = 0.0;
+  NodeSum        = 0.0;
+  VShortSum      = 0.0;
+  VLongSum       = 0.0;
+  TotalActionSum = 0.0;
   //  TIP5PSum   = 0.0;
   NumSamples = 0;
 }

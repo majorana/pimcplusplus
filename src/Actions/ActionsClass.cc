@@ -217,6 +217,34 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
 }
 
 
+
+void
+ActionsClass::GetActions (double& kinetic, double &UShort, double &ULong, 
+			  double &node)
+{
+  Array<int,1> activePtcls(PathData.Path.NumParticles());
+  for (int i=0; i<PathData.Path.NumParticles(); i++)
+    activePtcls(i) = i;
+  
+  int M = PathData.Path.NumTimeSlices()-1;
+  kinetic = Kinetic.Action (0, M, activePtcls, 0);
+  UShort = ShortRange.Action (0, M, activePtcls, 0);
+  ULong=0.0;
+  if (PathData.Path.LongRange){
+    if (UseRPA)
+      ULong = LongRangeRPA.Action (0, M, activePtcls, 0);
+    else if (PathData.Path.DavidLongRange)
+      ULong = DavidLongRange.Action(0,M, activePtcls, 0);
+    else
+      ULong = LongRange.Action (0, M, activePtcls, 0);
+  }
+  node = 0.0;
+  for (int species=0; species<PathData.Path.NumSpecies(); species++)
+    if (NodalActions(species) != NULL)
+      node += NodalActions(species)->Action(0, M, activePtcls, 0);
+}
+
+
 //   PathClass &Path = PathData.Path;
 //   for (int link=0; link<Path.NumTimeSlices()-1; link++) {    
 //     for (int ptcl1=0; ptcl1<numPtcls; ptcl1++) {
