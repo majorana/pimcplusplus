@@ -10,6 +10,8 @@ AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF)
 
 pimc___SOURCES =          \
     EventClass.h          \
+    InitPaths.cc          \
+    GridClass.cc          \
     Main.cc               \
     MirroredClass.cc      \
     MirroredClass.h       \
