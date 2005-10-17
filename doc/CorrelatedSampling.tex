@@ -1,0 +1,113 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Correlated sampling for action differences with PIMC}
+\author{K.P. Esler and B.K. Clark}
+
+\newcommand{\vR}{\mathbf{R}}
+\newcommand{\vr}{\mathbf{r}}
+
+\begin{document}
+\maketitle
+\section{Motivation}
+We wish to be able to ion configurations by averaging over electron
+paths with the penalty method.  In order to do this, we need to be
+able to estimate the action difference between two configurations of
+the ions, $\vR_A$ and $\vR_B$, with the electronic degrees of freedom
+integrated out.  In order for this method to be effe
+
+\section{Sampling probability}
+It is, in general, impossible to select the optimal importance
+sampling function without an {\em a priori} knowledge of the
+respective partition functions for the electronic system,
+$Z_\text{elec}(\mathbf{R})$ as a function of the ion positions.
+However, we can select a nearly optimal importance function that has
+the desired properties.  Let $S_A$ and $S_B$ represent the imaginary
+time action for the systems as with respective ion postions $\vR_A$
+and $\vR_B$.
+\begin{equation}
+p^* = e^{-S_A} + e^{-S_B}
+\end{equation}
+
+\subsection{Time slice parallelization}
+Let us now consider the quantity we will use in determining whether to
+accept or reject a change in the electron paths,
+\begin{equation}
+\frac{p^*_\text{new}}{p^*_\text{old}} = 
+\frac{e^{S_A^\text{new}} + e^{S_B^\text{new}}}{e^{S_A^\text{old}} +
+  e^{S_B^\text{old}}}.
+\end{equation}
+
+Now, consider splitting our paths over several processors, such that
+each processor holds several time slices.  In a usual PIMC simulation,
+most moves may be made independently on each processor, since this
+acceptance ratio may be factorized as a product of ratios calculated
+from the portion of the path on each processor.  Since we now have a
+sum of exponentials, we cannot make this factorization, and hence now
+move can be exclusively ``local'' to a single processor.  We can,
+however, reduce the communication overhead that would be incurred by
+doing a naive global move in which we have to perform a collective sum
+over all processors at every stage of bisection.
+
+In order to see how, let us then define new quantities,
+\begin{eqnarray}
+\bar{S} & \equiv & \frac{S_A + S_B}{2} \\
+\Delta S & \equiv & \frac{S_A - S_B}{2} 
+\end{eqnarray}
+Then, we may rewrite
+\begin{equation}
+p^* = e^{-\bar{S}}\left(e^{-\Delta S} + e^{+\Delta S} \right)
+\end{equation}
+Consider now that the action $S_A$ may be given by summing over the
+actions, $S_A^i$, from processors 1 through $N$.  
+\begin{equation}
+S_A = \sum_{i=1}^N S_A^i,
+\end{equation}
+and similarly for $S_B$.  Then, our probability ratio may be written
+as
+\begin{equation}
+\frac{p_*^\text{new}}{p_*^\text{old}} = 
+\frac{\exp \left[-\sum_{i=1}^{N} \bar{S}^\text{new}_i \right]}
+{\exp \left[-\sum_{i=1}^{N} \bar{S}^\text{old}_i \right]}
+\left[
+\frac{\exp \left(-\sum_{i=1}^N \Delta S_i^\text{new} \right) +
+\exp \left(+\sum_{i=1}^N \Delta S_i^\text{new} \right)}
+{\exp \left(-\sum_{i=1}^N \Delta S_i^\text{old} \right)+
+\exp \left(+\sum_{i=1}^N \Delta S_i^\text{old} \right)} \right]
+\end{equation}
+We first note that we have factored the acceptance ratio into two
+pieces, one involving the $\bar{S}$'s and one involving the $\Delta
+S$'s. This factorization implies we can separate those pieces into two
+acceptance stages -- first accept or reject based on the $\bar{S}$'s.
+If we accept, we go on to accept or reject based on the $\Delta S$'s.
+Furthermore, we note that the $\bar{S}$ stage may be further
+factorized by processor:
+\begin{equation}
+\frac{\exp \left[-\sum_{i=1}^{N} \bar{S}^\text{new}_i \right]}
+{\exp \left[-\sum_{i=1}^{N} \bar{S}^\text{old}_i \right]} =
+\prod_{i=1}^N \exp \left[ \bar{S}_i^\text{old} - \bar{S}_i^\text{new}\right]
+\end{equation}
+This factorization implies that we may make the decision about whether
+to accept the partial move on each processor independently.
+Considered in the context of the multistage bisection move, each
+processor begins at the highest bisection level.  At each level, each
+processor may continue to the next bisection level, or ``opt out'' of
+the collective move.  Once we get to the final bisection stage, we
+must do a collective communication, summing the action changes on all
+the processors that have made it to this stage.  Finally, we accept or
+reject the move globally for all the processors simultaneously.  This
+algorithm can be seen schematically in ...
+
+This scheme has the advantages that it avoid collective communication
+at each stage.  Futhermore, it prevents very unfavorable bisections
+(such as those in which electrons overlap) from causing a global
+rejection of the move.
+
+
+
+
+\section{Twist averaging}
+
+
+
+
+\end{document}
