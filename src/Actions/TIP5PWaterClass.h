@@ -11,8 +11,8 @@ class TIP5PWaterClass : public ActionBaseClass
 {
 public:
   void Read (IOSectionClass &in);
-  double Action (int slice1, int slice2, 
-		 const Array<int,1> &activeParticles, int level);
+  double SingleAction (int slice1, int slice2, 
+		       const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
   double OOSeparation (int slice,int ptcl1,int ptcl2);
   double RotationalKinetic(int startSlice, int endSlice, const Array<int,1> &activeParticles,int level);

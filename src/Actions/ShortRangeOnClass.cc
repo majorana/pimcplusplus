@@ -16,9 +16,10 @@ ShortRangeOnClass::ShortRangeOnClass(PathDataClass &pathData,
 {
 }
 
-double ShortRangeOnClass::Action (int slice1, int slice2,
-				const Array<int,1> &changedParticles,
-				int level)
+double 
+ShortRangeOnClass::SingleAction (int slice1, int slice2,
+				 const Array<int,1> &changedParticles,
+				 int level)
 {
   PathClass &Path=PathData.Path;
   int xEffect=Path.Cell.Xeffect;

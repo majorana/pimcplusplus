@@ -457,7 +457,9 @@ def ProcessScalarSection(infiles,doc,currNum):
      infiles.CloseSection() # sectionName2
      if (infiles.OpenSection("Actions")):
           print 'Found Actions'
+          haveBands = False
           if (infiles.OpenSection("NodalActions")):
+               haveBands = True
                print 'Found NodalActions'
                procScalarTable.body[0].append("Band")
                nodeIndex = 0;
@@ -475,9 +477,10 @@ def ProcessScalarSection(infiles,doc,currNum):
                     infiles.CloseSection() # NodalAction
                infiles.CloseSection() # NodalActions
           infiles.CloseSection() # Actions
-          for procNum in range(0,len(BandEnergies)):
-               print "procNum = " + repr(procNum)
-               procScalarTable.body[procNum+1].append(repr(BandEnergies[procNum]))
+          if (haveBands):
+               for procNum in range(0,len(BandEnergies)):
+                    print "procNum = " + repr(procNum)
+                    procScalarTable.body[procNum+1].append(repr(BandEnergies[procNum]))
                
      infiles.OpenSection(sectionName2)
      infiles.OpenSection(sectionName)
@@ -689,11 +692,13 @@ for counter in range(0,numSections):
      infiles.CloseSection()
 infiles.CloseSection() # "Observables"
 
-if (infiles.CountSections2("LongRangeAction") > 0):
-     infiles.OpenSection("LongRangeAction")
-     LRsection = ProcessLongRangeAction (infiles)
-     doc.append(LRsection)
-     infiles.CloseSection() # "LongRangeAction"
+if (infiles.OpenSection("Actions")):
+     if (infiles.CountSections2("LongRangeAction") > 0):
+          infiles.OpenSection("LongRangeAction")
+          LRsection = ProcessLongRangeAction (infiles)
+          doc.append(LRsection)
+          infiles.CloseSection() # "LongRangeAction"
+     infiles.CloseSection()
 
 
 

@@ -471,44 +471,44 @@ FixedPhaseClass::Det (int slice, int speciesNum)
 bool
 FixedPhaseActionClass::IsPositive (int slice)
 {
-  return FixedPhase.IsPositive(slice, SpeciesNum);
+  if (PathData.Path.GetConfig() == 0)
+    return FixedPhaseA.IsPositive(slice, SpeciesNum);
+  else
+    return FixedPhaseB.IsPositive(slice, SpeciesNum);
 }
 
 complex<double>
 FixedPhaseActionClass::Det (int slice)
 {
-  return FixedPhase.Det(slice, SpeciesNum);
+  if (PathData.Path.GetConfig() == 0)
+    return FixedPhaseA.Det(slice, SpeciesNum);
+  else
+    return FixedPhaseB.Det(slice, SpeciesNum);
 }
 
-// Array<double,2>
-// FixedPhaseActionClass::GetMatrix (int slice)
-// {
-//   return FixedPhase.GetMatrix(slice, SpeciesNum);
-//}
-
 double
-FixedPhaseActionClass::Action (int slice1, int slice2, 
-			       const Array<int,1> &activeParticles,
-			       int level)
+FixedPhaseActionClass::SingleAction (int slice1, int slice2, 
+				     const Array<int,1> &activeParticles,
+				     int level)
 {
-  double action = FixedPhase.Action (slice1, slice2, activeParticles, level,
-				     SpeciesNum);
-  return action;
+  if (PathData.Path.GetConfig() == 0)
+    return FixedPhaseA.Action (slice1, slice2, activeParticles, level, SpeciesNum);
+  else
+    return FixedPhaseB.Action (slice1, slice2, activeParticles, level, SpeciesNum);
 }
 
 double
 FixedPhaseActionClass::d_dBeta(int slice1, int slice2, int level)
 {
-  return FixedPhase.d_dBeta (slice1, slice2, level, SpeciesNum);
+  if (PathData.Path.GetConfig() == 0)
+    return FixedPhaseA.d_dBeta (slice1, slice2, level, SpeciesNum);
+  else
+    return FixedPhaseB.d_dBeta (slice1, slice2, level, SpeciesNum);
 }
 
 void FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
 {
   if ((speciesNum == UpSpeciesNum) || (speciesNum==DownSpeciesNum)) {
-//     if (speciesNum == UpSpeciesNum) 
-//       perr << "Shifting up species by " << slicesToShift << endl;
-//     if (speciesNum == DownSpeciesNum) 
-//       perr << "Shifting down species by " << slicesToShift << endl;
     Mirrored1DClass<double>& grad2 =
       ((speciesNum==UpSpeciesNum) ? UpGrad2 : DownGrad2);
     CommunicatorClass &comm = Path.Communicator;
@@ -596,19 +596,22 @@ FixedPhaseClass::RejectCopy (int slice1, int slice2)
 void
 FixedPhaseActionClass::ShiftData (int slices2Shift)
 {
-  FixedPhase.ShiftData (slices2Shift, SpeciesNum);
+  FixedPhaseA.ShiftData (slices2Shift, SpeciesNum);
+  FixedPhaseB.ShiftData (slices2Shift, SpeciesNum);
 }
 
 void
 FixedPhaseActionClass::AcceptCopy (int slice1, int slice2)
 {
-  FixedPhase.AcceptCopy (slice1, slice2);
+  FixedPhaseA.AcceptCopy (slice1, slice2);
+  FixedPhaseB.AcceptCopy (slice1, slice2);
 }
 
 void
 FixedPhaseActionClass::RejectCopy (int slice1, int slice2)
 {
-  FixedPhase.RejectCopy (slice1, slice2);
+  FixedPhaseA.RejectCopy (slice1, slice2);
+  FixedPhaseB.RejectCopy (slice1, slice2);
 }
 
 
@@ -636,7 +639,8 @@ FixedPhaseClass::Init(int speciesNum)
 void 
 FixedPhaseActionClass::Init()
 {
-  FixedPhase.Init (SpeciesNum);
+  FixedPhaseA.Init (SpeciesNum);
+  FixedPhaseB.Init (SpeciesNum);
 }
 
 bool
@@ -660,10 +664,10 @@ FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
   outkVec(0) = Getk()[0];  outkVec(1) = Getk()[1];  outkVec(2) = Getk()[2];
   out.WriteVar ("kVec", outkVec);
   double energy = 0.0;
-  if ((SpeciesNum==FixedPhase.UpSpeciesNum) || (SpeciesNum == FixedPhase.DownSpeciesNum))
-    for (int i=0; i<FixedPhase.System->GetNumBands(); i++) {
-      cerr << "Band Energy = " << FixedPhase.System->GetEnergy(i) << endl;
-      energy += FixedPhase.System->GetEnergy(i);
+  if ((SpeciesNum==FixedPhaseA.UpSpeciesNum) || (SpeciesNum == FixedPhaseA.DownSpeciesNum))
+    for (int i=0; i<FixedPhaseA.System->GetNumBands(); i++) {
+      cerr << "Band Energy = " << FixedPhaseA.System->GetEnergy(i) << endl;
+      energy += FixedPhaseA.System->GetEnergy(i);
     }
   out.WriteVar ("Energy", energy);
 //   int nx = FixedPhase.BandSplines.Nx;
@@ -701,8 +705,20 @@ FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
 void
 FixedPhaseActionClass::Setk(Vec3 k)
 {
-  FixedPhase.Setk(k);
+  FixedPhaseA.Setk(k);
+  FixedPhaseB.Setk(k);
 }
+
+
+double 
+FixedPhaseActionClass::CalcGrad2 (int slice) 
+{ 
+  if (PathData.Path.GetConfig() == 0)
+    return FixedPhaseA.CalcGrad2(slice, SpeciesNum); 
+  else
+    return FixedPhaseB.CalcGrad2(slice, SpeciesNum); 
+}
+
 
 void
 FixedPhaseClass::Setk(Vec3 k)

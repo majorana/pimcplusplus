@@ -12,6 +12,8 @@ libmoves_la_SOURCES  =            \
     BisectionStageSphereClass.h  \
     CenterDroplet.h              \
     CenterDroplet.cc             \
+    CorrelatedBisectionBlock.cc  \
+    CorrelatedBisectionBlock.h   \
     CoupledPermuteStageClass.cc  \
     CoupledPermuteStageClass.h   \
     CouplingMove.cc              \

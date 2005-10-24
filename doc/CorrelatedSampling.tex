@@ -1,5 +1,7 @@
 \documentclass{article}
 \usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
 \title{Correlated sampling for action differences with PIMC}
 \author{K.P. Esler and B.K. Clark}
 
@@ -88,6 +90,7 @@ factorized by processor:
 \end{equation}
 This factorization implies that we may make the decision about whether
 to accept the partial move on each processor independently.
+
 Considered in the context of the multistage bisection move, each
 processor begins at the highest bisection level.  At each level, each
 processor may continue to the next bisection level, or ``opt out'' of
@@ -96,6 +99,29 @@ must do a collective communication, summing the action changes on all
 the processors that have made it to this stage.  Finally, we accept or
 reject the move globally for all the processors simultaneously.  This
 algorithm can be seen schematically in ...
+
+\begin{algorithm}
+\caption{Modified correlated bisection algorithm}
+\begin{algorithmic}
+\STATE level $\leftarrow$ highest level
+\WHILE{(NOT rejected) AND (bisection level $>0$)}
+  \STATE Construct new path at this level
+  \STATE Calculate new and old level actions given by $\bar{S}_i$, 
+  where $i$ is my processor number.  Do not include nodal action in
+  calculation.
+  \STATE Accept or reject local level move.
+  \STATE level $\leftarrow$ level-1
+\ENDWHILE
+
+\IF{ accepted at level 1 }
+  \STATE Send my change in $\Delta S$ to collective sum.
+  \STATE Accept or reject whole move globally based on collective sums.
+\ELSE
+  \STATE Send 0 to collective sum for change in $\Delta S$.
+\ENDIF
+
+\end{algorithmic}
+\end{algorithm}
 
 This scheme has the advantages that it avoid collective communication
 at each stage.  Futhermore, it prevents very unfavorable bisections

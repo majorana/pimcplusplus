@@ -62,13 +62,13 @@ public:
 class FixedPhaseActionClass : public NodalActionClass
 {
 private:
-  FixedPhaseClass &FixedPhase;
+  FixedPhaseClass &FixedPhaseA, &FixedPhaseB;
   int SpeciesNum;
 public:
-  inline double CalcGrad2 (int slice) 
-  { return FixedPhase.CalcGrad2(slice, SpeciesNum); }
-  double Action (int slice1, int slice2,
-		 const Array<int,1> &activeParticles, int level);
+  double CalcGrad2 (int slice);
+
+  double SingleAction (int slice1, int slice2,
+		       const Array<int,1> &activeParticles, int level);
   
   double d_dBeta(int slice1, int slice2, int level);
 
@@ -91,12 +91,13 @@ public:
 
   /// Sets the k-vector or "twist angle"
   void Setk (Vec3 k);
-  inline Vec3 Getk() { return FixedPhase.Getk(); }
+  inline Vec3 Getk() { return FixedPhaseA.Getk(); }
   void WriteInfo (IOSectionClass &out);
 
-  FixedPhaseActionClass (PathDataClass &pathData, FixedPhaseClass &FP,
+  FixedPhaseActionClass (PathDataClass &pathData, 
+			 FixedPhaseClass &FPA, FixedPhaseClass &FPB,
 			 int speciesNum) :
-    FixedPhase(FP), NodalActionClass (pathData), SpeciesNum(speciesNum)
+    FixedPhaseA(FPA), FixedPhaseB(FPB), NodalActionClass (pathData), SpeciesNum(speciesNum)
   {
     
   }

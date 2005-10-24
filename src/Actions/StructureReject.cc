@@ -55,8 +55,10 @@ StructureRejectClass::StructureRejectClass(PathDataClass &pathData ) :
 {
 }
 
-double StructureRejectClass::Action (int slice1, int slice2,
-			     const Array<int,1> &changedParticles, int level)
+double 
+StructureRejectClass::SingleAction (int slice1, int slice2,
+				    const Array<int,1> &changedParticles, 
+				    int level)
 {
   Array<dVec,1> &kVecs = PathData.Path.kVecs;
   TotalCounts++;

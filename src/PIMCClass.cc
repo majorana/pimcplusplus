@@ -308,6 +308,11 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)=new BisectionBlockClass(PathData,OutFile);
       Moves(counter)->Read(in); 
     }
+    else if (MoveType=="CorrelatedBisectionBlock"){
+      moveName="CorrelatedBisectionBlock";
+      Moves(counter)=new CorrelatedBisectionBlockClass(PathData,OutFile);
+      Moves(counter)->Read(in); 
+    }
     else if (MoveType=="CouplingMove"){
       moveName="CouplingMove";
       Moves(counter)=new CouplingMoveClass(PathData,OutFile);

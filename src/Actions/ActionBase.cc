@@ -1,7 +1,8 @@
 #include "ActionBase.h"
 #include "../PathDataClass.h"
 
-void ActionBaseClass::Read (IOSectionClass &in)
+void 
+ActionBaseClass::Read (IOSectionClass &in)
 {
   // Do nothing for now
 }
@@ -12,7 +13,8 @@ ActionBaseClass::ActionBaseClass(PathDataClass &pathData) :
   /* Do nothing */
 }
 
-void ActionBaseClass::ShiftData (int slicesToShift)
+void 
+ActionBaseClass::ShiftData (int slicesToShift)
 {
   // Do nothing 
 }
@@ -23,3 +25,23 @@ PotentialBaseClass::PotentialBaseClass(PathDataClass &pathData) :
   /* Do nothing */
 }
 
+double
+ActionBaseClass::Action(int slice1, int slice2,
+			const Array<int,1> &activeParticles, int level)
+{
+//   if (PathData.UseCorrelatedSampling()) {
+//     if (level == 0) {
+//       cerr << "Action should not be called at level 0 with "
+// 	   << "correlated sampling on.\n";  
+//       abort();
+//     }
+//     double actionA, actionB;
+//     PathData.SetIonConfig(0);
+//     actionA = SingleAction(slice1, slice2, activeParticles, level);
+//     PathData.SetIonConfig(1);
+//     actionB = SingleAction(slice1, slice2, activeParticles, level);
+//     return 0.5*(actionA + actionB);
+//   }
+//   else 
+    return SingleAction(slice1, slice2, activeParticles, level);
+}

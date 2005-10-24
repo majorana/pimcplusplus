@@ -231,6 +231,23 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 //   fclose(fout);
 }
 
+void
+PathClass::SetIonConfig(int config)
+{
+  ConfigNum = config;
+  int first = Species(IonSpecies).FirstPtcl;
+  
+  SetMode(OLDMODE);
+  for (int ptcl=0; ptcl<IonConfigs[config].size(); ptcl++) 
+    for (int slice=0; slice<NumTimeSlices(); slice++)
+      SetPos(slice, ptcl+first, IonConfigs[config](ptcl));
+
+  SetMode(NEWMODE);
+  for (int ptcl=0; ptcl<IonConfigs[config].size(); ptcl++) 
+    for (int slice=0; slice<NumTimeSlices(); slice++)
+      SetPos(slice, ptcl+first, IonConfigs[config](ptcl));
+}
+
 void PathClass::Read (IOSectionClass &inSection)
 {
   SetMode (NEWMODE);
@@ -293,6 +310,33 @@ void PathClass::Read (IOSectionClass &inSection)
   inSection.CloseSection(); // Particles
   // Now actually allocate the path
   Allocate();
+
+
+  /// Read to see if we are using correlated sampling
+  string ionSpecies;
+  if (inSection.ReadVar ("IonSpecies", ionSpecies)) {
+    CorrelatedSampling = true;
+    IonSpecies = SpeciesNum(ionSpecies);
+    assert(IonSpecies!=-1);
+    Array<double,2> ionConfigA, ionConfigB;
+    assert(inSection.ReadVar("IonConfigA", ionConfigA));
+    assert(inSection.ReadVar("IonConfigB", ionConfigB));
+    assert(ionConfigA.extent(0) == ionConfigB.extent(0));
+    assert(ionConfigA.extent(1) == NDIM);
+    assert(ionConfigB.extent(1) == NDIM);
+    IonConfigs[0].resize(ionConfigA.extent(0));
+    IonConfigs[1].resize(ionConfigB.extent(0));
+    for (int i=0; i<ionConfigA.extent(0); i++)
+      for (int j=0; j<3; j++) {
+	IonConfigs[0](i)[j] = ionConfigA(i,j);
+	IonConfigs[1](i)[j] = ionConfigB(i,j);
+      }
+    cerr << "IonConfigs[0] = " << IonConfigs[0] << endl;
+    cerr << "IonConfigs[1] = " << IonConfigs[1] << endl;
+    SetIonConfig(0);
+  }
+
+
 }
 
 /// This function initializes the paths depending on how they are

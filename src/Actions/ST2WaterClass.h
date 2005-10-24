@@ -11,8 +11,8 @@ class ST2WaterClass : public ActionBaseClass
 {
 public:
   void Read (IOSectionClass &in);
-  double Action (int slice1, int slice2, 
-		 const Array<int,1> &activeParticles, int level);
+  double SingleAction (int slice1, int slice2, 
+		       const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
   double EField (Array<int,1> &activeMol, int startSlice, int endSlice,  int level);
   void EFieldVec (int molIndex, dVec &Efield, double &Emag, int slice, int level);

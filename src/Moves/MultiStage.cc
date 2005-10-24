@@ -123,11 +123,13 @@ void MultiStageClass::MakeMove()
   bool toAccept=true;
   list<StageClass*>::iterator stageIter=Stages.begin();
   double prevActionChange=0.0;
+
   while (stageIter!=Stages.end() && toAccept){
     toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 				     ActiveParticles,prevActionChange);
     stageIter++;
   }
+
   if (toAccept)
     Accept();
   else 

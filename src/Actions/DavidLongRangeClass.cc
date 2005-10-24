@@ -42,13 +42,14 @@ inline double mag2 (const complex<double> &z)
 }
 
 
-///Calculates the long range part of the action using David's breakup.
-///The short range part must be supplied as a dm file without the long
-///range part in it.  It ignores active particles.
-double DavidLongRangeClass::Action (int slice1, int slice2, 
-	       const Array<int,1> &activeParticles, int level)
+/// Calculates the long range part of the action using David's breakup.
+/// The short range part must be supplied as a dm file without the long
+/// range part in it.  It ignores active particles.
+double 
+DavidLongRangeClass::SingleAction (int slice1, int slice2, 
+				   const Array<int,1> &activeParticles, 
+				   int level)
 {
-  //  cerr<<"My level is "<<level<<endl;
   double total=0;
   double factor;
   for (int slice=slice1;slice<=slice2;slice++){
@@ -56,7 +57,6 @@ double DavidLongRangeClass::Action (int slice1, int slice2,
       factor = 0.5;
     else
       factor = 1.0;
-    //    cerr<<"Starting loop\n";
     for (int species=0; species<Path.NumSpecies(); species++) {
       Path.CalcRho_ks_Fast(slice,species);
       //      PairActionFitClass &pa = *PairMatrix(species,species);
@@ -69,19 +69,11 @@ double DavidLongRangeClass::Action (int slice1, int slice2,
 	while (abs(kmagnitude-Path.MagK(kcounter))>1e-10)
 	  kcounter++;
 	assert(kcounter<Path.MagK.size());
-	////	cerr<<"K counter is "<<kcounter<<" "<<Path.MagKint(kcounter)<<endl;
-	//	cerr<<"My ki is "<<ki<<endl;
-	//	cerr<<"The spot I'm acessing is "<<Path.MagKint(ki)<<endl;
-	//	cerr<<"The value of this spot is "<<uk(Path.MagKint(ki))<<endl;
 	total +=  factor*rhok2 * uk(Path.MagKint(kcounter));
 	
       }
     }
-    //    cerr<<"Ending loop";
   }
-  //  cerr<<"I am being called"<<endl;
-  //  cerr<<"My total is "<<total;
-
   return total;
 
 }

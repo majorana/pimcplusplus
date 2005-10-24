@@ -687,9 +687,10 @@ double FreeNodalActionClass::SimpleAction (int startSlice, int endSlice,
 }
 
 
-double FreeNodalActionClass::Action (int startSlice, int endSlice,
-				     const Array<int,1> &changePtcls, 
-				     int level)
+double 
+FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
+				    const Array<int,1> &changePtcls, 
+				    int level)
 { 
   /// HACK HACK HACK HACK
   startSlice = 0;

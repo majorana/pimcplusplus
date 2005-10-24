@@ -7,6 +7,7 @@
 #include <Common/Random/Random.h>
 #include <Common/MPI/Communication.h>
 #include "GridClass.h"
+#include <vector>
 class ActionsClass;
 
 
@@ -204,6 +205,34 @@ public:
   friend void SetupPathZincBlend(PathClass &path);
   friend void SetupPathSimpleCubic(PathClass &path);
 
+
+  ///////////////////////////////////////////////////////////////////
+  ///                     Correlated Sampling                      // 
+  ///////////////////////////////////////////////////////////////////
+protected:
+  /// Specifies which configuration we are using for correlated sampling.
+  int ConfigNum;
+  /// Specifies which species is the ion species for correlated
+  /// sampling
+  int IonSpecies;
+  bool CorrelatedSampling;
+public:
+  /// This function returns whether or not we are using correlated
+  /// sampling. 
+  bool UseCorrelatedSampling() { return CorrelatedSampling; }
+
+  /// HACK:  this should really copy the ion positions into the
+  /// appropriate place in the path.
+  void SetIonConfig (int config);
+  
+  inline int GetConfig ()
+  { return ConfigNum; }
+
+  /// Specifies the two ionic configurations for correlated sampling
+  TinyVector<Array<dVec,1>,2> IonConfigs;
+  vector<double> ActionA, WeightA, ActionB, WeightB;
+
+
   //////////////////////////
   /// Fermions           ///
   //////////////////////////
@@ -339,7 +368,8 @@ inline
 PathClass::PathClass (CommunicatorClass &communicator,
 			     RandomClass &random,
 			     ActionsClass &actions) : 
-  Communicator(communicator), Random(random), Actions(actions),Cell(*this)
+  Communicator(communicator), Random(random), Actions(actions),Cell(*this),
+  CorrelatedSampling(false), ConfigNum(0)
 {
   //      NumSpecies = 0;
   TotalNumSlices=0;

@@ -21,9 +21,20 @@ public:
   /// positions.  The level is used in bisection moves in which, at
   /// higher levels, we skip 2^level intervening time slices, building
   /// up a new path in a recursive style.
+  virtual double SingleAction(int slice1, int slice2,
+			      const Array<int,1> &activeParticles,
+			      int level) = 0;
+
+  /// This is the main function that gets called.  It simply returns
+  /// SingleAction if we are not using correlated sampling.  If we are
+  /// using correlated sampling, it returns the average of the actions
+  /// for the A and B configurations.  At level 0, we must do
+  /// something special, so Action should not be called with
+  /// Correlated sampling on and level = 0;  Note that this is
+  /// virtual, so that the nodal classes can override.
   virtual double Action(int slice1, int slice2,
 			const Array<int,1> &activeParticles,
-			int level) = 0;
+			int level);
 
   /// This function returns the \f$\beta\f$-derivative of the above
   /// function.  Since we are interested in total energy, it does not

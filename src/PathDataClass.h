@@ -22,6 +22,7 @@ private:
   /// These store the time of start and the maximum wall time in seconds.
   int StartWallTime, MaxWallTime;
   int GetWallTime();
+
 public:  
   int Seed;
   /// This defines a communicator for the group of processors working
@@ -35,6 +36,11 @@ public:
   CommunicatorClass WorldComm;
   RandomClass Random;
 
+
+
+  ///////////////////////////////////////////////////////////////////
+  ///                        Wall Time Data                        // 
+  ///////////////////////////////////////////////////////////////////  
   /// This function returns true if we have exceeded the maximum wall
   /// time.
   void SetMaxWallTime(int maxWallTime);
@@ -65,8 +71,7 @@ public:
   void MoveRefSlice (int absSlice);
 
   /// Returns the number of time slices.
-  inline int NumTimeSlices()
-  {  return Path.NumTimeSlices();  }
+  inline int NumTimeSlices() {  return Path.NumTimeSlices();  }
 
   /// Do all copies necessary to accept a move.
   inline void AcceptMove(int startTimeSlice,int endTimeSlice,
@@ -77,21 +82,14 @@ public:
 			 const Array <int,1> &activeParticles);
 		  
   /// Returns the number of particle species in the path
-  inline int NumSpecies(){
-    return Path.NumSpecies();
-  }
+  inline int NumSpecies(){ return Path.NumSpecies();  }
 
   /// Returns the total number of particles
-  inline int NumParticles(){
-    return Path.NumParticles();
-  }
+  inline int NumParticles(){ return Path.NumParticles(); }
 
 
   /// Returns a reference to the SpeciesClass object of number species
-  inline SpeciesClass& Species(int species){
-    return Path.Species(species);
-  }
-
+  inline SpeciesClass& Species(int species){ return Path.Species(species); }
 
   inline int SpeciesNum(string speciesName);
 
@@ -116,6 +114,7 @@ public:
   PathDataClass() : 
     /* Action(*this), */Actions(*this), Random(WorldComm), 
 			Path(IntraComm,Random, Actions), MaxWallTime(-1)
+		
   { 
     Join = 1; 
     StartWallTime = GetWallTime();
@@ -124,9 +123,9 @@ public:
 
 };
  
-inline int PathDataClass::SpeciesNum(string name)
+inline int 
+PathDataClass::SpeciesNum(string name)
 {
-
   for (int spec=0;spec<NumSpecies();spec++){
     if (Species(spec).Name==name){
       return spec;
@@ -135,15 +134,17 @@ inline int PathDataClass::SpeciesNum(string name)
   return -1;
 }
 
-inline void PathDataClass::AcceptMove(int startTimeSlice,int endTimeSlice,
-			       const Array <int,1> &activeParticles)
+inline void 
+PathDataClass::AcceptMove(int startTimeSlice,int endTimeSlice,
+			  const Array <int,1> &activeParticles)
 {
   Actions.AcceptCopy (startTimeSlice, endTimeSlice, activeParticles);
   Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
 }
 
-inline void PathDataClass::RejectMove(int startTimeSlice,int endTimeSlice,
-			       const Array <int,1> &activeParticles)
+inline void 
+PathDataClass::RejectMove(int startTimeSlice,int endTimeSlice,
+			  const Array <int,1> &activeParticles)
 {
   Actions.RejectCopy (startTimeSlice, endTimeSlice, activeParticles);
   Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticles); 

@@ -13,10 +13,11 @@ KineticSphereClass::KineticSphereClass(PathDataClass &pathData ) :
 {
 }
 
-double KineticSphereClass::Action (int slice1, int slice2,
-			     const Array<int,1> &changedParticles, int level)
+double 
+KineticSphereClass::SingleAction (int slice1, int slice2,
+				  const Array<int,1> &changedParticles, 
+				  int level)
 {
-  //  cerr<<"I am in the action"<<endl;
   double TotalK = 0.0;
   Array<double,1> KineticVal(PathData.Path.NumTimeSlices());
   KineticVal=0.0;

@@ -525,9 +525,9 @@ GroundStateNodalActionClass::Det (int slice)
 // }
 
 double
-GroundStateNodalActionClass::Action (int slice1, int slice2, 
-				     const Array<int,1> &activeParticles,
-				     int level)
+GroundStateNodalActionClass::SingleAction (int slice1, int slice2, 
+					   const Array<int,1> &activeParticles,
+					   int level)
 {
   double action = GroundState.Action (slice1, slice2, activeParticles, level,
 				      SpeciesNum);

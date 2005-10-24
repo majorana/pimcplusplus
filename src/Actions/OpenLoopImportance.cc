@@ -51,8 +51,10 @@ OpenLoopImportanceClass::OpenLoopImportanceClass(PathDataClass &pathData ) :
 {
 }
 
-double OpenLoopImportanceClass::Action (int slice1, int slice2,
-			     const Array<int,1> &changedParticles, int level)
+double 
+OpenLoopImportanceClass::SingleAction (int slice1, int slice2,
+				       const Array<int,1> &changedParticles, 
+				       int level)
 {
   //    if (PathData.Path.Communicator.MyProc()==1)
   //    cerr<<"Into importance action"<<endl;

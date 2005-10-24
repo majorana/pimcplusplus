@@ -15,9 +15,10 @@ ShortRangeApproximateClass::ShortRangeApproximateClass(PathDataClass &pathData,
 {
 }
 
-double ShortRangeApproximateClass::Action (int slice1, int slice2,
-					const Array<int,1> &changedParticles,
-					   int level)
+double 
+ShortRangeApproximateClass::SingleAction (int slice1, int slice2,
+					  const Array<int,1> &changedParticles,
+					  int level)
 {
   PathClass &Path=PathData.Path;
   // First, sum the pair actions

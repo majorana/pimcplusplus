@@ -33,8 +33,8 @@ public:
   bool UseBackground;
   void Init(IOSectionClass &in, IOSectionClass &out);
   void Read (IOSectionClass &in);
-  double Action (int slice1, int slice2, 
-		   const Array<int,1> &activeParticles, int level);
+  double SingleAction (int slice1, int slice2, 
+		       const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2,  int level);
   LongRangeClass (PathDataClass &pathData,
 		  Array<PairActionFitClass*, 2> &pairMatrix,

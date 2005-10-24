@@ -254,9 +254,10 @@ inline double mag2 (const complex<double> &z)
   return (z.real()*z.real() + z.imag()*z.imag());
 }
 
-double LongRangeClass::Action (int slice1, int slice2,
-			       const Array<int,1> &changedParticles,
-			       int level)
+double 
+LongRangeClass::SingleAction (int slice1, int slice2,
+			      const Array<int,1> &changedParticles,
+			      int level)
 {
   double homo = 0.0;
   double hetero = 0.0;

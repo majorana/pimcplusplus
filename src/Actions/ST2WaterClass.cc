@@ -10,7 +10,7 @@ ST2WaterClass::ST2WaterClass (PathDataClass &pathData) :
   //Do  nothing for now
 }
 
-double ST2WaterClass::Action (int startSlice, int endSlice, 
+double ST2WaterClass::SingleAction (int startSlice, int endSlice, 
 	       const Array<int,1> &activeParticles, int level)
 {
 //  cerr << "I'm calculating the Action" << endl;

@@ -17,8 +17,9 @@ bool TIP5PWaterClass::dVecsEqual(dVec u,dVec v){
 }
 
 
-double TIP5PWaterClass::Action (int startSlice, int endSlice, 
-	       const Array<int,1> &activeParticles, int level)
+double 
+TIP5PWaterClass::SingleAction (int startSlice, int endSlice, 
+			       const Array<int,1> &activeParticles, int level)
 {
 //  cerr << "I'm calculating the Action" << endl;
   for (int counter=0;counter<Path.DoPtcl.size();counter++){

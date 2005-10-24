@@ -26,6 +26,7 @@ void PathDataClass::Read (IOSectionClass &in)
   bool haveSeed = in.ReadVar ("Seed", seed);
   // Now, set up random number generator
 
+
   //  int seed;
   if (in.ReadVar("seed",Seed)){
     Random.Init (Seed, numClones);
@@ -100,3 +101,4 @@ PathDataClass::SetMaxWallTime(int maxWallTime)
 {
   MaxWallTime = maxWallTime;
 }
+

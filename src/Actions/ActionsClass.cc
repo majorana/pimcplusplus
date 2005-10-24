@@ -169,17 +169,21 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 	(PathData, groundState, groundState.IonSpeciesNum);
     }
     else if (type == "FIXEDPHASE") {
-      FixedPhaseClass &fixedPhase = *new FixedPhaseClass(PathData);
-      fixedPhase.Read (in);
-      NodalActions(fixedPhase.UpSpeciesNum) = 
+      FixedPhaseClass &fixedPhaseA = *new FixedPhaseClass(PathData);
+      fixedPhaseA.Read (in);
+      FixedPhaseClass &fixedPhaseB = 
+	PathData.Path.UseCorrelatedSampling() ? *new FixedPhaseClass(PathData) : fixedPhaseA;
+      if (PathData.Path.UseCorrelatedSampling())
+	fixedPhaseB.Read (in);
+      NodalActions(fixedPhaseA.UpSpeciesNum) = 
 	new FixedPhaseActionClass 
-	(PathData, fixedPhase, fixedPhase.UpSpeciesNum);
-      NodalActions(fixedPhase.DownSpeciesNum) = 
+	(PathData, fixedPhaseA, fixedPhaseB, fixedPhaseA.UpSpeciesNum);
+      NodalActions(fixedPhaseA.DownSpeciesNum) = 
 	new FixedPhaseActionClass 
-	(PathData, fixedPhase, fixedPhase.DownSpeciesNum);
-      NodalActions(fixedPhase.IonSpeciesNum) = 
+	(PathData, fixedPhaseA, fixedPhaseB, fixedPhaseA.DownSpeciesNum);
+      NodalActions(fixedPhaseA.IonSpeciesNum) = 
 	new FixedPhaseActionClass 
-	(PathData, fixedPhase, fixedPhase.IonSpeciesNum);
+	(PathData, fixedPhaseA, fixedPhaseB, fixedPhaseA.IonSpeciesNum);
     }
     in.CloseSection();
   }

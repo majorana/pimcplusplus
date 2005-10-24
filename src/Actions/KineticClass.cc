@@ -12,8 +12,9 @@ KineticClass::KineticClass(PathDataClass &pathData ) :
 {
 }
 
-double KineticClass::Action (int slice1, int slice2,
-			     const Array<int,1> &changedParticles, int level)
+double 
+KineticClass::SingleAction (int slice1, int slice2,
+			    const Array<int,1> &changedParticles, int level)
 {
   //  cerr<<"I'm in the action"<<endl;
   double TotalK = 0.0;
