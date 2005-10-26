@@ -230,7 +230,7 @@ public:
 
   /// Specifies the two ionic configurations for correlated sampling
   TinyVector<Array<dVec,1>,2> IonConfigs;
-  vector<double> ActionA, WeightA, ActionB, WeightB;
+  vector<double> ActionA, WeightA, ActionB, WeightB, EnergyA, EnergyB;
 
 
   //////////////////////////

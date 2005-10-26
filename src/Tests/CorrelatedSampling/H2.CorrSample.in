@@ -2,7 +2,7 @@ double tau=0.5;
 
 Section (System)
 {
-  int NumTimeSlices=100;
+  int NumTimeSlices=200;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[10.0,10.0,10.0];
   double kCutoff = 2.0;
@@ -17,8 +17,8 @@ Section (System)
       int NumParticles=2;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
-      Array<double,2> Positions(2,3)=[-5.0, 0.0, 0.0,
-				       5.0, 0.0, 0.0 ];
+      Array<double,2> Positions(2,3)=[-1.0, 0.0, 0.0,
+				       1.0, 0.0, 0.0 ];
     }
     Section (Species)
     {
@@ -55,58 +55,56 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "H2_tau0.25_CS";
-  Section (Observable)
-  {
+  string OutFileBase = "H2_tau0.5_beta100_CS";
+  Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
     string Description="Total Energy";
     int freq = 2;
     int dumpFreq = 500;
   }
-  Section (Observable)
-    {
-      string type = "PairCorrelation";
-      string Name = "epPC";
-      string Species1 = "e";
-      string Species2 = "p";
-      string Description="Electron-Proton Pair Correlation";
-      int freq = 20;
-      int dumpFreq=700;
-      Section (Grid)
-	{	  
-	  string type = "Linear";
-	  double start = 0.0;
-	  double end = 3.0;
-	  int NumPoints = 50;
-	}
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "epPC";
+    string Species1 = "e";
+    string Species2 = "p";
+    string Description="Electron-Proton Pair Correlation";
+    int freq = 20;
+    int dumpFreq=700;
+    Section (Grid) {
+      string type = "Linear";
+      double start = 0.0;
+      double end = 3.0;
+      int NumPoints = 50;
     }
-  Section (Observable)
-    {
-      string type = "PairCorrelation";
-      string Name = "eePC";
-      string Species1 = "e";
-      string Species2 = "e";
-      string Description="Electron-Eroton Pair Correlation";
-      int freq = 20;
-      int dumpFreq=700;
-      Section (Grid)
-	{	  
-	  string type = "Linear";
-	  double start = 0.0;
-	  double end = 3.0;
-	  int NumPoints = 50;
-	}
+  }
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "eePC";
+    string Species1 = "e";
+    string Species2 = "e";
+    string Description="Electron-Eroton Pair Correlation";
+    int freq = 20;
+    int dumpFreq=700;
+    Section (Grid) {	  
+      string type = "Linear";
+      double start = 0.0;
+      double end = 3.0;
+      int NumPoints = 50;
     }
-  Section (Observable)
-    {
-      string type = "TimeAnalysis";
-      string Name = "TimeAnalysis";
-      string Description="Analyzes time!";
-      int dumpFreq=100;
-      int freq=100;
-    }
-
+  }
+  Section (Observable) {
+    string type = "TimeAnalysis";
+    string Name = "TimeAnalysis";
+    string Description="Analyzes time!";
+    int dumpFreq=100;
+    int freq=100;
+  }
+  Section (Observable) {
+    string type = "PathDump";
+    string Name = "PathDump";
+    int dumpFreq = 200;
+  }
 
 }
 
@@ -149,6 +147,6 @@ Section (Algorithm)
     Section (Observe) {string name = "eePC";}
     Section (Observe) {string name = "TimeAnalysis";}
     Section (Observe) {string name = "Energy"; }
-    //    Section (Observe) {string name = "PathDump";}
+    Section (Observe) {string name = "PathDump";}
   }
 }

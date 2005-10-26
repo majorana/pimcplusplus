@@ -32,6 +32,8 @@ private:
   int MaxLevels; //is this the right place for this?
   void ReadNodalActions (IOSectionClass &in);
 public:
+  /// Used to keep track of the total action
+  double TotalA, TotalB;
 
   // Actions
   OpenLoopImportanceClass OpenLoopImportance;
