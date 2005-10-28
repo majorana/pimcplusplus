@@ -55,7 +55,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "H2_2.0_2.6_beta25_new";
+  string OutFileBase = "H2_2.0_2.6_beta25_test";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
