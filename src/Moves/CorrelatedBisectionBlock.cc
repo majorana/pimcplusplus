@@ -189,60 +189,68 @@ void CorrelatedBisectionBlockClass::MakeMove()
     for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) 
       totalSBOld+=(*iter)->Action(s1, s2, allParticles, 0);
     SetMode(NEWMODE);    
-    //    if (toAcceptLocal) 
     for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) 
       totalSBNew+=(*iter)->Action(s1, s2, allParticles, 0);
-//     else
-//       totalSBNew = totalSBOld;
-    
 
     PathData.Path.SetIonConfig(0);
     SetMode(OLDMODE);
     for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) 
       totalSAOld+=(*iter)->Action(s1, s2, allParticles, 0);
     SetMode(NEWMODE);    
-    //    if (toAcceptLocal) 
       for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) 
 	totalSANew+=(*iter)->Action(s1, s2, allParticles, 0);
-//     else
-//        totalSANew = totalSAOld;
 
     double deltaSOld = 0.5*(totalSAOld - totalSBOld);
     double deltaSNew = 0.5*(totalSANew - totalSBNew);
 
+    /// Only add my contribution to the sum if I've accepted locally
+    if (toAcceptLocal) {
+      deltaSNew  = PathData.Path.Communicator.AllSum(deltaSNew);
+      totalSANew = PathData.Path.Communicator.AllSum(totalSANew);
+      totalSBNew = PathData.Path.Communicator.AllSum(totalSBNew);
+    }
+    else { /// otherwise just add the old action 
+      deltaSNew  = PathData.Path.Communicator.AllSum(deltaSOld);
+      totalSANew = PathData.Path.Communicator.AllSum(totalSAOld);
+      totalSBNew = PathData.Path.Communicator.AllSum(totalSBOld);
+
+    }
+
     deltaSOld  = PathData.Path.Communicator.AllSum(deltaSOld);
-    deltaSNew  = PathData.Path.Communicator.AllSum(deltaSNew);
-    totalSANew = PathData.Path.Communicator.AllSum(totalSANew);
-    totalSBNew = PathData.Path.Communicator.AllSum(totalSBNew);
     totalSAOld = PathData.Path.Communicator.AllSum(totalSAOld);
     totalSBOld = PathData.Path.Communicator.AllSum(totalSBOld);
-    //    double commonAcceptProb = cosh(deltaSNew)/cosh(deltaSOld);
+    double commonAcceptProb = cosh(deltaSNew)/cosh(deltaSOld);
     
-    double commonAcceptProb = exp(logSampleProb) * 
-      (exp(-totalSANew)+exp(-totalSBNew))/(exp(-totalSAOld)+exp(-totalSBOld));
+//     double commonAcceptProb = exp(logSampleProb) * 
+//       (exp(-totalSANew)+exp(-totalSBNew))/(exp(-totalSAOld)+exp(-totalSBOld));
 
     bool toAcceptCommon = 
       log(commonAcceptProb)>=log(PathData.Path.Random.Common());
     
     double wA, wB;
-    if (/*toAcceptLocal && */toAcceptCommon) {
+    if (toAcceptCommon) {
       /// Accept
-      wA = exp(-totalSANew+0.5*(totalSANew+totalSBNew))/
-	(2.0*cosh(deltaSNew));
-//       double wA2 = exp(-totalSANew)/(exp(-totalSANew) + exp(-totalSBNew));
-//       cerr << "wA = " << wA << " wA2 = " << wA2 << endl;
-      wB = exp(-totalSBNew+0.5*(totalSANew+totalSBNew))/
-	(2.0*cosh(deltaSNew));
+//       wA = exp(-totalSANew+0.5*(totalSANew+totalSBNew))/
+// 	(2.0*cosh(deltaSNew));
+      wA = exp(-deltaSNew)/(2.0*cosh(deltaSNew));
+      //       wB = exp(-totalSBNew+0.5*(totalSANew+totalSBNew))/
+      // 	(2.0*cosh(deltaSNew));
+      wB = exp(+deltaSNew)/(2.0*cosh(deltaSNew));
       //      wB = 1.0-wA;
       assert (fabs(wA+wB-1.0) < 1.0e-12);
-      Accept();
+      if (toAcceptLocal)
+	Accept();
+      else
+	Reject();
     }
     else {
       /// Reject
-      wA = exp(-totalSAOld+0.5*(totalSAOld+totalSBOld))/
-	(2.0*cosh(deltaSOld));
-      wB = exp(-totalSBOld+0.5*(totalSAOld+totalSBOld))/
-	(2.0*cosh(deltaSOld));
+//       wA = exp(-totalSAOld+0.5*(totalSAOld+totalSBOld))/
+// 	(2.0*cosh(deltaSOld));
+//       wB = exp(-totalSBOld+0.5*(totalSAOld+totalSBOld))/
+// 	(2.0*cosh(deltaSOld));
+      wA = exp(-deltaSOld)/(2.0*cosh(deltaSOld));
+      wB = exp(+deltaSOld)/(2.0*cosh(deltaSOld));
       assert (fabs(wA+wB-1.0) < 1.0e-12);
       wB = 1.0-wA;
       Reject();
@@ -303,14 +311,14 @@ void CorrelatedBisectionBlockClass::MakeMove()
 	 << "  deltaS = " << (wASASum/wASum - wBSBSum/wBSum) << endl;
     perr << "delta E = " << (wAEASum/wASum - wBEBSum/wBSum) << endl;
     perr << "AcceptRatio = " << ((double)NumAccepted/NumMoves) << endl;
-    fprintf (EAout, "%1.12e\n", (wAEASum/wASum));
-    fprintf (EBout, "%1.12e\n", (wBEBSum/wBSum));
-    fprintf (SAout, "%1.12e\n", (wASASum/wASum));
-    fprintf (SBout, "%1.12e\n", (wBSBSum/wBSum));
-    fflush (EAout);
-    fflush (EBout);
-    fflush (SAout);
-    fflush (SBout);
+//     fprintf (EAout, "%1.12e\n", (wAEASum/wASum));
+//     fprintf (EBout, "%1.12e\n", (wBEBSum/wBSum));
+//     fprintf (SAout, "%1.12e\n", (wASASum/wASum));
+//     fprintf (SBout, "%1.12e\n", (wBSBSum/wBSum));
+//     fflush (EAout);
+//     fflush (EBout);
+//     fflush (SAout);
+//     fflush (SBout);
 
     wAEAvar.Write(wAEASum);
     wBEBvar.Write(wBEBSum);

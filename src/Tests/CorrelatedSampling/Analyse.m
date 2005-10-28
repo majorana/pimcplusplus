@@ -1,4 +1,4 @@
-fname = 'H2_2.0_2.6_beta25.0.h5';
+fname = 'H2_2.0_2.6_beta25_new.0.h5';
 
 wA   = hdf5read(fname, '/Moves_4/CorrelatedBisectionBlock_1/wA');
 wB   = hdf5read(fname, '/Moves_4/CorrelatedBisectionBlock_1/wB');
