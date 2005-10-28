@@ -11,18 +11,13 @@ void CorrelatedBisectionBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   assert (in.ReadVar ("name", Name));
 
-
   BisectionStages.resize(NumLevels);
   for (int level=0;level<NumLevels;level++)
     BisectionStages(NumLevels-level-1)=new BisectionStageClass(PathData,level,OutSection);
-
-
   
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
-  if    (PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION){
-    HaveRefslice=true;
-  }
- HaveRefslice = 
+  
+  HaveRefslice = 
     ((PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION) &&
      (PathData.Actions.NodalActions(SpeciesNum) != NULL) &&
      (!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
@@ -42,27 +37,42 @@ void CorrelatedBisectionBlockClass::Read(IOSectionClass &in)
     exit(EXIT_FAILURE);
   }
   PermuteStage->Read (in);
-
-  LocalActions.push_back(&PathData.Actions.Kinetic);
-  CommonActions.push_back(&PathData.Actions.Kinetic);
-  LocalActions.push_back(&PathData.Actions.ShortRange);
-  CommonActions.push_back(&PathData.Actions.ShortRange);
+  
+  BosonActions.push_back(&PathData.Actions.Kinetic);
+  BosonActions.push_back(&PathData.Actions.ShortRange);
   if (PathData.Path.LongRange){
-    if (PathData.Actions.UseRPA){
-      LocalActions.push_back(&PathData.Actions.LongRangeRPA);
-      CommonActions.push_back(&PathData.Actions.LongRangeRPA);
-    }
-    else{
-      LocalActions.push_back(&PathData.Actions.LongRange);
-      CommonActions.push_back(&PathData.Actions.LongRange);
-    }
+    if (PathData.Actions.UseRPA)
+      BosonActions.push_back(&PathData.Actions.LongRangeRPA);
+    else
+      BosonActions.push_back(&PathData.Actions.LongRange);
   }
   for (int species=0;species<PathData.NumSpecies();species++)
     if ((PathData.Actions.NodalActions(species)!=NULL)) {
       cerr << "Adding fermion node action for species " 
 	   << speciesName << endl;
-      CommonActions.push_back(PathData.Actions.NodalActions(species));
+      NodalActions.push_back(PathData.Actions.NodalActions(species));
     }
+
+  /// Initialize values for total action
+  double actionA = 0.0; double actionB = 0.0;
+  int s1 = 0; 
+  int s2 = PathData.Path.NumTimeSlices()-1;
+  Array<int,1> allParticles(PathData.Path.NumParticles());
+  for (int i=0; i<allParticles.size(); i++)
+    allParticles(i) = i;
+  list<ActionBaseClass*>::iterator iter;
+  PathData.Path.SetIonConfig(0);
+  for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++)
+    actionA += (*iter)->Action(s1, s2, allParticles, 0);
+  for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++)
+    actionA += (*iter)->Action(s1, s2, allParticles, 0);
+  PathData.Path.SetIonConfig(1);
+  for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++)
+    actionB += (*iter)->Action(s1, s2, allParticles, 0);
+  for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++)
+    actionB += (*iter)->Action(s1, s2, allParticles, 0);
+  PathData.Actions.TotalA = PathData.Path.Communicator.AllSum(actionA);
+  PathData.Actions.TotalB = PathData.Path.Communicator.AllSum(actionB);
 }
 
 
@@ -151,27 +161,39 @@ void CorrelatedBisectionBlockClass::MakeMove()
     
     list<ActionBaseClass*>::iterator iter;
     PathData.Path.SetIonConfig(0);
-    double localSAOld, localSANew, localSBOld, localSBNew;
-    localSAOld = 0.0; localSANew = 0.0; localSBOld = 0.0; localSBNew =0.0;
-    for (iter=LocalActions.begin();iter!=LocalActions.end();iter++){
+    double bosonSAOld, bosonSANew, bosonSBOld, bosonSBNew;
+    bosonSAOld = 0.0; bosonSANew = 0.0; bosonSBOld = 0.0; bosonSBNew =0.0;
+    double nodalSAOld, nodalSANew, nodalSBOld, nodalSBNew;
+    nodalSAOld = 0.0; nodalSANew = 0.0; nodalSBOld = 0.0; nodalSBNew =0.0;
+    for (iter=BosonActions.begin();iter!=BosonActions.end();iter++) {
       SetMode(NEWMODE);
-      localSANew += 
-	(*iter)->Action(Slice1,Slice2,ActiveParticles,0);
+      bosonSANew += (*iter)->Action(Slice1,Slice2,ActiveParticles,0);
       SetMode(OLDMODE);
-      localSAOld += 
-	(*iter)->Action(Slice1,Slice2,ActiveParticles,0);
+      bosonSAOld += (*iter)->Action(Slice1,Slice2,ActiveParticles,0);
     }
+    for (iter=NodalActions.begin();iter!=NodalActions.end();iter++) {
+      SetMode(NEWMODE);
+      nodalSANew += (*iter)->Action(Slice1,Slice2,ActiveParticles,0);
+      SetMode(OLDMODE);
+      nodalSAOld += (*iter)->Action(Slice1,Slice2,ActiveParticles,0);
+    }
+
     PathData.Path.SetIonConfig(1);
-    for (iter=LocalActions.begin();iter!=LocalActions.end();iter++){
+    for (iter=BosonActions.begin();iter!=BosonActions.end();iter++) {
       SetMode(NEWMODE);
-      localSBNew += 
-	(*iter)->Action(Slice1,Slice2,ActiveParticles,0);
+      bosonSBNew += (*iter)->Action(Slice1,Slice2,ActiveParticles,0);
       SetMode(OLDMODE);
-      localSBOld += 
-	(*iter)->Action(Slice1,Slice2,ActiveParticles,0);
+      bosonSBOld += (*iter)->Action(Slice1,Slice2,ActiveParticles,0);
     }
-    double localSBarOld=0.5*(localSAOld+localSBOld);
-    double localSBarNew=0.5*(localSANew+localSBNew);
+    for (iter=NodalActions.begin();iter!=NodalActions.end();iter++) {
+      SetMode(NEWMODE);
+      nodalSBNew += (*iter)->Action(Slice1,Slice2,ActiveParticles,0);
+      SetMode(OLDMODE);
+      nodalSBOld += (*iter)->Action(Slice1,Slice2,ActiveParticles,0);
+    }
+
+    double localSBarOld=0.5*(bosonSAOld+bosonSBOld);
+    double localSBarNew=0.5*(bosonSANew+bosonSBNew);
     double logAcceptProb= logSampleProb - localSBarNew + localSBarOld;
     bool toAcceptLocal = logAcceptProb>=log(PathData.Path.Random.Local());
     
@@ -186,20 +208,28 @@ void CorrelatedBisectionBlockClass::MakeMove()
 
     //// MUST MOVE JOIN OUT OF THE WAY FOR THIS TO WORK
     SetMode(OLDMODE);
-    for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) 
+    for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) 
+      totalSBOld+=(*iter)->Action(s1, s2, allParticles, 0);
+    for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) 
       totalSBOld+=(*iter)->Action(s1, s2, allParticles, 0);
     SetMode(NEWMODE);    
-    for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) 
+    for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) 
+      totalSBNew+=(*iter)->Action(s1, s2, allParticles, 0);
+    for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) 
       totalSBNew+=(*iter)->Action(s1, s2, allParticles, 0);
 
     PathData.Path.SetIonConfig(0);
     SetMode(OLDMODE);
-    for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) 
+    for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) 
+      totalSAOld+=(*iter)->Action(s1, s2, allParticles, 0);
+    for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) 
       totalSAOld+=(*iter)->Action(s1, s2, allParticles, 0);
     SetMode(NEWMODE);    
-      for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) 
-	totalSANew+=(*iter)->Action(s1, s2, allParticles, 0);
-
+    for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) 
+      totalSANew+=(*iter)->Action(s1, s2, allParticles, 0);
+    for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) 
+      totalSANew+=(*iter)->Action(s1, s2, allParticles, 0);
+    
     double deltaSOld = 0.5*(totalSAOld - totalSBOld);
     double deltaSNew = 0.5*(totalSANew - totalSBNew);
 
@@ -219,6 +249,35 @@ void CorrelatedBisectionBlockClass::MakeMove()
     deltaSOld  = PathData.Path.Communicator.AllSum(deltaSOld);
     totalSAOld = PathData.Path.Communicator.AllSum(totalSAOld);
     totalSBOld = PathData.Path.Communicator.AllSum(totalSBOld);
+
+    ///////////////////////////////////////////
+    /// New total calculation using updates ///
+    ///////////////////////////////////////////
+    double Achange = 
+      toAcceptLocal ? (bosonSANew+nodalSANew - (bosonSAOld+nodalSAOld)) : 0.0;
+    double Bchange = 
+      toAcceptLocal ? (bosonSBNew+nodalSBNew - (bosonSBOld+nodalSBOld)) : 0.0;
+
+    AllSumVecIn(0) = Achange;   AllSumVecIn(1) = Bchange;
+    PathData.Path.Communicator.AllSum (AllSumVecIn, AllSumVecOut);
+    Achange = AllSumVecOut(0);  Bchange = AllSumVecOut(1);
+
+    double totalSANew2 = PathData.Actions.TotalA + Achange;
+    double totalSBNew2 = PathData.Actions.TotalB + Bchange;
+    double deltaSNew2  = 0.5*(totalSANew2 - totalSBNew2);
+
+    cerr << "totalSANew  = " << totalSANew << endl;
+    cerr << "totalSANew2 = " << totalSANew2 << endl;
+    cerr << "totalSBNew  = " << totalSBNew << endl;
+    cerr << "totalSBNew2 = " << totalSBNew2 << endl;
+    
+    assert (fabs(deltaSNew-deltaSNew2)<1.0e-10);
+    assert (fabs(totalSANew - totalSANew2) < 1.0e-10);
+    assert (fabs(totalSBNew - totalSBNew2) < 1.0e-10);
+
+
+    
+
     double commonAcceptProb = cosh(deltaSNew)/cosh(deltaSOld);
     
 //     double commonAcceptProb = exp(logSampleProb) * 
@@ -238,6 +297,9 @@ void CorrelatedBisectionBlockClass::MakeMove()
       wB = exp(+deltaSNew)/(2.0*cosh(deltaSNew));
       //      wB = 1.0-wA;
       assert (fabs(wA+wB-1.0) < 1.0e-12);
+
+      PathData.Actions.TotalA = totalSANew2;
+      PathData.Actions.TotalB = totalSBNew2;
       if (toAcceptLocal)
 	Accept();
       else
@@ -261,13 +323,21 @@ void CorrelatedBisectionBlockClass::MakeMove()
     totalSA = totalSB = 0.0;
 
     PathData.Path.SetIonConfig(0);
-    for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) {
+    for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) {
+      energyA += (*iter)->d_dBeta(s1,s2,0);
+      totalSA += (*iter)->Action(s1, s2, allParticles, 0);
+    }
+    for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) {
       energyA += (*iter)->d_dBeta(s1,s2,0);
       totalSA += (*iter)->Action(s1, s2, allParticles, 0);
     }
 
     PathData.Path.SetIonConfig(1);
-    for (iter=CommonActions.begin(); iter!=CommonActions.end(); iter++) {
+    for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) {
+      energyB += (*iter)->d_dBeta(s1,s2,0);
+      totalSB += (*iter)->Action(s1, s2, allParticles,0);
+    }
+    for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) {
       energyB += (*iter)->d_dBeta(s1,s2,0);
       totalSB += (*iter)->Action(s1, s2, allParticles,0);
     }

@@ -25,11 +25,12 @@ private:
   void ChooseTimeSlices();
   PermuteStageClass* PermuteStage;
   Array<BisectionStageClass*,1> BisectionStages;
-  list<ActionBaseClass*> LocalActions;
-  list<ActionBaseClass*> CommonActions;
+  list<ActionBaseClass*> BosonActions;
+  list<ActionBaseClass*> NodalActions;
   
   FILE *EAout, *EBout, *SAout, *SBout;
   ObservableDouble wAEAvar, wBEBvar, wASAvar, wBSBvar, wAvar, wBvar;
+  Array<double,1> AllSumVecIn, AllSumVecOut;
   //  ObservableDouble AcceptanceRatioVar;
 public:
   /// Number of levels the bisection move works on 
@@ -45,7 +46,8 @@ public:
     wASAvar("wASA", OutSection, pathData.Path.Communicator),
     wBSBvar("wBSB", OutSection, pathData.Path.Communicator),
     wAvar  ("wA",   OutSection, pathData.Path.Communicator),
-    wBvar  ("wB",   OutSection, pathData.Path.Communicator)
+    wBvar  ("wB",   OutSection, pathData.Path.Communicator),
+    AllSumVecIn(2), AllSumVecOut(2)
   { 
     EAout = fopen ("EA.dat", "w");
     SAout = fopen ("SA.dat", "w");
