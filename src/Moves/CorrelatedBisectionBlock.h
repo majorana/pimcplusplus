@@ -29,7 +29,7 @@ private:
   list<ActionBaseClass*> NodalActions;
   
   FILE *EAout, *EBout, *SAout, *SBout;
-  ObservableDouble wAEAvar, wBEBvar, wASAvar, wBSBvar, wAvar, wBvar;
+  ObservableDouble wAEAvar, wBEBvar, wAvar, wBvar;
   Array<double,1> AllSumVecIn, AllSumVecOut;
   //  ObservableDouble AcceptanceRatioVar;
 public:
@@ -43,8 +43,6 @@ public:
     MultiStageClass(pathData, out),StepNum(0), 
     wAEAvar("wAEA", OutSection, pathData.Path.Communicator),
     wBEBvar("wBEB", OutSection, pathData.Path.Communicator),
-    wASAvar("wASA", OutSection, pathData.Path.Communicator),
-    wBSBvar("wBSB", OutSection, pathData.Path.Communicator),
     wAvar  ("wA",   OutSection, pathData.Path.Communicator),
     wBvar  ("wB",   OutSection, pathData.Path.Communicator),
     AllSumVecIn(2), AllSumVecOut(2)
