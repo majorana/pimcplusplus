@@ -30,6 +30,8 @@ void PIMCClass::Read(IOSectionClass &in)
   PathData.Path.InitPaths(in);
   in.CloseSection();
   perr << "Done InitPaths.\n";
+  if (PathData.Path.UseCorrelatedSampling())
+    PathData.Path.SetIonConfig(0);
   
   perr << "Initializing Actions caches.\n";
   PathData.Actions.Init();
