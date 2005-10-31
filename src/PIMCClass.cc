@@ -260,7 +260,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
   Moves.resize(numOfMoves);
   int steps;
   int myProc=PathData.Path.Communicator.MyProc();
-  bool iAmRoot = myProc == 0;
+  bool iAmRoot = (myProc == 0);
   
   if (iAmRoot)
     OutFile.NewSection("Moves");

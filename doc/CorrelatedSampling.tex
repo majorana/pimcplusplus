@@ -103,21 +103,38 @@ algorithm can be seen schematically in ...
 \begin{algorithm}
 \caption{Modified correlated bisection algorithm}
 \begin{algorithmic}
-\STATE level $\leftarrow$ highest level
-\WHILE{(NOT rejected) AND (bisection level $>0$)}
+\FOR{bisection level $\leftarrow$  highest down to 0}
   \STATE Construct new path at this level
-  \STATE Calculate new and old level actions given by $\bar{S}_i$, 
-  where $i$ is my processor number.  Do not include nodal action in
-  calculation.
-  \STATE Accept or reject local level move.
-  \STATE level $\leftarrow$ level-1
-\ENDWHILE
+\ENDFOR
+\STATE Calculate new and old actions (excluding nodal) given by $\bar{S}_i$, 
+       where $i$ is my processor number.
+\STATE Accept or reject local move based on 
+       $\bar{S}^i_\text{new} - \bar{S}^i_\text{old}$.
+
+\IF{accepted local move}
+  \STATE $\delta S_A^i \leftarrow (S_A^i)_\text{new} -
+(S_B^i)_\text{old}$ (including nodal action)
+  \STATE  $\delta S_B^i = (S_B^i)_\text{new}-(S_B^i)_\text{old}$
+\ELSE
+  \STATE $\delta S_A^i \leftarrow 0$
+  \STATE $\delta S_B^i \leftarrow 0$
+\ENDIF
+\STATE Perform global MPI sum on $\delta S_A^i$ and $\delta S_B^i$,
+       yielding $\delta S_A$ and $\delta S_B$.
+\STATE $(S_A)_\text{new} \leftarrow (S_A)_\text{old} + \delta S_A$
+\STATE $(S_B)_\text{new} \leftarrow (S_B)_\text{old} + \delta S_B$
+\STATE $\Delta S_\text{new} \leftarrow
+  \frac{1}{2}\left[(S_A)_\text{new} - (S_B)_\text{new}\right]$
+\STATE $\Delta S_\text{old} \, \, \leftarrow
+  \frac{1}{2}\left[(S_A)_\text{old} \,\, - (S_B)_\text{old} \right]$
+
+
 
 \IF{ accepted at level 1 }
-  \STATE Send my change in $\Delta S$ to collective sum.
+  \STATE Send my change in $\delta S$ to collective sum.
   \STATE Accept or reject whole move globally based on collective sums.
 \ELSE
-  \STATE Send 0 to collective sum for change in $\Delta S$.
+  \STATE Send 0 to collective sum for change in $\delta S$.
 \ENDIF
 
 \end{algorithmic}
