@@ -332,6 +332,9 @@ public:
   inline double AllSum (double a)
   {  return a; } 
 
+  inline void AllSum (Array<double,1> &in, Array<double,1> &out)
+  { out = in; }
+
   inline void PrintSync() {}
 
 #endif
