@@ -49,10 +49,10 @@ protected:
   ///////////////
   // Node data //
   ///////////////
-  bool HaveNodeData;
+  bool HaveANodeData, HaveBNodeData;
   /// This stores raw node data from the pimc++ output file.  The 4
   /// dimensions are (frame, x, y, z)
-  Array<double,4> NodeData;
+  Array<double,4> ANodeData, BNodeData;
   LinearGrid Xgrid, Ygrid, Zgrid;
 
   /// These are used only for open loops.

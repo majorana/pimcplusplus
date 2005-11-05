@@ -271,7 +271,7 @@ ExportClass::ExportMovie (string basename,
   // Data Setup //
   ////////////////
   Array<double,4> &PathArray = Visual.PathArray;
-  Array<double,4> &NodeData = Visual.NodeData;
+  Array<double,4> &NodeData = Visual.ANodeData;
   int numPaths = Visual.PathArray.extent(0) - 1;
   LinearGrid tGrid (0.0, (double)(numPaths-1), numPaths);
   CubicSpline interpSpline;

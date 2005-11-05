@@ -127,13 +127,43 @@ void VisualClass::MakeFrame(int frame)
 //   iso.SetIsoval (36.0);
 
 //   PathVis.Objects.push_back(isoPtr);
-  if (HaveNodeData) {
+  if (HaveANodeData) {
     Array<double,3> arrayRef;
-    arrayRef.reference(NodeData(frame,Range::all(),Range::all(),Range::all()));
+    arrayRef.reference
+      (ANodeData(frame, Range::all(),Range::all(),Range::all()));
     Isosurface *isoPtr = new Isosurface;
     Isosurface &iso = *isoPtr;
     iso.Init (&Xgrid, &Ygrid, &Zgrid, arrayRef, true);
     iso.SetIsoval(IsoAdjust.get_value());
+    PathVis.Objects.push_back(isoPtr);
+    // HACK HACK HACK 
+    // Draw electron positions
+    for (int ptcl=16; ptcl<24; ptcl++) {
+      	SphereObject* sphere = new SphereObject;
+	dVec pos;
+	pos[0] = PathArray(frame, ptcl, 0, 0);
+ 	pos[1] = PathArray(frame, ptcl, 0, 1);
+ 	pos[2] = PathArray(frame, ptcl, 0, 2);
+	sphere->SetPos (pos);
+	if (ptcl == 16)
+	  sphere->SetColor (Vec3(0.9, 0.0, 0.9));
+	else
+	  sphere->SetColor (Vec3(0.0, 0.0, 0.9));
+	sphere->SetRadius(0.25);
+	PathVis.Objects.push_back(sphere);
+    }
+  }
+  if (HaveBNodeData) {
+    cerr << "Creating B nodes.\n";
+    Array<double,3> arrayRef;
+    arrayRef.reference
+      (BNodeData(frame, Range::all(),Range::all(),Range::all()));
+    Isosurface *isoPtr = new Isosurface;
+    Isosurface &iso = *isoPtr;
+    iso.SetColor (0.8, 0.0, 0.0);
+    iso.Init (&Xgrid, &Ygrid, &Zgrid, arrayRef, true);
+    iso.SetIsoval(IsoAdjust.get_value());
+
     PathVis.Objects.push_back(isoPtr);
     // HACK HACK HACK 
     // Draw electron positions
@@ -208,8 +238,8 @@ void VisualClass::Read(string fileName)
     OpenPtcl = -1;
   }
   
-  HaveNodeData = in.OpenSection("Xgrid");
-  if (HaveNodeData) {
+  HaveANodeData = in.OpenSection("Xgrid");
+  if (HaveANodeData) {
     Xgrid.Read(in);
     in.CloseSection();
     assert(in.OpenSection("Ygrid"));
@@ -218,15 +248,28 @@ void VisualClass::Read(string fileName)
     assert(in.OpenSection("Zgrid"));
     Zgrid.Read(in);
     in.CloseSection();
-    assert(in.ReadVar("Nodes", NodeData));
+    if (in.ReadVar("ANodes", ANodeData))
+      HaveBNodeData = in.ReadVar("BNodes", BNodeData);
+    else
+      assert(in.ReadVar("Nodes", ANodeData));
+
     double maxVal = -1.0e100;
     double minVal = 1.0e100;
-    for (int frame=0; frame<NodeData.extent(0); frame++)
-      for (int ix=0; ix<NodeData.extent(1); ix++)
-	for (int iy=0; iy<NodeData.extent(2); iy++)
-	  for (int iz=0; iz<NodeData.extent(3); iz++) {
-	    maxVal = max(maxVal, NodeData(frame,ix,iy,iz));
-	    minVal = min(minVal, NodeData(frame,ix,iy,iz));
+    for (int frame=0; frame<ANodeData.extent(0); frame++)
+      for (int ix=0; ix<ANodeData.extent(1); ix++)
+	for (int iy=0; iy<ANodeData.extent(2); iy++)
+	  for (int iz=0; iz<ANodeData.extent(3); iz++) {
+	    double mx, mn;
+	    if (HaveBNodeData) {
+	      mx = max(ANodeData(frame,ix,iy,iz), BNodeData(frame,ix,iy,iz));
+	      mn = min(ANodeData(frame,ix,iy,iz), BNodeData(frame,ix,iy,iz));
+	    }
+	    else {
+	      mx = ANodeData(frame,ix,iy,iz);
+	      mn = ANodeData(frame,ix,iy,iz);
+	    }
+	    maxVal = max(maxVal, mx);
+	    minVal = min(minVal, mn);
 	  }
     IsoAdjust.set_lower(minVal);
     IsoAdjust.set_upper(maxVal);

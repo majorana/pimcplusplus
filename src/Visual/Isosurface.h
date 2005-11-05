@@ -26,6 +26,9 @@ private:
 public:
   inline void SetIsoval (double val) { Isoval = val; Set(); }
   void DrawPOV(FILE* out, string rotMatrix);
+  inline void SetColor (Vec3 color) { Color = color; }
+  inline void SetColor (double r, double g, double b) 
+  { SetColor (TinyVector<double,3>(r,g,b)); }
   Isosurface() : UseCubicInterp(true), UseNormals(true)
   {
     Color[0] = 0.0; Color[1] = 0.8; Color[2] = 0.0;

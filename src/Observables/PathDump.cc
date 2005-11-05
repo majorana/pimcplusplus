@@ -150,6 +150,26 @@ PathDumpClass::NodeDump()
 void
 PathDumpClass::FixedPhaseNodeDump()
 {
+  if (PathData.Path.UseCorrelatedSampling()) 
+    PathData.Path.SetIonConfig(0);
+
+  /// HACK HACK HACK
+  /// Find ptcl closest to ion we moved.
+  double closestDist = 1.0e100;
+  int closestPtcl = 16;
+  for (int ptcl=16; ptcl < 32; ptcl++) {
+    dVec disp = PathData.Path(NodeSlice,ptcl) - PathData.Path(NodeSlice,0);
+    PathData.Path.PutInBox(disp);
+    double dist = sqrt(dot(disp,disp));
+    if (dist < closestDist) {
+      closestDist = dist;
+      closestPtcl = ptcl;
+    }
+  }
+  NodePtcl = closestPtcl;
+
+
+
   int nx = Xgrid.NumPoints;
   int ny = Ygrid.NumPoints;
   int nz = Zgrid.NumPoints;
@@ -160,7 +180,9 @@ PathDumpClass::FixedPhaseNodeDump()
   FixedPhaseActionClass &FP = 
     *((FixedPhaseActionClass*)PathData.Actions.NodalActions(speciesNum));
 
-  int relNodeSlice = NodeSlice + Path.GetRefSlice();
+  /// This must be fixed!
+  /// HACK HACK
+  int relNodeSlice = NodeSlice; // + Path.GetRefSlice();
   if (relNodeSlice > Path.TotalNumSlices)
     relNodeSlice -= Path.TotalNumSlices;
 
