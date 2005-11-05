@@ -178,7 +178,24 @@ PathDumpClass::FixedPhaseNodeDump()
     }
   }
   Path(relNodeSlice,NodePtcl) = savePos;
-  NodeVar.Write(nodeDump);
+  NodeVarA.Write(nodeDump);
+  if (PathData.Path.UseCorrelatedSampling()) {
+    PathData.Path.SetIonConfig(1);
+    for (int ix=0; ix<nx; ix++) {
+      newPos[0] = Xgrid(ix);
+      for (int iy=0; iy<ny; iy++) {
+	newPos[1] = Ygrid(iy);
+	for (int iz=0; iz<nz; iz++) {
+	  newPos[2] = Zgrid(iz);
+	  Path(relNodeSlice,NodePtcl) = newPos;
+	  nodeDump(ix,iy,iz) = log10(FP.CalcGrad2(relNodeSlice));
+	}
+      }
+    }
+    Path(relNodeSlice,NodePtcl) = savePos;
+    NodeVarB.Write(nodeDump);
+    PathData.Path.SetIonConfig(0);
+  }
 }
 
 
@@ -201,6 +218,8 @@ PathDumpClass::GroundStateNodeDump()
 
   dVec savePos = Path(relNodeSlice,NodePtcl);
   dVec newPos;
+  if (PathData.Path.UseCorrelatedSampling()) 
+    PathData.Path.SetIonConfig(0);
   for (int ix=0; ix<nx; ix++) {
     newPos[0] = Xgrid(ix);
     for (int iy=0; iy<ny; iy++) {
@@ -213,7 +232,24 @@ PathDumpClass::GroundStateNodeDump()
     }
   }
   Path(relNodeSlice,NodePtcl) = savePos;
-  NodeVar.Write(nodeDump);
+  NodeVarA.Write(nodeDump);
+  if (PathData.Path.UseCorrelatedSampling()) {
+    PathData.Path.SetIonConfig(1);
+    for (int ix=0; ix<nx; ix++) {
+      newPos[0] = Xgrid(ix);
+      for (int iy=0; iy<ny; iy++) {
+	newPos[1] = Ygrid(iy);
+	for (int iz=0; iz<nz; iz++) {
+	  newPos[2] = Zgrid(iz);
+	  Path(relNodeSlice,NodePtcl) = newPos;
+	  nodeDump(ix,iy,iz) = GS.Det(relNodeSlice);
+	}
+      }
+    }
+    Path(relNodeSlice,NodePtcl) = savePos;
+    NodeVarB.Write(nodeDump);
+    PathData.Path.SetIonConfig(0);
+  }
 }
 
 
@@ -234,6 +270,8 @@ PathDumpClass::FreeParticleNodeDump()
   if (relNodeSlice > Path.TotalNumSlices)
     relNodeSlice -= Path.TotalNumSlices;
 
+  if (PathData.Path.UseCorrelatedSampling())
+    PathData.Path.SetIonConfig(0);
   dVec savePos = Path(relNodeSlice,NodePtcl);
   dVec newPos;
   for (int ix=0; ix<nx; ix++) {
@@ -248,5 +286,5 @@ PathDumpClass::FreeParticleNodeDump()
     }
   }
   Path(relNodeSlice,NodePtcl) = savePos;
-  NodeVar.Write(nodeDump);
+  NodeVarA.Write(nodeDump);
 }

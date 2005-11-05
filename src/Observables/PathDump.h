@@ -14,7 +14,7 @@ private:
   ObservableInt RefLinkVar;
   ObservableVecDouble1 TailLocVar;
   // Variables for node dumps.
-  ObservableVecDouble3 NodeVar;
+  ObservableVecDouble3 NodeVarA, NodeVarB;
   bool DumpNodes;
   int  NodePtcl;
   int  NodeSlice;
@@ -37,8 +37,8 @@ public:
     TailLocVar("TailLocation",IOSection,myPathData.Path.Communicator),
     OpenLinkPtclVar("OpenPtcl",IOSection,myPathData.Path.Communicator),
     RefLinkVar("RefLink",IOSection,myPathData.Path.Communicator),
-    NodeVar("Nodes",IOSection,myPathData.Path.Communicator)
-  
+    NodeVarA("ANodes",IOSection,myPathData.Path.Communicator),
+    NodeVarB("BNodes",IOSection,myPathData.Path.Communicator)
   { 
     Name="PathDump";
     TimesCalled=0;
