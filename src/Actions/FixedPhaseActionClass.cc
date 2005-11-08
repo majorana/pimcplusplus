@@ -59,6 +59,27 @@ FixedPhaseClass::CalcGrad2 (int slice, int species)
   return grad2;
 }
 
+/// This function returns the calculates the gradient squared for each
+/// particle in the species.
+void
+FixedPhaseClass::CalcGrad2 (int slice, int species, 
+			    Array<double,1> &grad2)
+{
+  int N = Path.Species(species).NumParticles;
+  if (grad2.size() != N)
+    grad2.resize(N);
+  /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
+  complex<double> detu = GradientDet(slice, species);
+  double detu2 = mag2(detu);
+  double detu2Inv = 1.0/detu2;
+  
+  for (int i=0; i<N; i++) {
+    Vec3 grad = (detu.real()*imag(Gradient(i)) - 
+		 detu.imag()*real(Gradient(i)))*detu2Inv - kVec;
+    grad2(i) += dot(grad,grad);
+  }
+}
+
 
 double
 FixedPhaseClass::Action (int slice1, int slice2, 
@@ -709,6 +730,15 @@ FixedPhaseActionClass::Setk(Vec3 k)
   FixedPhaseB.Setk(k);
 }
 
+
+void
+FixedPhaseActionClass::CalcGrad2 (int slice, Array<double,1> &grad2)
+{
+  if (PathData.Path.GetConfig() == 0)
+    return FixedPhaseA.CalcGrad2(slice, SpeciesNum, grad2); 
+  else
+    return FixedPhaseB.CalcGrad2(slice, SpeciesNum, grad2); 
+}
 
 double 
 FixedPhaseActionClass::CalcGrad2 (int slice) 

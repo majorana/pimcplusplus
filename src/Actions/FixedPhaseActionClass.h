@@ -38,6 +38,7 @@ private:
   friend class FixedPhaseActionClass;
 public:
   double CalcGrad2 (int slice, int species);
+  void   CalcGrad2 (int slice, int species, Array<double,1> &grad2);
   int IonSpeciesNum, UpSpeciesNum, DownSpeciesNum;
   double Action (int slice1, int slice2,
 		 const Array<int,1> &activeParticles, 
@@ -66,6 +67,7 @@ private:
   int SpeciesNum;
 public:
   double CalcGrad2 (int slice);
+  void   CalcGrad2 (int slice, Array<double,1> &grad2);
 
   double SingleAction (int slice1, int slice2,
 		       const Array<int,1> &activeParticles, int level);
