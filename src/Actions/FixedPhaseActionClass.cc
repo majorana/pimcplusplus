@@ -76,7 +76,7 @@ FixedPhaseClass::CalcGrad2 (int slice, int species,
   for (int i=0; i<N; i++) {
     Vec3 grad = (detu.real()*imag(Gradient(i)) - 
 		 detu.imag()*real(Gradient(i)))*detu2Inv - kVec;
-    grad2(i) += dot(grad,grad);
+    grad2(i) = dot(grad,grad);
   }
 }
 
