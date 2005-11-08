@@ -164,6 +164,20 @@ CommunicatorClass::AllGather (Array<double,1> &SendVec,
 	    recvbuf, count, MPI_DOUBLE);
 }
 
+void 
+CommunicatorClass::AllGather (Array<int,1> &SendVec, 
+			      Array<int,1> &RecvVec)
+{
+  int numProcs = NumProcs();
+  assert ((RecvVec.size()/SendVec.size())==numProcs);	
+  int count = SendVec.size();
+  int *sendbuf = SendVec.data();
+  int *recvbuf = RecvVec.data();
+  
+  AllGather(sendbuf, count, MPI_INT,
+	    recvbuf, count, MPI_INT);
+}
+
 void
 CommunicatorClass::AllGatherRows(Array<complex<double>,2> &mat)
 {

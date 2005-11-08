@@ -99,6 +99,8 @@ public:
 		 MPI_Datatype recvtype);
   void AllGather (Array<double,1> &SendVec, 
 		  Array<double,1> &RecvVec);
+  void AllGather (Array<int,1> &SendVec, 
+		  Array<int,1> &RecvVec);
   /// This function gathers all rows of a matrix to all processors.
   /// It assumes that each processor receives an equal number of rows,
   /// with any left over being distributed to the low number
@@ -195,6 +197,12 @@ public:
 
   inline void AllGather (Array<double,1> &SendVec, 
 			 Array<double,1> &RecvVec)
+  {
+    RecvVec = SendVec;
+  }
+
+  inline void AllGather (Array<int,1> &SendVec, 
+			 Array<int,1> &RecvVec)
   {
     RecvVec = SendVec;
   }
