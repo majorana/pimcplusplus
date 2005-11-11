@@ -154,6 +154,22 @@ namespace IO {
     bool Write(Array<T,RANK> &val, T0 s0) 
     { return Write(val, s0, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
   
+    template<typename T>
+    bool Append (const T val)
+    {
+
+    }
+
+    template<typename T, int RANK>
+    bool Append(Array<T,RANK> &val)
+    {
+      assert (GetRank() == (RANK+1));
+      int n = GetExtent(0);
+      for (int i=0; i<RANK; i++)
+	assert (val.extent(i) == GetExtent(i+1));
+      Resize(n+1);
+      return Write (val, n);
+    }
     
   };
 
