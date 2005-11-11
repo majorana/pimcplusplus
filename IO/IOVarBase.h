@@ -45,52 +45,52 @@ namespace IO {
 	     typename T8, typename T9>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6,
 	      T7 s7, T8 s8, T9 s9) 
-    { Read(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, n0); }
+    { return Read(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6, typename T7,
 	     typename T8>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6,
 	      T7 s7, T8 s8) 
-    { Read(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, n0, n0); }
+    { return Read(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6, typename T7>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6,
 	      T7 s7) 
-    { Read(val, s0, s1, s2, s3, s4, s5, s6, s7, n0, n0, n0); }
+    { Rreturn ead(val, s0, s1, s2, s3, s4, s5, s6, s7, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6) 
-    { Read(val, s0, s1, s2, s3, s4, s5, s6, n0, n0, n0, n0); }
+    { return Read(val, s0, s1, s2, s3, s4, s5, s6, n0, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5) 
-    { Read(val, s0, s1, s2, s3, s4, s5, n0, n0, n0, n0, n0); }
+    { return Read(val, s0, s1, s2, s3, s4, s5, n0, n0, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4) 
-    { Read(val, s0, s1, s2, s3, s4, n0, n0, n0, n0, n0, n0); }
+    { return Read(val, s0, s1, s2, s3, s4, n0, n0, n0, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3) 
-    { Read(val, s0, s1, s2, s3, n0, n0, n0, n0, n0, n0, n0); }
+    { return Read(val, s0, s1, s2, s3, n0, n0, n0, n0, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2) 
-    { Read(val, s0, s1, s2, n0, n0, n0, n0, n0, n0, n0, n0); }
+    { return Read(val, s0, s1, s2, n0, n0, n0, n0, n0, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1) 
-    { Read(val, s0, s1, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
+    { return Read(val, s0, s1, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0>
     bool Read(Array<T,RANK> &val, T0 s0) 
-    { Read(val, s0, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
+    { return Read(val, s0, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
     
 
     ///////////////////////
@@ -107,53 +107,54 @@ namespace IO {
 	     typename T8, typename T9>
     bool Write(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6,
 	       T7 s7, T8 s8, T9 s9) 
-    { Write(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, n0); }
+    { return Write(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6, typename T7,
 	     typename T8>
     bool Write(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6,
 	       T7 s7, T8 s8) 
-    { Write(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, n0, n0); }
+    { return Write(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6, typename T7>
     bool Write(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6,
 	       T7 s7) 
-    { Write(val, s0, s1, s2, s3, s4, s5, s6, s7, n0, n0, n0); }
+    { return Write(val, s0, s1, s2, s3, s4, s5, s6, s7, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6>
     bool Write(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6) 
-    { Write(val, s0, s1, s2, s3, s4, s5, s6, n0, n0, n0, n0); }
+    { return Write(val, s0, s1, s2, s3, s4, s5, s6, n0, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5>
     bool Write(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5) 
-    { Write(val, s0, s1, s2, s3, s4, s5, n0, n0, n0, n0, n0); }
+    { return Write(val, s0, s1, s2, s3, s4, s5, n0, n0, n0, n0, n0); }
 
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4>
     bool Write(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4) 
-    { Write(val, s0, s1, s2, s3, s4, n0, n0, n0, n0, n0, n0); }
+    { return Write(val, s0, s1, s2, s3, s4, n0, n0, n0, n0, n0, n0); }
 
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3>
     bool Write(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3) 
-    { Write(val, s0, s1, s2, s3, n0, n0, n0, n0, n0, n0, n0); }
+    { return Write(val, s0, s1, s2, s3, n0, n0, n0, n0, n0, n0, n0); }
 
     template<typename T,  int RANK,    typename T0, typename T1, typename T2>
     bool Write(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2) 
-    { Write(val, s0, s1, s2, n0, n0, n0, n0, n0, n0, n0, n0); }
+    { return Write(val, s0, s1, s2, n0, n0, n0, n0, n0, n0, n0, n0); }
 
     template<typename T,  int RANK,    typename T0, typename T1>
     bool Write(Array<T,RANK> &val, T0 s0, T1 s1) 
-    { Write(val, s0, s1, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
+    { return Write(val, s0, s1, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
 
     template<typename T,  int RANK,    typename T0>
     bool Write(Array<T,RANK> &val, T0 s0) 
-    { Write(val, s0, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
+    { return Write(val, s0, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
   
+    
   };
 
 
