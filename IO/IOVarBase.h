@@ -10,6 +10,17 @@ namespace IO {
   typedef enum { DOUBLE_TYPE, INT_TYPE, STRING_TYPE, BOOL_TYPE, INVALID } IODataType;
   typedef enum { HDF5_TYPE, ASCII_TYPE} IOFileType;
   
+  ///////////////////////////////////////////////////////////////////
+  /// The following is a template trick for counting how many     ///
+  /// dimension reductions we have made to a dataset by indexing  ///
+  /// by integer arguements.                                      ///
+  ///////////////////////////////////////////////////////////////////
+  template<typename T> class SliceCheck
+  { public:  static const int isSlice = 0; };
+
+  template<> class SliceCheck<int>
+  { public:  static const int isSlice = 1; };
+
   class IOVarBase
   {
   private:
@@ -58,7 +69,7 @@ namespace IO {
 	     typename T3, typename T4, typename T5, typename T6, typename T7>
     bool Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6,
 	      T7 s7) 
-    { Rreturn ead(val, s0, s1, s2, s3, s4, s5, s6, s7, n0, n0, n0); }
+    { return Read(val, s0, s1, s2, s3, s4, s5, s6, s7, n0, n0, n0); }
     
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6>
@@ -155,21 +166,15 @@ namespace IO {
     { return Write(val, s0, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0); }
   
     template<typename T>
-    bool Append (const T val)
-    {
-
-    }
-
-    template<typename T, int RANK>
-    bool Append(Array<T,RANK> &val)
-    {
-      assert (GetRank() == (RANK+1));
-      int n = GetExtent(0);
-      for (int i=0; i<RANK; i++)
-	assert (val.extent(i) == GetExtent(i+1));
-      Resize(n+1);
-      return Write (val, n);
-    }
+    bool Append (const T val);
+    template<class T>
+    bool Append(Array<T,1> &val);
+    template<class T>
+    bool Append(Array<T,2> &val);
+    template<class T>
+    bool Append(Array<T,3> &val);
+    template<class T>
+    bool Append(Array<T,4> &val);
     
   };
 

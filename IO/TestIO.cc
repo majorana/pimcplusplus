@@ -88,6 +88,19 @@ void TestDoubleRead(IOSectionClass &io)
 }
 
 
+void
+TestAppend (IOSectionClass &out)
+{
+  out.NewSection("Append");
+  Array<double,1> E(1);
+  E(0) = 5.0;
+  out.WriteVar ("E", E);
+  IOVarBase *Evar = out.GetVarPtr("E");
+  for (double e=6.0; e<20.0; e++)
+    Evar->Append(e);
+  out.CloseSection();
+}
+
 
 
 void TestHDF5()
@@ -160,6 +173,7 @@ main()
   ioHDF5.NewFile ("TestHDF5.h5");
   TestDoubleWrite(ioHDF5);
   TestDoubleRead(ioHDF5);
+  TestAppend(ioHDF5);
 
   IOSectionClass ioASCII;
   ioASCII.NewFile ("TestASCII.txt");

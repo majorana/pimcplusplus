@@ -1,12 +1,17 @@
 #ifndef IO_H
 #define IO_H
 
+#include "IOBase.h"
 #include "IOVar.h"
 #include "IOHDF5.h"
 #include "IOASCII.h"
 
 namespace IO {
-
+  template<> inline bool 
+  IOTreeClass::WriteVar (string name, const char* val)
+  {
+    return WriteVar(name, string(val));
+  }
   template<typename T> bool 
   IOTreeClass::WriteVar (string name, T val)
   {
@@ -178,6 +183,11 @@ namespace IO {
     /// and variable names.
     void PrintTree()
     { CurrentSection->PrintTree(); }
+
+    IOSectionClass(IOSectionClass &io)
+    {
+      CurrentSection = io.CurrentSection;
+    }
 
     IOSectionClass() 
     {

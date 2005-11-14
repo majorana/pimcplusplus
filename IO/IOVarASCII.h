@@ -8,17 +8,32 @@ namespace IO {
 
   template<typename T, int RANK> class IOVarASCII;
 
-  template<typename T,  typename T0, typename T1, typename T2, typename T3, typename T4,  
+//   template<typename T,  typename T0, typename T1, typename T2, typename T3, typename T4,  
+// 	   typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
+//   class ASCIISliceMaker
+//   {
+//   public:
+//     static const int rank =      ArraySectionInfo<T0>::rank + ArraySectionInfo<T1>::rank + 
+//     ArraySectionInfo<T2>::rank + ArraySectionInfo<T3>::rank + ArraySectionInfo<T4>::rank + 
+//     ArraySectionInfo<T5>::rank + ArraySectionInfo<T6>::rank + ArraySectionInfo<T7>::rank + 
+//     ArraySectionInfo<T8>::rank + ArraySectionInfo<T9>::rank + ArraySectionInfo<T10>::rank;
+
+//     typedef IOVarASCII<T,rank> SliceType;
+//   };
+
+  template<typename T, int RANK, typename T0, typename T1, typename T2, typename T3, typename T4,
 	   typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
   class ASCIISliceMaker
   {
   public:
-    static const int rank =      ArraySectionInfo<T0>::rank + ArraySectionInfo<T1>::rank + 
-    ArraySectionInfo<T2>::rank + ArraySectionInfo<T3>::rank + ArraySectionInfo<T4>::rank + 
-    ArraySectionInfo<T5>::rank + ArraySectionInfo<T6>::rank + ArraySectionInfo<T7>::rank + 
-    ArraySectionInfo<T8>::rank + ArraySectionInfo<T9>::rank + ArraySectionInfo<T10>::rank;
+    static const int rank = RANK -
+      (SliceCheck<T0>::isSlice + SliceCheck<T1>::isSlice + SliceCheck<T2>::isSlice +
+       SliceCheck<T3>::isSlice + SliceCheck<T4>::isSlice + SliceCheck<T5>::isSlice +
+       SliceCheck<T6>::isSlice + SliceCheck<T7>::isSlice + SliceCheck<T8>::isSlice +
+       SliceCheck<T9>::isSlice + SliceCheck<T10>::isSlice);
 
     typedef IOVarASCII<T,rank> SliceType;
+    typedef Array<T,rank> T_slice;
   };
 
   template<typename T, int RANK>
@@ -28,7 +43,7 @@ namespace IO {
     Array<T,RANK> ArrayValue;
     template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
 	     typename T6, typename T7, typename T8, typename T9, typename T10>
-    typename ASCIISliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType     
+    typename ASCIISliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType     
     Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10);
 
     int GetRank();
@@ -255,10 +270,10 @@ namespace IO {
   template<class T, int RANK>
   template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
 	   typename T6, typename T7, typename T8, typename T9, typename T10>
-  typename ASCIISliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType 
+  typename ASCIISliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType 
   IOVarASCII<T,RANK>::Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10)
   {
-    typedef typename ASCIISliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType newSliceType;
+    typedef typename ASCIISliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType newSliceType;
     newSliceType newVar(Name);
     newVar.ArrayValue.reference(ArrayValue(s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10));
     return newVar;

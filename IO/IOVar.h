@@ -6,18 +6,6 @@
 
 namespace IO {
 
-  ///////////////////////////////////////////////////////////////////
-  /// The following is a template trick for counting how many     ///
-  /// dimension reductions we have made to a dataset by indexing  ///
-  /// by integer arguements.                                      ///
-  ///////////////////////////////////////////////////////////////////
-  template<typename T> class SliceCheck
-  { public:  static const int isSlice = 0; };
-
-  template<> class SliceCheck<int>
-  { public:  static const int isSlice = 1; };
-
-
   template<typename T> bool
   IOVarBase::Read(T &val)
   {
@@ -138,7 +126,93 @@ namespace IO {
       return newVar->Slice(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10).VarWrite(val);
     }
 
-  }	
+  }
+
+  template<typename T> bool 
+  IOVarBase::Append (const T val)
+  {
+    assert (GetRank() == 1);
+    int n = GetExtent(0);
+    Resize(n+1);
+    Array<T,1> v(1);
+    v(0) = val;
+    return Write (v, Range(n,n));
+  }
+
+//   template<typename T, int RANK> bool 
+//   IOVarBase::Append(Array<T,RANK> &val)
+//   {
+//     assert (GetRank() == (RANK+1));
+//     int n = GetExtent(0);
+//     for (int i=0; i<RANK; i++)
+//       assert (val.extent(i) == GetExtent(i+1));
+
+//     if (GetFileType() == HDF5_TYPE) {
+//       IOVarHDF5<T,RANK+1>* newVar = dynamic_cast<IOVarHDF5<T,RANK+1>*>(this);
+//       if (newVar == NULL) {
+// 	cerr << "Error in dynamic cast to IOVarHDF5.\n";
+// 	abort();
+//       }
+//       newVar->Resize(n+1);
+//       return newVar->Slice(n, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0).VarWrite(val);
+//     }
+//     else if (GetFileType() == ASCII_TYPE) {
+//       IOVarASCII<T,RANK+1>* newVar = dynamic_cast<IOVarASCII<T,RANK+1>*>(this);
+//       if (newVar == NULL) {
+// 	cerr << "Error in dynamic cast to IOVarASCII.\n";
+// 	abort();
+//       }
+//       newVar->Resize(n+1);
+//       return newVar->Slice(n, n0, n0, n0, n0, n0, n0, n0, n0, n0, n0).VarWrite(val);
+//     }
+//   }
+  
+  template<class T> bool
+  IOVarBase::Append(Array<T,1> &val)
+  {
+    assert (GetRank()==2);
+    int n = GetExtent(0);
+    assert (val.extent(0) == GetExtent(1));
+    Resize(n+1);
+    return Write(val, n, Range::all());
+  } 
+
+  template<class T> bool
+  IOVarBase::Append(Array<T,2> &val)
+  {
+    assert (GetRank()==3);
+    int n = GetExtent(0);
+    assert (val.extent(0) == GetExtent(1));
+    assert (val.extent(1) == GetExtent(2));
+    Resize(n+1);
+    return Write(val, n, Range::all(), Range::all());
+  } 
+
+  template<class T> bool
+  IOVarBase::Append(Array<T,3> &val)
+  {
+    assert (GetRank()==4);
+    int n = GetExtent(0);
+    assert (val.extent(0) == GetExtent(1));
+    assert (val.extent(1) == GetExtent(2));
+    assert (val.extent(2) == GetExtent(3));
+    Resize(n+1);
+    return Write(val, n, Range::all(), Range::all(), Range::all());
+  } 
+
+  template<class T> bool
+  IOVarBase::Append(Array<T,4> &val)
+  {
+    assert (GetRank()==5);
+    int n = GetExtent(0);
+    assert (val.extent(0) == GetExtent(1));
+    assert (val.extent(1) == GetExtent(2));
+    assert (val.extent(2) == GetExtent(3));
+    assert (val.extent(3) == GetExtent(4));
+    Resize(n+1);
+    return Write(val, n, Range::all(), Range::all(), Range::all(), Range::all());
+  } 
+
 
 }       /// Ends namespace IO
 

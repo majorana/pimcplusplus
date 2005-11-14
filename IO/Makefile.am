@@ -1,19 +1,24 @@
-check_PROGRAMS = TestXML TestHDF5
+check_PROGRAMS = TestXML TestHDF5 TestIO
 
-LDADD = libciao.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(LIBS)
+LDADD = $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(LIBS)
 AM_CXXFLAGS = $(XML2_CFLAGS) $(HDF5_CFLAGS) $(BLITZ_CFLAGS)
 
 TestXML_SOURCES = TestXML.cc
-#TestXML_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
-#TestXML_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
+TestXML_LDADD = libciao.la
 
 TestHDF5_SOURCES = TestHDF5.cc
+TestHDF5_LDADD = libciao.la
+#TestHDF5_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
+#TestHDF5_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
+
+TestIO_SOURCES = TestIO.cc
+TestIO_LDADD = libIO.la
 #TestHDF5_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
 #TestHDF5_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
 
 includedir=$(prefix)/include/Common/IO
 
-noinst_LTLIBRARIES = libciao.la
+noinst_LTLIBRARIES = libciao.la libIO.la
 libciao_la_SOURCES = FileExpand.h        \
                      InputOutput.h       \
                      InputOutput.cc      \
@@ -25,6 +30,21 @@ libciao_la_SOURCES = FileExpand.h        \
                      InputOutputXML.h    \
                      InputOutputXML.cc   
 
+libIO_la_SOURCES =   IO.cc               \
+                     IO.h                \
+                     IOASCII.cc          \
+                     IOASCII.h           \
+                     IOBase.h            \
+                     IOHDF5.cc           \
+                     IOHDF5.h            \
+                     IOVar.h             \
+                     IOVarASCII.h        \
+                     IOVarBase.h         \
+                     IOVarHDF5.cc        \
+                     IOVarHDF5.h          
+
+
+
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
@@ -35,5 +55,9 @@ libciao_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
 #endif
 
 
-include_HEADERS = InputOutput.h InputOutputASCII.h InputOutputBase.h InputOutputHDF5.h InputOutputXML.h FileExpand.h
+include_HEADERS = InputOutput.h     InputOutputASCII.h InputOutputBase.h \
+                  InputOutputHDF5.h InputOutputXML.h   FileExpand.h      \
+                  IO.h              IOASCII.h          IOBase.h          \
+                  IOHDF5.h          IOVar.h            IOVarASCII.h      \
+                  IOVarBase.h       IOVarHDF5.h
 

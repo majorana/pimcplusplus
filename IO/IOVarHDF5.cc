@@ -12,6 +12,7 @@ namespace IO {
 			    DiskSpaceID, H5P_DEFAULT, charArray.data());
     val = charArray.data();
     H5Tclose(type);
+    return (status == 0);
   }
 
   template<> bool

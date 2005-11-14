@@ -10,15 +10,29 @@ namespace IO {
   ///////////////////////////////////////////////////////////
   template<typename T, int RANK> class IOVarHDF5;
 
-  template<typename T,  typename T0, typename T1, typename T2, typename T3, typename T4,  
+//   template<typename T,  typename T0, typename T1, typename T2, typename T3, typename T4,  
+// 	   typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
+//   class HDF5SliceMaker
+//   {
+//   public:
+//     static const int rank =      ArraySectionInfo<T0>::rank + ArraySectionInfo<T1>::rank + 
+//     ArraySectionInfo<T2>::rank + ArraySectionInfo<T3>::rank + ArraySectionInfo<T4>::rank + 
+//     ArraySectionInfo<T5>::rank + ArraySectionInfo<T6>::rank + ArraySectionInfo<T7>::rank + 
+//     ArraySectionInfo<T8>::rank + ArraySectionInfo<T9>::rank + ArraySectionInfo<T10>::rank;
+
+//     typedef IOVarHDF5<T,rank> SliceType;
+//   };
+
+  template<typename T,  int RANK, typename T0, typename T1, typename T2, typename T3, typename T4,  
 	   typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
   class HDF5SliceMaker
   {
   public:
-    static const int rank =      ArraySectionInfo<T0>::rank + ArraySectionInfo<T1>::rank + 
-    ArraySectionInfo<T2>::rank + ArraySectionInfo<T3>::rank + ArraySectionInfo<T4>::rank + 
-    ArraySectionInfo<T5>::rank + ArraySectionInfo<T6>::rank + ArraySectionInfo<T7>::rank + 
-    ArraySectionInfo<T8>::rank + ArraySectionInfo<T9>::rank + ArraySectionInfo<T10>::rank;
+    static const int rank = RANK -
+      (SliceCheck<T0>::isSlice + SliceCheck<T1>::isSlice + SliceCheck<T2>::isSlice +
+       SliceCheck<T3>::isSlice + SliceCheck<T4>::isSlice + SliceCheck<T5>::isSlice +
+       SliceCheck<T6>::isSlice + SliceCheck<T7>::isSlice + SliceCheck<T8>::isSlice +
+       SliceCheck<T9>::isSlice + SliceCheck<T10>::isSlice);
 
     typedef IOVarHDF5<T,rank> SliceType;
   };
@@ -34,7 +48,7 @@ namespace IO {
 
     template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
 	     typename T6, typename T7, typename T8, typename T9, typename T10>
-    typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType     
+    typename HDF5SliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType     
     Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10);
     
     int GetRank();
@@ -303,17 +317,17 @@ namespace IO {
   template<class T, int RANK>
   template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
 	   typename T6, typename T7, typename T8, typename T9, typename T10>
-  typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType 
+  typename HDF5SliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType 
   IOVarHDF5<T,RANK>::Slice(T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10)
   {
-    typedef typename HDF5SliceMaker<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType newSliceType;
+    typedef typename HDF5SliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType newSliceType;
     newSliceType newVar;
 
     newVar.DatasetID = DatasetID;
     newVar.DiskSpaceID = H5Scopy(H5Dget_space(DatasetID));
   
     hsize_t start[RANK], count[RANK], stride[RANK], dims[RANK], maxdims[RANK];
-    hsize_t memDims[SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank];
+    hsize_t memDims[HDF5SliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank];
     H5Sget_simple_extent_dims(newVar.DiskSpaceID, dims, maxdims);
   
     int memDimsIndex=0;
@@ -430,7 +444,7 @@ namespace IO {
 	memDimsIndex++;
       }
     }
-    newVar.MemSpaceID = H5Screate_simple(SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank,
+    newVar.MemSpaceID = H5Screate_simple(HDF5SliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank,
 					 memDims, memDims);
     H5Sselect_hyperslab(newVar.DiskSpaceID, H5S_SELECT_SET, start, stride, count, NULL);
     return newVar;
