@@ -221,6 +221,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection("Vacancy");
       tempObs=new VacancyLocClass(PathData,OutFile);
     }
+    else if (theObserveType=="OpenOrientation"){
+      if (iAmRoot)
+	OutFile.NewSection("OpenOrientation");
+      tempObs=new OpenOrientationClass(PathData,OutFile);
+    }
     else if (theObserveType=="CycleCount"){
       if (iAmRoot)
 	OutFile.NewSection("CycleCount");
