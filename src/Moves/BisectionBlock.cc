@@ -3,13 +3,16 @@
 
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
-
+  bool orderNBosons;
   string permuteType, speciesName;
   //  StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   assert (in.ReadVar ("name", Name));
+  in.ReadVar("OrderNBosons",orderNBosons);
+  bool addStructureRejectStage=false;
+  in.ReadVar("StructureReject",addStructureRejectStage);
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
   if    (PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION){
     HaveRefslice=true;
@@ -46,8 +49,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     else
       newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
-      ////ADDED JUST FOR THE MINUTE HACK! FOR THE hehp project
-      ////      newStage->Actions.push_back(&PathData.Actions.StructureReject);
+      if (addStructureRejectStage)
+	newStage->Actions.push_back(&PathData.Actions.StructureReject);
       ///If it's David's long range class then do this
       if (PathData.Path.DavidLongRange){
 	newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
@@ -143,13 +146,30 @@ void BisectionBlockClass::ChooseTimeSlices()
     Slice2 = Slice1+sliceSep;
   }
   //  if (PathData.Path.Communicator.MyProc()==0)
-    //    cerr<<"Ending Choosing time slices"<<endl;
+  //    cerr<<"Ending Choosing time slices"<<endl;
 }
 
 void BisectionBlockClass::MakeMove()
 {
+
+  // if (PathData.Path.Communicator.MyProc()==0)
+  //  cerr<<"Entering Bisection Block class "<<PathData.Path.Communicator.MyProc()<<endl;
+  //  perr << "BisectionBlock MakeMove.\n";
+  //  cerr<<"Starting my bisection block"<<endl;
+
+  //  cerr<<"I'm in bisection block"<<endl;
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
+
+  //  cerr<<"I am binning from "<<Slice1<<" to "<<Slice2<<"in bisection block"<<endl;
+  if (PathData.Path.OrderN){
+    for (int slice=Slice1;slice<=Slice2;slice++)
+      PathData.Path.Cell.BinParticles(slice);
+  }
+  //  cerr<<"Moving Join"<<endl;
+  //  sleep(10);
+
+
   ((PermuteStageClass*)PermuteStage)->InitBlock();
   ActiveParticles.resize(1);
   for (int step=0; step<StepsPerBlock; step++) {
