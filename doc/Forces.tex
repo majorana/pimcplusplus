@@ -1,0 +1,61 @@
+\documentclass{article}
+\usepackage{amsmath}
+\title{Force calculations with PIMC}
+\author{Kenneth P. Esler Jr.}
+\date{\today}
+
+\newcommand{\vr}{\mathbf{r}}
+\newcommand{\vrp}{\mathbf{r}'}
+\newcommand{\vR}{\mathbf{R}}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+\section{Pair action gradients}
+
+\begin{eqnarray}
+\vr \equiv   \vr_\text{elec} - \vR \\
+\vrp \equiv  \vrp_\text{elec} - \vR
+\end{eqnarray}
+Now $u = u(\vr,\vrp;\tau)$.  We wish to compute the gradient,
+$\nabla_\vR u(\vr, \vrp; \tau)$.  Because of symmetry, it is
+convenient to store, $u(\vr, \vrp;\tau) = u(q,s,z)$, where
+\begin{eqnarray}
+q \equiv \frac{|\vr| + |\vrp|}{2} \\
+z \equiv \frac{|\vr| - |\vrp|}{2} \\
+s \equiv |\vr - \vrp|
+\end{eqnarray}
+Since $s$ is independent of $\vR$, we may write
+\begin{equation}
+\nabla_\vR u = \frac{\partial u}{\partial q} \nabla_\vR q +
+\frac{\partial u}{\partial z} \nabla_\vR z
+\end{equation}
+Then we may write
+\begin{eqnarray}
+q & = & \frac{1}{2} \left\{\left[ (R_x - r_x)^2 + (R_y - r_y)^2 +
+  (R_z-r_z)^2\right]^{\frac{1}{2}}+ 
+\left[(R_x-r'_x)^2 +(R_y-r'_y)^2 +
+  (R_z-r'_z)^2\right]^\frac{1}{2}\right\} \\
+z & = &\frac{1}{2} \left\{\left[ (R_x - r_x)^2 + (R_y - r_y)^2 +
+  (R_z-r_z)^2\right]^{\frac{1}{2}}- 
+\left[(R_x-r'_x)^2 +(R_y-r'_y)^2 +
+  (R_z-r'_z)^2\right]^\frac{1}{2}\right\} 
+\end{eqnarray}
+Hence,
+\begin{eqnarray}
+  \nabla_\vR q & = & -\frac{\hat{\vr} + \hat{\vr}'}{2} \\
+  \nabla_\vR z & = & -\frac{\hat{\vr} - \hat{\vr}'}{2} \\
+\end{eqnarray}
+Then, we have
+\begin{equation}
+\nabla_{\vR} u(q,z,s;\tau) = -\frac{1}{2}\left[\frac{\partial u}{\partial q}
+\left(\hat{\vr} + \hat{\vr}'\right)
+-\frac{\partial u}{\partial z} \left(\hat{\vr} -\hat{\vr}'\right) \right]
+\end{equation}
+
+
+
+\end{document}
