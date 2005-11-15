@@ -1,15 +1,18 @@
 #include "ShortRangeClass.h"
 #include "../PathDataClass.h"
-
+#include "ShortRangeOnClass.h"
+#include "time.h"
 ///This has to be called after pathdata knows how many
 ///particles it has
 void ShortRangeClass::Read(IOSectionClass& in)
 {
   DoPtcl.resize(PathData.Path.NumParticles());
+  TotalTime=0;
 }
 
 ShortRangeClass::ShortRangeClass(PathDataClass &pathData,
 				 Array<PairActionFitClass* ,2> &pairMatrix) : 
+  ToCheck(pathData,pairMatrix),
   ActionBaseClass (pathData),
   PairMatrix(pairMatrix)
 {
@@ -20,11 +23,13 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 			       const Array<int,1> &changedParticles,
 			       int level)
 {
+  double TotalU=0.0;
+  //  int startTime=clock();
+  //  for (int toRun=0;toRun<1000;toRun++){
   PathClass &Path=PathData.Path;
   // First, sum the pair actions
   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
     Path.DoPtcl(ptcl)=true;
-  double TotalU = 0.0;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
@@ -109,6 +114,25 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 //    cerr<<"My link "<<counter+1<<" "<<counter+2<<" is "
 //	<<TotalUArray(counter)<<endl;
 //  }
+//  cerr<<endl;
+  //  cerr<<"My U is "<<TotalU<<endl;
+  //  cerr<<"Other U is "<<ToCheck.Action(slice1, slice2,
+  //				      changedParticles,
+  //				      level);
+  //cerr<<endl;
+  //cerr<<endl;
+  //  }
+  //  int endTime=clock();
+//   cerr<<"Diff is "<< (double)(endTime-startTime)/(double)CLOCKS_PER_SEC<<endl;
+//   startTime=clock();
+//   double dummyVar;
+//   for (int numTime=0;numTime<1000;numTime++)
+//     // assert(TotalU-ToCheck.Action(slice1, slice2,changedParticles,level)<1e-2);
+//     dummyVar+=ToCheck.Action(slice1, slice2,changedParticles,level);
+//   endTime=clock();
+//   cerr<<"O(n) Diff is "<<(double)(endTime-startTime)/(double)CLOCKS_PER_SEC<<endl;
+//   cerr<<endl;
+//   cerr<<"A: "<<dummyVar<<" "<<TotalU<<endl;
   return (TotalU);
 }
 

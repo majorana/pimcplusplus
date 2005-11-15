@@ -4,6 +4,8 @@
 #include "ActionBase.h"
 #include <Common/PairAction/PAFit.h>
 
+#include "ShortRangeOnClass.h"
+
 /// The ShortRangeClass is an action class which stores the part of
 /// the potential pair action that is summed in real space.  If the
 /// potential is short range, it contains the whole potential action.
@@ -13,6 +15,8 @@ class ShortRangeClass : public ActionBaseClass
 protected:
   Array<PairActionFitClass*,2> &PairMatrix;
   Array<bool,1> DoPtcl;
+  ShortRangeOnClass ToCheck;
+  int TotalTime;
 public:
   void Read (IOSectionClass &in);
   double SingleAction (int slice1, int slice2, 
