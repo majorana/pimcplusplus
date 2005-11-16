@@ -1,5 +1,10 @@
+#include "EmptyStage.h"
 #include "BisectionBlock.h"
 #include "StructureReject.h"
+#include "CouplingStage.h"
+#include "WormPermuteStageClass.h"
+#include "WormPermuteStageClass2.h"
+
 
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
@@ -32,16 +37,33 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   else if (permuteType == "NONE") 
     PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
 					   OutSection);
+  else if (permuteType=="OPEN")
+    PermuteStage = new WormPermuteStage2Class(PathData,SpeciesNum,NumLevels,
+					     OutSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);
   }
   PermuteStage->Read (in);
   Stages.push_back (PermuteStage);
+  if (permuteType=="OPEN"){
+    EmptyStageClass *newStage=new EmptyStageClass(PathData,OutSection);
+    newStage->Read(in);
+    newStage->Actions.push_back(&PathData.Actions.Kinetic);
+    Stages.push_back(newStage);
+  }
+//   if (PathData.Path.Random.Local()>0.5)
+//     PathData.Path.ExistsCoupling=1;
+//   else
+//     PathData.Path.ExistsCoupling=0;
+
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
 							     OutSection);
+    newStage->TotalLevels=NumLevels;
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
+
+    
     if (PathData.Path.OpenPaths && level==0)
       newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
     if (PathData.Path.OpenPaths && level>0)
@@ -79,10 +101,14 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 
 //   ///HACK! Addding a stage that will reject the move if the structure
 //   //factor gets too large
-//   StructureRejectStageClass* structureReject =
-//     new StructureRejectStageClass(PathData,in);
-//   structureReject->Read(in);
-//   Stages.push_back(structureReject);
+  bool useStructureRejectStage=false;
+  in.ReadVar("StructureReject",useStructureRejectStage);
+  if (useStructureRejectStage){
+    StructureRejectStageClass* structureReject =
+      new StructureRejectStageClass(PathData,in,OutSection);
+    structureReject->Read(in);
+    Stages.push_back(structureReject);
+  }
   // Add the nodal action stage, if necessary
 }
 
