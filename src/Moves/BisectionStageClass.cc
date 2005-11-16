@@ -167,6 +167,8 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
       logSampleProb += prefactorOfSampleProb  + log(GaussProd);
       
       dVec rpp=rbar+Delta;
+      ////REALLY BAD HACK!
+      ///      dVec rpp=rbar+100*Delta;
       ///Here we've stored the new position in the path
       Path.SetPos(slice+(skip>>1),ptcl,rpp);
     }
