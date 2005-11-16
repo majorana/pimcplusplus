@@ -120,10 +120,11 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
   double levelTau = 0.5*PathData.Path.tau*skip;
 
   int numImages = PathData.Actions.NumImages;
-
+  int oldSlice2=slice2;
+  slice2=slice1+(1<<TotalLevels);
   double logSampleProb=0.0;
   double logOldSampleProb=0.0;
-
+  dVec firstDelta;
   for (int ptclIndex=0;ptclIndex<activeParticles.size();ptclIndex++){
     int ptcl=activeParticles(ptclIndex);
     double lambda=PathData.Path.ParticleSpecies(ptcl).lambda;
@@ -148,7 +149,13 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
       dVec  Delta;
       Path.Random.LocalGaussianVec(sigma,Delta);
       PathData.Path.PutInBox(Delta);
-
+//       if (ptclIndex==0)
+//       	firstDelta=Delta;
+//       if (ptclIndex==1){
+//       	double length=sqrt(dot(Delta,Delta));
+//       	double firstLength=sqrt(dot(firstDelta,firstDelta));
+//       	Delta=-1.0*firstDelta*length/firstLength;
+//       }
       double GaussProd=1.0;
       double GaussProdOld=1.0;
       for (int dim=0; dim<NDIM; dim++) {
@@ -183,7 +190,9 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
   //cerr << "oldSampleProb = " << logOldSampleProb << endl;
   //cerr << "newSample = " << newSample << endl;
   //cerr << "newSampleProb = " << logSampleProb << endl;
-
+  //  if (activeParticles.size()>1)
+  //    cerr<<"Value is "<<BisectionLevel<<": "<<exp(-logSampleProb+logOldSampleProb)<<endl;
+  slice2=oldSlice2;
   return exp(-logSampleProb+logOldSampleProb);
   //return (exp (-newSample + oldSample));
 }
