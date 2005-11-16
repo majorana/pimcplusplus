@@ -43,6 +43,20 @@ void CouplingStageClass::ChooseTimeSlices(int &slice1,int &slice2)
 double CouplingStageClass::Sample(int &slice1,int &slice2, 
 	      Array<int,1> &activeParticles)
 {
+  //slice1=0;
+  //    slice2=PathData.NumTimeSlices()-1;
+  //  activeParticles.resize(PathData.NumParticles());
+  //  for (int ptcl=0;ptcl<activeParticles.size();ptcl++)
+  //    activeParticles(ptcl)=ptcl;
+  if (PathData.Path.ExistsCoupling==1)
+    PathData.Path.ExistsCoupling=0;
+  else
+    PathData.Path.ExistsCoupling=1;
+  return 1.0;
+  
+
+
+  ///For free energy
   slice1=0;
   slice2=PathData.NumTimeSlices()-1;
     activeParticles.resize(1);
