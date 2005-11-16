@@ -3,14 +3,14 @@
 
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
-  bool orderNBosons;
+  //  bool orderNBosons;
   string permuteType, speciesName;
   //  StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   assert (in.ReadVar ("name", Name));
-  in.ReadVar("OrderNBosons",orderNBosons);
+  //  in.ReadVar("OrderNBosons",orderNBosons);
   bool addStructureRejectStage=false;
   in.ReadVar("StructureReject",addStructureRejectStage);
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
@@ -46,6 +46,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
     if (PathData.Path.OpenPaths && level>0)
       newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
+    else if (PathData.Path.OrderN)
+      newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
     else
       newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
