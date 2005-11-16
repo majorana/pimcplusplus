@@ -12,12 +12,14 @@ public:
 		Array<int,1> &activeParticles);
   void Accept();
   void Reject();
+  int TotalLevels;
   BisectionStageClass(PathDataClass &pathData, int level,
 		      IOSectionClass outSection) : 
     LocalStageClass(pathData,outSection)
   { 
     //do nothing for now
     BisectionLevel = level;
+
   }
 };
 
