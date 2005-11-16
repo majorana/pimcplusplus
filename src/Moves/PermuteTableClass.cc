@@ -78,7 +78,7 @@ void PermuteTableClass::ConstructHTable()
  
 // } 
  
- 
+  
 // Actually applies my cyclic permutation to a path at a given time
 // slice and the permutation vector in the path
 void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
@@ -145,11 +145,11 @@ double PermuteTableClass::AttemptPermutation()
 
 double PermuteTableClass::CalcReverseProb(const PermuteTableClass &forwardTable)
 {
+  
   // Reverse probabily for a single ptcl move is the same as that for the
   // forward move.
   if (forwardTable.CurrentCycle.Length == 1)
     return (forwardTable.CurrentCycle.P*forwardTable.NormInv);
-
   //We reconstruct things from scratch to make sure we do the right
   //thing. We can try to incrementally make this faster.
   ConstructCycleTable(forwardTable.SpeciesNum,
@@ -319,4 +319,5 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
 
   Norm = CycleTable(NumEntries-1).C;
   NormInv = 1.0/Norm;
+  //  cerr<<"The number of my table is "<<NumEntries<<endl;
 }
