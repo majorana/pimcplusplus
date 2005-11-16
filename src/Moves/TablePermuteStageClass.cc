@@ -14,6 +14,7 @@ void TablePermuteStageClass::Accept()
   //  assert(myLen>0);
   NumAccepted(myLen-1)++;
   NumAttempted(myLen-1)++;
+  ///switched for temporary test on cell method ???
   PermuteTableClass* temp;
   if (myLen!=1){
     temp=Forw;
