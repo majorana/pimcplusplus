@@ -35,7 +35,8 @@ libmoves_la_SOURCES  =            \
     OpenEndMove.cc               \
     OpenEndMove.h                \
     PermuteStageClass.cc         \
-    PermuteStageClass.h          \
+    PermuteTableOnClass.cc         \
+    PermuteTableOnClass.h          \
     PermuteTableClass.cc         \
     PermuteTableClass.h          \
     RandomPermClass.cc           \
