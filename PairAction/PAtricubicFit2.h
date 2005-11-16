@@ -26,6 +26,12 @@ private:
 		    double &y, double &t);
   inline void yt2zs(double q, double y, double t, int level,
 		    double &z, double &s);
+  /// This computes the partial derivative matrix.  Returs the matrix 
+  /// [ dq/dq  dy/dq  dt/dq;
+  ///   dq/dz  dy/dz  dt/dz;
+  ///   dq/ds  dy/ds  dt/ds ]
+  void PartialDerivs (double q, double z, double s, int level,
+		      TinyMatrix<double,3,3> &derivs);
   Array<double,1> sMax, sMaxInv;
 public:
   Grid *qgrid, *ygrid, *tgrid;
@@ -43,6 +49,8 @@ public:
 	      int NumBetas);
   double U(double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
+  void Derivs (double q, double z, double s2, int level,
+	       double &d_dq, double &d_dz);
   /// The diagonal action only -- used for long-range breakup
   double Udiag(double q, int level);
   /// The q-derivative of the above

@@ -1,0 +1,2 @@
+string PAfilename = "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5";
+double tau = 0.0625;

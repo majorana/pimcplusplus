@@ -1,7 +1,7 @@
 #ifndef PA_FIT_BASE_H
 #define PA_FIT_BASE_H
 
-#include "../IO/InputOutput.h"
+#include "../IO/IO.h"
 #include "../PH/Potential.h"
 #include "../Splines/CubicSpline.h"
 #include "Particle.h"
@@ -65,6 +65,10 @@ public:
   virtual double Vp (double r) { return Pot->dVdr(r); }
   /// The q-derivative of the above
   virtual double Vpp(double r) { return Pot->d2Vdr2(r); }
+  /// These derivatives are needed to compute the gradient
+  virtual void Derivs (double q, double z, double s2, int level,
+		       double &d_dq, double &d_dz)
+  { d_dq = d_dz = 0.0; }
 
   /////////////////////////
   /// Long-ranged stuff ///

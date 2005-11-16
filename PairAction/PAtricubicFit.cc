@@ -705,6 +705,45 @@ double PAtricubicFitClass::dU(double q, double z, double s2, int level)
 }
 
 
+void
+PAtricubicFitClass::Derivs(double q, double z, double s2, int level,
+			   double &d_dq, double &d_dz)
+{
+  double sign =  (z>0) ? 1.0 : -1.0;
+  z = fabs(z);
+  double qmax = qgrid->End;
+  double smax = 2.0*q;
+  double zmax = smax;
+  double smin = z;
+  double s=sqrt(s2);
+  double x;
+
+  if ((q<=qmax)&&(z<zmax)&&(s<smax)) {
+    if (q == 0.0) {
+      Vec3 grad = Usplines(level).Grad(0.0, 0.0, 0.0);
+      d_dq = grad[0];
+      d_dz = 0.0;
+    }
+    else {
+      double y = z/zmax;
+      double t = (s-z)/(smax-z);
+      Vec3 grad = Usplines(level).Grad(q,y,t);
+      d_dq = grad[0] + grad[1]*sign*z/(2.0*q*q);
+      d_dz = sign * grad[1]/(2.0*q);
+    }
+  }
+  else {
+    double beta = ldexp(SmallestBeta,level);
+    double r = q+0.5*z;
+    double rp = q-0.5*z;
+    double dVdr = Pot->dVdr(r);
+    double dVdrp = Pot->dVdr(rp);
+    d_dq = 0.25*(dVdr + dVdrp);
+    d_dz = -d_dq;
+  }
+
+}
+
 
 // double PAtricubicFitClass::dU(double q, double z, double s2, int level)
 // {

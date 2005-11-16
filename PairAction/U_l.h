@@ -6,7 +6,7 @@
 #include "../MPI/Communication.h"
 #include "../Integration/GKIntegration.h"
 #include "../SpecialFunctions/SpecialFunctions.h"
-#include "../IO/InputOutput.h"
+#include "../IO/IO.h"
 #include "FreeParticles.h"
 
 ////////////////////////////////////////////////////////////

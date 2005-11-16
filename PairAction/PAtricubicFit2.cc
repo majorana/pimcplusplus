@@ -765,3 +765,86 @@ void PAtricubicFit2Class::Setrc (double rc)
   Vcoefs = 0.0;
   Vcoefs(0) = Z1Z2; Vcoefs(1) = 0.0; Vcoefs(2) = 0.0;
 }
+
+
+
+void
+PAtricubicFit2Class::PartialDerivs(double q, double z, double s, int level,
+				   TinyMatrix<double,3,3> &derivs)
+{
+  double sgn_z = (z >= 0.0) ? 1.0 : -1.0;
+  z = fabs(z);
+  if (z < (q+q)) {
+    double smax = 2.0*q;
+    derivs(0,0) = 1.0;                              /// \partial q \partial q
+    derivs(1,0) = 0.0;                              /// \partial q \partial z
+    derivs(2,0) = 0.0;                              /// \partial q \partial s
+    derivs(0,1) = -z/(2.0*q*q);                     /// \partial y \partial q
+    derivs(1,1) = sgn_z/smax;                      /// \partial y \partial z
+    derivs(2,1) = 0.0;                              /// \partial y \partial s
+    derivs(0,2) = -2.0*(s-z)/((2.0*q-z)*(2.0*q-z)); /// \partial t \partial q
+                                                    /// \partial t \partial z
+    derivs(1,2) = sgn_z*(1.0/(z-smax) + (s-z)/((smax-z)*(smax-z)));
+    derivs(2,2) = 1/(smax-z);                       /// \partial t \partail s
+  }
+  else {
+    double smax = sMax(level);
+    derivs(0,0) = 1.0;                  /// \partial q \partial q
+    derivs(1,0) = 0.0;                  /// \partial q \partial z
+    derivs(2,0) = 0.0;                  /// \partial q \partial s
+    derivs(0,1) = 0.0;                  /// \partial y \partial q
+    derivs(1,1) = sgn_z*sMaxInv(level); /// \partial y \partial z
+    derivs(2,1) = 0.0;                  /// \partial y \partial s
+    derivs(0,2) = 0.0;                  /// \partial t \partial q
+                                        /// \partial t \partial z
+    derivs(1,2) = sgn_z*(1.0/(z-smax) + (s-z)/((smax-z)*(smax-z)));
+    derivs(2,2) = 1/(smax-z);           /// \partial t \partail s
+  }
+}
+
+
+void
+PAtricubicFit2Class::Derivs(double q, double z, double s2, int level,
+			    double &d_dq, double &d_dz)
+{
+  z = fabs(z);
+  double y, t;
+  double s = sqrt(s2);
+  zs2yt (q, z, s, level, y, t);
+  TinyMatrix<double,3,3> partDerivs;
+
+
+  if (q<=qgrid->End) {
+    if (q == 0.0) {
+      d_dq = Usplines(level).d_dx(0.0, 0.0, 0.0);
+      d_dz = 0.0;
+    }
+    else {
+      Vec3 grad;
+      PartialDerivs(q, z, s, level, partDerivs);
+      if (t < 1.0) 
+	grad = Usplines(level).Grad(q, y, t);
+      else if (y < 1.0)
+	grad = Usplines(level).Grad(q, y, 1.0);
+      else 
+	grad = Usplines(level).Grad(q, 1.0, 1.0);
+      d_dq = 
+	partDerivs(0,0)*grad[0] +
+	partDerivs(0,1)*grad[1] +
+	partDerivs(0,2)*grad[2];
+      d_dz = 
+	partDerivs(1,0)*grad[0] +
+	partDerivs(1,1)*grad[1] + 
+	partDerivs(1,2)*grad[2];
+    }
+  }
+  else {
+    double beta = ldexp(SmallestBeta,level);
+    double r = q+0.5*z;
+    double rp = q-0.5*z;
+    double dVdr = Pot->dVdr(r);
+    double dVdrp = Pot->dVdr(rp);
+    d_dq = 0.25*(dVdr + dVdrp);
+    d_dz = -d_dq;  
+  }
+}

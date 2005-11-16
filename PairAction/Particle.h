@@ -1,7 +1,7 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-#include "../IO/InputOutput.h"
+#include "../IO/IO.h"
 
 class ParticleClass
 {
