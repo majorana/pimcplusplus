@@ -93,7 +93,7 @@ namespace IO {
     /// function, reading the contents of the file into the tree.
     bool OpenFile (string fileName);
     string GetName(){ return CurrentSection->Name;}
-    inline string GetFileName();
+    string GetFileName();
     string GetVarName(int num){ return GetVarPtr(num)->GetName();}
     /// Creates a file at the top level, choosing the appropriate type
     /// based on the file extension.

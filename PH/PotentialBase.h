@@ -1,7 +1,8 @@
 #ifndef POTENTIAL_BASE_H
 #define POTENTIAL_BASE_H
 
-#include "../IO/InputOutput.h"
+#include "../IO/IO.h"
+using namespace IO;
 
 class Potential
 {

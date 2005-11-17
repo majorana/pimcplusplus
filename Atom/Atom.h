@@ -1,7 +1,8 @@
 #ifndef ATOM_H
 #define ATOM_H
+
 #include "../PH/PH.h"
-#include "../IO/InputOutput.h"
+#include "../IO/IO.h"
 #include <string>
 
 inline double SmoothStep (double x, double CutOff, double Width)

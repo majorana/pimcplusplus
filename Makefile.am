@@ -27,7 +27,7 @@ AUX_DIST              = $(ac_aux_dir)/config.guess \
 
 lib_LTLIBRARIES = libcommon.la
 libcommon_la_SOURCES =
-libcommon_la_LIBADD = IO/libciao.la                  \
+libcommon_la_LIBADD = IO/libIO.la                    \
                       Splines/libspline.la           \
                       SpecialFunctions/libspecfun.la \
                       Integration/libquad.la         \
@@ -42,6 +42,7 @@ libcommon_la_LIBADD = IO/libciao.la                  \
                       PairAction/libpairact.la       \
                       PlaneWavePHDFT/libpw.la        \
                       Atom/libatom.la 
+
 
 includedir=$(prefix)/include/Common
 include_HEADERS = Blitz.h config.h

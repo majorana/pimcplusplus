@@ -3,7 +3,7 @@
 
 #include "../PH/Potential.h"
 #include "../Splines/CubicSpline.h"
-#include "../IO/InputOutput.h"
+#include "../IO/IO.h"
 
 class RadialWF
 {

@@ -2,7 +2,6 @@
 #define CUBIC_SPLINE_H
 
 #include "Grid.h"
-#include "../IO/InputOutput.h"
 #include <iostream>
 
 

@@ -1,7 +1,8 @@
 #ifndef GRID_H
 #define GRID_H
 
-#include "../IO/InputOutput.h"
+#include "../IO/IO.h"
+using namespace IO;
 #include "../Blitz.h"
 
 //Ken's Grid Class
@@ -78,7 +79,7 @@ class LinearGrid : public Grid
   void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Points", grid); 
-    outSection.WriteVar ("Type", "Linear");
+    outSection.WriteVar ("Type", string("Linear"));
     outSection.WriteVar ("Start", Start);
     outSection.WriteVar ("End", End);
     outSection.WriteVar ("NumPoints", NumPoints);
@@ -181,7 +182,7 @@ class OptimalGrid : public Grid
   void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Points", grid); 
-    outSection.WriteVar ("Type", "Optimal");
+    outSection.WriteVar ("Type", string("Optimal"));
     outSection.WriteVar ("a", a);
     outSection.WriteVar ("b", b);
     outSection.WriteVar ("NumPoints", NumPoints);
@@ -327,7 +328,7 @@ class OptimalGrid2 : public Grid
   void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Points", grid); 
-    outSection.WriteVar ("Type", "Optimal2");
+    outSection.WriteVar ("Type", string("Optimal2"));
     outSection.WriteVar ("Start", Start);
     outSection.WriteVar ("End", End);
     outSection.WriteVar ("Ratio", Ratio);
@@ -387,7 +388,7 @@ class LogGrid : public Grid
   void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Points", grid); 
-    outSection.WriteVar ("Type", "Log");
+    outSection.WriteVar ("Type", string("Log"));
     outSection.WriteVar ("r0", r0);
     outSection.WriteVar ("Spacing", Spacing);
   }
@@ -460,7 +461,7 @@ private:
   void Write (IOSectionClass &outSection)
   {
     outSection.WriteVar ("Points", grid); 
-    outSection.WriteVar ("Type", "Cluster");
+    outSection.WriteVar ("Type", string("Cluster"));
     outSection.WriteVar ("Start", Start);
     outSection.WriteVar ("End", End);
     outSection.WriteVar ("Cluster", Cluster);

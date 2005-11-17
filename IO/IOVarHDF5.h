@@ -499,7 +499,7 @@ namespace IO {
     TinyVector<int,RANK> dims;
     H5Sget_simple_extent_dims(MemSpaceID, &(h5dims[0]), NULL);
     dims = h5dims;
-    cerr << "resizing val to " << dims << endl;
+    //    cerr << "resizing val to " << dims << endl;
     val.resize(dims);
    
     /// Now, call HDF5 to do the actual reading.
