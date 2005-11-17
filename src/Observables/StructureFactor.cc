@@ -91,29 +91,20 @@ void StructureFactorClass::WriteBlock()
   ///actually take the  max of all the structure factors
   SkMaxVar.Write(SkMax);
   PathData.Path.Communicator.Sum(Sk, SkSum);
-  if (PathData.Path.Communicator.MyProc()==0) {
+  if (PathData.Path.Communicator.MyProc()==0) 
     if (FirstTime) {
       FirstTime=false;
       WriteInfo();
-      Array<double,2> SofkArray(1,kVecs.size());
-      for (int ki=0; ki<kVecs.size(); ki++)
-	SofkArray(0,ki) = (double) SkSum(ki) / norm;
-      IOSection.WriteVar("y",SofkArray);
-      IOVar = IOSection.GetVarPtr("y");
     }
-    else {
-      Array<double,1> SofkArray(SkSum.size());
-      for (int ki=0; ki<kVecs.size(); ki++)
-	SofkArray(ki) = (double) SkSum(ki) / norm;
-      IOVar->Append(SofkArray);
-    }
-  }
+  Array<double,1> SofkArray(SkSum.size());
+  for (int ki=0; ki<kVecs.size(); ki++)
+    SofkArray(ki) = (double) SkSum(ki) / norm;
+  SofkVar.Write(SofkArray);
   ///Clear the structure factor counts
   Sk=0;
   TotalCounts=0;
   SkMax=0;
   MaxkVec=0;
-
 }
 
 

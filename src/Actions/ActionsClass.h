@@ -26,12 +26,15 @@
 class ActionsClass
 {
 private:
+  // This stores pointers to the pair actions.
   Array<PairActionFitClass*,1> PairArray;
-  Array<PairActionFitClass*,2> PairMatrix;
   PathDataClass &PathData;
   int MaxLevels; //is this the right place for this?
   void ReadNodalActions (IOSectionClass &in);
 public:
+  // This stores pointers to pair action fits for each pair of species.
+  Array<PairActionFitClass*,2> PairMatrix;
+
   /// Used to keep track of the total action
   double TotalA, TotalB;
 

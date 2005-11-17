@@ -1,6 +1,6 @@
 #include "KineticSphereClass.h"
 #include "../PathDataClass.h"
-#include "../Common/SpecialFunctions/SpecialFunctions.h"
+#include <Common/SpecialFunctions/SpecialFunctions.h>
 ///This has to be called after pathdata knows how many
 ///particles it has
 void KineticSphereClass::Read(IOSectionClass& in)

@@ -78,49 +78,29 @@ void AutoCorrClass::WriteBlock()
 {
   int countNeg = 0;
   PathClass &Path = PathData.Path;
-// replacing HistSum with Histogram
-//  Array<int,1> HistSum(Histogram.size());
   double norm=(double)(TotalCounts - LastTotal);
   cerr << "normalizing by " << norm << "; LastTotal is " << LastTotal << endl;
   LastTotal = TotalCounts;
- // norm = (double)TotalCounts * PathData.Path.TotalNumSlices* (double)(1.0)/PathData.Path.GetVol();
 
-  if (Path.Communicator.MyProc()==0) {
+  if (Path.Communicator.MyProc()==0) 
     if (FirstTime) {
       FirstTime=false;
       WriteInfo();
-      //Array<double,2> gofrArray(1,HistSum.size());
-      Array<double,2> gofrArray(1,Histogram.size());
-      for (int i=0; i<grid.NumPoints; i++){
-	gofrArray(0,i) = Histogram(i)/norm;// / (binVol*norm);
-      }
-      IOSection.WriteVar("y",gofrArray);
-      IOVar = IOSection.GetVarPtr("y");
     }
-    else {
-      //Array<double,1> gofrArray(HistSum.size());
-      Array<double,1> gofrArray(Histogram.size());
-      for (int i=0; i<grid.NumPoints; i++){
-//	gofrArray(0,i) = (double) HistSum(i) / (binVol*norm);
-	gofrArray(i) =  Histogram(i)/norm;// / (binVol*norm);
-	if (gofrArray(i) < 0.0) {
-          countNeg++;
-	  //cerr << "binVol = " << binVol << endl;
-	  //cerr << "norm = " << norm << endl;
-	  //cerr << "TotalCounts = " << TotalCounts << endl;
-	}
-      }
-      IOVar->Append(gofrArray);
+  Array<double,1> gofrArray(Histogram.size());
+  for (int i=0; i<grid.NumPoints; i++){
+    gofrArray(i) =  Histogram(i)/norm;// / (binVol*norm);
+    if (gofrArray(i) < 0.0) {
+      countNeg++;
     }
-    IOSection.FlushFile();
   }
-cerr << countNeg << " negative entries." << endl;
+  HistVar.Write(gofrArray);
+  cerr << countNeg << " negative entries." << endl;
 }
 
 
 void AutoCorrClass::Print()
 {
-  cerr << "HOLY CRAP I'M IN PRINT() " << endl;
   for (int i=0; i<(grid.NumPoints-1); i++)
     {
       double r1 = grid(i);

@@ -2,6 +2,7 @@
 #define MOVE_BASE_H
 
 #include "../PathDataClass.h"
+#include "../Observables/ObservableBase.h"
 
 /// This is the generic parent class for all moves, including "real moves"
 /// which actually move particles and "pseudo moves", which just shift around
@@ -14,9 +15,9 @@ protected:
   /// info like the description, etc.
   bool FirstTime;
   int TimesCalled, DumpFreq;
-
+  ObservableDouble RatioVar;
   ///You can add more IOVar pointers to inhereted classes if necessary
-  VarClass *IOVar;
+  
   IOSectionClass OutSection;  
 public:
   double SecondsInMove;
@@ -34,8 +35,11 @@ public:
   /// MoveClass constructor. Sets reference to the PathData object
   MoveClass(PathDataClass &myPathData, IOSectionClass outSection) : 
     PathData(myPathData), FirstTime(true), OutSection(outSection),
-    TimesCalled(0), DumpFreq(1000), SecondsInMove(0.0)
-    {Name="";}
+    TimesCalled(0), DumpFreq(1000), SecondsInMove(0.0),
+    Name(""), RatioVar("AcceptRatio", OutSection, myPathData.Path.Communicator)
+    {
+      // do nothing 
+    }
 };
   
 

@@ -8,6 +8,7 @@
 class WindingNumberClass : public ObservableClass
 {
  private:
+  ObservableVecDouble1 WNVar;
   int Freq;
   int DumpFreq;
   dVec TotalW2;
@@ -20,7 +21,9 @@ class WindingNumberClass : public ObservableClass
   void WriteBlock();
   void Read(IOSectionClass& IO);
   WindingNumberClass(PathDataClass &myPathData,IOSectionClass &ioSection):
-    ObservableClass(myPathData,ioSection) {
+    ObservableClass(myPathData,ioSection),
+    WNVar("WindingNumber", IOSection, myPathData.Path.Communicator)
+  {
     TimesCalled=0;
     NumSamples=0;
     TotalDisp.resize(PathData.Path.NumParticles());

@@ -1,7 +1,7 @@
 #ifndef RUN_INFO_H
 #define RUN_INFO_H
 
-#include <Common/IO/InputOutput.h>
+#include <Common/IO/IO.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -17,6 +17,7 @@
 #endif
 
 
+using namespace IO;
 
 class RunInfoClass
 {

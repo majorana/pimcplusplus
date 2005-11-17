@@ -1,7 +1,7 @@
 #ifndef PATH_CLASS_H
 #define PATH_CLASS_H
 
-#include <Common/IO/InputOutput.h>
+#include <Common/IO/IO.h>
 #include "MirroredClass.h"
 #include "SpeciesClass.h"
 #include <Common/Random/Random.h>
@@ -10,7 +10,7 @@
 #include <vector>
 class ActionsClass;
 
-
+using namespace IO;
 
 ///The number of time slices is the number of slices on this processor.
 ///In all cases this processor shares a time slice with the processor 

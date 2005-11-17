@@ -6,6 +6,7 @@
 /// A pair correlation function observable.
 class StructureFactorClass : public ObservableClass
 {
+  ObservableVecDouble1 SofkVar;
   /// Stores the total number of counts
 
   int TimesCalled;
@@ -33,7 +34,8 @@ public:
   void Clear();
   StructureFactorClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
     ObservableClass(myPathData,ioSection),
-    SkMaxVar("SkMax",IOSection,myPathData.Path.Communicator)
+    SkMaxVar("SkMax",IOSection,myPathData.Path.Communicator),
+    SofkVar("y", IOSection, myPathData.Path.Communicator)
     {
       TimesCalled=0;
     }
@@ -41,7 +43,8 @@ public:
 		       int species1, int species2) : 
     ObservableClass(myPathData, ioSection), 
     Species1(species1), Species2(species2),
-    SkMaxVar("SkMax",IOSection,myPathData.Path.Communicator)
+    SkMaxVar("SkMax",IOSection,myPathData.Path.Communicator),
+    SofkVar("y", IOSection, myPathData.Path.Communicator)
   { Initialize(); }
 };
 

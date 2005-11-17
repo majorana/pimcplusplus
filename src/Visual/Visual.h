@@ -3,7 +3,7 @@
 
 #include "../Common.h"
 #include "PathVis.h"
-#include <Common/IO/InputOutput.h>
+#include <Common/IO/IO.h>
 #include <gtkmm/adjustment.h>
 #include "OnePath.h"
 #include "BoxClass.h"
@@ -29,6 +29,8 @@ public:
 typedef enum {LINES, TUBES} PathTypeType;
 
 
+using namespace IO;
+
 /// VisualClass is the main GUI interaction for the path visualization
 /// code.  It allows the user to rotate around and zoom in and out of
 /// a box containing paths and classical particles dumped from
@@ -50,9 +52,15 @@ protected:
   // Node data //
   ///////////////
   bool HaveANodeData, HaveBNodeData;
+  bool HaveWarpPos;
   /// This stores raw node data from the pimc++ output file.  The 4
-  /// dimensions are (frame, x, y, z)
-  Array<double,4> ANodeData, BNodeData;
+  /// dimensions are (x, y, z)
+  void ReadFrameData (int frame);
+  IOSectionClass Infile;
+  IOVarBase *ANodeVar, *BNodeVar;
+  Array<int,1> NodePtcl, NodeSlice;
+  Array<double,3> ANodeData, BNodeData;
+  Array<double,2> WarpPos;
   LinearGrid Xgrid, Ygrid, Zgrid;
 
   /// These are used only for open loops.

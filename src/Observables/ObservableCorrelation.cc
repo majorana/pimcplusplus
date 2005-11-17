@@ -287,28 +287,16 @@ void nofrClass::WriteBlock()
     if (FirstTime) {
       FirstTime=false;
       WriteInfo();
-      Array<double,2> gofrArray(1,HistSum.size());
-      for (int i=0; i<grid.NumPoints-1; i++){
-	double r1 = grid(i);
-	double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
-	double r = 0.5*(r1+r2);
-	//	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-	gofrArray(0,i) = (double) HistSum(i) / (norm);
-      }
-      IOSection.WriteVar("y",gofrArray);
-      IOVar = IOSection.GetVarPtr("y");
     }
-    else {
-      Array<double,1> gofrArray(HistSum.size());
-      for (int i=0; i<grid.NumPoints-1; i++){
-	double r1 = grid(i);
-	double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
-	double r = 0.5*(r1+r2);
-	double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-	gofrArray(i) = (double) HistSum(i) / (norm);
-      }
-      IOVar->Append(gofrArray);
+    Array<double,1> gofrArray(HistSum.size());
+    for (int i=0; i<grid.NumPoints-1; i++){
+      double r1 = grid(i);
+      double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
+      double r = 0.5*(r1+r2);
+      double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
+      gofrArray(i) = (double) HistSum(i) / (norm);
     }
+    nofrVar.Write(gofrArray);
   }
   TotalCounts=0;
   Histogram=0;

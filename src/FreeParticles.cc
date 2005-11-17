@@ -1,7 +1,8 @@
 #include <Common/Blitz.h>
 #include <Common/Random/Random.h>
-#include <Common/IO/InputOutput.h>
+#include <Common/IO/IO.h>
 
+using namespace IO;
 // #define NDIM 3
 
 typedef TinyVector<int,NDIM> State;

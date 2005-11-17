@@ -2,7 +2,7 @@
 #define SPHERE_OBJECT_H
 
 #include "GLObject.h"
-#include "../Common/Blitz.h"
+#include <Common/Blitz.h>
 
 class SphereObject : public GLObject
 {

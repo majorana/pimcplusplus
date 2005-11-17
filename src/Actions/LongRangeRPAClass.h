@@ -2,7 +2,7 @@
 #define LONG_RANGE_RPA_CLASS_H
 
 #include "ActionBase.h"
-#include "../Common/PairAction/PAFit.h"
+#include <Common/PairAction/PAFit.h>
 
 /// LongRangeRPAClass is the Random Phase Approximation corrected
 /// version of LongRangeClass.  This class solves the couple

@@ -1,6 +1,6 @@
 #include "NodalActionClass.h"
 #include "../PathDataClass.h"
-#include "../Common/MatrixOps/MatrixOps.h"
+#include <Common/MatrixOps/MatrixOps.h>
 
 // extern "C" int isnormal (double x);
 double 

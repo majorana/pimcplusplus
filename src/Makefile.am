@@ -2,7 +2,7 @@ if WANT_PATHVIS
    MAYBE_PATHVIS = Visual
 endif
 
-SUBDIRS = Actions Moves Observables $(MAYBE_PATHVIS)
+SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
 bin_PROGRAMS = pimc++ FreeParticles
 
 

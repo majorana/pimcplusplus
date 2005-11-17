@@ -2,7 +2,7 @@
 #define NODAL_ACTION_CLASS_H
 
 #include "ActionBase.h"
-#include "../Common/Splines/CubicSpline.h"
+#include <Common/Splines/CubicSpline.h>
 
 class PathClass;
 

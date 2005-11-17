@@ -4,7 +4,9 @@
 
 #include "../Common.h"
 #include "../PathDataClass.h"
-#include <Common/IO/InputOutput.h>
+#include <Common/IO/IO.h>
+
+using namespace IO;
 
 class ObservableVar
 {
@@ -12,7 +14,7 @@ protected:
   IOSectionClass &Out;
   CommunicatorClass &Comm;
   bool FirstTime;
-  VarClass *IOVar;
+  IOVarBase *IOVar;
   string Name;
   
 public:
@@ -238,8 +240,6 @@ protected:
   /// write a little differently and you might need to write additional
   /// info like the description, etc.
   bool FirstTime;
-  ///You can add more IOVar pointers to inhereted classes if necessary
-  VarClass *IOVar;
   IOSectionClass IOSection;  
 public:
   double SecondsInObservable;

@@ -1,4 +1,4 @@
-#include "../Common/IO/InputOutput.h"
+#include <Common/IO/IO.h>
 #include <iostream>
 #include <cstdlib>
 
@@ -7,7 +7,7 @@
 #include <gtkglmm.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "../Common/Blitz.h"
+#include <Common/Blitz.h>
 #include "GLObject.h"
 #include "PathObject.h"
 #include "BoxObject.h"

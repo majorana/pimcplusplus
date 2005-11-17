@@ -3,8 +3,9 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <revel.h>
-#include "../Common/Splines/CubicSpline.h"
+#include <Common/Splines/CubicSpline.h>
 
+using namespace IO;
 
 ExportClass::ExportClass(VisualClass &visual) :
     Visual(visual), Width(2000), Height(2000),
@@ -271,7 +272,7 @@ ExportClass::ExportMovie (string basename,
   // Data Setup //
   ////////////////
   Array<double,4> &PathArray = Visual.PathArray;
-  Array<double,4> &NodeData = Visual.ANodeData;
+  Array<double,3> &NodeData = Visual.ANodeData;
   int numPaths = Visual.PathArray.extent(0) - 1;
   LinearGrid tGrid (0.0, (double)(numPaths-1), numPaths);
   CubicSpline interpSpline;
@@ -304,12 +305,18 @@ ExportClass::ExportMovie (string basename,
     for (int ix=0; ix<NodeData.extent(0); ix++)
       for (int iy=0; iy<NodeData.extent(1); iy++)
 	for (int iz=0; iz<NodeData.extent(2); iz++) {
-	  for (int path=0; path<numPaths; path++) 
-	    pathData(path) = NodeData(path,ix,iy,iz);
+	  Visual.ANodeVar->Read(pathData, Range::all(), ix, iy, iz);
 	  interpSpline.Init(&tGrid,pathData);
 	  // Put interpolation in last slice
-	  NodeData(numPaths, ix, iy, iz) =
+	  Visual.ANodeData(ix, iy, iz) =
 	    interpSpline((double)frame/(double)interpFactor+firstFrame);
+	  if (Visual.HaveBNodeData) {
+	    Visual.BNodeVar->Read(pathData, Range::all(), ix, iy, iz);
+	    interpSpline.Init(&tGrid,pathData);
+	    // Put interpolation in last slice
+	    Visual.BNodeData(ix, iy, iz) =
+	      interpSpline((double)frame/(double)interpFactor+firstFrame);
+	  }
 	}
 
     /// Now, create image from interpolated frame

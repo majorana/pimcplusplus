@@ -2,19 +2,10 @@
 
 
 void RefSliceMoveClass::WriteRatio()
-  {
-    if (FirstTime){
-      FirstTime=false;
-      Array<double,1> ratio(1);
-      ratio(0)=(double)NodeAccept/(double)(NodeAccept+NodeReject);
-      OutSection.WriteVar("AcceptRatio",ratio);
-      IOVar=OutSection.GetVarPtr("AcceptRatio");
-    }
-    else {
-      IOVar->Append((double)NodeAccept/(NodeAccept+NodeReject));
-    }
-
-  }
+{
+  double ratio = (double)NodeAccept/(double)(NodeAccept+NodeReject);
+  RatioVar.Write(ratio);  
+}
 
 void RefSliceMoveClass::Read(IOSectionClass &in)
 {

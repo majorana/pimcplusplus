@@ -3,18 +3,7 @@
 
 void MoveClass::WriteRatio()
 {
-  if (FirstTime) {
-    FirstTime = false;
-    Array<double,1> ratios(1);
-    ratios(0) = AcceptanceRatio();
-    OutSection.WriteVar("AcceptRatio", ratios);
-    IOVar = OutSection.GetVarPtr("AcceptRatio");
-  }
-  else {
-    double ratio = AcceptanceRatio();
-    IOVar->Append(ratio);
-  }
-  OutSection.FlushFile();
+  RatioVar.Write(AcceptanceRatio());
 }
 
 void MoveClass::MakeMove()

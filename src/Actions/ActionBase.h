@@ -2,7 +2,9 @@
 #define ACTION_BASE_H
 
 #include "../Common.h"
-#include <Common/IO/InputOutput.h>
+#include <Common/IO/IO.h>
+
+using namespace IO;
 
 class PathDataClass;
 class PathClass;

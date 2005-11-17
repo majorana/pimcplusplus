@@ -48,59 +48,17 @@ void WindingNumberClass::Read(IOSectionClass& in)
 }
 void WindingNumberClass::WriteBlock()
 {
-//   double totSum;
-//   double totNumSamples;
-  
-//   double myAvg = ESum/(double)NumSamples; //everybody should have the same number of samples for this to be happy
-//   double avg = PathData.Path.Communicator.Sum(myAvg);
-//   double vavg =PathData.Path.Communicator.Sum(myVAvg);
-//   double savg =PathData.Path.Communicator.Sum(mySAvg);
-//   double favg =PathData.Path.Communicator.Sum(myFAvg);
-//   avg  = avg/(double)PathData.Path.TotalNumSlices;
-//   vavg =vavg/(double)PathData.Path.TotalNumSlices;
-//   savg =savg/(double)PathData.Path.TotalNumSlices;
-//   favg =favg/(double)PathData.Path.TotalNumSlices;
-//   // Only processor 0 writes.
-  if (PathData.Path.Communicator.MyProc()==0) {
-//     cerr << "myAvg = " << myAvg << endl;
-//     cerr << "avg = " << avg << endl;
-//     cerr << "Pot avg = " << vavg << endl;
-//     cerr << "S avg = " << savg << endl;
-//     cerr << "U avg = " <<favg <<endl;
+  // Only processor 0 writes.
+  if (PathData.Path.Communicator.MyProc()==0) 
     if (FirstTime) {
       FirstTime = false;
       WriteInfo();
-      IOSection.WriteVar("Type","Vector");
-       Array<double,2> dummy(1,3);
-       for (int dim=0;dim<NDIM;dim++)
-	 dummy(0,dim)=TotalW2[dim];
-       IOSection.WriteVar ("WindingNumber", dummy);
-//       dummy(0)=vavg;
-//       IOSection.WriteVar ("PotentialEnergy",dummy);
-//       dummy(0)=savg;
-//       IOSection.WriteVar ("SpringEnergy",dummy);
-//       dummy(0)=favg;
-//       IOSection.WriteVar ("DBetaEnergy",dummy);
-       IOVar = IOSection.GetVarPtr("WindingNumber");
-//       IOVVar= IOSection.GetVarPtr("PotentialEnergy");
-//       IOSVar= IOSection.GetVarPtr("SpringEnergy");
-//       IOUVar= IOSection.GetVarPtr("DBetaEnergy");
+      IOSection.WriteVar("Type",string("Vector"));
     }
-    else {
-      Array<double,1> dummy(3);
-      for (int dim=0;dim<NDIM;dim++)
-	dummy(dim)=TotalW2[dim];
-      IOVar->Append(dummy);
-//       IOVVar->Append(vavg);
-//       IOSVar->Append(savg);
-//       IOUVar->Append(favg);
-      IOSection.FlushFile();
-    }
-  }
-//   ESum = 0.0;
-//   VSum = 0.0;
-//   SSum = 0.0;
-//   FSum=0.0;
+  Array<double,1> dummy(3);
+  for (int dim=0;dim<NDIM;dim++)
+    dummy(dim)=TotalW2[dim];
+  WNVar.Write(dummy);
   NumSamples = 0;
 }
 

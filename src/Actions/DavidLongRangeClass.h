@@ -2,7 +2,7 @@
 #define DAVID_LONG_RANGE_CLASS_H
 
 #include "ActionBase.h"
-#include "../Common/PairAction/PAFit.h"
+#include <Common/PairAction/PAFit.h>
 
 
 

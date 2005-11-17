@@ -2,7 +2,7 @@
 #define BOX_OBJECT_H
 
 #include "GLObject.h"
-#include "../Common/Blitz.h"
+#include <Common/Blitz.h>
 
 class BoxObject : public GLObject
 {

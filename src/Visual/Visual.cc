@@ -1,5 +1,14 @@
 #include "Visual.h"
 
+void 
+VisualClass::ReadFrameData(int frame)
+{
+  if (ANodeVar != NULL)
+    ANodeVar->Read(ANodeData, frame, Range::all(), Range::all(), Range::all());
+  if (BNodeVar != NULL)
+    BNodeVar->Read(BNodeData, frame, Range::all(), Range::all(), Range::all());
+}
+
 void VisualClass::MakeFrame(int frame)
 {
   int numSpecies = Species.size();
@@ -8,6 +17,8 @@ void VisualClass::MakeFrame(int frame)
     delete PathVis.Objects[i];
   
   PathVis.Objects.resize(0);
+
+  ReadFrameData (frame);
 
   MakePaths(frame);
 
@@ -82,7 +93,10 @@ void VisualClass::MakeFrame(int frame)
  	pos[1] = PathArray(frame, ptcl, 0, 1);
  	pos[2] = PathArray(frame, ptcl, 0, 2);
 	sphere->SetPos (pos);
-	sphere->SetColor (Vec3(1.0, 0.0, 0.0));
+	if (ptcl==0)
+	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
+	else
+	  sphere->SetColor (Vec3(1.0, 0.0, 0.0));
 	PathVis.Objects.push_back(sphere);
       }
 
@@ -128,40 +142,40 @@ void VisualClass::MakeFrame(int frame)
 
 //   PathVis.Objects.push_back(isoPtr);
   if (HaveANodeData) {
-    Array<double,3> arrayRef;
-    arrayRef.reference
-      (ANodeData(frame, Range::all(),Range::all(),Range::all()));
     Isosurface *isoPtr = new Isosurface;
     Isosurface &iso = *isoPtr;
-    iso.Init (&Xgrid, &Ygrid, &Zgrid, arrayRef, true);
+    iso.Init (&Xgrid, &Ygrid, &Zgrid, ANodeData, true);
     iso.SetIsoval(IsoAdjust.get_value());
     PathVis.Objects.push_back(isoPtr);
     // HACK HACK HACK 
     // Draw electron positions
-    for (int ptcl=16; ptcl<24; ptcl++) {
+    for (int ptcl=16; ptcl<32; ptcl++) {
       	SphereObject* sphere = new SphereObject;
 	dVec pos;
-	pos[0] = PathArray(frame, ptcl, 0, 0);
- 	pos[1] = PathArray(frame, ptcl, 0, 1);
- 	pos[2] = PathArray(frame, ptcl, 0, 2);
+	pos[0] = PathArray(frame, ptcl, NodeSlice(frame), 0);
+ 	pos[1] = PathArray(frame, ptcl, NodeSlice(frame), 1);
+ 	pos[2] = PathArray(frame, ptcl, NodeSlice(frame), 2);
 	sphere->SetPos (pos);
-	if (ptcl == 16)
-	  sphere->SetColor (Vec3(0.9, 0.0, 0.9));
+	if (ptcl == NodePtcl(frame))
+	  sphere->SetColor (Vec3(0.9, 0.9, 0.0));
 	else
 	  sphere->SetColor (Vec3(0.0, 0.0, 0.9));
 	sphere->SetRadius(0.25);
 	PathVis.Objects.push_back(sphere);
     }
+    dVec pos( 0.20003,  0.70002,  1.10501);
+    SphereObject* sphere = new SphereObject;
+    sphere->SetPos(pos);
+    sphere->SetColor(Vec3(0.9, 0.9, 0.0));
+    sphere->SetRadius(1.0);
+    PathVis.Objects.push_back(sphere);
   }
   if (HaveBNodeData) {
     cerr << "Creating B nodes.\n";
-    Array<double,3> arrayRef;
-    arrayRef.reference
-      (BNodeData(frame, Range::all(),Range::all(),Range::all()));
     Isosurface *isoPtr = new Isosurface;
     Isosurface &iso = *isoPtr;
     iso.SetColor (0.8, 0.0, 0.0);
-    iso.Init (&Xgrid, &Ygrid, &Zgrid, arrayRef, true);
+    iso.Init (&Xgrid, &Ygrid, &Zgrid, BNodeData, true);
     iso.SetIsoval(IsoAdjust.get_value());
 
     PathVis.Objects.push_back(isoPtr);
@@ -186,12 +200,11 @@ void VisualClass::MakeFrame(int frame)
 
 void VisualClass::Read(string fileName)
 {
-  IOSectionClass in;
-  assert(in.OpenFile (fileName));
+  assert(Infile.OpenFile (fileName));
 
   Array<double,1> box;
-  assert (in.OpenSection("System"));
-  assert (in.ReadVar ("Box", box));
+  assert (Infile.OpenSection("System"));
+  assert (Infile.ReadVar ("Box", box));
   Box.Set (box(0), box(1), box(2));
   cerr << "Box = " << box << endl;
 
@@ -199,20 +212,20 @@ void VisualClass::Read(string fileName)
   PathVis.View.SetDistance (1.2*maxDim);
   //PathVis.View.SetDistance (0.2*maxDim);
 
-  int numSpecies = in.CountSections ("Species");  
+  int numSpecies = Infile.CountSections ("Species");  
   Species.resize(numSpecies);
   for (int i=0; i<numSpecies; i++)
     Species(i).FirstParticle = 0;
   for (int i=0; i<numSpecies; i++) {
-    in.OpenSection("Species",i);
-    assert (in.ReadVar("lambda", Species(i).lambda));
+    Infile.OpenSection("Species",i);
+    assert (Infile.ReadVar("lambda", Species(i).lambda));
     cerr << "lambda = " << Species(i).lambda << endl;
-    assert (in.ReadVar("Name", Species(i).Name));
-    assert (in.ReadVar("NumParticles", Species(i).NumParticles));
+    assert (Infile.ReadVar("Name", Species(i).Name));
+    assert (Infile.ReadVar("NumParticles", Species(i).NumParticles));
     for (int j=i+1; j<numSpecies; j++)
       Species(j).FirstParticle += Species(i).NumParticles;
     Species(i).LastParticle=Species(i).FirstParticle+Species(i).NumParticles-1;
-    in.CloseSection(); // Species
+    Infile.CloseSection(); // Species
   }
 
   for (int i=0; i<numSpecies; i++) 
@@ -220,17 +233,17 @@ void VisualClass::Read(string fileName)
 	 << Species(i).FirstParticle 
 	 << "   Last Ptcl = " << Species(i).LastParticle << "\n";
 
-  in.CloseSection (); // "System"
+  Infile.CloseSection (); // "System"
 
-  assert(in.OpenSection("Observables"));
-  assert(in.OpenSection("PathDump"));
-  assert(in.ReadVar ("Path", PathArray));
-  assert(in.ReadVar ("Permutation", PermArray));
+  assert(Infile.OpenSection("Observables"));
+  assert(Infile.OpenSection("PathDump"));
+  assert(Infile.ReadVar ("Path", PathArray));
+  assert(Infile.ReadVar ("Permutation", PermArray));
   PutInBox();
 
-  if (in.ReadVar ("OpenPtcl", OpenPtcl)) {
+  if (Infile.ReadVar ("OpenPtcl", OpenPtcl)) {
     assert (OpenPtcl.size() == PathArray.extent(0));
-    assert (in.ReadVar ("TailLocation", Tail));
+    assert (Infile.ReadVar ("TailLocation", Tail));
     assert (Tail.extent(0) == PathArray.extent(0));
   }
   else {
@@ -238,39 +251,46 @@ void VisualClass::Read(string fileName)
     OpenPtcl = -1;
   }
   
-  HaveANodeData = in.OpenSection("Xgrid");
+  HaveANodeData = Infile.OpenSection("Xgrid");
   if (HaveANodeData) {
-    Xgrid.Read(in);
-    in.CloseSection();
-    assert(in.OpenSection("Ygrid"));
-    Ygrid.Read(in);
-    in.CloseSection();
-    assert(in.OpenSection("Zgrid"));
-    Zgrid.Read(in);
-    in.CloseSection();
-    if (in.ReadVar("ANodes", ANodeData))
-      HaveBNodeData = in.ReadVar("BNodes", BNodeData);
-    else
-      assert(in.ReadVar("Nodes", ANodeData));
+    HaveWarpPos = Infile.ReadVar("WarpPos", WarpPos);
+    Xgrid.Read(Infile);
+    Infile.CloseSection();
+    assert(Infile.OpenSection("Ygrid"));
+    Ygrid.Read(Infile);
+    Infile.CloseSection();
+    assert(Infile.OpenSection("Zgrid"));
+    Zgrid.Read(Infile);
+    Infile.CloseSection();
+    Infile.ReadVar("NodePtcl", NodePtcl);
+    Infile.ReadVar("NodeSlice", NodeSlice);
+    ANodeVar = Infile.GetVarPtr ("ANodes");
+    if (ANodeVar == NULL)
+      assert((ANodeVar = Infile.GetVarPtr("Nodes")) != NULL);
+    BNodeVar = Infile.GetVarPtr ("BNodes");
+    HaveBNodeData = (BNodeVar != NULL);
 
     double maxVal = -1.0e100;
     double minVal = 1.0e100;
-    for (int frame=0; frame<ANodeData.extent(0); frame++)
-      for (int ix=0; ix<ANodeData.extent(1); ix++)
-	for (int iy=0; iy<ANodeData.extent(2); iy++)
-	  for (int iz=0; iz<ANodeData.extent(3); iz++) {
-	    double mx, mn;
-	    if (HaveBNodeData) {
-	      mx = max(ANodeData(frame,ix,iy,iz), BNodeData(frame,ix,iy,iz));
-	      mn = min(ANodeData(frame,ix,iy,iz), BNodeData(frame,ix,iy,iz));
-	    }
-	    else {
-	      mx = ANodeData(frame,ix,iy,iz);
-	      mn = ANodeData(frame,ix,iy,iz);
-	    }
-	    maxVal = max(maxVal, mx);
-	    minVal = min(minVal, mn);
+    //    for (int frame=0; frame<ANodeVar->GetExtent(0); frame++) {
+    //    ReadFrameData(frame);
+    ReadFrameData(0);
+    for (int ix=0; ix<ANodeData.extent(0); ix++)
+      for (int iy=0; iy<ANodeData.extent(1); iy++)
+	for (int iz=0; iz<ANodeData.extent(2); iz++) {
+	  double mx, mn;
+	  if (HaveBNodeData) {
+	    mx = max(ANodeData(ix,iy,iz), BNodeData(ix,iy,iz));
+	    mn = min(ANodeData(ix,iy,iz), BNodeData(ix,iy,iz));
 	  }
+	  else {
+	    mx = ANodeData(ix,iy,iz);
+	    mn = ANodeData(ix,iy,iz);
+	  }
+	  maxVal = max(maxVal, mx);
+	  minVal = min(minVal, mn);
+	}
+    //    }
     IsoAdjust.set_lower(minVal);
     IsoAdjust.set_upper(maxVal);
   }
@@ -278,8 +298,7 @@ void VisualClass::Read(string fileName)
   FrameAdjust.set_upper(PathArray.extent(0)-1);
   DetailAdjust.set_upper(PathArray.extent(2)/2);
   
-  in.CloseSection();
-  in.CloseFile();
+  Infile.CloseSection();
   FrameScale.set_value(0.0);
   MakeFrame (0);
 }

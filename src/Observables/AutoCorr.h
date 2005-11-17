@@ -8,6 +8,7 @@ class AutoCorrClass : public ObservableClass
 {
   /// Stores number of counts in each bin
   Array<double,1> Histogram;
+  ObservableVecDouble1 HistVar;
   /// Stores dipole moments
   Array<dVec,2> DipoleBin;
   /// Stores the total number of counts
@@ -37,7 +38,9 @@ public:
   double CalcDotProd(dVec v1, dVec v2);
   dVec Rotate(dVec coord, double theta);
   AutoCorrClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
-    ObservableClass(myPathData,ioSection){
+    ObservableClass(myPathData,ioSection), 
+    HistVar("y", IOSection, myPathData.Path.Communicator)
+  {
     TimesCalled=0;
     Initialize();
   }

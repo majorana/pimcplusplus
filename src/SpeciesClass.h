@@ -2,7 +2,9 @@
 #define SPECIES_CLASS_H
 
 #include "Common.h"
-#include <Common/IO/InputOutput.h>
+#include <Common/IO/IO.h>
+
+using namespace IO;
 
 typedef enum {FERMION, BOSON, BOLTZMANNON, ANYON} ParticleType;
 
