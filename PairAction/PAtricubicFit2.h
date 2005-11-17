@@ -91,7 +91,11 @@ PAtricubicFit2Class::zs2yt(double q,  double z, double s, int level,
 {
   z = fabs(z);
   double smax = min(2.0*q, sMax(level));
-  y = z*sMaxInv(level);
+  /////////////////////////////////////////
+  // CHECK THIS!!!!!!!!!!!!!!!!!!!!!!!!! //
+  /////////////////////////////////////////
+  //  y = z*sMaxInv(level);
+  y = z/smax;
   if (y < 1.0) 
     t = (s-z)/(smax-z);
   else
