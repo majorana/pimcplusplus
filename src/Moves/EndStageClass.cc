@@ -44,7 +44,9 @@ void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
   else
     Open=TAIL;
     
-
+  //  Open=HEAD;
+  //HACK!
+  //  Open=TAIL;
   if (Open==HEAD){
     slice1=(int)PathData.Path.OpenLink;
     slice2=(1<<NumLevels)+slice1;
@@ -146,6 +148,7 @@ double EndStageClass::Sample(int &slice1,int &slice2,
 
 
   int changePtcl;
+
   if (Open==HEAD){
     //    cerr<<"Setting to head"<<endl;
     changePtcl=(int)PathData.Path.OpenPtcl;
@@ -163,7 +166,7 @@ double EndStageClass::Sample(int &slice1,int &slice2,
   dVec oldPos=PathData.Path(PathData.Path.OpenLink,changePtcl);
   dVec newPos;///was /10 instead of /40 for the free particles
   newPos(0)= oldPos[0]+
-    PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/40.0)*
+    PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/10.0)*
     mysign(PathData.Path.Random.Local()-0.5);
   newPos(1)= oldPos[1]+
     PathData.Path.Random.Local()*(PathData.Path.GetBox()(1)/40.0)*
