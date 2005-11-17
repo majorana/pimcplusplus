@@ -1,6 +1,8 @@
-string PAfilename = "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5";
+// string PAfilename =
+// "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5";
+string PAfilename = "~/PairActions/e-p.fit.beta8.0.h5";
 double tau = 0.0625;
 
 Array<double,1> Rion(3) = [ 1.0, 2.0, 3.0 ];
 Array<double,1> r(3)    = [ 1.1, 2.2, 3.3 ];
-Array<double,1> rp(3)    = [ 1.11, 2.21, 3.31 ];
+Array<double,1> rp(3)    = [1.11, 2.21, 3.31 ];

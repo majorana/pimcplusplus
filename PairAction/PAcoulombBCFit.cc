@@ -175,6 +175,26 @@ double PAcoulombBCFitClass::dU(double q, double z, double s2, int level)
   }
 }
 
+void 
+PAcoulombBCFitClass::Derivs (double q, double z, double s2, int level,
+			     double &d_dq, double &d_dz)
+{
+  d_dz = 0.0;
+  if (q <= (qgrid->End*1.0000001)) {
+    if (q == 0)
+      d_dq = Usplines(level).d_dx(0.0,0.0);
+    else {
+      double t = sqrt(s2)/(2.0*q);
+      double dq = Usplines(level).d_dx(q,t);
+      double dt = Usplines(level).d_dy(q,t);
+      d_dq = dq - (t/q)*dt;
+    }
+  }
+  else {
+    // Coulomb action is independent of z
+    d_dq = ldexp(SmallestBeta,level)*Pot->dVdr(q);
+  }
+}
 
 
 

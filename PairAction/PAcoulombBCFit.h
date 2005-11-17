@@ -41,6 +41,8 @@ public:
   double U(double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
   /// The diagonal action only -- used for long-range breakup
+  void Derivs (double q, double z, double s2, int level,
+	       double &d_dq, double &d_dz);
   double Udiag(double q, int level);
   /// The q-derivative of the above
   double Udiag_p(double q, int level);
