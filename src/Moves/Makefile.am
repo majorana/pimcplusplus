@@ -22,6 +22,8 @@ libmoves_la_SOURCES  =            \
     CouplingStage.cc             \
     DisplaceMove.cc              \
     DisplaceMove.h               \
+    EmptyStage.h                 \
+    EmptyStage.cc                \
     EndStageClass.cc             \
     EndStageClass.h              \
     MetaMoves.cc                 \
@@ -53,4 +55,8 @@ libmoves_la_SOURCES  =            \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \
-    WaterMoveRing.h
+    WaterMoveRing.h              \
+    WormPermuteStageClass.h      \
+    WormPermuteStageClass.cc     \
+    WormPermuteStageClass2.h     \
+    WormPermuteStageClass2.cc      
