@@ -48,6 +48,8 @@ libmoves_la_SOURCES  =            \
     RefSliceMove.h               \
     StructureReject.cc           \
     StructureReject.h            \
+    StageClass.h                 \
+    StageClass.cc                \
     TablePermuteStageClass.cc    \
     TablePermuteStageClass.h     \
     ClusterMove.cc               \
