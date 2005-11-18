@@ -1,6 +1,6 @@
 #include "OpenEndMove.h"
-#include "BisectionStageClass.h"
-#include "EndStageClass.h"
+#include "BisectionStage.h"
+#include "EndStage.h"
 
 void OpenEndMoveClass::WriteRatio()
 {

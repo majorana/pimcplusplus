@@ -1,4 +1,4 @@
-#include "EndStageClass.h"
+#include "EndStage.h"
 void EndStageClass::Read(IOSectionClass &in)
 {
   OnlyX=false;

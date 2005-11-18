@@ -1,9 +1,9 @@
 #include "EmptyStage.h"
 #include "BisectionBlock.h"
-#include "StructureReject.h"
+#include "StructureRejectStage.h"
 #include "CouplingStage.h"
-#include "WormPermuteStageClass.h"
-#include "WormPermuteStageClass2.h"
+#include "WormPermuteStage.h"
+
 
 
 void BisectionBlockClass::Read(IOSectionClass &in)

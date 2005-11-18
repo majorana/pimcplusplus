@@ -1,5 +1,5 @@
-#include "PermuteStageClass.h"
-#include "WormPermuteStageClass2.h"
+#include "PermuteStage.h"
+#include "WormPermuteStage.h"
 
 double WormPermuteStage2Class::Sample(int &slice1,int &slice2,
 				      Array<int,1> &changedParticles)

@@ -4,9 +4,9 @@
 
 #include "MoveBase.h"
 #include "../PathDataClass.h"
-#include "PermuteStageClass.h"
-#include "CoupledPermuteStageClass.h"
-#include "BisectionStageSphereClass.h"
+#include "PermuteStage.h"
+#include "CoupledPermuteStage.h"
+#include "BisectionSphereStage.h"
 #include "../Observables/ObservableBase.h"
 
 /// This is the bisection move class inherited from ParticleMoveClass

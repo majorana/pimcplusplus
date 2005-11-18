@@ -2,7 +2,7 @@
 #define COUPLED_PERMUTE_STAGE_CLASS_H
 
 #include "MultiStage.h"
-#include "PermuteStageClass.h"
+#include "PermuteStage.h"
 #include "PermuteTableClass.h"
 
 

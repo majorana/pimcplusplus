@@ -1,5 +1,5 @@
 #include "CouplingMove.h"
-#include "BisectionStageClass.h"
+#include "BisectionStage.h"
 #include "CouplingStage.h"
 
 void CouplingMoveClass::WriteRatio()

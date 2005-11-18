@@ -6,16 +6,16 @@ libmoves_la_SOURCES  =            \
     BisectionBlock.h             \
     BisectionSphereBlock.cc      \
     BisectionSphereBlock.h       \
-    BisectionStageClass.cc       \
-    BisectionStageClass.h        \
-    BisectionStageSphereClass.cc \
-    BisectionStageSphereClass.h  \
-    CenterDroplet.h              \
-    CenterDroplet.cc             \
+    BisectionStage.cc       \
+    BisectionStage.h        \
+    BisectionSphereStage.cc \
+    BisectionSphereStage.h  \
+    CenterDropletMove.h              \
+    CenterDropletMove.cc             \
     CorrelatedBisectionBlock.cc  \
     CorrelatedBisectionBlock.h   \
-    CoupledPermuteStageClass.cc  \
-    CoupledPermuteStageClass.h   \
+    CoupledPermuteStage.cc  \
+    CoupledPermuteStage.h   \
     CouplingMove.cc              \
     CouplingMove.h               \
     CouplingStage.h              \
@@ -24,8 +24,8 @@ libmoves_la_SOURCES  =            \
     DisplaceMove.h               \
     EmptyStage.h                 \
     EmptyStage.cc                \
-    EndStageClass.cc             \
-    EndStageClass.h              \
+    EndStage.cc             \
+    EndStage.h              \
     MetaMoves.cc                 \
     MetaMoves.h                  \
     MoveBase.cc                  \
@@ -36,7 +36,7 @@ libmoves_la_SOURCES  =            \
     NoPermuteClass.cc            \
     OpenEndMove.cc               \
     OpenEndMove.h                \
-    PermuteStageClass.cc         \
+    PermuteStage.cc         \
     PermuteTableOnClass.cc         \
     PermuteTableOnClass.h          \
     PermuteTableClass.cc         \
@@ -46,19 +46,18 @@ libmoves_la_SOURCES  =            \
     RandomPermMove.h             \
     RefSliceMove.cc              \
     RefSliceMove.h               \
-    StructureReject.cc           \
-    StructureReject.h            \
+    StructureRejectStage.cc           \
+    StructureRejectStage.h            \
     StageClass.h                 \
     StageClass.cc                \
-    TablePermuteStageClass.cc    \
-    TablePermuteStageClass.h     \
+    TablePermuteStage.cc    \
+    TablePermuteStage.h     \
     ClusterMove.cc               \
     ClusterMove.h                \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \
     WaterMoveRing.h              \
-    WormPermuteStageClass.h      \
-    WormPermuteStageClass.cc     \
-    WormPermuteStageClass2.h     \
-    WormPermuteStageClass2.cc      
+    WormPermuteStage.h      \
+    WormPermuteStage.cc     
+

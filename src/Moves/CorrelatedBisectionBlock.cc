@@ -1,5 +1,5 @@
 #include "CorrelatedBisectionBlock.h"
-#include "StructureReject.h"
+#include "StructureRejectStage.h"
 
 void CorrelatedBisectionBlockClass::Read(IOSectionClass &in)
 {

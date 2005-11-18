@@ -3,8 +3,8 @@
 
 #include "MoveBase.h"
 #include "../PathDataClass.h"
-#include "PermuteStageClass.h"
-#include "BisectionStageClass.h"
+#include "PermuteStage.h"
+#include "BisectionStage.h"
 
 /// This move, inherited from ParticleMoveClass, performs a set of
 /// bisection stages over a set of time slices which contains the

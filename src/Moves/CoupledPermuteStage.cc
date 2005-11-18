@@ -1,4 +1,4 @@
-#include "CoupledPermuteStageClass.h"
+#include "CoupledPermuteStage.h"
 
 
 double CoupledPermuteStageClass::Sample(int &slice1,int &slice2,

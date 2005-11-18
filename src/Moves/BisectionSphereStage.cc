@@ -1,4 +1,4 @@
-#include "BisectionStageSphereClass.h"
+#include "BisectionSphereStage.h"
 
 void BisectionStageSphereClass::Read(IOSectionClass &in)
 {

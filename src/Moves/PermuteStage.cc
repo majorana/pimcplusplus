@@ -1,4 +1,4 @@
-#include "PermuteStageClass.h"
+#include "PermuteStage.h"
 
 
 void PermuteStageClass::InitBlock()

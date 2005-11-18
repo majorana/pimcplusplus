@@ -1,4 +1,4 @@
-#include "PermuteStageClass.h"
+#include "PermuteStage.h"
 
 
 double TablePermuteStageClass::Sample(int &slice1,int &slice2,

@@ -1,7 +1,7 @@
 #ifndef WORM_PERMUTE_STAGE2_CLASS_H
 #define WORM_PERMUTE_STAGE2_CLASS_H
 
-#include "PermuteStageClass.h"
+#include "PermuteStage.h"
 
 
 class WormPermuteStage2Class : public PermuteStageClass

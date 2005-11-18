@@ -1,5 +1,5 @@
 #include "BisectionSphereBlock.h"
-#include "StructureReject.h"
+#include "StructureRejectStage.h"
 
 //void BisectionSphereBlockClass::WriteRatio()
 //{

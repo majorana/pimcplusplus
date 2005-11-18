@@ -1,4 +1,4 @@
-#include "StructureReject.h"
+#include "StructureRejectStage.h"
 
 
 double StructureRejectStageClass::Sample(int &slice1,int &slice2,
