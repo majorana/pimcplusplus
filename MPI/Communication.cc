@@ -451,6 +451,25 @@ CommunicatorClass::AllSum (Array<double,1> &in, Array<double,1> &out)
 		MPI_DOUBLE, MPI_SUM, MPIComm);
 }
 
+void
+CommunicatorClass:: AllSum (Array<TinyVector<double,2>,1> &in, 
+			    Array<TinyVector<double,2>,1> &out) 
+{
+  assert (in.size() == out.size());
+  MPI_Allreduce(in.data(), out.data(), 2*in.size(),
+		MPI_DOUBLE, MPI_SUM, MPIComm);
+}
+
+void 
+CommunicatorClass::AllSum (Array<TinyVector<double,3>,1> &in, 
+			   Array<TinyVector<double,3>,1> &out) 
+{
+  assert (in.size() == out.size());
+  MPI_Allreduce(in.data(), out.data(), 3*in.size(),
+		MPI_DOUBLE, MPI_SUM, MPIComm);
+}
+
+
 
 #include <unistd.h>
 void 

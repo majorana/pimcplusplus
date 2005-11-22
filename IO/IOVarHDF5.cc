@@ -185,10 +185,11 @@ namespace IO {
   template<> bool
   IOVarHDF5<string,0>::VarWrite(string val)
   {
-    Array<char,1> charArray(MAX_HDF5_STRING_LENGTH);
+    Array<char,1> charArray(val.size()+1);
     charArray=0;
     for (int index=0; index<val.length(); index++)
       charArray(index) = val[index];
+    charArray(val.size()) = '\0';
     hid_t type = H5Dget_type(DatasetID);
     // Write the dataset to the file.
     herr_t status = H5Dwrite(DatasetID, type, MemSpaceID, DiskSpaceID, H5P_DEFAULT, 
@@ -207,9 +208,11 @@ namespace IO {
   {
     Array<char,2> charArray(val.extent(0),MAX_HDF5_STRING_LENGTH);
     charArray=0;
-    for (int i=0; i<val.extent(0); i++)
+    for (int i=0; i<val.extent(0); i++) {
+      assert (val(i).length() < (MAX_HDF5_STRING_LENGTH-1));
       for (int s=0; s<val(i).length(); s++)
 	charArray(i,s) = val(i)[s];
+    }
     hid_t type = H5Dget_type(DatasetID);
     // Write the dataset to the file.
     herr_t status = H5Dwrite(DatasetID, type, MemSpaceID, DiskSpaceID, H5P_DEFAULT, 
@@ -231,9 +234,11 @@ namespace IO {
 			    MAX_HDF5_STRING_LENGTH);
     charArray=0;
     for (int i=0; i<val.extent(0); i++)
-      for (int j=0; j<val.extent(1); j++)
+      for (int j=0; j<val.extent(1); j++) {
+	assert (val(i,j).length() < (MAX_HDF5_STRING_LENGTH-1));
 	for (int s=0; s<val(i,j).length(); s++)
 	  charArray(i,j,s) = val(i,j)[s];
+      }
     hid_t type = H5Dget_type(DatasetID);
     // Write the dataset to the file.
     herr_t status = H5Dwrite(DatasetID, type, MemSpaceID, DiskSpaceID, H5P_DEFAULT, 
@@ -256,9 +261,11 @@ namespace IO {
     charArray=0;
     for (int i=0; i<val.extent(0); i++)
       for (int j=0; j<val.extent(1); j++)
-	for (int k=0; k<val.extent(2); k++)
+	for (int k=0; k<val.extent(2); k++) {
+	  assert (val(i,j,k).length() < (MAX_HDF5_STRING_LENGTH-1));
 	  for (int s=0; s<val(i,j,k).length(); s++)
 	    charArray(i,j,k,s) = val(i,j,k)[s];
+	}
     hid_t type = H5Dget_type(DatasetID);
     // Write the dataset to the file.
     herr_t status = H5Dwrite(DatasetID, type, MemSpaceID, DiskSpaceID, H5P_DEFAULT, 
@@ -282,9 +289,11 @@ namespace IO {
     for (int i=0; i<val.extent(0); i++)
       for (int j=0; j<val.extent(1); j++)
 	for (int k=0; k<val.extent(2); k++)
-	  for (int l=0; l<val.extent(3); l++)
+	  for (int l=0; l<val.extent(3); l++) {
+	    assert (val(i,j,k,l).length() < (MAX_HDF5_STRING_LENGTH-1));
 	    for (int s=0; s<val(i,j,k).length(); s++)
 	      charArray(i,j,k,l,s) = val(i,j,k,l)[s];
+	  }
     hid_t type = H5Dget_type(DatasetID);
     // Write the dataset to the file.
     herr_t status = H5Dwrite(DatasetID, type, MemSpaceID, DiskSpaceID, H5P_DEFAULT, 
