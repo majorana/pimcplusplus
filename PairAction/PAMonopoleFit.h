@@ -23,7 +23,8 @@ public:
 	      int NumBetas);
   double U(double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
-
+  void Derivs (double q, double z, double s2, int level,
+	       double &d_dq, double &d_dz);
   /////////////////////////
   /// Long-ranged stuff ///
   /////////////////////////

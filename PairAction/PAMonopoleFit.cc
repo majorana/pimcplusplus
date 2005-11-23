@@ -48,6 +48,17 @@ double PACoulombFitClass::dU(double q, double z, double s2, int level)
   return (V);
 }
 
+void
+PACoulombFitClass::Derivs(double q, double z, double s2, int level,
+			  double &d_dq, double &d_dz)
+{
+  double r  = q + 0.5*z;
+  double rp = q - 0.5*z;
+  double leveltau = ldexp(SmallestBeta, level);
+  d_dq = -0.5*leveltau*Z1Z2*(1.0/(r*r) + 1.0/(rp*rp));
+  d_dz = -0.5*leveltau*Z1Z2*(0.5/(r*r) - 0.5/(rp*rp));
+}
+
 
 bool PACoulombFitClass::Read (IOSectionClass &in,
 			      double smallestBeta, int numBetas)

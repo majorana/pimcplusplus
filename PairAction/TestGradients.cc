@@ -24,7 +24,7 @@ void TestGradients (IOSectionClass &in)
   double rmag = sqrt(dot(r,r));
   double rpmag = sqrt(dot(rp,rp));
   double q = 0.5*(rmag + rpmag);
-  double z = 0.5*(rmag - rpmag);
+  double z = (rmag - rpmag);
   double s = sqrt (dot(r-rp,r-rp));
   cerr << "(q,z,s) = (" << q << ", " << z << ", " << s << ")\n";
 
