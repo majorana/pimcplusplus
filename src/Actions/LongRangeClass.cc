@@ -379,6 +379,43 @@ double LongRangeClass::d_dBeta (int slice1, int slice2,  int level)
   return dU;
 }
 
+void
+LongRangeClass::GradAction(int slice1, int slice2, 
+			   const Array<int,1> &ptcls, int level,
+			   Array<dVec,1> &gradVec)
+{
+  
+  int skip = 1<<level;
+  
+  for (int slice = slice1; slice<=slice2; slice+=skip) {
+    double factor = ((slice==slice1)||(slice==slice2)) ? 1.0 : 2.0;
+    for (int pi=0; pi<ptcls.size(); pi++) {
+      int ptcl = ptcls(pi);
+      int species1 = Path.ParticleSpeciesNum(ptcl);
+      for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	dVec r = Path(slice,ptcl);
+	dVec k = Path.kVecs(ki);
+	double phi = dot(r,k);
+	complex<double> z;
+	sincos(phi, &z.imag(), &z.real());
+	complex<double> rho_uSum(0.0, 0.0);
+	for (int si=0; si<Path.NumSpecies(); si++) {
+	  PairActionFitClass &PA = *PairMatrix(species1,si);
+	  rho_uSum += PA.Ulong_k(level,ki) * Path.Rho_k(slice, si, ki);
+	}
+	rho_uSum = conj (rho_uSum);
+	// Now, compute the imaginary part of the product, and
+	// multiply by k
+	gradVec(pi) -= 
+	  factor*(z.real()*rho_uSum.imag() + z.imag()*rho_uSum.real())*k;
+      }
+    } // end pi loop
+  } // end slice loop
+
+}
+
+
+
 void LongRangeClass::Init(IOSectionClass &in, IOSectionClass &out)
 {
   if (PathData.Path.Getkc() == 0.0) {

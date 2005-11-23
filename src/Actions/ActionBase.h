@@ -43,6 +43,16 @@ public:
   /// take a list of particles we are moving. 
   virtual double d_dBeta (int slice1, int slice2,
 			  int level) = 0;
+
+  /// This function returns the gradient of the action on a specified
+  /// set of particles, summed over the timeslices from slice1 to
+  /// slice2, inclusive.  The function adds its contribution to
+  /// whatever is already in gradVec.  The default implementation does
+  /// nothing.  
+  virtual void GradAction (int slice1, int slice2, 
+			   const Array<int,1> &ptcls, int level,
+			   Array<dVec,1> &gradVec);
+			     
   // This returns the sum over all time slices, using MPI
   // to sum over processors if necessary.
   virtual void Read (IOSectionClass &in);

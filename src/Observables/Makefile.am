@@ -12,6 +12,8 @@ libobservables_la_SOURCES  =     \
     Coupling.h                   \
     DistanceToHead.cc            \
     DistanceToHead.h             \
+    Forces.cc                    \
+    Forces.h                     \
     ObservableBase.cc            \
     ObservableBase.h             \
     ObservableClass.h            \

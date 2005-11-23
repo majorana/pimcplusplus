@@ -221,11 +221,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	OutFile.NewSection("Vacancy");
       tempObs=new VacancyLocClass(PathData,OutFile);
     }
-    else if (theObserveType=="OpenOrientation"){
-      if (iAmRoot)
-	OutFile.NewSection("OpenOrientation");
-      tempObs=new OpenOrientationClass(PathData,OutFile);
-    }
+//     else if (theObserveType=="OpenOrientation"){
+//       if (iAmRoot)
+// 	OutFile.NewSection("OpenOrientation");
+//       tempObs=new OpenOrientationClass(PathData,OutFile);
+//     }
     else if (theObserveType=="CycleCount"){
       if (iAmRoot)
 	OutFile.NewSection("CycleCount");
@@ -240,6 +240,11 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       if (iAmRoot)
 	OutFile.NewSection("Sign");
       tempObs=new WeightClass(PathData,OutFile);
+    }
+    else if (theObserveType=="Forces"){
+      if (iAmRoot)
+	OutFile.NewSection("Forces");
+      tempObs=new ForcesClass(PathData,OutFile);
     }
     else {
       perr<<"We do not recognize the observable "<<theObserveType<<endl;

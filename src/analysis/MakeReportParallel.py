@@ -399,59 +399,61 @@ def ProcessScalarSection(infiles,doc,currNum):
           
      for counter in range(0,numVars):
           data = infiles.ReadVar(counter)
-          if type(data[0])==numarray.numarraycore.NumArray:
-               currNum=currNum+1
-               varName=infiles.GetVarName(counter)
-               procScalarTable.body[0].append(varName+" Mean")
-               procScalarTable.body[0].append(varName+" Error")
-               baseName = varName+repr(currNum)
-               toAddList.append(Name(sectionName+varName+repr(currNum)))
-               toAddList.append(Heading(2,varName))
-               pageName=BuildScalarTracePage(data,baseName,varName)
-               print "My page name is",pageName
-               myFrame=IFrame()
-#               myFrame.scrolling='no'
-               myFrame.src=pageName
-               myFrame.width="100%"
-               myFrame.height="375"
-#               myImg=ProduceTracePicture(data[0], baseName,'Blocks',varName)
-               toAddList.append(myFrame)
-
+          varName = infiles.GetVarName(counter)
+          if ((varName!="TotalAction") and (varName!="ExpTotalAction")):
+               if type(data[0])==numarray.numarraycore.NumArray:
+                    currNum=currNum+1
+                    varName=infiles.GetVarName(counter)
+                    procScalarTable.body[0].append(varName+" Mean")
+                    procScalarTable.body[0].append(varName+" Error")
+                    baseName = varName+repr(currNum)
+                    toAddList.append(Name(sectionName+varName+repr(currNum)))
+                    toAddList.append(Heading(2,varName))
+                    pageName=BuildScalarTracePage(data,baseName,varName)
+                    print "My page name is",pageName
+                    myFrame=IFrame()
+                    #               myFrame.scrolling='no'
+                    myFrame.src=pageName
+                    myFrame.width="100%"
+                    myFrame.height="375"
+                    #               myImg=ProduceTracePicture(data[0], baseName,'Blocks',varName)
+                    toAddList.append(myFrame)
+                    
 ##   Write ASCII data to a file
-               asciiFileName = baseName + '.dat'
-               asciiFile = open (asciiFileName, "w")
-               n = len(data[0])
-               for i in range(0,n):
-                    asciiFile.write('%20.16e\n' % data[0][i])
-               asciiFile.close()
-               psFileName=baseName+'.ps'
-               doc.append(BR())
-               fileTable = Table()
-               fileTable.body = [[Href(psFileName,'PostScript'), Href(asciiFileName,'ASCII data')]]
-               fileTable.border=0
-               fileTable.width='40%'
-               fileTable.column1_align='center'
-               fileTable.cell_align='center'
-               toAddList.append(fileTable)
-               meanlist = []
-               varlist = []
-               errorlist = []
-               kappalist = []
-               for d in data:
-                    (mean,var,error,kappa)=stats.Stats(d[StartCut:-1])
-                    meanlist.append(mean)
-                    errorlist.append(error)
-                    varlist.append(var)
-                    kappalist.append(kappa)
-               (mean,error) = WeightedAvg(meanlist, errorlist)
-               print repr(mean) + "+/-" + repr(error)
-               for procNum in range(0,len(meanlist)):
-                    (meanstr, errorstr) = MeanErrorString (meanlist[procNum], errorlist[procNum])
-                    procScalarTable.body[procNum+1].append(meanstr)
-                    procScalarTable.body[procNum+1].append(errorstr)
-               (meanstr, errorstr) = MeanErrorString (mean, error)
-               myTable.body.append([Href("#"+sectionName+varName+repr(currNum),varName),\
-                                    meanstr,errorstr, '%1.2e' % var ,'%1.2f' % kappa])
+                    asciiFileName = baseName + '.dat'
+                    asciiFile = open (asciiFileName, "w")
+                    n = len(data[0])
+                    for i in range(0,n):
+                         asciiFile.write('%20.16e\n' % data[0][i])
+                    asciiFile.close()
+                    psFileName=baseName+'.ps'
+                    doc.append(BR())
+                    fileTable = Table()
+                    fileTable.body = [[Href(psFileName,'PostScript'), Href(asciiFileName,'ASCII data')]]
+                    fileTable.border=0
+                    fileTable.width='40%'
+                    fileTable.column1_align='center'
+                    fileTable.cell_align='center'
+                    toAddList.append(fileTable)
+                    meanlist = []
+                    varlist = []
+                    errorlist = []
+                    kappalist = []
+                    for d in data:
+                         (mean,var,error,kappa)=stats.Stats(d[StartCut:-1])
+                         meanlist.append(mean)
+                         errorlist.append(error)
+                         varlist.append(var)
+                         kappalist.append(kappa)
+                    (mean,error) = WeightedAvg(meanlist, errorlist)
+                    print repr(mean) + "+/-" + repr(error)
+                    for procNum in range(0,len(meanlist)):
+                         (meanstr, errorstr) = MeanErrorString (meanlist[procNum], errorlist[procNum])
+                         procScalarTable.body[procNum+1].append(meanstr)
+                         procScalarTable.body[procNum+1].append(errorstr)
+                    (meanstr, errorstr) = MeanErrorString (mean, error)
+                    myTable.body.append([Href("#"+sectionName+varName+repr(currNum),varName),\
+                                         meanstr,errorstr, '%1.2e' % var ,'%1.2f' % kappa])
      infiles.CloseSection() # sectionName
      sectionName2 = infiles.GetName()
      infiles.CloseSection() # sectionName2

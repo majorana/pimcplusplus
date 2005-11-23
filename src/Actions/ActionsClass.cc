@@ -435,3 +435,60 @@ ActionsClass::WriteInfo(IOSectionClass &out)
     }
   }
 }
+
+
+void
+ActionsClass::GetForces(const Array<int,1> &ptcls, Array<dVec,1> &F)
+{
+  PathClass &Path = PathData.Path;
+  assert (F.size() == ptcls.size());
+  Array<dVec,1> Ftmp(F.size());
+  dVec zero; 
+  for (int i=0; i<NDIM; i++)
+    zero[i] = 0.0;
+  Ftmp = zero;
+  /// Calculate short and long-range pair actions for now.
+  ShortRange.GradAction(0, Path.NumTimeSlices()-1, ptcls, 0, Ftmp);
+  LongRange.GradAction(0, Path.NumTimeSlices()-1, ptcls, 0, Ftmp);
+  /// Sum over clone processors
+  Path.Communicator.AllSum (Ftmp, Ftmp);
+  /// Answer must be divided by beta.
+  double beta = Path.TotalNumSlices * Path.tau;
+  F += (1.0/beta)*Ftmp;
+}
+
+
+void
+ActionsClass::GetForcesFD(const Array<int,1> &ptcls, Array<dVec,1> &F)
+{
+  const double eps = 1.0e-6;
+  PathClass &Path = PathData.Path;
+  Array<dVec,1> Ftmp(F.size());
+  dVec zero;
+  for (int i=0; i<NDIM; i++)
+    zero[i] = 0.0;
+  Ftmp = zero;
+  Array<int,1> onePtcl(1);
+  for (int pi=0; pi < ptcls.size(); pi++) {
+    int ptcl = ptcls(pi);
+    onePtcl(0) = ptcl;
+    dVec savePos = Path(0, ptcl);
+    dVec uPlus, uMinus;
+    for (int dim=0; dim<NDIM; dim++) {
+      for (int slice=0; slice<Path.NumTimeSlices(); slice++)
+	Path(slice,ptcl)[dim] = savePos[dim] + eps;
+      uPlus[dim] = ShortRange.Action(0, Path.NumTimeSlices()-1, onePtcl, 0);
+      uPlus[dim] += LongRange.Action(0, Path.NumTimeSlices()-1, onePtcl, 0);
+      for (int slice=0; slice<Path.NumTimeSlices(); slice++)
+	Path(slice,ptcl)[dim] = savePos[dim] - eps;
+      uMinus[dim] = ShortRange.Action(0, Path.NumTimeSlices()-1, onePtcl, 0);
+      uMinus[dim] += LongRange.Action(0, Path.NumTimeSlices()-1, onePtcl, 0);
+      for (int slice=0; slice<Path.NumTimeSlices(); slice++)
+	Path(slice,ptcl)[dim] = savePos[dim];
+    }
+    Ftmp(pi) = (0.5/eps)*(uPlus-uMinus);
+  }
+  Path.Communicator.AllSum(Ftmp, Ftmp);
+  double beta = Path.TotalNumSlices * Path.tau;
+  F += (1.0/beta)*Ftmp;
+}

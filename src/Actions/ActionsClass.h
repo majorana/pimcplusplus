@@ -92,6 +92,13 @@ public:
   void GetActions (double& kinetic, double &duShort, double &duLong, 
 		   double &node);
 
+  /// This function adds to F the current forces calculated from the
+  /// gradient of the action.  Does a global sum over the clone
+  /// processors to get the total.
+  void GetForces(const Array<int,1> &ptcls, Array<dVec,1> &F);
+  /// Finite difference version for testing.
+  void GetForcesFD(const Array<int,1> &ptcls, Array<dVec,1> &F);
+
   /// Return the all the energies for this processor's segment of
   /// the path.  Must do global sum to get total energy.
   void Energy (double& kinetic, double &duShort, double &duLong, 

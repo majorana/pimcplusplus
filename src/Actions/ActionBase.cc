@@ -45,3 +45,12 @@ ActionBaseClass::Action(int slice1, int slice2,
 //   else 
     return SingleAction(slice1, slice2, activeParticles, level);
 }
+
+void
+ActionBaseClass::GradAction(int slice1, int slice2,
+			    const Array<int,1> &ptcls, int level,
+			    Array<dVec,1> &gradVec)
+{
+  /// The default implementation does nothing for those actions which
+  /// we do not wish to contribute to the force calculation.
+}

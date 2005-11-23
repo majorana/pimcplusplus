@@ -17,6 +17,7 @@
 #include "AngularMomCor.h"
 #include "SuperfluiDrop.h"
 #include "VacancyLocation.h"
+#include "Forces.h"
 
 #include "PermutationCount.h"
 /// This template class will be used to construct distributed versions

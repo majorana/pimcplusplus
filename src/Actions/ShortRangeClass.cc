@@ -53,6 +53,15 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 	  double z = (rmag - rpmag);
 	  double U;
 	  U = PA.U(q,z,s2, level);
+// 	  if (isinf(U)) {
+// 	    cerr << "inf at slice=" << slice << " ptcl1=" << ptcl1
+// 		 << " ptcl2=" << ptcl2 << endl;
+// 	    cerr << "r = " << r << endl;
+// 	    cerr << "rp = " << rp << endl;
+// 	    cerr << "r1 = " << PathData.Path(slice+skip, ptcl1) << endl;
+// 	    cerr << "r2 = " << PathData.Path(slice+skip, ptcl2) << endl;
+// 	  }
+
 	  //	  if (ptcl2==4 && ptcl1==0 && slice==8)
 	    //	    cerr<<"MY real U is "<<U<<endl;
 	  //	  if (isnan(U)){
@@ -64,6 +73,9 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 	  // Subtract off long-range part from short-range action
 	  if (PA.IsLongRange())
 	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
+
+// 	  if ((slice1==0) && (slice2 == Path.NumTimeSlices()))
+// 	      cerr << "U = " << U << endl;
 	  //	  if (isnan(U))
 	    //	    cerr << "After  long range sub:  ptcl1=" << ptcl1
 	    //		 << " ptcl2=" << ptcl2 << " slice="<< slice << endl;
@@ -138,8 +150,8 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 
 
 
-double ShortRangeClass::d_dBeta (int slice1, int slice2,
-				 int level)
+double 
+ShortRangeClass::d_dBeta (int slice1, int slice2, int level)
 {
   double levelTau=Path.tau;
   int skip = 1<<level;
@@ -169,4 +181,42 @@ double ShortRangeClass::d_dBeta (int slice1, int slice2,
     }
   }
   return dU;
+}
+
+
+void
+ShortRangeClass::GradAction(int slice1, int slice2, 
+			    const Array<int,1> &ptcls, int level,
+			    Array<dVec,1> &gradVec)
+{
+  PathClass &Path = PathData.Path;
+  int skip = (1<<level);
+  assert (gradVec.size() == ptcls.size());
+  for (int pi=0; pi<ptcls.size(); pi++) {
+    int ptcl1 = ptcls(pi);
+    int species1 = Path.ParticleSpeciesNum(ptcl1);
+    for (int ptcl2=0; ptcl2<Path.NumParticles(); ptcl2++) {
+      int species2 = Path.ParticleSpeciesNum(ptcl2);
+      PairActionFitClass &PA=*(PathData.Actions.PairMatrix(species1,species2));
+      if (ptcl1 != ptcl2) {
+	for (int slice=slice1; slice<slice2; slice += skip) {
+	  	  dVec r, rp;
+	  double rmag, rpmag, du_dq, du_dz;
+	  Path.DistDisp(slice, slice+skip, ptcl1, ptcl2, rmag, rpmag, r, rp);
+	  double q = 0.5*(rmag+rpmag);
+	  double z = (rmag-rpmag);
+	  double s2 = dot (r-rp, r-rp);
+	  PA.Derivs(q,z,s2,level,du_dq, du_dz);
+	  Vec3 rhat  = (1.0/rmag)*r;
+	  Vec3 rphat = (1.0/rpmag)*rp;
+	  gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
+	  /// Now, subtract off long-range part that shouldn't be in
+	  /// here 
+	  if (PA.IsLongRange())
+	    gradVec(pi) += 0.5*(PA.Ulong(level).Deriv(rmag)*rhat+
+				PA.Ulong(level).Deriv(rpmag)*rphat);
+	}
+      }
+    }
+  }
 }
