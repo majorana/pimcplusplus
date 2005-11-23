@@ -1,0 +1,155 @@
+double tau=0.25;
+
+Section (System)
+{
+  int NumTimeSlices=100;
+  Array<bool,1> IsPeriodic(3) = [true,true,true];
+  Array<double,1> Box(3)=[10.0,10.0,10.0];
+  double kCutoff = 2.0;
+  Section (Particles)
+  {
+    Section (Species)
+    {
+      string Name="e";
+      string Type="e";
+      double lambda=0.5;
+      string Statistics="BOLTZMANNON";
+      int NumParticles=2;
+      int NumDim=3;
+      string InitPaths="LEVIFLIGHT";
+      Array<double,2> Positions(2,3)=[-5.0, 0.0, 0.0,
+				       5.0, 0.0, 0.0 ];
+    }
+    Section (Species)
+    {
+      string Name="p";
+      string Type="p";
+      double lambda=0.0; //classical particle
+      string Statistics="BOLTZMANNON";
+      int NumParticles=2;
+      int NumDim=3;
+      string InitPaths="FIXED";
+      Array<double,2> Positions(2,3)=[-0.70, 0.0, 0.0, 
+				       0.70, 0.0, 0.0 ];
+    }
+  }
+}
+
+Section (Action)
+{
+  int NumImages = 0;
+  int MaxLevels = 4;
+  Array<string,1> PairActionFiles(3) = ["../e-p_beta8.0.coulombBCfit.h5",
+                                        "../e-e_beta8.0.coulombBCfit.h5",
+                                        "../p-p.PairAction"];
+  int NumBreakupKnots = 20;
+  bool UseBackground = false;
+}
+
+Section (Observables)
+{
+  string OutFileBase = "H2_sep1.4_forces2";
+  Section (Observable)
+  {
+    string type = "Energy";
+    string Name = "Energy";
+    string Description="Total Energy";
+    int freq = 2;
+    int dumpFreq = 500;
+  }
+  Section (Observable) {
+    string type = "Forces";
+    string Name = "Forces";
+    string Species = "p";
+    int freq = 2;
+    int dumpFreq = 500;
+  }
+  Section (Observable)
+    {
+      string type = "PairCorrelation";
+      string Name = "epPC";
+      string Species1 = "e";
+      string Species2 = "p";
+      string Description="Electron-Proton Pair Correlation";
+      int freq = 20;
+      int dumpFreq=700;
+      Section (Grid)
+	{	  
+	  string type = "Linear";
+	  double start = 0.0;
+	  double end = 3.0;
+	  int NumPoints = 50;
+	}
+    }
+  Section (Observable)
+    {
+      string type = "PairCorrelation";
+      string Name = "eePC";
+      string Species1 = "e";
+      string Species2 = "e";
+      string Description="Electron-Eroton Pair Correlation";
+      int freq = 20;
+      int dumpFreq=700;
+      Section (Grid)
+	{	  
+	  string type = "Linear";
+	  double start = 0.0;
+	  double end = 3.0;
+	  int NumPoints = 50;
+	}
+    }
+  Section (Observable)
+    {
+      string type = "TimeAnalysis";
+      string Name = "TimeAnalysis";
+      string Description="Analyzes time!";
+      int dumpFreq=100;
+      int freq=100;
+    }
+
+
+}
+
+Section (Moves) {
+  Section (Move) {
+    string type="ShiftMove";
+    string name="Shift";
+  }
+  Section (Move) {
+    string type="BisectionBlock";
+    string name="electronBlock";
+    string PermuteType="NONE";
+    int NumLevels=4;
+    string Species = "e";
+    int StepsPerBlock=3;    
+  }
+}
+
+
+
+Section (Algorithm)
+{
+  Section (Loop){ // Before Accumulating Observables
+    int steps=1000; 
+    Section (Loop){ 
+      int steps=3;
+      Section (Move) {string name="electronBlock";}
+    }
+    Section (Move) {string name = "Shift";}
+  }
+  Section (Loop){ //Start Accumulating observables
+    int steps=3000000;
+    Section (Loop){
+      int steps=1;
+      //Section (Move) {string name="BlockCycleMove";} 
+      Section (Move) {string name="electronBlock";} 
+    }
+    Section (Move) {string name = "Shift"; }
+    Section (Observe) {string name = "epPC";}
+    Section (Observe) {string name = "eePC";}
+    //    Section (Observe) {string name = "TimeAnalysis";}
+    Section (Observe) {string name = "Energy"; }
+    Section (Observe) {string name = "Forces"; }
+    //    Section (Observe) {string name = "PathDump";}
+  }
+}
