@@ -213,7 +213,7 @@ void PathClass::InitPaths (IOSectionClass &in)
       assert (Positions.cols() == species.NumDim);
       for (int ptcl=species.FirstPtcl; 
 	   ptcl<=species.LastPtcl; ptcl++){
-	for (int slice=0; slice<NumTimeSlices(); slice++) {
+	for (int slice=0; slice<=NumTimeSlices(); slice++) {
 	  dVec pos;
 	  pos = 0.0;
 	  for (int dim=0; dim<species.NumDim; dim++)
