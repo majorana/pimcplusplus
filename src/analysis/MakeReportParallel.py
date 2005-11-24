@@ -148,6 +148,35 @@ def ProcessCorrelationSection(infiles,doc,currNum):
 def compare(a):
      return a[0]
 
+def ProcessForces(infiles,doc,currNum):
+     F = infiles.ReadVar("F")
+     numFiles = len(F)
+     numSamples = len(F[0])
+     numPtcls = len(F[0][0])
+     ndim = len(F[0][0][0])
+     myTable=Table()
+     myTable.body=[['Ptcl','x','y','z']]
+     myTable.width='50%'
+     for ptcl in range(0,numPtcls):
+          row = [repr(ptcl)]
+          for dim in range(0,ndim):
+               totalmean = 0.0
+               totale2 = 0.0
+               for i in range(0,numFiles):
+                    data = F[i]
+                    d = data[0:-1,ptcl,dim]
+                    [mean,var,err,kappa] = stats.Stats(d[StartCut:-1])
+                    totalmean = totalmean + mean
+                    totale2 = totale2 + err*err     
+               [meanstr, errstr] = \
+               MeanErrorString (totalmean/numFiles, sqrt(totale2)/numFiles)
+               row.append(meanstr + ' +/- ' + errstr)
+          myTable.body.append(row)
+     doc.append(Heading(2,"Forces"))
+     doc.append(myTable)
+     return currNum
+          
+
 def ProcessStructureFactor(infiles,doc,currNum):
      #acquire data about the structure factor
      sectionName=infiles.GetName()
@@ -681,6 +710,8 @@ for counter in range(0,numSections):
      if myName=="StructureFactor":
           currNum=ProcessStructureFactor(infiles,doc,currNum)
           doc.append(HR())
+     elif myName=="Forces":
+          currNum=ProcessForces(infiles,doc,currNum)
      elif myName=="TimeAnalysis":
           dummy=5
      elif myType=="Scalar":
