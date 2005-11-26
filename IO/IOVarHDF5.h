@@ -246,7 +246,7 @@ namespace IO {
   /// and a variable.  This is used for creating a new         ///
   /// variable for writing.                                    ///
   ////////////////////////////////////////////////////////////////
-  template<typename T>
+  template<typename T> inline
   IOVarBase *NewIOVar0HDF5(hid_t groupID, string name, T val,
 			   hid_t boolType)
   {
@@ -300,7 +300,7 @@ namespace IO {
   ////////////////////////////////////////////////////////////////
   /// String specialization of above                           ///
   ////////////////////////////////////////////////////////////////
-  template<>
+  template<> inline
   IOVarBase *NewIOVar0HDF5(hid_t groupID, string name, string val,
 			   hid_t boolType)
   {
