@@ -104,6 +104,36 @@ namespace IO {
 
   };
 
+  
+  ////////////////////////////////////////////////////////////////
+  /// Template specializations of reads and writes for string  ///
+  /// and bools.                                               ///
+  ////////////////////////////////////////////////////////////////
+  template<> bool IOVarHDF5<string,0>::VarRead(string &val);
+  template<> bool IOVarHDF5<string,1>::VarRead(Array<string,1> &val);
+  template<> bool IOVarHDF5<string,2>::VarRead(Array<string,2> &val);
+  template<> bool IOVarHDF5<string,3>::VarRead(Array<string,3> &val);
+  template<> bool IOVarHDF5<string,4>::VarRead(Array<string,4> &val);
+  template<> bool IOVarHDF5<bool,  0>::VarRead(bool &val);
+  template<> bool IOVarHDF5<bool,  1>::VarRead(Array<bool,1> &val);
+  template<> bool IOVarHDF5<bool,  2>::VarRead(Array<bool,2> &val);
+  template<> bool IOVarHDF5<bool,  3>::VarRead(Array<bool,3> &val);
+  template<> bool IOVarHDF5<bool,  4>::VarRead(Array<bool,4> &val);
+  template<> bool IOVarHDF5<string,0>::VarWrite(string val);
+  template<> bool IOVarHDF5<string,1>::VarWrite(const Array<string,1> &val);
+  template<> bool IOVarHDF5<string,2>::VarWrite(const Array<string,2> &val);
+  template<> bool IOVarHDF5<string,3>::VarWrite(const Array<string,3> &val);
+  template<> bool IOVarHDF5<string,4>::VarWrite(const Array<string,4> &val);
+  template<> bool IOVarHDF5<bool,  0>::VarWrite(bool val);
+  template<> bool IOVarHDF5<bool,  1>::VarWrite(const Array<bool,1> &val);
+  template<> bool IOVarHDF5<bool,  2>::VarWrite(const Array<bool,2> &val);
+  template<> bool IOVarHDF5<bool,  3>::VarWrite(const Array<bool,3> &val);
+  template<> bool IOVarHDF5<bool,  4>::VarWrite(const Array<bool,4> &val);
+
+
+
+
+
   template<typename T, int RANK> void
   IOVarHDF5<T,RANK>::Resize(int n) {
     /// The "+1" fixed compile error for RANK=0
@@ -265,6 +295,40 @@ namespace IO {
     
     return newVar;
   }
+
+
+  ////////////////////////////////////////////////////////////////
+  /// String specialization of above                           ///
+  ////////////////////////////////////////////////////////////////
+  template<>
+  IOVarBase *NewIOVar0HDF5(hid_t groupID, string name, string val,
+			   hid_t boolType)
+  {
+    /// First, create a new DataSpace.
+    hsize_t h5Dims, h5MaxDims;
+    h5Dims    = 1;
+    h5MaxDims = 1;
+    hid_t diskSpaceID = H5Screate_simple(1, &h5Dims, &h5MaxDims);
+    hid_t typeID;
+    typeID = H5Tcopy (H5T_C_S1);
+    H5Tset_size (typeID, val.length()+1);
+    
+    hid_t datasetID = 
+      H5Dcreate (groupID, name.c_str(), typeID, diskSpaceID, H5P_DEFAULT);
+
+    H5Tclose (typeID);
+    H5Sclose(diskSpaceID);
+
+    IOVarHDF5<string,0> *newVar = dynamic_cast<IOVarHDF5<string,0>*>(NewIOVarHDF5(datasetID, name, boolType));
+    if (newVar == NULL) {
+      cerr << "Error in dynamic_cast in NewIOVarHDF5.\n";
+      abort();
+    }
+    newVar->VarWrite(val);
+    
+    return newVar;
+  }
+
 
 
   template<typename T, int RANK> 
@@ -583,26 +647,6 @@ namespace IO {
 
   IOVarBase *NewIOVarHDF5(hid_t dataSetID, hid_t boolType);
 
-  template<> bool IOVarHDF5<string,0>::VarRead(string &val);
-  template<> bool IOVarHDF5<string,1>::VarRead(Array<string,1> &val);
-  template<> bool IOVarHDF5<string,2>::VarRead(Array<string,2> &val);
-  template<> bool IOVarHDF5<string,3>::VarRead(Array<string,3> &val);
-  template<> bool IOVarHDF5<string,4>::VarRead(Array<string,4> &val);
-  template<> bool IOVarHDF5<bool,  0>::VarRead(bool &val);
-  template<> bool IOVarHDF5<bool,  1>::VarRead(Array<bool,1> &val);
-  template<> bool IOVarHDF5<bool,  2>::VarRead(Array<bool,2> &val);
-  template<> bool IOVarHDF5<bool,  3>::VarRead(Array<bool,3> &val);
-  template<> bool IOVarHDF5<bool,  4>::VarRead(Array<bool,4> &val);
-  template<> bool IOVarHDF5<string,0>::VarWrite(string val);
-  template<> bool IOVarHDF5<string,1>::VarWrite(const Array<string,1> &val);
-  template<> bool IOVarHDF5<string,2>::VarWrite(const Array<string,2> &val);
-  template<> bool IOVarHDF5<string,3>::VarWrite(const Array<string,3> &val);
-  template<> bool IOVarHDF5<string,4>::VarWrite(const Array<string,4> &val);
-  template<> bool IOVarHDF5<bool,  0>::VarWrite(bool val);
-  template<> bool IOVarHDF5<bool,  1>::VarWrite(const Array<bool,1> &val);
-  template<> bool IOVarHDF5<bool,  2>::VarWrite(const Array<bool,2> &val);
-  template<> bool IOVarHDF5<bool,  3>::VarWrite(const Array<bool,3> &val);
-  template<> bool IOVarHDF5<bool,  4>::VarWrite(const Array<bool,4> &val);
 
 
 }      // namespace IO
