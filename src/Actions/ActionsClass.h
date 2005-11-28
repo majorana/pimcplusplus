@@ -38,6 +38,10 @@ public:
   /// Used to keep track of the total action
   double TotalA, TotalB;
 
+  /// Specifies whether to use long range breakups
+  bool UseLongRange;
+
+
   // Actions
   OpenLoopImportanceClass OpenLoopImportance;
   StructureRejectClass StructureReject;
@@ -145,7 +149,8 @@ public:
     TIP5PWater(pathData),
     ST2Water(pathData),
     StructureReject(pathData),
-    NumImages(1)
+    NumImages(1),
+    UseLongRange(true)
   {
     ///Do nothing for now
   }

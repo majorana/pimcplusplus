@@ -1,11 +1,11 @@
-double tau=0.25;
+double tau=0.125;
 
 Section (System)
 {
-  int NumTimeSlices=100;
+  int NumTimeSlices=200;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
-  Array<double,1> Box(3)=[10.0,10.0,10.0];
-  double kCutoff = 2.0;
+  Array<double,1> Box(3)=[20.0,20.0,20.0];
+  // double kCutoff = 0.5;
   Section (Particles)
   {
     Section (Species)
@@ -29,8 +29,8 @@ Section (System)
       int NumParticles=2;
       int NumDim=3;
       string InitPaths="FIXED";
-      Array<double,2> Positions(2,3)=[-0.70, 0.0, 0.0, 
-				       0.70, 0.0, 0.0 ];
+      Array<double,2> Positions(2,3)=[-0.725, 0.0, 0.0, 
+				       0.725, 0.0, 0.0 ];
     }
   }
 }
@@ -38,30 +38,31 @@ Section (System)
 Section (Action)
 {
   int NumImages = 0;
-  int MaxLevels = 4;
+  int MaxLevels = 5;
   Array<string,1> PairActionFiles(3) = ["../e-p_beta8.0.coulombBCfit.h5",
                                         "../e-e_beta8.0.coulombBCfit.h5",
                                         "../p-p.PairAction"];
   int NumBreakupKnots = 20;
+  bool UseLongRange = false;
   bool UseBackground = false;
 }
 
 Section (Observables)
 {
-  string OutFileBase = "H2_sep1.4_forces2";
+  string OutFileBase = "H2_sep1.45_forces3_tau0.125";
   Section (Observable)
   {
     string type = "Energy";
     string Name = "Energy";
     string Description="Total Energy";
-    int freq = 2;
+    int freq = 1;
     int dumpFreq = 500;
   }
   Section (Observable) {
     string type = "Forces";
     string Name = "Forces";
     string Species = "p";
-    int freq = 2;
+    int freq = 1;
     int dumpFreq = 500;
   }
   Section (Observable)
@@ -70,7 +71,7 @@ Section (Observables)
       string Name = "epPC";
       string Species1 = "e";
       string Species2 = "p";
-      string Description="Electron-Proton Pair Correlation";
+      string Description="Electron-proton pair correlation";
       int freq = 20;
       int dumpFreq=700;
       Section (Grid)
@@ -87,7 +88,7 @@ Section (Observables)
       string Name = "eePC";
       string Species1 = "e";
       string Species2 = "e";
-      string Description="Electron-Eroton Pair Correlation";
+      string Description="Electron-electron pair correlation";
       int freq = 20;
       int dumpFreq=700;
       Section (Grid)
@@ -119,7 +120,7 @@ Section (Moves) {
     string type="BisectionBlock";
     string name="electronBlock";
     string PermuteType="NONE";
-    int NumLevels=4;
+    int NumLevels=5;
     string Species = "e";
     int StepsPerBlock=3;    
   }
@@ -140,7 +141,7 @@ Section (Algorithm)
   Section (Loop){ //Start Accumulating observables
     int steps=3000000;
     Section (Loop){
-      int steps=1;
+      int steps=7;
       //Section (Move) {string name="BlockCycleMove";} 
       Section (Move) {string name="electronBlock";} 
     }

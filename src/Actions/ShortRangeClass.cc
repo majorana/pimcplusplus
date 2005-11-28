@@ -71,7 +71,7 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 	  //	    cerr<<"U is "<<U<<endl;
 	  //	  }
 	  // Subtract off long-range part from short-range action
-	  if (PA.IsLongRange())
+	  if (PA.IsLongRange() && PathData.Actions.UseLongRange)
 	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
 
 // 	  if ((slice1==0) && (slice2 == Path.NumTimeSlices()))
@@ -175,7 +175,7 @@ ShortRangeClass::d_dBeta (int slice1, int slice2, int level)
 	  *(PairMatrix(species1, PathData.Path.ParticleSpeciesNum(ptcl2)));
 	dU += pa.dU(q, z, s2, level);
 	// Subtract off long-range part from short-range action
-	if (pa.IsLongRange())
+	if (pa.IsLongRange() && PathData.Actions.UseLongRange)
 	  dU -= 0.5*(pa.dUlong(level)(rmag)+pa.dUlong(level)(rpmag));
       }
     }
@@ -212,7 +212,7 @@ ShortRangeClass::GradAction(int slice1, int slice2,
 	  gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
 	  /// Now, subtract off long-range part that shouldn't be in
 	  /// here 
-	  if (PA.IsLongRange())
+	  if (PA.IsLongRange() && PathData.Actions.UseLongRange)
 	    gradVec(pi) += 0.5*(PA.Ulong(level).Deriv(rmag)*rhat+
 				PA.Ulong(level).Deriv(rpmag)*rphat);
 	}

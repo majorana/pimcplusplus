@@ -23,7 +23,7 @@ ShortRangePotClass::V(int slice)
 	*(PairMatrix(species1, PathData.Path.ParticleSpeciesNum(ptcl2)));
       
       val += pa.V(dist);
-      if (pa.IsLongRange())
+      if (pa.IsLongRange() && PathData.Actions.UseLongRange)
 	val -= pa.Vlong(dist);
     }
   }

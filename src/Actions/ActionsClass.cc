@@ -84,7 +84,10 @@ ActionsClass::Read(IOSectionClass &in)
 	  exit(1);
 	}
       }
+  
+  in.ReadVar("UseLongRange", UseLongRange);
   if (HaveLongRange()) {
+    cerr << "*** Using long-range/short-range breakup. ***\n";
     assert (in.ReadVar("UseBackground", LongRange.UseBackground));
     LongRangePot.UseBackground = LongRange.UseBackground;
     LongRangeRPA.UseBackground = LongRange.UseBackground;
@@ -195,11 +198,12 @@ void
 ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong, 
 		      double &node, double &vShort, double &vLong)
 {
+  bool doLongRange = HaveLongRange() && UseLongRange;
   int M = PathData.Path.NumTimeSlices()-1;
   kinetic = Kinetic.d_dBeta (0, M, 0);
   dUShort = ShortRange.d_dBeta (0, M, 0);
   dULong=0.0;
-  if (PathData.Path.LongRange){
+  if (doLongRange){
     if (UseRPA)
       dULong = LongRangeRPA.d_dBeta (0, M, 0);
     else if (PathData.Path.DavidLongRange)
@@ -216,7 +220,8 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
   for (int slice=0; slice <= M; slice++) {
     double factor = ((slice==0)||(slice==M)) ? 0.5 : 1.0;
     vShort += factor * ShortRangePot.V(slice);
-    vLong  += factor *  LongRangePot.V(slice);
+    if (doLongRange)
+      vLong  += factor *  LongRangePot.V(slice);
   }
 }
 
@@ -226,6 +231,7 @@ void
 ActionsClass::GetActions (double& kinetic, double &UShort, double &ULong, 
 			  double &node)
 {
+  bool doLongRange = HaveLongRange() && UseLongRange;
   Array<int,1> activePtcls(PathData.Path.NumParticles());
   for (int i=0; i<PathData.Path.NumParticles(); i++)
     activePtcls(i) = i;
@@ -234,7 +240,7 @@ ActionsClass::GetActions (double& kinetic, double &UShort, double &ULong,
   kinetic = Kinetic.Action (0, M, activePtcls, 0);
   UShort = ShortRange.Action (0, M, activePtcls, 0);
   ULong=0.0;
-  if (PathData.Path.LongRange){
+  if (doLongRange){
     if (UseRPA)
       ULong = LongRangeRPA.Action (0, M, activePtcls, 0);
     else if (PathData.Path.DavidLongRange)
@@ -398,7 +404,7 @@ bool ActionsClass::HaveLongRange()
   bool longRange = false;
   for (int i=0; i<PairArray.size(); i++)
     longRange = longRange || PairArray(i)->IsLongRange();
-  return longRange;
+  return (UseLongRange && longRange);
 }
 
 void 

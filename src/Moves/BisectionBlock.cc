@@ -79,7 +79,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       if (PathData.Path.DavidLongRange){
 	newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
       }
-      else if (PathData.Path.LongRange){
+      else if (PathData.Actions.HaveLongRange()){
 	if (PathData.Actions.UseRPA)
 	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
 	else
