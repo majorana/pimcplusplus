@@ -390,6 +390,12 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)->Read(in);
       OutFile.CloseSection(); // Whatever Move section we opened above.
     }
+    else if (MoveType=="Langevin") {
+      OutFile.NewSection("Langevin");
+      Moves(counter) = new LangevinMoveClass(PathData, OutFile);
+      Moves(counter)->Read(in);
+      OutFile.CloseSection();
+    }
     else {
       perr<<"This type of move is not recognized: "<< MoveType <<endl;
       abort();

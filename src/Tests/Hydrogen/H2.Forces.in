@@ -29,8 +29,8 @@ Section (System)
       int NumParticles=2;
       int NumDim=3;
       string InitPaths="FIXED";
-      Array<double,2> Positions(2,3)=[-0.725, 0.0, 0.0, 
-				       0.725, 0.0, 0.0 ];
+      Array<double,2> Positions(2,3)=[-0.7, 0.0, 0.0, 
+				       0.7, 0.0, 0.0 ];
     }
   }
 }
@@ -49,7 +49,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "H2_sep1.45_forces3_tau0.125";
+  string OutFileBase = "H2_sep1.4_forces3_tau0.125";
   Section (Observable)
   {
     string type = "Energy";

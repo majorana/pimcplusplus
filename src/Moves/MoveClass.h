@@ -19,7 +19,7 @@
 #include "ClusterMove.h"
 #include "StructureRejectStage.h"
 #include "CouplingMove.h"
-
+#include "LangevinMove.h"
 
 
 #endif
