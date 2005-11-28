@@ -68,7 +68,10 @@ public:
   /// These derivatives are needed to compute the gradient
   virtual void Derivs (double q, double z, double s2, int level,
 		       double &d_dq, double &d_dz)
-  { d_dq = d_dz = 0.0; }
+  { 
+    cerr << "Error:  Derivs not implemented yet for this pair action type.";
+    abort();
+  }
 
   /////////////////////////
   /// Long-ranged stuff ///
