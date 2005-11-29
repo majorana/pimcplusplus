@@ -134,7 +134,7 @@ void LangevinMoveClass::InitVelocities()
 
   /// Now, normalize to appropriate temperature using equipartition
   /// theorem 
-  double norm = 0.5*(double)(NDIM*V.size())*kBT/Esum;
+  double norm = sqrt(0.5*(double)(NDIM*V.size())*kBT/Esum);
   for (int i=0; i<V.size(); i++)
     V(i) *= norm;
 
