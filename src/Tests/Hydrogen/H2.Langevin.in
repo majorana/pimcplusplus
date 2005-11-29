@@ -1,10 +1,15 @@
 double tau=0.125;
 
+Section (Parallel)
+{
+  int ProcsPerClone = 1;
+}
+
 Section (System)
 {
   int NumTimeSlices=200;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
-  Array<double,1> Box(3)=[20.0,20.0,20.0];
+  Array<double,1> Box(3)=[3.0,3.0,3.0];
   // double kCutoff = 0.5;
   Section (Particles)
   {
@@ -49,7 +54,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "H2_sep1.375_forces3_tau0.125";
+  string OutFileBase = "H2.Langevin.";
   Section (Observable)
   {
     string type = "Energy";
@@ -133,22 +138,22 @@ Section (Algorithm)
     int steps=1000; 
     Section (Loop){ 
       int steps=3;
-      Section (Move) {string name="electronBlock";}
+      Section (Move)  { string name="electronBlock";   }
     }
-    Section (Move) {string name = "Shift";}
+    Section (Move)    { string name = "Shift";         }
   }
-  Section (Loop){ //Start Accumulating observables
+  Section (Loop){ // Start Accumulating observables
     int steps=3000000;
     Section (Loop){
       int steps=7;
-      //Section (Move) {string name="BlockCycleMove";} 
-      Section (Move) {string name="electronBlock";} 
+      Section (Move)  { string name = "electronBlock"; } 
+      Section (Move)  { string name = "Shift";         }
     }
-    Section (Move) {string name = "Shift"; }
-    Section (Observe) {string name = "epPC";}
-    Section (Observe) {string name = "eePC";}
-    Section (Observe) {string name = "Energy"; }
-    Section (Observe) {string name = "Forces"; }
+    Section (Move)    { string name = "Langevin";      }
+    Section (Observe) { string name = "epPC";          }
+    Section (Observe) { string name = "eePC";          }
+    Section (Observe) { string name = "Energy";        }
+    Section (Observe) { string name = "Forces";        }
     //    Section (Observe) {string name = "PathDump";}
   }
 }

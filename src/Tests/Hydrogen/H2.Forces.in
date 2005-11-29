@@ -134,23 +134,21 @@ Section (Algorithm)
     int steps=1000; 
     Section (Loop){ 
       int steps=3;
-      Section (Move) {string name="electronBlock";}
+      Section (Move)  { string name = "electronBlock"; }
     }
-    Section (Move) {string name = "Shift";}
+    Section (Move)    { string name = "Shift";         }
   }
   Section (Loop){ //Start Accumulating observables
     int steps=3000000;
     Section (Loop){
       int steps=7;
-      //Section (Move) {string name="BlockCycleMove";} 
-      Section (Move) {string name="electronBlock";} 
+      Section (Move)  { string name = "electronBlock"; } 
+      Section (Move)  { string name = "Shift";         }
     }
-    Section (Move) {string name = "Shift"; }
-    Section (Observe) {string name = "epPC";}
-    Section (Observe) {string name = "eePC";}
-    //    Section (Observe) {string name = "TimeAnalysis";}
-    Section (Observe) {string name = "Energy"; }
-    Section (Observe) {string name = "Forces"; }
+    Section (Observe) { string name = "epPC";          }
+    Section (Observe) { string name = "eePC";          }
+    Section (Observe) { string name = "Energy";        }
+    Section (Observe) { string name = "Forces";        }
     //    Section (Observe) {string name = "PathDump";}
   }
 }
