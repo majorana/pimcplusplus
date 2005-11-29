@@ -6,7 +6,7 @@ void CenterDropletClass::MakeMove()
   ofstream outfile;
   outfile.open("CenterOfMass.txt");
   PathData.MoveJoin(PathData.Path.NumTimeSlices()-1);
-  dVec totalDispVec=0;
+  dVec totalDispVec(0.0);
   
   int firstPtcl=PathData.Path.Species(Species).FirstPtcl;
   int lastPtcl=PathData.Path.Species(Species).LastPtcl;

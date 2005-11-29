@@ -78,6 +78,7 @@ LangevinMoveClass::Read(IOSectionClass &in)
 {
   string speciesStr;
 
+  assert(in.ReadVar("name", Name));
   assert(in.ReadVar("Mass", Mass));
   assert (in.ReadVar("TimeStep", TimeStep));
   assert (in.ReadVar("NumEquilSteps", NumEquilSteps));
