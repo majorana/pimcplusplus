@@ -15,13 +15,13 @@ LangevinMoveClass::LDStep()
     R(i) += TimeStep * V(i) + 0.5*TimeStep*TimeStep*MassInv*OldF(i);
 
   // Now, compute F(t+dt)
-  // Sum Fsum over all the clones
-  PathData.InterComm.AllSum(Fsum, Fsum);
+  // Sum Fsum over all the processors (all clones included)
+  PathData.WorldComm.AllSum(Fsum, Fsum);
   int numClones = PathData.InterComm.NumProcs();
   double norm = 1.0/(double)(numClones*NumEquilSteps);
   for (int i=0; i<Fsum.size(); i++)
     Fsum(i) *= norm;
-  // Now F holds the force at x(t+dt)
+  // Now Fsum holds the force at x(t+dt)
   
   // Compute V(t+dt)
   for (int i=0; i<V.size(); i++)

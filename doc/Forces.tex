@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage{amsmath}
+\usepackage{cancel}
 \title{Force calculations with PIMC}
 \author{Kenneth P. Esler Jr.}
 \date{\today}
@@ -7,12 +8,34 @@
 \newcommand{\vr}{\mathbf{r}}
 \newcommand{\vrp}{\mathbf{r}'}
 \newcommand{\vR}{\mathbf{R}}
-
+\newcommand{\vF}{\mathbf{F}}
 
 \begin{document}
 \maketitle
 
 \section{Introduction}
+In this chapter, we address the specifics of how thermal forces on
+classical ions may be computed within the PIMC framework.  We begin by
+recalling from statistical mechanics that the average force exerted in
+particle $i$ in the canonical ensemble may be given by
+\begin{equation}
+\vF_i = -\nabla_{\vR_i} \mathcal{F},
+\end{equation}
+where $\mathcal{F}$ is the Helmholtz free energy.  Then we may write 
+\begin{eqnarray}
+\vF_i & = & \frac{1}{\beta}  \nabla_{\vR_i} \ln Z \\
+& = & -\frac{1}{\beta}
+\left\langle 
+\nabla_{\vR_i} S
+\right\rangle_{\text{PIMC}},
+\end{eqnarray}
+where $S$ denotes the total action, and the average is over all paths
+in the PIMC simulation.
+
+\section{Kinetic action gradients}
+Clearly, the kinetic action of the electrons has no explicit dependence
+on the location of the ions.  Hence, the gradient of this term is
+identically zero.
 
 \section{Pair action gradients}
 
@@ -55,6 +78,131 @@ Then, we have
 \left(\hat{\vr} + \hat{\vr}'\right)
 -\frac{\partial u}{\partial z} \left(\hat{\vr} -\hat{\vr}'\right) \right]
 \end{equation}
+
+\subsection{Tricubic Splines}
+A very general way to store the pair action, $u(q,z,s;\tau)$, is the
+use of tricubic spline interpolation.  This method tabulates the
+values of the action on a $3D$ mesh, and uses piecewise tricubic
+interpolants constructed such that the value and all first and second
+derivatives are continuous everywhere.  The use of these splines
+requires an box-shaped domain.  Because of their definitions, the
+range of $z$ depends on $q$ and the range of $s$ depends on both $q$
+and $z$.  Thus, we must choose an alternate set of variables such that
+the spline has a box-shaped domain in those variables.  For reasons of
+accuracy, we choose,
+\begin{eqnarray}
+q & \equiv & q \\
+y & \equiv & \frac{|z|}{z_\text{max}} \\
+t & \equiv & \frac{s-|z|}{z_\text{max}-|z|},
+\end{eqnarray}
+where
+\begin{equation}
+z_\text{max} = \min \left[2q, z^*_\text{max}(\tau)\right].
+\end{equation}
+$z^*_\text{max}(\tau)$ is an appropriately chosen constant to reflect
+the range of $z$ likely to occur in PIMC simulation.  On the rare
+occasion that $z$ exceeds $z^*_\text{max}$, we extrapolate from the
+last point using derivative information from the spline.
+
+Because $z_\text{max}$ may depend on $q$, we must compute the partial
+derivatives of $u$ carefully.
+\begin{eqnarray}
+\left.\frac{\partial u}{\partial q}\right|_{z,s} & = & 
+\left.\frac{\partial u}{\partial q}\right|_{y,t} \ \ \ \ \, + 
+\left.\frac{\partial u}{\partial y}\right|_{q,t} \frac{\partial y}{\partial q}+
+\left.\frac{\partial u}{\partial t}\right|_{q,y} \frac{\partial t}{\partial q} \\
+\left.\frac{\partial u}{\partial z}\right|_{q,s} & = & 
+\left.\frac{\partial u}{\partial q}\right|_{y,t} \cancelto{0}{\frac{\partial q}{\partial z}}+
+\left.\frac{\partial u}{\partial y}\right|_{q,t} \frac{\partial y}{\partial z}+
+\left.\frac{\partial u}{\partial t}\right|_{q,y} \frac{\partial t}{\partial z} \\
+\left.\frac{\partial u}{\partial s}\right|_{q,z} & = & 
+\left.\frac{\partial u}{\partial q}\right|_{y,t} \cancelto{0}{\frac{\partial q}{\partial s}}+
+\left.\frac{\partial u}{\partial y}\right|_{q,t} \frac{\partial y}{\partial s}+
+\left.\frac{\partial u}{\partial t}\right|_{q,y} \frac{\partial t}{\partial s} \\
+\end{eqnarray}
+
+\section{Long-range forces}
+We recall the expressions for the long-range contribution to the
+action at a given timeslice,
+\newcommand{\vk}{\mathbf{k}}
+\begin{eqnarray}
+U_\text{long} & = & \sum_{\alpha > \beta} \left[ \sum_\vk \mathcal{R}e\left(\rho_\vk^\alpha
+  \rho_{-\vk}^\beta\right) u^{\alpha \beta}_k   -N^\alpha N^\beta
+  u^{\alpha \beta}_{s\mathbf{0}}  +\tilde{U}_{k=0} \right] \\
+& + & \sum_\alpha \left[ -\frac{N^\alpha u_l^{\alpha \alpha}(0)}{2} + \frac{1}{2} \sum_\vk |\rho_\vk^\alpha|^2 u^{\alpha\alpha}_\vk - \frac{1}{2}\left(N_\alpha\right)^2
+  u_{s\mathbf{0}}^{\alpha\alpha} +\tilde{U}_{k=0}\right]  \nonumber 
+\end{eqnarray}
+We note that the only terms which depend on the ion positions, $\vR$,
+are the $\rho_\vk$.  Let $\alpha$ represent the ion species.  Then $\rho^\alpha$ is given by \begin{eqnarray}
+\rho^\alpha_\vk & = & \sum_j e^{i\vk \cdot \vR_j} \\
+\nabla_{\vR_j} \rho_\vk^\alpha & = & i\vk
+\end{eqnarray}
+\begin{eqnarray}
+\nabla_{\vR_j} U_\text{long} & = &
+-\sum_\vk \vk \left[ \mathcal{I}m \left(\rule{0.0cm}{0.35cm}e^{i\vk\cdot\vR_j}\rho_{-\vk}^\alpha\right)u^{\alpha
+    \alpha}_k +\sum_{\beta \neq \alpha} \mathcal{I}m\left(
+e^{i\vk\cdot\vR_j}\rho^\beta_{-\vk}\right) u_k^{\alpha\beta} \right] \\
+& = & -\sum_\vk \vk \sum_\beta \mathcal{I}m
+\left(e^{i\vk\cdot\vR_j}\rho_{-\vk}^\beta\right) u^{\alpha\beta}_k \\
+& = & - \sum_\vk \vk \ \mathcal{I}m \left( e^{i\vk\cdot\vR_j} \sum_\beta
+\rho_{-\vk}^\beta u^{\alpha\beta}_k \right)
+\end{eqnarray}
+
+\subsection{Storage issues}
+We reduce our calculation of $\rho^{\alpha\beta}_\vk$ by noting that
+$\rho_{-\vk}^{\alpha \beta} = \left( \rho_\vk^{\alpha
+  \beta}\right)^*$, and storing only half of the $\vk$-vectors.
+Therefore, we need to compensate for this storage by explicitly
+considering the vectors in $(\vk,-\vk)$ pairs.  We may then write
+\begin{eqnarray}
+\nabla_{\vR_j} U_\text{long} & = & 
+-\sum_{\text{sgn}(\vk)\ge 0} \left[\vk \mathcal{I}m 
+\left( e^{i\vk\cdot\vR_j} \sum_\beta \rho_{-\vk}^\beta
+u_k^{\alpha\beta}\right) - \vk \mathcal{I}m 
+\left(
+e^{-i\vk\cdot\vR_j} \sum_\beta \rho_{\vk}^\beta
+u_k^{\alpha\beta}\right) 
+\right] \nonumber \\
+& = & -2 \sum_{\text{sgn}(\vk)\ge 0} \vk \ \mathcal{I}m
+\left( e^{i\vk\cdot\vR_j} \sum_\beta \rho^\beta_{-\vk}
+u_k^{\alpha\beta} \right)
+\end{eqnarray}
+
+\section{Nodal action}
+If, in our restricted path integral formulation for fermions, our
+nodal surfaces are parameterized by the positions of the
+ions$\{\vR_i\}$, there must be a contribution to the gradient of the
+action, $\nabla_{\vR_i} S$, for a given instantaneous path in the
+simulation.  In this section, however, we argue that if our nodal
+surfaces correspond to those of the exact density matrix, the net
+contribution to the force when average over all paths will be zero.
+In practice, except for trivial problems, we never have exact nodal
+surfaces.  However, the approximation made in neglecting the
+contribution due to inexact nodes is no worse than the approximation
+of using the restricted path approach to begin with.
+
+To begin our argument, we return to partition function.  The partition
+function may be written as
+\begin{equation}
+Z = \sum_{s\in \text{states}} e^{-\beta E_s}
+\end{equation}
+Then
+\begin{eqnarray}
+\vF_i & = & \frac{1}{\beta Z} \nabla_{\vR_i} Z \\
+      & = & \frac{1}{\beta Z} \sum_s \nabla_{\vR_i} e^{-\beta E_s} \\
+      & = & \frac{1}{\beta Z} \sum_s \left\langle \psi_s |
+      \nabla_{\vR_i} V | \psi_s \right \rangle e^{-\beta E_s}.
+\end{eqnarray}
+The last is due to the Hellmann-Feynman.  
+Since $\nabla_{\vR_i} V$ is local, the force can clearly be written in
+terms of an integral over the thermal electron density.  Thus, there
+must clearly be an estimator for $\vF_i$ which does not have an
+explicit dependence on the nodal structure.  This structure comes in
+only in specifying the boundary conditions on the $|\psi_s\rangle$s
+that determine the charge density.
+
+The estimator we have been using above is not the direct
+Hellmann-Feynman estimator, but one base on pair actions.
 
 
 

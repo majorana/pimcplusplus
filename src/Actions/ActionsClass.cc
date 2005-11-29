@@ -456,8 +456,6 @@ ActionsClass::GetForces(const Array<int,1> &ptcls, Array<dVec,1> &F)
   /// Calculate short and long-range pair actions for now.
   ShortRange.GradAction(0, Path.NumTimeSlices()-1, ptcls, 0, Ftmp);
   LongRange.GradAction(0, Path.NumTimeSlices()-1, ptcls, 0, Ftmp);
-  /// Sum over clone processors
-  Path.Communicator.AllSum (Ftmp, Ftmp);
   /// Answer must be divided by beta.
   double beta = Path.TotalNumSlices * Path.tau;
   F += (1.0/beta)*Ftmp;
@@ -494,7 +492,6 @@ ActionsClass::GetForcesFD(const Array<int,1> &ptcls, Array<dVec,1> &F)
     }
     Ftmp(pi) = (0.5/eps)*(uPlus-uMinus);
   }
-  Path.Communicator.AllSum(Ftmp, Ftmp);
   double beta = Path.TotalNumSlices * Path.tau;
   F += (1.0/beta)*Ftmp;
 }

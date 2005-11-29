@@ -97,8 +97,8 @@ public:
 		   double &node);
 
   /// This function adds to F the current forces calculated from the
-  /// gradient of the action.  Does a global sum over the clone
-  /// processors to get the total.
+  /// gradient of the action.  Note that you must do an AllSum over
+  /// the clone processors to get the total.
   void GetForces(const Array<int,1> &ptcls, Array<dVec,1> &F);
   /// Finite difference version for testing.
   void GetForcesFD(const Array<int,1> &ptcls, Array<dVec,1> &F);
