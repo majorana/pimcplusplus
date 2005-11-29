@@ -396,8 +396,9 @@ LongRangeClass::GradAction(int slice1, int slice2,
 	dVec r = Path(slice,ptcl);
 	dVec k = Path.kVecs(ki);
 	double phi = dot(r,k);
-	complex<double> z;
-	sincos(phi, &z.imag(), &z.real());
+	double re, im;
+	sincos(phi, &im, &re);
+	complex<double> z(re, im);
 	complex<double> rho_uSum(0.0, 0.0);
 	for (int si=0; si<Path.NumSpecies(); si++) {
 	  PairActionFitClass &PA = *PairMatrix(species1,si);
