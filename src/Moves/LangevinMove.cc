@@ -10,6 +10,18 @@ LangevinMoveClass::AccumForces()
 void
 LangevinMoveClass::LDStep()
 {
+  /// Write out positions and velocities
+  TimeVar.Write(Time);
+  for (int i=0; i<R.size(); i++)
+    for (int j=0; j<NDIM; j++)
+      WriteArray(i,j) = R(i)[j];
+  Rvar.Write(WriteArray);
+
+  for (int i=0; i<V.size(); i++)
+    for (int j=0; j<NDIM; j++)
+      WriteArray(i,j) = V(i)[j];
+  Vvar.Write(WriteArray);
+
   // OldF holds the force computed at x(t).
   for (int i=0; i<R.size(); i++)
     R(i) += TimeStep * V(i) + 0.5*TimeStep*TimeStep*MassInv*OldF(i);
@@ -31,10 +43,9 @@ LangevinMoveClass::LDStep()
   OldF = Fsum;
 
   // And reset Fsum
-  dVec zero;
-  for (int i=0; i<NDIM; i++)
-    Fsum = zero;
-  
+  dVec zero(0.0);
+  for (int i=0; i<Fsum.size(); i++)
+    Fsum(i) = zero;
   // Put x(t+2dt) into the Path so we can start accumulating forces
   // for the next step
   int first = PathData.Path.Species(LDSpecies).FirstPtcl;
@@ -42,6 +53,9 @@ LangevinMoveClass::LDStep()
     for (int i=0; i<R.size(); i++)
       PathData.Path(slice,i+first) = 
 	R(i) + TimeStep*V(i) + 0.5*TimeStep*TimeStep*OldF(i);
+
+  /// Increment the time
+  Time += TimeStep;
 }
 
 void 
@@ -62,26 +76,37 @@ LangevinMoveClass::MakeMove()
 void 
 LangevinMoveClass::Read(IOSectionClass &in)
 {
-  dVec zero;
-  for (int i=0; i<NDIM; i++) zero[i] = 0.0;
   string speciesStr;
+
+  assert(in.ReadVar("Mass", Mass));
+  assert (in.ReadVar("TimeStep", TimeStep));
+  assert (in.ReadVar("NumEquilSteps", NumEquilSteps));
+  assert (in.ReadVar("NumAccumSteps", NumAccumSteps));
   assert (in.ReadVar("Species", speciesStr));
+
   LDSpecies = PathData.Path.SpeciesNum(speciesStr);
   SpeciesClass &species = PathData.Path.Species(LDSpecies);
   int numPtcls = species.NumParticles;
   V.resize(numPtcls);
   R.resize(numPtcls);
   Fsum.resize(numPtcls);
-  Fsum = zero;
+  OldF.resize(numPtcls);
   Particles.resize(numPtcls);
-  for (int i=0; i<numPtcls; i++)
+  WriteArray.resize(numPtcls,NDIM);
+
+  dVec zero(0.0);
+  for (int i=0; i<numPtcls; i++) {
     Particles(i) = i + species.FirstPtcl;
-  assert(in.ReadVar("Mass", Mass));
+    R(i) = PathData.Path(0,Particles(i));
+    Fsum(i) = zero;
+    OldF(i) = zero;
+  }
   MassInv = 1.0/Mass;
-  assert (in.ReadVar("TimeStep", TimeStep));
-  assert (in.ReadVar("NumEquilSteps", NumEquilSteps));
-  assert (in.ReadVar("NumAccumSteps", NumAccumSteps));
-  
+
+
+  /// Initialize the velocities
+  InitVelocities();
+
 }
 
 

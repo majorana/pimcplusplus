@@ -26,10 +26,14 @@ protected:
   double gamma;
   /// The mass of the LD species and its inverse
   double Mass, MassInv;
+  /// The LD time
+  double Time;
   void InitVelocities();
   void AccumForces();
   void LDStep();
-  ObservableVecDouble2 Rvar, Vvar, TimeVar;
+  ObservableVecDouble2 Rvar, Vvar;
+  Array<double,2> WriteArray;
+  ObservableDouble TimeVar;
 public:
   void MakeMove();
   void Read(IOSectionClass &in);
@@ -37,7 +41,8 @@ public:
     MoveClass (pathData, outSection), MCSteps(0), LDSteps(0),
     Rvar("R", OutSection, pathData.Path.Communicator),
     Vvar("V", OutSection, pathData.Path.Communicator),
-    TimeVar("Time", OutSection, pathData.Path.Communicator)
+    TimeVar("Time", OutSection, pathData.Path.Communicator),
+    Time(0.0)
   {
     // do nothing for now
   }
