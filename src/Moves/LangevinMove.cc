@@ -10,14 +10,38 @@ LangevinMoveClass::AccumForces()
 void
 LangevinMoveClass::LDStep()
 {
+  // OldF holds the force computed at x(t).
+  for (int i=0; i<R.size(); i++)
+    R(i) += TimeStep * V(i) + 0.5*TimeStep*TimeStep*MassInv*OldF(i);
+
+  // Now, compute F(t+dt)
   // Sum Fsum over all the clones
   PathData.InterComm.AllSum(Fsum, Fsum);
   int numClones = PathData.InterComm.NumProcs();
   double norm = 1.0/(double)(numClones*NumEquilSteps);
   for (int i=0; i<Fsum.size(); i++)
     Fsum(i) *= norm;
-  // Now F holds the new force
+  // Now F holds the force at x(t+dt)
+  
+  // Compute V(t+dt)
+  for (int i=0; i<V.size(); i++)
+    V(i) += 0.5*MassInv*TimeStep*(Fsum(i) + OldF(i));
 
+  // Copy new force into old
+  OldF = Fsum;
+
+  // And reset Fsum
+  dVec zero;
+  for (int i=0; i<NDIM; i++)
+    Fsum = zero;
+  
+  // Put x(t+2dt) into the Path so we can start accumulating forces
+  // for the next step
+  int first = PathData.Path.Species(LDSpecies).FirstPtcl;
+  for (int slice=0; slice<PathData.Path.NumTimeSlices(); slice++)
+    for (int i=0; i<R.size(); i++)
+      PathData.Path(slice,i+first) = 
+	R(i) + TimeStep*V(i) + 0.5*TimeStep*TimeStep*OldF(i);
 }
 
 void 
