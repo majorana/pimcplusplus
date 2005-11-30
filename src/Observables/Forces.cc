@@ -7,6 +7,7 @@ ForcesClass::SetSpecies(int speciesNum)
   SpeciesNum = speciesNum;
   SpeciesClass &species = PathData.Path.Species(speciesNum);
   Forces.resize(species.NumParticles);
+  SumTmp.resize(species.NumParticles);
   dVec zero;
   for (int i=0; i<NDIM; i++)
     zero[i] = 0.0;
@@ -53,7 +54,8 @@ ForcesClass::WriteBlock()
 {
   double norm = 1.0/(double)Counts;
   /// Sum up over all processors to get the total for the path.
-  PathData.Path.Communicator.AllSum(Forces,Forces);
+  PathData.Path.Communicator.AllSum(Forces,SumTmp);
+  Forces = SumTmp;
   for (int i=0; i<Forces.size(); i++)
     for (int j=0; j<NDIM; j++) 
       ForcesArray(i,j) = norm * Forces(i)[j];

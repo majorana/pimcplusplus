@@ -9,7 +9,7 @@ class ForcesClass : public ObservableClass
 private:
   ObservableVecDouble2 ForcesVar;
   /// Stores number of counts in each bin
-  Array<dVec,1> Forces;
+  Array<dVec,1> Forces, SumTmp;
   Array<double,2> ForcesArray;
   int SpeciesNum;
   Array<int,1> Ptcls;
