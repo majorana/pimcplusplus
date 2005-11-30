@@ -2,7 +2,7 @@ double tau=0.0625;
 
 Section (Parallel)
 {
-  int ProcsPerClone = 4;
+  int ProcsPerClone = 16;
 }
 
 
@@ -32,9 +32,9 @@ Section (System)
     {
       string Name="edown";
       string Type = "e";
-      string Statistics = "FERMION";
+      string Statistics = "BOLTZMANNON";
       double lambda=0.5; 
-      string NodeType = "FIXEDPHASE";
+      string NodeType = "GROUNDSTATE";
       int NumParticles=8;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
@@ -54,8 +54,8 @@ Section (System)
       string Name="eup";
       string Type="e";
       double lambda=0.5; 
-      string Statistics="FERMION";
-      string NodeType = "FIXEDPHASE";
+      string Statistics="BOLTZMANNON";
+      string NodeType = "GROUNDSTATE";
       int NumParticles=8;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
@@ -69,6 +69,7 @@ Section (System)
            4.250145,  4.345014, -4.2866014,
            4.620141,  4.53014,  4.784014 ];
     }
+
   }
 }
 
@@ -81,56 +82,22 @@ Section (Action)
   int NumImages = 0;
   Array<string,1> PairActionFiles(3) = 
     ["Na-Na.PairAction",
-     "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5",
+     "~/PairActions/NaPH_US_May9_05.fit.beta8.0.h5",
      "~/PairActions/e-e.fit.beta8.0.h5"];
-  Section (NodalAction)
-  {
-    string Type = "FIXEDPHASE";
-    string IonSpecies  = "Na";
-    string UpSpecies   = "eup";
-    string DownSpecies = "edown";
-    double kCut = 4.0;
-//    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
-    Array<double,2> TwistAngles(32,3) = [ 0.625, 0.125, 0.125,
-                                          0.625, 0.125, 0.375,
-                                          0.625, 0.125, 0.625,
-                                          0.625, 0.125, 0.875,
-                                          0.625, 0.375, 0.125,
-                                          0.625, 0.375, 0.375,
-                                          0.625, 0.375, 0.625,
-                                          0.625, 0.375, 0.875,
-                                          0.625, 0.625, 0.125,
-                                          0.625, 0.625, 0.375,
-                                          0.625, 0.625, 0.625,
-                                          0.625, 0.625, 0.875,
-                                          0.625, 0.875, 0.125,
-                                          0.625, 0.875, 0.375,
-                                          0.625, 0.875, 0.625,
-                                          0.625, 0.875, 0.875,
-                                          0.875, 0.125, 0.125,
-                                          0.875, 0.125, 0.375,
-                                          0.875, 0.125, 0.625,
-                                          0.875, 0.125, 0.875,
-                                          0.875, 0.375, 0.125,
-                                          0.875, 0.375, 0.375,
-                                          0.875, 0.375, 0.625,
-                                          0.875, 0.375, 0.875,
-                                          0.875, 0.625, 0.125,
-                                          0.875, 0.625, 0.375,
-                                          0.875, 0.625, 0.625,
-                                          0.875, 0.625, 0.875,
-                                          0.875, 0.875, 0.125,
-                                          0.875, 0.875, 0.375,
-                                          0.875, 0.875, 0.625,
-                                          0.875, 0.875, 0.875 ];
-  }
+//   Section (NodalAction)
+//   {
+//     string Type = "GROUNDSTATE";
+//     string IonSpecies  = "Na";
+//     string UpSpecies   = "eup";
+//     string DownSpecies = "edown";
+//     double kCut = 4.0;
+//   }
   bool UseBackground = false;
 }
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.0625_M2048.twistAvgFix.turing";
-  int FileStart = 32;
+  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.0625_M2048.NoNodes";
   Section (Observable) {
     string type = "Energy";
     string Name = "Energy";
@@ -167,7 +134,7 @@ Section (Observables)
     string Name = "eup-eup";
     string Species1 = "eup";
     string Species2 = "eup";
-    int freq=5;
+    int freq=20;
     int dumpFreq=100;
     Section (Grid) {
       string type = "Linear";
@@ -198,11 +165,11 @@ Section (Observables)
       int NumPoints = 200;
     }
   }
-//   Section (Observable) {
-//     string type = "PathDump";
-//     string Name = "PathDump";
-//     int dumpFreq = 2;
-//   }
+  Section (Observable) {
+    string type = "PathDump";
+    string Name = "PathDump";
+    int dumpFreq = 2;
+  }
 }
 
 
@@ -240,18 +207,18 @@ Section (Algorithm) {
   ////////////////////////
   // Equilibration loop //
   ////////////////////////
-//   Section (Loop) { 
-//     int steps=1000;
-//     Section (Loop) {
-//       int steps=1;
-//       Section (Loop) {
-//         int steps=2;
-//         Section (Move) { string name="eupBlock";} 
-//         Section (Move) { string name="edownBlock";} 
-//       }
-//       Section (Move) { string name = "Shift"; }
-//     }
-//   }
+  Section (Loop) { 
+    int steps=1000;
+    Section (Loop) {
+      int steps=1;
+      Section (Loop) {
+        int steps=2;
+        Section (Move) { string name="eupBlock";} 
+        Section (Move) { string name="edownBlock";} 
+      }
+      Section (Move) { string name = "Shift"; }
+    }
+  }
 
   Section (Loop) { //Start Accumulating observables
     int steps=6000000;

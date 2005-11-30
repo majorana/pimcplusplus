@@ -129,7 +129,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.0625_M2048.twistAvg.turing";
+  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.0625_M2048.twistAvgFix.turing";
 //  Array<double,1> Weights = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 //	                     1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
   int FileStart = 0;
