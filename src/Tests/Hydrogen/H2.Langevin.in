@@ -54,7 +54,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "H2.Langevin.";
+  string OutFileBase = "H2.Langevin2";
   Section (Observable)
   {
     string type = "Energy";
@@ -70,40 +70,51 @@ Section (Observables)
     int freq = 1;
     int dumpFreq = 500;
   }
-  Section (Observable)
-    {
-      string type = "PairCorrelation";
-      string Name = "epPC";
-      string Species1 = "e";
-      string Species2 = "p";
-      string Description="Electron-proton pair correlation";
-      int freq = 20;
-      int dumpFreq=700;
-      Section (Grid)
-	{	  
-	  string type = "Linear";
-	  double start = 0.0;
-	  double end = 3.0;
-	  int NumPoints = 50;
-	}
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "epPC";
+    string Species1 = "e";
+    string Species2 = "p";
+    string Description="Electron-proton pair correlation";
+    int freq = 1;
+    int dumpFreq=700;
+    Section (Grid) {
+      string type = "Linear";
+      double start = 0.0;
+      double end = 3.0;
+      int NumPoints = 50;
     }
-  Section (Observable)
-    {
-      string type = "PairCorrelation";
-      string Name = "eePC";
-      string Species1 = "e";
-      string Species2 = "e";
-      string Description="Electron-electron pair correlation";
-      int freq = 20;
-      int dumpFreq=700;
-      Section (Grid)
-	{	  
-	  string type = "Linear";
-	  double start = 0.0;
-	  double end = 3.0;
-	  int NumPoints = 50;
-	}
+  }
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "eePC";
+    string Species1 = "e";
+    string Species2 = "e";
+    string Description="Electron-electron pair correlation";
+    int freq = 1;
+    int dumpFreq=700;
+    Section (Grid) {	  
+      string type = "Linear";
+      double start = 0.0;
+      double end = 3.0;
+      int NumPoints = 50;
     }
+  }
+  Section (Observable) {
+    string type = "PairCorrelation";
+    string Name = "ppPC";
+    string Species1 = "p";
+    string Species2 = "p";
+    string Description="Proton-Proton pair correlation";
+    int freq = 111;
+    int dumpFreq=1110;
+    Section (Grid) {	  
+      string type = "Linear";
+      double start = 1.3;
+      double end = 1.8;
+      int NumPoints = 50;
+    }
+  }
 }
 
 Section (Moves) {
@@ -115,7 +126,7 @@ Section (Moves) {
     string type="Langevin";
     string name="Langevin";
     double Mass = 1.0;
-    double TimeStep = 1.0;
+    double TimeStep = 0.05;
     int NumEquilSteps = 10;
     int NumAccumSteps = 100;
     string Species = "p";
@@ -152,6 +163,7 @@ Section (Algorithm)
     Section (Move)    { string name = "Langevin";      }
     Section (Observe) { string name = "epPC";          }
     Section (Observe) { string name = "eePC";          }
+    Section (Observe) { string name = "ppPC";          }
     Section (Observe) { string name = "Energy";        }
     Section (Observe) { string name = "Forces";        }
     //    Section (Observe) {string name = "PathDump";}

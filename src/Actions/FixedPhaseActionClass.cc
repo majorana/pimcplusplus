@@ -3,7 +3,7 @@
 #include <Common/MatrixOps/MatrixOps.h>
 
 FixedPhaseClass::FixedPhaseClass(PathDataClass &pathData) :
-PathData (pathData), Path(pathData.Path)
+  PathData (pathData), Path(pathData.Path)
 {
   
 }
@@ -217,7 +217,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
   // Setup the plane wave system //
   /////////////////////////////////
   NumBands = max(NumUp, NumDown);
-  System = new SystemClass (NumBands);
+  System = new MPISystemClass (NumBands, Path.Communicator);
   PH = &PathData.Actions.GetPotential (IonSpeciesNum, UpSpeciesNum);
   //  Vec3 gamma (0.0, 0.0, 0.0);
   System->Setup (Path.GetBox(), kVec, kCut, *PH);

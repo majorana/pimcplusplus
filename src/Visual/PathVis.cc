@@ -207,19 +207,19 @@ bool PathVisClass::on_expose_event(GdkEventExpose* event)
 }
 
 
-void PathVisClass::AddPath (Array<Vec3,1> &path, bool closed)
-{
-  NumLists++;
-  glNewList(NumLists, GL_COMPILE);
-  glLineWidth (5.0);
-  glColor3f (1.0, 0.1, 0.1);
-  glBegin(GL_LINE_STRIP);
-    for (int i=0; i<path.size(); i++)
-      //      glVertex3dv(path(i)[0], path(i)[1], path(i)[2]);
-      glVertex3dv((double *)(&path(i)));
-    glEnd();
-  glEndList();
-}
+// void PathVisClass::AddPath (Array<Vec3,1> &path, bool closed)
+// {
+//   NumLists++;
+//   glNewList(NumLists, GL_COMPILE);
+//   glLineWidth (5.0);
+//   glColor3f (1.0, 0.1, 0.1);
+//   glBegin(GL_LINE_STRIP);
+//     for (int i=0; i<path.size(); i++)
+//       //      glVertex3dv(path(i)[0], path(i)[1], path(i)[2]);
+//       glVertex3dv((double *)(&path(i)));
+//     glEnd();
+//   glEndList();
+// }
 
 
 ///////////////////////////////////////////////////////////////////////////////

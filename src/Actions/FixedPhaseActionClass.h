@@ -2,7 +2,7 @@
 #define FIXED_PHASE_ACTION_CLASS_H
 
 #include "NodalActionClass.h"
-#include <Common/PlaneWavePHDFT/PlaneWaves.h>
+#include <Common/PlaneWavePHDFT/PlaneWavesMPI.h>
 #include <Common/Splines/ComplexMultiTricubicSpline.h>
 #include "../MirroredClass.h"
 
@@ -11,7 +11,7 @@ class FixedPhaseActionClass;
 class FixedPhaseClass
 {
 private:
-  SystemClass *System;
+  MPISystemClass *System;
   PathDataClass &PathData;
   PathClass &Path;
   double kCut;

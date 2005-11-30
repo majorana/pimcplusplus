@@ -78,7 +78,7 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      labels = get(gca(), 'yticklabels')
      setp(labels, 'fontsize', 16)
      currAxis=axis()
-     currAxis[0]=cutoff
+##     currAxis[0]=cutoff
      axis(currAxis)
      savefig(fileBase+".png",dpi=60)
      savefig(fileBase+".ps")

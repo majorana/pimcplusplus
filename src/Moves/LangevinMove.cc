@@ -12,12 +12,15 @@ LangevinMoveClass::LDStep()
 {
   /// Write out positions and velocities
   TimeVar.Write(Time);
-  for (int i=0; i<R.size(); i++)
-    for (int j=0; j<NDIM; j++)
-      WriteArray(i,j) = R(i)[j];
+  for (int i=0; i<R.size(); i++) {
+    dVec r = R(i);
+    PathData.Path.PutInBox(r);
+    for (int j=0; j<NDIM; j++) 
+      WriteArray(i,j) = r[j];
+  }
   Rvar.Write(WriteArray);
 
-  for (int i=0; i<V.size(); i++)
+  for (int i=0; i<V.size(); i++) 
     for (int j=0; j<NDIM; j++)
       WriteArray(i,j) = V(i)[j];
   Vvar.Write(WriteArray);
