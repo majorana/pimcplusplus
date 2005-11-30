@@ -6,7 +6,7 @@
 class LangevinMoveClass : public MoveClass
 {
 protected:
-  Array<dVec,1> V, R, OldF, Fsum;
+  Array<dVec,1> V, R, OldF, Fsum, Ftmp;
   /// The species we are doing Langevin dynamics on
   int LDSpecies;
   /// This holds the list of particles with which we're doing dynamics

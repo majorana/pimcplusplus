@@ -31,11 +31,11 @@ LangevinMoveClass::LDStep()
 
   // Now, compute F(t+dt)
   // Sum Fsum over all the processors (all clones included)
-  PathData.WorldComm.AllSum(Fsum, Fsum);
+  PathData.WorldComm.AllSum(Fsum, Ftmp);
   int numClones = PathData.InterComm.NumProcs();
   double norm = 1.0/(double)(numClones*NumEquilSteps);
   for (int i=0; i<Fsum.size(); i++)
-    Fsum(i) *= norm;
+    Fsum(i) = norm*Ftmp(i);
   // Now Fsum holds the force at x(t+dt)
   
   // Compute V(t+dt)
@@ -94,6 +94,7 @@ LangevinMoveClass::Read(IOSectionClass &in)
   V.resize(numPtcls);
   R.resize(numPtcls);
   Fsum.resize(numPtcls);
+  Ftmp.resize(numPtcls);
   OldF.resize(numPtcls);
   Particles.resize(numPtcls);
   WriteArray.resize(numPtcls,NDIM);
@@ -149,6 +150,8 @@ void LangevinMoveClass::InitVelocities()
     Esum += 0.5 * Mass * dot(V(i), V(i));
     Vsum += V(i);
   }
+  cerr << "Esum = " << Esum << " 3/2N kB T = " <<
+    (0.5*(double)(NDIM*V.size())*kBT) << endl;
   assert (fabs((Esum/(0.5*(double)(NDIM*V.size())*kBT))-1.0) < 1.0e-12);
   assert ((0.5*Mass*dot(Vsum,Vsum)) < 1.0e-10*kBT);
 }
