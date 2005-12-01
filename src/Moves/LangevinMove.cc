@@ -140,13 +140,13 @@ void LangevinMoveClass::InitVelocities()
   /// theorem 
   double norm = sqrt(0.5*(double)(NDIM*V.size())*kBT/Esum);
   for (int i=0; i<V.size(); i++)
-    V(i) *= norm;
+    V(i) = norm * V(i);
 
   /// Double-check that we did this write
   for (int i=0; i<NDIM; i++)
     Vsum[i] = 0.0;
   Esum = 0.0;
-  for (int i=0; i<NDIM; i++) {
+  for (int i=0; i<V.size(); i++) {
     Esum += 0.5 * Mass * dot(V(i), V(i));
     Vsum += V(i);
   }

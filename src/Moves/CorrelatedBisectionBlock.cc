@@ -142,6 +142,7 @@ void CorrelatedBisectionBlockClass::ChooseTimeSlices()
 
 void CorrelatedBisectionBlockClass::MakeMove()
 {
+  perr << "In CorrelatedBisectionBlockClass::MakeMove().\n";
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
   PermuteStage->InitBlock();
@@ -192,11 +193,15 @@ void CorrelatedBisectionBlockClass::MakeMove()
       nodalSBOld += (*iter)->Action(Slice1,Slice2,ActiveParticles,0);
     }
 
-    double localSBarOld=0.5*(bosonSAOld+bosonSBOld);
-    double localSBarNew=0.5*(bosonSANew+bosonSBNew);
+//     double localSBarOld=0.5*(bosonSAOld+bosonSBOld);
+//     double localSBarNew=0.5*(bosonSANew+bosonSBNew);
+    double localSBarOld=0.5*(bosonSAOld+bosonSBOld+nodalSAOld+nodalSBOld);
+    double localSBarNew=0.5*(bosonSANew+bosonSBNew+nodalSANew+nodalSBNew);
     double logAcceptProb= logSampleProb - localSBarNew + localSBarOld;
     bool toAcceptLocal = logAcceptProb>=log(PathData.Path.Random.Local());
-    
+
+    /// HACK
+    toAcceptLocal = true;
     ///////////////////////////////////////////
     /// New total calculation using updates ///
     ///////////////////////////////////////////
@@ -209,55 +214,92 @@ void CorrelatedBisectionBlockClass::MakeMove()
     PathData.Path.Communicator.AllSum (AllSumVecIn, AllSumVecOut);
     Achange = AllSumVecOut(0);  Bchange = AllSumVecOut(1);
 
-    double totalSANew = PathData.Actions.TotalA + Achange;
-    double totalSBNew = PathData.Actions.TotalB + Bchange;
-    double deltaSNew  = 0.5*(totalSANew - totalSBNew);
-    double deltaSOld  = 0.5*(PathData.Actions.TotalA-PathData.Actions.TotalB);
+    double totalSANew   = PathData.Actions.TotalA + Achange;
+    double totalSBNew   = PathData.Actions.TotalB + Bchange;
+    double deltaSNew    = 0.5*(totalSANew - totalSBNew);
+    double deltaSOld    = 0.5*(PathData.Actions.TotalA-PathData.Actions.TotalB);
+    double totalSbarNew = 0.5*(totalSANew + totalSBNew);
+    double totalSbarOld = 0.5*(PathData.Actions.TotalA+PathData.Actions.TotalB);
 
-    double commonAcceptProb = cosh(deltaSNew)/cosh(deltaSOld);
-    
+    /// HACK HACK HACK
+    //    commonAcceptProb = cosh(deltaSNew)/cosh(deltaSOld);
+ //    double commonAcceptProb = 
+//       cosh(deltaSNew)/cosh(deltaSOld) * exp(totalSbarOld - totalSbarNew);
+    logSampleProb = PathData.Path.Communicator.AllSum(logSampleProb);
+    double logCoshNew, logCoshOld;
+    if (deltaSNew > 100.0)
+      logCoshNew = log(0.5) + deltaSNew;
+    else if (deltaSNew < -100.0)
+      logCoshNew = log(0.5) - deltaSNew;
+    else
+      logCoshNew = log (cosh(deltaSNew));
+
+    if (deltaSOld > 100.0)
+      logCoshOld = log(0.5) + deltaSOld;
+    else if (deltaSOld < -100.0)
+      logCoshOld = log(0.5) - deltaSOld;
+    else
+      logCoshOld = log (cosh(deltaSOld));
+
+
+    double logCommonAcceptProb = 
+      logCoshNew - logCoshOld + totalSbarOld-totalSbarNew+logSampleProb;
+
+    //    cerr << "logCommonAcceptProb = " << logCommonAcceptProb << endl;
+
     bool toAcceptCommon = 
-      log(commonAcceptProb)>=log(PathData.Path.Random.Common());
+      logCommonAcceptProb>=log(PathData.Path.Random.Common());
     
     double wA, wB;
     if (toAcceptCommon) {      /// Accept
+      /// HACK HACK HACK
       wA = exp(-deltaSNew)/(2.0*cosh(deltaSNew));
       wB = 1.0-wA;
+//      wA = exp(-deltaSNew);
+//      wB = exp(+deltaSNew);
       PathData.Actions.TotalA = totalSANew;
       PathData.Actions.TotalB = totalSBNew;
       if (toAcceptLocal)
 	Accept();
       else
 	Reject();
+      perr << "Accepted. SA = " << totalSANew 
+	   << "    SB = " << totalSBNew << endl;
     }
     else {                      /// Reject
+      /// HACK HACK HACK
       wA = exp(-deltaSOld)/(2.0*cosh(deltaSOld));
       wB = 1.0-wA;
+//      wA = exp(-deltaSNew);
+//      wB = exp(+deltaSNew);
       Reject();
+      perr << "Rejected. SA = " << PathData.Actions.TotalA 
+	   << "    SB = " << PathData.Actions.TotalB << endl;
+
     }
 
     int s1 = 0;
     int s2 = PathData.Path.NumTimeSlices()-1;
-    double energyA, energyB, totalSA, totalSB;
+    double energyA, energyB;
     energyA = energyB = 0.0;
 
-    PathData.Path.SetIonConfig(0);
-    for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) 
-      energyA += (*iter)->d_dBeta(s1,s2,0);
-    for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) 
-      energyA += (*iter)->d_dBeta(s1,s2,0);
+//     PathData.Path.SetIonConfig(0);
+//     for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) 
+//       energyA += (*iter)->d_dBeta(s1,s2,0);
+//     for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) 
+//       energyA += (*iter)->d_dBeta(s1,s2,0);
 
 
-    PathData.Path.SetIonConfig(1);
-    for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) 
-      energyB += (*iter)->d_dBeta(s1,s2,0);
-    for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) 
-      energyB += (*iter)->d_dBeta(s1,s2,0);
+//     PathData.Path.SetIonConfig(1);
+//     for (iter=BosonActions.begin(); iter!=BosonActions.end(); iter++) 
+//       energyB += (*iter)->d_dBeta(s1,s2,0);
+//     for (iter=NodalActions.begin(); iter!=NodalActions.end(); iter++) 
+//       energyB += (*iter)->d_dBeta(s1,s2,0);
 
-    AllSumVecIn(0) = energyA;   AllSumVecIn(1) = energyB;
-    PathData.Path.Communicator.AllSum(AllSumVecIn, AllSumVecOut);
-    energyA = AllSumVecOut(0) / PathData.Path.TotalNumSlices;
-    energyB = AllSumVecOut(1) / PathData.Path.TotalNumSlices;
+//     AllSumVecIn(0) = energyA;   AllSumVecIn(1) = energyB;
+//     PathData.Path.Communicator.AllSum(AllSumVecIn, AllSumVecOut);
+//     energyA = AllSumVecOut(0) / PathData.Path.TotalNumSlices;
+//     energyB = AllSumVecOut(1) / PathData.Path.TotalNumSlices;
 
     PathData.Path.WeightA.push_back(wA);
     PathData.Path.EnergyA.push_back(energyA);
@@ -267,7 +309,7 @@ void CorrelatedBisectionBlockClass::MakeMove()
     StepNum++;
   }
 
-  if ((StepNum % 100) == 99) {
+  if (((StepNum/StepsPerBlock) % 20) == 19) {
     double wASum   = 0.0;      double wBSum   = 0.0;
     double wAEASum   = 0.0;    double wBEBSum   = 0.0;
 
