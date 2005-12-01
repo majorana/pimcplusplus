@@ -363,32 +363,26 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     else if (MoveType=="WaterRotate") {
       Moves(counter)=new WaterRotate(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="WaterTranslate") {
       Moves(counter)=new WaterTranslate(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="WaterTranslateRing") {
       Moves(counter)=new WaterTranslateRing(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="LocalFlip") {
       Moves(counter)=new LocalFlip(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="GlobalFlip") {
       Moves(counter)=new GlobalFlip(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="Langevin") {
       Moves(counter) = new LangevinMoveClass(PathData, OutFile);
       Moves(counter)->Read(in);
-      OutFile.CloseSection();
     }
     else {
       perr<<"This type of move is not recognized: "<< MoveType <<endl;
