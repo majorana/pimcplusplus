@@ -361,37 +361,31 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       Moves(counter)->Read(in); 
     }
     else if (MoveType=="WaterRotate") {
-      OutFile.NewSection("WaterRotate");
       Moves(counter)=new WaterRotate(PathData, OutFile);
       Moves(counter)->Read(in);
       OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="WaterTranslate") {
-      OutFile.NewSection("WaterTranslate");
       Moves(counter)=new WaterTranslate(PathData, OutFile);
       Moves(counter)->Read(in);
       OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="WaterTranslateRing") {
-      OutFile.NewSection("WaterTranslateRing");
       Moves(counter)=new WaterTranslateRing(PathData, OutFile);
       Moves(counter)->Read(in);
       OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="LocalFlip") {
-      OutFile.NewSection("LocalFlip");
       Moves(counter)=new LocalFlip(PathData, OutFile);
       Moves(counter)->Read(in);
       OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="GlobalFlip") {
-      OutFile.NewSection("GlobalFlip");
       Moves(counter)=new GlobalFlip(PathData, OutFile);
       Moves(counter)->Read(in);
       OutFile.CloseSection(); // Whatever Move section we opened above.
     }
     else if (MoveType=="Langevin") {
-      OutFile.NewSection("Langevin");
       Moves(counter) = new LangevinMoveClass(PathData, OutFile);
       Moves(counter)->Read(in);
       OutFile.CloseSection();
