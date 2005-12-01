@@ -376,19 +376,19 @@ FixedPhaseClass::UpdateBands()
   System->SetIons (Rions);
 
   // Only do calcualtion if I'm proc 0
-  if (Path.Communicator.MyProc() == 0) {
-    perr << "Updating bands.\n";
-    System->DiagonalizeH();
-
-    for (int band=0; band<NumBands; band++) {
-      System->SetRealSpaceBandNum(band);
-      for (int ix=0; ix<xGrid.NumPoints-1; ix++)
-	for (int iy=0; iy<yGrid.NumPoints-1; iy++)
-	  for (int iz=0; iz<zGrid.NumPoints-1; iz++)
-	    data(ix,iy,iz,band) = System->RealSpaceBand(ix,iy,iz);
-    }
-    MakePeriodic (data);
+  //  if (Path.Communicator.MyProc() == 0) {
+  perr << "Updating bands.\n";
+  System->DiagonalizeH();
+  
+  for (int band=0; band<NumBands; band++) {
+    System->SetRealSpaceBandNum(band);
+    for (int ix=0; ix<xGrid.NumPoints-1; ix++)
+      for (int iy=0; iy<yGrid.NumPoints-1; iy++)
+	for (int iz=0; iz<zGrid.NumPoints-1; iz++)
+	  data(ix,iy,iz,band) = System->RealSpaceBand(ix,iy,iz);
   }
+  MakePeriodic (data);
+    //  }
   Path.Communicator.Broadcast(0, data);
   
   /// DEBUG DEBUG DEBUG DEBUG
