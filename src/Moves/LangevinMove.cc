@@ -32,7 +32,7 @@ LangevinMoveClass::LDStep()
   // Now, compute F(t+dt)
   // Sum Fsum over all the processors (all clones included)
   PathData.WorldComm.AllSum(Fsum, Ftmp);
-  int numClones = PathData.InterComm.NumProcs();
+  int numClones = PathData.GetNumClones();
   double norm = 1.0/(double)(numClones*NumEquilSteps);
   for (int i=0; i<Fsum.size(); i++)
     Fsum(i) = norm*Ftmp(i);

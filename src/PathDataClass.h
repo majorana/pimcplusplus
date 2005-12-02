@@ -18,7 +18,7 @@
 class PathDataClass
 {
 private:
-  int MyCloneNum;
+  int MyCloneNum, NumClones;
   /// These store the time of start and the maximum wall time in seconds.
   int StartWallTime, MaxWallTime;
   int GetWallTime();
@@ -108,7 +108,8 @@ public:
     Path(timeSlice,particle) = r;
   }
 
-  inline int GetCloneNum() { return MyCloneNum; }
+  inline int GetCloneNum()  { return MyCloneNum; }
+  inline int GetNumClones() { return NumClones; }
 
   void Read (IOSectionClass &in);
   PathDataClass() : 

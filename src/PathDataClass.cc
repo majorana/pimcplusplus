@@ -12,7 +12,7 @@ void PathDataClass::Read (IOSectionClass &in)
   
   // Setup Inter- and IntraComms
   assert ((N % procsPerClone) == 0);
-  int numClones = N / procsPerClone;
+  NumClones = N / procsPerClone;
   MyCloneNum = WorldComm.MyProc()/procsPerClone;
   // Create IntraComm
   WorldComm.Split(MyCloneNum, IntraComm);
