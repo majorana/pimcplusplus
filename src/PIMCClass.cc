@@ -128,126 +128,58 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
   
   for (int counter=0;counter<numOfObservables;counter++){
     in.OpenSection("Observable",counter);
-    string theObserveType;
-    string theObserveName;
-    assert(in.ReadVar("type",theObserveType));
+    string observeType;
+    assert(in.ReadVar("type",observeType));
+    if (iAmRoot)
+      OutFile.NewSection(observeType);
     ObservableClass* tempObs;
-    if (theObserveType=="PairCorrelation"){
-      assert(in.ReadVar("Name",theObserveName));
-      if (iAmRoot)
-	OutFile.NewSection(theObserveName);
-      tempObs = new PairCorrelationClass(PathData,OutFile);
-    }
-    else if (theObserveType=="nofr"){
-      assert(in.ReadVar("Name",theObserveName));
-      if (iAmRoot)
-	OutFile.NewSection(theObserveName);
-      tempObs = new nofrClass(PathData,OutFile);
-    }
-    else if (theObserveType=="AngularMomentumCorrelation"){
-      if (iAmRoot)
-	OutFile.NewSection("AngularMomentumCorrelation");
-      tempObs = new AngularMomCor(PathData,OutFile);
-    }
-    else if (theObserveType=="DropletSuperfluidity"){
-      if (iAmRoot)
-	OutFile.NewSection("DropletSuperfluidity");
-      tempObs = new SuperfluiDrop(PathData,OutFile);
-    }
-    else if (theObserveType=="Vacancy"){
-      assert(in.ReadVar("Name",theObserveName));
-      if (iAmRoot)
-	OutFile.NewSection(theObserveName);
-      tempObs=new VacancyLocClass(PathData,OutFile);
-    }
-    else if (theObserveType=="Coupling"){
-      assert(in.ReadVar("Name",theObserveName));
-      if (iAmRoot)
-	OutFile.NewSection(theObserveName);
-      tempObs=new CouplingClass(PathData,OutFile);
-    }
-    else if (theObserveType=="Energy"){
-      if (iAmRoot)
-	OutFile.NewSection("Energies");
-      tempObs = new EnergyClass(PathData,OutFile);
-    }
-    else if (theObserveType=="EnergySign"){
-      if (iAmRoot)
-	OutFile.NewSection("Energies");
-      tempObs = new EnergySignClass(PathData,OutFile);
-    }
-    else if (theObserveType=="ModifiedEnergy"){
-      if (iAmRoot)
-	OutFile.NewSection("Energies(modified)");
-      tempObs = new ModifiedEnergyClass(PathData,OutFile);
-    }
-    else if (theObserveType=="AutoCorr"){
-      if (iAmRoot)
-	OutFile.NewSection("Autocorrelation");
-      tempObs = new AutoCorrClass(PathData,OutFile);
-    }
-    else if (theObserveType=="DistanceToOpen"){
-      if (iAmRoot)
-	OutFile.NewSection("DistanceToOpen");
-      tempObs = new HeadLocClass(PathData,OutFile);
-    }
-    else if (theObserveType=="VacancyLocation"){
-      if (iAmRoot)
-	OutFile.NewSection("VacancyLocation");
-      tempObs=new VacancyLocClass(PathData,OutFile);
-    }
-    else if (theObserveType=="TimeAnalysis"){
-      if (iAmRoot)
-	OutFile.NewSection("TimeAnalysis");
-      tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables);
-    }
-    else if (theObserveType=="Angular"){
-      if (iAmRoot)
-	OutFile.NewSection("Angular");
-      tempObs= new AngularClass(PathData,OutFile);
-    }
-    else if (theObserveType=="PathDump"){
-      if (iAmRoot)
-	OutFile.NewSection("PathDump");
-      tempObs=new PathDumpClass(PathData,OutFile);
-    }
-    else if (theObserveType=="WindingNumber"){
-      if (iAmRoot)
-	OutFile.NewSection("WindingNumber");
-      tempObs=new WindingNumberClass(PathData,OutFile);
-    }
-    else if (theObserveType=="Vacancy"){
-      if (iAmRoot)
-	OutFile.NewSection("Vacancy");
-      tempObs=new VacancyLocClass(PathData,OutFile);
-    }
-//     else if (theObserveType=="OpenOrientation"){
-//       if (iAmRoot)
-// 	OutFile.NewSection("OpenOrientation");
-//       tempObs=new OpenOrientationClass(PathData,OutFile);
-//     }
-    else if (theObserveType=="CycleCount"){
-      if (iAmRoot)
-	OutFile.NewSection("CycleCount");
-      tempObs=new PermutationCountClass(PathData,OutFile);
-    }
-    else if (theObserveType=="StructureFactor"){
-      if (iAmRoot)
- 	OutFile.NewSection("StructureFactor");
-      tempObs=new StructureFactorClass(PathData,OutFile);
-    }
-    else if (theObserveType=="Sign"){
-      if (iAmRoot)
-	OutFile.NewSection("Sign");
-      tempObs=new WeightClass(PathData,OutFile);
-    }
-    else if (theObserveType=="Forces"){
-      if (iAmRoot)
-	OutFile.NewSection("Forces");
-      tempObs=new ForcesClass(PathData,OutFile);
-    }
-    else {
-      perr<<"We do not recognize the observable "<<theObserveType<<endl;
+    switch (observeType) { 
+      case "PairCorrelation": 
+	tempObs = new PairCorrelationClass(PathData,OutFile);
+      case "nofr":
+	tempObs = new nofrClass(PathData,OutFile);
+      case "AngularMomentumCorrelation":
+	tempObs = new AngularMomCor(PathData,OutFile);
+      case "DropletSuperfluidity":
+	tempObs = new SuperfluiDrop(PathData,OutFile);
+      case "Vacancy":
+	tempObs = new VacancyLocClass(PathData,OutFile);
+      case "Coupling":
+	tempObs = new CouplingClass(PathData,OutFile);
+      case "Energy":
+	tempObs = new EnergyClass(PathData,OutFile);
+      case "EnergySign":
+	tempObs = new EnergySignClass(PathData,OutFile);
+      case "ModifiedEnergy":
+	tempObs = new ModifiedEnergyClass(PathData,OutFile);
+      case "AutoCorr":
+	tempObs = new AutoCorrClass(PathData,OutFile);
+      case "DistanceToOpen":
+	tempObs = new HeadLocClass(PathData,OutFile);
+      case "VacancyLocation":
+	tempObs = new VacancyLocClass(PathData,OutFile);
+      case "TimeAnalysis":
+	tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables);
+      case "Angular":
+	tempObs =  new AngularClass(PathData,OutFile);
+      case "PathDump":
+	tempObs = new PathDumpClass(PathData,OutFile);
+      case "WindingNumber":
+	tempObs = new WindingNumberClass(PathData,OutFile);
+      case "Vacancy":
+	tempObs = new VacancyLocClass(PathData,OutFile);
+      case "CycleCount":
+	tempObs = new PermutationCountClass(PathData,OutFile);
+      case "StructureFactor":
+	tempObs = new StructureFactorClass(PathData,OutFile);
+      case "Sign":
+	tempObs = new WeightClass(PathData,OutFile);
+      case "Forces":
+	tempObs = new ForcesClass(PathData,OutFile);
+	//  case "OpenOrientation":
+	//   tempObs = new OpenOrientationClass(PathData,OutFile);
+      default:
+	perr << "We do not recognize the observable " << observeType << endl;
 	abort();
     }
     tempObs->Read(in);
