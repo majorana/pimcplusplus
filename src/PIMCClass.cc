@@ -233,7 +233,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     }
     else if (theObserveType=="StructureFactor"){
       if (iAmRoot)
-	OutFile.NewSection("StructureFactor");
+ 	OutFile.NewSection("StructureFactor");
       tempObs=new StructureFactorClass(PathData,OutFile);
     }
     else if (theObserveType=="Sign"){

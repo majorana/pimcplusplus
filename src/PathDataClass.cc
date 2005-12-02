@@ -17,8 +17,8 @@ void PathDataClass::Read (IOSectionClass &in)
   // Create IntraComm
   WorldComm.Split(MyCloneNum, IntraComm);
   
-  Array<int,1> ranks (numClones);
-  for (int clone=0; clone<numClones; clone++)
+  Array<int,1> ranks (NumClones);
+  for (int clone=0; clone<NumClones; clone++)
     ranks(clone) = clone*procsPerClone;
   WorldComm.Subset (ranks, InterComm);
   
@@ -29,10 +29,10 @@ void PathDataClass::Read (IOSectionClass &in)
 
   //  int seed;
   if (in.ReadVar("seed",Seed)){
-    Random.Init (Seed, numClones);
+    Random.Init (Seed, NumClones);
   }
   else {
-    Seed=Random.InitWithRandomSeed(numClones);
+    Seed=Random.InitWithRandomSeed(NumClones);
   }
     //    Random.Init (314159, numClones);
 
