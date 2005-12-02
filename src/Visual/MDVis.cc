@@ -188,8 +188,10 @@ MDVisualClass::OnPlayToggle()
 bool
 MDVisualClass::OnTimeout()
 {
-  DrawFrame();
-  PathVis.Invalidate();
+  Glib::signal_idle().connect
+    (sigc::mem_fun(*this, &MDVisualClass::DrawFrame));
+  //  DrawFrame();
+  // PathVis.Invalidate();
   if (PlayDirection == 1) {
     if (CurrentFrame < (Trajectory.extent(0)-1)) {
       CurrentFrame++;
@@ -223,7 +225,7 @@ MDVisualClass::OnPerspectiveToggle()
   PathVis.View.SetPerspective(persp);
   //  PathVis.Invalidate();
   DrawFrame();
-  PathVis.Invalidate();
+  //  PathVis.Invalidate();
 }
 
 void
@@ -231,10 +233,10 @@ MDVisualClass::OnFrameChange()
 {
   CurrentFrame = (int)round(FrameScale.get_value());
   DrawFrame();
-  PathVis.Invalidate();
+  //  PathVis.Invalidate();
 }
 
-void
+bool
 MDVisualClass::DrawFrame()
 {
   for (int i=0; i<PathVis.Objects.size(); i++)
@@ -252,7 +254,8 @@ MDVisualClass::DrawFrame()
     sphere->SetRadius(0.5);
     PathVis.Objects.push_back(sphere);
   }
-			
+  PathVis.Invalidate();
+  return false;
 }
 
 

@@ -59,7 +59,7 @@ protected:
   // Other methods //
   ///////////////////
   string FindFullPath(string filename);
-  void   DrawFrame();
+  bool   DrawFrame();
 public:
   PathVisClass PathVis;
 

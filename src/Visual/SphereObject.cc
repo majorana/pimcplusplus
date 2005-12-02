@@ -3,11 +3,32 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 
+int SphereObject::SphereListNum(0);
+bool SphereObject::SphereListCreated(false);
+
+
+SphereObject::SphereObject() : 
+  Radius(1.0), Color(1.0, 0.0, 0.0), Pos(0.0, 0.0, 0.0)
+{
+  if (!SphereListCreated) {
+    glEnable(GL_NORMALIZE);
+    GLUquadricObj* qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, GLU_FILL);
+    SphereListNum = glGenLists(1);
+
+    glNewList (SphereListNum, GL_COMPILE);
+    gluSphere(qobj, 1.0, 30, 30);
+    gluDeleteQuadric(qobj);
+    glEndList();
+    SphereListCreated = true;
+  }
+}
+
 void 
 SphereObject::Set()
 {
-  GLUquadricObj* qobj = gluNewQuadric();
-  gluQuadricDrawStyle(qobj, GLU_FILL);
+//   GLUquadricObj* qobj = gluNewQuadric();
+//   gluQuadricDrawStyle(qobj, GLU_FILL);
   Start();
   // Set color
   float fcolor[4];
@@ -22,9 +43,11 @@ SphereObject::Set()
   // Create sphere
   glPushMatrix();
   glTranslated (Pos[0], Pos[1], Pos[2]);
-  gluSphere(qobj, Radius, 20, 20);
+  glScaled (Radius, Radius, Radius);
+  //  gluSphere(qobj, Radius, 20, 20);
+  glCallList(SphereListNum);
   glPopMatrix();
-  gluDeleteQuadric (qobj);
+  //  gluDeleteQuadric (qobj);
   End();
 }
 
