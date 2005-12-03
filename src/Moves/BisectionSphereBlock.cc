@@ -30,13 +30,13 @@ void BisectionSphereBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
     permuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels,
-					      OutSection);
+					      IOSection);
   else if (permuteType=="COUPLE")
     permuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,
-					       OutSection);
+					       IOSection);
   else if (permuteType == "NONE") 
     permuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
-					   OutSection);
+					   IOSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);
@@ -45,8 +45,8 @@ void BisectionSphereBlockClass::Read(IOSectionClass &in)
   Stages.push_back (permuteStage);
   
   for (int level=NumLevels-1; level>=0; level--) {
-    BisectionStageSphereClass *newStage = new BisectionStageSphereClass (PathData, level,
-							     OutSection);
+    BisectionStageSphereClass *newStage = 
+      new BisectionStageSphereClass (PathData, level, IOSection);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     if (PathData.Path.OpenPaths && level==0)
       newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
@@ -58,10 +58,9 @@ void BisectionSphereBlockClass::Read(IOSectionClass &in)
       ////ADDED JUST FOR THE MINUTE HACK! FOR THE hehp project
       ////      newStage->Actions.push_back(&PathData.Actions.StructureReject);
       ///If it's David's long range class then do this
-      if (PathData.Path.DavidLongRange){
+      if (PathData.Path.DavidLongRange)
 	newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
-      }
-      else if (PathData.Path.LongRange){
+      else if (PathData.Path.LongRange) {
 	if (PathData.Actions.UseRPA)
 	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
 	else

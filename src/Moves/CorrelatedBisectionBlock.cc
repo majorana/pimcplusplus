@@ -13,7 +13,7 @@ void CorrelatedBisectionBlockClass::Read(IOSectionClass &in)
 
   BisectionStages.resize(NumLevels);
   for (int level=0;level<NumLevels;level++)
-    BisectionStages(NumLevels-level-1)=new BisectionStageClass(PathData,level,OutSection);
+    BisectionStages(NumLevels-level-1)=new BisectionStageClass(PathData,level,IOSection);
   
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
   
@@ -24,14 +24,14 @@ void CorrelatedBisectionBlockClass::Read(IOSectionClass &in)
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
-    PermuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels,
-					      OutSection);
+    PermuteStage = 
+      new TablePermuteStageClass(PathData, SpeciesNum, NumLevels,IOSection);
   else if (permuteType=="COUPLE")
-    PermuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,
-					       OutSection);
+    PermuteStage = 
+      new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,IOSection);
   else if (permuteType == "NONE") 
-    PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
-					   OutSection);
+    PermuteStage = 
+      new NoPermuteStageClass(PathData, SpeciesNum, NumLevels, IOSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);

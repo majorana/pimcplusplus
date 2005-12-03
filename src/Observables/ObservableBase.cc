@@ -1,24 +1,34 @@
 #include "ObservableBase.h"
 
 
-void ObservableClass::WriteInfo()
+void 
+ObservableClass::WriteInfo()
 {
   if (PathData.Path.Communicator.MyProc()==0)
     IOSection.WriteVar("Description",Description);
 }
 
-void ObservableClass::Read(IOSectionClass &in)
+void 
+ObservableClass::Read(IOSectionClass &in)
 {
   assert(in.ReadVar("Name",Name));
   if(!(in.ReadVar("Description",Description))){
     Description="No description available";
   }
-  
 }
 
-void ObservableVar::Flush()
+void 
+ObservableVar::Flush()
 {
   if (Comm.MyProc()==0)
     Out.FlushFile();
+}
 
+
+void 
+ObservableClass::DoEvent()
+{
+  if ((TimesCalled % Frequency) == 0)
+    Accumulate();
+  TimesCalled++;
 }

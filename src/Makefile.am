@@ -12,6 +12,8 @@ pimc___SOURCES =          \
     EventClass.h          \
     InitPaths.cc          \
     GridClass.cc          \
+    LoopClass.cc          \
+    LoopClass.h           \
     Main.cc               \
     MirroredClass.cc      \
     MirroredClass.h       \

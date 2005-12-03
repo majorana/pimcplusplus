@@ -3,40 +3,30 @@
 
 #include "../PathDataClass.h"
 #include "../Observables/ObservableBase.h"
+#include "../EventClass.h"
 
 /// This is the generic parent class for all moves, including "real moves"
 /// which actually move particles and "pseudo moves", which just shift around
 /// data, but don't move anything physical.
-class MoveClass 
+class MoveClass : public EventClass
 {
 protected:
-  /// The first time you write to an observable you have to do the
-  /// write a little differently and you might need to write additional
-  /// info like the description, etc.
-  bool FirstTime;
-  int TimesCalled, DumpFreq;
+  /// This variable stores the acceptance ratio for the move
   ObservableDouble RatioVar;
-  ///You can add more IOVar pointers to inhereted classes if necessary
-  
-  IOSectionClass OutSection;  
+  int DumpFreq;
 public:
-  double SecondsInMove;
-  /// This hold a reference to the Path Data
-  PathDataClass &PathData;
   /// Call this in order to make a move.
   virtual void MakeMove();
-  ///Moves have a name by which they can be referenced
-  string Name;
   ///All moves ought to be able to read
   virtual void Read(IOSectionClass &input)=0;
   virtual double AcceptanceRatio() {return sqrt((double)-1.0);}
   virtual void WriteRatio();
+  void DoEvent();
   
   /// MoveClass constructor. Sets reference to the PathData object
-  MoveClass(PathDataClass &myPathData, IOSectionClass outSection) : 
-    PathData(myPathData), FirstTime(true), OutSection(outSection),
-    TimesCalled(0), DumpFreq(1000), SecondsInMove(0.0),
-    Name(""), RatioVar("AcceptRatio", OutSection, myPathData.Path.Communicator)
+  MoveClass(PathDataClass &pathData, IOSectionClass &out) : 
+    EventClass(pathData, out), DumpFreq(1000), 
+    RatioVar("AcceptRatio", IOSection, pathData.Path.Communicator)
     {
       // do nothing 
     }
@@ -61,11 +51,14 @@ protected:
 
  public:
   /// Stores the number of moves made and the number accepted
-  int NumMoves, NumAccepted;
+  int NumAccepted;
   /// An accumulator used to publish the diffusion value. -jg
   double total_r_squared;
   /// This returns the Acceptance Ratio.
-  inline double AcceptanceRatio() {return (double)(NumAccepted)/(double)NumMoves;}
+  inline double AcceptanceRatio() 
+  {
+    return (double)(NumAccepted)/(double)TimesCalled;
+  }
   /// Call this to make a move
   virtual void MakeMove()=0;
 
@@ -91,7 +84,6 @@ protected:
     MoveClass (myPathData, outSection)
   { 
     NumAccepted=0;
-    NumMoves=0;
     /* Do nothing for now.*/  
   }
 };

@@ -41,10 +41,10 @@ public:
 
   CorrelatedBisectionBlockClass(PathDataClass &pathData, IOSectionClass &out) : 
     MultiStageClass(pathData, out),StepNum(0), 
-    wAEAvar("wAEA", OutSection, pathData.Path.Communicator),
-    wBEBvar("wBEB", OutSection, pathData.Path.Communicator),
-    wAvar  ("wA",   OutSection, pathData.Path.Communicator),
-    wBvar  ("wB",   OutSection, pathData.Path.Communicator),
+    wAEAvar("wAEA", IOSection, pathData.Path.Communicator),
+    wBEBvar("wBEB", IOSection, pathData.Path.Communicator),
+    wAvar  ("wA",   IOSection, pathData.Path.Communicator),
+    wBvar  ("wB",   IOSection, pathData.Path.Communicator),
     AllSumVecIn(2), AllSumVecOut(2)
   { 
     EAout = fopen ("EA.dat", "w");

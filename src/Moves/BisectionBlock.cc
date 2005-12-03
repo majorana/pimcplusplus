@@ -30,16 +30,16 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
     PermuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels,
-					      OutSection);
+					      IOSection);
   else if (permuteType=="COUPLE")
     PermuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,
-					       OutSection);
+					       IOSection);
   else if (permuteType == "NONE") 
     PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
-					   OutSection);
+					   IOSection);
   else if (permuteType=="OPEN")
     PermuteStage = new WormPermuteStage2Class(PathData,SpeciesNum,NumLevels,
-					     OutSection);
+					     IOSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);
@@ -47,7 +47,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   PermuteStage->Read (in);
   Stages.push_back (PermuteStage);
   if (permuteType=="OPEN"){
-    EmptyStageClass *newStage=new EmptyStageClass(PathData,OutSection);
+    EmptyStageClass *newStage=new EmptyStageClass(PathData,IOSection);
     newStage->Read(in);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     Stages.push_back(newStage);
@@ -59,7 +59,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
-							     OutSection);
+							     IOSection);
     newStage->TotalLevels=NumLevels;
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
 
@@ -105,7 +105,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   in.ReadVar("StructureReject",useStructureRejectStage);
   if (useStructureRejectStage){
     StructureRejectStageClass* structureReject =
-      new StructureRejectStageClass(PathData,in,OutSection);
+      new StructureRejectStageClass(PathData,in,IOSection);
     structureReject->Read(in);
     Stages.push_back(structureReject);
   }

@@ -39,9 +39,9 @@ public:
   void Read(IOSectionClass &in);
   LangevinMoveClass (PathDataClass &pathData, IOSectionClass &outSection) :
     MoveClass (pathData, outSection), MCSteps(0), LDSteps(0),
-    Rvar("R", OutSection, pathData.Path.Communicator),
-    Vvar("V", OutSection, pathData.Path.Communicator),
-    TimeVar("Time", OutSection, pathData.Path.Communicator),
+    Rvar("R", IOSection, pathData.Path.Communicator),
+    Vvar("V", IOSection, pathData.Path.Communicator),
+    TimeVar("Time", IOSection, pathData.Path.Communicator),
     Time(0.0)
   {
     // do nothing for now

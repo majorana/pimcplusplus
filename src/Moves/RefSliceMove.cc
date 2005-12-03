@@ -20,10 +20,10 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
     permuteStage = new TablePermuteStageClass (PathData,SpeciesNum,NumLevels,
-					       OutSection);
+					       IOSection);
   else if (permuteType == "NONE") 
     permuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
-					   OutSection);
+					   IOSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);
@@ -33,7 +33,7 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
   
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
-							     OutSection);
+							     IOSection);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {

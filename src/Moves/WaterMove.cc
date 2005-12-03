@@ -304,17 +304,17 @@ void WaterTranslate::MakeMove()
     NumAccepted++;
     total_r_squared += move_mag*move_mag;
     //cerr << move << " has magnitude " << move_mag << " and mag squared " << move_mag*move_mag << endl;
-    //cerr<<"TRANSLATE:  I've accepted " << NumAccepted << " " << NumMoves+1 <<endl;
+    //cerr<<"TRANSLATE:  I've accepted " << NumAccepted << " " << TimesCalled+1 <<endl;
   }
   else {
    //cerr<<"TRANSLATE:  I've rejected"<<endl;
     PathData.RejectMove(startSlice,endSlice,ActiveParticles);
   }
-  NumMoves++;
-  if (NumMoves%10000 == 0){
-    cerr << NumMoves << " moves; current translate ratio is " << double(NumAccepted)/NumMoves << " with step size " << step << endl;
+  TimesCalled++;
+  if (TimesCalled%10000 == 0){
+    cerr << TimesCalled << " moves; current translate ratio is " << double(NumAccepted)/TimesCalled << " with step size " << step << endl;
     double avg = sqrt(total_r_squared)/NumAccepted;
-    double diff = total_r_squared/NumMoves;
+    double diff = total_r_squared/TimesCalled;
     cerr << "TRANSLATE diffusion value is " << diff << " avg step is " << avg << endl;
   }
 }
@@ -424,7 +424,7 @@ cerr << "test angle is " << PathData.Actions.TIP5PWater.GetAngle(v1,v2) << endl;
  
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
     PathData.AcceptMove(startSlice,endSlice,ActiveParticles);
-    //cerr<<"ROTATE:  I've accepted " << NumAccepted << " " << NumMoves+1 <<endl;
+    //cerr<<"ROTATE:  I've accepted " << NumAccepted << " " << TimesCalled+1 <<endl;
     NumAccepted++;
     total_r_squared += 2*(1-cos(theta));
   }
@@ -432,14 +432,14 @@ cerr << "test angle is " << PathData.Actions.TIP5PWater.GetAngle(v1,v2) << endl;
     PathData.RejectMove(startSlice,endSlice,ActiveParticles);
     //cerr<<"ROTATE:  I've rejected"<<endl;
   }
-  NumMoves++;
+  TimesCalled++;
   newtime = clock();
   elapsed += (newtime - oldtime);
   oldtime = newtime;
-  if (NumMoves%10000 == 0){
-    cerr << NumMoves << " moves; current rotate ratio is " << double(NumAccepted)/NumMoves << " with angle size " << dtheta << endl;
+  if (TimesCalled%10000 == 0){
+    cerr << TimesCalled << " moves; current rotate ratio is " << double(NumAccepted)/TimesCalled << " with angle size " << dtheta << endl;
     double avg = sqrt(total_r_squared)/NumAccepted;
-    double diff = total_r_squared/NumMoves;
+    double diff = total_r_squared/TimesCalled;
     cerr << "ROTATE diffusion value is " << diff << " avg angle is " << avg << endl;
   }
 }
@@ -526,7 +526,7 @@ void WaterRareRotate::MakeMove()
  
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
     PathData.AcceptMove(startSlice,endSlice,ActiveParticles);
-    //cerr<<"ROTATE:  I've accepted " << NumAccepted << " " << NumMoves+1 <<endl;
+    //cerr<<"ROTATE:  I've accepted " << NumAccepted << " " << TimesCalled+1 <<endl;
     NumAccepted++;
     total_r_squared += 2*(1-cos(angularmag));
     int slot = FindSlot(angularmag,1);
@@ -542,15 +542,15 @@ void WaterRareRotate::MakeMove()
 
   IntegrityCheck(slice,ActiveParticles);
 
-  NumMoves++;
-  if (NumMoves%10000 == 0){
-    cerr << NumMoves << " moves; current rare rotate ratio is " << double(NumAccepted)/NumMoves << " with angle size " << dtheta << endl;
+  TimesCalled++;
+  if (TimesCalled%10000 == 0){
+    cerr << TimesCalled << " moves; current rare rotate ratio is " << double(NumAccepted)/TimesCalled << " with angle size " << dtheta << endl;
     double avg = sqrt(total_r_squared)/NumAccepted;
-    double diff = total_r_squared/NumMoves;
+    double diff = total_r_squared/TimesCalled;
     cerr << "RARE ROTATE diffusion value is " << diff << " avg angle is " << avg << endl;
   }
-  if (NumMoves%200000 == 0){
-    cerr << NumMoves << ": Printing acceptance table of length " << AcceptLog.size() << endl;
+  if (TimesCalled%200000 == 0){
+    cerr << TimesCalled << ": Printing acceptance table of length " << AcceptLog.size() << endl;
     cerr << "printing histogram for angularmag" << endl;
     for (int i = 0; i < numSlots; i++)
       cerr << i*sqrt(3.0)*2*M_PI/numSlots << " " << AcceptLog(0,i) << endl;

@@ -137,17 +137,17 @@ void WaterTranslateRing::MakeMove()
     NumAccepted++;
     total_r_squared += move_mag*move_mag;
 //    cerr << move << " has magnitude " << move_mag << " and mag squared " << move_mag*move_mag << endl;
-//    cerr<<"TRANSLATE:  I've accepted " << NumAccepted << " " << NumMoves+1 <<endl;
+//    cerr<<"TRANSLATE:  I've accepted " << NumAccepted << " " << TimesCalled+1 <<endl;
   }
   else {
 //    cerr<<"TRANSLATE:  I've rejected"<<endl;
     PathData.RejectMove(startSlice,endSlice,ActiveParticles);
   }
-  NumMoves++;
-  if (NumMoves%10000 == 0){
-    cerr << NumMoves << " moves; current ring translate ratio is " << double(NumAccepted)/NumMoves << " with step size " << step << endl;
+  TimesCalled++;
+  if (TimesCalled%10000 == 0){
+    cerr << TimesCalled << " moves; current ring translate ratio is " << double(NumAccepted)/TimesCalled << " with step size " << step << endl;
     double avg = sqrt(total_r_squared)/NumAccepted;
-    double diff = total_r_squared/NumMoves;
+    double diff = total_r_squared/TimesCalled;
     cerr << "TRANSLATE RING diffusion value is " << diff << " avg step is " << avg << endl;
   }
 }
@@ -237,7 +237,7 @@ newAction += PathData.Actions.ST2Water.Action(startSlice,endSlice,ActiveParticle
  
   if (-(newAction-oldAction)>=log(PathData.Path.Random.Local())){
     PathData.AcceptMove(startSlice,endSlice,ActiveParticles);
-  //  cerr<<"ROTATE:  I've accepted " << NumAccepted << " " << NumMoves+1 <<endl;
+  //  cerr<<"ROTATE:  I've accepted " << NumAccepted << " " << TimesCalled+1 <<endl;
     NumAccepted++;
     total_r_squared += 2*(1-cos(theta));
   }
@@ -245,11 +245,11 @@ newAction += PathData.Actions.ST2Water.Action(startSlice,endSlice,ActiveParticle
     PathData.RejectMove(startSlice,endSlice,ActiveParticles);
 //    cerr<<"ROTATE:  I've rejected"<<endl;
   }
-  NumMoves++;
-  if (NumMoves%10000 == 0){
-    cerr << NumMoves << " moves; current ring rotate ratio is " << double(NumAccepted)/NumMoves << " with angle size " << dtheta << " (" << theta_step << ")" << endl;
+  TimesCalled++;
+  if (TimesCalled%10000 == 0){
+    cerr << TimesCalled << " moves; current ring rotate ratio is " << double(NumAccepted)/TimesCalled << " with angle size " << dtheta << " (" << theta_step << ")" << endl;
     double avg = sqrt(total_r_squared)/NumAccepted;
-    double diff = total_r_squared/NumMoves;
+    double diff = total_r_squared/TimesCalled;
     cerr << "ROTATE RING diffusion value is " << diff << " avg angle is " << avg << endl;
   }
 }

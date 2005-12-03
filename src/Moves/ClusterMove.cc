@@ -186,7 +186,7 @@ void LocalFlip::MakeMove()
         else{
           PathData.RejectMove(slice,slice,ActiveParticles);
         }
-        if (NumMoves%10 == 0){
+        if (TimesCalled%10 == 0){
           IntegrityCheck(slice, ActiveParticles);
         }
       }
@@ -239,7 +239,7 @@ cerr << "First Moved a cluster of size " << firstclustsize << endl;
         else{
           PathData.RejectMove(slice,slice,ActiveParticles);
         }
-        if (NumMoves%10 == 0){
+        if (TimesCalled%10 == 0){
           IntegrityCheck(slice, ActiveParticles);
         }
       }
@@ -260,11 +260,9 @@ cerr << "Then Moved a cluster of size " << clustsize << endl;
   total += clustsize;
 *///////////////////////////////////////////
 
-  NumMoves++;
-
-  if (NumMoves%100 == 0){
-    cerr << NumMoves << " moves; Average first cluster size is " << firsttotal/NumMoves << endl;
-//    cerr << NumMoves << " moves; Average return cluster size is " << total/NumMoves << endl;
+  if (TimesCalled%100 == 0){
+    cerr << TimesCalled << " moves; Average first cluster size is " << firsttotal/TimesCalled << endl;
+//    cerr << TimesCalled << " moves; Average return cluster size is " << total/TimesCalled << endl;
     cerr << "Maximum cluster size is " << clustmax << endl;
   }
 }
@@ -362,9 +360,8 @@ void GlobalFlip::MakeMove()
     clustmax = clustsize;
   total += clustsize;
 
-  NumMoves++;
-  if (NumMoves%20 == 0){
-    cerr << NumMoves << " moves; Average cluster size is " << total/NumMoves << endl;
+  if (TimesCalled%20 == 0){
+    cerr << TimesCalled << " moves; Average cluster size is " << total/TimesCalled << endl;
     cerr << "Maximum cluster size is " << clustmax << endl;
   }
 }

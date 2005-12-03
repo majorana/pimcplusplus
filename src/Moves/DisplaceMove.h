@@ -41,7 +41,7 @@ public:
   void MakeMove();
   DisplaceMoveClass (PathDataClass &pathData, IOSectionClass &outSection) :
     MultiStageClass(pathData, outSection),
-    DisplaceStage(pathData,OutSection)
+    DisplaceStage(pathData, outSection)
   {
     DumpFreq = 20;
   }

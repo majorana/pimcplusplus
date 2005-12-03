@@ -32,7 +32,7 @@ void CouplingMoveClass::Read(IOSectionClass &in)
 {
   assert (in.ReadVar ("name", Name));
   StageClass* coupleStage;
-  coupleStage=new CouplingStageClass(PathData,NumLevels,OutSection);
+  coupleStage=new CouplingStageClass(PathData,NumLevels,IOSection);
   coupleStage->Read(in);
   coupleStage->Actions.push_back(&PathData.Actions.Kinetic);
   coupleStage->Actions.push_back(&PathData.Actions.ShortRange);
