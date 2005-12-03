@@ -5,6 +5,7 @@ import os
 import math
 import stats
 import numarray
+from GraphDraw import *
 #from matplotlib.matlab import *
 from pylab import *
 from HTMLgen import *
@@ -27,7 +28,7 @@ def Avg (x):
      else:
           return sum(x)/len(x)
 
-#Takes a vector of means and erros and returns the weighted average and error
+#Takes a vector of means and vector of errors and returns the weighted average and error
 def WeightedAvg (means, errors):
      if (errors[0] != 0.0):
           weights = map (lambda x: 1.0/(x*x), errors)
@@ -61,29 +62,6 @@ def AvgLastVec (data):
           s = s+data[i][-1]
      return s/len(data)
 
-
-
-def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
-     clf()
-     if (IsMonotonic(x)):
-          plot(x, y)
-     else:
-          plot(x, y, 'o')
-     h1=xlabel(hlabel)
-     setp(h1,"FontSize",20)
-     v1=ylabel(vlabel)
-     setp(v1,"FontSize",20)
-     labels = get(gca(), 'xticklabels')
-     setp(labels, 'fontsize', 16)
-     labels = get(gca(), 'yticklabels')
-     setp(labels, 'fontsize', 16)
-     currAxis=axis()
-##     currAxis[0]=cutoff
-     axis(currAxis)
-     savefig(fileBase+".png",dpi=60)
-     savefig(fileBase+".ps")
-     myImg=Image(fileBase+".png")
-     return myImg
 
 
 
@@ -247,30 +225,6 @@ def ProcessStructureFactor(infiles,doc,currNum):
      return currNum
 
 
-def LongRangeImage(basename,r,long,short,myTitle,labelY):
-     clf()
-     hold ("off")
-     l1 = plot (r, long)
-     a = axis()
-     hold ("on")
-     l2 = plot (r[1:-1], long[1:-1]+short[1:-1], 'r-')
-     setp (l1, 'linewidth', 2);
-     setp (l2, 'linewidth', 2);
-     h1 = xlabel("r")
-     axis(a)
-     setp (h1, "FontSize", 20)
-     h2 = ylabel (labelY)
-     setp (h2, "FontSize", 20)
-     labels = get(gca(), 'xticklabels')
-     setp(labels, 'fontsize', 16)
-     labels = get(gca(), 'yticklabels')
-     setp(labels, 'fontsize', 16)
-     h3 = legend ('Ulong')
-     h4 = title (myTitle)
-     setp (h4, "FontSize", 20)
-     savefig(basename+".png",dpi=60)
-     return Image(basename+".png")
-
 
 def ProcessLongRangeAction(infiles):
      doc = SeriesDocument()
@@ -335,44 +289,6 @@ def ProcessLongRangeAction(infiles):
 ##                doc.append(Name(sectionName+varName+repr(currNum)))
 ##                doc.append(Heading(2,varName))
 ##                myImg=ProduceCorrelationPicture(data[-1],varName+repr(currNum),'r',varName)
-
-def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
-#produce scalar trace image and ps with data as a function of index
-    clf()
-    x=fromfunction(lambda i:i,(len(data),))
-    plot(x,data)
-    h1=xlabel(hlabel)
-    setp(h1,"FontSize",20)
-    v1=ylabel(vlabel)
-    setp(v1,"FontSize",20)
-    if len(myTitle) != 0:
-         t1=title(myTitle)
-         setp(t1,"FontSize",20)
-    labels = get(gca(), 'xticklabels')
-    setp(labels, 'fontsize', 16)
-    labels = get(gca(), 'yticklabels')
-    setp(labels, 'fontsize', 16)
-    savefig(fileBase+".png",dpi=45)
-    savefig(fileBase+".ps")
-    myImg=Image(fileBase+".png")
-
-#produce asciiFile
-    asciiFileName = fileBase + '.dat'
-    asciiFile = open (asciiFileName, "w")
-    n = len(data)
-    for i in range(0,len(data)):
-         asciiFile.write('%20.16e\n' % data[i])
-    asciiFile.close()
-
-#build table with image, ps, and ascii file in it
-    fileTable=BuildTable()
-    fileTable.width='100%'
-    fileTable.body= [[Href(fileBase+".ps",'Postscript'),Href(asciiFileName,'ASCII data')]]
-    myTable=BuildTable()
-    myTable.body=[[myImg]]
-    myTable.body.append([fileTable])
-    return myTable
-
 
 def MeanErrorString (mean, error):
      if (mean!=0.0):

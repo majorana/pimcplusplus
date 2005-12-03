@@ -18,8 +18,8 @@ private:
   ObservableDouble TotalTimeVar;
   int StartTime;
   double TotalTime;
-  Array<MoveClass*,1>  &Moves;
-  Array<ObservableClass*,1> &Observables;
+  list<MoveClass*>  &Moves;
+  list<ObservableClass*> &Observables;
 
   int TimesCalled;
   int Freq;
@@ -30,8 +30,8 @@ public:
   void WriteBlock();
   void Read(IOSectionClass& in);
   MCTimeClass(PathDataClass &myPathData, IOSectionClass &ioSection,
-	      Array<MoveClass*,1> &moves,
-	      Array<ObservableClass*,1> &observables)
+	      list<MoveClass*> &moves,
+	      list<ObservableClass*> &observables)
     : ObservableClass(myPathData, ioSection) , 
       MoveTimeVar("MoveTime",IOSection,myPathData.Path.Communicator),
       ObservableTimeVar("ObservableTime",

@@ -1,6 +1,7 @@
 #include "LoopClass.h"
 #include "PathDataClass.h"
-
+#include "Moves/MoveBase.h"
+#include "Observables/ObservableBase.h"
 void
 LoopClass::DoEvent()
 {
@@ -17,19 +18,19 @@ LoopClass::DoEvent()
 
 
 
-EventClass*
+MoveClass*
 LoopClass::FindMove(string name)
 {
-  list<EventClass*>::iterator iter;
+  list<MoveClass*>::iterator iter;
   for (iter=Moves.begin(); iter != Moves.end(); iter++)
     if ((*iter)->Name == name)
       return (*iter);
 }
 
-EventClass*
+ObservableClass*
 LoopClass::FindObservable(string name) 
 {
-  list<EventClass*>::iterator iter;
+  list<ObservableClass*>::iterator iter;
   for (iter=Observables.begin(); iter != Observables.end(); iter++)
     if ((*iter)->Name == name)
       return (*iter);

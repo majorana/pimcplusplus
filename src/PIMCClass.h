@@ -26,7 +26,7 @@ public:
   PathDataClass PathData;
   void Read(IOSectionClass &in);
   void Run();
-  PIMCClass() : Algorithm(*this, OutFile, Moves, Observables)
+  PIMCClass() : Algorithm(PathData, OutFile, Moves, Observables)
   {
     RunInfo.ProgramName="pimc++";
   }

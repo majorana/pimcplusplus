@@ -202,7 +202,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
   int steps;
   int myProc=PathData.Path.Communicator.MyProc();
   bool iAmRoot = (myProc == 0);
-  
+    MoveClass* move;  
   if (iAmRoot)
     OutFile.NewSection("Moves");
   for (int counter=0;counter<numOfMoves;counter++){
@@ -211,7 +211,6 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     assert(in.ReadVar("Type",moveType));
     if (iAmRoot)
       OutFile.NewSection(moveType);
-    MoveClass* move;
     if (moveType=="ShiftMove")
       move = new ShiftMoveClass(PathData, OutFile);
     else if (moveType=="PrintMove")
@@ -244,19 +243,19 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new GlobalFlip(PathData, OutFile);
     else if (moveType=="Langevin")
       move = new LangevinMoveClass(PathData, OutFile);
-    else
+    else{
       perr<<"This type of move is not recognized: "<< moveType <<endl;
-    abort();
+      abort();
+    }
+    move->Read(in);
+    Moves.push_back(move);
+    if (iAmRoot)
+      OutFile.CloseSection();
+    in.CloseSection();
   }
-  move->Read(in);
-  Moves.push_back(move);
   if (iAmRoot)
-    OutFile.CloseSection();
-  in.CloseSection();
-}
- if (iAmRoot)
-   OutFile.CloseSection (); // "Moves"
- 
+    OutFile.CloseSection (); // "Moves"
+  
 }
 
 
@@ -282,10 +281,10 @@ void PIMCClass::Run()
 {
   Algorithm.DoEvent();
   //  Array<MoveClass*,1> Moves;
-  for (int counter=0;counter<Moves.size();counter++){
-    cout<<"My name is "<<((MoveClass*)Moves(counter))->Name<<endl;
-    cout<<"My acceptance ratio is "<<((MoveClass*)Moves(counter))->AcceptanceRatio()<<endl;
-  }
+//   for (int counter=0;counter<Moves.size();counter++){
+//     cout<<"My name is "<<((MoveClass*)Moves(counter))->Name<<endl;
+//     cout<<"My acceptance ratio is "<<((MoveClass*)Moves(counter))->AcceptanceRatio()<<endl;
+//   }
   
 }
 

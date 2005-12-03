@@ -1,17 +1,10 @@
 #include "Time.h"
 
 
-// Fix to include final link between link M and 0
+
 void MCTimeClass::Accumulate()
 {
 
-  TimesCalled++;
-  if (TimesCalled % DumpFreq==0)
-    WriteBlock();
-
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
   
 }
 
@@ -28,25 +21,22 @@ void MCTimeClass::WriteBlock()
     cerr<<"My moves size is "<<MoveTime.size()<<endl;
     cerr<<"My observable size is "<<ObservableTime.size()<<endl;
   }
-  //  cerr<<"This is being called"<<endl;
   TotalTime+=(double)(clock()-StartTime)/(double)CLOCKS_PER_SEC;
   StartTime=clock();
   TotalTimeVar.Write(TotalTime);
-//   double moveNorm=0;
-//   double observeNorm=0;
-//   for (int counter=0;counter<Moves.size();counter++){
-//     moveNorm+=Moves(counter)->SecondsInMove;
-//   }
-//   for (int counter=0;counter<Observables.size();counter++){
-//     observeNorm+=Observables(counter)->SecondsInObservable;
-//  }
-  for (int counter=0;counter<Moves.size();counter++){
-    MoveTime(counter)=(Moves(counter)->TimeSpent)/TotalTime;
+  list<MoveClass*>::iterator moveIter;
+  int counter=0;
+  for (moveIter=Moves.begin();moveIter!=Moves.end();moveIter++){
+    MoveTime(counter)=((*moveIter)->TimeSpent)/TotalTime;
+    counter++;
   }
-  for (int counter=0;counter<Observables.size();counter++){
-    ObservableTime(counter)=(Observables(counter)->TimeSpent)/TotalTime;
+  counter = 0;
+  list<ObservableClass*>::iterator observeIter; 
+  for (observeIter=Observables.begin();observeIter!=Observables.end();observeIter++){
+    ObservableTime(counter)=((*observeIter)->TimeSpent)/TotalTime;
+    counter++;
   }
-
+  
   MoveTimeVar.Write(MoveTime);
   ObservableTimeVar.Write(ObservableTime);
 

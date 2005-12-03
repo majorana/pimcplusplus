@@ -25,9 +25,8 @@ pimc___SOURCES =          \
     PathDataClass.h       \
     RunInfoClass.h        \
     SpeciesClass.cc       \
-    SpeciesClass.h        \
-    WrapClass.cc          \
-    WrapClass.h
+    SpeciesClass.h        
+
 
 pimc___LDADD = Moves/libmoves.la Actions/libactions.la \
                Observables/libobservables.la $(COMMON_LIBS)

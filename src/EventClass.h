@@ -13,8 +13,6 @@ class PathDataClass;
 class EventClass
 {
 protected:
-  /// Stores the time spent doing the event in seconds.
-  double TimeSpent;
   /// Stores the number of times called
   int TimesCalled;
   
@@ -25,6 +23,9 @@ protected:
   /// Stores a reference to PathData
   PathDataClass &PathData;
 public:
+  /// Stores the time spent doing the event in seconds.
+  double TimeSpent;
+
   /// Stores the name that is used in the algorithm to refer to this
   /// event
   string Name;
