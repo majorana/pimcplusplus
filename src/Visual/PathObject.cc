@@ -15,10 +15,10 @@ void PathObject::LinesSet(vector<Vec3> &path)
   glLineWidth(3.0);
   glBegin(GL_LINE_STRIP);
   for (int i=0; i<path.size(); i++) {
-     fcolor[0] = Color[0]*(double)i/(double)(path.size()-1);
-     fcolor[1] = Color[1]*(double)i/(double)(path.size()-1);
-     fcolor[2] = Color[2]*(double)i/(double)(path.size()-1);
-     glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
+//     fcolor[0] = Color[0]*(double)i/(double)(path.size()-1);
+//     fcolor[1] = Color[1]*(double)i/(double)(path.size()-1);
+//     fcolor[2] = Color[2]*(double)i/(double)(path.size()-1);
+//     glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
     glVertex3dv ((double*)&path[i]);
   }
   glEnd();
@@ -53,7 +53,6 @@ void PathObject::TubesSet(vector<Vec3> &path)
 //     fcolor[0]=Color[0]; fcolor[1]=Color[1]; fcolor[2]=Color[2];
 //     //    glBlendFunc(GL_ONE, GL_ZERO);
 //   }
-
 // =======
   double alpha;
   int N = path.size();
@@ -121,9 +120,9 @@ void PathObject::TubesSet(vector<Vec3> &path)
   for (int i=0; i<N+3; i++) {
     double a = (double)i/(double)(path.size()-1);
     double b = 1.0-a;
-    colors[i][0] = fcolor[0]*a + (1.0-Color[0])*b;
-    colors[i][1] = fcolor[1]*a + (1.0-Color[1])*b;
-    colors[i][2] = fcolor[2]*a + (1.0-Color[2])*b;
+    colors[i][0] = fcolor[0];//*a + (1.0-Color[0])*b;
+    colors[i][1] = fcolor[1];//*a + (1.0-Color[1])*b;
+    colors[i][2] = fcolor[2];//*a + (1.0-Color[2])*b;
     colors[i][3] = alpha;
 //     colors[i][1] = Color[1]*(double)i/(double)(path.size()-1);
 //     colors[i][2] = Color[2]*(double)i/(double)(path.size()-1);

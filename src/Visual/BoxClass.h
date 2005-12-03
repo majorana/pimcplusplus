@@ -15,21 +15,15 @@ public:
   inline void Set (Vec3 box) 
   { 
     Box = box; 
-    //HACK!
-    //    Box[2]=1.0;
     BoxInv[0]=1.0/Box[0]; BoxInv[1]=1.0/Box[1]; BoxInv[2]=1.0/Box[2];
   }
   inline void Set (double lx, double ly, double lz)
   {
     Box[0] = lx; Box[1] = ly; Box[2] = lz;
-    //HACK!
-    //    Box[2]=1.0;
     BoxInv[0]=1.0/lx; BoxInv[1]=1.0/ly; BoxInv[2]=1.0/lz;
   }
   inline double operator[](int i) const
   { return Box[i]; }
-//   inline double& operator[](int i)
-//   { return Box[i]; }
   inline operator Vec3() const
   { return Box; }
 
