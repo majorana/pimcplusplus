@@ -15,8 +15,8 @@ class PIMCClass
 {
 
 public:
-  Array<MoveClass*,1> Moves;
-  Array<ObservableClass* ,1> Observables;
+  std::list<MoveClass*> Moves;
+  std::list<ObservableClass*> Observables;
   void ReadMoves(IOSectionClass &in);
   void ReadObservables(IOSectionClass &in);
   void ReadAlgorithm(IOSectionClass &in);
