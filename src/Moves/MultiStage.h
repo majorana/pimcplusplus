@@ -28,7 +28,7 @@ public:
   virtual void WriteRatio();
 
   ///Why was this MakeMove()=0 and virtual?
-  virtual void MakeMove();
+  void MakeMove();
   MultiStageClass(PathDataClass &pathData, IOSectionClass &outSection) : 
     ParticleMoveClass(pathData,outSection) 
   {

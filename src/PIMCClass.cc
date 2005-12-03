@@ -124,7 +124,6 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     }
   }
   int numOfObservables=in.CountSections("Observable");
-  Observables.resize(numOfObservables);
   
   for (int counter=0;counter<numOfObservables;counter++){
     in.OpenSection("Observable",counter);
@@ -198,7 +197,6 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
 {
 
   int numOfMoves=in.CountSections("Move");
-  Moves.resize(numOfMoves);
   int steps;
   int myProc=PathData.Path.Communicator.MyProc();
   bool iAmRoot = (myProc == 0);

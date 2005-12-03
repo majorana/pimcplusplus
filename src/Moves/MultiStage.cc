@@ -35,7 +35,7 @@ void MultiStageClass::MakeMove()
     Accept();
   else 
     Reject();
-  MoveClass::MakeMove();
+  //MoveClass::MakeMove();
 }
 
 

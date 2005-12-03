@@ -179,7 +179,7 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
-
+  //  cerr<<"I am running bisection block"<<endl;
   // if (PathData.Path.Communicator.MyProc()==0)
   //  cerr<<"Entering Bisection Block class "<<PathData.Path.Communicator.MyProc()<<endl;
   //  perr << "BisectionBlock MakeMove.\n";

@@ -131,6 +131,17 @@ dVec WaterTranslate::Translate(double epsilon)
 	return translate;
 }
 
+void 
+WaterRotate::Read(IOSectionClass &moveInput)
+{
+  string typeCheck;
+  assert(moveInput.ReadVar("type",typeCheck));
+  assert(typeCheck=="WaterRotate");
+  assert(moveInput.ReadVar("name",Name));
+  assert(moveInput.ReadVar("step",Theta));  
+}
+
+
 /*
 // MODIFIED VERSION
 void WaterTranslate::Molecule2Atoms(int moleculeNum)
@@ -151,6 +162,8 @@ void WaterTranslate::Molecule2Atoms(int moleculeNum)
   //cerr<<"leave function"<<endl;
 
 }
+
+
 
 void WaterRotate::Molecule2Atoms(int moleculeNum)
 {

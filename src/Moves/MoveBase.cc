@@ -5,6 +5,10 @@ MoveClass::DoEvent()
 {
   TimesCalled++;
   MakeMove();
+  if ((PathData.Path.Communicator.MyProc()==0) && 
+      (TimesCalled % DumpFreq) == 0)
+    WriteRatio();
+
 }
 
 
@@ -14,13 +18,14 @@ MoveClass::WriteRatio()
   RatioVar.Write(AcceptanceRatio());
 }
 
-void 
-MoveClass::MakeMove()
-{
-  if ((PathData.Path.Communicator.MyProc()==0) && 
-      (TimesCalled % DumpFreq) == 0)
-    WriteRatio();
-}
+// void 
+// MoveClass::MakeMove()
+// {
+//   cerr<<"I am making a MoveClass move"<<endl;
+//   if ((PathData.Path.Communicator.MyProc()==0) && 
+//       (TimesCalled % DumpFreq) == 0)
+//     WriteRatio();
+// }
 
 
 void 

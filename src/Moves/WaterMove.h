@@ -13,15 +13,7 @@ class WaterRotate : public ParticleMoveClass
   int numAccepted,numMoves;
   clock_t newtime,oldtime,elapsed,watch,watchstart,watchend;
   void MakeMove();
-  inline void Read(IOSectionClass &moveInput)
-    {
-      string typeCheck;
-      assert(moveInput.ReadVar("type",typeCheck));
-      assert(typeCheck=="WaterRotate");
-      assert(moveInput.ReadVar("name",Name));
-      assert(moveInput.ReadVar("step",Theta));
-
-    }
+  void Read(IOSectionClass &moveInput);
   void  Molecule2Atoms(int moleculeNum);
   Array<int,1> coord_loc;
   dVec Rotate(dVec coord,int u1,int u2,int u3,double theta);

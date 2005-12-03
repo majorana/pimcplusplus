@@ -8,13 +8,14 @@ void
 LoopClass::DoEvent()
 {
   std::list<EventClass*>::iterator iter;
-  for (int step=0; step<NumSteps; step++)
+  for (int step=0; step<NumSteps; step++){
     for (iter=Events.begin(); iter!=Events.end(); iter++) {
       if (PathData.ExceededWallTime())
 	return;
       else
 	(*iter)->DoEvent();
     }
+  }
 }
 
 
@@ -27,6 +28,7 @@ LoopClass::FindMove(string name)
   for (iter=Moves.begin(); iter != Moves.end(); iter++)
     if ((*iter)->Name == name)
       return (*iter);
+  return NULL;
 }
 
 ObservableClass*
@@ -67,7 +69,7 @@ LoopClass::Read(IOSectionClass &in, int steps)
     else if(in.GetName() == "Observe") {
       string name;
       assert (in.ReadVar("Name", name));
-      EventClass *event = FindMove(name);
+      EventClass *event = FindObservable(name);
       if (event == NULL) {
 	cerr << "Unknown observable """ << name << """.\n";
 	abort();
@@ -82,6 +84,7 @@ LoopClass::Read(IOSectionClass &in, int steps)
     }
     else if (in.GetName() == "WriteData") 
       Events.push_back(new WriteDataClass(PathData,IOSection,Moves,Observables));
+    in.CloseSection(); 
   }
 }
 

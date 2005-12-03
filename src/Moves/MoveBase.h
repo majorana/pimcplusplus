@@ -16,7 +16,7 @@ protected:
   int DumpFreq;
 public:
   /// Call this in order to make a move.
-  virtual void MakeMove();
+  virtual void MakeMove()=0;
   ///All moves ought to be able to read
   virtual void Read(IOSectionClass &input)=0;
   virtual double AcceptanceRatio() {return sqrt((double)-1.0);}
@@ -60,7 +60,7 @@ protected:
     return (double)(NumAccepted)/(double)TimesCalled;
   }
   /// Call this to make a move
-  virtual void MakeMove()=0;
+  //  virtual void MakeMove()=0;
 
   /// This array contains the int's of particles that you are 
   /// currently moving (i.e. NumParticlesToMove of them
