@@ -1,5 +1,5 @@
 #include "RefSliceMove.h"
-
+#include "NoPermuteStage.h"
 
 void RefSliceMoveClass::WriteRatio()
 {

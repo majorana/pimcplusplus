@@ -4,7 +4,7 @@
 
 #include <list>
 #include "MoveBase.h"
-#include "../Observables/ObservableBase.h"
+#include "../Observables/ObservableVar.h"
 #include "../Actions/ActionBase.h"
 #include "StageClass.h"
 

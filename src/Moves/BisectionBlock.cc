@@ -3,7 +3,7 @@
 #include "StructureRejectStage.h"
 #include "CouplingStage.h"
 #include "WormPermuteStage.h"
-
+#include "NoPermuteStage.h"
 
 
 void BisectionBlockClass::Read(IOSectionClass &in)

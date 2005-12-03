@@ -7,7 +7,7 @@
 #include "PermuteStage.h"
 #include "CoupledPermuteStage.h"
 #include "BisectionStage.h"
-#include "../Observables/ObservableBase.h"
+#include "../Observables/ObservableVar.h"
 
 /// This is the bisection move class inherited from ParticleMoveClass
 /// Explanation of how bisection moves work is in  

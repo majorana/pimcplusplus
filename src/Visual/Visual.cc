@@ -91,7 +91,8 @@ void VisualClass::MakeFrame(int frame)
 	dVec pos;
 	pos[0] = PathArray(frame, ptcl, 0, 0);
  	pos[1] = PathArray(frame, ptcl, 0, 1);
- 	pos[2] = PathArray(frame, ptcl, 0, 2);
+	//// 	pos[2] = 0.0; //HACK! for 2D PathArray(frame, ptcl, 0, 2);
+	pos[2] = PathArray(frame, ptcl, 0, 2);
 	sphere->SetPos (pos);
 	if (ptcl==0)
 	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
@@ -239,6 +240,31 @@ void VisualClass::Read(string fileName)
   assert(Infile.OpenSection("PathDump"));
   assert(Infile.ReadVar ("Path", PathArray));
   assert(Infile.ReadVar ("Permutation", PermArray));
+  IOSectionClass OutFile;
+  OutFile.NewFile("out.h5") ; 
+  OutFile.NewSection("Observables");
+  OutFile.NewSection("PathDump");
+  cerr<<"My extent is ";
+  //  cerr<<PathArray.extent(0)<<" "<<PathArray.extent(1)<<" "<<PathArray.extent(2)<<" "<<PathArray.extent(3)<<endl;
+  cerr<<PermArray.extent(0)<<" "<<PermArray.extent(1)<<endl;
+  Array<double,4> tempPath;
+  tempPath.resize(PathArray.extent(0),PathArray.extent(1),1,PathArray.extent(3));
+  tempPath(Range::all(),Range::all(),0,Range::all())=PathArray(Range::all(),Range::all(),PathArray.extent(2)-1,Range::all());
+  OutFile.WriteVar("Path",tempPath);
+  Array<int,2> myPerm;
+  myPerm.resize(1,PermArray.extent(1));
+  myPerm(0,Range::all())=PermArray(PermArray.extent(0)-1,Range::all());
+  OutFile.WriteVar("Permutation",myPerm);
+  OutFile.CloseSection();
+ OutFile.CloseSection();
+  OutFile.NewSection("System");
+  Array<double,1> myBox(3);
+  myBox(0)=Box[0];
+  myBox(1)=Box[1];
+  myBox(2)=Box[2];
+  OutFile.WriteVar("Box",myBox);
+  OutFile.CloseSection();
+  OutFile.CloseFile();
   PutInBox();
 
   if (Infile.ReadVar ("OpenPtcl", OpenPtcl)) {
@@ -308,6 +334,8 @@ void VisualClass::PutInBox()
   for (int frame=0; frame<PathArray.extent(0); frame++) 
     for (int ptcl=0; ptcl<PathArray.extent(1); ptcl++) 
       for (int dim=0; dim<3; dim++) {
+      //HACK FOR 2d!
+	//      for (int dim=0; dim<2; dim++) {
 	while (PathArray(frame,ptcl,0,dim) > 0.5*Box[dim])
 	  for (int slice=0; slice<PathArray.extent(2); slice++)
 	    PathArray(frame,ptcl,slice,dim) -= Box[dim];
@@ -372,8 +400,8 @@ VisualClass::VisualClass()
   add(m_VBox);
 
   // VisualClass OpenGL scene.
-  // PathVis.set_size_request(400, 400);
-  PathVis.set_size_request(800, 800);
+   PathVis.set_size_request(400, 400);
+   //  PathVis.set_size_request(800, 800);
 
 
   // VisualClass quit button.
@@ -713,7 +741,9 @@ void VisualClass::MakePaths(int frame)
       for (int slice=0; slice < numSlices; slice++) {
 	path.Path[slice+offset][0] = PathArray(frame,ptcl,slice,0);
 	path.Path[slice+offset][1] = PathArray(frame,ptcl,slice,1);
-	path.Path[slice+offset][2] = PathArray(frame,ptcl,slice,2);
+	//HACK FOR 2d!	path.Path[slice+offset][2] = PathArray(frame,ptcl,slice,2);
+	//	path.Path[slice+offset][2] = 0.0;
+	path.Path[slice+offset][2] =  PathArray(frame,ptcl,slice,2);
       }
       offset +=  numSlices;
       if (ptcl == OpenPtcl(frame)) 
@@ -724,6 +754,8 @@ void VisualClass::MakePaths(int frame)
       path.Path[path.Path.size()-1][0] = PathArray(frame,loop[0],0,0);
       path.Path[path.Path.size()-1][1] = PathArray(frame,loop[0],0,1);
       path.Path[path.Path.size()-1][2] = PathArray(frame,loop[0],0,2);
+	//HACK FOR 2d!
+      //      path.Path[path.Path.size()-1][2] =0.0;
     }
     else {
       path.Path[path.Path.size()-1][0] = Tail(frame,0);

@@ -17,6 +17,7 @@ libobservables_la_SOURCES  =     \
     ObservableBase.cc            \
     ObservableBase.h             \
     ObservableClass.h            \
+    ObservableVar.h              \
     ObservableCorrelation.cc     \
     ObservableCorrelation.h      \
     ObservableEnergy.cc          \

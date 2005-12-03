@@ -133,57 +133,56 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     if (iAmRoot)
       OutFile.NewSection(observeType);
     ObservableClass* tempObs;
-    switch (observeType) { 
-      case "PairCorrelation": 
+    if (observeType=="PairCorrelation") 
 	tempObs = new PairCorrelationClass(PathData,OutFile);
-      case "nofr":
-	tempObs = new nofrClass(PathData,OutFile);
-      case "AngularMomentumCorrelation":
-	tempObs = new AngularMomCor(PathData,OutFile);
-      case "DropletSuperfluidity":
-	tempObs = new SuperfluiDrop(PathData,OutFile);
-      case "Vacancy":
-	tempObs = new VacancyLocClass(PathData,OutFile);
-      case "Coupling":
-	tempObs = new CouplingClass(PathData,OutFile);
-      case "Energy":
-	tempObs = new EnergyClass(PathData,OutFile);
-      case "EnergySign":
-	tempObs = new EnergySignClass(PathData,OutFile);
-      case "ModifiedEnergy":
-	tempObs = new ModifiedEnergyClass(PathData,OutFile);
-      case "AutoCorr":
-	tempObs = new AutoCorrClass(PathData,OutFile);
-      case "DistanceToOpen":
-	tempObs = new HeadLocClass(PathData,OutFile);
-      case "VacancyLocation":
-	tempObs = new VacancyLocClass(PathData,OutFile);
-      case "TimeAnalysis":
-	tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables);
-      case "Angular":
-	tempObs =  new AngularClass(PathData,OutFile);
-      case "PathDump":
-	tempObs = new PathDumpClass(PathData,OutFile);
-      case "WindingNumber":
-	tempObs = new WindingNumberClass(PathData,OutFile);
-      case "Vacancy":
-	tempObs = new VacancyLocClass(PathData,OutFile);
-      case "CycleCount":
-	tempObs = new PermutationCountClass(PathData,OutFile);
-      case "StructureFactor":
-	tempObs = new StructureFactorClass(PathData,OutFile);
-      case "Sign":
-	tempObs = new WeightClass(PathData,OutFile);
-      case "Forces":
-	tempObs = new ForcesClass(PathData,OutFile);
-	//  case "OpenOrientation":
-	//   tempObs = new OpenOrientationClass(PathData,OutFile);
-      default:
-	perr << "We do not recognize the observable " << observeType << endl;
-	abort();
+    else if (observeType=="nofr")
+      tempObs=new nofrClass(PathData,OutFile);
+    else if (observeType=="AngularMomentumCorrelation")
+      tempObs= new AngularMomCor(PathData,OutFile);
+    else if (observeType=="DropletSuperfluidity")
+      tempObs = new SuperfluiDrop(PathData,OutFile);
+    else if (observeType=="Vacancy")
+      tempObs = new VacancyLocClass(PathData,OutFile);
+    else if (observeType=="Coupling")
+      tempObs = new CouplingClass(PathData,OutFile);
+    else if (observeType=="Energy")
+      tempObs = new EnergyClass(PathData,OutFile);
+    else if (observeType=="EnergySign")
+      tempObs = new EnergySignClass(PathData,OutFile);
+    else if (observeType=="ModifiedEnergy")
+      tempObs = new ModifiedEnergyClass(PathData,OutFile);
+    else if (observeType=="AutoCorr")
+      tempObs = new AutoCorrClass(PathData,OutFile);
+    else if (observeType=="DistanceToOpen")
+      tempObs = new HeadLocClass(PathData,OutFile);
+    else if (observeType=="VacancyLocation")
+      tempObs = new VacancyLocClass(PathData,OutFile);
+    else if (observeType=="TimeAnalysis")
+      tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables);
+    else if (observeType=="Angular")
+      tempObs =  new AngularClass(PathData,OutFile);
+    else if (observeType=="PathDump")
+      tempObs = new PathDumpClass(PathData,OutFile);
+    else if (observeType=="WindingNumber")
+      tempObs = new WindingNumberClass(PathData,OutFile);
+    else if (observeType=="Vacancy")
+      tempObs = new VacancyLocClass(PathData,OutFile);
+    else if (observeType=="CycleCount")
+      tempObs = new PermutationCountClass(PathData,OutFile);
+    else if (observeType=="StructureFactor")
+      tempObs = new StructureFactorClass(PathData,OutFile);
+    else if (observeType=="Sign")
+      tempObs = new WeightClass(PathData,OutFile);
+    else if (observeType=="Forces")
+      tempObs = new ForcesClass(PathData,OutFile);
+    //  else if ( "OpenOrientation")
+    //   tempObs = new OpenOrientationClass(PathData,OutFile);
+    else {
+      perr << "We do not recognize the observable " << observeType << endl;
+      abort();
     }
     tempObs->Read(in);
-    Observables(counter)=tempObs;
+    Observables.push_back(tempObs);
     if (iAmRoot)
       OutFile.CloseSection();
     in.CloseSection();//Observable
@@ -207,126 +206,57 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
   if (iAmRoot)
     OutFile.NewSection("Moves");
   for (int counter=0;counter<numOfMoves;counter++){
-    string moveName;
     in.OpenSection("Move",counter);
-    string MoveType;
-    assert(in.ReadVar("type",MoveType));
+    string moveType;
+    assert(in.ReadVar("Type",moveType));
     if (iAmRoot)
-      OutFile.NewSection(MoveType);
-//     if (MoveType=="Bisection") {
-//       moveName = "BisectionMove";
-//       Moves(counter)=new BisectionMoveClass(PathData, OutFile);
-//       Moves(counter)->Read(in);
-//     }
-//     else 
-/*    if (MoveType=="OpenBisection") {
-      moveName = "OpenBisectionMove";
-      Moves(counter)=new OpenBisectionMoveClass(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    else*/
-    if (MoveType=="ShiftMove") {
-      Moves(counter)=new ShiftMoveClass(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    //    else if (MoveType=="EndSTage"){
-    //      Moves(counter)=new OpenBisectionMoveClass(PathData,OutFile);
-    //      Moves(counter)->Read(in);
-    //    }
-    else if (MoveType=="PrintMove") {
-      Moves(counter)=new PrintMoveClass(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-//     else if (MoveType=="CycleBlock") {
-//       moveName = "CycleBlockMove";
-//       Moves(counter)=new CycleBlockMoveClass(PathData, OutFile);
-//       Moves(counter)->Read(in);
-//     }
-//     else if (MoveType=="PermMove") {
-//       moveName= "PermMove";
-//       Moves(counter)=new PermMove(PathData, OutFile);
-//       Moves(counter)->Read(in);
-//     }
-    else if (MoveType=="BisectionBlock"){
-      moveName="BisectionBlock";
-      Moves(counter)=new BisectionBlockClass(PathData,OutFile);
-      Moves(counter)->Read(in); 
-    }
-    else if (MoveType=="CorrelatedBisectionBlock"){
-      moveName="CorrelatedBisectionBlock";
-      Moves(counter)=new CorrelatedBisectionBlockClass(PathData,OutFile);
-      Moves(counter)->Read(in); 
-    }
-    else if (MoveType=="CouplingMove"){
-      moveName="CouplingMove";
-      Moves(counter)=new CouplingMoveClass(PathData,OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="BisectionSphereBlock"){
-      moveName="BisectionSphereBlock";
-      Moves(counter)=new BisectionSphereBlockClass(PathData,OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="CenterDroplet"){
-      moveName="CenterDroplet";
-      Moves(counter)=new CenterDropletClass(PathData,OutFile);
-      Moves(counter)->Read(in);
-    }
-    //    else if (MoveType=="StructureReject"){
-    //      moveName="StructureReject";
-    //      Moves(counter)=new StructureRejectClass(PathData,OutFile);
-    //      Moves(counter)->Read(in);
-    //    }
-    else if (MoveType=="OpenEnd"){
-      moveName="OpenEnd";
-      Moves(counter)=new OpenEndMoveClass(PathData,OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="RefSlice"){
-      moveName="RefSlice";
-      Moves(counter)=new RefSliceMoveClass(PathData,OutFile);
-      Moves(counter)->Read(in); 
-    }
-    else if (MoveType=="Displace"){
-      moveName="Displace";
-      Moves(counter)=new DisplaceMoveClass(PathData,OutFile);
-      Moves(counter)->Read(in); 
-    }
-    else if (MoveType=="WaterRotate") {
-      Moves(counter)=new WaterRotate(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="WaterTranslate") {
-      Moves(counter)=new WaterTranslate(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="WaterTranslateRing") {
-      Moves(counter)=new WaterTranslateRing(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="LocalFlip") {
-      Moves(counter)=new LocalFlip(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="GlobalFlip") {
-      Moves(counter)=new GlobalFlip(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    else if (MoveType=="Langevin") {
-      Moves(counter) = new LangevinMoveClass(PathData, OutFile);
-      Moves(counter)->Read(in);
-    }
-    else {
-      perr<<"This type of move is not recognized: "<< MoveType <<endl;
-      abort();
-    }
-    if (iAmRoot)
-      OutFile.CloseSection();
-    in.CloseSection();
+      OutFile.NewSection(moveType);
+    MoveClass* move;
+    if (moveType=="ShiftMove")
+      move = new ShiftMoveClass(PathData, OutFile);
+    else if (moveType=="PrintMove")
+      move = new PrintMoveClass(PathData, OutFile);
+    else if (moveType=="BisectionBlock")
+      move = new BisectionBlockClass(PathData,OutFile);
+    else if (moveType=="CorrelatedBisectionBlock")
+      move = new CorrelatedBisectionBlockClass(PathData,OutFile);
+    else if (moveType=="CouplingMove")
+      move = new CouplingMoveClass(PathData,OutFile);
+    else if (moveType=="BisectionSphereBlock")
+      move = new BisectionSphereBlockClass(PathData,OutFile);
+    else if (moveType=="CenterDroplet")
+      move = new CenterDropletClass(PathData,OutFile);
+    else if (moveType=="OpenEnd")
+      move = new OpenEndMoveClass(PathData,OutFile);
+    else if (moveType=="RefSlice")
+      move = new RefSliceMoveClass(PathData,OutFile);
+    else if (moveType=="Displace")
+      move = new DisplaceMoveClass(PathData,OutFile);
+    else if (moveType=="WaterRotate")
+      move = new WaterRotate(PathData, OutFile);
+    else if (moveType=="WaterTranslate")
+      move = new WaterTranslate(PathData, OutFile);
+    else if (moveType=="WaterTranslateRing")
+      move = new WaterTranslateRing(PathData, OutFile);
+    else if (moveType=="LocalFlip")
+      move = new LocalFlip(PathData, OutFile);
+    else if (moveType=="GlobalFlip")
+      move = new GlobalFlip(PathData, OutFile);
+    else if (moveType=="Langevin")
+      move = new LangevinMoveClass(PathData, OutFile);
+    else
+      perr<<"This type of move is not recognized: "<< moveType <<endl;
+    abort();
   }
+  move->Read(in);
+  Moves.push_back(move);
   if (iAmRoot)
-    OutFile.CloseSection (); // "Moves"
-  
+    OutFile.CloseSection();
+  in.CloseSection();
+}
+ if (iAmRoot)
+   OutFile.CloseSection (); // "Moves"
+ 
 }
 
 

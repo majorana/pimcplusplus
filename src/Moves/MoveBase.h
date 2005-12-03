@@ -2,7 +2,7 @@
 #define MOVE_BASE_H
 
 #include "../PathDataClass.h"
-#include "../Observables/ObservableBase.h"
+#include "../Observables/ObservableVar.h"
 #include "../EventClass.h"
 
 /// This is the generic parent class for all moves, including "real moves"
@@ -79,7 +79,6 @@ protected:
   /// places them in ActiveParticles; 
   void ChooseParticles();
   void ChooseParticlesOpen();
-  inline int RandInt(int x);
   ParticleMoveClass(PathDataClass &myPathData, IOSectionClass outSection) : 
     MoveClass (myPathData, outSection)
   { 

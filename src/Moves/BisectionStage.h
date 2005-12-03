@@ -2,7 +2,7 @@
 #define BISECTION_STAGE_CLASS_H
 
 #include "MultiStage.h"
-#include "../Observables/ObservableBase.h"
+#include "../Observables/ObservableVar.h"
 
 class BisectionStageClass : public LocalStageClass
 {

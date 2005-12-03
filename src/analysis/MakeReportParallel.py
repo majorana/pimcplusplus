@@ -508,6 +508,10 @@ def ProcessScalarSection(infiles,doc,currNum):
                     infiles.CloseSection() # NodalAction
                infiles.CloseSection() # NodalActions
           infiles.CloseSection() # Actions
+#          print "BandEnergies = " + repr(BandEnergies)
+#          for procNum in range(0,len(BandEnergies)):
+#               print "procNum = " + repr(procNum)
+#               procScalarTable.body[procNum+1].append(repr(BandEnergies[procNum]))
           if (haveBands):
                for procNum in range(0,len(BandEnergies)):
                     print "procNum = " + repr(procNum)
@@ -717,9 +721,9 @@ for counter in range(0,numSections):
      elif myType=="Scalar":
           currNum=ProcessScalarSection(infiles,doc,currNum)
           doc.append(HR())
-     elif myType=="CorrelationFunction":
-          currNum=ProcessCorrelationSection(infiles,doc,currNum)
-          doc.append(HR()) 
+#     elif myType=="CorrelationFunction":
+#          currNum=ProcessCorrelationSection(infiles,doc,currNum)
+#          doc.append(HR()) 
      else:
           a=5
      infiles.CloseSection()

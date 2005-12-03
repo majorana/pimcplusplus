@@ -48,7 +48,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "HeLowTemp6";
+  string OutFileBase = "HeLowTemp7";
   //  Section (Observable)
   //    {
   //      string type="StructureFactor";
@@ -95,8 +95,8 @@ Section (Observables)
       string Name = "Angular";
       string Species1 = "He";
       string Description="Helium-Helium Pair Correlation";
-      int freq=10;
-      int dumpFreq=100;
+      int freq=2;
+      int dumpFreq=10;
 
     }
 

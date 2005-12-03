@@ -45,7 +45,7 @@ void ParticleMoveClass::ChooseParticles()
   for (int i=0; i<NumParticlesToMove; i++) { 
     bool Redundant;
     do {
-      MyParticleIndices(i) = RandInt(TotalParticles);
+      MyParticleIndices(i) = PathData.Path.Random.LocalInt(TotalParticles);
       while (PathData.Path.OpenPaths && 
 	     MyParticleIndices(i)==(int)(PathData.Path.OpenPtcl)){ 
 	MyParticleIndices(i) = PathData.Path.Random.LocalInt(TotalParticles);
@@ -71,7 +71,7 @@ void ParticleMoveClass::ChooseParticlesOpen()
   for (int i=0; i<NumParticlesToMove; i++) { 
     bool Redundant;
     do {
-      MyParticleIndices(i) = RandInt(TotalParticles);
+      MyParticleIndices(i) = PathData.Path.Random.LocalInt(TotalParticles);
       Redundant = false;
       for (int j=0; j<i; j++){
 	if (MyParticleIndices(i) == MyParticleIndices(j)){

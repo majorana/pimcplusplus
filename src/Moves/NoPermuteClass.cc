@@ -1,4 +1,4 @@
-#include "PermuteStage.h"
+#include "NoPermuteStage.h"
 
 double NoPermuteStageClass::Sample (int &slice1, int &slice2,
 				    Array<int,1> &activeParticles)

@@ -2,7 +2,7 @@
 #define EMPTY_STAGE_CLASS_H
 
 #include "MultiStage.h"
-#include "../Observables/ObservableBase.h"
+#include "../Observables/ObservableVar.h"
 
 
 class EmptyStageClass : public LocalStageClass

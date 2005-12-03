@@ -1,3 +1,4 @@
+#include "NoPermuteStage.h"
 #include "BisectionSphereBlock.h"
 #include "StructureRejectStage.h"
 

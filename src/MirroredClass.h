@@ -83,6 +83,8 @@ protected:
 public:
   inline void resize (int m, int n)      
     { Data[OLDMODE].resize(m,n); Data[NEWMODE].resize(m,n); }
+  inline void resizeAndPreserve(int m, int n)
+    { Data[OLDMODE].resizeAndPreserve(m,n); Data[NEWMODE].resizeAndPreserve(m,n);}
   inline int rows() const                
     { return Data[NEWMODE].rows(); }
   inline int cols() const                

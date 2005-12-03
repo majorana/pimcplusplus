@@ -5,7 +5,7 @@
 
 
 #include <list>
-#include "../Observables/ObservableBase.h"
+#include "../Observables/ObservableVar.h"
 #include "../Actions/ActionBase.h"
  
 ///Some moves are built out of stages.  This class is the parent class

@@ -1,5 +1,6 @@
 #include "CorrelatedBisectionBlock.h"
 #include "StructureRejectStage.h"
+#include "NoPermuteStage.h"
 
 void CorrelatedBisectionBlockClass::Read(IOSectionClass &in)
 {

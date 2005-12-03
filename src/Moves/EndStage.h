@@ -2,7 +2,7 @@
 #define END_STAGE_CLASS_H
 
 #include "MultiStage.h"
-#include "../Observables/ObservableBase.h"
+#include "../Observables/ObservableVar.h"
 
 typedef enum {HEAD,TAIL} EndType;
 
