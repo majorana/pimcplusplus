@@ -41,10 +41,10 @@ void MCTimeClass::WriteBlock()
 //     observeNorm+=Observables(counter)->SecondsInObservable;
 //  }
   for (int counter=0;counter<Moves.size();counter++){
-    MoveTime(counter)=(Moves(counter)->SecondsInMove)/TotalTime;
+    MoveTime(counter)=(Moves(counter)->TimeSpent)/TotalTime;
   }
   for (int counter=0;counter<Observables.size();counter++){
-    ObservableTime(counter)=(Observables(counter)->SecondsInObservable)/TotalTime;
+    ObservableTime(counter)=(Observables(counter)->TimeSpent)/TotalTime;
   }
 
   MoveTimeVar.Write(MoveTime);
