@@ -22,12 +22,6 @@ ForcesClass::SetSpecies(int speciesNum)
 void
 ForcesClass::Accumulate()
 {
-  TimesCalled++;
-
-  if ((TimesCalled % DumpFreq) == 0)
-    WriteBlock();
-
-  if ((TimesCalled % Freq) == 0) {
 //     Array<dVec,1> Fanalytic(Ptcls.size()), FFD(Ptcls.size());
 //     dVec zero;
 //     for (int i=0; i<NDIM; i++) zero[i] = 0.0;
@@ -45,7 +39,7 @@ ForcesClass::Accumulate()
 //     }
     PathData.Actions.GetForces(Ptcls, Forces);
     Counts++;
-  }
+
 }
 
 
@@ -83,11 +77,9 @@ void
 ForcesClass::Read(IOSectionClass &in)
 {
   string speciesString;
+  ObservableClass::Read(in);
   assert (in.ReadVar("Species", speciesString));
   SpeciesNum = PathData.Path.SpeciesNum(speciesString);
   SetSpecies(SpeciesNum);
-  assert (in.ReadVar("freq", Freq));
-  assert (in.ReadVar("dumpFreq", DumpFreq));
-  assert (in.ReadVar("Name", Name));
   WriteInfo();
 }

@@ -1,7 +1,9 @@
 #include "LoopClass.h"
+#include "WriteData.h"
 #include "PathDataClass.h"
 #include "Moves/MoveBase.h"
 #include "Observables/ObservableBase.h"
+
 void
 LoopClass::DoEvent()
 {
@@ -78,6 +80,8 @@ LoopClass::Read(IOSectionClass &in, int steps)
       newLoop->Read(in);
       Events.push_back(newLoop);
     }
+    else if (in.GetName() == "WriteData") 
+      Events.push_back(new WriteDataClass(PathData,IOSection,Moves,Observables));
   }
 }
 

@@ -3,7 +3,6 @@
 
 #include "Common.h"
 #include "SpeciesClass.h"
-//#include "ActionClass.h"
 #include "PathClass.h"
 #include <Common/MPI/Communication.h>
 #include "Actions/ActionsClass.h"

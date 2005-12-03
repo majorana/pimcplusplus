@@ -12,8 +12,6 @@ dVec v;
 void AutoCorrClass::Read(IOSectionClass& in)
 {
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   assert(in.ReadVar("numSlots",NumSlots));
   assert(in.OpenSection("Grid"));
   string gridType;
@@ -255,10 +253,9 @@ void AutoCorrClass::Accumulate()
 //
 void AutoCorrClass::Accumulate()
 {
-  TimesCalled++;
 
   // measure and catalog dipole moments at now, then calculate autocorrelation 
-  if ((TimesCalled % Freq)==0){
+
     TotalCounts++;
     // loop over slices
     for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
@@ -291,12 +288,8 @@ cerr << "cleared it out.  now is " << now << endl;
       }
     }
     Advance(now,NumSlots-1);
-  }
 
-  // do nothing this time
-  else{
-    return;
-  }
+
 
 }//
 

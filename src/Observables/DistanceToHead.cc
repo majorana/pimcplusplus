@@ -4,13 +4,6 @@
 // Fix to include final link between link M and 0
 void HeadLocClass::Accumulate()
 {
-  TimesCalled++;
-  if (TimesCalled % DumpFreq==0)
-    WriteBlock();
-
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
   
   int closestHeadLoc=0;
   int closestTailLoc=0;
@@ -77,8 +70,6 @@ void HeadLocClass::Read(IOSectionClass &in)
 {  
   int numFixedPoints;
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   assert(in.ReadVar("NumFixedPoints",numFixedPoints));
   HeadLoc.resize(numFixedPoints);
   TailLoc.resize(numFixedPoints);

@@ -15,8 +15,6 @@ void StructureFactorClass::Read(IOSectionClass& in)
     assert(in.ReadVar("Species1",species1Name));
     assert(in.ReadVar("Species2",species2Name));
   }
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   for (int spec=0;spec<PathData.NumSpecies();spec++){
     if (PathData.Species(spec).Name==species1Name){
       Species1=spec;
@@ -117,14 +115,6 @@ void StructureFactorClass::Accumulate()
   SpeciesClass &species1=PathData.Path.Species(Species1);
   SpeciesClass &species2=PathData.Path.Species(Species2);
 
-  TimesCalled++;
-
-  if (TimesCalled % DumpFreq==0){
-    WriteBlock();
-  }
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
 
   if (!PathData.Path.LongRange) {
     for (int slice=0; slice < PathData.NumTimeSlices()-1; slice++)

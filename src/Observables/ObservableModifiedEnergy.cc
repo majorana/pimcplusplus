@@ -4,13 +4,6 @@
 // Fix to include final link between link M and 0
 void ModifiedEnergyClass::Accumulate()
 {
-  TimesCalled++;
-  if (TimesCalled % DumpFreq==0)
-    WriteBlock();
-
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
   //Move the join to the end so we don't have to worry about permutations
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
   
@@ -204,8 +197,6 @@ cerr << "okay nslices is " << nslices << endl;
 void ModifiedEnergyClass::Read(IOSectionClass &in)
 {  
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   if (PathData.Path.Communicator.MyProc()==0){
     WriteInfo();
     IOSection.WriteVar("Type","Scalar");

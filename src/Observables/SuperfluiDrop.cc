@@ -34,8 +34,6 @@ void SuperfluiDrop::Read(IOSectionClass &in)
 {  
 
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   string speciesName;
     assert(in.ReadVar("Species1",speciesName));
   for (int spec=0;spec<PathData.NumSpecies();spec++){ //???what is Species ?
@@ -60,13 +58,6 @@ void SuperfluiDrop::Read(IOSectionClass &in)
 
 void SuperfluiDrop::Accumulate()
 {
-  TimesCalled++;
-  if (TimesCalled % DumpFreq==0){
-    WriteBlock();
-  }
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
   TotalCounts++;
   PathClass &Path= PathData.Path;
   SpeciesClass &species=PathData.Path.Species(Species);

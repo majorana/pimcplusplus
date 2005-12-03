@@ -3,10 +3,7 @@
 
 void PathDumpClass::Accumulate()
 {
-  TimesCalled++;
-  if (TimesCalled%DumpFreq == (DumpFreq-1)){
-    WriteBlock();
-  }
+  WriteBlock();
 }
 
 void PathDumpClass::Read(IOSectionClass &in)

@@ -14,8 +14,6 @@ void PairCorrelationClass::Read(IOSectionClass& in)
   Species2=-1;
   assert(in.ReadVar("Species1",species1Name));
   assert(in.ReadVar("Species2",species2Name));
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   for (int spec=0;spec<PathData.NumSpecies();spec++){
     if (PathData.Species(spec).Name==species1Name){
       Species1=spec;
@@ -138,15 +136,6 @@ void PairCorrelationClass::Accumulate()
   SpeciesClass &species1=PathData.Path.Species(Species1);
   SpeciesClass &species2=PathData.Path.Species(Species2);
 
-  TimesCalled++;
-
-  if (TimesCalled % DumpFreq==0){
-    WriteBlock();
-  }
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
-
   TotalCounts++;
   if (Species1==Species2) {
     /// Note:  we make sure we don't count that last times slice
@@ -213,8 +202,7 @@ void nofrClass::Read(IOSectionClass& in)
 {
   
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
+
 
   assert(in.OpenSection("Grid"));
   string gridType;
@@ -323,15 +311,6 @@ void nofrClass::Print()
 ///loop. This does not compensaite for volume effects or importance sampling
 void nofrClass::Accumulate()
 {
-
-  TimesCalled++;
-  if (TimesCalled % DumpFreq==0){
-    WriteBlock();
-  }
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
-  //  cerr<<"I'm actually going to accumulate (exciting isn't it)"<<endl;
   
   int procWithRefSlice = PathData.Path.SliceOwner (PathData.Path.RefSlice);  
   if (procWithRefSlice == PathData.Path.Communicator.MyProc()) {

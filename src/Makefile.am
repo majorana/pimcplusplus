@@ -25,7 +25,9 @@ pimc___SOURCES =          \
     PathDataClass.h       \
     RunInfoClass.h        \
     SpeciesClass.cc       \
-    SpeciesClass.h        
+    SpeciesClass.h        \
+    WriteData.h           \
+    WriteData.cc
 
 
 pimc___LDADD = Moves/libmoves.la Actions/libactions.la \

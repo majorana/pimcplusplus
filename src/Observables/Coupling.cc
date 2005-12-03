@@ -8,8 +8,6 @@ void CouplingClass::Read(IOSectionClass& in)
 {
   
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   TotalCounts=0;
   Coupling.resize(110);
   Coupling=0;
@@ -50,17 +48,6 @@ void CouplingClass::WriteBlock()
 /// interested in.
 void CouplingClass::Accumulate()
 {
-
-
-
-  TimesCalled++;
-
-  if (TimesCalled % DumpFreq==0){
-    WriteBlock();
-  }
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
 
   TotalCounts++;
   int couplingBin=(int)((floor)((PathData.Path.ExistsCoupling*100)+0.2));

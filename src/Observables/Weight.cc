@@ -5,13 +5,6 @@
 void WeightClass::Accumulate()
 {
   //  cerr<<PathData.InterComm.MyProc()<<": I have been called "<<TimesCalled<<endl;
-  TimesCalled++;
-  if (TimesCalled % DumpFreq==0)
-    WriteBlock();
-
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
   NumSamples++;
   //  cerr<<"Accumulating the obseravble"<<endl;
   //  cerr<<"Attempting the coupled permute stage "<<PathData.InterComm.MyProc()<<endl;
@@ -73,8 +66,6 @@ void WeightClass::WriteBlock()
 void WeightClass::Read(IOSectionClass &in)
 {  
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   if (PathData.Path.Communicator.MyProc()==0){
     WriteInfo();
     IOSection.WriteVar("Type","CorrelationFunction");

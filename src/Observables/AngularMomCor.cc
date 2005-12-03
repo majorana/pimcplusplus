@@ -26,8 +26,6 @@ void AngularMomCor::Read(IOSectionClass &in)
 {  
 
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   string speciesName;
   Species=-1;
   assert(in.ReadVar("Species1",speciesName));
@@ -51,13 +49,6 @@ void AngularMomCor::Read(IOSectionClass &in)
 
 void AngularMomCor::Accumulate()
 {
-  TimesCalled++;
-  if (TimesCalled % DumpFreq==0){
-    WriteBlock();
-  }
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
   TotalCounts++;
   PathClass &Path= PathData.Path;
   SpeciesClass &species=PathData.Path.Species(Species);

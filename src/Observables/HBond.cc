@@ -92,9 +92,8 @@ void HbondClass::Accumulate()
 {
   // Table accumulates the lifetime of an HBond and is cleared out with period DumpFreq.  BondCount counts the presence or absence of a bond and is cleared with period Freq.
 
-  TimesCalled++;
   // Measure and tabulate hbonds at the curent time step
-  if ((TimesCalled % Freq)==0){
+
     // Just do this for slice 0 -- classical 
     int slice = 0;
     /// loop over molecules 
@@ -142,12 +141,6 @@ void HbondClass::Accumulate()
     WriteBlock();
     Histogram = 0;
     LifetimeHist = 0;
-  }
-
-  // do nothing this time
-  else{
-    return;
-  }
 
 }
 

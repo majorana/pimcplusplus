@@ -11,6 +11,7 @@ ObservableClass::WriteInfo()
 void 
 ObservableClass::Read(IOSectionClass &in)
 {
+  assert(in.ReadVar("Frequency",Frequency));
   assert(in.ReadVar("Name",Name));
   if(!(in.ReadVar("Description",Description))){
     Description="No description available";

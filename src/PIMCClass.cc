@@ -129,7 +129,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
   for (int counter=0;counter<numOfObservables;counter++){
     in.OpenSection("Observable",counter);
     string observeType;
-    assert(in.ReadVar("type",observeType));
+    assert(in.ReadVar("Type",observeType));
     if (iAmRoot)
       OutFile.NewSection(observeType);
     ObservableClass* tempObs;

@@ -8,14 +8,6 @@
 ///a specific species
 void WindingNumberClass::Accumulate()
 {
-  TimesCalled++;
-
-  if (TimesCalled % DumpFreq==0){
-    WriteBlock();
-  }
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
   TotalDisp=0.0;
   int numLinks=PathData.Path.NumTimeSlices()-1;
   for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
@@ -43,8 +35,6 @@ void WindingNumberClass::Accumulate()
 void WindingNumberClass::Read(IOSectionClass& in)
 {
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
 }
 void WindingNumberClass::WriteBlock()
 {

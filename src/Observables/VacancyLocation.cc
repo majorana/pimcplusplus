@@ -4,13 +4,6 @@
 // Fix to include final link between link M and 0
 void VacancyLocClass::Accumulate()
 {
-  TimesCalled++;
-  if (TimesCalled % DumpFreq==0)
-    WriteBlock();
-
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
   dVec displaceAmount;
   double distanceAmount;
   for (int slice=0;slice<PathData.NumTimeSlices();slice++){
@@ -80,8 +73,6 @@ void VacancyLocClass::Read(IOSectionClass &in)
 
   int numFixedPoints;
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
   assert(in.ReadVar("NumFixedPoints",numFixedPoints));
   Loc.resize(numFixedPoints);
   Loc=0;
