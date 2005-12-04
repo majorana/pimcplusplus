@@ -5,7 +5,7 @@ from HTMLgen import *
 from HTMLPlots import *
 import stats
 
-def ProcessEnergySection(infiles,summaryDoc,detailedDoc,StartCut):
+def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
     N=infiles.CountVars()
     varList = []
     numProcs=0

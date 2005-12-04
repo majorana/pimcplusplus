@@ -6,6 +6,7 @@ import math
 import stats
 import numarray
 from Energy import *
+from PairCorrelation import *
 from HTMLgen import *
 
 
@@ -53,8 +54,10 @@ for counter in range(0,numSections):
      myName= infiles.GetName()
      myType=infiles.ReadVar("Type")[0]
      print "Currently processing ",myName
-     if myType=="Scalar":
-         ProcessEnergySection(infiles,summaryDoc,detailedDoc,StartCut)
+     if myName=="PairCorrelation":
+         ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
+     elif myName=="Energy":
+         ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
      else:
