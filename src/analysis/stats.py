@@ -1,4 +1,47 @@
 from numarray import *
+
+
+def UnweightedAverage(meanList,errorList):
+    mean=sum(meanList)/(len(meanList)+0.0)
+    error=0.0;
+    for e in errorList:
+        error=error+e*e
+    error=sqrt(error)/len(errorList)
+    return (mean,error)
+
+
+def WeightedAvg (means, errors):
+     if (errors[0] != 0.0):
+          weights = map (lambda x: 1.0/(x*x), errors)
+          norm = 1.0/sum(weights)
+          weights = map(lambda x: x*norm, weights)
+          avg = 0.0
+          error2 = 0.0
+          for i in range (0,len(means)):
+               avg = avg + means[i]*weights[i]
+               error2 = error2 + weights[i]**2*errors[i]*errors[i]
+          return (avg, math.sqrt(error2))
+     else:
+          return (Avg(means), 0.0)
+
+
+def MeanErrorString (mean, error):
+     if (mean!=0.0):
+          meanDigits = math.floor(math.log(abs(mean))/math.log(10))
+     else:
+          meanDigits=2
+     if (error!=0.0):
+          rightDigits = -math.floor(math.log(error)/math.log(10))+1
+     else:
+          rightDigits=2
+     if (rightDigits < 0):
+          rightDigits = 0
+     formatstr = '%1.' + '%d' % rightDigits + 'f'
+     meanstr  = formatstr % mean
+     errorstr = formatstr % error
+     return (meanstr, errorstr)
+
+
 def c(i,x,mean,var):
     N=len(x)
     if var==0:#if the variance is 0 return an effectively infinity corr
