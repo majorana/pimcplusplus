@@ -12,6 +12,7 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   H.SetIonPot (ph, useFFT);
   H.Setk(k);
   Bands.resize (NumBands, GVecs.size());
+  LastBands.resize (NumBands, GVecs.size());
   PH = &ph;
   UseFFT = useFFT;
 }
@@ -27,6 +28,7 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, double z,
   H.SetIonPot (z, useFFT);
   H.Setk(k);
   Bands.resize (NumBands, GVecs.size());
+  LastBands.resize (NumBands, GVecs.size());
   UseFFT = useFFT;
 }
 
@@ -43,11 +45,19 @@ MPISystemClass::SetIons (const Array<Vec3,1> &rions)
 void 
 MPISystemClass::DiagonalizeH ()
 {
-  //  CG.InitBands();
+  if (MDExtrap) {
+    for (int i=0; i<Bands.extent(0); i++)
+      for (int j=0; j<Bands.extent(1); j++)
+	Bands(i,j) = 2.0*Bands(i,j) - LastBands(i,j);
+    GramSchmidt(Bands);
+  }
+  else
+    CG.InitBands();
   CG.Solve();
   if (Communicator.MyProc()==0)
     for (int i=0; i<Bands.rows(); i++) 
       fprintf (stderr, "Energy(%d) = %15.12f\n", i, CG.Energies(i)* 27.211383);
+  LastBands = Bands;
 }
 
 
@@ -170,5 +180,7 @@ MPISystemClass::Setk(Vec3 k)
   H.Setk(k);
   H.SetIons(Rions);
   Bands.resize (NumBands, GVecs.size());
+  LastBands.resize (NumBands, GVecs.size());
+  LastBands = complex<double> (0.0, 0.0);
   CG.Setup();
 }

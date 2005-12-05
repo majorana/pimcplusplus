@@ -11,7 +11,7 @@ protected:
   Array<Vec3,1> Rions;
   FFTBox FFT;
   HamiltonianClass H;
-  Array<complex<double>,2> Bands;
+  Array<complex<double>,2> Bands, LastBands;
   ConjGradMPI CG;
   Vec3 Box;
   double kCut;
@@ -19,6 +19,7 @@ protected:
   Potential *PH;
   bool UseFFT;
   CommunicatorClass &Communicator;
+  bool MDExtrap;
 public:
   GVecsClass GVecs;
   void Setup(Vec3 box, Vec3 k, double kcut, Potential &ph, bool useFFT=true);
@@ -42,9 +43,10 @@ public:
   void CalcChargeDensity(Array<double,3> &rho);
   void WriteXSFFile(string filename);
 
-  MPISystemClass(int numBands, CommunicatorClass &comm) 
+  MPISystemClass(int numBands, CommunicatorClass &comm,
+		 bool mdextrap=false) 
     : CG(H, Bands, comm), FFT(GVecs), H(GVecs, FFT), 
-      NumBands(numBands), Communicator(comm)
+      NumBands(numBands), Communicator(comm), MDExtrap(mdextrap)
   {
 
   }

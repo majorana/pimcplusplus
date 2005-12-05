@@ -197,6 +197,9 @@ ConjGradMPI::Iterate()
 
 void ConjGradMPI::Solve()
 {
+  /// Hamiltonian has changed, so we can't assume we're conjugate to
+  /// previous directions.
+  EtaXiLast = complex<double>(0.0, 0.0);
   int iter = 0;
   double residual = 1.0;
   while ((iter < 100) && (residual > 1.0e-8)) {
