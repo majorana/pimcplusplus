@@ -36,6 +36,7 @@ private:
   /// This updates GUp, gUp, and vUp, or GDown, gDown, and vDown,
   /// depending on the species.
   friend class FixedPhaseActionClass;
+  bool UseMDExtrap;
 public:
   double CalcGrad2 (int slice, int species);
   void   CalcGrad2 (int slice, int species, Array<double,1> &grad2);

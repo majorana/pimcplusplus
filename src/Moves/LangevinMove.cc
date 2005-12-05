@@ -10,6 +10,7 @@ LangevinMoveClass::AccumForces()
 void
 LangevinMoveClass::LDStep()
 {
+  cerr << "In LDStep.\n";
   /// Write out positions and velocities
   TimeVar.Write(Time);
   for (int i=0; i<R.size(); i++) {
@@ -54,9 +55,14 @@ LangevinMoveClass::LDStep()
   // for the next step
   int first = PathData.Path.Species(LDSpecies).FirstPtcl;
   for (int slice=0; slice<PathData.Path.NumTimeSlices(); slice++)
-    for (int i=0; i<R.size(); i++)
+    for (int i=0; i<R.size(); i++) {
+      SetMode (NEWMODE);
       PathData.Path(slice,i+first) = 
 	R(i) + TimeStep*V(i) + 0.5*TimeStep*TimeStep*OldF(i);
+      SetMode (OLDMODE);
+      PathData.Path(slice,i+first) = 
+	R(i) + TimeStep*V(i) + 0.5*TimeStep*TimeStep*OldF(i);
+    }
 
   /// Increment the time
   Time += TimeStep;
@@ -65,6 +71,7 @@ LangevinMoveClass::LDStep()
 void 
 LangevinMoveClass::MakeMove()
 {
+  cerr << "In Langevin MakeMove.\n";
   if (MCSteps >= (NumEquilSteps+NumAccumSteps)) {
     MCSteps = 0;
     LDStep();
@@ -89,6 +96,7 @@ LangevinMoveClass::Read(IOSectionClass &in)
   assert (in.ReadVar("Species", speciesStr));
 
   LDSpecies = PathData.Path.SpeciesNum(speciesStr);
+  assert (LDSpecies != -1);
   SpeciesClass &species = PathData.Path.Species(LDSpecies);
   int numPtcls = species.NumParticles;
   V.resize(numPtcls);

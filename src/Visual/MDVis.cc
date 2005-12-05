@@ -276,11 +276,12 @@ MDVisualClass::Read(string filename)
   
   assert(in.OpenSection("Moves"));
   assert(in.OpenSection("Langevin"));
-  assert(in.OpenSection("Langevin"));
+  bool extraSec = in.OpenSection("Langevin");
   assert(in.ReadVar("R", Trajectory));
   assert(in.ReadVar("Time", Time));
 
-  in.CloseSection(); // "Langevin"
+  if (extraSec) 
+    in.CloseSection(); // "Langevin"
   in.CloseSection(); // "Langevin"
   in.CloseSection(); // "Moves"
 

@@ -15,7 +15,7 @@ Section (System)
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   //  Array<double,1> Box(3)=[30.1766, 30.1766, 30.1766];
   Array<double,1> Box(3) = [23.951, 23.951, 23.951];
-  double kCutoff = 1.3;
+  double kCutoff = 0.65;
   Section (Particles)
   {
     Section (Species)
@@ -76,12 +76,12 @@ Section (System)
 
 Section (Action)
 {
-  int MaxLevels = 6;
+  int MaxLevels = 2;
   bool UseRPA = false;
   int NumBreakupKnots = 20;
   int NumImages = 0;
   Array<string,1> PairActionFiles(3) = 
-    ["Na-Na.PairAction",
+    ["../Na-Na.PairAction",
      "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5",
      "~/PairActions/e-e.fit.beta8.0.h5"];
   Section (NodalAction)
@@ -90,7 +90,8 @@ Section (Action)
     string IonSpecies  = "Na";
     string UpSpecies   = "eup";
     string DownSpecies = "edown";
-    double kCut = 4.0;
+    string UseMDExtrap = true;
+    double kCut = 1.5;
 //    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
 //     Array<double,2> TwistAngles(32,3) = [ 0.25, -0.75, -0.75,
 //                                           0.25, -0.75, -0.25,
@@ -132,95 +133,98 @@ Section (Action)
                                           0.75,  0.25,  0.75,
                                           0.75,  0.75,  0.25,
                                           0.75,  0.75,  0.75 ];
+//    Array<double,2> TwistAngles(1,3) = [  0.25,  0.25,  0.25];
+
   }
   bool UseBackground = false;
 }
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/Na_16_tau0.0625_M2286.langevin.turing";
+  string OutFileBase=
+    "~/Runs/NaRuns/Langevin/Na_16_tau0.0625_M2286.langevin.local";
   int FileStart = 0;
   Section (Observable) {
-    string type = "Energy";
+    string Type = "Energy";
     string Name = "Energy";
-    int freq=5;
+    int Frequency=5;
     int dumpFreq=100;
     
   }
   Section (Observable) {
-    string type = "PairCorrelation";
+    string Type = "PairCorrelation";
     string Name = "Na-eup";
     string Species1 = "Na";
     string Species2 = "eup";
-    int freq=5;
+    int Frequency=5;
     int dumpFreq=100;
     Section (Grid) {
-      string type = "Linear";
+      string Type = "Linear";
       int NumPoints = 200;
     }
   }
   Section (Observable) {
-    string type = "PairCorrelation";
+    string Type = "PairCorrelation";
     string Name = "Na-edown";
     string Species1 = "Na";
     string Species2 = "edown";
-    int freq=5;
+    int Frequency=5;
     int dumpFreq=100;
     Section (Grid) {
-      string type = "Linear";
+      string Type = "Linear";
       int NumPoints = 200;
     }
   }
   Section (Observable) {
-    string type = "PairCorrelation";
+    string Type = "PairCorrelation";
     string Name = "eup-eup";
     string Species1 = "eup";
     string Species2 = "eup";
-    int freq=5;
+    int Frequency=5;
     int dumpFreq=100;
     Section (Grid) {
-      string type = "Linear";
+      string Type = "Linear";
       int NumPoints = 200;
     }
   }
   Section (Observable) {
-    string type = "PairCorrelation";
+    string Type = "PairCorrelation";
     string Name = "eup-edown";
     string Species1 = "eup";
     string Species2 = "edown";
-    int freq=5;
+    int Frequency=5;
     int dumpFreq=100;
     Section (Grid) {
-      string type = "Linear";
+      string Type = "Linear";
       int NumPoints = 200;
     }
   }
   Section (Observable) {
-    string type = "PairCorrelation";
+    string Type = "PairCorrelation";
     string Name = "edown-edown";
     string Species1 = "edown";
     string Species2 = "edown";
-    int freq=5;
+    int Frequency=5;
     int dumpFreq=100;
     Section (Grid) {
-      string type = "Linear";
+      string Type = "Linear";
       int NumPoints = 200;
     }
   }
   Section (Observable) {
-    string type = "PairCorrelation";
+    string Type = "PairCorrelation";
     string Name = "Na-Na";
     string Species1 = "Na";
     string Species2 = "Na";
-    int freq=5;
+    int Frequency=5;
     int dumpFreq=100;
     Section (Grid) {
-      string type = "Linear";
+      string Type = "Linear";
       int NumPoints = 200;
     }
   }
 //   Section (Observable) {
-//     string type = "PathDump";
+//     string Type = "PathDump";
 //     string Name = "PathDump";
 //     int dumpFreq = 2;
 //   }
@@ -229,36 +233,36 @@ Section (Observables)
 
 Section (Moves) {
   Section (Move) {
-    string type="BisectionBlock";
-    string name="eupBlock";
+    string Type="BisectionBlock";
+    string Name="eupBlock";
     //string PermuteType="TABLE";
     string PermuteType="NONE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-    int NumLevels=6;
+    int NumLevels=2;
     string Species = "eup";
-    int StepsPerBlock=8;
+    int StepsPerBlock=1;
   }
   Section (Move) {
-    string type="BisectionBlock";
-    string name="edownBlock";
+    string Type="BisectionBlock";
+    string Name="edownBlock";
     string PermuteType="NONE";
     //string PermuteType="TABLE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-    int NumLevels=6;
+    int NumLevels=2;
     string Species = "edown";
-    int StepsPerBlock=8;
+    int StepsPerBlock=1;
   }
   Section (Move) {
-    string type="ShiftMove";
-    string name="Shift";
+    string Type="ShiftMove";
+    string Name="Shift";
   }
   Section (Move) {
-    string type="Langevin";
-    string name="Langevin";
+    string Type="Langevin";
+    string Name="Langevin";
     double Mass = 1.0;
-    double TimeStep = 0.01;
-    int NumEquilSteps = 10;
-    int NumAccumSteps = 100;
+    double TimeStep = 0.05;
+    int NumEquilSteps = 5;
+    int NumAccumSteps = 10;
     string Species="Na";
   }
 }
@@ -284,25 +288,25 @@ Section (Algorithm) {
 //   }
 
   Section (Loop) { //Start Accumulating observables
-    int steps=6000000;
+    int Steps=6000000;
     Section (Loop){
-      int steps=9;
+      int Steps=9;
       Section (Loop){
-        int steps=2;
-        Section (Move) { string name="eupBlock";     } 
-        Section (Move) { string name="edownBlock";   } 
+        int Steps=2;
+        Section (Move) { string Name="eupBlock";     } 
+        Section (Move) { string Name="edownBlock";   } 
       }
-      Section (Move)   { string name = "Shift";      }
+      Section (Move)   { string Name = "Shift";      }
     }
-    Section (Move)     { string name = "Langevin";   }
-    Section (Observe)  { string name = "Na-eup";     }
-    Section (Observe)  { string name = "Na-edown";   }
-    Section (Observe)  { string name = "eup-eup";    }
-    Section (Observe)  { string name = "edown-edown";}
-    Section (Observe)  { string name = "eup-edown";  }
-    Section (Observe)  {  string name = "Na-Na";     }
-    Section (Observe)  { string name = "Energy";     }
-//    Section (Observe) { string name = "PathDump"; }
+    Section (Move)     { string Name = "Langevin";   }
+    Section (Observe)  { string Name = "Na-eup";     }
+    Section (Observe)  { string Name = "Na-edown";   }
+    Section (Observe)  { string Name = "eup-eup";    }
+    Section (Observe)  { string Name = "edown-edown";}
+    Section (Observe)  { string Name = "eup-edown";  }
+    Section (Observe)  {  string Name = "Na-Na";     }
+    Section (Observe)  { string Name = "Energy";     }
+//    Section (Observe) { string Name = "PathDump"; }
   }
 }
 
