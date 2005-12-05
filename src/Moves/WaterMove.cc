@@ -137,7 +137,6 @@ WaterRotate::Read(IOSectionClass &moveInput)
   string typeCheck;
   assert(moveInput.ReadVar("type",typeCheck));
   assert(typeCheck=="WaterRotate");
-  assert(moveInput.ReadVar("name",Name));
   assert(moveInput.ReadVar("step",Theta));  
 }
 

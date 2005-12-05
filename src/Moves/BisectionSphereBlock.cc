@@ -19,7 +19,6 @@ void BisectionSphereBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
-  assert (in.ReadVar ("name", Name));
   cerr << "speciesName = " << speciesName << ".\n";
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
   HaveRefslice = 

@@ -24,7 +24,6 @@ DisplaceMoveClass::Read (IOSectionClass &in)
 {
   assert(in.ReadVar ("Sigma", Sigma));
   DisplaceStage.Sigma = Sigma;
-  assert(in.ReadVar("name",Name));
   Array<string,1> activeSpeciesNames;
 
   int numToMove;

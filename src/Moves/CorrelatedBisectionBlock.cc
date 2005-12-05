@@ -10,7 +10,6 @@ void CorrelatedBisectionBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
-  assert (in.ReadVar ("name", Name));
 
   BisectionStages.resize(NumLevels);
   for (int level=0;level<NumLevels;level++)

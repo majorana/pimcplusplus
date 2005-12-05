@@ -127,8 +127,9 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
   
   for (int counter=0;counter<numOfObservables;counter++){
     in.OpenSection("Observable",counter);
-    string observeType;
+    string observeType, observeName;
     assert(in.ReadVar("Type",observeType));
+    assert(in.ReadVar("Name",observeName));
     if (iAmRoot)
       OutFile.NewSection(observeType);
     ObservableClass* tempObs;
@@ -180,6 +181,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       perr << "We do not recognize the observable " << observeType << endl;
       abort();
     }
+    tempObs->Name = observeName;
     tempObs->Read(in);
     Observables.push_back(tempObs);
     if (iAmRoot)
@@ -205,8 +207,9 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     OutFile.NewSection("Moves");
   for (int counter=0;counter<numOfMoves;counter++){
     in.OpenSection("Move",counter);
-    string moveType;
+    string moveType, moveName;
     assert(in.ReadVar("Type",moveType));
+    assert(in.ReadVar("Name",moveName));
     if (iAmRoot)
       OutFile.NewSection(moveType);
     if (moveType=="ShiftMove")
@@ -245,6 +248,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       perr<<"This type of move is not recognized: "<< moveType <<endl;
       abort();
     }
+    move->Name = moveName;
     move->Read(in);
     Moves.push_back(move);
     if (iAmRoot)

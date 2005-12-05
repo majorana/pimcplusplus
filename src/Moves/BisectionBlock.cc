@@ -14,7 +14,6 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
-  assert (in.ReadVar ("name", Name));
   //  in.ReadVar("OrderNBosons",orderNBosons);
   bool addStructureRejectStage=false;
   in.ReadVar("StructureReject",addStructureRejectStage);
@@ -179,11 +178,9 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
-  cerr<<"I am running bisection block"<<endl;
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
 
-  //  cerr<<"I am binning from "<<Slice1<<" to "<<Slice2<<"in bisection block"<<endl;
   if (PathData.Path.OrderN){
     for (int slice=Slice1;slice<=Slice2;slice++)
       PathData.Path.Cell.BinParticles(slice);

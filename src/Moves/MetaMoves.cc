@@ -7,7 +7,6 @@ void PrintMoveClass::Read(IOSectionClass &IO)
   string typeCheck;
   assert(IO.ReadVar("Type",typeCheck));
   assert(typeCheck=="PrintMove");
-  assert(IO.ReadVar("name",Name));
   assert(IO.ReadVar("toprint",MyString));
 }
 
@@ -18,8 +17,6 @@ void ShiftMoveClass::Read(IOSectionClass &theInput)
   string typeCheck;
   assert(theInput.ReadVar("Type",typeCheck));
   assert(typeCheck=="ShiftMove");
-  assert(theInput.ReadVar("name",Name));
-
 }
 
 

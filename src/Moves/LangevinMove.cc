@@ -24,6 +24,7 @@ LangevinMoveClass::LDStep()
     for (int j=0; j<NDIM; j++)
       WriteArray(i,j) = V(i)[j];
   Vvar.Write(WriteArray);
+  Vvar.Flush();
 
   // OldF holds the force computed at x(t).
   for (int i=0; i<R.size(); i++)
@@ -81,7 +82,6 @@ LangevinMoveClass::Read(IOSectionClass &in)
 {
   string speciesStr;
 
-  assert(in.ReadVar("name", Name));
   assert(in.ReadVar("Mass", Mass));
   assert (in.ReadVar("TimeStep", TimeStep));
   assert (in.ReadVar("NumEquilSteps", NumEquilSteps));

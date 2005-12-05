@@ -30,7 +30,6 @@ void CouplingMoveClass::MakeMove()
 
 void CouplingMoveClass::Read(IOSectionClass &in)
 {
-  assert (in.ReadVar ("name", Name));
   StageClass* coupleStage;
   coupleStage=new CouplingStageClass(PathData,NumLevels,IOSection);
   coupleStage->Read(in);

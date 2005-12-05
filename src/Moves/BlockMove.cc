@@ -91,6 +91,5 @@ void CycleBlockMoveClass::Read(IOSectionClass  &in)
   assert(in.ReadVar("NumLevels",NumLevels));
   assert(in.ReadVar("Steps",StepsPerBlock));
   SpeciesNum=PathData.SpeciesNum(speciesName);
-  assert(in.ReadVar("name",Name));
 }
 

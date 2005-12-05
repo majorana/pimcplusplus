@@ -13,7 +13,6 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
   StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (in.ReadVar ("Species", speciesName));
-  assert (in.ReadVar ("name", Name));
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
 
   /// Set up permutation

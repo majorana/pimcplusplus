@@ -32,7 +32,6 @@ void OpenEndMoveClass::Read(IOSectionClass &in)
   string speciesName;
   StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
-  assert (in.ReadVar ("name", Name));
   SpeciesNum = PathData.Path.OpenSpeciesNum;
   StageClass* endStage;
   endStage=new EndStageClass(PathData,NumLevels,IOSection);
