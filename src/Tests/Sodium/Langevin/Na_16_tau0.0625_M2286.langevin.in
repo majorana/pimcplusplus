@@ -76,7 +76,7 @@ Section (System)
 
 Section (Action)
 {
-  int MaxLevels = 2;
+  int MaxLevels = 6;
   bool UseRPA = false;
   int NumBreakupKnots = 20;
   int NumImages = 0;
@@ -238,7 +238,7 @@ Section (Moves) {
     //string PermuteType="TABLE";
     string PermuteType="NONE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-    int NumLevels=2;
+    int NumLevels=6;
     string Species = "eup";
     int StepsPerBlock=1;
   }
@@ -248,7 +248,7 @@ Section (Moves) {
     string PermuteType="NONE";
     //string PermuteType="TABLE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
-    int NumLevels=2;
+    int NumLevels=6;
     string Species = "edown";
     int StepsPerBlock=1;
   }
