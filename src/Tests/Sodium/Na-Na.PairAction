@@ -1,6 +1,6 @@
 Section (Fits)
 {
-  string Type = "classical";
+  string Type = "coulomb";
 
   Section (Particle1)
   {

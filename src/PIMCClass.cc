@@ -200,7 +200,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
   int steps;
   int myProc=PathData.Path.Communicator.MyProc();
   bool iAmRoot = (myProc == 0);
-    MoveClass* move;  
+  MoveClass* move;  
   if (iAmRoot)
     OutFile.NewSection("Moves");
   for (int counter=0;counter<numOfMoves;counter++){
@@ -251,8 +251,10 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       OutFile.CloseSection();
     in.CloseSection();
   }
-  if (iAmRoot)
+  if (iAmRoot) {
     OutFile.CloseSection (); // "Moves"
+    OutFile.FlushFile();
+  }
   
 }
 

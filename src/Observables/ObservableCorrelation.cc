@@ -29,7 +29,7 @@ void PairCorrelationClass::Read(IOSectionClass& in)
   double gridStart;
   double gridEnd;
   int numGridPoints;
-  assert(in.ReadVar("type",gridType));
+  assert(in.ReadVar("Type",gridType));
   assert(gridType=="Linear");
   bool readStartGrid=in.ReadVar("start",gridStart);
   bool readEndGrid=in.ReadVar("end",gridEnd);
@@ -209,7 +209,7 @@ void nofrClass::Read(IOSectionClass& in)
   double gridStart;
   double gridEnd;
   int numGridPoints;
-  assert(in.ReadVar("type",gridType));
+  assert(in.ReadVar("Type",gridType));
   assert(gridType=="Linear");
   bool readStartGrid=in.ReadVar("start",gridStart);
   bool readEndGrid=in.ReadVar("end",gridEnd);

@@ -179,13 +179,7 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
-  //  cerr<<"I am running bisection block"<<endl;
-  // if (PathData.Path.Communicator.MyProc()==0)
-  //  cerr<<"Entering Bisection Block class "<<PathData.Path.Communicator.MyProc()<<endl;
-  //  perr << "BisectionBlock MakeMove.\n";
-  //  cerr<<"Starting my bisection block"<<endl;
-
-  //  cerr<<"I'm in bisection block"<<endl;
+  cerr<<"I am running bisection block"<<endl;
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
 
@@ -194,9 +188,6 @@ void BisectionBlockClass::MakeMove()
     for (int slice=Slice1;slice<=Slice2;slice++)
       PathData.Path.Cell.BinParticles(slice);
   }
-  //  cerr<<"Moving Join"<<endl;
-  //  sleep(10);
-
 
   ((PermuteStageClass*)PermuteStage)->InitBlock();
   ActiveParticles.resize(1);
