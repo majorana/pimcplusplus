@@ -10,7 +10,6 @@ LangevinMoveClass::AccumForces()
 void
 LangevinMoveClass::LDStep()
 {
-  cerr << "In LDStep.\n";
   /// Write out positions and velocities
   TimeVar.Write(Time);
   for (int i=0; i<R.size(); i++) {
@@ -71,7 +70,6 @@ LangevinMoveClass::LDStep()
 void 
 LangevinMoveClass::MakeMove()
 {
-  cerr << "In Langevin MakeMove.\n";
   if (MCSteps >= (NumEquilSteps+NumAccumSteps)) {
     MCSteps = 0;
     LDStep();
