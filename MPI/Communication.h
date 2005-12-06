@@ -161,6 +161,7 @@ public:
 	       Array<TinyVector<double,2>,1> &out);
   void AllSum (Array<TinyVector<double,3>,1> &in, 
 	       Array<TinyVector<double,3>,1> &out);
+  void BarrierSync();
   void PrintSync();
 
   CommunicatorClass()
@@ -354,7 +355,7 @@ public:
 		      Array<TinyVector<double,3>,1> &out)
   { out = in; }
 
-
+  inline void BarrierSync() {}
   inline void PrintSync() {}
 
 #endif

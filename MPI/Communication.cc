@@ -470,6 +470,11 @@ CommunicatorClass::AllSum (Array<TinyVector<double,3>,1> &in,
 }
 
 
+void
+CommunicatorClass::BarrierSync()
+{
+  MPI_Barrier(MPIComm);
+}
 
 #include <unistd.h>
 void 
