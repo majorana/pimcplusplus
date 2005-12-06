@@ -206,7 +206,7 @@ void ConjGradMPI::Solve()
     //    perr << "Iteration #" << (iter+1) << endl;
     residual = Iterate();
     /// HACK HACK HACK -- this shouldn't be necessary
-    Comm.Broadcast(0, residual);
+    Communicator.Broadcast(0, residual);
 //     for (int proc=0; proc<Communicator.NumProcs(); proc++) {
 //       Communicator.BarrierSync();
 //       if (proc == Communicator.MyProc())
