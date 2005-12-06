@@ -6,7 +6,6 @@
 void
 WriteDataClass::DoEvent()
 {
-  cerr<<"I am now calling write data"<<endl;
   list<MoveClass*>::iterator moveIter;
   for (moveIter=Moves.begin(); moveIter!=Moves.end(); moveIter++) 
     (*moveIter)->WriteRatio();
@@ -15,9 +14,6 @@ WriteDataClass::DoEvent()
   for (observeIter=Observables.begin(); observeIter!=Observables.end(); 
        observeIter++) 
     (*observeIter)->WriteBlock();
-    
-
-
 }
 
 
