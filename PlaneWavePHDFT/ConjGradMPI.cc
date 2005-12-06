@@ -207,7 +207,7 @@ void ConjGradMPI::Solve()
     residual = Iterate();
     for (int proc=0; proc<Communicator.NumProcs(); proc++) {
       Communicator.BarrierSync();
-      if (proc = Communicator.MyProc())
+      if (proc == Communicator.MyProc())
 	fprintf (stderr, "MyProc = %d  residual = %1.18e\n", 
 		 Communicator.MyProc(), residual);
     }
