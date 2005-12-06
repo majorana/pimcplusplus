@@ -205,12 +205,14 @@ void ConjGradMPI::Solve()
   while ((iter < 100) && (residual > 1.0e-8)) {
     //    perr << "Iteration #" << (iter+1) << endl;
     residual = Iterate();
-    for (int proc=0; proc<Communicator.NumProcs(); proc++) {
-      Communicator.BarrierSync();
-      if (proc == Communicator.MyProc())
-	fprintf (stderr, "MyProc = %d  residual = %1.18e\n", 
-		 Communicator.MyProc(), residual);
-    }
+    /// HACK HACK HACK -- this shouldn't be necessary
+    Comm.Broadcast(0, residual);
+//     for (int proc=0; proc<Communicator.NumProcs(); proc++) {
+//       Communicator.BarrierSync();
+//       if (proc == Communicator.MyProc())
+// 	fprintf (stderr, "MyProc = %d  residual = %1.18e\n", 
+// 		 Communicator.MyProc(), residual);
+//     }
     iter++;
   }
 
