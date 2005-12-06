@@ -21,9 +21,6 @@ private:
   list<MoveClass*>  &Moves;
   list<ObservableClass*> &Observables;
 
-  int TimesCalled;
-  int Freq;
-  int DumpFreq;
 public:
   void WriteInfo();
   void Accumulate();

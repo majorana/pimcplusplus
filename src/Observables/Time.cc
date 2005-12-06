@@ -50,10 +50,6 @@ void MCTimeClass::Read(IOSectionClass &in)
 {  
 
   ObservableClass::Read(in);
-  cerr<<"Hello I'm reading!"<<endl;
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
-  cerr<<"Dump freq is "<<DumpFreq<<endl;
   if (PathData.Path.Communicator.MyProc()==0){
     WriteInfo();
     IOSection.WriteVar("Type","Scalar");
