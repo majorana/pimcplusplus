@@ -317,7 +317,7 @@ Section (Algorithm) {
       // Section (Observe)  { string Name = "TimeAnalysis"; }
       // Section (Observe) { string Name = "PathDump"; }
     }
-    Section (WriteData)  {                               }
+//    Section (WriteData)  {                               }
   }
 }
 
