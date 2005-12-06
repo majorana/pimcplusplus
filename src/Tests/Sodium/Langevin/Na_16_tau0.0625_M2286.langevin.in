@@ -90,7 +90,7 @@ Section (Action)
     string IonSpecies  = "Na";
     string UpSpecies   = "eup";
     string DownSpecies = "edown";
-    string UseMDExtrap = true;
+    bool UseMDExtrap = true;
     double kCut = 1.5;
 //    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
 //     Array<double,2> TwistAngles(32,3) = [ 0.25, -0.75, -0.75,
@@ -142,7 +142,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Langevin/Na_16_tau0.0625_M2286.langevin.local";
+    "~/Runs/NaRuns/Langevin/Na_16_tau0.0625_M2286.langevin.turing";
   int FileStart = 0;
   Section (Observable) {
     string Type = "Energy";
@@ -224,12 +224,18 @@ Section (Observables)
     }
   }
 //   Section (Observable) {
+//     string Type   = "TimeAnalysis";
+//     string Name   = "TimeAnalysis";
+//     int Frequency = 10;
+//     int dumpFreq  = 10;
+//   }	
+  
+}	
+//   Section (Observable) {
 //     string Type = "PathDump";
 //     string Name = "PathDump";
 //     int dumpFreq = 2;
 //   }
-}
-
 
 Section (Moves) {
   Section (Move) {
@@ -289,24 +295,29 @@ Section (Algorithm) {
 
   Section (Loop) { //Start Accumulating observables
     int Steps=6000000;
-    Section (Loop){
-      int Steps=9;
+    Section (Loop) {
+      int Steps = 20;
       Section (Loop){
-        int Steps=2;
-        Section (Move) { string Name="eupBlock";     } 
-        Section (Move) { string Name="edownBlock";   } 
+	int Steps=9;
+	Section (Loop) {
+	  int Steps=2;
+	  Section (Move) { string Name="eupBlock";       } 
+	  Section (Move) { string Name="edownBlock";     } 
+	}
+	Section (Move)   { string Name = "Shift";        }
       }
-      Section (Move)   { string Name = "Shift";      }
+      Section (Move)     { string Name = "Langevin";     }
+      Section (Observe)  { string Name = "Na-eup";       }
+      Section (Observe)  { string Name = "Na-edown";     }
+      Section (Observe)  { string Name = "eup-eup";      }
+      Section (Observe)  { string Name = "edown-edown";  }
+      Section (Observe)  { string Name = "eup-edown";    }
+      Section (Observe)  { string Name = "Na-Na";        }
+      Section (Observe)  { string Name = "Energy";       }
+      // Section (Observe)  { string Name = "TimeAnalysis"; }
+      // Section (Observe) { string Name = "PathDump"; }
     }
-    Section (Move)     { string Name = "Langevin";   }
-    Section (Observe)  { string Name = "Na-eup";     }
-    Section (Observe)  { string Name = "Na-edown";   }
-    Section (Observe)  { string Name = "eup-eup";    }
-    Section (Observe)  { string Name = "edown-edown";}
-    Section (Observe)  { string Name = "eup-edown";  }
-    Section (Observe)  {  string Name = "Na-Na";     }
-    Section (Observe)  { string Name = "Energy";     }
-//    Section (Observe) { string Name = "PathDump"; }
+    Section (WriteData)  {                               }
   }
 }
 
