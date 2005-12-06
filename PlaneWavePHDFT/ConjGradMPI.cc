@@ -205,6 +205,9 @@ void ConjGradMPI::Solve()
   while ((iter < 100) && (residual > 1.0e-8)) {
     //    perr << "Iteration #" << (iter+1) << endl;
     residual = Iterate();
+    Communicator.PrintSync();
+    fprintf (stderr, "MyProc = %d  residual = %1.18e\n", 
+	     Communicator.MyProc(), residual);
     iter++;
   }
 
