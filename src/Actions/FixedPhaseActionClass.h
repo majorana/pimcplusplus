@@ -96,6 +96,9 @@ public:
   void Setk (Vec3 k);
   inline Vec3 Getk() { return FixedPhaseA.Getk(); }
   void WriteInfo (IOSectionClass &out);
+  /// Updates the bands if I'm  the ion species
+  void Update();
+
 
   FixedPhaseActionClass (PathDataClass &pathData, 
 			 FixedPhaseClass &FPA, FixedPhaseClass &FPB,

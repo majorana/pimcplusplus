@@ -62,9 +62,11 @@ LangevinMoveClass::LDStep()
       PathData.Path(slice,i+first) = 
 	R(i) + TimeStep*V(i) + 0.5*TimeStep*TimeStep*OldF(i);
     }
-
   /// Increment the time
   Time += TimeStep;
+  
+  /// Update the nodal actions
+  PathData.Actions.UpdateNodalActions();
 }
 
 void 

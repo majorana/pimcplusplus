@@ -8,6 +8,125 @@ FixedPhaseClass::FixedPhaseClass(PathDataClass &pathData) :
   
 }
 
+void
+FixedPhaseClass::Setk(Vec3 k)
+{
+  kVec = k;
+  System->Setk(k);
+  UpdateBands();
+}
+
+void FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
+{
+  if ((speciesNum == UpSpeciesNum) || (speciesNum==DownSpeciesNum)) {
+    Mirrored1DClass<double>& grad2 =
+      ((speciesNum==UpSpeciesNum) ? UpGrad2 : DownGrad2);
+    CommunicatorClass &comm = Path.Communicator;
+
+    int numProcs=comm.NumProcs();
+    int myProc=comm.MyProc();
+    int recvProc, sendProc;
+    int numSlices  = Path.NumTimeSlices();
+    assert(abs(slicesToShift)<numSlices);
+    sendProc=(myProc+1) % numProcs;
+    recvProc=((myProc-1) + numProcs) % numProcs;
+    if (slicesToShift<0)
+      swap (sendProc, recvProc);
+    
+    /// First shifts the data in the A copy left or right by the
+    /// appropriate amount 
+    if (slicesToShift>0)
+      for (int slice=numSlices-1; slice>=slicesToShift;slice--)
+	grad2[0](slice)=grad2[0](slice-slicesToShift);
+    else 
+      for (int slice=0; slice<numSlices+slicesToShift;slice++)
+	grad2[0](slice)=grad2[0](slice-slicesToShift);
+    
+    
+    /// Now bundle up the data to send to adjacent processor
+    int bufferSize=abs(slicesToShift);
+    Array<double,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
+    int startSlice;
+    int buffIndex=0;
+    if (slicesToShift>0) {
+      startSlice=numSlices-slicesToShift;
+      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
+	/// If shifting forward, don't send the last time slice (so always)
+	/// send slice-1
+	sendBuffer(buffIndex)=grad2[1](slice-1);
+	buffIndex++;
+      }
+    }
+    else {
+      startSlice=0;
+      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+	/// If shifting backward, don't send the first time slice (so always)
+	/// send slice+1
+	sendBuffer(buffIndex)=grad2[1](slice+1);
+	buffIndex++;
+      }
+    }
+    
+    /// Send and receive data to/from neighbors.
+    comm.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
+    
+    if (slicesToShift>0)
+      startSlice=0;
+    else 
+      startSlice=numSlices+slicesToShift;
+    
+    /// Copy the data into the A copy
+    buffIndex=0;
+    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+      grad2[0](slice)=receiveBuffer(buffIndex);
+      buffIndex++;
+    }
+    
+    // Now copy A into B, since A has all the good, shifted data now.
+    for (int slice=0; slice<numSlices; slice++)
+      grad2[1](slice) = grad2[0](slice);
+    // And we're done! 
+  } 
+}
+
+void 
+FixedPhaseClass::AcceptCopy (int slice1, int slice2)
+{
+  UpGrad2.AcceptCopy(slice1, slice2);
+  DownGrad2.AcceptCopy(slice1, slice2);
+}
+
+void 
+FixedPhaseClass::RejectCopy (int slice1, int slice2)
+{
+  UpGrad2.RejectCopy(slice1, slice2); 
+  DownGrad2.RejectCopy(slice1, slice2); 
+}
+
+
+
+
+
+void 
+FixedPhaseClass::Init(int speciesNum)
+{
+  SetMode(NEWMODE);
+
+  if (speciesNum == UpSpeciesNum) {
+    perr << "Initializing up species.\n";  
+    for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
+      CalcGrad2(slice, UpSpeciesNum);
+    AcceptCopy (0, Path.NumTimeSlices()-1);
+  }
+  else if (speciesNum == DownSpeciesNum) {
+    perr << "Initializing down species.\n";
+    for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
+      CalcGrad2(slice, DownSpeciesNum);
+    AcceptCopy (0, Path.NumTimeSlices()-1);
+  }
+}
+
+
 bool
 FixedPhaseClass::IonsHaveMoved()
 {
@@ -530,135 +649,18 @@ FixedPhaseActionClass::d_dBeta(int slice1, int slice2, int level)
     return FixedPhaseB.d_dBeta (slice1, slice2, level, SpeciesNum);
 }
 
-void FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
-{
-  if ((speciesNum == UpSpeciesNum) || (speciesNum==DownSpeciesNum)) {
-    Mirrored1DClass<double>& grad2 =
-      ((speciesNum==UpSpeciesNum) ? UpGrad2 : DownGrad2);
-    CommunicatorClass &comm = Path.Communicator;
-
-    int numProcs=comm.NumProcs();
-    int myProc=comm.MyProc();
-    int recvProc, sendProc;
-    int numSlices  = Path.NumTimeSlices();
-    assert(abs(slicesToShift)<numSlices);
-    sendProc=(myProc+1) % numProcs;
-    recvProc=((myProc-1) + numProcs) % numProcs;
-    if (slicesToShift<0)
-      swap (sendProc, recvProc);
-    
-    /// First shifts the data in the A copy left or right by the
-    /// appropriate amount 
-    if (slicesToShift>0)
-      for (int slice=numSlices-1; slice>=slicesToShift;slice--)
-	grad2[0](slice)=grad2[0](slice-slicesToShift);
-    else 
-      for (int slice=0; slice<numSlices+slicesToShift;slice++)
-	grad2[0](slice)=grad2[0](slice-slicesToShift);
-    
-    
-    /// Now bundle up the data to send to adjacent processor
-    int bufferSize=abs(slicesToShift);
-    Array<double,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
-    int startSlice;
-    int buffIndex=0;
-    if (slicesToShift>0) {
-      startSlice=numSlices-slicesToShift;
-      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
-	/// If shifting forward, don't send the last time slice (so always)
-	/// send slice-1
-	sendBuffer(buffIndex)=grad2[1](slice-1);
-	buffIndex++;
-      }
-    }
-    else {
-      startSlice=0;
-      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
-	/// If shifting backward, don't send the first time slice (so always)
-	/// send slice+1
-	sendBuffer(buffIndex)=grad2[1](slice+1);
-	buffIndex++;
-      }
-    }
-    
-    /// Send and receive data to/from neighbors.
-    comm.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
-    
-    if (slicesToShift>0)
-      startSlice=0;
-    else 
-      startSlice=numSlices+slicesToShift;
-    
-    /// Copy the data into the A copy
-    buffIndex=0;
-    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
-      grad2[0](slice)=receiveBuffer(buffIndex);
-      buffIndex++;
-    }
-    
-    // Now copy A into B, since A has all the good, shifted data now.
-    for (int slice=0; slice<numSlices; slice++)
-      grad2[1](slice) = grad2[0](slice);
-    // And we're done! 
-  } 
-}
-
-void 
-FixedPhaseClass::AcceptCopy (int slice1, int slice2)
-{
-  UpGrad2.AcceptCopy(slice1, slice2);
-  DownGrad2.AcceptCopy(slice1, slice2);
-}
-
-void 
-FixedPhaseClass::RejectCopy (int slice1, int slice2)
-{
-  UpGrad2.RejectCopy(slice1, slice2); 
-  DownGrad2.RejectCopy(slice1, slice2); 
-}
 
 void
-FixedPhaseActionClass::ShiftData (int slices2Shift)
+FixedPhaseActionClass::Update()
 {
-  FixedPhaseA.ShiftData (slices2Shift, SpeciesNum);
-  FixedPhaseB.ShiftData (slices2Shift, SpeciesNum);
+  if (PathData.Path.GetConfig() == 0) {
+    if (FixedPhaseA.IonsHaveMoved())
+      FixedPhaseA.UpdateBands();
+  }  
+  else if (FixedPhaseB.IonsHaveMoved())
+    FixedPhaseB.UpdateBands();
 }
 
-void
-FixedPhaseActionClass::AcceptCopy (int slice1, int slice2)
-{
-  FixedPhaseA.AcceptCopy (slice1, slice2);
-  FixedPhaseB.AcceptCopy (slice1, slice2);
-}
-
-void
-FixedPhaseActionClass::RejectCopy (int slice1, int slice2)
-{
-  FixedPhaseA.RejectCopy (slice1, slice2);
-  FixedPhaseB.RejectCopy (slice1, slice2);
-}
-
-
-
-
-void 
-FixedPhaseClass::Init(int speciesNum)
-{
-  SetMode(NEWMODE);
-
-  if (speciesNum == UpSpeciesNum) {
-    perr << "Initializing up species.\n";  
-    for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
-      CalcGrad2(slice, UpSpeciesNum);
-    AcceptCopy (0, Path.NumTimeSlices()-1);
-  }
-  else if (speciesNum == DownSpeciesNum) {
-    perr << "Initializing down species.\n";
-    for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
-      CalcGrad2(slice, DownSpeciesNum);
-    AcceptCopy (0, Path.NumTimeSlices()-1);
-  }
-}
 
 void 
 FixedPhaseActionClass::Init()
@@ -753,12 +755,28 @@ FixedPhaseActionClass::CalcGrad2 (int slice)
 }
 
 
+
 void
-FixedPhaseClass::Setk(Vec3 k)
+FixedPhaseActionClass::ShiftData (int slices2Shift)
 {
-  kVec = k;
-  System->Setk(k);
-  UpdateBands();
+  FixedPhaseA.ShiftData (slices2Shift, SpeciesNum);
+  FixedPhaseB.ShiftData (slices2Shift, SpeciesNum);
 }
+
+void
+FixedPhaseActionClass::AcceptCopy (int slice1, int slice2)
+{
+  FixedPhaseA.AcceptCopy (slice1, slice2);
+  FixedPhaseB.AcceptCopy (slice1, slice2);
+}
+
+void
+FixedPhaseActionClass::RejectCopy (int slice1, int slice2)
+{
+  FixedPhaseA.RejectCopy (slice1, slice2);
+  FixedPhaseB.RejectCopy (slice1, slice2);
+}
+
+
 
 

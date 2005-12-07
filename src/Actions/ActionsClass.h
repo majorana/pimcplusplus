@@ -9,6 +9,7 @@
 #include "LongRangePotClass.h"
 #include "KineticClass.h"
 #include "NodalActionClass.h"
+#include "FreeNodalActionClass.h"
 #include "GroundStateNodalActionClass.h"
 #include "FixedPhaseActionClass.h"
 #include "DavidLongRangeClass.h"
@@ -132,6 +133,8 @@ public:
   /// This function writes any pertinent information related to the
   /// actions to the output file.
   void WriteInfo (IOSectionClass &out);
+
+  void UpdateNodalActions();
 
   ActionsClass(PathDataClass &pathData) : 
     ShortRange(pathData,PairMatrix),

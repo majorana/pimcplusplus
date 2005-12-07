@@ -495,3 +495,11 @@ ActionsClass::GetForcesFD(const Array<int,1> &ptcls, Array<dVec,1> &F)
   double beta = Path.TotalNumSlices * Path.tau;
   F -= (1.0/beta)*Ftmp;
 }
+
+
+void
+ActionsClass::UpdateNodalActions()
+{
+  for (int i=0; i<NodalActions.size(); i++)
+    NodalActions(i)->Update();
+}
