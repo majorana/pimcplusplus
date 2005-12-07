@@ -62,6 +62,30 @@ bool TestAllGatherVec()
 }
 
 
+#include <time.h>
+#include <../Random/Random.h>
+void 
+TestSumSpeed()
+{
+  CommunicatorClass Comm;
+  Comm.SetWorld();
+  RandomClass random(Comm);
+  random.Init();
+
+  clock_t start, end;
+  start = clock();
+  for (int i=0; i<1000000; i++) {
+    double x = random.Local();
+    double y = Comm.AllSum(x);
+  }
+  end = clock();
+  if (Comm.MyProc() == 0) {
+    double t = (double)(end-start)/(double)CLOCKS_PER_SEC;
+    cerr << "Sums per second = " << (1.0e6/t) << endl;
+  }
+}
+
+
 main(int argc, char *argv[])
 {
   COMM::Init(argc, argv);
@@ -77,4 +101,5 @@ main(int argc, char *argv[])
   if (comm.MyProc()==0)
     cerr << "AllGatherVec() check:   " 
 	 << (passed ? "passed." : "failed.") << endl;
+  TestSumSpeed();
 }

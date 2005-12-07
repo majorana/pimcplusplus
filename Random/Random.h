@@ -2,7 +2,7 @@
 #define RANDOM_CLASS
 #include <sprng.h>
 #include "../MPI/Communication.h"
-
+#include <math.h>
 
 class RandomClass
 {
@@ -169,7 +169,12 @@ inline double RandomClass::LocalGaussian2(double sigma)
     double v2 = Local();
     double mag = sqrt(-2.0*log(v1));
     double s, c;
+#ifdef HAVE_SINCOS
     sincos(2.0*M_PI*v2, &s, &c);
+#else
+    s = sin(2.0*M_PI*v2);
+    c = cos(2.0*M_PI*v2);
+#endif
     X1 = mag * c;
     X2 = mag * s;
     OneLeft = 1;

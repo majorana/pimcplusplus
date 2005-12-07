@@ -482,7 +482,7 @@ CommunicatorClass::PrintSync()
 {
   MPI_Barrier (MPIComm);
   int myProc = MyProc();
-  unsigned long usecs = 30000*myProc;
+  unsigned long usecs = 300000*myProc;
   usleep (usecs);
 }
 
