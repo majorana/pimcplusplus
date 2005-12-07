@@ -203,7 +203,7 @@ void ConjGradMPI::Solve()
   int iter = 0;
   double residual = 1.0;
   while ((iter < 100) && (residual > 1.0e-8)) {
-    //    perr << "Iteration #" << (iter+1) << endl;
+    perr << "Iteration #" << (iter+1) << endl;
     residual = Iterate();
     /// HACK HACK HACK -- this shouldn't be necessary
     Communicator.Broadcast(0, residual);
