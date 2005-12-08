@@ -24,7 +24,12 @@ LangevinMoveClass::LDStep()
     for (int j=0; j<NDIM; j++)
       WriteArray(i,j) = V(i)[j];
   Vvar.Write(WriteArray);
-  Vvar.Flush();
+
+  for (int i=0; i<OldF.size(); i++) 
+    for (int j=0; j<NDIM; j++)
+      WriteArray(i,j) = OldF(i)[j];
+  Fvar.Write(WriteArray);
+  Fvar.Flush();
 
   // OldF holds the force computed at x(t).
   for (int i=0; i<R.size(); i++)

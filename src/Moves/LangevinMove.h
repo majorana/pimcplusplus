@@ -31,7 +31,7 @@ protected:
   void InitVelocities();
   void AccumForces();
   void LDStep();
-  ObservableVecDouble2 Rvar, Vvar;
+  ObservableVecDouble2 Rvar, Vvar, Fvar;
   Array<double,2> WriteArray;
   ObservableDouble TimeVar;
 public:
@@ -41,6 +41,7 @@ public:
     MoveClass (pathData, outSection), MCSteps(0), LDSteps(0),
     Rvar("R", IOSection, pathData.Path.Communicator),
     Vvar("V", IOSection, pathData.Path.Communicator),
+    Fvar("F", IOSection, pathData.Path.Communicator),
     TimeVar("Time", IOSection, pathData.Path.Communicator),
     Time(0.0)
   {
