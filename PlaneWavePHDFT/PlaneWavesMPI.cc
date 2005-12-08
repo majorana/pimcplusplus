@@ -53,7 +53,6 @@ MPISystemClass::DiagonalizeH ()
   }
   else
     CG.InitBands();
-  perr << "After InitBands.\n";
   CG.Solve();
   if (Communicator.MyProc()==0)
     for (int i=0; i<Bands.rows(); i++) 

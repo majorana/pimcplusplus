@@ -177,7 +177,6 @@ ConjGradMPI::Iterate()
     CurrentBand = band;
     c.reference     (Bands(band, Range::all()));
     Residuals(band) = CalcPhiCG();
-    perr << "After CalcPhiCG().\n";
 
     // Now, pick optimal theta for 
     double dE_dtheta = 2.0*realconjdot(Phip, Hc);
@@ -189,10 +188,7 @@ ConjGradMPI::Iterate()
     sincos(thetaMin, &sinthetaMin, &costhetaMin);
     c = costhetaMin*c + sinthetaMin*Phip;
   }
-  perr << "Before CollectBands().\n";
   CollectBands();
-  perr << "After CollectBands.\n";
-  //  perr << "Residuals = " << Residuals << endl;
   GramSchmidt(Bands);
   CheckOverlaps();
   return max(Residuals);
@@ -206,18 +202,7 @@ void ConjGradMPI::Solve()
   int iter = 0;
   double residual = 1.0;
   while ((iter < 100) && (residual > 1.0e-8)) {
-    perr << "Iteration #" << (iter+1) << endl;
     residual = Iterate();
-    perr << "After Iterate.\n";
-    /// HACK HACK HACK -- this shouldn't be necessary
-    Communicator.Broadcast(0, residual);
-    perr << "After Broadcast.\n";
-//     for (int proc=0; proc<Communicator.NumProcs(); proc++) {
-//       Communicator.BarrierSync();
-//       if (proc == Communicator.MyProc())
-// 	fprintf (stderr, "MyProc = %d  residual = %1.18e\n", 
-// 		 Communicator.MyProc(), residual);
-//     }
     iter++;
   }
 
@@ -266,13 +251,7 @@ ConjGradMPI::CheckOverlaps()
 void
 ConjGradMPI::CollectBands()
 {
-  cerr << "MyProc = " << Communicator.MyProc() 
-       << " and I am starting CollectBands.()";
   Communicator.AllGatherRows(Bands);
-  cerr << "MyProc = " << Communicator.MyProc() 
-       << " and I am doing Residuals.()";
   Communicator.AllGatherVec(Residuals);
-  cerr << "MyProc = " << Communicator.MyProc() 
-       << " and I am doing Energies.()";
   Communicator.AllGatherVec(Energies);
 }
