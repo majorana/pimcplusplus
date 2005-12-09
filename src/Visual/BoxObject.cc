@@ -5,16 +5,37 @@
 #include <GL/glut.h>
 
 void 
-BoxObject::Set(Vec3 box)
+BoxObject::Set(Vec3 box, bool useClip)
 {
-  Set (box[0], box[1], box[2]);
+  Set (box[0], box[1], box[2], useClip);
 }
 
 void 
-BoxObject::Set (double lx, double ly, double lz)
+BoxObject::Set (double lx, double ly, double lz, bool useClip)
 {
+
   Lx=lx; Ly=ly; Lz=lz;
   Start();
+  if (useClip) {
+    GLdouble eqn0[4] = {  1.0,  0.0,  0.0,  0.5001*lx };
+    GLdouble eqn1[4] = { -1.0,  0.0,  0.0,  0.5001*lx };
+    GLdouble eqn2[4] = {  0.0,  1.0,  0.0,  0.5001*ly };
+    GLdouble eqn3[4] = {  0.0, -1.0,  0.0,  0.5001*ly };
+    GLdouble eqn4[4] = {  0.0,  0.0,  1.0,  0.5001*lz };
+    GLdouble eqn5[4] = {  0.0,  0.0, -1.0,  0.5001*lz };
+    glClipPlane(GL_CLIP_PLANE0, eqn0);
+    glClipPlane(GL_CLIP_PLANE1, eqn1);
+    glClipPlane(GL_CLIP_PLANE2, eqn2);
+    glClipPlane(GL_CLIP_PLANE3, eqn3);
+    glClipPlane(GL_CLIP_PLANE4, eqn4);
+    glClipPlane(GL_CLIP_PLANE5, eqn5);
+    glEnable(GL_CLIP_PLANE0);
+    glEnable(GL_CLIP_PLANE1);
+    glEnable(GL_CLIP_PLANE2);
+    glEnable(GL_CLIP_PLANE3);
+    glEnable(GL_CLIP_PLANE4);
+    glEnable(GL_CLIP_PLANE5);
+  }
   glPushMatrix();
   glLineWidth (2.0);
   float fcolor[4];

@@ -244,14 +244,47 @@ MDVisualClass::DrawFrame()
   PathVis.Objects.resize(0);
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
-  boxObject->Set (Box[0], Box[1], Box[2]);
+  boxObject->Set (Box, true);
+  
+  const double radius = 3.5;
+
+  list<Vec3> sphereList;
+  for (int ptcl=0; ptcl < Trajectory.extent(1); ptcl++) 
+    sphereList.push_back(Vec3(Trajectory(CurrentFrame,ptcl,0),
+			      Trajectory(CurrentFrame,ptcl,1),
+			      Trajectory(CurrentFrame,ptcl,2)));
+  
+  list<Vec3>::iterator iter;
+  for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+    Vec3 &r = (*iter);
+    if ((r[0]+radius) > 0.5*Box[0])
+      sphereList.push_front(Vec3(r[0]-Box[0], r[1], r[2]));
+    if ((r[0]-radius) < -0.5*Box[0])
+      sphereList.push_front(Vec3(r[0]+Box[0], r[1], r[2]));
+  }
+
+  for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+    Vec3 &r = (*iter);
+    if ((r[1]+radius) > 0.5*Box[1])
+      sphereList.push_front(Vec3(r[0], r[1]-Box[1], r[2]));
+    if ((r[1]-radius) < -0.5*Box[1])
+      sphereList.push_front(Vec3(r[0], r[1]+Box[1], r[2]));
+  }
+
+  for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+    Vec3 &r = (*iter);
+    if ((r[2]+radius) > 0.5*Box[2])
+      sphereList.push_front(Vec3(r[0], r[1], r[2]-Box[2]));
+    if ((r[2]-radius) < -0.5*Box[2])
+      sphereList.push_front(Vec3(r[0], r[1], r[2]+Box[2]));
+  }
+
+
   PathVis.Objects.push_back(boxObject);
-  for (int ptcl=0; ptcl<Trajectory.extent(1); ptcl++) {
+  for (iter=sphereList.begin(); iter!=sphereList.end(); iter++) {
     SphereObject *sphere = new SphereObject;
-    sphere->SetPos(Vec3(Trajectory(CurrentFrame,ptcl,0),
-			Trajectory(CurrentFrame,ptcl,1),
-			Trajectory(CurrentFrame,ptcl,2)));
-    sphere->SetRadius(4.0);
+    sphere->SetPos(*iter);
+    sphere->SetRadius(radius);
     PathVis.Objects.push_back(sphere);
   }
   PathVis.Invalidate();

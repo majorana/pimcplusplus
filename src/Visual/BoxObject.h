@@ -13,8 +13,8 @@ class BoxObject : public GLObject
 		double x2, double y2, double z2, double radius,
 		string rotString);
 public:
-  void Set (Vec3 box);
-  void Set (double lx, double ly, double lz);
+  void Set (Vec3 box, bool useClip=false);
+  void Set (double lx, double ly, double lz, bool useClip = false);
   void SetColor (double red, double blue, double green);
   void DrawPOV (FILE *fout, string rotString);
   BoxObject()
