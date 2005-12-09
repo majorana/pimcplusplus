@@ -251,7 +251,7 @@ MDVisualClass::DrawFrame()
     sphere->SetPos(Vec3(Trajectory(CurrentFrame,ptcl,0),
 			Trajectory(CurrentFrame,ptcl,1),
 			Trajectory(CurrentFrame,ptcl,2)));
-    sphere->SetRadius(0.5);
+    sphere->SetRadius(4.0);
     PathVis.Objects.push_back(sphere);
   }
   PathVis.Invalidate();
