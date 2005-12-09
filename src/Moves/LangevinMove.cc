@@ -39,7 +39,7 @@ LangevinMoveClass::LDStep()
   // Sum Fsum over all the processors (all clones included)
   PathData.WorldComm.AllSum(Fsum, Ftmp);
   int numClones = PathData.GetNumClones();
-  double norm = 1.0/(double)(numClones*NumEquilSteps);
+  double norm = 1.0/(double)(numClones*NumAccumSteps);
   for (int i=0; i<Fsum.size(); i++)
     Fsum(i) = norm*Ftmp(i);
   // Now Fsum holds the force at x(t+dt)
