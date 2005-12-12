@@ -34,6 +34,8 @@ mdvis___SOURCES =       \
     BoxClass.h          \
     BoxObject.cc        \
     BoxObject.h         \
+    MDExport.cc         \
+    MDExport.h          \
     GLObject.cc         \
     GLObject.h          \
     MDVis.cc            \
@@ -49,4 +51,4 @@ mdvis___SOURCES =       \
 
 dist_pkgdata_DATA = tubes.png lines.png straight.png smooth.png nowrap2.png \
                     wrap.png orthographic.png perspective.png player_play.png \
-                    player_pause.png player_rev.png
+                    player_pause.png player_rev.png clipping.png

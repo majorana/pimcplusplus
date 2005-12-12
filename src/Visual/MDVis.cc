@@ -6,7 +6,8 @@ MDVisualClass::MDVisualClass() :
   FrameAdjust(0.0, 0.0, 0.0),
   CurrentFrame(0),
   PlayDirection(1),
-  TimeoutDelay(20)
+  TimeoutDelay(10),
+  MDExport(*this)
 {
   FrameScale.set_adjustment(FrameAdjust);
   FrameScale.signal_value_changed().connect
@@ -29,12 +30,16 @@ MDVisualClass::MDVisualClass() :
   PerspectButton.set_icon_widget(PerspectImage);
   PerspectButton.set_label("Perspect");
 
+  ClipImage.property_file().set_value(FindFullPath("clipping.png"));
+  ClipButton.set_icon_widget(ClipImage);
+  ClipButton.set_label("Clip");
+
   set_reallocate_redraws(true);
   PathVis.set_size_request(800, 800);
   ////////////////////
   // Setup tool bar //
   ////////////////////
-  Gtk::RadioButtonGroup group =PauseButton.get_group();
+  Gtk::RadioButtonGroup group = PauseButton.get_group();
   RevButton.set_group(group);
   group = RevButton.get_group();
   PlayButton.set_group(group);
@@ -48,6 +53,7 @@ MDVisualClass::MDVisualClass() :
   Tools.append(ToolSep1);
   Tools.append(OrthoButton);
   Tools.append(PerspectButton);
+  Tools.append(ClipButton);
   
   /////////////////
   // Setup menus //
@@ -98,6 +104,8 @@ MDVisualClass::MDVisualClass() :
     (sigc::mem_fun(*this, &MDVisualClass::OnPlayToggle));
   OrthoButton.signal_toggled().connect
     (sigc::mem_fun(*this, &MDVisualClass::OnPerspectiveToggle));
+  ClipButton.signal_toggled().connect
+    (sigc::mem_fun(*this, &MDVisualClass::OnClipToggle));
   QuitButton.signal_clicked().connect
     (sigc::mem_fun(*this, &MDVisualClass::Quit));
 
@@ -138,7 +146,8 @@ MDVisualClass::Quit()
 void
 MDVisualClass::OnExport()
 {
-
+  MDExport.SetupWidgets();
+  MDExport.show_all();
 }
 
 
@@ -185,11 +194,18 @@ MDVisualClass::OnPlayToggle()
 
 }
 
+void
+MDVisualClass::OnClipToggle()
+{
+  Glib::signal_idle().connect
+    (sigc::bind<bool>(mem_fun(*this, &MDVisualClass::DrawFrame), false));
+}
+
 bool
 MDVisualClass::OnTimeout()
 {
   Glib::signal_idle().connect
-    (sigc::mem_fun(*this, &MDVisualClass::DrawFrame));
+    (sigc::bind<bool>(mem_fun(*this, &MDVisualClass::DrawFrame), false));
   //  DrawFrame();
   // PathVis.Invalidate();
   if (PlayDirection == 1) {
@@ -237,52 +253,54 @@ MDVisualClass::OnFrameChange()
 }
 
 bool
-MDVisualClass::DrawFrame()
+MDVisualClass::DrawFrame(bool offScreen)
 {
+  bool clipping = ClipButton.get_active();
   for (int i=0; i<PathVis.Objects.size(); i++)
     delete PathVis.Objects[i];
   PathVis.Objects.resize(0);
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
-  boxObject->Set (Box, true);
+  boxObject->Set (Box, clipping);
   
   const double radius = 3.5;
 
+  list<Vec3>::iterator iter;
   list<Vec3> sphereList;
   for (int ptcl=0; ptcl < Trajectory.extent(1); ptcl++) 
     sphereList.push_back(Vec3(Trajectory(CurrentFrame,ptcl,0),
 			      Trajectory(CurrentFrame,ptcl,1),
 			      Trajectory(CurrentFrame,ptcl,2)));
-  
-  list<Vec3>::iterator iter;
-  for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-    Vec3 &r = (*iter);
-    if ((r[0]+radius) > 0.5*Box[0])
-      sphereList.push_front(Vec3(r[0]-Box[0], r[1], r[2]));
-    if ((r[0]-radius) < -0.5*Box[0])
-      sphereList.push_front(Vec3(r[0]+Box[0], r[1], r[2]));
-  }
-
-  for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-    Vec3 &r = (*iter);
-    if ((r[1]+radius) > 0.5*Box[1])
-      sphereList.push_front(Vec3(r[0], r[1]-Box[1], r[2]));
-    if ((r[1]-radius) < -0.5*Box[1])
-      sphereList.push_front(Vec3(r[0], r[1]+Box[1], r[2]));
-  }
-
-  for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+  if (clipping) {
+    for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+      Vec3 &r = (*iter);
+      if ((r[0]+radius) > 0.5*Box[0])
+	sphereList.push_front(Vec3(r[0]-Box[0], r[1], r[2]));
+      if ((r[0]-radius) < -0.5*Box[0])
+	sphereList.push_front(Vec3(r[0]+Box[0], r[1], r[2]));
+    }
+    
+    for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+      Vec3 &r = (*iter);
+      if ((r[1]+radius) > 0.5*Box[1])
+	sphereList.push_front(Vec3(r[0], r[1]-Box[1], r[2]));
+      if ((r[1]-radius) < -0.5*Box[1])
+	sphereList.push_front(Vec3(r[0], r[1]+Box[1], r[2]));
+    }
+    
+    for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
     Vec3 &r = (*iter);
     if ((r[2]+radius) > 0.5*Box[2])
       sphereList.push_front(Vec3(r[0], r[1], r[2]-Box[2]));
     if ((r[2]-radius) < -0.5*Box[2])
       sphereList.push_front(Vec3(r[0], r[1], r[2]+Box[2]));
+    }
   }
 
 
   PathVis.Objects.push_back(boxObject);
   for (iter=sphereList.begin(); iter!=sphereList.end(); iter++) {
-    SphereObject *sphere = new SphereObject;
+    SphereObject *sphere = new SphereObject (offScreen);
     sphere->SetPos(*iter);
     sphere->SetRadius(radius);
     PathVis.Objects.push_back(sphere);

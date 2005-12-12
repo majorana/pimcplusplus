@@ -36,6 +36,14 @@ BoxObject::Set (double lx, double ly, double lz, bool useClip)
     glEnable(GL_CLIP_PLANE4);
     glEnable(GL_CLIP_PLANE5);
   }
+  else {
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_CLIP_PLANE1);
+    glDisable(GL_CLIP_PLANE2);
+    glDisable(GL_CLIP_PLANE3);
+    glDisable(GL_CLIP_PLANE4);
+    glDisable(GL_CLIP_PLANE5);
+  }
   glPushMatrix();
   glLineWidth (2.0);
   float fcolor[4];

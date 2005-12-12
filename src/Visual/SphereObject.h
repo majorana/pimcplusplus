@@ -9,15 +9,15 @@ class SphereObject : public GLObject
 protected:
   Vec3 Color, Pos;
   double Radius;
-  static int SphereListNum;
-  static bool SphereListCreated;
+  static int SphereListNum, OffScreenListNum;
+  static bool SphereListCreated, OffScreenListCreated;
   void Set();
 public:
   void SetPos (Vec3 pos);
   void SetRadius (double radius);
   void SetColor (Vec3 color);
   void DrawPOV (FILE *fout, string rotString);
-  SphereObject();
+  SphereObject(bool offScreen=false);
 };
 
 

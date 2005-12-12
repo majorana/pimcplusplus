@@ -3,14 +3,29 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 
-int SphereObject::SphereListNum(0);
+int  SphereObject::SphereListNum(0);
 bool SphereObject::SphereListCreated(false);
+int  SphereObject::OffScreenListNum(0);
+bool SphereObject::OffScreenListCreated(false);
 
-
-SphereObject::SphereObject() : 
+SphereObject::SphereObject(bool offScreen) : 
   Radius(1.0), Color(1.0, 0.0, 0.0), Pos(0.0, 0.0, 0.0)
 {
-  if (!SphereListCreated) {
+  if (offScreen) {
+    if (!OffScreenListCreated) {
+      glEnable(GL_NORMALIZE);
+      GLUquadricObj* qobj = gluNewQuadric();
+      gluQuadricDrawStyle(qobj, GLU_FILL);
+      OffScreenListNum = glGenLists(1);
+      
+      glNewList (SphereListNum, GL_COMPILE);
+      gluSphere(qobj, 1.0, 30, 30);
+      gluDeleteQuadric(qobj);
+      glEndList();
+      OffScreenListCreated = true;
+    }
+  }
+  else if (!SphereListCreated) {
     glEnable(GL_NORMALIZE);
     GLUquadricObj* qobj = gluNewQuadric();
     gluQuadricDrawStyle(qobj, GLU_FILL);

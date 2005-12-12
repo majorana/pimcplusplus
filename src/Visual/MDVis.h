@@ -3,7 +3,7 @@
 
 #include "PathVis.h"
 #include "BoxClass.h"
-#include "Export.h"
+#include "MDExport.h"
 #include <Common/IO/IO.h>
 #include <gtkmm/adjustment.h>
 
@@ -13,7 +13,7 @@ using namespace IO;
 class MDVisualClass : public Gtk::Window
 {
 protected:
-  friend class ExportClass;
+  friend class MDExportClass;
   //////////
   // Data //
   //////////
@@ -37,9 +37,12 @@ protected:
   Gtk::SeparatorToolItem ToolSep1;
   Gtk::RadioToolButton OrthoButton, PerspectButton;
   Gtk::Image OrthoImage, PerspectImage;
+  Gtk::ToggleToolButton ClipButton;
+  Gtk::Image ClipImage;
 
   Glib::RefPtr<Gtk::ActionGroup> Actions;
   Glib::RefPtr<Gtk::UIManager> Manager;
+  MDExportClass MDExport;
 
   //////////////////////
   // Callback methods //
@@ -49,6 +52,7 @@ protected:
   void OnFrameChange();
   void OnPerspectiveToggle();
   void OnPlayToggle();
+  void OnClipToggle();
   void OnViewReset();
   void OnOpen();
   sigc::connection TimeoutConnection;
@@ -59,7 +63,7 @@ protected:
   // Other methods //
   ///////////////////
   string FindFullPath(string filename);
-  bool   DrawFrame();
+  bool   DrawFrame(bool offScreen=false);
 public:
   PathVisClass PathVis;
 
