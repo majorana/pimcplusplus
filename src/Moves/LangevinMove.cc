@@ -3,7 +3,7 @@
 void
 LangevinMoveClass::AccumForces()
 {
-  PathData.Actions.GetForces(Particles, Fsum);
+  PathData.Actions.GetForces(Particles, FShortSum, FLongSum);
 }
 
 
@@ -25,47 +25,59 @@ LangevinMoveClass::LDStep()
       WriteArray(i,j) = V(i)[j];
   Vvar.Write(WriteArray);
 
-  for (int i=0; i<OldF.size(); i++) 
+  for (int i=0; i<OldFShort.size(); i++) 
     for (int j=0; j<NDIM; j++)
-      WriteArray(i,j) = OldF(i)[j];
-  Fvar.Write(WriteArray);
-  Fvar.Flush();
+      WriteArray(i,j) = OldFShort(i)[j];
+  FShortVar.Write(WriteArray);
+
+  for (int i=0; i<OldFShort.size(); i++) 
+    for (int j=0; j<NDIM; j++)
+      WriteArray(i,j) = OldFLong(i)[j];
+  FLongVar.Write(WriteArray);
+  FLongVar.Flush();
 
   // OldF holds the force computed at x(t).
   for (int i=0; i<R.size(); i++)
     R(i) += TimeStep * V(i) + 0.5*TimeStep*TimeStep*MassInv*OldF(i);
 
   // Now, compute F(t+dt)
-  // Sum Fsum over all the processors (all clones included)
-  PathData.WorldComm.AllSum(Fsum, Ftmp);
+  // Sum forces over all the processors (all clones included)
+  PathData.WorldComm.AllSum(FShortSum, FShortTmp);
+  PathData.WorldComm.AllSum(FLongSum,  FLongTmp);
   int numClones = PathData.GetNumClones();
   double norm = 1.0/(double)(numClones*NumAccumSteps);
-  for (int i=0; i<Fsum.size(); i++)
-    Fsum(i) = norm*Ftmp(i);
-  // Now Fsum holds the force at x(t+dt)
+  for (int i=0; i<FShortSum.size(); i++) {
+    FShort(i) = norm*FShortTmp(i);
+    FLong(i) = norm*FLongTmp(i);
+  }
+  // Now FShortSum and FLongSum hold the forces at x(t+dt)
   
   // Compute V(t+dt)
   for (int i=0; i<V.size(); i++)
-    V(i) += 0.5*MassInv*TimeStep*(Fsum(i) + OldF(i));
+    V(i) += 0.5*MassInv*TimeStep*
+      (FShortSum(i) + FLongSum(i) + OldFShort(i) + OldFLong(i));
 
   // Copy new force into old
-  OldF = Fsum;
+  OldFShort = FShortSum; 
+  OldFLong = FLongSum;
 
-  // And reset Fsum
+  // And reset FShortSum and FLongSum
   dVec zero(0.0);
-  for (int i=0; i<Fsum.size(); i++)
-    Fsum(i) = zero;
+  for (int i=0; i<FShortSum.size(); i++) {
+    FShortSum(i) = zero;
+    FShortLong(i) = zero;
+  }
   // Put x(t+2dt) into the Path so we can start accumulating forces
   // for the next step
   int first = PathData.Path.Species(LDSpecies).FirstPtcl;
   for (int slice=0; slice<PathData.Path.NumTimeSlices(); slice++)
     for (int i=0; i<R.size(); i++) {
       SetMode (NEWMODE);
-      PathData.Path(slice,i+first) = 
-	R(i) + TimeStep*V(i) + 0.5*TimeStep*TimeStep*OldF(i);
+      PathData.Path(slice,i+first) = R(i) + TimeStep*V(i) + 
+	0.5*TimeStep*TimeStep* (OldFShort(i) + OldFLong(i));
       SetMode (OLDMODE);
-      PathData.Path(slice,i+first) = 
-	R(i) + TimeStep*V(i) + 0.5*TimeStep*TimeStep*OldF(i);
+      PathData.Path(slice,i+first) = R(i) + TimeStep*V(i) + 
+	0.5*TimeStep*TimeStep*(OldFShort(i)+OldFLong(i));
     }
   /// Increment the time
   Time += TimeStep;
@@ -106,9 +118,12 @@ LangevinMoveClass::Read(IOSectionClass &in)
   int numPtcls = species.NumParticles;
   V.resize(numPtcls);
   R.resize(numPtcls);
-  Fsum.resize(numPtcls);
-  Ftmp.resize(numPtcls);
-  OldF.resize(numPtcls);
+  FShortSum.resize(numPtcls);
+  FLongSum.resize(numPtcls);
+  FShortTmp.resize(numPtcls);
+  FLongTmp.resize(numPtcls);
+  OldFShort.resize(numPtcls);
+  OldFLong.resize(numPtcls);
   Particles.resize(numPtcls);
   WriteArray.resize(numPtcls,NDIM);
 
@@ -116,8 +131,10 @@ LangevinMoveClass::Read(IOSectionClass &in)
   for (int i=0; i<numPtcls; i++) {
     Particles(i) = i + species.FirstPtcl;
     R(i) = PathData.Path(0,Particles(i));
-    Fsum(i) = zero;
-    OldF(i) = zero;
+    FShortSum(i) = zero;
+    FLongSum(i)  = zero;
+    OldFShort(i) = zero;
+    OldFLong(i)  = zero;
   }
   MassInv = 1.0/Mass;
 

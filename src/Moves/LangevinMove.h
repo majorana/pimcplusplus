@@ -6,7 +6,8 @@
 class LangevinMoveClass : public MoveClass
 {
 protected:
-  Array<dVec,1> V, R, OldF, Fsum, Ftmp;
+  Array<dVec,1> V, R, OldFShort, OldFLong, 
+    FShortSum, FLongSum, FShortTmp, FtmpLongTmp;
   /// The species we are doing Langevin dynamics on
   int LDSpecies;
   /// This holds the list of particles with which we're doing dynamics
@@ -31,7 +32,7 @@ protected:
   void InitVelocities();
   void AccumForces();
   void LDStep();
-  ObservableVecDouble2 Rvar, Vvar, Fvar;
+  ObservableVecDouble2 Rvar, Vvar, FShortVar, FLongVar;
   Array<double,2> WriteArray;
   ObservableDouble TimeVar;
 public:
@@ -41,7 +42,8 @@ public:
     MoveClass (pathData, outSection), MCSteps(0), LDSteps(0),
     Rvar("R", IOSection, pathData.Path.Communicator),
     Vvar("V", IOSection, pathData.Path.Communicator),
-    Fvar("F", IOSection, pathData.Path.Communicator),
+    FShortVar("FShort", IOSection, pathData.Path.Communicator),
+    FLongVar ("FLong",  IOSection, pathData.Path.Communicator),
     TimeVar("Time", IOSection, pathData.Path.Communicator),
     Time(0.0)
   {

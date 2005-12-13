@@ -444,21 +444,26 @@ ActionsClass::WriteInfo(IOSectionClass &out)
 
 
 void
-ActionsClass::GetForces(const Array<int,1> &ptcls, Array<dVec,1> &F)
+ActionsClass::GetForces(const Array<int,1> &ptcls, 
+			Array<dVec,1> &Fshort, Array<dVec,1> &Flong)
 {
   PathClass &Path = PathData.Path;
-  assert (F.size() == ptcls.size());
-  Array<dVec,1> Ftmp(F.size());
+  assert (Fshort.size() == ptcls.size());
+  assert (Flong.size() == ptcls.size());
+  Array<dVec,1> FtmpShort(Fshort.size());
+  Array<dVec,1> FtmpLong(Flong.size());
   dVec zero; 
   for (int i=0; i<NDIM; i++)
     zero[i] = 0.0;
-  Ftmp = zero;
+  FtmpShort = zero;
+  FtmpLong = zero;
   /// Calculate short and long-range pair actions for now.
-  ShortRange.GradAction(0, Path.NumTimeSlices()-1, ptcls, 0, Ftmp);
-  LongRange.GradAction(0, Path.NumTimeSlices()-1, ptcls, 0, Ftmp);
+  ShortRange.GradAction(0, Path.NumTimeSlices()-1, ptcls, 0, FtmpShort);
+  LongRange.GradAction(0, Path.NumTimeSlices()-1, ptcls, 0, FtmpLong);
   /// Answer must be divided by beta.
   double beta = Path.TotalNumSlices * Path.tau;
-  F -= (1.0/beta)*Ftmp;
+  Fshort -= (1.0/beta)*FtmpShort;
+  Flong -= (1.0/beta)*FtmpLong;
 }
 
 

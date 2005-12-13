@@ -10,5 +10,5 @@ beta = 1.0/kBT
 
 V = 4*pi/3 * rs^3 * N
 L = V^(1/3)
-tau = 0.125 % inverse hartrees
+tau = 0.0625 % inverse hartrees
 M = beta/tau
