@@ -192,6 +192,11 @@ public:
   void Allocate();
   void InitPaths(IOSectionClass &inSection);
 
+  /// This throws down particles of a given species at random, making
+  /// sure they don't overlap.  It reads the variable "Radius" to
+  /// determine the particle radius.
+  void InitRandomFixed(IOSectionClass &in, SpeciesClass &species);
+
   /// This class will create a new brownian random walk for
   /// species(speciesNum).  If the species is fermion, it will do its
   /// best to construct a node-avoiding walk that is reasonable.
