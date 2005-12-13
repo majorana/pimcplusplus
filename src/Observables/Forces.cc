@@ -37,9 +37,8 @@ ForcesClass::Accumulate()
 // 	fprintf (stderr, "%12.6f ", FFD(i)[dim]);
 //       fprintf (stderr, "\n");
 //     }
-    PathData.Actions.GetForces(Ptcls, Forces);
-    Counts++;
-
+  PathData.Actions.GetForces(Ptcls, Forces, Forces);
+  Counts++;
 }
 
 
