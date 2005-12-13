@@ -38,7 +38,8 @@ LangevinMoveClass::LDStep()
 
   // OldF holds the force computed at x(t).
   for (int i=0; i<R.size(); i++)
-    R(i) += TimeStep * V(i) + 0.5*TimeStep*TimeStep*MassInv*OldF(i);
+    R(i) += TimeStep * V(i) + 
+      0.5*TimeStep*TimeStep*MassInv*(OldFShort(i)+OldFLong(i));
 
   // Now, compute F(t+dt)
   // Sum forces over all the processors (all clones included)
@@ -47,8 +48,8 @@ LangevinMoveClass::LDStep()
   int numClones = PathData.GetNumClones();
   double norm = 1.0/(double)(numClones*NumAccumSteps);
   for (int i=0; i<FShortSum.size(); i++) {
-    FShort(i) = norm*FShortTmp(i);
-    FLong(i) = norm*FLongTmp(i);
+    FShortSum(i) = norm*FShortTmp(i);
+    FLongSum(i) = norm*FLongTmp(i);
   }
   // Now FShortSum and FLongSum hold the forces at x(t+dt)
   
@@ -65,7 +66,7 @@ LangevinMoveClass::LDStep()
   dVec zero(0.0);
   for (int i=0; i<FShortSum.size(); i++) {
     FShortSum(i) = zero;
-    FShortLong(i) = zero;
+    FLongSum(i) = zero;
   }
   // Put x(t+2dt) into the Path so we can start accumulating forces
   // for the next step
