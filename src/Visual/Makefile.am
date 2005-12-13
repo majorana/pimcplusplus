@@ -8,6 +8,8 @@ pathvis___SOURCES =       \
     BoxClass.h          \
     BoxObject.cc        \
     BoxObject.h         \
+    DiskObject.cc       \
+    DiskObject.h        \
     Export.cc           \
     Export.h            \
     GLObject.cc         \
@@ -34,6 +36,8 @@ mdvis___SOURCES =       \
     BoxClass.h          \
     BoxObject.cc        \
     BoxObject.h         \
+    DiskObject.cc       \
+    DiskObject.h        \
     MDExport.cc         \
     MDExport.h          \
     GLObject.cc         \

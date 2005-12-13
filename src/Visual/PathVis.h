@@ -12,6 +12,7 @@
 #include "PathObject.h"
 #include "BoxObject.h"
 #include "SphereObject.h"
+#include "DiskObject.h"
 #include "Isosurface.h"
 
 

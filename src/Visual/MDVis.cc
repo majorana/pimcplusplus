@@ -252,6 +252,60 @@ MDVisualClass::OnFrameChange()
   //  PathVis.Invalidate();
 }
 
+
+// void
+// MDVisualClass::ClipSpheres(list<Vec3>& sphereList, double radius)
+// {
+//    list<Vec3>::iterator iter;
+//    /// First, replicate spheres
+//    for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+//      Vec3 &r = (*iter);
+//      bool makeDisks = false;
+//      if ((r[0]+radius) > 0.5*Box[0]) 
+//        sphereList.push_front(Vec3(r[0]-Box[0], r[1], r[2]));
+//       if ((r[0]-radius) < -0.5*Box[0]) 
+// 	sphereList.push_front(Vec3(r[0]+Box[0], r[1], r[2]));
+//     }
+    
+//     for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+//       Vec3 &r = (*iter);
+//       if ((r[1]+radius) > 0.5*Box[1])
+// 	sphereList.push_front(Vec3(r[0], r[1]-Box[1], r[2]));
+//       if ((r[1]-radius) < -0.5*Box[1])
+// 	sphereList.push_front(Vec3(r[0], r[1]+Box[1], r[2]));
+//     }
+    
+//     for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+//       Vec3 &r = (*iter);
+//       if ((r[2]+radius) > 0.5*Box[2])
+// 	sphereList.push_front(Vec3(r[0], r[1], r[2]-Box[2]));
+//       if ((r[2]-radius) < -0.5*Box[2])
+// 	sphereList.push_front(Vec3(r[0], r[1], r[2]+Box[2]));
+//     }
+//     // Now make disks
+//     for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+//       Vec3 &r = (*iter);
+//       for (int dim=0; dim<3; dim++) {
+// 	if ((r[dim]+radius) > Box[dim]) {
+// 	  double l = 0.5*Box[dim]-fabs(r[dim]);
+// 	  double diskRad = sqrt(radius*radius-l*l);
+// 	  DiskObject *disk1 = new DiskObject(offScreen);
+// 	  DiskObject *disk2 = new DiskObject(offScreen);
+// 	  disk1->SetRadius(diskRad);
+// 	  disk2->SetRadius(diskRad);
+// 	  disk1->SetAxis(dim);
+// 	  disk2->SetAxis(-dim);
+// 	  Vec3 r1, r2;
+// 	  r1 = r; r2 = r;
+// 	  r1[dim] =  0.5*Box[dim];
+// 	  r2[dim] = -0.5*Box[dim];
+// 	  disk1->SetPos(r1);
+// 	  disk2->SetPos(r2);
+// 	  PathVis.Objects.push_back(disk1);
+// 	  PathVis.Objects.push_back(disk2);
+//       }
+// }
+
 bool
 MDVisualClass::DrawFrame(bool offScreen)
 {
@@ -262,6 +316,7 @@ MDVisualClass::DrawFrame(bool offScreen)
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
   boxObject->Set (Box, clipping);
+  PathVis.Objects.push_back(boxObject);
   
   const double radius = 3.5;
 
@@ -274,10 +329,15 @@ MDVisualClass::DrawFrame(bool offScreen)
   if (clipping) {
     for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
       Vec3 &r = (*iter);
-      if ((r[0]+radius) > 0.5*Box[0])
+      bool makeDisks = false;
+      if ((r[0]+radius) > 0.5*Box[0]) {
 	sphereList.push_front(Vec3(r[0]-Box[0], r[1], r[2]));
-      if ((r[0]-radius) < -0.5*Box[0])
+	makeDisks = true;
+      }
+      if ((r[0]-radius) < -0.5*Box[0]) {
 	sphereList.push_front(Vec3(r[0]+Box[0], r[1], r[2]));
+	makeDisks = true;
+      }
     }
     
     for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
@@ -289,16 +349,39 @@ MDVisualClass::DrawFrame(bool offScreen)
     }
     
     for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-    Vec3 &r = (*iter);
-    if ((r[2]+radius) > 0.5*Box[2])
-      sphereList.push_front(Vec3(r[0], r[1], r[2]-Box[2]));
-    if ((r[2]-radius) < -0.5*Box[2])
-      sphereList.push_front(Vec3(r[0], r[1], r[2]+Box[2]));
+      Vec3 &r = (*iter);
+      if ((r[2]+radius) > 0.5*Box[2])
+	sphereList.push_front(Vec3(r[0], r[1], r[2]-Box[2]));
+      if ((r[2]-radius) < -0.5*Box[2])
+	sphereList.push_front(Vec3(r[0], r[1], r[2]+Box[2]));
+    }
+    // Now make disks to close spheres
+    for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+      Vec3 &r = (*iter);
+      for (int dim=0; dim<3; dim++) {
+	if ((r[dim]+radius) > 0.5*Box[dim]) {
+	  double l = 0.5*Box[dim]-fabs(r[dim]);
+	  double diskRad = sqrt(radius*radius-l*l);
+	  DiskObject *disk1 = new DiskObject(offScreen);
+	  DiskObject *disk2 = new DiskObject(offScreen);
+	  disk1->SetRadius(diskRad);
+	  disk2->SetRadius(diskRad);
+	  disk1->SetAxis(2*dim);
+	  disk2->SetAxis(2*dim+1);
+	  Vec3 r1, r2;
+	  r1 = r; r2 = r;
+	  r1[dim] =  0.5*Box[dim];
+	  r2[dim] = -0.5*Box[dim];
+	  disk1->SetPos(r1);
+	  disk2->SetPos(r2);
+	  PathVis.Objects.push_back(disk1);
+	  PathVis.Objects.push_back(disk2);
+	}
+      }
     }
   }
 
-
-  PathVis.Objects.push_back(boxObject);
+  /// Add sphere objects from list
   for (iter=sphereList.begin(); iter!=sphereList.end(); iter++) {
     SphereObject *sphere = new SphereObject (offScreen);
     sphere->SetPos(*iter);
