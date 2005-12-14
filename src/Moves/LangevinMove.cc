@@ -71,15 +71,21 @@ LangevinMoveClass::LDStep()
   // Put x(t+2dt) into the Path so we can start accumulating forces
   // for the next step
   int first = PathData.Path.Species(LDSpecies).FirstPtcl;
+  SetMode (NEWMODE);
   for (int slice=0; slice<PathData.Path.NumTimeSlices(); slice++)
-    for (int i=0; i<R.size(); i++) {
-      SetMode (NEWMODE);
+    for (int i=0; i<R.size(); i++) 
       PathData.Path(slice,i+first) = R(i) + TimeStep*V(i) + 
 	0.5*TimeStep*TimeStep* (OldFShort(i) + OldFLong(i));
-      SetMode (OLDMODE);
+
+  /// Warp electron paths to follow ions
+  PathData.Path.WarpPaths(LDSpecies);
+  
+  SetMode (OLDMODE);
+  for (int slice=0; slice<PathData.Path.NumTimeSlices(); slice++)
+    for (int i=0; i<R.size(); i++) 
       PathData.Path(slice,i+first) = R(i) + TimeStep*V(i) + 
 	0.5*TimeStep*TimeStep*(OldFShort(i)+OldFLong(i));
-    }
+
   /// Increment the time
   Time += TimeStep;
   

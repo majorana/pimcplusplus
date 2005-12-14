@@ -880,3 +880,37 @@ void PathClass::InitOpenPaths()
   perr<<"Initialized the open paths"<<endl;
 }
 
+
+void 
+PathClass::WarpPaths (int ionSpecies)
+{
+  SpeciesClass &ions = Species(ionSpecies);
+  int N = ions.NumParticles;
+  Array<dVec,1> Rold(N), Rnew(N), Rdelta(N);
+  for (int i=0; i<N; i++) {
+    Rold(i) = Path[0](0,i+ions.FirstPtcl);
+    Rnew(i) = Path[1](0,i+ions.FirstPtcl);
+    Rdelta(i) = Rnew(i)-Rold(i);
+    PutInBox(Rdelta(i));
+  }
+  SetMode(OLDMODE);
+  for (int elec=0; elec<NumParticles(); elec++) {
+    if (ParticleSpeciesNum(elec) != ionSpecies) {
+      for (int slice=0; slice<NumTimeSlices(); slice++) {
+	dVec disp;
+	double dist;
+	double totalWeight = 0.0;
+	for (int ion=0; ion<N; ion++) {
+	  DistDisp(slice, elec, ion+ions.FirstPtcl, dist, disp);
+	  totalWeight += 1.0/(dist*dist*dist*dist);
+	}
+	for (int ion=0; ion<N; ion++) {
+	  DistDisp(slice, elec, ion+ions.FirstPtcl, dist, disp);
+	  double weight = 1.0/(dist*dist*dist*dist*totalWeight);
+	  Path[1](slice, elec) += weight*Rdelta(ion);
+	}
+	Path[0](slice, elec) = Path[1](slice, elec);
+      }
+    }
+  }
+}

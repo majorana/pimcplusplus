@@ -1,3 +1,6 @@
+from pylab import *
+from HTMLgen import *
+from Tables import *
 
 def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      clf()
@@ -77,10 +80,10 @@ def ProduceTracePicture(data,fileBase,hlabel,vlabel,myTitle=''):
     asciiFile.close()
 
 #build table with image, ps, and ascii file in it
-    fileTable=BuildTable()
+    fileTable=NewTable()
     fileTable.width='100%'
     fileTable.body= [[Href(fileBase+".ps",'Postscript'),Href(asciiFileName,'ASCII data')]]
-    myTable=BuildTable()
+    myTable=NewTable()
     myTable.body=[[myImg]]
     myTable.body.append([fileTable])
     return myTable

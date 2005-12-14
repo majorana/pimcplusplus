@@ -29,8 +29,8 @@ Section (System)
       int NumParticles=2;
       int NumDim=3;
       string InitPaths="FIXED";
-      Array<double,2> Positions(2,3)=[-0.6875, 0.0, 0.0, 
-				       0.6875, 0.0, 0.0 ];
+      Array<double,2> Positions(2,3)=[-0.725, 0.0, 0.0, 
+				       0.725, 0.0, 0.0 ];
     }
   }
 }
@@ -49,34 +49,34 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "H2_sep1.375_forces3_tau0.125";
+  string OutFileBase = "H2_sep1.45_forcesLV_tau0.125";
   Section (Observable)
   {
-    string type = "Energy";
+    string Type = "Energy";
     string Name = "Energy";
     string Description="Total Energy";
-    int freq = 1;
+    int Frequency = 1;
     int dumpFreq = 500;
   }
   Section (Observable) {
-    string type = "Forces";
+    string Type = "Forces";
     string Name = "Forces";
     string Species = "p";
-    int freq = 1;
+    int Frequency = 1;
     int dumpFreq = 500;
   }
   Section (Observable)
     {
-      string type = "PairCorrelation";
+      string Type = "PairCorrelation";
       string Name = "epPC";
       string Species1 = "e";
       string Species2 = "p";
       string Description="Electron-proton pair correlation";
-      int freq = 20;
+      int Frequency = 20;
       int dumpFreq=700;
       Section (Grid)
 	{	  
-	  string type = "Linear";
+	  string Type = "Linear";
 	  double start = 0.0;
 	  double end = 3.0;
 	  int NumPoints = 50;
@@ -84,16 +84,16 @@ Section (Observables)
     }
   Section (Observable)
     {
-      string type = "PairCorrelation";
+      string Type = "PairCorrelation";
       string Name = "eePC";
       string Species1 = "e";
       string Species2 = "e";
       string Description="Electron-electron pair correlation";
-      int freq = 20;
+      int Frequency = 20;
       int dumpFreq=700;
       Section (Grid)
 	{	  
-	  string type = "Linear";
+	  string Type = "Linear";
 	  double start = 0.0;
 	  double end = 3.0;
 	  int NumPoints = 50;
@@ -101,11 +101,11 @@ Section (Observables)
     }
   Section (Observable)
     {
-      string type = "TimeAnalysis";
+      string Type = "TimeAnalysis";
       string Name = "TimeAnalysis";
       string Description="Analyzes time!";
       int dumpFreq=100;
-      int freq=100;
+      int Frequency=100;
     }
 
 
@@ -113,12 +113,12 @@ Section (Observables)
 
 Section (Moves) {
   Section (Move) {
-    string type="ShiftMove";
-    string name="Shift";
+    string Type="ShiftMove";
+    string Name="Shift";
   }
   Section (Move) {
-    string type="BisectionBlock";
-    string name="electronBlock";
+    string Type="BisectionBlock";
+    string Name="electronBlock";
     string PermuteType="NONE";
     int NumLevels=5;
     string Species = "e";
@@ -131,24 +131,27 @@ Section (Moves) {
 Section (Algorithm)
 {
   Section (Loop){ // Before Accumulating Observables
-    int steps=1000; 
+    int Steps=1000; 
     Section (Loop){ 
-      int steps=3;
-      Section (Move)  { string name = "electronBlock"; }
+      int Steps=3;
+      Section (Move)  { string Name = "electronBlock"; }
     }
-    Section (Move)    { string name = "Shift";         }
+    Section (Move)    { string Name = "Shift";         }
   }
   Section (Loop){ //Start Accumulating observables
-    int steps=3000000;
-    Section (Loop){
-      int steps=7;
-      Section (Move)  { string name = "electronBlock"; } 
-      Section (Move)  { string name = "Shift";         }
+    int Steps=3000000;
+    Section (Loop) {
+      int Steps = 100;
+      Section (Loop){
+	int Steps=7;
+	Section (Move)  { string Name = "electronBlock"; } 
+	Section (Move)  { string Name = "Shift";         }
+      }
+      Section (Observe) { string Name = "epPC";          }
+      Section (Observe) { string Name = "eePC";          }
+      Section (Observe) { string Name = "Energy";        }
+      Section (Observe) { string Name = "Forces";        }
     }
-    Section (Observe) { string name = "epPC";          }
-    Section (Observe) { string name = "eePC";          }
-    Section (Observe) { string name = "Energy";        }
-    Section (Observe) { string name = "Forces";        }
-    //    Section (Observe) {string name = "PathDump";}
+    Section (WriteData) {                                }
   }
 }

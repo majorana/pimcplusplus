@@ -210,6 +210,12 @@ public:
   friend void SetupPathZincBlend(PathClass &path);
   friend void SetupPathSimpleCubic(PathClass &path);
 
+  /// This function warps the electron paths to follow the course of
+  /// the ion positions, specified by the ionSpecies parameter.  Each
+  /// (slice,particle) position is displaced by the ion displacements,
+  /// weighted by its distance to each ion to the negative fourth power.
+  void WarpPaths (int ionSpecies);
+
 
   ///////////////////////////////////////////////////////////////////
   ///                     Correlated Sampling                      // 
