@@ -17,6 +17,14 @@ protected:
   Array<bool,1> DoPtcl;
   ShortRangeOnClass ToCheck;
   int TotalTime;
+  /// These are the coefficients used for the low-variance estimator
+  /// for the gradient
+  Array<double,1> ck;
+  int NumBasisFuncs, m;
+  double Router;
+  bool UseLowVariance;
+  void Setup_ck();
+  inline double g(double r);
 public:
   void Read (IOSectionClass &in);
   double SingleAction (int slice1, int slice2, 

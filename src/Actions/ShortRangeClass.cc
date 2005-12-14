@@ -2,6 +2,8 @@
 #include "../PathDataClass.h"
 #include "ShortRangeOnClass.h"
 #include "time.h"
+#include <Common/MatrixOps/MatrixOps.h>
+
 ///This has to be called after pathdata knows how many
 ///particles it has
 void ShortRangeClass::Read(IOSectionClass& in)
@@ -14,8 +16,53 @@ ShortRangeClass::ShortRangeClass(PathDataClass &pathData,
 				 Array<PairActionFitClass* ,2> &pairMatrix) : 
   ToCheck(pathData,pairMatrix),
   ActionBaseClass (pathData),
-  PairMatrix(pairMatrix)
+  PairMatrix(pairMatrix),
+  m(2), NumBasisFuncs(4), Router(0.6), UseLowVariance(/*true*/false)
 {
+  Setup_ck();
+}
+
+void ShortRangeClass::Setup_ck()
+{
+  ck.resize(NumBasisFuncs);
+  Array<double,1> h(NumBasisFuncs);
+  Array<double,2> S(NumBasisFuncs);
+  double Rtojplus1 = Router*Router;
+  for (int j=1; j<=NumBasisFuncs; j++) {
+    h(j-1) = Rtojplus1/(1.0+j);
+    Rtojplus1 *= Router;
+    for (int k=1; k<=NumBasisFuncs; k++)
+      S(k-1,j-1) = pow(Router, m+k+j+1)/(m+k+j+1.0);
+  }
+  GJInverse (S);
+  ck = 0.0;
+  for (int i=0; i < NumBasisFuncs; i++)
+    for (int j=0; j < NumBasisFuncs; j++)
+      ck(i) += S(i,j) * h(j);
+
+  /// HACK HACK HACK
+  FILE *fout = fopen ("gr.dat", "w");
+  for (double r=0.0; r<=Router; r+=0.001)
+    fprintf (fout, "%1.18e %1.18e\n", r, g(r));
+  fclose (fout);
+
+}
+
+inline double
+ShortRangeClass::g(double r)
+{
+  if (r > Router)
+    return 1.0;
+  double rtokplusm = r;
+  for (int i=0; i<m; i++)
+    rtokplusm *= r;
+
+  double gval = 0.0;
+  for (int k=1; k<=NumBasisFuncs; k++) {
+    gval += ck(k-1) * rtokplusm;
+    rtokplusm *= r;
+  }
+  return gval;
 }
 
 double 
@@ -209,12 +256,21 @@ ShortRangeClass::GradAction(int slice1, int slice2,
 	  PA.Derivs(q,z,s2,level,du_dq, du_dz);
 	  Vec3 rhat  = (1.0/rmag)*r;
 	  Vec3 rphat = (1.0/rpmag)*rp;
-	  gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
+	  
+	  double g1 = 1.0;
+	  double g2 = 1.0;
+	  if (UseLowVariance) {
+	    g1 = g(rmag);
+	    g2 = g(rpmag);
+	  }
+	  gradVec(pi) -= (g1*(0.5*du_dq + du_dz)*rhat + 
+			  g2*(0.5*du_dq - du_dz)*rphat);
+	  // gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
 	  /// Now, subtract off long-range part that shouldn't be in
 	  /// here 
 	  if (PA.IsLongRange() && PathData.Actions.UseLongRange)
-	    gradVec(pi) += 0.5*(PA.Ulong(level).Deriv(rmag)*rhat+
-				PA.Ulong(level).Deriv(rpmag)*rphat);
+	    gradVec(pi) += 0.5*(PA.Ulong(level).Deriv(rmag)*g1*rhat+
+				PA.Ulong(level).Deriv(rpmag)*g2*rphat);
 	}
       }
     }
