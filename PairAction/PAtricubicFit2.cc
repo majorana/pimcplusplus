@@ -777,7 +777,6 @@ PAtricubicFit2Class::PartialDerivs(double q, double z, double s, int level,
   double sgn_z = (z >= 0.0) ? 1.0 : -1.0;
   z = fabs(z);
   if ((2.0*q) < sMax(level)) {
-    cerr << "2q < sMax\n";
     double smax = 2.0*q;
     derivs(0,0) = 1.0;                              /// \partial q \partial q
     derivs(1,0) = 0.0;                              /// \partial q \partial z
@@ -791,7 +790,6 @@ PAtricubicFit2Class::PartialDerivs(double q, double z, double s, int level,
     derivs(2,2) = 1/(smax-z);                       /// \partial t \partail s
   }
   else {
-    cerr << "2q > sMax\n";
     double smax = sMax(level);
     derivs(0,0) = 1.0;                  /// \partial q \partial q
     derivs(1,0) = 0.0;                  /// \partial q \partial z
