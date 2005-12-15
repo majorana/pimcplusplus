@@ -1,9 +1,8 @@
 #include "PathDump.h"
 
 
-void PathDumpClass::Accumulate()
+void PathDumpClass::WriteBlock()
 {
-  WriteBlock();
 }
 
 void PathDumpClass::Read(IOSectionClass &in)
@@ -39,7 +38,7 @@ void PathDumpClass::Read(IOSectionClass &in)
   }
 }
 
-void PathDumpClass::WriteBlock()
+void PathDumpClass::Accumulate()
 {
   PathClass &Path = PathData.Path;
   int start, end, numProcs, myProc;
