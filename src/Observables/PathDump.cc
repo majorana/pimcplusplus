@@ -8,7 +8,6 @@ void PathDumpClass::WriteBlock()
 void PathDumpClass::Read(IOSectionClass &in)
 {
   ObservableClass::Read(in);
-  assert (in.ReadVar ("dumpFreq", DumpFreq));
   DumpNodes = in.OpenSection("NodeDump");
   if (DumpNodes) {
     assert(in.ReadVar("Ptcl", NodePtcl));
