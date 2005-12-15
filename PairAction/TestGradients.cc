@@ -29,13 +29,13 @@ void TestGradients (IOSectionClass &in)
   cerr << "(q,z,s) = (" << q << ", " << z << ", " << s << ")\n";
 
   double d_dq, d_dz, d_dqFD, d_dzFD;
-  PA.Derivs(q,z,s,0, d_dq, d_dz);
+  PA.Derivs(q, z, s*s, 0, d_dq, d_dz);
   cerr << "Analytic:\n";
   cerr << "  d_dq = " << d_dq << endl;
   cerr << "  d_dz = " << d_dz << endl;
 
-  d_dqFD = (PA.U(q+0.0001,z,s,0) - PA.U(q-0.0001,z,s,0))/0.0002;
-  d_dzFD = (PA.U(q,z+0.0001,s,0) - PA.U(q,z-0.0001,s,0))/0.0002;
+  d_dqFD = (PA.U(q+0.0001,z,s*s,0) - PA.U(q-0.0001,z,s*s,0))/0.0002;
+  d_dzFD = (PA.U(q,z+0.0001,s*s,0) - PA.U(q,z-0.0001,s*s,0))/0.0002;
 
   cerr << "Finite difference:\n";
   cerr << "  d_dq = " << d_dqFD << endl;
