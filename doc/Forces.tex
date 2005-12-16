@@ -48,7 +48,7 @@ $\nabla_\vR u(\vr, \vrp; \tau)$.  Because of symmetry, it is
 convenient to store, $u(\vr, \vrp;\tau) = u(q,s,z)$, where
 \begin{eqnarray}
 q \equiv \frac{|\vr| + |\vrp|}{2} \\
-z \equiv \frac{|\vr| - |\vrp|}{2} \\
+z \equiv |\vr| - |\vrp| \\
 s \equiv |\vr - \vrp|
 \end{eqnarray}
 Since $s$ is independent of $\vR$, we may write
@@ -58,23 +58,24 @@ Since $s$ is independent of $\vR$, we may write
 \end{equation}
 Then we may write
 \begin{eqnarray}
+& & \\
 q & = & \frac{1}{2} \left\{\left[ (R_x - r_x)^2 + (R_y - r_y)^2 +
   (R_z-r_z)^2\right]^{\frac{1}{2}}+ 
 \left[(R_x-r'_x)^2 +(R_y-r'_y)^2 +
-  (R_z-r'_z)^2\right]^\frac{1}{2}\right\} \\
-z & = &\frac{1}{2} \left\{\left[ (R_x - r_x)^2 + (R_y - r_y)^2 +
+  (R_z-r'_z)^2\right]^\frac{1}{2}\right\} \nonumber \\
+z & = & \rule{0.26cm}{0.0cm} \left\{\left[ (R_x - r_x)^2 + (R_y - r_y)^2 +
   (R_z-r_z)^2\right]^{\frac{1}{2}}- 
 \left[(R_x-r'_x)^2 +(R_y-r'_y)^2 +
-  (R_z-r'_z)^2\right]^\frac{1}{2}\right\} 
+  (R_z-r'_z)^2\right]^\frac{1}{2}\right\} \nonumber 
 \end{eqnarray}
 Hence,
 \begin{eqnarray}
   \nabla_\vR q & = & -\frac{\hat{\vr} + \hat{\vr}'}{2} \\
-  \nabla_\vR z & = & -\frac{\hat{\vr} - \hat{\vr}'}{2} \\
+  \nabla_\vR z & = & -\left[\hat{\vr} - \hat{\vr}'\right] 
 \end{eqnarray}
 Then, we have
 \begin{equation}
-\nabla_{\vR} u(q,z,s;\tau) = -\frac{1}{2}\left[\frac{\partial u}{\partial q}
+\nabla_{\vR} u(q,z,s;\tau) = -\left[\frac{1}{2}\frac{\partial u}{\partial q}
 \left(\hat{\vr} + \hat{\vr}'\right)
 -\frac{\partial u}{\partial z} \left(\hat{\vr} -\hat{\vr}'\right) \right]
 \end{equation}
