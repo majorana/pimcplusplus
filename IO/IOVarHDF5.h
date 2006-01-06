@@ -147,6 +147,7 @@ namespace IO {
     herr_t status = H5Dextend (DatasetID, dims);
     H5Sclose (DiskSpaceID);
     DiskSpaceID = H5Dget_space(DatasetID);
+    H5Sclose(MemSpaceID);
     MemSpaceID = H5Scopy(DiskSpaceID);
   }
 
