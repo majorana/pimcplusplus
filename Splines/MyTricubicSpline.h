@@ -76,7 +76,8 @@ public:
   inline double d2_dxdy   (double x, double y, double z); 
   inline double d2_dxdz   (double x, double y, double z); 
   inline double d2_dydz   (double x, double y, double z); 
-  inline TinyVector<double,3> Grad (double x, double y, double z);
+  inline TinyVector<double,3> Grad   (double x, double y, double z);
+  inline TinyVector<double,3> GradFD (double x, double y, double z);
   inline double Laplacian (double x, double y, double z);
 
   MyTricubicSpline(Grid *xgrid, Grid *ygrid, Grid *zgrid)
@@ -706,6 +707,22 @@ inline double MyTricubicSpline::d_dz (double x, double y, double z)
 
   return (val);
 }
+
+inline TinyVector<double,3>
+MyTricubicSpline::GradFD(double x, double y, double z)
+{
+  const double eps = 1.0e-6;
+  TinyVector<double,3> plus, minus;
+  
+  plus[0]  = (*this)(x+eps, y, z);
+  minus[0] = (*this)(x-eps, y, z);
+  plus[1]  = (*this)(x, y+eps, z);
+  minus[1] = (*this)(x, y-eps, z);
+  plus[2]  = (*this)(x, y, z+eps);
+  minus[2] = (*this)(x, y, z-eps);
+  return ((0.5/eps)*(plus-minus));
+}
+
 
 inline TinyVector<double,3> 
 MyTricubicSpline::Grad (double x, double y, double z)
