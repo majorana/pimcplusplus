@@ -2,6 +2,9 @@
 #define MATRIX_OPS_H
 #include "../Blitz.h"
 
+void
+MatVecProd (Array<double,2> &A, Array<double,1> &x, Array<double,1> &Ax);
+
 void LUdecomp (Array<double,2> &A, Array<int,1> &perm, 
 	       double &sign);
 

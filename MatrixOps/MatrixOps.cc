@@ -17,6 +17,7 @@
 #define F77_DGEMM  F77_FUNC(dgemm,DGEMM)
 #define F77_DSYEVR F77_FUNC(dsyevr,DSYEVR)
 #define F77_ZHEEVR F77_FUNC(zheevr,ZHEEVR)
+#define F77_DGEMV  F77_FUNC(dgemv,DGEMV)
 
 extern "C" void 
 F77_DGESVD (char *JOBU, char* JOBVT, int *M, int *N,
@@ -517,9 +518,12 @@ void SymmEigenPairs (const Array<scalar,2> &A, int NumPairs,
      }
 
    // Now free allocate memory
-   delete[] Amat, EigVals, EigVecs, WorkSpace, IWorkSpace, ISuppZ;
-   
-
+   delete[] Amat;
+   delete[] EigVals;
+   delete[] EigVecs; 
+   delete[] WorkSpace; 
+   delete[] IWorkSpace; 
+   delete[] ISuppZ;
 }
 
 
@@ -599,7 +603,12 @@ void SymmEigenPairs (const Array<complex<double>,2> &A, int NumPairs,
    }
 
    // Now free allocate memory
-   delete[] Amat, EigVals, EigVecs, WorkSpace, IWorkSpace, ISuppZ;
+   delete[] Amat;
+   delete[] EigVals;
+   delete[] EigVecs;
+   delete[] WorkSpace;
+   delete[] IWorkSpace;
+   delete[] ISuppZ;
    
 
 }
@@ -718,4 +727,29 @@ ComplexDetCofactorsWorksize(int N)
   F77_ZGETRI(&N, &dummy, &N, &ipiv, &work, &lwork, &info);
 
   return ((int)ceil(work.real()));
+}
+
+extern "C" void   F77_DGEMV (char *TRANS, const int *M, const int *N, 
+			     double *alpha, const void *A, 
+			     const int *LDA, const void *X, 
+			     const int *INCX, double *beta, 
+			     const void *Y, const int *INCY);
+
+
+void
+MatVecProd (Array<double,2> &A, Array<double,1> &x, Array<double,1> &Ax)
+{
+  assert (A.cols() == x.size());
+  assert (A.rows() == Ax.size());
+
+  double zero(0.0);
+  double one(1.0);
+  char trans = 'T';
+
+  int n = A.rows();
+  int m = A.cols();
+  int inc = 1;
+
+  F77_DGEMV(&trans, &m, &n, &one, A.data(), &m,
+	    x.data(), &inc, &zero, Ax.data(), &inc);
 }
