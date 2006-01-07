@@ -816,6 +816,9 @@ PAtricubicFit2Class::Derivs(double q, double z, double s2, int level,
   zs2yt (q, z, s, level, y, t);
   TinyMatrix<double,3,3> partDerivs;
 
+  cerr << "y = " << y << "    t = " << t << endl;
+  fprintf (stderr, "t = %1.18f\n", t);
+
   if (q<=qgrid->End) {
     if (q == 0.0) {
       d_dq = Usplines(level).d_dx(0.0, 0.0, 0.0);
@@ -835,7 +838,7 @@ PAtricubicFit2Class::Derivs(double q, double z, double s2, int level,
 	  partDerivs(1,1)*grad[1] + 
 	  partDerivs(1,2)*grad[2];
       }
-      else if (y < 1.0) {
+      else if (y <= 1.0) {
 	grad = Usplines(level).Grad(q, y, 1.0);
 	d_dq = 
 	  partDerivs(0,0)*grad[0] +
@@ -846,7 +849,7 @@ PAtricubicFit2Class::Derivs(double q, double z, double s2, int level,
 	  partDerivs(1,1)*grad[1] + 
 	  partDerivs(1,2)*grad[2];
 	d_dq += Usplines(level).d2_dxdz(q,y,1.0) *(t-1.0);
-	d_dz += partDerivs(1,1)*Usplines(level).d2_dydz(q,y,1.0) *(t-1.0);
+	d_dz += partDerivs(1,1)*Usplines(level).d2_dydz(q,y,1.0)*(t-1.0);
       }
       else {
 	grad = Usplines(level).Grad(q, 1.0, 1.0);

@@ -3,6 +3,6 @@ string PAfilename = "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5";
 //string PAfilename = "p-p.PairAction";
 double tau = 0.0625;
 
-Array<double,1> Rion(3)  = [ 1.0, 2.0, 3.0 ];
-Array<double,1> r(3)     = [ 50.1, 0.0, 0.0 ];
-Array<double,1> rp(3)    = [ 50.1, 0.1, 0.2 ];
+Array<double,1> Rion(3)  = [  0.0,  0.0,  0.0 ];
+Array<double,1> r(3)     = [  0.43, 0.0,  0.1 ];
+Array<double,1> rp(3)    = [ -0.44, 0.0, -0.1 ];
