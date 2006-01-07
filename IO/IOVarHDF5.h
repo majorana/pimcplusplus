@@ -390,6 +390,7 @@ namespace IO {
 
     newVar.DatasetID = DatasetID;
     newVar.DiskSpaceID = H5Scopy(H5Dget_space(DatasetID));
+    newVar.BoolTypeID = BoolTypeID;
   
     hsize_t start[RANK], count[RANK], stride[RANK], dims[RANK], maxdims[RANK];
     hsize_t memDims[HDF5SliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank];

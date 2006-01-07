@@ -82,8 +82,9 @@ namespace IO {
       typedef typename HDF5SliceMaker<T,varRank,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType newSliceType;
       newSliceType slice = newVar->Slice(s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10);
       bool success = slice.VarRead(val);
-      H5Sclose (slice.DiskSpaceID);
-      H5Sclose (slice.MemSpaceID);
+      // The following are actually closed by the destructor
+      //       H5Sclose (slice.DiskSpaceID);
+      //       H5Sclose (slice.MemSpaceID);
       return success;
     }
     else if (GetFileType() == ASCII_TYPE) {
@@ -122,8 +123,9 @@ namespace IO {
       typedef typename HDF5SliceMaker<T,varRank,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::SliceType newSliceType;
       newSliceType slice = newVar->Slice(s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10);
       bool success = slice.VarWrite(val);
-      H5Sclose (slice.DiskSpaceID);
-      H5Sclose (slice.MemSpaceID);
+      // The following are actually closed by the destructor
+      //       H5Sclose (slice.DiskSpaceID);
+      //       H5Sclose (slice.MemSpaceID);
       return success;
       //      return newVar->VarWriteSlice(val, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10);
     }
