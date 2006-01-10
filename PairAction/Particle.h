@@ -3,6 +3,8 @@
 
 #include "../IO/IO.h"
 
+using namespace IO;
+
 class ParticleClass
 {
 public:
