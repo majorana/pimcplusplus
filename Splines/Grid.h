@@ -16,16 +16,16 @@ class Grid
 {
  protected:
   /// Contains the grid points 
-  Array<scalar,1> grid;
+  Array<double,1> grid;
  public:
   /// First and last grid points
-  scalar Start, End;
+  double Start, End;
 
   /// Number of points in the grid
   int NumPoints;
 
   /// The i'th point in the grid
-  inline scalar operator()(int i) const
+  inline double operator()(int i) const
   {
     return (grid(i));
   }
@@ -42,7 +42,7 @@ class Grid
   virtual GridType Type() = 0;
    
   ///Returns the index of the nearest point below r. 
-  virtual int ReverseMap (scalar r) = 0;
+  virtual int ReverseMap (double r) = 0;
   virtual void Write (IOSectionClass &out) = 0;
   virtual void Read  (IOSectionClass &inSection) = 0;
 };
@@ -53,27 +53,27 @@ class LinearGrid : public Grid
 {
  private:
   /// The value between successive grid points.
-  scalar delta, deltainv;
+  double delta, deltainv;
  public:
   /// Returns the type of the grid (in this case LINEAR)
   GridType Type()
   { return (LINEAR); }  
 
   /// Returns the index of the nearest point below r. 
-  int ReverseMap(scalar r)
+  int ReverseMap(double r)
   {
     return ((int)floor((r-Start)*deltainv));
   }
 
   /// Initializes the linear grid.
-  inline void Init(scalar start, scalar end, int numpoints)
+  inline void Init(double start, double end, int numpoints)
   {
-      Start=start; End=end; NumPoints=numpoints;
-      grid.resize(NumPoints);
-      delta = (End-Start)/(scalar)(NumPoints-1);
-      deltainv = 1.0/delta;
-      for (int i=0; i<NumPoints; i++)
-	grid(i) = Start + (scalar)i*delta;
+    Start=start; End=end; NumPoints=numpoints;
+    grid.resize(NumPoints);
+    delta = (End-Start)/(double)(NumPoints-1);
+    deltainv = 1.0/delta;
+    for (int i=0; i<NumPoints; i++)
+      grid(i) = Start + (double)i*delta;
   }
 
   void Write (IOSectionClass &outSection)
@@ -99,7 +99,7 @@ class LinearGrid : public Grid
 
   /// Constructor that sets the number of points, start and end point
   /// of the original grid 
-  LinearGrid (scalar start, scalar end, int numpoints)
+  LinearGrid (double start, double end, int numpoints)
   {
     Init (start, end, numpoints);
   }
@@ -112,14 +112,14 @@ class LinearGrid : public Grid
 class OptimalGrid : public Grid
 {
  private:
-  scalar a, b;
+  double a, b;
   
  public:
 
   GridType Type()
   { return (OPTIMAL); }
 
-  int ReverseMap(scalar r)
+  int ReverseMap(double r)
   {
     if ((r/a) < 1e-6)
       return ((int)floor(r/(a*b)+0.5)-1);
@@ -142,12 +142,12 @@ class OptimalGrid : public Grid
   
   /// This form of the constructor takes the number of points, the
   /// maximum radius and the value of b.
-  void Init (int numpoints, scalar rmax, scalar bval)
+  void Init (int numpoints, double rmax, double bval)
   {
     NumPoints = numpoints;
     b = bval;
     End = rmax;
-    a = End / (exp(b*(scalar)NumPoints) - 1.0);  
+    a = End / (exp(b*(double)NumPoints) - 1.0);  
     Start = a * (exp(b) - 1.0);
     grid.resize(NumPoints);
     
@@ -155,10 +155,10 @@ class OptimalGrid : public Grid
       grid(i) = a*(exp(b*(i+1))-1.0);
   }
   
-  OptimalGrid (int numPoints, scalar rmax, scalar bval)
+  OptimalGrid (int numPoints, double rmax, double bval)
   { Init (numPoints, rmax, bval); }
   
-  void Init (scalar aval, scalar bval, int numPoints)
+  void Init (double aval, double bval, int numPoints)
   {
     a = aval;
     b = bval;
@@ -174,7 +174,7 @@ class OptimalGrid : public Grid
   
   
   /// This form of the constructor takes a, b, and the number of points.
-  OptimalGrid (scalar aval, scalar bval, int numPoints)
+  OptimalGrid (double aval, double bval, int numPoints)
   { 
     Init (aval, bval, numPoints);
   }
@@ -224,7 +224,7 @@ class OptimalGrid : public Grid
   /// This form of the constructor takes a nuclear charge and a
   /// maxmimum radius and chooses an appropriate number of points for
   /// that atom.
-  void Init (scalar Z, scalar rmax)
+  void Init (double Z, double rmax)
     {
       a = 4.34e-6/Z;
       //a = 4.0e-2;
@@ -232,7 +232,7 @@ class OptimalGrid : public Grid
       //b = 0.004;
 
       NumPoints = (int)ceil(log(rmax/a+1.0)/b);
-      b = log(rmax/a+1.0)/(scalar)NumPoints;
+      b = log(rmax/a+1.0)/(double)NumPoints;
       Start = a * (exp(b) - 1.0);
       End = rmax;
       //End   = a * (exp(b*NumPoints) - 1.0);
@@ -245,7 +245,7 @@ class OptimalGrid : public Grid
 	  //fprintf (stdout, "%1.12e\n", grid(i));
 	}
     }
-  OptimalGrid (scalar Z, scalar rmax)
+  OptimalGrid (double Z, double rmax)
   { Init (Z, rmax); }
 
 };
@@ -264,7 +264,7 @@ class OptimalGrid2 : public Grid
   GridType Type()
   { return (OPTIMAL2); }
 
-  int ReverseMap(scalar r)
+  int ReverseMap(double r)
   {
     r -= c;
     if ((r/a) < 1e-6)
@@ -288,12 +288,12 @@ class OptimalGrid2 : public Grid
 
   /// This form of the constructor takes the number of points, the
   /// maximum radius and the value of b.
-  OptimalGrid2 (int numpoints, scalar rmax, scalar bval)
+  OptimalGrid2 (int numpoints, double rmax, double bval)
   {
     NumPoints = numpoints;
     b = bval;
     End = rmax;
-    a = End / (exp(b*(scalar)NumPoints) - 1.0);  
+    a = End / (exp(b*(double)NumPoints) - 1.0);  
     Start = a * (exp(b) - 1.0);
     grid.resize(NumPoints);
       
@@ -356,12 +356,12 @@ class OptimalGrid2 : public Grid
 class LogGrid : public Grid
 {
  public:
-  scalar Z, r0, Spacing;
+  double Z, r0, Spacing;
 
   GridType Type()
     { return (LOG); }
 
-  int ReverseMap(scalar r)
+  int ReverseMap(double r)
   {
     return ((int)(floor(log(Z*r/r0)/log(Spacing))));
   }
@@ -371,16 +371,16 @@ class LogGrid : public Grid
     // Do nothing
   }
   
-  void Init (scalar R0, scalar spacing, int numpoints)
+  void Init (double R0, double spacing, int numpoints)
   {
     NumPoints = numpoints;
     Z = 1.0; r0 = R0; Spacing = spacing;
     Start = r0;
-    End = r0 * pow(Spacing, (scalar) NumPoints-1);
+    End = r0 * pow(Spacing, (double) NumPoints-1);
     grid.resize (NumPoints);
     
     for (int i=0; i<NumPoints; i++)
-      grid(i) = r0 * pow(Spacing, (scalar) i);
+      grid(i) = r0 * pow(Spacing, (double) i);
   }
 
 
@@ -403,23 +403,23 @@ class LogGrid : public Grid
     Init (tempr0, tempSpacing, tempNumPoints);
   }
 
-  LogGrid (scalar R0, scalar spacing, int numpoints)
+  LogGrid (double R0, double spacing, int numpoints)
   {
     Init  (R0, spacing, numpoints);
   }
 
-  LogGrid (int numpoints, scalar z, scalar R0, scalar spacing)
+  LogGrid (int numpoints, double z, double R0, double spacing)
   {
     NumPoints = numpoints;
     Z = z; r0 = R0; Spacing = spacing;
     
     Start = r0 / Z;
-    End = r0/Z * pow(Spacing, (scalar) (NumPoints-1));
+    End = r0/Z * pow(Spacing, (double) (NumPoints-1));
     
     grid.resize(NumPoints);
     
     for (int i=0; i<NumPoints; i++)
-      grid(i) = r0/Z * pow (Spacing, (scalar) i);
+      grid(i) = r0/Z * pow (Spacing, (double) i);
   }
 };
 
@@ -439,7 +439,7 @@ private:
   GridType Type()
     { return (CLUSTER); }
 
-  int ReverseMap(scalar r)
+  int ReverseMap(double r)
     {
       return ((int)floor (dri/(r-rr) -1.0 + x0));
     }

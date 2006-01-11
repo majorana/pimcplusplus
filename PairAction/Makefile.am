@@ -3,8 +3,7 @@ check_PROGRAMS = TestGradients
 TestGradients_SOURCES = TestGradients.cc
 
 LDADD = libpairact.la  ../Fitting/libfitting.la ../MatrixOps/libmatops.la ../PH/libPH.la ../Splines/libspline.la  ../IO/libIO.la ../Integration/libquad.la ../Distributed/libdistrib.la ../SpecialFunctions/libspecfun.la  ../MPI/libcomm.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(GSL_LIBS) $(FLIBS) 
-AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(GSL_CFLAGS)
-
+AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(GSL_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)
 noinst_LTLIBRARIES = libpairact.la
 libpairact_la_SOURCES = DavidPAClass.cc    \
                         DavidPAClass.h     \
@@ -41,7 +40,7 @@ includedir=$(prefix)/include/Common/PairAction
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
-libpairact_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
+libpairact_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(GSL_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)
 libpairact_la_LIBADD   =
 
 #if HAVE_GMP

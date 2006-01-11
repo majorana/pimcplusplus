@@ -20,7 +20,6 @@ double dr_dx (double x, double r, void *potptr)
 void
 CoreTransform::Initialize(Potential *pot, int NumPoints)
 {
-
   // First, we calculate the r->x transform by integrating
   rMax = pot->GetCoreRadius();
   rgrid.Init (0.0, rMax, NumPoints);

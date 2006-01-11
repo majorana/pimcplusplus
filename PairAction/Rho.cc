@@ -28,7 +28,6 @@ void Rho::Initialize(int lmax, double Lambda, scalar FinalBeta, int NumSquares,
     DebugFile = fopen (debugName, "w");
   }
 
-
   if ((numProcs % NumChannels) == 0) {
     // We have 1 or more processors per channel
     int ProcsPerChannel = numProcs/NumChannels;
@@ -676,8 +675,8 @@ void Rho::UdU_Coulomb (double r, double rp, double costheta,
 
 double Rho::U(double r, double rp, double costheta)
 {
-  cerr << "r = " << r << " rp = " << rp << " costheta = " 
-       << costheta << endl;
+//   cerr << "r = " << r << " rp = " << rp << " costheta = " 
+//        << costheta << endl;
 
   double LogTotalRho0r = Log_rho0 (r, rp, costheta, lambda, beta);
   double x = Transform.r2x(r);
