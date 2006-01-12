@@ -436,7 +436,7 @@ void Rho::UdU_local(double r, double rp, double costheta,
       double drho0l = drho0_dbeta_l(l, x, xp, lambda, beta);
       double expmUval = exp(-Ulvec(l));
       double dUexp = dUlvec(l)*exp(-Ulvec(l));
-      if (Extrapolate_ls && ((r+rp)>5.0)) {
+      if (Extrapolate_ls /*&& ((r+rp)>5.0)*/) {
 	expmUval -= expmUlmax;
 	dUexp -= dUlmax * exp(-Ulvec(lmax));
       }
@@ -448,7 +448,7 @@ void Rho::UdU_local(double r, double rp, double costheta,
 //       fprintf (stderr, "Legendre(%d) = %1.6e\n", l, LegTerm);
 //       fprintf (stderr, "U_%d = %1.6e\n", l, Ulvec(l));
     }
-  if (Extrapolate_ls && ((r+rp)>5.0)) {
+  if (Extrapolate_ls /*&& ((r+rp)>5.0)*/) {
     rho += 4.0*M_PI*x*xp*expmUlmax*rho0x;
     drho += 4.0*M_PI*x*xp*(drho0x*expmUlmax - rho0x*expmUlmax*dUlmax);
   }
@@ -485,25 +485,24 @@ void Rho::UdU_PH(double r, double rp, double costheta,
   int lmax = U_ls.size()-1;
   double Ulmax = Ulvec(lmax);
   double dUlmax = dUlvec(lmax);
-  for (int l=0; l<=3*lmax; l++)
-    {
-      double rho0l = exp(Log_rho0_l (l, x, xp, lambda, beta));
-      double drho0l = drho0_dbeta_l(l, x, xp, lambda, beta);
-      double Ul, dUl;
-      if ((r+rp) < 3.8) {
-	Ul  = (l > lmax) ? (Ulmax*(double)l/(double)lmax) : Ulvec(l);
-	dUl = (l > lmax) ? (dUlmax*(double)l/(double)lmax) : dUlvec(l);
-      }
-      else {
-	Ul  = (l > lmax) ?  Ulmax :  Ulvec(l);
-	dUl = (l > lmax) ? dUlmax : dUlvec(l);
-      }
-      double expmUval = exp(-Ul);
-      double dUexp = dUl*exp(-Ul);
-      double LegTerm = (2.0*l+1.0)* Legendre(l, costheta);
-      rho += LegTerm * expmUval * rho0l;
-      drho += LegTerm * (expmUval * drho0l - rho0l*dUexp);
+  for (int l=0; l<=3*lmax; l++) {
+    double rho0l = exp(Log_rho0_l (l, x, xp, lambda, beta));
+    double drho0l = drho0_dbeta_l(l, x, xp, lambda, beta);
+    double Ul, dUl;
+    if ((r+rp) < 3.8) {
+      Ul  = (l > lmax) ? (Ulmax*(double)l/(double)lmax) : Ulvec(l);
+      dUl = (l > lmax) ? (dUlmax*(double)l/(double)lmax) : dUlvec(l);
     }
+    else {
+      Ul  = (l > lmax) ?  Ulmax :  Ulvec(l);
+      dUl = (l > lmax) ? dUlmax : dUlvec(l);
+    }
+    double expmUval = exp(-Ul);
+    double dUexp = dUl*exp(-Ul);
+    double LegTerm = (2.0*l+1.0)* Legendre(l, costheta);
+    rho += LegTerm * expmUval * rho0l;
+    drho += LegTerm * (expmUval * drho0l - rho0l*dUexp);
+  }
 
   rho *= Prefact;
   drho*= Prefact;
