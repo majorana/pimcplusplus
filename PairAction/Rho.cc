@@ -1,5 +1,6 @@
 #include "Rho.h"
 #include "../SpecialFunctions/SpecialFunctions.h"
+#include "../nan.h"
 #include <unistd.h>
 
 
@@ -106,9 +107,11 @@ void Rho::Initialize(int lmax, double Lambda,
 
 
 /// Collect the various U_l's from the different processor groups.
-void Rho::GatherU_ls()
+void 
+Rho::GatherU_ls()
 {
   int myWorldProc = WorldComm.MyProc();
+  cerr << "MyProc = " << myWorldProc << " and I'm in GatherU_ls().\n";
   int myGroupProc = GroupComm.MyProc();
   /// This will be a receive buffer for proc 0 and a send buffer
   /// for all others.
@@ -116,77 +119,68 @@ void Rho::GatherU_ls()
   Array<double,1> Buff((NumPoints*(NumPoints+1))/2);
   int NumSCPoints = U_ls(0).SCgrid.NumPoints;
   Array<double,1> SCBuff(NumSCPoints*NumPoints);
-  if (myWorldProc == 0)
-    {
-      for (int group=1; group < NumGroups; group++)
-	for (int lindex=0; lindex<ChannelsPerGroup; lindex++)
-	  {
-	    int l = lindex*NumGroups + group;
-	    int groupLeader = group * ProcsPerGroup;
-	    // First, receive the U matrix
-	    WorldComm.Receive (groupLeader, Buff);
-	    for (int row=0; row<NumPoints; row++)
-	      for (int col=0; col<=row; col++)
-		{
-		  int index = Index(row,col);
-		  U_ls(l).U(row,col) = Buff(index);
-		  U_ls(l).U(col,row) = Buff(index);
-		}
-	    // Now receive the dU matrix
-	    WorldComm.Receive (groupLeader, Buff);
-	    for (int row=0; row<NumPoints; row++)
-	      for (int col=0; col<=row; col++)
-		{
-		  int index = Index(row,col);
-		  U_ls(l).dU(row,col) = Buff(index);
-		  U_ls(l).dU(col,row) = Buff(index);
-		}
-	    // Now receive the SC matrix
-	    WorldComm.Receive (groupLeader, SCBuff);
-	    for (int row=0; row<NumSCPoints; row++)
-	      for (int col=0; col<NumPoints; col++)
-		{
-		  int index = row*NumPoints+col;
-		  U_ls(l).SC(row,col) = SCBuff(index);
-		}
-	    // Now receive the Yl array
-	    U_ls(l).Yl.resize(NumPoints);
-	    WorldComm.Receive (groupLeader, U_ls(l).Yl);
-	    // Make sure beta is updated
-	    U_ls(l).beta = U_ls(0).beta;
+  if (myWorldProc == 0) {
+    for (int group=1; group < NumGroups; group++)
+      for (int lindex=0; lindex<ChannelsPerGroup; lindex++) {
+	int l = lindex*NumGroups + group;
+	int groupLeader = group * ProcsPerGroup;
+	// First, receive the U matrix
+	WorldComm.Receive (groupLeader, Buff);
+	for (int row=0; row<NumPoints; row++)
+	  for (int col=0; col<=row; col++) {
+	    int index = Index(row,col);
+	    U_ls(l).U(row,col) = Buff(index);
+	    U_ls(l).U(col,row) = Buff(index);
 	  }
-    }
-  else if (myGroupProc == 0) // I'm the group leader
-    {
-      for (int lindex=0; lindex<ChannelsPerGroup; lindex++)
-	{
-	  // First, send the U matrix
-	  for (int row=0; row<NumPoints; row++)
-	    for (int col=0; col<=row; col++)
-	      {
-		//fprintf (stderr, "row = %4d col = %4d index = %4d\n", 
-		//	 row, col, Index(row,col));
-		Buff(Index(row,col)) = U_ls(lindex).U(row,col);
-	      }
-		
-	  WorldComm.Send(0, Buff);
-	  // Next, send the dU matrix
-	  for (int row=0; row<NumPoints; row++)
-	    for (int col=0; col<=row; col++)
-	      Buff(Index(row,col)) = U_ls(lindex).dU(row,col);
-	  WorldComm.Send(0, Buff);
-	  // Now send the SC matrix
-	  for (int row=0; row<NumSCPoints; row++)
-	    for (int col=0; col<NumPoints; col++)
-	      {
-		int index = row*NumPoints+col;
-		SCBuff(index) = U_ls(lindex).SC(row,col);
-	      }
-	  WorldComm.Send(0, SCBuff);
-	  // Now send the Yl array
-	  WorldComm.Send(0, U_ls(lindex).Yl);
+	// Now receive the dU matrix
+	WorldComm.Receive (groupLeader, Buff);
+	for (int row=0; row<NumPoints; row++)
+	  for (int col=0; col<=row; col++) {
+	    int index = Index(row,col);
+	    U_ls(l).dU(row,col) = Buff(index);
+	    U_ls(l).dU(col,row) = Buff(index);
+	  }
+	// Now receive the SC matrix
+	WorldComm.Receive (groupLeader, SCBuff);
+	for (int row=0; row<NumSCPoints; row++)
+	  for (int col=0; col<NumPoints; col++) {
+	    int index = row*NumPoints+col;
+	    U_ls(l).SC(row,col) = SCBuff(index);
+	  }
+	// Now receive the Yl array
+	U_ls(l).Yl.resize(NumPoints);
+	WorldComm.Receive (groupLeader, U_ls(l).Yl);
+	// Make sure beta is updated
+	U_ls(l).beta = U_ls(0).beta;
+      }
+  }
+  else if (myGroupProc == 0) // I'm the group leader {
+    for (int lindex=0; lindex<ChannelsPerGroup; lindex++) {
+      // First, send the U matrix
+      for (int row=0; row<NumPoints; row++)
+	for (int col=0; col<=row; col++) {
+	  //fprintf (stderr, "row = %4d col = %4d index = %4d\n", 
+	  //	 row, col, Index(row,col));
+	  Buff(Index(row,col)) = U_ls(lindex).U(row,col);
 	}
+      
+      WorldComm.Send(0, Buff);
+      // Next, send the dU matrix
+      for (int row=0; row<NumPoints; row++)
+	for (int col=0; col<=row; col++)
+	  Buff(Index(row,col)) = U_ls(lindex).dU(row,col);
+      WorldComm.Send(0, Buff);
+      // Now send the SC matrix
+      for (int row=0; row<NumSCPoints; row++)
+	for (int col=0; col<NumPoints; col++) {
+	  int index = row*NumPoints+col;
+	  SCBuff(index) = U_ls(lindex).SC(row,col);
+	}
+      WorldComm.Send(0, SCBuff);
+      // Now send the Yl array
+      WorldComm.Send(0, U_ls(lindex).Yl);
     }
+  cerr << "MyProc = " << myWorldProc << " and I'm in GatherU_ls().\n";
 }
 
 /// Broadcast all the U_l's from processor 0 to all the other processors.
@@ -538,8 +532,10 @@ void Rho::UdU(double r, double rp, double costheta,
   // Inside the core, it seems that the approximation that 
   // U_l \approx l/lmax *U_{lmax} for l>lmax. 
   //  Outside the core, it seems that U_l \approx U_{lmax} for l>lmax.
-  if (Pot->IsPH()&&((r+rp)<3.8))
+  if (Pot->IsPH()&&((r+rp)<3.8)) {
+    cerr << "Using PH version of UdU.\n";
     UdU_PH(r, rp, costheta, Ulvec, dUlvec, U, dU);
+  }
   else
     UdU_local (r, rp, costheta, Ulvec, dUlvec, U, dU);
 }

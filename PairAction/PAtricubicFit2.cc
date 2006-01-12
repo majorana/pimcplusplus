@@ -191,7 +191,7 @@ void PAtricubicFit2Class::DoFit (Rho &rho)
 	}
 	else {
 	  rho.UdU(r,rp,costheta, Ul, dUl, U, dU);
-	  if (isnan(U)) {
+	  if (myIsNAN(U)) {
 	    //U = Usemi.U(r,rp,costheta);
 	    fprintf (stderr, "NAN in U at (qi,yi,ti) = (%d,%d,%d)\n",
 		     qi, yi, ti); 
@@ -200,7 +200,7 @@ void PAtricubicFit2Class::DoFit (Rho &rho)
 	    fprintf (stderr, "exp(-s^2/4lb) = %1.4e\n", 
 		     exp(-s*s/(4.0*lambda*beta)));
 	  }
-	  if (isnan(dU)) {
+	  if (myIsNAN(dU)) {
 	    //dU = Usemi.dU(r,rp,costheta);
 	    fprintf (stderr, "NAN in dU at (qi,yi,ti) = (%d,%d,%d)\n",
 		     qi, yi, ti);
@@ -269,7 +269,7 @@ PAtricubicFit2Class::Error(Rho &rho, double &Uerror, double &dUerror)
 
 	Ufit = U(q, z, s*s, level);
 	dUfit = dU(q, z, s*s, level);
-	if (!isnan(Uex) && !isnan(dUex)) {
+	if (!myIsNAN(Uex) && !myIsNAN(dUex)) {
 	  if (s <= zmax) {
 	    U2err += w*(Uex-Ufit)*(Uex-Ufit);
 	    dU2err += w*(dUex-dUfit)*(dUex-dUfit);
@@ -371,7 +371,7 @@ PAtricubicFit2Class::U(double q, double z, double s2, int level)
     else {
       if (t < 1.0) {
 	double spline = Usplines(level)(q,y,t);
-	if (isnan (spline)) {
+	if (myIsNAN (spline)) {
 	  cerr << "q = " << q << " s = " << s << " z = " << z << endl;
 	  cerr << "NAN in spline!!!!!!!!\n";
 	}
@@ -398,7 +398,7 @@ PAtricubicFit2Class::U(double q, double z, double s2, int level)
     double r = q+0.5*z;
     double rp = q-0.5*z;
     double prim  = 0.5*beta*(Pot->V(r)+Pot->V(rp));
-    if (isnan(prim))
+    if (myIsNAN(prim))
       cerr << "NAN in prim!!!!!\n";
     return (prim);
   }

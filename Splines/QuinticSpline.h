@@ -2,6 +2,7 @@
 #define QUINTIC_SPLINE_H
 
 #include "Grid.h"
+#include "../nan.h"
 #include <iostream>
 
 
@@ -99,19 +100,6 @@ public:
   }
 };
 
-
-
-inline bool myIsNAN (double x)
-{
-  union 
-  {
-    double d;
-    unsigned long long int l;
-  } val;
-  val.d = x;
-  return ((val.l == (unsigned long long int)0xfff8000000000000ULL) ||
-	  (val.l == (unsigned long long int)0x7ff8000000000000ULL));
-}
 
 
 inline int QuinticSpline::NumPoints() const 
