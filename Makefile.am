@@ -45,7 +45,7 @@ libcommon_la_LIBADD = IO/libIO.la                    \
 
 
 includedir=$(prefix)/include/Common
-include_HEADERS = Blitz.h config.h
+include_HEADERS = Blitz.h config.h nan.h
 
 pkgconfigdir = $(libdir)/pkgconfig/
 pkgconfig_DATA = common.pc
