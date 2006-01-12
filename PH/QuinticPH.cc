@@ -2,7 +2,14 @@
 
 bool QuinticPH::IsPH()
 { 
-  return true; 
+  /// Check to see if we really have position-dependent masses.
+  bool isph = false;
+  for (double y=0.0; y<=1.0; y+=0.001) {
+    double r = CoreRadius * y;
+    isph = isph || (fabs(A(r)-1.0)>1.0e-6);
+    isph = isph || (fabs(B(r)-1.0)>1.0e-6);
+  }
+  return isph;
 }
 
 double QuinticPH::GetCoreRadius()
