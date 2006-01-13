@@ -816,8 +816,8 @@ PAtricubicFit2Class::Derivs(double q, double z, double s2, int level,
   zs2yt (q, z, s, level, y, t);
   TinyMatrix<double,3,3> partDerivs;
 
-  cerr << "y = " << y << "    t = " << t << endl;
-  fprintf (stderr, "t = %1.18f\n", t);
+//   cerr << "y = " << y << "    t = " << t << endl;
+//   fprintf (stderr, "t = %1.18f\n", t);
 
   if (q<=qgrid->End) {
     if (q == 0.0) {
