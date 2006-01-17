@@ -157,6 +157,7 @@ public:
   ///  get result.
   double AllSum (double a);
   void AllSum (Array<double,1> &in, Array<double,1> &out);
+  void AllSum (Array<double,2> &in, Array<double,2> &out);
   void AllSum (Array<TinyVector<double,2>,1> &in, 
 	       Array<TinyVector<double,2>,1> &out);
   void AllSum (Array<TinyVector<double,3>,1> &in, 
@@ -346,6 +347,9 @@ public:
   {  return a; } 
 
   inline void AllSum (Array<double,1> &in, Array<double,1> &out)
+  { out = in; }
+
+  inline void AllSum (Array<double,2> &in, Array<double,2> &out)
   { out = in; }
 
   inline void AllSum (Array<TinyVector<double,2>,1> &in, 
