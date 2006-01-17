@@ -79,6 +79,7 @@ public:
   void Broadcast (int root, bool &val);
   void Broadcast (int root, double &val);
   void Broadcast (int root, Array<double,1> &buff);
+  void Broadcast (int root, Array<double,2> &buff);
   void Broadcast (int root, Array<complex<double>,2> &buff);
   void Broadcast (int root, Array<Vec2,1> &buff);
   void Broadcast (int root, Array<Vec3,1> &buff);
@@ -257,6 +258,8 @@ public:
   inline void Broadcast(int root, bool &val) {}
   inline void Broadcast(int root, double &val) {}
   inline void Broadcast(int root, Array<double,1> &buff)
+  { /* Do nothing in serial mode */ }
+  inline void Broadcast(int root, Array<double,2> &buff)
   { /* Do nothing in serial mode */ }
   void Broadcast (int root, Array<complex<double>,2> &buff) {}
   inline void Broadcast (int root, Array<Vec2,1> &buff)

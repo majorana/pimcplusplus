@@ -71,6 +71,14 @@ CommunicatorClass::Broadcast (int root, Array<double,1> &buff)
 }
 
 void 
+CommunicatorClass::Broadcast (int root, Array<double,2> &buff)
+{
+  MPI_Bcast(buff.data(), buff.rows()*buff.cols(), MPI_DOUBLE, root, MPIComm);
+}
+
+
+
+void 
 CommunicatorClass::Broadcast (int root, Array<complex<double>,2> &buff)
 {
   MPI_Bcast(buff.data(), 2*buff.size(), MPI_DOUBLE, root, MPIComm);
