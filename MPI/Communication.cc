@@ -451,6 +451,7 @@ CommunicatorClass::AllSum (Array<double,1> &in, Array<double,1> &out)
 		MPI_DOUBLE, MPI_SUM, MPIComm);
 }
 
+void
 CommunicatorClass::AllSum (Array<double,2> &in, Array<double,2> &out)
 {
   assert (in.rows() == out.rows());
