@@ -61,10 +61,11 @@ LangevinMoveClass::CalcCovariance()
 //     return;
 //   }
   int N = R.size();
+  int numFs = FDeque.size();
   double Ninv = 1.0/(double)N;
 
   /// First, sum the forces over the processors in my clone.
-  for (int i=0; i<FDeque.size(); i++) {
+  for (int i=0; i<numFs; i++) {
     PathData.IntraComm.AllSum(FDeque[i], FTmp);
     FDeque[i] = FShort;
   }
@@ -72,18 +73,18 @@ LangevinMoveClass::CalcCovariance()
   Fmean = 0.0;
   /// Compute mean force
   int n=0;
-  for (int k=0; k<FDeque.size(); k++)
+  for (int k=0; k<numFs; k++)
     for (int ptcl=0; ptcl<N; ptcl++) 
       for (int dim=0; dim<NDIM; dim++) {
 	Fmean(n) += FDeque[k](ptcl)[dim];
 	n++;
       }
-  Fmean = (1.0/(double)FDeque.size())*Fmean;
+  Fmean = (1.0/(double)numFs)*Fmean;
 
   
   CoVar = 0.0;
   /// Now, calculate the covariance and 
-  for (int k=0; k<FDeque.size(); k++) {
+  for (int k=0; k<numFs; k++) {
     int i=0;
     for (int ptcl1=0; ptcl1<N; ptcl1++) 
       for (int dim1=0; dim1<NDIM; dim1++) {
@@ -97,7 +98,7 @@ LangevinMoveClass::CalcCovariance()
 	i++;
       }
   }
-  CoVar = (1.0/(double)(FDeque.size()-1))*CoVar;
+  CoVar = (1.0/(double)(numFs-1))*CoVar;
   /// Subtract <F(i)><F(j)>
   for (int i=0; i<CoVar.rows(); i++)
     for (int j=0; j<CoVar.cols(); j++)
@@ -105,7 +106,7 @@ LangevinMoveClass::CalcCovariance()
 
   /// Compute the average autocorrelation time for the diagaonal
   /// elements only.
-  Array<double,1> x(FDeque.size());
+  Array<double,1> x(numFs);
   double tmpMean, tmpVar, tmpKappa;
   kappa = 0.0;
   for (int ptcl=0; ptcl<N; ptcl++)
@@ -129,20 +130,29 @@ LangevinMoveClass::CalcCovariance()
   if (PathData.IntraComm.MyProc() == 0) {
     int numClones = PathData.GetNumClones();
 
+    cerr << "Before intercomm AllSum1 and MyClone = " 
+	 << PathData.GetCloneNum() << endl;
     PathData.InterComm.AllSum(Fmean, FallSum);
+    cerr << "After intercomm AllSum1 and MyClone = " 
+	 << PathData.GetCloneNum() << endl;
     Fmean = 1.0/(double)numClones *FallSum;
 
+    cerr << "Before intercomm AllSum2 and MyClone = " 
+	 << PathData.GetCloneNum() << endl;
     PathData.InterComm.AllSum(CoVar, A);
+    cerr << "After intercomm AllSum2 and MyClone = " 
+	 << PathData.GetCloneNum() << endl;
     double beta = PathData.Path.tau * PathData.Path.TotalNumSlices;
     A *= 0.5*TimeStep*beta/(Mass*(double)(numClones*numClones));
     /// Now calculate eigenvalues and eigenvectors
     SymmEigenPairs (A, A.extent(0), Lambda, L);
   }
   /// Now, broadcast eigenvectors and values to all processors
+  cerr << "Before broadcasts.  MyClone = " << PathData.GetCloneNum() << endl;
   PathData.IntraComm.Broadcast(0, L);
   PathData.IntraComm.Broadcast(0, Lambda);
   PathData.IntraComm.Broadcast(0, Fmean);
-
+  cerr << "After broadcasts.  MyClone = " << PathData.GetCloneNum() << endl;
   /// Transpose eigenvectors
   for (int i=0; i<L.rows(); i++)
     for (int j=0; j<L.cols(); j++)
