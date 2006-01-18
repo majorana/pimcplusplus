@@ -43,7 +43,8 @@ Stats (Array<double,1> &x, double &mean, double &var, double &kappa)
       c_i += (x(j)-mean) * (x(j+i)-mean);
     c_i /= (var*(double)(N-i));
     i++;
-    kappa += c_i;
+    if (c_i > 0)
+      kappa += c_i;
     done = (i>=N) || (c_i<=0.0);
   }
 }
@@ -159,32 +160,12 @@ LangevinMoveClass::CalcCovariance()
 void
 LangevinMoveClass::CalcFriction()
 {
-  if (NumFs < 20) {
-    Lambda = 1.0e-5;
-    L      = 0.0;
-    Ltrans = 0.0;
-    for (int i=0; i<L.extent(0); i++) {
-      L(i,i) = 1.0;
-      Ltrans(i,i) = 1.0;
-    }
-  }
-  else {
-    double ninv = 1.0/NumFs;
-    double beta = PathData.Path.tau * PathData.Path.TotalNumSlices;
-    double norm = 0.5*beta*Mass;
-    for (int i=0; i<A.extent(0); i++)
-      for (int j=0; j<A.extent(1); j++)
-	A(i,j) = (ninv*(FF(i,j) - ninv*Fmean(i)*Fmean(j)));
-    SymmEigenPairs(A, A.extent(0), Lambda, L);
-    for (int i=0; i<L.extent(0); i++)
-      for (int j=0; j<L.extent(1); i++)
-	Ltrans(i,j) = L(j,i);
-  }
+
 }
 
 
 void
-LangevinMoveClass::LDStep()
+LangevinMoveClass::VerletStep()
 {
   CalcCovariance();
   /// Write out positions and velocities
@@ -196,21 +177,9 @@ LangevinMoveClass::LDStep()
       WriteArray(i,j) = r[j];
   }
   Rvar.Write(WriteArray);
-
-  for (int i=0; i<V.size(); i++) 
-    for (int j=0; j<NDIM; j++)
-      WriteArray(i,j) = V(i)[j];
-  Vvar.Write(WriteArray);
-
-  for (int i=0; i<OldFShort.size(); i++) 
-    for (int j=0; j<NDIM; j++)
-      WriteArray(i,j) = OldFShort(i)[j];
-  FShortVar.Write(WriteArray);
-
-  for (int i=0; i<OldFShort.size(); i++) 
-    for (int j=0; j<NDIM; j++)
-      WriteArray(i,j) = OldFLong(i)[j];
-  FLongVar.Write(WriteArray);
+  Vec2Array (V, WriteArray);        Vvar.Write(WriteArray);
+  Vec2Array(OldFShort, WriteArray); FShortVar.Write(WriteArray);
+  Vec2Array (OldFLong, WriteArray); FLongVar.Write(WriteArray);
   FLongVar.Flush();
 
   // OldF holds the force computed at x(t).
@@ -246,18 +215,6 @@ LangevinMoveClass::LDStep()
     FLongSum(i) = zero;
   }
 
-  /// Accumulate statistics for covariance matrices.
-  for (int i=0; i<FF.extent(0); i++) {
-    int m1 = i/NDIM;
-    int m2 = i%NDIM;
-    Fmean(i) += OldFShort(m1)[m2] + OldFLong(m1)[m2];
-    for (int j=0; j<FF.extent(1); j++) {
-      int n1 = j/NDIM;
-      int n2 = j%NDIM;
-      FF(i,j) += ( (OldFShort(m1)[m2] + OldFLong(m1)[m2]) * 
-		   (OldFShort(n1)[n2] + OldFLong(n1)[n2]) );
-    }
-  }
   NumFs++;
 
 
@@ -286,12 +243,102 @@ LangevinMoveClass::LDStep()
   PathData.Actions.UpdateNodalActions();
 }
 
+
+
+void
+LangevinMoveClass::LangevinStep()
+{
+  /// Write out positions and velocities
+  TimeVar.Write(Time);
+  for (int i=0; i<R.size(); i++) {
+    dVec r = R(i);
+    PathData.Path.PutInBox(r);
+    for (int j=0; j<NDIM; j++) 
+      WriteArray(i,j) = r[j];
+  }
+  Rvar.Write(WriteArray);
+  Vec2Array (V, WriteArray);         Vvar.Write(WriteArray);
+  Vec2Array (OldFShort, WriteArray); FShortVar.Write(WriteArray);
+  Vec2Array (OldFLong, WriteArray);  FLongVar.Write(WriteArray);
+  FLongVar.Flush();
+
+
+  /// Calculate the mean force, covariance and eigenvalue
+  /// decomposition. 
+  CalcCovariance();
+  for (int i=0; i<Lambda.size(); i++) {
+    ExpLambda(i)   =   exp(-TimeStep*Lambda(i));
+    Expm1Lambda(i) = expm1(-TimeStep*Lambda(i));
+  }
+  
+  Vec2Array(R,  RArray);
+  Vec2Array(Rp, RpArray);
+
+  // Compute next R;  from eq. 5.22 of attaccalite thesis
+  /// Change into eigenbasis of covariace
+  MatVecProd (Ltrans, RArray,  TempArray);  RArray  = TempArray;
+  MatVecProd (Ltrans, RpArray, TempArray);  RpArray = TempArray;
+  MatVecProd (Ltrans, Fmean,   TempArray);  Fmean   = TempArray;
+  
+  for (int i=0; i<RArray.size(); i++) {
+    RArray (i) *= (1.0+ExpLambda(i));
+    RpArray(i) *= ExpLambda(i);
+    Fmean  (i) *= -MassInv*TimeStep/Lambda(i)*Expm1Lambda(i);
+  }
+
+  /// Change back into regular position space
+  MatVecProd (L, RArray,  TempArray);  RArray  = TempArray;
+  MatVecProd (L, RpArray, TempArray);  RpArray = TempArray;
+  MatVecProd (L, Fmean,   TempArray);  Fmean   = TempArray;
+
+  /// Update to new positions
+  Rp = R;
+  for (int i=0; i<R.size(); i++) {
+    R(i)[0] = RArray(3*i+0) - RpArray(3*i+0) + Fmean(3*i+0);
+    R(i)[1] = RArray(3*i+1) - RpArray(3*i+1) + Fmean(3*i+1);
+    R(i)[2] = RArray(3*i+2) - RpArray(3*i+2) + Fmean(3*i+2);
+  }
+
+  /// This formula is inaccurate.  Use 5.23 of Attaccalite thesis
+  V = (1.0/TimeStep)*(R-Rp);
+
+  // Put x(t+2dt) into the Path so we can start accumulating forces
+  // for the next step
+  int first = PathData.Path.Species(LDSpecies).FirstPtcl;
+  SetMode (NEWMODE);
+  for (int slice=0; slice<PathData.Path.NumTimeSlices(); slice++)
+    for (int i=0; i<R.size(); i++) 
+      PathData.Path(slice,i+first) = R(i) + TimeStep*V(i) + 
+	0.5*TimeStep*TimeStep* (OldFShort(i) + OldFLong(i));
+
+  /// Warp electron paths to follow ions
+  PathData.Path.WarpPaths(LDSpecies);
+  
+  SetMode (OLDMODE);
+  for (int slice=0; slice<PathData.Path.NumTimeSlices(); slice++)
+    for (int i=0; i<R.size(); i++) 
+      PathData.Path(slice,i+first) = R(i) + TimeStep*V(i) + 
+	0.5*TimeStep*TimeStep*(OldFShort(i)+OldFLong(i));
+
+  /// Increment the time
+  Time += TimeStep;
+  
+  /// Update the nodal actions
+  PathData.Actions.UpdateNodalActions();
+}
+
+
+
+
 void 
 LangevinMoveClass::MakeMove()
 {
   if (MCSteps >= (NumEquilSteps+NumAccumSteps)) {
     MCSteps = 0;
-    LDStep();
+    if (Integrator == VERLET)
+      VerletStep();
+    else
+      LangevinStep();
   }
   else if (MCSteps >= NumEquilSteps) {
     AccumForces();
@@ -311,32 +358,50 @@ LangevinMoveClass::Read(IOSectionClass &in)
   assert (in.ReadVar("NumEquilSteps", NumEquilSteps));
   assert (in.ReadVar("NumAccumSteps", NumAccumSteps));
   assert (in.ReadVar("Species",       speciesStr));
+  string integrator;
+  bool found = in.ReadVar ("Integrator", integrator);
+  if (found) {
+    if (integrator == "VERLET")
+      Integrator = VERLET;
+    else if (integrator == "LANGEVIN")
+      Integrator = LANGEVIN;
+    else {
+      cerr << "Unrecognized MD integrator \"" << integrator 
+	   << "\".  Exitting.\n";
+      abort();
+    }
+  }
 
   LDSpecies = PathData.Path.SpeciesNum(speciesStr);
   assert (LDSpecies != -1);
   SpeciesClass &species = PathData.Path.Species(LDSpecies);
   int numPtcls = species.NumParticles;
-  V.resize         (numPtcls);
-  R.resize         (numPtcls);
-  FShort.resize    (numPtcls);
-  FLong.resize     (numPtcls);
-  FTmp.resize      (numPtcls);
-  FShortSum.resize (numPtcls);
-  FLongSum.resize  (numPtcls);
-  FShortTmp.resize (numPtcls);
-  FLongTmp.resize  (numPtcls);
-  OldFShort.resize (numPtcls);
-  OldFLong.resize  (numPtcls);
-  Particles.resize (numPtcls);
-  WriteArray.resize(numPtcls,NDIM);
-  Fmean.resize  (NDIM*numPtcls);
-  FallSum.resize(NDIM*numPtcls);
-  FF.resize     (NDIM*numPtcls, NDIM*numPtcls);
-  A.resize      (NDIM*numPtcls, NDIM*numPtcls);
-  CoVar.resize  (NDIM*numPtcls, NDIM*numPtcls);
-  L.resize      (NDIM*numPtcls, NDIM*numPtcls);
-  Ltrans.resize (NDIM*numPtcls, NDIM*numPtcls);
-  Lambda.resize (NDIM*numPtcls);
+  V.resize           (numPtcls);
+  R.resize           (numPtcls);
+  Rp.resize          (numPtcls);
+  FShort.resize      (numPtcls);
+  FLong.resize       (numPtcls);
+  FTmp.resize        (numPtcls);
+  FShortSum.resize   (numPtcls);
+  FLongSum.resize    (numPtcls);
+  FShortTmp.resize   (numPtcls);
+  FLongTmp.resize    (numPtcls);
+  OldFShort.resize   (numPtcls);
+  OldFLong.resize    (numPtcls);
+  Particles.resize   (numPtcls);
+  WriteArray.resize  (numPtcls,NDIM);
+  Fmean.resize       (NDIM*numPtcls);
+  FallSum.resize     (NDIM*numPtcls);
+  A.resize           (NDIM*numPtcls, NDIM*numPtcls);
+  CoVar.resize       (NDIM*numPtcls, NDIM*numPtcls);
+  L.resize           (NDIM*numPtcls, NDIM*numPtcls);
+  Ltrans.resize      (NDIM*numPtcls, NDIM*numPtcls);
+  Lambda.resize      (NDIM*numPtcls);
+  ExpLambda.resize   (NDIM*numPtcls);
+  Expm1Lambda.resize (NDIM*numPtcls);
+  RArray.resize      (NDIM*numPtcls);
+  RpArray.resize     (NDIM*numPtcls);
+  TempArray.resize   (NDIM*numPtcls);
   NumFs = 0;
 
   dVec zero(0.0);
@@ -396,4 +461,9 @@ void LangevinMoveClass::InitVelocities()
     (0.5*(double)(NDIM*V.size())*kBT) << endl;
   assert (fabs((Esum/(0.5*(double)(NDIM*V.size())*kBT))-1.0) < 1.0e-12);
   assert ((0.5*Mass*dot(Vsum,Vsum)) < 1.0e-10*kBT);
+
+  /// Now initialize Rp
+  for (int i=0; i<Rp.size(); i++)
+    Rp(i) = R(i) - TimeStep*V(i);
+
 }

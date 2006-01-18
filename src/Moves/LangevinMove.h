@@ -4,10 +4,14 @@
 #include "MoveBase.h"
 #include <deque>
 
+typedef enum { VERLET, LANGEVIN } MDIntegratorType;
+
 class LangevinMoveClass : public MoveClass
 {
 protected:
-  Array<dVec,1> V, R, OldFShort, OldFLong, 
+  MDIntegratorType Integrator;
+
+  Array<dVec,1> V, R, Rp, OldFShort, OldFLong, 
     FShortSum, FLongSum, FShortTmp, FLongTmp;
 
   ///////////////////////////
@@ -22,11 +26,10 @@ protected:
   /// L stores the eigenvectors of A.  Ltran is its transpose
   Array<double,2> L, Ltrans;
   /// This stores the eigenvalues of A;
-  Array<double,1> Lambda;
+  Array<double,1> Lambda, ExpLambda, Expm1Lambda, RArray, RpArray, TempArray;
   /// FF stores <F_i F_j>.  This is used in computing the covariance
   /// matrix for the forces, which in turn is used to compute friction
   /// coefficents.  
-  Array<double,2> FF;
   /// This stores the long-averaged means
   Array<double,1> Fmean, FallSum;
   /// Kappa is the autocorrelation time for the force calculation
@@ -36,6 +39,10 @@ protected:
   void CalcFriction();
   void CalcCovariance();
 
+
+  //////////////////////
+  /// Misc functions ///
+  //////////////////////
 
   /// The species we are doing Langevin dynamics on
   int LDSpecies;
@@ -60,7 +67,8 @@ protected:
   double Time;
   void InitVelocities();
   void AccumForces();
-  void LDStep();
+  void VerletStep();
+  void LangevinStep();
   ObservableVecDouble2 Rvar, Vvar, FShortVar, FLongVar;
   Array<double,2> WriteArray;
   ObservableDouble TimeVar;
@@ -74,7 +82,7 @@ public:
     FShortVar("FShort", IOSection, pathData.Path.Communicator),
     FLongVar ("FLong",  IOSection, pathData.Path.Communicator),
     TimeVar("Time", IOSection, pathData.Path.Communicator),
-    Time(0.0)
+    Time(0.0), Integrator (VERLET)
   {
     // do nothing for now
   }
