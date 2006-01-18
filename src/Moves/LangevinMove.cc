@@ -54,6 +54,7 @@ Stats (Array<double,1> &x, double &mean, double &var, double &kappa)
 void
 LangevinMoveClass::CalcCovariance()
 {
+  cerr << "In CalcCovariance.\n";
 //   if (FDeque.size() < 20) {
 //     A = 0.0;
 //     for (int i=0; i<A.rows(); i++)
@@ -112,7 +113,7 @@ LangevinMoveClass::CalcCovariance()
   for (int ptcl=0; ptcl<N; ptcl++)
     for (int dim=0; dim<NDIM; dim++) {
       for (int k=0; k<x.size(); k++) 
-	x(k) = FDeque[k](ptcl)(dim);
+	x(k) = FDeque[k](ptcl)[dim];
       Stats (x, tmpMean, tmpVar, tmpKappa);
       kappa += tmpKappa;
     }
@@ -258,6 +259,7 @@ LangevinMoveClass::VerletStep()
 void
 LangevinMoveClass::LangevinStep()
 {
+  cerr << "In LangevinStep.\n";
   /// Write out positions and velocities
   TimeVar.Write(Time);
   for (int i=0; i<R.size(); i++) {
@@ -271,7 +273,7 @@ LangevinMoveClass::LangevinStep()
   Vec2Array (OldFShort, WriteArray); FShortVar.Write(WriteArray);
   Vec2Array (OldFLong, WriteArray);  FLongVar.Write(WriteArray);
   FLongVar.Flush();
-
+  cerr << "After variable writes.\n";
 
   /// Calculate the mean force, covariance and eigenvalue
   /// decomposition. 
@@ -281,8 +283,10 @@ LangevinMoveClass::LangevinStep()
     Expm1Lambda(i) = expm1(-TimeStep*Lambda(i));
   }
   
+  cerr << "Before R->Rarray.\n";
   Vec2Array(R,  RArray);
   Vec2Array(Rp, RpArray);
+  cerr << "After Rp->Rarrayp.\n";
 
   // Compute next R;  from eq. 5.22 of attaccalite thesis
   /// Change into eigenbasis of covariace
@@ -434,6 +438,7 @@ LangevinMoveClass::Read(IOSectionClass &in)
 
 void LangevinMoveClass::InitVelocities()
 {
+  cerr << "In InitVelocities.\n";
   double beta = PathData.Path.tau * PathData.Path.TotalNumSlices;
   double kBT = 1.0/beta;
   /// First, initialize randomly.  We must use global random numbers,
@@ -475,5 +480,5 @@ void LangevinMoveClass::InitVelocities()
   /// Now initialize Rp
   for (int i=0; i<Rp.size(); i++)
     Rp(i) = R(i) - TimeStep*V(i);
-
+  cerr << "Out of InitVelocities.\n";
 }
