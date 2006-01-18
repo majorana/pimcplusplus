@@ -65,21 +65,24 @@ LangevinMoveClass::CalcCovariance()
   int numFs = FDeque.size();
   double Ninv = 1.0/(double)N;
 
+  cerr << "Before AllSums.\n";
   /// First, sum the forces over the processors in my clone.
   for (int i=0; i<numFs; i++) {
     PathData.IntraComm.AllSum(FDeque[i], FTmp);
     FDeque[i] = FShort;
   }
 
+  cerr << "Before AllSums.\n";
   Fmean = 0.0;
   /// Compute mean force
-  int n=0;
-  for (int k=0; k<numFs; k++)
+  for (int k=0; k<numFs; k++) {
+    int n=0;
     for (int ptcl=0; ptcl<N; ptcl++) 
       for (int dim=0; dim<NDIM; dim++) {
 	Fmean(n) += FDeque[k](ptcl)[dim];
 	n++;
       }
+  }
   Fmean = (1.0/(double)numFs)*Fmean;
 
   
