@@ -317,6 +317,78 @@ public:
   { N=0; }
 };
 
+  
+inline 
+void Vec2Array (Array<Vec2,1> &vec, Array<double,1> &array)
+{
+  assert (array.extent(0) == vec.size());
+  assert (array.extent(1) == 2);
+  memcpy(array.data(), vec.data(), 
+	 array.extent(0)*array.extent(1)*sizeof(double));
+}
+
+inline 
+void Vec2Array (Array<Vec3,1> &vec, Array<double,1> &array)
+{
+  assert (array.extent(0) == vec.size());
+  assert (array.extent(1) == 3);
+  memcpy(array.data(), vec.data(), 
+	 array.extent(0)*array.extent(1)*sizeof(double));
+}
+
+inline 
+void Array2Vec (Array<double,1> &array, Array<Vec2,1> &vec)
+{
+  assert (array.extent(0) == vec.size());
+  assert (array.extent(1) == 2);
+  memcpy (vec.data(), array.data(), 
+	  array.extent(0)*array.extent(1)*sizeof(double));
+}
+
+inline 
+void Array2Vec (Array<double,1> &array, Array<Vec3,1> &vec)
+{
+  assert (array.extent(0) == vec.size());
+  assert (array.extent(1) == 3);
+  memcpy (vec.data(), array.data(), 
+	  array.extent(0)*array.extent(1)*sizeof(double));
+}
+
+
+inline 
+void Vec2Array (Array<Vec2,1> &vec, Array<double,2> &array)
+{
+  assert (array.size() == vec.size()*2);
+  memcpy(array.data(), vec.data(), sizeof(double)*array.size());
+}
+
+inline
+void Vec2Array (Array<Vec3,1> &vec, Array<double,2> &array)
+{
+  assert (array.size() == vec.size()*3);
+  memcpy(array.data(), vec.data(), sizeof(double)*array.size());
+}
+
+
+inline 
+void Array2Vec (Array<double,2> &array, Array<Vec2,1> &vec)
+{
+  assert (array.size() == vec.size()*2);
+  memcpy (vec.data(), array.data(), sizeof(double)*array.size());
+}
+
+inline
+void Array2Vec (Array<double,2> &array, Array<Vec3,1> &vec)
+{
+  assert (array.size() == vec.size()*3);
+  memcpy(vec.data(), array.data(), sizeof(double)*array.size());
+}
+
+
+
+
+
+
 #ifndef NAN
 #define NAN sqrt(-1.0)
 #endif
