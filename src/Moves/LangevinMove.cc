@@ -54,7 +54,6 @@ Stats (Array<double,1> &x, double &mean, double &var, double &kappa)
 void
 LangevinMoveClass::CalcCovariance()
 {
-  cerr << "In CalcCovariance.\n";
 //   if (FDeque.size() < 20) {
 //     A = 0.0;
 //     for (int i=0; i<A.rows(); i++)
@@ -65,14 +64,12 @@ LangevinMoveClass::CalcCovariance()
   int numFs = FDeque.size();
   double Ninv = 1.0/(double)N;
 
-  cerr << "Before AllSums.\n";
   /// First, sum the forces over the processors in my clone.
   for (int i=0; i<numFs; i++) {
     PathData.IntraComm.AllSum(FDeque[i], FTmp);
     FDeque[i] = FShort;
   }
 
-  cerr << "Before AllSums.\n";
   Fmean = 0.0;
   /// Compute mean force
   for (int k=0; k<numFs; k++) {
@@ -133,30 +130,18 @@ LangevinMoveClass::CalcCovariance()
   /// over all the clones and divide by the number
   if (PathData.IntraComm.MyProc() == 0) {
     int numClones = PathData.GetNumClones();
-
-    cerr << "Before intercomm AllSum1 and MyClone = " 
-	 << PathData.GetCloneNum() << endl;
     PathData.InterComm.AllSum(Fmean, FallSum);
-    cerr << "After intercomm AllSum1 and MyClone = " 
-	 << PathData.GetCloneNum() << endl;
     Fmean = 1.0/(double)numClones *FallSum;
-
-    cerr << "Before intercomm AllSum2 and MyClone = " 
-	 << PathData.GetCloneNum() << endl;
     PathData.InterComm.AllSum(CoVar, A);
-    cerr << "After intercomm AllSum2 and MyClone = " 
-	 << PathData.GetCloneNum() << endl;
     double beta = PathData.Path.tau * PathData.Path.TotalNumSlices;
     A *= 0.5*TimeStep*beta/(Mass*(double)(numClones*numClones));
     /// Now calculate eigenvalues and eigenvectors
     SymmEigenPairs (A, A.extent(0), Lambda, L);
   }
   /// Now, broadcast eigenvectors and values to all processors
-  cerr << "Before broadcasts.  MyClone = " << PathData.GetCloneNum() << endl;
   PathData.IntraComm.Broadcast(0, L);
   PathData.IntraComm.Broadcast(0, Lambda);
   PathData.IntraComm.Broadcast(0, Fmean);
-  cerr << "After broadcasts.  MyClone = " << PathData.GetCloneNum() << endl;
   /// Transpose eigenvectors
   for (int i=0; i<L.rows(); i++)
     for (int j=0; j<L.cols(); j++)
@@ -262,7 +247,6 @@ LangevinMoveClass::VerletStep()
 void
 LangevinMoveClass::LangevinStep()
 {
-  cerr << "In LangevinStep.\n";
   /// Write out positions and velocities
   TimeVar.Write(Time);
   for (int i=0; i<R.size(); i++) {
@@ -276,7 +260,6 @@ LangevinMoveClass::LangevinStep()
   Vec2Array (OldFShort, WriteArray); FShortVar.Write(WriteArray);
   Vec2Array (OldFLong, WriteArray);  FLongVar.Write(WriteArray);
   FLongVar.Flush();
-  cerr << "After variable writes.\n";
 
   /// Calculate the mean force, covariance and eigenvalue
   /// decomposition. 
@@ -286,10 +269,8 @@ LangevinMoveClass::LangevinStep()
     Expm1Lambda(i) = expm1(-TimeStep*Lambda(i));
   }
   
-  cerr << "Before R->Rarray.\n";
   Vec2Array(R,  RArray);
   Vec2Array(Rp, RpArray);
-  cerr << "After Rp->Rarrayp.\n";
 
   // Compute next R;  from eq. 5.22 of attaccalite thesis
   /// Change into eigenbasis of covariace
@@ -441,7 +422,6 @@ LangevinMoveClass::Read(IOSectionClass &in)
 
 void LangevinMoveClass::InitVelocities()
 {
-  cerr << "In InitVelocities.\n";
   double beta = PathData.Path.tau * PathData.Path.TotalNumSlices;
   double kBT = 1.0/beta;
   /// First, initialize randomly.  We must use global random numbers,
@@ -483,5 +463,4 @@ void LangevinMoveClass::InitVelocities()
   /// Now initialize Rp
   for (int i=0; i<Rp.size(); i++)
     Rp(i) = R(i) - TimeStep*V(i);
-  cerr << "Out of InitVelocities.\n";
 }
