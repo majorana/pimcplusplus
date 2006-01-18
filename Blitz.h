@@ -330,8 +330,13 @@ inline
 void Vec2Array (Array<Vec3,1> &vec, Array<double,1> &array)
 {
   assert (array.extent(0) == (3*vec.size()));
-  memcpy(array.data(), vec.data(), 
-	 array.size()*sizeof(double));
+  for (int i=0; i<vec.size(); i++) {
+    array(3*i+0) = vec(i)[0];
+    array(3*i+1) = vec(i)[1];
+    array(3*i+2) = vec(i)[2];
+  }
+//   memcpy(array.data(), vec.data(), 
+// 	 array.size()*sizeof(double));
 }
 
 inline 
@@ -365,8 +370,13 @@ void Vec2Array (Array<Vec3,1> &vec, Array<double,2> &array)
 {
   assert (array.extent(0) == vec.size());
   assert (array.extent(1) == 3);
-  memcpy(array.data(), vec.data(), 
-	 array.size()*sizeof(double));
+  for (int i=0; i<vec.size(); i++) {
+    array(i,0) = vec(i)[0];
+    array(i,1) = vec(i)[1];
+    array(i,2) = vec(i)[2];
+  }
+//   memcpy(array.data(), vec.data(), 
+// 	 array.size()*sizeof(double));
 }
 
 
