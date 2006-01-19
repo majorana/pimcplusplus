@@ -257,13 +257,19 @@ LangevinMoveClass::LangevinStep()
   }
   Rvar.Write(WriteArray);
   Vec2Array (V, WriteArray);         Vvar.Write(WriteArray);
-  Vec2Array (OldFShort, WriteArray); FShortVar.Write(WriteArray);
-  Vec2Array (OldFLong, WriteArray);  FLongVar.Write(WriteArray);
-  FLongVar.Flush();
-
   /// Calculate the mean force, covariance and eigenvalue
   /// decomposition. 
   CalcCovariance();
+  LambdaVar.Write(Lambda);
+  for (int i=0; i<WriteArray.extent(0); i++) {
+    WriteArray(i,0) = Fmean(3*i+0);
+    WriteArray(i,1) = Fmean(3*i+1);
+    WriteArray(i,2) = Fmean(3*i+2);
+  }
+  FVar.Write(WriteArray);
+  FVar.Flush();
+
+
   for (int i=0; i<Lambda.size(); i++) {
     ExpLambda(i)   =   exp(-TimeStep*Lambda(i));
     Expm1Lambda(i) = expm1(-TimeStep*Lambda(i));

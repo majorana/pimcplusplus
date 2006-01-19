@@ -69,7 +69,8 @@ protected:
   void AccumForces();
   void VerletStep();
   void LangevinStep();
-  ObservableVecDouble2 Rvar, Vvar, FShortVar, FLongVar;
+  ObservableVecDouble2 Rvar, Vvar, FVar, FShortVar, FLongVar;
+  ObservableVecDouble1 LambdaVar;
   Array<double,2> WriteArray;
   ObservableDouble TimeVar;
 public:
@@ -79,8 +80,10 @@ public:
     MoveClass (pathData, outSection), MCSteps(0), LDSteps(0),
     Rvar("R", IOSection, pathData.Path.Communicator),
     Vvar("V", IOSection, pathData.Path.Communicator),
+    FVar("F", IOSection, pathData.Path.Communicator),
     FShortVar("FShort", IOSection, pathData.Path.Communicator),
     FLongVar ("FLong",  IOSection, pathData.Path.Communicator),
+    LambdaVar ("Lambda",  IOSection, pathData.Path.Communicator),
     TimeVar("Time", IOSection, pathData.Path.Communicator),
     Time(0.0), Integrator (VERLET)
   {
