@@ -4,14 +4,24 @@ MDVisualClass::MDVisualClass() :
   MainVBox(false, 0), 
   QuitButton("Quit"),
   FrameAdjust(0.0, 0.0, 0.0),
+  SpeedAdjust(5.0, 1.0, 10.0),
   CurrentFrame(0),
   PlayDirection(1),
   TimeoutDelay(10),
-  MDExport(*this)
+  MDExport(*this),
+  UpToDate(true)
 {
   FrameScale.set_adjustment(FrameAdjust);
   FrameScale.signal_value_changed().connect
     (sigc::mem_fun(*this, &MDVisualClass::OnFrameChange));
+
+  SpeedScale.set_adjustment(SpeedAdjust);
+  SpeedScale.signal_value_changed().connect
+    (sigc::mem_fun(*this, &MDVisualClass::OnSpeedChange));
+  SpeedFrame.set_label("Speed");
+  SpeedFrame.add(SpeedScale);
+  SpeedScale.property_width_request().set_value(100);
+  TimeoutDelay = (int) round (20.0/SpeedAdjust.get_value());
 
   PlayImage.property_file().set_value(FindFullPath("player_play.png"));
   PlayButton.set_icon_widget(PlayImage);
@@ -113,6 +123,7 @@ MDVisualClass::MDVisualClass() :
   // Pack the boxes //
   ////////////////////
   ToolBox.pack_start(Tools);
+  ToolBox.pack_start(SpeedFrame, Gtk::PACK_SHRINK,20);
   MainVBox.pack_start(*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK,0);
   MainVBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
   MainVBox.pack_start(PathVis);
@@ -204,14 +215,17 @@ MDVisualClass::OnClipToggle()
 bool
 MDVisualClass::OnTimeout()
 {
-  Glib::signal_idle().connect
-    (sigc::bind<bool>(mem_fun(*this, &MDVisualClass::DrawFrame), false));
+  if (UpToDate) {
+    UpToDate = false;
+    Glib::signal_idle().connect
+      (sigc::bind<bool>(mem_fun(*this, &MDVisualClass::DrawFrame), false));
+  }
   //  DrawFrame();
   // PathVis.Invalidate();
   if (PlayDirection == 1) {
     if (CurrentFrame < (Trajectory.extent(0)-1)) {
       CurrentFrame++;
-      FrameAdjust.set_value(CurrentFrame);
+      //      FrameAdjust.set_value(CurrentFrame);
       return true;
     }
     else {
@@ -222,7 +236,7 @@ MDVisualClass::OnTimeout()
   else if (PlayDirection == -1) {
     if (CurrentFrame > 0) {
       CurrentFrame--;
-      FrameAdjust.set_value(CurrentFrame);
+      //      FrameAdjust.set_value(CurrentFrame);
       return true;
     }
     else {
@@ -309,6 +323,9 @@ MDVisualClass::OnFrameChange()
 bool
 MDVisualClass::DrawFrame(bool offScreen)
 {
+  /// Update frame adjust
+  FrameAdjust.set_value(CurrentFrame);
+
   bool clipping = ClipButton.get_active();
   for (int i=0; i<PathVis.Objects.size(); i++)
     delete PathVis.Objects[i];
@@ -318,7 +335,7 @@ MDVisualClass::DrawFrame(bool offScreen)
   boxObject->Set (Box, clipping);
   PathVis.Objects.push_back(boxObject);
   
-  const double radius = 3.5;
+  const double radius = 2.5;
 
   list<Vec3>::iterator iter;
   list<Vec3> sphereList;
@@ -389,6 +406,7 @@ MDVisualClass::DrawFrame(bool offScreen)
     PathVis.Objects.push_back(sphere);
   }
   PathVis.Invalidate();
+  UpToDate = true;
   return false;
 }
 
@@ -425,6 +443,14 @@ MDVisualClass::Read(string filename)
   FrameScale.set_digits(0);
 
   DrawFrame();
+}
+
+
+void
+MDVisualClass::OnSpeedChange()
+{
+  TimeoutDelay = (int) round (20.0/SpeedAdjust.get_value());
+  OnPlayToggle();
 }
 
 

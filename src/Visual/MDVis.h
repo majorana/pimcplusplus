@@ -29,6 +29,9 @@ protected:
   Gtk::Button QuitButton;
   Gtk::HScale FrameScale;
   Gtk::Adjustment FrameAdjust;
+  Gtk::HScale SpeedScale;
+  Gtk::Adjustment SpeedAdjust;
+  Gtk::Frame SpeedFrame;
   
   Gtk::Toolbar Tools;
   Gtk::HBox ToolBox;
@@ -50,12 +53,14 @@ protected:
   void OnExport();
   void Quit();
   void OnFrameChange();
+  void OnSpeedChange();
   void OnPerspectiveToggle();
   void OnPlayToggle();
   void OnClipToggle();
   void OnViewReset();
   void OnOpen();
   sigc::connection TimeoutConnection;
+  bool UpToDate;
   /// The timeout callback is used for animation
   bool OnTimeout();
 
