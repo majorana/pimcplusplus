@@ -369,24 +369,23 @@ PathClass::InitRandomFixed(IOSectionClass &in,
   int N = species.NumParticles;
   Array<dVec,1> R(N);
   for (int i=0; i<N; i++) {
-    bool overlap = false;
+    bool overlap = true;
     int tries = 0;
-    while ((!overlap) && (tries < 1000)) {
+    while ((overlap) && (tries < 1000)) {
       tries++;
-      for (int dim=0; dim<NDIM; dim++) {
+      for (int dim=0; dim<NDIM; dim++) 
 	R(i)[dim] = Box[dim]*(Random.World()-0.5);
-	overlap = false;
-	for (int j=0; j<i; j++) {
-	  dVec disp = R(j)-R(i);
-	  PutInBox(disp);
-	  overlap = overlap || (dot(disp,disp) < (4.0*radius*radius));
-	}
+      overlap = false;
+      for (int j=0; j<i; j++) {
+	dVec disp = R(j)-R(i);
+	PutInBox(disp);
+	overlap = overlap || (dot(disp,disp) < (4.0*radius*radius));
       }
-      if (tries == 1000) {
-	cerr << "Exceed 1000 tries in InitRandomFixed.  "
-	     << "Decrease excluded radius.\n";
-	abort();
-      }
+    }
+    if (tries == 1000) {
+      cerr << "Exceed 1000 tries in InitRandomFixed.  "
+	   << "Decrease excluded radius.\n";
+      abort();
     }
   }
   for (int slice=0; slice<NumTimeSlices(); slice++)
