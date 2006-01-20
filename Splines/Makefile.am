@@ -1,6 +1,7 @@
-check_PROGRAMS =  TestFastCubic TestBicubic TestComplexMultiTricubicSpline TestGrid TestMultiTricubicSpline TestMyTricubic TestPeriodic TestQuintic
+check_PROGRAMS =  TestFastCubic TestFastMultiCubic TestBicubic TestComplexMultiTricubicSpline TestGrid TestMultiTricubicSpline TestMyTricubic TestPeriodic TestQuintic
 
 TestFastCubic_SOURCES = TestFastCubic.cc
+TestFastMultiCubic_SOURCES = TestFastMultiCubic.cc
 TestBicubic_SOURCES = TestBicubic.cc 
 TestComplexMultiTricubicSpline_SOURCES = TestComplexMultiTricubicSpline.cc
 TestGrid_SOURCES = TestGrid.cc
@@ -19,6 +20,8 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        CubicSpline.cc                 \
                        FastCubicSpline.cc             \
                        FastCubicSpline.h              \
+                       FastMultiCubicSpline.cc        \
+                       FastMultiCubicSpline.h         \
                        Grid.h                         \
                        Grid.cc                        \
                        ComplexMultiTricubicSpline.h   \

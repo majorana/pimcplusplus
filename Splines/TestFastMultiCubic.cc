@@ -1,4 +1,4 @@
-#include "FastCubicSpline.h"
+#include "FastMultiCubicSpline.h"
 #include "CubicSpline.h"
 #include "MyTricubicSpline.h"
 
@@ -6,53 +6,62 @@
 
 
 void
-TestFastCubic()
+TestFastMultiCubic()
 {
-  Array<double,1> y(20);
+  Array<double,2> y(500,5);
   for (int i=0; i<y.size(); i++) {
     double x = 2.0*M_PI*(double)i/(double)(y.size()-1);
-    y(i) = sin(x);
+    for (int j=0; j<5; j++)
+      y(i,j) = sin(x)*cos((double)j);
   }
   y(19) = y(0);
-  FastCubicSpline spline;
+  FastMultiCubicSpline spline;
   spline.Init (0.0, 2.0*M_PI, y, true);
   FILE *fout = fopen ("FastCubic.dat", "w");
-  for (double x=0.0; x<= 2.0*M_PI; x+=0.001) 
-    fprintf(fout, "%1.18e %1.18e %1.18e\n", x, spline(x), sin(x));
+  Array<double,1> val(5);
+  for (double x=0.0; x<= 2.0*M_PI; x+=0.001) {
+    spline(x, val);
+    fprintf (fout, "%1.18e ", x);
+    for (int j=0; j<val.size(); j++) 
+      fprintf (fout, "%1.18e %1.18e", val(j), sin(x)*cos((double)j));
+    fprintf (fout, "\n");
+  }
   fclose(fout);
 }
 
 void
-FastCubicSpeed()
+FastMultiCubicSpeed()
 {
-  Array<double,1> y(500);
-  for (int i=0; i<y.size(); i++) {
-    double x = 2.0*M_PI*(double)i/(double)(y.size()-1);
-    y(i) = sin(x);
+  Array<double,2> y(100,5);
+  for (int i=0; i<y.extent(0); i++) {
+    for (int j=0; j<y.extent(1); j++) {
+      double x = 2.0*M_PI*(double)i/(double)(y.size()-1);
+      y(i) = sin(x)*cos((double)j);
+    }
   }
-  FastCubicSpline spline;
-  spline.Init (0.0, 2.0*M_PI, y, 1.0, 1.0);
+  FastMultiCubicSpline spline;
+  spline.Init (0.0, 2.0*M_PI, y);
 
   clock_t start, end, rstart, rend;
 
-  const int numSamples = 1000000000;  
+  const int numSamples = 100000000;  
   rstart = clock();
   for (int i=0; i<numSamples; i++) {
     double x = 2.0*M_PI*drand48();
   }
   rend = clock();
 
+  Array<double,1> val(y.extent(1));
   start = clock();
   for (int i=0; i<numSamples; i++) {
     double x = 2.0*M_PI*drand48();
-    double p = spline(x);
+    spline(x, val);
   }
   end = clock();
 
   double time = (double)((end-start)-(rend-rstart))/(double)CLOCKS_PER_SEC;
 
-
-  fprintf (stderr, "Time for 1 spline evaluation = %1.5e\n",
+  fprintf (stderr, "Time for 1 multi spline evaluation = %1.5e\n",
 	   time/(double)numSamples);
 }
 
@@ -141,8 +150,8 @@ TricubicSpeed()
 
 main()
 {
-  TestFastCubic();
-  FastCubicSpeed();
+  //  TestFastMultiCubic();
+  FastMultiCubicSpeed();
   //  CubicSpeed();
   //  TricubicSpeed();
 } 

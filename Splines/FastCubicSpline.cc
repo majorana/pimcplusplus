@@ -6,17 +6,95 @@ FastCubicSpline::Init (double xStart, double xEnd, Array<double,1> NewYs,
 {
   int nx = NewYs.size();
   F.resize(nx);
+  for (int i=0; i<F.size(); i++)
+    F(i)[0] = NewYs(i);
   Xstart = xStart;
   Xend   = xEnd;
   dx = (xEnd-xStart)/(double)(nx-1);
   dxInv = 1.0/dx;
-  UpdateNatural();
+  Fixed    = true;
+  Periodic = false;
+  StartDeriv = startDeriv;
+  EndDeriv = endDeriv;
+  UpdateFixed();
 }
 
+
+void
+FastCubicSpline::Init (double xStart, double xEnd, Array<double,1> NewYs,
+		       bool isPeriodic)
+{
+  int nx = NewYs.size();
+  F.resize(nx);
+  for (int i=0; i<F.size(); i++)
+    F(i)[0] = NewYs(i);
+  Xstart = xStart;
+  Xend   = xEnd;
+  dx = (xEnd-xStart)/(double)(nx-1);
+  dxInv = 1.0/dx;
+  Fixed    = false;
+  Periodic = isPeriodic;
+  if (Periodic)
+    UpdatePeriodic();
+  else
+    UpdateNatural();
+}
+
+ 
 void
 FastCubicSpline::UpdatePeriodic()
 {
-
+  int M = F.extent(0)-1;
+  Array<double,1> lambda(M), mu(M), gamma(M);
+  Array<double,1> d(M);
+  assert (F(0)[0] == F(M)[0]);
+  assert (F(0)[1] == F(M)[1]);
+  // Setup lambdas, mus, and d's
+  lambda(0) = 0.25;
+  mu(0)     = 0.5-lambda(0);
+  d(0)      = 3.0*(lambda(0)*(F(0)[0]-F(M-1)[0])*dxInv +
+		   mu(0)    *(F(1)[0]-F(0)[0]) * dxInv);
+  lambda(M-1) = 0.25;
+  mu(M-1)     = 0.5*lambda(M-1);
+  d(M-1)      = 3.0*(lambda(M-1)*(F(M-1)[0]-F(M-2)[0])*dxInv +
+		     mu(M-1)    *(F(M)[0]  -F(M-1)[0])*dxInv);
+  gamma(M-1)  = 1.0;
+  gamma(0) = lambda(0);
+  
+  for (int ix=1; ix<M; ix++) {
+    lambda(ix) = 0.25;
+    mu(ix)     = 0.5-lambda(ix);
+    d(ix)      = 3.0*(lambda(ix)*(F(ix)[0]-F(ix-1)[0])*dxInv +
+		      mu(ix)   *(F(ix+1)[0]-F(ix)[0])*dxInv);
+  }
+  // Solve down lower triangular part
+  for (int ix=1; ix<(M-1); ix++) {
+    double diag = 1.0-lambda(ix)*mu(ix-1);
+    gamma(ix) = -gamma(ix-1)*lambda(ix);
+    d(ix) -= lambda(ix) * d(ix-1);
+    double diagInv = 1.0/diag;
+    gamma(ix) *= diagInv;
+    d(ix)     *= diagInv;
+    mu(ix)    *= diagInv;
+    // last row
+    d(M-1) -= mu(M-1) * d(ix-1);
+    gamma(M-1) -= mu(M-1) * gamma(ix-1);
+    mu(M-1) = -mu(M-1)*mu(ix-1);
+  }
+  // last row
+  // mu is really on top of lambda in the last row
+  lambda(M-1) += mu(M-1);
+  d(M-1) -= lambda(M-1) * d(M-2);
+  gamma(M-1) -= lambda(M-1) * (gamma(M-2)+ mu(M-2));
+  // Compute last derivative;
+  F(M-1)[1] = d(M-1)/gamma(M-1);
+  
+  // Now proceed up upper diagonal, backsubstituting
+  for (int ix=M-2; ix>=0; ix--)
+    F(ix)[1] = d(ix) - mu(ix)*F(ix+1)[1] - gamma(ix)*F(M-1)[1];
+  
+  // Finally, assign repeated last element for PBC
+  F(M)[1] = F(0)[1];
 }
 
 void
@@ -69,5 +147,6 @@ FastCubicSpline::UpdateNatural()
   for (j=Nx-2; j>=0; j--) {
     F(j)[1] -= mu(j) * F(j+1)[1];
   }
+  UpToDate = true;
 }
 
