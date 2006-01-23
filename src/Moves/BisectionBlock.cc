@@ -220,7 +220,7 @@ BisectionBlockClass::MakeStraightPaths()
   Array<int,1> ptcls(last-first+1);
   for (int ptcl=first; ptcl<=last; ptcl++)
     ptcls(ptcl-first) = ptcl;
-  Path.AcceptCopy(Slice1, Slice2, ptcls);
+  PathData.AcceptMove(Slice1, Slice2, ptcls);
 }
   
       
