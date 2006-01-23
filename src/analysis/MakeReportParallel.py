@@ -612,7 +612,7 @@ os.chdir(dirName)
 doc=SeriesDocument()
 ProcessTopTable(doc,infiles)
 
-#ProcessMove(doc,infiles)
+ProcessMove(doc,infiles)
 
 currNum=0
 infiles.OpenSection("Observables")

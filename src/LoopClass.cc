@@ -3,6 +3,7 @@
 #include "PathDataClass.h"
 #include "Moves/MoveBase.h"
 #include "Observables/ObservableBase.h"
+#include <sys/time.h>
 
 void
 LoopClass::DoEvent()
@@ -14,8 +15,18 @@ LoopClass::DoEvent()
 	cerr << "PIMC++ exceeded wall clock limit.  Exitting LoopClass.\n";
 	return;
       }
-      else
+      else {
+	struct timeval start, end;
+	struct timezone tz;
+	gettimeofday(&start, &tz);
+
 	(*iter)->DoEvent();
+
+	gettimeofday(&end,   &tz);
+	(*iter)->TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+	  1.0e-6*(double)(end.tv_usec-start.tv_usec);
+      }
+	
     }
   }
 }
