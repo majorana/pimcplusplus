@@ -12,6 +12,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   string permuteType, speciesName;
   //  StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
+  if (!in.ReadVar ("LowestLevel", LowestLevel))
+    LowestLevel = 0;
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   //  in.ReadVar("OrderNBosons",orderNBosons);
@@ -56,22 +58,22 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 //   else
 //     PathData.Path.ExistsCoupling=0;
 
-  for (int level=NumLevels-1; level>=0; level--) {
+  for (int level=NumLevels-1; level>=LowestLevel; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
 							     IOSection);
     newStage->TotalLevels=NumLevels;
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
 
     
-    if (PathData.Path.OpenPaths && level==0)
+    if (PathData.Path.OpenPaths && level==LowestLevel)
       newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
-    if (PathData.Path.OpenPaths && level>0)
+    if (PathData.Path.OpenPaths && level>LowestLevel)
       newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
     else if (PathData.Path.OrderN)
       newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
     else
       newStage->Actions.push_back(&PathData.Actions.ShortRange);
-    if (level == 0) {
+    if (level == LowestLevel) {
       if (addStructureRejectStage)
 	newStage->Actions.push_back(&PathData.Actions.StructureReject);
       ///If it's David's long range class then do this
@@ -108,7 +110,6 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     structureReject->Read(in);
     Stages.push_back(structureReject);
   }
-  // Add the nodal action stage, if necessary
 }
 
 
@@ -192,4 +193,34 @@ void BisectionBlockClass::MakeMove()
     ActiveParticles(0)=-1;
     MultiStageClass::MakeMove();
   }
+
+  if (LowestLevel != 0)
+    MakeStraightPaths();
 }
+
+
+void
+BisectionBlockClass::MakeStraightPaths()
+{
+  PathClass &Path = PathData.Path;
+  SetMode(NEWMODE);
+  int skip = 1<<LowestLevel;
+  int first = Path.Species(SpeciesNum).FirstPtcl;
+  int last = Path.Species(SpeciesNum).LastPtcl;
+  double inc = 1.0/(double)skip;
+  for (int slice=Slice1; slice < Slice2; slice += skip) 
+    for (int ptcl=first; ptcl<=last; ptcl++) {
+      dVec delta = Path.Velocity(slice, slice+skip, ptcl);
+      double frac = inc;
+      for (int s=1; s<skip; s++) {
+	Path(slice+s,ptcl) = Path(slice,ptcl) + frac*delta;
+	frac += inc;
+      }
+    }
+  Array<int,1> ptcls(last-first+1);
+  for (int ptcl=first; ptcl<=last; ptcl++)
+    ptcls(ptcl-first) = ptcl;
+  Path.AcceptCopy(Slice1, Slice2, ptcls);
+}
+  
+      

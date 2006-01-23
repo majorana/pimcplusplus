@@ -17,11 +17,14 @@ class BisectionBlockClass : public MultiStageClass
 {
 private:
   int StepNum;
-  int NumLevels;
+  int NumLevels, LowestLevel;
   int StepsPerBlock;
   bool HaveRefslice;
   int SpeciesNum;
   void ChooseTimeSlices();
+  /// If we do not bisect down to the lowest level, interpolate the
+  /// paths in imaginary time.
+  void MakeStraightPaths();
   StageClass* PermuteStage;
   //  ObservableDouble AcceptanceRatioVar;
 public:
