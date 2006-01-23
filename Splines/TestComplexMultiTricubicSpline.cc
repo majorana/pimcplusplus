@@ -105,7 +105,7 @@ void PeriodicTest()
 void SpeedTest()
 {
   int N = 30;
-  const int numSplines = 16;
+  const int numSplines = 8;
   Array<MyTricubicSpline,1> MySplines(2*numSplines);
   ComplexMultiTricubicSpline MultiSpline;
   LinearGrid xGrid, yGrid, zGrid;
@@ -138,7 +138,7 @@ void SpeedTest()
   MultiSpline.Init (&xGrid, &yGrid, &zGrid, initData);
 
   Array<complex<double>,1> vals(numSplines);
-  int numEvals = 16*100000;
+  int numEvals = 8*100000;
   clock_t start, end;
 
   for (int j=0; j<numSplines; j++) 
@@ -186,7 +186,7 @@ void SpeedTest()
 void GradValTest()
 {
   int N = 30;
-  const int numSplines = 16;
+  const int numSplines =8;
   Array<MyTricubicSpline,1> MySplines(2*numSplines);
   ComplexMultiTricubicSpline MultiSpline;
   LinearGrid xGrid, yGrid, zGrid;
@@ -267,7 +267,7 @@ void GradValTest()
 void GradSpeedTest()
 {
   int N = 30;
-  const int numSplines = 16;
+  const int numSplines = 8;
   Array<MyTricubicSpline,1> MySplines(2*numSplines);
   ComplexMultiTricubicSpline MultiSpline;
   LinearGrid xGrid, yGrid, zGrid;
@@ -301,7 +301,7 @@ void GradSpeedTest()
 
   Array<complex<double>,1> vals(numSplines), fvals(numSplines);
   Array<cVec3,1>          grads(numSplines), fgrads(numSplines);
-  int numEvals = 16*100000;
+  int numEvals = 8*100000;
   clock_t start, end;
 
   for (int j=0; j<numSplines; j++) 
@@ -380,9 +380,9 @@ void GradSpeedTest()
 
 main()
 {
-  PeriodicTest();
-  ValTest();
-  GradValTest();
+//   PeriodicTest();
+//   ValTest();
+//   GradValTest();
   GradSpeedTest();
 }
   

@@ -87,6 +87,7 @@ class ComplexMultiTricubicSpline
   void UpdateYPeriodic (int source, int dest, int i);
   void UpdateZPeriodic (int source, int dest, int i);
   bool UpToDate, Periodic;
+  double dx, dy, dz, dxInv, dyInv, dzInv;
 public:
   Array<TinyVector<TinyVector<double,2>,8>,4> F;
 
@@ -224,6 +225,9 @@ ComplexMultiTricubicSpline::Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
   Xgrid = xgrid; Nx = xgrid->NumPoints;
   Ygrid = ygrid; Ny = ygrid->NumPoints;
   Zgrid = zgrid; Nz = zgrid->NumPoints;
+  dx = (*xgrid)(1) - (*xgrid)(0);    dxInv = 1.0/dx;
+  dy = (*ygrid)(1) - (*ygrid)(0);    dyInv = 1.0/dy;
+  dz = (*zgrid)(1) - (*zgrid)(0);    dzInv = 1.0/dz;
 
   assert (init.extent(0) == Nx);
   assert (init.extent(1) == Ny);
@@ -1014,42 +1018,42 @@ ComplexMultiTricubicSpline::ValGrad(double x, double y, double z,
 
 
 
-  double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
-  double hinv = 1.0/h;
-  double k = (*Ygrid)(iy+1) - (*Ygrid)(iy);
-  double kinv = 1.0/k;
-  double l = (*Zgrid)(iz+1) - (*Zgrid)(iz);
-  double linv = 1.0/l;
+//   double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
+//   double hinv = 1.0/h;
+//   double k = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+//   double kinv = 1.0/k;
+//   double l = (*Zgrid)(iz+1) - (*Zgrid)(iz);
+//   double linv = 1.0/l;
 
-  double u = (x - (*Xgrid)(ix))/h;
-  double v = (y - (*Ygrid)(iy))/k;
-  double w = (z - (*Zgrid)(iz))/l;
+  double u = (x - (*Xgrid)(ix))*dxInv;
+  double v = (y - (*Ygrid)(iy))*dyInv;
+  double w = (z - (*Zgrid)(iz))*dzInv;
 
 
   double a0 = p1(u); 
   double a1 = p2(u);
-  double a2 = h*q1(u);
-  double a3 = h*q2(u);
-  double da0 = hinv*dp1(u);
-  double da1 = hinv*dp2(u);
+  double a2 = dx*q1(u);
+  double a3 = dx*q2(u);
+  double da0 = dxInv*dp1(u);
+  double da1 = dxInv*dp2(u);
   double da2 = dq1(u);
   double da3 = dq2(u);
 
   register double b0 = p1(v);
   register double b1 = p2(v);
-  register double b2 = k*q1(v);
-  register double b3 = k*q2(v);
-  register double db0 = kinv*dp1(v);
-  register double db1 = kinv*dp2(v);
+  register double b2 = dy*q1(v);
+  register double b3 = dy*q2(v);
+  register double db0 = dyInv*dp1(v);
+  register double db1 = dyInv*dp2(v);
   register double db2 = dq1(v);
   register double db3 = dq2(v);
 
   register double c0 = p1(w);
   register double c1 = p2(w);
-  register double c2 = l*q1(w);
-  register double c3 = l*q2(w);
-  register double dc0 = linv*dp1(w);
-  register double dc1 = linv*dp2(w);
+  register double c2 = dz*q1(w);
+  register double c3 = dz*q2(w);
+  register double dc0 = dzInv*dp1(w);
+  register double dc1 = dzInv*dp2(w);
   register double dc2 = dq1(w);
   register double dc3 = dq2(w);
 
