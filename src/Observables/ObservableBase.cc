@@ -1,6 +1,15 @@
 #include "ObservableBase.h"
 #include "time.h"
 
+
+void
+ObservableVar::Flush()
+{
+  if (Comm.MyProc() == 0)
+    Out.FlushFile();
+}
+
+
 void 
 ObservableClass::WriteInfo()
 {
@@ -17,7 +26,6 @@ ObservableClass::Read(IOSectionClass &in)
     Description="No description available";
   }
 }
-
 
 
 void 
