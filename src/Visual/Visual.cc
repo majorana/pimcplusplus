@@ -3,10 +3,12 @@
 void 
 VisualClass::ReadFrameData(int frame)
 {
-  if (ANodeVar != NULL)
-    ANodeVar->Read(ANodeData, frame, Range::all(), Range::all(), Range::all());
-  if (BNodeVar != NULL)
-    BNodeVar->Read(BNodeData, frame, Range::all(), Range::all(), Range::all());
+  if (HaveANodeData) {
+    if (ANodeVar != NULL)
+      ANodeVar->Read(ANodeData, frame, Range::all(),Range::all(),Range::all());
+    if (BNodeVar != NULL)
+      BNodeVar->Read(BNodeData, frame, Range::all(),Range::all(),Range::all());
+  }
 }
 
 void VisualClass::MakeFrame(int frame)
