@@ -1,5 +1,5 @@
 #include "ObservableBase.h"
-
+#include "time.h"
 
 void 
 ObservableClass::WriteInfo()
@@ -18,18 +18,17 @@ ObservableClass::Read(IOSectionClass &in)
   }
 }
 
-void 
-ObservableVar::Flush()
-{
-  if (Comm.MyProc()==0)
-    Out.FlushFile();
-}
 
 
 void 
 ObservableClass::DoEvent()
 {
+  int start=clock();
   if ((TimesCalled % Frequency) == 0)
     Accumulate();
   TimesCalled++;
+  int end=clock();
+  SecondsInObservable+=
+    (double)(end-start)/(double)CLOCKS_PER_SEC;
+  
 }
