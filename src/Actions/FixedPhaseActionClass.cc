@@ -210,7 +210,6 @@ FixedPhaseClass::Action (int slice1, int slice2,
   const double lambda = Path.Species(UpSpeciesNum).lambda;
 
   // The nodal action should only be used at level = 0;
-  assert (level == 0);
   bool doUp   = false;
   bool doDown = false;
   if (IonsHaveMoved()) 
@@ -251,7 +250,6 @@ FixedPhaseClass::d_dBeta (int slice1, int slice2, int level,
   const double lambda = Path.Species(UpSpeciesNum).lambda;
 
   // The nodal action should only be used at level = 0;
-  assert (level == 0);
   bool doUp   = false;
   bool doDown = false;
   if (IonsHaveMoved()) 
