@@ -23,12 +23,7 @@ ObservableClass::Read(IOSectionClass &in)
 void 
 ObservableClass::DoEvent()
 {
-  int start=clock();
   if ((TimesCalled % Frequency) == 0)
     Accumulate();
   TimesCalled++;
-  int end=clock();
-  SecondsInObservable+=
-    (double)(end-start)/(double)CLOCKS_PER_SEC;
-  
 }

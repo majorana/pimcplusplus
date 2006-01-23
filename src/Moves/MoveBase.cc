@@ -4,14 +4,10 @@ void
 MoveClass::DoEvent()
 {
   //  TimesCalled++;
-  int start=clock();
-
   MakeMove();
   if ((PathData.Path.Communicator.MyProc()==0) && 
       (TimesCalled % DumpFreq) == 0)
     WriteRatio();
-  int end=clock();
-  SecondsInMove += (double)(end-start)/(double)CLOCKS_PER_SEC;
 }
 
 
