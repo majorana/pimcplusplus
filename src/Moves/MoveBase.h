@@ -25,7 +25,7 @@ public:
   
   /// MoveClass constructor. Sets reference to the PathData object
   MoveClass(PathDataClass &pathData, IOSectionClass &out) : 
-    EventClass(pathData, out), DumpFreq(1000), 
+    EventClass(pathData, out), DumpFreq(10000), 
     RatioVar("AcceptRatio", IOSection, pathData.Path.Communicator)
     {
       // do nothing 
