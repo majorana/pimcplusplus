@@ -116,26 +116,94 @@ public:
   void Split (int color, CommunicatorClass &newComm);
   void Subset (Array<int,1> &ranks, CommunicatorClass &newComm);
 
-  ///Sends and receives an array of dVec
-  void SendReceive (int sendProc, const Array<Vec3,1> &sendBuff,
-		    int recvProc,       Array<Vec3,1> &recvBuff);
+//   ///Sends and receives an array of dVec
+//   void SendReceive (int sendProc, const Array<Vec3,1> &sendBuff,
+// 		    int recvProc,       Array<Vec3,1> &recvBuff);
 
-  ///Sends and receives an array of dVec
-  void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
+//   ///Sends and receives an array of dVec
+//   void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
 		    int recvProc,       Array<Vec2,1> &recvBuff);
 
+  template<int N>
+  void SendReceive (int sendProc, const Array<double,N> &sendBuff,
+		    int recvProc,       Array<double,N> &recvBuff)
+  {
+    MPI_Status status;
+    MPI_Sendrecv(sendBuff.data(), sendBuff.size(), MPI_DOUBLE, 2,
+		 recvBuff.data(), recvBuff.size(), MPI_DOUBLE, 2,
+		 MPI_Comm, &status);
+  }
 
-  ///Sends and receives an array of double
-  void SendReceive (int sendProc, const Array<double,1> &sendBuff,
-		    int recvProc,       Array<double,1> &recvBuff);
+  template<int N, int M>
+  void SendReceive (int sendProc, const Array<TinyVector<double,M>,N> &sendBuff,
+		    int recvProc,       Array<TinyVector<double,M>,N> &recvBuff)
+  {
+    MPI_Status status;
+    MPI_Sendrecv(sendBuff.data(), M*sendBuff.size(), MPI_DOUBLE, 2,
+		 recvBuff.data(), M*recvBuff.size(), MPI_DOUBLE, 2,
+		 MPI_Comm, &status);
+  }
 
-  ///Sends and receives an array of complex
-  void SendReceive (int sendProc, const Array<complex<double>,1> &sendBuff,
-		    int recvProc,       Array<complex<double>,1> &recvBuff);
+  template<int N>
+  void SendReceive (int sendProc, const Array<complex<double>,N> &sendBuff,
+		    int recvProc,       Array<complex<double>,N> &recvBuff)
+  {
+    MPI_Status status;
+    MPI_Sendrecv(sendBuff.data(), 2*sendBuff.size(), MPI_DOUBLE, 2,
+		 recvBuff.data(), 2*recvBuff.size(), MPI_DOUBLE, 2,
+		 MPI_Comm, &status);
+  }
+
+  template<int N, int M>
+  void SendReceive (int sendProc, const Array<TinyVector<complex<double>,M>,N> &sendBuff,
+		    int recvProc,       Array<TinyVector<complex<double>,M>,N> &recvBuff)
+  {
+    MPI_Status status;
+    MPI_Sendrecv(sendBuff.data(), 2*M*sendBuff.size(), MPI_DOUBLE, 2,
+		 recvBuff.data(), 2*M*recvBuff.size(), MPI_DOUBLE, 2,
+		 MPI_Comm, &status);
+  }
+
+  template<int N>
+  void SendReceive (int sendProc, const Array<int,N> &sendBuff,
+		    int recvProc,       Array<int,N> &recvBuff)
+  {
+    MPI_Status status;
+    MPI_Sendrecv(sendBuff.data(), sendBuff.size(), MPI_INT, 3,
+		 recvBuff.data(), recvBuff.size(), MPI_INT, 3,
+		 MPI_Comm, &status);
+  }
+
+  template<int N, int M>
+  void SendReceive (int sendProc, const Array<TinyVector<int,M>,N> &sendBuff,
+		    int recvProc,       Array<TinyVector<int,M>,N> &recvBuff)
+  {
+    MPI_Status status;
+    MPI_Sendrecv(sendBuff.data(), M*sendBuff.size(), MPI_INT, 3,
+		 recvBuff.data(), M*recvBuff.size(), MPI_INT, 3,
+		 MPI_Comm, &status);
+  }
+
+//   ///Sends and receives an array of double
+//   void SendReceive (int sendProc, const Array<double,1> &sendBuff,
+// 		    int recvProc,       Array<double,1> &recvBuff);
+
+//   ///Sends and receives an array of double
+//   void SendReceive (int sendProc, const Array<double,2> &sendBuff,
+// 		    int recvProc,       Array<double,2> &recvBuff);
+
+//   ///Sends and receives an array of double
+//   void SendReceive (int sendProc, const Array<double,3> &sendBuff,
+// 		    int recvProc,       Array<double,3> &recvBuff);
+
+
+//   ///Sends and receives an array of complex
+//   void SendReceive (int sendProc, const Array<complex<double>,1> &sendBuff,
+// 		    int recvProc,       Array<complex<double>,1> &recvBuff);
   
-  ///Sends and receives an array of int
-  void SendReceive (int sendProc, const Array<int,1> &sendBuff,
-		    int recvProc,       Array<int,1> &recvBuff);
+//   ///Sends and receives an array of int
+//   void SendReceive (int sendProc, const Array<int,1> &sendBuff,
+// 		    int recvProc,       Array<int,1> &recvBuff);
 
 
 
@@ -297,9 +365,17 @@ public:
   ///Sends and receives an array of double
   void SendReceive (int sendProc, const Array<double,1> &sendBuff,
 		    int recvProc,       Array<double,1> &recvBuff)
-  {
-    recvBuff=sendBuff;
-  }
+  {  recvBuff=sendBuff;  }
+
+  ///Sends and receives a 2D array of doubles
+  void SendReceive (int sendProc, const Array<double,2> &sendBuff,
+		    int recvProc,       Array<double,2> &recvBuff)
+  {  recvBuff=sendBuff;  }
+
+  ///Sends and receives a 3D array of doubles
+  void SendReceive (int sendProc, const Array<double,3> &sendBuff,
+		    int recvProc,       Array<double,3> &recvBuff)
+  {  recvBuff=sendBuff;  }
   
   ///Sends and receives an array of complex
   void SendReceive (int sendProc, const Array<complex<double>,1> &sendBuff,

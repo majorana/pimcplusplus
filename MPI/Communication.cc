@@ -285,92 +285,92 @@ CommunicatorClass::Subset (Array<int,1> &ranks,
 }
 
 
-///Sends and receives an array of Vec3
-void 
-CommunicatorClass::SendReceive (int sendProc, 
-				const Array<Vec3,1> &sendBuff,
-				int recvProc,Array<Vec3,1> &recvBuff)
-{
-  double *sendPtr = (double *)sendBuff.data();
-  double *recvPtr = (double *)recvBuff.data();
-  int numSend = sendBuff.size()*3;
-  int numRecv = recvBuff.size()*3;
-  MPI_Status status;
-  MPI_Sendrecv (sendPtr, numSend, MPI_DOUBLE, sendProc, 1, 
-		recvPtr, numRecv, MPI_DOUBLE, recvProc, 1,
-		MPIComm, &status);
-}
+// ///Sends and receives an array of Vec3
+// void 
+// CommunicatorClass::SendReceive (int sendProc, 
+// 				const Array<Vec3,1> &sendBuff,
+// 				int recvProc,Array<Vec3,1> &recvBuff)
+// {
+//   double *sendPtr = (double *)sendBuff.data();
+//   double *recvPtr = (double *)recvBuff.data();
+//   int numSend = sendBuff.size()*3;
+//   int numRecv = recvBuff.size()*3;
+//   MPI_Status status;
+//   MPI_Sendrecv (sendPtr, numSend, MPI_DOUBLE, sendProc, 1, 
+// 		recvPtr, numRecv, MPI_DOUBLE, recvProc, 1,
+// 		MPIComm, &status);
+// }
 
 
-///Sends and receives an array of Vec2
-void 
-CommunicatorClass::SendReceive (int sendProc, 
-				const Array<Vec2,1> &sendBuff,
-				int recvProc,Array<Vec2,1> &recvBuff)
-{
-  double *sendPtr = (double *)sendBuff.data();
-  double *recvPtr = (double *)recvBuff.data();
-  int numSend = sendBuff.size()*2;
-  int numRecv = recvBuff.size()*2;
-  MPI_Status status;
-  MPI_Sendrecv (sendPtr, numSend, MPI_DOUBLE, sendProc, 1, 
-		recvPtr, numRecv, MPI_DOUBLE, recvProc, 1,
-		MPIComm, &status);
-}
-
-
-
-///Sends and receives an array of double
-void 
-CommunicatorClass::SendReceive (int sendProc, 
-				const Array<double,1> &sendBuff,
-				int recvProc,
-				Array<double,1> &recvBuff)
-{
-  double *sendPtr = (double *)sendBuff.data();
-  double *recvPtr = recvBuff.data();
-  int numSend = sendBuff.size();
-  int numRecv = recvBuff.size();
-  MPI_Status status;
-  MPI_Sendrecv (sendPtr, numSend, MPI_DOUBLE, sendProc, 2, 
-		recvPtr, numRecv, MPI_DOUBLE, recvProc, 2,
-		MPIComm, &status);
-}
-
-
-///Sends and receives an array of complex<double>
-void 
-CommunicatorClass::SendReceive (int sendProc, 
-				const Array<complex<double>,1> &sendBuff,
-				int recvProc,
-				Array<complex<double>,1> &recvBuff)
-{
-  double *sendPtr = (double *)sendBuff.data();
-  double *recvPtr = (double *)recvBuff.data();
-  int numSend = 2*sendBuff.size();
-  int numRecv = 2*recvBuff.size();
-  MPI_Status status;
-  MPI_Sendrecv (sendPtr, numSend, MPI_DOUBLE, sendProc, 4, 
-		recvPtr, numRecv, MPI_DOUBLE, recvProc, 4,
-		MPIComm, &status);
-}
+// ///Sends and receives an array of Vec2
+// void 
+// CommunicatorClass::SendReceive (int sendProc, 
+// 				const Array<Vec2,1> &sendBuff,
+// 				int recvProc,Array<Vec2,1> &recvBuff)
+// {
+//   double *sendPtr = (double *)sendBuff.data();
+//   double *recvPtr = (double *)recvBuff.data();
+//   int numSend = sendBuff.size()*2;
+//   int numRecv = recvBuff.size()*2;
+//   MPI_Status status;
+//   MPI_Sendrecv (sendPtr, numSend, MPI_DOUBLE, sendProc, 1, 
+// 		recvPtr, numRecv, MPI_DOUBLE, recvProc, 1,
+// 		MPIComm, &status);
+// }
 
 
 
-///Sends and receives an array of int
-void 
-CommunicatorClass::SendReceive (int sendProc,const Array<int,1> &sendBuff,
-				int recvProc, Array<int,1> &recvBuff)
-{
-  int *sendPtr = (int *) sendBuff.data();
-  int *recvPtr = recvBuff.data();
-  int numSend = sendBuff.size();
-  int numRecv = recvBuff.size();
-  MPI_Status status;
-  MPI_Sendrecv (sendPtr, numSend, MPI_INT, sendProc, 3, 
-		recvPtr, numRecv, MPI_INT, recvProc, 3,
-		MPIComm, &status);
-}
+// ///Sends and receives an array of double
+// void 
+// CommunicatorClass::SendReceive (int sendProc, 
+// 				const Array<double,1> &sendBuff,
+// 				int recvProc,
+// 				Array<double,1> &recvBuff)
+// {
+//   double *sendPtr = (double *)sendBuff.data();
+//   double *recvPtr = recvBuff.data();
+//   int numSend = sendBuff.size();
+//   int numRecv = recvBuff.size();
+//   MPI_Status status;
+//   MPI_Sendrecv (sendPtr, numSend, MPI_DOUBLE, sendProc, 2, 
+// 		recvPtr, numRecv, MPI_DOUBLE, recvProc, 2,
+// 		MPIComm, &status);
+// }
+
+
+// ///Sends and receives an array of complex<double>
+// void 
+// CommunicatorClass::SendReceive (int sendProc, 
+// 				const Array<complex<double>,1> &sendBuff,
+// 				int recvProc,
+// 				Array<complex<double>,1> &recvBuff)
+// {
+//   double *sendPtr = (double *)sendBuff.data();
+//   double *recvPtr = (double *)recvBuff.data();
+//   int numSend = 2*sendBuff.size();
+//   int numRecv = 2*recvBuff.size();
+//   MPI_Status status;
+//   MPI_Sendrecv (sendPtr, numSend, MPI_DOUBLE, sendProc, 4, 
+// 		recvPtr, numRecv, MPI_DOUBLE, recvProc, 4,
+// 		MPIComm, &status);
+// }
+
+
+
+// ///Sends and receives an array of int
+// void 
+// CommunicatorClass::SendReceive (int sendProc,const Array<int,1> &sendBuff,
+// 				int recvProc, Array<int,1> &recvBuff)
+// {
+//   int *sendPtr = (int *) sendBuff.data();
+//   int *recvPtr = recvBuff.data();
+//   int numSend = sendBuff.size();
+//   int numRecv = recvBuff.size();
+//   MPI_Status status;
+//   MPI_Sendrecv (sendPtr, numSend, MPI_INT, sendProc, 3, 
+// 		recvPtr, numRecv, MPI_INT, recvProc, 3,
+// 		MPIComm, &status);
+// }
 
 
 
