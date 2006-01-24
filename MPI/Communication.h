@@ -308,134 +308,49 @@ public:
     if (ranks.size() !=1) {
       cerr << "Serial verion of code does not support nontrivial "
 	   << "subsets.  Exiting.\n";
-      exit(1);
+      abort();
     }
   }
   inline void Send (int toProc, Array<double,1> &buff)
   {
     cerr << "Sends not supported in serial mode.\n";
-    exit(1);
+    abort();
   }
 
   inline void Send (int toProc, Array<int,1> &buff)
   {
     cerr << "Sends not supported in serial mode.\n";
-    exit(1);
+    abort();
   }
-  inline void Broadcast(int root, int &val) {}
-  inline void Broadcast(int root, bool &val) {}
-  inline void Broadcast(int root, double &val) {}
-  inline void Broadcast(int root, Array<double,1> &buff)
-  { /* Do nothing in serial mode */ }
-  inline void Broadcast(int root, Array<double,2> &buff)
-  { /* Do nothing in serial mode */ }
-  void Broadcast (int root, Array<complex<double>,2> &buff) {}
-  inline void Broadcast (int root, Array<Vec2,1> &buff)
-  { /* Do nothing in serial mode */ }
-  inline void Broadcast (int root, Array<Vec3,1> &buff)
-  { /* Do nothing in serial mode */ }
-  inline void Broadcast(int root, Array<double,4> &buff) {}
-  inline void Broadcast (int root, Array<complex<double>,4> &buff) {}
+
+  template<typename T>
+  void Broadcast(int root, T &val) { }
+
   inline void Receive (int toProc, Array<double,1> &buff)
-  {
-    cerr << "Receives not supported in serial mode.\n";
-    exit(1);
-  }
+  { cerr << "Receives not supported in serial mode.\n";  abort(); }
   inline void Receive (int toProc, Array<int,1> &buff)
-  {
-    cerr << "Receives not supported in serial mode.\n";
-    exit(1);
-  }
+  { cerr << "Receives not supported in serial mode.\n";    abort(); }
 
-  ///Sends and receives an array of dVec
-  void SendReceive (int sendProc, const Array<Vec3,1> &sendBuff,
-		    int recvProc,       Array<Vec3,1> &recvBuff)
-  {
-    recvBuff=sendBuff;
-  }
-  
-  ///Sends and receives an array of dVec
-  void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
-		    int recvProc,       Array<Vec2,1> &recvBuff)
-  {
-    recvBuff=sendBuff;
-  }
-
-
-  ///Sends and receives an array of double
-  void SendReceive (int sendProc, const Array<double,1> &sendBuff,
-		    int recvProc,       Array<double,1> &recvBuff)
-  {  recvBuff=sendBuff;  }
-
-  ///Sends and receives a 2D array of doubles
-  void SendReceive (int sendProc, const Array<double,2> &sendBuff,
-		    int recvProc,       Array<double,2> &recvBuff)
-  {  recvBuff=sendBuff;  }
-
-  ///Sends and receives a 3D array of doubles
-  void SendReceive (int sendProc, const Array<double,3> &sendBuff,
-		    int recvProc,       Array<double,3> &recvBuff)
-  {  recvBuff=sendBuff;  }
-  
-  ///Sends and receives an array of complex
-  void SendReceive (int sendProc, const Array<complex<double>,1> &sendBuff,
-		    int recvProc,       Array<complex<double>,1> &recvBuff)
-  {
-    recvBuff=sendBuff;
-  }
-  ///Sends and receives an array of int
-  void SendReceive (int sendProc, const Array<int,1> &sendBuff,
-		    int recvProc,       Array<int,1> &recvBuff)
-  {
-    recvBuff=sendBuff;
-  }
-
-
+  template<typename T>
+  void SendReceive(int sendProc, const T &sendBuff,
+		   int recvProc,       T &recvBuff)
+  { recvBuff = sendBuff; }
 
   ///Sums up all values a.  Only processor 0 gets the result.  All
   ///other processors return 0;
   double Sum (double a)
-  {
-    return a;
-  }
+  { return a; }
 
-  ///Sums up the vectors in sendBuff.  Processor 0 only gets the
-  ///resulting sum.
-  void Sum (Array<int,1> &sendBuff, Array<int,1> &recvBuff)
-  {
-    recvBuff=sendBuff;
-  }
-  void Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuff)
-  {
-    recvBuff=sendBuff;
-  }
-  void Sum (Array<Vec2,1> &sendBuff, Array<Vec2,1> &recvBuff)
-  {
-    recvBuff=sendBuff;
-  }
-  void Sum (Array<Vec3,1> &sendBuff, Array<Vec3,1> &recvBuff)
-  {
-    recvBuff=sendBuff;
-  }
-
-    
+  template<class T, int N>
+  inline void Sum(Array<T,N> &sendBuff, Array<T,N> &recvBuff)
+  { recvBuff = sendBuff; }
   
-  /// Sums up all values of a on all processors.  All processors
-  ///  get result.
+  /// Sums up all values of a on all processors.  All processors get result.
   inline double AllSum (double a)
   {  return a; } 
 
-  inline void AllSum (Array<double,1> &in, Array<double,1> &out)
-  { out = in; }
-
-  inline void AllSum (Array<double,2> &in, Array<double,2> &out)
-  { out = in; }
-
-  inline void AllSum (Array<TinyVector<double,2>,1> &in, 
-		      Array<TinyVector<double,2>,1> &out)
-  { out = in; }
-  inline void AllSum (Array<TinyVector<double,3>,1> &in, 
-		      Array<TinyVector<double,3>,1> &out)
+  template<class T, int N>
+  inline void AllSum (Array<T, N> &in, Array<T, N> &out)
   { out = in; }
 
   inline void BarrierSync() {}
