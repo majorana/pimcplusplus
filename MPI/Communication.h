@@ -129,8 +129,8 @@ public:
 		    int recvProc,       Array<double,N> &recvBuff)
   {
     MPI_Status status;
-    MPI_Sendrecv(sendBuff.data(), sendBuff.size(), MPI_DOUBLE, 2,
-		 recvBuff.data(), recvBuff.size(), MPI_DOUBLE, 2,
+    MPI_Sendrecv((void*)sendBuff.data(), sendBuff.size(), MPI_DOUBLE, sendProc, 2,
+		 (void*)recvBuff.data(), recvBuff.size(), MPI_DOUBLE, recvProc, 2,
 		 MPIComm, &status);
   }
 
@@ -139,8 +139,8 @@ public:
 		    int recvProc,       Array<TinyVector<double,M>,N> &recvBuff)
   {
     MPI_Status status;
-    MPI_Sendrecv(sendBuff.data(), M*sendBuff.size(), MPI_DOUBLE, 2,
-		 recvBuff.data(), M*recvBuff.size(), MPI_DOUBLE, 2,
+    MPI_Sendrecv((void*)sendBuff.data(), M*sendBuff.size(), MPI_DOUBLE, sendProc, 2,
+		 (void*)recvBuff.data(), M*recvBuff.size(), MPI_DOUBLE, recvProc, 2,
 		 MPIComm, &status);
   }
   
@@ -149,8 +149,8 @@ public:
 		    int recvProc,       Array<complex<double>,N> &recvBuff)
   {
     MPI_Status status;
-    MPI_Sendrecv(sendBuff.data(), 2*sendBuff.size(), MPI_DOUBLE, 2,
-		 recvBuff.data(), 2*recvBuff.size(), MPI_DOUBLE, 2,
+    MPI_Sendrecv((void*)sendBuff.data(), 2*sendBuff.size(), MPI_DOUBLE, sendProc, 2,
+		 (void*)recvBuff.data(), 2*recvBuff.size(), MPI_DOUBLE, recvProc, 2,
 		 MPIComm, &status);
   }
 
@@ -159,8 +159,8 @@ public:
 		    int recvProc,       Array<TinyVector<complex<double>,M>,N> &recvBuff)
   {
     MPI_Status status;
-    MPI_Sendrecv(sendBuff.data(), 2*M*sendBuff.size(), MPI_DOUBLE, 2,
-		 recvBuff.data(), 2*M*recvBuff.size(), MPI_DOUBLE, 2,
+    MPI_Sendrecv((void*)sendBuff.data(), 2*M*sendBuff.size(), MPI_DOUBLE, sendProc, 2,
+		 (void*)recvBuff.data(), 2*M*recvBuff.size(), MPI_DOUBLE, recvProc, 2,
 		 MPIComm, &status);
   }
 
@@ -169,8 +169,8 @@ public:
 		    int recvProc,       Array<int,N> &recvBuff)
   {
     MPI_Status status;
-    MPI_Sendrecv(sendBuff.data(), sendBuff.size(), MPI_INT, 3,
-		 recvBuff.data(), recvBuff.size(), MPI_INT, 3,
+    MPI_Sendrecv((void*)sendBuff.data(), sendBuff.size(), MPI_INT, sendProc, 3,
+		 (void*)recvBuff.data(), recvBuff.size(), MPI_INT, recvProc, 3,
 		 MPIComm, &status);
   }
 
@@ -179,8 +179,8 @@ public:
 		    int recvProc,       Array<TinyVector<int,M>,N> &recvBuff)
   {
     MPI_Status status;
-    MPI_Sendrecv(sendBuff.data(), M*sendBuff.size(), MPI_INT, 3,
-		 recvBuff.data(), M*recvBuff.size(), MPI_INT, 3,
+    MPI_Sendrecv((void*)sendBuff.data(), M*sendBuff.size(), MPI_INT, sendProc, 3,
+		 (void*)recvBuff.data(), M*recvBuff.size(), MPI_INT, recvProc, 3,
 		 MPIComm, &status);
   }
 
