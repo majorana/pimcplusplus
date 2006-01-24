@@ -122,7 +122,7 @@ public:
 
 //   ///Sends and receives an array of dVec
 //   void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
-		    int recvProc,       Array<Vec2,1> &recvBuff);
+//		    int recvProc,       Array<Vec2,1> &recvBuff);
 
   template<int N>
   void SendReceive (int sendProc, const Array<double,N> &sendBuff,
@@ -131,7 +131,7 @@ public:
     MPI_Status status;
     MPI_Sendrecv(sendBuff.data(), sendBuff.size(), MPI_DOUBLE, 2,
 		 recvBuff.data(), recvBuff.size(), MPI_DOUBLE, 2,
-		 MPI_Comm, &status);
+		 MPIComm, &status);
   }
 
   template<int N, int M>
@@ -141,9 +141,9 @@ public:
     MPI_Status status;
     MPI_Sendrecv(sendBuff.data(), M*sendBuff.size(), MPI_DOUBLE, 2,
 		 recvBuff.data(), M*recvBuff.size(), MPI_DOUBLE, 2,
-		 MPI_Comm, &status);
+		 MPIComm, &status);
   }
-
+  
   template<int N>
   void SendReceive (int sendProc, const Array<complex<double>,N> &sendBuff,
 		    int recvProc,       Array<complex<double>,N> &recvBuff)
@@ -151,7 +151,7 @@ public:
     MPI_Status status;
     MPI_Sendrecv(sendBuff.data(), 2*sendBuff.size(), MPI_DOUBLE, 2,
 		 recvBuff.data(), 2*recvBuff.size(), MPI_DOUBLE, 2,
-		 MPI_Comm, &status);
+		 MPIComm, &status);
   }
 
   template<int N, int M>
@@ -161,7 +161,7 @@ public:
     MPI_Status status;
     MPI_Sendrecv(sendBuff.data(), 2*M*sendBuff.size(), MPI_DOUBLE, 2,
 		 recvBuff.data(), 2*M*recvBuff.size(), MPI_DOUBLE, 2,
-		 MPI_Comm, &status);
+		 MPIComm, &status);
   }
 
   template<int N>
@@ -171,7 +171,7 @@ public:
     MPI_Status status;
     MPI_Sendrecv(sendBuff.data(), sendBuff.size(), MPI_INT, 3,
 		 recvBuff.data(), recvBuff.size(), MPI_INT, 3,
-		 MPI_Comm, &status);
+		 MPIComm, &status);
   }
 
   template<int N, int M>
@@ -181,7 +181,7 @@ public:
     MPI_Status status;
     MPI_Sendrecv(sendBuff.data(), M*sendBuff.size(), MPI_INT, 3,
 		 recvBuff.data(), M*recvBuff.size(), MPI_INT, 3,
-		 MPI_Comm, &status);
+		 MPIComm, &status);
   }
 
 //   ///Sends and receives an array of double
