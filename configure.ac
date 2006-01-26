@@ -30,12 +30,32 @@ case "${host_cpu}" in
       CPPFLAGS="-DMAC $CPPFLAGS"
       CXXFLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
       F77FLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
-
    "i686")
-      AX_CC_OPTION(TUNEOPT, [-mtune=athlon-xp], [-mtune=athlon-xp], [-mcpu=athlon-xp])
-      AX_CC_OPTION(ARCHOPT, [-march=athlon-xp], [-march=athlon-xp], [-march=athlon])
-      CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -msse -m3dnow -g"
-      F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g";;
+      AC_MSG_CHECKING([ i686 cpu type])
+      if grep -q XP /proc/cpuinfo; then
+        AC_MSG_RESULT([Athlon XP])
+        AX_CC_OPTION(TUNEOPT, [-mtune=athlon-xp], [-mtune=athlon-xp], [-mcpu=athlon-xp])
+        AX_CC_OPTION(ARCHOPT, [-march=athlon-xp], [-march=athlon-xp], [-march=athlon])
+      fi
+      if grep -q "Pentium(R) M" /proc/cpuinfo; then
+	AC_MSG_RESULT([Pentium M])
+        AX_CC_OPTION(TUNEOPT, [-mtune=pentium-m], [-mtune=pentium-m], [-mcpu=pentium-m])
+        AX_CC_OPTION(ARCHOPT, [-march=pentium-m], [-march=pentium-m], [-march=pentium-m])
+      fi
+      CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
+      F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
+      if grep -q sse /proc/cpuinfo ; then
+        CXXFLAGS="$CXXFLAGS -msse"
+      fi
+      if grep -q sse2 /proc/cpuinfo ; then
+        CXXFLAGS="$CXXFLAGS -msse2"
+      fi
+      if grep -q sse3 /proc/cpuinfo ; then
+        CXXFLAGS="$CXXFLAGS -msse3"
+      fi
+      if grep -q 3dnow /proc/cpuinfo ; then
+        CXXFLAGS="$CXXFLAGS -m3dnow"
+      fi;;
 esac
 
 
