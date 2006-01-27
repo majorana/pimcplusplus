@@ -38,27 +38,28 @@ Section (Action)
 {
   int MaxLevels = 6;
   Array<string,1> PairActionFiles(1) = ["../../PairActions/zero.PairAction"];
+  int NumImages=1;
 }
 
 Section (Observables)
 {
   string OutFileBase = "FF_tau0.00125_beta0.25.hybrid7";
   Section (Observable) {
-    string type = "Energy";
+    string Type = "Energy";
     string Name = "Energy";
-    int freq=2;
+    int Frequency=2;
     int dumpFreq=100;
     
   }
   Section (Observable) {
-    string type = "PairCorrelation";
+    string Type = "PairCorrelation";
     string Name = "PairCorrelation";
     string Species1 = "free";
     string Species2 = "free";
-    int freq=20;
+    int Frequency=20;
     int dumpFreq=100;
     Section (Grid) {
-      string type = "Linear";
+      string Type = "Linear";
       int NumPoints = 100;
     }
  }
@@ -67,8 +68,8 @@ Section (Observables)
 
 Section (Moves) {
   Section (Move) {
-    string type="BisectionBlock";
-    string name="BisectionBlock";
+    string Type="BisectionBlock";
+    string Name="BisectionBlock";
     string PermuteType="NONE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
     int NumLevels=6;
@@ -77,16 +78,16 @@ Section (Moves) {
     
   }
   Section (Move) {
-    string type="RefSlice";
-    string name="RefSlice";
+    string Type="RefSlice";
+    string Name="RefSlice";
     string PermuteType="NONE";
     int NumLevels=6;
     string Species = "free";
   }
 
   Section (Move) {
-    string type="ShiftMove";
-    string name="Shift";
+    string Type="ShiftMove";
+    string Name="Shift";
   }
 }
 
@@ -95,26 +96,26 @@ Section (Moves) {
 
 Section (Algorithm) {
 //   Section (Loop){ // Before Accumulating Observables
-//     int steps=1000; 
+//     int Steps=1000; 
 //     Section (Loop){ 
-//       int steps=3;
-//       Section (Move) {string name="BisectionBlock";} 
-//       Section (Move) {string name="RefSlice";} 
+//       int Steps=3;
+//       Section (Move) {string Name="BisectionBlock";} 
+//       Section (Move) {string Name="RefSlice";} 
 //     }
-//     //    Section (Move) {string name="Permutations";} 
-//     Section (Move) {string name = "Shift";}
+//     //    Section (Move) {string Name="Permutations";} 
+//     Section (Move) {string Name = "Shift";}
 //   }
   Section (Loop) { //Start Accumulating observables
-    int steps=6000000;
+    int Steps=6000000;
     Section (Loop){
-      int steps=3;
-      Section (Move) {string name="BisectionBlock";} 
-      Section (Move) {string name="RefSlice";} 
+      int Steps=3;
+      Section (Move) {string Name="BisectionBlock";} 
+      Section (Move) {string Name="RefSlice";} 
     }
-    Section (Move) {string name = "Shift"; }
-    //    Section (Move) {string name="Permutations";} 
-    Section (Observe) {string name = "PairCorrelation";}
-    Section (Observe) {string name = "Energy"; }
+    Section (Move) {string Name = "Shift"; }
+    //    Section (Move) {string Name="Permutations";} 
+    Section (Observe) {string Name = "PairCorrelation";}
+    Section (Observe) {string Name = "Energy"; }
   }
 }
 
