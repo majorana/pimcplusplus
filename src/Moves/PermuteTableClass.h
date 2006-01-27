@@ -78,6 +78,9 @@ public:
   void ConstructCycleTable(int speciesNum,int slice1,int slice2);
   void ConstructCycleTable(int speciesNum,int slice1,int slice2,
 			   int excludeParticle);
+  void ConstructFermionCycleTable(int speciesNum,int slice1, int slice2);
+  void ConstructBosonCycleTable(int speciesNum,int slice1, int slice2,int excludeParticle);
+				  
   void CanonicalPermRep(Array<int,1> P);
   double AttemptPermutation();
   double CalcReverseProb(const PermuteTableClass &forwardTable);

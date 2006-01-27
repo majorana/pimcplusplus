@@ -214,13 +214,81 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
 
 }
 
+void PermuteTableClass::ConstructCycleTable(int speciesNum,
+					    int slice1, int slice2,
+					    int excludeParticle)
+{
+  if (PathData.Path.Species(SpeciesNum).GetParticleType()==FERMION)
+    ConstructFermionCycleTable(speciesNum,slice1,slice2);
+  else
+    ConstructBosonCycleTable(speciesNum,slice1,slice2,excludeParticle);
+
+}
+
+
 
 ///the Gamma's must all be greater then 1 or this won't do the correct
 ///thing.  Allows you to exclude a particle when producing the table
 ///(say for example the open particle).
-void PermuteTableClass::ConstructCycleTable(int speciesNum,
-					    int slice1, int slice2,
-					    int particleExclude)
+void FermionTableClass::ConstructFermionCycleTable(int speciesNum,
+						   int slice1, int slice2)
+					
+{
+  Slice1=slice1;
+  Slice2=slice2;
+  SpeciesNum=speciesNum;
+  ExcludeParticle=particleExclude;
+  ConstructHTable();
+  int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
+  CycleTable.resize(TableSize);
+  NumEntries = 0;
+  int N=HTable.extent(0);
+  for (int i=0; i<N; i++) {
+    ///Single particle move
+    if (i!=particleExclude){
+      double hprod=1.0;
+      double hprod2=1.0;
+      double hprod3=1.0;
+      CycleClass tempPerm;
+      tempPerm.Length=1;
+      tempPerm.CycleRep[0]=i;
+      tempPerm.P=Gamma(0);
+      tempPerm.C=tempPerm.P;
+      if (NumEntries!=0){
+	tempPerm.C+=CycleTable(NumEntries-1).C;
+      }
+      AddEntry(tempPerm);
+      for (int j=i+1; j<N; j++) {// 2 and higher cycles
+	//2 cycle permutations
+	tempPerm.CycleRep[1]=j;
+	hprod=HTable(i,j);
+	tempPerm.Length=3;
+	for (int k=i+1;k<N;k++){//3 and higher cycles
+	  //3 cycle permutations
+	  if (k!=j){
+	    tempPerm.CycleRep[2]=k;
+	    hprod2=hprod*HTable(j,k);
+	    tempPerm.P=Gamma(2)*hprod2*HTable(k,i);
+	    tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
+	    AddEntry(tempPerm);
+	  }
+	}
+      }
+    }
+  }
+
+  Norm = CycleTable(NumEntries-1).C;
+  NormInv = 1.0/Norm;
+
+}
+
+
+///the Gamma's must all be greater then 1 or this won't do the correct
+///thing.  Allows you to exclude a particle when producing the table
+///(say for example the open particle).
+void PermuteTableClass::ConstructBosonCycleTable(int speciesNum,
+						 int slice1, int slice2,
+						 int particleExclude)
 {
   Slice1=slice1;
   Slice2=slice2;
