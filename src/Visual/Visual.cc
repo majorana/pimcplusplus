@@ -295,6 +295,8 @@ void VisualClass::Read(string fileName)
     IsoAdjust.set_lower(minVal);
     IsoAdjust.set_upper(maxVal);
   }
+  else
+    HaveBNodeData = false;
 
   FrameAdjust.set_upper(PathArray.extent(0)-1);
   DetailAdjust.set_upper(PathArray.extent(2)/2);
