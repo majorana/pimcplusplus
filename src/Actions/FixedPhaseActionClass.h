@@ -24,22 +24,35 @@ private:
   Array<cVec3,2>   GradMat;
   Mirrored1DClass<double> UpGrad2, DownGrad2;
 
+  Mirrored3DClass<complex<double> > UpMatrixCache, DownMatrixCache;
+  Mirrored3DClass<cVec3> UpGradMatCache, DownGradMatCache;
+
   Array<cVec3,1> Gradient;
   Array<Vec3,1> Rions;
   int NumUp, NumDown, NumIons, NumBands;
+  Array<int,1> UpParticles, DownParticles;
   // This stores the real space grid dimensions
   LinearGrid xGrid, yGrid, zGrid;
   complex<double> GradientDet   (int slice, int speciesNum);
   complex<double> GradientDetFD (int slice, int speciesNum);
+  complex<double> GradientDet   (int slice, int speciesNum,
+				 const Array<int,1> &activeParticles);
   bool IonsHaveMoved();
+  /// Recomputes the electron orbitals for the new ion positions.
   void UpdateBands();
+  /// Fills all the cached slater matrices with the current electron
+  /// positions. 
+  void UpdateCache();
   /// This updates GUp, gUp, and vUp, or GDown, gDown, and vDown,
   /// depending on the species.
   friend class FixedPhaseActionClass;
   bool UseMDExtrap;
 public:
   double CalcGrad2 (int slice, int species);
-  void   CalcGrad2 (int slice, int species, Array<double,1> &grad2);
+  double CalcGrad2 (int slice, int species, 
+		    const Array<int,1> &activeParticles);
+  void   CalcGrad2 (int slice, int species, Array<double,1> &grad2,
+		    const Array<int,1> &activeParticles);
   int IonSpeciesNum, UpSpeciesNum, DownSpeciesNum;
   double Action (int slice1, int slice2,
 		 const Array<int,1> &activeParticles, 
@@ -51,8 +64,9 @@ public:
   complex<double> Det (int slice, int speciesNum);
   void Read (IOSectionClass &in);
   void ShiftData (int slices2Shift, int speciesNum);
-  void AcceptCopy (int slice1, int slice2);
-  void RejectCopy (int slice1, int slice2);
+  void MoveJoin  (int oldJoinPos, int newJoinPos, int speciesNum);
+  void AcceptCopy (int slice1, int slice2, int speciesNum);
+  void RejectCopy (int slice1, int slice2, int speciesNum);
   void Init(int speciesNum);
   void Setk(Vec3 k);
   inline Vec3 Getk() { return kVec; }
@@ -68,7 +82,9 @@ private:
   int SpeciesNum;
 public:
   double CalcGrad2 (int slice);
-  void   CalcGrad2 (int slice, Array<double,1> &grad2);
+  double CalcGrad2 (int slice, const Array<int,1> &activeParticles);
+  void   CalcGrad2 (int slice, Array<double,1> &grad2,
+		    const Array<int,1> &activeParticles);
 
   double SingleAction (int slice1, int slice2,
 		       const Array<int,1> &activeParticles, int level);
@@ -79,7 +95,8 @@ public:
   complex<double> Det (int slice);
   //  Array<double,2> GetMatrix (int slice);
   /// Shifts internal time-slice dependent data
-  void ShiftData (int slices2Shift);  
+  void ShiftData (int slices2Shift);
+  void MoveJoin (int oldJoinPos, int newJoinPos);
   void AcceptCopy (int slice1, int slice2);
   void RejectCopy (int slice1, int slice2);
 

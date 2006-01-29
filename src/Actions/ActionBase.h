@@ -57,6 +57,7 @@ public:
   // to sum over processors if necessary.
   virtual void Read (IOSectionClass &in);
   virtual void ShiftData (int slices2Shift);
+  virtual void MoveJoin (int oldJoinPos, int newJoinPos);
   ActionBaseClass(PathDataClass &pathData);				   
 };
 

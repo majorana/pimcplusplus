@@ -2,6 +2,7 @@
 #define MIRRORED_CLASS
 
 #include <blitz/array.h>
+#include <Common/MPI/Communication.h>
 
 typedef enum {OLDMODE, NEWMODE} ModeType;
 extern ModeType ActiveCopy;
@@ -149,7 +150,88 @@ public:
     { Data[OLDMODE] = Data[NEWMODE]; }
   inline void RejectCopy ()              
     { Data[NEWMODE] = Data[OLDMODE]; }
+  inline void AcceptCopy (int slice1, int slice2)
+    { Data[OLDMODE](Range(slice1,slice2), Range::all(), Range::all()) =
+      Data[NEWMODE](Range(slice1,slice2), Range::all(), Range::all()); }
+  inline void RejectCopy (int slice1, int slice2)
+    { Data[NEWMODE](Range(slice1,slice2), Range::all(), Range::all()) =
+      Data[OLDMODE](Range(slice1,slice2), Range::all(), Range::all()); }
+  inline void ShiftData(int sliceToShift, CommunicatorClass &comm);
 };
+
+template<typename T>
+inline void
+Mirrored3DClass<T>::ShiftData(int slicesToShift, CommunicatorClass &comm)
+{
+  int M = Data[0].extent(1);
+  int N = Data[0].extent(2);
+  int numProcs=comm.NumProcs();
+  int myProc=comm.MyProc();
+  int recvProc, sendProc;
+  int numSlices  = Data[0].extent(0);
+  assert(abs(slicesToShift)<numSlices);
+  sendProc=(myProc+1) % numProcs;
+  recvProc=((myProc-1) + numProcs) % numProcs;
+  if (slicesToShift<0)
+    swap (sendProc, recvProc);
+  
+  /// First shifts the data in the A copy left or right by the
+  /// appropriate amount 
+  if (slicesToShift>0)
+    for (int slice=numSlices-1; slice>=slicesToShift;slice--)
+      Data[0](slice, Range::all(), Range::all()) =
+	Data[0](slice-slicesToShift, Range::all(), Range::all());
+  else 
+    for (int slice=0; slice<numSlices+slicesToShift;slice++)
+      Data[0](slice, Range::all(), Range::all()) = 
+	Data[0](slice-slicesToShift, Range::all(), Range::all());
+  
+  /// Now bundle up the data to send to adjacent processor
+  int bufferSize=abs(slicesToShift);
+  Array<T,3> sendBuffer(bufferSize, M, N), receiveBuffer(bufferSize, M, N);
+  int startSlice;
+  int buffIndex=0;
+  if (slicesToShift>0) {
+    startSlice=numSlices-slicesToShift;
+    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
+      /// If shifting forward, don't send the last time slice (so always)
+      /// send slice-1
+      sendBuffer(buffIndex,Range::all(), Range::all())=
+	Data[1](slice-1, Range::all(), Range::all());
+      buffIndex++;
+    }
+  }
+  else {
+    startSlice=0;
+    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+      /// If shifting backward, don't send the first time slice (so always)
+      /// send slice+1
+      sendBuffer(buffIndex,Range::all(), Range::all()) = 
+	Data[1](slice+1,Range::all(), Range::all());
+      buffIndex++;
+    }
+  }
+  
+  /// Send and receive data to/from neighbors.
+  comm.SendReceive(sendProc, sendBuffer, recvProc, receiveBuffer);
+  
+  if (slicesToShift>0)
+    startSlice=0;
+  else 
+    startSlice=numSlices+slicesToShift;
+  
+  /// Copy the data into the A copy
+  buffIndex=0;
+  for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
+    Data[0](slice, Range::all(), Range::all()) = 
+      receiveBuffer(buffIndex, Range::all(), Range::all());
+    buffIndex++;
+  }
+  
+  // Now copy A into B, since A has all the good, shifted data now.
+  Data[1] = Data[0];
+  // And we're done! 
+}
 
 
 

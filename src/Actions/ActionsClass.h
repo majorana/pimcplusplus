@@ -118,6 +118,7 @@ public:
   /// This routine does any necessary shifting of stored data for the
   /// paths.  It just calls the ShiftData
   void ShiftData (int slicesToShift);
+  void MoveJoin (int oldJoinPos, int newJoinPos);
 
   void AcceptCopy (int startSlice, int endSlice,
 		   const Array<int,1> &activeParticles);

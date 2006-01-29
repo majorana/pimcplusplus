@@ -4,7 +4,8 @@
 // Fix to include final link between link M and 0
 void EnergyClass::Accumulate()
 {
-  //Move the join to the end so we don't have to worry about permutations
+  //Move the join to the end so we don't have to worry about
+  //permutations
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
   
   NumSamples++;
@@ -24,9 +25,10 @@ void EnergyClass::Accumulate()
   VShortSum  += vShort;
   VLongSum   += vLong;
 
-  double kAction, uShortAction, uLongAction, nodeAction;
-  PathData.Actions.GetActions(kAction, uShortAction, uLongAction, nodeAction);
-  TotalActionSum += (kAction + uShortAction + uLongAction + nodeAction);
+  /// Removing this total action stuff for now.
+//   double kAction, uShortAction, uLongAction, nodeAction;
+//   PathData.Actions.GetActions(kAction, uShortAction, uLongAction, nodeAction);
+//   TotalActionSum += (kAction + uShortAction + uLongAction + nodeAction);
 
   //  TIP5PSum   += tip5p;
 }

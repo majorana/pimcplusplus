@@ -560,7 +560,9 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     prevSlice = newSlice;
   }
   if (haveNodeAction) {
-    Array<int,1> changedParticles(1);
+    Array<int,1> changedParticles(species.NumParticles);
+    for (int i=0; i<species.NumParticles; i++)
+      changedParticles(i) = i+species.FirstPtcl;
     double localAction = 
       Actions.NodalActions(speciesNum)->Action(0, NumTimeSlices()-1, 
 					       changedParticles,0);

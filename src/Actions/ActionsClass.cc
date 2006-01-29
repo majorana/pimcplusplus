@@ -508,3 +508,12 @@ ActionsClass::UpdateNodalActions()
   for (int i=0; i<NodalActions.size(); i++)
     NodalActions(i)->Update();
 }
+
+void
+ActionsClass::MoveJoin (int oldJoinPos, int newJoinPos)
+{
+  // Currently, only some nodal actions actually need their MoveJoin called.
+  for (int i=0; i<NodalActions.size(); i++)
+    if (NodalActions(i) != NULL)
+      NodalActions(i)->MoveJoin (oldJoinPos, newJoinPos);
+}

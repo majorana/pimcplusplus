@@ -54,3 +54,10 @@ ActionBaseClass::GradAction(int slice1, int slice2,
   /// The default implementation does nothing for those actions which
   /// we do not wish to contribute to the force calculation.
 }
+
+
+void
+ActionBaseClass::MoveJoin (int oldJoinPos, int newJoinPos)
+{
+  // do nothing in base class.
+}
