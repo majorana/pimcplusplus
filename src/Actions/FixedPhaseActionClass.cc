@@ -117,13 +117,17 @@ FixedPhaseClass::AcceptCopy (int slice1, int slice2, int speciesNum)
 {
   if (speciesNum == UpSpeciesNum) {
     UpGrad2.AcceptCopy         (slice1, slice2);
-    UpMatrixCache[OLDMODE]  = UpMatrixCache[NEWMODE];
-    UpGradMatCache[OLDMODE] = UpGradMatCache[NEWMODE];
+    UpMatrixCache[OLDMODE](Range(slice1,slice2), Range::all(), Range::all()) = 
+      UpMatrixCache[NEWMODE](Range(slice1,slice2), Range::all(), Range::all());
+    UpGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all()) =
+      UpGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
   else if (speciesNum == DownSpeciesNum) {
     DownGrad2.AcceptCopy       (slice1, slice2);
-    DownMatrixCache[OLDMODE] = DownMatrixCache[NEWMODE];
-    DownGradMatCache[OLDMODE] = DownGradMatCache[NEWMODE];
+    DownMatrixCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all())=
+      DownMatrixCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all());
+    DownGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all())= 
+     DownGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
 }
 
@@ -132,13 +136,17 @@ FixedPhaseClass::RejectCopy (int slice1, int slice2, int speciesNum)
 {
   if (speciesNum == UpSpeciesNum) {
     UpGrad2.RejectCopy         (slice1, slice2);
-    UpMatrixCache[NEWMODE] = UpMatrixCache[OLDMODE];
-    UpGradMatCache[NEWMODE] = UpGradMatCache[OLDMODE];
+    UpMatrixCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all()) = 
+      UpMatrixCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
+    UpGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all()) = 
+      UpGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
   else if (speciesNum == DownSpeciesNum) {
     DownGrad2.RejectCopy       (slice1, slice2);
-    DownMatrixCache[NEWMODE] = DownMatrixCache[OLDMODE];
-    DownGradMatCache[NEWMODE] = DownGradMatCache[OLDMODE];
+    DownMatrixCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all()) = 
+      DownMatrixCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
+    DownGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all())= 
+     DownGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
 }
 
@@ -222,27 +230,27 @@ FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activePa
   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
 
   complex<double> detu = GradientDet(slice, species, activeParticles);
-  complex<double> detuOld = GradientDet(slice, species);
-  if (mag2(detu-detuOld)>1.0e-12*mag2(detuOld)) {
-    cerr << "Inconsistent cached gradient at slice = " << slice 
-	 << " and species = " << species << endl;
-    cerr << "activeParticles = " << activeParticles 
-	 << " detu=" << detu << " detuOld=" << detuOld << endl;
-    fprintf (stderr, "Old matrix = \n");
-    for (int i=0; i<8; i++) {
-      for (int j=0; j<8; j++)
-	fprintf (stderr, "%8.4f ", real(Matrix(i,j)));
-      fprintf (stderr, "\n");
-    }
-    fprintf (stderr, "New matrix = \n");
-    for (int i=0; i<8; i++) {
-      for (int j=0; j<8; j++)
-	fprintf (stderr, "%8.4f ", (species == UpSpeciesNum) ? real(UpMatrixCache(slice, i, j)) :
-		 real(DownMatrixCache(slice, i, j)));
-      fprintf (stderr, "\n");
-    }
-    fprintf (stderr, "\n");
-  }
+//   complex<double> detuOld = GradientDet(slice, species);
+//   if (mag2(detu-detuOld)>1.0e-12*mag2(detuOld)) {
+//     cerr << "Inconsistent cached gradient at slice = " << slice 
+// 	 << " and species = " << species << endl;
+//     cerr << "activeParticles = " << activeParticles 
+// 	 << " detu=" << detu << " detuOld=" << detuOld << endl;
+//     fprintf (stderr, "Old matrix = \n");
+//     for (int i=0; i<8; i++) {
+//       for (int j=0; j<8; j++)
+// 	fprintf (stderr, "%8.4f ", real(Matrix(i,j)));
+//       fprintf (stderr, "\n");
+//     }
+//     fprintf (stderr, "New matrix = \n");
+//     for (int i=0; i<8; i++) {
+//       for (int j=0; j<8; j++)
+// 	fprintf (stderr, "%8.4f ", (species == UpSpeciesNum) ? real(UpMatrixCache(slice, i, j)) :
+// 		 real(DownMatrixCache(slice, i, j)));
+//       fprintf (stderr, "\n");
+//     }
+//     fprintf (stderr, "\n");
+//   }
   double detu2 = mag2(detu);
   double detu2Inv = 1.0/detu2;
   
@@ -860,7 +868,8 @@ void
 FixedPhaseActionClass::Init()
 {
   FixedPhaseA.Init (SpeciesNum);
-  FixedPhaseB.Init (SpeciesNum);
+  if (&FixedPhaseB != &FixedPhaseA)
+    FixedPhaseB.Init (SpeciesNum);
 }
 
 bool
@@ -926,7 +935,8 @@ void
 FixedPhaseActionClass::Setk(Vec3 k)
 {
   FixedPhaseA.Setk(k);
-  FixedPhaseB.Setk(k);
+  if (&FixedPhaseB != &FixedPhaseA)
+    FixedPhaseB.Setk(k);
 }
 
 
@@ -964,28 +974,32 @@ void
 FixedPhaseActionClass::ShiftData (int slices2Shift)
 {
   FixedPhaseA.ShiftData (slices2Shift, SpeciesNum);
-  FixedPhaseB.ShiftData (slices2Shift, SpeciesNum);
+  if (&FixedPhaseB != &FixedPhaseA)
+    FixedPhaseB.ShiftData (slices2Shift, SpeciesNum);
 }
 
 void
 FixedPhaseActionClass::MoveJoin (int oldJoinPos, int newJoinPos)
 {
   FixedPhaseA.MoveJoin (oldJoinPos, newJoinPos, SpeciesNum);
-  FixedPhaseB.MoveJoin (oldJoinPos, newJoinPos, SpeciesNum);
+  if (&FixedPhaseB != &FixedPhaseA)
+    FixedPhaseB.MoveJoin (oldJoinPos, newJoinPos, SpeciesNum);
 }
 
 void
 FixedPhaseActionClass::AcceptCopy (int slice1, int slice2)
 {
   FixedPhaseA.AcceptCopy (slice1, slice2, SpeciesNum);
-  FixedPhaseB.AcceptCopy (slice1, slice2, SpeciesNum);
+  if (&FixedPhaseB != &FixedPhaseA)
+    FixedPhaseB.AcceptCopy (slice1, slice2, SpeciesNum);
 }
 
 void
 FixedPhaseActionClass::RejectCopy (int slice1, int slice2)
 {
   FixedPhaseA.RejectCopy (slice1, slice2, SpeciesNum);
-  FixedPhaseB.RejectCopy (slice1, slice2, SpeciesNum);
+  if (&FixedPhaseB != &FixedPhaseA)
+    FixedPhaseB.RejectCopy (slice1, slice2, SpeciesNum);
 }
 
 
