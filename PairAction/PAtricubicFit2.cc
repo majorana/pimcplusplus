@@ -398,8 +398,10 @@ PAtricubicFit2Class::U(double q, double z, double s2, int level)
     double r = q+0.5*z;
     double rp = q-0.5*z;
     double prim  = 0.5*beta*(Pot->V(r)+Pot->V(rp));
-    if (myIsNAN(prim))
+    if (myIsNAN(prim)) {
       cerr << "NAN in prim!!!!!\n";
+      cerr << "r = " << r << "    rp = " << rp << endl;
+    }
     return (prim);
   }
 }
