@@ -240,6 +240,8 @@ LangevinMoveClass::VerletStep()
   
   /// Update the nodal actions
   PathData.Actions.UpdateNodalActions();
+  /// And the Rho_ks
+  PathData.Path.UpdateRho_ks();
 }
 
 
@@ -329,6 +331,9 @@ LangevinMoveClass::LangevinStep()
   
   /// Update the nodal actions
   PathData.Actions.UpdateNodalActions();
+
+  /// And the Rho_ks
+  PathData.Path.UpdateRho_ks();
 }
 
 

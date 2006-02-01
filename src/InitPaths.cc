@@ -356,6 +356,7 @@ PathClass::InitPaths (IOSectionClass &in)
   RefPath.AcceptCopy();
   Weight.AcceptCopy();
   ExistsCoupling.AcceptCopy();
+  UpdateRho_ks();
 }
 
 
