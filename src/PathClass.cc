@@ -96,6 +96,15 @@ void PathClass::Read (IOSectionClass &inSection)
   if (!inSection.ReadVar("OpenLoops",OpenPaths))
     OpenPaths=false;
 
+#ifndef OPEN_LOOPS
+  if (OpenPaths) {
+    cerr << "OpenPaths are not enabled in the code!\n"
+	 << "Reconfigure with --enable-open and \n" 
+	 << "  make clean; make ...\nAborting.\n";
+    abort();
+  }
+#endif
+
   // Read in the k-space radius.  If we don't have that,
   // we're not long-ranged.
   LongRange = inSection.ReadVar("kCutoff", kCutoff);
@@ -143,6 +152,17 @@ void PathClass::Read (IOSectionClass &inSection)
     SetIonConfig(0);
   }
 
+  /// Checking rounding mode
+  bool roundOkay = true;
+  for (int i=0; i<1000; i++) {
+    double x = 10.0*drand48()-5.0;
+    if (nearbyint(x) != round(x))
+      roundOkay = false;
+  }
+  if (!roundOkay) {
+    cerr << "Rounding mode is not set to ""round"".  Aborting!\n";
+    abort();
+  }
 
 }
 
@@ -438,6 +458,89 @@ void PathClass::CalcRho_ks_Fast(int slice,int species)
   //  perr<<"ending the calcrhok stuff"<<endl;
 }
       
+void 
+PathClass::UpdateRho_ks(int slice1, int slice2,
+			const Array<int,1> &changedParticles, int level)
+{
+  int skip = 1<<level;
+  /// First, reset new to old;
+  for (int slice=slice1; slice<=slice2; slice+=skip)
+    for (int species=0; species<NumSpecies(); species++)
+      for (int ki=0; ki<kIndices.size(); ki++)
+	Rho_k[NEWMODE](slice,species,ki) = Rho_k[OLDMODE](slice,species,ki);
+  
+  /// Now update the new depending on the changed positions.
+  for (int pi=0; pi<changedParticles.size(); pi++) {
+    int ptcl = changedParticles(pi);
+    int species = ParticleSpeciesNum(ptcl);
+    for (int slice=slice1; slice <= slice2; slice+=skip) {
+      dVec &rnew = Path[NEWMODE](slice,ptcl);
+      dVec &rold = Path[OLDMODE](slice,ptcl);
+      for (int dim=0;dim<NDIM;dim++){
+	complex<double> tempC;
+	double phi = rnew[dim] * kBox[dim];
+	tempC=complex<double>(cos(phi), sin(phi));
+	C[dim](MaxkIndex[dim]) = 1.0;
+	for (int n=1; n<=MaxkIndex[dim]; n++) {
+	  C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
+	  C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));
+	}
+      }
+      // Now, loop over k-vector indices;
+      for (int ki=0; ki<kIndices.size(); ki++) {
+	const TinyVector<int,NDIM> &kIndex = kIndices(ki);
+	//#ifdef THREE_D
+#if NDIM==3
+	Rho_k[NEWMODE](slice,species,ki) += 
+	  C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
+#endif
+	//#ifdef TWO_D
+#if NDIM==2
+	Rho_k[NEWMODE](slice,species,ki) += C[0](kIndex[0])*C[1](kIndex[1]);
+#endif
+      }
+      for (int dim=0;dim<NDIM;dim++){
+	complex<double> tempC;
+	double phi = rold[dim] * kBox[dim];
+	tempC=complex<double>(cos(phi), sin(phi));
+	C[dim](MaxkIndex[dim]) = 1.0;
+	for (int n=1; n<=MaxkIndex[dim]; n++) {
+	  C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
+	  C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));
+	}
+      }
+      // Now, loop over k-vector indices;
+      for (int ki=0; ki<kIndices.size(); ki++) {
+	const TinyVector<int,NDIM> &kIndex = kIndices(ki);
+	//#ifdef THREE_D
+#if NDIM==3
+	Rho_k[NEWMODE](slice,species,ki) -= 
+	  C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
+#endif
+	//#ifdef TWO_D
+#if NDIM==2
+	Rho_k[NEWMODE](slice,species,ki) -= C[0](kIndex[0])*C[1](kIndex[1]);
+#endif
+      }
+    }
+  }
+}
+
+void 
+PathClass::UpdateRho_ks()
+{
+  ModeType mode = GetMode();
+  SetMode(OLDMODE);
+  for (int slice=0; slice<NumTimeSlices(); slice++)
+    for (int species=0; species<NumSpecies(); species++)
+      CalcRho_ks_Fast(slice,species);
+  SetMode(NEWMODE);
+  for (int slice=0; slice<NumTimeSlices(); slice++)
+    for (int species=0; species<NumSpecies(); species++)
+      CalcRho_ks_Fast(slice,species);
+  SetMode(mode);
+}
+
 
 
 void PathClass::MoveJoin(int oldJoin, int newJoin)
@@ -499,7 +602,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
 
 
 void PathClass::AcceptCopy(int startSlice,int endSlice, 
-				  const Array <int,1> &activeParticles)
+			   const Array <int,1> &activeParticles)
 {
   ExistsCoupling.AcceptCopy();
   Weight.AcceptCopy();
@@ -509,6 +612,8 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
       Path[NEWMODE](Range(startSlice, endSlice), ptcl);
     Permutation.AcceptCopy(ptcl);
   }
+  Rho_k[OLDMODE](Range(startSlice,endSlice), Range::all(), Range::all()) =
+    Rho_k[NEWMODE](Range(startSlice,endSlice), Range::all(), Range::all());
 
   if (OpenPaths){
     OpenPtcl.AcceptCopy();
@@ -542,6 +647,9 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
       Path[OLDMODE](Range(startSlice, endSlice), ptcl);
     Permutation.RejectCopy(ptcl);
   }
+
+  Rho_k[NEWMODE](Range(startSlice,endSlice), Range::all(), Range::all()) =
+    Rho_k[OLDMODE](Range(startSlice,endSlice), Range::all(), Range::all());
 
   if (OpenPaths){
     OpenPtcl.RejectCopy();

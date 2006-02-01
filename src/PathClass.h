@@ -98,7 +98,9 @@ public:
   Mirrored3DClass< complex<double> > Rho_k;
   void CalcRho_ks_Slow(int slice, int species);  
   void CalcRho_ks_Fast(int slice, int species);  
-
+  void UpdateRho_ks(int slice1, int slice2, 
+		    const Array<int,1> &changedParticles, int level);
+  void UpdateRho_ks();
 private:
   //  int RefSliceCheck;
   void ShiftPathData(int sliceToShift);
@@ -478,14 +480,29 @@ PathClass::DistDisp (int slice, int ptcl1, int ptcl2,
 			       double &dist, dVec &disp)
 {
   disp = Path(slice, ptcl2) -Path(slice, ptcl1);
-  
-  for (int i=0; i<NDIM; i++) {
-    double n = -floor(disp(i)*BoxInv(i)+0.5);
-    disp(i) += n*IsPeriodic(i)*Box(i);
-  }
+  dVec n;
+#if NDIM==3
+  n[0] = nearbyint(disp[0]*BoxInv[0]);
+  n[1] = nearbyint(disp[1]*BoxInv[1]);
+  n[2] = nearbyint(disp[2]*BoxInv[2]);
+  disp[0] -= n[0]*IsPeriodic[0]*BoxInv[0];
+  disp[1] -= n[1]*IsPeriodic[1]*BoxInv[1];
+  disp[2] -= n[2]*IsPeriodic[2]*BoxInv[2];
+#endif
+#if NDIM==2
+  n[0] = nearbyint(disp[0]*BoxInv);
+  n[1] = nearbyint(disp[1]*BoxInv);
+  disp[0] -= n[0]*IsPeriodic[0]*BoxInv[0];
+  disp[1] -= n[1]*IsPeriodic[1]*BoxInv[1];
+#endif
+
+//   for (int i=0; i<NDIM; i++) {
+//     double n = -floor(disp(i)*BoxInv(i)+0.5);
+//     disp(i) += n*IsPeriodic(i)*Box(i);
+//   }
   dist = sqrt(dot(disp,disp));
 
-#ifdef DEBUG
+#ifdef DEBUG2
   dVec DBdisp = Path(slice, ptcl2) -Path(slice, ptcl1);
   for (int i=0; i<NDIM; i++) {
     while (DBdisp(i) > 0.5*Box(i))
@@ -506,21 +523,48 @@ PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 		     dVec &dispA, dVec &dispB)
 {  
   dispA = Path(sliceA, ptcl2) - Path(sliceA,ptcl1);
+#ifdef OPEN_LOOPS
   if (OpenPaths && sliceB==(int)OpenLink && ptcl1==(int)OpenPtcl){
     dispB=Path(sliceB,ptcl2)-Path(sliceB,NumParticles());
   }
   else if (OpenPaths && sliceB==(int)OpenLink && ptcl2==(int)OpenPtcl){
     dispB=Path(sliceB,NumParticles())-Path(sliceB,ptcl1);
   }
-  else{
-    dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
-  }
-  for (int i=0; i<NDIM; i++) {
-    double n = -nearbyint(dispA(i)*BoxInv(i));
-    dispA(i) += n*IsPeriodic(i)*Box(i);
-    double mNew=-nearbyint((dispA(i)-dispB(i))*BoxInv(i));
-    dispB(i)-= mNew*IsPeriodic(i)*Box(i);
-  }
+  else
+#endif
+  dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
+
+  dVec n, m;
+#if NDIM==3
+  n[0] = -nearbyint(dispA[0]*BoxInv[0]);
+  n[1] = -nearbyint(dispA[1]*BoxInv[1]);
+  n[2] = -nearbyint(dispA[2]*BoxInv[2]);
+  dispA[0] += n[0]*IsPeriodic[0]*Box[0];
+  dispA[1] += n[1]*IsPeriodic[1]*Box[1];
+  dispA[2] += n[2]*IsPeriodic[2]*Box[2];
+  m[0] = nearbyint((dispA[0]-dispB[0])*BoxInv[0]);
+  m[1] = nearbyint((dispA[1]-dispB[1])*BoxInv[1]);
+  m[2] = nearbyint((dispA[2]-dispB[2])*BoxInv[2]);
+  dispB[0] += m[0]*IsPeriodic[0]*Box[0];
+  dispB[1] += m[1]*IsPeriodic[1]*Box[1];
+  dispB[2] += m[2]*IsPeriodic[2]*Box[2];
+#endif
+#if NDIM==2
+  n[0] = -nearbyint(dispA[0]*BoxInv[0]);
+  n[1] = -nearbyint(dispA[1]*BoxInv[1]);
+  dispA[0] += n[0]*IsPeriodic[0]*Box[0];
+  dispA[1] += n[1]*IsPeriodic[1]*Box[1];
+  m[0] = -nearbyint((dispA[0]-dispB[0])*BoxInv[0]);
+  m[1] = -nearbyint((dispA[1]-dispB[1])*BoxInv[1]);
+  dispB[0] += m[0]*IsPeriodic[0]*Box[0];
+  dispB[1] += m[1]*IsPeriodic[1]*Box[1];
+#endif
+//   for (int i=0; i<NDIM; i++) {
+//     double n = -nearbyint(dispA(i)*BoxInv(i));
+//     dispA(i) += n*IsPeriodic(i)*Box(i);
+//     double mNew=-nearbyint((dispA(i)-dispB(i))*BoxInv(i));
+//     dispB(i)-= mNew*IsPeriodic(i)*Box(i);
+//   }
   distA = sqrt(dot(dispA,dispA));
   distB = sqrt(dot(dispB,dispB));
 }
@@ -615,12 +659,13 @@ PathClass::Velocity (int sliceA, int sliceB, int ptcl)
   //  bool changePtcl=(OpenPaths && sliceB==(int)OpenLink && ptcl==(int)OpenPtcl);
   //  ptcl=ptcl*!changePtcl+NumParticles()*changePtcl;
   dVec vel;
+#ifdef OPEN_LOOPS
   if (OpenPaths && sliceB==(int)OpenLink && ptcl==(int)OpenPtcl){
     vel=Path(sliceB,NumParticles())-Path(sliceA,ptcl);
   }
-  else{
+  else
+#endif
     vel = Path(sliceB, ptcl) - Path(sliceA,ptcl);
-  }
   PutInBox(vel);
   
 
@@ -646,7 +691,7 @@ PathClass::Velocity (int sliceA, int sliceB, int ptcl)
 inline void 
 PathClass::PutInBox (dVec &v)
 {
-#ifdef DEBUG
+#ifdef DEBUG2
   dVec Dv=v;
 #endif
   for (int i=0; i<NDIM; i++) {
