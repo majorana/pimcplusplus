@@ -88,6 +88,18 @@ if test "x$enable_profile" = "xyes"; then
    LDFLAGS="-pg $LDFLAGS"
 fi
 
+AC_ARG_ENABLE(debug,[  --enable-debug          enable code for debugging checks])
+if test "x$enable_debug" = "xyes"; then
+   CXXFLAGS="-DDEBUG $CXXFLAGS"
+   F77FLAGS="-DDEBUG $F77FLAGS"
+fi
+
+AC_ARG_ENABLE(open,[ --enable-open            enable code for open loops])
+if test "x$enable_open" = "xyes"; then
+   CXXFLAGS="-DOPEN_LOOPS $CXXFLAGS"
+   F77FLAGS="-DOPEN_LOOPS $CXXFLAGS"
+fi
+
 # Optionally set dimensionality
 AC_ARG_WITH(ndim, [  --with-ndim=N           specify simulation dimensionality])
 if (test "x$with_ndim" != "x"); then
