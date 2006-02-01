@@ -54,6 +54,7 @@ class LinearGrid : public Grid
  private:
   /// The value between successive grid points.
   double delta, deltainv;
+  inline void CheckRoundingMode();
  public:
   /// Returns the type of the grid (in this case LINEAR)
   GridType Type()
@@ -62,7 +63,7 @@ class LinearGrid : public Grid
   /// Returns the index of the nearest point below r. 
   int ReverseMap(double r)
   {
-    return ((int)floor((r-Start)*deltainv));
+    return ((int)nearbyint((r-Start)*deltainv-0.5));
   }
 
   /// Initializes the linear grid.
@@ -74,6 +75,7 @@ class LinearGrid : public Grid
     deltainv = 1.0/delta;
     for (int i=0; i<NumPoints; i++)
       grid(i) = Start + (double)i*delta;
+    CheckRoundingMode();
   }
 
   void Write (IOSectionClass &outSection)
@@ -512,6 +514,20 @@ inline Grid* ReadGrid (IOSectionClass &inSection)
   newGrid->Read(inSection);
   return (newGrid);
 }
+
+
+inline void
+LinearGrid::CheckRoundingMode()
+{
+  for (int i=0; i<100; i++) {
+    double x = 100.0*drand48()-50.0;
+    if (nearbyint(x) != round(x)) {
+      cerr << "Error in rounding mode detected in LinearGrid.  Abort.\n";
+      abort();
+    }
+  }
+}
+      
 
 
 
