@@ -66,5 +66,7 @@ libpw_la_LIBADD   =
 
 
 include_HEADERS = ConjGrad2.h FFTBox.h GVecs.h Hamiltonian2.h PlaneWaves.h \
-                  VectorOps.h PlaneWavesMPI.h ConjGradMPI.h
+                  VectorOps.h PlaneWavesMPI.h ConjGradMPI.h Hamiltonians.h \
+                  Coulomb.h CoulombFFT.h HamiltonianBase.h LocalPotFFT.h   \
+                  PHPot.h PHPotFFT.h
 
