@@ -1,7 +1,7 @@
 #ifndef CONJ_GRAD_MPI_H
 #define CONJ_GRAD_MPI_H
 
-#include "Hamiltonian2.h"
+#include "Hamiltonians.h"
 
 class CommunicatorClass;
 

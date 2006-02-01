@@ -1,7 +1,7 @@
 #ifndef CONJ_GRAD2_H
 #define CONJ_GRAD2_H
 
-#include "Hamiltonian2.h"
+#include "Hamiltonians.h"
 
 class ConjGrad
 {

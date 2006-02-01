@@ -4,7 +4,7 @@ TestPW2_SOURCES = TestPW2.cc
 BandStructure_SOURCES = BandStructure.cc BandStructure.h
 MPIBandStructure_SOURCES = MPIBandStructure.cc MPIBandStructure.h
 
-LDADD = libpw.la                 ../IO/libciao.la                         \
+LDADD = libpw.la                 ../IO/libIO.la                           \
         ../FFT/libfft.la       ../PH/libPH.la                             \
         ../MatrixOps/libmatops.la ../Splines/libspline.la                 \
         ../Fitting/libfitting.la ../Integration/libquad.la                \
@@ -16,20 +16,32 @@ AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
               $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)
 
 noinst_LTLIBRARIES = libpw.la
-libpw_la_SOURCES = ConjGrad2.h       \
-                   ConjGrad2.cc      \
-                   ConjGradMPI.h     \
-                   ConjGradMPI.cc    \
-                   FFTBox.h          \
-                   FFTBox.cc         \
-                   GVecs.h           \
-                   GVecs.cc          \
-                   Hamiltonian2.h    \
-                   Hamiltonian2.cc   \
-                   PlaneWaves.h      \
-                   PlaneWaves.cc     \
-                   PlaneWavesMPI.h   \
-                   PlaneWavesMPI.cc  \
+libpw_la_SOURCES = ConjGrad2.h        \
+                   ConjGrad2.cc       \
+                   ConjGradMPI.h      \
+                   ConjGradMPI.cc     \
+                   Coulomb.h          \
+                   Coulomb.cc         \
+                   CoulombFFT.h       \
+                   CoulombFFT.cc      \
+                   FFTBox.h           \
+                   FFTBox.cc          \
+                   GVecs.h            \
+                   GVecs.cc           \
+                   HamiltonianBase.h  \
+                   HamiltonianBase.cc \
+                   Hamiltonians.h     \
+                   Hamiltonians.cc    \
+                   LocalPotFFT.h      \
+                   LocalPotFFT.cc     \
+                   PHPot.h            \
+                   PHPot.cc           \
+                   PHPotFFT.h         \
+                   PHPotFFT.cc        \
+                   PlaneWaves.h       \
+                   PlaneWaves.cc      \
+                   PlaneWavesMPI.h    \
+                   PlaneWavesMPI.cc   \
                    VectorOps.h
 
 #TestXML_SOURCES = TestXML.cc

@@ -148,6 +148,7 @@ public:
 };
 
 
+
 class HamiltonianClass
 {
 private:
