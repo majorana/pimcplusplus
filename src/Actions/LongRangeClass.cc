@@ -259,9 +259,36 @@ LongRangeClass::SingleAction (int slice1, int slice2,
 			      const Array<int,1> &changedParticles,
 			      int level)
 {
+  if (GetMode() == NEWMODE)
+    Path.UpdateRho_ks(slice1, slice2, changedParticles, level);
+  
+  int skip = (1<<level);
+#ifdef DEBUG
+  // Check to see if matrices are updated properly
+  Array<complex<double>,1> temp(Path.kVecs.size());
+  for (int slice=slice1; slice<=slice2; slice+=skip) {
+    for (int species=0; species<Path.NumSpecies(); species++) {
+//       if (GetMode() == NEWMODE)
+// 	Path.CalcRho_ks_Fast(slice,species);
+      for (int ki=0; ki<Path.kVecs.size(); ki++)
+	temp(ki) = Path.Rho_k(slice,species,ki);
+      Path.CalcRho_ks_Fast(slice,species);
+      for (int ki=0; ki<Path.kVecs.size(); ki++)
+	if (mag2(temp(ki)-Path.Rho_k(slice,species,ki)) > 1.0e-12) 
+	  cerr << "Error in LongRangeClass::SingleAction.  "
+	       << "Cache inconsisency at slice=" 
+	       << slice << " species=" << Path.Species(species).Name 
+	       << "  Mode=" << GetMode() << endl
+	       << "temp  = " << temp(ki) << endl
+	       << "Rho_k = " << Path.Rho_k(slice,species,ki) << endl;
+	  
+      
+    }
+  }
+#endif
+      
   double homo = 0.0;
   double hetero = 0.0;
-  int skip = (1<<level);
   double levelTau = Path.tau * (double)skip;
   for (int slice=slice1; slice<=slice2; slice+=skip) {
     double factor;
@@ -271,7 +298,7 @@ LongRangeClass::SingleAction (int slice1, int slice2,
       factor = 1.0;
     // First, do the homologous (same species) terms
     for (int species=0; species<Path.NumSpecies(); species++) {
-      Path.CalcRho_ks_Fast(slice,species);
+      // Path.CalcRho_ks_Fast(slice,species);
       PairActionFitClass &pa = *PairMatrix(species,species);
       if (pa.IsLongRange()) {
 	for (int ki=0; ki<Path.kVecs.size(); ki++) {

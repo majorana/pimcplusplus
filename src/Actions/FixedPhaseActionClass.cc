@@ -108,7 +108,39 @@ FixedPhaseClass::MoveJoin (int oldJoinPos, int newJoinPos, int speciesNum)
     UpMatrixCache : DownMatrixCache;
   Mirrored3DClass<cVec3> &gradCache = (speciesNum == UpSpeciesNum) ?
     UpGradMatCache : DownGradMatCache;
+  int first   = Path.Species(speciesNum).FirstPtcl;
+  int numPtcl = Path.Species(speciesNum).NumParticles;
 
+  if (newJoinPos > newJoinPos) {
+    for (int slice=oldJoinPos+1; slice <= newJoinPos; slice++)
+      for (int pi=0; pi<matCache[OLDMODE].extent(1); pi++) {
+	int ptcl = pi+first;
+	int perm = Path.Permutation(ptcl)-first;
+	matCache[OLDMODE](slice,pi,Range::all()) = 
+	  matCache[NEWMODE](slice,perm,Range::all());
+	gradCache[OLDMODE](slice,pi,Range::all()) = 
+	  gradCache[NEWMODE](slice,perm,Range::all());
+      }
+    matCache[NEWMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all())
+      = matCache[OLDMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all());
+    gradCache[NEWMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all())
+      = gradCache[OLDMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all());
+  }
+  else if (oldJoinPos >= newJoinPos) {
+    for (int slice=newJoinPos+1; slice<=oldJoinPos; slice++) 
+      for (int pi=0; pi<matCache[OLDMODE].extent(1); pi++) {
+	int ptcl = pi+first;
+	int perm = Path.Permutation(ptcl)-first;
+	matCache[OLDMODE](slice,perm,Range::all()) = 
+	  matCache[NEWMODE](slice,pi,Range::all());
+	gradCache[OLDMODE](slice,perm,Range::all()) = 
+	  gradCache[NEWMODE](slice,pi,Range::all());
+      }
+    matCache[NEWMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all())
+      = matCache[OLDMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all());
+    gradCache[NEWMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all())
+      = gradCache[OLDMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all());
+  }
 }
 
 
@@ -230,27 +262,30 @@ FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activePa
   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
 
   complex<double> detu = GradientDet(slice, species, activeParticles);
-//   complex<double> detuOld = GradientDet(slice, species);
-//   if (mag2(detu-detuOld)>1.0e-12*mag2(detuOld)) {
-//     cerr << "Inconsistent cached gradient at slice = " << slice 
-// 	 << " and species = " << species << endl;
-//     cerr << "activeParticles = " << activeParticles 
-// 	 << " detu=" << detu << " detuOld=" << detuOld << endl;
-//     fprintf (stderr, "Old matrix = \n");
-//     for (int i=0; i<8; i++) {
-//       for (int j=0; j<8; j++)
-// 	fprintf (stderr, "%8.4f ", real(Matrix(i,j)));
-//       fprintf (stderr, "\n");
-//     }
-//     fprintf (stderr, "New matrix = \n");
-//     for (int i=0; i<8; i++) {
-//       for (int j=0; j<8; j++)
-// 	fprintf (stderr, "%8.4f ", (species == UpSpeciesNum) ? real(UpMatrixCache(slice, i, j)) :
-// 		 real(DownMatrixCache(slice, i, j)));
-//       fprintf (stderr, "\n");
-//     }
-//     fprintf (stderr, "\n");
-//   }
+#ifdef DEBUG
+  complex<double> detuOld = GradientDet(slice, species);
+  if (mag2(detu-detuOld)>1.0e-12*mag2(detuOld)) {
+    cerr << "Inconsistent cached gradient at slice = " << slice 
+	 << " and species = " << species << endl;
+    cerr << "activeParticles = " << activeParticles 
+	 << " detu=" << detu << " detuOld=" << detuOld << endl;
+    fprintf (stderr, "Old matrix = \n");
+    for (int i=0; i<8; i++) {
+      for (int j=0; j<8; j++)
+	fprintf (stderr, "%8.4f ", real(Matrix(i,j)));
+      fprintf (stderr, "\n");
+    }
+    fprintf (stderr, "New matrix = \n");
+    for (int i=0; i<8; i++) {
+      for (int j=0; j<8; j++)
+	fprintf (stderr, "%8.4f ", (species == UpSpeciesNum) ? 
+		 real(UpMatrixCache(slice, i, j)) :
+		 real(DownMatrixCache(slice, i, j)));
+      fprintf (stderr, "\n");
+    }
+    fprintf (stderr, "\n");
+  }
+#endif
   double detu2 = mag2(detu);
   double detu2Inv = 1.0/detu2;
   
