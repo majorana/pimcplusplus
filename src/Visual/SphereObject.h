@@ -11,6 +11,7 @@ protected:
   double Radius;
   static int SphereListNum, OffScreenListNum;
   static bool SphereListCreated, OffScreenListCreated;
+  bool OffScreen;
   void Set();
 public:
   void SetPos (Vec3 pos);

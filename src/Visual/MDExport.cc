@@ -156,6 +156,7 @@ void
 MDExportClass::MakePixmap (int frame)
 {
   if (!GLContextSetup) {
+    cerr << "Setting up GL context.\n";
     GLContextSetup = true;
     GdkPixmap.clear();
     GLConfig.clear();
@@ -168,14 +169,19 @@ MDExportClass::MakePixmap (int frame)
       return;
     }
     
+    cerr << "Width = " << Width << "   Height = " << Height << endl;
     GdkPixmap = Gdk::Pixmap::create (MDVisual.get_window(),
 				     Width, Height, GLConfig->get_depth());
     
-    Glib::RefPtr<Gdk::GL::Pixmap> GLPixmap = 
+    GLPixmap = 
       Gdk::GL::ext(GdkPixmap).set_gl_capability (GLConfig);
-    
+
     GLContext = Gdk::GL::Context::create (GLPixmap, false);
   }
+  assert (GdkPixmap);
+  assert (GLPixmap);
+  assert (GLContext);
+
   GLPixmap->make_current(GLContext);
   GLPixmap->gl_begin(GLContext);
 
@@ -234,11 +240,12 @@ MDExportClass::ExportMovie (string basename,
   Revel_InitializeParams(&params);
   params.width  = Width;
   params.height = Height;
-  params.frameRate = 30.0;
+  params.frameRate = 60.0;
   params.quality = 1.0;
   params.codec = REVEL_CD_XVID;
   params.hasAudio = 0;
   basename.append(".avi");
+  cerr << "filename = " << basename << endl;
   Revel_EncodeStart(encoderHandle, basename.c_str(), &params);
   Revel_VideoFrame videoFrame;
   videoFrame.width  = Width;

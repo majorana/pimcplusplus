@@ -130,7 +130,7 @@ public:
 
   inline SpeciesClass& PtclSpecies (int ptcl);
   void Read(string fileName);
-  void MakeFrame (int frame);
+  void MakeFrame (int frame, bool offScreen=false);
   
   VisualClass();
   virtual ~VisualClass();

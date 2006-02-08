@@ -9,7 +9,8 @@ int  SphereObject::OffScreenListNum(0);
 bool SphereObject::OffScreenListCreated(false);
 
 SphereObject::SphereObject(bool offScreen) : 
-  Radius(1.0), Color(1.0, 0.0, 0.0), Pos(0.0, 0.0, 0.0)
+  Radius(1.0), Color(1.0, 0.0, 0.0), Pos(0.0, 0.0, 0.0),
+  OffScreen(offScreen)
 {
   if (offScreen) {
     if (!OffScreenListCreated) {
@@ -58,9 +59,17 @@ SphereObject::Set()
   // Create sphere
   glPushMatrix();
   glTranslated (Pos[0], Pos[1], Pos[2]);
-  glScaled (Radius, Radius, Radius);
-  //  gluSphere(qobj, Radius, 20, 20);
-  glCallList(SphereListNum);
+ 
+  if (OffScreen) {
+    //    glCallList(OffScreenListNum);
+    GLUquadricObj* qobj = gluNewQuadric();
+    gluSphere(qobj, Radius, 20, 20);
+    gluDeleteQuadric(qobj);
+  }
+  else {
+    glScaled (Radius, Radius, Radius);
+    glCallList(SphereListNum);
+  }
   glPopMatrix();
   //  gluDeleteQuadric (qobj);
   End();

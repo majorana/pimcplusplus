@@ -176,7 +176,7 @@ void ExportClass::MakePixmap (int frame)
 
   // Render here
   InitGLStuff();
-  Visual.MakeFrame (frame);
+  Visual.MakeFrame (frame, true);
   Visual.PathVis.GLRender();
 
   glFlush();

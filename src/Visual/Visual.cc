@@ -11,7 +11,7 @@ VisualClass::ReadFrameData(int frame)
   }
 }
 
-void VisualClass::MakeFrame(int frame)
+void VisualClass::MakeFrame(int frame, bool offScreen)
 {
   int numSpecies = Species.size();
 
@@ -89,15 +89,16 @@ void VisualClass::MakeFrame(int frame)
     if (Species(si).lambda == 0)
       for (int ptcl=Species(si).FirstParticle; ptcl<=Species(si).LastParticle;
 	   ptcl++) {
-	SphereObject* sphere = new SphereObject;
+	SphereObject* sphere = new SphereObject(offScreen);
 	dVec pos;
 	pos[0] = PathArray(frame, ptcl, 0, 0);
  	pos[1] = PathArray(frame, ptcl, 0, 1);
  	pos[2] = PathArray(frame, ptcl, 0, 2);
+	Box.PutInBox(pos);
 	sphere->SetPos (pos);
-	if (ptcl==0)
-	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
-	else
+// 	if (ptcl==0)
+// 	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
+// 	else
 	  sphere->SetColor (Vec3(1.0, 0.0, 0.0));
 	PathVis.Objects.push_back(sphere);
       }
@@ -297,6 +298,22 @@ void VisualClass::Read(string fileName)
   }
   else
     HaveBNodeData = false;
+
+  /// Make sure images are continuous from frame to frame
+  for (int frame=0; frame<PathArray.extent(0)-1; frame++) 
+    for (int ptcl=0; ptcl<PathArray.extent(1); ptcl++) 
+      for (int dim=0; dim<3; dim++) {
+	while ((PathArray(frame+1,ptcl,0,dim)-PathArray(frame,ptcl,0,dim)) 
+	       > 0.5*Box[dim])
+	  for (int slice=0; slice<PathArray.extent(2); slice++)
+	    PathArray(frame+1,ptcl,slice,dim) -= Box[dim];
+	while ((PathArray(frame+1,ptcl,0,dim)-PathArray(frame,ptcl,0,dim)) 
+	       < -0.5*Box[dim])
+	  for (int slice=0; slice<PathArray.extent(2); slice++)
+	    PathArray(frame+1,ptcl,slice,dim) += Box[dim];
+      }
+
+	       
 
   FrameAdjust.set_upper(PathArray.extent(0)-1);
   DetailAdjust.set_upper(PathArray.extent(2)/2);
@@ -733,7 +750,11 @@ void VisualClass::MakePaths(int frame)
       path.Path[path.Path.size()-1][1] = Tail(frame,1);
       path.Path[path.Path.size()-1][2] = Tail(frame,2);
     }
-      // Now, make sure the path doesn't have any discontinuities 
+
+    
+    // First, put first slice in box
+    Box.PutInBox(path.Path[0]);
+    // Now, make sure the path doesn't have any discontinuities 
     // because having different period images.
     for (int slice=0; slice<path.Path.size()-1; slice++) 
       for (int dim=0; dim<3; dim++) {
