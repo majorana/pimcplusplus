@@ -67,7 +67,7 @@ LangevinMoveClass::CalcCovariance()
   /// First, sum the forces over the processors in my clone.
   for (int i=0; i<numFs; i++) {
     PathData.IntraComm.AllSum(FDeque[i], FTmp);
-    FDeque[i] = FShort;
+    FDeque[i] = FTmp;
   }
 
   Fmean = 0.0;
