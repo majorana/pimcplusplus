@@ -31,7 +31,8 @@ Stats (Array<double,1> &x, double &mean, double &var, double &kappa)
     x2sum += x(i)*x(i);
   }
   mean = xsum * ninv;
-  var = x2sum/(double)(N-1) - mean*mean;
+  var  = ninv * x2sum - mean*mean;
+  var *= (double)N/(double)(N-1);
 
   /// Compute autocorrelation time, kappa
   kappa = 1.0;
