@@ -99,11 +99,12 @@ LangevinMoveClass::CalcCovariance()
 	i++;
       }
   }
-  CoVar = (1.0/(double)(numFs-1))*CoVar;
+  CoVar = (1.0/(double)numFs)*CoVar;
   /// Subtract <F(i)><F(j)>
   for (int i=0; i<CoVar.rows(); i++)
     for (int j=0; j<CoVar.cols(); j++)
       CoVar(i,j) -= Fmean(i)*Fmean(j);
+  CoVar = ((double)numFs/(double)(numFs-1)) * CoVar;
 
   /// Compute the average autocorrelation time for the diagaonal
   /// elements only.
