@@ -104,6 +104,8 @@ LangevinMoveClass::CalcCovariance()
   for (int i=0; i<CoVar.rows(); i++)
     for (int j=0; j<CoVar.cols(); j++)
       CoVar(i,j) -= Fmean(i)*Fmean(j);
+  /// Necessary to correct for bias that comes from the fact that we
+  /// calculated the mean from the data.
   CoVar = ((double)numFs/(double)(numFs-1)) * CoVar;
 
   /// Compute the average autocorrelation time for the diagaonal
