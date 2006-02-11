@@ -12,8 +12,10 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   string permuteType, speciesName;
   //  StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
+  assert (NumLevels <= PathData.Actions.GetMaxLevels());
   if (!in.ReadVar ("LowestLevel", LowestLevel))
     LowestLevel = 0;
+  assert (LowestLevel < NumLevels);
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   //  in.ReadVar("OrderNBosons",orderNBosons);

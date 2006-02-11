@@ -15,7 +15,7 @@ LangevinMoveClass::AccumForces()
   /// Queue the forces for the computation of the variance.  Note that
   /// the copy is very important since the normal blitz copy constructor
   /// operator references the array data.
-  FTmp += FShort + FLong;
+  FTmp = FShort + FLong;
   FDeque.push_back(FTmp.copy());
 }
 
@@ -67,6 +67,7 @@ LangevinMoveClass::CalcCovariance()
 
   /// First, sum the forces over the processors in my clone.
   for (int i=0; i<numFs; i++) {
+    FTmp = dVec(0.0);
     PathData.IntraComm.AllSum(FDeque[i], FTmp);
     FDeque[i] = FTmp;
   }
@@ -141,6 +142,16 @@ LangevinMoveClass::CalcCovariance()
     A *= 0.5*TimeStep*beta/(Mass*(double)(numClones*numClones));
     /// Now calculate eigenvalues and eigenvectors
     SymmEigenPairs (A, A.extent(0), Lambda, L);
+    /// Make sure we don't have negative eigenvalues
+    // cerr << "Lambdas = [" << Lambda << "]\n";
+    //    cerr << "Fmean = " << Fmean << endl;
+    for (int i=0; i<Lambda.size(); i++) {
+      if (Lambda(i) <= 0.0) {
+	cerr << "Negative eigenvalue detected. Lambda = "
+	     << Lambda(i) << endl;
+	Lambda(i) = 1.0e-10;
+      }
+    }
   }
   /// Now, broadcast eigenvectors and values to all processors
   PathData.IntraComm.Broadcast(0, L);
@@ -318,8 +329,8 @@ LangevinMoveClass::LangevinStep()
   SetMode (NEWMODE);
   for (int slice=0; slice<PathData.Path.NumTimeSlices(); slice++)
     for (int i=0; i<R.size(); i++) 
-      PathData.Path(slice,i+first) = R(i) + TimeStep*V(i) + 
-	0.5*TimeStep*TimeStep* (OldFShort(i) + OldFLong(i));
+      PathData.Path(slice,i+first) = R(i);
+  // + TimeStep*V(i) + 0.5*TimeStep*TimeStep* (OldFShort(i) + OldFLong(i));
 
   /// Warp electron paths to follow ions
   PathData.Path.WarpPaths(LDSpecies);
@@ -327,8 +338,8 @@ LangevinMoveClass::LangevinStep()
   SetMode (OLDMODE);
   for (int slice=0; slice<PathData.Path.NumTimeSlices(); slice++)
     for (int i=0; i<R.size(); i++) 
-      PathData.Path(slice,i+first) = R(i) + TimeStep*V(i) + 
-	0.5*TimeStep*TimeStep*(OldFShort(i)+OldFLong(i));
+      PathData.Path(slice,i+first) = R(i);
+  // + TimeStep*V(i) + 0.5*TimeStep*TimeStep*(OldFShort(i)+OldFLong(i));
 
   /// Increment the time
   Time += TimeStep;

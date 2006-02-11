@@ -5,9 +5,9 @@ MoveClass::DoEvent()
 {
   //  TimesCalled++;
   MakeMove();
-  if ((PathData.Path.Communicator.MyProc()==0) && 
-      (TimesCalled % DumpFreq) == 0)
-    WriteRatio();
+//   if ((PathData.Path.Communicator.MyProc()==0) && 
+//       (TimesCalled % DumpFreq) == 0)
+//     WriteRatio();
 }
 
 
