@@ -3,6 +3,7 @@
 #include "PathDataClass.h"
 #include "Moves/MoveBase.h"
 #include "Observables/ObservableBase.h"
+#include <sstream>
 #include <sys/time.h>
 
 void
@@ -26,7 +27,6 @@ LoopClass::DoEvent()
 	(*iter)->TimeSpent += (double)(end.tv_sec-start.tv_sec) +
 	  1.0e-6*(double)(end.tv_usec-start.tv_usec);
       }
-	
     }
   }
 }
@@ -60,6 +60,9 @@ LoopClass::Read(IOSectionClass &in)
 {
   assert (in.ReadVar("Steps", NumSteps));
   Read(in, NumSteps);
+  ostringstream loopStream;
+  loopStream << "Loop(" << NumSteps << ")";
+  Name = loopStream.str();
 }
 
 void
