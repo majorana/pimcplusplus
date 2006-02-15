@@ -45,7 +45,7 @@ Stats (Array<double,1> &x, double &mean, double &var, double &kappa)
     c_i /= (var*(double)(N-i));
     i++;
     if (c_i > 0)
-      kappa += c_i;
+      kappa += 2.0*c_i;
     done = (i>=N) || (c_i<=0.0);
   }
 }
@@ -129,7 +129,7 @@ LangevinMoveClass::CalcCovariance()
 	 << " and kappa = " << kappa << endl;
 
   /// Multiply covariance by kappa
-  CoVar *= kappa;
+  //CoVar *= kappa;
 
   /// Now we have the covariance matrix for the clone.  We must sum
   /// over all the clones and divide by the number
