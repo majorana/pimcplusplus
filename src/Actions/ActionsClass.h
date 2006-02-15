@@ -138,6 +138,8 @@ public:
 
   void UpdateNodalActions();
 
+  inline int GetMaxLevels() { return MaxLevels; }
+
   ActionsClass(PathDataClass &pathData) : 
     ShortRange(pathData,PairMatrix),
     ShortRangeOn(pathData,PairMatrix),
