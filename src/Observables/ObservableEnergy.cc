@@ -25,7 +25,14 @@ void EnergyClass::Accumulate()
   VShortSum  += vShort;
   VLongSum   += vLong;
 
-  /// Removing this total action stuff for now.
+//   double kAction, uShortAction, uLongAction, nodeAction;
+//   PathData.Actions.GetActions(kAction, uShortAction, uLongAction, nodeAction);
+//   double totalAction = (kAction + uShortAction + uLongAction + nodeAction);
+//   TotalActionSum += totalAction;
+//   PathData.Path.Communicator.Sum (totalAction);
+//   ExpTotalActionSum += exp(-totalAction+4.8879e4);
+
+/// Removing this total action stuff for now.
 //   double kAction, uShortAction, uLongAction, nodeAction;
 //   PathData.Actions.GetActions(kAction, uShortAction, uLongAction, nodeAction);
 //   TotalActionSum += (kAction + uShortAction + uLongAction + nodeAction);
@@ -94,7 +101,8 @@ void EnergyClass::WriteBlock()
   NodeVar.Write(PathData.Path.Communicator.Sum(NodeSum)*norm);
   VShortVar.Write(PathData.Path.Communicator.Sum(VShortSum)*norm);
   VLongVar.Write(PathData.Path.Communicator.Sum(VLongSum)*norm);
-  TotalActionVar.Write(PathData.Path.Communicator.Sum(TotalActionSum)*norm);
+  //  TotalActionVar.Write(PathData.Path.Communicator.Sum(TotalActionSum)/(double)(NumSamples));
+  //  ExpTotalActionVar.Write(ExpTotalActionSum/(double)NumSamples);
   //  TIP5PVar.Write(PathData.Path.Communicator.Sum(TIP5PSum)*norm);
 
   //  cerr << "Total " << TotalSum*norm << " and per molecule: " << TotalSum*norm/PathData.Path.numMol << endl;
@@ -108,7 +116,8 @@ void EnergyClass::WriteBlock()
   NodeSum        = 0.0;
   VShortSum      = 0.0;
   VLongSum       = 0.0;
-  TotalActionSum = 0.0;
+//   TotalActionSum = 0.0;
+//   ExpTotalActionSum = 0.0;
   //  TIP5PSum   = 0.0;
   NumSamples = 0;
 }
@@ -208,13 +217,13 @@ void EnergySignClass::Accumulate()
   double kinetic, dUShort, dULong, node, vShort, vLong;
   PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong);
   
-  TotalSum   += (kinetic + dUShort + dULong + node)*PathData.Path.Weight;
-  KineticSum += kinetic * PathData.Path.Weight;
-  dUShortSum += dUShort * PathData.Path.Weight;
-  dULongSum  += dULong * PathData.Path.Weight;
-  NodeSum    += node * PathData.Path.Weight;
-  VShortSum  += vShort * PathData.Path.Weight;
-  VLongSum   += vLong * PathData.Path.Weight;
+  TotalSum   += (kinetic + dUShort + dULong + node)/* *PathData.Path.Weight*/;
+  KineticSum += kinetic/* * PathData.Path.Weight*/;
+  dUShortSum += dUShort/* * PathData.Path.Weight*/;
+  dULongSum  += dULong/* * PathData.Path.Weight*/;
+  NodeSum    += node/* * PathData.Path.Weight*/;
+  VShortSum  += vShort/* * PathData.Path.Weight*/;
+  VLongSum   += vLong/* * PathData.Path.Weight*/;
 }
 
 
