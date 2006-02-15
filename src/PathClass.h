@@ -238,6 +238,9 @@ public:
   /// appropriate place in the path.
   void SetIonConfig (int config);
   
+  void WarpAtoB(dVec &pos);
+  void WarpBtoA(dVec &pos);
+
   inline int GetConfig ()
   { return ConfigNum; }
 

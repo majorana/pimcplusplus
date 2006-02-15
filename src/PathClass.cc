@@ -989,6 +989,51 @@ void PathClass::InitOpenPaths()
   perr<<"Initialized the open paths"<<endl;
 }
 
+void
+PathClass::WarpAtoB(dVec &pos)
+{
+  double weightSum = 0.0;
+  for (int i=0; i<IonConfigs[0].size(); i++) {
+    dVec disp = pos - IonConfigs[0](i);
+    PutInBox(disp);
+    double dist2 = dot(disp, disp);
+    weightSum += 1.0/(dist2*dist2);
+  }
+  dVec shift;
+  for(int i=0; i<NDIM; i++)
+    shift[i] = 0;
+  for (int i=0; i<IonConfigs[0].size(); i++) {
+    dVec disp = pos - IonConfigs[0](i);
+    PutInBox(disp);
+    double dist2 = dot(disp, disp);
+    double weight = 1.0/(dist2*dist2*weightSum);
+    shift = shift + weight*(IonConfigs[1](i)-IonConfigs[0](i));
+  }
+  pos = pos + shift;
+}
+
+void
+PathClass::WarpBtoA(dVec &pos)
+{
+  double weightSum = 0.0;
+  for (int i=0; i<IonConfigs[0].size(); i++) {
+    dVec disp = pos - IonConfigs[1](i);
+    PutInBox(disp);
+    double dist2 = dot(disp, disp);
+    weightSum += 1.0/(dist2*dist2);
+  }
+  dVec shift;
+  for(int i=0; i<NDIM; i++)
+    shift[i] = 0;
+  for (int i=0; i<IonConfigs[1].size(); i++) {
+    dVec disp = pos - IonConfigs[1](i);
+    PutInBox(disp);
+    double dist2 = dot(disp, disp);
+    double weight = 1.0/(dist2*dist2*weightSum);
+    shift = shift + weight*(IonConfigs[0](i)-IonConfigs[1](i));
+  }
+  pos = pos + shift;
+}
 
 void 
 PathClass::WarpPaths (int ionSpecies)
