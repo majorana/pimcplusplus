@@ -22,7 +22,7 @@ protected:
     EventClass(pathData, out),
     Moves(moves), Observables(observables)
   {
-    
+    Name = "WriteData";
   }
 };
 
