@@ -11,7 +11,7 @@ class LangevinMoveClass : public MoveClass
 protected:
   MDIntegratorType Integrator;
 
-  Array<dVec,1> V, R, Rp, OldFShort, OldFLong, 
+  Array<dVec,1> V, Vold, R, Rp, OldFShort, OldFLong, 
     FShortSum, FLongSum, FShortTmp, FLongTmp;
 
   ///////////////////////////
@@ -69,7 +69,7 @@ protected:
   void AccumForces();
   void VerletStep();
   void LangevinStep();
-  ObservableVecDouble2 Rvar, Vvar, FVar, FShortVar, FLongVar;
+  ObservableVecDouble2 Rvar, Vvar, VOldVar, FVar, FShortVar, FLongVar;
   ObservableVecDouble1 LambdaVar;
   Array<double,2> WriteArray;
   ObservableDouble TimeVar;
@@ -80,6 +80,7 @@ public:
     MoveClass (pathData, outSection), MCSteps(0), LDSteps(0),
     Rvar("R", IOSection, pathData.Path.Communicator),
     Vvar("V", IOSection, pathData.Path.Communicator),
+    VOldVar("Vold", IOSection, pathData.Path.Communicator),
     FVar("F", IOSection, pathData.Path.Communicator),
     FShortVar("FShort", IOSection, pathData.Path.Communicator),
     FLongVar ("FLong",  IOSection, pathData.Path.Communicator),

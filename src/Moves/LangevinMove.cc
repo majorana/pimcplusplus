@@ -273,7 +273,8 @@ LangevinMoveClass::LangevinStep()
       WriteArray(i,j) = r[j];
   }
   Rvar.Write(WriteArray);
-  Vec2Array (V, WriteArray);         Vvar.Write(WriteArray);
+  Vec2Array (V, WriteArray);    Vvar.Write(WriteArray);
+  Vec2Array (Vold, WriteArray); VOldVar.Write(WriteArray);
   /// Calculate the mean force, covariance and eigenvalue
   /// decomposition. 
   CalcCovariance();
@@ -294,6 +295,8 @@ LangevinMoveClass::LangevinStep()
   
   Vec2Array(R,  RArray);
   Vec2Array(Rp, RpArray);
+  /// Store Fmean for later
+  Array2Vec(Fmean, FTmp);
 
   // Compute next R;  from eq. 5.22 of attaccalite thesis
   /// Change into eigenbasis of covariace
@@ -320,8 +323,30 @@ LangevinMoveClass::LangevinStep()
     R(i)[2] = RArray(3*i+2) - RpArray(3*i+2) + Fmean(3*i+2);
   }
 
+  /// Calculate velocity with 5.23 of Attacalite
+  // First, do the R-Rp part
+  Vec2Array(R,  RArray);
+  Vec2Array(Rp,  RpArray);
+  RArray -= RpArray;
+  MatVecProd (Ltrans, RArray,  TempArray);  RArray  = TempArray;
+  for (int i=0; i<RArray.size(); i++) 
+    RArray (i) *= (-Lambda(i)*ExpLambda(i)/Expm1Lambda(i));
+  MatVecProd (L, RArray,  TempArray);  RArray  = TempArray;
+  /// Now do the force part
+  Vec2Array(FTmp, Fmean);
+  MatVecProd (Ltrans, Fmean, TempArray);    Fmean = TempArray;
+  for (int i=0; i<Fmean.size(); i++) 
+    Fmean(i) *= TimeStep*MassInv*
+      (1.0 - (Expm1Lambda(i) + Lambda(i)*TimeStep)/
+       (Lambda(i)*TimeStep*(-Expm1Lambda(i))));
+  MatVecProd(L, Fmean, TempArray);      Fmean = TempArray;
+  for (int i=0; i<V.size(); i++) {
+    V(i)[0] = RArray(3*i+0) + Fmean(3*i+0);
+    V(i)[1] = RArray(3*i+1) + Fmean(3*i+1);
+    V(i)[2] = RArray(3*i+2) + Fmean(3*i+2);
+  }
   /// This formula is inaccurate.  Use 5.23 of Attaccalite thesis
-  V = (1.0/TimeStep)*(R-Rp);
+  Vold = (1.0/TimeStep)*(R-Rp);
 
   // Put x(t+2dt) into the Path so we can start accumulating forces
   // for the next step
@@ -401,6 +426,7 @@ LangevinMoveClass::Read(IOSectionClass &in)
   SpeciesClass &species = PathData.Path.Species(LDSpecies);
   int numPtcls = species.NumParticles;
   V.resize           (numPtcls);
+  Vold.resize        (numPtcls);
   R.resize           (numPtcls);
   Rp.resize          (numPtcls);
   FShort.resize      (numPtcls);
