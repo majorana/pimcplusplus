@@ -31,6 +31,7 @@ void MultiStageClass::MakeMove()
     stageIter++;
   }
 
+  TimesCalled++;
   if (toAccept)
     Accept();
   else 
