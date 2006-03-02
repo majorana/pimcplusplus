@@ -5,6 +5,9 @@
 #include "../PH/kSpacePH.h"
 #include "FFTBox.h"
 
+#ifdef MAC
+#define sincos(p,s,c) *(s)=sin(p); *(c)=cos(p);
+#endif
 
 class PWKineticClass
 {

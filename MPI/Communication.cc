@@ -187,6 +187,35 @@ CommunicatorClass::AllGather (Array<int,1> &SendVec,
 }
 
 void
+CommunicatorClass::AllGatherRows(Array<double,2> &mat)
+{
+  int numProcs = NumProcs();
+  int myProc   = MyProc();
+  int rows = mat.rows();
+  int cols = mat.cols();
+  int displacements[numProcs];
+  int receiveCounts[numProcs];
+  int sendCount;
+  void *sendBuf, *receiveBuf;
+
+  int currRow = 0;
+  for (int proc=0; proc<numProcs; proc++) {
+    int procRows = rows/numProcs + ((rows%numProcs)>proc);
+    displacements[proc] = cols*currRow;
+    receiveCounts[proc] = cols*procRows;
+    if (proc == myProc) {
+      sendBuf = &(mat(currRow,0));
+      sendCount = cols*procRows;
+    }
+    currRow += procRows;
+  }
+  receiveBuf = mat.data();
+  MPI_Allgatherv(sendBuf, sendCount, MPI_DOUBLE, receiveBuf, 
+		 receiveCounts, displacements, MPI_DOUBLE, MPIComm);
+
+}
+
+void
 CommunicatorClass::AllGatherRows(Array<complex<double>,2> &mat)
 {
   int numProcs = NumProcs();

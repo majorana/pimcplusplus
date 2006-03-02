@@ -108,6 +108,7 @@ public:
   /// processors. E.g. If there are 8 rows and 3 processors, procs 0
   /// and 1 would get 3 rows and proc 2 would get 2 rows.
   void AllGatherRows (Array<complex<double>,2> &mat);
+  void AllGatherRows (Array<double,2> &mat);
 
   /// This function uses the same division stragegy as above, but
   /// gathers single elements, instead.
@@ -287,6 +288,10 @@ public:
   /// with any left over being distributed to the low number
   /// processors. E.g. If there are 8 rows and 3 processors, procs 0
   /// and 1 would get 3 rows and proc 2 would get 2 rows.
+  inline void AllGatherRows (Array<double,2> &mat) 
+  {
+    // Do nothing
+  }
   inline void AllGatherRows (Array<complex<double>,2> &mat) 
   {
     // Do nothing
