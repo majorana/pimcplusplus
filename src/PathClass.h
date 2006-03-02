@@ -480,7 +480,7 @@ PathClass::SetPeriodic(TinyVector<bool,NDIM> period)
 
 inline void 
 PathClass::DistDisp (int slice, int ptcl1, int ptcl2,
-			       double &dist, dVec &disp)
+		     double &dist, dVec &disp)
 {
   disp = Path(slice, ptcl2) -Path(slice, ptcl1);
   dVec n;
@@ -488,15 +488,15 @@ PathClass::DistDisp (int slice, int ptcl1, int ptcl2,
   n[0] = nearbyint(disp[0]*BoxInv[0]);
   n[1] = nearbyint(disp[1]*BoxInv[1]);
   n[2] = nearbyint(disp[2]*BoxInv[2]);
-  disp[0] -= n[0]*IsPeriodic[0]*BoxInv[0];
-  disp[1] -= n[1]*IsPeriodic[1]*BoxInv[1];
-  disp[2] -= n[2]*IsPeriodic[2]*BoxInv[2];
+  disp[0] -= n[0]*IsPeriodic[0]*Box[0];
+  disp[1] -= n[1]*IsPeriodic[1]*Box[1];
+  disp[2] -= n[2]*IsPeriodic[2]*Box[2];
 #endif
 #if NDIM==2
   n[0] = nearbyint(disp[0]*BoxInv);
   n[1] = nearbyint(disp[1]*BoxInv);
-  disp[0] -= n[0]*IsPeriodic[0]*BoxInv[0];
-  disp[1] -= n[1]*IsPeriodic[1]*BoxInv[1];
+  disp[0] -= n[0]*IsPeriodic[0]*Box[0];
+  disp[1] -= n[1]*IsPeriodic[1]*Box[1];
 #endif
 
 //   for (int i=0; i<NDIM; i++) {
