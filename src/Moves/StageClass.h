@@ -33,7 +33,7 @@ public:
   virtual void Accept();
   virtual void Reject();
   virtual void WriteRatio();
-  inline double StageAction(int startSlice,int endSlice,
+  double StageAction(int startSlice,int endSlice,
 			    const Array<int,1> &changedParticles);
   inline double GlobalStageAction (const Array<int,1> &changeParticles);
   inline double AcceptRatio () 
@@ -84,19 +84,21 @@ public:
 };
 
 
-inline double StageClass::StageAction(int startSlice,int endSlice,
-				      const Array<int,1> &changedParticles)
-{
-  double TotalAction=0.0;
-  list<ActionBaseClass*>::iterator actionIter=Actions.begin();
-  while (actionIter!=Actions.end()){
-    TotalAction += 
-      ((*actionIter)->Action(startSlice, endSlice, changedParticles,
-			     BisectionLevel));
-    actionIter++;
-  }
-  return TotalAction;
-}
+// inline double StageClass::StageAction(int startSlice,int endSlice,
+// 				      const Array<int,1> &changedParticles)
+// {
+//   double TotalAction=0.0;
+//   list<ActionBaseClass*>::iterator actionIter=Actions.begin();
+//   cerr<<"My action list size is "<<Actions.size()<<endl;
+//   while (actionIter!=Actions.end()){
+//     TotalAction += 
+//       ((*actionIter)->Action(startSlice, endSlice, changedParticles,
+// 			     BisectionLevel));
+//     actionIter++;
+//   }
+//   return TotalAction;
+// }
+
 
 inline double 
 StageClass::GlobalStageAction (const Array<int,1> &changedParticles)
