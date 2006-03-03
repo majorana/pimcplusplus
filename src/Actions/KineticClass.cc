@@ -41,7 +41,14 @@ KineticClass::SingleAction (int slice1, int slice2,
 	  }
 	  GaussProd *= GaussSum;
         }
-	TotalK -= log(GaussProd);    
+	//	if (changedParticles.size()==1)
+	//	if (ptcl<3)
+	//	  TotalK -= PathData.Path.ExistsCoupling*log(GaussProd);    
+	//	else 
+	//	if (changedParticles.size()>1)
+	//	  TotalK -= 0;
+	//	else
+	  TotalK -= log(GaussProd);    
 	//TotalK += dot(vel,vel)*FourLambdaTauInv; 
 	//	KineticVal(slice)+=dot(vel,vel)*FourLambdaTauInv; 
       }
