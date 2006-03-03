@@ -6,9 +6,9 @@
 #include "../PathDataClass.h"
 #include "PermuteStage.h"
 #include "CoupledPermuteStage.h"
-#include "BisectionStage.h"
 #include "../Observables/ObservableVar.h"
-
+#include "BisectionStage.h"
+#include "BisectionJosephsonStage.h"
 /// This is the bisection move class inherited from ParticleMoveClass
 /// Explanation of how bisection moves work is in  
 /// Path Integrals in the theory of condensed helium
@@ -20,6 +20,7 @@ private:
   int NumLevels, LowestLevel;
   int StepsPerBlock;
   bool HaveRefslice;
+  bool Josephson;
   int SpeciesNum;
   void ChooseTimeSlices();
   /// If we do not bisect down to the lowest level, interpolate the
