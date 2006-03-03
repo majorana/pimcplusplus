@@ -18,6 +18,9 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   assert (LowestLevel < NumLevels);
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
+  Josephson=false;
+  in.ReadVar("Josephson",Josephson);
+  cerr<<"Read in Josephson Data"<<endl;
   //  in.ReadVar("OrderNBosons",orderNBosons);
   bool addStructureRejectStage=false;
   in.ReadVar("StructureReject",addStructureRejectStage);
@@ -59,45 +62,70 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 //     PathData.Path.ExistsCoupling=1;
 //   else
 //     PathData.Path.ExistsCoupling=0;
-
   for (int level=NumLevels-1; level>=LowestLevel; level--) {
-    BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
-							     IOSection);
-    newStage->TotalLevels=NumLevels;
-    newStage->Actions.push_back(&PathData.Actions.Kinetic);
+    if (Josephson){
+      BisectionJosephsonStageClass *newStage;
+      //      BisectionStageClass *newStage;
 
+      newStage = new BisectionJosephsonStageClass(PathData, level,
+						  IOSection);
+      if (level==LowestLevel)
+	newStage->Actions.push_back(&PathData.Actions.Hermele);
+	//	newStage->Actions.push_back(&PathData.Actions.Josephson);
+      //      newStage = new BisectionStageClass(PathData, level,
+      //					  IOSection);
+      newStage->TotalLevels=NumLevels;
+      newStage->BisectionLevel = level;
+      Stages.push_back (newStage);
     
-    if (PathData.Path.OpenPaths && level==LowestLevel)
-      newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
-    if (PathData.Path.OpenPaths && level>LowestLevel)
-      newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
-    else if (PathData.Path.OrderN)
-      newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
-    else
-      newStage->Actions.push_back(&PathData.Actions.ShortRange);
-    if (level == LowestLevel) {
-      if (addStructureRejectStage)
-	newStage->Actions.push_back(&PathData.Actions.StructureReject);
-      ///If it's David's long range class then do this
-      if (PathData.Path.DavidLongRange){
-	newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
-      }
-      else if (PathData.Actions.HaveLongRange()){
-	if (PathData.Actions.UseRPA)
-	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-	else
-	  newStage->Actions.push_back(&PathData.Actions.LongRange);
-      }
-      if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-	cerr << "Adding fermion node action for species " 
-	     << speciesName << endl;
-	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
-      }
-//       for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
-// 	newStage->Actions.push_back(PathData.Actions.NodalActions(i));
+
     }
-    newStage->BisectionLevel = level;
-    Stages.push_back (newStage);
+    else{
+      BisectionStageClass *newStage;
+      newStage = new BisectionStageClass (PathData, level,
+					  IOSection);
+      newStage->TotalLevels=NumLevels;
+
+      newStage->Actions.push_back(&PathData.Actions.Kinetic);
+      
+      
+      if (PathData.Path.OpenPaths && level==LowestLevel){
+	newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
+      }
+      if (PathData.Path.OpenPaths && level>LowestLevel){
+	newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
+      }
+      else if (PathData.Path.OrderN){
+	newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
+      }
+      else // if (level==LowestLevel) //HACK HERE!
+	newStage->Actions.push_back(&PathData.Actions.ShortRange);
+      //      else
+      //	int dummy=5;
+      if (level == LowestLevel) {
+	if (addStructureRejectStage){
+	  newStage->Actions.push_back(&PathData.Actions.StructureReject);
+	}
+	///If it's David's long range class then do this
+	if (PathData.Path.DavidLongRange){
+	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+	}
+	else if (PathData.Actions.HaveLongRange()){
+	  if (PathData.Actions.UseRPA)
+	    newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+	  else
+	    newStage->Actions.push_back(&PathData.Actions.LongRange);
+	}
+	if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
+	  cerr << "Adding fermion node action for species " 
+	       << speciesName << endl;
+	  newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+	}
+      }
+      newStage->BisectionLevel = level;
+      Stages.push_back (newStage);
+
+    }
   }
   // Add the second stage of the permutation step
   Stages.push_back (PermuteStage);
