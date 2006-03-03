@@ -288,7 +288,7 @@ public:
   MirroredClass<double> ExistsCoupling;
   //CODE FOR SCALING BOX
   //  int MyClone;
-  //  double ScaleBox;
+  double ScaleBox;
   //END CODE FOR SCALING BOX
   bool FunnyCoupling;
 
