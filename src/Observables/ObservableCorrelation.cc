@@ -324,16 +324,39 @@ void nofrClass::Accumulate()
   
   int numLinks=PathData.Path.NumTimeSlices()-1;
   disp=0.0;
-  for (int slice=0;slice<numLinks;slice++) {
-    int realSlice=(openLink+slice) % numLinks;
-    int realSlicep1=(openLink+slice+1) % numLinks;
-    dVec linkDisp;
-    linkDisp=PathData.Path.Velocity(realSlice,realSlicep1,openPtcl);
-    disp =disp+linkDisp;
+  int currSlice=openLink;
+  int currPtcl=openPtcl;
+  int nextSlice=-1;
+  int nextPtcl=-1;
+  
+
+  while (nextSlice!=openLink || nextPtcl!=openPtcl){
+    nextSlice = (currSlice + 1) % PathData.Path.NumTimeSlices();
+    //    if (nextSlice==0)
+    //      nextSlice=numLinks+1;
+    if (currSlice==PathData.Join)
+      nextPtcl=PathData.Path.Permutation(currPtcl);
+    else 
+      nextPtcl=currPtcl;
+    dVec linkDisp=PathData.Path.VelocityBetweenPtcl(currSlice,currPtcl,nextSlice,nextPtcl);
+    disp=disp+linkDisp;
+    currSlice=nextSlice;
+    currPtcl=nextPtcl;
   }
-  double  dist=sqrt(dot(disp,disp));
-  if (dist-dist2>1e-5)
-    cerr<<"dist, dist2, diff: "<<dist<<" "<<dist2<<" "<<dist-dist2<<endl;
+  double dist=sqrt(dot(disp,disp));
+  //  if (((dist-dist2)/PathData.Path.GetBox()[0])-floor((dist-dist2)/PathData.Path.GetBox()[0]+0.1)<1e-5)
+  //    cerr<<"dist, dist2, diff: "<<dist<<" "<<dist2<<" "<<dist-dist2<<endl;
+
+  //  for (int slice=0;slice<numLinks;slice++) {
+  //    int realSlice=(openLink+slice) % numLinks;
+  //    int realSlicep1=(openLink+slice+1) % numLinks;
+  //    dVec linkDisp;
+  //    linkDisp=PathData.Path.Velocity(realSlice,realSlicep1,openPtcl);
+  //    disp =disp+linkDisp;
+  //  }
+  //  double  dist=sqrt(dot(disp,disp));
+  //  if (dist-dist2>1e-5)
+  //    cerr<<"dist, dist2, diff: "<<dist<<" "<<dist2<<" "<<dist-dist2<<endl;
   
     if (dist<grid.End){
       int index=grid.ReverseMap(dist);
