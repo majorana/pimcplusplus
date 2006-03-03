@@ -31,114 +31,43 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
-//   for (int slice=slice1;slice<slice2;slice+=2*skip){
 
-//     for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
-//       Path.DoPtcl(ptcl)=true;
-//     //    Path.Cell.BinParticles(slice+skip);
-//     for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
-//       int ptcl1 = changedParticles(ptcl1Index);
-//       Path.DoPtcl(ptcl1) = false;
-//       int species1=Path.ParticleSpeciesNum(ptcl1);
-//       int xBox,yBox,zBox;
-//       Path.Cell.FindBox(Path(slice,ptcl1),xBox,yBox,zBox);
-//       //      cerr<<"Beginning"<<endl;
-//       for (int xCell=xBox-xEffect;xCell<=xBox+xEffect;xCell++){
-// 	for (int yCell=yBox-yEffect;yCell<=yBox+yEffect;yCell++){
-// 	  for (int zCell=zBox-zEffect;zCell<=zBox+zEffect;zCell++){
-// 	    int rxbox,rybox,rzbox;
-// 	    rxbox=(xCell+Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
-// 	    rybox=(yCell+Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
-// 	    rzbox=(zCell+Path.Cell.GridsArray.extent(2)) % Path.Cell.GridsArray.extent(2);
-// 	    //	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
-// 	    list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox,rzbox).Particles(slice+skip);
-	    
-// 	    for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
-// 	      int ptcl2=*i;
-// 	      if (Path.DoPtcl(ptcl2)){ //I think this is ok
-// 		//		cerr<<"Particles: "<<ptcl1<<" "<<ptcl2<<endl;
-// 		PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
-// 		dVec r, rp;
-// 		double rmag, rpmag;
-// 		PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
-// 				       rmag, rpmag, r, rp);
-// 		double s2 = dot (r-rp, r-rp);
-// 		double q = 0.5 * (rmag + rpmag);
-// 		double z = (rmag - rpmag);
-// 		double U;
-// 		U = PA.U(q,z,s2, level);
-// 		// Subtract off long-range part from short-range action
-// 		//	  if (PA.IsLongRange())
-// 		//	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
-// 		TotalU += U;
-// 	      }
-// 	    }
-// 	  }
-// 	}
-//       }
-//     }
-//     ///second iteration 
-//     for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
-//       Path.DoPtcl(ptcl)=true;
-//     for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
-//       int ptcl1 = changedParticles(ptcl1Index);
-//       Path.DoPtcl(ptcl1) = false;
-//       int species1=Path.ParticleSpeciesNum(ptcl1);
-//       int xBox,yBox,zBox;
-//       Path.Cell.FindBox(Path(slice+2*skip,ptcl1),xBox,yBox,zBox);
-//       //      cerr<<"Beginning"<<endl;
-//       for (int xCell=xBox-xEffect;xCell<=xBox+xEffect;xCell++){
-// 	for (int yCell=yBox-yEffect;yCell<=yBox+yEffect;yCell++){
-// 	  for (int zCell=zBox-zEffect;zCell<=zBox+zEffect;zCell++){
-// 	    int rxbox,rybox,rzbox;
-// 	    rxbox=(xCell+Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
-// 	    rybox=(yCell+Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
-// 	    rzbox=(zCell+Path.Cell.GridsArray.extent(2)) % Path.Cell.GridsArray.extent(2);
-// 	    //	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
-// 	    list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox,rzbox).Particles(slice+skip);
-	    
-// 	    for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
-// 	      int ptcl2=*i;
-// 	      if (Path.DoPtcl(ptcl2)){ //I think this is ok
-// 		//		cerr<<"Particles: "<<ptcl1<<" "<<ptcl2<<endl;
-// 		PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
-// 		dVec r, rp;
-// 		double rmag, rpmag;
-// 		//		PathData.Path.DistDisp(slice+2*skip, slice+skip, ptcl1, ptcl2,
-// 		//				       rmag, rpmag, r, rp);
-// 		PathData.Path.DistDisp(slice+skip, slice+2*skip, ptcl2, ptcl1,
-// 				       rmag, rpmag, r, rp);
-
-// 		double s2 = dot (r-rp, r-rp);
-// 		double q = 0.5 * (rmag + rpmag);
-// 		double z = (rmag - rpmag);
-// 		double U;
-// 		U = PA.U(q,z,s2, level);
-// 		// Subtract off long-range part from short-range action
-// 		//	  if (PA.IsLongRange())
-// 		//	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
-// 		TotalU += U;
-// 	      }
-// 	    }
-// 	  }
-// 	}
-//       }
-//     }
   int totalParticles=0;
   Array<bool,1> todoIt(PathData.Path.NumParticles());
   todoIt=true;
+
+  ///Check to see if the open is one of the changed particles  
+  bool changingOpen=false;
+  for (int i=0;i<changedParticles.size();i++)
+    if (changedParticles(i)==PathData.Path.OpenPtcl)
+      changingOpen=true;
+  
+  Array<int,1> changedPlusOpenPtcl;
+  if (changingOpen || !PathData.Path.OpenPaths){
+    changedPlusOpenPtcl.resize(changedParticles.size());
+    for (int i=0;i<changedParticles.size();i++)
+      changedPlusOpenPtcl(i)=changedParticles(i);
+  }
+  else{
+    changedPlusOpenPtcl.resize(changedParticles.size()+1);
+    for (int i=0;i<changedParticles.size();i++)
+      changedPlusOpenPtcl(i)=changedParticles(i);
+    changedPlusOpenPtcl(changedPlusOpenPtcl.size()-1)=PathData.Path.OpenPtcl;
+  }
+
+
   for (int slice=slice1;slice<slice2;slice+=skip){
     
     for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
       Path.DoPtcl(ptcl)=true;
     //    Path.Cell.BinParticles(slice);
     //    Path.Cell.BinParticles(slice+skip);
-    for (int ptcl1Index=0;ptcl1Index<numChangedPtcls;ptcl1Index++){
-      int ptcl1 = changedParticles(ptcl1Index);
+    for (int ptcl1Index=0;ptcl1Index<changedPlusOpenPtcl.size();ptcl1Index++){
+      int ptcl1 = changedPlusOpenPtcl(ptcl1Index);
       int species1=Path.ParticleSpeciesNum(ptcl1);
       Path.DoPtcl(ptcl1)=false;
-      for (int ptcl2Index=ptcl1Index+1;ptcl2Index<numChangedPtcls;ptcl2Index++){
-    	int ptcl2=changedParticles(ptcl2Index);
+      for (int ptcl2Index=ptcl1Index+1;ptcl2Index<changedPlusOpenPtcl.size();ptcl2Index++){
+    	int ptcl2=changedPlusOpenPtcl(ptcl2Index);
     	PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
     	dVec r, rp;
     	double rmag, rpmag;
@@ -207,8 +136,13 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 	  }
 	}
       } 
-
-      Path.Cell.FindBox(Path(slice+skip,ptcl1),xBox,yBox,zBox);
+      if (PathData.Path.OpenPaths &&
+	  slice+skip==PathData.Path.OpenLink && 
+	  ptcl1==PathData.Path.OpenPtcl)
+	Path.Cell.FindBox(Path(slice+skip,PathData.Path.NumParticles()),
+			  xBox,yBox,zBox);
+      else
+	Path.Cell.FindBox(Path(slice+skip,ptcl1),xBox,yBox,zBox);
       //      cerr<<"Beginning"<<endl;
       for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
 	int rxbox,rybox,rzbox;
@@ -257,35 +191,161 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 
 
 
-double ShortRangeOnClass::d_dBeta (int slice1, int slice2,
-				 int level)
+double 
+ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
 {
-  double levelTau=Path.tau;
+  PathClass &Path=PathData.Path;
+  int xEffect=Path.Cell.Xeffect;
+  int yEffect=Path.Cell.Yeffect;
+  int zEffect=Path.Cell.Zeffect;
+  
+  // First, sum the pair actions
+  double TotalU = 0.0;
+
   int skip = 1<<level;
-  //  int slice2 = slice1 + (1<<level);
-  // Add constant part.  Note: we should really check the number of
-  // dimensions. 
-  double dU = 0.0;
-  for (int ptcl1=0; ptcl1<PathData.NumParticles(); ptcl1++) {
-    int species1=Path.ParticleSpeciesNum(ptcl1);
-    for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
-      for (int slice=slice1;slice<slice2;slice+=skip){
-	dVec r, rp;
-	double rmag, rpmag;
-	PathData.Path.DistDisp(slice,slice+skip,ptcl1,ptcl2,rmag,rpmag,r,rp);
+  double levelTau = Path.tau* (1<<level);
+
+  int totalParticles=0;
+  Array<bool,1> todoIt(PathData.Path.NumParticles());
+  todoIt=true;
+
+
+  for (int slice=slice1;slice<slice2;slice+=skip){
+    
+    for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
+      Path.DoPtcl(ptcl)=true;
+    for (int ptcl1=0; ptcl1<PathData.Path.NumParticles(); ptcl1++){
+
+      todoIt=true;
+      Path.DoPtcl(ptcl1) = false;
+      int species1=Path.ParticleSpeciesNum(ptcl1);
+      int xBox,yBox,zBox;
+      Path.Cell.FindBox(Path(slice,ptcl1),xBox,yBox,zBox);
+      //      cerr<<"Beginning"<<endl;
+      for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
+	int rxbox,rybox,rzbox;
+	rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
+	rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
+	rzbox=(zBox+Path.Cell.AffectedCells(cellVal) [2] +2 * Path.Cell.GridsArray.extent(2)) % Path.Cell.GridsArray.extent(2);
+
 	
-	double s2 = dot(r-rp, r-rp);
-	double q = 0.5*(rmag+rpmag);
-	double z = (rmag-rpmag);
+	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
+	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox,rzbox).Particles(slice);
 	
-	PairActionFitClass& pa=
-	  *(PairMatrix(species1, PathData.Path.ParticleSpeciesNum(ptcl2)));
-	dU += pa.dU(q, z, s2, level);
-	// Subtract off long-range part from short-range action
-	if (pa.IsLongRange())
-	  dU -= 0.5*(pa.dUlong(level)(rmag)+pa.dUlong(level)(rpmag));
+	for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
+	  int ptcl2=*i;
+	  if (Path.DoPtcl(ptcl2)){ //I think this is ok
+	    todoIt(ptcl2)=false;
+	    //		Path.DoPtcl(ptcl2)=false;
+	    
+	    //		cerr<<"Particles: "<<ptcl1<<" "<<ptcl2<<endl;
+	    PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
+	    dVec r, rp;
+	    double rmag, rpmag;
+	    if (slice==slice1)
+	      totalParticles++;
+	    PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+				   rmag, rpmag, r, rp);
+	    double s2 = dot (r-rp, r-rp);
+	    double q = 0.5 * (rmag + rpmag);
+	    double z = (rmag - rpmag);
+	    double U;
+	    U = PA.dU(q,z,s2, level);
+	    // Subtract off long-range part from short-range action
+	    //	  if (PA.IsLongRange())
+	    //	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
+	    //		//		if (TotalU>10000){
+	    //		//		  cerr<<TotalU<<" "<<ptcl1<<" "<<ptcl2<<" "<<slice<<" "<<endl;
+	    //		//		  cerr<<Path(slice,ptcl1)<<" "<<Path(slice,ptcl2)<<" "<<changedParticles<<endl;
+	    //		//		}
+	    TotalU += U;
+	  }
+	}
+      } 
+      if (PathData.Path.OpenPaths &&
+	  slice+skip==PathData.Path.OpenLink && 
+	  ptcl1==PathData.Path.OpenPtcl)
+	Path.Cell.FindBox(Path(slice+skip,PathData.Path.NumParticles()),
+			  xBox,yBox,zBox);
+      else
+	Path.Cell.FindBox(Path(slice+skip,ptcl1),xBox,yBox,zBox);
+      //      cerr<<"Beginning"<<endl;
+      for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
+	int rxbox,rybox,rzbox;
+	rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
+	rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
+	rzbox=(zBox+Path.Cell.AffectedCells(cellVal) [2] +2 * Path.Cell.GridsArray.extent(2)) % Path.Cell.GridsArray.extent(2);
+	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
+	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox,rzbox).Particles(slice);
+	
+	for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
+	  int ptcl2=*i;
+	  if (Path.DoPtcl(ptcl2) && todoIt(ptcl2)){ //I think this is ok
+	    //		cerr<<"Particles: "<<ptcl1<<" "<<ptcl2<<endl;
+	    PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
+	    dVec r, rp;
+	    double rmag, rpmag;
+	    if (slice==slice1)
+	      totalParticles++;
+	    PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+				       rmag, rpmag, r, rp);
+	    double s2 = dot (r-rp, r-rp);
+	    double q = 0.5 * (rmag + rpmag);
+	    double z = (rmag - rpmag);
+	    double U;
+	    U = PA.dU(q,z,s2, level);
+	    // Subtract off long-range part from short-range action
+	    //	  if (PA.IsLongRange())
+	    //	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
+	    TotalU += U;
+	  }
+	}
       }
+    
+
+
+
+      
     }
-  }
-  return dU;
+    
+
+    
+  } //end slice loop
+  //  cerr<<"My total number of particles is "<<totalParticles<<endl;
+  return (TotalU);
 }
+
+
+
+// double ShortRangeOnClass::d_dBeta (int slice1, int slice2,
+// 				 int level)
+// {
+//   double levelTau=Path.tau;
+//   int skip = 1<<level;
+//   //  int slice2 = slice1 + (1<<level);
+//   // Add constant part.  Note: we should really check the number of
+//   // dimensions. 
+//   double dU = 0.0;
+//   for (int ptcl1=0; ptcl1<PathData.NumParticles(); ptcl1++) {
+//     int species1=Path.ParticleSpeciesNum(ptcl1);
+//     for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
+//       for (int slice=slice1;slice<slice2;slice+=skip){
+// 	dVec r, rp;
+// 	double rmag, rpmag;
+// 	PathData.Path.DistDisp(slice,slice+skip,ptcl1,ptcl2,rmag,rpmag,r,rp);
+	
+// 	double s2 = dot(r-rp, r-rp);
+// 	double q = 0.5*(rmag+rpmag);
+// 	double z = (rmag-rpmag);
+	
+// 	PairActionFitClass& pa=
+// 	  *(PairMatrix(species1, PathData.Path.ParticleSpeciesNum(ptcl2)));
+// 	dU += pa.dU(q, z, s2, level);
+// 	// Subtract off long-range part from short-range action
+// 	if (pa.IsLongRange())
+// 	  dU -= 0.5*(pa.dUlong(level)(rmag)+pa.dUlong(level)(rpmag));
+//       }
+//     }
+//   }
+//   return dU;
+// }
