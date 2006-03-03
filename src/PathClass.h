@@ -155,6 +155,10 @@ public:
 		    double &dist, dVec &disp);
   //  inline double Distance (int slice, int ptcl1, int ptcl2);Not used?
   inline dVec Velocity (int sliceA, int sliceB, int ptcl);
+  inline dVec VelocityBetweenPtcl (int sliceA, int ptclA,int sliceB, int ptclB);
+  double MinImageDistance(dVec v1, dVec v2);
+  dVec MinImageDisp(dVec v1, dVec v2);
+
   inline void PutInBox (dVec &v);
 
 
@@ -260,19 +264,33 @@ public:
   //////////////////////////
   MirroredClass<int> OpenPtcl;
   MirroredClass<int> OpenLink;
+  MirroredClass<bool> NowOpen;
   bool OpenPaths;
   bool NowOpen;
   bool OrderN;
   int OpenSpeciesNum;
   void InitOpenPaths();
   void DistanceToTail();
+  const dVec ReturnOpenHead();
+  const dVec& GetOpenTail();
+  const dVec& GetOpenHead();
+  void SetHead(const dVec &r,int join);
+  void SetTail(const dVec &r);
+
   MirroredClass<int> Weight;
   int HeadSlice;
   int HeadParticle;
+
+
   //////////////////////////
   ////Vacancy Project /////
   ////////////////////////
   MirroredClass<double> ExistsCoupling;
+  //CODE FOR SCALING BOX
+  //  int MyClone;
+  //  double ScaleBox;
+  //END CODE FOR SCALING BOX
+  bool FunnyCoupling;
 
 };
 
@@ -388,11 +406,11 @@ PathClass::PathClass (CommunicatorClass &communicator,
 			     RandomClass &random,
 			     ActionsClass &actions) : 
   Communicator(communicator), Random(random), Actions(actions),Cell(*this),
-  CorrelatedSampling(false), ConfigNum(0)
+     CorrelatedSampling(false), ConfigNum(0),ScaleBox(1.0)
 {
   //      NumSpecies = 0;
   TotalNumSlices=0;
-
+  FunnyCoupling=false;
   //  OpenPaths=true;
   OpenPaths=false; //turns off open loops (Should be read at some poitn)
   Weight=1;
@@ -693,6 +711,25 @@ PathClass::Velocity (int sliceA, int sliceB, int ptcl)
 
   return vel;
 }
+
+inline dVec 
+PathClass::VelocityBetweenPtcl (int sliceA, int ptclA,int sliceB, int ptclB)
+{
+
+  dVec vel;
+
+  if (OpenPaths && sliceB==(int)OpenLink && ptclB==(int)OpenPtcl){
+    vel=Path(sliceB,NumParticles())-Path(sliceA,ptclA);
+  }
+  else{
+    vel = Path(sliceB, ptclB) - Path(sliceA,ptclA);
+  }
+  PutInBox(vel);
+
+
+  return vel;
+}
+
 
 inline void 
 PathClass::PutInBox (dVec &v)

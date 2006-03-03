@@ -1,6 +1,67 @@
 #include "PathClass.h"
 #include "Actions/ActionsClass.h"
 
+double PathClass::MinImageDistance(dVec v1, dVec v2)
+{
+  dVec disp = v2-v1;
+  for (int i=0; i<NDIM; i++) {
+    double n = -floor(disp(i)*BoxInv(i)+0.5);
+    disp(i) += n*IsPeriodic(i)*Box(i);
+  }
+  double dist = sqrt(dot(disp,disp));
+  return dist;
+}
+
+dVec PathClass::MinImageDisp(dVec v1, dVec v2)
+{
+  dVec disp = v2-v1;
+  for (int i=0; i<NDIM; i++) {
+    double n = -floor(disp(i)*BoxInv(i)+0.5);
+    disp(i) += n*IsPeriodic(i)*Box(i);
+  }
+  return disp;
+}
+
+
+const dVec& 
+PathClass::GetOpenTail()
+{
+  return Path(OpenLink,NumParticles());
+}
+
+const dVec
+PathClass::ReturnOpenHead()
+{
+  return Path(OpenLink,OpenPtcl);
+}
+
+// //NOTE: Be careful.  
+// const dVec& 
+// PathClass::GetOpenHead()
+// {
+//   return Path(OpenLink,OpenPtcl);
+// }
+
+void 
+PathClass::SetHead(const dVec &r,int join)
+{
+  (*this)(OpenLink, OpenPtcl) = r;
+  if (OpenLink==NumTimeSlices()-1){
+    if (join==NumTimeSlices()-1)
+      (*this)(0,Permutation(OpenPtcl))=r;
+    else 
+      (*this)(0,OpenPtcl)=r;
+  }
+}
+
+void 
+PathClass::SetTail(const dVec &r)
+{
+  (*this)(OpenLink, NumParticles()) = r;
+}
+
+
+
 
 void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
 			     double &dist, dVec &disp)
@@ -57,7 +118,11 @@ PathClass::SetIonConfig(int config)
 
 void PathClass::Read (IOSectionClass &inSection)
 {
+  inSection.ReadVar("FunnyCoupling",FunnyCoupling);
+  SetMode(OLDMODE);
+  NowOpen=false;
   SetMode (NEWMODE);
+  NowOpen=false;
   Weight=1;
   double tempExistsCoupling;
   if (!inSection.ReadVar("ExistsCoupling",tempExistsCoupling)){
@@ -65,7 +130,6 @@ void PathClass::Read (IOSectionClass &inSection)
   }
   else{
     ExistsCoupling=tempExistsCoupling;
-    ExistsCoupling=(double)(Communicator.MyProc())/100.0;
   }
   double tau;
   assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
@@ -85,8 +149,19 @@ void PathClass::Read (IOSectionClass &inSection)
     assert(inSection.ReadVar ("Box", tempBox));
     perr << "Using periodic boundary conditions.\n";
     assert(tempBox.size()==NDIM);
+    //HACK!
+    // //    int desiredNumParticles;
+    // //    assert(inSection.ReadVar("NumParticles",desiredNumParticles));
+    // //    double desiredBoxVol=(tempBox(0)*tempBox(1)*tempBox(2));
+    // //    double desiredDensity=
+    // //      desiredNumParticles/desiredBoxVol;
+    // //    ScaleBox=
+    // //      pow((double)(desiredNumParticles-MyClone)/(double)(desiredNumParticles),1.0/3.0);
+    //END HACK
+    ScaleBox=1.0;
+
     for (int counter=0;counter<tempBox.size();counter++)
-      Box(counter)=tempBox(counter);
+      Box(counter)=tempBox(counter)*ScaleBox;
     SetBox (Box);
   }
   else 
@@ -121,6 +196,15 @@ void PathClass::Read (IOSectionClass &inSection)
     inSection.OpenSection("Species", Species);
     SpeciesClass *newSpecies = ReadSpecies (inSection);
     inSection.CloseSection(); // "Species"
+    bool manyParticles=false;
+    inSection.ReadVar("ManyParticles",manyParticles);
+    if (manyParticles){
+      //UGLY HACK!
+      cerr<<"My current new species is "<<newSpecies->NumParticles<<endl;
+      newSpecies->NumParticles=newSpecies->NumParticles-MyClone;
+      //UGLY HACK!
+      cerr<<"My now new species is "<<newSpecies->NumParticles<<endl;
+    }
     AddSpecies (newSpecies);
   }
   inSection.CloseSection(); // Particles
@@ -607,20 +691,33 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
 {
   ExistsCoupling.AcceptCopy();
   Weight.AcceptCopy();
+  NowOpen.AcceptCopy();
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
     Path[OLDMODE](Range(startSlice, endSlice), ptcl) = 
       Path[NEWMODE](Range(startSlice, endSlice), ptcl);
     Permutation.AcceptCopy(ptcl);
   }
+  //I had this accepting the whole permutation.  Not sure why but have commented it out.  
+// <<<<<<< .mine
+//   for (int ptcl=0;ptcl<NumParticles();ptcl++)
+//     Permutation.AcceptCopy(ptcl);
+// =======
   Rho_k[OLDMODE](Range(startSlice,endSlice), Range::all(), Range::all()) =
     Rho_k[NEWMODE](Range(startSlice,endSlice), Range::all(), Range::all());
+
 
   if (OpenPaths){
     OpenPtcl.AcceptCopy();
     OpenLink.AcceptCopy();
+
     for (int counter=0;counter<NumTimeSlices();counter++){
       Path[OLDMODE](counter,NumParticles())=Path[NEWMODE](counter,NumParticles());
+    }
+    for (int ptcl=0;ptcl<NumParticles();ptcl++){
+      Path[OLDMODE](OpenLink[NEWMODE],ptcl)=Path[NEWMODE](OpenLink[NEWMODE],ptcl);
+      Path[OLDMODE](0,ptcl)=Path[NEWMODE](0,ptcl);
+      Permutation.AcceptCopy(ptcl);
     }
     //    Path[OLDMODE](Range(startSlice,endSlice),NumParticles())=
     //      Path[NEWMODE](Range(startSlice,endSlice),NumParticles());
@@ -642,12 +739,16 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
 {
   ExistsCoupling.RejectCopy();
   Weight.RejectCopy();
+  NowOpen.RejectCopy();
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
     Path[NEWMODE](Range(startSlice, endSlice), ptcl) = 
       Path[OLDMODE](Range(startSlice, endSlice), ptcl);
     Permutation.RejectCopy(ptcl);
   }
+  //For some reason rejecting the entire permutation?
+//   for (int ptcl=0;ptcl<NumParticles();ptcl++)
+//     Permutation.RejectCopy(ptcl);
 
   Rho_k[NEWMODE](Range(startSlice,endSlice), Range::all(), Range::all()) =
     Rho_k[OLDMODE](Range(startSlice,endSlice), Range::all(), Range::all());
@@ -655,8 +756,15 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
   if (OpenPaths){
     OpenPtcl.RejectCopy();
     OpenLink.RejectCopy();
+
     Path[NEWMODE](Range(startSlice,endSlice),NumParticles())=
       Path[OLDMODE](Range(startSlice,endSlice),NumParticles());
+    for (int ptcl=0;ptcl<NumParticles();ptcl++){
+      Path[NEWMODE](OpenLink[NEWMODE],ptcl)=Path[OLDMODE](OpenLink[NEWMODE],ptcl);
+      Path[NEWMODE](0,ptcl)=Path[OLDMODE](0,ptcl);
+      Permutation.RejectCopy(ptcl);
+    }
+
   }
 
 }
@@ -676,6 +784,7 @@ void PathClass::ShiftData(int slicesToShift)
     RefSlice += TotalNumSlices;
   //  perr<<"My ref slice at particle 0 is "<<Path(RefSlice,0)<<endl;
   if (OpenPaths){
+
     //    perr<<"Here my open link is "<<OpenLink<<endl;
     int openLinkOld=(int)OpenLink;
     int startSliceOpenLinkProc;
@@ -961,8 +1070,10 @@ void PathClass::InitOpenPaths()
 {
   perr<<"Starting to initialize"<<endl;
   if (OpenPaths){
+
     perr<<"openpaths"<<endl;
     SetMode(OLDMODE);
+
     if (Communicator.MyProc()==0)
       OpenLink=NumTimeSlices()-1;
     else
@@ -971,6 +1082,7 @@ void PathClass::InitOpenPaths()
     OpenPtcl=Species(OpenSpeciesNum).FirstPtcl;
     perr<<"set up the open particle"<<endl;
     SetMode(NEWMODE);
+
     if (Communicator.MyProc()==0)
       OpenLink=NumTimeSlices()-1;
     else 
