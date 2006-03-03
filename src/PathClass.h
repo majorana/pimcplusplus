@@ -261,11 +261,14 @@ public:
   MirroredClass<int> OpenPtcl;
   MirroredClass<int> OpenLink;
   bool OpenPaths;
+  bool NowOpen;
   bool OrderN;
   int OpenSpeciesNum;
   void InitOpenPaths();
   void DistanceToTail();
   MirroredClass<int> Weight;
+  int HeadSlice;
+  int HeadParticle;
   //////////////////////////
   ////Vacancy Project /////
   ////////////////////////
