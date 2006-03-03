@@ -151,6 +151,7 @@ void PathClass::Read (IOSectionClass &inSection)
     cerr << "IonConfigs[1] = " << IonConfigs[1] << endl;
     SetIonConfig(0);
   }
+  NowOpen=true;
 
   /// Checking rounding mode
   bool roundOkay = true;
