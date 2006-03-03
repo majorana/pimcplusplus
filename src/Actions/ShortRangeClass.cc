@@ -128,18 +128,24 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 	    //		 << " ptcl2=" << ptcl2 << " slice="<< slice << endl;
 
 	   // Code for vancacy project commented out
-// 	  if (PathData.Path.ExistsCoupling>=-0.05 &&
-// 	      (species1==1 || species2==1))
-// 	    TotalU += sqrt(PathData.Path.ExistsCoupling)*U;
-// 	  else
-// 	    TotalU += U;
+	  ///	  if (PathData.Path.ExistsCoupling>=-0.05 &&
+	  if (PathData.Path.FunnyCoupling && 
+	      (species1==1 || species2==1))
+	    TotalU +=sqrt(PathData.Path.ExistsCoupling)*U;
+	  ///	    TotalU +=PathData.Path.ExistsCoupling*10*U;
+	  else
+	    TotalU += U;
 
-	  TotalU += U;
+	  //	  TotalU += U;
 	}
       }
     }
   }
-
+//   int myProc=PathData.InterComm.MyProc();
+//   double lowVal=((double)(myProc))/100.0;
+//   double highVal=((double)(myProc))/100.0+1.0/100.0;
+//   if (abs(PathData.Path.ExistsCoupling-highVal)<0.001)
+//     TotalU-= log(10000.0);
 //   if (PathData.Path.LongRange){
 //     // Now add in the long-range part of the action
 //     // In primitive form, end slices get weighted by 1/2.  Others by 1.
@@ -186,12 +192,18 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 //   startTime=clock();
 //   double dummyVar;
 //   for (int numTime=0;numTime<1000;numTime++)
-//     // assert(TotalU-ToCheck.Action(slice1, slice2,changedParticles,level)<1e-2);
+// A//  double shortRangeU=ToCheck.Action(slice1, slice2,changedParticles,level);
+//   cerr<<"pre-on"<<endl;
+//A //  if (TotalU-shortRangeU>1e-2)
+//A //    cerr<<"There is a difference "<<TotalU<<" "<<shortRangeU<<endl;
+//A //  assert(TotalU-ToCheck.Action(slice1, slice2,changedParticles,level)<1e-2);
+  //  cerr<<"Post-On"<<TotalU<<" "<<shortRangeU<<" "<<TotalU-shortRangeU<<endl;
 //     dummyVar+=ToCheck.Action(slice1, slice2,changedParticles,level);
 //   endTime=clock();
 //   cerr<<"O(n) Diff is "<<(double)(endTime-startTime)/(double)CLOCKS_PER_SEC<<endl;
 //   cerr<<endl;
 //   cerr<<"A: "<<dummyVar<<" "<<TotalU<<endl;
+//  cerr<<"Action ends"<<endl;
   return (TotalU);
 }
 
