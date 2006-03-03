@@ -7,7 +7,7 @@ void EnergyClass::Accumulate()
   //Move the join to the end so we don't have to worry about
   //permutations
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
-  
+
   NumSamples++;
 
   double kinetic, dUShort, dULong, node, vShort, vLong, tip5p;
@@ -31,7 +31,6 @@ void EnergyClass::Accumulate()
 //   TotalActionSum += totalAction;
 //   PathData.Path.Communicator.Sum (totalAction);
 //   ExpTotalActionSum += exp(-totalAction+4.8879e4);
-
 /// Removing this total action stuff for now.
 //   double kAction, uShortAction, uLongAction, nodeAction;
 //   PathData.Actions.GetActions(kAction, uShortAction, uLongAction, nodeAction);
