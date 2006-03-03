@@ -9,7 +9,7 @@
 #include "PermuteTableClass.h"
 #include "RandomPermMove.h"
 #include "MultiStage.h"
-
+#include "GlobalJosephsonMove.h"
 #include "CorrelatedBisectionBlock.h"
 #include "RefSliceMove.h"
 #include "DisplaceMove.h"
