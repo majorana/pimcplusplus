@@ -18,7 +18,8 @@
 #include "SuperfluiDrop.h"
 #include "VacancyLocation.h"
 #include "Forces.h"
-
+#include "Phik.h"
+#include "JosephsonPathDump.h"
 #include "PermutationCount.h"
 /// This template class will be used to construct distributed versions
 /// of many different types of observables:  scalar observables, dVec

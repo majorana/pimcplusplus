@@ -14,10 +14,13 @@ libobservables_la_SOURCES  =     \
     DistanceToHead.h             \
     Forces.cc                    \
     Forces.h                     \
+    JosephsonPathDump.h          \
+    JosephsonPathDump.cc         \
     ObservableBase.cc            \
     ObservableBase.h             \
     ObservableClass.h            \
     ObservableVar.h              \
+    ObservableVar.cc             \
     ObservableCorrelation.cc     \
     ObservableCorrelation.h      \
     ObservableEnergy.cc          \
@@ -28,6 +31,8 @@ libobservables_la_SOURCES  =     \
     PathDump.h                   \
     PermutationCount.h           \
     PermutationCount.cc          \
+    PhiK.h                       \
+    Phik.cc                      \
     SuperfluiDrop.h              \
     SuperfluiDrop.cc             \
     StructureFactor.cc           \
