@@ -8,6 +8,8 @@ libmoves_la_SOURCES  =           \
     BisectionSphereBlock.h       \
     BisectionStage.cc            \
     BisectionStage.h             \
+    BisectionJosephsonStage.cc      \
+    BisectionJosephsonStage.h       \
     BisectionSphereStage.cc      \
     BisectionSphereStage.h       \
     CenterDropletMove.h          \
@@ -26,6 +28,8 @@ libmoves_la_SOURCES  =           \
     EmptyStage.cc                \
     EndStage.cc                  \
     EndStage.h                   \
+    GlobalJosephsonMove.h        \
+    GlobalJosephsonMove.cc       \
     LangevinMove.cc              \
     LangevinMove.h               \
     MetaMoves.cc                 \
@@ -39,6 +43,8 @@ libmoves_la_SOURCES  =           \
     NoPermuteClass.cc            \
     OpenEndMove.cc               \
     OpenEndMove.h                \
+    OpenStage.h                  \
+    OpenStage.cc                 \
     PermuteStage.cc              \
     PermuteTableOnClass.cc       \
     PermuteTableOnClass.h        \
@@ -61,6 +67,8 @@ libmoves_la_SOURCES  =           \
     WaterMove.h                  \
     WaterMoveRing.cc             \
     WaterMoveRing.h              \
+    WormGrow.h		         \
+    WormGrow.cc                  \
     WormPermuteStage.h           \
     WormPermuteStage.cc     
 
