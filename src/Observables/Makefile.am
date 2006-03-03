@@ -27,6 +27,8 @@ libobservables_la_SOURCES  =     \
     ObservableEnergy.h           \
     ObservableModifiedEnergy.cc  \
     ObservableModifiedEnergy.h   \
+    OpenOrientation.h            \
+    OpenOrientation.cc           \
     PathDump.cc                  \
     PathDump.h                   \
     PermutationCount.h           \

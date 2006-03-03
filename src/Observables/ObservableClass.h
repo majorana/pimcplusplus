@@ -17,6 +17,7 @@
 #include "AngularMomCor.h"
 #include "SuperfluiDrop.h"
 #include "VacancyLocation.h"
+#include "OpenOrientation.h"
 #include "Forces.h"
 #include "Phik.h"
 #include "JosephsonPathDump.h"
