@@ -16,7 +16,13 @@ ActionsClass::Read(IOSectionClass &in)
   Kinetic.SetNumImages (NumImages);
   KineticSphere.SetNumImages(NumImages);
   perr << "MaxLevels = " << MaxLevels << endl;
-
+  bool checkJosephson=false;
+  in.ReadVar("Josephson",checkJosephson);
+  if (checkJosephson){
+    Josephson.Read(in);
+    Hermele.Read(in);
+  }
+    
   if (!in.ReadVar ("UseRPA", UseRPA))
     UseRPA = false;
   if (UseRPA) 

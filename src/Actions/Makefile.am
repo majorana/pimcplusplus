@@ -14,6 +14,10 @@ libactions_la_SOURCES =            \
     FreeNodalActionClass.h         \
     GroundStateNodalActionClass.cc \
     GroundStateNodalActionClass.h  \
+    Hermele.h                      \
+    Hermele.cc                     \
+    Josephson.h                    \
+    Josephson.cc                   \
     KineticClass.cc                \
     KineticClass.h                 \
     KineticSphereClass.cc          \
