@@ -155,6 +155,10 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new AutoCorrClass(PathData,OutFile);
     else if (observeType=="DistanceToOpen")
       tempObs = new HeadLocClass(PathData,OutFile);
+    else if (observeType=="PhiK")
+      tempObs = new PhiKClass(PathData,OutFile);
+    else if (observeType=="JosephsonPathDump")
+      tempObs = new JosephsonPathDumpClass(PathData,OutFile);
     else if (observeType=="VacancyLocation")
       tempObs = new VacancyLocClass(PathData,OutFile);
     else if (observeType=="TimeAnalysis")
@@ -238,6 +242,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new WaterTranslate(PathData, OutFile);
     else if (moveType=="WaterTranslateRing")
       move = new WaterTranslateRing(PathData, OutFile);
+    else if (moveType=="GlobalJosephson")
+      move = new GlobalJosephsonMove(PathData, OutFile);
     else if (moveType=="LocalFlip")
       move = new LocalFlip(PathData, OutFile);
     else if (moveType=="GlobalFlip")
