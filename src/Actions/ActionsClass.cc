@@ -143,7 +143,8 @@ ActionsClass::Read(IOSectionClass &in)
   if (PathData.Path.DavidLongRange){
     DavidLongRange.Read(in);
   }
-  OpenLoopImportance.Read(in);
+  if (PathData.Path.OpenPaths)
+    OpenLoopImportance.Read(in);
 }
 
 /// Read in the nodal actions.
@@ -207,7 +208,10 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
   bool doLongRange = HaveLongRange() && UseLongRange;
   int M = PathData.Path.NumTimeSlices()-1;
   kinetic = Kinetic.d_dBeta (0, M, 0);
-  dUShort = ShortRange.d_dBeta (0, M, 0);
+  if (PathData.Path.OrderN)
+    dUShort=ShortRangeOn.d_dBeta(0,M,0);
+  else
+    dUShort = ShortRange.d_dBeta (0, M, 0);
   dULong=0.0;
   if (doLongRange){
     if (UseRPA)
