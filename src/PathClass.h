@@ -266,7 +266,6 @@ public:
   MirroredClass<int> OpenLink;
   MirroredClass<bool> NowOpen;
   bool OpenPaths;
-  bool NowOpen;
   bool OrderN;
   int OpenSpeciesNum;
   void InitOpenPaths();
