@@ -21,6 +21,8 @@ ShortRangeApproximateClass::SingleAction (int slice1, int slice2,
 					  int level)
 {
   PathClass &Path=PathData.Path;
+  //HACK! HACK! HACK!
+  //  return 0.0;
   // First, sum the pair actions
   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
     Path.DoPtcl(ptcl)=true;
@@ -50,7 +52,10 @@ ShortRangeApproximateClass::SingleAction (int slice1, int slice2,
 	  double z = (rmag - rpmag);
 
 	  double U;
-	  U=(PA.U(rmag,0,0,level)+PA.U(rpmag,0,0,level))/2.0;
+	  //	  if (ptcl1<3 && ptcl2<3)
+	  //	    U=0.0; //*PA.U(q,z,s2,level);
+	  //	  else
+	    U=(PA.U(rmag,0,0,level)+PA.U(rpmag,0,0,level))/2.0;
 	  //	  if (ptcl2==4 && ptcl1==0 && slice==8)
 	  //	    cerr<<"MY approximate U is "<<U<<endl;
 
