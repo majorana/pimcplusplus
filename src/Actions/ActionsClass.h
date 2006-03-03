@@ -18,7 +18,8 @@
 #include "OpenLoopImportance.h"
 #include "StructureReject.h"
 #include "KineticSphereClass.h"
-
+#include "Josephson.h"
+#include "Hermele.h"
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
 /// It includes kinetic, short range, long range, long range RPA
@@ -49,7 +50,8 @@ public:
   /// The Kinetic action
   KineticClass Kinetic;
   KineticSphereClass KineticSphere;
-
+  JosephsonClass Josephson;
+  HermeleClass Hermele;
   /// The short range part of the pair action.  This is the complete
   /// pair action in the case of short-range potententials.  The
   /// short-range action is summed in real space. 
@@ -147,6 +149,8 @@ public:
     ShortRangePot(pathData, PairMatrix),
     LongRange(pathData,PairMatrix,PairArray), 
     DavidLongRange(pathData),
+    Josephson(pathData),
+    Hermele(pathData),
     LongRangeRPA(pathData, PairMatrix, PairArray),
     LongRangePot(pathData, PairMatrix),
     OpenLoopImportance(pathData),
