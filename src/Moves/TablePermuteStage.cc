@@ -69,7 +69,7 @@ void TablePermuteStageClass::WriteRatio()
 
 }
 
-void TablePermuteStageClass::InitBlock()
+void TablePermuteStageClass::InitBlock(int &slice1,int &slice2)
 {
   NeedToRebuildTable=true;
 
@@ -128,7 +128,8 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
     prevActionChange = actionChange;
 
     double psi = PathData.Path.Random.Local();
-    return (acceptProb > psi);
+    bool toAccept=(acceptProb > psi);
+    return toAccept;
   }
   else{
     //    sleep(10);
