@@ -145,7 +145,7 @@ void CorrelatedBisectionBlockClass::MakeMove()
   perr << "In CorrelatedBisectionBlockClass::MakeMove().\n";
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
-  PermuteStage->InitBlock();
+  PermuteStage->InitBlock(Slice1,Slice2);
   ActiveParticles.resize(1);
   Array<int,1> allParticles(PathData.Path.NumParticles());
   for (int i=0; i<allParticles.size(); i++)
