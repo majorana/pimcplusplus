@@ -1,25 +1,25 @@
-#include "PermuteStage.h"
+#include "PermuteStageClass.h"
 #include "WormPermuteStage.h"
 
-double WormPermuteStage2Class::Sample(int &slice1,int &slice2,
+double WormPermuteStageClass::Sample(int &slice1,int &slice2,
 				      Array<int,1> &changedParticles)
 {
   //do nothing for now
 }
 
-void WormPermuteStage2Class::Accept()
+void WormPermuteStageClass::Accept()
 {
   NumAccepted(0)++;
   NumAttempted(0)++;
 }
 
-void WormPermuteStage2Class::Reject()
+void WormPermuteStageClass::Reject()
 {
   NumAttempted(0)++;
 }
 
 
-void WormPermuteStage2Class::WriteRatio()
+void WormPermuteStageClass::WriteRatio()
 {
 //   Array<int,1> numAttemptTotal(4);
 //   Array<int,1> numAcceptTotal(4);
@@ -53,22 +53,44 @@ void WormPermuteStage2Class::WriteRatio()
 
 }
 
-void WormPermuteStage2Class::InitBlock()
-{
 
 
-}
-
-
-void WormPermuteStage2Class::Read (IOSectionClass &in)
+void WormPermuteStageClass::Read (IOSectionClass &in)
 {
   OnlyX=false;
   in.ReadVar("OnlyX",OnlyX);
   LocalStageClass::Read(in);
-
+  Initialize();
 }
 
-int WormPermuteStage2Class::CountPtclInOpenLoop()
+//Decides which particles to attempt to permute onto. If you have set
+//OnlyX then it  choose to permute onto particles that are started
+//with the x value within 0.01 of the origin. Otherwise it attempts to
+//permute onto all particles.  
+//Must be called after the path has been initalized.
+void WormPermuteStageClass::Initialize()
+{
+  cerr<<"I've started initializing"<<endl;
+  if (OnlyX){
+    cerr<<"The number of particles is "<<PathData.Path.NumParticles()
+	<<PermuteOntoList.size()<<endl;
+    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+      if (abs(PathData.Path(0,ptcl)[1]-0.0)<0.01 && 
+	  abs(PathData.Path(0,ptcl)[2]-0.0)<0.01){
+	PermuteOntoList.push_back(ptcl);
+      }
+    }
+  }
+  else {
+    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+      PermuteOntoList.push_back(ptcl);
+    }
+  }
+    
+  cerr<<"The size of my list is "<<PermuteOntoList.size()<<endl;
+}
+
+int WormPermuteStageClass::CountPtclInOpenLoop()
 {
   int currPtcl=PathData.Path.OpenPtcl;
   int totalCount=1;
@@ -79,7 +101,7 @@ int WormPermuteStage2Class::CountPtclInOpenLoop()
   return totalCount;
 }
 
-bool WormPermuteStage2Class::PtclInOpenLoop(int checkPtcl)
+bool WormPermuteStageClass::PtclInOpenLoop(int checkPtcl)
 {
   int currPtcl=PathData.Path.OpenPtcl;
   if (currPtcl==checkPtcl)
@@ -94,29 +116,62 @@ bool WormPermuteStage2Class::PtclInOpenLoop(int checkPtcl)
 
 }
 
+void WormPermuteStageClass::InitBlock(int &slice1,int &slice2)
+{
 
-bool WormPermuteStage2Class::Attempt (int &slice1, int &slice2, 
+
+  ///Move the path so that it's setup with the tail at the last time slice
+  while (PathData.Path.OpenLink!=PathData.Path.NumTimeSlices()-1){
+    PathData.MoveJoin(0);
+    PathData.ShiftData(1);
+    PathData.Join=1;
+  }
+  
+  PathData.MoveJoin(PathData.Path.NumTimeSlices()-1);
+  slice2=PathData.Path.NumTimeSlices()-1;
+  slice1=0;
+  //  slice2=slice1+(1<<NumLevels);
+  
+  if (PathData.Path.OrderN){
+    for (int slice=slice1;slice<=slice2;slice++)
+      PathData.Path.Cell.BinParticles(slice);
+  }
+  
+}
+
+bool WormPermuteStageClass::Attempt (int &slice1, int &slice2, 
 				      Array<int,1> &activeParticles, double &prevActionChange)
 {
-  if (activeParticles(0)==-1){
-    ///Move the path so that it's setup with the tail at the last time slice
-    while (PathData.Path.OpenLink!=PathData.Path.NumTimeSlices()-1){
-      PathData.MoveJoin(0);
-      PathData.ShiftData(1);
-      PathData.Join=1;
-    }
 
-    PathData.MoveJoin(PathData.Path.NumTimeSlices()-1);
-    slice1=0;
-    slice2=PathData.Path.NumTimeSlices()-1;
-
-    int permuteWith=PathData.Path.OpenPtcl;
-    while (permuteWith==PathData.Path.OpenPtcl)
-      permuteWith=PathData.Path.Random.LocalInt(3);
-    activeParticles.resize(2);
-
-
-    if (!PtclInOpenLoop(permuteWith)){
+//   //sortof hackish here
+//   slice1=Slice1;
+//   slice2=Slice2;
+//  cerr<<"Inside attempt"<<endl;
+  if (activeParticles(0)!=-1)
+    return true;
+  int numOfPtclInOpenLoop=CountPtclInOpenLoop();
+//   if (numOfPtclInOpenLoop>=3){
+//     cerr<<"end info"<<endl;
+//     cerr<<"Info: "<<endl;
+//     cerr<<PathData.Path.OpenLink<<endl;
+//     cerr<<PathData.Path(PathData.Path.OpenLink,PathData.Path.OpenPtcl)<<endl;
+//     cerr<<PathData.Path(PathData.Path.OpenLink,PathData.Path.NumParticles())<<endl;
+//     cerr<<PathData.Path.OpenPtcl;
+//     cerr<<numOfPtclInOpenLoop<<endl;
+//     cerr<<slice1<<" "<<slice2<<endl;
+//     for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
+//       cerr<<PathData.Path.Permutation(ptcl)<<" ";
+//     cerr<<endl;
+//     assert(1==2);
+//   }
+  int permuteWith=PathData.Path.OpenPtcl;
+  while (permuteWith==PathData.Path.OpenPtcl)
+    permuteWith=
+      PermuteOntoList[PathData.Path.Random.LocalInt(PermuteOntoList.size())];
+  activeParticles.resize(2);
+  
+  
+  if (!PtclInOpenLoop(permuteWith)){
 
       activeParticles(0)=permuteWith;
       activeParticles(1)=PathData.Path.OpenPtcl;
@@ -137,6 +192,19 @@ bool WormPermuteStage2Class::Attempt (int &slice1, int &slice2,
       //end swap
       PathData.Path.OpenPtcl=permuteWith;
       prevActionChange=0;
+      int numOfPtclInOpenLoop=CountPtclInOpenLoop();
+      //      cerr<<"The number of particles in the open loop are A "<<numOfPtclInOpenLoop<<endl;
+      //      cerr<<"Leaving worm stage at this spot"<<endl
+//       if (numOfPtclInOpenLoop>=2){
+// 	cerr<<"Info: "<<endl;
+// 	cerr<<PathData.Path.OpenLink<<endl;
+// 	cerr<<PathData.Path(PathData.Path.OpenLink,PathData.Path.OpenPtcl)<<endl;
+// 	cerr<<PathData.Path(PathData.Path.OpenLink,PathData.Path.NumParticles())<<endl;
+// 	cerr<<PathData.Path.OpenPtcl;
+// 	cerr<<permuteWith<<endl;
+// 	cerr<<numOfPtclInOpenLoop<<endl;
+// 	cerr<<slice1<<" "<<slice2<<endl;
+//       }
       return true;
     }
     else{
@@ -168,6 +236,17 @@ bool WormPermuteStage2Class::Attempt (int &slice1, int &slice2,
       prevActionChange=0;
 
       int numOfPtclInOpenLoop=CountPtclInOpenLoop();
+//       if (numOfPtclInOpenLoop>=2){
+// 	cerr<<"Info Other: "<<endl;
+// 	cerr<<PathData.Path.OpenLink<<endl;
+// 	cerr<<PathData.Path(PathData.Path.OpenLink,PathData.Path.OpenPtcl)<<endl;
+// 	cerr<<PathData.Path(PathData.Path.OpenLink,PathData.Path.NumParticles())<<endl;
+// 	cerr<<PathData.Path.OpenPtcl;
+// 	cerr<<permutedOntoOpen<<endl;
+// 	cerr<<numOfPtclInOpenLoop<<endl;
+//       }
+      //      cerr<<"The number of particles in the open loop are "<<numOfPtclInOpenLoop<<endl;
+      //      cerr<<"Leaving worm stage at this other spot"<<endl;
       return (PathData.Path.Random.Local()<(double)(1.0/(double)(numOfPtclInOpenLoop)));
 	//       if  (numOfPtclInOpenLoop==1)
 // 	return true;
@@ -177,18 +256,14 @@ bool WormPermuteStage2Class::Attempt (int &slice1, int &slice2,
 // 	return (PathData.Path.Random.Local()<1.0/3.0);
 //       else if (numOfPtclInOpenLoop==4)
 // 	return (PathData.Path.Random.Local()<1.0/4.0);
-	}
-  }
-  else{
-    
-    
-    return true;    
-  }
+      //}
+    }
+
 }
 
 
 
-// bool WormPermuteStage2Class::Attempt (int &slice1, int &slice2, 
+// bool WormPermuteStageClass::Attempt (int &slice1, int &slice2, 
 // 				      Array<int,1> &activeParticles, double &prevActionChange)
 // {
 //   if (activeParticles(0)==-1){
