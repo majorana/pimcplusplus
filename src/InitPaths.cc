@@ -223,6 +223,30 @@ PathClass::InitPaths (IOSectionClass &in)
 	}      
       }
     }    
+
+    else if (InitPaths == "ADDVACANCIES") {
+      Array<double,2> Positions;
+      assert (in.ReadVar ("Positions", Positions));
+      //      assert (Positions.rows() >= species.NumParticles);
+      //      assert (Positions.cols() == species.NumDim);
+      cerr<<"My extent 1 is "<<Positions.extent(1);
+      cerr<<"MY scale box is "<<ScaleBox<<endl;
+      Positions.resizeAndPreserve(species.NumParticles,Positions.extent(1));
+      cerr<<"My ptcl are "<<Path.extent(1)<<" and agaisnt "<<Positions.extent(0)<<endl;
+      for (int ptcl=species.FirstPtcl; 
+	   ptcl<=species.LastPtcl; ptcl++){
+	for (int slice=0; slice<NumTimeSlices(); slice++) {
+	  dVec pos;
+	  pos = 0.0;
+	  for (int dim=0; dim<species.NumDim; dim++)
+	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim)*ScaleBox;
+	  Path(slice,ptcl) = pos;
+	}      
+      }
+      //      cerr<<"My species and numparticles are "<<species.NumParticles<<endl;
+      //      Positions.resizeAndPreserve(Positions.extent(0),species.NumParticles);
+    }    
+
     else if (InitPaths == "ALLPATHS") {
       Array<double,3> Positions;
       assert (in.ReadVar ("Positions", Positions));
@@ -330,13 +354,14 @@ PathClass::InitPaths (IOSectionClass &in)
     InitOpenPaths();
   }  
   if (OrderN){
+    cerr<<"BROKEN!"<<endl;
     Array<int,1>  numGrid(3);
     //  numGrid(0)=6*2;
     //  numGrid(1)=6*2;
     //  numGrid(2)=5*2;
-    numGrid(0)=10;
-    numGrid(1)=10;
-    numGrid(2)=10;
+    numGrid(0)=2;
+    numGrid(1)=3;
+    numGrid(2)=20;
     
     //  Cell=new GridClass(*this);
     Cell.Init(Box,numGrid);
