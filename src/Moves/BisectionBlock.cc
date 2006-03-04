@@ -3,6 +3,7 @@
 #include "StructureRejectStage.h"
 #include "CouplingStage.h"
 #include "WormPermuteStage.h"
+#include "OpenStage.h"
 #include "NoPermuteStage.h"
 
 
@@ -40,11 +41,14 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   else if (permuteType=="COUPLE")
     PermuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,
 					       IOSection);
+  else if (permuteType=="WORMMOVE")
+    PermuteStage=new OpenStageClass(PathData,SpeciesNum,NumLevels,
+				    OutSection);
   else if (permuteType == "NONE") 
     PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
 					   IOSection);
   else if (permuteType=="OPEN")
-    PermuteStage = new WormPermuteStage2Class(PathData,SpeciesNum,NumLevels,
+    PermuteStage = new WormPermuteStageClass(PathData,SpeciesNum,NumLevels,
 					     IOSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
@@ -52,12 +56,13 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   }
   PermuteStage->Read (in);
   Stages.push_back (PermuteStage);
-  if (permuteType=="OPEN"){
-    EmptyStageClass *newStage=new EmptyStageClass(PathData,IOSection);
-    newStage->Read(in);
-    newStage->Actions.push_back(&PathData.Actions.Kinetic);
-    Stages.push_back(newStage);
-  }
+  //   if (permuteType=="OPEN"){
+//     EmptyStageClass *newStage=new EmptyStageClass(PathData,NumLevels-1,OutSection);
+//     newStage->Read(in);
+//     newStage->Actions.push_back(&PathData.Actions.Kinetic);
+//     newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
+//     Stages.push_back(newStage);
+//   }
 //   if (PathData.Path.Random.Local()>0.5)
 //     PathData.Path.ExistsCoupling=1;
 //   else
@@ -66,6 +71,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     if (Josephson){
       BisectionJosephsonStageClass *newStage;
       //      BisectionStageClass *newStage;
+
 
       newStage = new BisectionJosephsonStageClass(PathData, level,
 						  IOSection);
@@ -92,13 +98,15 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       if (PathData.Path.OpenPaths && level==LowestLevel){
 	newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
       }
-      if (PathData.Path.OpenPaths && level>LowestLevel){
+      if (PathData.Path.OpenPaths && level>LowestLevel) // && permuteType=="OPEN")
+	cerr<<"Don't look at short range"<<endl;
+      else if (PathData.Path.OpenPaths && level>LowestLevel){
 	newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
       }
       else if (PathData.Path.OrderN){
 	newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
       }
-      else // if (level==LowestLevel) //HACK HERE!
+      else // if (level==LowestLevel) //HACK HERE CURRENTLY COMMENTED OUT!
 	newStage->Actions.push_back(&PathData.Actions.ShortRange);
       //      else
       //	int dummy=5;
@@ -212,12 +220,12 @@ void BisectionBlockClass::MakeMove()
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
 
-  if (PathData.Path.OrderN){
-    for (int slice=Slice1;slice<=Slice2;slice++)
-      PathData.Path.Cell.BinParticles(slice);
-  }
+//   if (PathData.Path.OrderN){
+//     for (int slice=Slice1;slice<=Slice2;slice++)
+//       PathData.Path.Cell.BinParticles(slice);
+//   }
 
-  ((PermuteStageClass*)PermuteStage)->InitBlock();
+  ((PermuteStageClass*)PermuteStage)->InitBlock(Slice1,Slice2);
   ActiveParticles.resize(1);
   for (int step=0; step<StepsPerBlock; step++) {
     ActiveParticles(0)=-1;
@@ -226,6 +234,7 @@ void BisectionBlockClass::MakeMove()
 
   if (LowestLevel != 0)
     MakeStraightPaths();
+
 }
 
 
