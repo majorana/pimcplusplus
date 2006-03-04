@@ -21,7 +21,7 @@ public:
 			 Array<int,1> &activeParticles) = 0;
   virtual bool Attempt (int &slice1, int &slice2, 
 			Array<int,1> &activeParticles, double &prevActionChange) = 0;
-  virtual void InitBlock();
+  virtual void InitBlock(int &slice1,int &slice2);
   virtual void Read (IOSectionClass &in);
   virtual void Accept();
   virtual void Reject();
@@ -59,7 +59,7 @@ public:
   /// that ratio if the move is rejected, saving time.  Thus, this
   /// function is called twice during a successful multistage move.
  
-  void InitBlock();
+  void InitBlock(int &slice1,int &slice2);
   void Read (IOSectionClass &in);
   double Sample (int &slice1, int &slice2,
 		 Array<int,1> &activeParticles);
