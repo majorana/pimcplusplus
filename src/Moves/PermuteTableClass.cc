@@ -77,8 +77,8 @@ void PermuteTableClass::ConstructHTable()
 //   }
  
 // } 
+
  
-  
 // Actually applies my cyclic permutation to a path at a given time
 // slice and the permutation vector in the path
 void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
@@ -95,10 +95,8 @@ void CycleClass::Apply(PathClass &path, int firstPtcl, int slice)
   }
   path.SetPos(slice,CycleRep(Length-1)+firstPtcl,tempPos);
   path.Permutation(CycleRep(Length-1)+firstPtcl) = tempPtcl;
-
-
+  
 }
-
 
 double PermuteTableClass::AttemptPermutation()
 {
