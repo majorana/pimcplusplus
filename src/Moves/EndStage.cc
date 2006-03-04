@@ -39,6 +39,7 @@ void EndStageClass::Reject()
 ///the correct place for that time slice.
 void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
 {
+  bool shiftWasNecessary=false;
   if (PathData.Path.Random.Local()>0.5)
     Open=HEAD;
   else
@@ -56,6 +57,7 @@ void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
     ///Shift the time slices so that from the head there are
     ///2^numlevels slices available  
     while (slice2>=PathData.Path.NumTimeSlices() || slice1==0){
+      shiftWasNecessary=true;
       PathData.MoveJoin(0);
       PathData.ShiftData(2);
       PathData.Join=2;
@@ -72,6 +74,7 @@ void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
     ///Shift the time slices so that from the tail there are
     ///2^numlevels slices available  
     while (slice1<0 || slice2==PathData.Path.NumTimeSlices()-1){
+      shiftWasNecessary=true;
       PathData.MoveJoin(0);
       PathData.ShiftData(2);
       PathData.Join=2;
@@ -84,7 +87,12 @@ void EndStageClass::ChooseTimeSlices(int &slice1,int &slice2)
     assert(1==2);
   }
   //  PathData.MoveJoin(slice2);
+  if (shiftWasNecessary && PathData.Path.OrderN){
+    for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++)
+      PathData.Path.Cell.BinParticles(slice);
+  }
 
+    
 }
 
 
@@ -166,13 +174,15 @@ double EndStageClass::Sample(int &slice1,int &slice2,
   dVec oldPos=PathData.Path(PathData.Path.OpenLink,changePtcl);
   dVec newPos;///was /10 instead of /40 for the free particles
   newPos(0)= oldPos[0]+
-    PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/10.0)*
+    //    PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/10.0)*
+    //HACK
+    PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/5.0)*
     mysign(PathData.Path.Random.Local()-0.5);
   newPos(1)= oldPos[1]+
-    PathData.Path.Random.Local()*(PathData.Path.GetBox()(1)/40.0)*
+    PathData.Path.Random.Local()*(PathData.Path.GetBox()(1)/5.0)*
     mysign(PathData.Path.Random.Local()-0.5);
   newPos(2)=  oldPos[2]+
-    PathData.Path.Random.Local()*(PathData.Path.GetBox()(2)/40.0)*
+    PathData.Path.Random.Local()*(PathData.Path.GetBox()(2)/5.0)*
     mysign(PathData.Path.Random.Local()-0.5);
   if (OnlyX){
     newPos(1)=oldPos[1];
