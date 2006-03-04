@@ -11,6 +11,7 @@
 #include "MultiStage.h"
 #include "GlobalJosephsonMove.h"
 #include "CorrelatedBisectionBlock.h"
+#include "CenterofMassMove.h"
 #include "RefSliceMove.h"
 #include "DisplaceMove.h"
 #include "OpenEndMove.h"
