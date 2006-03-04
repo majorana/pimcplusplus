@@ -1,7 +1,7 @@
 #include "PermuteStage.h"
 
 
-void PermuteStageClass::InitBlock()
+void PermuteStageClass::InitBlock(int &slice1, int &slice2)
 {
   //do nothing for now
 }
