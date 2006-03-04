@@ -19,7 +19,7 @@ public:
   void Read(IOSectionClass  &in);
   double Sample(int &slice1,int &slice2, 
 		Array<int,1> &activeParticles);
-  EmptyStageClass(PathDataClass &pathData, 
+  EmptyStageClass(PathDataClass &pathData, int level,
 		IOSectionClass &outSection) : 
     LocalStageClass(pathData,outSection),
     OutSection(outSection),
@@ -28,6 +28,7 @@ public:
     EndAttempts=0;
     AcceptRatio.resize(2);
     AcceptRatio=0;
+    BisectionLevel=level;
     //do nothing for now
 
   }
