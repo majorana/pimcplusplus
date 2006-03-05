@@ -1,4 +1,4 @@
-#include "PermuteStageClass.h"
+#include "PermuteStage.h"
 #include "WormPermuteStage.h"
 
 double WormPermuteStageClass::Sample(int &slice1,int &slice2,

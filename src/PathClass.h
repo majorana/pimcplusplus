@@ -277,8 +277,8 @@ public:
   void SetTail(const dVec &r);
 
   MirroredClass<int> Weight;
-  int HeadSlice;
-  int HeadParticle;
+  MirroredClass<int> HeadSlice;
+  MirroredClass<int> HeadParticle;
 
 
   //////////////////////////

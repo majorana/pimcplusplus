@@ -43,7 +43,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 					       IOSection);
   else if (permuteType=="WORMMOVE")
     PermuteStage=new OpenStageClass(PathData,SpeciesNum,NumLevels,
-				    OutSection);
+				    IOSection);
   else if (permuteType == "NONE") 
     PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
 					   IOSection);

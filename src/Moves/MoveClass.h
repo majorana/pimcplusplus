@@ -21,6 +21,6 @@
 #include "StructureRejectStage.h"
 #include "CouplingMove.h"
 #include "LangevinMove.h"
-
+#include "WormGrow.h"
 
 #endif
