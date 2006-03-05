@@ -17,7 +17,12 @@ void PIMCClass::Read(IOSectionClass &in)
   PathData.Path.Read(in);
   in.CloseSection();
   perr << "Finished Path read.\n";
+  
 
+  if (PathData.Path.ExistsCoupling){
+    int myProc=PathData.InterComm.MyProc();
+    PathData.Path.ExistsCoupling=(double)(myProc)/100;
+  }
   // Read in the action information
   assert(in.OpenSection("Action"));
   PathData.Actions.Read(in);
@@ -226,6 +231,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new CorrelatedBisectionBlockClass(PathData,OutFile);
     else if (moveType=="CouplingMove")
       move = new CouplingMoveClass(PathData,OutFile);
+    else if (moveType=="CenterOfMass")
+      move = new CenterOfMassMOveClass(PathData,OutFile);
     else if (moveType=="BisectionSphereBlock")
       move = new BisectionSphereBlockClass(PathData,OutFile);
     else if (moveType=="CenterDroplet")
@@ -244,6 +251,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new WaterTranslate(PathData, OutFile);
     else if (moveType=="WaterTranslateRing")
       move = new WaterTranslateRing(PathData, OutFile);
+    else if (MoveType=="LocalFlip")
+      move =new LocalFlip(PathData,OutFile);
     else if (moveType=="GlobalJosephson")
       move = new GlobalJosephsonMove(PathData, OutFile);
     else if (moveType=="LocalFlip")
