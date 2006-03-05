@@ -121,8 +121,10 @@ void PathClass::Read (IOSectionClass &inSection)
   inSection.ReadVar("FunnyCoupling",FunnyCoupling);
   SetMode(OLDMODE);
   NowOpen=false;
+  HeadSlice=0;
   SetMode (NEWMODE);
   NowOpen=false;
+  HeadSlice=0;
   Weight=1;
   double tempExistsCoupling;
   if (!inSection.ReadVar("ExistsCoupling",tempExistsCoupling)){
