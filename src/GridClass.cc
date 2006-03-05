@@ -190,6 +190,11 @@ void CellMethodClass::BinParticles(int slice)
   for (int ptcl=0;ptcl<Path.NumParticles();ptcl++){
     FindBox(Path(slice,ptcl),x,y,z);
     GridsArray(x,y,z).Particles(slice).push_back(ptcl);
+    //    if (slice==Path.OpenLink && ptcl==Path.OpenPtcl){
+    //      FindBox(Path(slice,Path.NumParticles()),x,y,z);
+    //      GridsArray(x,y,z).Particles(slice).push_back(ptcl);
+    //    }
+
   }	    
 }
 
