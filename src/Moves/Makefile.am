@@ -14,6 +14,8 @@ libmoves_la_SOURCES  =           \
     BisectionSphereStage.h       \
     CenterDropletMove.h          \
     CenterDropletMove.cc         \
+    CenterofMassMove.h           \
+    CenterofMassMove.cc          \
     CorrelatedBisectionBlock.cc  \
     CorrelatedBisectionBlock.h   \
     CoupledPermuteStage.cc       \
@@ -41,6 +43,8 @@ libmoves_la_SOURCES  =           \
     MultiStage.h                 \
     NoPermuteClass.h             \
     NoPermuteClass.cc            \
+    OpenStage.h                  \
+    OpenStage.cc                 \
     OpenEndMove.cc               \
     OpenEndMove.h                \
     OpenStage.h                  \
