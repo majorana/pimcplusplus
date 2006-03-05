@@ -232,7 +232,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     else if (moveType=="CouplingMove")
       move = new CouplingMoveClass(PathData,OutFile);
     else if (moveType=="CenterOfMass")
-      move = new CenterOfMassMOveClass(PathData,OutFile);
+      move = new CenterOfMassMoveClass(PathData,OutFile);
     else if (moveType=="BisectionSphereBlock")
       move = new BisectionSphereBlockClass(PathData,OutFile);
     else if (moveType=="CenterDroplet")
@@ -251,7 +251,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new WaterTranslate(PathData, OutFile);
     else if (moveType=="WaterTranslateRing")
       move = new WaterTranslateRing(PathData, OutFile);
-    else if (MoveType=="LocalFlip")
+    else if (moveType=="LocalFlip")
       move =new LocalFlip(PathData,OutFile);
     else if (moveType=="GlobalJosephson")
       move = new GlobalJosephsonMove(PathData, OutFile);
