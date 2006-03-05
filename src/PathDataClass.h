@@ -64,6 +64,8 @@ public:
     Join=newJoin;
   }
   
+  void MoveOpenLinkToEnd();
+  void MoveLinkToEnd(int linkToMove);
   /// This function shifts the path to make the reference slice
   /// equal to the absolute slice position absSlice.  The join is left
   /// on the last slice, so the permutation is out of the way.

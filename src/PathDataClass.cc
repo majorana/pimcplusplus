@@ -1,5 +1,44 @@
 #include "PathDataClass.h"
 
+///Will only work in serial
+void PathDataClass::MoveLinkToEnd(int linkToMove)
+{
+  //  cerr<<"Being called "<<linkToMove<<endl;
+  
+  int endTimeSlice=Path.NumTimeSlices()-1; //las slice on processor
+  int needToShift=endTimeSlice-linkToMove;
+  MoveJoin(linkToMove);
+  if (needToShift!=0){
+    ShiftData(needToShift);
+    Join=linkToMove+needToShift;
+    assert(Join==Path.NumTimeSlices()-1);
+  }
+  return;
+
+
+}
+
+
+///Will only work in serial
+void PathDataClass::MoveOpenLinkToEnd()
+{
+  //  cerr<<"Calling moveopenlinktoend"<<endl;
+  int openLink=Path.OpenLink;
+  int endTimeSlice=Path.NumTimeSlices()-1; //las slice on processor
+  int needToShift=endTimeSlice-openLink;
+  //  cerr<<openLink<<" "<<endTimeSlice<<" "<<needToShift<<endl;
+    MoveJoin(openLink);
+  if (needToShift!=0){
+    ShiftData(needToShift);
+    Join=Path.OpenLink;
+  }
+  //  cerr<<"Join: "<<Join<<" "<<Path.OpenLink<<" "<<Path.NumTimeSlices()-1<<endl;
+  assert(Join==Path.NumTimeSlices()-1);
+  return;
+
+
+}
+
 void PathDataClass::Read (IOSectionClass &in)
 {
   int N = WorldComm.NumProcs();
@@ -35,7 +74,7 @@ void PathDataClass::Read (IOSectionClass &in)
     Seed=Random.InitWithRandomSeed(NumClones);
   }
     //    Random.Init (314159, numClones);
-
+  Path.MyClone=InterComm.MyProc();
 }
 
 
