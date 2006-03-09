@@ -2,6 +2,7 @@
 #define POTENTIAL_H
 
 #include "CoulombPot.h"
+#include "ToppHopfield.h"
 #include "ScreenedPot.h"
 #include "QuinticPH.h"
 #include "SplinePot.h"

@@ -21,6 +21,8 @@ libPH_la_SOURCES = CoreTransform.h    \
                    ScreenedPot.cc     \
                    SplinePot.h        \
                    SplinePot.cc       \
+                   ToppHopfield.h     \
+                   ToppHopfield.cc    \
                    kSpacePH.h         \
                    kSpacePH.cc      
 
