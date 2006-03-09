@@ -36,3 +36,13 @@ ToppHopfieldPot::Read(IOSectionClass &in)
   assert (in.ReadVar("b",  b));
   assert (in.ReadVar("rc", rc));
 }
+
+void
+ToppHopfieldPot::Write(IOSectionClass &out)
+{
+  out.WriteVar("Z", Z);
+  out.WriteVar("V0", V0);
+  out.WriteVar("a", a);
+  out.WriteVar("b", b);
+  out.WriteVar("rc", rc);
+}
