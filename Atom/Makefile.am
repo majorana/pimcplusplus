@@ -4,7 +4,7 @@ TestDFTAtom_SOURCES  = TestDFTAtom.cc
 
 TestRadialWF_SOURCES = TestRadialWF.cc
 
-LDADD   = libatom.la                 ../IO/libciao.la           \
+LDADD   = libatom.la                 ../IO/libIO.la           \
           ../DFT/libdft.la           ../PH/libPH.la             \
           ../Splines/libspline.la    ../Integration/libquad.la  \
           ../Fitting/libfitting.la   ../MatrixOps/libmatops.la  \
