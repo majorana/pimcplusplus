@@ -258,7 +258,7 @@ void Rho::Square()
 	  l = lindex;
 	if (WriteDebug) {
 	  fprintf (DebugFile, "Doing l %d, beta = %1.5e\n",
-		   l, beta);
+		   U_ls(l).lchannel(), beta);
 	  fflush (DebugFile);
 	}
 	if (COMM::WorldProc() == 0)
