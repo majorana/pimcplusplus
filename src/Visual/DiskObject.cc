@@ -71,8 +71,12 @@ DiskObject::Set()
   else if (Axis == 5)
     glRotated (180.0, 1.0, 0.0, 0.0);
   //  gluDisk(qobj, Radius, 20, 20);
-  if (OffScreen)
-    glCallList(OffScreenListNum);
+  if (OffScreen) {
+    // glCallList(OffScreenListNum);
+    GLUquadricObj* qobj = gluNewQuadric();
+    gluDisk(qobj, 0.0, 1.0, 30, 1);
+    gluDeleteQuadric(qobj);
+  }
   else
     glCallList(DiskListNum);
   glPopMatrix();
