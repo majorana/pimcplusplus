@@ -1,9 +1,9 @@
-double tau=0.25;
+double tau=0.5;
 
 Section (System)
 {
-  int NumTimeSlices=300;
-  Array<double,1> Box(3)=[100.0,100.0,100.0];
+  int NumTimeSlices=600;
+  Array<double,1> Box(3)=[200.0,200.0,200.0];
   Array<bool,1> IsPeriodic(3)=[true, true, true];
   //  double kCutoff = 0.15;
   Section (Particles)
@@ -52,7 +52,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "Na2_6.0_tau0.25_beta75.TP";
+  string OutFileBase = "Na2_6.0_tau0.5_beta300.TH";
   Section (Observable) {
     string Type = "Energy";
     string Name = "Energy";
