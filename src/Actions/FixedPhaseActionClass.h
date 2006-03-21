@@ -36,7 +36,8 @@ private:
   complex<double> GradientDet   (int slice, int speciesNum);
   complex<double> GradientDetFD (int slice, int speciesNum);
   complex<double> GradientDet   (int slice, int speciesNum,
-				 const Array<int,1> &activeParticles);
+				 const Array<int,1> &activeParticles,
+				 bool updateMats=true);
   bool IonsHaveMoved();
   /// Recomputes the electron orbitals for the new ion positions.
   void UpdateBands();
@@ -50,7 +51,8 @@ private:
 public:
   double CalcGrad2 (int slice, int species);
   double CalcGrad2 (int slice, int species, 
-		    const Array<int,1> &activeParticles);
+		    const Array<int,1> &activeParticles,
+		    bool updateMats=true);
   void   CalcGrad2 (int slice, int species, Array<double,1> &grad2,
 		    const Array<int,1> &activeParticles);
   int IonSpeciesNum, UpSpeciesNum, DownSpeciesNum;

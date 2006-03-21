@@ -256,12 +256,13 @@ FixedPhaseClass::CalcGrad2 (int slice, int species)
 }
 
 double
-FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activeParticles)
+FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activeParticles,
+			    bool updateMats)
 {
   int N = Path.Species(species).NumParticles;
   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
 
-  complex<double> detu = GradientDet(slice, species, activeParticles);
+  complex<double> detu = GradientDet(slice, species, activeParticles, updateMats);
 #ifdef DEBUG
   complex<double> detuOld = GradientDet(slice, species);
   if (mag2(detu-detuOld)>1.0e-12*mag2(detuOld)) {
@@ -348,16 +349,18 @@ FixedPhaseClass::Action (int slice1, int slice2,
     perr << "Not doing either up or down.  Hmmm... " 
 	 << " speciesNum = " << speciesNum << endl;
 
+  bool updateMats = true;
+
   double action = 0.0;
   if (doUp) {
     for (int slice=slice1; slice <= slice2; slice+=skip) 
-      UpGrad2(slice) = CalcGrad2 (slice, UpSpeciesNum, activeParticles);
+      UpGrad2(slice) = CalcGrad2 (slice, UpSpeciesNum, activeParticles, updateMats);
     for (int link=slice1; link < slice2; link+=skip) 
       action += 0.5*lambda*levelTau*(UpGrad2(link)+UpGrad2(link+skip));
   }
   if (doDown) {
     for (int slice=slice1; slice <= slice2; slice+=skip) 
-      DownGrad2(slice) = CalcGrad2 (slice, DownSpeciesNum, activeParticles);
+      DownGrad2(slice) = CalcGrad2 (slice, DownSpeciesNum, activeParticles, updateMats);
     for (int link=slice1; link < slice2; link+=skip) 
       action += 0.5*lambda*levelTau*(DownGrad2(link)+DownGrad2(link+skip));
   }
@@ -575,7 +578,8 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum)
 
 complex<double>
 FixedPhaseClass::GradientDet(int slice, int speciesNum,
-			     const Array<int,1> &activeParticles)
+			     const Array<int,1> &activeParticles,
+			     bool updateMats)
 {
 #if NDIM==3
   SpeciesClass &species = Path.Species(speciesNum);
@@ -593,16 +597,18 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum,
     (speciesNum==UpSpeciesNum) ? UpGradMatCache.data() : DownGradMatCache.data();
 
 
-  // First, update determinant matrix for the active particles
-  Array<complex<double>,1> vals;
-  Array<cVec3,1> grads;
-  for (int i=0; i<activeParticles.size(); i++) {
-    int j = activeParticles(i) - first;
-    Vec3 r_j = Path(slice, activeParticles(i));
-    Path.PutInBox(r_j);
-    vals.reference ( matData(slice, j, Range::all()));
-    grads.reference(gradData(slice, j, Range::all()));
-    BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+  if (updateMats) {
+    // First, update determinant matrix for the active particles
+    Array<complex<double>,1> vals;
+    Array<cVec3,1> grads;
+    for (int i=0; i<activeParticles.size(); i++) {
+      int j = activeParticles(i) - first;
+      Vec3 r_j = Path(slice, activeParticles(i));
+      Path.PutInBox(r_j);
+      vals.reference ( matData(slice, j, Range::all()));
+      grads.reference(gradData(slice, j, Range::all()));
+      BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+    }
   }
 
 //   fprintf (stderr, "Re(matData(slice))) = \n");
