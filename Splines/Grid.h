@@ -8,7 +8,7 @@ using namespace IO;
 //Ken's Grid Class
 
 /// The different types of grids that we currently allow
-typedef enum {NONE, LINEAR, OPTIMAL, OPTIMAL2, LOG, CLUSTER} GridType;
+typedef enum {NONE, LINEAR, OPTIMAL, OPTIMAL2, LOG, CLUSTER, GENERAL} GridType;
 
 
 /// Parent class for all grids
@@ -105,6 +105,58 @@ class LinearGrid : public Grid
   {
     Init (start, end, numpoints);
   }
+};
+
+
+/// General Grid inherets from Grid.  
+class GeneralGrid : public Grid
+{
+ public:
+  /// Returns the type of the grid (in this case GENERAL)
+  GridType Type()
+  { return (GENERAL); }  
+
+  /// Returns the index of the nearest point below r. 
+  int ReverseMap(double r)
+  {
+    if (r <= grid(0))
+      return (0);
+    else if (r >= grid(NumPoints-1))
+      return (NumPoints-1);
+    else {
+      int hi = NumPoints-1;
+      int lo = 0;
+      bool done = false;
+      while (!done) {
+	int i = (hi+lo)>>1;
+	if (grid(i) > r)
+	  hi = i;
+	else
+	  lo = i;
+	done = (hi-lo)<2;
+      }
+      return (lo);
+    }
+  }
+
+  void Write (IOSectionClass &outSection)
+  {
+    outSection.WriteVar ("Points", grid); 
+    outSection.WriteVar ("Type", string("General"));
+  }
+
+  void Read (IOSectionClass &inSection)
+  {
+    assert (inSection.ReadVar("Points", grid));
+    Start = grid(0);
+    End = grid(grid.size()-1);
+    NumPoints = grid.size();
+  }
+
+  /// Useless constructor
+  GeneralGrid ()
+  { /*  Do nothing */ }
+
 };
 
 
@@ -498,6 +550,8 @@ inline Grid* ReadGrid (IOSectionClass &inSection)
   Grid *newGrid;
   if (Type == "Linear")
     newGrid = new LinearGrid;
+  if (Type == "General")
+    newGrid = new GeneralGrid;
   else if (Type == "Optimal")
     newGrid = new OptimalGrid;
   else if (Type == "Optimal2")

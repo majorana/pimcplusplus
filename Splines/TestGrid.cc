@@ -1,4 +1,5 @@
 #include "Grid.h"
+#include "../IO/IO.h"
 
 void TestOptimal()
 {
@@ -47,10 +48,23 @@ void TestCluster()
 }
 
 
+void TestGeneral()
+{
+  IOSectionClass in;
+  in.OpenFile("Na_HF_NLP.h5");
+  in.OpenSection("Grid");
+  Grid *grid = ReadGrid(in);
+  int lo = grid->ReverseMap(3.2);
+  cerr << "Grid(lo) = " << (*grid)(lo) << endl;
+  cerr << "Grid(hi) = " << (*grid)(lo+1) << endl;
+  in.CloseFile();
+}
+
 
 main()
 {
-  TestOptimal();
-  TestOptimal2();
-  TestCluster();
+  TestGeneral();
+//   TestOptimal();
+//   TestOptimal2();
+//   TestCluster();
 }
