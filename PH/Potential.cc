@@ -7,6 +7,8 @@ Potential* ReadPotential (IOSectionClass &in)
   assert (in.ReadVar ("Type", type));
   if (type == "Coulomb")
     pot = new CoulombPot;
+  else if (type == "General")
+    pot = new GeneralPot;
   else if (type == "ToppHopfield")
     pot = new ToppHopfieldPot;
   else if (type == "QuinticPH")

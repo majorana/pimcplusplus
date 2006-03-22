@@ -7,5 +7,6 @@
 #include "QuinticPH.h"
 #include "SplinePot.h"
 #include "HeAzizPot.h"
+#include "GeneralPot.h"
 
 #endif

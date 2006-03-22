@@ -40,8 +40,8 @@ ToppHopfieldPot::Read(IOSectionClass &in)
 void
 ToppHopfieldPot::Write(IOSectionClass &out)
 {
-  out.WriteVar("Type", "ToppHopfield");
   out.WriteVar("Z",  Z);
+  out.WriteVar("Type", "ToppHopfield");
   out.WriteVar("V0", V0);
   out.WriteVar("a",  a);
   out.WriteVar("b",  b);

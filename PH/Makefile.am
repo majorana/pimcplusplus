@@ -10,6 +10,8 @@ libPH_la_SOURCES = CoreTransform.h    \
                    CoreTransform.cc   \
                    CoulombPot.h       \
                    CoulombPot.cc      \
+                   GeneralPot.h       \
+                   GeneralPot.cc      \
                    HeAzizPot.h        \
                    HeAzizPot.cc       \
                    Potential.h        \
