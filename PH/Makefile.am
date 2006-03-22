@@ -45,5 +45,5 @@ libPH_la_LIBADD   =
 
 include_HEADERS = CoreTransform.h CoulombPot.h HeAzizPot.h Potential.h  \
                   PotentialBase.h QuinticPH.h ScreenedPot.h SplinePot.h \
-	          kSpacePH.h ToppHopfield.h
+	          kSpacePH.h ToppHopfield.h GeneralPot.h
 
