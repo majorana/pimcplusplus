@@ -20,6 +20,7 @@ GeneralPot::Write(IOSectionClass &out)
   out.CloseSection();
   out.WriteVar("V", PotSpline.Data());
   out.WriteVar("Z", Z);
+  out.WriteVar("Type", "General");
 }
 
 double
