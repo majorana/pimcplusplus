@@ -550,7 +550,7 @@ inline Grid* ReadGrid (IOSectionClass &inSection)
   Grid *newGrid;
   if (Type == "Linear")
     newGrid = new LinearGrid;
-  if (Type == "General")
+  else if (Type == "General")
     newGrid = new GeneralGrid;
   else if (Type == "Optimal")
     newGrid = new OptimalGrid;

@@ -180,4 +180,10 @@ main()
   TestDoubleWrite(ioASCII);
   TestDoubleRead(ioASCII);
 
+  IOSectionClass hack;
+  hack.OpenFile("/home/esler/PairActions/Na_HF_NLPP.square.beta16.0.h5");
+  hack.OpenSection("Potential");
+  hack.WriteVar("Type", "General");
+  hack.CloseFile();
+
 }

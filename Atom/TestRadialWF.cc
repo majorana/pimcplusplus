@@ -18,7 +18,7 @@ void TestRadialWF1()
   fprintf (stderr, "Energy = %1.12f\n", wf.Energy);
 }
 
-void TestRadialWF2()
+void TestRadialWF_TH()
 {
   ToppHopfieldPot pot;
   pot.Z = 1.0;
@@ -38,9 +38,15 @@ void TestRadialWF2()
   
   wf.Solve (1.0e-14);
   fprintf (stderr, "Topp-Hopfield energy = %1.12f\n", wf.Energy);
+  IOSectionClass out;
+  out.NewFile ("ToppHopfield_WF.h5");
+  out.WriteVar ("u", wf.u.Data());
+  out.WriteVar ("r", wf.grid->Points());
+  out.CloseFile();
+
 }
 
-void TestRadialWF3()
+void TestRadialWF_Needs()
 {
   Potential *pot;
   IOSectionClass in;
@@ -64,7 +70,32 @@ void TestRadialWF3()
   out.WriteVar ("u", wf.u.Data());
   out.WriteVar ("r", wf.grid->Points());
   out.CloseFile();
+}
 
+void TestRadialWF_LocalPH()
+{
+  Potential *pot;
+  IOSectionClass in;
+  assert(in.OpenFile("NaLocalPH.h5"));
+  pot = ReadPotential(in);
+
+  in.CloseFile(); 
+  OptimalGrid grid(1.0, 100.0);
+  RadialWF wf;
+  wf.l = 0;
+  wf.n = 1;
+  wf.Energy = -0.25;
+  wf.Occupancy = 1.0;
+  wf.SetPotential (pot);
+  wf.SetGrid (&grid);
+  
+  wf.Solve (1.0e-14);
+  fprintf (stderr, "NaLocalPH energy     = %1.12f\n", wf.Energy);
+  IOSectionClass out;
+  out.NewFile ("NaLocalPH_WF.h5");
+  out.WriteVar ("u", wf.u.Data());
+  out.WriteVar ("r", wf.grid->Points());
+  out.CloseFile();
 }
 
 
@@ -72,6 +103,7 @@ void TestRadialWF3()
 main()
 {
   TestRadialWF1();
-  TestRadialWF2();
-  TestRadialWF3();
+  TestRadialWF_TH();
+  TestRadialWF_Needs();
+  TestRadialWF_LocalPH();
 }
