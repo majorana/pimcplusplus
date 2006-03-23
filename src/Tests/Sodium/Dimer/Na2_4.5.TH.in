@@ -1,4 +1,4 @@
-double tau=0.25;
+double tau=0.50;
 
 Section (System)
 {
@@ -53,7 +53,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "Na2_4.5_tau0.25_beta75.TP";
+  string OutFileBase = "Na2_4.5_tau0.5_beta150.TH";
   Section (Observable) {
     string Type = "Energy";
     string Name = "Energy";
