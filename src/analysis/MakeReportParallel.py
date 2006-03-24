@@ -637,9 +637,9 @@ for counter in range(0,numSections):
      elif myType=="Scalar":
           currNum=ProcessScalarSection(infiles,doc,currNum)
           doc.append(HR())
-#     elif myType=="CorrelationFunction":
-#          currNum=ProcessCorrelationSection(infiles,doc,currNum)
-#          doc.append(HR()) 
+     elif myType=="CorrelationFunction":
+          currNum=ProcessCorrelationSection(infiles,doc,currNum)
+          doc.append(HR())
      else:
           a=5
      infiles.CloseSection()

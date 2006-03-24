@@ -111,6 +111,11 @@ public:
   int RefSlice;
 
   Mirrored1DClass<int> Permutation;
+  /// This mirror array is indexed by particle number.  It is used to
+  /// represent "partial" particles needed for the worm algorithm.
+  /// The first and the last slice, respectively, on this processor
+  /// are stored.
+  Mirrored1DClass<int> FirstSlice, LastSlice;
   /// This function accumulates the total permutation vector
   /// from all of the processors individual permutation vector.
   /// Only processor 0 gets the result

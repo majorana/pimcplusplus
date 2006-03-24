@@ -2,6 +2,13 @@ from pylab import *
 from HTMLgen import *
 from Tables import *
 
+def IsMonotonic (x):
+     isMono = True
+#     for i in range(0,x.size()-2):
+     for i in range(0,len(x)-2):
+          isMono = isMono and (x[i+1] > x[i])
+     return isMono
+
 def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      clf()
      if (IsMonotonic(x)):

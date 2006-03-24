@@ -294,6 +294,29 @@ void PathClass::Allocate()
   Path.resize(MyNumSlices,numParticles+OpenPaths);
   RefPath.resize(numParticles+OpenPaths);
   Permutation.resize(numParticles+OpenPaths);
+  
+  /// Initilize first and last slice for all "real" particles to the
+  /// first and last slices, respectively
+  FirstSlice.resize(numParticles+OpenPaths);
+  LastSlice.resize(numParticles+OpenPaths);
+  for (int ptcl=0; ptcl<numParticles; ptcl++) {
+    SetMode(OLDMODE);
+    FirstSlice(ptcl) = 0;
+    LastSlice(ptcl) = NumTimeSlices()-1;
+    SetMode(NEWMODE);
+    FirstSlice(ptcl) = 0;
+    LastSlice(ptcl) = NumTimeSlices()-1;
+  }
+  /// Set all nonexistant particles' first and last slices to -1
+  for (int ptcl=numParticles; ptcl<numParticles+OpenPaths; ptcl++) {
+    SetMode(OLDMODE);
+    FirstSlice(ptcl) = -1;
+    LastSlice(ptcl)  = -1;
+    SetMode(NEWMODE);
+    FirstSlice(ptcl) = -1;
+    LastSlice(ptcl)  = -1;
+  }
+
   SpeciesNumber.resize(numParticles+OpenPaths);
   DoPtcl.resize(numParticles+OpenPaths);
   /// Assign the species number to the SpeciesNumber array
