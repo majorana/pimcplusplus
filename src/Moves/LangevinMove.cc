@@ -55,25 +55,25 @@ Stats (Array<double,1> &x, double &mean, double &var, double &kappa)
 void
 LangevinMoveClass::CalcCovariance()
 {
-//   if (FDeque.size() < 20) {
-//     A = 0.0;
-//     for (int i=0; i<A.rows(); i++)
-//       A(i,i) = 1.0e-5;
-//     return;
-//   }
+  //   if (FDeque.size() < 20) {
+  //     A = 0.0;
+  //     for (int i=0; i<A.rows(); i++)
+  //       A(i,i) = 1.0e-5;
+  //     return;
+  //   }
   int N = R.size();
   int numFs = FDeque.size();
   double Ninv = 1.0/(double)N;
-
+  
   /// First, sum the forces over the processors in my clone.
   for (int i=0; i<numFs; i++) {
     FTmp = dVec(0.0);
     PathData.IntraComm.AllSum(FDeque[i], FTmp);
     FDeque[i] = FTmp;
   }
-
+  
   Fmean = 0.0;
-  /// Compute mean force
+  // Compute mean force
   for (int k=0; k<numFs; k++) {
     int n=0;
     for (int ptcl=0; ptcl<N; ptcl++) 
@@ -112,7 +112,7 @@ LangevinMoveClass::CalcCovariance()
 
   /// Compute the average autocorrelation time for the diagaonal
   /// elements only.
-  Array<double,1> x(numFs);
+    Array<double,1> x(numFs);
   double tmpMean, tmpVar, tmpKappa;
   kappa = 0.0;
   for (int ptcl=0; ptcl<N; ptcl++)
@@ -129,7 +129,7 @@ LangevinMoveClass::CalcCovariance()
 	 << " and kappa = " << kappa << endl;
 
   /// Multiply covariance by kappa
-  //CoVar *= kappa;
+  CoVar *= kappa;
 
   /// Now we have the covariance matrix for the clone.  We must sum
   /// over all the clones and divide by the number
@@ -152,6 +152,13 @@ LangevinMoveClass::CalcCovariance()
 	Lambda(i) = 1.0e-10;
       }
     }
+    /////////////////////////
+    // HACK HACK HACK HACK //
+    /////////////////////////
+//     Lambda = 1.0e-10;
+//     L = 0.0;
+//     for (int i=0; i<L.rows(); i++)
+//       L(i,i) = 1.0;
   }
   /// Now, broadcast eigenvectors and values to all processors
   PathData.IntraComm.Broadcast(0, L);
@@ -165,6 +172,85 @@ LangevinMoveClass::CalcCovariance()
   /// Now empty out the force deque for next time
   FDeque.clear();
 
+}
+
+
+
+
+void
+LangevinMoveClass::CalcCovariance2()
+{
+  int N = R.size();
+  int numFs = FDeque.size();
+  double Ninv = 1.0/(double)N;
+  
+  /// First, sum the forces over the processors in my clone.
+  for (int i=0; i<numFs; i++) {
+    FTmp = dVec(0.0);
+    PathData.IntraComm.AllSum(FDeque[i], FTmp);
+    FDeque[i] = FTmp;
+  }
+  
+  Fmean = 0.0;
+  // Compute mean force
+  for (int k=0; k<numFs; k++) {
+    int n=0;
+    for (int ptcl=0; ptcl<N; ptcl++) 
+      for (int dim=0; dim<NDIM; dim++) {
+	Fmean(n) += FDeque[k](ptcl)[dim];
+	n++;
+      }
+  }
+  Fmean = (1.0/(double)numFs)*Fmean;
+
+
+  if (PathData.IntraComm.MyProc() == 0) {
+    int numC = PathData.GetNumClones();
+    Array<double,2> meanMat(numC, Fmean.size());
+    for (int k=0; k<Fmean.size(); k++)
+      meanMat(PathData.GetCloneNum(), k) = Fmean(k);
+    
+    PathData.InterComm.AllGatherRows(meanMat);
+    CoVar = 0.0;
+    Fmean = 0.0;
+    for (int k=0; k<meanMat.rows(); k++)
+      Fmean += meanMat(k,Range::all());
+    Fmean *= (1.0/(double)numC);
+
+    for (int i=0; i<meanMat.cols(); i++)
+      for (int j=0; j<meanMat.cols(); j++)
+	for (int k=0; k<meanMat.rows(); k++)
+	  CoVar(i,j) += meanMat(k,i)*meanMat(k,j);
+    
+    CoVar = (1.0/(double)numC)*CoVar;
+    for (int i=0; i<CoVar.rows(); i++)
+      for (int j=0; j<CoVar.cols(); j++)
+	CoVar(i,j) -= Fmean(i)*Fmean(j);
+    // Want Covar to be the square of the error.  Therefore, divide by
+    // N-1
+    CoVar = (1.0/(double)(numC-1)) * CoVar;
+    // Compensatory term for "extra" noise
+    for (int i=0; i<CoVar.rows(); i++)
+      CoVar(i,i) += ExtraNoiseSigma*ExtraNoiseSigma;
+    double beta = PathData.Path.tau * PathData.Path.TotalNumSlices;
+    A = (0.5 * TimeStep*beta/Mass)*CoVar;
+    // Now calculate eigenvalues and eigenvectors
+    SymmEigenPairs (A, A.extent(0), Lambda, L);
+  }
+  /// Now, broadcast eigenvectors and values to all processors
+  PathData.IntraComm.Broadcast(0, L);
+  PathData.IntraComm.Broadcast(0, Lambda);
+  PathData.IntraComm.Broadcast(0, Fmean);
+  /// Transpose eigenvectors
+  for (int i=0; i<L.rows(); i++)
+    for (int j=0; j<L.cols(); j++)
+      Ltrans(i,j) = L(j,i);
+  
+  for (int i=0; i<Fmean.size(); i++)
+    Fmean(i) += PathData.Path.Random.WorldGaussian(ExtraNoiseSigma);
+
+  /// Now empty out the force deque for next time
+  FDeque.clear();
 }
 
 
@@ -275,9 +361,14 @@ LangevinMoveClass::LangevinStep()
   Rvar.Write(WriteArray);
   Vec2Array (V, WriteArray);    Vvar.Write(WriteArray);
   Vec2Array (Vold, WriteArray); VOldVar.Write(WriteArray);
-  /// Calculate the mean force, covariance and eigenvalue
-  /// decomposition. 
-  CalcCovariance();
+  CoVarVar.Write(CoVar);
+  // Calculate the mean force, covariance and eigenvalue
+  // decomposition. 
+				  
+  if (PathData.GetNumClones() > 2)
+    CalcCovariance2();
+  else
+    CalcCovariance();
   LambdaVar.Write(Lambda);
   for (int i=0; i<WriteArray.extent(0); i++) {
     WriteArray(i,0) = Fmean(3*i+0);
@@ -403,6 +494,8 @@ LangevinMoveClass::Read(IOSectionClass &in)
   string speciesStr;
 
   assert (in.ReadVar("Mass",          Mass));
+  if (in.ReadVar("ExtraNoiseSigma", ExtraNoiseSigma))
+    perr << "Extra Langevin noise = " << ExtraNoiseSigma << endl;
   assert (in.ReadVar("TimeStep",      TimeStep));
   assert (in.ReadVar("NumEquilSteps", NumEquilSteps));
   assert (in.ReadVar("NumAccumSteps", NumAccumSteps));

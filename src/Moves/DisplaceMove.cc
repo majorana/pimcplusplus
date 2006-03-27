@@ -93,7 +93,6 @@ DisplaceMoveClass::MakeMove ()
     ptclList.erase(iter);
     numLeft--;
   }
-  cerr << "ActiveParticles = " << ActiveParticles << endl;
 
 //   int ptclIndex = 0;
 //   for (int si=0; si < ActiveSpecies.size(); si++) {

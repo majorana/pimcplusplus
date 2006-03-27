@@ -38,6 +38,7 @@ protected:
   int NumFs;
   void CalcFriction();
   void CalcCovariance();
+  void CalcCovariance2();
 
 
   //////////////////////
@@ -65,11 +66,15 @@ protected:
   double Mass, MassInv;
   /// The LD time
   double Time;
+  /// The standard deviation of the extra noise constant
+  double ExtraNoiseSigma;
   void InitVelocities();
   void AccumForces();
   void VerletStep();
   void LangevinStep();
-  ObservableVecDouble2 Rvar, Vvar, VOldVar, FVar, FShortVar, FLongVar;
+
+  ObservableVecDouble2 Rvar, Vvar, VOldVar, FVar, FShortVar, FLongVar,
+                       CoVarVar;
   ObservableVecDouble1 LambdaVar;
   Array<double,2> WriteArray;
   ObservableDouble TimeVar;
@@ -85,8 +90,9 @@ public:
     FShortVar("FShort", IOSection, pathData.Path.Communicator),
     FLongVar ("FLong",  IOSection, pathData.Path.Communicator),
     LambdaVar ("Lambda",  IOSection, pathData.Path.Communicator),
+    CoVarVar ("CoVar",  IOSection, pathData.Path.Communicator),
     TimeVar("Time", IOSection, pathData.Path.Communicator),
-    Time(0.0), Integrator (VERLET)
+    Time(0.0), Integrator (VERLET), ExtraNoiseSigma(0.0)
   {
     // do nothing for now
   }
