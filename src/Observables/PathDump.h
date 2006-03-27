@@ -15,6 +15,8 @@ private:
   ObservableVecDouble1 TailLocVar;
   // Variables for node dumps.
   ObservableVecDouble3 NodeVarA, NodeVarB;
+  ObservableVecDouble1 WarpPosVar;
+  ObservableInt NodePtclVar, NodeSliceVar;
   bool DumpNodes;
   int  NodePtcl;
   int  NodeSlice;
@@ -23,6 +25,7 @@ private:
   void FreeParticleNodeDump();
   void GroundStateNodeDump();
   void FixedPhaseNodeDump();
+  void FindWorstBead(int &slice, int &ptcl);
 public:
   int TimesCalled;
   void Accumulate();
@@ -38,7 +41,10 @@ public:
     OpenLinkPtclVar("OpenPtcl",IOSection,myPathData.Path.Communicator),
     RefLinkVar("RefLink",IOSection,myPathData.Path.Communicator),
     NodeVarA("ANodes",IOSection,myPathData.Path.Communicator),
-    NodeVarB("BNodes",IOSection,myPathData.Path.Communicator)
+    NodeVarB("BNodes",IOSection,myPathData.Path.Communicator),
+    NodePtclVar ("NodePtcl",  IOSection, myPathData.Path.Communicator),
+    NodeSliceVar("NodeSlice", IOSection, myPathData.Path.Communicator),
+    WarpPosVar("WarpPos", IOSection, myPathData.Path.Communicator)
   { 
     Name="PathDump";
     TimesCalled=0;

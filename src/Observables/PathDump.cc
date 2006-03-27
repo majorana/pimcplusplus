@@ -21,8 +21,8 @@ void PathDumpClass::Read(IOSectionClass &in)
     Ygrid.Init(-0.5*box[1], 0.5*box[1], ny);
     Zgrid.Init(-0.5*box[2], 0.5*box[2], nz);
     if (PathData.Path.Communicator.MyProc()==0) {
-      IOSection.WriteVar("NodeSlice", NodeSlice);
-      IOSection.WriteVar("NodePtcl", NodePtcl);
+      //      IOSection.WriteVar("NodeSlice", NodeSlice);
+      //      IOSection.WriteVar("NodePtcl", NodePtcl);
       IOSection.NewSection("Xgrid");
       Xgrid.Write(IOSection);
       IOSection.CloseSection();
@@ -35,6 +35,8 @@ void PathDumpClass::Read(IOSectionClass &in)
     }
     in.CloseSection();
   }
+  else
+    NodeSlice = 0;
 }
 
 void PathDumpClass::Accumulate()
@@ -47,9 +49,8 @@ void PathDumpClass::Accumulate()
   int refSave = PathData.Path.GetRefSlice();
   PathData.MoveRefSlice(0);
 
-  if (DumpNodes) 
-    NodeDump();
-
+  if (DumpNodes)
+    FindWorstBead(NodeSlice, NodePtcl);
 
   if (PathData.Path.OpenPaths){
     Array<double,1> tailLoc(NDIM);
@@ -75,8 +76,7 @@ void PathDumpClass::Accumulate()
     pathArray.resize(numPtcls,totalSlices,NDIM);
   while (slicesLeft > maxShift) {
     int relNodeSlice = NodeSlice - offset;
-    if ((relNodeSlice>=0) && (relNodeSlice<Path.NumTimeSlices())
-	&& (myProc == 0))
+    if (DumpNodes && (relNodeSlice>=0) && (relNodeSlice<Path.NumTimeSlices()))
       NodeDump ();
     // First copy
     PathData.MoveJoin(maxShift);
@@ -126,18 +126,84 @@ void PathDumpClass::Accumulate()
   FirstTime = false;
 }
 
+void
+PathDumpClass::FindWorstBead(int &worstSlice, int &worstPtcl)
+{
+//   PathClass &Path = PathData.Path;
+//   double logWorst = 0.0;
+//   // First, find worst locally
+//   for (int si=0; si<Path.NumSpecies(); si++) {
+//     if ((PathData.Actions.NodalActions(si) != NULL) &&
+// 	(Path.Species(si).lambda != 0.0))
+//       if (PathData.Actions.NodalActions(si)->Type() == GROUND_STATE_FP) {
+// 	FixedPhaseActionClass &FP = 
+// 	  *((FixedPhaseActionClass*)PathData.Actions.NodalActions(si));
+	
+// 	int N = Path.Species(si).NumParticles;
+// 	int M = Path.NumTimeSlices();
+// 	int first = Path.Species(si).FirstPtcl;
+// 	Array<double,2> Agrad2(M,N), Bgrad2(M,N);
+// 	Path.SetIonConfig(0);
+// 	Array<double,1> grad2;
+// 	for (int slice=0; slice<M; slice++) {
+// 	  grad2.reference(Agrad2(slice,Range::all()));
+// 	  FP.CalcGrad2(slice, grad2);
+// 	}
+// 	Path.SetIonConfig(1);
+// 	for (int slice=0; slice<M; slice++) {
+// 	  grad2.reference(Bgrad2(slice,Range::all()));
+// 	  FP.CalcGrad2(slice, grad2);
+// 	}
+// 	for (int slice=0; slice<M; slice++)
+// 	  for (int ptcl=0; ptcl<N; ptcl++) {
+// 	    double maxlog = fabs(Agrad2(slice,ptcl)-Bgrad2(slice,ptcl));
+// 	    if (maxlog > logWorst) {
+// 	      logWorst = maxlog;
+// 	      worstSlice = slice;
+// 	      worstPtcl  = ptcl + first;
+// 	    }
+// 	  }
+//       }
+//   }
+//   Path.SetIonConfig(0);
+//   // Now, compare among processors to find worst bead
+//   Array<double,1> procWorst(1), allWorst(Path.Communicator.NumProcs());
+//   Array<int,1>    procBeads(2), allBeads(Path.Communicator.NumProcs()*2);
+//   procWorst(0) = logWorst;
+//   int ts = Path.TotalNumSlices;
+//   int myFirstSlice, myLastSlice;
+//   Path.SliceRange(Path.Communicator.MyProc(), myFirstSlice, myLastSlice);
+//   procBeads(0) = (worstSlice-Path.GetRefSlice()+myFirstSlice+ts)%ts;
+//   procBeads(1) = worstPtcl;
+//   Path.Communicator.AllGather(procWorst, allWorst);
+//   Path.Communicator.AllGather(procBeads, allBeads);
+//   for (int i=0; i<Path.Communicator.NumProcs(); i++) 
+//     if (allWorst(i) > logWorst) {
+//       logWorst = allWorst(i);
+//       worstSlice = allBeads(2*i);
+//       worstPtcl  = allBeads(2*i+1);
+//     }
+
+//   Path.Communicator.PrintSync();
+//   cerr << "All worst is " << logWorst << " at (" << worstSlice << ", " 
+//        << worstPtcl << ") myProc = " << Path.Communicator.MyProc() << endl;
+//   cerr << "Ref slice = " << Path.GetRefSlice() << endl;
+  
+}
 
 void
 PathDumpClass::NodeDump()
 {
+  int myProc = PathData.Path.Communicator.MyProc();
   int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
   if (PathData.Actions.NodalActions(speciesNum) != NULL) {
     NodeType nodeType = PathData.Actions.NodalActions(speciesNum)->Type();
-    if (nodeType == GROUND_STATE)
+    if ((nodeType==GROUND_STATE) && (myProc == 0))
       GroundStateNodeDump();
-    else if (nodeType == GROUND_STATE_FP)
+    else if (nodeType == GROUND_STATE_FP && (myProc==0)) {
       FixedPhaseNodeDump();
-    else if (nodeType == FREE_PARTICLE)
+    }
+    else if ((nodeType==FREE_PARTICLE) && (myProc==0))
       FreeParticleNodeDump();
   }
 }
@@ -145,43 +211,86 @@ PathDumpClass::NodeDump()
 void
 PathDumpClass::FixedPhaseNodeDump()
 {
-  if (PathData.Path.UseCorrelatedSampling()) 
-    PathData.Path.SetIonConfig(0);
+  PathClass &Path = PathData.Path;
+
+  if (Path.UseCorrelatedSampling()) 
+    Path.SetIonConfig(0);
+
+  int relNodeSlice = NodeSlice + Path.GetRefSlice();
+  if (relNodeSlice > Path.TotalNumSlices)
+    relNodeSlice -= Path.TotalNumSlices;
 
   /// HACK HACK HACK
   /// Find ptcl closest to ion we moved.
-  double closestDist = 1.0e100;
-  int closestPtcl = 16;
-  for (int ptcl=16; ptcl < 32; ptcl++) {
-    dVec disp = PathData.Path(NodeSlice,ptcl) - PathData.Path(NodeSlice,0);
-    PathData.Path.PutInBox(disp);
-    double dist = sqrt(dot(disp,disp));
-    if (dist < closestDist) {
-      closestDist = dist;
-      closestPtcl = ptcl;
-    }
-  }
-  NodePtcl = closestPtcl;
-
-
+//   double closestDist = 1.0e100;
+//   int closestPtcl = 16;
+//   for (int ptcl=16; ptcl < 32; ptcl++) {
+//     dVec disp = Path(relNodeSlice,ptcl) - Path(relNodeSlice,0);
+//     Path.PutInBox(disp);
+//     double dist = sqrt(dot(disp,disp));
+//     if (dist < closestDist) {
+//       closestDist = dist;
+//       closestPtcl = ptcl;
+//     }
+//   }
+//   NodePtcl = closestPtcl;
 
   int nx = Xgrid.NumPoints;
   int ny = Ygrid.NumPoints;
   int nz = Zgrid.NumPoints;
 
-  PathClass &Path = PathData.Path;
   Array<double,3> nodeDump(nx,ny,nz);
-  int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
+  int speciesNum = Path.ParticleSpeciesNum(NodePtcl);
   FixedPhaseActionClass &FP = 
     *((FixedPhaseActionClass*)PathData.Actions.NodalActions(speciesNum));
 
-  /// This must be fixed!
-  /// HACK HACK
-  int relNodeSlice = NodeSlice; // + Path.GetRefSlice();
-  if (relNodeSlice > Path.TotalNumSlices)
-    relNodeSlice -= Path.TotalNumSlices;
+  double grad2A = FP.CalcGrad2(relNodeSlice);
+  PathData.Path.SetIonConfig(1);
+  double grad2B = FP.CalcGrad2(relNodeSlice);
+  PathData.Path.SetIonConfig(0);
+  cerr << "Difference = " << grad2A - grad2B << endl;
 
   dVec savePos = Path(relNodeSlice,NodePtcl);
+
+  // Try space warp on the whole time slice
+  int N = Path.Species(speciesNum).NumParticles;
+  int first = Path.Species(speciesNum).FirstPtcl;
+  Array<dVec,1> saveSlice(N);
+  dVec warpPos;
+  for (int i=0; i<N; i++) {
+    saveSlice(i) = Path(relNodeSlice,i+first);
+    dVec tmp = saveSlice(i);
+    if ((i+first) == NodePtcl)
+      warpPos = tmp;
+    // if B is happier than A
+    if (grad2A > grad2B) {
+      /// Warp from the happy B position to the A position.
+      Path.WarpBtoA(tmp);
+      Path.SetPos(relNodeSlice,i+first,tmp);
+    }
+    else {
+      /// Warp from the happy A position to a hopefully better B position
+      Path.WarpAtoB(tmp);
+      Path.SetPos(relNodeSlice,i+first,tmp);
+    }
+  }
+  if (grad2A > grad2B) {
+    // Recalculate warped A slice
+    Path.SetIonConfig(0);
+    grad2A = FP.CalcGrad2(relNodeSlice);
+  }
+  else {
+    // Recalculate warped B slice.
+    Path.SetIonConfig(1);
+    grad2B = FP.CalcGrad2(relNodeSlice);
+    Path.SetIonConfig(0);
+  }
+  cerr << "Warped difference = " << (grad2A-grad2B) << endl;
+  // Restore original position
+  for (int i=0; i<N; i++)
+    Path(relNodeSlice, i+first) = saveSlice(i);
+
+
   dVec newPos;
   for (int ix=0; ix<nx; ix++) {
     newPos[0] = Xgrid(ix);
@@ -213,6 +322,12 @@ PathDumpClass::FixedPhaseNodeDump()
     NodeVarB.Write(nodeDump);
     PathData.Path.SetIonConfig(0);
   }
+  NodePtclVar.Write(NodePtcl);
+  NodeSliceVar.Write(NodeSlice);
+  Array<double,1> warpTmp(NDIM);
+  for (int i=0; i<NDIM; i++)
+    warpTmp(i) = warpPos[i];
+  WarpPosVar.Write(warpTmp);
 }
 
 
@@ -267,6 +382,7 @@ PathDumpClass::GroundStateNodeDump()
     NodeVarB.Write(nodeDump);
     PathData.Path.SetIonConfig(0);
   }
+  NodePtclVar.Write(NodePtcl);
 }
 
 
@@ -304,4 +420,5 @@ PathDumpClass::FreeParticleNodeDump()
   }
   Path(relNodeSlice,NodePtcl) = savePos;
   NodeVarA.Write(nodeDump);
+  NodePtclVar.Write(NodePtcl);
 }
