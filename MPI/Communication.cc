@@ -149,6 +149,24 @@ CommunicatorClass::Probe(int source, int tag, CommStatusClass &status)
 
 
 void 
+CommunicatorClass::Gather (Array<complex<double>,1> &sendVec, 
+			   Array<complex<double,1> &recvVec, 
+			   Array<int,1>& recvCounts, int root)
+{
+  int myProc = MyProc();
+  Array<int,1> displs(recvCounts.size());
+  Array<int,1> recvNum(recvCounts.size());
+  recvNum = 2*recvCounts;
+  displs(0) = 0;
+  for (int i=1; i<displs.size(); i++)
+    displs(i) = displs(i-1) + recvNum(i-1);
+  
+  MPI_Gatherv (sendVec.data(), sendVec.size(), MPI_DOUBLE, recvVec.data(), 
+	       recvNum.data(), displs.data(), MPI_DOUBLE, root,
+	       MPIComm);
+}
+
+void 
 CommunicatorClass::AllGather(void *sendbuf, int sendcount, 
 				  MPI_Datatype sendtype, 
 				  void* recvbuf, int recvcount,
