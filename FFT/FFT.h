@@ -4,6 +4,39 @@
 #include "../Blitz.h"
 #include <fftw3.h>
 
+class FFT1D
+{
+private:
+  complex<double> *rData, *kData;
+  fftw_plan r2kPlan, k2rPlan;
+  bool Allocated, InPlace;
+  double sqrtNinv;
+public:
+  Array<complex<double>,1> rBox, kBox;
+
+  void resize (int n);
+  inline int size()
+  { return rBox.size(); }
+  void r2k();
+  void k2r();
+
+  FFT1D(bool inPlace=true) : Allocated(false), InPlace(inPlace)
+  {
+    // Do nothing for now
+  }
+  ~FFT1D()
+  {
+    if (Allocated) {
+      fftw_free(rData);
+      if (!InPlace)
+	fftw_free(kData);
+      fftw_destroy_plan(r2kPlan);
+      fftw_destroy_plan(k2rPlan);
+    }
+  }
+};
+
+
 class FFT3D
 {
 private:
