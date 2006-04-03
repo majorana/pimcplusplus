@@ -18,13 +18,19 @@ Section (System)
       double lambda=1.0; 
       string Type="free";
       string Statistics = "BOLTZMANNON";
-      int NumParticles=4;
+      int NumParticles=10;
       int NumDim=3;
       string InitPaths="LEVIFLIGHT";
-      Array<double,2> Positions(4,3)=[ 0.0, 0.0, 0.0 ,
-				       0.1, 0.1, 0.1 , 
-				       0.2, 0.2, 0.2 ,
-				       -0.1,-0.1,-0.1];
+      Array<double,2> Positions(10,3)=[ 0.0, 0.0, 0.0 ,
+					0.1, 0.1, 0.1 , 
+					0.2, 0.2, 0.2 ,
+					-0.1,-0.1,-0.1,
+					0.0, 0.0, 0.0,
+					0.0, 0.0, 0.0,
+					0.0, 0.0, 0.0,
+					0.0, 0.0, 0.0,
+					0.0, 0.0, 0.0,
+					0.0, 0.0, 0.0 ];
     }
   }
 }
@@ -42,48 +48,47 @@ Section (Observables)
   string OutFileBase = "FreeBoltzmanon1";
   Section (Observable)
     {
-      string type = "Energy";
+      string Type = "Energy";
       string Name = "Energy";
-      int freq=2;
+      int Frequency=2;
       int dumpFreq=500;
       
     }
-  Section (Observable)
-    {
-      string type = "PairCorrelation";
-      string Name = "PairCorrelation";
-      string Species1 = "free";
-      string Species2 = "free";
-      int freq=20;
-      int dumpFreq=700;
-      
-	
-      Section (Grid)
-	{
-	  string type = "Linear";
-	  int NumPoints = 100;
-	}
+  Section (Observable) {
+    string Type = "PairCorrelation";
+    string Name = "PairCorrelation";
+    string Species1 = "free";
+    string Species2 = "free";
+    int Frequency=20;
+    int dumpFreq=700;
+    Section (Grid) {
+      string Type = "Linear";
+      int NumPoints = 100;
     }
-  
+  }
+  Section (Observable) {
+    string Type = "WindingNumber";
+    Array<string,1> SpeciesList(1) = ["free"];
+    string Name = "WN";
+    int Frequency = 20;
+  }
 }
 
 
 Section (Moves){
-  Section (Move)
-    {
-      string type="BisectionBlock";
-      string name="Bisection";
-      string PermuteType = "NONE";
-      string Species = "free"; 
-      int NumParticlesToMove=1;
-      int NumLevels = 3;
-      int StepsPerBlock = 2;
-    }
-  Section (Move)
-    {
-      string type="ShiftMove";
-      string name="Shift";
-    }
+  Section (Move) {
+    string Type="BisectionBlock";
+    string Name="Bisection";
+    string PermuteType = "NONE";
+    string Species = "free"; 
+    int NumParticlesToMove=1;
+    int NumLevels = 3;
+    int StepsPerBlock = 2;
+  }
+  Section (Move) {
+    string Type="ShiftMove";
+    string Name="Shift";
+  }
 }
 
 
@@ -92,22 +97,27 @@ Section (Moves){
 Section (Algorithm)
 {
   Section (Loop){ // Before Accumulating Observables
-    int steps=1000; 
+    int Steps=1000; 
     Section (Loop){ 
-      int steps=3;
-      Section (Move) {string name="Bisection";} 
+      int Steps=3;
+      Section (Move)   { string Name="Bisection";          } 
     }
-    Section (Move) {string name = "Shift";}
+    Section (Move)     { string Name = "Shift";            }
   }
   Section (Loop){ //Start Accumulating observables
-    int steps=30000;
-    Section (Loop){
-      int steps=3;
-      Section (Move) {string name="Bisection";} 
+    int Steps=30000;
+    Section (Loop) {
+      int Steps = 2000;
+      Section (Loop){
+	int Steps=3;
+	Section (Move)  { string Name="Bisection";         } 
+      }
+      Section (Move)    { string Name = "Shift";           }
+      Section (Observe) { string Name = "PairCorrelation"; }
+      Section (Observe) { string Name = "Energy";          }
+      Section (Observe) { string Name = "WN";              }
     }
-    Section (Move) {string name = "Shift"; }
-    Section (Observe) {string name = "PairCorrelation";}
-    Section (Observe) {string name = "Energy"; }
+    Section (WriteData) {                                  }
   }
 }
 
