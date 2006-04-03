@@ -7,28 +7,29 @@
 
 class WindingNumberClass : public ObservableClass
 {
- private:
+ protected:
   ObservableVecDouble1 WNVar;
-  int Freq;
-  int DumpFreq;
-  dVec TotalW2;
-  Array<dVec,1> TotalDisp;
-  Array<dVec,1> TempDisp;
+  /// This stores a list of integers corresponding to the species that
+  /// are included in the winding number calculation.
+  Array<int,1> SpeciesList;
+  /// This stores the block sum of the winding numbers
+  dVec W2Sum;
+  /// Vector which stores all of the local winding numbers since the
+  /// last writeblock.
+  std::vector<dVec> WNVec;
+  Array<double,1> WN2Array;
+  int SamplesInBlock;
+  void CalcWN2();
  public:
-  int TimesCalled;
-  int NumSamples;
   void Accumulate();
   void WriteBlock();
   void Read(IOSectionClass& IO);
-  WindingNumberClass(PathDataClass &myPathData,IOSectionClass &ioSection):
+  WindingNumberClass(PathDataClass &myPathData,IOSectionClass &ioSection) :
     ObservableClass(myPathData,ioSection),
-    WNVar("WindingNumber", IOSection, myPathData.Path.Communicator)
+    WNVar("W2", IOSection, myPathData.Path.Communicator)
   {
-    TimesCalled=0;
-    NumSamples=0;
-    TotalDisp.resize(PathData.Path.NumParticles());
-    TempDisp.resize(PathData.Path.NumParticles());
-    TotalW2=0.0;
+    W2Sum = 0.0;
+    SamplesInBlock = 0;
   }
 
 };

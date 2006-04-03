@@ -6,61 +6,104 @@
 ///This currently tells you the winding number of all the species. It
 ///might make sense to fix this so it tells only the winding number of
 ///a specific species
-void WindingNumberClass::Accumulate()
+void 
+WindingNumberClass::Accumulate()
 {
-  NumSamples++;
- //Move the join to the end so we don't have to worry about permutations
+  SamplesInBlock++;
+  // Move the join to the end so we don't have to worry about
+  // permutations 
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
 
-  TotalDisp=0.0;
-  TempDisp=0.0;
+  dVec totalDisp;
+
+  totalDisp = 0.0;
+
   int numLinks=PathData.Path.NumTimeSlices()-1;
-  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
-    for (int slice=0;slice<numLinks;slice++) {
-      dVec disp;
-      disp=PathData.Path.Velocity(slice,slice+1,ptcl);
-      //      TotalDisp(ptcl) =TotalDisp(ptcl)+ disp*PathData.Path.tau;
-      TotalDisp(0) =TotalDisp(0)+ disp;
+  for (int si=0; si<SpeciesList.size(); si++) {
+    SpeciesClass &species = PathData.Path.Species(SpeciesList(si));
+    int first = species.FirstPtcl;
+    int last  = species.LastPtcl;
+    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+      for (int slice=0;slice<numLinks;slice++) {
+	dVec disp;
+	disp=PathData.Path.Velocity(slice,slice+1,ptcl);
+	totalDisp += disp;
+      }
     }
   }
-  PathData.Path.Communicator.Sum(TotalDisp,TempDisp);
-  cerr<<"My tempDisp is "<<TempDisp(0)<<endl;
-  TempDisp=TempDisp; //*PathData.Path.tau;
-  if (PathData.Path.Communicator.MyProc()==0) {  
-    //    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
-      for (int dim=0;dim<NDIM;dim++){
-	//	TotalW2[dim] =TotalW2[dim]+TempDisp(ptcl)[dim]*TempDisp(ptcl)[dim];
-	TotalW2[dim] =TotalW2[dim]+TempDisp(0)[dim]*TempDisp(0)[dim];
-      }
-      //    }
-  }
-  //  for (dim=0;dim<NDIM;dim++){
-  //    allPtclDisp[dim]=(allPtclDisp[dim]*allPtclDisp[dim]);
-  //  }
-  //  TotalW2 += allPtclDispl;
+  for (int i=0; i<NDIM; i++)
+    totalDisp[i] *= PathData.Path.GetBoxInv()[i];
+
+  WNVec.push_back(totalDisp);
 }
 
-void WindingNumberClass::Read(IOSectionClass& in)
+void 
+WindingNumberClass::Read(IOSectionClass& in)
 {
   ObservableClass::Read(in);
+  Array<string,1> speciesStrings;
+  assert(in.ReadVar("SpeciesList", speciesStrings));
+  SpeciesList.resize(speciesStrings.size());
+  for (int i=0; i<speciesStrings.size(); i++) {
+    SpeciesList(i) = PathData.Path.SpeciesNum(speciesStrings(i));
+    if (SpeciesList(i) == -1) {
+      perr << "Unrecognized species name """ << speciesStrings(i) 
+	   << """.  Aborting.\n";
+      abort();
+    }
+  }
+  WN2Array.resize(NDIM);
 }
-void WindingNumberClass::WriteBlock()
+
+
+void 
+WindingNumberClass::CalcWN2()
 {
+  if (SamplesInBlock == 0) {
+    cerr << "WindingNumberClass::CalcWN2 called before "
+	 << "there is any data available.\n";  
+    abort();
+  }
+
+  Array<dVec,1> sendVec(WNVec.size()), recvVec(WNVec.size());
+  for (int i=0; i<WNVec.size(); i++)
+    sendVec(i) = WNVec[i];
+  PathData.Path.Communicator.Sum(sendVec, recvVec);
+
+  if (PathData.Path.Communicator.MyProc()==0) {
+    WN2Array = 0.0;
+    for (int i=0; i<recvVec.size(); i++)
+      for (int j=0; j<NDIM; j++)
+	WN2Array(j) += (recvVec(i)[j]*recvVec(i)[j]);
+    WN2Array /= (double)SamplesInBlock;
+  }
+  WNVec.clear();
+  SamplesInBlock = 0;
+}
+
+void
+WindingNumberClass::WriteBlock()
+{
+  CalcWN2();
   // Only processor 0 writes.
-  if (PathData.Path.Communicator.MyProc()==0) 
+  if (PathData.Path.Communicator.MyProc()==0) {
     if (FirstTime) {
       FirstTime = false;
       WriteInfo();
       IOSection.WriteVar("Type",string("Vector"));
     }
-  Array<double,1> dummy(3);
-  double beta=PathData.Path.tau*(PathData.Path.NumTimeSlices()-1);
-  double norm=(double)NumSamples*(2*PathData.Path.Species(0).lambda*
-				  beta*PathData.Path.NumParticles());
-  for (int dim=0;dim<NDIM;dim++)
-    dummy(dim)=TotalW2[dim]/norm;
-  WNVar.Write(dummy);
-  NumSamples = 0;
-  TotalW2=0.0;
+    WNVar.Write(WN2Array);
+  }
 }
+
+
+//   Array<double,1> dummy(3);
+//   double beta=PathData.Path.tau*(PathData.Path.NumTimeSlices()-1);
+//   double norm=(double)NumSamples*(2*PathData.Path.Species(0).lambda*
+// 				  beta*PathData.Path.NumParticles());
+//   for (int dim=0;dim<NDIM;dim++)
+//     dummy(dim)=TotalW2[dim]/norm;
+//   WNVar.Write(dummy);
+//   NumSamples = 0;
+//   TotalW2=0.0;
 
