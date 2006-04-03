@@ -128,12 +128,14 @@ public:
   Array<bool,1> DoPtcl;
 
   //jgadd
-  int numMol;  // we want to store the number of molecules; it's loaded in the .cc file
+  int numMol;  // we want to store the number of molecules; it's
+	       // loaded in the .cc file 
   Array<int,1> MolRef;
 
   inline void  SetBox (dVec box);
-  inline const dVec& GetBox();
-  inline const dVec& GetkBox();
+  inline const dVec GetBox();
+  inline const dVec GetBoxInv();
+  inline const dVec GetkBox();
   inline double GetVol();
   inline double Getkc();
   inline void  SetPeriodic(TinyVector<bool,NDIM> period);
@@ -464,13 +466,19 @@ PathClass::SetBox (dVec box)
   
 }
 
-inline const dVec& 
+inline const dVec 
 PathClass::GetBox()
 {
   return Box;
 }
 
-inline const dVec& 
+inline const dVec
+PathClass::GetBoxInv()
+{
+  return BoxInv;
+}
+
+inline const dVec
 PathClass::GetkBox()
 {
   return kBox;
