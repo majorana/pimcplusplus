@@ -31,7 +31,6 @@ void TablePermuteStageClass::Reject()
   //  assert(myLen>0);
   NumAttempted(myLen-1)++;
   NeedToRebuildTable=false;
-
 }
 
 
