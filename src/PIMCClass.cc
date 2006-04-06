@@ -19,10 +19,10 @@ void PIMCClass::Read(IOSectionClass &in)
   perr << "Finished Path read.\n";
   
 
-  if (PathData.Path.ExistsCoupling){
-    int myProc=PathData.InterComm.MyProc();
-    PathData.Path.ExistsCoupling=(double)(myProc)/100;
-  }
+//   if (PathData.Path.ExistsCoupling){
+//     int myProc=PathData.InterComm.MyProc();
+//     PathData.Path.ExistsCoupling=(double)(myProc)/100;
+//   }
   // Read in the action information
   assert(in.OpenSection("Action"));
   PathData.Actions.Read(in);
