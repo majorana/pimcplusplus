@@ -20,8 +20,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   Josephson=false;
-  in.ReadVar("Josephson",Josephson);
-  cerr<<"Read in Josephson Data"<<endl;
+  if (in.ReadVar("Josephson",Josephson))
+    cerr << "Read in Josephson Data" << endl;
   //  in.ReadVar("OrderNBosons",orderNBosons);
   bool addStructureRejectStage=false;
   in.ReadVar("StructureReject",addStructureRejectStage);
@@ -136,7 +136,10 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     }
   }
   // Add the second stage of the permutation step
-  Stages.push_back (PermuteStage);
+  /// EVIL BAD ERROR!!!  Pushing onto the stack twice causes the stage
+  /// to be accepted twice, which causes swapping the forward and
+  // reverse tables twice!
+  // Stages.push_back (PermuteStage);
 
 //   ///HACK! Addding a stage that will reject the move if the structure
 //   //factor gets too large
@@ -208,6 +211,11 @@ void BisectionBlockClass::ChooseTimeSlices()
     int sliceSep = 1<<NumLevels;
     assert (sliceSep < PathData.Path.NumTimeSlices());
     int numLeft = PathData.Path.NumTimeSlices()-sliceSep;
+    if (numLeft < 0) {
+      cerr << "Not enough slices to bisect with " << NumLevels 
+	   << " levels in BisectionBlock.\n";
+      abort();
+    }
     Slice1 = PathData.Path.Random.LocalInt (numLeft);
     Slice2 = Slice1+sliceSep;
   }
