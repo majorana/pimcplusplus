@@ -73,8 +73,9 @@ void PathDataClass::Read (IOSectionClass &in)
   else {
     Seed=Random.InitWithRandomSeed(NumClones);
   }
-    //    Random.Init (314159, numClones);
-  Path.MyClone=InterComm.MyProc();
+  //    Random.Init (314159, numClones);
+  
+  Path.MyClone=IntraComm.MyProc()/procsPerClone;
 }
 
 
@@ -86,7 +87,7 @@ void PathDataClass::MoveRefSlice (int absSlice)
   Path.SliceRange(numProcs-1, first, last);
   /// Min slices is the minimum number of slices owned by a processor
   /// It is the maximum we can shift the path at a time.
-  int minSlices = last - first;
+  int minSlices = last - first-1;
   Path.SliceRange(myProc, first, last);
   if (absSlice < Path.GetRefSlice()) { // Shift to left
     while ((Path.GetRefSlice()-absSlice) > minSlices) {
