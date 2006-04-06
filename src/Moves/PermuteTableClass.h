@@ -1,7 +1,7 @@
-//#include "../Common/Blitz.h"
-#include "../PathDataClass.h"
 #ifndef PERMUTE_TABLE_CLASS_H
 #define PERMUTE_TABLE_CLASS_H
+
+#include "../PathDataClass.h"
 
 // class Hclass
 // {
@@ -27,6 +27,7 @@ class CycleClass
   void Apply (PathClass &path, int firstPtcl, int timeSlice);
 
 };
+
 inline bool operator==(const CycleClass &a,const CycleClass &b)
 {
   if (a.Length!=b.Length){
