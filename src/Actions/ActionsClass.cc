@@ -457,6 +457,10 @@ void
 ActionsClass::GetForces(const Array<int,1> &ptcls, 
 			Array<dVec,1> &Fshort, Array<dVec,1> &Flong)
 {
+  //Move the join to the end so we don't have to worry about
+  //permutations
+  PathData.MoveJoin(PathData.NumTimeSlices()-1);
+
   PathClass &Path = PathData.Path;
   assert (Fshort.size() == ptcls.size());
   assert (Flong.size() == ptcls.size());
