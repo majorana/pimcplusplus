@@ -23,6 +23,8 @@ void ShiftMoveClass::Read(IOSectionClass &theInput)
 void ShiftMoveClass::MakeMove()
 {
   int slice1, slice2;
+  // The last processor will have the least number of slices
+  // possible.  Use that for the maximum shift.
   PathData.Path.SliceRange(PathData.Path.Communicator.NumProcs()-1,
 			   slice1, slice2);
   int maxSlices = slice2-slice1;
