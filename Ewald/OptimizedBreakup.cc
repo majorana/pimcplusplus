@@ -405,3 +405,33 @@ double LPQHI_BasisClass::c(int m, double k)
   //sum *= prefactor[alpha];
   return (sum);
 };
+
+
+double LPQHI_BasisClass::dc_dk(int m, double k)
+{
+  int i=m/3;
+  int alpha = m-3*i;
+  
+  double sum = 0.0;
+  if (i == 0) 
+    for (int n=0; n<=5; n++) {
+      double sign = ((alpha+n)&1) ? -1.0 : 1.0;
+      sum += S(alpha, n) * (dDplus_dk(i,k,n));
+    }
+  else if (i == (NumKnots-1)) 
+    for (int n=0; n<=5; n++) {
+      double sign = ((alpha+n)&1) ? -1.0 : 1.0;
+      sum += S(alpha, n) * (dDminus_dk(i,k,n)*sign);
+    }
+  else
+    for (int n=0; n<=5; n++) {
+      double sign = ((alpha+n)&1) ? -1.0 : 1.0;
+      sum += S(alpha, n) * (dDplus_dk(i,k,n) + dDminus_dk(i,k,n)*sign);
+    }
+  //for (int j=0; j<alpha; j++)
+  //  sum *= delta;
+//   TinyVector<double,3> prefactor;
+//   prefactor = 1.0, 0.2, 0.02;
+  //sum *= prefactor[alpha];
+  return (sum);
+};

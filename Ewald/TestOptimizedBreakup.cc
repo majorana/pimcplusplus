@@ -24,6 +24,45 @@ void  TestLPQHI()
   WriteBasis (basis);
 }
 
+void Test_kDeriv()
+{
+  LPQHI_BasisClass basis;
+  basis.SetNumKnots(6);
+  basis.Set_rc(5.0);
+  double epsilon=1.0e-6;
+  double k = 0.347;
+
+  for (int i=0; i<5; i++)
+    for (int n=0; n<5; n++) {
+      complex<double> FD = 
+	(basis.Dminus(i,k+epsilon,n)-basis.Dminus(i,k-epsilon,n))/(2.0*epsilon);
+      complex<double> an = basis.dDminus_dk(i,k,n);
+      fprintf (stderr, "%1.12e + %1.12ei      %1.12e + %1.12ei\n",
+	       real(FD), imag(FD), real(an), imag(an));
+    }
+}
+
+void TestBasisDeriv()
+{
+  LPQHI_BasisClass basis;
+  basis.SetNumKnots(10);
+  basis.Set_rc(5.0);
+  double epsilon=1.0e-5;
+  double k = 5.0;
+  
+  for (int i=0; i<basis.NumElements(); i++) {
+    double FD = (basis.c(i,k+epsilon)-basis.c(i,k-epsilon))/(2.0*epsilon);
+    double an = basis.dc_dk(i,k);
+    fprintf (stderr, "%1.12e  %1.12e\n", FD, an);
+  }
+}
+
+
+
+
+
+
+
 void TestCoulomb()
 {
   LPQHI_BasisClass basis;
@@ -83,6 +122,7 @@ void TestCoulomb()
 
 main()
 {
-  TestLPQHI();
-  TestCoulomb();
+  TestBasisDeriv();
+//   TestLPQHI();
+//   TestCoulomb();
 }
