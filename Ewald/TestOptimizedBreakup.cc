@@ -45,10 +45,10 @@ void Test_kDeriv()
 void TestBasisDeriv()
 {
   LPQHI_BasisClass basis;
-  basis.SetNumKnots(10);
-  basis.Set_rc(5.0);
+  basis.SetNumKnots(3);
+  basis.Set_rc(2.0);
   double epsilon=1.0e-5;
-  double k = 5.0;
+  double k = 1.0;
   
   for (int i=0; i<basis.NumElements(); i++) {
     double FD = (basis.c(i,k+epsilon)-basis.c(i,k-epsilon))/(2.0*epsilon);
