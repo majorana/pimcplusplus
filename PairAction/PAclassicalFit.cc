@@ -237,6 +237,16 @@ PAclassicalFitClass::Xk_U(double k, int level)
   return -4.0*M_PI*beta*Z1Z2/(k*k) * cos(k*rCut);
 }
 
+double
+PAclassicalFitClass::dXk_U_dk(double k, int level)
+{
+  double beta = SmallestBeta;
+  for (int i=0; i<level; i++)
+    beta *= 2.0;
+  return 4.0*M_PI*beta*Z1Z2/(k*k*k)*(2.0*cos(k*rCut)+k*rCut*sin(k*rCut));
+}
+
+
 /// HACK HACK HACK
 /// This assumes we have a coulomb potential
 double

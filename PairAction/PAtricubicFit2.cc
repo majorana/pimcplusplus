@@ -686,6 +686,16 @@ double PAtricubicFit2Class::Xk_U (double k, int level)
   return (Ucoefs(0,level)*C0 + Ucoefs(1,level)*C1 + Ucoefs(2,level)*C2);
 }
 
+double PAtricubicFit2Class::dXk_U_dk  (double k, int level)
+{
+  double kr = k*rcut;
+  double dC0 = 4.0*M_PI/(k*k*k) * (2.0*cos(kr) + kr*sin(kr));
+  double dC1 = 4.0*M_PI/(k*k) * (0.5*M_PI + sin(kr) - gsl_sf_Si(kr));
+  double dC2 = 4.0*M_PI/(k*k*rcut) * sin(kr);
+
+  return (Ucoefs(0,level)*dC0 + Ucoefs(1,level)*dC1 + Ucoefs(2,level)*dC2);
+}
+
 double PAtricubicFit2Class::Xk_dU (double k, int level) 
 {
   double C0 = -4.0*M_PI/(k*k) * cos(k*rcut);

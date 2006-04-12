@@ -163,6 +163,15 @@ double PADipoleFitClass::Xk_U(double k, int level)
   return 4.0*M_PI*beta*Z1Z2/k*(gsl_sf_Si(k*rcut)-0.5*M_PI);
 }
 
+double PADipoleFitClass::dXk_U_dk(double k, int level)
+{
+  double beta = SmallestBeta;
+  for (int i=0; i<level; i++)
+    beta *= 2.0;
+  return 4.0*M_PI*beta*Z1Z2/(k*k)*(0.5*M_PI + sin(k*rcut) - gsl_sf_Si(k*rcut));
+}
+
+
 double PADipoleFitClass::Xk_dU(double k, int level)
 {
   return 4.0*M_PI*Z1Z2/k*(gsl_sf_Si(k*rcut)-0.5*M_PI);

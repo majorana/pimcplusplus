@@ -59,6 +59,7 @@ public:
 
 
   double Xk_U  (double k, int level);
+  double dXk_U_dk (double k, int level);
   double Xk_dU (double k, int level);
   double Xk_V  (double k);
   double Vk    (double k);

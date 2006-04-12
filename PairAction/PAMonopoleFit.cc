@@ -172,6 +172,14 @@ double PACoulombFitClass::Xk_U(double k, int level)
   return -beta*4.0*M_PI*Z1Z2/(k*k)*cos(k*rcut);
 }
 
+double PACoulombFitClass::dXk_U_dk(double k, int level)
+{
+  double beta = SmallestBeta;
+  for (int i=0; i<level; i++)
+    beta *= 2.0;
+  return 4.0*M_PI*beta*Z1Z2/(k*k*k)*(2.0*cos(k*rcut)+k*rcut*sin(k*rcut));
+}
+
 double PACoulombFitClass::Xk_dU(double k, int level)
 {
   return -4.0*M_PI*Z1Z2/(k*k)*cos(k*rcut);

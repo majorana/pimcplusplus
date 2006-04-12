@@ -102,6 +102,8 @@ public:
   virtual double Xk_dU (double k, int level)     { return 0.0; }
   virtual double Xk_V  (double k)                { return 0.0; }
   virtual double Vk    (double k)                { return 0.0; }
+  /// Returns the derivative w.r.t. k of Xk_U
+  virtual double dXk_U_dk  (double k, int level) { return 0.0; }
 
   // Fills in the Vlong_k and dVlong_k array.
   virtual void DoBreakup (const Vec3 &box, const Array<Vec3,1> &kVecs) 

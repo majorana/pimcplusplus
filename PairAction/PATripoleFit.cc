@@ -163,6 +163,12 @@ double PATripoleFitClass::Xk_U(double k, int level)
   return 4.0*M_PI*beta*Z1Z2/k*(k*gsl_sf_Ci(k*rcut)-sin(k*rcut)/rcut);
 }
 
+double PATripoleFitClass::dXk_U_dk(double k, int level)
+{
+  double beta = ldexp(SmallestBeta, level);
+  return 4.0*M_PI*beta*Z1Z2/(k*k*rcut)*sin(k*rcut);
+}
+
 double PATripoleFitClass::Xk_dU(double k, int level)
 {
   return 4.0*M_PI*Z1Z2/k*(k*gsl_sf_Ci(k*rcut)-sin(k*rcut)/rcut);

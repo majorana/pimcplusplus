@@ -51,10 +51,11 @@ public:
   bool IsLongRange();
   //  void DoBreakup(const Vec3 &box, const Array<Vec3,1> &kVecs);
 
-  double Xk_U  (double k, int level);
-  double Xk_dU (double k, int level);
-  double Xk_V  (double k);
-  double Vk    (double k);
+  double Xk_U      (double k, int level);
+  double dXk_U_dk  (double k, int level);
+  double Xk_dU     (double k, int level);
+  double Xk_V      (double k);
+  double Vk        (double k);
   void Setrc (double rc);
 
   PAclassicalFitClass()

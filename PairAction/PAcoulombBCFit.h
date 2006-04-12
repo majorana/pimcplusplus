@@ -57,9 +57,12 @@ public:
   /// Set the cutoff radius for the long range breakup
   void Setrc(double rc);
   double Xk_U  (double k, int level);
+  // The k-derivative of the above.  Used for computing the pressure
+  double dXk_U_dk  (double k, int level);
   double Xk_dU (double k, int level);
   double Xk_V  (double k);
   double Vk    (double k);
+
 
   /////////////////////////
   /// Long-ranged stuff ///
