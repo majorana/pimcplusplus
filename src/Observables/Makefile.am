@@ -33,6 +33,8 @@ libobservables_la_SOURCES  =     \
     PathDump.h                   \
     PermutationCount.h           \
     PermutationCount.cc          \
+    Pressure.h                   \
+    Pressure.cc                  \
     PhiK.h                       \
     Phik.cc                      \
     SuperfluiDrop.h              \

@@ -289,6 +289,9 @@ LongRangeClass::SingleAction (int slice1, int slice2,
       
   double homo = 0.0;
   double hetero = 0.0;
+  double background = 0.0;
+  double k0Homo = 0.0;
+  double k0Hetero = 0.0;
   double levelTau = Path.tau * (double)skip;
   for (int slice=slice1; slice<=slice2; slice+=skip) {
     double factor;
@@ -310,7 +313,8 @@ LongRangeClass::SingleAction (int slice1, int slice2,
       // We can't forget the Madelung term.
       homo -= factor * 0.5 * N * pa.Ulong_r0(level);
       // Or the neutralizing background term
-      //homo -= factor * 0.5*N*N*pa.Ushort_k0(level);
+      background -= factor * 0.5*N*N*pa.Ushort_k0(level);
+      k0Homo += factor * 0.5*N*N*pa.Ulong_k0(level);
     }
     
     // Now do the heterologous terms
@@ -328,11 +332,18 @@ LongRangeClass::SingleAction (int slice1, int slice2,
 	  }
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
-	  //hetero -= factor * N1*N2*pa.Ushort_k0(level);
+	  background  -= factor * N1*N2*pa.Ushort_k0(level);
+	  k0Hetero += factor*N1*N2*pa.Ulong_k0(level);
 	}
       }
   }
-  return (homo+hetero);
+  double U = homo+hetero;
+  if (UseBackground)
+    U += background;
+  else
+    U += (k0Homo+k0Hetero);
+  //  return (homo+hetero);
+  return (U);
 }
 
 
@@ -539,6 +550,8 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
     pa.Ulong.resize(pa.NumBetas);
     pa.Ulong_k.resize(pa.NumBetas,Path.kVecs.size());
     pa.Ulong_k = 0.0;
+    pa.dUlong_dk.resize(pa.NumBetas,Path.kVecs.size());
+    pa.dUlong_dk = 0.0;
     pa.Ulong_r0.resize(pa.NumBetas);
     pa.Ushort_k0.resize(pa.NumBetas);
     pa.Ulong_k0.resize(pa.NumBetas);
@@ -622,11 +635,14 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
 	const dVec &kv = Path.kVecs(ki);
 	double k = sqrt (dot(kv,kv));
 	// Sum over basis functions
-	for (int n=0; n<N; n++)
-	  pa.Ulong_k(level,ki) += t(n) * basis.c(n,k);
+	for (int n=0; n<N; n++) {
+	  pa.Ulong_k(level,ki)   += t(n) * basis.c(n,k);
+	  pa.dUlong_dk(level,ki) += t(n) * basis.dc_dk(n,k);
+	}
 	// Now add on part from rc to infinity
 	// pa.Ulong_k(level,ki) -= CalcXk(paIndex, level, k, rc, JOB_U);
-	pa.Ulong_k(level,ki) -= pa.Xk_U(k, level)/boxVol;
+	pa.Ulong_k(level,ki)   -= pa.Xk_U  (k, level)/boxVol;
+	pa.dUlong_dk(level,ki) -= pa.dXk_U_dk(k, level)/boxVol;
       }
 //       // HACK HACK HACK HACK
 //       FILE *fout = fopen ("Vlongk.dat", "w");

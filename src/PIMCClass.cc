@@ -162,6 +162,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new HeadLocClass(PathData,OutFile);
     else if (observeType=="PhiK")
       tempObs = new PhiKClass(PathData,OutFile);
+    else if (observeType=="Pressure")
+      tempObs = new PressureClass(PathData,OutFile);
     else if (observeType=="JosephsonPathDump")
       tempObs = new JosephsonPathDumpClass(PathData,OutFile);
     else if (observeType=="VacancyLocation")
@@ -169,7 +171,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     else if (observeType=="TimeAnalysis")
       tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables);
     else if (observeType=="Angular")
-      tempObs =  new AngularClass(PathData,OutFile);
+      tempObs = new AngularClass(PathData,OutFile);
     else if (observeType=="PathDump")
       tempObs = new PathDumpClass(PathData,OutFile);
     else if (observeType=="WindingNumber")
