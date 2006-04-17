@@ -9,8 +9,9 @@
 /// \exp\left[-\frac{(R-R')^2}{4\lambda\tau}\right] \f$
 class KineticClass : public ActionBaseClass
 {
-  int NumImages;
 public:
+  int NumImages;
+
   void Read (IOSectionClass &in);
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
