@@ -93,13 +93,13 @@ void EnergyClass::WriteBlock()
   int nslices=PathData.Path.TotalNumSlices;
   double norm = 1.0/((double)NumSamples*(double)nslices);
   
-  TotalVar.Write(PathData.Path.Communicator.Sum(TotalSum)*norm);
-  KineticVar.Write(PathData.Path.Communicator.Sum(KineticSum)*norm);
-  dUShortVar.Write(PathData.Path.Communicator.Sum(dUShortSum)*norm);
-  dULongVar.Write(PathData.Path.Communicator.Sum(dULongSum)*norm);
-  NodeVar.Write(PathData.Path.Communicator.Sum(NodeSum)*norm);
-  VShortVar.Write(PathData.Path.Communicator.Sum(VShortSum)*norm);
-  VLongVar.Write(PathData.Path.Communicator.Sum(VLongSum)*norm);
+  TotalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(TotalSum)*norm);
+  KineticVar.Write (Prefactor*PathData.Path.Communicator.Sum(KineticSum)*norm);
+  dUShortVar.Write (Prefactor*PathData.Path.Communicator.Sum(dUShortSum)*norm);
+  dULongVar.Write  (Prefactor*PathData.Path.Communicator.Sum(dULongSum)*norm);
+  NodeVar.Write    (Prefactor*PathData.Path.Communicator.Sum(NodeSum)*norm);
+  VShortVar.Write  (Prefactor*PathData.Path.Communicator.Sum(VShortSum)*norm);
+  VLongVar.Write   (Prefactor*PathData.Path.Communicator.Sum(VLongSum)*norm);
   //  TotalActionVar.Write(PathData.Path.Communicator.Sum(TotalActionSum)/(double)(NumSamples));
   //  ExpTotalActionVar.Write(ExpTotalActionSum/(double)NumSamples);
   //  TIP5PVar.Write(PathData.Path.Communicator.Sum(TIP5PSum)*norm);

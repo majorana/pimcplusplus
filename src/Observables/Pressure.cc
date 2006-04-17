@@ -179,10 +179,10 @@ PressureClass::WriteBlock()
   double total = (double)numQuantum/(Path.GetVol()*Path.tau)
     + KineticSum + ShortRangeSum + LongRangeSum;
 
-  KineticVar.Write(KineticSum);
-  ShortRangeVar.Write(ShortRangeSum);
-  LongRangeVar.Write(LongRangeSum);
-  PressureVar.Write(total);
+  KineticVar.Write    (Prefactor*KineticSum);
+  ShortRangeVar.Write (Prefactor*ShortRangeSum);
+  LongRangeVar.Write  (Prefactor*LongRangeSum);
+  PressureVar.Write   (Prefactor*total);
 
   KineticSum    = 0.0;
   ShortRangeSum = 0.0;

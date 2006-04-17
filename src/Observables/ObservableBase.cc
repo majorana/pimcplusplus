@@ -20,6 +20,7 @@ ObservableClass::WriteInfo()
 void 
 ObservableClass::Read(IOSectionClass &in)
 {
+  in.ReadVar("Prefactor", Prefactor);
   assert(in.ReadVar("Frequency",Frequency));
   assert(in.ReadVar("Name",Name));
   if(!(in.ReadVar("Description",Description))){
