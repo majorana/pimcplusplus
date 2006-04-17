@@ -152,7 +152,8 @@ PressureClass::Accumulate()
   double volume = PathData.Path.GetVol();
   KineticSum    += KineticPressure();
   ShortRangeSum += ShortRangePressure();
-  LongRangeSum  += LongRangePressure();
+  if (PathData.Actions.HaveLongRange())
+    LongRangeSum  += LongRangePressure();
 
   NumSamples++;
 }
