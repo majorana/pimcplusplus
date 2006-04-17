@@ -5,7 +5,7 @@ PressureClass::KineticPressure()
 {
   PathClass &Path = PathData.Path;
   int numImages = PathData.Actions.Kinetic.NumImages;
-  //  cerr<<"I'm in the action"<<endl;
+
   double P = 0.0;
   for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++){
     int species=Path.ParticleSpeciesNum(ptcl);
@@ -42,36 +42,36 @@ PressureClass::ShortRangePressure()
   int M = Path.NumTimeSlices();
   for (int ptcl1=0; ptcl1 < Path.NumParticles(); ptcl1++) {
     int species1 = Path.ParticleSpeciesNum(ptcl1);
-    for (int ptcl2=0; ptcl2<Path.NumParticles(); ptcl2++) {
+    for (int ptcl2=ptcl1+1; ptcl2<Path.NumParticles(); ptcl2++) {
       int species2 = Path.ParticleSpeciesNum(ptcl2);
       PairActionFitClass &PA=*(PathData.Actions.PairMatrix(species1,species2));
-      if (ptcl1 != ptcl2) {
-	for (int slice=0; slice<(M-1); slice++) {
-	  dVec r, rp, grad, gradp;
-	  double rmag, rpmag, du_dq, du_dz;
-	  Path.DistDisp(slice, slice+1, ptcl1, ptcl2, rmag, rpmag, r, rp);
-	  double q = 0.5*(rmag+rpmag);
-	  double z = (rmag-rpmag);
-	  double s2 = dot (r-rp, r-rp);
-	  PA.Derivs(q,z,s2,0,du_dq, du_dz);
-	  Vec3 rhat  = (1.0/rmag)*r;
-	  Vec3 rphat = (1.0/rpmag)*rp;
-	  
-	  grad  = (0.5*du_dq + du_dz)*rhat;
-	  gradp = (0.5*du_dq - du_dz)*rphat;
-	  // gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
-	  /// Now, subtract off long-range part that shouldn't be in
-	  /// here 
-	  if (PA.IsLongRange() && PathData.Actions.UseLongRange) {
-	    grad  += 0.5*(PA.Ulong(0).Deriv(rmag) *rhat);
-	    gradp += 0.5*(PA.Ulong(0).Deriv(rpmag)*rphat);
-	  }
-	  P += dot(grad,r) + dot(rp, gradp);
+      for (int slice=0; slice<(M-1); slice++) {
+	dVec r, rp, grad, gradp;
+	double rmag, rpmag, du_dq, du_dz;
+	Path.DistDisp(slice, slice+1, ptcl1, ptcl2, rmag, rpmag, r, rp);
+	double q = 0.5*(rmag+rpmag);
+	double z = (rmag-rpmag);
+	double s2 = dot (r-rp, r-rp);
+	PA.Derivs(q,z,s2,0,du_dq, du_dz);
+	Vec3 rhat  = (1.0/rmag)*r;
+	Vec3 rphat = (1.0/rpmag)*rp;
+	
+	grad  = (0.5*du_dq + du_dz)*rhat;
+	gradp = (0.5*du_dq - du_dz)*rphat;
+	// gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
+	/// Now, subtract off long-range part that shouldn't be in
+	/// here 
+	if (PA.IsLongRange() && PathData.Actions.UseLongRange) {
+	  grad  += 0.5*(PA.Ulong(0).Deriv(rmag) *rhat);
+	  gradp += 0.5*(PA.Ulong(0).Deriv(rpmag)*rphat);
 	}
+	P += dot(grad,r) + dot(rp, gradp);
       }
     }
   }
-  P /= -3.0*Path.GetVol()*Path.tau;
+  /// HACK HACK HACK - minus sign
+  //P /= -3.0*Path.GetVol()*Path.tau;  
+  P /= 3.0*Path.GetVol()*Path.tau;
   return P;
 }
 
