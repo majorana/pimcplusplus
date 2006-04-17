@@ -20,8 +20,9 @@ public:
   Array<QuinticSpline,1> Ulong, dUlong;
   QuinticSpline Vlong;
   /// This stores the long-ranged part of the potential in k-space.  
-  /// Indices: (level, k-point).  dVlong_k stores the beta-derivative.
-  Array<double,2> Ulong_k, dUlong_k;
+  /// Indices: (level, k-point).  dUlong_k stores the beta-derivative.
+  /// dUlong_dk stores the k-derivative of Ulong_k
+  Array<double,2> Ulong_k, dUlong_k, dUlong_dk;
   Array<double,1> Vlong_k;
   /// This stores U_long(r=0);  Index is the level number.
   Array<double,1> Ulong_r0, dUlong_r0;

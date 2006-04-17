@@ -1,8 +1,9 @@
-string PAfilename = "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5";
+//string PAfilename = "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5";
 //string PAfilename = "~/PairActions/e-p.fit.beta8.0.h5";
 //string PAfilename = "p-p.PairAction";
-double tau = 0.0625;
+string PAfilename = "~/svnwork/PIMC++/src/PairActions/He4.95.OffDiag.PairAction";
+double tau = 0.05;
 
 Array<double,1> Rion(3)  = [  0.0,  0.0,  0.0 ];
-Array<double,1> r(3)     = [  0.43, 0.0,  0.1 ];
-Array<double,1> rp(3)    = [ -0.44, 0.0, -0.1 ];
+Array<double,1> rp(3)     = [  3.3, 0.0,  0.1 ];
+Array<double,1> r(3)    = [ 5.0, 0.0, -0.01 ];
