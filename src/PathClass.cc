@@ -487,6 +487,7 @@ void PathClass::SetupkVecs3D()
   perr << "Number of kVecs = " << numVecs << endl;
   perr << "MaxkIndex = " << MaxkIndex << endl;
   kVecs.resize(numVecs);
+  MagK.resize(numVecs);
   for (int i=0; i<NDIM; i++)
     C[i].resize(2*MaxkIndex[i]+1);
   numVecs = 0;
@@ -502,6 +503,7 @@ void PathClass::SetupkVecs3D()
 	if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
 	  kVecs(numVecs) = k;
 	  kIndices(numVecs)=ki;
+	  MagK(numVecs) = sqrt(dot(k,k));
 	  numVecs++;
 	}
       }
