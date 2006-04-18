@@ -6,12 +6,15 @@ import math
 import stats
 import numarray
 from Energy import *
+from nofr import *
 from PairCorrelation import *
 from HTMLgen import *
-
-
-
-
+from SystemInfo import *
+from Josephson import *
+from Coupling import *
+from Vacancy import *
+from PlaneDensity import *
+from Pressure import *
 basename = sys.argv[1]
 infiles = IOSectionClassList()
 infiles.OpenFiles(basename);
@@ -41,11 +44,13 @@ summaryDoc=SeriesDocument()
 
 #ProcessMove(doc,infiles)
 
+
+(_,tau,numTimeSlices)=ProcessTopTable(summaryDoc,infiles)
 currNum=0
 infiles.OpenSection("Observables")
 numSections=infiles.CountSections()
-
-
+summaryDoc.append(Href("detail.html","Detailed HTML Page"))
+summaryDoc.append(HR())
 
 
 
@@ -54,17 +59,50 @@ for counter in range(0,numSections):
      myName= infiles.GetName()
      myType=infiles.ReadVar("Type")[0]
      print "Currently processing ",myName
-     if myName=="PairCorrelation":
-         ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
-     elif myName=="Energy":
-         ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut)
+#     if myName=="PairCorrelation":
+#         print "Processing Pair Correlation"
+#         ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
+#         print "Pair Correlation done"
+     if myName=="Vacancy":
+         print "Processing Vacancy"
+         ProcessVacancy(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
+         print "Vacancy done"
+#     elif myName=="Energy":
+#         print "Processing Energy"
+#         ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut)
+#         summaryDoc.append(HR())
+#         detailedDoc.append(HR())
+#         print "Energy done"
+     elif myName=="nofr":
+         print "Processing nofr"
+         Processnofr(infiles,summaryDoc,detailedDoc,StartCut)
+         summaryDoc.append(HR())
+         detailedDoc.append(HR())
+         print "nofr done"
+     elif myName=="Pressure":
+         print "Processing Pressure"
+         ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut)
+         summaryDoc.append(HR())
+         detailedDoc.append(HR())
+         print "Pressure Done"
+     elif myName=="PlaneDensity":
+          print "Processing PlaneDensity"
+          ProcessPlaneDensity(infiles,summaryDoc,detailedDoc,StartCut)
+          summaryDoc.append(HR())
+          detailedDoc.append(HR())
+          print "PlaneDensity done"
+     elif myName=="PhiK":
+         ProcessJosephson(infiles,summaryDoc,detailedDoc,StartCut,tau,numTimeSlices)
+         print "Josephson done"
+#     elif myName=="Coupling":
+#          ProcessCoupling(infiles,summaryDoc,detailedDoc,StartCut)
      else:
          a=5
      infiles.CloseSection()
 infiles.CloseSection() # "Observables"
-
+print "Made it here"
 
 summaryDoc.logo=""
 summaryDoc.author="Ken and Bryan"
