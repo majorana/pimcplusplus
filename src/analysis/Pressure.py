@@ -48,8 +48,7 @@ def ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut):
         totalVar=sum(varList)/len(varList)
         totalKappa=sum(kappaList)/len(kappaList)
         (totalMeanStr,totalErrorStr)=stats.MeanErrorString(totalMean,totalError)
-        summaryTable.body[row]=[varName,totalMeanStr,totalErrorStr,totalVar,totalKappa]
-
+        summaryTable.body[row]=[varName,totalMeanStr,totalErrorStr,"%1.2e" % totalVar,"%1.2f" % totalKappa]
 
     summaryDoc.append(summaryTable)
     for pageName in scalarTracePageHTMLList:
