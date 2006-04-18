@@ -30,7 +30,7 @@ PressureClass::KineticPressure()
   }
   
   //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-  P /= (3*Path.tau*Path.GetVol());
+  P /= (3.0*Path.tau*Path.GetVol());
   return (P);
 }
 
@@ -56,8 +56,8 @@ PressureClass::ShortRangePressure()
 	Vec3 rhat  = (1.0/rmag)*r;
 	Vec3 rphat = (1.0/rpmag)*rp;
 	
-	grad  = (0.5*du_dq + du_dz)*rhat;
-	gradp = (0.5*du_dq - du_dz)*rphat;
+	grad  = -(0.5*du_dq + du_dz)*rhat;
+	gradp = -(0.5*du_dq - du_dz)*rphat;
 	// gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
 	/// Now, subtract off long-range part that shouldn't be in
 	/// here 
@@ -71,7 +71,7 @@ PressureClass::ShortRangePressure()
   }
   /// HACK HACK HACK - minus sign
   //P /= -3.0*Path.GetVol()*Path.tau;  
-  P /= 3.0*Path.GetVol()*Path.tau;
+  P /= -3.0*Path.GetVol()*Path.tau;
   return P;
 }
 
@@ -149,7 +149,6 @@ PressureClass::LongRangePressure()
 void
 PressureClass::Accumulate()
 {
-  double volume = PathData.Path.GetVol();
   KineticSum    += KineticPressure();
   ShortRangeSum += ShortRangePressure();
   if (PathData.Actions.HaveLongRange())
