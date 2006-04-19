@@ -47,8 +47,10 @@ void TestBasisDeriv()
   LPQHI_BasisClass basis;
   basis.SetNumKnots(3);
   basis.Set_rc(2.0);
+  basis.SetBox(TinyVector<double,3>(2.0, 2.0, 2.0));
   double epsilon=1.0e-5;
   double k = 1.0;
+  
   
   for (int i=0; i<basis.NumElements(); i++) {
     double FD = (basis.c(i,k+epsilon)-basis.c(i,k-epsilon))/(2.0*epsilon);
