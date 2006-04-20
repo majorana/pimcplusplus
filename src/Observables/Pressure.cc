@@ -105,7 +105,7 @@ PressureClass::ShortRangePressure()
   }
   /// HACK HACK HACK - minus sign
   //P /= -3.0*Path.GetVol()*Path.tau;  
-  P /= 3.0*Path.GetVol()*Path.tau;
+  P /= -3.0*Path.GetVol()*Path.tau;
   return P;
 }
 
@@ -174,7 +174,7 @@ PressureClass::LongRangePressure()
     P += background;
   else
     P += (k0Homo+k0Hetero);
-  P /= (3.0*Path.GetVol()*Path.tau);
+  P /= (-3.0*Path.GetVol()*Path.tau);
   //  return (homo+hetero);
   return (P);
 }

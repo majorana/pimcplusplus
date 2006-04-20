@@ -22,7 +22,7 @@ def WeightedAvg (means, errors):
                error2 = error2 + weights[i]**2*errors[i]*errors[i]
           return (avg, math.sqrt(error2))
      else:
-          return (Avg(means), 0.0)
+          return (sum(means)/len(means), 0.0)
 
 
 def MeanErrorString (mean, error):

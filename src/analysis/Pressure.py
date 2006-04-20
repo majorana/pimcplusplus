@@ -11,6 +11,7 @@ def ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut):
     varList=[]
     kappaList=[]
     variabList=[]
+    numProcs=0
     N=infiles.CountVars()
     for i in range(0,N):
         data = infiles.ReadVar(i)
