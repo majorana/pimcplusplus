@@ -25,6 +25,8 @@ public:
   double dU(double q, double z, double s2, int level);
   void Derivs (double q, double z, double s2, int level,
 	       double &d_dq, double &d_dz);
+  void Derivs (double q, double z, double s2, int level,
+	       double &d_dq, double &d_dz, double &d_ds);
   /////////////////////////
   /// Long-ranged stuff ///
   /////////////////////////

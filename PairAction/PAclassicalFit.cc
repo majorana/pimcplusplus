@@ -1,5 +1,5 @@
 //This is a comment designed to test the subversion submits. Feel free to remove it when you desire.
-#include "PAFit.h"
+#include "PAclassicalFit.h"
 #include "../Splines/BicubicSpline.h"
 
 /// The following routines are used only if we are creating fits, not

@@ -73,6 +73,12 @@ public:
     cerr << "Error:  Derivs not implemented yet for this pair action type.";
     abort();
   }
+  virtual void Derivs (double q, double z, double s2, int level,
+		       double &d_dq, double &d_dz, double &d_ds)
+  { 
+    cerr << "Error:  Derivs not implemented yet for this pair action type.";
+    abort();
+  }
 
   /////////////////////////
   /// Long-ranged stuff ///
