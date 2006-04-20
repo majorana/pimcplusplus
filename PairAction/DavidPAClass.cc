@@ -142,6 +142,85 @@ DavidPAClass::DerivsFD (double q, double z, double s2, int level,
   d_dz = (zplus - zminus)/(2.0*epsilon);
 }
 
+void
+DavidPAClass::Derivs (double q, double z, double s2, int level,
+		      double &d_dq, double &d_dz, double &d_ds)
+{
+  level += TauPos;
+  
+  double rmin = ukj(level).grid->Start;
+
+  double r  = q + 0.5*z;
+  double rp = q - 0.5*z;
+  if (r  > ukj(level).grid->End)
+    r  = ukj(level).grid->End;
+  if (rp > ukj(level).grid->End)
+    rp = ukj(level).grid->End;
+
+  /////////////////////
+  /// Diagonal part ///
+  /////////////////////
+  double dU_dr  = ukj(level).Deriv(1,r);
+  double dU_drp = ukj(level).Deriv(1,rp);
+
+  d_dq = 0.5*(dU_dr + dU_drp);
+  d_dz = 0.25*(dU_dr - dU_drp);
+  d_ds = 0.0;
+
+  /////////////////////////
+  /// Off-diagonal part ///
+  /////////////////////////
+  double z2=z*z;
+  double s2inverse=1.0/s2;
+  double sinverse = sqrt(s2inverse);
+  double Sto2k=s2;
+  
+  if (s2 > 0.0 && q<ukj(level).grid->End) { 
+    (ukj(level))(q,TempukjArray); 
+    (ukj(level)).Deriv(q,TempdukjArray); 
+    for (int k=1; k<=NumTerms; k++) {  
+      double Zto2j=1.0;
+      double Zto2jm1=z;
+      double currS=Sto2k;
+      for (int j=0; j<=k; j++) {
+	  // indexing into the 2darray
+	double dq_coef  = TempdukjArray(k*(k+1)/2+j+1);
+	double dz_coef  = TempukjArray (k*(k+1)/2+j+1);
+	d_dq += dq_coef*Zto2j*currS;
+	d_ds += dz_coef*2.0*(double)(k-j)*Zto2j*currS*sinverse;
+	if (j > 0) {
+	  d_dz += dz_coef*2.0*(double)j*Zto2jm1*currS;
+	  Zto2jm1 *= z2;
+	}
+	Zto2j *= z2;
+	currS=currS*s2inverse;				
+      }				
+      Sto2k=Sto2k*s2;
+    } 
+  }
+}
+
+void
+DavidPAClass::DerivsFD (double q, double z, double s2, int level,
+			double &d_dq, double &d_dz, double &d_ds)
+{
+  double s = sqrt(s2);
+  double epsilon = 1.0e-6;
+
+  double dummy;
+
+  double qplus, qminus, zplus, zminus, splus, sminus;
+  calcUsqz(s, q+epsilon, z, level, qplus,  dummy, dummy);
+  calcUsqz(s, q-epsilon, z, level, qminus, dummy, dummy);
+  calcUsqz(s, q, z+epsilon, level, zplus,  dummy, dummy);
+  calcUsqz(s, q, z-epsilon, level, zminus, dummy, dummy);
+  calcUsqz(s+epsilon, q, z, level, splus,  dummy, dummy);
+  calcUsqz(s-epsilon, q, z, level, sminus, dummy, dummy);
+  d_dq = (qplus - qminus)/(2.0*epsilon);
+  d_dz = (zplus - zminus)/(2.0*epsilon);
+  d_ds = (splus - sminus)/(2.0*epsilon);
+}
+
 /// Calculate the U(s,q,z) value when given s,q,z and the level 
 /*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
   \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */

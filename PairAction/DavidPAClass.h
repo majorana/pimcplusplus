@@ -71,6 +71,10 @@ class DavidPAClass : public PairActionFitClass
 	         double &d_dq, double &d_dz);
   void DerivsFD (double q, double z, double s2, int level,
 		 double &d_dq, double &d_dz);
+  void Derivs   (double q, double z, double s2, int level,
+	         double &d_dq, double &d_dz, double &d_ds);
+  void DerivsFD (double q, double z, double s2, int level,
+		 double &d_dq, double &d_dz, double &d_ds);
   bool IsLongRange(); 
 
   void ReadParams  (IOSectionClass &inSection);

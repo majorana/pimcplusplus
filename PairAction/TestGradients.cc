@@ -28,18 +28,22 @@ void TestGradients (IOSectionClass &in)
   double s = sqrt (dot(r-rp,r-rp));
   cerr << "(q,z,s) = (" << q << ", " << z << ", " << s << ")\n";
 
-  double d_dq, d_dz, d_dqFD, d_dzFD;
-  PA.Derivs(q, z, s*s, 0, d_dq, d_dz);
+  double d_dq, d_dz, d_ds, d_dqFD, d_dzFD, d_dsFD;
+  PA.Derivs(q, z, s*s, 0, d_dq, d_dz, d_ds);
   cerr << "Analytic:\n";
   cerr << "  d_dq = " << d_dq << endl;
   cerr << "  d_dz = " << d_dz << endl;
+  cerr << "  d_ds = " << d_ds << endl;
 
   d_dqFD = (PA.U(q+0.0001,z,s*s,0) - PA.U(q-0.0001,z,s*s,0))/0.0002;
   d_dzFD = (PA.U(q,z+0.0001,s*s,0) - PA.U(q,z-0.0001,s*s,0))/0.0002;
+  d_dsFD = (PA.U(q,z,(s+0.0001)*(s+0.0001),0) - 
+	    PA.U(q,z,(s-0.0001)*(s-0.0001),0))/0.0002;
 
   cerr << "Finite difference:\n";
   cerr << "  d_dq = " << d_dqFD << endl;
   cerr << "  d_dz = " << d_dzFD << endl;
+  cerr << "  d_ds = " << d_dsFD << endl;
 
   PAIO.CloseFile();
 }
