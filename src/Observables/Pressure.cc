@@ -11,6 +11,7 @@ PressureClass::KineticPressure()
     int species=Path.ParticleSpeciesNum(ptcl);
     double lambda = Path.Species(species).lambda;
     if (lambda != 0){
+      P += 3.0*(Path.NumTimeSlices()-1);
       double TwoLambdaTauInv=1.0/(2.0*Path.Species(species).lambda*Path.tau);
       for (int slice=0; slice < (Path.NumTimeSlices()-1);slice++) {
         dVec vel;
@@ -34,6 +35,48 @@ PressureClass::KineticPressure()
   return (P);
 }
 
+// double 
+// PressureClass::ShortRangePressure()
+// {
+//   PathClass &Path = PathData.Path;
+//   double P = 0.0;
+//   int M = Path.NumTimeSlices();
+//   for (int ptcl1=0; ptcl1 < Path.NumParticles(); ptcl1++) {
+//     int species1 = Path.ParticleSpeciesNum(ptcl1);
+//     for (int ptcl2=ptcl1+1; ptcl2<Path.NumParticles(); ptcl2++) {
+//       int species2 = Path.ParticleSpeciesNum(ptcl2);
+//       PairActionFitClass &PA=*(PathData.Actions.PairMatrix(species1,species2));
+//       for (int slice=0; slice<(M-1); slice++) {
+// 	dVec r, rp, grad, gradp;
+// 	double rmag, rpmag, du_dq, du_dz;
+// 	Path.DistDisp(slice, slice+1, ptcl1, ptcl2, rmag, rpmag, r, rp);
+// 	double q = 0.5*(rmag+rpmag);
+// 	double z = (rmag-rpmag);
+// 	double s2 = dot (r-rp, r-rp);
+// 	PA.Derivs(q,z,s2,0,du_dq, du_dz);
+// 	Vec3 rhat  = (1.0/rmag)*r;
+// 	Vec3 rphat = (1.0/rpmag)*rp;
+	
+// 	grad  = -(0.5*du_dq + du_dz)*rhat;
+// 	gradp = -(0.5*du_dq - du_dz)*rphat;
+// 	// gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
+// 	/// Now, subtract off long-range part that shouldn't be in
+// 	/// here 
+// 	if (PA.IsLongRange() && PathData.Actions.UseLongRange) {
+// 	  grad  += 0.5*(PA.Ulong(0).Deriv(rmag) *rhat);
+// 	  gradp += 0.5*(PA.Ulong(0).Deriv(rpmag)*rphat);
+// 	}
+// 	P += dot(grad,r) + dot(rp, gradp);
+//       }
+//     }
+//   }
+//   /// HACK HACK HACK - minus sign
+//   //P /= -3.0*Path.GetVol()*Path.tau;  
+//   P /= 3.0*Path.GetVol()*Path.tau;
+//   return P;
+// }
+
+
 double 
 PressureClass::ShortRangePressure()
 {
@@ -46,32 +89,23 @@ PressureClass::ShortRangePressure()
       int species2 = Path.ParticleSpeciesNum(ptcl2);
       PairActionFitClass &PA=*(PathData.Actions.PairMatrix(species1,species2));
       for (int slice=0; slice<(M-1); slice++) {
-	dVec r, rp, grad, gradp;
-	double rmag, rpmag, du_dq, du_dz;
+	dVec r, rp;
+	double rmag, rpmag, du_dq, du_dz, du_ds;
 	Path.DistDisp(slice, slice+1, ptcl1, ptcl2, rmag, rpmag, r, rp);
 	double q = 0.5*(rmag+rpmag);
 	double z = (rmag-rpmag);
 	double s2 = dot (r-rp, r-rp);
-	PA.Derivs(q,z,s2,0,du_dq, du_dz);
-	Vec3 rhat  = (1.0/rmag)*r;
-	Vec3 rphat = (1.0/rpmag)*rp;
-	
-	grad  = -(0.5*du_dq + du_dz)*rhat;
-	gradp = -(0.5*du_dq - du_dz)*rphat;
-	// gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
-	/// Now, subtract off long-range part that shouldn't be in
-	/// here 
-	if (PA.IsLongRange() && PathData.Actions.UseLongRange) {
-	  grad  += 0.5*(PA.Ulong(0).Deriv(rmag) *rhat);
-	  gradp += 0.5*(PA.Ulong(0).Deriv(rpmag)*rphat);
-	}
-	P += dot(grad,r) + dot(rp, gradp);
+	PA.Derivs(q,z,s2,0,du_dq, du_dz, du_ds);
+	P += q*du_dq + z*du_dz + sqrt(s2)*du_ds;
+	if (PA.IsLongRange() && PathData.Actions.UseLongRange)
+	  P -= 0.5*(rmag * PA.Ulong(0).Deriv(rmag) + 
+		    rpmag* PA.Ulong(0).Deriv(rpmag));
       }
     }
   }
   /// HACK HACK HACK - minus sign
   //P /= -3.0*Path.GetVol()*Path.tau;  
-  P /= -3.0*Path.GetVol()*Path.tau;
+  P /= 3.0*Path.GetVol()*Path.tau;
   return P;
 }
 
@@ -102,14 +136,14 @@ PressureClass::LongRangePressure()
 	for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	  double k = Path.MagK(ki);
 	  double rhok2 = mag2(Path.Rho_k(slice,species,ki));
-	  homo -= volInv*factor * 0.5 * 2.0 * rhok2 * pa.Ulong_k  (0, ki);
-	  homo -= third*k*volInv* 0.5 * 2.0 * rhok2 * pa.dUlong_dk(0, ki);
+	  homo -= 3.0 * factor * 0.5 * 2.0 * rhok2 * pa.Ulong_k  (0, ki);
+	  homo -=  k  * factor * 0.5 * 2.0 * rhok2 * pa.dUlong_dk(0, ki);
 	}
       }
       int N = Path.Species(species).NumParticles;
       // Or the neutralizing background term
-      background += volInv*factor * 0.5*N*N*pa.Ushort_k0(0);
-      k0Homo     -= volInv*factor * 0.5*N*N*pa.Ulong_k0 (0);
+      background += 3.0*factor * 0.5*N*N*pa.Ushort_k0(0);
+      k0Homo     -= 3.0*factor * 0.5*N*N*pa.Ulong_k0 (0);
     }
     
     // Now do the heterologous terms
@@ -125,14 +159,13 @@ PressureClass::LongRangePressure()
 	      Path.Rho_k(slice, species2, ki).real() + 
 	      Path.Rho_k(slice, species1, ki).imag() *
 	      Path.Rho_k(slice, species2, ki).imag();
-	    hetero -= volInv * factor * 2.0 * rhorho * pa.Ulong_k(0,ki);
-	    hetero -= third * k * volInv * factor * 2.0 * rhorho * 
-	      pa.dUlong_dk(0,ki);
+	    hetero -= 3.0 * factor * 2.0 * rhorho * pa.Ulong_k(0,ki);
+	    hetero -=  k  * factor * 2.0 * rhorho * pa.dUlong_dk(0,ki);
 	  }
 	  int N1 = Path.Species(species1).NumParticles;
 	  int N2 = Path.Species(species2).NumParticles;
-	  background  += volInv * factor * N1*N2*pa.Ushort_k0(0);
-	  k0Hetero    -= volInv * factor * N1*N2*pa.Ulong_k0(0);
+	  background  += 3.0 * factor * N1*N2*pa.Ushort_k0(0);
+	  k0Hetero    -= 3.0 * factor * N1*N2*pa.Ulong_k0(0);
 	}
       }
   }
@@ -141,7 +174,7 @@ PressureClass::LongRangePressure()
     P += background;
   else
     P += (k0Homo+k0Hetero);
-  P /= -Path.tau;
+  P /= (3.0*Path.GetVol()*Path.tau);
   //  return (homo+hetero);
   return (P);
 }
@@ -175,8 +208,8 @@ PressureClass::WriteBlock()
     if (Path.Species(si).lambda != 0.0)
       numQuantum += Path.Species(si).NumParticles;
 
-  double total = (double)numQuantum/(Path.GetVol()*Path.tau)
-    + KineticSum + ShortRangeSum + LongRangeSum;
+  double total = // (double)numQuantum/(Path.GetVol()*Path.tau) + 
+    KineticSum + ShortRangeSum + LongRangeSum;
 
   KineticVar.Write    (Prefactor*KineticSum);
   ShortRangeVar.Write (Prefactor*ShortRangeSum);

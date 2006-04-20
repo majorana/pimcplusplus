@@ -69,12 +69,12 @@ for counter in range(0,numSections):
          summaryDoc.append(HR())
          detailedDoc.append(HR())
          print "Vacancy done"
-#     elif myName=="Energy":
-#         print "Processing Energy"
-#         ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut)
-#         summaryDoc.append(HR())
-#         detailedDoc.append(HR())
-#         print "Energy done"
+     elif myName=="Energy":
+         print "Processing Energy"
+         ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut)
+         summaryDoc.append(HR())
+         detailedDoc.append(HR())
+         print "Energy done"
      elif myName=="nofr":
          print "Processing nofr"
          Processnofr(infiles,summaryDoc,detailedDoc,StartCut)

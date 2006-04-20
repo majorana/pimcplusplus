@@ -64,7 +64,7 @@ def ProcessTopTable(doc,infiles):
      infiles.CloseSection()
      infiles.OpenSection("System")
      (speciesTable,tau,numTimeSlices)=ProcessSystemInfo(infiles)
-     speciesTable="broken"
+     #speciesTable="broken"
      infiles.CloseSection()
      # Write the input file to the output directory
      InputFile = infiles.ReadVar("InputFile")[0]
