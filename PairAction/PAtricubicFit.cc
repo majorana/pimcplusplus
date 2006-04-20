@@ -1,4 +1,4 @@
-#include "PAFit.h"
+#include "PAtricubicFit.h"
 #include "../Fitting/Fitting.h"
 #include <gsl/gsl_sf.h>
 

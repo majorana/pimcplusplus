@@ -1,4 +1,4 @@
-#include "PAFit.h"
+#include "PAtricubicFit2.h"
 #include "../Fitting/Fitting.h"
 #include <gsl/gsl_sf.h>
 
@@ -873,6 +873,88 @@ PAtricubicFit2Class::Derivs(double q, double z, double s2, int level,
 	  partDerivs(1,0)*grad[0] +
 	  partDerivs(1,1)*grad[1] + 
 	  partDerivs(1,2)*grad[2];
+	d_dq += Usplines(level).d2_dxdy(q,1.0,1.0)*(y-1.0);
+      }
+    }
+  }
+  else {
+    double beta = ldexp(SmallestBeta,level);
+    double r = q+0.5*z;
+    double rp = q-0.5*z;
+    double dVdr = Pot->dVdr(r);
+    double dVdrp = Pot->dVdr(rp);
+    d_dq = beta * 0.5*(dVdr + dVdrp);
+    d_dz = beta * 0.25*(dVdr - dVdrp);;  
+  }
+}
+
+
+void
+PAtricubicFit2Class::Derivs(double q, double z, double s2, int level,
+			    double &d_dq, double &d_dz, double &d_ds)
+{
+  double sgn_z = (z>=0.0) ? 1.0 : -1.0;
+  z = fabs(z);
+  double y, t;
+  double s = sqrt(s2);
+  zs2yt (q, z, s, level, y, t);
+  TinyMatrix<double,3,3> partDerivs;
+
+  if (q<=qgrid->End) {
+    if (q == 0.0) {
+      d_dq = Usplines(level).d_dx(0.0, 0.0, 0.0);
+      d_dz = 0.0;
+      d_ds = 0.0;
+    }
+    else {
+      Vec3 grad;
+      PartialDerivs(q, sgn_z*z, s, level, partDerivs);
+      if (t < 1.0) {
+	grad = Usplines(level).Grad(q, y, t);
+	d_dq = 
+	  partDerivs(0,0)*grad[0] +
+	  partDerivs(0,1)*grad[1] +
+	  partDerivs(0,2)*grad[2];
+	d_dz = 
+	  partDerivs(1,0)*grad[0] +
+	  partDerivs(1,1)*grad[1] + 
+	  partDerivs(1,2)*grad[2];
+	d_ds =
+	  partDerivs(2,0)*grad[0] +
+	  partDerivs(2,1)*grad[1] +
+	  partDerivs(2,2)*grad[2];
+      }
+      else if (y <= 1.0) {
+	grad = Usplines(level).Grad(q, y, 1.0);
+	d_dq = 
+	  partDerivs(0,0)*grad[0] +
+	  partDerivs(0,1)*grad[1] +
+	  partDerivs(0,2)*grad[2];
+	d_dz = 
+	  partDerivs(1,0)*grad[0] +
+	  partDerivs(1,1)*grad[1] + 
+	  partDerivs(1,2)*grad[2];
+	d_ds =
+	  partDerivs(2,0)*grad[0] +
+	  partDerivs(2,1)*grad[1] +
+	  partDerivs(2,2)*grad[2];
+	d_dq += Usplines(level).d2_dxdz(q,y,1.0) *(t-1.0);
+	d_dz += partDerivs(1,1)*Usplines(level).d2_dydz(q,y,1.0)*(t-1.0);
+      }
+      else {
+	grad = Usplines(level).Grad(q, 1.0, 1.0);
+	d_dq = 
+	  partDerivs(0,0)*grad[0] +
+	  partDerivs(0,1)*grad[1] +
+	  partDerivs(0,2)*grad[2];
+	d_dz = 
+	  partDerivs(1,0)*grad[0] +
+	  partDerivs(1,1)*grad[1] + 
+	  partDerivs(1,2)*grad[2];
+	d_ds =
+	  partDerivs(2,0)*grad[0] +
+	  partDerivs(2,1)*grad[1] +
+	  partDerivs(2,2)*grad[2];
 	d_dq += Usplines(level).d2_dxdy(q,1.0,1.0)*(y-1.0);
       }
     }

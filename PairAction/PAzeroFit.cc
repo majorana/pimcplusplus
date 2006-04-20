@@ -1,4 +1,4 @@
-#include "PAFit.h"
+#include "PAzeroFit.h"
 
 double PAzeroFitClass::U(double q, double z, double s2, int level)
 {
