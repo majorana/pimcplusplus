@@ -59,10 +59,10 @@ for counter in range(0,numSections):
      myName= infiles.GetName()
      myType=infiles.ReadVar("Type")[0]
      print "Currently processing ",myName
-#     if myName=="PairCorrelation":
-#         print "Processing Pair Correlation"
-#         ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
-#         print "Pair Correlation done"
+     if myName=="PairCorrelation":
+         print "Processing Pair Correlation"
+         ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
+         print "Pair Correlation done"
      if myName=="Vacancy":
          print "Processing Vacancy"
          ProcessVacancy(infiles,summaryDoc,detailedDoc,StartCut)
