@@ -9,7 +9,7 @@ int  SphereObject::OffScreenListNum(0);
 bool SphereObject::OffScreenListCreated(false);
 
 SphereObject::SphereObject(bool offScreen) : 
-  Radius(1.0), Color(1.0, 0.0, 0.0), Pos(0.0, 0.0, 0.0),
+  Radius(0.2), Color(1.0, 0.0, 0.0), Pos(0.0, 0.0, 0.0),
   OffScreen(offScreen)
 {
   if (offScreen) {

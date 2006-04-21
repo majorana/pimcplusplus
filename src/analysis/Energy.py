@@ -30,7 +30,8 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
         data = infiles.ReadVar(varCounter)
         varName = infiles.GetVarName(varCounter)
         baseName=varName+"Energy"
-        scalarTracePageHTMLList.append(BuildScalarTracePage(data,baseName,varName,StartCut))
+        if (len(data[0]) > 1):
+            scalarTracePageHTMLList.append(BuildScalarTracePage(data,baseName,varName,StartCut))
         print row,len(scalarVarTable.body),len(scalarVarTable.body[0])
         scalarVarTable.body[0][row]=varName
         for proc in range(0,numProcs):

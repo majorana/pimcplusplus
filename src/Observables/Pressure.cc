@@ -203,13 +203,17 @@ PressureClass::WriteBlock()
   PathData.Path.Communicator.Sum (ShortRangeSum);
   PathData.Path.Communicator.Sum (LongRangeSum);
 
-  int numQuantum = 0;
+  int numClassical = 0;
   for (int si=0; si<Path.NumSpecies(); si++)
     if (Path.Species(si).lambda != 0.0)
-      numQuantum += Path.Species(si).NumParticles;
+      numClassical += Path.Species(si).NumParticles;
 
-  double total = // (double)numQuantum/(Path.GetVol()*Path.tau) + 
-    KineticSum + ShortRangeSum + LongRangeSum;
+  /// Add on classical kinetic energy contribution
+  double beta = Path.tau*Path.TotalNumSlices;
+  KineticSum += (double)numClassical/(Path.GetVol()*beta);
+
+  double total =  KineticSum + ShortRangeSum + LongRangeSum;
+
 
   KineticVar.Write    (Prefactor*KineticSum);
   ShortRangeVar.Write (Prefactor*ShortRangeSum);
