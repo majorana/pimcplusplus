@@ -1,5 +1,5 @@
-string PAfilename = "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5";
-//string PAfilename = "~/PairActions/e-p.fit.beta8.0.h5";
+//string PAfilename = "~/PairActions/NaPH_US_May9_05.fit.new.beta8.0.h5";
+string PAfilename = "~/PairActions/e-p.fit.beta8.0.h5";
 //string PAfilename = "p-p.PairAction";
 //string PAfilename = "~/svnwork/PIMC++/src/PairActions/He4.95.OffDiag.PairAction";
 double tau = 0.125;

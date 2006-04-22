@@ -464,6 +464,7 @@ void PAcoulombBCFitClass::Setrc (double rc)
     F(i,0) = 1.0/r;
     F(i,1) = 1.0/(r*r);
     F(i,2) = 1.0/(r*r*r);
+    //    F(i,3) = 1.0/(r*r*r*r);
     sigma(i) = 1.0;
   }
 
@@ -512,8 +513,11 @@ double PAcoulombBCFitClass::Xk_U (double k, int level)
   double C0 = -4.0*M_PI/(k*k) * cos(k*rcut);
   double C1 =  4.0*M_PI/k * (gsl_sf_Si(k*rcut) - 0.5*M_PI);
   double C2 =  4.0*M_PI/k * (k*gsl_sf_Ci(k*rcut) - sin(k*rcut)/rcut);
+  double C3 = -4.0*M_PI/k * (k*cos(k*rcut)/(2.0*rcut) + sin(k*rcut)/(2.0*rcut*rcut) +
+			     0.5*k*k*(gsl_sf_Si(k*rcut)-0.5*M_PI));
 
-  return (Ucoefs(0,level)*C0 + Ucoefs(1,level)*C1 + Ucoefs(2,level)*C2);
+  return (Ucoefs(0,level)*C0  + Ucoefs(1,level)*C1 + 
+	  Ucoefs(2,level)*C2 /*+ Ucoefs(3,level)*C3*/);
 }
 
 double PAcoulombBCFitClass::dXk_U_dk  (double k, int level)
@@ -522,8 +526,10 @@ double PAcoulombBCFitClass::dXk_U_dk  (double k, int level)
   double dC0 = 4.0*M_PI/(k*k*k) * (2.0*cos(kr) + kr*sin(kr));
   double dC1 = 4.0*M_PI/(k*k) * (0.5*M_PI + sin(kr) - gsl_sf_Si(kr));
   double dC2 = 4.0*M_PI/(k*k*rcut) * sin(kr);
+  double dC3 = 2.0*M_PI*(0.5*M_PI - cos(kr)/kr + sin(kr)/(kr*kr) - gsl_sf_Si(kr));
 
-  return (Ucoefs(0,level)*dC0 + Ucoefs(1,level)*dC1 + Ucoefs(2,level)*dC2);
+  return (Ucoefs(0,level)*dC0 + Ucoefs(1,level)*dC1 + 
+	  Ucoefs(2,level)*dC2 /*+ Ucoefs(3,level)*dC3*/);
 }
 
 double PAcoulombBCFitClass::Xk_dU (double k, int level)
@@ -531,8 +537,10 @@ double PAcoulombBCFitClass::Xk_dU (double k, int level)
   double C0 = -4.0*M_PI/(k*k) * cos(k*rcut);
   double C1 =  4.0*M_PI/k * (gsl_sf_Si(k*rcut) - 0.5*M_PI);
   double C2 =  4.0*M_PI/k * (k*gsl_sf_Ci(k*rcut) - sin(k*rcut)/rcut);
-
-  return (dUcoefs(0,level)*C0 + dUcoefs(1,level)*C1 + dUcoefs(2,level)*C2);
+  double C3 = -4.0*M_PI/k * (k*cos(k*rcut)/(2.0*rcut) + sin(k*rcut)/(2.0*rcut*rcut) +
+			     0.5*k*k*(gsl_sf_Si(k*rcut)-0.5*M_PI));
+  return (dUcoefs(0,level)*C0 + dUcoefs(1,level)*C1 +
+	  dUcoefs(2,level)*C2 /*+ dUcoefs(3,level)*C3*/);
 }
  
 double PAcoulombBCFitClass::Xk_V (double k)

@@ -4,6 +4,10 @@
 #include "../Blitz.h"
 #include <fftw3.h>
 
+typedef TinyVector<complex<double>,3>   cVec3;
+typedef TinyMatrix<complex<double>,3,3> cMat3;
+
+
 class FFT1D
 {
 private:
@@ -35,6 +39,82 @@ public:
     }
   }
 };
+
+template<int DIM>
+class FFTVec1D
+{
+private:
+  TinyVector<complex<double>,DIM> *rData, *kData;
+  fftw_plan r2kPlan, k2rPlan;
+  bool Allocated, InPlace;
+  double sqrtNinv;
+public:
+  Array<TinyVector<complex<double>,DIM>,1> rBox, kBox;
+
+  void resize (int n)
+  {
+    if (Allocated) {
+      fftw_free(rData);
+      if (!InPlace)
+	fftw_free(kData);
+      fftw_destroy_plan(r2kPlan);
+      fftw_destroy_plan(k2rPlan);
+    }
+    rData = (TinyVector<complex<double>,DIM>*) 
+      fftw_malloc(DIM*sizeof(fftw_complex)*n);
+    if (!InPlace)
+      kData = (TinyVector<complex<double>,DIM>*) 
+	fftw_malloc(DIM*sizeof(fftw_complex)*n);
+    else
+      kData = rData;
+    
+    Array<TinyVector<complex<double>,DIM>,1> *temp;
+    temp = new Array<TinyVector<complex<double>,DIM>,1>
+      (rData, shape(n), neverDeleteData);
+    rBox.reference (*temp);
+    delete temp;
+    
+    temp = new Array<TinyVector<complex<double>,DIM>,1>
+      (kData, shape(n), neverDeleteData);
+    kBox.reference(*temp);
+    delete temp;
+    
+    r2kPlan =      
+      fftw_plan_many_dft (1, &n, DIM, reinterpret_cast<fftw_complex*>(rData),
+			  &n, DIM, 1,  reinterpret_cast<fftw_complex*>(kData), 
+			  &n, DIM, 1, 1, FFTW_MEASURE);
+    assert (r2kPlan != NULL);
+    k2rPlan = 
+      fftw_plan_many_dft (1, &n, DIM, reinterpret_cast<fftw_complex*>(kData),
+			  &n, DIM, 1, reinterpret_cast<fftw_complex*>(rData), 
+			  &n, DIM, 1, -1, FFTW_MEASURE);
+    assert (k2rPlan != NULL);
+    
+    sqrtNinv = sqrt(1.0/(double)n);
+    Allocated = true;
+  }
+
+  inline int size()
+  { return rBox.size(); }
+  void r2k() { fftw_execute(r2kPlan); }
+  void k2r() { fftw_execute(k2rPlan); }
+
+  FFTVec1D(bool inPlace=true) : Allocated(false), InPlace(inPlace)
+  {
+    // Do nothing for now
+  }
+  ~FFTVec1D()
+  {
+    if (Allocated) {
+      fftw_free(rData);
+      if (!InPlace)
+	fftw_free(kData);
+      fftw_destroy_plan(r2kPlan);
+      fftw_destroy_plan(k2rPlan);
+    }
+  }
+};
+
 
 
 class FFT3D
@@ -69,8 +149,6 @@ public:
   }
 };
 
-typedef TinyVector<complex<double>,3>   cVec3;
-typedef TinyMatrix<complex<double>,3,3> cMat3;
 
 class FFTVec3D
 {
