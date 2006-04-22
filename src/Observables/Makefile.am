@@ -8,6 +8,8 @@ libobservables_la_SOURCES  =     \
     AngularMomCor.cc             \
     AutoCorr.cc                  \
     AutoCorr.h                   \
+    Conductivity.h               \
+    Conductivity.cc              \
     Coupling.cc                  \
     Coupling.h                   \
     DistanceToHead.cc            \

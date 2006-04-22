@@ -4,6 +4,7 @@
 #include "Angular.h"
 #include "AngularMomCor.h"
 #include "AutoCorr.h"
+#include "Conductivity.h"
 #include "Coupling.h"
 #include "DistanceToHead.h"
 #include "Forces.h"
