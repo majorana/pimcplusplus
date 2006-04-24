@@ -17,26 +17,36 @@ def ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut):
     currNum = 0
     if (data==[None]):
          return currNum
-#    data = map (lambda y: y[StartCut:-1],data)
-    data=sum(data)/len(data)
-    meanArray=zeros(len(data[0]))+0.0
-    errorArray=zeros(len(data[0]))+0.0
-    for col in range(0,len(data[0])):
-        (mean,var,error,kappa)=stats.Stats(data[:,col])
-        meanArray[col]=mean
-        errorArray[col]=error
+    s = shape(data[0])
+    numProcs = len(data)
+    (_,numBins) = shape(data[0])
+    mShape = (numProcs, numBins)
+    meanArray=zeros(mShape)+0.0
+    errorArray=zeros(mShape)+0.0
+    proc = 0
+    for d in data:
+        for bin in range(0,numBins):
+            (mean,var,error,kappa)=stats.Stats(d[:,bin])
+            meanArray[proc,bin]=mean
+            errorArray[proc,bin]=error
+        proc = proc + 1
+    mean  = zeros(numBins) + 0.0
+    error = zeros(numBins) + 0.0
+    for bin in range(0,numBins):
+        (mean[bin],error[bin])=stats.WeightedAvg(meanArray[:,bin],errorArray[:,bin])
+        
     x=infiles.ReadVar("x")[0]
     fillx = x
     revx= x[::-1]
     clf()
     fillx=concatenate((x,revx)) #reverse(x))
 #    filly = meanArray+errorArray
-    y1=meanArray+errorArray
-    y2=meanArray-errorArray
+    y1=mean+error
+    y2=mean-error
     filly=concatenate((y1,y2[::-1]))
     fill (fillx, filly,hold=True)
 #    hold on
-    plot (x, meanArray,'r',hold=True)
+    plot (x, mean,'r',hold=True)
     imageName = baseName + ".png"
     epsName = baseName +".eps"
     savefig(imageName,dpi=60)
