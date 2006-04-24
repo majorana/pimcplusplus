@@ -91,14 +91,14 @@ public:
   void Receive (int toProc, Array<int,1> &buff);
   bool Probe(int source, int tag, CommStatusClass &status);
   void Gather (Array<complex<double>,1> &sendVec, 
-	       Array<complex<double,1> &recvVec, 
+	       Array<complex<double>,1> &recvVec, 
 	       Array<int,1> &recvCounts, int root=0);
   void Gather (Array<TinyVector<double,3>,1> &sendVec, 
 	       Array<TinyVector<double,3>,1> &recvVec, 
 	       Array<int,1> &recvCounts, int root=0);
-  void Gather (Array<TinyVector<double,3>,1> &sendVec, 
-	       Array<TinyVector<double,3>,1> &recvVec, 
-	       Array<int,1> &recvCounts, int root=0);
+/*   void Gather (Array<TinyVector<double,3>,1> &sendVec,  */
+/* 	       Array<TinyVector<double,3>,1> &recvVec,  */
+/* 	       Array<int,1> &recvCounts, int root=0); */
   void Gather (Array<double,1> &sendVec, Array<double,2> &recvMat,
 	       int root=0);
   void Gather (Array<int,1> &sendVec, Array<int,2> &recvMat,

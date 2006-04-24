@@ -150,7 +150,7 @@ CommunicatorClass::Probe(int source, int tag, CommStatusClass &status)
 
 void 
 CommunicatorClass::Gather (Array<complex<double>,1> &sendVec, 
-			   Array<complex<double,1> &recvVec, 
+			   Array<complex<double>,1> &recvVec, 
 			   Array<int,1>& recvCounts, int root)
 {
   int myProc = MyProc();

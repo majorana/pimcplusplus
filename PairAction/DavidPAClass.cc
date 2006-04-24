@@ -396,6 +396,7 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
 
 void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 {
+  cerr<<"I AM READING DAVID SQUARER FILE"<<endl;
   double tau; //used to be in the base clase
   double smallestTau;
   ifstream infile;
