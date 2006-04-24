@@ -61,6 +61,7 @@ public:
   inline void MoveJoin(int newJoin)
   {
     Path.MoveJoin(Join,newJoin);
+    Actions.MoveJoin(Join,newJoin);
     Join=newJoin;
   }
   
