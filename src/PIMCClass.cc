@@ -148,6 +148,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new SuperfluiDrop(PathData,OutFile);
     else if (observeType=="Vacancy")
       tempObs = new VacancyLocClass(PathData,OutFile);
+    else if (observeType=="Conductivity")
+      tempObs = new ConductivityClass(PathData,OutFile);
     else if (observeType=="Coupling")
       tempObs = new CouplingClass(PathData,OutFile);
     else if (observeType=="Energy")
