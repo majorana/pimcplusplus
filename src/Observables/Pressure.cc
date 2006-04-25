@@ -179,11 +179,27 @@ PressureClass::LongRangePressure()
   return (P);
 }
 
+double
+PressureClass::NodePressure()
+{
+  PathClass &Path = PathData.Path;
+  double P = 0.0;
+  int M = Path.NumTimeSlices();
+  
+  for (int species=0; species<PathData.Path.NumSpecies(); species++)
+    if (PathData.Actions.NodalActions(species) != NULL)
+      P -= 2.0*PathData.Actions.NodalActions(species)->d_dBeta(0, M, 0);
+
+  P /= (-3.0*Path.GetVol());
+  return P;
+}
+
 void
 PressureClass::Accumulate()
 {
   KineticSum    += KineticPressure();
   ShortRangeSum += ShortRangePressure();
+  NodeSum += NodePressure();
   if (PathData.Actions.HaveLongRange())
     LongRangeSum  += LongRangePressure();
 
@@ -197,11 +213,13 @@ PressureClass::WriteBlock()
   KineticSum    /= (double)(NumSamples*Path.TotalNumSlices);
   ShortRangeSum /= (double)(NumSamples*Path.TotalNumSlices);
   LongRangeSum  /= (double)(NumSamples*Path.TotalNumSlices);
+  NodeSum       /= (double)(NumSamples*Path.TotalNumSlices);
 
   /// Sum over all processors in my clone
   PathData.Path.Communicator.Sum (KineticSum);
   PathData.Path.Communicator.Sum (ShortRangeSum);
   PathData.Path.Communicator.Sum (LongRangeSum);
+  PathData.Path.Communicator.Sum (NodeSum);
 
   int numClassical = 0;
   for (int si=0; si<Path.NumSpecies(); si++)
@@ -212,17 +230,19 @@ PressureClass::WriteBlock()
   double beta = Path.tau*Path.TotalNumSlices;
   KineticSum += (double)numClassical/(Path.GetVol()*beta);
 
-  double total =  KineticSum + ShortRangeSum + LongRangeSum;
+  double total =  KineticSum + ShortRangeSum + LongRangeSum + NodeSum;
 
 
   KineticVar.Write    (Prefactor*KineticSum);
   ShortRangeVar.Write (Prefactor*ShortRangeSum);
   LongRangeVar.Write  (Prefactor*LongRangeSum);
+  NodeVar.Write       (Prefactor*NodeSum);
   PressureVar.Write   (Prefactor*total);
 
   KineticSum    = 0.0;
   ShortRangeSum = 0.0;
   LongRangeSum  = 0.0;
+  NodeSum       = 0.0;
   NumSamples = 0;
 }
 

@@ -111,7 +111,7 @@ FixedPhaseClass::MoveJoin (int oldJoinPos, int newJoinPos, int speciesNum)
   int first   = Path.Species(speciesNum).FirstPtcl;
   int numPtcl = Path.Species(speciesNum).NumParticles;
 
-  if (newJoinPos > newJoinPos) {
+  if (newJoinPos > oldJoinPos) {
     for (int slice=oldJoinPos+1; slice <= newJoinPos; slice++)
       for (int pi=0; pi<matCache[OLDMODE].extent(1); pi++) {
 	int ptcl = pi+first;
@@ -126,7 +126,7 @@ FixedPhaseClass::MoveJoin (int oldJoinPos, int newJoinPos, int speciesNum)
     gradCache[NEWMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all())
       = gradCache[OLDMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all());
   }
-  else if (oldJoinPos >= newJoinPos) {
+  else if (oldJoinPos > newJoinPos) {
     for (int slice=newJoinPos+1; slice<=oldJoinPos; slice++) 
       for (int pi=0; pi<matCache[OLDMODE].extent(1); pi++) {
 	int ptcl = pi+first;
@@ -136,10 +136,10 @@ FixedPhaseClass::MoveJoin (int oldJoinPos, int newJoinPos, int speciesNum)
 	gradCache[OLDMODE](slice,perm,Range::all()) = 
 	  gradCache[NEWMODE](slice,pi,Range::all());
       }
-    matCache[NEWMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all())
-      = matCache[OLDMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all());
-    gradCache[NEWMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all())
-      = gradCache[OLDMODE](Range(oldJoinPos+1,newJoinPos),Range::all(),Range::all());
+    matCache[NEWMODE](Range(newJoinPos+1,oldJoinPos),Range::all(),Range::all())
+      = matCache[OLDMODE](Range(newJoinPos+1,oldJoinPos),Range::all(),Range::all());
+    gradCache[NEWMODE](Range(newJoinPos+1,oldJoinPos),Range::all(),Range::all())
+      = gradCache[OLDMODE](Range(newJoinPos+1,oldJoinPos),Range::all(),Range::all());
   }
 }
 
@@ -396,7 +396,7 @@ FixedPhaseClass::d_dBeta (int slice1, int slice2, int level,
     for (int link=slice1; link < slice2; link+=skip) 
       dU += 0.5*lambda*(UpGrad2(link)+UpGrad2(link+skip));
   if (doDown) 
-    for (int link=slice1; link < slice2; link+=skip)
+    for (int link=slice1; link < slice2; link+=skip) 
       dU += 0.5*lambda*(DownGrad2(link)+DownGrad2(link+skip));
   return dU;
 }
