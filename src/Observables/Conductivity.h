@@ -17,7 +17,8 @@ private:
   /// current-current correlation functions.  They are indexed by the
   /// imaginary time separation, \beta_2 - \beta_1.
   /// The kinetic-kinetic contribution
-  Array<dVec,1> CorrSumTT;
+  Array<dVec,1> RealSumTT;
+  Array<dVec,1> FreqSumTT;
   /// The kinetic-potential contribution
   Array<dVec,1> CorrSumTV;
   /// The potential-potential contribution
@@ -32,7 +33,8 @@ private:
   void CalcCurrentLong();
   void AccumulateFast();
   void AccumulateSlow();
-  ObservableVecDouble2 KineticVar;
+  ObservableVecDouble2 RealKineticVar;
+  ObservableVecDouble2 FreqKineticVar;
   Array<double,2> WriteArray;
   int M, NumSamples;
 public:
@@ -41,7 +43,8 @@ public:
   void Read (IOSectionClass &in);
   ConductivityClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection),
-      KineticVar("Kinetic", IOSection, myPathData.Path.Communicator),
+      RealKineticVar("RealKinetic", IOSection, myPathData.Path.Communicator),
+      FreqKineticVar("FreqKinetic", IOSection, myPathData.Path.Communicator),
       NumSamples(0)
   {
     // nothing for now
