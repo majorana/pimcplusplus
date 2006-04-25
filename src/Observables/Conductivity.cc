@@ -45,19 +45,22 @@ void
 ConductivityClass::AccumulateFast()
 {
   CalcCurrentT();
-  double Minv = 1.0/(double)M;
-  for (int dim=0; dim<NDIM; dim++) {
-    for (int i=0; i<M; i++)
-      FFTtemp.rBox(i) = TempCurrent(i)[dim];
-    FFTtemp.r2k();
-    for (int i=0; i<M; i++)
-      FFTtemp.kBox(i) = Minv*mag2(FFTtemp.kBox(i));
-    for (int i=0; i<M; i++)
-      FreqSumTT(i)[dim] += FFTtemp.rBox(i).real();
-    FFTtemp.k2r();
-    for (int i=0; i<M; i++)
-      RealSumTT(i)[dim] += FFTtemp.rBox(i).real();
+  if (PathData.Path.Communicator.MyProc()==0) {
+    double Minv = 1.0/(double)M;
+    for (int dim=0; dim<NDIM; dim++) {
+      for (int i=0; i<M; i++)
+	FFTtemp.rBox(i) = TempCurrent(i)[dim];
+      FFTtemp.r2k();
+      for (int i=0; i<M; i++)
+	FFTtemp.kBox(i) = Minv*mag2(FFTtemp.kBox(i));
+      for (int i=0; i<M; i++)
+	FreqSumTT(i)[dim] += FFTtemp.rBox(i).real();
+      FFTtemp.k2r();
+      for (int i=0; i<M; i++)
+	RealSumTT(i)[dim] += FFTtemp.rBox(i).real();
+    }
   }
+  NumSamples++;
 }
 
 void
@@ -72,7 +75,6 @@ ConductivityClass::Accumulate()
 //   fprintf (stderr, "RealSumTT = \n");
 //   for (int i=0; i<RealSumTT.size(); i++)
 //     fprintf (stderr, "%1.12e %1.12e\n", temp(i)[0], RealSumTT(i)[0]);
-  NumSamples++;
 }
 
 
@@ -97,7 +99,7 @@ ConductivityClass::Read(IOSectionClass &in)
   for (int proc=0; proc<PathData.Path.Communicator.NumProcs(); proc++) {
     int slice1, slice2;
     PathData.Path.SliceRange(proc, slice1, slice2);
-    ProcNumLinks = (slice2-slice1);
+    ProcNumLinks(proc) = (slice2-slice1);
   }
 }
 
