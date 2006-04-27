@@ -967,5 +967,6 @@ PAtricubicFit2Class::Derivs(double q, double z, double s2, int level,
     double dVdrp = Pot->dVdr(rp);
     d_dq = beta * 0.5*(dVdr + dVdrp);
     d_dz = beta * 0.25*(dVdr - dVdrp);;  
+    d_ds = 0.0;
   }
 }
