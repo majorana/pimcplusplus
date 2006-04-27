@@ -2,7 +2,7 @@ check_PROGRAMS = TestGradients
 
 TestGradients_SOURCES = TestGradients.cc
 
-LDADD = libpairact.la  ../Fitting/libfitting.la ../MatrixOps/libmatops.la ../PH/libPH.la ../Splines/libspline.la  ../IO/libIO.la ../Integration/libquad.la ../Distributed/libdistrib.la ../SpecialFunctions/libspecfun.la  ../MPI/libcomm.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(GSL_LIBS) $(FLIBS) 
+LDADD = libpairact.la  ../Fitting/libfitting.la ../MatrixOps/libmatops.la ../PH/libPH.la ../Splines/libspline.la  ../IO/libIO.la ../Integration/libquad.la ../Distributed/libdistrib.la ../SpecialFunctions/libspecfun.la  ../MPI/libcomm.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS) $(LAPACK_LIBS)
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(GSL_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)
 noinst_LTLIBRARIES = libpairact.la
 libpairact_la_SOURCES = DavidPAClass.cc    \
