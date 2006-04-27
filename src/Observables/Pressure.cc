@@ -10,7 +10,7 @@ PressureClass::KineticPressure()
   for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++){
     int species=Path.ParticleSpeciesNum(ptcl);
     double lambda = Path.Species(species).lambda;
-    if (lambda != 0){
+    if (lambda != 0.0){
       P += 3.0*(Path.NumTimeSlices()-1);
       double TwoLambdaTauInv=1.0/(2.0*Path.Species(species).lambda*Path.tau);
       for (int slice=0; slice < (Path.NumTimeSlices()-1);slice++) {
@@ -30,7 +30,7 @@ PressureClass::KineticPressure()
     }
   }
   
-  //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
+  //We are ignoring the \$\frac{3N}{2}*\log{4*\pi*\lambda*\tau}
   P /= (3.0*Path.tau*Path.GetVol());
   return (P);
 }
@@ -103,8 +103,7 @@ PressureClass::ShortRangePressure()
       }
     }
   }
-  /// HACK HACK HACK - minus sign
-  //P /= -3.0*Path.GetVol()*Path.tau;  
+
   P /= -3.0*Path.GetVol()*Path.tau;
   return P;
 }
@@ -197,6 +196,7 @@ PressureClass::NodePressure()
 void
 PressureClass::Accumulate()
 {
+  PathData.MoveJoin(PathData.NumTimeSlices()-1);
   KineticSum    += KineticPressure();
   ShortRangeSum += ShortRangePressure();
   NodeSum += NodePressure();
@@ -216,14 +216,14 @@ PressureClass::WriteBlock()
   NodeSum       /= (double)(NumSamples*Path.TotalNumSlices);
 
   /// Sum over all processors in my clone
-  PathData.Path.Communicator.Sum (KineticSum);
-  PathData.Path.Communicator.Sum (ShortRangeSum);
-  PathData.Path.Communicator.Sum (LongRangeSum);
-  PathData.Path.Communicator.Sum (NodeSum);
+  KineticSum    = PathData.Path.Communicator.Sum (KineticSum);
+  ShortRangeSum = PathData.Path.Communicator.Sum (ShortRangeSum);
+  LongRangeSum  = PathData.Path.Communicator.Sum (LongRangeSum);
+  NodeSum       = PathData.Path.Communicator.Sum (NodeSum);
 
   int numClassical = 0;
   for (int si=0; si<Path.NumSpecies(); si++)
-    if (Path.Species(si).lambda != 0.0)
+    if (Path.Species(si).lambda == 0.0)
       numClassical += Path.Species(si).NumParticles;
 
   /// Add on classical kinetic energy contribution
