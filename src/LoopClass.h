@@ -21,6 +21,8 @@ protected:
   void DoEvent();
   void Read(IOSectionClass &IO);
   void Read(IOSectionClass &IO, int steps);
+  void SetOutfile (IOSectionClass &out)
+  { IOSection = out; }
   LoopClass(PathDataClass &pathData, IOSectionClass &out,
 	    list<MoveClass*> &moves,
 	    list<ObservableClass*> &observables) : 

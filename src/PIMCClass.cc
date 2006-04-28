@@ -97,6 +97,10 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     OutFileName = 
       outFileBase+ "." + cloneNum.str() + ".h5";
     OutFile.NewFile(OutFileName);
+    /// This is needed so that all of the decendents of the root
+    /// LoopClass object have a real output file that they can flush.
+    /// In partcular, WriteData will flush the file.
+    Algorithm.SetOutfile(OutFile);
 
     /////////////////////////////////////
     // Write input file to output file //

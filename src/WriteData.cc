@@ -14,6 +14,8 @@ WriteDataClass::DoEvent()
   for (observeIter=Observables.begin(); observeIter!=Observables.end(); 
        observeIter++) 
     (*observeIter)->WriteBlock();
+  if (PathData.Path.Communicator.MyProc()==0)
+    IOSection.FlushFile();
 }
 
 
