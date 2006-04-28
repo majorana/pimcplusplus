@@ -15,6 +15,15 @@ double PAzeroFitClass::V(double r)
   return 0.0;
 }
 
+void 
+PAzeroFitClass::Derivs (double q, double z, double s2, int level,
+			double &d_dq, double &d_dz, double &d_ds)
+{
+  d_dq = 0.0;
+  d_dz = 0.0;
+  d_ds = 0.0;
+}
+
 bool PAzeroFitClass::Read (IOSectionClass &in,
 				double smallestBeta, int NumBetas)
 {
