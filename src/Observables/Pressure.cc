@@ -178,6 +178,34 @@ PressureClass::LongRangePressure()
   return (P);
 }
 
+// double 
+// PressureClass::LongRangePressureFD()
+// {
+//   PathClass &Path = PathData.Path;
+//   dVec box = Path.GetBox();
+//   double eps = 1.0e-6;
+
+//   double xiPlus  = 1.0+eps;
+//   Path.SetBox(xiPlus*box);
+//   double VPlus = Path.GetVol();
+//   // Scale particle positions
+//   for (int ptcl=0; ptcl<NumParticles; ptcl++) 
+//     for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
+//       Path(slice,ptcl) = xiPlus*Path(slice,ptcl);
+  
+
+  
+//   Path.SetBox(xiMinus*box);
+//   VMinus = Path.GetVol();
+//   // Scale particle positions
+//   for (int ptcl=0; ptcl<NumParticles; ptcl++) 
+//     for (int slice=0; slice<Path.NumTimeSlices(); slice++) 
+//       Path(slice,ptcl) = (xiMinus/xiPlus)*Path(slice,ptcl);
+
+
+// }
+
+
 double
 PressureClass::NodePressure()
 {
@@ -238,6 +266,7 @@ PressureClass::WriteBlock()
   LongRangeVar.Write  (Prefactor*LongRangeSum);
   NodeVar.Write       (Prefactor*NodeSum);
   PressureVar.Write   (Prefactor*total);
+  PressureVar.Flush();
 
   KineticSum    = 0.0;
   ShortRangeSum = 0.0;
