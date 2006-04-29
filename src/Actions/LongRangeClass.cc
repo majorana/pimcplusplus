@@ -642,11 +642,14 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
 	// Now add on part from rc to infinity
 	// pa.Ulong_k(level,ki) -= CalcXk(paIndex, level, k, rc, JOB_U);
 	pa.Ulong_k(level,ki)   -= pa.Xk_U  (k, level)/boxVol;
-// 	double dXk_dk = pa.dXk_U_dk(k, level)/boxVol;
-// 	double dXk_dkFD = 
-// 	  (pa.Xk_U(k+1.0e-6,level)-pa.Xk_U(k-1.0e-6,level))/(2.0e-6*boxVol);
-// 	fprintf (stderr, "analytic = %1.7e   FD = %1.7e\n",
-// 		 dXk_dk, dXk_dkFD);
+#ifdef DEBUG
+ 	double dXk_dk = pa.dXk_U_dk(k, level)/boxVol;
+ 	double dXk_dkFD = 
+ 	  (pa.Xk_U(k+1.0e-6,level)-pa.Xk_U(k-1.0e-6,level))/(2.0e-6*boxVol);
+	if (PathData.Path.Communicator.MyProc() == 0)
+	  fprintf (stderr, "analytic = %1.7e   FD = %1.7e\n",
+		   dXk_dk, dXk_dkFD);
+#endif
 	pa.dUlong_dk(level,ki) -= pa.dXk_U_dk(k, level)/boxVol;
       }
 //       // HACK HACK HACK HACK
