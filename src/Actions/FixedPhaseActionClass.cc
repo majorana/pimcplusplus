@@ -263,6 +263,7 @@ FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activePa
   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
 
   complex<double> detu = GradientDet(slice, species, activeParticles, updateMats);
+
 #ifdef DEBUG
   complex<double> detuOld = GradientDet(slice, species);
   if (mag2(detu-detuOld)>1.0e-12*mag2(detuOld)) {
@@ -286,6 +287,8 @@ FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activePa
     }
     fprintf (stderr, "\n");
   }
+  else
+    perr << "Passed matrix check.\n";
 #endif
   double detu2 = mag2(detu);
   double detu2Inv = 1.0/detu2;
