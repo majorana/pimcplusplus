@@ -23,6 +23,8 @@ private:
   Array<complex<double>,2> Matrix, Cofactors;
   Array<cVec3,2>   GradMat;
   Mirrored1DClass<double> UpGrad2, DownGrad2;
+  Mirrored2DClass<Vec3> UpGrad, DownGrad;
+  Mirrored1DClass<double> UpPhase, DownPhase;
 
   Mirrored3DClass<complex<double> > UpMatrixCache, DownMatrixCache;
   Mirrored3DClass<cVec3> UpGradMatCache, DownGradMatCache;
