@@ -67,7 +67,7 @@ void PathDataClass::Read (IOSectionClass &in)
 
 
   //  int seed;
-  if (in.ReadVar("seed",Seed)){
+  if (in.ReadVar("Seed",Seed)){
     Random.Init (Seed, NumClones);
   }
   else {
