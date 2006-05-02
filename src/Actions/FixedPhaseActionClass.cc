@@ -431,16 +431,56 @@ FixedPhaseClass::Action (int slice1, int slice2,
       G2T = G2 - g2*u;
       for (int i=0; i<NumUp; i++)
 	action2 += 0.5*lambda*levelTau*(dot(G1T(i), G1T(i))+dot(G2T(i), G2T(i)));
-      action2 += (2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv - g1T*g2T) /
+      action2 +=  lambda*levelTau*(2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv - g1T*g2T) /
 	(15.0*dRMag2);
 
     }
-    fprintf (stderr, "Action1 = %1.12e  Action2 = %1.12e\n", action, action2);
+    //    fprintf (stderr, "Action1 = %1.12e  Action2 = %1.12e\n", action, action2);
   }
 
-  
+  if (doDown) {
+    int first = Path.Species(DownSpeciesNum).FirstPtcl;
+    Array<Vec3,1> dR(NumDown), u(NumDown), G1T(NumDown), G2T(NumDown);
 
-  return action;
+    for (int slice=slice1; slice <= slice2; slice+=skip) 
+      DownGrad2(slice) = CalcGrad2 (slice, DownSpeciesNum, activeParticles, updateMats);
+    for (int link=slice1; link < slice2; link+=skip) {
+      Array<Vec3,1> G1;  G1.reference(DownGrad.data()(link,Range::all()));
+      Array<Vec3,1> G2;  G2.reference(DownGrad.data()((link+skip),Range::all()));;
+
+      double dRMag, dRMag2;
+      dRMag2 = 0.0;
+      double v1 = DownPhase(link);
+      double v2 = DownPhase(link+skip);
+      double dv = (v2-v1);
+      for (int i=0; i<NumDown; i++) {
+	dR(i) = Path.Velocity (link, link+skip, i+first);
+	/// Add on the e^{-i k \cdot r} term
+	dv -= dot(kVec, dR(i));
+	dRMag2 += dot(dR(i), dR(i));
+      }
+      while (dv > M_PI)
+	dv -= M_PI;
+      while (dv < -M_PI)
+	dv += M_PI;
+
+      dRMag = sqrt(dRMag2);
+      u = (1.0/dRMag)*dR;
+      double g1 = dot (G1, u);
+      double g2 = dot (G2, u);
+      double g1T = g1*dRMag;
+      double g2T = g2*dRMag;
+      G1T = G1 - g1*u;
+      G2T = G2 - g2*u;
+      for (int i=0; i<NumDown; i++)
+	action2 += 0.5*lambda*levelTau*(dot(G1T(i), G1T(i))+dot(G2T(i), G2T(i)));
+      action2 +=  lambda*levelTau*(2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv - g1T*g2T) /
+	(15.0*dRMag2);
+
+    }
+    // fprintf (stderr, "Action1 = %1.12e  Action2 = %1.12e\n", action, action2);
+  }
+  return action2;
 }
 
 double

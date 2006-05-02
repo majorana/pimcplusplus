@@ -520,7 +520,8 @@ void
 ActionsClass::UpdateNodalActions()
 {
   for (int i=0; i<NodalActions.size(); i++)
-    NodalActions(i)->Update();
+    if (NodalActions(i) != NULL)
+      NodalActions(i)->Update();
 }
 
 void
