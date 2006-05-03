@@ -1,5 +1,5 @@
-#ifndef PATHDUMP__H
-#define PATHDUMP_H
+#ifndef WINDING_NUMBER__H
+#define WINDING_NUMBER__H
 
 #include "ObservableBase.h"
 
