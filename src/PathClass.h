@@ -213,7 +213,8 @@ public:
   /// This class will create a new brownian random walk for
   /// species(speciesNum).  If the species is fermion, it will do its
   /// best to construct a node-avoiding walk that is reasonable.
-  void NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &initialPoints);
+  void NodeAvoidingLeviFlight  (int speciesNum, Array<dVec,1> &initialPoints);
+  void PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &initialPoints);
 
   void SetupClones();
   inline PathClass(CommunicatorClass &communicator,
@@ -790,7 +791,7 @@ PathClass::SliceOwner(int slice)
   for (int i=0; i<Communicator.NumProcs(); i++) {
     int slice1, slice2;
     SliceRange (i, slice1, slice2);
-    if ((slice1 <= slice) && (slice2 >= slice))
+    if ((slice1 < slice) && (slice2 >= slice))
       proc = i;
   }
   return proc;
