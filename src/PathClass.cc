@@ -287,9 +287,14 @@ void PathClass::Allocate()
 
   /// Set the particle range for the new species
   for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
-    SpeciesArray(speciesNum)->FirstPtcl = numParticles;
-    numParticles=numParticles + SpeciesArray(speciesNum)->NumParticles;
-    SpeciesArray(speciesNum)->LastPtcl= numParticles-1;
+    int N = SpeciesArray(speciesNum)->NumParticles;
+    int first = numParticles;
+    SpeciesArray(speciesNum)->FirstPtcl = first;
+    numParticles=numParticles + N;
+    SpeciesArray(speciesNum)->LastPtcl = first + N-1;;
+    SpeciesArray(speciesNum)->Ptcls.resize(N);
+    for (int i=0; i < N; i++)
+      SpeciesArray(speciesNum)->Ptcls(i) = i+first;
   }
   Path.resize(MyNumSlices,numParticles+OpenPaths);
   RefPath.resize(numParticles+OpenPaths);

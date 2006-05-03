@@ -21,6 +21,7 @@ public:
   int FirstPtcl;
   int NumDim;
   int NumParticles;
+  Array<int,1> Ptcls;
   TinyVector <bool,NDIM> DimensionActive;
   virtual bool Read(IOSectionClass &inSection);
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
