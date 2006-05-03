@@ -12,6 +12,7 @@ PressureClass::KineticPressure()
     double lambda = Path.Species(species).lambda;
     if (lambda != 0.0){
       P += 3.0*(Path.NumTimeSlices()-1);
+      KineticPressureVec+= (Path.NumTimeSlices()-1);
       double TwoLambdaTauInv=1.0/(2.0*Path.Species(species).lambda*Path.tau);
       for (int slice=0; slice < (Path.NumTimeSlices()-1);slice++) {
         dVec vel;
@@ -24,6 +25,7 @@ PressureClass::KineticPressure()
 	    GaussSum += exp(-dist*dist*TwoLambdaTauInv);
 	  }
 	  GaussProd *= GaussSum;
+	  KineticPressureVec(dim)+= log(GaussSum);
         }
 	P += log(GaussProd);    
       }
@@ -96,6 +98,12 @@ PressureClass::ShortRangePressure()
 	double z = (rmag-rpmag);
 	double s2 = dot (r-rp, r-rp);
 	PA.Derivs(q,z,s2,0,du_dq, du_dz, du_ds);
+	for (int dim=0;dim<NDIM;dim++){
+	  ShortRangePressureVec(dim)+=0.5*du_dq*(r(dim)*r(dim)/rmag+rp(dim)*rp(dim)/rpmag);
+	  ShortRangePressureVec(dim)+=du_dz*(r(dim)*r(dim)/rmag-rp(dim)*rp(dim)/rpmag);
+	  if (du_ds!=0)
+	    ShortRangePressureVec(dim)+=du_ds*((r(dim)-rp(dim))*(r(dim)-rp(dim)))/sqrt(s2);
+	}
 	P += q*du_dq + z*du_dz + sqrt(s2)*du_ds;
 	if (PA.IsLongRange() && PathData.Actions.UseLongRange)
 	  P -= 0.5*(rmag * PA.Ulong(0).Deriv(rmag) + 
@@ -237,17 +245,29 @@ PressureClass::Accumulate()
 void
 PressureClass::WriteBlock()
 {
+  //  cerr<<"Calling pressure writeblock"<<endl;
   PathClass &Path = PathData.Path;
   KineticSum    /= (double)(NumSamples*Path.TotalNumSlices);
   ShortRangeSum /= (double)(NumSamples*Path.TotalNumSlices);
   LongRangeSum  /= (double)(NumSamples*Path.TotalNumSlices);
   NodeSum       /= (double)(NumSamples*Path.TotalNumSlices);
-
+  ShortRangePressureVec /= (double)(NumSamples*Path.TotalNumSlices);
+  KineticPressureVec /= (double)(NumSamples*Path.TotalNumSlices);
   /// Sum over all processors in my clone
   KineticSum    = PathData.Path.Communicator.Sum (KineticSum);
   ShortRangeSum = PathData.Path.Communicator.Sum (ShortRangeSum);
   LongRangeSum  = PathData.Path.Communicator.Sum (LongRangeSum);
   NodeSum       = PathData.Path.Communicator.Sum (NodeSum);
+  Array<double,1> ShortRangePressureVecSum(ShortRangePressureVec.size());
+  Array<double,1> KineticPressureVecSum(KineticPressureVec.size());
+  ShortRangePressureVecSum=0.0;
+  KineticPressureVecSum=0.0;
+  PathData.Path.Communicator.Sum (ShortRangePressureVec,ShortRangePressureVecSum);
+  PathData.Path.Communicator.Sum (KineticPressureVec,KineticPressureVecSum);
+  KineticPressureVecSum /= (3.0*Path.GetVol()*Path.tau);
+  KineticPressureVecSum = KineticPressureVecSum*Prefactor;
+  ShortRangePressureVecSum /= -3.0*Path.GetVol()*Path.tau;
+  ShortRangePressureVecSum=ShortRangePressureVecSum*Prefactor;
 
   int numClassical = 0;
   for (int si=0; si<Path.NumSpecies(); si++)
@@ -266,17 +286,29 @@ PressureClass::WriteBlock()
   LongRangeVar.Write  (Prefactor*LongRangeSum);
   NodeVar.Write       (Prefactor*NodeSum);
   PressureVar.Write   (Prefactor*total);
+
+  ShortRangeVecVar.Write (ShortRangePressureVecSum);
+  KineticVecVar.Write (KineticPressureVecSum);
   PressureVar.Flush();
+
 
   KineticSum    = 0.0;
   ShortRangeSum = 0.0;
   LongRangeSum  = 0.0;
   NodeSum       = 0.0;
   NumSamples = 0;
+  ShortRangePressureVec=0.0;
+  KineticPressureVec=0.0;
+
 }
 
 void
 PressureClass::Read (IOSectionClass &in)
 {
   ObservableClass::Read(in);
+  ShortRangePressureVec.resize(3);
+  ShortRangePressureVec=0.0;
+  KineticPressureVec.resize(3);
+  KineticPressureVec=0.0;
+
 }
