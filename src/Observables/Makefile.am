@@ -43,6 +43,8 @@ libobservables_la_SOURCES  =     \
     Phik.cc                      \
     PlaneDensity.h               \
     PlaneDensity.cc              \
+    SuperfluidFraction.h         \
+    SuperfluidFraction.cc        \
     SuperfluiDrop.h              \
     SuperfluiDrop.cc             \
     StructureFactor.cc           \
