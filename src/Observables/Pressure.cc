@@ -223,7 +223,7 @@ PressureClass::NodePressure()
   
   for (int species=0; species<PathData.Path.NumSpecies(); species++)
     if (PathData.Actions.NodalActions(species) != NULL)
-      P -= 2.0*PathData.Actions.NodalActions(species)->d_dBeta(0, M, 0);
+      P -= 2.0*PathData.Actions.NodalActions(species)->d_dBeta(0, M-1, 0);
 
   P /= (-3.0*Path.GetVol());
   return P;
