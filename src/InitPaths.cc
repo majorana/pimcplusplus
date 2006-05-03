@@ -298,7 +298,8 @@ PathClass::InitPaths (IOSectionClass &in)
       for (int ptcl=0; ptcl<species.NumParticles; ptcl++) 
 	for (int dim=0; dim<NDIM; dim++)
 	  R0(ptcl)[dim] = Positions(ptcl,dim);
-      NodeAvoidingLeviFlight (speciesIndex,R0);
+      // NodeAvoidingLeviFlight (speciesIndex,R0);
+      PhaseAvoidingLeviFlight(speciesIndex, R0);
     }
     else if (InitPaths == "RANDOMFIXED") {
       InitRandomFixed (in, species);
@@ -601,7 +602,9 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     if (Communicator.MyProc()==0)
       perr << "Nodal Action after Levi flight = " << globalAction << endl;
   }
-  
+  Actions.NodalActions(speciesNum)->AcceptCopy(0, NumTimeSlices()-1);
+
+
 //   Communicator.PrintSync();
 //   char fname[100];
 //   snprintf (fname, 100, "%s.dat", species.Name.c_str());
@@ -617,4 +620,114 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 //     fprintf (fout, "\n");
 //   }
 //   fclose(fout);
+}
+
+
+void 
+PathClass::PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
+{
+  SpeciesClass &species = Species(speciesNum);
+  int numPtcls = species.NumParticles;
+  double lambda = species.lambda;
+  bool haveNodeAction = Actions.NodalActions(speciesNum)!=NULL;
+  double maxAction = 0.1*M_PI*M_PI/(double)numPtcls;
+
+
+  int myFirstSlice, myLastSlice, myProc;
+  myProc = Communicator.MyProc();
+  SliceRange (myProc, myFirstSlice, myLastSlice);
+
+  // HACK to get ground state plane wave calculations to happen
+  // simultaneously rather than sequentially.
+  if (haveNodeAction) {
+    for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++)
+      (*this)(0,ptcl) = R0(ptcl-species.FirstPtcl);
+    Actions.NodalActions(speciesNum)->IsPositive(0);
+  }
+
+  Array<dVec,1> prevSlice (numPtcls), newSlice(numPtcls);
+  for (int ptcl=0; ptcl<numPtcls; ptcl++) {
+    prevSlice (ptcl) = R0(ptcl);
+    if (myProc == 0)
+      (*this)(0, ptcl+species.FirstPtcl) = R0(ptcl);
+    RefPath(ptcl+species.FirstPtcl) = R0(ptcl);
+  }
+  
+  int N = TotalNumSlices+1;
+  for (int slice=1; slice<N; slice++) {
+    int sliceOwner = SliceOwner(slice);
+    int relSlice = slice-myFirstSlice;
+    
+    double delta = (double)(N-slice-1);
+    double taueff = tau*(1.0 - 1.0/(delta+1.0));
+    double sigma = sqrt (2.0*lambda*taueff);
+    bool positive = false;
+    
+    int numRejects = 0;
+    do {
+      // Randomly construct new slice
+      for (int ptcl=0; ptcl<numPtcls; ptcl++) {
+	dVec center = (1.0/(delta+1.0))*(delta*prevSlice(ptcl) + R0(ptcl));
+	Random.CommonGaussianVec(sigma, newSlice(ptcl));
+	newSlice(ptcl) += center;
+      }
+      // Now check the nodal sign if we're a fermion species
+      if (!haveNodeAction)
+	positive = true;
+      else {
+	// Now assign to Path
+	if (sliceOwner == myProc ) {
+	  for (int ptcl=0; ptcl<numPtcls; ptcl++)
+	    (*this)(relSlice, ptcl+species.FirstPtcl) = newSlice(ptcl);
+	  double action = Actions.NodalActions(speciesNum)->SingleAction
+	    (relSlice-1, relSlice, species.Ptcls, 0);
+	  positive = action < maxAction;
+	}
+	// Now broadcast whether or not I'm positive to everyone
+	Communicator.Broadcast(sliceOwner, positive);
+      }
+      if (!positive) {
+	numRejects++;
+	if (numRejects > 200) {
+	  /// Create a new starting point and start over
+	  for (int i=0; i<R0.size(); i++)
+	    for (int dim=0; dim<NDIM; dim++)
+	      R0(i)[dim] = Box[dim] *(Random.Common()-0.5);
+	  perr << "Calling recursively to start over.\n";
+	  PhaseAvoidingLeviFlight (speciesNum, R0);
+	  return;
+	}
+// 	if ((numRejects%50)==0)
+// 	  perr << "numRejects = " << numRejects << endl;
+      }
+    } while (!positive);
+    // Copy slice into Path if I'm the slice owner.
+    if ((slice>=myFirstSlice) && (slice<=myLastSlice)) {
+      for (int ptcl=0; ptcl<numPtcls; ptcl++) 
+	(*this)(relSlice, ptcl+species.FirstPtcl) = newSlice(ptcl);
+      // Check to make sure we're positive now.
+      if (haveNodeAction && (relSlice > 0)) {
+	if (Actions.NodalActions(speciesNum)->Action 
+	    (relSlice-1, relSlice, species.Ptcls, 0) > maxAction) {
+	  perr << "exceeded maximum action at slice " << slice 
+	       << " myProc = " << myProc << "relslice=" << relSlice <<endl;
+	  abort();
+	}	
+      }
+    }
+    // continue on to next slice
+    prevSlice = newSlice;
+  }
+  if (haveNodeAction) {
+    Array<int,1> changedParticles(species.NumParticles);
+    for (int i=0; i<species.NumParticles; i++)
+      changedParticles(i) = i+species.FirstPtcl;
+    double localAction = 
+      Actions.NodalActions(speciesNum)->Action(0, NumTimeSlices()-1, 
+					       changedParticles,0);
+    double globalAction = Communicator.AllSum(localAction);
+    if (Communicator.MyProc()==0)
+      perr << "Phase Action after Levi flight = " << globalAction << endl;
+  }
+  Actions.NodalActions(speciesNum)->AcceptCopy(0, NumTimeSlices()-1);  
 }
