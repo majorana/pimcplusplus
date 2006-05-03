@@ -253,18 +253,18 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new CenterDropletClass(PathData,OutFile);
     else if (moveType=="GrowWorm")
       move = new WormGrowMoveClass(PathData,OutFile);
-    else if (moveType=="CloseWorm")
-      move = new WormCloseMoveClass(PathData,OutFile);
-    else if (moveType=="RemoveWorm")
-      move = new WormRemoveMoveClass(PathData,OutFile);
+//     else if (moveType=="CloseWorm")
+//       move = new WormCloseMoveClass(PathData,OutFile);
+//     else if (moveType=="RemoveWorm")
+//       move = new WormRemoveMoveClass(PathData,OutFile);
     else if (moveType=="OpenEnd")
       move = new OpenEndMoveClass(PathData,OutFile);
     else if (moveType=="RefSlice")
       move = new RefSliceMoveClass(PathData,OutFile);
     else if (moveType=="Displace")
       move = new DisplaceMoveClass(PathData,OutFile);
-    else if (moveType=="VariationalDisplace")
-      move = new VariationalDisplaceMoveClass(PathData,OutFile);
+//     else if (moveType=="VariationalDisplace")
+//       move = new VariationalDisplaceMoveClass(PathData,OutFile);
     else if (moveType=="WaterRotate")
       move = new WaterRotate(PathData, OutFile);
     else if (moveType=="WaterTranslate")
