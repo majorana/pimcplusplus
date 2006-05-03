@@ -146,10 +146,16 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
 	tempObs = new PairCorrelationClass(PathData,OutFile);
     else if (observeType=="nofr")
       tempObs=new nofrClass(PathData,OutFile);
+    else if (observeType=="PlaneDensity")
+      tempObs=new PlaneDensityClass(PathData,OutFile);
     else if (observeType=="AngularMomentumCorrelation")
       tempObs= new AngularMomCor(PathData,OutFile);
+    else if (observeType=="ParticleAverageLoc")
+      tempObs= new ParticleAverageLocClass(PathData,OutFile);
     else if (observeType=="DropletSuperfluidity")
       tempObs = new SuperfluiDrop(PathData,OutFile);
+    else if (observeType=="SuperfluidFraction")
+      tempObs = new SuperfluidFractionClass(PathData,OutFile);
     else if (observeType=="Vacancy")
       tempObs = new VacancyLocClass(PathData,OutFile);
     else if (observeType=="Conductivity")
@@ -247,12 +253,18 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new CenterDropletClass(PathData,OutFile);
     else if (moveType=="GrowWorm")
       move = new WormGrowMoveClass(PathData,OutFile);
+    else if (moveType=="CloseWorm")
+      move = new WormCloseMoveClass(PathData,OutFile);
+    else if (moveType=="RemoveWorm")
+      move = new WormRemoveMoveClass(PathData,OutFile);
     else if (moveType=="OpenEnd")
       move = new OpenEndMoveClass(PathData,OutFile);
     else if (moveType=="RefSlice")
       move = new RefSliceMoveClass(PathData,OutFile);
     else if (moveType=="Displace")
       move = new DisplaceMoveClass(PathData,OutFile);
+    else if (moveType=="VariationalDisplace")
+      move = new VariationalDisplaceMoveClass(PathData,OutFile);
     else if (moveType=="WaterRotate")
       move = new WaterRotate(PathData, OutFile);
     else if (moveType=="WaterTranslate")
