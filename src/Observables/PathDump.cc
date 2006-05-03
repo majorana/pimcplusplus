@@ -244,9 +244,11 @@ PathDumpClass::FixedPhaseNodeDump()
   FixedPhaseActionClass &FP = 
     *((FixedPhaseActionClass*)PathData.Actions.NodalActions(speciesNum));
 
-  double grad2A = FP.CalcGrad2(relNodeSlice);
+  Array<int,1> dummyPtcls;
+
+  double grad2A = FP.CalcGrad2(relNodeSlice, dummyPtcls, UPDATE_ALL);
   PathData.Path.SetIonConfig(1);
-  double grad2B = FP.CalcGrad2(relNodeSlice);
+  double grad2B = FP.CalcGrad2(relNodeSlice, dummyPtcls, UPDATE_ALL);
   PathData.Path.SetIonConfig(0);
   cerr << "Difference = " << grad2A - grad2B << endl;
 
@@ -277,12 +279,12 @@ PathDumpClass::FixedPhaseNodeDump()
   if (grad2A > grad2B) {
     // Recalculate warped A slice
     Path.SetIonConfig(0);
-    grad2A = FP.CalcGrad2(relNodeSlice);
+    grad2A = FP.CalcGrad2(relNodeSlice, dummyPtcls, UPDATE_ALL);
   }
   else {
     // Recalculate warped B slice.
     Path.SetIonConfig(1);
-    grad2B = FP.CalcGrad2(relNodeSlice);
+    grad2B = FP.CalcGrad2(relNodeSlice, dummyPtcls, UPDATE_ALL);
     Path.SetIonConfig(0);
   }
   cerr << "Warped difference = " << (grad2A-grad2B) << endl;
@@ -299,7 +301,7 @@ PathDumpClass::FixedPhaseNodeDump()
       for (int iz=0; iz<nz; iz++) {
 	newPos[2] = Zgrid(iz);
 	Path(relNodeSlice,NodePtcl) = newPos;
-	nodeDump(ix,iy,iz) = log10(FP.CalcGrad2(relNodeSlice));
+	nodeDump(ix,iy,iz) = log10(FP.CalcGrad2(relNodeSlice, dummyPtcls, UPDATE_ALL));
       }
     }
   }
@@ -314,7 +316,7 @@ PathDumpClass::FixedPhaseNodeDump()
 	for (int iz=0; iz<nz; iz++) {
 	  newPos[2] = Zgrid(iz);
 	  Path(relNodeSlice,NodePtcl) = newPos;
-	  nodeDump(ix,iy,iz) = log10(FP.CalcGrad2(relNodeSlice));
+	  nodeDump(ix,iy,iz) = log10(FP.CalcGrad2(relNodeSlice, dummyPtcls, UPDATE_ALL));
 	}
       }
     }
