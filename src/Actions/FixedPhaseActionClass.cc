@@ -19,84 +19,88 @@ FixedPhaseClass::Setk(Vec3 k)
 void FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
 {
   if (speciesNum == UpSpeciesNum) {
-    UpMatrixCache.ShiftData (slicesToShift, Path.Communicator);
-    UpGradMatCache.ShiftData(slicesToShift, Path.Communicator);
+    UpMatrixCache.ShiftData  (slicesToShift, Path.Communicator);
+    UpGradMatCache.ShiftData (slicesToShift, Path.Communicator);
+    UpAction.ShiftData       (slicesToShift, Path.Communicator);
+    UpGrad2.ShiftData        (slicesToShift, Path.Communicator);
   }
   if (speciesNum == DownSpeciesNum) {
     DownMatrixCache.ShiftData (slicesToShift, Path.Communicator);
     DownGradMatCache.ShiftData(slicesToShift, Path.Communicator);
+    DownAction.ShiftData      (slicesToShift, Path.Communicator);
+    DownGrad2.ShiftData       (slicesToShift, Path.Communicator);
   }
 
-  if ((speciesNum == UpSpeciesNum) || (speciesNum==DownSpeciesNum)) {
+//   if ((speciesNum == UpSpeciesNum) || (speciesNum==DownSpeciesNum)) {
 
-    Mirrored1DClass<double>& grad2 =
-      ((speciesNum==UpSpeciesNum) ? UpGrad2 : DownGrad2);
-    CommunicatorClass &comm = Path.Communicator;
+//     Mirrored1DClass<double>& grad2 =
+//       ((speciesNum==UpSpeciesNum) ? UpGrad2 : DownGrad2);
+//     CommunicatorClass &comm = Path.Communicator;
 
-    int numProcs=comm.NumProcs();
-    int myProc=comm.MyProc();
-    int recvProc, sendProc;
-    int numSlices  = Path.NumTimeSlices();
-    assert(abs(slicesToShift)<numSlices);
-    sendProc=(myProc+1) % numProcs;
-    recvProc=((myProc-1) + numProcs) % numProcs;
-    if (slicesToShift<0)
-      swap (sendProc, recvProc);
+//     int numProcs=comm.NumProcs();
+//     int myProc=comm.MyProc();
+//     int recvProc, sendProc;
+//     int numSlices  = Path.NumTimeSlices();
+//     assert(abs(slicesToShift)<numSlices);
+//     sendProc=(myProc+1) % numProcs;
+//     recvProc=((myProc-1) + numProcs) % numProcs;
+//     if (slicesToShift<0)
+//       swap (sendProc, recvProc);
     
-    /// First shifts the data in the A copy left or right by the
-    /// appropriate amount 
-    if (slicesToShift>0)
-      for (int slice=numSlices-1; slice>=slicesToShift;slice--)
-	grad2[0](slice)=grad2[0](slice-slicesToShift);
-    else 
-      for (int slice=0; slice<numSlices+slicesToShift;slice++)
-	grad2[0](slice)=grad2[0](slice-slicesToShift);
+//     /// First shifts the data in the A copy left or right by the
+//     /// appropriate amount 
+//     if (slicesToShift>0)
+//       for (int slice=numSlices-1; slice>=slicesToShift;slice--)
+// 	grad2[0](slice)=grad2[0](slice-slicesToShift);
+//     else 
+//       for (int slice=0; slice<numSlices+slicesToShift;slice++)
+// 	grad2[0](slice)=grad2[0](slice-slicesToShift);
     
     
-    /// Now bundle up the data to send to adjacent processor
-    int bufferSize=abs(slicesToShift);
-    Array<double,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
-    int startSlice;
-    int buffIndex=0;
-    if (slicesToShift>0) {
-      startSlice=numSlices-slicesToShift;
-      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
-	/// If shifting forward, don't send the last time slice (so always)
-	/// send slice-1
-	sendBuffer(buffIndex)=grad2[1](slice-1);
-	buffIndex++;
-      }
-    }
-    else {
-      startSlice=0;
-      for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
-	/// If shifting backward, don't send the first time slice (so always)
-	/// send slice+1
-	sendBuffer(buffIndex)=grad2[1](slice+1);
-	buffIndex++;
-      }
-    }
+//     /// Now bundle up the data to send to adjacent processor
+//     int bufferSize=abs(slicesToShift);
+//     Array<double,1> sendBuffer(bufferSize), receiveBuffer(bufferSize);
+//     int startSlice;
+//     int buffIndex=0;
+//     if (slicesToShift>0) {
+//       startSlice=numSlices-slicesToShift;
+//       for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
+// 	/// If shifting forward, don't send the last time slice (so always)
+// 	/// send slice-1
+// 	sendBuffer(buffIndex)=grad2[1](slice-1);
+// 	buffIndex++;
+//       }
+//     }
+//     else {
+//       startSlice=0;
+//       for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+// 	/// If shifting backward, don't send the first time slice (so always)
+// 	/// send slice+1
+// 	sendBuffer(buffIndex)=grad2[1](slice+1);
+// 	buffIndex++;
+//       }
+//     }
     
-    /// Send and receive data to/from neighbors.
-    comm.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
+//     /// Send and receive data to/from neighbors.
+//     comm.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
     
-    if (slicesToShift>0)
-      startSlice=0;
-    else 
-      startSlice=numSlices+slicesToShift;
+//     if (slicesToShift>0)
+//       startSlice=0;
+//     else 
+//       startSlice=numSlices+slicesToShift;
     
-    /// Copy the data into the A copy
-    buffIndex=0;
-    for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
-      grad2[0](slice)=receiveBuffer(buffIndex);
-      buffIndex++;
-    }
+//     /// Copy the data into the A copy
+//     buffIndex=0;
+//     for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
+//       grad2[0](slice)=receiveBuffer(buffIndex);
+//       buffIndex++;
+//     }
     
-    // Now copy A into B, since A has all the good, shifted data now.
-    for (int slice=0; slice<numSlices; slice++)
-      grad2[1](slice) = grad2[0](slice);
-    // And we're done! 
-  } 
+//     // Now copy A into B, since A has all the good, shifted data now.
+//     for (int slice=0; slice<numSlices; slice++)
+//       grad2[1](slice) = grad2[0](slice);
+//     // And we're done! 
+//   } 
 }
 
 void
@@ -149,6 +153,7 @@ FixedPhaseClass::AcceptCopy (int slice1, int slice2, int speciesNum)
 {
   if (speciesNum == UpSpeciesNum) {
     UpGrad2.AcceptCopy         (slice1, slice2);
+    UpAction.AcceptCopy        (slice1, slice2);
     UpMatrixCache[OLDMODE](Range(slice1,slice2), Range::all(), Range::all()) = 
       UpMatrixCache[NEWMODE](Range(slice1,slice2), Range::all(), Range::all());
     UpGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all()) =
@@ -156,6 +161,7 @@ FixedPhaseClass::AcceptCopy (int slice1, int slice2, int speciesNum)
   }
   else if (speciesNum == DownSpeciesNum) {
     DownGrad2.AcceptCopy       (slice1, slice2);
+    DownAction.AcceptCopy      (slice1, slice2);
     DownMatrixCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all())=
       DownMatrixCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all());
     DownGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all())= 
@@ -168,6 +174,7 @@ FixedPhaseClass::RejectCopy (int slice1, int slice2, int speciesNum)
 {
   if (speciesNum == UpSpeciesNum) {
     UpGrad2.RejectCopy         (slice1, slice2);
+    UpAction.RejectCopy        (slice1, slice2);
     UpMatrixCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all()) = 
       UpMatrixCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
     UpGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all()) = 
@@ -175,6 +182,7 @@ FixedPhaseClass::RejectCopy (int slice1, int slice2, int speciesNum)
   }
   else if (speciesNum == DownSpeciesNum) {
     DownGrad2.RejectCopy       (slice1, slice2);
+    DownAction.RejectCopy      (slice1, slice2);
     DownMatrixCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all()) = 
       DownMatrixCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
     DownGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all())= 
@@ -237,32 +245,32 @@ inline double mag2 (complex<double> z)
   return (z.real()*z.real()+z.imag()*z.imag());
 }
 
-double
-FixedPhaseClass::CalcGrad2 (int slice, int species)
-{
-  if ((species != UpSpeciesNum) && (species != DownSpeciesNum))
-    return 0.0;
-  Mirrored2DClass<Vec3> &Grad    = (species == UpSpeciesNum) ? UpGrad  : DownGrad;
-  Mirrored1DClass<double> &Phase = (species == UpSpeciesNum) ? UpPhase : DownPhase;
-  int N = Path.Species(species).NumParticles;
-  /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
-  complex<double> detu = GradientDet(slice, species);
-  double detu2 = mag2(detu);
-  double detu2Inv = 1.0/detu2;
+// double
+// FixedPhaseClass::CalcGrad2 (int slice, int species)
+// {
+//   if ((species != UpSpeciesNum) && (species != DownSpeciesNum))
+//     return 0.0;
+//   Mirrored2DClass<Vec3> &Grad    = (species == UpSpeciesNum) ? UpGrad  : DownGrad;
+//   Mirrored1DClass<double> &Phase = (species == UpSpeciesNum) ? UpPhase : DownPhase;
+//   int N = Path.Species(species).NumParticles;
+//   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
+//   complex<double> detu = GradientDet(slice, species);
+//   double detu2 = mag2(detu);
+//   double detu2Inv = 1.0/detu2;
 
-  Phase(slice) = atan2(detu.imag(), detu.real());  
-  double grad2 = 0.0;
-  for (int i=0; i<N; i++) {
-    Grad(slice,i) = 
-      (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i)))*detu2Inv - kVec;
-    grad2 += dot(Grad(slice,i),Grad(slice,i));
-  }
-  return grad2;
-}
+//   Phase(slice) = atan2(detu.imag(), detu.real());  
+//   double grad2 = 0.0;
+//   for (int i=0; i<N; i++) {
+//     Grad(slice,i) = 
+//       (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i)))*detu2Inv - kVec;
+//     grad2 += dot(Grad(slice,i),Grad(slice,i));
+//   }
+//   return grad2;
+// }
 
 double
 FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activeParticles,
-			    bool updateMats)
+			    UpdateType update)
 {
   if ((species != UpSpeciesNum) && (species != DownSpeciesNum))
     return 0.0;
@@ -271,10 +279,10 @@ FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activePa
   int N = Path.Species(species).NumParticles;
   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
 
-  complex<double> detu = GradientDet(slice, species, activeParticles, updateMats);
+  complex<double> detu = GradientDet(slice, species, activeParticles, update);
 
 #ifdef DEBUG
-  complex<double> detuOld = GradientDet(slice, species);
+  complex<double> detuOld = GradientDet(slice, species, activeParticles, UPDATE_ALL);
   if (mag2(detu-detuOld)>1.0e-12*mag2(detuOld)) {
     cerr << "Inconsistent cached gradient at slice = " << slice 
 	 << " and species = " << species << endl;
@@ -299,6 +307,7 @@ FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activePa
   else
     perr << "Passed matrix check.\n";
 #endif
+
   double detu2 = mag2(detu);
   double detu2Inv = 1.0/detu2;
   
@@ -312,33 +321,25 @@ FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activePa
   return grad2;
 }
 
-/// This function returns the calculates the gradient squared for each
-/// particle in the species.
-void
-FixedPhaseClass::CalcGrad2 (int slice, int species, Array<double,1> &grad2,  
-			    const Array<int,1> &activeParticles)
+double
+FixedPhaseClass::PhaseGrad (int slice, int species, 
+			    const Array<int,1> &activeParticles,
+			    Array<Vec3,1> &gradPhase, UpdateType update)
 {
-  if ((species != UpSpeciesNum) && (species != DownSpeciesNum))
-    return;
-  Mirrored2DClass<Vec3> &Grad    = (species == UpSpeciesNum) ? UpGrad  : DownGrad;
-  Mirrored1DClass<double> &Phase = (species == UpSpeciesNum) ? UpPhase : DownPhase;
-
   int N = Path.Species(species).NumParticles;
-  if (grad2.size() != N)
-    grad2.resize(N);
   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
-  complex<double> detu = GradientDet(slice, species, activeParticles);
-  double detu2 = mag2(detu);
+
+  complex<double> detu = GradientDet(slice, species, activeParticles, update);
+    double detu2 = mag2(detu);
   double detu2Inv = 1.0/detu2;
 
-  Phase(slice) = atan2(detu.imag(), detu.real());
-
-  for (int i=0; i<N; i++) {
-    Grad (slice,i) = (detu.real()*imag(Gradient(i)) - 
-		      detu.imag()*real(Gradient(i)))*detu2Inv - kVec;
-    grad2(i) = dot(Grad(slice,i),Grad(slice,i));
-  }
+  double phase = atan2(detu.imag(), detu.real());
+  for (int i=0; i<N; i++) 
+    gradPhase(i) = detu2Inv *
+      (detu.real()*imag(Gradient(i)) - detu.imag()*real(Gradient(i))) - kVec;
+  return phase;
 }
+
 
 inline 
 double dot (Array<Vec3,1> &v1, Array<Vec3,1> &v2)
@@ -348,6 +349,79 @@ double dot (Array<Vec3,1> &v1, Array<Vec3,1> &v2)
     val += dot(v1(i), v2(i));
   return val;
 }
+
+
+double
+FixedPhaseClass::CalcAction (Array<Vec3,1> &G1, Array<Vec3,1> &G2,
+			     double phase1, double phase2, Array<Vec3,1> &dR)
+{
+  int N = G1.size();
+  static Array<Vec3,1> G1T, G2T, u;
+  if (G1T.size() != N) {
+    G1T.resize(N);
+    G2T.resize(N);
+    u.resize(N);
+  }
+
+  double dRMag, dRMag2;
+  dRMag2 = dot (dR, dR);
+  dRMag  = sqrt(dRMag2);
+  double dv = (phase2-phase1);
+  /// Add on the e^{-i k \cdot r} term
+  for (int i=0; i<G1.size(); i++) 
+    dv -= dot(kVec, dR(i));
+
+  while (dv > M_PI)
+    dv -= M_PI;
+  while (dv < -M_PI)
+    dv += M_PI;
+
+  u = (1.0/dRMag)*dR;
+  double g1 = dot (G1, u);
+  double g2 = dot (G2, u);
+  double g1T = g1*dRMag;
+  double g2T = g2*dRMag;
+  G1T = G1 - g1*u;
+  G2T = G2 - g2*u;
+  double action = 0.0;
+  // Up and down electrons must have the same mass.
+  double lambda = PathData.Path.Species(UpSpeciesNum).lambda;
+  for (int i=0; i<N; i++)
+    action += 0.5*lambda*(dot(G1T(i), G1T(i))+dot(G2T(i), G2T(i)));
+  action += lambda/(15.0*dRMag2)*
+    (2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv - g1T*g2T);
+  return action;
+}
+
+
+/// This function returns the calculates the gradient squared for each
+/// particle in the species.
+// void
+// FixedPhaseClass::CalcGrad2 (int slice, int species, Array<double,1> &grad2,  
+// 			    const Array<int,1> &activeParticles)
+// {
+//   if ((species != UpSpeciesNum) && (species != DownSpeciesNum))
+//     return;
+//   Mirrored2DClass<Vec3> &Grad    = (species == UpSpeciesNum) ? UpGrad  : DownGrad;
+//   Mirrored1DClass<double> &Phase = (species == UpSpeciesNum) ? UpPhase : DownPhase;
+
+//   int N = Path.Species(species).NumParticles;
+//   if (grad2.size() != N)
+//     grad2.resize(N);
+//   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
+//   complex<double> detu = GradientDet(slice, species, activeParticles);
+//   double detu2 = mag2(detu);
+//   double detu2Inv = 1.0/detu2;
+
+//   Phase(slice) = atan2(detu.imag(), detu.real());
+
+//   for (int i=0; i<N; i++) {
+//     Grad (slice,i) = (detu.real()*imag(Gradient(i)) - 
+// 		      detu.imag()*real(Gradient(i)))*detu2Inv - kVec;
+//     grad2(i) = dot(Grad(slice,i),Grad(slice,i));
+//   }
+// }
+
 
 
 double
@@ -378,18 +452,16 @@ FixedPhaseClass::Action (int slice1, int slice2,
     perr << "Not doing either up or down.  Hmmm... " 
 	 << " speciesNum = " << speciesNum << endl;
 
-  bool updateMats = true;
-
   double action = 0.0;
   if (doUp) {
     for (int slice=slice1; slice <= slice2; slice+=skip) 
-      UpGrad2(slice) = CalcGrad2 (slice, UpSpeciesNum, activeParticles, updateMats);
+      UpGrad2(slice) = CalcGrad2 (slice, UpSpeciesNum, activeParticles, UPDATE_ACTIVE);
     for (int link=slice1; link < slice2; link+=skip) 
       action += 0.5*lambda*levelTau*(UpGrad2(link)+UpGrad2(link+skip));
   }
   if (doDown) {
     for (int slice=slice1; slice <= slice2; slice+=skip) 
-      DownGrad2(slice) = CalcGrad2 (slice, DownSpeciesNum, activeParticles, updateMats);
+      DownGrad2(slice) = CalcGrad2 (slice, DownSpeciesNum, activeParticles, UPDATE_ACTIVE);
     for (int link=slice1; link < slice2; link+=skip) 
       action += 0.5*lambda*levelTau*(DownGrad2(link)+DownGrad2(link+skip));
   }
@@ -400,7 +472,7 @@ FixedPhaseClass::Action (int slice1, int slice2,
     Array<Vec3,1> dR(NumUp), u(NumUp), G1T(NumUp), G2T(NumUp);
 
     for (int slice=slice1; slice <= slice2; slice+=skip) 
-      UpGrad2(slice) = CalcGrad2 (slice, UpSpeciesNum, activeParticles, updateMats);
+      UpGrad2(slice) = CalcGrad2 (slice, UpSpeciesNum, activeParticles, UPDATE_ACTIVE);
     for (int link=slice1; link < slice2; link+=skip) {
       Array<Vec3,1> G1;  G1.reference(UpGrad.data()(link,Range::all()));
       Array<Vec3,1> G2;  G2.reference(UpGrad.data()((link+skip),Range::all()));;
@@ -429,11 +501,12 @@ FixedPhaseClass::Action (int slice1, int slice2,
       double g2T = g2*dRMag;
       G1T = G1 - g1*u;
       G2T = G2 - g2*u;
+      UpAction(link) = 0.0;
       for (int i=0; i<NumUp; i++)
-	action2 += 0.5*lambda*levelTau*(dot(G1T(i), G1T(i))+dot(G2T(i), G2T(i)));
-      action2 +=  lambda*levelTau*(2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv - g1T*g2T) /
+	UpAction(link) += 0.5*lambda*levelTau*(dot(G1T(i), G1T(i))+dot(G2T(i), G2T(i)));
+      UpAction(link) +=  lambda*levelTau*(2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv - g1T*g2T) /
 	(15.0*dRMag2);
-
+      action2 += UpAction(link);
     }
     //    fprintf (stderr, "Action1 = %1.12e  Action2 = %1.12e\n", action, action2);
   }
@@ -443,7 +516,7 @@ FixedPhaseClass::Action (int slice1, int slice2,
     Array<Vec3,1> dR(NumDown), u(NumDown), G1T(NumDown), G2T(NumDown);
 
     for (int slice=slice1; slice <= slice2; slice+=skip) 
-      DownGrad2(slice) = CalcGrad2 (slice, DownSpeciesNum, activeParticles, updateMats);
+      DownGrad2(slice) = CalcGrad2 (slice, DownSpeciesNum, activeParticles, UPDATE_ACTIVE);
     for (int link=slice1; link < slice2; link+=skip) {
       Array<Vec3,1> G1;  G1.reference(DownGrad.data()(link,Range::all()));
       Array<Vec3,1> G2;  G2.reference(DownGrad.data()((link+skip),Range::all()));;
@@ -472,14 +545,64 @@ FixedPhaseClass::Action (int slice1, int slice2,
       double g2T = g2*dRMag;
       G1T = G1 - g1*u;
       G2T = G2 - g2*u;
+      DownAction(link) = 0.0;
       for (int i=0; i<NumDown; i++)
-	action2 += 0.5*lambda*levelTau*(dot(G1T(i), G1T(i))+dot(G2T(i), G2T(i)));
-      action2 +=  lambda*levelTau*(2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv - g1T*g2T) /
+	DownAction(link) += 
+	  0.5*lambda*levelTau*(dot(G1T(i), G1T(i))+dot(G2T(i), G2T(i)));
+      DownAction(link) += lambda*levelTau*
+	(2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv - g1T*g2T) /
 	(15.0*dRMag2);
-
+      action2 += DownAction(link);
     }
     // fprintf (stderr, "Action1 = %1.12e  Action2 = %1.12e\n", action, action2);
   }
+  
+  // If it's the ions that have moved, update everything.  Else,
+  // update just the active electrons
+  UpdateType update = 
+    (speciesNum == IonSpeciesNum) ? UPDATE_ALL : UPDATE_ACTIVE;
+  double action3 = 0.0;
+  
+  if (doUp) {
+    static Array<Vec3,1> G1, G2, dR;
+    int first = PathData.Path.Species(UpSpeciesNum).FirstPtcl;
+    if (G1.size() != NumUp) {
+      G1.resize(NumUp); G2.resize(NumUp); dR.resize(NumUp);
+    }
+    double v1, v2;
+    v1 = PhaseGrad (slice1, UpSpeciesNum, activeParticles, G1, update);
+    for (int link=slice1; link<slice2; link+=skip) {
+      v2 = PhaseGrad (link+skip, UpSpeciesNum, activeParticles, G2, update);
+      for (int ptcl=0; ptcl<NumUp; ptcl++)
+	dR(ptcl) = PathData.Path.Velocity(link, link+skip, ptcl+first);
+      UpAction(link) = CalcAction(G1, G2, v1, v2, dR);
+      action3 += levelTau * UpAction(link);
+      v1 = v2;
+      G1 = G2;
+    }
+  }
+
+  if (doDown) {
+    static Array<Vec3,1> G1, G2, dR;
+    int first = PathData.Path.Species(DownSpeciesNum).FirstPtcl;
+    if (G1.size() != NumDown) {
+      G1.resize(NumDown); G2.resize(NumDown); dR.resize(NumDown);
+    }
+    double v1, v2;
+    v1 = PhaseGrad (slice1, DownSpeciesNum, activeParticles, G1, update);
+    for (int link=slice1; link<slice2; link+=skip) {
+      v2 = PhaseGrad (link+skip, DownSpeciesNum, activeParticles, G2, update);
+      for (int ptcl=0; ptcl<NumDown; ptcl++)
+	dR(ptcl) = PathData.Path.Velocity(link, link+skip, ptcl+first);
+      DownAction(link) = CalcAction (G1, G2, v1, v2, dR);
+      action3 += levelTau * DownAction(link);
+      v1 = v2;
+      G1 = G2;
+    }
+  }
+  fprintf (stderr, "action2 = %1.12e  action3 = %1.12e\n",
+	   action2, action3);
+
   return action2;
 }
 
@@ -498,22 +621,16 @@ FixedPhaseClass::d_dBeta (int slice1, int slice2, int level,
     UpdateCache();
   }
 
-  doUp   = (speciesNum == UpSpeciesNum);
-  doDown = (speciesNum == DownSpeciesNum);
-  // I think the follow was causing the nodal energy to be
-  // double-counted:
-  //   if (speciesNum == IonSpeciesNum) {
-  //     doUp   = true;
-  //     doDown = true;
-  //   }
-
   double dU = 0.0;
-  if (doUp) 
+  double tauInv = 1.0/PathData.Path.tau;
+  if (speciesNum == UpSpeciesNum) 
     for (int link=slice1; link < slice2; link+=skip) 
-      dU += 0.5*lambda*(UpGrad2(link)+UpGrad2(link+skip));
-  if (doDown) 
+      // dU += 0.5*lambda*(UpGrad2(link)+UpGrad2(link+skip));
+      dU += UpAction(link);
+  if (speciesNum == DownSpeciesNum) 
     for (int link=slice1; link < slice2; link+=skip) 
-      dU += 0.5*lambda*(DownGrad2(link)+DownGrad2(link+skip));
+      // dU += 0.5*lambda*(DownGrad2(link)+DownGrad2(link+skip));
+      dU += DownAction(link);
   return dU;
 }
 
@@ -569,13 +686,14 @@ FixedPhaseClass::Read(IOSectionClass &in)
   Cofactors.resize(NumUp, NumUp);
   GradMat.resize(NumUp, NumUp);
   Gradient.resize(NumUp);
-  UpGrad.resize(PathData.NumTimeSlices(), NumUp);
-  DownGrad.resize(PathData.NumTimeSlices(), NumDown);
-  UpPhase.resize(PathData.NumTimeSlices());
-  DownPhase.resize(PathData.NumTimeSlices());
-  UpGrad2.resize(PathData.NumTimeSlices());
-  DownGrad2.resize(PathData.NumTimeSlices());
-  
+  UpGrad.resize    (PathData.NumTimeSlices(), NumUp);
+  DownGrad.resize  (PathData.NumTimeSlices(), NumDown);
+  UpPhase.resize   (PathData.NumTimeSlices());
+  DownPhase.resize (PathData.NumTimeSlices());
+  UpGrad2.resize   (PathData.NumTimeSlices());
+  DownGrad2.resize (PathData.NumTimeSlices());
+  UpAction.resize  (PathData.NumTimeSlices()-1);
+  DownAction.resize(PathData.NumTimeSlices()-1);
 
   /////////////////////
   // Allocate caches //
@@ -636,71 +754,71 @@ FixedPhaseClass::Read(IOSectionClass &in)
 
 
 
-complex<double>
-FixedPhaseClass::GradientDet(int slice, int speciesNum)
-{
-#if NDIM==3
-  SpeciesClass &species = Path.Species(speciesNum);
-  int N = species.NumParticles;
-  int first = species.FirstPtcl;
-  if (N != Matrix.rows()) {
-    cerr << "N = " << N << endl;
-    cerr << "Matrix.rows() = " << Matrix.rows() << endl;
-  }
-  assert (N == Matrix.rows());
+// complex<double>
+// FixedPhaseClass::GradientDet(int slice, int speciesNum)
+// {
+// #if NDIM==3
+//   SpeciesClass &species = Path.Species(speciesNum);
+//   int N = species.NumParticles;
+//   int first = species.FirstPtcl;
+//   if (N != Matrix.rows()) {
+//     cerr << "N = " << N << endl;
+//     cerr << "Matrix.rows() = " << Matrix.rows() << endl;
+//   }
+//   assert (N == Matrix.rows());
 
-  // First, fill up determinant matrix
-  Array<complex<double>,1> vals;
-  Array<cVec3,1> grads;
-  //  fprintf (stderr, "Re(Matrix) = \n");
-  for (int j=0; j<N; j++) {
-    Vec3 r_j = Path(slice, first+j);
-    Path.PutInBox(r_j);
-    vals.reference(Matrix(j,Range::all()));
-    grads.reference(GradMat(j,Range::all()));
-    BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
-//     for (int i=0; i<N; i++)
-//       fprintf (stderr, "%8.4f ", real(Matrix(j,i)));
-//     fprintf (stderr, "\n");
+//   // First, fill up determinant matrix
+//   Array<complex<double>,1> vals;
+//   Array<cVec3,1> grads;
+//   //  fprintf (stderr, "Re(Matrix) = \n");
+//   for (int j=0; j<N; j++) {
+//     Vec3 r_j = Path(slice, first+j);
+//     Path.PutInBox(r_j);
+//     vals.reference(Matrix(j,Range::all()));
+//     grads.reference(GradMat(j,Range::all()));
+//     BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+// //     for (int i=0; i<N; i++)
+// //       fprintf (stderr, "%8.4f ", real(Matrix(j,i)));
+// //     fprintf (stderr, "\n");
 	     
-//     // New way of adding twist term
-//     double phi = -dot (kVec, r_j);
-//     double sinphi, cosphi;
-//     sincos (phi, &sinphi, &cosphi);
-//     complex<double> e2iphi = complex<double>(cosphi, sinphi);
-//     cVec3 ikVec;
-//     ikVec[0] = complex<double>(0.0, kVec[0]);
-//     ikVec[1] = complex<double>(0.0, kVec[1]);
-//     ikVec[2] = complex<double>(0.0, kVec[2]);
-//     for (int k=0; k<N; k++) {
-//       grads(k) = e2iphi*(grads(k) - vals(k)* ikVec);
-//       vals(k) *= e2iphi;
-//    }
-  }
+// //     // New way of adding twist term
+// //     double phi = -dot (kVec, r_j);
+// //     double sinphi, cosphi;
+// //     sincos (phi, &sinphi, &cosphi);
+// //     complex<double> e2iphi = complex<double>(cosphi, sinphi);
+// //     cVec3 ikVec;
+// //     ikVec[0] = complex<double>(0.0, kVec[0]);
+// //     ikVec[1] = complex<double>(0.0, kVec[1]);
+// //     ikVec[2] = complex<double>(0.0, kVec[2]);
+// //     for (int k=0; k<N; k++) {
+// //       grads(k) = e2iphi*(grads(k) - vals(k)* ikVec);
+// //       vals(k) *= e2iphi;
+// //    }
+//   }
 
-  // Compute determinant and cofactors
-  Cofactors = Matrix;
-  complex<double> det = ComplexDetCofactors (Cofactors, Workspace);
+//   // Compute determinant and cofactors
+//   Cofactors = Matrix;
+//   complex<double> det = ComplexDetCofactors (Cofactors, Workspace);
 
-  // Now, compute gradient
-  Gradient = cVec3(0.0, 0.0, 0.0);
-  for (int i=0; i<N; i++) {
-    for (int j=0; j<N; j++)
-      Gradient(i) += Cofactors(i,j)*GradMat(i,j);
-  }
-  //  perr << "Analytic gradient = " << Gradient << endl;
-//   GradientDetFD(slice, speciesNum);
-//   perr << "FD gradient = " << Gradient << endl;
-  return det;
-#endif
-}
+//   // Now, compute gradient
+//   Gradient = cVec3(0.0, 0.0, 0.0);
+//   for (int i=0; i<N; i++) {
+//     for (int j=0; j<N; j++)
+//       Gradient(i) += Cofactors(i,j)*GradMat(i,j);
+//   }
+//   //  perr << "Analytic gradient = " << Gradient << endl;
+// //   GradientDetFD(slice, speciesNum);
+// //   perr << "FD gradient = " << Gradient << endl;
+//   return det;
+// #endif
+// }
 
 
 
 complex<double>
 FixedPhaseClass::GradientDet(int slice, int speciesNum,
 			     const Array<int,1> &activeParticles,
-			     bool updateMats)
+			     UpdateType update)
 {
 #if NDIM==3
   SpeciesClass &species = Path.Species(speciesNum);
@@ -718,27 +836,33 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum,
     (speciesNum==UpSpeciesNum) ? UpGradMatCache.data() : DownGradMatCache.data();
 
 
-  if (updateMats) {
+  if (update != UPDATE_NONE) {
     // First, update determinant matrix for the active particles
     Array<complex<double>,1> vals;
     Array<cVec3,1> grads;
-    for (int i=0; i<activeParticles.size(); i++) {
-      int j = activeParticles(i) - first;
-      Vec3 r_j = Path(slice, activeParticles(i));
-      Path.PutInBox(r_j);
-      vals.reference ( matData(slice, j, Range::all()));
-      grads.reference(gradData(slice, j, Range::all()));
-      BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+    if (update == UPDATE_ALL) 
+      for (int j=0; j<N; j++) {
+	Vec3 r_j = Path(slice, j+first);
+	Path.PutInBox(r_j);
+	vals.reference ( matData(slice, j, Range::all()));
+	grads.reference(gradData(slice, j, Range::all()));
+	BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+      }
+    else if (update == UPDATE_ACTIVE)
+      for (int i=0; i<activeParticles.size(); i++) {
+	int j = activeParticles(i) - first;
+	Vec3 r_j = Path(slice, activeParticles(i));
+	Path.PutInBox(r_j);
+	vals.reference ( matData(slice, j, Range::all()));
+	grads.reference(gradData(slice, j, Range::all()));
+	BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+      }
+    else {
+      cerr << "Unrecognized update type.\n";
+      abort();
     }
+      
   }
-
-//   fprintf (stderr, "Re(matData(slice))) = \n");
-//   for (int j=0; j<N; j++){
-//     for (int i=0; i<N; i++)
-//       fprintf (stderr, "%8.4f ", real(matData(slice, j,i)));
-//     fprintf (stderr, "\n");
-//   }
-
 
   // Compute determinant and cofactors
   Cofactors = matData(slice, Range::all(), Range::all());
@@ -994,10 +1118,10 @@ FixedPhaseActionClass::SingleAction (int slice1, int slice2,
 				     const Array<int,1> &activeParticles,
 				     int level)
 {
-  if (PathData.Path.GetConfig() == 0)
-    return FixedPhaseA.Action (slice1, slice2, activeParticles, level, SpeciesNum);
-  else
-    return FixedPhaseB.Action (slice1, slice2, activeParticles, level, SpeciesNum);
+  if (PathData.Path.GetConfig() == 0) return FixedPhaseA.Action 
+    (slice1, slice2, activeParticles, level, SpeciesNum);
+  else return FixedPhaseB.Action 
+    (slice1, slice2, activeParticles, level, SpeciesNum);
 }
 
 double
@@ -1102,33 +1226,34 @@ FixedPhaseActionClass::Setk(Vec3 k)
 }
 
 
-void
-FixedPhaseActionClass::CalcGrad2 (int slice, Array<double,1> &grad2,
-				  const Array<int,1> &activeParticles)
-{
-  if (PathData.Path.GetConfig() == 0)
-    return FixedPhaseA.CalcGrad2(slice, SpeciesNum, grad2, activeParticles); 
-  else
-    return FixedPhaseB.CalcGrad2(slice, SpeciesNum, grad2, activeParticles); 
-}
+// void
+// FixedPhaseActionClass::CalcGrad2 (int slice, Array<double,1> &grad2,
+// 				  const Array<int,1> &activeParticles)
+// {
+//   if (PathData.Path.GetConfig() == 0)
+//     return FixedPhaseA.CalcGrad2(slice, SpeciesNum, grad2, activeParticles); 
+//   else
+//     return FixedPhaseB.CalcGrad2(slice, SpeciesNum, grad2, activeParticles); 
+// }
 
 double 
-FixedPhaseActionClass::CalcGrad2 (int slice, const Array<int,1> &activeParticles) 
+FixedPhaseActionClass::CalcGrad2 (int slice, const Array<int,1> &activeParticles,
+				  UpdateType update) 
 { 
   if (PathData.Path.GetConfig() == 0)
-    return FixedPhaseA.CalcGrad2(slice, SpeciesNum, activeParticles); 
+    return FixedPhaseA.CalcGrad2(slice, SpeciesNum, activeParticles, update); 
   else
-    return FixedPhaseB.CalcGrad2(slice, SpeciesNum, activeParticles); 
+    return FixedPhaseB.CalcGrad2(slice, SpeciesNum, activeParticles, update); 
 }
 
-double 
-FixedPhaseActionClass::CalcGrad2 (int slice)
-{ 
-  if (PathData.Path.GetConfig() == 0)
-    return FixedPhaseA.CalcGrad2(slice, SpeciesNum);
-  else
-    return FixedPhaseB.CalcGrad2(slice, SpeciesNum);
-}
+// double 
+// FixedPhaseActionClass::CalcGrad2 (int slice)
+// { 
+//   if (PathData.Path.GetConfig() == 0)
+//     return FixedPhaseA.CalcGrad2(slice, SpeciesNum);
+//   else
+//     return FixedPhaseB.CalcGrad2(slice, SpeciesNum);
+// }
 
 
 
