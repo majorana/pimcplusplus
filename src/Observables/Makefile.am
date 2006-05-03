@@ -31,6 +31,8 @@ libobservables_la_SOURCES  =     \
     ObservableModifiedEnergy.h   \
     OpenOrientation.h            \
     OpenOrientation.cc           \
+    ParticleAverageLoc.h         \
+    ParticleAverageLoc.cc        \
     PathDump.cc                  \
     PathDump.h                   \
     PermutationCount.h           \
@@ -39,6 +41,8 @@ libobservables_la_SOURCES  =     \
     Pressure.cc                  \
     PhiK.h                       \
     Phik.cc                      \
+    PlaneDensity.h               \
+    PlaneDensity.cc              \
     SuperfluiDrop.h              \
     SuperfluiDrop.cc             \
     StructureFactor.cc           \
