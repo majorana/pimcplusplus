@@ -95,7 +95,7 @@ void VacancyLocClass::Accumulate()
     for (int counter=0;counter<TempLoc.size();counter++)
       if (TempLoc(counter)==0 && NeighborsNotDoublyOccupied(counter)){
 	Loc(counter)++;
-	cerr<<"My temp Loc is "<<TempLoc<<endl;
+	//	cerr<<"My temp Loc is "<<TempLoc<<endl;
       }
     //    bool doPair=true;
     //    for (int counter=0;counter<TempLoc.size();counter++)
