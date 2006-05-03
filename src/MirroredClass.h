@@ -74,6 +74,10 @@ public:
   { Data[NEWMODE](Range(start,end)) = Data[OLDMODE](Range(start,end)); }
   /// This ShiftData function assumes that the index is the timeslice.
   inline void ShiftData(int sliceToShift, CommunicatorClass &comm);
+  /// This version is for link data, not timeslice data.  The
+  /// difference is that there is not invariant that the endpoint
+  /// slices are the same
+  inline void ShiftLinkData(int sliceToShift, CommunicatorClass &comm);
 };
 
 
@@ -221,6 +225,74 @@ Mirrored1DClass<T>::ShiftData(int slicesToShift, CommunicatorClass &comm)
   buffIndex=0;
   for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++) {
     Data[0](slice) = 
+      receiveBuffer(buffIndex);
+    buffIndex++;
+  }
+  
+  // Now copy A into B, since A has all the good, shifted data now.
+  Data[1] = Data[0];
+  // And we're done! 
+}
+
+template<typename T>
+inline void
+Mirrored1DClass<T>::ShiftLinkData(int linksToShift, CommunicatorClass &comm)
+{
+  int numProcs=comm.NumProcs();
+  int myProc=comm.MyProc();
+  int recvProc, sendProc;
+  int numLinks  = Data[0].extent(0);
+  assert(abs(linksToShift)<numLinks);
+  sendProc=(myProc+1) % numProcs;
+  recvProc=((myProc-1) + numProcs) % numProcs;
+  if (linksToShift<0)
+    swap (sendProc, recvProc);
+  
+  /// First shifts the data in the A copy left or right by the
+  /// appropriate amount 
+  if (linksToShift>0)
+    for (int link=numLinks-1; link>=linksToShift;link--)
+      Data[0](link) = Data[0](link-linksToShift);
+  else 
+    for (int link=0; link<numLinks+linksToShift;link++)
+      Data[0](link) = Data[0](link-linksToShift);
+  
+  /// Now bundle up the data to send to adjacent processor
+  int bufferSize=abs(linksToShift);
+  Array<T,3> sendBuffer(bufferSize), receiveBuffer(bufferSize);
+  int startLink;
+  int buffIndex=0;
+  if (linksToShift>0) {
+    startLink=numLinks-linksToShift;
+    for (int link=startLink; link<startLink+abs(linksToShift);link++) {
+      /// If shifting forward, don't send the last time link (so always)
+      /// send link-1
+      sendBuffer(buffIndex) = Data[1](link);
+      buffIndex++;
+    }
+  }
+  else {
+    startLink=0;
+    for (int link=startLink; link<startLink+abs(linksToShift);link++){
+      /// If shifting backward, don't send the first time link (so always)
+      /// send link+1
+      sendBuffer(buffIndex) = Data[1](link);
+      buffIndex++;
+    }
+  }
+  
+  /// Send and receive data to/from neighbors.
+  comm.SendReceive(sendProc, sendBuffer, recvProc, receiveBuffer);
+  
+  if (linksToShift>0)
+    startLink=0;
+  else 
+    startLink=numLinks+linksToShift;
+  
+  /// Copy the data into the A copy
+  buffIndex=0;
+  for (int link=startLink; link<startLink+abs(linksToShift);link++) {
+    Data[0](link) = 
       receiveBuffer(buffIndex);
     buffIndex++;
   }
