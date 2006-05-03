@@ -20,6 +20,7 @@
 #include "Pressure.h"
 #include "StructureFactor.h"     
 #include "SuperfluiDrop.h"
+#include "SuperfluidFraction.h"
 #include "Time.h"
 #include "VacancyLocation.h"
 #include "Weight.h"
