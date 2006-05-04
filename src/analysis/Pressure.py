@@ -15,7 +15,7 @@ def ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut):
     N=infiles.CountVars()
     for i in range(0,N):
         data = infiles.ReadVar(i)
-        if (type(data[0])==numarray.numarraycore.NumArray):
+        if (type(data[0])==numarray.numarraycore.NumArray and (data[0].rank==1)):
             variabList.append(i)
             numProcs=len(data)
     scalarVarTable=BuildTable(numProcs+1,len(variabList)+1)
