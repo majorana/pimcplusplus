@@ -9,7 +9,8 @@ main()
   //  Vec3 box(6.5, 6.500, 6.501);
   double kcut = 4.0;
   IOSectionClass in;
-  in.OpenFile ("NaUnscreenedPH_Feb18_05.h5");
+  //in.OpenFile ("NaUnscreenedPH_Feb18_05.h5");
+  in.OpenFile ("NaLocalPH.h5");
   //in.OpenFile ("NaPH_US_March1_05b.h5");
   Potential *ph = ReadPotential(in);
   in.CloseFile();

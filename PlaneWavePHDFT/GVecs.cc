@@ -41,6 +41,30 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut)
   ////////////////////////////////////////////
   vector<GVec> vecs;
   GVec vec;
+  int actxmin, actxmax, actymin, actymax, actzmin, actzmax;
+  actxmin = actxmax = actymin = actymax = actzmin = actzmax = 0;
+  TinyVector<double,3> g;
+  for (int ix=-2*maxX; ix<=2*maxX; ix++) {
+    g[0] = ix*kBox[0];
+    for (int iy=-2*maxY; iy<=2*maxY; iy++) {
+      g[1] = iy*kBox[1];
+      for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
+	g[2] = iz*kBox[2];
+	if (dot(k+g,k+g) < (4.0*kcut*kcut)) {
+	  actxmin = min (ix, actxmin);
+	  actxmax = max (ix, actxmax);
+	  actymin = min (iy, actymin);
+	  actymax = max (iy, actymax);
+	  actzmin = min (iz, actzmin);
+	  actzmax = max (iz, actzmax);
+	}
+      }
+    }
+  }
+  Nx = actxmax-actxmin+2;
+  Ny = actymax-actymin+2;
+  Nz = actzmax-actzmin+2;
+
   /// First, count k-vectors
   for (int ix=-maxX; ix<=maxX; ix++) {
     vec.G[0] = ix*kBox[0];
