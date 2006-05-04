@@ -57,7 +57,7 @@ def Stats(x):
     i=0          
     tempC=0.5
     kappa=0.0
-    while (tempC>0 and i<N):
+    while (tempC>0 and i<(N-1)):
         kappa=kappa+2.0*tempC
         i=i+1
         tempC=c(i,x,mean,var)
