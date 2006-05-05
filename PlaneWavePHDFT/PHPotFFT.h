@@ -9,9 +9,9 @@ class PHPotFFTClass : public VionBase
 private:
   kSpacePH kPH;
   Array<Mat3,1> Fk;
-  Array<cMat3,3> Fr;
+  Array<TinyMatrix<complex<FFT_FLOAT>,3,3>,3> Fr;
   Array<double,1> Vk;
-  Array<complex<double>,3> Vr;
+  Array<complex<FFT_FLOAT>,3> Vr;
   zVec Vc;
   zVecVec Gc;
   FFTBox      &cFFT;

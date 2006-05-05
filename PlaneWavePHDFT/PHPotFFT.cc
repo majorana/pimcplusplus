@@ -55,9 +55,9 @@ PHPotFFTClass::SetupkPotentials()
 void 
 PHPotFFTClass::SetuprPotentials()
 {
-  cFFT.kBox = complex<double>(0.0, 0.0);
-  complex<double> z(0.0, 0.0);
-  cMat3 Mat0;
+  cFFT.kBox = complex<FFT_FLOAT>(0.0, 0.0);
+  complex<FFT_FLOAT> z(0.0, 0.0);
+  TinyMatrix<complex<FFT_FLOAT>,3,3> Mat0;
   Mat0(0,0)=z; Mat0(0,1)=z; Mat0(0,2)=z; 
   Mat0(1,0)=z; Mat0(1,1)=z; Mat0(1,2)=z;
   Mat0(2,0)=z; Mat0(2,1)=z; Mat0(2,2)=z;
@@ -65,7 +65,11 @@ PHPotFFTClass::SetuprPotentials()
   for (int i=0; i<GVecs.DeltaSize(); i++) {
     Int3 I = GVecs.DeltaI(i);
     cFFT.kBox(I)   = StructureFactor(i)*Vk(i);
+#ifdef FFT_USE_SINGLE
+    MatFFT.kBox(I) = conv(StructureFactor(i)*Fk(i));
+#else
     MatFFT.kBox(I) = StructureFactor(i)*Fk(i);
+#endif
   }
   cFFT.k2r();
   Vr = cFFT.rBox;
@@ -152,10 +156,10 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
   for (int ix=0; ix<nx; ix++)
     for (int iy=0; iy<ny; iy++)
       for (int iz=0; iz<nz; iz++) {
-	register complex<double> vx = VecFFT.rBox(ix,iy,iz)[0];
-	register complex<double> vy = VecFFT.rBox(ix,iy,iz)[1];
-	register complex<double> vz = VecFFT.rBox(ix,iy,iz)[2];
-	register complex<double> Fvx, Fvy, Fvz;
+	register complex<FFT_FLOAT> vx = VecFFT.rBox(ix,iy,iz)[0];
+	register complex<FFT_FLOAT> vy = VecFFT.rBox(ix,iy,iz)[1];
+	register complex<FFT_FLOAT> vz = VecFFT.rBox(ix,iy,iz)[2];
+	register complex<FFT_FLOAT> Fvx, Fvy, Fvz;
 	Fvx  = Fr(ix,iy,iz)(0,0) * vx;
 	Fvy  = Fr(ix,iy,iz)(1,0) * vx;
 	Fvz  = Fr(ix,iy,iz)(2,0) * vx;
@@ -166,7 +170,7 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
 	Fvy += Fr(ix,iy,iz)(1,2) * vz;
 	Fvz += Fr(ix,iy,iz)(2,2) * vz;
 	VecFFT.rBox(ix,iy,iz) =
-	TinyVector<complex<double>,3>(Fvx,Fvy,Fvz);
+	TinyVector<complex<FFT_FLOAT>,3>(Fvx,Fvy,Fvz);
 
 //	VecFFT.rBox(ix,iy,iz) = Fr(ix,iy,iz)*VecFFT.rBox(ix,iy,iz);
 

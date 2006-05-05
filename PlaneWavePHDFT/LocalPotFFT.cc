@@ -53,8 +53,7 @@ LocalPotFFTClass::SetupkPotentials()
 void 
 LocalPotFFTClass::SetuprPotentials()
 {
-  cFFT.kBox = complex<double>(0.0, 0.0);
-  complex<double> z(0.0, 0.0);
+  cFFT.kBox = complex<FFT_FLOAT>(0.0, 0.0);
   for (int i=0; i<GVecs.DeltaSize(); i++) {
     Int3 I = GVecs.DeltaI(i);
     cFFT.kBox(I)   = StructureFactor(i)*Vk(i);

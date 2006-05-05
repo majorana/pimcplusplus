@@ -4,19 +4,23 @@
 #include "../Blitz.h"
 #include <fftw3.h>
 
-typedef TinyVector<complex<double>,3>   cVec3;
-typedef TinyMatrix<complex<double>,3,3> cMat3;
-
+#ifdef FFT_USE_SINGLE
+#define FFT_FLOAT float
+#define FFTNAME(name) fftwf_ ## name
+#else
+#define FFT_FLOAT double
+#define FFTNAME(name) fftw_ ## name
+#endif
 
 class FFT1D
 {
 private:
-  complex<double> *rData, *kData;
-  fftw_plan r2kPlan, k2rPlan;
+  complex<FFT_FLOAT> *rData, *kData;
+  FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  double sqrtNinv;
+  FFT_FLOAT sqrtNinv;
 public:
-  Array<complex<double>,1> rBox, kBox;
+  Array<complex<FFT_FLOAT>,1> rBox, kBox;
 
   void resize (int n);
   inline int size()
@@ -31,11 +35,11 @@ public:
   ~FFT1D()
   {
     if (Allocated) {
-      fftw_free(rData);
+      FFTNAME(free)(rData);
       if (!InPlace)
-	fftw_free(kData);
-      fftw_destroy_plan(r2kPlan);
-      fftw_destroy_plan(k2rPlan);
+	FFTNAME(free)(kData);
+      FFTNAME(destroy_plan)(r2kPlan);
+      FFTNAME(destroy_plan)(k2rPlan);
     }
   }
 };
@@ -44,61 +48,63 @@ template<int DIM>
 class FFTVec1D
 {
 private:
-  TinyVector<complex<double>,DIM> *rData, *kData;
-  fftw_plan r2kPlan, k2rPlan;
+  TinyVector<complex<FFT_FLOAT>,DIM> *rData, *kData;
+  FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  double sqrtNinv;
+  FFT_FLOAT sqrtNinv;
 public:
-  Array<TinyVector<complex<double>,DIM>,1> rBox, kBox;
+  Array<TinyVector<complex<FFT_FLOAT>,DIM>,1> rBox, kBox;
 
   void resize (int n)
   {
     if (Allocated) {
-      fftw_free(rData);
+      FFTNAME(free)(rData);
       if (!InPlace)
-	fftw_free(kData);
-      fftw_destroy_plan(r2kPlan);
-      fftw_destroy_plan(k2rPlan);
+	FFTNAME(free)(kData);
+      FFTNAME(destroy_plan)(r2kPlan);
+      FFTNAME(destroy_plan)(k2rPlan);
     }
-    rData = (TinyVector<complex<double>,DIM>*) 
-      fftw_malloc(DIM*sizeof(fftw_complex)*n);
+    rData = (TinyVector<complex<FFT_FLOAT>,DIM>*) 
+      FFTNAME(malloc)(DIM*sizeof(FFTNAME(complex))*n);
     if (!InPlace)
-      kData = (TinyVector<complex<double>,DIM>*) 
-	fftw_malloc(DIM*sizeof(fftw_complex)*n);
+      kData = (TinyVector<complex<FFT_FLOAT>,DIM>*) 
+	FFTNAME(malloc)(DIM*sizeof(FFTNAME(complex))*n);
     else
       kData = rData;
     
-    Array<TinyVector<complex<double>,DIM>,1> *temp;
-    temp = new Array<TinyVector<complex<double>,DIM>,1>
+    Array<TinyVector<complex<FFT_FLOAT>,DIM>,1> *temp;
+    temp = new Array<TinyVector<complex<FFT_FLOAT>,DIM>,1>
       (rData, shape(n), neverDeleteData);
     rBox.reference (*temp);
     delete temp;
     
-    temp = new Array<TinyVector<complex<double>,DIM>,1>
+    temp = new Array<TinyVector<complex<FFT_FLOAT>,DIM>,1>
       (kData, shape(n), neverDeleteData);
     kBox.reference(*temp);
     delete temp;
     
     r2kPlan =      
-      fftw_plan_many_dft (1, &n, DIM, reinterpret_cast<fftw_complex*>(rData),
-			  &n, DIM, 1,  reinterpret_cast<fftw_complex*>(kData), 
-			  &n, DIM, 1, 1, FFTW_MEASURE);
+      FFTNAME(plan_many_dft) 
+      (1, &n, DIM, reinterpret_cast<FFTNAME(complex)*>(rData),
+       &n, DIM, 1,  reinterpret_cast<FFTNAME(complex)*>(kData), 
+       &n, DIM, 1, 1, FFTW_MEASURE);
     assert (r2kPlan != NULL);
     k2rPlan = 
-      fftw_plan_many_dft (1, &n, DIM, reinterpret_cast<fftw_complex*>(kData),
-			  &n, DIM, 1, reinterpret_cast<fftw_complex*>(rData), 
-			  &n, DIM, 1, -1, FFTW_MEASURE);
+      FFTNAME(plan_many_dft) 
+      (1, &n, DIM, reinterpret_cast<FFTNAME(complex)*>(kData),
+       &n, DIM, 1, reinterpret_cast<FFTNAME(complex)*>(rData), 
+       &n, DIM, 1, -1, FFTW_MEASURE);
     assert (k2rPlan != NULL);
     
-    sqrtNinv = sqrt(1.0/(double)n);
+    sqrtNinv = sqrt(1.0/(FFT_FLOAT)n);
     Allocated = true;
   }
-
+  
   inline int size()
   { return rBox.size(); }
-  void r2k() { fftw_execute(r2kPlan); }
-  void k2r() { fftw_execute(k2rPlan); }
-
+  void r2k() { FFTNAME(execute)(r2kPlan); }
+  void k2r() { FFTNAME(execute)(k2rPlan); }
+  
   FFTVec1D(bool inPlace=true) : Allocated(false), InPlace(inPlace)
   {
     // Do nothing for now
@@ -106,11 +112,11 @@ public:
   ~FFTVec1D()
   {
     if (Allocated) {
-      fftw_free(rData);
+      FFTNAME(free)(rData);
       if (!InPlace)
-	fftw_free(kData);
-      fftw_destroy_plan(r2kPlan);
-      fftw_destroy_plan(k2rPlan);
+	FFTNAME(free)(kData);
+      FFTNAME(destroy_plan)(r2kPlan);
+      FFTNAME(destroy_plan)(k2rPlan);
     }
   }
 };
@@ -120,12 +126,12 @@ public:
 class FFT3D
 {
 private:
-  complex<double> *rData, *kData;
-  fftw_plan r2kPlan, k2rPlan;
+  complex<FFT_FLOAT> *rData, *kData;
+  FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  double sqrtNinv;
+  FFT_FLOAT sqrtNinv;
 public:
-  Array<complex<double>,3> rBox, kBox;
+  Array<complex<FFT_FLOAT>,3> rBox, kBox;
 
   void resize (int nx, int ny, int nz);
   inline int size()
@@ -140,58 +146,58 @@ public:
   ~FFT3D()
   {
     if (Allocated) {
-      fftw_free(rData);
+      FFTNAME(free)(rData);
       if (!InPlace)
-	fftw_free(kData);
-      fftw_destroy_plan(r2kPlan);
-      fftw_destroy_plan(k2rPlan);
+	FFTNAME(free)(kData);
+      FFTNAME(destroy_plan)(r2kPlan);
+      FFTNAME(destroy_plan)(k2rPlan);
     }
   }
 };
 
 
-class FFT3Df
-{
-private:
-  complex<float> *rData, *kData;
-  fftwf_plan r2kPlan, k2rPlan;
-  bool Allocated, InPlace;
-  float sqrtNinv;
-public:
-  Array<complex<float>,3> rBox, kBox;
+// class FFT3Df
+// {
+// private:
+//   complex<float> *rData, *kData;
+//   fftwf_plan r2kPlan, k2rPlan;
+//   bool Allocated, InPlace;
+//   float sqrtNinv;
+// public:
+//   Array<complex<float>,3> rBox, kBox;
 
-  void resize (int nx, int ny, int nz);
-  inline int size()
-  { return rBox.size(); }
-  void r2k();
-  void k2r();
+//   void resize (int nx, int ny, int nz);
+//   inline int size()
+//   { return rBox.size(); }
+//   void r2k();
+//   void k2r();
 
-  FFT3Df(bool inPlace=true) : Allocated(false), InPlace(inPlace)
-  {
-    // Do nothing for now
-  }
-  ~FFT3Df()
-  {
-    if (Allocated) {
-      fftwf_free(rData);
-      if (!InPlace)
-	fftw_free(kData);
-      fftwf_destroy_plan(r2kPlan);
-      fftwf_destroy_plan(k2rPlan);
-    }
-  }
-};
+//   FFT3Df(bool inPlace=true) : Allocated(false), InPlace(inPlace)
+//   {
+//     // Do nothing for now
+//   }
+//   ~FFT3Df()
+//   {
+//     if (Allocated) {
+//       fftwf_free(rData);
+//       if (!InPlace)
+// 	FFTNAME(free(kData);
+//       fftwf_destroy_plan(r2kPlan);
+//       fftwf_destroy_plan(k2rPlan);
+//     }
+//   }
+// };
 
 
 class FFTVec3D
 {
 private:
-  cVec3 *rData, *kData;
-  fftw_plan r2kPlan, k2rPlan;
+  TinyVector<complex<FFT_FLOAT>,3> *rData, *kData;
+  FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  double sqrtNinv;
+  FFT_FLOAT sqrtNinv;
 public:
-  Array<cVec3,3> rBox, kBox;
+  Array< TinyVector<complex<FFT_FLOAT>,3>,3> rBox, kBox;
 
   void resize (int nx, int ny, int nz);
   inline int size()
@@ -206,11 +212,11 @@ public:
   ~FFTVec3D()
   {
     if (Allocated) {
-      fftw_free(rData);
+      FFTNAME(free)(rData);
       if (!InPlace)
-	fftw_free(kData);
-      fftw_destroy_plan(r2kPlan);
-      fftw_destroy_plan(k2rPlan);
+	FFTNAME(free)(kData);
+      FFTNAME(destroy_plan)(r2kPlan);
+      FFTNAME(destroy_plan)(k2rPlan);
     }
   }
 };
@@ -218,12 +224,12 @@ public:
 class FFTMat3D
 {
 private:
-  cMat3 *rData, *kData;
-  fftw_plan r2kPlan, k2rPlan;
+  TinyMatrix<complex<FFT_FLOAT>,3,3> *rData, *kData;
+  FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  double sqrtNinv;
+  FFT_FLOAT sqrtNinv;
 public:
-  Array<cMat3,3> rBox, kBox;
+  Array<TinyMatrix<complex<FFT_FLOAT>,3,3>,3> rBox, kBox;
 
   void resize (int nx, int ny, int nz);
   inline int size()
@@ -239,11 +245,11 @@ public:
   {
     if (Allocated) {
       cerr << "Deallocating FFTMat3D.\n";
-      fftw_free(rData);
+      FFTNAME(free)(rData);
       if (!InPlace)
-	fftw_free(kData);
-      fftw_destroy_plan(r2kPlan);
-      fftw_destroy_plan(k2rPlan);
+	FFTNAME(free)(kData);
+      FFTNAME(destroy_plan)(r2kPlan);
+      FFTNAME(destroy_plan)(k2rPlan);
     }
   }
 };

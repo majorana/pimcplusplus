@@ -5,72 +5,42 @@ FFTBox::PutkVec (const zVec &c)
 {
   kBox = 0.0;
   if (c.size() == GVecs.size()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.Index(n)[0]+Nx)%Nx;
-//       int j = (GVecs.Index(n)[1]+Ny)%Ny;
-//       int k = (GVecs.Index(n)[2]+Nz)%Nz;
-//       kBox(i,j,k) = c(n);
+    for (int n=0; n<c.size(); n++) 
       kBox(GVecs.Index(n)) = c(n);
-    }
   else if (c.size() == GVecs.DeltaSize()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-//       int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-//       int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-//       kBox(i,j,k) = c(n);
+    for (int n=0; n<c.size(); n++) 
       kBox(GVecs.DeltaI(n)) = c(n);
-    }
   else {
     cerr << "Incommensurate dimensions in PutkVec.\n";
     abort();
   }
 }
 
+
 void 
 FFTBox::GetkVec (zVec &c)
 {
   if (c.size() == GVecs.size()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.Index(n)[0]+Nx)%Nx;
-//       int j = (GVecs.Index(n)[1]+Ny)%Ny;
-//       int k = (GVecs.Index(n)[2]+Nz)%Nz;
-//       c(n) = kBox(i,j,k);
+    for (int n=0; n<c.size(); n++) 
       c(n) = kBox(GVecs.Index(n));
-    }
   else if (c.size() == GVecs.DeltaSize()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-//       int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-//       int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-//       c(n) = kBox(i,j,k);
+    for (int n=0; n<c.size(); n++) 
       c(n) = kBox(GVecs.DeltaI(n));
-    }
   else {
     cerr << "Incommensurate dimensions in GetkVec.\n";
     abort();
   }
 }
 
-
 void
 FFTBox::AddFromVec (const zVec &c)
 {
   if (c.size() == GVecs.size()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.Index(n)[0]+Nx)%Nx;
-//       int j = (GVecs.Index(n)[1]+Ny)%Ny;
-//       int k = (GVecs.Index(n)[2]+Nz)%Nz;
-//       kBox(i,j,k) += c(n);
+    for (int n=0; n<c.size(); n++) 
       kBox(GVecs.Index(n)) += c(n);
-    }
   else if (c.size() == GVecs.DeltaSize()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-//       int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-//       int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-//       kBox(i,j,k) += c(n);
+    for (int n=0; n<c.size(); n++) 
       kBox(GVecs.DeltaI(n)) += c(n);
-    }
   else {
     cerr << "Incommensurate dimensions in AddFromVec.\n";
     abort();
@@ -81,21 +51,11 @@ void
 FFTBox::AddToVec (zVec &c)
 {
   if (c.size() == GVecs.size()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.Index(n)[0]+Nx)%Nx;
-//       int j = (GVecs.Index(n)[1]+Ny)%Ny;
-//       int k = (GVecs.Index(n)[2]+Nz)%Nz;
-//       c(n) += kBox(i,j,k);
+    for (int n=0; n<c.size(); n++) 
       c(n) += kBox(GVecs.Index(n));
-    }
   else if (c.size() == GVecs.DeltaSize()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-//       int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-//       int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-//       c(n) += kBox(i,j,k);
+    for (int n=0; n<c.size(); n++) 
       c(n) += kBox(GVecs.DeltaI(n));
-    }
   else {
     cerr << "Incommensurate dimensions in GetkVec.\n";
     abort();
@@ -189,21 +149,11 @@ void
 FFTVecBox::AddToVec (zVecVec &c)
 {
   if (c.size() == GVecs.size()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.Index(n)[0]+Nx)%Nx;
-//       int j = (GVecs.Index(n)[1]+Ny)%Ny;
-//       int k = (GVecs.Index(n)[2]+Nz)%Nz;
-//       c(n) += kBox(i,j,k);
+    for (int n=0; n<c.size(); n++) 
       c(n) += kBox(GVecs.Index(n));
-    }
   else if (c.size() == GVecs.DeltaSize()) 
-    for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-//       int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-//       int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-//       c(n) += kBox(i,j,k);
+    for (int n=0; n<c.size(); n++) 
       c(n) += kBox(GVecs.DeltaI(n));
-    }
   else {
     cerr << "Incommensurate dimensions in GetkVec.\n";
     abort();
@@ -217,26 +167,24 @@ FFTVecBox::AddToVec (zVecVec &c)
 void
 FFTMatBox::PutkVec (const zMatVec &c)
 {
-  cMat3 zero;
+  TinyMatrix<complex<FFT_FLOAT>,3,3> zero;
   zero(0,0)=0.0; zero(0,1)=0.0; zero(0,2)= 0.0;
   zero(1,0)=0.0; zero(1,1)=0.0; zero(1,2)= 0.0;
   zero(2,0)=0.0; zero(2,1)=0.0; zero(2,2)= 0.0;
   kBox = zero;
   if (c.size() == GVecs.size()) 
     for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.Index(n)[0]+Nx)%Nx;
-//       int j = (GVecs.Index(n)[1]+Ny)%Ny;
-//       int k = (GVecs.Index(n)[2]+Nz)%Nz;
-//       kBox(i,j,k) = c(n);
-      kBox(GVecs.Index(n)) = c(n);
+      TinyMatrix<complex<FFT_FLOAT>,3,3> &val = kBox(GVecs.Index(n));
+      val(0,0)=c(n)(0,0); val(0,1)=c(n)(0,1); val(0,2)=c(n)(0,2);
+      val(1,0)=c(n)(1,0); val(1,1)=c(n)(0,1); val(1,2)=c(n)(1,2);
+      val(2,0)=c(n)(2,0); val(2,1)=c(n)(0,1); val(2,2)=c(n)(2,2);
     }
   else if (c.size() == GVecs.DeltaSize()) 
     for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-//       int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-//       int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-//       kBox(i,j,k) = c(n);
-      kBox(GVecs.DeltaI(n)) = c(n);
+      TinyMatrix<complex<FFT_FLOAT>,3,3> &val = kBox(GVecs.DeltaI(n));
+      val(0,0)=c(n)(0,0); val(0,1)=c(n)(0,1); val(0,2)=c(n)(0,2);
+      val(1,0)=c(n)(1,0); val(1,1)=c(n)(0,1); val(1,2)=c(n)(1,2);
+      val(2,0)=c(n)(2,0); val(2,1)=c(n)(0,1); val(2,2)=c(n)(2,2);
     }
   else {
     cerr << "Incommensurate dimensions in PutkVec.\n";
@@ -249,19 +197,19 @@ FFTMatBox::GetkVec (zMatVec &c)
 {
   if (c.size() == GVecs.size()) 
     for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.Index(n)[0]+Nx)%Nx;
-//       int j = (GVecs.Index(n)[1]+Ny)%Ny;
-//       int k = (GVecs.Index(n)[2]+Nz)%Nz;
-//       c(n) = kBox(i,j,k);
-      c(n) = kBox(GVecs.Index(n));
+      TinyMatrix<complex<FFT_FLOAT>,3,3> &val = kBox(GVecs.Index(n)); 
+      c(n)(0,0)=val(0,0); c(n)(0,1)=val(0,1); c(n)(0,2)=val(0,2);
+      c(n)(1,0)=val(1,0); c(n)(1,1)=val(1,1); c(n)(1,2)=val(1,2);
+      c(n)(2,0)=val(2,0); c(n)(2,1)=val(2,1); c(n)(2,2)=val(2,2);
     }
   else if (c.size() == GVecs.DeltaSize()) 
     for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-//       int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-//       int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-//       c(n) = kBox(i,j,k);
-      c(n) = kBox(GVecs.DeltaI(n));
+//       TinyMatrix<complex<FFT_FLOAT>,3,3> &val = kBox(GVecs.Index(n));
+//       c(n) = kBox(GVecs.DeltaI(n));
+      TinyMatrix<complex<FFT_FLOAT>,3,3> &val = kBox(GVecs.DeltaI(n)); 
+      c(n)(0,0)=val(0,0); c(n)(0,1)=val(0,1); c(n)(0,2)=val(0,2);
+      c(n)(1,0)=val(1,0); c(n)(1,1)=val(1,1); c(n)(1,2)=val(1,2);
+      c(n)(2,0)=val(2,0); c(n)(2,1)=val(2,1); c(n)(2,2)=val(2,2);
     }
   else {
     cerr << "Incommensurate dimensions in GetkVec.\n";
@@ -275,19 +223,18 @@ FFTMatBox::AddFromVec (const zMatVec &c)
 {
   if (c.size() == GVecs.size()) 
     for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.Index(n)[0]+Nx)%Nx;
-//       int j = (GVecs.Index(n)[1]+Ny)%Ny;
-//       int k = (GVecs.Index(n)[2]+Nz)%Nz;
-//       kBox(i,j,k) += c(n);
-      kBox(GVecs.Index(n)) += c(n);
+      //kBox(GVecs.Index(n)) += c(n);
+      TinyMatrix<complex<FFT_FLOAT>,3,3> &val = kBox(GVecs.Index(n)); 
+      val(0,0)+=c(n)(0,0); val(0,1)+=c(n)(0,1); val(0,2)+=c(n)(0,2);
+      val(1,0)+=c(n)(1,0); val(1,1)+=c(n)(1,1); val(1,2)+=c(n)(1,2);
+      val(2,0)+=c(n)(2,0); val(2,1)+=c(n)(2,1); val(2,2)+=c(n)(2,2);
     }
   else if (c.size() == GVecs.DeltaSize()) 
     for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-//       int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-//       int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-//       kBox(i,j,k) += c(n);
-      kBox(GVecs.DeltaI(n)) += c(n);
+      TinyMatrix<complex<FFT_FLOAT>,3,3> &val = kBox(GVecs.DeltaI(n)); 
+      val(0,0)+=c(n)(0,0); val(0,1)+=c(n)(0,1); val(0,2)+=c(n)(0,2);
+      val(1,0)+=c(n)(1,0); val(1,1)+=c(n)(1,1); val(1,2)+=c(n)(1,2);
+      val(2,0)+=c(n)(2,0); val(2,1)+=c(n)(2,1); val(2,2)+=c(n)(2,2);
     }
   else {
     cerr << "Incommensurate dimensions in AddFromVec.\n";
@@ -300,19 +247,19 @@ FFTMatBox::AddToVec (zMatVec &c)
 {
   if (c.size() == GVecs.size()) 
     for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.Index(n)[0]+Nx)%Nx;
-//       int j = (GVecs.Index(n)[1]+Ny)%Ny;
-//       int k = (GVecs.Index(n)[2]+Nz)%Nz;
-//       c(n) += kBox(i,j,k);
-      c(n) += kBox(GVecs.Index(n));
+      TinyMatrix<complex<FFT_FLOAT>,3,3> &val = kBox(GVecs.Index(n)); 
+      c(n)(0,0)+=val(0,0); c(n)(0,1)+=val(0,1); c(n)(0,2)+=val(0,2);
+      c(n)(1,0)+=val(1,0); c(n)(1,1)+=val(1,1); c(n)(1,2)+=val(1,2);
+      c(n)(2,0)+=val(2,0); c(n)(2,1)+=val(2,1); c(n)(2,2)+=val(2,2);
+      // c(n) += kBox(GVecs.Index(n));
     }
   else if (c.size() == GVecs.DeltaSize()) 
     for (int n=0; n<c.size(); n++) {
-//       int i = (GVecs.DeltaI(n)[0]+Nx)%Nx;
-//       int j = (GVecs.DeltaI(n)[1]+Ny)%Ny;
-//       int k = (GVecs.DeltaI(n)[2]+Nz)%Nz;
-//       c(n) += kBox(i,j,k);
-      c(n) += kBox(GVecs.DeltaI(n));
+      //      c(n) += kBox(GVecs.DeltaI(n));
+      TinyMatrix<complex<FFT_FLOAT>,3,3> &val = kBox(GVecs.DeltaI(n)); 
+      c(n)(0,0)+=val(0,0); c(n)(0,1)+=val(0,1); c(n)(0,2)+=val(0,2);
+      c(n)(1,0)+=val(1,0); c(n)(1,1)+=val(1,1); c(n)(1,2)+=val(1,2);
+      c(n)(2,0)+=val(2,0); c(n)(2,1)+=val(2,1); c(n)(2,2)+=val(2,2);
     }
   else {
     cerr << "Incommensurate dimensions in GetkVec.\n";

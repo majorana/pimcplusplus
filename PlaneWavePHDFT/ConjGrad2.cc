@@ -179,7 +179,7 @@ void ConjGrad::Solve(int band)
   double residualNorm = 1.0;
   //  while (fabs (Elast - Energies(band)) > Tolerance) {
   int iter=0;
-  while ((residualNorm > 1.0e-8) && (iter < 50)) {
+  while ((residualNorm > 1.0e-6) && (iter < 50)) {
     //    cerr << "Energy = " << 27.211383*Energies(band) << endl;
     Elast = Energies(band);
     // First, calculate conjugate gradient direction

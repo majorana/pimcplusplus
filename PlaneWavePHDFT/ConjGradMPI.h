@@ -42,7 +42,7 @@ public:
   ConjGradMPI (HamiltonianClass &h, Array<complex<double>,2> &bands,
 	       CommunicatorClass &comm) : 
     H(h), IsSetup(false), iter(0),
-    LastBand(-1), Bands(bands), Tolerance (1.0e-8),
+    LastBand(-1), Bands(bands), Tolerance (1.0e-6),
     Communicator(comm)
   {
     // Do nothing for now
