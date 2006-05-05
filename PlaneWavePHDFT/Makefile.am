@@ -13,7 +13,7 @@ LDADD = libpw.la                 ../IO/libIO.la                           \
         $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS)
 
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
-              $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)
+              $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS) $(FFT_DEF)
 
 noinst_LTLIBRARIES = libpw.la
 libpw_la_SOURCES = ConjGrad2.h        \
@@ -57,7 +57,7 @@ includedir=$(prefix)/include/Common/PlaneWavePHDFT
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
 libpw_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS) \
-                    $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(AM_CXXFLAGS)
+                    $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(AM_CXXFLAGS) $(FFT_DEF)
 libpw_la_LIBADD   =
 
 #if HAVE_GMP

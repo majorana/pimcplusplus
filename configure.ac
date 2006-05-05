@@ -20,8 +20,6 @@ PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
 # this creates and AC_SUBST's vars GSL_CFLAGS and GSL_LIBS
 PKG_CHECK_MODULES(GSL, gsl, gsl_ok=yes, gsl_ok=no)
 
-FFTW3_LIBS="$FFTW3_LIBS -lfftw3f"
-
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([hdf5], [H5open],[hdf5_ok=yes], hdf5_ok=no)
 if test "x$hdf5_ok" = "xyes"; then
@@ -120,6 +118,16 @@ AC_SUBST(MPI_DEF)
 AC_SUBST(MPI_LIBS)
 AC_SUBST(MPI_CFLAGS)
 AC_SUBST(MPI_RUN)
+
+# Check if we want to use single-precision FFTs for SIMD spead improvements
+AC_ARG_ENABLE(fft-single,    [  --enable-fft-single       enable single-precision FFTs (default=no)])
+if test "$enable_fft_single" = "yes"; then
+    FFT_DEF="-DFFT_USE_SINGLE"
+    FFTW3_LIBS="$FFTW3_LIBS -lfftw3f"
+else
+    FFT_DEF=" "
+fi
+AC_SUBST(FFT_DEF)
 
 AC_ARG_ENABLE(profile,[  --enable-profile        instrument code with profiling information])
 if test "x$enable_profile" = "xyes"; then
