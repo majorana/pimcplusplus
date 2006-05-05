@@ -20,6 +20,7 @@ PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
 # this creates and AC_SUBST's vars GSL_CFLAGS and GSL_LIBS
 PKG_CHECK_MODULES(GSL, gsl, gsl_ok=yes, gsl_ok=no)
 
+FFTW3_LIBS="$FFTW3_LIBS -lfftw3f"
 
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([hdf5], [H5open],[hdf5_ok=yes], hdf5_ok=no)

@@ -150,6 +150,39 @@ public:
 };
 
 
+class FFT3Df
+{
+private:
+  complex<float> *rData, *kData;
+  fftwf_plan r2kPlan, k2rPlan;
+  bool Allocated, InPlace;
+  float sqrtNinv;
+public:
+  Array<complex<float>,3> rBox, kBox;
+
+  void resize (int nx, int ny, int nz);
+  inline int size()
+  { return rBox.size(); }
+  void r2k();
+  void k2r();
+
+  FFT3Df(bool inPlace=true) : Allocated(false), InPlace(inPlace)
+  {
+    // Do nothing for now
+  }
+  ~FFT3Df()
+  {
+    if (Allocated) {
+      fftwf_free(rData);
+      if (!InPlace)
+	fftw_free(kData);
+      fftwf_destroy_plan(r2kPlan);
+      fftwf_destroy_plan(k2rPlan);
+    }
+  }
+};
+
+
 class FFTVec3D
 {
 private:

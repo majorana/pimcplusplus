@@ -107,6 +107,61 @@ FFT3D::k2r()
 //     *(rBox.data()+i) *= sqrtNinv;
 }
 
+
+
+
+void 
+FFT3Df::resize(int nx, int ny, int nz)
+{
+  cerr << "FFT box size is " << nx << "x" << ny << "x" << nz << ".\n";
+  if (Allocated) {
+    fftwf_free(rData);
+    if (!InPlace)
+      fftwf_free(kData);
+    fftwf_destroy_plan(r2kPlan);
+    fftwf_destroy_plan(k2rPlan);
+  }
+  rData = (complex<float>*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny*nz);
+  if (!InPlace)
+    kData = (complex<float>*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny*nz);
+  else
+    kData = rData;
+
+  Array<complex<float>,3> *temp;
+  temp = new Array<complex<float>,3>(rData, shape(nx,ny,nz), neverDeleteData);
+  rBox.reference (*temp);
+  delete temp;
+
+  temp = new Array<complex<float>,3>(kData, shape(nx,ny,nz), neverDeleteData);
+  kBox.reference(*temp);
+  delete temp;
+
+  r2kPlan = 
+    fftwf_plan_dft_3d(nx, ny, nz, reinterpret_cast<fftwf_complex*>(rData), 
+		     reinterpret_cast<fftwf_complex*>(kData), 1, FFTW_MEASURE);
+  k2rPlan = 
+    fftwf_plan_dft_3d (nx, ny, nz, reinterpret_cast<fftwf_complex*>(kData), 
+		       reinterpret_cast<fftwf_complex*>(rData), -1,FFTW_MEASURE);
+
+  sqrtNinv = sqrt(1.0/(float)(nx*ny*nz));
+  Allocated = true;
+}
+
+
+void 
+FFT3Df::r2k()
+{
+  fftwf_execute(r2kPlan);
+}
+
+
+void 
+FFT3Df::k2r()
+{
+  fftwf_execute(k2rPlan);
+}
+
+
 void 
 FFTVec3D::resize(int nx, int ny, int nz)
 {
