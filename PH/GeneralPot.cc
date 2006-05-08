@@ -29,7 +29,7 @@ GeneralPot::V(double r)
   if (r < PotGrid->End)
     return PotSpline(r);
   else
-    return (Z/r);
+    return (-Z/r);
 }
 
 double
@@ -38,7 +38,7 @@ GeneralPot::dVdr (double r)
   if (r < PotGrid->End)
     return PotSpline.Deriv(r);
   else
-    return -Z/(r*r);
+    return Z/(r*r);
 }
 
 double
@@ -47,7 +47,7 @@ GeneralPot::d2Vdr2 (double r)
   if (r < PotGrid->End)
     return PotSpline.Deriv2(r);
   else
-    return 2.0*Z/(r*r*r);
+    return -2.0*Z/(r*r*r);
 }
 
 
