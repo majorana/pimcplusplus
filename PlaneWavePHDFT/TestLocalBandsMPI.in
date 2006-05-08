@@ -1,6 +1,8 @@
 Section (Potential, "NaLocalPH.h5");
 
 Array<double,1> Box(3) = [ 8.11, 8.11, 8.11 ];
+//Array<double,1> Box(3) = [ 26.6, 26.6, 26.6 ];
+
 Array<double,2> Positions(2,3) = [ 0.0   , 0.0   ,  0.0,
                                    4.055, 4.055, 4.055 ];
 int NumBands = 8;
@@ -16,5 +18,6 @@ Array<double,2> kPoints(8,3) = [ 0.0,     0.0,     0.0,
 
 int InterpPoints = 4;
 //double kCut = 7.7460;
-double kCut = 4.0;
+//double kCut = 4.0;
+double kCut = 13.0;
 string OutFilename = "TestLocalBandsMPI.dat";

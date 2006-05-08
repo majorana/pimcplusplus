@@ -190,7 +190,7 @@ ConjGradMPI::Iterate()
   }
   CollectBands();
   GramSchmidt(Bands);
-  CheckOverlaps();
+  // CheckOverlaps();
   return max(Residuals);
 }
 
@@ -201,12 +201,12 @@ void ConjGradMPI::Solve()
   EtaXiLast = complex<double>(0.0, 0.0);
   int iter = 0;
   double residual = 1.0;
-  while ((iter < 100) && (residual > 1.0e-8)) {
+  while ((iter < 100) && (residual > Tolerance)) {
     residual = Iterate();
     iter++;
   }
 
-  if (residual > 1.0e-8)
+  if (residual > Tolerance)
     perr << "Warning:  conjugate gradient residual norm = " 
 	 << residual << endl;
   perr << "# of iterations = " << iter << endl;
