@@ -11,18 +11,23 @@ def UnweightedAverage(meanList,errorList):
 
 
 def WeightedAvg (means, errors):
-     if (errors[0] != 0.0):
-          weights = map (lambda x: 1.0/(x*x), errors)
-          norm = 1.0/sum(weights)
-          weights = map(lambda x: x*norm, weights)
-          avg = 0.0
-          error2 = 0.0
-          for i in range (0,len(means)):
-               avg = avg + means[i]*weights[i]
-               error2 = error2 + weights[i]**2*errors[i]*errors[i]
-          return (avg, math.sqrt(error2))
-     else:
-          return (sum(means)/len(means), 0.0)
+    zeroErrors = False
+    for i in errors:
+        if i == 0.0:
+            zeroErrors = True
+    
+    if (not zeroErrors):
+        weights = map (lambda x: 1.0/(x*x), errors)
+        norm = 1.0/sum(weights)
+        weights = map(lambda x: x*norm, weights)
+        avg = 0.0
+        error2 = 0.0
+        for i in range (0,len(means)):
+            avg = avg + means[i]*weights[i]
+            error2 = error2 + weights[i]**2*errors[i]*errors[i]
+        return (avg, math.sqrt(error2))
+    else:
+        return (sum(means)/len(means), 0.0)
 
 
 def MeanErrorString (mean, error):

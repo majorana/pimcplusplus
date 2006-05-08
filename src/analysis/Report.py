@@ -15,6 +15,7 @@ from Coupling import *
 from Vacancy import *
 from PlaneDensity import *
 from Pressure import *
+from Langevin import *
 basename = sys.argv[1]
 infiles = IOSectionClassList()
 infiles.OpenFiles(basename);
@@ -41,18 +42,39 @@ if not(os.access(dirName,os.F_OK)):
 os.chdir(dirName)
 detailedDoc=SeriesDocument()
 summaryDoc=SeriesDocument()
+summaryDoc.append(Href("detail.html","Detailed HTML Page"))
+summaryDoc.append(HR())
+
 
 #ProcessMove(doc,infiles)
 
 
 (_,tau,numTimeSlices)=ProcessTopTable(summaryDoc,infiles)
+beta = tau*numTimeSlices
+
+###########
+## Moves ##
+###########
+infiles.OpenSection("Moves")
+numSections=infiles.CountSections()
+
+for secNum in range(0, numSections):
+     infiles.OpenSection(secNum)
+     moveName = infiles.GetName()
+     if moveName == "Langevin":
+          print "Processing Langevin move."
+          ProcessLangevin(infiles, summaryDoc, detailedDoc, StartCut, beta)
+          print "Done Langevin."
+     infiles.CloseSection() # Current move section
+infiles.CloseSection() # "Moves"
+
+
+#################
+## Observables ##
+#################
 currNum=0
 infiles.OpenSection("Observables")
 numSections=infiles.CountSections()
-summaryDoc.append(Href("detail.html","Detailed HTML Page"))
-summaryDoc.append(HR())
-
-
 
 for counter in range(0,numSections):
      infiles.OpenSection(counter)
