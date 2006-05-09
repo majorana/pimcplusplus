@@ -40,6 +40,6 @@ cd ${PBS_O_WORKDIR}
 #
 # We now insist users use the rjq command for running 
 # all MPI or Charm jobs whether in batch or interactive.
-rjq pimc++ Na_16_tau0.0625_M2048.twistAvg_B.in
+rjq pimc++ Na_16_tau0.0625_M2048.twistAvg_B.LocalPH.in
 
 

@@ -100,6 +100,12 @@ if test "x$enable_open" = "xyes"; then
    F77FLAGS="-DOPEN_LOOPS $CXXFLAGS"
 fi
 
+AC_ARG_ENABLE(open,[ --enable-on-fermions  enable code for order-n fermions])
+if test "x$enable_on_fermions" = "xyes"; then
+   AC_CHECK_LIB([dctmp], [cg])
+   CXXFLAGS="-DORDER_N_FERMIONS $CXXFLAGS"
+fi
+
 # Optionally set dimensionality
 AC_ARG_WITH(ndim, [  --with-ndim=N           specify simulation dimensionality])
 if (test "x$with_ndim" != "x"); then

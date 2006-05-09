@@ -1,8 +1,13 @@
 double tau=0.125;
 
+Section (Parallel)
+{
+  int ProcsPerClone = 4;
+}
+
 Section (System)
 {
-  int NumTimeSlices=200;
+  int NumTimeSlices=280;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[10.0,10.0,10.0];
   double kCutoff = 2.0;

@@ -9,9 +9,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#ifdef ORDER_N_FERMIONS
 extern "C"{
 #include "../det_calc_uekt.h"
 }
+#endif
 // int testme();
 
 
@@ -149,6 +152,7 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
 				  const Array<int,1> &changePtcls,
 				  int level)
 {
+#ifdef ORDER_N_FERMIONS
   //  cerr<<"Calling single action"<<endl;
   //  ModeType currMode=PathData.Path.Path.GetMode();
 //   SetMode(OLDMODE);
@@ -198,6 +202,12 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
   //    cerr<<"My det ratio is "<<1.0/abs(det_ratio)<<endl;
   return 1.0/abs(det_ratio);
   //  return 0.0;
+#else
+  cerr << "PIMC++ was not configured with --enable-on-fermions.\n"
+       << "This function doesn't work.  Please reconfigure.\n";
+  abort();
+  return 0.0;
+#endif
 
 }
 

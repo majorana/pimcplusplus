@@ -1,6 +1,6 @@
 noinst_LTLIBRARIES = libactions.la
 
-libactions_la_CXXFLAGS = $(COMMON_CFLAGS) -lgsl -lgslcblas -ldctmp -lf2c -lm
+libactions_la_CXXFLAGS = $(COMMON_CFLAGS) 
 libactions_la_SOURCES =            \
     ActionBase.cc                  \
     ActionBase.h                   \

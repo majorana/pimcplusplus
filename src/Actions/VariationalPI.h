@@ -1,5 +1,3 @@
-#ifdef ORDER_N_FERMIONS
-
 #ifndef VARIATIONAL_PI__CLASS_H
 #define VARIATIONAL_PI__CLASS_H
 
@@ -41,9 +39,5 @@ public:
   VariationalPIClass (PathDataClass &pathData);
 };
 
-
-
-
 #endif
 
-#endif

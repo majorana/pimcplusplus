@@ -1,5 +1,9 @@
 double tau=0.5;
 
+Section (Parallel) {
+  int ProcsPerClone = 1;
+}
+
 Section (System)
 {
   int NumTimeSlices=600;

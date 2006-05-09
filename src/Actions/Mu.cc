@@ -18,13 +18,14 @@ MuClass::MuClass(PathDataClass &pathData) :
 bool 
 MuClass::PadWorm()
 {
+#if 1==2
   int headSlice;
   int headPtcl;
   int tailSlice;
   int tailPtcl;
   PathData.FindHead(headSlice,headPtcl);
   PathData.FindTail(tailSlice,tailPtcl);
-  
+
 
   int nextPtcl=tailPtcl;
   int nextSlice=tailSlice;
@@ -53,7 +54,7 @@ MuClass::PadWorm()
 // 						  newNumParticles);
 //     PathData.Path.Permutation.resizeAndPreserve(newNumParticles);
 //   }
-
+#endif
 }
 
 double 
@@ -61,7 +62,7 @@ MuClass::SingleAction (int slice1, int slice2,
 			       const Array<int,1> &changedParticles,
 			       int level)
 {
-
+#if 1==2
   int headPtcl;
   int tailPtcl;
   int headSlice;
@@ -123,5 +124,5 @@ MuClass::SingleAction (int slice1, int slice2,
 //     return -100000;
 //  else
   return totalMu;
-
+#endif
 }

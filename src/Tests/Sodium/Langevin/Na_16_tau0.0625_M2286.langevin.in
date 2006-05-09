@@ -144,85 +144,85 @@ Section (Observables)
   string OutFileBase=
     "~/Runs/NaRuns/Langevin/Na_16_tau0.0625_M2286.langevin.turing";
   int FileStart = 0;
-  Section (Observable) {
-    string Type = "Energy";
-    string Name = "Energy";
-    int Frequency=5;
-    int dumpFreq=100;
+//   Section (Observable) {
+//     string Type = "Energy";
+//     string Name = "Energy";
+//     int Frequency=5;
+//     int dumpFreq=100;
     
-  }
-  Section (Observable) {
-    string Type = "PairCorrelation";
-    string Name = "Na-eup";
-    string Species1 = "Na";
-    string Species2 = "eup";
-    int Frequency=5;
-    int dumpFreq=100;
-    Section (Grid) {
-      string Type = "Linear";
-      int NumPoints = 200;
-    }
-  }
-  Section (Observable) {
-    string Type = "PairCorrelation";
-    string Name = "Na-edown";
-    string Species1 = "Na";
-    string Species2 = "edown";
-    int Frequency=5;
-    int dumpFreq=100;
-    Section (Grid) {
-      string Type = "Linear";
-      int NumPoints = 200;
-    }
-  }
-  Section (Observable) {
-    string Type = "PairCorrelation";
-    string Name = "eup-eup";
-    string Species1 = "eup";
-    string Species2 = "eup";
-    int Frequency=5;
-    int dumpFreq=100;
-    Section (Grid) {
-      string Type = "Linear";
-      int NumPoints = 200;
-    }
-  }
-  Section (Observable) {
-    string Type = "PairCorrelation";
-    string Name = "eup-edown";
-    string Species1 = "eup";
-    string Species2 = "edown";
-    int Frequency=5;
-    int dumpFreq=100;
-    Section (Grid) {
-      string Type = "Linear";
-      int NumPoints = 200;
-    }
-  }
-  Section (Observable) {
-    string Type = "PairCorrelation";
-    string Name = "edown-edown";
-    string Species1 = "edown";
-    string Species2 = "edown";
-    int Frequency=5;
-    int dumpFreq=100;
-    Section (Grid) {
-      string Type = "Linear";
-      int NumPoints = 200;
-    }
-  }
-  Section (Observable) {
-    string Type = "PairCorrelation";
-    string Name = "Na-Na";
-    string Species1 = "Na";
-    string Species2 = "Na";
-    int Frequency=5;
-    int dumpFreq=100;
-    Section (Grid) {
-      string Type = "Linear";
-      int NumPoints = 200;
-    }
-  }
+//   }
+//   Section (Observable) {
+//     string Type = "PairCorrelation";
+//     string Name = "Na-eup";
+//     string Species1 = "Na";
+//     string Species2 = "eup";
+//     int Frequency=5;
+//     int dumpFreq=100;
+//     Section (Grid) {
+//       string Type = "Linear";
+//       int NumPoints = 200;
+//     }
+//   }
+//   Section (Observable) {
+//     string Type = "PairCorrelation";
+//     string Name = "Na-edown";
+//     string Species1 = "Na";
+//     string Species2 = "edown";
+//     int Frequency=5;
+//     int dumpFreq=100;
+//     Section (Grid) {
+//       string Type = "Linear";
+//       int NumPoints = 200;
+//     }
+//   }
+//   Section (Observable) {
+//     string Type = "PairCorrelation";
+//     string Name = "eup-eup";
+//     string Species1 = "eup";
+//     string Species2 = "eup";
+//     int Frequency=5;
+//     int dumpFreq=100;
+//     Section (Grid) {
+//       string Type = "Linear";
+//       int NumPoints = 200;
+//     }
+//   }
+//   Section (Observable) {
+//     string Type = "PairCorrelation";
+//     string Name = "eup-edown";
+//     string Species1 = "eup";
+//     string Species2 = "edown";
+//     int Frequency=5;
+//     int dumpFreq=100;
+//     Section (Grid) {
+//       string Type = "Linear";
+//       int NumPoints = 200;
+//     }
+//   }
+//   Section (Observable) {
+//     string Type = "PairCorrelation";
+//     string Name = "edown-edown";
+//     string Species1 = "edown";
+//     string Species2 = "edown";
+//     int Frequency=5;
+//     int dumpFreq=100;
+//     Section (Grid) {
+//       string Type = "Linear";
+//       int NumPoints = 200;
+//     }
+//   }
+//   Section (Observable) {
+//     string Type = "PairCorrelation";
+//     string Name = "Na-Na";
+//     string Species1 = "Na";
+//     string Species2 = "Na";
+//     int Frequency=5;
+//     int dumpFreq=100;
+//     Section (Grid) {
+//       string Type = "Linear";
+//       int NumPoints = 200;
+//     }
+//   }
 //   Section (Observable) {
 //     string Type   = "TimeAnalysis";
 //     string Name   = "TimeAnalysis";
@@ -307,13 +307,13 @@ Section (Algorithm) {
 	Section (Move)   { string Name = "Shift";        }
       }
       Section (Move)     { string Name = "Langevin";     }
-      Section (Observe)  { string Name = "Na-eup";       }
-      Section (Observe)  { string Name = "Na-edown";     }
-      Section (Observe)  { string Name = "eup-eup";      }
-      Section (Observe)  { string Name = "edown-edown";  }
-      Section (Observe)  { string Name = "eup-edown";    }
-      Section (Observe)  { string Name = "Na-Na";        }
-      Section (Observe)  { string Name = "Energy";       }
+//       Section (Observe)  { string Name = "Na-eup";       }
+//       Section (Observe)  { string Name = "Na-edown";     }
+//       Section (Observe)  { string Name = "eup-eup";      }
+//       Section (Observe)  { string Name = "edown-edown";  }
+//       Section (Observe)  { string Name = "eup-edown";    }
+//       Section (Observe)  { string Name = "Na-Na";        }
+//       Section (Observe)  { string Name = "Energy";       }
       // Section (Observe)  { string Name = "TimeAnalysis"; }
       // Section (Observe) { string Name = "PathDump"; }
     }

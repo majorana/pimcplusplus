@@ -2,12 +2,12 @@ double tau=0.05;
 
 Section (Parallel)
 {
-  int ProcsPerClone = 1;
+  int ProcsPerClone = 4;
 }
 
 Section (System)
 {
-  int NumTimeSlices=40;
+  int NumTimeSlices=41;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   Array<double,1> Box(3)=[8.0,8.0,8.0];
   Section (Particles)
