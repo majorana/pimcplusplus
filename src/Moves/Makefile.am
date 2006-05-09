@@ -34,6 +34,8 @@ libmoves_la_SOURCES  =           \
     GlobalJosephsonMove.cc       \
     LangevinMove.cc              \
     LangevinMove.h               \
+    LeviFlightStage.h            \
+    LeviFlightStage.cc           \
     MetaMoves.cc                 \
     MetaMoves.h                  \
     MoveBase.cc                  \
@@ -67,12 +69,20 @@ libmoves_la_SOURCES  =           \
     TablePermuteStage.h          \
     ClusterMove.cc               \
     ClusterMove.h                \
+    VariationalDisplaceMove.h                \
+    VariationalDisplaceMove.cc                \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \
-    WaterMoveRing.h              \
-    WormGrow.h		         \
-    WormGrow.cc                  \
-    WormPermuteStage.h           \
-    WormPermuteStage.cc     
+    WaterMoveRing.h              
+//    WormClose.h                  \
+//    WormClose.cc                 \
+//    WormStage.h                  \
+//    WormStage.cc                 \
+//    WormGrow.h		         \
+//    WormGrow.cc                  \
+//    WormRemove.cc                \
+//    WormRemove.h                 \
+//    WormPermuteStage.h           \
+//    WormPermuteStage.cc     
 
