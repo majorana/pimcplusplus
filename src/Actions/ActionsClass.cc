@@ -15,6 +15,8 @@ ActionsClass::Read(IOSectionClass &in)
   assert(in.ReadVar ("NumImages", NumImages));
   Kinetic.SetNumImages (NumImages);
   KineticSphere.SetNumImages(NumImages);
+  Mu.Read(in);
+  VariationalPI.Read(in);
   perr << "MaxLevels = " << MaxLevels << endl;
   bool checkJosephson=false;
   in.ReadVar("Josephson",checkJosephson);
@@ -22,7 +24,12 @@ ActionsClass::Read(IOSectionClass &in)
     Josephson.Read(in);
     Hermele.Read(in);
   }
-    
+  bool usePairAction=false;
+  in.ReadVar("Paired",usePairAction);
+  if (usePairAction){
+    PairFixedPhase.Read(in);
+  }
+  
   if (!in.ReadVar ("UseRPA", UseRPA))
     UseRPA = false;
   if (UseRPA) 
@@ -152,6 +159,7 @@ ActionsClass::Read(IOSectionClass &in)
 void
 ActionsClass::ReadNodalActions(IOSectionClass &in)
 {
+  cerr<<"READING IN THE NODAL ACTIONS"<<endl;
   int numNodeSections=in.CountSections("NodalAction");
   NodalActions.resize (PathData.Path.NumSpecies());
   NodalActions = NULL;
@@ -159,11 +167,15 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
     in.OpenSection("NodalAction", nodeSection);
     string type, speciesString;
     assert (in.ReadVar ("Type", type));
+    cerr<<"Type is "<<type<<endl;
     if (type == "FREE") {
       assert (in.ReadVar("Species", speciesString));
       int species = PathData.Path.SpeciesNum(speciesString);
+      cerr<<"Species Num is "<<species<<endl;
       NodalActions(species) = 
 	new FreeNodalActionClass (PathData, species);
+      ((FreeNodalActionClass*)NodalActions(species))->Read(in);
+      cerr<<"Exiting"<<endl;
     }
     else if (type == "GROUNDSTATE") {
       GroundStateClass &groundState = *new GroundStateClass(PathData);
@@ -177,6 +189,10 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
       NodalActions(groundState.IonSpeciesNum) = 
 	new GroundStateNodalActionClass 
 	(PathData, groundState, groundState.IonSpeciesNum);
+    }
+    else if (type == "VARIATIONAL") {
+      NodalActions(0) = 
+	&VariationalPI;
     }
     else if (type == "FIXEDPHASE") {
       FixedPhaseClass &fixedPhaseA = *new FixedPhaseClass(PathData);

@@ -10,6 +10,7 @@
 #include "KineticClass.h"
 #include "NodalActionClass.h"
 #include "FreeNodalActionClass.h"
+#include "PairFixedPhase.h"
 #include "GroundStateNodalActionClass.h"
 #include "FixedPhaseActionClass.h"
 #include "DavidLongRangeClass.h"
@@ -20,6 +21,8 @@
 #include "KineticSphereClass.h"
 #include "Josephson.h"
 #include "Hermele.h"
+#include "Mu.h"
+#include "VariationalPI.h"
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
 /// It includes kinetic, short range, long range, long range RPA
@@ -36,7 +39,7 @@ private:
 public:
   // This stores pointers to pair action fits for each pair of species.
   Array<PairActionFitClass*,2> PairMatrix;
-
+  VariationalPIClass VariationalPI;
   /// Used to keep track of the total action
   double TotalA, TotalB;
 
@@ -52,6 +55,7 @@ public:
   KineticSphereClass KineticSphere;
   JosephsonClass Josephson;
   HermeleClass Hermele;
+  MuClass Mu;
   /// The short range part of the pair action.  This is the complete
   /// pair action in the case of short-range potententials.  The
   /// short-range action is summed in real space. 
@@ -81,7 +85,7 @@ public:
   Array<NodalActionClass *,1> NodalActions;
   //DiagonalClass Diagonal;
   //ImportanceSampleClass ImportanceSample;
-
+  PairFixedPhaseClass PairFixedPhase;
   // Potentials
   ShortRangePotClass ShortRangePot;
   LongRangePotClass  LongRangePot;
@@ -157,8 +161,11 @@ public:
     Kinetic(pathData),
     KineticSphere(pathData),
     PathData(pathData),
+    PairFixedPhase(pathData),
     TIP5PWater(pathData),
     ST2Water(pathData),
+    Mu(pathData),
+    VariationalPI(pathData),
     StructureReject(pathData),
     NumImages(1),
     UseLongRange(true)

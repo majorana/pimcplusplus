@@ -1,10 +1,12 @@
 noinst_LTLIBRARIES = libactions.la
 
-libactions_la_CXXFLAGS = $(COMMON_CFLAGS)
+libactions_la_CXXFLAGS = $(COMMON_CFLAGS) -lgsl -lgslcblas -ldctmp -lf2c -lm
 libactions_la_SOURCES =            \
     ActionBase.cc                  \
     ActionBase.h                   \
     ActionsClass.cc                \
+   ../det_calc_uekt.h              \
+   ../det_calc_uekt.c              \
     ActionsClass.h                 \
     DavidLongRangeClass.cc         \
     DavidLongRangeClass.h          \
@@ -28,10 +30,14 @@ libactions_la_SOURCES =            \
     LongRangePotClass.h            \
     LongRangeRPAClass.cc           \
     LongRangeRPAClass.h            \
+    Mu.h                           \
+    Mu.cc                          \
     NodalActionClass.cc            \
     NodalActionClass.h             \
     OpenLoopImportance.cc          \
     OpenLoopImportance.h           \
+    PairFixedPhase.h               \
+    PairFixedPhase.cc              \
     ST2WaterClass.cc               \
     ST2WaterClass.h                \
     ShortRangeApproximateClass.cc  \
@@ -45,6 +51,8 @@ libactions_la_SOURCES =            \
     StructureReject.cc             \
     StructureReject.h              \
     TIP5PWaterClass.cc             \
-    TIP5PWaterClass.h
+    TIP5PWaterClass.h              \
+    VariationalPI.h                \
+    VariationalPI.cc
 
 EXTRA_DIST = FixedPhase.tex
