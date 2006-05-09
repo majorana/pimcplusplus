@@ -245,7 +245,6 @@ PressureClass::Accumulate()
 void
 PressureClass::WriteBlock()
 {
-  //  cerr<<"Calling pressure writeblock"<<endl;
   PathClass &Path = PathData.Path;
   KineticSum    /= (double)(NumSamples*Path.TotalNumSlices);
   ShortRangeSum /= (double)(NumSamples*Path.TotalNumSlices);
