@@ -216,11 +216,11 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
 					    int slice1, int slice2,
 					    int excludeParticle)
 {
-  if (PathData.Path.Species(SpeciesNum).GetParticleType()==FERMION)
-    ConstructFermionCycleTable(speciesNum,slice1,slice2);
-  else
+  /// HACK HACK HACK HACK
+//   if (PathData.Path.Species(SpeciesNum).GetParticleType()==FERMION)
+//     ConstructFermionCycleTable(speciesNum,slice1,slice2);
+//   else
     ConstructBosonCycleTable(speciesNum,slice1,slice2,excludeParticle);
-
 }
 
 
@@ -352,34 +352,34 @@ void PermuteTableClass::ConstructBosonCycleTable(int speciesNum,
       }
     }
   }
-  if (OnlyOdd || PathData.Path.Species(SpeciesNum).GetParticleType()==FERMION){
-    int currSpot=0;
-    for (int counter=0;counter<NumEntries;counter++){
-      if (CycleTable(counter).Length % 2 ==1){
-	CycleTable(currSpot)=CycleTable(counter);
-	currSpot++;
-      }
-    }
-    NumEntries=currSpot;
-    CycleTable(0).C=CycleTable(0).P;
-    for (int counter=1;counter<NumEntries;counter++){
-      CycleTable(counter).C=CycleTable(counter-1).C+CycleTable(counter).P;
-    }
-  }
-  else if (OnlyEven) {
-    int currSpot=0;
-    for (int counter=0;counter<NumEntries;counter++){
-      if (CycleTable(counter).Length % 2 ==0){
-	CycleTable(currSpot)=CycleTable(counter);
-	currSpot++;
-      }
-    }
-    NumEntries=currSpot;
-    CycleTable(0).C=CycleTable(0).P;
-    for (int counter=1;counter<NumEntries;counter++){
-      CycleTable(counter).C=CycleTable(counter-1).C+CycleTable(counter).P;
-    }
-  }
+//   if (OnlyOdd || PathData.Path.Species(SpeciesNum).GetParticleType()==FERMION){
+//     int currSpot=0;
+//     for (int counter=0;counter<NumEntries;counter++){
+//       if (CycleTable(counter).Length % 2 ==1){
+// 	CycleTable(currSpot)=CycleTable(counter);
+// 	currSpot++;
+//       }
+//     }
+//     NumEntries=currSpot;
+//     CycleTable(0).C=CycleTable(0).P;
+//     for (int counter=1;counter<NumEntries;counter++){
+//       CycleTable(counter).C=CycleTable(counter-1).C+CycleTable(counter).P;
+//     }
+//   }
+//   else if (OnlyEven) {
+//     int currSpot=0;
+//     for (int counter=0;counter<NumEntries;counter++){
+//       if (CycleTable(counter).Length % 2 ==0){
+// 	CycleTable(currSpot)=CycleTable(counter);
+// 	currSpot++;
+//       }
+//     }
+//     NumEntries=currSpot;
+//     CycleTable(0).C=CycleTable(0).P;
+//     for (int counter=1;counter<NumEntries;counter++){
+//       CycleTable(counter).C=CycleTable(counter-1).C+CycleTable(counter).P;
+//     }
+//   }
 
   Norm = CycleTable(NumEntries-1).C;
   NormInv = 1.0/Norm;

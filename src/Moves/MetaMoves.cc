@@ -27,33 +27,23 @@ void ShiftMoveClass::MakeMove()
   // possible.  Use that for the maximum shift.
   PathData.Path.SliceRange(PathData.Path.Communicator.NumProcs()-1,
 			   slice1, slice2);
-  int maxSlices = slice2-slice1;
 
-  int numTimeSlicesToShift = PathData.Path.Random.CommonInt(maxSlices);
+  /// Shift between 7/16 and 1/2 of the maximum slices
+  int maxSlices = (slice2-slice1)>>1;
+  int minSlices = (7*(slice2-slice1))>>4;
+  if ((maxSlices-minSlices)<5)
+    minSlices = max(0, maxSlices - 5);
+  
+  //  int numTimeSlicesToShift =
+  //  PathData.Path.Random.CommonInt(maxSlices);
+  // There is no point in shifting more than maxSlices/2
+  // if (numTimeSlicesToShift > (maxSlices>>1))
+  //   numTimeSlicesToShift -= (maxSlices>>1);
 
-  //  HACK! HACK! HACK!!NEED THESE LINES
+  int numTimeSlicesToShift = 
+    minSlices + PathData.Path.Random.CommonInt(maxSlices-minSlices+1);
 
   PathData.MoveJoin(0);
   PathData.ShiftData(numTimeSlicesToShift);
   PathData.Join=numTimeSlicesToShift;
-
- 
-
-
-  ///END HACK!!!
-//   Array<int,1> changedParticles(PathData.Path.NumParticles());
-//   for (int counter=0;counter<changedParticles.size();counter++){
-//     changedParticles(counter)=counter;
-//   }
-   
-//   cerr.precision(10);
-//   cerr<<"My current kinetic action is "
-//       <<  PathData.Actions.Kinetic.Action(0,PathData.Path.TotalNumSlices,
-//  					  changedParticles,0)<<endl;
-//   cerr<<"My current shortrange action is "
-//       <<  PathData.Actions.ShortRange.Action(0,PathData.Path.TotalNumSlices,
-// 					     changedParticles,0)<<endl;
-//   cerr<<"My current approximate shortrange action is "
-//       <<  PathData.Actions.ShortRangeApproximate.Action(0,PathData.Path.TotalNumSlices,changedParticles,0)<<endl;
-
 }
