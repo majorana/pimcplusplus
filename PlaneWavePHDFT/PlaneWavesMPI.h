@@ -19,7 +19,7 @@ protected:
   Potential *PH;
   bool UseFFT;
   CommunicatorClass &Communicator;
-  bool MDExtrap;
+  bool MDExtrap, FirstTime;
 public:
   GVecsClass GVecs;
   void Setup(Vec3 box, Vec3 k, double kcut, Potential &ph, bool useFFT=true);
@@ -46,7 +46,8 @@ public:
   MPISystemClass(int numBands, CommunicatorClass &comm,
 		 bool mdextrap=false) 
     : CG(H, Bands, comm), FFT(GVecs), H(GVecs, FFT), 
-      NumBands(numBands), Communicator(comm), MDExtrap(mdextrap)
+      NumBands(numBands), Communicator(comm), MDExtrap(mdextrap),
+      FirstTime(true)
   {
 
   }

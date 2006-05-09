@@ -45,11 +45,11 @@ MPISystemClass::SetIons (const Array<Vec3,1> &rions)
 void 
 MPISystemClass::DiagonalizeH ()
 {
-  if (MDExtrap) {
-    for (int i=0; i<Bands.extent(0); i++)
-      for (int j=0; j<Bands.extent(1); j++)
-	Bands(i,j) = 2.0*Bands(i,j) - LastBands(i,j);
-    GramSchmidt(Bands);
+  if (MDExtrap && !FirstTime) {
+//     for (int i=0; i<Bands.extent(0); i++)
+//       for (int j=0; j<Bands.extent(1); j++)
+// 	Bands(i,j) = 2.0*Bands(i,j) - LastBands(i,j);
+//     GramSchmidt(Bands);
   }
   else
     CG.InitBands();
@@ -58,6 +58,7 @@ MPISystemClass::DiagonalizeH ()
     for (int i=0; i<Bands.rows(); i++) 
       fprintf (stderr, "Energy(%d) = %15.12f\n", i, CG.Energies(i)* 27.211383);
   LastBands = Bands;
+  FirstTime = false;
 }
 
 
