@@ -78,11 +78,11 @@ void ConjGradMPI::InitBands()
   // Now put results in Bands
   for (int band=0; band<numBands; band++)
     for (int vec=0; vec<Bands.cols(); vec++)
-      Bands(band,vec) = 0.0;//1.0e-8*drand48();
+      Bands(band,vec) = 1.0e-6*(drand48()-0.5);
   for (int band=0; band<numBands; band++) 
     for (int i=0; i<numVecs; i++)
       Bands(band, i) = EigVecs(band, i);
-  //  GramSchmidt(Bands);
+  GramSchmidt(Bands);
   // We have to broadcast in order to make sure everyone is starting
   // with the exact same bands.
   Communicator.Broadcast(0,Bands);
