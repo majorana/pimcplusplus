@@ -651,10 +651,11 @@ PathClass::UpdateRho_ks()
   for (int slice=0; slice<NumTimeSlices(); slice++)
     for (int species=0; species<NumSpecies(); species++)
       CalcRho_ks_Fast(slice,species);
-  SetMode(NEWMODE);
-  for (int slice=0; slice<NumTimeSlices(); slice++)
-    for (int species=0; species<NumSpecies(); species++)
-      CalcRho_ks_Fast(slice,species);
+  Rho_k[1] = Rho_k[0];
+//   SetMode(NEWMODE);
+//   for (int slice=0; slice<NumTimeSlices(); slice++)
+//     for (int species=0; species<NumSpecies(); species++)
+//       CalcRho_ks_Fast(slice,species);
   SetMode(mode);
 }
 
@@ -807,7 +808,8 @@ void PathClass::ShiftData(int slicesToShift)
 
   ShiftPathData(slicesToShift);
   if (LongRange)
-    ShiftRho_kData(slicesToShift);
+    // ShiftRho_kData(slicesToShift);
+    UpdateRho_ks();
   OpenLink.AcceptCopy(); ///the open link has changed and you want to accept it
   RefSlice += slicesToShift;
   while (RefSlice >= TotalNumSlices)
@@ -839,7 +841,6 @@ void PathClass::ShiftData(int slicesToShift)
 
 void PathClass::ShiftRho_kData(int slicesToShift)
 {
-
   int numProcs=Communicator.NumProcs();
   int myProc=Communicator.MyProc();
   int recvProc, sendProc;
@@ -921,9 +922,8 @@ void PathClass::ShiftRho_kData(int slicesToShift)
     for (int species=0; species<numSpecies; species++)
       for (int ki=0; ki<numk; ki++) 
 	Rho_k[1](slice,species,ki) = Rho_k[0](slice,species,ki);
-
+  
   // And we're done! 
-      
 }
 
 void PathClass::ShiftPathData(int slicesToShift)
