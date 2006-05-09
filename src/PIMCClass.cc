@@ -156,6 +156,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new SuperfluiDrop(PathData,OutFile);
     else if (observeType=="SuperfluidFraction")
       tempObs = new SuperfluidFractionClass(PathData,OutFile);
+    else if (observeType=="VariationalPIEnergy")
+      tempObs = new VariationalPIEnergyClass(PathData,OutFile);
     else if (observeType=="Vacancy")
       tempObs = new VacancyLocClass(PathData,OutFile);
     else if (observeType=="Conductivity")
@@ -263,8 +265,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new RefSliceMoveClass(PathData,OutFile);
     else if (moveType=="Displace")
       move = new DisplaceMoveClass(PathData,OutFile);
-//     else if (moveType=="VariationalDisplace")
-//       move = new VariationalDisplaceMoveClass(PathData,OutFile);
+     else if (moveType=="VariationalDisplace")
+       move = new VariationalDisplaceMoveClass(PathData,OutFile);
     else if (moveType=="WaterRotate")
       move = new WaterRotate(PathData, OutFile);
     else if (moveType=="WaterTranslate")
