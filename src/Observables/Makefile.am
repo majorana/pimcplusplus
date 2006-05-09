@@ -53,6 +53,8 @@ libobservables_la_SOURCES  =     \
     Time.h                       \
     VacancyLocation.h            \
     VacancyLocation.cc           \
+    VariationalPIEnergy.h        \
+    VariationalPIEnergy.cc       \
     Weight.cc                    \
     Weight.h                     \
     WindingNumber.cc             \
