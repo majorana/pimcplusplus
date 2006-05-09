@@ -18,18 +18,22 @@ FixedPhaseClass::Setk(Vec3 k)
 
 void FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
 {
-  if (speciesNum == UpSpeciesNum) {
-    UpMatrixCache.ShiftData  (slicesToShift, Path.Communicator);
-    UpGradMatCache.ShiftData (slicesToShift, Path.Communicator);
-    UpAction.ShiftLinkData   (slicesToShift, Path.Communicator);
-    UpGrad2.ShiftData        (slicesToShift, Path.Communicator);
-  }
-  if (speciesNum == DownSpeciesNum) {
-    DownMatrixCache.ShiftData (slicesToShift, Path.Communicator);
-    DownGradMatCache.ShiftData(slicesToShift, Path.Communicator);
-    DownAction.ShiftLinkData  (slicesToShift, Path.Communicator);
-    DownGrad2.ShiftData       (slicesToShift, Path.Communicator);
-  }
+//   if (speciesNum == UpSpeciesNum) {
+//     UpMatrixCache.ShiftData  (slicesToShift, Path.Communicator);
+//     UpGradMatCache.ShiftData (slicesToShift, Path.Communicator);
+//     UpAction.ShiftLinkData   (slicesToShift, Path.Communicator);
+//     UpGrad2.ShiftData        (slicesToShift, Path.Communicator);
+//   }
+//   if (speciesNum == DownSpeciesNum) {
+//     DownMatrixCache.ShiftData (slicesToShift, Path.Communicator);
+//     DownGradMatCache.ShiftData(slicesToShift, Path.Communicator);
+//     DownAction.ShiftLinkData  (slicesToShift, Path.Communicator);
+//     DownGrad2.ShiftData       (slicesToShift, Path.Communicator);
+//   }
+  // Recalculate actions everywhere instead of shifting.
+  if (speciesNum == IonSpeciesNum) 
+    Action (0, Path.NumTimeSlices()-1, Path.Species(IonSpeciesNum).Ptcls, 
+	    0, IonSpeciesNum);
 }
 
 void
@@ -236,7 +240,16 @@ FixedPhaseClass::PhaseGrad (int slice, int species,
   /// calculate \f$\det|u|\f$ and \f$ \nabla det|u| \f$.
 
   complex<double> detu = GradientDet(slice, species, activeParticles, update);
-    double detu2 = mag2(detu);
+
+#ifdef DEBUG
+  complex<double> detuOld = GradientDet (slice, species, activeParticles, UPDATE_ALL);
+  if (mag2(detu-detuOld)>1.0e-12*mag2(detuOld)) 
+    cerr << "Cache inconsistency in PhaseGrad!.\n";
+  else
+    perr << "Matrix check passed.\n";
+#endif 
+
+  double detu2 = mag2(detu);
   double detu2Inv = 1.0/detu2;
 
   double phase = atan2(detu.imag(), detu.real());
@@ -403,7 +416,13 @@ void
 FixedPhaseClass::Read(IOSectionClass &in)
 {
 #if NDIM==3
-  in.ReadVar("UseMDExtra", UseMDExtrap);
+  UseMDExtrap = false;
+  in.ReadVar("UseMDExtrap", UseMDExtrap);
+  if (UseMDExtrap) 
+    perr << "Using MD wavefunction extrapolation.\n";
+  else
+    perr << "Not using MD wavefunction extrapolation.\n";
+
   string speciesString;
   assert (in.ReadVar ("UpSpecies", speciesString));
   UpSpeciesNum = Path.SpeciesNum (speciesString);
@@ -685,7 +704,9 @@ FixedPhaseClass::UpdateBands()
 void
 FixedPhaseClass::UpdateCache()
 {
+  clock_t start, stop;
   perr << "Starting cache update.\n";
+  start = clock();
   int Nup    = Path.Species(UpSpeciesNum).NumParticles;
   int Ndown = Path.Species(DownSpeciesNum).NumParticles;
   Array<complex<double>,1> vals;
@@ -718,8 +739,10 @@ FixedPhaseClass::UpdateCache()
   Action (0, Path.NumTimeSlices()-1, Path.Species(IonSpeciesNum).Ptcls, 0, IonSpeciesNum);
   UpAction.AcceptCopy();
   DownAction.AcceptCopy();
-
-  perr << "Finished cache update.\n";  
+  
+  stop = clock();
+  perr << "Finished cache update.  Time = "
+       << (double)(stop-start)/(double)CLOCKS_PER_SEC << " seconds.\n";
 }
 
 
