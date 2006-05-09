@@ -16,6 +16,8 @@ from Vacancy import *
 from PlaneDensity import *
 from Pressure import *
 from Langevin import *
+from TimeAnalysis import *
+
 basename = sys.argv[1]
 infiles = IOSectionClassList()
 infiles.OpenFiles(basename);
@@ -82,42 +84,34 @@ for counter in range(0,numSections):
      myType=infiles.ReadVar("Type")[0]
      print "Currently processing ",myName
      if myName=="PairCorrelation":
-         print "Processing Pair Correlation"
          ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
-         print "Pair Correlation done"
      if myName=="Vacancy":
-         print "Processing Vacancy"
          ProcessVacancy(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
-         print "Vacancy done"
      elif myName=="Energy":
-         print "Processing Energy"
          ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
-         print "Energy done"
      elif myName=="nofr":
-         print "Processing nofr"
          Processnofr(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
-         print "nofr done"
      elif myName=="Pressure":
-         print "Processing Pressure"
          ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
-         print "Pressure Done"
      elif myName=="PlaneDensity":
-          print "Processing PlaneDensity"
           ProcessPlaneDensity(infiles,summaryDoc,detailedDoc,StartCut)
           summaryDoc.append(HR())
           detailedDoc.append(HR())
-          print "PlaneDensity done"
+     elif myName=="TimeAnalysis":
+          ProcessTimeAnalysis(infiles,summaryDoc,detailedDoc,StartCut)
+          summaryDoc.append(HR())
+          detailedDoc.append(HR())
      elif myName=="PhiK":
-         ProcessJosephson(infiles,summaryDoc,detailedDoc,StartCut,tau,numTimeSlices)
-         print "Josephson done"
+         ProcessJosephson(infiles,summaryDoc,detailedDoc,\
+                          StartCut,tau,numTimeSlices)
 #     elif myName=="Coupling":
 #          ProcessCoupling(infiles,summaryDoc,detailedDoc,StartCut)
      else:

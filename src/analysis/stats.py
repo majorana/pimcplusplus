@@ -66,6 +66,8 @@ def Stats(x):
         kappa=kappa+2.0*tempC
         i=i+1
         tempC=c(i,x,mean,var)
+    if kappa == 0.0:
+        kappa = 1.0
     Neff=(N+0.0)/(kappa+0.0)
     error=sqrt(var/Neff)
     return (mean,var,error,kappa)
