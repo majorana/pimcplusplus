@@ -25,7 +25,7 @@
 #include "VacancyLocation.h"
 #include "Weight.h"
 #include "WindingNumber.h"
-
+#include "VariationalPIEnergy.h"
 #include "PlaneDensity.h"
 /// This template class will be used to construct distributed versions
 /// of many different types of observables:  scalar observables, dVec
