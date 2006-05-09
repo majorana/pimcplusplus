@@ -31,9 +31,14 @@ void FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
 //     DownGrad2.ShiftData       (slicesToShift, Path.Communicator);
 //   }
   // Recalculate actions everywhere instead of shifting.
-  if (speciesNum == IonSpeciesNum) 
+  if (speciesNum == IonSpeciesNum) {
+    SetMode(NEWMODE);
     Action (0, Path.NumTimeSlices()-1, Path.Species(IonSpeciesNum).Ptcls, 
 	    0, IonSpeciesNum);
+    AcceptCopy(0, Path.NumTimeSlices()-1,   UpSpeciesNum);
+    AcceptCopy(0, Path.NumTimeSlices()-1, DownSpeciesNum);
+  }
+  
 }
 
 void
