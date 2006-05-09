@@ -61,9 +61,12 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut)
       }
     }
   }
-  Nx = actxmax-actxmin+2;
-  Ny = actymax-actymin+2;
-  Nz = actzmax-actzmin+2;
+  Nx = actxmax-actxmin+1;
+  Ny = actymax-actymin+1;
+  Nz = actzmax-actzmin+1;
+  if ((Nx%2)==1) Nx++;
+  if ((Ny%2)==1) Ny++;
+  if ((Nz%2)==1) Nz++;
 
   /// First, count k-vectors
   for (int ix=-maxX; ix<=maxX; ix++) {
