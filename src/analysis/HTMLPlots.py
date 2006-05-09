@@ -52,7 +52,6 @@ def BuildScalarTracePage(valArrayList,baseName,varName,StartCut):
      row = []
      for i in range(0,len(valArrayList)):
           d = valArrayList[i]
-          print "i=" + repr(i)
           row.append(ProduceTracePicture(d[StartCut:-1], baseName+"_"+repr(i), 'Blocks', varName,"Proc "+repr(i)))
      picTable = NewTable()
      picTable.width = 350*len(valArrayList)

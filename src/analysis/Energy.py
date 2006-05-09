@@ -20,7 +20,6 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
     summaryTable=BuildTable(len(varList)+1,5)
     summaryTable.body[0]=["Energy","Mean","Error","Variance","Kappa"]
     row = 0
-    print varList
     for varCounter in varList:
         row = row + 1
         meanList=[]
@@ -30,9 +29,8 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
         data = infiles.ReadVar(varCounter)
         varName = infiles.GetVarName(varCounter)
         baseName=varName+"Energy"
-#        if (len(data[0]) > 1):
-#            scalarTracePageHTMLList.append(BuildScalarTracePage(data,baseName,varName,StartCut))
-        print row,len(scalarVarTable.body),len(scalarVarTable.body[0])
+        if (len(data[0]) > 1):
+            scalarTracePageHTMLList.append(BuildScalarTracePage(data,baseName,varName,StartCut))
         scalarVarTable.body[0][row]=varName
         for proc in range(0,numProcs):
             (mean,var,error,kappa)=stats.Stats(data[proc][StartCut:-1])
