@@ -1,3 +1,5 @@
+#ifdef ORDER_N_FERMIONS
+
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
 
@@ -18,7 +20,7 @@ extern "C"{
 void 
 VariationalPIClass::AcceptCopy(int slice1, int slice2)
 {
-  cerr<<"I'm being accepted! YEA!"<<endl;
+  //  cerr<<"I'm being accepted! YEA!"<<endl;
   for (int theRow=0;theRow<DetMatrix.extent(0);theRow++){
     DetMatrix(ChangedColumn,theRow)+=u(theRow);
   }
@@ -34,7 +36,7 @@ VariationalPIClass::AcceptCopy(int slice1, int slice2)
 void 
 VariationalPIClass::RejectCopy(int slice1, int slice2)
 {
-  cerr<<"I'm being rejected! YEA!"<<endl;
+  //  cerr<<"I'm being rejected! YEA!"<<endl;
   
 }
 
@@ -193,7 +195,7 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
   }
   //  SetMode(currMode);
   
-    cerr<<"My det ratio is "<<1.0/abs(det_ratio)<<endl;
+  //    cerr<<"My det ratio is "<<1.0/abs(det_ratio)<<endl;
   return 1.0/abs(det_ratio);
   //  return 0.0;
 
@@ -231,3 +233,4 @@ VariationalPIClass::WriteInfo (IOSectionClass &out)
   out.WriteVar ("Type", "FREE_PARTICLE");
 }
 
+#endif

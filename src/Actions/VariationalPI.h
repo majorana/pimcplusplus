@@ -1,3 +1,5 @@
+#ifdef ORDER_N_FERMIONS
+
 #ifndef VARIATIONAL_PI__CLASS_H
 #define VARIATIONAL_PI__CLASS_H
 
@@ -41,5 +43,7 @@ public:
 
 
 
+
+#endif
 
 #endif
