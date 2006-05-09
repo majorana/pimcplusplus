@@ -186,9 +186,9 @@ CommunicatorClass::Gather (Array<TinyVector<double,3>,1> &sendVec,
 
 void 
 CommunicatorClass::AllGather(void *sendbuf, int sendcount, 
-				  MPI_Datatype sendtype, 
-				  void* recvbuf, int recvcount,
-				  MPI_Datatype recvtype)
+			     MPI_Datatype sendtype, 
+			     void* recvbuf, int recvcount,
+			     MPI_Datatype recvtype)
 {
   MPI_Allgather (sendbuf, sendcount, sendtype, 
 		 recvbuf, recvcount, recvtype, MPIComm);
