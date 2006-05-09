@@ -75,14 +75,14 @@ libmoves_la_SOURCES  =           \
     WaterMove.h                  \
     WaterMoveRing.cc             \
     WaterMoveRing.h              
-//    WormClose.h                  \
-//    WormClose.cc                 \
-//    WormStage.h                  \
-//    WormStage.cc                 \
-//    WormGrow.h		         \
-//    WormGrow.cc                  \
-//    WormRemove.cc                \
-//    WormRemove.h                 \
-//    WormPermuteStage.h           \
-//    WormPermuteStage.cc     
+#    WormClose.h                  \
+#    WormClose.cc                 \
+#    WormStage.h                  \
+#    WormStage.cc                 \
+#    WormGrow.h		         \
+#    WormGrow.cc                  \
+#    WormRemove.cc                \
+#    WormRemove.h                 \
+#    WormPermuteStage.h           \
+#    WormPermuteStage.cc     
 
