@@ -253,8 +253,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new BisectionSphereBlockClass(PathData,OutFile);
     else if (moveType=="CenterDroplet")
       move = new CenterDropletClass(PathData,OutFile);
-    else if (moveType=="GrowWorm")
-      move = new WormGrowMoveClass(PathData,OutFile);
+    //    else if (moveType=="GrowWorm")
+    //      move = new WormGrowMoveClass(PathData,OutFile);
 //     else if (moveType=="CloseWorm")
 //       move = new WormCloseMoveClass(PathData,OutFile);
 //     else if (moveType=="RemoveWorm")

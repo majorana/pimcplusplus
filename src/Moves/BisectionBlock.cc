@@ -2,7 +2,7 @@
 #include "BisectionBlock.h"
 #include "StructureRejectStage.h"
 #include "CouplingStage.h"
-#include "WormPermuteStage.h"
+//#include "WormPermuteStage.h"
 #include "OpenStage.h"
 #include "NoPermuteStage.h"
 
@@ -47,9 +47,9 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   else if (permuteType == "NONE") 
     PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
 					   IOSection);
-  else if (permuteType=="OPEN")
-    PermuteStage = new WormPermuteStageClass(PathData,SpeciesNum,NumLevels,
-					     IOSection);
+//   else if (permuteType=="OPEN")
+//     PermuteStage = new WormPermuteStageClass(PathData,SpeciesNum,NumLevels,
+// 					     IOSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);

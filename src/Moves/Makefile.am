@@ -8,8 +8,8 @@ libmoves_la_SOURCES  =           \
     BisectionSphereBlock.h       \
     BisectionStage.cc            \
     BisectionStage.h             \
-    BisectionJosephsonStage.cc      \
-    BisectionJosephsonStage.h       \
+    BisectionJosephsonStage.cc   \
+    BisectionJosephsonStage.h    \
     BisectionSphereStage.cc      \
     BisectionSphereStage.h       \
     CenterDropletMove.h          \
@@ -69,8 +69,8 @@ libmoves_la_SOURCES  =           \
     TablePermuteStage.h          \
     ClusterMove.cc               \
     ClusterMove.h                \
-    VariationalDisplaceMove.h                \
-    VariationalDisplaceMove.cc                \
+    VariationalDisplaceMove.h    \
+    VariationalDisplaceMove.cc   \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \

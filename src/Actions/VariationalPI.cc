@@ -1,4 +1,4 @@
-#ifdef ORDER_N_FERMIONS
+
 
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
@@ -243,4 +243,4 @@ VariationalPIClass::WriteInfo (IOSectionClass &out)
   out.WriteVar ("Type", "FREE_PARTICLE");
 }
 
-#endif
+

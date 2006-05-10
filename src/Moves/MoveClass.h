@@ -22,8 +22,8 @@
 #include "CouplingMove.h"
 #include "LangevinMove.h"
 #include "VariationalDisplaceMove.h"
-#include "WormClose.h"
-#include "WormGrow.h"
-#include "WormRemove.h"
+//#include "WormClose.h"
+//#include "WormGrow.h"
+//#include "WormRemove.h"
 
 #endif
