@@ -313,6 +313,7 @@ public:
   inline SymmArray<T>& operator=(const SymmArray<T>& B)
   {
     A=B.A;
+    return *this;
   }
   inline SymmArray<T>()
   { N=0; }
