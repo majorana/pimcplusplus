@@ -122,22 +122,22 @@ Section (Observables)
       double Prefactor=138.065;
     }
 
-  Section (Observable)
-    {
-      string Type = "PairCorrelation";
-      string Name = "HeHePC";
-      string Species1 = "He";
-      string Species2 = "He";
-      string Description="Helium-Helium Pair Correlation";
-      int Frequency=2;
-      int dumpFreq=20;
-      Section (Grid)
-	{
-	  string Type = "Linear";
-	  double start = 0.0;
-	  int NumPoints = 100;
-	}
-    }
+//   Section (Observable)
+//     {
+//       string Type = "PairCorrelation";
+//       string Name = "HeHePC";
+//       string Species1 = "He";
+//       string Species2 = "He";
+//       string Description="Helium-Helium Pair Correlation";
+//       int Frequency=2;
+//       int dumpFreq=20;
+//       Section (Grid)
+// 	{
+// 	  string Type = "Linear";
+// 	  double start = 0.0;
+// 	  int NumPoints = 100;
+// 	}
+//     }
     Section (Observable)
     {
       string Type="PathDump";
@@ -158,7 +158,7 @@ Section (Moves){
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
     double epsilon=1e-5;
     int NumLevels=2;
-    int StepsPerBlock=5;
+    int StepsPerBlock=100;
   }
 
 
@@ -175,10 +175,10 @@ Section (Algorithm)
   Section (Loop){ //Start Accumulating observables
     int Steps=3000000000;
     Section (Loop){
-      int Steps=10;
+      int Steps=100;
       Section (Move) {string Name="BisectionBlock";}
       //    Section (Observe) {string Name = "HeHePC";}
-      //    Section (Observe) {string Name = "Energy"; }
+      Section (Observe) {string Name = "Energy"; }
       Section (Observe) {string Name = "Pressure"; }
       Section (Observe) {string Name = "TimeAnalysis"; }
       Section (Move) {string Name = "Shift"; }

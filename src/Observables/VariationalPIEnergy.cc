@@ -16,9 +16,9 @@ VariationalPIEnergyClass::rho(int i, int j)
       for (int numZ=-NumImages;numZ<=NumImages;numZ++){
 	dVec disp=PathData.Path(0,i)-PathData.Path(0,j);
 	PathData.Path.PutInBox(disp);
-	disp(0)=disp(0)+numX*PathData.Path.Box(0);
-	disp(1)=disp(1)+numY*PathData.Path.Box(1);
-	disp(2)=disp(2)+numZ*PathData.Path.Box(2);
+	disp[0]=disp[0]+numX*PathData.Path.GetBox()[0];
+	disp[1]=disp[1]+numY*PathData.Path.GetBox()[1];
+	disp[2]=disp[2]+numZ*PathData.Path.GetBox()[2];
 	double dist2=dot(disp,disp); //disp*disp;
 	total+=exp(-T*dist2/(4.0*lambda));
       }
@@ -38,9 +38,9 @@ double VariationalPIEnergyClass::DRho(int i, int j)
       for (int numZ=-NumImages;numZ<=NumImages;numZ++){
 	dVec disp=PathData.Path(0,i)-PathData.Path(0,j);
 	PathData.Path.PutInBox(disp);
-	disp(0)=disp(0)+numX*PathData.Path.Box(0);
-	disp(1)=disp(1)+numY*PathData.Path.Box(1);
-	disp(2)=disp(2)+numZ*PathData.Path.Box(2);
+	disp[0]=disp[0]+numX*PathData.Path.GetBox()[0];
+	disp[1]=disp[1]+numY*PathData.Path.GetBox()[1];
+	disp[2]=disp[2]+numZ*PathData.Path.GetBox()[2];
 	double dist2=dot(disp,disp); //disp*disp;
 	//	total+=(3.0*T/2.0 - dist2*T*T/2)*exp(-T*dist2/2.0);
 	total+=(3.0*T/2.0 - dist2*T*T/(4.0*lambda))*exp(-T*dist2/(4.0*lambda));
