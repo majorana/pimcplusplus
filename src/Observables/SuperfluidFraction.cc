@@ -15,7 +15,7 @@ SuperfluidFractionClass::WriteBlock()
   double beta=PathData.Path.tau*PathData.Path.TotalNumSlices;
   int numParticles=
     PathData.Path.Species(species).LastPtcl-PathData.Path.Species(species).FirstPtcl;
-  double factor=1.0/((double)NumSamples*(2*PathData.Path.Species(species).lambda*beta*numParticles));
+  double factor=1.0/((double)SamplesInBlock*(2*PathData.Path.Species(species).lambda*beta*numParticles));
   
   CalcWN2();
   // Only processor 0 writes.
