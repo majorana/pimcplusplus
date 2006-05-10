@@ -184,15 +184,30 @@ OrthogExcluding(const Array<complex<double>,2> &A, zVec &x,
   int n = A.cols();
   assert (n == x.size());
   zVec Ar;
-  complex<double> S[m];
 
+#ifndef __INTEL_COMPILER
+  complex<double> S[m];
   for (int row=0; row<m; row++) {
     Ar.reference (A(row,Range::all()));
-    S[row] = conjdot (Ar, x);
+    S[row] = conjdot(Ar, x);
   }
   for (int row=0; row<m; row++) 
     if (row != excluding)
       x -= S[row] * A(row,Range::all());
+#else
+
+  double Sre[m], Sim[m];
+
+  for (int row=0; row<m; row++) {
+    Ar.reference (A(row,Range::all()));
+    complex<double> S = conjdot(Ar, x);
+    Sre[row] = real(S);
+    Sim[row] = imag(S);
+  }
+  for (int row=0; row<m; row++) 
+    if (row != excluding)
+      x -= complex<double>(Sre[row],Sim[row]) * A(row,Range::all());
+#endif
 }
 
 
