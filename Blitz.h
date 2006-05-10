@@ -214,6 +214,7 @@ inline cMat3 operator+(const cMat3 &A, const cMat3 &B)
   ApB(0,0)=A(0,0)+B(0,0); ApB(0,1)=A(0,1)+B(0,1); ApB(0,2)=A(0,2)+B(0,2);
   ApB(1,0)=A(1,0)+B(1,0); ApB(1,1)=A(1,1)+B(1,1); ApB(1,2)=A(1,2)+B(1,2);
   ApB(2,0)=A(2,0)+B(2,0); ApB(2,1)=A(2,1)+B(2,1); ApB(2,2)=A(2,2)+B(2,2);
+  return ApB;
 }
 
 inline cMat3 operator-(const cMat3 &A, const cMat3 &B)
