@@ -47,6 +47,8 @@ def ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut):
     fill (fillx, filly,hold=True)
 #    hold on
     plot (x, mean,'r',hold=True)
+    xlabel ('r')
+    ylabel ('g(r)')
     imageName = baseName + ".png"
     epsName = baseName +".eps"
     savefig(imageName,dpi=60)
@@ -61,6 +63,13 @@ def ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut):
     #myImg=ProduceCorrelationPicture(x, meanArray,baseName,hlabel,vlabel)
 ##Produce Ascii file
     asciiName = baseName + '.dat'
+    asciiFile = open (asciiName, "w")
+    n = len(x)
+    for i in range(0,n):
+          asciiFile.write('%20.16e %20.16e %20.16e\n' \
+                          % (x[i], mean[i], error[i]))
+    asciiFile.close()
+    
     #WriteAsciiFile(asciiFileName,x,y)
 
 ##create table with file names in it
