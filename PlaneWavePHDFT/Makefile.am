@@ -4,13 +4,14 @@ TestPW2_SOURCES = TestPW2.cc
 BandStructure_SOURCES = BandStructure.cc BandStructure.h
 MPIBandStructure_SOURCES = MPIBandStructure.cc MPIBandStructure.h
 
-LDADD = libpw.la                 ../IO/libIO.la                           \
-        ../FFT/libfft.la       ../PH/libPH.la                             \
+LDADD = libpw.la                  ../IO/libIO.la                          \
+        ../FFT/libfft.la          ../PH/libPH.la                          \
         ../MatrixOps/libmatops.la ../Splines/libspline.la                 \
-        ../Fitting/libfitting.la ../Integration/libquad.la                \
+        ../Fitting/libfitting.la  ../Integration/libquad.la               \
         ../MPI/libcomm.la                                                 \
         $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(FFTW3_LIBS) \
-        $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS)
+        $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS)      \
+        $(FLIBS)
 
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
               $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS) $(FFT_DEF)
