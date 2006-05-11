@@ -15,9 +15,10 @@ private:
   ObservableVecDouble1 TailLocVar;
   // Variables for node dumps.
   ObservableVecDouble3 NodeVarA, NodeVarB;
+  ObservableVecDouble3 RhoVar;
   ObservableVecDouble1 WarpPosVar;
   ObservableInt NodePtclVar, NodeSliceVar;
-  bool DumpNodes;
+  bool DumpNodes, DumpRho;
   int  NodePtcl;
   int  NodeSlice;
   LinearGrid Xgrid, Ygrid, Zgrid;
@@ -26,6 +27,7 @@ private:
   void GroundStateNodeDump();
   void FixedPhaseNodeDump();
   void FindWorstBead(int &slice, int &ptcl);
+  Array<double,3> Rho;
 public:
   int TimesCalled;
   void Accumulate();
@@ -44,7 +46,8 @@ public:
     NodeVarB("BNodes",IOSection,myPathData.Path.Communicator),
     NodePtclVar ("NodePtcl",  IOSection, myPathData.Path.Communicator),
     NodeSliceVar("NodeSlice", IOSection, myPathData.Path.Communicator),
-    WarpPosVar("WarpPos", IOSection, myPathData.Path.Communicator)
+    WarpPosVar("WarpPos", IOSection, myPathData.Path.Communicator),
+    RhoVar("Rho", IOSection, myPathData.Path.Communicator)
   { 
     Name="PathDump";
     TimesCalled=0;

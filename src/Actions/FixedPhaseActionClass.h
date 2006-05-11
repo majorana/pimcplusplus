@@ -75,6 +75,7 @@ public:
 		 int level, int speciesNum);
   
   double d_dBeta(int slice1, int slice2, int level, int speciesNum);
+  void CalcDensity (Array<double,3> &rho);
 
   bool IsPositive (int slice, int speciesNum);
   complex<double> Det (int slice, int speciesNum);
@@ -132,7 +133,7 @@ public:
   void WriteInfo (IOSectionClass &out);
   /// Updates the bands if I'm  the ion species
   void Update();
-
+  void CalcDensity (Array<double,3> &rho);
 
   FixedPhaseActionClass (PathDataClass &pathData, 
 			 FixedPhaseClass &FPA, FixedPhaseClass &FPB,

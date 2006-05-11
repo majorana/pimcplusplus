@@ -37,6 +37,17 @@ void PathDumpClass::Read(IOSectionClass &in)
   }
   else
     NodeSlice = 0;
+  
+  DumpRho = in.OpenSection("RhoDump");
+  if (DumpRho) {
+    int nx, ny, nz;
+    assert (in.ReadVar("Nx", nx));
+    assert (in.ReadVar("Ny", ny));
+    assert (in.ReadVar("Nz", nz));
+    Rho.resize(nx, ny, nz);
+    in.CloseSection (); // "RhoDump"
+  }
+  
 }
 
 void PathDumpClass::Accumulate()
@@ -51,6 +62,15 @@ void PathDumpClass::Accumulate()
 
   if (DumpNodes)
     FindWorstBead(NodeSlice, NodePtcl);
+
+  if (DumpRho) 
+    if (PathData.Actions.NodalActions(0) != NULL)
+      if (PathData.Actions.NodalActions(0)->Type() == GROUND_STATE_FP) {
+	FixedPhaseActionClass &FP = 
+	  *((FixedPhaseActionClass*)PathData.Actions.NodalActions(0));
+	FP.CalcDensity(Rho);
+	RhoVar.Write(Rho);
+      }
 
   if (PathData.Path.OpenPaths){
     Array<double,1> tailLoc(NDIM);

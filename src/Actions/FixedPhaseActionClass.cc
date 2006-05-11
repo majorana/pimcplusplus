@@ -16,7 +16,49 @@ FixedPhaseClass::Setk(Vec3 k)
   UpdateBands();
 }
 
-void FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
+inline double mag2 (complex<double> z)
+{
+  return (z.real()*z.real()+z.imag()*z.imag());
+}
+
+void
+FixedPhaseClass::CalcDensity(Array<double,3> &rho)
+{
+  int nx = rho.extent(0); double nxInv = 1.0/(nx-1);
+  int ny = rho.extent(1); double nyInv = 1.0/(ny-1);
+  int nz = rho.extent(2); double nzInv = 1.0/(nz-1);
+  int nBands  = BandSplines.N;
+  dVec box = PathData.Path.GetBox();
+  Array<complex<double>,1> vals(nBands);
+  
+  rho = 0.0;
+
+  for (int ix=0; ix<nx; ix++) {
+    double x = (nxInv*ix-0.5)*box[0];
+    for (int iy=0; iy<ny; iy++) {
+      double y = (nyInv*iy-0.5)*box[1];
+      for (int iz=0; iz<nz; iz++) {
+	double z = (nzInv*iz-0.5)*box[2];
+	BandSplines(x, y, z, vals);
+	for (int i=0; i<nBands; i++)
+	  rho(ix, iy, iz) += mag2(vals(i));
+      }
+    }
+  }
+  // Now normalize;
+  double sum = 0.0;
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	sum += rho(ix,iy,iz);
+  double norm = (double)(NumUp+NumDown)/(sum*PathData.Path.GetVol());
+  rho *= norm;
+  // This guarantees that when we integrate rho over the box, we get
+  // the number of electrons.
+}
+
+void 
+FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
 {
 //   if (speciesNum == UpSpeciesNum) {
 //     UpMatrixCache.ShiftData  (slicesToShift, Path.Communicator);
@@ -178,10 +220,6 @@ inline Vec3 imag(cVec3 v)
   return Vec3(v[0].imag(), v[1].imag(), v[2].imag());
 }
 
-inline double mag2 (complex<double> z)
-{
-  return (z.real()*z.real()+z.imag()*z.imag());
-}
 
 double
 FixedPhaseClass::CalcGrad2 (int slice, int species, const Array<int,1> &activeParticles,
@@ -958,4 +996,11 @@ FixedPhaseActionClass::RejectCopy (int slice1, int slice2)
 
 
 
-
+void
+FixedPhaseActionClass::CalcDensity(Array<double,3> &rho)
+{
+  if (PathData.Path.GetConfig() == 0)
+    FixedPhaseA.CalcDensity(rho);
+  else
+    FixedPhaseB.CalcDensity(rho);
+}
