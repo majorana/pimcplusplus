@@ -8,7 +8,7 @@ TestPoly_SOURCES = TestPoly.cc
 
 TestPolySet_SOURCES = TestPolySet.cc 
 
-LDADD = ../Integration/libquad.la libspecfun.la $(GSL_LIBS)
+LDADD = ../Integration/libquad.la libspecfun.la $(BLITZ_LIBS) $(GSL_LIBS) $(FLIBS)
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(GSL_CFLAGS) 
 
 noinst_LTLIBRARIES = libspecfun.la
