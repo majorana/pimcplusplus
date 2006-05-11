@@ -45,6 +45,7 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_F77
 AC_F77_LIBRARY_LDFLAGS
+AC_F77_MAIN
 AC_PROG_LIBTOOL
 
 # Optimization settings.
@@ -68,6 +69,11 @@ case "${host_cpu}" in
 	AC_MSG_RESULT([Pentium M])
         AX_CC_OPTION(TUNEOPT, [-mtune=pentium-m], [-mtune=pentium-m], [-mcpu=pentium-m])
         AX_CC_OPTION(ARCHOPT, [-march=pentium-m], [-march=pentium-m], [-march=pentium-m])
+      fi
+      if grep -q "Intel(R) Xeon" /proc/cpuinfo; then
+	AC_MSG_RESULT([Intel Xeon])
+        AX_CC_OPTION(TUNEOPT, [-tpp7], [-tpp7], [-tpp7])
+        AX_CC_OPTION(ARCHOPT, [-xW], [-xW], [-xW])
       fi
       CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
       F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
