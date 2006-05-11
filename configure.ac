@@ -42,6 +42,11 @@ case "${host_cpu}" in
         AX_CC_OPTION(TUNEOPT, [-mtune=pentium-m], [-mtune=pentium-m], [-mcpu=pentium-m])
         AX_CC_OPTION(ARCHOPT, [-march=pentium-m], [-march=pentium-m], [-march=pentium-m])
       fi
+      if grep -q "Intel(R) Xeon" /proc/cpuinfo; then
+	AC_MSG_RESULT([Intel Xeon])
+        AX_CC_OPTION(TUNEOPT, [-tpp7], [-tpp7], [-tpp7])
+        AX_CC_OPTION(ARCHOPT, [-xW], [-xW], [-xW])
+      fi
       CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
       F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
       if grep -q sse /proc/cpuinfo ; then
