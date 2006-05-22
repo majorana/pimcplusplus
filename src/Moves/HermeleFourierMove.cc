@@ -3,6 +3,8 @@
 double HermeleFourierStageClass::Sample (int &slice1, int &slice2,
 				   Array<int,1> &activeParticles)
 {
+#ifdef ORDER_N_FERMIONS
+
 
   double T=1.0/(PathData.Path.tau*(PathData.Path.NumTimeSlices()-1));
   PathData.Path.Phi2Omega();
@@ -29,6 +31,7 @@ double HermeleFourierStageClass::Sample (int &slice1, int &slice2,
   }
     PathData.Path(PathData.NumTimeSlices()-1,0)=PathData.Path(0,0);
   // And return sample probability ratio
+#endif
   return 1.0;
 }
 
@@ -48,6 +51,7 @@ HermeleFourierMoveClass::Read (IOSectionClass &in)
   Stages.push_back(&HermeleFourierStage);
 
   ActiveParticles.resize(1);
+
 }
 
 
