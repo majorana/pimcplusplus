@@ -3,6 +3,7 @@
 
 #include "MoveBase.h"
 #include "PermuteTableClass.h"
+#include "PermuteTableOnClass.h"
 #include "BisectionClass.h"
 
 class CycleBlockMoveClass  : public MoveClass
