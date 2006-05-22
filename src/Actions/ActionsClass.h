@@ -37,6 +37,8 @@
 #include "KineticSphereClass.h"
 #include "Josephson.h"
 #include "Hermele.h"
+#include "DualHermele.h"
+#include "TruncatedInverse.h"
 #include "Mu.h"
 #include "VariationalPI.h"
 /// ActionsClass is a shell of a class holding all of the necessary
@@ -56,6 +58,7 @@ public:
   // This stores pointers to pair action fits for each pair of species.
   Array<PairActionFitClass*,2> PairMatrix;
   VariationalPIClass VariationalPI;
+  TruncatedInverseClass TruncatedInverse;
   /// Used to keep track of the total action
   double TotalA, TotalB;
 
@@ -71,6 +74,7 @@ public:
   KineticSphereClass KineticSphere;
   JosephsonClass Josephson;
   HermeleClass Hermele;
+  DualHermeleClass DualHermele;
   MuClass Mu;
   /// The short range part of the pair action.  This is the complete
   /// pair action in the case of short-range potententials.  The
@@ -131,7 +135,6 @@ public:
   /// the path.  Must do global sum to get total energy.
   void Energy (double& kinetic, double &duShort, double &duLong, 
 	       double &node, double &vShort, double &vLong);
-
   /// Read the action parameters from the input file and do the
   /// necessary initialization.  This reads the pair actions, and does
   /// long range breakups and RPA corrections if necessary.
@@ -171,6 +174,7 @@ public:
     DavidLongRange(pathData),
     Josephson(pathData),
     Hermele(pathData),
+    DualHermele(pathData),
     LongRangeRPA(pathData, PairMatrix, PairArray),
     LongRangePot(pathData, PairMatrix),
     OpenLoopImportance(pathData),
@@ -183,6 +187,7 @@ public:
     Mu(pathData),
     VariationalPI(pathData),
     StructureReject(pathData),
+    TruncatedInverse(pathData),
     NumImages(1),
     UseLongRange(true)
   {
