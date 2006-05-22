@@ -22,11 +22,13 @@ double VariationalDisplaceStageClass::Sample (int &slice1, int &slice2,
 void
 VariationalDisplaceMoveClass::Read (IOSectionClass &in)
 {
+  cerr<<"Calling read of variational displace move"<<endl;
   // Construct action list
   assert(in.ReadVar("Sigma",VariationalDisplaceStage.Sigma));
-  VariationalDisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
+  VariationalDisplaceStage.Actions.push_back(&PathData.Actions.ShortRangeOn);
   VariationalDisplaceStage.Actions.push_back(&PathData.Actions.VariationalPI);
 
+  
   // Now construct stage list
   Stages.push_back(&VariationalDisplaceStage);
 
@@ -45,12 +47,14 @@ VariationalDisplaceStageClass::Attempt(int &slice1, int &slice2,
   SetMode (NEWMODE);
   double sampleRatio=Sample(slice1,slice2,activeParticles);
   SetMode(OLDMODE);
-  //  double oldAction= PathData.Actions.ShortRange.SingleAction(slice1,slice2,activeParticles,0);//GlobalStageAction(activeParticles);
-  double oldAction=0.0;
+  double oldAction= PathData.Actions.ShortRangeOn.SingleAction(slice1,slice2,activeParticles,0);//GlobalStageAction(activeParticles);
+  //  double oldAction=0.0;
   SetMode(NEWMODE);
-  //    double newAction = PathData.Actions.ShortRange.SingleAction(slice1,slice2,activeParticles,0); //GlobalStageAction(activeParticles);
-  double newAction=0.0;
+  double newAction = PathData.Actions.ShortRangeOn.SingleAction(slice1,slice2,activeParticles,0); //GlobalStageAction(activeParticles);
+  //  double newAction=0.0;
   double changeNodalAction=log(PathData.Actions.VariationalPI.SingleAction(slice1,slice2,activeParticles,0));
+  changeNodalAction=log(PathData.Actions.TruncatedInverse.SingleAction(slice1,slice2,activeParticles,0));
+  changeNodalAction=0.0;
   //  perr << "oldAction = " << oldAction
   //       << "newAction = " << newAction << endl;
   //  double currActionChange=2*(newAction-oldAction-changeNodalAction);
