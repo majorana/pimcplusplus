@@ -51,7 +51,7 @@ double BisectionJosephsonStageClass::Sample(int &slice1,int &slice2,
       
 
       ///Sortof HACK
-
+      SetMode(NEWMODE);
       if (PathData.Path.Random.Local()>0.9){
 	if (BisectionLevel==2){
 	  if (PathData.Path.Random.Local()>0.5){
@@ -68,7 +68,7 @@ double BisectionJosephsonStageClass::Sample(int &slice1,int &slice2,
       ///End Sortof HACK
 
 
-      SetMode(NEWMODE);
+
       dVec r=Path(slice,ptcl);
       dVec rdiff=Path.Velocity(slice,slice+skip,ptcl);
   

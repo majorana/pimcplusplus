@@ -25,7 +25,7 @@ void CenterDropletClass::MakeMove()
       disp=PathData.Path.Velocity(0,slice,ptcl);
       chainCtr+=disp;
     }
-    PathData.Path.PutInBox(chainCtr);
+    //    PathData.Path.PutInBox(chainCtr);
     chainCtr = chainCtr/PathData.Path.NumTimeSlices();
     chainCtr=chainCtr+dispToPtcl;
     PathData.Path.PutInBox(chainCtr);
