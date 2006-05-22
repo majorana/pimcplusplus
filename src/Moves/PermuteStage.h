@@ -3,6 +3,7 @@
 
 #include "MultiStage.h"
 #include "PermuteTableClass.h"
+#include "PermuteTableOnClass.h"
 #include "../Observables/ObservableVar.h"
 
 class PermuteStageClass : public LocalStageClass

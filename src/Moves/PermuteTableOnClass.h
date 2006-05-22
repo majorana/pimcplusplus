@@ -40,6 +40,13 @@
 // }
 
 
+struct ParticleProbStruct
+{
+  int ptcl;
+  double prob;
+
+
+};
 
 
 class PermuteTableOnClass
@@ -52,7 +59,7 @@ class PermuteTableOnClass
   int ExcludeParticle;
   PathDataClass &PathData;
   void ConstructHTable();
-
+  double calcij(int i, int j);
   double Norm, NormInv;
   inline int FindEntry(double xi);  
   inline int FindEntrySlow(double xi);  
@@ -62,7 +69,8 @@ public:
   bool OnlyEven;
   int NumEntries;
   CycleClass CurrentCycle;
-  Array<double,2> HTable;
+  Array<list<ParticleProbStruct>,1> HTable;
+  //  Array<double,2> HTable;
   Array<CycleClass,1> CycleTable;
 
   //  void PermuteHTable();
@@ -82,7 +90,7 @@ public:
   double AttemptPermutation();
   double CalcReverseProb(const PermuteTableOnClass &forwardTable);
   Array<int,1> CurrentParticles();
-  void PrintTable() const;
+
 
 
   void Read(IOSectionClass &inSection);
