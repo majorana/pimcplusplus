@@ -61,7 +61,13 @@ JosephsonClass::SingleAction (int slice1, int slice2,
 	totalPotential-=alpha/(8.0*M_PI*M_PI)*(diffPhi*diffPhi)/(denom*denom)*levelTau*levelTau;
       }
     }
-  totalU+=totalPotential*PiOverBeta*PiOverBeta;
+  
+  double massTerm=0.0;
+  for (int sliceA=slice1;sliceA<=slice2;sliceA+=skip)
+    massTerm += 
+      10*PathData.Path.tau*PathData.Path(sliceA,0)[0]*PathData.Path(sliceA,0)[0];
+  
+  totalU+=totalPotential*PiOverBeta*PiOverBeta+massTerm;
   return totalU;
 }
 
