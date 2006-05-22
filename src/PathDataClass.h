@@ -81,6 +81,19 @@ public:
     Join=newJoin;
   }
   
+
+  ////Worm Moves///
+  bool SliceFullandNextSliceEmpty(int slice,int ptcl);
+  bool SliceFullandPreviousSliceEmpty(int slice,int ptcl);
+  void FindHead(int &headSlice,int &headPtcl);
+  void FindTail(int &tailSlice,int &tailPtcl);
+  void MoveTailToSliceZero();
+  void Next(int &slice, int &ptcl);
+  void WormInfo(int &headSlice, int &headPtcl,
+		int &tailSlice, int &tailPtcl,
+		int &numEmpty, int &wormSize);
+
+  //////////
   void MoveOpenLinkToEnd();
   void MoveLinkToEnd(int linkToMove);
   /// This function shifts the path to make the reference slice
