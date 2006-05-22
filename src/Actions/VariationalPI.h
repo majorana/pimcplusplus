@@ -32,6 +32,7 @@ private:
   PathClass &Path;
   void calc_u();
   Array<double,1> u;
+  Array<double,1> newCol;
   /// These splines will hold the free-particle action for
   /// periodic boundary conditions.  The array is over time-slice
   /// separation from the reference slice.
@@ -43,6 +44,7 @@ public:
   double d_dBeta (int slice1, int slice2, 
 		  int level);
   void BuildDeterminantMatrix();
+  void CheckDeterminantMatrix();
   void calc_u(const Array<int,1> &changePtcls);
   void Read (IOSectionClass &in);
   bool IsGroundState();
@@ -52,6 +54,7 @@ public:
   void RejectCopy(int slice1, int slice2);
   void WriteInfo (IOSectionClass &out);
   int ChangedColumn;
+  
   VariationalPIClass (PathDataClass &pathData);
 };
 
