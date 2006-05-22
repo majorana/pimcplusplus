@@ -3,98 +3,96 @@
 void
 WormGrowMoveClass::Read (IOSectionClass &in)
 {
+  assert(in.ReadVar("MaxToGrow",MaxGrowth));
   // Construct action list
-  // WormGrowStage.Actions.push_back(&PathData.Actions.ShortRange);
+  //  WormGrowStage.Actions.push_back(&PathData.Actions.ShortRange);
   
   // Now construct stage list
+  WormGrowStage.Read(in);
+  WormGrowStage.Actions.push_back(&PathData.Actions.Kinetic);
+  WormGrowStage.Actions.push_back(&PathData.Actions.Mu);
+  
   Stages.push_back(&WormGrowStage);
-
+  
   ActiveParticles.resize(1);
 }
 
-double
-WormGrowStageClass::Sample (int &slice1, int &slice2,
-			    Array <int,1> &activeParticles)
+void 
+WormGrowMoveClass::MakeMove()
 {
-  cerr<<"Sampling now"<<endl;
-  // Move the Join out of the way.
-  PathData.MoveJoin (PathData.Path.NumTimeSlices()-1);
-  cerr<<"IO've moved the join"<<endl;
-  //only do helium
-  int ptcl=0;
-  cerr<<"Resizing"<<endl;
-  activeParticles.resize(1);
-
-  //  bool doHead=(PathData.Path.Random.Local()>0.5);
-  bool doHead=true;
-  bool doGrow=(PathData.Path.Random.Local()>0.5);
-  int numSlices=PathData.Path.Random.LocalInt(MaxSlicesToGrow)+1;
-  double logSampleProb=0.0;
-  cerr<<"here"<<endl;
-  if (doHead && doGrow){
-    cerr<<"Do head and do grow"<<endl;
-    while (PathData.Path.OpenLink+numSlices>=PathData.Path.NumTimeSlices()){
-      PathData.MoveJoin(1);
-      PathData.Path.ShiftData(-1);
-      PathData.Join=0;
-      PathData.Path.HeadSlice=
-	(PathData.Path.HeadSlice-1+PathData.Path.NumTimeSlices()) % 
-	PathData.Path.NumTimeSlices();
-    }
-    cerr<<"Post do head stuff"<<endl;
-    PathData.MoveJoin (PathData.Path.NumTimeSlices()-1);
-    cerr<<"Moved join"<<endl;
-    activeParticles(0)=PathData.Path.HeadParticle;    
-    double tau=PathData.Path.tau;
-    double lambda=PathData.Path.ParticleSpecies(ptcl).lambda;
-    double sigma2=(2.0*lambda*tau);
-    double sigma=sqrt(sigma2);
-    dVec delta;
-    cerr<<"hmm"<<endl;
-    for (int counter=0;counter<numSlices;counter++){
-      cerr<<"A"<<endl;
-      cerr<<PathData.Path.HeadSlice<<" "<<PathData.Path.HeadParticle<<endl;
-      
-      PathData.Path.Random.LocalGaussianVec(sigma,delta);
-      //      PathData.Path.PushHead(PathData.Path.CurrHead+delta);
-      PathData.Path(PathData.Path.HeadSlice+1,PathData.Path.HeadParticle)=
-	PathData.Path(PathData.Path.HeadSlice,PathData.Path.HeadParticle)+delta;
-      PathData.Path.HeadSlice=(PathData.Path.HeadSlice+1) %
-	PathData.Path.NumTimeSlices();
-      logSampleProb+=(-0.5*delta*delta/sigma2);
-    }
-    cerr<<"end a"<<endl;
-    slice1 = 0;
-    slice2 = PathData.Path.NumTimeSlices()-1;
-    cerr<<"Getting out once"<<endl;
-    return exp(logSampleProb);
+  Slice1=0;
+  Slice2=0;
+  ActiveParticles.resize(1);
+  ActiveParticles(0)=0;
+  cerr<<"Move begun"<<endl;
+  if (!PathData.Path.NowOpen){
+    MultiStageClass::Reject();
+    return;
   }
-  else {
-    cerr<<"Chose this path"<<endl;
-    while (PathData.Path.OpenLink-numSlices>=0){
-      PathData.MoveJoin(0);
-      PathData.Path.ShiftData(1);
-      PathData.Join=1;
-      PathData.Path.HeadSlice=
-	(PathData.Path.HeadSlice+1+PathData.Path.NumTimeSlices()) % 
-	PathData.Path.NumTimeSlices();
-
-    }
-    cerr<<"Going to move join"<<endl;
-    PathData.MoveJoin (0);
-    
-    activeParticles(0)=PathData.Path.HeadParticle;    
-    for (int counter=0;counter<numSlices;counter++){
-      PathData.Path.HeadSlice=PathData.Path.HeadSlice-1;
-    }
-    cerr<<"Helooo"<<endl;
-    slice1 = 0;
-    slice2 = PathData.Path.NumTimeSlices()-1;
-    cerr<<"Getting out twice"<<endl;
-    return 1.0;
-
-
+  int headSlice,headPtcl,tailSlice,tailPtcl,numEmpty,wormSize;
+  PathData.WormInfo(headSlice, headPtcl,
+		    tailSlice, tailPtcl,
+		    numEmpty, wormSize);
+  
+  cerr<<"Worm size is "<<wormSize<<" "<<numEmpty<<" "
+      <<headSlice<<" "<<headPtcl<<" "
+      <<tailSlice<<" "<<tailPtcl<<" "<<endl;
+  if (wormSize==0){
+    MultiStageClass::Reject();
+    return;
   }
+  bool moveHead = PathData.Path.Random.Local() >0.5;
+  bool grow = PathData.Path.Random.Local() < 0.5;
+  int changeAmount=PathData.Path.Random.LocalInt(MaxGrowth)+1;
+  //  cerr<<"Change amount is "<<changeAmount<<endl;
+  if (grow && numEmpty-changeAmount<PathData.Path.NumTimeSlices()){
+    MultiStageClass::Reject();
+    return;
+  }
+  
+  if (!grow && wormSize-changeAmount<1){
+    MultiStageClass::Reject();
+    return;
+  }
+  WormGrowStage.MoveHead=moveHead;
+  WormGrowStage.Grow=grow;
+  WormGrowStage.ChangeAmount=changeAmount;
+
+  bool toAccept=true;
+  list<StageClass*>::iterator stageIter=Stages.begin();
+  double prevActionChange=0.0;
+
+  while (stageIter!=Stages.end() && toAccept){
+    toAccept = (*stageIter)->Attempt(Slice1,Slice2,
+				     ActiveParticles,prevActionChange);
+    stageIter++;
+  }
+
+
+  PathData.WormInfo(headSlice, headPtcl,
+		    tailSlice, tailPtcl,
+		    numEmpty, wormSize);
+  
+  cerr<<"Worm size as "<<wormSize<<" "<<numEmpty<<" "
+      <<headSlice<<" "<<headPtcl<<" "
+      <<tailSlice<<" "<<tailPtcl<<" "<<endl;
+
+//   cerr<<"Worm information: "<<headSlice<<" "<<headPtcl<<" "
+//       <<tailSlice<<" "<<tailPtcl<<" "
+//       <<numEmpty<<" "<<wormSize<<endl;
+  assert(numEmpty>=PathData.Path.NumTimeSlices());
+  assert(wormSize>0);
+  
+
+  TimesCalled++;
+  if (toAccept)
+    Accept();
+  else 
+    Reject();
+
+  
+  cerr<<"Move done"<<endl;
+
   
 
 }
