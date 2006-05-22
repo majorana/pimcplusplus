@@ -1,7 +1,7 @@
 #ifndef MOVE_CLASS_H
 #define MOVE_CLASS_H
 
-
+#include "HermeleFourierMove.h"
 #include "BisectionBlock.h"
 #include "BisectionSphereBlock.h"
 #include "CenterDropletMove.h"
@@ -22,8 +22,8 @@
 #include "CouplingMove.h"
 #include "LangevinMove.h"
 #include "VariationalDisplaceMove.h"
-//#include "WormClose.h"
-//#include "WormGrow.h"
-//#include "WormRemove.h"
+#include "WormClose.h"
+#include "WormGrow.h"
+#include "WormRemove.h"
 
 #endif
