@@ -76,8 +76,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       newStage = new BisectionJosephsonStageClass(PathData, level,
 						  IOSection);
       if (level==LowestLevel)
-	newStage->Actions.push_back(&PathData.Actions.Hermele);
-	//	newStage->Actions.push_back(&PathData.Actions.Josephson);
+	newStage->Actions.push_back(&PathData.Actions.DualHermele);
+      //newStage->Actions.push_back(&PathData.Actions.Josephson);
       //      newStage = new BisectionStageClass(PathData, level,
       //					  IOSection);
       newStage->TotalLevels=NumLevels;
@@ -93,7 +93,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       newStage->TotalLevels=NumLevels;
 
       newStage->Actions.push_back(&PathData.Actions.Kinetic);
-      
+      //      newStage->Actions.push_back(&PathData.Actions.PairFixedPhase);
       
       if (PathData.Path.OpenPaths && level==LowestLevel){
 	newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
@@ -106,8 +106,10 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       else if (PathData.Path.OrderN){
 	newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
       }
-      else // if (level==LowestLevel) //HACK HERE CURRENTLY COMMENTED OUT!
+      else{ // if (level==LowestLevel) //HACK HERE CURRENTLY 
+	cerr<<"Adding short range values"<<endl;
 	newStage->Actions.push_back(&PathData.Actions.ShortRange);
+      }
       //      else
       //	int dummy=5;
       if (level == LowestLevel) {
@@ -225,6 +227,7 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
+  //  cerr<<"Making bisection block move"<<endl;
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
 
@@ -242,7 +245,7 @@ void BisectionBlockClass::MakeMove()
 
   if (LowestLevel != 0)
     MakeStraightPaths();
-
+  //  cerr<<"Ending bisection block move"<<endl;
 }
 
 
