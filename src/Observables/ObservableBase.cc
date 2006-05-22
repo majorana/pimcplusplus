@@ -32,7 +32,7 @@ ObservableClass::Read(IOSectionClass &in)
 void 
 ObservableClass::DoEvent()
 {
+  TimesCalled++;
   if ((TimesCalled % Frequency) == 0)
     Accumulate();
-  TimesCalled++;
 }
