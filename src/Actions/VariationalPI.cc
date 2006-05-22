@@ -10,11 +10,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef ORDER_N_FERMIONS
+// #ifdef ORDER_N_FERMIONS
 extern "C"{
 #include "../det_calc_uekt.h"
 }
-#endif
+/// #endif
 // int testme();
 
 
@@ -23,17 +23,24 @@ extern "C"{
 void 
 VariationalPIClass::AcceptCopy(int slice1, int slice2)
 {
-  //  cerr<<"I'm being accepted! YEA!"<<endl;
+//   cout<<"I'm being accepted! YEA!"<<ChangedColumn<<endl;
+//   SetMode(OLDMODE);
+//   cerr<<"Pre-checking"<<endl;
+//   CheckDeterminantMatrix();
+//   SetMode(NEWMODE);
+//   cerr<<"post checking"<<endl;
   for (int theRow=0;theRow<DetMatrix.extent(0);theRow++){
-    DetMatrix(ChangedColumn,theRow)+=u(theRow);
+    DetMatrix(ChangedColumn,theRow)=newCol(theRow);
   }
   for (int col=0;col<DetMatrix.extent(0);col++){
     if (col!=ChangedColumn)
-      DetMatrix(col,ChangedColumn)+=u(col);
+      DetMatrix(col,ChangedColumn)=newCol(col);
   }
+  
+  CheckDeterminantMatrix();
   //  cerr<<DetMatrix<<endl;
   //  cerr<<"My new determinant is "<<Determinant(DetMatrix)<<endl;
-  BuildDeterminantMatrix();
+  //  BuildDeterminantMatrix();
 }
 
 void 
@@ -47,7 +54,15 @@ VariationalPIClass::RejectCopy(int slice1, int slice2)
 void 
 VariationalPIClass::BuildDeterminantMatrix()
 {
-
+  //HACK!
+  cerr<<"Initializing"<<endl;
+  int N=Path.NumParticles();
+  cerr<<"the number of particles is"<<N<<endl;
+  DetMatrix.resize(N,N);
+  u.resize(N);
+  newCol.resize(N);
+  //HACK
+  cerr<<"Original buildling"<<endl;
   double T=1.0/(Path.TotalNumSlices*Path.tau);
   double lambda=PathData.Path.Species(0).lambda;
   for (int ptcl1=0;ptcl1<Path.NumParticles();ptcl1++){
@@ -56,6 +71,29 @@ VariationalPIClass::BuildDeterminantMatrix()
       PathData.Path.PutInBox(disp);
       double dist2=dot(disp,disp);
       DetMatrix(ptcl1,ptcl2)=exp(-T*dist2/(4.0*lambda));
+    }
+  }
+  //  CheckDeterminantMatrix();
+}
+
+
+void 
+VariationalPIClass::CheckDeterminantMatrix()
+{
+
+  double T=1.0/(Path.TotalNumSlices*Path.tau);
+  double lambda=PathData.Path.Species(0).lambda;
+  for (int ptcl1=0;ptcl1<Path.NumParticles();ptcl1++){
+    for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++){
+      dVec disp=Path(0,ptcl2)-Path(0,ptcl1);
+      PathData.Path.PutInBox(disp);
+      double dist2=dot(disp,disp);
+      if (DetMatrix(ptcl1,ptcl2)-exp(-T*dist2/(4.0*lambda))>=1e-3){
+	cerr<<ptcl1<<" "<<ptcl2<<endl;
+	cerr<<DetMatrix(ptcl1,ptcl2)<<endl;
+	cerr<<exp(-T*dist2/(4.0*lambda))<<endl;
+      }
+      assert(DetMatrix(ptcl1,ptcl2)-exp(-T*dist2/(4.0*lambda))<=1e-3);
     }
   }
 }
@@ -81,6 +119,8 @@ VariationalPIClass::Read (IOSectionClass &in)
   cerr<<"the number of particles is"<<N<<endl;
   DetMatrix.resize(N,N);
   u.resize(N);
+  newCol.resize(N);
+  testme();
   BuildDeterminantMatrix();
 
 }
@@ -99,7 +139,8 @@ VariationalPIClass::calc_u(const Array<int,1> &changePtcls)
     dVec disp=Path(0,ptcl2)-Path(0,ptcl1);
     PathData.Path.PutInBox(disp);
     double dist2=dot(disp,disp);
-    u(ptcl2)=exp(-T*dist2/(4.0*lambda))-DetMatrix(ptcl1,ptcl2);
+    newCol(ptcl2)=exp(-T*dist2/(4.0*lambda));
+    u(ptcl2)=newCol(ptcl2)-DetMatrix(ptcl1,ptcl2);
     
   }
 }
@@ -120,6 +161,15 @@ int matvec(double *x,double *b,int N,void *A){
   //  cerr<<"out of matvec"<<endl;
   return 0;
 }
+
+// int matvec_blitz(double *x, double *b, void *A){
+  
+//   int N=((Array<double,2>*)A).extent(0);
+//   Array<double,1> xBlitz(x, shape(N), neverDeleteData);
+//   Array<double,1> AxBlitz(b, shape(N), neverDeleteData);
+//   MatVecProd ((Array<double,2>*)A, xBlitz, AxBlitz);
+//   return 0;
+// }
 
 void set_gsl_vector_from_double(gsl_vector *V, double* x, int N){
   V->size=N;V->stride=1;V->data=x;V->block=NULL;V->owner=0;  
@@ -155,13 +205,27 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
 #ifdef ORDER_N_FERMIONS
   //  cerr<<"Calling single action"<<endl;
   //  ModeType currMode=PathData.Path.Path.GetMode();
-//   SetMode(OLDMODE);
-//   BuildDeterminantMatrix();
-//   SetMode(NEWMODE);
+// //   SetMode(NEWMODE);
+// //   BuildDeterminantMatrix();
+// //   double new_det=Determinant(DetMatrix);
+
+   SetMode(OLDMODE);
+   BuildDeterminantMatrix();
+// //   double old_det=Determinant(DetMatrix);
+   SetMode(NEWMODE);
+// //   cout<<old_det<<" "<<new_det<<" "<<new_det/old_det<<endl;
+
   //  cerr<<"Built determinant matrix"<<endl;
   //  cerr<<"My determinanat is "<<Determinant(DetMatrix)<<endl;
   //  DetOrderN DetOrderNInstance;
   drc_uekt_vanilla_parms parms={1e-3,2000};
+  
+//   SetMode(OLDMODE);
+//   cerr<<"Checking"<<endl;
+//   CheckDeterminantMatrix();
+//   SetMode(NEWMODE);
+
+
   calc_u(changePtcls);
   //  cerr<<"calculated change "<<changePtcls(0)<<endl;
   double det_ratio;
@@ -169,14 +233,13 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
 //   cerr<<"The address you shoudl look at is "<<DetMatrix.data()<<" "
 //       <<u.data()<<endl;
   
-//   gsl_matrix *myMatrix;
-//   myMatrix=gsl_matrix_calloc(DetMatrix.extent(0),DetMatrix.extent(1));
-
-//   for (int ptcl1=0;ptcl1<PathData.Path.NumParticles();ptcl1++){
+//    gsl_matrix *myMatrix;
+//    myMatrix=gsl_matrix_calloc(DetMatrix.extent(0),DetMatrix.extent(1));
+//    for (int ptcl1=0;ptcl1<PathData.Path.NumParticles();ptcl1++){
 //     for (int ptcl2=0;ptcl2<PathData.Path.NumParticles();ptcl2++){
-//       gsl_matrix_set(myMatrix,ptcl1,ptcl2,DetMatrix(ptcl1,ptcl2));
-//     }
-//   }
+//        gsl_matrix_set(myMatrix,ptcl1,ptcl2,DetMatrix(ptcl1,ptcl2));
+//      }
+//    }
     
   ChangedColumn=changePtcls(0);
 
@@ -191,7 +254,7 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
  //  BuildDeterminantMatrix();
   //  cerr<<"My old determinanat is "<<Determinant(DetMatrix)<<endl;
   //  cerr<<"Called ratio calculator"<<endl;
-
+  ////////  return new_det/old_det;
   //Somewhat of a hack
   if (isnan(det_ratio)){
     cerr<<"My det ratio is "<<0.0<<endl;
@@ -200,6 +263,7 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
   //  SetMode(currMode);
   
   //    cerr<<"My det ratio is "<<1.0/abs(det_ratio)<<endl;
+
   return 1.0/abs(det_ratio);
   //  return 0.0;
 #else
