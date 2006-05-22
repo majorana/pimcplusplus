@@ -32,6 +32,8 @@ libmoves_la_SOURCES  =           \
     EndStage.h                   \
     GlobalJosephsonMove.h        \
     GlobalJosephsonMove.cc       \
+    HermeleFourierMove.h         \
+    HermeleFourierMove.cc        \
     LangevinMove.cc              \
     LangevinMove.h               \
     LeviFlightStage.h            \
@@ -74,15 +76,15 @@ libmoves_la_SOURCES  =           \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \
-    WaterMoveRing.h              
-#    WormClose.h                  \
-#    WormClose.cc                 \
-#    WormStage.h                  \
-#    WormStage.cc                 \
-#    WormGrow.h		         \
-#    WormGrow.cc                  \
-#    WormRemove.cc                \
-#    WormRemove.h                 \
-#    WormPermuteStage.h           \
-#    WormPermuteStage.cc     
+    WaterMoveRing.h              \
+    WormClose.h                  \
+    WormClose.cc                 \
+    WormStage.h                  \
+    WormStage.cc                 \
+    WormGrow.h		         \
+    WormGrow.cc                  \
+    WormRemove.cc                \
+    WormRemove.h                 \
+    WormPermuteStage.h           \
+    WormPermuteStage.cc     
 
