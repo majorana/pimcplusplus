@@ -136,7 +136,7 @@ VariationalPIClass::Read (IOSectionClass &in)
   DetMatrix.resize(N,N);
   u.resize(N);
   newCol.resize(N);
-  testme();
+  //  testme();
   BuildDeterminantMatrix();
 
 }
