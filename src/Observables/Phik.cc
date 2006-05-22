@@ -10,18 +10,18 @@ void PhiKClass::Accumulate()
   NumSamples++;
 
   int slice1 = 0;
-  int slice2 = PathData.Path.NumTimeSlices();
+  int slice2 = PathData.Path.NumTimeSlices()-1;
   int numTimeSlices=PathData.Path.NumTimeSlices();
   PathClass &Path = PathData.Path;
   for (int tau=0;tau<numTimeSlices;tau++)
     for (int slice=slice1;slice<slice2;slice++)
-      PhiK(tau) += Path(slice,0)[0]*Path((slice+tau) % numTimeSlices,0)[0];
+      PhiK(tau) += Path(slice,0)[0]*Path((slice+tau) % PathData.Path.TotalNumSlices,0)[0];
 }
 
 
 void PhiKClass::WriteBlock()
 {
-  int nslices=PathData.Path.TotalNumSlices;
+  int nslices=PathData.Path.TotalNumSlices-1;
   double norm = 1.0/((double)NumSamples*(double)nslices);
   PhiK=PhiK*norm;
   PhiKVar.Write(PhiK);  
