@@ -17,7 +17,9 @@ libactions_la_SOURCES =            \
     GroundStateNodalActionClass.cc \
     GroundStateNodalActionClass.h  \
     Hermele.h                      \
+    DualHermele.h                      \
     Hermele.cc                     \
+    DualHermele.cc                     \
     Josephson.h                    \
     Josephson.cc                   \
     KineticClass.cc                \
@@ -49,7 +51,8 @@ libactions_la_SOURCES =            \
     ShortRangePotClass.cc          \
     ShortRangePotClass.h           \
     StructureReject.cc             \
-    StructureReject.h              \
+    TruncatedInverse.h              \
+    TruncatedInverse.cc              \
     TIP5PWaterClass.cc             \
     TIP5PWaterClass.h              \
     VariationalPI.h                \
