@@ -49,8 +49,10 @@ void MCTimeClass::WriteBlock()
       observableNames(i) = ((*observableIter)->Name);
       i++;
     }
-    IOSection.WriteVar("MoveNames", moveNames);
-    IOSection.WriteVar("ObserveNames", observableNames);
+    if (PathData.Path.Communicator.MyProc()==0) {
+      IOSection.WriteVar("MoveNames", moveNames);
+      IOSection.WriteVar("ObserveNames", observableNames);
+    }
   }
   TotalTime+=(double)(clock()-StartTime)/(double)CLOCKS_PER_SEC;
   StartTime=clock();
