@@ -82,6 +82,9 @@ protected:
   double Mass, MassInv;
   /// The LD time
   double Time;
+  /// A fudge-factor to increase/decrease the friction to get the
+  /// ionic temperature right.
+  double FrictionFactor;
   /// The standard deviation of the extra noise constant
   double ExtraNoiseSigma;
   void InitVelocities();
@@ -90,8 +93,8 @@ protected:
   void LangevinStep();
 
   ObservableVecDouble2 Rvar, Vvar, VOldVar, FVar, FShortVar, FLongVar,
-                       CoVarVar;
-  ObservableVecDouble1 LambdaVar;
+    CoVarVar;
+  ObservableVecDouble1 LambdaVar, BandEnergiesVar;
   Array<double,2> WriteArray;
   ObservableDouble TimeVar;
 public:
@@ -99,16 +102,17 @@ public:
   void Read(IOSectionClass &in);
   LangevinMoveClass (PathDataClass &pathData, IOSectionClass &outSection) :
     MoveClass (pathData, outSection), MCSteps(0), LDSteps(0),
-    Rvar("R", IOSection, pathData.Path.Communicator),
-    Vvar("V", IOSection, pathData.Path.Communicator),
-    VOldVar("Vold", IOSection, pathData.Path.Communicator),
-    FVar("F", IOSection, pathData.Path.Communicator),
-    FShortVar("FShort", IOSection, pathData.Path.Communicator),
-    FLongVar ("FLong",  IOSection, pathData.Path.Communicator),
-    LambdaVar ("Lambda",  IOSection, pathData.Path.Communicator),
-    CoVarVar ("CoVar",  IOSection, pathData.Path.Communicator),
-    TimeVar("Time", IOSection, pathData.Path.Communicator),
-    Time(0.0), Integrator (VERLET), ExtraNoiseSigma(0.0)
+    Rvar      ("R",                 IOSection, pathData.Path.Communicator),
+    Vvar      ("V",                 IOSection, pathData.Path.Communicator),
+    VOldVar   ("Vold",              IOSection, pathData.Path.Communicator),
+    FVar      ("F",                 IOSection, pathData.Path.Communicator),
+    FShortVar ("FShort",            IOSection, pathData.Path.Communicator),
+    FLongVar  ("FLong",             IOSection, pathData.Path.Communicator),
+    LambdaVar ("Lambda",            IOSection, pathData.Path.Communicator),
+    CoVarVar  ("CoVar",             IOSection, pathData.Path.Communicator),
+    TimeVar   ("Time",              IOSection, pathData.Path.Communicator),
+    BandEnergiesVar("BandEnergies", IOSection, pathData.Path.Communicator),
+    Time(0.0), Integrator (VERLET), ExtraNoiseSigma(0.0), FrictionFactor(1.0)
   {
     // do nothing for now
   }

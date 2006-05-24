@@ -378,14 +378,24 @@ LangevinMoveClass::LangevinStep()
   Vec2Array (V, WriteArray);    Vvar.Write(WriteArray);
   Vec2Array (Vold, WriteArray); VOldVar.Write(WriteArray);
   CoVarVar.Write(CoVar);
+  if (PathData.Actions.NodalActions(0) != NULL)
+    if (PathData.Actions.NodalActions(0)->Type() == GROUND_STATE_FP) {
+      FixedPhaseActionClass &FP = 
+	*((FixedPhaseActionClass*) PathData.Actions.NodalActions(0));
+      Array<double,1> bandEnergies;
+  
+      FP.GetBandEnergies(bandEnergies);
+      BandEnergiesVar.Write(bandEnergies);
+    }
   // Calculate the mean force, covariance and eigenvalue
   // decomposition. 
-				  
+	
   if (PathData.GetNumClones() > 2)
     CalcCovariance2();
   else
     CalcCovariance();
   LambdaVar.Write(Lambda);
+  Lambda = FrictionFactor * Lambda;
   for (int i=0; i<WriteArray.extent(0); i++) {
     WriteArray(i,0) = Fmean(3*i+0);
     WriteArray(i,1) = Fmean(3*i+1);
@@ -516,6 +526,8 @@ LangevinMoveClass::Read(IOSectionClass &in)
   assert (in.ReadVar("NumEquilSteps", NumEquilSteps));
   assert (in.ReadVar("NumAccumSteps", NumAccumSteps));
   assert (in.ReadVar("Species",       speciesStr));
+  if (in.ReadVar("FrictionFactor", FrictionFactor))
+    perr << "FrictionFactor = " << FrictionFactor << endl;
   string integrator;
   bool found = in.ReadVar ("Integrator", integrator);
   if (found) {
