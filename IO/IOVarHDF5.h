@@ -191,7 +191,7 @@ namespace IO {
       typeID = H5T_NATIVE_INT;
     if (TypeConvert<T>::Type == STRING_TYPE) {
       typeID = H5Tcopy (H5T_C_S1);
-      H5Tset_size (typeID, MAX_HDF5_STRING_LENGTH+1);
+      H5Tset_size (typeID, MAX_HDF5_STRING_LENGTH);
       mustCloseType = true;
     }
     else if (TypeConvert<T>::Type == BOOL_TYPE) {

@@ -212,6 +212,9 @@ namespace IO {
       assert (val(i).length() < (MAX_HDF5_STRING_LENGTH-1));
       for (int s=0; s<val(i).length(); s++)
 	charArray(i,s) = val(i)[s];
+      // NULL terminate
+      int n = val(i).length();
+      charArray(i,n) = '\0';
     }
     hid_t type = H5Dget_type(DatasetID);
     // Write the dataset to the file.
