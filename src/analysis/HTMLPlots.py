@@ -9,10 +9,19 @@ def ProduceTracePicture(valArray,fileBase,hlabel,vlabel,myTitle=''):
     clf()
 #    x=fromfunction(lambda i:i,(len(valArray)))
 
-    x=zeros(len(valArray))+0.0
-    for i in range(0,len(x)):
-        x[i]=i
-    plot(x,valArray)
+    x=zeros(valArray.shape)+0.0
+    if len(valArray.shape) == 2:
+        for i in range(0,len(x)):
+            x[i,:]=i
+        plot (x[:,0], valArray[:,0])
+        hold(True)
+        for i in range(0,valArray.shape[1]):
+            plot(x[:,i], valArray[:,i])
+        hold(False)
+    else:
+        for i in range(0,len(x)):
+            x[i] = i
+            plot(x,valArray)
     h1=xlabel(hlabel)
     setp(h1,"FontSize",20)
     v1=ylabel(vlabel)
@@ -32,8 +41,14 @@ def ProduceTracePicture(valArray,fileBase,hlabel,vlabel,myTitle=''):
     asciiFileName = fileBase + '.dat'
     asciiFile = open (asciiFileName, "w")
     n = len(valArray)
-    for i in range(0,len(valArray)):
-         asciiFile.write('%20.16e\n' % valArray[i])
+    if (len(valArray.shape) == 2):
+        for i in range(0,valArray.shape[0]):
+            for j in range(0,valArray.shape[1]):
+                asciiFile.write('%20.16e ' % valArray[i,j])
+            asciiFile.write('\n')
+    else:
+        for i in range(0,valArray.shape[0]):
+            asciiFile.write('%20.16e\n' % valArray[i])
     asciiFile.close()
 
 #build table with image, ps, and ascii file in it
