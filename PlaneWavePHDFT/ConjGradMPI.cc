@@ -57,7 +57,7 @@ void ConjGradMPI::Setup()
 void ConjGradMPI::InitBands()
 {
   int numBands = Bands.rows();
-  int numVecs = 4 * numBands;
+  int numVecs = 8 * numBands;
   assert (numVecs <= H.GVecs.size());
   Array<complex<double>,2> Hmat(numVecs, numVecs);
   Array<complex<double>,2> EigVecs(numBands, numVecs);
