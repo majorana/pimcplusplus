@@ -29,7 +29,7 @@ case "${host_cpu}" in
    "powerpc")
       CPPFLAGS="-DMAC $CPPFLAGS"
       CXXFLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
-      F77FLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
+      FFLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
    "i686")
       AC_MSG_CHECKING([ i686 cpu type])
       if grep -q XP /proc/cpuinfo; then
@@ -48,7 +48,7 @@ case "${host_cpu}" in
         AX_CC_OPTION(ARCHOPT, [-xW], [-xW], [-xW])
       fi
       CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
-      F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
+      FFLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
       if grep -q sse /proc/cpuinfo ; then
         CXXFLAGS="$CXXFLAGS -msse"
       fi
@@ -61,6 +61,15 @@ case "${host_cpu}" in
       if grep -q 3dnow /proc/cpuinfo ; then
         CXXFLAGS="$CXXFLAGS -m3dnow"
       fi;;
+      
+    "ia64")
+       AC_MSG_CHECKING([ Itanium cpu type])
+       if grep -q "Itanium 2" /proc/cpuinfo; then
+         AC_MSG_RESULT([Intel Itanium 2])
+         AX_CC_OPTION(TUNEOPT, [-mcpu=itanium2], [-mcpu=itanium2], [-mcpu=itanium2])
+       fi
+       CXXFLAGS="-O3 $TUNEOPT -g"
+       FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
 
@@ -89,20 +98,20 @@ fi
 AC_ARG_ENABLE(profile,[  --enable-profile        instrument code with profiling information])
 if test "x$enable_profile" = "xyes"; then
    CXXFLAGS="-pg $CXXFLAGS"
-   F77FLAGS="-pg $F77FLAGS"
+   FFLAGS="-pg $FFLAGS"
    LDFLAGS="-pg $LDFLAGS"
 fi
 
 AC_ARG_ENABLE(debug,[  --enable-debug          enable code for debugging checks])
 if test "x$enable_debug" = "xyes"; then
    CXXFLAGS="-DDEBUG $CXXFLAGS"
-   F77FLAGS="-DDEBUG $F77FLAGS"
+   FFLAGS="-DDEBUG $FFLAGS"
 fi
 
 AC_ARG_ENABLE(open,[ --enable-open            enable code for open loops])
 if test "x$enable_open" = "xyes"; then
    CXXFLAGS="-DOPEN_LOOPS $CXXFLAGS"
-   F77FLAGS="-DOPEN_LOOPS $CXXFLAGS"
+   FFLAGS="-DOPEN_LOOPS $CXXFLAGS"
 fi
 
 AC_ARG_ENABLE(open,[ --enable-on-fermions  enable code for order-n fermions])
