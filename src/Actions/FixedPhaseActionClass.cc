@@ -636,7 +636,7 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum,
 	Path.PutInBox(r_j);
 	vals.reference ( matData(slice, j, Range::all()));
 	grads.reference(gradData(slice, j, Range::all()));
-	BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+	BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
       }
     else if (update == UPDATE_ACTIVE)
       for (int i=0; i<activeParticles.size(); i++) {
@@ -645,7 +645,7 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum,
 	Path.PutInBox(r_j);
 	vals.reference ( matData(slice, j, Range::all()));
 	grads.reference(gradData(slice, j, Range::all()));
-	BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+	BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
       }
     else {
       cerr << "Unrecognized update type.\n";
@@ -787,7 +787,7 @@ FixedPhaseClass::UpdateCache()
       grads.reference(UpGradMatCache[0](slice, j, Range::all()));
       Vec3 r_j = Path(slice, j+upFirst);
       Path.PutInBox(r_j);
-      BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+      BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
     }
 
     for (int j=0; j < Ndown; j++) {
@@ -795,7 +795,7 @@ FixedPhaseClass::UpdateCache()
       grads.reference(DownGradMatCache[0](slice, j, Range::all()));
       Vec3 r_j = Path(slice, j+downFirst);
       Path.PutInBox(r_j);
-      BandSplines.ValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+      BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
     }
   }
   UpMatrixCache   [1] = UpMatrixCache   [0];
