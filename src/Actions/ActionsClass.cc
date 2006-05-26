@@ -32,7 +32,7 @@ ActionsClass::Read(IOSectionClass &in)
   Kinetic.SetNumImages (NumImages);
   KineticSphere.SetNumImages(NumImages);
   Mu.Read(in);
-  VariationalPI.Read(in);
+  //  VariationalPI.Read(in);
   perr << "MaxLevels = " << MaxLevels << endl;
   bool checkJosephson=false;
   in.ReadVar("Josephson",checkJosephson);
@@ -206,10 +206,10 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 	new GroundStateNodalActionClass 
 	(PathData, groundState, groundState.IonSpeciesNum);
     }
-    else if (type == "VARIATIONAL") {
-      NodalActions(0) = 
-	&VariationalPI;
-    }
+//     else if (type == "VARIATIONAL") {
+//       NodalActions(0) = 
+// 	&VariationalPI;
+//     }
     else if (type == "FIXEDPHASE") {
       FixedPhaseClass &fixedPhaseA = *new FixedPhaseClass(PathData);
       fixedPhaseA.Read (in);

@@ -71,20 +71,20 @@ libmoves_la_SOURCES  =           \
     TablePermuteStage.h          \
     ClusterMove.cc               \
     ClusterMove.h                \
-    VariationalDisplaceMove.h    \
-    VariationalDisplaceMove.cc   \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \
-    WaterMoveRing.h              \
-    WormClose.h                  \
-    WormClose.cc                 \
-    WormStage.h                  \
-    WormStage.cc                 \
-    WormGrow.h		         \
-    WormGrow.cc                  \
-    WormRemove.cc                \
-    WormRemove.h                 \
-    WormPermuteStage.h           \
-    WormPermuteStage.cc     
+    WaterMoveRing.h              
+#     VariationalDisplaceMove.h    \
+#     VariationalDisplaceMove.cc   \
+#     WormClose.h                  \
+#     WormClose.cc                 \
+#     WormStage.h                  \
+#     WormStage.cc                 \
+#     WormGrow.h		         \
+#     WormGrow.cc                  \
+#     WormRemove.cc                \
+#     WormRemove.h                 \
+#     WormPermuteStage.h           \
+#     WormPermuteStage.cc     
 
