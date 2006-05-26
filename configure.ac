@@ -56,7 +56,7 @@ case "${host_cpu}" in
    "powerpc")
       CPPFLAGS="-DMAC $CPPFLAGS"
       CXXFLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
-      F77FLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
+      FFLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
 
    "i686")
       AC_MSG_CHECKING([ i686 cpu type])
@@ -76,7 +76,7 @@ case "${host_cpu}" in
         AX_CC_OPTION(ARCHOPT, [-xW], [-xW], [-xW])
       fi
       CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
-      F77FLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
+      FFLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
       if grep -q sse /proc/cpuinfo ; then
         CXXFLAGS="$CXXFLAGS -msse"
       fi
@@ -96,8 +96,8 @@ case "${host_cpu}" in
          AC_MSG_RESULT([Intel Itanium 2])
          AX_CC_OPTION(TUNEOPT, [-mcpu=itanium2], [-mcpu=itanium2], [-mcpu=itanium2])
        fi
-       CXXFLAGS="-O3 $TUNEOPT -g";;
-
+       CXXFLAGS="-O3 $TUNEOPT -g"
+       FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
 # Checks if we want MPI support
@@ -146,7 +146,7 @@ AC_SUBST(FFT_DEF)
 AC_ARG_ENABLE(profile,[  --enable-profile        instrument code with profiling information])
 if test "x$enable_profile" = "xyes"; then
    CXXFLAGS="-pg $CXXFLAGS"
-   F77FLAGS="-pg $F77FLAGS"
+   FFLAGS="-pg $FFLAGS"
    LDFLAGS="-pg $LDFLAGS"
 fi
 
