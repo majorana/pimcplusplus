@@ -15,7 +15,7 @@ void TestFFT3D()
       for (int k=0; k<2; k++)
 	fprintf (stderr, "%1.5f\n", fft.kBox(i,j,k).real());
   fft.k2r();
-  fft.kBox = 0.0;
+  //fft.kBox = 0.0;
   fft.r2k();
     cerr << "FFT^-1(FFT(Original)):\n";
   for (int i=0; i<2; i++)
@@ -46,7 +46,7 @@ void TestFFTVec3D()
 	fprintf (stderr, "\n");
       }
   fft.k2r();
-  fft.kBox = complex<double>(0.0,0.0);
+  //fft.kBox = complex<double>(0.0,0.0);
   fft.r2k();
   cerr << "FFT^-1(FFT(Original)):\n";
   for (int i=0; i<2; i++)
@@ -108,13 +108,13 @@ void TestFFTMat3D()
 	fprintf (stderr, "\n");
       }
   fft.k2r();
-  complex<double> z(0.0, 0.0);
-  cMat3 a;
-  a(0,0)=z; a(0,1)=z; a(0,2)=z;
-  a(1,0)=z; a(1,1)=z; a(1,2)=z;
-  a(2,0)=z; a(2,1)=z; a(2,2)=z;
+//   complex<double> z(0.0, 0.0);
+//   cMat3 a;
+//   a(0,0)=z; a(0,1)=z; a(0,2)=z;
+//   a(1,0)=z; a(1,1)=z; a(1,2)=z;
+//   a(2,0)=z; a(2,1)=z; a(2,2)=z;
+//    fft.kBox = a;
 
-  fft.kBox = a;
   fft.r2k();
   cerr << "FFT^-1(FFT(Original)):\n";
   for (int i=0; i<2; i++)

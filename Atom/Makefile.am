@@ -8,7 +8,7 @@ LDADD   = libatom.la                 ../IO/libIO.la           \
           ../DFT/libdft.la           ../PH/libPH.la             \
           ../Splines/libspline.la    ../Integration/libquad.la  \
           ../Fitting/libfitting.la   ../MatrixOps/libmatops.la  \
-          $(XML2_LIBS) $(BLITZ_LIBS) $(GSL_LIBS) $(FLIBS)
+          $(XML2_LIBS) $(BLITZ_LIBS) $(GSL_LIBS) $(FLIBS) $(HDF5_LIBS)
 AM_CXXFLAGS = $(XML2_CFLAGS) $(BLITZ_CFLAGS) $(HDF5_CFLAGS)
 
 includedir=$(prefix)/include/Common/Atom

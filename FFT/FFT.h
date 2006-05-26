@@ -244,7 +244,6 @@ public:
   ~FFTMat3D()
   {
     if (Allocated) {
-      cerr << "Deallocating FFTMat3D.\n";
       FFTNAME(free)(rData);
       if (!InPlace)
 	FFTNAME(free)(kData);
