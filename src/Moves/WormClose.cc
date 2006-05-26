@@ -59,6 +59,8 @@ void WormCloseMoveClass::Reject()
 void 
 WormCloseMoveClass::MakeMove()
 {
+#if 1==2
+
   cerr<<"Starting WormCloseClass"<<endl;
   Slice1=0;
   Slice2=0;
@@ -207,7 +209,7 @@ WormCloseMoveClass::MakeMove()
       Reject();
     }
     PathData.Path.PrintRealSlices();
-
+#endif
 
 }
 
