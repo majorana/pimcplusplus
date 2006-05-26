@@ -32,6 +32,15 @@ FixedPhaseClass::Setk(Vec3 k)
   UpdateBands();
 }
 
+void
+FixedPhaseClass::GetBandEnergies(Array<double,1> &energies)
+{
+  if (energies.size() != NumBands)
+    energies.resize(NumBands);
+  for (int band=0; band<NumBands; band++)
+    energies(band) = System->GetEnergy(band);
+}
+
 inline double mag2 (complex<double> z)
 {
   return (z.real()*z.real()+z.imag()*z.imag());
@@ -1019,4 +1028,13 @@ FixedPhaseActionClass::CalcDensity(Array<double,3> &rho)
     FixedPhaseA.CalcDensity(rho);
   else
     FixedPhaseB.CalcDensity(rho);
+}
+
+void
+FixedPhaseActionClass::GetBandEnergies(Array<double,1> &energies)
+{
+  if (PathData.Path.GetConfig() == 0)
+    FixedPhaseA.GetBandEnergies(energies);
+  else
+    FixedPhaseB.GetBandEnergies(energies);
 }

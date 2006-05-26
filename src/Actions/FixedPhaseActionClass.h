@@ -103,6 +103,7 @@ public:
   void Init(int speciesNum);
   void Setk(Vec3 k);
   inline Vec3 Getk() { return kVec; }
+  void GetBandEnergies(Array<double,1> &energies);
   FixedPhaseClass (PathDataClass &pathData);
 };
 
@@ -150,6 +151,7 @@ public:
   /// Updates the bands if I'm  the ion species
   void Update();
   void CalcDensity (Array<double,3> &rho);
+  void GetBandEnergies(Array<double,1> &energies);
 
   FixedPhaseActionClass (PathDataClass &pathData, 
 			 FixedPhaseClass &FPA, FixedPhaseClass &FPB,
