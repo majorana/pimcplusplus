@@ -89,6 +89,14 @@ case "${host_cpu}" in
       if grep -q 3dnow /proc/cpuinfo ; then
         CXXFLAGS="$CXXFLAGS -m3dnow"
       fi;;
+    
+    "ia64")
+       AC_MSG_CHECKING([ Itanium cpu type])
+       if grep -q "Itanium 2" /proc/cpuinfo; then
+         AC_MSG_RESULT([Intel Itanium 2])
+         AX_CC_OPTION(TUNEOPT, [-mcpu=itanium2], [-mcpu=itanium2], [-mcpu=itanium2])
+       fi
+       CXXFLAGS="-O3 $TUNEOPT -g";;
 
 esac
 
@@ -178,6 +186,16 @@ fi
 #   fi
 #fi
 
+
+
+AC_ARG_WITH(blas-cflags, [  --with-blas-cflags=CFLAGS  specify BLAS compile flags ])
+if test "x$with_blas_cflags" != "x"; then
+   BLAS_CFLAGS="$with_blas_cflags"
+else
+   AC_CHECK_LIB([blas],[dgemv_])
+fi
+AC_SUBST(BLAS_CFLAGS)
+
 AC_ARG_WITH(blas-libs,   [  --with-blas-libs=LIBS      specify BLAS linker flags ])
 if test "x$with_blas_libs" != "x"; then
    BLAS_LIBS="$with_blas_libs"
@@ -185,6 +203,20 @@ else
    AC_CHECK_LIB([blas],[dgemv_])
 fi
 AC_SUBST(BLAS_LIBS)
+
+AC_ARG_ENABLE(cblas,      [  --enable-cblas            use     CBLAS instead of BLAS (default=no)])
+AC_ARG_ENABLE(mkl_cblas,  [  --enable-mkl-cblas        use MKL CBLAS instead of BLAS (default=no)])
+if test "$enable_mkl_cblas" = "yes"; then
+  CBLAS_DEF="-DUSE_MKL_CBLAS -DUSE_CBLAS"
+else
+  CBLAS_DEF=" "
+fi
+if test "$enable_cblas" = "yes"; then
+  CBLAS_DEF="-DUSE_CBLAS"
+fi
+AC_SUBST(CBLAS_DEF)
+
+
 
 AC_ARG_WITH(lapack-cflags,[  --with-lapack-cflags=FLAGS specify LAPACK linker flags])
 AC_ARG_WITH(lapack-libs, [  --with-lapack-libs=LIBS    specify LAPACK linker flags])

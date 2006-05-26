@@ -136,7 +136,6 @@ double ConjGrad::CalcPhiCG()
   /// Orthonalize to other bands here
   zVec &Xip = Xi;
   Orthogonalize2 (Bands, Xip, CurrentBand);
-
   Precondition();
 
   // Now, orthogonalize to all bands
@@ -144,7 +143,6 @@ double ConjGrad::CalcPhiCG()
   zVec &Etap = Eta;
   Orthogonalize2 (Bands, Etap, CurrentBand);
   // Etap = Eta - conjdot (c, Eta)*c;
-
   // Compute conjugate direction
   complex<double> etaxi = conjdot(Etap, Xip);
   complex<double> gamma; 

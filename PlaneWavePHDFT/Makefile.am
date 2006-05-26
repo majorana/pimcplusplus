@@ -14,7 +14,8 @@ LDADD = libpw.la                  ../IO/libIO.la                          \
         $(FLIBS)
 
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
-              $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS) $(FFT_DEF)
+              $(HDF5_CFLAGS)  $(BLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)    \
+              $(FFT_DEF) $(CBLAS_DEF)
 
 noinst_LTLIBRARIES = libpw.la
 libpw_la_SOURCES = ConjGrad2.h        \
