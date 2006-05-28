@@ -1,12 +1,10 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
-AC_INIT(pimc, 1.0, esler@uiuc.edu)
+AC_INIT(pimc++, 1.0, esler@uiuc.edu, pimc++)
 AM_INIT_AUTOMAKE(pimc, 1.0)
 AC_CONFIG_SRCDIR([src/PathClass.h])
 AC_CONFIG_HEADER([config.h])
-
-
 
 PKG_CHECK_MODULES(COMMON, common, common_ok=yes, common_ok=no)
 
@@ -36,19 +34,21 @@ case "${host_cpu}" in
         AC_MSG_RESULT([Athlon XP])
         AX_CC_OPTION(TUNEOPT, [-mtune=athlon-xp], [-mtune=athlon-xp], [-mcpu=athlon-xp])
         AX_CC_OPTION(ARCHOPT, [-march=athlon-xp], [-march=athlon-xp], [-march=athlon])
+	FFLAG="-O3 -march=athlon -ffast-math -msse -m3dnow -g"
       fi
       if grep -q "Pentium(R) M" /proc/cpuinfo; then
 	AC_MSG_RESULT([Pentium M])
         AX_CC_OPTION(TUNEOPT, [-mtune=pentium-m], [-mtune=pentium-m], [-mcpu=pentium-m])
         AX_CC_OPTION(ARCHOPT, [-march=pentium-m], [-march=pentium-m], [-march=pentium-m])
+	FFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
       fi
       if grep -q "Intel(R) Xeon" /proc/cpuinfo; then
 	AC_MSG_RESULT([Intel Xeon])
         AX_CC_OPTION(TUNEOPT, [-tpp7], [-tpp7], [-tpp7])
         AX_CC_OPTION(ARCHOPT, [-xW], [-xW], [-xW])
+	FFLAGS="-O3 $TUNEOPT $ARCHOPT -g"
       fi
       CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
-      FFLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
       if grep -q sse /proc/cpuinfo ; then
         CXXFLAGS="$CXXFLAGS -msse"
       fi
