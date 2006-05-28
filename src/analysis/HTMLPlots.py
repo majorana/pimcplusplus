@@ -10,7 +10,7 @@ def ProduceTracePicture(valArray,fileBase,hlabel,vlabel,myTitle=''):
 #    x=fromfunction(lambda i:i,(len(valArray)))
 
     x=zeros(valArray.shape)+0.0
-    if len(valArray.shape) == 2:
+    if (len(valArray.shape) == 2):
         for i in range(0,len(x)):
             x[i,:]=i
         plot (x[:,0], valArray[:,0])
@@ -21,7 +21,7 @@ def ProduceTracePicture(valArray,fileBase,hlabel,vlabel,myTitle=''):
     else:
         for i in range(0,len(x)):
             x[i] = i
-            plot(x,valArray)
+        plot(x,valArray)
     h1=xlabel(hlabel)
     setp(h1,"FontSize",20)
     v1=ylabel(vlabel)

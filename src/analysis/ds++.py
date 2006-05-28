@@ -193,8 +193,10 @@ class scalarClass:
         self.rowNum = rowNum
         self.name = varName
         self.y = infile.ReadVar(varName)
-        self.x = arange(0,self.y.size())
-        (self.mean, self.var, self.error, self.kappa) = stats.Stats(self.y)
+        self.x = arange(0,self.y.shape[0])
+        print 'y.shape = ' + repr(self.y.shape)
+        if len(self.y.shape) == 1:
+            (self.mean, self.var, self.error, self.kappa) = stats.Stats(self.y)
 #        print "New scalar class with name " + self.name
 
     def tv_callback (self, path, view_column):
