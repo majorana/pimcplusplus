@@ -400,7 +400,21 @@ void Array2Vec (Array<double,2> &array, Array<Vec3,1> &vec)
 	 array.size()*sizeof(double));
 }
 
+inline Array<Vec3,1> operator+(const Array<Vec3,1> &array, Vec3 vec)
+{
+  Array<Vec3,1> result(array.size());
+  for (int i=0; i<array.size(); i++)
+    result(i) = vec + array(i);
+  return result;
+}
 
+inline Array<Vec3,1> operator+(Vec3 vec, const Array<Vec3,1> &array)
+{
+  Array<Vec3,1> result(array.size());
+  for (int i=0; i<array.size(); i++)
+    result(i) = vec + array(i);
+  return result;
+}
 
 
 
