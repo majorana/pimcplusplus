@@ -225,6 +225,7 @@ FixedPhaseClass::IonsHaveMoved()
   int last = species.LastPtcl;
   int ptcl = first;
   bool changed = false;
+
   for (int ptcl=first; ptcl<=last; ptcl++) {
     dVec diff = Path(0,ptcl) - System->GetIonPos(ptcl-first);
     if (dot (diff,diff) > 1.0e-16)
@@ -734,6 +735,8 @@ FixedPhaseClass::UpdateBands()
 				zGrid.NumPoints, NumBands);
   SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
   int first = ionSpecies.FirstPtcl;
+  // We need this half box thing to compensate for fourier transform
+  // aliasing.  
   for (int i=0; i<NumIons; i++)
     Rions(i) = Path(0,i+first);
   System->SetIons (Rions);
