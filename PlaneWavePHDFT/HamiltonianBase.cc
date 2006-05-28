@@ -39,6 +39,7 @@ VionBase::SetIons(const Array<Vec3,1> &rions)
   for (int gi=0; gi<GVecs.DeltaSize(); gi++) {
     double c, s, phase;
     for (int i=0; i<rions.size(); i++) {
+      // HACK HACK HACK -- trying minus sign
       phase = dot (GVecs.DeltaG(gi), rions(i));
       sincos (phase, &s, &c);
       StructureFactor(gi) += complex<double>(c, s);

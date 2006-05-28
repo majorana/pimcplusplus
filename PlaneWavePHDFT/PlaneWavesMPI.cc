@@ -37,8 +37,10 @@ MPISystemClass::SetIons (const Array<Vec3,1> &rions)
 {
   if (Rions.size() != rions.size())
     Rions.resize(rions.size());
+  /// This half box addition compensates for the fourier transform
+  /// aliasing. 
   Rions = rions;
-  H.SetIons(rions);
+  H.SetIons(rions + 0.5*Box);
 }
 
 
@@ -179,7 +181,9 @@ MPISystemClass::Setk(Vec3 k)
   FFT.Setup();
   //  H.SetIonPot (*PH, UseFFT);
   H.Setk(k);
-  H.SetIons(Rions);
+  /// The half box is necessary to compensate for fourier transform
+  /// aliasing.  
+  H.SetIons(Rions+0.5*Box);
   Bands.resize (NumBands, GVecs.size());
   LastBands.resize (NumBands, GVecs.size());
   LastBands = complex<double> (0.0, 0.0);
