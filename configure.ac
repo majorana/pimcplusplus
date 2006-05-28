@@ -76,7 +76,7 @@ case "${host_cpu}" in
         AX_CC_OPTION(ARCHOPT, [-xW], [-xW], [-xW])
       fi
       CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
-      FFLAGS="-O3 -mtune=athlon -march=athlon -ffast-math -msse -m3dnow -g"
+      FFLAGS="-O3 -march=athlon -ffast-math -msse -m3dnow -g"
       if grep -q sse /proc/cpuinfo ; then
         CXXFLAGS="$CXXFLAGS -msse"
       fi
