@@ -57,9 +57,9 @@ protected:
   /// dimensions are (x, y, z)
   void ReadFrameData (int frame);
   IOSectionClass Infile;
-  IOVarBase *ANodeVar, *BNodeVar;
+  IOVarBase *ANodeVar, *BNodeVar, *RhoVar;
   Array<int,1> NodePtcl, NodeSlice;
-  Array<double,3> ANodeData, BNodeData;
+  Array<double,3> ANodeData, BNodeData, RhoData;
   Array<double,2> WarpPos;
   LinearGrid Xgrid, Ygrid, Zgrid;
 
@@ -104,6 +104,11 @@ protected:
   Gtk::Frame IsoFrame;
   Gtk::HScale IsoScale;
   Gtk::Adjustment IsoAdjust;
+  // Density isosurface control
+  Gtk::Frame RhoFrame;
+  Gtk::HScale RhoScale;
+  Gtk::Adjustment RhoAdjust;
+  double MaxRho, MinRho;
 
 
   Glib::RefPtr<Gtk::ActionGroup> Actions;
@@ -118,6 +123,7 @@ protected:
   void PutInBox();
   void OnDetailChange();
   void OnIsoChange();
+  void OnRhoChange();
 
   Gtk::FileChooserDialog FileChooser;
 

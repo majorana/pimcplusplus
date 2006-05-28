@@ -9,6 +9,30 @@ VisualClass::ReadFrameData(int frame)
     if (BNodeVar != NULL)
       BNodeVar->Read(BNodeData, frame, Range::all(),Range::all(),Range::all());
   }
+  if (RhoVar != NULL) {
+    RhoVar->Read(RhoData, frame, Range::all(), Range::all(), Range::all());
+    /// HACKY inversion of nodes
+    //     Array<double,3> rho;
+    //     RhoVar->Read(rho, frame, Range::all(), Range::all(), Range::all());
+    //     RhoData.resize(rho.shape());
+    //     int nx = rho.extent(0);
+    //     int ny = rho.extent(1);
+    //     int nz = rho.extent(2);
+    //     for (int ix=0; ix<nx; ix++)
+    //       for (int iy=0; iy<ny; iy++)
+    // 	for (int iz=0; iz<nz; iz++)
+    // 	  RhoData(ix,iy,iz) = rho(nx-ix-1,ny-iy-1,nz-iz-1);
+    //     RhoData = rho;
+
+    MaxRho=0.0;
+    MinRho = 1.0e100;
+    for (int ix=0; ix<RhoData.extent(0); ix++)
+      for (int iy=0; iy<RhoData.extent(1); iy++)
+	for (int iz=0; iz<RhoData.extent(2); iz++) {
+	  MaxRho = max(RhoData(ix,iy,iz), MaxRho);
+	  MinRho = min(RhoData(ix,iy,iz), MinRho);
+	}
+  }
 }
 
 void VisualClass::MakeFrame(int frame, bool offScreen)
@@ -94,6 +118,10 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
 	pos[0] = PathArray(frame, ptcl, 0, 0);
  	pos[1] = PathArray(frame, ptcl, 0, 1);
  	pos[2] = PathArray(frame, ptcl, 0, 2);
+	/// HACK HACK HACK HACK
+// 	pos[0] += 0.5*Box[0];
+// 	pos[1] += 0.5*Box[1];
+// 	pos[2] += 0.5*Box[2];
 	Box.PutInBox(pos);
 	sphere->SetPos (pos);
 // 	if (ptcl==0)
@@ -144,7 +172,18 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
 //   iso.SetIsoval (36.0);
 
 //   PathVis.Objects.push_back(isoPtr);
-  if (HaveANodeData) {
+  if (RhoVar != NULL) {
+    Isosurface *isoPtr = new Isosurface;
+    Isosurface &iso = *isoPtr;
+    Xgrid.Init(-0.5*Box[0], 0.5*Box[0], RhoData.extent(0));
+    Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
+    Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
+    iso.Init (&Xgrid, &Ygrid, &Zgrid, RhoData, true);
+    iso.SetIsoval(MaxRho*RhoAdjust.get_value());
+    //iso.SetIsoval(7.0e-9);
+    PathVis.Objects.push_back(isoPtr);
+  }
+  else if (HaveANodeData) {
     Isosurface *isoPtr = new Isosurface;
     Isosurface &iso = *isoPtr;
     iso.Init (&Xgrid, &Ygrid, &Zgrid, ANodeData, true);
@@ -241,6 +280,7 @@ void VisualClass::Read(string fileName)
   assert(Infile.OpenSection("PathDump"));
   assert(Infile.ReadVar ("Path", PathArray));
   assert(Infile.ReadVar ("Permutation", PermArray));
+  RhoVar = Infile.GetVarPtr("Rho");
   PutInBox();
 
   if (Infile.ReadVar ("OpenPtcl", OpenPtcl)) {
@@ -252,7 +292,6 @@ void VisualClass::Read(string fileName)
     OpenPtcl.resize (PathArray.extent(0));
     OpenPtcl = -1;
   }
-  
   HaveANodeData = Infile.OpenSection("Xgrid");
   if (HaveANodeData) {
     HaveWarpPos = Infile.ReadVar("WarpPos", WarpPos);
@@ -373,7 +412,8 @@ VisualClass::VisualClass()
     Wrap(false), Smooth(false), 
     DetailFrame ("Detail"),  DetailAdjust (1.0, 1.0, 2.0), 
     IsoFrame    ("Isosurf"),    IsoAdjust (0.0, 0.0, 5.0, 0.1),
-    Export(*this)
+    RhoFrame    ("Rho"),        RhoAdjust (0.0, 0.0, 1.0, 0.02, 0.1),
+    Export(*this), RhoVar(NULL)
 {
   TubesImage.property_file().set_value(FindFullPath("tubes.png"));
   LinesImage.property_file().set_value(FindFullPath("lines.png"));
@@ -463,7 +503,7 @@ VisualClass::VisualClass()
   DetailAdjust.signal_value_changed().connect
     (sigc::mem_fun(*this, &VisualClass::OnDetailChange));
   DetailFrame.add(DetailScale);
-  DetailScale.set_size_request(100,-1);
+  DetailScale.set_size_request(75,-1);
 
   // Setup iso stuff
   IsoScale.set_adjustment(IsoAdjust);
@@ -472,9 +512,16 @@ VisualClass::VisualClass()
   IsoAdjust.signal_value_changed().connect
     (sigc::mem_fun(*this, &VisualClass::OnIsoChange));
   IsoFrame.add(IsoScale);
-  IsoScale.set_size_request(100,-1);
+  IsoScale.set_size_request(75,-1);
 
-
+  // Setup rho stuff
+  RhoScale.set_adjustment(RhoAdjust);
+  RhoScale.set_digits(2);
+  RhoAdjust.set_step_increment(0.02);
+  RhoAdjust.signal_value_changed().connect
+    (sigc::mem_fun(*this, &VisualClass::OnRhoChange));
+  RhoFrame.add(RhoScale);
+  RhoScale.set_size_request(75,-1);
 
   // Setup the file chooser
   FileChooser.set_select_multiple(false);
@@ -531,6 +578,7 @@ VisualClass::VisualClass()
   ToolBox.pack_start (Tools);
   ToolBox.pack_start (DetailFrame, Gtk::PACK_SHRINK, 0);
   ToolBox.pack_start (IsoFrame, Gtk::PACK_SHRINK, 0);
+  ToolBox.pack_start (RhoFrame, Gtk::PACK_SHRINK, 0);
   m_VBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
   m_VBox.pack_start(PathVis);
   m_VBox.pack_start(FrameScale, Gtk::PACK_SHRINK,0);
@@ -800,6 +848,13 @@ void VisualClass::OnDetailChange()
 
 void
 VisualClass::OnIsoChange()
+{
+  FrameChanged();
+}
+
+
+void
+VisualClass::OnRhoChange()
 {
   FrameChanged();
 }
