@@ -9,8 +9,10 @@ bin_PROGRAMS = pimc++ FreeParticles
 AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF)
 
 pimc___SOURCES =          \
+    Common.h              \
     EventClass.h          \
     InitPaths.cc          \
+    GridClass.h           \
     GridClass.cc          \
     LoopClass.cc          \
     LoopClass.h           \
