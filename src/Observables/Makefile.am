@@ -39,7 +39,7 @@ libobservables_la_SOURCES  =     \
     PermutationCount.cc          \
     Pressure.h                   \
     Pressure.cc                  \
-    PhiK.h                       \
+    Phik.h                       \
     Phik.cc                      \
     PlaneDensity.h               \
     PlaneDensity.cc              \
