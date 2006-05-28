@@ -30,30 +30,31 @@ PathDataClass::WormInfo(int &headSlice, int &headPtcl,
 		    int &tailSlice, int &tailPtcl,
 		    int &numEmpty, int &wormSize)
 {
-//   tailSlice=-1;tailPtcl=-1;headSlice=-1;headPtcl=-1;
-//   numEmpty=0;
-//   wormSize=0;
-//   for (int slice=0;slice<Path.NumTimeSlices();slice++)
-//     for (int ptcl=0;ptcl<Path.NumParticles();ptcl++){
-//       if (SliceFullandPreviousSliceEmpty(slice,ptcl)){
-// 	headSlice=slice;
-// 	headPtcl=ptcl;
-//       }
-//       if (SliceFullandNextSliceEmpty(slice,ptcl)){
-// 	tailSlice=slice;
-// 	tailPtcl=ptcl;
-//       }
-//       if (Path.ParticleExist(slice,ptcl)==0 && slice!=Path.NumTimeSlices()-1)
-// 	numEmpty++;
-//     }
-//   int currSlice=headSlice;
-//   int currPtcl=headPtcl;
-//   while (currSlice!=tailSlice || currPtcl!=tailPtcl){
-//     if (currSlice!=Path.NumTimeSlices()-1)
-//       wormSize++;
-//     Next(currSlice,currPtcl);
-//   } 
-
+#if 1==2
+  tailSlice=-1;tailPtcl=-1;headSlice=-1;headPtcl=-1;
+  numEmpty=0;
+  wormSize=0;
+  for (int slice=0;slice<Path.NumTimeSlices();slice++)
+    for (int ptcl=0;ptcl<Path.NumParticles();ptcl++){
+      if (SliceFullandPreviousSliceEmpty(slice,ptcl)){
+	headSlice=slice;
+	headPtcl=ptcl;
+      }
+      if (SliceFullandNextSliceEmpty(slice,ptcl)){
+	tailSlice=slice;
+	tailPtcl=ptcl;
+      }
+      if (Path.ParticleExist(slice,ptcl)==0 && slice!=Path.NumTimeSlices()-1)
+	numEmpty++;
+    }
+  int currSlice=headSlice;
+  int currPtcl=headPtcl;
+  while (currSlice!=tailSlice || currPtcl!=tailPtcl){
+    if (currSlice!=Path.NumTimeSlices()-1)
+      wormSize++;
+    Next(currSlice,currPtcl);
+  } 
+#endif
 }
 void
 PathDataClass::MoveTailToSliceZero()
@@ -112,30 +113,32 @@ void PathDataClass::MoveOpenLinkToEnd()
 ///Worm Moves////////
 bool PathDataClass::SliceFullandNextSliceEmpty(int slice,int ptcl)
 {
-//   int nextSlice=(slice+1) % NumTimeSlices();
-//   int nextPtcl;
-//   if (Join==slice)
-//     nextPtcl=Path.Permutation(ptcl);
-//   else
-//     nextPtcl=ptcl;
-//   return (Path.ParticleExist(slice,ptcl)==1.0 && Path.ParticleExist(nextSlice,nextPtcl)==0.0);
-
+#if 1==2
+  int nextSlice=(slice+1) % NumTimeSlices();
+  int nextPtcl;
+  if (Join==slice)
+    nextPtcl=Path.Permutation(ptcl);
+  else
+    nextPtcl=ptcl;
+  return (Path.ParticleExist(slice,ptcl)==1.0 && Path.ParticleExist(nextSlice,nextPtcl)==0.0);
+#endif
 }
 
 bool PathDataClass::SliceFullandPreviousSliceEmpty(int slice,int ptcl)
 {
-//   int prevSlice=((slice-1)+Path.NumTimeSlices() ) % Path.NumTimeSlices();
-//   int prevPtcl=0;
-//   if (Join==prevSlice){
-//     while (Path.Permutation(prevPtcl)!=ptcl)
-//       prevPtcl++;
-//   }
-//   else
-//     prevPtcl=ptcl;
+#if 1==2
+  int prevSlice=((slice-1)+Path.NumTimeSlices() ) % Path.NumTimeSlices();
+  int prevPtcl=0;
+  if (Join==prevSlice){
+    while (Path.Permutation(prevPtcl)!=ptcl)
+      prevPtcl++;
+  }
+  else
+    prevPtcl=ptcl;
 
-//   return (Path.ParticleExist(slice,ptcl)==1.0 && Path.ParticleExist(prevSlice,prevPtcl)==0.0);
+  return (Path.ParticleExist(slice,ptcl)==1.0 && Path.ParticleExist(prevSlice,prevPtcl)==0.0);
 
-
+#endif
 }
   
 
