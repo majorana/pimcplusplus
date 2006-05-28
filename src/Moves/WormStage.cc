@@ -94,6 +94,7 @@ void WormStageClass::MakeRoomForShrinkingTail(int slicesToShrink,int &tailSlice)
 
 bool WormStageClass::PadWorm()
 {
+#if 1==2
   int headSlice;
   int headPtcl;
   int tailSlice;
@@ -130,7 +131,7 @@ bool WormStageClass::PadWorm()
 // 						  newNumParticles);
 //     PathData.Path.Permutation.resizeAndPreserve(newNumParticles);
 //   }
-
+#endif
 }
 
 ///Because this stage does shifting, it must be called before any
@@ -138,6 +139,7 @@ bool WormStageClass::PadWorm()
 double WormStageClass::Sample(int &slice1,int &slice2,
 				   Array<int,1> &activeParticles)
 {
+#if 1==2
   //  cerr<<"hmm"<<endl;
   if (!PathData.Path.NowOpen)
     return 1.0;
@@ -275,6 +277,7 @@ double WormStageClass::Sample(int &slice1,int &slice2,
     //    PadWorm();
     return exp(logSampleProb);
   }
+#endif
 }
 
 

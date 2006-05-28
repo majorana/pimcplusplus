@@ -67,6 +67,7 @@ dVec WormRemoveMoveClass::RandomBoxLocation()
 void 
 WormRemoveMoveClass::MakeMove()
 {
+#if 1==2
   cerr<<"Num Into worm remove class"<<endl;
   Slice1=0;
   Slice2=0;
@@ -168,5 +169,5 @@ WormRemoveMoveClass::MakeMove()
       <<tailSlice<<" "<<tailPtcl<<" "<<endl;
 
   cerr<<"Num Out of worm remove class"<<endl;    
-      
+#endif      
 }
