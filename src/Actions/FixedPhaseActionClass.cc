@@ -72,11 +72,13 @@ FixedPhaseClass::CalcDensity(Array<double,3> &rho)
   }
   // Now normalize;
   double sum = 0.0;
+  double dV = box[0]*box[1]*box[2]/(nx*ny*nz);
   for (int ix=0; ix<nx; ix++)
     for (int iy=0; iy<ny; iy++)
       for (int iz=0; iz<nz; iz++)
 	sum += rho(ix,iy,iz);
-  double norm = (double)(NumUp+NumDown)/(sum*PathData.Path.GetVol());
+
+  double norm = (double)(NumUp+NumDown)/(dV*sum);
   rho *= norm;
   // This guarantees that when we integrate rho over the box, we get
   // the number of electrons.
