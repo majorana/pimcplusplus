@@ -45,7 +45,6 @@ libmoves_la_SOURCES  =           \
     MoveClass.h                  \
     MultiStage.cc                \
     MultiStage.h                 \
-    NoPermuteClass.h             \
     NoPermuteClass.cc            \
     OpenStage.h                  \
     OpenStage.cc                 \
