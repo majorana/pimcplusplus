@@ -24,6 +24,7 @@ void PathDumpClass::WriteBlock()
 void PathDumpClass::Read(IOSectionClass &in)
 {
   ObservableClass::Read(in);
+  in.ReadVar("AllClones", AllClones);
   DumpNodes = in.OpenSection("NodeDump");
   if (DumpNodes) {
     assert(in.ReadVar("Ptcl", NodePtcl));
@@ -68,6 +69,9 @@ void PathDumpClass::Read(IOSectionClass &in)
 
 void PathDumpClass::Accumulate()
 {
+  if (!AllClones && (PathData.GetCloneNum() != 0))
+    return;
+
   PathClass &Path = PathData.Path;
   int start, end, numProcs, myProc;
   numProcs = Path.Communicator.NumProcs();

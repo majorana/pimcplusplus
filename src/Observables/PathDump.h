@@ -35,6 +35,9 @@ private:
   ObservableVecDouble1 WarpPosVar;
   ObservableInt NodePtclVar, NodeSliceVar;
   bool DumpNodes, DumpRho;
+  /// If AllClones is true, then all clones will generate path dumps.
+  /// Otherwise only clone 0 will.
+  bool AllClones;
   int  NodePtcl;
   int  NodeSlice;
   LinearGrid Xgrid, Ygrid, Zgrid;
@@ -63,7 +66,8 @@ public:
     NodePtclVar ("NodePtcl",  IOSection, myPathData.Path.Communicator),
     NodeSliceVar("NodeSlice", IOSection, myPathData.Path.Communicator),
     WarpPosVar("WarpPos", IOSection, myPathData.Path.Communicator),
-    RhoVar("Rho", IOSection, myPathData.Path.Communicator)
+    RhoVar("Rho", IOSection, myPathData.Path.Communicator),
+    AllClones(false)
   { 
     Name="PathDump";
     TimesCalled=0;
