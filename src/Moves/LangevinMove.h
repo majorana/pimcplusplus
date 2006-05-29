@@ -92,6 +92,12 @@ protected:
   void VerletStep();
   void LangevinStep();
 
+  /// This optionally writes the charge density to the file
+  ObservableVecDouble3 RhoVar;
+  /// This bool tells us whether or not to dump Rho
+  bool DumpRho;
+  /// And this store the actual density
+  Array<double,3> Rho;
   ObservableVecDouble2 Rvar, Vvar, VOldVar, FVar, FShortVar, FLongVar,
     CoVarVar;
   ObservableVecDouble1 LambdaVar, BandEnergiesVar;
@@ -112,7 +118,9 @@ public:
     CoVarVar  ("CoVar",             IOSection, pathData.Path.Communicator),
     TimeVar   ("Time",              IOSection, pathData.Path.Communicator),
     BandEnergiesVar("BandEnergies", IOSection, pathData.Path.Communicator),
-    Time(0.0), Integrator (VERLET), ExtraNoiseSigma(0.0), FrictionFactor(1.0)
+    RhoVar    ("Rho",               IOSection, pathData.Path.Communicator),
+    Time(0.0), Integrator (VERLET), ExtraNoiseSigma(0.0), FrictionFactor(1.0),
+    DumpRho(false)
   {
     // do nothing for now
   }

@@ -386,6 +386,10 @@ LangevinMoveClass::LangevinStep()
   
       FP.GetBandEnergies(bandEnergies);
       BandEnergiesVar.Write(bandEnergies);
+      if (DumpRho && (PathData.GetCloneNum()==0)) {
+	FP.CalcDensity(Rho);
+	RhoVar.Write(Rho);
+      }
     }
   // Calculate the mean force, covariance and eigenvalue
   // decomposition. 
@@ -586,6 +590,15 @@ LangevinMoveClass::Read(IOSectionClass &in)
   }
   MassInv = 1.0/Mass;
 
+  DumpRho = in.OpenSection("RhoDump");
+  if (DumpRho) {
+    int nx, ny, nz;
+    assert (in.ReadVar("Nx", nx));
+    assert (in.ReadVar("Ny", ny));
+    assert (in.ReadVar("Nz", nz));
+    Rho.resize(nx, ny, nz);
+    in.CloseSection (); // "RhoDump"
+  }
 
   /// Initialize the velocities
   InitVelocities();
