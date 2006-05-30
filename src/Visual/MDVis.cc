@@ -25,6 +25,7 @@ MDVisualClass::MDVisualClass() :
   TimeoutDelay = (int) round (20.0/SpeedAdjust.get_value());
 
   IsoScale.set_adjustment(IsoAdjust);
+  IsoScale.set_digits(2);
   IsoScale.signal_value_changed().connect
     (sigc::mem_fun(*this, &MDVisualClass::OnIsoChange));
   IsoFrame.set_label("Density");
@@ -286,10 +287,12 @@ void
 MDVisualClass::OnFrameChange()
 {
   CurrentFrame = (int)round(FrameScale.get_value());
+  cerr << "CurrentFrame = " << CurrentFrame << endl;
+  cerr << "RhoVar = " << RhoVar << endl;
   if (IsoButton.get_active()) {
     RhoVar->Read(RhoData, CurrentFrame, Range::all(), Range::all(), Range::all()); 
     MaxRho = FindMaxRho();
-    RhoIso.SetIsoval(MaxRho * IsoAdjust.get_value());
+    //    RhoIso.SetIsoval(MaxRho * IsoAdjust.get_value());
   }
   DrawFrame();
   //  PathVis.Invalidate();
@@ -364,10 +367,14 @@ MDVisualClass::DrawFrame(bool offScreen)
   boxObject->Set (Box, clipping);
   PathVis.Objects.push_back(boxObject);
   
-  if (IsoButton.get_active())
-    PathVis.Objects.push_back(&RhoIso);
+  if (IsoButton.get_active()) {
+    Isosurface *rhoIso = new Isosurface;
+    rhoIso->Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
+    rhoIso->SetIsoval(MaxRho*IsoAdjust.get_value());
+    PathVis.Objects.push_back(rhoIso);
+  }
 
-  const double radius = 2.5;
+  const double radius = 1.0;
 
   list<Vec3>::iterator iter;
   list<Vec3> sphereList;
@@ -465,6 +472,7 @@ MDVisualClass::Read(string filename)
   assert(in.ReadVar("Time", Time));
 
   RhoVar = in.GetVarPtr("Rho");
+  cerr << "RhoVar = " << RhoVar << endl;
   bool haveRho = RhoVar != NULL;
   if (haveRho) {
     RhoVar->Read(RhoData, 0, Range::all(), Range::all(), Range::all());
@@ -472,8 +480,8 @@ MDVisualClass::Read(string filename)
     Xgrid.Init(-0.5*Box[0], 0.5*Box[0], RhoData.extent(0));
     Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
     Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
-    RhoIso.Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
-    RhoIso.SetIsoval(MaxRho*IsoAdjust.get_value());
+//     RhoIso.Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
+//     RhoIso.SetIsoval(MaxRho*IsoAdjust.get_value());
   }
   IsoButton.set_active(haveRho);
   IsoButton.set_sensitive(haveRho);
@@ -515,7 +523,7 @@ MDVisualClass::OnSpeedChange()
 void
 MDVisualClass::OnIsoChange()
 {
-  RhoIso.SetIsoval(MaxRho * IsoAdjust.get_value());
+  //  RhoIso.SetIsoval(MaxRho * IsoAdjust.get_value());
   DrawFrame();
 }
 
