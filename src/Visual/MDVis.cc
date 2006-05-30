@@ -10,7 +10,8 @@ MDVisualClass::MDVisualClass() :
   PlayDirection(1),
   TimeoutDelay(10),
   MDExport(*this),
-  UpToDate(true)
+  UpToDate(true),
+  FileIsOpen(false)
 {
   FrameScale.set_adjustment(FrameAdjust);
   FrameScale.signal_value_changed().connect
@@ -287,8 +288,6 @@ void
 MDVisualClass::OnFrameChange()
 {
   CurrentFrame = (int)round(FrameScale.get_value());
-  cerr << "CurrentFrame = " << CurrentFrame << endl;
-  cerr << "RhoVar = " << RhoVar << endl;
   if (IsoButton.get_active()) {
     RhoVar->Read(RhoData, CurrentFrame, Range::all(), Range::all(), Range::all()); 
     MaxRho = FindMaxRho();
@@ -367,12 +366,6 @@ MDVisualClass::DrawFrame(bool offScreen)
   boxObject->Set (Box, clipping);
   PathVis.Objects.push_back(boxObject);
   
-  if (IsoButton.get_active()) {
-    Isosurface *rhoIso = new Isosurface;
-    rhoIso->Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
-    rhoIso->SetIsoval(MaxRho*IsoAdjust.get_value());
-    PathVis.Objects.push_back(rhoIso);
-  }
 
   const double radius = 1.0;
 
@@ -444,6 +437,14 @@ MDVisualClass::DrawFrame(bool offScreen)
     sphere->SetRadius(radius);
     PathVis.Objects.push_back(sphere);
   }
+
+  if (IsoButton.get_active()) {
+    Isosurface *rhoIso = new Isosurface;
+    rhoIso->Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
+    rhoIso->SetIsoval(MaxRho*IsoAdjust.get_value());
+    PathVis.Objects.push_back(rhoIso);
+  }
+
   PathVis.Invalidate();
   UpToDate = true;
   return false;
@@ -454,25 +455,26 @@ MDVisualClass::DrawFrame(bool offScreen)
 void
 MDVisualClass::Read(string filename)
 {
-  IOSectionClass in;
-  assert (in.OpenFile(filename));
+  if (FileIsOpen)
+    Infile.CloseFile();
+  assert (Infile.OpenFile(filename));
+  FileIsOpen = true;
   Array<double,1> box;
-  assert (in.OpenSection("System"));
-  assert (in.ReadVar ("Box", box));
+  assert (Infile.OpenSection("System"));
+  assert (Infile.ReadVar ("Box", box));
   Box.Set (box(0), box(1), box(2));
-  in.CloseSection();
+  Infile.CloseSection();
 
   double maxDim = max(max(box(0), box(1)), box(2));
   PathVis.View.SetDistance (1.2*maxDim);
   
-  assert(in.OpenSection("Moves"));
-  assert(in.OpenSection("Langevin"));
-  bool extraSec = in.OpenSection("Langevin");
-  assert(in.ReadVar("R", Trajectory));
-  assert(in.ReadVar("Time", Time));
+  assert(Infile.OpenSection("Moves"));
+  assert(Infile.OpenSection("Langevin"));
+  bool extraSec = Infile.OpenSection("Langevin");
+  assert(Infile.ReadVar("R", Trajectory));
+  assert(Infile.ReadVar("Time", Time));
 
-  RhoVar = in.GetVarPtr("Rho");
-  cerr << "RhoVar = " << RhoVar << endl;
+  RhoVar = Infile.GetVarPtr("Rho");
   bool haveRho = RhoVar != NULL;
   if (haveRho) {
     RhoVar->Read(RhoData, 0, Range::all(), Range::all(), Range::all());
@@ -489,11 +491,9 @@ MDVisualClass::Read(string filename)
     
 
   if (extraSec) 
-    in.CloseSection(); // "Langevin"
-  in.CloseSection(); // "Langevin"
-  in.CloseSection(); // "Moves"
-
-  in.CloseFile();
+    Infile.CloseSection(); // "Langevin"
+  Infile.CloseSection(); // "Langevin"
+  Infile.CloseSection(); // "Moves"
 
   FrameAdjust.set_upper(Trajectory.extent(0)-1);
   FrameScale.set_digits(0);

@@ -53,6 +53,8 @@ protected:
   //////////////////////////////
   // Density isosurface stuff //
   //////////////////////////////
+  IOSectionClass Infile;
+  bool FileIsOpen;
   IOVarBase *RhoVar;
   Array<double,3> RhoData;
   LinearGrid Xgrid, Ygrid, Zgrid;
