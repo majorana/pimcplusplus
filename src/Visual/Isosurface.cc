@@ -368,6 +368,7 @@ Isosurface::Set()
 
   glBegin(GL_TRIANGLES);
 
+  int numTriangles = 0;
 
   for (int ix=0; ix<(Nx-1); ix++) {
     for (int iy=0; iy<(Ny-1); iy++) {
@@ -385,6 +386,7 @@ Isosurface::Set()
 	int ei=0;
 	int edge;
 	while ((edge=EdgeData[index][ei]) != -1) {
+	  numTriangles++;
 	  Vec3 vertex = FindEdge (ix, iy, iz, edge);
 	  if (UseNormals) {
 	    Vec3 normal = Grad(vertex[0], vertex[1], vertex[2]);
@@ -397,6 +399,7 @@ Isosurface::Set()
     }
   }
   glEnd();
+  // cerr << "NumTriangles = " << numTriangles/3 << endl;
 
   End();
 }

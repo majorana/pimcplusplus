@@ -157,7 +157,8 @@ MDVisualClass::MDVisualClass() :
 void
 MDVisualClass::OnViewReset()
 {
-
+  PathVis.View.Reset();
+  PathVis.Invalidate();
 }
 
 
