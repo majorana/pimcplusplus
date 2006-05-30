@@ -150,7 +150,9 @@ AC_SUBST(MPI_RUN)
 AC_ARG_ENABLE(fft-single,    [  --enable-fft-single       enable single-precision FFTs (default=no)])
 if test "$enable_fft_single" = "yes"; then
     FFT_DEF="$FFT_DEF -DFFT_USE_SINGLE"
-    FFTW3_LIBS="$FFTW3_LIBS -lfftw3f"
+    if test "$enable-fftw2mkl" != "yes"; then
+      FFTW3_LIBS="$FFTW3_LIBS -lfftw3f"
+    fi
 else
     FFT_DEF="$FFT_DEF "
 fi
