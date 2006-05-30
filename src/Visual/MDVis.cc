@@ -4,6 +4,7 @@ MDVisualClass::MDVisualClass() :
   MainVBox(false, 0), 
   QuitButton("Quit"),
   FrameAdjust(0.0, 0.0, 0.0),
+  IsoAdjust  (0.01, 0.0, 1.0, 0.01, 0.1),
   SpeedAdjust(5.0, 1.0, 10.0),
   CurrentFrame(0),
   PlayDirection(1),
@@ -20,8 +21,16 @@ MDVisualClass::MDVisualClass() :
     (sigc::mem_fun(*this, &MDVisualClass::OnSpeedChange));
   SpeedFrame.set_label("Speed");
   SpeedFrame.add(SpeedScale);
-  SpeedScale.property_width_request().set_value(100);
+  SpeedScale.property_width_request().set_value(75);
   TimeoutDelay = (int) round (20.0/SpeedAdjust.get_value());
+
+  IsoScale.set_adjustment(IsoAdjust);
+  IsoScale.signal_value_changed().connect
+    (sigc::mem_fun(*this, &MDVisualClass::OnIsoChange));
+  IsoFrame.set_label("Density");
+  IsoFrame.add(IsoScale);
+  IsoScale.property_width_request().set_value(75);
+
 
   PlayImage.property_file().set_value(FindFullPath("player_play.png"));
   PlayButton.set_icon_widget(PlayImage);
@@ -44,6 +53,10 @@ MDVisualClass::MDVisualClass() :
   ClipButton.set_icon_widget(ClipImage);
   ClipButton.set_label("Clip");
 
+  IsoImage.property_file().set_value(FindFullPath("isoButton.png"));
+  IsoButton.set_icon_widget(IsoImage);
+  IsoButton.set_label("Isosurf");
+
   set_reallocate_redraws(true);
   PathVis.set_size_request(800, 800);
   ////////////////////
@@ -64,6 +77,7 @@ MDVisualClass::MDVisualClass() :
   Tools.append(OrthoButton);
   Tools.append(PerspectButton);
   Tools.append(ClipButton);
+  Tools.append(IsoButton);
   
   /////////////////
   // Setup menus //
@@ -116,6 +130,8 @@ MDVisualClass::MDVisualClass() :
     (sigc::mem_fun(*this, &MDVisualClass::OnPerspectiveToggle));
   ClipButton.signal_toggled().connect
     (sigc::mem_fun(*this, &MDVisualClass::OnClipToggle));
+  IsoButton.signal_toggled().connect
+    (sigc::mem_fun(*this, &MDVisualClass::OnIsoToggle));
   QuitButton.signal_clicked().connect
     (sigc::mem_fun(*this, &MDVisualClass::Quit));
 
@@ -123,6 +139,7 @@ MDVisualClass::MDVisualClass() :
   // Pack the boxes //
   ////////////////////
   ToolBox.pack_start(Tools);
+  ToolBox.pack_start(IsoFrame, Gtk::PACK_SHRINK,20);
   ToolBox.pack_start(SpeedFrame, Gtk::PACK_SHRINK,20);
   MainVBox.pack_start(*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK,0);
   MainVBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
@@ -212,6 +229,13 @@ MDVisualClass::OnClipToggle()
     (sigc::bind<bool>(mem_fun(*this, &MDVisualClass::DrawFrame), false));
 }
 
+void
+MDVisualClass::OnIsoToggle()
+{
+  Glib::signal_idle().connect
+    (sigc::bind<bool>(mem_fun(*this, &MDVisualClass::DrawFrame), false));
+}
+
 bool
 MDVisualClass::OnTimeout()
 {
@@ -262,6 +286,11 @@ void
 MDVisualClass::OnFrameChange()
 {
   CurrentFrame = (int)round(FrameScale.get_value());
+  if (IsoButton.get_active()) {
+    RhoVar->Read(RhoData, CurrentFrame, Range::all(), Range::all(), Range::all()); 
+    MaxRho = FindMaxRho();
+    RhoIso.SetIsoval(MaxRho * IsoAdjust.get_value());
+  }
   DrawFrame();
   //  PathVis.Invalidate();
 }
@@ -335,6 +364,9 @@ MDVisualClass::DrawFrame(bool offScreen)
   boxObject->Set (Box, clipping);
   PathVis.Objects.push_back(boxObject);
   
+  if (IsoButton.get_active())
+    PathVis.Objects.push_back(&RhoIso);
+
   const double radius = 2.5;
 
   list<Vec3>::iterator iter;
@@ -432,6 +464,22 @@ MDVisualClass::Read(string filename)
   assert(in.ReadVar("R", Trajectory));
   assert(in.ReadVar("Time", Time));
 
+  RhoVar = in.GetVarPtr("Rho");
+  bool haveRho = RhoVar != NULL;
+  if (haveRho) {
+    RhoVar->Read(RhoData, 0, Range::all(), Range::all(), Range::all());
+    MaxRho = FindMaxRho();
+    Xgrid.Init(-0.5*Box[0], 0.5*Box[0], RhoData.extent(0));
+    Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
+    Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
+    RhoIso.Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
+    RhoIso.SetIsoval(MaxRho*IsoAdjust.get_value());
+  }
+  IsoButton.set_active(haveRho);
+  IsoButton.set_sensitive(haveRho);
+  IsoFrame.set_sensitive(haveRho);
+    
+
   if (extraSec) 
     in.CloseSection(); // "Langevin"
   in.CloseSection(); // "Langevin"
@@ -445,12 +493,30 @@ MDVisualClass::Read(string filename)
   DrawFrame();
 }
 
+double
+MDVisualClass::FindMaxRho()
+{
+  double maxRho = 0.0;
+  for (int ix=0; ix<RhoData.extent(0); ix++)
+    for (int iy=0; iy<RhoData.extent(1); iy++)
+      for (int iz=0; iz<RhoData.extent(2); iz++)
+	maxRho = max(maxRho, RhoData(ix,iy,iz));
+  return maxRho;
+}
+	
 
 void
 MDVisualClass::OnSpeedChange()
 {
   TimeoutDelay = (int) round (20.0/SpeedAdjust.get_value());
   OnPlayToggle();
+}
+
+void
+MDVisualClass::OnIsoChange()
+{
+  RhoIso.SetIsoval(MaxRho * IsoAdjust.get_value());
+  DrawFrame();
 }
 
 

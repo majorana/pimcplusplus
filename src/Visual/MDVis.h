@@ -3,6 +3,7 @@
 
 #include "PathVis.h"
 #include "BoxClass.h"
+#include "Isosurface.h"
 #include "MDExport.h"
 #include <Common/IO/IO.h>
 #include <gtkmm/adjustment.h>
@@ -42,10 +43,26 @@ protected:
   Gtk::Image OrthoImage, PerspectImage;
   Gtk::ToggleToolButton ClipButton;
   Gtk::Image ClipImage;
+  Gtk::ToggleToolButton IsoButton;
+  Gtk::Image IsoImage;
 
   Glib::RefPtr<Gtk::ActionGroup> Actions;
   Glib::RefPtr<Gtk::UIManager> Manager;
   MDExportClass MDExport;
+
+  //////////////////////////////
+  // Density isosurface stuff //
+  //////////////////////////////
+  IOVarBase *RhoVar;
+  Array<double,3> RhoData;
+  LinearGrid Xgrid, Ygrid, Zgrid;
+  Gtk::HScale IsoScale;
+  Gtk::Adjustment IsoAdjust;
+  Gtk::Frame IsoFrame;
+  Isosurface RhoIso;
+  double FindMaxRho();
+  double MaxRho;
+
 
   //////////////////////
   // Callback methods //
@@ -54,9 +71,11 @@ protected:
   void Quit();
   void OnFrameChange();
   void OnSpeedChange();
+  void OnIsoChange();
   void OnPerspectiveToggle();
   void OnPlayToggle();
   void OnClipToggle();
+  void OnIsoToggle();
   void OnViewReset();
   void OnOpen();
   sigc::connection TimeoutConnection;
