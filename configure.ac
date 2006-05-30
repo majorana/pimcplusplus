@@ -7,14 +7,14 @@ AM_INIT_AUTOMAKE(libcommon, 1.0)
 AC_CONFIG_SRCDIR([Blitz.h])
 AC_CONFIG_HEADER([config.h])
 
-
 # Checks for libraries.
+# this creates and AC_SUBST's vars FFTW3_CFLAGS and FFTW3_LIBS
+
+
 # this creates and AC_SUBST's vars BLITZ_CFLAGS and BLITZ_LIBS
 PKG_CHECK_MODULES(BLITZ, blitz, blitz_ok=yes, blitz_ok=no)
 # this creates and AC_SUBST's vars XML2_CFLAGS and XML2_LIBS
 PKG_CHECK_MODULES(XML2, xml2, xml2_ok=yes, xml2_ok=no)
-# this creates and AC_SUBST's vars FFTW3_CFLAGS and FFTW3_LIBS
-PKG_CHECK_MODULES(FFTW3, fftw3, fftw3_ok=yes, fftw3_ok=no)
 # this creates and AC_SUBST's vars SPRNG2_CFLAGS and SPRNG2_LIBS
 PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
 # this creates and AC_SUBST's vars GSL_CFLAGS and GSL_LIBS
@@ -102,6 +102,17 @@ case "${host_cpu}" in
        FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
+# Check if we want to use the fftw2mkl wrappers
+AC_ARG_ENABLE(fftw2mkl,    [  --enable-fftw2mkl       enable MKL FFTW wrappers (default=no)])
+if test "x$enable_fftw2mkl" = "xyes"; then
+   FFT_DEF="-DUSE_FFTW2MKL"
+   PKG_CHECK_MODULES(FFTW3, fftw2mkl, fftw3_ok=yes, fftw3_ok=no)	   
+else
+   FFT_DEF=" "
+   PKG_CHECK_MODULES(FFTW3, fftw3, fftw3_ok=yes, fftw3_ok=no)
+fi
+
+
 # Checks if we want MPI support
 AC_ARG_ENABLE(mpi,    [  --enable-mpi              enable MPI support (default=no)])
 AC_ARG_WITH(mpi-inc,  [  --with-mpi-cflags=FLAGS   specify MPI compliler flags])
@@ -138,10 +149,10 @@ AC_SUBST(MPI_RUN)
 # Check if we want to use single-precision FFTs for SIMD spead improvements
 AC_ARG_ENABLE(fft-single,    [  --enable-fft-single       enable single-precision FFTs (default=no)])
 if test "$enable_fft_single" = "yes"; then
-    FFT_DEF="-DFFT_USE_SINGLE"
+    FFT_DEF="$FFT_DEF -DFFT_USE_SINGLE"
     FFTW3_LIBS="$FFTW3_LIBS -lfftw3f"
 else
-    FFT_DEF=" "
+    FFT_DEF="$FFT_DEF "
 fi
 AC_SUBST(FFT_DEF)
 
@@ -311,5 +322,7 @@ AC_MSG_RESULT([ XML2_LIBS   = $XML2_LIBS ])
 AC_MSG_RESULT([ GSL_LIBS    = $GSL_LIBS  ])
 AC_MSG_RESULT([ BLAS_LIBS   = $BLAS_LIBS ])
 AC_MSG_RESULT([ LAPACK_LIBS = $LAPACK_LIBS ])
+AC_MSG_RESULT([ FFTW3_LIBS  = $FFTW3_LIBS ])
+AC_MSG_RESULT([ FFT_DEF     = $FFT_DEF ])
 #AC_MSG_RESULT([ CBLAS_LIBS  = $CBLAS_LIBS ])
 AC_OUTPUT

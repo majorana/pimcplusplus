@@ -12,6 +12,23 @@
 #define FFTNAME(name) fftw_ ## name
 #endif
 
+#ifdef USE_FFTW2MKL
+#define FFT_MALLOC malloc
+#define FFT_FREE   free
+#define FFT_EXTRA_MEM 16
+inline complex<FFT_FLOAT>* FFTAlign (complex<FFT_FLOAT>* ptr)
+{
+  size_t offset = 16 - (size_t)((size_t)ptr)&0x0f;
+  return (complex<FFT_FLOAT>*) ((size_t)ptr+offset);
+}
+#else
+#define FFT_MALLOC FFTNAME(malloc)
+#define FFT_FREE   FFTNAME(free)
+#define FFT_EXTRA_MEM 0
+inline complex<FFT_FLOAT>* FFTAlign (complex<FFT_FLOAT>* ptr)
+{ return ptr; }
+#endif
+
 class FFT1D
 {
 private:
@@ -35,9 +52,9 @@ public:
   ~FFT1D()
   {
     if (Allocated) {
-      FFTNAME(free)(rData);
+      FFT_FREE(rData);
       if (!InPlace)
-	FFTNAME(free)(kData);
+	FFT_FREE(kData);
       FFTNAME(destroy_plan)(r2kPlan);
       FFTNAME(destroy_plan)(k2rPlan);
     }
@@ -58,41 +75,41 @@ public:
   void resize (int n)
   {
     if (Allocated) {
-      FFTNAME(free)(rData);
+      FFT_FREE(rData);
       if (!InPlace)
-	FFTNAME(free)(kData);
+	FFT_FREE(kData);
       FFTNAME(destroy_plan)(r2kPlan);
       FFTNAME(destroy_plan)(k2rPlan);
     }
     rData = (TinyVector<complex<FFT_FLOAT>,DIM>*) 
-      FFTNAME(malloc)(DIM*sizeof(FFTNAME(complex))*n);
+      FFT_MALLOC(DIM*sizeof(FFTNAME(complex))*n+FFT_EXTRA_MEM);
     if (!InPlace)
       kData = (TinyVector<complex<FFT_FLOAT>,DIM>*) 
-	FFTNAME(malloc)(DIM*sizeof(FFTNAME(complex))*n);
+	FFT_MALLOC(DIM*sizeof(FFTNAME(complex))*n+FFT_EXTRA_MEM);
     else
       kData = rData;
     
     Array<TinyVector<complex<FFT_FLOAT>,DIM>,1> *temp;
     temp = new Array<TinyVector<complex<FFT_FLOAT>,DIM>,1>
-      (rData, shape(n), neverDeleteData);
+      (FFT_ALIGN(rData), shape(n), neverDeleteData);
     rBox.reference (*temp);
     delete temp;
     
     temp = new Array<TinyVector<complex<FFT_FLOAT>,DIM>,1>
-      (kData, shape(n), neverDeleteData);
+      (FFT_ALIGN(kData), shape(n), neverDeleteData);
     kBox.reference(*temp);
     delete temp;
     
     r2kPlan =      
       FFTNAME(plan_many_dft) 
-      (1, &n, DIM, reinterpret_cast<FFTNAME(complex)*>(rData),
-       &n, DIM, 1,  reinterpret_cast<FFTNAME(complex)*>(kData), 
+      (1, &n, DIM, reinterpret_cast<FFTNAME(complex)*>(FFT_ALIGN(rData)),
+       &n, DIM, 1,  reinterpret_cast<FFTNAME(complex)*>(FFT_ALIGN(kData)), 
        &n, DIM, 1, 1, FFTW_MEASURE);
     assert (r2kPlan != NULL);
     k2rPlan = 
       FFTNAME(plan_many_dft) 
-      (1, &n, DIM, reinterpret_cast<FFTNAME(complex)*>(kData),
-       &n, DIM, 1, reinterpret_cast<FFTNAME(complex)*>(rData), 
+      (1, &n, DIM, reinterpret_cast<FFTNAME(complex)*>(FFT_ALIGN(kData)),
+       &n, DIM, 1, reinterpret_cast<FFTNAME(complex)*>(FFT_ALIGN(rData)), 
        &n, DIM, 1, -1, FFTW_MEASURE);
     assert (k2rPlan != NULL);
     
@@ -112,9 +129,9 @@ public:
   ~FFTVec1D()
   {
     if (Allocated) {
-      FFTNAME(free)(rData);
+      FFT_FREE(rData);
       if (!InPlace)
-	FFTNAME(free)(kData);
+	FFT_FREE(kData);
       FFTNAME(destroy_plan)(r2kPlan);
       FFTNAME(destroy_plan)(k2rPlan);
     }
@@ -146,9 +163,9 @@ public:
   ~FFT3D()
   {
     if (Allocated) {
-      FFTNAME(free)(rData);
+      FFT_FREE(rData);
       if (!InPlace)
-	FFTNAME(free)(kData);
+	FFT_FREE(kData);
       FFTNAME(destroy_plan)(r2kPlan);
       FFTNAME(destroy_plan)(k2rPlan);
     }
@@ -212,9 +229,9 @@ public:
   ~FFTVec3D()
   {
     if (Allocated) {
-      FFTNAME(free)(rData);
+      FFT_FREE(rData);
       if (!InPlace)
-	FFTNAME(free)(kData);
+	FFT_FREE(kData);
       FFTNAME(destroy_plan)(r2kPlan);
       FFTNAME(destroy_plan)(k2rPlan);
     }

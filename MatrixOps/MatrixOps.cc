@@ -464,7 +464,7 @@ void SymmEigenPairs (const Array<scalar,2> &A, int NumPairs,
   double VU = 0.0;
   int IL = 1;
   int IU = NumPairs;
-  double AbsTolerance = 0.0;
+  double AbsTolerance = -1.0;
   int NumComputed;
   double *EigVals = new double[N];
   double *EigVecs = new double[N*NumPairs];
@@ -501,10 +501,7 @@ void SymmEigenPairs (const Array<scalar,2> &A, int NumPairs,
 	       &Info);
 
    if (Info !=0) 
-     {
-       fprintf (stderr, "Lapack error in dsyevr_.  Exitting.\n");
-       exit(-1);
-     }
+     cerr << "Lapack error in DSYEVR: " << Info << endl;
 
    // Now copy over output of Vectors and Vals
    Vals.resize(NumPairs);

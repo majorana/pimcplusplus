@@ -13,8 +13,8 @@ LDADD = libpw.la                  ../IO/libIO.la                          \
         $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS)      \
         $(FLIBS)
 
-AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS)  \
-              $(HDF5_CFLAGS)  $(BLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)    \
+AM_CXXFLAGS = $(FFTW3_CFLAGS) $(BLITZ_CFLAGS) $(XML2_CFLAGS)              \
+              $(HDF5_CFLAGS)  $(BLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)     \
               $(FFT_DEF) $(CBLAS_DEF)
 
 noinst_LTLIBRARIES = libpw.la
@@ -58,7 +58,7 @@ includedir=$(prefix)/include/Common/PlaneWavePHDFT
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
-libpw_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)  $(FFTW3_CFLAGS) \
+libpw_la_CXXFLAGS = $(FFTW3_CFLAGS) $(BLITZ_CFLAGS) $(XML2_CFLAGS)   \
                     $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(AM_CXXFLAGS) $(FFT_DEF)
 libpw_la_LIBADD   =
 

@@ -4,33 +4,36 @@ void
 FFT1D::resize(int n)
 {
   if (Allocated) {
-    FFTNAME(free)(rData);
+    FFT_FREE(rData);
     if (!InPlace)
-      FFTNAME(free)(kData);
+      FFT_FREE(kData);
     FFTNAME(destroy_plan)(r2kPlan);
     FFTNAME(destroy_plan)(k2rPlan);
   }
-  rData = (complex<FFT_FLOAT>*) FFTNAME(malloc)(sizeof(FFTNAME(complex))*n);
+  rData = (complex<FFT_FLOAT>*) FFT_MALLOC(sizeof(FFTNAME(complex))*n+FFT_EXTRA_MEM);
   if (!InPlace)
-    kData = (complex<FFT_FLOAT>*) FFTNAME(malloc)(sizeof(FFTNAME(complex))*n);
+    kData = (complex<FFT_FLOAT>*) FFT_MALLOC(sizeof(FFTNAME(complex))*n+FFT_EXTRA_MEM);
   else
     kData = rData;
 
+  complex<FFT_FLOAT>* rAligned = FFTAlign(rData);
+  complex<FFT_FLOAT>* kAligned = FFTAlign(kData);
+
   Array<complex<FFT_FLOAT>,1> *temp;
-  temp = new Array<complex<FFT_FLOAT>,1>(rData, shape(n), neverDeleteData);
+  temp = new Array<complex<FFT_FLOAT>,1>(rAligned, shape(n), neverDeleteData);
   rBox.reference (*temp);
   delete temp;
   
-  temp = new Array<complex<FFT_FLOAT>,1>(kData, shape(n), neverDeleteData);
+  temp = new Array<complex<FFT_FLOAT>,1>(kAligned, shape(n), neverDeleteData);
   kBox.reference(*temp);
   delete temp;
 
   r2kPlan = FFTNAME(plan_dft_1d)
-    (n, reinterpret_cast<FFTNAME(complex)*>(rData), 
-     reinterpret_cast<FFTNAME(complex)*>(kData), 1, FFTW_MEASURE);
+    (n, reinterpret_cast<FFTNAME(complex)*>(rAligned), 
+     reinterpret_cast<FFTNAME(complex)*>(kAligned), 1, FFTW_MEASURE);
   k2rPlan = FFTNAME(plan_dft_1d) 
-    (n, reinterpret_cast<FFTNAME(complex)*>(kData), 
-     reinterpret_cast<FFTNAME(complex)*>(rData), -1,FFTW_MEASURE);
+    (n, reinterpret_cast<FFTNAME(complex)*>(kAligned), 
+     reinterpret_cast<FFTNAME(complex)*>(rAligned), -1,FFTW_MEASURE);
 
   sqrtNinv = sqrt(1.0/(FFT_FLOAT)n);
   Allocated = true;
@@ -57,35 +60,38 @@ FFT3D::resize(int nx, int ny, int nz)
 {
   cerr << "FFT box size is " << nx << "x" << ny << "x" << nz << ".\n";
   if (Allocated) {
-    FFTNAME(free)(rData);
+    FFT_FREE(rData);
     if (!InPlace)
-      FFTNAME(free)(kData);
+      FFT_FREE(kData);
     FFTNAME(destroy_plan)(r2kPlan);
     FFTNAME(destroy_plan)(k2rPlan);
   }
-  rData = (complex<FFT_FLOAT>*) 
-    FFTNAME(malloc)(sizeof(FFTNAME(complex))*nx*ny*nz);
+  rData = (complex<FFT_FLOAT>*) FFT_MALLOC(sizeof(FFTNAME(complex))*nx*ny*nz+FFT_EXTRA_MEM);
   if (!InPlace)
-    kData = (complex<FFT_FLOAT>*) FFTNAME(malloc)
-      (sizeof(FFTNAME(complex))*nx*ny*nz);
+    kData = (complex<FFT_FLOAT>*) FFT_MALLOC(sizeof(FFTNAME(complex))*nx*ny*nz+FFT_EXTRA_MEM);
   else
     kData = rData;
   
+  complex<FFT_FLOAT>* rAligned = FFTAlign(rData);
+  complex<FFT_FLOAT>* kAligned = FFTAlign(kData);
+  
+
+
   Array<complex<FFT_FLOAT>,3> *temp;
-  temp = new Array<complex<FFT_FLOAT>,3>(rData, shape(nx,ny,nz), neverDeleteData);
+  temp = new Array<complex<FFT_FLOAT>,3>(rAligned, shape(nx,ny,nz), neverDeleteData);
   rBox.reference (*temp);
   delete temp;
 
-  temp = new Array<complex<FFT_FLOAT>,3>(kData, shape(nx,ny,nz), neverDeleteData);
+  temp = new Array<complex<FFT_FLOAT>,3>(kAligned, shape(nx,ny,nz), neverDeleteData);
   kBox.reference(*temp);
   delete temp;
 
   r2kPlan = FFTNAME(plan_dft_3d)
-    (nx, ny, nz, reinterpret_cast<FFTNAME(complex)*>(rData), 
-     reinterpret_cast<FFTNAME(complex)*>(kData), 1, FFTW_MEASURE);
+    (nx, ny, nz, reinterpret_cast<FFTNAME(complex)*>(rAligned), 
+     reinterpret_cast<FFTNAME(complex)*>(kAligned), 1, FFTW_MEASURE);
   k2rPlan =  FFTNAME(plan_dft_3d)
-    (nx, ny, nz, reinterpret_cast<FFTNAME(complex)*>(kData), 
-     reinterpret_cast<FFTNAME(complex)*>(rData), -1,FFTW_MEASURE);
+    (nx, ny, nz, reinterpret_cast<FFTNAME(complex)*>(kAligned), 
+     reinterpret_cast<FFTNAME(complex)*>(rAligned), -1,FFTW_MEASURE);
   
   sqrtNinv = sqrt(1.0/(FFT_FLOAT)(nx*ny*nz));
   Allocated = true;
@@ -114,38 +120,43 @@ void
 FFTVec3D::resize(int nx, int ny, int nz)
 {
   if (Allocated) {
-    FFTNAME(free)(rData);
+    FFT_FREE(rData);
     if (!InPlace)
-      FFTNAME(free)(kData);
+      FFT_FREE(kData);
     FFTNAME(destroy_plan)(r2kPlan);
     FFTNAME(destroy_plan)(k2rPlan);
   }
-  rData = ( TinyVector<complex<FFT_FLOAT>,3>*) FFTNAME(malloc)(3*sizeof(FFTNAME(complex))*nx*ny*nz);
+  rData = ( TinyVector<complex<FFT_FLOAT>,3>*) FFT_MALLOC(3*sizeof(FFTNAME(complex))*nx*ny*nz+FFT_EXTRA_MEM);
   if (!InPlace)
-    kData = ( TinyVector<complex<FFT_FLOAT>,3>*) FFTNAME(malloc)(3*sizeof(FFTNAME(complex))*nx*ny*nz);
+    kData = ( TinyVector<complex<FFT_FLOAT>,3>*) FFT_MALLOC(3*sizeof(FFTNAME(complex))*nx*ny*nz+FFT_EXTRA_MEM);
   else
     kData = rData;
 
+  TinyVector<complex<FFT_FLOAT>,3>* rAligned = 
+    (TinyVector<complex<FFT_FLOAT>,3>*) FFTAlign((complex<FFT_FLOAT>*) rData);
+  TinyVector<complex<FFT_FLOAT>,3>* kAligned = 
+    (TinyVector<complex<FFT_FLOAT>,3>*) FFTAlign((complex<FFT_FLOAT>*) kData);
+
   Array< TinyVector<complex<FFT_FLOAT>,3>,3> *temp;
-  temp = new Array< TinyVector<complex<FFT_FLOAT>,3>,3>(rData, shape(nx,ny,nz), neverDeleteData);
+  temp = new Array< TinyVector<complex<FFT_FLOAT>,3>,3>(rAligned, shape(nx,ny,nz), neverDeleteData);
   rBox.reference (*temp);
   delete temp;
 
-  temp = new Array< TinyVector<complex<FFT_FLOAT>,3>,3>(kData, shape(nx,ny,nz), neverDeleteData);
+  temp = new Array< TinyVector<complex<FFT_FLOAT>,3>,3>(kAligned, shape(nx,ny,nz), neverDeleteData);
   kBox.reference(*temp);
   delete temp;
 
   int n[3] = {nx, ny, nz};
   r2kPlan = FFTNAME(plan_many_dft)(3, n, 3, 
-				   reinterpret_cast<FFTNAME(complex)*>(rData),
+				   reinterpret_cast<FFTNAME(complex)*>(rAligned),
 				   n, 3, 1, 
-				   reinterpret_cast<FFTNAME(complex)*>(kData), 
+				   reinterpret_cast<FFTNAME(complex)*>(kAligned), 
 				   n, 3, 1, 1, FFTW_MEASURE);
   assert (r2kPlan != NULL);
   k2rPlan = 
-    FFTNAME(plan_many_dft)(3, n, 3, reinterpret_cast<FFTNAME(complex)*>(kData),
+    FFTNAME(plan_many_dft)(3, n, 3, reinterpret_cast<FFTNAME(complex)*>(kAligned), 
 			   n, 3, 1, 
-			   reinterpret_cast<FFTNAME(complex)*>(rData), n,
+			   reinterpret_cast<FFTNAME(complex)*>(rAligned), n,
 			   3, 1, -1, FFTW_MEASURE);
   assert (k2rPlan != NULL);
   sqrtNinv = sqrt(1.0/(FFT_FLOAT)(nx*ny*nz));
@@ -173,43 +184,48 @@ void
 FFTMat3D::resize(int nx, int ny, int nz)
 {
   if (Allocated) {
-    FFTNAME(free)(rData);
+    FFT_FREE(rData);
     if (!InPlace)
-      FFTNAME(free)(kData);
+      FFT_FREE(kData);
     FFTNAME(destroy_plan)(r2kPlan);
     FFTNAME(destroy_plan)(k2rPlan);
   }
   rData = (TinyMatrix<complex<FFT_FLOAT>,3,3>*) 
-    FFTNAME(malloc)(9*sizeof(FFTNAME(complex))*nx*ny*nz);
+    FFT_MALLOC(9*sizeof(FFTNAME(complex))*nx*ny*nz+FFT_EXTRA_MEM);
   if (!InPlace)
     kData = (TinyMatrix<complex<FFT_FLOAT>,3,3>*) 
-      FFTNAME(malloc)(9*sizeof(FFTNAME(complex))*nx*ny*nz);
+      FFT_MALLOC(9*sizeof(FFTNAME(complex))*nx*ny*nz+FFT_EXTRA_MEM);
   else
     kData = rData;
   
+  TinyMatrix<complex<FFT_FLOAT>,3,3>* rAligned = 
+    (TinyMatrix<complex<FFT_FLOAT>,3,3>*) FFTAlign((complex<FFT_FLOAT>*)rData);
+  TinyMatrix<complex<FFT_FLOAT>,3,3>* kAligned = 
+    (TinyMatrix<complex<FFT_FLOAT>,3,3>*) FFTAlign((complex<FFT_FLOAT>*)kData);
+
   Array<TinyMatrix<complex<FFT_FLOAT>,3,3>,3> *temp;
   temp = new Array<TinyMatrix<complex<FFT_FLOAT>,3,3>,3>
-    (rData, shape(nx,ny,nz), neverDeleteData);
+    (rAligned, shape(nx,ny,nz), neverDeleteData);
   rBox.reference (*temp);
   delete temp;
   
   temp = new Array<TinyMatrix<complex<FFT_FLOAT>,3,3>,3>
-    (kData, shape(nx,ny,nz), neverDeleteData);
+    (kAligned, shape(nx,ny,nz), neverDeleteData);
   kBox.reference(*temp);
   delete temp;
 
   int n[3] = {nx, ny, nz};
   r2kPlan = 
     FFTNAME(plan_many_dft)(3, n, 9, 
-			   reinterpret_cast<FFTNAME(complex)*>(rData),
+			   reinterpret_cast<FFTNAME(complex)*>(rAligned),
 			   n, 9, 1, 
-			   reinterpret_cast<FFTNAME(complex)*>(kData), 
+			   reinterpret_cast<FFTNAME(complex)*>(kAligned), 
 			   n, 9, 1, 1, FFTW_MEASURE);
   assert (r2kPlan != NULL);
   k2rPlan = 
-    FFTNAME(plan_many_dft)(3, n, 9, reinterpret_cast<FFTNAME(complex)*>(kData),
+    FFTNAME(plan_many_dft)(3, n, 9, reinterpret_cast<FFTNAME(complex)*>(kAligned),
 			   n, 9, 1, 
-			   reinterpret_cast<FFTNAME(complex)*>(rData), 
+			   reinterpret_cast<FFTNAME(complex)*>(rAligned), 
 			n, 9, 1, -1, FFTW_MEASURE);
   assert (k2rPlan != NULL);
 
