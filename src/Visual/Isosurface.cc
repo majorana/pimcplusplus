@@ -349,14 +349,10 @@ Isosurface::Set()
   if (!UpToDate)
     Update();
   Start();
-  float fcolor[4];
-  fcolor[0] = Color[0];
-  fcolor[1] = Color[1];
-  fcolor[2] = Color[2];
-  fcolor[3] = 0.4;
 
   //glColor3d(Color[0], Color[1], Color[2]);
-  glColor4f(fcolor[0], fcolor[1], fcolor[2], fcolor[3]);
+  glColor4d(Color[0], Color[1], Color[2], Color[3]);
+  float fcolor[4] = { Color[0], Color[1], Color[2], Color[3] };
   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
   float spec[4] = { 1.0, 1.0, 1.0, 1.0};
   glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);
@@ -389,7 +385,7 @@ Isosurface::Set()
 	  numTriangles++;
 	  Vec3 vertex = FindEdge (ix, iy, iz, edge);
 	  if (UseNormals) {
-	    Vec3 normal = Grad(vertex[0], vertex[1], vertex[2]);
+	    Vec3 normal = -1.0*Grad(vertex[0], vertex[1], vertex[2]);
 	    glNormal3dv(&(normal[0]));
 	  }
 	  glVertex3dv(&(vertex[0]));
@@ -399,8 +395,6 @@ Isosurface::Set()
     }
   }
   glEnd();
-  // cerr << "NumTriangles = " << numTriangles/3 << endl;
-
   End();
 }
 
@@ -447,8 +441,8 @@ Isosurface::DrawPOV (FILE *fout, string rotString)
       }
     }
   }
-  fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
-	   Color[0], Color[1], Color[2]);
+  fprintf (fout, "  pigment { color rgbf <%1.5f %1.5f %1.5f %1.5f> }\n", 
+	   Color[0], Color[1], Color[2], Color[3]);
   fprintf (fout, "  finish { \n");
   fprintf (fout, "    specular 0.6 roughness 0.075\n");
   fprintf (fout, "    ambient  0.3\n");

@@ -124,10 +124,10 @@ void MDExportClass::SetupWidgets()
 
 void MDExportClass::InitGLStuff()
 {
-//   glShadeModel(GL_SMOOTH);
-//   glEnable (GL_LIGHTING);
-//   glEnable (GL_LINE_SMOOTH);
-//   glEnable (GL_POLYGON_SMOOTH);
+  glShadeModel(GL_SMOOTH);
+  glEnable (GL_LIGHTING);
+  glEnable (GL_LINE_SMOOTH);
+  glEnable (GL_POLYGON_SMOOTH);
 
   static GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};
   static GLfloat light_ambient[] = {0.2, 0.2, 0.2, 1.0};
@@ -198,6 +198,21 @@ MDExportClass::MakePixmap (int frame)
   GLPixmap->wait_gl();
 }
 
+#include <stdlib.h>
+//Glib::RefPtr<Gdk::Pixbuf>
+void
+MDExportClass::MakePOVPixbuf(int frame)
+{
+  MDVisual.CurrentFrame = frame;
+  MDVisual.PathVis.POVRender("POVframe.pov");
+  char povString[1000];
+  snprintf (povString, 1000, "povray -D +W%d +H%d POVframe.pov", 
+	    Width, Height);
+  system(povString);
+  Pixbuf.clear();
+  Pixbuf = Gdk::Pixbuf::create_from_file ("POVframe.png", Width, Height);
+}
+
 void 
 MDExportClass::Export (string filename)
 {
@@ -250,19 +265,33 @@ MDExportClass::ExportMovie (string basename,
   Revel_VideoFrame videoFrame;
   videoFrame.width  = Width;
   videoFrame.height = Height;
-  videoFrame.bytesPerPixel = 4;
-  videoFrame.pixelFormat = REVEL_PF_BGRA;
 
   ////////////////
   // Data Setup //
   ////////////////
   for (int frame=0; frame < MDVisual.Trajectory.extent(0); frame++) {
-    MakePixmap(frame);
-    Glib::RefPtr<Gdk::Image> image = GdkPixmap->get_image(0,0,Width,Height);
-    videoFrame.pixels = image->get_mem();
-    cerr << "Bits per pixel = " << image->get_bits_per_pixel() << endl;
+  
+    if (TypeCombo.get_active_text() == "POVray") {
+      if (MDVisual.IsoButton.get_active()) {
+	MDVisual.RhoVar->Read(MDVisual.RhoData, frame, 
+			      Range::all(), Range::all(), Range::all()); 
+	MDVisual.MaxRho = MDVisual.FindMaxRho();
+      }
+      videoFrame.bytesPerPixel = 3;  
+      videoFrame.pixelFormat = REVEL_PF_BGR;
+      MakePOVPixbuf(frame);
+      videoFrame.pixels = Pixbuf->get_pixels();
+    }
+    else {
+      videoFrame.bytesPerPixel = 4;  
+      videoFrame.pixelFormat = REVEL_PF_BGRA;
+      MakePixmap(frame);
+      Glib::RefPtr<Gdk::Image> image = GdkPixmap->get_image(0,0,Width,Height);
+      videoFrame.pixels = image->get_mem();
+    }
     int frameSize;
     Revel_EncodeFrame(encoderHandle, &videoFrame, &frameSize);
+    cerr << "After encoding frame.\n";
 //     char fname[100];
 //     snprintf (fname, 100, "frame%d.png", frame);
 //     Glib::RefPtr<Gdk::Drawable> drawable =  GdkPixmap;

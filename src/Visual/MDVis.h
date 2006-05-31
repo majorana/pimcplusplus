@@ -61,7 +61,6 @@ protected:
   Gtk::HScale IsoScale;
   Gtk::Adjustment IsoAdjust;
   Gtk::Frame IsoFrame;
-  Isosurface RhoIso;
   double FindMaxRho();
   double MaxRho;
 

@@ -76,6 +76,8 @@ private:
   int AttribList;
   void InitGLStuff();
   void MakePixmap(int frame);
+  Glib::RefPtr<Gdk::Pixbuf> Pixbuf;
+  void MakePOVPixbuf(int frame);
 public:
   void Export (string filename);
   void ExportPOV (string filename);

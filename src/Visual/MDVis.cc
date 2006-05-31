@@ -288,13 +288,16 @@ MDVisualClass::OnPerspectiveToggle()
 void
 MDVisualClass::OnFrameChange()
 {
-  CurrentFrame = (int)round(FrameScale.get_value());
+  int tempFrame =  (int)round(FrameScale.get_value());
   if (IsoButton.get_active()) {
-    RhoVar->Read(RhoData, CurrentFrame, Range::all(), Range::all(), Range::all()); 
+    RhoVar->Read(RhoData, tempFrame, Range::all(), Range::all(), Range::all()); 
     MaxRho = FindMaxRho();
-    //    RhoIso.SetIsoval(MaxRho * IsoAdjust.get_value());
+  }  
+
+  if (CurrentFrame != (int)round(FrameScale.get_value())) {
+    CurrentFrame = (int)round(FrameScale.get_value());
+    DrawFrame();
   }
-  DrawFrame();
   //  PathVis.Invalidate();
 }
 
@@ -359,8 +362,18 @@ MDVisualClass::DrawFrame(bool offScreen)
   FrameAdjust.set_value(CurrentFrame);
 
   bool clipping = ClipButton.get_active();
-  for (int i=0; i<PathVis.Objects.size(); i++)
-    delete PathVis.Objects[i];
+  for (int i=0; i<PathVis.Objects.size(); i++) {
+    if (dynamic_cast<SphereObject*> (PathVis.Objects[i]) != NULL)
+      delete dynamic_cast<SphereObject*> (PathVis.Objects[i]);
+    else if (dynamic_cast<DiskObject*> (PathVis.Objects[i]) != NULL)
+      delete dynamic_cast<DiskObject*> (PathVis.Objects[i]);
+    else if (dynamic_cast<Isosurface*> (PathVis.Objects[i]) != NULL)
+      delete dynamic_cast<Isosurface*> (PathVis.Objects[i]);
+    else if (dynamic_cast<BoxObject*> (PathVis.Objects[i]) != NULL)
+      delete dynamic_cast<BoxObject*> (PathVis.Objects[i]);
+
+    //    delete (PathVis.Objects[i]);
+  }
   PathVis.Objects.resize(0);
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
@@ -483,8 +496,6 @@ MDVisualClass::Read(string filename)
     Xgrid.Init(-0.5*Box[0], 0.5*Box[0], RhoData.extent(0));
     Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
     Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
-//     RhoIso.Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
-//     RhoIso.SetIsoval(MaxRho*IsoAdjust.get_value());
   }
   IsoButton.set_active(haveRho);
   IsoButton.set_sensitive(haveRho);
