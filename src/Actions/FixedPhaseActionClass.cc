@@ -84,6 +84,34 @@ FixedPhaseClass::CalcDensity(Array<double,3> &rho)
   // the number of electrons.
 }
 
+void
+FixedPhaseClass::CalcBandDensity(Array<double,4> &rho)
+{
+  int nx = rho.extent(0); double nxInv = 1.0/(nx-1);
+  int ny = rho.extent(1); double nyInv = 1.0/(ny-1);
+  int nz = rho.extent(2); double nzInv = 1.0/(nz-1);
+  int nBands  = BandSplines.N;
+  dVec box = PathData.Path.GetBox();
+  Array<complex<double>,1> vals(nBands);
+  
+  rho = 0.0;
+
+  for (int ix=0; ix<nx; ix++) {
+    double x = (nxInv*ix-0.5)*box[0];
+    for (int iy=0; iy<ny; iy++) {
+      double y = (nyInv*iy-0.5)*box[1];
+      for (int iz=0; iz<nz; iz++) {
+	double z = (nzInv*iz-0.5)*box[2];
+	BandSplines(x, y, z, vals);
+	for (int i=0; i<nBands; i++)
+	  rho(ix, iy, iz, i) = mag2(vals(i));
+      }
+    }
+  }
+}
+
+
+
 void 
 FixedPhaseClass::ShiftData(int slicesToShift, int speciesNum)
 {
@@ -1033,6 +1061,15 @@ FixedPhaseActionClass::CalcDensity(Array<double,3> &rho)
     FixedPhaseA.CalcDensity(rho);
   else
     FixedPhaseB.CalcDensity(rho);
+}
+
+void
+FixedPhaseActionClass::CalcBandDensity(Array<double,4> &rho)
+{
+  if (PathData.Path.GetConfig() == 0)
+    FixedPhaseA.CalcBandDensity(rho);
+  else
+    FixedPhaseB.CalcBandDensity(rho);
 }
 
 void

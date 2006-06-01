@@ -94,10 +94,12 @@ protected:
 
   /// This optionally writes the charge density to the file
   ObservableVecDouble3 RhoVar;
+  ObservableVecDouble4 BandRhoVar;
   /// This bool tells us whether or not to dump Rho
-  bool DumpRho;
+  bool DumpRho, DumpBandRho;
   /// And this store the actual density
   Array<double,3> Rho;
+  Array<double,4> BandRho;
   ObservableVecDouble2 Rvar, Vvar, VOldVar, FVar, FShortVar, FLongVar,
     CoVarVar;
   ObservableVecDouble1 LambdaVar, BandEnergiesVar;
@@ -119,6 +121,7 @@ public:
     TimeVar   ("Time",              IOSection, pathData.Path.Communicator),
     BandEnergiesVar("BandEnergies", IOSection, pathData.Path.Communicator),
     RhoVar    ("Rho",               IOSection, pathData.Path.Communicator),
+    BandRhoVar("BandRho",           IOSection, pathData.Path.Communicator),
     Time(0.0), Integrator (VERLET), ExtraNoiseSigma(0.0), FrictionFactor(1.0),
     DumpRho(false)
   {

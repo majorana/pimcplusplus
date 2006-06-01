@@ -389,6 +389,10 @@ LangevinMoveClass::LangevinStep()
       if (DumpRho && (PathData.GetCloneNum()==0)) {
 	FP.CalcDensity(Rho);
 	RhoVar.Write(Rho);
+      }      
+      if (DumpBandRho && (PathData.GetCloneNum()==0)) {
+	FP.CalcBandDensity(BandRho);
+	BandRhoVar.Write(BandRho);
       }
     }
   // Calculate the mean force, covariance and eigenvalue
@@ -530,6 +534,7 @@ LangevinMoveClass::Read(IOSectionClass &in)
   assert (in.ReadVar("NumEquilSteps", NumEquilSteps));
   assert (in.ReadVar("NumAccumSteps", NumAccumSteps));
   assert (in.ReadVar("Species",       speciesStr));
+  in.ReadVar ("DumpBandRho", DumpBandRho, false);
   if (in.ReadVar("FrictionFactor", FrictionFactor))
     perr << "FrictionFactor = " << FrictionFactor << endl;
   string integrator;

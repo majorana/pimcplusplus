@@ -204,13 +204,21 @@ void
 MDExportClass::MakePOVPixbuf(int frame)
 {
   MDVisual.CurrentFrame = frame;
+  MDVisual.DrawFrame();
   MDVisual.PathVis.POVRender("POVframe.pov");
   char povString[1000];
-  snprintf (povString, 1000, "povray -D +W%d +H%d POVframe.pov", 
+  snprintf (povString, 1000, "povray -D +A0.0 +W%d +H%d POVframe.pov", 
 	    Width, Height);
   system(povString);
   Pixbuf.clear();
   Pixbuf = Gdk::Pixbuf::create_from_file ("POVframe.png", Width, Height);
+  guint8 *data = Pixbuf->get_pixels();
+  /// Swap from RGB to BGR format
+  for (int i=0; i<Width*Height; i++) {
+    guint8 tmp    = *(data+3*i);
+    *(data+3*i)   = *(data+3*i+2);
+    *(data+3*i+2) = tmp;
+  }
 }
 
 void 

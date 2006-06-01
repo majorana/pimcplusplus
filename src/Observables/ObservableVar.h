@@ -166,6 +166,32 @@ public:
   }
 };
 
+class ObservableVecDouble4 : public ObservableVar
+{
+public:
+  inline void Write (Array<double,4> &val)
+  {
+    if (Comm.MyProc()==0) {
+      if (FirstTime) {
+	FirstTime=false;
+	Array<double,4> tensor(1,val.extent(0), val.extent(1), 
+			         val.extent(2), val.extent(3));
+	tensor(0,Range::all(),Range::all(),Range::all(),Range::all()) = val;
+	Out.WriteVar (Name, tensor);
+	IOVar = Out.GetVarPtr(Name);
+      }
+      else
+	IOVar->Append(val);
+    }
+  }
+  ObservableVecDouble4(string name, IOSectionClass &out, 
+		       CommunicatorClass &comm) 
+    : ObservableVar (name, out, comm)
+  {
+    // do nothing
+  }
+};
+
 
 
 
