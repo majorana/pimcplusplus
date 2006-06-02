@@ -56,13 +56,21 @@ protected:
   IOSectionClass Infile;
   bool FileIsOpen;
   IOVarBase *RhoVar;
+  IOVarBase *BandRhoVar;
   Array<double,3> RhoData;
+  Array<double,4> BandRhoData;
   LinearGrid Xgrid, Ygrid, Zgrid;
+  Gtk::VBox IsoBox;
   Gtk::HScale IsoScale;
   Gtk::Adjustment IsoAdjust;
   Gtk::Frame IsoFrame;
+  Gtk::HScale BandScale;
+  Gtk::Adjustment BandAdjust;
+  Gtk::Frame BandFrame;
   double FindMaxRho();
   double MaxRho;
+  double FindMaxBandRho();
+  double MaxBandRho;
 
 
   //////////////////////
@@ -73,6 +81,7 @@ protected:
   void OnFrameChange();
   void OnSpeedChange();
   void OnIsoChange();
+  void OnBandChange();
   void OnPerspectiveToggle();
   void OnPlayToggle();
   void OnClipToggle();

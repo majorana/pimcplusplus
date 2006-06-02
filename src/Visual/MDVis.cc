@@ -5,6 +5,7 @@ MDVisualClass::MDVisualClass() :
   QuitButton("Quit"),
   FrameAdjust(0.0, 0.0, 0.0),
   IsoAdjust  (0.01, 0.0, 1.0, 0.01, 0.1),
+  BandAdjust (0.0, 0.0, 8.0, 1.0, 1.0),
   SpeedAdjust(5.0, 1.0, 10.0),
   CurrentFrame(0),
   PlayDirection(1),
@@ -33,6 +34,16 @@ MDVisualClass::MDVisualClass() :
   IsoFrame.add(IsoScale);
   IsoScale.property_width_request().set_value(75);
 
+  BandScale.set_adjustment (BandAdjust);
+  BandScale.set_digits(0);
+  BandScale.signal_value_changed().connect
+    (sigc::mem_fun(*this, &MDVisualClass::OnBandChange));
+  BandScale.property_width_request().set_value(75);
+  BandFrame.set_label("Band");
+  BandFrame.add(BandScale);
+
+  IsoBox.pack_start(IsoFrame);
+  IsoBox.pack_start(BandFrame);
 
   PlayImage.property_file().set_value(FindFullPath("player_play.png"));
   PlayButton.set_icon_widget(PlayImage);
@@ -141,7 +152,7 @@ MDVisualClass::MDVisualClass() :
   // Pack the boxes //
   ////////////////////
   ToolBox.pack_start(Tools);
-  ToolBox.pack_start(IsoFrame, Gtk::PACK_SHRINK,20);
+  ToolBox.pack_start(IsoBox, Gtk::PACK_SHRINK,20);
   ToolBox.pack_start(SpeedFrame, Gtk::PACK_SHRINK,20);
   MainVBox.pack_start(*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK,0);
   MainVBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
@@ -290,8 +301,12 @@ MDVisualClass::OnFrameChange()
 {
   int tempFrame =  (int)round(FrameScale.get_value());
   if (IsoButton.get_active()) {
-    RhoVar->Read(RhoData, tempFrame, Range::all(), Range::all(), Range::all()); 
-    MaxRho = FindMaxRho();
+    if (BandRhoVar != NULL) {
+      RhoVar->Read(RhoData, tempFrame, Range::all(), Range::all(), Range::all()); 
+      MaxRho = FindMaxRho();
+    }
+    if (BandRhoVar != NULL)
+      BandRhoVar->Read(BandRhoData, tempFrame, Range::all(), Range::all(), Range::all(), Range::all());
   }  
 
   if (CurrentFrame != (int)round(FrameScale.get_value())) {
@@ -453,10 +468,29 @@ MDVisualClass::DrawFrame(bool offScreen)
   }
 
   if (IsoButton.get_active()) {
-    Isosurface *rhoIso = new Isosurface;
-    rhoIso->Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
-    rhoIso->SetIsoval(MaxRho*IsoAdjust.get_value());
-    PathVis.Objects.push_back(rhoIso);
+    int band;
+    band = (int)round(BandScale.get_value());
+    if (band == BandRhoData.extent(3)) {
+      Isosurface *rhoIso = new Isosurface;
+      rhoIso->Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
+      rhoIso->SetIsoval(MaxRho*IsoAdjust.get_value());
+      PathVis.Objects.push_back(rhoIso);
+    }
+    else if (BandRhoVar != NULL) {
+      Array<double,3> bandData;
+      bandData.reference (BandRhoData(Range::all(), Range::all(), Range::all(), band));
+      Isosurface *bandIso = new Isosurface;
+      bandIso->Init (&Xgrid, &Ygrid, &Zgrid, bandData);
+      Vec3 color;
+      int n = BandRhoData.extent(3);
+      double x = (double)band/(double)(n-1);
+      color[0] = exp(-10.0*x*x);
+      color[1] = exp(-10.0*(x-0.5)*(x-0.5));
+      color[2] = exp(-10.0*(1.0-x)*(1.0-x));
+      bandIso->SetColor(color);
+      bandIso->SetIsoval(MaxBandRho*IsoAdjust.get_value());
+      PathVis.Objects.push_back(bandIso);
+    }
   }
 
   PathVis.Invalidate();
@@ -489,10 +523,20 @@ MDVisualClass::Read(string filename)
   assert(Infile.ReadVar("Time", Time));
 
   RhoVar = Infile.GetVarPtr("Rho");
+  BandRhoVar = Infile.GetVarPtr("BandRho");
   bool haveRho = RhoVar != NULL;
   if (haveRho) {
     RhoVar->Read(RhoData, 0, Range::all(), Range::all(), Range::all());
     MaxRho = FindMaxRho();
+    Xgrid.Init(-0.5*Box[0], 0.5*Box[0], RhoData.extent(0));
+    Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
+    Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
+  }
+  bool haveBandRho = RhoVar != NULL;
+  if (haveBandRho) {
+    BandRhoVar->Read(BandRhoData, 0, Range::all(), Range::all(), Range::all(), Range::all());
+    BandAdjust.set_upper(BandRhoData.extent(3));
+    MaxBandRho = FindMaxBandRho();
     Xgrid.Init(-0.5*Box[0], 0.5*Box[0], RhoData.extent(0));
     Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
     Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
@@ -523,6 +567,18 @@ MDVisualClass::FindMaxRho()
 	maxRho = max(maxRho, RhoData(ix,iy,iz));
   return maxRho;
 }
+
+double
+MDVisualClass::FindMaxBandRho()
+{
+  double maxRho = 0.0;
+  for (int ix=0; ix<BandRhoData.extent(0); ix++)
+    for (int iy=0; iy<BandRhoData.extent(1); iy++)
+      for (int iz=0; iz<BandRhoData.extent(2); iz++)
+	for (int band=0; band<BandRhoData.extent(3); band++)
+	  maxRho = max(maxRho, BandRhoData(ix,iy,iz,band));
+  return maxRho;
+}
 	
 
 void
@@ -535,7 +591,12 @@ MDVisualClass::OnSpeedChange()
 void
 MDVisualClass::OnIsoChange()
 {
-  //  RhoIso.SetIsoval(MaxRho * IsoAdjust.get_value());
+  DrawFrame();
+}
+
+void
+MDVisualClass::OnBandChange()
+{
   DrawFrame();
 }
 

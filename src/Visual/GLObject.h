@@ -22,7 +22,7 @@ public:
   void SetTransparent (bool trans);
   bool GetTransparent ();
   GLObject();
-  ~GLObject();
+  virtual ~GLObject();
 };
 
 #endif
