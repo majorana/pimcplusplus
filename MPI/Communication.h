@@ -234,6 +234,7 @@ public:
   double AllSum (double a);
   void AllSum (Array<double,1> &in, Array<double,1> &out);
   void AllSum (Array<double,2> &in, Array<double,2> &out);
+  void AllSum (Array<double,3> &in, Array<double,3> &out);
   void AllSum (Array<TinyVector<double,2>,1> &in, 
 	       Array<TinyVector<double,2>,1> &out);
   void AllSum (Array<TinyVector<double,3>,1> &in, 

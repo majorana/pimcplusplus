@@ -534,6 +534,16 @@ CommunicatorClass::AllSum (Array<double,2> &in, Array<double,2> &out)
 }
 
 void
+CommunicatorClass::AllSum (Array<double,3> &in, Array<double,3> &out)
+{
+  assert (in.extent(0) == out.extent(0));
+  assert (in.extent(1) == out.extent(1));
+  assert (in.extent(2) == out.extent(2));
+  MPI_Allreduce(in.data(), out.data(), in.size(), 
+		MPI_DOUBLE, MPI_SUM, MPIComm);
+}
+
+void
 CommunicatorClass:: AllSum (Array<TinyVector<double,2>,1> &in, 
 			    Array<TinyVector<double,2>,1> &out) 
 {

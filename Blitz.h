@@ -416,6 +416,22 @@ inline Array<Vec3,1> operator+(Vec3 vec, const Array<Vec3,1> &array)
   return result;
 }
 
+template<typename T, int N>
+inline bool operator==(const TinyVector<T,N> &a, 
+		       const TinyVector<T,N> &b)
+{
+  bool equals = true;
+  for (int i=0; i<N; i++)
+    equals = equals && (a[i] == b[i]);
+  return equals;
+}
+
+template<typename T, int N>
+inline bool operator!=(const TinyVector<T,N> &a, 
+		       const TinyVector<T,N> &b)
+{
+  return !(a == b);
+}
 
 
 
