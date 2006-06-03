@@ -1,6 +1,7 @@
-check_PROGRAMS = TestPW2 BandStructure MPIBandStructure
+check_PROGRAMS = TestPW2 BandStructure MPIBandStructure TestPWMPI
 
 TestPW2_SOURCES = TestPW2.cc
+TestPWMPI_SOURCES = TestPWMPI.cc
 BandStructure_SOURCES = BandStructure.cc BandStructure.h
 MPIBandStructure_SOURCES = MPIBandStructure.cc MPIBandStructure.h
 

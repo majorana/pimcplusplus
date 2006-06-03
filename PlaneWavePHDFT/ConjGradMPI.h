@@ -24,15 +24,32 @@ protected:
   Array<complex<double>,2> &Bands;
   Array<complex<double>,2> lastPhis;
   double Tolerance;
-  CommunicatorClass &Communicator;
+  CommunicatorClass &BandComm, &kComm;
   /// Returns the maximum residual of all the bands
   double Iterate();
   void CollectBands();
   int MyFirstBand, MyLastBand;
   Array<double,1> Residuals;
   void CheckOverlaps();
+  /////////////////////////
+  /// DFT-related stuff ///
+  /////////////////////////
+  FFTBox &FFT;
+  bool UseLDA;
+  /// Stores the electron charge density in real space on the FFT
+  /// grid. 
+  int Nx, Ny, Nz;
+  Array<complex<double>,3> Phip_r, Psi_r;
+  /// The components of the Hatree term in k-space
+  zVec h_G;
+  void CalcChargeDensity();
+  Array<double,3> MyRho, TotalRho;
+  double CalcHartreeTerm(int band);
+  double CalcXCTerm(int band);
+  Array<double,3> Vxc;
 public:
   void Setup();
+  /// Stores the band eigenenergies
   Array<double,1> Energies;
   void InitBands();
   void Solve();
@@ -40,10 +57,12 @@ public:
   void PrintOverlaps();
 
   ConjGradMPI (HamiltonianClass &h, Array<complex<double>,2> &bands,
-	       CommunicatorClass &comm) : 
+	       CommunicatorClass &bandComm, 
+	       CommunicatorClass &kcomm,
+	       FFTBox &fft) : 
     H(h), IsSetup(false), iter(0),
     LastBand(-1), Bands(bands), Tolerance (1.0e-6),
-    Communicator(comm)
+    BandComm(bandComm), kComm(kcomm), FFT(fft), UseLDA(false)
   {
     // Do nothing for now
   }

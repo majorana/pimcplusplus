@@ -5,11 +5,12 @@
 void ConjGradMPI::Setup()
 {
   int numBands = Bands.rows();
-  int N = H.GVecs.size();
+  int N      = H.GVecs.size();
+  int NDelta = H.GVecs.DeltaSize();
 
   // Figure out which bands I'm responsible for
-  int numProcs = Communicator.NumProcs();
-  int myProc = Communicator.MyProc();
+  int numProcs = BandComm.NumProcs();
+  int myProc = BandComm.MyProc();
   int band = 0;
   for (int proc=0; proc<numProcs; proc++) {
     int procBands = numBands/numProcs + ((numBands % numProcs)>proc);
@@ -35,6 +36,16 @@ void ConjGradMPI::Setup()
   Xi.resize(N);
   Eta.resize(N);
   T.resize(N);
+  if (UseLDA) {
+    FFT.GetDims    (Nx, Ny, Nz);
+    Phip_r.resize  (Nx, Ny, Nz);
+    Psi_r.resize   (Nx, Ny, Nz);
+    MyRho.resize   (Nx, Ny, Nz);
+    TotalRho.resize(Nx, Ny, Nz);
+    h_G.resize(NDelta);
+  }
+    
+
   Bands = 0.0;
   Vec3 kBox = H.GVecs.GetkBox();
   double maxk = max(kBox[0], max(kBox[1], kBox[2]));
@@ -71,7 +82,7 @@ void ConjGradMPI::InitBands()
   }
   SymmEigenPairs (Hmat, numBands, EigVals, EigVecs);
 
-  if (Communicator.MyProc() == 0)
+  if (BandComm.MyProc() == 0)
     for (int i=0; i<numBands; i++)
       perr << "Mini energy(" << i << ") = " << 27.211383*EigVals(i) << endl;
 
@@ -85,7 +96,7 @@ void ConjGradMPI::InitBands()
   GramSchmidt(Bands);
   // We have to broadcast in order to make sure everyone is starting
   // with the exact same bands.
-  Communicator.Broadcast(0,Bands);
+  BandComm.Broadcast(0,Bands);
 }
 
 double ConjGradMPI::CalcPhiSD()
@@ -102,8 +113,9 @@ double ConjGradMPI::CalcPhiSD()
 void ConjGradMPI::Precondition()
 {
   double Tinv = 1.0/T(CurrentBand);
+  Vec3 k = H.kPoint;
   for (int i=0; i<c.size(); i++) {
-    double x = 0.5*dot(H.GVecs(i), H.GVecs(i))*Tinv;
+    double x = 0.5*dot(H.GVecs(i)+k, H.GVecs(i)+k)*Tinv;
     double num = 27.0 + 18.0*x +12.0*x*x + 8.0*x*x*x;
     double denom = num + 16.0*x*x*x*x;
     Eta(i) = (num/denom)* Xi(i);
@@ -251,7 +263,62 @@ ConjGradMPI::CheckOverlaps()
 void
 ConjGradMPI::CollectBands()
 {
-  Communicator.AllGatherRows(Bands);
-  Communicator.AllGatherVec(Residuals);
-  Communicator.AllGatherVec(Energies);
+  BandComm.AllGatherRows(Bands);
+  BandComm.AllGatherVec(Residuals);
+  BandComm.AllGatherVec(Energies);
 }
+
+
+void
+ConjGradMPI::CalcChargeDensity()
+{
+  int nx, ny, nz;
+  FFT.GetDims(nx,ny,nz);
+  if (MyRho.shape() != TinyVector<int,3>(nx,ny,nz))
+    MyRho.resize(nx,ny,nz);
+  if (TotalRho.shape() != TinyVector<int,3>(nx,ny,nz))
+    TotalRho.resize(nx,ny,nz);
+  MyRho = 0.0;
+  zVec band;
+
+  /// We assume that each of the bands is already normalized.
+  for (int bi=0; bi<Bands.rows(); bi++) {
+    band.reference(Bands(bi, Range::all()));
+    FFT.PutkVec (band);
+    FFT.k2r();
+    for (int ix=0; ix<nx; ix++)
+      for (int iy=0; iy<ny; iy++)
+	for (int iz=0; iz<nz; iz++)
+	  MyRho(ix,iy,iz) += norm (FFT.rBox(ix,iy,iz));
+  }
+  kComm.AllSum(MyRho, TotalRho);
+}
+
+
+double
+ConjGradMPI::CalcHartreeTerm(int band)
+{
+  zVec psi;
+  psi.reference (Bands(band, Range::all()));
+  FFT.PutkVec (Phip);
+  FFT.k2r();
+  Phip_r = FFT.rBox;
+  FFT.PutkVec (psi);
+  FFT.k2r();
+  
+  for (int ix=0; ix<Nx; ix++)
+    for (int iy=0; iy<Ny; iy++)
+      for (int iz=0; iz<Nz; iz++)
+	FFT.rBox(ix,iy,iz) *= conj(Phip_r(ix,iy,iz));
+  FFT.r2k();
+  FFT.GetkVec(h_G);
+  double volInv = 1.0/H.GVecs.GetBoxVol();
+  double e2_over_eps0 = 1.0; // ???????
+  double hartreeTerm = 0.0;
+  for (int i=0; i<h_G.size(); i++)
+    hartreeTerm += norm(h_G(i))*H.GVecs.DeltaGInv2(i);
+  hartreeTerm *= 2.0 * e2_over_eps0 * volInv;
+  return hartreeTerm;
+}
+
+

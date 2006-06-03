@@ -11,6 +11,7 @@ protected:
   Array<Int3,1> Indices;
   // This stores the differences between g-vectors:
   Array<Vec3,1> GDiff;
+  Array<double,1> GDiffInv2;
   Array<Int3,1> IDiff;
   Vec3 Box, kBox;
   int Nx, Ny, Nz;
@@ -34,6 +35,9 @@ public:
 
   inline const Vec3& DeltaG (int i)
   { return GDiff(i); }
+
+  inline double DeltaGInv2 (int i)
+  { return GDiffInv2(i); }
 
   inline Int3 DeltaI (int i) const
   { return IDiff(i); }

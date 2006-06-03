@@ -56,7 +56,7 @@ MPISystemClass::DiagonalizeH ()
   else
     CG.InitBands();
   CG.Solve();
-  if (Communicator.MyProc()==0)
+  if (BandComm.MyProc()==0)
     for (int i=0; i<Bands.rows(); i++) 
       fprintf (stderr, "Energy(%d) = %15.12f\n", i, CG.Energies(i)* 27.211383);
   LastBands = Bands;

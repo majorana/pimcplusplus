@@ -38,7 +38,7 @@ MPIBandStructureClass::Read(IOSectionClass &in)
 
   // Read the k-cutoff
   assert(in.ReadVar("kCut", kCut));
-  System = new MPISystemClass(NumBands, Communicator);
+  System = new MPISystemClass(NumBands, Communicator, Communicator);
 
   // Read the output file name
   assert (in.ReadVar ("OutFilename", OutFilename));

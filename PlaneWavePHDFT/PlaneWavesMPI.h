@@ -18,7 +18,7 @@ protected:
   int NumBands;
   Potential *PH;
   bool UseFFT;
-  CommunicatorClass &Communicator;
+  CommunicatorClass &BandComm, &kComm;
   bool MDExtrap, FirstTime;
 public:
   GVecsClass GVecs;
@@ -43,11 +43,12 @@ public:
   void CalcChargeDensity(Array<double,3> &rho);
   void WriteXSFFile(string filename);
 
-  MPISystemClass(int numBands, CommunicatorClass &comm,
+  MPISystemClass(int numBands, 
+		 CommunicatorClass &bandcomm, CommunicatorClass &kcomm,
 		 bool mdextrap=false) 
-    : CG(H, Bands, comm), FFT(GVecs), H(GVecs, FFT), 
-      NumBands(numBands), Communicator(comm), MDExtrap(mdextrap),
-      FirstTime(true)
+    : CG(H, Bands, bandcomm, kcomm, FFT), FFT(GVecs), H(GVecs, FFT), 
+      NumBands(numBands), BandComm(bandcomm), kComm(kcomm), 
+      MDExtrap(mdextrap), FirstTime(true)
   {
 
   }
