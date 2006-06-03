@@ -114,8 +114,9 @@ double ConjGrad::CalcPhiSD()
 void ConjGrad::Precondition()
 {
   double Tinv = 1.0/T;
+  Vec3 k = H.kPoint;
   for (int i=0; i<c.size(); i++) {
-    double x = 0.5*dot(H.GVecs(i), H.GVecs(i))*Tinv;
+    double x = 0.5*dot(H.GVecs(i)+k, H.GVecs(i)+k)*Tinv;
     double num = 27.0 + 18.0*x +12.0*x*x + 8.0*x*x*x;
     double denom = num + 16.0*x*x*x*x;
     Eta(i) = (num/denom)* Xi(i);
