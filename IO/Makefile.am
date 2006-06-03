@@ -1,4 +1,4 @@
-check_PROGRAMS = TestHDF5 TestIO TestXML GrabRho
+check_PROGRAMS = TestHDF5 TestIO TestXML 
 
 LDADD = $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(LIBS)
 AM_CXXFLAGS = $(XML2_CFLAGS) $(HDF5_CFLAGS) $(BLITZ_CFLAGS)
@@ -12,8 +12,8 @@ TestHDF5_LDADD = libciao.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(LIBS)
 TestIO_SOURCES = TestIO.cc 
 TestIO_LDADD = libIO.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(LIBS)
 
-GrabRho_SOURCES = GrabRho.cc 
-GrabRho_LDADD = libIO.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(LIBS)
+#GrabRho_SOURCES = GrabRho.cc 
+#GrabRho_LDADD = libIO.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(LIBS)
 
 includedir=$(prefix)/include/Common/IO
 
