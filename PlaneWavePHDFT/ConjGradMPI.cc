@@ -294,6 +294,15 @@ ConjGradMPI::CalcChargeDensity()
   kComm.AllSum(MyRho, TotalRho);
 }
 
+inline operator=(Array<complex<double>,3> &A,
+		 Array<complex<float>,3> &B)
+{
+  for (int ix=0; ix<A.extent(0); ix++)
+    for (int iy=0; iy<A.extent(1); iy++)
+      for (int iz=0; iz<A.extent(2); iz++)
+	A(ix,iy,iz) = B(ix,iy,iz);
+}
+
 
 double
 ConjGradMPI::CalcHartreeTerm(int band)
@@ -302,7 +311,10 @@ ConjGradMPI::CalcHartreeTerm(int band)
   psi.reference (Bands(band, Range::all()));
   FFT.PutkVec (Phip);
   FFT.k2r();
-  Phip_r = FFT.rBox;
+  for (int ix=0; ix<Nx; ix++)
+    for (int iy=0; iy<Ny; iy++)
+      for (int iz=0; iz<Nz; iz++)
+	Phip_r(ix,iy,iz) = FFT.rBox(ix,iy,iz);
   FFT.PutkVec (psi);
   FFT.k2r();
   
