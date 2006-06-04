@@ -40,8 +40,11 @@ void ConjGradMPI::Setup()
     FFT.GetDims    (Nx, Ny, Nz);
     Phip_r.resize  (Nx, Ny, Nz);
     Psi_r.resize   (Nx, Ny, Nz);
-    MyRho.resize   (Nx, Ny, Nz);
-    TotalRho.resize(Nx, Ny, Nz);
+    NewRho.resize  (Nx, Ny, Nz);
+    TempRho.resize (Nx, Ny, Nz);
+    VH.resize      (Nx, Ny, Nz);
+    VXC.resize     (Nx, Ny, Nz);
+    Rho.resize(Nx, Ny, Nz);
     h_G.resize(NDelta);
   }
     
@@ -274,35 +277,80 @@ ConjGradMPI::CalcChargeDensity()
 {
   int nx, ny, nz;
   FFT.GetDims(nx,ny,nz);
-  if (MyRho.shape() != TinyVector<int,3>(nx,ny,nz))
-    MyRho.resize(nx,ny,nz);
-  if (TotalRho.shape() != TinyVector<int,3>(nx,ny,nz))
-    TotalRho.resize(nx,ny,nz);
-  MyRho = 0.0;
+  if (TempRho.shape() != TinyVector<int,3>(nx,ny,nz))
+    TempRho.resize(nx,ny,nz);
+  if (NewRho.shape() != TinyVector<int,3>(nx,ny,nz))
+    NewRho.resize(nx,ny,nz);
+  TempRho = 0.0;
   zVec band;
 
   /// We assume that each of the bands is already normalized.
-  for (int bi=0; bi<Bands.rows(); bi++) {
+  for (int bi=MyFirstBand; bi<MyLastBand; bi++) {
     band.reference(Bands(bi, Range::all()));
     FFT.PutkVec (band);
     FFT.k2r();
     for (int ix=0; ix<nx; ix++)
       for (int iy=0; iy<ny; iy++)
 	for (int iz=0; iz<nz; iz++)
-	  MyRho(ix,iy,iz) += norm (FFT.rBox(ix,iy,iz));
+	  TempRho(ix,iy,iz) += norm (FFT.rBox(ix,iy,iz));
   }
-  kComm.AllSum(MyRho, TotalRho);
+  /// First, sum over all the band procs
+  BandComm.AllSum (TempRho, NewRho);
+  TempRho = NewRho;
+  // Now sum over all the kPoints
+  if (BandComm.MyProc() == 0) 
+    kComm.AllSum(TempRho, NewRho);
+  // And broadcast;
+  BandComm.Broadcast(0, NewRho);
+  /// Multiply by the right prefactor;
+  double volInv = 1.0/H.GVecs.GetBoxVol();
+  double prefactor = 2.0*volInv/(double)kComm.NumProcs();
+  NewRho *= prefactor;
 }
 
-inline operator=(Array<complex<double>,3> &A,
-		 Array<complex<float>,3> &B)
+template<typename T1,typename T2>
+inline void copy(Array<T1,3> &src,
+		 Array<T2,3> &dest)
 {
-  for (int ix=0; ix<A.extent(0); ix++)
-    for (int iy=0; iy<A.extent(1); iy++)
-      for (int iz=0; iz<A.extent(2); iz++)
-	A(ix,iy,iz) = B(ix,iy,iz);
+  assert (src.shape() == dest.shape());
+  for (int ix=0; ix<src.extent(0); ix++)
+    for (int iy=0; iy<src.extent(1); iy++)
+      for (int iz=0; iz<src.extent(2); iz++)
+	dest(ix,iy,iz) = src(ix,iy,iz);
 }
 
+
+/// Calculate the hartree, exchange, and correlation potentials.
+/// We assume that upon entry, Rho contains the charge density for
+/// which we wish to calculate V_H and V_XC.
+void 
+ConjGradMPI::CalcVHXC()
+{
+  ///////////////////////
+  // Hartree potential //
+  ///////////////////////
+  // FFT charge density into k-space
+  copy (Rho, FFT.rBox);
+  FFT.r2k();
+  FFT.GetkVec(h_G);
+  // Compute V_H in reciporical space
+  double volInv = 1.0/H.GVecs.GetBoxVol();
+  double hartreeTerm = 0.0;
+  for (int i=0; i<h_G.size(); i++)
+    h_G(i) = norm(h_G(i))*H.GVecs.DeltaGInv2(i);
+  h_G *= (4.0*M_PI/H.GVecs.GetBoxVol());
+  // FFT back to real space
+  FFT.PutkVec(h_G);
+  FFT.k2r();
+  copy (FFT.rBox, VH);
+
+  ////////////////////////////////////
+  // Exchange-correlation potential //
+  ////////////////////////////////////
+  
+
+  
+}
 
 double
 ConjGradMPI::CalcHartreeTerm(int band)
@@ -311,10 +359,11 @@ ConjGradMPI::CalcHartreeTerm(int band)
   psi.reference (Bands(band, Range::all()));
   FFT.PutkVec (Phip);
   FFT.k2r();
-  for (int ix=0; ix<Nx; ix++)
-    for (int iy=0; iy<Ny; iy++)
-      for (int iz=0; iz<Nz; iz++)
-	Phip_r(ix,iy,iz) = FFT.rBox(ix,iy,iz);
+  copy (FFT.rBox, Phip_r);
+//   for (int ix=0; ix<Nx; ix++)
+//     for (int iy=0; iy<Ny; iy++)
+//       for (int iz=0; iz<Nz; iz++)
+// 	Phip_r(ix,iy,iz) = FFT.rBox(ix,iy,iz);
   FFT.PutkVec (psi);
   FFT.k2r();
   
@@ -325,7 +374,7 @@ ConjGradMPI::CalcHartreeTerm(int band)
   FFT.r2k();
   FFT.GetkVec(h_G);
   double volInv = 1.0/H.GVecs.GetBoxVol();
-  double e2_over_eps0 = 1.0; // ???????
+  double e2_over_eps0 = 4.0*M_PI; // ???????
   double hartreeTerm = 0.0;
   for (int i=0; i<h_G.size(); i++)
     hartreeTerm += norm(h_G(i))*H.GVecs.DeltaGInv2(i);

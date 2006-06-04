@@ -132,3 +132,30 @@ LocalPotFFTClass::Apply (const zVec &c, zVec &Hc)
     Hc(i) += nInv*Vc(i);
 }
 
+void 
+LocalPotFFTClass::Apply (const zVec &c, zVec &Hc,
+			 Array<complex<double>,3> &VHXC)
+{
+  if (!IsSetup)
+    Setup();
+  int nx, ny, nz;
+  cFFT.GetDims(nx, ny, nz);
+  double nInv = 1.0/(double)(nx*ny*nz);
+
+  ////////////////////
+  // Potential part //
+  ////////////////////
+  // Transform c into real space
+  cFFT.PutkVec (c);
+  cFFT.k2r();
+  // Multiply by V
+  cFFT.rBox *= (Vr+VHXC);
+  // Transform back
+  cFFT.r2k();
+
+  // Get vector
+  cFFT.GetkVec (Vc);
+  for (int i=0; i<GVecs.size(); i++)
+    Hc(i) += nInv*Vc(i);
+}
+

@@ -47,3 +47,12 @@ VionBase::SetIons(const Array<Vec3,1> &rions)
   }
 }
 
+
+void
+VionBase::Apply   (const zVec &c, zVec &Hc, 
+		   Array<complex<double>,3> &VHXC)
+{
+  cerr << "Applying VHXC potential not supported by non-FFT versions"
+       << " of the potentials.\n"; 
+  abort();
+}

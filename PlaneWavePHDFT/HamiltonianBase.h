@@ -40,6 +40,9 @@ protected:
 public:
   // Adds H*c to the Hc vector.  Does not zero Hc before accumulating
   virtual void Apply   (const zVec &c, zVec &Hc) = 0;
+  /// This version includes the hartree and exchange-correlation pot
+  virtual void Apply   (const zVec &c, zVec &Hc, 
+			Array<complex<double>,3> &VHXC);
   virtual void SetIons (const Array<Vec3,1> &rions); 
   virtual void Setup() = 0;
   virtual void Vmatrix (Array<complex<double>,2> &vmat) = 0;

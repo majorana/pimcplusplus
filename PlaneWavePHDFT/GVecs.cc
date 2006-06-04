@@ -122,7 +122,10 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut)
   numUnique = 1;
   for (int i=0; i<vecs.size(); i++) {
     GDiff(i) = vecs[i].G;
-    GDiffInv2(i) = 1.0/dot(vecs[i].G, vecs[i].G);
+    if (vecs[i].I != TinyVector<int,3>(0,0,0))
+      GDiffInv2(i) = 1.0/dot(vecs[i].G, vecs[i].G);
+    else
+      GDiffInv2(i) = 0.0;
     IDiff(i) = vecs[i].I;
     if (i>0)
       if (!(vecs[i] == vecs[i-1]))

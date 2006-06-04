@@ -43,10 +43,15 @@ protected:
   /// The components of the Hatree term in k-space
   zVec h_G;
   void CalcChargeDensity();
-  Array<double,3> MyRho, TotalRho;
+  /// MyRho is used to compute the charge density for my own k-point.  
+  Array<double,3> TempRho, NewRho, Rho;
+  void CalcVHXC();
   double CalcHartreeTerm(int band);
   double CalcXCTerm(int band);
-  Array<double,3> Vxc;
+  /// The Hatree and exchange-correlation potentials in real space
+  Array<complex<double>,3> VH, VXC;
+  /// The Hartree and exchance-corelation energies
+  double EH, EXC;
 public:
   void Setup();
   /// Stores the band eigenenergies
