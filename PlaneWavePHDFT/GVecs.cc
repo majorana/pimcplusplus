@@ -19,22 +19,19 @@ inline bool operator==(const GVec &g1, const GVec &g2)
   return (fabs(dot(g1.G,g1.G)-dot(g2.G,g2.G)) < 1.0e-12);
 }
 
-void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut)
-{
-  k = kVec;
-  Box = box;
-  kCut = kcut;
-  kBox[0]=2.0*M_PI/box[0]; kBox[1]=2.0*M_PI/box[1]; kBox[2]=2.0*M_PI/box[2];
 
+Int3
+GVecsClass::GetFFTBoxSize(Vec3 box, Vec3 kvec, double kcut)
+{
   int maxX, maxY, maxZ;
   maxX = (int) ceil(kcut/kBox[0]);
   maxY = (int) ceil(kcut/kBox[1]);
   maxZ = (int) ceil(kcut/kBox[2]);
 
   // The FFT box must be twice the size as the maximum G in each direction.
-  Nx = 4*maxX+1;
-  Ny = 4*maxY+1;
-  Nz = 4*maxZ+1;
+  int nx = 4*maxX+1;
+  int ny = 4*maxY+1;
+  int nz = 4*maxZ+1; 
 
   ////////////////////////////////////////////
   // First, set up G-vectors and difference //
@@ -61,12 +58,44 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut)
       }
     }
   }
-  Nx = actxmax-actxmin+1;
-  Ny = actymax-actymin+1;
-  Nz = actzmax-actzmin+1;
-  if ((Nx%2)==1) Nx++;
-  if ((Ny%2)==1) Ny++;
-  if ((Nz%2)==1) Nz++;
+  nx = actxmax-actxmin+1;
+  ny = actymax-actymin+1;
+  nz = actzmax-actzmin+1;
+  if ((nx%2)==1) nx++;
+  if ((ny%2)==1) ny++;
+  if ((nz%2)==1) nz++;
+  return Int3(nx, ny, nz);
+}
+
+
+void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut)
+{
+  Int3 boxSize = GetFFTBoxSize(box, kVec, kcut);
+  Set (box, kVec, kcut, boxSize);
+}
+			       
+
+void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
+{
+  k = kVec;
+  Box = box;
+  kCut = kcut;
+  kBox[0]=2.0*M_PI/box[0]; kBox[1]=2.0*M_PI/box[1]; kBox[2]=2.0*M_PI/box[2];
+
+  int maxX, maxY, maxZ;
+  maxX = (int) ceil(kcut/kBox[0]);
+  maxY = (int) ceil(kcut/kBox[1]);
+  maxZ = (int) ceil(kcut/kBox[2]);
+
+  Nx = boxSize[0];
+  Ny = boxSize[1];
+  Ny = boxSize[2];
+
+  ////////////////////////////////////////////
+  // First, set up G-vectors and difference //
+  ////////////////////////////////////////////
+  vector<GVec> vecs;
+  GVec vec;
 
   /// First, count k-vectors
   for (int ix=-maxX; ix<=maxX; ix++) {

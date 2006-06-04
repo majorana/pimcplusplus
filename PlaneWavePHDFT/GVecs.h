@@ -19,7 +19,10 @@ protected:
   Vec3 k;
 
 public:
+  Int3 GetFFTBoxSize (Vec3 box, Vec3 kvec, double kcut);
+
   void Set (Vec3 box, Vec3 kvec, double kcut);
+  void Set (Vec3 box, Vec3 kvec, double kcut, Int3 boxSize);
 
   inline Vec3 operator()(int i) const
   { return GVecs(i); }
