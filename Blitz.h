@@ -1,8 +1,11 @@
 #ifndef MYBLITZ_H
 #define MYBLITZ_H
 
+#include <complex>
+using namespace std;
 #include <blitz/array.h>
 #include <blitz/tinyvec-et.h>
+
 typedef double scalar;
 
 // #define NDIM 3
