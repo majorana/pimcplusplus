@@ -24,9 +24,10 @@ Int3
 GVecsClass::GetFFTBoxSize(Vec3 box, Vec3 kvec, double kcut)
 {
   int maxX, maxY, maxZ;
-  maxX = (int) ceil(kcut/kBox[0]);
-  maxY = (int) ceil(kcut/kBox[1]);
-  maxZ = (int) ceil(kcut/kBox[2]);
+  Vec3 kbox = Vec3(2.0*M_PI/box[0], 2.0*M_PI/box[1], 2.0*M_PI/box[2]);
+  maxX = (int) ceil(kcut/kbox[0]);
+  maxY = (int) ceil(kcut/kbox[1]);
+  maxZ = (int) ceil(kcut/kbox[2]);
 
   // The FFT box must be twice the size as the maximum G in each direction.
   int nx = 4*maxX+1;
@@ -42,11 +43,11 @@ GVecsClass::GetFFTBoxSize(Vec3 box, Vec3 kvec, double kcut)
   actxmin = actxmax = actymin = actymax = actzmin = actzmax = 0;
   TinyVector<double,3> g;
   for (int ix=-2*maxX; ix<=2*maxX; ix++) {
-    g[0] = ix*kBox[0];
+    g[0] = ix*kbox[0];
     for (int iy=-2*maxY; iy<=2*maxY; iy++) {
-      g[1] = iy*kBox[1];
+      g[1] = iy*kbox[1];
       for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
-	g[2] = iz*kBox[2];
+	g[2] = iz*kbox[2];
 	if (dot(k+g,k+g) < (4.0*kcut*kcut)) {
 	  actxmin = min (ix, actxmin);
 	  actxmax = max (ix, actxmax);
@@ -89,7 +90,7 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
 
   Nx = boxSize[0];
   Ny = boxSize[1];
-  Ny = boxSize[2];
+  Nz = boxSize[2];
 
   ////////////////////////////////////////////
   // First, set up G-vectors and difference //

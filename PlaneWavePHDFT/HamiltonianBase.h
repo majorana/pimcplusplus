@@ -69,6 +69,8 @@ public:
   Vec3 kPoint;
 
   void Apply (const zVec &c, zVec &Hc);
+  void Apply (const zVec &c, zVec &Hc,
+	      Array<complex<double>,3> &VHXC);
   
   void SetIonPot (double z, bool useFFT);
   void SetIonPot (Potential &ph, bool useFFT);

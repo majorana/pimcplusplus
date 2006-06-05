@@ -45,3 +45,12 @@ HamiltonianClass::Apply (const zVec &c, zVec &Hc)
   Kinetic.Apply(c, Hc);
   Vion->Apply (c, Hc);
 }
+
+void
+HamiltonianClass::Apply (const zVec &c, zVec &Hc,
+			 Array<complex<double>,3> &VHXC)
+{
+  Hc = 0.0;
+  Kinetic.Apply(c, Hc);
+  Vion->Apply (c, Hc, VHXC);
+}

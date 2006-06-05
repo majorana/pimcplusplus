@@ -133,7 +133,10 @@ ConjGradMPI::CalcPhiCG()
   Hc = 0.0;
   H.Kinetic.Apply (c, Hc);
   T = realconjdot (c, Hc);
-  H.Vion->Apply (c, Hc);
+  if (UseLDA)
+    H.Vion->Apply (c, Hc, VHXC);
+  else
+    H.Vion->Apply (c, Hc);
   E0 = realconjdot (c, Hc);
   // Steepest descent direction: (5.10)
   Xi = E0*c - Hc;
@@ -195,7 +198,10 @@ ConjGradMPI::Iterate()
 
     // Now, pick optimal theta for 
     double dE_dtheta = 2.0*realconjdot(Phip, Hc);
-    H.Apply (Phip, Hc);
+    if (UseLDA)
+      H.Apply (Phip, Hc, VHXC);
+    else
+      H.Apply (Phip, Hc);
     double d2E_dtheta2 = 2.0*(realconjdot(Phip, Hc) - E0);
     double thetaMin = 0.5*atan(-dE_dtheta/(0.5*d2E_dtheta2));
 

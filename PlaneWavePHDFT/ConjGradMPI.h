@@ -49,7 +49,7 @@ protected:
   double CalcHartreeTerm(int band);
   double CalcXCTerm(int band);
   /// The Hatree and exchange-correlation potentials in real space
-  Array<complex<double>,3> VH, VXC;
+  Array<complex<double>,3> VH, VXC, VHXC;
   /// The Hartree and exchance-corelation energies
   double EH, EXC;
 public:
@@ -64,10 +64,10 @@ public:
   ConjGradMPI (HamiltonianClass &h, Array<complex<double>,2> &bands,
 	       CommunicatorClass &bandComm, 
 	       CommunicatorClass &kcomm,
-	       FFTBox &fft) : 
+	       FFTBox &fft, bool useLDA=false) : 
     H(h), IsSetup(false), iter(0),
     LastBand(-1), Bands(bands), Tolerance (1.0e-6),
-    BandComm(bandComm), kComm(kcomm), FFT(fft), UseLDA(false)
+    BandComm(bandComm), kComm(kcomm), FFT(fft), UseLDA(useLDA)
   {
     // Do nothing for now
   }
