@@ -17,18 +17,8 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   PH = &ph;
   UseFFT = useFFT;
   int NDelta = H.GVecs.DeltaSize();
-  if (UseLDA) {
-    CalcRadialChargeDensity();
-    FFT.GetDims    (Nx, Ny, Nz);
-    NewRho.resize  (Nx, Ny, Nz);
-    TempRho.resize (Nx, Ny, Nz);
-    VH.resize      (Nx, Ny, Nz);
-    VXC.resize     (Nx, Ny, Nz);
-    VHXC.resize    (Nx, Ny, Nz);
-    Rho_r.resize   (Nx, Ny, Nz);
-    h_G.resize     (NDelta);
-    Rho_G.resize   (NDelta);
-  }
+  if (UseLDA) 
+    InitLDA();
 }
 
 
@@ -56,6 +46,7 @@ MPISystemClass::SetIons (const Array<Vec3,1> &rions)
   /// aliasing. 
   Rions = rions;
   H.SetIons(rions + 0.5*Box);
+  InitRho_r();
 }
 
 

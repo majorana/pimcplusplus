@@ -8,9 +8,12 @@ class GVecsClass
 protected:
   // This stores the actual G-Vectors
   Array<Vec3,1> GVecs;
+  // This stores the index of this G-vector in the FFT box
   Array<Int3,1> Indices;
   // This stores the differences between g-vectors:
   Array<Vec3,1> GDiff;
+  // The inverse of the norm of the above:  used to compute the
+  // Hartree potential in DFT
   Array<double,1> GDiffInv2;
   Array<Int3,1> IDiff;
   Vec3 Box, kBox;

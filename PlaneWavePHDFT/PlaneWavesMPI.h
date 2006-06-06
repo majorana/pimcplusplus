@@ -49,7 +49,9 @@ protected:
   OptimalGrid AtomGrid;
   CubicSpline RadialChargeDensity;
   void CalcRadialChargeDensity();
+  void InitRho_r();
   void SolveLDA();
+  void InitLDA();
 public:
   GVecsClass GVecs;
   void Setup(Vec3 box, Vec3 k, double kcut, Potential &ph, 

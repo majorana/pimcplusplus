@@ -4,6 +4,23 @@
 #include "../DFT/Functionals.h"
 
 void
+MPISystemClass::InitLDA()
+{
+  int NDelta = GVecs.DeltaSize();
+  FFT.GetDims    (Nx, Ny, Nz);
+  NewRho.resize  (Nx, Ny, Nz);
+  TempRho.resize (Nx, Ny, Nz);
+  VH.resize      (Nx, Ny, Nz);
+  VXC.resize     (Nx, Ny, Nz);
+  VHXC.resize    (Nx, Ny, Nz);
+  Rho_r.resize   (Nx, Ny, Nz);
+  h_G.resize     (NDelta);
+  Rho_G.resize   (NDelta);
+  CalcRadialChargeDensity();
+}
+
+
+void
 MPISystemClass::SolveLDA()
 {
   int numSCIters = 0;
@@ -132,6 +149,42 @@ MPISystemClass::CalcRadialChargeDensity()
   }
   RadialChargeDensity.Init (&AtomGrid, rho);
 }
+
+/// Initializes the density to a superposition of the atomic charge
+/// densities from an Atomic DFT calculation.
+void
+MPISystemClass::InitRho_r()
+{
+  Rho_r = 0.0;
+  double nxInv = 1.0/(double)(Nx-1);
+  double nyInv = 1.0/(double)(Ny-1);
+  double nzInv = 1.0/(double)(Nz-1);
+  Vec3 boxInv = Vec3(1.0/Box[0], 1.0/Box[1], 1.0/Box[2]);
+  Vec3 r;
+  double chargePerAtom = (double)NumElecs/(double)Rions.size();
+  for (int ix=0; ix<Nx; ix++) {
+    r[0] = nxInv * (double)ix;
+    for (int iy=0; iy<Ny; iy++) {
+      r[1] = nyInv * (double)iy;
+      for (int iz=0; iz<Nz; iz++) {
+	r[2] = nzInv * (double)iz;
+	for (int ion=0; ion<Rions.size(); ion++) {
+	  Vec3 disp = r-Rions(ion);
+	  /// Find nearest image
+	  disp[0] -= nearbyint(disp[0]*boxInv[0])*Box[0];
+	  disp[1] -= nearbyint(disp[1]*boxInv[1])*Box[1];
+	  disp[2] -= nearbyint(disp[2]*boxInv[2])*Box[2];
+	  double dist = sqrt(dot(disp, disp));
+	  Rho_r(ix,iy,iz) += chargePerAtom*RadialChargeDensity(dist);
+	}
+      }
+    }
+  }
+}
+	 
+
+
+
 
 // double
 // PlaneWavesMPI::CalcHartreeTerm(int band)
