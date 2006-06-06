@@ -1,10 +1,10 @@
-#include "ConjGradMPI.h"
+#include "PlaneWavesMPI.h"
 #include "../MatrixOps/MatrixOps.h"
 #include "../MPI/Communication.h"
 #include "../DFT/Functionals.h"
 
 void
-ConjGradMPI::SolveLDA()
+MPISystemClass::SolveLDA()
 {
   int numSCIters = 0;
   bool SC = false;
@@ -13,7 +13,7 @@ ConjGradMPI::SolveLDA()
     CalcChargeDensity();
     MixChargeDensity();
     CalcVHXC();
-    SetTolerance(1.0e-6);
+    CG.SetTolerance(1.0e-6);
 
     numSCIters ++;
   }
@@ -21,14 +21,14 @@ ConjGradMPI::SolveLDA()
 }
 
 void
-ConjGradMPI::CalcOccupancies()
+MPISystemClass::CalcOccupancies()
 {
 
 
 }
 
 void
-ConjGradMPI::CalcChargeDensity()
+MPISystemClass::CalcChargeDensity()
 {
   int nx, ny, nz;
   FFT.GetDims(nx,ny,nz);
@@ -40,7 +40,7 @@ ConjGradMPI::CalcChargeDensity()
   zVec band;
 
   /// We assume that each of the bands is already normalized.
-  for (int bi=MyFirstBand; bi<MyLastBand; bi++) {
+  for (int bi=CG.GetFirstBand(); bi<CG.GetLastBand(); bi++) {
     band.reference(Bands(bi, Range::all()));
     FFT.PutkVec (band);
     FFT.k2r();
@@ -71,7 +71,7 @@ ConjGradMPI::CalcChargeDensity()
 /// On exit, VH will contain the Hartree potential and VXC will
 /// contain the exchange-correlation potential, both in real space.
 void 
-ConjGradMPI::CalcVHXC()
+MPISystemClass::CalcVHXC()
 {
   ///////////////////////
   // Hartree potential //
@@ -104,10 +104,37 @@ ConjGradMPI::CalcVHXC()
 	FortranExCorr (Rho_r(ix,iy,iz), exc, VXC(ix,iy,iz));
 	EXC += exc;
       }
+  VHXC = VH + VXC;
+}
+
+
+void
+MPISystemClass::CalcRadialChargeDensity()
+{
+  double maxBox = max(Box[0], max(Box[1], Box[2]));
+  double rmax = max (maxBox, 100.0);
+  AtomGrid.Init (1.0, rmax);
+  DFTAtom atom;
+  atom.NewMix = 0.5;
+  atom.RadialWFs.resize(1);
+  atom.RadialWFs(0).n = 0;
+  atom.RadialWFs(0).l = 0;
+  atom.RadialWFs(0).Occupancy = 1.0;
+  atom.RadialWFs(0).Energy = -0.15;
+  atom.SetGrid (&AtomGrid);
+  atom.SetBarePot (PH);
+  atom.Solve();
+  Array<double,1> rho(AtomGrid.NumPoints);
+  for (int i=0; i<rho.size(); i++) {
+    double r = AtomGrid(i);
+    double u = atom.RadialWFs(0).u(i);
+    rho(i) = u*u/(r*r);
+  }
+  RadialChargeDensity.Init (&AtomGrid, rho);
 }
 
 // double
-// ConjGradMPI::CalcHartreeTerm(int band)
+// PlaneWavesMPI::CalcHartreeTerm(int band)
 // {
 //   zVec psi;
 //   psi.reference (Bands(band, Range::all()));

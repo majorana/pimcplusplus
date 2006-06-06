@@ -3,8 +3,9 @@
 
 void
 MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
-		    bool useFFT)
+		       bool useLDA, bool useFFT)
 {
+  UseLDA = useLDA;
   Box = box;
   kCut = kcut;
   GVecs.Set (box, k, kcut);
@@ -15,13 +16,27 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   LastBands.resize (NumBands, GVecs.size());
   PH = &ph;
   UseFFT = useFFT;
+  int NDelta = H.GVecs.DeltaSize();
+  if (UseLDA) {
+    CalcRadialChargeDensity();
+    FFT.GetDims    (Nx, Ny, Nz);
+    NewRho.resize  (Nx, Ny, Nz);
+    TempRho.resize (Nx, Ny, Nz);
+    VH.resize      (Nx, Ny, Nz);
+    VXC.resize     (Nx, Ny, Nz);
+    VHXC.resize    (Nx, Ny, Nz);
+    Rho_r.resize   (Nx, Ny, Nz);
+    h_G.resize     (NDelta);
+    Rho_G.resize   (NDelta);
+  }
 }
 
 
 void 
 MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, double z,
-		    bool useFFT)
+		       bool useLDA, bool useFFT)
 {
+  UseLDA = useLDA;
   Box = box;
   GVecs.Set (box, k, kcut);
   FFT.Setup();

@@ -6,7 +6,6 @@ void ConjGradMPI::Setup()
 {
   int numBands = Bands.rows();
   int N      = H.GVecs.size();
-  int NDelta = H.GVecs.DeltaSize();
 
   // Figure out which bands I'm responsible for
   int numProcs = BandComm.NumProcs();
@@ -36,33 +35,12 @@ void ConjGradMPI::Setup()
   Xi.resize(N);
   Eta.resize(N);
   T.resize(N);
-  if (UseLDA) {
-    FFT.GetDims    (Nx, Ny, Nz);
-    NewRho.resize  (Nx, Ny, Nz);
-    TempRho.resize (Nx, Ny, Nz);
-    VH.resize      (Nx, Ny, Nz);
-    VXC.resize     (Nx, Ny, Nz);
-    Rho_r.resize   (Nx, Ny, Nz);
-    h_G.resize     (NDelta);
-    Rho_G.resize   (NDelta);
-  }
     
-
   Bands = 0.0;
   Vec3 kBox = H.GVecs.GetkBox();
   double maxk = max(kBox[0], max(kBox[1], kBox[2]));
   double maxE = 1.0*maxk*maxk;
   int numNonZero;
-  for (int band=0; band<numBands; band++) {
-    numNonZero = 0;
-    c.reference(Bands(band,Range::all()));
-    c = 0.0;
-    for (int i=0; i<N; i++) {
-      double dist2 = dot(H.GVecs(i), H.GVecs(i));
-      c(i) = exp(-2.0*dist2);
-    }
-    Normalize(c);
-  }
   InitBands();
   IsSetup = true;
 }
@@ -132,7 +110,7 @@ ConjGradMPI::CalcPhiCG()
   Hc = 0.0;
   H.Kinetic.Apply (c, Hc);
   T = realconjdot (c, Hc);
-  if (UseLDA)
+  if (VHXC.size() != 0)
     H.Vion->Apply (c, Hc, VHXC);
   else
     H.Vion->Apply (c, Hc);
@@ -197,7 +175,7 @@ ConjGradMPI::Iterate()
 
     // Now, pick optimal theta for 
     double dE_dtheta = 2.0*realconjdot(Phip, Hc);
-    if (UseLDA)
+    if (VHXC.size() != 0)
       H.Apply (Phip, Hc, VHXC);
     else
       H.Apply (Phip, Hc);
