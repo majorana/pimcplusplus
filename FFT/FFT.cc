@@ -117,6 +117,63 @@ FFT3D::k2r()
 
 
 void 
+FFT3D_r2c::resize(int nx, int ny, int nz)
+{
+  cerr << "FFT box size is " << nx << "x" << ny << "x" << nz << ".\n";
+  if (Allocated) {
+    FFT_FREE(rData);
+    FFT_FREE(kData);
+    FFTNAME(destroy_plan)(r2kPlan);
+    FFTNAME(destroy_plan)(k2rPlan);
+  }
+  int nz_k = nz/2+1;
+
+  rData = (FFT_FLOAT*) FFT_MALLOC(sizeof(FFT_FLOAT)*nx*ny*nz+FFT_EXTRA_MEM);
+  kData = (complex<FFT_FLOAT>*) FFT_MALLOC(sizeof(FFTNAME(complex))*nx*ny*nz_k+FFT_EXTRA_MEM);
+  
+  FFT_FLOAT*          rAligned = FFTAlign(rData);
+  complex<FFT_FLOAT>* kAligned = FFTAlign(kData);
+  
+
+
+  Array<FFT_FLOAT,3> *temp;
+  temp = new Array<FFT_FLOAT,3>(rAligned, shape(nx,ny,nz), neverDeleteData);
+  rBox.reference (*temp);
+  delete temp;
+
+  Array<complex<FFT_FLOAT>,3> *ktemp;
+  ktemp = new Array<complex<FFT_FLOAT>,3>(kAligned, shape(nx,ny,nz_k), neverDeleteData);
+  kBox.reference(*ktemp);
+  delete ktemp;
+
+  r2kPlan = FFTNAME(plan_dft_r2c_3d)
+    (nx, ny, nz, (FFT_FLOAT*)(rAligned), 
+     reinterpret_cast<FFTNAME(complex)*>(kAligned), FFTW_MEASURE);
+  k2rPlan =  FFTNAME(plan_dft_c2r_3d)
+    (nx, ny, nz, reinterpret_cast<FFTNAME(complex)*>(kAligned), 
+     (FFT_FLOAT*)(rAligned),FFTW_MEASURE);
+  
+  sqrtNinv = sqrt(1.0/(FFT_FLOAT)(nx*ny*nz));
+  Allocated = true;
+}
+
+
+void 
+FFT3D_r2c::r2k()
+{
+  FFTNAME(execute)(r2kPlan);
+}
+
+
+void 
+FFT3D_r2c::k2r()
+{
+  FFTNAME(execute)(k2rPlan);
+}
+
+
+
+void 
 FFTVec3D::resize(int nx, int ny, int nz)
 {
   if (Allocated) {

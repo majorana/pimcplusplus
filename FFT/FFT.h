@@ -16,16 +16,17 @@
 #define FFT_MALLOC malloc
 #define FFT_FREE   free
 #define FFT_EXTRA_MEM 16
-inline complex<FFT_FLOAT>* FFTAlign (complex<FFT_FLOAT>* ptr)
-{
+template<typename T>
+inline T* FFTAlign (T* ptr)
   size_t offset = 16 - (size_t)((size_t)ptr)&0x0f;
-  return (complex<FFT_FLOAT>*) ((size_t)ptr+offset);
+  return (T*) ((size_t)ptr+offset);
 }
 #else
 #define FFT_MALLOC FFTNAME(malloc)
 #define FFT_FREE   FFTNAME(free)
 #define FFT_EXTRA_MEM 0
-inline complex<FFT_FLOAT>* FFTAlign (complex<FFT_FLOAT>* ptr)
+template<typename T>
+inline T* FFTAlign (T* ptr)
 { return ptr; }
 #endif
 
@@ -172,6 +173,39 @@ public:
   }
 };
 
+// Real-to-complex version of the above
+class FFT3D_r2c
+{
+private:
+  FFT_FLOAT *rData;
+  complex<FFT_FLOAT> *kData;
+  FFTNAME(plan) r2kPlan, k2rPlan;
+  bool Allocated;
+  FFT_FLOAT sqrtNinv;
+public:
+  Array<FFT_FLOAT,3> rBox;
+  Array<complex<FFT_FLOAT>,3> kBox;
+
+  void resize (int nx, int ny, int nz);
+  inline int size()
+  { return rBox.size(); }
+  void r2k();
+  void k2r();
+
+  FFT3D_r2c() : Allocated(false)
+  {
+    // Do nothing for now
+  }
+  ~FFT3D_r2c()
+  {
+    if (Allocated) {
+      FFT_FREE(rData);
+      FFT_FREE(kData);
+      FFTNAME(destroy_plan)(r2kPlan);
+      FFTNAME(destroy_plan)(k2rPlan);
+    }
+  }
+};
 
 // class FFT3Df
 // {
