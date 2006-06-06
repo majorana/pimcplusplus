@@ -201,9 +201,16 @@ RadialWF::InfinityBC(double rend, double &uend, double &duend)
   double Vend = pot->V(rend);
   double dVdrend = pot->dVdr(rend);
   double E = Energy;
-  double k = sqrt(l*(l+1.0)/(rend*rend) + (Vend-E));
+  double k;
   uend = 1.0;
-  duend = -uend * (k + 0.5*rend/k*(dVdrend - 2.0*l*(l+1.0)/(rend*rend*rend)));
+  if (Vend > E) {
+    k = sqrt(l*(l+1.0)/(rend*rend) + (Vend-E));
+    duend = -uend * (k + 0.5*rend/k*(dVdrend-2.0*l*(l+1.0)/(rend*rend*rend)));
+  }
+  else
+    duend = -1.0;
+
+
 //   cerr << "duend = " << duend << endl;
 //   cerr << "rend = " << rend << endl;
 //   cerr << "k = " << k << endl;
@@ -254,14 +261,10 @@ RadialWF::Solve(double tolerance)
   Eold = Etrial = Energy;
   bool done = false;
   while (!done) {
-    //cerr << "Etrial = " << Etrial << endl;
     //cerr << "Ehigh = " << Ehigh << " Elow = " << Elow << endl;
     double CuspValue = IntegrateInOut(tindex);
-    //cerr << "Cusp value = " << CuspValue << "\n";
-    
+    //cerr << "Cusp value = " << CuspValue << "\n";    
     NumNodes = CountNodes();
-    //cerr << "NumNodes = " << NumNodes << "\n";
-    
     if (NumNodes > TotalNodes)
       Ehigh = Etrial;
     else if (NumNodes < TotalNodes)

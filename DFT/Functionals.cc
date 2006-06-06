@@ -331,7 +331,15 @@ void FortranExCorr(double  nup, double  ndown,
   Vdown = vxc - vpol;
 }
   
-
+void
+FortranExCorr (double n, double &Exc, double &Vxc)
+{
+  double zeta = 0.0;
+  int type = 4;
+  int Macdonald_Vosko = 0;
+  double vpol;
+  F77_EXCCOR(n, zeta, Exc, Vxc, vpol, type, Macdonald_Vosko);
+}
 
 double FortranXCE (double nup, double ndown)
 {

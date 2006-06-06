@@ -9,8 +9,8 @@ class Potential
 public:
   // Optional member functions -- if you're not a pseudoHamiltonian,
   // you do not need to define these
-  virtual bool IsPH()     { return false; }
-  virtual bool NeedsRel() { return false; }
+  virtual bool IsPH();     
+  virtual bool NeedsRel(); 
   virtual double GetCoreRadius() { return 0.0; }
   virtual double A      (double r) { return 1.0; }
   virtual double B      (double r) { return 1.0; }

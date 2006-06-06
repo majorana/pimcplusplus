@@ -437,6 +437,17 @@ inline bool operator!=(const TinyVector<T,N> &a,
 }
 
 
+template<typename T1,typename T2>
+inline void copy(const Array<T1,3> &src,
+		 Array<T2,3> &dest)
+{
+  assert (src.shape() == dest.shape());
+  for (int ix=0; ix<src.extent(0); ix++)
+    for (int iy=0; iy<src.extent(1); iy++)
+      for (int iz=0; iz<src.extent(2); iz++)
+	dest(ix,iy,iz) = src(ix,iy,iz);
+}
+
 
 #ifndef NAN
 #define NAN sqrt(-1.0)

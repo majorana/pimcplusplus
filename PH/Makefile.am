@@ -17,6 +17,7 @@ libPH_la_SOURCES = CoreTransform.h    \
                    Potential.h        \
                    Potential.cc       \
                    PotentialBase.h    \
+                   PotentialBase.cc   \
                    QuinticPH.h        \
                    QuinticPH.cc       \
                    ScreenedPot.h      \

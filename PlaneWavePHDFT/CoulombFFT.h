@@ -14,6 +14,8 @@ private:
   FFTBox &FFT;
 public:
   void Apply (const zVec &c, zVec &Hc);
+  void Apply (const zVec &c, zVec &Hc,
+	      const Array<double,3> &VHXC);
   void SetIons (const Array<Vec3,1> &rions);
   void Vmatrix (Array<complex<double>,2> &vmat);
 

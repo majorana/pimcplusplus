@@ -112,7 +112,6 @@ inline Vec2 RadialWF::PseudoDerivs (double r, Vec2 &u_and_du)
   double B = pot->B(r);
   double V = pot->V(r);
   double dAdr = pot->dAdr(r);
-  
   derivs[1] =  1.0/A*
     (-dAdr*u_and_du[1] + (dAdr/r + (double)(l*(l+1))*B/(r*r) 
 			  + 2.0*(V-Energy))*u_and_du[0]);

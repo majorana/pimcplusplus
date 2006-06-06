@@ -80,3 +80,26 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
   // And put into Vc
   FFT.AddToVec (Vc);
 }
+
+void 
+CoulombFFTClass::Apply(const zVec &c, zVec &Vc,
+		       const Array<double,3> &VHXC)
+{
+  if (!IsSetup)
+    Setup();
+
+  int Nx, Ny, Nz;
+  FFT.GetDims(Nx, Ny, Nz);
+  double Ninv = 1.0/(Nx*Ny*Nz);
+  // First, put c into FFTbox
+  FFT.PutkVec (c);
+  // Now, transform to real space
+  FFT.k2r();
+  // Now, multiply by V
+  FFT.rBox *= (Vr+VHXC);
+  // Transform back
+  FFT.r2k();
+  FFT.kBox *= Ninv;
+  // And put into Vc
+  FFT.AddToVec (Vc);
+}

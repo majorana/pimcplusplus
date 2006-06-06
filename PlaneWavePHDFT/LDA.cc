@@ -128,18 +128,20 @@ MPISystemClass::CalcVHXC()
 void
 MPISystemClass::CalcRadialChargeDensity()
 {
+  cerr << "Calculating atomic charge density:\n";
   double maxBox = max(Box[0], max(Box[1], Box[2]));
   double rmax = max (maxBox, 100.0);
   AtomGrid.Init (1.0, rmax);
   DFTAtom atom;
   atom.NewMix = 0.5;
   atom.RadialWFs.resize(1);
-  atom.RadialWFs(0).n = 0;
+  atom.RadialWFs(0).n = 1;
   atom.RadialWFs(0).l = 0;
   atom.RadialWFs(0).Occupancy = 1.0;
   atom.RadialWFs(0).Energy = -0.15;
   atom.SetGrid (&AtomGrid);
   atom.SetBarePot (PH);
+  //atom.SolveInit();
   atom.Solve();
   Array<double,1> rho(AtomGrid.NumPoints);
   for (int i=0; i<rho.size(); i++) {
@@ -148,6 +150,7 @@ MPISystemClass::CalcRadialChargeDensity()
     rho(i) = u*u/(r*r);
   }
   RadialChargeDensity.Init (&AtomGrid, rho);
+  cerr << "Done atomic charge density.\n";
 }
 
 /// Initializes the density to a superposition of the atomic charge
@@ -162,12 +165,14 @@ MPISystemClass::InitRho_r()
   Vec3 boxInv = Vec3(1.0/Box[0], 1.0/Box[1], 1.0/Box[2]);
   Vec3 r;
   double chargePerAtom = (double)NumElecs/(double)Rions.size();
+  double totalCharge = 0.0;
+  double cellVol = Box[0]*Box[1]*Box[2]/(double)(Nx*Ny*Nz);
   for (int ix=0; ix<Nx; ix++) {
-    r[0] = nxInv * (double)ix;
+    r[0] = (nxInv*(double)ix-0.5)*Box[0];
     for (int iy=0; iy<Ny; iy++) {
-      r[1] = nyInv * (double)iy;
+      r[1] = (nyInv* (double)iy-0.5)*Box[1];
       for (int iz=0; iz<Nz; iz++) {
-	r[2] = nzInv * (double)iz;
+	r[2] = (nzInv*(double)iz-0.5)*Box[2];
 	for (int ion=0; ion<Rions.size(); ion++) {
 	  Vec3 disp = r-Rions(ion);
 	  /// Find nearest image
@@ -177,12 +182,19 @@ MPISystemClass::InitRho_r()
 	  double dist = sqrt(dot(disp, disp));
 	  Rho_r(ix,iy,iz) += chargePerAtom*RadialChargeDensity(dist);
 	}
+	totalCharge += Rho_r(ix,iy,iz);
       }
     }
   }
+  totalCharge *= cellVol;
+  Rho_r *= (double)NumElecs/totalCharge;
 }
 	 
+void 
+MPISystemClass::MixChargeDensity()
+{
 
+}
 
 
 

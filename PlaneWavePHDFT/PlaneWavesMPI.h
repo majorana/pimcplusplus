@@ -51,6 +51,8 @@ protected:
   void CalcRadialChargeDensity();
   void InitRho_r();
   void SolveLDA();
+  /// HACK HACK HACK
+public:
   void InitLDA();
 public:
   GVecsClass GVecs;
@@ -60,6 +62,8 @@ public:
 	     bool useLDA, bool useFFT=true);
   void SetIons (const Array<Vec3,1> &rions);
   inline Vec3 GetIonPos(int i) { return Rions(i); }
+  inline const Array<double,3>& GetDensity()
+  { return Rho_r; }
   void Setk (Vec3 k);
   void DiagonalizeH();
   inline double GetEnergy(int band) { return CG.Energies(band); }

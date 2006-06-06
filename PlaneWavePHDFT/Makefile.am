@@ -1,9 +1,10 @@
-check_PROGRAMS = TestPW2 BandStructure MPIBandStructure TestPWMPI
+check_PROGRAMS = TestPW2 BandStructure MPIBandStructure TestPWMPI TestLDA
 
 TestPW2_SOURCES = TestPW2.cc
 TestPWMPI_SOURCES = TestPWMPI.cc
 BandStructure_SOURCES = BandStructure.cc BandStructure.h
 MPIBandStructure_SOURCES = MPIBandStructure.cc MPIBandStructure.h
+TestLDA_SOURCES = TestLDA.cc
 
 LDADD = libpw.la                  ../IO/libIO.la                          \
         ../FFT/libfft.la          ../PH/libPH.la                          \
@@ -13,6 +14,8 @@ LDADD = libpw.la                  ../IO/libIO.la                          \
         $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(FFTW3_LIBS) \
         $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS)      \
         $(FLIBS)
+
+TestLDA_LDADD = $(LDADD) ../Atom/libatom.la ../DFT/libdft.la $(FLIBS)
 
 AM_CXXFLAGS = $(FFTW3_CFLAGS) $(BLITZ_CFLAGS) $(XML2_CFLAGS)              \
               $(HDF5_CFLAGS)  $(BLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)     \

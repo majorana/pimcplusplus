@@ -1,4 +1,6 @@
       subroutine exccor( rho, pol, exc, vxc, vpol, ixctyp, imvex )
+c     This routine was kindly supplied to me by Zachary Levine at 
+c     NIST. (KPE)
 c
 c     input
 c
