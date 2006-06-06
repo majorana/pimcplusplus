@@ -4,6 +4,7 @@
 #include "ConjGradMPI.h"
 #include "../Splines/CubicSpline.h"
 #include "../Atom/DFTAtom.h"
+#include "FermiSmear.h"
 
 class CommunicatorClass;
 
@@ -30,7 +31,9 @@ protected:
   int Nx, Ny, Nz;
   // Array<complex<double>,3> Phip_r, Psi_r;
   void CalcOccupancies();
+  MethfesselPaxton Smearer;
   void CalcChargeDensity();
+  ChargeMixerClass *ChargeMixer;
   void MixChargeDensity();
   /// These store the electron charge density in real space on the FFT
   /// grid.  TempRho is used to compute the charge density for my own
@@ -49,8 +52,7 @@ protected:
   OptimalGrid AtomGrid;
   CubicSpline RadialChargeDensity;
   void CalcRadialChargeDensity();
-  void InitRho_r();
-  void SolveLDA();
+  void InitNewRho();
   /// HACK HACK HACK
 public:
   void InitLDA();
@@ -66,6 +68,7 @@ public:
   { return Rho_r; }
   void Setk (Vec3 k);
   void DiagonalizeH();
+  void SolveLDA();
   inline double GetEnergy(int band) { return CG.Energies(band); }
   inline int GetNumBands() { return NumBands; }
 

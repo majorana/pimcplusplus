@@ -6,6 +6,7 @@
 void
 MPISystemClass::InitLDA()
 {
+  ChargeMixer = new KerkerMixerClass (FFT);
   int NDelta = GVecs.DeltaSize();
   FFT.GetDims    (Nx, Ny, Nz);
   NewRho.resize  (Nx, Ny, Nz);
@@ -17,6 +18,8 @@ MPISystemClass::InitLDA()
   h_G.resize     (NDelta);
   Rho_G.resize   (NDelta);
   CalcRadialChargeDensity();
+  Smearer.SetOrder(2);
+  Smearer.SetWidth(0.05);
 }
 
 
@@ -26,12 +29,22 @@ MPISystemClass::SolveLDA()
   int numSCIters = 0;
   bool SC = false;
   while (!SC) {
-    CalcOccupancies();
-    CalcChargeDensity();
     MixChargeDensity();
     CalcVHXC();
+    IOSectionClass out;
+    out.NewFile ("VHXC.h5");
+    out.WriteVar("VH", VH);
+    out.WriteVar("VXC", VXC);
+    out.WriteVar("VHXC", VHXC);
+    out.CloseFile();
+    cerr << "After CaclVHXC.\n";
     CG.SetTolerance(1.0e-6);
-
+    cerr << "Before CG.Solve.\n";
+    CG.Solve();
+    cerr << "Before CalcOccupancies.\n";
+    CalcOccupancies();
+    cerr << "Before CalcChargeDensity.\n";
+    CalcChargeDensity();
     numSCIters ++;
   }
 
@@ -40,8 +53,45 @@ MPISystemClass::SolveLDA()
 void
 MPISystemClass::CalcOccupancies()
 {
-
-
+  ///////////////////////////////////////
+  // Calculate mu from 0.5*(HOMO+LUMO) //
+  ///////////////////////////////////////
+  // First, gather all the energies from the k-Point clones.
+  int numK = kComm.NumProcs();
+  int myK  = kComm.MyProc();
+  Array<double,2> allEnergies(numK, NumBands), occ(numK, NumBands);
+  if (BandComm.MyProc() == 0) {
+    allEnergies(myK, Range::all()) = CG.Energies;
+    kComm.AllGatherRows(allEnergies);
+  }
+  BandComm.Broadcast (0, allEnergies);
+  // Now processor zero has all the energies;
+  vector<double> Esort;
+  for (int i=0; i<allEnergies.extent(0); i++)
+    for (int j=0; j<allEnergies.extent(1); j++)
+      Esort.push_back(allEnergies(i,j));
+  sort (Esort.begin(), Esort.end());
+  int HOMO = (NumElecs*numK+1)/2-1;
+  int LUMO = (NumElecs*numK)/2;
+  double mu = 0.5*(Esort[HOMO] + Esort[LUMO]);
+  /// Broadcast mu to all procs in kBand;
+  if (BandComm.MyProc() == 0)
+    kComm.Broadcast(0, mu);
+  /// Now proc 0 of each k-point clone has mu.
+  /// Now broadcast mu from each BandComm Proc 0 to the rests of the
+  /// band holders
+  BandComm.Broadcast (0, mu);
+  /// Now everybody has mu!  Let's do the Methfessel-Paxton occupation 
+  double totalOcc;
+  for (int ki=0; ki<numK; ki++)
+    for (int bi=0; bi<Bands.size(); bi++) {
+      occ(ki, bi) = Smearer.S(CG.Energies(bi), mu);
+      totalOcc += occ(ki, bi);
+    }
+  /// Now normalize to to make sure we have exactly the right number
+  /// of electrons 
+  for (int bi=0; bi<Bands.size(); bi++) 
+    Occupancies(bi) = (double)(NumElecs*numK)/totalOcc * occ(myK, bi);
 }
 
 void
@@ -76,8 +126,15 @@ MPISystemClass::CalcChargeDensity()
   BandComm.Broadcast(0, NewRho);
   /// Multiply by the right prefactor;
   double volInv = 1.0/H.GVecs.GetBoxVol();
-  double prefactor = 2.0*volInv/((double)kComm.NumProcs()*(nx*ny*nz));
+  double prefactor = volInv/(double)(nx*ny*nz);
   NewRho *= prefactor;
+  double vCell = H.GVecs.GetBoxVol()/(double)(nx*ny*nz);
+  double totalCharge = 0.0;
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	totalCharge += vCell * NewRho(ix,iy,iz);
+  cerr << "totalCharge = " << totalCharge << endl;
 }
 
 
@@ -90,6 +147,9 @@ MPISystemClass::CalcChargeDensity()
 void 
 MPISystemClass::CalcVHXC()
 {
+  double totalCharge = 0.0;
+  
+
   ///////////////////////
   // Hartree potential //
   ///////////////////////
@@ -100,8 +160,8 @@ MPISystemClass::CalcVHXC()
   double prefact = (4.0*M_PI/H.GVecs.GetBoxVol());
   EH = 0.0;
   for (int i=0; i<h_G.size(); i++) {
-    h_G(i) *= prefact*H.GVecs.DeltaGInv2(i);
     EH += norm(h_G(i)) * H.GVecs.DeltaGInv2(i);
+    h_G(i) *= prefact*H.GVecs.DeltaGInv2(i);
   }
   EH *= 0.5*prefact;
 
@@ -156,9 +216,9 @@ MPISystemClass::CalcRadialChargeDensity()
 /// Initializes the density to a superposition of the atomic charge
 /// densities from an Atomic DFT calculation.
 void
-MPISystemClass::InitRho_r()
+MPISystemClass::InitNewRho()
 {
-  Rho_r = 0.0;
+  NewRho = 0.0;
   double nxInv = 1.0/(double)(Nx-1);
   double nyInv = 1.0/(double)(Ny-1);
   double nzInv = 1.0/(double)(Nz-1);
@@ -180,20 +240,20 @@ MPISystemClass::InitRho_r()
 	  disp[1] -= nearbyint(disp[1]*boxInv[1])*Box[1];
 	  disp[2] -= nearbyint(disp[2]*boxInv[2])*Box[2];
 	  double dist = sqrt(dot(disp, disp));
-	  Rho_r(ix,iy,iz) += chargePerAtom*RadialChargeDensity(dist);
+	  NewRho(ix,iy,iz) += chargePerAtom*RadialChargeDensity(dist);
 	}
-	totalCharge += Rho_r(ix,iy,iz);
+	totalCharge += NewRho(ix,iy,iz);
       }
     }
   }
   totalCharge *= cellVol;
-  Rho_r *= (double)NumElecs/totalCharge;
+  NewRho *= (double)NumElecs/totalCharge;
 }
 	 
 void 
 MPISystemClass::MixChargeDensity()
 {
-
+  ChargeMixer->Mix(NewRho, Rho_r, Rho_G);
 }
 
 

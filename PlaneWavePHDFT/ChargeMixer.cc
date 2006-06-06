@@ -1,7 +1,7 @@
 #include "ChargeMixer.h"
 
 KerkerMixerClass::KerkerMixerClass (FFTBox &fft) :
-  ChargeMixerBase(fft), Lambda(2.0), HaveLastCharge(false)
+  ChargeMixerClass(fft), Lambda(2.0), HaveLastCharge(false)
 {
   LastCharge.resize(FFT.GVecs.DeltaSize());
   NewCharge.resize(FFT.GVecs.DeltaSize());
@@ -50,7 +50,22 @@ KerkerMixerClass::Mix (const Array<double,3> &newCharge,
 }
 
 BroydenMixerClass::BroydenMixerClass (FFTBox &fft) :
-  ChargeMixerBase(fft)
+  ChargeMixerClass(fft)
 {
   // nothing more for now
+}
+
+void
+BroydenMixerClass::Reset()
+{
+
+}
+
+
+void
+BroydenMixerClass::Mix(const Array<double,3> &newCharge,
+		       Array<double,3>       &mixedCharge_r,
+		       zVec                  &mixedCharge_G)
+{
+
 }

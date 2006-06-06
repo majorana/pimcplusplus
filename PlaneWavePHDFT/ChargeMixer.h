@@ -3,23 +3,23 @@
 #include "FFTBox.h"
 #include <vector>
 
-class ChargeMixerBase
+class ChargeMixerClass
 {
 protected:
   FFTBox &FFT;
 public:
-  virtual void Reset();
+  virtual void Reset() = 0;
   virtual void Mix (const Array<double,3> &newCharge, 
 		    Array<double,3>       &mixedCharge_r,
-		    zVec                  &mixedCharge_G);
-  ChargeMixerBase (FFTBox &fft) :
+		    zVec                  &mixedCharge_G) = 0;
+  ChargeMixerClass (FFTBox &fft) :
     FFT(fft)
   {
     // nothing else for now
   }
 };
 
-class KerkerMixerClass : public ChargeMixerBase
+class KerkerMixerClass : public ChargeMixerClass
 {
 protected:
   bool HaveLastCharge;
@@ -39,7 +39,7 @@ public:
 };
 
 
-class BroydenMixerClass : public ChargeMixerBase
+class BroydenMixerClass : public ChargeMixerClass
 {
 protected:
   Array<double,3> LastCharge;

@@ -202,6 +202,8 @@ void ConjGradMPI::Solve()
   int iter = 0;
   double residual = 1.0;
   while ((iter < 100) && (residual > Tolerance)) {
+    cerr << "iter = " << iter << endl;
+    cerr << "Energies = " << Energies << endl;
     residual = Iterate();
     iter++;
   }

@@ -32,6 +32,8 @@ libpw_la_SOURCES = ChargeMixer.h      \
                    Coulomb.cc         \
                    CoulombFFT.h       \
                    CoulombFFT.cc      \
+                   FermiSmear.h       \
+                   FermiSmear.cc      \
                    FFTBox.h           \
                    FFTBox.cc          \
                    GVecs.h            \
