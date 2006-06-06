@@ -7,9 +7,11 @@
 class FFTBox : public FFT3D
 {
 protected:
-  GVecsClass &GVecs;
   int Nx, Ny, Nz;
 public:
+  // The G-vectors associated with this FFT
+  GVecsClass &GVecs;
+
   // Puts a linear c-vector into the fft box.
   void PutkVec (const zVec &c);
   

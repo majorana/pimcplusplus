@@ -134,7 +134,7 @@ LocalPotFFTClass::Apply (const zVec &c, zVec &Hc)
 
 void 
 LocalPotFFTClass::Apply (const zVec &c, zVec &Hc,
-			 Array<complex<double>,3> &VHXC)
+			 Array<double,3> &VHXC)
 {
   if (!IsSetup)
     Setup();

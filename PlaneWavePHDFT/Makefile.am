@@ -19,7 +19,9 @@ AM_CXXFLAGS = $(FFTW3_CFLAGS) $(BLITZ_CFLAGS) $(XML2_CFLAGS)              \
               $(FFT_DEF) $(CBLAS_DEF)
 
 noinst_LTLIBRARIES = libpw.la
-libpw_la_SOURCES = ConjGrad2.h        \
+libpw_la_SOURCES = ChargeMixer.h      \
+                   ChargeMixer.cc     \
+	           ConjGrad2.h        \
                    ConjGrad2.cc       \
                    ConjGradMPI.h      \
                    ConjGradMPI.cc     \
@@ -35,6 +37,7 @@ libpw_la_SOURCES = ConjGrad2.h        \
                    HamiltonianBase.cc \
                    Hamiltonians.h     \
                    Hamiltonians.cc    \
+                   LDA.cc             \
                    LocalPotFFT.h      \
                    LocalPotFFT.cc     \
                    PHPot.h            \

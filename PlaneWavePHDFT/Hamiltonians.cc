@@ -48,7 +48,7 @@ HamiltonianClass::Apply (const zVec &c, zVec &Hc)
 
 void
 HamiltonianClass::Apply (const zVec &c, zVec &Hc,
-			 Array<complex<double>,3> &VHXC)
+			 Array<double,3> &VHXC)
 {
   Hc = 0.0;
   Kinetic.Apply(c, Hc);

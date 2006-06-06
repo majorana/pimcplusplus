@@ -38,14 +38,13 @@ void ConjGradMPI::Setup()
   T.resize(N);
   if (UseLDA) {
     FFT.GetDims    (Nx, Ny, Nz);
-    Phip_r.resize  (Nx, Ny, Nz);
-    Psi_r.resize   (Nx, Ny, Nz);
     NewRho.resize  (Nx, Ny, Nz);
     TempRho.resize (Nx, Ny, Nz);
     VH.resize      (Nx, Ny, Nz);
     VXC.resize     (Nx, Ny, Nz);
-    Rho.resize(Nx, Ny, Nz);
-    h_G.resize(NDelta);
+    Rho_r.resize   (Nx, Ny, Nz);
+    h_G.resize     (NDelta);
+    Rho_G.resize   (NDelta);
   }
     
 
@@ -215,6 +214,8 @@ ConjGradMPI::Iterate()
   return max(Residuals);
 }
 
+
+
 void ConjGradMPI::Solve()
 {
   /// Hamiltonian has changed, so we can't assume we're conjugate to
@@ -275,117 +276,6 @@ ConjGradMPI::CollectBands()
   BandComm.AllGatherRows(Bands);
   BandComm.AllGatherVec(Residuals);
   BandComm.AllGatherVec(Energies);
-}
-
-
-void
-ConjGradMPI::CalcChargeDensity()
-{
-  int nx, ny, nz;
-  FFT.GetDims(nx,ny,nz);
-  if (TempRho.shape() != TinyVector<int,3>(nx,ny,nz))
-    TempRho.resize(nx,ny,nz);
-  if (NewRho.shape() != TinyVector<int,3>(nx,ny,nz))
-    NewRho.resize(nx,ny,nz);
-  TempRho = 0.0;
-  zVec band;
-
-  /// We assume that each of the bands is already normalized.
-  for (int bi=MyFirstBand; bi<MyLastBand; bi++) {
-    band.reference(Bands(bi, Range::all()));
-    FFT.PutkVec (band);
-    FFT.k2r();
-    for (int ix=0; ix<nx; ix++)
-      for (int iy=0; iy<ny; iy++)
-	for (int iz=0; iz<nz; iz++)
-	  TempRho(ix,iy,iz) += norm (FFT.rBox(ix,iy,iz));
-  }
-  /// First, sum over all the band procs
-  BandComm.AllSum (TempRho, NewRho);
-  TempRho = NewRho;
-  // Now sum over all the kPoints
-  if (BandComm.MyProc() == 0) 
-    kComm.AllSum(TempRho, NewRho);
-  // And broadcast;
-  BandComm.Broadcast(0, NewRho);
-  /// Multiply by the right prefactor;
-  double volInv = 1.0/H.GVecs.GetBoxVol();
-  double prefactor = 2.0*volInv/(double)kComm.NumProcs();
-  NewRho *= prefactor;
-}
-
-template<typename T1,typename T2>
-inline void copy(Array<T1,3> &src,
-		 Array<T2,3> &dest)
-{
-  assert (src.shape() == dest.shape());
-  for (int ix=0; ix<src.extent(0); ix++)
-    for (int iy=0; iy<src.extent(1); iy++)
-      for (int iz=0; iz<src.extent(2); iz++)
-	dest(ix,iy,iz) = src(ix,iy,iz);
-}
-
-
-/// Calculate the hartree, exchange, and correlation potentials.
-/// We assume that upon entry, Rho contains the charge density for
-/// which we wish to calculate V_H and V_XC.
-void 
-ConjGradMPI::CalcVHXC()
-{
-  ///////////////////////
-  // Hartree potential //
-  ///////////////////////
-  // FFT charge density into k-space
-  copy (Rho, FFT.rBox);
-  FFT.r2k();
-  FFT.GetkVec(h_G);
-  // Compute V_H in reciporical space
-  double volInv = 1.0/H.GVecs.GetBoxVol();
-  double hartreeTerm = 0.0;
-  for (int i=0; i<h_G.size(); i++)
-    h_G(i) = norm(h_G(i))*H.GVecs.DeltaGInv2(i);
-  h_G *= (4.0*M_PI/H.GVecs.GetBoxVol());
-  // FFT back to real space
-  FFT.PutkVec(h_G);
-  FFT.k2r();
-  copy (FFT.rBox, VH);
-
-  ////////////////////////////////////
-  // Exchange-correlation potential //
-  ////////////////////////////////////
-  
-
-  
-}
-
-double
-ConjGradMPI::CalcHartreeTerm(int band)
-{
-  zVec psi;
-  psi.reference (Bands(band, Range::all()));
-  FFT.PutkVec (Phip);
-  FFT.k2r();
-  copy (FFT.rBox, Phip_r);
-//   for (int ix=0; ix<Nx; ix++)
-//     for (int iy=0; iy<Ny; iy++)
-//       for (int iz=0; iz<Nz; iz++)
-// 	Phip_r(ix,iy,iz) = FFT.rBox(ix,iy,iz);
-  FFT.PutkVec (psi);
-  FFT.k2r();
-  
-  for (int ix=0; ix<Nx; ix++)
-    for (int iy=0; iy<Ny; iy++)
-      for (int iz=0; iz<Nz; iz++)
-	FFT.rBox(ix,iy,iz) *= conj(Phip_r(ix,iy,iz));
-  FFT.r2k();
-  FFT.GetkVec(h_G);
-  double volInv = 1.0/H.GVecs.GetBoxVol();
-  double e2_over_eps0 = 4.0*M_PI; // ???????
-  double hartreeTerm = 0.0;
-  for (int i=0; i<h_G.size(); i++)
-    hartreeTerm += norm(h_G(i))*H.GVecs.DeltaGInv2(i);
-  hartreeTerm *= 2.0 * e2_over_eps0 * volInv;
-  return hartreeTerm;
 }
 
 

@@ -21,7 +21,7 @@ public:
 
   void Apply (const zVec &c, zVec &Hc);
   void Apply (const zVec &c, zVec &Hc,
-	      Array<complex<double>,3> &VHXC);
+	      Array<double,3> &VHXC);
   LocalPotFFTClass (Potential &ph, GVecsClass &gvecs, FFTBox &fft) :
     VionBase (gvecs), kPH(ph), cFFT(fft)
   {

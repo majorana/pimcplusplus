@@ -17,7 +17,7 @@ protected:
   double kCut;
   int NumBands;
   Potential *PH;
-  bool UseFFT;
+  bool UseFFT, UseLDA;
   CommunicatorClass &BandComm, &kComm;
   bool MDExtrap, FirstTime;
 public:
@@ -43,12 +43,12 @@ public:
   void CalcChargeDensity(Array<double,3> &rho);
   void WriteXSFFile(string filename);
 
-  MPISystemClass(int numBands, 
+  MPISystemClass(int numBands, int numElecs,
 		 CommunicatorClass &bandcomm, CommunicatorClass &kcomm,
-		 bool mdextrap=false) 
-    : CG(H, Bands, bandcomm, kcomm, FFT), FFT(GVecs), H(GVecs, FFT), 
+		 bool useLDA=false, bool mdextrap=false) 
+    : CG(H, numElecs, Bands, bandcomm, kcomm, FFT), FFT(GVecs), H(GVecs, FFT), 
       NumBands(numBands), BandComm(bandcomm), kComm(kcomm), 
-      MDExtrap(mdextrap), FirstTime(true)
+      MDExtrap(mdextrap), FirstTime(true), UseLDA(useLDA)
   {
 
   }

@@ -212,3 +212,83 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
     Hc(i) += nInv*Vc(i);
 }
 
+
+void 
+PHPotFFTClass::Apply (const zVec &c, zVec &Hc,
+		      const Array<double,3> &VHXC)
+{
+  if (!IsSetup)
+    Setup();
+  int nx, ny, nz;
+  cFFT.GetDims(nx, ny, nz);
+  double nInv = 1.0/(double)(nx*ny*nz);
+
+  /////////////////////////
+  // Pseudo-kinetic part //
+  /////////////////////////
+  // First, build G*c vector in VecFFT  
+  for (int i=0; i<GVecs.size(); i++) 
+    Gc(i) = c(i)*(kPoint+GVecs(i));
+  VecFFT.PutkVec (Gc);
+  VecFFT.k2r();
+  
+  // Now, muliply by F(r)
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++) {
+	register complex<FFT_FLOAT> vx = VecFFT.rBox(ix,iy,iz)[0];
+	register complex<FFT_FLOAT> vy = VecFFT.rBox(ix,iy,iz)[1];
+	register complex<FFT_FLOAT> vz = VecFFT.rBox(ix,iy,iz)[2];
+	register complex<FFT_FLOAT> Fvx, Fvy, Fvz;
+	Fvx  = Fr(ix,iy,iz)(0,0) * vx;
+	Fvy  = Fr(ix,iy,iz)(1,0) * vx;
+	Fvz  = Fr(ix,iy,iz)(2,0) * vx;
+	Fvx += Fr(ix,iy,iz)(0,1) * vy;
+	Fvy += Fr(ix,iy,iz)(1,1) * vy;
+	Fvz += Fr(ix,iy,iz)(2,1) * vy;
+	Fvx += Fr(ix,iy,iz)(0,2) * vz;
+	Fvy += Fr(ix,iy,iz)(1,2) * vz;
+	Fvz += Fr(ix,iy,iz)(2,2) * vz;
+	VecFFT.rBox(ix,iy,iz) =
+	TinyVector<complex<FFT_FLOAT>,3>(Fvx,Fvy,Fvz);
+
+//	VecFFT.rBox(ix,iy,iz) = Fr(ix,iy,iz)*VecFFT.rBox(ix,iy,iz);
+
+// 	VecFFT.rBox(ix,iy,iz)[0] = 
+// 	  Fr(ix,iy,iz)(0,0)*VecFFT.rBox(ix,iy,iz)[0] + 
+// 	  Fr(ix,iy,iz)(0,1)*VecFFT.rBox(ix,iy,iz)[1] + 
+// 	  Fr(ix,iy,iz)(0,2)*VecFFT.rBox(ix,iy,iz)[2];
+// 	VecFFT.rBox(ix,iy,iz)[1] = 
+// 	  Fr(ix,iy,iz)(1,0)*VecFFT.rBox(ix,iy,iz)[0] + 
+// 	  Fr(ix,iy,iz)(1,1)*VecFFT.rBox(ix,iy,iz)[1] + 
+// 	  Fr(ix,iy,iz)(1,2)*VecFFT.rBox(ix,iy,iz)[2];
+// 	VecFFT.rBox(ix,iy,iz)[2] = 
+// 	  Fr(ix,iy,iz)(2,0)*VecFFT.rBox(ix,iy,iz)[0] + 
+// 	  Fr(ix,iy,iz)(2,1)*VecFFT.rBox(ix,iy,iz)[1] + 
+// 	  Fr(ix,iy,iz)(2,2)*VecFFT.rBox(ix,iy,iz)[2];
+      }
+  // Transform back;
+  VecFFT.r2k();
+  // Rename for clarity
+  zVecVec& FGc = Gc;
+  VecFFT.GetkVec (FGc);
+  for (int i=0; i<GVecs.size(); i++)
+    Hc(i) += 0.5*nInv*dot(GVecs(i)+kPoint, FGc(i));
+
+  ////////////////////
+  // Potential part //
+  ////////////////////
+  // Transform c into real space
+  cFFT.PutkVec (c);
+  cFFT.k2r();
+  // Multiply by V
+  cFFT.rBox *= (Vr + VHXC);
+  // Transform back
+  cFFT.r2k();
+
+  // Get vector
+  cFFT.GetkVec (Vc);
+  for (int i=0; i<GVecs.size(); i++)
+    Hc(i) += nInv*Vc(i);
+}
+

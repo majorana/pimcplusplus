@@ -42,11 +42,14 @@ public:
   virtual void Apply   (const zVec &c, zVec &Hc) = 0;
   /// This version includes the hartree and exchange-correlation pot
   virtual void Apply   (const zVec &c, zVec &Hc, 
-			Array<complex<double>,3> &VHXC);
+			Array<double,3> &VHXC);
   virtual void SetIons (const Array<Vec3,1> &rions); 
   virtual void Setup() = 0;
   virtual void Vmatrix (Array<complex<double>,2> &vmat) = 0;
-  
+  inline const Array<Vec3,1> GetRions() {
+    return Rions;
+  }
+
   virtual void Setk    (Vec3 k) 
   { kPoint = k; }
   
@@ -70,12 +73,14 @@ public:
 
   void Apply (const zVec &c, zVec &Hc);
   void Apply (const zVec &c, zVec &Hc,
-	      Array<complex<double>,3> &VHXC);
+	      Array<double,3> &VHXC);
   
   void SetIonPot (double z, bool useFFT);
   void SetIonPot (Potential &ph, bool useFFT);
   void SetIons (const Array<Vec3,1>& rions);
   void Setk (Vec3 k);
+  inline const Array<Vec3,1> GetRions()
+  {    return Vion->GetRions(); }
 
   HamiltonianClass (GVecsClass &gvecs, FFTBox &fft) 
     : GVecs(gvecs), Kinetic(gvecs), Vion(NULL), FFT(fft)
