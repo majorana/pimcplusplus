@@ -49,7 +49,7 @@ MPISystemClass::SolveLDA()
 	  magV(ix,iy,iz) = mag(pot.Vr(ix,iy,iz));
     out.WriteVar("Vion", magV);
     out.CloseFile();
-    CG.SetTolerance(1.0e-4);
+    CG.SetTolerance(3.0e-4);
     if (numSCIters < 3)
       CG.InitBands();
     CG.Solve();
