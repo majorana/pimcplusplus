@@ -132,12 +132,11 @@ namespace IO {
 
     IsOpen = (FileID >= 0);
     success = IsOpen;
-    if (success)
-      {
-	GroupID = FileID;
-	Parent=parent;
-	Name=myName;
-      }
+    if (success) {
+      GroupID = FileID;
+      Parent=parent;
+      Name=myName;
+    }
     return (success);
   }
 

@@ -63,7 +63,7 @@ void TestSolveLDA()
   Potential *pot = ReadPotential(in);
   in.CloseFile();
 
-  int numBands  = 10;
+  int numBands  = 14;
   int numElecs  = 16;
   Vec3 box (26.56, 26.56, 26.56);
   Array<Vec3,1> rions(16);
@@ -85,12 +85,44 @@ void TestSolveLDA()
   rions(15) = Vec3(  5.5497,  -11.6650,    9.0145);
   Vec3 Gprim = 2.0*M_PI*Vec3(1.0/box[0], 1.0/box[1], 1.0/box[2]);
   Vec3 k = 0.25 * Gprim;
+  cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 1.0, *pot, true, true);
+  system.Setup (box, k, 3.0, *pot, true, true);
   system.SetIons(rions);
   system.SolveLDA();
 }
+
+void TestSolidLDA()
+{
+  CommunicatorClass bandComm, kComm;
+  bandComm.SetWorld();
+  Array<int,1> root(1);
+  root(0) = 0;
+  bandComm.Subset (root, kComm);
+
+  IOSectionClass in;
+  //in.OpenFile("NaLocalPH.h5");
+  in.OpenFile("Na_HF_NLPP.h5");
+  Potential *pot = ReadPotential(in);
+  in.CloseFile();
+
+  int numBands  = 5;
+  int numElecs  = 2;
+  Vec3 box (8.11, 8.11, 8.11);
+  Array<Vec3,1> rions(2);
+  rions(0)  = Vec3( 0.00, 0.00, 0.00); 
+  rions(1)  = Vec3( 4.05, 4.05, 4.05);
+  Vec3 Gprim = 2.0*M_PI*Vec3(1.0/box[0], 1.0/box[1], 1.0/box[2]);
+  Vec3 k = 0.25 * Gprim;
+  cerr << "k = " << k << endl;
+  MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
+  
+  system.Setup (box, k, 8.0, *pot, true, true);
+  system.SetIons(rions);
+  system.SolveLDA();
+}
+
 
 #include "FermiSmear.h"
 void 
@@ -114,4 +146,5 @@ main(int argc, char **argv)
   // TestInitCharge();
   // TestSmear();
   TestSolveLDA();
+  // TestSolidLDA();
 }

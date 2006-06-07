@@ -17,11 +17,13 @@ MPISystemClass::InitLDA()
   Rho_r.resize   (Nx, Ny, Nz);
   h_G.resize     (NDelta);
   Rho_G.resize   (NDelta);
+  Occupancies.resize(NumBands);
   CalcRadialChargeDensity();
   Smearer.SetOrder(2);
-  Smearer.SetWidth(0.05);
+  Smearer.SetWidth(0.01);
 }
 
+#include "Hamiltonians.h"
 
 void
 MPISystemClass::SolveLDA()
@@ -32,18 +34,26 @@ MPISystemClass::SolveLDA()
     MixChargeDensity();
     CalcVHXC();
     IOSectionClass out;
-    out.NewFile ("VHXC.h5");
+    char fname[100];
+    snprintf (fname, 100, "VHXC%d.h5", numSCIters);
+    out.NewFile (fname);
     out.WriteVar("VH", VH);
     out.WriteVar("VXC", VXC);
     out.WriteVar("VHXC", VHXC);
+    out.WriteVar("Rho", Rho_r);
+    LocalPotFFTClass &pot = *((LocalPotFFTClass*)H.Vion);
+    Array<double,3> magV(VH.shape());
+    for (int ix=0; ix<magV.extent(0); ix++)
+      for (int iy=0; iy<magV.extent(1); iy++)
+	for (int iz=0; iz<magV.extent(2); iz++)
+	  magV(ix,iy,iz) = mag(pot.Vr(ix,iy,iz));
+    out.WriteVar("Vion", magV);
     out.CloseFile();
-    cerr << "After CaclVHXC.\n";
-    CG.SetTolerance(1.0e-6);
-    cerr << "Before CG.Solve.\n";
+    CG.SetTolerance(1.0e-4);
+    if (numSCIters < 3)
+      CG.InitBands();
     CG.Solve();
-    cerr << "Before CalcOccupancies.\n";
     CalcOccupancies();
-    cerr << "Before CalcChargeDensity.\n";
     CalcChargeDensity();
     numSCIters ++;
   }
@@ -82,16 +92,17 @@ MPISystemClass::CalcOccupancies()
   /// band holders
   BandComm.Broadcast (0, mu);
   /// Now everybody has mu!  Let's do the Methfessel-Paxton occupation 
-  double totalOcc;
+  double totalOcc = 0.0;
   for (int ki=0; ki<numK; ki++)
-    for (int bi=0; bi<Bands.size(); bi++) {
+    for (int bi=0; bi<NumBands; bi++) {
       occ(ki, bi) = Smearer.S(CG.Energies(bi), mu);
       totalOcc += occ(ki, bi);
     }
   /// Now normalize to to make sure we have exactly the right number
   /// of electrons 
-  for (int bi=0; bi<Bands.size(); bi++) 
+  for (int bi=0; bi<NumBands; bi++) 
     Occupancies(bi) = (double)(NumElecs*numK)/totalOcc * occ(myK, bi);
+  cerr << "Occupancies = " << Occupancies << endl;
 }
 
 void
@@ -104,17 +115,17 @@ MPISystemClass::CalcChargeDensity()
   if (NewRho.shape() != TinyVector<int,3>(nx,ny,nz))
     NewRho.resize(nx,ny,nz);
   TempRho = 0.0;
-  zVec band;
-
+  
+  zVec band(Bands.extent(1));
   /// We assume that each of the bands is already normalized.
-  for (int bi=CG.GetFirstBand(); bi<CG.GetLastBand(); bi++) {
-    band.reference(Bands(bi, Range::all()));
+  for (int bi=CG.GetFirstBand(); bi<=CG.GetLastBand(); bi++) {
+    band = Bands(bi, Range::all());
     FFT.PutkVec (band);
     FFT.k2r();
     for (int ix=0; ix<nx; ix++)
       for (int iy=0; iy<ny; iy++)
 	for (int iz=0; iz<nz; iz++)
-	  TempRho(ix,iy,iz) += Occupancies(bi)*norm (FFT.rBox(ix,iy,iz));
+ 	  TempRho(ix,iy,iz) += Occupancies(bi)*norm (FFT.rBox(ix,iy,iz));
   }
   /// First, sum over all the band procs
   BandComm.AllSum (TempRho, NewRho);
@@ -126,7 +137,7 @@ MPISystemClass::CalcChargeDensity()
   BandComm.Broadcast(0, NewRho);
   /// Multiply by the right prefactor;
   double volInv = 1.0/H.GVecs.GetBoxVol();
-  double prefactor = volInv/(double)(nx*ny*nz);
+  double prefactor = volInv; // /(double)(nx*ny*nz);
   NewRho *= prefactor;
   double vCell = H.GVecs.GetBoxVol()/(double)(nx*ny*nz);
   double totalCharge = 0.0;
@@ -157,7 +168,8 @@ MPISystemClass::CalcVHXC()
   // Compute V_H in reciporical space
   double volInv = 1.0/H.GVecs.GetBoxVol();
   double hartreeTerm = 0.0;
-  double prefact = (4.0*M_PI/H.GVecs.GetBoxVol());
+  //  double prefact = (4.0*M_PI/H.GVecs.GetBoxVol());
+  double prefact = 4.0*M_PI;
   EH = 0.0;
   for (int i=0; i<h_G.size(); i++) {
     EH += norm(h_G(i)) * H.GVecs.DeltaGInv2(i);
@@ -181,7 +193,9 @@ MPISystemClass::CalcVHXC()
 	FortranExCorr (Rho_r(ix,iy,iz), exc, VXC(ix,iy,iz));
 	EXC += exc;
       }
+  /// HACK HACK HACK:  do we need the volInv???
   VHXC = VH + VXC;
+  //VHXC = 0.0;
 }
 
 
@@ -225,6 +239,7 @@ MPISystemClass::InitNewRho()
   Vec3 boxInv = Vec3(1.0/Box[0], 1.0/Box[1], 1.0/Box[2]);
   Vec3 r;
   double chargePerAtom = (double)NumElecs/(double)Rions.size();
+  cerr << "chargePerAtom = " << chargePerAtom << endl;
   double totalCharge = 0.0;
   double cellVol = Box[0]*Box[1]*Box[2]/(double)(Nx*Ny*Nz);
   for (int ix=0; ix<Nx; ix++) {
@@ -240,7 +255,11 @@ MPISystemClass::InitNewRho()
 	  disp[1] -= nearbyint(disp[1]*boxInv[1])*Box[1];
 	  disp[2] -= nearbyint(disp[2]*boxInv[2])*Box[2];
 	  double dist = sqrt(dot(disp, disp));
-	  NewRho(ix,iy,iz) += chargePerAtom*RadialChargeDensity(dist);
+	  double rho = RadialChargeDensity(dist);
+	  if (rho < 0.0)
+	    cerr << "Negative rho at (ix,iy,iz) = (" 
+		 << ix << ", " << iy << ", " << iz << ")\n";
+	  NewRho(ix,iy,iz) += chargePerAtom*rho;
 	}
 	totalCharge += NewRho(ix,iy,iz);
       }

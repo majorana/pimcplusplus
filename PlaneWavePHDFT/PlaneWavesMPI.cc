@@ -46,7 +46,8 @@ MPISystemClass::SetIons (const Array<Vec3,1> &rions)
   /// aliasing. 
   Rions = rions;
   H.SetIons(rions + 0.5*Box);
-  InitNewRho();
+  if (UseLDA)
+    InitNewRho();
 }
 
 

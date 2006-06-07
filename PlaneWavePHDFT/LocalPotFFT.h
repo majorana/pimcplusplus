@@ -8,12 +8,12 @@ class LocalPotFFTClass : public VionBase
 private:
   kSpacePH kPH;
   Array<double,1> Vk;
-  Array<complex<FFT_FLOAT>,3> Vr;
   zVec Vc;
   FFTBox      &cFFT;
   void SetupkPotentials();
   void SetuprPotentials();
 public:
+  Array<complex<FFT_FLOAT>,3> Vr;
   void Setup();
   void SetIons (const Array<Vec3, 1>& rions);
   void Vmatrix (Array<complex<double>,2> &vmat);

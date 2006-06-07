@@ -150,6 +150,13 @@ AC_SUBST(MPI_LIBS)
 AC_SUBST(MPI_CFLAGS)
 AC_SUBST(MPI_RUN)
 
+AC_ARG_ENABLE(debug,[  --enable-debug          enable code for debugging checks])
+if test "x$enable_debug" = "xyes"; then
+   CXXFLAGS="-DDEBUG -DBZ_DEBUG $CXXFLAGS"
+   FFLAGS="-DDEBUG $FFLAGS"
+fi
+
+
 # Check if we want to use single-precision FFTs for SIMD spead improvements
 AC_ARG_ENABLE(fft-single,    [  --enable-fft-single       enable single-precision FFTs (default=no)])
 if test "$enable_fft_single" = "yes"; then

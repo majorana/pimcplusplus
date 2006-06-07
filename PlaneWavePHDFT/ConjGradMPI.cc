@@ -48,7 +48,7 @@ void ConjGradMPI::Setup()
 void ConjGradMPI::InitBands()
 {
   int numBands = Bands.rows();
-  int numVecs = 8 * numBands;
+  int numVecs = 3 * numBands;
   assert (numVecs <= H.GVecs.size());
   Array<complex<double>,2> Hmat(numVecs, numVecs);
   Array<complex<double>,2> EigVecs(numBands, numVecs);
@@ -68,8 +68,12 @@ void ConjGradMPI::InitBands()
 
   // Now put results in Bands
   for (int band=0; band<numBands; band++)
-    for (int vec=0; vec<Bands.cols(); vec++)
-      Bands(band,vec) = 1.0e-6*(drand48()-0.5);
+    for (int vec=0; vec<Bands.cols(); vec++) {
+      Vec3 G = H.GVecs(vec);
+      double E = 0.5*dot(G+H.kPoint, G+H.kPoint);
+      Bands(band,vec) = 1.0e-6*(drand48()-0.5)*exp(-4.0*E);
+    }
+  /// HACK HACK HACK
   for (int band=0; band<numBands; band++) 
     for (int i=0; i<numVecs; i++)
       Bands(band, i) = EigVecs(band, i);
@@ -117,7 +121,6 @@ ConjGradMPI::CalcPhiCG()
   E0 = realconjdot (c, Hc);
   // Steepest descent direction: (5.10)
   Xi = E0*c - Hc;
-  double residualNorm = norm (Xi);
   /// Orthonalize to other bands lower than me here (5.12)
   zVec &Xip = Xi;
   OrthogLower (Bands, Xip, CurrentBand);
@@ -128,6 +131,9 @@ ConjGradMPI::CalcPhiCG()
   // rename for clarity (5.18)
   zVec &Etap = Eta;
   OrthogLower(Bands, Etap, CurrentBand+1);
+  double residualNorm = norm (Etap);
+
+
 
   // Compute conjugate direction (5.20)
   complex<double> etaxi = conjdot(Etap, Xip);
@@ -202,7 +208,9 @@ void ConjGradMPI::Solve()
   int iter = 0;
   double residual = 1.0;
   while ((iter < 100) && (residual > Tolerance)) {
-    cerr << "iter = " << iter << endl;
+    if ((iter % 5) == 0)
+      EtaXiLast = 0.0;
+    cerr << "iter = " << iter << "  residual = " << residual << endl;
     cerr << "Energies = " << Energies << endl;
     residual = Iterate();
     iter++;
