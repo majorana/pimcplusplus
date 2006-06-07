@@ -173,7 +173,7 @@ protected:
   double Z;
 public:
   inline double operator()(double r)
-  { return 4.0*M_PI*(PH.V(r)*r*r-Z*r); }
+  { return 4.0*M_PI*(PH.V(r)*r*r+Z*r); }
 
   V0Integrand (Potential &ph, double rc) : PH(ph)
   { 
