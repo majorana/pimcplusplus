@@ -23,6 +23,7 @@ protected:
   Potential *PH;
   bool UseFFT;
   CommunicatorClass &BandComm, &kComm;
+  int Numk, Myk;
   bool MDExtrap, FirstTime;
   /////////////////////////
   /// LDA-related stuff ///

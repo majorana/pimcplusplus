@@ -60,7 +60,6 @@ LocalPotFFTClass::SetuprPotentials()
   }
   cFFT.k2r();
   Vr = cFFT.rBox;
-  cerr << "rPot is setup.\n";
 }
 
 void
