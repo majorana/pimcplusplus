@@ -48,7 +48,7 @@ GVecsClass::GetFFTBoxSize(Vec3 box, Vec3 kvec, double kcut)
       g[1] = iy*kbox[1];
       for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
 	g[2] = iz*kbox[2];
-	if (dot(k+g,k+g) < (4.0*kcut*kcut)) {
+	if (dot(kvec+g,kvec+g) < (4.0*kcut*kcut)) {
 	  actxmin = min (ix, actxmin);
 	  actxmax = max (ix, actxmax);
 	  actymin = min (iy, actymin);
