@@ -121,6 +121,7 @@ ConjGradMPI::CalcPhiCG()
   E0 = realconjdot (c, Hc);
   // Steepest descent direction: (5.10)
   Xi = E0*c - Hc;
+  double residualNorm = norm (Xi);
   /// Orthonalize to other bands lower than me here (5.12)
   zVec &Xip = Xi;
   OrthogLower (Bands, Xip, CurrentBand);
@@ -131,7 +132,6 @@ ConjGradMPI::CalcPhiCG()
   // rename for clarity (5.18)
   zVec &Etap = Eta;
   OrthogLower(Bands, Etap, CurrentBand+1);
-  double residualNorm = norm (Etap);
 
 
 
@@ -208,7 +208,7 @@ void ConjGradMPI::Solve()
   int iter = 0;
   double residual = 1.0;
   while ((iter < 100) && (residual > Tolerance)) {
-    if ((iter % 5) == 0)
+    if ((iter % 20) == 0)
       EtaXiLast = 0.0;
     cerr << "iter = " << iter << "  residual = " << residual << endl;
     cerr << "Energies = " << Energies << endl;

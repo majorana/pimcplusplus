@@ -36,7 +36,7 @@ private:
   complex<FFT_FLOAT> *rData, *kData;
   FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  FFT_FLOAT sqrtNinv;
+  FFT_FLOAT Ninv;
 public:
   Array<complex<FFT_FLOAT>,1> rBox, kBox;
 
@@ -69,7 +69,7 @@ private:
   TinyVector<complex<FFT_FLOAT>,DIM> *rData, *kData;
   FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  FFT_FLOAT sqrtNinv;
+  FFT_FLOAT Ninv;
 public:
   Array<TinyVector<complex<FFT_FLOAT>,DIM>,1> rBox, kBox;
 
@@ -114,7 +114,7 @@ public:
        &n, DIM, 1, -1, FFTW_MEASURE);
     assert (k2rPlan != NULL);
     
-    sqrtNinv = sqrt(1.0/(FFT_FLOAT)n);
+    Ninv = sqrt(1.0/(FFT_FLOAT)n);
     Allocated = true;
   }
   
@@ -147,7 +147,7 @@ private:
   complex<FFT_FLOAT> *rData, *kData;
   FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  FFT_FLOAT sqrtNinv;
+  FFT_FLOAT Ninv;
 public:
   Array<complex<FFT_FLOAT>,3> rBox, kBox;
 
@@ -181,7 +181,7 @@ private:
   complex<FFT_FLOAT> *kData;
   FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated;
-  FFT_FLOAT sqrtNinv;
+  FFT_FLOAT Ninv;
 public:
   Array<FFT_FLOAT,3> rBox;
   Array<complex<FFT_FLOAT>,3> kBox;
@@ -213,7 +213,7 @@ public:
 //   complex<float> *rData, *kData;
 //   fftwf_plan r2kPlan, k2rPlan;
 //   bool Allocated, InPlace;
-//   float sqrtNinv;
+//   float Ninv;
 // public:
 //   Array<complex<float>,3> rBox, kBox;
 
@@ -246,7 +246,7 @@ private:
   TinyVector<complex<FFT_FLOAT>,3> *rData, *kData;
   FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  FFT_FLOAT sqrtNinv;
+  FFT_FLOAT Ninv;
 public:
   Array< TinyVector<complex<FFT_FLOAT>,3>,3> rBox, kBox;
 
@@ -278,7 +278,7 @@ private:
   TinyMatrix<complex<FFT_FLOAT>,3,3> *rData, *kData;
   FFTNAME(plan) r2kPlan, k2rPlan;
   bool Allocated, InPlace;
-  FFT_FLOAT sqrtNinv;
+  FFT_FLOAT Ninv;
 public:
   Array<TinyMatrix<complex<FFT_FLOAT>,3,3>,3> rBox, kBox;
 

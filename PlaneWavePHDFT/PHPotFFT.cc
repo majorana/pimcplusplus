@@ -141,7 +141,6 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
     Setup();
   int nx, ny, nz;
   cFFT.GetDims(nx, ny, nz);
-  double nInv = 1.0/(double)(nx*ny*nz);
 
   /////////////////////////
   // Pseudo-kinetic part //
@@ -193,7 +192,7 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
   zVecVec& FGc = Gc;
   VecFFT.GetkVec (FGc);
   for (int i=0; i<GVecs.size(); i++)
-    Hc(i) += 0.5*nInv*dot(GVecs(i)+kPoint, FGc(i));
+    Hc(i) += 0.5*dot(GVecs(i)+kPoint, FGc(i));
 
   ////////////////////
   // Potential part //
@@ -209,7 +208,7 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
   // Get vector
   cFFT.GetkVec (Vc);
   for (int i=0; i<GVecs.size(); i++)
-    Hc(i) += nInv*Vc(i);
+    Hc(i) += Vc(i);
 }
 
 
@@ -221,7 +220,6 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc,
     Setup();
   int nx, ny, nz;
   cFFT.GetDims(nx, ny, nz);
-  double nInv = 1.0/(double)(nx*ny*nz);
 
   /////////////////////////
   // Pseudo-kinetic part //
@@ -273,7 +271,7 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc,
   zVecVec& FGc = Gc;
   VecFFT.GetkVec (FGc);
   for (int i=0; i<GVecs.size(); i++)
-    Hc(i) += 0.5*nInv*dot(GVecs(i)+kPoint, FGc(i));
+    Hc(i) += 0.5*dot(GVecs(i)+kPoint, FGc(i));
 
   ////////////////////
   // Potential part //
@@ -294,6 +292,6 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc,
   // Get vector
   cFFT.GetkVec (Vc);
   for (int i=0; i<GVecs.size(); i++)
-    Hc(i) += nInv*Vc(i);
+    Hc(i) += Vc(i);
 }
 

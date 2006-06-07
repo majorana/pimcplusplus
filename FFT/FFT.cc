@@ -35,7 +35,7 @@ FFT1D::resize(int n)
     (n, reinterpret_cast<FFTNAME(complex)*>(kAligned), 
      reinterpret_cast<FFTNAME(complex)*>(rAligned), -1,FFTW_MEASURE);
 
-  sqrtNinv = sqrt(1.0/(FFT_FLOAT)n);
+  Ninv = 1.0/(FFT_FLOAT)n;
   Allocated = true;
 }
 
@@ -43,6 +43,7 @@ void
 FFT1D::r2k()
 {
   FFTNAME(execute)(r2kPlan);
+  rBox *= Ninv;
 }
 
 
@@ -93,7 +94,7 @@ FFT3D::resize(int nx, int ny, int nz)
     (nx, ny, nz, reinterpret_cast<FFTNAME(complex)*>(kAligned), 
      reinterpret_cast<FFTNAME(complex)*>(rAligned), -1,FFTW_MEASURE);
   
-  sqrtNinv = sqrt(1.0/(FFT_FLOAT)(nx*ny*nz));
+  Ninv = 1.0/(FFT_FLOAT)(nx*ny*nz);
   Allocated = true;
 }
 
@@ -102,6 +103,7 @@ void
 FFT3D::r2k()
 {
   FFTNAME(execute)(r2kPlan);
+  kBox *= Ninv;
 //   for (int i=0; i<kBox.size(); i++)
 //     *(kBox.data()+i) *= sqrtNinv;
 }
@@ -153,7 +155,7 @@ FFT3D_r2c::resize(int nx, int ny, int nz)
     (nx, ny, nz, reinterpret_cast<FFTNAME(complex)*>(kAligned), 
      (FFT_FLOAT*)(rAligned),FFTW_MEASURE);
   
-  sqrtNinv = sqrt(1.0/(FFT_FLOAT)(nx*ny*nz));
+  Ninv = 1.0/(FFT_FLOAT)(nx*ny*nz);
   Allocated = true;
 }
 
@@ -162,6 +164,7 @@ void
 FFT3D_r2c::r2k()
 {
   FFTNAME(execute)(r2kPlan);
+  kBox *= Ninv;
 }
 
 
@@ -216,7 +219,7 @@ FFTVec3D::resize(int nx, int ny, int nz)
 			   reinterpret_cast<FFTNAME(complex)*>(rAligned), n,
 			   3, 1, -1, FFTW_MEASURE);
   assert (k2rPlan != NULL);
-  sqrtNinv = sqrt(1.0/(FFT_FLOAT)(nx*ny*nz));
+  Ninv = 1.0/(FFT_FLOAT)(nx*ny*nz);
   Allocated = true;
 }
 
@@ -225,6 +228,7 @@ void
 FFTVec3D::r2k()
 {
   FFTNAME(execute)(r2kPlan);
+  kBox *= Ninv;
 }
 
 
@@ -286,7 +290,7 @@ FFTMat3D::resize(int nx, int ny, int nz)
 			n, 9, 1, -1, FFTW_MEASURE);
   assert (k2rPlan != NULL);
 
-  sqrtNinv = sqrt(1.0/(FFT_FLOAT)(nx*ny*nz));
+  Ninv = 1.0/(FFT_FLOAT)(nx*ny*nz);
   Allocated = true;
 }
 
@@ -295,6 +299,19 @@ void
 FFTMat3D::r2k()
 {
   FFTNAME(execute)(r2kPlan);
+  for (int ix=0; ix<kBox.extent(0); ix++)
+    for (int iy=0; iy<kBox.extent(1); iy++)
+      for (int iz=0; iz<kBox.extent(2); iz++) {
+	kBox(ix,iy,iz)(0,0) *= Ninv;
+	kBox(ix,iy,iz)(0,1) *= Ninv;
+	kBox(ix,iy,iz)(0,2) *= Ninv;
+	kBox(ix,iy,iz)(1,0) *= Ninv;
+	kBox(ix,iy,iz)(1,1) *= Ninv;
+	kBox(ix,iy,iz)(1,2) *= Ninv;
+	kBox(ix,iy,iz)(2,0) *= Ninv;
+	kBox(ix,iy,iz)(2,1) *= Ninv;
+	kBox(ix,iy,iz)(2,2) *= Ninv;
+      }
 }
 
 

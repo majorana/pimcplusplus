@@ -21,7 +21,7 @@ void TestFFT3D()
   for (int i=0; i<2; i++)
     for (int j=0; j<2; j++)
       for (int k=0; k<2; k++)
-	fprintf (stderr, "%1.5f\n", fft.kBox(i,j,k).real()/8.0);
+	fprintf (stderr, "%1.5f\n", fft.kBox(i,j,k).real());
 }
 
 void TestFFTVec3D()
@@ -53,7 +53,7 @@ void TestFFTVec3D()
     for (int j=0; j<2; j++)
       for (int k=0; k<2; k++) {
 	for (int l=0; l<3; l++)
-	  fprintf (stderr, "%1.1f ", fft.kBox(i,j,k)[l].real()/8.0);
+	  fprintf (stderr, "%1.1f ", fft.kBox(i,j,k)[l].real());
 	fprintf (stderr, "\n");
       }
 }
@@ -122,7 +122,7 @@ void TestFFTMat3D()
       for (int k=0; k<2; k++) {
 	for (int l=0; l<3; l++)
 	  for (int m=0; m<3; m++)
-	    fprintf (stderr, "%1.1f ", fft.kBox(i,j,k)(l,m).real()/8.0);
+	    fprintf (stderr, "%1.1f ", fft.kBox(i,j,k)(l,m).real());
 	fprintf (stderr, "\n");
       }
 }

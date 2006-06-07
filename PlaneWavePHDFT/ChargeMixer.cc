@@ -33,8 +33,6 @@ KerkerMixerClass::Mix (const Array<double,3> &newCharge,
   FFT.GVecs.GetFFTBoxSize(nx,ny,nz);
   double meshCellVol = FFT.GVecs.GetBoxVol()/(double)(nx*ny*nz);
   FFT.GetkVec(NewCharge);
-  //NewCharge *= meshCellVol;
-  NewCharge *= 1.0/(double)(nx*ny*nz);
   if (HaveLastCharge) 
     for (int i=0; i<NewCharge.size(); i++) {
       double G2 = dot(FFT.GVecs.DeltaG(i), FFT.GVecs.DeltaG(i));

@@ -154,7 +154,7 @@ MPISystemClass::CalcChargeDensity()
     for (int iy=0; iy<ny; iy++)
       for (int iz=0; iz<nz; iz++)
 	totalCharge += vCell * NewRho(ix,iy,iz);
-  perr << "totalCharge = " << totalCharge << endl;
+  perr << "total NewRho charge = " << totalCharge << endl;
 }
 
 

@@ -11,8 +11,8 @@ void TestInitCharge()
   bandComm.Subset (root, kComm);
 
   IOSectionClass in;
-  //in.OpenFile("NaLocalPH.h5");
-  in.OpenFile("Na_HF_NLPP.h5");
+  in.OpenFile("NaLocalPH.h5");
+  //in.OpenFile("Na_HF_NLPP.h5");
   Potential *pot = ReadPotential(in);
   in.CloseFile();
 
@@ -58,8 +58,8 @@ void TestSolveLDA()
   bandComm.Subset (root, kComm);
 
   IOSectionClass in;
-  //in.OpenFile("NaLocalPH.h5");
-  in.OpenFile("Na_HF_NLPP.h5");
+  in.OpenFile("NaLocalPH.h5");
+  //in.OpenFile("Na_HF_NLPP.h5");
   Potential *pot = ReadPotential(in);
   in.CloseFile();
 

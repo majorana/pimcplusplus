@@ -102,7 +102,6 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
 
   int Nx, Ny, Nz;
   FFT.GetDims(Nx, Ny, Nz);
-  double Ninv = 1.0/(Nx*Ny*Nz);
   // First, put c into FFTbox
   FFT.PutkVec (c);
   // Now, transform to real space
@@ -116,7 +115,6 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
 
   // Transform back
   FFT.r2k();
-  FFT.kBox *= Ninv;
   // And put into Vc
   FFT.AddToVec (Vc);
 }
@@ -233,7 +231,6 @@ void PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
     Setup();
   int nx, ny, nz;
   cFFT.GetDims(nx, ny, nz);
-  double nInv = 1.0/(double)(nx*ny*nz);
 
   /////////////////////////
   // Pseudo-kinetic part //
@@ -255,7 +252,7 @@ void PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
   zVecVec& FGc = Gc;
   VecFFT.GetkVec (FGc);
   for (int i=0; i<GVecs.size(); i++)
-    Hc(i) += 0.5*nInv*dot(GVecs(i), FGc(i));
+    Hc(i) += 0.5*dot(GVecs(i), FGc(i));
 
   ////////////////////
   // Potential part //
@@ -271,5 +268,5 @@ void PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
   // Get vector
   cFFT.GetkVec (Vc);
   for (int i=0; i<GVecs.size(); i++)
-    Hc(i) += nInv*Vc(i);
+    Hc(i) += Vc(i);
 }

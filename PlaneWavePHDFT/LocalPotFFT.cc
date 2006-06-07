@@ -113,7 +113,6 @@ LocalPotFFTClass::Apply (const zVec &c, zVec &Hc)
     Setup();
   int nx, ny, nz;
   cFFT.GetDims(nx, ny, nz);
-  double nInv = 1.0/(double)(nx*ny*nz);
 
   ////////////////////
   // Potential part //
@@ -129,7 +128,7 @@ LocalPotFFTClass::Apply (const zVec &c, zVec &Hc)
   // Get vector
   cFFT.GetkVec (Vc);
   for (int i=0; i<GVecs.size(); i++)
-    Hc(i) += nInv*Vc(i);
+    Hc(i) += Vc(i);
 }
 
 void 
@@ -140,7 +139,6 @@ LocalPotFFTClass::Apply (const zVec &c, zVec &Hc,
     Setup();
   int nx, ny, nz;
   cFFT.GetDims(nx, ny, nz);
-  double nInv = 1.0/(double)(nx*ny*nz);
 
   ////////////////////
   // Potential part //
@@ -161,6 +159,6 @@ LocalPotFFTClass::Apply (const zVec &c, zVec &Hc,
   // Get vector
   cFFT.GetkVec (Vc);
   for (int i=0; i<GVecs.size(); i++)
-    Hc(i) += nInv*Vc(i);
+    Hc(i) += Vc(i);
 }
 

@@ -76,7 +76,6 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc)
   FFT.rBox *= Vr;
   // Transform back
   FFT.r2k();
-  FFT.kBox *= Ninv;
   // And put into Vc
   FFT.AddToVec (Vc);
 }
@@ -103,7 +102,6 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc,
   //  FFT.rBox *= (Vr+VHXC);
   // Transform back
   FFT.r2k();
-  FFT.kBox *= Ninv;
   // And put into Vc
   FFT.AddToVec (Vc);
 }
