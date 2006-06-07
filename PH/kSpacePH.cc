@@ -166,11 +166,30 @@ public:
   { /* do nothing for now */ }
 };
 
+class V0Integrand
+{
+protected:
+  Potential &PH;
+  double Z;
+public:
+  inline double operator()(double r)
+  { return 4.0*M_PI*(PH.V(r)*r*r-Z*r); }
+
+  V0Integrand (Potential &ph, double rc) : PH(ph)
+  { 
+    Z = -round(rc*PH.V(rc));
+    cerr << "Zion = " << Z << " in V0Integrand.\n";
+  }
+};
+
 
 double kSpacePH::Vk (double k)
 {
-  if (fabs(k) < 1.0e-10)
-    return 0.0;
+  if (fabs(k) < 1.0e-10) {
+    V0Integrand integrand(PH, R1);
+    GKIntegration<V0Integrand,GK31> integrator(integrand);
+    return integrator.Integrate(0.0, R1, 1.0e-10);
+  }
   // First, do the part of the integral up to R1 numerically
   VIntegrand integrand(PH);
   integrand.Setk(k);
