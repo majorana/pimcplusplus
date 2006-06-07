@@ -48,7 +48,8 @@ KerkerMixerClass::Mix (const Array<double,3> &newCharge,
   // Now FFT mixed charge to real space
   FFT.PutkVec (mixedCharge_G);
   FFT.k2r();
-  mixedCharge_r = real(FFT.rBox);
+  //  mixedCharge_r = real(FFT.rBox);
+  copy (real(FFT.rBox), mixedCharge_r);
   double totalCharge = 0.0;
   for (int ix=0; ix<nx; ix++)
     for (int iy=0; iy<ny; iy++)
@@ -56,7 +57,7 @@ KerkerMixerClass::Mix (const Array<double,3> &newCharge,
 	mixedCharge_r(ix,iy,iz) = max(mixedCharge_r(ix,iy,iz), 0.0);
 	totalCharge += mixedCharge_r(ix,iy,iz)*meshCellVol;
       }
-  cerr << "Total mixed charge = " << totalCharge << endl;
+  //  cerr << "Total mixed charge = " << totalCharge << endl;
 
 
 }

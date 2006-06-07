@@ -448,6 +448,11 @@ inline void copy(const Array<T1,3> &src,
 	dest(ix,iy,iz) = src(ix,iy,iz);
 }
 
+inline complex<float> operator+(complex<float> z, double r)
+{
+  return complex<float>(z.real()+r, z.imag());
+}
+
 
 #ifndef NAN
 #define NAN sqrt(-1.0)

@@ -96,7 +96,11 @@ CoulombFFTClass::Apply(const zVec &c, zVec &Vc,
   // Now, transform to real space
   FFT.k2r();
   // Now, multiply by V
-  FFT.rBox *= (Vr+VHXC);
+  for (int ix=0; ix<Nx; ix++)
+    for (int iy=0; iy<Ny; iy++)
+      for (int iz=0; iz<Nz; iz++)
+	FFT.rBox(ix,iy,iz) *= (Vr(ix,iy,iz)+VHXC(ix,iy,iz));
+  //  FFT.rBox *= (Vr+VHXC);
   // Transform back
   FFT.r2k();
   FFT.kBox *= Ninv;

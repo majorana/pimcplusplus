@@ -282,7 +282,12 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc,
   cFFT.PutkVec (c);
   cFFT.k2r();
   // Multiply by V
-  cFFT.rBox *= (Vr + VHXC);
+  // cFFT.rBox *= (Vr + VHXC);
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	cFFT.rBox(ix,iy,iz) *= (Vr(ix,iy,iz)+VHXC(ix,iy,iz));
+
   // Transform back
   cFFT.r2k();
 

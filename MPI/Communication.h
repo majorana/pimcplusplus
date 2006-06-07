@@ -80,6 +80,7 @@ public:
   void Broadcast (int root, double &val);
   void Broadcast (int root, Array<double,1> &buff);
   void Broadcast (int root, Array<double,2> &buff);
+  void Broadcast (int root, Array<double,3> &buff);
   void Broadcast (int root, Array<complex<double>,2> &buff);
   void Broadcast (int root, Array<Vec2,1> &buff);
   void Broadcast (int root, Array<Vec3,1> &buff);
