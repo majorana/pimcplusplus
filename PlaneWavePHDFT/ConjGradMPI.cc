@@ -132,9 +132,9 @@ ConjGradMPI::CalcPhiCG()
   // Now, orthogonalize to all bands, (including present band);
   // rename for clarity (5.18)
   zVec &Etap = Eta;
+  //OrthogLower(Bands, Etap, CurrentBand+1);
   //  OrthogLower(Bands, Etap, CurrentBand+1);
   OrthogLower(Bands, Etap, Bands.extent(0));
-
 
   // Compute conjugate direction (5.20)
   complex<double> etaxi = conjdot(Etap, Xip);
@@ -143,16 +143,18 @@ ConjGradMPI::CalcPhiCG()
     gamma = etaxi/EtaXiLast(CurrentBand);
   else
     gamma = 0.0;
-
+  
   EtaXiLast(CurrentBand) = etaxi;
   
   // (5.19)
   Phi = Etap + gamma * lastPhis(CurrentBand,Range::all());
   lastPhis(CurrentBand,Range::all()) = Phi;
-
+  
   // Orthogonalize to all lower bands band: (5.21)
   Phip = Phi;
   //  OrthogExcluding(Bands, Phip, -1);
+  //    OrthogLower(Bands, Phip, CurrentBand+1);
+  // (5.22)
   //  OrthogLower(Bands, Phip, CurrentBand+1);
   OrthogLower(Bands, Phip, Bands.extent(0));
   // (5.22)
@@ -197,7 +199,13 @@ ConjGradMPI::Iterate()
   CollectBands();
   GramSchmidt(Bands);
   // CheckOverlaps();
-  return max(Residuals);
+
+  /// HACK HACK HACK
+  //   return max(Residuals);
+  double maxRes = 0.0;
+  for (int i=0; i<8; i++)
+    maxRes = max (Residuals(i), maxRes);
+  return maxRes;
 }
 
 

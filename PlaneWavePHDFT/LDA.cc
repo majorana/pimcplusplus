@@ -65,7 +65,15 @@ MPISystemClass::SubspaceRotate()
   for (int bi=0; bi<NumBands; bi++)
     for (int bj=0; bj<NumBands; bj++)
       RotBands(bi,Range::all()) += EigVecs(bi,bj)*Bands(bj,Range::all());
+  
   Bands = RotBands;
+//   ApplyH();
+//   for (int bi=0; bi<NumBands; bi++) {
+//     c.reference (Bands(bi,Range::all()));
+//     Hc.reference (HBands(bi, Range::all()));
+//     double E = realconjdot(c, Hc);
+//     perr << "EigVal(bi) = " << EigVals(bi) << "cHc = " << E << endl;
+//   }
 }
 
 
@@ -81,28 +89,8 @@ MPISystemClass::SolveLDA()
   while (!SC) {
     MixChargeDensity();
     CalcVHXC();
-    if (BandComm.MyProc() == 0) {
-      if (kComm.MyProc() == 0) {
-	IOSectionClass out;
-	char fname[100];
-	snprintf (fname, 100, "VHXC%d.h5", numSCIters);
-	out.NewFile (fname);
-	out.WriteVar("VH", VH);
-	out.WriteVar("VXC", VXC);
-	out.WriteVar("VHXC", VHXC);
-	out.WriteVar("Rho", Rho_r);
-	LocalPotFFTClass &pot = *((LocalPotFFTClass*)H.Vion);
-	Array<double,3> magV(VH.shape());
-	for (int ix=0; ix<magV.extent(0); ix++)
-	  for (int iy=0; iy<magV.extent(1); iy++)
-	    for (int iz=0; iz<magV.extent(2); iz++)
-	      magV(ix,iy,iz) = mag(pot.Vr(ix,iy,iz));
-	out.WriteVar("Vion", magV);
-	out.CloseFile();
-      }
-    }
-    CG.SetTolerance(3.0e-4);
-    if (numSCIters == 0) {
+    CG.SetTolerance(1.0e-4);
+    if (numSCIters == 0 && ConfigNum == 0) {
       CG.InitBands();
       SubspaceRotate();
     }
@@ -115,7 +103,77 @@ MPISystemClass::SolveLDA()
     numSCIters ++;
   }
 
+  if (BandComm.MyProc() == 0) {
+    if (kComm.MyProc() == 0) {
+      IOSectionClass out;
+      char fname[100];
+      snprintf (fname, 100, "VHXC%d.h5", ConfigNum);
+      out.NewFile (fname);
+      out.WriteVar("VH", VH);
+      out.WriteVar("VXC", VXC);
+      out.WriteVar("VHXC", VHXC);
+      out.WriteVar("Rho", Rho_r);
+      LocalPotFFTClass &pot = *((LocalPotFFTClass*)H.Vion);
+      Array<double,3> magV(VH.shape());
+      for (int ix=0; ix<magV.extent(0); ix++)
+	for (int iy=0; iy<magV.extent(1); iy++)
+	  for (int iz=0; iz<magV.extent(2); iz++)
+	    magV(ix,iy,iz) = mag(pot.Vr(ix,iy,iz));
+      out.WriteVar("Vion", magV);
+      out.CloseFile();
+    }
+  }
+  Bands2 = Bands1;
+  Rions2 = Rions1;
+  Bands1 = Bands;
+  Rions1 = Rions;
+  ConfigNum++;
 }
+
+
+double
+Residue (Array<Vec3,1> &R0, Array<Vec3,1> &R1, Array<Vec3,1> &R2,
+	 double alpha)
+{
+  double residue = 0;
+  for (int i=0; i<R0.size(); i++)
+    for (int dim=0; dim < 3; dim++) {
+      double diff = R0(i)[dim] -(alpha*R1(i)[dim] + (1.0-alpha)*R2(i)[dim]);
+      residue += diff*diff;
+    }
+  return residue;
+}
+
+
+void 
+MPISystemClass::DoMDExtrap()
+{
+  if (ConfigNum > 1) {
+    double e0, e1, e2;
+    e0  = Residue(Rions, Rions1, Rions2,  0.0);
+    e1  = Residue(Rions, Rions1, Rions2,  1.0);
+    e2  = Residue(Rions, Rions1, Rions2,  2.0);
+    
+    double a = 0.5*(e2-2.0*e1+e0);
+    double b = 0.5*(4.0*e1 - e2 - 3.0*e0);
+    double c = e0;
+    double alpha;
+    if (a > 0.0)  // we have a minimum somewhere
+      alpha = -b/(2.0*a);
+    else if (e0>e2)
+      alpha = 2.0;
+    else
+      alpha = 0.0;
+    
+    alpha = max(0.0, alpha);
+    alpha = min(2.0, alpha);
+
+    cerr << "alpha = " << alpha << endl;
+    Bands = alpha * Bands1 + (1.0-alpha)*Bands2;
+    GramSchmidt(Bands);
+  }
+}
+
 
 void
 MPISystemClass::CalcOccupancies()
@@ -271,7 +329,6 @@ MPISystemClass::CalcRadialChargeDensity()
   atom.RadialWFs(0).Energy = -0.15;
   atom.SetGrid (&AtomGrid);
   atom.SetBarePot (PH);
-  //atom.SolveInit();
   atom.Solve();
   Array<double,1> rho(AtomGrid.NumPoints);
   for (int i=0; i<rho.size(); i++) {

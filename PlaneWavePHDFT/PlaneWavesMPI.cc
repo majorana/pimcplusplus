@@ -14,7 +14,8 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   H.Setk(k);
   Bands.resize (NumBands, GVecs.size());
   HBands.resize (NumBands, GVecs.size());
-  LastBands.resize (NumBands, GVecs.size());
+  Bands1.resize (NumBands, GVecs.size());
+  Bands2.resize (NumBands, GVecs.size());
   PH = &ph;
   UseFFT = useFFT;
   int NDelta = H.GVecs.DeltaSize();
@@ -34,20 +35,23 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, double z,
   H.SetIonPot (z, useFFT);
   H.Setk(k);
   Bands.resize (NumBands, GVecs.size());
-  LastBands.resize (NumBands, GVecs.size());
+  Bands1.resize (NumBands, GVecs.size());
   UseFFT = useFFT;
 }
 
 void
 MPISystemClass::SetIons (const Array<Vec3,1> &rions)
 {
-  if (Rions.size() != rions.size())
-    Rions.resize(rions.size());
+  if (Rions.size() != rions.size()) {
+    Rions.resize(rions.shape());
+    Rions1.resize(rions.shape());
+    Rions2.resize(rions.shape());
+  }
   /// This half box addition compensates for the fourier transform
   /// aliasing. 
   Rions = rions;
   H.SetIons(rions + 0.5*Box);
-  if (UseLDA)
+  if (UseLDA && (ConfigNum==0))
     InitNewRho();
 }
 
@@ -58,7 +62,7 @@ MPISystemClass::DiagonalizeH ()
   if (MDExtrap && !FirstTime) {
 //     for (int i=0; i<Bands.extent(0); i++)
 //       for (int j=0; j<Bands.extent(1); j++)
-// 	Bands(i,j) = 2.0*Bands(i,j) - LastBands(i,j);
+// 	Bands(i,j) = 2.0*Bands(i,j) - Bands1(i,j);
 //     GramSchmidt(Bands);
   }
   else
@@ -67,7 +71,7 @@ MPISystemClass::DiagonalizeH ()
   if (BandComm.MyProc()==0)
     for (int i=0; i<Bands.rows(); i++) 
       fprintf (stderr, "Energy(%d) = %15.12f\n", i, CG.Energies(i)* 27.211383);
-  LastBands = Bands;
+  Bands1 = Bands;
   FirstTime = false;
 }
 
@@ -193,7 +197,7 @@ MPISystemClass::Setk(Vec3 k)
   /// aliasing.  
   H.SetIons(Rions+0.5*Box);
   Bands.resize (NumBands, GVecs.size());
-  LastBands.resize (NumBands, GVecs.size());
-  LastBands = complex<double> (0.0, 0.0);
+  Bands1.resize (NumBands, GVecs.size());
+  Bands1 = complex<double> (0.0, 0.0);
   CG.Setup();
 }

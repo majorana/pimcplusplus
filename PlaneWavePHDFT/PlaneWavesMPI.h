@@ -14,7 +14,14 @@ protected:
   Array<Vec3,1> Rions;
   FFTBox FFT;
   HamiltonianClass H;
-  Array<complex<double>,2> Bands, HBands, LastBands;
+  Array<complex<double>,2> Bands, HBands;
+
+  //////////////////////
+  // MD extrapolation //
+  //////////////////////
+  Array<complex<double>,2> Bands1, Bands2;
+  Array<Vec3,1> Rions1, Rions2;
+
   ///////////////////////
   // Subspace rotation //
   ///////////////////////
@@ -37,6 +44,7 @@ protected:
   /////////////////////////
   /// LDA-related stuff ///
   /////////////////////////
+  int ConfigNum;
   bool UseLDA;
   int Nx, Ny, Nz;
   // Array<complex<double>,3> Phip_r, Psi_r;
@@ -66,6 +74,7 @@ protected:
   /// HACK HACK HACK
 public:
   void InitLDA();
+  void DoMDExtrap();
 public:
   GVecsClass GVecs;
   void Setup(Vec3 box, Vec3 k, double kcut, Potential &ph, 
@@ -100,7 +109,8 @@ public:
     : CG(H, Bands, HBands, bandcomm, kcomm, VHXC), 
       FFT(GVecs), H(GVecs, FFT), 
       NumBands(numBands), BandComm(bandcomm), kComm(kcomm), 
-      MDExtrap(mdextrap), FirstTime(true), NumElecs(numElecs)
+      MDExtrap(mdextrap), FirstTime(true), NumElecs(numElecs),
+      ConfigNum(0)
   {
 
   }

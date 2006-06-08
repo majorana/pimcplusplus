@@ -40,7 +40,7 @@ void TestInitCharge()
   Vec3 k = 0.25 * Gprim;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 2.5, *pot, true, true);
+  system.Setup (box, k, 3.0, *pot, true, true);
   system.SetIons(rions);
   IOSectionClass out;
   out.NewFile ("InitDensity.h5");
@@ -88,9 +88,55 @@ void TestSolveLDA()
   cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 4.0, *pot, true, true);
+  system.Setup (box, k, 3.0, *pot, true, true);
   system.SetIons(rions);
   system.SolveLDA();
+}
+
+
+void TestMultiLDA()
+{
+  CommunicatorClass bandComm, kComm;
+  bandComm.SetWorld();
+  Array<int,1> root(1);
+  root(0) = 0;
+  bandComm.Subset (root, kComm);
+
+  IOSectionClass in;
+  //in.OpenFile("NaLocalPH.h5");
+  in.OpenFile("Na_HF_NLPP.h5");
+  Potential *pot = ReadPotential(in);
+  in.CloseFile();
+
+  int numBands  = 16;
+  int numElecs  = 16;
+  Vec3 box (26.56, 26.56, 26.56);
+  
+  Vec3 Gprim = 2.0*M_PI*Vec3(1.0/box[0], 1.0/box[1], 1.0/box[2]);
+  Vec3 k = 0.25 * Gprim;
+  cerr << "k = " << k << endl;
+  MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
+  
+  system.Setup (box, k, 3.0, *pot, true, true);
+  
+  Array<Vec3,1> rions(16);
+  Array<double,3> R;
+  IOSectionClass configsIn;
+  configsIn.OpenFile("configs.h5");
+  configsIn.ReadVar("R", R);
+  for (int conf=0; conf<200; conf++) {
+    for (int ri=0; ri<R.extent(1); ri++)
+      for (int dim=0; dim<3; dim++)
+	rions(ri)[dim] = R(conf,ri,dim);
+    system.SetIons(rions);
+    system.DoMDExtrap();
+    system.SolveLDA();
+  }
+  
+
+
+
+
 }
 
 void TestSolidLDA()
@@ -145,7 +191,8 @@ main(int argc, char **argv)
   COMM::Init(argc, argv);
   // TestInitCharge();
   // TestSmear();
-  TestSolveLDA();
+  //TestSolveLDA();
+  TestMultiLDA();
   // TestSolidLDA();
   COMM::Finalize();
 }

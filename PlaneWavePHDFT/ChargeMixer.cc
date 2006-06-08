@@ -1,7 +1,7 @@
 #include "ChargeMixer.h"
 
 KerkerMixerClass::KerkerMixerClass (FFTBox &fft) :
-  ChargeMixerClass(fft), Lambda(1.0), HaveLastCharge(false),
+  ChargeMixerClass(fft), Lambda(0.55), HaveLastCharge(false),
   NewFraction(0.8)
 {
   LastCharge.resize(FFT.GVecs.DeltaSize());
