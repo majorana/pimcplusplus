@@ -19,7 +19,8 @@
 #include <Common/MatrixOps/MatrixOps.h>
 
 FixedPhaseClass::FixedPhaseClass(PathDataClass &pathData) :
-  PathData (pathData), Path(pathData.Path), UseMDExtrap(false)
+  PathData (pathData), Path(pathData.Path), UseMDExtrap(false),
+  UseLDA(true)
 {
   
 }
@@ -601,10 +602,10 @@ FixedPhaseClass::Read(IOSectionClass &in)
   NumBands = max(NumUp, NumDown);
   /// The last true indicates using MD extrapolation to initialize
   /// wavefunctions. 
-  System = new MPISystemClass (NumBands, Path.Communicator, UseMDExtrap);
+  System = new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, PathData.InterComm, UseLDA, UseMDExtrap);
   PH = &PathData.Actions.GetPotential (IonSpeciesNum, UpSpeciesNum);
   //  Vec3 gamma (0.0, 0.0, 0.0);
-  System->Setup (Path.GetBox(), kVec, kCut, *PH);
+  System->Setup (Path.GetBox(), kVec, kCut, *PH, UseLDA);
 
   /////////////////////////////
   // Setup the ion positions //

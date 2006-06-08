@@ -532,7 +532,7 @@ MDVisualClass::Read(string filename)
     Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
     Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
   }
-  bool haveBandRho = RhoVar != NULL;
+  bool haveBandRho = BandRhoVar != NULL;
   if (haveBandRho) {
     BandRhoVar->Read(BandRhoData, 0, Range::all(), Range::all(), Range::all(), Range::all());
     BandAdjust.set_upper(BandRhoData.extent(3));

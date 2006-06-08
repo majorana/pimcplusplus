@@ -70,6 +70,8 @@ private:
   /// depending on the species.
   friend class FixedPhaseActionClass;
   bool UseMDExtrap;
+  /// Include DFT in local density approximation
+  bool UseLDA;
   // Note this action DOES NOT INCLUDE TAU FACTOR
   double CalcAction (Array<Vec3,1> &G1, Array<Vec3,1> &G2,
 		     double phase1, double phase2, Array<Vec3,1> &dR);
