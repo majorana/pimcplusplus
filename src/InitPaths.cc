@@ -47,20 +47,27 @@ void PathClass::ReadSqueeze(string fileName,bool replicate)
   assert(inFile.ReadVar("Path",oldPaths));
   cerr << "My paths are of size"  << oldPaths.extent(0) << " "
        << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
-  
+
+  int myProc=Communicator.MyProc();
+  int myFirstSlice,myLastSlice;
+  SliceRange (myProc, myFirstSlice, myLastSlice);  
   for (int ptcl=0;ptcl<NumParticles();ptcl++){
     for (int slice=0; slice<NumTimeSlices(); slice++) {
-      dVec pos;
-      pos = 0.0;
-      for (int dim=0; dim<NDIM; dim++)
-	if (replicate){
+      int sliceOwner = SliceOwner(slice);
+      int relSlice = slice-myFirstSlice;
+      if (myProc==sliceOwner){
+	dVec pos;
+	pos = 0.0;
+	for (int dim=0; dim<NDIM; dim++)
+	  if (replicate){
           pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim)*(Box[dim]/oldBox(dim));
-        }
-        else{
-	  pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim)*(Box[dim]/oldBox(dim));
-        }
+	  }
+	  else{
+	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim)*(Box[dim]/oldBox(dim));
+	  }
 
-      Path(slice,ptcl) = pos;
+	Path(relSlice,ptcl) = pos;
+      }
       //      cerr<<"I'm putting the slice "<<slice<<" and the ptcl "<<ptcl<<"as "<<Path(slice,ptcl)<<endl;
     }      
   }
@@ -114,6 +121,9 @@ void PathClass::ReadOld(string fileName,bool replicate)
 void 
 PathClass::InitPaths (IOSectionClass &in)
 {
+  NowOpen=false;
+  NowOpen.AcceptCopy();
+
   SetMode (NEWMODE);
   //  cerr<<"Hello"<<endl;
   //  assert(1==2);
@@ -252,8 +262,47 @@ PathClass::InitPaths (IOSectionClass &in)
 	  Path(slice,ptcl) = pos;
 	}      
       }
+      //      InitRealSlices();
+      //      PrintRealSlices();
+      //      TestRealSlices();
     }    
+    else if (InitPaths == "WORM") {
+      NowOpen=true;
+      Array<double,2> Positions;
+      assert (in.ReadVar ("Positions", Positions));
+      assert (Positions.rows() == species.NumParticles);
+      assert (Positions.cols() == species.NumDim);
+      for (int ptcl=species.FirstPtcl; 
+	   ptcl<=species.LastPtcl; ptcl++){
+	for (int slice=0; slice<NumTimeSlices(); slice++) {
+	  ParticleExist(slice,ptcl)=1.0;
+	  dVec pos;
+	  pos = 0.0;
+	  for (int dim=0; dim<species.NumDim; dim++)
+	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
+	  Path(slice,ptcl) = pos;
+	}      
+      }
+      int startEmpty;
+      assert(in.ReadVar("NumRealParticles",startEmpty));
 
+      //      int startEmpty=1;
+      for (int ptcl=startEmpty;ptcl<NumParticles();ptcl++)
+	for (int slice=0;slice<NumTimeSlices();slice++){
+	  ParticleExist(slice,ptcl)=0.0;
+	}
+      ParticleExist(NumTimeSlices()-1,startEmpty)=0.0;
+      ParticleExist(0,startEmpty)=0.0;
+      //      ParticleExist.AcceptCopy();
+      for (int ptcl=startEmpty-1;ptcl<NumParticles()-1;ptcl++){
+	Permutation(ptcl)=ptcl+1;
+      }
+      Permutation(NumParticles()-1)=startEmpty-1;
+      Permutation.AcceptCopy();
+      Path.AcceptCopy();
+      ParticleExist.AcceptCopy();
+      NowOpen.AcceptCopy();
+    }
     else if (InitPaths == "ADDVACANCIES") {
       Array<double,2> Positions;
       assert (in.ReadVar ("Positions", Positions));
@@ -313,7 +362,7 @@ PathClass::InitPaths (IOSectionClass &in)
       }
       string pathFile;
       assert(in.ReadVar("File",pathFile));
-      ReadSqueeze(pathFile,replicate);
+      ReadOld(pathFile,replicate);
     }
     else if (InitPaths == "SQUEEZE"){
       string pathFile;
@@ -390,9 +439,15 @@ PathClass::InitPaths (IOSectionClass &in)
     //  numGrid(0)=6*2;
     //  numGrid(1)=6*2;
     //  numGrid(2)=5*2;
-    numGrid(0)=2;
-    numGrid(1)=3;
-    numGrid(2)=20;
+    ///    numGrid(0)=2;
+    ///    numGrid(1)=3;
+    ///    numGrid(2)=20;
+    //    //    numGrid(0)=10;
+    //    //    numGrid(1)=10;
+    //    numGrid(2)=10;
+    numGrid(0)=30;
+    numGrid(1)=30;
+    numGrid(2)=30;
     
     //  Cell=new GridClass(*this);
     Cell.Init(Box,numGrid);
@@ -414,6 +469,7 @@ PathClass::InitPaths (IOSectionClass &in)
   ExistsCoupling.AcceptCopy();
   if (LongRange)
     UpdateRho_ks();
+
 }
 
 
