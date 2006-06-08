@@ -13,6 +13,7 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   H.SetIonPot (ph, useFFT);
   H.Setk(k);
   Bands.resize (NumBands, GVecs.size());
+  HBands.resize (NumBands, GVecs.size());
   LastBands.resize (NumBands, GVecs.size());
   PH = &ph;
   UseFFT = useFFT;

@@ -14,7 +14,16 @@ protected:
   Array<Vec3,1> Rions;
   FFTBox FFT;
   HamiltonianClass H;
-  Array<complex<double>,2> Bands, LastBands;
+  Array<complex<double>,2> Bands, HBands, LastBands;
+  ///////////////////////
+  // Subspace rotation //
+  ///////////////////////
+  Array<complex<double>,2> Hmat, EigVecs, RotBands;
+  Array<double,1> EigVals;
+  void SubspaceRotate();
+  /// Applies the current hamiltonian to all bands, storing in Hbands
+  void ApplyH();
+
   Array<double,1> Occupancies;
   ConjGradMPI CG;
   Vec3 Box;
@@ -88,7 +97,7 @@ public:
   MPISystemClass(int numBands, int numElecs,
 		 CommunicatorClass &bandcomm, CommunicatorClass &kcomm,
 		 bool useLDA=false, bool mdextrap=false) 
-    : CG(H, Bands, bandcomm, kcomm, VHXC), 
+    : CG(H, Bands, HBands, bandcomm, kcomm, VHXC), 
       FFT(GVecs), H(GVecs, FFT), 
       NumBands(numBands), BandComm(bandcomm), kComm(kcomm), 
       MDExtrap(mdextrap), FirstTime(true), NumElecs(numElecs)

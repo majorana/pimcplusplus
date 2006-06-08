@@ -23,6 +23,7 @@ protected:
   int iter;
   int CurrentBand, LastBand;
   Array<complex<double>,2> &Bands;
+  Array<complex<double>,2> &HBands;
   Array<complex<double>,2> lastPhis;
   double Tolerance;
   CommunicatorClass &BandComm, &kComm;
@@ -50,11 +51,12 @@ public:
 
   ConjGradMPI (HamiltonianClass &h,
 	       Array<complex<double>,2> &bands,
+	       Array<complex<double>,2> &hbands,
 	       CommunicatorClass &bandComm, 
 	       CommunicatorClass &kcomm,
 	       Array<double,3> &vhxc) : 
     H(h), IsSetup(false), iter(0),
-    LastBand(-1), Bands(bands), Tolerance (1.0e-6),
+    LastBand(-1), Bands(bands), HBands(hbands), Tolerance (1.0e-6),
     BandComm(bandComm), kComm(kcomm), VHXC(vhxc)
   {
     // Do nothing for now

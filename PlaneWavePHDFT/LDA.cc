@@ -17,6 +17,10 @@ MPISystemClass::InitLDA()
   Rho_r.resize   (Nx, Ny, Nz);
   h_G.resize     (NDelta);
   Rho_G.resize   (NDelta);
+  Hmat.resize(NumBands, NumBands);
+  EigVecs.resize(NumBands, NumBands);
+  EigVals.resize(NumBands);
+  RotBands.resize(NumBands, Numk);
   Occupancies.resize(NumBands);
   CalcRadialChargeDensity();
   Smearer.SetOrder(2);
@@ -30,6 +34,40 @@ MPISystemClass::InitLDA()
 }
 
 #include "Hamiltonians.h"
+
+void
+MPISystemClass::ApplyH()
+{
+  zVec c, Hc;
+  for (int bi=0; bi<Bands.rows(); bi++) {
+    c.reference (Bands(bi,Range::all()));
+    Hc.reference (HBands(bi,Range::all()));
+    H.Apply (c,Hc,VHXC);
+  }
+}
+
+
+void
+MPISystemClass::SubspaceRotate()
+{
+  ApplyH();
+  zVec c, Hc;
+  for (int bi=0; bi<Bands.rows(); bi++) {
+    c.reference (Bands(bi,Range::all()));
+    for (int bj=0; bj<Bands.rows(); bj++) {
+      Hc.reference (HBands(bj, Range::all()));
+      Hmat(bi,bj) = conjdot (c, Hc);
+    }
+  }
+  SymmEigenPairs(Hmat, Hmat.rows(), EigVals, EigVecs);
+  // Now, compute the new rotated bands.
+  RotBands = 0.0;
+  for (int bi=0; bi<NumBands; bi++)
+    for (int bj=0; bj<NumBands; bj++)
+      RotBands(bi,Range::all()) += EigVecs(bi,bj)*Bands(bj,Range::all());
+  Bands = RotBands;
+}
+
 
 void
 MPISystemClass::SolveLDA()
@@ -64,8 +102,10 @@ MPISystemClass::SolveLDA()
       }
     }
     CG.SetTolerance(3.0e-4);
-    if (numSCIters == 0)
+    if (numSCIters == 0) {
       CG.InitBands();
+      SubspaceRotate();
+    }
     CG.Solve();
     SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-6);
     lastE = CG.Energies(highestOcc);

@@ -88,7 +88,7 @@ void TestSolveLDA()
   cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 3.0, *pot, true, true);
+  system.Setup (box, k, 4.0, *pot, true, true);
   system.SetIons(rions);
   system.SolveLDA();
 }
@@ -147,4 +147,5 @@ main(int argc, char **argv)
   // TestSmear();
   TestSolveLDA();
   // TestSolidLDA();
+  COMM::Finalize();
 }
