@@ -34,8 +34,12 @@ MPISystemClass::InitLDA()
 void
 MPISystemClass::SolveLDA()
 {
+  // Make sure we have enough bands
+  assert (NumBands >= (NumElecs+1)/2);
   int numSCIters = 0;
   bool SC = false;
+  int highestOcc = (NumElecs+1)/2-1;
+  double lastE = 500.0;
   while (!SC) {
     MixChargeDensity();
     CalcVHXC();
@@ -60,9 +64,11 @@ MPISystemClass::SolveLDA()
       }
     }
     CG.SetTolerance(3.0e-4);
-    if (numSCIters < 3)
+    if (numSCIters == 0)
       CG.InitBands();
     CG.Solve();
+    SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-6);
+    lastE = CG.Energies(highestOcc);
     CalcOccupancies();
     CalcChargeDensity();
     numSCIters ++;

@@ -2,7 +2,7 @@
 
 KerkerMixerClass::KerkerMixerClass (FFTBox &fft) :
   ChargeMixerClass(fft), Lambda(1.0), HaveLastCharge(false),
-  NewFraction(0.5)
+  NewFraction(0.8)
 {
   LastCharge.resize(FFT.GVecs.DeltaSize());
   NewCharge.resize(FFT.GVecs.DeltaSize());

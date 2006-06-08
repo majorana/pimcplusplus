@@ -208,11 +208,11 @@ void ConjGradMPI::Solve()
   int iter = 0;
   double residual = 1.0;
   while ((iter < 100) && (residual > Tolerance)) {
-    if ((iter % 20) == 0)
+    if ((iter % 10) == 0)
       EtaXiLast = 0.0;
-    cerr << "iter = " << iter << "  residual = " << residual << endl;
-    cerr << "Energies = " << Energies << endl;
     residual = Iterate();
+    cerr << "Energies = " << Energies << endl;
+    cerr << "iter = " << iter << "  residual = " << residual << endl;
     iter++;
   }
 

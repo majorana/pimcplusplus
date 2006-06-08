@@ -58,12 +58,12 @@ void TestSolveLDA()
   bandComm.Subset (root, kComm);
 
   IOSectionClass in;
-  in.OpenFile("NaLocalPH.h5");
-  //in.OpenFile("Na_HF_NLPP.h5");
+  //in.OpenFile("NaLocalPH.h5");
+  in.OpenFile("Na_HF_NLPP.h5");
   Potential *pot = ReadPotential(in);
   in.CloseFile();
 
-  int numBands  = 14;
+  int numBands  = 16;
   int numElecs  = 16;
   Vec3 box (26.56, 26.56, 26.56);
   Array<Vec3,1> rions(16);
@@ -88,7 +88,7 @@ void TestSolveLDA()
   cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 4.0, *pot, true, true);
+  system.Setup (box, k, 3.0, *pot, true, true);
   system.SetIons(rions);
   system.SolveLDA();
 }
