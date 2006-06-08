@@ -121,18 +121,19 @@ ConjGradMPI::CalcPhiCG()
   E0 = realconjdot (c, Hc);
   // Steepest descent direction: (5.10)
   Xi = E0*c - Hc;
-  double residualNorm = norm (Xi);
   /// Orthonalize to other bands lower than me here (5.12)
   zVec &Xip = Xi;
-  OrthogLower (Bands, Xip, CurrentBand);
+  //  OrthogLower (Bands, Xip, CurrentBand);
+  OrthogLower(Bands, Xip, Bands.extent(0));
+  double residualNorm = norm (Xi);
 
   Precondition();
 
   // Now, orthogonalize to all bands, (including present band);
   // rename for clarity (5.18)
   zVec &Etap = Eta;
-  OrthogLower(Bands, Etap, CurrentBand+1);
-
+  //  OrthogLower(Bands, Etap, CurrentBand+1);
+  OrthogLower(Bands, Etap, Bands.extent(0));
 
 
   // Compute conjugate direction (5.20)
@@ -152,7 +153,8 @@ ConjGradMPI::CalcPhiCG()
   // Orthogonalize to all lower bands band: (5.21)
   Phip = Phi;
   //  OrthogExcluding(Bands, Phip, -1);
-  OrthogLower(Bands, Phip, CurrentBand+1);
+  //  OrthogLower(Bands, Phip, CurrentBand+1);
+  OrthogLower(Bands, Phip, Bands.extent(0));
   // (5.22)
   Normalize (Phip);
 

@@ -20,7 +20,7 @@ MPISystemClass::InitLDA()
   Hmat.resize(NumBands, NumBands);
   EigVecs.resize(NumBands, NumBands);
   EigVals.resize(NumBands);
-  RotBands.resize(NumBands, Numk);
+  RotBands.resize(NumBands, GVecs.size());
   Occupancies.resize(NumBands);
   CalcRadialChargeDensity();
   Smearer.SetOrder(2);
@@ -106,6 +106,7 @@ MPISystemClass::SolveLDA()
       CG.InitBands();
       SubspaceRotate();
     }
+    SubspaceRotate();
     CG.Solve();
     SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-6);
     lastE = CG.Energies(highestOcc);

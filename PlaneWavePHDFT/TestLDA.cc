@@ -40,7 +40,7 @@ void TestInitCharge()
   Vec3 k = 0.25 * Gprim;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 4.0, *pot, true, true);
+  system.Setup (box, k, 2.5, *pot, true, true);
   system.SetIons(rions);
   IOSectionClass out;
   out.NewFile ("InitDensity.h5");
