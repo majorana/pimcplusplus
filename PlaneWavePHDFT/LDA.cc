@@ -37,22 +37,11 @@ MPISystemClass::InitLDA()
 
 #include "Hamiltonians.h"
 
-void
-MPISystemClass::ApplyH()
-{
-  zVec c, Hc;
-  for (int bi=0; bi<Bands.rows(); bi++) {
-    c.reference (Bands(bi,Range::all()));
-    Hc.reference (HBands(bi,Range::all()));
-    H.Apply (c,Hc,VHXC);
-  }
-}
-
 
 void
 MPISystemClass::SubspaceRotate()
 {
-  ApplyH();
+  //  ApplyH();
   zVec c, Hc;
   for (int bi=0; bi<Bands.rows(); bi++) {
     c.reference (Bands(bi,Range::all()));
@@ -69,7 +58,23 @@ MPISystemClass::SubspaceRotate()
       RotBands(bi,Range::all()) += EigVecs(bi,bj)*Bands(bj,Range::all());
   
   Bands = RotBands;
-//   ApplyH();
+  // And compute rotated HBands
+  RotBands = 0.0;
+  for (int bi=0; bi<NumBands; bi++)
+    for (int bj=0; bj<NumBands; bj++)
+      RotBands(bi,Range::all()) += EigVecs(bi,bj)*HBands(bj,Range::all());
+  HBands = RotBands;
+
+  zVec Tc(Bands.extent(1));
+  for (int bi=0; bi<NumBands; bi++) {
+    Tc = 0.0;
+    c.reference (Bands(bi, Range::all()));
+    H.Kinetic.Apply (c, Tc);
+    CG.T(bi) = realconjdot (c, Tc);
+  }
+  // HACK HACK HACK
+  // CG.ApplyH();
+
 //   for (int bi=0; bi<NumBands; bi++) {
 //     c.reference (Bands(bi,Range::all()));
 //     Hc.reference (HBands(bi, Range::all()));
@@ -82,6 +87,11 @@ MPISystemClass::SubspaceRotate()
 void
 MPISystemClass::SolveLDA()
 {
+  if (UseSubspaceRotation)
+    CG.SetOrthoType (ORTHO_ALL);
+  else
+    CG.SetOrthoType (ORTHO_LOWER);
+
   // Make sure we have enough bands
   assert (NumBands >= (NumElecs+1)/2);
   int numSCIters = 0;
@@ -95,9 +105,13 @@ MPISystemClass::SolveLDA()
     CG.SetTolerance(1.0e-4);
     if (numSCIters == 0 && ConfigNum == 0) {
       CG.InitBands();
+      CG.ApplyH();
       SubspaceRotate();
     }
-    SubspaceRotate();
+    CG.ApplyH();
+    if (UseSubspaceRotation) 
+      SubspaceRotate();
+
     CG.Solve();
     SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-6);
     lastE = CG.Energies(highestOcc);

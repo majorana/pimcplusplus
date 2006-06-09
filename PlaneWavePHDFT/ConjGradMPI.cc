@@ -123,8 +123,10 @@ ConjGradMPI::CalcPhiCG()
   Xi = E0*c - Hc;
   /// Orthonalize to other bands lower than me here (5.12)
   zVec &Xip = Xi;
-  //  OrthogLower (Bands, Xip, CurrentBand);
-  OrthogLower(Bands, Xip, Bands.extent(0));
+  if (Ortho == ORTHO_LOWER)
+    OrthogLower (Bands, Xip, CurrentBand);
+  else if (Ortho == ORTHO_ALL)
+    OrthogLower(Bands, Xip, Bands.extent(0));
   double residualNorm = norm (Xi);
 
   Precondition();
@@ -133,8 +135,10 @@ ConjGradMPI::CalcPhiCG()
   // rename for clarity (5.18)
   zVec &Etap = Eta;
   //OrthogLower(Bands, Etap, CurrentBand+1);
-  //  OrthogLower(Bands, Etap, CurrentBand+1);
-  OrthogLower(Bands, Etap, Bands.extent(0));
+  if (Ortho == ORTHO_LOWER)
+      OrthogLower(Bands, Etap, CurrentBand+1);
+  else if (Ortho == ORTHO_ALL)
+    OrthogLower(Bands, Etap, Bands.extent(0));
 
   // Compute conjugate direction (5.20)
   complex<double> etaxi = conjdot(Etap, Xip);
@@ -155,8 +159,10 @@ ConjGradMPI::CalcPhiCG()
   //  OrthogExcluding(Bands, Phip, -1);
   //    OrthogLower(Bands, Phip, CurrentBand+1);
   // (5.22)
-  //  OrthogLower(Bands, Phip, CurrentBand+1);
-  OrthogLower(Bands, Phip, Bands.extent(0));
+  if (Ortho == ORTHO_LOWER)
+    OrthogLower(Bands, Phip, CurrentBand+1);
+  else if (Ortho == ORTHO_ALL)
+    OrthogLower(Bands, Phip, Bands.extent(0));
   // (5.22)
   Normalize (Phip);
 
@@ -218,7 +224,7 @@ void ConjGradMPI::Solve()
   int iter = 0;
   double residual = 1.0;
   while ((iter < 100) && (residual > Tolerance)) {
-    if ((iter % 10) == 0)
+    if ((iter % 10) == 0 && (Ortho==ORTHO_LOWER))
       EtaXiLast = 0.0;
     residual = Iterate();
     cerr << "Energies = " << Energies << endl;
@@ -272,8 +278,26 @@ void
 ConjGradMPI::CollectBands()
 {
   BandComm.AllGatherRows(Bands);
+  BandComm.AllGatherRows(HBands);
   BandComm.AllGatherVec(Residuals);
+  BandComm.AllGatherVec(T);
   BandComm.AllGatherVec(Energies);
 }
 
 
+void
+ConjGradMPI::ApplyH()
+{
+  if (!IsSetup)
+    Setup();
+  zVec c, Hc;
+  for (int bi=MyFirstBand; bi<=MyLastBand; bi++) {
+    c.reference (Bands(bi,Range::all()));
+    Hc.reference (HBands(bi,Range::all()));
+    Hc = 0.0;
+    H.Kinetic.Apply(c,Hc);
+    T(bi) = realconjdot(c,Hc);
+    H.Vion->Apply (c,Hc,VHXC);
+  }
+  CollectBands();
+}

@@ -157,7 +157,7 @@ public:
       FFT(GVecs), H(GVecs, FFT), 
       NumBands(numBands), BandComm(bandcomm), kComm(kcomm), 
       UseMDExtrap(mdextrap), FirstTime(true), NumElecs(numElecs),
-      ConfigNum(0)
+      ConfigNum(0), UseSubspaceRotation(true)
   {
 
   }

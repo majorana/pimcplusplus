@@ -6,6 +6,8 @@
 
 class CommunicatorClass;
 
+typedef enum {ORTHO_ALL, ORTHO_LOWER} OrthoType;
+
 class ConjGradMPI
 {
 protected:
@@ -19,7 +21,6 @@ protected:
   double CalcPhiCG();
   bool IsSetup;
   void Precondition();
-  Array<double,1> T;
   int iter;
   int CurrentBand, LastBand;
   Array<complex<double>,2> &Bands;
@@ -29,14 +30,23 @@ protected:
   CommunicatorClass &BandComm, &kComm;
   /// Returns the maximum residual of all the bands
   double Iterate();
-  void CollectBands();
   int MyFirstBand, MyLastBand;
   Array<double,1> Residuals;
   void CheckOverlaps();
   /// For LDA
   Array<double,3> &VHXC;
 
+  /// Orthogonalize CG vector to all bands
+  OrthoType Ortho;
+  void CollectBands();
+
 public:
+  // The kinetic energies of the bands
+  Array<double,1> T;
+
+  /// Applies the current hamiltonian to all bands, storing in Hbands
+  void ApplyH();
+
   void Setup();
 
   /// Stores the band eigenenergies
@@ -44,6 +54,7 @@ public:
   void InitBands();
   void Solve();
   inline void SetTolerance(double tol) { Tolerance = tol;}
+  inline void SetOrthoType (OrthoType otype) { Ortho = otype; }
   void PrintOverlaps();
 
   inline int GetFirstBand() { return MyFirstBand; }
@@ -57,7 +68,8 @@ public:
 	       Array<double,3> &vhxc) : 
     H(h), IsSetup(false), iter(0),
     LastBand(-1), Bands(bands), HBands(hbands), Tolerance (1.0e-6),
-    BandComm(bandComm), kComm(kcomm), VHXC(vhxc)
+    BandComm(bandComm), kComm(kcomm), VHXC(vhxc),
+    Ortho (ORTHO_ALL)
   {
     // Do nothing for now
   }

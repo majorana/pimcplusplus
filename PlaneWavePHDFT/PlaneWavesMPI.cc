@@ -201,3 +201,15 @@ MPISystemClass::Setk(Vec3 k)
   Bands1 = complex<double> (0.0, 0.0);
   CG.Setup();
 }
+
+
+void
+MPISystemClass::Read(IOSectionClass &in)
+{
+  in.ReadVar ("UseLDA", UseLDA, true);
+  in.ReadVar ("UseSubspaceRotation", UseSubspaceRotation, true);
+  CG.SetOrthoType (UseSubspaceRotation ? ORTHO_ALL : ORTHO_LOWER);
+  in.ReadVar ("UseFFT", UseFFT, true);
+  in.ReadVar ("UseMDExtrap", UseMDExtrap, true);
+  assert (in.ReadVar ("kCut", kCut));
+}
