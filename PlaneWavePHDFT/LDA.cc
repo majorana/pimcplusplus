@@ -117,6 +117,12 @@ MPISystemClass::SolveLDA()
 
     CG.Solve();
     SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-6);
+    /// Now make sure we all k-points agree that we're
+    /// self-consistent.
+    if (BandComm.MyProc() == 0) 
+      kComm.AllAnd(SC);
+    BandComm.Broadcast(0, SC);
+
     lastE = CG.Energies(highestOcc);
     CalcOccupancies();
     CalcChargeDensity();
