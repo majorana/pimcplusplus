@@ -567,6 +567,15 @@ CommunicatorClass::AllSum (Array<TinyVector<double,3>,1> &in,
 		MPI_DOUBLE, MPI_SUM, MPIComm);
 }
 
+void
+CommunicatorClass::AllAnd (bool &TorF)
+{
+  int inval, outval;
+  inval = TorF ? 1 : 0;
+  MPI_Allreduce (&inval, &outval, 1, MPI_INT, MPI_SUM, MPIComm);
+  TorF = (outval == NumProcs());
+}
+
 
 void
 CommunicatorClass::BarrierSync()

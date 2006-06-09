@@ -240,6 +240,7 @@ public:
 	       Array<TinyVector<double,2>,1> &out);
   void AllSum (Array<TinyVector<double,3>,1> &in, 
 	       Array<TinyVector<double,3>,1> &out);
+  void AllAnd (bool &TorF);
   template<int N> 
   inline void AllMax (TinyVector<int,N> &vec) {
     TinyVector<int, N> outVec;
@@ -385,6 +386,9 @@ public:
   template<class T, int N>
   inline void AllSum (Array<T, N> &in, Array<T, N> &out)
   { out = in; }
+
+  inline void AllAnd (bool &TorF)
+  { /* do nothing */ }
 
   inline template<int N> 
   void AllMax (TinyVector<int,N> &vec) {
