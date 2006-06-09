@@ -124,7 +124,7 @@ void TestMultiLDA()
   IOSectionClass configsIn;
   configsIn.OpenFile("configs.h5");
   configsIn.ReadVar("R", R);
-  for (int conf=0; conf<200; conf++) {
+  for (int conf=0; conf<10; conf++) {
     for (int ri=0; ri<R.extent(1); ri++)
       for (int dim=0; dim<3; dim++)
 	rions(ri)[dim] = R(conf,ri,dim);

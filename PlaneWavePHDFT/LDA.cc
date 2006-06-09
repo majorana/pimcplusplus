@@ -10,6 +10,8 @@ MPISystemClass::InitLDA()
   int NDelta = GVecs.DeltaSize();
   FFT.GetDims    (Nx, Ny, Nz);
   NewRho.resize  (Nx, Ny, Nz);
+  Rho_r1.resize  (Nx, Ny, Nz);
+  Rho_r2.resize  (Nx, Ny, Nz);
   TempRho.resize (Nx, Ny, Nz);
   VH.resize      (Nx, Ny, Nz);
   VXC.resize     (Nx, Ny, Nz);
@@ -86,6 +88,7 @@ MPISystemClass::SolveLDA()
   bool SC = false;
   int highestOcc = (NumElecs+1)/2-1;
   double lastE = 500.0;
+  ChargeMixer->Reset();
   while (!SC) {
     MixChargeDensity();
     CalcVHXC();
@@ -127,6 +130,8 @@ MPISystemClass::SolveLDA()
   Rions2 = Rions1;
   Bands1 = Bands;
   Rions1 = Rions;
+  Rho_r2 = Rho_r1;
+  Rho_r1 = Rho_r;
   ConfigNum++;
 }
 
@@ -171,6 +176,11 @@ MPISystemClass::DoMDExtrap()
     cerr << "alpha = " << alpha << endl;
     Bands = alpha * Bands1 + (1.0-alpha)*Bands2;
     GramSchmidt(Bands);
+
+    // Now extrapolate density
+    Rho_r = alpha * Rho_r1 + (1.0-alpha)*Rho_r2;
+    // For the benefit of the charge mixer
+    NewRho = Rho_r;
   }
 }
 

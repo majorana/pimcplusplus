@@ -11,15 +11,73 @@ class CommunicatorClass;
 class MPISystemClass
 {
 protected:
+  ///////////////////
+  // Basic storage //
+  ///////////////////
+  /// The positions of the ions
   Array<Vec3,1> Rions;
-  FFTBox FFT;
+
+  /// Simulation box size
+  Vec3 Box;
+
+  /// The reciporical-space cutoff
+  double kCut;
+  
+  /// The number of bands and the number of electrons.  For technical
+  /// reasons, it is often necessary to solve for unoccupied bands
+  int NumBands, NumElecs;
+  
+  /// The electron-ion potential -- presently, this only works for
+  /// systems containing one element type
+  Potential *PH;
+
+  /// Object for applying the Hamiltonian to a vector.
   HamiltonianClass H;
+
+  // The band coefficients and the Hamiltonian applied to them
   Array<complex<double>,2> Bands, HBands;
+
+  // Band occupancies
+  Array<double,1> Occupancies;
+
+  // The conjugate gradient solver
+  ConjGradMPI CG;
+  
+  /// The workhorse for doing the FFTs.
+  FFTBox FFT;
+
+  /// The processors are divided into a number of groups, each of
+  /// which work on a different k-point.  BandComm is an MPI
+  /// communicator which includes all the processors working on this
+  /// processor groups k-point.  kComm is a communicator which
+  /// includes the root processor of each BandComm.  It is used to
+  /// determine occupancies and sum the charge density over k-points.
+  CommunicatorClass &BandComm, &kComm;
+  /// The number of k-points and this processors k-point number
+  int Numk, Myk;
+
+  ///////////
+  // Flags //
+  ///////////
+  bool UseFFT;
+  bool UseMDExtrap, FirstTime;
+  bool UseLDA;
+  bool UseSubspaceRotation;
+
+  ////////////////
+  // IO related //
+  ////////////////
+  void Read (IOSectionClass &in);
+  /// This stores the file location for storing any output
+  IOSectionClass OutSection;
 
   //////////////////////
   // MD extrapolation //
   //////////////////////
+  // The _1's contain the data from the previous ion configuration and
+  // the _2's from the one before that.  We need both to extrapolate.
   Array<complex<double>,2> Bands1, Bands2;
+  Array<double,3> Rho_r1, Rho_r2;
   Array<Vec3,1> Rions1, Rions2;
 
   ///////////////////////
@@ -31,21 +89,10 @@ protected:
   /// Applies the current hamiltonian to all bands, storing in Hbands
   void ApplyH();
 
-  Array<double,1> Occupancies;
-  ConjGradMPI CG;
-  Vec3 Box;
-  double kCut;
-  int NumBands, NumElecs;
-  Potential *PH;
-  bool UseFFT;
-  CommunicatorClass &BandComm, &kComm;
-  int Numk, Myk;
-  bool MDExtrap, FirstTime;
   /////////////////////////
   /// LDA-related stuff ///
   /////////////////////////
   int ConfigNum;
-  bool UseLDA;
   int Nx, Ny, Nz;
   // Array<complex<double>,3> Phip_r, Psi_r;
   void CalcOccupancies();
@@ -109,7 +156,7 @@ public:
     : CG(H, Bands, HBands, bandcomm, kcomm, VHXC), 
       FFT(GVecs), H(GVecs, FFT), 
       NumBands(numBands), BandComm(bandcomm), kComm(kcomm), 
-      MDExtrap(mdextrap), FirstTime(true), NumElecs(numElecs),
+      UseMDExtrap(mdextrap), FirstTime(true), NumElecs(numElecs),
       ConfigNum(0)
   {
 

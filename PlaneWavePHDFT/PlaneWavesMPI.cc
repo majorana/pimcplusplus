@@ -59,7 +59,7 @@ MPISystemClass::SetIons (const Array<Vec3,1> &rions)
 void 
 MPISystemClass::DiagonalizeH ()
 {
-  if (MDExtrap && !FirstTime) {
+  if (UseMDExtrap && !FirstTime) {
 //     for (int i=0; i<Bands.extent(0); i++)
 //       for (int j=0; j<Bands.extent(1); j++)
 // 	Bands(i,j) = 2.0*Bands(i,j) - Bands1(i,j);
