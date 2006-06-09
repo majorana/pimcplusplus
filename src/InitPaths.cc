@@ -74,6 +74,7 @@ void PathClass::ReadSqueeze(string fileName,bool replicate)
   inFile.CloseSection();
   inFile.CloseSection();
   inFile.CloseFile();
+  MoveJoin(NumTimeSlices()-1,1);
 }
 
 void PathClass::ReadOld(string fileName,bool replicate)
@@ -266,43 +267,43 @@ PathClass::InitPaths (IOSectionClass &in)
       //      PrintRealSlices();
       //      TestRealSlices();
     }    
-    else if (InitPaths == "WORM") {
-      NowOpen=true;
-      Array<double,2> Positions;
-      assert (in.ReadVar ("Positions", Positions));
-      assert (Positions.rows() == species.NumParticles);
-      assert (Positions.cols() == species.NumDim);
-      for (int ptcl=species.FirstPtcl; 
-	   ptcl<=species.LastPtcl; ptcl++){
-	for (int slice=0; slice<NumTimeSlices(); slice++) {
-	  ParticleExist(slice,ptcl)=1.0;
-	  dVec pos;
-	  pos = 0.0;
-	  for (int dim=0; dim<species.NumDim; dim++)
-	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
-	  Path(slice,ptcl) = pos;
-	}      
-      }
-      int startEmpty;
-      assert(in.ReadVar("NumRealParticles",startEmpty));
+//     else if (InitPaths == "WORM") {
+//       NowOpen=true;
+//       Array<double,2> Positions;
+//       assert (in.ReadVar ("Positions", Positions));
+//       assert (Positions.rows() == species.NumParticles);
+//       assert (Positions.cols() == species.NumDim);
+//       for (int ptcl=species.FirstPtcl; 
+// 	   ptcl<=species.LastPtcl; ptcl++){
+// 	for (int slice=0; slice<NumTimeSlices(); slice++) {
+// 	  ParticleExist(slice,ptcl)=1.0;
+// 	  dVec pos;
+// 	  pos = 0.0;
+// 	  for (int dim=0; dim<species.NumDim; dim++)
+// 	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
+// 	  Path(slice,ptcl) = pos;
+// 	}      
+//       }
+//       int startEmpty;
+//       assert(in.ReadVar("NumRealParticles",startEmpty));
 
-      //      int startEmpty=1;
-      for (int ptcl=startEmpty;ptcl<NumParticles();ptcl++)
-	for (int slice=0;slice<NumTimeSlices();slice++){
-	  ParticleExist(slice,ptcl)=0.0;
-	}
-      ParticleExist(NumTimeSlices()-1,startEmpty)=0.0;
-      ParticleExist(0,startEmpty)=0.0;
-      //      ParticleExist.AcceptCopy();
-      for (int ptcl=startEmpty-1;ptcl<NumParticles()-1;ptcl++){
-	Permutation(ptcl)=ptcl+1;
-      }
-      Permutation(NumParticles()-1)=startEmpty-1;
-      Permutation.AcceptCopy();
-      Path.AcceptCopy();
-      ParticleExist.AcceptCopy();
-      NowOpen.AcceptCopy();
-    }
+//       //      int startEmpty=1;
+//       for (int ptcl=startEmpty;ptcl<NumParticles();ptcl++)
+// 	for (int slice=0;slice<NumTimeSlices();slice++){
+// 	  ParticleExist(slice,ptcl)=0.0;
+// 	}
+//       ParticleExist(NumTimeSlices()-1,startEmpty)=0.0;
+//       ParticleExist(0,startEmpty)=0.0;
+//       //      ParticleExist.AcceptCopy();
+//       for (int ptcl=startEmpty-1;ptcl<NumParticles()-1;ptcl++){
+// 	Permutation(ptcl)=ptcl+1;
+//       }
+//       Permutation(NumParticles()-1)=startEmpty-1;
+//       Permutation.AcceptCopy();
+//       Path.AcceptCopy();
+//       ParticleExist.AcceptCopy();
+//       NowOpen.AcceptCopy();
+//     }
     else if (InitPaths == "ADDVACANCIES") {
       Array<double,2> Positions;
       assert (in.ReadVar ("Positions", Positions));
@@ -362,7 +363,7 @@ PathClass::InitPaths (IOSectionClass &in)
       }
       string pathFile;
       assert(in.ReadVar("File",pathFile));
-      ReadOld(pathFile,replicate);
+      ReadSqueeze(pathFile,replicate);
     }
     else if (InitPaths == "SQUEEZE"){
       string pathFile;
