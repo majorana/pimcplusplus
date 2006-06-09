@@ -30,6 +30,7 @@ protected:
   zVec LastCharge, NewCharge;
 public:
   void SetLambda(double lambda);
+  double GetLambda();
   void SetNewFraction (double frac);
   void Reset();
   void Mix (const Array<double,3> &newCharge,

@@ -8,7 +8,11 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   UseLDA = useLDA;
   Box = box;
   kCut = kcut;
-  GVecs.Set (box, k, kcut);
+  Int3 fftSize = GVecs.GetFFTBoxSize (box, k, kcut);
+  CommunicatorClass worldComm;
+  worldComm.SetWorld();
+  worldComm.AllMax(fftSize);
+  GVecs.Set (box, k, kcut, fftSize);
   FFT.Setup();
   H.SetIonPot (ph, useFFT);
   H.Setk(k);

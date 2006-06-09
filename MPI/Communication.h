@@ -240,6 +240,12 @@ public:
 	       Array<TinyVector<double,2>,1> &out);
   void AllSum (Array<TinyVector<double,3>,1> &in, 
 	       Array<TinyVector<double,3>,1> &out);
+  template<int N> 
+  inline void AllMax (TinyVector<int,N> &vec) {
+    TinyVector<int, N> outVec;
+    MPI_Allreduce(&(vec[0]), &(outVec[0]), N, MPI_INT, MPI_MAX, MPIComm);
+    vec = outVec;
+  }
   void BarrierSync();
   void PrintSync();
 
@@ -379,6 +385,12 @@ public:
   template<class T, int N>
   inline void AllSum (Array<T, N> &in, Array<T, N> &out)
   { out = in; }
+
+  inline template<int N> 
+  void AllMax (TinyVector<int,N> &vec) {
+    // do nothing
+  }
+
 
   inline void BarrierSync() {}
   inline void PrintSync() {}

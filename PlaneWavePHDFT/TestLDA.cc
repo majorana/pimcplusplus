@@ -124,7 +124,9 @@ void TestMultiLDA()
   IOSectionClass configsIn;
   configsIn.OpenFile("configs.h5");
   configsIn.ReadVar("R", R);
-  FILE *fout = fopen ("Energies.dat", "w");
+  FILE *fout;
+  if (bandComm.MyProc() == 0)
+    fout = fopen ("Energies.dat", "w");
   for (int conf=0; conf<R.extent(0); conf++) {
     for (int ri=0; ri<R.extent(1); ri++)
       for (int dim=0; dim<3; dim++)
@@ -132,10 +134,12 @@ void TestMultiLDA()
     system.SetIons(rions);
     system.DoMDExtrap();
     system.SolveLDA();
-    for (int bi=0; bi<numBands; bi++)
-      fprintf (fout, "%1.12e ", system.GetEnergy(bi));
-    fprintf (fout, "\n");
-    fflush (fout);
+    if (bandComm.MyProc() == 0) {
+      for (int bi=0; bi<numBands; bi++)
+	fprintf (fout, "%1.12e ", system.GetEnergy(bi));
+      fprintf (fout, "\n");
+      fflush (fout);
+    }
   }
   
 

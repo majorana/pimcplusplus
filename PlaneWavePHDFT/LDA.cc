@@ -99,6 +99,9 @@ MPISystemClass::SolveLDA()
   int highestOcc = (NumElecs+1)/2-1;
   double lastE = 500.0;
   ChargeMixer->Reset();
+  
+  double startLambda = ChargeMixer->GetLambda();
+
   while (!SC) {
     MixChargeDensity();
     CalcVHXC();
@@ -118,7 +121,14 @@ MPISystemClass::SolveLDA()
     CalcOccupancies();
     CalcChargeDensity();
     numSCIters ++;
+    /// Stability control:  if convergence is taking forever, we're
+    /// probably  charge sloshing. Then increase the Kerker
+    /// parameter
+    if ((numSCIters % 50) == 0)
+      ChargeMixer->SetLambda (1.2*ChargeMixer->GetLambda());
   }
+  // Reset initial lambda
+  ChargeMixer->SetLambda(startLambda);
 
   if (BandComm.MyProc() == 0) {
     if (kComm.MyProc() == 0) {
@@ -248,7 +258,7 @@ MPISystemClass::CalcOccupancies()
   /// Now normalize to to make sure we have exactly the right number
   /// of electrons 
   for (int bi=0; bi<NumBands; bi++) 
-    Occupancies(bi) = (double)(NumElecs*Numk)/totalOcc * occ(Myk, bi);
+    Occupancies(bi) = (double)(NumElecs)/totalOcc * occ(Myk, bi);
   perr << "Occupancies = " << Occupancies << endl;
 }
 

@@ -67,7 +67,9 @@ protected:
   ////////////////
   // IO related //
   ////////////////
+public:
   void Read (IOSectionClass &in);
+private:
   /// This stores the file location for storing any output
   IOSectionClass OutSection;
 
@@ -102,7 +104,8 @@ private:
   void CalcOccupancies();
   MethfesselPaxton Smearer;
   void CalcChargeDensity();
-  ChargeMixerClass *ChargeMixer;
+  //  ChargeMixerClass *ChargeMixer;
+  KerkerMixerClass *ChargeMixer;
   void MixChargeDensity();
   /// These store the electron charge density in real space on the FFT
   /// grid.  TempRho is used to compute the charge density for my own
@@ -156,7 +159,7 @@ public:
   MPISystemClass(int numBands, int numElecs,
 		 CommunicatorClass &bandcomm, CommunicatorClass &kcomm,
 		 bool useLDA=false, bool mdextrap=false) 
-    : CG(H, Bands, HBands, bandcomm, kcomm, VHXC), 
+    : CG(H, Bands, HBands, (numElecs+1)/2, bandcomm, kcomm, VHXC), 
       FFT(GVecs), H(GVecs, FFT), 
       NumBands(numBands), BandComm(bandcomm), kComm(kcomm), 
       UseMDExtrap(mdextrap), FirstTime(true), NumElecs(numElecs),

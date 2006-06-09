@@ -209,7 +209,7 @@ ConjGradMPI::Iterate()
   /// HACK HACK HACK
   //   return max(Residuals);
   double maxRes = 0.0;
-  for (int i=0; i<8; i++)
+  for (int i=0; i<NumOccupied; i++)
     maxRes = max (Residuals(i), maxRes);
   return maxRes;
 }
