@@ -130,6 +130,7 @@ MPISystemClass::SolveLDA()
       out.WriteVar("VXC", VXC);
       out.WriteVar("VHXC", VHXC);
       out.WriteVar("Rho", Rho_r);
+      out.WriteVar ("E", CG.Energies);
       LocalPotFFTClass &pot = *((LocalPotFFTClass*)H.Vion);
       Array<double,3> magV(VH.shape());
       for (int ix=0; ix<magV.extent(0); ix++)
@@ -163,7 +164,15 @@ Residue (Array<Vec3,1> &R0, Array<Vec3,1> &R1, Array<Vec3,1> &R2,
   return residue;
 }
 
+/// See Dario Alfe, Computer Physics Communications 118, 31-33 (1999)
+void
+MPISystemClass::ExtrapolateCharge()
+{
 
+
+}
+
+/// See Arias et al. Phys. Rev. B 45, 1538 (1992)
 void 
 MPISystemClass::DoMDExtrap()
 {

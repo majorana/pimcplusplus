@@ -79,6 +79,10 @@ protected:
   Array<complex<double>,2> Bands1, Bands2;
   Array<double,3> Rho_r1, Rho_r2;
   Array<Vec3,1> Rions1, Rions2;
+  void ExtrapolateCharge();
+public:
+  void DoMDExtrap();
+private:
 
   ///////////////////////
   // Subspace rotation //
@@ -121,7 +125,6 @@ protected:
   /// HACK HACK HACK
 public:
   void InitLDA();
-  void DoMDExtrap();
 public:
   GVecsClass GVecs;
   void Setup(Vec3 box, Vec3 k, double kcut, Potential &ph, 

@@ -124,13 +124,18 @@ void TestMultiLDA()
   IOSectionClass configsIn;
   configsIn.OpenFile("configs.h5");
   configsIn.ReadVar("R", R);
-  for (int conf=0; conf<10; conf++) {
+  FILE *fout = fopen ("Energies.dat", "w");
+  for (int conf=0; conf<R.extent(0); conf++) {
     for (int ri=0; ri<R.extent(1); ri++)
       for (int dim=0; dim<3; dim++)
 	rions(ri)[dim] = R(conf,ri,dim);
     system.SetIons(rions);
     system.DoMDExtrap();
     system.SolveLDA();
+    for (int bi=0; bi<numBands; bi++)
+      fprintf (fout, "%1.12e ", system.GetEnergy(bi));
+    fprintf (fout, "\n");
+    fflush (fout);
   }
   
 
