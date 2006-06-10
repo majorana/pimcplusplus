@@ -25,8 +25,8 @@ MPISystemClass::InitLDA()
   RotBands.resize(NumBands, GVecs.size());
   Occupancies.resize(NumBands);
   CalcRadialChargeDensity();
-  Smearer.SetOrder(2);
-  Smearer.SetWidth(0.01);
+  Smearer.SetOrder(3);
+  Smearer.SetWidth(0.02);
   if (BandComm.MyProc() == 0) {
     Numk = kComm.NumProcs();
     Myk  = kComm.MyProc();

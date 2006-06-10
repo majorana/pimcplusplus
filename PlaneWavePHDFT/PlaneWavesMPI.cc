@@ -216,4 +216,8 @@ MPISystemClass::Read(IOSectionClass &in)
   in.ReadVar ("UseFFT", UseFFT, true);
   in.ReadVar ("UseMDExtrap", UseMDExtrap, true);
   assert (in.ReadVar ("kCut", kCut));
+  in.ReadVar("SmearOrder", SmearOrder, 2);
+  in.ReadVar("SmearWidth", SmearWidth, 0.01);
+  Smearer.SetOrder(SmearOrder);
+  Smearer.SetWidth(SmearWidth);
 }
