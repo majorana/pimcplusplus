@@ -14,8 +14,11 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   worldComm.AllMax(fftSize);
   GVecs.Set (box, k, kcut, fftSize);
   FFT.Setup();
+  cerr << "Before SetIonPot.\n";
   H.SetIonPot (ph, useFFT);
+  cerr << "After SetIonPot.\n";
   H.Setk(k);
+  cerr << "After Set(k).\n";
   Bands.resize (NumBands, GVecs.size());
   HBands.resize (NumBands, GVecs.size());
   Bands1.resize (NumBands, GVecs.size());
@@ -25,6 +28,7 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   int NDelta = H.GVecs.DeltaSize();
   if (UseLDA) 
     InitLDA();
+  cerr << "After InitLDA.\n";
 }
 
 
@@ -218,6 +222,9 @@ MPISystemClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("kCut", kCut));
   in.ReadVar("SmearOrder", SmearOrder, 2);
   in.ReadVar("SmearWidth", SmearWidth, 0.01);
+  double lambda;
+  in.ReadVar("KerkerLambda", lambda, 0.65);
+  ChargeMixer->SetLambda(lambda);
   Smearer.SetOrder(SmearOrder);
   Smearer.SetWidth(SmearWidth);
 }

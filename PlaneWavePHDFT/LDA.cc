@@ -26,7 +26,7 @@ MPISystemClass::InitLDA()
   Occupancies.resize(NumBands);
   CalcRadialChargeDensity();
   Smearer.SetOrder(3);
-  Smearer.SetWidth(0.02);
+  Smearer.SetWidth(0.01);
   if (BandComm.MyProc() == 0) {
     Numk = kComm.NumProcs();
     Myk  = kComm.MyProc();
@@ -258,7 +258,7 @@ MPISystemClass::CalcOccupancies()
   double totalOcc = 0.0;
   for (int ki=0; ki<Numk; ki++)
     for (int bi=0; bi<NumBands; bi++) {
-      occ(ki, bi) = Smearer.S(CG.Energies(bi), mu);
+      occ(ki, bi) = Smearer.S(allEnergies(ki, bi), mu);
       totalOcc += occ(ki, bi);
     }
   /// Now normalize to to make sure we have exactly the right number
