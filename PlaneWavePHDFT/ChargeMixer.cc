@@ -59,9 +59,7 @@ KerkerMixerClass::Mix (const Array<double,3> &newCharge,
 	mixedCharge_r(ix,iy,iz) = max(mixedCharge_r(ix,iy,iz), 0.0);
 	totalCharge += mixedCharge_r(ix,iy,iz)*meshCellVol;
       }
-  //  cerr << "Total mixed charge = " << totalCharge << endl;
-
-
+  cerr << "Total mixed charge = " << totalCharge << endl;
 }
 
 BroydenMixerClass::BroydenMixerClass (FFTBox &fft) :

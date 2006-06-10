@@ -322,14 +322,14 @@ void
 MPISystemClass::CalcVHXC()
 {
   double totalCharge = 0.0;
-  
+  double vol = GVecs.GetBoxVol();
+  double Ngrid = Rho_r.size();
 
   ///////////////////////
   // Hartree potential //
   ///////////////////////
   h_G = Rho_G;
   // Compute V_H in reciporical space
-  double volInv = 1.0/H.GVecs.GetBoxVol();
   double hartreeTerm = 0.0;
   //  double prefact = (4.0*M_PI/H.GVecs.GetBoxVol());
   double prefact = 4.0*M_PI;
@@ -338,8 +338,7 @@ MPISystemClass::CalcVHXC()
     EH += norm(h_G(i)) * H.GVecs.DeltaGInv2(i);
     h_G(i) *= prefact*H.GVecs.DeltaGInv2(i);
   }
-  EH *= 0.5*prefact;
-
+  EH *= 0.5*prefact*vol;
   // FFT back to real space
   FFT.PutkVec(h_G);
   FFT.k2r();
@@ -354,11 +353,11 @@ MPISystemClass::CalcVHXC()
     for (int iy=0; iy<Rho_r.extent(1); iy++)
       for (int iz=0; iz<Rho_r.extent(2); iz++) {
 	FortranExCorr (Rho_r(ix,iy,iz), exc, VXC(ix,iy,iz));
-	EXC += exc;
+	EXC += exc*Rho_r(ix,iy,iz);
       }
-  /// HACK HACK HACK:  do we need the volInv???
+  EXC *= vol/(double)Ngrid;
+  perr<< "EH = " << EH << "   EXC = " << EXC << endl;
   VHXC = VH + VXC;
-  //VHXC = 0.0;
 }
 
 
