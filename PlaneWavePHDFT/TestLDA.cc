@@ -40,7 +40,7 @@ void TestInitCharge()
   Vec3 k = 0.25 * Gprim;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 3.0, *pot, true, true);
+  system.Setup (box, k, 4.0, *pot, true, true);
   system.SetIons(rions);
   IOSectionClass out;
   out.NewFile ("InitDensity.h5");
@@ -104,7 +104,8 @@ void TestMultiLDA()
 
   IOSectionClass in;
   //in.OpenFile("NaLocalPH.h5");
-  in.OpenFile("Na_HF_NLPP.h5");
+  //  in.OpenFile("Na_HF_NLPP.h5");
+  in.OpenFile("OpiumNaLocal.h5");
   Potential *pot = ReadPotential(in);
   in.CloseFile();
 
@@ -117,7 +118,7 @@ void TestMultiLDA()
   cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 3.0, *pot, true, true);
+  system.Setup (box, k, 4.0, *pot, true, true);
   
   Array<Vec3,1> rions(16);
   Array<double,3> R;
@@ -126,8 +127,8 @@ void TestMultiLDA()
   configsIn.ReadVar("R", R);
   FILE *fout;
   if (bandComm.MyProc() == 0)
-    fout = fopen ("Energies.dat", "w");
-  for (int conf=0; conf<R.extent(0); conf++) {
+    fout = fopen ("Energies1.dat", "w");
+  for (int conf=0; conf<1/*R.extent(0)*/; conf++) {
     for (int ri=0; ri<R.extent(1); ri++)
       for (int dim=0; dim<3; dim++)
 	rions(ri)[dim] = R(conf,ri,dim);
