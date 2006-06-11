@@ -390,8 +390,9 @@ public:
   inline void AllAnd (bool &TorF)
   { /* do nothing */ }
 
-  inline template<int N> 
-  void AllMax (TinyVector<int,N> &vec) {
+  template<int N> 
+  inline void
+  AllMax (TinyVector<int,N> &vec) {
     // do nothing
   }
 
