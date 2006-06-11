@@ -266,7 +266,6 @@ void BisectionBlockClass::MakeMove()
 
   if (LowestLevel != 0)
     MakeStraightPaths();
-  //  cerr<<"Ending bisection block move"<<endl;
 }
 
 
