@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.59)
 AC_INIT(libcommon, 1.0, esler@uiuc.edu)
-AM_INIT_AUTOMAKE(libcommon, 1.0)
+AM_INIT_AUTOMAKE(libcommon, 0.5)
 AC_CONFIG_SRCDIR([Blitz.h])
 AC_CONFIG_HEADER([config.h])
 
