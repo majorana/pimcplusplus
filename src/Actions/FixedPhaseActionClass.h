@@ -51,7 +51,7 @@ private:
 
   Array<cVec3,1> Gradient;
   Array<Vec3,1> Rions;
-  int NumUp, NumDown, NumIons, NumBands;
+  int NumUp, NumDown, NumIons, NumBands, NumFilled;
   Array<int,1> UpParticles, DownParticles;
   // This stores the real space grid dimensions
   LinearGrid xGrid, yGrid, zGrid;

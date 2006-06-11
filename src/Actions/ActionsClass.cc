@@ -175,7 +175,6 @@ ActionsClass::Read(IOSectionClass &in)
 void
 ActionsClass::ReadNodalActions(IOSectionClass &in)
 {
-  cerr<<"READING IN THE NODAL ACTIONS"<<endl;
   int numNodeSections=in.CountSections("NodalAction");
   NodalActions.resize (PathData.Path.NumSpecies());
   NodalActions = NULL;
@@ -183,15 +182,13 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
     in.OpenSection("NodalAction", nodeSection);
     string type, speciesString;
     assert (in.ReadVar ("Type", type));
-    cerr<<"Type is "<<type<<endl;
     if (type == "FREE") {
       assert (in.ReadVar("Species", speciesString));
       int species = PathData.Path.SpeciesNum(speciesString);
-      cerr<<"Species Num is "<<species<<endl;
-      NodalActions(species) = 
-	new FreeNodalActionClass (PathData, species);
-      ((FreeNodalActionClass*)NodalActions(species))->Read(in);
-      cerr<<"Exiting"<<endl;
+      FreeNodalActionClass &nodeAction = 
+	*(new FreeNodalActionClass (PathData, species));
+      nodeAction.Read(in);
+      NodalActions(species) = &nodeAction;
     }
     else if (type == "GROUNDSTATE") {
       GroundStateClass &groundState = *new GroundStateClass(PathData);

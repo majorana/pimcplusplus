@@ -202,7 +202,10 @@ FreeNodalActionClass::IsPositive (int slice)
   int myProc = PathData.Path.Communicator.MyProc();
   Path.SliceRange (myProc, myStartSlice, myEndSlice);
   int refSlice = Path.GetRefSlice()-myStartSlice;
-  if (refSlice == slice)
+  int sliceDiff = slice - refSlice;
+  sliceDiff = min(sliceDiff, Path.TotalNumSlices-sliceDiff);
+  cerr << "slice=" << slice << " sliceDiff = " << sliceDiff << endl;
+  if (sliceDiff == 0)
     return (true);
   else
     return (Det(slice) > 0.0);
@@ -248,9 +251,15 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
       for (int dim=0; dim<NDIM; dim++)
 	action += ActionSplines(sliceDiff)[dim](diff[dim]);
       DetMatrix(refPtcl-first, ptcl-first) = exp(-action);
-      singular = singular || 
-	(fabs(DetMatrix(refPtcl-first, ptcl-first)) < 1.0e-30) ||
-	isnan (DetMatrix(refPtcl-first, ptcl-first));
+//        if (fabs(DetMatrix(refPtcl-first, ptcl-first)) < 1.0e-30) {
+// 	 cerr << "detmatrix = " << DetMatrix(refPtcl-first, ptcl-first)<<endl;
+// 	 cerr << "action = " << action << endl;
+// 	 cerr << "diff = " << diff << endl;
+// 	 cerr << "slicediff = " << sliceDiff << endl;
+//        }
+//       singular = singular || 
+// 	(fabs(DetMatrix(refPtcl-first, ptcl-first)) < 1.0e-30)
+	/* || isnan (DetMatrix(refPtcl-first, ptcl-first))*/;
     }
   }
 
@@ -258,21 +267,25 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
 //   cerr << "RefSlice = " << Path.GetRefSlice() << endl;
 //   cerr << "DetMatrix = " << endl << DetMatrix << endl;
 
-
+  if (singular)  
+    cerr << "Singular at slice=" << slice << endl;
   // Compute determinant
   det = Determinant (DetMatrix);
   if (singular) {
     gradient(0)[0] = sqrt(-1.0);
     return;
   }
+  if (fabs(det)<1.0e-40) {
+    cerr << "DetMatrix = " << DetMatrix << endl;
+    for (int ptcl=first; ptcl<=last; ptcl++)
+      cerr << "ptcl " << ptcl << " = " << Path(slice, ptcl) << endl;
+    cerr << "Permutation = " << Path.Permutation.data() << endl;
+  }
   Cofactors = DetMatrix;
   GJInverse (Cofactors);
   Transpose (Cofactors);
   Cofactors = det * Cofactors;
 
-//   double cofDet = 0.0;
-//   for (int col=0; col<DetMatrix.cols(); col++)
-//     cofDet += DetMatrix(col,0) * Cofactors(col,0);
 
   // Now compute gradient of determinant
   for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
@@ -715,9 +728,9 @@ FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
 				    int level)
 { 
   /// HACK HACK HACK HACK
-  startSlice = 0;
-  endSlice = Path.NumTimeSlices()-1;
-  string mode = GetMode()==OLDMODE ? " Old mode" : " New mode";
+//   startSlice = 0;
+//   endSlice = Path.NumTimeSlices()-1;
+//   string mode = GetMode()==OLDMODE ? " Old mode" : " New mode";
 
   double uNode=0.0;
 
@@ -729,10 +742,15 @@ FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
   int myStart, myEnd;
   Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
   int refSlice = Path.GetRefSlice() - myStart;
-  
+  //  cerr << "refSlice = " << refSlice << "  startSlice = " << startSlice << endl;
+
   double dist1, dist2;
-  if (startSlice != refSlice) {
+  bool slice1IsRef, slice2IsRef;
+  slice1IsRef = (startSlice == refSlice) || 
+    (startSlice==refSlice+Path.TotalNumSlices);
+  if (!slice1IsRef) {
     dist1 = HybridDist (startSlice, lambda*levelTau);
+    // dist1 = NodalDist (startSlice);
     if (dist1 < 0.0) {
       // cerr << "node cross in species = " << species.Name << endl;
 //       uNode = 1.0e100;
@@ -745,34 +763,38 @@ FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
   
   int totalSlices = Path.TotalNumSlices;
   for (int slice=startSlice; slice < endSlice; slice+=skip) {
-    if ((slice != refSlice) && (slice != refSlice+Path.TotalNumSlices))
-      if (Det(slice) < 0.0)
+    //    cerr << "slice = " << slice << endl;
+    if ((slice!=refSlice) && (slice != refSlice+Path.TotalNumSlices))
+      if (Det(slice) < 0.0) 
 	uNode += 1.0e50;
-    if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
-      dist2 = sqrt(-1.0);
-    else {
+    slice2IsRef = (slice+skip == refSlice) || 
+      (slice+skip == refSlice+totalSlices);
+    if (!slice2IsRef) {
       //dist2 = MaxDist(slice+skip);//LineSearchDist (slice+skip);
       dist2 = HybridDist (slice+skip, lambda*levelTau);
+      //dist2 = NodalDist (slice+skip);
+//       cerr << "slice+skip = " << slice+skip << endl;
+//       cerr << "dist2 = " << dist2 << endl;
       //fprintf (stderr, "%1.12e %1.12e\n", lineDist, dist2);
       if (dist2 < 0.0) {
-	//	cerr << "node cross in species = " << species.Name <<
-	//	endl;
-// 	uNode = 1.0e100;
-// 	cerr << species.Name << " " << mode << " uNode = " << uNode << endl;
 	return 1.0e100;
       }
     }
     
-    if (!isnan(dist1) && (dist1<0.0))
+    if (!slice1IsRef && (dist1<0.0)) {
+      cerr << "slice = " << slice << "  dist1 = " << dist1 
+	   << " refslice = " << refSlice << endl;
       uNode += 1.0e100;
-    else if (!isnan(dist2) && (dist2 < 0.0))
+    }
+    else if (!slice2IsRef && (dist2 < 0.0))
       uNode += 1.0e100;
-    else if (isnan (dist1) || (dist1==0.0))
+    else if (slice1IsRef || (dist1==0.0))
       uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
-    else if (isnan(dist2) || (dist2==0.0))
+    else if (slice2IsRef || (dist2==0.0))
       uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
     else 
       uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
+    slice1IsRef = slice2IsRef;
     dist1 = dist2;
   }
 //   cerr << species.Name << " " << mode << " uNode = " << uNode << endl;
@@ -785,15 +807,6 @@ FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
 { 
   Array<int,1> changedPtcls(1);
   
-
-//   SetMode (OLDMODE);
-//   double oldAction = Action (slice1, slice2, changedPtcls, level);
-//   cerr << "oldAction = " << oldAction << endl;
-//   SetMode (NEWMODE);
-//   double newAction = Action (slice1, slice2, changedPtcls, level);
-//   cerr << "newAction = " << newAction << endl;
-
-
   SpeciesClass &species = Path.Species(SpeciesNum);
   double lambda = species.lambda;
   int skip = 1<<level;
@@ -802,9 +815,15 @@ FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
   int myStart, myEnd;
   Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
   int refSlice = Path.GetRefSlice() - myStart;
+  int sliceDiff1 = abs(slice1-refSlice);
+  sliceDiff1 = min (sliceDiff1, PathData.Path.TotalNumSlices-sliceDiff1);
   
   double dist1, dist2;
-  if (slice1 != refSlice) {
+
+  bool slice1IsRef, slice2IsRef;
+  slice1IsRef = (slice1 == refSlice) || (slice1==refSlice+Path.TotalNumSlices);
+
+  if (!slice1IsRef) {
     dist1 = HybridDist (slice1, lambda*levelTau);
     if (dist1 < 0.0) {
       cerr << "slice1 = " << slice1 << " refSlice = " << refSlice << endl;
@@ -817,9 +836,11 @@ FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
   int totalSlices = Path.TotalNumSlices;
   double uNode=0.0;
   for (int slice=slice1; slice < slice2; slice+=skip) {
-    if ((slice+skip == refSlice) || (slice+skip == refSlice+totalSlices))
-      dist2 = sqrt(-1.0);
-    else {
+    int sliceDiff = slice-refSlice;
+    sliceDiff = min (sliceDiff, PathData.Path.TotalNumSlices-sliceDiff);
+    slice2IsRef = (slice+skip == refSlice) || 
+      (slice+skip==refSlice+Path.TotalNumSlices);
+    if (!slice2IsRef) {
       dist2 = HybridDist (slice+skip, lambda*levelTau);
       if (dist2 < 0.0){
 	cerr << "slice2 = " << slice+skip << " refSlice = " << refSlice
@@ -829,9 +850,9 @@ FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
     }
 
     double prod;
-    if (isnan (dist1) || (dist1==0.0))
+    if (slice1IsRef || (dist1==0.0))
       prod = dist2*dist2;
-    else if (isnan(dist2) || (dist2==0.0))
+    else if (slice2IsRef || (dist2==0.0))
       prod = dist1*dist1;
     else
       prod = dist1*dist2;
@@ -846,6 +867,7 @@ FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
     if (isnan(uNode))
       cerr << "uNode broken again!\n";
     dist1 = dist2;
+    slice1IsRef = slice2IsRef;
   }
   //  return 0.0;
   return uNode/(double)Path.TotalNumSlices;

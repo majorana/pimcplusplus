@@ -36,9 +36,10 @@ FixedPhaseClass::Setk(Vec3 k)
 void
 FixedPhaseClass::GetBandEnergies(Array<double,1> &energies)
 {
-  if (energies.size() != NumBands)
-    energies.resize(NumBands);
-  for (int band=0; band<NumBands; band++)
+  int numBands = System->GetNumBands();
+  if (energies.size() != numBands)
+    energies.resize(numBands);
+  for (int band=0; band<numBands; band++)
     energies(band) = System->GetEnergy(band);
 }
 
@@ -599,10 +600,12 @@ FixedPhaseClass::Read(IOSectionClass &in)
   /////////////////////////////////
   // Setup the plane wave system //
   /////////////////////////////////
-  NumBands = max(NumUp, NumDown);
+  NumFilled = max(NumUp, NumDown);
+  NumBands = 2*NumFilled;
   /// The last true indicates using MD extrapolation to initialize
   /// wavefunctions. 
-  System = new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, PathData.InterComm, UseLDA, UseMDExtrap);
+  System = new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, 
+			       PathData.InterComm, UseLDA, UseMDExtrap);
   PH = &PathData.Actions.GetPotential (IonSpeciesNum, UpSpeciesNum);
   //  Vec3 gamma (0.0, 0.0, 0.0);
   System->Setup (Path.GetBox(), kVec, kCut, *PH, UseLDA);
@@ -629,7 +632,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
   xGrid.Init (-0.5*box[0], 0.5*box[0], nx);
   yGrid.Init (-0.5*box[1], 0.5*box[1], ny);
   zGrid.Init (-0.5*box[2], 0.5*box[2], nz);
-  Array<complex<double>,4> initData(nx,ny,nz,NumBands);
+  Array<complex<double>,4> initData(nx,ny,nz,NumFilled);
   initData = 0.0;
   BandSplines.Init (&xGrid, &yGrid, &zGrid, initData, true);
   //  UpdateBands();
@@ -763,7 +766,7 @@ FixedPhaseClass::UpdateBands()
   // Now, make bands real and put into splines
   Array<complex<double>,4> data(xGrid.NumPoints, 
 				yGrid.NumPoints, 
-				zGrid.NumPoints, NumBands);
+				zGrid.NumPoints, NumFilled);
   SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
   int first = ionSpecies.FirstPtcl;
   // We need this half box thing to compensate for fourier transform
@@ -776,7 +779,7 @@ FixedPhaseClass::UpdateBands()
   perr << "Updating bands.\n";
   System->DiagonalizeH();
   
-  for (int band=0; band<NumBands; band++) {
+  for (int band=0; band<NumFilled; band++) {
     System->SetRealSpaceBandNum(band);
     for (int ix=0; ix<xGrid.NumPoints-1; ix++)
       for (int iy=0; iy<yGrid.NumPoints-1; iy++)

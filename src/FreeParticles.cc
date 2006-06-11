@@ -240,10 +240,10 @@ void FermionClass::FillStates()
       k[0] = kPrim[0]*ix;
       for (int iy=-iymax; iy<=iymax; iy++) {
 	tryState[1] = iy;
-	k[0] = kPrim[1]*iy;
+	k[1] = kPrim[1]*iy;
 	for (int iz=-izmax; iz<=izmax; iz++) {
 	  tryState[2] = iz;
-	  k[0] = kPrim[2]*iz;
+	  k[2] = kPrim[2]*iz;
 	  double E = lambda * dot(k,k);
 	  if (n < NumParticles)
 	    if (E < Ecut) {
