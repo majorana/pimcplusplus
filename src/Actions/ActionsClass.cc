@@ -116,7 +116,7 @@ ActionsClass::Read(IOSectionClass &in)
   
   in.ReadVar("UseLongRange", UseLongRange);
   if (HaveLongRange()) {
-    cerr << "*** Using long-range/short-range breakup. ***\n";
+    perr << "*** Using long-range/short-range breakup. ***\n";
     assert (in.ReadVar("UseBackground", LongRange.UseBackground));
     LongRangePot.UseBackground = LongRange.UseBackground;
     LongRangeRPA.UseBackground = LongRange.UseBackground;
@@ -185,6 +185,7 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
     if (type == "FREE") {
       assert (in.ReadVar("Species", speciesString));
       int species = PathData.Path.SpeciesNum(speciesString);
+
       FreeNodalActionClass &nodeAction = 
 	*(new FreeNodalActionClass (PathData, species));
       nodeAction.Read(in);

@@ -607,8 +607,9 @@ FixedPhaseClass::Read(IOSectionClass &in)
   System = new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, 
 			       PathData.InterComm, UseLDA, UseMDExtrap);
   PH = &PathData.Actions.GetPotential (IonSpeciesNum, UpSpeciesNum);
-  //  Vec3 gamma (0.0, 0.0, 0.0);
   System->Setup (Path.GetBox(), kVec, kCut, *PH, UseLDA);
+  System->Read (in);
+  //  Vec3 gamma (0.0, 0.0, 0.0);
 
   /////////////////////////////
   // Setup the ion positions //
@@ -769,16 +770,16 @@ FixedPhaseClass::UpdateBands()
 				zGrid.NumPoints, NumFilled);
   SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
   int first = ionSpecies.FirstPtcl;
-  // We need this half box thing to compensate for fourier transform
-  // aliasing.  
   for (int i=0; i<NumIons; i++)
     Rions(i) = Path(0,i+first);
   System->SetIons (Rions);
 
   /// The diagonalization is now done in parallel
   perr << "Updating bands.\n";
-  System->DiagonalizeH();
-  
+  // System->DiagonalizeH();
+  System->DoMDExtrap();
+  System->SolveLDA();  
+
   for (int band=0; band<NumFilled; band++) {
     System->SetRealSpaceBandNum(band);
     for (int ix=0; ix<xGrid.NumPoints-1; ix++)
