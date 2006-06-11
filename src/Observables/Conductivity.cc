@@ -68,7 +68,7 @@ ConductivityClass::AccumulateFast()
 	FFTtemp.rBox(i) = TempCurrent(i)[dim];
       FFTtemp.r2k();
       for (int i=0; i<M; i++)
-	FFTtemp.kBox(i) = Minv*mag2(FFTtemp.kBox(i));
+	FFTtemp.kBox(i) = mag2(FFTtemp.kBox(i));
       for (int i=0; i<M; i++)
 	FreqSumTT(i)[dim] += FFTtemp.rBox(i).real();
       FFTtemp.k2r();
