@@ -43,7 +43,7 @@ private:
 
   /// The species this particular instance is working on
   int SpeciesNum;
-
+  StageClass *PermuteStage;
 
 
   /// This function checks to see if we should accept based on the

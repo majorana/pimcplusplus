@@ -26,7 +26,7 @@ void RefSliceMoveClass::WriteRatio()
 void RefSliceMoveClass::Read(IOSectionClass &in)
 {
   string permuteType, speciesName;
-  StageClass *permuteStage;
+
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (in.ReadVar ("Species", speciesName));
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
@@ -34,17 +34,17 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
-    permuteStage = new TablePermuteStageClass (PathData,SpeciesNum,NumLevels,
+    PermuteStage = new TablePermuteStageClass (PathData,SpeciesNum,NumLevels,
 					       IOSection);
   else if (permuteType == "NONE") 
-    permuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
+    PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
 					   IOSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);
   }
-  permuteStage->Read (in);
-  Stages.push_back (permuteStage);
+  PermuteStage->Read (in);
+  Stages.push_back (PermuteStage);
   
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
@@ -72,7 +72,7 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
   }
   
   // Add the second stage of the permutation step
-  Stages.push_back (permuteStage);
+  Stages.push_back (PermuteStage);
 }
 
 
@@ -120,7 +120,6 @@ void RefSliceMoveClass::MakeMoveMaster()
 {
   PathClass &Path = PathData.Path;
   int myProc = PathData.Path.Communicator.MyProc();
-
   int firstSlice, lastSlice;
   Path.SliceRange (myProc, firstSlice, lastSlice);
   // Choose time slices
@@ -143,6 +142,7 @@ void RefSliceMoveClass::MakeMoveMaster()
   list<StageClass*>::iterator stageIter=Stages.begin();
   double prevActionChange=0.0;
   int stageCounter = 0;
+  ((PermuteStageClass*)PermuteStage)->InitBlock(Slice1, Slice2);
   while (stageIter!=Stages.end() && toAccept){
     toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 				     ActiveParticles,prevActionChange);

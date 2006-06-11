@@ -45,10 +45,16 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   if    (PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION){
     HaveRefslice=true;
   }
- HaveRefslice = 
+  HaveRefslice = 
     ((PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION) &&
      (PathData.Actions.NodalActions(SpeciesNum) != NULL) &&
      (!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
+//   cerr<<"I have a ref slice? "<<HaveRefslice<<" ";
+//   cerr<<(PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION); 
+//   cerr<<(PathData.Actions.NodalActions(SpeciesNum) != NULL);
+//   cerr<<(!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState());
+//   cerr<<(!(PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
+//   cerr<<endl;
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
   if (permuteType == "TABLE") 
@@ -181,7 +187,6 @@ void BisectionBlockClass::ChooseTimeSlices()
   // do something special to avoid moving reference slice
   if (HaveRefslice &&
       Path.SliceOwner(Path.GetRefSlice()) == myProc) {
-    cerr << "Avoid reference slice.\n";
     int bSlices = 1<<NumLevels;
     int myStart, myEnd;
     Path.SliceRange (myProc, myStart, myEnd);

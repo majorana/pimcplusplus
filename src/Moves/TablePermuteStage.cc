@@ -112,7 +112,7 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
 {
   if (activeParticles(0)==-1){
     if ((PathData.Path.OpenPaths && slice1<=PathData.Path.OpenLink && 
-	PathData.Path.OpenLink<=slice2) || 
+	 PathData.Path.OpenLink<=slice2) || 
 	(PathData.Path.OpenLink==PathData.Path.NumTimeSlices()-1 &&
 	 (slice1==0 || slice2==0))){
       if (NeedToRebuildTable)

@@ -19,7 +19,7 @@
 void
 MoveClass::DoEvent()
 {
-  //  TimesCalled++;
+  TimesCalled++;
   MakeMove();
 //   if ((PathData.Path.Communicator.MyProc()==0) && 
 //       (TimesCalled % DumpFreq) == 0)
