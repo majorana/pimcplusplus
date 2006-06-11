@@ -2,7 +2,7 @@ double tau=0.125;
 
 Section (Parallel)
 {
-  int ProcsPerClone = 2;
+  int ProcsPerClone = 4;
 }
 
 int Seed = 12345;
@@ -48,8 +48,8 @@ Section (System)
       Array<double,2> Positions(8,3)=
         [ -8.73103005, -8.5150300, -8.630300,
 	  -8.3303008, -8.2660300,   0.920000,
-	  -8.2303001,   0.7330000, -8.5420300,
             0.4700003, -8.9460300, -8.1340300,
+	  -4.2303001,   0.7330000, -8.5420300,
 	  -8.5303004,   0.8260000,   0.2520000,
             0.63500007, -8.1260300,   0.721067000,
             0.71200003,   0.6026000, -8.230300,
@@ -71,7 +71,7 @@ Section (System)
           -4.120141,  4.923014, -4.336014,
           -4.410143, -4.73014,  4.808414,
           -4.160148,  4.9123014,  4.544014,
-           4.580142, -4.832014, -4.366014,
+           7.580142, -4.832014, -4.366014,
            4.920145, -4.563014,  4.732014,
            4.250145,  4.345014, -4.2866014,
            4.620141,  4.53014,  4.784014 ];
@@ -96,7 +96,7 @@ Section (Action)
     string IonSpecies  = "Na";
     string UpSpecies   = "eup";
     string DownSpecies = "edown";
-    bool UseMDExtrap = true;
+    bool UseMDExtrap = false;
     double kCut = 4.0;
 //    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
 //     Array<double,2> TwistAngles(32,3) = [ 0.25, -0.75, -0.75,
@@ -148,7 +148,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Langevin/Na_16_rho200_T2300_1kvec_Bands";
+    "~/Runs/NaRuns/Langevin/Na_16_rho200_T2300_1kvec_PD";
   int FileStart = 0;
   Section (Observable) {
     string Type = "Energy";
@@ -204,16 +204,16 @@ Section (Observables)
     int Frequency = 10;
     int dumpFreq  = 10;
   }	
-//   Section (Observable) {
-//     int Frequency = 2;
-//     string Type = "PathDump";
-//     string Name = "PathDump";
-//     Section(RhoDump) {
-//       int Nx = 100;
-//       int Ny = 100;
-//       int Nz = 100;
-//     }
-//   }
+  Section (Observable) {
+    int Frequency = 2;
+    string Type = "PathDump";
+    string Name = "PathDump";
+    Section(RhoDump) {
+      int Nx = 100;
+      int Ny = 100;
+      int Nz = 100;
+    }
+  }
 }
 
 Section (Moves) {
@@ -333,9 +333,8 @@ Section (Algorithm) {
       Section (Move)        { string Name = "Shift";        }
       Section (Move)        { string Name = "Langevin";     }
       Section (WriteData)   {                               }
+      Section (Observe)     { string Name = "PathDump";     }
     }
-    // Dump paths every 20 Langevin steps
-    //Section (Observe)       { string Name = "PathDump";     }
 
     // Section (Observe)  { string Name = "Na-Na";        }
     // Section (Observe)  { string Name = "Na-eup";       }

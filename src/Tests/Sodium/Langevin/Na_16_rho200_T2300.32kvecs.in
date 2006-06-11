@@ -148,7 +148,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Langevin/Na_16_rho200_T2300_32kvecs_NoMDExtrap";
+    "~/Runs/NaRuns/Langevin/Na_16_rho200_T2300_32kvecs_BandFix";
   int FileStart = 0;
   Section (Observable) {
     string Type = "Energy";

@@ -96,7 +96,10 @@ Section (Action)
     string IonSpecies  = "Na";
     string UpSpecies   = "eup";
     string DownSpecies = "edown";
-    bool UseMDExtrap = true;
+    bool UseMDExtrap = false;
+    bool UseLDA = true;
+    bool UseFFT = true;
+    bool UseSubspaceRotation = true;
     double kCut = 4.0;
 //    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
     Array<double,2> TwistAngles(32,3) = [ 0.25, -0.75, -0.75,
@@ -148,7 +151,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Langevin/Na_16_rho200_T2503_32kvecs";
+    "~/Runs/NaRuns/Langevin/Na_16_rho200_T2503_32kvecs_BandFix";
   int FileStart = 0;
   Section (Observable) {
     string Type = "Energy";
@@ -205,9 +208,14 @@ Section (Observables)
     int dumpFreq  = 10;
   }	
   Section (Observable) {
-    int Frequency = 2;
+    int Frequency = 1;
     string Type = "PathDump";
     string Name = "PathDump";
+    Section(RhoDump) {
+      int Nx = 68;
+      int Ny = 68;
+      int Nz = 68;
+    }
   }
 }
 
@@ -329,7 +337,7 @@ Section (Algorithm) {
       Section (WriteData)   {                               }
     }
     // Dump paths every 20 Langevin steps
-    //Section (Observe)       { string Name = "PathDump";     }
+    Section (Observe)       { string Name = "PathDump";     }
 
     // Section (Observe)  { string Name = "Na-Na";        }
     // Section (Observe)  { string Name = "Na-eup";       }

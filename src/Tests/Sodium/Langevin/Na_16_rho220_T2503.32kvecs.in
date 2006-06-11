@@ -254,6 +254,11 @@ Section (Moves) {
     int NumEquilSteps = 50;
     int NumAccumSteps = 20;
     string Species="Na";
+    Section(RhoDump) {
+      int Nx = 68;
+      int Ny = 68;
+      int Nz = 68;
+    }
   }
 }
 
