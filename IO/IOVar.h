@@ -196,7 +196,7 @@ namespace IO {
 //   }
   
   template<class T> bool
-  IOVarBase::Append(Array<T,1> &val)
+  IOVarBase::Append(const Array<T,1> &val)
   {
     assert (GetRank()==2);
     int n = GetExtent(0);
@@ -206,7 +206,7 @@ namespace IO {
   } 
 
   template<class T> bool
-  IOVarBase::Append(Array<T,2> &val)
+  IOVarBase::Append(const Array<T,2> &val)
   {
     assert (GetRank()==3);
     int n = GetExtent(0);
@@ -217,7 +217,7 @@ namespace IO {
   } 
 
   template<class T> bool
-  IOVarBase::Append(Array<T,3> &val)
+  IOVarBase::Append(const Array<T,3> &val)
   {
     assert (GetRank()==4);
     int n = GetExtent(0);
@@ -229,7 +229,7 @@ namespace IO {
   } 
 
   template<class T> bool
-  IOVarBase::Append(Array<T,4> &val)
+  IOVarBase::Append(const Array<T,4> &val)
   {
     assert (GetRank()==5);
     int n = GetExtent(0);
