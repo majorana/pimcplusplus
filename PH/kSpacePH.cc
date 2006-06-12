@@ -194,7 +194,6 @@ public:
   V0Integrand (Potential &ph, double rc) : PH(ph)
   { 
     Z = -round(rc*PH.V(rc));
-    cerr << "Zion = " << Z << " in V0Integrand.\n";
   }
 };
 

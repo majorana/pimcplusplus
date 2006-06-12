@@ -597,7 +597,9 @@ namespace IO {
 	newVar->ArrayValue.resize(dims(0), dims(1), dims(2), dims(3));
 	return newVar;
       }
-    }  
+    }
+    else
+      return NULL;
   }
 
 
