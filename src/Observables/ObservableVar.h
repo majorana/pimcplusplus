@@ -174,7 +174,7 @@ public:
     if (Comm.MyProc()==0) {
       if (FirstTime) {
 	FirstTime=false;
-	Array<double,4> tensor(1,val.extent(0), val.extent(1), 
+	Array<double,5> tensor(1,val.extent(0), val.extent(1), 
 			         val.extent(2), val.extent(3));
 	tensor(0,Range::all(),Range::all(),Range::all(),Range::all()) = val;
 	Out.WriteVar (Name, tensor);
