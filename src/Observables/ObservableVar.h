@@ -68,7 +68,7 @@ public:
 class ObservableVecDouble1 : public ObservableVar
 {
 public:
-  inline void Write (Array<double,1> &val)
+  inline void Write (const Array<double,1> &val)
   {
     if (Comm.MyProc()==0) {
       if (FirstTime) {
@@ -94,7 +94,7 @@ public:
  class ObservableVecInt1 : public ObservableVar
  {
  public:
-   inline void Write (Array<int,1> &val)
+   inline void Write (const Array<int,1> &val)
    {
      if (Comm.MyProc()==0) {
        if (FirstTime) {
@@ -119,7 +119,7 @@ public:
 class ObservableVecDouble2 : public ObservableVar
 {
 public:
-  inline void Write (Array<double,2> &val)
+  inline void Write (const Array<double,2> &val)
   {
     if (Comm.MyProc()==0) {
       if (FirstTime) {
@@ -144,7 +144,7 @@ public:
 class ObservableVecDouble3 : public ObservableVar
 {
 public:
-  inline void Write (Array<double,3> &val)
+  inline void Write (const Array<double,3> &val)
   {
     if (Comm.MyProc()==0) {
       if (FirstTime) {
@@ -169,7 +169,7 @@ public:
 class ObservableVecDouble4 : public ObservableVar
 {
 public:
-  inline void Write (Array<double,4> &val)
+  inline void Write (const Array<double,4> &val)
   {
     if (Comm.MyProc()==0) {
       if (FirstTime) {
@@ -223,7 +223,7 @@ public:
 class ObservableVecInt2 : public ObservableVar
 {
 public:
-  inline void Write (Array<int,2> &val)
+  inline void Write (const Array<int,2> &val)
   {
     if (Comm.MyProc()==0) {
       if (FirstTime) {
@@ -248,7 +248,7 @@ public:
 class ObservableVecInt3 : public ObservableVar
 {
 public:
-  inline void Write (Array<int,3> &val)
+  inline void Write (const Array<int,3> &val)
   {
     if (Comm.MyProc()==0) {
       if (FirstTime) {
