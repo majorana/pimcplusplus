@@ -164,6 +164,8 @@ public:
   void SolveLDA();
   inline double GetEnergy(int band) { return CG.Energies(band); }
   inline int GetNumBands() { return NumBands; }
+  inline const Array<double,3>& GetChargeDensity()
+  { return Rho_r; }
 
   /// Gets the FFT box dimensions.
   inline void GetBoxDims(int &nx, int &ny, int &nz)
