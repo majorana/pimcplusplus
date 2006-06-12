@@ -117,7 +117,7 @@ namespace IO {
   template<typename T,  int RANK, typename T0, typename T1, typename T2, 
 	   typename T3, typename T4, typename T5, typename T6, typename T7, 
 	   typename T8, typename T9, typename T10> bool
-  IOVarBase::Write(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4,
+  IOVarBase::Write(const Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4,
 		   T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10)
   {
     static const int numSlices = 
