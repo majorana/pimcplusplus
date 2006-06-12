@@ -184,13 +184,13 @@ namespace IO {
     template<typename T>
     bool Append (const T val);
     template<class T>
-    bool Append(Array<T,1> &val);
+    bool Append(const Array<T,1> &val);
     template<class T>
-    bool Append(Array<T,2> &val);
+    bool Append(const Array<T,2> &val);
     template<class T>
-    bool Append(Array<T,3> &val);
+    bool Append(const Array<T,3> &val);
     template<class T>
-    bool Append(Array<T,4> &val);
+    bool Append(const Array<T,4> &val);
     
   };
 
