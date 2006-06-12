@@ -34,6 +34,7 @@
 #define FFT_EXTRA_MEM 16
 template<typename T>
 inline T* FFTAlign (T* ptr)
+{
   size_t offset = 16 - (size_t)((size_t)ptr)&0x0f;
   return (T*) ((size_t)ptr+offset);
 }

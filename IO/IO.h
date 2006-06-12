@@ -174,11 +174,15 @@ namespace IO {
     { return CurrentSection->WriteVar(name, val); }
 
     template<typename T, int RANK> bool
-    WriteVar (string name, Array<T,RANK>& val)
+    WriteVar (string name, const Array<T,RANK>& val)
     { return CurrentSection->WriteVar(name, val); }
   
-    template<class T>
-    bool AppendVar(string name, T val)
+    template<class T> bool
+    AppendVar(string name, T val)
+    { return CurrentSection->AppendVar(name, val); }
+
+    template<typename T, int RANK> bool
+    AppendVar (string name, const Array<T,RANK>& val)
     { return CurrentSection->AppendVar(name, val); }
   
     inline IOVarBase *GetVarPtr(string name)
