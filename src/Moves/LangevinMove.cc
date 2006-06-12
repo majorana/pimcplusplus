@@ -387,8 +387,9 @@ LangevinMoveClass::LangevinStep()
       FP.GetBandEnergies(bandEnergies);
       BandEnergiesVar.Write(bandEnergies);
       if (DumpRho && (PathData.GetCloneNum()==0)) {
-	FP.CalcDensity(Rho);
-	RhoVar.Write(Rho);
+// 	FP.CalcDensity(Rho);
+// 	RhoVar.Write(Rho);
+	RhoVar.Write(FP.GetDensity());
       }      
       if (DumpBandRho && (PathData.GetCloneNum()==0)) {
 	FP.CalcBandDensity(BandRho);

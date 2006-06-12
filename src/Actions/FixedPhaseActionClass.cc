@@ -1068,6 +1068,15 @@ FixedPhaseActionClass::CalcDensity(Array<double,3> &rho)
     FixedPhaseB.CalcDensity(rho);
 }
 
+const Array<double,3>&
+FixedPhaseActionClass::GetDensity()
+{
+  if (PathData.Path.GetConfig() == 0)
+    return FixedPhaseA.GetDensity();
+  else
+    return FixedPhaseB.GetDensity();
+}
+
 void
 FixedPhaseActionClass::CalcBandDensity(Array<double,4> &rho)
 {
