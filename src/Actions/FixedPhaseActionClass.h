@@ -108,6 +108,7 @@ public:
   void Init(int speciesNum);
   void Setk(Vec3 k);
   inline Vec3 Getk() { return kVec; }
+  inline int GetNumBands() { return NumBands; }
   void GetBandEnergies(Array<double,1> &energies);
   FixedPhaseClass (PathDataClass &pathData);
 };
@@ -152,6 +153,7 @@ public:
   /// Sets the k-vector or "twist angle"
   void Setk (Vec3 k);
   inline Vec3 Getk() { return FixedPhaseA.Getk(); }
+  inline int GetNumBands() { return FixedPhaseA.GetNumBands(); }
   void WriteInfo (IOSectionClass &out);
   /// Updates the bands if I'm  the ion species
   void Update();
