@@ -78,11 +78,11 @@ namespace IO {
     bool VarRead(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
 		 T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10);
 
-    bool VarWrite(Array<T,RANK> &val);
+    bool VarWrite(const Array<T,RANK> &val);
     template<typename T0, typename T1, typename T2, typename T3, typename T4,
 	     typename T5, typename T6, typename T7, typename T8, typename T9,
 	     typename T10>
-    bool VarWrite(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
+    bool VarWrite(const typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
 		  T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10);
 
     /// Assignment operator
@@ -261,7 +261,7 @@ namespace IO {
   }
 
   template<typename T, int RANK> bool
-  IOVarASCII<T,RANK>::VarWrite(Array<T,RANK> &val) {
+  IOVarASCII<T,RANK>::VarWrite(const Array<T,RANK> &val) {
     bool mustReshape = false;
     for (int i=0; i<RANK; i++)
       if (ArrayValue.extent(i) != val.extent(i))
@@ -275,7 +275,7 @@ namespace IO {
   template<typename T, int RANK> 
   template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
 	   typename T6, typename T7, typename T8, typename T9, typename T10> inline bool
-  IOVarASCII<T,RANK>::VarWrite(typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
+  IOVarASCII<T,RANK>::VarWrite(const typename SliceInfo<T,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::T_slice &val,
 			       T0 s0, T1 s1, T2 s2, T3 s3, T4 s4, T5 s5, T6 s6, T7 s7, T8 s8, T8 s9, T10 s10)
   {
     ArrayValue(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10) = val;
