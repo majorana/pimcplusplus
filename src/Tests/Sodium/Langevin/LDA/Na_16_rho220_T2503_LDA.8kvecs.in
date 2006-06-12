@@ -101,6 +101,8 @@ Section (Action)
     bool UseLDA = true;
     bool UseSubspaceRotation = true;
     double kCut = 3.0;
+    int SmearOrder = 2;
+    double SmearWidth = 0.015;
 //    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
 //     Array<double,2> TwistAngles(32,3) = [ 0.25, -0.75, -0.75,
 //                                           0.25, -0.75, -0.25,
@@ -151,7 +153,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Langevin/Na_16_rho220_T2503_8kvecs_LDA";
+    "~/Runs/NaRuns/Langevin/LDA/Na_16_rho220_T2503_8kvecs_LDA";
   int FileStart = 0;
   Section (Observable) {
     string Type = "Energy";

@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
-AC_INIT(pimc++, 1.0, esler@uiuc.edu, pimc++)
-AM_INIT_AUTOMAKE(pimc, 1.0)
+AC_INIT(pimc++, 0.5, esler@uiuc.edu, pimc++)
+AM_INIT_AUTOMAKE(pimc, 0.5)
 AC_CONFIG_SRCDIR([src/PathClass.h])
 AC_CONFIG_HEADER([config.h])
 
