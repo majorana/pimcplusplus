@@ -535,7 +535,6 @@ LangevinMoveClass::Read(IOSectionClass &in)
   assert (in.ReadVar("NumEquilSteps", NumEquilSteps));
   assert (in.ReadVar("NumAccumSteps", NumAccumSteps));
   assert (in.ReadVar("Species",       speciesStr));
-  in.ReadVar ("DumpBandRho", DumpBandRho, false);
   if (in.ReadVar("FrictionFactor", FrictionFactor))
     perr << "FrictionFactor = " << FrictionFactor << endl;
   string integrator;
@@ -603,6 +602,15 @@ LangevinMoveClass::Read(IOSectionClass &in)
     assert (in.ReadVar("Ny", ny));
     assert (in.ReadVar("Nz", nz));
     Rho.resize(nx, ny, nz);
+    in.ReadVar ("DumpBandRho", DumpBandRho, false);
+    if (DumpBandRho) 
+      if (PathData.Actions.NodalActions(0) != NULL)
+	if (PathData.Actions.NodalActions(0)->Type() == GROUND_STATE_FP) {
+	  FixedPhaseActionClass &FP = 
+	    *((FixedPhaseActionClass*) PathData.Actions.NodalActions(0));
+	  int numBands = FP.GetNumBands();
+	  BandRho.resize(nx, ny, nz, numBands);
+	}
     in.CloseSection (); // "RhoDump"
   }
 
