@@ -49,6 +49,7 @@ namespace IO {
       cerr << "Unknown file type in WriteVar.\n";
       abort();
     }
+    return true;
   }
 
   template<typename T, int RANK> bool 
@@ -72,6 +73,7 @@ namespace IO {
       cerr << "Unknown file type in WriteVar.\n";
       abort();
     }
+    return true;
   }
 
 
