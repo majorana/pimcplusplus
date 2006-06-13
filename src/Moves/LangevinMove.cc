@@ -362,6 +362,35 @@ LangevinMoveClass::VerletStep()
 }
 
 
+void
+MakePeriodic(Array<double,3> &A)
+{
+  int Nx = A.extent(0);
+  int Ny = A.extent(1);
+  int Nz = A.extent(2);
+  for (int iy=0; iy<Ny-1; iy++)
+    for (int iz=0; iz<Nz-1; iz++)
+      A(Nx-1,iy,iz) = A(0,iy,iz);
+  // Y face
+  for (int ix=0; ix<Nx-1; ix++)
+    for (int iz=0; iz<Nz-1; iz++)
+      A(ix,Ny-1,iz) = A(ix,0,iz);
+  // Z face
+  for (int ix=0; ix<Nx-1; ix++)
+    for (int iy=0; iy<Ny-1; iy++)
+      A(ix,iy,Nz-1) = A(ix,iy,0);
+  // XY edge
+  for (int iz=0; iz<Nz-1; iz++)
+    A(Nx-1,Ny-1,iz) = A(0,0,iz);
+  // XZ edge
+  for (int iy=0; iy<Ny-1; iy++)
+    A(Nx-1,iy,Nz-1) = A(0,iy,0);
+  // YZ edge
+  for (int ix=0; ix<Nx-1; ix++)
+    A(ix,Ny-1,Nz-1) = A(ix,0,0);
+  /// Corner
+  A(Nx-1,Ny-1,Nz-1) = A(0,0,0);
+}
 
 void
 LangevinMoveClass::LangevinStep()
@@ -389,7 +418,14 @@ LangevinMoveClass::LangevinStep()
       if (DumpRho && (PathData.GetCloneNum()==0)) {
 // 	FP.CalcDensity(Rho);
 // 	RhoVar.Write(Rho);
-	RhoVar.Write(FP.GetDensity());
+	const Array<double,3> &rho = FP.GetDensity();
+	int nx = rho.extent(0);
+	int ny = rho.extent(1);
+	int nz = rho.extent(2);
+	Rho.resize(nx+1,ny+1, nz+1);
+	Rho(Range(0,nx-1), Range(0,ny-1), Range(0,nz-1)) = rho;
+	MakePeriodic(Rho);
+	RhoVar.Write(Rho);
       }      
       if (DumpBandRho && (PathData.GetCloneNum()==0)) {
 	FP.CalcBandDensity(BandRho);
