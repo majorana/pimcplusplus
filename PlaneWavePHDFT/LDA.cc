@@ -261,26 +261,46 @@ MPISystemClass::CalcOccupancies()
       Esort.push_back(allEnergies(i,j));
   sort (Esort.begin(), Esort.end());
   int HOMO = (NumElecs*Numk+1)/2-1;
-  int LUMO = (NumElecs*Numk)/2;
-  double mu = 0.5*(Esort[HOMO] + Esort[LUMO]);
-  /// Broadcast mu to all procs in kBand;
-  if (BandComm.MyProc() == 0)
-    kComm.Broadcast(0, mu);
-  /// Now proc 0 of each k-point clone has mu.
-  /// Now broadcast mu from each BandComm Proc 0 to the rests of the
-  /// band holders
-  BandComm.Broadcast (0, mu);
-  /// Now everybody has mu!  Let's do the Methfessel-Paxton occupation 
-  double totalOcc = 0.0;
-  for (int ki=0; ki<Numk; ki++)
-    for (int bi=0; bi<NumBands; bi++) {
-      occ(ki, bi) = Smearer.S(allEnergies(ki, bi), mu);
-      totalOcc += occ(ki, bi);
-    }
+  assert ((HOMO+1) < Esort.size());
+  double muLo = Esort[0];
+  double muHi = Esort[Esort.size()-1];
+  double numkInv = 1.0/(double)Numk;
+  double mu, occSum;
+  while (fabs(occSum-(double)NumElecs) > 1.0e-10) {
+    occSum = 0.0;
+    mu = 0.5*(muHi + muLo);
+    for (int ki=0; ki<Numk; ki++)
+      for (int bi=0; bi<NumBands; bi++) {
+	occ(ki, bi) = 2.0*numkInv*Smearer.S(allEnergies(ki, bi), mu);
+	occSum += occ(ki, bi);
+      }
+    if (occSum < (double) NumElecs)
+      muLo = mu;
+    else if (occSum > (double) NumElecs)
+      muHi = mu;
+  }
+  
+
+//   int LUMO = (NumElecs*Numk)/2;
+//   double mu = 0.5*(Esort[HOMO] + Esort[LUMO]);
+//   /// Broadcast mu to all procs in kBand;
+//   if (BandComm.MyProc() == 0)
+//     kComm.Broadcast(0, mu);
+//   /// Now proc 0 of each k-point clone has mu.
+//   /// Now broadcast mu from each BandComm Proc 0 to the rests of the
+//   /// band holders
+//   BandComm.Broadcast (0, mu);
+//   /// Now everybody has mu!  Let's do the Methfessel-Paxton occupation 
+//   double totalOcc = 0.0;
+//   for (int ki=0; ki<Numk; ki++)
+//     for (int bi=0; bi<NumBands; bi++) {
+//       occ(ki, bi) = Smearer.S(allEnergies(ki, bi), mu);
+//       totalOcc += occ(ki, bi);
+//     }
   /// Now normalize to to make sure we have exactly the right number
   /// of electrons 
   for (int bi=0; bi<NumBands; bi++) 
-    Occupancies(bi) = (double)(NumElecs)/totalOcc * occ(Myk, bi);
+    Occupancies(bi) = (double)(NumElecs)/occSum * occ(Myk, bi);
   perr << "Occupancies = " << Occupancies << endl;
 }
 
