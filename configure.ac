@@ -64,7 +64,7 @@ case "${host_cpu}" in
         AC_MSG_RESULT([Athlon XP])
         AX_CC_OPTION(TUNEOPT, [-mtune=athlon-xp], [-mtune=athlon-xp], [-mcpu=athlon-xp])
         AX_CC_OPTION(ARCHOPT, [-march=athlon-xp], [-march=athlon-xp], [-march=athlon])
-	FFLAG="-O3 -march=athlon -ffast-math -msse -m3dnow -g"
+	FFLAGS="-O3 -march=athlon -ffast-math -msse -m3dnow -g"
       fi
       if grep -q "Pentium(R) M" /proc/cpuinfo; then
 	AC_MSG_RESULT([Pentium M])
