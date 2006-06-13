@@ -301,7 +301,7 @@ MDVisualClass::OnFrameChange()
 {
   int tempFrame =  (int)round(FrameScale.get_value());
   if (IsoButton.get_active()) {
-    if (BandRhoVar != NULL) {
+    if (RhoVar != NULL) {
       RhoVar->Read(RhoData, tempFrame, Range::all(), Range::all(), Range::all()); 
       MaxRho = FindMaxRho();
     }
@@ -470,7 +470,8 @@ MDVisualClass::DrawFrame(bool offScreen)
   if (IsoButton.get_active()) {
     int band;
     band = (int)round(BandScale.get_value());
-    if (band == BandRhoData.extent(3)) {
+    bool doTotal = (BandRhoVar == NULL) || (band == BandRhoData.extent(3));
+    if (doTotal) {
       Isosurface *rhoIso = new Isosurface;
       rhoIso->Init(&Xgrid, &Ygrid, &Zgrid, RhoData, true);
       rhoIso->SetIsoval(MaxRho*IsoAdjust.get_value());
@@ -541,6 +542,8 @@ MDVisualClass::Read(string filename)
     Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
     Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
   }
+  else
+    BandFrame.hide();
   IsoButton.set_active(haveRho);
   IsoButton.set_sensitive(haveRho);
   IsoFrame.set_sensitive(haveRho);
