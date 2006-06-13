@@ -422,7 +422,7 @@ LangevinMoveClass::LangevinStep()
 	int nx = rho.extent(0);
 	int ny = rho.extent(1);
 	int nz = rho.extent(2);
-	Rho.resize(nx+1,ny+1, nz+1);
+	Rho.resize(nx+1, ny+1, nz+1);
 	Rho(Range(0,nx-1), Range(0,ny-1), Range(0,nz-1)) = rho;
 	MakePeriodic(Rho);
 	RhoVar.Write(Rho);
