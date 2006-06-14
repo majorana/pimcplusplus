@@ -152,27 +152,27 @@ MPISystemClass::SolveLDA()
   // Reset initial lambda
   ChargeMixer->SetLambda(startLambda);
 
-  if (BandComm.MyProc() == 0) {
-    if (kComm.MyProc() == 0) {
-      IOSectionClass out;
-      char fname[100];
-      snprintf (fname, 100, "VHXC%d.h5", ConfigNum);
-      out.NewFile (fname);
-      out.WriteVar("VH", VH);
-      out.WriteVar("VXC", VXC);
-      out.WriteVar("VHXC", VHXC);
-      out.WriteVar("Rho", Rho_r);
-      out.WriteVar ("E", CG.Energies);
-      LocalPotFFTClass &pot = *((LocalPotFFTClass*)H.Vion);
-      Array<double,3> magV(VH.shape());
-      for (int ix=0; ix<magV.extent(0); ix++)
-	for (int iy=0; iy<magV.extent(1); iy++)
-	  for (int iz=0; iz<magV.extent(2); iz++)
-	    magV(ix,iy,iz) = mag(pot.Vr(ix,iy,iz));
-      out.WriteVar("Vion", magV);
-      out.CloseFile();
-    }
-  }
+//   if (BandComm.MyProc() == 0) {
+//     if (kComm.MyProc() == 0) {
+//       IOSectionClass out;
+//       char fname[100];
+//       snprintf (fname, 100, "VHXC%d.h5", ConfigNum);
+//       out.NewFile (fname);
+//       out.WriteVar("VH", VH);
+//       out.WriteVar("VXC", VXC);
+//       out.WriteVar("VHXC", VHXC);
+//       out.WriteVar("Rho", Rho_r);
+//       out.WriteVar ("E", CG.Energies);
+//       LocalPotFFTClass &pot = *((LocalPotFFTClass*)H.Vion);
+//       Array<double,3> magV(VH.shape());
+//       for (int ix=0; ix<magV.extent(0); ix++)
+// 	for (int iy=0; iy<magV.extent(1); iy++)
+// 	  for (int iz=0; iz<magV.extent(2); iz++)
+// 	    magV(ix,iy,iz) = mag(pot.Vr(ix,iy,iz));
+//       out.WriteVar("Vion", magV);
+//       out.CloseFile();
+//     }
+//   }
   Bands2 = Bands1;
   Rions2 = Rions1;
   Bands1 = Bands;
