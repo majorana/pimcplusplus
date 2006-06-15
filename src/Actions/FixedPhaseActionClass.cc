@@ -606,8 +606,10 @@ FixedPhaseClass::Read(IOSectionClass &in)
   /// wavefunctions. 
   System = new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, 
 			       PathData.InterComm, UseLDA, UseMDExtrap);
-  PH = &PathData.Actions.GetPotential (IonSpeciesNum, UpSpeciesNum);
-  System->Setup (Path.GetBox(), kVec, kCut, *PH, UseLDA);
+  V_elec_ion = &PathData.Actions.GetPotential (IonSpeciesNum,  UpSpeciesNum);
+  V_ion_ion  = &PathData.Actions.GetPotential (IonSpeciesNum, IonSpeciesNum);
+  System->Setup (Path.GetBox(), kVec, kCut, 
+		 *V_elec_ion, *V_ion_ion, UseLDA);
   System->Read (in);
   //  Vec3 gamma (0.0, 0.0, 0.0);
 
@@ -883,6 +885,56 @@ FixedPhaseClass::Det (int slice, int speciesNum)
 #endif
 }
 
+void
+FixedPhaseClass::GetIonForces (Array<Vec3,1> &F)
+{
+  PathClass &Path = PathData.Path;
+  SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
+  PairActionFitClass& paIonIon = 
+    *PathData.Actions.PairMatrix(IonSpeciesNum, IonSpeciesNum);
+  // First get the force on the ions from the electrons
+  System->CalcIonForces(F);
+
+  int first = ionSpecies.FirstPtcl;
+  int last  = ionSpecies.LastPtcl;
+
+  // Now, add on the ion-ion forces
+  // Short-range part
+  for (int ptcl1=first; ptcl1<=last; ptcl1++) {
+    Vec3 r1 = Rions(ptcl1-first);
+    for (int ptcl2=ptcl1; ptcl2 <= ionSpecies.LastPtcl; ptcl2++) {
+      Vec3 r2  = Rions(ptcl2-first);
+      Vec3 diff = r2-r1;
+      Path.PutInBox (diff);
+      double dist = sqrt(dot(diff, diff));
+      diff = (1.0/dist)*diff;
+      double dVshort = paIonIon.Pot->dVdr(dist) - paIonIon.Vlong.Deriv(dist);
+      // DO I HAVE THESE SIGNS RIGHT????????????????
+      F(ptcl1-first) -= dVshort *diff;
+      F(ptcl2-first) += dVshort *diff;
+    }
+  }
+  // Long-range part
+  for (int ptcl=first; ptcl<=last; ptcl++) {
+    for (int ki=0; ki<Path.kVecs.size(); ki++) {
+      dVec r = Path(0,ptcl);
+      dVec G = Path.kVecs(ki);
+      double phi = dot(r,G);
+      double s, c;
+      sincos(phi, &s, &c);
+      complex<double> z(c,s); // z = e^{iG dot r}
+      complex<double> rho_mk = conj(Path.Rho_k(0,IonSpeciesNum, ki));
+      // DO I HAVE THE SIGN RIGHT????????????????
+      F(ptcl-first) += 
+	2.0*paIonIon.Vlong_k(ki)*imag(z*rho_mk)*G; 
+    }
+  }
+      
+    
+
+}
+
+
 bool
 FixedPhaseActionClass::IsPositive (int slice)
 {
@@ -1093,4 +1145,13 @@ FixedPhaseActionClass::GetBandEnergies(Array<double,1> &energies)
     FixedPhaseA.GetBandEnergies(energies);
   else
     FixedPhaseB.GetBandEnergies(energies);
+}
+
+void
+FixedPhaseActionClass::GetIonForces(Array<Vec3,1> &F)
+{
+   if (PathData.Path.GetConfig() == 0)
+    FixedPhaseA.GetIonForces(F);
+  else
+    FixedPhaseB.GetIonForces(F);
 }

@@ -1,9 +1,9 @@
 double tau=0.125;
 
-Section (Parallel)
-{
-  int ProcsPerClone = 4;
-}
+// Section (Parallel)
+// {
+//   int ProcsPerClone = 4;
+// }
 
 int Seed = 12345;
 //int seed = 314159;

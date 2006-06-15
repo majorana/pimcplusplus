@@ -35,7 +35,7 @@ private:
   PathClass &Path;
   double kCut;
   ComplexMultiTricubicSpline BandSplines;
-  Potential *PH;
+  Potential *V_elec_ion, *V_ion_ion;
   Vec3 kVec;
 
   Array<complex<double>,1> Workspace;
@@ -110,6 +110,7 @@ public:
   inline Vec3 Getk() { return kVec; }
   inline int GetNumBands() { return NumBands; }
   void GetBandEnergies(Array<double,1> &energies);
+  void GetIonForces (Array<Vec3,1> &F);
   FixedPhaseClass (PathDataClass &pathData);
 };
 
@@ -161,6 +162,7 @@ public:
   const Array<double,3>& GetDensity ();
   void CalcBandDensity (Array<double,4> &rho);
   void GetBandEnergies(Array<double,1> &energies);
+  void GetIonForces (Array<Vec3,1> &F);
 
   FixedPhaseActionClass (PathDataClass &pathData, 
 			 FixedPhaseClass &FPA, FixedPhaseClass &FPB,
