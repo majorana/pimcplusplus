@@ -23,7 +23,6 @@ class LocalPotFFTClass : public VionBase
 {
 private:
   kSpacePH kPH;
-  Array<double,1> Vk;
   zVec Vc;
   FFTBox      &cFFT;
   void SetupkPotentials();

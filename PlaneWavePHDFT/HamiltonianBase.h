@@ -53,6 +53,9 @@ protected:
   Vec3 kPoint;
   zVec StructureFactor;
   Array<Vec3,1> Rions;
+  /// This is the potential for single atom evaluated at the
+  /// reciporical lattice vectors
+  Array<double,1> VG;
 public:
   // Adds H*c to the Hc vector.  Does not zero Hc before accumulating
   virtual void Apply   (const zVec &c, zVec &Hc) = 0;
@@ -66,6 +69,9 @@ public:
     return Rions;
   }
 
+  inline const Array<double,1>& GetVG()
+  { return VG; }
+  
   virtual void Setk    (Vec3 k) 
   { kPoint = k; }
   
@@ -96,7 +102,9 @@ public:
   void SetIons (const Array<Vec3,1>& rions);
   void Setk (Vec3 k);
   inline const Array<Vec3,1> GetRions()
-  {    return Vion->GetRions(); }
+  {  return Vion->GetRions(); }
+  inline const Array<double,1> GetVG()
+  {  return Vion->GetVG();    }
 
   HamiltonianClass (GVecsClass &gvecs, FFTBox &fft) 
     : GVecs(gvecs), Kinetic(gvecs), Vion(NULL), FFT(fft)

@@ -62,7 +62,7 @@ LocalPotFFTClass::SetupkPotentials()
       kPH.GetVals(gMag, a, bPerp, bPar, V);
       numCalls++;
     }
-    Vk(i) = volInv * V;
+    VG(i) = volInv * V;
   }
 }
 
@@ -72,7 +72,7 @@ LocalPotFFTClass::SetuprPotentials()
   cFFT.kBox = complex<FFT_FLOAT>(0.0, 0.0);
   for (int i=0; i<GVecs.DeltaSize(); i++) {
     Int3 I = GVecs.DeltaI(i);
-    cFFT.kBox(I)   = StructureFactor(i)*Vk(i);
+    cFFT.kBox(I)   = StructureFactor(i)*VG(i);
   }
   cFFT.k2r();
   Vr = cFFT.rBox;
@@ -96,7 +96,7 @@ LocalPotFFTClass::Setup()
   cFFT.GetDims(nx,ny,nz);
   Vr.resize(nx,ny,nz);
   Vc.resize(GVecs.size());
-  Vk.resize(GVecs.DeltaSize());
+  VG.resize(GVecs.DeltaSize());
 //   StructureFactor.resize(GVecs.DeltaSize());
 //   StructureFactor = complex<double>(1.0, 0.0);
 
@@ -115,7 +115,7 @@ LocalPotFFTClass::Setk (Vec3 k)
   cFFT.GetDims(nx,ny,nz);
   Vr.resize(nx,ny,nz);
   Vc.resize(GVecs.size());
-  Vk.resize(GVecs.DeltaSize());
+  VG.resize(GVecs.DeltaSize());
 
   SetupkPotentials();
   SetIons(Rions);

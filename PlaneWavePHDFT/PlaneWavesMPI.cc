@@ -18,7 +18,8 @@
 #include "../MPI/Communication.h"
 
 void
-MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
+MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, 
+		       Potential &v_elec_ion, Potential &v_ion_ion,
 		       bool useLDA, bool useFFT)
 {
   UseLDA = useLDA;
@@ -30,13 +31,14 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, Potential &ph,
   worldComm.AllMax(fftSize);
   GVecs.Set (box, k, kcut, fftSize);
   FFT.Setup();
-  H.SetIonPot (ph, useFFT);
+  H.SetIonPot (v_elec_ion, useFFT);
   H.Setk(k);
   Bands.resize (NumBands, GVecs.size());
   HBands.resize (NumBands, GVecs.size());
   Bands1.resize (NumBands, GVecs.size());
   Bands2.resize (NumBands, GVecs.size());
-  PH = &ph;
+  V_elec_ion = &v_elec_ion;
+  V_ion_ion = &v_ion_ion;
   UseFFT = useFFT;
   int NDelta = H.GVecs.DeltaSize();
   if (UseLDA) 
@@ -211,7 +213,7 @@ MPISystemClass::Setk(Vec3 k)
 {
   GVecs.Set (Box, k, kCut);
   FFT.Setup();
-  //  H.SetIonPot (*PH, UseFFT);
+  //  H.SetIonPot (*V_elec_ion, UseFFT);
   H.Setk(k);
   /// The half box is necessary to compensate for fourier transform
   /// aliasing.  
@@ -240,3 +242,5 @@ MPISystemClass::Read(IOSectionClass &in)
   Smearer.SetOrder(SmearOrder);
   Smearer.SetWidth(SmearWidth);
 }
+
+

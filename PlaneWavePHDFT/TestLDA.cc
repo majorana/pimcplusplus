@@ -29,7 +29,9 @@ void TestInitCharge()
   IOSectionClass in;
   in.OpenFile("NaLocalPH.h5");
   //in.OpenFile("Na_HF_NLPP.h5");
-  Potential *pot = ReadPotential(in);
+  Potential *V_elec_ion = ReadPotential(in);
+  CoulombPot V_ion_ion;
+  V_ion_ion.Z1Z2 = 1.0;
   in.CloseFile();
 
   int numBands  = 10;
@@ -56,7 +58,7 @@ void TestInitCharge()
   Vec3 k = 0.25 * Gprim;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 4.0, *pot, true, true);
+  system.Setup (box, k, 4.0, *V_elec_ion, V_ion_ion, true, true);
   system.SetIons(rions);
   IOSectionClass out;
   out.NewFile ("InitDensity.h5");
@@ -76,7 +78,9 @@ void TestSolveLDA()
   IOSectionClass in;
   //in.OpenFile("NaLocalPH.h5");
   in.OpenFile("Na_HF_NLPP.h5");
-  Potential *pot = ReadPotential(in);
+  Potential *V_elec_ion = ReadPotential(in);
+  CoulombPot V_ion_ion;
+  V_ion_ion.Z1Z2 = 1.0;
   in.CloseFile();
 
   int numBands  = 16;
@@ -104,7 +108,7 @@ void TestSolveLDA()
   cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 3.0, *pot, true, true);
+  system.Setup (box, k, 3.0, *V_elec_ion, V_ion_ion, true, true);
   system.SetIons(rions);
   system.SolveLDA();
 }
@@ -122,8 +126,12 @@ void TestMultiLDA()
   //in.OpenFile("NaLocalPH.h5");
   //  in.OpenFile("Na_HF_NLPP.h5");
   in.OpenFile("OpiumNaLocal.h5");
-  Potential *pot = ReadPotential(in);
+  Potential *V_elec_ion = ReadPotential(in);
   in.CloseFile();
+  CoulombPot V_ion_ion;
+  V_ion_ion.Z1Z2 = 1.0;
+
+
 
   int numBands  = 16;
   int numElecs  = 16;
@@ -134,7 +142,7 @@ void TestMultiLDA()
   cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 4.0, *pot, true, true);
+  system.Setup (box, k, 4.0, *V_elec_ion, V_ion_ion, true, true);
   
   Array<Vec3,1> rions(16);
   Array<double,3> R;
@@ -176,8 +184,11 @@ void TestSolidLDA()
   IOSectionClass in;
   //in.OpenFile("NaLocalPH.h5");
   in.OpenFile("Na_HF_NLPP.h5");
-  Potential *pot = ReadPotential(in);
+  Potential *V_elec_ion = ReadPotential(in);
   in.CloseFile();
+  CoulombPot V_ion_ion;
+  V_ion_ion.Z1Z2 = 1.0;
+
 
   int numBands  = 5;
   int numElecs  = 2;
@@ -190,7 +201,7 @@ void TestSolidLDA()
   cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
-  system.Setup (box, k, 8.0, *pot, true, true);
+  system.Setup (box, k, 8.0, *V_elec_ion, V_ion_ion, true, true);
   system.SetIons(rions);
   system.SolveLDA();
 }
@@ -200,14 +211,19 @@ void TestSolidLDA()
 void 
 TestSmear()
 {
-  FILE *fout = fopen ("Smear.dat", "w");
+  FILE *fout = fopen ("smear.dat", "w");
   double mu = 0.0;
   MethfesselPaxton smearer;
   smearer.SetOrder(2);
   smearer.SetWidth(0.5);
-  for (double E=-3.0; E<=3.0; E+=0.01) 
-    fprintf (fout, "%1.12e %1.12e %1.12e\n", 
-	     E, smearer.D(E, mu), smearer.S(E, mu));
+  for (double E=-3.0; E<=3.0; E+=0.001) {
+    fprintf (fout, "%1.12e ", E);
+    for (int order=1; order<6; order++) {
+      smearer.SetOrder(order);
+      fprintf (fout, "%1.12e ", smearer.S(E,mu));
+    }
+    fprintf (fout, "\n");
+  }
   fclose(fout);
 }	     
 
@@ -216,9 +232,9 @@ main(int argc, char **argv)
 {
   COMM::Init(argc, argv);
   // TestInitCharge();
-  // TestSmear();
+  TestSmear();
   //TestSolveLDA();
-  TestMultiLDA();
+  // TestMultiLDA();
   // TestSolidLDA();
   COMM::Finalize();
 }

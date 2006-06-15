@@ -45,7 +45,7 @@ protected:
   
   /// The electron-ion potential -- presently, this only works for
   /// systems containing one element type
-  Potential *PH;
+  Potential *V_elec_ion, *V_ion_ion;
 
   /// Object for applying the Hamiltonian to a vector.
   HamiltonianClass H;
@@ -151,7 +151,8 @@ public:
   void InitLDA();
 public:
   GVecsClass GVecs;
-  void Setup(Vec3 box, Vec3 k, double kcut, Potential &ph, 
+  void Setup(Vec3 box, Vec3 k, double kcut, 
+	     Potential &v_elec_ion, Potential &v_ion_ion,
 	     bool useLDA, bool useFFT=true);
   void Setup(Vec3 box, Vec3 k, double kcut, double z, 
 	     bool useLDA, bool useFFT=true);
@@ -159,6 +160,7 @@ public:
   inline Vec3 GetIonPos(int i) { return Rions(i); }
   inline const Array<double,3>& GetDensity()
   { return Rho_r; }
+  void CalcIonForces(Array<Vec3,1> &F);
   void Setk (Vec3 k);
   void DiagonalizeH();
   void SolveLDA();

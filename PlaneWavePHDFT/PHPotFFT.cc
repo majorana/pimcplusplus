@@ -63,7 +63,7 @@ PHPotFFTClass::SetupkPotentials()
       kPH.GetVals(gMag, a, bPerp, bPar, V);
       numCalls++;
     }
-    Vk(i) = volInv * V;
+    VG(i) = volInv * V;
     Fk(i) = volInv * kPH.Ftensor (GVecs.DeltaG(i), a, bPerp, bPar);
   }
 }
@@ -80,7 +80,7 @@ PHPotFFTClass::SetuprPotentials()
   MatFFT.kBox = Mat0;
   for (int i=0; i<GVecs.DeltaSize(); i++) {
     Int3 I = GVecs.DeltaI(i);
-    cFFT.kBox(I)   = StructureFactor(i)*Vk(i);
+    cFFT.kBox(I)   = StructureFactor(i)*VG(i);
 #ifdef FFT_USE_SINGLE
     MatFFT.kBox(I) = conv(StructureFactor(i)*Fk(i));
 #else
@@ -118,7 +118,7 @@ PHPotFFTClass::Setup()
   Vr.resize(nx,ny,nz);
   Gc.resize(GVecs.size());
   Vc.resize(GVecs.size());
-  Vk.resize(GVecs.DeltaSize());
+  VG.resize(GVecs.DeltaSize());
   Fk.resize(GVecs.DeltaSize());
 //   StructureFactor.resize(GVecs.DeltaSize());
 //   StructureFactor = complex<double>(1.0, 0.0);
@@ -142,7 +142,7 @@ PHPotFFTClass::Setk (Vec3 k)
   Vr.resize(nx,ny,nz);
   Gc.resize(GVecs.size());
   Vc.resize(GVecs.size());
-  Vk.resize(GVecs.DeltaSize());
+  VG.resize(GVecs.DeltaSize());
   Fk.resize(GVecs.DeltaSize());
 
   SetupkPotentials();

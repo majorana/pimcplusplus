@@ -412,7 +412,7 @@ MPISystemClass::CalcRadialChargeDensity()
   atom.RadialWFs(0).Occupancy = 1.0;
   atom.RadialWFs(0).Energy = -0.15;
   atom.SetGrid (&AtomGrid);
-  atom.SetBarePot (PH);
+  atom.SetBarePot (V_elec_ion);
   atom.Solve();
   Array<double,1> rho(AtomGrid.NumPoints);
   for (int i=0; i<rho.size(); i++) {
@@ -474,34 +474,29 @@ MPISystemClass::MixChargeDensity()
 
 
 
-// double
-// PlaneWavesMPI::CalcHartreeTerm(int band)
-// {
-//   zVec psi;
-//   psi.reference (Bands(band, Range::all()));
-//   FFT.PutkVec (Phip);
-//   FFT.k2r();
-//   copy (FFT.rBox, Phip_r);
-// //   for (int ix=0; ix<Nx; ix++)
-// //     for (int iy=0; iy<Ny; iy++)
-// //       for (int iz=0; iz<Nz; iz++)
-// // 	Phip_r(ix,iy,iz) = FFT.rBox(ix,iy,iz);
-//   FFT.PutkVec (psi);
-//   FFT.k2r();
+// Note, this returns only the forces of the electrons on the ions,
+// not the ions on the ions.
+void
+MPISystemClass::CalcIonForces (Array<Vec3,1> &F)
+{
+  if (F.size() != Rions.size())
+    F.resize(Rions.size());
   
-//   for (int ix=0; ix<Nx; ix++)
-//     for (int iy=0; iy<Ny; iy++)
-//       for (int iz=0; iz<Nz; iz++)
-// 	FFT.rBox(ix,iy,iz) *= conj(Phip_r(ix,iy,iz));
-//   FFT.r2k();
-//   FFT.GetkVec(h_G);
-//   double volInv = 1.0/H.GVecs.GetBoxVol();
-//   double e2_over_eps0 = 4.0*M_PI; // ???????
-//   double hartreeTerm = 0.0;
-//   for (int i=0; i<h_G.size(); i++)
-//     hartreeTerm += norm(h_G(i))*H.GVecs.DeltaGInv2(i);
-//   hartreeTerm *= 2.0 * e2_over_eps0 * volInv;
-//   return hartreeTerm;
-// }
+  /// Do the electronic part
+  const Array<double,1> &VG = H.GetVG();
+  F = 0.0;
+  for (int ion=0; ion<Rions.size(); ion++) {
+    Vec3 r = Rions(ion);
+    for (int i=0; i<H.GVecs.DeltaSize(); i++) {
+      double phase, s, c;
+      const Vec3 &G = H.GVecs.DeltaG(i);
+      phase = dot (G, r);
+      sincos(phase, &s, &c);
+      F(ion) += G*imag(Rho_G(i)*complex<double>(c,s))*VG(i);
+    }
+  }
+
+}
+
 
 
