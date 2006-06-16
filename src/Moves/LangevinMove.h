@@ -28,7 +28,7 @@ protected:
   MDIntegratorType Integrator;
 
   Array<dVec,1> V, Vold, R, Rp, OldFShort, OldFLong, 
-    FShortSum, FLongSum, FShortTmp, FLongTmp;
+    FShortSum, FLongSum, FShortTmp, FLongTmp, FLDA;
 
   ///////////////////////////
   // Friction calculations //
@@ -101,7 +101,7 @@ protected:
   Array<double,3> Rho;
   Array<double,4> BandRho;
   ObservableVecDouble2 Rvar, Vvar, VOldVar, FVar, FShortVar, FLongVar,
-    CoVarVar;
+    CoVarVar, FLDAVar;
   ObservableVecDouble1 LambdaVar, BandEnergiesVar;
   Array<double,2> WriteArray;
   ObservableDouble TimeVar;
@@ -116,6 +116,7 @@ public:
     FVar      ("F",                 IOSection, pathData.Path.Communicator),
     FShortVar ("FShort",            IOSection, pathData.Path.Communicator),
     FLongVar  ("FLong",             IOSection, pathData.Path.Communicator),
+    FLDAVar   ("FLDA",              IOSection, pathData.Path.Communicator),
     LambdaVar ("Lambda",            IOSection, pathData.Path.Communicator),
     CoVarVar  ("CoVar",             IOSection, pathData.Path.Communicator),
     TimeVar   ("Time",              IOSection, pathData.Path.Communicator),
