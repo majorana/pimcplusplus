@@ -38,9 +38,13 @@ case "${host_cpu}" in
       fi
       if grep -q "Pentium(R) M" /proc/cpuinfo; then
 	AC_MSG_RESULT([Pentium M])
-        AX_CC_OPTION(TUNEOPT, [-mtune=pentium-m], [-mtune=pentium-m], [-mcpu=pentium-m])
-        AX_CC_OPTION(ARCHOPT, [-march=pentium-m], [-march=pentium-m], [-march=pentium-m])
-	FFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
+#        AX_CC_OPTION(TUNEOPT, [-mtune=pentium-m], [-mtune=pentium-m], [-mcpu=pentium-m])
+#        AX_CC_OPTION(ARCHOPT, [-march=pentium-m], [-march=pentium-m], [-march=pentium-m])
+#	FFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
+        AX_CC_OPTION(TUNEOPT, [-mtune=pentium-m], [-mtune=pentium-m], [-mcpu=pentium4])
+	AX_CC_OPTION(ARCHOPT, [-march=pentium-m], [-march=pentium-m], [-mcpu=pentium4])
+        AX_F77_OPTION(FARCHOPT, [-march=pentium4], [-march=pentium4], [ ])
+	FFLAGS="-O3 $FARCHOPT -ffast-math -g"
       fi
       if grep -q "Intel(R) Xeon" /proc/cpuinfo; then
 	AC_MSG_RESULT([Intel Xeon])
