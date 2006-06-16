@@ -108,6 +108,10 @@ bool PACoulombFitClass::Read (IOSectionClass &in,
   in.OpenSection("Potential");
   if (!in.ReadVar ("Z1Z2", Z1Z2))
     Z1Z2 = 0.0;
+  CoulombPot &coul = *(new CoulombPot);
+  coul.Z1Z2 = Z1Z2;
+  Pot = &coul;
+  
   in.CloseSection();
   in.CloseSection();
   return true;

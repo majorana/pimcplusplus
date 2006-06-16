@@ -33,7 +33,7 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut,
   FFT.Setup();
   H.SetIonPot (v_elec_ion, useFFT);
   H.Setk(k);
-  Bands.resize (NumBands, GVecs.size());
+  Bands.resize  (NumBands, GVecs.size());
   HBands.resize (NumBands, GVecs.size());
   Bands1.resize (NumBands, GVecs.size());
   Bands2.resize (NumBands, GVecs.size());
