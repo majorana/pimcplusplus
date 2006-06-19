@@ -28,7 +28,6 @@ private:
   void SetupkPotentials();
   void SetuprPotentials();
 public:
-  Array<complex<FFT_FLOAT>,3> Vr;
   void Setup();
   void SetIons (const Array<Vec3, 1>& rions);
   void Vmatrix (Array<complex<double>,2> &vmat);

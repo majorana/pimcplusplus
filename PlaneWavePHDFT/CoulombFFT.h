@@ -23,7 +23,6 @@ class CoulombFFTClass : public VionBase
 {
 private:
   double Z;
-  Array<complex<FFT_FLOAT>,3> Vr;
 
   void Setup();
   void SetVr();

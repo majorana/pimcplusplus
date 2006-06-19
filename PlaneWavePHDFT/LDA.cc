@@ -392,10 +392,55 @@ MPISystemClass::CalcVHXC()
 	EXC += exc*Rho_r(ix,iy,iz);
       }
   EXC *= vol/(double)Ngrid;
-  perr<< "EH = " << EH << "   EXC = " << EXC << endl;
   VHXC = VH + VXC;
+
+  ///////////////////////////////////
+  // Calculate electron-ion energy //
+  ///////////////////////////////////
+//   Eelec_ion = 0.0;
+//   const Array<double,1> &VG = H.GetVG();
+//   for (int i=0; i<H.GVecs.DeltaSize(); i++) {
+//     complex<double> S(0.0, 0.0);
+//     for (int ion=0; ion<Rions.size(); ion++) {
+//       Vec3 r = Rions(ion) + 0.5*Box;
+//       const Vec3 &G = H.GVecs.DeltaG(i);
+//       double phase, c, s;
+//       phase = dot (r, G);
+//       sincos(phase, &s, &c);
+//       S += complex<double> (c, s);
+//     }
+//     Eelec_ion += real(conj(Rho_G(i))*S*VG(i));
+//   }
+//   Eelec_ion *= vol;
+//   double Eelec_ion2 = 0.0;
+//   for (int ix=0; ix<Rho_r.extent(0); ix++)
+//     for (int iy=0; iy<Rho_r.extent(1); iy++)
+//       for (int iz=0; iz<Rho_r.extent(2); iz++)
+// 	Eelec_ion2 += Rho_r(ix,iy,iz)*H.GetVr()(ix,iy,iz).real();
+
+//   Eelec_ion2 *= vol/(double)Ngrid;
+  Eelec_ion = CalcElectronIonEnergy();
+
+  perr<< "EH = " << EH << "   EXC = " << EXC 
+      << " Eelec_ion  = " << Eelec_ion  << endl;
+  //      << " Eelec_ion2 = " << Eelec_ion2 << endl;
+
 }
 
+
+double
+MPISystemClass::CalcElectronIonEnergy()
+{
+  double E = 0.0;
+  for (int ix=0; ix<Rho_r.extent(0); ix++)
+    for (int iy=0; iy<Rho_r.extent(1); iy++)
+      for (int iz=0; iz<Rho_r.extent(2); iz++)
+	E += Rho_r(ix,iy,iz)*H.GetVr()(ix,iy,iz).real();
+  double vol = GVecs.GetBoxVol();
+  double Ngrid = Rho_r.size();
+  E *= vol/Ngrid;
+  return E;
+}
 
 void
 MPISystemClass::CalcRadialChargeDensity()
@@ -486,16 +531,16 @@ MPISystemClass::CalcIonForces (Array<Vec3,1> &F)
   const Array<double,1> &VG = H.GetVG();
   F = 0.0;
   for (int ion=0; ion<Rions.size(); ion++) {
-    Vec3 r = Rions(ion);
+    Vec3 r = Rions(ion) + 0.5*Box;
     for (int i=0; i<H.GVecs.DeltaSize(); i++) {
       double phase, s, c;
       const Vec3 &G = H.GVecs.DeltaG(i);
       phase = dot (G, r);
       sincos(phase, &s, &c);
-      F(ion) += G*imag(Rho_G(i)*complex<double>(c,s))*VG(i);
+      F(ion) += G*imag(conj(Rho_G(i))*complex<double>(c,s))*VG(i);
     }
   }
-
+  F *= H.GVecs.GetBoxVol();
 }
 
 

@@ -173,6 +173,61 @@ void TestMultiLDA()
 
 }
 
+
+void TestLDAForces()
+{
+  CommunicatorClass bandComm, kComm;
+  bandComm.SetWorld();
+  Array<int,1> root(1);
+  root(0) = 0;
+  bandComm.Subset (root, kComm);
+
+  IOSectionClass in;
+  //in.OpenFile("NaLocalPH.h5");
+  //  in.OpenFile("Na_HF_NLPP.h5");
+  in.OpenFile("OpiumNaLocal.h5");
+  Potential *V_elec_ion = ReadPotential(in);
+  in.CloseFile();
+  CoulombPot V_ion_ion;
+  V_ion_ion.Z1Z2 = 1.0;
+
+  int numBands  = 16;
+  int numElecs  = 16;
+  Vec3 box (26.56, 26.56, 26.56);
+  
+  Vec3 Gprim = 2.0*M_PI*Vec3(1.0/box[0], 1.0/box[1], 1.0/box[2]);
+  Vec3 k = 0.25 * Gprim;
+  cerr << "k = " << k << endl;
+  MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
+  
+  system.Setup (box, k, 4.0, *V_elec_ion, V_ion_ion, true, true);
+  
+  Array<Vec3,1> rions(16);
+  Array<double,3> R;
+  IOSectionClass configsIn;
+  configsIn.OpenFile("configs.h5");
+  configsIn.ReadVar("R", R);
+  for (int ri=0; ri<R.extent(1); ri++)
+    for (int dim=0; dim<3; dim++)
+      rions(ri)[dim] = R(0,ri,dim);
+  
+  system.SetIons(rions);
+  system.DoMDExtrap();
+  system.SolveLDA();
+  
+  rions(0)[0] += 1.0e-5;
+  system.SetIons(rions);
+  double Eplus = system.CalcElectronIonEnergy();
+  rions(0)[0] -= 2.0e-5;
+  system.SetIons(rions);
+  double Eminus = system.CalcElectronIonEnergy();
+
+  Array<Vec3,1> forces(16);
+  system.CalcIonForces(forces);
+  fprintf (stderr, "forces(0)[0] = %1.12e\n", forces(0)[0]);
+  fprintf (stderr, "FD forces    = %1.12e\n", -(Eplus-Eminus)/2e-5);
+}
+
 void TestSolidLDA()
 {
   CommunicatorClass bandComm, kComm;
@@ -232,9 +287,10 @@ main(int argc, char **argv)
 {
   COMM::Init(argc, argv);
   // TestInitCharge();
-  TestSmear();
+  //TestSmear();
   //TestSolveLDA();
-  // TestMultiLDA();
+  //TestMultiLDA();
   // TestSolidLDA();
+  TestLDAForces();
   COMM::Finalize();
 }

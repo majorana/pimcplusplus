@@ -26,7 +26,6 @@ private:
   kSpacePH kPH;
   Array<Mat3,1> Fk;
   Array<TinyMatrix<complex<FFT_FLOAT>,3,3>,3> Fr;
-  Array<complex<FFT_FLOAT>,3> Vr;
   zVec Vc;
   zVecVec Gc;
   FFTBox      &cFFT;

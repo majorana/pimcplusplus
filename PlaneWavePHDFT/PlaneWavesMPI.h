@@ -140,7 +140,7 @@ private:
   /// The components of the Hartree term in k-space
   zVec h_G;
   /// The Hartree and exchance-corelation energies
-  double EH, EXC;
+  double EH, EXC, Eelec_ion;
   /// This radial density is used to calculate 
   OptimalGrid AtomGrid;
   CubicSpline RadialChargeDensity;
@@ -160,6 +160,7 @@ public:
   inline Vec3 GetIonPos(int i) { return Rions(i); }
   inline const Array<double,3>& GetDensity()
   { return Rho_r; }
+  double CalcElectronIonEnergy ();
   void CalcIonForces(Array<Vec3,1> &F);
   void Setk (Vec3 k);
   void DiagonalizeH();
