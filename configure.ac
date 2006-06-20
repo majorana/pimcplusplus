@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(libcommon, 1.0, esler@uiuc.edu)
+AC_INIT(libcommon, 0.5, esler@uiuc.edu)
 AM_INIT_AUTOMAKE(libcommon, 0.5)
 AC_CONFIG_SRCDIR([Blitz.h])
 AC_CONFIG_HEADER([config.h])
