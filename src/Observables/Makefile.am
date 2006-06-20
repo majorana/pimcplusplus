@@ -1,6 +1,10 @@
 noinst_LTLIBRARIES = libobservables.la
 
-libobservables_la_CXXFLAGS = $(COMMON_CFLAGS)
+#QMCPACK_ROOT = /home/gergely/qmcPlusPlusNew
+#QMCPACK_ROOT = /home/gergely/qmcPlusPlusCEIMC
+#QMCPACK_HOME = $(QMCPACK_ROOT)/build
+
+libobservables_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF)
 libobservables_la_SOURCES  =     \
     Angular.h                    \
     Angular.cc                   \

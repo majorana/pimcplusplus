@@ -52,10 +52,12 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
   double currActionChange=newAction-oldAction;
   double logAcceptProb=log(sampleRatio)-currActionChange+prevActionChange;
   bool toAccept = logAcceptProb>=log(PathData.Path.Random.Local()); /// Accept condition
-  if (toAccept)
+  if (toAccept){
     NumAccepted++;
+	}
   NumAttempted++;
   prevActionChange=currActionChange;
+
   return toAccept;
 }
 

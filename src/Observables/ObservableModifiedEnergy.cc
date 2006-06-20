@@ -102,7 +102,7 @@ void ModifiedEnergyClass::ShiftData (int NumTimeSlices)
 void ModifiedEnergyClass::WriteBlock()
 {
   int nslices=PathData.Path.TotalNumSlices;
-cerr << "okay nslices is " << nslices << endl;
+cerr << "okay nslices is " << nslices << " and NumSamples is " << NumSamples << endl;
   double norm = 1.0/((double)NumSamples*(double)nslices);
 
 // NORMALIZE BY NUMBER OF MOLECULES *******

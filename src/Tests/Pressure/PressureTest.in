@@ -142,8 +142,8 @@ Section (Observables)
     {
       string Type="PathDump";
       string Name="PathDump";
-      int Frequency=2000;
-      int dumpFreq=2000;
+      int Frequency=2;
+      int dumpFreq=2;
     }
 
 }

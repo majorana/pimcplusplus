@@ -11,10 +11,10 @@ def IsMonotonic (x):
 
 def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      clf()
-     if (IsMonotonic(x)):
-          plot(x, y)
-     else:
-          plot(x, y, 'o')
+     #if (IsMonotonic(x)):
+     #     plot(x, y)
+     #else:
+     plot(x, y, 'o')
      h1=xlabel(hlabel)
      setp(h1,"FontSize",20)
      v1=ylabel(vlabel)

@@ -154,8 +154,9 @@ public:
 	Out.WriteVar (Name, tensor);
 	IOVar = Out.GetVarPtr(Name);
       }
-      else
-	IOVar->Append(val);
+      else{
+				IOVar->Append(val);
+			}
     }
   }
   ObservableVecDouble3(string name, IOSectionClass &out, 

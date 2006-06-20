@@ -152,6 +152,7 @@ PIMCobjs =                                \
   Moves/MoveBase.o                        \
   Moves/WaterMove.o                       \
   Moves/WaterMoveRing.o                   \
+  Moves/QMCTest.o                   \
   Actions/StructureReject.o               \
   Actions/ActionBase.o                    \
   Actions/ShortRangeClass.o               \

@@ -130,8 +130,9 @@ Section (System)
 }
 Section (Action)
 {
+	int NumImages = 0;
   int MaxLevels = 2;
-  Array<string,1> PairActionFiles(1) = ["../../PairActions/He495.PairAction"];
+  Array<string,1> PairActionFiles(1) = ["../../PairActions/He4.Old.Diag.PairAction"];
 }
 
 Section (Observables)
@@ -179,8 +180,8 @@ Section (Observables)
     {
       string type="PathDump";
       string Name="PathDump";
-      int freq=2000;
-      int dumpFreq=2000;
+      int freq=2;
+      int dumpFreq=2;
     }
 
 }

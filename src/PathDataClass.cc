@@ -15,6 +15,9 @@
 /////////////////////////////////////////////////////////////
 
 #include "PathDataClass.h"
+//#include <QMCApp/QMCInterface.h>
+//#include "Message/Communicate.h"
+//#include "Utilities/OhmmsInfo.h"
 
 
 void PathDataClass::Next(int &slice, int &ptcl)
@@ -176,24 +179,34 @@ void PathDataClass::Read (IOSectionClass &in)
   ////  Join=NumTimeSlices()-1;
   ///  //END MINOR HACK!
   int N = WorldComm.NumProcs();
+cerr << "PathDataClass.cc: N is " << N << endl;
   int procsPerClone = 1;
+  //bool UsingQMC = false;
   if (N > 1) {
     assert (in.OpenSection ("Parallel"));
     assert (in.ReadVar("ProcsPerClone", procsPerClone));
+    //in.ReadVar("Talk_To_QMC", UsingQMC); // flag for CEIMC, using qmcPACK
+    //if(UsingQMC && procsPerClone > 1) cerr << "ERROR: YOU HAVE Talk_To_QMC ON AND ProcsPerClone > 1: THIS IS NOT YET SUPPORTED!!!!!!!!!!!!!!!" << endl;
     in.CloseSection();
+    //if(UsingQMC) cerr << "  I am UsingQMC" << endl;
   }
   
+  cerr << "  Set up Inter- and Intra- " << endl;
   // Setup Inter- and IntraComms
   assert ((N % procsPerClone) == 0);
   NumClones = N / procsPerClone;
   MyCloneNum = WorldComm.MyProc()/procsPerClone;
   // Create IntraComm
+cerr << "  Going to initialize IntraComm with MyCloneNum " << MyCloneNum << endl;
   WorldComm.Split(MyCloneNum, IntraComm);
-  
+cerr << "  initialized IntraComm" << endl;  
+//cerr << "  skipped IntraComm" << endl;  
   Array<int,1> ranks (NumClones);
   for (int clone=0; clone<NumClones; clone++)
     ranks(clone) = clone*procsPerClone;
+cerr << "  ranks is " << ranks << "; going to creat Intercomm." << endl;
   WorldComm.Subset (ranks, InterComm);
+cerr << "  PIMC: initialized InterComm; ranks is " << ranks << endl;
   
   int seed;
   bool haveSeed = in.ReadVar ("Seed", seed);
@@ -210,6 +223,31 @@ void PathDataClass::Read (IOSectionClass &in)
   //    Random.Init (314159, numClones);
   
   Path.MyClone=IntraComm.MyProc()/procsPerClone;
+
+#ifdef USE_QMC
+  string QMCFilename;
+  RUN_QMC = false;
+  in.ReadVar("CEIMC_MODE", RUN_QMC);
+  if(RUN_QMC){
+    cerr << "CEIMC_MODE: Reading CEIMC Section..." << endl;
+    assert (in.OpenSection ("CEIMC"));
+    assert (in.ReadVar("QMCFile", QMCFilename));
+    in.CloseSection();
+    int argc = 1;
+    char* argv[argc];
+    argv[0]  = (char*)(QMCFilename.c_str());
+    OHMMS::Controller->initialize(argc,argv);
+    OhmmsInfo Welcome(argc,argv,OHMMS::Controller->mycontext());
+    //qmcplusplus::QMCInterface* qmc = new qmcplusplus::QMCInterface(argc,argv);
+    qmc = new qmcplusplus::QMCInterface(argc,argv);
+    //qmcplusplus::QMCMain *qmcmain = new qmcplusplus::QMCMain(argc,argv);
+    if(qmc->parse(argv[0])) {
+      qmc->initialize();
+    }
+  }
+#endif
+
+cerr << "leaving read" << endl;
 }
 
 

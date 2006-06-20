@@ -363,7 +363,8 @@ PathClass::InitPaths (IOSectionClass &in)
       }
       string pathFile;
       assert(in.ReadVar("File",pathFile));
-      ReadSqueeze(pathFile,replicate);
+      //ReadSqueeze(pathFile,replicate);
+      ReadOld(pathFile,replicate);
     }
     else if (InitPaths == "SQUEEZE"){
       string pathFile;
@@ -411,13 +412,16 @@ PathClass::InitPaths (IOSectionClass &in)
       abort();
     }
     in.CloseSection(); // Species
+// 	THIS IS OBSOLETE
 //   jgadd: get numMol
-    if (speciesIndex == 0){  
-      numMol = species.NumParticles;
-    }
+//    if (speciesIndex == 0){  
+//      numMol = species.NumParticles;
+//    }
   }
   in.CloseSection(); // "Particles"
 
+/// THIS IS OBSOLETE; SHOULD BE REMOVED
+/*
 // jgadd: correct entries where necessary
 //  perr << "PRINT MolRef corrected" << endl;
   for(int m = 0;m < MolRef.size(); m++){
@@ -427,7 +431,9 @@ PathClass::InitPaths (IOSectionClass &in)
     MolRef(m) = ref;
     }
     perr << m << " " << MolRef(m) << endl;
-  } 
+  }
+*/
+ 
   string openSpeciesName;
   if (OpenPaths) {
     assert(in.ReadVar("OpenSpecies",openSpeciesName));

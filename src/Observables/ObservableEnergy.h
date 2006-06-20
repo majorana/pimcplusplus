@@ -33,6 +33,10 @@ private:
   int TimesCalled;
   int Freq;
   int DumpFreq;
+	vector<ActionBaseClass*> OtherActions;
+	vector<ObservableDouble*> OtherVars;
+	vector<double> OtherSums;
+	int numEnergies;
 public:
   void Accumulate();
   void WriteBlock();
@@ -63,6 +67,9 @@ public:
     NumSamples = 0;
     TimesCalled=0;
     //    TIP5PSum = 0;
+		OtherActions.resize(0);
+		OtherVars.resize(0);
+		OtherSums.resize(0);
   }
 };
 

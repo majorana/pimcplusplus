@@ -1,6 +1,6 @@
 noinst_LTLIBRARIES = libactions.la
 
-libactions_la_CXXFLAGS = $(COMMON_CFLAGS) 
+libactions_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF)
 libactions_la_SOURCES =            \
     ActionBase.cc                  \
     ActionBase.h                   \
@@ -40,6 +40,8 @@ libactions_la_SOURCES =            \
     OpenLoopImportance.h           \
     PairFixedPhase.h               \
     PairFixedPhase.cc              \
+    QMCSamplingClass.h             \
+    QMCSamplingClass.cc            \
     ST2WaterClass.cc               \
     ST2WaterClass.h                \
     ShortRangeApproximateClass.cc  \

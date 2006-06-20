@@ -16,6 +16,11 @@
 
 #include "ObservableEnergy.h"
 
+// These are included for the new runtime 
+// specification of energy observables 
+// to compute; see below -John
+#include "../Actions/ST2WaterClass.h"
+#include "../Actions/QMCSamplingClass.h"
 
 // Fix to include final link between link M and 0
 void EnergyClass::Accumulate()
@@ -26,13 +31,17 @@ void EnergyClass::Accumulate()
 
   NumSamples++;
 
+	//map<double> Energies;
   double kinetic, dUShort, dULong, node, vShort, vLong, tip5p;
   PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong);
+  //PathData.Actions.Energy(Energies);
+	//kinetic = Energies["kinetic"];
+	//dUShort = Energies["dUShort"];
+	//dULong = Energies["dULong"];
+	//node = Energies["node"];
+	//vShort = Energies["vShort"];
+	//vLong = Energies["vLong"];
 
-  int slice1 = 0;
-  int slice2 = PathData.Path.TotalNumSlices;
-  // tip5p = PathData.Actions.TIP5PWater.d_dBeta(slice1,slice2,0);
-  
   TotalSum   += kinetic + dUShort + dULong + node;// + tip5p;
   KineticSum += kinetic;
   dUShortSum += dUShort;
@@ -40,6 +49,12 @@ void EnergyClass::Accumulate()
   NodeSum    += node;
   VShortSum  += vShort;
   VLongSum   += vLong;
+
+  int slice1 = 0;
+  int slice2 = PathData.Path.NumTimeSlices() - 1;
+	for(int n=0; n<numEnergies; n++){
+		OtherSums[n] += OtherActions[n]->d_dBeta(slice1,slice2,0);
+	}
 
 //   double kAction, uShortAction, uLongAction, nodeAction;
 //   PathData.Actions.GetActions(kAction, uShortAction, uLongAction, nodeAction);
@@ -116,6 +131,10 @@ void EnergyClass::WriteBlock()
   NodeVar.Write    (Prefactor*PathData.Path.Communicator.Sum(NodeSum)*norm);
   VShortVar.Write  (Prefactor*PathData.Path.Communicator.Sum(VShortSum)*norm);
   VLongVar.Write   (Prefactor*PathData.Path.Communicator.Sum(VLongSum)*norm);
+	for(int n=0; n<numEnergies; n++){
+		OtherVars[n]->Write(Prefactor*PathData.Path.Communicator.Sum(OtherSums[n])*norm);
+		OtherSums[n] = 0.0;
+	}
   //  TotalActionVar.Write(PathData.Path.Communicator.Sum(TotalActionSum)/(double)(NumSamples));
   //  ExpTotalActionVar.Write(ExpTotalActionSum/(double)NumSamples);
   //  TIP5PVar.Write(PathData.Path.Communicator.Sum(TIP5PSum)*norm);
@@ -208,6 +227,44 @@ void EnergyClass::Read(IOSectionClass &in)
     WriteInfo();
     IOSection.WriteVar("Type","Scalar");
   }
+
+	// New code to read in and accumulate
+	// energies from specified action objects
+	// Added by John on June 16 2006
+  Array<string,1> EnergyStrings(0);
+  in.ReadVar("ComputeEnergies", EnergyStrings);
+  numEnergies = EnergyStrings.size();
+	OtherActions.resize(numEnergies);
+	OtherVars.resize(numEnergies);
+	OtherSums.resize(numEnergies);	
+	for(int n=0; n<numEnergies; n++){
+		if(EnergyStrings(n) == "ST2WaterClass"){
+			OtherActions[n] = new ST2WaterClass(PathData);
+			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
+			OtherSums[n] = 0.0;
+		} else if(EnergyStrings(n) == "QMCSamplingClass"){
+			OtherActions[n] = new QMCSamplingClass(PathData);
+			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
+			OtherSums[n] = 0.0;
+		} else if(EnergyStrings(n) == "IonIonActionClass"){
+			OtherActions[n] = new IonIonActionClass(PathData);
+			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
+			OtherSums[n] = 0.0;
+		}
+		// Other action objects can be specified here of course
+#ifdef USE_QMC
+		else if(EnergyStrings(n) == "CEIMCActionClass"){
+			OtherActions[n] = new CEIMCActionClass(PathData);
+			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
+			OtherSums[n] = 0.0;
+		}
+#endif
+		else {
+			cerr << "You specified " << EnergyStrings(n) << ", which is not supported for runtime inclusion as a computed energy observable." << endl;
+		}
+	}
+	// End John's block of code
+
 }
 
 

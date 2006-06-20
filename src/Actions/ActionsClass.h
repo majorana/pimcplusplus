@@ -32,6 +32,7 @@
 #include "DavidLongRangeClass.h"
 #include "TIP5PWaterClass.h"
 #include "ST2WaterClass.h"
+#include "QMCSamplingClass.h"
 #include "OpenLoopImportance.h"
 #include "StructureReject.h"
 #include "KineticSphereClass.h"
@@ -98,6 +99,14 @@ public:
   /// Action for simulations using the ST2 water model
   ST2WaterClass ST2Water;
 
+#ifdef USE_QMC
+  CEIMCActionClass CEIMCAction;
+#endif
+
+  QMCSamplingClass QMCSampling;
+
+	IonIonActionClass IonInteraction;
+
   /// This array of actions are used for Restricted PIMC for
   /// fermions.  These effective actions ensure that the paths do not
   /// cross the nodes of some trial density matrix with respective to
@@ -133,6 +142,7 @@ public:
 
   /// Return the all the energies for this processor's segment of
   /// the path.  Must do global sum to get total energy.
+	//void Energy(map<double>& Energies);
   void Energy (double& kinetic, double &duShort, double &duLong, 
 	       double &node, double &vShort, double &vLong);
   /// Read the action parameters from the input file and do the
@@ -184,6 +194,11 @@ public:
     PairFixedPhase(pathData),
     TIP5PWater(pathData),
     ST2Water(pathData),
+#ifdef USE_QMC
+    CEIMCAction(pathData),
+#endif
+    QMCSampling(pathData),
+    IonInteraction(pathData),
     Mu(pathData),
     //    VariationalPI(pathData),
     StructureReject(pathData),

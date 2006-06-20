@@ -1,7 +1,9 @@
 noinst_LTLIBRARIES = libmoves.la
 
-libmoves_la_CXXFLAGS = $(COMMON_CFLAGS)
+libmoves_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF)
 libmoves_la_SOURCES  =           \
+		AVBMove.cc                   \
+		AVBMove.h                    \
     BisectionBlock.cc            \
     BisectionBlock.h             \
     BisectionSphereBlock.cc      \
@@ -30,6 +32,10 @@ libmoves_la_SOURCES  =           \
     EmptyStage.cc                \
     EndStage.cc                  \
     EndStage.h                   \
+    IonMoveStage.h               \
+    IonMoveStage.cc              \
+    IonMoveManager.h             \
+    IonMoveManager.cc            \
     GlobalJosephsonMove.h        \
     GlobalJosephsonMove.cc       \
     HermeleFourierMove.h         \
@@ -40,9 +46,13 @@ libmoves_la_SOURCES  =           \
     LeviFlightStage.cc           \
     MetaMoves.cc                 \
     MetaMoves.h                  \
+    MoleculeMoveBase.cc          \
+    MoleculeMoveBase.h           \
     MoveBase.cc                  \
     MoveBase.h                   \
     MoveClass.h                  \
+    MoveUtils.cc                 \
+    MoveUtils.h                  \
     MultiStage.cc                \
     MultiStage.h                 \
     NoPermuteClass.cc            \
@@ -70,10 +80,17 @@ libmoves_la_SOURCES  =           \
     TablePermuteStage.h          \
     ClusterMove.cc               \
     ClusterMove.h                \
+		WaterMoveManager.cc          \
+		WaterMoveManager.h           \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \
-    WaterMoveRing.h              
+    WaterMoveRing.h              \
+    QMCTest.cc                   \
+    QMCTest.h                    \
+    WormPermuteStage.h           \
+    WormPermuteStage.cc     		 \
+    WaterMoveRing.h              	
 #     VariationalDisplaceMove.h    \
 #     VariationalDisplaceMove.cc   \
 #     WormClose.h                  \
@@ -86,5 +103,3 @@ libmoves_la_SOURCES  =           \
 #     WormRemove.h                 \
 #     WormPermuteStage.h           \
 #     WormPermuteStage.cc     
-
-

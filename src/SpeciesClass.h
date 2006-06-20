@@ -46,7 +46,16 @@ public:
   double Charge;
   /// sigma and epsilon are parameters for the Lennard-Jones potential used in the TIP5P water model. -jg
   double Sigma;
-  double Epsilon;  
+  double Epsilon; 
+
+	//  If specified in the input file,
+	//  molecule holds the name of a "molecule"
+  //  to which particles of this species belong
+	// 	formula holds an integer to designate
+	//	the corresponding	chemical formula
+	string molecule; 
+	int formula;
+	bool AssignMoleculeIndex;
 
   /// Returns the nodal action for fermions.  Returns 0 for bosons.
   virtual ParticleType GetParticleType() = 0;

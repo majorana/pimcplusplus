@@ -283,12 +283,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new DisplaceMoveClass(PathData,OutFile);
 //     else if (moveType=="VariationalDisplace")
 //        move = new VariationalDisplaceMoveClass(PathData,OutFile);
-    else if (moveType=="WaterRotate")
-      move = new WaterRotate(PathData, OutFile);
-    else if (moveType=="WaterTranslate")
-      move = new WaterTranslate(PathData, OutFile);
-    else if (moveType=="WaterTranslateRing")
-      move = new WaterTranslateRing(PathData, OutFile);
+    else if (moveType=="WaterMove")
+      move = new WaterMoveClass(PathData, OutFile);
     else if (moveType=="LocalFlip")
       move =new LocalFlip(PathData,OutFile);
     else if (moveType=="GlobalJosephson")

@@ -122,9 +122,9 @@ void PathDumpClass::Accumulate()
     PathData.MoveJoin(maxShift);
     if (myProc == 0)
       for (int i=0; i<maxShift; i++)
-	for (int ptcl=0; ptcl < numPtcls; ptcl++) 
-	  for (int dim=0; dim<NDIM; dim++) 
-	    pathArray(ptcl, i+offset, dim) = Path(i,ptcl)[dim];
+				for (int ptcl=0; ptcl < numPtcls; ptcl++) 
+				  for (int dim=0; dim<NDIM; dim++) 
+				    pathArray(ptcl, i+offset, dim) = Path(i,ptcl)[dim];
     
     // Now shift
     PathData.ShiftData(-maxShift);

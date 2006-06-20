@@ -88,13 +88,14 @@ public:
 class LocalStageClass : public StageClass
 {
 public:
+	double UAction; // jg just for testing
   bool Attempt(int &slice1, int &slice2,
 	       Array<int,1> &activeParticles,
 	       double &prevActionChange);
   LocalStageClass(PathDataClass &pathData,IOSectionClass &outSection) :
     StageClass(pathData,outSection)
   {
-
+		UAction = 0.0;
   }
 	       
 };

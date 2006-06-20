@@ -143,11 +143,6 @@ public:
   /// looped over this particle yet
   Array<bool,1> DoPtcl;
 
-  //jgadd
-  int numMol;  // we want to store the number of molecules; it's
-	       // loaded in the .cc file 
-  Array<int,1> MolRef;
-
   inline void  SetBox (dVec box);
   inline const dVec GetBox();
   inline const dVec GetBoxInv();
@@ -315,6 +310,14 @@ public:
   //END CODE FOR SCALING BOX
   bool FunnyCoupling;
 
+	public:
+	// containers for data about user-defined molecules
+	vector<string> MoleculeName; // stores all specified molecule names
+	vector<int> MoleculeNumber;  // stores corresponding number of each molecule
+	//map<string,int> MoleculeMap; // maps molecule name to molecule id
+  int numMol; // stores number of molecules of the FIRST type of molecule specified
+  Array<int,1> MolRef; // maps ptcl index to molecule index
+	bool doMol;
 };
 
 inline bool PathClass::HasFermions(const Array<int,1>& activeParticles)
@@ -437,6 +440,13 @@ PathClass::PathClass (CommunicatorClass &communicator,
   //  OpenPaths=true;
   OpenPaths=false; //turns off open loops (Should be read at some poitn)
   Weight=1;
+
+	MoleculeName.resize(0);
+	MoleculeNumber.resize(0);
+	//MoleculeMap.resize(0);
+	numMol = 0;
+	MolRef.resize(0);
+	doMol = false;
 }
 
 
