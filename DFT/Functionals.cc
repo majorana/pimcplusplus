@@ -351,7 +351,8 @@ void
 FortranExCorr (double n, double &Exc, double &Vxc)
 {
   double zeta = 0.0;
-  int type = 3;
+  //  int type = 4;
+  int type = 3;  // Perdue Zunger
   int Macdonald_Vosko = 0;
   double vpol;
   F77_EXCCOR(n, zeta, Exc, Vxc, vpol, type, Macdonald_Vosko);
