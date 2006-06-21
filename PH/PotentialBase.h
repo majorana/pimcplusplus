@@ -39,6 +39,7 @@ public:
   virtual double d2Vdr2(double r) = 0;
   virtual void Write(IOSectionClass &out) = 0;
   virtual void Read(IOSectionClass &in) = 0;
+  virtual double X_k (double rcut, double k) { return 0.0; }
 };
 
 Potential* ReadPotential (IOSectionClass &in);

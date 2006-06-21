@@ -46,3 +46,9 @@ bool CoulombPot::NeedsRel()
 {
   return true;
 }
+
+double
+CoulombPot::X_k(double rcut, double k)
+{
+  return -4.0*M_PI*Z1Z2/(k*k)*cos(k*rcut);
+}

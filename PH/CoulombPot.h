@@ -27,6 +27,7 @@ public:
   double V      (double r);
   double dVdr   (double r);
   double d2Vdr2 (double r);
+  double X_k (double rcut, double k);
   bool NeedsRel();
   void Write(IOSectionClass &out);
   void Read (IOSectionClass &in);
