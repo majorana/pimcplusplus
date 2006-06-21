@@ -49,8 +49,8 @@
 			double deltaE, variance;
 			QuickAvg(&Uvalues,deltaE,variance);
 			cerr << "	computed average " << deltaE << " with variance " << variance << " from " << Uvalues.size() << " entries." << endl;
-	  	Utotal += (deltaE + variance/2); // penalty included
-	  	//Utotal += deltaE; // no penalty; biased estimator
+	  	//Utotal += (deltaE + variance/2); // penalty included
+	  	Utotal += deltaE; // no penalty; biased estimator
 		}
 	  //}
 		return Utotal*PathData.Path.tau;
