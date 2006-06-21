@@ -141,6 +141,20 @@ else
     MPI_DEF=" "
 fi
 AC_SUBST(MPI_DEF)
+
+# Checks if we want qmcPACK functionality for CEIMC
+AC_ARG_WITH(qmc,    [  --with-qmcpack=/path/to/my/qmcpack/builddir	enable QMCPACK functionality])
+if (test "x$with_qmcpack" != "x"); then
+   	QMC_DEF="-DUSE_QMC -DAPPNAMESPACE=qmcplusplus -I$with_qmcpack/src -I$with_qmcpack/../src"
+	 	QMC_LIB="$with_qmcpack/lib/libqmc.a $with_qmcpack/lib/libqmcbase.a $with_qmcpack/lib/libqmcutil.a"
+else # don't link with qmcpack
+    QMC_DEF=" "
+		QMC_LIB=" "
+fi
+
+AC_SUBST(QMC_DEF)
+AC_SUBST(QMC_LIB)
+
 AC_F77_WRAPPERS
 
 # Checks for typedefs, structures, and compiler characteristics.
