@@ -18,6 +18,7 @@
 #include "../MatrixOps/MatrixOps.h"
 #include "../MPI/Communication.h"
 #include "../DFT/Functionals.h"
+#include "../Ewald/OptimizedBreakup.h"
 
 void
 MPISystemClass::InitLDA()
@@ -42,7 +43,8 @@ MPISystemClass::InitLDA()
   Occupancies.resize(NumBands);
   CalcRadialChargeDensity();
   Smearer.SetOrder(2);
-  Smearer.SetWidth(0.02);
+  Smearer.SetWidth(0.01);
+  DoOptimizedBreakup();
   if (BandComm.MyProc() == 0) {
     Numk = kComm.NumProcs();
     Myk  = kComm.MyProc();
@@ -421,10 +423,12 @@ MPISystemClass::CalcVHXC()
 //   Eelec_ion2 *= vol/(double)Ngrid;
   Eelec_ion = CalcElectronIonEnergy();
 
-  perr<< "EH = " << EH << "   EXC = " << EXC 
-      << " Eelec_ion  = " << Eelec_ion  << endl;
-  //      << " Eelec_ion2 = " << Eelec_ion2 << endl;
-
+  
+  perr << "Energies:\n"
+       << "   EH         = " << EH  << endl
+       << "   EXC        = " << EXC << endl 
+       << "   Eelec_ion  = " << Eelec_ion << endl
+       << "   Eewald     = " << EwaldEnergy() << endl;
 }
 
 
@@ -541,6 +545,153 @@ MPISystemClass::CalcIonForces (Array<Vec3,1> &F)
     }
   }
   F *= H.GVecs.GetBoxVol();
+
+  Vec3 boxInv (1.0/Box[0], 1.0/Box[1], 1.0/Box[2]);
+
+  // Now add ion-ion part
+  // Short-range
+  for (int i=0; i<Rions.size(); i++)
+    for (int j=0; j<Rions.size(); j++)
+      if (i != j) {
+	Vec3 disp = Rions(j)-Rions(i);
+	disp[0] -= floor(disp[0]*boxInv[0]+0.5)*Box[0];
+	disp[1] -= floor(disp[1]*boxInv[1]+0.5)*Box[1];
+	disp[2] -= floor(disp[2]*boxInv[2]+0.5)*Box[2];
+	double dist = sqrt(dot(disp,disp));
+	disp = (1.0/dist)*disp;
+	double dV = V_ion_ion->dVdr(dist) - Vlong.Deriv(dist);
+	F(i) -= dV*disp;
+      }
+  // Long-range
+  Array<complex<double>,1> S(GVecs.size());
+  S = 0.0;
+  for (int gi=0; gi<H.GVecs.size(); gi++) {
+    Vec3 G = H.GVecs(gi);
+    for (int ri=0; ri<Rions.size(); ri++) {
+      Vec3 r = Rions(ri);
+      double phase = dot(r,G);
+      double s,c;
+      sincos(phase, &s, &c);
+      S(gi) += complex<double>(c,s);
+    }
+  }
+}
+
+inline complex<double> e2iphi(double phi)
+{
+  double s,c;
+  sincos(phi, &s, &c);
+  return complex<double>(c,s);
+}
+
+double
+MPISystemClass::EwaldEnergy()
+{
+  double Eewald = 0.0;
+  Vec3 boxInv (1.0/Box[0], 1.0/Box[1], 1.0/Box[2]);
+
+  for (int i=0; i<Rions.size(); i++)
+    for (int j=0; j<Rions.size(); j++) 
+      if (i != j) {
+	Vec3 disp = Rions(j)-Rions(i);
+	disp[0] -= floor(disp[0]*boxInv[0]+0.5)*Box[0];
+	disp[1] -= floor(disp[1]*boxInv[1]+0.5)*Box[1];
+	disp[2] -= floor(disp[2]*boxInv[2]+0.5)*Box[2];
+	double dist = sqrt(dot(disp,disp));
+	Eewald += 0.5*(V_ion_ion->V(dist)-Vlong(dist));
+      }
+
+  for (int gi=0; gi < H.GVecs.size(); gi++) {
+    complex<double> S(0.0, 0.0);
+    Vec3 G = H.GVecs(gi);
+    for (int ri=0; ri<Rions.size(); ri++) {
+      Vec3 r = Rions(ri);
+      S += e2iphi(dot(r,G));
+    }
+    Eewald += 0.5*norm(S)*Vlong_G(gi);
+  }
+  return Eewald;
+}
+
+void
+MPISystemClass::DoOptimizedBreakup()
+{
+  double rcut = 0.5*min(Box[0],min(Box[1],Box[2]));
+  double vol = Box[0]*Box[1]*Box[2];
+  double volInv = 1.0/vol;
+  double kvol = (8.0*M_PI*M_PI*M_PI)/vol;
+  double kavg = pow(kvol, 1.0/3.0);
+  
+  LPQHI_BasisClass basis;
+  basis.Set_rc(rcut);
+  basis.SetBox(Box);
+  basis.SetNumKnots (10);
+  double kCont = 50.0 * kavg;
+  double delta = basis.GetDelta();
+  double kMax = 20.0*M_PI/delta;
+  OptimizedBreakupClass breakup(basis);
+  breakup.SetkVecs (kCut, kCont, kMax);
+  int numk = breakup.kpoints.size();
+  int N = basis.NumElements();
+  Array<double,1> t(N);
+  Array<bool,1>   adjust (N);
+  Array<double,1> Xk(numk);
+
+  // Setup the grid for storing the long range potential
+  double rmax = 0.500001*sqrt(dot(Box,Box));
+  const int numPoints = 1000;
+  VlongGrid.Init(0.0, rmax, numPoints);
+  for (int ki=0; ki<numk; ki++)
+    Xk(ki) = volInv * V_ion_ion->X_k(rcut, breakup.kpoints(ki)[0]);
+  
+  adjust = true;
+  perr << "Doing ion-ion breakup...\n";
+  breakup.DoBreakup (Xk, t, adjust);
+  perr << "Completed.\n";
+  
+  ///////////////////////////////
+  // Calculate real-space part //
+  ///////////////////////////////
+  Array<double,1> Vlong_r(numPoints);
+  for (int i=0; i<numPoints; i++) {
+    double r = VlongGrid(i);
+    if (r <= rcut) {
+      // Sum over basis functions
+      for (int n=0; n<N; n++) 
+	Vlong_r(i) += t(n) * basis.h(n, r);
+    }
+    else
+      Vlong_r(i) = V_ion_ion->V(r);
+  }
+  Vlong.Init(&VlongGrid, Vlong_r);
+
+  //////////////////////////////////////
+  // Calculate reciporical-space part //
+  //////////////////////////////////////
+  Vlong_G.resize(H.GVecs.size());
+  Vlong_G = 0.0;
+  for (int ki=0; ki < H.GVecs.size(); ki++) {
+    const Vec3 &kv = H.GVecs(ki);
+    double k = sqrt (dot(kv,kv));
+    // Sum over basis functions
+    for (int n=0; n<N; n++)
+      Vlong_G(ki) += t(n) * basis.c(n,k);
+    // Now add on part from rc to infinity
+    Vlong_G(ki) -= volInv*V_ion_ion->X_k(rcut, k);
+    if (k < 1.0e-10)
+      Vlong_G(ki) = 0.0;
+  }
+
+  // Now, write out a file for checking purposes
+  if (BandComm.MyProc()==0)
+    if (kComm.MyProc()==0) {
+      FILE *fout = fopen ("Vion.dat", "w");
+      for (int i=0; i<numPoints; i++)
+	fprintf (fout, "%1.12e %1.12e %1.12e\n",
+		 VlongGrid(i), V_ion_ion->V(VlongGrid(i)), Vlong_r(i));
+      fclose(fout);
+    }
+      
 }
 
 

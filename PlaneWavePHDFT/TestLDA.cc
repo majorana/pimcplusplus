@@ -215,17 +215,33 @@ void TestLDAForces()
   system.DoMDExtrap();
   system.SolveLDA();
   
-  rions(0)[0] += 1.0e-5;
-  system.SetIons(rions);
-  double Eplus = system.CalcElectronIonEnergy();
-  rions(0)[0] -= 2.0e-5;
-  system.SetIons(rions);
-  double Eminus = system.CalcElectronIonEnergy();
-
+  Array<Vec3,1> forcesFD(16);
+  if (bandComm.MyProc() == 0)
+    fprintf (stderr, "Finite difference forces:\n");
+  for (int pi=0; pi<16; pi++) {
+    for (int dim=0; dim<3; dim++) {
+      rions(pi)[dim] += 1.0e-4;
+      system.SetIons(rions);
+      double Eplus = system.CalcElectronIonEnergy();
+      rions(pi)[dim] -= 2.0e-4;
+      system.SetIons(rions);
+      double Eminus = system.CalcElectronIonEnergy();
+      rions(pi)[dim] += 1.0e-4;
+      forcesFD(pi)[dim] = -(Eplus-Eminus)/2.0e-4;
+      if (bandComm.MyProc() == 0)
+	fprintf (stderr, "%18.12f ", forcesFD(pi)[dim]);
+    }
+    if (bandComm.MyProc() == 0)
+      fprintf (stderr, "\n");
+  }
+  if (bandComm.MyProc() == 0)
+    fprintf (stderr, "\nAnalytic forces:\n");
   Array<Vec3,1> forces(16);
   system.CalcIonForces(forces);
-  fprintf (stderr, "forces(0)[0] = %1.12e\n", forces(0)[0]);
-  fprintf (stderr, "FD forces    = %1.12e\n", -(Eplus-Eminus)/2e-5);
+  if (bandComm.MyProc() == 0)
+    for (int pi=0; pi<16; pi++) 
+      fprintf(stderr, "%18.12f %18.12f %18.12f\n",
+	      forces(pi)[0], forces(pi)[1], forces(pi)[2]);
 }
 
 void TestSolidLDA()
