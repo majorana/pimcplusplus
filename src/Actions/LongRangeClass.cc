@@ -971,6 +971,8 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 void LongRangeClass::OptimizedBreakup_V(int numKnots,
 					IOSectionClass &out)
 {
+  bool iAmRoot = PathData.Path.Communicator.MyProc() == 0;
+
   ///BUG: Optimized breakup only works when NDIM==3
 #if NDIM==3
   const double tolerance = 1.0e-7;
@@ -1016,10 +1018,24 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
   double rmax = 0.75 * sqrt (dot(box,box));
   const int numPoints = 1000;
   LongGrid.Init (0.0, rmax, numPoints);
-  Array<double,1> Vlong_r(numPoints);
+  Array<double,1> Vlong_r(numPoints), r(numPoints), Vshort_r(numPoints);
+  for (int i=0; i<numPoints; i++)
+    r(i) = LongGrid(i);
+
+
+  if (iAmRoot) {
+    out.NewSection ("V");
+    out.WriteVar ("r", r);
+  }
 
   for (int paIndex=0; paIndex<PairArray.size(); paIndex++) {
     PairActionFitClass &pa = *PairArray(paIndex);
+    if (iAmRoot) {
+      out.NewSection("PairAction");
+      out.WriteVar ("Particle1", pa.Particle1.Name);
+      out.WriteVar ("Particle2", pa.Particle2.Name);
+    }
+
     pa.Setrc (rc);
     pa.Vlong_k.resize(Path.kVecs.size());
     pa.Vlong_k = 0.0;
@@ -1037,10 +1053,10 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
     // potential at rc.
     adjust = true;
     double delta = basis.GetDelta();
-    t(N-3) = pa.V(rc);                 adjust(N-3) = false;
-    t(N-2) = pa.Vp(rc)*delta;          adjust(N-2) = false;
-    t(N-1) = pa.Vpp(rc)*delta*delta;   adjust(N-1) = false;
-    t(1) = 0.0;                        adjust(1)   = false;
+//     t(N-3) = pa.V(rc);                 adjust(N-3) = false;
+//     t(N-2) = pa.Vp(rc)*delta;          adjust(N-2) = false;
+//     t(N-1) = pa.Vpp(rc)*delta*delta;   adjust(N-1) = false;
+//     t(1) = 0.0;                        adjust(1)   = false;
     
     // Now, do the optimal breakup:  this gives me the coefficents
     // of the basis functions, h_n in the array t.
@@ -1064,6 +1080,14 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
 	Vlong_r(i) = pa.V (r);
     }
     pa.Vlong.Init(&LongGrid, Vlong_r);
+    if (iAmRoot) {
+      // Now write to outfile
+      out.WriteVar ("Vlong", Vlong_r);
+      for (int i=0; i<numPoints; i++)
+	Vshort_r(i) = pa.V(r(i)) - Vlong_r(i);
+      out.WriteVar ("Vshort", Vshort_r);
+    }
+
     // Calculate FT of Ushort at k=0
     UshortIntegrand shortIntegrand(pa, 0, JOB_V);
     GKIntegration<UshortIntegrand, GK31> shortIntegrator(shortIntegrand);
@@ -1092,6 +1116,13 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
       //pa.Vlong_k(ki) -= CalcXk(paIndex, 0, k, rc, JOB_V);
       pa.Vlong_k(ki) -= pa.Xk_V(k) / boxVol;
     }
+    if (iAmRoot)
+      out.CloseSection(); // "PairAction"
+  }
+
+  if (iAmRoot) {
+    out.CloseSection(); // V
+    out.FlushFile();
   }
 #endif
 }

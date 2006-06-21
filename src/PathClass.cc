@@ -134,7 +134,6 @@ PathClass::SetIonConfig(int config)
 
 void PathClass::Read (IOSectionClass &inSection)
 {
-	cerr << "In PathClass::Read" << endl;
   inSection.ReadVar("FunnyCoupling",FunnyCoupling);
   SetMode(OLDMODE);
   NowOpen=false;
@@ -220,10 +219,8 @@ void PathClass::Read (IOSectionClass &inSection)
     inSection.ReadVar("ManyParticles",manyParticles);
     if (manyParticles){
       //UGLY HACK!
-      cerr<<"My current new species is "<<newSpecies->NumParticles<<endl;
       newSpecies->NumParticles=newSpecies->NumParticles-MyClone;
       //UGLY HACK!
-      cerr<<"My now new species is "<<newSpecies->NumParticles<<endl;
     }
     AddSpecies (newSpecies);
   }
@@ -288,7 +285,6 @@ inline bool Include(dVec k)
 
 void PathClass::Allocate()
 {
-	cerr << "PathClass::Allocate" << endl;
   assert(TotalNumSlices>0);
   int myProc=Communicator.MyProc();
   int numProcs=Communicator.NumProcs();
@@ -305,66 +301,68 @@ void PathClass::Allocate()
 
   /// Set the particle range for the new species
   for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
-		cerr << "  species " << (speciesNum+1) << " of " << SpeciesArray.size() << endl;
+    cerr << "  species " << (speciesNum+1) << " of " 
+	 << SpeciesArray.size() << endl;
     int N = SpeciesArray(speciesNum)->NumParticles;
-		cerr << "		I have N = " << N << " and doMol is " << doMol << endl;
+    cerr << "		I have N = " << N << " and doMol is " << doMol << endl;
     int first = numParticles;
     SpeciesArray(speciesNum)->FirstPtcl = first;
     numParticles=numParticles + N;
     SpeciesArray(speciesNum)->LastPtcl = first + N-1;;
     SpeciesArray(speciesNum)->Ptcls.resize(N);
-
-		int foundAt;
-		int prevIndex;
-		if(doMol){
-			string newMol = SpeciesArray(speciesNum)->molecule;
-			cerr << "		Looking for string " << newMol << endl;
-			bool foundMol = false;
-			for(int m=0; m<MoleculeName.size(); m++){
-				if(newMol == MoleculeName[m]){
-					foundMol = true;
-					assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
-					foundAt = m;
-					cerr << "		Found at " << foundAt << " of " << MoleculeName.size() << endl;
-				}
-			}
-			if(!foundMol){
-				MoleculeName.push_back(newMol);
-				MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
-				foundAt = MoleculeName.size() - 1;
-				cerr << "		Added " << newMol << " at " << foundAt << endl;
-			}
-
-			prevIndex = 0;
-			for(int i=0; i<foundAt; i++){
-				prevIndex += MoleculeNumber[i];
-			}
-			//cerr << "		set prevIndex " << prevIndex << endl;
-					
-			//map<string,int>::iterator findName = (MoleculeMap.find(newMol));
-			//if(findName != MoleculeMap.end()){
-			//	assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
-			//}
-			//else{
-			//	MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
-			//	MoleculeMap[newMol] = MoleculeNumber.size();
-			//}
-			//cerr << "		Doing resizeAndPreserve...";
-			MolRef.resizeAndPreserve(MolRef.size() + N);
-			//cerr << " done" << endl;
-			numMol = MoleculeNumber[0];
-		}
+    
+    int foundAt;
+    int prevIndex;
+    if(doMol){
+      string newMol = SpeciesArray(speciesNum)->molecule;
+      cerr << "		Looking for string " << newMol << endl;
+      bool foundMol = false;
+      for(int m=0; m<MoleculeName.size(); m++){
+	if(newMol == MoleculeName[m]){
+	  foundMol = true;
+	  assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
+	  foundAt = m;
+	  cerr << "		Found at " << foundAt 
+	       << " of " << MoleculeName.size() << endl;
+	}
+      }
+      if(!foundMol){
+	MoleculeName.push_back(newMol);
+	MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
+	foundAt = MoleculeName.size() - 1;
+	cerr << "		Added " << newMol << " at " << foundAt << endl;
+      }
+      
+      prevIndex = 0;
+      for(int i=0; i<foundAt; i++){
+	prevIndex += MoleculeNumber[i];
+      }
+      //cerr << "		set prevIndex " << prevIndex << endl;
+      
+      //map<string,int>::iterator findName = (MoleculeMap.find(newMol));
+      //if(findName != MoleculeMap.end()){
+      //	assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
+      //}
+      //else{
+      //	MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
+      //	MoleculeMap[newMol] = MoleculeNumber.size();
+      //}
+      //cerr << "		Doing resizeAndPreserve...";
+      MolRef.resizeAndPreserve(MolRef.size() + N);
+      //cerr << " done" << endl;
+      numMol = MoleculeNumber[0];
+    }
     for (int i=0; i < N; i++){
       SpeciesArray(speciesNum)->Ptcls(i) = i+first;
-			if(doMol){
-				//cerr << "		" << i << " prevIndex " << prevIndex << ", foundAt " << foundAt << ", Mol.Num. " << MoleculeNumber[foundAt];
-				//cerr  << " so mod is " << i%MoleculeNumber[foundAt] << endl;
-				MolRef(i+first) = prevIndex + i%MoleculeNumber[foundAt]; // need to assign myMolecule
-				//cerr << "Assigned MolRef " << MolRef(i+first) << " to ptcl " << i+first << endl;
-			}
-		}
-
-	}
+      if(doMol){
+	//cerr << "		" << i << " prevIndex " << prevIndex << ", foundAt " << foundAt << ", Mol.Num. " << MoleculeNumber[foundAt];
+	//cerr  << " so mod is " << i%MoleculeNumber[foundAt] << endl;
+	MolRef(i+first) = prevIndex + i%MoleculeNumber[foundAt]; // need to assign myMolecule
+	//cerr << "Assigned MolRef " << MolRef(i+first) << " to ptcl " << i+first << endl;
+      }
+    }
+    
+  }
   Path.resize(MyNumSlices,numParticles+OpenPaths);
   RefPath.resize(numParticles+OpenPaths);
   Permutation.resize(numParticles+OpenPaths);

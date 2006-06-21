@@ -904,20 +904,20 @@ FixedPhaseClass::GetIonForces (Array<Vec3,1> &F)
     Vec3 r1 = Rions(ptcl1-first);
     for (int ptcl2=ptcl1+1; ptcl2 <= ionSpecies.LastPtcl; ptcl2++) {
       Vec3 r2  = Rions(ptcl2-first);
-      Vec3 diff = r2-r1;
-      Path.PutInBox (diff);
-      double dist = sqrt(dot(diff, diff));
-      diff = (1.0/dist)*diff;
+      Vec3 disp = r2-r1;
+      Path.PutInBox (disp);
+      double dist = sqrt(dot(disp, disp));
+      disp = (1.0/dist)*disp;
       double dVshort = paIonIon.Vp(dist) - paIonIon.Vlong.Deriv(dist);
       // DO I HAVE THESE SIGNS RIGHT????????????????
-      F(ptcl1-first) -= dVshort *diff;
-      F(ptcl2-first) += dVshort *diff;
+      F(ptcl1-first) -= dVshort *disp;
+      F(ptcl2-first) += dVshort *disp;
     }
   }
   // Long-range part
   for (int ptcl=first; ptcl<=last; ptcl++) {
     for (int ki=0; ki<Path.kVecs.size(); ki++) {
-      dVec r = Path(0,ptcl);
+      dVec r = Rions(ptcl-first);
       dVec G = Path.kVecs(ki);
       double phi = dot(r,G);
       double s, c;
