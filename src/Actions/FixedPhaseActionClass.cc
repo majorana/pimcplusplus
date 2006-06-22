@@ -895,40 +895,43 @@ FixedPhaseClass::GetIonForces (Array<Vec3,1> &F)
   // First get the force on the ions from the electrons
   System->CalcIonForces(F);
 
-  int first = ionSpecies.FirstPtcl;
-  int last  = ionSpecies.LastPtcl;
+  // The following contributions are now done from within the plane
+  // wave part of the code.
 
-  // Now, add on the ion-ion forces
-  // Short-range part
-  for (int ptcl1=first; ptcl1<=last; ptcl1++) {
-    Vec3 r1 = Rions(ptcl1-first);
-    for (int ptcl2=ptcl1+1; ptcl2 <= ionSpecies.LastPtcl; ptcl2++) {
-      Vec3 r2  = Rions(ptcl2-first);
-      Vec3 disp = r2-r1;
-      Path.PutInBox (disp);
-      double dist = sqrt(dot(disp, disp));
-      disp = (1.0/dist)*disp;
-      double dVshort = paIonIon.Vp(dist) - paIonIon.Vlong.Deriv(dist);
-      // DO I HAVE THESE SIGNS RIGHT????????????????
-      F(ptcl1-first) -= dVshort *disp;
-      F(ptcl2-first) += dVshort *disp;
-    }
-  }
-  // Long-range part
-  for (int ptcl=first; ptcl<=last; ptcl++) {
-    for (int ki=0; ki<Path.kVecs.size(); ki++) {
-      dVec r = Rions(ptcl-first);
-      dVec G = Path.kVecs(ki);
-      double phi = dot(r,G);
-      double s, c;
-      sincos(phi, &s, &c);
-      complex<double> z(c,s); // z = e^{iG dot r}
-      complex<double> rho_mk = conj(Path.Rho_k(0,IonSpeciesNum, ki));
-      // DO I HAVE THE SIGN RIGHT????????????????
-      F(ptcl-first) += 
-	2.0*paIonIon.Vlong_k(ki)*imag(z*rho_mk)*G; 
-    }
-  }
+//   int first = ionSpecies.FirstPtcl;
+//   int last  = ionSpecies.LastPtcl;
+
+//   // Now, add on the ion-ion forces
+//   // Short-range part
+//   for (int ptcl1=first; ptcl1<=last; ptcl1++) {
+//     Vec3 r1 = Rions(ptcl1-first);
+//     for (int ptcl2=ptcl1+1; ptcl2 <= ionSpecies.LastPtcl; ptcl2++) {
+//       Vec3 r2  = Rions(ptcl2-first);
+//       Vec3 disp = r2-r1;
+//       Path.PutInBox (disp);
+//       double dist = sqrt(dot(disp, disp));
+//       disp = (1.0/dist)*disp;
+//       double dVshort = paIonIon.Vp(dist) - paIonIon.Vlong.Deriv(dist);
+//       // DO I HAVE THESE SIGNS RIGHT????????????????
+//       F(ptcl1-first) += dVshort *disp;
+//       F(ptcl2-first) -= dVshort *disp;
+//     }
+//   }
+//   // Long-range part
+//   for (int ptcl=first; ptcl<=last; ptcl++) {
+//     for (int ki=0; ki<Path.kVecs.size(); ki++) {
+//       dVec r = Rions(ptcl-first);
+//       dVec G = Path.kVecs(ki);
+//       double phi = dot(r,G);
+//       double s, c;
+//       sincos(phi, &s, &c);
+//       complex<double> z(c,s); // z = e^{iG dot r}
+//       complex<double> rho_mk = conj(Path.Rho_k(0,IonSpeciesNum, ki));
+//       // DO I HAVE THE SIGN RIGHT????????????????
+//       F(ptcl-first) += 
+// 	2.0*paIonIon.Vlong_k(ki)*imag(z*rho_mk)*G; 
+//     }
+//   }
       
     
 
