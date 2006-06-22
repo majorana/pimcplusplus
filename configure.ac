@@ -112,13 +112,13 @@ if test "x$enable_debug" = "xyes"; then
    FFLAGS="-DDEBUG $FFLAGS"
 fi
 
-AC_ARG_ENABLE(open,[ --enable-open            enable code for open loops])
+AC_ARG_ENABLE(open, [  --enable-open           enable code for open loops])
 if test "x$enable_open" = "xyes"; then
    CXXFLAGS="-DOPEN_LOOPS $CXXFLAGS"
    FFLAGS="-DOPEN_LOOPS $CXXFLAGS"
 fi
 
-AC_ARG_ENABLE(open,[ --enable-on-fermions  enable code for order-n fermions])
+AC_ARG_ENABLE(open, [  --enable-on-fermions    enable code for order-n fermions])
 if test "x$enable_on_fermions" = "xyes"; then
    AC_CHECK_LIB([dctmp], [cg])
    CXXFLAGS="-DORDER_N_FERMIONS $CXXFLAGS"
