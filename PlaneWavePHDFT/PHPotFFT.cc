@@ -63,7 +63,12 @@ PHPotFFTClass::SetupkPotentials()
       kPH.GetVals(gMag, a, bPerp, bPar, V);
       numCalls++;
     }
-    VG(i) = volInv * V;
+    if (gMag2 > 1.0e-10)
+      VG(i) = volInv * V;
+    else {
+      VG(i) = 0.0;
+      VG0 = volInv * V;
+    }
     Fk(i) = volInv * kPH.Ftensor (GVecs.DeltaG(i), a, bPerp, bPar);
   }
 }

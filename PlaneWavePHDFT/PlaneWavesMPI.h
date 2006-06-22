@@ -51,6 +51,7 @@ protected:
   LinearGrid VlongGrid;
   QuinticSpline Vlong;
   Array<double,1> Vlong_G;
+  double Vshort_G0;
   /// Breakup the long range potential into short and long range.
   void DoOptimizedBreakup();
 
@@ -141,8 +142,6 @@ private:
   Array<double,3> TempRho, NewRho, Rho_r;
   zVec Rho_G;
   void CalcVHXC();
-  /// Calculates and returns the ion-ion energy terms
-  double EwaldEnergy();
   /// The Hatree and exchange-correlation potentials in real space --
   /// they should always be real in real space
   Array<double,3> VH, VXC, VHXC;
@@ -170,6 +169,8 @@ public:
   inline const Array<double,3>& GetDensity()
   { return Rho_r; }
   double CalcElectronIonEnergy ();
+  /// Calculates and returns the ion-ion energy terms
+  double EwaldEnergy();
   void CalcIonForces(Array<Vec3,1> &F);
   void Setk (Vec3 k);
   void DiagonalizeH();

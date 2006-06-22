@@ -203,8 +203,8 @@ double kSpacePH::Vk (double k)
   if (fabs(k) < 1.0e-10) {
     V0Integrand integrand(PH, R1);
     GKIntegration<V0Integrand,GK31> integrator(integrand);
-    //    return integrator.Integrate(0.0, R1, 1.0e-10);
-    return 0.0;
+    return integrator.Integrate(0.0, R1, 1.0e-10);
+    //    return 0.0;
   }
   // First, do the part of the integral up to R1 numerically
   VIntegrand integrand(PH);

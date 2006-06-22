@@ -57,6 +57,7 @@ protected:
   /// reciporical lattice vectors
   Array<double,1> VG;
   Array<complex<FFT_FLOAT>,3> Vr;
+  double VG0;
 public:
   // Adds H*c to the Hc vector.  Does not zero Hc before accumulating
   virtual void Apply   (const zVec &c, zVec &Hc) = 0;
@@ -72,6 +73,8 @@ public:
 
   inline const Array<double,1>& GetVG()
   { return VG; }
+
+  inline double GetVG0() { return VG0; }
 
   inline const Array<complex<FFT_FLOAT>,3> & GetVr()
   { return Vr; }
@@ -109,6 +112,8 @@ public:
   {  return Vion->GetRions(); }
   inline const Array<double,1> GetVG()
   {  return Vion->GetVG();    }
+  inline double GetVG0()
+  {  return Vion->GetVG0();   }
   inline const Array<complex<FFT_FLOAT>,3> GetVr()
   {  return Vion->GetVr();    }
 

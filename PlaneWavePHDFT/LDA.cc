@@ -19,6 +19,7 @@
 #include "../MPI/Communication.h"
 #include "../DFT/Functionals.h"
 #include "../Ewald/OptimizedBreakup.h"
+#include "../Integration/GKIntegration.h"
 
 void
 MPISystemClass::InitLDA()
@@ -42,7 +43,7 @@ MPISystemClass::InitLDA()
   RotBands.resize(NumBands, GVecs.size());
   Occupancies.resize(NumBands);
   CalcRadialChargeDensity();
-  Smearer.SetOrder(2);
+  Smearer.SetOrder(1);
   Smearer.SetWidth(0.01);
   DoOptimizedBreakup();
   if (BandComm.MyProc() == 0) {
@@ -134,7 +135,7 @@ MPISystemClass::SolveLDA()
       SubspaceRotate();
 
     CG.Solve();
-    SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-6);
+    SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-8);
     /// Now make sure we all k-points agree that we're
     /// self-consistent.
     if (BandComm.MyProc() == 0) 
@@ -422,13 +423,14 @@ MPISystemClass::CalcVHXC()
 
 //   Eelec_ion2 *= vol/(double)Ngrid;
   Eelec_ion = CalcElectronIonEnergy();
-
+  double Ecore = NumElecs*(double)Rions.size() * H.GetVG0();
   
   perr << "Energies:\n"
        << "   EH         = " << EH  << endl
        << "   EXC        = " << EXC << endl 
        << "   Eelec_ion  = " << Eelec_ion << endl
-       << "   Eewald     = " << EwaldEnergy() << endl;
+       << "   Eewald     = " << EwaldEnergy() << endl
+       << "   Ecore      = " << Ecore << endl;
 }
 
 
@@ -521,34 +523,41 @@ MPISystemClass::MixChargeDensity()
   ChargeMixer->Mix(NewRho, Rho_r, Rho_G);
 }
 
-
+inline complex<double> e2iphi(double phi)
+{
+  double s,c;
+  sincos(phi, &s, &c);
+  return complex<double>(c,s);
+}
 
 // Note, this returns only the forces of the electrons on the ions,
 // not the ions on the ions.
 void
 MPISystemClass::CalcIonForces (Array<Vec3,1> &F)
 {
+
   if (F.size() != Rions.size())
     F.resize(Rions.size());
-  
-  /// Do the electronic part
+  ///////////////////////
+  // Electron-ion part //
+  ///////////////////////
   const Array<double,1> &VG = H.GetVG();
   F = 0.0;
   for (int ion=0; ion<Rions.size(); ion++) {
     Vec3 r = Rions(ion) + 0.5*Box;
     for (int i=0; i<H.GVecs.DeltaSize(); i++) {
-      double phase, s, c;
       const Vec3 &G = H.GVecs.DeltaG(i);
-      phase = dot (G, r);
-      sincos(phase, &s, &c);
-      F(ion) += G*imag(conj(Rho_G(i))*complex<double>(c,s))*VG(i);
+      complex<double> z = e2iphi(dot(G,r));
+      F(ion) += G*imag(conj(Rho_G(i))*z)*VG(i);
     }
   }
   F *= H.GVecs.GetBoxVol();
 
   Vec3 boxInv (1.0/Box[0], 1.0/Box[1], 1.0/Box[2]);
 
-  // Now add ion-ion part
+  //////////////////
+  // Ion-ion part //
+  //////////////////
   // Short-range
   for (int i=0; i<Rions.size(); i++)
     for (int j=0; j<Rions.size(); j++)
@@ -560,29 +569,29 @@ MPISystemClass::CalcIonForces (Array<Vec3,1> &F)
 	double dist = sqrt(dot(disp,disp));
 	disp = (1.0/dist)*disp;
 	double dV = V_ion_ion->dVdr(dist) - Vlong.Deriv(dist);
-	F(i) -= dV*disp;
+	F(i) += dV*disp;
       }
   // Long-range
+  // Compute structure factor
   Array<complex<double>,1> S(GVecs.size());
   S = 0.0;
   for (int gi=0; gi<H.GVecs.size(); gi++) {
     Vec3 G = H.GVecs(gi);
     for (int ri=0; ri<Rions.size(); ri++) {
       Vec3 r = Rions(ri);
-      double phase = dot(r,G);
-      double s,c;
-      sincos(phase, &s, &c);
-      S(gi) += complex<double>(c,s);
+      S(gi) += e2iphi(dot(G,r));
+    }
+  }
+  // Now compute force
+  for (int ri=0; ri<Rions.size(); ri++) {
+    Vec3 r = Rions(ri);
+    for (int gi=0; gi<H.GVecs.size(); gi++) {
+      Vec3 G = H.GVecs(gi);
+      F(ri) += imag(conj(S(gi))*e2iphi(dot(G,r)))*Vlong_G(gi)*G;
     }
   }
 }
 
-inline complex<double> e2iphi(double phi)
-{
-  double s,c;
-  sincos(phi, &s, &c);
-  return complex<double>(c,s);
-}
 
 double
 MPISystemClass::EwaldEnergy()
@@ -606,12 +615,32 @@ MPISystemClass::EwaldEnergy()
     Vec3 G = H.GVecs(gi);
     for (int ri=0; ri<Rions.size(); ri++) {
       Vec3 r = Rions(ri);
-      S += e2iphi(dot(r,G));
+       S += e2iphi(dot(r,G));
     }
     Eewald += 0.5*norm(S)*Vlong_G(gi);
   }
+  double N = Rions.size();
+  Eewald -= 0.5 * Vlong(0.0) * N;
+  Eewald -= 0.5 * Vshort_G0  * N * N;
   return Eewald;
 }
+
+class VshortIntegrand
+{
+private:
+  Potential &V;
+  QuinticSpline &Vlong;
+public:
+  inline double operator()(double r)
+  {
+    double vshort = V.V(r) - Vlong(r);
+    return r*r*vshort;
+  }
+
+  VshortIntegrand(Potential &v, QuinticSpline &vlong) :
+    V(v), Vlong(vlong)
+  { /* do nothing */ }
+};
 
 void
 MPISystemClass::DoOptimizedBreakup()
@@ -653,6 +682,7 @@ MPISystemClass::DoOptimizedBreakup()
   // Calculate real-space part //
   ///////////////////////////////
   Array<double,1> Vlong_r(numPoints);
+  Vlong_r = 0.0;
   for (int i=0; i<numPoints; i++) {
     double r = VlongGrid(i);
     if (r <= rcut) {
@@ -691,7 +721,15 @@ MPISystemClass::DoOptimizedBreakup()
 		 VlongGrid(i), V_ion_ion->V(VlongGrid(i)), Vlong_r(i));
       fclose(fout);
     }
-      
+  
+  ///////////////////////////////////////////// 
+  // Compute the fourier transform of Vshort //
+  // for G=0.                                //
+  /////////////////////////////////////////////
+  VshortIntegrand integrand (*V_ion_ion, Vlong);
+  GKIntegration<VshortIntegrand, GK31> integrator(integrand);
+  Vshort_G0 = 4.0*M_PI/H.GVecs.GetBoxVol() *
+    integrator.Integrate(1.0e-100, rcut, 1.0e-10);
 }
 
 

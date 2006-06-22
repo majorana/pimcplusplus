@@ -196,7 +196,8 @@ void TestLDAForces()
   Vec3 box (26.56, 26.56, 26.56);
   
   Vec3 Gprim = 2.0*M_PI*Vec3(1.0/box[0], 1.0/box[1], 1.0/box[2]);
-  Vec3 k = 0.25 * Gprim;
+  //  Vec3 k = 0.25 * Gprim;
+  Vec3 k = 0.0;
   cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
@@ -222,10 +223,10 @@ void TestLDAForces()
     for (int dim=0; dim<3; dim++) {
       rions(pi)[dim] += 1.0e-4;
       system.SetIons(rions);
-      double Eplus = system.CalcElectronIonEnergy();
+      double Eplus = system.CalcElectronIonEnergy()+system.EwaldEnergy();
       rions(pi)[dim] -= 2.0e-4;
       system.SetIons(rions);
-      double Eminus = system.CalcElectronIonEnergy();
+      double Eminus = system.CalcElectronIonEnergy()+system.EwaldEnergy();
       rions(pi)[dim] += 1.0e-4;
       forcesFD(pi)[dim] = -(Eplus-Eminus)/2.0e-4;
       if (bandComm.MyProc() == 0)
