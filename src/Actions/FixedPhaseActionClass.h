@@ -167,7 +167,8 @@ public:
   FixedPhaseActionClass (PathDataClass &pathData, 
 			 FixedPhaseClass &FPA, FixedPhaseClass &FPB,
 			 int speciesNum) :
-    FixedPhaseA(FPA), FixedPhaseB(FPB), NodalActionClass (pathData), SpeciesNum(speciesNum)
+    FixedPhaseA(FPA), FixedPhaseB(FPB), NodalActionClass (pathData), 
+    SpeciesNum(speciesNum)
   {
     
   }

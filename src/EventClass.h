@@ -22,6 +22,7 @@
 using namespace IO;
 
 class PathDataClass;
+class PathClass;
 
 /// EventClass is the parent of ObservableClass and MoveClass.  It is
 /// used as a handle by the algorithm to call the different
@@ -38,6 +39,8 @@ protected:
   
   /// Stores a reference to PathData
   PathDataClass &PathData;
+  /// And a reference to Path for convenience
+  PathClass &Path;
 public:
   /// Stores the time spent doing the event in seconds.
   double TimeSpent;
@@ -48,11 +51,7 @@ public:
 
   virtual void DoEvent()=0;
   virtual void Read(IOSectionClass& IO)=0;
-  EventClass(PathDataClass &pathData, IOSectionClass& out) : 
-    PathData(pathData), IOSection(out), TimeSpent(0.0), TimesCalled(0)
-  {
-    // do nothing else for now
-  }
+  EventClass(PathDataClass &pathData, IOSectionClass& out);
  };
 
 #endif

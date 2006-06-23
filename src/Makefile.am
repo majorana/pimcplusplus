@@ -14,6 +14,7 @@ AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF)
 SHARED_SOURCES =          \
     Common.h              \
     EventClass.h          \
+    EventClass.cc         \
     InitPaths.cc          \
     GridClass.h           \
     GridClass.cc          \
