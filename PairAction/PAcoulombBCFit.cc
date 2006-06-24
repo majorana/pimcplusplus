@@ -264,7 +264,6 @@ bool PAcoulombBCFitClass::Read (IOSectionClass &in,
   in.CloseSection();
 
   Z1Z2 = ((CoulombPot *)Pot)->Z1Z2;
-  cerr << "Z1Z2 = " << Z1Z2 << endl;
 
   // Read the fits
   assert(in.OpenSection("Fits"));
