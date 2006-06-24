@@ -32,6 +32,8 @@ libmoves_la_SOURCES  =           \
     EmptyStage.cc                \
     EndStage.cc                  \
     EndStage.h                   \
+    IonDisplaceMove.h            \
+    IonDisplaceMove.cc           \
     IonMoveStage.h               \
     IonMoveStage.cc              \
     IonMoveManager.h             \

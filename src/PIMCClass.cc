@@ -285,6 +285,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
 //        move = new VariationalDisplaceMoveClass(PathData,OutFile);
     else if (moveType=="WaterMove")
       move = new WaterMoveClass(PathData, OutFile);
+    else if (moveType=="IonDisplaceMove")
+      move = new IonDisplaceMoveClass (PathData, OutFile);
     else if (moveType=="IonMove")
       move = new IonMoveClass(PathData, OutFile);
     else if (moveType=="LocalFlip")

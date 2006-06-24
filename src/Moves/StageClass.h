@@ -17,9 +17,6 @@
 #ifndef STAGE_H
 #define STAGE_H
 
-
-
-
 #include <list>
 #include "../Observables/ObservableVar.h"
 #include "../Actions/ActionBase.h"
@@ -34,6 +31,7 @@ class StageClass
 {
 protected:
   PathDataClass &PathData;
+  PathClass &Path;
   IOSectionClass OutSection;
   ObservableDouble AcceptRatioVar;
 public:
@@ -61,8 +59,8 @@ public:
 
 
   StageClass(PathDataClass &pathData,IOSectionClass outSection) :
-    PathData(pathData), NumAccepted(0), NumAttempted(0),
-    BisectionLevel(0),
+    PathData(pathData), Path(pathData.Path), 
+    NumAccepted(0), NumAttempted(0), BisectionLevel(0),
     OutSection(outSection),
     AcceptRatioVar("AcceptRatio",OutSection,pathData.Path.Communicator)
   {
