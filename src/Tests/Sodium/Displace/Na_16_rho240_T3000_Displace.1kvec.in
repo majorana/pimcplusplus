@@ -13,8 +13,8 @@ int Seed = 12345;
 // Note:  energy per isolated atom for this PH is -0.18233776 hartrees.
 Section (System)
 {
-  /// T = 2503.7 Kelvin
-  int NumTimeSlices=1009;
+  /// T = 3000 Kelvin
+  int NumTimeSlices=842;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   //Array<double,1> Box(3)=[30.1766, 30.1766, 30.1766];
   // r_s = 5.9 bohr
@@ -154,15 +154,15 @@ Section (Action)
 //                                           0.75,  0.75, -0.25,
 //                                           0.75,  0.75,  0.25,
 //                                           0.75,  0.75,  0.75 ];
-    Array<double,2> TwistAngles(8,3) = [  0.25,  0.25,  0.25,
- 					  0.25,  0.25,  0.75,
-  					  0.25,  0.75,  0.25,
- 					  0.25,  0.75,  0.75,
-  					  0.75,  0.25,  0.25,
- 					  0.75,  0.25,  0.75,
- 					  0.75,  0.75,  0.25,
- 					  0.75,  0.75,  0.75 ];
-    // Array<double,2> TwistAngles(1,3) = [  0.25,  0.25,  0.25];
+//     Array<double,2> TwistAngles(8,3) = [  0.25,  0.25,  0.25,
+//  					  0.25,  0.25,  0.75,
+//   					  0.25,  0.75,  0.25,
+//  					  0.25,  0.75,  0.75,
+//   					  0.75,  0.25,  0.25,
+//  					  0.75,  0.25,  0.75,
+//  					  0.75,  0.75,  0.25,
+//  					  0.75,  0.75,  0.75 ];
+    Array<double,2> TwistAngles(1,3) = [  0.25,  0.25,  0.25];
 
   }
   bool UseBackground = false;
@@ -171,7 +171,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Langevin/LDA/Na_16_rho240_T2503_8kvecs_SmallStep";
+    "/turing/projects/mcc/esler/Runs/Na_16_rho240_T3000_8kvecs_Displace16";
   int FileStart = 0;
   Section (Observable) {
     string Type = "Energy";
@@ -267,21 +267,11 @@ Section (Moves) {
     string Name="Shift";
   }
   Section (Move) {
-    string Type="Langevin";
-    string Name="Langevin";
-    string Integrator="LANGEVIN";
-    double Mass = 1.0;
-    double TimeStep = 0.4;
-    double FrictionFactor = 1.2;
-    double ExtraNoiseSigma = 0.025;
-    int NumEquilSteps = 50;
-    int NumAccumSteps = 20;
-    string Species="Na";
-    Section(RhoDump) {
-      int Nx = 68;
-      int Ny = 68;
-      int Nz = 68;
-    }
+    string Type = "Displace";
+    string Name = "Displace";
+    Array<string,1> ActiveSpecies(1) = [ "Na" ];
+    int NumToMove = 16;
+    double Sigma = 0.1;
   }
 }
 
@@ -292,18 +282,12 @@ Section (Algorithm) {
   ////////////////////////
   // Equilibration loop //
   ////////////////////////
-//   Section (Loop) { 
-//     int steps=1000;
-//     Section (Loop) {
-//       int steps=1;
-//       Section (Loop) {
-//         int steps=2;
-//         Section (Move) { string name="eupBlock";} 
-//         Section (Move) { string name="edownBlock";} 
-//       }
-//       Section (Move) { string name = "Shift"; }
-//     }
-//   }
+   Section (Loop) { 
+     int Steps=100;
+       Section (Move) { string Name="eupBlock";} 
+       Section (Move) { string Name="edownBlock";} 
+       Section (Move) { string Name = "Shift"; }
+   }
 
   Section (Loop) { //Start Accumulating observables
     int Steps=6000000;
@@ -325,19 +309,7 @@ Section (Algorithm) {
 //       }
 //       Section (Move)      { string Name = "Shift";        }
 //     }
-    Section (Loop) {
-      int Steps = 20;
-      /// Equilibration loop
-      Section (Loop) {
-	int Steps = 50;
-	Section (Move)      { string Name="eupBlock";       } 
-	Section (Move)      { string Name="edownBlock";     } 
-	Section (Move)      { string Name="eupBlock";       } 
-	Section (Move)      { string Name="edownBlock";     } 
-	Section (Move)      { string Name = "Shift";        }
-	Section (Move)      { string Name = "Langevin";     }
-      }
-      /// Accumulation loop
+    /// Accumulation loop
       Section (Loop) {
 	int Steps = 19;
 	Section (Move)      { string Name="eupBlock";       } 
@@ -345,23 +317,17 @@ Section (Algorithm) {
 	Section (Move)      { string Name="eupBlock";       } 
 	Section (Move)      { string Name="edownBlock";     } 
 	Section (Observe)   { string Name = "Pressure";     }
+	Section (Observe)   { string Name = "Energy";       }
+	Section (Observe)   { string Name = "Pressure";     }
+	Section (Observe)   { string Name = "Conductivity"; }
+	Section (Observe)   { string Name = "NaSk";         }
 	Section (Observe)   { string Name = "WN";           }
+	Section (Observe)   { string Name = "Na-Na";        }
 	Section (Move)      { string Name = "Shift";        }
-	Section (Move)      { string Name = "Langevin";     }	
+	Section (Move)      { string Name = "Displace";     }	
+	Section (Observe)   { string Name = "TimeAnalysis"; }
+	Section (WriteData) { }
       }
-      Section (Observe)     { string Name = "Na-Na";        }
-      Section (Move)        { string Name = "eupBlock";     } 
-      Section (Move)        { string Name = "edownBlock";   } 
-      Section (Observe)     { string Name = "Energy";       }
-      Section (Observe)     { string Name = "Pressure";     }
-      Section (Observe)     { string Name = "Conductivity"; }
-      Section (Observe)     { string Name = "NaSk";         }
-      Section (Observe)     { string Name = "WN";           }
-      Section (Observe)     { string Name = "TimeAnalysis"; }
-      Section (Move)        { string Name = "Shift";        }
-      Section (Move)        { string Name = "Langevin";     }
-      Section (WriteData)   {                               }
-    }
     // Dump paths every 20 Langevin steps
     Section (Observe)       { string Name = "PathDump";     }
 
