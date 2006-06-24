@@ -84,6 +84,7 @@ IonDisplaceMoveClass::Read (IOSectionClass &in)
   string ionSpeciesStr;
   assert (in.ReadVar("IonSpecies",   ionSpeciesStr));
   IonSpeciesNum  = Path.SpeciesNum(ionSpeciesStr);
+  assert (in.ReadVar ("NumToMove", NumParticlesToMove));
   in.ReadVar("WarpElectrons", WarpElectrons, false);
 
   IonDisplaceStage.Sigma = Sigma;
