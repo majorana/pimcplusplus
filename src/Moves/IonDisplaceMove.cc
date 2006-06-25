@@ -7,10 +7,14 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
   SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
   int first = ionSpecies.FirstPtcl;
   int last  = ionSpecies.LastPtcl;
-  int N     = last - first + 1;;
-  if (DeltaRions.size() != N)
+  int N     = last - first + 1;
+  if (DeltaRions.size() != N) {
     DeltaRions.resize(N);
-  
+    Weights.resize(N);
+  }
+
+  dVec zero(0.0);
+  DeltaRions = zero;
   /// Now, choose a random displacement 
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
@@ -35,6 +39,33 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
 double
 IonDisplaceStageClass::DoElectronWarp()
 {
+  SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
+  int ionFirst = ionSpecies.FirstPtcl;
+  int ionLast  = ionSpecies.LastPtcl;
+  int N     = ionLast - ionFirst + 1;
+  dVec disp;
+  double dist;
+  for (int si=0; si<Path.NumSpecies(); si++) {
+    SpeciesClass &species = Path.Species(si);
+    if (species.lambda != 0.0) {
+      for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
+	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
+	  SetMode (OLDMODE);
+	  Weights = 0.0;
+	  double totalWeight = 0.0;
+	  for (int ion=ionFirst; ion <= ionLast; ion++) {
+	    Path.DistDisp(slice, elec, ion, dist, disp);
+	    Weights(ion-ionFirst) = 1.0/(dist*dist*dist*dist);
+	    totalWeight *= Weights(ion-ionFirst);
+	  }
+	  Weights *= (1.0/totalWeight);
+	  SetMode (NEWMODE);
+	  for (int ion=ionFirst; ion <= ionLast; ion++) 
+	    Path(slice, elec) += Weights(ion-ionFirst)*DeltaRions(ion-ionFirst);
+	}
+      }
+    }
+  }
   return 1.0;
 }
 

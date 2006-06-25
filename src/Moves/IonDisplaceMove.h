@@ -26,6 +26,7 @@ class IonDisplaceStageClass : public CommonStageClass
 {
 protected:
   Array<dVec,1> &DeltaRions;
+  Array<double,1> Weights;
   /// Returns the ratio of the sampling probabilities for the ion
   /// moved as a result of the warp transformation.
   double DoElectronWarp();

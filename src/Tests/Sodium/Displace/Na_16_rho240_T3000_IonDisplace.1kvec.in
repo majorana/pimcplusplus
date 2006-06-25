@@ -22,7 +22,7 @@ Section (System)
   //  Array<double,1> Box(3) = [27.417, 27.417, 27.417]; // rho = 200 kg/m^3
   /// Array<double,1> Box(3) = [26.56, 26.56, 26.56]; // rho = 220 kg/m^3
   Array<double,1> Box(3) = [25.8, 25.8, 25.80]; // rho = 240 kg/m^3
-  double kCutoff = 1.2;
+  double kCutoff = 0.1;
   Section (Particles)
   {
     Section (Species)
@@ -101,7 +101,7 @@ Section (System)
 
 Section (Action)
 {
-  int MaxLevels = 7;
+  int MaxLevels = 1;
   bool UseRPA = false;
   int NumBreakupKnots = 10;
   int NumImages = 0;
@@ -118,7 +118,7 @@ Section (Action)
     bool UseMDExtrap = true;
     bool UseLDA = true;
     bool UseSubspaceRotation = true;
-    double kCut = 3.0;
+    double kCut = 1.0;
     int SmearOrder = 2;
     double SmearWidth = 0.015;
 //    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
@@ -171,7 +171,8 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "/turing/projects/mcc/esler/Runs/Na_16_rho240_T3000_8kvecs_IonDisplace";
+    //    "/turing/projects/mcc/esler/Runs/Na_16_rho240_T3000_8kvecs_IonDisplace";
+    "/home/esler/Runs/Na_16_rho240_T3000_8kvecs_IonDisplace";
   int FileStart = 0;
   Section (Observable) {
     string Type = "Energy";
@@ -247,7 +248,7 @@ Section (Moves) {
     //string PermuteType="NONE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
     double epsilon = 1.0e-4;
-    int NumLevels=7;
+    int NumLevels=1;
     string Species = "eup";
     int StepsPerBlock = 20;
   }
@@ -258,7 +259,7 @@ Section (Moves) {
     string PermuteType="TABLE";
     Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
     double epsilon = 1.0e-4;
-    int NumLevels=7;
+    int NumLevels=1;
     string Species = "edown";
     int StepsPerBlock = 20;
   }
