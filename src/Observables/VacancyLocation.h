@@ -32,6 +32,8 @@ private:
   ///This is the set of locations you should compare against to decide
   ///the location of the head and the tail
   Array<dVec,1> FixedLoc;
+  Array<int,2> DispFromASite;
+  Array<int,1> TempVacancyLoc;
   ObservableVecDouble1 HistogramVar;
   ObservableVecDouble1 HistogramDispVar;
   double R2Dist;

@@ -14,10 +14,13 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+
 #include "VacancyLocation.h"
+#include <blitz/array.h>
+
 #define FORT(name) name ## _
 #define F77_LSAPR F77_FUNC(lsapr,LSAPR)
-#include <blitz/array.h>
+
 using namespace blitz;
 
 
@@ -89,16 +92,40 @@ F77_LSAPR (int *n,double* c, int *perm);
 //   return true;
 // }
 
-
+// void VacancyLocClass::ReturnDispFromASite(dVec loc1,dVec loc2)
+// {
+//   for (int loc=0;loc<FixedLoc.size();loc++){
+//     dVec dispCompare=FixedLoc(loc)-FixedLoc(0);
+//     PathData.Path.PutInBox(dispCompare);
+//     if (dot(disp1-dispCompare,disp1-dispCompare)<=1e-5){
+//       disp1Found=true;
+//       HistogramDisp(loc)=HistogramDisp(loc)+1.0;
+//     }
+//     if (dot(disp2-dispCompare,disp2-dispCompare)<=1e-5){
+//       HistogramDisp(loc)=HistogramDisp(loc)+1.0;
+//       disp2Found=true;
+//     }
+    
+// 	}
+// }
 
 void VacancyLocClass::Accumulate()
 {
+  TimesCalled++;
+  if (TimesCalled % DumpFreq==0)
+    WriteBlock();
+
+  if ((TimesCalled % Freq)!=0){
+    return;
+  }
+
+
     Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
     DistTable.resize(FixedLoc.size(), FixedLoc.size());
     Array<int,1> Perm;
     Perm.resize(FixedLoc.size());
     DistTable=0.0;
-
+    int numEmptySites=FixedLoc.size()-PathData.Path.NumParticles();
 
     for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++){
       for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
@@ -108,36 +135,72 @@ void VacancyLocClass::Accumulate()
 	disp=PathData.Path(slice,ptcl)-FixedLoc(latticeSite);
 	PathData.Path.PutInBox(disp);
 	dist2=dot(disp,disp);
-	DistTable(latticeSite,ptcl+2)=dist2;
+	DistTable(latticeSite,ptcl+numEmptySites)=dist2;
 	}
       }
       int n =FixedLoc.size();
       F77_LSAPR (&n,DistTable.data(),Perm.data());
-      int vacancy1=Perm(0)-1;
-      int vacancy2=Perm(1)-1;
-      dVec disp1=FixedLoc(vacancy1)-FixedLoc(vacancy2);
-      dVec disp2=FixedLoc(vacancy2)-FixedLoc(vacancy1);
-      PathData.Path.PutInBox(disp1);
-      PathData.Path.PutInBox(disp2);
-      double dist=sqrt(dot(disp1,disp1));
-      if (dist<Grid.End){
-	int index=Grid.ReverseMap(dist);
-	Histogram(index)++;
-      }
-      
-      for (int counter3=0;counter3<FixedLoc.size();counter3++){
-	dVec dispCompare=FixedLoc(counter3)-FixedLoc(0);
-	PathData.Path.PutInBox(dispCompare);
-	if (dot(disp1-dispCompare,disp1-dispCompare)<=1e-5)
+      if (numEmptySites==2){
+	int vacancy1=Perm(0)-1;
+	int vacancy2=Perm(1)-1;
+	dVec disp1=FixedLoc(vacancy1)-FixedLoc(vacancy2);
+	dVec disp2=FixedLoc(vacancy2)-FixedLoc(vacancy1);
+	PathData.Path.PutInBox(disp1);
+	PathData.Path.PutInBox(disp2);
+	double dist=sqrt(dot(disp1,disp1));
+	if (dist<Grid.End){
+	  int index=Grid.ReverseMap(dist);
+	  Histogram(index)++;
+	}
+	bool disp1Found=false;
+	bool disp2Found=false;
+    
+	for (int counter3=0;counter3<FixedLoc.size();counter3++){
+	  dVec dispCompare=FixedLoc(counter3)-FixedLoc(0);
+	  PathData.Path.PutInBox(dispCompare);
+	  if (dot(disp1-dispCompare,disp1-dispCompare)<=1e-5){
+	    disp1Found=true;
+	    HistogramDisp(counter3)=HistogramDisp(counter3)+1.0;
+	  }
+	  if (dot(disp2-dispCompare,disp2-dispCompare)<=1e-5){
 	  HistogramDisp(counter3)=HistogramDisp(counter3)+1.0;
-	if (dot(disp2-dispCompare,disp2-dispCompare)<=1e-5)
-	  HistogramDisp(counter3)=HistogramDisp(counter3)+1.0;
+	  disp2Found=true;
+	  }
+	  
+	}
+// 	if (!disp1Found)
+// 	  cerr<<"Disp 1 not found: "<<disp1<<" "<<disp2<<" "
+// 	      <<vacancy1<<" "<<vacancy2
+// 	      <<PathData.Path(slice,vacancy1)<<" "
+// 	    <<PathData.Path(slice,vacancy2)<<endl;
+// 	if (!disp2Found)
+// 	  cerr<<"Disp 2 not found: "<<disp2<<" "<<disp1<<" "
+// 	      <<vacancy1<<" "<<vacancy2
+// 	      <<PathData.Path(slice,vacancy1)<<" "
+// 	      <<PathData.Path(slice,vacancy2)<<endl;
 	
+	
+      }
+      else {
+	int vacancy1=Perm(0)-1;	
+	TempVacancyLoc(slice)=vacancy1;
+      }
+    }  
+    if (numEmptySites==1){
+      int halfSlice=PathData.Path.TotalNumSlices/2;
+      for (int slice=0;slice<PathData.Path.NumTimeSlices()/2;slice++){
+	int i=DispFromASite(TempVacancyLoc(slice),TempVacancyLoc(slice+halfSlice));
+	if (i!=-1)
+	  HistogramDisp(i)=HistogramDisp(i)+1.0;
+	i=DispFromASite(TempVacancyLoc(slice+halfSlice),TempVacancyLoc(slice));
+	if (i!=-1)
+	  HistogramDisp(i)=HistogramDisp(i)+1.0;
       }
     }
     NumSamples++;
-}
 
+    
+}
 
 void VacancyLocClass::WriteBlock()
 {
@@ -169,6 +232,8 @@ void VacancyLocClass::Read(IOSectionClass &in)
   HistogramDisp=0.0;
   Array<double,2> positions;
   assert(in.ReadVar("LocationsToCompare",positions));
+  assert(in.ReadVar("freq",Freq));
+  assert(in.ReadVar("dumpFreq",DumpFreq));
 
   ///Verify you used the right number of points to compare against
   assert(positions.extent(0)==FixedLoc.size());
@@ -201,6 +266,27 @@ void VacancyLocClass::Read(IOSectionClass &in)
     }
   }
   IOSection.WriteVar("Multiplicity",toDivide);
+
+
+  TempVacancyLoc.resize(FixedLoc.size());
+
+  //setting up the table that maps the displacement from the A site
+  //Makes the assumption that FixedLoc(0) is part of the A site
+  DispFromASite.resize(FixedLoc.size(),FixedLoc.size());
+  DispFromASite=-1;
+  for (int loc1=0;loc1<FixedLoc.size();loc1++){
+    for (int loc2=0;loc2<FixedLoc.size();loc2++){
+      dVec disp1=FixedLoc(loc2)-FixedLoc(loc1);
+      PathData.Path.PutInBox(disp1);
+      for (int counter3=0;counter3<FixedLoc.size();counter3++){
+	dVec dispCompare=FixedLoc(counter3)-FixedLoc(0);
+	PathData.Path.PutInBox(dispCompare);
+	if (dot(disp1-dispCompare,disp1-dispCompare)<=1e-5){
+	  DispFromASite(loc1,loc2)=counter3;
+	}
+      }
+    }
+  }
 }
 
 
