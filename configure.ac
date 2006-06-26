@@ -48,6 +48,12 @@ AC_F77_LIBRARY_LDFLAGS
 AC_F77_MAIN
 AC_PROG_LIBTOOL
 
+# Check which compilers we're using
+AX_COMPILER_VENDOR
+AC_MSG_CHECKING([optimal compiler flags])
+AX_CC_MAXOPT
+AC_MSG_RESULT([$CFLAGS])
+
 # Optimization settings.
 AC_CANONICAL_HOST
 AC_MSG_CHECKING([host cpu = ])
