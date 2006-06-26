@@ -7,6 +7,11 @@ AM_INIT_AUTOMAKE(libcommon, 0.5)
 AC_CONFIG_SRCDIR([Blitz.h])
 AC_CONFIG_HEADER([config.h])
 
+# Check which compilers we're using
+AX_CXX_MAXOPT
+AC_MSG_CHECKING([optimal compiler flags])
+AC_MSG_RESULT([${CXXFLAGS}])
+
 # Checks for libraries.
 # this creates and AC_SUBST's vars FFTW3_CFLAGS and FFTW3_LIBS
 
@@ -48,11 +53,6 @@ AC_F77_LIBRARY_LDFLAGS
 AC_F77_MAIN
 AC_PROG_LIBTOOL
 
-# Check which compilers we're using
-AX_COMPILER_VENDOR
-AC_MSG_CHECKING([optimal compiler flags])
-AX_CC_MAXOPT
-AC_MSG_RESULT([$CFLAGS])
 
 # Optimization settings.
 AC_CANONICAL_HOST
