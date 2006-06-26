@@ -88,7 +88,7 @@ case "${host_cpu}" in
         AX_CC_OPTION(ARCHOPT, [-xW], [-xW], [-xW])
 	FFLAGS="-O3 $TUNEOPT $ARCHOPT -g"
       fi
-      CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
+      CXXFLAGS="$CXXFLAGS -O3 $TUNEOPT $ARCHOPT -ffast-math -g"
       if grep -q sse /proc/cpuinfo ; then
         CXXFLAGS="$CXXFLAGS -msse"
       fi
@@ -108,7 +108,7 @@ case "${host_cpu}" in
          AC_MSG_RESULT([Intel Itanium 2])
          AX_CC_OPTION(TUNEOPT, [-mcpu=itanium2], [-mcpu=itanium2], [-mcpu=itanium2])
        fi
-       CXXFLAGS="-O3 $TUNEOPT -g"
+       CXXFLAGS="$CXXFLAGS -O3 $TUNEOPT -g"
        FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
