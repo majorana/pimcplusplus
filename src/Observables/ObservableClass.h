@@ -37,6 +37,7 @@
 #include "StructureFactor.h"     
 #include "SuperfluiDrop.h"
 #include "SuperfluidFraction.h"
+#include "SuperfluidFractionPerLayer.h"
 #include "Time.h"
 #include "VacancyLocation.h"
 #include "Weight.h"
