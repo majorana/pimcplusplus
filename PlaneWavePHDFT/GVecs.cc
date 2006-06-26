@@ -27,7 +27,9 @@ public:
 
 inline bool operator<(const GVec &g1, const GVec &g2)
 {
-  return (dot(g1.G, g1.G) < dot(g2.G, g2.G));
+  double v1 = dot(g1.G, g1.G);
+  double v2 = dot(g2.G, g2.G);
+  return (v1 < v2);
 }
 
 inline bool operator==(const GVec &g1, const GVec &g2)
