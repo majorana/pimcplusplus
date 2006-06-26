@@ -170,7 +170,9 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs= new ParticleAverageLocClass(PathData,OutFile);
     else if (observeType=="DropletSuperfluidity")
       tempObs = new SuperfluiDrop(PathData,OutFile);
-    else if (observeType=="SuperfluidFraction")
+    else if (observeType=="SuperfluidFractionPerLayer")
+      tempObs = new SuperfluidFractionPerLayerClass(PathData,OutFile); 
+   else if (observeType=="SuperfluidFraction")
       tempObs = new SuperfluidFractionClass(PathData,OutFile);
     else if (observeType=="VariationalPIEnergy")
       tempObs = new VariationalPIEnergyClass(PathData,OutFile);
