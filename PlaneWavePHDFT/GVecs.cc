@@ -23,13 +23,12 @@ class GVec
 public:
   Vec3 G;
   Int3 I;
+  double G2;
 };
 
 inline bool operator<(const GVec &g1, const GVec &g2)
 {
-  double v1 = dot(g1.G, g1.G);
-  double v2 = dot(g2.G, g2.G);
-  return (v1 < v2);
+  return (g1.G2 < g2.G2);
 }
 
 inline bool operator==(const GVec &g1, const GVec &g2)
@@ -124,7 +123,8 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
       for (int iz=-maxZ; iz<=maxZ; iz++) {
 	vec.G[2] = iz*kBox[2];
 	vec.I[2] = (iz+Nz)%Nz;
-	if (dot(k+vec.G,k+vec.G) < (kcut*kcut)) 
+	vec.G2 = dot (vec.G,vec.G);
+	if (vec.G2 < (kcut*kcut)) 
 	  vecs.push_back(vec);
       }
     }
@@ -156,7 +156,8 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
       for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
 	vec.G[2] = iz*kBox[2];
 	vec.I[2] = (iz+Nz)%Nz;
-	if (dot(k+vec.G,k+vec.G) < (4.0*kcut*kcut))
+	vec.G2 = dot (vec.G, vec.G);
+	if (vec.G2 < (4.0*kcut*kcut))
 	  vecs.push_back(vec);
       }
     }
