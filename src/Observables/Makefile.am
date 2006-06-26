@@ -20,6 +20,7 @@ libobservables_la_SOURCES  =     \
     DistanceToHead.h             \
     Forces.cc                    \
     Forces.h                     \
+    lsapr.f                      \
     JosephsonPathDump.h          \
     JosephsonPathDump.cc         \
     ObservableBase.cc            \
@@ -49,6 +50,8 @@ libobservables_la_SOURCES  =     \
     PlaneDensity.cc              \
     SuperfluidFraction.h         \
     SuperfluidFraction.cc        \
+    SuperfluidFractionPerLayer.cc \
+    SuperfluidFractionPerLayer.h \
     SuperfluiDrop.h              \
     SuperfluiDrop.cc             \
     StructureFactor.cc           \
