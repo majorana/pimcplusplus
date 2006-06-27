@@ -12,7 +12,6 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
     DeltaRions.resize(N);
     Weights.resize(N);
   }
-
   dVec zero(0.0);
   DeltaRions = zero;
   /// Now, choose a random displacement 
@@ -98,11 +97,9 @@ IonDisplaceMoveClass::MakeMove ()
     ptclList.erase(iter);
     numLeft--;
   }
-
   // Next, set timeslices
   Slice1 = 0;
   Slice2 = PathData.Path.NumTimeSlices()-1;
-
   // Now call MultiStageClass' MakeMove
   MultiStageClass::MakeMove();
 }
@@ -115,6 +112,11 @@ IonDisplaceMoveClass::Read (IOSectionClass &in)
   string ionSpeciesStr;
   assert (in.ReadVar("IonSpecies",   ionSpeciesStr));
   IonSpeciesNum  = Path.SpeciesNum(ionSpeciesStr);
+  if (IonSpeciesNum == -1) {
+    cerr << "Unrecogonized species, """ << ionSpeciesStr 
+	 << """ in IonDisplaceMoveClass::Read.\n";
+    abort();
+  }
   assert (in.ReadVar ("NumToMove", NumParticlesToMove));
   in.ReadVar("WarpElectrons", WarpElectrons, false);
 

@@ -42,7 +42,7 @@ public:
   double Sample (int &slice1, int &slice2,
 		 Array <int,1> &activeParticles);
   IonDisplaceStageClass (PathDataClass &pathData, IOSectionClass &outSection,
-			 Array<dVec,1> deltaRions) :
+			 Array<dVec,1> &deltaRions) :
     CommonStageClass (pathData,outSection), DeltaRions(deltaRions)
   {
     // Do nothing for now.
