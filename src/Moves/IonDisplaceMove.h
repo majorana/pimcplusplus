@@ -36,6 +36,7 @@ public:
   double Sigma;
   int IonSpeciesNum;
   bool WarpElectrons;
+  Array<int,1> IonsToMove;
 
   /// This does the actual displacement of the path.  All processors
   /// within a single close must displace by the same amount.
@@ -59,7 +60,7 @@ class IonDisplaceMoveClass : public MultiStageClass
 private:
   /// This is the standard distribution of the displacement gaussian
   double Sigma;
-  int NumPtclsToMove;
+  int NumIonsToMove;
   int IonSpeciesNum;
   bool DoElectronWarp;
   

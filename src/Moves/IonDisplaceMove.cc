@@ -15,8 +15,8 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
   dVec zero(0.0);
   DeltaRions = zero;
   /// Now, choose a random displacement 
-  for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
-    int ptcl = activeParticles(ptclIndex);
+  for (int ptclIndex=0; ptclIndex<IonsToMove.size(); ptclIndex++) {
+    int ptcl = IonsToMove(ptclIndex);
     PathData.Path.Random.CommonGaussianVec (Sigma, DeltaRions(ptcl-first));
 
     // Actually displace the path
@@ -38,6 +38,7 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
 double
 IonDisplaceStageClass::DoElectronWarp()
 {
+  cerr << "DoElectronWarp...\n";
   SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
   int ionFirst = ionSpecies.FirstPtcl;
   int ionLast  = ionSpecies.LastPtcl;
@@ -46,7 +47,7 @@ IonDisplaceStageClass::DoElectronWarp()
   double dist;
   for (int si=0; si<Path.NumSpecies(); si++) {
     SpeciesClass &species = Path.Species(si);
-    if (species.lambda != 0.0) {
+    if (species.lambda > 1.0e-10) {
       for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
 	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
 	  SetMode (OLDMODE);
@@ -55,12 +56,12 @@ IonDisplaceStageClass::DoElectronWarp()
 	  for (int ion=ionFirst; ion <= ionLast; ion++) {
 	    Path.DistDisp(slice, elec, ion, dist, disp);
 	    Weights(ion-ionFirst) = 1.0/(dist*dist*dist*dist);
-	    totalWeight *= Weights(ion-ionFirst);
+	    totalWeight += Weights(ion-ionFirst);
 	  }
 	  Weights *= (1.0/totalWeight);
 	  SetMode (NEWMODE);
 	  for (int ion=ionFirst; ion <= ionLast; ion++) 
-	    Path(slice, elec) += Weights(ion-ionFirst)*DeltaRions(ion-ionFirst);
+	    Path(slice, elec) = Path(slice,elec) + Weights(ion-ionFirst)*DeltaRions(ion-ionFirst);
 	}
       }
     }
@@ -88,10 +89,10 @@ IonDisplaceMoveClass::MakeMove ()
   }
   
   // First, choose particle to move
-  for (int i=0; i<NumParticlesToMove; i++) {
+  for (int i=0; i<NumIonsToMove; i++) {
     int index = PathData.Path.Random.CommonInt(numLeft);
     vector<int>::iterator iter = ptclList.begin();
-    ActiveParticles(i) = ptclList[index];
+    IonDisplaceStage.IonsToMove(i) = ptclList[index];
     for (int j=0; j<index; j++)
       iter++;
     ptclList.erase(iter);
@@ -117,7 +118,7 @@ IonDisplaceMoveClass::Read (IOSectionClass &in)
 	 << """ in IonDisplaceMoveClass::Read.\n";
     abort();
   }
-  assert (in.ReadVar ("NumToMove", NumParticlesToMove));
+  assert (in.ReadVar ("NumToMove", NumIonsToMove));
   in.ReadVar("WarpElectrons", WarpElectrons, false);
 
   IonDisplaceStage.Sigma = Sigma;
@@ -142,5 +143,8 @@ IonDisplaceMoveClass::Read (IOSectionClass &in)
   // Now construct stage list
   Stages.push_back(&IonDisplaceStage);
 
-  ActiveParticles.resize(NumParticlesToMove);
+  IonDisplaceStage.IonsToMove.resize(NumIonsToMove);
+  ActiveParticles.resize(Path.NumParticles());
+  for (int i=0; i<Path.NumParticles(); i++)
+    ActiveParticles(i) = i;
 }
