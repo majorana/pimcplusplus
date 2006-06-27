@@ -115,7 +115,7 @@ Section (Action)
     string IonSpecies  = "Na";
     string UpSpecies   = "eup";
     string DownSpecies = "edown";
-    bool UseMDExtrap = true;
+    bool UseMDExtrap = false;
     bool UseLDA = true;
     bool UseSubspaceRotation = true;
     double kCut = 3.0;
@@ -171,8 +171,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    //    "/turing/projects/mcc/esler/Runs/Na_16_rho240_T3000_8kvecs_IonDisplace";
-    "~/Runs/NaRuns/Displace/Na_16_rho240_T3000_8kvecs_IonDisplace";
+    "~/Runs/NaRuns/Displace/Na_16_rho240_T3000_8kvecs_WarpElectrons";
   int FileStart = 0;
 //   Section (Observable) {
 //     string Type = "Energy";
@@ -264,9 +263,10 @@ Section (Moves) {
   Section (Move) {
     string Type = "IonDisplace";
     string Name = "Displace";
+    bool WarpElectrons = true;
     string IonSpecies = "Na";
     int NumToMove = 16;
-    double Sigma = 0.1;
+    double Sigma = 0.3;
   }
 }
 
@@ -278,7 +278,7 @@ Section (Algorithm) {
   // Equilibration loop //
   ////////////////////////
    Section (Loop) { 
-     int Steps=100;
+     int Steps=200;
        Section (Move) { string Name="eupBlock";} 
        Section (Move) { string Name="edownBlock";} 
        Section (Move) { string Name = "Shift"; }
@@ -307,10 +307,12 @@ Section (Algorithm) {
     /// Accumulation loop
       Section (Loop) {
 	int Steps = 19;
-	Section (Move)      { string Name="eupBlock";       } 
-	Section (Move)      { string Name="edownBlock";     } 
-	Section (Move)      { string Name="eupBlock";       } 
-	Section (Move)      { string Name="edownBlock";     } 
+	Section (Loop) {
+	  int Steps = 10;
+	  Section (Move)    { string Name="eupBlock";       } 
+	  Section (Move)    { string Name="edownBlock";     } 
+	  Section (Move)    { string Name="Shift";          }
+	}
 // 	Section (Observe)   { string Name = "Pressure";     }
 // 	Section (Observe)   { string Name = "Energy";       }
 // 	Section (Observe)   { string Name = "Pressure";     }
@@ -318,13 +320,14 @@ Section (Algorithm) {
 // 	Section (Observe)   { string Name = "NaSk";         }
 // 	Section (Observe)   { string Name = "WN";           }
 // 	Section (Observe)   { string Name = "Na-Na";        }
-	Section (Move)      { string Name = "Shift";        }
-	Section (Move)      { string Name = "Displace";     }	
+	Section (Observe)   { string Name = "PathDump";     }
+	Section (Move)      { string Name = "Displace";     }
+	Section (Observe)   { string Name = "PathDump";     }	
 //	Section (Observe)   { string Name = "TimeAnalysis"; }
 	Section (WriteData) { }
       }
     // Dump paths every 20 Langevin steps
-    Section (Observe)       { string Name = "PathDump";     }
+    //Section (Observe)       { string Name = "PathDump";     }
 
     // Section (Observe)  { string Name = "Na-Na";        }
     // Section (Observe)  { string Name = "Na-eup";       }

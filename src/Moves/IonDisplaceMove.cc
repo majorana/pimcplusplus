@@ -11,13 +11,18 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
   if (DeltaRions.size() != N) {
     DeltaRions.resize(N);
     Weights.resize(N);
+    DeltaRhat.resize(N);
   }
   dVec zero(0.0);
   DeltaRions = zero;
   /// Now, choose a random displacement 
   for (int ptclIndex=0; ptclIndex<IonsToMove.size(); ptclIndex++) {
     int ptcl = IonsToMove(ptclIndex);
-    PathData.Path.Random.CommonGaussianVec (Sigma, DeltaRions(ptcl-first));
+    Vec3 delta;
+    PathData.Path.Random.CommonGaussianVec (Sigma, delta);
+    DeltaRions(ptcl-first) = delta;
+    double norm = 1.0/sqrt(dot(delta,delta));
+    DeltaRhat(ptcl-first) = norm * delta;
 
     // Actually displace the path
     SetMode(NEWMODE);
@@ -35,6 +40,14 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
   return 1.0;
 }
 
+inline double det (const TinyMatrix<double,3,3> &A)
+{
+  return 
+    A(0,0)*(A(1,1)*A(2,2)-A(1,2)*A(2,1)) -
+    A(0,1)*(A(1,0)*A(2,2)-A(1,2)*A(2,0)) +
+    A(0,2)*(A(1,0)*A(2,1)-A(1,1)*A(2,0));
+}
+
 double
 IonDisplaceStageClass::DoElectronWarp()
 {
@@ -45,11 +58,19 @@ IonDisplaceStageClass::DoElectronWarp()
   int N     = ionLast - ionFirst + 1;
   dVec disp;
   double dist;
+  double JacobianProd = 0.0;
+  /// The jacobian matrix
+  TinyMatrix<double,3,3> J;
   for (int si=0; si<Path.NumSpecies(); si++) {
-    SpeciesClass &species = Path.Species(si);
+    SpeciesClass &species = Path.Species(si);    
     if (species.lambda > 1.0e-10) {
       for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
 	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
+	  J = 1.0, 0.0, 0.0,
+	      0.0, 1.0, 0.0,
+	      0.0, 0.0, 1.0;
+	  
+	  
 	  SetMode (OLDMODE);
 	  Weights = 0.0;
 	  double totalWeight = 0.0;
@@ -60,8 +81,11 @@ IonDisplaceStageClass::DoElectronWarp()
 	  }
 	  Weights *= (1.0/totalWeight);
 	  SetMode (NEWMODE);
-	  for (int ion=ionFirst; ion <= ionLast; ion++) 
-	    Path(slice, elec) = Path(slice,elec) + Weights(ion-ionFirst)*DeltaRions(ion-ionFirst);
+	  for (int ion=ionFirst; ion <= ionLast; ion++) {
+	    Path(slice, elec) = Path(slice,elec) + 
+	      Weights(ion-ionFirst)*DeltaRions(ion-ionFirst);
+	    
+	  }
 	}
       }
     }
@@ -144,7 +168,16 @@ IonDisplaceMoveClass::Read (IOSectionClass &in)
   Stages.push_back(&IonDisplaceStage);
 
   IonDisplaceStage.IonsToMove.resize(NumIonsToMove);
-  ActiveParticles.resize(Path.NumParticles());
-  for (int i=0; i<Path.NumParticles(); i++)
-    ActiveParticles(i) = i;
+  if (WarpElectrons) {
+    IonDisplaceStage.Actions.push_back(&PathData.Actions.Kinetic);
+    ActiveParticles.resize(Path.NumParticles());
+    for (int i=0; i<Path.NumParticles(); i++)
+      ActiveParticles(i) = i;
+  }
+  else {
+    SpeciesClass &species = Path.Species(IonSpeciesNum);
+    ActiveParticles.resize(species.NumParticles);
+    for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++)
+      ActiveParticles(ptcl-species.FirstPtcl) = ptcl;
+  }
 }
