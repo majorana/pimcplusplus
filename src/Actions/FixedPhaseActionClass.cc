@@ -679,11 +679,13 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum,
     else if (update == UPDATE_ACTIVE)
       for (int i=0; i<activeParticles.size(); i++) {
 	int j = activeParticles(i) - first;
-	Vec3 r_j = Path(slice, activeParticles(i));
-	Path.PutInBox(r_j);
-	vals.reference ( matData(slice, j, Range::all()));
-	grads.reference(gradData(slice, j, Range::all()));
-	BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+	if ((j >= 0) && (j<N)) {
+	  Vec3 r_j = Path(slice, activeParticles(i));
+	  Path.PutInBox(r_j);
+	  vals.reference ( matData(slice, j, Range::all()));
+	  grads.reference(gradData(slice, j, Range::all()));
+	  BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+	}
       }
     else {
       cerr << "Unrecognized update type.\n";
