@@ -35,7 +35,7 @@ class CycleClass
  public:
   int Length;
   TinyVector<int,4> CycleRep;
-  double P, C;
+  float P, C;
   ///Takes the number of particles you have and returns the
   ///representation such that p(j) is the particle that the j'th
   ///particle permutes onto. 
@@ -63,24 +63,29 @@ class PermuteTableClass
 {
  private:
   int TableSize;
-  int SpeciesNum;
-  int Slice1, Slice2;
+
+
   inline void AddEntry(const CycleClass &cycle);
   int ExcludeParticle;
   PathDataClass &PathData;
-  void ConstructHTable();
+
 
   double Norm, NormInv;
   inline int FindEntry(double xi);  
   inline int FindEntrySlow(double xi);  
 public:
+  int Slice1, Slice2;
+  int SpeciesNum;
   ///Designed to allow it to give only odd or only even permutations.  Specifically used for a coupling move.
   bool OnlyOdd;
   bool OnlyEven;
   int NumEntries;
+  void ConstructHTable();
+
   CycleClass CurrentCycle;
-  Array<double,2> HTable;
+  Array<float,2> HTable;
   Array<CycleClass,1> CycleTable;
+  void UpdateHTable(const CycleClass &perm);
 
   //  void PermuteHTable();
 

@@ -49,8 +49,79 @@ Array<int,1> PermuteTableClass::CurrentParticles()
   return tempPtcl;
 }
 
+void 
+PermuteTableClass::UpdateHTable(const CycleClass &perm)
+{
+ //  int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
+//   int lastPtcl = PathData.Species(SpeciesNum).LastPtcl;
+//   int N = lastPtcl-firstPtcl+1;
+//   double tempDistance;
+//   for (int i=0; i<N; i++) {
+//     tempDistance=HTable(i,perm.CycleRep(0));
+//     for (int counter=1;counter<perm.Length;counter++){
+//       HTable(i,perm.CycleRep(counter-1))=HTable(i,perm.CycleRep(counter));
+//     }
+//     HTable(i,perm.CycleRep(perm.Length-1))=tempDistance;
+//   }    
+
+
+//   for (int i=0; i<N; i++) {
+//     tempDistance=HTable(perm.CycleRep(0),i);
+//     for (int counter=1;counter<perm.Length;counter++){
+//       HTable(perm.CycleRep(counter-1),i)=HTable(perm.CycleRep(counter),i);
+//     }
+//     HTable(perm.CycleRep(perm.Length-1),i)=tempDistance;
+//   }    
+
+
+  double logEps=log(epsilon);
+  int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
+  int lastPtcl = PathData.Species(SpeciesNum).LastPtcl;
+  double lambda = PathData.Species(SpeciesNum).lambda;
+  double beta = PathData.Path.tau * (double) (Slice2-Slice1);
+  double fourLambdaBetaInv = 1.0/(4.0*lambda*beta);
+  int N = lastPtcl-firstPtcl+1;
+  for (int i=0; i<N; i++) {
+    dVec disp_ii = PathData(Slice2,i+firstPtcl)-PathData(Slice1,i+firstPtcl);
+    PathData.Path.PutInBox(disp_ii);
+    double dist_ii = dot (disp_ii,disp_ii);
+    for (int jC=0; jC<perm.Length; jC++) {
+      int j=perm.CycleRep(jC);
+      dVec disp_ij = PathData(Slice2,j+firstPtcl)-PathData(Slice1,i+firstPtcl);
+      PathData.Path.PutInBox(disp_ij);
+      double dist_ij = dot (disp_ij,disp_ij);
+      double toExp=(-dist_ij + dist_ii)*fourLambdaBetaInv;
+      if (toExp<logEps)
+      	HTable(i,j)=0.0;
+      else
+      	HTable(i,j)=exp(toExp);
+    }
+  }
+
+  for (int iC=0; iC<perm.Length; iC++) {
+    int i=perm.CycleRep(iC);
+    dVec disp_ii = PathData(Slice2,i+firstPtcl)-PathData(Slice1,i+firstPtcl);
+    PathData.Path.PutInBox(disp_ii);
+    double dist_ii = dot (disp_ii,disp_ii);
+    for (int j=0; j<N; j++) {
+      dVec disp_ij = PathData(Slice2,j+firstPtcl)-PathData(Slice1,i+firstPtcl);
+      PathData.Path.PutInBox(disp_ij);
+      double dist_ij = dot (disp_ij,disp_ij);
+      double toExp=(-dist_ij + dist_ii)*fourLambdaBetaInv;
+      if (toExp<logEps)
+      	HTable(i,j)=0.0;
+      else
+      	HTable(i,j)=exp(toExp);
+    }
+  }
+
+
+
+}
+
 void PermuteTableClass::ConstructHTable()
 {
+  double logEps=log(epsilon);
   int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
   int lastPtcl = PathData.Species(SpeciesNum).LastPtcl;
   double lambda = PathData.Species(SpeciesNum).lambda;
@@ -58,24 +129,25 @@ void PermuteTableClass::ConstructHTable()
   double fourLambdaBetaInv = 1.0/(4.0*lambda*beta);
   int N = lastPtcl-firstPtcl+1;
   HTable.resize(N,N);
+  //  cerr<<"N: "<<N<<" "<<fourLambdaBetaInv<<endl;
   for (int i=0; i<N; i++) {
+    dVec disp_ii = PathData(Slice2,i+firstPtcl)-PathData(Slice1,i+firstPtcl);
+    PathData.Path.PutInBox(disp_ii);
+    double dist_ii = dot (disp_ii,disp_ii);
     for (int j=0; j<N; j++) {
       dVec disp_ij = PathData(Slice2,j+firstPtcl)-PathData(Slice1,i+firstPtcl);
       PathData.Path.PutInBox(disp_ij);
       double dist_ij = dot (disp_ij,disp_ij);
-      dVec disp_ii = PathData(Slice2,i+firstPtcl)-PathData(Slice1,i+firstPtcl);
-      PathData.Path.PutInBox(disp_ii);
-      double dist_ii = dot (disp_ii,disp_ii);
-      HTable(i,j) = exp((-dist_ij + dist_ii)*fourLambdaBetaInv);
-      if (HTable(i,j) < epsilon)
-	HTable(i,j) = 0.0;
-    }
+      double toExp=(-dist_ij + dist_ii)*fourLambdaBetaInv;
+      if (toExp<logEps)
+	HTable(i,j)=0.0;
+      else
+	HTable(i,j)=exp(toExp);
     // Now we should really sort with respect to j, but we won't for
     // now because we are far too lazy and it's a Friday.
+    }
   }
 }
-
- 
 ///// This constructs the Htable for the reverse move from the Htable
 ///// for the forward move.  i.e. Constructs Hrev(i,j) = H(P(i),P(j)).
 // void PermuteTableClass::PermuteHTable(const CycleClass &myPerm,
@@ -133,27 +205,12 @@ double PermuteTableClass::AttemptPermutation()
   double xi=PathData.Path.Random.Local(); 
   int index=FindEntry(xi);
   CurrentCycle = CycleTable(index);
-  //  cerr<<"Index is "<<xi<<" "<<index<<" "<<endl;
-  //  for (int j=0; j<CurrentCycle.Length; j++)
-  //    cerr << CurrentCycle.CycleRep[j] << " ";
-  //  cerr<<"Done"<<endl;
   if (CurrentCycle.CycleRep[0]<0 || CurrentCycle.CycleRep[0]>10000){
     PrintTable();
   }
-  //  cerr<<"After find entry"<<endl;
   // Now, apply the permutation to the Path
   int firstPtcl=PathData.Species(SpeciesNum).FirstPtcl;
   CurrentCycle.Apply(PathData.Path,firstPtcl,Slice2);
-  
-//   int diff = Slice2-Slice1;
-//   int numLevels = 0;
-//   while (diff != 1) {
-//     diff >>= 1;
-//     numLevels++;
-//   }
-  ///Remember to update distance table after permutation
-
-
   return (CurrentCycle.P * NormInv);
 }
 
@@ -169,26 +226,8 @@ double PermuteTableClass::CalcReverseProb(const PermuteTableClass &forwardTable)
   ConstructCycleTable(forwardTable.SpeciesNum,
 		      forwardTable.Slice1,forwardTable.Slice2,
 		      forwardTable.ExcludeParticle); 
-  //  cerr << "Forward Table:\n";
-  //  forwardTable.PrintTable();
-  //  cerr << "Reverse Table:\n";
-  //  PrintTable();
-  ///Correct for gamma factors here
-
-
-//   int i=0;
-//   while (!(CycleTable(i)==forwardTable.CurrentCycle))
-//     i++;
-//   if (fabs(CycleTable(i).P-
-// 	   (1.0/(forwardTable.CurrentCycle.P)))>1e-12)
-//     cerr <<"BAD! BAD! BAD! "
-// 	 << CycleTable(i).P<<" "
-// 	 <<1.0/(forwardTable.CurrentCycle.P);
-//   }
-  
-  return (1.0/(forwardTable.CurrentCycle.P)*NormInv);
-	 
-	   
+  int len=forwardTable.CurrentCycle.Length;
+  return ((Gamma[len-1]*Gamma[len-1])/(forwardTable.CurrentCycle.P)*NormInv);
 }
 
 
@@ -251,7 +290,7 @@ void PermuteTableClass::ConstructFermionCycleTable(int speciesNum,
   Slice1=slice1;
   Slice2=slice2;
   SpeciesNum=speciesNum;
-  ConstructHTable();
+  //  ConstructHTable();
   int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
   CycleTable.resize(TableSize);
   NumEntries = 0;
@@ -306,9 +345,9 @@ void PermuteTableClass::ConstructBosonCycleTable(int speciesNum,
   Slice2=slice2;
   SpeciesNum=speciesNum;
   ExcludeParticle=particleExclude;
-  ConstructHTable();
+  //  ConstructHTable();
   int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
-  CycleTable.resize(TableSize);
+  //  CycleTable.resize(TableSize);
   NumEntries = 0;
   int N=HTable.extent(0);
   for (int i=0; i<N; i++) {
