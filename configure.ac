@@ -15,7 +15,6 @@ AC_MSG_RESULT([${CXXFLAGS}])
 # Checks for libraries.
 # this creates and AC_SUBST's vars FFTW3_CFLAGS and FFTW3_LIBS
 
-
 # this creates and AC_SUBST's vars BLITZ_CFLAGS and BLITZ_LIBS
 PKG_CHECK_MODULES(BLITZ, blitz, blitz_ok=yes, blitz_ok=no)
 # this creates and AC_SUBST's vars XML2_CFLAGS and XML2_LIBS

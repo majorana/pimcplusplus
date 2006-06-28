@@ -113,7 +113,7 @@ MPISystemClass::SolveLDA()
 
   // Make sure we have enough bands
   assert (NumBands >= (NumElecs+1)/2);
-  int numSCIters = 0;
+  SCiter = 0;
   bool SC = false;
   int highestOcc = (NumElecs+1)/2-1;
   double lastE = 500.0;
@@ -125,7 +125,7 @@ MPISystemClass::SolveLDA()
     MixChargeDensity();
     CalcVHXC();
     CG.SetTolerance(1.0e-4);
-    if (numSCIters == 0 && ConfigNum == 0) {
+    if (SCiter == 0 && ConfigNum == 0) {
       CG.InitBands();
       CG.ApplyH();
       SubspaceRotate();
@@ -135,7 +135,7 @@ MPISystemClass::SolveLDA()
       SubspaceRotate();
 
     CG.Solve();
-    SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-8);
+    SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-6);
     /// Now make sure we all k-points agree that we're
     /// self-consistent.
     if (BandComm.MyProc() == 0) 
@@ -145,11 +145,11 @@ MPISystemClass::SolveLDA()
     lastE = CG.Energies(highestOcc);
     CalcOccupancies();
     CalcChargeDensity();
-    numSCIters ++;
+    SCiter++;
     /// Stability control:  if convergence is taking forever, we're
     /// probably  charge sloshing. Then increase the Kerker
     /// parameter
-    if ((numSCIters % 50) == 0)
+    if ((SCiter % 50) == 0)
       ChargeMixer->SetLambda (1.2*ChargeMixer->GetLambda());
   }
   // Reset initial lambda
@@ -231,7 +231,8 @@ MPISystemClass::DoMDExtrap()
     alpha = max(0.0, alpha);
     alpha = min(2.0, alpha);
 
-    cerr << "alpha = " << alpha << endl;
+    if (Verbose)
+      cerr << "alpha = " << alpha << endl;
     Bands = alpha * Bands1 + (1.0-alpha)*Bands2;
     GramSchmidt(Bands);
 
@@ -304,7 +305,8 @@ MPISystemClass::CalcOccupancies()
   /// of electrons 
   for (int bi=0; bi<NumBands; bi++) 
     Occupancies(bi) = (double)(NumElecs)/occSum * occ(Myk, bi);
-  perr << "Occupancies = " << Occupancies << endl;
+  if (Verbose)
+    perr << "Occupancies = " << Occupancies << endl;
 }
 
 void
@@ -347,7 +349,8 @@ MPISystemClass::CalcChargeDensity()
     for (int iy=0; iy<ny; iy++)
       for (int iz=0; iz<nz; iz++)
 	totalCharge += vCell * NewRho(ix,iy,iz);
-  perr << "total NewRho charge = " << totalCharge << endl;
+  if (Verbose)
+    perr << "total NewRho charge = " << totalCharge << endl;
 }
 
 
@@ -425,12 +428,20 @@ MPISystemClass::CalcVHXC()
   Eelec_ion = CalcElectronIonEnergy();
   double Ecore = NumElecs*(double)Rions.size() * H.GetVG0();
   
-  perr << "Energies:\n"
-       << "   EH         = " << EH  << endl
-       << "   EXC        = " << EXC << endl 
-       << "   Eelec_ion  = " << Eelec_ion << endl
-       << "   Eewald     = " << EwaldEnergy() << endl
-       << "   Ecore      = " << Ecore << endl;
+  if (BandComm.MyProc() == 0)
+    if (kComm.MyProc() == 0) {
+      fprintf (stderr, 
+	       "Iter     EH        EXC       E_el_ion  Eewald    Ecore\n");
+      fprintf (stderr, 
+	       "%3d    %9.5f %9.5f %9.5f %9.5f %9.5f\n", SCiter,
+	       EH, EXC, Eelec_ion, EwaldEnergy(), Ecore);
+    }	       
+//   perr << "Energies:\n"
+//        << "   EH         = " << EH  << endl
+//        << "   EXC        = " << EXC << endl 
+//        << "   Eelec_ion  = " << Eelec_ion << endl
+//        << "   Eewald     = " << EwaldEnergy() << endl
+//        << "   Ecore      = " << Ecore << endl;
 }
 
 

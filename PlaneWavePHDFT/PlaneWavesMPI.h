@@ -87,6 +87,7 @@ protected:
   bool UseMDExtrap, FirstTime;
   bool UseLDA;
   bool UseSubspaceRotation;
+  bool Verbose;
 
   ////////////////
   // IO related //
@@ -123,6 +124,7 @@ private:
   /// LDA-related stuff ///
   /////////////////////////
   int ConfigNum;
+  int SCiter;
   int Nx, Ny, Nz;
   // Array<complex<double>,3> Phip_r, Psi_r;
   void CalcOccupancies();
@@ -199,7 +201,7 @@ public:
       FFT(GVecs), H(GVecs, FFT), 
       NumBands(numBands), BandComm(bandcomm), kComm(kcomm), 
       UseMDExtrap(mdextrap), FirstTime(true), NumElecs(numElecs),
-      ConfigNum(0), UseSubspaceRotation(true)
+      ConfigNum(0), UseSubspaceRotation(true), Verbose(false)
   {
 
   }

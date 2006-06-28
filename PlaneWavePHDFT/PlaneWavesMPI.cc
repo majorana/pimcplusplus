@@ -230,6 +230,8 @@ MPISystemClass::Read(IOSectionClass &in)
 {
   in.ReadVar ("UseLDA", UseLDA, true);
   in.ReadVar ("UseSubspaceRotation", UseSubspaceRotation, true);
+  in.ReadVar ("Verbose", Verbose, false);
+  CG.SetVerbose(Verbose);
   CG.SetOrthoType (UseSubspaceRotation ? ORTHO_ALL : ORTHO_LOWER);
   in.ReadVar ("UseFFT", UseFFT, true);
   in.ReadVar ("UseMDExtrap", UseMDExtrap, true);

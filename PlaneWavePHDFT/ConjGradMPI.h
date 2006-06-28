@@ -27,6 +27,7 @@ typedef enum {ORTHO_ALL, ORTHO_LOWER} OrthoType;
 class ConjGradMPI
 {
 protected:
+  bool Verbose;
   HamiltonianClass &H;
   zVec c;
   zVec cnext, Hc, Phi;
@@ -76,6 +77,7 @@ public:
 
   inline int GetFirstBand() { return MyFirstBand; }
   inline int GetLastBand () { return MyLastBand; }
+  inline void SetVerbose(bool verb) { Verbose = verb; }
 
   ConjGradMPI (HamiltonianClass &h,
 	       Array<complex<double>,2> &bands,
@@ -88,7 +90,7 @@ public:
     LastBand(-1), Bands(bands), HBands(hbands), 
     NumOccupied(numOccupied), Tolerance (1.0e-6),
     BandComm(bandComm), kComm(kcomm), VHXC(vhxc),
-    Ortho (ORTHO_ALL)
+    Ortho (ORTHO_ALL), Verbose(false)
   {
     // Do nothing for now
   }

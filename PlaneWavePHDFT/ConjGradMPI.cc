@@ -78,7 +78,7 @@ void ConjGradMPI::InitBands()
   }
   SymmEigenPairs (Hmat, numBands, EigVals, EigVecs);
 
-  if (BandComm.MyProc() == 0)
+  if (BandComm.MyProc() == 0 && Verbose)
     for (int i=0; i<numBands; i++)
       perr << "Mini energy(" << i << ") = " << 27.211383*EigVals(i) << endl;
 
@@ -239,12 +239,14 @@ void ConjGradMPI::Solve()
   EtaXiLast = complex<double>(0.0, 0.0);
   int iter = 0;
   double residual = 1.0;
-  while ((iter < 100) && (residual > Tolerance)) {
+  while ((iter < 10) && (residual > Tolerance)) {
     if ((iter % 10) == 0 && (Ortho==ORTHO_LOWER))
       EtaXiLast = 0.0;
     residual = Iterate();
-    cerr << "Energies = " << Energies << endl;
-    cerr << "iter = " << iter << "  residual = " << residual << endl;
+    if (Verbose) {
+      cerr << "Energies = " << Energies << endl;
+      cerr << "iter = " << iter << "  residual = " << residual << endl;
+    }
     iter++;
   }
 
