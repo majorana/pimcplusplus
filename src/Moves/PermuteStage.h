@@ -65,6 +65,8 @@ private:
   Array<int,1> NumAccepted;
   Array<int,1> NumAttempted;
   bool NeedToRebuildTable;
+  bool HaveBeenAcceptedOrRejected;
+  double forwT;
 public:
   /// This function will construct a new permutation if
   /// activeParticles is set to the array, [ -1 ];  In this case,
