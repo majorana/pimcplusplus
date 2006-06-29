@@ -84,6 +84,8 @@ libmoves_la_SOURCES  =           \
     ClusterMove.h                \
 		WaterMoveManager.cc          \
 		WaterMoveManager.h           \
+     VariationalDisplaceMove.h    \
+     VariationalDisplaceMove.cc   \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \
@@ -93,8 +95,6 @@ libmoves_la_SOURCES  =           \
     WormPermuteStage.h           \
     WormPermuteStage.cc     		 \
     WaterMoveRing.h              	
-#     VariationalDisplaceMove.h    \
-#     VariationalDisplaceMove.cc   \
 #     WormClose.h                  \
 #     WormClose.cc                 \
 #     WormStage.h                  \

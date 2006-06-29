@@ -54,10 +54,10 @@ libactions_la_SOURCES =            \
     ShortRangePotClass.h           \
     StructureReject.cc             \
     TIP5PWaterClass.cc             \
+    VariationalPI.h                \
+    VariationalPI.cc               \
+    TruncatedInverse.h             \
+    TruncatedInverse.cc            \
     TIP5PWaterClass.h              
-#    VariationalPI.h                
-#    VariationalPI.cc
-#    TruncatedInverse.h             
-#    TruncatedInverse.cc            
 
 EXTRA_DIST = FixedPhase.tex
