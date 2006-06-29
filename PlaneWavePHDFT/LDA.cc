@@ -270,7 +270,7 @@ MPISystemClass::CalcOccupancies()
   double muHi = Esort[Esort.size()-1];
   double numkInv = 1.0/(double)Numk;
   double mu, occSum;
-  while (fabs(occSum-(double)NumElecs) > 1.0e-10) {
+  do {
     occSum = 0.0;
     mu = 0.5*(muHi + muLo);
     for (int ki=0; ki<Numk; ki++)
@@ -282,7 +282,7 @@ MPISystemClass::CalcOccupancies()
       muLo = mu;
     else if (occSum > (double) NumElecs)
       muHi = mu;
-  }
+  } while (fabs(occSum-(double)NumElecs) > 1.0e-10);
   
 
 //   int LUMO = (NumElecs*Numk)/2;
