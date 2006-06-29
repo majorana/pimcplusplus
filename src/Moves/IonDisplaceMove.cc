@@ -11,7 +11,7 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
   if (DeltaRions.size() != N) {
     DeltaRions.resize(N);
     Weights.resize(N);
-    DeltaRhat.resize(N);
+    rhat.resize(N);
   }
   dVec zero(0.0);
   DeltaRions = zero;
@@ -21,8 +21,6 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
     Vec3 delta;
     PathData.Path.Random.CommonGaussianVec (Sigma, delta);
     DeltaRions(ptcl-first) = delta;
-    double norm = 1.0/sqrt(dot(delta,delta));
-    DeltaRhat(ptcl-first) = norm * delta;
 
     // Actually displace the path
     SetMode(NEWMODE);
@@ -58,38 +56,99 @@ IonDisplaceStageClass::DoElectronWarp()
   int N     = ionLast - ionFirst + 1;
   dVec disp;
   double dist;
-  double JacobianProd = 0.0;
-  /// The jacobian matrix
+  double logJProdForw = 0.0;
+  double logJProdRev  = 0.0;
+  // The jacobian matrices for the forward and reverse move
   TinyMatrix<double,3,3> J;
+  Array<double,1> g(N);
+  Array<Vec3,1> wgr(N);
   for (int si=0; si<Path.NumSpecies(); si++) {
     SpeciesClass &species = Path.Species(si);    
     if (species.lambda > 1.0e-10) {
       for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
 	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
-	  J = 1.0, 0.0, 0.0,
-	      0.0, 1.0, 0.0,
-	      0.0, 0.0, 1.0;
-	  
-	  
 	  SetMode (OLDMODE);
 	  Weights = 0.0;
 	  double totalWeight = 0.0;
 	  for (int ion=ionFirst; ion <= ionLast; ion++) {
-	    Path.DistDisp(slice, elec, ion, dist, disp);
-	    Weights(ion-ionFirst) = 1.0/(dist*dist*dist*dist);
+	    Path.DistDisp(slice, ion, elec, dist, disp);
+	    double d4 = dist*dist*dist*dist;
+	    Weights(ion-ionFirst) = 1.0/d4;
+	    g(ion-ionFirst)      = -4.0/dist;
+	    rhat(ion-ionFirst )   = (1.0/dist)*disp;
 	    totalWeight += Weights(ion-ionFirst);
 	  }
 	  Weights *= (1.0/totalWeight);
 	  SetMode (NEWMODE);
-	  for (int ion=ionFirst; ion <= ionLast; ion++) {
+	  for (int ion=ionFirst; ion <= ionLast; ion++) 
 	    Path(slice, elec) = Path(slice,elec) + 
 	      Weights(ion-ionFirst)*DeltaRions(ion-ionFirst);
-	    
+
+	  // Calculate Jacobian for forward move
+	  J = 1.0, 0.0, 0.0,
+  	      0.0, 1.0, 0.0,
+	      0.0, 0.0, 1.0;
+	  Vec3 sumwgr(0.0, 0.0, 0.0);
+	  for (int j=0; j<N; j++) {
+	    wgr(j) = Weights(j)*g(j)*rhat(j);
+	    sumwgr += wgr(j);
 	  }
+	  for (int i=0; i<N; i++) {
+	    // Vec3 dwdr = Weights(i)*(g(i)*rhat(i) - sumwgr);
+	    Vec3 dwdr = (wgr(i) - Weights(i)*sumwgr);
+	    for (int alpha=0; alpha<3; alpha++)
+	      for (int beta=0; beta<3; beta++) 
+		J(alpha,beta) += DeltaRions(i)[alpha] * dwdr[beta];
+	  }
+	  logJProdForw += log(det(J));
 	}
       }
     }
   }
+  // Repeat the loop for the reverse move to calculate the reverse
+  // Jacobian 
+  //DeltaRions = -1.0*DeltaRions;
+  for (int si=0; si<Path.NumSpecies(); si++) {
+    SpeciesClass &species = Path.Species(si);    
+    if (species.lambda > 1.0e-10) {
+      for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
+	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
+	  Weights = 0.0;
+	  double totalWeight = 0.0;
+	  for (int ion=ionFirst; ion <= ionLast; ion++) {
+	    Path.DistDisp(slice, ion, elec, dist, disp);
+	    double d4 = dist*dist*dist*dist;
+	    Weights(ion-ionFirst) = 1.0/d4;
+	    g(ion-ionFirst)      = -4.0/dist;
+	    rhat(ion-ionFirst )   = (1.0/dist)*disp;
+	    totalWeight += Weights(ion-ionFirst);
+	  }
+	  Weights *= (1.0/totalWeight);
+	  
+	  // Calculate Jacobian for forward move
+	  J = 1.0, 0.0, 0.0,
+  	      0.0, 1.0, 0.0,
+	      0.0, 0.0, 1.0;
+	  Vec3 sumwgr(0.0, 0.0, 0.0);
+	  for (int j=0; j<N; j++) {
+	    wgr(j) = Weights(j)*g(j)*rhat(j);
+	    sumwgr += wgr(j);
+	  }
+	  for (int i=0; i<N; i++) {
+	    Vec3 dwdr = (wgr(i) - Weights(i)*sumwgr);
+	    for (int alpha=0; alpha<3; alpha++)
+	      for (int beta=0; beta<3; beta++) 
+		J(alpha,beta) += DeltaRions(i)[alpha] * dwdr[beta];
+	  }
+	  logJProdRev += log(det(J));
+	}
+      }
+    }
+  }
+  cerr << "JProdForw = " << exp(logJProdForw) << endl;
+  cerr << "JProdRev =  " << exp(logJProdRev)  << endl;
+  cerr << "JProdRev/JProdForw = " << exp(logJProdRev-logJProdForw) << endl;
+  //  return exp(logJProdRev-logJProdForw);
   return 1.0;
 }
 

@@ -27,7 +27,7 @@ class IonDisplaceStageClass : public CommonStageClass
 protected:
   Array<dVec,1> &DeltaRions;
   /// Unit vectors in the direction of the above
-  Array<dVec,1> DeltaRhat;
+  Array<dVec,1> rhat;
   Array<double,1> Weights;
   /// Returns the ratio of the sampling probabilities for the ion
   /// moved as a result of the warp transformation.
