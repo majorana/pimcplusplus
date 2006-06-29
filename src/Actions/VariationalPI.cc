@@ -226,7 +226,7 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
 // //   double new_det=Determinant(DetMatrix);
 
    SetMode(OLDMODE);
-   BuildDeterminantMatrix();
+   /////???   BuildDeterminantMatrix();
 // //   double old_det=Determinant(DetMatrix);
    SetMode(NEWMODE);
 // //   cout<<old_det<<" "<<new_det<<" "<<new_det/old_det<<endl;
@@ -278,8 +278,8 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
   }
   //  SetMode(currMode);
   
-  //    cerr<<"My det ratio is "<<1.0/abs(det_ratio)<<endl;
-
+  cerr<<"My det ratio is "<<1.0/abs(det_ratio)<<endl;
+  
   return 1.0/abs(det_ratio);
   //  return 0.0;
 #else
