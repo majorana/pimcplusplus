@@ -118,12 +118,6 @@ if test "x$enable_open" = "xyes"; then
    FFLAGS="-DOPEN_LOOPS $CXXFLAGS"
 fi
 
-AC_ARG_ENABLE(open, [  --enable-on-fermions    enable code for order-n fermions])
-if test "x$enable_on_fermions" = "xyes"; then
-   AC_CHECK_LIB([dctmp], [cg])
-   CXXFLAGS="-DORDER_N_FERMIONS $CXXFLAGS"
-fi
-
 # Optionally set dimensionality
 AC_ARG_WITH(ndim, [  --with-ndim=N           specify simulation dimensionality])
 if (test "x$with_ndim" != "x"); then
@@ -141,6 +135,12 @@ else
     MPI_DEF=" "
 fi
 AC_SUBST(MPI_DEF)
+
+AC_ARG_ENABLE(open, [  --enable-on-fermions    enable code for order-n fermions])
+if test "x$enable_on_fermions" = "xyes"; then
+   AC_CHECK_LIB([dctmp], [cg])
+   CXXFLAGS="-DORDER_N_FERMIONS $CXXFLAGS"
+fi
 
 # Checks if we want qmcPACK functionality for CEIMC
 AC_ARG_WITH(qmc,    [  --with-qmcpack=/path/to/my/qmcpack/builddir	enable QMCPACK functionality])
