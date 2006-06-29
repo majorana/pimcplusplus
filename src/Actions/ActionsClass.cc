@@ -25,6 +25,7 @@
 void 
 ActionsClass::Read(IOSectionClass &in)
 { 
+  cerr<<"Starting Actions Read"<<endl;
   PathClass &Path=PathData.Path;
   assert(in.ReadVar ("tau", Path.tau));
   assert(in.ReadVar ("MaxLevels", MaxLevels));
@@ -33,12 +34,15 @@ ActionsClass::Read(IOSectionClass &in)
   KineticSphere.SetNumImages(NumImages);
   Mu.Read(in);
   //  VariationalPI.Read(in);
+  TruncatedInverse.Read(in);
+  //  VariationalPI.Read(in);
   perr << "MaxLevels = " << MaxLevels << endl;
   bool checkJosephson=false;
   in.ReadVar("Josephson",checkJosephson);
   if (checkJosephson){
     Josephson.Read(in);
     Hermele.Read(in);
+    DualHermele.Read(in);
   }
   bool usePairAction=false;
   in.ReadVar("Paired",usePairAction);
@@ -208,6 +212,10 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 //       NodalActions(0) = 
 // 	&VariationalPI;
 //     }
+    else if (type == "TRUNCATED") {
+      NodalActions(0) = 
+	&TruncatedInverse;
+    }
     else if (type == "FIXEDPHASE") {
       FixedPhaseClass &fixedPhaseA = *new FixedPhaseClass(PathData);
       fixedPhaseA.Read (in);
@@ -227,6 +235,7 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
     }
     in.CloseSection();
   }
+  cerr<<"Ending actions read"<<endl;
 }
 
 

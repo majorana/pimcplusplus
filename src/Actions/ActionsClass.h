@@ -41,7 +41,7 @@
 #include "DualHermele.h"
 #include "TruncatedInverse.h"
 #include "Mu.h"
-//#include "VariationalPI.h"
+#include "VariationalPI.h"
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
 /// It includes kinetic, short range, long range, long range RPA
@@ -58,8 +58,8 @@ private:
 public:
   // This stores pointers to pair action fits for each pair of species.
   Array<PairActionFitClass*,2> PairMatrix;
-  //  VariationalPIClass VariationalPI;
-  // TruncatedInverseClass TruncatedInverse;
+  VariationalPIClass VariationalPI;
+  TruncatedInverseClass TruncatedInverse;
   /// Used to keep track of the total action
   double TotalA, TotalB;
 
@@ -200,9 +200,9 @@ public:
     QMCSampling(pathData),
     IonInteraction(pathData),
     Mu(pathData),
-    //    VariationalPI(pathData),
+    VariationalPI(pathData),
     StructureReject(pathData),
-    //    TruncatedInverse(pathData),
+    TruncatedInverse(pathData),
     NumImages(1),
     UseLongRange(true)
   {
