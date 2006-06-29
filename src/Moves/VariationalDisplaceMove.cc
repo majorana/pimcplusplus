@@ -68,9 +68,11 @@ VariationalDisplaceStageClass::Attempt(int &slice1, int &slice2,
   SetMode(NEWMODE);
   double newAction = PathData.Actions.ShortRangeOn.SingleAction(slice1,slice2,activeParticles,0); //GlobalStageAction(activeParticles);
   //  double newAction=0.0;
-  double changeNodalAction=log(PathData.Actions.VariationalPI.SingleAction(slice1,slice2,activeParticles,0));
+  double changeNodalAction;
+  
   changeNodalAction=log(PathData.Actions.TruncatedInverse.SingleAction(slice1,slice2,activeParticles,0));
-  changeNodalAction=0.0;
+  changeNodalAction=log(PathData.Actions.VariationalPI.SingleAction(slice1,slice2,activeParticles,0));
+//  changeNodalAction=0.0;
   //  perr << "oldAction = " << oldAction
   //       << "newAction = " << newAction << endl;
   //  double currActionChange=2*(newAction-oldAction-changeNodalAction);
