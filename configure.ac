@@ -138,7 +138,15 @@ AC_SUBST(MPI_DEF)
 
 AC_ARG_ENABLE(open, [  --enable-on-fermions    enable code for order-n fermions])
 if test "x$enable_on_fermions" = "xyes"; then
-   AC_CHECK_LIB([dctmp], [cg])
+   AC_CHECK_LIB([dctmp], [cg], [HAVE_DCTMP="yes"], [HAVE_DCTMP="no"])
+   if test "x$HAVE_DCTMP" = "xyes"; then
+      ORDER_N_LIBS="-ldctmp"
+   fi
+   if test "x$HAVE_DCTMP" = "xno"; then
+      AC_MSG_ERROR([  Cannot find libdctmp.  Aborting.])
+   fi
+   AC_SUBST(ORDER_N_LIBS)      
+   ORDER_N_LIBS="-ldctmp"
    CXXFLAGS="-DORDER_N_FERMIONS $CXXFLAGS"
 fi
 
