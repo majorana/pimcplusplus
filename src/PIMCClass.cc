@@ -49,6 +49,7 @@ void PIMCClass::Read(IOSectionClass &in)
   perr << "Before InitPaths.\n";
   assert(in.OpenSection("System"));
   PathData.Path.InitPaths(in);
+   PathData.Actions.VariationalPI.BuildDeterminantMatrix();
   in.CloseSection();
   perr << "Done InitPaths.\n";
   if (PathData.Path.UseCorrelatedSampling())
@@ -271,18 +272,23 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new BisectionSphereBlockClass(PathData,OutFile);
     else if (moveType=="CenterDroplet")
       move = new CenterDropletClass(PathData,OutFile);
-    //    else if (moveType=="GrowWorm")
-    //      move = new WormGrowMoveClass(PathData,OutFile);
-//     else if (moveType=="CloseWorm")
-//       move = new WormCloseMoveClass(PathData,OutFile);
-//     else if (moveType=="RemoveWorm")
-//       move = new WormRemoveMoveClass(PathData,OutFile);
+     else if (moveType=="GrowWorm")
+       move = new WormGrowMoveClass(PathData,OutFile);
+     else if (moveType=="CloseWorm")
+       move = new WormCloseMoveClass(PathData,OutFile);
+     else if (moveType=="RemoveWorm")
+       move = new WormRemoveMoveClass(PathData,OutFile);
     else if (moveType=="OpenEnd")
       move = new OpenEndMoveClass(PathData,OutFile);
     else if (moveType=="RefSlice")
       move = new RefSliceMoveClass(PathData,OutFile);
     else if (moveType=="Displace")
       move = new DisplaceMoveClass(PathData,OutFile);
+    else if (moveType=="VariationalDisplace")
+      move = new VariationalDisplaceMoveClass(PathData,OutFile);
+    else if (moveType=="HermeleFourier")
+      move = new HermeleFourierMoveClass(PathData,OutFile);
+    //     else if (moveType=="WaterRotate")
 //     else if (moveType=="VariationalDisplace")
 //        move = new VariationalDisplaceMoveClass(PathData,OutFile);
     else if (moveType=="WaterMove")
@@ -341,6 +347,7 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 void PIMCClass::Run()
 {
   Algorithm.DoEvent();
+  cerr<<"Ending now"<<endl;
   //  Array<MoveClass*,1> Moves;
 //   for (int counter=0;counter<Moves.size();counter++){
 //     cout<<"My name is "<<((MoveClass*)Moves(counter))->Name<<endl;
