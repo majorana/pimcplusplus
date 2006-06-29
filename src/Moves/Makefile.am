@@ -2,8 +2,8 @@ noinst_LTLIBRARIES = libmoves.la
 
 libmoves_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF)
 libmoves_la_SOURCES  =           \
-		AVBMove.cc                   \
-		AVBMove.h                    \
+    AVBMove.cc                   \
+    AVBMove.h                    \
     BisectionBlock.cc            \
     BisectionBlock.h             \
     BisectionSphereBlock.cc      \
@@ -82,10 +82,10 @@ libmoves_la_SOURCES  =           \
     TablePermuteStage.h          \
     ClusterMove.cc               \
     ClusterMove.h                \
-		WaterMoveManager.cc          \
-		WaterMoveManager.h           \
-     VariationalDisplaceMove.h    \
-     VariationalDisplaceMove.cc   \
+    WaterMoveManager.cc          \
+    WaterMoveManager.h           \
+    VariationalDisplaceMove.h    \
+    VariationalDisplaceMove.cc   \
     WaterMove.cc                 \
     WaterMove.h                  \
     WaterMoveRing.cc             \
@@ -93,15 +93,4 @@ libmoves_la_SOURCES  =           \
     QMCTest.cc                   \
     QMCTest.h                    \
     WormPermuteStage.h           \
-    WormPermuteStage.cc     		 \
-    WaterMoveRing.h              	
-#     WormClose.h                  \
-#     WormClose.cc                 \
-#     WormStage.h                  \
-#     WormStage.cc                 \
-#     WormGrow.h		         \
-#     WormGrow.cc                  \
-#     WormRemove.cc                \
-#     WormRemove.h                 \
-#     WormPermuteStage.h           \
-#     WormPermuteStage.cc     
+    WormPermuteStage.cc   
