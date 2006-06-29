@@ -4,6 +4,12 @@
 #include "../MirroredClass.h"
 #include "NodalActionClass.h"
 #include <Common/Splines/CubicSpline.h>
+#include <vector>
+struct doubleint
+{
+  double distance;
+  int ptcl;
+};
 
 
 /// VartionalPIClass implements the nodal action corresponding to
@@ -15,6 +21,7 @@ class TruncatedInverseClass : public NodalActionClass
 {
 private:
   PathClass &Path;
+  double CutoffAverage;
   void calc_u();
   Array<double,1> u;
   Array<double,1> newCol;
@@ -23,7 +30,15 @@ private:
   /// separation from the reference slice.
   Array<double,2> DetMatrix;
   Array<double,2> SmallDetMatrix;
+  Array<double,2> SmallDetMatrixOld;
+  void BuildOldMatrix(vector<doubleint> determinantPtcl,int size,
+		       Array<double,2> &SmallDetMatrix);
+  void BuildNewMatrix(vector<doubleint> determinantPtcl,int size,
+		      Array<double,2> &SmallDetMatrix);
+  double GetDistance(dVec sortFrom,int ptcl2);
+
   Mirrored1DClass<double> DeterminantList;
+  Mirrored2DClass<double> OtherInfo;
 
 public:
   double SingleAction (int slice1, int slice2,
@@ -33,11 +48,13 @@ public:
 		  int level);
   void BuildDeterminantMatrix();
   void BuildSmallDeterminantMatrix();
+  double  MinDistance(dVec oldDvec, dVec newDvec, int ptcl);
   void CheckDeterminantMatrix();
   void Read (IOSectionClass &in);
   bool IsGroundState();
   bool IsPositive(int x);
   NodeType Type();
+  int NumTimes;
   void AcceptCopy(int slice1, int slice2);
   void RejectCopy(int slice1, int slice2);
   void WriteInfo (IOSectionClass &out);
