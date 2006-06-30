@@ -26,7 +26,7 @@ def ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut):
     proc = 0
     for d in data:
         for bin in range(0,numBins):
-            (mean,var,error,kappa)=stats.Stats(d[:,bin])
+            (mean,var,error,kappa)=stats.Stats(d[StartCut:-1,bin])
             meanArray[proc,bin]=mean
             errorArray[proc,bin]=error
         proc = proc + 1
