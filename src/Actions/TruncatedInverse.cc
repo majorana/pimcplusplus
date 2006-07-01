@@ -1189,4 +1189,10 @@ TruncatedInverseClass::WriteInfo (IOSectionClass &out)
   out.WriteVar ("Type", "FREE_PARTICLE");
 }
 
+string
+TruncatedInverseClass::GetName()
+{
+  return "TruncatedInverse";
+}
+
 

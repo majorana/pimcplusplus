@@ -891,3 +891,8 @@ FreeNodalActionClass::WriteInfo (IOSectionClass &out)
   out.WriteVar ("Type", "FREE_PARTICLE");
 }
 
+string
+FreeNodalActionClass::GetName()
+{
+  return "FreeNodal";
+}

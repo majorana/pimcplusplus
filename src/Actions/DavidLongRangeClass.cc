@@ -141,3 +141,10 @@ DavidLongRangeClass::DavidLongRangeClass (PathDataClass &pathData) :
 {
   //Do  nothing for now
 }
+
+
+string
+DavidLongRangeClass::GetName()
+{
+  return "DavidsLongRange";
+}

@@ -30,6 +30,7 @@ public:
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
+  string GetName();
   double OOSeparation (int slice,int ptcl1,int ptcl2);
   double RotationalKinetic(int startSlice, int endSlice, const Array<int,1> &activeParticles,int level);
   double RotationalEnergy(int startSlice, int endSlice, int level);

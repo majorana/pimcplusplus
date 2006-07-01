@@ -6,38 +6,48 @@
 #include <vector>
 
 #ifdef USE_QMC
-class CEIMCActionClass: public ActionBaseClass{
+class CEIMCActionClass: public ActionBaseClass
+{
   std::vector<double>* qmcData;
-	int EnergyIndex0, EnergyIndex1, EnergyDiffIndex;
-	string ptclSet0, ptclSet1;
-  public:
-  double SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level);
+  int EnergyIndex0, EnergyIndex1, EnergyDiffIndex;
+  string ptclSet0, ptclSet1;
+  
+public:
+  double SingleAction(int slice1,int slice2,
+		      const Array<int,1> &activeParticles,int level);
   double d_dBeta (int slice1, int slice2, int level);
+  std::string GetName();
   void Read (IOSectionClass &in);
-
+  
   CEIMCActionClass(PathDataClass &pathData);
 };
 #endif
 
-class IonIonActionClass: public ActionBaseClass{
+class IonIonActionClass: public ActionBaseClass
+{
   double prefactor;
   double cutoff;
-  public:
-  double SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level);
+public:
+  double SingleAction(int slice1,int slice2,
+		      const Array<int,1> &activeParticles,int level);
   double d_dBeta (int slice1, int slice2, int level);
+  std::string GetName();
   void Read (IOSectionClass &in);
-
+  
   IonIonActionClass(PathDataClass &pathData);
 };
 
-class QMCSamplingClass: public ActionBaseClass{
-  public:
+class QMCSamplingClass: public ActionBaseClass
+{
+public:
   int manager;
   int myProc;
   int workerSize;
   int workerList[];
-  double SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level);
+  double SingleAction(int slice1,int slice2,const 
+		      Array<int,1> &activeParticles,int level);
   double d_dBeta (int slice1, int slice2, int level);
+  std::string GetName();
   void Read (IOSectionClass &in);
 
   QMCSamplingClass(PathDataClass &pathData);

@@ -32,6 +32,7 @@ public:
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
+  string GetName();
   inline void SetNumImages (int num) { NumImages = num; }
   KineticClass (PathDataClass &pathData);
 };

@@ -74,6 +74,7 @@ public:
   virtual void Read (IOSectionClass &in);
   virtual void ShiftData (int slices2Shift);
   virtual void MoveJoin (int oldJoinPos, int newJoinPos);
+  virtual string GetName()=0;
   ActionBaseClass(PathDataClass &pathData);				   
 };
 

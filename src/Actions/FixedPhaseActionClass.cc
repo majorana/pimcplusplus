@@ -543,8 +543,9 @@ FixedPhaseClass::Read(IOSectionClass &in)
     if (PathData.IntraComm.MyProc()==0)
       if (twistAngles.extent(0) != PathData.InterComm.NumProcs()) {
 	cerr << "Error:  Number of twist angles must match number of clones.\n" 
-	     << "        Number of twist angles:  "  << twistAngles.size() << endl 
-	     << "        Number of clones:        "  << PathData.InterComm.NumProcs() << endl;
+	     << "        Number of twist angles:  "  << twistAngles.extent(0) << endl 
+	     << "        Number of clones:        "  << PathData.InterComm.NumProcs() 
+	     << endl;
 	abort();
       }
     assert (twistAngles.extent(1) == 3);
@@ -1159,4 +1160,12 @@ FixedPhaseActionClass::GetIonForces(Array<Vec3,1> &F)
     FixedPhaseA.GetIonForces(F);
   else
     FixedPhaseB.GetIonForces(F);
+}
+
+
+string
+FixedPhaseActionClass::GetName()
+{
+  string speciesName = Path.Species(SpeciesNum).Name;
+  return "FixedPhase(" + speciesName + ")";
 }

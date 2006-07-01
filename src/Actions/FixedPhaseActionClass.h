@@ -163,6 +163,7 @@ public:
   void CalcBandDensity (Array<double,4> &rho);
   void GetBandEnergies(Array<double,1> &energies);
   void GetIonForces (Array<Vec3,1> &F);
+  string GetName();
 
   FixedPhaseActionClass (PathDataClass &pathData, 
 			 FixedPhaseClass &FPA, FixedPhaseClass &FPB,

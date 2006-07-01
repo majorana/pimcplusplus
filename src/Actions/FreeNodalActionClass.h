@@ -75,6 +75,7 @@ public:
   bool IsGroundState();
   NodeType Type();
   void WriteInfo (IOSectionClass &out);
+  string GetName();
   FreeNodalActionClass (PathDataClass &pathData, int speciesNum);
 };
 

@@ -188,3 +188,10 @@ DualHermeleClass::d_dBeta (int slice1, int slice2, int level)
 {
   return 0.0;
 }
+
+
+string
+DualHermeleClass::GetName()
+{
+  return "DualHermele";
+}

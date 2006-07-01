@@ -159,3 +159,10 @@ double ShortRangeApproximateClass::d_dBeta (int slice1, int slice2,
   
   return dU;
 }
+
+
+string 
+ShortRangeApproximateClass::GetName()
+{
+  return "ShortRangeApproximate";
+}

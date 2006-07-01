@@ -286,3 +286,8 @@ double KineticSphereClass::K2(int slice,int nextSlice,int ptcl, int level,double
 //   //remember to multiply by hbar2/(2mradius) when u exit the function
   
 }
+
+string KineticSphereClass::GetName()
+{
+  return "KineticSphere";
+}

@@ -365,3 +365,10 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
 //   }
 //   return dU;
 // }
+
+
+string 
+ShortRangeOnClass::GetName()
+{
+  return "ShortRangeOn";
+}

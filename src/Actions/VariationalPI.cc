@@ -324,3 +324,8 @@ VariationalPIClass::WriteInfo (IOSectionClass &out)
 }
 
 
+string
+VariationalPIClass::GetName()
+{
+  return "VariationalPI";
+}

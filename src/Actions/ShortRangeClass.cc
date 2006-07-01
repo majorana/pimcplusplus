@@ -304,3 +304,10 @@ ShortRangeClass::GradAction(int slice1, int slice2,
     }
   }
 }
+
+
+string
+ShortRangeClass::GetName()
+{
+  return "ShortRange";
+}

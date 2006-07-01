@@ -142,3 +142,10 @@ MuClass::SingleAction (int slice1, int slice2,
   return totalMu;
 #endif
 }
+
+
+string
+MuClass::GetName()
+{
+  return "Mu";
+}

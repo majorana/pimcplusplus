@@ -143,3 +143,10 @@ double KineticClass::d_dBeta (int slice1, int slice2,
 
   return spring;
 }
+
+
+string
+KineticClass::GetName()
+{
+  return "Kinetic";
+}

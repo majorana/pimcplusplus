@@ -394,3 +394,9 @@ double LongRangeRPAClass::d_dBeta (int slice1, int slice2,  int level)
     dU += (k0Homo+k0Hetero);
   return dU;
 }
+
+string
+LongRangeRPAClass::GetName()
+{
+  return "LongRangeRPA";
+}

@@ -38,6 +38,7 @@ public:
   {
     return 0.0;
   }
+  string GetName();
   double Mu;
   MuClass (PathDataClass &pathData);
     

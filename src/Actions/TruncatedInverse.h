@@ -46,6 +46,7 @@ public:
 		       int level);
   double d_dBeta (int slice1, int slice2, 
 		  int level);
+  string GetName();
   void BuildDeterminantMatrix();
   void BuildSmallDeterminantMatrix();
   double  MinDistance(dVec oldDvec, dVec newDvec, int ptcl);

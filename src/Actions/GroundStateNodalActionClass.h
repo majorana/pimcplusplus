@@ -79,6 +79,7 @@ public:
 		       const Array<int,1> &activeParticles, int level);
   
   double d_dBeta(int slice1, int slice2, int level);
+  string GetName();
 
   bool IsPositive (int slice);
   double Det (int slice);

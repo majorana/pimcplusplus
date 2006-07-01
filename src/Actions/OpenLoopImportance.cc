@@ -392,3 +392,10 @@ double OpenLoopImportanceClass::d_dBeta (int slice1, int slice2,
 {
   return 0.0;
 }
+
+
+string 
+OpenLoopImportanceClass::GetName()
+{
+  return "OpenLoopImportance";
+}

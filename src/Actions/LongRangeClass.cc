@@ -1126,3 +1126,10 @@ void LongRangeClass::OptimizedBreakup_V(int numKnots,
   }
 #endif
 }
+
+
+string
+LongRangeClass::GetName()
+{
+  return "LongRange";
+}

@@ -34,6 +34,7 @@ public:
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
+  string GetName();
   OpenLoopImportanceClass (PathDataClass &pathData);
   SampleChoice ImpChoice;
   Xvalue Xis;

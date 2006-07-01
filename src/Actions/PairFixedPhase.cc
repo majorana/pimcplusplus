@@ -265,3 +265,8 @@ PairFixedPhaseClass::Read (IOSectionClass &in)
   DegenerateRefSliceDeterminates.resize(6);
 }
 
+string
+PairFixedPhaseClass::GetName()
+{
+  return "PairFixedPhase";
+}

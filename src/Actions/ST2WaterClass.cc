@@ -1899,3 +1899,10 @@ double ST2WaterClass::CalcPsi(double theta)
     psi = acos(cos(theta)/SinAlpha);  
   return psi;
 }
+
+
+string 
+ST2WaterClass::GetName()
+{
+  return "ST2Water";
+}

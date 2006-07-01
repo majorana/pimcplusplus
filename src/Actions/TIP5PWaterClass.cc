@@ -1955,3 +1955,10 @@ double TIP5PWaterClass::CalcCutoff(int ptcl1, int ptcl2, int slice, double Rcmag
   double r12 = Mag(R12);
   return r12;
 }
+
+
+string
+TIP5PWaterClass::GetName()
+{
+  return "TIP5PWater";
+}

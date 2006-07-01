@@ -33,6 +33,7 @@ public:
 		 const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
   double d_dBeta_old (int slice1, int slice2, int level);
+  string GetName();
   inline void SetNumImages (int num) { NumImages = num; }
   KineticSphereClass (PathDataClass &pathData);
   double K(int slice,int nextSlice,int ptcl,int level,double lambda);

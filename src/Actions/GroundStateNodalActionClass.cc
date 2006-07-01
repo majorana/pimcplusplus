@@ -712,3 +712,9 @@ GroundStateNodalActionClass::WriteInfo (IOSectionClass &out)
 {
   out.WriteVar ("Type", "GROUND_STATE");
 }
+
+string
+GroundStateNodalActionClass::GetName()
+{
+  return "GroundStateNodal";
+}

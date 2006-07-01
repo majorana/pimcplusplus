@@ -37,6 +37,7 @@ public:
 		 int level);
   PairFixedPhaseClass (PathDataClass &pathData);
   double d_dBeta(int slice1, int slice2, int level);
+  string GetName();
   complex<double> Det (int slice,dVec kVec);
   Array<complex<double>,1> DegenerateRefSliceDeterminates;
   complex<double>  CalcDegenerateDet(int slice);
