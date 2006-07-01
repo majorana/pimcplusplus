@@ -172,15 +172,17 @@ inline Mat3 operator*(scalar s, const Mat3 &M)
 
 inline Mat3 operator*(const Mat3 &A, const Mat3 &B)
 {
-  Mat3 AB;
-  for (int i=0; i<3; i++)
-    for (int j=0; j<3; j++)
-      AB(i,j) = 0.0;
-  for (int i=0; i<3; i++)
-    for (int j=0; j<3; j++)
-      for (int k=0; k<3; k++)
-	AB(i,j) += A(i,k)*B(k,j);
-  return (AB);
+  Mat3 C;
+  C(0,0) = A(0,0)*B(0,0)+A(0,1)*B(1,0)+A(0,2)*B(2,0);
+  C(0,1) = A(0,0)*B(0,1)+A(0,1)*B(1,1)+A(0,2)*B(2,1);
+  C(0,2) = A(0,0)*B(0,2)+A(0,1)*B(1,2)+A(0,2)*B(2,2);
+  C(1,0) = A(1,0)*B(0,0)+A(1,1)*B(1,0)+A(1,2)*B(2,0);
+  C(1,1) = A(1,0)*B(0,1)+A(1,1)*B(1,1)+A(1,2)*B(2,1);
+  C(1,2) = A(1,0)*B(0,2)+A(2,1)*B(1,2)+A(1,2)*B(2,2);
+  C(2,0) = A(2,0)*B(0,0)+A(2,1)*B(1,0)+A(2,2)*B(2,0);
+  C(2,1) = A(2,0)*B(0,1)+A(2,1)*B(1,1)+A(2,2)*B(2,1);
+  C(2,2) = A(2,0)*B(0,2)+A(2,1)*B(1,2)+A(2,2)*B(2,2);
+  return C;
 }
 
 inline Mat3 operator+(const Mat3 &A, const Mat3 &B)
@@ -451,6 +453,30 @@ inline void copy(const Array<T1,3> &src,
 inline complex<float> operator+(complex<float> z, double r)
 {
   return complex<float>(z.real()+r, z.imag());
+}
+
+
+inline double det(const Mat3 &A)
+{
+  return (A(0,0)*(A(1,1)*A(2,2)-A(1,2)*A(2,1)) -
+	  A(0,1)*(A(1,0)*A(2,2)-A(1,2)*A(2,0)) +
+	  A(0,2)*(A(1,0)*A(2,1)-A(1,1)*A(2,0)));
+}
+
+inline Mat3 Inverse (const Mat3 &A)
+{
+  Mat3 Ainv;
+  double dinv = 1.0/det (A);
+  Ainv(0,0) =  dinv*(A(1,1)*A(2,2)-A(1,2)*A(2,1));
+  Ainv(1,0) = -dinv*(A(1,0)*A(2,2)-A(1,2)*A(2,0));
+  Ainv(2,0) =  dinv*(A(1,0)*A(2,1)-A(1,1)*A(2,0));
+  Ainv(0,1) = -dinv*(A(0,1)*A(2,2)-A(0,2)*A(2,1));
+  Ainv(1,1) =  dinv*(A(0,0)*A(2,2)-A(0,2)*A(2,0));
+  Ainv(2,1) = -dinv*(A(0,0)*A(2,1)-A(0,1)*A(2,0));
+  Ainv(0,2) =  dinv*(A(0,1)*A(1,2)-A(0,2)*A(1,1));
+  Ainv(1,2) = -dinv*(A(0,0)*A(1,2)-A(0,2)*A(1,0));
+  Ainv(2,2) =  dinv*(A(0,0)*A(1,1)-A(0,1)*A(1,0));
+  return Ainv;
 }
 
 

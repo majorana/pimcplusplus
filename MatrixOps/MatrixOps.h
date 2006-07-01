@@ -208,45 +208,45 @@ inline double det (const Mat2 &C)
   return (C(0,0)*C(1,1)-C(0,1)*C(1,0));
 }
 
-inline double det (const Mat3 &C)
-{
-  double d0, d1, d2;
-  d0 = C(1,1)*C(2,2) - C(1,2)*C(2,1);
-  d1 = C(1,0)*C(2,2) - C(2,0)*C(1,2);
-  d2 = C(1,0)*C(2,1) - C(2,0)*C(1,1);
-  return (C(0,0)*d0 - C(0,1)*d1 + C(0,2)*d2);
-}
+// inline double det (const Mat3 &C)
+// {
+//   double d0, d1, d2;
+//   d0 = C(1,1)*C(2,2) - C(1,2)*C(2,1);
+//   d1 = C(1,0)*C(2,2) - C(2,0)*C(1,2);
+//   d2 = C(1,0)*C(2,1) - C(2,0)*C(1,1);
+//   return (C(0,0)*d0 - C(0,1)*d1 + C(0,2)*d2);
+// }
 
-inline Mat3 Inverse (const Mat3 &A)
-{
-  Mat3 CoFacts, Inv;
-  CoFacts(0,0) = A(1,1)*A(2,2) - A(1,2)*A(2,1);
-  CoFacts(0,1) = -(A(1,0)*A(2,2) - A(2,0)*A(1,2));
-  CoFacts(0,2) = A(1,0)*A(2,1) - A(2,0)*A(1,1);
-  CoFacts(1,0) = -(A(0,1)*A(2,2) - A(0,2)*A(2,1));
-  CoFacts(1,1) = A(0,0)*A(2,2) - A(0,2)*A(2,0);
-  CoFacts(1,2) = -(A(0,0)*A(2,1)-A(0,1)*A(2,0));
-  CoFacts(2,0) = A(0,1)*A(1,2) - A(0,2)*A(1,1);
-  CoFacts(2,1) = -(A(0,0)*A(1,2) - A(1,0)*A(0,2));
-  CoFacts(2,2) = A(0,0)*A(1,1) - A(0,1)*A(1,0);
+// inline Mat3 Inverse (const Mat3 &A)
+// {
+//   Mat3 CoFacts, Inv;
+//   CoFacts(0,0) = A(1,1)*A(2,2) - A(1,2)*A(2,1);
+//   CoFacts(0,1) = -(A(1,0)*A(2,2) - A(2,0)*A(1,2));
+//   CoFacts(0,2) = A(1,0)*A(2,1) - A(2,0)*A(1,1);
+//   CoFacts(1,0) = -(A(0,1)*A(2,2) - A(0,2)*A(2,1));
+//   CoFacts(1,1) = A(0,0)*A(2,2) - A(0,2)*A(2,0);
+//   CoFacts(1,2) = -(A(0,0)*A(2,1)-A(0,1)*A(2,0));
+//   CoFacts(2,0) = A(0,1)*A(1,2) - A(0,2)*A(1,1);
+//   CoFacts(2,1) = -(A(0,0)*A(1,2) - A(1,0)*A(0,2));
+//   CoFacts(2,2) = A(0,0)*A(1,1) - A(0,1)*A(1,0);
 
-  double det = (A(0,0) * CoFacts(0,0) +
-		A(0,1) * CoFacts(0,1) +
-		A(0,2) * CoFacts(0,2));
-  double detinv = 1.0/det;
-  Inv(0,0)=CoFacts(0,0)*detinv; 
-  Inv(0,1)=CoFacts(1,0)*detinv;
-  Inv(0,2)=CoFacts(2,0)*detinv;
+//   double det = (A(0,0) * CoFacts(0,0) +
+// 		A(0,1) * CoFacts(0,1) +
+// 		A(0,2) * CoFacts(0,2));
+//   double detinv = 1.0/det;
+//   Inv(0,0)=CoFacts(0,0)*detinv; 
+//   Inv(0,1)=CoFacts(1,0)*detinv;
+//   Inv(0,2)=CoFacts(2,0)*detinv;
 
-  Inv(1,0)=CoFacts(0,1)*detinv; 
-  Inv(1,1)=CoFacts(1,1)*detinv;
-  Inv(1,2)=CoFacts(2,1)*detinv;
+//   Inv(1,0)=CoFacts(0,1)*detinv; 
+//   Inv(1,1)=CoFacts(1,1)*detinv;
+//   Inv(1,2)=CoFacts(2,1)*detinv;
 
-  Inv(2,0)=CoFacts(0,2)*detinv; 
-  Inv(2,1)=CoFacts(1,2)*detinv;
-  Inv(2,2)=CoFacts(2,2)*detinv;
-  return (Inv);
-}
+//   Inv(2,0)=CoFacts(0,2)*detinv; 
+//   Inv(2,1)=CoFacts(1,2)*detinv;
+//   Inv(2,2)=CoFacts(2,2)*detinv;
+//   return (Inv);
+// }
 
 
 inline Mat3 Transpose(const Mat3 &A)
