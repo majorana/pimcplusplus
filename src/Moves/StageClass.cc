@@ -71,13 +71,17 @@ bool CommonStageClass::Attempt(int &slice1, int &slice2,
   SetMode (NEWMODE);
   double sampleRatio=Sample(slice1,slice2,activeParticles);
   double logSampleRatio = log(sampleRatio);
-  PathData.Path.Communicator.AllSum (logSampleRatio);
+  logSampleRatio = PathData.Path.Communicator.AllSum (logSampleRatio);
   SetMode(OLDMODE);
+  perr << "OldActions:\n";
   double oldAction= GlobalStageAction(activeParticles);
   SetMode(NEWMODE);
+  perr << "NewActions:\n";
   double newAction = GlobalStageAction(activeParticles);
-  //  perr << "oldAction = " << oldAction
-  //       << "newAction = " << newAction << endl;
+  perr << "oldAction = " << oldAction << endl
+       << "newAction = " << newAction << endl;
+  cerr << "Diff           = " << newAction-oldAction << endl;
+  cerr << "logSampleRatio = " << logSampleRatio << endl;
   double currActionChange=newAction-oldAction;
   double logAcceptProb=logSampleRatio-currActionChange+prevActionChange;
   bool toAccept = logAcceptProb>=log(PathData.Path.Random.Common()); /// Accept condition
@@ -101,3 +105,28 @@ double StageClass::StageAction(int startSlice,int endSlice,
   }
   return TotalAction;
 }
+
+
+inline double 
+StageClass::GlobalStageAction (const Array<int,1> &changedParticles)
+{
+  int slice1 = 0;
+  int slice2 = PathData.Path.NumTimeSlices()-1;
+  //  double localAction = StageAction (slice1, slice2,
+  //  changedParticles);
+  double localAction = 0.0;
+  list<ActionBaseClass*>::iterator actionIter=Actions.begin();
+  while (actionIter!=Actions.end()){
+    double action = 
+      ((*actionIter)->Action(slice1, slice2, changedParticles,
+			     BisectionLevel));
+    perr << (*actionIter)->GetName() << ":  " << action << endl;
+    localAction += action;
+    actionIter++;
+  }
+
+  double globalAction = PathData.Path.Communicator.AllSum (localAction);
+
+  return globalAction;
+}
+

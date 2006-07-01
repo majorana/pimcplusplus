@@ -48,7 +48,7 @@ public:
   virtual void Reject();
   virtual void WriteRatio();
   double StageAction(int startSlice,int endSlice,
-			    const Array<int,1> &changedParticles);
+		     const Array<int,1> &changedParticles);
   inline double GlobalStageAction (const Array<int,1> &changeParticles);
   inline double AcceptRatio () 
   { return (double)NumAccepted / (double) NumAttempted; }
@@ -114,17 +114,6 @@ public:
 //   return TotalAction;
 // }
 
-
-inline double 
-StageClass::GlobalStageAction (const Array<int,1> &changedParticles)
-{
-  int slice1 = 0;
-  int slice2 = PathData.Path.NumTimeSlices()-1;
-  double localAction = StageAction (slice1, slice2, changedParticles);
-  double globalAction = PathData.Path.Communicator.AllSum (localAction);
-
-  return globalAction;
-}
 
 
 

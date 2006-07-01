@@ -46,6 +46,8 @@ inline double det (const TinyMatrix<double,3,3> &A)
     A(0,2)*(A(1,0)*A(2,1)-A(1,1)*A(2,0));
 }
 
+
+
 double
 IonDisplaceStageClass::DoElectronWarp()
 {
@@ -107,7 +109,7 @@ IonDisplaceStageClass::DoElectronWarp()
   }
   // Repeat the loop for the reverse move to calculate the reverse
   // Jacobian 
-  //DeltaRions = -1.0*DeltaRions;
+  DeltaRions = -1.0*DeltaRions;
   for (int si=0; si<Path.NumSpecies(); si++) {
     SpeciesClass &species = Path.Species(si);    
     if (species.lambda > 1.0e-10) {
@@ -185,6 +187,7 @@ IonDisplaceMoveClass::MakeMove ()
   Slice1 = 0;
   Slice2 = PathData.Path.NumTimeSlices()-1;
   // Now call MultiStageClass' MakeMove
+
   MultiStageClass::MakeMove();
 }
 
@@ -228,7 +231,7 @@ IonDisplaceMoveClass::Read (IOSectionClass &in)
 
   IonDisplaceStage.IonsToMove.resize(NumIonsToMove);
   if (WarpElectrons) {
-    IonDisplaceStage.Actions.push_back(&PathData.Actions.Kinetic);
+    //    IonDisplaceStage.Actions.push_back(&PathData.Actions.Kinetic);
     ActiveParticles.resize(Path.NumParticles());
     for (int i=0; i<Path.NumParticles(); i++)
       ActiveParticles(i) = i;
