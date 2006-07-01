@@ -74,6 +74,8 @@ libmoves_la_SOURCES  =           \
     RandomPermMove.h             \
     RefSliceMove.cc              \
     RefSliceMove.h               \
+    SpaceWarp.cc                 \
+    SpaceWarp.h                  \
     StructureRejectStage.cc      \
     StructureRejectStage.h       \
     StageClass.h                 \
