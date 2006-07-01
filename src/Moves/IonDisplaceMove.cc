@@ -38,13 +38,6 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
   return 1.0;
 }
 
-inline double det (const TinyMatrix<double,3,3> &A)
-{
-  return 
-    A(0,0)*(A(1,1)*A(2,2)-A(1,2)*A(2,1)) -
-    A(0,1)*(A(1,0)*A(2,2)-A(1,2)*A(2,0)) +
-    A(0,2)*(A(1,0)*A(2,1)-A(1,1)*A(2,0));
-}
 
 
 

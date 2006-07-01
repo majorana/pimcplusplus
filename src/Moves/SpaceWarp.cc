@@ -23,6 +23,7 @@ SpaceWarpClass::Set(const Array<Vec3,1> &rions,
     Weights.resize(N);
     Wgr.resize(N);
     rhat.resize(N);
+    g.resize(N);
   }
   Rions = rions;
   DeltaRions = delta;
@@ -53,7 +54,10 @@ SpaceWarpClass::ForwardWarp(Vec3 r,
 			    TinyMatrix<double,3,3> &jmat)
 {
   Vec3 disp;
+  Vec3 wr;
+  wr = r;
   double dist, distInv, totalWeight;
+  totalWeight = 0.0;
   for (int i=0; i<N; i++) {
     disp = r - Rions(i);
     PutInBox(disp);
@@ -66,7 +70,7 @@ SpaceWarpClass::ForwardWarp(Vec3 r,
   }
   Weights = (1.0/totalWeight)*Weights;
   for (int i=0; i<N; i++)
-    r += Weights(i)*DeltaRions(i);
+    wr += Weights(i)*DeltaRions(i);
   /// Now calculate Jacobian
   jmat = 1.0, 0.0, 0.0,
       0.0, 1.0, 0.0,
@@ -88,7 +92,30 @@ SpaceWarpClass::ForwardWarp(Vec3 r,
     jmat(2,1) += DeltaRions(i)[2] * dwdr[1];
     jmat(2,2) += DeltaRions(i)[2] * dwdr[2];
   }
-  return r;
+  return wr;
 }
 
+/// Try to find the r that would have warped me to this position. 
+Vec3
+SpaceWarpClass::ReverseWarp (Vec3 rp, Mat3 &jRev)
+{
+  Vec3 rtrial, wrtrial;
+  Mat3 jForw, jForwInv;
+  // First, apply the forward warp
+  rtrial = ForwardWarp (rp, jForw);
+  // Invert the direction of warp.  This gives us our first guess for
+  // the inverse.
+  rtrial = rp - (rtrial - rp);
+  wrtrial = ForwardWarp (rtrial, jForw);
+  do {
+    jForwInv = Inverse (jForw);
+    // Solve for rtrial
+    rtrial = jForwInv*(rp-wrtrial) + rtrial;
+    // Now calculate the forward warp from that position
+    wrtrial = ForwardWarp (rtrial, jForw);
+  } while (dot(rp-wrtrial,rp-wrtrial)>1.0e-30);
+  jRev = Inverse(jForw);
+  return rtrial;
+}
 
+  

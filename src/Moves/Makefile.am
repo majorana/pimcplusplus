@@ -1,3 +1,11 @@
+check_PROGRAMS = TestSpaceWarp
+
+TestSpaceWarp_SOURCES = TestSpaceWarp.cc
+
+LDADD = $(COMMON_LIBS) libmoves.la
+
+AM_CXXFLAGS = $(COMMON_FLAGS)
+
 noinst_LTLIBRARIES = libmoves.la
 
 libmoves_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF)
