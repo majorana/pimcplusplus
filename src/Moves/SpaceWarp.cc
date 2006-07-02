@@ -157,7 +157,7 @@ SpaceWarpClass::SimilarTriangles
   if (dot(hhatp,hhat)< 0.0)
     hhatp = -1.0*hhatp;
 
-  r1p = alpha/bmag *bp + hp*hhatp;
+  r1p = r0p + alpha/bmag *bp + hp*hhatp;
 
 }
   
