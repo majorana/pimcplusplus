@@ -136,6 +136,7 @@ SpaceWarpClass::SimilarTriangles
 
   b = r2-r0; 
   bp = r2p-r0p;
+  assert (dot(b,bp) != 0.0);
   a = r1-r0;
   bmag = sqrt(dot(b,b));
   bpmag = sqrt(dot(bp,bp));
