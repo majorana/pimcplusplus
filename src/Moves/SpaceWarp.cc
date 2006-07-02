@@ -101,11 +101,15 @@ SpaceWarpClass::ReverseWarp (Vec3 rp, Mat3 &jRev)
 {
   Vec3 rtrial, wrtrial;
   Mat3 jForw, jForwInv;
-  // First, apply the forward warp
-  rtrial = ForwardWarp (rp, jForw);
-  // Invert the direction of warp.  This gives us our first guess for
-  // the inverse.
-  rtrial = rp - (rtrial - rp);
+//   // First, apply the forward warp
+//   rtrial = ForwardWarp (rp, jForw);
+//   // Invert the direction of warp.  This gives us our first guess for
+//   // the inverse.
+//   rtrial = rp - (rtrial - rp);
+  
+  // Initialize my guess for r with rp
+  rtrial = rp;
+
   wrtrial = ForwardWarp (rtrial, jForw);
   do {
     jForwInv = Inverse (jForw);
