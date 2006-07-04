@@ -33,7 +33,7 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
   }
 
   if (WarpElectrons)
-    return DoElectronWarp();
+    return NewElectronWarp();
   else
     return 1.0;
 
@@ -102,8 +102,25 @@ IonDisplaceStageClass::NewElectronWarp()
 
   // Now, solve the scale equation
   double s = SpaceWarp.SolveScaleEquation (A, B, C);
-
+  SetMode (NEWMODE);
+  // And scale the triangles
+  for (int si=0; si<Path.NumSpecies(); si++) {
+    SpeciesClass &species = Path.Species(si);
+    double fourLambdaTauInv = 1.0/(4.0*species.lambda*Path.tau);
+    if (species.lambda > 1.0e-10) 
+      for (int slice=0; slice<Path.NumTimeSlices()-2;slice+=2) 
+	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
+	  Vec3 &r0 = Path(slice,   elec);	  
+	  Vec3 &r1 = Path(slice+1, elec);
+	  Vec3 &r2 = Path(slice+2, elec);
+	  SpaceWarp.ScaleTriangleHeight (r0, r1, r2, s);
+	}
+  }
+  double jScale = B * log(s);
+  return (exp(jWarp + jTri + jScale));
 }
+
+
 
 double
 IonDisplaceStageClass::DoElectronWarp()

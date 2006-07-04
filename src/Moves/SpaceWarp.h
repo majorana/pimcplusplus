@@ -38,6 +38,9 @@ public:
 			 const Vec3 &r0p,       Vec3 &r1p, const Vec3 &r2p,
 			 double &alpha, double &beta, double &h, 
 			 double &ratio);
+  /// Adjusts r1 to scale the height by factor s.
+  void ScaleTriangleHeight (const Vec3 &r0, Vec3 &r1, const Vec3 &r2,
+			    double s);
   // Solves the equation As^2 + B ln(s) + C = 0;  returns s.
   double SolveScaleEquation (double A, double B, double C);
 };

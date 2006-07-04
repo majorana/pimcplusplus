@@ -163,6 +163,29 @@ SpaceWarpClass::SimilarTriangles
 }
   
 
+void
+SpaceWarpClass::ScaleTriangleHeight(const Vec3 &r0, Vec3 &r1, const Vec3 &r2,
+				    double s)
+{
+  Vec3 a, b, hhat, bhat;
+  double norm, bmag, h, hp, alpha;
+
+  b = r2-r0;
+  a = r1-r0;
+  bmag = sqrt(dot(b,b));
+  bhat = (1.0/bmag) * b;
+
+  hhat = cross(cross(b,a),b);
+  norm = 1.0/sqrt(dot(hhat,hhat));
+  hhat = norm*hhat;
+  h = dot (a, hhat);
+  hp = s * h;
+
+  alpha = dot (a,bhat);
+  
+  r1 = r0 + alpha*bhat + hp*hhat;
+}
+
 double
 SpaceWarpClass::SolveScaleEquation (double A, double B, double C)
 {
