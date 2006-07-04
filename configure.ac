@@ -6,6 +6,11 @@ AM_INIT_AUTOMAKE(pimc, 0.5)
 AC_CONFIG_SRCDIR([src/PathClass.h])
 AC_CONFIG_HEADER([config.h])
 
+# Check which compilers we're using
+AX_CXX_MAXOPT
+AC_MSG_CHECKING([optimal compiler flags])
+AC_MSG_RESULT([${CXXFLAGS}])
+
 PKG_CHECK_MODULES(COMMON, common, common_ok=yes, common_ok=no)
 
 AC_CHECK_LIB([m], [sqrt])
@@ -26,7 +31,7 @@ AC_MSG_RESULT([${host_cpu}])
 case "${host_cpu}" in
    "powerpc")
       CPPFLAGS="-DMAC $CPPFLAGS"
-      CXXFLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
+      CXXFLAGS="$CXX_FLAGS -O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g"
       FFLAGS="-O3 -mcpu=970 -mtune=970 -mpowerpc64 -mpowerpc-gpopt -ffast-math -g";;
    "i686")
       AC_MSG_CHECKING([ i686 cpu type])
@@ -52,7 +57,7 @@ case "${host_cpu}" in
         AX_CC_OPTION(ARCHOPT, [-xW], [-xW], [-xW])
 	FFLAGS="-O3 $TUNEOPT $ARCHOPT -g"
       fi
-      CXXFLAGS="-O3 $TUNEOPT $ARCHOPT -ffast-math -g"
+      CXXFLAGS="$CXXFLAGS -O3 $TUNEOPT $ARCHOPT -ffast-math -g"
       if grep -q sse /proc/cpuinfo ; then
         CXXFLAGS="$CXXFLAGS -msse"
       fi
@@ -72,7 +77,7 @@ case "${host_cpu}" in
          AC_MSG_RESULT([Intel Itanium 2])
          AX_CC_OPTION(TUNEOPT, [-mcpu=itanium2], [-mcpu=itanium2], [-mcpu=itanium2])
        fi
-       CXXFLAGS="-O3 $TUNEOPT -g"
+       CXXFLAGS="$CXXFLAGS -O3 $TUNEOPT -g"
        FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
