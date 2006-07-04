@@ -59,7 +59,9 @@ IonDisplaceStageClass::NewElectronWarp()
   for (int si=0; si<Path.NumSpecies(); si++) {
     SpeciesClass &species = Path.Species(si);
     if (species.lambda > 1.0e-10) 
-      for (int slice=0; slice<Path.NumTimeSlices();slice+=2) 
+      for (int slice=0; slice<Path.NumTimeSlices();slice+=2) {
+	double factor = 
+	  ((slice==0)||(slice==Path.NumTimeSlices()-1)) ? 0.5 : 1.0;
 	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
 	  SetMode (OLDMODE);
 	  Vec3 r = Path(slice, elec);
@@ -71,8 +73,9 @@ IonDisplaceStageClass::NewElectronWarp()
 		 << " and elec = " << elec << endl;
 	    cerr << "r = " << r << endl;
 	  }
-	  jWarp += log(d);
+	  jWarp += factor * log(d);
 	}
+      }
   }
   
   cerr << "jWarp = " << jWarp << endl;

@@ -1,9 +1,9 @@
 double tau = 0.125;
 
-int Seed = 314159;
+int Seed = 319959;
 
 Section (System) {
-  int NumTimeSlices = 1000;
+  int NumTimeSlices = 300;
   Array<bool,1> IsPeriodic(3) = [true, true, true];
   Array<double,1> Box(3) = [10.0, 10.0, 10.0];
   

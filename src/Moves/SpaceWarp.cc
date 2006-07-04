@@ -118,7 +118,7 @@ SpaceWarpClass::ReverseWarp (Vec3 rp, Mat3 &jRev)
     rtrial = jForwInv*(rp-wrtrial) + rtrial;
     // Now calculate the forward warp from that position
     wrtrial = ForwardWarp (rtrial, jForw);
-  } while (dot(rp-wrtrial,rp-wrtrial)>1.0e-30);
+  } while (dot(rp-wrtrial,rp-wrtrial)>1.0e-25);
   jRev = Inverse(jForw);
   return rtrial;
 }
@@ -138,6 +138,9 @@ SpaceWarpClass::SimilarTriangles
   bp = r2p-r0p;
   assert (dot(b,bp) != 0.0);
   a = r1-r0;
+  PutInBox(b);
+  PutInBox(a);
+  PutInBox(bp);
   bmag = sqrt(dot(b,b));
   bpmag = sqrt(dot(bp,bp));
   ratio = bpmag/bmag;
@@ -172,6 +175,8 @@ SpaceWarpClass::ScaleTriangleHeight(const Vec3 &r0, Vec3 &r1, const Vec3 &r2,
 
   b = r2-r0;
   a = r1-r0;
+  PutInBox (b);
+  PutInBox (a);
   bmag = sqrt(dot(b,b));
   bhat = (1.0/bmag) * b;
 
@@ -182,7 +187,6 @@ SpaceWarpClass::ScaleTriangleHeight(const Vec3 &r0, Vec3 &r1, const Vec3 &r2,
   hp = s * h;
 
   alpha = dot (a,bhat);
-  
   r1 = r0 + alpha*bhat + hp*hhat;
   return hp;
 }
