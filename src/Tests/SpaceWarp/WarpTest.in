@@ -1,0 +1,135 @@
+double tau = 0.125;
+
+Section (System) {
+  int NumTimeSlices = 1000;
+  Array<bool,1> IsPeriodic(3) = [true, true, true];
+  Array<double,1> Box(3) = [10.0, 10.0, 10.0];
+  
+  Section (Particles) {
+    Section (Species) {
+      string Name = "ion";
+      string Type = "free";
+      double lambda = 0.0;
+      string Statistics = "BOLTZMANNON";
+      int NumParticles = 16;
+      int NumDim=3;
+      string InitPaths = "RANDOMFIXED";
+      double Radius = 1.0;
+    }
+    Section (Species) {
+      string Name = "up";
+      string Type = "free";
+      double lambda = 0.5;
+      string Statistics = "BOLTZMANNON";
+      int NumParticles = 16;
+      int NumDim=3;
+      string InitPaths = "LEVIFLIGHT";
+      Array<double,2> Positions(8,3) = 
+        [ -8.73103005, -8.5150300, -8.630300,
+	  -8.3303008,  -8.2660300,  0.920000,
+	  -8.2303001,   0.7330000, -8.5420300,
+	   0.4700003,  -8.9460300, -8.1340300,
+	  -8.5303004,   0.8260000,  0.2520000,
+	   0.63500007, -8.1260300,  0.721067000,
+	   0.71200003,  0.6026000, -8.230300,
+	   0.80780001,  0.2201200,  0.5520000 ];
+    }
+    Section (Species) {
+      string Name = "down";
+      string Type = "free";
+      double lambda = 0.5;
+      string Statistics = "BOLTZMANNON";
+      int NumParticles = 16;
+      int NumDim=3;
+      string InitPaths = "LEVIFLIGHT";
+      Array<double,2> Positions(8,3) = 
+	[ -4.350146, -4.332014, -4.262014,
+          -4.120141,  4.923014, -4.336014,
+          -4.410143, -4.730148,   4.808414,
+          -4.160148,  4.912301,  4.544014,
+           4.580142, -4.832014, -4.366014,
+           4.920145, -4.563014,  4.732014,
+           4.250145,  4.345014, -4.2866014,
+           4.620141,  4.530146   4.784014 ];
+    }
+    
+  }
+}
+
+
+Section (Action) {
+  int MaxLevels = 6;
+  Array<string,1> PairActionFiles(1) = "~/PairActions/zero.PairAction";
+}
+
+Section (Observables) {
+  string OutFileBase =  "~/Runs/SpaceWarp/WarpTest";
+  
+  Section (Observable) {
+    string Type = "PairCorrelation";
+    string Name = "ion-up";
+    string Species1 = "ion";
+    string Species2 = "up";
+    int Frequency = 1;
+    Section (Grid) {
+      string Type = "Linear";
+      int NumPoints = 50;
+      double start = 0.1;
+      double end = 5.0;
+    }
+  }
+  Section (Observable) {
+    string Type = "PathDump";
+    string Name = "PathDump";
+    int Frequency = 1;
+  }
+}
+
+Section (Moves) {
+  Section (Move) {
+    string Type = "BisectionBlock";
+    string Name = "upBlock";
+    string PermuteType = "NONE";
+    int NumLevels = 6;
+    string Species = "up";
+    int StepsPerBlock = 20;
+  }
+  Section (Move) {
+    string Type = "BisectionBlock";
+    string Name = "downBlock";
+    string PermuteType = "NONE";
+    int NumLevels = 6;
+    string Species = "down";
+    int StepsPerBlock = 20;
+  }
+  Section (Move) {
+    string Type = "IonDisplace";
+    string Name = "Displace";
+    bool WarpElectrons = true;
+    string IonSpecies = "ion";
+    int NumToMove = 16;
+    double Sigma = 0.5;
+  }
+}
+
+Section (Algorithm) {
+  Section (Loop) {
+    int Steps = 500;
+    
+    Section (Loop) {
+      int Steps = 5;
+      Section (Move)    { string Name = "upBlock";   }
+      Section (Move)    { string Name = "downBlock"; }
+      Section (Move)    { string Name = "Shift";     }
+    }
+    
+    Section (Observe)   { string Name = "ion-up";    }
+    Section (Observe)   { string Name = "PathDump";  }
+    Section (Move)      { string Name = "Displace";  }
+    Section (Observe)   { string Name = "PathDump";  }
+    Section (WriteData) {                            }
+  }
+}
+    
+
+
