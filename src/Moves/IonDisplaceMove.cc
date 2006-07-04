@@ -81,6 +81,7 @@ IonDisplaceStageClass::NewElectronWarp()
   double jTri = 0.0;
   double A, B, C;
   A = B = C = 0.0;
+  double deltaK = 0.0;
   for (int si=0; si<Path.NumSpecies(); si++) {
     SpeciesClass &species = Path.Species(si);
     double fourLambdaTauInv = 1.0/(4.0*species.lambda*Path.tau);
@@ -98,7 +99,7 @@ IonDisplaceStageClass::NewElectronWarp()
 	  double alpha, beta, ratio;
 	  SpaceWarp.SimilarTriangles (r0, r1, r2, r0p, r1p, r2p,
 				      alpha, beta, h, gamma);
-	  A -= fourLambdaTauInv * gamma*gamma*h*h;
+	  A -= 2.0*fourLambdaTauInv * gamma*gamma*h*h;
 	  jTri += 2.0*log(gamma);
 	  B += 1.0;
 	    
@@ -107,6 +108,8 @@ IonDisplaceStageClass::NewElectronWarp()
 // 	  cerr << "gamma = " << gamma << endl;
 // 	  cerr << "h = " << h << endl;
 	  C -= fourLambdaTauInv * 
+	    ((gamma*gamma-1.0)*(alpha*alpha + beta*beta) - 2.0*h*h);
+	  deltaK += fourLambdaTauInv * 
 	    ((gamma*gamma-1.0)*(alpha*alpha + beta*beta) - 2.0*h*h);
 	}
   }
@@ -127,12 +130,14 @@ IonDisplaceStageClass::NewElectronWarp()
 	  Vec3 &r0 = Path(slice,   elec);	  
 	  Vec3 &r1 = Path(slice+1, elec);
 	  Vec3 &r2 = Path(slice+2, elec);
-	  SpaceWarp.ScaleTriangleHeight (r0, r1, r2, s);
+	  double hpp = SpaceWarp.ScaleTriangleHeight (r0, r1, r2, s);
+	  deltaK += fourLambdaTauInv * 2.0 * hpp*hpp;
 	}
   }
   double jScale = B * log(s);
   cerr << "jTri = " << jTri << endl;
   cerr << "jScale = " << jScale << endl;
+  cerr << "Estimate deltaK = " << deltaK << endl;
   return (exp(jWarp + jTri + jScale));
 }
 
