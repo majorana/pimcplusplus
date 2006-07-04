@@ -127,12 +127,12 @@ void
 SpaceWarpClass::SimilarTriangles 
 (const Vec3 &r0,  const Vec3 &r1,  const Vec3 &r2,
  const Vec3 &r0p,       Vec3 &r1p, const Vec3 &r2p,
- double &alpha, double &beta, double &bratio)
+ double &alpha, double &beta, double &h, double &ratio)
  
 {
   Vec3 a, b, bp;
   Vec3 hhat, hhatp;
-  double norm, bmag, bpmag, h, hp;
+  double norm, bmag, bpmag, hp;
 
   b = r2-r0; 
   bp = r2p-r0p;
@@ -140,7 +140,7 @@ SpaceWarpClass::SimilarTriangles
   a = r1-r0;
   bmag = sqrt(dot(b,b));
   bpmag = sqrt(dot(bp,bp));
-  bratio = bpmag/bmag;
+  ratio = bpmag/bmag;
   
   alpha = dot(a,b)/bmag;
   beta  = bmag - alpha;
@@ -149,7 +149,7 @@ SpaceWarpClass::SimilarTriangles
   norm = 1.0/sqrt(dot(hhat,hhat));
   hhat = norm*hhat;
   h = dot (a, hhat);
-  hp = bratio * h;
+  hp = ratio * h;
 
   hhatp = cross(cross(bp,hhat),bp);
   norm = 1.0/sqrt(dot(hhatp, hhatp));
@@ -162,3 +162,18 @@ SpaceWarpClass::SimilarTriangles
 
 }
   
+
+double
+SpaceWarpClass::SolveScaleEquation (double A, double B, double C)
+{
+  double s = 1.0;
+  double val = A*s*s + B*log(s) + C;
+
+  while (fabs(val) > 1.0e-10) {
+    double deriv = 2.0*A*s + B/s;
+    s -= val/deriv;
+    val = A*s*s + B*log(s) + C;
+    cerr << "s = " << s << " val = " << val << endl;
+  }
+}
+

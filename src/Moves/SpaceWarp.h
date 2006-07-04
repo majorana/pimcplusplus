@@ -36,7 +36,10 @@ public:
   /// similar triangles.  It returns the length ratio |r2p-r0p|/|r2-r0|.
   void SimilarTriangles (const Vec3 &r0,  const Vec3 &r1,  const Vec3 &r2,
 			 const Vec3 &r0p,       Vec3 &r1p, const Vec3 &r2p,
-			 double &alpha, double &beta, double &bratio);
+			 double &alpha, double &beta, double &h, 
+			 double &ratio);
+  // Solves the equation As^2 + B ln(s) + C = 0;  returns s.
+  double SolveScaleEquation (double A, double B, double C);
 };
 
 inline Vec3

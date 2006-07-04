@@ -1,6 +1,5 @@
 #include "IonDisplaceMove.h"
 
-
 double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
 				      Array<int,1> &activeParticles)
 {
@@ -10,11 +9,15 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
   int N     = last - first + 1;
   if (DeltaRions.size() != N) {
     DeltaRions.resize(N);
+    Rions.resize(N);
     Weights.resize(N);
     rhat.resize(N);
   }
   dVec zero(0.0);
   DeltaRions = zero;
+  /// Store present ion positions
+  for (int i=0; i<N; i++)
+    Rions(i) = Path(0,i+first);
   /// Now, choose a random displacement 
   for (int ptclIndex=0; ptclIndex<IonsToMove.size(); ptclIndex++) {
     int ptcl = IonsToMove(ptclIndex);
@@ -39,7 +42,68 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
 }
 
 
+double
+IonDisplaceStageClass::NewElectronWarp()
+{
+  SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
+  int N = ionSpecies.NumParticles;
 
+  // Setup the warp
+  bool warpForw = (PathData.Random.Common() > 0.5);
+  SpaceWarp.Set (Rions, DeltaRions, Path.GetBox(), warpForw);
+
+  // First stage:  warp every other slice
+  Mat3 jMat;
+  double jWarp = 0.0;
+  for (int si=0; si<Path.NumSpecies(); si++) {
+    SpeciesClass &species = Path.Species(si);
+    if (species.lambda > 1.0e-10) 
+      for (int slice=0; slice<Path.NumTimeSlices();slice+=2) 
+	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
+	  SetMode (OLDMODE);
+	  Vec3 r = Path(slice, elec);
+	  SetMode (NEWMODE);
+	  Path(slice,elec) = SpaceWarp.Warp (r, jMat);
+	  jWarp += log(det (jMat));
+	}
+  }
+  
+  // Second stage: similar triangle construction
+  double gamma, h;
+  double jTri = 0.0;
+  double A, B, C;
+  A = B = C = 0.0;
+  for (int si=0; si<Path.NumSpecies(); si++) {
+    SpeciesClass &species = Path.Species(si);
+    double fourLambdaTauInv = 1.0/(4.0*species.lambda*Path.tau);
+    if (species.lambda > 1.0e-10) 
+      for (int slice=0; slice<Path.NumTimeSlices()-2;slice+=2) 
+	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
+	  SetMode (OLDMODE);
+	  Vec3 &r0 = Path(slice,   elec);	  
+	  Vec3 &r1 = Path(slice+1, elec);
+	  Vec3 &r2 = Path(slice+2, elec);
+	  SetMode (NEWMODE);
+	  Vec3 &r0p = Path(slice,   elec);	  
+	  Vec3 &r1p = Path(slice+1, elec);
+	  Vec3 &r2p = Path(slice+2, elec);
+	  double alpha, beta, ratio;
+	  SpaceWarp.SimilarTriangles (r0, r1, r2, r0p, r1p, r2p,
+				      alpha, beta, h, gamma);
+	  A -= fourLambdaTauInv * gamma*gamma*h*h;
+	  jTri += 2.0*log(gamma);
+	  B += 1.0;
+	    
+	  C -= fourLambdaTauInv * 
+	    ((gamma*gamma-1.0)*(alpha*alpha + beta*beta) - 2.0*h*h);
+	}
+  }
+  C += jWarp + jTri;
+
+  // Now, solve the scale equation
+  double s = SpaceWarp.SolveScaleEquation (A, B, C);
+
+}
 
 double
 IonDisplaceStageClass::DoElectronWarp()
