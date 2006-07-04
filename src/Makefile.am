@@ -6,7 +6,7 @@ endif
 #QMCPACK_HOME = $(QMCPACK_ROOT)/build
 
 SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
-bin_PROGRAMS = pimc++
+bin_PROGRAMS = pimc++ FreeParticles
 
 
 AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF)
@@ -37,6 +37,9 @@ SHARED_SOURCES =          \
 pimc___SOURCES =          \
     $(SHARED_SOURCES)     \
     Main.cc               
+
+FreeParticles_SOURCES =  FreeParticles.cc
+FreeParticles_LDADD   = $(COMMON_LIBS)
 
 #INCLUDES = -I$(QMCPACK_HOME)/src -I$(QMCPACK_ROOT)/src 
 

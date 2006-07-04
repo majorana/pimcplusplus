@@ -41,7 +41,6 @@ protected:
   dVec kPrim;
   Array<State,1> AllowedStates;
   Array<complex<double>,1> Rhok;
-  double kCut;
   double Esum, E2sum;
   int BlockSize, NumBlocks;
   double lambda, beta;
@@ -101,7 +100,6 @@ void ParticleClass::Read(IOSectionClass &in)
     kPrim[i] = 2.0*M_PI/box(i);
   }
   assert(in.ReadVar ("NumParticles", NumParticles));
-  assert(in.ReadVar ("kCut", kCut));
   assert(in.ReadVar ("beta", beta));
   assert(in.ReadVar ("BlockSize", BlockSize));
   assert(in.ReadVar ("NumBlocks", NumBlocks));
