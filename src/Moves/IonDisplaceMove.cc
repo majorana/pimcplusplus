@@ -50,6 +50,7 @@ IonDisplaceStageClass::NewElectronWarp()
 
   // Setup the warp
   bool warpForw = (PathData.Random.Common() > 0.5);
+  cerr << "Starting " << (warpForw ? "forward" : "reverse") << " move.\n";
   SpaceWarp.Set (Rions, DeltaRions, Path.GetBox(), warpForw);
 
   // First stage:  warp every other slice
@@ -64,10 +65,17 @@ IonDisplaceStageClass::NewElectronWarp()
 	  Vec3 r = Path(slice, elec);
 	  SetMode (NEWMODE);
 	  Path(slice,elec) = SpaceWarp.Warp (r, jMat);
-	  jWarp += log(det (jMat));
+	  double d = det(jMat);
+	  if (d <= 0) {
+	    cerr << "det(jMat) = " << d << " at slice=" << slice
+		 << " and elec = " << elec << endl;
+	    cerr << "r = " << r << endl;
+	  }
+	  jWarp += log(d);
 	}
   }
   
+  cerr << "jWarp = " << jWarp << endl;
   // Second stage: similar triangle construction
   double gamma, h;
   double jTri = 0.0;
@@ -94,6 +102,10 @@ IonDisplaceStageClass::NewElectronWarp()
 	  jTri += 2.0*log(gamma);
 	  B += 1.0;
 	    
+// 	  cerr << "alpha = " << alpha << endl;
+// 	  cerr << "beta = " << beta << endl;
+// 	  cerr << "gamma = " << gamma << endl;
+// 	  cerr << "h = " << h << endl;
 	  C -= fourLambdaTauInv * 
 	    ((gamma*gamma-1.0)*(alpha*alpha + beta*beta) - 2.0*h*h);
 	}
@@ -101,7 +113,9 @@ IonDisplaceStageClass::NewElectronWarp()
   C += jWarp + jTri;
 
   // Now, solve the scale equation
+  cerr << "A = " << A << "   B = " << B << "   C = " << C << endl;
   double s = SpaceWarp.SolveScaleEquation (A, B, C);
+  cerr << "s = " << s <<  endl;
   SetMode (NEWMODE);
   // And scale the triangles
   for (int si=0; si<Path.NumSpecies(); si++) {
@@ -117,6 +131,8 @@ IonDisplaceStageClass::NewElectronWarp()
 	}
   }
   double jScale = B * log(s);
+  cerr << "jTri = " << jTri << endl;
+  cerr << "jScale = " << jScale << endl;
   return (exp(jWarp + jTri + jScale));
 }
 
@@ -305,7 +321,7 @@ IonDisplaceMoveClass::Read (IOSectionClass &in)
 
   IonDisplaceStage.IonsToMove.resize(NumIonsToMove);
   if (WarpElectrons) {
-    //    IonDisplaceStage.Actions.push_back(&PathData.Actions.Kinetic);
+    IonDisplaceStage.Actions.push_back(&PathData.Actions.Kinetic);
     ActiveParticles.resize(Path.NumParticles());
     for (int i=0; i<Path.NumParticles(); i++)
       ActiveParticles(i) = i;

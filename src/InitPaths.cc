@@ -822,5 +822,6 @@ PathClass::PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     if (Communicator.MyProc()==0)
       perr << "Phase Action after Levi flight = " << globalAction << endl;
   }
-  Actions.NodalActions(speciesNum)->AcceptCopy(0, NumTimeSlices()-1);  
+  if (Actions.NodalActions(speciesNum) != NULL)
+    Actions.NodalActions(speciesNum)->AcceptCopy(0, NumTimeSlices()-1);  
 }

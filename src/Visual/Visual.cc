@@ -415,14 +415,14 @@ VisualClass::VisualClass()
     RhoFrame    ("Rho"),        RhoAdjust (0.0, 0.0, 1.0, 0.02, 0.1),
     Export(*this), RhoVar(NULL)
 {
-  TubesImage.property_file().set_value(FindFullPath("tubes.png"));
-  LinesImage.property_file().set_value(FindFullPath("lines.png"));
-  StraightImage.property_file().set_value(FindFullPath("straight.png"));
-  SmoothImage.property_file().set_value(FindFullPath("smooth.png"));
-  NoWrapImage.property_file().set_value(FindFullPath("nowrap2.png"));
-  WrapImage.property_file().set_value(FindFullPath("wrap.png"));
-  OrthoImage.property_file().set_value(FindFullPath("orthographic.png"));
-  PerspectImage.property_file().set_value(FindFullPath("perspective.png"));
+  TubesImage.set(FindFullPath("tubes.png"));
+  LinesImage.set(FindFullPath("lines.png"));
+  StraightImage.set(FindFullPath("straight.png"));
+  SmoothImage.set(FindFullPath("smooth.png"));
+  NoWrapImage.set(FindFullPath("nowrap2.png"));
+  WrapImage.set(FindFullPath("wrap.png"));
+  OrthoImage.set(FindFullPath("orthographic.png"));
+  PerspectImage.set(FindFullPath("perspective.png"));
 
   // Top-level window.
   set_title("VisualClass");
@@ -573,7 +573,8 @@ VisualClass::VisualClass()
     "  </toolbar>"
     "</ui>";
   
-  Manager->add_ui_from_string (ui_info);
+  std::auto_ptr<Glib::Error> err;
+  Manager->add_ui_from_string (ui_info, err);
   m_VBox.pack_start (*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK, 0);
   ToolBox.pack_start (Tools);
   ToolBox.pack_start (DetailFrame, Gtk::PACK_SHRINK, 0);

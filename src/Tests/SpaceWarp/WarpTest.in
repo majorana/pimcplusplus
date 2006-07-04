@@ -1,5 +1,7 @@
 double tau = 0.125;
 
+int Seed = 314159;
+
 Section (System) {
   int NumTimeSlices = 1000;
   Array<bool,1> IsPeriodic(3) = [true, true, true];
@@ -21,7 +23,7 @@ Section (System) {
       string Type = "free";
       double lambda = 0.5;
       string Statistics = "BOLTZMANNON";
-      int NumParticles = 16;
+      int NumParticles = 8;
       int NumDim=3;
       string InitPaths = "LEVIFLIGHT";
       Array<double,2> Positions(8,3) = 
@@ -39,7 +41,7 @@ Section (System) {
       string Type = "free";
       double lambda = 0.5;
       string Statistics = "BOLTZMANNON";
-      int NumParticles = 16;
+      int NumParticles = 8;
       int NumDim=3;
       string InitPaths = "LEVIFLIGHT";
       Array<double,2> Positions(8,3) = 
@@ -50,7 +52,7 @@ Section (System) {
            4.580142, -4.832014, -4.366014,
            4.920145, -4.563014,  4.732014,
            4.250145,  4.345014, -4.2866014,
-           4.620141,  4.530146   4.784014 ];
+  	   4.620141,  4.530146,  4.784014 ];
     }
     
   }
@@ -59,7 +61,8 @@ Section (System) {
 
 Section (Action) {
   int MaxLevels = 6;
-  Array<string,1> PairActionFiles(1) = "~/PairActions/zero.PairAction";
+  Array<string,1> PairActionFiles(1) = [ "~/PairActions/zero.PairAction" ];
+  int NumImages = 0;
 }
 
 Section (Observables) {
@@ -103,12 +106,16 @@ Section (Moves) {
     int StepsPerBlock = 20;
   }
   Section (Move) {
+    string Type = "ShiftMove";
+    string Name = "Shift";
+  }
+  Section (Move) {
     string Type = "IonDisplace";
     string Name = "Displace";
     bool WarpElectrons = true;
     string IonSpecies = "ion";
     int NumToMove = 16;
-    double Sigma = 0.5;
+    double Sigma = 0.05;
   }
 }
 

@@ -8,8 +8,8 @@
 #include <Common/MatrixOps/MatrixOps.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include "fstream.h"
+#include <string>
+#include <fstream>
 // #ifdef ORDER_N_FERMIONS
 extern "C"{
 #include "../det_calc_uekt.h"

@@ -228,8 +228,9 @@ void ExportClass::Export (string filename)
 
   if (drawable == drawable2)
     cerr << "no change\n";
-						  
-  Pbuf->save(filename, "png");
+			
+  std::auto_ptr<Glib::Error> err;
+  Pbuf->save(filename, Glib::ustring("png"), err);
 }
 
 

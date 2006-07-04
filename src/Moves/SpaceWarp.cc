@@ -198,5 +198,6 @@ SpaceWarpClass::SolveScaleEquation (double A, double B, double C)
     val = A*s*s + B*log(s) + C;
     cerr << "s = " << s << " val = " << val << endl;
   }
+  return s;
 }
 

@@ -45,28 +45,28 @@ MDVisualClass::MDVisualClass() :
   IsoBox.pack_start(IsoFrame);
   IsoBox.pack_start(BandFrame);
 
-  PlayImage.property_file().set_value(FindFullPath("player_play.png"));
+  PlayImage.set(FindFullPath("player_play.png"));
   PlayButton.set_icon_widget(PlayImage);
   PlayButton.set_label("Play");
-  RevImage.property_file().set_value (FindFullPath("player_rev.png"));
+  RevImage.set (FindFullPath("player_rev.png"));
   RevButton.set_icon_widget(RevImage);
   RevButton.set_label("Reverse");
-  PauseImage.property_file().set_value (FindFullPath("player_pause.png"));
+  PauseImage.set (FindFullPath("player_pause.png"));
   PauseButton.set_icon_widget(PauseImage);
   PauseButton.set_label("Pause");
 
-  OrthoImage.property_file().set_value(FindFullPath("orthographic.png"));
+  OrthoImage.set(FindFullPath("orthographic.png"));
   OrthoButton.set_icon_widget(OrthoImage);
   OrthoButton.set_label("Ortho");
-  PerspectImage.property_file().set_value(FindFullPath("perspective.png"));
+  PerspectImage.set(FindFullPath("perspective.png"));
   PerspectButton.set_icon_widget(PerspectImage);
   PerspectButton.set_label("Perspect");
 
-  ClipImage.property_file().set_value(FindFullPath("clipping.png"));
+  ClipImage.set(FindFullPath("clipping.png"));
   ClipButton.set_icon_widget(ClipImage);
   ClipButton.set_label("Clip");
 
-  IsoImage.property_file().set_value(FindFullPath("isoButton.png"));
+  IsoImage.set(FindFullPath("isoButton.png"));
   IsoButton.set_icon_widget(IsoImage);
   IsoButton.set_label("Isosurf");
 
