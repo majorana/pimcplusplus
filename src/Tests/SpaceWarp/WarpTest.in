@@ -82,6 +82,11 @@ Section (Observables) {
     }
   }
   Section (Observable) {
+    string Type = "Energy";
+    string Name = "Energy";
+    int Frequency = 1;
+  }
+  Section (Observable) {
     string Type = "PathDump";
     string Name = "PathDump";
     int Frequency = 1;
@@ -115,13 +120,13 @@ Section (Moves) {
     bool WarpElectrons = true;
     string IonSpecies = "ion";
     int NumToMove = 16;
-    double Sigma = 0.05;
+    double Sigma = 0.1;
   }
 }
 
 Section (Algorithm) {
   Section (Loop) {
-    int Steps = 500;
+    int Steps = 50000;
     
     Section (Loop) {
       int Steps = 5;
@@ -131,9 +136,10 @@ Section (Algorithm) {
     }
     
     Section (Observe)   { string Name = "ion-up";    }
-    Section (Observe)   { string Name = "PathDump";  }
+    Section (Observe)   { string Name = "Energy";    }
+    //Section (Observe)   { string Name = "PathDump";  }
     Section (Move)      { string Name = "Displace";  }
-    Section (Observe)   { string Name = "PathDump";  }
+    //Section (Observe)   { string Name = "PathDump";  }
     Section (WriteData) {                            }
   }
 }

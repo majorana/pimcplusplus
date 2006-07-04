@@ -118,7 +118,7 @@ SpaceWarpClass::ReverseWarp (Vec3 rp, Mat3 &jRev)
     rtrial = jForwInv*(rp-wrtrial) + rtrial;
     // Now calculate the forward warp from that position
     wrtrial = ForwardWarp (rtrial, jForw);
-  } while (dot(rp-wrtrial,rp-wrtrial)>1.0e-25);
+  } while (dot(rp-wrtrial,rp-wrtrial)>1.0e-20);
   jRev = Inverse(jForw);
   return rtrial;
 }

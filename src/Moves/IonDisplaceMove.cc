@@ -67,7 +67,7 @@ IonDisplaceStageClass::NewElectronWarp()
 	  Vec3 r = Path(slice, elec);
 	  SetMode (NEWMODE);
 	  Path(slice,elec) = SpaceWarp.Warp (r, jMat);
-	  double d = det(jMat);
+	  double d = fabs(det(jMat));
 	  if (d <= 0) {
 	    cerr << "det(jMat) = " << d << " at slice=" << slice
 		 << " and elec = " << elec << endl;
