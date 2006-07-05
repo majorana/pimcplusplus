@@ -66,7 +66,7 @@ Section (Action) {
 }
 
 Section (Observables) {
-  string OutFileBase =  "~/Runs/SpaceWarp/WarpTest3";
+  string OutFileBase =  "~/Runs/SpaceWarp/WarpDump";
   
   Section (Observable) {
     string Type = "PairCorrelation";
@@ -113,7 +113,7 @@ Section (Moves) {
     string PermuteType = "NONE";
     int NumLevels = 8;
     string Species = "up";
-    int StepsPerBlock = 2;
+    int StepsPerBlock = 10;
   }
   Section (Move) {
     string Type = "BisectionBlock";
@@ -121,7 +121,7 @@ Section (Moves) {
     string PermuteType = "NONE";
     int NumLevels = 8;
     string Species = "down";
-    int StepsPerBlock = 2;
+    int StepsPerBlock = 10;
   }
   Section (Move) {
     string Type = "ShiftMove";
@@ -148,15 +148,14 @@ Section (Algorithm) {
 	Section (Move)    { string Name = "downBlock"; }
 	Section (Move)    { string Name = "Shift";     }
       }
+      Section (Move)      { string Name = "Displace";  }
       Section (Observe)   { string Name = "ion-up";    }
-      Section (Observe)   { string Name = "ion-ion";    }
+      Section (Observe)   { string Name = "ion-ion";   }
       Section (Observe)   { string Name = "Energy";    }
       //Section (Observe)   { string Name = "PathDump";  }
-      Section (Move)      { string Name = "Displace";  }
-
+      //Section (Observe)   { string Name = "PathDump";  }
     }
     Section (WriteData) {                            }
-    Section (Observe)   { string Name = "PathDump";  }
   }
 }
     

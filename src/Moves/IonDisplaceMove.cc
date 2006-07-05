@@ -107,7 +107,7 @@ IonDisplaceStageClass::NewElectronWarp()
 				      alpha, beta, h, gamma);
 	  A -= 2.0*fourLambdaTauInv * gamma*gamma*h*h;
 	  jTri += 2.0*log(gamma);
-	  B += 1.0;
+	  // B += 1.0;
 	    
 // 	  cerr << "alpha = " << alpha << endl;
 // 	  cerr << "beta = " << beta << endl;
