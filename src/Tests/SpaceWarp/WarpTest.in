@@ -3,9 +3,9 @@ double tau = 0.125;
 int Seed = 319959;
 
 Section (System) {
-  int NumTimeSlices = 300;
+  int NumTimeSlices = 900;
   Array<bool,1> IsPeriodic(3) = [true, true, true];
-  Array<double,1> Box(3) = [10.0, 10.0, 10.0];
+  Array<double,1> Box(3) = [26.0, 26.0, 26.0];
   
   Section (Particles) {
     Section (Species) {
@@ -60,19 +60,32 @@ Section (System) {
 
 
 Section (Action) {
-  int MaxLevels = 6;
+  int MaxLevels = 8;
   Array<string,1> PairActionFiles(1) = [ "~/PairActions/zero.PairAction" ];
   int NumImages = 0;
 }
 
 Section (Observables) {
-  string OutFileBase =  "~/Runs/SpaceWarp/WarpTest";
+  string OutFileBase =  "~/Runs/SpaceWarp/WarpTest3";
   
   Section (Observable) {
     string Type = "PairCorrelation";
     string Name = "ion-up";
     string Species1 = "ion";
     string Species2 = "up";
+    int Frequency = 1;
+    Section (Grid) {
+      string Type = "Linear";
+      int NumPoints = 50;
+      double start = 0.1;
+      double end = 5.0;
+    }
+  }
+  Section (Observable) {
+    string Type = "PairCorrelation";
+    string Name = "ion-ion";
+    string Species1 = "ion";
+    string Species2 = "ion";
     int Frequency = 1;
     Section (Grid) {
       string Type = "Linear";
@@ -98,17 +111,17 @@ Section (Moves) {
     string Type = "BisectionBlock";
     string Name = "upBlock";
     string PermuteType = "NONE";
-    int NumLevels = 6;
+    int NumLevels = 8;
     string Species = "up";
-    int StepsPerBlock = 20;
+    int StepsPerBlock = 2;
   }
   Section (Move) {
     string Type = "BisectionBlock";
     string Name = "downBlock";
     string PermuteType = "NONE";
-    int NumLevels = 6;
+    int NumLevels = 8;
     string Species = "down";
-    int StepsPerBlock = 20;
+    int StepsPerBlock = 2;
   }
   Section (Move) {
     string Type = "ShiftMove";
@@ -120,27 +133,30 @@ Section (Moves) {
     bool WarpElectrons = true;
     string IonSpecies = "ion";
     int NumToMove = 16;
-    double Sigma = 0.1;
+    double Sigma = 0.3;
   }
 }
 
 Section (Algorithm) {
   Section (Loop) {
-    int Steps = 50000;
-    
+    int Steps = 5000;
     Section (Loop) {
-      int Steps = 5;
-      Section (Move)    { string Name = "upBlock";   }
-      Section (Move)    { string Name = "downBlock"; }
-      Section (Move)    { string Name = "Shift";     }
+      int Steps = 20;
+      Section (Loop) {
+	int Steps = 5;
+	Section (Move)    { string Name = "upBlock";   }
+	Section (Move)    { string Name = "downBlock"; }
+	Section (Move)    { string Name = "Shift";     }
+      }
+      Section (Observe)   { string Name = "ion-up";    }
+      Section (Observe)   { string Name = "ion-ion";    }
+      Section (Observe)   { string Name = "Energy";    }
+      //Section (Observe)   { string Name = "PathDump";  }
+      Section (Move)      { string Name = "Displace";  }
+
     }
-    
-    Section (Observe)   { string Name = "ion-up";    }
-    Section (Observe)   { string Name = "Energy";    }
-    //Section (Observe)   { string Name = "PathDump";  }
-    Section (Move)      { string Name = "Displace";  }
-    //Section (Observe)   { string Name = "PathDump";  }
     Section (WriteData) {                            }
+    Section (Observe)   { string Name = "PathDump";  }
   }
 }
     

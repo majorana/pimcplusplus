@@ -26,8 +26,15 @@ SpaceWarpClass::Set(const Array<Vec3,1> &rions,
     rhat.resize(N);
     g.resize(N);
   }
-  Rions = rions;
-  DeltaRions = delta;
+
+  if (doForward) {
+    Rions = rions;
+    DeltaRions = delta;
+  }
+  else {
+    Rions = rions + delta;
+    DeltaRions = -delta;
+  }
 }
 
 Vec3
@@ -102,24 +109,28 @@ SpaceWarpClass::ReverseWarp (Vec3 rp, Mat3 &jRev)
 {
   Vec3 rtrial, wrtrial;
   Mat3 jForw, jForwInv;
-//   // First, apply the forward warp
-//   rtrial = ForwardWarp (rp, jForw);
-//   // Invert the direction of warp.  This gives us our first guess for
-//   // the inverse.
-//   rtrial = rp - (rtrial - rp);
-  
+  const double tol = 1.0e-20;
   // Initialize my guess for r with rp
   rtrial = rp;
 
   wrtrial = ForwardWarp (rtrial, jForw);
+  int numIter = 0;
+  double err;
   do {
     jForwInv = Inverse (jForw);
     // Solve for rtrial
     rtrial = jForwInv*(rp-wrtrial) + rtrial;
     // Now calculate the forward warp from that position
     wrtrial = ForwardWarp (rtrial, jForw);
-  } while (dot(rp-wrtrial,rp-wrtrial)>1.0e-20);
-  jRev = Inverse(jForw);
+    numIter++;
+    err = dot (rp-wrtrial, rp-wrtrial);
+  } while (err>tol && (numIter < 100));
+  if (err >= tol)
+    jRev = 1.0e-50,     0.0,     0.0,
+               0.0, 1.0e-50,     0.0,
+               0.0,     0.0, 1.0e-50;
+  else
+    jRev = Inverse(jForw);
   return rtrial;
 }
 
@@ -197,12 +208,21 @@ SpaceWarpClass::SolveScaleEquation (double A, double B, double C)
   double s = 1.0;
   double val = A*s*s + B*log(s) + C;
 
-  while (fabs(val) > 1.0e-10) {
+  int numIter = 0;
+  while (fabs(val) > 1.0e-10 && (numIter < 100)) {
     double deriv = 2.0*A*s + B/s;
-    s -= val/deriv;
+    double deltas = -val/deriv;
+    if (deltas + s > 0.0)
+      s -= val/deriv;
+    else
+      s = 1.1*s;
     val = A*s*s + B*log(s) + C;
     cerr << "s = " << s << " val = " << val << endl;
+    numIter ++;
   }
-  return s;
+  if (fabs(val) > 1.0e-10)
+    return -1.0e100;
+  else
+    return s;
 }
 

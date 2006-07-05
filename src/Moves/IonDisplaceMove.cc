@@ -67,11 +67,14 @@ IonDisplaceStageClass::NewElectronWarp()
 	  Vec3 r = Path(slice, elec);
 	  SetMode (NEWMODE);
 	  Path(slice,elec) = SpaceWarp.Warp (r, jMat);
-	  double d = fabs(det(jMat));
+	  double d = det(jMat);
 	  if (d <= 0) {
+	    cerr <<"*****************************************************\n";
 	    cerr << "det(jMat) = " << d << " at slice=" << slice
 		 << " and elec = " << elec << endl;
 	    cerr << "r = " << r << endl;
+	    cerr <<"*****************************************************\n";
+	    return (1.0e-300);
 	  }
 	  jWarp += factor * log(d);
 	}
@@ -122,6 +125,8 @@ IonDisplaceStageClass::NewElectronWarp()
   cerr << "A = " << A << "   B = " << B << "   C = " << C << endl;
   double s = SpaceWarp.SolveScaleEquation (A, B, C);
   cerr << "s = " << s <<  endl;
+  if (s < -1.0e10)
+    return 1.0e-300;
   SetMode (NEWMODE);
   // And scale the triangles
   for (int si=0; si<Path.NumSpecies(); si++) {

@@ -573,8 +573,7 @@ VisualClass::VisualClass()
     "  </toolbar>"
     "</ui>";
   
-  std::auto_ptr<Glib::Error> err;
-  Manager->add_ui_from_string (ui_info, err);
+  Manager->add_ui_from_string (ui_info);
   m_VBox.pack_start (*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK, 0);
   ToolBox.pack_start (Tools);
   ToolBox.pack_start (DetailFrame, Gtk::PACK_SHRINK, 0);
