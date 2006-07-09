@@ -27,7 +27,11 @@ class IonDisplaceStageClass : public CommonStageClass
 {
 protected:
   Array<dVec,1> &DeltaRions;
+  
   Array<dVec,1> Rions;
+  // The drift terms for the forward and reverse moves used in Smart
+  // Monte Carlo.
+  Array<dVec,1> DriftForw, DriftRev, Forces;
   /// Unit vectors in the direction of the above
   Array<dVec,1> rhat;
   Array<double,1> Weights;
@@ -36,12 +40,13 @@ protected:
   double DoElectronWarp();
   double NewElectronWarp();
   SpaceWarpClass SpaceWarp;
+  // Stores whether or not to use Smart Monte Carlo
 public:
   /// This is the width of the gaussian distribution for the
   /// displacement vector.
   double Sigma;
   int IonSpeciesNum;
-  bool WarpElectrons;
+  bool WarpElectrons, UseSmartMC;
   Array<int,1> IonsToMove;
 
   /// This does the actual displacement of the path.  All processors

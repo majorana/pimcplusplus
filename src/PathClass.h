@@ -143,6 +143,7 @@ public:
   /// looped over this particle yet
   Array<bool,1> DoPtcl;
 
+  inline double GetBeta() { return tau * (double)TotalNumSlices; }
   inline void  SetBox (dVec box);
   inline const dVec GetBox();
   inline const dVec GetBoxInv();

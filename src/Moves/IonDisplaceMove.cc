@@ -4,26 +4,47 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
 				      Array<int,1> &activeParticles)
 {
   SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
+  double beta = PathData.Path.GetBeta();
   int first = ionSpecies.FirstPtcl;
   int last  = ionSpecies.LastPtcl;
   int N     = last - first + 1;
   if (DeltaRions.size() != N) {
     DeltaRions.resize(N);
-    Rions.resize(N);
+    DriftForw.resize(N);
+    DriftRev.resize(N);
     Weights.resize(N);
+    Forces.resize(N);
+    Rions.resize(N);
     rhat.resize(N);
   }
   dVec zero(0.0);
+  Forces = 0.0;
   DeltaRions = zero;
+  DriftForw = zero;
+  DriftRev = zero;
   /// Store present ion positions
   for (int i=0; i<N; i++)
     Rions(i) = Path(0,i+first);
+
+  if (UseSmartMC) {
+    // Calculate the forward drift term
+    assert (PathData.Actions.NodalActions(IonSpeciesNum) != NULL);
+    FixedPhaseActionClass *fp = dynamic_cast<FixedPhaseActionClass*>
+      (PathData.Actions.NodalActions(IonSpeciesNum));
+    assert (fp != NULL);
+    fp->GetIonForces(Forces);
+  }
+  else
+    Forces = zero;
+
   /// Now, choose a random displacement 
   for (int ptclIndex=0; ptclIndex<IonsToMove.size(); ptclIndex++) {
     int ptcl = IonsToMove(ptclIndex);
     Vec3 delta;
     PathData.Path.Random.CommonGaussianVec (Sigma, delta);
-    DeltaRions(ptcl-first) = delta;
+    DriftForw(ptcl-first) = 0.5*beta*Sigma*Sigma*Forces(ptcl-first);
+    DeltaRions(ptcl-first) = DriftForw(ptcl-first) + delta;
+
 
     // Actually displace the path
     SetMode(NEWMODE);
@@ -31,11 +52,32 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
       PathData.Path(slice, ptcl) = 
 	PathData.Path(slice, ptcl) + DeltaRions(ptcl-first);
   }
+  /// Now compute reverse move forces
+  double logTratio = 0.0;
+  if (UseSmartMC) {
+    // Calculate the forward drift term
+    assert (PathData.Actions.NodalActions(IonSpeciesNum) != NULL);
+    FixedPhaseActionClass *fp = dynamic_cast<FixedPhaseActionClass*>
+      (PathData.Actions.NodalActions(IonSpeciesNum));
+    assert (fp != NULL);
+    fp->GetIonForces(Forces);
+    for (int ptclIndex=0; ptclIndex<IonsToMove.size(); ptclIndex++) {
+      int ptcl = IonsToMove(ptclIndex);
+      int i = ptcl - first;
+      Vec3 delta;
+      DriftRev(i) = 0.5*beta*Sigma*Sigma*Forces(i);
+      logTratio += 
+	dot(DriftRev(i),  DriftRev(i)) +
+	dot(DriftForw(i), DriftForw(i)) +
+	2.0*dot(DeltaRions(i), DriftForw(i)+DriftRev(i));
+    }
+  }
+  logTratio /= (2.0*Sigma*Sigma);
 
   if (WarpElectrons)
-    return NewElectronWarp();
+    return exp(logTratio)*NewElectronWarp();
   else
-    return 1.0;
+    return exp(logTratio);
 
   // And return sample probability ratio
   return 1.0;
@@ -59,7 +101,8 @@ IonDisplaceStageClass::NewElectronWarp()
   for (int si=0; si<Path.NumSpecies(); si++) {
     SpeciesClass &species = Path.Species(si);
     if (species.lambda > 1.0e-10) 
-      for (int slice=0; slice<Path.NumTimeSlices();slice+=2) {
+      //      for (int slice=0; slice<Path.NumTimeSlices();slice+=2) {
+      for (int slice=0; slice<Path.NumTimeSlices();slice++) {
 	double factor = 
 	  ((slice==0)||(slice==Path.NumTimeSlices()-1)) ? 0.5 : 1.0;
 	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
@@ -82,71 +125,74 @@ IonDisplaceStageClass::NewElectronWarp()
   }
   
   cerr << "jWarp = " << jWarp << endl;
-  // Second stage: similar triangle construction
-  double gamma, h;
-  double jTri = 0.0;
-  double A, B, C;
-  A = B = C = 0.0;
-  double deltaK = 0.0;
-  for (int si=0; si<Path.NumSpecies(); si++) {
-    SpeciesClass &species = Path.Species(si);
-    double fourLambdaTauInv = 1.0/(4.0*species.lambda*Path.tau);
-    if (species.lambda > 1.0e-10) 
-      for (int slice=0; slice<Path.NumTimeSlices()-2;slice+=2) 
-	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
-	  SetMode (OLDMODE);
-	  Vec3 &r0 = Path(slice,   elec);	  
-	  Vec3 &r1 = Path(slice+1, elec);
-	  Vec3 &r2 = Path(slice+2, elec);
-	  SetMode (NEWMODE);
-	  Vec3 &r0p = Path(slice,   elec);	  
-	  Vec3 &r1p = Path(slice+1, elec);
-	  Vec3 &r2p = Path(slice+2, elec);
-	  double alpha, beta, ratio;
-	  SpaceWarp.SimilarTriangles (r0, r1, r2, r0p, r1p, r2p,
-				      alpha, beta, h, gamma);
-	  A -= 2.0*fourLambdaTauInv * gamma*gamma*h*h;
-	  jTri += 2.0*log(gamma);
-	  // B += 1.0;
+//   // Second stage: similar triangle construction
+//   double gamma, h;
+//   double jTri = 0.0;
+//   double A, B, C;
+//   A = B = C = 0.0;
+//   double deltaK = 0.0;
+//   for (int si=0; si<Path.NumSpecies(); si++) {
+//     SpeciesClass &species = Path.Species(si);
+//     double fourLambdaTauInv = 1.0/(4.0*species.lambda*Path.tau);
+//     if (species.lambda > 1.0e-10) 
+//       for (int slice=0; slice<Path.NumTimeSlices()-2;slice+=2) 
+// 	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
+// 	  SetMode (OLDMODE);
+// 	  Vec3 &r0 = Path(slice,   elec);	  
+// 	  Vec3 &r1 = Path(slice+1, elec);
+// 	  Vec3 &r2 = Path(slice+2, elec);
+// 	  SetMode (NEWMODE);
+// 	  Vec3 &r0p = Path(slice,   elec);	  
+// 	  Vec3 &r1p = Path(slice+1, elec);
+// 	  Vec3 &r2p = Path(slice+2, elec);
+// 	  double alpha, beta, ratio;
+// 	  SpaceWarp.SimilarTriangles (r0, r1, r2, r0p, r1p, r2p,
+// 				      alpha, beta, h, gamma);
+// 	  A -= 2.0*fourLambdaTauInv * gamma*gamma*h*h;
+// 	  jTri += 2.0*log(gamma);
+// 	  B += 1.0;
 	    
-// 	  cerr << "alpha = " << alpha << endl;
-// 	  cerr << "beta = " << beta << endl;
-// 	  cerr << "gamma = " << gamma << endl;
-// 	  cerr << "h = " << h << endl;
-	  C -= fourLambdaTauInv * 
-	    ((gamma*gamma-1.0)*(alpha*alpha + beta*beta) - 2.0*h*h);
-	  deltaK += fourLambdaTauInv * 
-	    ((gamma*gamma-1.0)*(alpha*alpha + beta*beta) - 2.0*h*h);
-	}
-  }
-  C += jWarp + jTri;
+// // 	  cerr << "alpha = " << alpha << endl;
+// // 	  cerr << "beta = " << beta << endl;
+// // 	  cerr << "gamma = " << gamma << endl;
+// // 	  cerr << "h = " << h << endl;
+// 	  C -= fourLambdaTauInv * 
+// 	    ((gamma*gamma-1.0)*(alpha*alpha + beta*beta) - 2.0*h*h);
+// 	  deltaK += fourLambdaTauInv * 
+// 	    ((gamma*gamma-1.0)*(alpha*alpha + beta*beta) - 2.0*h*h);
+// 	}
+//   }
+//   C += jWarp + jTri;
 
-  // Now, solve the scale equation
-  cerr << "A = " << A << "   B = " << B << "   C = " << C << endl;
-  double s = SpaceWarp.SolveScaleEquation (A, B, C);
-  cerr << "s = " << s <<  endl;
-  if (s < -1.0e10)
-    return 1.0e-300;
-  SetMode (NEWMODE);
-  // And scale the triangles
-  for (int si=0; si<Path.NumSpecies(); si++) {
-    SpeciesClass &species = Path.Species(si);
-    double fourLambdaTauInv = 1.0/(4.0*species.lambda*Path.tau);
-    if (species.lambda > 1.0e-10) 
-      for (int slice=0; slice<Path.NumTimeSlices()-2;slice+=2) 
-	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
-	  Vec3 &r0 = Path(slice,   elec);	  
-	  Vec3 &r1 = Path(slice+1, elec);
-	  Vec3 &r2 = Path(slice+2, elec);
-	  double hpp = SpaceWarp.ScaleTriangleHeight (r0, r1, r2, s);
-	  deltaK += fourLambdaTauInv * 2.0 * hpp*hpp;
-	}
-  }
-  double jScale = B * log(s);
-  cerr << "jTri = " << jTri << endl;
-  cerr << "jScale = " << jScale << endl;
-  cerr << "Estimate deltaK = " << deltaK << endl;
-  return (exp(jWarp + jTri + jScale));
+//   // Now, solve the scale equation
+//   cerr << "A = " << A << "   B = " << B << "   C = " << C << endl;
+//   double s = SpaceWarp.SolveScaleEquation (A, B, C);
+//   cerr << "s = " << s <<  endl;
+//   /// HACK HACK HACK
+//   s = 1.0;
+//   if (s < -1.0e10)
+//     return 1.0e-300;
+//   SetMode (NEWMODE);
+//   // And scale the triangles
+//   for (int si=0; si<Path.NumSpecies(); si++) {
+//     SpeciesClass &species = Path.Species(si);
+//     double fourLambdaTauInv = 1.0/(4.0*species.lambda*Path.tau);
+//     if (species.lambda > 1.0e-10) 
+//       for (int slice=0; slice<Path.NumTimeSlices()-2;slice+=2) 
+// 	for (int elec=species.FirstPtcl; elec<=species.LastPtcl; elec++) {
+// 	  Vec3 &r0 = Path(slice,   elec);	  
+// 	  Vec3 &r1 = Path(slice+1, elec);
+// 	  Vec3 &r2 = Path(slice+2, elec);
+// 	  double hpp = SpaceWarp.ScaleTriangleHeight (r0, r1, r2, s);
+// 	  deltaK += fourLambdaTauInv * 2.0 * hpp*hpp;
+// 	}
+//   }
+//   double jScale = B * log(s);
+//   cerr << "jTri = " << jTri << endl;
+//   cerr << "jScale = " << jScale << endl;
+//   cerr << "Estimate deltaK = " << deltaK << endl;
+//  return (exp(jWarp + jTri + jScale));
+  return (exp(jWarp));
 }
 
 
@@ -309,6 +355,7 @@ IonDisplaceMoveClass::Read (IOSectionClass &in)
   }
   assert (in.ReadVar ("NumToMove", NumIonsToMove));
   in.ReadVar("WarpElectrons", WarpElectrons, false);
+  in.ReadVar("UseSmartMC", IonDisplaceStage.UseSmartMC, false);
 
   IonDisplaceStage.Sigma = Sigma;
   IonDisplaceStage.IonSpeciesNum = IonSpeciesNum;

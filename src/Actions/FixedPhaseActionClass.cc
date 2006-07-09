@@ -895,6 +895,7 @@ FixedPhaseClass::GetIonForces (Array<Vec3,1> &F)
   SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
   PairActionFitClass& paIonIon = 
     *PathData.Actions.PairMatrix(IonSpeciesNum, IonSpeciesNum);
+
   // First get the force on the ions from the electrons
   System->CalcIonForces(F);
 
@@ -1156,7 +1157,9 @@ FixedPhaseActionClass::GetBandEnergies(Array<double,1> &energies)
 void
 FixedPhaseActionClass::GetIonForces(Array<Vec3,1> &F)
 {
-   if (PathData.Path.GetConfig() == 0)
+  // Make sure wave functions are up to date.
+  Update();
+  if (PathData.Path.GetConfig() == 0)
     FixedPhaseA.GetIonForces(F);
   else
     FixedPhaseB.GetIonForces(F);

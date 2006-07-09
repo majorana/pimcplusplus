@@ -3,9 +3,9 @@ double tau = 0.125;
 int Seed = 319959;
 
 Section (System) {
-  int NumTimeSlices = 900;
+  int NumTimeSlices = 10;
   Array<bool,1> IsPeriodic(3) = [true, true, true];
-  Array<double,1> Box(3) = [26.0, 26.0, 26.0];
+  Array<double,1> Box(3) = [2.75, 2.75, 2.75];
   
   Section (Particles) {
     Section (Species) {
@@ -16,7 +16,7 @@ Section (System) {
       int NumParticles = 16;
       int NumDim=3;
       string InitPaths = "RANDOMFIXED";
-      double Radius = 1.0;
+      double Radius = 0.0;
     }
     Section (Species) {
       string Name = "up";
@@ -60,13 +60,13 @@ Section (System) {
 
 
 Section (Action) {
-  int MaxLevels = 8;
+  int MaxLevels = 3;
   Array<string,1> PairActionFiles(1) = [ "~/PairActions/zero.PairAction" ];
-  int NumImages = 0;
+  int NumImages = 1;
 }
 
 Section (Observables) {
-  string OutFileBase =  "~/Runs/SpaceWarp/WarpDump";
+  string OutFileBase =  "~/Runs/SpaceWarp/NoWarp2";
   
   Section (Observable) {
     string Type = "PairCorrelation";
@@ -78,7 +78,7 @@ Section (Observables) {
       string Type = "Linear";
       int NumPoints = 50;
       double start = 0.1;
-      double end = 5.0;
+      double end = 1.375;
     }
   }
   Section (Observable) {
@@ -91,7 +91,7 @@ Section (Observables) {
       string Type = "Linear";
       int NumPoints = 50;
       double start = 0.1;
-      double end = 5.0;
+      double end = 1.375;
     }
   }
   Section (Observable) {
@@ -111,17 +111,17 @@ Section (Moves) {
     string Type = "BisectionBlock";
     string Name = "upBlock";
     string PermuteType = "NONE";
-    int NumLevels = 8;
+    int NumLevels = 3;
     string Species = "up";
-    int StepsPerBlock = 10;
+    int StepsPerBlock = 8;
   }
   Section (Move) {
     string Type = "BisectionBlock";
     string Name = "downBlock";
     string PermuteType = "NONE";
-    int NumLevels = 8;
+    int NumLevels = 3;
     string Species = "down";
-    int StepsPerBlock = 10;
+    int StepsPerBlock = 8;
   }
   Section (Move) {
     string Type = "ShiftMove";
@@ -130,10 +130,10 @@ Section (Moves) {
   Section (Move) {
     string Type = "IonDisplace";
     string Name = "Displace";
-    bool WarpElectrons = true;
+    bool WarpElectrons = false;
     string IonSpecies = "ion";
     int NumToMove = 16;
-    double Sigma = 0.3;
+    double Sigma = 0.03;
   }
 }
 
