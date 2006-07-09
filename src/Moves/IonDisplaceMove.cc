@@ -68,7 +68,7 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
       DriftRev(i) = 0.5*beta*Sigma*Sigma*Forces(i);
       logTratio += 
 	dot(DriftRev(i),  DriftRev(i)) +
-	dot(DriftForw(i), DriftForw(i)) +
+	dot(DriftForw(i), DriftForw(i)) -
 	2.0*dot(DeltaRions(i), DriftForw(i)+DriftRev(i));
     }
   }
