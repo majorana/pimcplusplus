@@ -287,6 +287,7 @@ FFTMatBox::AddToVec (zMatVec &c)
 FFTBox&
 FFTBox::operator=(const FFTBox &fft)
 {
+  FFT3D::operator=(fft);
   Nx = fft.Nx;
   Ny = fft.Ny;
   Nz = fft.Nz;

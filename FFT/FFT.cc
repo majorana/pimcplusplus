@@ -191,6 +191,17 @@ FFT3D_r2c::k2r()
 }
 
 
+FFT3D&
+FFT3D::operator= (const FFT3D& fft)
+{
+  InPlace = fft.InPlace;
+  if (rBox.shape() != fft.rBox.shape()) 
+    resize (fft.rBox.extent(0), fft.rBox.extent(1), fft.rBox.extent(2));
+  rBox = fft.rBox;
+  kBox = fft.kBox;
+  return *this;
+}
+
 
 void 
 FFTVec3D::resize(int nx, int ny, int nz)

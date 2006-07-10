@@ -173,6 +173,8 @@ public:
   { return rBox.size(); }
   void r2k();
   void k2r();
+  
+  FFT3D& operator= (const FFT3D& fft);
 
   FFT3D(bool inPlace=true) : Allocated(false), InPlace(inPlace)
   {
