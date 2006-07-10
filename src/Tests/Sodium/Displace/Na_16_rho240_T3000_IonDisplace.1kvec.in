@@ -171,56 +171,56 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Displace/Na_16_rho240_T3000_1kvec_CheatWarp";
+    "~/Runs/NaRuns/Displace/Na_16_rho240_T3000_1kvec_Sigma0.1_SmartMC";
   int FileStart = 0;
-//   Section (Observable) {
-//     string Type = "Energy";
-//     string Name = "Energy";
-//     int Frequency=1;
-//   }
-   Section (Observable) {
-     string Type = "Pressure";
-     string Name = "Pressure";
-     // Convert pressure to bar
-     double Prefactor = 2.942184e8;
-     int Frequency=1;
-   }
-//   Section (Observable) {
-//     string Type = "Conductivity";
-//     string Name = "Conductivity";
-//     int Frequency=1;
-//   }
-   Section (Observable) {
-     string Type = "PairCorrelation";
-     string Name = "Na-Na";
-     string Species1 = "Na";
-     string Species2 = "Na";
-     int Frequency=1;
-     Section (Grid) {
-       string Type = "Linear";
-       int NumPoints = 50;
-       double start = 0.1;
-       double end = 15.0;
-     }
-   }
-//   Section (Observable) {
-//     string Type = "StructureFactor";
-//     string Name = "NaSk";
-//     string Species1 = "Na";
-//     string Species2 = "Na";
-//     int Frequency=1;
-//   }
-//   Section (Observable) {
-//     string Type = "WindingNumber";
-//     string Name = "WN";
-//     Array<string,1> SpeciesList(2) = ["eup", "edown"];
-//     int Frequency = 1;
-//   }
-//   Section (Observable) {
-//     string Type   = "TimeAnalysis";
-//     string Name   = "TimeAnalysis";
-//     int Frequency = 1;
-//   }	
+  Section (Observable) {
+    string Type = "Energy";
+    string Name = "Energy";
+    int Frequency=1;
+  }
+  Section (Observable) {
+    string Type = "Pressure";
+    string Name = "Pressure";
+    // Convert pressure to bar
+    double Prefactor = 2.942184e8;
+    int Frequency=1;
+  }
+  Section (Observable) {
+    string Type = "Conductivity";
+    string Name = "Conductivity";
+    int Frequency=1;
+  }
+  Section (Observable) {
+    string Type = "PairCorrelation";
+    string Name = "Na-Na";
+    string Species1 = "Na";
+    string Species2 = "Na";
+    int Frequency=1;
+    Section (Grid) {
+      string Type = "Linear";
+      int NumPoints = 50;
+      double start = 0.1;
+      double end = 15.0;
+    }
+  }
+  //   Section (Observable) {
+  //     string Type = "StructureFactor";
+  //     string Name = "NaSk";
+  //     string Species1 = "Na";
+  //     string Species2 = "Na";
+  //     int Frequency=1;
+  //   }
+  //   Section (Observable) {
+  //     string Type = "WindingNumber";
+  //     string Name = "WN";
+  //     Array<string,1> SpeciesList(2) = ["eup", "edown"];
+  //     int Frequency = 1;
+  //   }
+  Section (Observable) {
+    string Type   = "TimeAnalysis";
+    string Name   = "TimeAnalysis";
+    int Frequency = 1;
+  }	
   Section (Observable) {
     int Frequency = 1;
     string Type = "PathDump";
@@ -243,7 +243,7 @@ Section (Moves) {
     double epsilon = 1.0e-4;
     int NumLevels=6;
     string Species = "eup";
-    int StepsPerBlock = 20;
+    int StepsPerBlock = 16;
   }
   Section (Move) {
     string Type="BisectionBlock";
@@ -254,7 +254,7 @@ Section (Moves) {
     double epsilon = 1.0e-4;
     int NumLevels=6;
     string Species = "edown";
-    int StepsPerBlock = 20;
+    int StepsPerBlock = 16;
   }
   Section (Move) {
     string Type="ShiftMove";
@@ -263,10 +263,11 @@ Section (Moves) {
   Section (Move) {
     string Type = "IonDisplace";
     string Name = "Displace";
-    bool WarpElectrons = true;
+    bool WarpElectrons = false;
+    bool UseSmartMC    = true;
     string IonSpecies = "Na";
     int NumToMove = 16;
-    double Sigma = 0.3;
+    double Sigma = 0.1;
   }
 }
 
@@ -308,22 +309,23 @@ Section (Algorithm) {
       Section (Loop) {
 	int Steps = 50;
 	Section (Loop) {
-	  int Steps = 10;
-	  Section (Move)    { string Name="eupBlock";       } 
-	  Section (Move)    { string Name="edownBlock";     } 
-	  Section (Move)    { string Name="Shift";          }
+	  int Steps = 5;
+	  Section (Loop) {
+	    int Steps = 10;
+	    Section (Move)    { string Name="eupBlock";       } 
+	    Section (Move)    { string Name="edownBlock";     } 
+	    Section (Move)    { string Name="Shift";          }
+	  }
+	  Section (Observe)   { string Name = "Pressure";     }
+	  Section (Observe)   { string Name = "Conductivity"; }
 	}
- 	Section (Observe)   { string Name = "Pressure";     }
-// 	Section (Observe)   { string Name = "Energy";       }
+ 	Section (Observe)   { string Name = "Energy";       }
 // 	Section (Observe)   { string Name = "Pressure";     }
-// 	Section (Observe)   { string Name = "Conductivity"; }
 // 	Section (Observe)   { string Name = "NaSk";         }
 // 	Section (Observe)   { string Name = "WN";           }
  	Section (Observe)   { string Name = "Na-Na";        }
-	//	Section (Observe)   { string Name = "PathDump";     }
 	Section (Move)      { string Name = "Displace";     }
-	//	Section (Observe)   { string Name = "PathDump";     }	
-//	Section (Observe)   { string Name = "TimeAnalysis"; }
+	Section (Observe)   { string Name = "TimeAnalysis"; }
 	Section (WriteData) { }
       }
     // Dump paths every 50 Langevin steps

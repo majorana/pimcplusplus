@@ -30,11 +30,11 @@ typedef enum {UPDATE_NONE, UPDATE_ALL, UPDATE_ACTIVE} UpdateType;
 class FixedPhaseClass
 {
 private:
-  MPISystemClass *System;
+  MirroredRefClass<MPISystemClass> System;
   PathDataClass &PathData;
   PathClass &Path;
   double kCut;
-  ComplexMultiTricubicSpline BandSplines;
+  MirroredClass<ComplexMultiTricubicSpline> BandSplines;
   Potential *V_elec_ion, *V_ion_ion;
   Vec3 kVec;
 
@@ -50,7 +50,7 @@ private:
   Mirrored3DClass<cVec3> UpGradMatCache, DownGradMatCache;
 
   Array<cVec3,1> Gradient;
-  Array<Vec3,1> Rions;
+  Mirrored1DClass<Vec3> Rions;
   int NumUp, NumDown, NumIons, NumBands, NumFilled;
   Array<int,1> UpParticles, DownParticles;
   // This stores the real space grid dimensions
@@ -95,7 +95,7 @@ public:
   double d_dBeta(int slice1, int slice2, int level, int speciesNum);
   void CalcDensity     (Array<double,3> &rho);
   inline const Array<double,3>&  GetDensity()
-  { return System->GetDensity(); }
+  { return System().GetDensity(); }
   void CalcBandDensity (Array<double,4> &rho);
 
   bool IsPositive (int slice, int speciesNum);

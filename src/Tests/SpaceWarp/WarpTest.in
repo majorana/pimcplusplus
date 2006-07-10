@@ -1,5 +1,9 @@
 double tau = 0.125;
 
+Section (Parallel) {
+  int ProcsPerClone = 1;
+}
+
 int Seed = 319959;
 
 Section (System) {

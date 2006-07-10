@@ -29,18 +29,19 @@ void
 FixedPhaseClass::Setk(Vec3 k)
 {
   kVec = k;
-  System->Setk(k);
+  System[0].Setk(k);
+  System[1].Setk(k);
   UpdateBands();
 }
 
 void
 FixedPhaseClass::GetBandEnergies(Array<double,1> &energies)
 {
-  int numBands = System->GetNumBands();
+  int numBands = System().GetNumBands();
   if (energies.size() != numBands)
     energies.resize(numBands);
   for (int band=0; band<numBands; band++)
-    energies(band) = System->GetEnergy(band);
+    energies(band) = System().GetEnergy(band);
 }
 
 inline double mag2 (complex<double> z)
@@ -54,7 +55,7 @@ FixedPhaseClass::CalcDensity(Array<double,3> &rho)
   int nx = rho.extent(0); double nxInv = 1.0/(nx-1);
   int ny = rho.extent(1); double nyInv = 1.0/(ny-1);
   int nz = rho.extent(2); double nzInv = 1.0/(nz-1);
-  int nBands  = BandSplines.N;
+  int nBands  = BandSplines().N;
   dVec box = PathData.Path.GetBox();
   Array<complex<double>,1> vals(nBands);
   
@@ -66,7 +67,7 @@ FixedPhaseClass::CalcDensity(Array<double,3> &rho)
       double y = (nyInv*iy-0.5)*box[1];
       for (int iz=0; iz<nz; iz++) {
 	double z = (nzInv*iz-0.5)*box[2];
-	BandSplines(x, y, z, vals);
+	BandSplines()(x, y, z, vals);
 	for (int i=0; i<nBands; i++)
 	  rho(ix, iy, iz) += mag2(vals(i));
       }
@@ -92,7 +93,7 @@ FixedPhaseClass::CalcBandDensity(Array<double,4> &rho)
   int nx = rho.extent(0); double nxInv = 1.0/(nx-1);
   int ny = rho.extent(1); double nyInv = 1.0/(ny-1);
   int nz = rho.extent(2); double nzInv = 1.0/(nz-1);
-  int nBands  = BandSplines.N;
+  int nBands  = BandSplines().N;
   dVec box = PathData.Path.GetBox();
   Array<complex<double>,1> vals(nBands);
   
@@ -104,7 +105,7 @@ FixedPhaseClass::CalcBandDensity(Array<double,4> &rho)
       double y = (nyInv*iy-0.5)*box[1];
       for (int iz=0; iz<nz; iz++) {
 	double z = (nzInv*iz-0.5)*box[2];
-	BandSplines(x, y, z, vals);
+	BandSplines()(x, y, z, vals);
 	for (int i=0; i<nBands; i++)
 	  rho(ix, iy, iz, i) = mag2(vals(i));
       }
@@ -204,6 +205,11 @@ FixedPhaseClass::AcceptCopy (int slice1, int slice2, int speciesNum)
     DownGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all())= 
      DownGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
+  else if (speciesNum == IonSpeciesNum) {
+    AcceptCopy(slice1, slice2, UpSpeciesNum);
+    AcceptCopy(slice1, slice2, DownSpeciesNum);
+    System[OLDMODE] = System[NEWMODE];
+  }
 }
 
 void 
@@ -225,6 +231,12 @@ FixedPhaseClass::RejectCopy (int slice1, int slice2, int speciesNum)
     DownGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all())= 
      DownGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
+  else if (speciesNum == IonSpeciesNum) {
+    RejectCopy(slice1, slice2, UpSpeciesNum);
+    RejectCopy(slice1, slice2, DownSpeciesNum);
+    System[NEWMODE] = System[OLDMODE];
+  }
+
 }
 
 
@@ -259,7 +271,7 @@ FixedPhaseClass::IonsHaveMoved()
   bool changed = false;
 
   for (int ptcl=first; ptcl<=last; ptcl++) {
-    dVec diff = Path(0,ptcl) - System->GetIonPos(ptcl-first);
+    dVec diff = Path(0,ptcl) - System().GetIonPos(ptcl-first);
     if (dot (diff,diff) > 1.0e-16)
       changed = true;
   }
@@ -596,39 +608,43 @@ FixedPhaseClass::Read(IOSectionClass &in)
     DownParticles(i) = i+Path.Species(DownSpeciesNum).FirstPtcl;
 
   Rions.resize(NumIons);
-  Rions = Vec3(0.0, 0.0, 0.0);
+  Rions[0] = Vec3(0.0, 0.0, 0.0);
+  Rions[1] = Vec3(0.0, 0.0, 0.0);
 
   /////////////////////////////////
   // Setup the plane wave system //
   /////////////////////////////////
   NumFilled = max(NumUp, NumDown);
   NumBands = 2*NumFilled;
-  /// The last true indicates using MD extrapolation to initialize
-  /// wavefunctions. 
-  System = new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, 
-			       PathData.InterComm, UseLDA, UseMDExtrap);
+  // The last true indicates using MD extrapolation to initialize
+  // wavefunctions. 
+  System.SetOld(new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, 
+				    PathData.InterComm, UseLDA, UseMDExtrap));
+  System.SetNew(new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, 
+				    PathData.InterComm, UseLDA, UseMDExtrap));
   V_elec_ion = &PathData.Actions.GetPotential (IonSpeciesNum,  UpSpeciesNum);
   V_ion_ion  = &PathData.Actions.GetPotential (IonSpeciesNum, IonSpeciesNum);
-  System->Setup (Path.GetBox(), kVec, kCut, 
+  System[0].Setup (Path.GetBox(), kVec, kCut, 
 		 *V_elec_ion, *V_ion_ion, UseLDA);
-  System->Read (in);
-  //  Vec3 gamma (0.0, 0.0, 0.0);
-
+  System[0].Read (in);
   /////////////////////////////
   // Setup the ion positions //
   /////////////////////////////
   SpeciesClass& ionSpecies = Path.Species(IonSpeciesNum);
   int first = ionSpecies.FirstPtcl;
   for (int i=0; i<NumIons; i++)
-    Rions(i) = Path(0,i+first);
-  Rions = Vec3(0.0, 0.0, 0.0);
-  System->SetIons (Rions);
+    Rions[0](i)= Rions[1](i) = Path(0,i+first);
+  Rions[0] = Vec3(0.0, 0.0, 0.0);  
+  Rions[1] = Vec3(0.0, 0.0, 0.0);
+  System[0].SetIons (Rions);
+
+  System[1] = System[0];
 
   ////////////////////////////////////////
   // Setup real space grids and splines //
   ////////////////////////////////////////
   int nx, ny, nz;
-  System->GetBoxDims (nx, ny, nz);
+  System().GetBoxDims (nx, ny, nz);
   // Increment sizes to compensate for PBC
   nx++; ny++; nz++;
   Vec3 box;
@@ -638,7 +654,9 @@ FixedPhaseClass::Read(IOSectionClass &in)
   zGrid.Init (-0.5*box[2], 0.5*box[2], nz);
   Array<complex<double>,4> initData(nx,ny,nz,NumFilled);
   initData = 0.0;
-  BandSplines.Init (&xGrid, &yGrid, &zGrid, initData, true);
+  BandSplines[0].Init (&xGrid, &yGrid, &zGrid, initData, true);
+  BandSplines[1].Init (&xGrid, &yGrid, &zGrid, initData, true);
+
   //  UpdateBands();
 #endif
 }
@@ -675,7 +693,7 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum,
 	Path.PutInBox(r_j);
 	vals.reference ( matData(slice, j, Range::all()));
 	grads.reference(gradData(slice, j, Range::all()));
-	BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+	BandSplines().FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
       }
     else if (update == UPDATE_ACTIVE)
       for (int i=0; i<activeParticles.size(); i++) {
@@ -685,7 +703,7 @@ FixedPhaseClass::GradientDet(int slice, int speciesNum,
 	  Path.PutInBox(r_j);
 	  vals.reference ( matData(slice, j, Range::all()));
 	  grads.reference(gradData(slice, j, Range::all()));
-	  BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+	  BandSplines().FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
 	}
       }
     else {
@@ -729,7 +747,7 @@ FixedPhaseClass::GradientDetFD(int slice, int speciesNum)
     Vec3 r_j = Path(slice, first+j);
     Path.PutInBox(r_j);
     row.reference(Matrix(j,Range::all()));
-    BandSplines(r_j[0], r_j[1], r_j[2], row);
+    BandSplines()(r_j[0], r_j[1], r_j[2], row);
   }
 
   complex<double> det = Determinant (Matrix);
@@ -744,19 +762,19 @@ FixedPhaseClass::GradientDetFD(int slice, int speciesNum)
       r = r_i;
       r[dim] += eps;
       Path.PutInBox(r);
-      BandSplines(r[0], r[1], r[2], row);
+      BandSplines()(r[0], r[1], r[2], row);
       plus[dim] = Determinant (Matrix);
       
       r = r_i;
       r[dim] -= eps;
       Path.PutInBox(r);
-      BandSplines(r[0], r[1], r[2], row);
+      BandSplines()(r[0], r[1], r[2], row);
       minus[dim] = Determinant (Matrix);
     }
     // Reset row to orignal value
     r = r_i;
     Path.PutInBox(r);
-    BandSplines(r[0], r[1], r[2], row);
+    BandSplines()(r[0], r[1], r[2], row);
     // And compute gradient
     Gradient(i) = (plus-minus)/(2.0*eps);
   }
@@ -777,20 +795,20 @@ FixedPhaseClass::UpdateBands()
   int first = ionSpecies.FirstPtcl;
   for (int i=0; i<NumIons; i++)
     Rions(i) = Path(0,i+first);
-  System->SetIons (Rions);
+  System().SetIons (Rions);
 
   /// The diagonalization is now done in parallel
   perr << "Updating bands.\n";
-  // System->DiagonalizeH();
-  System->DoMDExtrap();
-  System->SolveLDA();  
+  // System().DiagonalizeH();
+  System().DoMDExtrap();
+  System().SolveLDA();  
 
   for (int band=0; band<NumFilled; band++) {
-    System->SetRealSpaceBandNum(band);
+    System().SetRealSpaceBandNum(band);
     for (int ix=0; ix<xGrid.NumPoints-1; ix++)
       for (int iy=0; iy<yGrid.NumPoints-1; iy++)
 	for (int iz=0; iz<zGrid.NumPoints-1; iz++)
-	  data(ix,iy,iz,band) = System->RealSpaceBand(ix,iy,iz);
+	  data(ix,iy,iz,band) = System().RealSpaceBand(ix,iy,iz);
   }
   MakePeriodic (data);
   Path.Communicator.Broadcast(0, data);
@@ -808,7 +826,7 @@ FixedPhaseClass::UpdateBands()
 //     fclose (fout);
 //   }
 
-  BandSplines.Init (&xGrid, &yGrid, &zGrid, data, true);
+  BandSplines().Init (&xGrid, &yGrid, &zGrid, data, true);
 #endif
 }
 
@@ -826,32 +844,27 @@ FixedPhaseClass::UpdateCache()
   int downFirst = Path.Species(DownSpeciesNum).FirstPtcl;
   for (int slice=0; slice<Path.NumTimeSlices(); slice++) {
     for (int j=0; j < Nup; j++) {
-      vals.reference(UpMatrixCache[0](slice, j, Range::all()));
-      grads.reference(UpGradMatCache[0](slice, j, Range::all()));
+      vals.reference(UpMatrixCache[GetMode()](slice, j, Range::all()));
+      grads.reference(UpGradMatCache[GetMode()](slice, j, Range::all()));
       Vec3 r_j = Path(slice, j+upFirst);
       Path.PutInBox(r_j);
-      BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+      BandSplines().FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
     }
 
     for (int j=0; j < Ndown; j++) {
-      vals.reference (DownMatrixCache[0](slice, j, Range::all()));
-      grads.reference(DownGradMatCache[0](slice, j, Range::all()));
+      vals.reference (DownMatrixCache[GetMode()](slice, j, Range::all()));
+      grads.reference(DownGradMatCache[GetMode()](slice, j, Range::all()));
       Vec3 r_j = Path(slice, j+downFirst);
       Path.PutInBox(r_j);
-      BandSplines.FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
+      BandSplines().FValGrad(r_j[0], r_j[1], r_j[2], vals, grads);
     }
   }
-  UpMatrixCache   [1] = UpMatrixCache   [0];
-  UpGradMatCache  [1] = UpGradMatCache  [0];
-  DownMatrixCache [1] = DownMatrixCache [0];
-  DownGradMatCache[1] = DownGradMatCache[0];
+//   UpMatrixCache   [1] = UpMatrixCache   [0];
+//   UpGradMatCache  [1] = UpGradMatCache  [0];
+//   DownMatrixCache [1] = DownMatrixCache [0];
+//   DownGradMatCache[1] = DownGradMatCache[0];
 
-  ModeType mode = GetMode();
-  SetMode (NEWMODE);
   Action (0, Path.NumTimeSlices()-1, Path.Species(IonSpeciesNum).Ptcls, 0, IonSpeciesNum);
-  SetMode (OLDMODE);
-  Action (0, Path.NumTimeSlices()-1, Path.Species(IonSpeciesNum).Ptcls, 0, IonSpeciesNum);
-  SetMode (mode);
 //   UpAction.AcceptCopy();
 //   DownAction.AcceptCopy();
   
@@ -886,7 +899,7 @@ FixedPhaseClass::Det (int slice, int speciesNum)
     Vec3 r_j = Path(slice, first+j);
     Path.PutInBox(r_j);
     vals.reference(Matrix(j,Range::all()));
-    BandSplines(r_j[0], r_j[1], r_j[2], vals);
+    BandSplines()(r_j[0], r_j[1], r_j[2], vals);
   }
   return Determinant (Matrix);
 #endif
@@ -901,7 +914,7 @@ FixedPhaseClass::GetIonForces (Array<Vec3,1> &F)
     *PathData.Actions.PairMatrix(IonSpeciesNum, IonSpeciesNum);
 
   // First get the force on the ions from the electrons
-  System->CalcIonForces(F);
+  System().CalcIonForces(F);
 
   // The following contributions are now done from within the plane
   // wave part of the code.
@@ -1031,31 +1044,31 @@ FixedPhaseActionClass::WriteInfo (IOSectionClass &out)
   out.WriteVar ("kVec", outkVec);
   double energy = 0.0;
   if ((SpeciesNum==FixedPhaseA.UpSpeciesNum) || (SpeciesNum == FixedPhaseA.DownSpeciesNum))
-    for (int i=0; i<FixedPhaseA.System->GetNumBands(); i++) {
-      cerr << "Band Energy = " << FixedPhaseA.System->GetEnergy(i) << endl;
-      energy += FixedPhaseA.System->GetEnergy(i);
+    for (int i=0; i<FixedPhaseA.System().GetNumBands(); i++) {
+      cerr << "Band Energy = " << FixedPhaseA.System().GetEnergy(i) << endl;
+      energy += FixedPhaseA.System().GetEnergy(i);
     }
   out.WriteVar ("Energy", energy);
-//   int nx = FixedPhase.BandSplines.Nx;
-//   int ny = FixedPhase.BandSplines.Ny;
-//   int nz = FixedPhase.BandSplines.Nz;
-//   int n  = FixedPhase.BandSplines.N;
+//   int nx = FixedPhase.BandSplines().Nx;
+//   int ny = FixedPhase.BandSplines().Ny;
+//   int nz = FixedPhase.BandSplines().Nz;
+//   int n  = FixedPhase.BandSplines().N;
 //   Array<double,4> Bands(nx, ny, nz, 2*n);
 //   for (int ix=0; ix<nx; ix++)
 //     for (int iy=0; iy<ny; iy++)
 //       for (int iz=0; iz<nz; iz++)
 // 	for (int i=0; i<n; i++) {
-// 	  Bands(ix,iy,iz,2*i)   = FixedPhase.BandSplines(ix,iy,iz,i).real();
-// 	  Bands(ix,iy,iz,2*i+1) = FixedPhase.BandSplines(ix,iy,iz,i).imag();
+// 	  Bands(ix,iy,iz,2*i)   = FixedPhase.BandSplines()(ix,iy,iz,i).real();
+// 	  Bands(ix,iy,iz,2*i+1) = FixedPhase.BandSplines()(ix,iy,iz,i).imag();
 // 	}
 //   out.WriteVar("Bands", Bands);
 //   Vec3 r;
 //   for (int ix=0; ix<nx; ix++) {
-//     r[0] = (*FixedPhase.BandSplines.Xgrid)(ix);
+//     r[0] = (*FixedPhase.BandSplines().Xgrid)(ix);
 //     for (int iy=0; iy<ny; iy++) {
-//       r[1] = (*FixedPhase.BandSplines.Ygrid)(iy);
+//       r[1] = (*FixedPhase.BandSplines().Ygrid)(iy);
 //       for (int iz=0; iz<nz; iz++) {
-// 	r[2] = (*FixedPhase.BandSplines.Zgrid)(iz);
+// 	r[2] = (*FixedPhase.BandSplines().Zgrid)(iz);
 // 	double phi = dot(Getk(), r);
 // 	for (int i=0; i<n; i++) {
 // 	  Bands(ix,iy,iz,2*i)   = cos(phi);
