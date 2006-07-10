@@ -171,7 +171,7 @@ namespace IO {
     int GetExtent(int dim);
     void Resize(int n);
 
-    bool VarRead(string &val) { val = Value; return true; }
+    bool VarRead(string &val);
     bool VarWrite(string val);
     IOVarASCII(string name, string val) {
       Name = name;

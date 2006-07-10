@@ -970,6 +970,12 @@ namespace IO {
     cerr << "Cannot resize atomic variable.\n";
     abort();
   }
+  bool
+  IOVarASCII<string,0>::VarRead (string &val) 
+  { 
+    val = Value; 
+    return true; 
+  }
 
   int 
   IOVarASCII<bool,0>::GetRank()

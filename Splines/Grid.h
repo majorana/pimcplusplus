@@ -115,6 +115,17 @@ class LinearGrid : public Grid
   LinearGrid ()
   { /*  Do nothing */ }
 
+  LinearGrid& operator= (const LinearGrid& lin)
+  {
+    grid.resize(lin.grid.shape());
+    Start    = lin.Start;
+    End      = lin.End;
+    grid     = lin.grid;
+    delta    = lin.delta;
+    deltainv = lin.deltainv;
+    return *this;
+  }
+
   /// Constructor that sets the number of points, start and end point
   /// of the original grid 
   LinearGrid (double start, double end, int numpoints)
@@ -295,26 +306,38 @@ class OptimalGrid : public Grid
   /// maxmimum radius and chooses an appropriate number of points for
   /// that atom.
   void Init (double Z, double rmax)
-    {
-      a = 4.34e-6/Z;
-      //a = 4.0e-2;
-      b = 0.002304;
-      //b = 0.004;
-
-      NumPoints = (int)ceil(log(rmax/a+1.0)/b);
-      b = log(rmax/a+1.0)/(double)NumPoints;
-      Start = a * (exp(b) - 1.0);
-      End = rmax;
-      //End   = a * (exp(b*NumPoints) - 1.0);
-      
-      grid.resize(NumPoints);
-      
-      for (int i=0; i<NumPoints; i++)
-	{
-	  grid(i) = a*(exp(b*(i+1))-1.0);
-	  //fprintf (stdout, "%1.12e\n", grid(i));
-	}
+  {
+    a = 4.34e-6/Z;
+    //a = 4.0e-2;
+    b = 0.002304;
+    //b = 0.004;
+    
+    NumPoints = (int)ceil(log(rmax/a+1.0)/b);
+    b = log(rmax/a+1.0)/(double)NumPoints;
+    Start = a * (exp(b) - 1.0);
+    End = rmax;
+    //End   = a * (exp(b*NumPoints) - 1.0);
+    
+    grid.resize(NumPoints);
+    
+    for (int i=0; i<NumPoints; i++) {
+      grid(i) = a*(exp(b*(i+1))-1.0);
+      //fprintf (stdout, "%1.12e\n", grid(i));
     }
+  }
+
+  inline OptimalGrid& operator= (const OptimalGrid& opt)
+  {
+    grid.resize(opt.grid.shape());
+    a         = opt.a;
+    b         = opt.b;
+    NumPoints = opt.NumPoints;
+    Start     = opt.Start;
+    End       = opt.End;
+    grid      = opt.grid;
+    return *this;
+  }
+
   OptimalGrid (double Z, double rmax)
   { Init (Z, rmax); }
 
