@@ -108,6 +108,7 @@ public:
   }
   void Write(IOSectionClass &outSection);
   void Read(IOSectionClass &inSection);
+  QuinticSpline& operator=(const QuinticSpline& spline);
 
   /// Trivial constructor
   QuinticSpline()

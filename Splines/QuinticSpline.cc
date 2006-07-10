@@ -157,3 +157,33 @@ void QuinticSpline::Read(IOSectionClass &inSection)
   Init (newGrid, newY, StartDeriv, EndDeriv, StartDeriv2, EndDeriv2);
   Update();
 }
+
+QuinticSpline&
+QuinticSpline::operator=(const QuinticSpline& spline)
+{
+  UpToDate = spline.UpToDate;
+  Y.resize(spline.Y.shape());   Y  = spline.Y;
+  FX.resize(spline.FX.shape()); FX = spline.FX;
+  FY.resize(spline.FY.shape()); FY = spline.FY;
+  FB.resize(spline.FB.shape()); FB = spline.FB;
+  FC.resize(spline.FC.shape()); FC = spline.FC;
+  FD.resize(spline.FD.shape()); FD = spline.FD;
+  FE.resize(spline.FE.shape()); FE = spline.FE;
+  FF.resize(spline.FF.shape()); FF = spline.FF;
+  offset = spline.offset;
+  StartDeriv = spline.StartDeriv;
+  StartDeriv2 = spline.StartDeriv2;
+  EndDeriv    = spline.EndDeriv;
+  EndDeriv2   = spline.EndDeriv2;
+  B.resize (spline.B.shape()); B = spline.B;
+  C.resize (spline.C.shape()); C = spline.C;
+  D.resize (spline.D.shape()); D = spline.D;
+  E.resize (spline.E.shape()); E = spline.E;
+  F.resize (spline.F.shape()); F = spline.F;
+  I = spline.I;
+  J = spline.J;
+  grid = spline.grid;
+  NumParams = spline.NumParams;
+
+  return *this;
+}
