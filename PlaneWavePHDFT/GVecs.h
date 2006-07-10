@@ -83,6 +83,8 @@ public:
   { return kBox; }
 
   void GetFFTBoxSize (int &nx, int &ny, int &nz);
+
+  GVecsClass& operator=(const GVecsClass &gvecs);
 };
 
 

@@ -246,3 +246,81 @@ MPISystemClass::Read(IOSectionClass &in)
 }
 
 
+MPISystemClass &
+MPISystemClass::operator=(const MPISystemClass &system)
+{
+  Rions.resize(system.Rions.shape());
+  Rions = system.Rions;
+  Box = system.Box;
+  kCut = system.kCut;
+  NumBands = system.NumBands;
+  NumElecs = system.NumElecs;
+  V_elec_ion = system.V_elec_ion;
+  V_ion_ion  = system.V_ion_ion;
+  VlongGrid = system.VlongGrid;
+  Vlong = system.Vlong;
+  Vshort_G0 = system.Vshort_G0;
+  H = system.H;
+  Bands.resize(system.Bands.shape());
+  Bands = system.Bands;
+  HBands.resize(system.Bands.shape());
+  HBands = system.HBands;
+  Occupancies.resize(system.Occupancies.shape());
+  Occupancies = system.Occupancies;
+  CG = system.CG;
+  FFT = system.FFT;
+  Numk = system.Numk;
+  Myk = system.Myk;
+  UseFFT = system.UseFFT;
+  UseMDExtrap = system.UseMDExtrap;
+  FirstTime = system.FirstTime;
+  UseSubspaceRotation = system.UseSubspaceRotation;
+  Verbose = system.Verbose;
+  OutSection = system.OutSection;
+  Bands1.resize(system.Bands1.shape());
+  Bands1 = system.Bands1;
+  Bands2.resize(system.Bands2.shape());
+  Bands2 = system.Bands2;
+  Rho_r1.resize(system.Rho_r1.shape());
+  Rho_r1 = system.Rho_r1;
+  Rho_r2.resize(system.Rho_r2.shape());
+  Rho_r2 = system.Rho_r2;
+  Hmat.resize(system.Hmat.shape());
+  Hmat = system.Hmat;
+  EigVecs.resize(system.EigVecs.shape());
+  EigVecs = system.EigVecs;
+  RotBands.resize(system.RotBands.shape());
+  RotBands = system.RotBands;
+  ConfigNum = system.ConfigNum;
+  SCiter = system.SCiter;
+  Nx = system.Nx;
+  Ny = system.Ny;
+  Nz = system.Nz;
+  Smearer = system.Smearer;
+  SmearOrder = system.SmearOrder;
+  SmearWidth = system.SmearWidth;
+  ChargeMixer = system.ChargeMixer;
+  TempRho.resize (system.TempRho.shape());
+  TempRho = system.TempRho;
+  NewRho.resize (system.NewRho.shape());
+  NewRho = system.NewRho;
+  Rho_r.resize (system.Rho_r.shape());
+  Rho_r = system.Rho_r;
+  Rho_G.resize (system.Rho_G.shape());
+  Rho_G = system.Rho_G;
+  VH.resize(system.VH.shape());
+  VH = system.VH;
+  VXC.resize(system.VXC.shape());
+  VXC = system.VXC;
+  h_G.resize (system.h_G.shape());
+  h_G = system.h_G;
+  EH = system.EH;
+  EXC = system.EXC;
+  Eelec_ion = system.Eelec_ion;
+  AtomGrid = system.AtomGrid;
+  GVecs = system.GVecs;
+
+  return *this;
+}
+
+

@@ -4,8 +4,9 @@ module1 = Extension('IOSection',
                     sources = ['InputOutputPythonWrapper.cc','InputOutput.cc',\
                                'InputOutputHDF5.cc', 'InputOutputASCII.cc',\
                                'InputOutputXML.cc' ],\
-                    include_dirs=['/usr/include/libxml2'],
-                    library_dirs=[ ],
+                    include_dirs=['/usr/include/libxml2',\
+                                  '/turing/projects/mcc/include'],
+                    library_dirs=['/turing/projects/mcc/lib'],
                     libraries =  ['blitz', 'xml2', 'hdf5'])
 
 setup (name = 'PackageName',

@@ -282,3 +282,14 @@ FFTMatBox::AddToVec (zMatVec &c)
     abort();
   }
 }
+
+
+FFTBox&
+FFTBox::operator=(const FFTBox &fft)
+{
+  Nx = fft.Nx;
+  Ny = fft.Ny;
+  Nz = fft.Nz;
+
+  return *this;
+}

@@ -194,6 +194,8 @@ public:
   void CalcChargeDensity(Array<double,3> &rho);
   void WriteXSFFile(string filename);
 
+  MPISystemClass& operator= (const MPISystemClass &system);
+
   MPISystemClass(int numBands, int numElecs,
 		 CommunicatorClass &bandcomm, CommunicatorClass &kcomm,
 		 bool useLDA=false, bool mdextrap=false) 

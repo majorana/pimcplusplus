@@ -50,6 +50,7 @@ public:
     resize(Nx, Ny, Nz);
   }
 
+  FFTBox& operator=(const FFTBox& fft);
   FFTBox (GVecsClass &gvecs) : GVecs (gvecs)
   {
   }

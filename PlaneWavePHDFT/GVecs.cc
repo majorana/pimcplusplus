@@ -187,3 +187,26 @@ void GVecsClass::GetFFTBoxSize(int &nx, int &ny, int &nz)
 {
   nx=Nx; ny=Ny; nz=Nz;
 }
+
+
+GVecsClass& 
+GVecsClass::operator=(const GVecsClass &gvecs)
+{
+  GVecs.resize(gvecs.GVecs.shape());
+  GVecs = gvecs.GVecs;
+  Indices.resize(gvecs.Indices.shape());
+  Indices = gvecs.Indices;
+  GDiff.resize(gvecs.GDiff.size());
+  GDiff = gvecs.GDiff;
+  GDiffInv2.resize(gvecs.GDiffInv2.shape());
+  GDiffInv2 = gvecs.GDiffInv2;
+  IDiff.resize (gvecs.IDiff.shape());
+  IDiff = gvecs.IDiff;
+  Box = gvecs.Box;
+  kBox = gvecs.kBox;
+  Nx = gvecs.Nx;  Ny = gvecs.Ny;  Nz = gvecs.Nz;
+  kCut = gvecs.kCut;
+  k = gvecs.k;
+
+  return *this;
+}

@@ -37,6 +37,7 @@ public:
   void Apply (const zVec &c, zVec &Kc);
   void Setk  (Vec3 k);
 
+  PWKineticClass& operator=(const PWKineticClass &kinetic);
   PWKineticClass (GVecsClass &gvecs) : 
     GVecs (gvecs), IsSetup(false), kPoint(0.0, 0.0, 0.0)
   {
@@ -117,6 +118,7 @@ public:
   inline const Array<complex<FFT_FLOAT>,3> GetVr()
   {  return Vion->GetVr();    }
 
+  HamiltonianClass& operator=(const HamiltonianClass &h);
   HamiltonianClass (GVecsClass &gvecs, FFTBox &fft) 
     : GVecs(gvecs), Kinetic(gvecs), Vion(NULL), FFT(fft)
   {

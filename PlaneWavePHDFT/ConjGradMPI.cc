@@ -319,3 +319,39 @@ ConjGradMPI::ApplyH()
   }
   CollectBands();
 }
+
+
+ConjGradMPI&
+ConjGradMPI::operator=(const ConjGradMPI &cg)
+{
+  Verbose = cg.Verbose;
+  c.resize(cg.c.shape()); c=cg.c;
+  cnext.resize(cg.cnext.shape()); cnext=cg.cnext;
+  Hc.resize(cg.Hc.shape()); Hc=cg.Hc;
+  Phi.resize(cg.Phi.shape()); Phi=cg.Phi;
+  Phip.resize(cg.Phip.shape()); Phip=cg.Phip;
+  Phipp.resize(cg.Phipp.shape()); Phipp=cg.Phipp;
+  Xi.resize(cg.Xi.shape()); Xi=cg.Xi;
+  Eta.resize(cg.Eta.shape()); Eta=cg.Eta;
+  EtaXiLast.resize(cg.EtaXiLast.shape()); EtaXiLast=cg.EtaXiLast;
+  E0 = cg.E0;
+  IsSetup = cg.IsSetup;
+  iter = cg.iter;
+  CurrentBand = cg.CurrentBand;
+  LastBand = cg.LastBand;
+  NumOccupied = cg.NumOccupied;
+  lastPhis.resize(cg.lastPhis.shape());
+  lastPhis = cg.lastPhis;
+  Tolerance = cg.Tolerance;
+  MyFirstBand = cg.MyFirstBand;
+  MyLastBand  = cg.MyLastBand;
+  Residuals.resize(cg.Residuals.shape());
+  Residuals = cg.Residuals;
+  Ortho = cg.Ortho;
+  T.resize(cg.T.shape());
+  T = cg.T;
+  Energies.resize(cg.Energies.shape());
+  Energies = cg.Energies;
+  
+  return *this;
+}

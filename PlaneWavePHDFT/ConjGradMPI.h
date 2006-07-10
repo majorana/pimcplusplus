@@ -78,6 +78,7 @@ public:
   inline int GetFirstBand() { return MyFirstBand; }
   inline int GetLastBand () { return MyLastBand; }
   inline void SetVerbose(bool verb) { Verbose = verb; }
+  ConjGradMPI& operator=(const ConjGradMPI& cg);
 
   ConjGradMPI (HamiltonianClass &h,
 	       Array<complex<double>,2> &bands,

@@ -72,3 +72,23 @@ VionBase::Apply   (const zVec &c, zVec &Hc,
        << " of the potentials.\n"; 
   abort();
 }
+
+
+HamiltonianClass&
+HamiltonianClass::operator=(const HamiltonianClass& h)
+{
+  Kinetic = h.Kinetic;
+  Vion    = h.Vion;
+  kPoint  = h.kPoint;
+  return *this;
+}
+
+PWKineticClass& 
+PWKineticClass::operator=(const PWKineticClass &kinetic)
+{
+  halfG2.resize (kinetic.halfG2.shape());
+  halfG2 = kinetic.halfG2;
+  kPoint = kinetic.kPoint;
+  IsSetup = kinetic.IsSetup;
+  return *this;
+}
