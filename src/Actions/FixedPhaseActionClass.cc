@@ -846,10 +846,14 @@ FixedPhaseClass::UpdateCache()
   DownMatrixCache [1] = DownMatrixCache [0];
   DownGradMatCache[1] = DownGradMatCache[0];
 
+  ModeType mode = GetMode();
   SetMode (NEWMODE);
   Action (0, Path.NumTimeSlices()-1, Path.Species(IonSpeciesNum).Ptcls, 0, IonSpeciesNum);
-  UpAction.AcceptCopy();
-  DownAction.AcceptCopy();
+  SetMode (OLDMODE);
+  Action (0, Path.NumTimeSlices()-1, Path.Species(IonSpeciesNum).Ptcls, 0, IonSpeciesNum);
+  SetMode (mode);
+//   UpAction.AcceptCopy();
+//   DownAction.AcceptCopy();
   
   stop = clock();
   perr << "Finished cache update.  Time = "
