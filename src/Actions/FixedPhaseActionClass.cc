@@ -206,8 +206,8 @@ FixedPhaseClass::AcceptCopy (int slice1, int slice2, int speciesNum)
      DownGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
   else if (speciesNum == IonSpeciesNum) {
-    AcceptCopy(slice1, slice2, UpSpeciesNum);
-    AcceptCopy(slice1, slice2, DownSpeciesNum);
+//     AcceptCopy(slice1, slice2, UpSpeciesNum);
+//     AcceptCopy(slice1, slice2, DownSpeciesNum);
     System[OLDMODE] = System[NEWMODE];
   }
 }
@@ -232,8 +232,8 @@ FixedPhaseClass::RejectCopy (int slice1, int slice2, int speciesNum)
      DownGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
   else if (speciesNum == IonSpeciesNum) {
-    RejectCopy(slice1, slice2, UpSpeciesNum);
-    RejectCopy(slice1, slice2, DownSpeciesNum);
+//     RejectCopy(slice1, slice2, UpSpeciesNum);
+//     RejectCopy(slice1, slice2, DownSpeciesNum);
     System[NEWMODE] = System[OLDMODE];
   }
 
@@ -626,6 +626,8 @@ FixedPhaseClass::Read(IOSectionClass &in)
   V_ion_ion  = &PathData.Actions.GetPotential (IonSpeciesNum, IonSpeciesNum);
   System[0].Setup (Path.GetBox(), kVec, kCut, 
 		 *V_elec_ion, *V_ion_ion, UseLDA);
+//   System[1].Setup (Path.GetBox(), kVec, kCut, 
+// 		 *V_elec_ion, *V_ion_ion, UseLDA);
   System[0].Read (in);
   /////////////////////////////
   // Setup the ion positions //

@@ -430,7 +430,7 @@ ActionsClass::ShiftData (int slicesToShift)
 
 void 
 ActionsClass::AcceptCopy (int startSlice, int endSlice,
-			       const Array<int,1> &activeParticles)
+			  const Array<int,1> &activeParticles)
 {
   for (int i=0; i<NodalActions.size(); i++)
     if (NodalActions(i) != NULL)
