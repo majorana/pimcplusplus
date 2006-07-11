@@ -2,7 +2,8 @@ double tau=0.125;
 
 Section (Parallel)
 {
-  int ProcsPerClone = 8;
+  int ProcsPerClone = 2;
+  //int ProcsPerClone = 1;
 }
 
 int Seed = 12345;
@@ -173,11 +174,11 @@ Section (Observables)
   string OutFileBase=
     "~/Runs/NaRuns/Displace/Na_16_rho240_T3000_1kvec_Sigma0.1_SmartMC";
   int FileStart = 0;
-  Section (Observable) {
-    string Type = "Energy";
-    string Name = "Energy";
-    int Frequency=1;
-  }
+//   Section (Observable) {
+//     string Type = "Energy";
+//     string Name = "Energy";
+//     int Frequency=1;
+//   }
   Section (Observable) {
     string Type = "Pressure";
     string Name = "Pressure";
@@ -185,11 +186,11 @@ Section (Observables)
     double Prefactor = 2.942184e8;
     int Frequency=1;
   }
-  Section (Observable) {
-    string Type = "Conductivity";
-    string Name = "Conductivity";
-    int Frequency=1;
-  }
+//   Section (Observable) {
+//     string Type = "Conductivity";
+//     string Name = "Conductivity";
+//     int Frequency=1;
+//   }
   Section (Observable) {
     string Type = "PairCorrelation";
     string Name = "Na-Na";
@@ -216,11 +217,11 @@ Section (Observables)
   //     Array<string,1> SpeciesList(2) = ["eup", "edown"];
   //     int Frequency = 1;
   //   }
-  Section (Observable) {
-    string Type   = "TimeAnalysis";
-    string Name   = "TimeAnalysis";
-    int Frequency = 1;
-  }	
+//   Section (Observable) {
+//     string Type   = "TimeAnalysis";
+//     string Name   = "TimeAnalysis";
+//     int Frequency = 1;
+//   }	
   Section (Observable) {
     int Frequency = 1;
     string Type = "PathDump";
@@ -287,45 +288,27 @@ Section (Algorithm) {
 
   Section (Loop) { //Start Accumulating observables
     int Steps=6000000;
-//      Section (Loop) {
-//        int Steps = 100;
-//        Section (Loop) {
-//  	int Steps = 5;
-//  	Section (Move)    { string Name="eupBlockFast";   } 
-//  	Section (Move)    { string Name="edownBlockFast"; } 
-//        }	
-//        Section (Move)      { string Name = "Shift";        }
-//     }
-//     Section (Loop) {
-//       int Steps = 5;
-//       Section (Loop) {
-// 	int Steps = 5;
-// 	Section (Move)      { string Name="eupBlock";       } 
-// 	Section (Move)      { string Name="edownBlock";     } 
-//       }
-//       Section (Move)      { string Name = "Shift";        }
-//     }
     /// Accumulation loop
+    Section (Loop) {
+      int Steps = 50;
       Section (Loop) {
-	int Steps = 50;
+	int Steps = 5;
 	Section (Loop) {
-	  int Steps = 5;
-	  Section (Loop) {
-	    int Steps = 10;
-	    Section (Move)    { string Name="eupBlock";       } 
-	    Section (Move)    { string Name="edownBlock";     } 
-	    Section (Move)    { string Name="Shift";          }
-	  }
-	  Section (Observe)   { string Name = "Pressure";     }
-	  Section (Observe)   { string Name = "Conductivity"; }
+	  int Steps = 10;
+	  Section (Move)    { string Name="eupBlock";       } 
+	  Section (Move)    { string Name="edownBlock";     } 
+	  Section (Move)    { string Name="Shift";          }
 	}
- 	Section (Observe)   { string Name = "Energy";       }
+// 	  Section (Observe)   { string Name = "Pressure";     }
+// 	  Section (Observe)   { string Name = "Conductivity"; }
+	}
+// 	Section (Observe)   { string Name = "Energy";       }
 // 	Section (Observe)   { string Name = "Pressure";     }
 // 	Section (Observe)   { string Name = "NaSk";         }
 // 	Section (Observe)   { string Name = "WN";           }
  	Section (Observe)   { string Name = "Na-Na";        }
 	Section (Move)      { string Name = "Displace";     }
-	Section (Observe)   { string Name = "TimeAnalysis"; }
+//	Section (Observe)   { string Name = "TimeAnalysis"; }
 	Section (WriteData) { }
       }
     // Dump paths every 50 Langevin steps

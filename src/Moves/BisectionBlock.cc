@@ -30,6 +30,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   //  StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
   assert (NumLevels <= PathData.Actions.GetMaxLevels());
+  LowestLevel = 0;
   if (!in.ReadVar ("LowestLevel", LowestLevel))
     LowestLevel = 0;
   assert (LowestLevel < NumLevels);
@@ -248,7 +249,8 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
-  //  cerr<<"Making bisection block move"<<endl;
+  cerr<<"Making bisection block move:  MyProc = " << 
+      Path.Communicator.MyProc() << endl;
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
 
@@ -263,9 +265,11 @@ void BisectionBlockClass::MakeMove()
     ActiveParticles(0)=-1;
     MultiStageClass::MakeMove();
   }
-
   if (LowestLevel != 0)
     MakeStraightPaths();
+  cerr<<"Done bisection block move:  MyProc = " << 
+      Path.Communicator.MyProc() << endl;
+
 }
 
 

@@ -75,6 +75,10 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
   }
 
   logTratio /= (2.0*Sigma*Sigma);
+  // The transition prob ratios from each processor get multiplied, so
+  // they will be double counted if we do this this way.
+  if (Path.Communicator.MyProc() != 0)
+    logTratio = 0.0;
 
   if (WarpElectrons)
     return exp(logTratio)*NewElectronWarp();
