@@ -41,6 +41,7 @@ public:
   inline double GetWidth ()             { return Width; }
   double D(double E, double mu);
   double S(double E, double mu);
+  MethfesselPaxton& operator=(const MethfesselPaxton& mp);
 };
 
 #endif

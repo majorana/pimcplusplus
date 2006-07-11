@@ -62,3 +62,12 @@ MethfesselPaxton::S(double E, double mu)
   
   return Sn;
 }
+  
+MethfesselPaxton& 
+MethfesselPaxton::operator=(const MethfesselPaxton& mp)
+{
+  Order = mp.Order;
+  Width = mp.Width;
+  A.resize(mp.A.shape());  A = mp.A;
+  H.resize(mp.H.shape());  H = mp.H;
+}
