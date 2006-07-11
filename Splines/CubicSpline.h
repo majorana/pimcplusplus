@@ -143,6 +143,7 @@ public:
     Update();
   }
 
+  CubicSpline& operator= (const CubicSpline& spline);
 
   /// Trivial constructor
   CubicSpline()

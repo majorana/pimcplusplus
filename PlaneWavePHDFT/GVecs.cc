@@ -55,7 +55,9 @@ GVecsClass::GetFFTBoxSize(Vec3 box, Vec3 kvec, double kcut)
   // First, set up G-vectors and difference //
   ////////////////////////////////////////////
   int actxmin, actxmax, actymin, actymax, actzmin, actzmax;
-  actxmin = actxmax = actymin = actymax = actzmin = actzmax = 0;
+  actxmin=0; actxmax=0;
+  actymin=0; actymax=0; 
+  actzmin=0; actzmax=0;
   TinyVector<double,3> g;
   for (int ix=-2*maxX; ix<=2*maxX; ix++) {
     g[0] = ix*kbox[0];

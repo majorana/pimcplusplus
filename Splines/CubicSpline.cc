@@ -210,6 +210,20 @@ void TestMultiCubicSpline()
 }
 
 
+CubicSpline&
+CubicSpline::operator=(const CubicSpline &spline)
+{
+  UpToDate = spline.UpToDate;
+  y.resize(spline.y.shape());     y   = spline.y;
+  d2y.resize(spline.d2y.shape()); d2y = spline.d2y;
+  NumParams = spline.NumParams;
+  grid = spline.grid;
+  StartDeriv = spline.StartDeriv;
+  EndDeriv   = spline.EndDeriv;
+  
+  return *this;
+}
+
 
 //main()
 //{

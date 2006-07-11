@@ -306,6 +306,7 @@ MPISystemClass::operator=(const MPISystemClass &system)
   EXC = system.EXC;
   Eelec_ion = system.Eelec_ion;
   AtomGrid = system.AtomGrid;
+  RadialChargeDensity = system.RadialChargeDensity;
   GVecs = system.GVecs;
 
   return *this;
