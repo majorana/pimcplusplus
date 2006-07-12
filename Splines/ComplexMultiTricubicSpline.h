@@ -163,8 +163,8 @@ public:
   inline ComplexMultiTricubicSpline (const ComplexMultiTricubicSpline &a);
 
   /// Assigment operator -- necessary for array resizeAndPreserve
-  inline ComplexMultiTricubicSpline & operator= (ComplexMultiTricubicSpline &a);
-  inline ComplexMultiTricubicSpline & operator= (ComplexMultiTricubicSpline a);
+  inline ComplexMultiTricubicSpline& operator=(const ComplexMultiTricubicSpline &a);
+  //inline ComplexMultiTricubicSpline & operator= (ComplexMultiTricubicSpline a);
 
 
   inline void Init (Grid *xgrid, Grid *ygrid, Grid *zgrid,
@@ -198,7 +198,7 @@ ComplexMultiTricubicSpline::ComplexMultiTricubicSpline
 
 inline 
 ComplexMultiTricubicSpline& ComplexMultiTricubicSpline::operator=
-(ComplexMultiTricubicSpline &a)
+(const ComplexMultiTricubicSpline &a)
 {
   F.resize(a.F.shape());
   F = a.F;
@@ -213,21 +213,21 @@ ComplexMultiTricubicSpline& ComplexMultiTricubicSpline::operator=
   return (*this);
 }
 
-inline ComplexMultiTricubicSpline& 
-ComplexMultiTricubicSpline::operator=(ComplexMultiTricubicSpline a)
-{
-  F.resize(a.F.shape());
-  F = a.F;
-  Nx = a.Nx;
-  Ny = a.Ny;
-  Nz = a.Nz;
-  N  = a.N;
-  Xgrid = a.Xgrid;
-  Ygrid = a.Ygrid;
-  Zgrid = a.Zgrid;
-  UpToDate = a.UpToDate;
-  return (*this);
-}
+// inline ComplexMultiTricubicSpline& 
+// ComplexMultiTricubicSpline::operator=(ComplexMultiTricubicSpline a)
+// {
+//   F.resize(a.F.shape());
+//   F = a.F;
+//   Nx = a.Nx;
+//   Ny = a.Ny;
+//   Nz = a.Nz;
+//   N  = a.N;
+//   Xgrid = a.Xgrid;
+//   Ygrid = a.Ygrid;
+//   Zgrid = a.Zgrid;
+//   UpToDate = a.UpToDate;
+//   return (*this);
+// }
 
 
 
