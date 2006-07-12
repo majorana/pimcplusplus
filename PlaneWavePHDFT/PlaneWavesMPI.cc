@@ -43,6 +43,7 @@ MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut,
   int NDelta = H.GVecs.DeltaSize();
   if (UseLDA) 
     InitLDA();
+  CG.Setup();
 }
 
 
