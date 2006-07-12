@@ -246,6 +246,20 @@ FixedPhaseClass::RejectCopy (int slice1, int slice2, int speciesNum)
 void 
 FixedPhaseClass::Init(int speciesNum)
 {
+  ModeType mode = GetMode();
+  SetMode (NEWMODE);
+  if (IonsHaveMoved()) {
+    UpdateBands();
+    UpdateCache();
+  }
+  SetMode (OLDMODE);
+  if (IonsHaveMoved()) {
+    UpdateBands();
+    UpdateCache();
+  }
+  SetMode (mode);
+  
+  
   if (speciesNum == UpSpeciesNum) {
     perr << "Initializing up species.\n";  
     UpdateCache();
