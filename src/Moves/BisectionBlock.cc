@@ -249,8 +249,6 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
-  cerr<<"Making bisection block move:  MyProc = " << 
-      Path.Communicator.MyProc() << endl;
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
 
@@ -267,9 +265,6 @@ void BisectionBlockClass::MakeMove()
   }
   if (LowestLevel != 0)
     MakeStraightPaths();
-  cerr<<"Done bisection block move:  MyProc = " << 
-      Path.Communicator.MyProc() << endl;
-
 }
 
 

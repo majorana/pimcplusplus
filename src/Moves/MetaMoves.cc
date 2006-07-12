@@ -38,7 +38,6 @@ void ShiftMoveClass::Read(IOSectionClass &theInput)
 
 void ShiftMoveClass::MakeMove()
 {
-  cerr << "Start ShiftMove:  MyProc = " << Path.Communicator.MyProc() << endl;
   int slice1, slice2;
   // The last processor will have the least number of slices
   // possible.  Use that for the maximum shift.
@@ -63,5 +62,4 @@ void ShiftMoveClass::MakeMove()
   PathData.MoveJoin(0);
   PathData.ShiftData(numTimeSlicesToShift);
   PathData.Join=numTimeSlicesToShift;
-  cerr << "End ShiftMove:  MyProc = " << Path.Communicator.MyProc() << endl;
 }
