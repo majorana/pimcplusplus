@@ -432,8 +432,15 @@ void
 ActionsClass::AcceptCopy (int startSlice, int endSlice,
 			  const Array<int,1> &activeParticles)
 {
+  PathClass &Path = PathData.Path;
+  bool activeSpecies[Path.NumSpecies()];
+  for (int i=0; i<Path.NumSpecies(); i++)
+    activeSpecies[i] = false;
+  for (int pi=0; pi<activeParticles.size(); pi++)
+    activeSpecies[Path.ParticleSpeciesNum(activeParticles(pi))] = true;
+
   for (int i=0; i<NodalActions.size(); i++)
-    if (NodalActions(i) != NULL)
+    if (NodalActions(i) != NULL && activeSpecies[i])
       NodalActions(i)->AcceptCopy (startSlice, endSlice);
 }
 
@@ -442,8 +449,15 @@ void
 ActionsClass::RejectCopy (int startSlice, int endSlice,
 			       const Array<int,1> &activeParticles)
 {
+  PathClass &Path = PathData.Path;
+  bool activeSpecies[Path.NumSpecies()];
+  for (int i=0; i<Path.NumSpecies(); i++)
+    activeSpecies[i] = false;
+  for (int pi=0; pi<activeParticles.size(); pi++)
+    activeSpecies[Path.ParticleSpeciesNum(activeParticles(pi))] = true;
+
   for (int i=0; i<NodalActions.size(); i++)
-    if (NodalActions(i) != NULL)
+    if (NodalActions(i) != NULL && activeSpecies[i])
       NodalActions(i)->RejectCopy (startSlice, endSlice);
 }
 

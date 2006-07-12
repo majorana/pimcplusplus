@@ -206,9 +206,13 @@ FixedPhaseClass::AcceptCopy (int slice1, int slice2, int speciesNum)
      DownGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
   else if (speciesNum == IonSpeciesNum) {
+    cerr << "Fixed phase ion AcceptCopy.  MyProc = " 
+	 << PathData.Path.Communicator.MyProc() << endl;
 //     AcceptCopy(slice1, slice2, UpSpeciesNum);
 //     AcceptCopy(slice1, slice2, DownSpeciesNum);
+    Rions.AcceptCopy();
     System[OLDMODE] = System[NEWMODE];
+    BandSplines.AcceptCopy();
   }
 }
 
@@ -232,9 +236,13 @@ FixedPhaseClass::RejectCopy (int slice1, int slice2, int speciesNum)
      DownGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
   else if (speciesNum == IonSpeciesNum) {
+    cerr << "Fixed phase ion RejectCopy.  MyProc = " 
+	 << PathData.Path.Communicator.MyProc() << endl;
 //     RejectCopy(slice1, slice2, UpSpeciesNum);
 //     RejectCopy(slice1, slice2, DownSpeciesNum);
+    Rions.RejectCopy();
     System[NEWMODE] = System[OLDMODE];
+    BandSplines.RejectCopy();
   }
 
 }
