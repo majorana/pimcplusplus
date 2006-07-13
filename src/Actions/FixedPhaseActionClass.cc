@@ -30,7 +30,8 @@ FixedPhaseClass::Setk(Vec3 k)
 {
   kVec = k;
   System[0].Setk(k);
-  System[1].Setk(k);
+  if (MonteCarloIons)
+    System[1].Setk(k);
   UpdateBands();
 }
 
@@ -206,12 +207,9 @@ FixedPhaseClass::AcceptCopy (int slice1, int slice2, int speciesNum)
      DownGradMatCache[NEWMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
   else if (speciesNum == IonSpeciesNum) {
-    cerr << "Fixed phase ion AcceptCopy.  MyProc = " 
-	 << PathData.Path.Communicator.MyProc() << endl;
-//     AcceptCopy(slice1, slice2, UpSpeciesNum);
-//     AcceptCopy(slice1, slice2, DownSpeciesNum);
     Rions.AcceptCopy();
-    System[OLDMODE] = System[NEWMODE];
+    if (MonteCarloIons)
+      System[OLDMODE] = System[NEWMODE];
     BandSplines.AcceptCopy();
   }
 }
@@ -236,12 +234,9 @@ FixedPhaseClass::RejectCopy (int slice1, int slice2, int speciesNum)
      DownGradMatCache[OLDMODE](Range(slice1,slice2),Range::all(),Range::all());
   }
   else if (speciesNum == IonSpeciesNum) {
-    cerr << "Fixed phase ion RejectCopy.  MyProc = " 
-	 << PathData.Path.Communicator.MyProc() << endl;
-//     RejectCopy(slice1, slice2, UpSpeciesNum);
-//     RejectCopy(slice1, slice2, DownSpeciesNum);
     Rions.RejectCopy();
-    System[NEWMODE] = System[OLDMODE];
+    if (MonteCarloIons)
+      System[NEWMODE] = System[OLDMODE];
     BandSplines.RejectCopy();
   }
 
@@ -557,6 +552,11 @@ FixedPhaseClass::Read(IOSectionClass &in)
     perr << "Using MD wavefunction extrapolation.\n";
   else
     perr << "Not using MD wavefunction extrapolation.\n";
+  in.ReadVar ("MonteCarloIons", MonteCarloIons, false);
+  if (MonteCarloIons) 
+    perr << "Using duplicate plane wave objects for MC on ions.\n";
+  else
+    perr << "Using single plane wave object for non-MC ion moves.\n";
 
   string speciesString;
   assert (in.ReadVar ("UpSpecies", speciesString));
@@ -640,16 +640,21 @@ FixedPhaseClass::Read(IOSectionClass &in)
   NumBands = 2*NumFilled;
   // The last true indicates using MD extrapolation to initialize
   // wavefunctions. 
-  System.SetOld(new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, 
-				    PathData.InterComm, UseLDA, UseMDExtrap));
-  System.SetNew(new MPISystemClass (NumBands, NumUp+NumDown, PathData.IntraComm, 
-				    PathData.InterComm, UseLDA, UseMDExtrap));
+  System.SetOld (new MPISystemClass
+		 (NumBands,NumUp+NumDown, PathData.IntraComm,
+		  PathData.InterComm, UseLDA, UseMDExtrap));
+  if (MonteCarloIons) {
+    System.SetNew (new MPISystemClass
+		   (NumBands,NumUp+NumDown, PathData.IntraComm,
+		    PathData.InterComm, UseLDA, UseMDExtrap));
+  }
+  else 
+    System.SetNew (&System[OLDMODE]);
+    
   V_elec_ion = &PathData.Actions.GetPotential (IonSpeciesNum,  UpSpeciesNum);
   V_ion_ion  = &PathData.Actions.GetPotential (IonSpeciesNum, IonSpeciesNum);
   System[0].Setup (Path.GetBox(), kVec, kCut, 
 		 *V_elec_ion, *V_ion_ion, UseLDA);
-//   System[1].Setup (Path.GetBox(), kVec, kCut, 
-// 		 *V_elec_ion, *V_ion_ion, UseLDA);
   System[0].Read (in);
   /////////////////////////////
   // Setup the ion positions //
@@ -662,7 +667,8 @@ FixedPhaseClass::Read(IOSectionClass &in)
   Rions[1] = Vec3(0.0, 0.0, 0.0);
   System[0].SetIons (Rions);
 
-  System[1] = System[0];
+  if (MonteCarloIons)
+    System[1] = System[0];
 
   ////////////////////////////////////////
   // Setup real space grids and splines //

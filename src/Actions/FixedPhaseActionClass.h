@@ -75,7 +75,7 @@ private:
   // Note this action DOES NOT INCLUDE TAU FACTOR
   double CalcAction (Array<Vec3,1> &G1, Array<Vec3,1> &G2,
 		     double phase1, double phase2, Array<Vec3,1> &dR);
-		     
+  bool MonteCarloIons;
 public:
   //  double CalcGrad2 (int slice, int species);
   double CalcGrad2 (int slice, int species, 
