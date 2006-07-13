@@ -68,6 +68,8 @@ private:
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
  public:
+  dVec CenterOfMass;
+
   CellMethodClass Cell;
   /// This is the maximum number of k vectors in each direction
   TinyVector<int,NDIM> MaxkIndex;
