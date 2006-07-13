@@ -136,6 +136,11 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       //      else
       //	int dummy=5;
       if (level == LowestLevel) {
+	bool useTether=false;
+	in.ReadVar("UseTether",useTether);
+	if (useTether){
+	  newStage->Actions.push_back(&PathData.Actions.Tether);
+	}
 	if (addStructureRejectStage){
 	  newStage->Actions.push_back(&PathData.Actions.StructureReject);
 	}
