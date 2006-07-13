@@ -42,6 +42,7 @@
 #include "TruncatedInverse.h"
 #include "Mu.h"
 #include "VariationalPI.h"
+#include "Tether.h"
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
 /// It includes kinetic, short range, long range, long range RPA
@@ -118,7 +119,7 @@ public:
   // Potentials
   ShortRangePotClass ShortRangePot;
   LongRangePotClass  LongRangePot;
-  
+  TetherClass Tether;
   /// Stores whether we use Random Phase Approximation corrections to
   /// the long range action.
   bool UseRPA;
@@ -176,6 +177,7 @@ public:
   inline int GetMaxLevels() { return MaxLevels; }
 
   ActionsClass(PathDataClass &pathData) : 
+    Tether(pathData),
     ShortRange(pathData,PairMatrix),
     ShortRangeOn(pathData,PairMatrix),
     ShortRangeApproximate(pathData,PairMatrix),

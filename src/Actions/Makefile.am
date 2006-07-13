@@ -53,6 +53,8 @@ libactions_la_SOURCES =            \
     ShortRangePotClass.cc          \
     ShortRangePotClass.h           \
     StructureReject.cc             \
+    Tether.h                       \
+    Tether.cc                      \
     TIP5PWaterClass.cc             \
     TIP5PWaterClass.h              \
     VariationalPI.h                \

@@ -165,7 +165,10 @@ ActionsClass::Read(IOSectionClass &in)
     StructureReject.Read(in);
     in.CloseSection();
   }
-
+  if (in.OpenSection("Tether")){
+    Tether.Read(in);
+    in.CloseSection();
+  }
   ///Reading in information for David long range action
   if (PathData.Path.DavidLongRange){
     DavidLongRange.Read(in);
