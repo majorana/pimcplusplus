@@ -534,8 +534,11 @@ LangevinMoveClass::LangevinStep()
   /// Increment the time
   Time += TimeStep;
   
-  /// Update the nodal actions
+  // Update the nodal actions
+  SetMode(NEWMODE);
   PathData.Actions.UpdateNodalActions();
+  PathData.Actions.AcceptCopy(0, Path.NumTimeSlices(),
+			      Path.Species(LDSpecies).Ptcls);
 
   /// And the Rho_ks
   PathData.Path.UpdateRho_ks();
