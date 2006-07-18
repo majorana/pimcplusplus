@@ -12,9 +12,11 @@ protected:
   static int SphereListNum, OffScreenListNum;
   static bool SphereListCreated, OffScreenListCreated;
   bool OffScreen;
+  Vec3 Box;
   void Set();
 public:
   void SetPos (Vec3 pos);
+  void SetBox (Vec3 box);
   void SetRadius (double radius);
   void SetColor (Vec3 color);
   void DrawPOV (FILE *fout, string rotString);

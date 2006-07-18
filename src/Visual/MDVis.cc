@@ -463,6 +463,7 @@ MDVisualClass::DrawFrame(bool offScreen)
   for (iter=sphereList.begin(); iter!=sphereList.end(); iter++) {
     SphereObject *sphere = new SphereObject (offScreen);
     sphere->SetPos(*iter);
+    sphere->SetBox(Box);
     sphere->SetRadius(radius);
     PathVis.Objects.push_back(sphere);
   }

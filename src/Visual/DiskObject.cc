@@ -113,18 +113,18 @@ DiskObject::SetColor (Vec3 color)
 void
 DiskObject::DrawPOV (FILE *fout, string rotString)
 {
-  fprintf (fout, "disk {\n");
-  fprintf (fout, "  <%10.8f, %10.8f, %10.8f>, %10.8f\n",
-	   Pos[0], Pos[1], Pos[2], Radius);
-  fprintf (fout, "%s", rotString.c_str());
-  fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
-	   Color[0], Color[1], Color[2]);
-  fprintf (fout, "  finish {\n");
-  fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
-  //  fprintf (fout, "    reflection 0.5\n");
-  fprintf (fout, "    specular 0.6\n");
-  fprintf (fout, "    roughness 0.025 \n");
-  fprintf (fout, "  }\n");
-  fprintf (fout, "}\n");
+//   fprintf (fout, "disk {\n");
+//   fprintf (fout, "  <%10.8f, %10.8f, %10.8f>, %10.8f\n",
+// 	   Pos[0], Pos[1], Pos[2], Radius);
+//   fprintf (fout, "%s", rotString.c_str());
+//   fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
+// 	   Color[0], Color[1], Color[2]);
+//   fprintf (fout, "  finish {\n");
+//   fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
+//   //  fprintf (fout, "    reflection 0.5\n");
+//   fprintf (fout, "    specular 0.6\n");
+//   fprintf (fout, "    roughness 0.025 \n");
+//   fprintf (fout, "  }\n");
+//   fprintf (fout, "}\n");
 
 }

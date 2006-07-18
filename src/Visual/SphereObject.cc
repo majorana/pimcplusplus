@@ -96,22 +96,37 @@ SphereObject::SetColor (Vec3 color)
   Set();
 }
 
+void
+SphereObject::SetBox (Vec3 box)
+{
+  Box = box;
+}
+
 
 void
 SphereObject::DrawPOV (FILE *fout, string rotString)
 {
-  fprintf (fout, "sphere {\n");
-  fprintf (fout, "  <%10.8f, %10.8f, %10.8f>, %10.8f\n",
+  fprintf (fout, "intersection {\n");
+  fprintf (fout, "  box {\n");
+  fprintf (fout, "    <%10.8f, %10.8f, %10.8f>,\n",
+	   -0.5*Box[0], -0.5*Box[1], -0.5*Box[2]);
+  fprintf (fout, "    <%10.8f, %10.8f, %10.8f>\n",
+	   0.5*Box[0],   0.5*Box[1],  0.5*Box[2]);
+  fprintf (fout, "%s", rotString.c_str());
+  fprintf (fout, "  }\n");
+  fprintf (fout, "  sphere {\n");
+  fprintf (fout, "    <%10.8f, %10.8f, %10.8f>, %10.8f\n",
 	   Pos[0], Pos[1], Pos[2], Radius);
   fprintf (fout, "%s", rotString.c_str());
-  fprintf (fout, "  pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
+  fprintf (fout, "  }\n");    // Sphere
+  fprintf (fout, "    pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
 	   Color[0], Color[1], Color[2]);
-  fprintf (fout, "  finish {\n");
-  fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
+  fprintf (fout, "    finish {\n");
+  fprintf (fout, "      ambient 0.1\n  diffuse 0.8\n");
   //  fprintf (fout, "    reflection 0.5\n");
-  fprintf (fout, "    specular 0.6\n");
-  fprintf (fout, "    roughness 0.025 \n");
-  fprintf (fout, "  }\n");
-  fprintf (fout, "}\n");
+  fprintf (fout, "      specular 0.6\n");
+  fprintf (fout, "      roughness 0.025 \n");
+  fprintf (fout, "    }\n"); //
+  fprintf (fout, "}\n");    // Intersection
 
 }
