@@ -27,12 +27,12 @@ private:
   Array<Vec3,1> Rions;
   Potential *PH;
   double kCut;
-  Array<Vec3,1> kPoints;
+  Array<Vec3,1> kPoints, kMesh;
   int NumBands, NumElecs;
   Vec3 Box;
   string OutFilename;
   int InterpPoints;
-  CommunicatorClass Communicator;
+  CommunicatorClass BandComm, kComm;
   CoulombPot IonPot;
   bool UseLDA;
 public:

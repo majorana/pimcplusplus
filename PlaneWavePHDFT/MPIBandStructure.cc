@@ -19,7 +19,7 @@
 void
 MPIBandStructureClass::Read(IOSectionClass &in)
 {
-  Communicator.SetWorld();
+  BandComm.SetWorld();
   // Read the pseudoHamiltonian
   assert (in.OpenSection ("Potential"));
   PH = ReadPotential (in);
@@ -54,13 +54,20 @@ MPIBandStructureClass::Read(IOSectionClass &in)
     for (int j=0; j<3; j++)
       kPoints(i)[j] = tmpkPoints(i,j);
 
+  if (UseLDA) {
+    
+    assert (in.ReadVar("kMesh", tmpkPoints));
+  }    
+  
+
+
   // Read the number of interpolation points per kPoint
   assert (in.ReadVar ("InterpPoints", InterpPoints));
 
   // Read the k-cutoff
   assert(in.ReadVar("kCut", kCut));
   System = new MPISystemClass(NumBands, NumElecs,
-			      Communicator, Communicator);
+			      BandComm, kComm);
 
   // Read the output file name
   assert (in.ReadVar ("OutFilename", OutFilename));
@@ -70,14 +77,21 @@ MPIBandStructureClass::Read(IOSectionClass &in)
   System->SetIons(Rions);
 
 
-};
+}
+
+void
+MPIBandStructureClass::CalcLDABands()
+{
+  
+
+}
 
 
 void
 MPIBandStructureClass::CalcBands()
 {
   FILE *fout;
-  if (Communicator.MyProc()==0) {
+  if (BandComm.MyProc()==0) {
     fout = fopen (OutFilename.c_str(), "w");
     assert (fout != NULL);
   }
@@ -86,18 +100,18 @@ MPIBandStructureClass::CalcBands()
     for (int i=0; i<InterpPoints; i++) {
       double alpha = (double)i/(double)InterpPoints;
       Vec3 k = (1.0-alpha)*kPoints(ki) + alpha*kPoints(ki+1);
-      if (Communicator.MyProc()==0) 
+      if (BandComm.MyProc()==0) 
 	fprintf (fout, "%1.6e %1.6e %1.6e ", k[0], k[1], k[2]);
       System->Setk(k);
       System->DiagonalizeH();
-      if (Communicator.MyProc()==0) {
+      if (BandComm.MyProc()==0) {
 	for (int band=0; band<NumBands; band++)
 	  fprintf (fout, "%1.16e ", System->GetEnergy(band));
 	fprintf (fout, "\n");
 	fflush (fout);
       }
     }
-  if (Communicator.MyProc()==0)
+  if (BandComm.MyProc()==0)
     fclose(fout);
 }
 
@@ -112,9 +126,6 @@ main(int argc, char **argv)
   }
   else {
   clock_t start, end;
-
-
-
     IOSectionClass in;
     assert (in.OpenFile(argv[1]));
     MPIBandStructureClass BandStructure;
