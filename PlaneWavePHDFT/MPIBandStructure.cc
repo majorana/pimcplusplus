@@ -23,6 +23,9 @@ MPIBandStructureClass::Read(IOSectionClass &in)
   // Read the pseudoHamiltonian
   assert (in.OpenSection ("Potential"));
   PH = ReadPotential (in);
+  double Z1Z2 = round (50.0*PH->V(50.0));
+  cerr << "Z = " << -Z1Z2 << endl;
+  IonPot.Z1Z2 = Z1Z2;
   in.CloseSection();
 
   // Read the box
@@ -40,6 +43,8 @@ MPIBandStructureClass::Read(IOSectionClass &in)
 
   // Read the number of bands
   assert (in.ReadVar ("NumBands", NumBands));
+  assert (in.ReadVar ("NumElecs", NumElecs));
+  assert (in.ReadVar ("UseLDA", UseLDA));
 	  
   // Read the k-point list
   Array<double,2> tmpkPoints;
@@ -54,13 +59,14 @@ MPIBandStructureClass::Read(IOSectionClass &in)
 
   // Read the k-cutoff
   assert(in.ReadVar("kCut", kCut));
-  System = new MPISystemClass(NumBands, Communicator, Communicator);
+  System = new MPISystemClass(NumBands, NumElecs,
+			      Communicator, Communicator);
 
   // Read the output file name
   assert (in.ReadVar ("OutFilename", OutFilename));
 
   // Setup the plane-wave system
-  System->Setup (Box, kPoints(0), kCut, *PH, true);
+  System->Setup (Box, kPoints(0), kCut, *PH, IonPot, UseLDA);
   System->SetIons(Rions);
 
 

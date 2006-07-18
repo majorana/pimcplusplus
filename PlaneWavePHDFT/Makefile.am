@@ -11,6 +11,7 @@ LDADD = libpw.la                  ../IO/libIO.la                          \
         ../MatrixOps/libmatops.la ../Splines/libspline.la                 \
         ../Fitting/libfitting.la  ../Integration/libquad.la               \
         ../MPI/libcomm.la         ../Ewald/libbreakup.la                  \
+	../Atom/libatom.la        ../DFT/libdft.la                        \
         $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(FFTW3_LIBS) \
         $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS)      \
         $(FLIBS)
