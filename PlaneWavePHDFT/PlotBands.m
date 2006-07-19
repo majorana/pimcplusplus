@@ -1,5 +1,5 @@
 %bands = load ('TestBands.dat');
-bands = load ('TestLDABands2.dat');
+bands = load ('TestLDABands5.dat');
 bands = bands(:,1:9);
 bands2 = load ('TestBands2.dat');
 t = [0:0.1:6.9];
@@ -45,7 +45,7 @@ handles = plot (t, bands(:,4), 'b', tb, abands(:,4), 'r', t, fp1, 'k', ...% t2, 
       t, bands(:,8), 'b', tb, abands(:,8), 'r', t, fp5, 'k', ...% t2, bands2(:,8), 'g--',...
       t, bands(:,9), 'b', tb, abands(:,9), 'r', t, fp6, 'k');
 set (handles, 'LineWidth', 2);
-axis([0 7 0 0.85]);
+axis([0 7 0 0.45]);
 
 ca = get (gcf, 'CurrentAxes');
 set(ca, 'FontSize', 16');

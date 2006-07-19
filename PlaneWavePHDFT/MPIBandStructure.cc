@@ -96,7 +96,10 @@ MPIBandStructureClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("OutFilename", OutFilename));
 
   // Setup the plane-wave system
-  System->Setup (Box, kPoints(0), kCut, *PH, IonPot, UseLDA);
+  if (UseLDA)
+    System->Setup (Box, kMesh(MykPoint), kCut, *PH, IonPot, UseLDA);
+  else
+    System->Setup (Box, kPoints(0), kCut, *PH, IonPot, UseLDA);
   System->SetIons(Rions);
 
 
