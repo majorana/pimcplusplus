@@ -19,7 +19,7 @@
 void
 MPIBandStructureClass::Read(IOSectionClass &in)
 {
-  BandComm.SetWorld();
+  WorldComm.SetWorld();
   // Read the pseudoHamiltonian
   assert (in.OpenSection ("Potential"));
   PH = ReadPotential (in);
@@ -55,9 +55,32 @@ MPIBandStructureClass::Read(IOSectionClass &in)
       kPoints(i)[j] = tmpkPoints(i,j);
 
   if (UseLDA) {
-    
     assert (in.ReadVar("kMesh", tmpkPoints));
+    kMesh.resize(tmpkPoints.rows());
+    for (int i=0; i<kMesh.size(); i++) {
+      kMesh(i)[0] = tmpkPoints(i,0);
+      kMesh(i)[1] = tmpkPoints(i,1);
+      kMesh(i)[2] = tmpkPoints(i,2);
+    }
+    // Setup bandComm
+    int procsPerk = WorldComm.NumProcs()/kMesh.size();
+    if ((BandComm.NumProcs()%kMesh.size()) != 0) {
+      cerr << "The number of processors is not a multiple"
+	   << " of the number of k-points.\n";
+      abort();
+    }
+    int color = WorldComm.MyProc()/procsPerk;
+    WorldComm.Split (color, BandComm);
+    Array<int,1> kCommRanks(kMesh.size());
+    for (int ki=0; ki<kMesh.size(); ki++)
+      kCommRanks(ki) = ki*procsPerk;
+    WorldComm.Subset (kCommRanks, kComm);
+    MykPoint = WorldComm.MyProc()/procsPerk;
   }    
+  else {
+    BandComm.SetWorld();
+    kComm.SetWorld();
+  }
   
 
 
@@ -82,13 +105,41 @@ MPIBandStructureClass::Read(IOSectionClass &in)
 void
 MPIBandStructureClass::CalcLDABands()
 {
-  
+  /// First, do the full, self-consistent LDA calculation with the
+  /// k-Mesh points:
+  System->Setk(kMesh(MykPoint));
+  System->SolveLDA();
 
+  /// Now VHXC is set.  Do a non-self-consistent band-structure sweep,
+  /// computing eigenenergies:
+  FILE *fout;
+  if (MykPoint == 0) {
+    if (WorldComm.MyProc() == 0) {
+      fout = fopen (OutFilename.c_str(), "w");
+      assert(fout != NULL);
+    }
+    for (int ki=0; ki<kPoints.size()-1; ki++) 
+      for (int i=0; i<InterpPoints; i++) {
+	double alpha = (double)i/(double)InterpPoints;
+	Vec3 k = (1.0-alpha)*kPoints(ki) + alpha*kPoints(ki+1);
+	System->Setk_NonSC(k);
+	System->DiagonalizeH();
+	if (WorldComm.MyProc() == 0) {
+	  fprintf (fout, "%1.6e %1.6e %1.6e ", k[0], k[1], k[2]);
+	  for (int band=0; band<NumBands; band++)
+	    fprintf (fout, "%1.16e ", System->GetEnergy(band));
+	  fprintf (fout, "\n");
+	  fflush(fout);
+	}
+      }
+    if (WorldComm.MyProc() == 0)
+      fclose(fout);
+  }
 }
 
 
 void
-MPIBandStructureClass::CalcBands()
+MPIBandStructureClass::CalcBareBands()
 {
   FILE *fout;
   if (BandComm.MyProc()==0) {
@@ -113,6 +164,16 @@ MPIBandStructureClass::CalcBands()
     }
   if (BandComm.MyProc()==0)
     fclose(fout);
+}
+
+
+void
+MPIBandStructureClass::CalcBands()
+{
+  if (UseLDA)
+    CalcLDABands();
+  else
+    CalcBareBands();
 }
 
 #include <time.h>

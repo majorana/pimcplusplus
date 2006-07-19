@@ -28,16 +28,17 @@ private:
   Potential *PH;
   double kCut;
   Array<Vec3,1> kPoints, kMesh;
-  int NumBands, NumElecs;
+  int NumBands, NumElecs, MykPoint;
   Vec3 Box;
   string OutFilename;
   int InterpPoints;
-  CommunicatorClass BandComm, kComm;
+  CommunicatorClass WorldComm, BandComm, kComm;
   CoulombPot IonPot;
   bool UseLDA;
 public:
   void Read(IOSectionClass &in);
   void CalcBands();
+  void CalcBareBands();
   void CalcLDABands();
 };
 

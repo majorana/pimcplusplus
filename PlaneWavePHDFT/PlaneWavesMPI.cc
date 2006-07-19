@@ -225,6 +225,13 @@ MPISystemClass::Setk(Vec3 k)
   CG.Setup();
 }
 
+void
+MPISystemClass::Setk_NonSC(Vec3 k)
+{
+  H.Setk(k);
+  H.SetIons(Rions+0.5*Box);
+}
+
 
 void
 MPISystemClass::Read(IOSectionClass &in)

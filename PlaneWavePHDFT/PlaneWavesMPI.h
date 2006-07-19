@@ -175,6 +175,9 @@ public:
   double EwaldEnergy();
   void CalcIonForces(Array<Vec3,1> &F);
   void Setk (Vec3 k);
+  /// The the k-point for a non-self-consistent band structure sweep
+  /// after doing the fully SC solve on a mesh.
+  void Setk_NonSC (Vec3 k);
   void DiagonalizeH();
   void SolveLDA();
   inline double GetEnergy(int band) { return CG.Energies(band); }
