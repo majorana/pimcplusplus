@@ -40,7 +40,7 @@ public:
   void Setk(Vec3 k);
 
   void Apply (const zVec &c, zVec &Hc);
-  void Apply (const zVec &c, zVec &Hc, const Array<double,3> &VHXC);
+  void Apply (const zVec &c, zVec &Hc, Array<double,3> &VHXC);
   PHPotFFTClass (Potential &ph, GVecsClass &gvecs, FFTBox &fft) :
     VionBase (gvecs), kPH(ph), cFFT(fft), VecFFT(gvecs), MatFFT(gvecs)
   {

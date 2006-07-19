@@ -235,7 +235,7 @@ PHPotFFTClass::Apply (const zVec &c, zVec &Hc)
 
 void 
 PHPotFFTClass::Apply (const zVec &c, zVec &Hc,
-		      const Array<double,3> &VHXC)
+		      Array<double,3> &VHXC)
 {
   if (!IsSetup)
     Setup();
