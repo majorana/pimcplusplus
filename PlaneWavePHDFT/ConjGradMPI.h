@@ -42,7 +42,7 @@ protected:
   int CurrentBand, LastBand;
   Array<complex<double>,2> &Bands;
   Array<complex<double>,2> &HBands;
-  int NumOccupied;
+  int NumOccupied, MaxIter;
   Array<complex<double>,2> lastPhis;
   double Tolerance;
   CommunicatorClass &BandComm, &kComm;
@@ -66,6 +66,8 @@ public:
   void ApplyH();
 
   void Setup();
+  inline void SetNumOccupied (int num) { NumOccupied = num; }
+  inline void SetMaxIter     (int num) { MaxIter     = num; }
 
   /// Stores the band eigenenergies
   Array<double,1> Energies;
@@ -91,7 +93,7 @@ public:
     LastBand(-1), Bands(bands), HBands(hbands), 
     NumOccupied(numOccupied), Tolerance (1.0e-6),
     BandComm(bandComm), kComm(kcomm), VHXC(vhxc),
-    Ortho (ORTHO_ALL), Verbose(false)
+    Ortho (ORTHO_ALL), Verbose(false), MaxIter(10)
   {
     // Do nothing for now
   }

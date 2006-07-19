@@ -202,7 +202,7 @@ public:
   MPISystemClass(int numBands, int numElecs,
 		 CommunicatorClass &bandcomm, CommunicatorClass &kcomm,
 		 bool useLDA=false, bool mdextrap=false) 
-    : CG(H, Bands, HBands, (numElecs+1)/2-1, bandcomm, kcomm, VHXC), 
+    : CG(H, Bands, HBands, (numElecs+1)/2, bandcomm, kcomm, VHXC), 
       FFT(GVecs), H(GVecs, FFT), 
       NumBands(numBands), BandComm(bandcomm), kComm(kcomm), 
       UseMDExtrap(mdextrap), FirstTime(true), NumElecs(numElecs),

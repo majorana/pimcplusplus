@@ -90,6 +90,9 @@ MPISystemClass::DiagonalizeH ()
   }
   else
     CG.InitBands();
+  CG.SetTolerance(1.0e-6);
+  CG.SetMaxIter(25);
+  CG.SetNumOccupied (NumBands);
   CG.Solve();
   if (BandComm.MyProc()==0)
     for (int i=0; i<Bands.rows(); i++) 
