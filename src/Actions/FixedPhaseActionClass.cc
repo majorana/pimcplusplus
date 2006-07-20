@@ -456,10 +456,26 @@ FixedPhaseClass::Action (int slice1, int slice2,
   bool doUp   = false;
   bool doDown = false;
   if (IonsHaveMoved()) {
-    UpdateBands();
-    UpdateCache();
+    if (!MonteCarloIons) {
+      ModeType mode = GetMode();
+      UpdateBands();
+      if (mode == OLDMODE) {
+	BandSplines.RejectCopy();
+	UpdateCache();
+	SetMode(NEWMODE);
+	UpdateCache();
+	SetMode (OLDMODE);
+      }      
+      else {
+	BandSplines.AcceptCopy();
+	UpdateCache();
+	SetMode (OLDMODE);
+	UpdateCache();
+	SetMode(NEWMODE);
+      }
+    }
   }
-
+  
   doUp   = (speciesNum == UpSpeciesNum);
   doDown = (speciesNum == DownSpeciesNum);
   if (speciesNum == IonSpeciesNum) {
@@ -649,7 +665,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
 		    PathData.InterComm, UseLDA, UseMDExtrap));
   }
   else 
-    System.SetNew (&System[OLDMODE]);
+    System.SetNew (&(System[OLDMODE]));
     
   V_elec_ion = &PathData.Actions.GetPotential (IonSpeciesNum,  UpSpeciesNum);
   V_ion_ion  = &PathData.Actions.GetPotential (IonSpeciesNum, IonSpeciesNum);
@@ -665,11 +681,11 @@ FixedPhaseClass::Read(IOSectionClass &in)
     Rions[0](i)= Rions[1](i) = Path(0,i+first);
   Rions[0] = Vec3(0.0, 0.0, 0.0);  
   Rions[1] = Vec3(0.0, 0.0, 0.0);
-  System[0].SetIons (Rions);
+  System[0].SetIons (Rions[0]);
 
   if (MonteCarloIons)
     System[1] = System[0];
-
+  
   ////////////////////////////////////////
   // Setup real space grids and splines //
   ////////////////////////////////////////
@@ -686,7 +702,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
   initData = 0.0;
   BandSplines[0].Init (&xGrid, &yGrid, &zGrid, initData, true);
   BandSplines[1].Init (&xGrid, &yGrid, &zGrid, initData, true);
-
+  
   //  UpdateBands();
 #endif
 }
@@ -843,7 +859,7 @@ FixedPhaseClass::UpdateBands()
   MakePeriodic (data);
   Path.Communicator.Broadcast(0, data);
   
-  /// DEBUG DEBUG DEBUG DEBUG
+  // DEBUG DEBUG DEBUG DEBUG
 //   for (int band=0; band<NumBands; band++) {
 //     char fname[100];
 //     int proc = 
@@ -856,7 +872,12 @@ FixedPhaseClass::UpdateBands()
 //     fclose (fout);
 //   }
 
-  BandSplines().Init (&xGrid, &yGrid, &zGrid, data, true);
+  if (MonteCarloIons)
+    BandSplines().Init (&xGrid, &yGrid, &zGrid, data, true);
+  else {
+    BandSplines[0].Init (&xGrid, &yGrid, &zGrid, data, true);
+    BandSplines[1].Init (&xGrid, &yGrid, &zGrid, data, true);
+  }
 #endif
 }
 
