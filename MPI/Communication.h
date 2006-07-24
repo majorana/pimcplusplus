@@ -94,6 +94,7 @@ public:
   void Broadcast (int root, int &val);
   void Broadcast (int root, bool &val);
   void Broadcast (int root, double &val);
+  void Broadcast (int root, Array<int,1> &buff)
   void Broadcast (int root, Array<double,1> &buff);
   void Broadcast (int root, Array<double,2> &buff);
   void Broadcast (int root, Array<double,3> &buff);
