@@ -1,5 +1,5 @@
 %bands = load ('TestBands.dat');
-bands = load ('TestLDABands5.dat');
+bands = load ('TestLDABands32k_kcut10.dat');
 bands = bands(:,1:9);
 bands2 = load ('TestBands2.dat');
 t = [0:0.1:6.9];
@@ -45,7 +45,7 @@ handles = plot (t, bands(:,4), 'b', tb, abands(:,4), 'r', t, fp1, 'k', ...% t2, 
       t, bands(:,8), 'b', tb, abands(:,8), 'r', t, fp5, 'k', ...% t2, bands2(:,8), 'g--',...
       t, bands(:,9), 'b', tb, abands(:,9), 'r', t, fp6, 'k');
 set (handles, 'LineWidth', 2);
-axis([0 7 0 0.45]);
+axis([0 7 0 0.55]);
 
 ca = get (gcf, 'CurrentAxes');
 set(ca, 'FontSize', 16');
@@ -56,4 +56,4 @@ ylabel ('Energy (Ry)');
 set(ca, 'XTick', [0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0]);
 set(ca, 'XTickLabel', ['G';'H';'N';'G';'P';'N';'P';'H']);
 legend ('PH bands', 'ABINIT bands', 'Free particle bands');
-title ('BCC Sodium Band Comparison');
+%title ('BCC Sodium Band Comparison');

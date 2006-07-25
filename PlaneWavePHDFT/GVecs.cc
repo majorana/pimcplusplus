@@ -126,7 +126,8 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
 	vec.G[2] = iz*kBox[2];
 	vec.I[2] = (iz+Nz)%Nz;
 	vec.G2 = dot (vec.G,vec.G);
-	if (vec.G2 < (kcut*kcut)) 
+	//	if (vec.G2 < (kcut*kcut)) 
+	if (dot(vec.G+kVec,vec.G+kVec) < (kcut*kcut))
 	  vecs.push_back(vec);
       }
     }

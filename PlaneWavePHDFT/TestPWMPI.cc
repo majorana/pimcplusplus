@@ -32,14 +32,16 @@ main(int argc, char **argv)
   in.OpenFile ("NaLocalPH.h5");
   //in.OpenFile ("NaPH_US_March1_05b.h5");
   Potential *ph = ReadPotential(in);
+  CoulombPot ion_ion;
+  ion_ion.Z1Z2 = -1.0;
   in.CloseFile();
   CommunicatorClass bandComm, kComm;
   bandComm.SetWorld();
   kComm.SetWorld();
 
-  MPISystemClass system(13, bandComm, kComm);
+  MPISystemClass system(13, 16, bandComm, kComm, true, true);
   Vec3 k(0.0, 0.0, 0.0);
-  system.Setup (box, k, kcut, *ph, true); 
+  system.Setup (box, k, kcut, *ph, ion_ion, true); 
   //system.Setup (box, k, kcut, 1.0, true);
 //  Array<Vec3,1> rions(16);
 //   rions(0)  = Vec3 ( -1.017425796249996E-005, -2.030943049556812E-005,  4.920717706347283E-005);
