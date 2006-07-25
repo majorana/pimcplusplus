@@ -239,7 +239,6 @@ void ConjGradMPI::Solve()
   EtaXiLast = complex<double>(0.0, 0.0);
   int iter = 0;
   double residual = 1.0;
-  cerr << "Tolerance = " << Tolerance << endl;
   while ((iter < MaxIter) && (residual > Tolerance)) {
     if ((iter % 10) == 0 && (Ortho==ORTHO_LOWER))
       EtaXiLast = 0.0;
