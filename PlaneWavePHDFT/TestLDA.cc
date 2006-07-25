@@ -196,8 +196,8 @@ void TestLDAForces()
   Vec3 box (26.56, 26.56, 26.56);
   
   Vec3 Gprim = 2.0*M_PI*Vec3(1.0/box[0], 1.0/box[1], 1.0/box[2]);
-  //  Vec3 k = 0.25 * Gprim;
-  Vec3 k = 0.0;
+  Vec3 k = 0.25 * Gprim;
+  //Vec3 k = 0.0;
   cerr << "k = " << k << endl;
   MPISystemClass system (numBands, numElecs, bandComm, kComm, true, false);
   
