@@ -533,8 +533,8 @@ TruncatedInverseClass::BuildSmallDeterminantMatrix()
   //  }
   BuildOldMatrix(determinantPtcl,determinantPtcl.size(),SmallDetMatrix);
   BuildNewMatrix(determinantPtcl,determinantPtcl.size(),SmallDetMatrixOld);
-  Array<double,2> A11OldLarge = SmallDetMatrixOld(Range(0,100), Range(0,100));
-  Array<double,2> A11NewLarge = SmallDetMatrix(Range(0,100), Range(0,100));
+  Array<double,2> A11OldLarge = SmallDetMatrixOld(Range(0,SmallDetMatrixOld.extent(0)-1), Range(0,SmallDetMatrixOld.extent(0)-1));
+  Array<double,2> A11NewLarge = SmallDetMatrix(Range(0,SmallDetMatrixOld.extent(0)-1), Range(0,SmallDetMatrixOld.extent(0)-1));
   
 
   int A11size=25;
@@ -551,8 +551,90 @@ TruncatedInverseClass::BuildSmallDeterminantMatrix()
 
   double oldDeterminant=Determinant(A11Old);
   double newDeterminant=Determinant(A11New);
-  cerr<<newDeterminant/oldDeterminant<<endl;
-  cerr<<Determinant(A11NewLarge)/Determinant(A11OldLarge)<<endl;
+//  cerr<<"The truncated method with "<<A11size<<" particles included is "<<newDeterminant/oldDeterminant<<endl;
+//  cerr<<"The truncated method with all particles included is "<<Determinant(A11NewLarge)/Determinant(A11OldLarge)<<endl;
+  cerr<<newDeterminant/oldDeterminant<<" ";
+  DeterminantList(0)=Determinant(A11NewLarge)/Determinant(A11OldLarge);
+  cerr<<Determinant(A11NewLarge)/Determinant(A11OldLarge)<<" ";
+  int oldZero=0;
+  int newZero=0;
+
+  cerr<<"Actual det is "<<Determinant(A11NewLarge)<<" "
+      <<Determinant(A11OldLarge)<<endl;
+  Array<double,2> TestDetNew;
+  TestDetNew.resize(A11NewLarge.shape());
+  Array<double,2> TestDetOld;
+  TestDetOld.resize(A11OldLarge.shape());
+
+//  cerr<<A11NewLarge<<endl;
+  for (int loop=0;loop<2;loop++){
+
+
+      newZero=0;
+      oldZero=0;
+      for (int counter=0;counter<A11OldLarge.extent(0);counter++)
+	  for (int counter2=0;counter2<A11OldLarge.extent(1);counter2++){
+	      TestDetNew(counter,counter2)=A11NewLarge(counter,counter2);
+	      TestDetOld(counter,counter2)=A11OldLarge(counter,counter2);
+	      if (A11OldLarge(counter,counter2)<0.99 && 
+		  A11NewLarge(counter,counter2)<0.99){
+		  double e1=A11OldLarge(counter,counter2);
+		  double e2=A11NewLarge(counter,counter2);
+		  
+		  if (PathData.Path.Random.Local()>1.0/PathData.Path.NumParticles()){
+		      TestDetOld(counter,counter2)=0.0;
+		      TestDetNew(counter,counter2)=0.0;
+		      oldZero++;
+		  }
+		  else {
+		      TestDetOld(counter,counter2)=PathData.Path.NumParticles()*e1;
+		      TestDetNew(counter,counter2)=PathData.Path.NumParticles()*e2;
+		  }
+	      }
+	  }
+
+
+
+
+
+//   for (int counter=0;counter<A11OldLarge.extent(0);counter++)
+//       for (int counter2=0;counter2<A11OldLarge.extent(1);counter2++){
+// 	  if (A11OldLarge(counter,counter2)<0.99){
+// 	      if (PathData.Path.Random.Local()>1.0/0.1*A11OldLarge(counter,counter2)){
+// 		  A11OldLarge(counter,counter2)=0.0;
+// 		  oldZero++;
+// 	      }
+// 	      else {
+// 		  A11OldLarge(counter,counter2)=0.1;
+// 	      }
+// 	  }
+//       }
+//   newZero=0;
+//   for (int counter=0;counter<A11NewLarge.extent(0);counter++)
+//       for (int counter2=0;counter2<A11NewLarge.extent(1);counter2++){
+// 	  TestDet(counter,counter2)=A11NewLarge(counter,counter2);
+// 	  if (A11NewLarge(counter,counter2)<0.99){
+// 	      if (PathData.Path.Random.Local()>(1.0/0.1)*A11NewLarge(counter,counter2)){
+// 		  TestDet(counter,counter2)=0.0;
+// 		  newZero++;
+// 	      }
+// 	      else {
+// 		  TestDet(counter,counter2)=0.1;
+// 	      }
+// 	  }
+//       }
+//  cerr<<Determinant(TestDet)<<" "<<PathData.Path.NumParticles()*PathData.Path.NumParticles()-newZero<<endl;
+  cerr<<Determinant(TestDetNew)<<" "<<Determinant(TestDetOld)<<" "
+      <<Determinant(TestDetNew)/Determinant(TestDetOld)<<" "<<endl;
+
+  }
+
+  // cerr<<500*500-oldZero<<" "<<500*500-newZero<<" "
+  cerr<<Determinant(A11NewLarge)<<" "<<Determinant(A11OldLarge)<<" "
+      <<Determinant(A11NewLarge)/Determinant(A11OldLarge)<<" ";
+	  
+
+  
   SetMode(NEWMODE);
 }
 
@@ -1145,7 +1227,8 @@ TruncatedInverseClass::SingleAction (int startSlice, int endSlice,
 
   NumTimes++;
   SetMode(currMode);
-  return 1.0;
+  return DeterminantList(0);
+//  return 1.0;
 
 
 #else

@@ -39,7 +39,7 @@ extern "C"{
 void 
 VariationalPIClass::AcceptCopy(int slice1, int slice2)
 {
-//   cout<<"I'm being accepted! YEA!"<<ChangedColumn<<endl;
+   cout<<"I'm being accepted! YEA!"<<ChangedColumn<<endl;
 //   SetMode(OLDMODE);
 //   cerr<<"Pre-checking"<<endl;
 //   CheckDeterminantMatrix();
@@ -62,7 +62,7 @@ VariationalPIClass::AcceptCopy(int slice1, int slice2)
 void 
 VariationalPIClass::RejectCopy(int slice1, int slice2)
 {
-  //  cerr<<"I'm being rejected! YEA!"<<endl;
+    cerr<<"I'm being rejected! YEA!"<<endl;
   
 }
 
@@ -71,14 +71,14 @@ void
 VariationalPIClass::BuildDeterminantMatrix()
 {
   //HACK!
-  cerr<<"Initializing"<<endl;
+//  cerr<<"Initializing"<<endl;
   int N=Path.NumParticles();
-  cerr<<"the number of particles is"<<N<<endl;
+//  cerr<<"the number of particles is"<<N<<endl;
   DetMatrix.resize(N,N);
   u.resize(N);
   newCol.resize(N);
   //HACK
-  cerr<<"Original buildling"<<endl;
+//  cerr<<"Original buildling"<<endl;
   double T=1.0/(Path.TotalNumSlices*Path.tau);
   double lambda=PathData.Path.Species(0).lambda;
   for (int ptcl1=0;ptcl1<Path.NumParticles();ptcl1++){
@@ -130,7 +130,7 @@ VariationalPIClass::Read (IOSectionClass &in)
 {
   // Do nothing for now
   //  SetupFreeActions();
-  cerr<<"Initializing"<<endl;
+  cerr<<"Initializing Iterative Eigenvalue solver"<<endl;
   int N=Path.NumParticles();
   cerr<<"the number of particles is"<<N<<endl;
   DetMatrix.resize(N,N);
@@ -221,15 +221,15 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
 #ifdef ORDER_N_FERMIONS
   //  cerr<<"Calling single action"<<endl;
   //  ModeType currMode=PathData.Path.Path.GetMode();
-// //   SetMode(NEWMODE);
-// //   BuildDeterminantMatrix();
-// //   double new_det=Determinant(DetMatrix);
+//    SetMode(NEWMODE); //a
+//    BuildDeterminantMatrix();//a
+//    double new_det=Determinant(DetMatrix);//a
 
    SetMode(OLDMODE);
-   /////???   BuildDeterminantMatrix();
-// //   double old_det=Determinant(DetMatrix);
+//   BuildDeterminantMatrix();//a
+//   double old_det=Determinant(DetMatrix);//a
    SetMode(NEWMODE);
-// //   cout<<old_det<<" "<<new_det<<" "<<new_det/old_det<<endl;
+//   cerr<<old_det<<" "<<new_det<<" "<<old_det/new_det<<" ";//a
 
   //  cerr<<"Built determinant matrix"<<endl;
   //  cerr<<"My determinanat is "<<Determinant(DetMatrix)<<endl;
@@ -278,7 +278,8 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
   }
   //  SetMode(currMode);
   
-  cerr<<"My det ratio is "<<1.0/abs(det_ratio)<<endl;
+//  cerr<<"The iterative solver answer is "<<1.0/abs(det_ratio)<<endl;
+  cerr<<1.0/abs(det_ratio)<<endl;
   
   return 1.0/abs(det_ratio);
   //  return 0.0;
