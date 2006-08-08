@@ -9,7 +9,8 @@ module1 = Extension('IOSection',
                     library_dirs=['/turing/projects/mcc/lib'],
                     libraries =  ['blitz', 'xml2', 'hdf5'])
 
-setup (name = 'PackageName',
+setup (name = 'IO',
        version = '1.0',
        description = 'This is a demo package',
-       ext_modules = [module1])
+       ext_modules = [module1],
+       py_modules=['IO'])
