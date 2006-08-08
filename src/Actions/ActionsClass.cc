@@ -57,10 +57,11 @@ ActionsClass::Read(IOSectionClass &in)
   else      
     perr << "Not using RPA for long range action.\n";
 
-
+cerr << " going to read pair actions" << endl;
   Array<string,1> PAFiles;
   assert (in.ReadVar ("PairActionFiles", PAFiles));
   int numPairActions = PAFiles.size();
+cerr << "Looking for " << numPairActions << endl;
   PairArray.resize(numPairActions);
   PairMatrix.resize(Path.NumSpecies(),Path.NumSpecies());
   // Initialize to a nonsense value so we can later check in the table
@@ -69,12 +70,15 @@ ActionsClass::Read(IOSectionClass &in)
     for (int j=0; j<Path.NumSpecies(); j++)
       PairMatrix(i,j) = (PairActionFitClass*)NULL;
   // Read pair actions files
+cerr << "declaring IOSectionClass...";
   IOSectionClass PAIO;
+cerr << " done" << endl;
 
   for (int i=0; i<numPairActions; i++) {
     // Allow for tilde-expansion in these files
     string name = ExpandFileName(PAFiles(i));
     assert(PAIO.OpenFile (name));
+cerr << i << ": reading " << name << endl;
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
     bool paUsed=false;
     for (int spec1=0;spec1<Path.NumSpecies();spec1++)
@@ -103,7 +107,7 @@ ActionsClass::Read(IOSectionClass &in)
     }
     PAIO.CloseFile();
   }
-
+cerr << " finished with pair actions" << endl;
    
   // Now check to make sure all PairActions that we need are defined.
   for (int species1=0; species1<Path.NumSpecies(); species1++)

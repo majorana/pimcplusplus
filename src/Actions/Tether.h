@@ -31,6 +31,7 @@ public:
   Array<dVec,1> TetheredSites;
   double TetherCutoff;
   int SpeciesNum;
+	std::string GetName(){return NULL;};
 };
 
 

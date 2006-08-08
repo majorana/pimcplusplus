@@ -53,7 +53,9 @@ void EnergyClass::Accumulate()
   int slice1 = 0;
   int slice2 = PathData.Path.NumTimeSlices() - 1;
 	for(int n=0; n<numEnergies; n++){
-		OtherSums[n] += OtherActions[n]->d_dBeta(slice1,slice2,0);
+		double otherE = OtherActions[n]->d_dBeta(slice1,slice2,0);
+		OtherSums[n] += otherE;
+		TotalSum += otherE;
 	}
 
 //   double kAction, uShortAction, uLongAction, nodeAction;
@@ -274,6 +276,10 @@ void EnergyClass::Read(IOSectionClass &in)
 // Fix to include final link between link M and 0
 void EnergySignClass::Accumulate()
 {
+  TimesCalled++;
+  if (TimesCalled % DumpFreq==0)
+    WriteBlock();
+
   if ((TimesCalled % Freq)!=0){
     return;
   }
@@ -331,6 +337,8 @@ void EnergySignClass::WriteBlock()
 void EnergySignClass::Read(IOSectionClass &in)
 {  
   ObservableClass::Read(in);
+  assert(in.ReadVar("freq",Freq));
+  assert(in.ReadVar("dumpFreq",DumpFreq));
   if (PathData.Path.Communicator.MyProc()==0){
     WriteInfo();
     IOSection.WriteVar("Type","Scalar");

@@ -13,6 +13,7 @@ class CEIMCActionClass: public ActionBaseClass
   string ptclSet0, ptclSet1;
   
 public:
+	bool correlated;
   double SingleAction(int slice1,int slice2,
 		      const Array<int,1> &activeParticles,int level);
   double d_dBeta (int slice1, int slice2, int level);

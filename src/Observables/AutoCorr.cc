@@ -15,11 +15,9 @@
 /////////////////////////////////////////////////////////////
 
 #include "AutoCorr.h"
+#include "../Moves/MoveUtils.h"
 
-int NumSlots;
-int WaitToFill;
-int LastTotal;
-dVec v;
+//dVec v;
 
 ////////////////////////////////////////
 ///Autocorrelation Class           ///
@@ -28,6 +26,7 @@ dVec v;
 void AutoCorrClass::Read(IOSectionClass& in)
 {
   ObservableClass::Read(in);
+  assert(in.ReadVar("dumpFrequency",dumpFrequency));
   assert(in.ReadVar("numSlots",NumSlots));
   assert(in.OpenSection("Grid"));
   string gridType;
@@ -45,7 +44,7 @@ void AutoCorrClass::Read(IOSectionClass& in)
 //  if (!readEndGrid){
  //   if (PathData.Path.GetPeriodic()[0]){
     //gridEnd=PathData.Path.GetBox()[0];
-    gridEnd=NumSlots*Freq;
+    gridEnd=NumSlots*Frequency;
 //    }
 //    else {
 //      cerr<<"I don't know where you want me to end this grid"<<endl;
@@ -55,12 +54,15 @@ void AutoCorrClass::Read(IOSectionClass& in)
   //assert(in.ReadVar("NumPoints",numGridPoints));
   grid.Init(gridStart,gridEnd,numGridPoints);
   //TotalCounts=0;
-  Histogram.resize(NumSlots);
-cerr << "Histogram size is " << Histogram.size() << endl;
+  OneOneHistogram.resize(NumSlots);
+  OneNetHistogram.resize(NumSlots);
+  NetNetHistogram.resize(NumSlots);
+	cerr << "OneOneHistogram size is " << OneOneHistogram.size() << endl;
   DipoleBin.resize(PathData.Path.numMol*(PathData.Path.NumTimeSlices()-1),NumSlots);
-cerr << "DipoleBin size: " << DipoleBin.size() << endl;
+	cerr << "DipoleBin size: " << DipoleBin.size() << endl;
+  NetDipoleBin.resize((PathData.Path.NumTimeSlices()-1),NumSlots);
   cerr << "slices " << PathData.NumTimeSlices()-1 << " and molecules " << PathData.Path.numMol << endl;
-cerr << "NumSlots is " << NumSlots << endl;
+	cerr << "NumSlots is " << NumSlots << endl;
   in.CloseSection();
 }
 
@@ -90,10 +92,13 @@ void AutoCorrClass::WriteInfo()
 
 void AutoCorrClass::WriteBlock()
 {
-  int countNeg = 0;
+}
+
+void AutoCorrClass::LocalWriteBlock()
+{
   PathClass &Path = PathData.Path;
   double norm=(double)(TotalCounts - LastTotal);
-  cerr << "normalizing by " << norm << "; LastTotal is " << LastTotal << endl;
+  cerr << "TotalCounts is " << TotalCounts << "; normalizing by " << norm << "; LastTotal is " << LastTotal << endl;
   LastTotal = TotalCounts;
 
   if (Path.Communicator.MyProc()==0) 
@@ -101,15 +106,25 @@ void AutoCorrClass::WriteBlock()
       FirstTime=false;
       WriteInfo();
     }
-  Array<double,1> gofrArray(Histogram.size());
+  Array<double,1> OneOnegofrArray(OneOneHistogram.size());
   for (int i=0; i<grid.NumPoints; i++){
-    gofrArray(i) =  Histogram(i)/norm;// / (binVol*norm);
-    if (gofrArray(i) < 0.0) {
-      countNeg++;
-    }
+    OneOnegofrArray(i) =  OneOneHistogram(i)/norm;// / (binVol*norm);
   }
-  HistVar.Write(gofrArray);
-  cerr << countNeg << " negative entries." << endl;
+  Array<double,1> OneNetgofrArray(OneNetHistogram.size());
+  for (int i=0; i<grid.NumPoints; i++){
+    OneNetgofrArray(i) =  OneNetHistogram(i)/norm;// / (binVol*norm);
+  }
+  Array<double,1> NetNetgofrArray(NetNetHistogram.size());
+  for (int i=0; i<grid.NumPoints; i++){
+    NetNetgofrArray(i) =  NetNetHistogram(i)/norm;// / (binVol*norm);
+  }
+
+//cerr << "going to write OneOne " << OneOnegofrArray << endl;
+  OneOneHistVar.Write(OneOnegofrArray);
+//cerr << "going to write OneNet " << OneNetgofrArray << endl;
+  OneNetHistVar.Write(OneNetgofrArray);
+//cerr << "going to write NetNet " << NetNetgofrArray << endl;
+  NetNetHistVar.Write(NetNetgofrArray);
 }
 
 
@@ -121,7 +136,7 @@ void AutoCorrClass::Print()
       double r2 = grid(i+1);
       double r = 0.5*(r1+r2);
       double vol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-      double gofr = Histogram(i)/(TotalCounts - WaitToFill);// / (vol*TotalCounts);
+      double gofr = OneOneHistogram(i)/(TotalCounts - WaitToFill);// / (vol*TotalCounts);
       fprintf (stderr, "%1.12e %1.12e\n", r, gofr);
     }
 }
@@ -147,9 +162,9 @@ dVec AutoCorrClass::MeasureDipole(int slice,int molecule){
   dVec P2 = PathData.Path(slice,activeParticles(4));
   P1 -= O;
   P2 -= O;
-  P1 = PathData.Actions.TIP5PWater.Normalize(P1);
-  P2 = PathData.Actions.TIP5PWater.Normalize(P2);
-  dVec pvec = PathData.Actions.TIP5PWater.Normalize(PathData.Actions.TIP5PWater.GetBisector(P1,P2));
+  P1 = Normalize(P1);
+  P2 = Normalize(P2);
+  dVec pvec = Normalize(PathData.Actions.TIP5PWater.GetBisector(P1,P2));
   return pvec;
 }
 
@@ -175,29 +190,32 @@ double AutoCorrClass::CalcDotProd(dVec v1, dVec v2){
   return total;
 }
 
-double AutoCorrClass::CalcAutoCorr(int index, int t, int limit){
-  int count = 0;
-  int count2 = 0;
+void
+AutoCorrClass::CalcAutoCorr(int index, int t, int limit, double& SingleSingle, double& SingleNet, double& NetNet){
+	SingleSingle = 0.0;
+	SingleNet = 0.0;
+	NetNet = 0.0;
   double k = 0.0;
-//cerr << "calculating autocorrelation between " << index << " and " << Locate(index,t,limit) << endl;;
+	//cerr << "calculating autocorrelation between " << index << " and " << Locate(index,t,limit) << endl;;
   double norm = (PathData.NumTimeSlices()-1)*PathData.Path.numMol;
   for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
+		dVec muNet1 = NetDipoleBin(slice, index);
+		dVec muNet2 = NetDipoleBin(slice, Locate(index,t,limit));
+		double NetNetDot = CalcDotProd(muNet1, muNet2);
+		NetNet += NetNetDot;
     for (int mol=0;mol<PathData.Path.numMol;mol++){
       dVec mu1 = DipoleBin(MapIndex(slice,mol),index);
       dVec mu2 = DipoleBin(MapIndex(slice,mol),Locate(index,t,limit));
 //cerr << "     slice " << slice << " and mol " << mol << "; mu1 is " << mu1 << " and mu2 is " << mu2;
       double dot = CalcDotProd(mu1,mu2);
-      if (dot == 1)
-        count++;
-      else if (dot < -0.2)
-        count2++;
-      k += dot;
+			double SingleNetDot = CalcDotProd(mu1,muNet2);
+      SingleSingle += dot;
+			SingleNet += SingleNetDot;
     }
   }
-//cerr << ": k " << k << " /norm " << norm <<  " is " << k/norm << endl;
-  //cerr << "I counted " << count << " unchanged particles out of " << norm <<  endl;
-  //cerr << "I counted " << count2 << " particles with dot < -0.2" << endl;
-  return k/norm;
+	SingleSingle *= 1.0/norm;
+	SingleNet *= 1.0/norm;
+	NetNet *= 1.0/(PathData.NumTimeSlices() - 1);
 }
 
 dVec AutoCorrClass::Rotate(dVec coord, double theta){
@@ -265,57 +283,60 @@ void AutoCorrClass::Accumulate()
 
 }*/
 
-// ORIGINAL
-//
 void AutoCorrClass::Accumulate()
 {
-
   // measure and catalog dipole moments at now, then calculate autocorrelation 
-
-    TotalCounts++;
-    // loop over slices
-    for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
-      /// loop over molecules 
-      for (int mol=0;mol<PathData.Path.numMol;mol++){
-        DipoleBin(MapIndex(slice,mol),now) = MeasureDipole(slice,mol);
-      }
+  TotalCounts++;
+  // loop over slices
+  for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
+    /// loop over molecules 
+		dVec netMu(0.0, 0.0, 0.0);
+    for (int mol=0;mol<PathData.Path.numMol;mol++){
+			int index = MapIndex(slice,mol); 
+      DipoleBin(index,now) = MeasureDipole(slice,mol);
+			netMu += DipoleBin(index,now);
     }
-    // calculate autocorrelations
-    if (TotalCounts > WaitToFill){
-      for (int t = 0;t < NumSlots; t++){
-        double c = CalcAutoCorr(now,-t,NumSlots-1);
-        if (t<Histogram.size()){
-          Histogram(t) += c;
-//cerr << TotalCounts << ": adding " << c << " to bin " << t << endl;
-        }
-        else
-          cerr << "array size error: " << t << " > " << Histogram.size() << endl;
-      }
-//cerr << "Accumulate: after entry is " << DipoleBin(50,now) << endl;
-//cerr << "column updated to " << now << ". ";
-
-      // Write to file
-      if ((TotalCounts % DumpFreq) == 0){
-        cerr << TimesCalled << ", " << TotalCounts << ": Writing Autocorrelation" << endl;
-        WriteBlock();
-        Histogram = 0;
-        //TotalCounts = 0;
-cerr << "cleared it out.  now is " << now << endl;
-      }
+		netMu = Normalize(netMu);
+		//cerr << "Adding " << netMu << " at " << slice << ", " << now << endl;
+		NetDipoleBin(slice,now) = netMu;
+  }
+  // calculate autocorrelations
+  if (TotalCounts > WaitToFill){
+    for (int t=0; t<NumSlots; t++){
+			double OneOneCorr, OneNetCorr, NetNetCorr;
+      CalcAutoCorr(now,-t,NumSlots-1,OneOneCorr,OneNetCorr,NetNetCorr);
+      assert(t<OneOneHistogram.size());
+      OneOneHistogram(t) += OneOneCorr;
+      OneNetHistogram(t) += OneNetCorr;
+      NetNetHistogram(t) += NetNetCorr;
+			//cerr << TotalCounts << ": adding " << OneOneCorr << " to bin " << t << endl;
     }
-    Advance(now,NumSlots-1);
+		//cerr << "Accumulate: after entry is " << DipoleBin(50,now) << endl;
+		//cerr << "  and Net is " << NetDipoleBin(50,now) << endl;
+		//cerr << "  column updated to " << now << ". ";
 
-
-
-}//
+    // Write to file
+		//cerr << "TotalCounts " << TotalCounts << "%" << dumpFrequency << " is " << TotalCounts%dumpFrequency << endl;
+    if ((TotalCounts % dumpFrequency) == 0){
+      cerr << TimesCalled << ", " << TotalCounts << ": Writing Autocorrelation" << endl;
+      LocalWriteBlock();
+      OneOneHistogram = 0;
+      OneNetHistogram = 0;
+      NetNetHistogram = 0;
+    }
+  }
+  Advance(now,NumSlots-1);
+}
 
 void AutoCorrClass::Initialize()
 {
   TotalCounts = 0;
   TimesCalled=0;
   now = 0;
-  Histogram=0;
-  v(0) = 1;
-  v(1) = 0;
-  v(2) = 0;
+  OneOneHistogram=0;
+  OneNetHistogram=0;
+  NetNetHistogram=0;
+  //v(0) = 1;
+  //v(1) = 0;
+  //v(2) = 0;
 }

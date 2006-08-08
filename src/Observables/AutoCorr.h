@@ -23,17 +23,25 @@
 class AutoCorrClass : public ObservableClass
 {
   /// Stores number of counts in each bin
-  Array<double,1> Histogram;
-  ObservableVecDouble1 HistVar;
+  Array<double,1> OneOneHistogram;
+  Array<double,1> OneNetHistogram;
+  Array<double,1> NetNetHistogram;
+  ObservableVecDouble1 OneOneHistVar;
+  ObservableVecDouble1 OneNetHistVar;
+  ObservableVecDouble1 NetNetHistVar;
   /// Stores dipole moments
   Array<dVec,2> DipoleBin;
+  Array<dVec,2> NetDipoleBin;
   /// Stores the total number of counts
   int TotalCounts;
   int TimesCalled;
-  int Freq;
-  int DumpFreq;
+  //int Freq;
+  int dumpFrequency;
   int now;
 public:
+	int NumSlots;
+	int WaitToFill;
+	int LastTotal;
   /// This grid defines the bins.  Bin 0 is bounded by 0 on the 
   /// bottom and grid(0) on the top.
   LinearGrid grid;
@@ -44,18 +52,21 @@ public:
   /// My specialization of the virtual function.
   void Print();
   void WriteBlock();
+  void LocalWriteBlock();
   void WriteInfo();
   void Read(IOSectionClass& IO);
   int MapIndex(int slice, int molecule);
   void Advance(int& index,int limit);
   dVec MeasureDipole(int slice,int molecule);
-  double CalcAutoCorr(int index, int t, int limit);
+  void CalcAutoCorr(int index, int t, int limit, double& SingleSingle, double& SingleNet, double& NetNet);
   int Locate(int i, int t, int limit);
   double CalcDotProd(dVec v1, dVec v2);
   dVec Rotate(dVec coord, double theta);
   AutoCorrClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
     ObservableClass(myPathData,ioSection), 
-    HistVar("y", IOSection, myPathData.Path.Communicator)
+    OneOneHistVar("OneOney", IOSection, myPathData.Path.Communicator),
+    OneNetHistVar("OneNety", IOSection, myPathData.Path.Communicator),
+    NetNetHistVar("NetNety", IOSection, myPathData.Path.Communicator)
   {
     TimesCalled=0;
     Initialize();
