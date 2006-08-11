@@ -88,14 +88,18 @@ DisplaceMoveClass::MakeMove ()
 {
   // Move the Join out of the way.
   PathData.MoveJoin (PathData.Path.NumTimeSlices()-1);
-
+  Array<int,1> permVec;
+  PathData.Path.TotalPermutation(permVec);
+  PathData.Path.Communicator.Broadcast(0,permVec);
   vector<int> ptclList;
   int numLeft=0;
   for (int i=0; i<ActiveSpecies.size(); i++) {
     SpeciesClass &species = PathData.Path.Species(ActiveSpecies(i));
     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
-      ptclList.push_back(ptcl);
-      numLeft++;
+      if (permVec(ptcl)==ptcl){
+	ptclList.push_back(ptcl);
+	numLeft++;
+      }
     }
   }
   
