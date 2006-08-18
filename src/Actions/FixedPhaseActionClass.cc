@@ -421,9 +421,9 @@ FixedPhaseClass::CalcAction (Array<Vec3,1> &G1, Array<Vec3,1> &G2,
     dv -= dot(kVec, dR(i));
 
   while (dv > M_PI)
-    dv -= M_PI;
+    dv -= 2.0*M_PI;
   while (dv < -M_PI)
-    dv += M_PI;
+    dv += 2.0*M_PI;
 
   u = (1.0/dRMag)*dR;
   double g1 = dot (G1, u);
