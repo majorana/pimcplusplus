@@ -359,8 +359,13 @@ Isosurface::Set()
   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30.0);
 
 
+
   if (UseNormals)
     glEnable (GL_NORMALIZE);
+
+  //  glDisable(GL_DEPTH_TEST);
+  glDepthMask(GL_FALSE);
+
 
   glBegin(GL_TRIANGLES);
 
@@ -395,6 +400,8 @@ Isosurface::Set()
     }
   }
   glEnd();
+  glDepthMask(GL_TRUE);
+  //  glEnable(GL_DEPTH_TEST);
   End();
 }
 

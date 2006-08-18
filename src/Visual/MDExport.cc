@@ -207,7 +207,7 @@ MDExportClass::MakePOVPixbuf(int frame)
   MDVisual.DrawFrame();
   MDVisual.PathVis.POVRender("POVframe.pov");
   char povString[1000];
-  snprintf (povString, 1000, "povray -D +A0.0 +W%d +H%d POVframe.pov", 
+  snprintf (povString, 1000, "povray -D +A0.01 +W%d +H%d POVframe.pov", 
 	    Width, Height);
   system(povString);
   Pixbuf.clear();
