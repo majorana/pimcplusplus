@@ -56,8 +56,12 @@ libmoves_la_SOURCES  =           \
     LeviFlightStage.cc           \
     MetaMoves.cc                 \
     MetaMoves.h                  \
+    MoleculeMove.cc              \
+    MoleculeMove.h               \
     MoleculeMoveBase.cc          \
     MoleculeMoveBase.h           \
+    MoleculeMoveManager.cc       \
+    MoleculeMoveManager.h        \
     MoveBase.cc                  \
     MoveBase.h                   \
     MoveClass.h                  \
@@ -92,12 +96,8 @@ libmoves_la_SOURCES  =           \
     TablePermuteStage.h          \
     ClusterMove.cc               \
     ClusterMove.h                \
-    WaterMoveManager.cc          \
-    WaterMoveManager.h           \
     VariationalDisplaceMove.h    \
     VariationalDisplaceMove.cc   \
-    WaterMove.cc                 \
-    WaterMove.h                  \
     WaterMoveRing.cc             \
     WaterMoveRing.h              \
     QMCTest.cc                   \

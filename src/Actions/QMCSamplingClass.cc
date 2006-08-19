@@ -16,6 +16,8 @@
 	
 	CEIMCActionClass::CEIMCActionClass(PathDataClass &pathData) : ActionBaseClass (pathData){
 	  //cerr << "CEIMCActionClass Constructor: " << endl;
+		ptclSet0.resize(pathData.Path.NumSpecies());
+		ptclSet1.resize(pathData.Path.NumSpecies());
 	}
 	
 	double CEIMCActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level){
@@ -24,18 +26,33 @@
 		int slice = 0;
 		// not sure about looping over slices; not done right now
 	  //for(int slice=slice1; slice<slice2; slice++) left bracket
-		string setPtclSet = ptclSet0;
+		Array<string,1> setPtclSet(PathData.Path.NumSpecies());
+		for(int s=0; s<setPtclSet.size(); s++) setPtclSet(s) = ptclSet0(s);
 		if((GetMode() == NEWMODE) && correlated)
-			setPtclSet = ptclSet1;
+			for(int s=0; s<setPtclSet.size(); s++) setPtclSet(s) = ptclSet1(s);
 		// set ion positions for either mode
+		cerr << "SetPtclSet contains..." << endl;
+		for(int s=0; s<setPtclSet.size(); s++){
+			cerr << s << " " << setPtclSet(s) << endl;
+		}
+		cerr << "PtclSets contain..." << endl;
+		for(int s=0; s<setPtclSet.size(); s++){
+			cerr << s << " " << ptclSet0(s) << ", " << ptclSet1(s) << endl;
+		}
+		cerr << "activeParticles.size is " << activeParticles.size() << endl;
 		for(int i=0; i<activeParticles.size(); i++){
 		  int ptcl = activeParticles(i);
-		  PathData.qmc->SetPtclPos(setPtclSet, ptcl, PathData.Path(slice,ptcl).data());
+			int mySpecies = PathData.Path.ParticleSpeciesNum(ptcl);
+			int offset = PathData.Path.Species(mySpecies).FirstPtcl;
+			cerr << i << "[" << ptcl << ", " << mySpecies << ", " << offset << "], ";
+			cerr << endl << "going to update the position of ptcl " << ptcl << " of set " << setPtclSet(mySpecies) << endl;
+		  PathData.qmc->SetPtclPos(setPtclSet(mySpecies), ptcl - offset, PathData.Path(slice,ptcl).data());
 		}
 
-		if((GetMode() == NEWMODE) && correlated){
+		if(correlated){
+			if(GetMode() == NEWMODE){
 				//cerr << "  QMCAction: Setting up VMCMultiple run...";
-				PathData.qmc->SetVMCMultiple(50);
+	  		PathData.qmc->SetVMCMultiple(dt, walkers, steps, blocks);
 				//cerr << " done." << endl;
 	
 	  		PathData.qmc->process();
@@ -43,23 +60,27 @@
 				EnergyDiffIndex = PathData.qmc->qmcDriver->addObservable("DiffS0S1");
 				EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LE0");
 				EnergyIndex1 = PathData.qmc->qmcDriver->addObservable("LE1");
+	  		PathData.qmc->execute();
+			}
 		}
 		else {
-			PathData.qmc->SetVMC(50);
+	  	PathData.qmc->SetVMC(dt, walkers, steps, blocks);
 			PathData.qmc->process();
 			EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LocalEnergy");
+	  	PathData.qmc->execute();
 		}
 
-	  PathData.qmc->execute();
-	
 		vector<double> Uvalues;
-		if((GetMode() == NEWMODE) && correlated){
-			PathData.qmc->qmcDriver->Estimators->getData(EnergyDiffIndex,Uvalues); // get energy difference
-			double deltaE, variance;
-			QuickAvg(&Uvalues,deltaE,variance);
-			cerr << "	computed average " << deltaE << " with variance " << variance << " from " << Uvalues.size() << " entries." << endl;
-  		Utotal += (deltaE + PathData.Path.tau*variance/2); // penalty included
-  		//Utotal += deltaE; // no penalty; biased estimator
+	
+		if(correlated){
+			if(GetMode() == NEWMODE){
+				PathData.qmc->qmcDriver->Estimators->getData(EnergyDiffIndex,Uvalues); // get energy difference
+				double deltaE, variance;
+				QuickAvg(&Uvalues,deltaE,variance);
+				cerr << "	computed average " << deltaE << " with variance " << variance << " from " << Uvalues.size() << " entries." << endl;
+  			Utotal += (deltaE + PathData.Path.tau*variance/2); // penalty included
+  			//Utotal += deltaE; // no penalty; biased estimator
+			}
 		}
 		else{
 			PathData.qmc->qmcDriver->Estimators->getData(EnergyIndex0,Uvalues); // get energy
@@ -89,7 +110,7 @@
 	double CEIMCActionClass::d_dBeta (int slice1, int slice2, int level){
 	  double Utotal = 0.0;
 	  for(int slice=slice1; slice<slice2; slice++){
-	  	PathData.qmc->SetVMC(100);
+	  	PathData.qmc->SetVMC(dt, walkers, steps, blocks);
 	
 	  	PathData.qmc->process();
 	
@@ -117,6 +138,14 @@
 		//cerr << "EnergyIndex0 at " << EnergyIndex0 << endl;
 		//cerr << "EnergyIndex1 at " << EnergyIndex1 << endl;
 		//cerr << "EnergyDiffIndex at " << EnergyDiffIndex << endl;
+		if(!in.ReadVar("Timestep", dt))
+			dt = 0.05;
+		if(!in.ReadVar("Walkers", walkers))
+			walkers = 10;
+		if(!in.ReadVar("Steps", steps))
+			steps = 100;
+		if(!in.ReadVar("Blocks", blocks))
+			blocks = 50;
 		assert(in.ReadVar("Correlated",correlated));
 		if(correlated){
 			cerr << "Using correlated samping to compute energy differences." << endl;
@@ -124,12 +153,23 @@
 		else{
 			cerr << "NOT using correlated sampling for energy differences." << endl;
 		}
-		if(in.ReadVar("ParticleSet0", ptclSet0) && in.ReadVar("ParticleSet1", ptclSet1))
-			cerr << "  Got qmcPACK particlesets " << ptclSet0 << " and " << ptclSet1 << " for correlated sampling." << endl;
-		else{
-			cerr << "  Didn't read in particleset names; using default ion particleset 'i'" << endl;
-			ptclSet0 = ptclSet1 = "i";
+
+  	//Array<string,1> PtclSet0, PtclSet1;
+		if(in.ReadVar("ParticleSet0", ptclSet0) && in.ReadVar("ParticleSet1", ptclSet1)){
+			assert(ptclSet0.size() == PathData.Path.NumSpecies());
+			cerr << "  Got the following qmcpack particleset labels:\n";
 		}
+		else{
+			ptclSet0.resize(PathData.Path.NumSpecies());
+			ptclSet1.resize(PathData.Path.NumSpecies());
+			for(int s=0; s< ptclSet0.size(); s++){
+				ptclSet0(s) = PathData.Path.Species(s).Name;
+				ptclSet1(s) = PathData.Path.Species(s).Name + '1';
+			}
+			cerr << "  Didn't read in particleset names; generated defaults:" << endl;
+		}
+		cerr << "SPECIES		SET 0		SET 1" << endl; 
+		for(int s=0; s<ptclSet0.size(); s++) cerr << PathData.Path.Species(s).Name << "  " << ptclSet0(s) << "  " << ptclSet1(s) << endl;
 	}
 #endif
 
@@ -168,7 +208,8 @@ double IonIonActionClass::SingleAction(int slice1,int slice2,
       int species1 = Path.ParticleSpeciesNum(ptcl1);
       int species2 = Path.ParticleSpeciesNum(ptcl2);
       // make sure we haven't already done it AND that it's not an electron
-      if(Path.DoPtcl(ptcl2) && (species2 != speciese)){
+      //if(Path.DoPtcl(ptcl2) && (species2 != speciese) && Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+      if(Path.DoPtcl(ptcl2)){
 	//cerr << "  " << ptcl1 << ", " << ptcl2 << ": ";
 				for (int slice=slice1;slice<slice2;slice++){
 				  double r;
@@ -199,7 +240,8 @@ double IonIonActionClass::d_dBeta (int slice1, int slice2, int level){
       int species1 = Path.ParticleSpeciesNum(ptcl1);
       int species2 = Path.ParticleSpeciesNum(ptcl2);
       // make sure we haven't already done it AND that it's not an electron
-      if(Path.DoPtcl(ptcl2) && (species2 != speciese)){
+      //if(Path.DoPtcl(ptcl2) && (species2 != speciese) && Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+      if(Path.DoPtcl(ptcl2)){
 	for (int slice=slice1;slice<slice2;slice++){
 	  double r;
 	  dVec Rvec;

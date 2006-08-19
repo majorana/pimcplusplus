@@ -318,24 +318,28 @@ void PathClass::Allocate()
       cerr << "		Looking for string " << newMol << endl;
       bool foundMol = false;
       for(int m=0; m<MoleculeName.size(); m++){
-	if(newMol == MoleculeName[m]){
-	  foundMol = true;
-	  assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
-	  foundAt = m;
-	  cerr << "		Found at " << foundAt 
-	       << " of " << MoleculeName.size() << endl;
-	}
+				if(newMol == MoleculeName[m]){
+				  foundMol = true;
+				  assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
+				  foundAt = m;
+				  cerr << "		Found at " << foundAt 
+				       << " of " << MoleculeName.size() << endl;
+				}
       }
       if(!foundMol){
-	MoleculeName.push_back(newMol);
-	MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
-	foundAt = MoleculeName.size() - 1;
-	cerr << "		Added " << newMol << " at " << foundAt << endl;
+				MoleculeName.push_back(newMol);
+				MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
+				int sum = 0;
+				for(int s=0; s<(MoleculeNumber.size()-1); s++)
+					sum += MoleculeNumber[s];
+				offset.push_back(sum);
+				foundAt = MoleculeName.size() - 1;
+				cerr << "		Added " << newMol << " at " << foundAt << endl;
       }
       
       prevIndex = 0;
       for(int i=0; i<foundAt; i++){
-	prevIndex += MoleculeNumber[i];
+				prevIndex += MoleculeNumber[i];
       }
       //cerr << "		set prevIndex " << prevIndex << endl;
       
@@ -357,11 +361,10 @@ void PathClass::Allocate()
       if(doMol){
 	//cerr << "		" << i << " prevIndex " << prevIndex << ", foundAt " << foundAt << ", Mol.Num. " << MoleculeNumber[foundAt];
 	//cerr  << " so mod is " << i%MoleculeNumber[foundAt] << endl;
-	MolRef(i+first) = prevIndex + i%MoleculeNumber[foundAt]; // need to assign myMolecule
+				MolRef(i+first) = prevIndex + i%MoleculeNumber[foundAt]; // need to assign myMolecule
 	//cerr << "Assigned MolRef " << MolRef(i+first) << " to ptcl " << i+first << endl;
       }
     }
-    
   }
   Path.resize(MyNumSlices,numParticles+OpenPaths);
   RefPath.resize(numParticles+OpenPaths);
@@ -410,13 +413,6 @@ void PathClass::Allocate()
 #endif
     Rho_k.resize(MyNumSlices, NumSpecies(), kVecs.size());
   }
-	//  // jgadd
-	//  MolRef.resize(numParticles);
-	////  perr << "PRINT MolRef Initialized" << endl;
-	//  for(int q = 0;q < MolRef.size();q++){
-	//    MolRef(q) = q;
-	////    perr << q << " " << MolRef(q) << endl;
-	//  }
 }
 
 void PathClass::SetupkVecs2D()

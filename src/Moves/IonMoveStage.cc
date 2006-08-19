@@ -78,6 +78,8 @@ void IonStageClass::Set(double setdRMag){
 // very simple translations of activeParticles
 double IonStageClass::Sample(int &slice1,int &slice2, Array<int,1>& activeParticles)
 {
+	bool proceed = false; // hack
+	double barrier = 10.0; // hack
   activeParticles.resize(PtclRoster.size());
   for(int i=0; i<PtclRoster.size(); i++) activeParticles(i) = PtclRoster(i);
 		//cerr << "  IonStage::Sample... PtclRoster is " << PtclRoster << endl;
@@ -86,17 +88,27 @@ double IonStageClass::Sample(int &slice1,int &slice2, Array<int,1>& activePartic
   slice1 = 0;
   slice2 = 1;
   int slice = slice1;
-  for(int slice=slice1; slice<slice2; slice++){
-    for(int i=0; i<activeParticles.size(); i++){
-			//cerr << "  Move: ptcl " << activeParticles(i) << " to ";
-      dVec dR;
-      for(int x=0; x<3; x++) dR(x) = (PathData.Path.Random.Local() - 0.5);
-      dR = Scale(dR,dRMag);
-      dR += PathData.Path(slice,activeParticles(i));
-			//cerr << dR << endl;
-      PathData.Path.SetPos(slice,activeParticles(i),dR);
-    }
-  }
+	while(!proceed){ // hack to implement hard wall to prevent H2 dissociation
+		proceed = true;
+	  for(int slice=slice1; slice<slice2; slice++){
+	    for(int i=0; i<activeParticles.size(); i++){
+				//cerr << "  Move: ptcl " << activeParticles(i) << " to ";
+	      dVec dR;
+	      for(int x=0; x<3; x++) dR(x) = (PathData.Path.Random.Local() - 0.5);
+	      dR = Scale(dR,dRMag);
+	      dR += PathData.Path(slice,activeParticles(i));
+				//cerr << dR << endl;
+	      PathData.Path.SetPos(slice,activeParticles(i),dR);
+				for(int j=0; j<activeParticles.size(); j++){
+					dVec disp;
+					double Rmag;
+					PathData.Path.DistDisp(slice,activeParticles(i), activeParticles(j), Rmag, disp);
+					if(Rmag > barrier)
+						proceed = false;
+				}
+	    }
+	  }
+	}
   return 1; // transition probability is constant inside the box of length dRMag
 }
 

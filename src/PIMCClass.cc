@@ -291,8 +291,13 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     //     else if (moveType=="WaterRotate")
 //     else if (moveType=="VariationalDisplace")
 //        move = new VariationalDisplaceMoveClass(PathData,OutFile);
-    else if (moveType=="WaterMove")
-      move = new WaterMoveClass(PathData, OutFile);
+		/// This is just here for debugging; should be deleted in the future
+    else if (moveType=="WaterMove"){
+			cerr << "ERROR: 'WaterMove' IS OBSOLETE: USE 'MoleculeMove' NOW" << endl;
+			assert(0);
+		}
+    else if (moveType=="MoleculeMove")
+      move = new MoleculeManagerClass(PathData, OutFile);
     else if (moveType=="IonDisplace")
       move = new IonDisplaceMoveClass (PathData, OutFile);
     else if (moveType=="IonMove")

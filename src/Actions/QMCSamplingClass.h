@@ -10,9 +10,11 @@ class CEIMCActionClass: public ActionBaseClass
 {
   std::vector<double>* qmcData;
   int EnergyIndex0, EnergyIndex1, EnergyDiffIndex;
-  string ptclSet0, ptclSet1;
+	Array<string, 1> ptclSet0, ptclSet1;
   
 public:
+	double dt;
+	int walkers, steps, blocks;
 	bool correlated;
   double SingleAction(int slice1,int slice2,
 		      const Array<int,1> &activeParticles,int level);

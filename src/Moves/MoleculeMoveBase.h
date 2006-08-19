@@ -4,13 +4,20 @@
 //#include "MoveBase.h"
 #include "StageClass.h"
 
+// Identifies whether moves should be attempted globally
+// or one particle at a time (SINGLE)
+enum MoveMode{GLOBAL, SINGLE, SEQUENTIAL};
+
 //class MolMoveClass: public ParticleMoveClass{
 class MolMoveClass: public LocalStageClass{
+	int numMol, molIndex;
   public:
+	MoveMode mode;
 	int numAccepted, numMoves;
   // This will store an array of active particles for each molecule in the sim;
   // should eliminate the need to repeatedly asemble these arrays at each move
   Array<Array<int,1>,1> MolMembers;
+	Array<int, 1> MoveList;
   MolMoveClass(PathDataClass&, IO::IOSectionClass);
   dVec GetCOM(int slice, int mol);
   dVec TranslateMol(int slice, Array<int,1>& activePtcls, double epsilon);
@@ -18,6 +25,7 @@ class MolMoveClass: public LocalStageClass{
   void RotateMol(int slice, Array<int,1>& activePtcls, double theta);
   void Read (IOSectionClass &in);
 	void Accept();
+	void Advance();
 };
 
 dVec ArbitraryRotate(dVec axis,dVec coord, double phi);

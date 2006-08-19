@@ -317,8 +317,10 @@ public:
 	// containers for data about user-defined molecules
 	vector<string> MoleculeName; // stores all specified molecule names
 	vector<int> MoleculeNumber;  // stores corresponding number of each molecule
+	vector<int> offset;	// stores starting index for each molecule
 	//map<string,int> MoleculeMap; // maps molecule name to molecule id
-  int numMol; // stores number of molecules of the FIRST type of molecule specified
+  int numMol; // stores number of molecules of the FIRST type of molecule 
+							///specified, maintained for compatibility with earlier segments of code
   Array<int,1> MolRef; // maps ptcl index to molecule index
 	bool doMol;
 };
@@ -446,6 +448,7 @@ PathClass::PathClass (CommunicatorClass &communicator,
 
 	MoleculeName.resize(0);
 	MoleculeNumber.resize(0);
+	offset.resize(0);
 	//MoleculeMap.resize(0);
 	numMol = 0;
 	MolRef.resize(0);

@@ -5,9 +5,94 @@
 MolMoveClass::MolMoveClass(PathDataClass& myPathData, IO::IOSectionClass outSection):
   LocalStageClass (myPathData,outSection)
 {
+	cerr << "MolMoveClass constructor" << endl;
+	cerr << "	numMol is " << numMol << endl;
 	numAccepted = 0;
 	numMoves = 0;
-  int numMol = PathData.Path.numMol;
+
+	mode = SINGLE;
+ 
+	/* 
+  cerr << "In MolMoveClass Constructor.  MolMembers loaded: " << endl;
+  for(int i = 0; i < MolMembers.size() ; i++){
+    cerr << i << ":  ";
+    for(int j = 0; j < MolMembers(i).size(); j++) cerr << MolMembers(i)(j) << ", ";
+    cerr << endl;
+  }*/
+}
+
+void MolMoveClass::Read (IOSectionClass &in){
+	/// Read in the molecule to move by string or int
+	cerr << "MolMoveClass::Read" << endl;
+	string setMolecule;
+	int indexMolecule;
+	if(in.ReadVar("Molecule",setMolecule)){
+		cerr << "got Molecule " << setMolecule << endl;
+		indexMolecule = 0;
+		cerr << " index is " << indexMolecule << " which gets " << PathData.Path.MoleculeName[indexMolecule];
+		cerr  << " out of total size " << PathData.Path.MoleculeName.size() << endl;
+		while((PathData.Path.MoleculeName[indexMolecule] != setMolecule) && (indexMolecule<PathData.Path.MoleculeName.size())){
+			cerr << "indexMolecule is " << indexMolecule << "... max is " << PathData.Path.MoleculeName.size() << endl;
+			indexMolecule++;
+		}
+		molIndex = indexMolecule;
+		numMol = PathData.Path.MoleculeNumber[molIndex];
+		cerr << "Selected molecule " << PathData.Path.MoleculeName[molIndex] << endl;
+	}
+	else if (in.ReadVar("Molecule",indexMolecule)){
+		molIndex = indexMolecule;
+		numMol = PathData.Path.MoleculeNumber[molIndex];
+		cerr << "Selected molecule " << PathData.Path.MoleculeName[molIndex] << endl;
+	}
+	else{
+		molIndex = 0;
+		numMol = PathData.Path.MoleculeNumber[molIndex];
+		cerr << "Selected molecule " << PathData.Path.MoleculeName[molIndex] << " by default" << endl;
+	}
+	
+/// Read in update mode: GLOBAL, SEQUENTIAL, SINGLE	
+	string setMode;
+	in.ReadVar("Mode", setMode);
+	if(setMode == "GLOBAL"){
+		mode = GLOBAL;
+		MoveList.resize(numMol);
+		for(int m=0; m<numMol; m++)
+			MoveList(m) = m + PathData.Path.offset[molIndex];
+		cerr << "Set for GLOBAL particle updates." << endl;
+	}
+	else if(setMode == "SEQUENTIAL"){
+		mode = SEQUENTIAL;
+		MoveList.resize(1);
+		MoveList(0) = 0;
+		cerr << "Set for SEQUENTIAL particle updates." << endl;
+	}
+	else{
+		cerr << "Set for SINGLE particle updates." << endl;
+		MoveList.resize(1);
+	}
+		
+  Array<string,1> ActionList;
+  assert (in.ReadVar ("Actions", ActionList));
+	for(int a=0; a<ActionList.size(); a++){
+		string setAction = ActionList(a);
+	  if(setAction == "ST2Potential"){
+  		Actions.push_back(&PathData.Actions.ST2Water);
+			cerr << "  Added ST2 Water Potential" << endl;
+		}else if(setAction == "TIP5PPotential"){
+  		Actions.push_back(&PathData.Actions.TIP5PWater);
+			cerr << "Added TIP5P Water Potential" << endl;
+		}else if(setAction == "CEIMCAction"){
+			//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
+			PathData.Actions.CEIMCAction.Read(in);
+  		Actions.push_back(&PathData.Actions.CEIMCAction);
+			cerr << "Added CEIMC calculation of BO energy" << endl;
+		}else if(setAction == "IonInteraction"){
+  		Actions.push_back(&PathData.Actions.IonInteraction);
+			cerr << "Added intermolecular ion-ion interaction" << endl;
+		} else
+    	cerr << "You specified " << setAction << ", which is not supported for this type of move" << endl;
+	}
+
   MolMembers.resize(numMol);
   vector<int> catalog(numMol); // for storing info to load MolMembers
   // initialize catalog (all zeros)
@@ -26,30 +111,6 @@ MolMoveClass::MolMoveClass(PathDataClass& myPathData, IO::IOSectionClass outSect
     int m = PathData.Path.MolRef(p);
 		MolMembers(m)(catalog[m]) = p;
 		catalog[m]++;
-	}
- 
-	/* 
-  cerr << "In MolMoveClass Constructor.  MolMembers loaded: " << endl;
-  for(int i = 0; i < MolMembers.size() ; i++){
-    cerr << i << ":  ";
-    for(int j = 0; j < MolMembers(i).size(); j++) cerr << MolMembers(i)(j) << ", ";
-    cerr << endl;
-  }*/
-}
-
-void MolMoveClass::Read (IOSectionClass &in){
-  Array<string,1> ActionList;
-  assert (in.ReadVar ("Actions", ActionList));
-	for(int a=0; a<ActionList.size(); a++){
-		string setAction = ActionList(a);
-	  if(setAction == "ST2Potential"){
-  		Actions.push_back(&PathData.Actions.ST2Water);
-			cerr << "  Added ST2 Water Potential" << endl;
-		}else if(setAction == "TIP5PPotential"){
-  		Actions.push_back(&PathData.Actions.TIP5PWater);
-			cerr << "Added TIP5P Water Potential" << endl;
-		} else
-    	cerr << "You specified " << setAction << ", which is not supported for this type of move" << endl;
 	}
 }
 
@@ -97,6 +158,12 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, double theta)
 
 void MolMoveClass::Accept(){
 	numAccepted++;
+}
+
+void MolMoveClass::Advance(){
+	MoveList(0) = MoveList(0) + 1;
+	if(MoveList(0) >= PathData.Path.numMol)
+		MoveList(0) = 0;
 }
 
 // ArbitraryRotate takes a unit vector, axis, about
