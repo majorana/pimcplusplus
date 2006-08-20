@@ -14,12 +14,12 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#ifndef WATER_MOVE_H
-#define WATER_MOVE_H
+#ifndef MOLECULE_MOVE_H
+#define MOLECULE_MOVE_H
 
 #include "MoleculeMoveBase.h"
 
-class WaterRotate : public MolMoveClass
+class MoleculeRotate : public MolMoveClass
 {
  public:
   double Theta;
@@ -28,9 +28,10 @@ class WaterRotate : public MolMoveClass
   double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
   void Read(IOSectionClass &moveInput);
 
-  WaterRotate(PathDataClass &myPathData,IOSectionClass outSection) : 
+  MoleculeRotate(PathDataClass &myPathData,IOSectionClass outSection) : 
     MolMoveClass (myPathData,outSection)
     {
+			cerr << "MoleculeRotate constructor" << endl;
     }
   //  double AcceptanceRatio(int numAccepted,int numMoves);
 
@@ -39,7 +40,7 @@ class WaterRotate : public MolMoveClass
     };
 };
 
-class WaterTranslate : public MolMoveClass
+class MoleculeTranslate : public MolMoveClass
 {
 	int counter;
  	public:
@@ -53,7 +54,7 @@ class WaterTranslate : public MolMoveClass
     {
     };
 
-  WaterTranslate(PathDataClass &myPathData,IOSectionClass outSection) : 
+  MoleculeTranslate(PathDataClass &myPathData,IOSectionClass outSection) : 
     MolMoveClass (myPathData,outSection)
     {
 			counter = 0;

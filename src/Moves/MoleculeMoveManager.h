@@ -1,15 +1,15 @@
-#ifndef WATER_MOVE_MANAGER_CLASS_H
-#define WATER_MOVE_MANAGER_CLASS_H
+#ifndef MOLECULE_MOVE_MANAGER_CLASS_H
+#define MOLECULE_MOVE_MANAGER_CLASS_H
 
 
 #include "MoveBase.h"
 #include "../PathDataClass.h"
 #include "../Observables/ObservableVar.h"
-#include "WaterMove.h"
+#include "MoleculeMove.h"
 #include "AVBMove.h"
 #include "MultiStage.h"
 
-class WaterMoveClass : public MultiStageClass
+class MoleculeManagerClass : public MultiStageClass
 {
 private:
   int SpeciesNum;
@@ -24,7 +24,7 @@ public:
   /// Override base class MakeMove to do a block of moves
   //void MakeMove();
 
-  WaterMoveClass(PathDataClass &pathData, IOSectionClass &out) : 
+  MoleculeManagerClass(PathDataClass &pathData, IOSectionClass &out) : 
     MultiStageClass(pathData, out)
 
   { 

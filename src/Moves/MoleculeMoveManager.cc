@@ -1,16 +1,16 @@
-#include "WaterMoveManager.h"
+#include "MoleculeMoveManager.h"
 
-void WaterMoveClass::Read(IOSectionClass &in)
+void MoleculeManagerClass::Read(IOSectionClass &in)
 {
 	string method;
 	assert(in.ReadVar("MoveMethod",method));
 	if(method == "Translate"){
 		cerr << "Creating new Translate move...";
-  	MoveStage = new WaterTranslate(PathData, IOSection);
+  	MoveStage = new MoleculeTranslate(PathData, IOSection);
 		cerr << " done." << endl;
 	} else if (method == "Rotate"){
 		cerr << "Creating new Rotate move...";
-  	MoveStage = new WaterRotate(PathData, IOSection);
+  	MoveStage = new MoleculeRotate(PathData, IOSection);
 		cerr << " done." << endl;
 	} else if (method == "AVB"){
 		cerr << "Creating new Aggregation Volume Bias move...";

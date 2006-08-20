@@ -14,27 +14,24 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "WaterMove.h"
+#include "MoleculeMove.h"
 
-void WaterRotate::Read(IOSectionClass &moveInput) {
+void MoleculeRotate::Read(IOSectionClass &moveInput) {
   //assert(moveInput.ReadVar("SetTheta",Theta));
   assert(moveInput.ReadVar("SetAngle",Theta));
 	MolMoveClass::Read(moveInput);
 }
 
-void WaterTranslate::Read(IOSectionClass &moveInput) {
+void MoleculeTranslate::Read(IOSectionClass &moveInput) {
   assert(moveInput.ReadVar("SetStep",Step));
 	MolMoveClass::Read(moveInput);
 }
 
-//void WaterTranslate::MakeMove() {
-double WaterTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
-//cerr << " WaterTranslate::Sample ";
+//void MoleculeTranslate::MakeMove() {
+double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+//cerr << " MoleculeTranslate::Sample ";
   //double step = 0.3;
   double step = Step; // Using Step from input file
-  int speciesO = PathData.Path.SpeciesNum("O");
-  int speciesp = PathData.Path.SpeciesNum("p");
-  int speciese = PathData.Path.SpeciesNum("e");
 
   int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
 //cerr << counter << ", ";
@@ -82,43 +79,54 @@ double WaterTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	return 1;
 }
 
-//void WaterRotate::MakeMove()
-double WaterRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+//void MoleculeRotate::MakeMove()
+double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
   double dtheta = 2*M_PI*Theta; // Using Theta from input file
-//cerr << " WaterRotate::Sample ";
+//cerr << " MoleculeRotate::Sample ";
   //double dtheta = 2*M_PI*0.3;
-  int speciesO = PathData.Path.SpeciesNum("O");
 
-  int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
-	activeParticles.resize(MolMembers(choosemol).size());
-	for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(choosemol)(i);
-//cerr << "  chose molecule " << choosemol << " of " << PathData.Path.numMol << endl;
-//cerr << "  Getting info from " << MolMembers(choosemol) << endl;
-//cerr << "  activeParticles is " << activeParticles << endl;
+	if(mode == SINGLE){
+  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
+		MoveList(0) = choosemol;
+		activeParticles.resize(MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(0))(i);
+	}
+	else if(mode == SEQUENTIAL){
+		activeParticles.resize(MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(0))(i);
+	}
+	else if(mode == GLOBAL){
+		activeParticles.resize(PathData.Path.NumParticles());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = i;
+	}
 
-	// choose a time slice to move
-  int numSlices = PathData.Path.TotalNumSlices;
-  int slice=0;
-  slice1 = 0;
-  slice2 = 0;
-  if(numSlices>1){
-    int P_max = numSlices - 1;
-    slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
-    slice1 = slice-1;
-    slice2 = slice+1;
-  }
+	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
+		//activeParticles.resize(MolMembers(MoveList(activeMol)).size());
+		//for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(activeMol))(i);
 
-  double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
-//	cerr << "  Before move: " << endl;
-//	for(int i=0; i<activeParticles.size(); i++) cerr << "  " << i << ": " << PathData.Path(slice,activeParticles(i)) << endl;
-  RotateMol(slice,activeParticles,theta);
-//	cerr << "  After move: " << endl;
-//	for(int i=0; i<activeParticles.size(); i++) cerr << "  " << i << ": " << PathData.Path(slice,activeParticles(i)) << endl;
+		// choose a time slice to move
+		int numSlices = PathData.Path.TotalNumSlices;
+		int slice=0;
+		slice1 = 0;
+		slice2 = 0;
+		if(numSlices>1){
+		  int P_max = numSlices - 1;
+		  slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
+		  slice1 = slice-1;
+		  slice2 = slice+1;
+		}
+		
+		double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
+		RotateMol(slice,MolMembers(MoveList(activeMol)),theta);
+
+	}
 
   if (numMoves%10000 == 0 && numMoves>0){
     cerr << numMoves << " moves; current rotate ratio is " << double(numAccepted)/numMoves << " with angle size " << dtheta << endl;
   }
   numMoves++;
+
+	if(mode == SEQUENTIAL) Advance();
 
 	return 1;
 }
