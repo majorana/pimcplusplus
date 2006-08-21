@@ -59,13 +59,13 @@
       
       ixl = int((x-x0)/dx)+1
       ixh = ixl+1
-      xlo = dx*(ixl-1)
+      xlo = x0+dx*(ixl-1)
       iyl = int((y-y0)/dy)+1
       iyh = iyl+1
-      ylo = dy*(iyl-1)
+      ylo = y0+dy*(iyl-1)
       izl = int((z-z0)/dx)+1
       izh = izl + 1
-      zlo = dz*(izl-1)
+      zlo = z0+dz*(izl-1)
 
       u = (x-xlo)/dx
       v = (y-ylo)/dy
@@ -144,13 +144,13 @@
 
       ixl = int((x-x0)*dxInv)+1
       ixh = ixl+1
-      xlo = dx*(ixl-1)
+      xlo = x0+dx*(ixl-1)
       iyl = int((y-y0)*dyInv)+1
       iyh = iyl+1
-      ylo = dy*(iyl-1)
+      ylo = y0+dy*(iyl-1)
       izl = int((z-z0)*dzInv)+1
       izh = izl + 1
-      zlo = dz*(izl-1)
+      zlo = z0+dz*(izl-1)
 
       u = (x-xlo)/dx
       v = (y-ylo)/dy

@@ -201,15 +201,15 @@ void SpeedTest()
 
 void GradValTest()
 {
-  int N = 30;
+  int N = 100;
   const int numSplines =8;
   Array<MyTricubicSpline,1> MySplines(2*numSplines);
   ComplexMultiTricubicSpline MultiSpline;
   LinearGrid xGrid, yGrid, zGrid;
   
-  xGrid.Init(0.0, 4.0, N);
-  yGrid.Init(0.0, 5.0, N);
-  zGrid.Init(0.0, 6.0, N);
+  xGrid.Init(-4.0, 4.0, N);
+  yGrid.Init(-5.0, 5.0, N);
+  zGrid.Init(-6.0, 6.0, N);
   
   Array<complex<double>,4> initData(N,N,N,numSplines);
   for (int ix=0; ix<N; ix++)
@@ -398,7 +398,7 @@ main()
 {
 //   PeriodicTest();
 //   ValTest();
-//   GradValTest();
-  GradSpeedTest();
+   GradValTest();
+//  GradSpeedTest();
 }
   
