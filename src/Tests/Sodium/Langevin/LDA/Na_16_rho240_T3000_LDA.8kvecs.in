@@ -1,0 +1,381 @@
+double tau=0.125;
+
+Section (Parallel)
+{
+  int ProcsPerClone = 4;
+}
+
+int Seed = 12345;
+//int seed = 314159;
+
+// This system contains 16 sodium atoms at approximate the ground state,
+// and experimental lattice constant of 8.003 bohr
+// Note:  energy per isolated atom for this PH is -0.18233776 hartrees.
+Section (System)
+{
+  /// T = 3000 Kelvin
+  int NumTimeSlices=842;
+  Array<bool,1> IsPeriodic(3) = [true,true,true];
+  //Array<double,1> Box(3)=[30.1766, 30.1766, 30.1766];
+  // r_s = 5.9 bohr
+  // Array<double,1> Box(3) = [23.951, 23.951, 23.951];
+  //  Array<double,1> Box(3) = [27.417, 27.417, 27.417]; // rho = 200 kg/m^3
+  /// Array<double,1> Box(3) = [26.56, 26.56, 26.56]; // rho = 220 kg/m^3
+  Array<double,1> Box(3) = [25.8, 25.8, 25.80]; // rho = 240 kg/m^3
+  double kCutoff = 1.2;
+  Section (Particles)
+  {
+    Section (Species)
+    {
+      string Name="Na";
+      string Type="Na+";
+      double lambda=0.0; 
+      string Statistics="BOLTZMANNON";
+      string NodeType = "NONE";
+      int NumParticles=16;
+      int NumDim=3;
+      string InitPaths="RANDOMFIXED";
+//       Array<double,2> Positions(16,3) = 
+// 	[  6.59676048026161,  11.29050359735536,  12.20624875942293,
+// 	   1.25689456279900,   9.87176150557223,  -9.32509360469941,
+//           -5.83463266195510,   3.48539301450563,  -5.82188562925357,
+//  	   9.64401944301709,  -7.44188184984350,  12.49603476769179,
+//          -10.04789565171165,  -4.93814243131331,   8.44867862050368,
+// 	  -6.06384370542062,  -4.18188683006359,  -4.93551131867479,
+// 	  12.11695051850797,  -0.21099820407202, -11.22757175786997,
+// 	   5.29103001002230,   2.59545622344652, -10.14446569411534,
+// 	  -0.97041961112607,   1.58856148037743,  -4.85853338831773,
+// 	  -6.66595189258432, -10.77503942562158,  12.23151777384346,
+// 	  -8.96300869400207,  -2.70681982778231, -11.06444014395348,
+// 	 -10.47382253559666,   6.34048182107514, -12.22087095527604,
+// 	  -8.48414169870951,  11.91788502810131,  -8.62678845434777,
+// 	 -12.44007022044162,  -9.41883497781939,  -8.66462854081453,
+// 	  -3.40363265177317,   6.86393012032015,  12.35875576573677,
+// 	  10.85950013920689,  10.33064949414753, -10.54745003433620 ];
+      double Radius = 3.0;
+    }
+    Section (Species)
+    {
+      string Name="edown";
+      string Type = "e";
+      string Statistics = "FERMION";
+      double lambda=0.5; 
+      string NodeType = "FIXEDPHASE";
+      int NumParticles=8;
+      int NumDim=3;
+      string InitPaths="LEVIFLIGHT";
+      Array<double,2> Positions(8,3)=
+        [ -8.73103005, -8.5150300, -8.630300,
+	  -8.3303008, -8.2660300,   0.920000,
+	  -8.2303001,   0.7330000, -8.5420300,
+            0.4700003, -8.9460300, -8.1340300,
+	  -8.5303004,   0.8260000,   0.2520000,
+            0.63500007, -8.1260300,   0.721067000,
+            0.71200003,   0.6026000, -8.230300,
+            0.80780001,   0.22012000,   0.5520000 ];
+      
+    }
+    Section (Species)
+    {
+      string Name="eup";
+      string Type="e";
+      double lambda=0.5; 
+      string Statistics="FERMION";
+      string NodeType = "FIXEDPHASE";
+      int NumParticles=8;
+      int NumDim=3;
+      string InitPaths="LEVIFLIGHT";
+      Array<double,2> Positions(8,3)=
+	[ -4.350146, -4.332014, -4.262014,
+          -4.120141,  4.923014, -4.336014,
+          -4.410143, -4.73014,  4.808414,
+          -4.160148,  4.9123014,  4.544014,
+           4.580142, -4.832014, -4.366014,
+           4.920145, -4.563014,  4.732014,
+           4.250145,  4.345014, -4.2866014,
+           4.620141,  4.53014,  4.784014 ];
+    }
+  }
+}
+
+
+Section (Action)
+{
+  int MaxLevels = 7;
+  bool UseRPA = false;
+  int NumBreakupKnots = 10;
+  int NumImages = 0;
+  Array<string,1> PairActionFiles(3) = 
+    ["~/PairActions/Na-Na.PairAction",
+     "~/PairActions/Na_HF_NLPP.beta16.0.tricubicfit2.h5",
+     "~/PairActions/e-e.fit.beta16.0.h5"];
+  Section (NodalAction)
+  {
+    string Type = "FIXEDPHASE";
+    string IonSpecies  = "Na";
+    string UpSpecies   = "eup";
+    string DownSpecies = "edown";
+    bool UseMDExtrap = true;
+    bool UseLDA = true;
+    bool UseSubspaceRotation = true;
+    double kCut = 3.0;
+    int SmearOrder = 2;
+    double SmearWidth = 0.015;
+//    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
+//     Array<double,2> TwistAngles(32,3) = [ 0.25, -0.75, -0.75,
+//                                           0.25, -0.75, -0.25,
+//                                           0.25, -0.75,  0.25,
+//                                           0.25, -0.75,  0.75,
+//                                           0.25, -0.25, -0.75,
+//                                           0.25, -0.25, -0.25,
+//                                           0.25, -0.25,  0.25,
+//                                           0.25, -0.25,  0.75,
+//                                           0.25,  0.25, -0.75,
+//                                           0.25,  0.25, -0.25,
+//                                           0.25,  0.25,  0.25,
+//                                           0.25,  0.25,  0.75,
+//                                           0.25,  0.75, -0.75,
+//                                           0.25,  0.75, -0.25,
+//                                           0.25,  0.75,  0.25,
+//                                           0.25,  0.75,  0.75,
+//                                           0.75, -0.75, -0.75,
+//                                           0.75, -0.75, -0.25,
+//                                           0.75, -0.75,  0.25,
+//                                           0.75, -0.75,  0.75,
+//                                           0.75, -0.25, -0.75,
+//                                           0.75, -0.25, -0.25,
+//                                           0.75, -0.25,  0.25,
+//                                           0.75, -0.25,  0.75,
+//                                           0.75,  0.25, -0.75,
+//                                           0.75,  0.25, -0.25,
+//                                           0.75,  0.25,  0.25,
+//                                           0.75,  0.25,  0.75,
+//                                           0.75,  0.75, -0.75,
+//                                           0.75,  0.75, -0.25,
+//                                           0.75,  0.75,  0.25,
+//                                           0.75,  0.75,  0.75 ];
+    Array<double,2> TwistAngles(8,3) = [  0.25,  0.25,  0.25,
+ 					  0.25,  0.25,  0.75,
+  					  0.25,  0.75,  0.25,
+ 					  0.25,  0.75,  0.75,
+  					  0.75,  0.25,  0.25,
+ 					  0.75,  0.25,  0.75,
+ 					  0.75,  0.75,  0.25,
+ 					  0.75,  0.75,  0.75 ];
+    // Array<double,2> TwistAngles(1,3) = [  0.25,  0.25,  0.25];
+
+  }
+  bool UseBackground = false;
+}
+
+Section (Observables)
+{
+  string OutFileBase=
+    "~/Runs/NaRuns/Langevin/LDA/Na_16_rho240_T3000_8kvecs_LDA_RandStart";
+  int FileStart = 0;
+  Section (Observable) {
+    string Type = "Energy";
+    string Name = "Energy";
+    int Frequency=1;
+    int dumpFreq=100;  
+  }
+  Section (Observable) {
+    string Type = "Pressure";
+    string Name = "Pressure";
+    // Convert pressure to bar
+    double Prefactor = 2.942184e8;
+    int Frequency=1;
+    int dumpFreq=100;
+  }
+  Section (Observable) {
+    string Type = "Conductivity";
+    string Name = "Conductivity";
+    int Frequency=1;
+    int dumpFreq=100;
+  }
+  Section (Observable) {
+    string Type = "PairCorrelation";
+    string Name = "Na-Na";
+    string Species1 = "Na";
+    string Species2 = "Na";
+    int Frequency=1;
+    int dumpFreq=100;
+    Section (Grid) {
+      string Type = "Linear";
+      int NumPoints = 50;
+      double start = 0.1;
+      double end = 15.0;
+    }
+  }
+  Section (Observable) {
+    string Type = "StructureFactor";
+    string Name = "NaSk";
+    string Species1 = "Na";
+    string Species2 = "Na";
+    int Frequency=1;
+    int dumpFreq=100;
+  }
+  Section (Observable) {
+    string Type = "WindingNumber";
+    string Name = "WN";
+    Array<string,1> SpeciesList(2) = ["eup", "edown"];
+    int Frequency = 1;
+  }
+  Section (Observable) {
+    string Type   = "TimeAnalysis";
+    string Name   = "TimeAnalysis";
+    int Frequency = 10;
+    int dumpFreq  = 10;
+  }	
+  Section (Observable) {
+    int Frequency = 1;
+    string Type = "PathDump";
+    string Name = "PathDump";
+    Section(RhoDump) {
+      int Nx = 68;
+      int Ny = 68;
+      int Nz = 68;
+    }
+  }
+}
+
+Section (Moves) {
+  Section (Move) {
+    string Type="BisectionBlock";
+    string Name="eupBlock";
+    string PermuteType="TABLE";
+    //string PermuteType="NONE";
+    Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
+    double epsilon = 1.0e-4;
+    int NumLevels=7;
+    string Species = "eup";
+    int StepsPerBlock = 20;
+  }
+  Section (Move) {
+    string Type="BisectionBlock";
+    string Name="edownBlock";
+    //string PermuteType="NONE";
+    string PermuteType="TABLE";
+    Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
+    double epsilon = 1.0e-4;
+    int NumLevels=7;
+    string Species = "edown";
+    int StepsPerBlock = 20;
+  }
+  Section (Move) {
+    string Type="ShiftMove";
+    string Name="Shift";
+  }
+  Section (Move) {
+    string Type="Langevin";
+    string Name="Langevin";
+    string Integrator="LANGEVIN";
+    double Mass = 1.0;
+    double TimeStep = 0.8;
+    double FrictionFactor = 1.2;
+    double ExtraNoiseSigma = 0.05;
+    int NumEquilSteps = 50;
+    int NumAccumSteps = 20;
+    string Species="Na";
+    Section(RhoDump) {
+      int Nx = 68;
+      int Ny = 68;
+      int Nz = 68;
+    }
+  }
+}
+
+ 
+
+
+Section (Algorithm) {
+  ////////////////////////
+  // Equilibration loop //
+  ////////////////////////
+//   Section (Loop) { 
+//     int steps=1000;
+//     Section (Loop) {
+//       int steps=1;
+//       Section (Loop) {
+//         int steps=2;
+//         Section (Move) { string name="eupBlock";} 
+//         Section (Move) { string name="edownBlock";} 
+//       }
+//       Section (Move) { string name = "Shift"; }
+//     }
+//   }
+
+  Section (Loop) { //Start Accumulating observables
+    int Steps=6000000;
+//      Section (Loop) {
+//        int Steps = 100;
+//        Section (Loop) {
+//  	int Steps = 5;
+//  	Section (Move)    { string Name="eupBlockFast";   } 
+//  	Section (Move)    { string Name="edownBlockFast"; } 
+//        }	
+//        Section (Move)      { string Name = "Shift";        }
+//     }
+//     Section (Loop) {
+//       int Steps = 5;
+//       Section (Loop) {
+// 	int Steps = 5;
+// 	Section (Move)      { string Name="eupBlock";       } 
+// 	Section (Move)      { string Name="edownBlock";     } 
+//       }
+//       Section (Move)      { string Name = "Shift";        }
+//     }
+    Section (Loop) {
+      int Steps = 20;
+      /// Equilibration loop
+      Section (Loop) {
+	int Steps = 50;
+	Section (Move)      { string Name="eupBlock";       } 
+	Section (Move)      { string Name="edownBlock";     } 
+	Section (Move)      { string Name="eupBlock";       } 
+	Section (Move)      { string Name="edownBlock";     } 
+	Section (Move)      { string Name = "Shift";        }
+	Section (Move)      { string Name = "Langevin";     }
+      }
+      /// Accumulation loop
+      Section (Loop) {
+	int Steps = 19;
+	Section (Move)      { string Name="eupBlock";       } 
+	Section (Move)      { string Name="edownBlock";     } 
+	Section (Move)      { string Name="eupBlock";       } 
+	Section (Move)      { string Name="edownBlock";     } 
+	Section (Observe)   { string Name = "Pressure";     }
+	Section (Observe)   { string Name = "WN";           }
+	Section (Move)      { string Name = "Shift";        }
+	Section (Move)      { string Name = "Langevin";     }	
+      }
+      Section (Observe)     { string Name = "Na-Na";        }
+      Section (Move)        { string Name = "eupBlock";     } 
+      Section (Move)        { string Name = "edownBlock";   } 
+      Section (Observe)     { string Name = "Energy";       }
+      Section (Observe)     { string Name = "Pressure";     }
+      Section (Observe)     { string Name = "Conductivity"; }
+      Section (Observe)     { string Name = "NaSk";         }
+      Section (Observe)     { string Name = "WN";           }
+      Section (Observe)     { string Name = "TimeAnalysis"; }
+      Section (Move)        { string Name = "Shift";        }
+      Section (Move)        { string Name = "Langevin";     }
+      Section (WriteData)   {                               }
+    }
+    // Dump paths every 20 Langevin steps
+    Section (Observe)       { string Name = "PathDump";     }
+
+    // Section (Observe)  { string Name = "Na-Na";        }
+    // Section (Observe)  { string Name = "Na-eup";       }
+    // Section (Observe)  { string Name = "Na-edown";     }
+    // Section (Observe)  { string Name = "eup-eup";      }
+    // Section (Observe)  { string Name = "edown-edown";  }
+    // Section (Observe)  { string Name = "eup-edown";    }
+    
+  }
+}
+
+
+
+
+	  
