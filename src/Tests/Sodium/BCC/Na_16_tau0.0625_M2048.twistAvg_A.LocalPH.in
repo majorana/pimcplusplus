@@ -85,8 +85,8 @@ Section (Action)
   int NumImages = 0;
   Array<string,1> PairActionFiles(3) = 
     ["Na-Na.PairAction",
-     //     "~/PairActions/NaLocalPH.tricubicfit2.h5",
-     "~/PairActions/Na_HF_NLPP.beta16.0.tricubicfit2.h5",
+     "~/PairActions/NaLocalPH.tricubicfit2.h5",
+     //"~/PairActions/Na_HF_NLPP.beta16.0.tricubicfit2.h5",
      "~/PairActions/e-e.fit.beta8.0.h5"];
   Section (NodalAction)
   {
@@ -142,7 +142,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase="~/Runs/NaRuns/BCC/Na_16_tau0.0625_M2048.twistAvg.Na_HF_NLPP.32k";
+  string OutFileBase="~/Runs/NaRuns/BCC/Na_16_tau0.0625_M2048.twistAvg.LocalPH.64k";
 //  Array<double,1> Weights = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 //	                     1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
   int FileStart = 0;

@@ -313,6 +313,8 @@ IonDisplaceStageClass::DoElectronWarp()
 void
 IonDisplaceMoveClass::MakeMove ()
 {
+  cerr << "Start IonDisplaceMove  MyProc = " 
+       << Path.Communicator.MyProc() << endl;
   // Move the Join out of the way.
   PathData.MoveJoin (PathData.Path.NumTimeSlices()-1);
 
@@ -344,6 +346,9 @@ IonDisplaceMoveClass::MakeMove ()
   // Now call MultiStageClass' MakeMove
 
   MultiStageClass::MakeMove();
+  cerr << "End IonDisplaceMove  MyProc = " 
+       << Path.Communicator.MyProc() << endl;
+
 }
 
 

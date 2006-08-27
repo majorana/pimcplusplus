@@ -171,7 +171,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Langevin/LDA/Na_16_rho240_T2503_8kvecs_SmallStep";
+    "~/Runs/NaRuns/Langevin/LDA/FixedGrad/Na_16_rho240_T2503_8kvecs_LDA";
   int FileStart = 0;
   Section (Observable) {
     string Type = "Energy";
@@ -271,9 +271,9 @@ Section (Moves) {
     string Name="Langevin";
     string Integrator="LANGEVIN";
     double Mass = 1.0;
-    double TimeStep = 0.4;
-    double FrictionFactor = 1.2;
-    double ExtraNoiseSigma = 0.025;
+    double TimeStep = 0.8;
+    double FrictionFactor = 1.1;
+    double ExtraNoiseSigma = 0.04;
     int NumEquilSteps = 50;
     int NumAccumSteps = 20;
     string Species="Na";

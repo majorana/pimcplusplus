@@ -130,7 +130,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
       }
       else{ // if (level==LowestLevel) //HACK HERE CURRENTLY 
-	cerr<<"Adding short range values"<<endl;
+	perr<<"Adding short range action in BisectionBlock."<<endl;
 	newStage->Actions.push_back(&PathData.Actions.ShortRange);
       }
       //      else

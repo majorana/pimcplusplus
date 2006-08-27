@@ -435,14 +435,13 @@ FixedPhaseClass::CalcAction (Array<Vec3,1> &G1, Array<Vec3,1> &G2,
   double action = 0.0;
   // Up and down electrons must have the same mass.
   double lambda = PathData.Path.Species(UpSpeciesNum).lambda;
-//   for (int i=0; i<N; i++)
-//     action += 0.5*lambda*(dot(G1T(i), G1T(i))+dot(G2T(i), G2T(i)));
-//   action += lambda/(15.0*dRMag2)*
-//     (2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv -
-//     g1T*g2T);
-  // HACK HACK HACK
   for (int i=0; i<N; i++)
-    action += 0.5*lambda*(dot(G1(i),G1(i)) + dot (G2(i),G2(i)));
+    action += 0.5*lambda*(dot(G1T(i), G1T(i))+dot(G2T(i), G2T(i)));
+  action += lambda/(15.0*dRMag2)*
+    (2.0*(g1T*g1T+g2T*g2T) -3.0*(g1T+g2T)*dv + 18.0*dv*dv - g1T*g2T);
+  // HACK HACK HACK
+//   for (int i=0; i<N; i++)
+//     action += 0.5*lambda*(dot(G1(i),G1(i)) + dot (G2(i),G2(i)));
   return action;
 }
 

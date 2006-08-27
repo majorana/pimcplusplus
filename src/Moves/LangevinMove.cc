@@ -395,6 +395,9 @@ MakePeriodic(Array<double,3> &A)
 void
 LangevinMoveClass::LangevinStep()
 {
+  perr << "********************************************\n"
+       << "*             Start LangevinStep.          *\n"
+       << "********************************************\n";
   /// Write out positions and velocities
   TimeVar.Write(Time);
   for (int i=0; i<R.size(); i++) {
@@ -542,6 +545,10 @@ LangevinMoveClass::LangevinStep()
 
   /// And the Rho_ks
   PathData.Path.UpdateRho_ks();
+  perr << "********************************************\n"
+       << "*              End LangevinStep            *\n"
+       << "********************************************\n";
+
 }
 
 

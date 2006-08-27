@@ -2,7 +2,7 @@ double tau=0.125;
 
 Section (Parallel)
 {
-  int ProcsPerClone = 2;
+  int ProcsPerClone = 8;
   //int ProcsPerClone = 1;
 }
 
@@ -172,7 +172,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Displace/Na_16_rho240_T3000_1kvec_Sigma0.1_SmartMC";
+    "~/Runs/NaRuns/Displace/Na_16_rho240_T3000_1kvec_Sigma0.05_DumbMC";
   int FileStart = 0;
 //   Section (Observable) {
 //     string Type = "Energy";
@@ -265,10 +265,11 @@ Section (Moves) {
     string Type = "IonDisplace";
     string Name = "Displace";
     bool WarpElectrons = false;
-    bool UseSmartMC    = true;
+    bool UseSmartMC    = false;
+    //bool UseSmartMC    = true;
     string IonSpecies = "Na";
     int NumToMove = 16;
-    double Sigma = 0.1;
+    double Sigma = 0.05;
   }
 }
 
@@ -280,7 +281,7 @@ Section (Algorithm) {
   // Equilibration loop //
   ////////////////////////
    Section (Loop) { 
-     int Steps=200;
+     int Steps=20 ;
        Section (Move) { string Name="eupBlock";} 
        Section (Move) { string Name="edownBlock";} 
        Section (Move) { string Name = "Shift"; }
@@ -290,11 +291,11 @@ Section (Algorithm) {
     int Steps=6000000;
     /// Accumulation loop
     Section (Loop) {
-      int Steps = 50;
+      int Steps = 25;
       Section (Loop) {
 	int Steps = 5;
 	Section (Loop) {
-	  int Steps = 10;
+	  int Steps = 5 ;
 	  Section (Move)    { string Name="eupBlock";       } 
 	  Section (Move)    { string Name="edownBlock";     } 
 	  Section (Move)    { string Name="Shift";          }
