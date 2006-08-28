@@ -26,7 +26,8 @@ class PermutationCountClass : public ObservableClass
   int TotalCounts;
   int TimesCalled;
   ObservableVecDouble1 CycleCountVar;
-  
+  Array<bool,1> CountedAlready;
+  Array<int,1> TotalPerm;
 public:
   Array<double,1> CycleCount;
   int Species;

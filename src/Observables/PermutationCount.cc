@@ -66,17 +66,22 @@ void PermutationCountClass::Accumulate()
 {
   TotalCounts++;
   PathClass &Path= PathData.Path;
-  Array<bool,1> countedAlready(PathData.Path.NumParticles());
-  countedAlready =false;
+  int N = PathData.Path.NumParticles();
+  if (CountedAlready.size() != N) {
+    CountedAlready.resize(N);
+    TotalPerm.resize(N);
+  }
+  PathData.Path.TotalPermutation (TotalPerm);
+  CountedAlready =false;
   int ptcl=0;
-  while (ptcl<PathData.Path.NumParticles()){
-    if (!countedAlready(ptcl)){
+  while (ptcl < N) {
+    if (!CountedAlready(ptcl)) {
       int startPtcl=ptcl;
       int roamingPtcl=ptcl;
       int cycleLength=0;
-      roamingPtcl=PathData.Path.Permutation(roamingPtcl);
+      roamingPtcl = TotalPerm(roamingPtcl);
       while (roamingPtcl!=startPtcl){
-	countedAlready(roamingPtcl)=true;
+	CountedAlready(roamingPtcl)=true;
 	cycleLength++;
 	roamingPtcl=PathData.Path.Permutation(roamingPtcl);
       }
