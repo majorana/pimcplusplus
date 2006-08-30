@@ -23,10 +23,7 @@
 #include "Observables/ObservableClass.h"
 #include "LoopClass.h"
 #include "RunInfoClass.h"
-
-#if USE_QMC
-	#include "QMCWrapper.h"
-#endif
+#include "QMCWrapper.h"
 
 class PIMCClass 
 {

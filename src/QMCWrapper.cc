@@ -2,17 +2,19 @@
 #include <sstream>
 
 void QMCWrapperClass::DummyInit(PathDataClass& PathData){
+#ifdef USE_QMC
 	ostringstream filename;
 	filename << "QMCDummy." << PathData.MetaWorldComm.MyProc() << "." << PathData.QMCComm.MyProc() << ".out";
 	out.open(filename.str().c_str());
 	initialized = true;
+#endif
 }
 
 void QMCWrapperClass::QMCDummy(PathDataClass& PathData){
 
 #if USE_QMC
-	if(!initialized)
-		DummyInit(PathData);
+	//if(!initialized)
+		//DummyInit(PathData);
 
 	out << "proc" << PathData.QMCComm.MyProc() << "): In QMCDummy correlated is " << correlated << " but PathData.corr is " << PathData.correlated << endl;
 	// SLICE SHOULD BE SENT, RIGHT??

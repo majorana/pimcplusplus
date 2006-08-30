@@ -3,7 +3,7 @@
 
 #include "PathDataClass.h"
 
-#if USE_QMC
+#ifdef USE_QMC
   #include <QMCApp/QMCInterface.h>
   #include <QMCDrivers/QMCDriver.h>
   #include "Message/Communicate.h"
@@ -17,6 +17,7 @@ class QMCWrapperClass
 	bool initialized;
 	ofstream out;
 	public:
+#ifdef USE_QMC
 	double dt;
 	int walkers;
 	int steps;
@@ -33,6 +34,11 @@ class QMCWrapperClass
     blocks = pathData.blocks;
     correlated = pathData.correlated;
 	}
+#else
+	QMCWrapperClass(PathDataClass& pathData){};
+	void QMCDummy(PathDataClass& PathData);
+	void DummyInit(PathDataClass& PathData);
+#endif
 };
 
 #endif

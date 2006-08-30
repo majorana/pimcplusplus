@@ -105,7 +105,6 @@ bool PIMCClass::Read(IOSectionClass &in)
 	}
 	else
 		QMCWrapper = new QMCWrapperClass(PathData);
-	cerr << PathData.MetaWorldComm.MyProc() << ": returning " << doPIMCRun << endl;
 	return doPIMCRun;
 }
 
