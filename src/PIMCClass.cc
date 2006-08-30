@@ -21,77 +21,92 @@
 #include <fstream>
 #include <Common/Blitz.h>
 #include <Common/IO/FileExpand.h>
+#include "QMCWrapper.h"
 
-void PIMCClass::Read(IOSectionClass &in)
+bool PIMCClass::Read(IOSectionClass &in)
 {
+	// tells whether to run or be a dummy
+	bool doPIMCRun = false;
   // Read the parallelization strategy
   PathData.Read (in);
   perr << "Finished PathData Read.\n";
 
-  // Read in the system information and allocate the path
-  assert(in.OpenSection("System"));
-  PathData.Path.Read(in);
-  in.CloseSection();
-  perr << "Finished Path read.\n";
-  
+	// this is set to true in PathDataClass::Read
+	// when not built with qmcpack
+	if(PathData.IAmQMCManager){
+		doPIMCRun = true;
+  	// Read in the system information and allocate the path
+  	assert(in.OpenSection("System"));
+  	PathData.Path.Read(in);
+  	in.CloseSection();
+  	perr << "Finished Path read.\n";
 
-//   if (PathData.Path.ExistsCoupling){
-//     int myProc=PathData.InterComm.MyProc();
-//     PathData.Path.ExistsCoupling=(double)(myProc)/100;
-//   }
-  // Read in the action information
-  assert(in.OpenSection("Action"));
-  PathData.Actions.Read(in);
-  in.CloseSection();
-  perr << "Finished Actions read.\n";
+#ifdef USE_QMC
+		PathData.AssignPtclSetStrings();
+#endif
 
-  // Now actually initialize the paths
-  perr << "Before InitPaths.\n";
-  assert(in.OpenSection("System"));
-  PathData.Path.InitPaths(in);
-   PathData.Actions.VariationalPI.BuildDeterminantMatrix();
-  in.CloseSection();
-  perr << "Done InitPaths.\n";
-  if (PathData.Path.UseCorrelatedSampling())
-    PathData.Path.SetIonConfig(0);
-  
-  perr << "Initializing Actions caches.\n";
-  PathData.Actions.Init();
-  perr << "done.\n";
+//	   if (PathData.Path.ExistsCoupling){
+//	     int myProc=PathData.InterComm.MyProc();
+//	     PathData.Path.ExistsCoupling=(double)(myProc)/100;
+//	   }
+  	// Read in the action information
+  	assert(in.OpenSection("Action"));
+  	PathData.Actions.Read(in);
+  	in.CloseSection();
+  	perr << "Finished Actions read.\n";
 
-  // Read in the Observables
-  assert(in.OpenSection("Observables"));
-  ReadObservables(in);
-  perr << "Finished Observables Read.\n";
-  in.CloseSection();
+  	// Now actually initialize the paths
+  	perr << "Before InitPaths.\n";
+  	assert(in.OpenSection("System"));
+  	PathData.Path.InitPaths(in);
+  	 PathData.Actions.VariationalPI.BuildDeterminantMatrix();
+  	in.CloseSection();
+  	perr << "Done InitPaths.\n";
+  	if (PathData.Path.UseCorrelatedSampling())
+  	  PathData.Path.SetIonConfig(0);
+  	
+  	perr << "Initializing Actions caches.\n";
+  	PathData.Actions.Init();
+  	perr << "done.\n";
 
-  bool iAmRootProc = (PathData.Path.Communicator.MyProc()==0);
+  	// Read in the Observables
+  	assert(in.OpenSection("Observables"));
+  	ReadObservables(in);
+  	perr << "Finished Observables Read.\n";
+  	in.CloseSection();
 
-  if (iAmRootProc)
-    OutFile.NewSection("Actions");
-  if (PathData.Actions.HaveLongRange()) {
-    assert (in.OpenSection ("Action"));
-    PathData.Actions.LongRange.Init (in, OutFile);
-    if (PathData.Actions.UseRPA)
-      PathData.Actions.LongRangeRPA.Init(in);
-    in.CloseSection();
-  }
+  	bool iAmRootProc = (PathData.Path.Communicator.MyProc()==0);
 
-  if (iAmRootProc) {
-    PathData.Actions.WriteInfo(OutFile);
-    OutFile.CloseSection(); // "Actions"
-  }
+  	if (iAmRootProc)
+  	  OutFile.NewSection("Actions");
+  	if (PathData.Actions.HaveLongRange()) {
+  	  assert (in.OpenSection ("Action"));
+  	  PathData.Actions.LongRange.Init (in, OutFile);
+  	  if (PathData.Actions.UseRPA)
+  	    PathData.Actions.LongRangeRPA.Init(in);
+  	  in.CloseSection();
+  	}
 
-  // Read in the Moves
-  assert(in.OpenSection("Moves"));
-  ReadMoves(in);
-  perr << "Finished Moves Read.\n";
-  in.CloseSection();
+  	if (iAmRootProc) {
+  	  PathData.Actions.WriteInfo(OutFile);
+  	  OutFile.CloseSection(); // "Actions"
+  	}
 
-  // Read in the Algorithm
-  assert(in.OpenSection("Algorithm"));
-  ReadAlgorithm(in);
-  in.CloseSection();
+  	// Read in the Moves
+  	assert(in.OpenSection("Moves"));
+  	ReadMoves(in);
+  	perr << "Finished Moves Read.\n";
+  	in.CloseSection();
+
+  	// Read in the Algorithm
+  	assert(in.OpenSection("Algorithm"));
+  	ReadAlgorithm(in);
+  	in.CloseSection();
+	}
+	else
+		QMCWrapper = new QMCWrapperClass(PathData);
+	cerr << PathData.MetaWorldComm.MyProc() << ": returning " << doPIMCRun << endl;
+	return doPIMCRun;
 }
 
 
@@ -359,6 +374,12 @@ void PIMCClass::Run()
 //     cout<<"My acceptance ratio is "<<((MoveClass*)Moves(counter))->AcceptanceRatio()<<endl;
 //   }
   
+}
+
+void PIMCClass::Dummy()
+{
+	while(true)
+		QMCWrapper->QMCDummy(PathData);
 }
 
 void PIMCClass::WriteSystemInfo()

@@ -4,10 +4,12 @@
 //#include <QMCApp/QMCInterface.h>
 #include "ActionBase.h"
 #include <vector>
+#include <fstream>
 
 #ifdef USE_QMC
 class CEIMCActionClass: public ActionBaseClass
 {
+	ofstream out;
   std::vector<double>* qmcData;
   int EnergyIndex0, EnergyIndex1, EnergyDiffIndex;
 	Array<string, 1> ptclSet0, ptclSet1;

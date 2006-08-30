@@ -24,6 +24,10 @@
 #include "LoopClass.h"
 #include "RunInfoClass.h"
 
+#if USE_QMC
+	#include "QMCWrapper.h"
+#endif
+
 class PIMCClass 
 {
 
@@ -38,10 +42,12 @@ public:
   IOSectionClass OutFile;
   LoopClass Algorithm;
   RunInfoClass RunInfo;
+	QMCWrapperClass* QMCWrapper;
 public:
   PathDataClass PathData;
-  void Read(IOSectionClass &in);
+  bool Read(IOSectionClass &in);
   void Run();
+	void Dummy();
   PIMCClass() : Algorithm(PathData, OutFile, Moves, Observables)
   {
     RunInfo.ProgramName="pimc++";

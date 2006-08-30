@@ -57,7 +57,14 @@ main(int argc, char **argv)
     IOSectionClass in;
     assert (in.OpenFile(argv[1]));
     PIMCClass PIMC;
-    PIMC.Read(in);
-    PIMC.Run();
+    bool doRun = PIMC.Read(in);
+    if(doRun){
+			cerr << "I am about to run..." << endl;
+			PIMC.Run();
+		}
+		else {
+			cerr << "I am about to launch a dummy..." << endl;
+			PIMC.Dummy();
+		}
   }
 }

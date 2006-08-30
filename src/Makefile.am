@@ -28,6 +28,8 @@ SHARED_SOURCES =          \
     PathClass.h           \
     PathDataClass.cc      \
     PathDataClass.h       \
+		QMCWrapper.cc         \
+		QMCWrapper.h          \
     RunInfoClass.h        \
     SpeciesClass.cc       \
     SpeciesClass.h        \

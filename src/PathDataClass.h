@@ -45,9 +45,8 @@ private:
   int GetWallTime();
 
 public:  
-  //bool UsingQMC; // this is obsolete: should be removed
   bool RUN_QMC;
-  //bool QMC_BUILT;
+	bool IAmQMCManager;
   int Seed;
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
@@ -62,6 +61,17 @@ public:
 
 #ifdef USE_QMC
   qmcplusplus::QMCInterface* qmc;
+	CommunicatorClass MetaWorldComm;
+	CommunicatorClass QMCComm;
+	void AssignPtclSetStrings();
+	bool useDefaultStrings;
+	// user-defined parameters to control QMC run
+	// read in from input file
+public:
+	Array<string, 1> ptclSet0, ptclSet1;
+	double dt;
+	int walkers, steps, blocks;
+	bool correlated;
 #endif
 
   ///////////////////////////////////////////////////////////////////
@@ -80,15 +90,6 @@ public:
   inline void ShiftData(int numTimeSlicesToShift){
     Path.ShiftData(numTimeSlicesToShift);
     Actions.ShiftData(numTimeSlicesToShift);
-   // USE_QMC = false;
-/*
-#ifdef BUILD_QMC
-    QMC_BUILT = true;
-#else
-    QMC_BUILT = false;
-#endif
-*/
-  //  QMC_BUILT = true;
   }
 
   /// We are probaby going to have to move permutation
