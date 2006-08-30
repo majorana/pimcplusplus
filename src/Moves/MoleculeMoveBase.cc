@@ -81,11 +81,13 @@ void MolMoveClass::Read (IOSectionClass &in){
 		}else if(setAction == "TIP5PPotential"){
   		Actions.push_back(&PathData.Actions.TIP5PWater);
 			cerr << "Added TIP5P Water Potential" << endl;
+#ifdef USE_QMC
 		}else if(setAction == "CEIMCAction"){
 			//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
 			PathData.Actions.CEIMCAction.Read(in);
   		Actions.push_back(&PathData.Actions.CEIMCAction);
 			cerr << "Added CEIMC calculation of BO energy" << endl;
+#endif
 		}else if(setAction == "IonInteraction"){
   		Actions.push_back(&PathData.Actions.IonInteraction);
 			cerr << "Added intermolecular ion-ion interaction" << endl;

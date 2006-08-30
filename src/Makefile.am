@@ -44,7 +44,7 @@ FreeParticles_LDADD   = $(COMMON_LIBS)
 #INCLUDES = -I$(QMCPACK_HOME)/src -I$(QMCPACK_ROOT)/src 
 
 pimc___LDADD = Moves/libmoves.la Actions/libactions.la \
-               Observables/libobservables.la $(COMMON_LIBS) $(QMC_LIB) $(ORDER_N_LIBS)
+               Observables/libobservables.la $(COMMON_LIBS) $(QMC_LIB) $(ORDER_N_LIBS) $(BOOST_LIB)
 #							 $(QMCPACK_HOME)/lib/libqmc.a \
 #							 $(QMCPACK_HOME)/lib/libqmcutil.a \
 #							 $(QMCPACK_HOME)/lib/libqmcbase.a

@@ -1,6 +1,6 @@
 noinst_LTLIBRARIES = libactions.la
 
-libactions_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF)
+libactions_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF) $(BOOST_LIB)
 libactions_la_SOURCES =            \
     ActionBase.cc                  \
     ActionBase.h                   \

@@ -168,8 +168,16 @@ else # don't link with qmcpack
 		QMC_LIB=" "
 fi
 
+AC_ARG_WITH(boost,    [  --with-boost=/path/to/my/boost	include boost libraries; needed for qmcpack])
+if (test "x$with_boost" != "x"); then
+	 	BOOST_LIB="-I$with_boost/include -L$with_boost/lib"
+else # don't link with boost
+		BOOST_LIB=" "
+fi
+
 AC_SUBST(QMC_DEF)
 AC_SUBST(QMC_LIB)
+AC_SUBST(BOOST_LIB)
 
 AC_F77_WRAPPERS
 
