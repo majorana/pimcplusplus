@@ -9,7 +9,7 @@ SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
 bin_PROGRAMS = pimc++ FreeParticles
 
 
-AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF)
+AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) $(BOOST_LIB)
 
 SHARED_SOURCES =          \
     Common.h              \
