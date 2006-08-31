@@ -16,9 +16,10 @@
 
 #include "PathClass.h"
 #include "Actions/ActionsClass.h"
+#include <Common/IO/FileExpand.h>
 
-
-void PathClass::ReadSqueeze(string fileName,bool replicate)
+void 
+PathClass::ReadSqueeze(string fileName,bool replicate)
 {
 // This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
 
@@ -77,7 +78,8 @@ void PathClass::ReadSqueeze(string fileName,bool replicate)
   MoveJoin(NumTimeSlices()-1,1);
 }
 
-void PathClass::ReadOld(string fileName,bool replicate)
+void 
+PathClass::ReadOld(string fileName,bool replicate)
 {
 // This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
   cerr<<"Trying to read old"<<endl;
@@ -144,6 +146,9 @@ PathClass::InitPaths (IOSectionClass &in)
     if (InitPaths == "RANDOM") {
       perr << "Don't know how to do RANDOM yet.\n";
       exit(1);
+    }
+    else if (InitPaths == "LANGEVIN") {
+      InitLangevin (in, species);
     }
     else if (InitPaths == "CUBIC") {
       int num = species.NumParticles;
@@ -824,4 +829,39 @@ PathClass::PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
   }
   if (Actions.NodalActions(speciesNum) != NULL)
     Actions.NodalActions(speciesNum)->AcceptCopy(0, NumTimeSlices()-1);  
+}
+
+
+void
+PathClass::InitLangevin(IOSectionClass &in, 
+			SpeciesClass &species)
+{
+  // Read the name of the previous runs output file
+  string langevinName;
+  assert (in.ReadVar("LangevinFile", langevinName));
+  langevinName = ExpandFileName (langevinName);
+
+  // Read in data from previous runs output file
+  IOSectionClass langFile;
+  assert (langFile.OpenFile (langevinName));
+  assert (langFile.OpenSection("Moves"));
+  assert (langFile.OpenSection("Langevin"));
+
+  int first = species.FirstPtcl;
+  int last  = species.LastPtcl;
+  IOVarBase *Rvar = langFile.GetVarPtr("R");
+  assert (Rvar != NULL);
+  assert (Rvar->GetRank() == 3);
+  int numSteps = Rvar->GetExtent(0);
+  Array<double,2> lastPos(last-first+1,NDIM);
+  Rvar->Read(lastPos, (numSteps-1), Range::all(), Range::all());
+  langFile.CloseFile();
+
+  // Now assign to path
+  for (int slice=0; slice<NumTimeSlices(); slice++) 
+    for (int ptcl=first; ptcl<=last; ptcl++) 
+      for (int dim=0; dim<NDIM; dim++)
+	Path(slice,ptcl)[dim] = lastPos(ptcl-first,dim);
+
+  perr << "Successfully read Langevin initial positions."  << endl;
 }

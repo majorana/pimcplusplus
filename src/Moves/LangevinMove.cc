@@ -16,6 +16,7 @@
 
 #include "LangevinMove.h"
 #include <Common/MatrixOps/MatrixOps.h>
+#include <Common/IO/FileExpand.h>
 
 
 /// AccumForces adds the forces for my section of the path to the
@@ -663,8 +664,28 @@ LangevinMoveClass::Read(IOSectionClass &in)
     in.CloseSection (); // "RhoDump"
   }
 
-  /// Initialize the velocities
-  InitVelocities();
+  // Initialize the velocities
+  string langevinName;
+  if (in.ReadVar ("LangevinFile", langevinName)) {
+    langevinName = ExpandFileName (langevinName);
+    IOSectionClass langFile;
+    assert (langFile.OpenFile(langevinName));
+    assert (langFile.OpenSection("Moves"));
+    Array<double,2> readV(V.size(),NDIM);
+    IOVarBase *Vvar = langFile.GetVarPtr("V");
+    assert (Vvar != NULL);
+    assert (Vvar->GetRank() == 3);
+    int numSteps = Vvar->GetExtent(0);
+    Vvar->Read (readV, (numSteps-1), Range::all(), Range::all());
+    langFile.CloseFile();
+    for (int i=0; i<V.extent(0); i++) {
+      for (int dim=0; dim < NDIM; dim++)
+	V(i)[dim] = readV(i,dim);
+      Rp(i) = R(i) - TimeStep*V(i);
+    }
+  }
+  else
+    InitVelocities();
 
 }
 

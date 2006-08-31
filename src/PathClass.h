@@ -224,6 +224,11 @@ public:
   /// determine the particle radius.
   void InitRandomFixed(IOSectionClass &in, SpeciesClass &species);
 
+  /// Read the name of the output file from a previous run.  Then, it
+  /// reads the last configuration from the Langevin move section and
+  /// assigns it to every particle of the species.
+  void InitLangevin (IOSectionClass &in, SpeciesClass &species);
+
   /// This class will create a new brownian random walk for
   /// species(speciesNum).  If the species is fermion, it will do its
   /// best to construct a node-avoiding walk that is reasonable.
