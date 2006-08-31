@@ -82,8 +82,8 @@ namespace IO {
     static const int numSlices = 
       SliceCheck<T0>::isSlice+SliceCheck<T1>::isSlice+SliceCheck<T2>::isSlice+
       SliceCheck<T3>::isSlice+SliceCheck<T4>::isSlice+SliceCheck<T5>::isSlice+
-      SliceCheck<T6>::isSlice+SliceCheck<T7>::isSlice+SliceCheck<T7>::isSlice+
-      SliceCheck<T8>::isSlice+SliceCheck<T9>::isSlice+SliceCheck<T10>::isSlice;
+      SliceCheck<T6>::isSlice+SliceCheck<T7>::isSlice+SliceCheck<T8>::isSlice+
+      SliceCheck<T9>::isSlice+SliceCheck<T10>::isSlice;
   
     /// The rank of the array must be the rank of the IO variable minus
     /// the number of slices by integer singlet ranges.
@@ -109,7 +109,7 @@ namespace IO {
 	cerr << "Error in dynamic cast to IOVarHDF5.\n";
 	abort();
       }
-      return newVar->Slice(s0, s1, s2, s2, s4, s5, s6, s7, s8, s9, s10).VarRead(val);
+      return newVar->Slice(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10).VarRead(val);
     }
   }	
 
@@ -123,8 +123,8 @@ namespace IO {
     static const int numSlices = 
       SliceCheck<T0>::isSlice+SliceCheck<T1>::isSlice+SliceCheck<T2>::isSlice+
       SliceCheck<T3>::isSlice+SliceCheck<T4>::isSlice+SliceCheck<T5>::isSlice+
-      SliceCheck<T6>::isSlice+SliceCheck<T7>::isSlice+SliceCheck<T7>::isSlice+
-      SliceCheck<T8>::isSlice+SliceCheck<T9>::isSlice+SliceCheck<T10>::isSlice;
+      SliceCheck<T6>::isSlice+SliceCheck<T7>::isSlice+SliceCheck<T8>::isSlice+
+      SliceCheck<T9>::isSlice+SliceCheck<T10>::isSlice;
     
     /// The rank of the array must be the rank of the IO variable minus
     /// the number of slices by integer singlet ranges.
