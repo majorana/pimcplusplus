@@ -671,6 +671,7 @@ LangevinMoveClass::Read(IOSectionClass &in)
     IOSectionClass langFile;
     assert (langFile.OpenFile(langevinName));
     assert (langFile.OpenSection("Moves"));
+    assert (langFile.OpenSection("Langevin"));
     Array<double,2> readV(V.size(),NDIM);
     IOVarBase *Vvar = langFile.GetVarPtr("V");
     assert (Vvar != NULL);
