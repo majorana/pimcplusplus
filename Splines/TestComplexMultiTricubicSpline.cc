@@ -398,7 +398,7 @@ main()
 {
 //   PeriodicTest();
 //   ValTest();
-   GradValTest();
-//  GradSpeedTest();
+//   GradValTest();
+  GradSpeedTest();
 }
   
