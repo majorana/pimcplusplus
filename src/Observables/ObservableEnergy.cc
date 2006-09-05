@@ -241,22 +241,23 @@ void EnergyClass::Read(IOSectionClass &in)
 	OtherSums.resize(numEnergies);	
 	for(int n=0; n<numEnergies; n++){
 		if(EnergyStrings(n) == "ST2WaterClass"){
-			OtherActions[n] = new ST2WaterClass(PathData);
+			OtherActions[n] = &PathData.Actions.ST2Water;
 			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
 			OtherSums[n] = 0.0;
 		} else if(EnergyStrings(n) == "QMCSamplingClass"){
-			OtherActions[n] = new QMCSamplingClass(PathData);
+			OtherActions[n] = &PathData.Actions.QMCSampling;
 			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
 			OtherSums[n] = 0.0;
 		} else if(EnergyStrings(n) == "IonIonActionClass"){
-			OtherActions[n] = new IonIonActionClass(PathData);
+			OtherActions[n] = &PathData.Actions.IonInteraction;
 			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
 			OtherSums[n] = 0.0;
 		}
 		// Other action objects can be specified here of course
 #ifdef USE_QMC
 		else if(EnergyStrings(n) == "CEIMCActionClass"){
-			OtherActions[n] = new CEIMCActionClass(PathData);
+  		OtherActions[n] = &PathData.Actions.CEIMCAction;
+      PathData.Actions.CEIMCAction.Read(IOSection);
 			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
 			OtherSums[n] = 0.0;
 		}

@@ -216,7 +216,7 @@ void PathDataClass::Read (IOSectionClass &in)
     qmc = new qmcplusplus::QMCInterface(argc,argv);
     //qmcplusplus::QMCMain *qmcmain = new qmcplusplus::QMCMain(argc,argv);
     if(qmc->parse(argv[0])) {
-      qmc->initialize();
+      qmc->initialize(MetaWorldComm.MyProc(), MetaWorldComm.NumProcs());
     }
   }
 

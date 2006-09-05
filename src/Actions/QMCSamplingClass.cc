@@ -82,14 +82,18 @@
 				EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LE0");
 				EnergyIndex1 = PathData.qmc->qmcDriver->addObservable("LE1");
 				out << "  QMCAction: calling execute...";
+				cerr << "  QMCAction: calling execute..." << endl;
 	  		PathData.qmc->execute();
 				out << " done." << endl;
 			}
 		}
 		else {
+			cerr << " QMCACtion: IN UNCORRELATED" << endl;
 	  	PathData.qmc->SetVMC(dt, walkers, steps, blocks);
 			PathData.qmc->process();
 			EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LocalEnergy");
+			out << "  QMCAction: calling VMC execute...";
+			cerr << "  QMCAction: calling VMC execute..." << endl;
 	  	PathData.qmc->execute();
 		}
 
@@ -233,6 +237,7 @@
 	}
 	
 	double CEIMCActionClass::d_dBeta (int slice1, int slice2, int level){
+		cerr << "dBeta Parameters are " << dt << " " << walkers << " " << steps << " " << blocks << endl;
 	  double Utotal = 0.0;
 	  for(int slice=slice1; slice<slice2; slice++){
 	  	PathData.qmc->SetVMC(dt, walkers, steps, blocks);
@@ -249,6 +254,7 @@
 			out << "	ENERGY computed average " << Uavg << " with variance " << variance << " from " << Evalues.size() << " entries." << endl;
 	    Utotal += Uavg;
 	  }
+		cerr << "Leaving dBeta" << endl;
 	  return Utotal;
 	}
 	

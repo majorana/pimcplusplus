@@ -13,8 +13,8 @@ void QMCWrapperClass::DummyInit(PathDataClass& PathData){
 void QMCWrapperClass::QMCDummy(PathDataClass& PathData){
 
 #if USE_QMC
-	//if(!initialized)
-		//DummyInit(PathData);
+	if(!initialized)
+		DummyInit(PathData);
 
 	out << "proc" << PathData.QMCComm.MyProc() << "): In QMCDummy correlated is " << correlated << " but PathData.corr is " << PathData.correlated << endl;
 	// SLICE SHOULD BE SENT, RIGHT??
@@ -81,15 +81,19 @@ void QMCWrapperClass::QMCDummy(PathDataClass& PathData){
 			EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LE0");
 			EnergyIndex1 = PathData.qmc->qmcDriver->addObservable("LE1");
 			out << "  QMCWrapper: calling execute...";
+			cerr << "  QMCWrapper: calling execute..." << endl;
   		PathData.qmc->execute();
 			out << "done" << endl;
 		}
 	}
 	else {
+		cerr << " QMCACtion: IN UNCORRELATED" << endl;
 		out << "NOT CORRELATED!!!!!!!!!!!!!!!!!!!!!!!" << endl;
   	PathData.qmc->SetVMC(dt, walkers, steps, blocks);
 		PathData.qmc->process();
 		EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LocalEnergy");
+		out << "  QMCWrapper: calling VMC execute...";
+		cerr << "  QMCWrapper: calling VMC execute..." << endl;
   	PathData.qmc->execute();
 	}
 
