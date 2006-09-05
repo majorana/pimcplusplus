@@ -26,7 +26,8 @@ PathClass::ReadSqueeze(string fileName,bool replicate)
   cerr<<"Read squeezing now"<<endl;
   IOSectionClass inFile;
   stringstream oss;
-  oss<<fileName<<"."<<MyClone<<".h5";
+  ////  oss<<fileName<<"."<<MyClone<<".h5";
+  oss<<fileName<<"."<<0<<".h5";
   string fullFileName=oss.str();
   cerr<<"THE FULL FILE NAME IS "<<fullFileName<<endl;
   assert (inFile.OpenFile(fullFileName.c_str()));
@@ -42,14 +43,16 @@ PathClass::ReadSqueeze(string fileName,bool replicate)
   Array<int,2> oldPermutation;
   assert(inFile.ReadVar("Permutation",oldPermutation));
   SetMode(NEWMODE);
-  for (int ptcl=0;ptcl<NumParticles();ptcl++)
-    Permutation(ptcl) = oldPermutation(oldPermutation.extent(0)-1,ptcl);
-  Permutation.AcceptCopy();
+  int myProc=Communicator.MyProc();
+  if (myProc==Communicator.NumProcs()-1){
+    for (int ptcl=0;ptcl<NumParticles();ptcl++)
+      Permutation(ptcl) = oldPermutation(oldPermutation.extent(0)-1,ptcl);
+    Permutation.AcceptCopy();
+  }
   assert(inFile.ReadVar("Path",oldPaths));
   cerr << "My paths are of size"  << oldPaths.extent(0) << " "
        << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
 
-  int myProc=Communicator.MyProc();
   int myFirstSlice,myLastSlice;
   SliceRange (myProc, myFirstSlice, myLastSlice);  
   for (int ptcl=0;ptcl<NumParticles();ptcl++){
@@ -75,7 +78,8 @@ PathClass::ReadSqueeze(string fileName,bool replicate)
   inFile.CloseSection();
   inFile.CloseSection();
   inFile.CloseFile();
-  MoveJoin(NumTimeSlices()-1,1);
+  if (myProc==Communicator.NumProcs()-1)
+    MoveJoin(NumTimeSlices()-1,1);
 }
 
 void 
@@ -368,8 +372,8 @@ PathClass::InitPaths (IOSectionClass &in)
       }
       string pathFile;
       assert(in.ReadVar("File",pathFile));
-      //ReadSqueeze(pathFile,replicate);
-      ReadOld(pathFile,replicate);
+      ReadSqueeze(pathFile,replicate);
+      //      ReadOld(pathFile,replicate);
     }
     else if (InitPaths == "SQUEEZE"){
       string pathFile;
