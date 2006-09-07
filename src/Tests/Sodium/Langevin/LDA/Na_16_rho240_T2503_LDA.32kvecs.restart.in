@@ -16,7 +16,7 @@ int Seed = 12345;
 Section (System)
 {
   /// T = 1200.1 Kelvin
-  int NumTimeSlices=2105;
+  int NumTimeSlices=1009;
   Array<bool,1> IsPeriodic(3) = [true,true,true];
   //Array<double,1> Box(3)=[30.1766, 30.1766, 30.1766];
   // r_s = 5.9 bohr
