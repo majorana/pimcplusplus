@@ -74,21 +74,23 @@ void PermutationCountClass::Accumulate()
   PathData.Path.TotalPermutation (TotalPerm);
   CountedAlready =false;
   int ptcl=0;
-  while (ptcl < N) {
-    if (!CountedAlready(ptcl)) {
-      int startPtcl=ptcl;
-      int roamingPtcl=ptcl;
-      int cycleLength=0;
-      roamingPtcl = TotalPerm(roamingPtcl);
-      while (roamingPtcl!=startPtcl){
-	CountedAlready(roamingPtcl)=true;
-	cycleLength++;
-	roamingPtcl=PathData.Path.Permutation(roamingPtcl);
+  /// Only proc 0 gets TotalPerm
+  if (Path.Communicator.MyProc() == 0) 
+    while (ptcl < N) {
+      if (!CountedAlready(ptcl)) {
+	int startPtcl=ptcl;
+	int roamingPtcl=ptcl;
+	int cycleLength=0;
+	roamingPtcl = TotalPerm(roamingPtcl);
+	while (roamingPtcl!=startPtcl){
+	  CountedAlready(roamingPtcl)=true;
+	  cycleLength++;
+	  roamingPtcl=PathData.Path.Permutation(roamingPtcl);
+	}
+	CycleCount(cycleLength)++;
       }
-      CycleCount(cycleLength)++;
+      ptcl++;
     }
-    ptcl++;
-  }
 }
 
 
