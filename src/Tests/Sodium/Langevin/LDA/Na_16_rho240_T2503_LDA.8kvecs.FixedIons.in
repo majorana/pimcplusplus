@@ -218,11 +218,11 @@ Section (Observables)
     int Frequency = 10;
     int dumpFreq  = 10;
   }	
-  Section (Observable) {
-    string Type = "CycleCount";
-    string Name = "CycleCount";
-    int Frequency = 1;
-  }
+//   Section (Observable) {
+//     string Type = "CycleCount";
+//     string Name = "CycleCount";
+//     int Frequency = 1;
+//   }
   Section (Observable) {
     int Frequency = 1;
     string Type = "PathDump";
@@ -324,7 +324,7 @@ Section (Algorithm) {
 	Section (Move)      { string Name="edownBlock";     } 
 	Section (Observe)   { string Name = "Pressure";     }
 	Section (Observe)   { string Name = "WN";           }
-	Section (Observe)   { string Name = "CycleCount";   }
+	//	Section (Observe)   { string Name = "CycleCount";   }
 	Section (Move)      { string Name = "Shift";        }
       }
       Section (Observe)     { string Name = "Na-Na";        }
@@ -336,7 +336,7 @@ Section (Algorithm) {
       Section (Observe)     { string Name = "NaSk";         }
       Section (Observe)     { string Name = "WN";           }
       Section (Observe)     { string Name = "TimeAnalysis"; }
-      Section (Observe)     { string Name = "CycleCount";   }
+      //      Section (Observe)     { string Name = "CycleCount";   }
       Section (Move)        { string Name = "Shift";        }
       Section (WriteData)   {                               }
     }

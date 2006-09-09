@@ -85,7 +85,7 @@ void PermutationCountClass::Accumulate()
 	while (roamingPtcl!=startPtcl){
 	  CountedAlready(roamingPtcl)=true;
 	  cycleLength++;
-	  roamingPtcl=PathData.Path.Permutation(roamingPtcl);
+	  roamingPtcl=TotalPerm(roamingPtcl);
 	}
 	CycleCount(cycleLength)++;
       }
