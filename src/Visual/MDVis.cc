@@ -31,7 +31,10 @@ MDVisualClass::MDVisualClass() :
   IsoScale.signal_value_changed().connect
     (sigc::mem_fun(*this, &MDVisualClass::OnIsoChange));
   IsoFrame.set_label("Density");
-  IsoFrame.add(IsoScale);
+  IsoFrame.add(DensityBox);
+  DensityBox.pack_start(rsLabel);
+  DensityBox.pack_start(IsoScale);
+  rsLabel.set_text("rs = ");
   IsoScale.property_width_request().set_value(75);
 
   BandScale.set_adjustment (BandAdjust);
@@ -302,8 +305,8 @@ MDVisualClass::OnFrameChange()
   int tempFrame =  (int)round(FrameScale.get_value());
   if (IsoButton.get_active()) {
     if (RhoVar != NULL) {
-      RhoVar->Read(RhoData, tempFrame, Range::all(), Range::all(), Range::all()); 
-      MaxRho = FindMaxRho();
+      RhoVar->Read(RhoData, tempFrame, 
+		   Range::all(), Range::all(), Range::all()); 
     }
     if (BandRhoVar != NULL)
       BandRhoVar->Read(BandRhoData, tempFrame, Range::all(), Range::all(), Range::all(), Range::all());
@@ -527,9 +530,14 @@ MDVisualClass::Read(string filename)
   RhoVar = Infile.GetVarPtr("Rho");
   BandRhoVar = Infile.GetVarPtr("BandRho");
   bool haveRho = RhoVar != NULL;
+  MaxRho = 0.0;
   if (haveRho) {
+    for (int frame=0; frame < Trajectory.extent(0); frame+=20) {
+      cerr << "Checking frame " << frame << endl;
+      RhoVar->Read(RhoData, frame, Range::all(), Range::all(), Range::all());
+      MaxRho = max(FindMaxRho(), MaxRho);
+    }
     RhoVar->Read(RhoData, 0, Range::all(), Range::all(), Range::all());
-    MaxRho = FindMaxRho();
     Xgrid.Init(-0.5*Box[0], 0.5*Box[0], RhoData.extent(0));
     Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
     Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
@@ -565,10 +573,20 @@ double
 MDVisualClass::FindMaxRho()
 {
   double maxRho = 0.0;
+  double totalRho = 0.0;
   for (int ix=0; ix<RhoData.extent(0); ix++)
     for (int iy=0; iy<RhoData.extent(1); iy++)
-      for (int iz=0; iz<RhoData.extent(2); iz++)
+      for (int iz=0; iz<RhoData.extent(2); iz++) 
 	maxRho = max(maxRho, RhoData(ix,iy,iz));
+  for (int ix=0; ix<RhoData.extent(0)-1; ix++)
+    for (int iy=0; iy<RhoData.extent(1)-1; iy++)
+      for (int iz=0; iz<RhoData.extent(2)-1; iz++) 
+	totalRho += RhoData(ix, iy, iz);
+  
+  totalRho *= Box[0]*Box[1]*Box[2]/(double)((RhoData.extent(0)-1)*
+					    (RhoData.extent(1)-1)*
+					    (RhoData.extent(2)-1));
+  cerr << "TotalRho = " << totalRho << endl;
   return maxRho;
 }
 
@@ -595,6 +613,12 @@ MDVisualClass::OnSpeedChange()
 void
 MDVisualClass::OnIsoChange()
 {
+  double rho = IsoAdjust.get_value() * MaxRho;
+  double rs = pow (3.0/(4.0*M_PI*rho),1.0/3.0);
+  char rstext[100];
+  snprintf (rstext, 100, "rs = %1.3f", rs);
+  rsLabel.set_text(rstext);
+  
   DrawFrame();
 }
 

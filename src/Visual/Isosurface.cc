@@ -354,7 +354,8 @@ Isosurface::Set()
   glColor4d(Color[0], Color[1], Color[2], Color[3]);
   float fcolor[4] = { Color[0], Color[1], Color[2], Color[3] };
   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
-  float spec[4] = { 1.0, 1.0, 1.0, 1.0};
+  //  float spec[4] = { 1.0, 1.0, 1.0, 1.0};
+  float spec[4] = { 1.0, 1.0, 1.0, Color[3]};
   glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);
   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30.0);
 
@@ -363,7 +364,6 @@ Isosurface::Set()
   if (UseNormals)
     glEnable (GL_NORMALIZE);
 
-  //  glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
 
 
@@ -401,7 +401,6 @@ Isosurface::Set()
   }
   glEnd();
   glDepthMask(GL_TRUE);
-  //  glEnable(GL_DEPTH_TEST);
   End();
 }
 

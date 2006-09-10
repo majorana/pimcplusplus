@@ -165,8 +165,8 @@ void PathObject::DrawPOV(FILE *fout, string rotString)
     endControl   = MyPath[0];
   }
   else {
-    startControl = 2.0*MyPath[0] - MyPath[1];
-    endControl   = 2.0*MyPath[N-1] - MyPath[N-2];
+    startControl = MyPath[0] +0.0001*(MyPath[0]- MyPath[1]);
+    endControl   = 1.0001*MyPath[N-1] - 0.0001*MyPath[N-2];
   }
   // First write the first control point
   fprintf (fout, "  <%14.10f, %14.10f, %14.10f>, %8.5f\n",
@@ -176,7 +176,7 @@ void PathObject::DrawPOV(FILE *fout, string rotString)
     fprintf (fout, "  <%14.10f, %14.10f, %14.10f>, %8.5f\n",
 	     MyPath[i][0], MyPath[i][1], MyPath[i][2], Radius);
 
-  // Now, write the last control point
+//   // Now, write the last control point
   fprintf (fout, "  <%14.10f, %14.10f, %14.10f>, %8.5f\n",
 	   endControl[0], endControl[1], endControl[2], Radius);
   

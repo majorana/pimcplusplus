@@ -6,6 +6,7 @@ OnePath* SmoothClass::SmoothClosedPath (OnePath &oldPath)
 {
   OnePath &newPath = *(new OnePath);
   newPath.Closed = true;
+  newPath.Winding = oldPath.Winding;
   // The -1 ignores the path close to get proper periodicity
   int N = oldPath.Path.size()-1;
   double Ninv = 1.0/(double)N;
@@ -68,6 +69,7 @@ OnePath* SmoothClass::SmoothClosedPath (OnePath &oldPath)
 OnePath* SmoothClass::SmoothOpenPath2 (OnePath &oldPath)
 {
   OnePath &newPath = *(new OnePath);
+  newPath.Winding = oldPath.Winding;
   newPath.Closed = false;
   // The -1 ignores the path close to get proper periodicity
   int N = oldPath.Path.size()-1;
@@ -145,6 +147,7 @@ OnePath* SmoothClass::SmoothOpenPath (OnePath &oldPath)
 {
   OnePath &newPath = *(new OnePath);
   newPath.Closed = false;
+  newPath.Winding = oldPath.Winding;
   int N = oldPath.Path.size();
   double Ninv = 1.0/(double)(2*N-1);
   int Numk = (int) floor (SmoothLevel+0.00001) + 1;

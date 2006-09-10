@@ -95,6 +95,7 @@ void BoxClass::PutPathsInBox (vector<OnePath*>& inList)
     for (int in=0; in<inList.size(); in++) {
       OnePath *newPath = new OnePath;
       OnePath *oldPath = inList[in];
+      bool closed = oldPath->Closed;
       for (int slice=0; slice<(oldPath->Path.size()-1); slice++) {
 	Vec3 r1, r2, wall1, wall2;
 	r1 = oldPath->Path[slice];
@@ -102,11 +103,13 @@ void BoxClass::PutPathsInBox (vector<OnePath*>& inList)
 	if (BreakSegment (r1, r2, wall1, wall2, dim)) {
 	  newPath->Path.push_back(r1);
 	  newPath->Path.push_back(wall1);
+	  newPath->Winding = oldPath->Winding;
+	  newPath->Closed = false;
 	  outList.push_back(newPath);
 	  newPath = new OnePath;
 	  newPath->Path.push_back(wall2);
 	} 
-	else
+	else 
 	  newPath->Path.push_back(r1);
       }
       // Push last coordinate onto new path
@@ -117,6 +120,8 @@ void BoxClass::PutPathsInBox (vector<OnePath*>& inList)
 //       rlast = oldPath->Path[0];
 //       PutInBox(rlast, dim);
 //       newPath->Path.push_back(rlast);
+      newPath->Winding = oldPath->Winding;
+      newPath->Closed = oldPath->Closed;
       outList.push_back (newPath);
       delete oldPath;
     }

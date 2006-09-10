@@ -9,7 +9,7 @@ class OnePath
 public:
   vector<Vec3> Path;
   vector<Vec3> Color;
-  bool Closed;
+  bool Closed, Winding;
 };
 
 

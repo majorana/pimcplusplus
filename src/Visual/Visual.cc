@@ -97,12 +97,16 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
 // //       pathObj->SetColor (1.0, 0.0, 0.0);
 // =======
     pathObj->Closed = Paths[li]->Closed;
-    if (li < 8)
-      pathObj->SetColor (0.0, 0.0, 1.0);
+    if (Paths[li]->Winding)
+      pathObj->SetColor (0.6, 0.6, 0.0);
     else
-      pathObj->SetColor (0.7, 0.7, 0.0);
+      pathObj->SetColor (0.0, 0.0, 1.0);
+//     if (li < 8)
+//       pathObj->SetColor (0.0, 0.0, 1.0);
+//     else
+//       pathObj->SetColor (0.7, 0.7, 0.0);
 // >>>>>>> .r523
-    pathObj->SetRadius (min(min(Box[0], Box[1]), Box[2])*0.005);
+    pathObj->SetRadius (min(min(Box[0], Box[1]), Box[2])*0.003);
     if (PathType == TUBES)
       pathObj->TubesSet (Paths[li]->Path);
     else
@@ -124,6 +128,7 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
 // 	pos[2] += 0.5*Box[2];
 	Box.PutInBox(pos);
 	sphere->SetPos (pos);
+	sphere->SetBox(Box);
 // 	if (ptcl==0)
 // 	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
 // 	else
@@ -813,11 +818,15 @@ void VisualClass::MakePaths(int frame)
       }
     // Check to see if the path is closed or is a winding path
     int last = path.Path.size()-1;
-    for (int dim=0; dim<3; dim++)
+    path.Closed = true;
+    path.Winding = false;
+    for (int dim=0; dim<3; dim++) {
       if (fabs(path.Path[last][dim] - path.Path[0][dim]) > 0.5*Box[dim]) {
 	cerr << "Winding path.\n";
 	path.Closed = false;
+	path.Winding = true;
       }
+    }
     // If we're not close, pop off the closing point
 //   if (!path.Closed) 
 //     path.Path.pop_back();

@@ -60,7 +60,8 @@ protected:
   Array<double,3> RhoData;
   Array<double,4> BandRhoData;
   LinearGrid Xgrid, Ygrid, Zgrid;
-  Gtk::VBox IsoBox;
+  Gtk::VBox IsoBox, DensityBox;
+  Gtk::Label rsLabel;
   Gtk::HScale IsoScale;
   Gtk::Adjustment IsoAdjust;
   Gtk::Frame IsoFrame;
