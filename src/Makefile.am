@@ -33,6 +33,7 @@ SHARED_SOURCES =          \
     RunInfoClass.h        \
     SpeciesClass.cc       \
     SpeciesClass.h        \
+		WormHelper.cc         \
     WriteData.h           \
     WriteData.cc
 
