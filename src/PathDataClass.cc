@@ -165,7 +165,6 @@ void PathDataClass::FindTail(int &tailSlice,int &tailPtcl)
 
 
 
-/////////////
 
 
 
@@ -333,8 +332,10 @@ cerr << "  PIMC: initialized InterComm; ranks is " << ranks << endl;
   }
   //    Random.Init (314159, numClones);
   
+
   //BAD BUG!  Path.MyClone=IntraComm.MyProc()/procsPerClone;
   Path.MyClone=WorldComm.MyProc()/procsPerClone;
+
 
 #endif
 

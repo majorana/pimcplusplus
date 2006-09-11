@@ -85,7 +85,7 @@ public:
   //  ActionClass Action; //(MemoizedDataClass,SpeciesArrayClass);
   ActionsClass Actions;
   /// The constructor that initializes the action and such
-  int Join;
+  int &Join;
   PathClass Path;
   inline void ShiftData(int numTimeSlicesToShift){
     Path.ShiftData(numTimeSlicesToShift);
@@ -166,7 +166,8 @@ public:
   void Read (IOSectionClass &in);
   PathDataClass() : 
     /* Action(*this), */Actions(*this), Random(WorldComm), 
-			Path(IntraComm,Random, Actions), MaxWallTime(-1)
+			Path(IntraComm,Random, Actions), MaxWallTime(-1),
+			Join(Path.Join)
 		
   { 
     Join = 1; 

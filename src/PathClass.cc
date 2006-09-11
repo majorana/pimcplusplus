@@ -134,13 +134,10 @@ PathClass::SetIonConfig(int config)
 
 void PathClass::Read (IOSectionClass &inSection)
 {
-  inSection.ReadVar("FunnyCoupling",FunnyCoupling);
-  SetMode(OLDMODE);
-  NowOpen=false;
-  HeadSlice=0;
-  SetMode (NEWMODE);
-  NowOpen=false;
-  HeadSlice=0;
+  if (!inSection.ReadVar("FunnyCoupling",FunnyCoupling)){
+    FunnyCoupling=false;
+  }
+
   Weight=1;
   double tempExistsCoupling;
   if (!inSection.ReadVar("ExistsCoupling",tempExistsCoupling)){
@@ -163,23 +160,36 @@ void PathClass::Read (IOSectionClass &inSection)
     periodic[i] = tempPeriodic(i);
   }
   SetPeriodic (periodic);
-  if (needBox) {
-    assert(inSection.ReadVar ("Box", tempBox));
+  double desiredDensity;
+  bool useDensity=inSection.ReadVar("Density",desiredDensity);
+  bool useBox=inSection.ReadVar("Box",tempBox);
+  assert(useBox || useDensity);
+  if (needBox && !useDensity) {
     perr << "Using periodic boundary conditions.\n";
     assert(tempBox.size()==NDIM);
-    //HACK!
-    // //    int desiredNumParticles;
-    // //    assert(inSection.ReadVar("NumParticles",desiredNumParticles));
-    // //    double desiredBoxVol=(tempBox(0)*tempBox(1)*tempBox(2));
-    // //    double desiredDensity=
-    // //      desiredNumParticles/desiredBoxVol;
-    // //    ScaleBox=
-    // //      pow((double)(desiredNumParticles-MyClone)/(double)(desiredNumParticles),1.0/3.0);
-    //END HACK
-    ScaleBox=1.0;
-
     for (int counter=0;counter<tempBox.size();counter++)
-      Box(counter)=tempBox(counter)*ScaleBox;
+      Box(counter)=tempBox(counter);
+    SetBox (Box);
+  }
+  else if (useDensity){
+    inSection.OpenSection("Particles");
+    int numSpecSections=inSection.CountSections("Species");
+    int totalNumParticles=0;
+    for (int specNumber=0;specNumber<numSpecSections;specNumber++){
+      inSection.OpenSection("Species",specNumber);
+      int specNumParticles;
+      assert(inSection.ReadVar("NumParticles",specNumParticles));
+      totalNumParticles += specNumParticles;
+      inSection.CloseSection();
+    }
+    inSection.CloseSection();
+    double currentBoxVolume=tempBox(0)*tempBox(1)*tempBox(2);
+    double desiredBoxVolume=1.0/desiredDensity*totalNumParticles;
+    double scaleBox=pow(desiredBoxVolume/currentBoxVolume,1.0/3.0);
+    assert(tempBox.size()==NDIM);
+    for (int counter=0;counter<tempBox.size();counter++)
+      Box(counter)=tempBox(counter)*scaleBox;
+    cerr<<"The BOX I am setting is "<<Box<<endl;
     SetBox (Box);
   }
   else 
@@ -188,6 +198,9 @@ void PathClass::Read (IOSectionClass &inSection)
   inSection.ReadVar("OrderN",OrderN);
   if (!inSection.ReadVar("OpenLoops",OpenPaths))
     OpenPaths=false;
+  if (!inSection.ReadVar("WormOn",WormOn))
+    WormOn=false;
+    
 
 #ifndef OPEN_LOOPS
   if (OpenPaths) {
@@ -252,8 +265,6 @@ void PathClass::Read (IOSectionClass &inSection)
     cerr << "IonConfigs[1] = " << IonConfigs[1] << endl;
     SetIonConfig(0);
   }
-  NowOpen=true;
-
   /// Checking rounding mode
   bool roundOkay = true;
   for (int i=0; i<1000; i++) {
@@ -367,30 +378,9 @@ void PathClass::Allocate()
     }
   }
   Path.resize(MyNumSlices,numParticles+OpenPaths);
+  ParticleExist.resize(MyNumSlices,numParticles);
   RefPath.resize(numParticles+OpenPaths);
   Permutation.resize(numParticles+OpenPaths);
-  
-  /// Initilize first and last slice for all "real" particles to the
-  /// first and last slices, respectively
-  FirstSlice.resize(numParticles+OpenPaths);
-  LastSlice.resize(numParticles+OpenPaths);
-  for (int ptcl=0; ptcl<numParticles; ptcl++) {
-    SetMode(OLDMODE);
-    FirstSlice(ptcl) = 0;
-    LastSlice(ptcl) = NumTimeSlices()-1;
-    SetMode(NEWMODE);
-    FirstSlice(ptcl) = 0;
-    LastSlice(ptcl) = NumTimeSlices()-1;
-  }
-  /// Set all nonexistant particles' first and last slices to -1
-  for (int ptcl=numParticles; ptcl<numParticles+OpenPaths; ptcl++) {
-    SetMode(OLDMODE);
-    FirstSlice(ptcl) = -1;
-    LastSlice(ptcl)  = -1;
-    SetMode(NEWMODE);
-    FirstSlice(ptcl) = -1;
-    LastSlice(ptcl)  = -1;
-  }
 
   SpeciesNumber.resize(numParticles+OpenPaths);
   DoPtcl.resize(numParticles+OpenPaths);
@@ -413,6 +403,7 @@ void PathClass::Allocate()
 #endif
     Rho_k.resize(MyNumSlices, NumSpecies(), kVecs.size());
   }
+  //  InitializeJosephsonCode();
 }
 
 void PathClass::SetupkVecs2D()
@@ -778,6 +769,8 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
   }
   //  perr<<Path(OpenLink,OpenPtcl)<<endl;
   //  perr<<"Ending"<<endl;
+  if (WormOn)
+    MoveJoinParticleExist(oldJoin,newJoin);
 }
 
 
@@ -792,6 +785,9 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
     int ptcl = activeParticles(ptclIndex);
     Path[OLDMODE](Range(startSlice, endSlice), ptcl) = 
       Path[NEWMODE](Range(startSlice, endSlice), ptcl);
+    ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl) = 
+      ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl);
+
     Permutation.AcceptCopy(ptcl);
   }
   //I had this accepting the whole permutation.  Not sure why but have commented it out.  
@@ -840,6 +836,9 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
     int ptcl = activeParticles(ptclIndex);
     Path[NEWMODE](Range(startSlice, endSlice), ptcl) = 
       Path[OLDMODE](Range(startSlice, endSlice), ptcl);
+    ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl) = 
+      ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl);
+
     Permutation.RejectCopy(ptcl);
   }
   //For some reason rejecting the entire permutation?
@@ -868,7 +867,7 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
 
 void PathClass::ShiftData(int slicesToShift)
 {
-
+  ShiftParticleExist(slicesToShift);
   ShiftPathData(slicesToShift);
   if (LongRange)
     // ShiftRho_kData(slicesToShift);
@@ -1276,3 +1275,4 @@ PathClass::WarpPaths (int ionSpecies)
     }
   }
 }
+

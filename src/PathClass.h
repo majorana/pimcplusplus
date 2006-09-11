@@ -24,6 +24,8 @@
 #include <Common/MPI/Communication.h>
 #include "GridClass.h"
 #include <vector>
+#include <fftw3.h>
+
 class ActionsClass;
 
 using namespace IO;
@@ -68,6 +70,7 @@ private:
   /// k-space stuff for long-range potentials ///
   ///////////////////////////////////////////////
  public:
+  int Join;
   dVec CenterOfMass;
 
   CellMethodClass Cell;
@@ -123,6 +126,9 @@ private:
   //  int RefSliceCheck;
   void ShiftPathData(int sliceToShift);
   void ShiftRho_kData(int sliceToShift);
+  void ShiftParticleExist(int slicesToShift);
+  void MoveJoinParticleExist(int oldJoin, int newJoin);
+  
 public:
   /// Stores the position of the reference slice w.r.t. time slice 0
   /// on processor 0.
@@ -279,6 +285,22 @@ public:
   TinyVector<Array<dVec,1>,2> IonConfigs;
   vector<double> WeightA, WeightB, EnergyA, EnergyB;
 
+  ////////////////////////////
+  ///Multistep moves///
+  
+  ////Currently will only work in serial
+  void InitializeStateSaving();
+  void SaveState();
+  void RestoreState();
+
+  Array<dVec,2> SavedPath;
+  Array<int,1> SavedPermutation;
+  int SavedJoin;
+  
+
+
+  ////////////////////////////////////
+
 
   //////////////////////////
   /// Fermions           ///
@@ -308,6 +330,29 @@ public:
   MirroredClass<int> HeadParticle;
 
 
+  ///////////////////////////
+  //// Worm Moves        ///
+  /////////////////////////
+  bool WormOn;
+  int MaxOpenPaths;
+  struct RealSliceStruct{
+    int first;
+    int last;
+  };
+  void FindHead(int &headSlice,int &headPtcl);
+  void FindTail(int &tailSlice,int &tailPtcl);
+  Mirrored2DClass<double> ParticleExist;
+  Mirrored1DClass<RealSliceStruct> RealSlices;
+  void InitRealSlices();
+  void ShiftRealSlices(int numToShift);
+  void MoveJoinRealSlices();
+  void MaxAllowedParticles();
+  bool IsEmpty(int ptcl);
+  bool IsFull(int ptcl);
+  void TestRealSlices();
+  void PrintRealSlices();
+  int FindEmptyParticle();
+
   //////////////////////////
   ////Vacancy Project /////
   ////////////////////////
@@ -317,6 +362,18 @@ public:
   double ScaleBox;
   //END CODE FOR SCALING BOX
   bool FunnyCoupling;
+
+  ///////////////////////
+  ///Josephson Project//
+  //////////////////////
+//   fftw_complex *inPhi, *outOmega;
+//   fftw_complex *inOmega, *outPhi;
+//   fftw_plan phi2omegaPlan;
+//   fftw_plan omega2phiPlan;
+//   void InitializeJosephsonCode();
+//   void Phi2Omega();
+//   void Omega2Phi();
+
 
 	public:
 	// containers for data about user-defined molecules
@@ -328,6 +385,7 @@ public:
 							///specified, maintained for compatibility with earlier segments of code
   Array<int,1> MolRef; // maps ptcl index to molecule index
 	bool doMol;
+
 };
 
 inline bool PathClass::HasFermions(const Array<int,1>& activeParticles)
@@ -449,6 +507,7 @@ PathClass::PathClass (CommunicatorClass &communicator,
   FunnyCoupling=false;
   //  OpenPaths=true;
   OpenPaths=false; //turns off open loops (Should be read at some poitn)
+  WormOn=false; //assume the worm is not on 
   Weight=1;
 
 	MoleculeName.resize(0);
