@@ -31,7 +31,16 @@ public:
   void Read (IOSectionClass &in);
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
+  double SingleActionForcedTau (int slice1, int slice2,
+				const Array<int,1> &changedParticles, 
+				int level,
+				double forcedTau);
   double d_dBeta (int slice1, int slice2, int level);
+  double d_dBetaForcedTau (int slice1, int slice2,
+			   int level,
+			   double forcedTau);
+  
+
   string GetName();
   inline void SetNumImages (int num) { NumImages = num; }
   KineticClass (PathDataClass &pathData);
