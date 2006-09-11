@@ -86,6 +86,7 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 			       const Array<int,1> &changedParticles,
 			       int level)
 {
+  //  cerr<<"I'm in the short range action"<<endl;
   double TotalU=0.0;
   //  int startTime=clock();
   //  for (int toRun=0;toRun<1000;toRun++){
@@ -115,6 +116,10 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
 	  double U;
+// 	  if (rmag<2.8 || rpmag<2.8)
+// 	    U=5000;
+// 	  else 
+// 	    U=0;
 	  U = PA.U(q,z,s2, level);
 	  // Subtract off long-range part from short-range action
 	  if (PA.IsLongRange() && PathData.Actions.UseLongRange)
@@ -123,15 +128,101 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 	  if (PathData.Path.FunnyCoupling && 
 	      (species1==1 || species2==1))
 	    TotalU +=sqrt(PathData.Path.ExistsCoupling)*U;
+	  else if (PathData.Path.WormOn){
+	    TotalU += U*PathData.Path.ParticleExist(slice,ptcl1)*
+	      PathData.Path.ParticleExist(slice,ptcl2)*
+	      PathData.Path.ParticleExist(slice+skip,ptcl1)*
+	      PathData.Path.ParticleExist(slice+skip,ptcl2);
+	  }
 	  else
-	    TotalU += U;
+	    TotalU+=U;
 	}
+      }
+    }
+  }
+//  cerr<<"Num total U is "<<TotalU<<endl;
+////  cerr<<"Worm short range action is "<<TotalU<<endl;
+//  cerr<<"I'm out of the short range action"<<endl;
+  return (TotalU);
+}
+
+//Doesn't deal correctly with the long range term possibly
+double 
+ShortRangeClass::SingleActionForcedPairAction (int slice1, int slice2,
+					       PairActionFitClass &PA)
+{
+  double TotalU=0.0;
+  PathClass &Path=PathData.Path;
+  // First, sum the pair actions
+  for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
+    Path.DoPtcl(ptcl)=true;
+  int level=0;
+  int skip = 1<<level;
+  double levelTau = Path.tau* (1<<level);
+  for (int ptcl1=0;ptcl1<Path.NumParticles();ptcl1++){
+    int species1=Path.ParticleSpeciesNum(ptcl1);
+    for (int ptcl2=0;ptcl2<ptcl1;ptcl2++) {
+      int species2=Path.ParticleSpeciesNum(ptcl2);
+      for (int slice=slice1;slice<slice2;slice+=skip){
+	dVec r, rp;
+	double rmag, rpmag;
+	PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+			       rmag, rpmag, r, rp);
+	double s2 = dot (r-rp, r-rp);
+	double q = 0.5 * (rmag + rpmag);
+	double z = (rmag - rpmag);
+	double U;
+	U = PA.U(q,z,s2, level);
+	// Subtract off long-range part from short-range action
+	if (PA.IsLongRange() && PathData.Actions.UseLongRange)
+	  U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
+	TotalU += U;
       }
     }
   }
   return (TotalU);
 }
 
+
+
+double 
+ShortRangeClass::d_dBetaForcedPairAction (int slice1, int slice2,
+					  PairActionFitClass &pa)
+
+{
+  double levelTau=Path.tau;
+  int level=0;
+  int skip = 1<<level;
+  // Add constant part.  Note: we should really check the number of
+  // dimensions. 
+  double dU = 0.0;
+  for (int ptcl1=0; ptcl1<PathData.NumParticles(); ptcl1++) {
+    int species1=Path.ParticleSpeciesNum(ptcl1);
+    for (int ptcl2=0; ptcl2<ptcl1; ptcl2++) {
+      for (int slice=slice1;slice<slice2;slice+=skip){
+	dVec r, rp;
+	double rmag, rpmag;
+	PathData.Path.DistDisp(slice,slice+skip,ptcl1,ptcl2,rmag,rpmag,r,rp);
+	
+	double s2 = dot(r-rp, r-rp);
+	double q = 0.5*(rmag+rpmag);
+	double z = (rmag-rpmag);
+	
+
+	dU += pa.dU(q, z, s2, level)*
+	  PathData.Path.ParticleExist(slice,ptcl1)*
+	  PathData.Path.ParticleExist(slice,ptcl2)*
+	  PathData.Path.ParticleExist(slice+skip,ptcl1)*
+	  PathData.Path.ParticleExist(slice+skip,ptcl2);
+
+	// Subtract off long-range part from short-range action
+	if (pa.IsLongRange() && PathData.Actions.UseLongRange)
+	  dU -= 0.5*(pa.dUlong(level)(rmag)+pa.dUlong(level)(rpmag));
+      }
+    }
+  }
+  return dU;
+}
 
 
 double 
@@ -157,7 +248,12 @@ ShortRangeClass::d_dBeta (int slice1, int slice2, int level)
 	
 	PairActionFitClass& pa=
 	  *(PairMatrix(species1, PathData.Path.ParticleSpeciesNum(ptcl2)));
-	dU += pa.dU(q, z, s2, level);
+	dU += pa.dU(q, z, s2, level)*
+	  PathData.Path.ParticleExist(slice,ptcl1)*
+	  PathData.Path.ParticleExist(slice,ptcl2)*
+	  PathData.Path.ParticleExist(slice+skip,ptcl1)*
+	  PathData.Path.ParticleExist(slice+skip,ptcl2);
+
 	// Subtract off long-range part from short-range action
 	if (pa.IsLongRange() && PathData.Actions.UseLongRange)
 	  dU -= 0.5*(pa.dUlong(level)(rmag)+pa.dUlong(level)(rpmag));

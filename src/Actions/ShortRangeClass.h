@@ -45,6 +45,10 @@ public:
   void Read (IOSectionClass &in);
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
+  double SingleActionForcedPairAction (int slice1, int slice2,
+				       PairActionFitClass &PA);
+  double  d_dBetaForcedPairAction (int slice1, int slice2,
+				   PairActionFitClass &pA);
   double d_dBeta (int slice1, int slice2, int level);
   void GradAction (int slice1, int slice2, const Array<int,1> &ptcls,
 		   int level, Array<dVec,1> &gradVec);
