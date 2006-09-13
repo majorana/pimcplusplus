@@ -226,7 +226,7 @@ void PathClass::Read (IOSectionClass &inSection)
   for (int Species=0; Species < numSpecies; Species++) {
     inSection.OpenSection("Species", Species);
     SpeciesClass *newSpecies = ReadSpecies (inSection);
-		doMol = newSpecies->AssignMoleculeIndex;
+    doMol = newSpecies->AssignMoleculeIndex;
     inSection.CloseSection(); // "Species"
     bool manyParticles=false;
     inSection.ReadVar("ManyParticles",manyParticles);
@@ -240,6 +240,7 @@ void PathClass::Read (IOSectionClass &inSection)
   inSection.CloseSection(); // Particles
   // Now actually allocate the path
   Allocate();
+    
 
 
   /// Read to see if we are using correlated sampling
@@ -277,6 +278,7 @@ void PathClass::Read (IOSectionClass &inSection)
     abort();
   }
 
+
 }
 
 
@@ -296,6 +298,7 @@ inline bool Include(dVec k)
 
 void PathClass::Allocate()
 {
+  SetMode(NEWMODE);
   assert(TotalNumSlices>0);
   int myProc=Communicator.MyProc();
   int numProcs=Communicator.NumProcs();
@@ -378,7 +381,7 @@ void PathClass::Allocate()
     }
   }
   Path.resize(MyNumSlices,numParticles+OpenPaths);
-  ParticleExist.resize(MyNumSlices,numParticles);
+  ParticleExist.resize(MyNumSlices,numParticles+OpenPaths);
   RefPath.resize(numParticles+OpenPaths);
   Permutation.resize(numParticles+OpenPaths);
 
@@ -391,8 +394,10 @@ void PathClass::Allocate()
       SpeciesNumber(i) = speciesNum;
   }
   //Sets to the identity permutaiton 
+  cerr<<"setting permutations"<<" "<<GetMode()<<endl;
   for (int ptcl=0;ptcl<Permutation.size();ptcl++){
     Permutation(ptcl) = ptcl;
+    cerr<<ptcl<<" "<<Permutation(ptcl)<<endl;
   }
   if (LongRange) {
 #if NDIM==3    
@@ -402,6 +407,8 @@ void PathClass::Allocate()
     SetupkVecs2D();
 #endif
     Rho_k.resize(MyNumSlices, NumSpecies(), kVecs.size());
+
+
   }
   //  InitializeJosephsonCode();
 }
@@ -785,8 +792,9 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
     int ptcl = activeParticles(ptclIndex);
     Path[OLDMODE](Range(startSlice, endSlice), ptcl) = 
       Path[NEWMODE](Range(startSlice, endSlice), ptcl);
-    ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl) = 
-      ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl);
+    if (WormOn)
+      ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl) = 
+	ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl);
 
     Permutation.AcceptCopy(ptcl);
   }
@@ -836,8 +844,9 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
     int ptcl = activeParticles(ptclIndex);
     Path[NEWMODE](Range(startSlice, endSlice), ptcl) = 
       Path[OLDMODE](Range(startSlice, endSlice), ptcl);
-    ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl) = 
-      ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl);
+    if (WormOn)
+      ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl) = 
+	ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl);
 
     Permutation.RejectCopy(ptcl);
   }
@@ -867,7 +876,8 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
 
 void PathClass::ShiftData(int slicesToShift)
 {
-  ShiftParticleExist(slicesToShift);
+  if (WormOn)
+    ShiftParticleExist(slicesToShift);
   ShiftPathData(slicesToShift);
   if (LongRange)
     // ShiftRho_kData(slicesToShift);
