@@ -26,6 +26,7 @@ WormGrowMoveClass::Read (IOSectionClass &in)
   // Now construct stage list
   WormGrowStage.Read(in);
   WormGrowStage.Actions.push_back(&PathData.Actions.Kinetic);
+  WormGrowStage.Actions.push_back(&PathData.Actions.ShortRange);
   WormGrowStage.Actions.push_back(&PathData.Actions.Mu);
   
   Stages.push_back(&WormGrowStage);
@@ -36,25 +37,29 @@ WormGrowMoveClass::Read (IOSectionClass &in)
 void 
 WormGrowMoveClass::MakeMove()
 {
+  cerr<<"Move begun"<<endl;
+
   Slice1=0;
   Slice2=0;
   ActiveParticles.resize(1);
   ActiveParticles(0)=0;
-  cerr<<"Move begun"<<endl;
-  if (!PathData.Path.NowOpen){
+
+
+  if (!PathData.Path.NowOpen){ //if worm closed, then reject
     MultiStageClass::Reject();
     return;
   }
+
   int headSlice,headPtcl,tailSlice,tailPtcl,numEmpty,wormSize;
   PathData.WormInfo(headSlice, headPtcl,
 		    tailSlice, tailPtcl,
-		    numEmpty, wormSize);
-  
+		    numEmpty, wormSize);  
   cerr<<"Worm size is "<<wormSize<<" "<<numEmpty<<" "
       <<headSlice<<" "<<headPtcl<<" "
       <<tailSlice<<" "<<tailPtcl<<" "<<endl;
   if (wormSize==0){
     MultiStageClass::Reject();
+    cerr<<"ERROR! WORM SHOULD NEVER BE SIZE 0 BECAUSE THEN THE WORLD SHOULD BE CLOSED! BUG BUG!"<<endl;
     return;
   }
   bool moveHead = PathData.Path.Random.Local() >0.5;
@@ -88,10 +93,13 @@ WormGrowMoveClass::MakeMove()
   PathData.WormInfo(headSlice, headPtcl,
 		    tailSlice, tailPtcl,
 		    numEmpty, wormSize);
-  
+
   cerr<<"Worm size as "<<wormSize<<" "<<numEmpty<<" "
       <<headSlice<<" "<<headPtcl<<" "
       <<tailSlice<<" "<<tailPtcl<<" "<<endl;
+  //  for (int ptcl=0;ptcl<PathData.Path.Permutation.size();ptcl++){
+  //    cerr<<"Worm: "<<ptcl<<" "<<PathData.Path.Permutation(ptcl)<<endl;
+  //  }
 
 //   cerr<<"Worm information: "<<headSlice<<" "<<headPtcl<<" "
 //       <<tailSlice<<" "<<tailPtcl<<" "

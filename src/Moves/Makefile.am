@@ -102,6 +102,8 @@ libmoves_la_SOURCES  =           \
     WaterMoveRing.h              \
     QMCTest.cc                   \
     QMCTest.h                    \
+    WormStage.h                  \
+    WormStage.cc                 \
     WormGrow.h                   \
     WormGrow.cc                  \
     WormPermuteStage.h           \
