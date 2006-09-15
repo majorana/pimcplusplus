@@ -29,7 +29,6 @@ PathDataClass::WormInfo(int &headSlice, int &headPtcl,
 		    int &tailSlice, int &tailPtcl,
 		    int &numEmpty, int &wormSize)
 {
-#if 1==2
   tailSlice=-1;tailPtcl=-1;headSlice=-1;headPtcl=-1;
   numEmpty=0;
   wormSize=0;
@@ -53,7 +52,6 @@ PathDataClass::WormInfo(int &headSlice, int &headPtcl,
       wormSize++;
     Next(currSlice,currPtcl);
   } 
-#endif
 }
 void
 PathDataClass::MoveTailToSliceZero()
@@ -112,7 +110,6 @@ void PathDataClass::MoveOpenLinkToEnd()
 ///Worm Moves////////
 bool PathDataClass::SliceFullandNextSliceEmpty(int slice,int ptcl)
 {
-#if 1==2
   int nextSlice=(slice+1) % NumTimeSlices();
   int nextPtcl;
   if (Join==slice)
@@ -120,12 +117,10 @@ bool PathDataClass::SliceFullandNextSliceEmpty(int slice,int ptcl)
   else
     nextPtcl=ptcl;
   return (Path.ParticleExist(slice,ptcl)==1.0 && Path.ParticleExist(nextSlice,nextPtcl)==0.0);
-#endif
 }
 
 bool PathDataClass::SliceFullandPreviousSliceEmpty(int slice,int ptcl)
 {
-#if 1==2
   int prevSlice=((slice-1)+Path.NumTimeSlices() ) % Path.NumTimeSlices();
   int prevPtcl=0;
   if (Join==prevSlice){
@@ -137,7 +132,6 @@ bool PathDataClass::SliceFullandPreviousSliceEmpty(int slice,int ptcl)
 
   return (Path.ParticleExist(slice,ptcl)==1.0 && Path.ParticleExist(prevSlice,prevPtcl)==0.0);
 
-#endif
 }
   
 
@@ -278,7 +272,7 @@ void PathDataClass::Read (IOSectionClass &in)
   	}
   	//    Random.Init (314159, numClones);
   	
-  	Path.MyClone=IntraComm.MyProc()/procsPerClone;
+  	Path.MyClone=WorldComm.MyProc()/procsPerClone;
 	}
 
 #else

@@ -176,8 +176,8 @@ bool PathClass::IsFull(int ptcl)
 //Must be called after the number of particles is set
 void PathClass::InitRealSlices()
 {
-  
 
+  //  return;
   SetMode(NEWMODE);
 //   //  RealSlices.resize(MaxAllowedParticles());
 //   RealSlices.resize(NumParticles());
@@ -196,23 +196,28 @@ void PathClass::InitRealSlices()
     ParticleExist.AcceptCopy();
     return;
   }
+  cerr<<"Worm Initialization"<<endl;
+  NowOpen=true;
+  NowOpen.AcceptCopy();
   ///If you are here then you want to be initializing the worm.
   ///Specifies how many empty "extra" particles should you start with.
-  int startEmpty;
-  //IN  assert(in.ReadVar("StartEmpty",startEmpty));
-  //  int startEmpty=1;
-  for (int ptcl=startEmpty;ptcl<NumParticles();ptcl++)
+
+  //  assert(in.ReadVar("StartEmpty",startEmpty));
+  int startEmpty=2;
+  for (int ptcl=NumParticles()-startEmpty;ptcl<NumParticles();ptcl++)
     for (int slice=0;slice<NumTimeSlices();slice++){
       ParticleExist(slice,ptcl)=0.0;
     }
-  ParticleExist(NumTimeSlices()-1,startEmpty)=0.0;
-  ParticleExist(0,startEmpty)=0.0;
+  ParticleExist(NumTimeSlices()-1,NumParticles()-startEmpty-1)=0.0;
+  ParticleExist(0,NumParticles()-startEmpty-1)=0.0;
   ParticleExist.AcceptCopy();
   
-  for (int ptcl=startEmpty-1;ptcl<NumParticles()-1;ptcl++){
+  for (int ptcl=NumParticles()-startEmpty-1;ptcl<NumParticles()-1;ptcl++){
     Permutation(ptcl)=ptcl+1;
   }
-  Permutation(NumParticles()-1)=startEmpty-1;
+  Permutation(NumParticles()-1)=NumParticles()-startEmpty-1;
+  for (int ptcl=0;ptcl<NumParticles();ptcl++)
+    cerr<<"Worm Perm"<<Permutation(ptcl)<<endl;
   Permutation.AcceptCopy();
   Path.AcceptCopy();
 }

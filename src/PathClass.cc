@@ -387,6 +387,8 @@ void PathClass::Allocate()
       }
     }
   }
+  if (WormOn)
+    numParticles=numParticles+2;
   Path.resize(MyNumSlices,numParticles+OpenPaths);
   ParticleExist.resize(MyNumSlices,numParticles+OpenPaths);
   RefPath.resize(numParticles+OpenPaths);
