@@ -134,6 +134,13 @@ PathClass::SetIonConfig(int config)
 
 void PathClass::Read (IOSectionClass &inSection)
 {
+  CenterOfMass=0.0;
+  SetMode(OLDMODE);
+  NowOpen=false;
+  HeadSlice=0;
+  SetMode (NEWMODE);
+  NowOpen=false;
+  HeadSlice=0;
   if (!inSection.ReadVar("FunnyCoupling",FunnyCoupling)){
     FunnyCoupling=false;
   }
@@ -797,6 +804,12 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
 	ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl);
 
     Permutation.AcceptCopy(ptcl);
+    for (int slice=startSlice;slice<endSlice;slice++){
+      dVec newLoc=Path[NEWMODE](slice,ptcl);
+      dVec oldLoc=Path[OLDMODE](slice,ptcl);
+      dVec minDisp=MinImageDisp(oldLoc,newLoc);
+      CenterOfMass=CenterOfMass+minDisp;
+    }
   }
   //I had this accepting the whole permutation.  Not sure why but have commented it out.  
 // <<<<<<< .mine
