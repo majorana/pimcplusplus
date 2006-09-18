@@ -38,6 +38,7 @@ private:
   bool HaveRefslice;
   bool Josephson;
   int SpeciesNum;
+  bool UseApproximateHigherLevelAction;
   void ChooseTimeSlices();
   /// If we do not bisect down to the lowest level, interpolate the
   /// paths in imaginary time.
@@ -55,6 +56,7 @@ public:
     MultiStageClass(pathData, out),StepNum(0)
 
   { 
+    UseApproximateHigherLevelAction=false;
     // do nothing for now
   }
 };
