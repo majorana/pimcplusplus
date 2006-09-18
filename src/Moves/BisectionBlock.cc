@@ -29,6 +29,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   string permuteType, speciesName;
   //  StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
+  in.ReadVar("UseApproximateHigherLevelAction",UseApproximateHigherLevelAction);
   assert (NumLevels <= PathData.Actions.GetMaxLevels());
   LowestLevel = 0;
   if (!in.ReadVar ("LowestLevel", LowestLevel))
@@ -123,7 +124,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       }
       if (PathData.Path.OpenPaths && level>LowestLevel) // && permuteType=="OPEN")
 	cerr<<"Don't look at short range"<<endl;
-      else if (PathData.Path.OpenPaths && level>LowestLevel){
+      else if ((PathData.Path.OpenPaths && level>LowestLevel) || UseApproximateHigherLevelAction){
 	newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
       }
       else if (PathData.Path.OrderN){
@@ -134,7 +135,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	newStage->Actions.push_back(&PathData.Actions.ShortRange);
       }
       //      else
-      //	int dummy=5;
+      //      	int dummy=5;
       if (level == LowestLevel) {
 	bool useTether=false;
 	in.ReadVar("UseTether",useTether);
@@ -169,7 +170,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   /// EVIL BAD ERROR!!!  Pushing onto the stack twice causes the stage
   /// to be accepted twice, which causes swapping the forward and
   // reverse tables twice!
-  // Stages.push_back (PermuteStage);
+  ///  Stages.push_back (PermuteStage);
 
 //   ///HACK! Addding a stage that will reject the move if the structure
 //   //factor gets too large
@@ -254,6 +255,9 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
+  //  cerr<<"Bisection Block beginning"<<endl;
+  //  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
+  //    cerr<<PathData.Path.Permutation(ptcl)<<endl;
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
 
