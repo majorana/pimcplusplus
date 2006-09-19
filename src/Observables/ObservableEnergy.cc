@@ -31,7 +31,7 @@ void EnergyClass::Accumulate()
 
   NumSamples++;
 
-	//map<double> Energies;
+  	//map<double> Energies;
   double kinetic, dUShort, dULong, node, vShort, vLong, tip5p;
   PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong);
   //PathData.Actions.Energy(Energies);
