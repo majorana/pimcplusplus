@@ -17,7 +17,11 @@
 #include "Tether.h"
 #include "../PathDataClass.h"
 
-
+string 
+TetherClass::GetName()
+{
+  return "Tether";
+}
 
 
 ///This has to be called after pathdata knows how many
