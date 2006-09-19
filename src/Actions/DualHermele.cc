@@ -88,7 +88,7 @@ DualHermeleClass::SingleAction (int slice1, int slice2,
 {
   double total=0.0;
 #ifdef ORDER_N_FERMIONS
-
+#if 1==2
   double T=1.0/(PathData.Path.tau*(PathData.Path.NumTimeSlices()-1));
   PathData.Path.Phi2Omega();
   //  for (int slice=0;slice<PathData.Path.NumTimeSlices()-1;slice++)
@@ -104,7 +104,7 @@ DualHermeleClass::SingleAction (int slice1, int slice2,
   double c=1.0;
   double K_s=1.0;
   double omega_c2=50.0*50.0;
-  double total=0.0;
+
   for (int slice=1;slice<=(PathData.Path.NumTimeSlices()-1)/2;slice++){
     //  for (int slice=1;slice<=(PathData.Path.NumTimeSlices()-1);slice++){
     double omega_n=2.0*M_PI*(slice)*T;
@@ -133,6 +133,7 @@ DualHermeleClass::SingleAction (int slice1, int slice2,
     totalTau+=1.0/J*(vel[0]*vel[0])/PathData.Path.tau;
   }
   //  cerr<<"T: "<<total<<" "<<totalTau<<endl;
+#endif
 #endif
   return total;
 
