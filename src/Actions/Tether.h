@@ -22,7 +22,6 @@
 class TetherClass : public ActionBaseClass
 {
 public:
-  string GetName();
   void Read (IOSectionClass &in);
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
