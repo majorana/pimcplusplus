@@ -15,7 +15,7 @@ def ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut):
     vlabel="g(r)" #infiles.ReadVar("ylabel")[0]
     data=infiles.ReadVar("y")
     currNum = 0
-    if (data==[None]):
+    if data==None or data==[None]:
          return currNum
     s = shape(data[0])
     numProcs = len(data)
