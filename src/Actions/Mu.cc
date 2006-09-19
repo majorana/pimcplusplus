@@ -78,6 +78,8 @@ MuClass::SingleAction (int slice1, int slice2,
 			       const Array<int,1> &changedParticles,
 			       int level)
 {
+  
+  return 0.0;
 #if 1==2
   int headPtcl;
   int tailPtcl;
