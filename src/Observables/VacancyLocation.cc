@@ -33,6 +33,19 @@ F77_LSAPR (int *n,double* c, int *perm);
 // void VacancyLocClass::PrintNearbySites()
 // {
 
+//<<<<<<< .mine
+//   for (int site=0;site<FixedLoc.size();site++){
+//     list<int>::iterator neighborIter;
+//     cerr<<"Site: "<<site<<endl;
+//     for (neighborIter=Neighbors[site].begin();
+// 	 neighborIter!=Neighbors[site].end();
+// 	 neighborIter++){
+//       cerr<<(*neighborIter)<<", ";
+//     }
+//     cerr<<endl;
+//   }
+// }
+//=======
 //   for (int site=0;site<FixedLoc.size();site++){
 //     list<int>::iterator neighborIter;
 //     cerr<<"Site: "<<site<<endl;
@@ -109,75 +122,139 @@ F77_LSAPR (int *n,double* c, int *perm);
 // 	}
 // }
 
+
+// void VacancyLocClass::TabulateNearbySites()
+// {
+//   double minDist=10*dot(PathData.Path.GetBox(),PathData.Path.GetBox());
+//   for (int siteA=0;siteA<FixedLoc.size();siteA++){
+//     for (int siteB=0;siteB<FixedLoc.size();siteB++){
+//       double currDist=
+// 	PathData.Path.MinImageDistance(FixedLoc(siteA),FixedLoc(siteB));
+//       if (currDist<minDist && abs(currDist)>0.01)
+// 	minDist=currDist;
+//     }
+//   }
+//   double epsilon=0.1;
+//   for (int siteA=0;siteA<FixedLoc.size();siteA++){
+//     for (int siteB=0;siteB<FixedLoc.size();siteB++){
+//       double currDist=
+// 	PathData.Path.MinImageDistance(FixedLoc(siteA),FixedLoc(siteB));
+//       if (currDist<minDist+epsilon && abs(currDist)>0.01)
+// 	Neighbors[siteA].push_back(siteB);
+//     }
+//   }
+// }
+
+
+// bool VacancyLocClass::NeighborsVacancyFree(int site)
+// {
+//   list<int>::iterator neighborIter;
+//   for (neighborIter=Neighbors[site].begin();
+//        neighborIter!=Neighbors[site].end();
+//        neighborIter++){
+//     if (TempLoc(*neighborIter)==0)
+//       return false;
+//   }
+//   return true;
+// }
+// =======
+//     Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
+//     DistTable.resize(FixedLoc.size(), FixedLoc.size());
+//     Array<int,1> Perm;
+//     Perm.resize(FixedLoc.size());
+//     DistTable=0.0;
+//     int numEmptySites=FixedLoc.size()-PathData.Path.NumParticles();
+// >>>>>>> .r1247
+
+// <<<<<<< .mine
+// bool VacancyLocClass::NeighborsNotDoublyOccupied(int site)
+// {
+//   list<int>::iterator neighborIter;
+//   for (neighborIter=Neighbors[site].begin();
+//        neighborIter!=Neighbors[site].end();
+//        neighborIter++){
+//     if (TempLoc(*neighborIter)>1)
+//       return false;
+//   }
+//   return true;
+// }
+
+// void VacancyLocClass::ReturnDispFromASite(dVec loc1,dVec loc2)
+// {
+//   for (int loc=0;loc<FixedLoc.size();loc++){
+//     dVec dispCompare=FixedLoc(loc)-FixedLoc(0);
+//     PathData.Path.PutInBox(dispCompare);
+//     if (dot(disp1-dispCompare,disp1-dispCompare)<=1e-5){
+//       disp1Found=true;
+//       HistogramDisp(loc)=HistogramDisp(loc)+1.0;
+//     }
+//     if (dot(disp2-dispCompare,disp2-dispCompare)<=1e-5){
+//       HistogramDisp(loc)=HistogramDisp(loc)+1.0;
+//       disp2Found=true;
+//     }
+    
+// 	}
+// }
+
 void VacancyLocClass::Accumulate()
 {
   TimesCalled++;
-//   if (TimesCalled % DumpFreq==0)
-//     WriteBlock();
-
-//   if ((TimesCalled % Freq)!=0){
-//     return;
-//   }
-
-  if ((TimesCalled % Freq)!=0){
-    return;
-  }
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
- 
-    Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
-    DistTable.resize(FixedLoc.size(), FixedLoc.size());
-    Array<int,1> Perm;
-    Perm.resize(FixedLoc.size());
-    DistTable=0.0;
-    int numEmptySites=FixedLoc.size()-PathData.Path.NumParticles();
-
-    for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++){
-      for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
-	for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+  
+  Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
+  DistTable.resize(FixedLoc.size(), FixedLoc.size());
+  Array<int,1> Perm;
+  Perm.resize(FixedLoc.size());
+  DistTable=0.0;
+  int numEmptySites=FixedLoc.size()-PathData.Path.NumParticles();
+  
+  for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++){
+    for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
+      for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
 	dVec disp;
 	double dist2;
 	disp=PathData.Path(slice,ptcl)-FixedLoc(latticeSite);
 	PathData.Path.PutInBox(disp);
 	dist2=dot(disp,disp);
 	DistTable(latticeSite,ptcl+numEmptySites)=dist2;
-	}
       }
-      int n =FixedLoc.size();
-      F77_LSAPR (&n,DistTable.data(),Perm.data());
-      if (numEmptySites==2){
-	int vacancy1=Perm(0)-1;
-	int vacancy2=Perm(1)-1;
-	dVec disp1=FixedLoc(vacancy1)-FixedLoc(vacancy2);
-	dVec disp2=FixedLoc(vacancy2)-FixedLoc(vacancy1);
-	PathData.Path.PutInBox(disp1);
-	PathData.Path.PutInBox(disp2);
-	double dist=sqrt(dot(disp1,disp1));
-	if (dist<Grid.End){
-	  int index=Grid.ReverseMap(dist);
-	  Histogram(index)++;
-	}
-	bool disp1Found=false;
-	bool disp2Found=false;
-    
-	for (int counter3=0;counter3<FixedLoc.size();counter3++){
-	  dVec dispCompare=FixedLoc(counter3)-FixedLoc(0);
-	  PathData.Path.PutInBox(dispCompare);
-	  if (dot(disp1-dispCompare,disp1-dispCompare)<=1e-5){
-	    disp1Found=true;
-	    HistogramDisp(counter3)=HistogramDisp(counter3)+1.0;
+    }
+    int n =FixedLoc.size();
+    F77_LSAPR (&n,DistTable.data(),Perm.data());
+    if (numEmptySites==2){
+      int vacancy1=Perm(0)-1;
+      int vacancy2=Perm(1)-1;
+      dVec disp1=FixedLoc(vacancy1)-FixedLoc(vacancy2);
+      dVec disp2=FixedLoc(vacancy2)-FixedLoc(vacancy1);
+      PathData.Path.PutInBox(disp1);
+      PathData.Path.PutInBox(disp2);
+      double dist=sqrt(dot(disp1,disp1));
+      if (dist<Grid.End){
+	int index=Grid.ReverseMap(dist);
+	Histogram(index)++;
+      }
+      bool disp1Found=false;
+      bool disp2Found=false;
+      
+      for (int counter3=0;counter3<FixedLoc.size();counter3++){
+	dVec dispCompare=FixedLoc(counter3)-FixedLoc(0);
+	PathData.Path.PutInBox(dispCompare);
+	if (dot(disp1-dispCompare,disp1-dispCompare)<=1e-5){
+	  disp1Found=true;
+	  HistogramDisp(counter3)=HistogramDisp(counter3)+1.0;
 	  }
-	  if (dot(disp2-dispCompare,disp2-dispCompare)<=1e-5){
+	if (dot(disp2-dispCompare,disp2-dispCompare)<=1e-5){
 	  HistogramDisp(counter3)=HistogramDisp(counter3)+1.0;
 	  disp2Found=true;
-	  }
-	  
 	}
-// 	if (!disp1Found)
-// 	  cerr<<"Disp 1 not found: "<<disp1<<" "<<disp2<<" "
-// 	      <<vacancy1<<" "<<vacancy2
-// 	      <<PathData.Path(slice,vacancy1)<<" "
-// 	    <<PathData.Path(slice,vacancy2)<<endl;
-// 	if (!disp2Found)
+	
+      }
+      // 	if (!disp1Found)
+      // 	  cerr<<"Disp 1 not found: "<<disp1<<" "<<disp2<<" "
+      // 	      <<vacancy1<<" "<<vacancy2
+      // 	      <<PathData.Path(slice,vacancy1)<<" "
+      // 	    <<PathData.Path(slice,vacancy2)<<endl;
+      // 	if (!disp2Found)
 // 	  cerr<<"Disp 2 not found: "<<disp2<<" "<<disp1<<" "
 // 	      <<vacancy1<<" "<<vacancy2
 // 	      <<PathData.Path(slice,vacancy1)<<" "
