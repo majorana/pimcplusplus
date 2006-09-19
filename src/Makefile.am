@@ -6,16 +6,20 @@ endif
 #QMCPACK_HOME = $(QMCPACK_ROOT)/build
 
 SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
-bin_PROGRAMS = pimc++ FreeParticles
+bin_PROGRAMS = pimc++ FreeParticles VacancyLoc vmc
 
 
-AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) $(BOOST_LIB)
+AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) 
+
 
 SHARED_SOURCES =          \
+    det_calc_uekt.h       \
+    det_calc_uekt.c       \
     Common.h              \
     EventClass.h          \
     EventClass.cc         \
     InitPaths.cc          \
+    JosephsonJunctionHelper.cc \
     GridClass.h           \
     GridClass.cc          \
     LoopClass.cc          \
@@ -28,14 +32,14 @@ SHARED_SOURCES =          \
     PathClass.h           \
     PathDataClass.cc      \
     PathDataClass.h       \
-		QMCWrapper.cc         \
-		QMCWrapper.h          \
+    QMCWrapper.cc         \
+    QMCWrapper.h          \
     RunInfoClass.h        \
     SpeciesClass.cc       \
     SpeciesClass.h        \
-		WormHelper.cc         \
+    WormHelper.cc         \
     WriteData.h           \
-    WriteData.cc
+    WriteData.cc          
 
 pimc___SOURCES =          \
     $(SHARED_SOURCES)     \
@@ -43,6 +47,14 @@ pimc___SOURCES =          \
 
 FreeParticles_SOURCES =  FreeParticles.cc
 FreeParticles_LDADD   = $(COMMON_LIBS)
+
+VacancyLoc_SOURCES = \
+                      Observables/lsapr.f           \
+                      VacancyLoc.cc  
+VacancyLoc_LDADD = $(COMMON_LIBS)
+
+vmc_SOURCES = vmc.cc 
+vmc_LDADD = $(COMMON_LIBS)
 
 #INCLUDES = -I$(QMCPACK_HOME)/src -I$(QMCPACK_ROOT)/src 
 
