@@ -26,7 +26,9 @@ PressureClass::KineticPressure()
   for (int ptcl=0; ptcl<Path.NumParticles(); ptcl++){
     int species=Path.ParticleSpeciesNum(ptcl);
     double lambda = Path.Species(species).lambda;
-    if (lambda != 0.0){
+    //    cerr<<"Lambda outside: "<<lambda<<endl;
+    if (abs(lambda-0.0)>1e-10){
+      //      cerr<<"Lambda inside: "<<lambda<<endl;
       P += 3.0*(Path.NumTimeSlices()-1);
       KineticPressureVec+= (Path.NumTimeSlices()-1);
       double TwoLambdaTauInv=1.0/(2.0*Path.Species(species).lambda*Path.tau);
