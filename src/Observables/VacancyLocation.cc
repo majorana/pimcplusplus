@@ -112,14 +112,18 @@ F77_LSAPR (int *n,double* c, int *perm);
 void VacancyLocClass::Accumulate()
 {
   TimesCalled++;
-  if (TimesCalled % DumpFreq==0)
-    WriteBlock();
+//   if (TimesCalled % DumpFreq==0)
+//     WriteBlock();
+
+//   if ((TimesCalled % Freq)!=0){
+//     return;
+//   }
 
   if ((TimesCalled % Freq)!=0){
     return;
   }
-
-
+  PathData.MoveJoin(PathData.NumTimeSlices()-1);
+ 
     Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
     DistTable.resize(FixedLoc.size(), FixedLoc.size());
     Array<int,1> Perm;
@@ -232,8 +236,8 @@ void VacancyLocClass::Read(IOSectionClass &in)
   HistogramDisp=0.0;
   Array<double,2> positions;
   assert(in.ReadVar("LocationsToCompare",positions));
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
+  assert(in.ReadVar("Frequency",Freq));
+  //  assert(in.ReadVar("dumpFreq",DumpFreq));
 
   ///Verify you used the right number of points to compare against
   assert(positions.extent(0)==FixedLoc.size());
