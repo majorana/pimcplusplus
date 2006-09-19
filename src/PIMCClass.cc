@@ -276,6 +276,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new PrintMoveClass(PathData, OutFile);
     else if (moveType=="BisectionBlock")
       move = new BisectionBlockClass(PathData,OutFile);
+    else if (moveType=="SwapMove")
+      move = new SwapMoveClass(PathData,OutFile);
     else if (moveType=="CorrelatedBisectionBlock")
       move = new CorrelatedBisectionBlockClass(PathData,OutFile);
     else if (moveType=="CouplingMove")
