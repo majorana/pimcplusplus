@@ -148,12 +148,38 @@ void PairCorrelationClass::Print()
 /// interested in.
 void PairCorrelationClass::Accumulate()
 {
-
+   
   SpeciesClass &species1=PathData.Path.Species(Species1);
   SpeciesClass &species2=PathData.Path.Species(Species2);
 
-  TotalCounts++;
-  if (Species1==Species2) {
+//     if (!PathData.Path.NowOpen){
+//       int numP=0;
+//       for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
+// 	if (PathData.Path.IsFull(ptcl)){
+// 	  numP++;
+// 	}
+//       Histogram(numP)=Histogram(numP)+1;
+      
+      
+      
+//       TotalCounts++;
+    
+//     if (TotalCounts!=0){
+//       cerr<<"OBSERVE: ";
+//       for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+// 	cerr<<Histogram(ptcl)/(double)TotalCounts<<" ";
+//       }
+//       cerr<<endl;
+//       cerr<<"OBS Perm: "<<PathData.Path.Permutation(0)<<" "
+// 	  <<PathData.Path.Permutation(1)<<" "
+// 	  <<PathData.Path.Permutation(2)<<" "
+// 	  <<numP<<endl;
+      
+//     }
+//     }
+//     return;
+    TotalCounts++;
+    if (Species1==Species2) {
     /// Note:  we make sure we don't count that last times slice
     /// we have.  This prevents double counting "shared" slices.
     for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) 
