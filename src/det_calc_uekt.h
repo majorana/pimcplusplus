@@ -14,7 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#ifdef ORDER_N_FERMIONS
+// #ifdef ORDER_N_FERMIONS
+
 
 #ifndef _DET_CALC_UEKT_H_
 #define _DET_CALC_UEKT_H_
@@ -48,4 +49,4 @@ struct drc_uekt_vanilla_parms{
 
 
 #endif
-#endif
+// #endif

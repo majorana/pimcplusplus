@@ -1,4 +1,4 @@
-#ifdef ORDER_N_FERMIONS
+//#ifdef ORDER_N_FERMIONS
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -49,20 +49,35 @@ int drc_uekt_templates_style_fcall(double *alpha, double* x, double *beta, doubl
 
 int testme()
 {
-
+/* Allocate Space */
+  
   return 2;
 }
+  
 
 void det_ratio_calculator_uekt_symmetric_vanilla_value(int (*func)(double*,double*,int,void*),
 				       void * data, int N, double * u, int col_id, 
 				      double die_roll, double* det_ratio,  void *params){
 
-  /* Allocate Space */
-  double *mv1=(double*)calloc(N,sizeof(double));
-  double *mv2=(double*)calloc(N,sizeof(double));
-  double *ekt=(double*)calloc(N,sizeof(double));
-  //  double *work=(double*)malloc(4*N*sizeof(double));
-  double *work=(double*)calloc(4*N,sizeof(double));
+  static int firstTime=0;
+  static double *mv1;
+  static double *mv2;
+  static double *ekt;
+  static double *work;
+  if (firstTime==0){
+    mv1=(double*)calloc(N,sizeof(double));
+    mv2=(double*)calloc(N,sizeof(double));
+    ekt=(double*)calloc(N,sizeof(double));
+    //  double *work=(double*)malloc(4*N*sizeof(double));
+    work=(double*)calloc(4*N,sizeof(double));
+    firstTime=1;
+  }
+/*   /\* Allocate Space *\/ */
+/*   double *mv1=(double*)calloc(N,sizeof(double)); */
+/*   double *mv2=(double*)calloc(N,sizeof(double)); */
+/*   double *ekt=(double*)calloc(N,sizeof(double)); */
+/*   //  double *work=(double*)malloc(4*N*sizeof(double)); */
+/*   double *work=(double*)calloc(4*N,sizeof(double)); */
   double lambda[2];
   double tol;
   int iters[2];
@@ -74,11 +89,11 @@ void det_ratio_calculator_uekt_symmetric_vanilla_value(int (*func)(double*,doubl
   CDATA.matrix_parameters=data;
   iters[0]=OPTS->max_its;iters[1]=OPTS->max_its;
 
-  int counter;
-/*   for (counter=0;counter<4*N;counter++){ */
+   int counter;
+  // for (counter=0;counter<4*N;counter++){ 
 /*     printf("AAA: %6.4e\n",work[counter]); */
-/*     //    work[counter]=0.0; */
-/*   } */
+  //  work[counter]=0.0; 
+  //  } 
   for (counter=0;counter<N;counter++){ 
     mv1[counter]=0.0;
     mv2[counter]=0.0;
@@ -94,7 +109,7 @@ void det_ratio_calculator_uekt_symmetric_vanilla_value(int (*func)(double*,doubl
   cg_(&N,ekt,mv2,work,&N,&(iters[1]),&tol,(int(*)())drc_uekt_templates_style_fcall,(int(*)())drc_uekt_identity_preconditioner,&info);
   if(info<0) fprintf(stderr,"Error: CG Failed with Error Code %d\n",info);
   OPTS->its_used=iters[0]+iters[1];
-  //  printf("opts used is %i\n",OPTS->its_used);
+    printf("opts used is %i\n",OPTS->its_used);
   /* Calculate the lambdas (eigenvalues) */
   lambda[0]=ddot_(&N,ekt,&one,mv1,&one);
   lambda[1]=lambda[0] - ddot_(&N,ekt,&one,mv2,&one) * ddot_(&N,u,&one,mv1,&one)  / (1+lambda[0]);
@@ -103,10 +118,10 @@ void det_ratio_calculator_uekt_symmetric_vanilla_value(int (*func)(double*,doubl
   (*det_ratio)=(1.0+lambda[0])*(1.0+lambda[1]);
   ///////  printf("%6.4e %6.4e %6.4e\n",lambda[0],lambda[1],*det_ratio);
   //  rv=(*det_ratio) > die_roll;
-  ///////  printf("-- det=%6.4e die=%6.4e\n",*det_ratio,die_roll);
+  printf("-- det=%6.4e die=%6.4e\n",*det_ratio,die_roll);
   
   /* Cleanup */
-  free(mv1);free(mv2);free(ekt);free(work);
+  //////  free(mv1);free(mv2);free(ekt);free(work);
   //  return (*det_Ratio);
 }/* end det_ratio_calculator_uekt_symmetric_vanilla*/
 
@@ -202,4 +217,4 @@ void det_ratio_calculator_uekt_symmetric_vanilla_value(int (*func)(double*,doubl
 // }/* end det_ratio_calculator_uekt_symmetric_vanilla*/
 
 
-#endif
+//#endif
