@@ -31,7 +31,7 @@ Section (System)
   // Array<double,1> Box(3) = [17.726, 17.726, 17.726]; // rho = 470 kg/m^3
   Array<double,1> Box(3) = [16.426, 16.426, 16.426]; // rho = 930 kg/m^3
 
-  double kCutoff = 1.2;
+  double kCutoff = 2.0;
   Section (Particles)
   {
     Section (Species)
@@ -111,7 +111,7 @@ Section (Action)
     bool UseMDExtrap = true;
     bool UseLDA = true;
     bool UseSubspaceRotation = true;
-    double kCut = 4.5;
+    double kCut = 5.0;
     int SmearOrder = 2;
     double SmearWidth = 0.015;
 //    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
@@ -233,7 +233,7 @@ Section (Action)
 Section (Observables)
 {
   string OutFileBase=
-    "~/Runs/NaRuns/Langevin/LDA/FixedGrad/Na_16_rho930_T800_64kvecs_LDA_FixedIons";
+    "~/Runs/NaRuns/Langevin/LDA/FixedGrad/Na_16_rho930_T800_64kvecs_LDA_FixedIons_B";
   int FileStart = 0;
   Section (Observable) {
     string Type = "Energy";
