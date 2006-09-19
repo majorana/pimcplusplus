@@ -35,10 +35,10 @@ WindingNumberClass::Accumulate()
   totalDisp = 0.0;
 
   int numLinks=PathData.Path.NumTimeSlices()-1;
-  for (int si=0; si<SpeciesList.size(); si++) {
-    SpeciesClass &species = PathData.Path.Species(SpeciesList(si));
-    int first = species.FirstPtcl;
-    int last  = species.LastPtcl;
+  //  for (int si=0; si<SpeciesList.size(); si++) {
+  //    SpeciesClass &species = PathData.Path.Species(SpeciesList(si));
+  //    int first = species.FirstPtcl;
+  //    int last  = species.LastPtcl;
     for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
       for (int slice=0;slice<numLinks;slice++) {
 	dVec disp;
@@ -46,7 +46,7 @@ WindingNumberClass::Accumulate()
 	totalDisp += disp;
       }
     }
-  }
+    //  }
   for (int i=0; i<NDIM; i++)
     totalDisp[i] *= PathData.Path.GetBoxInv()[i];
 
@@ -82,6 +82,7 @@ WindingNumberClass::CalcWN2()
   }
 
   Array<dVec,1> sendVec(WNVec.size()), recvVec(WNVec.size());
+  recvVec=0.0;
   for (int i=0; i<WNVec.size(); i++)
     sendVec(i) = WNVec[i];
   PathData.Path.Communicator.Sum(sendVec, recvVec);
