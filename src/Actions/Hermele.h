@@ -47,12 +47,12 @@ public:
   double omega_c2;
 
   HermeleClass (PathDataClass &pathData);
-  ~HermeleClass()
-  {
-    fftw_destroy_plan(p);
-    fftw_free(inArray);
-    fftw_free(out);
-  }
+//   ~HermeleClass()
+//   {
+//     fftw_destroy_plan(p);
+//     fftw_free(inArray);
+//     fftw_free(out);
+//   }
 
 };
 
