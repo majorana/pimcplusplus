@@ -25,6 +25,11 @@ double NoPermuteStageClass::Sample (int &slice1, int &slice2,
 bool NoPermuteStageClass::Attempt (int &slice1, int &slice2,
 				   Array<int,1> &activeParticles, double &prevActionChange)
 {
+  //  OldAcceptProb=1.0;
+  //  AcceptProb=1.0;
+  //  NewSample=1.0;
+  //  OldSample=1.0;
+
   // If I'm being called the first time in the move, choose a particle
   if (activeParticles(0) == -1) {
     activeParticles.resize (1);
