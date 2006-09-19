@@ -23,6 +23,7 @@ libobservables_la_SOURCES  =     \
     lsapr.f                      \
     JosephsonPathDump.h          \
     JosephsonPathDump.cc         \
+    lsapr.f                      \
     ObservableBase.cc            \
     ObservableBase.h             \
     ObservableClass.h            \
@@ -48,6 +49,10 @@ libobservables_la_SOURCES  =     \
     Phik.cc                      \
     PlaneDensity.h               \
     PlaneDensity.cc              \
+    SpecificHeat.h               \
+    SpecificHeat.cc              \
+    SpecificHeatA.h               \
+    SpecificHeatA.cc              \
     SuperfluidFraction.h         \
     SuperfluidFraction.cc        \
     SuperfluidFractionPerLayer.cc \
