@@ -41,6 +41,15 @@ class IOSectionClass:
 import os
 class IOSectionClassList:
     IOlist = []
+    def OpenFilesList(this,filesList):
+        for name in  filesList:
+#	    print name
+            if (os.access(name,os.F_OK)):	    	
+                infile = IOSectionClass()
+                success = infile.OpenFile (name)
+                if (success==1) :
+                    this.IOlist.append(infile)
+                    print name
     def OpenFiles(this, baseName):
         proc=0
         done = 0
