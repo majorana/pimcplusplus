@@ -102,10 +102,13 @@ DisplaceMoveClass::MakeMove ()
       }
     }
   }
-  
+  if (numLeft==0) //if there are no non-permuted particles, abort move
+    return;
   // First, choose particle to move
   for (int i=0; i<NumParticlesToMove; i++) {
     int index = PathData.Path.Random.CommonInt(numLeft);
+    //    cerr<<"Index is "<<index<<endl;
+    //    cerr<<"numLeft is  "<<numLeft<<endl;
     vector<int>::iterator iter = ptclList.begin();
     ActiveParticles(i) = ptclList[index];
     for (int j=0; j<index; j++)
