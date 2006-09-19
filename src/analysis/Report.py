@@ -17,6 +17,7 @@ from PlaneDensity import *
 from Pressure import *
 from Langevin import *
 from TimeAnalysis import *
+from Conductivity import *
 
 basename = sys.argv[1]
 infiles = IOSectionClassList()
@@ -112,6 +113,8 @@ for counter in range(0,numSections):
      elif myName=="PhiK":
          ProcessJosephson(infiles,summaryDoc,detailedDoc,\
                           StartCut,tau,numTimeSlices)
+#     elif myName=="Conductivity":
+#         ProcessConductivity(infiles,summaryDoc,detailedDoc, StartCut)
 #     elif myName=="Coupling":
 #          ProcessCoupling(infiles,summaryDoc,detailedDoc,StartCut)
      else:
