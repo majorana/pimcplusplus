@@ -35,7 +35,9 @@ def ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut):
         numProcs=len(data)
         baseName=varName+"Pressure"
         scalarVarTable.body[0][row]=varName
-        scalarTracePageHTMLList.append(BuildScalarTracePage(data,baseName,varName,StartCut))
+        if (numProcs < 50):
+            scalarTracePageHTMLList.append(BuildScalarTracePage\
+                                           (data,baseName,varName,StartCut))
         for proc in range(0,numProcs):
             (mean,var,error,kappa)=stats.Stats(data[proc][StartCut:-1])
             meanList.append(mean)
@@ -45,7 +47,7 @@ def ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut):
             (meanstr, errorstr) = stats.MeanErrorString (mean, error)
             scalarVarTable.body[proc+1][0]=repr(proc)
             scalarVarTable.body[proc+1][row]=meanstr + "+/-" + errorstr
-        (totalMean,totalError)=stats.WeightedAvg(meanList,errorList)
+        (totalMean,totalError)=stats.UnweightedAvg(meanList,errorList)
         totalVar=sum(varList)/len(varList)
         totalKappa=sum(kappaList)/len(kappaList)
         (totalMeanStr,totalErrorStr)=stats.MeanErrorString(totalMean,totalError)
@@ -59,4 +61,5 @@ def ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut):
         myFrame.height="375"
         detailedDoc.append(myFrame)
     detailedDoc.append(summaryTable)
+    detailedDoc.append(scalarVarTable)
     return infiles,summaryDoc,detailedDoc
