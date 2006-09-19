@@ -40,18 +40,32 @@ void MultiStageClass::MakeMove()
   bool toAccept=true;
   list<StageClass*>::iterator stageIter=Stages.begin();
   double prevActionChange=0.0;
-
+  //  NewMoveProb=1.0;
+  //  OldMoveProb=1.0;
+  cerr<<"In "<<endl;
   while (stageIter!=Stages.end() && toAccept){
     toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 				     ActiveParticles,prevActionChange);
+
+//     if (toAccept){
+//       NewMoveProb*=(*stageIter)->NewSample*(*stageIter)->AcceptProb;
+//       OldMoveProb*=(*stageIter)->OldSample*(*stageIter)->OldAcceptProb;
+//     }
+//     else {
+//       NewMoveProb*=(*stageIter)->NewSample*(1.0-((*stageIter)->AcceptProb));
+//       OldMoveProb*=(*stageIter)->OldSample*(1.0-((*stageIter)->OldAcceptProb));
+//     }
+//     cerr<<(*stageIter)->OldSample<<" "<<(*stageIter)->OldAcceptProb<<endl;
+
     stageIter++;
   }
-
+  //  cerr<<"Out "<<endl;
   if (toAccept)
     Accept();
   else 
     Reject();
   //MoveClass::MakeMove();
+  //  cerr<<NewMoveProb<<" "<<OldMoveProb<<endl;
 }
 
 
