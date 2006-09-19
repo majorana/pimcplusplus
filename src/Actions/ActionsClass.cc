@@ -33,8 +33,10 @@ ActionsClass::Read(IOSectionClass &in)
   Kinetic.SetNumImages (NumImages);
   KineticSphere.SetNumImages(NumImages);
   Mu.Read(in);
-  //  VariationalPI.Read(in);
+#ifdef ORDER_N_FERMIONS
+  VariationalPI.Read(in);
   TruncatedInverse.Read(in);
+#endif
   //  VariationalPI.Read(in);
   perr << "MaxLevels = " << MaxLevels << endl;
   bool checkJosephson=false;
@@ -237,12 +239,14 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 	new GroundStateNodalActionClass 
 	(PathData, groundState, groundState.IonSpeciesNum);
     }
-//     else if (type == "VARIATIONAL") {
-//       NodalActions(0) = 
-// 	&VariationalPI;
-//     }
+     else if (type == "VARIATIONAL") {
+	 NodalActions.resizeAndPreserve(2);
+       NodalActions(0) = 
+ 	&VariationalPI;
+     }
     else if (type == "TRUNCATED") {
-      NodalActions(0) = 
+	 NodalActions.resizeAndPreserve(2);
+      NodalActions(1) = 
 	&TruncatedInverse;
     }
     else if (type == "FIXEDPHASE") {
