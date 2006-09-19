@@ -114,7 +114,16 @@ WormGrowMoveClass::MakeMove()
   else 
     Reject();
 
-  
+  PathData.WormInfo(headSlice, headPtcl,
+		    tailSlice, tailPtcl,
+		    numEmpty, wormSize);
+  if (wormSize==PathData.Path.NumTimeSlices()){
+    cerr<<"CORRECT Worm SIZE!"<<endl;
+    cerr<<"After Worm size is "<<wormSize<<" "<<numEmpty<<" "
+	<<headSlice<<" "<<headPtcl<<" "
+	<<tailSlice<<" "<<tailPtcl<<" "<<endl;
+  }
+
   cerr<<"Move done"<<endl;
 
   

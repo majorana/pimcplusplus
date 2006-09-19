@@ -59,7 +59,7 @@ void WormCloseMoveClass::Reject()
 void 
 WormCloseMoveClass::MakeMove()
 {
-#if 1==2
+#if 1==1
 
   cerr<<"Starting WormCloseClass"<<endl;
   Slice1=0;
