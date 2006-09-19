@@ -51,11 +51,18 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
   double newAction =StageAction(slice1,slice2,activeParticles);
   double currActionChange=newAction-oldAction;
   double logAcceptProb=log(sampleRatio)-currActionChange+prevActionChange;
+  //  AcceptProb=exp(logAcceptProb);
+  //  OldAcceptProb=exp(log(1/sampleRatio)+currActionChange);
+  //  if (AcceptProb>1.0)
+  //    AcceptProb=1.0;
+  //  if (OldAcceptProb>1.0)
+  //    OldAcceptProb=1.0;
   bool toAccept = logAcceptProb>=log(PathData.Path.Random.Local()); /// Accept condition
   if (toAccept){
     NumAccepted++;
-	}
+  }
   NumAttempted++;
+  //  cerr<<"Curr action change is "<<currActionChange<<endl;
   prevActionChange=currActionChange;
 
   return toAccept;

@@ -38,7 +38,12 @@ public:
   int NumAccepted, NumAttempted;
   int BisectionLevel;
   list<ActionBaseClass*> Actions;
-
+  ///Stores the transition probability that you have made this move. 
+  ///This is not implemented in all stages.
+  double NewSample;
+  double OldSample;
+  double AcceptProb;
+  double OldAcceptProb;
   ///The first stage will set the slices and activeParticles
   ///This returns transition probability ratio T(new->old)/T(old->new)
   virtual double Sample (int &slice1,int &slice2,
