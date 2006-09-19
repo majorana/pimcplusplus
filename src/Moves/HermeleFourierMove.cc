@@ -4,8 +4,6 @@ double HermeleFourierStageClass::Sample (int &slice1, int &slice2,
 				   Array<int,1> &activeParticles)
 {
 #if 1==2
-
-
   double T=1.0/(PathData.Path.tau*(PathData.Path.NumTimeSlices()-1));
   PathData.Path.Phi2Omega();
   
