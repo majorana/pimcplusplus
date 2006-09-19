@@ -138,9 +138,152 @@ void TestCoulomb()
 }
 
 
+void CoulombError()
+{
+  LPQHI_BasisClass basis;
+  TinyVector<double,3> box;
+  //  box = 10.0, 10.0, 10.0;
+  box = 5.0, 5.0, 5.0;
+  basis.SetBox (box);
+  double Omega = box[0]*box[1]*box[2];
+  basis.SetNumKnots(20);
+  double rc = 0.5*min(box[0],min(box[1],box[2]));
+  basis.Set_rc(rc);
+
+  FILE *fout = fopen ("/home/esler/Thesis/Ewald/chi.dat", "w");
+  assert (fout != NULL);
+  for (double kcut=0.6; kcut <7; kcut += 0.2) {
+    OptimizedBreakupClass breakup(basis);
+    breakup.SetkVecs (kcut, 25.0, 1000.0);
+    double delta = basis.GetDelta();
+
+    Array<double,1> Xk(breakup.kpoints.size());
+    for (int i=0; i<breakup.kpoints.size(); i++) {
+      double k = breakup.kpoints(i)[0];
+      double k0 = 2.0*M_PI;
+      Xk(i) = 4.0*M_PI/(Omega*(k*k)) * cos(k*basis.Get_rc());
+    }
+    int N = basis.NumElements();
+    Array<double,1> t(N);
+    Array<bool,1> adjust(N);
+    adjust = true;
+    t = 0.0;
+
+    double chi2 = breakup.DoBreakup(Xk, t, adjust);
+    fprintf (fout, "%1.16e %1.16e\n", rc*kcut, chi2);
+    fflush (fout);
+//     cerr << "chi-squared = " << chi2 << endl;
+//     cerr << "t = " << t << endl;
+    
+//     FILE *fout = fopen ("Vlong.dat", "w");
+//     for (double r=0.0; r<10.0; r+=0.001) {
+//       double v = 0.0;
+//       for (int n=0; n<t.rows(); n++)
+// 	v += t(n)*basis.h(n,r);
+//       fprintf (fout, "%1.12e %1.12e\n", r, v);
+
+//     }
+//     fclose(fout);
+  }
+  fclose (fout);
+}
+
+double 
+GetChi2 (double kc, double L)
+{
+  double rc = 0.5 * L;
+  TinyVector<double,3> box (L,L,L);
+  LPQHI_BasisClass basis;
+  double Omega = box[0]*box[1]*box[2];
+  basis.SetNumKnots(20);
+  basis.Set_rc(rc);
+  
+  OptimizedBreakupClass breakup(basis);
+  breakup.SetkVecs (kc, 25.0, 1000.0);
+  double delta = basis.GetDelta();
+  
+  Array<double,1> Xk(breakup.kpoints.size());
+  for (int i=0; i<breakup.kpoints.size(); i++) {
+    double k = breakup.kpoints(i)[0];
+    double k0 = 2.0*M_PI;
+    Xk(i) = 4.0*M_PI/(Omega*(k*k)) * cos(k*basis.Get_rc());
+  }
+  int N = basis.NumElements();
+  Array<double,1> t(N);
+  Array<bool,1> adjust(N);
+  adjust = true;
+  t = 0.0;
+  
+  double chi2 = breakup.DoBreakup(Xk, t, adjust);
+  return chi2;
+}
+
+void CoulombError3()
+{
+  FILE *fout = fopen ("/home/esler/Thesis/Ewald/chi2.dat", "w");
+  for (double kr=
+
+
+void CoulombError2()
+{
+
+  FILE *fout = fopen ("/home/esler/Thesis/Ewald/chi2.dat", "w");
+  double kc = 3.48;
+  assert (fout != NULL);
+  for (double L=0.2; L <10.0; L += 0.5) {
+    LPQHI_BasisClass basis;
+    TinyVector<double,3> box;
+    //  box = 10.0, 10.0, 10.0;
+    box = L, L, L;
+    basis.SetBox (box);
+    double Omega = box[0]*box[1]*box[2];
+    basis.SetNumKnots(20);
+    double rc = 0.5*min(box[0],min(box[1],box[2]));
+    basis.Set_rc(rc);
+
+    OptimizedBreakupClass breakup(basis);
+    breakup.SetkVecs (kc, 25.0, 1000.0);
+    double delta = basis.GetDelta();
+
+    Array<double,1> Xk(breakup.kpoints.size());
+    for (int i=0; i<breakup.kpoints.size(); i++) {
+      double k = breakup.kpoints(i)[0];
+      double k0 = 2.0*M_PI;
+      Xk(i) = 4.0*M_PI/(Omega*(k*k)) * cos(k*basis.Get_rc());
+    }
+    int N = basis.NumElements();
+    Array<double,1> t(N);
+    Array<bool,1> adjust(N);
+    adjust = true;
+    t = 0.0;
+
+    double chi2 = breakup.DoBreakup(Xk, t, adjust);
+    double chi = sqrt(chi2);
+    fprintf (fout, "%1.16e %1.16e\n", rc*kc, log(L*chi));
+    fflush (fout);
+//     cerr << "chi-squared = " << chi2 << endl;
+//     cerr << "t = " << t << endl;
+    
+//     FILE *fout = fopen ("Vlong.dat", "w");
+//     for (double r=0.0; r<10.0; r+=0.001) {
+//       double v = 0.0;
+//       for (int n=0; n<t.rows(); n++)
+// 	v += t(n)*basis.h(n,r);
+//       fprintf (fout, "%1.12e %1.12e\n", r, v);
+
+//     }
+//     fclose(fout);
+  }
+  fclose (fout);
+}
+
+
+
+
 main()
 {
-  TestBasisDeriv();
+  //  TestBasisDeriv();
 //   TestLPQHI();
 //   TestCoulomb();
+  CoulombError();
 }
