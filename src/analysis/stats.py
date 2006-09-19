@@ -1,7 +1,7 @@
 from numarray import *
 
 
-def UnweightedAverage(meanList,errorList):
+def UnweightedAvg(meanList,errorList):
     mean=sum(meanList)/(len(meanList)+0.0)
     error=0.0;
     for e in errorList:
