@@ -209,6 +209,8 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
   //  if (activeParticles.size()>1)
   //    cerr<<"Value is "<<BisectionLevel<<": "<<exp(-logSampleProb+logOldSampleProb)<<endl;
   slice2=oldSlice2;
+  //  NewSample=exp(logSampleProb);
+  //  OldSample=exp(logOldSampleProb);
   return exp(-logSampleProb+logOldSampleProb);
   //return (exp (-newSample + oldSample));
 }
