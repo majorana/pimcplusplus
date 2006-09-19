@@ -60,9 +60,17 @@ ActionsClass::Read(IOSectionClass &in)
 cerr << " going to read pair actions" << endl;
   Array<string,1> PAFiles;
   assert (in.ReadVar ("PairActionFiles", PAFiles));
+  Array<string,1> SpecificHeatPAFiles;
+  bool readSpecificHeatFiles=false;
+  if (in.ReadVar("SpecificHeatPAFiles",SpecificHeatPAFiles))
+    readSpecificHeatFiles=true;
+  
+
   int numPairActions = PAFiles.size();
 cerr << "Looking for " << numPairActions << endl;
   PairArray.resize(numPairActions);
+  if (readSpecificHeatFiles)
+    SpecificHeatPairArray.resize(SpecificHeatPAFiles.size());
   PairMatrix.resize(Path.NumSpecies(),Path.NumSpecies());
   // Initialize to a nonsense value so we can later check in the table
   // element was filled in.
@@ -105,9 +113,23 @@ cerr << i << ": reading " << name << endl;
 	   << PairArray(i)->Particle1.Name << ", "
  	   << PairArray(i)->Particle1.Name << ") not used.\n";
     }
+
     PAIO.CloseFile();
   }
-cerr << " finished with pair actions" << endl;
+
+  if (readSpecificHeatFiles){
+    cerr<<"I READ SPECIFIC HEAT FILES"<<endl;
+    assert((in.ReadVar("TauValues",TauValues)));
+    assert(TauValues.size()==SpecificHeatPAFiles.size());
+    for (int i=0; i<SpecificHeatPAFiles.size() ; i++) {
+      // Allow for tilde-expansion in these files
+      string name = ExpandFileName(SpecificHeatPAFiles(i));
+      assert(PAIO.OpenFile (name));
+      SpecificHeatPairArray(i) = ReadPAFit (PAIO, TauValues(i), MaxLevels);	
+      PAIO.CloseFile();
+    }
+  }
+
    
   // Now check to make sure all PairActions that we need are defined.
   for (int species1=0; species1<Path.NumSpecies(); species1++)
@@ -136,7 +158,7 @@ cerr << " finished with pair actions" << endl;
 //       LongRangeRPA.Init(in);
 //   }
 
-  // Create nodal action objects
+//  Create nodal action objects
 //   NodalActions.resize(PathData.Path.NumSpecies());
 //   for (int spIndex=0; spIndex<PathData.Path.NumSpecies(); spIndex++) {
 //     SpeciesClass &species = PathData.Path.Species(spIndex);
