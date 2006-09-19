@@ -19,7 +19,26 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
     scalarTracePageHTMLList=[]
     summaryTable=BuildTable(len(varList)+1,5)
     summaryTable.body[0]=["Energy","Mean","Error","Variance","Kappa"]
-    row = 0
+
+    
+    Etable = 1.0*zeros((numProcs, 2*len(varList)))
+    col=0
+    for var in varList:
+        data = infiles.ReadVar(var)
+        for proc in range(0,numProcs):
+            (mean,var, error,kappa) = stats.Stats(data[proc][StartCut:-1])
+            Etable[proc,2*col]   = mean
+            Etable[proc,2*col+1] = error
+        col = col + 1
+    Efile = open ('Energies.dat', 'w')
+    for row in range(0, numProcs):
+        for col in range(0,2*len(varList)):
+            Efile.write ('%1.6f ' % Etable[row][col])
+        Efile.write ('\n')
+    Efile.close()
+            
+            
+    row = 0            
     for varCounter in varList:
         row = row + 1
         meanList=[]
@@ -29,7 +48,7 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
         data = infiles.ReadVar(varCounter)
         varName = infiles.GetVarName(varCounter)
         baseName=varName+"Energy"
-        if (len(data[0]) > 1):
+        if (len(data[0]) > 1 and numProcs<50):
             scalarTracePageHTMLList.append(BuildScalarTracePage(data,baseName,varName,StartCut))
         scalarVarTable.body[0][row]=varName
         for proc in range(0,numProcs):
@@ -41,7 +60,7 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
             (meanstr, errorstr) = stats.MeanErrorString (mean, error)
             scalarVarTable.body[proc+1][0]=repr(proc)
             scalarVarTable.body[proc+1][row]=meanstr + "+/-" + errorstr
-        (totalMean,totalError)=stats.UnweightedAverage(meanList,errorList)
+        (totalMean,totalError)=stats.UnweightedAvg(meanList,errorList)
         totalVar=sum(varList)/len(varList)
         totalKappa=sum(kappaList)/len(kappaList)
         (totalMeanStr,totalErrorStr)=stats.MeanErrorString(totalMean,totalError)
