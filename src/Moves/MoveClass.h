@@ -34,6 +34,7 @@
 #include "DisplaceMove.h"
 #include "OpenEndMove.h"
 #include "MoleculeMove.h"
+#include "SwapMove.h"
 #include "WaterMoveRing.h"
 #include "ClusterMove.h"
 #include "QMCTest.h"

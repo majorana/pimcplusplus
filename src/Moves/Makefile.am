@@ -88,6 +88,8 @@ libmoves_la_SOURCES  =           \
     RefSliceMove.h               \
     SpaceWarp.cc                 \
     SpaceWarp.h                  \
+    SwapMove.h                   \
+    SwapMove.cc                  \
     StructureRejectStage.cc      \
     StructureRejectStage.h       \
     StageClass.h                 \
