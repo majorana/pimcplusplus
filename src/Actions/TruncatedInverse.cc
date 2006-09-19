@@ -536,8 +536,8 @@ TruncatedInverseClass::BuildSmallDeterminantMatrix()
   Array<double,2> A11OldLarge = SmallDetMatrixOld(Range(0,SmallDetMatrixOld.extent(0)-1), Range(0,SmallDetMatrixOld.extent(0)-1));
   Array<double,2> A11NewLarge = SmallDetMatrix(Range(0,SmallDetMatrixOld.extent(0)-1), Range(0,SmallDetMatrixOld.extent(0)-1));
   
-
-  int A11size=25;
+  ///EDIT ME! BELOW HERE!
+  int A11size=30;
   Array<double,2> A11Old = SmallDetMatrixOld(Range(0,A11size), Range(0,A11size));
   Array<double,2> A11New = SmallDetMatrix(Range(0,A11size), Range(0,A11size));
   
@@ -548,48 +548,77 @@ TruncatedInverseClass::BuildSmallDeterminantMatrix()
   Array<double,2> A22New=  SmallDetMatrix(Range(A11size+1,determinantPtcl.size()),Range(A11size+1,determinantPtcl.size()));
   
 
+  ///Check size check is indicative of bad configurations
+  cerr<<"DET: "<<" "<<Determinant(SmallDetMatrix)/Determinant(SmallDetMatrixOld)<<" ";
+  for (int sizeCheck=25;sizeCheck<30;sizeCheck++){
+    Array<double,2> A11Newer=SmallDetMatrix(Range(0,sizeCheck), Range(0,sizeCheck));
+    Array<double,2> A11Older=SmallDetMatrixOld(Range(0,sizeCheck), Range(0,sizeCheck));
+    cerr<<Determinant(A11Newer)/Determinant(A11Older)<<" ";
+  }
+  
+    
+    
+  cerr<<endl;
 
+
+
+	 ///End of back configurations
   double oldDeterminant=Determinant(A11Old);
   double newDeterminant=Determinant(A11New);
 //  cerr<<"The truncated method with "<<A11size<<" particles included is "<<newDeterminant/oldDeterminant<<endl;
 //  cerr<<"The truncated method with all particles included is "<<Determinant(A11NewLarge)/Determinant(A11OldLarge)<<endl;
   cerr<<newDeterminant/oldDeterminant<<" ";
-  DeterminantList(0)=Determinant(A11NewLarge)/Determinant(A11OldLarge);
-  cerr<<Determinant(A11NewLarge)/Determinant(A11OldLarge)<<" ";
+  DeterminantList(0)=newDeterminant/oldDeterminant;
+////BBB  DeterminantList(0)=Determinant(A11NewLarge)/Determinant(A11OldLarge);
+////BBB  cerr<<Determinant(A11NewLarge)/Determinant(A11OldLarge)<<" ";
   int oldZero=0;
   int newZero=0;
-
-  cerr<<"Actual det is "<<Determinant(A11NewLarge)<<" "
-      <<Determinant(A11OldLarge)<<endl;
+  int totalElements=PathData.Path.NumParticles()*PathData.Path.NumParticles();
+  ///BBB  cerr<<"Actual det is "<<Determinant(A11NewLarge)<<" "
+  ///BBB      <<Determinant(A11OldLarge)<<endl;
   Array<double,2> TestDetNew;
   TestDetNew.resize(A11NewLarge.shape());
   Array<double,2> TestDetOld;
   TestDetOld.resize(A11OldLarge.shape());
 
 //  cerr<<A11NewLarge<<endl;
+  double prob=10.0;
+  double totAverage=0.0;
+  double numTimes=0.0;
+  int np=PathData.Path.NumParticles();
   for (int loop=0;loop<2;loop++){
 
-
+    double factor=2.0*(double)np;
       newZero=0;
       oldZero=0;
+      totalElements=PathData.Path.NumParticles()*PathData.Path.NumParticles();
       for (int counter=0;counter<A11OldLarge.extent(0);counter++)
 	  for (int counter2=0;counter2<A11OldLarge.extent(1);counter2++){
 	      TestDetNew(counter,counter2)=A11NewLarge(counter,counter2);
 	      TestDetOld(counter,counter2)=A11OldLarge(counter,counter2);
-	      if (A11OldLarge(counter,counter2)<0.99 && 
-		  A11NewLarge(counter,counter2)<0.99){
+	      //	      if (A11OldLarge(counter,counter2)<1.0/(factor*10.0) && 
+	      //		  A11NewLarge(counter,counter2)<1.0/(factor*10.0)){
+	      //	      if (A11OldLarge(counter,counter2)>1e-5 && 
+	      //		  A11NewLarge(counter,counter2)>1e-5){
+	      if (A11OldLarge(counter,counter2)<1.0/(factor*10.0) && 
+		  A11NewLarge(counter,counter2)<1.0/(factor*10.0)){
+
+
 		  double e1=A11OldLarge(counter,counter2);
 		  double e2=A11NewLarge(counter,counter2);
 		  
-		  if (PathData.Path.Random.Local()>1.0/PathData.Path.NumParticles()){
+		  if (PathData.Path.Random.Local()>factor*e1)
 		      TestDetOld(counter,counter2)=0.0;
-		      TestDetNew(counter,counter2)=0.0;
-		      oldZero++;
+		  else 
+		    TestDetOld(counter,counter2)=1.0/factor;
+		  if (PathData.Path.Random.Local()>factor*e2){
+		    TestDetNew(counter,counter2)=0.0;
+		    totalElements--;
+		    oldZero++;
 		  }
-		  else {
-		      TestDetOld(counter,counter2)=PathData.Path.NumParticles()*e1;
-		      TestDetNew(counter,counter2)=PathData.Path.NumParticles()*e2;
-		  }
+		  else 
+		    TestDetNew(counter,counter2)=1.0/factor;
+		  
 	      }
 	  }
 
@@ -624,15 +653,18 @@ TruncatedInverseClass::BuildSmallDeterminantMatrix()
 // 	  }
 //       }
 //  cerr<<Determinant(TestDet)<<" "<<PathData.Path.NumParticles()*PathData.Path.NumParticles()-newZero<<endl;
-  cerr<<Determinant(TestDetNew)<<" "<<Determinant(TestDetOld)<<" "
-      <<Determinant(TestDetNew)/Determinant(TestDetOld)<<" "<<endl;
+  totAverage=totAverage+Determinant(TestDetNew);      
+  numTimes=numTimes+1.0;
+  cerr<<"TOPRINTA: "<<Determinant(TestDetNew)<<" "<<Determinant(TestDetOld)<<" "
+      <<Determinant(TestDetNew)/Determinant(TestDetOld)<<" "<<totalElements<<" "<<totAverage/numTimes<<endl;
+  
 
   }
 
   // cerr<<500*500-oldZero<<" "<<500*500-newZero<<" "
-  cerr<<Determinant(A11NewLarge)<<" "<<Determinant(A11OldLarge)<<" "
-      <<Determinant(A11NewLarge)/Determinant(A11OldLarge)<<" ";
-	  
+  ////A  cerr<<Determinant(A11NewLarge)<<" "<<Determinant(A11OldLarge)<<" "
+  ////A      <<Determinant(A11NewLarge)/Determinant(A11OldLarge)<<" "<<totalElements<<endl;
+  
 
   
   SetMode(NEWMODE);
