@@ -17,12 +17,11 @@
 #include "Tether.h"
 #include "../PathDataClass.h"
 
-string 
+std::string 
 TetherClass::GetName()
 {
   return "Tether";
 }
-
 
 ///This has to be called after pathdata knows how many
 ///particles it has

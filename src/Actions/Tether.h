@@ -27,11 +27,11 @@ public:
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
   double d_dBeta (int slice1, int slice2, int level);
+  std::string GetName();
   TetherClass (PathDataClass &pathData);
   Array<dVec,1> TetheredSites;
   double TetherCutoff;
   int SpeciesNum;
-
 };
 
 
