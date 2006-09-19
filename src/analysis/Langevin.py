@@ -13,6 +13,9 @@ def ProcessLangevin (infiles, summaryDoc, detailedDoc, StartCut, beta):
     numSteps = len(KE)
     step = arange(0,len(KE))
     expectedKE = 1.5*numPtcls/beta * (step+1)/(step+1)
+    AvgKE = sum(KE)/len(KE)
+    Tratio = AvgKE/(1.5*numPtcls/beta)
+    print "Actual T/Target T = %1.5f" % (Tratio)
     baseName  = "LangevinKE"
     imageName = baseName + ".png"
     epsName   = baseName + ".eps"
