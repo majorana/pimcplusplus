@@ -25,22 +25,24 @@
 
 bool PIMCClass::Read(IOSectionClass &in)
 {
-	// tells whether to run or be a dummy
-	bool doPIMCRun = false;
+  // tells whether to run or be a dummy
+  bool doPIMCRun = false;
   // Read the parallelization strategy
+  
   PathData.Read (in);
   perr << "Finished PathData Read.\n";
-
-	// this is set to true in PathDataClass::Read
-	// when not built with qmcpack
-	if(PathData.IAmQMCManager){
-		doPIMCRun = true;
-  	// Read in the system information and allocate the path
-  	assert(in.OpenSection("System"));
-  	PathData.Path.Read(in);
-  	in.CloseSection();
-  	perr << "Finished Path read.\n";
-
+  
+  // this is set to true in PathDataClass::Read
+  // when not built with qmcpack
+  if(PathData.IAmQMCManager){
+    doPIMCRun = true;
+    // Read in the system information and allocate the path
+    assert(in.OpenSection("System"));
+    PathData.Path.Read(in);
+    in.CloseSection();
+    perr << "Finished Path read.\n";
+    
+    
 #ifdef USE_QMC
 		PathData.AssignPtclSetStrings();
 #endif
@@ -55,19 +57,30 @@ bool PIMCClass::Read(IOSectionClass &in)
   	in.CloseSection();
   	perr << "Finished Actions read.\n";
 
+
+
   	// Now actually initialize the paths
   	perr << "Before InitPaths.\n";
   	assert(in.OpenSection("System"));
   	PathData.Path.InitPaths(in);
-  	 PathData.Actions.VariationalPI.BuildDeterminantMatrix();
+
+
+
+
+	PathData.Actions.VariationalPI.BuildDeterminantMatrix();
+
+
   	in.CloseSection();
   	perr << "Done InitPaths.\n";
   	if (PathData.Path.UseCorrelatedSampling())
   	  PathData.Path.SetIonConfig(0);
+
+
   	
   	perr << "Initializing Actions caches.\n";
   	PathData.Actions.Init();
   	perr << "done.\n";
+
 
   	// Read in the Observables
   	assert(in.OpenSection("Observables"));
@@ -185,6 +198,10 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs= new ParticleAverageLocClass(PathData,OutFile);
     else if (observeType=="DropletSuperfluidity")
       tempObs = new SuperfluiDrop(PathData,OutFile);
+    else if (observeType=="SpecificHeatA")
+      tempObs = new SpecificHeatAClass(PathData,OutFile);
+    else if (observeType=="SpecificHeat")
+      tempObs = new SpecificHeatClass(PathData,OutFile);
     else if (observeType=="SuperfluidFractionPerLayer")
       tempObs = new SuperfluidFractionPerLayerClass(PathData,OutFile); 
    else if (observeType=="SuperfluidFraction")
@@ -288,8 +305,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new BisectionSphereBlockClass(PathData,OutFile);
     else if (moveType=="CenterDroplet")
       move = new CenterDropletClass(PathData,OutFile);
-//     else if (moveType=="GrowWorm")
-//       move = new WormGrowMoveClass(PathData,OutFile);
+    else if (moveType=="GrowWorm")
+      move = new WormGrowMoveClass(PathData,OutFile);
 //     else if (moveType=="CloseWorm")
 //       move = new WormCloseMoveClass(PathData,OutFile);
 //     else if (moveType=="RemoveWorm")
