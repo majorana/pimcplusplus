@@ -44,6 +44,8 @@
 #include "WindingNumber.h"
 #include "VariationalPIEnergy.h"
 #include "PlaneDensity.h"
+#include "SpecificHeat.h"
+#include "SpecificHeatA.h"
 /// This template class will be used to construct distributed versions
 /// of many different types of observables:  scalar observables, dVec
 /// observables, array observables, array of dVec observables, etc.
