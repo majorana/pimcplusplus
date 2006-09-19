@@ -42,7 +42,8 @@ public:
   void Accept();
   void Reject();
   virtual void WriteRatio();
-
+  double NewMoveProb;
+  double OldMoveProb;
   ///Why was this MakeMove()=0 and virtual?
   void MakeMove();
   MultiStageClass(PathDataClass &pathData, IOSectionClass &outSection) : 
