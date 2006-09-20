@@ -23,7 +23,7 @@ void MuClass::Read(IOSectionClass& in)
 {
   in.ReadVar("Mu",Mu);
   //  Mu=-0.72/10+0.9633;
-  //  Mu=0.1;
+  Mu=1.0;
 }
 
 MuClass::MuClass(PathDataClass &pathData) : 
@@ -141,7 +141,7 @@ MuClass::SingleAction (int slice1, int slice2,
 //   if (PadWorm())
 //     return -100000;
 //  else
-  return totalMu;
+  //return totalMu;
 #endif
 }
 

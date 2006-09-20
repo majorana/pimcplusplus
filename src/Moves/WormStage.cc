@@ -164,7 +164,7 @@ double WormStageClass::Sample(int &slice1,int &slice2,
   double logSampleProb=0.0;
   //  grow=false;
   if (!MoveHead && Grow){
-    cerr<<"Preparing to grow tail "<<ChangeAmount<<endl;
+    cerr<<"Worm Preparing to grow tail "<<ChangeAmount<<endl;
     MakeRoomForGrowingTail(ChangeAmount,tailSlice);
     PathData.FindTail(tailSlice,tailPtcl);
     for (int slice=tailSlice;slice<tailSlice+ChangeAmount;slice++){
@@ -188,7 +188,7 @@ double WormStageClass::Sample(int &slice1,int &slice2,
       return exp(-logSampleProb);
   }
   else if (MoveHead && Grow){
-    cerr<<"Preparing to grow the head "<<ChangeAmount<<endl;
+    cerr<<"Worm Preparing to grow the head "<<ChangeAmount<<endl;
     MakeRoomForGrowingHead(ChangeAmount,headSlice);
     PathData.FindHead(headSlice,headPtcl);
     //    cerr<<headSlice<<" "<<ChangeAmount<<endl;
@@ -213,7 +213,7 @@ double WormStageClass::Sample(int &slice1,int &slice2,
       return exp(-logSampleProb);
   }
   else if (MoveHead && !Grow){
-    cerr<<"Preparing to shrink head "<<ChangeAmount<<endl;
+    cerr<<"Worm Preparing to shrink head "<<ChangeAmount<<endl;
     MakeRoomForShrinkingHead(ChangeAmount,headSlice);
     PathData.FindTail(tailSlice,tailPtcl);
     PathData.FindHead(headSlice,headPtcl);
@@ -243,7 +243,7 @@ double WormStageClass::Sample(int &slice1,int &slice2,
   }
   else if (!MoveHead && !Grow){
     //    PathData.Path.PrintRealSlices();
-    cerr<<"Preparing to shrink "<<ChangeAmount<<" "<<tailSlice<<" "
+    cerr<<"Worm Preparing to shrink "<<ChangeAmount<<" "<<tailSlice<<" "
 	<<tailPtcl<<" "
 	<<headSlice<<" "
 	<<headPtcl<<endl;

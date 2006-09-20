@@ -47,7 +47,7 @@ Section (Observables)
   string OutFileBase = "FreeBosons2";
 //   Section (Observable)
 //     {
-//       string type = "EnergySign";
+//       string Type = "EnergySign";
 //       string Name = "EnergySign";
 //       int freq=2;
 //       int dumpFreq=500;
@@ -55,7 +55,7 @@ Section (Observables)
 //     }
   Section (Observable)
     {
-      string type = "Energy";
+      string Type = "Energy";
       string Name = "Energy";
       int freq=2;
       int dumpFreq=500;
@@ -64,7 +64,7 @@ Section (Observables)
 
   Section (Observable)
     {
-      string type = "PairCorrelation";
+      string Type = "PairCorrelation";
       string Name = "PairCorrelation";
       string Species1 = "free";
       string Species2 = "free";
@@ -72,7 +72,7 @@ Section (Observables)
       int dumpFreq=700;
       Section (Grid)
 	{
-	  string type = "Linear";
+	  string Type = "Linear";
 	  int NumPoints = 100;
 	}
     }

@@ -57,6 +57,24 @@ WormGrowMoveClass::MakeMove()
   cerr<<"Worm size is "<<wormSize<<" "<<numEmpty<<" "
       <<headSlice<<" "<<headPtcl<<" "
       <<tailSlice<<" "<<tailPtcl<<" "<<endl;
+
+	if(wormSize==(PathData.Path.NumTimeSlices()-1)){
+		count++;
+		double rmag;
+		dVec r;
+		PathData.Path.DistDisp(headSlice,headPtcl,tailPtcl,rmag,r);
+		int bin = int(rmag/(numBins*dr));
+		wormBin(bin,1)++;
+		if(count%writeFreq == 0){
+			out.open("WormData.dat");
+			out << "# r g(r)" << endl;
+			for(int i=0; i<numBins; i++){
+				out << wormBin(i,0) << " " << wormBin(i,1) << endl;
+			}
+			out.close();
+		}
+	}
+
   if (wormSize==0){
     MultiStageClass::Reject();
     cerr<<"ERROR! WORM SHOULD NEVER BE SIZE 0 BECAUSE THEN THE WORLD SHOULD BE CLOSED! BUG BUG!"<<endl;
@@ -94,7 +112,7 @@ WormGrowMoveClass::MakeMove()
 		    tailSlice, tailPtcl,
 		    numEmpty, wormSize);
 
-  cerr<<"Worm size as "<<wormSize<<" "<<numEmpty<<" "
+  cerr<<"  Worm size is "<<wormSize<<" "<<numEmpty<<" "
       <<headSlice<<" "<<headPtcl<<" "
       <<tailSlice<<" "<<tailPtcl<<" "<<endl;
   //  for (int ptcl=0;ptcl<PathData.Path.Permutation.size();ptcl++){

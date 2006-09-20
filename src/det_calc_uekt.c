@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "det_calc_uekt.h"
-
+#ifdef ORDER_N_FERMIONS
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
@@ -218,3 +218,4 @@ void det_ratio_calculator_uekt_symmetric_vanilla_value(int (*func)(double*,doubl
 
 
 //#endif
+#endif

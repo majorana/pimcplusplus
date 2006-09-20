@@ -31,6 +31,13 @@ private:
   /// This is the standard distribution of the displacement gaussian
   double Sigma;
   WormStageClass WormGrowStage;
+
+	// stuff for debugging
+	ofstream out;
+	Array<double,2> wormBin;
+	int numBins, writeFreq, count;
+	double dr;
+
 public:
   // Read the parameters from the input file
   void Read (IOSectionClass &in);
@@ -42,7 +49,18 @@ public:
     WormGrowStage(pathData, outSection)
   {
     DumpFreq = 20;
-  }
+
+		// all for debugging
+		count = 0;
+		writeFreq = 10;
+		numBins = 200;
+		dr = 0.1;
+		wormBin.resize(numBins,2);
+		wormBin = 0;
+		for(int w=0; w<numBins; w++)
+			wormBin(w,0) = dr*w;
+
+	}
 };
 
 

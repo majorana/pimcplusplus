@@ -54,11 +54,11 @@ private:
   // This stores pointers to the pair actions.
   Array<PairActionFitClass*,1> PairArray;
 
-  Array<double,1> TauValues;
   PathDataClass &PathData;
   int MaxLevels; //is this the right place for this?
   void ReadNodalActions (IOSectionClass &in);
 public:
+  Array<double,1> TauValues;
   Array<PairActionFitClass*,1> SpecificHeatPairArray;
   // This stores pointers to pair action fits for each pair of species.
   Array<PairActionFitClass*,2> PairMatrix;
