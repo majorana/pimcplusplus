@@ -1,7 +1,9 @@
 #ifndef MOVE_UTILITIES_H
 #define MOVE_UTILITIES_H
 
-#include "MoveBase.h"
+#include <Common/Blitz.h>
+
+typedef TinyVector<scalar,NDIM> dVec;
 
 // A number of functions used by several 
 // Move and Action classes
@@ -30,5 +32,9 @@ dVec Scale(dVec v, double scale);
 // the component of u parallel to R, and
 // perp, the component of u perpendicular to R
 void Strip(dVec R, dVec u,dVec &aligned, dVec &perp);
+
+// not really supported; just a quick hack
+double GetAngle(dVec v1, dVec v2);
+dVec GetBisector(dVec v1, dVec v2);
 
 #endif

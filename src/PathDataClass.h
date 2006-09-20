@@ -70,8 +70,9 @@ public:
 public:
 	Array<string, 1> ptclSet0, ptclSet1;
 	double dt;
-	int walkers, steps, blocks;
+	int walkers, chains, steps, blocks;
 	bool correlated;
+	string QMCMethod;
 #endif
 
   ///////////////////////////////////////////////////////////////////

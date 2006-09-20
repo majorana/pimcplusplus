@@ -15,6 +15,7 @@
 /////////////////////////////////////////////////////////////
 
 #include "ClusterMove.h"
+#include "MoveUtils.h"
 
 int firsttotal = 0;
 int total = 0;
@@ -33,7 +34,7 @@ double LocalFlip::MolPairAction(int slice,int m,int n){
     activeParticles(i) = m + PathData.Path.numMol*i;
     activeParticles(i+5) = n + PathData.Path.numMol*i;
   }
-  return PathData.Actions.ST2Water.Action(slice, slice, activeParticles, 0);
+  return PathData.Actions.MoleculeInteractions.Action(slice, slice, activeParticles, 0);
 }
 
 // Original: replacing w/ coordinate inversion
@@ -77,9 +78,9 @@ dVec LocalFlip::ArbitraryRotate(dVec axis,dVec coord, double phi){
   dVec coord_perp;
   dVec coord_aligned;
   Strip(axis,coord,coord_aligned,coord_perp);
-  double perp_mag = PathData.Actions.TIP5PWater.Mag(coord_perp);
+  double perp_mag = Mag(coord_perp);
 //cerr << "stripped vector " << coord << " off " << axis << " to give aligned " << coord_aligned << " and perp " << coord_perp << endl;
-  coord =  PathData.Actions.TIP5PWater.Normalize(coord_perp);
+  coord =  Normalize(coord_perp);
   double cosphi = cos(phi);
   double sinphi = sin(phi);
   double gamma = coord(1)/coord(2) - axis(1)/axis(2);
@@ -92,13 +93,13 @@ dVec LocalFlip::ArbitraryRotate(dVec axis,dVec coord, double phi){
   newcoord(1) = y;
   newcoord(2) = z;
 //cerr << "then new coord_perp is " << newcoord << endl;
-  return (PathData.Actions.TIP5PWater.Scale(newcoord,perp_mag) + coord_aligned);
+  return (Scale(newcoord,perp_mag) + coord_aligned);
 }
 
 void LocalFlip::Strip(dVec R, dVec u,dVec &aligned, dVec &perp){
   //double phi = PathData.Actions.TIP5PWater.GetAngle(R,u);
   //aligned = PathData.Actions.TIP5PWater.Scale(R,PathData.Actions.TIP5PWater.Mag(u)*cos(phi));
-  aligned = PathData.Actions.TIP5PWater.Scale(R,PathData.Actions.TIP5PWater.dotprod(R,u,1.0));
+  aligned = Scale(R,dotprod(R,u,1.0));
   perp = u - aligned;
 }
 
@@ -124,7 +125,7 @@ void LocalFlip::IntegrityCheck(int slice, Array<int,1> activeParticles){
   // test geometry
   // check bond lengths
   for (int i = 1; i < activeParticles.size(); i++){
-    double length = PathData.Actions.TIP5PWater.Mag(V(i));
+    double length = Mag(V(i));
     double complength;
     if (i == 1 || i == 2)
       complength = Elength;
@@ -140,7 +141,7 @@ void LocalFlip::IntegrityCheck(int slice, Array<int,1> activeParticles){
   // check angular separation 
   for (int i = 1; i < activeParticles.size(); i++){
     for (int j = i+1; j < activeParticles.size(); j++){
-      double theta = PathData.Actions.TIP5PWater.GetAngle(V(i),V(j));
+      double theta = GetAngle(V(i),V(j));
       if (abs(TetAngle - theta) > Amargin){
         pass = false;
         cerr << activeParticles(0) << ": Integrity Check Failed." << endl;
@@ -170,7 +171,7 @@ void LocalFlip::MakeMove()
   A(0) = PathData.Path.Random.Local()-0.5;
   A(1) = PathData.Path.Random.Local()-0.5;
   A(2) = PathData.Path.Random.Local()-0.5;
-  A = PathData.Actions.TIP5PWater.Normalize(A); 
+  A = Normalize(A); 
 
   // For now make this a classical move
   int slice = 0;
@@ -306,7 +307,7 @@ double GlobalFlip::MolPairAction(int slice,int m,int n){
     activeParticles(i) = m + PathData.Path.numMol*i;
     activeParticles(i+5) = n + PathData.Path.numMol*i;
   }
-  return PathData.Actions.ST2Water.Action(slice, slice, activeParticles, 0);
+  return PathData.Actions.MoleculeInteractions.Action(slice, slice, activeParticles, 0);
 }
 
 void GlobalFlip::MakeMove()

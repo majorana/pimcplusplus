@@ -186,9 +186,20 @@ void PathDataClass::Read (IOSectionClass &in)
 			steps = 100;
 		if(!in.ReadVar("Blocks", blocks))
 			blocks = 50;
+		if(!in.ReadVar("Chains", chains))
+			chains = 51;
 		assert(in.ReadVar("Correlated",correlated));
 		if(correlated){
 			cerr << "Using correlated samping to compute energy differences." << endl;
+			assert(in.ReadVar("QMCMethod",QMCMethod));
+			if(QMCMethod == "VMC")
+				cerr << "Using VMCMultiple driver." << endl;
+			else if(QMCMethod == "RQMC")
+				cerr << "Using RQMCMultiple driver." << endl;
+			else{
+				cerr << "Method " << QMCMethod << " not recognized.  Supported options are VMC or RQMC." << endl;
+				assert(0);
+			}
 		}
 		else{
 			cerr << "NOT using correlated sampling for energy differences." << endl;

@@ -75,12 +75,10 @@ void MolMoveClass::Read (IOSectionClass &in){
   assert (in.ReadVar ("Actions", ActionList));
 	for(int a=0; a<ActionList.size(); a++){
 		string setAction = ActionList(a);
-	  if(setAction == "ST2Potential"){
-  		Actions.push_back(&PathData.Actions.ST2Water);
-			cerr << "  Added ST2 Water Potential" << endl;
-		}else if(setAction == "TIP5PPotential"){
-  		Actions.push_back(&PathData.Actions.TIP5PWater);
-			cerr << "Added TIP5P Water Potential" << endl;
+	  if(setAction == "MoleculeInteractions"){
+			PathData.Actions.MoleculeInteractions.Read(in);
+  		Actions.push_back(&PathData.Actions.MoleculeInteractions);
+			cerr << "  Added Molecule Actions" << endl;
 #ifdef USE_QMC
 		}else if(setAction == "CEIMCAction"){
 			//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);

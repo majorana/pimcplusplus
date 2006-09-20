@@ -6,4 +6,5 @@ EventClass::EventClass(PathDataClass &pathData, IOSectionClass& out) :
   Path(pathData.Path)
 {
     // do nothing else for now
+		cerr << "EventClass construct" << endl;
 }

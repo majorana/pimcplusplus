@@ -71,9 +71,18 @@ void QMCWrapperClass::QMCDummy(PathDataClass& PathData){
 
 	if(correlated){
 		if(newmode){
-			out << "  QMCWrapper: Setting up VMCMultiple run...";
-  		PathData.qmc->SetVMCMultiple(dt, walkers, steps, blocks);
-			out << " done." << endl;
+			if(QMCMethod == "VMC"){
+				out << "  QMCAction: Setting up VMCMultiple run...";
+	  		PathData.qmc->SetVMCMultiple(dt, walkers, steps, blocks);
+				out << " done." << endl;
+			} else if (QMCMethod == "RQMC"){
+				out << "  QMCAction: Setting up RQMCMultiple run...";
+	  		PathData.qmc->SetRQMCMultiple(dt, chains, steps, blocks);
+				out << " done." << endl;
+			} else {
+				cerr << "QMCMethod " << QMCMethod << " not recognized." << endl;
+				assert(0);
+			}
 
   		PathData.qmc->process();
 

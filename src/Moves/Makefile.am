@@ -100,8 +100,6 @@ libmoves_la_SOURCES  =           \
     ClusterMove.h                \
     VariationalDisplaceMove.h    \
     VariationalDisplaceMove.cc   \
-    WaterMoveRing.cc             \
-    WaterMoveRing.h              \
     QMCTest.cc                   \
     QMCTest.h                    \
     WormStage.h                  \

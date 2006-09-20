@@ -164,7 +164,7 @@ dVec AutoCorrClass::MeasureDipole(int slice,int molecule){
   P2 -= O;
   P1 = Normalize(P1);
   P2 = Normalize(P2);
-  dVec pvec = Normalize(PathData.Actions.TIP5PWater.GetBisector(P1,P2));
+  dVec pvec = Normalize(GetBisector(P1,P2));
   return pvec;
 }
 

@@ -43,7 +43,7 @@ void QMCTestMove::MakeMove()
   AssignPtcl(choosemol, ActiveParticles);
 
   double oldAction = 0.0;
- oldAction += PathData.Actions.ST2Water.SingleAction(slice,slice,ActiveParticles,0);
+ oldAction += PathData.Actions.MoleculeInteractions.SingleAction(slice,slice,ActiveParticles,0);
 
   dVec move = Translate(step); 
   double move_mag = sqrt(move(0)*move(0) + move(1)*move(1) + move(2)*move(2));
@@ -54,7 +54,7 @@ void QMCTestMove::MakeMove()
   }
  
   double newAction = 0.0;
- newAction += PathData.Actions.ST2Water.SingleAction(slice,slice,ActiveParticles,0);
+ newAction += PathData.Actions.MoleculeInteractions.SingleAction(slice,slice,ActiveParticles,0);
  //if(PathData.UsingQMC){
     //cerr << "calling QMCSampling from " << PathData.Actions.QMCSampling.myProc << endl;
     newAction += PathData.Actions.QMCSampling.SingleAction(slice,slice,ActiveParticles,0);

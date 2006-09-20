@@ -27,7 +27,6 @@
 #include "JosephsonPathDump.h"
 #include "ObservableCorrelation.h"
 #include "ObservableEnergy.h"
-#include "ObservableModifiedEnergy.h"
 #include "OpenOrientation.h"
 #include "ParticleAverageLoc.h"
 #include "PathDump.h"

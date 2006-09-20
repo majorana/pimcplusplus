@@ -453,8 +453,6 @@ ActionsClass::ShiftData (int slicesToShift)
   LongRange.ShiftData(slicesToShift);
   LongRangeRPA.ShiftData(slicesToShift);
   DavidLongRange.ShiftData(slicesToShift);
-  TIP5PWater.ShiftData(slicesToShift);
-  ST2Water.ShiftData(slicesToShift);
   for (int i=0; i<NodalActions.size(); i++)
     if (NodalActions(i)!=NULL)
       NodalActions(i)->ShiftData(slicesToShift);

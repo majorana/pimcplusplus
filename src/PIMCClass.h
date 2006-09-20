@@ -47,6 +47,7 @@ public:
 	void Dummy();
   PIMCClass() : Algorithm(PathData, OutFile, Moves, Observables)
   {
+		cerr << "PIMCC constructor..." << endl;
     RunInfo.ProgramName="pimc++";
   }
 };

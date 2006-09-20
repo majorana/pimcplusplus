@@ -72,9 +72,18 @@
 
 		if(correlated){
 			if(newmode){
-				out << "  QMCAction: Setting up VMCMultiple run...";
-	  		PathData.qmc->SetVMCMultiple(dt, walkers, steps, blocks);
-				out << " done." << endl;
+				if(QMCMethod == "VMC"){
+					out << "  QMCAction: Setting up VMCMultiple run...";
+	  			PathData.qmc->SetVMCMultiple(dt, walkers, steps, blocks);
+					out << " done." << endl;
+				} else if (QMCMethod == "RQMC"){
+					out << "  QMCAction: Setting up RQMCMultiple run...";
+	  			PathData.qmc->SetRQMCMultiple(dt, chains, steps, blocks);
+					out << " done." << endl;
+				} else {
+					cerr << "QMCMethod " << QMCMethod << " not recognized." << endl;
+					assert(0);
+				}
 	
 	  		PathData.qmc->process();
 	
@@ -270,7 +279,9 @@
 		//out << "EnergyIndex1 at " << EnergyIndex1 << endl;
 		//out << "EnergyDiffIndex at " << EnergyDiffIndex << endl;
 
+		QMCMethod = PathData.QMCMethod;
 		dt = PathData.dt;
+		chains =  PathData.chains;
 		walkers = PathData.walkers;
 		steps = PathData.steps;
 		blocks = PathData.blocks;

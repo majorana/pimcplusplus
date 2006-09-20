@@ -16,9 +16,10 @@ class CEIMCActionClass: public ActionBaseClass
   
 public:
 	double dt;
-	int walkers, steps, blocks;
+	int walkers, chains, steps, blocks;
 	bool correlated;
-  double SingleAction(int slice1,int slice2,
+	string QMCMethod;
+	double SingleAction(int slice1,int slice2,
 		      const Array<int,1> &activeParticles,int level);
   double d_dBeta (int slice1, int slice2, int level);
   std::string GetName();

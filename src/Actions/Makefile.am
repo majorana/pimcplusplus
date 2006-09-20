@@ -32,6 +32,8 @@ libactions_la_SOURCES =            \
     LongRangePotClass.h            \
     LongRangeRPAClass.cc           \
     LongRangeRPAClass.h            \
+		MoleculeInteractionsClass.cc   \
+		MoleculeInteractionsClass.h    \
     Mu.h                           \
     Mu.cc                          \
     NodalActionClass.cc            \
@@ -42,8 +44,6 @@ libactions_la_SOURCES =            \
     PairFixedPhase.cc              \
     QMCSamplingClass.h             \
     QMCSamplingClass.cc            \
-    ST2WaterClass.cc               \
-    ST2WaterClass.h                \
     ShortRangeApproximateClass.cc  \
     ShortRangeApproximateClass.h   \
     ShortRangeClass.cc             \
@@ -55,8 +55,6 @@ libactions_la_SOURCES =            \
     StructureReject.cc             \
     Tether.h                       \
     Tether.cc                      \
-    TIP5PWaterClass.cc             \
-    TIP5PWaterClass.h              \
     VariationalPI.h                \
     VariationalPI.cc               \
     TruncatedInverse.h             \

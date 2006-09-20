@@ -45,7 +45,7 @@ protected:
     EventClass(pathData, out), NumSteps(1), 
     Moves(moves), Observables(observables)
   {
-    
+  cerr << "LoopClass construct" << endl;  
   }
 };
 

@@ -22,7 +22,9 @@ class QMCWrapperClass
 	int walkers;
 	int steps;
 	int blocks;
+	int chains;
 	bool correlated;
+	string QMCMethod;
 	int EnergyDiffIndex, EnergyIndex0, EnergyIndex1;
 	void DummyInit(PathDataClass& PathData);
 	void QMCDummy(PathDataClass& PathData);
@@ -33,6 +35,8 @@ class QMCWrapperClass
     steps = pathData.steps;
     blocks = pathData.blocks;
     correlated = pathData.correlated;
+		chains = pathData.chains;
+		QMCMethod = pathData.QMCMethod;
 	}
 #else
 	QMCWrapperClass(PathDataClass& pathData){};

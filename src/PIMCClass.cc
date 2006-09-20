@@ -27,6 +27,7 @@ bool PIMCClass::Read(IOSectionClass &in)
 {
   // tells whether to run or be a dummy
   bool doPIMCRun = false;
+	cerr << "PIMC::Read" << endl;
   // Read the parallelization strategy
   
   PathData.Read (in);
@@ -218,8 +219,6 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new EnergyClass(PathData,OutFile);
     else if (observeType=="EnergySign")
       tempObs = new EnergySignClass(PathData,OutFile);
-    else if (observeType=="ModifiedEnergy")
-      tempObs = new ModifiedEnergyClass(PathData,OutFile);
     else if (observeType=="AutoCorr")
       tempObs = new AutoCorrClass(PathData,OutFile);
     else if (observeType=="DistanceToOpen")

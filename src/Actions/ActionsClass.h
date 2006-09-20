@@ -24,14 +24,13 @@
 #include "ShortRangePotClass.h"
 #include "LongRangePotClass.h"
 #include "KineticClass.h"
+#include "MoleculeInteractionsClass.h"
 #include "NodalActionClass.h"
 #include "FreeNodalActionClass.h"
 #include "PairFixedPhase.h"
 #include "GroundStateNodalActionClass.h"
 #include "FixedPhaseActionClass.h"
 #include "DavidLongRangeClass.h"
-#include "TIP5PWaterClass.h"
-#include "ST2WaterClass.h"
 #include "QMCSamplingClass.h"
 #include "OpenLoopImportance.h"
 #include "StructureReject.h"
@@ -97,11 +96,7 @@ public:
   ///David's Long Range Class
   DavidLongRangeClass DavidLongRange;
 
-  /// Action for simulations using the TIP5P water model
-  TIP5PWaterClass TIP5PWater;
-
-  /// Action for simulations using the ST2 water model
-  ST2WaterClass ST2Water;
+	MoleculeInteractionsClass MoleculeInteractions;
 
 #ifdef USE_QMC
   CEIMCActionClass CEIMCAction;
@@ -197,8 +192,7 @@ public:
     KineticSphere(pathData),
     PathData(pathData),
     PairFixedPhase(pathData),
-    TIP5PWater(pathData),
-    ST2Water(pathData),
+		MoleculeInteractions(pathData),
 #ifdef USE_QMC
     CEIMCAction(pathData),
 #endif

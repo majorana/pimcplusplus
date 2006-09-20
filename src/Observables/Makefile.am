@@ -33,8 +33,6 @@ libobservables_la_SOURCES  =     \
     ObservableCorrelation.h      \
     ObservableEnergy.cc          \
     ObservableEnergy.h           \
-    ObservableModifiedEnergy.cc  \
-    ObservableModifiedEnergy.h   \
     OpenOrientation.h            \
     OpenOrientation.cc           \
     ParticleAverageLoc.h         \

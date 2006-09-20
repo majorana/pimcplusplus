@@ -44,6 +44,7 @@ public:
     EventClass(pathData, out), DumpFreq(10000), 
     RatioVar("AcceptRatio", IOSection, pathData.Path.Communicator)
     {
+		cerr << "MoveClass construct" << endl;
       // do nothing 
     }
 };

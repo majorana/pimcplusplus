@@ -26,8 +26,8 @@ class PathDataClass;
 class PathClass;
 
 /// The ActionBaseClass is an abstract base class from which all the
-/// physical action classes are derived.  It's primary methods are
-/// Action and it's beta-derivative.
+/// physical action classes are derived.  Its primary methods are
+/// Action and its beta-derivative.
 class ActionBaseClass
 {
 protected:

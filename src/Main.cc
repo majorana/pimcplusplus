@@ -54,9 +54,15 @@ main(int argc, char **argv)
     cout << "pimc++ myfile.in\n"; 
  }
   else {
+	cerr << "new IO...";
     IOSectionClass in;
+	cerr << "done" << endl;
+	cerr << "opening input...";
     assert (in.OpenFile(argv[1]));
+		cerr << " done" << endl;
+		cerr << "new PIMC...";
     PIMCClass PIMC;
+		cerr << "done" << endl;
     bool doRun = PIMC.Read(in);
     if(doRun){
 			cerr << "I am about to run..." << endl;

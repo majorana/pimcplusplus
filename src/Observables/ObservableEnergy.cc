@@ -19,7 +19,7 @@
 // These are included for the new runtime 
 // specification of energy observables 
 // to compute; see below -John
-#include "../Actions/ST2WaterClass.h"
+#include "../Actions/MoleculeInteractionsClass.h"
 #include "../Actions/QMCSamplingClass.h"
 
 // Fix to include final link between link M and 0
@@ -240,8 +240,8 @@ void EnergyClass::Read(IOSectionClass &in)
 	OtherVars.resize(numEnergies);
 	OtherSums.resize(numEnergies);	
 	for(int n=0; n<numEnergies; n++){
-		if(EnergyStrings(n) == "ST2WaterClass"){
-			OtherActions[n] = &PathData.Actions.ST2Water;
+		if(EnergyStrings(n) == "MoleculeInteractions"){
+			OtherActions[n] = &PathData.Actions.MoleculeInteractions;
 			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
 			OtherSums[n] = 0.0;
 		} else if(EnergyStrings(n) == "QMCSamplingClass"){
