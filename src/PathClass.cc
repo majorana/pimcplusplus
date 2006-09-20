@@ -395,6 +395,8 @@ void PathClass::Allocate()
   Permutation.resize(numParticles+OpenPaths);
 
   SpeciesNumber.resize(numParticles+OpenPaths);
+  if (WormOn)
+    SpeciesNumber=1;///HACK! HACK HACK!
   DoPtcl.resize(numParticles+OpenPaths);
   /// Assign the species number to the SpeciesNumber array
   for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
