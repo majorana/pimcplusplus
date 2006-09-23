@@ -57,7 +57,7 @@ private:
   /////////////////////
   void LeviFlight (Array<dVec,1> &vec, double lambda);
   void ReadOld(string fileName, bool replicate);
-  void ReadSqueeze(string fileName, bool replicate);
+  void ReadSqueeze(IOSectionClass &in,string fileName, bool replicate);
   ////////////////////////////////
   /// Boundary conditions stuff //
   ////////////////////////////////

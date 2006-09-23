@@ -19,7 +19,7 @@
 #include <Common/IO/FileExpand.h>
 
 void 
-PathClass::ReadSqueeze(string fileName,bool replicate)
+PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
 {
 // This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
 
@@ -27,7 +27,14 @@ PathClass::ReadSqueeze(string fileName,bool replicate)
   IOSectionClass inFile;
   stringstream oss;
   ////  oss<<fileName<<"."<<MyClone<<".h5";
-  oss<<fileName<<"."<<0<<".h5";
+  bool parallelFileRead;
+  if (!in.ReadVar("ParallelFileRead",parallelFileRead)){
+    parallelFileRead=true;
+  }
+  if (parallelFileRead)
+    oss<<fileName<<"."<<MyClone<<".h5";
+  else
+    oss<<fileName<<"."<<0<<".h5";
   string fullFileName=oss.str();
   cerr<<"THE FULL FILE NAME IS "<<fullFileName<<endl;
   assert (inFile.OpenFile(fullFileName.c_str()));
@@ -56,7 +63,7 @@ PathClass::ReadSqueeze(string fileName,bool replicate)
   int myFirstSlice,myLastSlice;
   SliceRange (myProc, myFirstSlice, myLastSlice);  
   for (int ptcl=0;ptcl<NumParticles();ptcl++){
-    for (int slice=0; slice<NumTimeSlices(); slice++) {
+    for (int slice=0; slice<TotalNumSlices; slice++) {
       int sliceOwner = SliceOwner(slice);
       int relSlice = slice-myFirstSlice;
       if (myProc==sliceOwner){
@@ -421,7 +428,7 @@ PathClass::InitPaths (IOSectionClass &in)
       }
       string pathFile;
       assert(in.ReadVar("File",pathFile));
-      ReadSqueeze(pathFile,replicate);
+      ReadSqueeze(in,pathFile,replicate);
       //      ReadOld(pathFile,replicate);
     }
     else if (InitPaths == "SQUEEZE"){
