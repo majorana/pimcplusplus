@@ -4,7 +4,8 @@ TestkSpacePH_SOURCES = TestkSpacePH.cc
 MakeGeneralPot_SOURCES = MakeGeneralPot.cc
 
 LDADD = libPH.la ../IO/libIO.la   ../MatrixOps/libmatops.la ../Fitting/libfitting.la ../Integration/libquad.la ../Splines/libspline.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(GSL_LIBS) $(LAPACK_LIBS)
-AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(GSL_CFLAGS)
+
+AM_CXXFLAGS = $(XML2_CFLAGS) $(HDF5_CFLAGS) $(BLITZ_CFLAGS) $(GSL_CFLAGS)
 
 noinst_LTLIBRARIES = libPH.la
 libPH_la_SOURCES = CoreTransform.h    \
@@ -37,7 +38,7 @@ includedir=$(prefix)/include/Common/PH
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
-libPH_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)
+libPH_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
 libPH_la_LIBADD   =
 
 #if HAVE_GMP

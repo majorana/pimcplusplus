@@ -10,7 +10,7 @@ TestMyTricubic_SOURCES = TestMyTricubic.cc
 TestPeriodic_SOURCES = TestPeriodic.cc
 TestQuintic_SOURCES = TestQuintic.cc
 
-LDADD = ../IO/libIO.la libspline.la $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(FLIBS) 
+LDADD = ../IO/libIO.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(XML2_LIBS) $(BLITZ_LIBS)
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
 
 noinst_LTLIBRARIES = libspline.la

@@ -1,6 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+add m4_include([gsl.m4])
 AC_PREREQ(2.59)
 AC_INIT(libcommon, 0.5, esler@uiuc.edu)
 AM_INIT_AUTOMAKE(libcommon, 0.5)
@@ -9,6 +10,7 @@ AC_CONFIG_HEADER([config.h])
 
 # Check which compilers we're using
 AX_CXX_MAXOPT
+AX_F77_MAXOPT
 AC_MSG_CHECKING([optimal compiler flags])
 AC_MSG_RESULT([${CXXFLAGS}])
 
