@@ -1,4 +1,5 @@
 #include "MDVis.h"
+#include <GL/glut.h>
 
 MDVisualClass::MDVisualClass() :
   MainVBox(false, 0), 
@@ -640,6 +641,7 @@ int main(int argc, char** argv)
 
   // Init gtkglextmm.
   Gtk::GL::init(argc, argv);
+  glutInit(&argc, argv);
 
   if (argc < 2) {
     cerr << "Usage:\n  mdvis++ myfile.h5\n";
