@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////
+                                      /////////////////////////////////////////////////////////////
 // Copyright (C) 2003-2006 Bryan Clark and Kenneth Esler   //
 //                                                         //
 // This program is free software; you can redistribute it  //
@@ -66,7 +66,8 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
     for (int slice=0; slice<TotalNumSlices; slice++) {
       int sliceOwner = SliceOwner(slice);
       int relSlice = slice-myFirstSlice;
-      if (myProc==sliceOwner){
+      ///      if (myProc==sliceOwner){
+      if (myFirstSlice<=slice && slice<=myLastSlice){
 	dVec pos;
 	pos = 0.0;
 	for (int dim=0; dim<NDIM; dim++)
@@ -79,8 +80,24 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
 
 	Path(relSlice,ptcl) = pos;
       }
-      //      cerr<<"I'm putting the slice "<<slice<<" and the ptcl "<<ptcl<<"as "<<Path(slice,ptcl)<<endl;
+      cerr<<"I'm putting the slice "<<slice<<" and the ptcl "<<ptcl<<"as "<<Path(slice,ptcl)<<endl;
     }      
+    ///If you are the last processors you must make sure the last
+    ///slice is the same as the first slice on the first
+    ///processors. The  join should be at the 
+    if (myProc==Communicator.NumProcs()-1){
+      dVec pos;
+      pos = 0.0;
+      for (int dim=0; dim<NDIM; dim++)
+	if (replicate){//not sure this works for replicate
+	  pos(dim) = oldPaths(oldPaths.extent(0)-1,Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
+	}
+	else{//you want to end up on the person you permute onto
+	  pos(dim) = oldPaths(oldPaths.extent(0)-1,Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
+	}
+    
+      Path(NumTimeSlices()-1,ptcl) = pos;
+    }
   }
   inFile.CloseSection();
   inFile.CloseSection();
