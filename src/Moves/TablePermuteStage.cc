@@ -153,14 +153,25 @@ void TablePermuteStageClass::Read (IOSectionClass &in)
   Array<double,1> gamma;
   double epsilon;
   assert (in.ReadVar("Gamma", gamma));
-  assert (in.ReadVar("epsilon",epsilon));
   assert (gamma.size()==4);
+  assert (in.ReadVar("epsilon",epsilon));
+  if (!in.ReadVar("zFocus",zFocus))
+    zFocus=false;
+  Table1.zfocus=zFocus;
+  Table2.zfocus=zFocus;
+  double zalpha;
+  if (zFocus){
+    in.ReadVar("zalpha",zalpha);
+    Table1.zalpha=zalpha;
+    Table2.zalpha=zalpha;
+  }
   for (int i=0; i<4; i++) {
     Table1.Gamma[i] = gamma(i);
     Table2.Gamma[i] = gamma(i);
   }
   Table1.epsilon=epsilon;
   Table2.epsilon=epsilon;
+  
       
 }
 
