@@ -396,6 +396,7 @@ MakePeriodic(Array<double,3> &A)
 void
 LangevinMoveClass::LangevinStep()
 {
+#if NDIM==3
   perr << "********************************************\n"
        << "*             Start LangevinStep.          *\n"
        << "********************************************\n";
@@ -549,7 +550,9 @@ LangevinMoveClass::LangevinStep()
   perr << "********************************************\n"
        << "*              End LangevinStep            *\n"
        << "********************************************\n";
-
+#else
+  cerr<<"Langevin step not implemented in 2d"<<endl;
+#endif
 }
 
 
