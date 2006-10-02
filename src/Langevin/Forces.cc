@@ -13,6 +13,7 @@ ForcesClass::SetSpecies(int speciesNum)
 void
 ForcesClass::Accumulate()
 {
+#if NDIM==3
   PathClass &Path = PathData.Path;
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;  
@@ -57,4 +58,8 @@ ForcesClass::Accumulate()
 
 
   Counts++;
+#else
+  cerr<<"Langevin/Forces is not designed to work in 3d"<<endl;
+  assert(NDIM==3);
+#endif
 }
