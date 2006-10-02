@@ -28,6 +28,8 @@ protected:
   Array<Int3,1> Indices;
   // This stores the differences between g-vectors:
   Array<Vec3,1> GDiff;
+  /// Lattice[0,:] gives the first primitive lattice vector, etc.
+  Mat3 Lattice;
   // The inverse of the norm of the above:  used to compute the
   // Hartree potential in DFT
   Array<double,1> GDiffInv2;
@@ -42,6 +44,7 @@ public:
 
   void Set (Vec3 box, Vec3 kvec, double kcut);
   void Set (Vec3 box, Vec3 kvec, double kcut, Int3 boxSize);
+  void Set (Mat3 &lattice, Array<Vec3,1> &gvecs);
 
   inline Vec3 operator()(int i) const
   { return GVecs(i); }

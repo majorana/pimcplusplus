@@ -213,3 +213,100 @@ GVecsClass::operator=(const GVecsClass &gvecs)
 
   return *this;
 }
+
+inline Int3 
+GetIndex(Vec3 a[3], Vec3 b[3], Vec3 gvec)
+{
+  Int3 i;
+  const double twoPiInv = 1.0/(2.0*M_PI);
+  i[0] = (int)round(twoPiInv*dot(a[0], gvec));
+  i[1] = (int)round(twoPiInv*dot(a[1], gvec));
+  i[2] = (int)round(twoPiInv*dot(a[2], gvec));
+
+  Vec3 gprime = (double)i[0]*b[0] + (double)i[1]*b[1] + (double)i[2]*b[2];
+  Vec3 diff = gprime - gvec;
+  assert (dot(diff,diff) < 1.0e-14);
+
+  return i;
+}
+  
+
+
+void
+GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs)
+{
+  Lattice = lattice;
+  Vec3 a[3], b[3];
+  a[0] = lattice(0,0), lattice(0,1), lattice(0,2);
+  a[1] = lattice(1,0), lattice(1,1), lattice(1,2);
+  a[2] = lattice(2,0), lattice(2,1), lattice(2,2);
+  double vol = fabs(dot(cross(a[0],a[1]),a[2]));
+  double volInv = 1.0/vol;
+  b[0] = 2.0*M_PI*volInv * cross(a[1], a[2]);  
+  b[1] = 2.0*M_PI*volInv * cross(a[2], a[0]);
+  b[2] = 2.0*M_PI*volInv * cross(a[0], a[1]);
+
+
+  GVecs.resize(gvecs.size());
+  Indices.resize(gvecs.size());
+  GVecs = gvecs;
+  
+  for (int i=0; i<GVecs.size(); i++)
+    Indices(i) = GetIndex(a, b, GVecs(i));
+
+  // Construct difference vectors
+  int diffCount = 0;
+  for (int g1=0; g1<GVecs.size(); g1++) {
+    Int3 i1 = Indices(g1);
+    Indices(g1) = i1;
+    for (int g2=0; g2<GVecs.size(); g2++) {
+      Int3 i2 = Indices(g1);
+      Int3 idiff = i2-i1;
+      bool duplicate = false;
+      for (int j=0; j<IDiff.size(); j++) 
+	if (idiff == IDiff(j))
+	  duplicate = true;
+      if (!duplicate) 
+	diffCount ++;
+    }
+  }
+  IDiff.resize(diffCount);
+  GDiff.resize(diffCount);
+
+  diffCount = 0;
+  for (int g1=0; g1<GVecs.size(); g1++) {
+    Int3 i1 = Indices(g1);
+    Indices(g1) = i1;
+    for (int g2=0; g2<GVecs.size(); g2++) {
+      Int3 i2 = Indices(g1);
+      Int3 idiff = i2-i1;
+      bool duplicate = false;
+      for (int j=0; j<IDiff.size(); j++) 
+	if (idiff == IDiff(j))
+	  duplicate = true;
+      if (!duplicate) {
+	IDiff(diffCount) = idiff;
+	Vec3 G = (double)idiff[0]*b[0] + (double)idiff[1]*b[1] + 
+	  (double)idiff[2]*b[2];
+	GDiff(diffCount) = G;
+      }
+    }
+  }
+  cerr << "Found " << GDiff.size() << " unique difference vectors.\n";
+
+  /// Find FFT box size;
+  Int3 maxIndex(0,0,0), minIndex(0,0,0);
+  for (int i=0; i<IDiff.size(); i++) 
+    for (int j=0; j<3; j++) {
+      if (IDiff(i)[j] < minIndex[j])
+	minIndex[j] = IDiff(i)[j];
+      if (IDiff(i)[j] > maxIndex[j])
+	maxIndex[j] = IDiff(i)[j];
+    }
+  Nx = maxIndex[0] - minIndex[0] + 1;
+  Ny = maxIndex[1] - minIndex[1] + 1;
+  Nz = maxIndex[2] - minIndex[2] + 1;
+  
+  /// Adjust indices
+  for (int i=0; i<IDiff.size(); i++);
+}
