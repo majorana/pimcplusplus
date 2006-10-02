@@ -16,8 +16,8 @@
 
 
 
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_blas.h>
+// #include <gsl/gsl_linalg.h>
+// #include <gsl/gsl_blas.h>
 
 #include "VariationalPI.h"
 #include "../PathDataClass.h"
@@ -187,30 +187,30 @@ int matvec(double *x,double *b,int N,void *A){
 //   return 0;
 // }
 
-void set_gsl_vector_from_double(gsl_vector *V, double* x, int N){
-  V->size=N;V->stride=1;V->data=x;V->block=NULL;V->owner=0;  
-}
+// void set_gsl_vector_from_double(gsl_vector *V, double* x, int N){
+//   V->size=N;V->stride=1;V->data=x;V->block=NULL;V->owner=0;  
+// }
 
 
-int matvec_gsl_matrix(double *x,double *b,int N,void *params){
-  gsl_vector Xgsl,Bgsl;
-  set_gsl_vector_from_double(&Xgsl,x,N);
-  set_gsl_vector_from_double(&Bgsl,b,N);
-  //typedef struct
-  //{
-  //  size_t size;
-  //  size_t stride;
-  //  double *data;
-  //  gsl_block *block;
-  //  int owner;
-  //}
-  // gsl_vector;
+// int matvec_gsl_matrix(double *x,double *b,int N,void *params){
+//   gsl_vector Xgsl,Bgsl;
+//   set_gsl_vector_from_double(&Xgsl,x,N);
+//   set_gsl_vector_from_double(&Bgsl,b,N);
+//   //typedef struct
+//   //{
+//   //  size_t size;
+//   //  size_t stride;
+//   //  double *data;
+//   //  gsl_block *block;
+//   //  int owner;
+//   //}
+//   // gsl_vector;
 
-  //int gsl_blas_dgemv (CBLAS_TRANSPOSE_t TransA, double alpha, const gsl_matrix * A, const gsl_vector * x, double beta, gsl_vector * y)  
-  int toReturn= gsl_blas_dgemv(CblasNoTrans,1,(gsl_matrix*)params,&Xgsl,0,&Bgsl);  
-  //  cerr<<"I am returning "<<toReturn;
-  return toReturn;
-}/*end matvec_gsl_matrix*/
+//   //int gsl_blas_dgemv (CBLAS_TRANSPOSE_t TransA, double alpha, const gsl_matrix * A, const gsl_vector * x, double beta, gsl_vector * y)  
+//   int toReturn= gsl_blas_dgemv(CblasNoTrans,1,(gsl_matrix*)params,&Xgsl,0,&Bgsl);  
+//   //  cerr<<"I am returning "<<toReturn;
+//   return toReturn;
+// }/*end matvec_gsl_matrix*/
 
 
 double 
