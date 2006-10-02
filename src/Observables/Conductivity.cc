@@ -19,6 +19,7 @@
 void
 ConductivityClass::CalcCurrentT()
 {
+#if NDIM==3
   PathClass &Path = PathData.Path;
   MyCurrent = 0.0;
   for (int si=0; si<Path.NumSpecies(); si++) {
@@ -34,6 +35,10 @@ ConductivityClass::CalcCurrentT()
   // Now that we've calculated this processors current, let us gather
   // to processor 0
   Path.Communicator.Gather(MyCurrent, TempCurrent, ProcNumLinks);
+#else
+  cerr<<"ERROR! Conductivity not defined in 3d"<<endl;
+  assert(NDIM==3);
+#endif
 }
 
 void
