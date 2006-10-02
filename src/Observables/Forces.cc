@@ -38,6 +38,7 @@ ForcesClass::SetSpecies(int speciesNum)
 void
 ForcesClass::Accumulate()
 {
+#if NDIM==3
 //     Array<dVec,1> Fanalytic(Ptcls.size()), FFD(Ptcls.size());
 //     dVec zero;
 //     for (int i=0; i<NDIM; i++) zero[i] = 0.0;
@@ -53,8 +54,13 @@ ForcesClass::Accumulate()
 // 	fprintf (stderr, "%12.6f ", FFD(i)[dim]);
 //       fprintf (stderr, "\n");
 //     }
+
   PathData.Actions.GetForces(Ptcls, Forces, Forces);
   Counts++;
+#else
+  cerr<<"2D not implemented in forces"<<endl;
+  assert(NDIM==3);
+#endif
 }
 
 
