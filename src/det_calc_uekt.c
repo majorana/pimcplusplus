@@ -1,4 +1,4 @@
-//#ifdef ORDER_N_FERMIONS
+#ifdef ORDER_N_FERMIONS
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -217,5 +217,5 @@ void det_ratio_calculator_uekt_symmetric_vanilla_value(int (*func)(double*,doubl
 // }/* end det_ratio_calculator_uekt_symmetric_vanilla*/
 
 
-//#endif
+#endif
 #endif
