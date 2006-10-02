@@ -35,6 +35,7 @@ public:
   /// that ratio if the move is rejected, saving time.  Thus, this
   /// function is called twice during a successful multistage move.
   double forwT;
+  bool zFocus;
   double Sample (int &slice1,int &slice2,
 		 Array<int,1> &changedParticles); 
   TablePermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels) 

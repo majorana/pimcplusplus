@@ -240,6 +240,9 @@ void PermuteTableClass::Read(IOSectionClass &inSection)
     Gamma(counter)=tempGamma(counter);
   }
   assert(inSection.ReadVar("epsilon",epsilon));
+  inSection.ReadVar("zfocus",zfocus);
+  if (zfocus)
+    assert(inSection.ReadVar("zalpha",zalpha));
   //  assert(inSection.ReadVar("SpeciesNum",SpeciesNum));
   
   
@@ -360,6 +363,9 @@ void PermuteTableClass::ConstructBosonCycleTable(int speciesNum,
       tempPerm.Length=1;
       tempPerm.CycleRep[0]=i;
       tempPerm.P=Gamma(0);
+      if (zfocus)
+	tempPerm.P=tempPerm.P*
+	  exp(-zalpha*PathData.Path(slice1,i+firstPtcl)[2]*PathData.Path(slice1,i+firstPtcl)[2]+-zalpha*PathData.Path(slice2,i+firstPtcl)[2]*PathData.Path(slice2,i+firstPtcl)[2]);
       tempPerm.C=tempPerm.P;
       if (NumEntries!=0){
 	tempPerm.C+=CycleTable(NumEntries-1).C;
@@ -372,6 +378,9 @@ void PermuteTableClass::ConstructBosonCycleTable(int speciesNum,
 	  hprod=HTable(i,j);
 	  tempPerm.Length=2;
 	  tempPerm.P=Gamma(1)*hprod*HTable(j,i);
+	  if (zfocus)
+	    tempPerm.P=tempPerm.P*
+	      exp(-zalpha*PathData.Path(slice1,j+firstPtcl)[2]*PathData.Path(slice1,j+firstPtcl)[2]+-zalpha*PathData.Path(slice2,j+firstPtcl)[2]*PathData.Path(slice2,j+firstPtcl)[2]);
 	  tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;     
 	  if (tempPerm.P > epsilon)
 	    AddEntry(tempPerm);
@@ -384,6 +393,9 @@ void PermuteTableClass::ConstructBosonCycleTable(int speciesNum,
 		  hprod2=hprod*HTable(j,k);
 		  tempPerm.Length=3;
 		  tempPerm.P=Gamma(2)*hprod2*HTable(k,i);
+	  if (zfocus)
+	    tempPerm.P=tempPerm.P*
+	      exp(-zalpha*PathData.Path(slice1,k+firstPtcl)[2]*PathData.Path(slice1,k+firstPtcl)[2]+-zalpha*PathData.Path(slice2,k+firstPtcl)[2]*PathData.Path(slice2,k+firstPtcl)[2]);
 		  tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
 		  if (tempPerm.P > epsilon)
 		    AddEntry(tempPerm);
@@ -394,6 +406,9 @@ void PermuteTableClass::ConstructBosonCycleTable(int speciesNum,
 			tempPerm.CycleRep[3]=l;
 			tempPerm.Length=4;
 			tempPerm.P=Gamma(3)*hprod3*HTable(l,i);
+	  if (zfocus)
+	    tempPerm.P=tempPerm.P*
+	      exp(-zalpha*PathData.Path(slice1,l+firstPtcl)[2]*PathData.Path(slice1,l+firstPtcl)[2]+-zalpha*PathData.Path(slice2,l+firstPtcl)[2]*PathData.Path(slice2,l+firstPtcl)[2]);
 			tempPerm.C=tempPerm.P+CycleTable(NumEntries-1).C;
 			if (tempPerm.P > epsilon) 
 			  AddEntry(tempPerm);

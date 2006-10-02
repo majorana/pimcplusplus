@@ -97,6 +97,12 @@ public:
   // in Htable.
   double epsilon;
 
+  ///Boolean variable that determines whether whether you focus
+  ///specifically on the particles around z=0
+  bool zfocus;
+  ///Value of alpha in exp(-zalpha*(z-0)^2) that focuses on close to
+  ///the z axis
+  double zalpha;
   void ConstructCycleTable(int speciesNum,int slice1,int slice2);
   void ConstructCycleTable(int speciesNum,int slice1,int slice2,
 			   int excludeParticle);
