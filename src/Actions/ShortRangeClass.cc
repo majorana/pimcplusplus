@@ -57,10 +57,10 @@ void ShortRangeClass::Setup_ck()
       ck(i) += S(i,j) * h(j);
 
   /// HACK HACK HACK
-  FILE *fout = fopen ("gr.dat", "w");
-  for (double r=0.0; r<=Router; r+=0.001)
-    fprintf (fout, "%1.18e %1.18e\n", r, g(r));
-  fclose (fout);
+//   FILE *fout = fopen ("gr.dat", "w");
+//   for (double r=0.0; r<=Router; r+=0.001)
+//     fprintf (fout, "%1.18e %1.18e\n", r, g(r));
+//   fclose (fout);
 
 }
 
@@ -263,12 +263,13 @@ ShortRangeClass::d_dBeta (int slice1, int slice2, int level)
   return dU;
 }
 
-
+//Gradient of the action only works in 3d!!!!!!!
 void
 ShortRangeClass::GradAction(int slice1, int slice2, 
 			    const Array<int,1> &ptcls, int level,
 			    Array<dVec,1> &gradVec)
 {
+#if NDIM==3
   PathClass &Path = PathData.Path;
   int skip = (1<<level);
   assert (gradVec.size() == ptcls.size());
@@ -308,6 +309,10 @@ ShortRangeClass::GradAction(int slice1, int slice2,
       }
     }
   }
+#else
+  cerr<<"Gradient not working in 2d"<<endl;
+  assert(1==2);
+#endif
 }
 
 
