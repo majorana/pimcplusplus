@@ -1,23 +1,12 @@
-/////////////////////////////////////////////////////////////
-// Copyright (C) 2003-2006 Bryan Clark and Kenneth Esler   //
-//                                                         //
-// This program is free software; you can redistribute it  //
-// and/or modify it under the terms of the GNU General     //
-// Public License as published by the Free Software        //
-// Foundation; either version 2 of the License, or         //
-// (at your option) any later version.  This program is    //
-// distributed in the hope that it will be useful, but     //
-// WITHOUT ANY WARRANTY; without even the implied warranty //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. //  
-// See the GNU General Public License for more details.    //
-// For more information, please see the PIMC++ Home Page:  //
-//           http://pathintegrals.info                     //
-/////////////////////////////////////////////////////////////
-
 #include "ST2WaterClass.h"
 #include "../PathDataClass.h"
 
 double CUTOFF = 7.75; // setcutoff: spherical cutoff in angstroms
+double innerCUTOFF = CUTOFF - 2;
+
+string ST2WaterClass::GetName(){
+	return("ST2WaterClass");
+}
 
 ST2WaterClass::ST2WaterClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)
@@ -25,17 +14,17 @@ ST2WaterClass::ST2WaterClass (PathDataClass &pathData) :
   //Do  nothing for now
 }
 
-double ST2WaterClass::SingleAction (int startSlice, int endSlice, 
-	       const Array<int,1> &activeParticles, int level)
-{
-//	cerr << " ST2WaterClass::SingleAction" << endl;// returning ";// << endl;
+double ST2WaterClass::SingleAction (int slice1, int slice2, const Array<int,1> &activeParticles, int level){
+	return Action(slice1, slice2, activeParticles, level);
+}
 
+double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
+{
+//  cerr << "I'm calculating the Action" << endl;
   for (int counter=0;counter<Path.DoPtcl.size();counter++){
     Path.DoPtcl(counter)=true;
   }
 
-//cerr << " I have activePtcls " << endl;
-//	for (int i=0; i< activeParticles.size(); i++) cerr << activeParticles(i) << PathData.Path(0,activeParticles(i)) << endl;
 // obnoxious physical constants
   double elementary_charge = 1.602*pow(10.0,-19);
   double N_Avogadro = 6.022*pow(10.0,23.0);
@@ -58,14 +47,11 @@ double ST2WaterClass::SingleAction (int startSlice, int endSlice,
     int ptcl1 = activeParticles(ptcl1Index);
     Path.DoPtcl(ptcl1) = false;
     int species1=Path.ParticleSpeciesNum(ptcl1);
-    double sigma_over_cutoff = PathData.Species(species1).Sigma/CUTOFF;
-    double offset = pow(sigma_over_cutoff,12) - pow(sigma_over_cutoff,6);
 
     if (species1==speciesO){
       int counter = 0;
 //    Calculate o-o interaction
       for (int ptcl2=Path.Species(speciesO).FirstPtcl;ptcl2<=Path.Species(speciesO).LastPtcl;ptcl2++) {///loop over oxygen
-        // would it be possible to remove this conditional... just loop over j=(i+1,N)?
 	if (Path.DoPtcl(ptcl2)){
 //          int PairIndex = PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2));
 	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
@@ -74,16 +60,19 @@ double ST2WaterClass::SingleAction (int startSlice, int endSlice,
 	    PathData.Path.DistDisp(slice, ptcl1, ptcl2, rmag, r);
 //  implement spherical cutoff  
             if (rmag <= CUTOFF){
-//cerr << ptcl1 << PathData.Path(slice,ptcl1) << Path.ParticleSpeciesNum(ptcl1) << ", ";
-//cerr << ptcl2 << PathData.Path(slice,ptcl2) << Path.ParticleSpeciesNum(ptcl2) << ": " ;
               counter ++;
-              double rinv = 1.0/rmag;
-              double sigR = PathData.Species(species1).Sigma*rinv;
-              double sigR6 = sigR*sigR*sigR*sigR*sigR*sigR;
-              // this should be calculated as a constant basically; much earlier
-	      double lj = 4*PathData.Species(species1).Epsilon*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
+              double sigma_over_r = PathData.Species(species1).Sigma/rmag;
+              double sigma_over_cutoff = PathData.Species(species1).Sigma/CUTOFF;
+              double offset = pow(sigma_over_cutoff,12) - pow(sigma_over_cutoff,6);
+	      double lj = 4*PathData.Species(species1).Epsilon*(pow(sigma_over_r,12)-pow(sigma_over_r,6) - offset); // this is in kcal/mol 
 	      TotalU += lj;
-	      //cerr << "lj  " << lj << " at distance " << rmag << endl;
+              // harmonic potential for dimer tesing!!
+              double omega = 2.6*pow(10.0,13);
+              double mass = 0.036;
+              double x = (rmag-2.85)*angstrom_to_m;
+              double quad = 0.5*mass*omega*omega*x*x;
+//              TotalU += quad;
+//	      cerr << "lj  " << lj << " at distance " << rmag << endl;
             }
 	  }
 	}
@@ -104,14 +93,12 @@ double ST2WaterClass::SingleAction (int startSlice, int endSlice,
 // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
-//cerr << ptcl1 << PathData.Path(slice,ptcl1) << Path.ParticleSpeciesNum(ptcl1) << ", ";
-//cerr << ptcl2 << PathData.Path(slice,ptcl2) << Path.ParticleSpeciesNum(ptcl2) << ": " ;
               double cutoff = PathData.Actions.TIP5PWater.CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
 	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciesp).Charge*N_Avogadro/kcal_to_joule;
-              //double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
-              double coulomb = coulomb_const*(1.0/rmag - 1.0/cutoff);
+              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
+              //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
 	      TotalU += coulomb;
-	      //cerr << "protons " << coulomb << " at distance " << rmag  << " with cutoff " << cutoff << endl;
+//	      cerr << "protons " << coulomb << " at distance " << rmag  << " with offset " << coulomb_const/CUTOFF << endl;
             }
           }
 	}
@@ -127,14 +114,12 @@ double ST2WaterClass::SingleAction (int startSlice, int endSlice,
 // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
-//cerr << ptcl1 << PathData.Path(slice,ptcl1) << Path.ParticleSpeciesNum(ptcl1) << ", ";
-//cerr << ptcl2 << PathData.Path(slice,ptcl2) << Path.ParticleSpeciesNum(ptcl2) << ": " ;
               double cutoff = PathData.Actions.TIP5PWater.CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
   	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciese).Charge*N_Avogadro/kcal_to_joule;
-              //double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
-              double coulomb = coulomb_const*(1.0/rmag - 1.0/cutoff);
+              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
+              //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
 	      TotalU += coulomb;
-	      //cerr << "electrons " << coulomb << " at distance " << rmag  << " with cutoff " << cutoff << endl;
+//	      cerr << "electrons " << coulomb << " at distance " << rmag << " with offset " << coulomb_const/CUTOFF << endl;
             }
 	  }
 	}
@@ -149,14 +134,12 @@ double ST2WaterClass::SingleAction (int startSlice, int endSlice,
   double TotalU_times_tau = TotalU*PathData.Path.tau;
 //  cerr << TotalU << " and times tau " << TotalU_times_tau << " at temp " << 1.0/PathData.Path.tau << endl;
 //  cerr << "I'm returning ST2 action " << TotalU_times_tau << endl;
-//cerr << "		returning " << TotalU_times_tau;
   return (TotalU_times_tau);
 }
 
 double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 {
-//cerr << "d_dBeta: computing energy..." << endl;
-//cerr << "  Box size is " << Path.GetBox() << endl;
+	cerr << "ST2WaterClass::d_dBeta_________________";// << endl;
   double thermal = 6/PathData.Path.tau;
   Array<int,1> activeParticles(PathData.Path.NumParticles());
   for (int i=0;i<PathData.Path.NumParticles();i++){
@@ -194,33 +177,28 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 */
     Path.DoPtcl(ptcl1) = false;
     int species1=Path.ParticleSpeciesNum(ptcl1);
-//    cerr << "  Choosing particle " << ptcl1 << " which is of species " << species1 << endl;
+//    cerr << "Choosing particle " << ptcl1 << " which is of species " << species1 << endl;
 
     if (species1==speciesO){
       int counter = 0;
 //    Calculate o-o interaction
       for (int ptcl2=Path.Species(speciesO).FirstPtcl;ptcl2<=Path.Species(speciesO).LastPtcl;ptcl2++) {///loop over oxygen
-//cerr << "    and O ptcl " << ptcl2 << endl;
 	if (Path.DoPtcl(ptcl2)){
 //          int PairIndex = PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2));
 	  
 	  for (int slice=startSlice;slice<endSlice;slice+=skip){
-//cerr << "      slice " << slice << endl;
+//cerr << "slice " << slice << endl;
 	    dVec r, rp;
 	    double rmag, rpmag;
 	    PathData.Path.DistDisp(slice, ptcl1, ptcl2,
 				   rmag, r);
 //  implement spherical cutoff  
-//cerr << "      coord for ptcl1 " << Path(slice,ptcl1) << endl;
-//cerr << "      coord for ptcl2 " << Path(slice,ptcl2) << endl;
-//cerr << "      I calculate r " << r << endl;
-//cerr << "      rmag is " << rmag << endl;
             if (rmag <= CUTOFF){
-//cerr << "      sigma " << PathData.Species(species1).Sigma << " and epsilon " << PathData.Species(species1).Epsilon << endl;
               counter ++;
               double sigma_over_r = PathData.Species(species1).Sigma/rmag;
 	      double lj = 4*PathData.Species(species1).Epsilon*(pow(sigma_over_r,12)-pow(sigma_over_r,6)); // this is in kcal/mol 
 	      TotalU += lj;
+							//cerr  << TotalU << " added " << lj << " from LJ interaction between " << ptcl1 << " and " << ptcl2 << endl;
               // harmonic potential for dimer tesing!!
               double omega = 2.6*pow(10.0,13);
               double mass = 0.036;
@@ -239,44 +217,36 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
       /// calculating coulomb interactions
       for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {///loop over protons
 //  don't compute intramolecular interactions
-//cerr << "    and p ptcl " << ptcl2 << endl;
 	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
 	  for (int slice=startSlice;slice<endSlice;slice+=skip){
-//cerr << "      slice " << slice << endl;
 	    double rmag;
 	    dVec r;
 	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
 // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
-//cerr << "      rmag is " << rmag << " and Ormag is " << Ormag << endl;
             if (Ormag <= CUTOFF){
-//cerr << "      charge1 " << PathData.Species(species1).Charge << " and charge2 " << PathData.Species(speciesp).Charge << endl;
 	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciesp).Charge*N_Avogadro/kcal_to_joule;
-              //double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);
-              double coulomb = coulomb_const*(1.0/rmag);
+              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);
 	      TotalU += coulomb;
+							//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
             }
           }
 	}
       }
       for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {///loop over electrons
 //  don't compute intramolecular interactions
-//cerr << "    and e ptcl " << ptcl2 << endl;
 	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
 	  for (int slice=startSlice;slice<endSlice;slice+=skip){
-//cerr << "      slice " << slice << endl;
 	    double rmag;
 	    dVec r;
 	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
 // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
-//cerr << "      rmag is " << rmag << " and Ormag is " << Ormag << endl;
             if (Ormag <= CUTOFF){
-//cerr << "      charge1 " << PathData.Species(species1).Charge << " and charge2 " << PathData.Species(speciesp).Charge << endl;
 	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciese).Charge*N_Avogadro/kcal_to_joule;
-              //double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);
-              double coulomb = coulomb_const*(1.0/rmag);
+              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);
 	      TotalU += coulomb;
+							//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
             }
 	  }
 	}
@@ -293,8 +263,8 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 //  cerr << "Energy function is returning " << TotalU << endl;
 
   double energy_per_molecule = TotalU/PathData.Path.numMol;
-  //cerr << "  Energy per molecule " << energy_per_molecule << endl;
 //  return energy_per_molecule; // + thermal;
+	cerr << "RETURNING " << TotalU << endl;
   return TotalU;
 }
 
@@ -1255,8 +1225,7 @@ double ST2WaterClass::FixedAxisAction(int startSlice, int endSlice, const Array<
 //cerr << "nprime " << nprime << endl;
       double vel_squared;
       double prefactor;
-      //if (n == nprime){
-      if (PathData.Actions.TIP5PWater.dVecsEqual(n,nprime)){
+      if (n == nprime){
 //        cerr << "EQUAL--------------------------------" << endl;
 //        vel_squared = 0.0;
       }
@@ -1404,8 +1373,7 @@ double ST2WaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
         double vel_squared;
         double prefactor;
         double CDsqrt;
-      //  if (n == nprime){
-        if (PathData.Actions.TIP5PWater.dVecsEqual(n,nprime)){
+        if (n == nprime){
  //         vel_squared = 0.0;
         }
         else{
@@ -1550,8 +1518,7 @@ double ST2WaterClass::NewRotKinAction(int startSlice, int endSlice, const Array<
 //cerr << "n " << n << endl;
 //cerr << "nprime " << nprime << endl;
       double vel_squared;
-      //if (n == nprime){
-      if (PathData.Actions.TIP5PWater.dVecsEqual(n,nprime)){
+      if (n == nprime){
 //        cerr << "EQUAL--------------------------------" << endl;
 //        vel_squared = 0.0;
       }
@@ -1731,8 +1698,7 @@ double ST2WaterClass::NewRotKinEnergy(int startSlice, int endSlice, int level)
         n = Normalize(n);
         nprime = Normalize(nprime);
         double vel_squared;
-        //if (n == nprime){
-        if (PathData.Actions.TIP5PWater.dVecsEqual(n,nprime)){
+        if (n == nprime){
           vel_squared = 0.0;
         }
         else{
@@ -1898,11 +1864,4 @@ double ST2WaterClass::CalcPsi(double theta)
   else
     psi = acos(cos(theta)/SinAlpha);  
   return psi;
-}
-
-
-string 
-ST2WaterClass::GetName()
-{
-  return "ST2Water";
 }

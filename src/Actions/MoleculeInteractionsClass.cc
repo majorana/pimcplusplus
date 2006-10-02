@@ -50,11 +50,13 @@ double MoleculeInteractionsClass::SingleAction (int startSlice, int endSlice,
 
 double MoleculeInteractionsClass::d_dBeta (int startSlice, int endSlice,  int level)
 {
+	//cerr << "MoleculeInteractions::d_dBeta__________________";// << endl;
   Array<int,1> activeParticles(PathData.Path.NumParticles());
   for (int i=0;i<PathData.Path.NumParticles();i++)
     activeParticles(i)=i;
 
-	double TotalU = ComputeEnergy(startSlice, endSlice, activeParticles, level, false);
+	double TotalU = ComputeEnergy(startSlice, endSlice-1, activeParticles, level, false);
+	//cerr << "RETURNING " << TotalU << endl;
   return TotalU;
 }
 
@@ -71,28 +73,34 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 
 	//cerr << "Hello.  This is MoleculeInteractionsClass::ComputeEnergy.  ActivePtcls are " << activeParticles << endl;
 	//cerr << "I'm doing Intramolecular " << IntraMolecular << " and with_truncations " << with_truncations << " and with modulation " << withS << endl;
+	//cerr << "CUTOFF is " << CUTOFF << endl;
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = activeParticles(ptcl1Index);
     Path.DoPtcl(ptcl1) = false;
+		//cerr << "DoPtcl bools are after killing " << ptcl1 << Path.DoPtcl << endl;
     int species1=Path.ParticleSpeciesNum(ptcl1);
 
-		//	Calculate o-o interaction
+		//	Calculate Lennard-Jones interaction
     if (Interacting(species1,0)){
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
     		int species2=Path.ParticleSpeciesNum(ptcl2);
+				//cerr << "Considering LJ between " << ptcl1 << " and " << ptcl2 << " for which DoPtcl is " << Path.DoPtcl(ptcl2) << "...";
     		if (Interacting(species2,0) && Path.DoPtcl(ptcl2)){
+					//cerr << " Going to compute between " << ptcl1 << " and " << ptcl2;
 	  			for (int slice=startSlice;slice<=endSlice;slice+=skip){
 	    			dVec r;
 	    			double rmag;
 	    			PathData.Path.DistDisp(slice, ptcl1, ptcl2, rmag, r);
-						if(ptcl1==Path.MolRef(ptcl1) && ptcl2==Path.MolRef(ptcl2) && !Updated(ptcl1,ptcl2)){
-							Updated(ptcl1,ptcl2) = Updated(ptcl2,ptcl1) = true;
-							COMTable(ptcl1,ptcl2) = COMTable(ptcl2,ptcl1) = rmag;
-							COMVecs(ptcl1,ptcl2) = r;
-							COMVecs(ptcl2,ptcl1) = -1*r;
-						}
+						//cerr << "... rmag is " << rmag;
+						//if(ptcl1==Path.MolRef(ptcl1) && ptcl2==Path.MolRef(ptcl2) && !Updated(ptcl1,ptcl2)){
+						//	Updated(ptcl1,ptcl2) = Updated(ptcl2,ptcl1) = true;
+						//	COMTable(ptcl1,ptcl2) = COMTable(ptcl2,ptcl1) = rmag;
+						//	COMVecs(ptcl1,ptcl2) = r;
+						//	COMVecs(ptcl2,ptcl1) = -1*r;
+						//}
 						//	disregard interactions outside spherical cutoff  
             if (rmag <= CUTOFF){
+							//cerr << "<"<<CUTOFF;
               double rinv = 1.0/rmag;
               double sigR = PathData.Species(species1).Sigma*rinv;
               double sigR6 = sigR*sigR*sigR*sigR*sigR*sigR;
@@ -101,10 +109,16 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
   							double sigma_over_cutoff = PathData.Species(species1).Sigma/CUTOFF;
   							offset = pow(sigma_over_cutoff,12) - pow(sigma_over_cutoff,6);
 							}
+							//cerr << "; using offset " << offset << endl;
 	      			double lj = 4*PathData.Species(species1).Epsilon*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
 	      			TotalU += lj;
+							//cerr  << TotalU << " added " << lj << " from LJ interaction between " << ptcl1 << " and " << ptcl2 << endl;
             }
+						//cerr << "... outside" << endl;
 	  			}
+				}
+				else{
+					//cerr << "Skipped" << endl;
 				}
       }
     } else if(Interacting(species1,1)){
@@ -120,20 +134,21 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 	    				dVec r;
 	    				PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
 							// implement spherical cutoff
-            	double Ormag = COMSeparation(slice,Path.MolRef(ptcl1),Path.MolRef(ptcl2));
+            	double Ormag = COMSeparation(slice,ptcl1,ptcl2);
             	if (Ormag <= CUTOFF){
-							double truncate = 0.0;
-              double cutoff = 1.0;
-							if(with_truncations){
-								truncate = 1.0;
-								cutoff = CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
-							}
-							double modulation=1.0;
-							if(withS)
-								modulation = S(Ormag);
-              double coulomb = prefactor*PathData.Species(species1).Charge
-															*PathData.Species(species2).Charge*modulation*(1.0/rmag - truncate/cutoff);
-	      			TotalU += coulomb;
+								double truncate = 0.0;
+              	double ptclCutoff = 1.0;
+								if(with_truncations){
+									truncate = 1.0;
+									ptclCutoff = CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
+								}
+								double modulation=1.0;
+								if(withS)
+									modulation = S(Ormag);
+              	double coulomb = prefactor*PathData.Species(species1).Charge
+																*PathData.Species(species2).Charge*modulation*(1.0/rmag - truncate/ptclCutoff);
+	      				TotalU += coulomb;
+								//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
   	          }
   	        }
 					}
@@ -164,16 +179,16 @@ double MoleculeInteractionsClass::CalcCutoff(int ptcl1, int ptcl2, int slice, do
   // get vector between oxygens
   dVec Roo;
   double Ormag;
-	if(!Updated(Optcl1,Optcl2)){
+	//if(!Updated(Optcl1,Optcl2)){
   	PathData.Path.DistDisp(slice, Optcl1, Optcl2, Ormag, Roo);
-		Updated(Optcl1,Optcl2) = Updated(Optcl2,Optcl1) = true;
-		COMTable(Optcl1,Optcl2) = COMTable(Optcl2,Optcl1) = Ormag;
-		COMVecs(Optcl1,Optcl2) = Roo;
-		COMVecs(Optcl2,Optcl1) = -1*Roo;
-	} else {
-		Ormag = COMTable(Optcl1,Optcl2);
-		Roo = COMVecs(Optcl1,Optcl2);
-	}
+	//	Updated(Optcl1,Optcl2) = Updated(Optcl2,Optcl1) = true;
+	//	COMTable(Optcl1,Optcl2) = COMTable(Optcl2,Optcl1) = Ormag;
+	//	COMVecs(Optcl1,Optcl2) = Roo;
+	//	COMVecs(Optcl2,Optcl1) = -1*Roo;
+	//} else {
+	//	Ormag = COMTable(Optcl1,Optcl2);
+	//	Roo = COMVecs(Optcl1,Optcl2);
+	//}
   dVec Rc = Scale(Roo,Rcmag);
   // get constituent coordinates WRT oxygen COM
   dVec P1 = PathData.Path(slice,ptcl1);
@@ -189,18 +204,20 @@ double MoleculeInteractionsClass::CalcCutoff(int ptcl1, int ptcl2, int slice, do
 
 double MoleculeInteractionsClass::COMSeparation (int slice,int ptcl1,int ptcl2)
 {
+  // get oxygen particle ids
+  int Optcl1 = Path.MolRef(ptcl1);
+  int Optcl2 = Path.MolRef(ptcl2);
   dVec Or;
   double Ormag;
 
-	if(!Updated(ptcl1,ptcl2)){
-  	PathData.Path.DistDisp(slice, ptcl1, ptcl2, Ormag, Or);
-		Updated(ptcl1,ptcl2) = Updated(ptcl2,ptcl1) = true;
-		COMTable(ptcl1,ptcl2) = COMTable(ptcl2,ptcl1) = Ormag;
-		COMVecs(ptcl1,ptcl2) = Or;
-		COMVecs(ptcl2,ptcl1) = -1*Or;
-	} else {
-		Ormag = COMTable(ptcl1,ptcl2);
-	}
+	//if(!Updated(Optcl1,Optcl2)){
+  	PathData.Path.DistDisp(slice, Optcl1, Optcl2, Ormag, Or);
+//		Updated(Optcl1,Optcl2) = Updated(Optcl2,Optcl1) = true; COMTable(Optcl1,Optcl2) = COMTable(Optcl2,Optcl1) = Ormag;
+//		COMVecs(Optcl1,Optcl2) = Or;
+//		COMVecs(Optcl2,Optcl1) = -1*Or;
+//	} else {
+//		Ormag = COMTable(Optcl1,Optcl2);
+//	}
 
   return Ormag;
 }

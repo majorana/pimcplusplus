@@ -79,6 +79,10 @@ void MolMoveClass::Read (IOSectionClass &in){
 			PathData.Actions.MoleculeInteractions.Read(in);
   		Actions.push_back(&PathData.Actions.MoleculeInteractions);
 			cerr << "  Added Molecule Actions" << endl;
+		}else if(setAction == "ST2Water"){
+			//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
+  		Actions.push_back(&PathData.Actions.ST2Water);
+			cerr << "Added ST2Water action" << endl;
 #ifdef USE_QMC
 		}else if(setAction == "CEIMCAction"){
 			//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);

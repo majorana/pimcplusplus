@@ -20,6 +20,7 @@
 // specification of energy observables 
 // to compute; see below -John
 #include "../Actions/MoleculeInteractionsClass.h"
+#include "../Actions/ST2WaterClass.h"
 #include "../Actions/QMCSamplingClass.h"
 
 // Fix to include final link between link M and 0
@@ -56,6 +57,7 @@ void EnergyClass::Accumulate()
 		double otherE = OtherActions[n]->d_dBeta(slice1,slice2,0);
 		OtherSums[n] += otherE;
 		TotalSum += otherE;
+		cerr << "  finished." << endl;
 	}
 
 //   double kAction, uShortAction, uLongAction, nodeAction;
@@ -70,6 +72,7 @@ void EnergyClass::Accumulate()
 //   TotalActionSum += (kAction + uShortAction + uLongAction + nodeAction);
 
   //  TIP5PSum   += tip5p;
+	cerr << "ObservableEnergy leaving Accumulate" << endl;
 }
 
 
@@ -242,6 +245,11 @@ void EnergyClass::Read(IOSectionClass &in)
 	for(int n=0; n<numEnergies; n++){
 		if(EnergyStrings(n) == "MoleculeInteractions"){
 			OtherActions[n] = &PathData.Actions.MoleculeInteractions;
+			PathData.Actions.MoleculeInteractions.Read(in);
+			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
+			OtherSums[n] = 0.0;
+		} else if(EnergyStrings(n) == "ST2WaterClass"){
+			OtherActions[n] = &PathData.Actions.ST2Water;
 			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
 			OtherSums[n] = 0.0;
 		} else if(EnergyStrings(n) == "QMCSamplingClass"){
