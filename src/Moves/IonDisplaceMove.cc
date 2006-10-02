@@ -3,6 +3,7 @@
 double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
 				      Array<int,1> &activeParticles)
 {
+#if NDIM==3
   SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
   double beta = PathData.Path.GetBeta();
   int first = ionSpecies.FirstPtcl;
@@ -87,12 +88,17 @@ double IonDisplaceStageClass::Sample (int &slice1, int &slice2,
 
   // And return sample probability ratio
   return 1.0;
+#else
+  cerr<<"Ion displace stage Sample not implemented in 2d"<<endl;
+  assert(1==2);
+#endif
 }
 
 
 double
 IonDisplaceStageClass::NewElectronWarp()
 {
+#if NDIM==3
   SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
   int N = ionSpecies.NumParticles;
 
@@ -199,6 +205,10 @@ IonDisplaceStageClass::NewElectronWarp()
 //   cerr << "Estimate deltaK = " << deltaK << endl;
 //  return (exp(jWarp + jTri + jScale));
   return (exp(jWarp));
+#else
+  cerr<<"IONDisplace Move does not work in 2d!!!"<<endl;
+  assert(NDIM==3);
+#endif
 }
 
 
@@ -206,6 +216,7 @@ IonDisplaceStageClass::NewElectronWarp()
 double
 IonDisplaceStageClass::DoElectronWarp()
 {
+#if NDIM==3
   cerr << "DoElectronWarp...\n";
   SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
   int ionFirst = ionSpecies.FirstPtcl;
@@ -307,6 +318,10 @@ IonDisplaceStageClass::DoElectronWarp()
   cerr << "JProdRev/JProdForw = " << exp(logJProdRev-logJProdForw) << endl;
   //  return exp(logJProdRev-logJProdForw);
   return 1.0;
+#else 
+  cerr<<"Not Implemented in 2d"<<endl;
+  assert(NDIM==3);
+#endif
 }
 
 
