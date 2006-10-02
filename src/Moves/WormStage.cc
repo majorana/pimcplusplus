@@ -148,8 +148,14 @@ double WormStageClass::Sample(int &slice1,int &slice2,
   int headPtcl;
   int tailSlice;
   int tailPtcl;
-  PathData.FindHead(headSlice,headPtcl);
-  PathData.FindTail(tailSlice,tailPtcl);
+  int numEmpty;
+  int wormSize;
+  PathData.WormInfo(headSlice, headPtcl,
+			 tailSlice, tailPtcl,
+			 numEmpty,  wormSize);
+  
+
+
   SetMode(OLDMODE);
   //  PathData.Path.PrintRealSlices();
   SetMode(NEWMODE);
@@ -166,7 +172,10 @@ double WormStageClass::Sample(int &slice1,int &slice2,
   if (!MoveHead && Grow){
     cerr<<"Worm Preparing to grow tail "<<ChangeAmount<<endl;
     MakeRoomForGrowingTail(ChangeAmount,tailSlice);
-    PathData.FindTail(tailSlice,tailPtcl);
+    PathData.WormInfo(headSlice, headPtcl,
+	     tailSlice, tailPtcl,
+	     numEmpty, wormSize);
+
     for (int slice=tailSlice;slice<tailSlice+ChangeAmount;slice++){
       dVec delta;
       Path.Random.LocalGaussianVec(sigma,delta);
@@ -190,7 +199,10 @@ double WormStageClass::Sample(int &slice1,int &slice2,
   else if (MoveHead && Grow){
     cerr<<"Worm Preparing to grow the head "<<ChangeAmount<<endl;
     MakeRoomForGrowingHead(ChangeAmount,headSlice);
-    PathData.FindHead(headSlice,headPtcl);
+    PathData.WormInfo(headSlice, headPtcl,
+	     tailSlice, tailPtcl,
+	     numEmpty, wormSize);
+
     //    cerr<<headSlice<<" "<<ChangeAmount<<endl;
     for (int slice=headSlice;slice>headSlice-ChangeAmount;slice--){
       dVec delta;
@@ -215,8 +227,10 @@ double WormStageClass::Sample(int &slice1,int &slice2,
   else if (MoveHead && !Grow){
     cerr<<"Worm Preparing to shrink head "<<ChangeAmount<<endl;
     MakeRoomForShrinkingHead(ChangeAmount,headSlice);
-    PathData.FindTail(tailSlice,tailPtcl);
-    PathData.FindHead(headSlice,headPtcl);
+    PathData.WormInfo(headSlice, headPtcl,
+	     tailSlice, tailPtcl,
+	     numEmpty, wormSize);
+
     int slice=headSlice;
     slice2=headSlice;
     slice1=headSlice;
@@ -249,8 +263,10 @@ double WormStageClass::Sample(int &slice1,int &slice2,
 	<<headPtcl<<endl;
     MakeRoomForShrinkingTail(ChangeAmount,tailSlice);
     //    PathData.Path.PrintRealSlices();
-    PathData.FindTail(tailSlice,tailPtcl);
-    PathData.FindHead(headSlice,headPtcl);
+    PathData.WormInfo(headSlice, headPtcl,
+	     tailSlice, tailPtcl,
+	     numEmpty, wormSize);
+
     int slice=tailSlice;
     slice1=tailSlice;
     while (slice>tailSlice-ChangeAmount &&(!(headPtcl==tailPtcl && headSlice==slice))){
