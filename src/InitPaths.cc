@@ -80,7 +80,6 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
 
 	Path(relSlice,ptcl) = pos;
       }
-      cerr<<"I'm putting the slice "<<slice<<" and the ptcl "<<ptcl<<"as "<<Path(slice,ptcl)<<endl;
     }      
     ///If you are the last processors you must make sure the last
     ///slice is the same as the first slice on the first
