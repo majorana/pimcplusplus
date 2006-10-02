@@ -451,6 +451,7 @@ FixedPhaseClass::Action (int slice1, int slice2,
 			 const Array<int,1> &activeParticles, 
 			 int level, int speciesNum)
 {
+#if NDIM==3
   int skip = 1<<level;
   double levelTau = ldexp(Path.tau, level);
   const double lambda = Path.Species(UpSpeciesNum).lambda;
@@ -530,6 +531,7 @@ FixedPhaseClass::Action (int slice1, int slice2,
     }
   }
   return action;
+#endif
 }
 
 double
@@ -887,6 +889,7 @@ FixedPhaseClass::UpdateBands()
 void
 FixedPhaseClass::UpdateCache()
 {
+#if NDIM==3
   clock_t start, stop;
   perr << "Starting cache update.\n";
   start = clock();
@@ -925,6 +928,7 @@ FixedPhaseClass::UpdateCache()
   stop = clock();
   perr << "Finished cache update.  Time = "
        << (double)(stop-start)/(double)CLOCKS_PER_SEC << " seconds.\n";
+#endif
 }
 
 
