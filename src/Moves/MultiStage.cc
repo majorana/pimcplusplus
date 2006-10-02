@@ -42,7 +42,7 @@ void MultiStageClass::MakeMove()
   double prevActionChange=0.0;
   //  NewMoveProb=1.0;
   //  OldMoveProb=1.0;
-  cerr<<"In "<<endl;
+  //  cerr<<"In "<<endl;
   while (stageIter!=Stages.end() && toAccept){
     toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 				     ActiveParticles,prevActionChange);
