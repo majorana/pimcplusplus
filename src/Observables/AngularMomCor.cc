@@ -65,6 +65,7 @@ void AngularMomCor::Read(IOSectionClass &in)
 
 void AngularMomCor::Accumulate()
 {
+#if NDIM==3
   TotalCounts++;
   PathClass &Path= PathData.Path;
   SpeciesClass &species=PathData.Path.Species(Species);
@@ -95,5 +96,8 @@ void AngularMomCor::Accumulate()
     }
     
   }
- 
+#else
+  cerr<<"AngularMomCor doesn't work in 3d"<<endl;
+  assert(NDIM==3);
+#endif
 }
