@@ -114,6 +114,19 @@ namespace IO {
       H5Tenum_insert(BoolType, "TRUE", &val);
       H5Tcommit (GroupID, "BOOL", BoolType);
     }
+    ComplexType = H5Topen(GroupID, "COMPLEX");
+    // If we don't already have this in here (old version of this
+    // library created this file), create a new one and stick it in the
+    // file. 
+    if (ComplexType < 0) {
+      ComplexType = H5Tcreate(H5T_COMPOUND, sizeof(complex<double>));
+      H5Tinsert (ComplexType, "real", HOFFSET(complex<double>,real()),
+		 H5T_NATIVE_DOUBLE);
+      H5Tinsert (ComplexType, "imaginary", HOFFSET(complex<double>,imag()),
+		 H5T_NATIVE_DOUBLE);
+      
+      H5Tcommit (GroupID, "COMPLEX", ComplexType);
+    }
     // And turn it back on;
     H5Eset_auto(func, client_data);
 
@@ -146,6 +159,14 @@ namespace IO {
     H5Tenum_insert(BoolType, "TRUE", &val);
     H5Tcommit (FileID, "BOOL", BoolType);
 
+    // Create complex compound type
+    ComplexType = H5Tcreate(H5T_COMPOUND, sizeof(complex<double>));
+    H5Tinsert (ComplexType, "real", HOFFSET(complex<double>,real()),
+	       H5T_NATIVE_DOUBLE);
+    H5Tinsert (ComplexType, "imaginary", HOFFSET(complex<double>,imag()),
+	       H5T_NATIVE_DOUBLE);
+    H5Tcommit (FileID, "COMPLEX", ComplexType);
+
     IsOpen = (FileID >= 0);
     success = IsOpen;
     if (success) {
@@ -175,6 +196,7 @@ namespace IO {
     if (FileName!="") {
       // Release BoolType;
       H5Tclose (BoolType);
+      H5Tclose (ComplexType);
       H5Fclose(GroupID);
     }
     else {
@@ -210,6 +232,7 @@ namespace IO {
     newSection->Parent=this;
     newSection->MyNumber=CurrSecNum;
     newSection->BoolType = BoolType;
+    newSection->ComplexType = ComplexType;
     SectionList.push_back(newSection);
   
     string numstr = NumExtension(CurrSecNum);
@@ -299,6 +322,7 @@ namespace IO {
 	StripName(member_name,newTree->Name,newTree->MyNumber);
 	InsertSection(newTree);
 	newTree->BoolType = BoolType;
+	newTree->ComplexType = ComplexType;
 	newTree->ReadGroup (GroupID, member_name, this);
       }
       else {
@@ -320,7 +344,7 @@ namespace IO {
     }
     else if (statbuf.type == H5G_DATASET) {
       hid_t datasetID = H5Dopen(GroupID, member_name.c_str());
-      VarList.push_back (NewIOVarHDF5(datasetID, member_name, BoolType));
+      VarList.push_back (NewIOVarHDF5(datasetID, member_name, BoolType, ComplexType));
     }
     else if (statbuf.type == H5G_TYPE) {
       if (member_name != "BOOL")

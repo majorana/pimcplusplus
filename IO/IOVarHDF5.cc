@@ -134,7 +134,7 @@ namespace IO {
     Array<unsigned char,1> cval(dims);
     val.resize(dims);
     herr_t status = H5Dread(DatasetID, BoolTypeID, MemSpaceID, DiskSpaceID,
-			     H5P_DEFAULT, val.data());
+			     H5P_DEFAULT, cval.data());
     for (int i=0; i<dims[0]; i++)
       val(i) = (cval(i) == 1);
     return (status == 0);
@@ -150,7 +150,7 @@ namespace IO {
     Array<unsigned char,2> cval(dims);
     val.resize(dims);
     herr_t status = H5Dread(DatasetID, BoolTypeID, MemSpaceID, DiskSpaceID,
-			     H5P_DEFAULT, val.data());
+			     H5P_DEFAULT, cval.data());
     for (int i=0; i<dims[0]; i++)
       for (int j=0; j<dims[1]; j++)
 	val(i,j) = (cval(i,j) == 1);
@@ -167,7 +167,7 @@ namespace IO {
     Array<unsigned char,3> cval(dims);
     val.resize(dims);
     herr_t status = H5Dread(DatasetID, BoolTypeID, MemSpaceID, DiskSpaceID,
-			     H5P_DEFAULT, val.data());
+			     H5P_DEFAULT, cval.data());
     for (int i=0; i<dims[0]; i++)
       for (int j=0; j<dims[1]; j++)
 	for (int k=0; k<dims[2]; k++)
@@ -185,7 +185,7 @@ namespace IO {
     Array<unsigned char,4> cval(dims);
     val.resize(dims);
     herr_t status = H5Dread(DatasetID, BoolTypeID, MemSpaceID, DiskSpaceID,
-			     H5P_DEFAULT, val.data());
+			     H5P_DEFAULT, cval.data());
     for (int i=0; i<dims[0]; i++)
       for (int j=0; j<dims[1]; j++)
 	for (int k=0; k<dims[2]; k++)
@@ -193,6 +193,74 @@ namespace IO {
 	    val(i,j,k,k) = (cval(i,j,k,l) == 1);
     return (status == 0);     
   }
+
+
+  ///////////////////////////
+  // Complex type VarReads //
+  ///////////////////////////
+//   template<> bool
+//   IOVarHDF5<complex<double>,0>::VarRead(complex<double> &val)
+//   {
+//     herr_t status = H5Dread(DatasetID, ComplexTypeID, MemSpaceID, 
+// 			    DiskSpaceID, H5P_DEFAULT, &val);
+//     return (status == 0);
+//   }  
+  
+//   template<> bool
+//   IOVarHDF5<complex<double>,1>::VarRead(Array<complex<double>,1> &val)
+//   {
+//     TinyVector<hsize_t,1> hdims;
+//     TinyVector<int,1> dims;
+//     H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+//     dims = hdims;
+//     Array<unsigned char,1> cval(dims);
+//     val.resize(dims);
+//     herr_t status = H5Dread(DatasetID, ComplexTypeID, MemSpaceID, DiskSpaceID,
+// 			     H5P_DEFAULT, val.data());
+//     return (status == 0);
+//   }
+  
+//   template<> bool
+//   IOVarHDF5<complex<double>,2>::VarRead(Array<complex<double>,2> &val)
+//   {
+//     TinyVector<hsize_t,2> hdims;
+//     TinyVector<int,2> dims;
+//     H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+//     dims = hdims;
+//     Array<unsigned char,2> cval(dims);
+//     val.resize(dims);
+//     herr_t status = H5Dread(DatasetID, ComplexTypeID, MemSpaceID, DiskSpaceID,
+// 			     H5P_DEFAULT, val.data());
+//     return (status == 0); 
+//   }
+  
+//   template<> bool
+//   IOVarHDF5<complex<double>,3>::VarRead(Array<complex<double>,3> &val)
+//   {
+//     TinyVector<hsize_t,3> hdims;
+//     TinyVector<int,3> dims;
+//     H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+//     dims = hdims;
+//     val.resize(dims);
+//     herr_t status = H5Dread(DatasetID, ComplexTypeID, MemSpaceID, DiskSpaceID,
+// 			     H5P_DEFAULT, val.data());
+//     return (status == 0); 
+//   }
+  
+//   template<> bool
+//   IOVarHDF5<complex<double>,4>::VarRead(Array<complex<double>,4> &val)
+//   {
+//     TinyVector<hsize_t,4> hdims;
+//     TinyVector<int,4> dims;
+//     H5Sget_simple_extent_dims(MemSpaceID, &(hdims[0]), NULL);
+//     dims = hdims;
+//     val.resize(dims);
+//     herr_t status = H5Dread(DatasetID, ComplexTypeID, MemSpaceID, DiskSpaceID,
+// 			     H5P_DEFAULT, val.data());
+//     return (status == 0);     
+//   }
+
+
   
   //////////////////////////////////////////
   /// String and bool VarWrite functions ///
@@ -416,7 +484,7 @@ namespace IO {
 
 
   
-  IOVarBase *NewIOVarHDF5(hid_t dataSetID, string name, hid_t boolType)
+  IOVarBase *NewIOVarHDF5(hid_t dataSetID, string name, hid_t boolType, hid_t cmplxType)
   {
     /// First, figure out the rank
     hid_t diskSpaceID = H5Dget_space(dataSetID);
@@ -435,67 +503,67 @@ namespace IO {
     H5Tclose (typeID);
     if (classID == H5T_FLOAT) {
       if (rank == 0) 
-	return new IOVarHDF5<double,0> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<double,0> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 1) 
-	return new IOVarHDF5<double,1> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<double,1> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 2) 
-	return new IOVarHDF5<double,2> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<double,2> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 3) 
-	return new IOVarHDF5<double,3> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<double,3> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 4) 
-	return new IOVarHDF5<double,4> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<double,4> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 5) 
-	return new IOVarHDF5<double,5> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<double,5> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 6) 
-	return new IOVarHDF5<double,6> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<double,6> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
     }
     if (classID == H5T_INTEGER) {
       if (rank == 0) 
-	return  new IOVarHDF5<int,0> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
-      else if (rank == 1) 
-	return  new IOVarHDF5<int,1> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
-      else if (rank == 2) 
-	return new IOVarHDF5<int,2> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
-      else if (rank == 3) 
-	return new IOVarHDF5<int,3> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
-      else if (rank == 4) 
-	return new IOVarHDF5<int,4> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
-      else if (rank == 5) 
-	return new IOVarHDF5<int,5> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
-      else if (rank == 6) 
-	return new IOVarHDF5<int,6> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<int,0> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
+      else if (rank == 1)
+	return new IOVarHDF5<int,1> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
+      else if (rank == 2)
+	return new IOVarHDF5<int,2> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
+      else if (rank == 3)
+	return new IOVarHDF5<int,3> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
+      else if (rank == 4)
+	return new IOVarHDF5<int,4> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
+      else if (rank == 5)
+	return new IOVarHDF5<int,5> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
+      else if (rank == 6)
+	return new IOVarHDF5<int,6> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
     }
     if (classID == H5T_STRING) {
       if (rank == 0) 
-	return new IOVarHDF5<string,0> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<string,0> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 1) 
-	return new IOVarHDF5<string,1> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<string,1> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 2) 
-	return new IOVarHDF5<string,2> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<string,2> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 3) 
-	return new IOVarHDF5<string,3> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<string,3> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 4) 
-	return new IOVarHDF5<string,4> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<string,4> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 5) 
-	return new IOVarHDF5<string,5> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<string,5> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 6) 
-	return new IOVarHDF5<string,6> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<string,6> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
     }
     if (classID == H5T_ENUM){
       if (rank == 0) 
-	return new IOVarHDF5<bool,0> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<bool,0> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 1) 
-	return new IOVarHDF5<bool,1> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<bool,1> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 2) 
-	return new IOVarHDF5<bool,2> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<bool,2> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 3) 
-	return new IOVarHDF5<bool,3> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<bool,3> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 4) 
-	return new IOVarHDF5<bool,4> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<bool,4> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 5) 
-	return new IOVarHDF5<bool,5> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<bool,5> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
       else if (rank == 6) 
-	return new IOVarHDF5<bool,6> (name, dataSetID, diskSpaceID, memSpaceID, boolType, true);
+	return new IOVarHDF5<bool,6> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
     }
   }
 }

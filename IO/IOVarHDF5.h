@@ -60,7 +60,7 @@ namespace IO {
 
     bool OwnDataset;
   public:
-    hid_t DatasetID, DiskSpaceID, MemSpaceID, BoolTypeID;
+    hid_t DatasetID, DiskSpaceID, MemSpaceID, BoolTypeID, ComplexTypeID;
 
     template<typename T0, typename T1, typename T2, typename T3, typename T4, typename T5,
 	     typename T6, typename T7, typename T8, typename T9, typename T10>
@@ -100,14 +100,15 @@ namespace IO {
     }
     
     IOVarHDF5(string name, hid_t datasetID, hid_t diskSpaceID, hid_t memSpaceID, 
-	      hid_t boolTypeID, bool ownDataset=false)
+	      hid_t boolTypeID, hid_t complexTypeID, bool ownDataset=false)
     {
-      Name        = name;
-      DatasetID   = datasetID;
-      DiskSpaceID = diskSpaceID;
-      MemSpaceID  = memSpaceID;
-      OwnDataset  = ownDataset;
-      BoolTypeID  = boolTypeID;
+      Name          = name;
+      DatasetID     = datasetID;
+      DiskSpaceID   = diskSpaceID;
+      MemSpaceID    = memSpaceID;
+      OwnDataset    = ownDataset;
+      BoolTypeID    = boolTypeID;
+      ComplexTypeID = complexTypeID;
     }
     ~IOVarHDF5()
     {
@@ -181,7 +182,7 @@ namespace IO {
   ////////////////////////////////////////////////////////////////
   /// This function creates a new IOVarHDF5 from a dataset id. /// 
   ////////////////////////////////////////////////////////////////
-  IOVarBase *NewIOVarHDF5(hid_t dataSetID, string name, hid_t boolType);
+  IOVarBase *NewIOVarHDF5(hid_t dataSetID, string name, hid_t boolType, hid_t cmplxType);
   
 
   ////////////////////////////////////////////////////////////////
@@ -191,7 +192,7 @@ namespace IO {
   ////////////////////////////////////////////////////////////////
   template<typename T, int RANK>
   IOVarBase *NewIOVarHDF5(hid_t groupID, string name, const Array<T,RANK> &val,
-			  hid_t boolType)
+			  hid_t boolType, hid_t cmplxType)
   {
     /// First, create a new DataSpace.
     TinyVector<hsize_t, RANK> h5Dims, h5MaxDims;
@@ -212,6 +213,9 @@ namespace IO {
     }
     else if (TypeConvert<T>::Type == BOOL_TYPE) {
       typeID = boolType;
+    }
+    else if (TypeConvert<T>::Type == COMPLEX_TYPE) {
+      typeID = cmplxType;
     }
     
     hid_t chunkProp = H5Pcreate(H5P_DATASET_CREATE);
@@ -247,7 +251,7 @@ namespace IO {
     H5Sclose(diskSpaceID);
 
     IOVarHDF5<T,RANK> *newVar = 
-      dynamic_cast<IOVarHDF5<T,RANK>*> (NewIOVarHDF5(datasetID, name, boolType));
+      dynamic_cast<IOVarHDF5<T,RANK>*> (NewIOVarHDF5(datasetID, name, boolType, cmplxType));
     if (newVar == NULL) {
       cerr << "Error in dynamic_cast in NewIOVarHDF5.\n";
       abort();
@@ -265,7 +269,7 @@ namespace IO {
   ////////////////////////////////////////////////////////////////
   template<typename T> inline
   IOVarBase *NewIOVar0HDF5(hid_t groupID, string name, T val,
-			   hid_t boolType)
+			   hid_t boolType, hid_t cmplxType)
   {
     /// First, create a new DataSpace.
     hsize_t h5Dims, h5MaxDims;
@@ -286,6 +290,9 @@ namespace IO {
     else if (TypeConvert<T>::Type == BOOL_TYPE) {
       typeID = boolType;
     }
+    else if (TypeConvert<T>::Type == COMPLEX_TYPE) {
+      typeID = cmplxType;
+    }
     
     hid_t datasetID = 
       H5Dcreate (groupID, name.c_str(), typeID, diskSpaceID, H5P_DEFAULT);
@@ -303,7 +310,7 @@ namespace IO {
       H5Tclose (typeID);
     H5Sclose(diskSpaceID);
 
-    IOVarHDF5<T,0> *newVar =  dynamic_cast<IOVarHDF5<T,0>*> (NewIOVarHDF5(datasetID, name, boolType));
+    IOVarHDF5<T,0> *newVar =  dynamic_cast<IOVarHDF5<T,0>*> (NewIOVarHDF5(datasetID, name, boolType, cmplxType));
     if (newVar == NULL) {
       cerr << "Error in dynamic_cast in NewIOVarHDF5.\n";
       abort();
@@ -319,7 +326,7 @@ namespace IO {
   ////////////////////////////////////////////////////////////////
   template<> inline
   IOVarBase *NewIOVar0HDF5(hid_t groupID, string name, string val,
-			   hid_t boolType)
+			   hid_t boolType, hid_t cmplxType)
   {
     /// First, create a new DataSpace.
     hsize_t h5Dims, h5MaxDims;
@@ -336,7 +343,8 @@ namespace IO {
     H5Tclose (typeID);
     H5Sclose(diskSpaceID);
 
-    IOVarHDF5<string,0> *newVar = dynamic_cast<IOVarHDF5<string,0>*>(NewIOVarHDF5(datasetID, name, boolType));
+    IOVarHDF5<string,0> *newVar = dynamic_cast<IOVarHDF5<string,0>*>
+      (NewIOVarHDF5(datasetID, name, boolType, cmplxType));
     if (newVar == NULL) {
       cerr << "Error in dynamic_cast in NewIOVarHDF5.\n";
       abort();
@@ -407,6 +415,7 @@ namespace IO {
     newVar.DatasetID = DatasetID;
     newVar.DiskSpaceID = H5Scopy(H5Dget_space(DatasetID));
     newVar.BoolTypeID = BoolTypeID;
+    newVar.ComplexTypeID = ComplexTypeID;
   
     hsize_t start[RANK], count[RANK], stride[RANK], dims[RANK], maxdims[RANK];
     hsize_t memDims[HDF5SliceMaker<T,RANK,T0,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>::rank];
@@ -540,8 +549,9 @@ namespace IO {
     assert (RANK == 0);
     IODataType dataType = TypeConvert<T>::Type;
     hid_t memType;
-    if      (dataType == DOUBLE_TYPE) memType = H5T_NATIVE_DOUBLE;
-    else if (dataType == INT_TYPE)    memType = H5T_NATIVE_INT;
+    if      (dataType == DOUBLE_TYPE)  memType = H5T_NATIVE_DOUBLE;
+    else if (dataType == INT_TYPE)     memType = H5T_NATIVE_INT;
+    else if (dataType == COMPLEX_TYPE) memType = ComplexTypeID;
     else {
       T a;
       cerr << "Unknown data type in IOVarHDF5<" << TypeString(a) << ", " 
@@ -570,6 +580,7 @@ namespace IO {
     hid_t memType;
     if      (dataType == DOUBLE_TYPE) memType = H5T_NATIVE_DOUBLE;
     else if (dataType == INT_TYPE)    memType = H5T_NATIVE_INT;
+    else if (dataType == COMPLEX_TYPE) memType = ComplexTypeID;
     else {
       T a;
       cerr << "Unknown data type in IOVarHDF5<" << TypeString(a) << ", " 
@@ -607,6 +618,7 @@ namespace IO {
     hid_t memType;
     if      (dataType == DOUBLE_TYPE) memType = H5T_NATIVE_DOUBLE;
     else if (dataType == INT_TYPE)    memType = H5T_NATIVE_INT;
+    else if (dataType == COMPLEX_TYPE) memType = ComplexTypeID;
     else {
       T a;
       cerr << "Unknown data type in IOVarHDF5<" << TypeString(a) << ", 0>" << endl;
@@ -636,6 +648,7 @@ namespace IO {
     hid_t memType;
     if      (dataType == DOUBLE_TYPE) memType = H5T_NATIVE_DOUBLE;
     else if (dataType == INT_TYPE)    memType = H5T_NATIVE_INT;
+    else if (dataType == COMPLEX_TYPE) memType = ComplexTypeID;
     else {
       T a;
       cerr << "Unknown data type in IOVarHDF5<" << TypeString(a) << ", " 
@@ -663,7 +676,7 @@ namespace IO {
     return TypeConvert<T>::Type;
   }
 
-  IOVarBase *NewIOVarHDF5(hid_t dataSetID, hid_t boolType);
+  IOVarBase *NewIOVarHDF5(hid_t dataSetID, hid_t boolType, hid_t cmplxType);
 
 
 

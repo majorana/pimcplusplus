@@ -31,7 +31,7 @@ namespace IO {
   {
   private:
     bool IsOpen;
-    hid_t BoolType;
+    hid_t BoolType, ComplexType;
     /// ReadGroup reads a HDF5 group, given by name, from the file.
     /// It reads in all variables and groups within the file, calling
     /// itself recursively for groups within itself.
@@ -59,7 +59,8 @@ namespace IO {
     void IncludeSection (IOTreeClass *);
     void CloseFile();
     void FlushFile();
-    hid_t GetBoolType() { return BoolType; }
+    hid_t GetBoolType()    { return BoolType; }
+    hid_t GetComplexType() { return ComplexType; }
     IOTreeHDF5Class() : IOTreeClass()
     {
       IsOpen=false;

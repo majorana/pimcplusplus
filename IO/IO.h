@@ -37,9 +37,10 @@ namespace IO {
 	cerr << "Error in dynamic_cast in WriteVar.\n";
 	abort();
       }
-      hid_t groupID = h5Tree->GroupID;
-      hid_t boolType = h5Tree->GetBoolType();
-      IOVarBase *newVar = NewIOVar0HDF5(groupID, name, val, boolType);
+      hid_t groupID     = h5Tree->GroupID;
+      hid_t boolType    = h5Tree->GetBoolType();
+      hid_t complexType = h5Tree->GetComplexType();
+      IOVarBase *newVar = NewIOVar0HDF5(groupID, name, val, boolType, complexType);
       VarList.push_back(newVar);
     }
     else if (GetFileType() == ASCII_TYPE) {
@@ -61,9 +62,10 @@ namespace IO {
 	cerr << "Error in dynamic_cast in WriteVar.\n";
 	abort();
       }
-      hid_t groupID = h5Tree->GroupID;
-      hid_t boolType = h5Tree->GetBoolType();
-      IOVarBase *newVar = NewIOVarHDF5(groupID, name, val, boolType);
+      hid_t groupID     = h5Tree->GroupID;
+      hid_t boolType    = h5Tree->GetBoolType();
+      hid_t complexType = h5Tree->GetComplexType();
+      IOVarBase *newVar = NewIOVarHDF5(groupID, name, val, boolType, complexType);
       VarList.push_back(newVar);
     }
     else if (GetFileType() == ASCII_TYPE) {

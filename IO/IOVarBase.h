@@ -23,7 +23,7 @@
 using namespace blitz;
 
 namespace IO {
-  typedef enum { DOUBLE_TYPE, INT_TYPE, STRING_TYPE, BOOL_TYPE, INVALID } IODataType;
+  typedef enum { DOUBLE_TYPE, INT_TYPE, STRING_TYPE, BOOL_TYPE, COMPLEX_TYPE, INVALID } IODataType;
   typedef enum { HDF5_TYPE, ASCII_TYPE} IOFileType;
   
   ///////////////////////////////////////////////////////////////////
@@ -213,6 +213,9 @@ namespace IO {
 
   template<> class TypeConvert<bool>
   { public: static const IODataType Type = BOOL_TYPE; };
+
+  template<> class TypeConvert<complex<double> >
+  { public: static const IODataType Type = COMPLEX_TYPE; };
   
 
 
