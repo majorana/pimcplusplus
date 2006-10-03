@@ -378,7 +378,7 @@ namespace IO {
   /// is a problem.
   void ReadAtomicVar(TokenClass token, complex<double> &a)
   {
-    cerr << "Reading complex not yet implemented."
+    cerr << "Reading complex not yet implemented.";
   }
 
   /// This template function reads a 1-D array from a token list into
@@ -518,6 +518,8 @@ namespace IO {
 	return new IOVarASCII<string,0>(name);
       else if (newType == BOOL_TYPE)
 	return new IOVarASCII<bool,0>(name);
+      else if (newType == COMPLEX_TYPE)
+	return new IOVarASCII<complex<double>,0>(name);
     }
     else if (ndim == 1) {
       if (newType == DOUBLE_TYPE) {
@@ -537,6 +539,11 @@ namespace IO {
       }
       else if (newType == BOOL_TYPE) {
 	IOVarASCII<bool,1> *newVar = new IOVarASCII<bool,1>(name);
+	newVar->ArrayValue.resize(dims(0));
+	return newVar;
+      }
+      else if (newType == COMPLEX_TYPE) {
+	IOVarASCII<complex<double>,1> *newVar = new IOVarASCII<complex<double>,1>(name);
 	newVar->ArrayValue.resize(dims(0));
 	return newVar;
       }
@@ -562,6 +569,11 @@ namespace IO {
 	newVar->ArrayValue.resize(dims(0), dims(1));
 	return newVar;
       }
+      else if (newType == COMPLEX_TYPE) {
+	IOVarASCII<complex<double>,2> *newVar = new IOVarASCII<complex<double>,2>(name);
+	newVar->ArrayValue.resize(dims(0), dims(1));
+	return newVar;
+      }
     }  
     else if (ndim == 3) {
       if (newType == DOUBLE_TYPE) {
@@ -584,6 +596,11 @@ namespace IO {
 	newVar->ArrayValue.resize(dims(0), dims(1), dims(2));
 	return newVar;
       }
+      else if (newType == COMPLEX_TYPE) {
+	IOVarASCII<complex<double>,3> *newVar = new IOVarASCII<complex<double>,3>(name);
+	newVar->ArrayValue.resize(dims(0), dims(1), dims(2));
+	return newVar;
+      }
     }
     else if (ndim == 4) {
       if (newType == DOUBLE_TYPE) {
@@ -603,6 +620,11 @@ namespace IO {
       }
       else if (newType == BOOL_TYPE) {
 	IOVarASCII<bool,4> *newVar = new IOVarASCII<bool,4>(name);
+	newVar->ArrayValue.resize(dims(0), dims(1), dims(2), dims(3));
+	return newVar;
+      }
+      else if (newType == COMPLEX_TYPE) {
+	IOVarASCII<complex<double>,4> *newVar = new IOVarASCII<complex<double>,4>(name);
 	newVar->ArrayValue.resize(dims(0), dims(1), dims(2), dims(3));
 	return newVar;
       }
@@ -1000,6 +1022,25 @@ namespace IO {
   { return 1; }
   void
   IOVarASCII<bool,0>::Resize(int n)
+  {
+    cerr << "Cannot resize atomic variable.\n";
+    abort();
+  }
+
+  int 
+  IOVarASCII<complex<double>,0>::GetRank()
+  { return 0; }
+  IODataType 
+  IOVarASCII<complex<double>,0>::GetType()
+  { return COMPLEX_TYPE; }
+  IOFileType 
+  IOVarASCII<complex<double>,0>::GetFileType()
+  { return ASCII_TYPE; }
+  int
+  IOVarASCII<complex<double>,0>::GetExtent(int i)
+  { return 1; }
+  void
+  IOVarASCII<complex<double>,0>::Resize(int n)
   {
     cerr << "Cannot resize atomic variable.\n";
     abort();
