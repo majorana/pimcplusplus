@@ -209,6 +209,32 @@ namespace IO {
   };
 
 
+  template<>
+  class IOVarASCII<complex<double>,0> : public IOVarBase
+  {
+  public:
+    complex<double> Value;
+
+    int GetRank();
+    IODataType GetType();
+    IOFileType GetFileType();
+
+    int GetExtent(int dim);
+    void Resize(int n);
+
+    bool VarRead(complex<double> &val) { val = Value; return true; }
+    bool VarWrite(complex<double> &val);
+    IOVarASCII(string name, complex<double> val) {
+      Name = name;
+      Value = val;
+    }
+    /// Default constructor
+    IOVarASCII(string name) {
+      Name = name;
+    }
+  };
+
+
 
   template<typename T, int RANK> inline int
   IOVarASCII<T,RANK>::GetRank()

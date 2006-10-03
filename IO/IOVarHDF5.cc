@@ -565,5 +565,28 @@ namespace IO {
       else if (rank == 6) 
 	return new IOVarHDF5<bool,6> (name, dataSetID, diskSpaceID, memSpaceID, boolType, cmplxType, true);
     }
+    if (classID == H5T_COMPOUND){
+      if (rank == 0) 
+	return new IOVarHDF5<complex<double>,0> (name, dataSetID, diskSpaceID, 
+						 memSpaceID, boolType, cmplxType, true);
+      else if (rank == 1) 
+	return new IOVarHDF5<complex<double>,1> (name, dataSetID, diskSpaceID, 
+						 memSpaceID, boolType, cmplxType, true);
+      else if (rank == 2) 
+	return new IOVarHDF5<complex<double>,2> (name, dataSetID, diskSpaceID, 
+						 memSpaceID, boolType, cmplxType, true);
+      else if (rank == 3) 
+	return new IOVarHDF5<complex<double>,3> (name, dataSetID, diskSpaceID, 
+						 memSpaceID, boolType, cmplxType, true);
+      else if (rank == 4) 
+	return new IOVarHDF5<complex<double>,4> (name, dataSetID, diskSpaceID, 
+						 memSpaceID, boolType, cmplxType, true);
+      else if (rank == 5) 
+	return new IOVarHDF5<complex<double>,5> (name, dataSetID, diskSpaceID, 
+						 memSpaceID, boolType, cmplxType, true);
+      else if (rank == 6) 
+	return new IOVarHDF5<complex<double>,6> (name, dataSetID, diskSpaceID, 
+						 memSpaceID, boolType, cmplxType, true);
+    }
   }
 }

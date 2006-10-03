@@ -323,6 +323,8 @@ namespace IO {
       return STRING_TYPE;
     else if (typeString=="bool")
       return BOOL_TYPE;
+    else if (typeString=="complex")
+      return COMPLEX_TYPE;
     else return INVALID;
   }
 
@@ -370,6 +372,13 @@ namespace IO {
       b=false;
     }
     else ReadAbort(true,token.LineNumber,"Expected true or false\n");
+  }
+
+  /// Takes a token and reads its value into a bool, aborting if there
+  /// is a problem.
+  void ReadAtomicVar(TokenClass token, complex<double> &a)
+  {
+    cerr << "Reading complex not yet implemented."
   }
 
   /// This template function reads a 1-D array from a token list into

@@ -103,6 +103,25 @@ void TestDoubleRead(IOSectionClass &io)
   io.CloseSection();
 }
 
+void TestComplexWrite (IOSectionClass &out)
+{
+  Array<complex<double>,1> vals(100);
+  for (int i=0; i<100; i++) {
+    double phi = (double)i/99.0 * 2.0*M_PI;
+    double re = cos(phi);
+    double im = sin(phi);
+    vals(i) = complex<double>(re,im);
+  }
+  out.WriteVar("CompTest", vals);
+}
+
+
+void TestComplexRead (IOSectionClass &out)
+{
+  Array<complex<double>,1> vals;
+  out.ReadVar("CompTest", vals);
+}
+
 
 void
 TestAppend (IOSectionClass &out)
@@ -190,11 +209,17 @@ main()
   TestDoubleWrite(ioHDF5);
   TestDoubleRead(ioHDF5);
   TestAppend(ioHDF5);
+  TestComplexWrite (ioHDF5);
+  TestComplexRead  (ioHDF5);
+
 
   IOSectionClass ioASCII;
   ioASCII.NewFile ("TestASCII.txt");
   TestDoubleWrite(ioASCII);
   TestDoubleRead(ioASCII);
+  TestComplexWrite (ioASCII);
+  TestComplexRead  (ioASCII);
+
 
 //   IOSectionClass hack;
 //   hack.OpenFile("/home/esler/PairActions/Na_HF_NLPP.square.beta16.0.h5");

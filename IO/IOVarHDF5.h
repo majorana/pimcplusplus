@@ -253,7 +253,7 @@ namespace IO {
     IOVarHDF5<T,RANK> *newVar = 
       dynamic_cast<IOVarHDF5<T,RANK>*> (NewIOVarHDF5(datasetID, name, boolType, cmplxType));
     if (newVar == NULL) {
-      cerr << "Error in dynamic_cast in NewIOVarHDF5.\n";
+      cerr << "Error in dynamic_cast in NewIOVarHDF5 #1.\n";
       abort();
     }
     newVar->VarWrite(val);
@@ -312,7 +312,7 @@ namespace IO {
 
     IOVarHDF5<T,0> *newVar =  dynamic_cast<IOVarHDF5<T,0>*> (NewIOVarHDF5(datasetID, name, boolType, cmplxType));
     if (newVar == NULL) {
-      cerr << "Error in dynamic_cast in NewIOVarHDF5.\n";
+      cerr << "Error in dynamic_cast in NewIOVarHDF5 #2.\n";
       abort();
     }
     newVar->VarWrite(val);
@@ -346,7 +346,7 @@ namespace IO {
     IOVarHDF5<string,0> *newVar = dynamic_cast<IOVarHDF5<string,0>*>
       (NewIOVarHDF5(datasetID, name, boolType, cmplxType));
     if (newVar == NULL) {
-      cerr << "Error in dynamic_cast in NewIOVarHDF5.\n";
+      cerr << "Error in dynamic_cast in NewIOVarHDF5 #3.\n";
       abort();
     }
     newVar->VarWrite(val);
