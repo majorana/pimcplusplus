@@ -39,7 +39,7 @@ public:
   bool OnMotion        (GdkEventMotion* event);
   void SetDistance (double dist);
 
-  inline bool SetPerspective (bool usePersp) 
+  inline void SetPerspective (bool usePersp) 
   { UsePerspective = usePersp; }
   void GLtransform();
   void POVtransform (FILE *fout);

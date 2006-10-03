@@ -1,4 +1,4 @@
-bin_PROGRAMS = pathvis++ mdvis++
+bin_PROGRAMS = pathvis++ mdvis++ wfvis++
 
 LDADD = $(GTKMM_LIBS) $(GTKGLEXTMM_LIBS) $(COMMON_LIBS) $(GTS_LIBS)
 AM_CXXFLAGS = $(GTKMM_CFLAGS) $(GTKGLEXTMM_CFLAGS) $(COMMON_CFLAGS)\
@@ -46,6 +46,29 @@ mdvis___SOURCES =       \
     GLObject.h          \
     MDVis.cc            \
     MDVis.h             \
+    PathVis.cc          \
+    PathVis.h           \
+    SphereObject.cc     \
+    SphereObject.h      \
+    ViewClass.cc        \
+    trackball.h         \
+    trackball.c    
+
+wfvis___SOURCES =       \
+    BoxClass.cc         \
+    BoxClass.h          \
+    BoxObject.cc        \
+    BoxObject.h         \
+    DiskObject.cc       \
+    DiskObject.h        \
+    ElementData.cc      \
+    ElementData.h       \
+    Isosurface.h        \
+    Isosurface.cc       \
+    GLObject.cc         \
+    GLObject.h          \
+    WFVis.cc            \
+    WFVis.h             \
     PathVis.cc          \
     PathVis.h           \
     SphereObject.cc     \

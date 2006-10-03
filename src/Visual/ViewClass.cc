@@ -8,7 +8,7 @@ namespace Trackball {
 
 ViewClass::ViewClass (PathVisClass &pathVis) :
   PathVis(pathVis), Button1Pressed(false), MinScale(0.2), MaxScale(5.0),
-  Scale(1.0), Distance(3.0), UsePerspective(false)
+  Scale(1.0), Distance(3.0), UsePerspective(true)
 {
   for (int i=0; i<4; i++)
     for (int j=0; j<4; j++)
