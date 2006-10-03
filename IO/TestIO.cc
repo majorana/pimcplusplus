@@ -183,8 +183,8 @@ void TestASCII()
 
 main()
 {
-//   TestHDF5();
-//   TestASCII();
+  TestHDF5();
+  TestASCII();
   IOSectionClass ioHDF5;
   ioHDF5.NewFile ("TestHDF5.h5");
   TestDoubleWrite(ioHDF5);
@@ -196,10 +196,10 @@ main()
   TestDoubleWrite(ioASCII);
   TestDoubleRead(ioASCII);
 
-  IOSectionClass hack;
-  hack.OpenFile("/home/esler/PairActions/Na_HF_NLPP.square.beta16.0.h5");
-  hack.OpenSection("Potential");
-  hack.WriteVar("Type", "General");
-  hack.CloseFile();
+//   IOSectionClass hack;
+//   hack.OpenFile("/home/esler/PairActions/Na_HF_NLPP.square.beta16.0.h5");
+//   hack.OpenSection("Potential");
+//   hack.WriteVar("Type", "General");
+//   hack.CloseFile();
 
 }
