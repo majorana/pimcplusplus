@@ -16,7 +16,8 @@ protected:
   //////////
   // Data //
   //////////
-  Array<complex<double>,3> WFdata;
+  Array<double,3> WFData;
+  int CurrBand, Currk;
   Array<Vec3,1> AtomPos;
   Array<int,1> AtomTypes;
   BoxClass Box;
@@ -69,6 +70,7 @@ protected:
   void OnSpeedChange();
   void OnIsoChange();
   void OnBandChange();
+  void OnkChange();
   void OnPerspectiveToggle();
   void OnPlayToggle();
   void OnClipToggle();

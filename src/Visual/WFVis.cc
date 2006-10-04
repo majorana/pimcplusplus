@@ -30,8 +30,13 @@ WFVisualClass::WFVisualClass() :
   BandFrame.set_label("Band");
   BandFrame.add(BandScale);
 
-  IsoBox.pack_start(IsoFrame);
-  IsoBox.pack_start(BandFrame);
+  kScale.set_adjustment (kAdjust);
+  kScale.set_digits(0);
+  kScale.signal_value_changed().connect
+    (sigc::mem_fun(*this, &WFVisualClass::OnkChange));
+  kScale.property_width_request().set_value(75);
+  kFrame.set_label("k point");
+  kFrame.add(kScale);
 
   OrthoImage.set(FindFullPath("orthographic.png"));
   OrthoButton.set_icon_widget(OrthoImage);
@@ -116,7 +121,9 @@ WFVisualClass::WFVisualClass() :
   // Pack the boxes //
   ////////////////////
   ToolBox.pack_start(Tools);
-  ToolBox.pack_start(IsoBox, Gtk::PACK_SHRINK,20);
+  ToolBox.pack_start(IsoFrame,  Gtk::PACK_SHRINK,20);
+  ToolBox.pack_start(BandFrame, Gtk::PACK_SHRINK,20);
+  ToolBox.pack_start(kFrame,    Gtk::PACK_SHRINK,20);
   MainVBox.pack_start(*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK,0);
   MainVBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
   MainVBox.pack_start(PathVis);
@@ -378,8 +385,18 @@ WFVisualClass::DrawFrame(bool offScreen)
   }
 
   if (IsoButton.get_active()) {
-    int band;
+    int band, k;
     band = (int)round(BandScale.get_value());
+    k    = (int)round(kScale.get_value());
+    if ((CurrBand != band) || (Currk != k)) {
+      CurrBand = band;
+      Currk    = k;
+      ReadWF (k, band);
+    }
+    Isosurface *wfIso = new Isosurface;
+    wfIso->Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+    wfIso->SetIsoval(IsoAdjust.get_value());
+    PathVis.Objects.push_back(wfIso);
   }
 
   PathVis.Invalidate();
@@ -437,6 +454,11 @@ WFVisualClass::Read(string filename)
 
   /// Read first wave function
   ReadWF(0,0);
+  Xgrid.Init(-0.5*Box[0], 0.5*Box[0], WFData.extent(0));
+  Ygrid.Init(-0.5*Box[1], 0.5*Box[1], WFData.extent(1));
+  Zgrid.Init(-0.5*Box[2], 0.5*Box[2], WFData.extent(2));
+  CurrBand = 0; 
+  Currk = 0;
 
   double maxDim = max(max(lattice(0,0), lattice(1,1)), lattice(2,2));
   PathVis.View.SetDistance (1.2*maxDim);
@@ -488,6 +510,12 @@ WFVisualClass::OnBandChange()
   DrawFrame();
 }
 
+void
+WFVisualClass::OnkChange()
+{
+  DrawFrame();
+}
+
 
 WFVisualClass::~WFVisualClass()
 {
@@ -505,7 +533,14 @@ WFVisualClass::ReadWF (int kpoint, int band)
   Infile.CloseSection(); // "eigenstates"
   Infile.CloseSection(); // "twist"
   Infile.CloseSection(); // "band"
-
+  WFData.resize(wfdata.extent(0), 
+		wfdata.extent(1),
+		wfdata.extent(2));
+  for (int ix=0; ix<wfdata.extent(0); ix++)
+    for (int iy=0; iy<wfdata.extent(1); iy++)
+      for (int iz=0; iz<wfdata.extent(2); iz++)
+	WFData(ix,iy,iz) = (wfdata(ix,iy,iz,0)*wfdata(ix,iy,iz,0) +
+			    wfdata(ix,iy,iz,1)*wfdata(ix,iy,iz,1));
 	  
   return true;
 }
