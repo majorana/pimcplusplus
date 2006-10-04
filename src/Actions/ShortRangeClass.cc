@@ -248,11 +248,16 @@ ShortRangeClass::d_dBeta (int slice1, int slice2, int level)
 	
 	PairActionFitClass& pa=
 	  *(PairMatrix(species1, PathData.Path.ParticleSpeciesNum(ptcl2)));
-	dU += pa.dU(q, z, s2, level)*
-	  PathData.Path.ParticleExist(slice,ptcl1)*
-	  PathData.Path.ParticleExist(slice,ptcl2)*
-	  PathData.Path.ParticleExist(slice+skip,ptcl1)*
-	  PathData.Path.ParticleExist(slice+skip,ptcl2);
+
+	if (PathData.Path.WormOn){
+	  dU += pa.dU(q,z,s2,level)*
+	    PathData.Path.ParticleExist(slice,ptcl1)*
+	    PathData.Path.ParticleExist(slice,ptcl2)*
+	    PathData.Path.ParticleExist(slice+skip,ptcl1)*
+	    PathData.Path.ParticleExist(slice+skip,ptcl2);
+	}
+	else
+	  dU += pa.dU(q,z,s2,level);
 
 	// Subtract off long-range part from short-range action
 	if (pa.IsLongRange() && PathData.Actions.UseLongRange)
