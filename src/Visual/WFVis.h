@@ -17,7 +17,7 @@ protected:
   // Data //
   //////////
   Array<double,3> WFData;
-  int CurrBand, Currk;
+  int CurrBand, Currk, NumBands, Numk;
   Array<Vec3,1> AtomPos;
   Array<int,1> AtomTypes;
   BoxClass Box;

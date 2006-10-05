@@ -121,9 +121,9 @@ WFVisualClass::WFVisualClass() :
   // Pack the boxes //
   ////////////////////
   ToolBox.pack_start(Tools);
-  ToolBox.pack_start(IsoFrame,  Gtk::PACK_SHRINK,20);
-  ToolBox.pack_start(BandFrame, Gtk::PACK_SHRINK,20);
-  ToolBox.pack_start(kFrame,    Gtk::PACK_SHRINK,20);
+  ToolBox.pack_start(IsoFrame,  Gtk::PACK_SHRINK, 5);
+  ToolBox.pack_start(BandFrame, Gtk::PACK_SHRINK, 5);
+  ToolBox.pack_start(kFrame,    Gtk::PACK_SHRINK, 5);
   MainVBox.pack_start(*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK,0);
   MainVBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
   MainVBox.pack_start(PathVis);
@@ -426,19 +426,6 @@ WFVisualClass::Read(string filename)
     Infile.CloseFile();
   assert (Infile.OpenFile(filename));
   FileIsOpen = true;
-
-
-  /// Read ion positions
-  assert (Infile.OpenSection("ions"));
-  Array<double,2> pos;
-  assert (Infile.ReadVar("pos", pos));
-  AtomPos.resize(pos.extent(0));
-  for (int i=0; i<pos.extent(0); i++)
-    for (int j=0; j<3; j++)
-      AtomPos(i)[j] = pos(i,j);
-  assert (Infile.ReadVar("atom_types", AtomTypes));
-  Infile.CloseSection (); // "ions"
-
   
   /// Read lattice vectors
   assert (Infile.OpenSection("parameters"));
@@ -451,6 +438,29 @@ WFVisualClass::Read(string filename)
   Box.Set (lattice(0,0), lattice(1,1), lattice(2,2));
   
   Infile.CloseSection(); // parameters
+
+  /// Read ion positions
+  assert (Infile.OpenSection("ions"));
+  Array<double,2> pos;
+  assert (Infile.ReadVar("pos", pos));
+  AtomPos.resize(pos.extent(0));
+  for (int i=0; i<pos.extent(0); i++)
+    for (int j=0; j<3; j++)
+      AtomPos(i)[j] = pos(i,j)/* - 0.5*Box[j]*/;
+  assert (Infile.ReadVar("atom_types", AtomTypes));
+  Infile.CloseSection (); // "ions"
+
+  /// Count k-points and bands
+  assert (Infile.OpenSection("eigenstates"));
+  Numk = Infile.CountSections ("twist");
+  assert (Infile.OpenSection("twist", 0));
+  NumBands = Infile.CountSections("band");
+  Infile.CloseSection(); // "twist"
+  Infile.CloseSection(); // "eigenstates"
+  cerr << "Numk = " << Numk << "   NumBands = " << NumBands << endl;
+  BandAdjust.set_upper(NumBands-1.0);
+  kAdjust.set_upper(Numk-1.0);
+
 
   /// Read first wave function
   ReadWF(0,0);
