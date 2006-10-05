@@ -151,17 +151,17 @@ PathClass::ReadOld(string fileName,bool replicate)
 void 
 PathClass::InitPaths (IOSectionClass &in)
 {
-      cerr<<"Printing Permutation InitPath 0"<<endl;
+      //cerr<<"Printing Permutation InitPath 0"<<endl;
       for (int ptcl=0;ptcl<NumParticles();ptcl++)
-	cerr<<Permutation(ptcl)<<endl;
+	//cerr<<Permutation(ptcl)<<endl;
 
 
   NowOpen=false;
   NowOpen.AcceptCopy();
-  cerr<<"I am in mode "<<GetMode()<<endl;
-      cerr<<"Printing Permutation InitPath 0p"<<endl;
-      for (int ptcl=0;ptcl<NumParticles();ptcl++)
-	cerr<<Permutation(ptcl)<<endl;
+  //cerr<<"I am in mode "<<GetMode()<<endl;
+  //    cerr<<"Printing Permutation InitPath 0p"<<endl;
+  //    for (int ptcl=0;ptcl<NumParticles();ptcl++)
+	//cerr<<Permutation(ptcl)<<endl;
 
 
 
@@ -169,26 +169,25 @@ PathClass::InitPaths (IOSectionClass &in)
   //  cerr<<"Hello"<<endl;
   //  assert(1==2);
   assert(in.OpenSection ("Particles"));
-  cerr<<"Printing Permutation InitPath 0pp"<<endl;
-  for (int ptcl=0;ptcl<NumParticles();ptcl++)
-    cerr<<Permutation(ptcl)<<endl;
+  //cerr<<"Printing Permutation InitPath 0pp"<<endl;
+  //for (int ptcl=0;ptcl<NumParticles();ptcl++)
+  //  cerr<<Permutation(ptcl)<<endl;
   
   SetMode(OLDMODE);
-  cerr<<"Printing Permutation InitPath 0ppOLD"<<endl;
-  for (int ptcl=0;ptcl<NumParticles();ptcl++)
-    cerr<<Permutation(ptcl)<<endl;
+  //cerr<<"Printing Permutation InitPath 0ppOLD"<<endl;
+  //for (int ptcl=0;ptcl<NumParticles();ptcl++)
+  //  cerr<<Permutation(ptcl)<<endl;
   SetMode(NEWMODE);
 
   int numSpecies = NumSpecies();
-      cerr<<"Printing Permutation InitPath 0ppp"<<endl;
-      for (int ptcl=0;ptcl<NumParticles();ptcl++)
-	cerr<<Permutation(ptcl)<<endl;
-
+//      cerr<<"Printing Permutation InitPath 0ppp"<<endl;
+//      for (int ptcl=0;ptcl<NumParticles();ptcl++)
+//	cerr<<Permutation(ptcl)<<endl;
 
   // Now initialize the Path
-      cerr<<"Printing Permutation InitPath a"<<endl;
-      for (int ptcl=0;ptcl<NumParticles();ptcl++)
-	cerr<<Permutation(ptcl)<<endl;
+//      cerr<<"Printing Permutation InitPath a"<<endl;
+//      for (int ptcl=0;ptcl<NumParticles();ptcl++)
+//	cerr<<Permutation(ptcl)<<endl;
 
   for (int speciesIndex=0; speciesIndex<numSpecies; speciesIndex++)
   {
@@ -200,9 +199,9 @@ PathClass::InitPaths (IOSectionClass &in)
     cerr<<"Read "<<InitPaths<<endl;
     string Replicate;
     in.ReadVar ("Replicate", Replicate);
-      cerr<<"Printing Permutation InitPath c"<<endl;
-      for (int ptcl=0;ptcl<NumParticles();ptcl++)
-	cerr<<Permutation(ptcl)<<endl;
+//      cerr<<"Printing Permutation InitPath c"<<endl;
+//      for (int ptcl=0;ptcl<NumParticles();ptcl++)
+//	cerr<<Permutation(ptcl)<<endl;
 
     if (InitPaths == "RANDOM") {
       perr << "Don't know how to do RANDOM yet.\n";
@@ -315,9 +314,9 @@ PathClass::InitPaths (IOSectionClass &in)
       }
     }
     else if (InitPaths == "FIXED") {
-      cerr<<"Printing Permutation InitPath 1"<<endl;
-      for (int ptcl=0;ptcl<NumParticles();ptcl++)
-	cerr<<Permutation(ptcl)<<endl;
+//      cerr<<"Printing Permutation InitPath 1"<<endl;
+//      for (int ptcl=0;ptcl<NumParticles();ptcl++)
+//	cerr<<Permutation(ptcl)<<endl;
 
 
       Array<double,2> Positions;
@@ -334,15 +333,15 @@ PathClass::InitPaths (IOSectionClass &in)
 	  Path(slice,ptcl) = pos;
 	}      
       }
-      cerr<<"Printing Permutation InitPath 2"<<endl;
-	for (int ptcl=0;ptcl<NumParticles();ptcl++)
-	  cerr<<Permutation(ptcl)<<endl;
+//      cerr<<"Printing Permutation InitPath 2"<<endl;
+//	for (int ptcl=0;ptcl<NumParticles();ptcl++)
+//	  cerr<<Permutation(ptcl)<<endl;
 
 
 
-      cerr<<"Printing Permutation InitPath 3"<<endl;
-	for (int ptcl=0;ptcl<NumParticles();ptcl++)
-	  cerr<<Permutation(ptcl)<<endl;
+//      cerr<<"Printing Permutation InitPath 3"<<endl;
+//	for (int ptcl=0;ptcl<NumParticles();ptcl++)
+//	  cerr<<Permutation(ptcl)<<endl;
 
 
       //      PrintRealSlices();

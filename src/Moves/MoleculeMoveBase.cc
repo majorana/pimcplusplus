@@ -83,6 +83,9 @@ void MolMoveClass::Read (IOSectionClass &in){
 			//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
   		Actions.push_back(&PathData.Actions.ST2Water);
 			cerr << "Added ST2Water action" << endl;
+		}else if(setAction == "Kinetic"){
+  		Actions.push_back(&PathData.Actions.Kinetic);
+			cerr << "Added Kinetic action" << endl;
 #ifdef USE_QMC
 		}else if(setAction == "CEIMCAction"){
 			//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
