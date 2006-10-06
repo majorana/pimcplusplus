@@ -687,8 +687,8 @@ PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
   n[1] = -nearbyint(dispA[1]*BoxInv[1]);
   dispA[0] += n[0]*IsPeriodic[0]*Box[0];
   dispA[1] += n[1]*IsPeriodic[1]*Box[1];
-  m[0] = -nearbyint((dispA[0]-dispB[0])*BoxInv[0]);
-  m[1] = -nearbyint((dispA[1]-dispB[1])*BoxInv[1]);
+  m[0] = nearbyint((dispA[0]-dispB[0])*BoxInv[0]);
+  m[1] = nearbyint((dispA[1]-dispB[1])*BoxInv[1]);
   dispB[0] += m[0]*IsPeriodic[0]*Box[0];
   dispB[1] += m[1]*IsPeriodic[1]*Box[1];
 #endif
