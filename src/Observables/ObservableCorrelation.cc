@@ -118,7 +118,12 @@ void PairCorrelationClass::WriteBlock()
     double r1 = grid(i);
     double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
     double r = 0.5*(r1+r2);
+#if NDIM==3
     double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
+#endif
+#if NDIM==2
+    double binVol = M_PI * (r2*r2-r1*r1);
+#endif
     gofrArray(i) = (double) HistSum(i) / (binVol*norm);
   }
   gofrVar.Write(gofrArray);
