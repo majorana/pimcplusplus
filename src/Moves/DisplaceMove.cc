@@ -61,6 +61,9 @@ DisplaceMoveClass::Read (IOSectionClass &in)
 
   // Construct action list
   DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
+  if (PathData.Path.DavidLongRange){
+    newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+  }
   if (PathData.Path.LongRange) 
     if (PathData.Actions.UseRPA)
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRangeRPA);
