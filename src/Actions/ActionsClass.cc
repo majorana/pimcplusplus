@@ -293,7 +293,7 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
     else
       dULong = LongRange.d_dBeta (0, M, 0);
   }
-  else if (PathData.Path.DavidLongRange)
+  if (PathData.Path.DavidLongRange)
     dULong = DavidLongRange.d_dBeta(0,M,0);
   node = 0.0;
   for (int species=0; species<PathData.Path.NumSpecies(); species++)
