@@ -82,6 +82,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 
 		//	Calculate Lennard-Jones interaction
     if (Interacting(species1,0)){
+			//cerr << "LJ for ptcl " << ptcl1 << " of species " << species1 << endl;
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
     		int species2=Path.ParticleSpeciesNum(ptcl2);
 				//cerr << "Considering LJ between " << ptcl1 << " and " << ptcl2 << " for which DoPtcl is " << Path.DoPtcl(ptcl2) << "...";
@@ -121,7 +122,8 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 					//cerr << "Skipped" << endl;
 				}
       }
-    } else if(Interacting(species1,1)){
+    }
+		if(Interacting(species1,1)){
       /// calculating coulomb interactions
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
     		int species2=Path.ParticleSpeciesNum(ptcl2);
@@ -154,7 +156,8 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 					}
   	    }
   	  }
-  	} else if(Interacting(species1,2)){
+  	}
+		if(Interacting(species1,2)){
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
     		int species2=Path.ParticleSpeciesNum(ptcl2);
     		if (Interacting(species2,2) && Path.DoPtcl(ptcl2)){
@@ -162,7 +165,36 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 				}
 			}
 		}
+		if(Interacting(species1,3)){
+			// compute kinetic action: imaginary time spring term
+			// Based on KineticClass::SingleAction, execpt that displacements are WRT the molecule COM
 
+			//cerr << "species " << species1 << ", ptcl " << ptcl1 << " computing kinetic...";
+		  double TotalK = 0.0;
+		  int skip = 1<<level;
+		  double levelTau = Path.tau* (1<<level);
+		  double lambda = lambdas(species1);
+		  if (lambda != 0){
+		    double FourLambdaTauInv=1.0/(4.0*lambda*levelTau*levelTau);
+		    for (int slice=startSlice; slice < endSlice;slice+=skip) {
+		      dVec vel;
+					vel = COMVelocity(slice, slice+skip, ptcl1);
+			
+		      double GaussProd = 1.0;
+		      for (int dim=0; dim<NDIM; dim++) {
+						double GaussSum=0.0;
+						for (int image=-NumImages; image<=NumImages; image++) {
+						  double dist = vel[dim]+(double)image*Path.GetBox()[dim];
+						  GaussSum += exp(-dist*dist*FourLambdaTauInv);
+						}
+						GaussProd *= GaussSum;
+		      }
+					TotalK -= log(GaussProd);
+		    }
+		  }
+			TotalU += TotalK;
+			//cerr << TotalK << endl;
+		}
 	}
 
   return (TotalU);
@@ -174,13 +206,13 @@ double MoleculeInteractionsClass::CalcCutoff(int ptcl1, int ptcl2, int slice, do
   int Optcl1 = Path.MolRef(ptcl1);
   int Optcl2 = Path.MolRef(ptcl2);
   // get vectors of oxygens
-  dVec O1 = PathData.Path(slice,Optcl1);
-  dVec O2 = PathData.Path(slice,Optcl2);
+  dVec O1 = Path(slice,Optcl1);
+  dVec O2 = Path(slice,Optcl2);
   // get vector between oxygens
   dVec Roo;
   double Ormag;
 	//if(!Updated(Optcl1,Optcl2)){
-  	PathData.Path.DistDisp(slice, Optcl1, Optcl2, Ormag, Roo);
+  	Path.DistDisp(slice, Optcl1, Optcl2, Ormag, Roo);
 	//	Updated(Optcl1,Optcl2) = Updated(Optcl2,Optcl1) = true;
 	//	COMTable(Optcl1,Optcl2) = COMTable(Optcl2,Optcl1) = Ormag;
 	//	COMVecs(Optcl1,Optcl2) = Roo;
@@ -191,8 +223,8 @@ double MoleculeInteractionsClass::CalcCutoff(int ptcl1, int ptcl2, int slice, do
 	//}
   dVec Rc = Scale(Roo,Rcmag);
   // get constituent coordinates WRT oxygen COM
-  dVec P1 = PathData.Path(slice,ptcl1);
-  dVec P2 = PathData.Path(slice,ptcl2);
+  dVec P1 = Path(slice,ptcl1);
+  dVec P2 = Path(slice,ptcl2);
   P1 -= O1;
   P2 -= O2;
   // solve for vector between constituents (if molecule 2 is at cutoff radius)
@@ -238,6 +270,19 @@ double MoleculeInteractionsClass::S(double r)
   return mod;
 }
 
+dVec MoleculeInteractionsClass::COMVelocity(int sliceA, int sliceB, int ptcl){
+	dVec p1 = Path(sliceB, ptcl);
+	dVec p2 = Path(sliceA, ptcl);
+	if(ptcl != PathData.Path.MolRef(ptcl)){
+		int COMptcl = PathData.Path.MolRef(ptcl);
+ 		p1 -= Path(sliceB, COMptcl);
+ 		p2 -= Path(sliceA, COMptcl);
+	}
+ 	dVec vel = p1 - p2;
+  PathData.Path.PutInBox(vel);
+	return vel;
+}
+
 void MoleculeInteractionsClass::Read (IOSectionClass &in)
 {
 	if(!ReadComplete){
@@ -254,14 +299,21 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		in.ReadVar("Modulated",withS);
 		in.ReadVar("Intramolecular",IntraMolecular);
 
-		Interacting.resize(PathData.NumSpecies(),3);
+		Interacting.resize(PathData.NumSpecies(),4);
 		Interacting = false;
 		LJSpecies.resize(0);
 		ChargeSpecies.resize(0);
 		SpringSpecies.resize(0);
+		KineticSpecies.resize(0);
 		in.ReadVar("LJSpecies",LJSpecies);
 		in.ReadVar("ChargeSpecies",ChargeSpecies);
 		in.ReadVar("SpringSpecies",SpringSpecies);
+		in.ReadVar("KineticActionSpecies",KineticSpecies);
+
+		if(KineticSpecies.size() > 0){
+			assert(in.ReadVar("Lambdas",lambdas));
+			cerr << "Read lambda for each species: " << lambdas << endl;
+		}
 
 		for(int s=0; s<LJSpecies.size(); s++)
 			Interacting(Path.SpeciesNum(LJSpecies(s)), 0) = true;
@@ -269,6 +321,8 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 			Interacting(Path.SpeciesNum(ChargeSpecies(s)), 1) = true;
 		for(int s=0; s<SpringSpecies.size(); s++)
 			Interacting(Path.SpeciesNum(SpringSpecies(s)), 2) = true;
+		for(int s=0; s<KineticSpecies.size(); s++)
+			Interacting(Path.SpeciesNum(KineticSpecies(s)), 3) = true;
 		cerr << "MoleculeInteractions::Read I have loaded Interacting table " << Interacting << endl;
 	
 		Updated.resize(PathData.Path.numMol);
@@ -277,4 +331,9 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		
 		ReadComplete = true;
 	}
+}
+
+void MoleculeInteractionsClass::SetNumImages (int num)
+{
+	NumImages = num;
 }

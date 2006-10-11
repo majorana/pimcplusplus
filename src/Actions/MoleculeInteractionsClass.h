@@ -30,10 +30,12 @@ class MoleculeInteractionsClass : public ActionBaseClass
 	Array<string, 1> LJSpecies;
 	Array<string, 1> ChargeSpecies;
 	Array<string, 1> SpringSpecies;
+	Array<string, 1> KineticSpecies;
 	Array<bool,2> Updated;
 	Array<double,2> COMTable;
 	Array<dVec,2> COMVecs;
-
+	Array<double, 1> lambdas;
+	int NumImages;
 	double RL, RU;
 
 public:
@@ -59,9 +61,10 @@ public:
   double CalcCutoff(int ptcl1, int ptcl2, int slice, double Rcmag);
 	double COMSeparation(int slice,int ptcl1,int ptcl2);
 	double S(double r);
-
+	dVec COMVelocity(int sliceA, int sliceB, int ptcl);
+	void SetNumImages(int num);
   string GetName();
-
+ 
 	MoleculeInteractionsClass (PathDataClass &pathData);
 };
 

@@ -245,7 +245,8 @@ void EnergyClass::Read(IOSectionClass &in)
 	for(int n=0; n<numEnergies; n++){
 		if(EnergyStrings(n) == "MoleculeInteractions"){
 			OtherActions[n] = &PathData.Actions.MoleculeInteractions;
-			PathData.Actions.MoleculeInteractions.Read(in);
+			// read should be done in action
+			//PathData.Actions.MoleculeInteractions.Read(in);
 			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
 			OtherSums[n] = 0.0;
 		} else if(EnergyStrings(n) == "ST2WaterClass"){

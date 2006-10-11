@@ -33,6 +33,8 @@ ActionsClass::Read(IOSectionClass &in)
   Kinetic.SetNumImages (NumImages);
   KineticSphere.SetNumImages(NumImages);
   Mu.Read(in);
+	MoleculeInteractions.Read(in);
+	MoleculeInteractions.SetNumImages(NumImages);
 #ifdef ORDER_N_FERMIONS
   VariationalPI.Read(in);
   TruncatedInverse.Read(in);

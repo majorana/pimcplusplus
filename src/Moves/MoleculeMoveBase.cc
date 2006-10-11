@@ -76,7 +76,8 @@ void MolMoveClass::Read (IOSectionClass &in){
 	for(int a=0; a<ActionList.size(); a++){
 		string setAction = ActionList(a);
 	  if(setAction == "MoleculeInteractions"){
-			PathData.Actions.MoleculeInteractions.Read(in);
+			// read should be done in actions now
+			//PathData.Actions.MoleculeInteractions.Read(in);
   		Actions.push_back(&PathData.Actions.MoleculeInteractions);
 			cerr << "  Added Molecule Actions" << endl;
 		}else if(setAction == "ST2Water"){
