@@ -41,7 +41,7 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
 	if (lvl==0 && isEnergy==1){
 	  uk(kVec)=myNum;
 	}
-	if (lvl==0 && isEnergy==2){
+	if ((lvl==0 && isEnergy==2) || (lvl==0 && isEnergy==0)){
 	  duk(kVec)+=myNum;
 	  cout<<"My energy is "<<myNum<<endl;
 	}
