@@ -85,11 +85,13 @@ DavidLongRangeClass::SingleAction (int slice1, int slice2,
 	while (abs(kmagnitude-Path.MagK(kcounter))>1e-10)
 	  kcounter++;
 	assert(kcounter<Path.MagK.size());
+	cerr<<rhok2<<" "<<Path.MagKint(kcounter)<<" "<<uk(Path.MagKint(counter))<<endl;
 	total +=  factor*rhok2 * uk(Path.MagKint(kcounter));
 	
       }
     }
   }
+  cerr<<"My total action is "<<total<<endl;
   return total;
 
 }
