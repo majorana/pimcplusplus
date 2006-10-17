@@ -211,6 +211,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new VariationalPIEnergyClass(PathData,OutFile);
     else if (observeType=="Vacancy")
       tempObs = new VacancyLocClass(PathData,OutFile);
+    else if (observeType=="VacancyDensity")
+      tempObs = new VacancyDensityClass(PathData,OutFile);
     else if (observeType=="Conductivity")
       tempObs = new ConductivityClass(PathData,OutFile);
     else if (observeType=="Coupling")
