@@ -44,7 +44,7 @@ public:
   void GetDims(int &nx, int &ny, int &nz)
   { nx=Nx; ny=Ny; nz=Nz; }
 
-  void Setup()
+  void Setup(double factor=1.0)
   {
     GVecs.GetFFTBoxSize(Nx, Ny, Nz);
     resize(Nx, Ny, Nz);

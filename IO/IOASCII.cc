@@ -688,6 +688,8 @@ namespace IO {
 	ReadArrayData(iter, tokenList, ((IOVarASCII<string,1> *)newVar)->ArrayValue);
       else if (myType == BOOL_TYPE)
 	ReadArrayData(iter, tokenList, ((IOVarASCII<bool,1> *)  newVar)->ArrayValue);
+      else if (myType == COMPLEX_TYPE)
+	ReadArrayData(iter, tokenList, ((IOVarASCII<complex<double>,1> *)  newVar)->ArrayValue);
     }
     if (numDim == 2) {
       if (myType == DOUBLE_TYPE)
@@ -698,6 +700,8 @@ namespace IO {
 	ReadArrayData(iter, tokenList, ((IOVarASCII<string,2> *)newVar)->ArrayValue);
       else if (myType == BOOL_TYPE)
 	ReadArrayData(iter, tokenList, ((IOVarASCII<bool,2> *)  newVar)->ArrayValue);
+      else if (myType == COMPLEX_TYPE)
+	ReadArrayData(iter, tokenList, ((IOVarASCII<complex<double>,2> *) newVar)->ArrayValue);
     }
     if (numDim == 3) {
       if (myType == DOUBLE_TYPE)
@@ -708,6 +712,8 @@ namespace IO {
 	ReadArrayData(iter, tokenList, ((IOVarASCII<string,3> *)newVar)->ArrayValue);
       else if (myType == BOOL_TYPE)
 	ReadArrayData(iter, tokenList, ((IOVarASCII<bool,3> *)  newVar)->ArrayValue);
+      else if (myType == COMPLEX_TYPE)
+	ReadArrayData(iter, tokenList, ((IOVarASCII<complex<double>,3> *)  newVar)->ArrayValue);
     }
     if (numDim == 4) {
       if (myType == DOUBLE_TYPE)
@@ -718,6 +724,8 @@ namespace IO {
 	ReadArrayData(iter, tokenList, ((IOVarASCII<string,4> *)newVar)->ArrayValue);
       else if (myType == BOOL_TYPE)
 	ReadArrayData(iter, tokenList, ((IOVarASCII<bool,4> *)  newVar)->ArrayValue);
+      else if (myType == COMPLEX_TYPE)
+	ReadArrayData(iter, tokenList, ((IOVarASCII<complex<double>,4> *)  newVar)->ArrayValue);
     }
     return (newVar);
   }
@@ -760,6 +768,8 @@ namespace IO {
 	ReadAtomicVar (valToken, ((IOVarASCII<string,0> *)newVar)->Value);
       else if (myType == BOOL_TYPE)
 	ReadAtomicVar (valToken, ((IOVarASCII<bool,0> *)newVar)->Value);
+      else if (myType == COMPLEX_TYPE)
+	ReadAtomicVar (valToken, ((IOVarASCII<complex<double>,0> *)newVar)->Value);
     }
     return(newVar);
   }

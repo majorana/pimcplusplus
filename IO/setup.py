@@ -5,8 +5,8 @@ module1 = Extension('IOSection',
                                'InputOutputHDF5.cc', 'InputOutputASCII.cc',\
                                'InputOutputXML.cc' ],\
                     include_dirs=['/usr/include/libxml2',\
-                                  '/turing/projects/mcc/include'],
-                    library_dirs=['/turing/projects/mcc/lib'],
+                                  '/home/kesler/include'],
+                    library_dirs=['/home/kesler/lib'],
                     libraries =  ['blitz', 'xml2', 'hdf5'])
 
 setup (name = 'IO',

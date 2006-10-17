@@ -1161,8 +1161,11 @@ bool IOTreeHDF5Class::OpenFile(string fileName,
   IsOpen = true;
   Parent = parent;
   ReadGroup (GroupID, "/", parent);
+  cerr << "Before name = mySectionName\n";
   Name = mySectionName;
+  cerr << "Before FileName=fileName\n";
   FileName=fileName;
+  cerr << "Before return\n";
   return true;
 }
 
@@ -1298,8 +1301,10 @@ void IOTreeHDF5Class::IncludeSection(IOTreeClass *newSection)
 herr_t HDF5GroupIterator(hid_t group_id, const char *member_name,
 			 void *classPtr)
 {
+  cerr << "Before C group iterator.\n";
   IOTreeHDF5Class &HDF5sec= *((IOTreeHDF5Class *)classPtr);
   HDF5sec.GroupIterator(member_name);
+  cerr << "After C group iterator.\n";
   return (0);
 }
 
@@ -1324,7 +1329,7 @@ inline AtomicType H5toAtomic (H5T_class_t type)
 
 void IOTreeHDF5Class::GroupIterator(string member_name)
 {
-  //cerr << "GroupIterator( " << member_name << ")\n";
+  cerr << "GroupIterator( " << member_name << ")\n";
 
   H5G_stat_t statbuf;
   
@@ -1402,7 +1407,7 @@ void IOTreeHDF5Class::GroupIterator(string member_name)
   }
   else
     cerr << " Unable to identify an object " << member_name << endl;;
-
+  cerr << "GroupIterator( " << member_name << ") done\n";
 }
 
 
@@ -1461,6 +1466,7 @@ void IOTreeHDF5Class::ReadGroup(hid_t parentGroupID,
     CurrSecNum = 0;
   else
     CurrSecNum = (SectionList.back())->MyNumber+1;
+  cerr << "After ReadGroup " << name << endl;
 }
 
 

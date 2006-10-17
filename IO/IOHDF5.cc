@@ -347,7 +347,7 @@ namespace IO {
       VarList.push_back (NewIOVarHDF5(datasetID, member_name, BoolType, ComplexType));
     }
     else if (statbuf.type == H5G_TYPE) {
-      if (member_name != "BOOL")
+      if ((member_name != "BOOL") && (member_name != "COMPLEX"))
 	cerr << "Compound types not yet supported "
 	     << "in IOTreeHDF5Class.  Ignoring " 
 	     << member_name << endl;

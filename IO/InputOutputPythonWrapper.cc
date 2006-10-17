@@ -84,6 +84,7 @@ IOSection_OpenFile (PyObject *self, PyObject *args)
     return NULL;
   else {
     bool success = ((IOSectionClass*)IOSectionPtr)->OpenFile(fileName);
+    cerr << " done with C++ open.\n";
     return Py_BuildValue("i",(int)success);
   }
 }

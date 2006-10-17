@@ -44,7 +44,7 @@ public:
 
   void Set (Vec3 box, Vec3 kvec, double kcut);
   void Set (Vec3 box, Vec3 kvec, double kcut, Int3 boxSize);
-  void Set (Mat3 &lattice, Array<Vec3,1> &gvecs);
+  void Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double factor=1.0);
 
   inline Vec3 operator()(int i) const
   { return GVecs(i); }

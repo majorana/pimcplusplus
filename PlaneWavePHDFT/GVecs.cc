@@ -233,7 +233,7 @@ GetIndex(Vec3 a[3], Vec3 b[3], Vec3 gvec)
 
 
 void
-GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs)
+GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor)
 {
   Lattice = lattice;
   Vec3 a[3], b[3];
@@ -271,12 +271,19 @@ GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs)
     if (dot (GVecs(i), GVecs(i)) > maxG2)
       maxG2 = dot (GVecs(i), GVecs(i));
   }
+  kCut = sqrt (maxG2);
 //   cerr << "minIndex = " << minIndex << endl;
 //   cerr << "maxIndex = " << maxIndex << endl;
 //   cerr << "maxG2 = " << maxG2 << endl;
   Nx = 2*(maxIndex[0] - minIndex[0] + 1);
   Ny = 2*(maxIndex[1] - minIndex[1] + 1);
   Nz = 2*(maxIndex[2] - minIndex[2] + 1);
+
+  // This is to increase the resolution of the FFT box, for spline
+  // representation 
+  Nx = (int)ceil(fftFactor * Nx);
+  Ny = (int)ceil(fftFactor * Ny);
+  Nz = (int)ceil(fftFactor * Nz);
 
   if ((Nx%2)==1) Nx++;
   if ((Ny%2)==1) Ny++;

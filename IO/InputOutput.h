@@ -70,6 +70,7 @@ inline IOTreeClass *ReadTree (string fileName,
   
   newTree->FileName = fileName;
   bool success = newTree->OpenFile (fileName, myName, parent);
+  cerr << "success = " << success << endl;
   if (success)
     return (newTree);
   else{
@@ -266,6 +267,7 @@ public:
 inline bool IOSectionClass::OpenFile (string fileName)
 {
   CurrentSection = ReadTree (fileName, "Root", NULL);
+  cerr << "After ReadTree.\n";
   if (CurrentSection == NULL)
     return (false);
   else

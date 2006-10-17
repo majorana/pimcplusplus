@@ -225,7 +225,7 @@ namespace IO {
   template<> string inline TypeString(int &val)             {  return "int";     }
   template<> string inline TypeString(string &val)          {  return "string";  }
   template<> string inline TypeString(bool &val)            {  return "bool";    }
-  template<> string inline TypeString(complex<double> &val) {  return "complex<double>";    }
+  template<> string inline TypeString(complex<double> &val) {  return "complex";    }
 
 
 }
