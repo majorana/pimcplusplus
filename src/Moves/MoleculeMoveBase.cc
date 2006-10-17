@@ -136,6 +136,20 @@ dVec MolMoveClass::TranslateMol(int slice, Array<int,1>& activePtcls, double eps
     dVec newP = PathData.Path(slice,activePtcls(ptcl)) + translate;
     PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
   }
+	///////////////////// hackity
+	//cerr << "TranslateMol:: I'm just doing this as a favor.  Fixe me right away!!!!!!" << endl;
+	//ofstream dimerOut("dimer.in");
+	//cerr << "mol is " << activePtcls(0) << " with members " << activePtcls << endl;
+	//for(int ptcl=0; ptcl<activePtcls.size(); ptcl++){
+	//	dimerOut << PathData.Path(slice,activePtcls(ptcl)) << endl;
+	//}
+	//dimerOut << endl;
+	//dVec myTranslate(2.85, 0.0, 0.0);
+  //for(int ptcl = 0; ptcl<activePtcls.size(); ptcl++){
+  //  dVec newP = PathData.Path(slice,activePtcls(ptcl)) + myTranslate;
+	//	dimerOut << newP << endl;
+  //}
+	//////////////////// end hackity
 	return translate;
 }
 

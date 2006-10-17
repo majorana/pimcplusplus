@@ -164,6 +164,7 @@ void PathDataClass::FindTail(int &tailSlice,int &tailPtcl)
 
 void PathDataClass::Read (IOSectionClass &in)
 {
+	useDefaultStrings = true;
 #ifdef USE_QMC
 
 	int M = MetaWorldComm.NumProcs();
@@ -207,8 +208,6 @@ void PathDataClass::Read (IOSectionClass &in)
 
 		if(in.ReadVar("ParticleSet0", ptclSet0) && in.ReadVar("ParticleSet1", ptclSet1))
 			useDefaultStrings = false;
-		else
-			useDefaultStrings = true;
 		
     in.CloseSection();
     int argc = 1;

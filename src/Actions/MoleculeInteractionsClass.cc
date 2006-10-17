@@ -44,30 +44,36 @@ double MoleculeInteractionsClass::SingleAction (int startSlice, int endSlice,
 	       const Array<int,1> &activeParticles, int level){
 
 	assert(ReadComplete);
-	double TotalU = ComputeEnergy(startSlice, endSlice, activeParticles, level, true);
+	bool IsAction = true;
+	double TotalU = ComputeEnergy(startSlice, endSlice, activeParticles, level, TruncateAction, IsAction);
   return(TotalU*PathData.Path.tau);
 }
 
 double MoleculeInteractionsClass::d_dBeta (int startSlice, int endSlice,  int level)
 {
-	//cerr << "MoleculeInteractions::d_dBeta__________________";// << endl;
+	cerr << "MoleculeInteractions::d_dBeta__________________ for slices " << startSlice << " to " << endSlice << endl;
   Array<int,1> activeParticles(PathData.Path.NumParticles());
   for (int i=0;i<PathData.Path.NumParticles();i++)
     activeParticles(i)=i;
-
-	double TotalU = ComputeEnergy(startSlice, endSlice-1, activeParticles, level, false);
-	//cerr << "RETURNING " << TotalU << endl;
+	
+	bool IsAction = false;
+	double TotalU = ComputeEnergy(startSlice, endSlice-1, activeParticles, level, TruncateEnergy, IsAction);
+	cerr << "RETURNING " << TotalU << endl;
   return TotalU;
 }
 
 double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice, 
-	       const Array<int,1> &activeParticles, int level, bool with_truncations){
+	       const Array<int,1> &activeParticles, int level, bool with_truncations, bool isAction){
 
 	Updated = false;
   for (int counter=0; counter<Path.DoPtcl.size(); counter++)
     Path.DoPtcl(counter)=true;
 
   double TotalU = 0.0;
+	double TotalLJ = 0.0;
+	double TotalCharge = 0.0;
+	double TotalSpring = 0.0;
+	double TotalKinetic = 0.0;
   int numChangedPtcls = activeParticles.size();
   int skip = 1<<level;
 
@@ -99,7 +105,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 						//	COMVecs(ptcl1,ptcl2) = r;
 						//	COMVecs(ptcl2,ptcl1) = -1*r;
 						//}
-						//	disregard interactions outside spherical cutoff  
+						//	disregard interactions outside spherical cutoff
             if (rmag <= CUTOFF){
 							//cerr << "<"<<CUTOFF;
               double rinv = 1.0/rmag;
@@ -112,6 +118,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 							}
 							//cerr << "; using offset " << offset << endl;
 	      			double lj = 4*PathData.Species(species1).Epsilon*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
+							TotalLJ += lj;
 	      			TotalU += lj;
 							//cerr  << TotalU << " added " << lj << " from LJ interaction between " << ptcl1 << " and " << ptcl2 << endl;
             }
@@ -149,6 +156,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 									modulation = S(Ormag);
               	double coulomb = prefactor*PathData.Species(species1).Charge
 																*PathData.Species(species2).Charge*modulation*(1.0/rmag - truncate/ptclCutoff);
+								TotalCharge += coulomb;
 	      				TotalU += coulomb;
 								//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
   	          }
@@ -158,10 +166,22 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
   	  }
   	}
 		if(Interacting(species1,2)){
+			// harmonic intermolecular potential
+			// parameters for ST2 water dimer
+			// could be generalized
+			double omega = 26;
+			double m_H2O = 0.043265;
+			double R0 = 2.85;
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
     		int species2=Path.ParticleSpeciesNum(ptcl2);
     		if (Interacting(species2,2) && Path.DoPtcl(ptcl2)){
-					// set up spring interactions...
+	  			for (int slice=startSlice;slice<=endSlice;slice+=skip){
+  					dVec COMr;
+  					double COMrmag;
+  					PathData.Path.DistDisp(slice, ptcl1, ptcl2, COMrmag, COMr);
+						TotalSpring += 0.5*m_H2O*omega*omega*(COMrmag - R0)*(COMrmag - R0);
+						TotalU += TotalSpring;
+					}
 				}
 			}
 		}
@@ -192,11 +212,15 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 					TotalK -= log(GaussProd);
 		    }
 		  }
+			TotalKinetic += TotalK;
 			TotalU += TotalK;
-			//cerr << TotalK << endl;
+			//cerr << TotalKinetic << endl;
 		}
 	}
-
+	// write additional output file
+	if(!isAction && special){
+		outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalKinetic << endl;
+	}
   return (TotalU);
 }
 
@@ -293,11 +317,15 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		CUTOFF = Path.GetBox()(0)/2;
 		IntraMolecular = false;
 		withS = true;
+		TruncateAction = true;
+		TruncateEnergy = false;
 
 		in.ReadVar("Cutoff",CUTOFF);
 		in.ReadVar("Prefactor",prefactor);
 		in.ReadVar("Modulated",withS);
 		in.ReadVar("Intramolecular",IntraMolecular);
+		in.ReadVar("TruncateAction",TruncateAction);
+		in.ReadVar("TruncateEnergy",TruncateEnergy);
 
 		Interacting.resize(PathData.NumSpecies(),4);
 		Interacting = false;
@@ -328,6 +356,14 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		Updated.resize(PathData.Path.numMol);
 		COMTable.resize(PathData.Path.numMol);
 		COMVecs.resize(PathData.Path.numMol);
+
+		special = false;
+		in.ReadVar("ExtraOutput",special);
+		if(special){
+			outfile.open("MoleculeEnergyBreakdown.dat");
+			outfile << "# Total LJ Coulomb Spring Kinetic" << endl;
+		}
+			
 		
 		ReadComplete = true;
 	}

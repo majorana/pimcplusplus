@@ -130,6 +130,7 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	  slice2 = slice+1;
 	}
 
+	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << MolMembers(MoveList(0)) << endl;
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
 		//activeParticles.resize(MolMembers(MoveList(activeMol)).size());
 		//for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(activeMol))(i);

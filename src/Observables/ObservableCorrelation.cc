@@ -124,6 +124,10 @@ void PairCorrelationClass::WriteBlock()
 #if NDIM==2
     double binVol = M_PI * (r2*r2-r1*r1);
 #endif
+		//////////////////////////
+		// This line does not normalize by volume for a dimer, e.g. -jg
+    //gofrArray(i) = (double) HistSum(i) / (norm);
+		//////////////////////////
     gofrArray(i) = (double) HistSum(i) / (binVol*norm);
   }
   gofrVar.Write(gofrArray);
