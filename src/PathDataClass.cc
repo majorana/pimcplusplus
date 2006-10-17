@@ -164,9 +164,8 @@ void PathDataClass::FindTail(int &tailSlice,int &tailPtcl)
 
 void PathDataClass::Read (IOSectionClass &in)
 {
-	useDefaultStrings = true;
 #ifdef USE_QMC
-
+	useDefaultStrings = true;
 	int M = MetaWorldComm.NumProcs();
 	cerr << MetaWorldComm.MyProc() << ": PathDataClass.cc: N is " << M << endl;
   string QMCFilename;
