@@ -38,15 +38,14 @@ int PlaneDensityClass::IntoGrid(double num)
 void PlaneDensityClass::Accumulate()
 {
   for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++)
-    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
-      if (abs(PathData.Path(slice,ptcl)[2])<1.85){
-	NumSamples++;
-	int nx=IntoGrid(PathData.Path(slice,ptcl)[0]);
-	int ny=IntoGrid(PathData.Path(slice,ptcl)[1]);
-	if (nx<NumSamples && ny<NumSamples)
-	  Grid(nx,ny)=Grid(nx,ny)+1;
-      }
-
+    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+      NumSamples++;
+      int nx=IntoGrid(PathData.Path(slice,ptcl)[0]);
+      int ny=IntoGrid(PathData.Path(slice,ptcl)[1]);
+      if (nx<NumSamples && ny<NumSamples)
+	Grid(nx,ny)=Grid(nx,ny)+1;
+      
+    }
 }
 
 void PlaneDensityClass::WriteBlock()
