@@ -97,6 +97,11 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
 {
   k = kVec;
   Box = box;
+  Lattice = 
+    box[0], 0.0   , 0.0,
+    0.0   , box[1], 0.0,
+    0.0   , 0.0   , box[2];
+
   kCut = kcut;
   kBox[0]=2.0*M_PI/box[0]; kBox[1]=2.0*M_PI/box[1]; kBox[2]=2.0*M_PI/box[2];
 

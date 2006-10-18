@@ -55,6 +55,7 @@ public:
       C(i) = P[i];
     return (*this);
   }
+
   inline PolynomialClass& operator+=(const PolynomialClass &P)
   {
     assert(Order() == P.Order());
@@ -67,6 +68,7 @@ public:
   {
     for (int i=0; i<=Order(); i++)
       C(i) = x;
+    return (*this);
   }
 
   PolynomialClass (const PolynomialClass &P) 
@@ -81,11 +83,34 @@ public:
     C.resize(order+1);
     C = 0.0;
   }
+  PolynomialClass (Array<double,1> &coefs)
+  {
+    C.resize(coefs.size());
+    C = coefs;
+  }
+
   PolynomialClass() {}
 };
 
 
+inline PolynomialClass Integral (const PolynomialClass &p)
+{
+  PolynomialClass pint(p.Order()+1);
+  pint[0] = 0.0;
+  for (int i=1; i<=(p.Order()+1); i++)
+    pint[i] = p[i-1]/(double)i;
+  return pint;
+}
 
+inline PolynomialClass Deriv (const PolynomialClass &p)
+{
+  int order = max (0, p.Order()-1);
+  PolynomialClass dp(order);
+  dp[0] = 0.0;
+  for (int i=0; i<p.Order(); i++)
+    dp[i] = (double)(i+1)*p[i+1];
+  return dp;
+}
 
 inline PolynomialClass operator+(const PolynomialClass &a, 
 				 const PolynomialClass &b)

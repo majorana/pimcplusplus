@@ -74,13 +74,16 @@ public:
   { return GDiff.size(); }
 
   inline double GetBoxVol() 
-  { return Box[0]*Box[1]*Box[2]; }
+  { return fabs(det(Lattice)); }
 
   inline double GetkCut() 
   { return kCut; }
 
   inline Vec3 GetBox()
   { return Box; }
+
+  inline Mat3 GetLattice() const
+  { return Lattice; }
 
   inline Vec3 GetkBox()
   { return kBox; }

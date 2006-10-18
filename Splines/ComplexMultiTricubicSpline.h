@@ -93,7 +93,6 @@ class ComplexMultiTricubicSpline
   inline double d2q2 (double t)
   { return (6.0*t - 2.0); } 
   
-  static const TinyMatrix<double,4,4> IntMat, d2IntMat;
   // The definite integrals of the hermite functions from 0 to 1
   static const double Int_p1, Int_p2, Int_q1, Int_q2;
   // The definite integrals of the second derivatives of the hermite
@@ -155,7 +154,8 @@ public:
 			 Array<complex<double>,1> &vals);
   /// Returns the integral of the laplacian over the whole box.
   inline void IntegralOfLaplacian (Array<complex<double>,1> &vals);
-  inline void KineticEnergy (Array<double,1> &ke);
+  inline void KineticEnergy (Array<double,1> &ke);  
+  inline void Norm (Array<double,1> &norm);
   inline void* Data () { return F.data(); }
 
   ComplexMultiTricubicSpline(Grid *xgrid, Grid *ygrid, Grid *zgrid, int n)
@@ -2455,7 +2455,8 @@ TinyMatrix<T,M,N> operator*(T val, const TinyMatrix<T,M,N>& mat)
 inline void
 ComplexMultiTricubicSpline::KineticEnergy(Array<double,1> &KE)
 {
-
+  if (!UpToDate)
+    Update();
   KE = 0.0;
   
   Array<complex<double>,3> Y(4,4,4);
@@ -2551,72 +2552,72 @@ ComplexMultiTricubicSpline::KineticEnergy(Array<double,1> &KE)
 	register double d2c3 = Int_d2q2;
 	
 	for (int i=0; i<N; i++) {
-	  Y(0,0,0) = complex<double> (F(ix,iy,iz,i)[0][0]      , F(ix,iy,iz,i)[0][1]      );      //   F
-	  Y(0,0,1) = complex<double> (F(ix,iy,iz+1,i)[0][0]    , F(ix,iy,iz+1,i)[0][1]    );    //   F
-	  Y(0,0,2) = complex<double> (F(ix,iy,iz,i)[3][0]      , F(ix,iy,iz,i)[3][1]      );      //  dF/dz
-	  Y(0,0,3) = complex<double> (F(ix,iy,iz+1,i)[3][0]    , F(ix,iy,iz+1,i)[3][1]    );    //  dF/dz
-	  Y(0,1,0) = complex<double> (F(ix,iy+1,iz,i)[0][0]    , F(ix,iy+1,iz,i)[0][1]    );    //   F
+	  Y(0,0,0) = complex<double> (F(ix,iy,iz,i)[0][0]      , F(ix,iy,iz,i)[0][1]      );  //   F
+	  Y(0,0,1) = complex<double> (F(ix,iy,iz+1,i)[0][0]    , F(ix,iy,iz+1,i)[0][1]    );  //   F
+	  Y(0,0,2) = complex<double> (F(ix,iy,iz,i)[3][0]      , F(ix,iy,iz,i)[3][1]      );  //  dF/dz
+	  Y(0,0,3) = complex<double> (F(ix,iy,iz+1,i)[3][0]    , F(ix,iy,iz+1,i)[3][1]    );  //  dF/dz
+	  Y(0,1,0) = complex<double> (F(ix,iy+1,iz,i)[0][0]    , F(ix,iy+1,iz,i)[0][1]    );  //   F
 	  Y(0,1,1) = complex<double> (F(ix,iy+1,iz+1,i)[0][0]  , F(ix,iy+1,iz+1,i)[0][1]  );  //   F
-	  Y(0,1,2) = complex<double> (F(ix,iy+1,iz,i)[3][0]    , F(ix,iy+1,iz,i)[3][1]    );    //  dF/dz
+	  Y(0,1,2) = complex<double> (F(ix,iy+1,iz,i)[3][0]    , F(ix,iy+1,iz,i)[3][1]    );  //  dF/dz
 	  Y(0,1,3) = complex<double> (F(ix,iy+1,iz+1,i)[3][0]  , F(ix,iy+1,iz+1,i)[3][1]  );  //  dF/dz
-	  Y(0,2,0) = complex<double> (F(ix,iy,iz,i)[2][0]      , F(ix,iy,iz,i)[2][1]      );      //  dF/dy
-	  Y(0,2,1) = complex<double> (F(ix,iy,iz+1,i)[2][0]    , F(ix,iy,iz+1,i)[2][1]    );    //  dF/dy
-	  Y(0,2,2) = complex<double> (F(ix,iy,iz,i)[6][0]      , F(ix,iy,iz,i)[6][1]      );      // d2F/dydz
-	  Y(0,2,3) = complex<double> (F(ix,iy,iz+1,i)[6][0]    , F(ix,iy,iz+1,i)[6][1]    );    // d2F/dydz
-	  Y(0,3,0) = complex<double> (F(ix,iy+1,iz,i)[2][0]    , F(ix,iy+1,iz,i)[2][1]    );    //  dF/dy
+	  Y(0,2,0) = complex<double> (F(ix,iy,iz,i)[2][0]      , F(ix,iy,iz,i)[2][1]      );  //  dF/dy
+	  Y(0,2,1) = complex<double> (F(ix,iy,iz+1,i)[2][0]    , F(ix,iy,iz+1,i)[2][1]    );  //  dF/dy
+	  Y(0,2,2) = complex<double> (F(ix,iy,iz,i)[6][0]      , F(ix,iy,iz,i)[6][1]      );  // d2F/dydz
+	  Y(0,2,3) = complex<double> (F(ix,iy,iz+1,i)[6][0]    , F(ix,iy,iz+1,i)[6][1]    );  // d2F/dydz
+	  Y(0,3,0) = complex<double> (F(ix,iy+1,iz,i)[2][0]    , F(ix,iy+1,iz,i)[2][1]    );  //  dF/dy
 	  Y(0,3,1) = complex<double> (F(ix,iy+1,iz+1,i)[2][0]  , F(ix,iy+1,iz+1,i)[2][1]  );  //  dF/dy
-	  Y(0,3,2) = complex<double> (F(ix,iy+1,iz,i)[6][0]    , F(ix,iy+1,iz,i)[6][1]    );    // d2F/dydz
+	  Y(0,3,2) = complex<double> (F(ix,iy+1,iz,i)[6][0]    , F(ix,iy+1,iz,i)[6][1]    );  // d2F/dydz
 	  Y(0,3,3) = complex<double> (F(ix,iy+1,iz+1,i)[6][0]  , F(ix,iy+1,iz+1,i)[6][1]  );  // d2F/dydz
 	 						       						       
-	  Y(1,0,0) = complex<double> (F(ix+1,iy,iz,i)[0][0]    , F(ix+1,iy,iz,i)[0][1]    );      //   F
-	  Y(1,0,1) = complex<double> (F(ix+1,iy,iz+1,i)[0][0]  , F(ix+1,iy,iz+1,i)[0][1]  );    //   F
-	  Y(1,0,2) = complex<double> (F(ix+1,iy,iz,i)[3][0]    , F(ix+1,iy,iz,i)[3][1]    );      //  dF/dz
-	  Y(1,0,3) = complex<double> (F(ix+1,iy,iz+1,i)[3][0]  , F(ix+1,iy,iz+1,i)[3][1]  );    //  dF/dz
-	  Y(1,1,0) = complex<double> (F(ix+1,iy+1,iz,i)[0][0]  , F(ix+1,iy+1,iz,i)[0][1]  );    //   F
+	  Y(1,0,0) = complex<double> (F(ix+1,iy,iz,i)[0][0]    , F(ix+1,iy,iz,i)[0][1]    );  //   F
+	  Y(1,0,1) = complex<double> (F(ix+1,iy,iz+1,i)[0][0]  , F(ix+1,iy,iz+1,i)[0][1]  );  //   F
+	  Y(1,0,2) = complex<double> (F(ix+1,iy,iz,i)[3][0]    , F(ix+1,iy,iz,i)[3][1]    );  //  dF/dz
+	  Y(1,0,3) = complex<double> (F(ix+1,iy,iz+1,i)[3][0]  , F(ix+1,iy,iz+1,i)[3][1]  );  //  dF/dz
+	  Y(1,1,0) = complex<double> (F(ix+1,iy+1,iz,i)[0][0]  , F(ix+1,iy+1,iz,i)[0][1]  );  //   F
 	  Y(1,1,1) = complex<double> (F(ix+1,iy+1,iz+1,i)[0][0], F(ix+1,iy+1,iz+1,i)[0][1]);  //   , F
-	  Y(1,1,2) = complex<double> (F(ix+1,iy+1,iz,i)[3][0]  , F(ix+1,iy+1,iz,i)[3][1]  );    //  dF/dz
+	  Y(1,1,2) = complex<double> (F(ix+1,iy+1,iz,i)[3][0]  , F(ix+1,iy+1,iz,i)[3][1]  );  //  dF/dz
 	  Y(1,1,3) = complex<double> (F(ix+1,iy+1,iz+1,i)[3][0], F(ix+1,iy+1,iz+1,i)[3][1]);  //  dF/dz
-	  Y(1,2,0) = complex<double> (F(ix+1,iy,iz,i)[2][0]    , F(ix+1,iy,iz,i)[2][1]    );      //  dF/dy
-	  Y(1,2,1) = complex<double> (F(ix+1,iy,iz+1,i)[2][0]  , F(ix+1,iy,iz+1,i)[2][1]  );    //  dF/dy
-	  Y(1,2,2) = complex<double> (F(ix+1,iy,iz,i)[6][0]    , F(ix+1,iy,iz,i)[6][1]    );      // d2F/dydz
-	  Y(1,2,3) = complex<double> (F(ix+1,iy,iz+1,i)[6][0]  , F(ix+1,iy,iz+1,i)[6][1]  );    // d2F/dydz
-	  Y(1,3,0) = complex<double> (F(ix+1,iy+1,iz,i)[2][0]  , F(ix+1,iy+1,iz,i)[2][1]  );    //  dF/dy
+	  Y(1,2,0) = complex<double> (F(ix+1,iy,iz,i)[2][0]    , F(ix+1,iy,iz,i)[2][1]    );  //  dF/dy
+	  Y(1,2,1) = complex<double> (F(ix+1,iy,iz+1,i)[2][0]  , F(ix+1,iy,iz+1,i)[2][1]  );  //  dF/dy
+	  Y(1,2,2) = complex<double> (F(ix+1,iy,iz,i)[6][0]    , F(ix+1,iy,iz,i)[6][1]    );  // d2F/dydz
+	  Y(1,2,3) = complex<double> (F(ix+1,iy,iz+1,i)[6][0]  , F(ix+1,iy,iz+1,i)[6][1]  );  // d2F/dydz
+	  Y(1,3,0) = complex<double> (F(ix+1,iy+1,iz,i)[2][0]  , F(ix+1,iy+1,iz,i)[2][1]  );  //  dF/dy
 	  Y(1,3,1) = complex<double> (F(ix+1,iy+1,iz+1,i)[2][0], F(ix+1,iy+1,iz+1,i)[2][1]);  //  dF/dy
-	  Y(1,3,2) = complex<double> (F(ix+1,iy+1,iz,i)[6][0]  , F(ix+1,iy+1,iz,i)[6][1]  );    // d2F/dydz
+	  Y(1,3,2) = complex<double> (F(ix+1,iy+1,iz,i)[6][0]  , F(ix+1,iy+1,iz,i)[6][1]  );  // d2F/dydz
 	  Y(1,3,3) = complex<double> (F(ix+1,iy+1,iz+1,i)[6][0], F(ix+1,iy+1,iz+1,i)[6][1]);  // d2F/dydz
 	 						       						       
-	  Y(2,0,0) = complex<double> (F(ix,iy,iz,i)[1][0]      , F(ix,iy,iz,i)[1][1]      );      //  dF/dx
-	  Y(2,0,1) = complex<double> (F(ix,iy,iz+1,i)[1][0]    , F(ix,iy,iz+1,i)[1][1]    );    //  dF/dx
-	  Y(2,0,2) = complex<double> (F(ix,iy,iz,i)[5][0]      , F(ix,iy,iz,i)[5][1]      );      // d2F/dxdz
-	  Y(2,0,3) = complex<double> (F(ix,iy,iz+1,i)[5][0]    , F(ix,iy,iz+1,i)[5][1]    );    // d2F/dxdz
-	  Y(2,1,0) = complex<double> (F(ix,iy+1,iz,i)[1][0]    , F(ix,iy+1,iz,i)[1][1]    );    //  dF/dx
+	  Y(2,0,0) = complex<double> (F(ix,iy,iz,i)[1][0]      , F(ix,iy,iz,i)[1][1]      );  //  dF/dx
+	  Y(2,0,1) = complex<double> (F(ix,iy,iz+1,i)[1][0]    , F(ix,iy,iz+1,i)[1][1]    );  //  dF/dx
+	  Y(2,0,2) = complex<double> (F(ix,iy,iz,i)[5][0]      , F(ix,iy,iz,i)[5][1]      );  // d2F/dxdz
+	  Y(2,0,3) = complex<double> (F(ix,iy,iz+1,i)[5][0]    , F(ix,iy,iz+1,i)[5][1]    );  // d2F/dxdz
+	  Y(2,1,0) = complex<double> (F(ix,iy+1,iz,i)[1][0]    , F(ix,iy+1,iz,i)[1][1]    );  //  dF/dx
 	  Y(2,1,1) = complex<double> (F(ix,iy+1,iz+1,i)[1][0]  , F(ix,iy+1,iz+1,i)[1][1]  );  //  dF/dx
-	  Y(2,1,2) = complex<double> (F(ix,iy+1,iz,i)[5][0]    , F(ix,iy+1,iz,i)[5][1]    );    // d2F/dxdz
+	  Y(2,1,2) = complex<double> (F(ix,iy+1,iz,i)[5][0]    , F(ix,iy+1,iz,i)[5][1]    );  // d2F/dxdz
 	  Y(2,1,3) = complex<double> (F(ix,iy+1,iz+1,i)[5][0]  , F(ix,iy+1,iz+1,i)[5][1]  );  // d2F/dxdz
-	  Y(2,2,0) = complex<double> (F(ix,iy,iz,i)[4][0]      , F(ix,iy,iz,i)[4][1]      );      // d2F/dxdy
-	  Y(2,2,1) = complex<double> (F(ix,iy,iz+1,i)[4][0]    , F(ix,iy,iz+1,i)[4][1]    );    // d2F/dxdy
-	  Y(2,2,2) = complex<double> (F(ix,iy,iz,i)[7][0]      , F(ix,iy,iz,i)[7][1]      );      // d3F/dxdydz
-	  Y(2,2,3) = complex<double> (F(ix,iy,iz+1,i)[7][0]    , F(ix,iy,iz+1,i)[7][1]    );    // d3F/dxdydz
-	  Y(2,3,0) = complex<double> (F(ix,iy+1,iz,i)[4][0]    , F(ix,iy+1,iz,i)[4][1]    );    // d2F/dxdy
+	  Y(2,2,0) = complex<double> (F(ix,iy,iz,i)[4][0]      , F(ix,iy,iz,i)[4][1]      );  // d2F/dxdy
+	  Y(2,2,1) = complex<double> (F(ix,iy,iz+1,i)[4][0]    , F(ix,iy,iz+1,i)[4][1]    );  // d2F/dxdy
+	  Y(2,2,2) = complex<double> (F(ix,iy,iz,i)[7][0]      , F(ix,iy,iz,i)[7][1]      );  // d3F/dxdydz
+	  Y(2,2,3) = complex<double> (F(ix,iy,iz+1,i)[7][0]    , F(ix,iy,iz+1,i)[7][1]    );  // d3F/dxdydz
+	  Y(2,3,0) = complex<double> (F(ix,iy+1,iz,i)[4][0]    , F(ix,iy+1,iz,i)[4][1]    );  // d2F/dxdy
 	  Y(2,3,1) = complex<double> (F(ix,iy+1,iz+1,i)[4][0]  , F(ix,iy+1,iz+1,i)[4][1]  );  // d2F/dxdy
-	  Y(2,3,2) = complex<double> (F(ix,iy+1,iz,i)[7][0]    , F(ix,iy+1,iz,i)[7][1]    );    // d3F/dxdydz
+	  Y(2,3,2) = complex<double> (F(ix,iy+1,iz,i)[7][0]    , F(ix,iy+1,iz,i)[7][1]    );  // d3F/dxdydz
 	  Y(2,3,3) = complex<double> (F(ix,iy+1,iz+1,i)[7][0]  , F(ix,iy+1,iz+1,i)[7][1]  );  // d3F/dxdydz
 	 						       						       
-	  Y(3,0,0) = complex<double> (F(ix+1,iy,iz,i)[1][0]    , F(ix+1,iy,iz,i)[1][1]    );      //  dF/dx
-	  Y(3,0,1) = complex<double> (F(ix+1,iy,iz+1,i)[1][0]  , F(ix+1,iy,iz+1,i)[1][1]  );    //  dF/dx
-	  Y(3,0,2) = complex<double> (F(ix+1,iy,iz,i)[5][0]    , F(ix+1,iy,iz,i)[5][1]    );      // d2F/dxdz
-	  Y(3,0,3) = complex<double> (F(ix+1,iy,iz+1,i)[5][0]  , F(ix+1,iy,iz+1,i)[5][1]  );    // d2F/dxdz
-	  Y(3,1,0) = complex<double> (F(ix+1,iy+1,iz,i)[1][0]  , F(ix+1,iy+1,iz,i)[1][1]  );    //  dF/dx
+	  Y(3,0,0) = complex<double> (F(ix+1,iy,iz,i)[1][0]    , F(ix+1,iy,iz,i)[1][1]    );  //  dF/dx
+	  Y(3,0,1) = complex<double> (F(ix+1,iy,iz+1,i)[1][0]  , F(ix+1,iy,iz+1,i)[1][1]  );  //  dF/dx
+	  Y(3,0,2) = complex<double> (F(ix+1,iy,iz,i)[5][0]    , F(ix+1,iy,iz,i)[5][1]    );  // d2F/dxdz
+	  Y(3,0,3) = complex<double> (F(ix+1,iy,iz+1,i)[5][0]  , F(ix+1,iy,iz+1,i)[5][1]  );  // d2F/dxdz
+	  Y(3,1,0) = complex<double> (F(ix+1,iy+1,iz,i)[1][0]  , F(ix+1,iy+1,iz,i)[1][1]  );  //  dF/dx
 	  Y(3,1,1) = complex<double> (F(ix+1,iy+1,iz+1,i)[1][0], F(ix+1,iy+1,iz+1,i)[1][1]);  //  dF/dx
-	  Y(3,1,2) = complex<double> (F(ix+1,iy+1,iz,i)[5][0]  , F(ix+1,iy+1,iz,i)[5][1]  );    // d2F/dxdz
+	  Y(3,1,2) = complex<double> (F(ix+1,iy+1,iz,i)[5][0]  , F(ix+1,iy+1,iz,i)[5][1]  );  // d2F/dxdz
 	  Y(3,1,3) = complex<double> (F(ix+1,iy+1,iz+1,i)[5][0], F(ix+1,iy+1,iz+1,i)[5][1]);  // d2F/dxdz
-	  Y(3,2,0) = complex<double> (F(ix+1,iy,iz,i)[4][0]    , F(ix+1,iy,iz,i)[4][1]    );      // d2F/dxdy
-	  Y(3,2,1) = complex<double> (F(ix+1,iy,iz+1,i)[4][0]  , F(ix+1,iy,iz+1,i)[4][1]  );    // d2F/dxdy
-	  Y(3,2,2) = complex<double> (F(ix+1,iy,iz,i)[7][0]    , F(ix+1,iy,iz,i)[7][1]    );      // d3F/dxdydz
-	  Y(3,2,3) = complex<double> (F(ix+1,iy,iz+1,i)[7][0]  , F(ix+1,iy,iz+1,i)[7][1]  );    // d3F/dxdydz
-	  Y(3,3,0) = complex<double> (F(ix+1,iy+1,iz,i)[4][0]  , F(ix+1,iy+1,iz,i)[4][1]  );    // d2F/dxdy
+	  Y(3,2,0) = complex<double> (F(ix+1,iy,iz,i)[4][0]    , F(ix+1,iy,iz,i)[4][1]    );  // d2F/dxdy
+	  Y(3,2,1) = complex<double> (F(ix+1,iy,iz+1,i)[4][0]  , F(ix+1,iy,iz+1,i)[4][1]  );  // d2F/dxdy
+	  Y(3,2,2) = complex<double> (F(ix+1,iy,iz,i)[7][0]    , F(ix+1,iy,iz,i)[7][1]    );  // d3F/dxdydz
+	  Y(3,2,3) = complex<double> (F(ix+1,iy,iz+1,i)[7][0]  , F(ix+1,iy,iz+1,i)[7][1]  );  // d3F/dxdydz
+	  Y(3,3,0) = complex<double> (F(ix+1,iy+1,iz,i)[4][0]  , F(ix+1,iy+1,iz,i)[4][1]  );  // d2F/dxdy
 	  Y(3,3,1) = complex<double> (F(ix+1,iy+1,iz+1,i)[4][0], F(ix+1,iy+1,iz+1,i)[4][1]);  // d2F/dxdy
-	  Y(3,3,2) = complex<double> (F(ix+1,iy+1,iz,i)[7][0]  , F(ix+1,iy+1,iz,i)[7][1]  );    // d3F/dxdydz
+	  Y(3,3,2) = complex<double> (F(ix+1,iy+1,iz,i)[7][0]  , F(ix+1,iy+1,iz,i)[7][1]  );  // d3F/dxdydz
 	  Y(3,3,3) = complex<double> (F(ix+1,iy+1,iz+1,i)[7][0], F(ix+1,iy+1,iz+1,i)[7][1]);  // d3F/dxdydz
 	  
 	  for (int i1=0; i1<4; i1++)
@@ -2625,10 +2626,213 @@ ComplexMultiTricubicSpline::KineticEnergy(Array<double,1> &KE)
 		for (int j2=0; j2<4; j2++)
 		  for (int k1=0; k1<4; k1++)
 		    for (int k2=0; k2<4; k2++) {
-		      KE(i) += real(d2IntMatX(i1,i2) *  IntMatY(j1,j2) *  IntMatZ(k1,k2)*Y(i1,j1,k1)*conj(Y(i2,j2,k2)));
-		      KE(i) += real(  IntMatX(i1,i2) *d2IntMatY(j1,j2) *  IntMatZ(k1,k2)*Y(i1,j1,k1)*conj(Y(i2,j2,k2)));
-		      KE(i) += real(  IntMatX(i1,i2) *  IntMatY(j1,j2) *d2IntMatZ(k1,k2)*Y(i1,j1,k1)*conj(Y(i2,j2,k2)));
+		      KE(i) += real(d2IntMatX(i1,i2) *  IntMatY(j1,j2) *  IntMatZ(k1,k2)*conj(Y(i1,j1,k1))*Y(i2,j2,k2));
+		      KE(i) += real(  IntMatX(i1,i2) *d2IntMatY(j1,j2) *  IntMatZ(k1,k2)*conj(Y(i1,j1,k1))*Y(i2,j2,k2));
+		      KE(i) += real(  IntMatX(i1,i2) *  IntMatY(j1,j2) *d2IntMatZ(k1,k2)*conj(Y(i1,j1,k1))*Y(i2,j2,k2));
 		    }
+		      
+// 	  TinyVector<double,2> Val =
+// 	    d2a0*
+// 	    (b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+// 	     b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+// 	     b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+// 	     b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
+// 	    d2a1 *
+// 	    (b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+// 	     b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+// 	     b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+// 	     b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
+// 	    d2a2 *
+// 	    (b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+// 	     b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+// 	     b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+// 	     b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
+// 	    d2a3 *
+// 	    (b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+// 	     b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+// 	     b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+// 	     b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
+	  
+// 	  Val +=
+// 	    a0*
+// 	    (d2b0*(Y000*c0+Y001*c1+Y002*c2+Y003*c3) +
+// 	     d2b1*(Y010*c0+Y011*c1+Y012*c2+Y013*c3) +
+// 	     d2b2*(Y020*c0+Y021*c1+Y022*c2+Y023*c3) +
+// 	     d2b3*(Y030*c0+Y031*c1+Y032*c2+Y033*c3))+
+// 	    a1 *
+// 	    (d2b0*(Y100*c0+Y101*c1+Y102*c2+Y103*c3) +
+// 	     d2b1*(Y110*c0+Y111*c1+Y112*c2+Y113*c3) +
+// 	     d2b2*(Y120*c0+Y121*c1+Y122*c2+Y123*c3) +
+// 	     d2b3*(Y130*c0+Y131*c1+Y132*c2+Y133*c3))+
+// 	    a2 *
+// 	    (d2b0*(Y200*c0+Y201*c1+Y202*c2+Y203*c3) +
+// 	     d2b1*(Y210*c0+Y211*c1+Y212*c2+Y213*c3) +
+// 	     d2b2*(Y220*c0+Y221*c1+Y222*c2+Y223*c3) +
+// 	     d2b3*(Y230*c0+Y231*c1+Y232*c2+Y233*c3))+
+// 	    a3 *
+// 	    (d2b0*(Y300*c0+Y301*c1+Y302*c2+Y303*c3) +
+// 	     d2b1*(Y310*c0+Y311*c1+Y312*c2+Y313*c3) +
+// 	     d2b2*(Y320*c0+Y321*c1+Y322*c2+Y323*c3) +
+// 	     d2b3*(Y330*c0+Y331*c1+Y332*c2+Y333*c3));
+	  
+// 	  Val += 
+// 	    a0*
+// 	    (b0*(Y000*d2c0+Y001*d2c1+Y002*d2c2+Y003*d2c3) +
+// 	     b1*(Y010*d2c0+Y011*d2c1+Y012*d2c2+Y013*d2c3) +
+// 	     b2*(Y020*d2c0+Y021*d2c1+Y022*d2c2+Y023*d2c3) +
+// 	     b3*(Y030*d2c0+Y031*d2c1+Y032*d2c2+Y033*d2c3))+
+// 	    a1 *
+// 	    (b0*(Y100*d2c0+Y101*d2c1+Y102*d2c2+Y103*d2c3) +
+// 	     b1*(Y110*d2c0+Y111*d2c1+Y112*d2c2+Y113*d2c3) +
+// 	     b2*(Y120*d2c0+Y121*d2c1+Y122*d2c2+Y123*d2c3) +
+// 	     b3*(Y130*d2c0+Y131*d2c1+Y132*d2c2+Y133*d2c3))+
+// 	    a2 *
+// 	    (b0*(Y200*d2c0+Y201*d2c1+Y202*d2c2+Y203*d2c3) +
+// 	     b1*(Y210*d2c0+Y211*d2c1+Y212*d2c2+Y213*d2c3) +
+// 	     b2*(Y220*d2c0+Y221*d2c1+Y222*d2c2+Y223*d2c3) +
+// 	     b3*(Y230*d2c0+Y231*d2c1+Y232*d2c2+Y233*d2c3))+
+// 	    a3 *
+// 	    (b0*(Y300*d2c0+Y301*d2c1+Y302*d2c2+Y303*d2c3) +
+// 	     b1*(Y310*d2c0+Y311*d2c1+Y312*d2c2+Y313*d2c3) +
+// 	     b2*(Y320*d2c0+Y321*d2c1+Y322*d2c2+Y323*d2c3) +
+// 	     b3*(Y330*d2c0+Y331*d2c1+Y332*d2c2+Y333*d2c3));
+	  
+// 	  vals(i) += complex<double>(Val[0],Val[1]);
+	}
+      }
+    }
+  }
+}
+
+inline void
+ComplexMultiTricubicSpline::Norm(Array<double,1> &nrm)
+{
+  if (!UpToDate)
+    Update();
+  nrm = 0.0;
+  
+  Array<complex<double>,3> Y(4,4,4);
+
+  for (int ix=0; ix<(Nx-1); ix++) {
+    for (int iy=0; iy<(Ny-1); iy++) {
+      for (int iz=0; iz<(Nz-1); iz++) {
+	TinyMatrix<double,4,4> IntMatX, IntMatY, IntMatZ;
+	double h = (*Xgrid)(ix+1) - (*Xgrid)(ix);
+	double hinv = 1.0/h;
+	double k = (*Ygrid)(iy+1) - (*Ygrid)(iy);
+	double kinv = 1.0/k;
+	double l = (*Zgrid)(iz+1) - (*Zgrid)(iz);
+	double linv = 1.0/l;
+
+	IntMatX =
+	  0.37142857142857144126  ,     0.12857142857142855874,
+	  0.05238095238095241690*h,    -0.03095238095238106446*h,
+	  0.12857142857142855874,       0.37142857142857144126,   
+	  0.03095238095238095344*h,    -0.05238095238095230588*h,
+	  0.05238095238095241690*h,     0.03095238095238095344*h,   
+	  0.00952380952380943446*h*h,  -0.00714285714285717299*h*h,
+         -0.03095238095238106446*h,    -0.05238095238095230588*h,  
+         -0.00714285714285717299*h*h,   0.00952380952380954549*h*h;
+	IntMatX = h * IntMatX;
+
+	IntMatY =
+	  0.37142857142857144126  ,     0.12857142857142855874,
+	  0.05238095238095241690*k,    -0.03095238095238106446*k,
+	  0.12857142857142855874,       0.37142857142857144126,   
+	  0.03095238095238095344*k,    -0.05238095238095230588*k,
+	  0.05238095238095241690*k,     0.03095238095238095344*k,   
+	  0.00952380952380943446*k*k,  -0.00714285714285717299*k*k,
+         -0.03095238095238106446*k,    -0.05238095238095230588*k,  
+         -0.00714285714285717299*k*k,   0.00952380952380954549*k*k;
+	IntMatY = k * IntMatY;
+
+	IntMatZ =
+	  0.37142857142857144126  ,     0.12857142857142855874,
+	  0.05238095238095241690*l,    -0.03095238095238106446*l,
+	  0.12857142857142855874,       0.37142857142857144126,   
+	  0.03095238095238095344*l,    -0.05238095238095230588*l,
+	  0.05238095238095241690*l,     0.03095238095238095344*l,   
+	  0.00952380952380943446*l*l,  -0.00714285714285717299*l*l,
+         -0.03095238095238106446*l,    -0.05238095238095230588*l,  
+         -0.00714285714285717299*l*l,   0.00952380952380954549*l*l;
+	IntMatZ = l * IntMatZ;
+	
+	for (int i=0; i<N; i++) {
+	  Y(0,0,0) = complex<double> (F(ix,iy,iz,i)[0][0]      , F(ix,iy,iz,i)[0][1]      );  //   F
+	  Y(0,0,1) = complex<double> (F(ix,iy,iz+1,i)[0][0]    , F(ix,iy,iz+1,i)[0][1]    );  //   F
+	  Y(0,0,2) = complex<double> (F(ix,iy,iz,i)[3][0]      , F(ix,iy,iz,i)[3][1]      );  //  dF/dz
+	  Y(0,0,3) = complex<double> (F(ix,iy,iz+1,i)[3][0]    , F(ix,iy,iz+1,i)[3][1]    );  //  dF/dz
+	  Y(0,1,0) = complex<double> (F(ix,iy+1,iz,i)[0][0]    , F(ix,iy+1,iz,i)[0][1]    );  //   F
+	  Y(0,1,1) = complex<double> (F(ix,iy+1,iz+1,i)[0][0]  , F(ix,iy+1,iz+1,i)[0][1]  );  //   F
+	  Y(0,1,2) = complex<double> (F(ix,iy+1,iz,i)[3][0]    , F(ix,iy+1,iz,i)[3][1]    );  //  dF/dz
+	  Y(0,1,3) = complex<double> (F(ix,iy+1,iz+1,i)[3][0]  , F(ix,iy+1,iz+1,i)[3][1]  );  //  dF/dz
+	  Y(0,2,0) = complex<double> (F(ix,iy,iz,i)[2][0]      , F(ix,iy,iz,i)[2][1]      );  //  dF/dy
+	  Y(0,2,1) = complex<double> (F(ix,iy,iz+1,i)[2][0]    , F(ix,iy,iz+1,i)[2][1]    );  //  dF/dy
+	  Y(0,2,2) = complex<double> (F(ix,iy,iz,i)[6][0]      , F(ix,iy,iz,i)[6][1]      );  // d2F/dydz
+	  Y(0,2,3) = complex<double> (F(ix,iy,iz+1,i)[6][0]    , F(ix,iy,iz+1,i)[6][1]    );  // d2F/dydz
+	  Y(0,3,0) = complex<double> (F(ix,iy+1,iz,i)[2][0]    , F(ix,iy+1,iz,i)[2][1]    );  //  dF/dy
+	  Y(0,3,1) = complex<double> (F(ix,iy+1,iz+1,i)[2][0]  , F(ix,iy+1,iz+1,i)[2][1]  );  //  dF/dy
+	  Y(0,3,2) = complex<double> (F(ix,iy+1,iz,i)[6][0]    , F(ix,iy+1,iz,i)[6][1]    );  // d2F/dydz
+	  Y(0,3,3) = complex<double> (F(ix,iy+1,iz+1,i)[6][0]  , F(ix,iy+1,iz+1,i)[6][1]  );  // d2F/dydz
+	 						       						       
+	  Y(1,0,0) = complex<double> (F(ix+1,iy,iz,i)[0][0]    , F(ix+1,iy,iz,i)[0][1]    );  //   F
+	  Y(1,0,1) = complex<double> (F(ix+1,iy,iz+1,i)[0][0]  , F(ix+1,iy,iz+1,i)[0][1]  );  //   F
+	  Y(1,0,2) = complex<double> (F(ix+1,iy,iz,i)[3][0]    , F(ix+1,iy,iz,i)[3][1]    );  //  dF/dz
+	  Y(1,0,3) = complex<double> (F(ix+1,iy,iz+1,i)[3][0]  , F(ix+1,iy,iz+1,i)[3][1]  );  //  dF/dz
+	  Y(1,1,0) = complex<double> (F(ix+1,iy+1,iz,i)[0][0]  , F(ix+1,iy+1,iz,i)[0][1]  );  //   F
+	  Y(1,1,1) = complex<double> (F(ix+1,iy+1,iz+1,i)[0][0], F(ix+1,iy+1,iz+1,i)[0][1]);  //   , F
+	  Y(1,1,2) = complex<double> (F(ix+1,iy+1,iz,i)[3][0]  , F(ix+1,iy+1,iz,i)[3][1]  );  //  dF/dz
+	  Y(1,1,3) = complex<double> (F(ix+1,iy+1,iz+1,i)[3][0], F(ix+1,iy+1,iz+1,i)[3][1]);  //  dF/dz
+	  Y(1,2,0) = complex<double> (F(ix+1,iy,iz,i)[2][0]    , F(ix+1,iy,iz,i)[2][1]    );  //  dF/dy
+	  Y(1,2,1) = complex<double> (F(ix+1,iy,iz+1,i)[2][0]  , F(ix+1,iy,iz+1,i)[2][1]  );  //  dF/dy
+	  Y(1,2,2) = complex<double> (F(ix+1,iy,iz,i)[6][0]    , F(ix+1,iy,iz,i)[6][1]    );  // d2F/dydz
+	  Y(1,2,3) = complex<double> (F(ix+1,iy,iz+1,i)[6][0]  , F(ix+1,iy,iz+1,i)[6][1]  );  // d2F/dydz
+	  Y(1,3,0) = complex<double> (F(ix+1,iy+1,iz,i)[2][0]  , F(ix+1,iy+1,iz,i)[2][1]  );  //  dF/dy
+	  Y(1,3,1) = complex<double> (F(ix+1,iy+1,iz+1,i)[2][0], F(ix+1,iy+1,iz+1,i)[2][1]);  //  dF/dy
+	  Y(1,3,2) = complex<double> (F(ix+1,iy+1,iz,i)[6][0]  , F(ix+1,iy+1,iz,i)[6][1]  );  // d2F/dydz
+	  Y(1,3,3) = complex<double> (F(ix+1,iy+1,iz+1,i)[6][0], F(ix+1,iy+1,iz+1,i)[6][1]);  // d2F/dydz
+	 						       						       
+	  Y(2,0,0) = complex<double> (F(ix,iy,iz,i)[1][0]      , F(ix,iy,iz,i)[1][1]      );  //  dF/dx
+	  Y(2,0,1) = complex<double> (F(ix,iy,iz+1,i)[1][0]    , F(ix,iy,iz+1,i)[1][1]    );  //  dF/dx
+	  Y(2,0,2) = complex<double> (F(ix,iy,iz,i)[5][0]      , F(ix,iy,iz,i)[5][1]      );  // d2F/dxdz
+	  Y(2,0,3) = complex<double> (F(ix,iy,iz+1,i)[5][0]    , F(ix,iy,iz+1,i)[5][1]    );  // d2F/dxdz
+	  Y(2,1,0) = complex<double> (F(ix,iy+1,iz,i)[1][0]    , F(ix,iy+1,iz,i)[1][1]    );  //  dF/dx
+	  Y(2,1,1) = complex<double> (F(ix,iy+1,iz+1,i)[1][0]  , F(ix,iy+1,iz+1,i)[1][1]  );  //  dF/dx
+	  Y(2,1,2) = complex<double> (F(ix,iy+1,iz,i)[5][0]    , F(ix,iy+1,iz,i)[5][1]    );  // d2F/dxdz
+	  Y(2,1,3) = complex<double> (F(ix,iy+1,iz+1,i)[5][0]  , F(ix,iy+1,iz+1,i)[5][1]  );  // d2F/dxdz
+	  Y(2,2,0) = complex<double> (F(ix,iy,iz,i)[4][0]      , F(ix,iy,iz,i)[4][1]      );  // d2F/dxdy
+	  Y(2,2,1) = complex<double> (F(ix,iy,iz+1,i)[4][0]    , F(ix,iy,iz+1,i)[4][1]    );  // d2F/dxdy
+	  Y(2,2,2) = complex<double> (F(ix,iy,iz,i)[7][0]      , F(ix,iy,iz,i)[7][1]      );  // d3F/dxdydz
+	  Y(2,2,3) = complex<double> (F(ix,iy,iz+1,i)[7][0]    , F(ix,iy,iz+1,i)[7][1]    );  // d3F/dxdydz
+	  Y(2,3,0) = complex<double> (F(ix,iy+1,iz,i)[4][0]    , F(ix,iy+1,iz,i)[4][1]    );  // d2F/dxdy
+	  Y(2,3,1) = complex<double> (F(ix,iy+1,iz+1,i)[4][0]  , F(ix,iy+1,iz+1,i)[4][1]  );  // d2F/dxdy
+	  Y(2,3,2) = complex<double> (F(ix,iy+1,iz,i)[7][0]    , F(ix,iy+1,iz,i)[7][1]    );  // d3F/dxdydz
+	  Y(2,3,3) = complex<double> (F(ix,iy+1,iz+1,i)[7][0]  , F(ix,iy+1,iz+1,i)[7][1]  );  // d3F/dxdydz
+	 						       						       
+	  Y(3,0,0) = complex<double> (F(ix+1,iy,iz,i)[1][0]    , F(ix+1,iy,iz,i)[1][1]    );  //  dF/dx
+	  Y(3,0,1) = complex<double> (F(ix+1,iy,iz+1,i)[1][0]  , F(ix+1,iy,iz+1,i)[1][1]  );  //  dF/dx
+	  Y(3,0,2) = complex<double> (F(ix+1,iy,iz,i)[5][0]    , F(ix+1,iy,iz,i)[5][1]    );  // d2F/dxdz
+	  Y(3,0,3) = complex<double> (F(ix+1,iy,iz+1,i)[5][0]  , F(ix+1,iy,iz+1,i)[5][1]  );  // d2F/dxdz
+	  Y(3,1,0) = complex<double> (F(ix+1,iy+1,iz,i)[1][0]  , F(ix+1,iy+1,iz,i)[1][1]  );  //  dF/dx
+	  Y(3,1,1) = complex<double> (F(ix+1,iy+1,iz+1,i)[1][0], F(ix+1,iy+1,iz+1,i)[1][1]);  //  dF/dx
+	  Y(3,1,2) = complex<double> (F(ix+1,iy+1,iz,i)[5][0]  , F(ix+1,iy+1,iz,i)[5][1]  );  // d2F/dxdz
+	  Y(3,1,3) = complex<double> (F(ix+1,iy+1,iz+1,i)[5][0], F(ix+1,iy+1,iz+1,i)[5][1]);  // d2F/dxdz
+	  Y(3,2,0) = complex<double> (F(ix+1,iy,iz,i)[4][0]    , F(ix+1,iy,iz,i)[4][1]    );  // d2F/dxdy
+	  Y(3,2,1) = complex<double> (F(ix+1,iy,iz+1,i)[4][0]  , F(ix+1,iy,iz+1,i)[4][1]  );  // d2F/dxdy
+	  Y(3,2,2) = complex<double> (F(ix+1,iy,iz,i)[7][0]    , F(ix+1,iy,iz,i)[7][1]    );  // d3F/dxdydz
+	  Y(3,2,3) = complex<double> (F(ix+1,iy,iz+1,i)[7][0]  , F(ix+1,iy,iz+1,i)[7][1]  );  // d3F/dxdydz
+	  Y(3,3,0) = complex<double> (F(ix+1,iy+1,iz,i)[4][0]  , F(ix+1,iy+1,iz,i)[4][1]  );  // d2F/dxdy
+	  Y(3,3,1) = complex<double> (F(ix+1,iy+1,iz+1,i)[4][0], F(ix+1,iy+1,iz+1,i)[4][1]);  // d2F/dxdy
+	  Y(3,3,2) = complex<double> (F(ix+1,iy+1,iz,i)[7][0]  , F(ix+1,iy+1,iz,i)[7][1]  );  // d3F/dxdydz
+	  Y(3,3,3) = complex<double> (F(ix+1,iy+1,iz+1,i)[7][0], F(ix+1,iy+1,iz+1,i)[7][1]);  // d3F/dxdydz
+	  
+	  for (int i1=0; i1<4; i1++)
+	    for (int i2=0; i2<4; i2++)
+	      for (int j1=0; j1<4; j1++)
+		for (int j2=0; j2<4; j2++)
+		  for (int k1=0; k1<4; k1++)
+		    for (int k2=0; k2<4; k2++) 
+		      nrm(i) += real(IntMatX(i1,i2) *  IntMatY(j1,j2) *  IntMatZ(k1,k2)*conj(Y(i1,j1,k1))*Y(i2,j2,k2));
 		      
 // 	  TinyVector<double,2> Val =
 // 	    d2a0*
