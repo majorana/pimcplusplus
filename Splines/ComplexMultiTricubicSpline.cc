@@ -16,6 +16,17 @@
 
 #include "ComplexMultiTricubicSpline.h"
 
+const double ComplexMultiTricubicSpline::Int_p1 = 0.5;
+const double ComplexMultiTricubicSpline::Int_p2 = 0.5;
+const double ComplexMultiTricubicSpline::Int_q1 = 1.0/12.0;
+const double ComplexMultiTricubicSpline::Int_q2 = -1.0/12.0;
+
+const double ComplexMultiTricubicSpline::Int_d2p1 =  0.0;
+const double ComplexMultiTricubicSpline::Int_d2p2 =  0.0;
+const double ComplexMultiTricubicSpline::Int_d2q1 = -1.0;
+const double ComplexMultiTricubicSpline::Int_d2q2 =  1.0;
+
+
 void 
 ComplexMultiTricubicSpline::Update()
 {
