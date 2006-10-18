@@ -2457,7 +2457,9 @@ ComplexMultiTricubicSpline::KineticEnergy(Array<double,1> &KE)
 {
 
   KE = 0.0;
-      
+  
+  Array<complex<double>,3> Y(4,4,4);
+
   for (int ix=0; ix<(Nx-1); ix++) {
     for (int iy=0; iy<(Ny-1); iy++) {
       for (int iz=0; iz<(Nz-1); iz++) {
@@ -2548,7 +2550,6 @@ ComplexMultiTricubicSpline::KineticEnergy(Array<double,1> &KE)
 	register double d2c2 = Int_d2q1;
 	register double d2c3 = Int_d2q2;
 	
-	Array<complex<double>,3> Y(4,4,4);
 	for (int i=0; i<N; i++) {
 	  Y(0,0,0) = complex<double> (F(ix,iy,iz,i)[0][0]      , F(ix,iy,iz,i)[0][1]      );      //   F
 	  Y(0,0,1) = complex<double> (F(ix,iy,iz+1,i)[0][0]    , F(ix,iy,iz+1,i)[0][1]    );    //   F
