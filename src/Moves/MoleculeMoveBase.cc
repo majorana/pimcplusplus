@@ -101,29 +101,30 @@ void MolMoveClass::Read (IOSectionClass &in){
     	cerr << "You specified " << setAction << ", which is not supported for this type of move" << endl;
 	}
 
-  MolMembers.resize(numMol);
-  vector<int> catalog(numMol); // for storing info to load MolMembers
-  // initialize catalog (all zeros)
-  for(int m = 0; m < catalog.size(); m++)
-    catalog[m] = 0;
-	// get number of ptcls for each molecule m; store in catalog
-  for(int p = 0; p <PathData.Path.NumParticles(); p++)
-		catalog[PathData.Path.MolRef(p)]++;
-	// resize MolMembers arrays appropritely; re-initialize catalog
-  for(int m = 0; m < catalog.size(); m++){
-    MolMembers(m).resize(catalog[m]);
-		catalog[m] = 0;
-  }
-	// load ptcls into the MolMembers array; catalog indexes
-  for(int p = 0; p <PathData.Path.NumParticles(); p++){
-    int m = PathData.Path.MolRef(p);
-		MolMembers(m)(catalog[m]) = p;
-		catalog[m]++;
-	}
+	// this should all be done in PathClass.cc now
+  //MolMembers.resize(numMol);
+  //vector<int> catalog(numMol); // for storing info to load MolMembers
+  //// initialize catalog (all zeros)
+  //for(int m = 0; m < catalog.size(); m++)
+  //  catalog[m] = 0;
+	//// get number of ptcls for each molecule m; store in catalog
+  //for(int p = 0; p <PathData.Path.NumParticles(); p++)
+	//	catalog[PathData.Path.MolRef(p)]++;
+	//// resize MolMembers arrays appropritely; re-initialize catalog
+  //for(int m = 0; m < catalog.size(); m++){
+  //  MolMembers(m).resize(catalog[m]);
+	//	catalog[m] = 0;
+  //}
+	//// load ptcls into the MolMembers array; catalog indexes
+  //for(int p = 0; p <PathData.Path.NumParticles(); p++){
+  //  int m = PathData.Path.MolRef(p);
+	//	MolMembers(m)(catalog[m]) = p;
+	//	catalog[m]++;
+	//}
 }
 
 dVec MolMoveClass::GetCOM(int slice, int mol){
-  return PathData.Path(slice,MolMembers(mol)(0));
+  return PathData.Path(slice,PathData.Path.MolMembers(mol)(0));
 }
 
 // Generates a translation vector and moves all
@@ -151,6 +152,14 @@ dVec MolMoveClass::TranslateMol(int slice, Array<int,1>& activePtcls, double eps
   //}
 	//////////////////// end hackity
 	return translate;
+}
+
+void MolMoveClass::TranslatePtcl(int slice, int ptcl, double Sigma){
+    dVec translate;
+    PathData.Path.Random.CommonGaussianVec (Sigma, translate);
+
+    dVec newP = PathData.Path(slice,ptcl) + translate;
+    PathData.Path.SetPos(slice, ptcl, newP);
 }
 
 // This will orchestrate the rotation of molecule mol

@@ -29,10 +29,10 @@ class VacancyHelperClass
 private:
   ///This is the set of locations you should compare against to decide
   ///the location of the head and the tail
-  Array<dVec,1> FixedLoc;
 
   PathDataClass &PathData;
 public:
+  Array<dVec,1> FixedLoc;
   int NumVacancies;
   void Read(IOSectionClass &in);
   void FindVacancy(int slice);

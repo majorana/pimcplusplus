@@ -61,4 +61,26 @@ class MoleculeTranslate : public MolMoveClass
     }
 };
 
+// individual intramolecular moves
+class ParticleTranslate : public MolMoveClass
+{
+	int counter;
+ 	public:
+  double Sigma;
+  void Set(double setSigma);
+  //void MakeMove();
+  double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
+  void Read(IOSectionClass &moveInput);
+  //  double AcceptanceRatio(int numAccepted,int numMoves);
+  inline void WriteRatio()
+    {
+    };
+
+  ParticleTranslate(PathDataClass &myPathData,IOSectionClass outSection) : 
+    MolMoveClass (myPathData,outSection)
+    {
+			counter = 0;
+    }
+};
+
 #endif

@@ -32,12 +32,17 @@ class MoleculeInteractionsClass : public ActionBaseClass
 	Array<string, 1> ChargeSpecies;
 	Array<string, 1> SpringSpecies;
 	Array<string, 1> KineticSpecies;
+	Array<string, 1> QuadSpecies;
 	Array<bool,2> Updated;
 	Array<double,2> COMTable;
 	Array<dVec,2> COMVecs;
 	Array<double, 1> lambdas;
 	int NumImages;
+	// parameters for ST2 modulation function
 	double RL, RU;
+	// parameters for SPC quadratic intramolecular potential
+	double b, c, d, D, rho, R_OH_0, R_HH_0, alpha;
+	double Dyn2kcal;
 	// this is kind of a hack
 	ofstream outfile;
 	bool special;

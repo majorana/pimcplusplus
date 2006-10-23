@@ -14,13 +14,15 @@ class MolMoveClass: public LocalStageClass{
   public:
 	MoveMode mode;
 	int numAccepted, numMoves;
+	// located in PathClass now
   // This will store an array of active particles for each molecule in the sim;
   // should eliminate the need to repeatedly asemble these arrays at each move
-  Array<Array<int,1>,1> MolMembers;
+  //Array<Array<int,1>,1> MolMembers;
 	Array<int, 1> MoveList;
   MolMoveClass(PathDataClass&, IO::IOSectionClass);
   dVec GetCOM(int slice, int mol);
   dVec TranslateMol(int slice, Array<int,1>& activePtcls, double epsilon);
+	void MolMoveClass::TranslatePtcl(int slice, int ptcl, double Sigma);
   void RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, double theta);
   void RotateMol(int slice, Array<int,1>& activePtcls, double theta);
   void Read (IOSectionClass &in);

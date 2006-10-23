@@ -33,6 +33,19 @@ MoleculeInteractionsClass::MoleculeInteractionsClass (PathDataClass &pathData) :
 	// radial cutoffs for ST2 modulation function
 	RL = 2.0160;
 	RU = 3.1287;
+
+	// SPC intramolecular potential parameters
+	rho = 2.361;
+	D = 0.708;
+	alpha = 108.0*M_PI/180.0;
+	R_OH_0 = 1.0;
+	R_HH_0 = 2*R_OH_0*sin(alpha/2);
+	b = 1.803;
+	c = -1.469;
+	d = 0.776;
+	// conversion factor for mdyn*angstrom^-1 --> kcal*mol^-1*angstrom^-2
+	Dyn2kcal = 143.929;
+
 	ReadComplete = false;
 }
 
@@ -74,6 +87,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 	double TotalCharge = 0.0;
 	double TotalSpring = 0.0;
 	double TotalKinetic = 0.0;
+	double TotalHarmonic = 0.0;
   int numChangedPtcls = activeParticles.size();
   int skip = 1<<level;
 
@@ -165,24 +179,36 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
   	    }
   	  }
   	}
-		if(Interacting(species1,2)){
-			// harmonic intermolecular potential
-			// parameters for ST2 water dimer
-			// could be generalized
-			double omega = 26;
-			double m_H2O = 0.043265;
-			double R0 = 2.85;
-  		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
-    		int species2=Path.ParticleSpeciesNum(ptcl2);
-    		if (Interacting(species2,2) && Path.DoPtcl(ptcl2)){
-	  			for (int slice=startSlice;slice<=endSlice;slice+=skip){
-  					dVec COMr;
-  					double COMrmag;
-  					PathData.Path.DistDisp(slice, ptcl1, ptcl2, COMrmag, COMr);
-						TotalSpring += 0.5*m_H2O*omega*omega*(COMrmag - R0)*(COMrmag - R0);
-						TotalU += TotalSpring;
+		if(Interacting(species1,2) && (ptcl1 == PathData.Path.MolRef(ptcl1))){
+			// quadratic intramolecular potential
+			// SPC/F; see Lobaugh and Voth, JCP 106, 2400 (1996)
+			double spring = 0.0;
+	  	for (int slice=startSlice;slice<=endSlice;slice+=skip){
+				vector<int> activeP(0);
+				activeP.push_back(ptcl1);
+				//cerr << " INTRA added " << ptcl1;
+  			for (int index2=1; index2<PathData.Path.MolMembers(ptcl1).size(); index2++){
+					int ptcl2 = PathData.Path.MolMembers(ptcl1)(index2);
+    			int species2=Path.ParticleSpeciesNum(ptcl2);
+    			if (Interacting(species2,2) && Path.DoPtcl(ptcl2)){
+						activeP.push_back(ptcl2);
+						//cerr << " INTRA added " << ptcl2;
 					}
 				}
+				dVec r;
+				double ROH1, ROH2, RHH;
+				PathData.Path.DistDisp(slice,activeP[0],activeP[1],ROH1,r);
+				PathData.Path.DistDisp(slice,activeP[0],activeP[2],ROH2,r);
+				PathData.Path.DistDisp(slice,activeP[1],activeP[2],RHH,r);
+
+				double term1 = rho*rho*D*((ROH1 - R_OH_0)*(ROH1 - R_OH_0) + (ROH2 - R_OH_0)*(ROH2 - R_OH_0));
+				double term2 = 0.5*b*(RHH - R_HH_0)*(RHH - R_HH_0);
+				double term3 = c*(ROH1 + ROH2 - 2*R_OH_0)*(RHH - R_HH_0);
+				double term4 = d*(ROH1 - R_OH_0)*(ROH2 - R_OH_0);
+				//cerr << "slice " << slice << " INTRA: ROH1 " << ROH1 << " ROH2 " << ROH2 << " RHH " << RHH << " term1 " << term1 << " term2 " << term2 << " term3 " << term3 << " term4 " << term4 << endl;
+				spring = Dyn2kcal*(term1 + term2 + term3 + term4);
+				TotalSpring += spring;
+				TotalU += spring;
 			}
 		}
 		if(Interacting(species1,3)){
@@ -216,10 +242,32 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 			TotalU += TotalK;
 			//cerr << TotalKinetic << endl;
 		}
+		if(Interacting(species1,4)){
+			// harmonic intermolecular potential
+			// hard-wired parameters for ST2 water dimer
+			// could be generalized
+			double harmonic = 0.0;
+			double omega = 26;
+			double m_H2O = 0.043265;
+			double R0 = 2.85;
+  		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
+    		int species2=Path.ParticleSpeciesNum(ptcl2);
+    		if (Interacting(species2,2) && Path.DoPtcl(ptcl2)){
+	  			for (int slice=startSlice;slice<=endSlice;slice+=skip){
+  					dVec COMr;
+  					double COMrmag;
+  					PathData.Path.DistDisp(slice, ptcl1, ptcl2, COMrmag, COMr);
+						harmonic = 0.5*m_H2O*omega*omega*(COMrmag - R0)*(COMrmag - R0);
+						TotalHarmonic += harmonic;
+						TotalU += harmonic;
+					}
+				}
+			}
+		}
 	}
 	// write additional output file
 	if(!isAction && special){
-		outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalKinetic << endl;
+		outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << endl;
 	}
   return (TotalU);
 }
@@ -335,8 +383,9 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		KineticSpecies.resize(0);
 		in.ReadVar("LJSpecies",LJSpecies);
 		in.ReadVar("ChargeSpecies",ChargeSpecies);
-		in.ReadVar("SpringSpecies",SpringSpecies);
+		in.ReadVar("IntraMolecularSpecies",SpringSpecies);
 		in.ReadVar("KineticActionSpecies",KineticSpecies);
+		in.ReadVar("QuadraticSpecies",QuadSpecies);
 
 		if(KineticSpecies.size() > 0){
 			assert(in.ReadVar("Lambdas",lambdas));
@@ -351,7 +400,21 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 			Interacting(Path.SpeciesNum(SpringSpecies(s)), 2) = true;
 		for(int s=0; s<KineticSpecies.size(); s++)
 			Interacting(Path.SpeciesNum(KineticSpecies(s)), 3) = true;
+		for(int s=0; s<QuadSpecies.size(); s++)
+			Interacting(Path.SpeciesNum(QuadSpecies(s)), 4) = true;
 		cerr << "MoleculeInteractions::Read I have loaded Interacting table " << Interacting << endl;
+
+		// make sure something is filled
+		bool empty = true;
+		for(int i=0; i<Interacting.rows(); i++){
+			for(int j=0; j<Interacting.cols(); j++){
+				if(Interacting(i,j) != 0){
+					empty = (empty && false);
+				}
+			}
+		}
+		assert(!empty);
+				
 	
 		Updated.resize(PathData.Path.numMol);
 		COMTable.resize(PathData.Path.numMol);
@@ -361,7 +424,7 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		in.ReadVar("ExtraOutput",special);
 		if(special){
 			outfile.open("MoleculeEnergyBreakdown.dat");
-			outfile << "# Total LJ Coulomb Spring Kinetic" << endl;
+			outfile << "# Total LJ Coulomb Intramolecular Quadratic Kinetic" << endl;
 		}
 			
 		

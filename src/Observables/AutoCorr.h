@@ -29,6 +29,8 @@ class AutoCorrClass : public ObservableClass
   ObservableVecDouble1 OneOneHistVar;
   ObservableVecDouble1 OneNetHistVar;
   ObservableVecDouble1 NetNetHistVar;
+  ObservableDouble TotalNetMuVar;
+	double TotalNetMu;
   /// Stores dipole moments
   Array<dVec,2> DipoleBin;
   Array<dVec,2> NetDipoleBin;
@@ -66,7 +68,8 @@ public:
     ObservableClass(myPathData,ioSection), 
     OneOneHistVar("OneOney", IOSection, myPathData.Path.Communicator),
     OneNetHistVar("OneNety", IOSection, myPathData.Path.Communicator),
-    NetNetHistVar("NetNety", IOSection, myPathData.Path.Communicator)
+    NetNetHistVar("NetNety", IOSection, myPathData.Path.Communicator),
+    TotalNetMuVar  ("NetDipoleMoment",  IOSection, myPathData.Path.Communicator)
   {
     TimesCalled=0;
     Initialize();

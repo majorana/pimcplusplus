@@ -27,6 +27,11 @@ void MoleculeTranslate::Read(IOSectionClass &moveInput) {
 	MolMoveClass::Read(moveInput);
 }
 
+void ParticleTranslate::Read(IOSectionClass &moveInput) {
+  assert(moveInput.ReadVar("SetSigma",Sigma));
+	MolMoveClass::Read(moveInput);
+}
+
 //void MoleculeTranslate::MakeMove() {
 double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
 	//cerr << " MoleculeTranslate::Sample ";
@@ -36,12 +41,12 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 	if(mode == SINGLE){
   	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
 		MoveList(0) = choosemol;
-		activeParticles.resize(MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
 	}
 	else if(mode == SEQUENTIAL){
-		activeParticles.resize(MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
 	}
 	else if(mode == GLOBAL){
 		activeParticles.resize(PathData.Path.NumParticles());
@@ -75,7 +80,7 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
 		//cerr << "  Before move: chose slice " << slice << endl;
 		//for(int i=0; i<activeParticles.size(); i++) cerr << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
-  	dVec move = TranslateMol(slice,MolMembers(MoveList(activeMol)),step); 
+  	dVec move = TranslateMol(slice,PathData.Path.MolMembers(MoveList(activeMol)),step); 
 		//cerr << "  After move: of " << move << endl;
 		//for(int i=0; i<activeParticles.size(); i++) cerr << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
   	move_mag_sq += move(0)*move(0) + move(1)*move(1) + move(2)*move(2);
@@ -106,12 +111,12 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	if(mode == SINGLE){
   	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
 		MoveList(0) = choosemol;
-		activeParticles.resize(MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
 	}
 	else if(mode == SEQUENTIAL){
-		activeParticles.resize(MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
 	}
 	else if(mode == GLOBAL){
 		activeParticles.resize(PathData.Path.NumParticles());
@@ -130,13 +135,13 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	  slice2 = slice+1;
 	}
 
-	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << MolMembers(MoveList(0)) << endl;
+	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Path.MolMembers(MoveList(0)) << endl;
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
 		//activeParticles.resize(MolMembers(MoveList(activeMol)).size());
 		//for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(activeMol))(i);
 		
 		double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
-		RotateMol(slice,MolMembers(MoveList(activeMol)),theta);
+		RotateMol(slice,PathData.Path.MolMembers(MoveList(activeMol)),theta);
 
 	}
 
@@ -144,6 +149,57 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
     cerr << numMoves << " moves; current rotate ratio is " << double(numAccepted)/numMoves << " with angle size " << dtheta << endl;
   }
   numMoves++;
+
+	if(mode == SEQUENTIAL) Advance();
+
+	return 1;
+}
+
+double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+
+	if(mode == SINGLE){
+  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
+		MoveList(0) = choosemol;
+		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+	}
+	else if(mode == SEQUENTIAL){
+		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+	}
+	else if(mode == GLOBAL){
+		activeParticles.resize(PathData.Path.NumParticles());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = i;
+	}
+
+  // choose a time slice to move
+  int numSlices = PathData.Path.TotalNumSlices;
+	int slice =0;
+  slice1 = 0;
+  slice2 = 0;
+  if(numSlices>1){
+    int P_max = numSlices - 1;
+    slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
+    slice1 = slice-1;
+    slice2 = slice+1;
+  }
+
+	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
+		for(int activeP = 0; activeP<PathData.Path.MolMembers(MoveList(activeMol)).size(); activeP++){
+			int movePtcl = PathData.Path.MolMembers(MoveList(activeMol))(activeP);
+			//cerr << "Moving ptcl " <<  movePtcl << " at slice " << slice << " from " << PathData.Path(slice,movePtcl);
+  		TranslatePtcl(slice, movePtcl, Sigma);
+			//cerr << " to " << PathData.Path(slice,movePtcl) << endl;
+		}
+	}
+
+  if (numMoves%10000 == 0 && numMoves>0){
+    cerr << numMoves << " moves; current PARTICLE translate ratio is " << double(numAccepted)/numMoves << " with step size " << Sigma << endl;
+  }
+  numMoves++;
+//	if(counter == 0)
+//		cerr << endl << "I have average action " << UAction << "/" << numMoves << " = " << UAction/numMoves << endl;
+	//cerr << "+";
 
 	if(mode == SEQUENTIAL) Advance();
 

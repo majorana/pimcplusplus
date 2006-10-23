@@ -8,6 +8,10 @@ void MoleculeManagerClass::Read(IOSectionClass &in)
 		cerr << "Creating new Translate move...";
   	MoveStage = new MoleculeTranslate(PathData, IOSection);
 		cerr << " done." << endl;
+	} else if (method == "ParticleTranslate"){
+		cerr << "Creating new INTRAmolecular displacement move...";
+  	MoveStage = new ParticleTranslate(PathData, IOSection);
+		cerr << " done." << endl;
 	} else if (method == "Rotate"){
 		cerr << "Creating new Rotate move...";
   	MoveStage = new MoleculeRotate(PathData, IOSection);

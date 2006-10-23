@@ -376,16 +376,38 @@ void PathClass::Allocate()
       MolRef.resizeAndPreserve(MolRef.size() + N);
       //cerr << " done" << endl;
       numMol = MoleculeNumber[0];
-    }
-    for (int i=0; i < N; i++){
-      SpeciesArray(speciesNum)->Ptcls(i) = i+first;
-      if(doMol){
-	//cerr << "		" << i << " prevIndex " << prevIndex << ", foundAt " << foundAt << ", Mol.Num. " << MoleculeNumber[foundAt];
-	//cerr  << " so mod is " << i%MoleculeNumber[foundAt] << endl;
+		}
+  	for (int i=0; i < N; i++){
+  	  SpeciesArray(speciesNum)->Ptcls(i) = i+first;
+  	  if(doMol){
+				//cerr << "		" << i << " prevIndex " << prevIndex << ", foundAt " << foundAt << ", Mol.Num. " << MoleculeNumber[foundAt];
+				//cerr  << " so mod is " << i%MoleculeNumber[foundAt] << endl;
 				MolRef(i+first) = prevIndex + i%MoleculeNumber[foundAt]; // need to assign myMolecule
-	//cerr << "Assigned MolRef " << MolRef(i+first) << " to ptcl " << i+first << endl;
-      }
-    }
+				//cerr << "Assigned MolRef " << MolRef(i+first) << " to ptcl " << i+first << endl;
+
+  	  }
+  	}
+  }
+  if(doMol){
+  	MolMembers.resize(numMol);
+  	vector<int> catalog(numMol); // for storing info to load MolMembers
+  	// initialize catalog (all zeros)
+  	for(int m = 0; m < catalog.size(); m++)
+  	  catalog[m] = 0;
+		// get number of ptcls for each molecule m; store in catalog
+  	for(int p = 0; p <numParticles; p++)
+			catalog[MolRef(p)]++;
+		// resize MolMembers arrays appropritely; re-initialize catalog
+  	for(int m = 0; m < catalog.size(); m++){
+  	  MolMembers(m).resize(catalog[m]);
+			catalog[m] = 0;
+  	}
+		// load ptcls into the MolMembers array; catalog indexes
+  	for(int p = 0; p <numParticles; p++){
+  	  int m = MolRef(p);
+			MolMembers(m)(catalog[m]) = p;
+			catalog[m]++;
+		}
   }
   if (WormOn)
     numParticles=numParticles+2;
@@ -405,11 +427,11 @@ void PathClass::Allocate()
       SpeciesNumber(i) = speciesNum;
   }
   //Sets to the identity permutaiton 
-  cerr<<"setting permutations"<<" "<<GetMode()<<endl;
-  for (int ptcl=0;ptcl<Permutation.size();ptcl++){
-    Permutation(ptcl) = ptcl;
-    cerr<<ptcl<<" "<<Permutation(ptcl)<<endl;
-  }
+  //cerr<<"setting permutations"<<" "<<GetMode()<<endl;
+  //for (int ptcl=0;ptcl<Permutation.size();ptcl++){
+  //  Permutation(ptcl) = ptcl;
+  //  cerr<<ptcl<<" "<<Permutation(ptcl)<<endl;
+  //}
   if (LongRange) {
 #if NDIM==3    
     SetupkVecs3D();

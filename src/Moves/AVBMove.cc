@@ -66,8 +66,8 @@ double AVBMove::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles){
 	// choose molecule i and j for "swap" move
   int choosemoli = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
   int choosemolj = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
-	activeParticles.resize(MolMembers(choosemoli).size());
-	for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(choosemoli)(i);
+	activeParticles.resize(PathData.Path.MolMembers(choosemoli).size());
+	for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(choosemoli)(i);
 
   // choose a time slice to move
   int numSlices = PathData.Path.TotalNumSlices;
@@ -101,8 +101,8 @@ double AVBMove::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles){
 		move = GenerateUnBound(slice, choosemoli, choosemolj);
 	}
 
-	for(int i=0; i<MolMembers(choosemoli).size(); i++){
-		int ptcl = MolMembers(choosemoli)(i);
+	for(int i=0; i<PathData.Path.MolMembers(choosemoli).size(); i++){
+		int ptcl = PathData.Path.MolMembers(choosemoli)(i);
 		dVec newPos = PathData.Path(slice,ptcl) + move;
 		PathData.Path.SetPos(slice,ptcl,newPos);
 	}

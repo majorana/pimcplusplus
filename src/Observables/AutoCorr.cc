@@ -98,7 +98,8 @@ void AutoCorrClass::LocalWriteBlock()
 {
   PathClass &Path = PathData.Path;
   double norm=(double)(TotalCounts - LastTotal);
-  cerr << "TotalCounts is " << TotalCounts << "; normalizing by " << norm << "; LastTotal is " << LastTotal << endl;
+	double sliceNorm = PathData.NumTimeSlices()-1;
+  cerr << "TotalCounts is " << TotalCounts << "; normalizing by " << norm << " and sliceNorm is " << sliceNorm << "; LastTotal is " << LastTotal << endl;
   LastTotal = TotalCounts;
 
   if (Path.Communicator.MyProc()==0) 
@@ -125,6 +126,9 @@ void AutoCorrClass::LocalWriteBlock()
   OneNetHistVar.Write(OneNetgofrArray);
 //cerr << "going to write NetNet " << NetNetgofrArray << endl;
   NetNetHistVar.Write(NetNetgofrArray);
+
+	TotalNetMu *= 1.0/(norm*sliceNorm);
+	TotalNetMuVar.Write(TotalNetMu);
 }
 
 
@@ -296,6 +300,8 @@ void AutoCorrClass::Accumulate()
       DipoleBin(index,now) = MeasureDipole(slice,mol);
 			netMu += DipoleBin(index,now);
     }
+		TotalNetMu += sqrt(CalcDotProd(netMu, netMu));
+		// Is it right to normalize????????????
 		netMu = Normalize(netMu);
 		//cerr << "Adding " << netMu << " at " << slice << ", " << now << endl;
 		NetDipoleBin(slice,now) = netMu;
@@ -323,6 +329,7 @@ void AutoCorrClass::Accumulate()
       OneOneHistogram = 0;
       OneNetHistogram = 0;
       NetNetHistogram = 0;
+			TotalNetMu = 0.0;
     }
   }
   Advance(now,NumSlots-1);
@@ -336,6 +343,7 @@ void AutoCorrClass::Initialize()
   OneOneHistogram=0;
   OneNetHistogram=0;
   NetNetHistogram=0;
+	TotalNetMu = 0.0;
   //v(0) = 1;
   //v(1) = 0;
   //v(2) = 0;

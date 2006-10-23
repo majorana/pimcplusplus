@@ -385,6 +385,8 @@ public:
 							///specified, maintained for compatibility with earlier segments of code
   Array<int,1> MolRef; // maps ptcl index to molecule index
 	bool doMol;
+	// stores (nested) arrays of ptcls j belonging to molecule i (i.e. MolMembers(i).size() = j)
+  Array<Array<int,1>,1> MolMembers;
 
 };
 
