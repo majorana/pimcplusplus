@@ -141,7 +141,7 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 		//for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(activeMol))(i);
 		
 		double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
-		RotateMol(slice,PathData.Path.MolMembers(MoveList(activeMol)),theta);
+		RotateMol(slice,PathData.Path.MolMembers(MoveList(activeMol)), theta);
 
 	}
 

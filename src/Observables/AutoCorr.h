@@ -40,6 +40,7 @@ class AutoCorrClass : public ObservableClass
   //int Freq;
   int dumpFrequency;
   int now;
+	string dipoleSpecies;
 public:
 	int NumSlots;
 	int WaitToFill;

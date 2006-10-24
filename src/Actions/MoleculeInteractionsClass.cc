@@ -423,7 +423,9 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		special = false;
 		in.ReadVar("ExtraOutput",special);
 		if(special){
-			outfile.open("MoleculeEnergyBreakdown.dat");
+			string filename;
+			assert(in.ReadVar("File",filename));
+			outfile.open(filename.c_str());
 			outfile << "# Total LJ Coulomb Intramolecular Quadratic Kinetic" << endl;
 		}
 			

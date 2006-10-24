@@ -28,6 +28,8 @@ void AutoCorrClass::Read(IOSectionClass& in)
   ObservableClass::Read(in);
   assert(in.ReadVar("dumpFrequency",dumpFrequency));
   assert(in.ReadVar("numSlots",NumSlots));
+	if(!in.ReadVar("Species",dipoleSpecies))
+		dipoleSpecies = "p";
   assert(in.OpenSection("Grid"));
   string gridType;
   double gridStart;
@@ -157,20 +159,44 @@ void AutoCorrClass::Advance(int& index,int limit){
     index = 0;
 }
 
+// new one
 dVec AutoCorrClass::MeasureDipole(int slice,int molecule){
-  Array <int,1> activeParticles(5);
-  for (int a = 0; a < 5; a++)
-    activeParticles(a) = molecule + a*PathData.Path.numMol;
-  dVec O = PathData.Path(slice,activeParticles(0));
-  dVec P1 = PathData.Path(slice,activeParticles(3));
-  dVec P2 = PathData.Path(slice,activeParticles(4));
+	Array<int,1> dipoleIndex(2);
+	int foundIndex = 0;
+  for (int a = 0; a < PathData.Path.MolMembers(molecule).size(); a++){
+    int ptcl = PathData.Path.MolMembers(molecule)(a);
+		if(PathData.Path.ParticleSpeciesNum(ptcl) == PathData.Path.SpeciesNum(dipoleSpecies)){
+			dipoleIndex(foundIndex) = ptcl;
+			foundIndex++;
+		}
+	}
+	//cerr << "autocorr loaded molecule " << molecule << " and protons " << dipoleIndex << endl;
+  dVec O = PathData.Path(slice,molecule);
+  dVec P1 = PathData.Path(slice,dipoleIndex(0));
+  dVec P2 = PathData.Path(slice,dipoleIndex(1));
   P1 -= O;
   P2 -= O;
-  P1 = Normalize(P1);
-  P2 = Normalize(P2);
+  //P1 = Normalize(P1);
+  //P2 = Normalize(P2);
   dVec pvec = Normalize(GetBisector(P1,P2));
   return pvec;
 }
+
+// old one; try to make it a little more robust
+//dVec AutoCorrClass::MeasureDipole(int slice,int molecule){
+//  Array <int,1> activeParticles(5);
+//  for (int a = 0; a < 5; a++)
+//    activeParticles(a) = molecule + a*PathData.Path.numMol;
+//  dVec O = PathData.Path(slice,activeParticles(0));
+//  dVec P1 = PathData.Path(slice,activeParticles(3));
+//  dVec P2 = PathData.Path(slice,activeParticles(4));
+//  P1 -= O;
+//  P2 -= O;
+//  P1 = Normalize(P1);
+//  P2 = Normalize(P2);
+//  dVec pvec = Normalize(GetBisector(P1,P2));
+//  return pvec;
+//}
 
 int AutoCorrClass::Locate(int i, int t, int limit){
   int place = i + t;
@@ -212,7 +238,7 @@ AutoCorrClass::CalcAutoCorr(int index, int t, int limit, double& SingleSingle, d
       dVec mu2 = DipoleBin(MapIndex(slice,mol),Locate(index,t,limit));
 //cerr << "     slice " << slice << " and mol " << mol << "; mu1 is " << mu1 << " and mu2 is " << mu2;
       double dot = CalcDotProd(mu1,mu2);
-			double SingleNetDot = CalcDotProd(mu1,muNet2);
+			double SingleNetDot = CalcDotProd(mu2,muNet2);
       SingleSingle += dot;
 			SingleNet += SingleNetDot;
     }
@@ -301,7 +327,6 @@ void AutoCorrClass::Accumulate()
 			netMu += DipoleBin(index,now);
     }
 		TotalNetMu += sqrt(CalcDotProd(netMu, netMu));
-		// Is it right to normalize????????????
 		netMu = Normalize(netMu);
 		//cerr << "Adding " << netMu << " at " << slice << ", " << now << endl;
 		NetDipoleBin(slice,now) = netMu;
