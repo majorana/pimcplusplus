@@ -1,4 +1,4 @@
-check_PROGRAMS =  TestFastCubic TestFastMultiCubic TestBicubic TestComplexMultiTricubicSpline TestGrid TestMultiTricubicSpline TestMyTricubic TestPeriodic TestQuintic
+check_PROGRAMS =  TestFastCubic TestFastMultiCubic TestBicubic TestComplexMultiTricubicSpline TestGrid TestMultiTricubicSpline TestMyTricubic TestPeriodic TestQuintic TestCubicBspline
 
 TestFastCubic_SOURCES = TestFastCubic.cc
 TestFastMultiCubic_SOURCES = TestFastMultiCubic.cc
@@ -9,6 +9,7 @@ TestMultiTricubicSpline_SOURCES = TestMultiTricubicSpline.cc
 TestMyTricubic_SOURCES = TestMyTricubic.cc
 TestPeriodic_SOURCES = TestPeriodic.cc
 TestQuintic_SOURCES = TestQuintic.cc
+TestCubicBspline_SOURCES = TestCubicBspline.cc
 
 LDADD = ../IO/libIO.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(XML2_LIBS) $(BLITZ_LIBS)
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
@@ -16,6 +17,8 @@ AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
 noinst_LTLIBRARIES = libspline.la
 libspline_la_SOURCES = BicubicSpline.h                \
                        BicubicSpline.cc               \
+                       CubicBspline.cc                \
+                       CubicBspline.h                 \
                        CubicSpline.h                  \
                        CubicSpline.cc                 \
                        FastCubicSpline.cc             \

@@ -180,6 +180,15 @@ class GeneralGrid : public Grid
     NumPoints = grid.size();
   }
 
+  void Init (Array<double,1> &points)
+  {
+    NumPoints = points.size();
+    grid.resize(NumPoints);
+    grid = points;
+    Start = grid(0);
+    End = grid(NumPoints-1);
+  }
+
   /// Useless constructor
   GeneralGrid ()
   { /*  Do nothing */ }
