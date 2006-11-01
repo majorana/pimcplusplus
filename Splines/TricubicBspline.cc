@@ -42,17 +42,17 @@ TricubicBspline::SolvePeriodicInterp (Array<double,3> &data)
   // Do X direction
   for (int iy=0; iy<Ny; iy++)
     for (int iz=0; iz<Nz; iz++) 
-      SolvePeriodicInterp(data(Range(0,Nx-1), iy, iz), P(Range(0,Nx-1),iy, iz));
+      SolvePeriodicInterp(data(Range(0,Nx-1), iy, iz), P(Range(-1,Nx-2),iy, iz));
   
   // Do Y direction
   for (int ix=0; ix<Nx; ix++)
     for (int iz=0; iz<Nz; iz++) 
-      SolvePeriodicInterp(P(ix,Range(0,Ny-1), iz), P(ix, Range(0,Ny-1), iz));
+      SolvePeriodicInterp(P(ix,Range(0,Ny-1), iz), P(ix, Range(-1,Ny-2), iz));
   
   // Do z direction
   for (int ix=0; ix<Nx; ix++)
     for (int iy=0; iy<Ny; iy++) 
-      SolvePeriodicInterp(P(ix,iy,Range(0,Nz-1)), P(ix, iy, Range(0,Nz-1)));
+      SolvePeriodicInterp(P(ix,iy,Range(0,Nz-1)), P(ix, iy, Range(-1,Nz-2)));
 }
 
 void
@@ -62,7 +62,7 @@ TricubicBspline::MakePeriodic()
   for (int ix=-1; ix<(Nx+2); ix++)
     for (int iy=-1; iy<(Ny+2); iy++)
       for (int iz=-1; iz<(Nz+2); iz++)
-	P(ix, iy, iz) = P((ix+Nx)%Nx, (iy+Nz)%Ny, (iz+Nx)%Nz);
+	P(ix, iy, iz) = P((ix+Nx)%Nx, (iy+Ny)%Ny, (iz+Nz)%Nz);
 }
 
 
@@ -96,6 +96,30 @@ TricubicBspline::Init (double xi, double xf, double yi, double yf, double zi, do
     cerr << "Nonperiodic Tricubic B-splines not yet supported.\n";
     abort();
   }
-
-
 }
+
+TricubicBspline::TricubicBspline()
+{
+  A(0,0) = -1.0/6.0; A(0,1) =  3.0/6.0; A(0,2) = -3.0/6.0; A(0,3) = 1.0/6.0;
+  A(1,0) =  3.0/6.0; A(1,1) = -6.0/6.0; A(1,2) =  3.0/6.0; A(1,3) = 0.0/6.0;
+  A(2,0) = -3.0/6.0; A(2,1) =  0.0/6.0; A(2,2) =  3.0/6.0; A(2,3) = 0.0/6.0;
+  A(3,0) =  1.0/6.0; A(3,1) =  4.0/6.0; A(3,2) =  1.0/6.0; A(3,3) = 0.0/6.0;
+
+  dA(0,0)= 0.0; dA(0,1)= 0.0; dA(0,2)= 0.0; dA(0,3)= 0.0;
+  dA(1,0)=-0.5; dA(1,1)= 1.5; dA(1,2)=-1.5; dA(1,3)= 0.5;
+  dA(2,0)= 1.0; dA(2,1)=-2.0; dA(2,2)= 1.0; dA(2,3)= 0.0;
+  dA(3,0)=-0.5; dA(3,1)= 0.0; dA(3,2)= 0.5; dA(3,3)= 0.0;
+
+  d2A(0,0)= 0.0; d2A(0,1)= 0.0; d2A(0,2)= 0.0; d2A(0,3)= 0.0;
+  d2A(1,0)= 0.0; d2A(1,1)= 0.0; d2A(1,2)= 0.0; d2A(1,3)= 0.0;
+  d2A(2,0)=-1.0; d2A(2,1)= 3.0; d2A(2,2)=-3.0; d2A(2,3)= 1.0;
+  d2A(3,0)= 1.0; d2A(3,1)=-2.0; d2A(3,2)= 1.0; d2A(3,3)= 0.0;
+
+  d3A(0,0)= 0.0; d3A(0,1)= 0.0; d3A(0,2)= 0.0; d3A(0,3)= 0.0;
+  d3A(1,0)= 0.0; d3A(1,1)= 0.0; d3A(1,2)= 0.0; d3A(1,3)= 0.0;
+  d3A(2,0)= 0.0; d3A(2,1)= 0.0; d3A(1,2)= 2.0; d3A(2,3)= 0.0;
+  d3A(3,0)=-1.0; d3A(3,1)= 3.0; d3A(3,2)=-3.0; d3A(3,3)= 1.0;
+}
+
+
+
