@@ -39,6 +39,8 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        QuinticSpline.cc               \
                        QuinticSplines.f               \
                        TricubicSpline.h               \
+                       TricubicBspline.cc             \
+                       TricubicBspline.h              \
                        r3spline.f                     \
                        z3spline.f                     \
                        bcspeval.f                     \

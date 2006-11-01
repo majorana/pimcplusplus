@@ -1,5 +1,5 @@
-#ifndef CUBIC_B_SPLINES
-#define CUBIC_B_SPLINES
+#ifndef CUBIC_B_SPLINE_H
+#define CUBIC_B_SPLINE_H
 
 #include <blitz/array.h>
 #include <blitz/tinymat.h>
@@ -40,8 +40,9 @@ public:
 inline void
 CubicBspline::Find(double x) const
 {
-  // Enforce PBC
   double delta = x - GridStart;
+
+  // Enforce PBC
   if (Periodic) 
     delta -= nearbyint(delta*Linv)*L;
     
@@ -64,9 +65,9 @@ CubicBspline::operator()(double x) const
 {
   Find(x);
 //   return (P(im1)*(A(0,0)*tp[0]+A(1,0)*tp[1]+A(2,0)*tp[2]+A(3,0)*tp[3])+
-// 	  P(i  )*(A(0,1)*tp[0]+A(1,1)*tp[1]+A(2,1)*tp[2]+A(3,1)*tp[3])+
-// 	  P(ip1)*(A(0,2)*tp[0]+A(1,2)*tp[1]+A(2,2)*tp[2]+A(3,2)*tp[3])+
-// 	  P(ip2)*(A(0,3)*tp[0]+A(1,3)*tp[1]+A(2,3)*tp[2]+A(3,3)*tp[3]));
+//   	     P(i  )*(A(0,1)*tp[0]+A(1,1)*tp[1]+A(2,1)*tp[2]+A(3,1)*tp[3])+
+// 	     P(ip1)*(A(0,2)*tp[0]+A(1,2)*tp[1]+A(2,2)*tp[2]+A(3,2)*tp[3])+
+// 	     P(ip2)*(A(0,3)*tp[0]+A(1,3)*tp[1]+A(2,3)*tp[2]+A(3,3)*tp[3]));
   return 
     (tp[0]*(A(0,0)*P(im1)+A(0,1)*P(i)+A(0,2)*P(ip1)+A(0,3)*P(ip2))+
      tp[1]*(A(1,0)*P(im1)+A(1,1)*P(i)+A(1,2)*P(ip1)+A(1,3)*P(ip2))+
