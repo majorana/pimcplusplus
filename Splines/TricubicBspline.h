@@ -91,9 +91,9 @@ TricubicBspline::operator()(double x, double y, double z)
   c[0]+= A(3,0)*pz[3]; c[1]+=A(3,1)*pz[3]; c[2]+=A(3,2)*pz[3]; c[3]+=A(3,3)*pz[3];  
 
   int ix0, ix1, ix2, ix3, iy0, iy1, iy2, iy3, iz0, iz1, iz2, iz3;
-  ix0 = ix-1; ix1=ix; ix2=ix+1; ix3=ix+2;
-  iy0 = iy-1; iy1=iy; iy2=iy+1; iy3=iy+2;
-  iz0 = iz-1; iz1=iz; iz2=iz+1; iz3=iz+2;
+  ix0 = ix; ix1=ix+1; ix2=ix+2; ix3=ix+3;
+  iy0 = iy; iy1=iy+1; iy2=iy+2; iy3=iy+3;
+  iz0 = iz; iz1=iz+1; iz2=iz+2; iz3=iz+3;
 
   return 
     (a[0]*(b[0]*(c[0]*P(ix0,iy0,iz0)+c[1]*P(ix0,iy0,iz1)+c[2]*P(ix0,iy0,iz2)+c[3]*P(ix0,iy0,iz3))+

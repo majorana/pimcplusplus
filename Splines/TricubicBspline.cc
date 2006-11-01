@@ -42,27 +42,27 @@ TricubicBspline::SolvePeriodicInterp (Array<double,3> &data)
   // Do X direction
   for (int iy=0; iy<Ny; iy++)
     for (int iz=0; iz<Nz; iz++) 
-      SolvePeriodicInterp(data(Range(0,Nx-1), iy, iz), P(Range(-1,Nx-2),iy, iz));
+      SolvePeriodicInterp(data(Range(0,Nx-1), iy, iz), P(Range(1,Nx),iy+1, iz+1));
   
   // Do Y direction
   for (int ix=0; ix<Nx; ix++)
     for (int iz=0; iz<Nz; iz++) 
-      SolvePeriodicInterp(P(ix,Range(0,Ny-1), iz), P(ix, Range(-1,Ny-2), iz));
+      SolvePeriodicInterp(P(ix+1,Range(1,Ny), iz+1), P(ix+1, Range(1,Ny), iz+1));
   
   // Do z direction
   for (int ix=0; ix<Nx; ix++)
     for (int iy=0; iy<Ny; iy++) 
-      SolvePeriodicInterp(P(ix,iy,Range(0,Nz-1)), P(ix, iy, Range(-1,Nz-2)));
+      SolvePeriodicInterp(P(ix+1,iy+1,Range(1,Nz)), P(ix+1, iy+1, Range(1,Nz)));
 }
 
 void
 TricubicBspline::MakePeriodic()
 {
   // Now, make periodic
-  for (int ix=-1; ix<(Nx+2); ix++)
-    for (int iy=-1; iy<(Ny+2); iy++)
-      for (int iz=-1; iz<(Nz+2); iz++)
-	P(ix, iy, iz) = P((ix+Nx)%Nx, (iy+Ny)%Ny, (iz+Nz)%Nz);
+  for (int ix=0; ix<(Nx+3); ix++)
+    for (int iy=0; iy<(Ny+3); iy++)
+      for (int iz=0; iz<(Nz+3); iz++)
+	P(ix, iy, iz) = P((ix+Nx-1)%Nx+1, (iy+Ny-1)%Ny+1, (iz+Nz-1)%Nz+1);
 }
 
 
@@ -83,7 +83,7 @@ TricubicBspline::Init (double xi, double xf, double yi, double yf, double zi, do
   Periodic = periodic;
   Interpolating = interp;
 
-  P.resize(Range(-1,Nx+1), Range(-1,Ny+1), Range(-1,Nz+1));
+  P.resize(Nx+3, Nx+3, Nx+3);
 
   if (Periodic) {
     if (interp)
