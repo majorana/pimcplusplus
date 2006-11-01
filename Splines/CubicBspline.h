@@ -15,6 +15,10 @@ private:
 
   // The control points
   Array<double,1> P;
+
+  // Interpolating solvers:
+  void SolvePeriodicInterp(Array<double,1> &data);  
+
 public:
   inline double GetControlPoint (int i);
   void Set(double start, double end, Array<double,1> &data, 

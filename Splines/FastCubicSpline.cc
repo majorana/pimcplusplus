@@ -64,7 +64,6 @@ FastCubicSpline::UpdatePeriodic()
   Array<double,1> lambda(M), mu(M), gamma(M);
   Array<double,1> d(M);
   assert (F(0)[0] == F(M)[0]);
-  assert (F(0)[1] == F(M)[1]);
   // Setup lambdas, mus, and d's
   lambda(0) = 0.25;
   mu(0)     = 0.5-lambda(0);
