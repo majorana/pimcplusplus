@@ -83,7 +83,7 @@ TricubicBspline::Init (double xi, double xf, double yi, double yf, double zi, do
   Periodic = periodic;
   Interpolating = interp;
 
-  P.resize(Nx+3, Nx+3, Nx+3);
+  P.resize(Nx+3, Ny+3, Nz+3);
 
   if (Periodic) {
     if (interp)
