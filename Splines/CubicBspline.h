@@ -9,8 +9,8 @@ using namespace blitz;
 class CubicBspline
 {
 private:
-  TinyMatrix<double,4,4> A;
-  double GridStart, GridEnd, GridDelta, GridDeltaInv;
+  TinyMatrix<double,4,4> A, dA, d2A, d3A;
+  double GridStart, GridEnd, GridDelta, GridDeltaInv, L, Linv;
   bool Interpolating, Periodic;
 
   // The control points
@@ -18,6 +18,12 @@ private:
 
   // Interpolating solvers:
   void SolvePeriodicInterp(Array<double,1> &data);  
+
+  // Data related to locating grid points
+  mutable int i, im1, ip1, ip2;
+  mutable double t;
+  mutable double tp[4];
+  void Find (double x) const;
 
 public:
   inline double GetControlPoint (int i);
@@ -31,40 +37,73 @@ public:
   CubicBspline();
 };
 
+inline void
+CubicBspline::Find(double x) const
+{
+  // Enforce PBC
+  double delta = x - GridStart;
+  if (Periodic) 
+    delta -= nearbyint(delta*Linv)*L;
+    
+  double fi = delta*GridDeltaInv;
+  double ipart;
+  t = modf (fi, &ipart);
+  i = (int) ipart;
+  im1 = i-1;
+  ip1 = i+1;
+  ip2 = i+2;
+  
+  tp[0] = t*t*t;
+  tp[1] = t*t;
+  tp[2] = t;
+  tp[3] = 1.0;
+}
+
 inline double 
 CubicBspline::operator()(double x) const
 {
-  double fi = (x-GridStart)*GridDeltaInv;
-  double ipart, t;
-  t = modf (fi, &ipart);
-  int i, im1, ip1, ip2;
-  i = (int) ipart;
-  double tv[4];
-  if (Periodic) {
-    int N = P.size();
-    i   = i % P.size();
-    im1 = (i-1+N)%N;
-    ip1 = (i+1)%N;
-    ip2 = (i+2)%N;
-  }
-  else {
-    i += 1;
-    im1 = i-1;
-    ip1 = i+1;
-    ip2 = i+2;
-  }
-  tv[0] = t*t*t;
-  tv[1] = t*t;
-  tv[2] = t;
-  tv[3] = 1.0;
-//   return (P(im1)*(A(0,0)*tv[0]+A(1,0)*tv[1]+A(2,0)*tv[2]+A(3,0)*tv[3])+
-// 	  P(i  )*(A(0,1)*tv[0]+A(1,1)*tv[1]+A(2,1)*tv[2]+A(3,1)*tv[3])+
-// 	  P(ip1)*(A(0,2)*tv[0]+A(1,2)*tv[1]+A(2,2)*tv[2]+A(3,2)*tv[3])+
-// 	  P(ip2)*(A(0,3)*tv[0]+A(1,3)*tv[1]+A(2,3)*tv[2]+A(3,3)*tv[3]));
-  return (tv[0]*(A(0,0)*P(im1)+A(0,1)*P(i)+A(0,2)*P(ip1)+A(0,3)*P(ip2))+
-	  tv[1]*(A(1,0)*P(im1)+A(1,1)*P(i)+A(1,2)*P(ip1)+A(1,3)*P(ip2))+
-	  tv[2]*(A(2,0)*P(im1)+A(2,1)*P(i)+A(2,2)*P(ip1)+A(2,3)*P(ip2))+
-	  tv[3]*(A(3,0)*P(im1)+A(3,1)*P(i)+A(3,2)*P(ip1)+A(3,3)*P(ip2)));
+  Find(x);
+//   return (P(im1)*(A(0,0)*tp[0]+A(1,0)*tp[1]+A(2,0)*tp[2]+A(3,0)*tp[3])+
+// 	  P(i  )*(A(0,1)*tp[0]+A(1,1)*tp[1]+A(2,1)*tp[2]+A(3,1)*tp[3])+
+// 	  P(ip1)*(A(0,2)*tp[0]+A(1,2)*tp[1]+A(2,2)*tp[2]+A(3,2)*tp[3])+
+// 	  P(ip2)*(A(0,3)*tp[0]+A(1,3)*tp[1]+A(2,3)*tp[2]+A(3,3)*tp[3]));
+  return 
+    (tp[0]*(A(0,0)*P(im1)+A(0,1)*P(i)+A(0,2)*P(ip1)+A(0,3)*P(ip2))+
+     tp[1]*(A(1,0)*P(im1)+A(1,1)*P(i)+A(1,2)*P(ip1)+A(1,3)*P(ip2))+
+     tp[2]*(A(2,0)*P(im1)+A(2,1)*P(i)+A(2,2)*P(ip1)+A(2,3)*P(ip2))+
+     tp[3]*(A(3,0)*P(im1)+A(3,1)*P(i)+A(3,2)*P(ip1)+A(3,3)*P(ip2)));
 }
+
+
+inline double 
+CubicBspline::Deriv(double x) const
+{
+  Find(x);
+  return GridDeltaInv *
+    (tp[1]*(dA(1,0)*P(im1)+dA(1,1)*P(i)+dA(1,2)*P(ip1)+dA(1,3)*P(ip2))+
+     tp[2]*(dA(2,0)*P(im1)+dA(2,1)*P(i)+dA(2,2)*P(ip1)+dA(2,3)*P(ip2))+
+     tp[3]*(dA(3,0)*P(im1)+dA(3,1)*P(i)+dA(3,2)*P(ip1)+dA(3,3)*P(ip2)));
+}
+
+
+inline double 
+CubicBspline::Deriv2(double x) const
+{
+  Find(x);
+  return GridDeltaInv * GridDeltaInv*
+    (tp[2]*(d2A(2,0)*P(im1)+d2A(2,1)*P(i)+d2A(2,2)*P(ip1)+d2A(2,3)*P(ip2))+
+     tp[3]*(d2A(3,0)*P(im1)+d2A(3,1)*P(i)+d2A(3,2)*P(ip1)+d2A(3,3)*P(ip2)));
+}
+
+inline double 
+CubicBspline::Deriv3(double x) const
+{
+  Find(x);
+  return GridDeltaInv * GridDeltaInv* GridDeltaInv*
+    (tp[3]*(d2A(3,0)*P(im1)+d2A(3,1)*P(i)+d2A(3,2)*P(ip1)+d2A(3,3)*P(ip2)));
+}
+
+
+
 
 #endif

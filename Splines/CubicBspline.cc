@@ -11,7 +11,7 @@ CubicBspline::SolvePeriodicInterp(Array<double,1> &data)
 
   Array<double,1> d(N), gamma(N), mu(N);
   d = 1.5*data;
-  P.resize(N);
+  P.resize(Range(-1,N+1));
   // First, eliminate leading coefficients
   gamma (0) = ratio;
   mu(0) = ratio;
@@ -49,7 +49,8 @@ CubicBspline::Set(double start, double end, Array<double,1> &data,
   GridEnd   = end;
   GridDelta = (end-start)/(double)(data.size());
   GridDeltaInv = 1.0/GridDelta;
-  P.resize(data.size());
+  P.resize(Range(-1,data.size()+1));
+  int N = data.size();
   
   if (!periodic) {
     cerr << "Non-periodic B-splines not yet implemented.\n";
@@ -59,7 +60,11 @@ CubicBspline::Set(double start, double end, Array<double,1> &data,
     if (interpolating) 
       SolvePeriodicInterp (data);
     else 
-      P = data;
+      P(Range(0,N-1)) = data;
+    // Finally, assign periodic elements
+    P(-1)  = P(N-1);
+    P(N)   = P(0);
+    P(N+1) = P(1);
   }
 }
 
@@ -70,4 +75,19 @@ CubicBspline::CubicBspline()
   A(1,0) =  3.0/6.0; A(1,1) = -6.0/6.0; A(1,2) =  3.0/6.0; A(1,3) = 0.0/6.0;
   A(2,0) = -3.0/6.0; A(2,1) =  0.0/6.0; A(2,2) =  3.0/6.0; A(2,3) = 0.0/6.0;
   A(3,0) =  1.0/6.0; A(3,1) =  4.0/6.0; A(3,2) =  1.0/6.0; A(3,3) = 0.0/6.0;
+
+  dA(0,0)= 0.0; dA(0,1)= 0.0; dA(0,2)= 0.0; dA(0,3)= 0.0;
+  dA(1,0)=-0.5; dA(1,1)= 1.5; dA(1,2)=-1.5; dA(1,3)= 0.5;
+  dA(2,0)= 1.0; dA(2,1)=-2.0; dA(2,2)= 1.0; dA(2,3)= 0.0;
+  dA(3,0)=-0.5; dA(3,1)= 0.0; dA(3,2)= 0.5; dA(3,3)= 0.0;
+
+  d2A(0,0)= 0.0; d2A(0,1)= 0.0; d2A(0,2)= 0.0; d2A(0,3)= 0.0;
+  d2A(1,0)= 0.0; d2A(1,1)= 0.0; d2A(1,2)= 0.0; d2A(1,3)= 0.0;
+  d2A(2,0)=-1.0; d2A(2,1)= 3.0; d2A(2,2)=-3.0; d2A(2,3)= 1.0;
+  d2A(3,0)= 1.0; d2A(3,1)=-2.0; d2A(3,2)= 1.0; d2A(3,3)= 0.0;
+
+  d3A(0,0)= 0.0; d3A(0,1)= 0.0; d3A(0,2)= 0.0; d3A(0,3)= 0.0;
+  d3A(1,0)= 0.0; d3A(1,1)= 0.0; d3A(1,2)= 0.0; d3A(1,3)= 0.0;
+  d3A(2,0)= 0.0; d3A(2,1)= 0.0; d3A(1,2)= 2.0; d3A(2,3)= 0.0;
+  d3A(3,0)=-1.0; d3A(3,1)= 3.0; d3A(3,2)=-3.0; d3A(3,3)= 1.0;
 }
