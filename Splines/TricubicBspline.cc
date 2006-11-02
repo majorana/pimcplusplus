@@ -108,7 +108,7 @@ TricubicBspline<T>::Init (double xi, double xf, double yi, double yf, double zi,
     if (interp)
       SolvePeriodicInterp(data);
     else
-      P(Range(0,Nx-1),Range(0,Ny-1),Range(0,Nz-1)) = data;
+      P(Range(1,Nx),Range(1,Ny),Range(1,Nz)) = data;
     MakePeriodic();
   }
   else {
