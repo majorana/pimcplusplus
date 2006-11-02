@@ -150,6 +150,37 @@ public:
       }
     }
   }
+  void Evaluate (double x, double y, double z,
+		 double &val, TinyVector<double,3> &grad,
+		 TinyMatrix<double,3,3> &secDerivs)
+  {
+    val = (*this)(x,y,z);
+    grad[0] = 0.0;  grad[1] = 0.0;  grad[2] = 0.0;
+    secDerivs = 0.0;
+    complex<double> eye(0.0, 1.0);
+    for (int i=0; i<c.extent(0); i++) {
+      complex<double> e2inx(cos(x*i),sin(x*i));
+      for (int j=0; j<c.extent(1); j++) {
+	complex<double> e2iny(cos(y*j),sin(y*j));
+	for (int k=0; k<c.extent(2); k++) {
+	  complex<double> e2inz(cos(z*k),sin(z*k));
+	  complex<double> e2inr = e2inx*e2iny*e2inz;
+	  grad[0] += real(eye*(double)i * c(i,j,k)*e2inr);
+	  grad[1] += real(eye*(double)j * c(i,j,k)*e2inr);
+	  grad[2] += real(eye*(double)k * c(i,j,k)*e2inr);
+	  secDerivs(0,0) +=  real(-(double)(i*i)*c(i,j,k)*e2inr);
+	  secDerivs(1,1) +=  real(-(double)(j*j)*c(i,j,k)*e2inr);
+	  secDerivs(2,2) +=  real(-(double)(k*k)*c(i,j,k)*e2inr);
+	  secDerivs(0,1) +=  real(-(double)(i*j)*c(i,j,k)*e2inr);
+	  secDerivs(0,2) +=  real(-(double)(i*k)*c(i,j,k)*e2inr);
+	  secDerivs(1,2) +=  real(-(double)(j*k)*c(i,j,k)*e2inr);
+	}
+      }
+    }
+    secDerivs(1,0) = secDerivs(0,1);
+    secDerivs(2,0) = secDerivs(0,2);
+    secDerivs(2,1) = secDerivs(1,2);
+  }
 
   ExactFunc(int nx, int ny, int nz)
   {
@@ -165,10 +196,10 @@ public:
 void
 TestAll()
 {
-  int Nplx=3, Nply=3, Nplz=3;
+  int Nplx=10, Nply=10, Nplz=10;
   ExactFunc ex(Nplx, Nply, Nplz);
 
-  int Nspx=30, Nspy=30, Nspz=30;  
+  int Nspx=60, Nspy=60, Nspz=60;  
   Array<double,3> data(Nspx,Nspy,Nspz);
   for (int ix=0; ix<Nspx; ix++) {
     double x = 2.0*M_PI*ix/(double)Nspx;
@@ -207,6 +238,68 @@ TestAll()
     fprintf (noinOut, "%20.16e %20.16e %20.16e %20.16e %20.16e  %20.16e\n",
 	     t, valNoInterp, gradNoInterp[0], gradNoInterp[1], 
 	     gradNoInterp[2], lapNoInterp);
+  }
+  fclose (exOut);
+  fclose (inOut);
+  fclose (noinOut);
+}
+
+void
+TestAll2()
+{
+  int Nplx=10, Nply=10, Nplz=10;
+  ExactFunc ex(Nplx, Nply, Nplz);
+
+  int Nspx=60, Nspy=60, Nspz=60;  
+  Array<double,3> data(Nspx,Nspy,Nspz);
+  for (int ix=0; ix<Nspx; ix++) {
+    double x = 2.0*M_PI*ix/(double)Nspx;
+    for (int iy=0; iy<Nspy; iy++) {
+      double y = 2.0*M_PI*iy/(double)Nspy;
+      for (int iz=0; iz<Nspz; iz++) {
+	double z = 2.0*M_PI*iz/(double)Nspz;
+	data (ix, iy, iz) = ex(x,y,z);
+      }
+    }
+  }
+  double xi=0.0; double xf=2.0*M_PI;
+  double yi=0.0; double yf=2.0*M_PI;
+  double zi=0.0; double zf=2.0*M_PI;
+  TricubicBspline<double> interp, noInterp;
+  interp.Init(xi, xf, yi, yf, zi, zf, data, true, true);
+  noInterp.Init(xi, xf, yi, yf, zi, zf, data, false, true);
+  
+  FILE *exOut = fopen ("exact.dat", "w");
+  FILE *inOut = fopen ("interp.dat", "w");
+  FILE *noinOut = fopen ("nointerp.dat", "w");
+
+  for (double t=0.0; t<=1.0; t+=0.001) {
+    double y = 2.0*M_PI*t;
+    double x = 1.1+0.3*M_PI*t;
+    double z = 1.7+0.5*M_PI*t;
+    TinyVector<double,3> gradEx, gradInterp, gradNoInterp;
+    TinyMatrix<double,3,3> d2Ex, d2Interp, d2NoInterp;
+    double valEx, valInterp, valNoInterp, lapEx, lapInterp, lapNoInterp;
+    ex.Evaluate (x, y, z, valEx, gradEx, d2Ex);
+    interp.Evaluate(x, y, z, valInterp, gradInterp, d2Interp);
+    noInterp.Evaluate(x, y, z, valNoInterp, gradNoInterp, d2NoInterp);
+    fprintf (exOut, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n",
+	     t, valEx, gradEx[0], gradEx[1], gradEx[2], 
+	     d2Ex(0,0), d2Ex(0,1), d2Ex(0,2), 
+	     d2Ex(1,0), d2Ex(1,1), d2Ex(1,2), 
+	     d2Ex(2,0), d2Ex(2,1), d2Ex(2,2));
+    fprintf (inOut, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n",
+	     t, valInterp, gradInterp[0], gradInterp[1], gradInterp[2], 
+	     d2Interp(0,0), d2Interp(0,1), d2Interp(0,2), 
+	     d2Interp(1,0), d2Interp(1,1), d2Interp(1,2), 
+	     d2Interp(2,0), d2Interp(2,1), d2Interp(2,2));
+	     
+    fprintf (noinOut, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n",
+	     t, valNoInterp, gradNoInterp[0], gradNoInterp[1], gradNoInterp[2], 
+	     d2NoInterp(0,0), d2NoInterp(0,1), d2NoInterp(0,2), 
+	     d2NoInterp(1,0), d2NoInterp(1,1), d2NoInterp(1,2), 
+	     d2NoInterp(2,0), d2NoInterp(2,1), d2NoInterp(2,2));
+
   }
   fclose (exOut);
   fclose (inOut);
@@ -275,5 +368,5 @@ TestEvaluate()
 
 main()
 {
-  TestAll();
+  TestAll2();
 }
