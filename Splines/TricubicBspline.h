@@ -246,7 +246,7 @@ TricubicBspline<T>::Evaluate(double x, double y, double z,
 			     T &val, TinyVector<T,3> &grad,
 			     T &laplacian)
 {
-  double a[4], b[4], c[4], da[4], db[4], dc[4], d2a[4], d2b[4], d2c[4];
+  register double a[4], b[4], c[4], da[4], db[4], dc[4], d2a[4], d2b[4], d2c[4];
   Find(x, y, z);
   a[0] = A(0,0)*px[0]; a[1] =A(0,1)*px[0]; a[2] =A(0,2)*px[0]; a[3] =A(0,3)*px[0];
   a[0]+= A(1,0)*px[1]; a[1]+=A(1,1)*px[1]; a[2]+=A(1,2)*px[1]; a[3]+=A(1,3)*px[1];
