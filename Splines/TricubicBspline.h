@@ -6,6 +6,7 @@
 
 using namespace blitz;
 
+template<typename T>
 class TricubicBspline
 {
 private:
@@ -19,12 +20,11 @@ private:
   // The grid spacing and inverse
   double dx, dxInv, dy, dyInv, dz, dzInv;
   // The control points
-  Array<double,3> P;
+  Array<T,3> P;
 
   bool Interpolating, Periodic;
 
-  void SolvePeriodicInterp (Array<double,1> data, Array<double,1> p);
-  void SolvePeriodicInterp (Array<double,3> &data);
+  void SolvePeriodicInterp (Array<T,3> &data);
   void MakePeriodic();
 
   mutable int ix, iy, iz;
@@ -34,14 +34,14 @@ private:
 
 public:
   void Init (double xi, double xf, double yi, double yf, double zi, double zf,
-	    Array<double,3> &data, bool interp=true, bool periodic=true);
-  inline double operator()(double x, double y, double z);
-  inline TinyVector<double,3> Grad(double x, double y, double z);
+	    Array<T,3> &data, bool interp=true, bool periodic=true);
+  inline T operator()(double x, double y, double z);
+  inline TinyVector<T,3> Grad(double x, double y, double z);
   TricubicBspline();
 };
 
-inline void
-TricubicBspline::Find(double x, double y, double z) const 
+template<typename T> inline void
+TricubicBspline<T>::Find(double x, double y, double z) const 
 {
   double xDelta = x - xStart;
   double yDelta = y - yStart;
@@ -71,8 +71,8 @@ TricubicBspline::Find(double x, double y, double z) const
 }
 
 
-inline double
-TricubicBspline::operator()(double x, double y, double z)
+template<typename T> inline T
+TricubicBspline<T>::operator()(double x, double y, double z)
 {
   Find(x, y, z);
   double a[4], b[4], c[4];
@@ -115,8 +115,8 @@ TricubicBspline::operator()(double x, double y, double z)
 	   b[3]*(c[0]*P(ix3,iy3,iz0)+c[1]*P(ix3,iy3,iz1)+c[2]*P(ix3,iy3,iz2)+c[3]*P(ix3,iy3,iz3))));
 }
 
-inline TinyVector<double,3>
-TricubicBspline::Grad(double x, double y, double z)
+template<typename T> inline TinyVector<T,3>
+TricubicBspline<T>::Grad(double x, double y, double z)
 {
   double a[4], b[4], c[4], da[4], db[4], dc[4];
   Find(x, y, z);
@@ -154,7 +154,7 @@ TricubicBspline::Grad(double x, double y, double z)
 
 
   // Save some operations by factorizing computation.
-  TinyMatrix<double,4,4> cP;
+  TinyMatrix<T,4,4> cP;
   cP(0,0) = c[0]*P(ix0,iy0,iz0)+c[1]*P(ix0,iy0,iz1)+c[2]*P(ix0,iy0,iz2)+c[3]*P(ix0,iy0,iz3);
   cP(0,1) = c[0]*P(ix0,iy1,iz0)+c[1]*P(ix0,iy1,iz1)+c[2]*P(ix0,iy1,iz2)+c[3]*P(ix0,iy1,iz3);
   cP(0,2) = c[0]*P(ix0,iy2,iz0)+c[1]*P(ix0,iy2,iz1)+c[2]*P(ix0,iy2,iz2)+c[3]*P(ix0,iy2,iz3);
@@ -173,7 +173,7 @@ TricubicBspline::Grad(double x, double y, double z)
   cP(3,3) = c[0]*P(ix3,iy3,iz0)+c[1]*P(ix3,iy3,iz1)+c[2]*P(ix3,iy3,iz2)+c[3]*P(ix3,iy3,iz3);
 
 
-  TinyVector<double,3> g;
+  TinyVector<T,3> g;
 
   g[0] = dxInv *
     (da[0]*(cP(0,0)*b[0]+cP(0,1)*b[1]+cP(0,2)*b[2]+cP(0,3)*b[3]) +
@@ -245,6 +245,5 @@ TricubicBspline::Grad(double x, double y, double z)
 }
   
 
-  
 
 #endif

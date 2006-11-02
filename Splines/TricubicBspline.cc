@@ -1,7 +1,7 @@
 #include "TricubicBspline.h"
 
-void
-TricubicBspline::SolvePeriodicInterp (Array<double,1> data, Array<double,1> p)
+template<typename T> inline void
+SolvePeriodicInterp1D (Array<T,1> data, Array<T,1> p)
 {
   double ratio = 0.25;
   int N = data.size();
@@ -33,30 +33,49 @@ TricubicBspline::SolvePeriodicInterp (Array<double,1> data, Array<double,1> p)
   // Now go back upward, back substituting
   for (int row=N-2; row>=0; row--) 
     p(row) = d(row) - mu(row)*p(row+1) - gamma(row)*p(N-1);
-
 }
 
-void
-TricubicBspline::SolvePeriodicInterp (Array<double,3> &data)
+inline void
+SolvePeriodicInterp1D (Array<complex<double>,1> data, 
+		     Array<complex<double>,1> p)
+{
+  int N = data.size();
+  Array<double,1> dataReal(N), dataImag(N), pReal(N), pImag(N);
+  for (int i=0; i<N; i++) {
+    dataReal(i) = data(i).real();
+    dataImag(i) = data(i).imag();
+    pReal(i)    = p(i).real();
+    pImag(i)    = p(i).real();
+  }
+  SolvePeriodicInterp1D(dataReal, pReal);
+  SolvePeriodicInterp1D(dataImag, pImag);
+
+  for (int i=0; i<N; i++) 
+    p(i) = complex<double>(pReal(i), pImag(i));
+}
+
+
+template<typename T> void
+TricubicBspline<T>::SolvePeriodicInterp (Array<T,3> &data)
 {
   // Do X direction
   for (int iy=0; iy<Ny; iy++)
     for (int iz=0; iz<Nz; iz++) 
-      SolvePeriodicInterp(data(Range(0,Nx-1), iy, iz), P(Range(1,Nx),iy+1, iz+1));
+      SolvePeriodicInterp1D(data(Range(0,Nx-1), iy, iz), P(Range(1,Nx),iy+1, iz+1));
   
   // Do Y direction
   for (int ix=0; ix<Nx; ix++)
     for (int iz=0; iz<Nz; iz++) 
-      SolvePeriodicInterp(P(ix+1,Range(1,Ny), iz+1), P(ix+1, Range(1,Ny), iz+1));
+      SolvePeriodicInterp1D(P(ix+1,Range(1,Ny), iz+1), P(ix+1, Range(1,Ny), iz+1));
   
   // Do z direction
   for (int ix=0; ix<Nx; ix++)
     for (int iy=0; iy<Ny; iy++) 
-      SolvePeriodicInterp(P(ix+1,iy+1,Range(1,Nz)), P(ix+1, iy+1, Range(1,Nz)));
+      SolvePeriodicInterp1D(P(ix+1,iy+1,Range(1,Nz)), P(ix+1, iy+1, Range(1,Nz)));
 }
 
-void
-TricubicBspline::MakePeriodic()
+template<typename T> void
+TricubicBspline<T>::MakePeriodic()
 {
   // Now, make periodic
   for (int ix=0; ix<(Nx+3); ix++)
@@ -66,9 +85,9 @@ TricubicBspline::MakePeriodic()
 }
 
 
-void
-TricubicBspline::Init (double xi, double xf, double yi, double yf, double zi, double zf,
-		       Array<double,3> &data, bool interp, bool periodic)
+template<typename T> void
+TricubicBspline<T>::Init (double xi, double xf, double yi, double yf, double zi, double zf,
+			  Array<T,3> &data, bool interp, bool periodic)
 {
   Nx = data.extent(0);
   Ny = data.extent(1);
@@ -98,7 +117,8 @@ TricubicBspline::Init (double xi, double xf, double yi, double yf, double zi, do
   }
 }
 
-TricubicBspline::TricubicBspline()
+template<typename T>
+TricubicBspline<T>::TricubicBspline()
 {
   A(0,0) = -1.0/6.0; A(0,1) =  3.0/6.0; A(0,2) = -3.0/6.0; A(0,3) = 1.0/6.0;
   A(1,0) =  3.0/6.0; A(1,1) = -6.0/6.0; A(1,2) =  3.0/6.0; A(1,3) = 0.0/6.0;
@@ -122,4 +142,6 @@ TricubicBspline::TricubicBspline()
 }
 
 
+template class TricubicBspline<double>;
+template class TricubicBspline<complex<double> >;
 
