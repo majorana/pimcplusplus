@@ -22,7 +22,7 @@ class GVec
 {
 public:
   Vec3 G;
-  Int3 I;
+  Int3 I, M;
   double G2;
 };
 
@@ -38,7 +38,7 @@ inline bool operator==(const GVec &g1, const GVec &g2)
 
 
 Int3
-GVecsClass::GetFFTBoxSize(Vec3 box, Vec3 kvec, double kcut)
+GVecsClass::GetFFTBoxSize(Vec3 box, Vec3 kvec, double kcut, double fftFactor)
 {
   int maxX, maxY, maxZ;
   Vec3 kbox = Vec3(2.0*M_PI/box[0], 2.0*M_PI/box[1], 2.0*M_PI/box[2]);
@@ -82,13 +82,16 @@ GVecsClass::GetFFTBoxSize(Vec3 box, Vec3 kvec, double kcut)
   if ((nx%2)==1) nx++;
   if ((ny%2)==1) ny++;
   if ((nz%2)==1) nz++;
+  nx = (int)ceil(fftFactor*nx);
+  ny = (int)ceil(fftFactor*ny);
+  nz = (int)ceil(fftFactor*nz);
   return Int3(nx, ny, nz);
 }
 
 
-void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut)
+void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, double fftFactor)
 {
-  Int3 boxSize = GetFFTBoxSize(box, kVec, kcut);
+  Int3 boxSize = GetFFTBoxSize(box, kVec, kcut, fftFactor);
   Set (box, kVec, kcut, boxSize);
 }
 			       
@@ -123,12 +126,15 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
   /// First, count k-vectors
   for (int ix=-maxX; ix<=maxX; ix++) {
     vec.G[0] = ix*kBox[0];
+    vec.M[0] = ix;
     vec.I[0] = (ix+Nx)%Nx;
     for (int iy=-maxY; iy<=maxY; iy++) {
       vec.G[1] = iy*kBox[1];
+      vec.M[1] = iy;
       vec.I[1] = (iy+Ny)%Ny;
       for (int iz=-maxZ; iz<=maxZ; iz++) {
 	vec.G[2] = iz*kBox[2];
+	vec.M[2] = iz;
 	vec.I[2] = (iz+Nz)%Nz;
 	vec.G2 = dot (vec.G,vec.G);
 	//	if (vec.G2 < (kcut*kcut)) 
@@ -140,10 +146,12 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
   sort (vecs.begin(), vecs.end());
   GVecs.resize(vecs.size());
   Indices.resize(vecs.size());
+  Multipliers.resize(vecs.size());
   int numUnique = 1;
   for (int i=0; i<vecs.size(); i++) {
     GVecs(i) = vecs[i].G;
     Indices(i) = vecs[i].I;
+    Multipliers(i) = vecs[i].M;
     if (i>0)
       if (!(vecs[i] == vecs[i-1]))
 	numUnique++;
@@ -204,6 +212,8 @@ GVecsClass::operator=(const GVecsClass &gvecs)
   GVecs = gvecs.GVecs;
   Indices.resize(gvecs.Indices.shape());
   Indices = gvecs.Indices;
+  Multipliers.resize(gvecs.Multipliers.shape());
+  Multipliers = gvecs.Multipliers;
   GDiff.resize(gvecs.GDiff.size());
   GDiff = gvecs.GDiff;
   GDiffInv2.resize(gvecs.GDiffInv2.shape());
@@ -258,10 +268,12 @@ GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor)
 
   GVecs.resize(gvecs.size());
   Indices.resize(gvecs.size());
+  Multipliers.resize(gvecs.size());
   GVecs = gvecs;
   
-  for (int i=0; i<GVecs.size(); i++)
+  for (int i=0; i<GVecs.size(); i++) 
     Indices(i) = GetIndex(a, b, GVecs(i));
+  Multipliers = Indices;
 
   /// Find FFT box size;
   Int3 maxIndex(0,0,0), minIndex(0,0,0);

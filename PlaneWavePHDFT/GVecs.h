@@ -26,6 +26,9 @@ protected:
   Array<Vec3,1> GVecs;
   // This stores the index of this G-vector in the FFT box
   Array<Int3,1> Indices;
+  // This stores the integer multipliers of the reciprocal lattice
+  // vector for each G-vector
+  Array<Int3,1> Multipliers;
   // This stores the differences between g-vectors:
   Array<Vec3,1> GDiff;
   /// Lattice[0,:] gives the first primitive lattice vector, etc.
@@ -40,11 +43,12 @@ protected:
   Vec3 k;
 
 public:
-  Int3 GetFFTBoxSize (Vec3 box, Vec3 kvec, double kcut);
+  Int3 GetFFTBoxSize (Vec3 box, Vec3 kvec, double kcut,
+		      double fftFactor=1.0);
 
-  void Set (Vec3 box, Vec3 kvec, double kcut);
+  void Set (Vec3 box, Vec3 kvec, double kcut, double fftFactor=1.0);
   void Set (Vec3 box, Vec3 kvec, double kcut, Int3 boxSize);
-  void Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double factor=1.0);
+  void Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor=1.0);
 
   inline Vec3 operator()(int i) const
   { return GVecs(i); }
@@ -54,7 +58,10 @@ public:
 
   inline Int3 Index(int i) const
   { return Indices(i); }
-  
+
+  inline Int3 Multiplier (int i) const
+  { return Multipliers(i); }
+
   inline Vec3 DeltaG (int i) const
   { return GDiff(i); }
 
