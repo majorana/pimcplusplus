@@ -1,4 +1,6 @@
-check_PROGRAMS =  TestFastCubic TestFastMultiCubic TestBicubic TestComplexMultiTricubicSpline TestGrid TestMultiTricubicSpline TestMyTricubic TestPeriodic TestQuintic TestCubicBspline TestTricubicBspline
+check_PROGRAMS =  TestFastCubic TestFastMultiCubic TestBicubic TestComplexMultiTricubicSpline \
+                  TestGrid TestMultiTricubicSpline TestMyTricubic TestPeriodic TestQuintic    \
+                  TestCubicBspline TestTricubicBspline TestBlips
 
 TestFastCubic_SOURCES = TestFastCubic.cc
 TestFastMultiCubic_SOURCES = TestFastMultiCubic.cc
@@ -11,9 +13,10 @@ TestPeriodic_SOURCES = TestPeriodic.cc
 TestQuintic_SOURCES = TestQuintic.cc
 TestCubicBspline_SOURCES = TestCubicBspline.cc
 TestTricubicBspline_SOURCES = TestTricubicBspline.cc
+TestBlips_SOURCES = TestBlips.cc
 
-LDADD = ../IO/libIO.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(XML2_LIBS) $(BLITZ_LIBS)
-AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
+LDADD = ../IO/libIO.la ../PlaneWavePHDFT/libpw.la ../FFT/libfft.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(XML2_LIBS) $(BLITZ_LIBS) $(FFTW3_LIBS) $(LAPACK_LIBS)
+AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(FFTW3_CFLAGS)
 
 noinst_LTLIBRARIES = libspline.la
 libspline_la_SOURCES = BicubicSpline.h                \

@@ -36,6 +36,8 @@ private:
 public:
   void Init (double xi, double xf, double yi, double yf, double zi, double zf,
 	    Array<T,3> &data, bool interp=true, bool periodic=true);
+  inline T GetControlPoint (int ix, int iy, int iz) const
+  { return P(ix+1, iy+1, iz+1); }
   inline T operator()(double x, double y, double z);
   inline TinyVector<T,3> Grad(double x, double y, double z);
   inline void Evaluate (double x, double y, double z,
