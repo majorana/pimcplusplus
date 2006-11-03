@@ -26,7 +26,8 @@
 void AutoCorrClass::Read(IOSectionClass& in)
 {
   ObservableClass::Read(in);
-  assert(in.ReadVar("dumpFrequency",dumpFrequency));
+  assert(in.ReadVar("Frequency", Frequency));
+  assert(in.ReadVar("dumpFrequency", dumpFrequency));
   assert(in.ReadVar("numSlots",NumSlots));
 	if(!in.ReadVar("Species",dipoleSpecies))
 		dipoleSpecies = "p";
@@ -85,9 +86,10 @@ void AutoCorrClass::WriteInfo()
     r(i) = 0.75 * (rb*rb*rb*rb-ra*ra*ra*ra)/(rb*rb*rb-ra*ra*ra);
   }
   IOSection.WriteVar("x", r);
-  IOSection.WriteVar("xlabel", "r");
-  IOSection.WriteVar("ylabel", "g(r)");
-  IOSection.WriteVar("Type","Autocorrelation");
+  IOSection.WriteVar("xlabel", "MC timestep");
+  IOSection.WriteVar("ylabel", "Autocorrelation");
+  IOSection.WriteVar("Type","CorrelationFunction");
+  IOSection.WriteVar("Cumulative", false);
 }
 
 
@@ -315,6 +317,7 @@ void AutoCorrClass::Accumulate()
 
 void AutoCorrClass::Accumulate()
 {
+	TimesCalled++;
   // measure and catalog dipole moments at now, then calculate autocorrelation 
   TotalCounts++;
   // loop over slices

@@ -21,17 +21,39 @@
 
 class HbondClass : public ObservableClass
 {
+	private:
 
-private:
+  LinearGrid grid;
+	Array<int,3> AgeTable;
+	Array<int,2> BondCount;
+	Array<int,1> Histogram;
+	Array<int,1> LifetimeHist;
+	Array<int,1> AgeHist;
+	Array<int,2> Protons;
+
   double TotalSum;
 
+  ObservableVecDouble1 LifetimeVar;
+  ObservableVecDouble1 AgeVar;
   ObservableDouble TotalVar;
 
   int NumSamples;
   int TimesCalled;
-  int Freq;
-  int DumpFreq;
-public:
+	int TotalSamples;
+  int Frequency;
+  int dumpFrequency;
+	double gridStart, gridEnd;
+	int numGridPoints;
+	int totalSlices;
+	int totalMol;
+	int overflow;
+
+	// Here we use HBond criteria r_OO < 3.5 and HOH bond angle > 145 deg, after Artacho (2004)
+  double OOlimit;
+  double HOHangle;
+
+	public:
+
   bool CheckPair(int slice, int obond, int ohome, int p);
   bool IsHBond(int slice, int OA, int OB);
   void Accumulate();
@@ -40,9 +62,13 @@ public:
   void Read(IOSectionClass& in);
   HbondClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) , 
-      TotalVar  ("Total",  IOSection,myPathData.Path.Communicator)
+      TotalVar  ("Total",  IOSection,myPathData.Path.Communicator),
+      LifetimeVar  ("Lifetimes",  IOSection,myPathData.Path.Communicator),
+      AgeVar  ("Age Distribution",  IOSection,myPathData.Path.Communicator)
   {
     Initialize();
   }
+
 };
+
 #endif 

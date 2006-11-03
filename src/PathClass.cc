@@ -409,6 +409,12 @@ void PathClass::Allocate()
 			catalog[m]++;
 		}
   }
+	else if(!doMol){
+		MolRef.resize(numParticles);
+		for(int m=0; m<MolRef.size(); m++)
+			MolRef(m) = m;
+		cerr << "Initializing MolRef to default: " << MolRef << endl;
+	}
   if (WormOn)
     numParticles=numParticles+2;
   Path.resize(MyNumSlices,numParticles+OpenPaths);

@@ -18,153 +18,183 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "../Moves/MoveUtils.h"
 
-Array<int,2> Table;
-Array<int,2> BondCount;
-Array<int,1> Histogram;
-Array<int,1> LifetimeHist;
-
-  //////////////////////////////////////
- ///  Hydrogen Bond Analysis Class  ///
+//////////////////////////////////////
+///  Hydrogen Bond Analysis Class  ///
 //////////////////////////////////////
 
 bool HbondClass::IsHBond(int slice, int OA, int OB){
   bool bond = false;
-  int numMol = PathData.Path.numMol;
-  int PA1 = OA + 3*numMol; 
-  int PA2 = OA + 4*numMol; 
-  int PB1 = OB + 3*numMol; 
-  int PB2 = OB + 4*numMol; 
-  if (CheckPair(slice,OA,OB,PB1))
-    bond = true;
-  else if (CheckPair(slice,OA,OB,PB2))
-    bond = true;
-  else if (CheckPair(slice,OB,OA,PA1))
-    bond = true;
-  else if (CheckPair(slice,OB,OA,PA2))
-    bond = true;
+	dVec OO;
+	double OOmag;
+  PathData.Path.DistDisp(slice,OA,OB,OOmag,OO);
+	if(OOmag < OOlimit){
+ 		if (CheckPair(slice,OA,OB,Protons(OB,0)))
+  	  bond = true;
+  	else if (CheckPair(slice,OA,OB,Protons(OB,1)))
+  	  bond = true;
+  	else if (CheckPair(slice,OB,OA,Protons(OA,0)))
+  	  bond = true;
+  	else if (CheckPair(slice,OB,OA,Protons(OA,1)))
+  	  bond = true;
+	}
   return bond;
 }
 
 bool HbondClass::CheckPair(int slice, int obond, int ohome, int p){
-// Here we use HBond criteria r_OO < 3.5 and HOH bond angle > 145 deg, after Artacho (2004)
-  double OOlimit = 3.5;
-  double HOHangle = 2*M_PI*145/360;
   bool bond = false;
-  double OHmag,OHbondmag,OOmag;
-  dVec OH,OHbond,OO;
+  double OHmag,OHbondmag;
+  dVec OH,OHbond;
   PathData.Path.DistDisp(slice,p,obond,OHbondmag,OHbond);
   PathData.Path.DistDisp(slice,p,ohome,OHmag,OH);
-  PathData.Path.DistDisp(slice,obond,ohome,OOmag,OO);
   double theta = PathData.Actions.TIP5PWater.GetAngle(OHbond,OH);
-  if ((OOmag < OOlimit) && (theta > HOHangle))
+  if (theta > HOHangle)
     bond = true;
   return bond; 
 }
 
 void HbondClass::Read(IOSectionClass& in)
 {
-cerr << "HBond: Reading..." << endl;  
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
-cerr << "Freq is " << Freq << " and DumpFreq is " << DumpFreq << endl;
-  Table.resize(PathData.Path.numMol,PathData.Path.numMol);
-  Table=0;
-cerr << "resized Table: " << Table.size() << endl;
+  assert(in.ReadVar("Frequency",Frequency));
+	totalSlices = PathData.NumTimeSlices()-1;
+	totalMol = PathData.Path.numMol;
+  AgeTable.resize(totalSlices, totalMol, totalMol);
+  AgeTable=0;
+	cerr << "resized AgeTable: " << AgeTable.size() << endl;
+
   BondCount.resize(PathData.Path.numMol,PathData.Path.numMol);
   BondCount=0;
-cerr << "resized BondCount: " << BondCount.size() << endl;
-  LifetimeHist.resize(DumpFreq/Freq);
+	cerr << "resized BondCount: " << BondCount.size() << endl;
+
+	string ProtonSpecies = "p";
+	in.ReadVar("ProtonSpecies",ProtonSpecies);
+	Protons.resize(PathData.Path.numMol, 2);
+	for(int m=0; m<PathData.Path.numMol; m++){
+		int foundIndex = 0;
+  	for (int a = 0; a < PathData.Path.MolMembers(m).size(); a++){
+  	  int ptcl = PathData.Path.MolMembers(m)(a);
+			if(PathData.Path.ParticleSpeciesNum(ptcl) == PathData.Path.SpeciesNum(ProtonSpecies)){
+				Protons(m, foundIndex) = ptcl;
+				foundIndex++;
+			}
+		}
+	}
+
+  bool readStartGrid=in.ReadVar("start",gridStart);
+  if (!readStartGrid)
+    gridStart=0.0;
+  assert(in.ReadVar("BinSize",numGridPoints));
+	gridEnd = gridStart + numGridPoints*Frequency;
+
+  Histogram.resize(numGridPoints);
+  Histogram = 0;
+  LifetimeHist.resize(numGridPoints);
   LifetimeHist = 0;
-cerr << "resized LifetimeHist: " << LifetimeHist.size() << endl;
-  in.CloseSection();
-cerr << "leaving Read" << endl;
+  AgeHist.resize(numGridPoints);
+  AgeHist = 0;
+
+  //in.CloseSection();
 }
 
 void HbondClass::WriteBlock()
 {
-  // IO Stuff; Open files
-  std::fstream bondout,lifetimeout;
-  bondout.open("./HBondCount.dat", std::ios::out);
-  lifetimeout.open("./HBondLifetime.dat", std::ios::out);
+	cerr << "HBOND WRITEBLOCK totalslices is " << totalSlices << " and totalSamples is " << TotalSamples << endl;
+  double AgeNorm = 1.0/(totalSlices*TotalSamples);
+  double LifetimeNorm = 1.0/(totalSlices);
+	double totalHBS = 0.0;
+	double hbs = 0.0;
 
-  int countNorm = DumpFreq/Freq;
-  int lifetimeNorm = 1;
-
-  // Write files
-  for (int i = 0; i < Histogram.size(); i++){
-    bondout << i << " " << Histogram(i) << endl;
+  Array<double,1> LifetimeArray(LifetimeHist.size());
+  for (int i=0; i<LifetimeArray.size(); i++){
+    LifetimeArray(i) = (double)LifetimeHist(i)*LifetimeNorm;
+		totalHBS += LifetimeArray(i);
   }
-  for (int j = 0; j < LifetimeHist.size(); j++){
-    lifetimeout << j << " " << LifetimeHist(j) << endl;
-  }
+  LifetimeVar.Write(LifetimeArray);
+  LifetimeVar.Flush();
+	//cerr << "HBOND: Histogram contains " << totalHBS << " HBonds; hist is " << LifetimeHist << ", norm is " << LifetimeNorm << endl;
 
-  bondout.close();
-  lifetimeout.close();
+  Array<double,1> AgeArray(AgeHist.size());
+  for (int i=0; i<AgeArray.size(); i++){
+    AgeArray(i) = (double)AgeHist(i)*AgeNorm;
+		hbs += AgeArray(i);
+  }
+	cerr << "HBOND: Snapshot has " << hbs << " bonds" << endl;
+  AgeVar.Write(AgeArray);
+  AgeVar.Flush();
+	AgeHist = 0;
+	TotalSamples = 0;
 }
 
 void HbondClass::Accumulate()
 {
-  // Table accumulates the lifetime of an HBond and is cleared out with period DumpFreq.  BondCount counts the presence or absence of a bond and is cleared with period Freq.
-
-  // Measure and tabulate hbonds at the curent time step
-
-    // Just do this for slice 0 -- classical 
-    int slice = 0;
-    /// loop over molecules 
-    for (int mol1=0;mol1<PathData.Path.numMol;mol1++){
+	TimesCalled++;
+	TotalSamples++;
+	// Measure and tabulate hbonds at the curent time step
+	int bondCt = 0;
+	int totalPair = 0;
+	int died=0;
+  for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
+  	/// loop over molecules 
+    for (int mol1=0;mol1<PathData.Path.numMol-1;mol1++){
       for (int mol2=mol1+1;mol2<PathData.Path.numMol;mol2++){
+				totalPair++;
         if(IsHBond(slice,mol1,mol2)){
-          Table(mol1,mol2)++;
-          BondCount(mol1,mol2)++;
-        } 
+          AgeTable(slice, mol1, mol2)++;
+					int age = AgeTable(slice,mol1,mol2);
+					if(age>=numGridPoints)
+						age = numGridPoints - 1;
+					AgeHist(age)++;
+					bondCt++;
+          //BondCount(mol1,mol2)++;
+          //BondCount(mol2,mol1)++;
+        }
+				else{
+					int index = AgeTable(slice, mol1, mol2);
+					if(index >= numGridPoints){
+						index = numGridPoints-1;
+						overflow++;
+					}
+					if(index>0){
+						LifetimeHist(index)++;
+						died++;
+					}
+					AgeTable(slice, mol1, mol2) = 0;
+				}
       }
     }
+	}
+	//cerr << TimesCalled << ": HBOND counted " << bondCt << " of " << totalPair << " possible HBonds" << " and " << died << " died with lifetime>0" << endl;
 
-    // Tabulate the number of hbonds and accumulate in Histogram
-    int count = 0;
-    for (int mol = 0; mol < BondCount.extent(0); mol++){
-      // Sum entries over rows
-      for (int m = 0; m < BondCount.extent(0); m++)
-        count += BondCount(m,mol);
-      // Sum entries over columns
-      for (int n = 0; n < BondCount.extent(1); n++)
-        count += BondCount(mol,n);
-      Histogram(count)++;
-      count = 0;
-    }
-    BondCount = 0;
-  }  
+	if(TimesCalled%5000 == 0){
+		cerr << "HBond: " << overflow << " are longer than the histogram size" << endl;
+  //	// Write files
+  //	WriteBlock();
+	}
 
-  // Tabulate hbond lifetime histogram and write data to file
-  if ((TimesCalled % DumpFreq) == 0){
-    cerr << TimesCalled << ": " << TimesCalled << "; Writing HBond Data" << endl;
-    // Tabulate hbond lifetimes and accumulate in LifetimeHist
-    int count = 0;
-    for (int mol = 0; mol < Table.extent(0); mol++){
-      // Sum entries over rows
-      for (int m = 0; m < Table.extent(0); m++)
-        count += Table(m,mol);
-      // Sum entries over columns
-      for (int n = 0; n < Table.extent(1); n++)
-        count += Table(mol,n);
-      LifetimeHist(count)++;
-      count = 0;
-    }
-
-    // Write files
-    WriteBlock();
-    Histogram = 0;
-    LifetimeHist = 0;
-
+  //// Tabulate the number of hbonds and accumulate in Histogram
+  //int count = 0;
+  //for (int mol = 0; mol < BondCount.extent(0); mol++){
+  //  // Sum entries over rows
+  //  for (int m = 0; m < BondCount.extent(0); m++)
+  //    count += BondCount(m,mol);
+  //  // Sum entries over columns
+  //  for (int n = 0; n < BondCount.extent(1); n++)
+  //    count += BondCount(mol,n);
+  //  Histogram(count)++;
+  //  count = 0;
+  //}
+  //BondCount = 0;
+  //Histogram = 0;
 }
 
 void HbondClass::Initialize()
 {
-cerr << "HBond: Initialize" << endl;
-  TimesCalled=0;
-  Histogram.resize(10);
-  Histogram = 0;
-cerr << "Leaving Initialize" << endl;
+  TimesCalled = 0;
+  TotalSamples = 0;
+
+	// Here we use HBond criteria r_OO < 3.5 and HOH bond angle > 145 deg, after Artacho (2004)
+  OOlimit = 3.5;
+  HOHangle = 2*M_PI*145/360;
 }

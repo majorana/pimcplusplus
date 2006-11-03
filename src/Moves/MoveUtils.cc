@@ -46,7 +46,7 @@ double GetAngle(dVec v1, dVec v2)
 //    cerr << "OH CRAP: DOT PRODUCT IS " << dot << " between " << v1 << " and " << v2 << "; I used mag " << mag << " and I'm going to return " << angle << endl;
 //  }
   if (dot-1 < 0.0001 && dot-1 > 0){
-//    cerr << "correcting angle" << endl;
+    cerr << "correcting angle" << endl;
     angle = 0.0;
   }
   return angle;

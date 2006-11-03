@@ -23,6 +23,8 @@ libobservables_la_SOURCES  =     \
     lsapr.f                      \
     JosephsonPathDump.h          \
     JosephsonPathDump.cc         \
+		HBond.cc                     \
+		HBond.h                      \
     lsapr.f                      \
     ObservableBase.cc            \
     ObservableBase.h             \
@@ -31,6 +33,8 @@ libobservables_la_SOURCES  =     \
     ObservableVar.cc             \
     ObservableCorrelation.cc     \
     ObservableCorrelation.h      \
+		ObservableDiffusion.h        \
+		ObservableDiffusion.cc       \
     ObservableEnergy.cc          \
     ObservableEnergy.h           \
     OpenOrientation.h            \

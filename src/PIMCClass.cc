@@ -223,6 +223,10 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new EnergySignClass(PathData,OutFile);
     else if (observeType=="AutoCorr")
       tempObs = new AutoCorrClass(PathData,OutFile);
+    else if (observeType=="HBond")
+      tempObs = new HbondClass(PathData,OutFile);
+    else if (observeType=="MeanSqDiffusion")
+      tempObs = new ObsDiffusionClass(PathData,OutFile);
     else if (observeType=="DistanceToOpen")
       tempObs = new HeadLocClass(PathData,OutFile);
     else if (observeType=="PhiK")
