@@ -21,6 +21,7 @@ AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(FFTW3_CFLAGS)
 noinst_LTLIBRARIES = libspline.la
 libspline_la_SOURCES = BicubicSpline.h                \
                        BicubicSpline.cc               \
+                       BsplineHelper.h                \
                        CubicBspline.cc                \
                        CubicBspline.h                 \
                        CubicSpline.h                  \

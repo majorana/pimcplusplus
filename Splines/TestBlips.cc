@@ -85,7 +85,7 @@ TestBlips()
   GVecsClass GVecs;
   Vec3 k (0.0, 0.0, 0.0);
   
-  GVecs.Set(box, k, kcut, 2.0);
+  GVecs.Set(box, k, kcut, 4.0);
   FFTBox fft(GVecs);
   fft.Setup();
   zVec c(GVecs.size());

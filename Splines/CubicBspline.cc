@@ -1,4 +1,5 @@
 #include "CubicBspline.h"
+#include "BsplineHelper.h"
 #include <iostream>
 #include <cstdlib>
 
@@ -11,7 +12,7 @@ CubicBspline::SolvePeriodicInterp(Array<double,1> &data)
 
   Array<double,1> d(N), gamma(N), mu(N);
   d = 1.5*data;
-  P.resize(Range(-1,N+1));
+  P.resize(Range(0,N+2));
   // First, eliminate leading coefficients
   gamma (0) = ratio;
   mu(0) = ratio;
@@ -32,12 +33,16 @@ CubicBspline::SolvePeriodicInterp(Array<double,1> &data)
   mu(N-1) += ratio;
   gamma(N-1) -= mu(N-1)*(mu(N-2)+gamma(N-2));
   d(N-1) -= mu(N-1) * d(N-2);
-  P(N-1) = d(N-1)/gamma(N-1);
+  P(N) = d(N-1)/gamma(N-1);
  
   // Now go back upward, back substituting
   for (int row=N-2; row>=0; row--) 
-    P(row) = d(row) - mu(row)*P(row+1) - gamma(row)*P(N-1);
+    P(row+1) = d(row) - mu(row)*P(row+2) - gamma(row)*P(N);
 }
+
+
+
+
 
 void
 CubicBspline::Set(double start, double end, Array<double,1> &data,
@@ -47,24 +52,36 @@ CubicBspline::Set(double start, double end, Array<double,1> &data,
   Interpolating = interpolating;
   GridStart = start;
   GridEnd   = end;
-  GridDelta = (end-start)/(double)(data.size());
-  GridDeltaInv = 1.0/GridDelta;
-  P.resize(Range(-1,data.size()+1));
   int N = data.size();
   
   if (!periodic) {
-    cerr << "Non-periodic B-splines not yet implemented.\n";
-    abort();
+    GridDelta = (end-start)/(double)(data.size()-1);
+    GridDeltaInv = 1.0/GridDelta;
+    P.resize(data.size()+2);
+    Array<double,1> d(P.size());
+    d(Range(1,N)) = data;
+    d(0) = 0.0;
+    d(N+1) = 0.0;
+    if (interpolating)
+      SolveFirstDerivInterp1D (d, P);
+    else {
+      cerr << "Don't know how to do noninterpolating nonperiodic.\n";
+      abort();
+    }
   }
   else {
+    GridDelta = (end-start)/(double)(data.size());
+    GridDeltaInv = 1.0/GridDelta;
+    P.resize(data.size()+3);
+
     if (interpolating) 
       SolvePeriodicInterp (data);
     else 
-      P(Range(0,N-1)) = data;
+      P(Range(1,N)) = data;
     // Finally, assign periodic elements
-    P(-1)  = P(N-1);
-    P(N)   = P(0);
+    P(0)   = P(N);
     P(N+1) = P(1);
+    P(N+2) = P(2);
   }
 }
 

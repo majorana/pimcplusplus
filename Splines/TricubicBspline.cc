@@ -35,6 +35,46 @@ SolvePeriodicInterp1D (Array<T,1> data, Array<T,1> p)
     p(row) = d(row) - mu(row)*p(row+1) - gamma(row)*p(N-1);
 }
 
+
+// Solve for fixed first derivative.  
+// data(0)  = dy_0/dx dx.  
+// data(1)   = y_0 and
+// data(M-1) = y_{M-1}.  
+// data(M)   = dy_{M-1}/dx dx.  
+template<typename T> inline void
+SolveFirstDerivInterp1D (Array<T,1> data, Array<T,1> p)
+{
+  double ratio = 0.25;
+  double ratio2 = 0.75;
+  int M = data.size()-2;
+
+  Array<double,1> d(M+2), mu(M+2);
+  d = 1.5*data;
+  mu = ratio;
+  // First, eliminate leading coefficients
+  mu(0) = 0.0;
+  mu(M+1) = 0.0;
+  mu(1) = -1.0;
+  d(0) /= (-ratio2);
+  for (int row=1; row <=M; row++) {
+    double diag = 1.0- mu(row-1)*ratio;
+    double diagInv = 1.0/diag;
+    mu(row) *= diagInv;
+    d(row)  = diagInv*(d(row)-ratio*d(row-1));
+  }
+  d(M+1) -= -ratio2 * data(M-1);
+  mu(M+1) -= -ratio2*mu(M-1);
+  double diag = ratio2 - mu(M+1)*mu(M);
+  p(M+1) = d(M+1)/diag;
+ 
+  // Now go back upward, back substituting
+  for (int row=M; row>=1; row--) 
+    p(row+1) = d(row) - mu(row)*p(row+1) - gamma(row)*p(N-1);
+
+  // And do 0th row
+  p(0) = d(0) + p(2)*d(2);
+}
+
 inline void
 SolvePeriodicInterp1D (Array<complex<double>,1> data, 
 		     Array<complex<double>,1> p)
@@ -73,6 +113,28 @@ TricubicBspline<T>::SolvePeriodicInterp (Array<T,3> &data)
     for (int iy=0; iy<Ny; iy++) 
       SolvePeriodicInterp1D(P(ix+1,iy+1,Range(1,Nz)), P(ix+1, iy+1, Range(1,Nz)));
 }
+
+// template<typename T> void
+// TricubicBspline<T>::SolveClampedInterp (Array<T,3> &data)
+// {
+//   Array<T,1> dx(data.extent(0)+2);
+//   Array<T,1> dy(data.extent(0)+2);
+//   // Do X direction
+//   for (int iy=0; iy<Ny; iy++)
+//     for (int iz=0; iz<Nz; iz++) 
+//       SolvePeriodicInterp1D(data(Range(0,Nx-1), iy, iz), P(Range(1,Nx),iy+1, iz+1));
+  
+//   // Do Y direction
+//   for (int ix=0; ix<Nx; ix++)
+//     for (int iz=0; iz<Nz; iz++) 
+//       SolvePeriodicInterp1D(P(ix+1,Range(1,Ny), iz+1), P(ix+1, Range(1,Ny), iz+1));
+  
+//   // Do z direction
+//   for (int ix=0; ix<Nx; ix++)
+//     for (int iy=0; iy<Ny; iy++) 
+//       SolvePeriodicInterp1D(P(ix+1,iy+1,Range(1,Nz)), P(ix+1, iy+1, Range(1,Nz)));
+// }
+
 
 template<typename T> void
 TricubicBspline<T>::MakePeriodic()
