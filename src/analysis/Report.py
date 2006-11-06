@@ -15,9 +15,15 @@ from Coupling import *
 from Vacancy import *
 from PlaneDensity import *
 from Pressure import *
+from WindingNumber import *
 from Langevin import *
 from TimeAnalysis import *
-from Conductivity import *
+from VacancyDensity import *
+from SpecificHeat import *
+from SpecificHeatA import *
+from CycleCount import *
+#from Conductivity import *
+
 
 basename = sys.argv[1]
 infiles = IOSectionClassList()
@@ -85,29 +91,64 @@ for counter in range(0,numSections):
      myType=infiles.ReadVar("Type")[0]
      print "Currently processing ",myName
      if myName=="PairCorrelation":
-         ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
+         try:
+              ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
+         except:
+              print "Error in pair correlation function"
      if myName=="Vacancy":
-         ProcessVacancy(infiles,summaryDoc,detailedDoc,StartCut)
+         try:
+              ProcessVacancy(infiles,summaryDoc,detailedDoc,StartCut)
+              summaryDoc.append(HR())
+              detailedDoc.append(HR())
+         except:
+              print "Error in processing vacancy"
+     elif myName=="Energy" or myName=="Energies":
+          try:
+               ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut)
+               summaryDoc.append(HR())
+               detailedDoc.append(HR())
+          except:
+               print "Error in energy processing"
+     elif myName=="CycleCount":
+          ProcessCycleCount(infiles,summaryDoc,detailedDoc,StartCut)
+          summaryDoc.append(HR())
+          detailedDoc.append(HR())
+     elif myName=="SpecificHeat":
+         ProcessSpecificHeat(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
-     elif myName=="Energy":
-         ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut)
+     elif myName=="SpecificHeatA":
+         ProcessSpecificHeatA(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
+
      elif myName=="nofr":
          Processnofr(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
-     elif myName=="Pressure":
-         ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut)
-         summaryDoc.append(HR())
-         detailedDoc.append(HR())
+#     elif myName=="Pressure":
+#         print "Processing Pressure"
+#         ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut)
+#         summaryDoc.append(HR())
+#         detailedDoc.append(HR())
+#         print "Pressure Done"
+     elif myName=="WindingNumber":
+         print "Processing Winding Number"
+         ProcessWindingNumber(infiles,summaryDoc,detailedDoc,StartCut)
+#     elif myName=="Pressure":
+#         ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut)
+#         summaryDoc.append(HR())
+#         detailedDoc.append(HR())
      elif myName=="PlaneDensity":
           ProcessPlaneDensity(infiles,summaryDoc,detailedDoc,StartCut)
           summaryDoc.append(HR())
           detailedDoc.append(HR())
      elif myName=="TimeAnalysis":
           ProcessTimeAnalysis(infiles,summaryDoc,detailedDoc,StartCut)
+          summaryDoc.append(HR())
+          detailedDoc.append(HR())
+     elif myName=="VacancyDensity":
+          ProcessVacancyDensity(infiles,summaryDoc,detailedDoc,StartCut)
           summaryDoc.append(HR())
           detailedDoc.append(HR())
      elif myName=="PhiK":
