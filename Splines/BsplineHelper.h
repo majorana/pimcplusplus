@@ -110,7 +110,69 @@ SolveFirstDerivInterp1D (Array<T,1> &data, Array<T,1> &p)
     p(row) = d(row) - mu(row)*p(row+1);
 
   // And do 0th row
-  p(0) = d(0) + p(2)*d(2);
+  p(0) = d(0) + p(2)/**d(2)*/;
+}
+
+// We multiply both sides by 1/4 to make diagonals equal 1
+template<typename T> inline void
+SolveDerivInterp1D (Array<T,1> &data, Array<T,1> &p,
+		    TinyVector<T,4> abcdInitial,
+		    TinyVector<T,4> abcdFinal)
+{
+  double al = 0.25*abcdInitial[0];
+  double bl = 0.25*abcdInitial[1];
+  double cl = 0.25*abcdInitial[2];
+  double dl = 1.5 *abcdInitial[3];
+  double ar = 0.25*abcdFinal[0];
+  double br = 0.25*abcdFinal[1];
+  double cr = 0.25*abcdFinal[2];
+  double dr = 1.5 *abcdFinal[3];
+    
+  double ratio = 0.25;
+  int M = data.size()-2;
+
+  Array<double,1> d(M+2), mu(M+2);
+  d = 1.5*data;
+  mu = ratio;
+  // First, eliminate leading coefficients
+  double alInv = 1.0/al;
+  bl *= alInv;
+  cl *= alInv;
+  dl *= alInv;
+
+  d(0) = dl;  
+  mu(0) = bl;
+  mu(1) = ratio - ratio*cl;
+
+  for (int row=1; row <=M; row++) {
+    double diag = 1.0- mu(row-1)*ratio;
+    double diagInv = 1.0/diag;
+    mu(row) *= diagInv;
+    d(row)  = diagInv*(d(row)-ratio*d(row-1));
+  }
+  
+  br -= ar*mu(M-1);
+  dr -= ar*d(M-1);
+  cr -= br*mu(M);
+  dr -= br*d(M);
+  p(M+1) = dr/cr;
+  
+
+//   d(M+1) /= -ratio2;
+//   mu(M+1) /= -ratio2;
+  
+//   d(M+1)  -= d(M-1);
+//   mu(M+1) -= mu(M-1);
+//   d(M+1)  -= mu(M+1)*d(M);
+//   double diag = -1.0 - mu(M+1)*mu(M);
+//   p(M+1) = d(M+1)/diag;
+ 
+  // Now go back upward, back substituting
+  for (int row=M; row>=1; row--) 
+    p(row) = d(row) - mu(row)*p(row+1);
+
+  // And do 0th row
+  p(0) = dl -bl*p(1) - cl*p(2);
 }
 
 #endif

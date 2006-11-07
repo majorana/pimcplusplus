@@ -62,8 +62,15 @@ CubicBspline::Set(double start, double end, Array<double,1> &data,
     d(Range(1,N)) = data;
     d(0) = 0.0;
     d(N+1) = 0.0;
-    if (interpolating)
-      SolveFirstDerivInterp1D (d, P);
+    if (interpolating) {
+//       SolveFirstDerivInterp1D (d, P);
+      TinyVector<double,4> rBC, lBC;
+//       rBC = -3.0, 0.0, 3.0, GridDelta;
+//       lBC = -3.0, 0.0, 3.0, GridDelta;
+      rBC = 6.0, -12.0, 6.0, GridDelta*GridDelta;
+      lBC = 6.0, -12.0, 6.0, GridDelta*GridDelta;
+      SolveDerivInterp1D (d, P, rBC, lBC);
+    }
     else {
       cerr << "Don't know how to do noninterpolating nonperiodic.\n";
       abort();
