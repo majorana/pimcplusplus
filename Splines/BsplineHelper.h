@@ -12,39 +12,32 @@ class BoundaryCondition
 {
 private:
   BCType BC;
-  T StartDeriv, EndDeriv;
-  T StartDeriv2, EndDeriv2;
+  T Val;
 public:
   inline BCType GetType() { return BC; }
-  void GetDerivs (T & startDeriv, T &endDeriv) {
-    assert (BC == FIXED_FIRST);
-    startDeriv = StartDeriv;
-    endDeriv = EndDeriv; 
-  }
-  void GetDerivs2 (T & startDeriv2, T &endDeriv2) {
-    assert (BC == FIXED_SECOND);
-    startDeriv2 = StartDeriv2;
-    endDeriv2 = EndDeriv2; 
+  T GetVal () {
+    assert (BC == FIXED_FIRST || BC == FIXED_SECOND);
+    return Val;
   }
   BoundaryCondition (BCType bctype)
   {
     if (bctype == FLAT) {
       BC = FIXED_FIRST;
-      StartDeriv = EndDeriv = T();
+      Val = T();
     }
     else if (bctype == NATURAL) {
       BC = FIXED_SECOND;
-      StartDeriv2 = EndDeriv2 = T();
+      Val = T();
     }
     else if (bctype == PERIODIC) {
       BC = PERIODIC;
     }
     else if (bctype == FIXED_FIRST) {
-      cerr << "You must specify the start and end derivatives for FIXED_FIRST BC.\n";
+      cerr << "You must specify the derivative value for FIXED_FIRST BC.\n";
       abort();
     }
     else if (bctype == FIXED_SECOND) {
-      cerr << "You must specify the start and end derivatives for FIXED_FIRST BC.\n";
+      cerr << "You must specify the FIXED_SECOND BC.\n";
       abort();
     }
     else {
@@ -52,20 +45,14 @@ public:
       abort();
     }
   }
-  BoundaryCondition (BCType bctype, T start, T end)
+  BoundaryCondition (BCType bctype, T val)
   {
-    if (bctype == FIXED_FIRST) {
-      StartDeriv = start;
-      EndDeriv   = endl;
-    }
-    else if (bctype == FIXED_SECOND) {
-      StartDeriv2 = start;
-      EndDeriv2 = end;
-    }
-    else {
-      cerr << "Cannot fix derivatives with periodic boundary condition.\n";
+    if ((bctype != FIXED_FIRST) && (bctype != FIXED_SECOND)) {
+      cerr << "Cannot fix derivatives with periodic, flat, or natural boundary conditions.\n";
       abort();
     }
+    Val = val;
+    BC = bctype;
   }
 
 };
@@ -156,17 +143,7 @@ SolveDerivInterp1D (Array<T,1> &data, Array<T,1> &p,
   cr -= br*mu(M);
   dr -= br*d(M);
   p(M+1) = dr/cr;
-  
-
-//   d(M+1) /= -ratio2;
-//   mu(M+1) /= -ratio2;
-  
-//   d(M+1)  -= d(M-1);
-//   mu(M+1) -= mu(M-1);
-//   d(M+1)  -= mu(M+1)*d(M);
-//   double diag = -1.0 - mu(M+1)*mu(M);
-//   p(M+1) = d(M+1)/diag;
- 
+   
   // Now go back upward, back substituting
   for (int row=M; row>=1; row--) 
     p(row) = d(row) - mu(row)*p(row+1);

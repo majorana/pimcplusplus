@@ -38,11 +38,18 @@ public:
 	    Array<T,3> &data, bool interp=true, bool periodic=true);
   inline T GetControlPoint (int ix, int iy, int iz) const
   { return P(ix+1, iy+1, iz+1); }
+  inline T operator() (TinyVector<double,3> r);
   inline T operator()(double x, double y, double z);
+  inline TinyVector<T,3> Grad(TinyVector<double,3> r);
   inline TinyVector<T,3> Grad(double x, double y, double z);
   inline void Evaluate (double x, double y, double z,
 			T &val, TinyVector<T,3> &grad, T &laplacian);
+  inline void Evaluate (TinyVector<double,3> r,
+			T &val, TinyVector<T,3> &grad, T &laplacian);
   inline void Evaluate (double x, double y, double z,
+			T &val, TinyVector<T,3> &grad, 
+			TinyMatrix<T,3,3> &secDerivs);
+  inline void Evaluate (TinyVector<double,3> r,
 			T &val, TinyVector<T,3> &grad, 
 			TinyMatrix<T,3,3> &secDerivs);
   TricubicBspline();
@@ -81,6 +88,11 @@ TricubicBspline<T>::Find(double x, double y, double z) const
   px[3] = 1.0;       py[3] = 1.0;      pz[3] = 1.0;
 }
 
+template<typename T> inline T
+TricubicBspline<T>::operator()(TinyVector<double,3> r)
+{
+  return ((*this)(r[0], r[1], r[2]));
+}
 
 template<typename T> inline T
 TricubicBspline<T>::operator()(double x, double y, double z)
@@ -120,6 +132,14 @@ TricubicBspline<T>::operator()(double x, double y, double z)
 	   b[2]*(c[0]*P(ix3,iy2,iz0)+c[1]*P(ix3,iy2,iz1)+c[2]*P(ix3,iy2,iz2)+c[3]*P(ix3,iy2,iz3))+
 	   b[3]*(c[0]*P(ix3,iy3,iz0)+c[1]*P(ix3,iy3,iz1)+c[2]*P(ix3,iy3,iz2)+c[3]*P(ix3,iy3,iz3))));
 }
+
+
+template<typename T> inline TinyVector<T,3>
+TricubicBspline<T>::Grad(TinyVector<double,3> r) 
+{
+  return Grad (r[0], r[1], r[2]);
+}
+
 
 template<typename T> inline TinyVector<T,3>
 TricubicBspline<T>::Grad(double x, double y, double z)
@@ -244,6 +264,12 @@ TricubicBspline<T>::Grad(double x, double y, double z)
   return g;
 }
  
+template<typename T> inline void
+TricubicBspline<T>::Evaluate(TinyVector<double,3> r, T &val, 
+			     TinyVector<T,3> &grad, T &laplacian)
+{
+  Evaluate (r[0], r[1], r[2], val, grad, laplacian);
+}
 
 
 template<typename T> inline void
@@ -376,6 +402,14 @@ TricubicBspline<T>::Evaluate(double x, double y, double z,
 
 }
 
+
+template<typename T> inline void
+TricubicBspline<T>::Evaluate(TinyVector<double,3> r,
+			     T &val, TinyVector<T,3> &grad,
+			     TinyMatrix<T,3,3> &secDerivs)
+{
+  Evaluate (r[0], r[1], r[2], val, grad, secDerivs);
+}
 
 template<typename T> inline void
 TricubicBspline<T>::Evaluate(double x, double y, double z,
