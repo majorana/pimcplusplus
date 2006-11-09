@@ -27,10 +27,11 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
   for (int counter=0;counter<duk.size();counter++){
     duk(counter)=0.0;
   }
-
+  string fileName;
+  assert(in.ReadVar("LongRangeFile",fileName));
   ifstream infile;
   ///BUG: Currently hardcoded for actual file
-  infile.open("bc70r10.lr");
+  infile.open(fileName.c_str());
   cerr<<"Beginning now"<<endl;
   for (int lvl=0;lvl<2;lvl++)
     for (int isEnergy=0;isEnergy<3;isEnergy++)
@@ -85,13 +86,13 @@ DavidLongRangeClass::SingleAction (int slice1, int slice2,
 	while (abs(kmagnitude-Path.MagK(kcounter))>1e-10)
 	  kcounter++;
 	assert(kcounter<Path.MagK.size());
-	cerr<<rhok2<<" "<<Path.MagKint(kcounter)<<" "<<uk(Path.MagKint(kcounter))<<endl;
+	//	cerr<<rhok2<<" "<<Path.MagKint(kcounter)<<" "<<uk(Path.MagKint(kcounter))<<endl;
 	total +=  factor*rhok2 * uk(Path.MagKint(kcounter));
 	
       }
     }
   }
-  cerr<<"My total action is "<<total<<endl;
+  //  cerr<<"The action total is "<<total<<endl;
   return total;
 
 }
@@ -99,10 +100,12 @@ DavidLongRangeClass::SingleAction (int slice1, int slice2,
   ///Not really d_dbeta but total energy
 double DavidLongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 {
+  cerr<<"Calculating long range energy"<<endl;
   //  cerr<<"My level is "<<level<<endl;
-  double total=0;
+  double total=0.0;
   double factor=1.0;
   for (int slice=slice1;slice<=slice2;slice++){
+    double sliceTotal=0.0;
     //    if ((slice == slice1) || (slice==slice2))
     //      factor = 0.5;
     //    else
@@ -124,14 +127,17 @@ double DavidLongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 	//	cerr<<"My ki is "<<ki<<endl;
 	//	cerr<<"The spot I'm acessing is "<<Path.MagKint(ki)<<endl;
 	//	cerr<<"The value of this spot is "<<uk(Path.MagKint(ki))<<endl;
-	total +=  factor*rhok2 * duk(Path.MagKint(kcounter));
+	sliceTotal +=  factor*rhok2 * duk(Path.MagKint(kcounter));
 	
       }
     }
     //    cerr<<"Ending loop";
+    total += sliceTotal;
+    cerr<<"My slice total is "<<slice<<" "<<sliceTotal<<endl;
+    
   }
   //  cerr<<"I am being called"<<endl;
-  //  cerr<<"My total is "<<total;
+  //  cerr<<"The energy total is "<<total<<endl;
 
   return total;
 
