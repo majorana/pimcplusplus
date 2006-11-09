@@ -81,10 +81,10 @@ CubicBspline::Init(double start, double end, Array<double,1> &data,
     GridDelta = (end-start)/(double)(data.size()-1);
     GridDeltaInv = 1.0/GridDelta;
     P.resize(data.size()+2);
-    Array<double,1> d(P.size());
-    d(Range(1,N)) = data;
-    d(0) = 0.0;
-    d(N+1) = 0.0;
+//     Array<double,1> d(P.size());
+//     d(Range(1,N)) = data;
+//     d(0) = 0.0;
+//     d(N+1) = 0.0;
     if (interpolating) {
       TinyVector<double,4> rBC, lBC;
       if (startBC.GetType() == FIXED_FIRST) 
@@ -110,7 +110,7 @@ CubicBspline::Init(double start, double end, Array<double,1> &data,
 //       lBC = -3.0, 0.0, 3.0, GridDelta;
 //       rBC = 6.0, -12.0, 6.0, GridDelta*GridDelta;
 //       lBC = 6.0, -12.0, 6.0, GridDelta*GridDelta;
-      SolveDerivInterp1D (d, P, lBC, rBC);
+      SolveDerivInterp1D (data, P, lBC, rBC);
     }
     else {
       cerr << "Don't know how to do noninterpolating nonperiodic.\n";

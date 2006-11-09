@@ -314,6 +314,50 @@ TestAll2()
 }
 
 
+void
+TestFlat()
+{
+  int Nplx=10, Nply=11, Nplz=12;
+  ExactFunc ex(Nplx, Nply, Nplz);
+
+  int Nspx=60, Nspy=61, Nspz=62;  
+  Array<double,3> data(Nspx,Nspy,Nspz);
+  for (int ix=0; ix<Nspx; ix++) {
+    double x = 2.0*M_PI*ix/(double)Nspx;
+    for (int iy=0; iy<Nspy; iy++) {
+      double y = 2.0*M_PI*iy/(double)Nspy;
+      for (int iz=0; iz<Nspz; iz++) {
+	double z = 2.0*M_PI*iz/(double)Nspz;
+	data (ix, iy, iz) = ex(x,y,z);
+      }
+    }
+  }
+  double xi=0.0; double xf=2.0*M_PI;
+  double yi=0.0; double yf=2.0*M_PI;
+  double zi=0.0; double zf=2.0*M_PI;
+  TricubicBspline<double> spline, noInterp;
+  spline.Init(xi, xf, yi, yf, zi, zf, data, true, 
+	      NATURAL, NATURAL, NATURAL);
+  
+  FILE *fout = fopen ("flat.dat", "w");
+  for (double t=0.0; t<=1.000001; t+=0.001) {
+    double x = t*xf;
+    double y = 0.2+0.1*t*yf;
+    double z = 0.8+0.5*t*zf;
+    TinyVector<double,3> r(x,y,z);
+    TinyVector<double,3> grad;
+    double val, lapl;
+
+    spline.Evaluate(r, val, grad, lapl);
+    fprintf (fout, "%20.16e %20.16e %20.16e %20.26e %20.26e %20.16e\n", t, val,
+	     grad[0], grad[1], grad[2], lapl);
+
+  }
+
+  fclose(fout);
+
+}
+
 
 void
 TestEvaluate()
@@ -377,5 +421,6 @@ TestEvaluate()
 
 main()
 {
-  TestAll2();
+  // TestAll2();
+  TestFlat();
 }

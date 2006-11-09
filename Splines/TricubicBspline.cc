@@ -111,7 +111,7 @@ TricubicBspline<T>::SolveInterp (Array<T,3> &data,
       BC = -3.0, 0.0, 3.0, 0.0;
     else if (xbc == NATURAL)
       BC = 6.0, -12.0, 6.0, 0.0;
-    for (int iy=0; iy<Nz; iy++)
+    for (int iy=0; iy<Ny; iy++)
       for (int iz=0; iz<Nz; iz++)
 	SolveDerivInterp1D(data(Range::all(), iy, iz),  P(Range::all(), iy+1, iz+1), BC, BC);
   }
@@ -130,7 +130,7 @@ TricubicBspline<T>::SolveInterp (Array<T,3> &data,
       BC = 6.0, -12.0, 6.0, 0.0;
     for (int ix=0; ix<Mx; ix++)
       for (int iz=0; iz<Mz; iz++)
-	SolveDerivInterp1D(P(ix, Range::all(), iz),  P(ix, Range::all(), iz), BC, BC);
+	SolveDerivInterp1D(P(ix,Range(1,Ny), iz),  P(ix, Range::all(), iz), BC, BC);
   }
   ////////////////////
   // Do Z direction //
@@ -147,7 +147,7 @@ TricubicBspline<T>::SolveInterp (Array<T,3> &data,
       BC = 6.0, -12.0, 6.0, 0.0;
     for (int ix=0; ix<Mx; ix++)
       for (int iy=0; iy<My; iy++)
-	SolveDerivInterp1D(P(ix, iy, Range::all()),  P(ix, iy, Range::all()), BC, BC);
+	SolveDerivInterp1D(P(ix, iy, Range(1,Nz)),  P(ix, iy, Range::all()), BC, BC);
   }
 }
 

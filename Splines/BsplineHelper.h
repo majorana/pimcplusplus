@@ -205,6 +205,7 @@ SolveDerivInterp1D (Array<T,1> data, Array<T,1> p,
 		    TinyVector<double,4> abcdInitial,
 		    TinyVector<double,4> abcdFinal)
 {
+  assert (p.size() == (data.size()+2));
   double al = 0.25*abcdInitial[0];
   double bl = 0.25*abcdInitial[1];
   double cl = 0.25*abcdInitial[2];
@@ -215,10 +216,10 @@ SolveDerivInterp1D (Array<T,1> data, Array<T,1> p,
   double dr = 1.5 *abcdFinal[3];
     
   double ratio = 0.25;
-  int M = data.size()-2;
+  int M = data.size();
 
   Array<double,1> d(M+2), mu(M+2);
-  d = 1.5*data;
+  d(Range(1,M)) = 1.5*data;
   mu = ratio;
   // First, eliminate leading coefficients
   double alInv = 1.0/al;

@@ -12,13 +12,15 @@ void TestValue()
   e(10) = e(0);
 
   CubicBspline bspline;
-  bspline.Init (0.0, 2.0*M_PI, d, true);
+  bspline.Init (0.0, 2.0*M_PI, d, true, 
+		BoundaryCondition<double>(FLAT), 
+		BoundaryCondition<double>(FLAT));
 
   FastCubicSpline spline;
   spline.Init (0.0, 2.0*M_PI, e, true);
 
   for (double x=0.0; x<2.0*M_PI; x+=0.0001) 
-    fprintf (stdout, "%20.16e %20.16e %20.16e\n", x, bspline.Deriv2(x), spline(x));
+    fprintf (stdout, "%20.16e %20.16e %20.16e\n", x, bspline.Deriv(x), spline(x));
 }
 
 main() 
