@@ -1,40 +1,5 @@
 #include "TricubicBspline.h"
 
-template<typename T> inline void
-SolvePeriodicInterp1D (Array<T,1> data, Array<T,1> p)
-{
-  double ratio = 0.25;
-  int N = data.size();
-
-  Array<double,1> d(N), gamma(N), mu(N);
-  d = 1.5*data;
-  // First, eliminate leading coefficients
-  gamma (0) = ratio;
-  mu(0) = ratio;
-  mu(N-1) = ratio;
-  gamma(N-1) = 1.0;
-  for (int row=1; row <(N-1); row++) {
-    double diag = 1.0- mu(row-1)*ratio;
-    double diagInv = 1.0/diag;
-    gamma(row) = -ratio*gamma(row-1)*diagInv;
-    mu(row) = diagInv*ratio;
-    d(row)  = diagInv*(d(row)-ratio*d(row-1));
-    // Last row
-    d(N-1) -= mu(N-1) * d(row-1);
-    gamma(N-1) -= mu(N-1)*gamma(row-1);
-    mu(N-1) = -mu(N-1)*mu(row-1);
-  }
-  // Last row:  gamma(N-1) hold diagonal element
-  mu(N-1) += ratio;
-  gamma(N-1) -= mu(N-1)*(mu(N-2)+gamma(N-2));
-  d(N-1) -= mu(N-1) * d(N-2);
-  p(N-1) = d(N-1)/gamma(N-1);
- 
-  // Now go back upward, back substituting
-  for (int row=N-2; row>=0; row--) 
-    p(row) = d(row) - mu(row)*p(row+1) - gamma(row)*p(N-1);
-}
-
 
 // Solve for fixed first derivative.  
 // data(0)  = dy_0/dx dx.  
@@ -75,24 +40,6 @@ SolveFirstDerivInterp1D (Array<T,1> data, Array<T,1> p)
   p(0) = d(0) + p(2)*d(2);
 }
 
-inline void
-SolvePeriodicInterp1D (Array<complex<double>,1> data, 
-		     Array<complex<double>,1> p)
-{
-  int N = data.size();
-  Array<double,1> dataReal(N), dataImag(N), pReal(N), pImag(N);
-  for (int i=0; i<N; i++) {
-    dataReal(i) = data(i).real();
-    dataImag(i) = data(i).imag();
-    pReal(i)    = p(i).real();
-    pImag(i)    = p(i).real();
-  }
-  SolvePeriodicInterp1D(dataReal, pReal);
-  SolvePeriodicInterp1D(dataImag, pImag);
-
-  for (int i=0; i<N; i++) 
-    p(i) = complex<double>(pReal(i), pImag(i));
-}
 
 
 template<typename T> void
@@ -135,6 +82,75 @@ TricubicBspline<T>::SolvePeriodicInterp (Array<T,3> &data)
 //       SolvePeriodicInterp1D(P(ix+1,iy+1,Range(1,Nz)), P(ix+1, iy+1, Range(1,Nz)));
 // }
 
+template<typename T> void
+TricubicBspline<T>::SolveInterp (Array<T,3> &data,
+				 BCType xbc, BCType ybc, BCType zbc)
+{
+  int Mx, My, Mz;
+  Mx = (xbc == PERIODIC) ? Nx+3 : Nx+2;
+  My = (ybc == PERIODIC) ? Ny+3 : Ny+2;
+  Mz = (zbc == PERIODIC) ? Nz+3 : Nz+2;
+  
+  dx = Lx/(double)(Mx-3); dxInv = 1.0/dx;
+  dy = Ly/(double)(My-3); dyInv = 1.0/dy;
+  dz = Lz/(double)(Mz-3); dzInv = 1.0/dz;
+
+  P.resize(Mx, My, Mz);
+
+  TinyVector<double,4> BC;
+  ////////////////////
+  // Do X direction //
+  ////////////////////
+  if (xbc == PERIODIC) {
+    for (int iy=0; iy<Ny; iy++)
+      for (int iz=0; iz<Nz; iz++) 
+	SolvePeriodicInterp1D(data(Range::all(), iy, iz), P(Range::all(),iy+1, iz+1));
+  }
+  else {
+    if (xbc == FLAT) 
+      BC = -3.0, 0.0, 3.0, 0.0;
+    else if (xbc == NATURAL)
+      BC = 6.0, -12.0, 6.0, 0.0;
+    for (int iy=0; iy<Nz; iy++)
+      for (int iz=0; iz<Nz; iz++)
+	SolveDerivInterp1D(data(Range::all(), iy, iz),  P(Range::all(), iy+1, iz+1), BC, BC);
+  }
+  ////////////////////
+  // Do Y direction //
+  ////////////////////
+  if (ybc == PERIODIC) {
+    for (int ix=0; ix<Mx; ix++)
+      for (int iz=0; iz<Mz; iz++) 
+	SolvePeriodicInterp1D(P(ix, Range(1,Ny), iz), P(ix, Range::all(), iz));
+  }
+  else {
+    if (ybc == FLAT) 
+      BC = -3.0, 0.0, 3.0, 0.0;
+    else if (ybc == NATURAL)
+      BC = 6.0, -12.0, 6.0, 0.0;
+    for (int ix=0; ix<Mx; ix++)
+      for (int iz=0; iz<Mz; iz++)
+	SolveDerivInterp1D(P(ix, Range::all(), iz),  P(ix, Range::all(), iz), BC, BC);
+  }
+  ////////////////////
+  // Do Z direction //
+  ////////////////////
+  if (zbc == PERIODIC) {
+    for (int ix=0; ix<Mx; ix++)
+      for (int iy=0; iy<My; iy++) 
+	SolvePeriodicInterp1D(P(ix, iy, Range(1,Nz)), P(ix, iy, Range::all()));
+  }
+  else {
+    if (zbc == FLAT) 
+      BC = -3.0, 0.0, 3.0, 0.0;
+    else if (zbc == NATURAL)
+      BC = 6.0, -12.0, 6.0, 0.0;
+    for (int ix=0; ix<Mx; ix++)
+      for (int iy=0; iy<My; iy++)
+	SolveDerivInterp1D(P(ix, iy, Range::all()),  P(ix, iy, Range::all()), BC, BC);
+  }
+}
+
 
 template<typename T> void
 TricubicBspline<T>::MakePeriodic()
@@ -149,34 +165,54 @@ TricubicBspline<T>::MakePeriodic()
 
 template<typename T> void
 TricubicBspline<T>::Init (double xi, double xf, double yi, double yf, double zi, double zf,
-			  Array<T,3> &data, bool interp, bool periodic)
+			  Array<T,3> &data, bool interp, 
+			  BCType xbc, BCType ybc, BCType zbc)
 {
+  if ((xbc==FIXED_FIRST) || (xbc==FIXED_SECOND) ||
+      (ybc==FIXED_FIRST) || (ybc==FIXED_SECOND) ||
+      (zbc==FIXED_FIRST) || (zbc==FIXED_SECOND)) {
+    cerr << "Cannot fix nonzero first or second derivative wint TricubicBSpline without specifying.\n";
+    abort();
+  }
   Nx = data.extent(0);
   Ny = data.extent(1);
   Nz = data.extent(2);
   xStart=xi;  xEnd=xf;  yStart=yi;  yEnd=yf;  zStart=zi; zEnd=zf;
   Lx    = xf-xi;  Ly    = yf-yi;  Lz    = zf-zi;
   LxInv = 1.0/Lx; LyInv = 1.0/Ly; LzInv = 1.0/Lz;
-  dx = Lx/(double)Nx; dxInv = 1.0/dx;
-  dy = Ly/(double)Ny; dyInv = 1.0/dy;
-  dz = Lz/(double)Nz; dzInv = 1.0/dz;
+//   dx = Lx/(double)Nx; dxInv = 1.0/dx;
+//   dy = Ly/(double)Ny; dyInv = 1.0/dy;
+//   dz = Lz/(double)Nz; dzInv = 1.0/dz;
+//   P.resize(Nx+3, Ny+3, Nz+3);
 
-  Periodic = periodic;
   Interpolating = interp;
 
-  P.resize(Nx+3, Ny+3, Nz+3);
-
-  if (Periodic) {
-    if (interp)
-      SolvePeriodicInterp(data);
-    else
-      P(Range(1,Nx),Range(1,Ny),Range(1,Nz)) = data;
+  if (interp) 
+    SolveInterp (data, xbc, ybc, zbc);
+  else if ((xbc==PERIODIC) && (ybc==PERIODIC) && (zbc==PERIODIC)) {
+    P.resize(Nx+3, Ny+3, Nz+3);
+    dx = Lx/(double)Nx; dxInv = 1.0/dx;
+    dy = Ly/(double)Ny; dyInv = 1.0/dy;
+    dz = Lz/(double)Nz; dzInv = 1.0/dz;
+    P(Range(1,Nx),Range(1,Ny),Range(1,Nz)) = data;
     MakePeriodic();
   }
   else {
-    cerr << "Nonperiodic Tricubic B-splines not yet supported.\n";
+    cerr << "I don't know how to construct a nonperiodic, noninterpolating Tricubic B-spline.\n";
     abort();
   }
+
+//   if (xbc==PERIODIC) {
+//     if (interp)
+//       SolvePeriodicInterp(data);
+//     else
+//       P(Range(1,Nx),Range(1,Ny),Range(1,Nz)) = data;
+//     MakePeriodic();
+//   }
+//   else {
+//     cerr << "Nonperiodic Tricubic B-splines not yet supported.\n";
+//     abort();
+//   }
 }
 
 template<typename T>

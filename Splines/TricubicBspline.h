@@ -3,6 +3,7 @@
 
 #include <blitz/array.h>
 #include <blitz/tinymat.h>
+#include "BsplineHelper.h"
 
 using namespace blitz;
 
@@ -25,6 +26,8 @@ private:
   bool Interpolating, Periodic;
 
   void SolvePeriodicInterp (Array<T,3> &data);
+  void SolveInterp (Array<T,3> &data,
+		    BCType xbc, BCType ybc, BCType zbc);
   void MakePeriodic();
 
   mutable int ix, iy, iz;
@@ -35,7 +38,8 @@ private:
 
 public:
   void Init (double xi, double xf, double yi, double yf, double zi, double zf,
-	    Array<T,3> &data, bool interp=true, bool periodic=true);
+	     Array<T,3> &data, bool interp=true, 
+	     BCType xbc=PERIODIC, BCType ybc=PERIODIC, BCType zbc=PERIODIC);
   inline T GetControlPoint (int ix, int iy, int iz) const
   { return P(ix+1, iy+1, iz+1); }
   inline T operator() (TinyVector<double,3> r);

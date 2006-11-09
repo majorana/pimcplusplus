@@ -19,7 +19,8 @@ TestValue()
   double yi=0.0; double yf=2.0*M_PI;
   double zi=0.0; double zf=2.0*M_PI;
   TricubicBspline<double> bspline;
-  bspline.Init(xi, xf, yi, yf, zi, zf, data, true, true);
+  bspline.Init(xi, xf, yi, yf, zi, zf, data, true, 
+	       PERIODIC, PERIODIC, PERIODIC);
 
   for (double t=0.0; t<=1.0; t+=0.001) {
     double y = 2.0*M_PI*t;
@@ -51,7 +52,8 @@ TestComplexValue()
   double yi=0.0; double yf=2.0*M_PI;
   double zi=0.0; double zf=2.0*M_PI;
   TricubicBspline<complex<double> > bspline;
-  bspline.Init(xi, xf, yi, yf, zi, zf, data, true, true);
+  bspline.Init(xi, xf, yi, yf, zi, zf, data, true, 
+	       PERIODIC, PERIODIC, PERIODIC);
 
   for (double t=0.0; t<=1.0; t+=0.001) {
     double y = 2.0*M_PI*t;
@@ -84,7 +86,8 @@ TestGrad()
   double yi=0.0; double yf=2.0*M_PI;
   double zi=0.0; double zf=2.0*M_PI;
   TricubicBspline<double> bspline;
-  bspline.Init(xi, xf, yi, yf, zi, zf, data, true, true);
+  bspline.Init(xi, xf, yi, yf, zi, zf, data, true,
+	       PERIODIC, PERIODIC, PERIODIC);
 
   for (double t=0.0; t<=1.0; t+=0.001) {
     double y = 2.0*M_PI*t;
@@ -215,8 +218,10 @@ TestAll()
   double yi=0.0; double yf=2.0*M_PI;
   double zi=0.0; double zf=2.0*M_PI;
   TricubicBspline<double> interp, noInterp;
-  interp.Init(xi, xf, yi, yf, zi, zf, data, true, true);
-  noInterp.Init(xi, xf, yi, yf, zi, zf, data, false, true);
+  interp.Init(xi, xf, yi, yf, zi, zf, data, true, 
+	      PERIODIC, PERIODIC, PERIODIC);
+  noInterp.Init(xi, xf, yi, yf, zi, zf, data, false, 
+		PERIODIC, PERIODIC, PERIODIC);
   
   FILE *exOut = fopen ("exact.dat", "w");
   FILE *inOut = fopen ("interp.dat", "w");
@@ -266,8 +271,10 @@ TestAll2()
   double yi=0.0; double yf=2.0*M_PI;
   double zi=0.0; double zf=2.0*M_PI;
   TricubicBspline<double> interp, noInterp;
-  interp.Init(xi, xf, yi, yf, zi, zf, data, true, true);
-  noInterp.Init(xi, xf, yi, yf, zi, zf, data, false, true);
+  interp.Init(xi, xf, yi, yf, zi, zf, data, true, 
+	      PERIODIC, PERIODIC, PERIODIC);
+  noInterp.Init(xi, xf, yi, yf, zi, zf, data, false, 
+		PERIODIC, PERIODIC, PERIODIC);
   
   FILE *exOut = fopen ("exact.dat", "w");
   FILE *inOut = fopen ("interp.dat", "w");
@@ -329,8 +336,10 @@ TestEvaluate()
   double zi=0.0; double zf=2.0*M_PI;
   TricubicBspline<double> interpSpline;
   TricubicBspline<double> nointerp;
-  interpSpline.Init(xi, xf, yi, yf, zi, zf, data, true, true);
-  nointerp.Init(xi, xf, yi, yf, zi, zf, data, false, true);
+  interpSpline.Init(xi, xf, yi, yf, zi, zf, data, true, 
+		    PERIODIC, PERIODIC, PERIODIC);
+  nointerp.Init(xi, xf, yi, yf, zi, zf, data, false, 
+		PERIODIC, PERIODIC, PERIODIC);
   
   FILE *exOut = fopen ("exact.dat", "w");
   FILE *inOut = fopen ("interp.dat", "w");

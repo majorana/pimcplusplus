@@ -16,7 +16,7 @@ TestTricubicBspline_SOURCES = TestTricubicBspline.cc
 TestBlips_SOURCES = TestBlips.cc
 
 LDADD = ../IO/libIO.la ../PlaneWavePHDFT/libpw.la ../FFT/libfft.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(XML2_LIBS) $(BLITZ_LIBS) $(FFTW3_LIBS) $(LAPACK_LIBS)
-AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(FFTW3_CFLAGS)
+AM_CXXFLAGS = -g $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(FFTW3_CFLAGS)
 
 noinst_LTLIBRARIES = libspline.la
 libspline_la_SOURCES = BicubicSpline.h                \

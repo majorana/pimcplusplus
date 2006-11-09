@@ -45,38 +45,21 @@ CubicBspline::SolvePeriodicInterp(Array<double,1> &data)
 
 
 void
-CubicBspline::Set(double start, double end, Array<double,1> &data,
-		  bool interpolating, bool periodic)
+CubicBspline::Init(double start, double end, Array<double,1> &data,
+		   bool interpolating, 
+		   BoundaryCondition<double> startBC,
+		   BoundaryCondition<double> endBC)
 {
-  Periodic = periodic;
   Interpolating = interpolating;
   GridStart = start;
   GridEnd   = end;
   int N = data.size();
   
-  if (!periodic) {
-    GridDelta = (end-start)/(double)(data.size()-1);
-    GridDeltaInv = 1.0/GridDelta;
-    P.resize(data.size()+2);
-    Array<double,1> d(P.size());
-    d(Range(1,N)) = data;
-    d(0) = 0.0;
-    d(N+1) = 0.0;
-    if (interpolating) {
-//       SolveFirstDerivInterp1D (d, P);
-      TinyVector<double,4> rBC, lBC;
-//       rBC = -3.0, 0.0, 3.0, GridDelta;
-//       lBC = -3.0, 0.0, 3.0, GridDelta;
-      rBC = 6.0, -12.0, 6.0, GridDelta*GridDelta;
-      lBC = 6.0, -12.0, 6.0, GridDelta*GridDelta;
-      SolveDerivInterp1D (d, P, rBC, lBC);
-    }
-    else {
-      cerr << "Don't know how to do noninterpolating nonperiodic.\n";
+  if (startBC.GetType() == PERIODIC) {
+    if (endBC.GetType() != PERIODIC) {
+      cerr << "If startBC is periodic, endBC must also be.\n";
       abort();
     }
-  }
-  else {
     GridDelta = (end-start)/(double)(data.size());
     GridDeltaInv = 1.0/GridDelta;
     P.resize(data.size()+3);
@@ -89,6 +72,50 @@ CubicBspline::Set(double start, double end, Array<double,1> &data,
     P(0)   = P(N);
     P(N+1) = P(1);
     P(N+2) = P(2);
+  }
+  else {
+    if (endBC.GetType() == PERIODIC) {
+     cerr << "If endBC is periodic, startBC must also be.\n";
+      abort();
+    }
+    GridDelta = (end-start)/(double)(data.size()-1);
+    GridDeltaInv = 1.0/GridDelta;
+    P.resize(data.size()+2);
+    Array<double,1> d(P.size());
+    d(Range(1,N)) = data;
+    d(0) = 0.0;
+    d(N+1) = 0.0;
+    if (interpolating) {
+      TinyVector<double,4> rBC, lBC;
+      if (startBC.GetType() == FIXED_FIRST) 
+	lBC = -3.0, 0.0, 3.0, startBC.GetVal()*GridDelta;
+      else if (startBC.GetType() == FIXED_SECOND) 
+	lBC = 6.0, -12.0, 6.0, startBC.GetVal()*GridDelta*GridDelta;
+      else if (startBC.GetType() == FLAT) 
+	lBC = -3.0, 0.0, 3.0, 0.0;
+      else if (startBC.GetType() == NATURAL)
+	lBC = 6.0, -12.0, 6.0, 0.0;
+
+      if (endBC.GetType() == FIXED_FIRST) 
+	rBC = -3.0, 0.0, 3.0, endBC.GetVal()*GridDelta;
+      else if (endBC.GetType() == FIXED_SECOND) 
+	rBC = 6.0, -12.0, 6.0, endBC.GetVal()*GridDelta*GridDelta;
+      else if (endBC.GetType() == FLAT) 
+	rBC = -3.0, 0.0, 3.0, 0.0;
+      else if (endBC.GetType() == NATURAL)
+	rBC = 6.0, -12.0, 6.0, 0.0;
+      
+
+//       rBC = -3.0, 0.0, 3.0, GridDelta;
+//       lBC = -3.0, 0.0, 3.0, GridDelta;
+//       rBC = 6.0, -12.0, 6.0, GridDelta*GridDelta;
+//       lBC = 6.0, -12.0, 6.0, GridDelta*GridDelta;
+      SolveDerivInterp1D (d, P, lBC, rBC);
+    }
+    else {
+      cerr << "Don't know how to do noninterpolating nonperiodic.\n";
+      abort();
+    }
   }
 }
 

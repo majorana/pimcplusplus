@@ -3,6 +3,7 @@
 
 #include <blitz/array.h>
 #include <blitz/tinymat.h>
+#include "BsplineHelper.h"
 
 using namespace blitz;
 
@@ -27,8 +28,10 @@ private:
 
 public:
   inline double GetControlPoint (int i);
-  void Set(double start, double end, Array<double,1> &data, 
-	   bool interpolating=true, bool periodic=true);
+  void Init(double start, double end, Array<double,1> &data, 
+	    bool interpolating=true, 
+	    BoundaryCondition<double> startBC=BoundaryCondition<double>(PERIODIC),
+	    BoundaryCondition<double>   endBC=BoundaryCondition<double>(PERIODIC));
   inline double operator()(double x) const;
   inline double Deriv     (double x) const;
   inline double Deriv2    (double x) const;

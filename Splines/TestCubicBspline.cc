@@ -12,7 +12,7 @@ void TestValue()
   e(10) = e(0);
 
   CubicBspline bspline;
-  bspline.Set (0.0, 2.0*M_PI, d, true, false);
+  bspline.Init (0.0, 2.0*M_PI, d, true);
 
   FastCubicSpline spline;
   spline.Init (0.0, 2.0*M_PI, e, true);
