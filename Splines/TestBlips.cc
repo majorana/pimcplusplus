@@ -55,7 +55,7 @@ MakeInterpCoefs (FFTBox &fft, const zVec &c,
   TricubicBspline<complex<double> > spline;
   Vec3 box = fft.GVecs.GetBox();
   spline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2],
-	       data, true, true);
+	       data, true, PERIODIC, PERIODIC, PERIODIC);
   coefs.resize(nx,ny,nz);
   for (int ix=0; ix<nx; ix++)
     for (int iy=0; iy<ny; iy++)
@@ -306,16 +306,94 @@ public:
 
 
 void
-TestLocal()
+MakeBlipCoefs (Array<double,3> &data,
+	       Array<double,3> &coefs)
+{
+  int nx = data.extent(0);
+  int ny = data.extent(1);
+  int nz = data.extent(2);
+  int nx2 = (nx-1)/2;
+  int ny2 = (ny-1)/2;
+  int nz2 = (nz-1)/2;
+  FFT3D fft;
+  fft.resize(nx, ny, nz);
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	fft.rBox(ix,iy,iz) = data(ix,iy,iz);
+  fft.r2k();
+
+  double fracx = 2.0*M_PI/(double)nx;
+  double fracy = 2.0*M_PI/(double)ny;
+  double fracz = 2.0*M_PI/(double)nz;
+  // Now we have the fourier transform -- multiply coefs apprpriately
+  double gammax, gammay, gammaz;
+  for (int ix=0; ix<nx; ix++) {
+    double fx = fracx*(double)((ix+nx2)%nx - nx2);
+    if (fabs(fx) > 1.0e-12)
+      gammax = (3.0/(fx*fx*fx*fx)*(3.0 - 4.0*cos(fx) + cos(2.0*fx)))/1.5;
+    else
+      gammax = 1.0;
+    for (int iy=0; iy<ny; iy++) {
+      double fy = fracy*(double)((iy+ny2)%ny - ny2);
+      if (fabs(fy) > 1.0e-12)
+	gammay = (3.0/(fy*fy*fy*fy)*(3.0 - 4.0*cos(fy) + cos(2.0*fy)))/1.5;
+      else
+	gammay = 1.0;
+      for (int iz=0; iz<nz; iz++) {
+	double fz = fracz*(double)((iz+nz2)%nz - nz2);
+	if (fabs(fz) > 1.0e-12)
+	  gammaz = (3.0/(fz*fz*fz*fz)*(3.0 - 4.0*cos(fz) + cos(2.0*fz)))/1.5;
+	else
+	  gammaz = 1.0;
+
+	fft.kBox(ix,iy,iz) *= (1.0/(gammax*gammay*gammaz));
+      }
+    }
+  }
+  fft.k2r();
+  for (int ix=0; ix<nx; ix++)  
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	coefs(ix,iy,iz) = fft.kBox(ix,iy,iz).real();
+}
+
+void
+TestLocal(int nx, int ny, int nz)
 {
   Vec3 box(10.0, 11.0, 12.0);
   LocalFunc local (box, 500);
 
   Vec3 r;
-  r[1] = 2.8;
-  r[2] = 5.7;
+
+  Array<double,3> spdata(nx,ny,nz);
+  for (int ix=0; ix<nx; ix++) {
+    r[0] = box[0]*(double)ix/(double)(nx-1);
+    for (int iy=0; iy<ny; iy++) {
+      r[1] = box[1]*(double)iy/(double)(ny-1);
+      for (int iz=0; iz<nz; iz++) {
+	r[2] = box[2]*(double)iz/(double)(nz-1);
+	spdata(ix,iy,iz) = local(r);
+      }
+    }
+  }
+  Array<double,3> blipdata(nx-1, ny-1, nz-1), 
+    blipcoefs (nx-1, ny-1, nz-1);
+  blipdata = spdata(Range(0,nx-2),Range(0,ny-2), Range(0,nz-2));
+  MakeBlipCoefs(blipdata, blipcoefs);
+
+  TricubicBspline<double> interpSpline, blipSpline;
+  //  spline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2], 
+  //	       spdata, true, PERIODIC, PERIODIC, PERIODIC);
+  interpSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2], 
+	       spdata, true, FLAT, FLAT, FLAT);
+  blipSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2], 
+		   blipcoefs, false, PERIODIC, PERIODIC, PERIODIC);
+
+  r[1] = 2.8;  r[2] = 5.7;
   for (r[0]=0.0; r[0]<=box[0]; r[0]+=0.001)
-    fprintf (stdout, "%1.10e %1.10e\n", r[0], local(r));
+    fprintf (stdout, "%20.16e %20.16e %20.16e %20.16e\n", 
+	     r[0], local(r), interpSpline(r), blipSpline(r));
 
 }
 
@@ -330,14 +408,16 @@ TestOnePeriodic(PeriodicFunc &pfunc)
   MakeBlipCoefs (pfunc.FFT, pfunc.c, blipCoefs);
   TricubicBspline<complex<double> > blipSpline;
   blipSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2],
-		   blipCoefs, false, true);
+		   blipCoefs, false, 
+		   PERIODIC, PERIODIC, PERIODIC);
 
   // Make interpolating B-spline
   Array<complex<double>,3> interpCoefs;
   MakeInterpCoefs (pfunc.FFT, pfunc.c, interpCoefs);
   TricubicBspline<complex<double> > interpSpline;
   interpSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2],
-		     interpCoefs, false, true);
+		     interpCoefs, false, 
+		     PERIODIC, PERIODIC, PERIODIC);
   
   // Compare errors
   double bValError =0.0, sValError =0.0;
@@ -439,9 +519,9 @@ TestBlips()
 //       }
   TricubicBspline<complex<double> > blipSpline, interpSpline;
   blipSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2],
-		   blipCoefs, false, true);
+		   blipCoefs, false, PERIODIC, PERIODIC, PERIODIC);
   interpSpline.Init (0.0, box[1], 0.0, box[1], 0.0, box[2],
-		     interpCoefs, false, true);
+		     interpCoefs, false, PERIODIC, PERIODIC, PERIODIC);
 //   for (int ix=0; ix<blipCoefs.extent(0); ix++)
 //     for (int iy=0; iy<blipCoefs.extent(1); iy++)
 //       for (int iz=0; iz<blipCoefs.extent(2); iz++)
@@ -468,6 +548,6 @@ TestBlips()
 
 main()
 {
-  //TestPeriodic();
-  TestLocal();
+  // TestPeriodic();
+  TestLocal(61, 65, 79);
 }
