@@ -120,10 +120,13 @@ namespace IO {
     // file. 
     if (ComplexType < 0) {
       ComplexType = H5Tcreate(H5T_COMPOUND, sizeof(complex<double>));
-      H5Tinsert (ComplexType, "real", HOFFSET(complex<double>,real()),
-		 H5T_NATIVE_DOUBLE);
-      H5Tinsert (ComplexType, "imaginary", HOFFSET(complex<double>,imag()),
-		 H5T_NATIVE_DOUBLE);
+      assert (sizeof(complex<double>) == (2*sizeof(double)));
+//       H5Tinsert (ComplexType, "real", HOFFSET(complex<double>,(real())),
+// 		 H5T_NATIVE_DOUBLE);
+//       H5Tinsert (ComplexType, "imaginary", HOFFSET(complex<double>,(imag())),
+// 		 H5T_NATIVE_DOUBLE);
+      H5Tinsert (ComplexType, "real",                   0, H5T_NATIVE_DOUBLE);
+      H5Tinsert (ComplexType, "imaginary", sizeof(double), H5T_NATIVE_DOUBLE);
       
       H5Tcommit (GroupID, "COMPLEX", ComplexType);
     }
@@ -161,10 +164,12 @@ namespace IO {
 
     // Create complex compound type
     ComplexType = H5Tcreate(H5T_COMPOUND, sizeof(complex<double>));
-    H5Tinsert (ComplexType, "real", HOFFSET(complex<double>,real()),
-	       H5T_NATIVE_DOUBLE);
-    H5Tinsert (ComplexType, "imaginary", HOFFSET(complex<double>,imag()),
-	       H5T_NATIVE_DOUBLE);
+//     H5Tinsert (ComplexType, "real", HOFFSET(complex<double>,real()),
+// 	       H5T_NATIVE_DOUBLE);
+//     H5Tinsert (ComplexType, "imaginary", HOFFSET(complex<double>,imag()),
+// 	       H5T_NATIVE_DOUBLE);
+    H5Tinsert (ComplexType, "real",                   0, H5T_NATIVE_DOUBLE);
+    H5Tinsert (ComplexType, "imaginary", sizeof(double), H5T_NATIVE_DOUBLE);
     H5Tcommit (FileID, "COMPLEX", ComplexType);
 
     IsOpen = (FileID >= 0);
