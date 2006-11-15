@@ -163,19 +163,18 @@ void AutoCorrClass::Advance(int& index,int limit){
 
 // new one
 dVec AutoCorrClass::MeasureDipole(int slice,int molecule){
-	Array<int,1> dipoleIndex(2);
-	int foundIndex = 0;
+	vector<int> dipoleIndex(0);
   for (int a = 0; a < PathData.Path.MolMembers(molecule).size(); a++){
     int ptcl = PathData.Path.MolMembers(molecule)(a);
 		if(PathData.Path.ParticleSpeciesNum(ptcl) == PathData.Path.SpeciesNum(dipoleSpecies)){
-			dipoleIndex(foundIndex) = ptcl;
-			foundIndex++;
+			dipoleIndex.push_back(ptcl);
 		}
 	}
+	assert(dipoleIndex.size() == 2);
 	//cerr << "autocorr loaded molecule " << molecule << " and protons " << dipoleIndex << endl;
   dVec O = PathData.Path(slice,molecule);
-  dVec P1 = PathData.Path(slice,dipoleIndex(0));
-  dVec P2 = PathData.Path(slice,dipoleIndex(1));
+  dVec P1 = PathData.Path(slice,dipoleIndex[0]);
+  dVec P2 = PathData.Path(slice,dipoleIndex[1]);
   P1 -= O;
   P2 -= O;
   //P1 = Normalize(P1);
@@ -321,6 +320,7 @@ void AutoCorrClass::Accumulate()
   // measure and catalog dipole moments at now, then calculate autocorrelation 
   TotalCounts++;
   // loop over slices
+	//cerr << "In Autocorr " << TimesCalled << " " << TotalCounts << endl;
   for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
     /// loop over molecules 
 		dVec netMu(0.0, 0.0, 0.0);

@@ -34,6 +34,7 @@
 #include "FixedPhaseActionClass.h"
 #include "DavidLongRangeClass.h"
 #include "QMCSamplingClass.h"
+#include "QBoxAction.h"
 #include "OpenLoopImportance.h"
 #include "StructureReject.h"
 #include "KineticSphereClass.h"
@@ -99,6 +100,8 @@ public:
   DavidLongRangeClass DavidLongRange;
 
 	MoleculeInteractionsClass MoleculeInteractions;
+
+	QBoxActionClass QBoxAction;
 
 	ST2WaterClass ST2Water;
 
@@ -199,6 +202,7 @@ public:
     PathData(pathData),
     PairFixedPhase(pathData),
 		MoleculeInteractions(pathData),
+		QBoxAction(pathData),
 		ST2Water(pathData),
 		TIP5PWater(pathData),
 #ifdef USE_QMC

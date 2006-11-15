@@ -19,6 +19,7 @@
 void
 MoveClass::DoEvent()
 {
+	PathData.moveClock++;
   TimesCalled++;
   MakeMove();
 //   if ((PathData.Path.Communicator.MyProc()==0) && 

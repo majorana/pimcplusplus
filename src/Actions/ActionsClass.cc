@@ -38,6 +38,11 @@ ActionsClass::Read(IOSectionClass &in)
 		MoleculeInteractions.Read(in);
 		MoleculeInteractions.SetNumImages(NumImages);
 	}
+	bool doQBoxRead = false;
+	if(in.ReadVar("InitQBoxAction",doQBoxRead)){
+		QBoxAction.Read(in);
+	}
+
 #ifdef ORDER_N_FERMIONS
   VariationalPI.Read(in);
   TruncatedInverse.Read(in);
@@ -478,6 +483,8 @@ ActionsClass::AcceptCopy (int startSlice, int endSlice,
   for (int i=0; i<NodalActions.size(); i++)
     if (NodalActions(i) != NULL && activeSpecies[i])
       NodalActions(i)->AcceptCopy (startSlice, endSlice);
+
+	QBoxAction.AcceptCopy(startSlice, endSlice);
 }
 
 
@@ -495,6 +502,8 @@ ActionsClass::RejectCopy (int startSlice, int endSlice,
   for (int i=0; i<NodalActions.size(); i++)
     if (NodalActions(i) != NULL && activeSpecies[i])
       NodalActions(i)->RejectCopy (startSlice, endSlice);
+
+	QBoxAction.RejectCopy(startSlice, endSlice);
 }
 
 void

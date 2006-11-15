@@ -156,6 +156,8 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 }
 
 double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+  numMoves++;
+	//cerr << "In ParticleTranslate::Sample" << endl;
 
 	if(mode == SINGLE){
   	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
@@ -183,7 +185,8 @@ double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
     slice1 = slice-1;
     slice2 = slice+1;
   }
-
+	
+	//cerr << numMoves << ": ParticleTranslate moving " << activeParticles << endl;
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
 		for(int activeP = 0; activeP<PathData.Path.MolMembers(MoveList(activeMol)).size(); activeP++){
 			int movePtcl = PathData.Path.MolMembers(MoveList(activeMol))(activeP);
@@ -193,15 +196,15 @@ double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 		}
 	}
 
-  if (numMoves%10000 == 0 && numMoves>0){
+  if (numMoves%100 == 0){
     cerr << numMoves << " moves; current PARTICLE translate ratio is " << double(numAccepted)/numMoves << " with step size " << Sigma << endl;
   }
-  numMoves++;
 //	if(counter == 0)
 //		cerr << endl << "I have average action " << UAction << "/" << numMoves << " = " << UAction/numMoves << endl;
 	//cerr << "+";
 
 	if(mode == SEQUENTIAL) Advance();
 
+	//cerr << "Goodbye Ptcl Translate Sample " << endl;
 	return 1;
 }

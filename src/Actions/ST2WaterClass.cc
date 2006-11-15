@@ -139,7 +139,7 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
 
 double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 {
-	cerr << "ST2WaterClass::d_dBeta_________________";// << endl;
+	//cerr << "ST2WaterClass::d_dBeta_________________";// << endl;
   double thermal = 6/PathData.Path.tau;
   Array<int,1> activeParticles(PathData.Path.NumParticles());
   for (int i=0;i<PathData.Path.NumParticles();i++){
@@ -264,7 +264,7 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 
   double energy_per_molecule = TotalU/PathData.Path.numMol;
 //  return energy_per_molecule; // + thermal;
-	cerr << "RETURNING " << TotalU << endl;
+	//cerr << "RETURNING " << TotalU << endl;
   return TotalU;
 }
 

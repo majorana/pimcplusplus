@@ -20,6 +20,7 @@
 // specification of energy observables 
 // to compute; see below -John
 #include "../Actions/MoleculeInteractionsClass.h"
+#include "../Actions/QBoxAction.h"
 #include "../Actions/ST2WaterClass.h"
 #include "../Actions/QMCSamplingClass.h"
 
@@ -54,10 +55,11 @@ void EnergyClass::Accumulate()
   int slice1 = 0;
   int slice2 = PathData.Path.NumTimeSlices() - 1;
 	for(int n=0; n<numEnergies; n++){
+		//cerr << "ObsEnergy computing dBeta";
 		double otherE = OtherActions[n]->d_dBeta(slice1,slice2,0);
 		OtherSums[n] += otherE;
 		TotalSum += otherE;
-		cerr << "  finished." << endl;
+		//cerr << "  finished." << endl;
 	}
 
 //   double kAction, uShortAction, uLongAction, nodeAction;
@@ -72,7 +74,7 @@ void EnergyClass::Accumulate()
 //   TotalActionSum += (kAction + uShortAction + uLongAction + nodeAction);
 
   //  TIP5PSum   += tip5p;
-	cerr << "ObservableEnergy leaving Accumulate" << endl;
+	//cerr << "ObservableEnergy leaving Accumulate" << endl;
 }
 
 
@@ -247,33 +249,27 @@ void EnergyClass::Read(IOSectionClass &in)
 			OtherActions[n] = &PathData.Actions.MoleculeInteractions;
 			// read should be done in action
 			//PathData.Actions.MoleculeInteractions.Read(in);
-			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
-			OtherSums[n] = 0.0;
 		} else if(EnergyStrings(n) == "ST2WaterClass"){
 			OtherActions[n] = &PathData.Actions.ST2Water;
-			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
-			OtherSums[n] = 0.0;
+		} else if(EnergyStrings(n) == "QBoxActionClass"){
+			OtherActions[n] = &PathData.Actions.QBoxAction;
 		} else if(EnergyStrings(n) == "QMCSamplingClass"){
 			OtherActions[n] = &PathData.Actions.QMCSampling;
-			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
-			OtherSums[n] = 0.0;
 		} else if(EnergyStrings(n) == "IonIonActionClass"){
 			OtherActions[n] = &PathData.Actions.IonInteraction;
-			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
-			OtherSums[n] = 0.0;
 		}
 		// Other action objects can be specified here of course
 #ifdef USE_QMC
 		else if(EnergyStrings(n) == "CEIMCActionClass"){
   		OtherActions[n] = &PathData.Actions.CEIMCAction;
       PathData.Actions.CEIMCAction.Read(IOSection);
-			OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
-			OtherSums[n] = 0.0;
 		}
 #endif
 		else {
 			cerr << "You specified " << EnergyStrings(n) << ", which is not supported for runtime inclusion as a computed energy observable." << endl;
 		}
+		OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
+		OtherSums[n] = 0.0;
 	}
 	// End John's block of code
 

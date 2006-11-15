@@ -30,6 +30,18 @@ ActionBaseClass::ActionBaseClass(PathDataClass &pathData) :
 }
 
 void 
+ActionBaseClass::AcceptCopy (int slice1, int slice2)
+{
+  /// Base class does nothing
+}
+
+void 
+ActionBaseClass::RejectCopy (int slice1, int slice2)
+{
+  /// Base class does nothing
+}
+
+void 
 ActionBaseClass::ShiftData (int slicesToShift)
 {
   // Do nothing 

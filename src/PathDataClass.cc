@@ -342,6 +342,7 @@ cerr << "  PIMC: initialized InterComm; ranks is " << ranks << endl;
 
 #endif
 
+	moveClock = 0;
 	cerr << "leaving read" << endl;
 }
 

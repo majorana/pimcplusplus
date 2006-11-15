@@ -97,6 +97,9 @@ void MolMoveClass::Read (IOSectionClass &in){
 		}else if(setAction == "IonInteraction"){
   		Actions.push_back(&PathData.Actions.IonInteraction);
 			cerr << "Added intermolecular ion-ion interaction" << endl;
+		} else if(setAction == "QBoxAction"){
+  		Actions.push_back(&PathData.Actions.QBoxAction);
+			cerr << "Computing action with QBox DFT code" << endl;
 		} else
     	cerr << "You specified " << setAction << ", which is not supported for this type of move" << endl;
 	}

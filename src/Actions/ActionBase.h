@@ -75,6 +75,8 @@ public:
   virtual void ShiftData (int slices2Shift);
   virtual void MoveJoin (int oldJoinPos, int newJoinPos);
   virtual string GetName()=0;
+  virtual void AcceptCopy (int slice1, int slice2);
+  virtual void RejectCopy (int slice1, int slice2);
   ActionBaseClass(PathDataClass &pathData);				   
 };
 

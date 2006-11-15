@@ -42,6 +42,8 @@ libactions_la_SOURCES =            \
     OpenLoopImportance.h           \
     PairFixedPhase.h               \
     PairFixedPhase.cc              \
+		QBoxAction.cc                  \
+		QBoxAction.h                   \
     QMCSamplingClass.h             \
     QMCSamplingClass.cc            \
     ShortRangeApproximateClass.cc  \

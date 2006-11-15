@@ -64,14 +64,14 @@ double MoleculeInteractionsClass::SingleAction (int startSlice, int endSlice,
 
 double MoleculeInteractionsClass::d_dBeta (int startSlice, int endSlice,  int level)
 {
-	cerr << "MoleculeInteractions::d_dBeta__________________ for slices " << startSlice << " to " << endSlice << endl;
+	//cerr << "MoleculeInteractions::d_dBeta__________________ for slices " << startSlice << " to " << endSlice << endl;
   Array<int,1> activeParticles(PathData.Path.NumParticles());
   for (int i=0;i<PathData.Path.NumParticles();i++)
     activeParticles(i)=i;
 	
 	bool IsAction = false;
 	double TotalU = ComputeEnergy(startSlice, endSlice-1, activeParticles, level, TruncateEnergy, IsAction);
-	cerr << "RETURNING " << TotalU << endl;
+	cerr << "MoleculeInteractionsClass RETURNING " << TotalU << endl;
   return TotalU;
 }
 
@@ -248,15 +248,19 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 			// could be generalized
 			double harmonic = 0.0;
 			double omega = 26;
+			// for Rossky ST2 in kcal/mol
 			double m_H2O = 0.043265;
+			// Lobaugh & Voth in amu
+			//double m_H2O = 9.0;
 			double R0 = 2.85;
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
     		int species2=Path.ParticleSpeciesNum(ptcl2);
-    		if (Interacting(species2,2) && Path.DoPtcl(ptcl2)){
+    		if (Interacting(species2,4) && Path.DoPtcl(ptcl2)){
 	  			for (int slice=startSlice;slice<=endSlice;slice+=skip){
   					dVec COMr;
   					double COMrmag;
   					PathData.Path.DistDisp(slice, ptcl1, ptcl2, COMrmag, COMr);
+						//cerr << "Harmonic: COMrmag is " << COMrmag << " between " << ptcl1 << " and " << ptcl2 << " and R0 is " << R0 << endl;
 						harmonic = 0.5*m_H2O*omega*omega*(COMrmag - R0)*(COMrmag - R0);
 						TotalHarmonic += harmonic;
 						TotalU += harmonic;
@@ -375,7 +379,7 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		in.ReadVar("TruncateAction",TruncateAction);
 		in.ReadVar("TruncateEnergy",TruncateEnergy);
 
-		Interacting.resize(PathData.NumSpecies(),4);
+		Interacting.resize(PathData.NumSpecies(),5);
 		Interacting = false;
 		LJSpecies.resize(0);
 		ChargeSpecies.resize(0);
@@ -387,13 +391,16 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		in.ReadVar("KineticActionSpecies",KineticSpecies);
 		in.ReadVar("QuadraticSpecies",QuadSpecies);
 
+		cerr << "Read LJSpec " << LJSpecies << " and chargeSpec " << ChargeSpecies << " etc..." << endl;
 		if(KineticSpecies.size() > 0){
 			assert(in.ReadVar("Lambdas",lambdas));
 			cerr << "Read lambda for each species: " << lambdas << endl;
 		}
 
-		for(int s=0; s<LJSpecies.size(); s++)
+		for(int s=0; s<LJSpecies.size(); s++){
 			Interacting(Path.SpeciesNum(LJSpecies(s)), 0) = true;
+			cerr << "Setting " << LJSpecies(s) << " to interact via LJ!!" << endl;
+		}
 		for(int s=0; s<ChargeSpecies.size(); s++)
 			Interacting(Path.SpeciesNum(ChargeSpecies(s)), 1) = true;
 		for(int s=0; s<SpringSpecies.size(); s++)
