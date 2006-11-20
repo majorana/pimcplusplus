@@ -243,22 +243,22 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
   int zEffect=Path.Cell.Zeffect;
   
   // First, sum the pair actions
-  double TotalU = 0.0;
-
+  double dU = 0.0;
+  
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
-
+  
   int totalParticles=0;
   Array<bool,1> todoIt(PathData.Path.NumParticles());
   todoIt=true;
-
-
+  
+  
   for (int slice=slice1;slice<slice2;slice+=skip){
     
     for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
       Path.DoPtcl(ptcl)=true;
     for (int ptcl1=0; ptcl1<PathData.Path.NumParticles(); ptcl1++){
-
+      
       todoIt=true;
       Path.DoPtcl(ptcl1) = false;
       int species1=Path.ParticleSpeciesNum(ptcl1);
@@ -271,7 +271,7 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
 	rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
 	rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
 	rzbox=(zBox+Path.Cell.AffectedCells(cellVal) [2] +2 * Path.Cell.GridsArray.extent(2)) % Path.Cell.GridsArray.extent(2);
-
+	
 	
 	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
 	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox,rzbox).Particles(slice);
@@ -306,18 +306,11 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
 	    double q = 0.5 * (rmag + rpmag);
 	    double z = (rmag - rpmag);
 	    double U;
-	    U = PA.dU(q,z,s2, level);
-	    // Subtract off long-range part from short-range action
-	    //	  if (PA.IsLongRange())
-	    //	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
-	    //		//		if (TotalU>10000){
-	    //		//		  cerr<<TotalU<<" "<<ptcl1<<" "<<ptcl2<<" "<<slice<<" "<<endl;
-	    //		//		  cerr<<Path(slice,ptcl1)<<" "<<Path(slice,ptcl2)<<" "<<changedParticles<<endl;
-	    //		//		}
-	    TotalU += U;
+	    dU += PA.dU(q,z,s2, level);
+	    
 	  }
 	}
-      } 
+      }
       if (PathData.Path.OpenPaths &&
 	  slice+skip==PathData.Path.OpenLink && 
 	  ptcl1==PathData.Path.OpenPtcl)
@@ -359,23 +352,19 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
 	    if (slice==slice1)
 	      totalParticles++;
 	    PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
-				       rmag, rpmag, r, rp);
+				   rmag, rpmag, r, rp);
 	    double s2 = dot (r-rp, r-rp);
 	    double q = 0.5 * (rmag + rpmag);
 	    double z = (rmag - rpmag);
 	    double U;
-	    U = PA.dU(q,z,s2, level);
-	    // Subtract off long-range part from short-range action
-	    //	  if (PA.IsLongRange())
-	    //	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
-	    TotalU += U;
+	    dU += PA.dU(q,z,s2, level);
 	  }
 	}
       }
-    
-
-
-
+      
+      
+      
+      
       
     }
     
@@ -383,7 +372,7 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
     
   } //end slice loop
   //  cerr<<"My total number of particles is "<<totalParticles<<endl;
-  return (TotalU);
+  return (dU);
 }
 
 

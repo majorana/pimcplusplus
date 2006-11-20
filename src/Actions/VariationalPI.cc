@@ -26,11 +26,11 @@
 #include <stdio.h>
 #include <string.h>
 
-// #ifdef ORDER_N_FERMIONS
+#ifdef ORDER_N_FERMIONS
 extern "C"{
 #include "../det_calc_uekt.h"
 }
-/// #endif
+#endif
 // int testme();
 
 
@@ -258,15 +258,16 @@ VariationalPIClass::SingleAction (int startSlice, int endSlice,
 //    }
     
   ChangedColumn=changePtcls(0);
-
-  det_ratio_calculator_uekt_symmetric_vanilla_value(//matvec_gsl_matrix,
-						    matvec,
-						    DetMatrix.data(), 
-						    //(void*)myMatrix,
-						    u.size(), 
-						    u.data(), changePtcls(0),
-    						    0, &det_ratio, 
-						    (void*)&parms);
+#ifdef ORDER_N_FERMIONS
+  ////BUG!!  det_ratio_calculator_uekt_symmetric_vanilla_value(//matvec_gsl_matrix,
+  ///BUG!						    matvec,
+  ///BUG!						    DetMatrix.data(), 
+  ///BUG!						    //(void*)myMatrix,
+  ///BUG!						    u.size(), 
+  ///BUG!						    u.data(), changePtcls(0),
+  //BUG!    						    0, &det_ratio, 
+  ///BUG!						    (void*)&parms);
+#endif
  //  BuildDeterminantMatrix();
   //  cerr<<"My old determinanat is "<<Determinant(DetMatrix)<<endl;
   //  cerr<<"Called ratio calculator"<<endl;
@@ -330,3 +331,4 @@ VariationalPIClass::GetName()
 {
   return "VariationalPI";
 }
+
