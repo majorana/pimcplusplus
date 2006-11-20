@@ -50,9 +50,12 @@ void PlaneDensityClass::Accumulate()
 
 void PlaneDensityClass::WriteBlock()
 {
+  Array<double,2> SumGrid(Grid.extent(0),Grid.extent(1));
+  Path.Communicator.Sum(Grid, SumGrid);
+ 
   double norm = 1.0/((double)NumSamples);
-  Grid=Grid/norm;
-  GridVar.Write(Grid);
+  SumGrid=SumGrid/norm;
+  GridVar.Write(SumGrid);
   GridVar.Flush();
   NumSamples = 0;
   Grid=0.0;

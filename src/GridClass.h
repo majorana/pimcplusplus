@@ -32,8 +32,7 @@ public:
   list<CellInfoClass*> NeighborGrids;
   CellInfoClass()
   {
-    MyLoc.resize(3);
-
+    MyLoc.resize(NDIM);
   }
   Array<list<int>,1> Particles;
 };
@@ -44,20 +43,25 @@ public:
   int Xeffect;
   int Yeffect;
   int Zeffect;
-  Array<TinyVector<int,3>,1> AffectedCells;
+  Array<TinyVector<int,NDIM>,1> AffectedCells;
   PathClass &Path;
   double CutoffDistance;
   Array<int,1> NumGrid;
-  Array<CellInfoClass,3> GridsArray;
+  Array<CellInfoClass,NDIM> GridsArray;
   void Init(dVec box,Array<int,1> numGrid);
   bool GridsAffect(CellInfoClass &grid1,CellInfoClass &grid2);
-  void BuildNeighborGrids();
+  //deprecated  void BuildNeighborGrids();
   void PrintNeighborGrids();
   void BinParticles(int slice);
   void PrintParticles(int slice);
+#if NDIM==3
   void FindBox(dVec myPoint,int &x,int &y,int &z);
+#endif
+#if NDIM==2
+  void FindBox(dVec myPoint,int &x,int &y);
+#endif
   void ReGrid(int slice,int ptcl);
-  bool InBox(CellInfoClass &theGrid,dVec thePoint);
+  //deprecated  bool InBox(CellInfoClass &theGrid,dVec thePoint);
 CellMethodClass(PathClass &path) : Path(path){
     CutoffDistance=8.0;
     //do nothing for now

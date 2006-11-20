@@ -158,7 +158,7 @@ void PermuteTableOnClass::ConstructHTable()
     PathData.Path.PutInBox(disp_ii);
     double dist_ii = dot (disp_ii,disp_ii);
     int xBox,yBox,zBox;
-    PathData.Path.Cell.FindBox(PathData.Path(Slice1,i+firstPtcl),xBox,yBox,zBox);
+    ////BUG!    PathData.Path.Cell.FindBox(PathData.Path(Slice1,i+firstPtcl),xBox,yBox,zBox);
     int rxbox,rybox,rzbox;
     for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
       rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);

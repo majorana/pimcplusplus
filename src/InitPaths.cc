@@ -522,8 +522,13 @@ PathClass::InitPaths (IOSectionClass &in)
     InitOpenPaths();
   }  
   if (OrderN){
-    cerr<<"BROKEN!"<<endl;
-    Array<int,1>  numGrid(3);
+    double cutoff;
+    assert(in.ReadVar("CutoffDistance",cutoff));
+    Cell.CutoffDistance=cutoff;
+    //    Array<int,1>  numGrid(NDIM);
+    Array<int,1>  numGrid;
+    assert(in.ReadVar("CellGridSize",numGrid));
+    assert(numGrid.size()==NDIM);
     //  numGrid(0)=6*2;
     //  numGrid(1)=6*2;
     //  numGrid(2)=5*2;
@@ -533,10 +538,12 @@ PathClass::InitPaths (IOSectionClass &in)
     //    //    numGrid(0)=10;
     //    //    numGrid(1)=10;
     //    numGrid(2)=10;
-    numGrid(0)=30;
-    numGrid(1)=30;
-    numGrid(2)=30;
-    
+    //    numGrid(0)=30;
+    //    numGrid(1)=30;
+    //#if NDIM==3
+    //    numGrid(2)=30;
+    //#endif
+
     //  Cell=new GridClass(*this);
     Cell.Init(Box,numGrid);
     //  Cell.BuildNeighborGrids();

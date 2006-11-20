@@ -228,6 +228,7 @@ ShortRangeClass::d_dBetaForcedPairAction (int slice1, int slice2,
 double 
 ShortRangeClass::d_dBeta (int slice1, int slice2, int level)
 {
+  Array<double,1> sliceTotal(PathData.Path.NumTimeSlices());
   double levelTau=Path.tau;
   int skip = 1<<level;
   //  int slice2 = slice1 + (1<<level);
@@ -256,15 +257,19 @@ ShortRangeClass::d_dBeta (int slice1, int slice2, int level)
 	    PathData.Path.ParticleExist(slice+skip,ptcl1)*
 	    PathData.Path.ParticleExist(slice+skip,ptcl2);
 	}
-	else
+	else{
+	  sliceTotal(slice)+=pa.dU(q,z,s2,level);
 	  dU += pa.dU(q,z,s2,level);
-
+	}
 	// Subtract off long-range part from short-range action
 	if (pa.IsLongRange() && PathData.Actions.UseLongRange)
 	  dU -= 0.5*(pa.dUlong(level)(rmag)+pa.dUlong(level)(rpmag));
       }
     }
   }
+  cerr<<"Printing short range stuff"<<endl;
+  for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++)
+    cerr<<slice<<" "<<sliceTotal(slice)<<endl;
   return dU;
 }
 

@@ -110,6 +110,7 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
       Path.DoPtcl(ptcl1) = false;
       int species1=Path.ParticleSpeciesNum(ptcl1);
       int xBox,yBox,zBox;
+#if NDIM==3
       Path.Cell.FindBox(Path(slice,ptcl1),xBox,yBox,zBox);
       //      cerr<<"Beginning"<<endl;
       for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
@@ -121,7 +122,18 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 	
 	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
 	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox,rzbox).Particles(slice);
-	
+#endif
+#if NDIM==2
+      Path.Cell.FindBox(Path(slice,ptcl1),xBox,yBox);
+      //      cerr<<"Beginning"<<endl;
+      for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
+	int rxbox,rybox,rzbox;
+	rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
+	rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
+	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
+	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox).Particles(slice);
+#endif
+
 	for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
 	  int ptcl2=*i;
 	  if (Path.DoPtcl(ptcl2)){ //I think this is ok
@@ -155,6 +167,7 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
       if (PathData.Path.OpenPaths &&
 	  slice+skip==PathData.Path.OpenLink && 
 	  ptcl1==PathData.Path.OpenPtcl)
+#if NDIM==3
 	Path.Cell.FindBox(Path(slice+skip,PathData.Path.NumParticles()),
 			  xBox,yBox,zBox);
       else
@@ -167,7 +180,21 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 	rzbox=(zBox+Path.Cell.AffectedCells(cellVal) [2] +2 * Path.Cell.GridsArray.extent(2)) % Path.Cell.GridsArray.extent(2);
 	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
 	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox,rzbox).Particles(slice);
-	
+#endif	
+#if NDIM==2
+	Path.Cell.FindBox(Path(slice+skip,PathData.Path.NumParticles()),
+			  xBox,yBox);
+      else
+	Path.Cell.FindBox(Path(slice+skip,ptcl1),xBox,yBox);
+      //      cerr<<"Beginning"<<endl;
+      for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
+	int rxbox,rybox,rzbox;
+	rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
+	rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
+	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
+	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox).Particles(slice);
+#endif	
+
 	for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
 	  int ptcl2=*i;
 	  if (Path.DoPtcl(ptcl2) && todoIt(ptcl2)){ //I think this is ok
@@ -236,6 +263,7 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
       Path.DoPtcl(ptcl1) = false;
       int species1=Path.ParticleSpeciesNum(ptcl1);
       int xBox,yBox,zBox;
+#if NDIM==3
       Path.Cell.FindBox(Path(slice,ptcl1),xBox,yBox,zBox);
       //      cerr<<"Beginning"<<endl;
       for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
@@ -247,6 +275,18 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
 	
 	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
 	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox,rzbox).Particles(slice);
+#endif
+#if NDIM==2
+      Path.Cell.FindBox(Path(slice,ptcl1),xBox,yBox);
+      //      cerr<<"Beginning"<<endl;
+      for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
+	int rxbox,rybox,rzbox;
+	rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
+	rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
+	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
+	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox).Particles(slice);
+#endif
+
 	
 	for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
 	  int ptcl2=*i;
@@ -281,6 +321,7 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
       if (PathData.Path.OpenPaths &&
 	  slice+skip==PathData.Path.OpenLink && 
 	  ptcl1==PathData.Path.OpenPtcl)
+#if NDIM==3
 	Path.Cell.FindBox(Path(slice+skip,PathData.Path.NumParticles()),
 			  xBox,yBox,zBox);
       else
@@ -293,6 +334,20 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
 	rzbox=(zBox+Path.Cell.AffectedCells(cellVal) [2] +2 * Path.Cell.GridsArray.extent(2)) % Path.Cell.GridsArray.extent(2);
 	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
 	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox,rzbox).Particles(slice);
+#endif
+#if NDIM==2
+	Path.Cell.FindBox(Path(slice+skip,PathData.Path.NumParticles()),
+			  xBox,yBox);
+      else
+	Path.Cell.FindBox(Path(slice+skip,ptcl1),xBox,yBox);
+      //      cerr<<"Beginning"<<endl;
+      for (int cellVal=0;cellVal<Path.Cell.AffectedCells.size();cellVal++){
+	int rxbox,rybox,rzbox;
+	rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
+	rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
+	//	    cerr<<rxbox<<" "<<rybox<<" "<<rzbox<<endl;
+	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox).Particles(slice);
+#endif
 	
 	for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
 	  int ptcl2=*i;
