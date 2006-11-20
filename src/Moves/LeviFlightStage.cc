@@ -1,4 +1,4 @@
-/////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // Copyright (C) 2003-2006 Bryan Clark and Kenneth Esler   //
 //                                                         //
 // This program is free software; you can redistribute it  //
