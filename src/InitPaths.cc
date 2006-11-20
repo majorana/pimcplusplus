@@ -538,11 +538,18 @@ PathClass::InitPaths (IOSectionClass &in)
     //    //    numGrid(0)=10;
     //    //    numGrid(1)=10;
     //    numGrid(2)=10;
+    numGrid(0)=30;
+    numGrid(1)=30;
+#if NDIM==3
+    numGrid(2)=30;
+#endif
+
     //    numGrid(0)=30;
     //    numGrid(1)=30;
     //#if NDIM==3
     //    numGrid(2)=30;
     //#endif
+
 
     //  Cell=new GridClass(*this);
     Cell.Init(Box,numGrid);
