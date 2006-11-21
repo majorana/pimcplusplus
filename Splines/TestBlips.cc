@@ -1,6 +1,121 @@
 #include "TricubicBspline.h"
 #include "../PlaneWavePHDFT/FFTBox.h"
 
+inline double conj(double x)
+{ return x; }
+
+inline double real(double x)
+{ return x; }
+
+template<typename T>
+double norm (T &func, Vec3 box,
+	     int nx, int ny, int nz)
+{
+  double sixth = 1.0/6.0;
+  Array<double,1> wx(nx), wy(ny), wz(nz);
+ 
+  // x weights
+  wx(0) = sixth;
+  wx(nx-1) = sixth;
+  for (int ix=1; ix<nx-1; ix++)
+    if ((ix & 1) == 1)
+      wx(ix) = 4.0*sixth;
+    else
+      wx(ix) = 2.0*sixth;
+
+  // y weights
+  wy(0) = sixth;
+  wy(ny-1) = sixth;
+  for (int iy=1; iy<ny-1; iy++)
+    if ((iy & 1) == 1)
+      wy(iy) = 4.0*sixth;
+    else
+      wy(iy) = 2.0*sixth;
+
+  // z weights
+  wz(0) = sixth;
+  wz(nz-1) = sixth;
+  for (int iz=1; iz<nz-1; iz++)
+    if ((iz & 1) == 1)
+      wz(iz) = 4.0*sixth;
+    else
+      wz(iz) = 2.0*sixth;
+
+  double nrm = 0.0;
+  Vec3 r;
+  for (int ix=0; ix<(nx); ix++) {
+    r[0] = box[0]*(double)ix/(double)(nx-1);
+    for (int iy=0; iy<(ny); iy++) {
+      r[1] = box[1]*(double)iy/(double)(ny-1);
+      for (int iz=0; iz<(nz); iz++) {
+	r[2] = box[2]*(double)iz/(double)(nz-1);
+	double weight = wx(ix)*wy(iy)*wz(iz);
+	nrm += weight*real(conj(func(r))*func(r));
+      }
+    }
+  }
+  nrm *= box[0]/(nx-1);
+  nrm *= box[1]/(ny-1);
+  nrm *= box[2]/(nz-1);
+  return nrm;
+}
+
+
+
+template<typename T1, typename T2>
+double InnerProd (T1 &func1, T2 &func2, Vec3 box,
+		  int nx, int ny, int nz)
+{
+  double sixth = 1.0/6.0;
+  Array<double,1> wx(nx), wy(ny), wz(nz);
+ 
+  // x weights
+  wx(0) = sixth;
+  wx(nx-1) = sixth;
+  for (int ix=1; ix<nx-1; ix++)
+    if ((ix & 1) == 1)
+      wx(ix) = 4.0*sixth;
+    else
+      wx(ix) = 2.0*sixth;
+
+  // y weights
+  wy(0) = sixth;
+  wy(ny-1) = sixth;
+  for (int iy=1; iy<ny-1; iy++)
+    if ((iy & 1) == 1)
+      wy(iy) = 4.0*sixth;
+    else
+      wy(iy) = 2.0*sixth;
+
+  // z weights
+  wz(0) = sixth;
+  wz(nz-1) = sixth;
+  for (int iz=1; iz<nz-1; iz++)
+    if ((iz & 1) == 1)
+      wz(iz) = 4.0*sixth;
+    else
+      wz(iz) = 2.0*sixth;
+
+  double nrm = 0.0;
+  Vec3 r;
+  for (int ix=0; ix<(nx); ix++) {
+    r[0] = box[0]*(double)ix/(double)(nx-1);
+    for (int iy=0; iy<(ny); iy++) {
+      r[1] = box[1]*(double)iy/(double)(ny-1);
+      for (int iz=0; iz<(nz); iz++) {
+	r[2] = box[2]*(double)iz/(double)(nz-1);
+	double weight = wx(ix)*wy(iy)*wz(iz);
+	nrm += weight*real(conj(func1(r))*func2(r));
+      }
+    }
+  }
+  nrm *= box[0]/(nx-1);
+  nrm *= box[1]/(ny-1);
+  nrm *= box[2]/(nz-1);
+  return nrm;
+}
+
+
 void MakeBlipCoefs (FFTBox &fft,  const zVec &c,
 		    Array<complex<double>,3> &coefs)
 {
@@ -80,6 +195,9 @@ complex<double> eval(double x, double y, double z,
 
 class PeriodicFunc
 {
+private:
+  double NormFactor;
+
 public:
   Array<complex<double>,1> c;
 
@@ -134,7 +252,7 @@ public:
       Vec3 G = GVecs(i);
       double phase = -dot(r,G);
       complex<double> e2iGr = complex<double>(cos(phase), sin(phase));
-      grad += -(eye * c(i)*G*e2iGr);
+      grad += NormFactor*-(eye * c(i)*G*e2iGr);
       secDerivs(0,0) +=  -G[0]*G[0]*c(i)*e2iGr;
       secDerivs(0,1) +=  -G[0]*G[1]*c(i)*e2iGr;
       secDerivs(0,2) +=  -G[0]*G[2]*c(i)*e2iGr;
@@ -151,6 +269,9 @@ public:
   {
     FFT.Setup();
     c.resize(gvecs.size());
+    int nx, ny, nz;
+    FFT.GetDims(nx, ny, nz);
+    NormFactor = sqrt(1.0/(gvecs.GetBoxVol()));    
     double nrm;
     for (int i=0; i<gvecs.size(); i++) {
       c(i) = complex<double>(2.0*drand48()-1.0, 2.0*drand48()-1);
@@ -168,36 +289,40 @@ private:
   TinyVector<double,3> Box, BoxInv;
   Array<TinyVector<double,3>,1> Center;
   Array<double,1> Prefactor, Alpha;
+  double a;
   
   inline double clamp(double t)
   {
     double u = 1.0-t;
-    t *= 10.0;
-    u *= 10.0;
-    double e1 = exp(-t*t*t);
-    double e2 = exp(-u*u*u);
+    double e1 = exp(-a*a*a*t*t*t);
+    double e2 = exp(-a*a*a*u*u*u);
     return (1.0-e1)*(1.0-e2);
   }
   inline double dclamp(double t)
   {
    double u = 1.0-t;
-   t *= 10.0;
-   u *= 10.0;
-   double e1 = exp(-t*t*t);
-   double e2 = exp(-t*t*t);
+   double e1 = exp(-a*a*a*t*t*t);
+   double e2 = exp(-a*a*a*u*u*u);
 
-   return (+3000.0*t*t*(1.0-e2) +
-	   -3000.0*u*u*(1.0-e1));
+   return (+3.0*a*a*a*t*t*e1*(1.0-e2) +
+	   -3.0*a*a*a*u*u*e2*(1.0-e1));
   }
   inline double d2clamp(double t)
   {
     double u = 1.0-t;
-    t *= 10.0;
-    u *= 10.0;
-    double e1 = exp(-t*t*t);
-    double e2 = exp(-t*t*t);
-    return (+6000.0*t*(1.0-e2) +(+3000.0*t*t)*(-3000.0*u*u) +
-	    -6000.0*u*(1.0-e1) +(-3000.0*u*u)*(+3000.0*t*t));
+    double a3 = a*a*a;
+    double e1 = exp(-a3*t*t*t);
+    double e2 = exp(-a3*u*u*u);
+    double de1 = -3.0*a3*t*t*e1;
+    double de2 = +3.0*a3*u*u*e2;
+    double d2e1 = (-6.0*a3*t + 3.0*a3*a3*t*t*t*t)*e1;
+    double d2e2 = (-6.0*a3*u + 3.0*a3*a3*u*u*u*u)*e2;
+    return (d2e1*(e2-1.0)+d2e2*(e1-1.0) + 2.0*de1*de2);
+//     return (+6.0*a3*t*e1*(1.0-e2) 
+// 	    -9.0*a3*a3*t*t*t*t*e1*(1.0-e2)
+// 	    -18.0*a3*a3*t*t*u*u*e1*e2
+// 	    -6.0*a3*u*e2*(1.0-e1)
+// 	    +9.0*a3*a3*u*u*u*u*e2*(1.0-e1));
   }
 
 
@@ -213,7 +338,7 @@ public:
     val *= clamp(r[0])*clamp(r[1])*clamp(r[2]);
     return val;
   }
-  void Evaluate (TinyVector<double,3> r, complex<double> &val, 
+  void Evaluate (TinyVector<double,3> r, double &val, 
 		 TinyVector<double,3> &grad, double &laplacian)
   {
     TinyVector<double,3> t = r;
@@ -247,24 +372,27 @@ public:
 //       double dphix = -2.0*Alpha(i)*dt[2]*BoxInv[2]*phiy +
 // 	BoxInv[2]*dclamp(t[2])*exp(-Alpha(i)*dt[2]*dt[2]);
 
-      double dphix = dclamp(t[0])*expx + clamp(t[0])*dexpx;
-      double dphiy = dclamp(t[1])*expy + clamp(t[1])*dexpy;
-      double dphiz = dclamp(t[2])*expz + clamp(t[2])*dexpz;
+      double dphix = BoxInv[0]*dclamp(t[0])*expx + clamp(t[0])*dexpx;
+      double dphiy = BoxInv[1]*dclamp(t[1])*expy + clamp(t[1])*dexpy;
+      double dphiz = BoxInv[2]*dclamp(t[2])*expz + clamp(t[2])*dexpz;
 
       grad[0] += Prefactor(i) *(dphix *  phiy *  phiz);
       grad[1] += Prefactor(i) *( phix * dphiy *  phiz);
       grad[2] += Prefactor(i) *( phix *  phiy * dphiz);
 
       double d2expx = expx*Alpha(i)*BoxInv[0]*BoxInv[0]*
-	(-2.0 + 4.0*Alpha(i)*Alpha(i)*dt[0]*dt[0]);
+	(-2.0 + 4.0*Alpha(i)*dt[0]*dt[0]);
       double d2expy = expy*Alpha(i)*BoxInv[1]*BoxInv[1]*
-	(-2.0 + 4.0*Alpha(i)*Alpha(i)*dt[1]*dt[1]);
+	(-2.0 + 4.0*Alpha(i)*dt[1]*dt[1]);
       double d2expz = expz*Alpha(i)*BoxInv[2]*BoxInv[2]*
-	(-2.0 + 4.0*Alpha(i)*Alpha(i)*dt[2]*dt[2]);
+	(-2.0 + 4.0*Alpha(i)*dt[2]*dt[2]);
 	
-      double d2phix = d2clamp(t[0])*expx + clamp(t[0])*d2expx;
-      double d2phiy = d2clamp(t[1])*expy + clamp(t[1])*d2expy;
-      double d2phiz = d2clamp(t[2])*expz + clamp(t[2])*d2expz;
+      double d2phix = BoxInv[0]*BoxInv[0]*d2clamp(t[0])*expx + clamp(t[0])*d2expx
+	+2.0*BoxInv[0]*dclamp(t[0])*dexpx;
+      double d2phiy = BoxInv[1]*BoxInv[1]*d2clamp(t[1])*expy + clamp(t[1])*d2expy
+	+2.0*BoxInv[1]*dclamp(t[1])*dexpy;
+      double d2phiz = BoxInv[2]*BoxInv[2]*d2clamp(t[2])*expz + clamp(t[2])*d2expz
+	+2.0*BoxInv[2]*dclamp(t[2])*dexpz;
 
       laplacian += Prefactor(i)*(d2phix *   phiy *   phiz+
 				 phix   * d2phiy *   phiz +
@@ -288,6 +416,7 @@ public:
   LocalFunc (TinyVector<double,3> box, int num)
   {
     Box = box;
+    a = 100.0;
     BoxInv[0] = 1.0/Box[0];
     BoxInv[1] = 1.0/Box[1];
     BoxInv[2] = 1.0/Box[2];
@@ -295,12 +424,14 @@ public:
     Prefactor.resize(num);
     Alpha.resize(num);
     for (int i=0; i<num; i++) {
-      Center(i)[0] = 0.25+0.5*drand48();
-      Center(i)[1] = 0.25+0.5*drand48();
-      Center(i)[2] = 0.25+0.5*drand48();
+      Center(i)[0] = 0.1+0.8*drand48();
+      Center(i)[1] = 0.1+0.8*drand48();
+      Center(i)[2] = 0.1+0.8*drand48();
       Prefactor(i) = 2.0*drand48()-1.0;
-      Alpha(i) = 40.0 + 5000.0*drand48();
+      Alpha(i) = 20.0 + 1000.0*drand48();
     }
+    double nrm = norm (*this, box, 200, 200, 200);
+    Prefactor *= (1.0/sqrt(nrm));
   }
 };
 
@@ -358,12 +489,18 @@ MakeBlipCoefs (Array<double,3> &data,
 	coefs(ix,iy,iz) = fft.kBox(ix,iy,iz).real();
 }
 
-void
-TestLocal(int nx, int ny, int nz)
+inline double sqr(double x)
 {
-  Vec3 box(10.0, 11.0, 12.0);
-  LocalFunc local (box, 500);
+  return x*x;
+}
 
+
+
+
+void
+TestLocal(LocalFunc &local, Vec3 &box, 
+	  int nx, int ny, int nz)
+{
   Vec3 r;
 
   Array<double,3> spdata(nx,ny,nz);
@@ -386,22 +523,156 @@ TestLocal(int nx, int ny, int nz)
   //  spline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2], 
   //	       spdata, true, PERIODIC, PERIODIC, PERIODIC);
   interpSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2], 
-	       spdata, true, FLAT, FLAT, FLAT);
+		     spdata, true, FLAT, FLAT, FLAT);
+  //   interpSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2], 
+  // 		     spdata, true, NATURAL, NATURAL, NATURAL);
   blipSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2], 
 		   blipcoefs, false, PERIODIC, PERIODIC, PERIODIC);
 
-  r[1] = 2.8;  r[2] = 5.7;
-  for (r[0]=0.0; r[0]<=box[0]; r[0]+=0.001)
-    fprintf (stdout, "%20.16e %20.16e %20.16e %20.16e\n", 
-	     r[0], local(r), interpSpline(r), blipSpline(r));
 
+  // Compute norms
+//   double blipNorm=0.0, spNorm=0.0, exNorm=0.0;
+//   double sixth = 1.0/6.0;
+//   Array<double,1> wx(2*nx), wy(2*ny), wz(2*nz);
+ 
+//   // x weights
+//   wx(0) = sixth;
+//   wx(2*nx-1) = sixth;
+//   for (int ix=1; ix<2*nx-1; ix++)
+//     if ((ix & 1) == 1)
+//       wx(ix) = 4.0*sixth;
+//     else
+//       wx(ix) = 2.0*sixth;
+
+//   // y weights
+//   wy(0) = sixth;
+//   wy(2*ny-1) = sixth;
+//   for (int iy=1; iy<2*ny-1; iy++)
+//     if ((iy & 1) == 1)
+//       wy(iy) = 4.0*sixth;
+//     else
+//       wy(iy) = 2.0*sixth;
+
+//   // z weights
+//   wz(0) = sixth;
+//   wz(2*nz-1) = sixth;
+//   for (int iz=1; iz<2*nz-1; iz++)
+//     if ((iz & 1) == 1)
+//       wz(iz) = 4.0*sixth;
+//     else
+//       wz(iz) = 2.0*sixth;
+
+//   for (int ix=0; ix<(2*nx); ix++) {
+//     r[0] = box[0]*(double)ix/(double)(2*nx-1);
+//     for (int iy=0; iy<(2*ny); iy++) {
+//       r[1] = box[1]*(double)iy/(double)(2*ny-1);
+//       for (int iz=0; iz<(2*nz); iz++) {
+// 	r[2] = box[2]*(double)iz/(double)(2*nz-1);
+// 	double weight = wx(ix)*wy(iy)*wz(iz);
+// 	exNorm += weight*local(r)*local(r);
+// 	spNorm += weight*interpSpline(r)*interpSpline(r);
+// 	blipNorm += weight * blipSpline(r)*blipSpline(r);
+//       }
+//     }
+//   }
+
+  double spNorm   = norm (interpSpline, box, 2*nx+1, 2*ny+1, 2*nz+1);
+  double blipNorm = norm (blipSpline,   box, 2*nx+1, 2*ny+1, 2*nz+1);
+
+  double interpEx = InnerProd (local, interpSpline, 
+			       box, 2*nx+1, 2*ny+1, 2*nz+1);
+  double blipEx   = InnerProd (local, blipSpline, 
+			       box, 2*nx+1, 2*ny+1, 2*nz+1);
+  double interpAlpha = 1.0 - interpEx / sqrt(spNorm);
+  double blipAlpha  =  1.0 -  blipEx / sqrt(blipNorm);
+  cerr << "interp alpha = " << interpAlpha  << endl;
+  cerr << "blip   alpha = " << blipAlpha << endl;
+
+		 
+  // renormalize
+  spdata    *= (1.0/sqrt(spNorm));
+  blipcoefs *= (1.0/sqrt(blipNorm));
+  interpSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2], 
+		     spdata, true, 
+		     FLAT, FLAT, FLAT);
+  blipSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2], 
+		   blipcoefs, false, 
+		   PERIODIC, PERIODIC, PERIODIC);
+  fprintf (stderr, "%20.16f %20.16f\n", 
+	   spNorm, blipNorm);
+//   exNorm   = norm (local,        box, 2*nx+1, 2*ny+1, 2*nz+1);
+//   spNorm   = norm (interpSpline, box, 2*nx+1, 2*ny+1, 2*nz+1);
+//   blipNorm = norm (blipSpline,   box, 2*nx+1, 2*ny+1, 2*nz+1);
+//   fprintf (stderr, "%20.16f %20.16f %20.16f\n", 
+// 	   exNorm, spNorm, blipNorm);
+
+
+
+  // Compare errors
+  double bValError =0.0, sValError =0.0;
+  double bGradError=0.0, sGradError=0.0;
+  double bLaplError=0.0, sLaplError=0.0;
+  double xValNorm = 0.0, xGradNorm=0.0, xLaplNorm=0.0;
+  for (int i=0; i<10000; i++) {
+    TinyVector<double,3> xGrad, bGrad, sGrad;
+    double xLapl, bLapl, sLapl;
+    double xVal, bVal, sVal;
+    TinyVector<double,3> r (box[0]*drand48(),
+			    box[1]*drand48(),
+			    box[2]*drand48());
+			      
+    local.Evaluate (r, xVal, xGrad, xLapl);
+    blipSpline.Evaluate (r, bVal, bGrad, bLapl);
+    interpSpline.Evaluate (r, sVal, sGrad, sLapl);
+    sValError  += sqr(sVal - xVal);
+    bValError  += sqr(bVal - xVal);
+    sGradError += sqr(sGrad[0]-xGrad[0]) + sqr(sGrad[1]-xGrad[1]) + sqr(sGrad[2]-xGrad[2]);
+    bGradError += sqr(bGrad[0]-xGrad[0]) + sqr(bGrad[1]-xGrad[1]) + sqr(bGrad[2]-xGrad[2]);
+    sLaplError += sqr(sLapl-xLapl);
+    bLaplError += sqr(bLapl-xLapl);
+    xValNorm   += sqr(xVal);
+    xGradNorm  += sqr(xGrad[0])+sqr(xGrad[1]) + sqr(xGrad[2]);
+    xLaplNorm  += sqr (xLapl);
+  } 
+  sValError = sqrt(sValError/xValNorm);
+  bValError = sqrt(bValError/xValNorm);
+  sGradError = sqrt(sGradError/xGradNorm);
+  bGradError = sqrt(bGradError/xGradNorm);
+  sLaplError = sqrt(sLaplError/xLaplNorm);
+  bLaplError = sqrt(bLaplError/xLaplNorm);
+  double spacing = box[0] / blipcoefs.extent(0);
+  fprintf (stdout, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n", 
+	   spacing, sValError, bValError,
+	   sGradError, bGradError,
+	   sLaplError, bLaplError,
+	   interpAlpha, blipAlpha);
+  fflush (stdout);
+
+
+//   r[1] = 2.8;  r[2] = 5.7;
+//   for (r[0]=0.0; r[0]<=box[0]; r[0]+=0.001)
+//     fprintf (stdout, "%20.16e %20.16e %20.16e %20.16e\n", 
+// 	     r[0], local(r), interpSpline(r), blipSpline(r));
 }
+
+
+void TestLocal()
+{
+  Vec3 box(10.0, 10.0, 10.0);
+
+  LocalFunc local (box, 100);
+  for (int n=21; n<300; n+=20)
+    TestLocal (local, box, n,n,n);
+}
+
 
 
 void
 TestOnePeriodic(PeriodicFunc &pfunc)
 {
   Vec3 box = pfunc.GVecs.GetBox();
+  int nx, ny, nz;
+  pfunc.FFT.GetDims(nx, ny, nz);
 
   // Make blip function
   Array<complex<double>,3> blipCoefs;
@@ -419,11 +690,37 @@ TestOnePeriodic(PeriodicFunc &pfunc)
 		     interpCoefs, false, 
 		     PERIODIC, PERIODIC, PERIODIC);
   
+//   double interpEx   = InnerProd (pfunc, interpSpline, box,
+// 			       2*nx+1, 2*ny+1, 2*nz+1);
+//   double blipEx     = InnerProd (pfunc, blipSpline, box,
+// 			        2*nx+1, 2*ny+1, 2*nz+1);
+//   double interpNorm = norm (interpSpline, box,
+// 			    2*nx+1, 2*ny+1, 2*nz+1);
+//   interpCoefs *= (1.0/sqrt(interpNorm));
+//   interpSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2],
+// 		     interpCoefs, false, 
+// 		     PERIODIC, PERIODIC, PERIODIC);
+
+//   double blipNorm   = norm (blipSpline, box,
+// 			    2*nx+1, 2*ny+1, 2*nz+1);
+//   blipCoefs *= (1.0/sqrt(blipNorm));
+//   blipSpline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2],
+// 		   blipCoefs, false, 
+// 		   PERIODIC, PERIODIC, PERIODIC);
+//   double exNorm     = norm (pfunc, box, 2*nx+1, 2*nx+1, 2*nx+1);
+
+//   double sAlpha = 1.0 - interpEx/sqrt(interpNorm*exNorm);
+//   double bAlpha = 1.0 - blipEx/sqrt(blipNorm*exNorm);
+
   // Compare errors
   double bValError =0.0, sValError =0.0;
   double bGradError=0.0, sGradError=0.0;
   double bLaplError=0.0, sLaplError=0.0;
-  double xValNorm = 0.0, xGradNorm=0.0, xLaplNorm=0.0;
+  double xValNorm  =0.0, xGradNorm=0.0, xLaplNorm=0.0;
+  double sAlpha    =1.0, bAlpha = 1.0;
+  double SpSpVal   =0.0, SpExVal = 0.0;
+  double BlBlVal   =0.0, BlExVal = 0.0;
+  double ExExVal   =0.0;
   for (int i=0; i<10000; i++) {
     TinyVector<complex<double>,3> xGrad, bGrad, sGrad;
     complex<double> xLapl, bLapl, sLapl;
@@ -444,7 +741,14 @@ TestOnePeriodic(PeriodicFunc &pfunc)
     xValNorm   += norm (xVal);
     xGradNorm  += norm(xGrad[0])+norm(xGrad[1]) + norm(xGrad[2]);
     xLaplNorm  += norm (xLapl);
+    ExExVal += norm (xVal);
+    SpSpVal += norm (sVal);
+    BlBlVal += norm (bVal);
+    SpExVal += real(conj(sVal)*xVal);
+    BlExVal += real(conj(bVal)*xVal);
   } 
+  sAlpha = 1.0-SpExVal / sqrt(SpSpVal*ExExVal);
+  bAlpha = 1.0-BlExVal / sqrt(BlBlVal*ExExVal);
   sValError = sqrt(sValError/xValNorm);
   bValError = sqrt(bValError/xValNorm);
   sGradError = sqrt(sGradError/xGradNorm);
@@ -452,10 +756,11 @@ TestOnePeriodic(PeriodicFunc &pfunc)
   sLaplError = sqrt(sLaplError/xLaplNorm);
   bLaplError = sqrt(bLaplError/xLaplNorm);
   double spacing = box[0] / interpCoefs.extent(0);
-  fprintf (stdout, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n", 
+  fprintf (stdout, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n", 
 	   spacing, sValError, bValError,
 	   sGradError, bGradError,
-	   sLaplError, bLaplError);
+	   sLaplError, bLaplError,
+	   sAlpha, bAlpha);
   fflush (stdout);
 }
 
@@ -548,6 +853,6 @@ TestBlips()
 
 main()
 {
-  // TestPeriodic();
-  TestLocal(61, 65, 79);
+  TestPeriodic();
+  //TestLocal();
 }

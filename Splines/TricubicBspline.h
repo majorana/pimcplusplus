@@ -25,8 +25,8 @@ private:
 
   bool Interpolating, Periodic;
 
-  void SolvePeriodicInterp (Array<T,3> &data);
-  void SolveInterp (Array<T,3> &data,
+  void SolvePeriodicInterp (const Array<T,3> &data);
+  void SolveInterp (const Array<T,3> &data,
 		    BCType xbc, BCType ybc, BCType zbc);
   void MakePeriodic();
 
@@ -38,7 +38,7 @@ private:
 
 public:
   void Init (double xi, double xf, double yi, double yf, double zi, double zf,
-	     Array<T,3> &data, bool interp=true, 
+	     const Array<T,3> &data, bool interp=true, 
 	     BCType xbc=PERIODIC, BCType ybc=PERIODIC, BCType zbc=PERIODIC);
   inline T GetControlPoint (int ix, int iy, int iz) const
   { return P(ix+1, iy+1, iz+1); }
@@ -79,9 +79,9 @@ TricubicBspline<T>::Find(double x, double y, double z) const
   tx = modf (xDelta*dxInv, &xInt);
   ty = modf (yDelta*dyInv, &yInt);
   tz = modf (zDelta*dzInv, &zInt);
-  ix = (int)xInt;
-  iy = (int)yInt;
-  iz = (int)zInt;
+  ix = min((int)xInt, Nx-1);
+  iy = min((int)yInt, Ny-1);
+  iz = min((int)zInt, Nz-1);
   ix0=ix; ix1=ix+1; ix2=ix+2; ix3=ix+3;
   iy0=iy; iy1=iy+1; iy2=iy+2; iy3=iy+3;
   iz0=iz; iz1=iz+1; iz2=iz+2; iz3=iz+3;

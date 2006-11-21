@@ -43,7 +43,7 @@ SolveFirstDerivInterp1D (Array<T,1> data, Array<T,1> p)
 
 
 template<typename T> void
-TricubicBspline<T>::SolvePeriodicInterp (Array<T,3> &data)
+TricubicBspline<T>::SolvePeriodicInterp (const Array<T,3> &data)
 {
   // Do X direction
   for (int iy=0; iy<Ny; iy++)
@@ -83,7 +83,7 @@ TricubicBspline<T>::SolvePeriodicInterp (Array<T,3> &data)
 // }
 
 template<typename T> void
-TricubicBspline<T>::SolveInterp (Array<T,3> &data,
+TricubicBspline<T>::SolveInterp (const Array<T,3> &data,
 				 BCType xbc, BCType ybc, BCType zbc)
 {
   int Mx, My, Mz;
@@ -165,7 +165,7 @@ TricubicBspline<T>::MakePeriodic()
 
 template<typename T> void
 TricubicBspline<T>::Init (double xi, double xf, double yi, double yf, double zi, double zf,
-			  Array<T,3> &data, bool interp, 
+			  const Array<T,3> &data, bool interp, 
 			  BCType xbc, BCType ybc, BCType zbc)
 {
   if ((xbc==FIXED_FIRST) || (xbc==FIXED_SECOND) ||
