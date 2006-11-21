@@ -311,10 +311,10 @@ NUBsplineBasis<t>::BuildBasis()
   xVals(N+3) = grid(N-1) + 2.0*(grid(N-1)-grid(N-2));
   for (int i=0; i<N+2; i++) {
     for (int j=0; j<3; j++) {
-      if ((i-2) <= 0.0)
-	dxInv(i)[j] = 1.0/(grid(j+1)-grid(0));
+      if ((i-2) <= 0)
+	dxInv(i)[j] = 1.0/(xVals(i+j+1)-xVals(i));
       else if (i+j-1 >= N)
-	dxInv(i)[j] = 1.0/(grid(N-1)-grid(N-j-2));
+	dxInv(i)[j] = 1.0/(xVals(i+j+1)-xVals(i));
       else //((i-2)>=0) && (i+j-1)<grid.NumPoints)
 	dxInv(i)[j] = 1.0/(grid(i+j-1)-grid(i-2));
 //       else
