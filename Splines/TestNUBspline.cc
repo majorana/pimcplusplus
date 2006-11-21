@@ -4,7 +4,8 @@
 void TestBasis()
 {
   LinearGrid grid(0.0, 1.0, 11);
-  NUBsplineBasis<LinearGrid> uniform(grid);
+  NUBsplineBasis<LinearGrid> uniform;
+  uniform.Init(&grid);
 
   FILE *fout = fopen ("uniformBasis.dat", "w");
   TinyVector<double,4> bfuncs;
@@ -22,12 +23,15 @@ void TestNUBasis()
   points = 0.0, 1.0, 1.4, 1.8, 6.0, 7.0, 9.0, 10.0, 12.8, 13.0, 15.0;
   GeneralGrid grid;
   grid.Init(points);
-  NUBsplineBasis<GeneralGrid> uniform(grid);
+  NUBsplineBasis<GeneralGrid> nonuni;
+  nonuni.Init (&grid);
 
   FILE *fout = fopen ("NUBasis.dat", "w");
   TinyVector<double,4> bfuncs, dbfuncs, d2bfuncs;
   for (double x=0.0; x<=15.0; x+=0.001) {
-    uniform.Evaluate(x, bfuncs, dbfuncs, d2bfuncs);
+//   for (int i=0; i<grid.NumPoints; i++) {
+//     double x = grid(i);
+    nonuni.Evaluate(x, bfuncs, dbfuncs, d2bfuncs);
     fprintf (fout, "%22.16e %22.16e %22.16e %22.16e %22.16e "
 	     "%22.16e %22.16e %22.16e %22.16e "
 	     "%22.16e %22.16e %22.16e %22.16e\n",

@@ -281,8 +281,8 @@ template <typename GridType>
 class NUBsplineBasis
 {
 private:
-  GridType &grid;
-  inline void BuildBasis();
+  GridType *GridPtr;
+
   // xVals is just the grid points, augmented by two extra points on
   // either side.  These are necessary to generate enough basis
   // functions. 
@@ -291,22 +291,27 @@ private:
   // This is used to avoid division in evalating the splines
   Array<TinyVector<double,3>,1> dxInv;
 public:
+  // Initialized xVals and dxInv.
+  inline double Grid (int i) { return ((*GridPtr)(i)); }
+  inline void Init(GridType *gridPtr);
+  // Evaluates the basis functions at a give value of x
   inline void operator() (double x, TinyVector<double,4>& bfuncs);
+  inline void operator() (int i, TinyVector<double,4>& bfuncs);
+  // Same as above, but also computes first derivatives
   inline void Evaluate   (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv);
+  // Same as above, but also computes second derivatives
   inline void Evaluate   (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv,
 			  TinyVector<double,4> &deriv2);
-  NUBsplineBasis (GridType &newGrid) : grid(newGrid)
-  {
-    BuildBasis();
-  }
-  
 };
 
-template<typename t> void
-NUBsplineBasis<t>::BuildBasis()
+template<typename GridType> void
+NUBsplineBasis<GridType>::Init(GridType *gridPtr)
 {
+  GridPtr = gridPtr;
+  GridType &grid =  (*GridPtr);
+
   int N = grid.NumPoints;
   dxInv.resize(grid.NumPoints+2);
   xVals.resize(N+4);
@@ -323,9 +328,10 @@ NUBsplineBasis<t>::BuildBasis()
 }
 
 
-template<typename t> void
-NUBsplineBasis<t>::operator()(double x, TinyVector<double,4> &bfuncs)
+template<typename GridType> void
+NUBsplineBasis<GridType>::operator()(double x, TinyVector<double,4> &bfuncs)
 {
+  GridType &grid =  (*GridPtr);
   double b1[2], b2[3];
   int i = grid.ReverseMap (x);
   int i2 = i+2;
@@ -369,10 +375,32 @@ NUBsplineBasis<t>::operator()(double x, TinyVector<double,4> &bfuncs)
   bfuncs[3] = (x-xVals(i2))    * dxInv(i+2)[2] * b2[2];
 }
 
-template<typename t> void
-NUBsplineBasis<t>::Evaluate(double x, TinyVector<double,4> &bfuncs,
+template<typename GridType> void
+NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs)
+{
+  int i2 = i+2;
+  GridType &grid =  (*GridPtr);
+  double x = grid(i);
+  b1[0]     = (xVals(i2+1)-x)  * dxInv(i+2)[0];
+  b1[1]     = (x-xVals(i2))    * dxInv(i+2)[0];
+  b2[0]     = (xVals(i2+1)-x)  * dxInv(i+1)[1] * b1[0];
+  b2[1]     = ((x-xVals(i2-1)) * dxInv(i+1)[1] * b1[0]+
+	       (xVals(i2+2)-x) * dxInv(i+2)[1] * b1[1]);
+  b2[2]     = (x-xVals(i2))    * dxInv(i+2)[1] * b1[1];
+  bfuncs[0] = (xVals(i2+1)-x)  * dxInv(i  )[2] * b2[0];
+  bfuncs[1] = ((x-xVals(i2-2)) * dxInv(i  )[2] * b2[0] +
+	       (xVals(i2+2)-x) * dxInv(i+1)[2] * b2[1]);
+  bfuncs[2] = ((x-xVals(i2-1)) * dxInv(i+1)[2] * b2[1] +
+	       (xVals(i2+3)-x) * dxInv(i+2)[2] * b2[2]);
+  bfuncs[3] = (x-xVals(i2))    * dxInv(i+2)[2] * b2[2];
+}
+
+
+template<typename GridType> void
+NUBsplineBasis<GridType>::Evaluate(double x, TinyVector<double,4> &bfuncs,
 			    TinyVector<double,4> &dbfuncs)
 {
+  GridType &grid =  (*GridPtr);
   double b1[2], b2[3];
   int i = grid.ReverseMap (x);
   int i2 = i+2;
@@ -414,12 +442,13 @@ NUBsplineBasis<t>::Evaluate(double x, TinyVector<double,4> &bfuncs,
 }
 
 
-template<typename t> void
-NUBsplineBasis<t>::Evaluate(double x, 
+template<typename GridType> void
+NUBsplineBasis<GridType>::Evaluate(double x, 
 			    TinyVector<double,4> &bfuncs,
 			    TinyVector<double,4> &dbfuncs,
 			    TinyVector<double,4> &d2bfuncs)
 {
+  GridType &grid =  (*GridPtr);
   double b1[2], b2[3];
   int i = min(grid.ReverseMap (x), grid.NumPoints-1);
   int i2 = i+2;
@@ -456,6 +485,70 @@ NUBsplineBasis<t>::Evaluate(double x,
 //   d2b = 500.0*(dbp-dbm);
 //   if (d2b[0] < 10.0) 
 //     fprintf (stderr, "FD = %20.16e Ana = %20.16e\n",  d2b[3], d2bfuncs[3]);
+}
+
+
+template<typename GridType, typename T> inline void
+SolveDerivInterp1D (NUBsplineBasis<GridType> &basis,
+		    Array<T,1> data, Array<T,1> p,
+		    TinyVector<double,4> abcdInitial,
+		    TinyVector<double,4> abcdFinal)
+{
+  assert (p.size() == (data.size()+2));
+
+  // Banded matrix storage.  The first three elements in the
+  // tinyvector store the tridiagonal coefficients.  The last element
+  // stores the RHS data.
+  Array<TinyVector<double,4>,1> bands(p.size());
+  int M = data.size();
+
+  // Fill up bands
+  bands(0)          = abcdInitial;
+  bands(p.size()-1) = abcdFinal;
+  for (int i=0; i<M; i++) {
+    Basis (i, bands(i+1));
+    bands(i+1)[3] = data(i);
+  }
+    
+  // Now solve:
+  // First and last rows are different
+  bands(0)[1] /= bands(0)[0];
+  bands(0)[2] /= bands(0)[0];
+  bands(0)[3] /= bands(0)[0];
+  bands(0)[0] = 1.0;
+  bands(1)[1] -= bands(1)[0]*bands(0)[1];
+  bands(1)[2] -= bands(1)[0]*bands(0)[2];
+  bands(1)[3] -= bands(1)[0]*bands(0)[3];
+  bands(0)[0] = 0.0;
+  bands(1)[2] /= bands(1)[1];
+  bands(1)[3] /= bands(1)[1];
+  bands(1)[1] = 1.0;
+  
+  // Now do rows 2 through M+1
+  for (int row=2; row < (p.size()-1); row++) {
+    bands(row)[1] -= bands(row)[0]*bands(row-1)[2];
+    bands(row)[3] -= bands(row)[0]*bands(row-1)[3];
+    bands(row)[2] /= bands(row)[1];
+    bands(row)[3] /= bands(row)[1];
+    bands(row)[0] = 0.0;
+    bands(row)[1] = 1.0;
+  }
+
+  // Do last row
+  bands(M+1)[1] -= bands(M+1)[0]*bands(M-1)[2];
+  bands(M+1)[3] -= bands(M+1)[0]*bands(M-1)[3];
+  bands(M+1)[2] -= bands(M+1)[1]*bands(M)[2];
+  bands(M+1)[3] -= bands(M+1)[1]*bands(M)[3];
+  bands(M+1)[3] /= bands(M+1)[2];
+  bands(M+1)[2] = 1.0;
+
+  p(M+1) = bands(M+1)[3];
+  // Now back substitute up
+  for (int row=M; row>0; M--)
+    p(row) = bands(row)[3] - bands(row)[2]*p(row+1);
+  
+  // Finish with first row
+  p(0) = bands(0)[3] - bands(0)[1]*p(1) - bands(0)[2]*p(2);
 }
 
 
