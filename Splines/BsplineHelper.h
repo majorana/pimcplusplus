@@ -2,7 +2,10 @@
 #define BSPLINE_HELPER_H
 
 #include <blitz/array.h>
+#include <blitz/tinyvec.h>
 #include <blitz/tinymat.h>
+#include <blitz/tinyvec-et.h>
+//#include "../Blitz.h"
 
 using namespace blitz;
 
@@ -280,7 +283,12 @@ class NUBsplineBasis
 private:
   GridType &grid;
   inline void BuildBasis();
+  // xVals is just the grid points, augmented by two extra points on
+  // either side.  These are necessary to generate enough basis
+  // functions. 
   Array<double,1> xVals;
+  // dxInv(i)[j] = 1.0/(grid(i+j-1)-grid(i-2))
+  // This is used to avoid division in evalating the splines
   Array<TinyVector<double,3>,1> dxInv;
 public:
   inline void operator() (double x, TinyVector<double,4>& bfuncs);
@@ -309,18 +317,9 @@ NUBsplineBasis<t>::BuildBasis()
   xVals(1) = grid(0) - 1.0*(grid(1)-grid(0));
   xVals(N+2) = grid(N-1) + 1.0*(grid(N-1)-grid(N-2));
   xVals(N+3) = grid(N-1) + 2.0*(grid(N-1)-grid(N-2));
-  for (int i=0; i<N+2; i++) {
-    for (int j=0; j<3; j++) {
-      if ((i-2) <= 0)
-	dxInv(i)[j] = 1.0/(xVals(i+j+1)-xVals(i));
-      else if (i+j-1 >= N)
-	dxInv(i)[j] = 1.0/(xVals(i+j+1)-xVals(i));
-      else //((i-2)>=0) && (i+j-1)<grid.NumPoints)
-	dxInv(i)[j] = 1.0/(grid(i+j-1)-grid(i-2));
-//       else
-// 	dxInv(i)[j] = 0.0;
-    }
-  }
+  for (int i=0; i<N+2; i++) 
+    for (int j=0; j<3; j++) 
+      dxInv(i)[j] = 1.0/(xVals(i+j+1)-xVals(i));
 }
 
 
@@ -370,7 +369,94 @@ NUBsplineBasis<t>::operator()(double x, TinyVector<double,4> &bfuncs)
   bfuncs[3] = (x-xVals(i2))    * dxInv(i+2)[2] * b2[2];
 }
 
+template<typename t> void
+NUBsplineBasis<t>::Evaluate(double x, TinyVector<double,4> &bfuncs,
+			    TinyVector<double,4> &dbfuncs)
+{
+  double b1[2], b2[3];
+  int i = grid.ReverseMap (x);
+  int i2 = i+2;
 
+  b1[0]      = (xVals(i2+1)-x)  * dxInv(i+2)[0];
+  b1[1]      = (x-xVals(i2))    * dxInv(i+2)[0];
+  
+  b2[0]      = (xVals(i2+1)-x)  * dxInv(i+1)[1] * b1[0];
+  b2[1]      = ((x-xVals(i2-1)) * dxInv(i+1)[1] * b1[0]+
+		(xVals(i2+2)-x) * dxInv(i+2)[1] * b1[1]);
+  b2[2]      = (x-xVals(i2))    * dxInv(i+2)[1] * b1[1];
+  
+  bfuncs[0]  = (xVals(i2+1)-x)  * dxInv(i  )[2] * b2[0];
+  bfuncs[1]  = ((x-xVals(i2-2)) * dxInv(i  )[2] * b2[0] +
+		(xVals(i2+2)-x) * dxInv(i+1)[2] * b2[1]);
+  bfuncs[2]  = ((x-xVals(i2-1)) * dxInv(i+1)[2] * b2[1] +
+		(xVals(i2+3)-x) * dxInv(i+2)[2] * b2[2]);
+  bfuncs[3]  = (x-xVals(i2))    * dxInv(i+2)[2] * b2[2];
+
+  dbfuncs[0] = -3.0 * (dxInv(i  )[2] * b2[0]);
+  dbfuncs[1] =  3.0 * (dxInv(i  )[2] * b2[0] - dxInv(i+1)[2] * b2[1]);
+  dbfuncs[2] =  3.0 * (dxInv(i+1)[2] * b2[1] - dxInv(i+2)[2] * b2[2]);
+  dbfuncs[3] =  3.0 * (dxInv(i+2)[2] * b2[2]);
+
+  // The following is the stupid way of doing things:
+  //   double  db1[2], db2[3];
+  //   db1[0]     = -dxInv(i+2)[0];
+  //   db1[1]     =  dxInv(i+2)[0];
+  //   db2[0]     = ((xVals(i2+1)-x)  * dxInv(i+1)[1] * db1[0] - dxInv(i+1)[1] * b1[0]);
+  //   db2[1]     = (((x-xVals(i2-1)) * dxInv(i+1)[1] * db1[0] + dxInv(i+1)[1] * b1[0]) +
+  // 		((xVals(i2+2)-x) * dxInv(i+2)[1] * db1[1] - dxInv(i+2)[1] * b1[1]));
+  //   db2[2]     = ((x-xVals(i2))    * dxInv(i+2)[1] * db1[1] + dxInv(i+2)[1] * b1[1]);
+  //   dbfuncs[0] = ((xVals(i2+1)-x) * dxInv(i  )[2] * db2[0] - dxInv(i  )[2] * b2[0]);
+  //   dbfuncs[1] = ((x-xVals(i2-2)) * dxInv(i  )[2] * db2[0] + dxInv(i  )[2] * b2[0] +
+  // 		(xVals(i2+2)-x) * dxInv(i+1)[2] * db2[1] - dxInv(i+1)[2] * b2[1]);
+  //   dbfuncs[2] = ((x-xVals(i2-1)) * dxInv(i+1)[2] * db2[1] + dxInv(i+1)[2] * b2[1] +
+  // 		(xVals(i2+3)-x) * dxInv(i+2)[2] * db2[2] - dxInv(i+2)[2] * b2[2]);
+  //   dbfuncs[3] = ((x-xVals(i2))   * dxInv(i+2)[2] * db2[2] + dxInv(i+2)[2] * b2[2]);
+}
+
+
+template<typename t> void
+NUBsplineBasis<t>::Evaluate(double x, 
+			    TinyVector<double,4> &bfuncs,
+			    TinyVector<double,4> &dbfuncs,
+			    TinyVector<double,4> &d2bfuncs)
+{
+  double b1[2], b2[3];
+  int i = min(grid.ReverseMap (x), grid.NumPoints-1);
+  int i2 = i+2;
+
+  b1[0]      = (xVals(i2+1)-x)  * dxInv(i+2)[0];
+  b1[1]      = (x-xVals(i2))    * dxInv(i+2)[0];
+  
+  b2[0]      = (xVals(i2+1)-x)  * dxInv(i+1)[1] * b1[0];
+  b2[1]      = ((x-xVals(i2-1)) * dxInv(i+1)[1] * b1[0]+
+		(xVals(i2+2)-x) * dxInv(i+2)[1] * b1[1]);
+  b2[2]      = (x-xVals(i2))    * dxInv(i+2)[1] * b1[1];
+  
+  bfuncs[0]  = (xVals(i2+1)-x)  * dxInv(i  )[2] * b2[0];
+  bfuncs[1]  = ((x-xVals(i2-2)) * dxInv(i  )[2] * b2[0] +
+		(xVals(i2+2)-x) * dxInv(i+1)[2] * b2[1]);
+  bfuncs[2]  = ((x-xVals(i2-1)) * dxInv(i+1)[2] * b2[1] +
+		(xVals(i2+3)-x) * dxInv(i+2)[2] * b2[2]);
+  bfuncs[3]  = (x-xVals(i2))    * dxInv(i+2)[2] * b2[2];
+
+  dbfuncs[0] = -3.0 * (dxInv(i  )[2] * b2[0]);
+  dbfuncs[1] =  3.0 * (dxInv(i  )[2] * b2[0] - dxInv(i+1)[2] * b2[1]);
+  dbfuncs[2] =  3.0 * (dxInv(i+1)[2] * b2[1] - dxInv(i+2)[2] * b2[2]);
+  dbfuncs[3] =  3.0 * (dxInv(i+2)[2] * b2[2]);
+
+  d2bfuncs[0] = 6.0 * (+dxInv(i+0)[2]*dxInv(i+1)[1]*b1[0]);
+  d2bfuncs[1] = 6.0 * (-dxInv(i+1)[1]*(dxInv(i+0)[2]+dxInv(i+1)[2])*b1[0] +
+		       dxInv(i+1)[2]*dxInv(i+2)[1]*b1[1]);
+  d2bfuncs[2] = 6.0 * (dxInv(i+1)[2]*dxInv(i+1)[1]*b1[0] -
+		       dxInv(i+2)[1]*(dxInv(i+1)[2] + dxInv(i+2)[2])*b1[1]);
+  d2bfuncs[3] = 6.0 * (+dxInv(i+2)[2]*dxInv(i+2)[1]*b1[1]);
+//   TinyVector<double,4> b, dbp, dbm, d2b;
+//   Evaluate (x+0.001, b, dbp);
+//   Evaluate (x-0.001, b, dbm);
+//   d2b = 500.0*(dbp-dbm);
+//   if (d2b[0] < 10.0) 
+//     fprintf (stderr, "FD = %20.16e Ana = %20.16e\n",  d2b[3], d2bfuncs[3]);
+}
 
 
 #endif
