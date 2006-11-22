@@ -1,4 +1,5 @@
 #include "BsplineHelper.h"
+#include "CubicNUBspline.h"
 #include "Grid.h"
 
 void TestBasis()
@@ -10,7 +11,7 @@ void TestBasis()
   FILE *fout = fopen ("uniformBasis.dat", "w");
   TinyVector<double,4> bfuncs;
   for (double x=0.0; x<=1.0; x+=0.0001) {
-    uniform(x, bfuncs);
+    int i = uniform((double)x, bfuncs);
     fprintf (fout, "%22.16e %22.16e %22.16e %22.16e %22.16e\n",
 	     x, bfuncs[0], bfuncs[1], bfuncs[2], bfuncs[3]);
   }
@@ -42,8 +43,35 @@ void TestNUBasis()
   fclose(fout);
 }
 
+void
+TestNUBspline()
+{
+  Array<double,1> points(11);
+  points = 0.0, 1.0, 1.4, 1.8, 6.0, 7.0, 9.0, 10.0, 12.8, 13.0, 15.0;
+  GeneralGrid grid;
+  grid.Init(points);
+  Array<double,1> data(11);
+  data = sin (points);
+  
+  BoundaryCondition<double> lBC(NATURAL);
+  BoundaryCondition<double> rBC(FLAT);
+  CubicNUBspline<GeneralGrid> spline;
+  spline.Init (grid, data, lBC, rBC);
+
+  FILE *fout = fopen ("NUBspline.dat", "w");
+  for (double x=0.0; x<=15.0; x+=0.001) {
+    double y = spline (x);
+    double ex = sin(x);
+    fprintf (fout, "%20.16e %20.16e %20.16e\n", x, y, ex);
+  }
+  fclose (fout);
+
+}
+
+
 main()
 {
   TestBasis();
   TestNUBasis();
+  TestNUBspline();
 }

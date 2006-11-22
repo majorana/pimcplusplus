@@ -294,14 +294,20 @@ public:
   // Initialized xVals and dxInv.
   inline double Grid (int i) { return ((*GridPtr)(i)); }
   inline void Init(GridType *gridPtr);
-  // Evaluates the basis functions at a give value of x
-  inline void operator() (double x, TinyVector<double,4>& bfuncs);
-  inline void operator() (int i, TinyVector<double,4>& bfuncs);
+  // Evaluates the basis functions at a give value of x.  Returns the
+  // index of the first basis function
+  inline int operator() (double x, TinyVector<double,4>& bfuncs) const;
+  inline void operator() (int i, TinyVector<double,4>& bfuncs) const;
+  inline void operator() (int i, TinyVector<double,4>& bfuncs,
+			  TinyVector<double,4> &dbfuncs);
+  inline void operator() (int i, TinyVector<double,4>& bfuncs,
+			  TinyVector<double,4> &dbfuncs,
+			  TinyVector<double,4> &d2bfuncs);
   // Same as above, but also computes first derivatives
-  inline void Evaluate   (double x, TinyVector<double,4>& bfunc,
+  inline int Evaluate   (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv);
   // Same as above, but also computes second derivatives
-  inline void Evaluate   (double x, TinyVector<double,4>& bfunc,
+  inline int Evaluate   (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv,
 			  TinyVector<double,4> &deriv2);
 };
@@ -328,8 +334,8 @@ NUBsplineBasis<GridType>::Init(GridType *gridPtr)
 }
 
 
-template<typename GridType> void
-NUBsplineBasis<GridType>::operator()(double x, TinyVector<double,4> &bfuncs)
+template<typename GridType> int
+NUBsplineBasis<GridType>::operator()(double x, TinyVector<double,4> &bfuncs) const
 {
   GridType &grid =  (*GridPtr);
   double b1[2], b2[3];
@@ -373,14 +379,18 @@ NUBsplineBasis<GridType>::operator()(double x, TinyVector<double,4> &bfuncs)
   bfuncs[2] = ((x-xVals(i2-1)) * dxInv(i+1)[2] * b2[1] +
 	       (xVals(i2+3)-x) * dxInv(i+2)[2] * b2[2]);
   bfuncs[3] = (x-xVals(i2))    * dxInv(i+2)[2] * b2[2];
+  return i;
 }
 
+
 template<typename GridType> void
-NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs)
+NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs) const
 {
   int i2 = i+2;
   GridType &grid =  (*GridPtr);
+  double b1[2], b2[3];
   double x = grid(i);
+
   b1[0]     = (xVals(i2+1)-x)  * dxInv(i+2)[0];
   b1[1]     = (x-xVals(i2))    * dxInv(i+2)[0];
   b2[0]     = (xVals(i2+1)-x)  * dxInv(i+1)[1] * b1[0];
@@ -396,9 +406,9 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs)
 }
 
 
-template<typename GridType> void
+template<typename GridType> int
 NUBsplineBasis<GridType>::Evaluate(double x, TinyVector<double,4> &bfuncs,
-			    TinyVector<double,4> &dbfuncs)
+				   TinyVector<double,4> &dbfuncs)
 {
   GridType &grid =  (*GridPtr);
   double b1[2], b2[3];
@@ -425,6 +435,9 @@ NUBsplineBasis<GridType>::Evaluate(double x, TinyVector<double,4> &bfuncs,
   dbfuncs[2] =  3.0 * (dxInv(i+1)[2] * b2[1] - dxInv(i+2)[2] * b2[2]);
   dbfuncs[3] =  3.0 * (dxInv(i+2)[2] * b2[2]);
 
+  return i;
+
+
   // The following is the stupid way of doing things:
   //   double  db1[2], db2[3];
   //   db1[0]     = -dxInv(i+2)[0];
@@ -442,7 +455,36 @@ NUBsplineBasis<GridType>::Evaluate(double x, TinyVector<double,4> &bfuncs,
 }
 
 
+
 template<typename GridType> void
+NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
+				     TinyVector<double,4> &dbfuncs)
+{
+  int i2 = i+2;
+  GridType &grid =  (*GridPtr);
+  double x = grid(i);
+  double b1[2], b2[3];
+
+  b1[0]     = (xVals(i2+1)-x)  * dxInv(i+2)[0];
+  b1[1]     = (x-xVals(i2))    * dxInv(i+2)[0];
+  b2[0]     = (xVals(i2+1)-x)  * dxInv(i+1)[1] * b1[0];
+  b2[1]     = ((x-xVals(i2-1)) * dxInv(i+1)[1] * b1[0]+
+	       (xVals(i2+2)-x) * dxInv(i+2)[1] * b1[1]);
+  b2[2]     = (x-xVals(i2))    * dxInv(i+2)[1] * b1[1];
+  bfuncs[0] = (xVals(i2+1)-x)  * dxInv(i  )[2] * b2[0];
+  bfuncs[1] = ((x-xVals(i2-2)) * dxInv(i  )[2] * b2[0] +
+	       (xVals(i2+2)-x) * dxInv(i+1)[2] * b2[1]);
+  bfuncs[2] = ((x-xVals(i2-1)) * dxInv(i+1)[2] * b2[1] +
+	       (xVals(i2+3)-x) * dxInv(i+2)[2] * b2[2]);
+  bfuncs[3] = (x-xVals(i2))    * dxInv(i+2)[2] * b2[2];
+
+  dbfuncs[0] = -3.0 * (dxInv(i  )[2] * b2[0]);
+  dbfuncs[1] =  3.0 * (dxInv(i  )[2] * b2[0] - dxInv(i+1)[2] * b2[1]);
+  dbfuncs[2] =  3.0 * (dxInv(i+1)[2] * b2[1] - dxInv(i+2)[2] * b2[2]);
+  dbfuncs[3] =  3.0 * (dxInv(i+2)[2] * b2[2]);
+}
+
+template<typename GridType> int
 NUBsplineBasis<GridType>::Evaluate(double x, 
 			    TinyVector<double,4> &bfuncs,
 			    TinyVector<double,4> &dbfuncs,
@@ -479,6 +521,8 @@ NUBsplineBasis<GridType>::Evaluate(double x,
   d2bfuncs[2] = 6.0 * (dxInv(i+1)[2]*dxInv(i+1)[1]*b1[0] -
 		       dxInv(i+2)[1]*(dxInv(i+1)[2] + dxInv(i+2)[2])*b1[1]);
   d2bfuncs[3] = 6.0 * (+dxInv(i+2)[2]*dxInv(i+2)[1]*b1[1]);
+
+  return i;
 //   TinyVector<double,4> b, dbp, dbm, d2b;
 //   Evaluate (x+0.001, b, dbp);
 //   Evaluate (x-0.001, b, dbm);
@@ -486,6 +530,44 @@ NUBsplineBasis<GridType>::Evaluate(double x,
 //   if (d2b[0] < 10.0) 
 //     fprintf (stderr, "FD = %20.16e Ana = %20.16e\n",  d2b[3], d2bfuncs[3]);
 }
+
+
+template<typename GridType> void
+NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
+				     TinyVector<double,4> &dbfuncs,
+				     TinyVector<double,4> &d2bfuncs)
+{
+  int i2 = i+2;
+  GridType &grid =  (*GridPtr);
+  double x = grid(i);
+  double b1[2], b2[3];
+
+  b1[0]     = (xVals(i2+1)-x)  * dxInv(i+2)[0];
+  b1[1]     = (x-xVals(i2))    * dxInv(i+2)[0];
+  b2[0]     = (xVals(i2+1)-x)  * dxInv(i+1)[1] * b1[0];
+  b2[1]     = ((x-xVals(i2-1)) * dxInv(i+1)[1] * b1[0]+
+	       (xVals(i2+2)-x) * dxInv(i+2)[1] * b1[1]);
+  b2[2]     = (x-xVals(i2))    * dxInv(i+2)[1] * b1[1];
+  bfuncs[0] = (xVals(i2+1)-x)  * dxInv(i  )[2] * b2[0];
+  bfuncs[1] = ((x-xVals(i2-2)) * dxInv(i  )[2] * b2[0] +
+	       (xVals(i2+2)-x) * dxInv(i+1)[2] * b2[1]);
+  bfuncs[2] = ((x-xVals(i2-1)) * dxInv(i+1)[2] * b2[1] +
+	       (xVals(i2+3)-x) * dxInv(i+2)[2] * b2[2]);
+  bfuncs[3] = (x-xVals(i2))    * dxInv(i+2)[2] * b2[2];
+
+  dbfuncs[0] = -3.0 * (dxInv(i  )[2] * b2[0]);
+  dbfuncs[1] =  3.0 * (dxInv(i  )[2] * b2[0] - dxInv(i+1)[2] * b2[1]);
+  dbfuncs[2] =  3.0 * (dxInv(i+1)[2] * b2[1] - dxInv(i+2)[2] * b2[2]);
+  dbfuncs[3] =  3.0 * (dxInv(i+2)[2] * b2[2]);
+
+  d2bfuncs[0] = 6.0 * (+dxInv(i+0)[2]*dxInv(i+1)[1]*b1[0]);
+  d2bfuncs[1] = 6.0 * (-dxInv(i+1)[1]*(dxInv(i+0)[2]+dxInv(i+1)[2])*b1[0] +
+		       dxInv(i+1)[2]*dxInv(i+2)[1]*b1[1]);
+  d2bfuncs[2] = 6.0 * (dxInv(i+1)[2]*dxInv(i+1)[1]*b1[0] -
+		       dxInv(i+2)[1]*(dxInv(i+1)[2] + dxInv(i+2)[2])*b1[1]);
+  d2bfuncs[3] = 6.0 * (+dxInv(i+2)[2]*dxInv(i+2)[1]*b1[1]);
+}
+
 
 
 template<typename GridType, typename T> inline void
@@ -506,7 +588,7 @@ SolveDerivInterp1D (NUBsplineBasis<GridType> &basis,
   bands(0)          = abcdInitial;
   bands(p.size()-1) = abcdFinal;
   for (int i=0; i<M; i++) {
-    Basis (i, bands(i+1));
+    basis (i, bands(i+1));
     bands(i+1)[3] = data(i);
   }
     
@@ -544,7 +626,7 @@ SolveDerivInterp1D (NUBsplineBasis<GridType> &basis,
 
   p(M+1) = bands(M+1)[3];
   // Now back substitute up
-  for (int row=M; row>0; M--)
+  for (int row=M; row>0; row--)
     p(row) = bands(row)[3] - bands(row)[2]*p(row+1);
   
   // Finish with first row

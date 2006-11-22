@@ -27,6 +27,7 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        BsplineHelper.h                \
                        CubicBspline.cc                \
                        CubicBspline.h                 \
+                       CubicNUBspline.h               \
                        CubicSpline.h                  \
                        CubicSpline.cc                 \
                        FastCubicSpline.cc             \
