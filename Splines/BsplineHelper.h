@@ -290,10 +290,11 @@ private:
   // dxInv(i)[j] = 1.0/(grid(i+j-1)-grid(i-2))
   // This is used to avoid division in evalating the splines
   Array<TinyVector<double,3>,1> dxInv;
+  bool Periodic;
 public:
   // Initialized xVals and dxInv.
   inline double Grid (int i) { return ((*GridPtr)(i)); }
-  inline void Init(GridType *gridPtr);
+  inline void Init(GridType *gridPtr, bool periodic=false);
   // Evaluates the basis functions at a give value of x.  Returns the
   // index of the first basis function
   inline int operator() (double x, TinyVector<double,4>& bfuncs) const;
@@ -313,8 +314,9 @@ public:
 };
 
 template<typename GridType> void
-NUBsplineBasis<GridType>::Init(GridType *gridPtr)
+NUBsplineBasis<GridType>::Init(GridType *gridPtr, bool periodic)
 {
+  Periodic = periodic;
   GridPtr = gridPtr;
   GridType &grid =  (*GridPtr);
 
@@ -323,11 +325,18 @@ NUBsplineBasis<GridType>::Init(GridType *gridPtr)
   xVals.resize(N+4);
   for (int i=0; i<N; i++)
     xVals(i+2) = grid(i);
-
-  xVals(0) = grid(0) - 2.0*(grid(1)-grid(0));
-  xVals(1) = grid(0) - 1.0*(grid(1)-grid(0));
-  xVals(N+2) = grid(N-1) + 1.0*(grid(N-1)-grid(N-2));
-  xVals(N+3) = grid(N-1) + 2.0*(grid(N-1)-grid(N-2));
+  if (!Periodic) {
+    xVals(0) = grid(0) - 2.0*(grid(1)-grid(0));
+    xVals(1) = grid(0) - 1.0*(grid(1)-grid(0));
+    xVals(N+2) = grid(N-1) + 1.0*(grid(N-1)-grid(N-2));
+    xVals(N+3) = grid(N-1) + 2.0*(grid(N-1)-grid(N-2));
+  }
+  else {
+    xVals(0) = grid(N-2);
+    xVals(1) = grid(N-1);
+    xVals(N+2) = grid(0);
+    xVals(N+3) = grid(1);
+  }
   for (int i=0; i<N+2; i++) 
     for (int j=0; j<3; j++) 
       dxInv(i)[j] = 1.0/(xVals(i+j+1)-xVals(i));
