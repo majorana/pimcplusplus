@@ -81,5 +81,26 @@ CubicNUBspline<GridType>::operator()(double x) const
   return P(i)*bfuncs[0] + P(i+1)*bfuncs[1] + P(i+2)*bfuncs[2] + P(i+3)*bfuncs[3];
 }
 
+template<typename GridType>
+inline double
+CubicNUBspline<GridType>::Deriv(double x) const
+{
+  TinyVector<double,4> bfuncs, dbfuncs;
+  int i = Basis (x, bfuncs, dbfuncs);
+  return (P(i)*dbfuncs[0] + P(i+1)*dbfuncs[1] + 
+	  P(i+2)*dbfuncs[2] + P(i+3)*dbfuncs[3]);
+}
+
+template<typename GridType>
+inline double
+CubicNUBspline<GridType>::Deriv2(double x) const
+{
+  TinyVector<double,4> bfuncs, dbfuncs, d2bfuncs;
+  int i = Basis (x, bfuncs, dbfuncs, d2bfuncs);
+  return (P(i)*d2bfuncs[0] + P(i+1)*d2bfuncs[1] + 
+	  P(i+2)*d2bfuncs[2] + P(i+3)*d2bfuncs[3]);
+}
+
+
 
 #endif

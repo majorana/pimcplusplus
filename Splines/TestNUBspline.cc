@@ -64,8 +64,10 @@ TestNUBspline()
   FILE *fout = fopen ("NUBspline.dat", "w");
   for (double x=0.0; x<=15.0; x+=0.001) {
     double y = spline (x);
+    double dy = spline.Deriv(x);
+    double d2y = spline.Deriv2(x);
     double ex = sin(x);
-    fprintf (fout, "%20.16e %20.16e %20.16e\n", x, y, ex);
+    fprintf (fout, "%20.16e %20.16e %20.16e %20.16e %20.16e\n", x, y, dy, d2y, ex);
   }
   fclose (fout);
 
