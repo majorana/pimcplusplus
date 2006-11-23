@@ -34,7 +34,7 @@ SolveFirstDerivInterp1D (Array<T,1> data, Array<T,1> p)
  
   // Now go back upward, back substituting
   for (int row=M; row>=1; row--) 
-    p(row+1) = d(row) - mu(row)*p(row+1) - gamma(row)*p(N-1);
+    p(row+1) = d(row) - mu(row)*p(row+1) - gamma(row)*p(M-1);
 
   // And do 0th row
   p(0) = d(0) + p(2)*d(2);

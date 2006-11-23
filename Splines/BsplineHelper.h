@@ -297,20 +297,20 @@ public:
   inline void Init(GridType *gridPtr, bool periodic=false);
   // Evaluates the basis functions at a give value of x.  Returns the
   // index of the first basis function
-  inline int operator() (double x, TinyVector<double,4>& bfuncs) const;
+  inline int  operator() (double x, TinyVector<double,4>& bfuncs) const;
   inline void operator() (int i, TinyVector<double,4>& bfuncs) const;
   inline void operator() (int i, TinyVector<double,4>& bfuncs,
-			  TinyVector<double,4> &dbfuncs);
+			  TinyVector<double,4> &dbfuncs) const;
   inline void operator() (int i, TinyVector<double,4>& bfuncs,
 			  TinyVector<double,4> &dbfuncs,
-			  TinyVector<double,4> &d2bfuncs);
+			  TinyVector<double,4> &d2bfuncs) const;
   // Same as above, but also computes first derivatives
-  inline int Evaluate   (double x, TinyVector<double,4>& bfunc,
-			  TinyVector<double,4> &deriv);
+  inline int  operator() (double x, TinyVector<double,4>& bfunc,
+			  TinyVector<double,4> &deriv) const;
   // Same as above, but also computes second derivatives
-  inline int Evaluate   (double x, TinyVector<double,4>& bfunc,
+  inline int  operator() (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv,
-			  TinyVector<double,4> &deriv2);
+			  TinyVector<double,4> &deriv2) const;
 };
 
 template<typename GridType> void
@@ -332,10 +332,10 @@ NUBsplineBasis<GridType>::Init(GridType *gridPtr, bool periodic)
     xVals(N+3) = grid(N-1) + 2.0*(grid(N-1)-grid(N-2));
   }
   else {
-    xVals(0) = grid(N-2);
-    xVals(1) = grid(N-1);
-    xVals(N+2) = grid(0);
-    xVals(N+3) = grid(1);
+    xVals(1)   = grid(0)   - (grid(N-1) - grid(N-2));
+    xVals(0)   = grid(0)   - (grid(N-1) - grid(N-3));
+    xVals(N+2) = grid(N-1) + (grid(1)   - grid(0));
+    xVals(N+3) = grid(N-1) + (grid(2)   - grid(0));
   }
   for (int i=0; i<N+2; i++) 
     for (int j=0; j<3; j++) 
@@ -416,8 +416,8 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs) const
 
 
 template<typename GridType> int
-NUBsplineBasis<GridType>::Evaluate(double x, TinyVector<double,4> &bfuncs,
-				   TinyVector<double,4> &dbfuncs)
+NUBsplineBasis<GridType>::operator()(double x, TinyVector<double,4> &bfuncs,
+				     TinyVector<double,4> &dbfuncs) const
 {
   GridType &grid =  (*GridPtr);
   double b1[2], b2[3];
@@ -467,7 +467,7 @@ NUBsplineBasis<GridType>::Evaluate(double x, TinyVector<double,4> &bfuncs,
 
 template<typename GridType> void
 NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
-				     TinyVector<double,4> &dbfuncs)
+				     TinyVector<double,4> &dbfuncs) const
 {
   int i2 = i+2;
   GridType &grid =  (*GridPtr);
@@ -494,10 +494,10 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
 }
 
 template<typename GridType> int
-NUBsplineBasis<GridType>::Evaluate(double x, 
+NUBsplineBasis<GridType>::operator()(double x, 
 			    TinyVector<double,4> &bfuncs,
 			    TinyVector<double,4> &dbfuncs,
-			    TinyVector<double,4> &d2bfuncs)
+			    TinyVector<double,4> &d2bfuncs) const
 {
   GridType &grid =  (*GridPtr);
   double b1[2], b2[3];
@@ -533,8 +533,8 @@ NUBsplineBasis<GridType>::Evaluate(double x,
 
   return i;
 //   TinyVector<double,4> b, dbp, dbm, d2b;
-//   Evaluate (x+0.001, b, dbp);
-//   Evaluate (x-0.001, b, dbm);
+//   (*this) (x+0.001, b, dbp);
+//   (*this) (x-0.001, b, dbm);
 //   d2b = 500.0*(dbp-dbm);
 //   if (d2b[0] < 10.0) 
 //     fprintf (stderr, "FD = %20.16e Ana = %20.16e\n",  d2b[3], d2bfuncs[3]);
@@ -544,7 +544,7 @@ NUBsplineBasis<GridType>::Evaluate(double x,
 template<typename GridType> void
 NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
 				     TinyVector<double,4> &dbfuncs,
-				     TinyVector<double,4> &d2bfuncs)
+				     TinyVector<double,4> &d2bfuncs) const
 {
   int i2 = i+2;
   GridType &grid =  (*GridPtr);
@@ -642,5 +642,65 @@ SolveDerivInterp1D (NUBsplineBasis<GridType> &basis,
   p(0) = bands(0)[3] - bands(0)[1]*p(1) - bands(0)[2]*p(2);
 }
 
+template<typename GridType, typename T> inline void
+SolvePeriodicInterp1D (NUBsplineBasis<GridType> &basis,
+		       Array<T,1> data, Array<T,1> p)
+{
+  assert (p.size() == (data.size()+3));
+
+  // Banded matrix storage.  The first three elements in the
+  // tinyvector store the tridiagonal coefficients.  The last element
+  // stores the RHS data.
+  Array<TinyVector<double,4>,1> bands(data.size());
+  Array<double,1> lastCol(data.size());
+  int M = data.size();
+
+  // Fill up bands
+  for (int i=0; i<M; i++) {
+    basis (i, bands(i));
+    bands(i)[3] = data(i);
+  }
+    
+  // Now solve:
+  // First and last rows are different
+  bands(0)[2] /= bands(0)[1];
+  bands(0)[0] /= bands(0)[1];
+  bands(0)[3] /= bands(0)[1];
+  bands(0)[1]  = 1.0;
+  bands(M-1)[1] -= bands(M-1)[2]*bands(0)[0];
+  bands(M-1)[3] -= bands(M-1)[2]*bands(0)[3];
+  bands(M-1)[2]  = -bands(M-1)[2]*bands(0)[2];
+  lastCol(0) = bands(0)[0];
+  
+  for (int row=1; row < (M-1); row++) {
+    bands(row)[1] -= bands(row)[0] * bands(row-1)[2];
+    bands(row)[3] -= bands(row)[0] * bands(row-1)[3];
+    lastCol(row)   = -bands(row)[0] * lastCol(row-1);
+    bands(row)[0] = 0.0;
+    bands(row)[2] /= bands(row)[1];
+    bands(row)[3] /= bands(row)[1];
+    lastCol(row)  /= bands(row)[1];
+    bands(row)[1]  = 1.0;
+    if (row < (M-2)) {
+      bands(M-1)[3] -= bands(M-1)[2]*bands(row)[3];
+      bands(M-1)[1] -= bands(M-1)[2]*lastCol(row);
+      bands(M-1)[2] = -bands(M-1)[2]*bands(row)[2];
+    }
+  }
+
+  // Now do last row
+  // The [2] element and [0] element are now on top of each other 
+  bands(M-1)[0] += bands(M-1)[2];
+  bands(M-1)[1] -= bands(M-1)[0] * (bands(M-2)[2]+lastCol(M-2));
+  bands(M-1)[3] -= bands(M-1)[0] *  bands(M-2)[3];
+  bands(M-1)[3] /= bands(M-1)[1];
+  p(M) = bands(M-1)[3];
+  for (int row=M-2; row>=0; row--) 
+    p(row+1) = bands(row)[3] - bands(row)[2]*p(row+2) - lastCol(row)*p(M);
+  
+  p(0) = p(M);
+  p(M+1) = p(1);
+  p(M+2) = p(2);
+}
 
 #endif

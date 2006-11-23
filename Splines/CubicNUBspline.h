@@ -31,41 +31,45 @@ CubicNUBspline<GridType>::Init(GridType &grid, Array<double,1> &data,
 			       BoundaryCondition<double> startBC,
 			       BoundaryCondition<double>   endBC)
 {
-  Basis.Init(&grid);
   TinyVector<double,4> rBC, lBC, dummy1, dummy2;
   int N = grid.NumPoints;
 
-  if (startBC.GetType() == FIXED_FIRST) 
-    Basis(0, dummy1, lBC);
-  else if (startBC.GetType() == FIXED_SECOND) 
-    Basis(0, dummy1, dummy2, lBC);
-  else {
-    if (startBC.GetType() == PERIODIC) 
-      cerr << "Cannot yet do periodic NUBspline.\n";
-    else
-      cerr << "Unknown right BC type.\n";
-    abort();
-  }
-  lBC[3] = startBC.GetVal();
-
-  if (endBC.GetType() == FIXED_FIRST) 
-    Basis(N-1, dummy1, rBC);
-  else if (endBC.GetType() == FIXED_SECOND) 
-    Basis(N-1, dummy1, dummy2, rBC);
-  else {
-    if (endBC.GetType() == PERIODIC) 
-      cerr << "Cannot yet do periodic NUBspline.\n";
-    else
-      cerr << "Unknown right BC type.\n";
-    abort();
-  }
-
-  rBC[3] = endBC.GetVal();
+  if (startBC.GetType() == PERIODIC) {
+    Basis.Init(&grid, true);
   
-  P.resize(data.size()+2);
-  assert (grid.NumPoints == data.size());
-  
-  SolveDerivInterp1D (Basis, data, P, lBC, rBC);
+    assert (endBC.GetType() == PERIODIC);
+    P.resize(data.size()+3);
+    assert (grid.NumPoints == data.size()+1);
+    
+    SolvePeriodicInterp1D (Basis, data, P);
+  }
+  else {
+    Basis.Init(&grid);
+    if (startBC.GetType() == FIXED_FIRST) 
+      Basis(0, dummy1, lBC);
+    else if (startBC.GetType() == FIXED_SECOND) 
+      Basis(0, dummy1, dummy2, lBC);
+    else {
+      cerr << "Unknown right BC type.\n";
+      abort();
+    }
+    lBC[3] = startBC.GetVal();
+    
+    if (endBC.GetType() == FIXED_FIRST) 
+      Basis(N-1, dummy1, rBC);
+    else if (endBC.GetType() == FIXED_SECOND) 
+      Basis(N-1, dummy1, dummy2, rBC);
+    else {
+      cerr << "Unknown right BC type.\n";
+      abort();
+    }
+    rBC[3] = endBC.GetVal();
+    
+    P.resize(data.size()+2);
+    assert (grid.NumPoints == data.size());
+    
+    SolveDerivInterp1D (Basis, data, P, lBC, rBC);
+  }
 }
 
 template<typename GridType>

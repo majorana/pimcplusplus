@@ -32,7 +32,7 @@ void TestNUBasis()
   for (double x=0.0; x<=15.0; x+=0.001) {
 //   for (int i=0; i<grid.NumPoints; i++) {
 //     double x = grid(i);
-    nonuni.Evaluate(x, bfuncs, dbfuncs, d2bfuncs);
+    nonuni(x, bfuncs, dbfuncs, d2bfuncs);
     fprintf (fout, "%22.16e %22.16e %22.16e %22.16e %22.16e "
 	     "%22.16e %22.16e %22.16e %22.16e "
 	     "%22.16e %22.16e %22.16e %22.16e\n",
@@ -48,13 +48,16 @@ TestNUBspline()
 {
   Array<double,1> points(11);
   points = 0.0, 1.0, 1.4, 1.8, 6.0, 7.0, 9.0, 10.0, 12.8, 13.0, 15.0;
+  // points = 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0;
   GeneralGrid grid;
   grid.Init(points);
-  Array<double,1> data(11);
-  data = sin (points);
+  Array<double,1> data(10);
+  data = sin (points(Range(0,9)));
   
-  BoundaryCondition<double> lBC(NATURAL);
-  BoundaryCondition<double> rBC(FLAT);
+//   BoundaryCondition<double> lBC(NATURAL);
+//   BoundaryCondition<double> rBC(FLAT);
+  BoundaryCondition<double> lBC(PERIODIC);
+  BoundaryCondition<double> rBC(PERIODIC);
   CubicNUBspline<GeneralGrid> spline;
   spline.Init (grid, data, lBC, rBC);
 
