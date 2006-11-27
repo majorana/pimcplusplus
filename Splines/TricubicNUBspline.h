@@ -57,6 +57,9 @@ TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Init
   Mx = (xbc == PERIODIC) ? Nx+3 : Nx+2;
   My = (ybc == PERIODIC) ? Ny+3 : Ny+2;
   Mz = (zbc == PERIODIC) ? Nz+3 : Nz+2;
+  assert (xgrid->NumPoints == Mx-2);
+  assert (ygrid->NumPoints == My-2);
+  assert (zgrid->NumPoints == Mz-2);
 
   P.resize(Mx, My, Mz);
 
