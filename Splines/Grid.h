@@ -196,6 +196,7 @@ class GeneralGrid : public Grid
 };
 
 
+
 /// The OptimalGrid class stores a grid which has linear spacing at
 /// the origin and exponential spacing further out.  It has the
 /// analytic form \f[r_k = a\left(e^{kb}-1\right)\f].
@@ -368,11 +369,10 @@ class OptimalGrid2 : public Grid
 
   int ReverseMap(double r)
   {
-    r -= c;
-    if ((r/a) < 1e-6)
-      return ((int)floor(r/(a*b)+0.5));
-    else
-      return((int)floor(log(r/a + 1.0)/b + 0.5));
+//     if ((r/a) < 1e-6)
+//       return ((int)floor(r/(a*b)));
+//     else
+    return((int)floor(log1p((r-c)/a)/b));
   }
   
   /// Returns a parameter
@@ -398,9 +398,10 @@ class OptimalGrid2 : public Grid
     a = End / (exp(b*(double)NumPoints) - 1.0);  
     Start = a * (exp(b) - 1.0);
     grid.resize(NumPoints);
+    c = 0.0;
       
     for (int i=0; i<NumPoints; i++)
-      grid(i) = a*(exp(b*(i+1))-1.0);
+      grid(i) = c + a*expm1(b*i);
   }
 
   void Init (double start, double end, double ratio, int numpoints)
@@ -412,12 +413,12 @@ class OptimalGrid2 : public Grid
     
     b = log(ratio)/(double)(numpoints-2);
     c = Start;
-    a = (end - c)/(exp(b*(double)(numpoints-1)) - 1);
+    a = (end - c)/expm1(b*(double)(numpoints-1));
       
     grid.resize(NumPoints);
       
     for (int i=0; i<NumPoints; i++)
-      grid(i) = c + a*(exp(b*i)-1.0);
+      grid(i) = c + a*expm1(b*i);
   }
 
 
@@ -448,6 +449,35 @@ class OptimalGrid2 : public Grid
     Init (start,end,ratio,numPoints);
   }
 };
+
+
+class CenterGrid : public Grid
+{
+private:
+  double a, b, center;
+  int HalfPoints;
+  bool Odd;
+public:
+  void Init (double start, double end, double ratio, int numPoints) {
+    Start      = start;
+    End        = end;
+    center     = 0.5*(start + end);
+    NumPoints  = numPoints;
+    HalfPoints = numPoints/2;
+    Odd = ((HalfPoints % 2) == 1);
+    if (Odd) 
+      for (int i=-HalfPoints; i<=HalfPoints; i++) {
+	double sign = (i<0) ? -1.0 : 1.0;
+	grid(i+HalfPoints) = sign * a*expm1(b*abs(i))+center;
+      }
+    else
+      for (int i=-HalfPoints; i<=HalfPoints; i++) {
+
+      }
+  }
+
+};
+
 
 
 /// LogGrid is a function whose gridpoints increase exponentially with

@@ -1,7 +1,7 @@
 check_PROGRAMS =  TestFastCubic TestFastMultiCubic TestBicubic TestComplexMultiTricubicSpline \
                   TestGrid TestMultiTricubicSpline TestMyTricubic TestPeriodic TestQuintic    \
                   TestCubicBspline TestTricubicBspline TestBlips TestNonuniform               \
-                  TestNUBspline
+                  TestNUBspline TestTricubicNUBspline
 
 TestFastCubic_SOURCES = TestFastCubic.cc
 TestFastMultiCubic_SOURCES = TestFastMultiCubic.cc
@@ -17,6 +17,7 @@ TestTricubicBspline_SOURCES = TestTricubicBspline.cc
 TestBlips_SOURCES = TestBlips.cc
 TestNonuniform_SOURCES = TestNonuniform.cc
 TestNUBspline_SOURCES = TestNUBspline.cc
+TestTricubicNUBspline_SOURCES= = TestTricubicNUBspline.cc
 
 LDADD = ../IO/libIO.la ../PlaneWavePHDFT/libpw.la ../FFT/libfft.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(XML2_LIBS) $(BLITZ_LIBS) $(FFTW3_LIBS) $(LAPACK_LIBS)
 AM_CXXFLAGS = -g $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(FFTW3_CFLAGS)
@@ -50,6 +51,7 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        TricubicSpline.h               \
                        TricubicBspline.cc             \
                        TricubicBspline.h              \
+                       TricubicNUBspline.h           \
                        r3spline.f                     \
                        z3spline.f                     \
                        bcspeval.f                     \

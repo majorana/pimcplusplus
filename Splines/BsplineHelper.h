@@ -294,6 +294,7 @@ private:
 public:
   // Initialized xVals and dxInv.
   inline double Grid (int i) { return ((*GridPtr)(i)); }
+  inline GridType& GetGrid() { return (*GridPtr); }
   inline void Init(GridType *gridPtr, bool periodic=false);
   // Evaluates the basis functions at a give value of x.  Returns the
   // index of the first basis function
@@ -702,5 +703,10 @@ SolvePeriodicInterp1D (NUBsplineBasis<GridType> &basis,
   p(M+1) = p(1);
   p(M+2) = p(2);
 }
+
+
+
+
+
 
 #endif
