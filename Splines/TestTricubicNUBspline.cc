@@ -30,12 +30,20 @@ TestLinear()
     double z = 5.2341;
     TinyVector<double,3> r(x,y,z), Bgrad, NUBgrad;
     double Bval, NUBval, Blapl, NUBlapl;
-    Bspline.Evaluate(r, Bval, Bgrad, Blapl);
-    NUBspline.Evaluate(r, NUBval, NUBgrad, NUBlapl);
-    fprintf (Bfile, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n", 
-	     x, Bval, Bgrad[0], Bgrad[1], Bgrad[2], Blapl);
-    fprintf (NUBfile, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n", 
-	     x, NUBval, NUBgrad[0], NUBgrad[1], NUBgrad[2], NUBlapl);
+    TinyMatrix<double,3,3> B2, NUB2;
+    Bspline.Evaluate(r, Bval, Bgrad, B2);
+    NUBspline.Evaluate(r, NUBval, NUBgrad, NUB2);
+    fprintf (Bfile, "%20.16e %20.16e %20.16e %20.16e %20.16e ", 
+	     x, Bval, Bgrad[0], Bgrad[1], Bgrad[2]);
+    fprintf (NUBfile, "%20.16e %20.16e %20.16e %20.16e %20.16e ", 
+	     x, NUBval, NUBgrad[0], NUBgrad[1], NUBgrad[2]);
+    for (int i=0; i<3; i++)
+      for (int j=0; j<3; j++) {
+	fprintf (NUBfile, "%20.16e ", NUB2(i,j));
+	fprintf (Bfile, "%20.16e ", B2(i,j));
+      }
+    fprintf (Bfile, "\n");
+    fprintf (NUBfile, "\n");
   }
   fclose (NUBfile);
   fclose(Bfile);
