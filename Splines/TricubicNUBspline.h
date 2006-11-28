@@ -66,7 +66,7 @@ TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Init
   
   // Now solve interpolating equations
   
-  TinyVector<double,4> lBC, rBC, dummy1, dummy2;
+  TinyVector<T,4> lBC, rBC, dummy1, dummy2;
   ////////////////////
   // Do X direction //
   ////////////////////

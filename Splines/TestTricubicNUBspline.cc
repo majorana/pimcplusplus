@@ -65,7 +65,33 @@ TestNonlinear()
 
 }
 
+void
+TestComplexNonlinear()
+{
+  OptimalGrid2 xGrid, yGrid, zGrid;  
+  xGrid.Init (1.1, 5.5, 3.0, 22);
+  yGrid.Init (3.1, 8.3, 4.0, 25);
+  zGrid.Init (2.1, 7.9, 5.0, 26);
+  TricubicNUBspline<complex<double>, OptimalGrid2, OptimalGrid2, OptimalGrid2> spline;
+  
+  Array<complex<double>,3> data (xGrid.NumPoints-1, yGrid.NumPoints-1, zGrid.NumPoints-1);
+  for (int ix=0; ix<xGrid.NumPoints-1; ix++)
+    for (int iy=0; iy<yGrid.NumPoints-1; iy++)
+      for (int iz=0; iz<zGrid.NumPoints-1; iz++) 
+	data(ix,iy,iz) = complex<double>(2.0*(drand48()-0.5),2.0*(drand48()-0.5)); 
+  spline.Init (&xGrid, &yGrid, &zGrid, data, PERIODIC, PERIODIC, PERIODIC);
+
+  for (double x=1.1; x<=5.5; x+=0.001) {
+    double y = 3.342;
+    double z = 5.2341;
+    TinyVector<double,3> r(x,y,z);
+    complex<double> val = spline (r);
+    fprintf (stderr, "%20.16e %20.16e %20.16e\n", x, val.real(), val.imag());
+  }
+
+}
+
 main()
 {
-  TestNonlinear();
+  TestComplexNonlinear();
 }

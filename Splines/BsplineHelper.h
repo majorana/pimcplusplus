@@ -5,9 +5,11 @@
 #include <blitz/tinyvec.h>
 #include <blitz/tinymat.h>
 #include <blitz/tinyvec-et.h>
+#include <complex>
 //#include "../Blitz.h"
 
 using namespace blitz;
+using namespace std;
 
 typedef enum {PERIODIC, FIXED_FIRST, FIXED_SECOND, FLAT, NATURAL} BCType;
 
@@ -299,12 +301,6 @@ public:
   // Evaluates the basis functions at a give value of x.  Returns the
   // index of the first basis function
   inline int  operator() (double x, TinyVector<double,4>& bfuncs) const;
-  inline void operator() (int i, TinyVector<double,4>& bfuncs) const;
-  inline void operator() (int i, TinyVector<double,4>& bfuncs,
-			  TinyVector<double,4> &dbfuncs) const;
-  inline void operator() (int i, TinyVector<double,4>& bfuncs,
-			  TinyVector<double,4> &dbfuncs,
-			  TinyVector<double,4> &d2bfuncs) const;
   // Same as above, but also computes first derivatives
   inline int  operator() (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv) const;
@@ -312,6 +308,22 @@ public:
   inline int  operator() (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv,
 			  TinyVector<double,4> &deriv2) const;
+  // These versions take the grid point index.  These are needed for
+  // the boundary conditions on the interpolating equations.  The
+  // complex version return the basis functions in both the real and
+  // imaginary parts.
+  inline void operator() (int i, TinyVector<double,4>& bfuncs) const;
+  inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs) const;
+  inline void operator() (int i, TinyVector<double,4>& bfuncs,
+			  TinyVector<double,4> &dbfuncs) const;
+  inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs,
+			  TinyVector<complex<double>,4> &dbfuncs) const;
+  inline void operator() (int i, TinyVector<double,4>& bfuncs,
+			  TinyVector<double,4> &dbfuncs,
+			  TinyVector<double,4> &d2bfuncs) const;
+  inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs,
+			  TinyVector<complex<double>,4> &dbfuncs,
+			  TinyVector<complex<double>,4> &d2bfuncs) const;
 };
 
 template<typename GridType> void
@@ -415,6 +427,19 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs) const
   bfuncs[3] = (x-xVals(i2))    * dxInv(i+2)[2] * b2[2];
 }
 
+template<typename GridType> void
+NUBsplineBasis<GridType>::operator()(int i,
+				     TinyVector<complex<double>,4> &bfuncs) const
+{
+  TinyVector<double,4> funcs;
+  (*this)(i, funcs);
+  bfuncs[0] = complex<double>(funcs[0], funcs[0]);
+  bfuncs[1] = complex<double>(funcs[1], funcs[1]);
+  bfuncs[2] = complex<double>(funcs[2], funcs[2]);
+  bfuncs[3] = complex<double>(funcs[3], funcs[3]);
+}
+
+
 
 template<typename GridType> int
 NUBsplineBasis<GridType>::operator()(double x, TinyVector<double,4> &bfuncs,
@@ -494,6 +519,22 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
   dbfuncs[3] =  3.0 * (dxInv(i+2)[2] * b2[2]);
 }
 
+template<typename GridType> void
+NUBsplineBasis<GridType>::operator()(int i, TinyVector<complex<double>,4> &bfuncs,
+				     TinyVector<complex<double>,4> &dbfuncs) const
+{
+  TinyVector<double,4> funcs, dfuncs;
+  (*this)(i, funcs, dfuncs);
+  bfuncs[0]  = complex<double>(funcs[0],  funcs[0]);
+  bfuncs[1]  = complex<double>(funcs[1],  funcs[1]);
+  bfuncs[2]  = complex<double>(funcs[2],  funcs[2]);
+  bfuncs[3]  = complex<double>(funcs[3],  funcs[3]);
+  dbfuncs[0] = complex<double>(dfuncs[0], dfuncs[0]);
+  dbfuncs[1] = complex<double>(dfuncs[1], dfuncs[1]);
+  dbfuncs[2] = complex<double>(dfuncs[2], dfuncs[2]);
+  dbfuncs[3] = complex<double>(dfuncs[3], dfuncs[3]);
+}
+
 template<typename GridType> int
 NUBsplineBasis<GridType>::operator()(double x, 
 			    TinyVector<double,4> &bfuncs,
@@ -533,13 +574,29 @@ NUBsplineBasis<GridType>::operator()(double x,
   d2bfuncs[3] = 6.0 * (+dxInv(i+2)[2]*dxInv(i+2)[1]*b1[1]);
 
   return i;
-//   TinyVector<double,4> b, dbp, dbm, d2b;
-//   (*this) (x+0.001, b, dbp);
-//   (*this) (x-0.001, b, dbm);
-//   d2b = 500.0*(dbp-dbm);
-//   if (d2b[0] < 10.0) 
-//     fprintf (stderr, "FD = %20.16e Ana = %20.16e\n",  d2b[3], d2bfuncs[3]);
 }
+
+template<typename GridType> void
+NUBsplineBasis<GridType>::operator()(int i, TinyVector<complex<double>,4> &bfuncs,
+				     TinyVector<complex<double>,4> &dbfuncs,
+				     TinyVector<complex<double>,4> &d2bfuncs) const
+{
+  TinyVector<double,4> funcs, dfuncs, d2funcs;
+  (*this)(i, funcs, dfuncs, d2funcs);
+  bfuncs[0]   = complex<double>(  funcs[0],   funcs[0]);
+  bfuncs[1]   = complex<double>(  funcs[1],   funcs[1]);
+  bfuncs[2]   = complex<double>(  funcs[2],   funcs[2]);
+  bfuncs[3]   = complex<double>(  funcs[3],   funcs[3]);
+  dbfuncs[0]  = complex<double>( dfuncs[0],  dfuncs[0]);
+  dbfuncs[1]  = complex<double>( dfuncs[1],  dfuncs[1]);
+  dbfuncs[2]  = complex<double>( dfuncs[2],  dfuncs[2]);
+  dbfuncs[3]  = complex<double>( dfuncs[3],  dfuncs[3]);
+  d2bfuncs[0] = complex<double>(d2funcs[0], d2funcs[0]);
+  d2bfuncs[1] = complex<double>(d2funcs[1], d2funcs[1]);
+  d2bfuncs[2] = complex<double>(d2funcs[2], d2funcs[2]);
+  d2bfuncs[3] = complex<double>(d2funcs[3], d2funcs[3]);
+}
+
 
 
 template<typename GridType> void
@@ -583,15 +640,15 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
 template<typename GridType, typename T> inline void
 SolveDerivInterp1D (NUBsplineBasis<GridType> &basis,
 		    Array<T,1> data, Array<T,1> p,
-		    TinyVector<double,4> abcdInitial,
-		    TinyVector<double,4> abcdFinal)
+		    TinyVector<T,4> abcdInitial,
+		    TinyVector<T,4> abcdFinal)
 {
   assert (p.size() == (data.size()+2));
 
   // Banded matrix storage.  The first three elements in the
   // tinyvector store the tridiagonal coefficients.  The last element
   // stores the RHS data.
-  Array<TinyVector<double,4>,1> bands(p.size());
+  Array<TinyVector<T,4>,1> bands(p.size());
   int M = data.size();
 
   // Fill up bands
@@ -642,6 +699,50 @@ SolveDerivInterp1D (NUBsplineBasis<GridType> &basis,
   // Finish with first row
   p(0) = bands(0)[3] - bands(0)[1]*p(1) - bands(0)[2]*p(2);
 }
+
+template<typename T, int N> inline TinyVector<T,4> 
+real(TinyVector<complex<T>,N> v)
+{
+  TinyVector<T,N> rv;
+  for (int i=0; i<N; i++)
+    rv[i] = real(v[i]);
+  return rv;
+}
+
+template<typename T, int N> inline TinyVector<T,4> 
+imag(TinyVector<complex<T>,N> v)
+{
+  TinyVector<T,N> iv;
+  for (int i=0; i<N; i++)
+    iv[i] = imag(v[i]);
+  return iv;
+}
+
+
+template<typename GridType, typename T> inline void
+SolveDerivInterp1D (NUBsplineBasis<GridType> &basis,
+		    Array<complex<T>,1> data, Array<complex<T>,1> p,
+		    TinyVector<complex<T>,4> abcdInitial,
+		    TinyVector<complex<T>,4> abcdFinal)
+{
+  Array<T,1> rdata(data.size()), rp(p.size()),
+    idata(data.size()), ip(p.size());
+  TinyVector<T,4> rStartBC, iStartBC, rEndBC, iEndBC;
+  rStartBC = real(abcdInitial);
+  iStartBC = imag(abcdInitial);
+  rEndBC   = real(abcdFinal);
+  iEndBC   = imag(abcdFinal);
+  
+  for (int i=0; i<data.size(); i++){
+    rdata(i) = real(data(i));
+    idata(i) = imag(data(i));
+  }
+  SolveDerivInterp1D (basis, rdata, rp, rStartBC, rEndBC);
+  SolveDerivInterp1D (basis, idata, ip, iStartBC, iEndBC);
+  for (int i=0; i<p.size(); i++)
+    p(i) = complex<T> (rp(i), ip(i));
+}
+
 
 template<typename GridType, typename T> inline void
 SolvePeriodicInterp1D (NUBsplineBasis<GridType> &basis,
@@ -705,7 +806,22 @@ SolvePeriodicInterp1D (NUBsplineBasis<GridType> &basis,
 }
 
 
-
+template<typename GridType, typename T> inline void
+SolvePeriodicInterp1D (NUBsplineBasis<GridType> &basis,
+		       Array<complex<T>,1> data, Array<complex<T>,1> p)
+{
+  Array<T,1> rdata(data.size()), rp(p.size()),
+    idata(data.size()), ip(p.size());
+  
+  for (int i=0; i<data.size(); i++){
+    rdata(i) = real(data(i));
+    idata(i) = imag(data(i));
+  }
+  SolvePeriodicInterp1D (basis, rdata, rp);
+  SolvePeriodicInterp1D (basis, idata, ip);
+  for (int i=0; i<p.size(); i++)
+    p(i) = complex<T> (rp(i), ip(i));
+}
 
 
 
