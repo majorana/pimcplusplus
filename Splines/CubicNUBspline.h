@@ -1,6 +1,8 @@
 #ifndef CUBIC_NUB_SPLINE_H
 #define CUBIC_NUB_SPLINE_H
 
+#include "NUBsplineBasis.h"
+
 template<typename GridType>
 class CubicNUBspline
 {

@@ -2,6 +2,7 @@
 #define TRICUBIC_NUB_SPLINE_H
 
 #include "BsplineHelper.h"
+#include "NUBsplineBasis.h"
 #include "Grid.h"
 
 template<typename T, typename XGridType=LinearGrid, 
@@ -35,6 +36,23 @@ public:
 };
 
 
+void Duplicate (TinyVector<double,4> source,
+		TinyVector<complex<double>,4> dest)
+{
+  dest[0] = complex<double>(source[0], source[0]);
+  dest[1] = complex<double>(source[1], source[1]);
+  dest[2] = complex<double>(source[2], source[2]);
+  dest[3] = complex<double>(source[3], source[3]);
+}
+
+void Duplicate (TinyVector<double,4> source,
+		TinyVector<double,4> dest)
+{
+  dest = source;
+}
+
+
+
 template<typename T, typename XGridType, typename YGridType, typename ZGridType>
 void 
 TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Init
@@ -65,7 +83,6 @@ TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Init
 
   
   // Now solve interpolating equations
-  
   TinyVector<T,4> lBC, rBC, dummy1, dummy2;
   ////////////////////
   // Do X direction //

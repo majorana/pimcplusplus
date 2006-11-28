@@ -1,6 +1,5 @@
 #include "TricubicBspline.h"
 
-
 // Solve for fixed first derivative.  
 // data(0)  = dy_0/dx dx.  
 // data(1)   = y_0 and
