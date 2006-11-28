@@ -1,4 +1,5 @@
 #include "TricubicNUBspline.h"
+#include "TricubicBspline.h"
 
 void
 TestLinear()
@@ -7,21 +8,37 @@ TestLinear()
   LinearGrid yGrid (2.0, 9.0, 31);
   LinearGrid zGrid (3.1, 5.7, 19);
 
-  TricubicNUBspline<double> spline;
+  TricubicNUBspline<double> NUBspline;
+  TricubicBspline<double> Bspline;
   Array<double,3> data (xGrid.NumPoints-1, yGrid.NumPoints-1, zGrid.NumPoints-1);
   for (int ix=0; ix<xGrid.NumPoints-1; ix++)
     for (int iy=0; iy<yGrid.NumPoints-1; iy++)
       for (int iz=0; iz<zGrid.NumPoints-1; iz++) 
 	data(ix,iy,iz) = 2.0*(drand48()-0.5);
-  spline.Init (&xGrid, &yGrid, &zGrid, data);
+  Bspline.Init (xGrid.Start, xGrid.End, 
+		  yGrid.Start, yGrid.End, 
+		  zGrid.Start, zGrid.End, data);
+  NUBspline.Init (&xGrid, &yGrid, &zGrid, data);
+
+  FILE *Bfile, *NUBfile;
+  Bfile = fopen ("triB.dat", "w");
+  NUBfile = fopen ("triNUB.dat", "w");
+
 
   for (double x=1.0; x<5.0; x+=0.001) {
     double y = 2.342;
     double z = 5.2341;
-    TinyVector<double,3> r(x,y,z);
-    double val = spline (r);
-    fprintf (stderr, "%20.16e %20.16e\n", x, val);
+    TinyVector<double,3> r(x,y,z), Bgrad, NUBgrad;
+    double Bval, NUBval, Blapl;
+    Bspline.Evaluate(r, Bval, Bgrad, Blapl);
+    NUBspline.Evaluate(r, NUBval, NUBgrad);
+    fprintf (Bfile, "%20.16e %20.16e %20.16e %20.16e %20.16e\n", 
+	     x, Bval, Bgrad[0], Bgrad[1], Bgrad[2]);
+    fprintf (NUBfile, "%20.16e %20.16e %20.16e %20.16e %20.16e\n", 
+	     x, NUBval, NUBgrad[0], NUBgrad[1], NUBgrad[2]);
   }
+  fclose (NUBfile);
+  fclose(Bfile);
 
 }
 
@@ -93,5 +110,6 @@ TestComplexNonlinear()
 
 main()
 {
-  TestComplexNonlinear();
+  TestLinear();
+  //  TestComplexNonlinear();
 }

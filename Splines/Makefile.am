@@ -26,6 +26,7 @@ noinst_LTLIBRARIES = libspline.la
 libspline_la_SOURCES = BicubicSpline.h                \
                        BicubicSpline.cc               \
                        BsplineHelper.h                \
+                       BoundaryCondition.h            \
                        CubicBspline.cc                \
                        CubicBspline.h                 \
                        CubicNUBspline.h               \
@@ -43,6 +44,7 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        MultiTricubicSpline.cc         \
                        MyTricubicSpline.h             \
                        MyTricubicSpline.cc            \
+                       NUBsplineBasis.h               \
                        PeriodicSpline.h               \
                        PeriodicSpline.cc              \
                        QuinticSpline.h                \
@@ -51,7 +53,7 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        TricubicSpline.h               \
                        TricubicBspline.cc             \
                        TricubicBspline.h              \
-                       TricubicNUBspline.h           \
+                       TricubicNUBspline.h            \
                        r3spline.f                     \
                        z3spline.f                     \
                        bcspeval.f                     \
