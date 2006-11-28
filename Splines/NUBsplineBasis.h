@@ -369,189 +369,189 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
 
 
 
-// ////////////////////////////////////////////////////////////
-// //              LinearGrid specialization                 //
-// ////////////////////////////////////////////////////////////
-// template<>
-// class NUBsplineBasis<LinearGrid>
-// {
-// private:
-//   LinearGrid *GridPtr;
-//   TinyMatrix<double,4,4> A, dA, d2A, d3A;
-//   double GridStart, GridEnd, GridDelta, GridDeltaInv, L, Linv;
-//   double Periodic, Sixth, TwoThirds;
-//   inline int Find (double x) const;
-//   mutable TinyVector<double,4> tp;
-//   mutable int i0;
-// public:
-//   // Initialized xVals and dxInv.
-//   inline double Grid (int i) { return ((*GridPtr)(i)); }
-//   inline LinearGrid& GetGrid() { return (*GridPtr); }
-//   inline void Init(LinearGrid *gridPtr, bool periodic=false);
-//   // Evaluates the basis functions at a give value of x.  Returns the
-//   // index of the first basis function
-//   inline int  operator() (double x, TinyVector<double,4>& bfuncs) const;
-//   // Same as above, but also computes first derivatives
-//   inline int  operator() (double x, TinyVector<double,4>& bfunc,
-// 			  TinyVector<double,4> &deriv) const;
-//   // Same as above, but also computes second derivatives
-//   inline int  operator() (double x, TinyVector<double,4>& bfunc,
-// 			  TinyVector<double,4> &deriv,
-// 			  TinyVector<double,4> &deriv2) const;
-//   // These versions take the grid point index.  These are needed for
-//   // the boundary conditions on the interpolating equations.  The
-//   // complex version return the basis functions in both the real and
-//   // imaginary parts.
-//   inline void operator() (int i, TinyVector<double,4>& bfuncs) const;
-//   inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs) const;
-//   inline void operator() (int i, TinyVector<double,4>& bfuncs,
-// 			  TinyVector<double,4> &dbfuncs) const;
-//   inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs,
-// 			  TinyVector<complex<double>,4> &dbfuncs) const;
-//   inline void operator() (int i, TinyVector<double,4>& bfuncs,
-// 			  TinyVector<double,4> &dbfuncs,
-// 			  TinyVector<double,4> &d2bfuncs) const;
-//   inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs,
-// 			  TinyVector<complex<double>,4> &dbfuncs,
-// 			  TinyVector<complex<double>,4> &d2bfuncs) const;
-//   NUBsplineBasis();
-// };
+////////////////////////////////////////////////////////////
+//              LinearGrid specialization                 //
+////////////////////////////////////////////////////////////
+template<>
+class NUBsplineBasis<LinearGrid>
+{
+private:
+  LinearGrid *GridPtr;
+  TinyMatrix<double,4,4> A, dA, d2A, d3A;
+  double GridStart, GridEnd, GridDelta, GridDeltaInv, L, Linv;
+  double Periodic, Sixth, TwoThirds;
+  inline int Find (double x) const;
+  mutable TinyVector<double,4> tp;
+  mutable int i0;
+public:
+  // Initialized xVals and dxInv.
+  inline double Grid (int i) { return ((*GridPtr)(i)); }
+  inline LinearGrid& GetGrid() { return (*GridPtr); }
+  inline void Init(LinearGrid *gridPtr, bool periodic=false);
+  // Evaluates the basis functions at a give value of x.  Returns the
+  // index of the first basis function
+  inline int  operator() (double x, TinyVector<double,4>& bfuncs) const;
+  // Same as above, but also computes first derivatives
+  inline int  operator() (double x, TinyVector<double,4>& bfunc,
+			  TinyVector<double,4> &deriv) const;
+  // Same as above, but also computes second derivatives
+  inline int  operator() (double x, TinyVector<double,4>& bfunc,
+			  TinyVector<double,4> &deriv,
+			  TinyVector<double,4> &deriv2) const;
+  // These versions take the grid point index.  These are needed for
+  // the boundary conditions on the interpolating equations.  The
+  // complex version return the basis functions in both the real and
+  // imaginary parts.
+  inline void operator() (int i, TinyVector<double,4>& bfuncs) const;
+  inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs) const;
+  inline void operator() (int i, TinyVector<double,4>& bfuncs,
+			  TinyVector<double,4> &dbfuncs) const;
+  inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs,
+			  TinyVector<complex<double>,4> &dbfuncs) const;
+  inline void operator() (int i, TinyVector<double,4>& bfuncs,
+			  TinyVector<double,4> &dbfuncs,
+			  TinyVector<double,4> &d2bfuncs) const;
+  inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs,
+			  TinyVector<complex<double>,4> &dbfuncs,
+			  TinyVector<complex<double>,4> &d2bfuncs) const;
+  NUBsplineBasis();
+};
 
-// inline int
-// NUBsplineBasis<LinearGrid>::Find(double x) const
-// {
-//   double delta = x - GridStart;
-//   delta -= Periodic*floor(delta*Linv)*L;
-//   double fi = delta*GridDeltaInv;
-//   double ipart;
-//   double t = modf (fi, &ipart);
-//   int i = (int) ipart;
-//   tp[0] = t*t*t;
-//   tp[1] = t*t;
-//   tp[2] = t;
-//   tp[3] = 1.0;
-//   return i;
-// }
+inline int
+NUBsplineBasis<LinearGrid>::Find(double x) const
+{
+  double delta = x - GridStart;
+  delta -= Periodic*floor(delta*Linv)*L;
+  double fi = delta*GridDeltaInv;
+  double ipart;
+  double t = modf (fi, &ipart);
+  int i = (int) ipart;
+  tp[0] = t*t*t;
+  tp[1] = t*t;
+  tp[2] = t;
+  tp[3] = 1.0;
+  return i;
+}
 
-// inline int
-// NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs) const
-// {
-//   int i0 = Find(x);
-//   bfuncs[0]  = A(0,0)*tp[0] + A(1,0)*tp[1] + A(2,0)*tp[2] + A(3,0)*tp[3];
-//   bfuncs[1]  = A(0,1)*tp[0] + A(1,1)*tp[1] + A(2,1)*tp[2] + A(3,1)*tp[3];
-//   bfuncs[2]  = A(0,2)*tp[0] + A(1,2)*tp[1] + A(2,2)*tp[2] + A(3,2)*tp[3];
-//   bfuncs[3]  = A(0,3)*tp[0] + A(1,3)*tp[1] + A(2,3)*tp[2] + A(3,3)*tp[3];
+inline int
+NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs) const
+{
+  int i0 = Find(x);
+  bfuncs[0]  = A(0,0)*tp[0] + A(1,0)*tp[1] + A(2,0)*tp[2] + A(3,0)*tp[3];
+  bfuncs[1]  = A(0,1)*tp[0] + A(1,1)*tp[1] + A(2,1)*tp[2] + A(3,1)*tp[3];
+  bfuncs[2]  = A(0,2)*tp[0] + A(1,2)*tp[1] + A(2,2)*tp[2] + A(3,2)*tp[3];
+  bfuncs[3]  = A(0,3)*tp[0] + A(1,3)*tp[1] + A(2,3)*tp[2] + A(3,3)*tp[3];
 
-//   return i0;
-// }
+  return i0;
+}
 
-// inline int
-// NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs,
-// 				       TinyVector<double,4> &dbfuncs) const
-// {
-//   int i0 = Find(x);
-//   bfuncs[0]  = A(0,0)*tp[0] + A(1,0)*tp[1] + A(2,0)*tp[2] + A(3,0)*tp[3];
-//   bfuncs[1]  = A(0,1)*tp[0] + A(1,1)*tp[1] + A(2,1)*tp[2] + A(3,1)*tp[3];
-//   bfuncs[2]  = A(0,2)*tp[0] + A(1,2)*tp[1] + A(2,2)*tp[2] + A(3,2)*tp[3];
-//   bfuncs[3]  = A(0,3)*tp[0] + A(1,3)*tp[1] + A(2,3)*tp[2] + A(3,3)*tp[3];
+inline int
+NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs,
+				       TinyVector<double,4> &dbfuncs) const
+{
+  int i0 = Find(x);
+  bfuncs[0]  = A(0,0)*tp[0] + A(1,0)*tp[1] + A(2,0)*tp[2] + A(3,0)*tp[3];
+  bfuncs[1]  = A(0,1)*tp[0] + A(1,1)*tp[1] + A(2,1)*tp[2] + A(3,1)*tp[3];
+  bfuncs[2]  = A(0,2)*tp[0] + A(1,2)*tp[1] + A(2,2)*tp[2] + A(3,2)*tp[3];
+  bfuncs[3]  = A(0,3)*tp[0] + A(1,3)*tp[1] + A(2,3)*tp[2] + A(3,3)*tp[3];
 
-//   dbfuncs[0]  = GridDeltaInv*(dA(1,0)*tp[1] + dA(2,0)*tp[2] + dA(3,0)*tp[3]);
-//   dbfuncs[1]  = GridDeltaInv*(dA(1,1)*tp[1] + dA(2,1)*tp[2] + dA(3,1)*tp[3]);
-//   dbfuncs[2]  = GridDeltaInv*(dA(1,2)*tp[1] + dA(2,2)*tp[2] + dA(3,2)*tp[3]);
-//   dbfuncs[3]  = GridDeltaInv*(dA(1,3)*tp[1] + dA(2,3)*tp[2] + dA(3,3)*tp[3]);
+  dbfuncs[0]  = GridDeltaInv*(dA(1,0)*tp[1] + dA(2,0)*tp[2] + dA(3,0)*tp[3]);
+  dbfuncs[1]  = GridDeltaInv*(dA(1,1)*tp[1] + dA(2,1)*tp[2] + dA(3,1)*tp[3]);
+  dbfuncs[2]  = GridDeltaInv*(dA(1,2)*tp[1] + dA(2,2)*tp[2] + dA(3,2)*tp[3]);
+  dbfuncs[3]  = GridDeltaInv*(dA(1,3)*tp[1] + dA(2,3)*tp[2] + dA(3,3)*tp[3]);
 
-//   return i0;
-// }
+  return i0;
+}
 
-// inline int
-// NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs,
-// 				       TinyVector<double,4> &dbfuncs,
-// 				       TinyVector<double,4> &d2bfuncs) const
-// {
-//   int i0 = Find(x);
-//   bfuncs[0]  = A(0,0)*tp[0] + A(1,0)*tp[1] + A(2,0)*tp[2] + A(3,0)*tp[3];
-//   bfuncs[1]  = A(0,1)*tp[0] + A(1,1)*tp[1] + A(2,1)*tp[2] + A(3,1)*tp[3];
-//   bfuncs[2]  = A(0,2)*tp[0] + A(1,2)*tp[1] + A(2,2)*tp[2] + A(3,2)*tp[3];
-//   bfuncs[3]  = A(0,3)*tp[0] + A(1,3)*tp[1] + A(2,3)*tp[2] + A(3,3)*tp[3];
+inline int
+NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs,
+				       TinyVector<double,4> &dbfuncs,
+				       TinyVector<double,4> &d2bfuncs) const
+{
+  int i0 = Find(x);
+  bfuncs[0]  = A(0,0)*tp[0] + A(1,0)*tp[1] + A(2,0)*tp[2] + A(3,0)*tp[3];
+  bfuncs[1]  = A(0,1)*tp[0] + A(1,1)*tp[1] + A(2,1)*tp[2] + A(3,1)*tp[3];
+  bfuncs[2]  = A(0,2)*tp[0] + A(1,2)*tp[1] + A(2,2)*tp[2] + A(3,2)*tp[3];
+  bfuncs[3]  = A(0,3)*tp[0] + A(1,3)*tp[1] + A(2,3)*tp[2] + A(3,3)*tp[3];
 
-//   dbfuncs[0]  = GridDeltaInv*(dA(1,0)*tp[1] + dA(2,0)*tp[2] + dA(3,0)*tp[3]);
-//   dbfuncs[1]  = GridDeltaInv*(dA(1,1)*tp[1] + dA(2,1)*tp[2] + dA(3,1)*tp[3]);
-//   dbfuncs[2]  = GridDeltaInv*(dA(1,2)*tp[1] + dA(2,2)*tp[2] + dA(3,2)*tp[3]);
-//   dbfuncs[3]  = GridDeltaInv*(dA(1,3)*tp[1] + dA(2,3)*tp[2] + dA(3,3)*tp[3]);
+  dbfuncs[0]  = GridDeltaInv*(dA(1,0)*tp[1] + dA(2,0)*tp[2] + dA(3,0)*tp[3]);
+  dbfuncs[1]  = GridDeltaInv*(dA(1,1)*tp[1] + dA(2,1)*tp[2] + dA(3,1)*tp[3]);
+  dbfuncs[2]  = GridDeltaInv*(dA(1,2)*tp[1] + dA(2,2)*tp[2] + dA(3,2)*tp[3]);
+  dbfuncs[3]  = GridDeltaInv*(dA(1,3)*tp[1] + dA(2,3)*tp[2] + dA(3,3)*tp[3]);
 
-//   d2bfuncs[0]  = GridDeltaInv*GridDeltaInv*(d2A(2,0)*tp[2] + d2A(3,0)*tp[3]);
-//   d2bfuncs[1]  = GridDeltaInv*GridDeltaInv*(d2A(2,1)*tp[2] + d2A(3,1)*tp[3]);
-//   d2bfuncs[2]  = GridDeltaInv*GridDeltaInv*(d2A(2,2)*tp[2] + d2A(3,2)*tp[3]);
-//   d2bfuncs[3]  = GridDeltaInv*GridDeltaInv*(d2A(2,3)*tp[2] + d2A(3,3)*tp[3]);
-//   return i0;
-// }
-
-
-
-// inline void
-// NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs) const
-// {
-//   bfuncs = TinyVector<double,4> (Sixth, TwoThirds, Sixth, 0.0);
-// }
+  d2bfuncs[0]  = GridDeltaInv*GridDeltaInv*(d2A(2,0)*tp[2] + d2A(3,0)*tp[3]);
+  d2bfuncs[1]  = GridDeltaInv*GridDeltaInv*(d2A(2,1)*tp[2] + d2A(3,1)*tp[3]);
+  d2bfuncs[2]  = GridDeltaInv*GridDeltaInv*(d2A(2,2)*tp[2] + d2A(3,2)*tp[3]);
+  d2bfuncs[3]  = GridDeltaInv*GridDeltaInv*(d2A(2,3)*tp[2] + d2A(3,3)*tp[3]);
+  return i0;
+}
 
 
 
-// inline void
-// NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs,
-// 				       TinyVector<double,4> &dbfuncs) const
-// {
-//   bfuncs  = TinyVector<double,4> (Sixth, TwoThirds, Sixth, 0.0);
-//   dbfuncs = TinyVector<double,4> (-0.5, 0.0, 0.5, 0.0);
-// }
-
-// inline void
-// NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs,
-// 				       TinyVector<double,4> &dbfuncs,
-// 				       TinyVector<double,4> &d2bfuncs) const
-// {
-//   bfuncs   = TinyVector<double,4> (Sixth, TwoThirds, Sixth, 0.0);
-//   dbfuncs  = TinyVector<double,4> (-0.5, 0.0, 0.5, 0.0);
-//   d2bfuncs = TinyVector<double,4> (1.0, -2.0, 1.0, 0.0);
-// }
-
-// inline void
-// NUBsplineBasis<LinearGrid>::Init(LinearGrid *grid, bool periodic)
-// {
-//   Periodic = periodic ? 1.0 : 0.0;
-//   GridStart = grid->Start;
-//   GridEnd   = grid->End;
-//   int N = grid->NumPoints;
-//   L = GridEnd - GridStart;
-//   Linv = 1.0/L;
-//   GridDelta = L/(double)(N-1);
-//   GridDeltaInv = 1.0/GridDelta;
-// }
+inline void
+NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs) const
+{
+  bfuncs = TinyVector<double,4> (Sixth, TwoThirds, Sixth, 0.0);
+}
 
 
-// NUBsplineBasis<LinearGrid>::NUBsplineBasis()
-// {
-//   Sixth     = 1.0/6.0;
-//   TwoThirds = 2.0/3.0;
-//   A(0,0) = -1.0/6.0; A(0,1) =  3.0/6.0; A(0,2) = -3.0/6.0; A(0,3) = 1.0/6.0;
-//   A(1,0) =  3.0/6.0; A(1,1) = -6.0/6.0; A(1,2) =  3.0/6.0; A(1,3) = 0.0/6.0;
-//   A(2,0) = -3.0/6.0; A(2,1) =  0.0/6.0; A(2,2) =  3.0/6.0; A(2,3) = 0.0/6.0;
-//   A(3,0) =  1.0/6.0; A(3,1) =  4.0/6.0; A(3,2) =  1.0/6.0; A(3,3) = 0.0/6.0;
 
-//   dA(0,0)= 0.0; dA(0,1)= 0.0; dA(0,2)= 0.0; dA(0,3)= 0.0;
-//   dA(1,0)=-0.5; dA(1,1)= 1.5; dA(1,2)=-1.5; dA(1,3)= 0.5;
-//   dA(2,0)= 1.0; dA(2,1)=-2.0; dA(2,2)= 1.0; dA(2,3)= 0.0;
-//   dA(3,0)=-0.5; dA(3,1)= 0.0; dA(3,2)= 0.5; dA(3,3)= 0.0;
+inline void
+NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs,
+				       TinyVector<double,4> &dbfuncs) const
+{
+  bfuncs  = TinyVector<double,4> (Sixth, TwoThirds, Sixth, 0.0);
+  dbfuncs = TinyVector<double,4> (-0.5, 0.0, 0.5, 0.0);
+}
 
-//   d2A(0,0)= 0.0; d2A(0,1)= 0.0; d2A(0,2)= 0.0; d2A(0,3)= 0.0;
-//   d2A(1,0)= 0.0; d2A(1,1)= 0.0; d2A(1,2)= 0.0; d2A(1,3)= 0.0;
-//   d2A(2,0)=-1.0; d2A(2,1)= 3.0; d2A(2,2)=-3.0; d2A(2,3)= 1.0;
-//   d2A(3,0)= 1.0; d2A(3,1)=-2.0; d2A(3,2)= 1.0; d2A(3,3)= 0.0;
+inline void
+NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs,
+				       TinyVector<double,4> &dbfuncs,
+				       TinyVector<double,4> &d2bfuncs) const
+{
+  bfuncs   = TinyVector<double,4> (Sixth, TwoThirds, Sixth, 0.0);
+  dbfuncs  = TinyVector<double,4> (-0.5, 0.0, 0.5, 0.0);
+  d2bfuncs = TinyVector<double,4> (1.0, -2.0, 1.0, 0.0);
+}
 
-//   d3A(0,0)= 0.0; d3A(0,1)= 0.0; d3A(0,2)= 0.0; d3A(0,3)= 0.0;
-//   d3A(1,0)= 0.0; d3A(1,1)= 0.0; d3A(1,2)= 0.0; d3A(1,3)= 0.0;
-//   d3A(2,0)= 0.0; d3A(2,1)= 0.0; d3A(1,2)= 2.0; d3A(2,3)= 0.0;
-//   d3A(3,0)=-1.0; d3A(3,1)= 3.0; d3A(3,2)=-3.0; d3A(3,3)= 1.0;
-// }
+inline void
+NUBsplineBasis<LinearGrid>::Init(LinearGrid *grid, bool periodic)
+{
+  Periodic = periodic ? 1.0 : 0.0;
+  GridStart = grid->Start;
+  GridEnd   = grid->End;
+  int N = grid->NumPoints;
+  L = GridEnd - GridStart;
+  Linv = 1.0/L;
+  GridDelta = L/(double)(N-1);
+  GridDeltaInv = 1.0/GridDelta;
+}
+
+
+NUBsplineBasis<LinearGrid>::NUBsplineBasis()
+{
+  Sixth     = 1.0/6.0;
+  TwoThirds = 2.0/3.0;
+  A(0,0) = -1.0/6.0; A(0,1) =  3.0/6.0; A(0,2) = -3.0/6.0; A(0,3) = 1.0/6.0;
+  A(1,0) =  3.0/6.0; A(1,1) = -6.0/6.0; A(1,2) =  3.0/6.0; A(1,3) = 0.0/6.0;
+  A(2,0) = -3.0/6.0; A(2,1) =  0.0/6.0; A(2,2) =  3.0/6.0; A(2,3) = 0.0/6.0;
+  A(3,0) =  1.0/6.0; A(3,1) =  4.0/6.0; A(3,2) =  1.0/6.0; A(3,3) = 0.0/6.0;
+
+  dA(0,0)= 0.0; dA(0,1)= 0.0; dA(0,2)= 0.0; dA(0,3)= 0.0;
+  dA(1,0)=-0.5; dA(1,1)= 1.5; dA(1,2)=-1.5; dA(1,3)= 0.5;
+  dA(2,0)= 1.0; dA(2,1)=-2.0; dA(2,2)= 1.0; dA(2,3)= 0.0;
+  dA(3,0)=-0.5; dA(3,1)= 0.0; dA(3,2)= 0.5; dA(3,3)= 0.0;
+
+  d2A(0,0)= 0.0; d2A(0,1)= 0.0; d2A(0,2)= 0.0; d2A(0,3)= 0.0;
+  d2A(1,0)= 0.0; d2A(1,1)= 0.0; d2A(1,2)= 0.0; d2A(1,3)= 0.0;
+  d2A(2,0)=-1.0; d2A(2,1)= 3.0; d2A(2,2)=-3.0; d2A(2,3)= 1.0;
+  d2A(3,0)= 1.0; d2A(3,1)=-2.0; d2A(3,2)= 1.0; d2A(3,3)= 0.0;
+
+  d3A(0,0)= 0.0; d3A(0,1)= 0.0; d3A(0,2)= 0.0; d3A(0,3)= 0.0;
+  d3A(1,0)= 0.0; d3A(1,1)= 0.0; d3A(1,2)= 0.0; d3A(1,3)= 0.0;
+  d3A(2,0)= 0.0; d3A(2,1)= 0.0; d3A(1,2)= 2.0; d3A(2,3)= 0.0;
+  d3A(3,0)=-1.0; d3A(3,1)= 3.0; d3A(3,2)=-3.0; d3A(3,3)= 1.0;
+}
 
 
 
