@@ -29,13 +29,13 @@ TestLinear()
     double y = 2.342;
     double z = 5.2341;
     TinyVector<double,3> r(x,y,z), Bgrad, NUBgrad;
-    double Bval, NUBval, Blapl;
+    double Bval, NUBval, Blapl, NUBlapl;
     Bspline.Evaluate(r, Bval, Bgrad, Blapl);
-    NUBspline.Evaluate(r, NUBval, NUBgrad);
-    fprintf (Bfile, "%20.16e %20.16e %20.16e %20.16e %20.16e\n", 
-	     x, Bval, Bgrad[0], Bgrad[1], Bgrad[2]);
-    fprintf (NUBfile, "%20.16e %20.16e %20.16e %20.16e %20.16e\n", 
-	     x, NUBval, NUBgrad[0], NUBgrad[1], NUBgrad[2]);
+    NUBspline.Evaluate(r, NUBval, NUBgrad, NUBlapl);
+    fprintf (Bfile, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n", 
+	     x, Bval, Bgrad[0], Bgrad[1], Bgrad[2], Blapl);
+    fprintf (NUBfile, "%20.16e %20.16e %20.16e %20.16e %20.16e %20.16e\n", 
+	     x, NUBval, NUBgrad[0], NUBgrad[1], NUBgrad[2], NUBlapl);
   }
   fclose (NUBfile);
   fclose(Bfile);
