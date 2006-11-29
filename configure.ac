@@ -162,7 +162,7 @@ fi
 AC_ARG_WITH(qmc,    [  --with-qmcpack=/path/to/my/qmcpack/builddir	enable QMCPACK functionality])
 if (test "x$with_qmcpack" != "x"); then
    	QMC_DEF="-DUSE_QMC -DAPPNAMESPACE=qmcplusplus -I$with_qmcpack/src -I$with_qmcpack/../src"
-	 	QMC_LIB="$with_qmcpack/lib/libqmc.a $with_qmcpack/lib/libqmcbase.a $with_qmcpack/lib/libqmcutil.a"
+	 	QMC_LIB="$with_qmcpack/lib/liboompi.a $with_qmcpack/lib/libqmc.a $with_qmcpack/lib/libqmcdriver.a $with_qmcpack/lib/libqmcham.a $with_qmcpack/lib/libqmcwfs.a $with_qmcpack/lib/libqmcbase.a $with_qmcpack/lib/libqmcutil.a"
 else # don't link with qmcpack
     QMC_DEF=" "
 		QMC_LIB=" "
