@@ -86,6 +86,36 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
   	move_mag_sq += move(0)*move(0) + move(1)*move(1) + move(2)*move(2);
 	}
 
+  // this block is a hack to output configurations
+  // in a format for QBox
+	//int numMol = PathData.Path.numMol;
+	//int output1 = 0;
+	//int output2 = output1 + 1;
+	//if(numMoves == output1){
+	//	ofstream before("H2O.64.rigid.global.before.dat");
+	//	for(int i=0; i<numMol; i++){
+	//		dVec RO = PathData.Path(0,i);
+	//		dVec RH1 = PathData.Path(0,i+numMol);
+	//		dVec RH2 = PathData.Path(0,i+2*numMol);
+	//		before << "O" << i << " to " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
+	//		before << "H" << i << " to " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
+	//		before << "H" << i+numMol << " to " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
+	//	}
+	//	before.close();
+	//}
+	//else if(numMoves == output2){
+	//	ofstream after("H2O.64.rigid.global.after.dat");
+	//	for(int i=0; i<numMol; i++){
+	//		dVec RO = PathData.Path(0,i);
+	//		dVec RH1 = PathData.Path(0,i+numMol);
+	//		dVec RH2 = PathData.Path(0,i+2*numMol);
+	//		after << "O" << i << " to " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
+	//		after << "H" << i << " to " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
+	//		after << "H" << i+numMol << " to " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
+	//	}
+	//	after.close();
+	//}
+
   if (numMoves%10000 == 0 && numMoves>0){
     cerr << numMoves << " moves; current translate ratio is " << double(numAccepted)/numMoves << " with step size " << step << endl;
     double avg = sqrt(move_mag_sq)/numAccepted;
@@ -93,6 +123,7 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
     cerr << "TRANSLATE diffusion value is " << diff << " avg step is " << avg << endl;
   }
   numMoves++;
+
 //	if(counter == 0)
 //		cerr << endl << "I have average action " << UAction << "/" << numMoves << " = " << UAction/numMoves << endl;
 	//cerr << "+";

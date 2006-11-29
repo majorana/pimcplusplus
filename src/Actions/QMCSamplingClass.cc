@@ -15,8 +15,6 @@
 	}
 	
 	CEIMCActionClass::CEIMCActionClass(PathDataClass &pathData) : ActionBaseClass (pathData){
-	  out << "CEIMCActionClass Constructor: " << endl;
-		out.open("QMCManager.out");
 	}
 	
 	double CEIMCActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level){
@@ -26,9 +24,7 @@
 		bool newmode = false;
 		if(GetMode() == NEWMODE)
 			newmode = true;
-		out << PathData.QMCComm.MyProc() << " broadcasting newmode " << newmode << "... ";
 		PathData.QMCComm.Broadcast(0,newmode);
-		out << "done" << endl;
 		// not sure about looping over slices; not done right now
 	  //for(int slice=slice1; slice<slice2; slice++) left bracket
 		Array<string,1> setPtclSet(PathData.Path.NumSpecies());
@@ -36,19 +32,8 @@
 		if(newmode && correlated)
 			for(int s=0; s<setPtclSet.size(); s++) setPtclSet(s) = PathData.ptclSet1(s);
 		// set ion positions for either mode
-		out << "SetPtclSet contains..." << endl;
-		for(int s=0; s<setPtclSet.size(); s++){
-			out << s << " " << setPtclSet(s) << endl;
-		}
-		out << "PtclSets contain..." << endl;
-		for(int s=0; s<setPtclSet.size(); s++){
-			out << s << " " << PathData.ptclSet0(s) << ", " << PathData.ptclSet1(s) << endl;
-		}
 		int ptclSize = activeParticles.size();
-		out << "activeParticles.size is " << ptclSize << endl;
-		out << PathData.QMCComm.MyProc() << " broadcasting ptclsize " << ptclSize << "... ";
 		PathData.QMCComm.Broadcast(0,ptclSize);
-		out << "done" << endl;
 		Array<int,1> SpeciesList(ptclSize);
 		Array<int,1> OffsetList(ptclSize);
 		Array<Vec3,1> CoordList(ptclSize);
@@ -59,50 +44,44 @@
 			SpeciesList(i) = mySpecies;
 			OffsetList(i) = ptcl - offset;
 			CoordList(i) = PathData.Path(slice,ptcl);
-			out << i << "[" << ptcl << ", " << mySpecies << ", " << offset << "], ";
-			out << endl << "going to update the position of ptcl " << ptcl << " of set " << setPtclSet(mySpecies) << endl;
 		  PathData.qmc->SetPtclPos(setPtclSet(mySpecies), ptcl - offset, PathData.Path(slice,ptcl).data());
 		}
-		out << PathData.QMCComm.MyProc() << " broadcasting SpeciesList " << SpeciesList << "... ";
 		PathData.QMCComm.Broadcast(0, SpeciesList);
-		out << PathData.QMCComm.MyProc() << " broadcasting OffsetList " << OffsetList << "... ";
 		PathData.QMCComm.Broadcast(0, OffsetList);
-		out << PathData.QMCComm.MyProc() << " broadcasting CoordList " << CoordList << "... ";
 		PathData.QMCComm.Broadcast(0, CoordList);
 
+    bool isNewDriver = true;
 		if(correlated){
 			if(newmode){
 				if(QMCMethod == "VMC"){
-					out << "  QMCAction: Setting up VMCMultiple run...";
 	  			PathData.qmc->SetVMCMultiple(dt, walkers, steps, blocks);
-					out << " done." << endl;
 				} else if (QMCMethod == "RQMC"){
-					out << "  QMCAction: Setting up RQMCMultiple run...";
-	  			PathData.qmc->SetRQMCMultiple(dt, chains, steps, blocks);
-					out << " done." << endl;
+	  			isNewDriver = PathData.qmc->SetRQMCMultiple(dt, chains, steps, blocks);
 				} else {
 					cerr << "QMCMethod " << QMCMethod << " not recognized." << endl;
 					assert(0);
 				}
 	
-	  		PathData.qmc->process();
+        if(isNewDriver){
+	  		  PathData.qmc->process();
 	
-				EnergyDiffIndex = PathData.qmc->qmcDriver->addObservable("DiffS0S1");
-				EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LE0");
-				EnergyIndex1 = PathData.qmc->qmcDriver->addObservable("LE1");
-				out << "  QMCAction: calling execute...";
-				cerr << "  QMCAction: calling execute..." << endl;
+				  EnergyDiffIndex = PathData.qmc->qmcDriver->addObservable("DiffS0S1");
+				  EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LE0");
+				  EnergyIndex1 = PathData.qmc->qmcDriver->addObservable("LE1");
+				  //WeightIndex0 = PathData.qmc->qmcDriver->addObservable("WPsi0");
+				  //WeightIndex1 = PathData.qmc->qmcDriver->addObservable("WPsi1");
+        }
+        else{
+          PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
+          PathData.qmc->qmcDriver->Estimators->reset();
+        }
 	  		PathData.qmc->execute();
-				out << " done." << endl;
 			}
 		}
 		else {
-			cerr << " QMCACtion: IN UNCORRELATED" << endl;
 	  	PathData.qmc->SetVMC(dt, walkers, steps, blocks);
 			PathData.qmc->process();
 			EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LocalEnergy");
-			out << "  QMCAction: calling VMC execute...";
-			cerr << "  QMCAction: calling VMC execute..." << endl;
 	  	PathData.qmc->execute();
 		}
 
@@ -110,28 +89,17 @@
 	
 		if(correlated){
 			if(newmode){
-				out << "going to collect energy differences" << endl;
 				PathData.qmc->qmcDriver->Estimators->getData(EnergyDiffIndex,Uvalues); // get energy difference
-				out << "got " << Uvalues.size() << " for myself" << endl;
-				out << "Now collect from " << PathData.QMCComm.NumProcs() << " processes" << endl;
 				for(int q=1; q<PathData.QMCComm.NumProcs(); q++){
-					//vector<double>* DataBuff;
-					out << "receiving from " << q << ": expecting " << blocks << " entries" << endl;
-					//PathData.QMCComm.Receive (DataBuff, blocks, MPI_DOUBLE, q, 9);
 					Array<double, 1> DataBuff(blocks);
 					PathData.QMCComm.Receive (q,DataBuff);
-					out << " complete.  Got " << DataBuff.size() << " entries: " << DataBuff << endl;
-					//for(int f=0; f<DataBuff.size(); f++) out << DataBuff[f] << ", ";
-					//out << "]]]" << endl;
 					for(int e=0; e<DataBuff.size(); e++){
 						Uvalues.push_back(DataBuff(e));
 					}
-					out << "now Uvalues has " << Uvalues.size() << " entries" << endl;
 				}
-				out << "completed loop over receives" << endl;
 				double deltaE, variance;
 				QuickAvg(&Uvalues,deltaE,variance);
-				out << "	computed average " << deltaE << " with variance " << variance << " from " << Uvalues.size() << " entries." << endl;
+				cerr << "	computed average " << deltaE << " with variance " << variance << " from " << Uvalues.size() << " entries." << endl;
   			Utotal += (deltaE + PathData.Path.tau*variance/2); // penalty included
   			//Utotal += deltaE; // no penalty; biased estimator
 			}
@@ -147,90 +115,13 @@
 			}
 			double E, variance;
 			QuickAvg(&Uvalues,E,variance);
-			out << "	computed average " << E << " with variance " << variance << " from " << Uvalues.size() << " entries." << endl;
+			cerr << "	computed average " << E << " with variance " << variance << " from " << Uvalues.size() << " entries." << endl;
 	  	Utotal += E; // no penalty
 		}
 	  // end slice for loop
-		out << "QMCAction returning..." << endl;
 		return Utotal*PathData.Path.tau;
 	}
 
-	/*
-	// I think I can scrap this, but just in case...
-	double CEIMCActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level){
-	  double Utotal = 0.0;
-	  double U;
-		int slice = 0;
-		// not sure about looping over slices; not done right now
-	  //for(int slice=slice1; slice<slice2; slice++) left bracket
-		Array<string,1> setPtclSet(PathData.Path.NumSpecies());
-		for(int s=0; s<setPtclSet.size(); s++) setPtclSet(s) = ptclSet0(s);
-		if((GetMode() == NEWMODE) && correlated)
-			for(int s=0; s<setPtclSet.size(); s++) setPtclSet(s) = ptclSet1(s);
-		// set ion positions for either mode
-		out << "SetPtclSet contains..." << endl;
-		for(int s=0; s<setPtclSet.size(); s++){
-			out << s << " " << setPtclSet(s) << endl;
-		}
-		out << "PtclSets contain..." << endl;
-		for(int s=0; s<setPtclSet.size(); s++){
-			out << s << " " << ptclSet0(s) << ", " << ptclSet1(s) << endl;
-		}
-		out << "activeParticles.size is " << activeParticles.size() << endl;
-		for(int i=0; i<activeParticles.size(); i++){
-		  int ptcl = activeParticles(i);
-			int mySpecies = PathData.Path.ParticleSpeciesNum(ptcl);
-			int offset = PathData.Path.Species(mySpecies).FirstPtcl;
-			out << i << "[" << ptcl << ", " << mySpecies << ", " << offset << "], ";
-			out << endl << "going to update the position of ptcl " << ptcl << " of set " << setPtclSet(mySpecies) << endl;
-		  PathData.qmc->SetPtclPos(setPtclSet(mySpecies), ptcl - offset, PathData.Path(slice,ptcl).data());
-		}
-
-		if(correlated){
-			if(GetMode() == NEWMODE){
-				//out << "  QMCAction: Setting up VMCMultiple run...";
-	  		PathData.qmc->SetVMCMultiple(dt, walkers, steps, blocks);
-				//out << " done." << endl;
-	
-	  		PathData.qmc->process();
-	
-				EnergyDiffIndex = PathData.qmc->qmcDriver->addObservable("DiffS0S1");
-				EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LE0");
-				EnergyIndex1 = PathData.qmc->qmcDriver->addObservable("LE1");
-	  		PathData.qmc->execute();
-			}
-		}
-		else {
-	  	PathData.qmc->SetVMC(dt, walkers, steps, blocks);
-			PathData.qmc->process();
-			EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LocalEnergy");
-	  	PathData.qmc->execute();
-		}
-
-		vector<double> Uvalues;
-	
-		if(correlated){
-			if(GetMode() == NEWMODE){
-				PathData.qmc->qmcDriver->Estimators->getData(EnergyDiffIndex,Uvalues); // get energy difference
-				double deltaE, variance;
-				QuickAvg(&Uvalues,deltaE,variance);
-				out << "	computed average " << deltaE << " with variance " << variance << " from " << Uvalues.size() << " entries." << endl;
-  			Utotal += (deltaE + PathData.Path.tau*variance/2); // penalty included
-  			//Utotal += deltaE; // no penalty; biased estimator
-			}
-		}
-		else{
-			PathData.qmc->qmcDriver->Estimators->getData(EnergyIndex0,Uvalues); // get energy
-			double E, variance;
-			QuickAvg(&Uvalues,E,variance);
-			out << "	computed average " << E << " with variance " << variance << " from " << Uvalues.size() << " entries." << endl;
-	  	Utotal += E;
-		}
-	  // end slice for loop
-		return Utotal*PathData.Path.tau;
-	}
-	*/
-	
 	void QuickAvg(std::vector<double>* values, double& avg, double& var){
 	  double total = 0.0;
 		double totalSq = 0.0;
@@ -246,39 +137,37 @@
 	}
 	
 	double CEIMCActionClass::d_dBeta (int slice1, int slice2, int level){
-		cerr << "dBeta Parameters are " << dt << " " << walkers << " " << steps << " " << blocks << endl;
 	  double Utotal = 0.0;
+    bool isNewDriver = true;
+    string energyObs;
 	  for(int slice=slice1; slice<slice2; slice++){
-	  	PathData.qmc->SetVMC(dt, walkers, steps, blocks);
+      if(QMCMethod == "VMC"){
+	  	  PathData.qmc->SetVMC(dt, walkers, steps, blocks);
+        energyObs = "LocalEnergy";
+      }else if (QMCMethod == "RQMC"){
+	  	  isNewDriver = PathData.qmc->SetRQMCMultiple(dt, chains, steps, blocks);
+        energyObs = "LE0";
+      }
+      if(isNewDriver)
+	  	  PathData.qmc->process();
+       else
+         PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
+         PathData.qmc->qmcDriver->Estimators->reset();
 	
-	  	PathData.qmc->process();
 	
-			EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LocalEnergy");
+			EnergyIndex0 = PathData.qmc->qmcDriver->addObservable(energyObs);
 	  	PathData.qmc->execute();
 	
 			vector<double> Evalues;
 			PathData.qmc->qmcDriver->Estimators->getData(EnergyIndex0,Evalues); // get energy difference
 			double Uavg, variance;
 			QuickAvg(&Evalues,Uavg,variance);
-			out << "	ENERGY computed average " << Uavg << " with variance " << variance << " from " << Evalues.size() << " entries." << endl;
 	    Utotal += Uavg;
 	  }
-		cerr << "Leaving dBeta" << endl;
 	  return Utotal;
 	}
 	
 	void CEIMCActionClass::Read (IOSectionClass &in){
-		//out << "In CEIMCActionClass::Read.  Got indices" << endl;
-		//EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LE0");
-		//assert(EnergyIndex0 != -1);
-		//EnergyIndex1 = PathData.qmc->qmcDriver->addObservable("LE1");
-		//assert(EnergyIndex1 != -1);
-		//EnergyDiffIndex = PathData.qmc->qmcDriver->addObservable("DiffS0S1");
-		//assert(EnergyDiffIndex != -1);
-		//out << "EnergyIndex0 at " << EnergyIndex0 << endl;
-		//out << "EnergyIndex1 at " << EnergyIndex1 << endl;
-		//out << "EnergyDiffIndex at " << EnergyDiffIndex << endl;
-
 		QMCMethod = PathData.QMCMethod;
 		dt = PathData.dt;
 		chains =  PathData.chains;

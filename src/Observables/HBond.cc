@@ -68,9 +68,10 @@ void HbondClass::Read(IOSectionClass& in)
   BondCount=0;
 	cerr << "resized BondCount: " << BondCount.size() << endl;
 
-	string ProtonSpecies = "p";
+	string ProtonSpecies = "H";
 	in.ReadVar("ProtonSpecies",ProtonSpecies);
 	Protons.resize(PathData.Path.numMol, 2);
+	int totalFound = 0;
 	for(int m=0; m<PathData.Path.numMol; m++){
 		int foundIndex = 0;
   	for (int a = 0; a < PathData.Path.MolMembers(m).size(); a++){
@@ -78,9 +79,11 @@ void HbondClass::Read(IOSectionClass& in)
 			if(PathData.Path.ParticleSpeciesNum(ptcl) == PathData.Path.SpeciesNum(ProtonSpecies)){
 				Protons(m, foundIndex) = ptcl;
 				foundIndex++;
+				totalFound++;
 			}
 		}
 	}
+	assert(totalFound != 0);
 
   bool readStartGrid=in.ReadVar("start",gridStart);
   if (!readStartGrid)
