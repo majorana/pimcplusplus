@@ -24,7 +24,8 @@ using namespace IO;
 //Ken's Grid Class
 
 /// The different types of grids that we currently allow
-typedef enum {NONE, LINEAR, OPTIMAL, OPTIMAL2, LOG, CLUSTER, GENERAL} GridType;
+typedef enum {NONE, LINEAR, OPTIMAL, OPTIMAL2, LOG, 
+	      CLUSTER, GENERAL, CENTER} GridType;
 
 
 /// Parent class for all grids
@@ -457,23 +458,51 @@ private:
   double a, b, center;
   int HalfPoints;
   bool Odd;
+  double EvenHalf;
 public:
+  // ratio gives approximately the largest grid spacing divided by the
+  // smallest. 
+  GridType Type()
+  { return CENTER; }
+
+  int ReverseMap (double x)
+  {
+    x -= center;
+    if (x < 0.0) 
+      return HalfPoints - floor (log1p(fabs(x)/a)+EvenHalf);
+    else 
+      return HalfPoints + floor (log1p(fabs(x)/a)+EvenHalf);
+  }
+  void Write (IOSectionClass &out) {
+  }
+  void Read  (IOSectionClass &in) {
+  }
   void Init (double start, double end, double ratio, int numPoints) {
+    assert (ratio > 1.0);
     Start      = start;
     End        = end;
     center     = 0.5*(start + end);
     NumPoints  = numPoints;
     HalfPoints = numPoints/2;
-    Odd = ((HalfPoints % 2) == 1);
-    if (Odd) 
+    Odd = ((numPoints % 2) == 1);
+    b = log(ratio) / (double)(HalfPoints-1);
+    grid.resize(numPoints);
+    if (Odd) {
+      EvenHalf = 0.0;
+      a = 0.5*(end-start)/expm1(b*HalfPoints);
       for (int i=-HalfPoints; i<=HalfPoints; i++) {
 	double sign = (i<0) ? -1.0 : 1.0;
 	grid(i+HalfPoints) = sign * a*expm1(b*abs(i))+center;
       }
-    else
-      for (int i=-HalfPoints; i<=HalfPoints; i++) {
-
+    }
+    else {
+      EvenHalf = 0.5;
+      a = 0.5*(end-start)/expm1(b*(-0.5+HalfPoints));
+      for (int i=-HalfPoints; i<HalfPoints; i++) {
+	double sign = (i<0) ? -1.0 : 1.0;
+	grid(i+HalfPoints) = sign * a*expm1(b*fabs(0.5+i)) + center;
       }
+    }
   }
 
 };

@@ -179,12 +179,19 @@ void SpeedTest()
 
 }
 
-
+void TestCenterGrid()
+{
+  CenterGrid grid;
+  grid.Init (-2.0, 2.0, 10, 50);
+  for (int i=0; i<50; i++)
+    fprintf (stderr, "%22.16e\n", grid(i));
+}
 
 
 main()
 {
-  SpeedTest();
+  //  SpeedTest();
+  TestCenterGrid();
   //  TestLinear();
   //  TestComplexNonlinear();
 }
