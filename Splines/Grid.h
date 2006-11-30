@@ -455,10 +455,11 @@ class OptimalGrid2 : public Grid
 class CenterGrid : public Grid
 {
 private:
-  double a, b, center;
+  double a, aInv, b, bInv, center;
   int HalfPoints;
   bool Odd;
   double EvenHalf;
+  int OddOne;
 public:
   // ratio gives approximately the largest grid spacing divided by the
   // smallest. 
@@ -468,10 +469,8 @@ public:
   int ReverseMap (double x)
   {
     x -= center;
-    if (x < 0.0) 
-      return HalfPoints - floor (log1p(fabs(x)/a)+EvenHalf);
-    else 
-      return HalfPoints + floor (log1p(fabs(x)/a)+EvenHalf);
+    double index = copysign (log1p(fabs(x)*aInv)*bInv, x);
+    return (int)floor(HalfPoints + index - EvenHalf);
   }
   void Write (IOSectionClass &out) {
   }
@@ -486,18 +485,21 @@ public:
     HalfPoints = numPoints/2;
     Odd = ((numPoints % 2) == 1);
     b = log(ratio) / (double)(HalfPoints-1);
+    bInv = 1.0/b;
     grid.resize(numPoints);
     if (Odd) {
-      EvenHalf = 0.0;
+      EvenHalf = 0.0;  OddOne = 1;
       a = 0.5*(end-start)/expm1(b*HalfPoints);
+      aInv = 1.0/a;
       for (int i=-HalfPoints; i<=HalfPoints; i++) {
 	double sign = (i<0) ? -1.0 : 1.0;
 	grid(i+HalfPoints) = sign * a*expm1(b*abs(i))+center;
       }
     }
     else {
-      EvenHalf = 0.5;
+      EvenHalf = 0.5;  OddOne = 0;
       a = 0.5*(end-start)/expm1(b*(-0.5+HalfPoints));
+      aInv = 1.0/a;
       for (int i=-HalfPoints; i<HalfPoints; i++) {
 	double sign = (i<0) ? -1.0 : 1.0;
 	grid(i+HalfPoints) = sign * a*expm1(b*fabs(0.5+i)) + center;

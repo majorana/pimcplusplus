@@ -374,113 +374,109 @@ TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Evaluate
   int iy0 = YBasis(r[1], b, db, d2b); int iy1=iy0+1; int iy2=iy0+2; int iy3=iy0+3;
   int iz0 = ZBasis(r[2], c, dc, d2c); int iz1=iz0+1; int iz2=iz0+2; int iz3=iz0+3;
 
-  T Pi[64], cP[16], dcP[16], bcP[4], bdcP[4];
-  // First, preload spline coefs into cache
-  Pi[ 0]=P(ix0,iy0,iz0);  Pi[ 1]=P(ix0,iy0,iz1);  Pi[ 2]=P(ix0,iy0,iz2);  Pi[ 3]=P(ix0,iy0,iz3);
-  Pi[ 4]=P(ix0,iy1,iz0);  Pi[ 5]=P(ix0,iy1,iz1);  Pi[ 6]=P(ix0,iy1,iz2);  Pi[ 7]=P(ix0,iy1,iz3);
-  Pi[ 8]=P(ix0,iy2,iz0);  Pi[ 9]=P(ix0,iy2,iz1);  Pi[10]=P(ix0,iy2,iz2);  Pi[11]=P(ix0,iy2,iz3);
-  Pi[12]=P(ix0,iy3,iz0);  Pi[13]=P(ix0,iy3,iz1);  Pi[14]=P(ix0,iy3,iz2);  Pi[15]=P(ix0,iy3,iz3);
-  Pi[16]=P(ix1,iy0,iz0);  Pi[17]=P(ix1,iy0,iz1);  Pi[18]=P(ix1,iy0,iz2);  Pi[19]=P(ix1,iy0,iz3);
-  Pi[20]=P(ix1,iy1,iz0);  Pi[21]=P(ix1,iy1,iz1);  Pi[22]=P(ix1,iy1,iz2);  Pi[23]=P(ix1,iy1,iz3);
-  Pi[24]=P(ix1,iy2,iz0);  Pi[25]=P(ix1,iy2,iz1);  Pi[26]=P(ix1,iy2,iz2);  Pi[27]=P(ix1,iy2,iz3);
-  Pi[28]=P(ix1,iy3,iz0);  Pi[29]=P(ix1,iy3,iz1);  Pi[30]=P(ix1,iy3,iz2);  Pi[31]=P(ix1,iy3,iz3);
-  Pi[32]=P(ix2,iy0,iz0);  Pi[33]=P(ix2,iy0,iz1);  Pi[34]=P(ix2,iy0,iz2);  Pi[35]=P(ix2,iy0,iz3);
-  Pi[36]=P(ix2,iy1,iz0);  Pi[37]=P(ix2,iy1,iz1);  Pi[38]=P(ix2,iy1,iz2);  Pi[39]=P(ix2,iy1,iz3);
-  Pi[40]=P(ix2,iy2,iz0);  Pi[41]=P(ix2,iy2,iz1);  Pi[42]=P(ix2,iy2,iz2);  Pi[43]=P(ix2,iy2,iz3);
-  Pi[44]=P(ix2,iy3,iz0);  Pi[45]=P(ix2,iy3,iz1);  Pi[46]=P(ix2,iy3,iz2);  Pi[47]=P(ix2,iy3,iz3);
-  Pi[48]=P(ix3,iy0,iz0);  Pi[49]=P(ix3,iy0,iz1);  Pi[50]=P(ix3,iy0,iz2);  Pi[51]=P(ix3,iy0,iz3);
-  Pi[52]=P(ix3,iy1,iz0);  Pi[53]=P(ix3,iy1,iz1);  Pi[54]=P(ix3,iy1,iz2);  Pi[55]=P(ix3,iy1,iz3);
-  Pi[56]=P(ix3,iy2,iz0);  Pi[57]=P(ix3,iy2,iz1);  Pi[58]=P(ix3,iy2,iz2);  Pi[59]=P(ix3,iy2,iz3);
-  Pi[60]=P(ix3,iy3,iz0);  Pi[61]=P(ix3,iy3,iz1);  Pi[62]=P(ix3,iy3,iz2);  Pi[63]=P(ix3,iy3,iz3);
+  // Save some operations by factorizing computation.
+  TinyMatrix<T,4,4> cP, dcP;
+  cP(0,0) = c[0]*P(ix0,iy0,iz0)+c[1]*P(ix0,iy0,iz1)+c[2]*P(ix0,iy0,iz2)+c[3]*P(ix0,iy0,iz3);
+  cP(0,1) = c[0]*P(ix0,iy1,iz0)+c[1]*P(ix0,iy1,iz1)+c[2]*P(ix0,iy1,iz2)+c[3]*P(ix0,iy1,iz3);
+  cP(0,2) = c[0]*P(ix0,iy2,iz0)+c[1]*P(ix0,iy2,iz1)+c[2]*P(ix0,iy2,iz2)+c[3]*P(ix0,iy2,iz3);
+  cP(0,3) = c[0]*P(ix0,iy3,iz0)+c[1]*P(ix0,iy3,iz1)+c[2]*P(ix0,iy3,iz2)+c[3]*P(ix0,iy3,iz3);
+  cP(1,0) = c[0]*P(ix1,iy0,iz0)+c[1]*P(ix1,iy0,iz1)+c[2]*P(ix1,iy0,iz2)+c[3]*P(ix1,iy0,iz3);
+  cP(1,1) = c[0]*P(ix1,iy1,iz0)+c[1]*P(ix1,iy1,iz1)+c[2]*P(ix1,iy1,iz2)+c[3]*P(ix1,iy1,iz3); 
+  cP(1,2) = c[0]*P(ix1,iy2,iz0)+c[1]*P(ix1,iy2,iz1)+c[2]*P(ix1,iy2,iz2)+c[3]*P(ix1,iy2,iz3);
+  cP(1,3) = c[0]*P(ix1,iy3,iz0)+c[1]*P(ix1,iy3,iz1)+c[2]*P(ix1,iy3,iz2)+c[3]*P(ix1,iy3,iz3);
+  cP(2,0) = c[0]*P(ix2,iy0,iz0)+c[1]*P(ix2,iy0,iz1)+c[2]*P(ix2,iy0,iz2)+c[3]*P(ix2,iy0,iz3);
+  cP(2,1) = c[0]*P(ix2,iy1,iz0)+c[1]*P(ix2,iy1,iz1)+c[2]*P(ix2,iy1,iz2)+c[3]*P(ix2,iy1,iz3);
+  cP(2,2) = c[0]*P(ix2,iy2,iz0)+c[1]*P(ix2,iy2,iz1)+c[2]*P(ix2,iy2,iz2)+c[3]*P(ix2,iy2,iz3);
+  cP(2,3) = c[0]*P(ix2,iy3,iz0)+c[1]*P(ix2,iy3,iz1)+c[2]*P(ix2,iy3,iz2)+c[3]*P(ix2,iy3,iz3);
+  cP(3,0) = c[0]*P(ix3,iy0,iz0)+c[1]*P(ix3,iy0,iz1)+c[2]*P(ix3,iy0,iz2)+c[3]*P(ix3,iy0,iz3);
+  cP(3,1) = c[0]*P(ix3,iy1,iz0)+c[1]*P(ix3,iy1,iz1)+c[2]*P(ix3,iy1,iz2)+c[3]*P(ix3,iy1,iz3);
+  cP(3,2) = c[0]*P(ix3,iy2,iz0)+c[1]*P(ix3,iy2,iz1)+c[2]*P(ix3,iy2,iz2)+c[3]*P(ix3,iy2,iz3);
+  cP(3,3) = c[0]*P(ix3,iy3,iz0)+c[1]*P(ix3,iy3,iz1)+c[2]*P(ix3,iy3,iz2)+c[3]*P(ix3,iy3,iz3);
 
-  // Now plow through 3 times
-  cP[ 0] = c[0]*Pi[ 0] + c[1]*Pi[ 1] + c[2]*Pi[ 2] + c[3]*Pi[ 3];
-  cP[ 1] = c[0]*Pi[ 4] + c[1]*Pi[ 5] + c[2]*Pi[ 6] + c[3]*Pi[ 7];
-  cP[ 2] = c[0]*Pi[ 8] + c[1]*Pi[ 9] + c[2]*Pi[10] + c[3]*Pi[11];
-  cP[ 3] = c[0]*Pi[12] + c[1]*Pi[13] + c[2]*Pi[14] + c[3]*Pi[15];
-  cP[ 4] = c[0]*Pi[16] + c[1]*Pi[17] + c[2]*Pi[18] + c[3]*Pi[19];
-  cP[ 5] = c[0]*Pi[20] + c[1]*Pi[21] + c[2]*Pi[22] + c[3]*Pi[23];
-  cP[ 6] = c[0]*Pi[24] + c[1]*Pi[25] + c[2]*Pi[26] + c[3]*Pi[27];
-  cP[ 7] = c[0]*Pi[28] + c[1]*Pi[29] + c[2]*Pi[30] + c[3]*Pi[31];
-  cP[ 8] = c[0]*Pi[32] + c[1]*Pi[33] + c[2]*Pi[34] + c[3]*Pi[35];
-  cP[ 9] = c[0]*Pi[36] + c[1]*Pi[37] + c[2]*Pi[38] + c[3]*Pi[39];
-  cP[10] = c[0]*Pi[40] + c[1]*Pi[41] + c[2]*Pi[42] + c[3]*Pi[43];
-  cP[11] = c[0]*Pi[44] + c[1]*Pi[45] + c[2]*Pi[46] + c[3]*Pi[47];
-  cP[12] = c[0]*Pi[48] + c[1]*Pi[49] + c[2]*Pi[50] + c[3]*Pi[51];
-  cP[13] = c[0]*Pi[52] + c[1]*Pi[53] + c[2]*Pi[54] + c[3]*Pi[55];
-  cP[14] = c[0]*Pi[56] + c[1]*Pi[57] + c[2]*Pi[58] + c[3]*Pi[59];
-  cP[15] = c[0]*Pi[60] + c[1]*Pi[61] + c[2]*Pi[62] + c[3]*Pi[63];
+  dcP(0,0) = dc[0]*P(ix0,iy0,iz0)+dc[1]*P(ix0,iy0,iz1)+dc[2]*P(ix0,iy0,iz2)+dc[3]*P(ix0,iy0,iz3);
+  dcP(0,1) = dc[0]*P(ix0,iy1,iz0)+dc[1]*P(ix0,iy1,iz1)+dc[2]*P(ix0,iy1,iz2)+dc[3]*P(ix0,iy1,iz3);
+  dcP(0,2) = dc[0]*P(ix0,iy2,iz0)+dc[1]*P(ix0,iy2,iz1)+dc[2]*P(ix0,iy2,iz2)+dc[3]*P(ix0,iy2,iz3);
+  dcP(0,3) = dc[0]*P(ix0,iy3,iz0)+dc[1]*P(ix0,iy3,iz1)+dc[2]*P(ix0,iy3,iz2)+dc[3]*P(ix0,iy3,iz3);
+  dcP(1,0) = dc[0]*P(ix1,iy0,iz0)+dc[1]*P(ix1,iy0,iz1)+dc[2]*P(ix1,iy0,iz2)+dc[3]*P(ix1,iy0,iz3);
+  dcP(1,1) = dc[0]*P(ix1,iy1,iz0)+dc[1]*P(ix1,iy1,iz1)+dc[2]*P(ix1,iy1,iz2)+dc[3]*P(ix1,iy1,iz3); 
+  dcP(1,2) = dc[0]*P(ix1,iy2,iz0)+dc[1]*P(ix1,iy2,iz1)+dc[2]*P(ix1,iy2,iz2)+dc[3]*P(ix1,iy2,iz3);
+  dcP(1,3) = dc[0]*P(ix1,iy3,iz0)+dc[1]*P(ix1,iy3,iz1)+dc[2]*P(ix1,iy3,iz2)+dc[3]*P(ix1,iy3,iz3);
+  dcP(2,0) = dc[0]*P(ix2,iy0,iz0)+dc[1]*P(ix2,iy0,iz1)+dc[2]*P(ix2,iy0,iz2)+dc[3]*P(ix2,iy0,iz3);
+  dcP(2,1) = dc[0]*P(ix2,iy1,iz0)+dc[1]*P(ix2,iy1,iz1)+dc[2]*P(ix2,iy1,iz2)+dc[3]*P(ix2,iy1,iz3);
+  dcP(2,2) = dc[0]*P(ix2,iy2,iz0)+dc[1]*P(ix2,iy2,iz1)+dc[2]*P(ix2,iy2,iz2)+dc[3]*P(ix2,iy2,iz3);
+  dcP(2,3) = dc[0]*P(ix2,iy3,iz0)+dc[1]*P(ix2,iy3,iz1)+dc[2]*P(ix2,iy3,iz2)+dc[3]*P(ix2,iy3,iz3);
+  dcP(3,0) = dc[0]*P(ix3,iy0,iz0)+dc[1]*P(ix3,iy0,iz1)+dc[2]*P(ix3,iy0,iz2)+dc[3]*P(ix3,iy0,iz3);
+  dcP(3,1) = dc[0]*P(ix3,iy1,iz0)+dc[1]*P(ix3,iy1,iz1)+dc[2]*P(ix3,iy1,iz2)+dc[3]*P(ix3,iy1,iz3);
+  dcP(3,2) = dc[0]*P(ix3,iy2,iz0)+dc[1]*P(ix3,iy2,iz1)+dc[2]*P(ix3,iy2,iz2)+dc[3]*P(ix3,iy2,iz3);
+  dcP(3,3) = dc[0]*P(ix3,iy3,iz0)+dc[1]*P(ix3,iy3,iz1)+dc[2]*P(ix3,iy3,iz2)+dc[3]*P(ix3,iy3,iz3);
 
-  dcP[ 0] = dc[0]*Pi[ 0] + dc[1]*Pi[ 1] + dc[2]*Pi[ 2] + dc[3]*Pi[ 3];
-  dcP[ 1] = dc[0]*Pi[ 4] + dc[1]*Pi[ 5] + dc[2]*Pi[ 6] + dc[3]*Pi[ 7];
-  dcP[ 2] = dc[0]*Pi[ 8] + dc[1]*Pi[ 9] + dc[2]*Pi[10] + dc[3]*Pi[11];
-  dcP[ 3] = dc[0]*Pi[12] + dc[1]*Pi[13] + dc[2]*Pi[14] + dc[3]*Pi[15];
-  dcP[ 4] = dc[0]*Pi[16] + dc[1]*Pi[17] + dc[2]*Pi[18] + dc[3]*Pi[19];
-  dcP[ 5] = dc[0]*Pi[20] + dc[1]*Pi[21] + dc[2]*Pi[22] + dc[3]*Pi[23];
-  dcP[ 6] = dc[0]*Pi[24] + dc[1]*Pi[25] + dc[2]*Pi[26] + dc[3]*Pi[27];
-  dcP[ 7] = dc[0]*Pi[28] + dc[1]*Pi[29] + dc[2]*Pi[30] + dc[3]*Pi[31];
-  dcP[ 8] = dc[0]*Pi[32] + dc[1]*Pi[33] + dc[2]*Pi[34] + dc[3]*Pi[35];
-  dcP[ 9] = dc[0]*Pi[36] + dc[1]*Pi[37] + dc[2]*Pi[38] + dc[3]*Pi[39];
-  dcP[10] = dc[0]*Pi[40] + dc[1]*Pi[41] + dc[2]*Pi[42] + dc[3]*Pi[43];
-  dcP[11] = dc[0]*Pi[44] + dc[1]*Pi[45] + dc[2]*Pi[46] + dc[3]*Pi[47];
-  dcP[12] = dc[0]*Pi[48] + dc[1]*Pi[49] + dc[2]*Pi[50] + dc[3]*Pi[51];
-  dcP[13] = dc[0]*Pi[52] + dc[1]*Pi[53] + dc[2]*Pi[54] + dc[3]*Pi[55];
-  dcP[14] = dc[0]*Pi[56] + dc[1]*Pi[57] + dc[2]*Pi[58] + dc[3]*Pi[59];
-  dcP[15] = dc[0]*Pi[60] + dc[1]*Pi[61] + dc[2]*Pi[62] + dc[3]*Pi[63];
+  TinyVector<T,4> bcP, bdcP;
+  bcP[0] = cP(0,0)*b[0]+cP(0,1)*b[1]+cP(0,2)*b[2]+cP(0,3)*b[3];
+  bcP[1] = cP(1,0)*b[0]+cP(1,1)*b[1]+cP(1,2)*b[2]+cP(1,3)*b[3];
+  bcP[2] = cP(2,0)*b[0]+cP(2,1)*b[1]+cP(2,2)*b[2]+cP(2,3)*b[3];
+  bcP[3] = cP(3,0)*b[0]+cP(3,1)*b[1]+cP(3,2)*b[2]+cP(3,3)*b[3];
+ 
+  bdcP[0] = dcP(0,0)*b[0]+dcP(0,1)*b[1]+dcP(0,2)*b[2]+dcP(0,3)*b[3];
+  bdcP[1] = dcP(1,0)*b[0]+dcP(1,1)*b[1]+dcP(1,2)*b[2]+dcP(1,3)*b[3];
+  bdcP[2] = dcP(2,0)*b[0]+dcP(2,1)*b[1]+dcP(2,2)*b[2]+dcP(2,3)*b[3];
+  bdcP[3] = dcP(3,0)*b[0]+dcP(3,1)*b[1]+dcP(3,2)*b[2]+dcP(3,3)*b[3];
 
-  secDerivs(2,2) =     
-    a[0]*(b[0]*(d2c[0]*Pi[ 0] + d2c[1]*Pi[ 1] + d2c[2]*Pi[ 2] + d2c[3]*Pi[ 3])+
-	  b[1]*(d2c[0]*Pi[ 4] + d2c[1]*Pi[ 5] + d2c[2]*Pi[ 6] + d2c[3]*Pi[ 7])+
-	  b[2]*(d2c[0]*Pi[ 8] + d2c[1]*Pi[ 9] + d2c[2]*Pi[10] + d2c[3]*Pi[11])+
-	  b[3]*(d2c[0]*Pi[12] + d2c[1]*Pi[13] + d2c[2]*Pi[14] + d2c[3]*Pi[15]))+
-    a[1]*(b[0]*(d2c[0]*Pi[16] + d2c[1]*Pi[17] + d2c[2]*Pi[18] + d2c[3]*Pi[19])+ 
-	  b[1]*(d2c[0]*Pi[20] + d2c[1]*Pi[21] + d2c[2]*Pi[22] + d2c[3]*Pi[23])+
-	  b[2]*(d2c[0]*Pi[24] + d2c[1]*Pi[25] + d2c[2]*Pi[26] + d2c[3]*Pi[27])+
-	  b[3]*(d2c[0]*Pi[28] + d2c[1]*Pi[29] + d2c[2]*Pi[30] + d2c[3]*Pi[31]))+
-    a[2]*(b[0]*(d2c[0]*Pi[32] + d2c[1]*Pi[33] + d2c[2]*Pi[34] + d2c[3]*Pi[35])+
-	  b[1]*(d2c[0]*Pi[36] + d2c[1]*Pi[37] + d2c[2]*Pi[38] + d2c[3]*Pi[39])+
-	  b[2]*(d2c[0]*Pi[40] + d2c[1]*Pi[41] + d2c[2]*Pi[42] + d2c[3]*Pi[43])+
-	  b[3]*(d2c[0]*Pi[44] + d2c[1]*Pi[45] + d2c[2]*Pi[46] + d2c[3]*Pi[47]))+
-    a[3]*(b[0]*(d2c[0]*Pi[48] + d2c[1]*Pi[49] + d2c[2]*Pi[50] + d2c[3]*Pi[51])+
-	  b[1]*(d2c[0]*Pi[52] + d2c[1]*Pi[53] + d2c[2]*Pi[54] + d2c[3]*Pi[55])+
-	  b[2]*(d2c[0]*Pi[56] + d2c[1]*Pi[57] + d2c[2]*Pi[58] + d2c[3]*Pi[59])+
-	  b[3]*(d2c[0]*Pi[60] + d2c[1]*Pi[61] + d2c[2]*Pi[62] + d2c[3]*Pi[63]));
 
-  bcP[0] = b[0]*cP[ 0] + b[1]*cP[ 1] + b[2]*cP[ 2] + b[3]*cP[ 3];
-  bcP[1] = b[0]*cP[ 4] + b[1]*cP[ 5] + b[2]*cP[ 6] + b[3]*cP[ 7];
-  bcP[2] = b[0]*cP[ 8] + b[1]*cP[ 9] + b[2]*cP[10] + b[3]*cP[11];
-  bcP[3] = b[0]*cP[12] + b[1]*cP[13] + b[2]*cP[14] + b[3]*cP[15];
 
-  bdcP[0] = b[0]*dcP[ 0] + b[1]*dcP[ 1] + b[2]*dcP[ 2] + b[3]*dcP[ 3];
-  bdcP[1] = b[0]*dcP[ 4] + b[1]*dcP[ 5] + b[2]*dcP[ 6] + b[3]*dcP[ 7];
-  bdcP[2] = b[0]*dcP[ 8] + b[1]*dcP[ 9] + b[2]*dcP[10] + b[3]*dcP[11];
-  bdcP[3] = b[0]*dcP[12] + b[1]*dcP[13] + b[2]*dcP[14] + b[3]*dcP[15];
-
+  // Compute value
   val = a[0]*bcP[0] + a[1]*bcP[1] + a[2]*bcP[2] + a[3]*bcP[3];
-  grad[0] = da[0]*bcP[0] + da[1]*bcP[1] + da[2]*bcP[2] + da[3]*bcP[3];
-  grad[1] = (a[0]*(db[0]*cP[ 0] + db[1]*cP[ 1] + db[2]*cP[ 2] + db[3]*cP[ 3]) +
-	     a[1]*(db[0]*cP[ 4] + db[1]*cP[ 5] + db[2]*cP[ 6] + db[3]*cP[ 7]) +
-	     a[2]*(db[0]*cP[ 8] + db[1]*cP[ 9] + db[2]*cP[10] + db[3]*cP[11]) +
-	     a[3]*(db[0]*cP[12] + db[1]*cP[13] + db[2]*cP[14] + db[3]*cP[15]));
-  grad[2] = 
-    a[0]*bdcP[0] + a[1]*bdcP[1] + a[2]*bdcP[2] + a[3]*bdcP[3];
 
-  secDerivs(0,0) = d2a[0]*bcP[0] + d2a[1]*bcP[1] + d2a[2]*bcP[2] + d2a[3]*bcP[3];
-  secDerivs(1,1) = 
-    (a[0]*(d2b[0]*cP[ 0] + d2b[1]*cP[ 1] + d2b[2]*cP[ 2] + d2b[3]*cP[ 3]) +
-     a[1]*(d2b[0]*cP[ 4] + d2b[1]*cP[ 5] + d2b[2]*cP[ 6] + d2b[3]*cP[ 7]) +
-     a[2]*(d2b[0]*cP[ 8] + d2b[1]*cP[ 9] + d2b[2]*cP[10] + d2b[3]*cP[11]) +
-     a[3]*(d2b[0]*cP[12] + d2b[1]*cP[13] + d2b[2]*cP[14] + d2b[3]*cP[15]));
+  // Compute gradient
+  grad[0] = 
+    (da[0]*bcP[0] + da[1]*bcP[1] + da[2]*bcP[2] + da[3]*bcP[3]);
+  
+  grad[1] =
+    (a[0]*(cP(0,0)*db[0]+cP(0,1)*db[1]+cP(0,2)*db[2]+cP(0,3)*db[3]) +
+     a[1]*(cP(1,0)*db[0]+cP(1,1)*db[1]+cP(1,2)*db[2]+cP(1,3)*db[3]) +
+     a[2]*(cP(2,0)*db[0]+cP(2,1)*db[1]+cP(2,2)*db[2]+cP(2,3)*db[3]) +
+     a[3]*(cP(3,0)*db[0]+cP(3,1)*db[1]+cP(3,2)*db[2]+cP(3,3)*db[3]));
+
+  grad[2] = 
+    (a[0]*bdcP[0] + a[1]*bdcP[1] + a[2]*bdcP[2] + a[3]*bdcP[3]);
+
+
+  // Compute laplacian
+  secDerivs(0,0) = 
+    (d2a[0]*bcP[0] + d2a[1]*bcP[1] + d2a[2]*bcP[2] + d2a[3]*bcP[3]);
   secDerivs(0,1) = secDerivs(1,0) = 
-    (da[0]*(db[0]*cP[ 0] + db[1]*cP[ 1] + db[2]*cP[ 2] + db[3]*cP[ 3]) +
-     da[1]*(db[0]*cP[ 4] + db[1]*cP[ 5] + db[2]*cP[ 6] + db[3]*cP[ 7]) +
-     da[2]*(db[0]*cP[ 8] + db[1]*cP[ 9] + db[2]*cP[10] + db[3]*cP[11]) +
-     da[3]*(db[0]*cP[12] + db[1]*cP[13] + db[2]*cP[14] + db[3]*cP[15]));
+    (da[0]*(cP(0,0)*db[0]+cP(0,1)*db[1]+cP(0,2)*db[2]+cP(0,3)*db[3]) +
+     da[1]*(cP(1,0)*db[0]+cP(1,1)*db[1]+cP(1,2)*db[2]+cP(1,3)*db[3]) +
+     da[2]*(cP(2,0)*db[0]+cP(2,1)*db[1]+cP(2,2)*db[2]+cP(2,3)*db[3]) +
+     da[3]*(cP(3,0)*db[0]+cP(3,1)*db[1]+cP(3,2)*db[2]+cP(3,3)*db[3]));
   secDerivs(0,2) = secDerivs(2,0) = 
-    da[0]*bdcP[0] + da[1]*bdcP[1] + da[2]*bdcP[2] + da[3]*bdcP[3];
-  secDerivs(1,2) = secDerivs(2,1) = 
-    a[0]*(db[0]*dcP[ 0] + db[1]*dcP[ 1] + db[2]*dcP[ 2] + db[3]*dcP[ 3])+
-    a[1]*(db[0]*dcP[ 4] + db[1]*dcP[ 5] + db[2]*dcP[ 6] + db[3]*dcP[ 7])+
-    a[2]*(db[0]*dcP[ 8] + db[1]*dcP[ 9] + db[2]*dcP[10] + db[3]*dcP[11])+
-    a[3]*(db[0]*dcP[12] + db[1]*dcP[13] + db[2]*dcP[14] + db[3]*dcP[15]);
+    (da[0]*bdcP[0] + da[1]*bdcP[1] + da[2]*bdcP[2] + da[3]*bdcP[3]);
+        
+  secDerivs(1,1) = 
+    (a[0]*(cP(0,0)*d2b[0]+cP(0,1)*d2b[1]+cP(0,2)*d2b[2]+cP(0,3)*d2b[3]) +
+     a[1]*(cP(1,0)*d2b[0]+cP(1,1)*d2b[1]+cP(1,2)*d2b[2]+cP(1,3)*d2b[3]) +
+     a[2]*(cP(2,0)*d2b[0]+cP(2,1)*d2b[1]+cP(2,2)*d2b[2]+cP(2,3)*d2b[3]) +
+     a[3]*(cP(3,0)*d2b[0]+cP(3,1)*d2b[1]+cP(3,2)*d2b[2]+cP(3,3)*d2b[3]));
+  secDerivs(1,2) = 
+    (a[0]*(db[0]*dcP(0,0) + db[1]*dcP(0,1) + db[2]*dcP(0,2) + db[3]*dcP(0,3))+
+     a[1]*(db[0]*dcP(1,0) + db[1]*dcP(1,1) + db[2]*dcP(1,2) + db[3]*dcP(1,3))+
+     a[2]*(db[0]*dcP(2,0) + db[1]*dcP(2,1) + db[2]*dcP(2,2) + db[3]*dcP(2,3))+
+     a[3]*(db[0]*dcP(3,0) + db[1]*dcP(3,1) + db[2]*dcP(3,2) + db[3]*dcP(3,3)));
+  secDerivs(2,2) = 
+    (a[0]*(b[0]*(d2c[0]*P(ix0,iy0,iz0)+d2c[1]*P(ix0,iy0,iz1)+d2c[2]*P(ix0,iy0,iz2)+d2c[3]*P(ix0,iy0,iz3))+
+	   b[1]*(d2c[0]*P(ix0,iy1,iz0)+d2c[1]*P(ix0,iy1,iz1)+d2c[2]*P(ix0,iy1,iz2)+d2c[3]*P(ix0,iy1,iz3))+
+	   b[2]*(d2c[0]*P(ix0,iy2,iz0)+d2c[1]*P(ix0,iy2,iz1)+d2c[2]*P(ix0,iy2,iz2)+d2c[3]*P(ix0,iy2,iz3))+
+	   b[3]*(d2c[0]*P(ix0,iy3,iz0)+d2c[1]*P(ix0,iy3,iz1)+d2c[2]*P(ix0,iy3,iz2)+d2c[3]*P(ix0,iy3,iz3)))+
+     a[1]*(b[0]*(d2c[0]*P(ix1,iy0,iz0)+d2c[1]*P(ix1,iy0,iz1)+d2c[2]*P(ix1,iy0,iz2)+d2c[3]*P(ix1,iy0,iz3))+
+	   b[1]*(d2c[0]*P(ix1,iy1,iz0)+d2c[1]*P(ix1,iy1,iz1)+d2c[2]*P(ix1,iy1,iz2)+d2c[3]*P(ix1,iy1,iz3))+
+	   b[2]*(d2c[0]*P(ix1,iy2,iz0)+d2c[1]*P(ix1,iy2,iz1)+d2c[2]*P(ix1,iy2,iz2)+d2c[3]*P(ix1,iy2,iz3))+
+	   b[3]*(d2c[0]*P(ix1,iy3,iz0)+d2c[1]*P(ix1,iy3,iz1)+d2c[2]*P(ix1,iy3,iz2)+d2c[3]*P(ix1,iy3,iz3)))+
+     a[2]*(b[0]*(d2c[0]*P(ix2,iy0,iz0)+d2c[1]*P(ix2,iy0,iz1)+d2c[2]*P(ix2,iy0,iz2)+d2c[3]*P(ix2,iy0,iz3))+
+	   b[1]*(d2c[0]*P(ix2,iy1,iz0)+d2c[1]*P(ix2,iy1,iz1)+d2c[2]*P(ix2,iy1,iz2)+d2c[3]*P(ix2,iy1,iz3))+
+	   b[2]*(d2c[0]*P(ix2,iy2,iz0)+d2c[1]*P(ix2,iy2,iz1)+d2c[2]*P(ix2,iy2,iz2)+d2c[3]*P(ix2,iy2,iz3))+
+	   b[3]*(d2c[0]*P(ix2,iy3,iz0)+d2c[1]*P(ix2,iy3,iz1)+d2c[2]*P(ix2,iy3,iz2)+d2c[3]*P(ix2,iy3,iz3)))+
+     a[3]*(b[0]*(d2c[0]*P(ix3,iy0,iz0)+d2c[1]*P(ix3,iy0,iz1)+d2c[2]*P(ix3,iy0,iz2)+d2c[3]*P(ix3,iy0,iz3))+
+	   b[1]*(d2c[0]*P(ix3,iy1,iz0)+d2c[1]*P(ix3,iy1,iz1)+d2c[2]*P(ix3,iy1,iz2)+d2c[3]*P(ix3,iy1,iz3))+
+	   b[2]*(d2c[0]*P(ix3,iy2,iz0)+d2c[1]*P(ix3,iy2,iz1)+d2c[2]*P(ix3,iy2,iz2)+d2c[3]*P(ix3,iy2,iz3))+
+	   b[3]*(d2c[0]*P(ix3,iy3,iz0)+d2c[1]*P(ix3,iy3,iz1)+d2c[2]*P(ix3,iy3,iz2)+d2c[3]*P(ix3,iy3,iz3))));
+
 }

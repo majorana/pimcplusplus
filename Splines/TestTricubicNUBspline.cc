@@ -121,7 +121,7 @@ TestComplexNonlinear()
 void SpeedTest()
 {
   double xi=3.1, xf=7.9, yi=2.9, yf=10.0, zi=4.6, zf=14.0;
-  int nx=335, ny=329, nz=344;
+  int nx=35, ny=29, nz=44;
 //   GeneralGrid xGrid, yGrid, zGrid;
 //   Array<double,1> xp(nx), yp(ny), zp(nz);
 //   for (int ix=0; ix<nx; ix++)
@@ -182,15 +182,24 @@ void SpeedTest()
 void TestCenterGrid()
 {
   CenterGrid grid;
-  grid.Init (-2.0, 2.0, 10, 50);
+  grid.Init (-2.0, 2.0, 10, 51);
   for (int i=0; i<50; i++)
     fprintf (stderr, "%22.16e\n", grid(i));
+
+  for (int i=0; i<10000; i++) {
+    double x = 4.0*drand48()-2.0;
+    int j = grid.ReverseMap(x);
+    if (grid(j) > x) 
+      cerr << "x=" << x << "  j=" << j << " grid(j)=" << grid(j) << endl;
+    if (x >= grid(j+1)) 
+      cerr << "x=" << x << "  j=" << j << " grid(j)=" << grid(j) << endl;
+  }
 }
 
 
 main()
 {
-  //  SpeedTest();
+  //SpeedTest();
   TestCenterGrid();
   //  TestLinear();
   //  TestComplexNonlinear();
