@@ -435,10 +435,10 @@ void PathClass::Allocate()
   }
   //Sets to the identity permutaiton 
   //cerr<<"setting permutations"<<" "<<GetMode()<<endl;
-  //for (int ptcl=0;ptcl<Permutation.size();ptcl++){
-  //  Permutation(ptcl) = ptcl;
+  for (int ptcl=0;ptcl<Permutation.size();ptcl++){
+    Permutation(ptcl) = ptcl;
   //  cerr<<ptcl<<" "<<Permutation(ptcl)<<endl;
-  //}
+  }
   if (LongRange) {
 #if NDIM==3    
     SetupkVecs3D();
@@ -773,6 +773,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
   //  perr<<Path(OpenLink,OpenPtcl)<<endl;
   bool swappedAlready=false;
   if (newJoin>oldJoin){
+    //    cerr<<"Here I am "<<oldJoin<<" "<<newJoin<<" "<<" "<<endl;
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
 	Path[OLDMODE](timeSlice,ptcl)=Path[NEWMODE](timeSlice,Permutation(ptcl));
