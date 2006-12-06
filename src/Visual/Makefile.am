@@ -8,6 +8,8 @@ pathvis___SOURCES =       \
     BoxClass.h          \
     BoxObject.cc        \
     BoxObject.h         \
+    CoordObject.cc      \
+    CoordObject.h       \
     DiskObject.cc       \
     DiskObject.h        \
     Export.cc           \
@@ -36,6 +38,8 @@ mdvis___SOURCES =       \
     BoxClass.h          \
     BoxObject.cc        \
     BoxObject.h         \
+    CoordObject.cc      \
+    CoordObject.h       \
     DiskObject.cc       \
     DiskObject.h        \
     Isosurface.h        \
@@ -59,6 +63,8 @@ wfvis___SOURCES =       \
     BoxClass.h          \
     BoxObject.cc        \
     BoxObject.h         \
+    CoordObject.cc      \
+    CoordObject.h       \
     DiskObject.cc       \
     DiskObject.h        \
     ElementData.cc      \

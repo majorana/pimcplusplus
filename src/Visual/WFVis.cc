@@ -299,6 +299,10 @@ WFVisualClass::DrawFrame(bool offScreen)
   boxObject->SetColor (0.5, 0.5, 1.0);
   boxObject->Set (Box, clipping);
   PathVis.Objects.push_back(boxObject);
+  CoordObject *coord = new CoordObject;
+  coord->Set (Box);
+  PathVis.Objects.push_back(coord);
+  
   
 
   list<AtomClass>::iterator iter;
@@ -395,7 +399,7 @@ WFVisualClass::DrawFrame(bool offScreen)
     }
     Isosurface *wfIso = new Isosurface;
     wfIso->Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
-    wfIso->SetIsoval(IsoAdjust.get_value());
+    wfIso->SetIsoval(MaxRho*IsoAdjust.get_value());
     PathVis.Objects.push_back(wfIso);
   }
 
@@ -446,7 +450,7 @@ WFVisualClass::Read(string filename)
   AtomPos.resize(pos.extent(0));
   for (int i=0; i<pos.extent(0); i++)
     for (int j=0; j<3; j++)
-      AtomPos(i)[j] = pos(i,j)/* - 0.5*Box[j]*/;
+      AtomPos(i)[j] = (pos(i,j) - 0.5*Box[j]);
   assert (Infile.ReadVar("atom_types", AtomTypes));
   Infile.CloseSection (); // "ions"
 
@@ -546,12 +550,22 @@ WFVisualClass::ReadWF (int kpoint, int band)
   WFData.resize(wfdata.extent(0), 
 		wfdata.extent(1),
 		wfdata.extent(2));
+  int Nx = wfdata.extent(0);
+  int Ny = wfdata.extent(1);
+  int Nz = wfdata.extent(2);
+  MaxRho = 0.0;
   for (int ix=0; ix<wfdata.extent(0); ix++)
     for (int iy=0; iy<wfdata.extent(1); iy++)
-      for (int iz=0; iz<wfdata.extent(2); iz++)
-	WFData(ix,iy,iz) = (wfdata(ix,iy,iz,0)*wfdata(ix,iy,iz,0) +
-			    wfdata(ix,iy,iz,1)*wfdata(ix,iy,iz,1));
-	  
+      for (int iz=0; iz<wfdata.extent(2); iz++) {
+	// WF data is store from 0 to Lx, not -Lx/2 to Lx/2
+	int jx = (ix+Nx/2)%(Nx-1);
+	int jy = (iy+Ny/2)%(Ny-1);
+	int jz = (iz+Nz/2)%(Nz-1);
+	double rho = (wfdata(jx,jy,jz,0)*wfdata(jx,jy,jz,0) +
+		      wfdata(jx,jy,jz,1)*wfdata(jx,jy,jz,1));
+	WFData(ix,iy,iz) = rho;
+	MaxRho = max(MaxRho, rho);
+      }
   return true;
 }
 

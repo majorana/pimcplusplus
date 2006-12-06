@@ -3,6 +3,7 @@
 
 #include "PathVis.h"
 #include "BoxClass.h"
+#include "CoordObject.h"
 #include "Isosurface.h"
 #include <Common/IO/IO.h>
 #include <gtkmm/adjustment.h>
