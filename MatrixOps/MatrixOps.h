@@ -31,6 +31,11 @@ void SVdecomp (Array<double,2> &A,
 	       Array<double,2> &U, Array<double,1> &S,
 	       Array<double,2> &V);
 
+void SVdecomp (Array<complex<double>,2> &A,
+	       Array<complex<double>,2> &U, Array<double,1> &S,
+	       Array<complex<double>,2> &V);
+
+
 void SymmEigenPairs (const Array<double,2> &A, int NumPairs,
 		     Array<double,1> &Vals,
 		     Array<double,2> &Vectors);
@@ -39,11 +44,17 @@ void SymmEigenPairs (const Array<complex<double>,2> &A, int NumPairs,
 		     Array<double,1> &Vals,
 		     Array<complex<double>,2> &Vectors);
 
+// Orthogonalizes matrix A with the polar decomposition.  This returns
+// the matrix closest to A which is orthogonal.  A must be square.
+void PolarOrthogonalize (Array<complex<double>,2> &A);
+
 const Array<double,2> operator*(const Array<double,2> &A,
 				const Array<double,2> &B);
 
 void MatMult (const Array<double,2> &A, const Array<double,2> &B,
 	      Array<double,2> &C);
+void MatMult (const Array<complex<double>,2> &A, const Array<complex<double>,2> &B,
+	      Array<complex<double>,2> &C);
 
 double Determinant (const Array<double,2> &A);
 complex<double> Determinant (const Array<complex<double>,2> &A);

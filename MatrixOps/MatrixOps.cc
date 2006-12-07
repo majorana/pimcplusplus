@@ -25,12 +25,14 @@
 //#endif 
 
 
+#define F77_ZGESVD F77_FUNC(zgesvd,ZGESVD)
 #define F77_DGESVD F77_FUNC(dgesvd,DGESVD)
 #define F77_DGETRF F77_FUNC(dgetrf,DGETRF)
 #define F77_ZGETRF F77_FUNC(zgetrf,ZGETRF)
 #define F77_DGETRI F77_FUNC(dgetri,DGETRI)
 #define F77_ZGETRI F77_FUNC(zgetri,ZGETRI)
 #define F77_DGEMM  F77_FUNC(dgemm,DGEMM)
+#define F77_ZGEMM  F77_FUNC(zgemm,ZGEMM)
 #define F77_DSYEVR F77_FUNC(dsyevr,DSYEVR)
 #define F77_ZHEEVR F77_FUNC(zheevr,ZHEEVR)
 #define F77_DGEMV  F77_FUNC(dgemv,DGEMV)
@@ -40,6 +42,13 @@ F77_DGESVD (char *JOBU, char* JOBVT, int *M, int *N,
 	    double *A, int *LDA, double *S, double *U,
 	    int *LDU, double *VT, int *LDVT, double *work,
 	    int *LWORK, int *INFO);
+
+extern "C" void 
+F77_ZGESVD (char *JOBU, char* JOBVT, int *M, int *N,
+	    complex<double> *A, int *LDA, double *S, complex<double> *U,
+	    int *LDU, complex<double> *VT, int *LDVT, complex<double> *work,
+	    int *LWORK, double *work2, int *INFO);
+
 
 extern "C" void 
 F77_DGETRF(int *m, int *n, double A[], int *lda, int ipiv[], int *info);
@@ -60,6 +69,11 @@ extern "C" void
 F77_DGEMM (char *transA, char *transB, int *m, int *n, int *k,
 	   double *alpha, const double *A, int *lda, const double *B, int *ldb,
 	   double *beta,  double *C, int *ldc);
+
+extern "C" void 
+F77_ZGEMM (char *transA, char *transB, int *m, int *n, int *k,
+	   complex<double> *alpha, const complex<double> *A, int *lda, const complex<double> *B, 
+	   int *ldb, complex<double> *beta,  complex<double> *C, int *ldc);
 
 extern "C" void 
 F77_DSYEVR (char *JobType, char *Range, char *UpperLower, 
@@ -109,6 +123,27 @@ const Array<double,2> operator*(const Array<double,2> &A,
   return C;
 }
 
+const Array<complex<double>,2> operator*(const Array<complex<double>,2> &A,
+					 const Array<complex<double>,2> &B)
+{
+  int m = A.rows();
+  int n = B.cols();
+  int k = A.cols();
+  assert (B.rows() == k);
+  // We use "transpose" operation because we have C ordering, which fortran
+  // thinks is transposed.
+  char transA = 'T';
+  char transB = 'T';
+  complex<double> alpha(1.0, 0.0);
+  complex<double> beta(0.0, 0.0);
+  GeneralArrayStorage<2> colMajor;
+  colMajor.ordering() = firstDim, secondDim;
+  Array<complex<double>,2> C(m,n,colMajor);
+  F77_ZGEMM (&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
+	     B.data(), &n, &beta, C.data(), &m);
+  return C;
+}
+
 
 void MatMult (const Array<double,2> &A, const Array<double,2> &B,
 	      Array<double,2> &C)
@@ -127,6 +162,27 @@ void MatMult (const Array<double,2> &A, const Array<double,2> &B,
   colMajor.ordering() = firstDim, secondDim;
   F77_DGEMM (&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
 	     B.data(), &n, &beta, C.data(), &m);
+}
+
+
+void MatMult (const Array<complex<double>,2> &A, const Array<complex<double>,2> &B,
+	      Array<complex<double>,2> &C)
+{
+  int m = A.rows();
+  int n = B.cols();
+  int k = A.cols();
+  assert (B.rows() == k);
+  // We use "transpose" operation because we have C ordering, which fortran
+  // thinks is transposed.
+  char transA = 'T';
+  char transB = 'T';
+  complex<double> alpha = 1.0;
+  complex<double> beta = 0.0;
+  GeneralArrayStorage<2> colMajor;
+  colMajor.ordering() = firstDim, secondDim;
+  F77_ZGEMM (&transA, &transB, &m, &n, &k, &alpha, A.data(), &k, 
+	     B.data(), &n, &beta, C.data(), &m);
+  Transpose(C);
 }
 
 
@@ -353,7 +409,59 @@ void SVdecomp (Array<double,2> &A,
 }
 
 
+void SVdecomp (Array<complex<double>,2> &A, Array<complex<double>,2> &U, 
+	       Array<double,1> &S, Array<complex<double>,2> &V)
+{
+  int M = A.rows();
+  int N = A.cols();
+  Array<complex<double>,2> Atrans(M,N);
+  // U will be Utrans after lapack call
+  U.resize(min(M,N),M);
+  V.resize(N,min(M,N));
+  
+  S.resize(min(N,M));
+  Atrans = A;
 
+  // Transpose U for FORTRAN ordering
+  Transpose(Atrans);
+  char JOBU  = 'S'; // return min (M,N) columns of U
+  char JOBVT = 'S'; // return min (M,N) columns of V
+  int LDA = M;
+  int LDU = M;
+  int LDVT = min(M,N);
+  int LWORK = 10 * max(3*min(M,N)+max(M,N),5*min(M,N));
+  Array<complex<double>,1> WORK(LWORK);
+  Array<double,1> WORK2(5*min(M,N));
+  int INFO;
+
+  F77_ZGESVD (&JOBU, &JOBVT, &M, &N, Atrans.data(), &LDA,
+	      S.data(), U.data(), &LDU, V.data(), &LDVT,
+	      WORK.data(), &LWORK, WORK2.data(), &INFO);
+  assert (INFO == 0);
+  // Transpose U to get back to C ordering
+  // V was really Vtrans so we don't need to transpose
+  Transpose(U);
+}
+
+
+void PolarOrthogonalize (Array<complex<double>,2> &A)
+{
+  int M = A.rows();
+  int N = A.cols();
+  if (M != N) {
+    cerr << "Error:  nonsquare matrix in PolarOrthogonalize. Aborting.\n";
+    abort();
+  }
+  Array<complex<double>,2> U, V;
+  Array<double,1> S;
+
+  SVdecomp (A, U, S, V);
+  Transpose(V);
+  for (int i=0; i<V.rows(); i++)
+    for (int j=0; j<V.cols(); j++)
+      V(i,j) = conj(V(i,j));
+  A = U * V;
+}
 	       
 
       // Adapted from Numerical Recipes in C
