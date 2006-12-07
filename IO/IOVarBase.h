@@ -191,7 +191,8 @@ namespace IO {
     bool Append(const Array<T,3> &val);
     template<class T>
     bool Append(const Array<T,4> &val);
-    
+
+    virtual ~IOVarBase() { /* do nothing at this level */ }
   };
 
 
@@ -226,7 +227,6 @@ namespace IO {
   template<> string inline TypeString(string &val)          {  return "string";  }
   template<> string inline TypeString(bool &val)            {  return "bool";    }
   template<> string inline TypeString(complex<double> &val) {  return "complex";    }
-
 
 }
 

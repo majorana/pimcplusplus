@@ -198,10 +198,39 @@ namespace IO {
       SectionList.pop_front();
     }
 
+
     if (FileName!="") {
       // Release BoolType;
       H5Tclose (BoolType);
       H5Tclose (ComplexType);
+
+      hid_t ids[10000];
+      int num = H5Fget_obj_ids(GroupID, H5F_OBJ_DATASET, 10000, ids);
+      if (num > 0) {
+	cerr << "Found " << num << " open datasets.\n";
+	for (int i=0; i<num; i++)
+	  H5Dclose(ids[i]);
+      }
+      num = H5Fget_obj_ids(GroupID, H5F_OBJ_GROUP, 10000, ids);
+      if (num > 0) {
+	cerr << "Found " << num << " open groups.\n";
+	for (int i=0; i<num; i++)
+	  H5Gclose(ids[i]);
+      }
+      num = H5Fget_obj_ids(GroupID, H5F_OBJ_DATATYPE, 10000, ids);
+      if (num > 0) {
+ 	cerr << "Found " << num << " open datatypes.\n";
+ 	for (int i=0; i<num; i++)
+ 	  H5Tclose(ids[i]);
+      }
+      num = H5Fget_obj_ids(GroupID, H5F_OBJ_ATTR, 10000, ids);
+      if (num > 0) {
+	cerr << "Found " << num << " open attributes.\n";
+	for (int i=0; i<num; i++)
+	  H5Aclose(ids[i]);
+      }
+      
+      // Close the file
       H5Fclose(GroupID);
     }
     else {

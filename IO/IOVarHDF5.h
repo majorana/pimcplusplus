@@ -116,7 +116,6 @@ namespace IO {
       H5Sclose(MemSpaceID);
       if (OwnDataset)
 	H5Dclose(DatasetID);
-      
     }
 
   };
