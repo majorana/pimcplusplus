@@ -182,18 +182,34 @@ void SpeedTest()
 void TestCenterGrid()
 {
   CenterGrid grid;
-  grid.Init (-2.0, 2.0, 10, 51);
-  for (int i=0; i<50; i++)
-    fprintf (stderr, "%22.16e\n", grid(i));
+  grid.Init (-1.0, 1.0, 10, 24);
+//   for (int i=0; i<50; i++)
+//     fprintf (stderr, "%22.16e\n", grid(i));
 
+  // Check ReverseMap for correctness
   for (int i=0; i<10000; i++) {
-    double x = 4.0*drand48()-2.0;
+    double x = 2.0*drand48()-1.0;
     int j = grid.ReverseMap(x);
     if (grid(j) > x) 
       cerr << "x=" << x << "  j=" << j << " grid(j)=" << grid(j) << endl;
     if (x >= grid(j+1)) 
       cerr << "x=" << x << "  j=" << j << " grid(j)=" << grid(j) << endl;
   }
+
+  // Write out a nonuniform 
+  NUBsplineBasis<CenterGrid> basis;
+  basis.Init (&grid);
+  TinyVector<double,4> b;
+  for (double x=-1.0; x<1.0; x+= 0.001) {
+    basis (x, b);
+    int i0 = (100-grid.ReverseMap(x)+0)%4;
+    int i1 = (100-grid.ReverseMap(x)+1)%4;
+    int i2 = (100-grid.ReverseMap(x)+2)%4;
+    int i3 = (100-grid.ReverseMap(x)+3)%4;
+    fprintf (stdout, "%22.16e %22.16e %22.16e %22.16e %22.16e\n",
+	     x, b[i0], b[i1], b[i2], b[i3]);
+  }
+
 }
 
 
