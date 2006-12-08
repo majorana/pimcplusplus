@@ -1,9 +1,9 @@
 from distutils.core import setup, Extension
 
 module1 = Extension('IOSection',
-                    sources = ['InputOutputPythonWrapper.cc','InputOutput.cc',\
-                               'InputOutputHDF5.cc', 'InputOutputASCII.cc',\
-                               'InputOutputXML.cc' ],\
+                    sources = ['IOPythonWrapper.cc','IO.cc',\
+                               'IOHDF5.cc', 'IOASCII.cc',\
+                               'IOVarHDF5.cc' ],\
                     include_dirs=['/usr/include/libxml2',\
                                   '/home/kesler/include'],
                     library_dirs=['/home/kesler/lib'],
