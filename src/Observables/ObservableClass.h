@@ -24,6 +24,7 @@
 #include "Coupling.h"
 #include "DistanceToHead.h"
 #include "Forces.h"
+#include "Hexatic.h"
 #include "HBond.h"
 #include "JosephsonPathDump.h"
 #include "ObservableCorrelation.h"

@@ -340,28 +340,28 @@ void PathClass::Allocate()
       cerr << "		Looking for string " << newMol << endl;
       bool foundMol = false;
       for(int m=0; m<MoleculeName.size(); m++){
-				if(newMol == MoleculeName[m]){
-				  foundMol = true;
-				  assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
-				  foundAt = m;
-				  cerr << "		Found at " << foundAt 
-				       << " of " << MoleculeName.size() << endl;
-				}
+	if(newMol == MoleculeName[m]){
+	  foundMol = true;
+	  assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
+	  foundAt = m;
+	  cerr << "		Found at " << foundAt 
+	       << " of " << MoleculeName.size() << endl;
+	}
       }
       if(!foundMol){
-				MoleculeName.push_back(newMol);
-				MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
-				int sum = 0;
-				for(int s=0; s<(MoleculeNumber.size()-1); s++)
-					sum += MoleculeNumber[s];
-				offset.push_back(sum);
-				foundAt = MoleculeName.size() - 1;
-				cerr << "		Added " << newMol << " at " << foundAt << endl;
+	MoleculeName.push_back(newMol);
+	MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
+	int sum = 0;
+	for(int s=0; s<(MoleculeNumber.size()-1); s++)
+	  sum += MoleculeNumber[s];
+	offset.push_back(sum);
+	foundAt = MoleculeName.size() - 1;
+	cerr << "		Added " << newMol << " at " << foundAt << endl;
       }
       
       prevIndex = 0;
       for(int i=0; i<foundAt; i++){
-				prevIndex += MoleculeNumber[i];
+	prevIndex += MoleculeNumber[i];
       }
       //cerr << "		set prevIndex " << prevIndex << endl;
       
@@ -377,45 +377,45 @@ void PathClass::Allocate()
       MolRef.resizeAndPreserve(MolRef.size() + N);
       //cerr << " done" << endl;
       numMol = MoleculeNumber[0];
-		}
-  	for (int i=0; i < N; i++){
-  	  SpeciesArray(speciesNum)->Ptcls(i) = i+first;
-  	  if(doMol){
-				//cerr << "		" << i << " prevIndex " << prevIndex << ", foundAt " << foundAt << ", Mol.Num. " << MoleculeNumber[foundAt];
-				//cerr  << " so mod is " << i%MoleculeNumber[foundAt] << endl;
-				MolRef(i+first) = prevIndex + i%MoleculeNumber[foundAt]; // need to assign myMolecule
-				//cerr << "Assigned MolRef " << MolRef(i+first) << " to ptcl " << i+first << endl;
-
-  	  }
-  	}
+    }
+    for (int i=0; i < N; i++){
+      SpeciesArray(speciesNum)->Ptcls(i) = i+first;
+      if(doMol){
+	//cerr << "		" << i << " prevIndex " << prevIndex << ", foundAt " << foundAt << ", Mol.Num. " << MoleculeNumber[foundAt];
+	//cerr  << " so mod is " << i%MoleculeNumber[foundAt] << endl;
+	MolRef(i+first) = prevIndex + i%MoleculeNumber[foundAt]; // need to assign myMolecule
+	//cerr << "Assigned MolRef " << MolRef(i+first) << " to ptcl " << i+first << endl;
+	
+      }
+    }
   }
   if(doMol){
-  	MolMembers.resize(numMol);
-  	vector<int> catalog(numMol); // for storing info to load MolMembers
-  	// initialize catalog (all zeros)
-  	for(int m = 0; m < catalog.size(); m++)
-  	  catalog[m] = 0;
-		// get number of ptcls for each molecule m; store in catalog
-  	for(int p = 0; p <numParticles; p++)
-			catalog[MolRef(p)]++;
-		// resize MolMembers arrays appropritely; re-initialize catalog
-  	for(int m = 0; m < catalog.size(); m++){
-  	  MolMembers(m).resize(catalog[m]);
-			catalog[m] = 0;
-  	}
-		// load ptcls into the MolMembers array; catalog indexes
-  	for(int p = 0; p <numParticles; p++){
-  	  int m = MolRef(p);
-			MolMembers(m)(catalog[m]) = p;
-			catalog[m]++;
-		}
+    MolMembers.resize(numMol);
+    vector<int> catalog(numMol); // for storing info to load MolMembers
+    // initialize catalog (all zeros)
+    for(int m = 0; m < catalog.size(); m++)
+      catalog[m] = 0;
+    // get number of ptcls for each molecule m; store in catalog
+    for(int p = 0; p <numParticles; p++)
+      catalog[MolRef(p)]++;
+    // resize MolMembers arrays appropritely; re-initialize catalog
+    for(int m = 0; m < catalog.size(); m++){
+      MolMembers(m).resize(catalog[m]);
+      catalog[m] = 0;
+    }
+    // load ptcls into the MolMembers array; catalog indexes
+    for(int p = 0; p <numParticles; p++){
+      int m = MolRef(p);
+      MolMembers(m)(catalog[m]) = p;
+      catalog[m]++;
+    }
   }
-	else if(!doMol){
-		MolRef.resize(numParticles);
-		for(int m=0; m<MolRef.size(); m++)
-			MolRef(m) = m;
-		cerr << "Initializing MolRef to default: " << MolRef << endl;
-	}
+  else if(!doMol){
+    MolRef.resize(numParticles);
+    for(int m=0; m<MolRef.size(); m++)
+      MolRef(m) = m;
+    cerr << "Initializing MolRef to default: " << MolRef << endl;
+  }
   if (WormOn)
     numParticles=numParticles+2;
   Path.resize(MyNumSlices,numParticles+OpenPaths);
@@ -764,6 +764,7 @@ PathClass::UpdateRho_ks()
 
 void PathClass::MoveJoin(int oldJoin, int newJoin)
 {
+  //  cerr<<"IN move join"<<endl;
   //  perr<<"My time slices is "<<NumTimeSlices()<<endl;
   //  for (int ptcl=0;ptcl<NumParticles();ptcl++){
     //    perr<<Permutation(ptcl)<<endl;
@@ -772,12 +773,16 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
   //  perr<<"Starting"<<endl;
   //  perr<<Path(OpenLink,OpenPtcl)<<endl;
   bool swappedAlready=false;
+  //  cerr<<"A MOve join"<<endl;
   if (newJoin>oldJoin){
     //    cerr<<"Here I am "<<oldJoin<<" "<<newJoin<<" "<<" "<<endl;
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
+      //      cerr<<"Slice "<<timeSlice<<endl;
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
+	//	cerr<<"ptcl "<<ptcl<<" "<<Permutation(ptcl)<<endl;
 	Path[OLDMODE](timeSlice,ptcl)=Path[NEWMODE](timeSlice,Permutation(ptcl));
 	if (OpenPaths) {
+	  //	  cerr<<"IN OPEN PATHS"<<endl;
 	  if (timeSlice==(int)OpenLink && Permutation(ptcl)==(int)OpenPtcl && !swappedAlready){
 	    OpenPtcl[OLDMODE]=ptcl;
 	    OpenPtcl[NEWMODE]=ptcl;
@@ -786,6 +791,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
 	}
       }
     }
+    //    cerr<<"B MOve join"<<endl;
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){ 
@@ -796,6 +802,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     }
   }
   else if (oldJoin>newJoin){
+    //  cerr<<"C MOve join"<<endl;
     //  else if (oldJoin>=newJoin){//CHANGED!
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
@@ -808,6 +815,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
 	Path[OLDMODE](timeSlice,Permutation(ptcl))=Path[NEWMODE](timeSlice,ptcl);
       }
     }
+    //    cerr<<"D MOve join"<<endl;
     //Now that we've copied the data from B into A, we need to copy the 
     //information into B
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
@@ -817,8 +825,10 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
   }
   //  perr<<Path(OpenLink,OpenPtcl)<<endl;
   //  perr<<"Ending"<<endl;
+  //  cerr<<"E MOve join"<<endl;
   if (WormOn)
     MoveJoinParticleExist(oldJoin,newJoin);
+  //  cerr<<"out move join"<<endl;
 }
 
 

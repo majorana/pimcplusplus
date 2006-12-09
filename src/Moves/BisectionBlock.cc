@@ -255,7 +255,7 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
-  //  cerr<<"Bisection Block beginning"<<endl;
+  //  cerr<<"Starting bisection block"<<endl;
   //  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
   //    cerr<<PathData.Path.Permutation(ptcl)<<endl;
   ChooseTimeSlices();
@@ -274,6 +274,7 @@ void BisectionBlockClass::MakeMove()
   }
   if (LowestLevel != 0)
     MakeStraightPaths();
+  //  cerr<<"ending bisection block"<<endl;
 }
 
 

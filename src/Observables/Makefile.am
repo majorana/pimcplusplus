@@ -23,6 +23,8 @@ libobservables_la_SOURCES  =     \
     lsapr.f                      \
     JosephsonPathDump.h          \
     JosephsonPathDump.cc         \
+    Hexatic.h                    \
+    Hexatic.cc                   \
 		HBond.cc                     \
 		HBond.h                      \
     lsapr.f                      \

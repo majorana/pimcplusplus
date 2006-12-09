@@ -223,6 +223,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new EnergySignClass(PathData,OutFile);
     else if (observeType=="AutoCorr")
       tempObs = new AutoCorrClass(PathData,OutFile);
+    else if (observeType=="Hexatic")
+      tempObs = new HexaticClass(PathData,OutFile);
     else if (observeType=="HBond")
       tempObs = new HbondClass(PathData,OutFile);
     else if (observeType=="MeanSqDiffusion")

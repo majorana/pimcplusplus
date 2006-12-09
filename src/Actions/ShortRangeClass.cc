@@ -267,9 +267,9 @@ ShortRangeClass::d_dBeta (int slice1, int slice2, int level)
       }
     }
   }
-  cerr<<"Printing short range stuff"<<endl;
-  for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++)
-    cerr<<slice<<" "<<sliceTotal(slice)<<endl;
+  //  cerr<<"Printing short range stuff"<<endl;
+  //  for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++)
+  //    cerr<<slice<<" "<<sliceTotal(slice)<<endl;
   return dU;
 }
 

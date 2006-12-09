@@ -32,7 +32,7 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
   ifstream infile;
   ///BUG: Currently hardcoded for actual file
   infile.open(fileName.c_str());
-  cerr<<"Beginning now"<<endl;
+  //  cerr<<"Beginning now"<<endl;
   for (int lvl=0;lvl<2;lvl++)
     for (int isEnergy=0;isEnergy<3;isEnergy++)
       ///BUG: 
@@ -48,7 +48,7 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
 	}
 
       }
-  cerr<<"Done"<<endl;
+  //  cerr<<"Done"<<endl;
   infile.close();
   
 }
@@ -99,7 +99,7 @@ DavidLongRangeClass::SingleAction (int slice1, int slice2,
   ///Not really d_dbeta but total energy
 double DavidLongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 {
-  cerr<<"Calculating long range energy"<<endl;
+  //  cerr<<"Calculating long range energy"<<endl;
   //  cerr<<"My level is "<<level<<endl;
   double total=0.0;
   double factor=1.0;
@@ -132,7 +132,7 @@ double DavidLongRangeClass::d_dBeta (int slice1, int slice2,  int level)
     }
     //    cerr<<"Ending loop";
     total += sliceTotal;
-    cerr<<"My slice total is "<<slice<<" "<<sliceTotal<<endl;
+    //    cerr<<"My slice total is "<<slice<<" "<<sliceTotal<<endl;
     
   }
   //  cerr<<"I am being called"<<endl;
