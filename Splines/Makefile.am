@@ -90,6 +90,6 @@ libspline_la_LIBADD   =
 #endif
 
 
-include_HEADERS = BicubicSpline.h ComplexMultiTricubicSpline.h CubicSpline.h Grid.h MultiTricubicSpline.h MyTricubicSpline.h PeriodicSpline.h QuinticSpline.h TricubicSpline.h FastCubicSpline.h
+include_HEADERS = BicubicSpline.h ComplexMultiTricubicSpline.h CubicSpline.h Grid.h MultiTricubicSpline.h MyTricubicSpline.h PeriodicSpline.h QuinticSpline.h TricubicSpline.h FastCubicSpline.h CubicBspline.h BsplineHelper.h BoundaryCondition.h NUBsplineBasis.h TricubicBspline.h TricubicNUBspline.h
 
 EXTRA_DIST = CubicSplines.tex
