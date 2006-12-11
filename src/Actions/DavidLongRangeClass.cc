@@ -105,11 +105,12 @@ double DavidLongRangeClass::d_dBeta (int slice1, int slice2,  int level)
   double factor=1.0;
   for (int slice=slice1;slice<=slice2;slice++){
     double sliceTotal=0.0;
-    //    if ((slice == slice1) || (slice==slice2))
-    //      factor = 0.5;
-    //    else
-    //      factor = 1.0;
-    //    cerr<<"Starting loop\n";
+    if ((slice == slice1) || (slice==slice2))
+      factor = 0.5;
+    else
+      factor = 1.0;
+
+
     for (int species=0; species<Path.NumSpecies(); species++) {
       Path.CalcRho_ks_Fast(slice,species);
       //      PairActionFitClass &pa = *PairMatrix(species,species);
