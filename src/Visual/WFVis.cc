@@ -8,6 +8,9 @@ WFVisualClass::WFVisualClass() :
   IsoAdjust  (0.01, 0.0, 1.0, 0.01, 0.1),
   BandAdjust (0.0, 0.0, 8.0, 1.0, 1.0),
   kAdjust (0.0, 0.0, 16.0, 1.0, 1.0),
+  xPlaneAdjust(0.0, 0.0, 1.0, 0.01, 0.1),
+  yPlaneAdjust(0.0, 0.0, 1.0, 0.01, 0.1),
+  zPlaneAdjust(0.0, 0.0, 1.0, 0.01, 0.1),
   UpToDate(true),
   FileIsOpen(false)
 {
@@ -52,6 +55,36 @@ WFVisualClass::WFVisualClass() :
   IsoImage.set(FindFullPath("isoButton.png"));
   IsoButton.set_icon_widget(IsoImage);
   IsoButton.set_label("Isosurf");
+
+
+  //////////////////////////////
+  // Color plane widget setup //
+  //////////////////////////////
+  xPlaneScale.set_value_pos(Gtk::POS_RIGHT);
+  yPlaneScale.set_value_pos(Gtk::POS_RIGHT);
+  zPlaneScale.set_value_pos(Gtk::POS_RIGHT);
+  xPlaneScale.set_adjustment(xPlaneAdjust);
+  yPlaneScale.set_adjustment(yPlaneAdjust);
+  zPlaneScale.set_adjustment(zPlaneAdjust);
+  xPlaneScale.property_width_request().set_value(75);
+  yPlaneScale.property_width_request().set_value(75);
+  zPlaneScale.property_width_request().set_value(75);
+  xPlaneScale.set_digits(2);
+  yPlaneScale.set_digits(2);
+  zPlaneScale.set_digits(2);
+  xPlaneButton.set_label("x Plane");
+  yPlaneButton.set_label("y Plane");
+  zPlaneButton.set_label("z Plane");
+  xPlaneBox.pack_start (xPlaneButton, Gtk::PACK_SHRINK, 5);
+  xPlaneBox.pack_start (xPlaneScale,  Gtk::PACK_SHRINK, 5);
+  yPlaneBox.pack_start (yPlaneButton, Gtk::PACK_SHRINK, 5);
+  yPlaneBox.pack_start (yPlaneScale,  Gtk::PACK_SHRINK, 5);
+  zPlaneBox.pack_start (zPlaneButton, Gtk::PACK_SHRINK, 5);
+  zPlaneBox.pack_start (zPlaneScale,  Gtk::PACK_SHRINK, 5);
+  PlaneBox.pack_start(xPlaneBox, Gtk::PACK_SHRINK);
+  PlaneBox.pack_start(yPlaneBox, Gtk::PACK_SHRINK);
+  PlaneBox.pack_start(zPlaneBox, Gtk::PACK_SHRINK);
+  PlaneFrame.add (PlaneBox);
 
   set_reallocate_redraws(true);
   PathVis.set_size_request(800, 800);
@@ -121,6 +154,7 @@ WFVisualClass::WFVisualClass() :
   // Pack the boxes //
   ////////////////////
   ToolBox.pack_start(Tools);
+  ToolBox.pack_start(PlaneFrame, Gtk::PACK_SHRINK, 5);
   ToolBox.pack_start(IsoFrame,  Gtk::PACK_SHRINK, 5);
   ToolBox.pack_start(BandFrame, Gtk::PACK_SHRINK, 5);
   ToolBox.pack_start(kFrame,    Gtk::PACK_SHRINK, 5);
@@ -295,13 +329,15 @@ WFVisualClass::DrawFrame(bool offScreen)
     //    delete (PathVis.Objects[i]);
   }
   PathVis.Objects.resize(0);
+
+  CoordObject *coord = new CoordObject;
+  coord->Set (Box);
+  PathVis.Objects.push_back(coord);
+
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
   boxObject->Set (Box, clipping);
   PathVis.Objects.push_back(boxObject);
-  CoordObject *coord = new CoordObject;
-  coord->Set (Box);
-  PathVis.Objects.push_back(coord);
   
   
 
@@ -400,6 +436,21 @@ WFVisualClass::DrawFrame(bool offScreen)
     Isosurface *wfIso = new Isosurface;
     wfIso->Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
     wfIso->SetIsoval(MaxRho*IsoAdjust.get_value());
+    if (xPlaneButton.get_active()) {
+      PlaneObject *plane = new PlaneObject (*wfIso);
+      plane->SetPosition (0, xPlaneScale.get_value());
+      PathVis.Objects.push_back(plane);
+    }
+    if (yPlaneButton.get_active()) {
+      PlaneObject *plane = new PlaneObject (*wfIso);
+      plane->SetPosition (1, yPlaneScale.get_value());
+      PathVis.Objects.push_back(plane);
+    }
+    if (zPlaneButton.get_active()) {
+      PlaneObject *plane = new PlaneObject (*wfIso);
+      plane->SetPosition (2, zPlaneScale.get_value());
+      PathVis.Objects.push_back(plane);
+    }
     PathVis.Objects.push_back(wfIso);
   }
 
@@ -558,9 +609,9 @@ WFVisualClass::ReadWF (int kpoint, int band)
     for (int iy=0; iy<wfdata.extent(1); iy++)
       for (int iz=0; iz<wfdata.extent(2); iz++) {
 	// WF data is store from 0 to Lx, not -Lx/2 to Lx/2
-	int jx = (ix+Nx/2)%(Nx-1);
-	int jy = (iy+Ny/2)%(Ny-1);
-	int jz = (iz+Nz/2)%(Nz-1);
+	int jx = (ix/*+Nx/2*/)%(Nx-1);
+	int jy = (iy/*+Ny/2*/)%(Ny-1);
+	int jz = (iz/*+Nz/2*/)%(Nz-1);
 	double rho = (wfdata(jx,jy,jz,0)*wfdata(jx,jy,jz,0) +
 		      wfdata(jx,jy,jz,1)*wfdata(jx,jy,jz,1));
 	WFData(ix,iy,iz) = rho;

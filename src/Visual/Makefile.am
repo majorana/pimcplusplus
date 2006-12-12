@@ -8,6 +8,8 @@ pathvis___SOURCES =       \
     BoxClass.h          \
     BoxObject.cc        \
     BoxObject.h         \
+    ColorMap.cc         \
+    ColorMap.h          \
     CoordObject.cc      \
     CoordObject.h       \
     DiskObject.cc       \
@@ -21,6 +23,8 @@ pathvis___SOURCES =       \
     PathObject.h        \
     PathVis.cc          \
     PathVis.h           \
+    PlaneObject.cc      \
+    PlaneObject.h       \
     SmoothClass.cc      \
     SmoothClass.h       \
     SphereObject.cc     \
@@ -63,6 +67,8 @@ wfvis___SOURCES =       \
     BoxClass.h          \
     BoxObject.cc        \
     BoxObject.h         \
+    ColorMap.h          \
+    ColorMap.cc         \
     CoordObject.cc      \
     CoordObject.h       \
     DiskObject.cc       \
@@ -77,6 +83,8 @@ wfvis___SOURCES =       \
     WFVis.h             \
     PathVis.cc          \
     PathVis.h           \
+    PlaneObject.cc      \
+    PlaneObject.h       \
     SphereObject.cc     \
     SphereObject.h      \
     ViewClass.cc        \

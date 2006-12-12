@@ -5,6 +5,7 @@
 #include "BoxClass.h"
 #include "CoordObject.h"
 #include "Isosurface.h"
+#include "PlaneObject.h"
 #include <Common/IO/IO.h>
 #include <gtkmm/adjustment.h>
 
@@ -62,6 +63,15 @@ protected:
   double FindMaxBandRho();
   double MaxBandRho;
 
+  ///////////////////////
+  // Color plane stuff //
+  ///////////////////////
+  Gtk::Frame PlaneFrame;
+  Gtk::VBox PlaneBox;
+  Gtk::Adjustment xPlaneAdjust, yPlaneAdjust, zPlaneAdjust;
+  Gtk::HScale xPlaneScale, yPlaneScale, zPlaneScale;
+  Gtk::CheckButton xPlaneButton, yPlaneButton, zPlaneButton;
+  Gtk::HBox xPlaneBox, yPlaneBox, zPlaneBox;
 
   //////////////////////
   // Callback methods //

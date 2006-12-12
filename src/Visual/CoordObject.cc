@@ -15,6 +15,14 @@ CoordObject::Set (double lx, double ly, double lz)
   Lx=1.1*lx; Ly=1.1*ly; Lz=1.1*lz;
   Start();
   
+  // Make sure the coordinates don't get clipped
+  glDisable(GL_CLIP_PLANE0);
+  glDisable(GL_CLIP_PLANE1);
+  glDisable(GL_CLIP_PLANE2);
+  glDisable(GL_CLIP_PLANE3);
+  glDisable(GL_CLIP_PLANE4);
+  glDisable(GL_CLIP_PLANE5);
+
   glPushMatrix();
   
   glTranslated (-0.5*Lx, -0.5*Ly, -0.5*Lz);
