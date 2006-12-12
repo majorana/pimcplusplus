@@ -98,6 +98,12 @@ WFVisualClass::WFVisualClass() :
     (sigc::bind<int>(sigc::mem_fun(*this, &WFVisualClass::OnPlaneChange), 1));
   zPlaneScale.signal_value_changed().connect
     (sigc::bind<int>(sigc::mem_fun(*this, &WFVisualClass::OnPlaneChange), 2));
+  xPlaneButton.signal_toggled().connect
+    (sigc::bind<int>(sigc::mem_fun(*this, &WFVisualClass::OnPlaneChange), 0));
+  yPlaneButton.signal_toggled().connect
+    (sigc::bind<int>(sigc::mem_fun(*this, &WFVisualClass::OnPlaneChange), 1));
+  zPlaneButton.signal_toggled().connect
+    (sigc::bind<int>(sigc::mem_fun(*this, &WFVisualClass::OnPlaneChange), 2));
 
 
   set_reallocate_redraws(true);
@@ -628,7 +634,12 @@ WFVisualClass::OnkChange()
 void
 WFVisualClass::OnPlaneChange(int dir)
 {
-  UpdatePlane[dir] = true;
+  if (dir==0 && xPlaneButton.get_active())
+    UpdatePlane[0] = true;
+  if (dir==1 && yPlaneButton.get_active())
+    UpdatePlane[1] = true;
+  if (dir==2 && zPlaneButton.get_active())
+    UpdatePlane[2] = true;
   DrawFrame();
 }
 

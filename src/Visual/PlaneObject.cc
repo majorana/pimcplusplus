@@ -5,7 +5,6 @@ PlaneObject::SetPosition(int dir, double pos)
 {
   Direction = dir;
   Position = pos;
-  cerr << "SetPosition, dir = " << dir << endl;
   Set();
 }
 
@@ -107,6 +106,11 @@ PlaneObject::Set()
   Vec3 r1 = r0 + sVec;
   Vec3 r2 = r0 + sVec + tVec;
   Vec3 r3 = r0 + tVec;
+  // When commensurate with the face of the cell, place slightly
+  // outside the cell.
+  if ((fabs(Position)<1.0e-6) || (fabs(1.0-Position)<1.0e-6)) {
+    r0 = 1.0001*r0;  r1 = 1.0001*r1;  r2 = 1.0001*r2;  r3 = 1.0001*r3;
+  }
   glTexCoord2f(0.0, 0.0); glVertex3f(r0[0], r0[1], r0[2]);
   glTexCoord2f(0.0, 1.0); glVertex3f(r1[0], r1[1], r1[2]);
   glTexCoord2f(1.0, 1.0); glVertex3f(r2[0], r2[1], r2[2]);
