@@ -5,7 +5,8 @@
 
 using namespace std;
 
-GLObject::GLObject() : Created(false), Visible(true), Transparent(false)
+GLObject::GLObject() : Created(false), Visible(true), Transparent(false),
+		       Dynamic(true)
 {
  
 };

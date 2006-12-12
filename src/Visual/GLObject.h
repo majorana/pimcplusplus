@@ -13,6 +13,7 @@ protected:
   bool Visible;
   bool Transparent;
 public:
+  bool Dynamic;
   virtual void Draw();
   virtual void DrawPOV(FILE *fout, string rotString) = 0;
   void Start();

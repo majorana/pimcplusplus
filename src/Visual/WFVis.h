@@ -52,6 +52,7 @@ protected:
   IOSectionClass Infile;
   bool FileIsOpen;
   Array<double,3> RhoData;
+  Isosurface WFIso;
   LinearGrid Xgrid, Ygrid, Zgrid;
   Gtk::VBox IsoBox, DensityBox;
   Gtk::Label rsLabel;
@@ -66,12 +67,19 @@ protected:
   ///////////////////////
   // Color plane stuff //
   ///////////////////////
+  PlaneObject xPlane, yPlane, zPlane;
   Gtk::Frame PlaneFrame;
   Gtk::VBox PlaneBox;
   Gtk::Adjustment xPlaneAdjust, yPlaneAdjust, zPlaneAdjust;
   Gtk::HScale xPlaneScale, yPlaneScale, zPlaneScale;
   Gtk::CheckButton xPlaneButton, yPlaneButton, zPlaneButton;
   Gtk::HBox xPlaneBox, yPlaneBox, zPlaneBox;
+
+  /////////////////
+  // State flags //
+  /////////////////
+  bool UpdateIso;
+  bool UpdatePlane[3];
 
   //////////////////////
   // Callback methods //
@@ -82,6 +90,7 @@ protected:
   void OnIsoChange();
   void OnBandChange();
   void OnkChange();
+  void OnPlaneChange(int dir);
   void OnPerspectiveToggle();
   void OnPlayToggle();
   void OnClipToggle();

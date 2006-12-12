@@ -40,7 +40,8 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
   int numSpecies = Species.size();
 
   for (int i=0; i<PathVis.Objects.size(); i++)
-    delete PathVis.Objects[i];
+    if (PathVis.Objects[i]->Dynamic)
+      delete PathVis.Objects[i];
   
   PathVis.Objects.resize(0);
 

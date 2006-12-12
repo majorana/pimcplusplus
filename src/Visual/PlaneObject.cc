@@ -5,6 +5,7 @@ PlaneObject::SetPosition(int dir, double pos)
 {
   Direction = dir;
   Position = pos;
+  cerr << "SetPosition, dir = " << dir << endl;
   Set();
 }
 
@@ -14,15 +15,6 @@ PlaneObject::Init()
 {
   MinVal = Spline(0,0,0);
   MaxVal = Spline(0,0,0);
-//   double xi = Spline.Xgrid->Start; double xf = Spline.Xgrid->End;
-//   double nxInv = 1.0/(double)Spline.Nx;
-//   double yi = Spline.Ygrid->Start; double yf = Spline.Ygrid->End;
-//   double nyInv = 1.0/(double)Spline.Ny;
-//   double zi = Spline.Zgrid->Start; double zf = Spline.Zgrid->End;
-//   double nzInv = 1.0/(double)Spline.Nz;
-  cerr << "Nx = " << Spline.Nx << endl;
-  cerr << "Ny = " << Spline.Ny << endl;
-  cerr << "Nz = " << Spline.Nz << endl;
   for (int ix=0; ix<Spline.Nx; ix++) 
     for (int iy=0; iy<Spline.Ny; iy++)
       for (int iz=0; iz<Spline.Nz; iz++) {
@@ -30,26 +22,30 @@ PlaneObject::Init()
 	MinVal = (val < MinVal) ? val : MinVal;
 	MaxVal = (val > MaxVal) ? val : MaxVal;
       }
-  cerr << "MinVal = " << MinVal << endl;
-  cerr << "MaxVal = " << MaxVal << endl;
   CMap. Init (MinVal, MaxVal);
-  // Allocate a texture
-  glGenTextures (1, &TextureNum);
-  glBindTexture (GL_TEXTURE_2D, TextureNum);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
 PlaneObject::~PlaneObject()
 {
-  glDeleteTextures(1, &TextureNum);
+  if (HaveTexture) 
+    glDeleteTextures(1, &TextureNum);
 }
 
 void
 PlaneObject::Set()
 {
+  if (!HaveTexture) {
+    // Allocate a texture
+    glGenTextures (1, &TextureNum);
+    glBindTexture (GL_TEXTURE_2D, TextureNum);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    HaveTexture = true;
+  }
+
+
   const int N = 256;
   Array<TinyVector<GLubyte,4>,2> texData(N,N);
   
@@ -91,8 +87,16 @@ PlaneObject::Set()
     }
   }
   
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA,
-	       GL_UNSIGNED_BYTE, texData.data());
+  glBindTexture(GL_TEXTURE_2D, TextureNum);
+  if (!BuiltTexture) {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA,
+		 GL_UNSIGNED_BYTE, texData.data());
+    BuiltTexture = true;
+  }
+  else
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, N, N, 
+		    GL_RGBA, GL_UNSIGNED_BYTE, texData.data());
+  
 
   // Create the polygons
   Start();

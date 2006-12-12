@@ -12,8 +12,15 @@ WFVisualClass::WFVisualClass() :
   yPlaneAdjust(0.0, 0.0, 1.0, 0.01, 0.1),
   zPlaneAdjust(0.0, 0.0, 1.0, 0.01, 0.1),
   UpToDate(true),
-  FileIsOpen(false)
+  FileIsOpen(false),
+  xPlane(WFIso),
+  yPlane(WFIso),
+  zPlane(WFIso)
 {
+  WFIso.Dynamic = false;
+  xPlane.Dynamic = false;
+  yPlane.Dynamic = false;
+  zPlane.Dynamic = false;
   IsoScale.set_adjustment(IsoAdjust);
   IsoScale.set_digits(2);
   IsoScale.signal_value_changed().connect
@@ -85,6 +92,13 @@ WFVisualClass::WFVisualClass() :
   PlaneBox.pack_start(yPlaneBox, Gtk::PACK_SHRINK);
   PlaneBox.pack_start(zPlaneBox, Gtk::PACK_SHRINK);
   PlaneFrame.add (PlaneBox);
+  xPlaneScale.signal_value_changed().connect
+    (sigc::bind<int>(sigc::mem_fun(*this, &WFVisualClass::OnPlaneChange), 0));
+  yPlaneScale.signal_value_changed().connect
+    (sigc::bind<int>(sigc::mem_fun(*this, &WFVisualClass::OnPlaneChange), 1));
+  zPlaneScale.signal_value_changed().connect
+    (sigc::bind<int>(sigc::mem_fun(*this, &WFVisualClass::OnPlaneChange), 2));
+
 
   set_reallocate_redraws(true);
   PathVis.set_size_request(800, 800);
@@ -168,6 +182,8 @@ WFVisualClass::WFVisualClass() :
   show_all();
 
   PerspectButton.set_active(true);
+  UpdateIso = true;
+  UpdatePlane[0] = UpdatePlane[1] = UpdatePlane[2] = true;
 }
 
 void
@@ -317,14 +333,16 @@ WFVisualClass::DrawFrame(bool offScreen)
 {
   bool clipping = ClipButton.get_active();
   for (int i=0; i<PathVis.Objects.size(); i++) {
-    if (dynamic_cast<SphereObject*> (PathVis.Objects[i]) != NULL)
-      delete dynamic_cast<SphereObject*> (PathVis.Objects[i]);
-    else if (dynamic_cast<DiskObject*> (PathVis.Objects[i]) != NULL)
-      delete dynamic_cast<DiskObject*> (PathVis.Objects[i]);
-    else if (dynamic_cast<Isosurface*> (PathVis.Objects[i]) != NULL)
-      delete dynamic_cast<Isosurface*> (PathVis.Objects[i]);
-    else if (dynamic_cast<BoxObject*> (PathVis.Objects[i]) != NULL)
-      delete dynamic_cast<BoxObject*> (PathVis.Objects[i]);
+    if (PathVis.Objects[i]->Dynamic) {
+      if (dynamic_cast<SphereObject*> (PathVis.Objects[i]) != NULL)
+	delete dynamic_cast<SphereObject*> (PathVis.Objects[i]);
+      else if (dynamic_cast<DiskObject*> (PathVis.Objects[i]) != NULL)
+	delete dynamic_cast<DiskObject*> (PathVis.Objects[i]);
+      else if (dynamic_cast<Isosurface*> (PathVis.Objects[i]) != NULL)
+	delete dynamic_cast<Isosurface*> (PathVis.Objects[i]);
+      else if (dynamic_cast<BoxObject*> (PathVis.Objects[i]) != NULL)
+	delete dynamic_cast<BoxObject*> (PathVis.Objects[i]);
+    }
 
     //    delete (PathVis.Objects[i]);
   }
@@ -433,29 +451,46 @@ WFVisualClass::DrawFrame(bool offScreen)
       Currk    = k;
       ReadWF (k, band);
     }
-    Isosurface *wfIso = new Isosurface;
-    wfIso->Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
-    wfIso->SetIsoval(MaxRho*IsoAdjust.get_value());
-    if (xPlaneButton.get_active()) {
-      PlaneObject *plane = new PlaneObject (*wfIso);
-      plane->SetPosition (0, xPlaneScale.get_value());
-      PathVis.Objects.push_back(plane);
+    //    Isosurface *wfIso = new Isosurface;
+    if (UpdateIso) {
+      WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+      WFIso.SetIsoval(MaxRho*IsoAdjust.get_value());
+      xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
-    if (yPlaneButton.get_active()) {
-      PlaneObject *plane = new PlaneObject (*wfIso);
-      plane->SetPosition (1, yPlaneScale.get_value());
-      PathVis.Objects.push_back(plane);
-    }
-    if (zPlaneButton.get_active()) {
-      PlaneObject *plane = new PlaneObject (*wfIso);
-      plane->SetPosition (2, zPlaneScale.get_value());
-      PathVis.Objects.push_back(plane);
-    }
-    PathVis.Objects.push_back(wfIso);
+    if (UpdatePlane[0] && xPlaneButton.get_active())
+      xPlane.SetPosition (0, xPlaneScale.get_value());
+    if (xPlaneButton.get_active())
+      PathVis.Objects.push_back(&xPlane);
+
+    if (UpdatePlane[1] && yPlaneButton.get_active())
+      yPlane.SetPosition (1, yPlaneScale.get_value());
+    if (yPlaneButton.get_active())
+      PathVis.Objects.push_back(&yPlane);
+
+    if (UpdatePlane[2] && zPlaneButton.get_active())
+      zPlane.SetPosition (2, zPlaneScale.get_value());
+    if (zPlaneButton.get_active())
+      PathVis.Objects.push_back(&zPlane);
+
+//     if (yPlaneButton.get_active()) {
+//       PlaneObject *plane = new PlaneObject (WFIso);
+//       plane->SetPosition (1, yPlaneScale.get_value());
+//       PathVis.Objects.push_back(plane);
+//     }
+//     if (zPlaneButton.get_active()) {
+//       PlaneObject *plane = new PlaneObject (WFIso);
+//       plane->SetPosition (2, zPlaneScale.get_value());
+//       PathVis.Objects.push_back(plane);
+//     }
+    PathVis.Objects.push_back(&WFIso);
   }
 
   PathVis.Invalidate();
   UpToDate = true;
+  UpdateIso = false;
+  UpdatePlane[0] = false;
+  UpdatePlane[1] = false;
+  UpdatePlane[2] = false;
   return false;
 }
 
@@ -566,18 +601,34 @@ WFVisualClass::OnIsoChange()
   snprintf (rstext, 100, "rs = %1.3f", rs);
   rsLabel.set_text(rstext);
   
+  UpdateIso = true;
   DrawFrame();
 }
 
 void
 WFVisualClass::OnBandChange()
 {
+  UpdateIso = true;
+  UpdatePlane[0] = true;
+  UpdatePlane[1] = true;
+  UpdatePlane[2] = true;
   DrawFrame();
 }
 
 void
 WFVisualClass::OnkChange()
 {
+  UpdateIso = true;
+  UpdatePlane[0] = true;
+  UpdatePlane[1] = true;
+  UpdatePlane[2] = true;
+  DrawFrame();
+}
+
+void
+WFVisualClass::OnPlaneChange(int dir)
+{
+  UpdatePlane[dir] = true;
   DrawFrame();
 }
 

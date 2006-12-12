@@ -3,8 +3,6 @@
 void
 ColorMap::Init (double min, double max, ColorMapType map)
 {
-  cerr << "min = " << min << endl;
-  cerr << "max = " << max << endl;
   Min = min;
   Max = max;
 
@@ -25,9 +23,9 @@ ColorMap::Init (double min, double max, ColorMapType map)
   Splines[1].Init (min, max, g, true, fBC, fBC);
   Splines[2].Init (min, max, b, true, nBC, fBC);
   Splines[3].Init (min, max, a, true, nBC, nBC);
-  FILE *fout = fopen ("colormap.dat", "w");
-  for (double x=min; x<=max; x+=0.001)
-    fprintf (fout, "%10.6e %10.6e %10.6e %10.6e %10.6e\n",
-	     x, Splines[0](x), Splines[1](x), Splines[2](x), Splines[3](x));
-  fclose (fout);
+//   FILE *fout = fopen ("colormap.dat", "w");
+//   for (double x=min; x<=max; x+=0.001)
+//     fprintf (fout, "%10.6e %10.6e %10.6e %10.6e %10.6e\n",
+// 	     x, Splines[0](x), Splines[1](x), Splines[2](x), Splines[3](x));
+//   fclose (fout);
 }
