@@ -261,8 +261,6 @@ void
 WFVisualClass::OnPerspectiveToggle()
 {
   bool persp = !OrthoButton.get_active();
-  cerr << "Now using " << (persp ? "perspective" : "orthographic") 
-       << " projection.\n";
   PathVis.View.SetPerspective(persp);
   //  PathVis.Invalidate();
   DrawFrame();
@@ -448,7 +446,7 @@ WFVisualClass::DrawFrame(bool offScreen)
     PathVis.Objects.push_back(sphere);
   }
 
-  if (IsoButton.get_active()) {
+  if (FileIsOpen) {
     int band, k;
     band = (int)round(BandScale.get_value());
     k    = (int)round(kScale.get_value());
@@ -456,39 +454,29 @@ WFVisualClass::DrawFrame(bool offScreen)
       CurrBand = band;
       Currk    = k;
       ReadWF (k, band);
-    }
-    //    Isosurface *wfIso = new Isosurface;
-    if (UpdateIso) {
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+    }
+    if (UpdateIso) {
       WFIso.SetIsoval(MaxRho*IsoAdjust.get_value());
       xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
+
     if (UpdatePlane[0] && xPlaneButton.get_active())
       xPlane.SetPosition (0, xPlaneScale.get_value());
     if (xPlaneButton.get_active())
       PathVis.Objects.push_back(&xPlane);
-
+    
     if (UpdatePlane[1] && yPlaneButton.get_active())
       yPlane.SetPosition (1, yPlaneScale.get_value());
     if (yPlaneButton.get_active())
       PathVis.Objects.push_back(&yPlane);
-
+    
     if (UpdatePlane[2] && zPlaneButton.get_active())
       zPlane.SetPosition (2, zPlaneScale.get_value());
     if (zPlaneButton.get_active())
       PathVis.Objects.push_back(&zPlane);
-
-//     if (yPlaneButton.get_active()) {
-//       PlaneObject *plane = new PlaneObject (WFIso);
-//       plane->SetPosition (1, yPlaneScale.get_value());
-//       PathVis.Objects.push_back(plane);
-//     }
-//     if (zPlaneButton.get_active()) {
-//       PlaneObject *plane = new PlaneObject (WFIso);
-//       plane->SetPosition (2, zPlaneScale.get_value());
-//       PathVis.Objects.push_back(plane);
-//     }
-    PathVis.Objects.push_back(&WFIso);
+    if (IsoButton.get_active()) 
+      PathVis.Objects.push_back(&WFIso);
   }
 
   PathVis.Invalidate();
@@ -554,17 +542,17 @@ WFVisualClass::Read(string filename)
   Infile.CloseSection(); // "twist"
   Infile.CloseSection(); // "eigenstates"
   cerr << "Numk = " << Numk << "   NumBands = " << NumBands << endl;
-  BandAdjust.set_upper(NumBands-1.0);
-  kAdjust.set_upper(Numk-1.0);
-
 
   /// Read first wave function
   ReadWF(0,0);
   Xgrid.Init(-0.5*Box[0], 0.5*Box[0], WFData.extent(0));
   Ygrid.Init(-0.5*Box[1], 0.5*Box[1], WFData.extent(1));
   Zgrid.Init(-0.5*Box[2], 0.5*Box[2], WFData.extent(2));
+  WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
   CurrBand = 0; 
   Currk = 0;
+  BandAdjust.set_upper(NumBands-1.0);
+  kAdjust.set_upper(Numk-1.0);
 
   double maxDim = max(max(lattice(0,0), lattice(1,1)), lattice(2,2));
   PathVis.View.SetDistance (1.2*maxDim);
@@ -572,7 +560,6 @@ WFVisualClass::Read(string filename)
   IsoButton.set_active(true);
   IsoButton.set_sensitive(true);
   IsoFrame.set_sensitive(true);
-    
   DrawFrame();
 }
 
