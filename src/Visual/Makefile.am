@@ -88,6 +88,8 @@ wfvis___SOURCES =       \
     SphereObject.cc     \
     SphereObject.h      \
     ViewClass.cc        \
+    WFExport.cc         \
+    WFExport.h          \
     trackball.h         \
     trackball.c    
 

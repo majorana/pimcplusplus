@@ -1,4 +1,6 @@
 #include "PlaneObject.h"
+#include <sstream>
+#include <gtkmm.h>
 
 void
 PlaneObject::SetPosition(int dir, double pos)
@@ -122,8 +124,114 @@ PlaneObject::Set()
 	
 
 void
-PlaneObject::DrawPOV(FILE *out, string rotMatrix)
+PlaneObject::DrawPOV(FILE *fout, string rotMatrix)
 {
+  // First, we have to create an image file for the texture map
+  const int N = 1024;
+  Array<TinyVector<guint8,4>,2> texData(N,N);
+  
+  Vec3 r0, sVec, tVec;
+  Vec3 dr[3];
+  dr[0] = (Spline.Xgrid->End - Spline.Xgrid->Start) * Vec3(1.0, 0.0, 0.0);
+  dr[1] = (Spline.Ygrid->End - Spline.Ygrid->Start) * Vec3(0.0, 1.0, 0.0);
+  dr[2] = (Spline.Zgrid->End - Spline.Zgrid->Start) * Vec3(0.0, 0.0, 1.0);
+  r0 = Vec3 (Spline.Xgrid->Start, Spline.Ygrid->Start, Spline.Zgrid->Start);
+  r0 += Position*dr[Direction];
+  if (Direction == 0) {
+    sVec = dr[1];
+    tVec = dr[2];
+  }
+  else if (Direction == 1) {
+    sVec = dr[2];
+    tVec = dr[0];
+  }
+  else if (Direction == 2) {
+    sVec = dr[0];
+    tVec = dr[1];
+  }
 
+  // Create the data
+  double nInv = 1.0/(double)(N-1);
+  for (int is=0; is<N; is++) {
+    double s = nInv * (double)is;
+    for (int it=0; it<N; it++) {
+      double t = nInv * (double)it;
+      Vec3 r = r0 + s*sVec + t*tVec;
+      double val = Spline(r[0], r[1], r[2]);
+      TinyVector<double,4> color;
+      CMap (val, color);
+      //      cerr << "val = " << val << "  color = " << color << endl;
+      texData(is, it)[0] = (guint8) floor (256.0 * color[0]);
+      texData(is, it)[1] = (guint8) floor (256.0 * color[1]);
+      texData(is, it)[2] = (guint8) floor (256.0 * color[2]);
+      texData(is, it)[3] = (guint8) floor (256.0 * color[3]);
+    }
+  }
+  
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf = 
+    Gdk::Pixbuf::create_from_data((guint8*)texData.data(), 
+				  Gdk::COLORSPACE_RGB,
+				  true, 8, N, N, 4*N);
+  stringstream fname;
+  fname << "ColorPlane" << Direction << ".png";
+  pixbuf->save (fname.str(), (Glib::ustring)"png"); 
 
+  // Now, we actually create a box geometry onto which to apply this
+  // texture.  
+//   fprintf (fout, "intersection {\n");
+//   fprintf (fout, "  box {\n");
+//   fprintf (fout, "    <%10.8f, %10.8f, %10.8f>,\n",
+// 	   Spline.Xgrid->Start, Spline.Ygrid->Start, Spline.Zgrid->Start);
+//   fprintf (fout, "    <%10.8f, %10.8f, %10.8f>\n",
+//  	   Spline.Xgrid->End, Spline.Ygrid->End, Spline.Zgrid->End);
+//   fprintf (fout, "%s", rotMatrix.c_str());
+//   fprintf (fout, "  }\n");
+  fprintf (fout, "box {\n");
+  fprintf (fout, "  <0.0000,0.0000,0.0000>, \n");
+  fprintf (fout, "  <1.0000,1.0000,0.0001>  \n");
+  fprintf (fout, "  pigment {\n");
+  fprintf (fout, "    image_map {\"%s\"}\n", fname.str().c_str());
+  fprintf (fout, "  }\n"); // pigment
+  fprintf (fout, "  translate <-0.5, -0.5, 0.0>\n");
+  if (Direction == 0)
+    fprintf (fout, "  scale <-1, -1, 1>\n");
+  else if (Direction == 1)
+    fprintf (fout, "  scale <1, -1, 1>\n");
+  else
+    fprintf (fout, "  scale <1, 1, 1>\n");
+  // Now rotate
+  if (Direction == 0)
+    fprintf (fout, "  rotate <0, 90, 0>\n");
+  else if (Direction == 1)
+    fprintf (fout, "  rotate <90, 0, 0>\n");
+  else if (Direction == 2)
+    fprintf (fout, "  rotate <0, 0, 90>\n");
+
+  // First scale
+  fprintf (fout, "  scale <%1.6f, %1.6f, %1.6f>\n",
+	   (Spline.Xgrid->End-Spline.Xgrid->Start),
+	   (Spline.Ygrid->End-Spline.Ygrid->Start),
+	   (Spline.Zgrid->End-Spline.Zgrid->Start));
+  if (Direction == 0) {
+    fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
+	     (1.0-Position)*Spline.Xgrid->Start
+	     +Position*Spline.Xgrid->End, 0.0, 0.0);
+  }
+  else if (Direction == 1)
+    fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
+	     0.0, 
+	     (1.0-Position)*Spline.Ygrid->Start
+	     +Position*Spline.Ygrid->End, 0.0);
+  else if (Direction == 2)
+    fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
+	     0.0, 0.0, (1.0-Position)*Spline.Zgrid->Start
+	     + Position*Spline.Zgrid->End);
+
+  // Now translate
+  //   fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
+  // 	   Spline.Xgrid->Start, Spline.Ygrid->Start, Spline.Zgrid->Start);
+
+  fprintf (fout, "%s", rotMatrix.c_str());
+  fprintf (fout, "  }\n"); // box
+  //  fprintf (fout, "}\n");   // intersection
 }

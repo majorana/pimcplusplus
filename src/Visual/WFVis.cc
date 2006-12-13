@@ -15,7 +15,8 @@ WFVisualClass::WFVisualClass() :
   FileIsOpen(false),
   xPlane(WFIso),
   yPlane(WFIso),
-  zPlane(WFIso)
+  zPlane(WFIso),
+  Export(*this)
 {
   WFIso.Dynamic = false;
   xPlane.Dynamic = false;
@@ -215,7 +216,8 @@ WFVisualClass::Quit()
 void
 WFVisualClass::OnExport()
 {
-
+  Export.SetupWidgets();
+  Export.show_all();
 }
 
 

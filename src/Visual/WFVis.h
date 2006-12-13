@@ -6,6 +6,7 @@
 #include "CoordObject.h"
 #include "Isosurface.h"
 #include "PlaneObject.h"
+#include "WFExport.h"
 #include <Common/IO/IO.h>
 #include <gtkmm/adjustment.h>
 
@@ -81,6 +82,11 @@ protected:
   bool UpdateIso;
   bool UpdatePlane[3];
 
+  ////////////
+  // Export //
+  ////////////
+  WFExportClass Export;
+
   //////////////////////
   // Callback methods //
   //////////////////////
@@ -103,7 +109,6 @@ protected:
   // Other methods //
   ///////////////////
   string FindFullPath(string filename);
-  bool   DrawFrame(bool offScreen=false);
   bool ReadWF (int kPoint, int band);
 public:
   PathVisClass PathVis;
@@ -112,6 +117,8 @@ public:
   // Public methods //
   ////////////////////
   void Read(string filename);
+  bool DrawFrame(bool offScreen=false);
+
   
   WFVisualClass ();
   virtual ~WFVisualClass();
