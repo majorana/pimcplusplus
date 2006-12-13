@@ -167,7 +167,27 @@ void PathVisClass::POVRender(string filename)
   double light_position[] = {50.0, 50.0, 60.0, 0.0};
   fprintf (fout, "light_source { <%8.5f, %8.5f, %8.5f> \n",
 	   light_position[0], light_position[1], light_position[2]);  
-  fprintf (fout, "    color rgb <1.333, 1.333, 1.333> \n}\n\n");
+  fprintf (fout, "    color rgb <1.0, 1.0, 1.0> \n");
+  fprintf (fout, "    area_light <-8,8,-8>, <8,-8,-8>, 5, 5\n");
+  fprintf (fout, "    jitter\n");
+  fprintf (fout, "    adaptive 5\n");
+  fprintf (fout, "}\n\n");
+
+  fprintf (fout, "light_source { <%8.5f, %8.5f, %8.5f> \n",
+	   light_position[0], light_position[1], light_position[2]);  
+  fprintf (fout, "    color rgb <0.5, 0.5, 0.5> \n");
+  fprintf (fout, "    shadowless\n");
+  fprintf (fout, "}\n\n");
+
+  double light_position2[] = {-150.0, 100.0, -50.0, 0.0};
+  fprintf (fout, "light_source { <%8.5f, %8.5f, %8.5f> \n",
+	   light_position2[0], light_position2[1], light_position2[2]);  
+  fprintf (fout, "    color rgb <0.75, 0.75, 0.75> \n");
+  fprintf (fout, "    area_light <-18,18,-18>, <18,-18,-18>, 5, 5\n");
+  fprintf (fout, "    jitter\n");
+  fprintf (fout, "    adaptive 5\n");
+  fprintf (fout, "}\n\n");
+
 //   double light_position2[] = {-80.0, 30.0, 50.0, 0.0};
 //   fprintf (fout, "light_source { <%8.5f, %8.5f, %8.5f> \n",
 // 	   light_position2[0], light_position2[1], light_position2[2]);

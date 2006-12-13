@@ -449,12 +449,12 @@ Isosurface::DrawPOV (FILE *fout, string rotString)
       }
     }
   }
-  fprintf (fout, "  pigment { color rgbf <%1.5f %1.5f %1.5f %1.5f> }\n", 
-	   Color[0], Color[1], Color[2], Color[3]);
+  fprintf (fout, "  pigment { color rgbt <%1.5f %1.5f %1.5f %1.5f> }\n", 
+	   0.6*Color[0], 0.6*Color[1], 0.6*Color[2], 1.0-0.7*Color[3]);
   fprintf (fout, "  finish { \n");
-  fprintf (fout, "    specular 0.6 roughness 0.075\n");
-  fprintf (fout, "    ambient  0.3\n");
-  fprintf (fout, "    diffuse  0.6\n");
+  fprintf (fout, "    specular 0.25roughness 0.025\n");
+  fprintf (fout, "    ambient  0.2\n");
+  fprintf (fout, "    diffuse  0.8\n");
   fprintf (fout, "  }\n");
   fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "}\n\n");
