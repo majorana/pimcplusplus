@@ -24,6 +24,7 @@ private:
   TinyVector<double,4> Color;
   void Set();
 public:
+  int NumTriangles();
   inline void SetIsoval (double val) { Isoval = val; Set(); }
   void DrawPOV(FILE* out, string rotMatrix);
   inline void SetColor (Vec3 color) 

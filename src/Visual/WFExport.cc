@@ -57,9 +57,11 @@ WFExportClass::WFExportClass(WFVisualClass &visual) :
   POVFrame.set_label ("POVray options");
   POVRenderButton.set_label("Render");
   POVAntiAliasButton.set_label("Anti-alias");
+  POVOnScreenButton.set_label("On-screen");
   POVTolLabel.set_text("AA tolerance");
   POVVBox1.pack_start(POVRenderButton, Gtk::PACK_SHRINK, 5);
   POVVBox1.pack_start(POVAntiAliasButton, Gtk::PACK_SHRINK, 5);
+  POVVBox1.pack_start(POVOnScreenButton, Gtk::PACK_SHRINK, 5);
   POVVBox2.pack_start(POVTolLabel,  Gtk::PACK_SHRINK, 1);
   POVVBox2.pack_start(POVTolerance, Gtk::PACK_SHRINK, 1);
   POVHBox.pack_start(POVVBox1, Gtk::PACK_SHRINK, 5);
@@ -264,6 +266,34 @@ WFExportClass::ExportPOV(string basename)
   string filename = basename;
   filename.append(".pov");
   Visual.PathVis.POVRender (filename);
+  if (POVRenderButton.get_active()) {
+    POVFile = filename;
+    Glib::Thread::create
+      (sigc::mem_fun (*this, WFExportClass::RenderPOV), true);
+  }
+}
+
+
+void
+WFExportClass::RenderPOV()
+{
+  cerr << "I'm going to render " << POVFile << endl;
+  stringstream povcmd;
+  povcmd << "povray ";
+  if (!POVOnScreenButton.get_active())
+    povcmd << "-D ";
+  if (POVAntiAliasButton.get_active()) {
+    povcmd.setf(ios_base::floatfield, ios_base::fixed);
+    povcmd.precision(3);
+    povcmd << "+A" << (double)POVTolerance.get_value() << " ";
+  }
+  povcmd << "+W" << (int)WidthButton.get_value() 
+	 << " +H" << (int)HeightButton.get_value() << " ";
+  povcmd << POVFile;
+
+  cerr << "povcmd = " << povcmd.str() << endl;
+
+  system (povcmd.str().c_str());
 }
 
 

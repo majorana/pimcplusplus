@@ -70,9 +70,12 @@ private:
   Gtk::HBox  POVHBox;
   Gtk::CheckButton POVRenderButton;
   Gtk::CheckButton POVAntiAliasButton;
+  Gtk::CheckButton POVOnScreenButton;
   Gtk::SpinButton  POVTolerance;
   Gtk::Adjustment  POVTolAdjust;
   Gtk::Label       POVTolLabel;
+  string POVFile;
+  void RenderPOV();
 
   /// Signal handlers
   void OnExportButton(), OnCancelButton(), OnBrowseButton();
