@@ -56,8 +56,23 @@ public:
   inline void Evaluate (TinyVector<double,3> r,
 			T &val, TinyVector<T,3> &grad, 
 			TinyMatrix<T,3,3> &secDerivs);
+  inline void GetExtents (double &xi, double &xf, 
+			  double &yi, double &yf, 
+			  double &zi, double &zf);
   TricubicBspline();
 };
+
+template<typename T>
+inline void 
+TricubicBspline<T>::GetExtents (double &xi, double &xf, 
+			     double &yi, double &yf, 
+			     double &zi, double &zf)
+{
+  xi=xStart;  xf=xEnd;
+  yi=yStart;  yf=yEnd;
+  zi=zStart;  zf=zEnd;
+}
+  
 
 template<typename T> inline void
 TricubicBspline<T>::Find(double x, double y, double z) const 

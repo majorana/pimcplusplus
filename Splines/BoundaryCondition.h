@@ -1,6 +1,8 @@
 #ifndef BOUNDARY_CONDITION_H
 #define BOUNDARY_CONDITION_H
 
+#include <iostream>
+
 typedef enum {PERIODIC, FIXED_FIRST, FIXED_SECOND, FLAT, NATURAL} BCType;
 
 template<typename T>
@@ -29,22 +31,24 @@ public:
       BC = PERIODIC;
     }
     else if (bctype == FIXED_FIRST) {
-      cerr << "You must specify the derivative value for FIXED_FIRST BC.\n";
+      std::cerr << "You must specify the derivative value"
+		<< " for FIXED_FIRST BC.\n";
       abort();
     }
     else if (bctype == FIXED_SECOND) {
-      cerr << "You must specify the FIXED_SECOND BC.\n";
+      std::cerr << "You must specify the FIXED_SECOND BC.\n";
       abort();
     }
     else {
-      cerr << "Unknown boundary conditions.\n";
+      std::cerr << "Unknown boundary conditions.\n";
       abort();
     }
   }
   BoundaryCondition (BCType bctype, T val)
   {
     if ((bctype != FIXED_FIRST) && (bctype != FIXED_SECOND)) {
-      cerr << "Cannot fix derivatives with periodic, flat, or natural boundary conditions.\n";
+      std::cerr << "Cannot fix derivatives with periodic, flat, " 
+		<< "or natural boundary conditions.\n";
       abort();
     }
     Val = val;

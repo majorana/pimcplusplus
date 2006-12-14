@@ -20,7 +20,7 @@ AC_MSG_RESULT([${CXXFLAGS}])
 # this creates and AC_SUBST's vars BLITZ_CFLAGS and BLITZ_LIBS
 PKG_CHECK_MODULES(BLITZ, blitz, blitz_ok=yes, blitz_ok=no)
 # this creates and AC_SUBST's vars XML2_CFLAGS and XML2_LIBS
-PKG_CHECK_MODULES(XML2, xml2, xml2_ok=yes, xml2_ok=no)
+# PKG_CHECK_MODULES(XML2, xml2, xml2_ok=yes, xml2_ok=no)
 # this creates and AC_SUBST's vars SPRNG2_CFLAGS and SPRNG2_LIBS
 PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
 # this creates and AC_SUBST's vars GSL_CFLAGS and GSL_LIBS
@@ -270,22 +270,22 @@ if test "x$lapack_ok" = "xno"; then
    fi
 fi
 
-AC_ARG_WITH(xml2-cflags,[  --with-xml2-cflags=FLAGS specify XML2 linker flags])
-AC_ARG_WITH(xml2-libs, [  --with-xml2-libs=LIBS    specify XML2 linker flags])
-if test "x$with_xml2_cflags" != "x"; then
-   XML2_CFLAGS="$with_xml2_cflags"
-fi
-if test "x$with_xml2_libs" != "x"; then
-   XML2_LIBS="$with_xml2_libs"
-fi
-AC_SUBST(XML2_CFLAGS)
-AC_SUBST(XML2_LIBS)
-if test "x$xml2_ok" = "xno"; then
-   AC_MSG_WARN([Didn't find libxml2 in standard place.])
-   if test "x$with_xml2_libs" = "x"; then
-       AC_MSG_ERROR([XML2 library could not be found.  Please specify location with --with-xml2-libs=])
-   fi
-fi
+#AC_ARG_WITH(xml2-cflags,[  --with-xml2-cflags=FLAGS specify XML2 linker flags])
+#AC_ARG_WITH(xml2-libs, [  --with-xml2-libs=LIBS    specify XML2 linker flags])
+#if test "x$with_xml2_cflags" != "x"; then
+#   XML2_CFLAGS="$with_xml2_cflags"
+#fi
+#if test "x$with_xml2_libs" != "x"; then
+#   XML2_LIBS="$with_xml2_libs"
+#fi
+#AC_SUBST(XML2_CFLAGS)
+#AC_SUBST(XML2_LIBS)
+#if test "x$xml2_ok" = "xno"; then
+#   AC_MSG_WARN([Didn't find libxml2 in standard place.])
+#   if test "x$with_xml2_libs" = "x"; then
+#       AC_MSG_ERROR([XML2 library could not be found.  Please specify location with --with-xml2-libs=])
+#   fi
+#fi
 
 AC_ARG_WITH(gsl-cflags,[  --with-gsl-cflags=FLAGS specify GSL linker flags])
 AC_ARG_WITH(gsl-libs,  [  --with-gsl-libs=LIBS    specify GSL linker flags])
@@ -338,7 +338,7 @@ AC_CONFIG_FILES([ Makefile                  \
                   PairAction/Makefile       \
                   PlaneWavePHDFT/Makefile ] )
 AC_MSG_RESULT([ HDF5_LIBS   = $HDF5_LIBS ])
-AC_MSG_RESULT([ XML2_LIBS   = $XML2_LIBS ])
+#AC_MSG_RESULT([ XML2_LIBS   = $XML2_LIBS ])
 AC_MSG_RESULT([ GSL_LIBS    = $GSL_LIBS  ])
 AC_MSG_RESULT([ BLAS_LIBS   = $BLAS_LIBS ])
 AC_MSG_RESULT([ LAPACK_LIBS = $LAPACK_LIBS ])
