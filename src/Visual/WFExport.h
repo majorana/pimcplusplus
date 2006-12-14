@@ -64,11 +64,21 @@ private:
   Gtk::VBox MovieParamBox;
   Gtk::SpinButton InterpFactorButton;
   
+  /// POV parameters
+  Gtk::Frame POVFrame;
+  Gtk::VBox  POVVBox1, POVVBox2;
+  Gtk::HBox  POVHBox;
+  Gtk::CheckButton POVRenderButton;
+  Gtk::CheckButton POVAntiAliasButton;
+  Gtk::SpinButton  POVTolerance;
+  Gtk::Adjustment  POVTolAdjust;
+  Gtk::Label       POVTolLabel;
 
   /// Signal handlers
   void OnExportButton(), OnCancelButton(), OnBrowseButton();
   void OnWidthAdjust(), OnHeightAdjust(), OnRatioToggle();
   void OnStillMovie(), OnChooserChange(), OnEntryChange();
+  void OnTypeChange();
 
   int Width, Height;
   double Ratio;

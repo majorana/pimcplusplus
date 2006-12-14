@@ -10,14 +10,18 @@ using namespace IO;
 WFExportClass::WFExportClass(WFVisualClass &visual) :
     Visual(visual), Width(2000), Height(2000),
     BaseNameChooser("Export filename", Gtk::FILE_CHOOSER_ACTION_SAVE),
-    WidthLabel("Width:"), HeightLabel("Height:")
+    WidthLabel("Width:"), HeightLabel("Height:"),
+    POVTolAdjust(0.0, 0.0, 1.0, 0.05, 0.2)
 {
+  // Set up base name entry and chooser
   BaseNameFrame.set_label("Base filename");
   BaseNameFrame.add (BaseNameHBox);
-  BaseNameHBox.pack_start(BaseNameEntry, Gtk::PACK_SHRINK, 5);
+  BaseNameHBox.pack_start(BaseNameEntry, Gtk::PACK_EXPAND_WIDGET, 5);
   BaseNameHBox.pack_start(BaseNameBrowseButton, Gtk::PACK_SHRINK);
   BaseNameBrowseButton.set_label("Browse");
   MainVBox.pack_start (BaseNameFrame, Gtk::PACK_SHRINK, 5);
+  BaseNameChooser.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  BaseNameChooser.add_button (Gtk::Stock::SAVE,   Gtk::RESPONSE_OK);
   
   SizeFrame.set_label ("Size");
   SizeFrame.add (SizeBox);
@@ -39,6 +43,7 @@ WFExportClass::WFExportClass(WFVisualClass &visual) :
   SizeBox.pack_start (RatioButton,    Gtk::PACK_SHRINK);
   RatioButton.set_label ("Fixed ratio");
   
+  // Setup Rendering Type combo
   TypeFrame.set_label("Rendering Type");
   TypeFrame.add(TypeBox);
   TypeBox.pack_start(TypeCombo, Gtk::PACK_SHRINK);
@@ -47,6 +52,22 @@ WFExportClass::WFExportClass(WFVisualClass &visual) :
   TypeCombo.set_active (0);
   ExportButton.set_label ("Export");
   CancelButton.set_label ("Cancel");
+
+  // Setup POV widgets
+  POVFrame.set_label ("POVray options");
+  POVRenderButton.set_label("Render");
+  POVAntiAliasButton.set_label("Anti-alias");
+  POVTolLabel.set_text("AA tolerance");
+  POVVBox1.pack_start(POVRenderButton, Gtk::PACK_SHRINK, 5);
+  POVVBox1.pack_start(POVAntiAliasButton, Gtk::PACK_SHRINK, 5);
+  POVVBox2.pack_start(POVTolLabel,  Gtk::PACK_SHRINK, 1);
+  POVVBox2.pack_start(POVTolerance, Gtk::PACK_SHRINK, 1);
+  POVHBox.pack_start(POVVBox1, Gtk::PACK_SHRINK, 5);
+  POVHBox.pack_start(POVVBox2, Gtk::PACK_SHRINK, 5);
+  POVFrame.add (POVHBox);
+  POVFrame.set_sensitive(false);
+  POVTolerance.set_adjustment (POVTolAdjust);
+  POVTolerance.set_digits(2);
   
   StillMovieFrame.set_label("Still/Movie");
   StillMovieFrame.add (StillMovieBox);
@@ -80,8 +101,9 @@ WFExportClass::WFExportClass(WFVisualClass &visual) :
   ButtonBox.pack_start(CancelButton,    Gtk::PACK_SHRINK, 5);
   MainVBox.pack_start (SizeFrame,       Gtk::PACK_SHRINK, 5);
   MainVBox.pack_start (TypeFrame,       Gtk::PACK_SHRINK, 5);
-  MainVBox.pack_start (StillMovieFrame, Gtk::PACK_SHRINK, 5);
-  MainVBox.pack_start (MovieParamFrame, Gtk::PACK_SHRINK, 5);
+  MainVBox.pack_start (POVFrame,        Gtk::PACK_SHRINK, 5);
+//   MainVBox.pack_start (StillMovieFrame, Gtk::PACK_SHRINK, 5);
+//   MainVBox.pack_start (MovieParamFrame, Gtk::PACK_SHRINK, 5);
   MainVBox.pack_start (ButtonBox,       Gtk::PACK_SHRINK, 10);
   add (MainVBox);
   set_title ("Export");
@@ -104,6 +126,8 @@ WFExportClass::WFExportClass(WFVisualClass &visual) :
     (sigc::mem_fun(*this, &WFExportClass::OnChooserChange));
   BaseNameEntry.signal_activate().connect
     (sigc::mem_fun(*this, &WFExportClass::OnEntryChange));
+  TypeCombo.signal_changed().connect
+    (sigc::mem_fun(*this, &WFExportClass::OnTypeChange));
 }
 
 
@@ -268,7 +292,15 @@ WFExportClass::OnCancelButton()
 void
 WFExportClass::OnBrowseButton()
 {
-  BaseNameChooser.run();
+  int result = BaseNameChooser.run();
+  if (result ==  Gtk::RESPONSE_OK) {
+    string fname = BaseNameChooser.get_filename();
+    BaseNameEntry.set_text(fname);
+  }
+
+  else if (result == Gtk::RESPONSE_CANCEL)
+    cerr << "Response was OK.\n";
+  BaseNameChooser.hide();
 }
 
 void 
@@ -309,4 +341,14 @@ void
 WFExportClass::OnEntryChange()
 {
   BaseNameChooser.select_filename(BaseNameEntry.get_text());
+}
+
+
+void
+WFExportClass::OnTypeChange()
+{
+  if (TypeCombo.get_active_text() == "POVray") 
+    POVFrame.set_sensitive(true);
+  else 
+    POVFrame.set_sensitive(false);
 }
