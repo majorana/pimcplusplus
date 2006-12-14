@@ -12,13 +12,13 @@ LDADD = libpw.la                  ../IO/libIO.la                          \
         ../Fitting/libfitting.la  ../Integration/libquad.la               \
         ../MPI/libcomm.la         ../Ewald/libbreakup.la                  \
 	../Atom/libatom.la        ../DFT/libdft.la                        \
-        $(XML2_LIBS) $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(FFTW3_LIBS) \
+        $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(FFTW3_LIBS)              \
         $(LAPACK_LIBS) $(BLAS_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS)      \
         $(FLIBS)
 
 TestLDA_LDADD = $(LDADD) ../Atom/libatom.la ../DFT/libdft.la $(FLIBS)
 
-AM_CXXFLAGS = $(FFTW3_CFLAGS) $(BLITZ_CFLAGS) $(XML2_CFLAGS)              \
+AM_CXXFLAGS = $(FFTW3_CFLAGS) $(BLITZ_CFLAGS)                             \
               $(HDF5_CFLAGS)  $(BLAS_CFLAGS) $(MPI_DEF) $(MPI_CFLAGS)     \
               $(FFT_DEF) $(CBLAS_DEF)
 
@@ -56,20 +56,14 @@ libpw_la_SOURCES = ChargeMixer.h      \
                    PlaneWavesMPI.cc   \
                    VectorOps.h
 
-#TestXML_SOURCES = TestXML.cc
-#TestXML_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
-
-#TestHDF5_SOURCES = TestHDF5.cc
-#TestHDF5_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
-
 includedir=$(prefix)/include/Common/PlaneWavePHDFT
 
 
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
-libpw_la_CXXFLAGS = $(FFTW3_CFLAGS) $(BLITZ_CFLAGS) $(XML2_CFLAGS)   \
-                    $(HDF5_CFLAGS)  $(CBLAS_CFLAGS) $(AM_CXXFLAGS) $(FFT_DEF)
+libpw_la_CXXFLAGS = $(FFTW3_CFLAGS) $(BLITZ_CFLAGS) $(HDF5_CFLAGS)  \
+                    $(CBLAS_CFLAGS) $(AM_CXXFLAGS) $(FFT_DEF)
 libpw_la_LIBADD   =
 
 #if HAVE_GMP

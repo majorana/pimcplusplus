@@ -152,21 +152,27 @@ void MakeBlipCoefs (FFTBox &fft,  const zVec &c,
   fft.PutkVec (gc);
   fft.k2r();
   coefs.resize(nx,ny,nz);
-  coefs = fft.rBox;
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	coefs(ix,iy,iz) = fft.rBox(ix,iy,iz);
 }
 
 void
 MakeInterpCoefs (FFTBox &fft, const zVec &c,
 		 Array<complex<double>,3> &coefs)
 {
-  fft.kBox = complex<double>();
+  fft.kBox = complex<FFT_FLOAT>();
   fft.PutkVec (c);
   fft.k2r();
   Array<complex<double>,3> data;
   int nx, ny, nz;
   fft.GetDims(nx,ny,nz);
   data.resize(nx,ny,nz);
-  data = fft.rBox;
+  for (int ix=0; ix<nx; ix++)
+    for (int iy=0; iy<ny; iy++)
+      for (int iz=0; iz<nz; iz++)
+	data(ix,iy,iz) = fft.rBox(ix,iy,iz);
   TricubicBspline<complex<double> > spline;
   Vec3 box = fft.GVecs.GetBox();
   spline.Init (0.0, box[0], 0.0, box[1], 0.0, box[2],
@@ -451,7 +457,7 @@ MakeBlipCoefs (Array<double,3> &data,
   for (int ix=0; ix<nx; ix++)
     for (int iy=0; iy<ny; iy++)
       for (int iz=0; iz<nz; iz++)
-	fft.rBox(ix,iy,iz) = data(ix,iy,iz);
+	fft.rBox(ix,iy,iz) = fft_complex(data(ix,iy,iz));
   fft.r2k();
 
   double fracx = 2.0*M_PI/(double)nx;

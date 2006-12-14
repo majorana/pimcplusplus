@@ -3,8 +3,8 @@ check_PROGRAMS = TestIntegrate TestHermite
 TestIntegrate_SOURCES = TestIntegrate.cc
 TestHermite_SOURCES = TestHermite.cc 
 
-LDADD = libquad.la ../IO/libIO.la  $(XML2_LIBS) $(BLITZ_LIBS) $(HDF5_LIBS)
-AM_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS)
+LDADD = libquad.la ../IO/libIO.la $(BLITZ_LIBS) $(HDF5_LIBS)
+AM_CXXFLAGS = $(BLITZ_CFLAGS) $(HDF5_CFLAGS)
 
 noinst_LTLIBRARIES = libquad.la
 libquad_la_SOURCES = GKIntegration.h    \
@@ -16,7 +16,7 @@ libquad_la_SOURCES = GKIntegration.h    \
                      RungeKutta.h       \
                      Standard.h         
 
-libquad_la_CXXFLAGS = $(XML2_CFLAGS) $(HDF5_CLFAGS) $(AM_CXXFLAGS)
+libquad_la_CXXFLAGS = $(HDF5_CLFAGS) $(AM_CXXFLAGS)
 
 includedir=$(prefix)/include/Common/Integration
 

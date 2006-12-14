@@ -47,6 +47,27 @@ inline T* FFTAlign (T* ptr)
 { return ptr; }
 #endif
 
+inline complex<FFT_FLOAT> fft_complex(complex<double> x)
+{
+  return complex<FFT_FLOAT>(x.real(), x.imag());
+}
+
+inline complex<FFT_FLOAT> fft_complex(complex<float> x)
+{
+  return complex<FFT_FLOAT>(x.real(), x.imag());
+}
+
+inline complex<FFT_FLOAT> fft_complex(double x)
+{
+  return complex<FFT_FLOAT>(x, 0.0);
+}
+
+inline complex<FFT_FLOAT> fft_complex(float x)
+{
+  return complex<FFT_FLOAT>(x, 0.0);
+}
+
+
 class FFT1D
 {
 private:

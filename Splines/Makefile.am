@@ -19,8 +19,8 @@ TestNonuniform_SOURCES = TestNonuniform.cc
 TestNUBspline_SOURCES = TestNUBspline.cc
 TestTricubicNUBspline_SOURCES= = TestTricubicNUBspline.cc
 
-LDADD = ../IO/libIO.la ../PlaneWavePHDFT/libpw.la ../FFT/libfft.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(XML2_LIBS) $(BLITZ_LIBS) $(FFTW3_LIBS) $(LAPACK_LIBS)
-AM_CXXFLAGS = -g $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(HDF5_CFLAGS) $(FFTW3_CFLAGS)
+LDADD = ../IO/libIO.la ../PlaneWavePHDFT/libpw.la ../FFT/libfft.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(BLITZ_LIBS) $(FFTW3_LIBS) $(LAPACK_LIBS)
+AM_CXXFLAGS = -g $(BLITZ_CFLAGS) $(HDF5_CFLAGS) $(FFTW3_CFLAGS) $(FFT_DEF)
 
 noinst_LTLIBRARIES = libspline.la
 libspline_la_SOURCES = BicubicSpline.h                \
@@ -68,21 +68,13 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        v_spline.f                     \
                        zonfind.f
 
-
-
-#TestXML_SOURCES = TestXML.cc
-#TestXML_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
-
-#TestHDF5_SOURCES = TestHDF5.cc
-#TestHDF5_LDADD = libciao.la $(XML2_LIBS) $(BLITZ_LIBS)
-
 includedir=$(prefix)/include/Common/Splines
 
 
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
 #endif
-libspline_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS) $(AM_CXXFLAGS)
+libspline_la_CXXFLAGS = $(BLITZ_CFLAGS) $(AM_CXXFLAGS) $(FFT_DEF)
 libspline_la_LIBADD   =
 
 #if HAVE_GMP

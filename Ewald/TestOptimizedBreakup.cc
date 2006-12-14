@@ -218,10 +218,6 @@ GetChi2 (double kc, double L)
   return chi2;
 }
 
-void CoulombError3()
-{
-  FILE *fout = fopen ("/home/esler/Thesis/Ewald/chi2.dat", "w");
-  for (double kr=
 
 
 void CoulombError2()

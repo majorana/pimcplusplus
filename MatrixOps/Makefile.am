@@ -10,7 +10,7 @@ libmatops_la_SOURCES = MatrixOps.h MatrixOps.cc
 
 includedir=$(prefix)/include/Common/MatrixOps
 
-libmatops_la_CXXFLAGS = $(BLITZ_CFLAGS) $(XML2_CFLAGS)
+libmatops_la_CXXFLAGS = $(BLITZ_CFLAGS)
 
 include_HEADERS = MatrixOps.h
 
