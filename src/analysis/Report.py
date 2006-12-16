@@ -22,12 +22,25 @@ from VacancyDensity import *
 from SpecificHeat import *
 from SpecificHeatA import *
 from CycleCount import *
+from StructureFactor import *
 #from Conductivity import *
 
 
-basename = sys.argv[1]
+
 infiles = IOSectionClassList()
-infiles.OpenFiles(basename);
+if (sys.argv[1]=='-f'):
+     print "NOTE: First argument is -f"
+     basename=sys.argv[2]
+     listFile=file(basename)
+     filesList=listFile.readlines()
+     for counter in range(0,len(filesList)):
+          filesList[counter]=filesList[counter][:-1]
+     print "The file list is ",filesList
+     infiles.OpenFilesList(filesList)
+     basename=basename+"d"
+else:
+     basename = sys.argv[1]
+     infiles.OpenFiles(basename);
       
 print 'Found ' +repr(infiles.len()) + ' output files.'
 
@@ -57,10 +70,10 @@ summaryDoc.append(HR())
 
 #ProcessMove(doc,infiles)
 
-
+print "PreTopTable"
 (_,tau,numTimeSlices)=ProcessTopTable(summaryDoc,infiles)
 beta = tau*numTimeSlices
-
+print "PostTopTable"
 ###########
 ## Moves ##
 ###########
@@ -151,6 +164,11 @@ for counter in range(0,numSections):
           ProcessVacancyDensity(infiles,summaryDoc,detailedDoc,StartCut)
           summaryDoc.append(HR())
           detailedDoc.append(HR())
+     elif myName=="StructureFactor":
+          ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut)
+          summaryDoc.append(HR())
+          detailedDoc.append(HR())
+
      elif myName=="PhiK":
          ProcessJosephson(infiles,summaryDoc,detailedDoc,\
                           StartCut,tau,numTimeSlices)
