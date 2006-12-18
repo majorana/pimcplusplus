@@ -277,7 +277,6 @@ WFExportClass::ExportPOV(string basename)
 void
 WFExportClass::RenderPOV()
 {
-  cerr << "I'm going to render " << POVFile << endl;
   stringstream povcmd;
   povcmd << "povray ";
   if (!POVOnScreenButton.get_active())

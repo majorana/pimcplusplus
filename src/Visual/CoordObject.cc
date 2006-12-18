@@ -83,6 +83,111 @@ CoordObject::Set (double lx, double ly, double lz)
 void
 CoordObject::DrawPOV(FILE *fout, string rotString)
 {
+  double radius = 0.015*Lx;
+  double radius2 = 0.025*Lx;
+
+  fprintf (fout, "cylinder {\n");
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>\n",
+	   -0.5*Lx, -0.5*Ly, -0.5*Lz);
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>\n",
+	   -0.25*Lx, -0.5*Ly, -0.5*Lz);
+  fprintf (fout, "  %1.5f\n", radius);
+  fprintf (fout, "  pigment { color rgb <1.0, 0.0, 0.0> }\n");
+  fprintf (fout, "  finish {\n");
+  fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
+  fprintf (fout, "    specular 0.6\n");
+  fprintf (fout, "    roughness 0.025 \n");
+  fprintf (fout, "  }\n"); //
+  fprintf (fout, "%s", rotString.c_str());
+  fprintf (fout, "}\n");
+
+  fprintf (fout, "cone {\n");
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>, %1.5f\n",
+	   -0.25*Lx, -0.5*Ly, -0.5*Lz, radius2);
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>, %1.5f\n",
+	   -0.25*Lx+0.04*Lx, -0.5*Ly, -0.5*Lz, 0.0);
+  fprintf (fout, "  pigment { color rgb <1.0, 0.0, 0.0> }\n");
+  fprintf (fout, "  finish {\n");
+  fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
+  fprintf (fout, "    specular 0.6\n");
+  fprintf (fout, "    roughness 0.025 \n");
+  fprintf (fout, "  }\n"); //
+  fprintf (fout, "%s", rotString.c_str());
+  fprintf (fout, "}\n");
+
+  fprintf (fout, "cylinder {\n");
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>\n",
+	   -0.5*Lx, -0.5*Ly, -0.5*Lz);
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>\n",
+	   -0.5*Lx, -0.5*Ly+0.25*Lx, -0.5*Lz);
+  fprintf (fout, "  %1.5f\n", radius);
+  fprintf (fout, "  pigment { color rgb <0.0, 1.0, 0.0> }\n");
+  fprintf (fout, "  finish {\n");
+  fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
+  fprintf (fout, "    specular 0.6\n");
+  fprintf (fout, "    roughness 0.025 \n");
+  fprintf (fout, "  }\n"); //
+  fprintf (fout, "%s", rotString.c_str());
+  fprintf (fout, "}\n");
+
+  fprintf (fout, "cone {\n");
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>, %1.5f\n",
+	   -0.5*Lx, -0.5*Ly+0.25*Lx, -0.5*Lz, radius2);
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>, %1.5f\n",
+	   -0.5*Lx, -0.5*Ly+0.25*Lx+0.04*Lx, -0.5*Lz, 0.0);
+  fprintf (fout, "  pigment { color rgb <0.0, 1.0, 0.0> }\n");
+  fprintf (fout, "  finish {\n");
+  fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
+  fprintf (fout, "    specular 0.6\n");
+  fprintf (fout, "    roughness 0.025 \n");
+  fprintf (fout, "  }\n"); //
+  fprintf (fout, "%s", rotString.c_str());
+  fprintf (fout, "}\n");
+
+
+  fprintf (fout, "cylinder {\n");
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>\n",
+	   -0.5*Lx, -0.5*Ly, -0.5*Lz);
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>\n",
+	   -0.5*Lx, -0.5*Ly, -0.5*Lz+0.25*Lx);
+  fprintf (fout, "  %1.5f\n", radius);
+  fprintf (fout, "  pigment { color rgb <0.0, 0.0, 1.0> }\n");
+  fprintf (fout, "  finish {\n");
+  fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
+  fprintf (fout, "    specular 0.6\n");
+  fprintf (fout, "    roughness 0.025 \n");
+  fprintf (fout, "  }\n"); //
+  fprintf (fout, "%s", rotString.c_str());
+  fprintf (fout, "}\n");
+
+  fprintf (fout, "cone {\n");
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>, %1.5f\n",
+	   -0.5*Lx, -0.5*Ly, -0.5*Lz+0.25*Lx, radius2);
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>, %1.5f\n",
+	   -0.5*Lx, -0.5*Ly, -0.5*Lz+0.25*Lx+0.04*Lx, 0.0);
+  fprintf (fout, "  pigment { color rgb <0.0, 0.0, 1.0> }\n");
+  fprintf (fout, "  finish {\n");
+  fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
+  fprintf (fout, "    specular 0.6\n");
+  fprintf (fout, "    roughness 0.025 \n");
+  fprintf (fout, "  }\n"); //
+  fprintf (fout, "%s", rotString.c_str());
+  fprintf (fout, "}\n");
+
+
+
+  fprintf (fout, "sphere {\n");
+  fprintf (fout, "  <%1.6f, %1.6f, %1.6f>\n",
+	   -0.5*Lx, -0.5*Ly, -0.5*Lz);
+  fprintf (fout, "  %1.5f\n", radius);
+  fprintf (fout, "  pigment { color rgb <1.0, 0.0, 0.0> }\n");
+  fprintf (fout, "  finish {\n");
+  fprintf (fout, "    ambient 0.1\n  diffuse 0.8\n");
+  fprintf (fout, "    specular 0.6\n");
+  fprintf (fout, "    roughness 0.025 \n");
+  fprintf (fout, "  }\n"); //
+  fprintf (fout, "%s", rotString.c_str());
+  fprintf (fout, "}\n");
 
 
 
