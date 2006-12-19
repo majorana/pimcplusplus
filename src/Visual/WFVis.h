@@ -34,6 +34,7 @@ protected:
   Gtk::HScale kScale, BandScale;
   Gtk::Adjustment kAdjust, BandAdjust;
   Gtk::Frame kFrame, BandFrame;
+  Glib::RefPtr<Gtk::ToggleAction> CoordToggle;
   
   Gtk::Toolbar Tools;
   Gtk::HBox ToolBox;
@@ -102,6 +103,7 @@ protected:
   void OnClipToggle();
   void OnIsoToggle();
   void OnViewReset();
+  void OnCoordToggle();
   void OnOpen();
   bool UpToDate;
 

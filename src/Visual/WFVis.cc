@@ -134,6 +134,10 @@ WFVisualClass::WFVisualClass() :
   Actions->add (Gtk::Action::create("MenuView", "View"));
   Actions->add (Gtk::Action::create("Reset", "Reset"),
 		sigc::mem_fun(*this, &WFVisualClass::OnViewReset));
+  CoordToggle = Gtk::ToggleAction::create("Axes", "Coordinate axes",
+					  "Show coordinate axes", true);
+  Actions->add (CoordToggle,
+		sigc::mem_fun(*this, &WFVisualClass::OnCoordToggle));
 
   Glib::ustring ui_info =
     "<ui>"
@@ -146,6 +150,7 @@ WFVisualClass::WFVisualClass() :
     "    </menu>"
     "    <menu action='MenuView'>"
     "      <menuitem action='Reset'/>"
+    "      <menuitem action='Axes'/>"
     "    </menu>"
     "  </menubar>"
     "  <toolbar  name='ToolBar'>"
@@ -354,9 +359,11 @@ WFVisualClass::DrawFrame(bool offScreen)
   }
   PathVis.Objects.resize(0);
 
-  CoordObject *coord = new CoordObject;
-  coord->Set (Box);
-  PathVis.Objects.push_back(coord);
+  if (CoordToggle->get_active()) {
+    CoordObject *coord = new CoordObject;
+    coord->Set (Box);
+    PathVis.Objects.push_back(coord);
+  }
 
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
@@ -671,6 +678,13 @@ WFVisualClass::ReadWF (int kpoint, int band)
   return true;
 }
 
+
+
+void
+WFVisualClass::OnCoordToggle()
+{
+  DrawFrame();
+}
 
 int main(int argc, char** argv)
 {
