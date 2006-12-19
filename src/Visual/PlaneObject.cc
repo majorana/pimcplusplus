@@ -24,6 +24,7 @@ PlaneObject::Init()
 	MaxVal = (val > MaxVal) ? val : MaxVal;
       }
   CMap. Init (MinVal, MaxVal);
+  IsInitialized = true;
 }
 
 PlaneObject::~PlaneObject()
@@ -35,6 +36,8 @@ PlaneObject::~PlaneObject()
 void
 PlaneObject::Set()
 {
+  if (!IsInitialized)
+    Init();
   if (!HaveTexture) {
     // Allocate a texture
     glGenTextures (1, &TextureNum);
@@ -80,7 +83,6 @@ PlaneObject::Set()
       double val = Spline(r[0], r[1], r[2]);
       TinyVector<double,4> color;
       CMap (val, color);
-      //      cerr << "val = " << val << "  color = " << color << endl;
       texData(is, it)[0] = (GLubyte) floor (256.0 * color[0]);
       texData(is, it)[1] = (GLubyte) floor (256.0 * color[1]);
       texData(is, it)[2] = (GLubyte) floor (256.0 * color[2]);
@@ -160,7 +162,6 @@ PlaneObject::DrawPOV(FILE *fout, string rotMatrix)
       double val = Spline(r[0], r[1], r[2]);
       TinyVector<double,4> color;
       CMap (val, color);
-      //      cerr << "val = " << val << "  color = " << color << endl;
       texData(is, it)[0] = (guint8) floor (256.0 * color[0]);
       texData(is, it)[1] = (guint8) floor (256.0 * color[1]);
       texData(is, it)[2] = (guint8) floor (256.0 * color[2]);

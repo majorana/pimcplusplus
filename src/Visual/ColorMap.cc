@@ -22,7 +22,8 @@ ColorMap::Init (double min, double max, ColorMapType map)
   Splines[0].Init (min, max, r, true, fBC, nBC);
   Splines[1].Init (min, max, g, true, fBC, fBC);
   Splines[2].Init (min, max, b, true, nBC, fBC);
-  Splines[3].Init (min, max, a, true, nBC, nBC);
+  Splines[3].Init (min, max, a, true, fBC, fBC);
+  Initialized = true;
 //   FILE *fout = fopen ("colormap.dat", "w");
 //   for (double x=min; x<=max; x+=0.001)
 //     fprintf (fout, "%10.6e %10.6e %10.6e %10.6e %10.6e\n",

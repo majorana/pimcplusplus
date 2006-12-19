@@ -18,13 +18,15 @@ private:
   double MinVal, MaxVal;
   GLuint TextureNum;
   bool HaveTexture, BuiltTexture;
+  bool IsInitialized;
 public:
   void Init();
   void DrawPOV (FILE *out, string rotMatrix);
   void SetPosition (int dir, double pos);
   PlaneObject (MyTricubicSpline &spline) : 
     Spline (spline), Direction(0), Position(0),
-    HaveTexture(false), BuiltTexture(false)
+    HaveTexture(false), BuiltTexture(false),
+    IsInitialized(false)
   {
   }
   ~PlaneObject();

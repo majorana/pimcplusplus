@@ -464,6 +464,7 @@ WFVisualClass::DrawFrame(bool offScreen)
       Currk    = k;
       ReadWF (k, band);
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+      xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
     if (UpdateIso) {
       WFIso.SetIsoval(MaxRho*IsoAdjust.get_value());

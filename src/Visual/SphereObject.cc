@@ -15,15 +15,15 @@ SphereObject::SphereObject(bool offScreen) :
   if (offScreen) {
     if (!OffScreenListCreated) {
       glEnable(GL_NORMALIZE);
-      GLUquadricObj* qobj = gluNewQuadric();
-      gluQuadricDrawStyle(qobj, GLU_FILL);
-      OffScreenListNum = glGenLists(1);
-      
-      glNewList (SphereListNum, GL_COMPILE);
-      gluSphere(qobj, 1.0, 30, 30);
-      gluDeleteQuadric(qobj);
-      glEndList();
-      OffScreenListCreated = true;
+//       GLUquadricObj* qobj = gluNewQuadric();
+//       gluQuadricDrawStyle(qobj, GLU_FILL);
+
+//       OffScreenListNum = glGenLists(1);
+//       glNewList (OffScreenListNum, GL_COMPILE);
+//       gluSphere(qobj, 1.0, 30, 30);
+//       gluDeleteQuadric(qobj);
+//       glEndList();
+//       OffScreenListCreated = true;
     }
   }
   else if (!SphereListCreated) {
