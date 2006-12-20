@@ -496,9 +496,15 @@ WFVisualClass::DrawFrame(bool offScreen)
       ResetIso = false;
     }
     if (UpdateIso) {
-      if (WFDisplay == MAG2)
+      if (WFDisplay == MAG2) {
+	WFIso.SetColor (0.0, 0.8, 0.0);
 	WFIso.SetIsoval(MaxVal*IsoAdjust.get_value());
+      }
       else {
+	vector<TinyVector<double,3> > colors;
+	colors.push_back(TinyVector<double,3> (0.8, 0.0, 0.0));
+	colors.push_back(TinyVector<double,3> (0.0, 0.0, 0.8));
+	WFIso.SetColor(colors);
 	vector<double> vals;
 	vals.push_back(+MaxVal*IsoAdjust.get_value());
 	vals.push_back(-MaxVal*IsoAdjust.get_value());

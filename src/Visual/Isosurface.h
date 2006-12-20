@@ -25,6 +25,7 @@ private:
   double Isoval;
   TinyVector<double,4> Color;
   vector<TinyVector<double,4> > Colors;
+  double Alpha;
   void Set();
 public:
   int NumTriangles();
@@ -33,14 +34,16 @@ public:
   inline void SetIsoval (vector<double> vals) 
   { Isovals.resize(vals.size()); Isovals = vals; Set(); }
   void DrawPOV(FILE* out, string rotMatrix);
-  inline void SetColor (Vec3 color) 
-  { Color[0]=color[0]; Color[1]=color[1]; Color[2]=color[2]; }
-  inline void SetAlpha (double alpha) { Color[3] = alpha; }
+  void SetColor (Vec3 color);
+  void SetColor (vector<TinyVector<double,3> > &colors);
+  void SetAlpha (double alpha);
   inline void SetColor (double r, double g, double b) 
   { SetColor (TinyVector<double,3>(r,g,b)); }
   Isosurface() : UseCubicInterp(true), UseNormals(true)
   {
     Color[0] = 0.0; Color[1] = 0.8; Color[2] = 0.0; Color[3] = 0.5;
+    Colors.push_back(Color);
+    Alpha = 0.5;
   }
 };
 #endif

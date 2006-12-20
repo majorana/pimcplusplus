@@ -350,17 +350,8 @@ Isosurface::Set()
     Update();
   Start();
 
-  //glColor3d(Color[0], Color[1], Color[2]);
-  glColor4d(Color[0], Color[1], Color[2], Color[3]);
-  float fcolor[4] = { Color[0], Color[1], Color[2], Color[3] };
-  glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
-  //  float spec[4] = { 1.0, 1.0, 1.0, 1.0};
-  float spec[4] = { 1.0, 1.0, 1.0, Color[3]};
-  glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);
   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30.0);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-
 
   if (UseNormals)
     glEnable (GL_NORMALIZE);
@@ -371,6 +362,13 @@ Isosurface::Set()
 
   for (int i=0; i < Isovals.size(); i++) {
     Isoval = Isovals[i];
+    Color  = Colors[i];
+    glColor4d(Color[0], Color[1], Color[2], Color[3]);
+    float fcolor[4] = { Color[0], Color[1], Color[2], Color[3] };
+    glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
+    float spec[4] = { 1.0, 1.0, 1.0, Color[3]};
+    glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);
+
     glBegin(GL_TRIANGLES);
     for (int ix=0; ix<(Nx-1); ix++) {
       for (int iy=0; iy<(Ny-1); iy++) {
@@ -490,6 +488,39 @@ Isosurface::DrawPOV (FILE *fout, string rotString)
   fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "}\n\n");
 }
+
+
+void
+Isosurface::SetColor (TinyVector<double,3> color)
+{
+  Colors.resize(1);
+  Colors[0][0] = color[0];
+  Colors[0][1] = color[1];
+  Colors[0][2] = color[2];
+  Colors[0][3] = Alpha;
+}
+
+void
+Isosurface::SetAlpha(double alpha)
+{
+  Alpha = alpha;
+  for (int i=0; i<Colors.size(); i++)
+    Colors[i][3] = alpha;
+}
+
+
+void
+Isosurface::SetColor (vector<TinyVector<double,3> > &colors)
+{
+  Colors.resize(colors.size());
+  for (int i=0; i<colors.size(); i++) {
+    Colors[i][0] = colors[i][0];
+    Colors[i][1] = colors[i][1];
+    Colors[i][2] = colors[i][2];
+    Colors[i][3] = Alpha;
+  }
+}
+
 
 int Isosurface::EdgeTable[12][7] = {
 // dim  x1 x2 y1 y2 z1 z2
