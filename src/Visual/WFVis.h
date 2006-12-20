@@ -13,6 +13,8 @@
 
 using namespace IO;
 
+typedef enum {REAL_PART, IMAG_PART, MAG2} WFDisplayType;
+
 class WFVisualClass : public Gtk::Window
 {
 protected:
@@ -25,6 +27,7 @@ protected:
   Array<int,1> AtomTypes;
   BoxClass Box;
   int Currentk, CurrentBand;
+  WFDisplayType WFDisplay;
 
   /////////////
   // Widgets //
@@ -35,6 +38,8 @@ protected:
   Gtk::Adjustment kAdjust, BandAdjust;
   Gtk::Frame kFrame, BandFrame;
   Glib::RefPtr<Gtk::ToggleAction> CoordToggle;
+  Gtk::RadioButtonGroup DisplayGroup;
+  Glib::RefPtr<Gtk::RadioAction> RealRadio, ImagRadio, Mag2Radio;
   
   Gtk::Toolbar Tools;
   Gtk::HBox ToolBox;
@@ -61,10 +66,10 @@ protected:
   Gtk::HScale IsoScale;
   Gtk::Adjustment IsoAdjust;
   Gtk::Frame IsoFrame;
-  double FindMaxRho();
-  double MaxRho;
-  double FindMaxBandRho();
-  double MaxBandRho;
+  double FindMaxVal();
+  double MaxVal;
+  double FindMaxBandVal();
+  double MaxBandVal;
 
   ///////////////////////
   // Color plane stuff //
@@ -80,7 +85,7 @@ protected:
   /////////////////
   // State flags //
   /////////////////
-  bool UpdateIso;
+  bool UpdateIso, ResetIso;
   bool UpdatePlane[3];
 
   ////////////
@@ -105,6 +110,7 @@ protected:
   void OnViewReset();
   void OnCoordToggle();
   void OnOpen();
+  void OnDisplayRadio(WFDisplayType type);
   bool UpToDate;
 
   ///////////////////

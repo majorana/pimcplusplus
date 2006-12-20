@@ -16,7 +16,9 @@ WFVisualClass::WFVisualClass() :
   xPlane(WFIso),
   yPlane(WFIso),
   zPlane(WFIso),
-  Export(*this)
+  Export(*this),
+  WFDisplay(MAG2),
+  ResetIso(false)
 {
   WFIso.Dynamic = false;
   xPlane.Dynamic = false;
@@ -139,6 +141,24 @@ WFVisualClass::WFVisualClass() :
   Actions->add (CoordToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnCoordToggle));
 
+  Actions->add (Gtk::Action::create("MenuDisplay", "Display"));
+  Mag2Radio = Gtk::RadioAction::create
+    (DisplayGroup, "Mag2", "Magnitude squared",
+     "Display square magnitude of WF");
+  RealRadio = Gtk::RadioAction::create
+    (DisplayGroup, "Real", "Real part", "Display real part of WF");
+  ImagRadio = Gtk::RadioAction::create
+    (DisplayGroup, "Imag", "Imag part", "Display imaginary part of WF");
+  Actions->add
+    (RealRadio, sigc::bind<WFDisplayType> 
+     (sigc::mem_fun(*this, WFVisualClass::OnDisplayRadio),REAL_PART));
+  Actions->add
+    (ImagRadio, sigc::bind<WFDisplayType> 
+     (sigc::mem_fun(*this, WFVisualClass::OnDisplayRadio),IMAG_PART));
+  Actions->add
+    (Mag2Radio, sigc::bind<WFDisplayType> 
+     (sigc::mem_fun(*this, WFVisualClass::OnDisplayRadio),MAG2));  
+
   Glib::ustring ui_info =
     "<ui>"
     "  <menubar name='MenuBar'>"
@@ -151,6 +171,11 @@ WFVisualClass::WFVisualClass() :
     "    <menu action='MenuView'>"
     "      <menuitem action='Reset'/>"
     "      <menuitem action='Axes'/>"
+    "    </menu>"
+    "    <menu action='MenuDisplay'>"
+    "      <menuitem action='Real'/>"
+    "      <menuitem action='Imag'/>"
+    "      <menuitem action='Mag2'/>"
     "    </menu>"
     "  </menubar>"
     "  <toolbar  name='ToolBar'>"
@@ -466,8 +491,19 @@ WFVisualClass::DrawFrame(bool offScreen)
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
       xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
+    if (ResetIso) {
+      WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+      ResetIso = false;
+    }
     if (UpdateIso) {
-      WFIso.SetIsoval(MaxRho*IsoAdjust.get_value());
+      if (WFDisplay == MAG2)
+	WFIso.SetIsoval(MaxVal*IsoAdjust.get_value());
+      else {
+	vector<double> vals;
+	vals.push_back(+MaxVal*IsoAdjust.get_value());
+	vals.push_back(-MaxVal*IsoAdjust.get_value());
+	WFIso.SetIsoval(vals);
+      }
       xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
 
@@ -573,32 +609,12 @@ WFVisualClass::Read(string filename)
   DrawFrame();
 }
 
-double
-WFVisualClass::FindMaxRho()
-{
-  double maxRho = 0.0;
-  double totalRho = 0.0;
-  for (int ix=0; ix<RhoData.extent(0); ix++)
-    for (int iy=0; iy<RhoData.extent(1); iy++)
-      for (int iz=0; iz<RhoData.extent(2); iz++) 
-	maxRho = max(maxRho, RhoData(ix,iy,iz));
-  for (int ix=0; ix<RhoData.extent(0)-1; ix++)
-    for (int iy=0; iy<RhoData.extent(1)-1; iy++)
-      for (int iz=0; iz<RhoData.extent(2)-1; iz++) 
-	totalRho += RhoData(ix, iy, iz);
-  
-  totalRho *= Box[0]*Box[1]*Box[2]/(double)((RhoData.extent(0)-1)*
-					    (RhoData.extent(1)-1)*
-					    (RhoData.extent(2)-1));
-  cerr << "TotalRho = " << totalRho << endl;
-  return maxRho;
-}
 
 	
 void
 WFVisualClass::OnIsoChange()
 {
-  double rho = IsoAdjust.get_value() * MaxRho;
+  double rho = IsoAdjust.get_value() * MaxVal;
   double rs = pow (3.0/(4.0*M_PI*rho),1.0/3.0);
   char rstext[100];
   snprintf (rstext, 100, "rs = %1.3f", rs);
@@ -663,7 +679,7 @@ WFVisualClass::ReadWF (int kpoint, int band)
   int Nx = wfdata.extent(0);
   int Ny = wfdata.extent(1);
   int Nz = wfdata.extent(2);
-  MaxRho = 0.0;
+  MaxVal = 0.0;
   for (int ix=0; ix<wfdata.extent(0); ix++)
     for (int iy=0; iy<wfdata.extent(1); iy++)
       for (int iz=0; iz<wfdata.extent(2); iz++) {
@@ -671,10 +687,16 @@ WFVisualClass::ReadWF (int kpoint, int band)
 	int jx = (ix/*+Nx/2*/)%(Nx-1);
 	int jy = (iy/*+Ny/2*/)%(Ny-1);
 	int jz = (iz/*+Nz/2*/)%(Nz-1);
-	double rho = (wfdata(jx,jy,jz,0)*wfdata(jx,jy,jz,0) +
-		      wfdata(jx,jy,jz,1)*wfdata(jx,jy,jz,1));
-	WFData(ix,iy,iz) = rho;
-	MaxRho = max(MaxRho, rho);
+	if (WFDisplay == MAG2) {
+	  double rho = (wfdata(jx,jy,jz,0)*wfdata(jx,jy,jz,0) +
+			wfdata(jx,jy,jz,1)*wfdata(jx,jy,jz,1));
+	  WFData(ix,iy,iz) = rho;
+	}
+	else if (WFDisplay == REAL_PART)
+	  WFData(ix,iy,iz) = wfdata(jx, jy, jz, 0);
+	else if (WFDisplay == IMAG_PART)
+	  WFData(ix,iy,iz) = wfdata(jx, jy, jz, 1);
+	MaxVal = max(MaxVal, WFData(ix,iy,iz));
       }
   return true;
 }
@@ -686,6 +708,28 @@ WFVisualClass::OnCoordToggle()
 {
   DrawFrame();
 }
+
+void
+WFVisualClass::OnDisplayRadio(WFDisplayType type)
+{
+  WFDisplayType newtype;
+  if (RealRadio->get_active() && type==REAL_PART)
+    newtype = REAL_PART;
+  if (ImagRadio->get_active() && type==IMAG_PART)
+    newtype = IMAG_PART;
+  if (Mag2Radio->get_active() && type==MAG2)
+    newtype = MAG2;
+
+  if (WFDisplay != newtype) {
+    WFDisplay = newtype;
+    ReadWF (Currk, CurrBand);
+    UpdatePlane[0] = UpdatePlane[1] = UpdatePlane[2] = true;
+    UpdateIso = true;  ResetIso = true;
+    DrawFrame ();
+  }
+}
+
+
 
 int main(int argc, char** argv)
 {

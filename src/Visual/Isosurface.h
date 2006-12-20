@@ -3,6 +3,7 @@
 
 #include <Common/Splines/MyTricubicSpline.h>
 #include <GLObject.h>
+#include <vector>
 
 /// This class uses to Marching Cubes algorithm to construct an
 /// isosurface from data tabulated on a 3D grid.  It inherits from
@@ -20,12 +21,17 @@ private:
   Vec3 FindEdge(int ix, int iy, int iz, int edgeNum);
   bool UseCubicInterp;
   bool UseNormals;
+  vector<double> Isovals;
   double Isoval;
   TinyVector<double,4> Color;
+  vector<TinyVector<double,4> > Colors;
   void Set();
 public:
   int NumTriangles();
-  inline void SetIsoval (double val) { Isoval = val; Set(); }
+  inline void SetIsoval (double val) 
+  { Isovals.resize(1);  Isovals[0] = val; Set();}
+  inline void SetIsoval (vector<double> vals) 
+  { Isovals.resize(vals.size()); Isovals = vals; Set(); }
   void DrawPOV(FILE* out, string rotMatrix);
   inline void SetColor (Vec3 color) 
   { Color[0]=color[0]; Color[1]=color[1]; Color[2]=color[2]; }

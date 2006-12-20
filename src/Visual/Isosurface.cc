@@ -367,40 +367,41 @@ Isosurface::Set()
 
   glDepthMask(GL_FALSE);
 
-
-  glBegin(GL_TRIANGLES);
-
   int numTriangles = 0;
 
-  for (int ix=0; ix<(Nx-1); ix++) {
-    for (int iy=0; iy<(Ny-1); iy++) {
-      for (int iz=0; iz<(Nz-1); iz++) { 
-	/// Check corners
-	int index = 0;
-	index |= (F(ix  ,  iy+1, iz  )[0] > Isoval);
-	index |= ((F(ix+1, iy+1, iz  )[0] > Isoval) << 1);
-	index |= ((F(ix+1, iy  , iz  )[0] > Isoval) << 2);
-	index |= ((F(ix  , iy  , iz  )[0] > Isoval) << 3);
-	index |= ((F(ix  , iy+1, iz+1)[0] > Isoval) << 4);
-	index |= ((F(ix+1, iy+1, iz+1)[0] > Isoval) << 5);
-	index |= ((F(ix+1, iy  , iz+1)[0] > Isoval) << 6);
-	index |= ((F(ix  , iy  , iz+1)[0] > Isoval) << 7);
-	int ei=0;
-	int edge;
-	while ((edge=EdgeData[index][ei]) != -1) {
-	  numTriangles++;
-	  Vec3 vertex = FindEdge (ix, iy, iz, edge);
-	  if (UseNormals) {
-	    Vec3 normal = -1.0*Grad(vertex[0], vertex[1], vertex[2]);
-	    glNormal3dv(&(normal[0]));
+  for (int i=0; i < Isovals.size(); i++) {
+    Isoval = Isovals[i];
+    glBegin(GL_TRIANGLES);
+    for (int ix=0; ix<(Nx-1); ix++) {
+      for (int iy=0; iy<(Ny-1); iy++) {
+	for (int iz=0; iz<(Nz-1); iz++) { 
+	  /// Check corners
+	  int index = 0;
+	  index |= (F(ix  ,  iy+1, iz  )[0] > Isoval);
+	  index |= ((F(ix+1, iy+1, iz  )[0] > Isoval) << 1);
+	  index |= ((F(ix+1, iy  , iz  )[0] > Isoval) << 2);
+	  index |= ((F(ix  , iy  , iz  )[0] > Isoval) << 3);
+	  index |= ((F(ix  , iy+1, iz+1)[0] > Isoval) << 4);
+	  index |= ((F(ix+1, iy+1, iz+1)[0] > Isoval) << 5);
+	  index |= ((F(ix+1, iy  , iz+1)[0] > Isoval) << 6);
+	  index |= ((F(ix  , iy  , iz+1)[0] > Isoval) << 7);
+	  int ei=0;
+	  int edge;
+	  while ((edge=EdgeData[index][ei]) != -1) {
+	    numTriangles++;
+	    Vec3 vertex = FindEdge (ix, iy, iz, edge);
+	    if (UseNormals) {
+	      Vec3 normal = -1.0*Grad(vertex[0], vertex[1], vertex[2]);
+	      glNormal3dv(&(normal[0]));
+	    }
+	    glVertex3dv(&(vertex[0]));
+	    ei++;
 	  }
-	  glVertex3dv(&(vertex[0]));
-	  ei++;
 	}
       }
     }
+    glEnd();
   }
-  glEnd();
   glDepthMask(GL_TRUE);
   End();
 }
