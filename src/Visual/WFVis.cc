@@ -702,7 +702,7 @@ WFVisualClass::ReadWF (int kpoint, int band)
 	  WFData(ix,iy,iz) = wfdata(jx, jy, jz, 0);
 	else if (WFDisplay == IMAG_PART)
 	  WFData(ix,iy,iz) = wfdata(jx, jy, jz, 1);
-	MaxVal = max(MaxVal, WFData(ix,iy,iz));
+	MaxVal = max(MaxVal, fabs(WFData(ix,iy,iz)));
       }
   return true;
 }
