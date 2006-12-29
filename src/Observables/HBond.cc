@@ -146,6 +146,8 @@ void HbondClass::Accumulate()
         if(IsHBond(slice,mol1,mol2)){
           AgeTable(slice, mol1, mol2)++;
 					int age = AgeTable(slice,mol1,mol2);
+					if(age>oldest)
+						oldest = age;
 					if(age>=numGridPoints)
 						age = numGridPoints - 1;
 					AgeHist(age)++;
@@ -168,10 +170,11 @@ void HbondClass::Accumulate()
       }
     }
 	}
-	//cerr << TimesCalled << ": HBOND counted " << bondCt << " of " << totalPair << " possible HBonds" << " and " << died << " died with lifetime>0" << endl;
 
-	if(TimesCalled%5000 == 0){
+	if(TimesCalled%100 == 0){
 		cerr << "HBond: " << overflow << " are longer than the histogram size" << endl;
+		cerr << TimesCalled << ": HBOND counted " << bondCt << " of " << totalPair << " possible HBonds" << " and " << died << " died with lifetime>0" << endl;
+		cerr << "Oldest HB is " << oldest << endl;
   //	// Write files
   //	WriteBlock();
 	}
@@ -196,6 +199,8 @@ void HbondClass::Initialize()
 {
   TimesCalled = 0;
   TotalSamples = 0;
+	overflow = 0;
+	oldest = 0;
 
 	// Here we use HBond criteria r_OO < 3.5 and HOH bond angle > 145 deg, after Artacho (2004)
   OOlimit = 3.5;

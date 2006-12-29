@@ -16,6 +16,7 @@
 
 #include "MoleculeInteractionsClass.h"
 #include "../PathDataClass.h"
+#include "../Moves/MoveUtils.h"
 
 MoleculeInteractionsClass::MoleculeInteractionsClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)
@@ -34,7 +35,7 @@ MoleculeInteractionsClass::MoleculeInteractionsClass (PathDataClass &pathData) :
 	RL = 2.0160;
 	RU = 3.1287;
 
-	// SPC intramolecular potential parameters
+	// SPC/F2 intramolecular potential parameters
 	rho = 2.361;
 	D = 0.708;
 	alpha = 108.0*M_PI/180.0;
@@ -71,7 +72,7 @@ double MoleculeInteractionsClass::d_dBeta (int startSlice, int endSlice,  int le
 	
 	bool IsAction = false;
 	double TotalU = ComputeEnergy(startSlice, endSlice-1, activeParticles, level, TruncateEnergy, IsAction);
-	cerr << "MoleculeInteractionsClass RETURNING " << TotalU << endl;
+	//cerr << "MoleculeInteractionsClass RETURNING " << TotalU << endl;
   return TotalU;
 }
 
@@ -146,6 +147,8 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
     }
 		if(Interacting(species1,1)){
       /// calculating coulomb interactions
+
+      /// hack: we're going to sum over the first set of images too
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
     		int species2=Path.ParticleSpeciesNum(ptcl2);
     		if (Interacting(species2,1) && Path.DoPtcl(ptcl2)){
@@ -153,27 +156,43 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 					//  unless told to
 					if(IntraMolecular || Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
 	  				for (int slice=startSlice;slice<=endSlice;slice+=skip){
-	    				double rmag;
-	    				dVec r;
-	    				PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
-							// implement spherical cutoff
-            	double Ormag = COMSeparation(slice,ptcl1,ptcl2);
-            	if (Ormag <= CUTOFF){
-								double truncate = 0.0;
-              	double ptclCutoff = 1.0;
-								if(with_truncations){
-									truncate = 1.0;
-									ptclCutoff = CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
-								}
-								double modulation=1.0;
-								if(withS)
-									modulation = S(Ormag);
-              	double coulomb = prefactor*PathData.Species(species1).Charge
-																*PathData.Species(species2).Charge*modulation*(1.0/rmag - truncate/ptclCutoff);
-								TotalCharge += coulomb;
-	      				TotalU += coulomb;
-								//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
-  	          }
+	    				double Ormag;
+	    				dVec Or;
+	    				PathData.Path.DistDisp(slice,Path.MolRef(ptcl1),Path.MolRef(ptcl2),Ormag,Or);
+              dVec L = Path.GetBox();
+						  for (int x=-1; x<=1; x++) {
+						    for (int y=-1; y<=1; y++) {
+						      for (int z=-1; z<=1; z++) {
+                    Or(0) += x*L(0);
+                    Or(1) += y*L(1);
+                    Or(2) += z*L(2);
+                    Ormag = Mag(Or);
+							      // implement spherical cutoff
+            	      //double Ormag = COMSeparation(slice,ptcl1,ptcl2);
+            	      if (Ormag <= CUTOFF){
+                      dVec r = Or - (Path(slice,ptcl1) - Path(slice,Path.MolRef(ptcl1)))
+                        + (Path(slice,ptcl2) - Path(slice,Path.MolRef(ptcl2)));
+                      double rmag = Mag(r);
+							      	double truncate = 0.0;
+                    	double ptclCutoff = 1.0;
+							      	if(with_truncations){
+							      		truncate = 1.0;
+							      		//ptclCutoff = CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
+							      		ptclCutoff = Mag(r - Or + Scale(Or,CUTOFF));
+							      	}
+							      	double modulation=1.0;
+							      	if(withS)
+							      		modulation = S(Ormag);
+                    	double coulomb = prefactor*PathData.Species(species1).Charge
+							      									*PathData.Species(species2).Charge*modulation
+                                      *(1.0/rmag - truncate/ptclCutoff);
+							      	TotalCharge += coulomb;
+	      			      	TotalU += coulomb;
+							      	//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
+  	                }
+                  }
+                }
+						  }
   	        }
 					}
   	    }

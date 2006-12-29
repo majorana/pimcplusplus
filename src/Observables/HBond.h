@@ -47,6 +47,7 @@ class HbondClass : public ObservableClass
 	int totalSlices;
 	int totalMol;
 	int overflow;
+	int oldest;
 
 	// Here we use HBond criteria r_OO < 3.5 and HOH bond angle > 145 deg, after Artacho (2004)
   double OOlimit;

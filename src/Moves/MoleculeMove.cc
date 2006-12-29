@@ -221,9 +221,11 @@ double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
 		for(int activeP = 0; activeP<PathData.Path.MolMembers(MoveList(activeMol)).size(); activeP++){
 			int movePtcl = PathData.Path.MolMembers(MoveList(activeMol))(activeP);
-			//cerr << "Moving ptcl " <<  movePtcl << " at slice " << slice << " from " << PathData.Path(slice,movePtcl);
-  		TranslatePtcl(slice, movePtcl, Sigma);
-			//cerr << " to " << PathData.Path(slice,movePtcl) << endl;
+      if(Path.ParticleSpeciesNum(movePtcl) != 0){
+			  //cerr << "Moving ptcl " <<  movePtcl << " at slice " << slice << " from " << PathData.Path(slice,movePtcl);
+  		  TranslatePtcl(slice, movePtcl, Sigma);
+			  //cerr << " to " << PathData.Path(slice,movePtcl) << endl;
+      }
 		}
 	}
 
