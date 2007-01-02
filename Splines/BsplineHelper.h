@@ -161,6 +161,12 @@ SolveDerivInterp1D (Array<T,1> data, Array<T,1> p,
 		    TinyVector<double,4> abcdInitial,
 		    TinyVector<double,4> abcdFinal)
 {
+  if (p.size() != (data.size()+2)) {
+    cerr << "p.size() != (data.size()+2)\n";
+    cerr << "p.size() = " << p.size() << endl;
+    cerr << "data.size() = " << data.size() << endl;
+    abort();
+  }
   assert (p.size() == (data.size()+2));
   double al = 0.25*abcdInitial[0];
   double bl = 0.25*abcdInitial[1];
@@ -216,7 +222,8 @@ SolveDerivInterp1D (Array<complex<double>,1> data,
 		    TinyVector<double,4> abcdFinal)
 {
   int N = data.size();
-  Array<double,1> dataReal(N), dataImag(N), pReal(N+3), pImag(N+3);
+  int M = p.size();
+  Array<double,1> dataReal(N), dataImag(N), pReal(M), pImag(M);
   for (int i=0; i<N; i++) {
     dataReal(i) = data(i).real();
     dataImag(i) = data(i).imag();
@@ -224,7 +231,7 @@ SolveDerivInterp1D (Array<complex<double>,1> data,
   SolveDerivInterp1D(dataReal, pReal, abcdInitial, abcdFinal);
   SolveDerivInterp1D(dataImag, pImag, abcdInitial, abcdFinal);
 
-  for (int i=0; i<N+3; i++) 
+  for (int i=0; i<M; i++) 
     p(i) = complex<double>(pReal(i), pImag(i));
 }
 
