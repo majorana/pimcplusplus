@@ -28,7 +28,7 @@ private:
   double Alpha;
   void Set();
 public:
-  int NumTriangles();
+  int NumTriangles(int i=0);
   inline void SetIsoval (double val) 
   { Isovals.resize(1);  Isovals[0] = val; Set();}
   inline void SetIsoval (vector<double> vals) 
