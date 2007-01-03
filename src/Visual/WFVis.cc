@@ -140,6 +140,10 @@ WFVisualClass::WFVisualClass() :
 					  "Show coordinate axes", true);
   Actions->add (CoordToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnCoordToggle));
+  SphereToggle = Gtk::ToggleAction::create("Nuclei", "Nuclei",
+					  "Show nuclei", true);
+  Actions->add (SphereToggle,
+		sigc::mem_fun(*this, &WFVisualClass::OnSphereToggle));
 
   Actions->add (Gtk::Action::create("MenuDisplay", "Display"));
   Mag2Radio = Gtk::RadioAction::create
@@ -170,6 +174,7 @@ WFVisualClass::WFVisualClass() :
     "    </menu>"
     "    <menu action='MenuView'>"
     "      <menuitem action='Reset'/>"
+    "      <menuitem action='Nuclei'/>"
     "      <menuitem action='Axes'/>"
     "    </menu>"
     "    <menu action='MenuDisplay'>"
@@ -396,88 +401,88 @@ WFVisualClass::DrawFrame(bool offScreen)
   PathVis.Objects.push_back(boxObject);
   
   
-
-  list<AtomClass>::iterator iter;
-  list<AtomClass> sphereList;
-  for (int ptcl=0; ptcl < AtomPos.extent(0); ptcl++) 
-    sphereList.push_back(AtomClass(AtomPos(ptcl), AtomTypes(ptcl)));
-  if (clipping) {
-    for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-      Vec3 &r = (*iter).Pos;
-      int type = (*iter).Type;
-      double radius = ElementData::GetRadius(type);
-      bool makeDisks = false;
-      if ((r[0]+radius) > 0.5*Box[0]) {
-	sphereList.push_front(AtomClass(Vec3(r[0]-Box[0], r[1], r[2]), type));
-	makeDisks = true;
+  if (SphereToggle->get_active()) {
+    list<AtomClass>::iterator iter;
+    list<AtomClass> sphereList;
+    for (int ptcl=0; ptcl < AtomPos.extent(0); ptcl++) 
+      sphereList.push_back(AtomClass(AtomPos(ptcl), AtomTypes(ptcl)));
+    if (clipping) {
+      for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+	Vec3 &r = (*iter).Pos;
+	int type = (*iter).Type;
+	double radius = ElementData::GetRadius(type);
+	bool makeDisks = false;
+	if ((r[0]+radius) > 0.5*Box[0]) {
+	  sphereList.push_front(AtomClass(Vec3(r[0]-Box[0],r[1], r[2]), type));
+	  makeDisks = true;
+	}
+	if ((r[0]-radius) < -0.5*Box[0]) {
+	  sphereList.push_front(AtomClass(Vec3(r[0]+Box[0],r[1], r[2]), type));
+	  makeDisks = true;
+	}
       }
-      if ((r[0]-radius) < -0.5*Box[0]) {
-	sphereList.push_front(AtomClass(Vec3(r[0]+Box[0], r[1], r[2]), type));
-	makeDisks = true;
+      
+      for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+	Vec3 &r = (*iter).Pos;
+	int type = (*iter).Type;
+	double radius = ElementData::GetRadius(type);
+	if ((r[1]+radius) > 0.5*Box[1])
+	  sphereList.push_front(AtomClass(Vec3(r[0], r[1]-Box[1], r[2]),type));
+	if ((r[1]-radius) < -0.5*Box[1])
+	  sphereList.push_front(AtomClass(Vec3(r[0], r[1]+Box[1], r[2]),type));
       }
-    }
-    
-    for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-      Vec3 &r = (*iter).Pos;
-      int type = (*iter).Type;
-      double radius = ElementData::GetRadius(type);
-      if ((r[1]+radius) > 0.5*Box[1])
-	sphereList.push_front(AtomClass(Vec3(r[0], r[1]-Box[1], r[2]),type));
-      if ((r[1]-radius) < -0.5*Box[1])
-	sphereList.push_front(AtomClass(Vec3(r[0], r[1]+Box[1], r[2]),type));
-    }
-    
-    for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-      Vec3 &r = (*iter).Pos;
-      int type = (*iter).Type;
-      double radius = ElementData::GetRadius(type);
-      if ((r[2]+radius) > 0.5*Box[2])
-	sphereList.push_front(AtomClass(Vec3(r[0], r[1], r[2]-Box[2]),type));
-      if ((r[2]-radius) < -0.5*Box[2])
-	sphereList.push_front(AtomClass(Vec3(r[0], r[1], r[2]+Box[2]),type));
-    }
-    // Now make disks to close spheres
-    for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-      Vec3 &r = (*iter).Pos;
-      int type = (*iter).Type;
-      double radius = ElementData::GetRadius(type);
-
-      for (int dim=0; dim<3; dim++) {
-	if ((r[dim]+radius) > 0.5*Box[dim]) {
-	  double l = 0.5*Box[dim]-fabs(r[dim]);
-	  double diskRad = sqrt(radius*radius-l*l);
-	  DiskObject *disk1 = new DiskObject(offScreen);
-	  DiskObject *disk2 = new DiskObject(offScreen);
-	  Vec3 color = ElementData::GetColor (type);
-	  disk1->SetRadius(diskRad);
-	  disk2->SetRadius(diskRad);
-	  disk1->SetAxis(2*dim);
-	  disk2->SetAxis(2*dim+1);
-	  disk1->SetColor(color);
-	  disk2->SetColor(color);
-	  Vec3 r1, r2;
-	  r1 = r; r2 = r;
-	  r1[dim] =  0.5*Box[dim];
-	  r2[dim] = -0.5*Box[dim];
-	  disk1->SetPos(r1);
-	  disk2->SetPos(r2);
-	  PathVis.Objects.push_back(disk1);
-	  PathVis.Objects.push_back(disk2);
+      
+      for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+	Vec3 &r = (*iter).Pos;
+	int type = (*iter).Type;
+	double radius = ElementData::GetRadius(type);
+	if ((r[2]+radius) > 0.5*Box[2])
+	  sphereList.push_front(AtomClass(Vec3(r[0], r[1], r[2]-Box[2]),type));
+	if ((r[2]-radius) < -0.5*Box[2])
+	  sphereList.push_front(AtomClass(Vec3(r[0], r[1], r[2]+Box[2]),type));
+      }
+      // Now make disks to close spheres
+      for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+	Vec3 &r = (*iter).Pos;
+	int type = (*iter).Type;
+	double radius = ElementData::GetRadius(type);
+	
+	for (int dim=0; dim<3; dim++) {
+	  if ((r[dim]+radius) > 0.5*Box[dim]) {
+	    double l = 0.5*Box[dim]-fabs(r[dim]);
+	    double diskRad = sqrt(radius*radius-l*l);
+	    DiskObject *disk1 = new DiskObject(offScreen);
+	    DiskObject *disk2 = new DiskObject(offScreen);
+	    Vec3 color = ElementData::GetColor (type);
+	    disk1->SetRadius(diskRad);
+	    disk2->SetRadius(diskRad);
+	    disk1->SetAxis(2*dim);
+	    disk2->SetAxis(2*dim+1);
+	    disk1->SetColor(color);
+	    disk2->SetColor(color);
+	    Vec3 r1, r2;
+	    r1 = r; r2 = r;
+	    r1[dim] =  0.5*Box[dim];
+	    r2[dim] = -0.5*Box[dim];
+	    disk1->SetPos(r1);
+	    disk2->SetPos(r2);
+	    PathVis.Objects.push_back(disk1);
+	    PathVis.Objects.push_back(disk2);
+	  }
 	}
       }
     }
-  }
-
-  /// Add sphere objects from list
-  for (iter=sphereList.begin(); iter!=sphereList.end(); iter++) {
-    SphereObject *sphere = new SphereObject (offScreen);
-    sphere->SetPos((*iter).Pos);
-    Vec3 color = ElementData::GetColor (iter->Type);
-    double radius = ElementData::GetRadius(iter->Type);
-    sphere->SetColor(color);
-    sphere->SetBox(Box);
-    sphere->SetRadius(radius);
-    PathVis.Objects.push_back(sphere);
+    /// Add sphere objects from list
+    for (iter=sphereList.begin(); iter!=sphereList.end(); iter++) {
+      SphereObject *sphere = new SphereObject (offScreen);
+      sphere->SetPos((*iter).Pos);
+      Vec3 color = ElementData::GetColor (iter->Type);
+      double radius = ElementData::GetRadius(iter->Type);
+      sphere->SetColor(color);
+      sphere->SetBox(Box);
+      sphere->SetRadius(radius);
+      PathVis.Objects.push_back(sphere);
+    }
   }
 
   if (FileIsOpen) {
@@ -488,10 +493,16 @@ WFVisualClass::DrawFrame(bool offScreen)
       CurrBand = band;
       Currk    = k;
       ReadWF (k, band);
+      Xgrid.Init(-0.5*Box[0], 0.5*Box[0], WFData.extent(0));
+      Ygrid.Init(-0.5*Box[1], 0.5*Box[1], WFData.extent(1));
+      Zgrid.Init(-0.5*Box[2], 0.5*Box[2], WFData.extent(2));
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
       xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
     if (ResetIso) {
+      Xgrid.Init(-0.5*Box[0], 0.5*Box[0], WFData.extent(0));
+      Ygrid.Init(-0.5*Box[1], 0.5*Box[1], WFData.extent(1));
+      Zgrid.Init(-0.5*Box[2], 0.5*Box[2], WFData.extent(2));
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
       ResetIso = false;
     }
@@ -711,6 +722,12 @@ WFVisualClass::ReadWF (int kpoint, int band)
 
 void
 WFVisualClass::OnCoordToggle()
+{
+  DrawFrame();
+}
+
+void
+WFVisualClass::OnSphereToggle()
 {
   DrawFrame();
 }
