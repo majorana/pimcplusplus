@@ -22,7 +22,7 @@ class MolMoveClass: public LocalStageClass{
   MolMoveClass(PathDataClass&, IO::IOSectionClass);
   dVec GetCOM(int slice, int mol);
   dVec TranslateMol(int slice, Array<int,1>& activePtcls, double epsilon);
-	void MolMoveClass::TranslatePtcl(int slice, int ptcl, double Sigma);
+  void TranslatePtcl(int slice, int ptcl, double Sigma);
   void RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, double theta);
   void RotateMol(int slice, Array<int,1>& activePtcls, double theta);
   void Read (IOSectionClass &in);
