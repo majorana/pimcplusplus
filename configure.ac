@@ -94,6 +94,10 @@ if test "x$enable_pathvis" = "xyes"; then
   if test "x$gtkglextmm_ok" != "xyes"; then
      AC_MSG_ERROR([gtkglextmm libraries missing.  Please install.])
   fi
+  PKG_CHECK_MODULES(GTHREAD, gthread-2.0, gthread_ok=yes, gthread_ok=no)
+  if test "x$gthread_ok" != "xyes"; then
+     AC_MSG_ERROR([gthread libraries missing.  Please install.])
+  fi
 #  PKG_CHECK_MODULES(GTS, gts, gts_ok=yes, gts_ok=no)
 #  if test "x$gts_ok" != "xyes"; then
 #     AC_MSG_ERROR([GTS libraries missing.  Please install. (http://gts.sourceforge.net)])

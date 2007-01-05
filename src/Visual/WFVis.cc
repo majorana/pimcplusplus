@@ -20,6 +20,7 @@ WFVisualClass::WFVisualClass() :
   WFDisplay(MAG2),
   ResetIso(false)
 {
+  Glib::thread_init();
   WFIso.Dynamic = false;
   xPlane.Dynamic = false;
   yPlane.Dynamic = false;
