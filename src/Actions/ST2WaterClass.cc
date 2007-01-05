@@ -94,7 +94,7 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
               double cutoff = PathData.Actions.TIP5PWater.CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
-	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciesp).Charge*N_Avogadro/kcal_to_joule;
+	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciesp).pseudoCharge*N_Avogadro/kcal_to_joule;
               double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
               //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
 	      TotalU += coulomb;
@@ -115,7 +115,7 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
               double cutoff = PathData.Actions.TIP5PWater.CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
-  	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciese).Charge*N_Avogadro/kcal_to_joule;
+  	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciese).pseudoCharge*N_Avogadro/kcal_to_joule;
               double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
               //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
 	      TotalU += coulomb;
@@ -225,7 +225,7 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
-	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciesp).Charge*N_Avogadro/kcal_to_joule;
+	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciesp).pseudoCharge*N_Avogadro/kcal_to_joule;
               double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);
 	      TotalU += coulomb;
 							//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
@@ -243,7 +243,7 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
-	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciese).Charge*N_Avogadro/kcal_to_joule;
+	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciese).pseudoCharge*N_Avogadro/kcal_to_joule;
               double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);
 	      TotalU += coulomb;
 							//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
@@ -327,7 +327,7 @@ double ST2WaterClass::EField (Array<int,1> &activeMol, int startSlice, int endSl
 // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
-	      double coulomb_const = SI*angstrom_to_m*elementary_charge*PathData.Species(speciesp).Charge*N_Avogadro/kcal_to_joule;
+	      double coulomb_const = SI*angstrom_to_m*elementary_charge*PathData.Species(speciesp).pseudoCharge*N_Avogadro/kcal_to_joule;
               double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);// - 1.0/CUTOFF);
 	      V += coulomb;
             }
@@ -342,7 +342,7 @@ double ST2WaterClass::EField (Array<int,1> &activeMol, int startSlice, int endSl
 // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
-	      double coulomb_const = SI*angstrom_to_m*elementary_charge*PathData.Species(speciese).Charge*N_Avogadro/kcal_to_joule;
+	      double coulomb_const = SI*angstrom_to_m*elementary_charge*PathData.Species(speciese).pseudoCharge*N_Avogadro/kcal_to_joule;
               double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);// - 1.0/CUTOFF);
 	      V += coulomb;
             }
@@ -459,7 +459,7 @@ void ST2WaterClass::EFieldVec (int molIndex, dVec & Efield, double &Emag, int sl
 // implement spherical cutoff
         double Ormag = OOSeparation(slice,ptcl1,ptcl2);
         if (Ormag <= CUTOFF){
-	  double coulomb_const = SI*angstrom_to_m*elementary_charge*PathData.Species(speciesp).Charge*N_Avogadro/kcal_to_joule;
+	  double coulomb_const = SI*angstrom_to_m*elementary_charge*PathData.Species(speciesp).pseudoCharge*N_Avogadro/kcal_to_joule;
           double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);// - 1.0/CUTOFF);
 	  V += coulomb;
         }
@@ -475,7 +475,7 @@ void ST2WaterClass::EFieldVec (int molIndex, dVec & Efield, double &Emag, int sl
 // implement spherical cutoff
         double Ormag = OOSeparation(slice,ptcl1,ptcl2);
         if (Ormag <= CUTOFF){
-	  double coulomb_const = SI*angstrom_to_m*elementary_charge*PathData.Species(speciese).Charge*N_Avogadro/kcal_to_joule;
+	  double coulomb_const = SI*angstrom_to_m*elementary_charge*PathData.Species(speciese).pseudoCharge*N_Avogadro/kcal_to_joule;
           double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);// - 1.0/CUTOFF);
 	  V += coulomb;
         }

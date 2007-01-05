@@ -44,6 +44,10 @@ public:
   /// classical particle.
   double lambda;
   double Charge;
+  // I added this parameter for use with empirical potentials
+  // in a pre-rejection context, where having the "real" charge
+  // is also necessary - john
+  double pseudoCharge;
   /// sigma and epsilon are parameters for the Lennard-Jones potential used in the TIP5P water model. -jg
   double Sigma;
   double Epsilon; 

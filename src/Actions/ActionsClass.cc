@@ -484,7 +484,7 @@ ActionsClass::AcceptCopy (int startSlice, int endSlice,
     if (NodalActions(i) != NULL && activeSpecies[i])
       NodalActions(i)->AcceptCopy (startSlice, endSlice);
 
-	QBoxAction.AcceptCopy(startSlice, endSlice);
+  QBoxAction.AcceptCopy(startSlice, endSlice);
 }
 
 
@@ -503,7 +503,7 @@ ActionsClass::RejectCopy (int startSlice, int endSlice,
     if (NodalActions(i) != NULL && activeSpecies[i])
       NodalActions(i)->RejectCopy (startSlice, endSlice);
 
-	QBoxAction.RejectCopy(startSlice, endSlice);
+  QBoxAction.RejectCopy(startSlice, endSlice);
 }
 
 void

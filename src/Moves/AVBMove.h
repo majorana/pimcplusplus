@@ -10,6 +10,10 @@ class AVBMove: public MolMoveClass{
   int numAccepted,numMoves;
   public:
   AVBMove(PathDataClass &myPathData,IOSectionClass outSection); 
+  AVBMove(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
+    MolMoveClass (myPathData,outSection, numToRead, start)
+    {
+    }
 	void Read(IOSectionClass &moveInput);
 	bool AreBound(int slice, int mol1, int mol2);
 	bool AreBound(int slice, int mol1, dVec coord);

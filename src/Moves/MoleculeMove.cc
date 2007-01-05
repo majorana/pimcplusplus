@@ -17,24 +17,38 @@
 #include "MoleculeMove.h"
 
 void MoleculeRotate::Read(IOSectionClass &moveInput) {
+  cerr << "  Rotate read in" << endl;
   //assert(moveInput.ReadVar("SetTheta",Theta));
   assert(moveInput.ReadVar("SetAngle",Theta));
 	MolMoveClass::Read(moveInput);
 }
 
 void MoleculeTranslate::Read(IOSectionClass &moveInput) {
+  cerr << "  Molecule Translate read in" << endl;
   assert(moveInput.ReadVar("SetStep",Step));
 	MolMoveClass::Read(moveInput);
 }
 
+void DimerMove::Read(IOSectionClass &moveInput) {
+  cerr << "  Dimer Move read in" << endl;
+  assert(moveInput.ReadVar("SetStep",Step));
+	MolMoveClass::Read(moveInput);
+  assert(mode == GLOBAL);
+}
+
 void ParticleTranslate::Read(IOSectionClass &moveInput) {
+  cerr << "  Ptcl Trans read in" << endl;
   assert(moveInput.ReadVar("SetSigma",Sigma));
+	MolMoveClass::Read(moveInput);
+}
+
+void DummyEvaluate::Read(IOSectionClass &moveInput) {
 	MolMoveClass::Read(moveInput);
 }
 
 //void MoleculeTranslate::MakeMove() {
 double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
-	//cerr << " MoleculeTranslate::Sample ";
+	cerr << " MoleculeTranslate::Sample ";
   //double step = 0.3;
   double step = Step; // Using Step from input file
 
@@ -133,10 +147,41 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 	return 1;
 }
 
+double DimerMove::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+  //cerr << " DimerMove::Sample ";
+  // load activeParticles; this move is hard-wired to be a GLOBAL update
+	activeParticles.resize(PathData.Path.NumParticles());
+	for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = i;
+
+  double step = Step; // Using Step from input file
+  // this is only written to work for a dimer!
+  assert(MoveList.size() == 2);
+
+  int numSlices = PathData.Path.TotalNumSlices;
+	int slice =0;
+  slice1 = 0;
+  slice2 = 0;
+  if(numSlices>1){
+    int P_max = numSlices - 1;
+    slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
+    slice1 = slice-1;
+    slice2 = slice+1;
+  }
+
+  MoveDimerSeparation(slice,PathData.Path.MolMembers(0), PathData.Path.MolMembers(1),step); 
+
+  if (numMoves%10000 == 0 && numMoves>0){
+    cerr << numMoves << " moves; current Dimer Move ratio is " << double(numAccepted)/numMoves << " with step size " << step << " really numAcc is " << numAccepted << endl;
+  }
+  numMoves++;
+
+	return 1;
+}
+
 //void MoleculeRotate::MakeMove()
 double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
   double dtheta = 2*M_PI*Theta; // Using Theta from input file
-//cerr << " MoleculeRotate::Sample ";
+  //cerr << " MoleculeRotate::Sample ";
   //double dtheta = 2*M_PI*0.3;
 
 	if(mode == SINGLE){
@@ -188,7 +233,7 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 
 double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
   numMoves++;
-	//cerr << "In ParticleTranslate::Sample" << endl;
+	//cerr << " ParticleTranslate::Sample" << endl;
 
 	if(mode == SINGLE){
   	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
@@ -229,7 +274,7 @@ double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 		}
 	}
 
-  if (numMoves%100 == 0){
+  if (numMoves%10000 == 0){
     cerr << numMoves << " moves; current PARTICLE translate ratio is " << double(numAccepted)/numMoves << " with step size " << Sigma << endl;
   }
 //	if(counter == 0)
@@ -239,5 +284,15 @@ double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 	if(mode == SEQUENTIAL) Advance();
 
 	//cerr << "Goodbye Ptcl Translate Sample " << endl;
+	return 1;
+}
+
+double DummyEvaluate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+  numMoves++;
+
+  if (numMoves%10000 == 0){
+    cerr << numMoves << " moves; current DUMMY accept ratio is " << double(numAccepted)/numMoves << endl;
+  }
+
 	return 1;
 }

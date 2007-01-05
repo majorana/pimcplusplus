@@ -230,11 +230,17 @@ void PathClass::Read (IOSectionClass &inSection)
   assert(inSection.OpenSection("Particles"));
   int numSpecies = inSection.CountSections ("Species");
   perr<<"we have this many sections: "<<numSpecies<<endl;
-   // First loop over species and read info about species
+  // First loop over species and read info about species
+  bool prevDoMol;
   for (int Species=0; Species < numSpecies; Species++) {
     inSection.OpenSection("Species", Species);
     SpeciesClass *newSpecies = ReadSpecies (inSection);
+    prevDoMol = doMol;
     doMol = newSpecies->AssignMoleculeIndex;
+    // check to ensure all species are setting doMol consistently "on" or "off"
+    if(Species>0){
+      assert(doMol == prevDoMol);
+    }
     inSection.CloseSection(); // "Species"
     bool manyParticles=false;
     inSection.ReadVar("ManyParticles",manyParticles);

@@ -11,6 +11,9 @@ MolMoveClass::MolMoveClass(PathDataClass& myPathData, IO::IOSectionClass outSect
 	numMoves = 0;
 
 	mode = SINGLE;
+
+  startIndex = 0;
+  numActionsToRead = 1;
  
 	/* 
   cerr << "In MolMoveClass Constructor.  MolMembers loaded: " << endl;
@@ -19,6 +22,18 @@ MolMoveClass::MolMoveClass(PathDataClass& myPathData, IO::IOSectionClass outSect
     for(int j = 0; j < MolMembers(i).size(); j++) cerr << MolMembers(i)(j) << ", ";
     cerr << endl;
   }*/
+}
+
+MolMoveClass::MolMoveClass(PathDataClass& myPathData, IO::IOSectionClass outSection, int numToRead, int start):
+  LocalStageClass (myPathData,outSection)
+{
+	numAccepted = 0;
+	numMoves = 0;
+
+	mode = SINGLE;
+
+  startIndex = start;
+  numActionsToRead = numToRead;
 }
 
 void MolMoveClass::Read (IOSectionClass &in){
@@ -73,8 +88,11 @@ void MolMoveClass::Read (IOSectionClass &in){
 		
   Array<string,1> ActionList;
   assert (in.ReadVar ("Actions", ActionList));
-	for(int a=0; a<ActionList.size(); a++){
-		string setAction = ActionList(a);
+  cerr << "  Looking for " << numActionsToRead << " actions starting at index " << startIndex << endl;
+  assert ((numActionsToRead + startIndex) <= ActionList.size());
+	for(int a=0; a<numActionsToRead; a++){
+    cerr << "Read in actions " << ActionList << endl;
+		string setAction = ActionList(a+startIndex);
 	  if(setAction == "MoleculeInteractions"){
 			// read should be done in actions now
 			//PathData.Actions.MoleculeInteractions.Read(in);
@@ -190,6 +208,28 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, double theta)
   RotateMol(slice, activePtcls, axis, theta);
 }
 
+void MolMoveClass::MoveDimerSeparation(int slice, Array<int,1> mol1, Array<int,1> mol2, double Sigma){
+  dVec translate = PathData.Path(slice,mol1(0)) - PathData.Path(slice,mol2(0));
+  //cerr << "D vector between O is " << translate << endl;
+  double mag = PathData.Path.Random.LocalGaussian(Sigma);
+  //cerr << "D random # is " << mag << endl;
+  translate = Scale(translate, mag);
+  //cerr << "D rescaled vector is " << translate << endl;
+  
+  assert(mol1.size() == mol2.size());
+
+  for(int i=0; i<mol1.size(); i++){
+    //cerr << "D ptcl " << mol1(i) << " move from " << PathData.Path(slice,mol1(i));
+    dVec newR = PathData.Path(slice,mol1(i)) + translate;
+    PathData.Path.SetPos(slice, mol1(i), newR);
+    //cerr << " to " << PathData.Path(slice,mol1(i)) << endl;
+    //cerr << "D ptcl " << mol2(i) << " move from " << PathData.Path(slice,mol2(i));
+    newR = PathData.Path(slice,mol2(i)) - translate;
+    PathData.Path.SetPos(slice, mol2(i), newR);
+    //cerr << " to " << PathData.Path(slice,mol2(i)) << endl;
+  }
+}
+
 void MolMoveClass::Accept(){
 	numAccepted++;
 }
@@ -226,3 +266,4 @@ dVec ArbitraryRotate(dVec axis,dVec coord, double phi){
   newcoord(2) = z;
   return (Scale(newcoord,perp_mag) + coord_aligned);
 }
+

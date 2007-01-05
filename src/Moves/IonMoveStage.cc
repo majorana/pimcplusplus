@@ -114,6 +114,7 @@ double IonStageClass::Sample(int &slice1,int &slice2, Array<int,1>& activePartic
 
 bool IonStageClass::Attempt(int &slice1, int &slice2, Array<int,1> &activeParticles, double &prevActionChange)
 {
+  cerr << "Ion Attempt move" << endl;
   SetMode (NEWMODE);
   double sampleRatio=Sample(slice1,slice2,activeParticles);
   SetMode(OLDMODE);
@@ -121,6 +122,7 @@ bool IonStageClass::Attempt(int &slice1, int &slice2, Array<int,1> &activePartic
   SetMode(NEWMODE);
   double newAction =StageAction(slice1,slice2,activeParticles);
   double currActionChange=newAction-oldAction;
+  cerr << "  collected newAction " << newAction << " - " << oldAction << endl;
   double logAcceptProb=log(sampleRatio)-currActionChange+prevActionChange;
   bool toAccept = logAcceptProb>=log(PathData.Path.Random.Local()); /// Accept condition
   if (toAccept){
@@ -128,6 +130,6 @@ bool IonStageClass::Attempt(int &slice1, int &slice2, Array<int,1> &activePartic
 	}
   NumAttempted++;
   prevActionChange=currActionChange;
-
+  cerr << "  returning " << toAccept << endl;
   return toAccept;
 }

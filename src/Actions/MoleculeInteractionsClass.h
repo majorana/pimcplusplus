@@ -50,13 +50,13 @@ class MoleculeInteractionsClass : public ActionBaseClass
 public:
  	// Parameters that can be specified on input
 	// Defaults in constructor
-	double prefactor;
+	double prefactor, conversion;
 	double CUTOFF;
 
 	// hardwired units and unit conversions
 	// set in constructor
   double elementary_charge, N_Avogadro, kcal_to_joule,
-		epsilon_not, angstrom_to_m, SI, k_B, erg_to_eV, joule_to_eV;
+		epsilon_not, angstrom_to_m, SI, k_B, erg_to_eV, joule_to_eV, bohr_per_angstrom;
 
 	double sigma_over_cutoff, offset;
 

@@ -11,6 +11,7 @@ enum MoveMode{GLOBAL, SINGLE, SEQUENTIAL};
 //class MolMoveClass: public ParticleMoveClass{
 class MolMoveClass: public LocalStageClass{
 	int numMol, molIndex;
+  int numActionsToRead, startIndex;
   public:
 	MoveMode mode;
 	int numAccepted, numMoves;
@@ -20,9 +21,11 @@ class MolMoveClass: public LocalStageClass{
   //Array<Array<int,1>,1> MolMembers;
 	Array<int, 1> MoveList;
   MolMoveClass(PathDataClass&, IO::IOSectionClass);
+  MolMoveClass(PathDataClass&, IO::IOSectionClass, int numToRead, int start);
   dVec GetCOM(int slice, int mol);
   dVec TranslateMol(int slice, Array<int,1>& activePtcls, double epsilon);
-  void TranslatePtcl(int slice, int ptcl, double Sigma);
+	void TranslatePtcl(int slice, int ptcl, double Sigma);
+	void MoveDimerSeparation(int slice, Array<int,1> mol1, Array<int,1> mol2, double Sigma);
   void RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, double theta);
   void RotateMol(int slice, Array<int,1>& activePtcls, double theta);
   void Read (IOSectionClass &in);

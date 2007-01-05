@@ -30,6 +30,7 @@ MoleculeInteractionsClass::MoleculeInteractionsClass (PathDataClass &pathData) :
   k_B = 1.3807*pow(10.0,-23);
   erg_to_eV = 1.6*pow(10.0,12);
   joule_to_eV = pow(10.0,19)/1.602;
+  bohr_per_angstrom = 1.890359;
 
 	// radial cutoffs for ST2 modulation function
 	RL = 2.0160;
@@ -79,6 +80,7 @@ double MoleculeInteractionsClass::d_dBeta (int startSlice, int endSlice,  int le
 double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice, 
 	       const Array<int,1> &activeParticles, int level, bool with_truncations, bool isAction){
 
+  //cerr << "MoleculeInteraction computing SPC energy...";
 	Updated = false;
   for (int counter=0; counter<Path.DoPtcl.size(); counter++)
     Path.DoPtcl(counter)=true;
@@ -132,7 +134,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
   							offset = pow(sigma_over_cutoff,12) - pow(sigma_over_cutoff,6);
 							}
 							//cerr << "; using offset " << offset << endl;
-	      			double lj = 4*PathData.Species(species1).Epsilon*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
+	      			double lj = conversion*4*PathData.Species(species1).Epsilon*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
 							TotalLJ += lj;
 	      			TotalU += lj;
 							//cerr  << TotalU << " added " << lj << " from LJ interaction between " << ptcl1 << " and " << ptcl2 << endl;
@@ -183,8 +185,8 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 							      	double modulation=1.0;
 							      	if(withS)
 							      		modulation = S(Ormag);
-                    	double coulomb = prefactor*PathData.Species(species1).Charge
-							      									*PathData.Species(species2).Charge*modulation
+                    	double coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
+							      									*PathData.Species(species2).pseudoCharge*modulation
                                       *(1.0/rmag - truncate/ptclCutoff);
 							      	TotalCharge += coulomb;
 	      			      	TotalU += coulomb;
@@ -200,7 +202,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
   	}
 		if(Interacting(species1,2) && (ptcl1 == PathData.Path.MolRef(ptcl1))){
 			// quadratic intramolecular potential
-			// SPC/F; see Lobaugh and Voth, JCP 106, 2400 (1996)
+			// SPC/F2; see Lobaugh and Voth, JCP 106, 2400 (1997)
 			double spring = 0.0;
 	  	for (int slice=startSlice;slice<=endSlice;slice+=skip){
 				vector<int> activeP(0);
@@ -214,6 +216,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 						//cerr << " INTRA added " << ptcl2;
 					}
 				}
+        assert(activeP.size() == 3);
 				dVec r;
 				double ROH1, ROH2, RHH;
 				PathData.Path.DistDisp(slice,activeP[0],activeP[1],ROH1,r);
@@ -225,7 +228,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 				double term3 = c*(ROH1 + ROH2 - 2*R_OH_0)*(RHH - R_HH_0);
 				double term4 = d*(ROH1 - R_OH_0)*(ROH2 - R_OH_0);
 				//cerr << "slice " << slice << " INTRA: ROH1 " << ROH1 << " ROH2 " << ROH2 << " RHH " << RHH << " term1 " << term1 << " term2 " << term2 << " term3 " << term3 << " term4 " << term4 << endl;
-				spring = Dyn2kcal*(term1 + term2 + term3 + term4);
+				spring = conversion*Dyn2kcal*(term1 + term2 + term3 + term4);
 				TotalSpring += spring;
 				TotalU += spring;
 			}
@@ -266,12 +269,15 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 			// hard-wired parameters for ST2 water dimer
 			// could be generalized
 			double harmonic = 0.0;
-			double omega = 26;
-			// for Rossky ST2 in kcal/mol
-			double m_H2O = 0.043265;
+			double omega = 26; // ps^-1
+			// for Rossky ST2 in kcal/mol*s^2 m^-2
+			//double m_H2O = 0.043265; // ???? this seems off by a factor of 2
+      //double m_H2O = 0.02163; // kcal/mol*ps^2 angstrom^-2
+      double m_H2O = 0.0060537; // kcal/mol*ps^2 bohr^-2
 			// Lobaugh & Voth in amu
 			//double m_H2O = 9.0;
-			double R0 = 2.85;
+			//double R0 = 2.85; // angstrom
+			double R0 = 5.39; // bohr
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
     		int species2=Path.ParticleSpeciesNum(ptcl2);
     		if (Interacting(species2,4) && Path.DoPtcl(ptcl2)){
@@ -280,7 +286,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
   					double COMrmag;
   					PathData.Path.DistDisp(slice, ptcl1, ptcl2, COMrmag, COMr);
 						//cerr << "Harmonic: COMrmag is " << COMrmag << " between " << ptcl1 << " and " << ptcl2 << " and R0 is " << R0 << endl;
-						harmonic = 0.5*m_H2O*omega*omega*(COMrmag - R0)*(COMrmag - R0);
+						harmonic = conversion*0.5*m_H2O*omega*omega*(COMrmag - R0)*(COMrmag - R0);
 						TotalHarmonic += harmonic;
 						TotalU += harmonic;
 					}
@@ -288,6 +294,8 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 			}
 		}
 	}
+  //cerr << " returning energy " << TotalU << " and action " << TotalU*PathData.Path.tau << endl;
+	//cerr << "Empirical potential contributions: " << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << endl;
 	// write additional output file
 	if(!isAction && special){
 		outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << endl;
@@ -385,14 +393,49 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		// DEFAULTS
 		prefactor = SI*angstrom_to_m*elementary_charge*
 								elementary_charge*N_Avogadro/kcal_to_joule;
+
+    // SPC/F2 intramolecular potential parameters
+    // Lobaugh and Voth, JCP 106 2400 (1997)
+    // these are the stated parameters from the paper in units of angstrom
+	  rho = 2.361;
+	  D = 0.708;
+	  alpha = 108.0*M_PI/180.0;
+	  R_OH_0 = 1.0;
+	  R_HH_0 = 2*R_OH_0*sin(alpha/2);
+	  b = 1.803;
+	  c = -1.469;
+	  d = 0.776;
+	  // conversion factor for mdyn*angstrom^-1 --> kcal*mol^-1*angstrom^-2
+	  Dyn2kcal = 143.929;
+
+    string units = "angstrom";
+    in.ReadVar("Units",units);
+    if(units == "bohr"){
+      prefactor *= bohr_per_angstrom;
+
+      // these are converted into bohr from angstrom
+	    rho = 4.463;
+	    D = 1.338;
+	    R_OH_0 = 1.8904;
+	    R_HH_0 = 2*R_OH_0*sin(alpha/2);
+	    b = 0.9538;
+	    c = -0.7771;
+	    d = 0.4105;
+	    // conversion factor for mdyn*bohr^-1 --> kcal*mol^-1*bohr^-2
+	    Dyn2kcal = 76.138;
+    }
+
 		CUTOFF = Path.GetBox()(0)/2;
 		IntraMolecular = false;
 		withS = true;
 		TruncateAction = true;
 		TruncateEnergy = false;
 
+    conversion = 1.0;
+		if(in.ReadVar("Prefactor",conversion)){
+      cerr << "Setting conversion factor to " << conversion << ". Default units are kcal/mol with length in " << units << endl;
+    }
 		in.ReadVar("Cutoff",CUTOFF);
-		in.ReadVar("Prefactor",prefactor);
 		in.ReadVar("Modulated",withS);
 		in.ReadVar("Intramolecular",IntraMolecular);
 		in.ReadVar("TruncateAction",TruncateAction);

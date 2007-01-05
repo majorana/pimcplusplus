@@ -44,6 +44,9 @@
 			SpeciesList(i) = mySpecies;
 			OffsetList(i) = ptcl - offset;
 			CoordList(i) = PathData.Path(slice,ptcl);
+      cerr << GetMode() << " setting ptcl " << ptcl+1 << " of " << ptclSize << " ptcls" << endl;
+      cerr << "  id " << setPtclSet(mySpecies) << " index " << ptcl-offset << " coord " << PathData.Path(slice,ptcl).data() << endl;
+
 		  PathData.qmc->SetPtclPos(setPtclSet(mySpecies), ptcl - offset, PathData.Path(slice,ptcl).data());
 		}
 		PathData.QMCComm.Broadcast(0, SpeciesList);
@@ -79,6 +82,8 @@
 			}
 		}
 		else {
+      // I'm only supporting VMC for UN-correlated sampling right now
+      assert(QMCMethod == "VMC");
 	  	PathData.qmc->SetVMC(dt, walkers, steps, blocks);
 			PathData.qmc->process();
 			EnergyIndex0 = PathData.qmc->qmcDriver->addObservable("LocalEnergy");
@@ -119,6 +124,7 @@
 	  	Utotal += E; // no penalty
 		}
 	  // end slice for loop
+    cerr << GetMode() << " CEIMC Returning " << Utotal << " " << Utotal*PathData.Path.tau << endl;
 		return Utotal*PathData.Path.tau;
 	}
 
@@ -148,11 +154,12 @@
 	  	  isNewDriver = PathData.qmc->SetRQMCMultiple(dt, chains, steps, blocks);
         energyObs = "LE0";
       }
-      if(isNewDriver)
+      if(isNewDriver) {
 	  	  PathData.qmc->process();
-       else
-         PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
-         PathData.qmc->qmcDriver->Estimators->reset();
+      } else {
+        PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
+        PathData.qmc->qmcDriver->Estimators->reset();
+      }
 	
 	
 			EnergyIndex0 = PathData.qmc->qmcDriver->addObservable(energyObs);
@@ -199,7 +206,7 @@ double IonIonActionClass::SingleAction(int slice1,int slice2,
 				       const Array<int,1> &activeParticles,
 				       int level)
 {
-  //out << "Calculating Ion-Ion interaction" << endl;
+  cerr << "Calculating Ion-Ion interaction" << endl;
   double Utotal = 0.0;
   
   for (int c=0; c<Path.DoPtcl.size(); c++) Path.DoPtcl(c)=true;
@@ -215,20 +222,21 @@ double IonIonActionClass::SingleAction(int slice1,int slice2,
       // make sure we haven't already done it AND that it's not an electron
       //if(Path.DoPtcl(ptcl2) && (species2 != speciese) && Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
       if(Path.DoPtcl(ptcl2)){
-	//out << "  " << ptcl1 << ", " << ptcl2 << ": ";
-				for (int slice=slice1;slice<slice2;slice++){
+	cerr << "  " << ptcl1 << ", " << ptcl2 << ": ";
+				for (int slice=slice1;slice<=slice2;slice++){
 				  double r;
 				  dVec Rvec;
 				  PathData.Path.DistDisp(slice, ptcl1, ptcl2, r, Rvec);
 				  Utotal += prefactor*
 				    PathData.Species(species1).Charge*
 				    PathData.Species(species2).Charge*(1.0/r - 1.0/cutoff);
-				  //out << "r=" << r << "; Utotal = " << Utotal << endl;
-				  //out << "  assembling prefactor " << prefactor << "* charge1 " << PathData.Species(species1).Charge << "* charge2 " << PathData.Species(species2).Charge << " *(1/r " << 1.0/r << " - 1.0/cutoff " << -1.0/cutoff << endl;
+				  cerr << "r=" << r << "; Utotal = " << Utotal << endl;
+				  cerr << "  assembling prefactor " << prefactor << "* charge1 " << PathData.Species(species1).Charge << "* charge2 " << PathData.Species(species2).Charge << " *(1/r " << 1.0/r << " - 1.0/cutoff " << -1.0/cutoff << endl;
 				}
       }
     }
   }
+  cerr << GetMode() << " IonAction Returning " << Utotal << " " << Utotal*PathData.Path.tau << endl;
   return Utotal*PathData.Path.tau;
 }
 
@@ -247,7 +255,7 @@ double IonIonActionClass::d_dBeta (int slice1, int slice2, int level){
       // make sure we haven't already done it AND that it's not an electron
       //if(Path.DoPtcl(ptcl2) && (species2 != speciese) && Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
       if(Path.DoPtcl(ptcl2)){
-	for (int slice=slice1;slice<slice2;slice++){
+	for (int slice=slice1;slice<=slice2;slice++){
 	  double r;
 	  dVec Rvec;
 	  PathData.Path.DistDisp(slice, ptcl1, ptcl2, r, Rvec);

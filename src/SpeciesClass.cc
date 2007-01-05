@@ -21,6 +21,8 @@ bool SpeciesClass::Read(IOSectionClass &inSection)
   assert(inSection.ReadVar("Name",Name));
   assert(inSection.ReadVar("lambda",lambda));
   inSection.ReadVar("Charge",Charge);
+  pseudoCharge = Charge;
+  inSection.ReadVar("PseudoCharge",pseudoCharge);
   inSection.ReadVar("Epsilon",Epsilon);
   inSection.ReadVar("Sigma",Sigma);
 	AssignMoleculeIndex = false;

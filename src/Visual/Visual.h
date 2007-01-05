@@ -67,6 +67,11 @@ protected:
   Array<int,1>    OpenPtcl;
   Array<double,2>   Tail;
 
+  //////////////////////////////////////
+  // items to process water molecules //
+  //////////////////////////////////////
+  bool processH2O;
+
   /// This stores the global permutations for the paths.
   /// (frame, ptcl).  The permutation acts between the last and first
   /// slice.  
@@ -137,7 +142,8 @@ public:
   inline SpeciesClass& PtclSpecies (int ptcl);
   void Read(string fileName);
   void MakeFrame (int frame, bool offScreen=false);
-  
+  void SetFlag(string newFlag);
+
   VisualClass();
   virtual ~VisualClass();
 

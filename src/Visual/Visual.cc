@@ -114,28 +114,40 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
       pathObj->LinesSet (Paths[li]->Path);
     PathVis.Objects.push_back(pathObj);
   }
-  for (int si=0; si<numSpecies; si++) 
-    if (Species(si).lambda == 0)
-      for (int ptcl=Species(si).FirstParticle; ptcl<=Species(si).LastParticle;
+  for (int si=0; si<numSpecies; si++) {
+    if(!processH2O || (processH2O && Species(si).Name!="e")){
+      cerr << "Handling species " << Species(si).Name << endl;
+      if (Species(si).lambda == 0){
+        for (int ptcl=Species(si).FirstParticle; ptcl<=Species(si).LastParticle;
 	   ptcl++) {
-	SphereObject* sphere = new SphereObject(offScreen);
-	dVec pos;
-	pos[0] = PathArray(frame, ptcl, 0, 0);
- 	pos[1] = PathArray(frame, ptcl, 0, 1);
- 	pos[2] = PathArray(frame, ptcl, 0, 2);
-	/// HACK HACK HACK HACK
-// 	pos[0] += 0.5*Box[0];
-// 	pos[1] += 0.5*Box[1];
-// 	pos[2] += 0.5*Box[2];
-	Box.PutInBox(pos);
-	sphere->SetPos (pos);
-	sphere->SetBox(Box);
-// 	if (ptcl==0)
-// 	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
-// 	else
-	  sphere->SetColor (Vec3(1.0, 0.0, 0.0));
-	PathVis.Objects.push_back(sphere);
+	        SphereObject* sphere = new SphereObject(offScreen);
+	        dVec pos;
+	        pos[0] = PathArray(frame, ptcl, 0, 0);
+ 	        pos[1] = PathArray(frame, ptcl, 0, 1);
+ 	        pos[2] = PathArray(frame, ptcl, 0, 2);
+	        /// HACK HACK HACK HACK
+//         	pos[0] += 0.5*Box[0];
+//         	pos[1] += 0.5*Box[1];
+//         	pos[2] += 0.5*Box[2];
+	        Box.PutInBox(pos);
+	        sphere->SetPos (pos);
+	        sphere->SetBox(Box);
+//         	if (ptcl==0)
+//         	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
+//         	else
+            Vec3 colorCode(1.0, 0.0, 0.0);
+            if(processH2O && (Species(si).Name == "p" || Species(si).Name == "H")){
+              colorCode(0) = 0.8;
+              colorCode(1) = 1.0;
+              colorCode(2) = 0.8;
+            }
+	          //sphere->SetColor (Vec3(1.0, 0.0, 0.0));
+	          sphere->SetColor (colorCode);
+	        PathVis.Objects.push_back(sphere);
+        }
       }
+    }
+  }
 
   ///Addition of sphere for helium droplets
   if (false) {
@@ -272,6 +284,7 @@ void VisualClass::Read(string fileName)
     for (int j=i+1; j<numSpecies; j++)
       Species(j).FirstParticle += Species(i).NumParticles;
     Species(i).LastParticle=Species(i).FirstParticle+Species(i).NumParticles-1;
+
     Infile.CloseSection(); // Species
   }
 
@@ -366,6 +379,13 @@ void VisualClass::Read(string fileName)
   Infile.CloseSection();
   FrameScale.set_value(0.0);
   MakeFrame (0);
+}
+
+void VisualClass::SetFlag(string newFlag){
+  if(newFlag == "water"){
+    processH2O = true;
+    cerr << "setting processH2O true " << processH2O << endl;
+  }
 }
 
 void VisualClass::PutInBox()
@@ -592,6 +612,7 @@ VisualClass::VisualClass()
 
   // Show window.
   show_all();
+  processH2O = false;
 }
 
 VisualClass::~VisualClass()
@@ -669,8 +690,6 @@ int main(int argc, char** argv)
     cerr << "Usage:\n  Visual myfile.h5\n";
     exit (1);
   }
-  
-
   // Query OpenGL extension version.
   int major, minor;
   Gdk::GL::query_version(major, minor);
@@ -679,7 +698,16 @@ int main(int argc, char** argv)
 
 //   // Instantiate and run the application.
   VisualClass visual;
-  visual.Read (argv[1]);
+
+  // John's addition to read in special flags
+  int index = 1;
+  if (argc == 3){
+    cerr << "Read in flag " << argv[1] << endl;
+    visual.SetFlag(argv[1]);
+    index = 2;
+  }
+
+  visual.Read (argv[index]);
   kit.run(visual);
 
 //   Vec3 r2 (0.99, 0.2, 0.3), r1(1.09, 0.3, 0.4), wall1, wall2;

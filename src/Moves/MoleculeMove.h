@@ -33,11 +33,16 @@ class MoleculeRotate : public MolMoveClass
     {
 			cerr << "MoleculeRotate constructor" << endl;
     }
+
+  MoleculeRotate(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
+    MolMoveClass (myPathData,outSection, numToRead, start)
+    {
+    }
   //  double AcceptanceRatio(int numAccepted,int numMoves);
 
-  void WriteRatio()
-    {
-    };
+  //void WriteRatio()
+  //  {
+  //  };
 };
 
 class MoleculeTranslate : public MolMoveClass
@@ -50,14 +55,19 @@ class MoleculeTranslate : public MolMoveClass
   double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
   void Read(IOSectionClass &moveInput);
   //  double AcceptanceRatio(int numAccepted,int numMoves);
-  inline void WriteRatio()
-    {
-    };
+  //inline void WriteRatio()
+  //  {
+  //  };
 
   MoleculeTranslate(PathDataClass &myPathData,IOSectionClass outSection) : 
     MolMoveClass (myPathData,outSection)
     {
 			counter = 0;
+    }
+
+  MoleculeTranslate(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
+    MolMoveClass (myPathData,outSection, numToRead, start)
+    {
     }
 };
 
@@ -72,14 +82,61 @@ class ParticleTranslate : public MolMoveClass
   double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
   void Read(IOSectionClass &moveInput);
   //  double AcceptanceRatio(int numAccepted,int numMoves);
-  inline void WriteRatio()
-    {
-    };
+  //inline void WriteRatio()
+  //  {
+  //  };
 
   ParticleTranslate(PathDataClass &myPathData,IOSectionClass outSection) : 
     MolMoveClass (myPathData,outSection)
     {
 			counter = 0;
+    }
+
+  ParticleTranslate(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
+    MolMoveClass (myPathData,outSection, numToRead, start)
+    {
+    }
+};
+
+class DimerMove : public MolMoveClass
+{
+ 	public:
+  double Step;
+  void Set(double setStep);
+  //void MakeMove();
+  double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
+  void Read(IOSectionClass &moveInput);
+
+  DimerMove(PathDataClass &myPathData,IOSectionClass outSection) : 
+    MolMoveClass (myPathData,outSection)
+    {
+    }
+
+  DimerMove(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
+    MolMoveClass (myPathData,outSection, numToRead, start)
+    {
+    }
+};
+
+class DummyEvaluate : public MolMoveClass
+{
+	int counter;
+ 	public:
+  double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
+  void Read(IOSectionClass &moveInput);
+  //inline void WriteRatio()
+  //  {
+  //  };
+
+  DummyEvaluate(PathDataClass &myPathData,IOSectionClass outSection) : 
+    MolMoveClass (myPathData,outSection)
+    {
+			counter = 0;
+    }
+
+  DummyEvaluate(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
+    MolMoveClass (myPathData,outSection, numToRead, start)
+    {
     }
 };
 

@@ -16,15 +16,14 @@ double QBoxActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &a
 	int myAge = PathData.moveClock;
 	double Utotal = 0.0;
 	if(GetMode()==OLDMODE){
-		if((myAge-1)==age){
-			//Utotal = prevEnergy;
-			Utotal = ComputeEnergy(slice1, slice2, activeParticles, level);
-			cerr << "Cached energy " << prevEnergy << " from move " << age << " at move " << myAge << " compares with computed energy " << Utotal << endl;
-		}
-		else{
-			Utotal = ComputeEnergy(slice1, slice2, activeParticles, level);
-			//oldEnergy = Utotal;
-		}
+		//if((myAge-1)==age){
+		//	Utotal = prevEnergy;
+		//	cerr << "Cached energy " << prevEnergy << " from move " << age << " at move " << myAge << " compares with computed energy " << Utotal << endl;
+		//}
+		//else{
+		Utotal = ComputeEnergy(slice1, slice2, activeParticles, level);
+    //oldEnergy = Utotal;
+		//}
 	}
 	else {
 		Utotal = ComputeEnergy(slice1, slice2, activeParticles, level);
@@ -67,6 +66,7 @@ void QBoxActionClass::SetPtclPos(int slice, Array<int,1> activeParticles){
 }
 
 double QBoxActionClass::Collect(){
+  cerr << "  In QBoxAction::Collect... ";
 	double e0, e1, value;
 	e0 = 0.0;
 	string tag;
@@ -99,6 +99,7 @@ double QBoxActionClass::Collect(){
 			return value;
 		}
 	}
+  cerr << "DEAD" << endl;
 	return 0.0;
 }
 			
@@ -120,14 +121,17 @@ void QBoxActionClass::Read (IOSectionClass &in){
 	}
 	string filename, fromqboxString, toqboxString;
 	assert(in.ReadVar("InitFile", filename));
-	assert(in.ReadVar("OutputStream", fromqboxString));
-	assert(in.ReadVar("InputStream", toqboxString));
-	cerr << "Opening pipes " << fromqboxString << " and " << toqboxString << endl;
+	assert(in.ReadVar("OutputStream", toqboxString));
+	assert(in.ReadVar("InputStream", fromqboxString));
+	cerr << "Opening pipes " << fromqboxString << " and " << toqboxString << "...";
 	toqbox.open(toqboxString.c_str());
 	fromqbox.open(fromqboxString.c_str());
+  cerr << " done. Sending input file " << filename << "... ";
 	toqbox << filename << endl;
+  cerr << "done." << endl;
 	prevEnergy = Collect();
 	age = PathData.moveClock;
+  cerr << "QBoxAction Read finished." << endl;
 }
   
 void QBoxActionClass::AcceptCopy (int slice1, int slice2){
