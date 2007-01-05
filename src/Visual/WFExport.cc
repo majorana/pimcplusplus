@@ -269,7 +269,7 @@ WFExportClass::ExportPOV(string basename)
   if (POVRenderButton.get_active()) {
     POVFile = filename;
     Glib::Thread::create
-      (sigc::mem_fun (*this, WFExportClass::RenderPOV), true);
+      (sigc::mem_fun (*this, &WFExportClass::RenderPOV), true);
   }
 }
 

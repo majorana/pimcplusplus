@@ -99,7 +99,10 @@ if test "x$enable_pathvis" = "xyes"; then
 #     AC_MSG_ERROR([GTS libraries missing.  Please install. (http://gts.sourceforge.net)])
 #  fi
   AC_CHECK_LIB([xvidcore],[decoder_create])
-  AC_CHECK_LIB([revel],[main])
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  AC_CHECK_LIB([revel],[Revel_EncodeStart])
+  AC_LANG_RESTORE
   AC_CHECK_LIB([glut],[glutSolidTeapot])
   AC_CHECK_LIB([gle],[gleSetNumSides])
 fi

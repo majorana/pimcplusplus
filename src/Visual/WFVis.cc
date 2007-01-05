@@ -155,13 +155,13 @@ WFVisualClass::WFVisualClass() :
     (DisplayGroup, "Imag", "Imag part", "Display imaginary part of WF");
   Actions->add
     (RealRadio, sigc::bind<WFDisplayType> 
-     (sigc::mem_fun(*this, WFVisualClass::OnDisplayRadio),REAL_PART));
+     (sigc::mem_fun(*this, &WFVisualClass::OnDisplayRadio),REAL_PART));
   Actions->add
     (ImagRadio, sigc::bind<WFDisplayType> 
-     (sigc::mem_fun(*this, WFVisualClass::OnDisplayRadio),IMAG_PART));
+     (sigc::mem_fun(*this, &WFVisualClass::OnDisplayRadio),IMAG_PART));
   Actions->add
     (Mag2Radio, sigc::bind<WFDisplayType> 
-     (sigc::mem_fun(*this, WFVisualClass::OnDisplayRadio),MAG2));  
+     (sigc::mem_fun(*this, &WFVisualClass::OnDisplayRadio),MAG2));  
 
   Glib::ustring ui_info =
     "<ui>"
