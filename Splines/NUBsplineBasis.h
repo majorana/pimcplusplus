@@ -445,6 +445,8 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs) c
   return i0;
 }
 
+
+
 inline int
 NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs,
 				       TinyVector<double,4> &dbfuncs) const
@@ -505,6 +507,36 @@ NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs,
 }
 
 inline void
+NUBsplineBasis<LinearGrid>::operator()(int i,
+				       TinyVector<complex<double>,4> &bfuncs) const
+{
+  TinyVector<double,4> funcs;
+  (*this)(i, funcs);
+  bfuncs[0] = complex<double>(funcs[0], funcs[0]);
+  bfuncs[1] = complex<double>(funcs[1], funcs[1]);
+  bfuncs[2] = complex<double>(funcs[2], funcs[2]);
+  bfuncs[3] = complex<double>(funcs[3], funcs[3]);
+}
+
+
+void
+NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<complex<double>,4> &bfuncs,
+				     TinyVector<complex<double>,4> &dbfuncs) const
+{
+  TinyVector<double,4> funcs, dfuncs;
+  (*this)(i, funcs, dfuncs);
+  bfuncs[0]  = complex<double>(funcs[0],  funcs[0]);
+  bfuncs[1]  = complex<double>(funcs[1],  funcs[1]);
+  bfuncs[2]  = complex<double>(funcs[2],  funcs[2]);
+  bfuncs[3]  = complex<double>(funcs[3],  funcs[3]);
+  dbfuncs[0] = complex<double>(dfuncs[0], dfuncs[0]);
+  dbfuncs[1] = complex<double>(dfuncs[1], dfuncs[1]);
+  dbfuncs[2] = complex<double>(dfuncs[2], dfuncs[2]);
+  dbfuncs[3] = complex<double>(dfuncs[3], dfuncs[3]);
+}
+
+
+inline void
 NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs,
 				       TinyVector<double,4> &dbfuncs,
 				       TinyVector<double,4> &d2bfuncs) const
@@ -513,6 +545,29 @@ NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs,
   dbfuncs  = TinyVector<double,4> (-0.5, 0.0, 0.5, 0.0);
   d2bfuncs = TinyVector<double,4> (1.0, -2.0, 1.0, 0.0);
 }
+
+
+inline void
+NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<complex<double>,4> &bfuncs,
+				     TinyVector<complex<double>,4> &dbfuncs,
+				     TinyVector<complex<double>,4> &d2bfuncs) const
+{
+  TinyVector<double,4> funcs, dfuncs, d2funcs;
+  (*this)(i, funcs, dfuncs, d2funcs);
+  bfuncs[0]   = complex<double>(  funcs[0],   funcs[0]);
+  bfuncs[1]   = complex<double>(  funcs[1],   funcs[1]);
+  bfuncs[2]   = complex<double>(  funcs[2],   funcs[2]);
+  bfuncs[3]   = complex<double>(  funcs[3],   funcs[3]);
+  dbfuncs[0]  = complex<double>( dfuncs[0],  dfuncs[0]);
+  dbfuncs[1]  = complex<double>( dfuncs[1],  dfuncs[1]);
+  dbfuncs[2]  = complex<double>( dfuncs[2],  dfuncs[2]);
+  dbfuncs[3]  = complex<double>( dfuncs[3],  dfuncs[3]);
+  d2bfuncs[0] = complex<double>(d2funcs[0], d2funcs[0]);
+  d2bfuncs[1] = complex<double>(d2funcs[1], d2funcs[1]);
+  d2bfuncs[2] = complex<double>(d2funcs[2], d2funcs[2]);
+  d2bfuncs[3] = complex<double>(d2funcs[3], d2funcs[3]);
+}
+
 
 inline void
 NUBsplineBasis<LinearGrid>::Init(LinearGrid *grid, bool periodic)
