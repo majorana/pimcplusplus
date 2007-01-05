@@ -20,8 +20,9 @@
 #include "VectorOps.h"
 #include "../PH/kSpacePH.h"
 #include "FFTBox.h"
+#include "../config.h"
 
-#ifdef MAC
+#if !HAVE_SINCOS
 #define sincos(p,s,c) *(s)=sin(p); *(c)=cos(p);
 #endif
 
