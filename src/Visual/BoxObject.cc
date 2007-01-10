@@ -177,31 +177,73 @@ BoxObject::DrawPOV (FILE *fout, string rotString)
 {
   double minDim = min(min(Lx,Ly),Lz);
   double radius = minDim/450.0;
-  POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
-	          0.5*Lx ,-0.5*Ly, -0.5*Lz, radius, rotString);
-  POVLine (fout, -0.5*Lx,  0.5*Ly, -0.5*Lz,
-	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius, rotString);
-  POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
-	         -0.5*Lx , 0.5*Ly, -0.5*Lz, radius, rotString);
-  POVLine (fout,  0.5*Lx, -0.5*Ly, -0.5*Lz,
-	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius, rotString);
+  Vec3 a[3], ma[3];
+  a[0] = LatticeVecs[0];
+  a[1] = LatticeVecs[1];
+  a[2] = LatticeVecs[2];
+  ma[0] = -1.0*a[0];  ma[1] = -1.0*a[1];  ma[2] = -1.0*a[2];
+  Vec3 r[8];
+  r[0] = 0.5*(ma[0] + ma[1] + ma[2]);
+  r[1] = 0.5*(ma[0] + ma[1] +  a[2]);
+  r[2] = 0.5*(ma[0] +  a[1] +  a[2]);
+  r[3] = 0.5*(ma[0] +  a[1] + ma[2]);
+  r[4] = 0.5*( a[0] + ma[1] + ma[2]);
+  r[5] = 0.5*( a[0] + ma[1] +  a[2]);
+  r[6] = 0.5*( a[0] +  a[1] +  a[2]);
+  r[7] = 0.5*( a[0] +  a[1] + ma[2]);
+  
+  POVLine (fout, r[0][0], r[0][1], r[0][2],
+ 	         r[1][0], r[1][1], r[1][2], radius, rotString);
+  POVLine (fout, r[1][0], r[1][1], r[1][2],
+ 	         r[2][0], r[2][1], r[2][2], radius, rotString);
+  POVLine (fout, r[2][0], r[2][1], r[2][2],
+ 	         r[3][0], r[3][1], r[3][2], radius, rotString);
+  POVLine (fout, r[3][0], r[3][1], r[3][2],
+ 	         r[0][0], r[0][1], r[0][2], radius, rotString);
 
-  POVLine (fout, -0.5*Lx, -0.5*Ly,  0.5*Lz,
-	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius, rotString);
-  POVLine (fout, -0.5*Lx,  0.5*Ly,  0.5*Lz,
-	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
-  POVLine (fout, -0.5*Lx, -0.5*Ly,  0.5*Lz,
-	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
-  POVLine (fout,  0.5*Lx, -0.5*Ly,  0.5*Lz,
-	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
+  POVLine (fout, r[4][0], r[4][1], r[4][2],
+ 	         r[5][0], r[4][1], r[5][2], radius, rotString);
+  POVLine (fout, r[5][0], r[4][1], r[5][2],
+ 	         r[6][0], r[6][1], r[6][2], radius, rotString);
+  POVLine (fout, r[6][0], r[6][1], r[6][2],
+ 	         r[7][0], r[7][1], r[7][2], radius, rotString);
+  POVLine (fout, r[7][0], r[7][1], r[7][2],
+ 	         r[4][0], r[4][1], r[4][2], radius, rotString);
 
-  POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
-	         -0.5*Lx ,-0.5*Ly,  0.5*Lz, radius, rotString);
-  POVLine (fout, -0.5*Lx,  0.5*Ly, -0.5*Lz,
-	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
-  POVLine (fout,  0.5*Lx, -0.5*Ly, -0.5*Lz,
-	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius, rotString);
-  POVLine (fout,  0.5*Lx,  0.5*Ly, -0.5*Lz,
-	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
+  POVLine (fout, r[0][0], r[0][1], r[0][2],
+ 	         r[4][0], r[4][1], r[4][2], radius, rotString);
+  POVLine (fout, r[1][0], r[1][1], r[1][2],
+ 	         r[5][0], r[5][1], r[5][2], radius, rotString);
+  POVLine (fout, r[2][0], r[2][1], r[2][2],
+ 	         r[6][0], r[6][1], r[6][2], radius, rotString);
+  POVLine (fout, r[3][0], r[3][1], r[3][2],
+ 	         r[7][0], r[7][1], r[7][2], radius, rotString);
+
+//   POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
+// 	          0.5*Lx ,-0.5*Ly, -0.5*Lz, radius, rotString);
+//   POVLine (fout, -0.5*Lx,  0.5*Ly, -0.5*Lz,
+// 	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius, rotString);
+//   POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
+// 	         -0.5*Lx , 0.5*Ly, -0.5*Lz, radius, rotString);
+//   POVLine (fout,  0.5*Lx, -0.5*Ly, -0.5*Lz,
+// 	          0.5*Lx , 0.5*Ly, -0.5*Lz, radius, rotString);
+
+//   POVLine (fout, -0.5*Lx, -0.5*Ly,  0.5*Lz,
+// 	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius, rotString);
+//   POVLine (fout, -0.5*Lx,  0.5*Ly,  0.5*Lz,
+// 	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
+//   POVLine (fout, -0.5*Lx, -0.5*Ly,  0.5*Lz,
+// 	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
+//   POVLine (fout,  0.5*Lx, -0.5*Ly,  0.5*Lz,
+// 	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
+
+//   POVLine (fout, -0.5*Lx, -0.5*Ly, -0.5*Lz,
+// 	         -0.5*Lx ,-0.5*Ly,  0.5*Lz, radius, rotString);
+//   POVLine (fout, -0.5*Lx,  0.5*Ly, -0.5*Lz,
+// 	         -0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
+//   POVLine (fout,  0.5*Lx, -0.5*Ly, -0.5*Lz,
+// 	          0.5*Lx ,-0.5*Ly,  0.5*Lz, radius, rotString);
+//   POVLine (fout,  0.5*Lx,  0.5*Ly, -0.5*Lz,
+// 	          0.5*Lx , 0.5*Ly,  0.5*Lz, radius, rotString);
 
 }

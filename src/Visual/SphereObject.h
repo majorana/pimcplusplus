@@ -12,10 +12,11 @@ protected:
   static int SphereListNum, OffScreenListNum;
   static bool SphereListCreated, OffScreenListCreated;
   bool OffScreen;
-  Vec3 Box;
+  Mat3 Lattice;
   void Set();
 public:
   void SetPos (Vec3 pos);
+  void SetBox (Mat3 lattice);
   void SetBox (Vec3 box);
   void SetRadius (double radius);
   void SetColor (Vec3 color);

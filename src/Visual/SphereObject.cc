@@ -99,7 +99,15 @@ SphereObject::SetColor (Vec3 color)
 void
 SphereObject::SetBox (Vec3 box)
 {
-  Box = box;
+  Mat3 lattice;
+  lattice = box[0], 0.0, 0.0, 0.0, box[1], 0.0, 0.0, 0.0, box[2];
+  SetBox (box);
+}
+
+void
+SphereObject::SetBox (Mat3 lattice)
+{
+  Lattice = lattice;
 }
 
 
@@ -108,10 +116,20 @@ SphereObject::DrawPOV (FILE *fout, string rotString)
 {
   fprintf (fout, "intersection {\n");
   fprintf (fout, "  box {\n");
-  fprintf (fout, "    <%10.8f, %10.8f, %10.8f>,\n",
-	   -0.5*Box[0], -0.5*Box[1], -0.5*Box[2]);
-  fprintf (fout, "    <%10.8f, %10.8f, %10.8f>\n",
-	   0.5*Box[0],   0.5*Box[1],  0.5*Box[2]);
+//   fprintf (fout, "    <%10.8f, %10.8f, %10.8f>,\n",
+// 	   -0.5*Box[0], -0.5*Box[1], -0.5*Box[2]);
+//   fprintf (fout, "    <%10.8f, %10.8f, %10.8f>\n",
+// 	   0.5*Box[0],   0.5*Box[1],  0.5*Box[2]);
+  fprintf (fout, "    <-0.5, -0.5, -0.5>,\n");
+  fprintf (fout, "    < 0.5,  0.5,  0.5>\n");
+  fprintf (fout, "    matrix < %10.8f, %10.8f, %10.8f,\n",
+	   Lattice(0,0), Lattice(0,1), Lattice(0,2));
+  fprintf (fout, "             %10.8f, %10.8f, %10.8f,\n",
+	   Lattice(1,0), Lattice(1,1), Lattice(1,2));
+  fprintf (fout, "             %10.8f, %10.8f, %10.8f,\n",
+	   Lattice(2,0), Lattice(2,1), Lattice(2,2));
+  fprintf (fout, "             %10.8f, %10.8f, %10.8f>\n",
+	   0.0, 0.0, 0.0);
   fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "  }\n");
   fprintf (fout, "  sphere {\n");

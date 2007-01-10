@@ -467,8 +467,15 @@ Isosurface::DrawPOV (FILE *fout, string rotString)
 	    while ((edge=EdgeData[index][ei]) != -1) {
 	      if (triCounter == 0)
 		fprintf (fout, "  smooth_triangle {\n");
-	      Vec3 vertex = FindEdge (ix, iy, iz, edge);
-	      Vec3 normal = -1.0*Grad(vertex[0], vertex[1], vertex[2]);
+	      
+	      Vec3 reduced = FindEdge (ix, iy, iz, edge);
+	      Vec3 vertex = (reduced[0]*LatticeVecs[0] +
+			     reduced[1]*LatticeVecs[1] +
+			     reduced[2]*LatticeVecs[2]);
+	      Vec3 nred = -1.0*Grad(reduced[0], reduced[1], reduced[2]);
+	      Vec3 normal = (nred[0]*LatticeVecs[0]+
+			     nred[1]*LatticeVecs[1]+
+			     nred[2]*LatticeVecs[2]);
 	      normal = 1.0/sqrt(dot(normal,normal)) * normal;
 	      fprintf (fout, "    <%14.10f, %14.10f, %14.10f>, ",
 		       vertex[0], vertex[1], vertex[2]);

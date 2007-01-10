@@ -398,7 +398,8 @@ WFVisualClass::DrawFrame(bool offScreen)
 
   if (CoordToggle->get_active()) {
     CoordObject *coord = new CoordObject;
-    coord->Set (Box);
+    Vec3 box = Box(0) + Box(1) + Box(2);
+    coord->Set (box);
     PathVis.Objects.push_back(coord);
   }
 
@@ -408,6 +409,14 @@ WFVisualClass::DrawFrame(bool offScreen)
   boxObject->Set (Box.GetLattice(), clipping);
   PathVis.Objects.push_back(boxObject);
   
+  Vec3 nLattice[3];
+  double length[3];
+  length[0] = sqrt(dot(Box(0), Box(0)));
+  length[1] = sqrt(dot(Box(1), Box(1)));
+  length[2] = sqrt(dot(Box(2), Box(2)));
+  nLattice[0] = Box(0)/length[0];
+  nLattice[1] = Box(1)/length[1];
+  nLattice[2] = Box(2)/length[2];
   
   if (SphereToggle->get_active()) {
     list<AtomClass>::iterator iter;
@@ -420,12 +429,12 @@ WFVisualClass::DrawFrame(bool offScreen)
 	int type = (*iter).Type;
 	double radius = ElementData::GetRadius(type);
 	bool makeDisks = false;
-	if ((r[0]+radius) > 0.5*Box[0]) {
-	  sphereList.push_front(AtomClass(Vec3(r[0]-Box[0],r[1], r[2]), type));
+	if ((dot(r,nLattice[0])+radius) > 0.5*length[0]) {
+	  sphereList.push_front(AtomClass(r-Box(0), type));
 	  makeDisks = true;
 	}
-	if ((r[0]-radius) < -0.5*Box[0]) {
-	  sphereList.push_front(AtomClass(Vec3(r[0]+Box[0],r[1], r[2]), type));
+	if ((dot(r,nLattice[0])-radius) < -0.5*length[0]) {
+	  sphereList.push_front(AtomClass(r+Box(0), type));
 	  makeDisks = true;
 	}
       }
@@ -434,20 +443,20 @@ WFVisualClass::DrawFrame(bool offScreen)
 	Vec3 &r = (*iter).Pos;
 	int type = (*iter).Type;
 	double radius = ElementData::GetRadius(type);
-	if ((r[1]+radius) > 0.5*Box[1])
-	  sphereList.push_front(AtomClass(Vec3(r[0], r[1]-Box[1], r[2]),type));
-	if ((r[1]-radius) < -0.5*Box[1])
-	  sphereList.push_front(AtomClass(Vec3(r[0], r[1]+Box[1], r[2]),type));
+	if ((dot(r,nLattice[1])+radius) > 0.5*length[1])
+	  sphereList.push_front(AtomClass(r-Box(1),type));
+	if ((dot(r,nLattice[1])-radius) < -0.5*Box[1])
+	  sphereList.push_front(AtomClass(r+Box(1),type));
       }
       
       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
 	Vec3 &r = (*iter).Pos;
 	int type = (*iter).Type;
 	double radius = ElementData::GetRadius(type);
-	if ((r[2]+radius) > 0.5*Box[2])
-	  sphereList.push_front(AtomClass(Vec3(r[0], r[1], r[2]-Box[2]),type));
-	if ((r[2]-radius) < -0.5*Box[2])
-	  sphereList.push_front(AtomClass(Vec3(r[0], r[1], r[2]+Box[2]),type));
+	if ((dot(r,nLattice[2])+radius) > 0.5*length[2])
+	  sphereList.push_front(AtomClass(r-Box(2),type));
+	if ((dot(r,nLattice[2])-radius) < -0.5*length[2])
+	  sphereList.push_front(AtomClass(r+Box(2),type));
       }
       // Now make disks to close spheres
       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
@@ -487,7 +496,7 @@ WFVisualClass::DrawFrame(bool offScreen)
       Vec3 color = ElementData::GetColor (iter->Type);
       double radius = ElementData::GetRadius(iter->Type);
       sphere->SetColor(color);
-      sphere->SetBox(Box);
+      sphere->SetBox(Box.GetLattice());
       sphere->SetRadius(radius);
       PathVis.Objects.push_back(sphere);
     }
