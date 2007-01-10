@@ -616,6 +616,9 @@ WFVisualClass::Read(string filename)
 //   }
   //  Box.Set (lattice(0,0), lattice(1,1), lattice(2,2));
   Box.Set (ToMat3(lattice));
+  xPlane.SetLattice (ToMat3(lattice));
+  yPlane.SetLattice (ToMat3(lattice));
+  zPlane.SetLattice (ToMat3(lattice));
   
   Infile.CloseSection(); // parameters
 

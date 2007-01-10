@@ -19,15 +19,18 @@ private:
   GLuint TextureNum;
   bool HaveTexture, BuiltTexture;
   bool IsInitialized;
+  Mat3 Lattice;
 public:
   void Init();
   void DrawPOV (FILE *out, string rotMatrix);
   void SetPosition (int dir, double pos);
+  void SetLattice(Mat3 lattice);
   PlaneObject (MyTricubicSpline &spline) : 
     Spline (spline), Direction(0), Position(0),
     HaveTexture(false), BuiltTexture(false),
     IsInitialized(false)
   {
+    Lattice = 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0;
   }
   ~PlaneObject();
 };

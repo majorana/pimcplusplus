@@ -53,13 +53,13 @@ PlaneObject::Set()
   const int N = 256;
   Array<TinyVector<GLubyte,4>,2> texData(N,N);
   
-  Vec3 r0, sVec, tVec;
+  Vec3 u0, sVec, tVec;
   Vec3 dr[3];
   dr[0] = (Spline.Xgrid->End - Spline.Xgrid->Start) * Vec3(1.0, 0.0, 0.0);
   dr[1] = (Spline.Ygrid->End - Spline.Ygrid->Start) * Vec3(0.0, 1.0, 0.0);
   dr[2] = (Spline.Zgrid->End - Spline.Zgrid->Start) * Vec3(0.0, 0.0, 1.0);
-  r0 = Vec3 (Spline.Xgrid->Start, Spline.Ygrid->Start, Spline.Zgrid->Start);
-  r0 += Position*dr[Direction];
+  u0 = Vec3 (Spline.Xgrid->Start, Spline.Ygrid->Start, Spline.Zgrid->Start);
+  u0 += Position*dr[Direction];
   if (Direction == 0) {
     sVec = dr[1];
     tVec = dr[2];
@@ -79,7 +79,7 @@ PlaneObject::Set()
     double s = nInv * (double)is;
     for (int it=0; it<N; it++) {
       double t = nInv * (double)it;
-      Vec3 r = r0 + s*sVec + t*tVec;
+      Vec3 r = u0 + s*sVec + t*tVec;
       double val = Spline(r[0], r[1], r[2]);
       TinyVector<double,4> color;
       CMap (val, color);
@@ -107,9 +107,13 @@ PlaneObject::Set()
   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
   glBindTexture(GL_TEXTURE_2D, TextureNum);
   glBegin (GL_QUADS);
-  Vec3 r1 = r0 + sVec;
-  Vec3 r2 = r0 + sVec + tVec;
-  Vec3 r3 = r0 + tVec;
+  Vec3 u1 = u0 + sVec;
+  Vec3 u2 = u0 + sVec + tVec;
+  Vec3 u3 = u0 + tVec;
+  Vec3 r0 = Lattice * u0;
+  Vec3 r1 = Lattice * u1;
+  Vec3 r2 = Lattice * u2;
+  Vec3 r3 = Lattice * u3;
   // When commensurate with the face of the cell, place slightly
   // outside the cell.
   if ((fabs(Position)<1.0e-6) || (fabs(1.0-Position)<1.0e-6)) {
@@ -235,4 +239,11 @@ PlaneObject::DrawPOV(FILE *fout, string rotMatrix)
   fprintf (fout, "%s", rotMatrix.c_str());
   fprintf (fout, "  }\n"); // box
   //  fprintf (fout, "}\n");   // intersection
+}
+
+
+void
+PlaneObject::SetLattice (Mat3 lattice)
+{
+  Lattice = lattice;
 }

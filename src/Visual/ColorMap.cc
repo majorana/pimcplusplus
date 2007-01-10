@@ -3,8 +3,8 @@
 void
 ColorMap::Init (double min, double max, ColorMapType map)
 {
-  Min = min;
-  Max = max;
+  Min = 0.9999*min;
+  Max = 0.9999*max;
 
   Array<double,1> r, g, b, a;
   if (map == BLUE_WHITE_RED) {
