@@ -396,7 +396,7 @@ MDVisualClass::DrawFrame(bool offScreen)
   PathVis.Objects.resize(0);
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
-  boxObject->Set (Box, clipping);
+  boxObject->Set ((Vec3)Box, clipping);
   PathVis.Objects.push_back(boxObject);
   
 

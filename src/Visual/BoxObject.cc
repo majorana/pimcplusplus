@@ -13,16 +13,46 @@ BoxObject::Set(Vec3 box, bool useClip)
 void 
 BoxObject::Set (double lx, double ly, double lz, bool useClip)
 {
+  Mat3 lattice;
+  lattice = lx, 0.0, 0.0, 0.0, ly, 0.0, 0.0, 0.0, lz;
+  Set (lattice, useClip);
+}
 
-  Lx=lx; Ly=ly; Lz=lz;
+void
+BoxObject::Set(Mat3 lattice, bool useClip)
+{
+  Lx = lattice(0,0); Ly=lattice(1,1); Lz=lattice(2,2);
+  Mat3 &l = lattice;
+  LatticeVecs[0] = Vec3 (lattice(0,0), lattice(0,1), lattice(0,2));
+  LatticeVecs[1] = Vec3 (lattice(1,0), lattice(1,1), lattice(1,2));
+  LatticeVecs[2] = Vec3 (lattice(2,0), lattice(2,1), lattice(2,2));
   Start();
+  glLineWidth (2.0);
+  float fcolor[4];
+  fcolor[0] = Color[0]; fcolor[1] = Color[1]; fcolor[2] = Color[2];
+  fcolor[3] = 1.0;
+  glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
+  glColor3d (Color[0], Color[1], Color[2]);
+
+  // Create the clippling planes.  These planes are constructed in
+  // pairs by computing the normals to the planes by cross products.
+  Vec3 p01 = cross (LatticeVecs[0], LatticeVecs[1]);
+  Vec3 p12 = cross (LatticeVecs[1], LatticeVecs[2]);
+  Vec3 p20 = cross (LatticeVecs[2], LatticeVecs[0]);
+  p01 = 1.0/sqrt(dot(p01, p01)) * p01;
+  p12 = 1.0/sqrt(dot(p12, p12)) * p12;
+  p20 = 1.0/sqrt(dot(p20, p20)) * p20;
+  double d01 = 0.5001*dot(LatticeVecs[2], p01);
+  double d12 = 0.5001*dot(LatticeVecs[0], p12);
+  double d20 = 0.5001*dot(LatticeVecs[1], p20);
+
   if (useClip) {
-    GLdouble eqn0[4] = {  1.0,  0.0,  0.0,  0.5001*lx };
-    GLdouble eqn1[4] = { -1.0,  0.0,  0.0,  0.5001*lx };
-    GLdouble eqn2[4] = {  0.0,  1.0,  0.0,  0.5001*ly };
-    GLdouble eqn3[4] = {  0.0, -1.0,  0.0,  0.5001*ly };
-    GLdouble eqn4[4] = {  0.0,  0.0,  1.0,  0.5001*lz };
-    GLdouble eqn5[4] = {  0.0,  0.0, -1.0,  0.5001*lz };
+    GLdouble eqn0[4] = { p01[0], p01[1], p01[2], d01};
+    GLdouble eqn1[4] = {-p01[0],-p01[1],-p01[2], d01};
+    GLdouble eqn2[4] = { p12[0], p12[1], p12[2], d12};
+    GLdouble eqn3[4] = {-p12[0],-p12[1],-p12[2], d12};
+    GLdouble eqn4[4] = { p20[0], p20[1], p20[2], d20};
+    GLdouble eqn5[4] = {-p20[0],-p20[1],-p20[2], d20};
     glClipPlane(GL_CLIP_PLANE0, eqn0);
     glClipPlane(GL_CLIP_PLANE1, eqn1);
     glClipPlane(GL_CLIP_PLANE2, eqn2);
@@ -36,27 +66,85 @@ BoxObject::Set (double lx, double ly, double lz, bool useClip)
     glEnable(GL_CLIP_PLANE4);
     glEnable(GL_CLIP_PLANE5);
   }
-  else {
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-    glDisable(GL_CLIP_PLANE2);
-    glDisable(GL_CLIP_PLANE3);
-    glDisable(GL_CLIP_PLANE4);
-    glDisable(GL_CLIP_PLANE5);
-  }
-  glPushMatrix();
-  glLineWidth (2.0);
-  float fcolor[4];
-  fcolor[0] = Color[0]; fcolor[1] = Color[1]; fcolor[2] = Color[2];
-  fcolor[3] = 1.0;
-  glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
-  glColor3d (Color[0], Color[1], Color[2]);
-  glScaled (lx, ly, lz);
-  glutWireCube (1.0);
-  glTranslated (-0.5, -0.5, -0.5);
-  glPopMatrix();
+  // Now draw the cell
+  Vec3 a[3], ma[3];
+  a[0] = Vec3 (lattice(0,0), lattice(0,1), lattice(0,2));
+  a[1] = Vec3 (lattice(1,0), lattice(1,1), lattice(1,2));
+  a[2] = Vec3 (lattice(2,0), lattice(2,1), lattice(2,2));
+  ma[0] = -1.0*a[0];  ma[1] = -1.0*a[1];  ma[2] = -1.0*a[2];
+  Vec3 r[8];
+  r[0] = 0.5*(ma[0] + ma[1] + ma[2]);
+  r[1] = 0.5*(ma[0] + ma[1] +  a[2]);
+  r[2] = 0.5*(ma[0] +  a[1] +  a[2]);
+  r[3] = 0.5*(ma[0] +  a[1] + ma[2]);
+  r[4] = 0.5*( a[0] + ma[1] + ma[2]);
+  r[5] = 0.5*( a[0] + ma[1] +  a[2]);
+  r[6] = 0.5*( a[0] +  a[1] +  a[2]);
+  r[7] = 0.5*( a[0] +  a[1] + ma[2]);
+  glBegin(GL_LINES);
+  glVertex3dv(&(r[0][0])); glVertex3dv (&(r[1][0]));
+  glVertex3dv(&(r[1][0])); glVertex3dv (&(r[2][0]));
+  glVertex3dv(&(r[2][0])); glVertex3dv (&(r[3][0]));
+  glVertex3dv(&(r[3][0])); glVertex3dv (&(r[0][0]));
+  glVertex3dv(&(r[4][0])); glVertex3dv (&(r[5][0]));
+  glVertex3dv(&(r[5][0])); glVertex3dv (&(r[6][0]));
+  glVertex3dv(&(r[6][0])); glVertex3dv (&(r[7][0]));
+  glVertex3dv(&(r[7][0])); glVertex3dv (&(r[4][0]));
+  glVertex3dv(&(r[0][0])); glVertex3dv (&(r[4][0]));
+  glVertex3dv(&(r[1][0])); glVertex3dv (&(r[5][0]));
+  glVertex3dv(&(r[2][0])); glVertex3dv (&(r[6][0]));
+  glVertex3dv(&(r[3][0])); glVertex3dv (&(r[7][0]));
+  glEnd();
   End();
 }
+
+// void 
+// BoxObject::Set (double lx, double ly, double lz, bool useClip)
+// {
+
+//   Lx=lx; Ly=ly; Lz=lz;
+//   Start();
+//   if (useClip) {
+//     GLdouble eqn0[4] = {  1.0,  0.0,  0.0,  0.5001*lx };
+//     GLdouble eqn1[4] = { -1.0,  0.0,  0.0,  0.5001*lx };
+//     GLdouble eqn2[4] = {  0.0,  1.0,  0.0,  0.5001*ly };
+//     GLdouble eqn3[4] = {  0.0, -1.0,  0.0,  0.5001*ly };
+//     GLdouble eqn4[4] = {  0.0,  0.0,  1.0,  0.5001*lz };
+//     GLdouble eqn5[4] = {  0.0,  0.0, -1.0,  0.5001*lz };
+//     glClipPlane(GL_CLIP_PLANE0, eqn0);
+//     glClipPlane(GL_CLIP_PLANE1, eqn1);
+//     glClipPlane(GL_CLIP_PLANE2, eqn2);
+//     glClipPlane(GL_CLIP_PLANE3, eqn3);
+//     glClipPlane(GL_CLIP_PLANE4, eqn4);
+//     glClipPlane(GL_CLIP_PLANE5, eqn5);
+//     glEnable(GL_CLIP_PLANE0);
+//     glEnable(GL_CLIP_PLANE1);
+//     glEnable(GL_CLIP_PLANE2);
+//     glEnable(GL_CLIP_PLANE3);
+//     glEnable(GL_CLIP_PLANE4);
+//     glEnable(GL_CLIP_PLANE5);
+//   }
+//   else {
+//     glDisable(GL_CLIP_PLANE0);
+//     glDisable(GL_CLIP_PLANE1);
+//     glDisable(GL_CLIP_PLANE2);
+//     glDisable(GL_CLIP_PLANE3);
+//     glDisable(GL_CLIP_PLANE4);
+//     glDisable(GL_CLIP_PLANE5);
+//   }
+//   glPushMatrix();
+//   glLineWidth (2.0);
+//   float fcolor[4];
+//   fcolor[0] = Color[0]; fcolor[1] = Color[1]; fcolor[2] = Color[2];
+//   fcolor[3] = 1.0;
+//   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
+//   glColor3d (Color[0], Color[1], Color[2]);
+//   glScaled (lx, ly, lz);
+//   glutWireCube (1.0);
+//   glTranslated (-0.5, -0.5, -0.5);
+//   glPopMatrix();
+//   End();
+// }
 
 void BoxObject::SetColor (double red, double green, double blue)
 {

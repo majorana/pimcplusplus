@@ -20,7 +20,7 @@ WFVisualClass::WFVisualClass() :
   WFDisplay(MAG2),
   ResetIso(false)
 {
-  Glib::thread_init();
+  //Glib::thread_init();
   WFIso.Dynamic = false;
   xPlane.Dynamic = false;
   yPlane.Dynamic = false;
@@ -83,9 +83,15 @@ WFVisualClass::WFVisualClass() :
   xPlaneScale.set_digits(2);
   yPlaneScale.set_digits(2);
   zPlaneScale.set_digits(2);
-  xPlaneButton.set_label("x Plane");
+  xPlaneButton.set_label("x Plane"); 
+  ((std::vector<Gtk::Widget*>)xPlaneButton.get_children())[0]->
+    modify_fg(Gtk::STATE_NORMAL, Gdk::Color("red"));
   yPlaneButton.set_label("y Plane");
+  ((std::vector<Gtk::Widget*>)yPlaneButton.get_children())[0]->
+    modify_fg(Gtk::STATE_NORMAL, Gdk::Color("green"));
   zPlaneButton.set_label("z Plane");
+  ((std::vector<Gtk::Widget*>)zPlaneButton.get_children())[0]->
+    modify_fg(Gtk::STATE_NORMAL, Gdk::Color("blue"));
   xPlaneBox.pack_start (xPlaneButton, Gtk::PACK_SHRINK, 5);
   xPlaneBox.pack_start (xPlaneScale,  Gtk::PACK_SHRINK, 5);
   yPlaneBox.pack_start (yPlaneButton, Gtk::PACK_SHRINK, 5);
@@ -398,7 +404,8 @@ WFVisualClass::DrawFrame(bool offScreen)
 
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
-  boxObject->Set (Box, clipping);
+  //boxObject->Set (Box, clipping);
+  boxObject->Set (Box.GetLattice(), clipping);
   PathVis.Objects.push_back(boxObject);
   
   
@@ -494,17 +501,19 @@ WFVisualClass::DrawFrame(bool offScreen)
       CurrBand = band;
       Currk    = k;
       ReadWF (k, band);
-      Xgrid.Init(-0.5*Box[0], 0.5*Box[0], WFData.extent(0));
-      Ygrid.Init(-0.5*Box[1], 0.5*Box[1], WFData.extent(1));
-      Zgrid.Init(-0.5*Box[2], 0.5*Box[2], WFData.extent(2));
+      Xgrid.Init(-0.5, 0.5, WFData.extent(0));
+      Ygrid.Init(-0.5, 0.5, WFData.extent(1));
+      Zgrid.Init(-0.5, 0.5, WFData.extent(2));
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+      WFIso.SetLattice (Box.GetLattice());
       xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
     if (ResetIso) {
-      Xgrid.Init(-0.5*Box[0], 0.5*Box[0], WFData.extent(0));
-      Ygrid.Init(-0.5*Box[1], 0.5*Box[1], WFData.extent(1));
-      Zgrid.Init(-0.5*Box[2], 0.5*Box[2], WFData.extent(2));
+      Xgrid.Init(-0.5, 0.5, WFData.extent(0));
+      Ygrid.Init(-0.5, 0.5, WFData.extent(1));
+      Zgrid.Init(-0.5, 0.5, WFData.extent(2));
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+      WFIso.SetLattice (Box.GetLattice());
       ResetIso = false;
     }
     if (UpdateIso) {
@@ -566,6 +575,18 @@ IsDiag(Array<double,2> &lattice)
 	  (fabs(lattice(2,1)) < 1.0e-16));
 }
 
+Mat3 ToMat3 (Array<double,2> &a)
+{
+  assert (a.rows()==3);
+  assert (a.cols()==3);
+  Mat3 b;
+  b = 
+    a(0,0), a(0,1), a(0,2), 
+    a(1,0), a(1,1), a(1,2),
+    a(2,0), a(2,1), a(2,2);
+  return b;
+}
+
 
 void
 WFVisualClass::Read(string filename)
@@ -579,11 +600,13 @@ WFVisualClass::Read(string filename)
   assert (Infile.OpenSection("parameters"));
   Array<double,2> lattice;
   assert (Infile.ReadVar("lattice", lattice));
-  if (!IsDiag(lattice)) { 
-    cerr << "wfvis does not currently work with non-orthorhombic cells.\n";
-    abort();
-  }
-  Box.Set (lattice(0,0), lattice(1,1), lattice(2,2));
+//   if (!IsDiag(lattice)) { 
+//     cerr << "wfvis does not currently work with non-orthorhombic cells.\n";
+//     abort();
+//     //Box.Set (ToMat3(lattice));
+//   }
+  //  Box.Set (lattice(0,0), lattice(1,1), lattice(2,2));
+  Box.Set (ToMat3(lattice));
   
   Infile.CloseSection(); // parameters
 
@@ -592,9 +615,14 @@ WFVisualClass::Read(string filename)
   Array<double,2> pos;
   assert (Infile.ReadVar("pos", pos));
   AtomPos.resize(pos.extent(0));
-  for (int i=0; i<pos.extent(0); i++)
+//   for (int i=0; i<pos.extent(0); i++)
+//     for (int j=0; j<3; j++)
+//       AtomPos(i)[j] = (pos(i,j) - 0.5*Box[j]);
+  for (int i=0; i<pos.extent(0); i++) {
+    AtomPos(i) = Vec3(pos(i,0), pos(i,1), pos(i,2));
     for (int j=0; j<3; j++)
-      AtomPos(i)[j] = (pos(i,j) - 0.5*Box[j]);
+      AtomPos(i) -= 0.5*Box(j);
+  }
   assert (Infile.ReadVar("atom_types", AtomTypes));
   Infile.CloseSection (); // "ions"
 
@@ -609,10 +637,14 @@ WFVisualClass::Read(string filename)
 
   /// Read first wave function
   ReadWF(0,0);
-  Xgrid.Init(-0.5*Box[0], 0.5*Box[0], WFData.extent(0));
-  Ygrid.Init(-0.5*Box[1], 0.5*Box[1], WFData.extent(1));
-  Zgrid.Init(-0.5*Box[2], 0.5*Box[2], WFData.extent(2));
+//   Xgrid.Init(-0.5*Box[0], 0.5*Box[0], WFData.extent(0));
+//   Ygrid.Init(-0.5*Box[1], 0.5*Box[1], WFData.extent(1));
+//   Zgrid.Init(-0.5*Box[2], 0.5*Box[2], WFData.extent(2));
+  Xgrid.Init(-0.5, 0.5, WFData.extent(0));
+  Ygrid.Init(-0.5, 0.5, WFData.extent(1));
+  Zgrid.Init(-0.5, 0.5, WFData.extent(2));
   WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+  WFIso.SetLattice(Box.GetLattice());
   CurrBand = 0; 
   Currk = 0;
   BandAdjust.set_upper(NumBands-1.0);

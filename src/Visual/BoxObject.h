@@ -8,6 +8,7 @@ class BoxObject : public GLObject
 {
   Vec3 Color;
   double Lx, Ly, Lz;
+  Vec3 LatticeVecs[3];
   void POVLine (FILE *fout, 
 		double x1, double y1, double z1,
 		double x2, double y2, double z2, double radius,
@@ -15,6 +16,7 @@ class BoxObject : public GLObject
 public:
   void Set (Vec3 box, bool useClip=false);
   void Set (double lx, double ly, double lz, bool useClip = false);
+  void Set (Mat3 lattice, bool useClip=false);
   void SetColor (double red, double blue, double green);
   void DrawPOV (FILE *fout, string rotString);
   BoxObject()
