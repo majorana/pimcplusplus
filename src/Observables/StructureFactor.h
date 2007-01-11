@@ -14,6 +14,7 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+///These work in parallel except for skmax
 #ifndef STRUCTURE_FACTOR_H
 #define STRUCTURE_FACTOR_H
 
@@ -24,7 +25,8 @@ class StructureFactorClass : public ObservableClass
 {
   ObservableVecDouble1 SofkVar;
   /// Stores the total number of counts
-
+  Array<dVec,1> Additionalkvecs;
+  Array<complex<double>,3> AdditionalRho_k;
   int TimesCalled;
   int Freq;
   int DumpFreq;
