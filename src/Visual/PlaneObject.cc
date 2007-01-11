@@ -110,10 +110,10 @@ PlaneObject::Set()
   Vec3 u1 = u0 + sVec;
   Vec3 u2 = u0 + sVec + tVec;
   Vec3 u3 = u0 + tVec;
-  Vec3 r0 = Lattice * u0;
-  Vec3 r1 = Lattice * u1;
-  Vec3 r2 = Lattice * u2;
-  Vec3 r3 = Lattice * u3;
+  Vec3 r0 = u0*Lattice;
+  Vec3 r1 = u1*Lattice;
+  Vec3 r2 = u2*Lattice;
+  Vec3 r3 = u3*Lattice;
   // When commensurate with the face of the cell, place slightly
   // outside the cell.
   if ((fabs(Position)<1.0e-6) || (fabs(1.0-Position)<1.0e-6)) {

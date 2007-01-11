@@ -28,7 +28,7 @@ private:
   double Alpha;
   void Set();
   Vec3 LatticeVecs[3];
-
+  Mat3 Lattice;
 public:
   inline void SetLattice (Mat3 lattice);
   int NumTriangles(int i=0);
@@ -56,6 +56,7 @@ public:
 inline void
 Isosurface::SetLattice (Mat3 lattice)
 {
+  Lattice = lattice;
   LatticeVecs[0] = Vec3 (lattice(0,0), lattice(0,1), lattice(0,2));
   LatticeVecs[1] = Vec3 (lattice(1,0), lattice(1,1), lattice(1,2));
   LatticeVecs[2] = Vec3 (lattice(2,0), lattice(2,1), lattice(2,2));

@@ -388,14 +388,16 @@ Isosurface::Set()
 	  while ((edge=EdgeData[index][ei]) != -1) {
 	    numTriangles++;
 	    Vec3 reduced = FindEdge (ix, iy, iz, edge);
-	    Vec3 vertex = (reduced[0]*LatticeVecs[0] +
-			   reduced[1]*LatticeVecs[1] +
-			   reduced[2]*LatticeVecs[2]);
+// 	    Vec3 vertex = (reduced[0]*LatticeVecs[0] +
+// 			   reduced[1]*LatticeVecs[1] +
+// 			   reduced[2]*LatticeVecs[2]);
+	    Vec3 vertex = reduced * Lattice;
 	    if (UseNormals) {
 	      Vec3 nred = -1.0*Grad(reduced[0], reduced[1], reduced[2]);
-	      Vec3 normal = (nred[0]*LatticeVecs[0]+
-			     nred[1]*LatticeVecs[1]+
-			     nred[2]*LatticeVecs[2]);
+// 	      Vec3 normal = (nred[0]*LatticeVecs[0]+
+// 			     nred[1]*LatticeVecs[1]+
+// 			     nred[2]*LatticeVecs[2]);
+	      Vec3 normal = nred*Lattice;
 	      glNormal3dv(&(normal[0]));
 	    }
 	    glVertex3dv(&(vertex[0]));
