@@ -34,7 +34,7 @@ public:
   bool Attempt (int &slice1, int &slice2, 
 		 Array<int,1> &activeParticles, double &prevActionChange);
 
-  void NoPermuteStageClass::InitBlock(int &slice1,int &slice2);
+  void InitBlock(int &slice1,int &slice2);
   NoPermuteStageClass (PathDataClass &pathData, int speciesNum, int numLevels,
 		       IOSectionClass &outSection) 
     : PermuteStageClass(pathData, speciesNum, numLevels,outSection)
