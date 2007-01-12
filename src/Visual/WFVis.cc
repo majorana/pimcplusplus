@@ -442,36 +442,34 @@ WFVisualClass::DrawFrame(bool offScreen)
     if (clipping) {
       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
 	Vec3 &r = (*iter).Pos;
+	Vec3 n = Box.GetLatticeInv() * r; 
 	int type = (*iter).Type;
 	double radius = ElementData::GetRadius(type);
-	bool makeDisks = false;
-	if ((dot(r,nLattice[0])+radius) > 0.5*length[0]) {
+	if ((n[0]+radius) > 0.5) 
 	  sphereList.push_front(AtomClass(r-Box(0), type));
-	  makeDisks = true;
-	}
-	if ((dot(r,nLattice[0])-radius) < -0.5*length[0]) {
+	if ((n[0]-radius) < -0.5) 
 	  sphereList.push_front(AtomClass(r+Box(0), type));
-	  makeDisks = true;
-	}
       }
       
       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
 	Vec3 &r = (*iter).Pos;
+	Vec3 n = Box.GetLatticeInv() * r; 
 	int type = (*iter).Type;
-	double radius = ElementData::GetRadius(type);
-	if ((dot(r,nLattice[1])+radius) > 0.5*length[1])
+	double radius = ElementData::GetRadius(type)/length[0];
+	if ((n[1]+radius) > 0.5)
 	  sphereList.push_front(AtomClass(r-Box(1),type));
-	if ((dot(r,nLattice[1])-radius) < -0.5*length[1])
+	if ((n[1]-radius) < -0.5)
 	  sphereList.push_front(AtomClass(r+Box(1),type));
       }
       
       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
 	Vec3 &r = (*iter).Pos;
+	Vec3 n = Box.GetLatticeInv() * r; 
 	int type = (*iter).Type;
 	double radius = ElementData::GetRadius(type);
-	if ((dot(r,nLattice[2])+radius) > 0.5*length[2])
+	if ((n[2]-radius) < -0.5)
 	  sphereList.push_front(AtomClass(r-Box(2),type));
-	if ((dot(r,nLattice[2])-radius) < -0.5*length[2])
+	if ((n[2]-radius) < -0.5)
 	  sphereList.push_front(AtomClass(r+Box(2),type));
       }
       // Now make disks to close spheres
