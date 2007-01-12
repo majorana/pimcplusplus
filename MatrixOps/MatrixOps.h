@@ -19,6 +19,9 @@
 #include "../Blitz.h"
 
 void
+LinearLeastSquares(Array<double,2> &A, Array<double,1> &x,
+		   Array<double,1> &b);
+void
 MatVecProd (Array<double,2> &A, Array<double,1> &x, Array<double,1> &Ax);
 
 void LUdecomp (Array<double,2> &A, Array<int,1> &perm, 
@@ -50,6 +53,16 @@ void PolarOrthogonalize (Array<complex<double>,2> &A);
 
 const Array<double,2> operator*(const Array<double,2> &A,
 				const Array<double,2> &B);
+
+double 
+InnerProduct(const Array<double,1> &A,
+	     const Array<double,1> &B);
+
+void
+OuterProduct(const Array<double,1> &A,
+	     const Array<double,1> &B,
+	     Array<double,2> &AB);
+
 
 void MatMult (const Array<double,2> &A, const Array<double,2> &B,
 	      Array<double,2> &C);

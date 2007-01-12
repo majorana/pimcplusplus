@@ -24,7 +24,7 @@
 #define FORT(name) name ## _
 //#endif 
 
-
+#define F77_DGELS  F77_FUNC(dgels,DGELS)
 #define F77_ZGESVD F77_FUNC(zgesvd,ZGESVD)
 #define F77_DGESVD F77_FUNC(dgesvd,DGESVD)
 #define F77_DGETRF F77_FUNC(dgetrf,DGETRF)
@@ -36,6 +36,12 @@
 #define F77_DSYEVR F77_FUNC(dsyevr,DSYEVR)
 #define F77_ZHEEVR F77_FUNC(zheevr,ZHEEVR)
 #define F77_DGEMV  F77_FUNC(dgemv,DGEMV)
+
+
+extern "C" void 
+F77_DGELS (char *transa, int *m, int *n, int *nrhs, 
+	   double *A, int *LDA, double *B,int *LDB,
+	   double *work, int *LDWORK,int *INFO);
 
 extern "C" void 
 F77_DGESVD (char *JOBU, char* JOBVT, int *M, int *N,
@@ -164,7 +170,58 @@ void MatMult (const Array<double,2> &A, const Array<double,2> &B,
 	     B.data(), &n, &beta, C.data(), &m);
 }
 
+double 
+InnerProduct(const Array<double,1> &A,
+	     const Array<double,1> &B)
+{
+  assert(A.size()==B.size());
+  double total=0.0;
+  for (int counter=0;counter<A.size();counter++)
+    total+=A(counter)*B(counter);
+  return total;
 
+}
+
+
+void
+OuterProduct(const Array<double,1> &A,
+	     const Array<double,1> &B,
+	     Array<double,2> &AB)
+{
+  double total=0.0;
+  AB.resize(A.size(),B.size());
+  for (int i=0;i<A.size();i++)
+    for (int j=0;j<B.size();j++)
+      AB(i,j)=A(i)*B(j);
+}
+
+//Note that A gets corrupted in this process and b gets returned
+//as the answer
+void
+LinearLeastSquares(Array<double,2> &A, Array<double,1> &x,
+		   Array<double,1> &b)
+{
+  char trans;
+  trans='T';
+  ///These n and m are "transposed" because of Fortran ordering
+  int n=A.rows();
+  int m=A.cols();
+  ///
+
+  int ldb=b.size();
+  //  cerr<<"The value of ldb is "<<ldb<<endl;
+  Array<double,1> work(1);
+  int ldwork=-1;
+  int info=0;
+  int nrhs=1;
+  F77_DGELS(&trans,&m,&n,&nrhs,A.data(),&m,b.data(),&ldb,work.data(),
+	    &ldwork,&info);
+  work.resize((int)work(0));
+  ldwork=work.size();
+  F77_DGELS(&trans,&m,&n,&nrhs,A.data(),&m,b.data(),&ldb,work.data(),
+	    &ldwork,&info);
+
+}
 void MatMult (const Array<complex<double>,2> &A, const Array<complex<double>,2> &B,
 	      Array<complex<double>,2> &C)
 {
@@ -186,6 +243,7 @@ void MatMult (const Array<complex<double>,2> &A, const Array<complex<double>,2> 
 }
 
 
+>>>>>>> .r981
 double Determinant (const Array<double,2> &A)
 {
   int m = A.rows();
