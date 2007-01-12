@@ -461,7 +461,7 @@ WFVisualClass::DrawFrame(bool offScreen)
 	double radius = ElementData::GetRadius(type);
 	if ((dot(r,nLattice[1])+radius) > 0.5*length[1])
 	  sphereList.push_front(AtomClass(r-Box(1),type));
-	if ((dot(r,nLattice[1])-radius) < -0.5*Box[1])
+	if ((dot(r,nLattice[1])-radius) < -0.5*length[1])
 	  sphereList.push_front(AtomClass(r+Box(1),type));
       }
       
