@@ -169,3 +169,38 @@ ViewClass::RotationString()
   string str = rotString;
   return str;
 }
+
+
+void
+ViewClass::Write(IOSectionClass &out)
+{
+  out.WriteVar ("Distance", Distance);
+  out.WriteVar ("Scale", Scale);
+  Array<double,2> rotmat(4,4);
+  for (int i=0; i<4; i++)
+    for (int j=0; j<4; j++)
+      rotmat(i,j) = RotMat[i][j];
+  out.WriteVar ("RotationMatrix", rotmat);
+  Array<double,1> quat(4);
+  quat = Quaternion[0], Quaternion[1], Quaternion[2], Quaternion[3];
+  out.WriteVar("Quaternion", quat);
+}
+
+
+void
+ViewClass::Read (IOSectionClass &in)
+{
+  in.ReadVar ("Distance", Distance);
+  in.ReadVar ("Scale", Scale);
+  Array<double,2> rotmat;
+  in.ReadVar ("RotationMatrix", rotmat);
+  for (int i=0; i<4; i++)
+    for (int j=0; j<4; j++)
+      RotMat[i][j] = rotmat(i,j);
+  Array<double,1> quat;
+  in.ReadVar("Quaternion", quat);
+  Quaternion[0] = quat(0);
+  Quaternion[1] = quat(1);
+  Quaternion[2] = quat(2);
+  Quaternion[3] = quat(3);
+}

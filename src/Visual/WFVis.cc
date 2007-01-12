@@ -18,7 +18,9 @@ WFVisualClass::WFVisualClass() :
   zPlane(WFIso),
   Export(*this),
   WFDisplay(MAG2),
-  ResetIso(false)
+  ResetIso(false),
+  SaveStateChooser ("State filename", Gtk::FILE_CHOOSER_ACTION_SAVE),
+  OpenStateChooser ("State filename", Gtk::FILE_CHOOSER_ACTION_OPEN)
 {
   //Glib::thread_init();
   WFIso.Dynamic = false;
@@ -138,6 +140,10 @@ WFVisualClass::WFVisualClass() :
 		sigc::mem_fun(*this, &WFVisualClass::OnOpen));
   Actions->add (Gtk::Action::create("Export", "_Export Image"),
 		sigc::mem_fun(*this, &WFVisualClass::OnExport));
+  Actions->add (Gtk::Action::create("OpenState", "Open State"),
+		sigc::mem_fun(*this, &WFVisualClass::OnOpenState));
+  Actions->add (Gtk::Action::create("SaveState", "Save State"),
+		sigc::mem_fun(*this, &WFVisualClass::OnSaveState));
   Actions->add (Gtk::Action::create("Quit", "_Quit"),
 		sigc::mem_fun(*this, &WFVisualClass::Quit));
   Actions->add (Gtk::Action::create("MenuView", "View"));
@@ -176,6 +182,8 @@ WFVisualClass::WFVisualClass() :
     "    <menu action='MenuFile'>"
     "      <menuitem action='Open'/>"
     "      <menuitem action='Export'/>"
+    "      <menuitem action='SaveState'/>"
+    "      <menuitem action='OpenState'/>"
     "      <separator/>"
     "      <menuitem action='Quit'/>"
     "    </menu>"
@@ -199,6 +207,14 @@ WFVisualClass::WFVisualClass() :
   Manager->insert_action_group(Actions);
   add_accel_group (Manager->get_accel_group());
   Manager->add_ui_from_string (ui_info);
+
+  ////////////////////
+  // Setup choosers //
+  ////////////////////
+  SaveStateChooser.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  SaveStateChooser.add_button (Gtk::Stock::SAVE,   Gtk::RESPONSE_OK);
+  OpenStateChooser.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  OpenStateChooser.add_button (Gtk::Stock::OPEN,   Gtk::RESPONSE_OK);
 
   /////////////////////
   // Connect signals //
@@ -693,7 +709,8 @@ WFVisualClass::OnBandChange()
   UpdatePlane[0] = true;
   UpdatePlane[1] = true;
   UpdatePlane[2] = true;
-  DrawFrame();
+  Glib::signal_idle().connect
+    (sigc::bind<bool>(mem_fun(*this, &WFVisualClass::DrawFrame), false));
 }
 
 void
@@ -798,6 +815,133 @@ WFVisualClass::OnDisplayRadio(WFDisplayType type)
 }
 
 
+bool
+WFVisualClass::WriteState(string fname)
+{
+  IOSectionClass out;
+  
+  if (out.NewFile(fname) == false)
+    return false;
+
+  out.NewSection ("Flags");
+  out.WriteVar ("xPlane", xPlaneButton.get_active());
+  out.WriteVar ("yPlane", yPlaneButton.get_active());
+  out.WriteVar ("zPlane", zPlaneButton.get_active());
+  out.WriteVar ("Nuclei", SphereToggle->get_active());
+  out.WriteVar ("Isosurface", IsoButton.get_active());
+  out.WriteVar ("Clip", ClipButton.get_active());
+  out.WriteVar ("Perspective", PerspectButton.get_active());
+  string wftype;
+  if (WFDisplay == REAL_PART)
+    wftype = "real";
+  if (WFDisplay == IMAG_PART)
+    wftype = "imag";
+  if (WFDisplay == MAG2)
+    wftype = "mag2";
+  out.WriteVar ("WFDisplay", wftype);
+  out.CloseSection();
+
+  out.WriteVar ("kPoint", (int)round(kAdjust.get_value()));
+  out.WriteVar ("Band", (int)round(BandAdjust.get_value()));
+  out.WriteVar ("IsoVal", IsoAdjust.get_value());
+  out.WriteVar ("xPlanePos", xPlaneAdjust.get_value());
+  out.WriteVar ("yPlanePos", yPlaneAdjust.get_value());
+  out.WriteVar ("zPlanePos", zPlaneAdjust.get_value());
+  out.NewSection("View");
+  PathVis.View.Write(out);
+  out.CloseSection();
+  out.CloseFile();
+  return true;
+}
+
+bool
+WFVisualClass::ReadState (string fname)
+{
+  IOSectionClass in;
+  if (in.OpenFile(fname) == false)
+    return false;
+  bool active;
+  
+  assert(in.OpenSection ("Flags"));
+  in.ReadVar ("xPlane", active);
+  xPlaneButton.set_active(active);
+  assert(in.ReadVar ("yPlane", active));
+  yPlaneButton.set_active(active);
+  assert(in.ReadVar ("zPlane", active));
+  zPlaneButton.set_active(active);
+  assert(in.ReadVar ("Nuclei", active));
+  SphereToggle->set_active(active);
+  assert(in.ReadVar ("Isosurface", active));
+  IsoButton.set_active(active);
+  assert(in.ReadVar ("Clip", active));
+  ClipButton.set_active(active);
+  assert(in.ReadVar ("Perspective", active));
+  PerspectButton.set_active(active);
+  string wftype;
+  assert(in.ReadVar ("WFDisplay", wftype));
+  if (wftype == "real") {
+    RealRadio->set_active(true);
+    WFDisplay = REAL_PART;
+  }
+  else if (wftype == "imag") {
+    ImagRadio->set_active(true);
+    WFDisplay = IMAG_PART;
+  }
+  else if (wftype == "mag2") {
+    Mag2Radio->set_active(true);
+    WFDisplay = MAG2;
+  }
+  in.CloseSection(); // flags
+
+  int k, band;
+  assert(in.ReadVar ("kPoint", k));
+  assert(in.ReadVar ("Band", band));
+  double val;
+  assert(in.ReadVar ("IsoVal", val));
+  IsoAdjust.set_value(val);
+
+  assert(in.ReadVar ("xPlanePos", val));
+  xPlaneAdjust.set_value(val);
+  assert(in.ReadVar ("yPlanePos", val));
+  yPlaneAdjust.set_value(val);
+  assert(in.ReadVar ("zPlanePos", val));
+  zPlaneAdjust.set_value(val);
+
+  kAdjust.set_value((double)k);
+  BandAdjust.set_value((double)band);
+  assert(in.OpenSection("View"));
+  PathVis.View.Read(in);
+  in.CloseSection();
+  in.CloseFile();
+  Glib::signal_idle().connect
+    (sigc::bind<bool>(mem_fun(*this, &WFVisualClass::DrawFrame), false));
+  return true;
+}
+
+void
+WFVisualClass::OnSaveState()
+{
+  int result = SaveStateChooser.run();
+  if (result == Gtk::RESPONSE_OK) {
+    string fname = SaveStateChooser.get_filename();
+    WriteState (fname);
+  }
+  SaveStateChooser.hide();
+}
+
+void
+WFVisualClass::OnOpenState()
+{
+  int result = OpenStateChooser.run();
+  if (result == Gtk::RESPONSE_OK) {
+    string fname = OpenStateChooser.get_filename();
+    ReadState (fname);
+  }
+  OpenStateChooser.hide();
+}  
+
+
+
 
 int main(int argc, char** argv)
 {
@@ -821,6 +965,8 @@ int main(int argc, char** argv)
   // Instantiate and run the application.
   WFVisualClass wfvisual;
   wfvisual.Read (argv[1]);
+  if (argc > 2)
+    wfvisual.ReadState (argv[2]);
   kit.run(wfvisual);
 
   return 0;

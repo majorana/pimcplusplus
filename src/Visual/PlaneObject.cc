@@ -217,20 +217,37 @@ PlaneObject::DrawPOV(FILE *fout, string rotMatrix)
 	   (Spline.Xgrid->End-Spline.Xgrid->Start),
 	   (Spline.Ygrid->End-Spline.Ygrid->Start),
 	   (Spline.Zgrid->End-Spline.Zgrid->Start));
-  if (Direction == 0) {
-    fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
-	     (1.0-Position)*Spline.Xgrid->Start
-	     +Position*Spline.Xgrid->End, 0.0, 0.0);
-  }
-  else if (Direction == 1)
-    fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
-	     0.0, 
-	     (1.0-Position)*Spline.Ygrid->Start
-	     +Position*Spline.Ygrid->End, 0.0);
-  else if (Direction == 2)
-    fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
-	     0.0, 0.0, (1.0-Position)*Spline.Zgrid->Start
-	     + Position*Spline.Zgrid->End);
+  fprintf (fout, "  matrix <%12.8f, %12.8f, %12.8f, \n",
+	   Lattice(0,0), Lattice(0,1), Lattice(0,2));
+  fprintf (fout, "          %12.8f, %12.8f, %12.8f, \n",
+	   Lattice(1,0), Lattice(1,1), Lattice(1,2));
+  fprintf (fout, "          %12.8f, %12.8f, %12.8f, \n",
+	   Lattice(2,0), Lattice(2,1), Lattice(2,2));
+  fprintf (fout, "          %12.8f, %12.8f, %12.8f> \n",
+	   0.0, 0.0, 0.0);
+
+  fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
+	   (Position-0.5) * Lattice(Direction,0), 
+	   (Position-0.5) * Lattice(Direction,1), 
+	   (Position-0.5) * Lattice(Direction,2));
+  
+
+  
+//   if (Direction == 0) 
+//     fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
+//  	     (1.0-Position)*Spline.Xgrid->Start
+//  	     +Position*Spline.Xgrid->End, 0.0, 0.0);
+//   else if (Direction == 1)
+//      fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
+//  	     0.0, 
+//  	     (1.0-Position)*Spline.Ygrid->Start
+//  	     +Position*Spline.Ygrid->End, 0.0);
+//   else if (Direction == 2)
+//     fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",
+//  	     0.0, 0.0, (1.0-Position)*Spline.Zgrid->Start
+//  	     + Position*Spline.Zgrid->End);
+  
+
 
   // Now translate
   //   fprintf (fout, "  translate <%1.6f, %1.6f, %1.6f>\n",

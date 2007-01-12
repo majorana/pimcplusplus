@@ -87,6 +87,15 @@ protected:
   /////////////////
   bool UpdateIso, ResetIso;
   bool UpdatePlane[3];
+  
+  /////////////////////////////////////
+  // Saving and opening viewer state //
+  /////////////////////////////////////
+  bool WriteState(string fname);
+  void OnOpenState();
+  void OnSaveState();
+  Gtk::FileChooserDialog OpenStateChooser, SaveStateChooser;
+
 
   ////////////
   // Export //
@@ -126,6 +135,7 @@ public:
   // Public methods //
   ////////////////////
   void Read(string filename);
+  bool ReadState (string fname);
   bool DrawFrame(bool offScreen=false);
 
   

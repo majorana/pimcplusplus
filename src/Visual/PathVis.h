@@ -44,6 +44,8 @@ public:
   void GLtransform();
   void POVtransform (FILE *fout);
   string RotationString();
+  void Write (IOSectionClass &out);
+  void Read  (IOSectionClass &in);
   void Reset();
 
   ViewClass (PathVisClass &pathVis);
