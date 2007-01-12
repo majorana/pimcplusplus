@@ -117,6 +117,8 @@ public:
   /// Stores the kvectors needed for the reciporical space sum.
   /// Stores only half the vectors because of k/-k symmetry.
   Mirrored3DClass< complex<double> > Rho_k;
+  void CalcRho_ks_Slow(int slice, int species,Array<dVec,1> &thekvecs,
+		       Array<complex<double>,3> rho_k);
   void CalcRho_ks_Slow(int slice, int species);  
   void CalcRho_ks_Fast(int slice, int species);  
   void UpdateRho_ks(int slice1, int slice2, 

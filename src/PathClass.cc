@@ -514,6 +514,9 @@ void PathClass::SetupkVecs2D()
     }
   }
   SortRhoK();
+  ///Now it's conceivable that we might want to add some k vectors to be additionally computed
+
+
 }
 
 
@@ -628,6 +631,22 @@ void PathClass::SetupkVecs3D()
 
 
 // }
+
+void PathClass::CalcRho_ks_Slow(int slice, int species,Array<dVec,1> &thekvecs,
+				Array<complex<double> ,3> rho_k)
+{
+  for (int ki=0; ki<thekvecs.size(); ki++) {
+    complex<double> rho;
+    rho = 0.0;
+    for (int ptcl=Species(species).FirstPtcl; 
+	 ptcl <= Species(species).LastPtcl; ptcl++) {
+      const dVec &r = (*this)(slice, ptcl);
+      double phase = dot(r, thekvecs(ki));
+      rho += complex<double> (cos(phase), sin(phase));
+    }
+    rho_k(slice, species, ki) = rho;
+  }
+}
 
 void PathClass::CalcRho_ks_Slow(int slice, int species)
 {
