@@ -6,7 +6,7 @@ endif
 #QMCPACK_HOME = $(QMCPACK_ROOT)/build
 
 SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
-bin_PROGRAMS = pimc++ FreeParticles VacancyLoc vmc
+bin_PROGRAMS = pimc++ FreeParticles vmc
 
 
 AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) 
@@ -53,8 +53,8 @@ VacancyLoc_SOURCES = \
                       VacancyLoc.cc  
 VacancyLoc_LDADD = $(COMMON_LIBS)
 
-vmc_SOURCES = vmc.cc 
-vmc_LDADD = $(COMMON_LIBS)
+vmc_SOURCES = VMC6.cc 
+vmc_LDADD = $(COMMON_LIBS) $(LAPACK_LIBS)
 
 #INCLUDES = -I$(QMCPACK_HOME)/src -I$(QMCPACK_ROOT)/src 
 
