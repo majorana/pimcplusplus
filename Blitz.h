@@ -213,6 +213,15 @@ inline Vec3 operator*(const Mat3& A, const Vec3 &v)
   return Av;
 }
 
+inline Vec3 operator*(const Vec3 &v, const Mat3 &A)
+{
+  Vec3 vA;
+  vA[0] = A(0,0)*v[0] + A(1,0)*v[1] + A(2,0)*v[2];
+  vA[1] = A(0,1)*v[0] + A(1,1)*v[1] + A(2,1)*v[2];
+  vA[2] = A(0,2)*v[0] + A(1,2)*v[1] + A(2,2)*v[2];
+  return vA;
+}
+
 inline cMat3 operator+(const cMat3 &A, const cMat3 &B)
 {
   cMat3 ApB;
