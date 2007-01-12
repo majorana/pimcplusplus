@@ -43,6 +43,23 @@ void StructureFactorClass::Read(IOSectionClass& in)
   assert(Species2!=-1);
 
   TotalCounts=0;
+
+  //These are kVecs that wouldn't be calculated given the kcutoff
+  Array<double,2> tempkvecs;
+  if (in.ReadVar("AdditionalkVecs",tempkvecs)){
+    assert(tempkvecs.extent(1)==NDIM);
+    Additionalkvecs.resize(tempkvecs.extent(0));
+    for (int kvec=0;kvec<tempkvecs.extent(0);kvec++)
+      for (int dim=0;dim<NDIM;dim++){
+	Additionalkvecs(kvec)[dim]=tempkvecs(kvec,dim);
+      }
+  }
+  else{
+    Additionalkvecs.resize(0);
+  }
+  AdditionalRho_k.resize(PathData.Path.NumTimeSlices(),1, Additionalkvecs.size()); 
+  
+
   ///if it's not long range you haven't set the kvecs up yet and need to
   if (!PathData.Path.LongRange){//This is hackish..we use kcutoff
     ///to tell if you are long range and now we have to read 
@@ -59,7 +76,7 @@ void StructureFactorClass::Read(IOSectionClass& in)
   }
   
 
-  Sk.resize(PathData.Path.kVecs.size());
+  Sk.resize(PathData.Path.kVecs.size()+Additionalkvecs.size());
   Sk=0;
 }
 
@@ -67,11 +84,11 @@ void StructureFactorClass::Read(IOSectionClass& in)
 
 void StructureFactorClass::WriteInfo()
 {
-  PathClass &Path = PathData.Path;
+ PathClass &Path = PathData.Path;
   Array<dVec,1> &kVecs = PathData.Path.kVecs;
   ObservableClass::WriteInfo();
-  Array<double,2> kVecArray(kVecs.size(),NDIM);
-  Array<double,1> kMagArray(kVecs.size());
+  Array<double,2> kVecArray(kVecs.size()+Additionalkvecs.size(),NDIM);
+  Array<double,1> kMagArray(kVecs.size()+Additionalkvecs.size());
 
   for (int ki=0; ki < kVecs.size(); ki++) {
     dVec &k = kVecs(ki);
@@ -79,7 +96,12 @@ void StructureFactorClass::WriteInfo()
     for (int j=0; j<NDIM; j++)
       kVecArray(ki,j) = k[j];
   }
-
+  for (int ki=kVecs.size();ki<kVecs.size()+Additionalkvecs.size();ki++){
+    dVec &k = Additionalkvecs(ki-kVecs.size());
+    kMagArray(ki) = sqrt(dot(k,k));
+    for (int j=0; j<NDIM; j++)
+      kVecArray(ki,j) = k[j];
+  }
   IOSection.WriteVar("kVecs", kVecArray);
   ///We now accumulate the structure factor one at a time
   IOSection.WriteVar("Cumulative","False");
@@ -96,13 +118,11 @@ void StructureFactorClass::WriteInfo()
 void StructureFactorClass::WriteBlock()
 {
   Array<dVec,1> &kVecs = PathData.Path.kVecs;
-  Array<double,1> SkSum(kVecs.size());
+  Array<double,1> SkSum(kVecs.size()+Additionalkvecs.size());
   double norm=0.0;
   int num1 = PathData.Path.Species(Species1).NumParticles;
   int num2 = PathData.Path.Species(Species1).NumParticles;
   norm = TotalCounts * sqrt((double)num1*num2);
-  ///This variable currently doesn't work in parallel. Have to
-  ///actually take the  max of all the structure factors
   SkMaxVar.Write(SkMax);
   PathData.Path.Communicator.Sum(Sk, SkSum);
   if (PathData.Path.Communicator.MyProc()==0) 
@@ -112,6 +132,8 @@ void StructureFactorClass::WriteBlock()
     }
   Array<double,1> SofkArray(SkSum.size());
   for (int ki=0; ki<kVecs.size(); ki++)
+    SofkArray(ki) = (double) SkSum(ki) / norm;
+  for (int ki=kVecs.size();ki<kVecs.size()+Additionalkvecs.size();ki++)
     SofkArray(ki) = (double) SkSum(ki) / norm;
   SofkVar.Write(SofkArray);
   ///Clear the structure factor counts
@@ -139,7 +161,13 @@ void StructureFactorClass::Accumulate()
       for (int slice=0; slice < PathData.NumTimeSlices()-1; slice++)
 	PathData.Path.CalcRho_ks_Fast(slice, Species2);
   }
-
+  if (Additionalkvecs.extent(0)!=0){
+    assert(Species1==Species2);
+    for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++)
+      PathData.Path.CalcRho_ks_Slow(slice,Species1,
+				    Additionalkvecs,
+				    AdditionalRho_k);
+  }
   for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
     TotalCounts++;
     for (int ki=0; ki<kVecs.size(); ki++) {
@@ -155,6 +183,16 @@ void StructureFactorClass::Accumulate()
       }
       Sk(ki) += sk;
     }
+    for (int ki=kVecs.size();ki<kVecs.size()+Additionalkvecs.size();ki++){
+      double a = AdditionalRho_k(slice, Species1, ki-kVecs.size()).real();
+      double b = AdditionalRho_k(slice, Species1, ki-kVecs.size()).imag();
+      double c = AdditionalRho_k(slice, Species2, ki-kVecs.size()).real();
+      double d = AdditionalRho_k(slice, Species2, ki-kVecs.size()).imag();
+      // \f$ Sk(ki) :=  Sk(ki) + \Re(rho^1_k * rho^2_{-k}) \f
+      double sk=a*c+b*d;
+      Sk(ki) += sk;
+    }
+    
   }
 }
 void StructureFactorClass::Clear()
