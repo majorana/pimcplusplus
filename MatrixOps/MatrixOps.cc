@@ -243,7 +243,6 @@ void MatMult (const Array<complex<double>,2> &A, const Array<complex<double>,2> 
 }
 
 
->>>>>>> .r981
 double Determinant (const Array<double,2> &A)
 {
   int m = A.rows();
