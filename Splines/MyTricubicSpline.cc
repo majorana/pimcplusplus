@@ -333,7 +333,7 @@ MyTricubicSpline::UpdateZPeriodic(int source, int dest)
   Array<double,1> lambda(M), mu(M), d(M), gamma(M);
   
   for (int ix=0; ix<Nx; ix++) 
-    for (int iy=0; iy<Nz; iy++) {
+    for (int iy=0; iy<Ny; iy++) {
       F(ix,iy,M)[source] = F(ix,iy,0)[source];
   
       // Setup lambdas, mus, and d's
