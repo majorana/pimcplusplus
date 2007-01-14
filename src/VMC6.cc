@@ -906,7 +906,7 @@ int main(int argc, char **argv)
   Read(in,lattice,config,cutoff); 
   double sigma=Box(0)*0.02;
   ofstream outFile;
-  outFile.open("configs.out");
+  outFile.open("configs300v3.out");
   Array<double,2> M(config.size(),config.size());
   Array<double,1> u(config.size());
   cerr<<"Building up initial M"<<endl;
@@ -973,7 +973,7 @@ int main(int argc, char **argv)
 	<<Truncated.detRatio<<" "
 	<<Spai.detRatio<<endl;
     
-    if (Dense.detRatio>ranNumber){//accept
+    if (Dense.detRatio*Dense.detRatio>ranNumber){//accept
       cerr<<"Accept"<<endl;
       accept++;
       totalCount++;
@@ -989,7 +989,7 @@ int main(int argc, char **argv)
       //SP      Sparse.UpdateInverse(movePtcl); 
       Spai.UpdateInverse(lattice,config);
       //      cerr<<"Accept end"<<endl;
-      //     cerr<<"CHECK IS "<<Spai.CheckMe()<<endl;
+      cerr<<"CHECK IS "<<Spai.CheckMe()<<endl;
       //      cerr<<"Accept ending"<<endl;
     }
     else { //reject
