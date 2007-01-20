@@ -46,6 +46,12 @@ HexaticClass::OrderParamater(int slice,int ptcl)
   return op;
 }
 
+complex<double>
+Conj(complex<double> a)
+{
+  complex<double> b(a.real(),-a.imag());
+  return b;
+}
 
 void
 HexaticClass::Accumulate()
@@ -63,7 +69,8 @@ HexaticClass::Accumulate()
 	PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
 	if (dist<grid.End){
 	  int index=grid.ReverseMap(dist);
-	  Histogram(index)++;
+	  Histogram(index)=Histogram(index)+
+	    ParticleOrder(ptcl1)*Conj(ParticleOrder(ptcl2));
 	}
       }
     }
@@ -75,13 +82,23 @@ void
 HexaticClass::WriteBlock()
 {
   PathClass &Path = PathData.Path;
-  Path.Communicator.Sum(Histogram,HistSum);
   double norm=1.0/((double)NumSamples*Path.TotalNumSlices);
-  for (int i=0;i<HistDouble.size();i++)
-    HistDouble(i)=(double)HistSum(i)*norm;
-  HexaticVar.Write(HistDouble);
-  HexaticVar.Flush();
-  Histogram=0;
+  for (int counter=0;counter<Histogram.size();counter++)
+    HistDouble(counter)=Histogram(counter).real();
+  Path.Communicator.Sum(HistDouble,HistSum);
+  HistSum=HistSum*norm;
+  HexaticRealVar.Write(HistSum);
+
+  for (int counter=0;counter<Histogram.size();counter++)
+    HistDouble(counter)=Histogram(counter).imag();
+  Path.Communicator.Sum(HistDouble,HistSum);
+  HistSum=HistSum*norm;
+  HexaticImagVar.Write(HistSum);
+
+  HexaticRealVar.Flush();
+  Histogram=0.0;
+  HistSum=0.0;
+  HistDouble=0.0;
   NumSamples=0;
 }
 

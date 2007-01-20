@@ -28,10 +28,11 @@ protected:
   void ReadGrid(IOSectionClass &in);
   complex<double> OrderParamater(int slice,int ptcl);
   LinearGrid grid;
-  Array<int,1> Histogram;
-  Array<int,1> HistSum;
+  Array<complex<double>,1> Histogram;
   Array<double,1> HistDouble;
-  ObservableVecDouble1 HexaticVar;
+  Array<double,1> HistSum;
+  ObservableVecDouble1 HexaticRealVar;
+  ObservableVecDouble1 HexaticImagVar;
   int NumSamples;
 public:
   void Accumulate();
@@ -39,8 +40,9 @@ public:
   void Read(IOSectionClass &in);
   HexaticClass(PathDataClass &pathData, IOSectionClass &ioSection) :
     ObservableClass (pathData, ioSection), 
-    HexaticVar("HexaticOrderParamater",IOSection,pathData.Path.Communicator),
-    q(6), DistCutoff(2.0)
+    HexaticRealVar("HexaticReal",IOSection,pathData.Path.Communicator),
+    HexaticImagVar("HexaticReal",IOSection,pathData.Path.Communicator),
+    q(6), DistCutoff(3.5)
     {}
 
 };
