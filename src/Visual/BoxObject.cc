@@ -175,8 +175,13 @@ BoxObject::POVLine (FILE *fout,
 void
 BoxObject::DrawPOV (FILE *fout, string rotString)
 {
-  double minDim = min(min(Lx,Ly),Lz);
-  double radius = minDim/450.0;
+  double l[3];
+  l[0] = sqrt(dot(LatticeVecs[0], LatticeVecs[0]));
+  l[1] = sqrt(dot(LatticeVecs[1], LatticeVecs[1]));
+  l[2] = sqrt(dot(LatticeVecs[2], LatticeVecs[2]));
+  double maxDim = max(max(l[0],l[1]),l[2]);
+  double minDim = min(min(l[0],l[1]),l[2]);
+  double radius = (minDim + maxDim)/900.0;
   Vec3 a[3], ma[3];
   a[0] = LatticeVecs[0];
   a[1] = LatticeVecs[1];
