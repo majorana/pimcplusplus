@@ -11,6 +11,7 @@ WFVisualClass::WFVisualClass() :
   xPlaneAdjust(0.0, 0.0, 1.0, 0.01, 0.1),
   yPlaneAdjust(0.0, 0.0, 1.0, 0.01, 0.1),
   zPlaneAdjust(0.0, 0.0, 1.0, 0.01, 0.1),
+  RadiusAdjust(0.4, 0.0, 1.0, 0.01, 0.1),
   UpToDate(true),
   FileIsOpen(false),
   xPlane(WFIso),
@@ -53,6 +54,16 @@ WFVisualClass::WFVisualClass() :
   kScale.property_width_request().set_value(75);
   kFrame.set_label("k point");
   kFrame.add(kScale);
+
+  RadiusScale.set_adjustment(RadiusAdjust);
+  RadiusScale.set_digits(2);
+  RadiusScale.signal_value_changed().connect
+    (sigc::mem_fun(*this, &WFVisualClass::OnRadiusChange));
+  RadiusScale.property_width_request().set_value(75);
+  RadiusFrame.set_label("Ion radii");
+  RadiusFrame.add(RadiusScale);
+  RadiusBox.pack_start(RadiusFrame, Gtk::PACK_SHRINK, 5);
+  OptionsBox.pack_start(RadiusBox,  Gtk::PACK_SHRINK, 5);
 
   OrthoImage.set(FindFullPath("orthographic.png"));
   OrthoButton.set_icon_widget(OrthoImage);
@@ -239,7 +250,10 @@ WFVisualClass::WFVisualClass() :
   ToolBox.pack_start(kFrame,    Gtk::PACK_SHRINK, 5);
   MainVBox.pack_start(*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK,0);
   MainVBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
-  MainVBox.pack_start(PathVis);
+  MiddleBox.pack_start(PathVis);
+  MiddleBox.pack_start(OptionsBox);
+  //  MainVBox.pack_start(PathVis);
+  MainVBox.pack_start(MiddleBox);
   MainVBox.pack_start(QuitButton, Gtk::PACK_SHRINK, 0);
 
   add (MainVBox);
@@ -444,7 +458,8 @@ WFVisualClass::DrawFrame(bool offScreen)
 	Vec3 &r = (*iter).Pos;
 	Vec3 n = Box.GetLatticeInv() * r; 
 	int type = (*iter).Type;
-	double radius = ElementData::GetRadius(type);
+	double radius = RadiusScale.get_value() *
+	  ElementData::GetRadius(type);
 	if ((n[0]+radius) > 0.5) 
 	  sphereList.push_front(AtomClass(r-Box(0), type));
 	if ((n[0]-radius) < -0.5) 
@@ -455,7 +470,8 @@ WFVisualClass::DrawFrame(bool offScreen)
 	Vec3 &r = (*iter).Pos;
 	Vec3 n = Box.GetLatticeInv() * r; 
 	int type = (*iter).Type;
-	double radius = ElementData::GetRadius(type)/length[0];
+	double radius = RadiusScale.get_value() *
+	  ElementData::GetRadius(type)/length[0];
 	if ((n[1]+radius) > 0.5)
 	  sphereList.push_front(AtomClass(r-Box(1),type));
 	if ((n[1]-radius) < -0.5)
@@ -466,7 +482,8 @@ WFVisualClass::DrawFrame(bool offScreen)
 	Vec3 &r = (*iter).Pos;
 	Vec3 n = Box.GetLatticeInv() * r; 
 	int type = (*iter).Type;
-	double radius = ElementData::GetRadius(type);
+	double radius = RadiusScale.get_value() *
+	  ElementData::GetRadius(type);
 	if ((n[2]-radius) < -0.5)
 	  sphereList.push_front(AtomClass(r-Box(2),type));
 	if ((n[2]-radius) < -0.5)
@@ -476,7 +493,8 @@ WFVisualClass::DrawFrame(bool offScreen)
       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
 	Vec3 &r = (*iter).Pos;
 	int type = (*iter).Type;
-	double radius = ElementData::GetRadius(type);
+	double radius = RadiusScale.get_value() *
+	  ElementData::GetRadius(type);
 	
 	for (int dim=0; dim<3; dim++) {
 	  if ((r[dim]+radius) > 0.5*Box[dim]) {
@@ -508,7 +526,8 @@ WFVisualClass::DrawFrame(bool offScreen)
       SphereObject *sphere = new SphereObject (offScreen);
       sphere->SetPos((*iter).Pos);
       Vec3 color = ElementData::GetColor (iter->Type);
-      double radius = ElementData::GetRadius(iter->Type);
+      double radius = RadiusScale.get_value() *
+	ElementData::GetRadius(iter->Type);
       sphere->SetColor(color);
       sphere->SetBox(Box.GetLattice());
       sphere->SetRadius(radius);
@@ -793,6 +812,12 @@ WFVisualClass::OnSphereToggle()
 }
 
 void
+WFVisualClass::OnRadiusChange()
+{
+  DrawFrame();
+}
+
+void
 WFVisualClass::OnDisplayRadio(WFDisplayType type)
 {
   WFDisplayType newtype;
@@ -826,9 +851,11 @@ WFVisualClass::WriteState(string fname)
   out.WriteVar ("yPlane", yPlaneButton.get_active());
   out.WriteVar ("zPlane", zPlaneButton.get_active());
   out.WriteVar ("Nuclei", SphereToggle->get_active());
+  out.WriteVar ("CoordAxes", CoordToggle->get_active());
   out.WriteVar ("Isosurface", IsoButton.get_active());
   out.WriteVar ("Clip", ClipButton.get_active());
   out.WriteVar ("Perspective", PerspectButton.get_active());
+
   string wftype;
   if (WFDisplay == REAL_PART)
     wftype = "real";
@@ -845,6 +872,7 @@ WFVisualClass::WriteState(string fname)
   out.WriteVar ("xPlanePos", xPlaneAdjust.get_value());
   out.WriteVar ("yPlanePos", yPlaneAdjust.get_value());
   out.WriteVar ("zPlanePos", zPlaneAdjust.get_value());
+  out.WriteVar ("Radius", RadiusScale.get_value());
   out.NewSection("View");
   PathVis.View.Write(out);
   out.CloseSection();
@@ -875,6 +903,8 @@ WFVisualClass::ReadState (string fname)
   ClipButton.set_active(active);
   assert(in.ReadVar ("Perspective", active));
   PerspectButton.set_active(active);
+  if (in.ReadVar ("CoordAxes", active))
+    CoordToggle->set_active(active);
   string wftype;
   assert(in.ReadVar ("WFDisplay", wftype));
   if (wftype == "real") {
@@ -904,6 +934,8 @@ WFVisualClass::ReadState (string fname)
   yPlaneAdjust.set_value(val);
   assert(in.ReadVar ("zPlanePos", val));
   zPlaneAdjust.set_value(val);
+  if (in.ReadVar("Radius", val))
+    RadiusScale.set_value(val);
 
   kAdjust.set_value((double)k);
   BandAdjust.set_value((double)band);

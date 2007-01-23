@@ -52,6 +52,12 @@ protected:
 
   Glib::RefPtr<Gtk::ActionGroup> Actions;
   Glib::RefPtr<Gtk::UIManager> Manager;
+  Gtk::HBox MiddleBox;
+  Gtk::VBox OptionsBox;
+  Gtk::Frame RadiusFrame;
+  Gtk::HScale RadiusScale;
+  Gtk::Adjustment RadiusAdjust;
+  Gtk::HBox RadiusBox;
 
   //////////////////////////////
   // Density isosurface stuff //
@@ -119,6 +125,7 @@ protected:
   void OnViewReset();
   void OnCoordToggle();
   void OnSphereToggle();
+  void OnRadiusChange();
   void OnOpen();
   void OnDisplayRadio(WFDisplayType type);
   bool UpToDate;

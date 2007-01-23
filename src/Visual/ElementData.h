@@ -16,7 +16,7 @@ public:
 		 (double)IntColors[element-1][2]*MaxInv);
   }
   inline static double GetRadius (int element) {
-    return 0.40*1.8897261 * Radii[element-1];
+    return 1.0*1.8897261 * Radii[element-1];
   }
 };
 
