@@ -122,7 +122,7 @@ void StructureFactorClass::WriteBlock()
   double norm=0.0;
   int num1 = PathData.Path.Species(Species1).NumParticles;
   int num2 = PathData.Path.Species(Species1).NumParticles;
-  norm = TotalCounts * sqrt((double)num1*num2);
+  norm = PathData.Path.TotalNumSlices*TotalCounts * sqrt((double)num1*num2);
   SkMaxVar.Write(SkMax);
   PathData.Path.Communicator.Sum(Sk, SkSum);
   if (PathData.Path.Communicator.MyProc()==0) 
@@ -168,8 +168,8 @@ void StructureFactorClass::Accumulate()
 				    Additionalkvecs,
 				    AdditionalRho_k);
   }
+  TotalCounts++;
   for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
-    TotalCounts++;
     for (int ki=0; ki<kVecs.size(); ki++) {
       double a = PathData.Path.Rho_k(slice, Species1, ki).real();
       double b = PathData.Path.Rho_k(slice, Species1, ki).imag();
