@@ -52,6 +52,8 @@ libactions_la_SOURCES =            \
     ShortRangeClass.h              \
     ShortRangeOnClass.h            \
     ShortRangeOnClass.cc           \
+    ShortRangePrimitive.h           \
+    ShortRangePrimitive.cc           \
     ShortRangePotClass.cc          \
     ShortRangePotClass.h           \
 		ST2WaterClass.cc               \

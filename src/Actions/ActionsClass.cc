@@ -460,6 +460,7 @@ ActionsClass::ShiftData (int slicesToShift)
   ShortRange.ShiftData(slicesToShift);
   ShortRangeOn.ShiftData(slicesToShift);
   ShortRangeApproximate.ShiftData(slicesToShift);
+  ShortRangePrimitive.ShiftData(slicesToShift);
   LongRange.ShiftData(slicesToShift);
   LongRangeRPA.ShiftData(slicesToShift);
   DavidLongRange.ShiftData(slicesToShift);

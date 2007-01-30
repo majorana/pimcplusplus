@@ -32,6 +32,7 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
   ifstream infile;
   ///BUG: Currently hardcoded for actual file
   infile.open(fileName.c_str());
+  cerr<<" of "<<fileName.c_str()<<endl;
   //  cerr<<"Beginning now"<<endl;
   for (int lvl=0;lvl<2;lvl++)
     for (int isEnergy=0;isEnergy<3;isEnergy++)
@@ -39,6 +40,7 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
       ///Currently hard coded for 20. Ugly 
       for (int kVec=0;kVec<20;kVec++){
 	infile>>myNum;
+	cerr<<"My num is "<<myNum<<endl;
 	if (lvl==0 && isEnergy==1){
 	  uk(kVec)=myNum;
 	}

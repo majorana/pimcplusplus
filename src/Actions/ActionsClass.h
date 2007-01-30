@@ -19,6 +19,7 @@
 #include "ShortRangeClass.h"
 #include "ShortRangeOnClass.h"
 #include "ShortRangeApproximateClass.h"
+#include "ShortRangePrimitive.h"
 #include "LongRangeClass.h"
 #include "LongRangeRPAClass.h"
 #include "ShortRangePotClass.h"
@@ -89,6 +90,7 @@ public:
   ShortRangeClass ShortRange;
   ShortRangeOnClass ShortRangeOn;
   ShortRangeApproximateClass ShortRangeApproximate;
+  ShortRangePrimitiveClass ShortRangePrimitive;
 
   /// The long range part of the action, which is summed in k-space.  
   LongRangeClass LongRange;
@@ -188,6 +190,7 @@ public:
     ShortRange(pathData,PairMatrix),
     ShortRangeOn(pathData,PairMatrix),
     ShortRangeApproximate(pathData,PairMatrix),
+    ShortRangePrimitive(pathData,PairMatrix),
     ShortRangePot(pathData, PairMatrix),
     LongRange(pathData,PairMatrix,PairArray), 
     DavidLongRange(pathData),
