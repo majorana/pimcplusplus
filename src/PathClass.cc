@@ -155,6 +155,18 @@ void PathClass::Read (IOSectionClass &inSection)
   }
   double tau;
   assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
+  ///HACK! HACK! HACK! HACK!
+
+  //  if ((MyClone/10)==0)
+  //    TotalNumSlices=50;
+  //  else if ((MyClone/10)==1)
+  //    TotalNumSlices=100;
+  //  else if ((MyClone/10)==2)
+  //    TotalNumSlices=200;
+  //  else if ((MyClone/10)==3)
+  //    TotalNumSlices=400;
+  //  else if ((MyClone/10)==4)
+  //    TotalNumSlices=800;
   assert(inSection.ReadVar ("tau", tau));
   Array<double,1> tempBox;
   Array<bool,1> tempPeriodic;
