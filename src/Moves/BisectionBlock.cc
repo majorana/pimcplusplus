@@ -30,7 +30,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   //  StageClass *permuteStage;
   assert (in.ReadVar ("NumLevels", NumLevels));
   in.ReadVar("UseApproximateHigherLevelAction",UseApproximateHigherLevelAction);
-  assert (NumLevels <= PathData.Actions.GetMaxLevels());
+  // now just use primitive action assert (NumLevels <= PathData.Actions.GetMaxLevels());
   LowestLevel = 0;
   if (!in.ReadVar ("LowestLevel", LowestLevel))
     LowestLevel = 0;
@@ -126,6 +126,9 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	cerr<<"Don't look at short range"<<endl;
       else if ((PathData.Path.OpenPaths && level>LowestLevel) || UseApproximateHigherLevelAction){
 	newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
+      }
+      else if (level>=PathData.Actions.GetMaxLevels()){
+	newStage->Actions.push_back(&PathData.Actions.ShortRangePrimitive);
       }
       else if (PathData.Path.OrderN){
 	newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
