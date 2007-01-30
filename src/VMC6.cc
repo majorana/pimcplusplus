@@ -16,12 +16,24 @@
 #include "Common.h"
 #include "Observables/ObservableBase.h"
 #include <list>
-
+#include <sstream>
 #include <algorithm>
 using namespace boost::numeric::ublas;
 
 #include <blitz/mstruct.h>
 #include <fstream.h>
+
+string IntToString ( int number )
+{
+  ostringstream oss;
+
+  // Works just like cout
+  oss<< number;
+
+  // Return the underlying string
+  return oss.str();
+}
+
 
 
 double k=1.0;
@@ -148,6 +160,19 @@ void NearbyParticle(Array<dVec,1> &lattice, Array<dVec,1> &config,
       ptclList.push_back(ptcl);
     }
 	 
+}
+
+void LoadConfiguration(ifstream &inFile,int configNum,
+		       Array<dVec,1> &config)
+{
+  for (int currConfig=0;currConfig<=configNum;currConfig++){
+    for (int counter=0;counter<config.size();counter++){
+      for (int dim=0;dim<3;dim++){
+	inFile>>config(counter)[dim];
+      }
+    }
+  }
+  
 }
 
 void SaveConfiguration(ofstream &outFile,Array<dVec,1> &config)
@@ -339,6 +364,7 @@ void Read(IOSectionClass &in, Array<dVec,1> &lattice,Array<dVec,1> &config,
   Box(0)=pow(numParticles*4.0/3.0*M_PI,1.0/3.0);
   Box(1)=pow(numParticles*4.0/3.0*M_PI,1.0/3.0);
   Box(2)=pow(numParticles*4.0/3.0*M_PI,1.0/3.0);
+  cerr<<"My BOX IS "<<Box(0)<<" "<<Box(1)<<" "<<Box(2)<<endl;
   BuildBCC(Box,numParticles,config);
   BuildBCC(Box,numParticles,lattice);
   dVec toAdd;
@@ -390,8 +416,21 @@ double calcOrbital(int ptclNum, int orbitalNum,Array<dVec,1> &lattice, Array<dVe
   
 
 }
+bool CheckM(Array<double,2> &M,Array<dVec,1> &lattice, Array<dVec,1> &config)
+{
+  for (int i=0;i<M.extent(0);i++)
+    for (int j=0;j<M.extent(1);j++)
+      if (abs(M(i,j)-calcOrbital(i,j,lattice,config))>1e-10){
+	cerr<<M(i,j)<<" "<<calcOrbital(i,j,lattice,config)<<i<<" "<<j<<endl;
+	cerr<<"VERY BAD"<<endl;
+	assert(1==2);
+      }
+  return false;
+}
 void BuildInitialM(Array<double,2> &M,Array<dVec,1> &lattice, Array<dVec,1> &config)
 {
+  cerr<<"Lattice size"<<lattice.size()<<" "<<config.size()<<" "
+      <<M.extent(0)<<" "<<M.extent(1)<<endl;
    //Build initial matrix
    for (int ptclNum=0;ptclNum<config.size();ptclNum++)
      for (int orbitalNum=0;orbitalNum<lattice.size();orbitalNum++)
@@ -615,11 +654,11 @@ public:
     MtInverse.resize(size,size);
     MtInverseu.resize(size);
     OuterProductTerm.resize(size,size);
-    //    CalcMtInverse(M,MtInverse);
+    CalcMtInverse(M,MtInverse);
     PseudoIdent.resize(size,size);
     //    MakeBlitzIdentity(Ident);
-    for (int i=0;i<config.size();i++)
-      LinearSolve(i,lattice,config);
+    //    for (int i=0;i<config.size();i++)
+    //      LinearSolve(i,lattice,config);
   }
   ///for checking code
   double CheckMe()
@@ -637,6 +676,21 @@ public:
     return sqrt(frobNorm2);
     
   }
+  double CheckFast(int ptcl)
+  {
+    double oneApprox=0.0;
+    for (int orbital=0;orbital<M.extent(1);orbital++){
+      oneApprox+=M(ptcl,orbital)*MtInverse(ptcl,orbital);
+    }
+    return oneApprox;
+  }
+
+  //  void CheckFast(int ptcl)
+  //  {
+  //    dot(
+  //
+  //
+  //  }
    void CalcDeterminantRatio(int movePtcl)
   {
     MatVecProd(MtInverse,u,MtInverseu);
@@ -703,6 +757,8 @@ public:
     PseudoIdent.resize(size,size);
     //    MakeBlitzIdentity(Ident);
   }
+  ///for checking code
+
   ///for checking code
   double CheckMe()
   {
@@ -906,12 +962,17 @@ int main(int argc, char **argv)
   Read(in,lattice,config,cutoff); 
   double sigma=Box(0)*0.02;
   ofstream outFile;
-  outFile.open("configs300v3.out");
+  outFile.open("300alreadyEquil.out");
+  ifstream inFile;
+  inFile.open("300.nextToLast");
+  LoadConfiguration(inFile,0,config);
+  cerr<<config<<endl;
   Array<double,2> M(config.size(),config.size());
   Array<double,1> u(config.size());
   cerr<<"Building up initial M"<<endl;
-  BuildInitialM(M,config,lattice);
-
+  BuildInitialM(M,lattice,config);
+  cerr<<"Check 1"<<endl;
+  //  CheckM(M,lattice,config);
   //Initialize truncated method
   TruncatedClass Truncated(M,u);
   Truncated.Initialize(config.size());
@@ -933,16 +994,18 @@ int main(int argc, char **argv)
   ///   Dense.LinearSolve(i,lattice,config);
   
   ///initialize sparse update method
-  SparseUpdateInverseClass Sparse(M);
-  Sparse.SetCutoff(cutoff);
-  Sparse.Initialize(config.size());
-  cerr<<"Sparse is initialized"<<endl;
+  ///////  SparseUpdateInverseClass Sparse(M);
+  //////  Sparse.SetCutoff(cutoff);
+  /////  Sparse.Initialize(config.size());
+  //  cerr<<"Sparse is initialized"<<endl;
   int accept=0;
   int totalCount=0;
   ///Run monte carlo
   int totalSteps=config.size()*config.size()*config.size()+100;
   cerr<<"CHECK Total size is "<<config.size()<<endl;
   cerr<<"CHECK Total size is "<<totalSteps<<endl;
+  cerr<<"Check 1"<<endl;
+  //  CheckM(M,lattice,config);
 
   for (int mcSteps=0;mcSteps<totalSteps;mcSteps++){
     cerr<<"Starting mcStep "<<mcSteps<<endl;
@@ -966,13 +1029,54 @@ int main(int argc, char **argv)
     //SP    Sparse.CalcDeterminantRatio(movePtcl);
     Spai.CalcDeterminantRatio(movePtcl);
     ///print out determinant ratio
+    double fastError=Spai.CheckFast(movePtcl);
+    cerr<<"Moveptcl: "<<movePtcl<<" "<<changeGaussian<<" "<<config(movePtcl)<<" "<<config(movePtcl)-changeGaussian<<endl;
     cerr<<"ratios are "
       //	<<Direct.detRatio<<" "
 	<<Dense.detRatio<<" "
-	<<Sparse.detRatio<<" "
+      ////	<<Sparse.detRatio<<" "
 	<<Truncated.detRatio<<" "
-	<<Spai.detRatio<<endl;
-    
+	<<Spai.detRatio<<" "
+	<<fastError<<endl;
+    string outFileName;
+    if (abs(fastError-1.0)<1e-3 && abs(Dense.detRatio-Spai.detRatio)>0.1){
+      ofstream outfile;
+      string mcStepString=IntToString(mcSteps);
+      outFileName="dense."+mcStepString;
+      outfile.open(outFileName.c_str());
+      for (int o=0;o<config.size();o++)
+	outfile<<Dense.MtInverse(movePtcl,o)<<endl;
+      outfile.close();
+      outFileName="SPAI."+mcStepString;
+      outfile.open(outFileName.c_str());
+      for (int o=0;o<config.size();o++)
+	outfile<<Spai.MtInverse(movePtcl,o)<<endl;
+      outfile.close();
+      outFileName="Mnew."+mcStepString;
+      outfile.open(outFileName.c_str());
+      for (int o=0;o<config.size();o++)
+	outfile<<calcOrbital(movePtcl,o,lattice,config)<<endl;
+      outfile.close();
+      outFileName="Mold."+mcStepString;
+      outfile.open(outFileName.c_str());
+      for (int o=0;o<config.size();o++)
+	outfile<<M(movePtcl,o)<<endl;
+      outfile.close();
+
+      outFileName="config."+mcStepString;
+      outfile.open(outFileName.c_str());
+      for (int o=0;o<config.size();o++)
+	outfile<<config(o)<<endl;
+      outfile.close();
+
+      outFileName="lattice."+mcStepString;
+      outfile.open(outFileName.c_str());
+      for (int o=0;o<config.size();o++)
+	outfile<<lattice(o)<<endl;
+      outfile.close();
+
+
+    }
     if (Dense.detRatio*Dense.detRatio>ranNumber){//accept
       cerr<<"Accept"<<endl;
       accept++;
@@ -989,7 +1093,7 @@ int main(int argc, char **argv)
       //SP      Sparse.UpdateInverse(movePtcl); 
       Spai.UpdateInverse(lattice,config);
       //      cerr<<"Accept end"<<endl;
-      cerr<<"CHECK IS "<<Spai.CheckMe()<<endl;
+      cerr<<"CHECK is "<<Spai.CheckMe()<<" "<< Dense.CheckMe()<<endl;
       //      cerr<<"Accept ending"<<endl;
     }
     else { //reject
@@ -1007,7 +1111,7 @@ int main(int argc, char **argv)
       SaveConfiguration(outFile,config);
       // cerr<<"Hi"<<endl;
     }
-      
+    CheckM(M,lattice,config);
   }
 
 
