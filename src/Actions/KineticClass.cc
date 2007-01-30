@@ -32,7 +32,6 @@ double
 KineticClass::SingleAction (int slice1, int slice2,
 			    const Array<int,1> &changedParticles, int level)
 {
-  //  cerr<<"I'm in the Kinetic action"<<endl;
   double TotalK = 0.0;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
@@ -78,7 +77,6 @@ KineticClass::SingleAction (int slice1, int slice2,
     }
   }
   //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-  //  cerr << "I'm returning kinetic action " << TotalK << endl;
   //  for (int counter=0;counter<KineticVal.size();counter++){
   //    cerr<<"My kinetic link "<<counter<<" is "<<KineticVal(counter)<<endl;
   //  }
@@ -86,7 +84,6 @@ KineticClass::SingleAction (int slice1, int slice2,
   //    TotalK-=100*PathData.Path.ExistsCoupling*log(0.9);
     //    TotalK+=pow(0.8,100*PathData.Path.ExistsCoupling);
   //  cerr<<"My total K is "<<TotalK<<endl;
-  //  cerr<<"I'm out of hte kinetic action"<<endl;
   return (TotalK);
 }
 
@@ -218,7 +215,9 @@ double KineticClass::d_dBeta (int slice1, int slice2,
 	    double expPart = exp(-d2overFLT);
 	    GaussSum[dim] += expPart;
 	    numSum[dim] += -d2overFLT/levelTau* expPart;
+	    //	    cerr<<"dist is "<<dist<<" "<<endl;
 	  }
+	  ///	  cerr<<"GaussSum[dim] is "<<GaussSum[dim]<<" "<<endl;
 	  Z *= GaussSum[dim];
 	}
 	double scalarnumSum=0.0;
@@ -233,10 +232,15 @@ double KineticClass::d_dBeta (int slice1, int slice2,
 	  scalarnumSum += numProd[dim];
 	} //cerr << "Z = " << Z << " scalarnumSum = " << scalarnumSum << endl;
 	spring += scalarnumSum/Z;
+	//	cerr << "spring = " << spring << endl;
+	//	cerr << "Z      = " << Z      << endl;
+	//	cerr << "scalarnumsum      = " << scalarnumSum      << endl;
+	//	cerr << "ptcl is  " <<ptcl<<endl;
+	//	cerr<<  "slice is " <<slice<<endl;
       }
     }
+
   }
-  //  cerr << "spring = " << spring << endl;
   //cerr << "I'm returning kinetic energy " << TotalK << endl;
 //   cerr<<"Returning kinetic energy"<<endl;
 //   for (int counter=0;counter<KineticVal.size();counter++){
