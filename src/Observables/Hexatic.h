@@ -41,7 +41,7 @@ public:
   HexaticClass(PathDataClass &pathData, IOSectionClass &ioSection) :
     ObservableClass (pathData, ioSection), 
     HexaticRealVar("HexaticReal",IOSection,pathData.Path.Communicator),
-    HexaticImagVar("HexaticReal",IOSection,pathData.Path.Communicator),
+    HexaticImagVar("HexaticImag",IOSection,pathData.Path.Communicator),
     q(6), DistCutoff(3.5)
     {}
 

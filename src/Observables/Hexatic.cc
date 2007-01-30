@@ -33,14 +33,16 @@ HexaticClass::OrderParamater(int slice,int ptcl)
        nearPtcl++){
     double r12dist;
     dVec r12disp;
-    PathData.Path.DistDisp(slice,ptcl,nearPtcl,r12dist,r12disp);
-    if (r12dist<DistCutoff){
-      r12disp=r12disp/r12dist;
-      if (dot(r12disp,r12disp)-1.0<0.001)
-	cerr<<dot(r12disp,r12disp);
-      assert(dot(r12disp,r12disp)-1.0<0.001);
-      double theta_12=unit2angle(r12disp(0),r12disp(1));
-      op=op+complex<double>(cos(theta_12*q),sin(theta_12*q));
+    if (nearPtcl!=ptcl){
+      PathData.Path.DistDisp(slice,ptcl,nearPtcl,r12dist,r12disp);
+      if (r12dist<DistCutoff){
+	r12disp=r12disp/r12dist;
+	if (abs(dot(r12disp,r12disp)-1.0)>=0.001)
+	  cerr<<dot(r12disp,r12disp);
+	assert(abs(dot(r12disp,r12disp)-1.0)<0.001);
+	double theta_12=unit2angle(r12disp(0),r12disp(1));
+	op=op+complex<double>(cos(theta_12*q),sin(theta_12*q));
+      }
     }
   }
   return op;
@@ -81,6 +83,7 @@ HexaticClass::Accumulate()
 void
 HexaticClass::WriteBlock()
 {
+  cerr<<"Hexatic class writing"<<endl;
   PathClass &Path = PathData.Path;
   double norm=1.0/((double)NumSamples*Path.TotalNumSlices);
   for (int counter=0;counter<Histogram.size();counter++)
@@ -100,6 +103,7 @@ HexaticClass::WriteBlock()
   HistSum=0.0;
   HistDouble=0.0;
   NumSamples=0;
+  cerr<<"Hexatic class writing done"<<endl;
 }
 
 void 
