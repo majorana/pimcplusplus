@@ -1,7 +1,7 @@
 #ifndef LI_EOS_H
 #define LI_EOS_H
 
-#include <blitz/TinyVector.h>
+#include <blitz/tinyvec.h>
 
 using namespace blitz;
 
@@ -17,7 +17,7 @@ public:
   inline TinyVector<double,4> GradFD(double V);
   inline void SetParams (TinyVector<double,4> params);
   inline TinyVector<double,4> GetParams ();
-  LiEOSClass() : third(1.0/3.0);
+  LiEOSClass() : third(1.0/3.0)
   { 
   }
 };
@@ -32,7 +32,7 @@ LiEOSClass::SetParams (TinyVector<double,4> p)
 }
 
 inline TinyVector<double,4>
-LiEOSClass::GetParams (p)
+LiEOSClass::GetParams ()
 {
   TinyVector<double,4> p;
   p[0] = V0;
@@ -45,7 +45,7 @@ LiEOSClass::GetParams (p)
 
 
 inline double
-LiEOSClass::operator()(double V, TinyVector<double,4> p)
+LiEOSClass::operator()(double V)
 {
   double x = cbrt(V/V0);
   double eta = sqrt(9.0*B0*V0/Ec);
@@ -64,23 +64,35 @@ LiEOSClass::LiEOSClass::Grad (double V)
   double eta = sqrt(9.0*B0*V0/Ec);
   double a = eta*(x-1.0);
   double delta = (B0p-1.0)/(2.0*eta) - third;
+  
+  cerr << "x     = " << x << endl;
+  cerr << "eta   = " << eta << endl;
+  cerr << "a     = " << a << endl;
+  cerr << "delta = " << delta << endl;
+  cerr << "third = " << third << endl;
 
-  double dx_dV0 = -third *cbrt(V/(V0*V0*V0*V0));
-  double deta_dB0 = 0.5*sqrt(9.0*V0/(Ec*B0));
-  double deta_dV0 = 0.5*sqrt(9.0*B0/(Ec*V0));
-  double deta_dEc = -0.5*sqrt(9.0*B0*V0/(Ec*Ec*Ec));
-  double da_dV0 = deta_dV0*(x-1.0) + eta * dx_dV0;
-  double da_dB0 = deta_dB0*(x-1.0);
-  double da_dEc = deta_dEc*(x-1.0);
+  double dx_dV0      = -third *cbrt(V/(V0*V0*V0*V0));
+  double deta_dB0    =  0.5*sqrt(9.0*V0/(Ec*B0));
+  double deta_dV0    =  0.5*sqrt(9.0*B0/(Ec*V0));
+  double deta_dEc    = -0.5*sqrt(9.0*B0*V0/(Ec*Ec*Ec));
+  double da_dV0      =  deta_dV0*(x-1.0) + eta * dx_dV0;
+  double da_dB0      =  deta_dB0*(x-1.0);
+  double da_dEc      =  deta_dEc*(x-1.0);
   double ddelta_dV0  = -(B0p-1.0)/(2.0*eta*eta)*deta_dV0;
   double ddelta_dB0  = -(B0p-1.0)/(2.0*eta*eta)*deta_dB0;
   double ddelta_dEc  = -(B0p-1.0)/(2.0*eta*eta)*deta_dEc;
-  double ddelta_dB0p = 1.0/(2.0*eta);
+  double ddelta_dB0p =  1.0/(2.0*eta);
+
+  cerr << "da_dV0 = " << da_dV0 << endl;
+  cerr << "da_dEc = " << da_dEc << endl;
+  cerr << "da_dB0 = " << da_dB0 << endl;
 
   double dE_dV0  = 
     -Ec*(da_dV0 + ddelta_dV0*a*a*a + 3.0*delta*a*a*da_dV0)*exp(-a) 
     +Ec*(1.0+a+delta*a*a*a)*exp(-a)*da_dV0; 
-  double dE_dEc  = -(1.0+a+delta*a*a*a)*exp(-a);
+  double dE_dEc  = -(1.0+a+delta*a*a*a)*exp(-a)
+    -Ec*(da_dEc + ddelta_dEc*a*a*a + 3.0*delta*a*a*da_dEc)*exp(-a)
+    +Ec*(1.0+a*delta*a*a*a)*exp(-a)*da_dEc;
   double dE_dB0  = 
     -Ec*(da_dB0 + ddelta_dB0*a*a*a + 3.0*delta*a*a*da_dB0)*exp(-a)
     +Ec*(1.0+a*delta*a*a*a)*exp(-a)*da_dB0;
@@ -94,13 +106,14 @@ LiEOSClass::GradFD(double V)
 {
   TinyVector<double,4> p, p_plus, p_minus, grad;
   double Eplus, Eminus;
+  p = GetParams();
   for (int i=0; i<4; i++) {
-    pplus = pminus = GetParams();
-    p_plus[i]  += 1.0e-5;
-    p_minus[i] -= 1.0e-5;
+    p_plus = p; p_minus = p;
+    p_plus[i]  += 1.0e-7;
+    p_minus[i] -= 1.0e-7;
     SetParams(p_plus);   Eplus  = (*this)(V);
     SetParams(p_minus);  Eminus = (*this)(V);
-    grad[i] = (Eplus-Eminus)/(2.0e-5);
+    grad[i] = (Eplus-Eminus)/(2.0e-7);
   }
   return grad;
 }
