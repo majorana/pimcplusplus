@@ -13,7 +13,7 @@ template<int M, typename ModelType>
 class NonlinearFitClass
 {
 private:
-  ModelType &Model;
+  ModelType Model;
   TinyVector<double,M> Params, Beta, dParams;
   TinyMatrix<double,M,M> Alpha;
   Array<double,2> AlphaInv;
@@ -51,6 +51,9 @@ NonlinearFitClass<M,ModelType>::Chi2(const Array<double,1> &x,
   double chi2 = 0;
   for (int i=0; i<N; i++) {
     double val = Model (x(i));
+//     cerr << "val = " << val << endl; 
+//     cerr << "yi  = " << y(i) << endl;
+//     cerr << "sigma = " << sigma(i) << endl;
     chi2 += (val-y(i))*(val-y(i))/(sigma(i)*sigma(i));
   }
   return chi2;
@@ -75,19 +78,17 @@ NonlinearFitClass<M,ModelType>::CalcAlphaBeta (const Array<double,1> &x,
 
   for (int i=0; i<N; i++) {
     double val = Model(x(i));
-    TinyVector<double,M> grad = Model.Grad(x(i));
+    TinyVector<double,M> grad = Model.GradFD(x(i));
     for (int k=0; k<M; k++)
       Beta[k] += grad[k]*(y(i)-val)/(sigma(i)*sigma(i));
   }
   for (int i=0; i<N; i++) {
     double val = Model(x(i));
-    TinyVector<double,M> grad = Model.Grad(x(i));
+    TinyVector<double,M> grad = Model.GradFD(x(i));
     for (int k=0; k<M; k++)
       for (int l=0; l<M; l++)
 	Alpha(k,l) += grad[k]*grad[l]/(sigma(i)*sigma(i));
   }
-  cerr << "Alpha = " << Alpha << endl;
-  cerr << "Beta  = " << Beta  << endl;
 }
 
 
@@ -139,28 +140,38 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
 				     TinyVector<double,M> &params)
 {
   double chiNow = Chi2 (x, y, sigma, params);
-  double lambda = 0.0001;
+  double lambda = 0.01;
   
   bool done = false;
+  int iter = 1;
   while (!done) {
+    cerr << "Iteration " << iter << ":  Chi2 = " << chiNow << endl;
+    cerr << "params = " << params << endl;
+    cerr << "lambda = " << lambda << endl;
+
     CalcAlphaBeta (x, y, sigma, params);
     for (int i=0; i<M; i++)
       Alpha(i,i) *= (1.0+lambda);
     Solve();
+    for (int i=0; i<M; i++)
+      fprintf (stderr, "%9.5e ", Beta[i]);
+    fprintf (stderr, "\n");
     done = true;
     for (int i=0; i<M; i++)
-      if ((dParams[i]/params[i]) > 1.0e-5)
+      if (fabs(Beta[i]) > 1.0e-6)
 	done = false;
     if (!done) {
       double chiNew = Chi2 (x, y, sigma, params + dParams);
       if (chiNew < chiNow) {
-	lambda *= 0.2;
+	lambda *= 0.5;
 	params = params + dParams;
+	chiNow = chiNew;
       }
       else {
-	lambda *= 5.0;
+	lambda *= 2.0;
       }
     }
+    iter++;
   }
 }
 

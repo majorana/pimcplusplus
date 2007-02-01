@@ -1,6 +1,6 @@
 check_PROGRAMS = TestFitting TestEOS
 
-LDADD = libfitting.la ../MatrixOps/libmatops.la $(LAPACK_LIBS) $(BLITZ_LIBS)
+LDADD = libfitting.la ../MatrixOps/libmatops.la ../IO/libIO.la $(LAPACK_LIBS) $(BLITZ_LIBS)
 
 TestFitting_SOURCES = TestFitting.cc
 TestEOS_SOURCES     = TestEOS.cc
