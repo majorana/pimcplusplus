@@ -78,13 +78,13 @@ NonlinearFitClass<M,ModelType>::CalcAlphaBeta (const Array<double,1> &x,
 
   for (int i=0; i<N; i++) {
     double val = Model(x(i));
-    TinyVector<double,M> grad = Model.GradFD(x(i));
+    TinyVector<double,M> grad = Model.Grad(x(i));
     for (int k=0; k<M; k++)
       Beta[k] += grad[k]*(y(i)-val)/(sigma(i)*sigma(i));
   }
   for (int i=0; i<N; i++) {
     double val = Model(x(i));
-    TinyVector<double,M> grad = Model.GradFD(x(i));
+    TinyVector<double,M> grad = Model.Grad(x(i));
     for (int k=0; k<M; k++)
       for (int l=0; l<M; l++)
 	Alpha(k,l) += grad[k]*grad[l]/(sigma(i)*sigma(i));
@@ -153,9 +153,6 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
     for (int i=0; i<M; i++)
       Alpha(i,i) *= (1.0+lambda);
     Solve();
-    for (int i=0; i<M; i++)
-      fprintf (stderr, "%9.5e ", Beta[i]);
-    fprintf (stderr, "\n");
     done = true;
     for (int i=0; i<M; i++)
       if (fabs(Beta[i]) > 1.0e-6)
