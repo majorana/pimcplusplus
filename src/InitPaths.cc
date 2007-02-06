@@ -72,7 +72,10 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
 	pos = 0.0;
 	for (int dim=0; dim<NDIM; dim++)
 	  if (replicate){
-          pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim)*(Box[dim]/oldBox(dim));
+	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim)*(Box[dim]/oldBox(dim));
+	  }
+	  else if (slice>=oldPaths.extent(2)){
+	    pos(dim)=oldPaths(oldPaths.extent(0)-1,ptcl,oldPaths.extent(2)-1,dim)*(Box[dim]/oldBox(dim));
 	  }
 	  else{
 	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim)*(Box[dim]/oldBox(dim));
