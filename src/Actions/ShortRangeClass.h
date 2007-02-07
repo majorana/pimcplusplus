@@ -42,7 +42,9 @@ protected:
   void Setup_ck();
   inline double g(double r);
 public:
+  bool HaveSamplingTable;
   void Read (IOSectionClass &in);
+  double dUdR(int slice,int ptcl1, int ptcl2, int level);
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
   double SingleActionForcedPairAction (int slice1, int slice2,

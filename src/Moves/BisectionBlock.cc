@@ -23,8 +23,11 @@
 #include "NoPermuteStage.h"
 
 
+
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
+  cerr<<"Reading bisection block"<<endl;
+  ////  FP.Read(in);
   //  bool orderNBosons;
   string permuteType, speciesName;
   //  StageClass *permuteStage;
@@ -185,6 +188,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     structureReject->Read(in);
     Stages.push_back(structureReject);
   }
+  cerr<<"Bisection block done"<<endl;
 }
 
 
@@ -258,7 +262,15 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
+
+  ////  FP.CheckxyzDeriv();
+  ///  FP.CheckGradRho();
+  
+
+  //  cerr<<"Bisection Block beginning"<<endl;
+
   //  cerr<<"Starting bisection block"<<endl;
+
   //  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
   //    cerr<<PathData.Path.Permutation(ptcl)<<endl;
   ChooseTimeSlices();
@@ -272,6 +284,7 @@ void BisectionBlockClass::MakeMove()
   ((PermuteStageClass*)PermuteStage)->InitBlock(Slice1,Slice2);
   ActiveParticles.resize(1);
   for (int step=0; step<StepsPerBlock; step++) {
+    NumAttempted++;
     ActiveParticles(0)=-1;
     MultiStageClass::MakeMove();
   }

@@ -82,6 +82,28 @@ ShortRangeClass::g(double r)
 }
 
 double 
+ShortRangeClass::dUdR(int slice,int ptcl1, int ptcl2, int level)
+{
+  
+    int species1=Path.ParticleSpeciesNum(ptcl1);
+    int species2=Path.ParticleSpeciesNum(ptcl2);
+    PairActionFitClass *PA = PairMatrix(species1, species2);
+    assert(((DavidPAClass*)PA)->SamplingTableRead);
+    double dist;
+    dVec disp;
+    PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
+    return ((DavidPAClass*)PA)->dUdRTimesSigma(dist,level);
+    
+
+
+
+
+
+
+
+}
+
+double 
 ShortRangeClass::SingleAction (int slice1, int slice2,
 			       const Array<int,1> &changedParticles,
 			       int level)
