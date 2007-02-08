@@ -148,6 +148,12 @@ public:
 //   ///Sends and receives an array of dVec
 //   void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
 //		    int recvProc,       Array<Vec2,1> &recvBuff);
+  
+  template<int N>
+  void Broadcast (int root, TinyVector<double,N> &vec)
+  {
+    MPI_Bcast(&(vec[0]), N, MPI_DOUBLE, root, MPIComm);
+  }
 
   template<int N, int M>
   void Broadcast (int root, TinyMatrix<double,N,M> &mat)
