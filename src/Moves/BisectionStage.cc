@@ -128,6 +128,15 @@ void BisectionStageClass::Reject()
 
 }
 
+///Calculates a new rbar that is displaced
+///by the old rbar via the correlated sampling
+void guassianDisplace(dVec rbar)
+{
+  
+
+
+}
+
 double BisectionStageClass::Sample(int &slice1,int &slice2,
 				   Array<int,1> &activeParticles)
 {
@@ -149,9 +158,27 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
     double prefactorOfSampleProb=0.0; //-NDIM/2.0*log(2*M_PI*sigma2);
     for (int slice=slice1;slice<slice2;slice+=skip){
       SetMode(OLDMODE);
+      ///Correlated sampling
+      dVec rshiftOld;
+      rshiftOld=0.0;
+      for (int cptcl=0;cptcl<PathData.Path.NumParticles();cptcl++){
+	double dist;
+	dVec disp;
+	PathData.Path.DistDisp(slice,ptcl,cptcl,dist,disp);
+	double t1=PathData.Actions.ShortRange.dUdR(slice,ptcl,cptcl,BisectionLevel);
+	for (int dim=0;dim<NDIM;dim++)
+	  rshiftOld[dim]+=t1*disp[dim];
+      }      
+
+      ///
+
+
       dVec rOld=Path(slice,ptcl);
       dVec rdiffOld=Path.Velocity(slice,slice+skip,ptcl);
       dVec rbarOld=rOld+ 0.5*rdiffOld;
+      ///correlated sampling
+      rbarOld +=rshiftOld;
+      ///
       dVec rppOld=Path(slice+(skip>>1),ptcl);
       dVec DeltaOld=rppOld-rbarOld;
       Path.PutInBox(DeltaOld);
@@ -161,6 +188,23 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
       dVec rdiff=Path.Velocity(slice,slice+skip,ptcl);
   
       dVec rbar=r+ 0.5*rdiff;
+
+
+      ///Correlated sampling
+      dVec rshift;
+      rshift=0.0;
+      for (int cptcl=0;cptcl<PathData.Path.NumParticles();cptcl++){
+	double dist;
+	dVec disp;
+	PathData.Path.DistDisp(slice,ptcl,cptcl,dist,disp);
+	double t1=PathData.Actions.ShortRange.dUdR(slice,ptcl,cptcl,BisectionLevel);
+	for (int dim=0;dim<NDIM;dim++)
+	  rshift[dim]+=t1*disp[dim];
+      }      
+
+      rbar+=rshift;
+      ///correlated sampling
+
       ///Here we've stored the new position in the path
       dVec  Delta;
       Path.Random.LocalGaussianVec(sigma,Delta);
