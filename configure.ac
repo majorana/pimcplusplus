@@ -113,6 +113,8 @@ case "${host_cpu}" in
        FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
+CXXFLAGS="$CXXFLAGS -g"
+
 # Check if we want to use the fftw2mkl wrappers
 AC_ARG_ENABLE(fftw2mkl,    [  --enable-fftw2mkl       enable MKL FFTW wrappers (default=no)])
 if test "x$enable_fftw2mkl" = "xyes"; then

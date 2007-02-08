@@ -1,9 +1,10 @@
-check_PROGRAMS = TestFitting TestEOS
+check_PROGRAMS = TestFitting 
+bin_PROGRAMS   = eosfit
 
 LDADD = libfitting.la ../MatrixOps/libmatops.la ../IO/libIO.la $(LAPACK_LIBS) $(BLITZ_LIBS)
 
 TestFitting_SOURCES = TestFitting.cc
-TestEOS_SOURCES     = TestEOS.cc
+eosfit_SOURCES      = TestEOS.cc
 
 AM_CXXFLAGS = $(BLITZ_CFLAGS)
 

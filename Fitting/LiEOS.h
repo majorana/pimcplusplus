@@ -15,6 +15,8 @@ public:
   inline double operator()(double V);
   inline TinyVector<double,4> Grad(double V);
   inline TinyVector<double,4> GradFD(double V);
+  inline double Pressure(double V);
+  inline double PressureFD(double V);
   inline void SetParams (TinyVector<double,4> params);
   inline TinyVector<double,4> GetParams ();
   LiEOSClass() : third(1.0/3.0)
@@ -54,6 +56,29 @@ LiEOSClass::operator()(double V)
   
   double E = -Ec*(1.0+a+delta*a*a*a)*exp(-a);
   return E;
+}
+
+inline double
+LiEOSClass::Pressure(double V)
+{
+  double x = cbrt(V/V0);
+  double eta = sqrt(9.0*B0*V0/Ec);
+  double a = eta*(x-1.0);
+  double delta = (B0p-1.0)/(2.0*eta) - third;
+  double dx_dV = third * cbrt(1.0/(V0*V*V));
+  double da_dV = eta * dx_dV;
+  
+  double dE_dV = -Ec*(da_dV + 3.0*delta*a*a*da_dV)*exp(-a) 
+    + Ec*(1.0 + a + delta*a*a*a)*exp(-a)*da_dV;
+  double E = -Ec*(1.0 + a + delta*a*a*a)*exp(-a);
+  return -29421.01*dE_dV;
+}
+
+
+inline double
+LiEOSClass::PressureFD(double V)
+{
+  return 29421.01*((*this)(V+1.0e-5)-(*this)(V-1.0e-5))/-2.0e-5;
 }
 
 
