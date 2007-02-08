@@ -27,7 +27,7 @@
 #include "BisectionJosephsonStage.h"
 
 
-#include "../Actions/FixedPhaseActionBCSClass.h"
+// #include "../Actions/FixedPhaseActionBCSClass.h"
 
 /// This is the bisection move class inherited from ParticleMoveClass
 /// Explanation of how bisection moves work is in  
@@ -62,14 +62,14 @@ public:
   }
   BisectionBlockClass(PathDataClass &pathData, IOSectionClass &out) : 
     //    PermuteRatioVar("PermuteRatioVar",IOSection,pathData.Path.Communicator),
-    MultiStageClass(pathData, out),StepNum(0), FP(pathData)
+    MultiStageClass(pathData, out),StepNum(0)
 
   { 
     NumAttempted=0;
     UseApproximateHigherLevelAction=false;
     // do nothing for now
   }
-  FixedPhaseActionBCSClass FP;
+  //  FixedPhaseActionBCSClass FP;
 };
 
 
