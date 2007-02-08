@@ -55,7 +55,11 @@ void GlobalJosephsonMove::BuildA()
 }
 void GlobalJosephsonMove::MakeMove()
 {
-  PathClass &Path=PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
+  PathClass &Path = PathData.Path;
+#endif
   vector<int> flipList;
   Array<bool,1> flippedAlready(PathData.Path.NumTimeSlices()-1);
   for (int counter=0;counter<flippedAlready.size();counter++)
@@ -143,7 +147,11 @@ void GlobalJosephsonMove::MakeMove()
 //Move by Werner, Troyer, et al in PRL 95 060201 (2005)
 void GlobalJosephsonMove::MakeMoveSlow()
 {
-  PathClass &Path=PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
+  PathClass &Path = PathData.Path;
+#endif
   vector<int> flipList;
   Array<bool,1> flippedAlready(PathData.Path.NumTimeSlices()-1);
   for (int counter=0;counter<flippedAlready.size();counter++)

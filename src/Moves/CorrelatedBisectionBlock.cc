@@ -96,7 +96,11 @@ void CorrelatedBisectionBlockClass::ChooseTimeSlices()
 {
   //  if (PathData.Path.Communicator.MyProc()==0)
     //    cerr<<"Choosing time slices"<<endl;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
   PathClass &Path = PathData.Path;
+#endif
   int myProc = PathData.Path.Communicator.MyProc();
   // do something special to avoid moving reference slice
   if (HaveRefslice &&

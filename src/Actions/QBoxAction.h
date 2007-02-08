@@ -4,6 +4,7 @@
 #include "ActionBase.h"
 #include <vector>
 #include <fstream>
+#include "popen2.h"
 
 class QBoxActionClass: public ActionBaseClass
 {
@@ -13,8 +14,10 @@ class QBoxActionClass: public ActionBaseClass
 	int steps;
 	double tol, w;
 	bool feedback;
-	ofstream toqbox;
-	ifstream fromqbox;
+  string command;
+  int toread, towrite;
+	//ofstream toqbox;
+	//ifstream fromqbox;
 	Array<string,1> ptclID;
   
 	public:

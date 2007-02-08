@@ -45,7 +45,11 @@ void CouplingClass::WriteInfo()
 
 void CouplingClass::WriteBlock()
 {
-  PathClass &Path = PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path= PathData.Path;
+#else
+  PathClass &Path= PathData.Path;
+#endif
   Array<int,1> CouplingSum(Coupling.size());
   double norm=0.0;
   norm=TotalCounts;

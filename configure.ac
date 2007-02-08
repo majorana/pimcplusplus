@@ -83,6 +83,9 @@ case "${host_cpu}" in
        FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
+# Optionally compile pimcDev, the development version
+AC_ARG_ENABLE(pimcdev, [  --enable-pimcdev      compile development version pimcDev])
+AM_CONDITIONAL([WANT_PIMC_DEV], [test "$enable_pimcdev" = "yes"])
 
 # Optionally compile visual
 AC_ARG_ENABLE(pathvis, [  --enable-pathvis        compile path visualization GUI])
@@ -184,9 +187,17 @@ else # don't link with boost
 		BOOST_LIB=" "
 fi
 
+AC_ARG_WITH(libxml,    [  --with-libxml=/path/to/my/libxml2  include libxml2 libraries; needed for qmcpack])
+if (test "x$with_libxml" != "x"); then
+	 	LIBXML_LIB="-I$with_libxml/include/libxml2 $with_libxml/lib/libxml2.so"
+else # don't link with libxml
+		LIBXML_LIB=" "
+fi
+
 AC_SUBST(QMC_DEF)
 AC_SUBST(QMC_LIB)
 AC_SUBST(BOOST_LIB)
+AC_SUBST(LIBXML_LIB)
 
 AC_F77_WRAPPERS
 

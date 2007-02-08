@@ -40,7 +40,11 @@ JosephsonClass::SingleAction (int slice1, int slice2,
   double totalU=0.0;
   int skip = 1<<level;
   //  cerr<<"My skip is "<<skip<<" and my level Tau is "<<levelTau<<endl;
-  PathClass &Path=PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
+  PathClass &Path = PathData.Path;
+#endif
   //  for (int slice=0;slice<Path.NumTimeSlices()-1;slice+=skip){
   for (int slice=slice1;slice<slice2;slice+=skip){
     dVec diff=(Path(slice+skip,0)-Path(slice,0));

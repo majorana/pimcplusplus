@@ -10,7 +10,7 @@ void MoleculeManagerClass::Read(IOSectionClass &in)
   assert(methodList.size() == stages);
   Array<int,1> numActions(stages);
   numActions = 1;
-  in.ReadVar("NumActions", numActions);
+  assert(in.ReadVar("NumActions", numActions));
   assert(numActions.size() == stages);
   int startIndex = 0;
   for(int s=0; s<stages; s++){

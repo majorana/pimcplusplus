@@ -206,11 +206,10 @@ double IonIonActionClass::SingleAction(int slice1,int slice2,
 				       const Array<int,1> &activeParticles,
 				       int level)
 {
-  cerr << "Calculating Ion-Ion interaction" << endl;
+  //cerr << "Calculating Ion-Ion interaction" << endl;
   double Utotal = 0.0;
   
   for (int c=0; c<Path.DoPtcl.size(); c++) Path.DoPtcl(c)=true;
-  int speciese=Path.SpeciesNum("e");
   
   for(int i=0; i<activeParticles.size(); i++){
     int ptcl1 = activeParticles(i);
@@ -219,10 +218,9 @@ double IonIonActionClass::SingleAction(int slice1,int slice2,
     for(int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
       int species1 = Path.ParticleSpeciesNum(ptcl1);
       int species2 = Path.ParticleSpeciesNum(ptcl2);
-      // make sure we haven't already done it AND that it's not an electron
-      //if(Path.DoPtcl(ptcl2) && (species2 != speciese) && Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+      //if(Path.DoPtcl(ptcl2) && Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
       if(Path.DoPtcl(ptcl2)){
-	cerr << "  " << ptcl1 << ", " << ptcl2 << ": ";
+	      //cerr << "  " << ptcl1 << ", " << ptcl2 << ": ";
 				for (int slice=slice1;slice<=slice2;slice++){
 				  double r;
 				  dVec Rvec;
@@ -230,13 +228,13 @@ double IonIonActionClass::SingleAction(int slice1,int slice2,
 				  Utotal += prefactor*
 				    PathData.Species(species1).Charge*
 				    PathData.Species(species2).Charge*(1.0/r - 1.0/cutoff);
-				  cerr << "r=" << r << "; Utotal = " << Utotal << endl;
-				  cerr << "  assembling prefactor " << prefactor << "* charge1 " << PathData.Species(species1).Charge << "* charge2 " << PathData.Species(species2).Charge << " *(1/r " << 1.0/r << " - 1.0/cutoff " << -1.0/cutoff << endl;
+				  //cerr << "r=" << r << "; Utotal = " << Utotal << endl;
+				  //cerr << "  assembling prefactor " << prefactor << "* charge1 " << PathData.Species(species1).Charge << "* charge2 " << PathData.Species(species2).Charge << " *(1/r " << 1.0/r << " - 1.0/cutoff " << -1.0/cutoff << endl;
 				}
       }
     }
   }
-  cerr << GetMode() << " IonAction Returning " << Utotal << " " << Utotal*PathData.Path.tau << endl;
+  //cerr << GetMode() << " IonAction Returning " << Utotal << " " << Utotal*PathData.Path.tau << endl;
   return Utotal*PathData.Path.tau;
 }
 
@@ -248,19 +246,19 @@ double IonIonActionClass::d_dBeta (int slice1, int slice2, int level){
   
   for(int ptcl1=0; ptcl1<PathData.Path.NumParticles(); ptcl1++){
     Path.DoPtcl(ptcl1) = false;
-    
+
     for(int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
       int species1 = Path.ParticleSpeciesNum(ptcl1);
       int species2 = Path.ParticleSpeciesNum(ptcl2);
       // make sure we haven't already done it AND that it's not an electron
       //if(Path.DoPtcl(ptcl2) && (species2 != speciese) && Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
       if(Path.DoPtcl(ptcl2)){
-	for (int slice=slice1;slice<=slice2;slice++){
-	  double r;
-	  dVec Rvec;
-	  PathData.Path.DistDisp(slice, ptcl1, ptcl2, r, Rvec);
-	  Utotal += prefactor*PathData.Species(species1).Charge*PathData.Species(species2).Charge*(1.0/r);
-	}
+        for (int slice=slice1;slice<=slice2;slice++){
+          double r;
+          dVec Rvec;
+          PathData.Path.DistDisp(slice, ptcl1, ptcl2, r, Rvec);
+          Utotal += prefactor*PathData.Species(species1).Charge*PathData.Species(species2).Charge*(1.0/r);
+        }
       }
     }
   }

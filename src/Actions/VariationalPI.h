@@ -29,7 +29,11 @@
 class VariationalPIClass : public NodalActionClass
 {
 private:
+#ifdef BUILD_DEV
+  PathClassDev &Path;
+#else
   PathClass &Path;
+#endif
   void calc_u();
   Array<double,1> u;
   Array<double,1> newCol;

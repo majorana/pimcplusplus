@@ -19,7 +19,11 @@
 
 void CenterOfMassMoveClass::MakeMove()
 {
-  PathClass &Path=PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
+  PathClass &Path = PathData.Path;
+#endif
   //  cerr<<"The current center of mass is "<<Path.CenterOfMass;
   dVec toShift=-1*Path.CenterOfMass/((Path.NumTimeSlices()-1)*Path.NumParticles());
   for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)

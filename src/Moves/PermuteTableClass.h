@@ -40,7 +40,11 @@ class CycleClass
   ///representation such that p(j) is the particle that the j'th
   ///particle permutes onto. 
   //  void CanonicalPermRep(Array<int,1> myArray);
+#ifdef BUILD_DEV
+  void Apply(PathClassDev &path, int firstPtcl, int slice);
+#else
   void Apply (PathClass &path, int firstPtcl, int timeSlice);
+#endif
 
 };
 

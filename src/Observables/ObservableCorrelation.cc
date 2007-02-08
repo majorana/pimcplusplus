@@ -100,7 +100,11 @@ void PairCorrelationClass::WriteInfo()
 
 void PairCorrelationClass::WriteBlock()
 {
-  PathClass &Path = PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path= PathData.Path;
+#else
+  PathClass &Path= PathData.Path;
+#endif
   Array<int,1> HistSum(Histogram.size());
   double norm=0.0;
   int N1 = PathData.Species(Species1).NumParticles;
@@ -314,7 +318,11 @@ void nofrClass::WriteInfo()
 void nofrClass::WriteBlock()
 {
 
-  PathClass &Path = PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path= PathData.Path;
+#else
+  PathClass &Path= PathData.Path;
+#endif
   Array<double,1> HistSum(Histogram.size());
   double norm=0.0;
   norm = TotalCounts/PathData.Path.GetVol();

@@ -31,7 +31,11 @@ public:
   int Species2Num;
   int NumberAssymetry;
   PathDataClass &PathData;
+#ifdef BUILD_DEV
+  PathClassDev &Path;
+#else
   PathClass &Path;
+#endif
   double SingleAction (int slice1, int slice2,
 		 const Array<int,1> &activeParticles, 
 		 int level);

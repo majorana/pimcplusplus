@@ -29,7 +29,11 @@ double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> pa
   dVec rpp;
   int skip = 1<<(level+1);
   double logNewSampleProb=0.0;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
   PathClass &Path = PathData.Path;
+#endif
   ActionClass &Action = PathData.Action;
   double levelTau = 0.5*PathData.Action.tau*skip;
   for (int ptclIndex=0;ptclIndex<particles.size();ptclIndex++){
@@ -78,7 +82,11 @@ double BisectionClass::SamplePaths(int startSlice, int endSlice, Array<int,1> pa
 double BisectionClass::LogSampleProb(int startSlice, int endSlice, 
 				     Array<int,1> particles, int level)
 {
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
   PathClass &Path = PathData.Path;
+#endif
   dVec rpp;
   int skip = 1<<(level+1);
   double logSampleProb=0.0;

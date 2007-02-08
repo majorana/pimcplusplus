@@ -72,7 +72,11 @@ double
 LeviFlightStageClass::Sample(int &slice1,int &slice2,
 			     Array<int,1> &activeParticles)
 {
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
   PathClass &Path = PathData.Path;
+#endif
   double logSampleProb=0.0;
   assert(activeParticles.size()==1);
   //you are about to close and this needs to be lcosed for the action
@@ -92,7 +96,11 @@ LeviFlightStageClass::Sample(int &slice1,int &slice2,
 double 
 LeviFlightStageClass::LeviFlight(int slice1,int slice2, int ptcl, double lambda)
 {
-  PathClass &Path=PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
+  PathClass &Path = PathData.Path;
+#endif
   double logSampleProb=0.0;
   int N = slice2-slice1+1;
   dVec dispToBuild=Path(slice2,ptcl)-Path(slice1,ptcl);

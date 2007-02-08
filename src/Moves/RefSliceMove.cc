@@ -79,7 +79,11 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
 bool RefSliceMoveClass::NodeCheck()
 {
   if (PathData.Actions.NodalActions(SpeciesNum) != NULL) {
-    PathClass &Path = PathData.Path;
+#ifdef BUILD_DEV
+    PathClassDev &Path=PathData.Path;
+#else
+    PathClass &Path=PathData.Path;
+#endif
     // Broadcast the new reference path to all the other processors
     PathData.Path.BroadcastRefPath();
     
@@ -118,7 +122,11 @@ bool RefSliceMoveClass::NodeCheck()
 /// This version is for the processor with the reference slice
 void RefSliceMoveClass::MakeMoveMaster()
 {
-  PathClass &Path = PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path=PathData.Path;
+#else
+  PathClass &Path=PathData.Path;
+#endif
   int myProc = PathData.Path.Communicator.MyProc();
   int firstSlice, lastSlice;
   Path.SliceRange (myProc, firstSlice, lastSlice);
@@ -182,7 +190,11 @@ void RefSliceMoveClass::MakeMoveMaster()
 /// This version is for processors that do no own the reference slice 
 void RefSliceMoveClass::MakeMoveSlave()
 {
-  PathClass &Path = PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path=PathData.Path;
+#else
+  PathClass &Path=PathData.Path;
+#endif
   int myProc = PathData.Path.Communicator.MyProc();
   int master = Path.SliceOwner (Path.GetRefSlice());
 
@@ -215,7 +227,11 @@ void RefSliceMoveClass::MakeMoveSlave()
 
 void RefSliceMoveClass::MakeMove()
 {
-  PathClass &Path = PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path=PathData.Path;
+#else
+  PathClass &Path=PathData.Path;
+#endif
   MasterProc = Path.SliceOwner (Path.GetRefSlice());
   if (PathData.Path.Communicator.MyProc() == MasterProc)
     MakeMoveMaster();

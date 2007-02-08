@@ -48,7 +48,6 @@ void DummyEvaluate::Read(IOSectionClass &moveInput) {
 
 //void MoleculeTranslate::MakeMove() {
 double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
-	cerr << " MoleculeTranslate::Sample ";
   //double step = 0.3;
   double step = Step; // Using Step from input file
 
@@ -81,11 +80,13 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
   // choose a time slice to move
   int numSlices = PathData.Path.TotalNumSlices;
 	int slice =0;
-  slice1 = 0;
-  slice2 = 0;
+  slice1 = slice;
+  slice2 = slice;
   if(numSlices>1){
     int P_max = numSlices - 1;
     slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
+    //slice1 = slice;
+    //slice2 = slice;
     slice1 = slice-1;
     slice2 = slice+1;
   }
@@ -102,33 +103,46 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 
   // this block is a hack to output configurations
   // in a format for QBox
-	//int numMol = PathData.Path.numMol;
-	//int output1 = 0;
-	//int output2 = output1 + 1;
-	//if(numMoves == output1){
-	//	ofstream before("H2O.64.rigid.global.before.dat");
-	//	for(int i=0; i<numMol; i++){
-	//		dVec RO = PathData.Path(0,i);
-	//		dVec RH1 = PathData.Path(0,i+numMol);
-	//		dVec RH2 = PathData.Path(0,i+2*numMol);
-	//		before << "O" << i << " to " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
-	//		before << "H" << i << " to " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
-	//		before << "H" << i+numMol << " to " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
-	//	}
-	//	before.close();
-	//}
-	//else if(numMoves == output2){
-	//	ofstream after("H2O.64.rigid.global.after.dat");
-	//	for(int i=0; i<numMol; i++){
-	//		dVec RO = PathData.Path(0,i);
-	//		dVec RH1 = PathData.Path(0,i+numMol);
-	//		dVec RH2 = PathData.Path(0,i+2*numMol);
-	//		after << "O" << i << " to " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
-	//		after << "H" << i << " to " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
-	//		after << "H" << i+numMol << " to " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
-	//	}
-	//	after.close();
-	//}
+	int numMol = PathData.Path.numMol;
+	int output1 = 0;
+	int output2 = output1 + 1;
+	int output3 = output2 + 1;
+	if(numMoves == output1){
+		ofstream before("H2O.64.rigid.global.1.dat");
+		for(int i=0; i<numMol; i++){
+			dVec RO = PathData.Path(0,i);
+			dVec RH1 = PathData.Path(0,i+numMol);
+			dVec RH2 = PathData.Path(0,i+2*numMol);
+			before << "O" << " " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
+			before << "H" << " " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
+			before << "H" << " " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
+		}
+		before.close();
+	}
+	else if(numMoves == output2){
+		ofstream after("H2O.64.rigid.global.2.dat");
+		for(int i=0; i<numMol; i++){
+			dVec RO = PathData.Path(0,i);
+			dVec RH1 = PathData.Path(0,i+numMol);
+			dVec RH2 = PathData.Path(0,i+2*numMol);
+			after << "O" << " " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
+			after << "H" << " " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
+			after << "H" << " " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
+		}
+		after.close();
+	}
+	else if(numMoves == output3){
+		ofstream third("H2O.64.rigid.global.3.dat");
+		for(int i=0; i<numMol; i++){
+			dVec RO = PathData.Path(0,i);
+			dVec RH1 = PathData.Path(0,i+numMol);
+			dVec RH2 = PathData.Path(0,i+2*numMol);
+			third << "O" << " " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
+			third << "H" << " " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
+			third << "H" << " " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
+		}
+		third.close();
+	}
 
   if (numMoves%10000 == 0 && numMoves>0){
     cerr << numMoves << " moves; current translate ratio is " << double(numAccepted)/numMoves << " with step size " << step << endl;
@@ -164,6 +178,8 @@ double DimerMove::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles)
   if(numSlices>1){
     int P_max = numSlices - 1;
     slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
+    //slice1 = slice;
+    //slice2 = slice;
     slice1 = slice-1;
     slice2 = slice+1;
   }
@@ -180,7 +196,7 @@ double DimerMove::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles)
 
 //void MoleculeRotate::MakeMove()
 double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
-  double dtheta = 2*M_PI*Theta; // Using Theta from input file
+  double dtheta = M_PI*Theta; // Using Theta from input file
   //cerr << " MoleculeRotate::Sample ";
   //double dtheta = 2*M_PI*0.3;
 
@@ -207,6 +223,8 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	if(numSlices>1){
 	  int P_max = numSlices - 1;
 	  slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
+    //slice1 = slice;
+    //slice2 = slice;
 	  slice1 = slice-1;
 	  slice2 = slice+1;
 	}
@@ -258,19 +276,20 @@ double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
   if(numSlices>1){
     int P_max = numSlices - 1;
     slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
+    //slice1 = slice;
+    //slice2 = slice;
     slice1 = slice-1;
     slice2 = slice+1;
   }
-	
 	//cerr << numMoves << ": ParticleTranslate moving " << activeParticles << endl;
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
 		for(int activeP = 0; activeP<PathData.Path.MolMembers(MoveList(activeMol)).size(); activeP++){
 			int movePtcl = PathData.Path.MolMembers(MoveList(activeMol))(activeP);
-      if(Path.ParticleSpeciesNum(movePtcl) != 0){
+      //if(Path.ParticleSpeciesNum(movePtcl) != 0){
 			  //cerr << "Moving ptcl " <<  movePtcl << " at slice " << slice << " from " << PathData.Path(slice,movePtcl);
-  		  TranslatePtcl(slice, movePtcl, Sigma);
+  		TranslatePtcl(slice, movePtcl, Sigma);
 			  //cerr << " to " << PathData.Path(slice,movePtcl) << endl;
-      }
+      //}
 		}
 	}
 

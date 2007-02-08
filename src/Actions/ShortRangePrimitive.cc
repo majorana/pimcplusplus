@@ -36,7 +36,11 @@ ShortRangePrimitiveClass::SingleAction (int slice1, int slice2,
 					  const Array<int,1> &changedParticles,
 					  int level)
 {
-  PathClass &Path=PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
+  PathClass &Path = PathData.Path;
+#endif
   // First, sum the pair actions
   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
     Path.DoPtcl(ptcl)=true;

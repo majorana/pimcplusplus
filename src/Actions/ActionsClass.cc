@@ -26,7 +26,11 @@ void
 ActionsClass::Read(IOSectionClass &in)
 { 
   cerr<<"Starting Actions Read"<<endl;
-  PathClass &Path=PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
+  PathClass &Path = PathData.Path;
+#endif
   assert(in.ReadVar ("tau", Path.tau));
   assert(in.ReadVar ("MaxLevels", MaxLevels));
   assert(in.ReadVar ("NumImages", NumImages));
@@ -474,7 +478,11 @@ void
 ActionsClass::AcceptCopy (int startSlice, int endSlice,
 			  const Array<int,1> &activeParticles)
 {
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
   PathClass &Path = PathData.Path;
+#endif
   bool activeSpecies[Path.NumSpecies()];
   for (int i=0; i<Path.NumSpecies(); i++)
     activeSpecies[i] = false;
@@ -493,7 +501,11 @@ void
 ActionsClass::RejectCopy (int startSlice, int endSlice,
 			       const Array<int,1> &activeParticles)
 {
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
   PathClass &Path = PathData.Path;
+#endif
   bool activeSpecies[Path.NumSpecies()];
   for (int i=0; i<Path.NumSpecies(); i++)
     activeSpecies[i] = false;
@@ -568,7 +580,11 @@ ActionsClass::GetForces(const Array<int,1> &ptcls,
   //permutations
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
 
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
   PathClass &Path = PathData.Path;
+#endif
   assert (Fshort.size() == ptcls.size());
   assert (Flong.size() == ptcls.size());
   Array<dVec,1> FtmpShort(Fshort.size());
@@ -592,7 +608,11 @@ void
 ActionsClass::GetForcesFD(const Array<int,1> &ptcls, Array<dVec,1> &F)
 {
   const double eps = 1.0e-6;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
   PathClass &Path = PathData.Path;
+#endif
   Array<dVec,1> Ftmp(F.size());
   dVec zero;
   for (int i=0; i<NDIM; i++)

@@ -67,7 +67,11 @@ void AngularMomCor::Accumulate()
 {
 #if NDIM==3
   TotalCounts++;
+#ifdef BUILD_DEV
+  PathClassDev &Path= PathData.Path;
+#else
   PathClass &Path= PathData.Path;
+#endif
   SpeciesClass &species=PathData.Path.Species(Species);
   dVec r;
   dVec angMom1,angMom2;

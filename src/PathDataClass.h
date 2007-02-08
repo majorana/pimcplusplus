@@ -19,7 +19,13 @@
 
 #include "Common.h"
 #include "SpeciesClass.h"
-#include "PathClass.h"
+
+#ifdef BUILD_DEV
+  #include "PathClassDev.h"
+#else
+  #include "PathClass.h"
+#endif
+
 #include <Common/MPI/Communication.h>
 #include "Actions/ActionsClass.h"
 #include <Common/Random/Random.h>
@@ -91,7 +97,11 @@ public:
   ActionsClass Actions;
   /// The constructor that initializes the action and such
   int &Join;
+#ifdef BUILD_DEV
+  PathClassDev Path;
+#else
   PathClass Path;
+#endif
   inline void ShiftData(int numTimeSlicesToShift){
     Path.ShiftData(numTimeSlicesToShift);
     Actions.ShiftData(numTimeSlicesToShift);

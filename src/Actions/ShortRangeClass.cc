@@ -88,11 +88,13 @@ ShortRangeClass::dUdR(int slice,int ptcl1, int ptcl2, int level)
     int species1=Path.ParticleSpeciesNum(ptcl1);
     int species2=Path.ParticleSpeciesNum(ptcl2);
     PairActionFitClass *PA = PairMatrix(species1, species2);
-    assert(((DavidPAClass*)PA)->SamplingTableRead);
-    double dist;
-    dVec disp;
-    PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
-    return ((DavidPAClass*)PA)->dUdRTimesSigma(dist,level);
+    //assert(((DavidPAClass*)PA)->SamplingTableRead);
+    //double dist;
+    //dVec disp;
+    //PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
+    //return ((DavidPAClass*)PA)->dUdRTimesSigma(dist,level);
+    cerr << "OH NO YOU CALLED SHORTRANGECLASS::DUDR BUT I'M COMMENTED OUT!! FIX ME" << endl;
+    return 0.0;
     
 
 
@@ -112,7 +114,11 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
   double TotalU=0.0;
   //  int startTime=clock();
   //  for (int toRun=0;toRun<1000;toRun++){
-  PathClass &Path=PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
+  PathClass &Path = PathData.Path;
+#endif
   // First, sum the pair actions
   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
     Path.DoPtcl(ptcl)=true;
@@ -174,7 +180,11 @@ ShortRangeClass::SingleActionForcedPairAction (int slice1, int slice2,
 					       PairActionFitClass &PA)
 {
   double TotalU=0.0;
-  PathClass &Path=PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
+  PathClass &Path = PathData.Path;
+#endif
   // First, sum the pair actions
   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
     Path.DoPtcl(ptcl)=true;
@@ -302,7 +312,11 @@ ShortRangeClass::GradAction(int slice1, int slice2,
 			    Array<dVec,1> &gradVec)
 {
 #if NDIM==3
+#ifdef BUILD_DEV
+  PathClassDev &Path = PathData.Path;
+#else
   PathClass &Path = PathData.Path;
+#endif
   int skip = (1<<level);
   assert (gradVec.size() == ptcls.size());
   for (int pi=0; pi<ptcls.size(); pi++) {

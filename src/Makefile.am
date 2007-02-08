@@ -6,11 +6,22 @@ endif
 #QMCPACK_HOME = $(QMCPACK_ROOT)/build
 
 SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
-bin_PROGRAMS = pimc++ FreeParticles vmc
+
+if WANT_PIMC_DEV
+  bin_PROGRAMS = pimc++ pimcDev FreeParticles VacancyLoc vmc
+else
+  bin_PROGRAMS = pimc++ FreeParticles VacancyLoc vmc
+endif
+  
 
 
-AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) 
+AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) $(LIBXML_LIB)
 
+pimc___CXXFLAGS = $(AM_CXXFLAGS)
+pimcDev_CXXFLAGS = -DBUILD_DEV $(AM_CXXFLAGS)
+FreeParticles_CXXFLAGS = $(AM_CXXFLAGS)
+VacancyLoc_CXXFLAGS = $(AM_CXXFLAGS)
+vmc_CXXFLAGS = $(AM_CXXFLAGS)
 
 SHARED_SOURCES =          \
     det_calc_uekt.h       \
@@ -18,7 +29,6 @@ SHARED_SOURCES =          \
     Common.h              \
     EventClass.h          \
     EventClass.cc         \
-    InitPaths.cc          \
     JosephsonJunctionHelper.cc \
     GridClass.h           \
     GridClass.cc          \
@@ -28,8 +38,6 @@ SHARED_SOURCES =          \
     MirroredClass.h       \
     PIMCClass.cc          \
     PIMCClass.h           \
-    PathClass.cc          \
-    PathClass.h           \
     PathDataClass.cc      \
     PathDataClass.h       \
     QMCWrapper.cc         \
@@ -37,12 +45,23 @@ SHARED_SOURCES =          \
     RunInfoClass.h        \
     SpeciesClass.cc       \
     SpeciesClass.h        \
-    WormHelper.cc         \
     WriteData.h           \
     WriteData.cc          
 
 pimc___SOURCES =          \
     $(SHARED_SOURCES)     \
+    InitPaths.cc          \
+    PathClass.cc          \
+    PathClass.h           \
+    WormHelper.cc         \
+    Main.cc               
+
+pimcDev_SOURCES =         \
+    $(SHARED_SOURCES)     \
+    InitPathsDev.cc       \
+    PathClassDev.cc       \
+    PathClassDev.h        \
+    WormHelperDev.cc      \
     Main.cc               
 
 FreeParticles_SOURCES =  FreeParticles.cc
@@ -56,10 +75,8 @@ VacancyLoc_LDADD = $(COMMON_LIBS)
 vmc_SOURCES = VMC6.cc 
 vmc_LDADD = $(COMMON_LIBS) $(LAPACK_LIBS)
 
-#INCLUDES = -I$(QMCPACK_HOME)/src -I$(QMCPACK_ROOT)/src 
-
 pimc___LDADD = Moves/libmoves.la Actions/libactions.la \
-               Observables/libobservables.la $(COMMON_LIBS) $(QMC_LIB) $(ORDER_N_LIBS) $(BOOST_LIB)
-#							 $(QMCPACK_HOME)/lib/libqmc.a \
-#							 $(QMCPACK_HOME)/lib/libqmcutil.a \
-#							 $(QMCPACK_HOME)/lib/libqmcbase.a
+               Observables/libobservables.la $(COMMON_LIBS) $(QMC_LIB) $(ORDER_N_LIBS) $(BOOST_LIB) $(LIBXML_LIB)
+
+pimcDev_LDADD = Moves/libmovesDev.la Actions/libactionsDev.la \
+               Observables/libobservablesDev.la $(COMMON_LIBS) $(QMC_LIB) $(ORDER_N_LIBS) $(BOOST_LIB) $(LIBXML_LIB)

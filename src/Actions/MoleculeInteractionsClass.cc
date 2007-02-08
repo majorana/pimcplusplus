@@ -33,20 +33,22 @@ MoleculeInteractionsClass::MoleculeInteractionsClass (PathDataClass &pathData) :
   bohr_per_angstrom = 1.890359;
 
 	// radial cutoffs for ST2 modulation function
+  // these are in angstrom
 	RL = 2.0160;
 	RU = 3.1287;
 
+  // these are initialized in Read() now
 	// SPC/F2 intramolecular potential parameters
-	rho = 2.361;
-	D = 0.708;
-	alpha = 108.0*M_PI/180.0;
-	R_OH_0 = 1.0;
-	R_HH_0 = 2*R_OH_0*sin(alpha/2);
-	b = 1.803;
-	c = -1.469;
-	d = 0.776;
-	// conversion factor for mdyn*angstrom^-1 --> kcal*mol^-1*angstrom^-2
-	Dyn2kcal = 143.929;
+	//rho = 2.361;
+	//D = 0.708;
+	//alpha = 108.0*M_PI/180.0;
+	//R_OH_0 = 1.0;
+	//R_HH_0 = 2*R_OH_0*sin(alpha/2);
+	//b = 1.803;
+	//c = -1.469;
+	//d = 0.776;
+	//// conversion factor for mdyn*angstrom^-1 --> kcal*mol^-1*angstrom^-2
+	//Dyn2kcal = 143.929;
 
 	ReadComplete = false;
 }
@@ -58,29 +60,36 @@ string MoleculeInteractionsClass::GetName(){
 double MoleculeInteractionsClass::SingleAction (int startSlice, int endSlice, 
 	       const Array<int,1> &activeParticles, int level){
 
+	//cerr << "MoleculeInteractions::Action__________________ for slices " << startSlice << " to " << endSlice;// << endl;
 	assert(ReadComplete);
+  if(startSlice == 0 && endSlice == 0){
+    startSlice -= 1;
+    endSlice += 1;
+  }
 	bool IsAction = true;
-	double TotalU = ComputeEnergy(startSlice, endSlice, activeParticles, level, TruncateAction, IsAction);
+	double TotalU = ComputeEnergy(startSlice+1, endSlice-1, activeParticles, level, TruncateAction, IsAction);
+	//cerr << " RETURNING " << TotalU*PathData.Path.tau << endl;
   return(TotalU*PathData.Path.tau);
 }
 
 double MoleculeInteractionsClass::d_dBeta (int startSlice, int endSlice,  int level)
 {
-	//cerr << "MoleculeInteractions::d_dBeta__________________ for slices " << startSlice << " to " << endSlice << endl;
+	//cerr << "MoleculeInteractions::d_dBeta__________________ for slices " << startSlice << " to " << endSlice;// << endl;
+	assert(ReadComplete);
   Array<int,1> activeParticles(PathData.Path.NumParticles());
   for (int i=0;i<PathData.Path.NumParticles();i++)
     activeParticles(i)=i;
 	
 	bool IsAction = false;
 	double TotalU = ComputeEnergy(startSlice, endSlice-1, activeParticles, level, TruncateEnergy, IsAction);
-	//cerr << "MoleculeInteractionsClass RETURNING " << TotalU << endl;
+	//cerr << " RETURNING " << TotalU << endl;
   return TotalU;
 }
 
 double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice, 
 	       const Array<int,1> &activeParticles, int level, bool with_truncations, bool isAction){
 
-  //cerr << "MoleculeInteraction computing SPC energy...";
+  //cerr << isAction << " MoleculeInteraction computing SPC energy over slices " << startSlice << " to " << endSlice << endl;
 	Updated = false;
   for (int counter=0; counter<Path.DoPtcl.size(); counter++)
     Path.DoPtcl(counter)=true;
@@ -111,7 +120,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 				//cerr << "Considering LJ between " << ptcl1 << " and " << ptcl2 << " for which DoPtcl is " << Path.DoPtcl(ptcl2) << "...";
     		if (Interacting(species2,0) && Path.DoPtcl(ptcl2)){
 					//cerr << " Going to compute between " << ptcl1 << " and " << ptcl2;
-	  			for (int slice=startSlice;slice<=endSlice;slice+=skip){
+	  			for (int slice=startSlice; slice<=endSlice; slice+=skip){
 	    			dVec r;
 	    			double rmag;
 	    			PathData.Path.DistDisp(slice, ptcl1, ptcl2, rmag, r);
@@ -229,6 +238,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 				double term4 = d*(ROH1 - R_OH_0)*(ROH2 - R_OH_0);
 				//cerr << "slice " << slice << " INTRA: ROH1 " << ROH1 << " ROH2 " << ROH2 << " RHH " << RHH << " term1 " << term1 << " term2 " << term2 << " term3 " << term3 << " term4 " << term4 << endl;
 				spring = conversion*Dyn2kcal*(term1 + term2 + term3 + term4);
+				outfile << spring << " " << term1 << " " << term2 << " " << term3 << " " << term4 << endl;
 				TotalSpring += spring;
 				TotalU += spring;
 			}
@@ -242,23 +252,43 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 		  int skip = 1<<level;
 		  double levelTau = Path.tau* (1<<level);
 		  double lambda = lambdas(species1);
-		  if (lambda != 0){
+		  if (lambda != 0.0){
 		    double FourLambdaTauInv=1.0/(4.0*lambda*levelTau*levelTau);
-		    for (int slice=startSlice; slice < endSlice;slice+=skip) {
-		      dVec vel;
-					vel = COMVelocity(slice, slice+skip, ptcl1);
+        if(isAction){
+		      for (int slice=startSlice-1; slice<= endSlice;slice+=skip) {
+		        dVec vel;
+				  	//vel = COMVelocity(slice, slice+skip, ptcl1);
+				  	vel = PathData.Path.Velocity(slice, slice+skip, ptcl1);
 			
-		      double GaussProd = 1.0;
-		      for (int dim=0; dim<NDIM; dim++) {
-						double GaussSum=0.0;
-						for (int image=-NumImages; image<=NumImages; image++) {
-						  double dist = vel[dim]+(double)image*Path.GetBox()[dim];
-						  GaussSum += exp(-dist*dist*FourLambdaTauInv);
-						}
-						GaussProd *= GaussSum;
+		        double GaussProd = 1.0;
+		        for (int dim=0; dim<NDIM; dim++) {
+				  		double GaussSum=0.0;
+				  		for (int image=-NumImages; image<=NumImages; image++) {
+				  		  double dist = vel[dim]+(double)image*Path.GetBox()[dim];
+				  		  GaussSum += exp(-dist*dist*FourLambdaTauInv);
+				  		}
+				  		GaussProd *= GaussSum;
+		        }
+				  	TotalK -= log(GaussProd);
 		      }
-					TotalK -= log(GaussProd);
-		    }
+        } else {
+		      for (int slice=startSlice; slice <= endSlice;slice+=skip) {
+		        dVec vel;
+				  	//vel = COMVelocity(slice, slice+skip, ptcl1);
+				  	vel = PathData.Path.Velocity(slice, slice+skip, ptcl1);
+			
+		        double GaussProd = 1.0;
+		        for (int dim=0; dim<NDIM; dim++) {
+				  		double GaussSum=0.0;
+				  		for (int image=-NumImages; image<=NumImages; image++) {
+				  		  double dist = vel[dim]+(double)image*Path.GetBox()[dim];
+				  		  GaussSum += exp(-dist*dist*FourLambdaTauInv);
+				  		}
+				  		GaussProd *= GaussSum;
+		        }
+				  	TotalK -= log(GaussProd);
+		      }
+        }
 		  }
 			TotalKinetic += TotalK;
 			TotalU += TotalK;
@@ -295,11 +325,12 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 		}
 	}
   //cerr << " returning energy " << TotalU << " and action " << TotalU*PathData.Path.tau << endl;
-	//cerr << "Empirical potential contributions: " << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << endl;
+	//cerr << "Empirical potential contributions: " << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic;// << endl;
 	// write additional output file
-	if(!isAction && special){
-		outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << endl;
-	}
+
+	//if(!isAction && special){
+	//	outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << endl;
+	//}
   return (TotalU);
 }
 
@@ -414,10 +445,14 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
       prefactor *= bohr_per_angstrom;
 
       // these are converted into bohr from angstrom
-	    rho = 4.463;
+	    rho = 1.24897;
 	    D = 1.338;
-	    R_OH_0 = 1.8904;
-	    R_HH_0 = 2*R_OH_0*sin(alpha/2);
+	    //R_OH_0 = 1.8904;
+      // optimized value
+	    R_OH_0 = 1.8696;
+	    //R_HH_0 = 2*R_OH_0*sin(alpha/2);
+      // optimized value
+	    R_HH_0 = 2.98;
 	    b = 0.9538;
 	    c = -0.7771;
 	    d = 0.4105;
@@ -495,7 +530,8 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 			string filename;
 			assert(in.ReadVar("File",filename));
 			outfile.open(filename.c_str());
-			outfile << "# Total LJ Coulomb Intramolecular Quadratic Kinetic" << endl;
+			//outfile << "# Total LJ Coulomb Intramolecular Quadratic Kinetic" << endl;
+			outfile << "# Intramolecular Int1 Int2 Int3 Int4" << endl;
 		}
 			
 		

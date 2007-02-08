@@ -31,7 +31,11 @@ class StageClass
 {
 protected:
   PathDataClass &PathData;
+#ifdef BUILD_DEV
+  PathClassDev &Path;
+#else
   PathClass &Path;
+#endif
   IOSectionClass OutSection;
   ObservableDouble AcceptRatioVar;
 public:

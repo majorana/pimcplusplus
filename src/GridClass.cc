@@ -15,7 +15,11 @@
 /////////////////////////////////////////////////////////////
 
 #include "GridClass.h"
-#include "PathClass.h"
+#ifdef BUILD_DEV
+  #include "PathClassDev.h"
+#else
+  #include "PathClass.h"
+#endif
 
 
 ///affected cells are the cells that are within the cutoff and need to be used.  

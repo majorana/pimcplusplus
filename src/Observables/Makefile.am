@@ -1,11 +1,87 @@
-noinst_LTLIBRARIES = libobservables.la
+if WANT_PIMC_DEV
+  noinst_LTLIBRARIES = libobservables.la libobservablesDev.la
+else 
+  noinst_LTLIBRARIES = libobservables.la
+endif
 
-#QMCPACK_ROOT = /home/gergely/qmcPlusPlusNew
-#QMCPACK_ROOT = /home/gergely/qmcPlusPlusCEIMC
-#QMCPACK_HOME = $(QMCPACK_ROOT)/build
-
-libobservables_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF)
+libobservables_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF) $(LIBXML_LIB)
 libobservables_la_SOURCES  =     \
+    Angular.h                    \
+    Angular.cc                   \
+    AngularMomCor.h              \
+    AngularMomCor.cc             \
+    AutoCorr.cc                  \
+    AutoCorr.h                   \
+    Conductivity.h               \
+    Conductivity.cc              \
+    Coupling.cc                  \
+    Coupling.h                   \
+    DistanceToHead.cc            \
+    DistanceToHead.h             \
+    Forces.cc                    \
+    Forces.h                     \
+    lsapr.f                      \
+    JosephsonPathDump.h          \
+    JosephsonPathDump.cc         \
+    Hexatic.h                    \
+    Hexatic.cc                   \
+		HBond.cc                     \
+		HBond.h                      \
+    lsapr.f                      \
+    ObservableBase.cc            \
+    ObservableBase.h             \
+    ObservableClass.h            \
+    ObservableVar.h              \
+    ObservableVar.cc             \
+    ObservableCorrelation.cc     \
+    ObservableCorrelation.h      \
+		ObservableDiffusion.h        \
+		ObservableDiffusion.cc       \
+    ObservableEnergy.cc          \
+    ObservableEnergy.h           \
+    OpenOrientation.h            \
+    OpenOrientation.cc           \
+    ParticleAverageLoc.h         \
+    ParticleAverageLoc.cc        \
+    PathDump.cc                  \
+    PathDump.h                   \
+    PermutationCount.h           \
+    PermutationCount.cc          \
+    Pressure.h                   \
+    Pressure.cc                  \
+    Phik.h                       \
+    Phik.cc                      \
+    PlaneDensity.h               \
+    PlaneDensity.cc              \
+    SpecificHeat.h               \
+    SpecificHeat.cc              \
+    SpecificHeatA.h               \
+    SpecificHeatA.cc              \
+    SuperfluidFraction.h         \
+    SuperfluidFraction.cc        \
+    SuperfluidFractionPerLayer.cc \
+    SuperfluidFractionPerLayer.h \
+    SuperfluiDrop.h              \
+    SuperfluiDrop.cc             \
+    StructureFactor.cc           \
+    StructureFactor.h            \
+    Time.cc                      \
+    Time.h                       \
+    VacancyLocation.h            \
+    VacancyLocation.cc           \
+    VacancyHelper.h              \
+    VacancyHelper.cc             \
+    VacancyDensity.h             \
+    VacancyDensity.cc            \
+    VariationalPIEnergy.h        \
+    VariationalPIEnergy.cc       \
+    Weight.cc                    \
+    Weight.h                     \
+    WindingNumber.cc             \
+    WindingNumber.h
+
+libobservablesDev_la_CXXFLAGS = -DBUILD_DEV $(COMMON_CFLAGS) $(QMC_DEF) $(LIBXML_LIB)
+libobservablesDev_la_SOURCES  =  \
     Angular.h                    \
     Angular.cc                   \
     AngularMomCor.h              \

@@ -84,7 +84,11 @@ void
 HexaticClass::WriteBlock()
 {
   cerr<<"Hexatic class writing"<<endl;
-  PathClass &Path = PathData.Path;
+#ifdef BUILD_DEV
+  PathClassDev &Path= PathData.Path;
+#else
+  PathClass &Path= PathData.Path;
+#endif
   double norm=1.0/((double)NumSamples*Path.TotalNumSlices);
   for (int counter=0;counter<Histogram.size();counter++)
     HistDouble(counter)=Histogram(counter).real();

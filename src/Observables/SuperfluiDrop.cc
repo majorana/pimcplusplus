@@ -75,7 +75,11 @@ void SuperfluiDrop::Read(IOSectionClass &in)
 void SuperfluiDrop::Accumulate()
 {
   TotalCounts++;
+#ifdef BUILD_DEV
+  PathClassDev &Path= PathData.Path;
+#else
   PathClass &Path= PathData.Path;
+#endif
   SpeciesClass &species=PathData.Path.Species(Species);
 
   dVec r;
