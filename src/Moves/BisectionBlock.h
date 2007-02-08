@@ -25,6 +25,10 @@
 #include "../Observables/ObservableVar.h"
 #include "BisectionStage.h"
 #include "BisectionJosephsonStage.h"
+
+
+#include "../Actions/FixedPhaseActionBCSClass.h"
+
 /// This is the bisection move class inherited from ParticleMoveClass
 /// Explanation of how bisection moves work is in  
 /// Path Integrals in the theory of condensed helium
@@ -38,6 +42,7 @@ private:
   bool HaveRefslice;
   bool Josephson;
   int SpeciesNum;
+  int NumAttempted;
   bool UseApproximateHigherLevelAction;
   void ChooseTimeSlices();
   /// If we do not bisect down to the lowest level, interpolate the
@@ -51,14 +56,20 @@ public:
   
   /// Override base class MakeMove to do a block of moves
   void MakeMove();
-
+  inline double AcceptanceRatio() 
+  {
+    return (double)(NumAccepted)/(double)NumAttempted;
+  }
   BisectionBlockClass(PathDataClass &pathData, IOSectionClass &out) : 
-    MultiStageClass(pathData, out),StepNum(0)
+    //    PermuteRatioVar("PermuteRatioVar",IOSection,pathData.Path.Communicator),
+    MultiStageClass(pathData, out),StepNum(0), FP(pathData)
 
   { 
+    NumAttempted=0;
     UseApproximateHigherLevelAction=false;
     // do nothing for now
   }
+  FixedPhaseActionBCSClass FP;
 };
 
 

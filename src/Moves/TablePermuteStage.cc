@@ -92,34 +92,34 @@ void TablePermuteStageClass::Reject()
 
 void TablePermuteStageClass::WriteRatio()
 {
-//   Array<int,1> numAttemptTotal(4);
-//   Array<int,1> numAcceptTotal(4);
-//   Array<double,1> ratioTotal(4);
-//   int totalAttempts=0;
-//   cerr<<"A"<<endl;
-//   PathData.Path.Communicator.Sum(NumAttempted,numAttemptTotal);
-//   cerr<<"A2"<<endl;
-//   PathData.Path.Communicator.Sum(NumAccepted,numAcceptTotal);
-//   for (int len=0;len<4;len++){
-//     totalAttempts=totalAttempts+numAcceptTotal(len);
-//     if (numAttemptTotal(len)!=0)
 
-//       ratioTotal(len)=(double)numAcceptTotal(len)/((double)numAttemptTotal(len));
-//     else
-//       ratioTotal(len)=0.0;
-//   }
+   Array<int,1> numAttemptTotal(4);
+   Array<int,1> numAcceptTotal(4);
+   Array<double,1> ratioTotal(4);
+   int totalAttempts=0;
+   //   cerr<<"A"<<endl;
+   PathData.Path.Communicator.Sum(NumAttempted,numAttemptTotal);
+   //cerr<<"A2"<<endl;
+   PathData.Path.Communicator.Sum(NumAccepted,numAcceptTotal);
+   for (int len=0;len<4;len++){
+     totalAttempts=totalAttempts+numAcceptTotal(len);
+     if (numAttemptTotal(len)!=0)
+       ratioTotal(len)=(double)numAcceptTotal(len)/((double)numAttemptTotal(len));
+     else
+       ratioTotal(len)=0.0;
+   }
 //   cerr<<"B"<<endl;
 //       ///divides by 2because accept gets called twice in acepting stages
 //   for (int i=0;i<numAttemptTotal.size();i++)
 //     numAttemptTotal(i)=(int)(numAttemptTotal(i)/2);
 //   cerr<<"C"<<endl;
  
-//   if (totalAttempts!=0){
-//     AcceptanceRatioVar.Write(ratioTotal);
-//     AcceptanceTotalVar.Write(numAttemptTotal);
-//     NumAttempted=0;
-//     NumAccepted=0;
-//   }
+   if (totalAttempts!=0){
+     AcceptanceRatioVar.Write(ratioTotal);
+     AcceptanceTotalVar.Write(numAttemptTotal);
+     NumAttempted=0;
+     NumAccepted=0;
+   }
 //   cerr<<"out of my permute stage ratio"<<endl;
 
 }
