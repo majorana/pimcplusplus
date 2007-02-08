@@ -42,6 +42,19 @@ void DavidPAClass::WriteFit(IOSectionClass &out)
 
 }
 
+double DavidPAClass::dUdRTimesSigma(double r,int level)
+{
+  if (r>dUdRTimesSigmaSpline(level).grid->End){
+    r=dUdRTimesSigmaSpline(level).grid->End;
+  }
+  if (r<dUdRTimesSigmaSpline(level).grid->Start){
+    r=dUdRTimesSigmaSpline(level).grid->Start;
+  }
+  return dUdRTimesSigmaSpline(level)(r);
+
+}
+
+
 double DavidPAClass::U (double q, double z, double s2, int level)
 {
   double s=sqrt(s2);
@@ -408,6 +421,46 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
 //     cerr<<"ERROR! ERROR!"<<endl;
 //     cerr<<dU<<" "<<V<<" "<<r<<" "<<rprime<<" "<<s<<" "<<z<<" "<<q<<endl;
 //   }
+}
+
+void DavidPAClass::ReadSamplingTable(string fileName)
+{
+  cerr<<"Reading the sampling table"<<endl;
+  IOSectionClass in;
+  bool success=in.OpenFile(fileName.c_str());
+  if (!success){
+    cerr<<"Expected but can not find a pairaction file";
+    assert(1==2);
+  }
+  Array<double,2> tempdudR;
+  in.OpenSection("dUdR");
+  in.ReadVar("dUdR",tempdudR);
+  //We should now assert that the tau array has the correct number
+  //of tau's in it.
+  assert(tempdudR.extent(0)==NumTau);
+  //Now we want to read the grid
+  assert(in.OpenSection("Grid"));
+  string gridType;
+  double gridStart;
+  double gridEnd;
+  int numGridPoints;
+  assert(in.ReadVar("Type",gridType));
+  assert(gridType=="Linear");
+  assert(in.ReadVar("start",gridStart));
+  assert(in.ReadVar("end",gridEnd));
+  assert(in.ReadVar("NumPoints",numGridPoints));
+  LinearGrid *theGrid;
+  theGrid=new LinearGrid(gridStart,gridEnd,numGridPoints);
+  in.CloseSection();
+  dUdRTimesSigmaSpline.resize(NumTau);
+  //WHAT SHOULD THE DERIVATIVES ON THIS CUBIC SPLINE BE?
+  for (int level=0;level<NumTau;level++)
+    dUdRTimesSigmaSpline(level).Init(theGrid,tempdudR(level,Range::all()));
+  //  d(levelCounter).Init(theGrid,tempdUkj2(Range::all(),Range::all(),levelCounter),startDeriv,endDeriv);
+  
+  in.CloseSection();
+  in.CloseFile();
+  cerr<<"Left the sampling table"<<endl;
 }
 
 void DavidPAClass::ReadDavidSquarerFile(string DMFile)

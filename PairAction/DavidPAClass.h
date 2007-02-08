@@ -45,6 +45,7 @@ class DavidPAClass : public PairActionFitClass
  public:
   Array<double,1> Potential; 
   string type1,type2;
+  bool SamplingTableRead;
   inline bool Read(IOSectionClass &IOSection,double desiredTau, int numLevels);
   inline void Print();
   double DesiredTau;
@@ -58,6 +59,8 @@ class DavidPAClass : public PairActionFitClass
   Array<MultiCubicSpline,1> ukj; ///<(level )
   ///Same as ukj but stores the beta derivatives.
   Array<MultiCubicSpline,1> dukj; ///<(level )
+  Array<CubicSpline,1> dUdRTimesSigmaSpline; ///<(level
+
   /////  MultiCubicSpline Pot;
   /// Calculate the U(s,q,z) value when given s,q,z and the level 
   void calcUsqz(double s,double q,double z,int level,
@@ -68,9 +71,11 @@ class DavidPAClass : public PairActionFitClass
   //////  double tau;
   /// Function to read David's squarer file input.
   void ReadDavidSquarerFile(string DMFile);
+  void ReadSamplingTable(string fileName);
   double U (double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
   double V(double r);
+  double dUdRTimesSigma(double r,int level);
   /// The diagonal action only -- used for long-range breakup
   double Udiag(double q, int level);
   /// The q-derivative of the above
@@ -105,6 +110,7 @@ class DavidPAClass : public PairActionFitClass
 
 inline bool DavidPAClass::Read(IOSectionClass &in,double x, int y)
 {
+  cerr<<"In DavidPAClass Read"<<endl;
   string fileName;
   DesiredTau=x;
   NumLevels=y;
@@ -124,6 +130,14 @@ inline bool DavidPAClass::Read(IOSectionClass &in,double x, int y)
   //  assert(in.ReadVar("MaxLevels",NumLevels));
   assert(in.ReadVar("Daviddmfile",fileName));
   ReadDavidSquarerFile(fileName.c_str());
+  string samplingTableFile;
+  SamplingTableRead=in.ReadVar("SamplingTableFile",samplingTableFile);
+  cerr<<"My sampling table read is "<<SamplingTableRead<<endl;
+  if (SamplingTableRead){
+    cerr<<"Reading sampling table"<<endl;
+    ReadSamplingTable(samplingTableFile);
+  }
+  
   //  assert(in.ReadVar("type1",type1));
   //  assert(in.ReadVar("type2",type2));
   in.CloseSection();
