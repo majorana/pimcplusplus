@@ -16,20 +16,33 @@
 
 #include "PlaneDensity.h"
 
-///Only works in cubic box
-int PlaneDensityClass::IntoGrid(double num)
+// ///Only works in cubic box
+// int PlaneDensityClass::IntoGrid(double num)
+// {
+//   dVec box=PathData.Path.GetBox();
+//   double maxLen=max(box[0],max(box[1],box[2]));
+//   while (num>maxLen/2) 
+//     num-=maxLen;
+//   while (num<-maxLen/2)
+//     num+=maxLen;
+//   num+=maxLen/2.0;
+//   int myNum=(int)floor(num/(maxLen/(double)(Grid.extent(0))));
+//   //  //  cerr<<num;
+//   //  cerr<<maxLen/(double)(Grid.extent(0));
+//   //  cerr<<"My num is "<<myNum<<endl;
+//   return myNum;
+// }
+
+int PlaneDensityClass::IntoGrid(double num,int dim)
 {
   dVec box=PathData.Path.GetBox();
-  double maxLen=max(box[0],max(box[1],box[2]));
-  while (num>maxLen/2) 
-    num-=maxLen;
-  while (num<-maxLen/2)
-    num+=maxLen;
-  num+=maxLen/2.0;
-  int myNum=(int)floor(num/(maxLen/(double)(Grid.extent(0))));
-  //  //  cerr<<num;
-  //  cerr<<maxLen/(double)(Grid.extent(0));
-  //  cerr<<"My num is "<<myNum<<endl;
+  double boxLen=box[dim];
+  while (num>boxLen/2) 
+    num-=boxLen;
+  while (num<-boxLen/2)
+    num+=boxLen;
+  num+=boxLen/2.0;
+  int myNum=(int)floor(num/(boxLen/(double)(Grid.extent(dim))));
   return myNum;
 }
 
@@ -40,8 +53,8 @@ void PlaneDensityClass::Accumulate()
   for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++)
     for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
       NumSamples++;
-      int nx=IntoGrid(PathData.Path(slice,ptcl)[0]);
-      int ny=IntoGrid(PathData.Path(slice,ptcl)[1]);
+      int nx=IntoGrid(PathData.Path(slice,ptcl)[0],0);
+      int ny=IntoGrid(PathData.Path(slice,ptcl)[1],1);
       if (nx<NumSamples && ny<NumSamples)
 	Grid(nx,ny)=Grid(nx,ny)+1;
       
@@ -72,7 +85,6 @@ void PlaneDensityClass::Read(IOSectionClass &in)
     WriteInfo();
     IOSection.WriteVar("Type","Grid");
   }
-  
   
 }
 

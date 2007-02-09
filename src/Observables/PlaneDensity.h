@@ -27,7 +27,7 @@ class PlaneDensityClass : public ObservableClass
 private:
   Array<double,2> Grid;
   ObservableVecDouble2 GridVar;
-  int IntoGrid(double num);
+  int IntoGrid(double num,int dim);
   int NumSamples;
   int TimesCalled;
   int Freq;
