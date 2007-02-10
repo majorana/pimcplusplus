@@ -151,6 +151,22 @@ public:
 //		    int recvProc,       Array<Vec2,1> &recvBuff);
   
   template<int N>
+  void Sum (Array<complex<double>,N> Ain, Array<complex<double>,N> Aout)
+  {
+    assert (Ain.size() == Aout.size());
+    MPI_Reduce ((void*)Ain.data(), (void*)Aout.data(), 
+		2*Ain.size(), MPI_DOUBLE, MPI_SUM, 0, MPIComm);
+  }
+
+  template<int N>
+  void AllSum (Array<complex<double>,N> Ain, Array<complex<double>,N> Aout)
+  {
+    assert (Ain.size() == Aout.size());
+    MPI_Allreduce ((void*)Ain.data(), (void*)Aout.data(), 
+		   2*Ain.size(), MPI_DOUBLE, MPI_SUM, MPIComm);
+  }
+
+  template<int N>
   void Broadcast (int root, TinyVector<double,N> &vec)
   {
     MPI_Bcast(&(vec[0]), N, MPI_DOUBLE, root, MPIComm);
@@ -183,13 +199,28 @@ public:
   }
   
   template<int N>
-  void SendReceive (int sendProc, const Array<complex<double>,N> &sendBuff,
-		    int recvProc,       Array<complex<double>,N> &recvBuff)
+  void SendReceive (int sendProc, const Array<complex<double>,N> sendBuff,
+		    int recvProc,       Array<complex<double>,N> recvBuff)
   {
     MPI_Status status;
     MPI_Sendrecv((void*)sendBuff.data(), 2*sendBuff.size(), MPI_DOUBLE, sendProc, 2,
 		 (void*)recvBuff.data(), 2*recvBuff.size(), MPI_DOUBLE, recvProc, 2,
 		 MPIComm, &status);
+  }
+
+  template<int N>
+  void Send (int sendProc, const Array<complex<double>,N> sendBuff)
+  {
+    MPI_Send((void*)sendBuff.data(), 2*sendBuff.size(), MPI_DOUBLE, sendProc, 2,
+	     MPIComm);
+  }
+  
+  template<int N>
+  void Receive (int recvProc, Array<complex<double>,N> recvBuff)
+  {
+    MPI_Status status;
+    MPI_Recv((void*)recvBuff.data(), 2*recvBuff.size(), MPI_DOUBLE, recvProc, 2,
+	     MPIComm, &status);
   }
 
   template<int N, int M>
