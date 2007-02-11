@@ -13,6 +13,15 @@ double dotprod(dVec vec1, dVec vec2, double mag) {
   return dotprod(vec1, vec2)*norm;
 }
 
+dVec crossprod(dVec v1, dVec v2)
+{
+  dVec cross;
+  cross[0] = v1[1]*v2[2] - v1[2]*v2[1];
+  cross[1] = -v1[0]*v2[2] + v1[2]*v2[0];
+  cross[2] = v1[0]*v2[1] - v1[1]*v2[0];
+  return cross;
+}
+
 double Mag(dVec v) {
   double mag = sqrt(dotprod(v,v));
   return mag;
