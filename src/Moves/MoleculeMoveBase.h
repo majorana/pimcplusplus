@@ -28,6 +28,8 @@ class MolMoveClass: public LocalStageClass{
 	void MoveDimerSeparation(int slice, Array<int,1> mol1, Array<int,1> mol2, double Sigma);
   void RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, double theta);
   void RotateMol(int slice, Array<int,1>& activePtcls, double theta);
+  void StressAngle(int slice, int ptcl, dVec axis, double theta);
+  void StressBond(int slice, int ptcl, int mol, double s);
   void Read (IOSectionClass &in);
 	void Accept();
 	void Advance();

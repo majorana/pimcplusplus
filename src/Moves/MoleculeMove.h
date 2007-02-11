@@ -45,6 +45,30 @@ class MoleculeRotate : public MolMoveClass
   //  };
 };
 
+class BondStretch : public MolMoveClass
+{
+ public:
+  double s;
+  double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
+  void Read(IOSectionClass &moveInput);
+
+  BondStretch(PathDataClass &myPathData,IOSectionClass outSection) : 
+    MolMoveClass (myPathData,outSection)
+    {
+			cerr << "BondStretch constructor" << endl;
+    }
+
+  BondStretch(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
+    MolMoveClass (myPathData,outSection, numToRead, start)
+    {
+    }
+  //  double AcceptanceRatio(int numAccepted,int numMoves);
+
+  //void WriteRatio()
+  //  {
+  //  };
+};
+
 class MoleculeTranslate : public MolMoveClass
 {
 	int counter;
