@@ -23,6 +23,12 @@ void MoleculeRotate::Read(IOSectionClass &moveInput) {
 	MolMoveClass::Read(moveInput);
 }
 
+void BondStretch::Read(IOSectionClass &moveInput) {
+  cerr << "  Stretch read in" << endl;
+  assert(moveInput.ReadVar("SetStrain",s));
+	MolMoveClass::Read(moveInput);
+}
+
 void MoleculeTranslate::Read(IOSectionClass &moveInput) {
   cerr << "  Molecule Translate read in" << endl;
   assert(moveInput.ReadVar("SetStep",Step));
@@ -312,6 +318,83 @@ double DummyEvaluate::Sample(int &slice1,int &slice2, Array<int,1> &activePartic
   if (numMoves%10000 == 0){
     cerr << numMoves << " moves; current DUMMY accept ratio is " << double(numAccepted)/numMoves << endl;
   }
+  cout << "DUMMY " << numAccepted << " acc out of " << numMoves << " = " << double(numAccepted)/numMoves << " and just for fun " << double(numAccepted)/(numMoves-1) << endl;
+
+	return 1;
+}
+
+
+double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles){
+
+	if(mode == SINGLE){
+  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
+		MoveList(0) = choosemol;
+		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+	}
+	else if(mode == SEQUENTIAL){
+		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+	}
+	else if(mode == GLOBAL){
+		activeParticles.resize(PathData.Path.NumParticles());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = i;
+	}
+
+	// choose a time slice to move
+	int numSlices = PathData.Path.TotalNumSlices;
+	int slice=0;
+	slice1 = 0;
+	slice2 = 0;
+	if(numSlices>1){
+	  int P_max = numSlices - 1;
+	  slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
+    //slice1 = slice;
+    //slice2 = slice;
+	  slice1 = slice-1;
+	  slice2 = slice+1;
+	}
+
+	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Path.MolMembers(MoveList(0)) << endl;
+	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
+
+		// get relevant bonds from MoveList and PathData.Path.MolMembers
+    vector<int> bondPtcls(0);
+    vector<int*> anglePairs(0);
+    for(int p1=0; p1<PathData.Path.MolMembers(activeMol).size(); p1++){
+      int ptcl1 = PathData.Path.MolMembers(activeMol)(p1);
+      if(ptcl1 != PathData.Path.MolRef(ptcl1))
+        bondPtcls.push_back(ptcl1);
+      for(int p2=p1+1; p2<PathData.Path.MolMembers(activeMol).size(); p2++){
+        int ptcl2 = PathData.Path.MolMembers(activeMol)(p2);
+        int pair[2];
+        pair[0] = ptcl1;
+        pair[1] = ptcl2;
+        anglePairs.push_back(pair);
+      }
+    }
+    // stretch bonds along their length
+    for(int b=0; b<bondPtcls.size(); b++){
+      double strain = 2*(PathData.Path.Random.Local()-0.5)*s;
+      StressBond(slice, bondPtcls[b], activeMol, strain);
+    }
+    // stretch angles by rotating
+    for(int a=0; a<anglePairs.size(); a++){
+      dVec v1 = PathData.Path(slice,anglePairs[a][0]) - PathData.Path(slice,activeMol);
+      dVec v2 = PathData.Path(slice,anglePairs[a][1]) - PathData.Path(slice,activeMol);
+      double theta0 = GetAngle(v1,v2);
+      double dtheta = 2*theta0*(PathData.Path.Random.Local()-0.5);
+      dVec u = crossprod(v1,v2);
+      StressAngle(slice, anglePairs[a][1],Normalize(u),dtheta);
+	  }
+  }
+
+  if (numMoves%10000 == 0 && numMoves>0){
+    cerr << numMoves << " moves; current STRETCH ratio is " << double(numAccepted)/numMoves << endl;
+  }
+  numMoves++;
+
+	if(mode == SEQUENTIAL) Advance();
 
 	return 1;
 }

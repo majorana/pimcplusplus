@@ -67,7 +67,7 @@ void MolMoveClass::Read (IOSectionClass &in){
 	
 /// Read in update mode: GLOBAL, SEQUENTIAL, SINGLE	
 	string setMode;
-	in.ReadVar("Mode", setMode);
+	assert(in.ReadVar("Mode", setMode));
 	if(setMode == "GLOBAL"){
 		mode = GLOBAL;
 		MoveList.resize(numMol);
@@ -228,6 +228,22 @@ void MolMoveClass::MoveDimerSeparation(int slice, Array<int,1> mol1, Array<int,1
     PathData.Path.SetPos(slice, mol2(i), newR);
     //cerr << " to " << PathData.Path(slice,mol2(i)) << endl;
   }
+}
+
+void MolMoveClass::StressBond(int slice, int ptcl, int mol, double s){
+  dVec O = PathData.Path(slice,mol);
+  dVec v = PathData.Path(slice,ptcl) - O;
+  double scale = 1 + s;
+  v = Scale(v,scale);
+  PathData.Path.SetPos(slice, ptcl, O+v);
+}
+
+void MolMoveClass::StressAngle(int slice, int ptcl, dVec axis, double theta){
+  int mol = PathData.Path.MolRef(ptcl);
+  dVec O = PathData.Path(slice,mol);
+  dVec v = PathData.Path(slice,ptcl) - O;
+  v = ArbitraryRotate(axis, v, theta);
+  PathData.Path.SetPos(slice, ptcl, O+v);
 }
 
 void MolMoveClass::Accept(){
