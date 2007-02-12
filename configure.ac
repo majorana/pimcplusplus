@@ -1,7 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-add m4_include([gsl.m4])
 AC_PREREQ(2.59)
 AC_INIT(libcommon, 0.5, esler@uiuc.edu)
 AM_INIT_AUTOMAKE(libcommon, 0.5)
@@ -125,6 +124,38 @@ else
    PKG_CHECK_MODULES(FFTW3, fftw3, fftw3_ok=yes, fftw3_ok=no)
 fi
 
+# Check if we want to use single-precision FFTs for SIMD spead improvements
+AC_ARG_ENABLE(fft-single,    [  --enable-fft-single       enable single-precision FFTs (default=no)])
+if test "$enable_fft_single" = "yes"; then
+    FFT_DEF="$FFT_DEF -DFFT_USE_SINGLE"
+    if test "$enable-fftw2mkl" != "yes"; then
+      FFTW3_LIBS="$FFTW3_LIBS -lfftw3f"
+    fi
+else
+    FFT_DEF="$FFT_DEF "
+fi
+AC_SUBST(FFT_DEF)
+
+# Check if we have specified FFTW location
+AC_ARG_WITH(fftw3-cflags,[  --with-fftw3-cflags=FLAGS specify FFTW3 linker flags])
+AC_ARG_WITH(fftw3-libs, [  --with-fftw3-libs=LIBS    specify FFTW3 linker flags])
+if test "x$with_fftw3_cflags" != "x"; then
+   FFTW3_CFLAGS="$with_fftw3_cflags"
+fi
+if test "x$with_fftw3_libs" != "x"; then
+   FFTW3_LIBS="$with_fftw3_libs"
+fi
+AC_SUBST(FFTW3_CFLAGS)
+AC_SUBST(FFTW3_LIBS)
+
+if test "x$fftw3_ok" = "xno"; then
+   AC_MSG_WARN([Didn't find libfftw3 in standard place.])
+   if test "x$with_fftw3_libs" = "x"; then
+       AC_MSG_ERROR([FFTW3 library could not be found.  Please specify location with --with-fftw3-libs=])
+   fi
+fi
+
+
 
 # Checks if we want MPI support
 AC_ARG_ENABLE(mpi,    [  --enable-mpi              enable MPI support (default=no)])
@@ -166,17 +197,6 @@ if test "x$enable_debug" = "xyes"; then
 fi
 
 
-# Check if we want to use single-precision FFTs for SIMD spead improvements
-AC_ARG_ENABLE(fft-single,    [  --enable-fft-single       enable single-precision FFTs (default=no)])
-if test "$enable_fft_single" = "yes"; then
-    FFT_DEF="$FFT_DEF -DFFT_USE_SINGLE"
-    if test "$enable-fftw2mkl" != "yes"; then
-      FFTW3_LIBS="$FFTW3_LIBS -lfftw3f"
-    fi
-else
-    FFT_DEF="$FFT_DEF "
-fi
-AC_SUBST(FFT_DEF)
 
 AC_ARG_ENABLE(profile,[  --enable-profile        instrument code with profiling information])
 if test "x$enable_profile" = "xyes"; then
@@ -203,6 +223,8 @@ if test "x$hdf5_ok" = "xno"; then
        AC_MSG_ERROR([HDF5 library could not be found.  Please specify location with --with-hdf5-libs=])
    fi
 fi
+
+
 
 #AC_ARG_WITH(cblas-cflags,[  --with-cblas-cflags=FLAGS specify CBLAS linker flags])
 #AC_ARG_WITH(cblas-libs, [  --with-cblas-libs=LIBS    specify CBLAS linker flags])
