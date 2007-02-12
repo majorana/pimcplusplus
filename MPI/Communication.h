@@ -419,6 +419,13 @@ public:
   }
 
   template<int N>
+  void SendReceive (int sendProc, const Array<complex<double>,N> sendBuff,
+		    int recvProc,       Array<complex<double>,N> recvBuff)
+  {
+    // do nothing for serial version
+  }
+
+  template<int N>
   void Send (int sendProc, const Array<complex<double>,N> sendBuff)
   {
     cerr << "Sends not supported in serial mode.\n";
