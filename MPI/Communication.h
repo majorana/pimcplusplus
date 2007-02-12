@@ -418,6 +418,20 @@ public:
     abort();
   }
 
+  template<int N>
+  void Send (int sendProc, const Array<complex<double>,N> sendBuff)
+  {
+    cerr << "Sends not supported in serial mode.\n";
+    abort();
+  }
+  
+  template<int N>
+  void Receive (int recvProc, Array<complex<double>,N> recvBuff)
+  {
+    cerr << "Receives not supported in serial mode.\n";
+    abort();
+  }
+
   template<typename T>
   void Broadcast(int root, T &val) { }
 
