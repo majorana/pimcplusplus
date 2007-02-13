@@ -15,6 +15,13 @@ using namespace IO;
 
 typedef enum {REAL_PART, IMAG_PART, MAG2} WFDisplayType;
 
+class BandRow
+{
+public:
+  Gtk::CheckButton Check;
+  Gtk::Label kLabel, BandLabel;
+};
+
 class WFVisualClass : public Gtk::Window
 {
 protected:
@@ -87,6 +94,17 @@ protected:
   Gtk::HScale xPlaneScale, yPlaneScale, zPlaneScale;
   Gtk::CheckButton xPlaneButton, yPlaneButton, zPlaneButton;
   Gtk::HBox xPlaneBox, yPlaneBox, zPlaneBox;
+
+  ////////////////////////////
+  // Visible band selection //
+  ////////////////////////////
+  Gtk::Frame VisibleBandFrame;
+  Gtk::VBox  VisibleBandBox;
+  Gtk::ScrolledWindow VisibleBandWindow;
+  Gtk::Table VisibleBandTable;
+  vector<BandRow*> VisibleBandRows;
+  Gtk::Label kLabel, BandLabel;
+  void SetupBandTable();
 
   /////////////////
   // State flags //

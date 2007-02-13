@@ -65,6 +65,14 @@ WFVisualClass::WFVisualClass() :
   RadiusBox.pack_start(RadiusFrame, Gtk::PACK_SHRINK, 5);
   OptionsBox.pack_start(RadiusBox,  Gtk::PACK_SHRINK, 5);
 
+  VisibleBandFrame.add (VisibleBandBox);
+  VisibleBandBox.pack_start (VisibleBandWindow);
+  VisibleBandWindow.add (VisibleBandTable);
+  VisibleBandFrame.set_label("Visible");
+  OptionsBox.pack_start(VisibleBandFrame, Gtk::PACK_SHRINK, 5);
+  VisibleBandWindow.property_height_request().set_value(300);
+  VisibleBandWindow.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
   OrthoImage.set(FindFullPath("orthographic.png"));
   OrthoButton.set_icon_widget(OrthoImage);
   OrthoButton.set_label("Ortho");
@@ -631,6 +639,36 @@ Mat3 ToMat3 (Array<double,2> &a)
 
 
 void
+WFVisualClass::SetupBandTable()
+{
+  kLabel.set_text ("k");
+  BandLabel.set_text ("Band");
+  VisibleBandTable.resize(Numk*NumBands+1,3);
+  VisibleBandTable.attach (kLabel,    1, 2, 0, 1, Gtk::EXPAND, Gtk::SHRINK);
+  VisibleBandTable.attach (BandLabel, 2, 3, 0, 1, Gtk::EXPAND, Gtk::SHRINK);
+  VisibleBandRows.resize (Numk*NumBands);
+  int row = 0;
+  for (int ki=0; ki<Numk; ki++) 
+    for (int bi=0; bi<NumBands; bi++) {
+      BandRow &band = *(new BandRow);
+      VisibleBandTable.attach(band.Check,     0, 1, row+1, row+2, 
+			      Gtk::EXPAND, Gtk::SHRINK);
+      VisibleBandTable.attach(band.kLabel,    1, 2, row+1, row+2,
+			      Gtk::EXPAND, Gtk::SHRINK);
+      VisibleBandTable.attach(band.BandLabel, 2, 3, row+1, row+2, 
+			      Gtk::EXPAND, Gtk::SHRINK);
+      char kstr[50], bstr[50];
+      snprintf (kstr, 50, "%d", ki+1);
+      snprintf (bstr, 50, "%d", bi+1);
+      band.kLabel.set_text(kstr);
+      band.BandLabel.set_text(bstr);
+      VisibleBandRows[row] = &band;
+      row++;
+    }
+  VisibleBandTable.show_all();
+}
+
+void
 WFVisualClass::Read(string filename)
 {
   if (FileIsOpen)
@@ -679,6 +717,7 @@ WFVisualClass::Read(string filename)
   Infile.CloseSection(); // "twist"
   Infile.CloseSection(); // "eigenstates"
   cerr << "Numk = " << Numk << "   NumBands = " << NumBands << endl;
+  SetupBandTable();
 
   /// Read first wave function
   ReadWF(0,0);
