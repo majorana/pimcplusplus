@@ -87,6 +87,7 @@ FFLAGS="$FFLAGS -g"
 
 # Checks if we want MPI support
 AC_ARG_ENABLE(mpi,    [  --enable-mpi            enable MPI support (default=no)])
+AM_CONDITIONAL([PARALLEL], [test "$enable_mpi" = "yes"])
 #PKG_CHECK_MODULES(COMMON, common, common_ok=yes, common_ok=no)
 # If so, use MPI version of libcommon.  Otherwise, use serial version
 if test "x$enable_mpi" != "xyes"; then
