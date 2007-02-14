@@ -679,6 +679,14 @@ WFVisualClass::SetupBandTable()
       snprintf (bstr, 50, "%d", bi+1);
       band.kLabel.set_text(kstr);
       band.BandLabel.set_text(bstr);
+      if (bi < NumElectrons/2) {
+	band.kLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("black"));
+	band.BandLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("black"));
+      }
+      else {
+	band.kLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("red"));
+	band.BandLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("red"));
+      }
       VisibleBandRows[row] = &band;
       row++;
     }		   
@@ -697,6 +705,7 @@ WFVisualClass::Read(string filename)
   assert (Infile.OpenSection("parameters"));
   Array<double,2> lattice;
   assert (Infile.ReadVar("lattice", lattice));
+  assert (Infile.ReadVar("num_electrons", NumElectrons));
 //   if (!IsDiag(lattice)) { 
 //     cerr << "wfvis does not currently work with non-orthorhombic cells.\n";
 //     abort();
