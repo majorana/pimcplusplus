@@ -23,6 +23,7 @@ AC_PROG_CC
 AC_F77_LIBRARY_LDFLAGS
 AC_F77_MAIN
 AC_PROG_LIBTOOL
+PKG_PROG_PKG_CONFIG
 
 
 AC_CANONICAL_HOST
@@ -88,7 +89,6 @@ FFLAGS="$FFLAGS -g"
 # Checks if we want MPI support
 AC_ARG_ENABLE(mpi,    [  --enable-mpi            enable MPI support (default=no)])
 AM_CONDITIONAL([PARALLEL], [test "$enable_mpi" = "yes"])
-#PKG_CHECK_MODULES(COMMON, common, common_ok=yes, common_ok=no)
 # If so, use MPI version of libcommon.  Otherwise, use serial version
 if test "x$enable_mpi" != "xyes"; then
   PKG_CHECK_MODULES(COMMON, common, common_ok=yes, common_ok=no)
