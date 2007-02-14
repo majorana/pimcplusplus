@@ -65,13 +65,20 @@ WFVisualClass::WFVisualClass() :
   RadiusBox.pack_start(RadiusFrame, Gtk::PACK_SHRINK, 5);
   OptionsBox.pack_start(RadiusBox,  Gtk::PACK_SHRINK, 5);
 
-//   VisibleBandFrame.add (VisibleBandBox);
-//   VisibleBandBox.pack_start (VisibleBandWindow);
-//   VisibleBandWindow.add (VisibleBandTable);
-//   VisibleBandFrame.set_label("Visible");
-//   OptionsBox.pack_start(VisibleBandFrame, Gtk::PACK_SHRINK, 5);
-//   VisibleBandWindow.property_height_request().set_value(300);
-//   VisibleBandWindow.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+  ///////////////////////////////////////
+  // Setup multiband selection widgets //
+  ///////////////////////////////////////
+  VisibleBandFrame.add (VisibleBandBox);
+  VisibleBandBox.pack_start (MultiBandButton, Gtk::PACK_SHRINK, 5);
+  VisibleBandBox.pack_start (VisibleBandWindow);
+  VisibleBandWindow.add (VisibleBandTable);
+  VisibleBandFrame.set_label("Multiband");
+  OptionsBox.pack_start(VisibleBandFrame, Gtk::PACK_SHRINK, 5);
+  VisibleBandWindow.property_height_request().set_value(700);
+  VisibleBandWindow.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+  MultiBandButton.set_label ("Enable");
+  MultiBandButton.signal_toggled().connect
+    (sigc::mem_fun(*this, &WFVisualClass::OnMultiBandToggle));
 
   OrthoImage.set(FindFullPath("orthographic.png"));
   OrthoButton.set_icon_widget(OrthoImage);
@@ -543,7 +550,7 @@ WFVisualClass::DrawFrame(bool offScreen)
     }
   }
 
-  if (FileIsOpen) {
+  if (FileIsOpen && !MultiBandButton.get_active()) {
     int band, k;
     band = (int)round(BandScale.get_value());
     k    = (int)round(kScale.get_value());
@@ -601,6 +608,13 @@ WFVisualClass::DrawFrame(bool offScreen)
     if (IsoButton.get_active()) 
       PathVis.Objects.push_back(&WFIso);
   }
+  if (MultiBandButton.get_active()) {
+    for (int i=0; i<VisibleBandRows.size(); i++) {
+      BandRow& band = *(VisibleBandRows[i]);
+      if (band.Iso != NULL)
+	PathVis.Objects.push_back(band.Iso);
+    }
+  }
 
   PathVis.Invalidate();
   UpToDate = true;
@@ -644,13 +658,16 @@ WFVisualClass::SetupBandTable()
   kLabel.set_text ("k");
   BandLabel.set_text ("Band");
   VisibleBandTable.resize(Numk*NumBands+1,3);
-  VisibleBandTable.attach (kLabel,    1, 2, 0, 1, Gtk::EXPAND, Gtk::SHRINK);
-  VisibleBandTable.attach (BandLabel, 2, 3, 0, 1, Gtk::EXPAND, Gtk::SHRINK);
+  VisibleBandTable.attach (kLabel,    1, 2, 0, 1, Gtk::EXPAND, Gtk::SHRINK, 3);
+  VisibleBandTable.attach (BandLabel, 2, 3, 0, 1, Gtk::EXPAND, Gtk::SHRINK, 3);
   VisibleBandRows.resize (Numk*NumBands);
   int row = 0;
   for (int ki=0; ki<Numk; ki++) 
     for (int bi=0; bi<NumBands; bi++) {
-      BandRow &band = *(new BandRow);
+      BandRow &band = *(new BandRow(*this));
+      band.Check.signal_toggled().connect 
+	(sigc::bind<int>
+	 (sigc::mem_fun(*this, &WFVisualClass::OnBandToggle),row));
       VisibleBandTable.attach(band.Check,     0, 1, row+1, row+2, 
 			      Gtk::EXPAND, Gtk::SHRINK);
       VisibleBandTable.attach(band.kLabel,    1, 2, row+1, row+2,
@@ -664,7 +681,7 @@ WFVisualClass::SetupBandTable()
       band.BandLabel.set_text(bstr);
       VisibleBandRows[row] = &band;
       row++;
-    }
+    }		   
   VisibleBandTable.show_all();
 }
 
@@ -717,7 +734,7 @@ WFVisualClass::Read(string filename)
   Infile.CloseSection(); // "twist"
   Infile.CloseSection(); // "eigenstates"
   cerr << "Numk = " << Numk << "   NumBands = " << NumBands << endl;
-  //SetupBandTable();
+  SetupBandTable();
 
   /// Read first wave function
   ReadWF(0,0);
@@ -1008,6 +1025,82 @@ WFVisualClass::OnOpenState()
   }
   OpenStateChooser.hide();
 }  
+
+
+
+void
+WFVisualClass::OnMultiBandToggle()
+{
+  if (MultiBandButton.get_active()) {
+    IsoButton.set_active(false);
+    xPlaneButton.set_active(false);
+    yPlaneButton.set_active(false);
+    zPlaneButton.set_active(false);
+    IsoButton.set_sensitive (false);
+    PlaneFrame.set_sensitive(false);
+    BandFrame.set_sensitive(false);
+    kFrame.set_sensitive(false);
+  }
+  else {
+    IsoButton.set_sensitive (true);
+    PlaneFrame.set_sensitive(true);
+    BandFrame.set_sensitive (true);
+    kFrame.set_sensitive    (true);
+  }
+}
+
+void
+WFVisualClass::OnBandToggle (int row)
+{
+  int ki = row/NumBands;
+  int bi = row % NumBands;
+  BandRow &band = *(VisibleBandRows[row]);
+  if (band.Check.get_active()) {
+    if (band.Iso == NULL) {
+      band.Iso = new Isosurface;
+      cerr << "Creating new isosuface for k-point " << ki 
+	   << " and band " << bi << endl;
+      if (FileIsOpen) {
+	ReadWF (ki, bi);
+	Xgrid.Init(-0.5, 0.5, WFData.extent(0));
+	Ygrid.Init(-0.5, 0.5, WFData.extent(1));
+	Zgrid.Init(-0.5, 0.5, WFData.extent(2));
+	band.Iso->Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+	band.Iso->SetLattice (Box.GetLattice());
+	if (WFDisplay == MAG2) {
+	  band.Iso->SetColor (0.0, 0.8, 0.0);
+	  band.Iso->SetIsoval(MaxVal*IsoAdjust.get_value());
+	}
+	else {
+	  vector<TinyVector<double,3> > colors;
+	  colors.push_back(TinyVector<double,3> (0.8, 0.0, 0.0));
+	  colors.push_back(TinyVector<double,3> (0.0, 0.0, 0.8));
+	  band.Iso->SetColor(colors);
+	  vector<double> vals;
+	  vals.push_back(+MaxVal*IsoAdjust.get_value());
+	  vals.push_back(-MaxVal*IsoAdjust.get_value());
+	  band.Iso->SetIsoval(vals);
+	}
+      }
+      band.Iso->Dynamic = false;
+    } 
+  }
+  else {
+    if (band.Iso != NULL) {
+      delete band.Iso;
+      band.Iso = NULL;
+      cerr << "Deleted band for k-point " << ki 
+	   << " and band " << bi << endl;
+    }
+  }
+  if (MultiBandButton.get_active())
+    DrawFrame();
+}
+
+void
+WFVisualClass::DrawMultiIsos()
+{
+}
 
 
 

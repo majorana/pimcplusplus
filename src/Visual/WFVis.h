@@ -15,11 +15,17 @@ using namespace IO;
 
 typedef enum {REAL_PART, IMAG_PART, MAG2} WFDisplayType;
 
+class WFVisualClass;
 class BandRow
 {
 public:
   Gtk::CheckButton Check;
   Gtk::Label kLabel, BandLabel;
+  Isosurface *Iso;
+  BandRow(WFVisualClass &wfvis) : Iso(NULL)
+  {
+    Check.set_active(false);
+  }
 };
 
 class WFVisualClass : public Gtk::Window
@@ -95,16 +101,19 @@ protected:
   Gtk::CheckButton xPlaneButton, yPlaneButton, zPlaneButton;
   Gtk::HBox xPlaneBox, yPlaneBox, zPlaneBox;
 
-  ////////////////////////////
-  // Visible band selection //
-  ////////////////////////////
+  //////////////////////////
+  // Multi-band selection //
+  //////////////////////////
   Gtk::Frame VisibleBandFrame;
   Gtk::VBox  VisibleBandBox;
   Gtk::ScrolledWindow VisibleBandWindow;
   Gtk::Table VisibleBandTable;
   vector<BandRow*> VisibleBandRows;
   Gtk::Label kLabel, BandLabel;
+  Gtk::CheckButton MultiBandButton;
   void SetupBandTable();
+  void OnMultiBandToggle(), OnBandToggle(int row);
+  void DrawMultiIsos();
 
   /////////////////
   // State flags //
