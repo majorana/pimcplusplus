@@ -65,13 +65,13 @@ WFVisualClass::WFVisualClass() :
   RadiusBox.pack_start(RadiusFrame, Gtk::PACK_SHRINK, 5);
   OptionsBox.pack_start(RadiusBox,  Gtk::PACK_SHRINK, 5);
 
-  VisibleBandFrame.add (VisibleBandBox);
-  VisibleBandBox.pack_start (VisibleBandWindow);
-  VisibleBandWindow.add (VisibleBandTable);
-  VisibleBandFrame.set_label("Visible");
-  OptionsBox.pack_start(VisibleBandFrame, Gtk::PACK_SHRINK, 5);
-  VisibleBandWindow.property_height_request().set_value(300);
-  VisibleBandWindow.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+//   VisibleBandFrame.add (VisibleBandBox);
+//   VisibleBandBox.pack_start (VisibleBandWindow);
+//   VisibleBandWindow.add (VisibleBandTable);
+//   VisibleBandFrame.set_label("Visible");
+//   OptionsBox.pack_start(VisibleBandFrame, Gtk::PACK_SHRINK, 5);
+//   VisibleBandWindow.property_height_request().set_value(300);
+//   VisibleBandWindow.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
   OrthoImage.set(FindFullPath("orthographic.png"));
   OrthoButton.set_icon_widget(OrthoImage);
@@ -717,7 +717,7 @@ WFVisualClass::Read(string filename)
   Infile.CloseSection(); // "twist"
   Infile.CloseSection(); // "eigenstates"
   cerr << "Numk = " << Numk << "   NumBands = " << NumBands << endl;
-  SetupBandTable();
+  //SetupBandTable();
 
   /// Read first wave function
   ReadWF(0,0);

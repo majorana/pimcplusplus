@@ -83,6 +83,9 @@ case "${host_cpu}" in
        FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
+CXXFLAGS="$CXXFLAGS -g"
+FFLAGS="$FFLAGS -g"
+
 # Optionally compile pimcDev, the development version
 AC_ARG_ENABLE(pimcdev, [  --enable-pimcdev      compile development version pimcDev])
 AM_CONDITIONAL([WANT_PIMC_DEV], [test "$enable_pimcdev" = "yes"])
@@ -107,7 +110,7 @@ if test "x$enable_pathvis" = "xyes"; then
 #  if test "x$gts_ok" != "xyes"; then
 #     AC_MSG_ERROR([GTS libraries missing.  Please install. (http://gts.sourceforge.net)])
 #  fi
-  AC_CHECK_LIB([xvidcore],[decoder_create])
+  AC_CHECK_LIB([xvidcore],[xvid_decore])
   AC_LANG_SAVE
   AC_LANG_CPLUSPLUS
   AC_CHECK_LIB([revel],[Revel_EncodeStart])
@@ -125,7 +128,7 @@ fi
 
 AC_ARG_ENABLE(debug,[  --enable-debug          enable code for debugging checks])
 if test "x$enable_debug" = "xyes"; then
-   CXXFLAGS="-DDEBUG $CXXFLAGS"
+   CXXFLAGS="-DDEBUG -DBZ_DEBUG $CXXFLAGS"
    FFLAGS="-DDEBUG $FFLAGS"
 fi
 
