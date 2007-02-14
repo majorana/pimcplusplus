@@ -25,7 +25,16 @@ AUX_DIST              = $(ac_aux_dir)/config.guess \
                         $(ac_aux_dir)/missing \
                         $(ac_aux_dir)/mkinstalldirs
 
-lib_LTLIBRARIES = libcommon.la
+if PARALLEL
+  lib_LTLIBRARIES = libmpicommon.la
+  pkgconfig_DATA  = mpicommon.pc
+  EXTRA_DIST      = mpicommon.pc.in turing.conf
+else
+  lib_LTLIBRARIES = libcommon.la
+  pkgconfig_DATA  = common.pc
+  EXTRA_DIST      = common.pc.in turing.conf
+endif 
+
 libcommon_la_SOURCES =
 libcommon_la_LIBADD = IO/libIO.la                    \
                       Splines/libspline.la           \
@@ -43,14 +52,30 @@ libcommon_la_LIBADD = IO/libIO.la                    \
                       PlaneWavePHDFT/libpw.la        \
                       Atom/libatom.la 
 
+libmpicommon_la_SOURCES =
+libmpicommon_la_LIBADD = IO/libIO.la                    \
+                         Splines/libspline.la           \
+                         SpecialFunctions/libspecfun.la \
+                         Integration/libquad.la         \
+                         MatrixOps/libmatops.la         \
+                         Fitting/libfitting.la          \
+                         DFT/libdft.la                  \
+                         PH/libPH.la                    \
+                         MPI/libcomm.la                 \
+                         Distributed/libdistrib.la      \
+                         Ewald/libbreakup.la            \
+                         FFT/libfft.la                  \
+                         PairAction/libpairact.la       \
+                         PlaneWavePHDFT/libpw.la        \
+                         Atom/libatom.la 
+
 
 includedir=$(prefix)/include/Common
 include_HEADERS = Blitz.h config.h nan.h
 
 pkgconfigdir = $(libdir)/pkgconfig/
-pkgconfig_DATA = common.pc
 
 install-data-local:
 	$(INSTALL_DATA) common.pc $(pkgconfigdir)
 
-EXTRA_DIST = common.pc.in turing.conf
+

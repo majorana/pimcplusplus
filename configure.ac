@@ -161,6 +161,7 @@ fi
 
 # Checks if we want MPI support
 AC_ARG_ENABLE(mpi,    [  --enable-mpi              enable MPI support (default=no)])
+AM_CONDITIONAL([PARALLEL], [test "$enable_mpi" = "yes"])
 AC_ARG_WITH(mpi-inc,  [  --with-mpi-cflags=FLAGS   specify MPI compliler flags])
 AC_ARG_WITH(mpi-libs, [  --with-mpi-libs=LIBS      specify MPI linker flags])
 AC_ARG_WITH(mpi-run,  [  --with-mpi-run=cmd        specify MPI run command (default=mpirun)])
