@@ -12,6 +12,8 @@ AX_CXX_MAXOPT
 AX_F77_MAXOPT
 AC_MSG_CHECKING([optimal compiler flags])
 AC_MSG_RESULT([${CXXFLAGS}])
+CXXFLAGS="$CXXFLAGS -pthread"
+
 
 # Checks for libraries.
 # this creates and AC_SUBST's vars FFTW3_CFLAGS and FFTW3_LIBS
