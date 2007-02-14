@@ -11,8 +11,6 @@ AX_CXX_MAXOPT
 AC_MSG_CHECKING([optimal compiler flags])
 AC_MSG_RESULT([${CXXFLAGS}])
 
-PKG_CHECK_MODULES(COMMON, common, common_ok=yes, common_ok=no)
-
 AC_CHECK_LIB([m], [sqrt])
 AC_MSG_CHECKING([LIBS = $LIBS])
 # Checks for header files.
@@ -86,6 +84,23 @@ esac
 CXXFLAGS="$CXXFLAGS -g"
 FFLAGS="$FFLAGS -g"
 
+
+# Checks if we want MPI support
+AC_ARG_ENABLE(mpi,    [  --enable-mpi            enable MPI support (default=no)])
+#PKG_CHECK_MODULES(COMMON, common, common_ok=yes, common_ok=no)
+# If so, use MPI version of libcommon.  Otherwise, use serial version
+if test "x$enable_mpi" != "xyes"; then
+  PKG_CHECK_MODULES(COMMON, common, common_ok=yes, common_ok=no)
+  AC_MSG_RESULT([Linking against serial version of libcommon.])
+else
+  PKG_CHECK_MODULES(COMMON, mpicommon, common_ok=yes, common_ok=no)
+  AC_MSG_RESULT([Linking against parallel version of libmpicommon.])
+fi
+
+if test "x$common_ok" != "xyes"; then
+   AC_MSG_ERROR([Could not find common library.  Please install first.])
+fi
+
 # Optionally compile pimcDev, the development version
 AC_ARG_ENABLE(pimcdev, [  --enable-pimcdev      compile development version pimcDev])
 AM_CONDITIONAL([WANT_PIMC_DEV], [test "$enable_pimcdev" = "yes"])
@@ -146,8 +161,7 @@ else # Default to 3D
    CPPFLAGS="-DNDIM=3 $CPPFLAGS"
 fi
 
-# Checks if we want MPI support
-AC_ARG_ENABLE(mpi,    [  --enable-mpi            enable MPI support (default=no)])
+
 
 if test "$enable_mpi" = "yes"; then
     MPI_DEF="-DUSE_MPI"
