@@ -348,6 +348,7 @@ AC_CHECK_FUNCS([clock_gettime floor pow sqrt strtol sincos])
 
 AC_CONFIG_FILES([ Makefile                  \
                   common.pc                 \
+                  mpicommon.pc              \
                   IO/Makefile               \
                   Splines/Makefile          \
                   SpecialFunctions/Makefile \
