@@ -175,6 +175,7 @@ public:
   bool ReadState (string fname);
   bool DrawFrame(bool offScreen=false);
   void SetShift (Vec3 shift);
+  void SetViewportSize (int size);
   
   WFVisualClass ();
   virtual ~WFVisualClass();

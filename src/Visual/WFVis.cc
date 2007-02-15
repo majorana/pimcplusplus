@@ -270,10 +270,10 @@ WFVisualClass::WFVisualClass() :
   ToolBox.pack_start(kFrame,    Gtk::PACK_SHRINK, 5);
   MainVBox.pack_start(*Manager->get_widget("/MenuBar"), Gtk::PACK_SHRINK,0);
   MainVBox.pack_start(ToolBox, Gtk::PACK_SHRINK, 0);
-  MiddleBox.pack_start(PathVis);
-  MiddleBox.pack_start(OptionsBox);
+  MiddleBox.pack_start(PathVis, Gtk::PACK_SHRINK, 5);
+  MiddleBox.pack_start(OptionsBox, Gtk::PACK_SHRINK, 5);
   //  MainVBox.pack_start(PathVis);
-  MainVBox.pack_start(MiddleBox);
+  MainVBox.pack_start(MiddleBox, Gtk::PACK_SHRINK, 5);
   MainVBox.pack_start(QuitButton, Gtk::PACK_SHRINK, 0);
 
   add (MainVBox);
@@ -1159,6 +1159,15 @@ WFVisualClass::SetShift(Vec3 shift)
 }
 
 
+void
+WFVisualClass::SetViewportSize (int size)
+{
+  VisibleBandWindow.property_height_request().set_value(size-100);
+  PathVis.set_size_request(size, size);
+  resize(10,10);
+}
+
+
 vector<string>
 BreakString (string str, char sep)
 {
@@ -1191,8 +1200,8 @@ int main(int argc, char** argv)
 
   list<ParamClass> optionList;
   optionList.push_back(ParamClass("shift", true));
-  optionList.push_back(ParamClass("small", true));
-  optionList.push_back(ParamClass("remote", true));
+  optionList.push_back(ParamClass("small", false));
+  optionList.push_back(ParamClass("remote", false));
   CommandLineParserClass parser (optionList);
   bool success = parser.Parse (argc, argv);
   if (!success || parser.NumFiles() < 1 || parser.NumFiles() > 2) {
@@ -1227,6 +1236,8 @@ int main(int argc, char** argv)
       shift[i] = strtod (components[i].c_str(), NULL);
     wfvisual.SetShift (shift);
   }
+  if (parser.Found("small"))
+    wfvisual.SetViewportSize (600);
 
   wfvisual.Read (parser.GetFile(0));
 
