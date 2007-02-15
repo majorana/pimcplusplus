@@ -10,7 +10,7 @@ bool SphereObject::OffScreenListCreated(false);
 
 SphereObject::SphereObject(bool offScreen) : 
   Radius(1.0), Color(1.0, 0.0, 0.0), Pos(0.0, 0.0, 0.0),
-  OffScreen(offScreen)
+  OffScreen(offScreen), NumFacets (20)
 {
   if (offScreen) {
     if (!OffScreenListCreated) {
@@ -33,7 +33,7 @@ SphereObject::SphereObject(bool offScreen) :
     SphereListNum = glGenLists(1);
 
     glNewList (SphereListNum, GL_COMPILE);
-    gluSphere(qobj, 1.0, 30, 30);
+    gluSphere(qobj, 1.0, NumFacets, NumFacets);
     gluDeleteQuadric(qobj);
     glEndList();
     SphereListCreated = true;
@@ -73,6 +73,12 @@ SphereObject::Set()
   glPopMatrix();
   //  gluDeleteQuadric (qobj);
   End();
+}
+
+void
+SphereObject::SetNumFacets(int num)
+{
+  NumFacets = num;
 }
 
 void 

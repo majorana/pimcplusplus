@@ -1,6 +1,7 @@
 #include "WFVis.h"
 #include <GL/glut.h>
 #include "ElementData.h"
+#include "ParseCommand.h"
 
 WFVisualClass::WFVisualClass() :
   MainVBox(false, 0), 
@@ -21,7 +22,11 @@ WFVisualClass::WFVisualClass() :
   WFDisplay(MAG2),
   ResetIso(false),
   SaveStateChooser ("State filename", Gtk::FILE_CHOOSER_ACTION_SAVE),
-  OpenStateChooser ("State filename", Gtk::FILE_CHOOSER_ACTION_OPEN)
+  OpenStateChooser ("State filename", Gtk::FILE_CHOOSER_ACTION_OPEN),
+  UpdateIsoType(false), 
+  UpdateIsoVal(false),
+  DoShift (false),
+  Shift (0.0, 0.0, 0.0)
 {
   //Glib::thread_init();
   WFIso.Dynamic = false;
@@ -609,6 +614,8 @@ WFVisualClass::DrawFrame(bool offScreen)
       PathVis.Objects.push_back(&WFIso);
   }
   if (MultiBandButton.get_active()) {
+    if (UpdateIsoVal || UpdateIsoType)
+      UpdateMultiIsos();
     for (int i=0; i<VisibleBandRows.size(); i++) {
       BandRow& band = *(VisibleBandRows[i]);
       if (band.Iso != NULL)
@@ -730,7 +737,7 @@ WFVisualClass::Read(string filename)
   for (int i=0; i<pos.extent(0); i++) {
     AtomPos(i) = Vec3(pos(i,0), pos(i,1), pos(i,2));
     for (int j=0; j<3; j++)
-      AtomPos(i) -= 0.5*Box(j);
+      AtomPos(i) -= (0.5-Shift[j])*Box(j);
   }
   assert (Infile.ReadVar("atom_types", AtomTypes));
   Infile.CloseSection (); // "ions"
@@ -781,6 +788,7 @@ WFVisualClass::OnIsoChange()
   rsLabel.set_text(rstext);
   
   UpdateIso = true;
+  UpdateIsoVal = true;
   DrawFrame();
 }
 
@@ -841,13 +849,17 @@ WFVisualClass::ReadWF (int kpoint, int band)
   int Ny = wfdata.extent(1);
   int Nz = wfdata.extent(2);
   MaxVal = 0.0;
+  int xShift, yShift, zShift;
+  xShift = round(Shift[0]*wfdata.extent(0));
+  yShift = round(Shift[1]*wfdata.extent(1));
+  zShift = round(Shift[2]*wfdata.extent(2));
   for (int ix=0; ix<wfdata.extent(0); ix++)
     for (int iy=0; iy<wfdata.extent(1); iy++)
       for (int iz=0; iz<wfdata.extent(2); iz++) {
 	// WF data is store from 0 to Lx, not -Lx/2 to Lx/2
-	int jx = (ix/*+Nx/2*/)%(Nx-1);
-	int jy = (iy/*+Ny/2*/)%(Ny-1);
-	int jz = (iz/*+Nz/2*/)%(Nz-1);
+	int jx = (ix-xShift+Nx-1/*+Nx/2*/)%(Nx-1);
+	int jy = (iy-yShift+Ny-1/*+Ny/2*/)%(Ny-1);
+	int jz = (iz-zShift+Nz-1/*+Nz/2*/)%(Nz-1);
 	if (WFDisplay == MAG2) {
 	  double rho = (wfdata(jx,jy,jz,0)*wfdata(jx,jy,jz,0) +
 			wfdata(jx,jy,jz,1)*wfdata(jx,jy,jz,1));
@@ -900,6 +912,9 @@ WFVisualClass::OnDisplayRadio(WFDisplayType type)
     UpdateIso = true;  ResetIso = true;
     DrawFrame ();
   }
+  UpdateIsoType = true;
+  if (MultiBandButton.get_active())
+    DrawFrame();
 }
 
 
@@ -1067,8 +1082,6 @@ WFVisualClass::OnBandToggle (int row)
   if (band.Check.get_active()) {
     if (band.Iso == NULL) {
       band.Iso = new Isosurface;
-      cerr << "Creating new isosuface for k-point " << ki 
-	   << " and band " << bi << endl;
       if (FileIsOpen) {
 	ReadWF (ki, bi);
 	Xgrid.Init(-0.5, 0.5, WFData.extent(0));
@@ -1107,11 +1120,65 @@ WFVisualClass::OnBandToggle (int row)
 }
 
 void
-WFVisualClass::DrawMultiIsos()
+WFVisualClass::UpdateMultiIsos()
 {
+  for (int i=0; i<VisibleBandRows.size(); i++) {
+    int ki = i / NumBands;
+    int bi = i % NumBands;
+    if (VisibleBandRows[i]->Iso != NULL) {
+      Isosurface &iso = *(VisibleBandRows[i]->Iso);
+      if (UpdateIsoType) 
+	ReadWF(ki, bi);
+      if (UpdateIsoType || UpdateIsoVal) {
+	if (WFDisplay == MAG2) {
+	  iso.SetColor (0.0, 0.8, 0.0);
+	  iso.SetIsoval(MaxVal*IsoAdjust.get_value());
+	}
+	else {
+	  vector<TinyVector<double,3> > colors;
+	  colors.push_back(TinyVector<double,3> (0.8, 0.0, 0.0));
+	  colors.push_back(TinyVector<double,3> (0.0, 0.0, 0.8));
+	  iso.SetColor(colors);
+	  vector<double> vals;
+	  vals.push_back(+MaxVal*IsoAdjust.get_value());
+	  vals.push_back(-MaxVal*IsoAdjust.get_value());
+	  iso.SetIsoval(vals);
+	}
+      }
+    }
+  }
+  UpdateIsoVal = false;
+  UpdateIsoType = false;
+}
+
+void
+WFVisualClass::SetShift(Vec3 shift)
+{
+  DoShift = true;
+  Shift = shift;
 }
 
 
+vector<string>
+BreakString (string str, char sep)
+{
+  vector<string> strvec;
+  int len = str.size();
+  int i = 0;
+  while (i < len) {
+    char s[2];
+    s[1] = '\0';
+    string item;
+    while (str[i] != sep && i < len) {
+      s[0] = str[i];
+      item.append(s);
+      i++;
+    }
+    strvec.push_back(item);
+    i++;
+  }
+  return strvec;
+}
 
 
 int main(int argc, char** argv)
@@ -1122,11 +1189,23 @@ int main(int argc, char** argv)
   Gtk::GL::init(argc, argv);
   glutInit(&argc, argv);
 
-  if (argc < 2) {
-    cerr << "Usage:\n  wfvis++ myfile.h5\n";
+  list<ParamClass> optionList;
+  optionList.push_back(ParamClass("shift", true));
+  optionList.push_back(ParamClass("small", true));
+  optionList.push_back(ParamClass("remote", true));
+  CommandLineParserClass parser (optionList);
+  bool success = parser.Parse (argc, argv);
+  if (!success || parser.NumFiles() < 1 || parser.NumFiles() > 2) {
+    cerr << "Usage:\n  wfvis++ [options...] myfile.h5 [statefile.h5]\n"
+	 << "Options:\n"
+	 << "  --shift x,y,z       shift by reduced coordinates\n"
+	 << "  --small             reduce size for small displays\n"
+	 << "  --remote            reduce data transfer for remote operation\n"
+	 << "                      over a network connection\n";
     exit (1);
   }
   
+
   // Query OpenGL extension version.
   int major, minor;
   Gdk::GL::query_version(major, minor);
@@ -1135,9 +1214,24 @@ int main(int argc, char** argv)
 
   // Instantiate and run the application.
   WFVisualClass wfvisual;
-  wfvisual.Read (argv[1]);
-  if (argc > 2)
-    wfvisual.ReadState (argv[2]);
+
+  if (parser.Found("shift")) {
+    string shiftStr = parser.GetArg("shift");
+    Vec3 shift;
+    vector<string> components = BreakString (shiftStr, ',');
+    if (components.size() != 3) {
+      cerr << "Expected 3 components for shift.\n";
+      abort();
+    }
+    for (int i=0; i<3; i++)
+      shift[i] = strtod (components[i].c_str(), NULL);
+    wfvisual.SetShift (shift);
+  }
+
+  wfvisual.Read (parser.GetFile(0));
+
+  if (parser.NumFiles() == 2)
+    wfvisual.ReadState (parser.GetFile(1));
   kit.run(wfvisual);
 
   return 0;

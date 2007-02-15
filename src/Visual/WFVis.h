@@ -41,6 +41,9 @@ protected:
   BoxClass Box;
   int Currentk, CurrentBand;
   WFDisplayType WFDisplay;
+  // This stores the amount to shift the coordinates by
+  Vec3 Shift;
+  bool DoShift;
 
   /////////////
   // Widgets //
@@ -113,12 +116,12 @@ protected:
   Gtk::CheckButton MultiBandButton;
   void SetupBandTable();
   void OnMultiBandToggle(), OnBandToggle(int row);
-  void DrawMultiIsos();
+  void UpdateMultiIsos();
 
   /////////////////
   // State flags //
   /////////////////
-  bool UpdateIso, ResetIso;
+  bool UpdateIso, UpdateIsoVal, UpdateIsoType, ResetIso;
   bool UpdatePlane[3];
   
   /////////////////////////////////////
@@ -171,7 +174,7 @@ public:
   void Read(string filename);
   bool ReadState (string fname);
   bool DrawFrame(bool offScreen=false);
-
+  void SetShift (Vec3 shift);
   
   WFVisualClass ();
   virtual ~WFVisualClass();

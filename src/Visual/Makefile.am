@@ -81,6 +81,8 @@ wfvis___SOURCES =       \
     GLObject.h          \
     WFVis.cc            \
     WFVis.h             \
+    ParseCommand.cc     \
+    ParseCommand.h      \
     PathVis.cc          \
     PathVis.h           \
     PlaneObject.cc      \

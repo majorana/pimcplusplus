@@ -14,12 +14,14 @@ protected:
   bool OffScreen;
   Mat3 Lattice;
   void Set();
+  int NumFacets;
 public:
   void SetPos (Vec3 pos);
   void SetBox (Mat3 lattice);
   void SetBox (Vec3 box);
   void SetRadius (double radius);
   void SetColor (Vec3 color);
+  void SetNumFacets(int num);
   void DrawPOV (FILE *fout, string rotString);
   SphereObject(bool offScreen=false);
 };
