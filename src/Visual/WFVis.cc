@@ -935,6 +935,11 @@ WFVisualClass::WriteState(string fname)
   out.WriteVar ("Isosurface", IsoButton.get_active());
   out.WriteVar ("Clip", ClipButton.get_active());
   out.WriteVar ("Perspective", PerspectButton.get_active());
+  out.WriteVar ("MultiBands", MultiBandButton.get_active());
+  Array<bool,1> visibleBands (VisibleBandRows.size());
+  for (int i=0; i<VisibleBandRows.size(); i++)
+    visibleBands(i) = VisibleBandRows[i]->Check.get_active();
+  out.WriteVar ("VisibleBands", visibleBands);
 
   string wftype;
   if (WFDisplay == REAL_PART)
@@ -985,6 +990,14 @@ WFVisualClass::ReadState (string fname)
   PerspectButton.set_active(active);
   if (in.ReadVar ("CoordAxes", active))
     CoordToggle->set_active(active);
+  if (in.ReadVar ("MultiBands", active))
+    MultiBandButton.set_active(active);
+  Array<bool,1> visibleBands;
+  if (in.ReadVar ("VisibleBands", visibleBands))
+    for (int i=0; i<visibleBands.size(); i++) 
+      VisibleBandRows[i]->Check.set_active(visibleBands(i));
+
+
   string wftype;
   assert(in.ReadVar ("WFDisplay", wftype));
   if (wftype == "real") {
