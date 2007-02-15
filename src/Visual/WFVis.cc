@@ -850,9 +850,9 @@ WFVisualClass::ReadWF (int kpoint, int band)
   int Nz = wfdata.extent(2);
   MaxVal = 0.0;
   int xShift, yShift, zShift;
-  xShift = round(Shift[0]*wfdata.extent(0));
-  yShift = round(Shift[1]*wfdata.extent(1));
-  zShift = round(Shift[2]*wfdata.extent(2));
+  xShift = (int)round(Shift[0]*wfdata.extent(0));
+  yShift = (int)round(Shift[1]*wfdata.extent(1));
+  zShift = (int)round(Shift[2]*wfdata.extent(2));
   for (int ix=0; ix<wfdata.extent(0); ix++)
     for (int iy=0; iy<wfdata.extent(1); iy++)
       for (int iz=0; iz<wfdata.extent(2); iz++) {
@@ -1111,8 +1111,6 @@ WFVisualClass::OnBandToggle (int row)
     if (band.Iso != NULL) {
       delete band.Iso;
       band.Iso = NULL;
-      cerr << "Deleted band for k-point " << ki 
-	   << " and band " << bi << endl;
     }
   }
   if (MultiBandButton.get_active())
@@ -1239,7 +1237,6 @@ int main(int argc, char** argv)
   if (parser.Found("small"))
     wfvisual.SetViewportSize (600);
 
-  cerr << "Filename = \"" << parser.GetFile(0) << "\".\n";
   wfvisual.Read (parser.GetFile(0));
 
   if (parser.NumFiles() == 2)
