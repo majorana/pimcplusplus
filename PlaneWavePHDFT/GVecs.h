@@ -32,7 +32,7 @@ protected:
   // This stores the differences between g-vectors:
   Array<Vec3,1> GDiff;
   /// Lattice[0,:] gives the first primitive lattice vector, etc.
-  Mat3 Lattice;
+  Mat3 Lattice, LatticeInv, RecipLattice;
   // The inverse of the norm of the above:  used to compute the
   // Hartree potential in DFT
   Array<double,1> GDiffInv2;
@@ -91,6 +91,12 @@ public:
 
   inline Mat3 GetLattice() const
   { return Lattice; }
+
+  inline Mat3 GetLatticeInv() const
+  { return LatticeInv; }
+
+  inline Mat3 GetRecipLattice() const
+  { return RecipLattice; }
 
   inline Vec3 GetkBox()
   { return kBox; }

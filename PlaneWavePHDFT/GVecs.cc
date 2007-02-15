@@ -104,6 +104,11 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
     box[0], 0.0   , 0.0,
     0.0   , box[1], 0.0,
     0.0   , 0.0   , box[2];
+  LatticeInv =
+    1.0/box[0],    0.0    ,   0.0    ,
+       0.0    , 1.0/box[1],   0.0    ,
+       0.0    ,    0.0    , 1.0/box[2];
+  RecipLattice = 2.0*M_PI*LatticeInv;
 
   kCut = kcut;
   kBox[0]=2.0*M_PI/box[0]; kBox[1]=2.0*M_PI/box[1]; kBox[2]=2.0*M_PI/box[2];
@@ -260,11 +265,23 @@ GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor)
   b[0] = 2.0*M_PI*volInv * cross(a[1], a[2]);  
   b[1] = 2.0*M_PI*volInv * cross(a[2], a[0]);
   b[2] = 2.0*M_PI*volInv * cross(a[0], a[1]);
-
-  cerr << "b0 = " << b[0] << endl;
-  cerr << "b1 = " << b[1] << endl;
-  cerr << "b2 = " << b[2] << endl;
-
+  LatticeInv(0,0) =  (Lattice(1,1)*Lattice(2,2) - Lattice(2,1)*Lattice(1,2));
+  LatticeInv(0,1) = -(Lattice(1,0)*Lattice(2,2) - Lattice(1,2)*Lattice(2,0));
+  LatticeInv(0,2) =  (Lattice(1,0)*Lattice(2,1) - Lattice(1,1)*Lattice(2,0));
+  LatticeInv(1,0) = -(Lattice(0,1)*Lattice(2,2) - Lattice(0,2)*Lattice(2,1));
+  LatticeInv(1,1) =  (Lattice(0,0)*Lattice(2,2) - Lattice(0,2)*Lattice(2,0));
+  LatticeInv(1,2) = -(Lattice(0,0)*Lattice(2,1) - Lattice(0,1)*Lattice(2,0));
+  LatticeInv(2,0) =  (Lattice(0,1)*Lattice(1,2) - Lattice(0,2)*Lattice(1,1));
+  LatticeInv(2,1) = -(Lattice(0,0)*Lattice(1,2) - Lattice(0,2)*Lattice(1,0));
+  LatticeInv(2,2) =  (Lattice(0,0)*Lattice(1,1) - Lattice(0,1)*Lattice(1,0));
+  LatticeInv   = volInv * LatticeInv;
+  RecipLattice = 2.0*M_PI * LatticeInv;
+  /// Make sure we've computed the inverse lattice properly
+  Mat3 ident = LatticeInv * Lattice;
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++) 
+      if (i==j) assert (fabs(ident(i,j)-1.0) < 1.0e-12);
+      else      assert (fabs(ident(i,j))      < 1.0e-12);
 
   GVecs.resize(gvecs.size());
   Indices.resize(gvecs.size());
