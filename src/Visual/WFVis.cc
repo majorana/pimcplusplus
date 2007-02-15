@@ -1239,6 +1239,7 @@ int main(int argc, char** argv)
   if (parser.Found("small"))
     wfvisual.SetViewportSize (600);
 
+  cerr << "Filename = \"" << parser.GetFile(0) << "\".\n";
   wfvisual.Read (parser.GetFile(0));
 
   if (parser.NumFiles() == 2)
