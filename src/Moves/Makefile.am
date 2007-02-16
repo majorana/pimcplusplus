@@ -12,7 +12,7 @@ else
   noinst_LTLIBRARIES = libmoves.la
 endif
 
-libmovesDev_la_CXXFLAGS = -DBUILD_DEV $(COMMON_CFLAGS) $(QMC_DEF) $(LIBXML_LIB)
+libmovesDev_la_CXXFLAGS = -DBUILD_DEV $(COMMON_CFLAGS) $(QMC_DEF) $(LIBXML_LIB) $(MPI_DEF)
 libmovesDev_la_SOURCES  =        \
     AVBMove.cc                   \
     AVBMove.h                    \
@@ -113,7 +113,7 @@ libmovesDev_la_SOURCES  =        \
     WormPermuteStage.h           \
     WormPermuteStage.cc   
 
-libmoves_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF) $(LIBXML_LIB)
+libmoves_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF) $(LIBXML_LIB) $(MPI_DEF)
 libmoves_la_SOURCES  =           \
     AVBMove.cc                   \
     AVBMove.h                    \
