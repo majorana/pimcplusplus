@@ -4,7 +4,7 @@ else
   noinst_LTLIBRARIES = libactions.la
 endif
 
-libactions_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF) $(BOOST_LIB) $(LIBXML_LIB)
+libactions_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF) $(BOOST_LIB) $(LIBXML_LIB) $(MPI_DEF)
 libactions_la_SOURCES =            \
     ActionBase.cc                  \
     ActionBase.h                   \
@@ -76,7 +76,7 @@ libactions_la_SOURCES =            \
     VariationalPI.h                \
     VariationalPI.cc               
 
-libactionsDev_la_CXXFLAGS = -DBUILD_DEV $(COMMON_CFLAGS) $(QMC_DEF) $(BOOST_LIB) $(LIBXML_LIB)
+libactionsDev_la_CXXFLAGS = -DBUILD_DEV $(COMMON_CFLAGS) $(QMC_DEF) $(BOOST_LIB) $(LIBXML_LIB) $(MPI_DEF)
 libactionsDev_la_SOURCES =         \
     ActionBase.cc                  \
     ActionBase.h                   \
