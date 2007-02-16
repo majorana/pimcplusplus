@@ -213,7 +213,8 @@ void MolMoveClass::MoveDimerSeparation(int slice, Array<int,1> mol1, Array<int,1
   //cerr << "D vector between O is " << translate << endl;
   double mag = PathData.Path.Random.LocalGaussian(Sigma);
   //cerr << "D random # is " << mag << endl;
-  translate = Scale(translate, mag);
+  translate = Renormalize(translate, mag);
+  //translate = Scale(translate, mag);
   //cerr << "D rescaled vector is " << translate << endl;
   
   assert(mol1.size() == mol2.size());
@@ -231,11 +232,16 @@ void MolMoveClass::MoveDimerSeparation(int slice, Array<int,1> mol1, Array<int,1
 }
 
 void MolMoveClass::StressBond(int slice, int ptcl, int mol, double s){
+  //cerr << "Bond stretch for " << ptcl << " and COM " << mol << endl;
   dVec O = PathData.Path(slice,mol);
-  dVec v = PathData.Path(slice,ptcl) - O;
+  dVec v0 = PathData.Path(slice,ptcl) - O;
+  //cerr << "  Initial coords are " << O << " and " << v0 << " wrt O " << endl;
   double scale = 1 + s;
-  v = Scale(v,scale);
+  //dVec v = Scale(v0,scale);
+  dVec v = v0*scale;
+  //cerr << "  scaled " << v0 << " by " << scale << " to " << v << endl;
   PathData.Path.SetPos(slice, ptcl, O+v);
+  //cerr << "  Final coords are " << O << " and " << v << " wrt O " << endl;
 }
 
 void MolMoveClass::StressAngle(int slice, int ptcl, dVec axis, double theta){
@@ -280,6 +286,7 @@ dVec ArbitraryRotate(dVec axis,dVec coord, double phi){
   newcoord(0) = x;
   newcoord(1) = y;
   newcoord(2) = z;
-  return (Scale(newcoord,perp_mag) + coord_aligned);
+  return (Renormalize(newcoord,perp_mag) + coord_aligned);
+  //return (Scale(newcoord,perp_mag) + coord_aligned);
 }
 

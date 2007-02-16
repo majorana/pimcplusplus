@@ -35,6 +35,14 @@ void MoleculeTranslate::Read(IOSectionClass &moveInput) {
 	MolMoveClass::Read(moveInput);
 }
 
+void MoleculeMulti::Read(IOSectionClass &moveInput) {
+  cerr << "  Multi read in" << endl;
+  Rotate.Read(moveInput);
+  Trans.Read(moveInput);
+  Stretch.Read(moveInput);
+	MolMoveClass::Read(moveInput);
+}
+
 void DimerMove::Read(IOSectionClass &moveInput) {
   cerr << "  Dimer Move read in" << endl;
   assert(moveInput.ReadVar("SetStep",Step));
@@ -255,6 +263,21 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	return 1;
 }
 
+double MoleculeMulti::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+  double r = Rotate.Sample(slice1, slice2, activeParticles);
+  double t = Trans.Sample(slice1, slice2, activeParticles);
+  double s = Stretch.Sample(slice1, slice2, activeParticles);
+
+  if (numMoves%10000 == 0 && numMoves>0){
+    cerr << numMoves << " moves; current MULTI ratio is " << double(numAccepted)/numMoves << endl;
+    cerr << "NOTE: please disregard acceptance output from individual moves; it will erroneously state 0" << endl;
+  }
+
+  numMoves++;
+
+	return(r*s*t); 
+}
+
 double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
   numMoves++;
 	//cerr << " ParticleTranslate::Sample" << endl;
@@ -318,7 +341,7 @@ double DummyEvaluate::Sample(int &slice1,int &slice2, Array<int,1> &activePartic
   if (numMoves%10000 == 0){
     cerr << numMoves << " moves; current DUMMY accept ratio is " << double(numAccepted)/numMoves << endl;
   }
-  cout << "DUMMY " << numAccepted << " acc out of " << numMoves << " = " << double(numAccepted)/numMoves << " and just for fun " << double(numAccepted)/(numMoves-1) << endl;
+  //cout << "DUMMY " << numAccepted << " acc out of " << numMoves << " = " << double(numAccepted)/numMoves << " and just for fun " << double(numAccepted)/(numMoves-1) << endl;
 
 	return 1;
 }
@@ -356,26 +379,30 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
 	}
 
 	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Path.MolMembers(MoveList(0)) << endl;
-	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
+	for(int molIndex=0; molIndex<MoveList.size(); molIndex++){
+    int activeMol = MoveList(molIndex);
 
 		// get relevant bonds from MoveList and PathData.Path.MolMembers
     vector<int> bondPtcls(0);
     vector<int*> anglePairs(0);
-    for(int p1=0; p1<PathData.Path.MolMembers(activeMol).size(); p1++){
+    for(int p1=1; p1<PathData.Path.MolMembers(activeMol).size(); p1++){
       int ptcl1 = PathData.Path.MolMembers(activeMol)(p1);
-      if(ptcl1 != PathData.Path.MolRef(ptcl1))
+      if(ptcl1 != PathData.Path.MolRef(ptcl1)){
         bondPtcls.push_back(ptcl1);
+        //cerr << "S adding bound ptcl " << ptcl1 << endl;
+      }
       for(int p2=p1+1; p2<PathData.Path.MolMembers(activeMol).size(); p2++){
         int ptcl2 = PathData.Path.MolMembers(activeMol)(p2);
         int pair[2];
         pair[0] = ptcl1;
         pair[1] = ptcl2;
         anglePairs.push_back(pair);
+        //cerr << "S adding angle pair " << pair[0] << " & " << pair[1] << endl;
       }
     }
     // stretch bonds along their length
     for(int b=0; b<bondPtcls.size(); b++){
-      double strain = 2*(PathData.Path.Random.Local()-0.5)*s;
+      double strain = 2*s*(PathData.Path.Random.Local()-0.5);
       StressBond(slice, bondPtcls[b], activeMol, strain);
     }
     // stretch angles by rotating
@@ -383,9 +410,15 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
       dVec v1 = PathData.Path(slice,anglePairs[a][0]) - PathData.Path(slice,activeMol);
       dVec v2 = PathData.Path(slice,anglePairs[a][1]) - PathData.Path(slice,activeMol);
       double theta0 = GetAngle(v1,v2);
-      double dtheta = 2*theta0*(PathData.Path.Random.Local()-0.5);
+      double dtheta = 2*s*theta0*(PathData.Path.Random.Local()-0.5);
+      //cerr << "S going to stretch angle " << theta0*180/M_PI << " by dtheta which is in deg " << dtheta*180/M_PI << endl;
       dVec u = crossprod(v1,v2);
       StressAngle(slice, anglePairs[a][1],Normalize(u),dtheta);
+
+      v1 = PathData.Path(slice,anglePairs[a][0]) - PathData.Path(slice,activeMol);
+      v2 = PathData.Path(slice,anglePairs[a][1]) - PathData.Path(slice,activeMol);
+      double afterTheta = GetAngle(v1,v2);
+      //cerr << "S and after stress angle is " << afterTheta << " in deg " << afterTheta*180/M_PI << endl;
 	  }
   }
 

@@ -45,6 +45,7 @@ class MoleculeRotate : public MolMoveClass
   //  };
 };
 
+
 class BondStretch : public MolMoveClass
 {
  public:
@@ -160,6 +161,33 @@ class DummyEvaluate : public MolMoveClass
 
   DummyEvaluate(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
     MolMoveClass (myPathData,outSection, numToRead, start)
+    {
+    }
+};
+
+class MoleculeMulti : public MolMoveClass
+{
+  MoleculeRotate Rotate;
+  MoleculeTranslate Trans;
+  BondStretch Stretch;
+
+ public:
+  double Theta;
+  double Step;
+  double s;
+  double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
+  void Read(IOSectionClass &moveInput);
+
+  MoleculeMulti(PathDataClass &myPathData,IOSectionClass outSection) : 
+    MolMoveClass (myPathData,outSection),
+    Rotate(myPathData, outSection), Trans(myPathData, outSection), Stretch(myPathData, outSection)
+    {
+			cerr << "MoleculeMulti constructor" << endl;
+    }
+
+  MoleculeMulti(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
+    MolMoveClass (myPathData,outSection, numToRead, start),
+    Rotate(myPathData, outSection, numToRead, start), Trans(myPathData, outSection, numToRead, start), Stretch(myPathData, outSection, numToRead, start)
     {
     }
 };

@@ -33,6 +33,10 @@ void MoleculeManagerClass::Read(IOSectionClass &in)
 	  	cerr << "Creating new Rotate move...";
     	MoveStage = new MoleculeRotate(PathData, IOSection, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
+	  } else if (method == "Multi"){
+	  	cerr << "Creating new Multiple move...";
+    	MoveStage = new MoleculeMulti(PathData, IOSection, actionsToRead, startIndex);
+	  	cerr << " done." << endl;
 	  } else if (method == "Stretch"){
 	  	cerr << "Creating new bond-stretching move...";
     	MoveStage = new BondStretch(PathData, IOSection, actionsToRead, startIndex);
