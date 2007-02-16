@@ -26,8 +26,13 @@ double Mag(dVec v);
 // i.e. generates a unit vector
 dVec Normalize(dVec v);
 
-// Scales a vector by a give scalar
+// Scales a vector by a given scalar
+// now deprecated
 dVec Scale(dVec v, double scale);
+
+// **Re-Scales** a vector by a given scalar
+// used to be called Scale()
+dVec Renormalize(dVec v, double scale);
 
 // Takes a vector u and a unit vector R
 // and returns the vector aligned that is

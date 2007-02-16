@@ -33,7 +33,15 @@ dVec Normalize(dVec v) {
   return norm;
 }
 
+dVec Renormalize(dVec v, double scale) {
+  double mag = Mag(v);
+  dVec norm = v/mag;
+  norm *= scale;
+  return norm;
+}
+
 dVec Scale(dVec v, double scale) {
+  cerr << "CALLING SCALE, NOW DEPRECATED.  PLEASE REPLACE WITH RENORMALIZE IN MOVEUTILS.  IT'S THE SAME THING BUT THE NAME IS CLEARER" << endl;
   double mag = Mag(v);
   dVec norm = v/mag;
   norm *= scale;
@@ -41,7 +49,8 @@ dVec Scale(dVec v, double scale) {
 }
 
 void Strip(dVec R, dVec u,dVec &aligned, dVec &perp){
-  aligned = Scale(R,dotprod(R,u));
+  //aligned = Scale(R,dotprod(R,u));
+  aligned = Renormalize(R,dotprod(R,u));
   perp = u - aligned;
 }
 
@@ -51,6 +60,7 @@ double GetAngle(dVec v1, dVec v2)
   mag *= Mag(v2);
   double dot = dotprod(v1,v2,mag);
   double angle = acos(dot);
+  //cerr << "Computed angle " << angle << " in deg " << angle*180/M_PI << endl;
 //  if (dot > 1.0){
 //    cerr << "OH CRAP: DOT PRODUCT IS " << dot << " between " << v1 << " and " << v2 << "; I used mag " << mag << " and I'm going to return " << angle << endl;
 //  }
