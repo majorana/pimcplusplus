@@ -75,7 +75,6 @@ FFT1D::k2r()
 void 
 FFT3D::resize(int nx, int ny, int nz)
 {
-  cerr << "FFT box size is " << nx << "x" << ny << "x" << nz << ".\n";
   if (Allocated) {
     FFT_FREE(rData);
     if (!InPlace)
@@ -137,7 +136,6 @@ FFT3D::k2r()
 void 
 FFT3D_r2c::resize(int nx, int ny, int nz)
 {
-  cerr << "FFT box size is " << nx << "x" << ny << "x" << nz << ".\n";
   if (Allocated) {
     FFT_FREE(rData);
     FFT_FREE(kData);
