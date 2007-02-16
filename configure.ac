@@ -82,9 +82,8 @@ case "${host_cpu}" in
        FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
-CXXFLAGS="$CXXFLAGS -g"
+CXXFLAGS="$CXXFLAGS -g -pthread"
 FFLAGS="$FFLAGS -g"
-
 
 # Checks if we want MPI support
 AC_ARG_ENABLE(mpi,    [  --enable-mpi            enable MPI support (default=no)])
