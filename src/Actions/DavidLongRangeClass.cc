@@ -68,7 +68,13 @@ double
 DavidLongRangeClass::SingleAction (int slice1, int slice2, 
 				   const Array<int,1> &activeParticles, 
 				   int level)
+
 {
+
+  if (GetMode() == NEWMODE)
+    Path.UpdateRho_ks(slice1, slice2, activeParticles, level);
+
+
   double total=0;
   double factor;
   for (int slice=slice1;slice<=slice2;slice++){
@@ -77,7 +83,7 @@ DavidLongRangeClass::SingleAction (int slice1, int slice2,
     else
       factor = 1.0;
     for (int species=0; species<Path.NumSpecies(); species++) {
-      Path.CalcRho_ks_Fast(slice,species);
+      ///COMMENTED OUT FOR UPDATERHOK      Path.CalcRho_ks_Fast(slice,species);
       //      PairActionFitClass &pa = *PairMatrix(species,species);
       //      if (pa.IsLongRange()) {
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
