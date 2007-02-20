@@ -26,6 +26,8 @@ public:
   void WriteRatio();
   double Sample(int &slice1,int &slice2, 
 		Array<int,1> &activeParticles);
+  Array<double,2> Correlated;
+  bool UseCorrelatedSampling;
   void Accept();
   void Reject();
   int TotalLevels;
