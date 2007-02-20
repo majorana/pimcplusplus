@@ -79,7 +79,7 @@ WFVisualClass::WFVisualClass() :
   VisibleBandWindow.add (VisibleBandTable);
   VisibleBandFrame.set_label("Multiband");
   OptionsBox.pack_start(VisibleBandFrame, Gtk::PACK_SHRINK, 5);
-  VisibleBandWindow.property_height_request().set_value(700);
+  VisibleBandWindow.property_height_request().set_value(680);
   VisibleBandWindow.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
   MultiBandButton.set_label ("Enable");
   MultiBandButton.signal_toggled().connect
@@ -589,8 +589,8 @@ WFVisualClass::DrawFrame(bool offScreen)
 	colors.push_back(TinyVector<double,3> (0.0, 0.0, 0.8));
 	WFIso.SetColor(colors);
 	vector<double> vals;
-	vals.push_back(+MaxVal*IsoAdjust.get_value());
-	vals.push_back(-MaxVal*IsoAdjust.get_value());
+	vals.push_back(+MaxVal*sqrt(IsoAdjust.get_value()));
+	vals.push_back(-MaxVal*sqrt(IsoAdjust.get_value()));
 	WFIso.SetIsoval(vals);
       }
       xPlane.Init(); yPlane.Init(); zPlane.Init();
@@ -837,6 +837,12 @@ WFVisualClass::ReadWF (int kpoint, int band)
   Array<double,4> wfdata;
   assert (Infile.OpenSection("eigenstates"));
   assert (Infile.OpenSection("twist", kpoint));
+  Array<double,1> twist_angle;
+  assert (Infile.ReadVar("twist_angle", twist_angle));
+  bool gammaPoint = 
+    (fabs(twist_angle(0)) < 1.0e-12) &&
+    (fabs(twist_angle(1)) < 1.0e-12) &&
+    (fabs(twist_angle(2)) < 1.0e-12);
   assert (Infile.OpenSection("band", band));
   assert (Infile.ReadVar ("eigenvector", wfdata));
   Infile.CloseSection(); // "eigenstates"
@@ -848,6 +854,34 @@ WFVisualClass::ReadWF (int kpoint, int band)
   int Nx = wfdata.extent(0);
   int Ny = wfdata.extent(1);
   int Nz = wfdata.extent(2);
+  // If we're at the gamma point, adjust the phase of the WF so that
+  // it is purely real.
+  if (gammaPoint && ((WFDisplay == REAL_PART) || (WFDisplay == IMAG_PART))) {
+    double maxRho = 0.0;
+    int ixMax, iyMax, izMax;
+    for (int ix=0; ix<Nx; ix+=5)
+      for (int iy=0; iy<Ny; iy+=5)
+	for (int iz=0; iz<Nz; iz+=5) {
+	  double rho = (wfdata(ix,iy,iz,0)*wfdata(ix,iy,iz,0) +
+			wfdata(ix,iy,iz,1)*wfdata(ix,iy,iz,1));
+	  if (rho > maxRho) {
+	    maxRho = rho;
+	    ixMax = ix; iyMax = iy; izMax=iz;
+	  }
+	}
+    double phase = atan2 (wfdata(ixMax, iyMax, izMax,1),
+			  wfdata(ixMax, iyMax, izMax,0));
+    complex<double> factor (cos(phase), -sin(phase));
+    for (int ix=0; ix<wfdata.extent(0); ix++)
+      for (int iy=0; iy<wfdata.extent(1); iy++)
+	for (int iz=0; iz<wfdata.extent(2); iz++) {
+	  complex<double> wf(wfdata(ix,iy,iz,0), wfdata(ix,iy,iz,1));	  
+	  wf *= factor;
+	  wfdata(ix,iy,iz,0) = wf.real();
+	  wfdata(ix,iy,iz,1) = wf.imag();
+	}
+  }
+    
   MaxVal = 0.0;
   int xShift, yShift, zShift;
   xShift = (int)round(Shift[0]*wfdata.extent(0));
@@ -871,6 +905,7 @@ WFVisualClass::ReadWF (int kpoint, int band)
 	  WFData(ix,iy,iz) = wfdata(jx, jy, jz, 1);
 	MaxVal = max(MaxVal, fabs(WFData(ix,iy,iz)));
       }
+  cerr << "MaxVal = " << MaxVal << endl;
   return true;
 }
 
@@ -1112,8 +1147,8 @@ WFVisualClass::OnBandToggle (int row)
 	  colors.push_back(TinyVector<double,3> (0.0, 0.0, 0.8));
 	  band.Iso->SetColor(colors);
 	  vector<double> vals;
-	  vals.push_back(+MaxVal*IsoAdjust.get_value());
-	  vals.push_back(-MaxVal*IsoAdjust.get_value());
+	  vals.push_back(+MaxVal*sqrt(IsoAdjust.get_value()));
+	  vals.push_back(-MaxVal*sqrt(IsoAdjust.get_value()));
 	  band.Iso->SetIsoval(vals);
 	}
       }
@@ -1151,8 +1186,8 @@ WFVisualClass::UpdateMultiIsos()
 	  colors.push_back(TinyVector<double,3> (0.0, 0.0, 0.8));
 	  iso.SetColor(colors);
 	  vector<double> vals;
-	  vals.push_back(+MaxVal*IsoAdjust.get_value());
-	  vals.push_back(-MaxVal*IsoAdjust.get_value());
+	  vals.push_back(+MaxVal*sqrt(IsoAdjust.get_value()));
+	  vals.push_back(-MaxVal*sqrt(IsoAdjust.get_value()));
 	  iso.SetIsoval(vals);
 	}
       }
