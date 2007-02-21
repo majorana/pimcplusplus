@@ -372,13 +372,19 @@ Isosurface::Set()
     glBegin(GL_TRIANGLES);
     for (int ix=0; ix<(Nx-1); ix++) {
       for (int iy=0; iy<(Ny-1); iy++) {
+	int index = 0;
+	index |= ((F(ix  , iy+1, 0)[0] > Isoval) << 4);
+	index |= ((F(ix+1, iy+1, 0)[0] > Isoval) << 5);
+	index |= ((F(ix+1, iy  , 0)[0] > Isoval) << 6);
+	index |= ((F(ix  , iy  , 0)[0] > Isoval) << 7);
 	for (int iz=0; iz<(Nz-1); iz++) { 
+	  index = (index & 0x000000f0) >> 4;
 	  /// Check corners
-	  int index = 0;
-	  index |= (F(ix  ,  iy+1, iz  )[0] > Isoval);
-	  index |= ((F(ix+1, iy+1, iz  )[0] > Isoval) << 1);
-	  index |= ((F(ix+1, iy  , iz  )[0] > Isoval) << 2);
-	  index |= ((F(ix  , iy  , iz  )[0] > Isoval) << 3);
+	  //	  int index = 0;
+// 	  index |= (F(ix  ,  iy+1, iz  )[0] > Isoval);
+// 	  index |= ((F(ix+1, iy+1, iz  )[0] > Isoval) << 1);
+// 	  index |= ((F(ix+1, iy  , iz  )[0] > Isoval) << 2);
+// 	  index |= ((F(ix  , iy  , iz  )[0] > Isoval) << 3);
 	  index |= ((F(ix  , iy+1, iz+1)[0] > Isoval) << 4);
 	  index |= ((F(ix+1, iy+1, iz+1)[0] > Isoval) << 5);
 	  index |= ((F(ix+1, iy  , iz+1)[0] > Isoval) << 6);

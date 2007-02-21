@@ -567,6 +567,7 @@ WFVisualClass::DrawFrame(bool offScreen)
       Ygrid.Init(-0.5, 0.5, WFData.extent(1));
       Zgrid.Init(-0.5, 0.5, WFData.extent(2));
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+      // WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
       WFIso.SetLattice (Box.GetLattice());
       xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
@@ -575,6 +576,7 @@ WFVisualClass::DrawFrame(bool offScreen)
       Ygrid.Init(-0.5, 0.5, WFData.extent(1));
       Zgrid.Init(-0.5, 0.5, WFData.extent(2));
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+      // WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
       WFIso.SetLattice (Box.GetLattice());
       ResetIso = false;
     }
@@ -761,6 +763,7 @@ WFVisualClass::Read(string filename)
   Ygrid.Init(-0.5, 0.5, WFData.extent(1));
   Zgrid.Init(-0.5, 0.5, WFData.extent(2));
   WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+  //  WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
   WFIso.SetLattice(Box.GetLattice());
   CurrBand = 0; 
   Currk = 0;
@@ -1136,6 +1139,7 @@ WFVisualClass::OnBandToggle (int row)
 	Ygrid.Init(-0.5, 0.5, WFData.extent(1));
 	Zgrid.Init(-0.5, 0.5, WFData.extent(2));
 	band.Iso->Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+	//	band.Iso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
 	band.Iso->SetLattice (Box.GetLattice());
 	if (WFDisplay == MAG2) {
 	  band.Iso->SetColor (0.0, 0.8, 0.0);

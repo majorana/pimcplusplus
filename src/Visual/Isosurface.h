@@ -2,8 +2,11 @@
 #define ISOSURFACE_H
 
 #include <Common/Splines/MyTricubicSpline.h>
+//#include <Common/Splines/TricubicBspline.h>
 #include <GLObject.h>
 #include <vector>
+#include <Common/Blitz.h>
+
 
 /// This class uses to Marching Cubes algorithm to construct an
 /// isosurface from data tabulated on a 3D grid.  It inherits from
