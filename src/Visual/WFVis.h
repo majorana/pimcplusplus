@@ -53,7 +53,7 @@ protected:
   Gtk::HScale kScale, BandScale;
   Gtk::Adjustment kAdjust, BandAdjust;
   Gtk::Frame kFrame, BandFrame;
-  Glib::RefPtr<Gtk::ToggleAction> CoordToggle, SphereToggle;
+  Glib::RefPtr<Gtk::ToggleAction> CoordToggle, SphereToggle, BoxToggle;
   Gtk::RadioButtonGroup DisplayGroup;
   Glib::RefPtr<Gtk::RadioAction> RealRadio, ImagRadio, Mag2Radio;
   
@@ -155,6 +155,7 @@ protected:
   void OnViewReset();
   void OnCoordToggle();
   void OnSphereToggle();
+  void OnBoxToggle();
   void OnRadiusChange();
   void OnOpen();
   void OnDisplayRadio(WFDisplayType type);

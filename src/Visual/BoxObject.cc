@@ -19,8 +19,15 @@ BoxObject::Set (double lx, double ly, double lz, bool useClip)
 }
 
 void
-BoxObject::Set(Mat3 lattice, bool useClip)
+BoxObject::Set (Mat3 lattice, bool useClip)
 {
+  Set (lattice, true, useClip);
+}
+
+void
+BoxObject::Set (Mat3 lattice, bool visible, bool useClip)
+{
+  Visible = visible;
   Lx = lattice(0,0); Ly=lattice(1,1); Lz=lattice(2,2);
   Mat3 &l = lattice;
   LatticeVecs[0] = Vec3 (lattice(0,0), lattice(0,1), lattice(0,2));
@@ -66,35 +73,37 @@ BoxObject::Set(Mat3 lattice, bool useClip)
     glEnable(GL_CLIP_PLANE4);
     glEnable(GL_CLIP_PLANE5);
   }
-  // Now draw the cell
-  Vec3 a[3], ma[3];
-  a[0] = Vec3 (lattice(0,0), lattice(0,1), lattice(0,2));
-  a[1] = Vec3 (lattice(1,0), lattice(1,1), lattice(1,2));
-  a[2] = Vec3 (lattice(2,0), lattice(2,1), lattice(2,2));
-  ma[0] = -1.0*a[0];  ma[1] = -1.0*a[1];  ma[2] = -1.0*a[2];
-  Vec3 r[8];
-  r[0] = 0.5*(ma[0] + ma[1] + ma[2]);
-  r[1] = 0.5*(ma[0] + ma[1] +  a[2]);
-  r[2] = 0.5*(ma[0] +  a[1] +  a[2]);
-  r[3] = 0.5*(ma[0] +  a[1] + ma[2]);
-  r[4] = 0.5*( a[0] + ma[1] + ma[2]);
-  r[5] = 0.5*( a[0] + ma[1] +  a[2]);
-  r[6] = 0.5*( a[0] +  a[1] +  a[2]);
-  r[7] = 0.5*( a[0] +  a[1] + ma[2]);
-  glBegin(GL_LINES);
-  glVertex3dv(&(r[0][0])); glVertex3dv (&(r[1][0]));
-  glVertex3dv(&(r[1][0])); glVertex3dv (&(r[2][0]));
-  glVertex3dv(&(r[2][0])); glVertex3dv (&(r[3][0]));
-  glVertex3dv(&(r[3][0])); glVertex3dv (&(r[0][0]));
-  glVertex3dv(&(r[4][0])); glVertex3dv (&(r[5][0]));
-  glVertex3dv(&(r[5][0])); glVertex3dv (&(r[6][0]));
-  glVertex3dv(&(r[6][0])); glVertex3dv (&(r[7][0]));
-  glVertex3dv(&(r[7][0])); glVertex3dv (&(r[4][0]));
-  glVertex3dv(&(r[0][0])); glVertex3dv (&(r[4][0]));
-  glVertex3dv(&(r[1][0])); glVertex3dv (&(r[5][0]));
-  glVertex3dv(&(r[2][0])); glVertex3dv (&(r[6][0]));
-  glVertex3dv(&(r[3][0])); glVertex3dv (&(r[7][0]));
-  glEnd();
+  if (visible) {
+    // Now draw the cell
+    Vec3 a[3], ma[3];
+    a[0] = Vec3 (lattice(0,0), lattice(0,1), lattice(0,2));
+    a[1] = Vec3 (lattice(1,0), lattice(1,1), lattice(1,2));
+    a[2] = Vec3 (lattice(2,0), lattice(2,1), lattice(2,2));
+    ma[0] = -1.0*a[0];  ma[1] = -1.0*a[1];  ma[2] = -1.0*a[2];
+    Vec3 r[8];
+    r[0] = 0.5*(ma[0] + ma[1] + ma[2]);
+    r[1] = 0.5*(ma[0] + ma[1] +  a[2]);
+    r[2] = 0.5*(ma[0] +  a[1] +  a[2]);
+    r[3] = 0.5*(ma[0] +  a[1] + ma[2]);
+    r[4] = 0.5*( a[0] + ma[1] + ma[2]);
+    r[5] = 0.5*( a[0] + ma[1] +  a[2]);
+    r[6] = 0.5*( a[0] +  a[1] +  a[2]);
+    r[7] = 0.5*( a[0] +  a[1] + ma[2]);
+    glBegin(GL_LINES);
+    glVertex3dv(&(r[0][0])); glVertex3dv (&(r[1][0]));
+    glVertex3dv(&(r[1][0])); glVertex3dv (&(r[2][0]));
+    glVertex3dv(&(r[2][0])); glVertex3dv (&(r[3][0]));
+    glVertex3dv(&(r[3][0])); glVertex3dv (&(r[0][0]));
+    glVertex3dv(&(r[4][0])); glVertex3dv (&(r[5][0]));
+    glVertex3dv(&(r[5][0])); glVertex3dv (&(r[6][0]));
+    glVertex3dv(&(r[6][0])); glVertex3dv (&(r[7][0]));
+    glVertex3dv(&(r[7][0])); glVertex3dv (&(r[4][0]));
+    glVertex3dv(&(r[0][0])); glVertex3dv (&(r[4][0]));
+    glVertex3dv(&(r[1][0])); glVertex3dv (&(r[5][0]));
+    glVertex3dv(&(r[2][0])); glVertex3dv (&(r[6][0]));
+    glVertex3dv(&(r[3][0])); glVertex3dv (&(r[7][0]));
+    glEnd();
+  }
   End();
 }
 
@@ -175,6 +184,9 @@ BoxObject::POVLine (FILE *fout,
 void
 BoxObject::DrawPOV (FILE *fout, string rotString)
 {
+  if (!Visible)
+    return;
+
   double l[3];
   l[0] = sqrt(dot(LatticeVecs[0], LatticeVecs[0]));
   l[1] = sqrt(dot(LatticeVecs[1], LatticeVecs[1]));

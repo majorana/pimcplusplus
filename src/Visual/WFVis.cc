@@ -189,6 +189,10 @@ WFVisualClass::WFVisualClass() :
   Actions->add (SphereToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnSphereToggle));
 
+  BoxToggle = Gtk::ToggleAction::create("Box", "Box", "Show box", true);
+  Actions->add (BoxToggle,
+		sigc::mem_fun(*this, &WFVisualClass::OnBoxToggle));
+
   Actions->add (Gtk::Action::create("MenuDisplay", "Display"));
   Mag2Radio = Gtk::RadioAction::create
     (DisplayGroup, "Mag2", "Magnitude squared",
@@ -222,6 +226,7 @@ WFVisualClass::WFVisualClass() :
     "      <menuitem action='Reset'/>"
     "      <menuitem action='Nuclei'/>"
     "      <menuitem action='Axes'/>"
+    "      <menuitem action='Box'/>"
     "    </menu>"
     "    <menu action='MenuDisplay'>"
     "      <menuitem action='Real'/>"
@@ -430,6 +435,7 @@ bool
 WFVisualClass::DrawFrame(bool offScreen)
 {
   bool clipping = ClipButton.get_active();
+  bool boxVisible = BoxToggle->get_active();
   for (int i=0; i<PathVis.Objects.size(); i++) {
     if (PathVis.Objects[i]->Dynamic) {
       if (dynamic_cast<SphereObject*> (PathVis.Objects[i]) != NULL)
@@ -456,7 +462,7 @@ WFVisualClass::DrawFrame(bool offScreen)
   BoxObject *boxObject = new BoxObject;
   boxObject->SetColor (0.5, 0.5, 1.0);
   //boxObject->Set (Box, clipping);
-  boxObject->Set (Box.GetLattice(), clipping);
+  boxObject->Set (Box.GetLattice(), boxVisible, clipping);
   PathVis.Objects.push_back(boxObject);
   
   Vec3 nLattice[3];
@@ -480,9 +486,9 @@ WFVisualClass::DrawFrame(bool offScreen)
 	int type = (*iter).Type;
 	double radius = RadiusScale.get_value() *
 	  ElementData::GetRadius(type);
-	if ((n[0]+radius) > 0.5) 
+	if ((n[0]+radius/length[0]) > 0.5) 
 	  sphereList.push_front(AtomClass(r-Box(0), type));
-	if ((n[0]-radius) < -0.5) 
+	if ((n[0]-radius/length[0]) < -0.5) 
 	  sphereList.push_front(AtomClass(r+Box(0), type));
       }
       
@@ -492,9 +498,9 @@ WFVisualClass::DrawFrame(bool offScreen)
 	int type = (*iter).Type;
 	double radius = RadiusScale.get_value() *
 	  ElementData::GetRadius(type)/length[0];
-	if ((n[1]+radius) > 0.5)
+	if ((n[1]+radius/length[1]) > 0.5)
 	  sphereList.push_front(AtomClass(r-Box(1),type));
-	if ((n[1]-radius) < -0.5)
+	if ((n[1]-radius/length[1]) < -0.5)
 	  sphereList.push_front(AtomClass(r+Box(1),type));
       }
       
@@ -504,9 +510,9 @@ WFVisualClass::DrawFrame(bool offScreen)
 	int type = (*iter).Type;
 	double radius = RadiusScale.get_value() *
 	  ElementData::GetRadius(type);
-	if ((n[2]-radius) < -0.5)
+	if ((n[2]+radius/length[2]) > 0.5)
 	  sphereList.push_front(AtomClass(r-Box(2),type));
-	if ((n[2]-radius) < -0.5)
+	if ((n[2]-radius/length[2]) < -0.5)
 	  sphereList.push_front(AtomClass(r+Box(2),type));
       }
       // Now make disks to close spheres
@@ -922,6 +928,12 @@ WFVisualClass::OnCoordToggle()
 
 void
 WFVisualClass::OnSphereToggle()
+{
+  DrawFrame();
+}
+
+void
+WFVisualClass::OnBoxToggle()
 {
   DrawFrame();
 }
