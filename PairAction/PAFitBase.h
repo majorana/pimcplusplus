@@ -54,7 +54,7 @@ public:
   /// and needs to know about the number of particles.
   Array<double,2> U_RPA_long_k, dU_RPA_long_k;
   /// This stores the beta-derivative of the above.
-
+  bool SamplingTableRead;
   // Product of the two charges.  Zero if not coulomb or not charged.
   double Z1Z2;
 
@@ -131,7 +131,7 @@ public:
   // Fills in the Vlong_k and dVlong_k array.
   virtual void DoBreakup (const Vec3 &box, const Array<Vec3,1> &kVecs) 
   { }
-  PairActionFitClass() : Z1Z2(0.0)
+  PairActionFitClass() : Z1Z2(0.0), SamplingTableRead(false)
   { /* Do nothing */ }
 };
 

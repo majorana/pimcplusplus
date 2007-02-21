@@ -60,6 +60,11 @@ class DavidPAClass : public PairActionFitClass
   ///Same as ukj but stores the beta derivatives.
   Array<MultiCubicSpline,1> dukj; ///<(level )
   Array<CubicSpline,1> dUdRTimesSigmaSpline; ///<(level
+  Array<CubicSpline,1> dUdRTimesSigmaSpline_movers; ///<(level
+  Array<CubicSpline,1> d2UdR2TimesSigmaSpline; ///<(level
+  Array<CubicSpline,1> d2UdR2TimesSigmaSpline_movers; ///<(level
+
+  Array<double,1> SamplingTau;
 
   /////  MultiCubicSpline Pot;
   /// Calculate the U(s,q,z) value when given s,q,z and the level 
@@ -76,6 +81,9 @@ class DavidPAClass : public PairActionFitClass
   double dU(double q, double z, double s2, int level);
   double V(double r);
   double dUdRTimesSigma(double r,int level);
+  double dUdRTimesSigma_movers(double r,int level);
+  double d2UdR2TimesSigma(double r,int level);
+  double d2UdR2TimesSigma_movers(double r,int level);
   /// The diagonal action only -- used for long-range breakup
   double Udiag(double q, int level);
   /// The q-derivative of the above

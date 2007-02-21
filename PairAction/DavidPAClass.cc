@@ -51,7 +51,41 @@ double DavidPAClass::dUdRTimesSigma(double r,int level)
     r=dUdRTimesSigmaSpline(level).grid->Start;
   }
   return dUdRTimesSigmaSpline(level)(r);
+}
 
+
+double DavidPAClass::dUdRTimesSigma_movers(double r,int level)
+{
+  if (r>dUdRTimesSigmaSpline_movers(level).grid->End){
+    r=dUdRTimesSigmaSpline_movers(level).grid->End;
+  }
+  if (r<dUdRTimesSigmaSpline_movers(level).grid->Start){
+    r=dUdRTimesSigmaSpline_movers(level).grid->Start;
+  }
+  return dUdRTimesSigmaSpline_movers(level)(r);
+}
+
+
+double DavidPAClass::d2UdR2TimesSigma(double r,int level)
+{
+  if (r>d2UdR2TimesSigmaSpline(level).grid->End){
+    r=d2UdR2TimesSigmaSpline(level).grid->End;
+  }
+  if (r<d2UdR2TimesSigmaSpline(level).grid->Start){
+    r=d2UdR2TimesSigmaSpline(level).grid->Start;
+  }
+  return d2UdR2TimesSigmaSpline(level)(r);
+}
+
+double DavidPAClass::d2UdR2TimesSigma_movers(double r,int level)
+{
+  if (r>d2UdR2TimesSigmaSpline_movers(level).grid->End){
+    r=d2UdR2TimesSigmaSpline_movers(level).grid->End;
+  }
+  if (r<d2UdR2TimesSigmaSpline_movers(level).grid->Start){
+    r=d2UdR2TimesSigmaSpline_movers(level).grid->Start;
+  }
+  return d2UdR2TimesSigmaSpline_movers(level)(r);
 }
 
 
@@ -432,12 +466,15 @@ void DavidPAClass::ReadSamplingTable(string fileName)
     cerr<<"Expected but can not find a pairaction file";
     assert(1==2);
   }
-  Array<double,2> tempdudR;
+  int startLevel=-1;
+  assert(in.ReadVar("SamplingTau",SamplingTau));
+  for (int i=0;i<SamplingTau.size();i++)
+    if (fabs(SamplingTau(i)-DesiredTau)<1e-4){
+      cerr<<"The sampling tau I've chosen is "<<SamplingTau(i);
+      startLevel=i;
+    }
+  assert(startLevel!=-1);
   in.OpenSection("dUdR");
-  in.ReadVar("dUdR",tempdudR);
-  //We should now assert that the tau array has the correct number
-  //of tau's in it.
-  assert(tempdudR.extent(0)==NumTau);
   //Now we want to read the grid
   assert(in.OpenSection("Grid"));
   string gridType;
@@ -452,11 +489,43 @@ void DavidPAClass::ReadSamplingTable(string fileName)
   LinearGrid *theGrid;
   theGrid=new LinearGrid(gridStart,gridEnd,numGridPoints);
   in.CloseSection();
-  dUdRTimesSigmaSpline.resize(NumTau);
-  //WHAT SHOULD THE DERIVATIVES ON THIS CUBIC SPLINE BE?
-  for (int level=0;level<NumTau;level++)
-    dUdRTimesSigmaSpline(level).Init(theGrid,tempdudR(level,Range::all()));
-  //  d(levelCounter).Init(theGrid,tempdUkj2(Range::all(),Range::all(),levelCounter),startDeriv,endDeriv);
+
+  Array<double,2> tempdudR;
+  Array<double,2> tempdudR_movers;
+  in.ReadVar("dUdR",tempdudR);
+  in.ReadVar("dUdR_movers",tempdudR_movers);
+  //We should now assert that the tau array has the correct number
+  //of tau's in it.
+  assert(tempdudR.extent(0)==NumTau);
+  assert(tempdudR_movers.extent(0)==NumTau);
+  dUdRTimesSigmaSpline.resize(NumTau-startLevel);
+  dUdRTimesSigmaSpline_movers.resize(NumTau-startLevel);
+  for (int level=startLevel;level<NumTau;level++){
+    dUdRTimesSigmaSpline(level-startLevel).Init(theGrid,tempdudR(level,Range::all()));
+    dUdRTimesSigmaSpline_movers(level-startLevel).Init(theGrid,tempdudR_movers(level,Range::all()));
+  }
+  ///We've read the dUdR and now will read the d2UdR2
+
+
+
+  Array<double,2> tempd2UdR2;
+  Array<double,2> tempd2UdR2_movers;
+  in.ReadVar("d2UdR2_nonmovers",tempd2UdR2);
+  in.ReadVar("d2UdR2_movers",tempd2UdR2_movers);
+  //We should now assert that the tau array has the correct number
+  //of tau's in it.
+  assert(tempd2UdR2.extent(0)==NumTau);
+  assert(tempd2UdR2_movers.extent(0)==NumTau);
+  d2UdR2TimesSigmaSpline.resize(NumTau-startLevel);
+  d2UdR2TimesSigmaSpline_movers.resize(NumTau-startLevel);
+  for (int level=startLevel;level<NumTau;level++){
+    d2UdR2TimesSigmaSpline(level-startLevel).Init(theGrid,tempd2UdR2(level,Range::all()));
+    d2UdR2TimesSigmaSpline_movers(level-startLevel).Init(theGrid,tempd2UdR2_movers(level,Range::all()));
+  }
+  
+  
+
+
   
   in.CloseSection();
   in.CloseFile();
