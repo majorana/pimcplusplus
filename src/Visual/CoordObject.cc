@@ -35,6 +35,7 @@ CoordObject::Set (double lx, double ly, double lz)
   glRotated (90.0, 0.0, 1.0, 0.0);
   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, red);
   glColor3d (red[0], red[1], red[2]);
+  glutSolidSphere (0.015*Lx, 20, 20);
   GLUquadricObj* qobj = gluNewQuadric();
   gluCylinder(qobj, 0.015*Lx, 0.015*Lx, 0.25*Lx, 20, 1);
   gluDeleteQuadric(qobj);
