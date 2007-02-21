@@ -37,6 +37,7 @@ public:
   bool OnButtonPress   (GdkEventButton* event);
   bool OnButtonRelease (GdkEventButton* event);
   bool OnMotion        (GdkEventMotion* event);
+  bool OnScroll        (GdkEventScroll* event);
   void SetDistance (double dist);
 
   inline void SetPerspective (bool usePersp) 

@@ -21,12 +21,15 @@ ViewClass::ViewClass (PathVisClass &pathVis) :
     (sigc::mem_fun(*this, &ViewClass::OnButtonRelease));
   PathVis.signal_motion_notify_event().connect
     (sigc::mem_fun(*this, &ViewClass::OnMotion));
+  PathVis.signal_scroll_event().connect
+    (sigc::mem_fun(*this, &ViewClass::OnScroll));
 
   PathVis.add_events(Gdk::BUTTON1_MOTION_MASK    |
 		     Gdk::BUTTON2_MOTION_MASK    |
 		     Gdk::BUTTON_PRESS_MASK      |
 		     Gdk::BUTTON_RELEASE_MASK    |
-		     Gdk::VISIBILITY_NOTIFY_MASK);
+		     Gdk::VISIBILITY_NOTIFY_MASK |
+		     Gdk::SCROLL_MASK);
 }
 
 
@@ -57,6 +60,28 @@ ViewClass::OnButtonRelease (GdkEventButton *event)
     Button1Pressed = false;
   if (event->button == 2)
     Button2Pressed = false;
+  
+  return false;
+}
+
+bool
+ViewClass::OnScroll (GdkEventScroll *event)
+{
+  if (event->direction == GDK_SCROLL_UP) {
+    if (Scale < MaxScale)
+      Scale *= 1.07;
+    else
+      Scale = MaxScale;
+    PathVis.Invalidate();
+  }
+  if (event->direction == GDK_SCROLL_DOWN) {
+    if (Scale > MinScale)
+      Scale /= 1.07;
+    else
+      Scale = MinScale;
+    PathVis.Invalidate();
+  }
+
   return false;
 }
 
