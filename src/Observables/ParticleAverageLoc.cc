@@ -60,6 +60,7 @@ void ParticleAverageLocClass::WriteBlock()
   ParticleCenterOfMass *= norm;
   ParticleAverageLocVar.Write(ParticleCenterOfMass);
   ParticleCenterOfMass=0.0;
+  NumSamples=0.0;
   ParticleAverageLocVar.Flush();
 }
 
