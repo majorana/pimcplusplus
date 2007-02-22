@@ -23,7 +23,10 @@ double DisplaceStageClass::Sample (int &slice1, int &slice2,
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
     dVec disp;
-    PathData.Path.Random.CommonGaussianVec (Sigma, disp);
+    ///    PathData.Path.Random.CommonGaussianVec (Sigma, disp);
+    disp(0)=PathData.Path.Random.Common()-0.5;disp(1)=PathData.Path.Random.Common()-0.5;disp(2)=PathData.Path.Random.Common()-0.5;
+    disp=disp*Sigma;
+    
 
     // Actually displace the path
     SetMode(NEWMODE);
