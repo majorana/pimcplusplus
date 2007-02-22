@@ -27,6 +27,11 @@
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
   cerr<<"Reading bisection block"<<endl;
+  bool useCorrelatedSampling;
+  if (!in.ReadVar("UseCorrelatedSampling",useCorrelatedSampling))
+    useCorrelatedSampling=false;
+  if (useCorrelatedSampling)
+    cerr<<"Using correlated sampling"<<endl;
   ////  FP.Read(in);
   //  bool orderNBosons;
   string permuteType, speciesName;
@@ -118,7 +123,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       newStage = new BisectionStageClass (PathData, level,
 					  IOSection);
       newStage->TotalLevels=NumLevels;
-
+      newStage->UseCorrelatedSampling=useCorrelatedSampling;
       newStage->Actions.push_back(&PathData.Actions.Kinetic);
       //      newStage->Actions.push_back(&PathData.Actions.PairFixedPhase);
       
@@ -277,6 +282,31 @@ void BisectionBlockClass::MakeMove()
 
   //  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
   //    cerr<<PathData.Path.Permutation(ptcl)<<endl;
+
+//   //HACK!
+//   ifstream infile;
+//   infile.open("fort.500");
+//   int ptclNum;
+//   double zero;
+//   double pos;
+//   for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+//     infile >> ptclNum;
+//     infile >> zero;
+//     infile >> pos;
+//     for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++){
+//       PathData.Path(slice,ptcl)[0]=pos;
+//     }
+//     infile >> zero;
+//     infile >> zero;
+//     infile >>pos;
+//     for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++){
+//       PathData.Path(slice,ptcl)[1]=pos;
+//     }
+//     infile >> zero;
+//     infile >> zero;
+//   }
+
+  //HACK!
   ChooseTimeSlices();
   PathData.MoveJoin(Slice2);
 
