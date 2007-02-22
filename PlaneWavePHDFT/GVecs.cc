@@ -349,7 +349,7 @@ GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor)
   GDiff.resize(numDiff);
   GDiffInv2.resize(numDiff);
   IDiff.resize(numDiff);
-  cerr << "Found " << GDiff.size() << " unique difference vectors.\n";
+  //  cerr << "Found " << GDiff.size() << " unique difference vectors.\n";
 
   // Now actually store
   numDiff = 0;

@@ -76,6 +76,6 @@ include_HEADERS = Blitz.h config.h nan.h
 pkgconfigdir = $(libdir)/pkgconfig/
 
 install-data-local:
-	$(INSTALL_DATA) common.pc $(pkgconfigdir)
+	$(INSTALL_DATA) $(pkgconfig_DATA) $(pkgconfigdir)
 
 
