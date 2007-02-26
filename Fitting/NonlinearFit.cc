@@ -102,9 +102,10 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
     for (int i=0; i<M; i++)
       Alpha(i,i) *= (1.0+lambda);
     Solve();
+    cerr << "dParams = " << dParams << endl;
     done = true;
     for (int i=0; i<M; i++)
-      if ((dParams[i]/params[i]) > 1.0e-5)
+      if (fabs(dParams[i]/params[i]) > 1.0e-5)
 	done = false;
     if (!done) {
       double chiNew = Chi2 (x, y, sigma, params + dParams);

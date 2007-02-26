@@ -52,7 +52,7 @@ using namespace IO;
 void
 TestFit2(string fname)
 {
-  TinyVector<double,4> params(80.0, 0.51, 0.0155, 2.0);  
+  TinyVector<double,4> params(80.0, 0.51, 0.0155, 3.0);  
   LiEOSClass eos;
   eos.SetParams (params);
   NonlinearFitClass<4,LiEOSClass> fitter(eos);

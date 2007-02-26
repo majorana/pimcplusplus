@@ -112,7 +112,6 @@ NonlinearFitClass<M,ModelType>::Solve()
   for (int i=0; i<M; i++)
     for (int j=0; j<M; j++)
       dParams[i] += AlphaInv(i,j)*Beta(j);
-  //  cerr << "dParams = " << dParams << endl;
 
   // Do simple Gaussian elimination
 //   double dInv = 1.0/Alpha(0,0);
@@ -144,6 +143,7 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
   
   bool done = false;
   int iter = 1;
+  int numSmallDecrease = 0;
   while (!done) {
     cerr << "Iteration " << iter << ":  Chi2 = " << chiNow << endl;
     cerr << "params = " << params << endl;
@@ -153,15 +153,19 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
     for (int i=0; i<M; i++)
       Alpha(i,i) *= (1.0+lambda);
     Solve();
-    done = true;
-    for (int i=0; i<M; i++)
-      if (fabs(Beta[i]) > 1.0e-6)
-	done = false;
+//     done = true;
+//     for (int i=0; i<M; i++)
+//       if (fabs(Beta[i]) > 1.0e-6)
+// 	done = false;
     if (!done) {
       double chiNew = Chi2 (x, y, sigma, params + dParams);
-      if (chiNew < chiNow) {
+      if (chiNew <= chiNow) {
 	lambda *= 0.5;
 	params = params + dParams;
+	if ((chiNow - chiNew) < 0.001)
+	  numSmallDecrease++;
+	if (numSmallDecrease > 2)
+	  done = true;
 	chiNow = chiNew;
       }
       else {
