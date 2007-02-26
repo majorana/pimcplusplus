@@ -174,6 +174,17 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
     }
     iter++;
   }
+  CalcAlphaBeta (x, y, sigma, params);
+  for (int i=0; i<M; i++) 
+    for (int j=0; j<M; j++)
+      AlphaInv(i,j) = Alpha(i,j);
+  GJInverse(AlphaInv);
+  cerr << "Covariace matrix:\n";
+  for (int i=0; i<AlphaInv.rows(); i++) {
+    for (int j=0; j<AlphaInv.cols(); j++)
+      fprintf (stderr, "%12.4e ", AlphaInv(i,j));
+    fprintf (stderr, "\n");
+  }
 }
 
 #endif
