@@ -68,8 +68,8 @@ double MoleculeInteractionsClass::SingleAction (int startSlice, int endSlice,
 
 	//cerr << "MoleculeInteractions::Action__________________ for slices " << startSlice << " to " << endSlice;// << endl;
   bCount++;
-  if(bCount%64 == 0)
-    yout << bCount << endl;
+  //if(bCount%64 == 0)
+  yout << bCount << endl;
 	assert(ReadComplete);
   if(startSlice == 0 && endSlice == 0){
     startSlice -= 1;

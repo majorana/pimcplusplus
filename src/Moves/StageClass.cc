@@ -60,13 +60,18 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
   double logMyRand = log(PathData.Path.Random.Local());
   bool toAccept = logAcceptProb>=logMyRand; /// Accept condition
   //bool toAccept = logAcceptProb>=log(PathData.Path.Random.Local()); /// Accept condition
-  out << oldAction << " " << newAction << " " << logMyRand << " " << toAccept << endl;
+  //out << oldAction << " " << newAction << " " << logMyRand << " " << toAccept << endl;
   if (toAccept){
     NumAccepted++;
   }
   NumAttempted++;
   //  cerr<<"Curr action change is "<<currActionChange<<endl;
   prevActionChange=currActionChange;
+
+  // hack
+  dSVar.Write(-currActionChange);
+  NumAcceptVar.Write(NumAccepted);
+  LogRVar.Write(logMyRand);
 
   return toAccept;
 }

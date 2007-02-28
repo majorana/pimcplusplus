@@ -2,6 +2,9 @@
 #include "../PathDataClass.h"
 #include <sstream>
 
+ofstream qout("MolIntAct.dat");
+int qCount;
+
 bool Extract(string s, string find, string& data);
 
 std::string
@@ -17,9 +20,12 @@ QBoxActionClass::QBoxActionClass(PathDataClass &pathData) : ActionBaseClass (pat
   out << "## Rx Ry Rz oldS(10) oldS(20) oldS(25) oldS(30) oldS(full) oldConverged Rx Ry Rz newS(10) newS(20) newS(25) newS(30) newS(full) newConverged" << endl;
   //out << "## Rxnew Rynew Rznew newS(5) newS(10) newS(15) newS(20) newS(full) newConverged" << endl;
   isAction = false;
+  qCount = 0;
 }
 	
 double QBoxActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level){
+  qCount++;
+  qout << qCount << endl;
 	int myAge = PathData.moveClock;
 	double Utotal = 0.0;
   isAction = true;

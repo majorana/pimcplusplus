@@ -37,6 +37,7 @@ protected:
   list<StageClass*> Stages;
   int NumSteps;
   int Slice1,Slice2;
+
 public:
   void Read(IOSectionClass &io);
   void Accept();

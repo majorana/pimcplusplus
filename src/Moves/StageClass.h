@@ -38,6 +38,9 @@ protected:
 #endif
   IOSectionClass OutSection;
   ObservableDouble AcceptRatioVar;
+  ObservableDouble LogRVar;
+  ObservableDouble NumAcceptVar;
+  ObservableDouble dSVar;
 public:
   int NumAccepted, NumAttempted;
   int BisectionLevel;
@@ -71,7 +74,10 @@ public:
     PathData(pathData), Path(pathData.Path), 
     NumAccepted(0), NumAttempted(0), BisectionLevel(0),
     OutSection(outSection),
-    AcceptRatioVar("AcceptRatio",OutSection,pathData.Path.Communicator)
+    AcceptRatioVar("AcceptRatio",OutSection,pathData.Path.Communicator),
+    LogRVar("LogRandom",OutSection,pathData.Path.Communicator),
+    NumAcceptVar("NumAccepted",OutSection,pathData.Path.Communicator),
+    dSVar("deltaAction",OutSection,pathData.Path.Communicator)
   {
     if (PathData.Path.Communicator.MyProc()==0)
       OutSection.NewSection("Stage");
