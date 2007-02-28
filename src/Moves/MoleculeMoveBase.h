@@ -24,6 +24,7 @@ class MolMoveClass: public LocalStageClass{
   MolMoveClass(PathDataClass&, IO::IOSectionClass, int numToRead, int start);
   dVec GetCOM(int slice, int mol);
   dVec TranslateMol(int slice, Array<int,1>& activePtcls, double epsilon);
+  dVec TranslateMol(int slice, Array<int,1>& activePtcls, dVec translate);
 	void TranslatePtcl(int slice, int ptcl, double Sigma);
 	void MoveDimerSeparation(int slice, Array<int,1> mol1, Array<int,1> mol2, double Sigma);
   void RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, double theta);

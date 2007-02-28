@@ -148,6 +148,15 @@ dVec MolMoveClass::GetCOM(int slice, int mol){
   return PathData.Path(slice,PathData.Path.MolMembers(mol)(0));
 }
 
+// translate members of a molecule by a specified vector translate
+dVec MolMoveClass::TranslateMol(int slice, Array<int,1>& activePtcls, dVec translate){
+  for(int ptcl = 0; ptcl<activePtcls.size(); ptcl++){
+    dVec newP = PathData.Path(slice,activePtcls(ptcl)) + translate;
+    PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
+  }
+	return translate;
+}
+
 // Generates a translation vector and moves all
 // particles in the molecule
 dVec MolMoveClass::TranslateMol(int slice, Array<int,1>& activePtcls, double epsilon){

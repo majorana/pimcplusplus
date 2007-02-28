@@ -21,6 +21,10 @@ class QBoxActionClass: public ActionBaseClass
 	Array<string,1> ptclID;
   
 	public:
+  // hack
+  ofstream out;
+  bool isAction;
+
 	double SingleAction(int slice1,int slice2,
 		      const Array<int,1> &activeParticles,int level);
 	double ComputeEnergy(int slice1,int slice2,

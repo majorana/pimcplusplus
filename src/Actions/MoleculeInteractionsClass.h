@@ -26,6 +26,7 @@ class MoleculeInteractionsClass : public ActionBaseClass
 	bool withS;
 	bool IntraMolecular;
 	bool TruncateAction, TruncateEnergy;
+  bool useFirstImage;
 	enum Interactions{LJ,CHARGE,SPRING};
 	Array<bool, 2> Interacting;
 	Array<string, 1> LJSpecies;
@@ -48,6 +49,8 @@ class MoleculeInteractionsClass : public ActionBaseClass
 	bool special;
 
 public:
+  // hack
+  int TIPPIMC;
  	// Parameters that can be specified on input
 	// Defaults in constructor
 	double prefactor, conversion;
@@ -67,6 +70,7 @@ public:
 	double ComputeEnergy(int slice1, int slice2,
 						const Array<int,1> &activeParticles, int level,
 						bool with_truncations, bool isAction);
+  dVec Force(int slice, int ptcl);
   double CalcCutoff(int ptcl1, int ptcl2, int slice, double Rcmag);
 	double COMSeparation(int slice,int ptcl1,int ptcl2);
 	double S(double r);
@@ -74,7 +78,6 @@ public:
 	void SetNumImages(int num);
   string GetName();
  
-	MoleculeInteractionsClass (PathDataClass &pathData);
-};
+	MoleculeInteractionsClass (PathDataClass &pathData); };
 
 #endif

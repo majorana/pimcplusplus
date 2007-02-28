@@ -12,11 +12,17 @@ QBoxActionClass::GetName()
 	
 QBoxActionClass::QBoxActionClass(PathDataClass &pathData) : ActionBaseClass (pathData){
   cerr << "QBoxActionClass Constructor: " << endl;
+  out.open("convergence.dat");
+  out.precision(16);
+  out << "## Rx Ry Rz oldS(10) oldS(20) oldS(25) oldS(30) oldS(full) oldConverged Rx Ry Rz newS(10) newS(20) newS(25) newS(30) newS(full) newConverged" << endl;
+  //out << "## Rxnew Rynew Rznew newS(5) newS(10) newS(15) newS(20) newS(full) newConverged" << endl;
+  isAction = false;
 }
 	
 double QBoxActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level){
 	int myAge = PathData.moveClock;
 	double Utotal = 0.0;
+  isAction = true;
 	if(GetMode()==OLDMODE){
 		//if((myAge-1)==age){
 		//	Utotal = prevEnergy;
@@ -38,6 +44,8 @@ double QBoxActionClass::ComputeEnergy(int slice1,int slice2,const Array<int,1> &
 		int slice = 0;
 		double Utotal = 0.0;
 		SetPtclPos(slice, activeParticles);
+    dVec R = PathData.Path(slice, activeParticles(0));
+    out << R(0) << " " << R(1) << " " << R(2) << " ";
 		//toqbox << "run 1 " << steps << endl;
     ostringstream runCmd;
     runCmd << "run 1 " << steps;
@@ -50,6 +58,7 @@ double QBoxActionClass::ComputeEnergy(int slice1,int slice2,const Array<int,1> &
 
 double QBoxActionClass::d_dBeta (int slice1, int slice2, int level){
 	int slice = 0;
+  isAction = false;
 	Array<int,1> activeParticles;
 	activeParticles.resize(PathData.Path.NumParticles());
 	for(int a=0; a<activeParticles.size(); a++){
@@ -77,6 +86,12 @@ void QBoxActionClass::SetPtclPos(int slice, Array<int,1> activeParticles){
 }
 
 double QBoxActionClass::Collect(){
+  int trigger1 = 10;
+  int trigger2 = 20;
+  int trigger3 = 25;
+  int trigger4 = 30;
+  int iterations = 0;
+  double tau = PathData.Path.tau;
   cerr << "  In QBoxAction::Collect for " << steps << " iterations: ";
 	double e0, e1, value;
 	e0 = 0.0;
@@ -84,7 +99,7 @@ double QBoxActionClass::Collect(){
   bool found = false;
 	while(!found){
     tag = myRead(toread);
-    //cerr << tag << endl;
+    //cerr << "PIMC echo " << tag << endl;
 		//if(tag == "run"){
 		//	cerr << "QBox running for " << steps << " iterations";
 		//}
@@ -93,6 +108,14 @@ double QBoxActionClass::Collect(){
 			//tag = myRead(toread);
 			e0 = atof(data.c_str());
 			cerr << ".";
+      iterations++;
+      if((iterations == trigger1 ||
+          iterations == trigger2 ||
+          iterations == trigger3 ||
+          iterations == trigger4 )
+          && isAction){
+        out << e0*tau << " ";
+      }
 		}
     else if(Extract(tag, "<etotal>", data)){
       found = true;
@@ -100,6 +123,15 @@ double QBoxActionClass::Collect(){
     }
   }
 	value = atof(data.c_str());
+  if(isAction){
+    out << value*tau;
+		double diff = abs(e0 - e1);
+    out << " " << diff;
+	  if(GetMode() == NEWMODE)
+      out << endl;
+    else
+      out << " ";
+  }
 	if(feedback){
 		double diff = abs(e0 - e1);
 		cerr << " converged to " << diff << endl;
@@ -158,7 +190,7 @@ double QBoxActionClass::Collect(){
 			
 		
 void QBoxActionClass::Read (IOSectionClass &in){
-	cerr.precision(8);
+	cerr.precision(16);
 	cerr << "QBoxAction Read" << endl;
 	int numPtcls;
 	assert(in.ReadVar("NumParticles",numPtcls));

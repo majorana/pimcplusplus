@@ -95,6 +95,9 @@ public:
 class LocalStageClass : public StageClass
 {
 public:
+  // hack
+  ofstream out;
+
 	double UAction; // jg just for testing
   bool Attempt(int &slice1, int &slice2,
 	       Array<int,1> &activeParticles,
@@ -103,6 +106,8 @@ public:
     StageClass(pathData,outSection)
   {
 		UAction = 0.0;
+    out.open("accept.dat");
+    out << "## oldAction newAction logRand accepted" << endl;
   }
 	       
 };

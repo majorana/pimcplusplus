@@ -18,9 +18,14 @@
 #include "../PathDataClass.h"
 #include "../Moves/MoveUtils.h"
 
+// hack some extra output
+ofstream yout("MolIntAct.dat");
+int bCount;
+
 MoleculeInteractionsClass::MoleculeInteractionsClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)
 {
+  bCount = 0;
   elementary_charge = 1.602*pow(10.0,-19);
   N_Avogadro = 6.022*pow(10.0,23.0);
   kcal_to_joule = 4184;
@@ -51,6 +56,7 @@ MoleculeInteractionsClass::MoleculeInteractionsClass (PathDataClass &pathData) :
 	//Dyn2kcal = 143.929;
 
 	ReadComplete = false;
+  TIPPIMC = 1;
 }
 
 string MoleculeInteractionsClass::GetName(){
@@ -61,6 +67,9 @@ double MoleculeInteractionsClass::SingleAction (int startSlice, int endSlice,
 	       const Array<int,1> &activeParticles, int level){
 
 	//cerr << "MoleculeInteractions::Action__________________ for slices " << startSlice << " to " << endSlice;// << endl;
+  bCount++;
+  if(bCount%64 == 0)
+    yout << bCount << endl;
 	assert(ReadComplete);
   if(startSlice == 0 && endSlice == 0){
     startSlice -= 1;
@@ -88,6 +97,8 @@ double MoleculeInteractionsClass::d_dBeta (int startSlice, int endSlice,  int le
 
 double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice, 
 	       const Array<int,1> &activeParticles, int level, bool with_truncations, bool isAction){
+  double int1, int2, int3, int4;
+  int1 = int2 = int3 = int4 = 0.0;
 
   //cerr << isAction << " MoleculeInteraction computing SPC energy over slices " << startSlice << " to " << endSlice << endl;
 	Updated = false;
@@ -158,6 +169,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
     }
 		if(Interacting(species1,1)){
       /// calculating coulomb interactions
+      /// calculating charge-charge interactions
 
       /// hack: we're going to sum over the first set of images too
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
@@ -170,40 +182,73 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 	    				double Ormag;
 	    				dVec Or;
 	    				PathData.Path.DistDisp(slice,Path.MolRef(ptcl1),Path.MolRef(ptcl2),Ormag,Or);
-              dVec L = Path.GetBox();
-						  for (int x=-1; x<=1; x++) {
-						    for (int y=-1; y<=1; y++) {
-						      for (int z=-1; z<=1; z++) {
-                    Or(0) += x*L(0);
-                    Or(1) += y*L(1);
-                    Or(2) += z*L(2);
-                    Ormag = Mag(Or);
-							      // implement spherical cutoff
-            	      //double Ormag = COMSeparation(slice,ptcl1,ptcl2);
-            	      if (Ormag <= CUTOFF){
-                      dVec r = Or - (Path(slice,ptcl1) - Path(slice,Path.MolRef(ptcl1)))
-                        + (Path(slice,ptcl2) - Path(slice,Path.MolRef(ptcl2)));
-                      double rmag = Mag(r);
-							      	double truncate = 0.0;
-                    	double ptclCutoff = 1.0;
-							      	if(with_truncations){
-							      		truncate = 1.0;
-							      		//ptclCutoff = CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
-							      		ptclCutoff = Mag(r - Or + Scale(Or,CUTOFF));
-							      	}
-							      	double modulation=1.0;
-							      	if(withS)
-							      		modulation = S(Ormag);
-                    	double coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
-							      									*PathData.Species(species2).pseudoCharge*modulation
-                                      *(1.0/rmag - truncate/ptclCutoff);
-							      	TotalCharge += coulomb;
-	      			      	TotalU += coulomb;
-							      	//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
-  	                }
+              //bool useFirstImage = true;
+              if(isAction && useFirstImage){
+                dVec L = Path.GetBox();
+                double tempOrmag = Ormag;
+						    for (int x=-1; x<=1; x++) {
+						      for (int y=-1; y<=1; y++) {
+						        for (int z=-1; z<=1; z++) {
+                      Or(0) += x*L(0);
+                      Or(1) += y*L(1);
+                      Or(2) += z*L(2);
+                      Ormag = Mag(Or);
+							        // implement spherical cutoff
+            	        //double Ormag = COMSeparation(slice,ptcl1,ptcl2);
+            	        if (Ormag <= CUTOFF){
+                        dVec r = Or - (Path(slice,ptcl1) - Path(slice,Path.MolRef(ptcl1)))
+                          + (Path(slice,ptcl2) - Path(slice,Path.MolRef(ptcl2)));
+                        double rmag = Mag(r);
+							        	double truncate = 0.0;
+                      	double ptclCutoff = 1.0;
+							        	if(with_truncations){
+							        		truncate = 1.0;
+							        		//ptclCutoff = CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
+							        		//ptclCutoff = Mag(r - Or + Scale(Or,CUTOFF));
+							        		ptclCutoff = Mag(r - Or + Renormalize(Or,CUTOFF));
+							        	}
+							        	double modulation=1.0;
+							        	if(withS)
+							        		modulation = S(Ormag);
+                        double coulomb;
+                      	coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
+							        									*PathData.Species(species2).pseudoCharge*modulation
+                                        *(1.0/rmag - truncate/ptclCutoff);
+							        	TotalCharge += coulomb;
+	      			        	TotalU += coulomb;
+                        //cerr << "  " << ptcl1 << " - " << ptcl2 << " rmag " << rmag << " coulomb " << coulomb << " tmpOrmag " << tempOrmag << endl;
+							        	//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
+  	                  }
+                    }
                   }
+						    }
+              }
+              // using conventional truncation at spherical cutoff
+              else{
+                //cerr << "CALLING CONVENTIONAL COULOMB EVALUATION" << endl;
+							  // implement spherical cutoff
+            	  if (Ormag <= CUTOFF){
+                  double rmag;
+                  dVec r;
+	    				    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
+							  	double truncate = 0.0;
+                	double ptclCutoff = 1.0;
+							  	if(with_truncations){
+							  		truncate = 1.0;
+							  		ptclCutoff = CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
+							  		ptclCutoff = Mag(r - Or + Renormalize(Or,CUTOFF));
+							  	}
+							  	double modulation=1.0;
+							  	if(withS)
+							  		modulation = S(Ormag);
+                  double coulomb;
+                	coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
+							  									*PathData.Species(species2).pseudoCharge*modulation
+                                  *(1.0/rmag - truncate/ptclCutoff);
+							  	TotalCharge += coulomb;
+	      			  	TotalU += coulomb;
                 }
-						  }
+              }
   	        }
 					}
   	    }
@@ -238,7 +283,11 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 				double term4 = d*(ROH1 - R_OH_0)*(ROH2 - R_OH_0);
 				//cerr << "slice " << slice << " INTRA: ROH1 " << ROH1 << " ROH2 " << ROH2 << " RHH " << RHH << " term1 " << term1 << " term2 " << term2 << " term3 " << term3 << " term4 " << term4 << endl;
 				spring = conversion*Dyn2kcal*(term1 + term2 + term3 + term4);
-				outfile << spring << " " << term1 << " " << term2 << " " << term3 << " " << term4 << endl;
+				//outfile << spring << " " << term1 << " " << term2 << " " << term3 << " " << term4 << endl;
+        int1 += conversion*Dyn2kcal*term1;
+        int2 += conversion*Dyn2kcal*term2;
+        int3 += conversion*Dyn2kcal*term3;
+        int4 += conversion*Dyn2kcal*term4;
 				TotalSpring += spring;
 				TotalU += spring;
 			}
@@ -324,13 +373,14 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 			}
 		}
 	}
-  //cerr << " returning energy " << TotalU << " and action " << TotalU*PathData.Path.tau << endl;
+  //cerr << "MolINtAct returning energy " << TotalU << " and action " << TotalU*PathData.Path.tau << endl;
+  //cerr << "  It consists of LJ " << TotalLJ << " and coulomb " << TotalCharge << endl;
 	//cerr << "Empirical potential contributions: " << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic;// << endl;
 	// write additional output file
 
-	//if(!isAction && special){
-	//	outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << endl;
-	//}
+	if(!isAction && special){
+		outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << " " << int1 << " " << int2 << " " << int3 << " " << int4 << endl;
+	}
   return (TotalU);
 }
 
@@ -355,7 +405,8 @@ double MoleculeInteractionsClass::CalcCutoff(int ptcl1, int ptcl2, int slice, do
 	//	Ormag = COMTable(Optcl1,Optcl2);
 	//	Roo = COMVecs(Optcl1,Optcl2);
 	//}
-  dVec Rc = Scale(Roo,Rcmag);
+  //dVec Rc = Scale(Roo,Rcmag);
+  dVec Rc = Renormalize(Roo,Rcmag);
   // get constituent coordinates WRT oxygen COM
   dVec P1 = Path(slice,ptcl1);
   dVec P2 = Path(slice,ptcl2);
@@ -465,6 +516,7 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		withS = true;
 		TruncateAction = true;
 		TruncateEnergy = false;
+    useFirstImage = true;
 
     conversion = 1.0;
 		if(in.ReadVar("Prefactor",conversion)){
@@ -475,6 +527,7 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		in.ReadVar("Intramolecular",IntraMolecular);
 		in.ReadVar("TruncateAction",TruncateAction);
 		in.ReadVar("TruncateEnergy",TruncateEnergy);
+		in.ReadVar("UseImage",useFirstImage);
 
 		Interacting.resize(PathData.NumSpecies(),5);
 		Interacting = false;
@@ -530,13 +583,88 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 			string filename;
 			assert(in.ReadVar("File",filename));
 			outfile.open(filename.c_str());
-			//outfile << "# Total LJ Coulomb Intramolecular Quadratic Kinetic" << endl;
-			outfile << "# Intramolecular Int1 Int2 Int3 Int4" << endl;
+			outfile << "# Total LJ Coulomb Intramolecular Quadratic Kinetic Int1 Int2 Int3 Int4" << endl;
 		}
 			
 		
 		ReadComplete = true;
 	}
+}
+
+dVec MoleculeInteractionsClass::Force(int slice, int ptcl)
+{
+  if(withS)
+    cerr << "WARNING MOLECULEINTERACTIONSCLASS::FORCE NOT BUILT TO INCLUDE ST2 MODULATION" << endl;
+
+  for (int counter=0;counter<Path.DoPtcl.size();counter++)
+    Path.DoPtcl(counter)=true;
+  Path.DoPtcl(ptcl) = false;
+  int species1=Path.ParticleSpeciesNum(ptcl);
+  //if(Interacting(species1,2))
+  //  cerr << "WARNING MOLECULEINTERACTIONSCLSS::FORCE NOT COMPUTED FOR INTRAMOLECULAR TERM" << endl;
+
+  dVec F; // the force
+  F[0] = 0;
+  F[1] = 0;
+  F[2] = 0;
+
+  int numChangedPtcls = 1;
+  //int speciesO=Path.SpeciesNum("O");
+  //int speciesp=Path.SpeciesNum("p");
+  //int speciese=Path.SpeciesNum("e");
+
+  if (Interacting(species1,0)){
+    for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
+      int species2=Path.ParticleSpeciesNum(ptcl2);
+      if (Interacting(species2,0) && Path.DoPtcl(ptcl2)
+          && Path.MolRef(ptcl)!=Path.MolRef(ptcl2)){
+        dVec r, unitr;
+        double rmag;
+        PathData.Path.DistDisp(slice, ptcl, ptcl2, rmag, r);
+        unitr[0] = r[0]/rmag;
+        unitr[1] = r[1]/rmag;
+        unitr[2] = r[2]/rmag;
+        double rinv = 1.0/rmag;
+        double sigR = PathData.Species(species1).Sigma*rinv;
+        double sigR6 = sigR*sigR*sigR*sigR*sigR*sigR;
+        // this is in kcal/mol 
+        double ljmag = conversion*24*PathData.Species(species1).Epsilon*rinv*sigR6*(sigR6-1);
+        F[0] += ljmag*unitr[0];
+        F[1] += ljmag*unitr[1];
+        F[2] += ljmag*unitr[2];
+      }
+    }
+  }
+  if(Interacting(species1,1)){
+    /// calculating charge-charge interactions
+
+    for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
+      int species2=Path.ParticleSpeciesNum(ptcl2);
+      if (Interacting(species2,1) && Path.DoPtcl(ptcl2)){
+        //	don't compute intramolecular interactions
+        //  unless told to
+        if(IntraMolecular || Path.MolRef(ptcl)!=Path.MolRef(ptcl2)){
+          double Ormag;
+          dVec Or;
+          PathData.Path.DistDisp(slice,Path.MolRef(ptcl),Path.MolRef(ptcl2),Ormag,Or);
+          double rmag;
+          dVec r, unitr;
+          PathData.Path.DistDisp(slice,ptcl,ptcl2,rmag,r);
+          unitr[0] = r[0]/rmag;
+          unitr[1] = r[1]/rmag;
+          unitr[2] = r[2]/rmag;
+          double coulomb;
+          coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
+            *PathData.Species(species2).pseudoCharge/(rmag*rmag);
+          F[0] += coulomb*unitr[0];
+          F[1] += coulomb*unitr[1];
+          F[2] += coulomb*unitr[2];
+        }
+      }
+    }
+  }
+
+  return F;
 }
 
 void MoleculeInteractionsClass::SetNumImages (int num)

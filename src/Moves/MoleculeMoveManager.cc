@@ -41,6 +41,10 @@ void MoleculeManagerClass::Read(IOSectionClass &in)
 	  	cerr << "Creating new bond-stretching move...";
     	MoveStage = new BondStretch(PathData, IOSection, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
+	  } else if (method == "ForceBias"){
+	  	cerr << "Creating new Force Bias move...";
+    	MoveStage = new MoleculeForceBiasMove(PathData, IOSection, actionsToRead, startIndex);
+	  	cerr << " done." << endl;
 	  } else if (method == "AVB"){
 	  	cerr << "Creating new Aggregation Volume Bias move...";
     	MoveStage = new AVBMove(PathData, IOSection, actionsToRead, startIndex);

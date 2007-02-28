@@ -60,6 +60,8 @@ libmovesDev_la_SOURCES  =        \
     LeviFlightStage.cc           \
     MetaMoves.cc                 \
     MetaMoves.h                  \
+    MoleculeBias.cc              \
+    MoleculeBias.h               \
     MoleculeMove.cc              \
     MoleculeMove.h               \
     MoleculeMoveBase.cc          \
@@ -161,6 +163,8 @@ libmoves_la_SOURCES  =           \
     LeviFlightStage.cc           \
     MetaMoves.cc                 \
     MetaMoves.h                  \
+    MoleculeBias.cc              \
+    MoleculeBias.h               \
     MoleculeMove.cc              \
     MoleculeMove.h               \
     MoleculeMoveBase.cc          \

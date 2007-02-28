@@ -1,8 +1,13 @@
 #include "ST2WaterClass.h"
 #include "../PathDataClass.h"
 
-double CUTOFF = 7.75; // setcutoff: spherical cutoff in angstroms
+//double CUTOFF = 7.75; // setcutoff: spherical cutoff in angstroms
+double CUTOFF = 18.0; // setcutoff: spherical cutoff in angstroms
 double innerCUTOFF = CUTOFF - 2;
+
+// hack extra output
+ofstream xout("ST2WaterAction.dat");
+int aCount;
 
 string ST2WaterClass::GetName(){
 	return("ST2WaterClass");
@@ -11,21 +16,27 @@ string ST2WaterClass::GetName(){
 ST2WaterClass::ST2WaterClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)
 {
+  aCount = 0;
+  xout << aCount << endl;
   //Do  nothing for now
 }
 
 double ST2WaterClass::SingleAction (int slice1, int slice2, const Array<int,1> &activeParticles, int level){
+	//cerr << "ST2WaterAction::Action__________________ for slices " << slice1 << " to " << slice2;// << endl;
 	return Action(slice1, slice2, activeParticles, level);
 }
 
 double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
 {
-//  cerr << "I'm calculating the Action" << endl;
+  aCount++;
+  if(aCount%64 == 0)
+    xout << aCount << endl;
+  //  cerr << "I'm calculating the Action" << endl;
   for (int counter=0;counter<Path.DoPtcl.size();counter++){
     Path.DoPtcl(counter)=true;
   }
 
-// obnoxious physical constants
+  // obnoxious physical constants
   double elementary_charge = 1.602*pow(10.0,-19);
   double N_Avogadro = 6.022*pow(10.0,23.0);
   double kcal_to_joule = 4184;
@@ -37,6 +48,8 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
   double joule_to_eV = pow(10.0,19)/1.602;
 
   double TotalU = 0.0;
+  double TotalLJ = 0.0;
+  double TotalCoul = 0.0;
   int numChangedPtcls = activeParticles.size();
   int skip = 1<<level;
   int speciesO=Path.SpeciesNum("O");
@@ -50,32 +63,33 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
 
     if (species1==speciesO){
       int counter = 0;
-//    Calculate o-o interaction
+      //    Calculate o-o interaction
       for (int ptcl2=Path.Species(speciesO).FirstPtcl;ptcl2<=Path.Species(speciesO).LastPtcl;ptcl2++) {///loop over oxygen
-	if (Path.DoPtcl(ptcl2)){
-//          int PairIndex = PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2));
-	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
-	    dVec r, rp;
-	    double rmag, rpmag;
-	    PathData.Path.DistDisp(slice, ptcl1, ptcl2, rmag, r);
-//  implement spherical cutoff  
+        if (Path.DoPtcl(ptcl2)){
+          //          int PairIndex = PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2));
+          for (int slice=startSlice;slice<=endSlice;slice+=skip){
+            dVec r, rp;
+            double rmag, rpmag;
+            PathData.Path.DistDisp(slice, ptcl1, ptcl2, rmag, r);
+            //  implement spherical cutoff  
             if (rmag <= CUTOFF){
               counter ++;
               double sigma_over_r = PathData.Species(species1).Sigma/rmag;
               double sigma_over_cutoff = PathData.Species(species1).Sigma/CUTOFF;
               double offset = pow(sigma_over_cutoff,12) - pow(sigma_over_cutoff,6);
-	      double lj = 4*PathData.Species(species1).Epsilon*(pow(sigma_over_r,12)-pow(sigma_over_r,6) - offset); // this is in kcal/mol 
-	      TotalU += lj;
+              double lj = 4*PathData.Species(species1).Epsilon*(pow(sigma_over_r,12)-pow(sigma_over_r,6) - offset); // this is in kcal/mol 
+              TotalU += lj;
+              TotalLJ += lj;
               // harmonic potential for dimer tesing!!
-              double omega = 2.6*pow(10.0,13);
-              double mass = 0.036;
-              double x = (rmag-2.85)*angstrom_to_m;
-              double quad = 0.5*mass*omega*omega*x*x;
-//              TotalU += quad;
-//	      cerr << "lj  " << lj << " at distance " << rmag << endl;
+              //double omega = 2.6*pow(10.0,13);
+              //double mass = 0.036;
+              //double x = (rmag-2.85)*angstrom_to_m;
+              //double quad = 0.5*mass*omega*omega*x*x;
+              //              TotalU += quad;
+              //	      cerr << "lj  " << lj << " at distance " << rmag << endl;
             }
-	  }
-	}
+          }
+        }
       }
       ///end calculating o-o interactions
       //cerr << "I calculated Lennard-Jones interactions with: " << counter << " particles: " << TotalU << endl;
@@ -84,73 +98,127 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
       /// calculating coulomb interactions
       for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {
         ///loop over protons
-//  don't compute intramolecular interactions
-	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
-	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
-	    double rmag;
-	    dVec r;
-	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
-// implement spherical cutoff
-            double Ormag = OOSeparation(slice,ptcl1,ptcl2);
-            if (Ormag <= CUTOFF){
-              double cutoff = PathData.Actions.TIP5PWater.CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
-	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciesp).pseudoCharge*N_Avogadro/kcal_to_joule;
-              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
-              //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
-	      TotalU += coulomb;
-//	      cerr << "protons " << coulomb << " at distance " << rmag  << " with offset " << coulomb_const/CUTOFF << endl;
+        //  don't compute intramolecular interactions
+        if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+          for (int slice=startSlice;slice<=endSlice;slice+=skip){
+            double Ormag;
+            dVec Or;
+            PathData.Path.DistDisp(slice,Path.MolRef(ptcl1),Path.MolRef(ptcl2),Ormag,Or);
+            double tempOrmag = Ormag;
+            dVec L = Path.GetBox();
+            for (int x=-1; x<=1; x++) {
+              for (int y=-1; y<=1; y++) {
+                for (int z=-1; z<=1; z++) {
+                  Or(0) += x*L(0);
+                  Or(1) += y*L(1);
+                  Or(2) += z*L(2);
+                  Ormag = Mag(Or);
+                  // implement spherical cutoff
+                  //double Ormag = COMSeparation(slice,ptcl1,ptcl2);
+                  if (Ormag <= CUTOFF){
+                    dVec r = Or - (Path(slice,ptcl1) - Path(slice,Path.MolRef(ptcl1)))
+                      + (Path(slice,ptcl2) - Path(slice,Path.MolRef(ptcl2)));
+                    double rmag = Mag(r);
+                    double ptclCutoff = 1.0;
+                    ptclCutoff = Mag(r - Or + Renormalize(Or,CUTOFF));
+                    //double rmag;
+                    //dVec r;
+                    //PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
+                    // imp//lement spherical cutoff
+                    //      double Ormag = OOSeparation(slice,ptcl1,ptcl2);
+                    //      if (Ormag <= CUTOFF){
+                    //       double cutoff = PathData.Actions.TIP5PWater.CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
+                    double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciesp).Charge*N_Avogadro/kcal_to_joule;
+                    //double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
+                    double coulomb = coulomb_const*(1.0/rmag - 1.0/ptclCutoff);
+                    //cerr << "                  " << ptcl1 << " - " << ptcl2 << " rmag " << rmag << " coulomb " << coulomb << " tmpOrmag was " << tempOrmag << endl;
+                    //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
+                    TotalU += coulomb;
+                    TotalCoul += coulomb;
+                    //	      cerr << "protons " << coulomb << " at distance " << rmag  << " with offset " << coulomb_const/CUTOFF << endl;
+                  //}
+                  }
+                }
+              }
             }
           }
-	}
+        }
       }
       for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {
         ///loop over electrons
-//  don't compute intramolecular interactions
-	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
-	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
-	    double rmag;
-	    dVec r;
-	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
-// implement spherical cutoff
-            double Ormag = OOSeparation(slice,ptcl1,ptcl2);
-            if (Ormag <= CUTOFF){
-              double cutoff = PathData.Actions.TIP5PWater.CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
-  	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciese).pseudoCharge*N_Avogadro/kcal_to_joule;
-              double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
-              //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
-	      TotalU += coulomb;
-//	      cerr << "electrons " << coulomb << " at distance " << rmag << " with offset " << coulomb_const/CUTOFF << endl;
+        //  don't compute intramolecular interactions
+        if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+          for (int slice=startSlice;slice<=endSlice;slice+=skip){
+            double Ormag;
+            dVec Or;
+            PathData.Path.DistDisp(slice,Path.MolRef(ptcl1),Path.MolRef(ptcl2),Ormag,Or);
+            dVec L = Path.GetBox();
+            double tempOrmag = Ormag;
+            for (int x=-1; x<=1; x++) {
+              for (int y=-1; y<=1; y++) {
+                for (int z=-1; z<=1; z++) {
+                  Or(0) += x*L(0);
+                  Or(1) += y*L(1);
+                  Or(2) += z*L(2);
+                  Ormag = Mag(Or);
+
+                  if (Ormag <= CUTOFF){
+                    dVec r = Or - (Path(slice,ptcl1) - Path(slice,Path.MolRef(ptcl1)))
+                      + (Path(slice,ptcl2) - Path(slice,Path.MolRef(ptcl2)));
+                    double rmag = Mag(r);
+                    double ptclCutoff = 1.0;
+                    ptclCutoff = Mag(r - Or + Renormalize(Or,CUTOFF));
+                    double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).Charge*PathData.Species(speciese).Charge*N_Avogadro/kcal_to_joule;
+                    double coulomb = coulomb_const*(1.0/rmag - 1.0/ptclCutoff);
+                    TotalU += coulomb;
+                    TotalCoul += coulomb;
+                    //cerr << "                 " << ptcl1 << " - " << ptcl2 << " rmag " << rmag << " coulomb " << coulomb << " tempOrmag " << tempOrmag << endl;
+                    //double rmag;
+                    //dVec r;
+                    //PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
+                    // imp//lement spherical cutoff
+                    //      double Ormag = OOSeparation(slice,ptcl1,ptcl2);
+                    //      if (Ormag <= CUTOFF){
+                    //        double cutoff = PathData.Actions.TIP5PWater.CalcCutoff(ptcl1,ptcl2,slice,CUTOFF);
+                    //    double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciese).pseudoCharge*N_Avogadro/kcal_to_joule;
+                    //        double coulomb = S(Ormag)*coulomb_const*(1.0/rmag - 1.0/cutoff);
+                    //        //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
+                    //  TotalU += coulomb;
+                    //	      cerr << "electrons " << coulomb << " at distance " << rmag << " with offset " << coulomb_const/CUTOFF << endl;
+                  //}
+                  }
+                }
+              }
             }
-	  }
-	}
+          }
+        }
       }
-    
-	
     }
-   /// end calculating coulomb interactions 
-  
-  
+    /// end calculating coulomb interactions 
+
+
   }
   double TotalU_times_tau = TotalU*PathData.Path.tau;
-//  cerr << TotalU << " and times tau " << TotalU_times_tau << " at temp " << 1.0/PathData.Path.tau << endl;
-//  cerr << "I'm returning ST2 action " << TotalU_times_tau << endl;
+  //  cerr << TotalU << " and times tau " << TotalU_times_tau << " at temp " << 1.0/PathData.Path.tau << endl;
+  //cerr << "I'm returning ST2 action " << TotalU_times_tau << endl;
+  //cerr << "  It consists of LJ " << TotalLJ << " and coulomb " << TotalCoul << endl;
   return (TotalU_times_tau);
 }
 
 double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 {
-	//cerr << "ST2WaterClass::d_dBeta_________________";// << endl;
+  //cerr << "ST2WaterClass::d_dBeta_________________";// << endl;
   double thermal = 6/PathData.Path.tau;
   Array<int,1> activeParticles(PathData.Path.NumParticles());
   for (int i=0;i<PathData.Path.NumParticles();i++){
     activeParticles(i)=i;
   }
- 
+
   for (int counter=0;counter<Path.DoPtcl.size();counter++){
     Path.DoPtcl(counter)=true;
   }
 
-// obnoxious physical constants
+  // obnoxious physical constants
   double elementary_charge = 1.602*pow(10.0,-19);
   double N_Avogadro = 6.022*pow(10.0,23.0);
   double kcal_to_joule = 4184;
@@ -170,101 +238,101 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = activeParticles(ptcl1Index);
-/*   need to exclude intramolecular interactions - compare with line commented out below
-      for(int i = 0;i<=4;++i){
-        Path.DoPtcl(ptcl1+4*i) = false;
-      }
-*/
+    /*   need to exclude intramolecular interactions - compare with line commented out below
+         for(int i = 0;i<=4;++i){
+         Path.DoPtcl(ptcl1+4*i) = false;
+         }
+     */
     Path.DoPtcl(ptcl1) = false;
     int species1=Path.ParticleSpeciesNum(ptcl1);
-//    cerr << "Choosing particle " << ptcl1 << " which is of species " << species1 << endl;
+    //    cerr << "Choosing particle " << ptcl1 << " which is of species " << species1 << endl;
 
     if (species1==speciesO){
       int counter = 0;
-//    Calculate o-o interaction
+      //    Calculate o-o interaction
       for (int ptcl2=Path.Species(speciesO).FirstPtcl;ptcl2<=Path.Species(speciesO).LastPtcl;ptcl2++) {///loop over oxygen
-	if (Path.DoPtcl(ptcl2)){
-//          int PairIndex = PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2));
-	  
-	  for (int slice=startSlice;slice<endSlice;slice+=skip){
-//cerr << "slice " << slice << endl;
-	    dVec r, rp;
-	    double rmag, rpmag;
-	    PathData.Path.DistDisp(slice, ptcl1, ptcl2,
-				   rmag, r);
-//  implement spherical cutoff  
+        if (Path.DoPtcl(ptcl2)){
+          //          int PairIndex = PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2));
+
+          for (int slice=startSlice;slice<endSlice;slice+=skip){
+            //cerr << "slice " << slice << endl;
+            dVec r, rp;
+            double rmag, rpmag;
+            PathData.Path.DistDisp(slice, ptcl1, ptcl2,
+                rmag, r);
+            //  implement spherical cutoff  
             if (rmag <= CUTOFF){
               counter ++;
               double sigma_over_r = PathData.Species(species1).Sigma/rmag;
-	      double lj = 4*PathData.Species(species1).Epsilon*(pow(sigma_over_r,12)-pow(sigma_over_r,6)); // this is in kcal/mol 
-	      TotalU += lj;
-							//cerr  << TotalU << " added " << lj << " from LJ interaction between " << ptcl1 << " and " << ptcl2 << endl;
+              double lj = 4*PathData.Species(species1).Epsilon*(pow(sigma_over_r,12)-pow(sigma_over_r,6)); // this is in kcal/mol 
+              TotalU += lj;
+              //cerr  << TotalU << " added " << lj << " from LJ interaction between " << ptcl1 << " and " << ptcl2 << endl;
               // harmonic potential for dimer tesing!!
               double omega = 2.6*pow(10.0,13);
               double mass = 0.036;
               double x = (rmag - 2.85)/angstrom_to_m;
               double quad = -0.5*mass*omega*omega*x*x/kcal_to_joule;
-         //     TotalU += quad;
-//	      cerr << "lj  " << lj << " at distance " << rmag << endl;
+              //     TotalU += quad;
+              //	      cerr << "lj  " << lj << " at distance " << rmag << endl;
             }
-	  }
-	}
+          }
+        }
       }
       ///end calculating o-o interactions
-//      cerr << "I calculated Lennard-Jones interactions with: " << counter << " particles" << endl;
+      //      cerr << "I calculated Lennard-Jones interactions with: " << counter << " particles" << endl;
     }
     else{
       /// calculating coulomb interactions
       for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {///loop over protons
-//  don't compute intramolecular interactions
-	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
-	  for (int slice=startSlice;slice<endSlice;slice+=skip){
-	    double rmag;
-	    dVec r;
-	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
-// implement spherical cutoff
+        //  don't compute intramolecular interactions
+        if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+          for (int slice=startSlice;slice<endSlice;slice+=skip){
+            double rmag;
+            dVec r;
+            PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
+            // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
-	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciesp).pseudoCharge*N_Avogadro/kcal_to_joule;
+              double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciesp).pseudoCharge*N_Avogadro/kcal_to_joule;
               double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);
-	      TotalU += coulomb;
-							//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
+              TotalU += coulomb;
+              //cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
             }
           }
-	}
+        }
       }
       for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {///loop over electrons
-//  don't compute intramolecular interactions
-	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
-	  for (int slice=startSlice;slice<endSlice;slice+=skip){
-	    double rmag;
-	    dVec r;
-	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
-// implement spherical cutoff
+        //  don't compute intramolecular interactions
+        if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+          for (int slice=startSlice;slice<endSlice;slice+=skip){
+            double rmag;
+            dVec r;
+            PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
+            // implement spherical cutoff
             double Ormag = OOSeparation(slice,ptcl1,ptcl2);
             if (Ormag <= CUTOFF){
-	      double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciese).pseudoCharge*N_Avogadro/kcal_to_joule;
+              double coulomb_const = SI*angstrom_to_m*elementary_charge*elementary_charge*PathData.Species(species1).pseudoCharge*PathData.Species(speciese).pseudoCharge*N_Avogadro/kcal_to_joule;
               double coulomb = S(Ormag)*coulomb_const*(1.0/rmag);
-	      TotalU += coulomb;
-							//cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
+              TotalU += coulomb;
+              //cerr  << TotalU << " added " << coulomb << " from charge-charge interaction between " << ptcl1 << " and " << ptcl2 << endl;
             }
-	  }
-	}
+          }
+        }
       }
-    
-	
+
+
     }
-   /// end calculating coulomb interactions 
-  
-  
+    /// end calculating coulomb interactions 
+
+
   }
-//  double TotalU_times_beta = TotalU*kcal_to_joule/(N_Avogadro*k_B)*PathData.Path.tau;
-//  cerr << TotalU << " and times beta " << TotalU_times_beta << " at temp " << 1.0/PathData.Path.tau << endl;
-//  cerr << "Energy function is returning " << TotalU << endl;
+  //  double TotalU_times_beta = TotalU*kcal_to_joule/(N_Avogadro*k_B)*PathData.Path.tau;
+  //  cerr << TotalU << " and times beta " << TotalU_times_beta << " at temp " << 1.0/PathData.Path.tau << endl;
+  //  cerr << "Energy function is returning " << TotalU << endl;
 
   double energy_per_molecule = TotalU/PathData.Path.numMol;
-//  return energy_per_molecule; // + thermal;
-	//cerr << "RETURNING " << TotalU << endl;
+  //  return energy_per_molecule; // + thermal;
+  //cerr << "RETURNING " << TotalU << endl;
   return TotalU;
 }
 

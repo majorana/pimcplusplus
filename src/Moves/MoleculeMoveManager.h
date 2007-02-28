@@ -8,6 +8,7 @@
 #include "MoleculeMove.h"
 #include "AVBMove.h"
 #include "MultiStage.h"
+#include "MoleculeBias.h"
 
 class MoleculeManagerClass : public MultiStageClass
 {

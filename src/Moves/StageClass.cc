@@ -57,7 +57,10 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
   //    AcceptProb=1.0;
   //  if (OldAcceptProb>1.0)
   //    OldAcceptProb=1.0;
-  bool toAccept = logAcceptProb>=log(PathData.Path.Random.Local()); /// Accept condition
+  double logMyRand = log(PathData.Path.Random.Local());
+  bool toAccept = logAcceptProb>=logMyRand; /// Accept condition
+  //bool toAccept = logAcceptProb>=log(PathData.Path.Random.Local()); /// Accept condition
+  out << oldAction << " " << newAction << " " << logMyRand << " " << toAccept << endl;
   if (toAccept){
     NumAccepted++;
   }
