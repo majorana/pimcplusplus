@@ -71,7 +71,7 @@ public:
     PathData(pathData), Path(pathData.Path), 
     NumAccepted(0), NumAttempted(0), BisectionLevel(0),
     OutSection(outSection),
-    AcceptRatioVar("AcceptRatio",OutSection,pathData.Path.Communicator),
+    AcceptRatioVar("AcceptRatio",OutSection,pathData.Path.Communicator)
   {
     if (PathData.Path.Communicator.MyProc()==0)
       OutSection.NewSection("Stage");
