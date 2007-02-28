@@ -38,9 +38,6 @@ protected:
 #endif
   IOSectionClass OutSection;
   ObservableDouble AcceptRatioVar;
-  ObservableDouble LogRVar;
-  ObservableDouble NumAcceptVar;
-  ObservableDouble dSVar;
 public:
   int NumAccepted, NumAttempted;
   int BisectionLevel;
@@ -75,9 +72,6 @@ public:
     NumAccepted(0), NumAttempted(0), BisectionLevel(0),
     OutSection(outSection),
     AcceptRatioVar("AcceptRatio",OutSection,pathData.Path.Communicator),
-    LogRVar("LogRandom",OutSection,pathData.Path.Communicator),
-    NumAcceptVar("NumAccepted",OutSection,pathData.Path.Communicator),
-    dSVar("deltaAction",OutSection,pathData.Path.Communicator)
   {
     if (PathData.Path.Communicator.MyProc()==0)
       OutSection.NewSection("Stage");
@@ -101,8 +95,6 @@ public:
 class LocalStageClass : public StageClass
 {
 public:
-  // hack
-  ofstream out;
 
 	double UAction; // jg just for testing
   bool Attempt(int &slice1, int &slice2,
@@ -112,8 +104,6 @@ public:
     StageClass(pathData,outSection)
   {
 		UAction = 0.0;
-    out.open("accept.dat");
-    out << "## oldAction newAction logRand accepted" << endl;
   }
 	       
 };
