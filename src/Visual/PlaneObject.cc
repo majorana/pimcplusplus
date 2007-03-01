@@ -12,6 +12,14 @@ PlaneObject::SetPosition(int dir, double pos)
 
 
 void
+PlaneObject::SetColorMap(ColorMapType map)
+{
+  MapType = map;
+  CMap.Init (MinVal, MaxVal, map);
+  Set();
+}
+
+void
 PlaneObject::Init()
 {
   MinVal = Spline(0,0,0);
@@ -23,7 +31,7 @@ PlaneObject::Init()
 	MinVal = (val < MinVal) ? val : MinVal;
 	MaxVal = (val > MaxVal) ? val : MaxVal;
       }
-  CMap. Init (MinVal, MaxVal);
+  CMap. Init (MinVal, MaxVal, MapType);
   IsInitialized = true;
 }
 

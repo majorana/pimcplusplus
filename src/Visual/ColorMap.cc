@@ -78,12 +78,12 @@ ColorMap::Init (double min, double max, ColorMapType map)
   Array<double,1> r, g, b, a;
   if (map <= WINTER) {
     r.resize(64); g.resize(64); b.resize(64); a.resize(64);
-    r = MapData(map,Range::all(), 0);
-    g = MapData(map,Range::all(), 1);
-    b = MapData(map,Range::all(), 2);
-    a = 1.0;
+    r = 0.99*MapData(map,Range::all(), 0);
+    g = 0.99*MapData(map,Range::all(), 1);
+    b = 0.99*MapData(map,Range::all(), 2);
+    a = 0.99;
   }
-  if (map == BLUE_WHITE_RED) {
+  else if (map == BLUE_WHITE_RED) {
     r.resize(10); g.resize(10); b.resize(10); a.resize(10);
     r = 0.00, 0.00, 0.00, 0.10, 0.50, 0.80, 0.85, 0.85, 0.70, 0.50;
     g = 0.00, 0.05, 0.20, 0.50, 0.85, 0.85, 0.50, 0.20, 0.10, 0.05;
@@ -96,10 +96,6 @@ ColorMap::Init (double min, double max, ColorMapType map)
     g = 0.00, 0.25, 0.50, 0.75, 1.00;
     b = 0.00, 0.25, 0.50, 0.75, 1.00;
     a = 0.99, 0.99, 0.99, 0.99, 0.99;
-  }
-  else if (map == COOL) {
-
-
   }
   else {
     cerr << "Unknown map type in ColorMap::Init.\n";

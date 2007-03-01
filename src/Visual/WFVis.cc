@@ -28,7 +28,8 @@ WFVisualClass::WFVisualClass() :
   UpdateIsoType(false), 
   UpdateIsoVal(false),
   DoShift (false),
-  Shift (0.0, 0.0, 0.0)
+  Shift (0.0, 0.0, 0.0),
+  CMap(BLUE_WHITE_RED)
 {
   //Glib::thread_init();
   WFIso.Dynamic = false;
@@ -236,11 +237,12 @@ WFVisualClass::WFVisualClass() :
   mapNames.push_back ("Winter");
   mapNames.push_back ("BlueWhiteRed");
   Actions->add (Gtk::Action::create("MenuColormap", "Colormap"));
+  CMapActions.resize(BLUE_WHITE_RED+1);
   for (int i=0; i <= BLUE_WHITE_RED; i++) {
-    Glib::RefPtr<Gtk::RadioAction> action = Gtk::RadioAction::create
+    CMapActions[i] = Gtk::RadioAction::create
       (ColorMapGroup, mapNames[i], mapNames[i]);
     Actions->add
-      (action, sigc::bind<ColorMapType>
+      (CMapActions[i], sigc::bind<ColorMapType>
        (sigc::mem_fun (*this, &WFVisualClass::OnColorMapRadio),
 	(ColorMapType)i));
   }
@@ -1285,7 +1287,13 @@ WFVisualClass::SetViewportSize (int size)
 void
 WFVisualClass::OnColorMapRadio (ColorMapType type)
 {
-  cerr << "New colorMapType = " << type << endl;
+  if (CMapActions[type]->get_active()) {
+    CMap = type;
+    xPlane.SetColorMap(type);
+    yPlane.SetColorMap(type);
+    zPlane.SetColorMap(type);
+    DrawFrame();
+  }
 }
 
 

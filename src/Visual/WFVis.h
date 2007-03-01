@@ -103,6 +103,8 @@ protected:
   Gtk::HScale xPlaneScale, yPlaneScale, zPlaneScale;
   Gtk::CheckButton xPlaneButton, yPlaneButton, zPlaneButton;
   Gtk::HBox xPlaneBox, yPlaneBox, zPlaneBox;
+  ColorMapType CMap;
+  vector<Glib::RefPtr<Gtk::RadioAction> > CMapActions;
 
   //////////////////////////
   // Multi-band selection //
