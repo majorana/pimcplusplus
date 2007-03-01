@@ -3,7 +3,11 @@
 
 #include <Common/Splines/CubicBspline.h>
 
-typedef enum {BLUE_WHITE_RED, JET, GRAY} ColorMapType;
+typedef enum { AUTUMN, BONE, COLORCUBE, COOL, COPPER, FLAG,
+               GRAY, HOT, HSV, JET, LINES, PINK, SPRING, SUMMER,
+               WHITE, WINTER, BLUE_WHITE_RED } ColorMapType;
+
+
 
 class ColorMap
 {
@@ -11,13 +15,16 @@ private:
   CubicBspline Splines[4];
   bool Initialized;
   double Min, Max;
+  static bool MapsRead;
+  void ReadMaps();
 public:
   inline void operator()(double x, TinyVector<double,3> &val);
   inline void operator()(double x, TinyVector<double,4> &val);
   void Init (double min, double max, ColorMapType map=BLUE_WHITE_RED);
   ColorMap() : Initialized(false)
   {
-
+    if (!MapsRead)
+      ReadMaps();
   }
 };
 

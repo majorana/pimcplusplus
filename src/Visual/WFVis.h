@@ -54,7 +54,7 @@ protected:
   Gtk::Adjustment kAdjust, BandAdjust;
   Gtk::Frame kFrame, BandFrame;
   Glib::RefPtr<Gtk::ToggleAction> CoordToggle, SphereToggle, BoxToggle;
-  Gtk::RadioButtonGroup DisplayGroup;
+  Gtk::RadioButtonGroup DisplayGroup, ColorMapGroup;
   Glib::RefPtr<Gtk::RadioAction> RealRadio, ImagRadio, Mag2Radio;
   
   Gtk::Toolbar Tools;
@@ -159,6 +159,7 @@ protected:
   void OnRadiusChange();
   void OnOpen();
   void OnDisplayRadio(WFDisplayType type);
+  void OnColorMapRadio(ColorMapType type);
   bool UpToDate;
 
   ///////////////////

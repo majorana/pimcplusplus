@@ -3,6 +3,8 @@
 #include "ElementData.h"
 #include "ParseCommand.h"
 
+
+
 WFVisualClass::WFVisualClass() :
   MainVBox(false, 0), 
   QuitButton("Quit"),
@@ -211,6 +213,38 @@ WFVisualClass::WFVisualClass() :
     (Mag2Radio, sigc::bind<WFDisplayType> 
      (sigc::mem_fun(*this, &WFVisualClass::OnDisplayRadio),MAG2));  
 
+
+  ///////////////////
+  // Colormap menu //
+  ///////////////////
+  vector<string> mapNames;
+  mapNames.push_back ("Autumn");
+  mapNames.push_back ("Bone");
+  mapNames.push_back ("Colorcube");
+  mapNames.push_back ("Cool");
+  mapNames.push_back ("Copper");
+  mapNames.push_back ("Flag");
+  mapNames.push_back ("Gray");
+  mapNames.push_back ("Hot");
+  mapNames.push_back ("HSV");
+  mapNames.push_back ("Jet");
+  mapNames.push_back ("Lines");
+  mapNames.push_back ("Pink");
+  mapNames.push_back ("Spring");
+  mapNames.push_back ("Summer");
+  mapNames.push_back ("White");
+  mapNames.push_back ("Winter");
+  mapNames.push_back ("BlueWhiteRed");
+  Actions->add (Gtk::Action::create("MenuColormap", "Colormap"));
+  for (int i=0; i <= BLUE_WHITE_RED; i++) {
+    Glib::RefPtr<Gtk::RadioAction> action = Gtk::RadioAction::create
+      (ColorMapGroup, mapNames[i], mapNames[i]);
+    Actions->add
+      (action, sigc::bind<ColorMapType>
+       (sigc::mem_fun (*this, &WFVisualClass::OnColorMapRadio),
+	(ColorMapType)i));
+  }
+
   Glib::ustring ui_info =
     "<ui>"
     "  <menubar name='MenuBar'>"
@@ -232,6 +266,25 @@ WFVisualClass::WFVisualClass() :
     "      <menuitem action='Real'/>"
     "      <menuitem action='Imag'/>"
     "      <menuitem action='Mag2'/>"
+    "    </menu>"
+    "    <menu action='MenuColormap'>"
+    "       <menuitem action='Autumn'/>"
+    "       <menuitem action='Bone'/>"
+    "       <menuitem action='Colorcube'/>"
+    "       <menuitem action='Cool'/>"
+    "       <menuitem action='Copper'/>"
+    "       <menuitem action='Flag'/>"
+    "       <menuitem action='Gray'/>"
+    "       <menuitem action='Hot'/>"
+    "       <menuitem action='HSV'/>"
+    "       <menuitem action='Jet'/>"
+    "       <menuitem action='Lines'/>"
+    "       <menuitem action='Pink'/>"
+    "       <menuitem action='Spring'/>"
+    "       <menuitem action='Summer'/>"
+    "       <menuitem action='White'/>"
+    "       <menuitem action='Winter'/>"
+    "       <menuitem action='BlueWhiteRed'/>"
     "    </menu>"
     "  </menubar>"
     "  <toolbar  name='ToolBar'>"
@@ -1227,6 +1280,12 @@ WFVisualClass::SetViewportSize (int size)
   VisibleBandWindow.property_height_request().set_value(size-100);
   PathVis.set_size_request(size, size);
   resize(10,10);
+}
+
+void
+WFVisualClass::OnColorMapRadio (ColorMapType type)
+{
+  cerr << "New colorMapType = " << type << endl;
 }
 
 
