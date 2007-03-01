@@ -67,7 +67,10 @@ ViewClass::OnButtonRelease (GdkEventButton *event)
 bool
 ViewClass::OnScroll (GdkEventScroll *event)
 {
-  double factor = (event->state & GDK_SHIFT_MASK) ? 1.01 : 1.07;
+  /// This is the zoom factor.  If shift is held down, take steps ten
+  /// times smaller (1.00678880501846 = 1.07^(1/10)).
+  double factor = (event->state & GDK_SHIFT_MASK) ? 1.00678880501846 : 1.07;
+  
 
   if (event->direction == GDK_SCROLL_UP) {
     if (Scale < MaxScale)
