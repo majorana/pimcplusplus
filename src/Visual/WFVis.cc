@@ -231,6 +231,7 @@ WFVisualClass::WFVisualClass() :
   mapNames.push_back ("Jet");
   mapNames.push_back ("Lines");
   mapNames.push_back ("Pink");
+  mapNames.push_back ("Prism");
   mapNames.push_back ("Spring");
   mapNames.push_back ("Summer");
   mapNames.push_back ("White");
@@ -282,6 +283,7 @@ WFVisualClass::WFVisualClass() :
     "       <menuitem action='Jet'/>"
     "       <menuitem action='Lines'/>"
     "       <menuitem action='Pink'/>"
+    "       <menuitem action='Prism'/>"
     "       <menuitem action='Spring'/>"
     "       <menuitem action='Summer'/>"
     "       <menuitem action='White'/>"
@@ -969,7 +971,7 @@ WFVisualClass::ReadWF (int kpoint, int band)
 	  WFData(ix,iy,iz) = wfdata(jx, jy, jz, 1);
 	MaxVal = max(MaxVal, fabs(WFData(ix,iy,iz)));
       }
-  cerr << "MaxVal = " << MaxVal << endl;
+  // cerr << "MaxVal = " << MaxVal << endl;
   return true;
 }
 

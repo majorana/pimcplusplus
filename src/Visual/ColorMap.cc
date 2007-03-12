@@ -55,6 +55,8 @@ ColorMap::ReadMaps()
     MapData(LINES,  Range::all(),Range::all()) = map;
     in.ReadVar ("pink", map);
     MapData(PINK,  Range::all(),Range::all()) = map;
+    in.ReadVar ("prism", map);
+    MapData(PRISM,  Range::all(),Range::all()) = map;
     in.ReadVar ("spring", map);
     MapData(SPRING,  Range::all(),Range::all()) = map;
     in.ReadVar ("summer", map);
@@ -63,9 +65,9 @@ ColorMap::ReadMaps()
     MapData(WHITE,  Range::all(),Range::all()) = map;
     in.ReadVar ("winter", map);
     MapData(WINTER,  Range::all(),Range::all()) = map;
-
+    
+    in.CloseFile();
     MapsRead = true;
-    cerr << "Read all colormaps.\n";
   }
 }
 

@@ -4,8 +4,8 @@
 #include <Common/Splines/CubicBspline.h>
 
 typedef enum { AUTUMN, BONE, COLORCUBE, COOL, COPPER, FLAG,
-               GRAY, HOT, HSV, JET, LINES, PINK, SPRING, SUMMER,
-               WHITE, WINTER, BLUE_WHITE_RED } ColorMapType;
+               GRAY, HOT, HSV, JET, LINES, PINK, PRISM, SPRING, 
+	       SUMMER, WHITE, WINTER, BLUE_WHITE_RED } ColorMapType;
 
 
 
