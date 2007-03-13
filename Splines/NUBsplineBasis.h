@@ -460,6 +460,16 @@ public:
   NUBsplineBasis();
 };
 
+#ifdef __SSE12__
+inline int
+NUBsplineBasis<LinearGrid>::Find(double x) const
+{
+
+
+}
+
+#endif
+
 inline int
 NUBsplineBasis<LinearGrid>::Find(double x) const
 {

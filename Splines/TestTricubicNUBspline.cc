@@ -219,14 +219,13 @@ void FloatSpeedTest()
     r[0] = xi + (xf-xi)*drand48();
     r[1] = yi + (yf-yi)*drand48();
     r[2] = zi + (zf-zi)*drand48();
-    B.Evaluate (r, val2, grad2, secDerivs2);
     NUB.Evaluate(r, val, grad, secDerivs);
-//     cerr << "Bgrad   = " << grad2 <<  endl;
-//     cerr << "NUBgrad = " << grad  <<  endl;
-    cerr << "Diff = " << dot (grad-grad2, grad-grad2) << endl;
+    //B.Evaluate (r, val2, grad2, secDerivs2);
+    //     cerr << "Bgrad   = " << grad2 <<  endl;
+    //     cerr << "NUBgrad = " << grad  <<  endl;
+    //cerr << "Diff = " << dot (grad-grad2, grad-grad2) << endl;
   }
   NUBend   = clock();
-
   fprintf (stderr, "B-spline time   = %0.5f\n", 
 	   (double)(Bend-Bstart)/(double)CLOCKS_PER_SEC);
   fprintf (stderr, "NUB-spline time = %0.5f\n", 

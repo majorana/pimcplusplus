@@ -666,7 +666,7 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
 {
   TinyVector<double,4> a, da, d2a, b, db, d2b, c, dc, d2c;
   TinyVector<float,4>  af, daf, d2af, bf, dbf, d2bf, cf, dcf, d2cf;
-  __m128 av, dav, d2av, bv, dbv, d2bv, cv, dcv, d2cv;
+  __m128 av, dav, d2av, bv, dbv, d2bv, cv, dcv, d2cv, reg0, reg1, reg2;
   // Evaluate 1D basis functions
   int ix0 = XBasis(r[0], a, da, d2a); int ix1=ix0+1; int ix2=ix0+2; int ix3=ix0+3;
   int iy0 = YBasis(r[1], b, db, d2b); int iy1=iy0+1; int iy2=iy0+2; int iy3=iy0+3;
@@ -678,40 +678,23 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
   bv = _mm_loadu_ps (&(bf[0]));  dbv = _mm_loadu_ps (&(dbf[0])); d2bv = _mm_loadu_ps (&(d2bf[0]));
   cv = _mm_loadu_ps (&(cf[0]));  dcv = _mm_loadu_ps (&(dcf[0])); d2cv = _mm_loadu_ps (&(d2cf[0]));
 
-  __m128 Pi[16], tmp[16], cP[4], dcP[4], bcP, bdcP;
-  Pi[0]  = _mm_loadu_ps (&(P(ix0, iy0, iz0)));
-  Pi[1]  = _mm_loadu_ps (&(P(ix0, iy1, iz0)));
-  Pi[2]  = _mm_loadu_ps (&(P(ix0, iy2, iz0)));
-  Pi[3]  = _mm_loadu_ps (&(P(ix0, iy3, iz0)));
-  Pi[4]  = _mm_loadu_ps (&(P(ix1, iy0, iz0)));
-  Pi[5]  = _mm_loadu_ps (&(P(ix1, iy1, iz0)));
-  Pi[6]  = _mm_loadu_ps (&(P(ix1, iy2, iz0)));
-  Pi[7]  = _mm_loadu_ps (&(P(ix1, iy3, iz0)));
-  Pi[8]  = _mm_loadu_ps (&(P(ix2, iy0, iz0)));
-  Pi[9]  = _mm_loadu_ps (&(P(ix2, iy1, iz0)));
-  Pi[10] = _mm_loadu_ps (&(P(ix2, iy2, iz0)));
-  Pi[11] = _mm_loadu_ps (&(P(ix2, iy3, iz0)));
-  Pi[12] = _mm_loadu_ps (&(P(ix3, iy0, iz0)));
-  Pi[13] = _mm_loadu_ps (&(P(ix3, iy1, iz0)));
-  Pi[14] = _mm_loadu_ps (&(P(ix3, iy2, iz0)));
-  Pi[15] = _mm_loadu_ps (&(P(ix3, iy3, iz0)));
-
-  tmp[0]  = _mm_mul_ps (cv, Pi[0]);
-  tmp[1]  = _mm_mul_ps (cv, Pi[1]);
-  tmp[2]  = _mm_mul_ps (cv, Pi[2]);
-  tmp[3]  = _mm_mul_ps (cv, Pi[3]);
-  tmp[4]  = _mm_mul_ps (cv, Pi[4]);
-  tmp[5]  = _mm_mul_ps (cv, Pi[5]);
-  tmp[6]  = _mm_mul_ps (cv, Pi[6]);
-  tmp[7]  = _mm_mul_ps (cv, Pi[7]);
-  tmp[8]  = _mm_mul_ps (cv, Pi[8]);
-  tmp[9]  = _mm_mul_ps (cv, Pi[9]);
-  tmp[10] = _mm_mul_ps (cv, Pi[10]);
-  tmp[11] = _mm_mul_ps (cv, Pi[11]);
-  tmp[12] = _mm_mul_ps (cv, Pi[12]);
-  tmp[13] = _mm_mul_ps (cv, Pi[13]);
-  tmp[14] = _mm_mul_ps (cv, Pi[14]);
-  tmp[15] = _mm_mul_ps (cv, Pi[15]);
+  __m128 tmp[16], cP[4], dcP[4], bcP, bdcP;
+  reg0 = _mm_loadu_ps (&(P(ix0, iy0, iz0)));  tmp[0]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy1, iz0)));  tmp[1]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy2, iz0)));  tmp[2]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy3, iz0)));  tmp[3]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));  tmp[4]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  tmp[5]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  tmp[6]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  tmp[7]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));  tmp[8]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  tmp[9]  = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  tmp[10] = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  tmp[11] = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));  tmp[12] = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  tmp[13] = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  tmp[14] = _mm_mul_ps (cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  tmp[15] = _mm_mul_ps (cv, reg0);
 
   tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
   tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
@@ -728,22 +711,22 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
   cP[3] = _mm_hadd_ps (tmp[6], tmp[7]);
   
   // Now cP has P tensor times c vector
-  tmp[0]  = _mm_mul_ps (dcv, Pi[0]);
-  tmp[1]  = _mm_mul_ps (dcv, Pi[1]);
-  tmp[2]  = _mm_mul_ps (dcv, Pi[2]);
-  tmp[3]  = _mm_mul_ps (dcv, Pi[3]);
-  tmp[4]  = _mm_mul_ps (dcv, Pi[4]);
-  tmp[5]  = _mm_mul_ps (dcv, Pi[5]);
-  tmp[6]  = _mm_mul_ps (dcv, Pi[6]);
-  tmp[7]  = _mm_mul_ps (dcv, Pi[7]);
-  tmp[8]  = _mm_mul_ps (dcv, Pi[8]);
-  tmp[9]  = _mm_mul_ps (dcv, Pi[9]);
-  tmp[10] = _mm_mul_ps (dcv, Pi[10]);
-  tmp[11] = _mm_mul_ps (dcv, Pi[11]);
-  tmp[12] = _mm_mul_ps (dcv, Pi[12]);
-  tmp[13] = _mm_mul_ps (dcv, Pi[13]);
-  tmp[14] = _mm_mul_ps (dcv, Pi[14]);
-  tmp[15] = _mm_mul_ps (dcv, Pi[15]);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy0, iz0)));  tmp[0]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy1, iz0)));  tmp[1]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy2, iz0)));  tmp[2]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy3, iz0)));  tmp[3]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));  tmp[4]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  tmp[5]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  tmp[6]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  tmp[7]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));  tmp[8]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  tmp[9]  = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  tmp[10] = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  tmp[11] = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));  tmp[12] = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  tmp[13] = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  tmp[14] = _mm_mul_ps (dcv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  tmp[15] = _mm_mul_ps (dcv, reg0);
 
   tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
   tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
@@ -806,6 +789,31 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
   tmp[0] = _mm_hadd_ps(tmp[0], tmp[0]);
   tmp[0] = _mm_hadd_ps(tmp[0], tmp[0]);
   _mm_store_ss (&grad[2], tmp[0]);
+
+
+  // Compute second derivatives
+  // (0,0) component
+  tmp[0] = _mm_mul_ps (d2av, bcP);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  _mm_store_ss (&(secDerivs(0,0)), tmp[0]);
+
+  // (0,1) component
+  tmp[0] = _mm_mul_ps (d2bv, cP[0]);
+  tmp[1] = _mm_mul_ps (d2bv, cP[1]);
+  tmp[2] = _mm_mul_ps (d2bv, cP[2]);
+  tmp[3] = _mm_mul_ps (d2bv, cP[3]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[0] = _mm_mul_ps (dav, tmp[0]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  _mm_store_ss (&(secDerivs(0,1)), tmp[0]);
+  secDerivs(1,0) = secDerivs(0,1);
+
+  // (1,1) component
+  
 
 
 //   // Compute value
