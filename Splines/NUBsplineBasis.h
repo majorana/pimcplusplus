@@ -44,12 +44,20 @@ public:
   // the boundary conditions on the interpolating equations.  The
   // complex version return the basis functions in both the real and
   // imaginary parts.
+  inline void operator() (int i, TinyVector<float,4>& bfuncs) const;
   inline void operator() (int i, TinyVector<double,4>& bfuncs) const;
   inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs) const;
+
+  inline void operator() (int i, TinyVector<float,4>& bfuncs,
+			  TinyVector<float,4> &dbfuncs) const;
   inline void operator() (int i, TinyVector<double,4>& bfuncs,
 			  TinyVector<double,4> &dbfuncs) const;
   inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs,
 			  TinyVector<complex<double>,4> &dbfuncs) const;
+
+  inline void operator() (int i, TinyVector<float,4>& bfuncs,
+			  TinyVector<float,4> &dbfuncs,
+			  TinyVector<float,4> &d2bfuncs) const;
   inline void operator() (int i, TinyVector<double,4>& bfuncs,
 			  TinyVector<double,4> &dbfuncs,
 			  TinyVector<double,4> &d2bfuncs) const;
@@ -171,6 +179,17 @@ NUBsplineBasis<GridType>::operator()(int i,
   bfuncs[3] = complex<double>(funcs[3], funcs[3]);
 }
 
+template<typename GridType> void
+NUBsplineBasis<GridType>::operator()(int i,
+				     TinyVector<float,4> &bfuncs) const
+{
+  TinyVector<double,4> funcs;
+  (*this)(i, funcs);
+  bfuncs[0] = float(funcs[0]);
+  bfuncs[1] = float(funcs[1]);
+  bfuncs[2] = float(funcs[2]);
+  bfuncs[3] = float(funcs[3]);
+}
 
 
 template<typename GridType> int
@@ -265,6 +284,22 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<complex<double>,4> &bfunc
   dbfuncs[1] = complex<double>(dfuncs[1], dfuncs[1]);
   dbfuncs[2] = complex<double>(dfuncs[2], dfuncs[2]);
   dbfuncs[3] = complex<double>(dfuncs[3], dfuncs[3]);
+}
+
+template<typename GridType> void
+NUBsplineBasis<GridType>::operator()(int i, TinyVector<float,4> &bfuncs,
+				     TinyVector<float,4> &dbfuncs) const
+{
+  TinyVector<double,4> funcs, dfuncs;
+  (*this)(i, funcs, dfuncs);
+  bfuncs[0]  = float(funcs[0] );
+  bfuncs[1]  = float(funcs[1] );
+  bfuncs[2]  = float(funcs[2] );
+  bfuncs[3]  = float(funcs[3] );
+  dbfuncs[0] = float(dfuncs[0]);
+  dbfuncs[1] = float(dfuncs[1]);
+  dbfuncs[2] = float(dfuncs[2]);
+  dbfuncs[3] = float(dfuncs[3]);
 }
 
 template<typename GridType> int
@@ -402,12 +437,20 @@ public:
   // the boundary conditions on the interpolating equations.  The
   // complex version return the basis functions in both the real and
   // imaginary parts.
+  inline void operator() (int i, TinyVector<float,4>& bfuncs) const;
   inline void operator() (int i, TinyVector<double,4>& bfuncs) const;
   inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs) const;
+
+  inline void operator() (int i, TinyVector<float,4>& bfuncs,
+			  TinyVector<float,4> &dbfuncs) const;
   inline void operator() (int i, TinyVector<double,4>& bfuncs,
 			  TinyVector<double,4> &dbfuncs) const;
   inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs,
 			  TinyVector<complex<double>,4> &dbfuncs) const;
+
+  inline void operator() (int i, TinyVector<float,4>& bfuncs,
+			  TinyVector<float,4> &dbfuncs,
+			  TinyVector<float,4> &d2bfuncs) const;
   inline void operator() (int i, TinyVector<double,4>& bfuncs,
 			  TinyVector<double,4> &dbfuncs,
 			  TinyVector<double,4> &d2bfuncs) const;
@@ -518,6 +561,19 @@ NUBsplineBasis<LinearGrid>::operator()(int i,
   bfuncs[3] = complex<double>(funcs[3], funcs[3]);
 }
 
+inline void
+NUBsplineBasis<LinearGrid>::operator()(int i,
+				       TinyVector<float,4> &bfuncs) const
+{
+  TinyVector<double,4> funcs;
+  (*this)(i, funcs);
+  bfuncs[0] = float(funcs[0]);
+  bfuncs[1] = float(funcs[1]);
+  bfuncs[2] = float(funcs[2]);
+  bfuncs[3] = float(funcs[3]);
+}
+
+
 
 void
 NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<complex<double>,4> &bfuncs,
@@ -535,6 +591,22 @@ NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<complex<double>,4> &bfu
   dbfuncs[3] = complex<double>(dfuncs[3], dfuncs[3]);
 }
 
+void
+NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<float,4> &bfuncs,
+				     TinyVector<float,4> &dbfuncs) const
+{
+  TinyVector<double,4> funcs, dfuncs;
+  (*this)(i, funcs, dfuncs);
+  bfuncs[0]  = float(funcs[0]);
+  bfuncs[1]  = float(funcs[1]);
+  bfuncs[2]  = float(funcs[2]);
+  bfuncs[3]  = float(funcs[3]);
+  dbfuncs[0] = float(dfuncs[0]);
+  dbfuncs[1] = float(dfuncs[1]);
+  dbfuncs[2] = float(dfuncs[2]);
+  dbfuncs[3] = float(dfuncs[3]);
+}
+
 
 inline void
 NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs,
@@ -549,8 +621,8 @@ NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<double,4> &bfuncs,
 
 inline void
 NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<complex<double>,4> &bfuncs,
-				     TinyVector<complex<double>,4> &dbfuncs,
-				     TinyVector<complex<double>,4> &d2bfuncs) const
+				       TinyVector<complex<double>,4> &dbfuncs,
+				       TinyVector<complex<double>,4> &d2bfuncs) const
 {
   TinyVector<double,4> funcs, dfuncs, d2funcs;
   (*this)(i, funcs, dfuncs, d2funcs);
@@ -566,6 +638,27 @@ NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<complex<double>,4> &bfu
   d2bfuncs[1] = complex<double>(d2funcs[1], d2funcs[1]);
   d2bfuncs[2] = complex<double>(d2funcs[2], d2funcs[2]);
   d2bfuncs[3] = complex<double>(d2funcs[3], d2funcs[3]);
+}
+
+inline void
+NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<float,4> &bfuncs,
+				       TinyVector<float,4> &dbfuncs,
+				       TinyVector<float,4> &d2bfuncs) const
+{
+  TinyVector<double,4> funcs, dfuncs, d2funcs;
+  (*this)(i, funcs, dfuncs, d2funcs);
+  bfuncs[0]   = float(  funcs[0]);
+  bfuncs[1]   = float(  funcs[1]);
+  bfuncs[2]   = float(  funcs[2]);
+  bfuncs[3]   = float(  funcs[3]);
+  dbfuncs[0]  = float( dfuncs[0]);
+  dbfuncs[1]  = float( dfuncs[1]);
+  dbfuncs[2]  = float( dfuncs[2]);
+  dbfuncs[3]  = float( dfuncs[3]);
+  d2bfuncs[0] = float(d2funcs[0]);
+  d2bfuncs[1] = float(d2funcs[1]);
+  d2bfuncs[2] = float(d2funcs[2]);
+  d2bfuncs[3] = float(d2funcs[3]);
 }
 
 

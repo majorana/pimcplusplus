@@ -179,6 +179,61 @@ void SpeedTest()
 
 }
 
+
+void FloatSpeedTest()
+{
+  double xi=3.1, xf=7.9, yi=2.9, yf=10.0, zi=4.6, zf=14.0;
+  int nx=35, ny=29, nz=44;
+  LinearGrid xGrid(xi, xf, nx);
+  LinearGrid yGrid(yi, yf, ny);
+  LinearGrid zGrid(zi, zf, nz);
+
+  Array<float,3> data(nx-1,ny-1,nz-1);
+  for (int ix=0; ix<nx-1; ix++)
+    for (int iy=0; iy<ny-1; iy++)
+      for (int iz=0; iz<nz-1; iz++)
+	data(ix,iy,iz) = 2.0*(drand48()-0.5);
+  TricubicBspline<float> B;
+  TricubicNUBspline<float,LinearGrid,LinearGrid,LinearGrid> NUB;
+  B.Init (xi, xf, yi, yf, zi, zf, data);
+  NUB.Init (&xGrid, &yGrid, &zGrid, data);
+
+  float val, val2;
+  TinyVector<double,3> r;
+  TinyVector<float,3> grad, grad2;
+  TinyMatrix<float,3,3> secDerivs, secDerivs2;
+
+  clock_t Bstart, Bend, NUBstart, NUBend;
+  const int N = 10000000;
+  Bstart = clock();
+  for (int i=0; i<N; i++) {
+    r[0] = xi + (xf-xi)*drand48();
+    r[1] = yi + (yf-yi)*drand48();
+    r[2] = zi + (zf-zi)*drand48();
+    B.Evaluate(r, val, grad, secDerivs);
+  }
+  Bend   = clock();
+
+  NUBstart = clock();
+  for (int i=0; i<N; i++) {
+    r[0] = xi + (xf-xi)*drand48();
+    r[1] = yi + (yf-yi)*drand48();
+    r[2] = zi + (zf-zi)*drand48();
+    B.Evaluate (r, val2, grad2, secDerivs2);
+    NUB.Evaluate(r, val, grad, secDerivs);
+//     cerr << "Bgrad   = " << grad2 <<  endl;
+//     cerr << "NUBgrad = " << grad  <<  endl;
+    cerr << "Diff = " << dot (grad-grad2, grad-grad2) << endl;
+  }
+  NUBend   = clock();
+
+  fprintf (stderr, "B-spline time   = %0.5f\n", 
+	   (double)(Bend-Bstart)/(double)CLOCKS_PER_SEC);
+  fprintf (stderr, "NUB-spline time = %0.5f\n", 
+	   (double)(NUBend-NUBstart)/(double)CLOCKS_PER_SEC);
+
+}
+
 void TestCenterGrid()
 {
   CenterGrid grid;
@@ -215,8 +270,8 @@ void TestCenterGrid()
 
 main()
 {
-  //SpeedTest();
-  TestCenterGrid();
+  FloatSpeedTest();
+  //TestCenterGrid();
   //  TestLinear();
   //  TestComplexNonlinear();
 }

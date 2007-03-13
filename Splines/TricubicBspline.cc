@@ -240,5 +240,6 @@ TricubicBspline<T>::TricubicBspline()
 
 
 template class TricubicBspline<double>;
+template class TricubicBspline<float>;
 template class TricubicBspline<complex<double> >;
 

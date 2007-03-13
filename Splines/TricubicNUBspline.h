@@ -36,6 +36,8 @@ public:
 };
 
 
+
+
 void Duplicate (TinyVector<double,4> source,
 		TinyVector<complex<double>,4> dest)
 {
@@ -259,6 +261,7 @@ TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Evaluate (TinyVector<double,
 	  b[3]*(dc[0]*Pi[60] + dc[1]*Pi[61] + dc[2]*Pi[62] + dc[3]*Pi[63]));
 }
 
+
 template<typename T, typename XGridType, typename YGridType, typename ZGridType>
 inline void
 TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Evaluate (TinyVector<double,3> r,
@@ -362,7 +365,8 @@ TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Evaluate (TinyVector<double,
 }
 
 
-#endif
+
+
 template<typename T, typename XGridType, typename YGridType, typename ZGridType>
 inline void
 TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Evaluate 
@@ -480,3 +484,391 @@ TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Evaluate
 	   b[3]*(d2c[0]*P(ix3,iy3,iz0)+d2c[1]*P(ix3,iy3,iz1)+d2c[2]*P(ix3,iy3,iz2)+d2c[3]*P(ix3,iy3,iz3))));
 
 }
+
+
+//////////////////////////////////////////////////////////////////////
+//           Optimized, SSE version for floating point              //
+//////////////////////////////////////////////////////////////////////
+#ifdef __SSE__
+#include <xmmintrin.h>
+#include <pmmintrin.h>
+template<typename XGridType, typename YGridType, typename ZGridType>
+class TricubicNUBspline<float,XGridType,YGridType,ZGridType>
+{
+private:
+  NUBsplineBasis<XGridType> XBasis;
+  NUBsplineBasis<YGridType> YBasis;
+  NUBsplineBasis<ZGridType> ZBasis;
+  int Nx, Ny, Nz;
+  // The starting and ending values for the uniform grids
+  double xStart, xEnd, yStart, yEnd, zStart, zEnd;
+  // The box dimensions and their inverses
+  double Lx, LxInv, Ly, LyInv, Lz, LzInv;
+  // The control points
+  Array<float,3> P;
+
+  TinyVector<double,3> Periodic;  
+public:
+  inline void Init (XGridType *xgrid, YGridType *ygrid, ZGridType *zgrid, Array<float,3> &data, 
+		    BCType xbct=PERIODIC, BCType ybct=PERIODIC, BCType zbct=PERIODIC);
+  inline float operator() (TinyVector<double,3> r) const;
+  inline void Evaluate (TinyVector<double,3> r, float &val, 
+			TinyVector<float,3> &grad) const;
+  inline void Evaluate (TinyVector<double,3> r, float &val,
+			TinyVector<float,3> &grad, float &laplacian) const;
+  inline void Evaluate (TinyVector<double,3> r, float & val,
+			TinyVector<float,3> &grad, 
+			TinyMatrix<float,3,3> &secDerivs) const;
+};
+
+template<typename XGridType, typename YGridType, typename ZGridType>
+void 
+TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Init
+(XGridType *xgrid, YGridType *ygrid, ZGridType *zgrid, Array<float,3> &data, 
+ BCType xbc, BCType ybc, BCType zbc)
+{
+  // Set up 1D basis functions
+  XBasis.Init (xgrid, xbc==PERIODIC);
+  YBasis.Init (ygrid, ybc==PERIODIC);
+  ZBasis.Init (zgrid, zbc==PERIODIC);
+  Periodic[0] = xbc==PERIODIC ? 1.0 : 0.0;
+  Periodic[1] = ybc==PERIODIC ? 1.0 : 0.0;
+  Periodic[2] = zbc==PERIODIC ? 1.0 : 0.0;
+
+  Nx = data.extent(0);
+  Ny = data.extent(1);
+  Nz = data.extent(2);
+
+  int Mx, My, Mz;
+  Mx = (xbc == PERIODIC) ? Nx+3 : Nx+2;
+  My = (ybc == PERIODIC) ? Ny+3 : Ny+2;
+  Mz = (zbc == PERIODIC) ? Nz+3 : Nz+2;
+  assert (xgrid->NumPoints == Mx-2);
+  assert (ygrid->NumPoints == My-2);
+  assert (zgrid->NumPoints == Mz-2);
+
+  P.resize(Mx, My, Mz);
+
+  
+  // Now solve interpolating equations
+  TinyVector<float,4> lBC, rBC, dummy1, dummy2;
+  ////////////////////
+  // Do X direction //
+  ////////////////////
+  if (xbc == PERIODIC) {
+    for (int iy=0; iy<Ny; iy++)
+      for (int iz=0; iz<Nz; iz++) 
+	SolvePeriodicInterp1D(XBasis, data(Range::all(), iy, iz), P(Range::all(),iy+1, iz+1));
+  }
+  else {
+    if (xbc == FLAT) {
+      XBasis (0   , dummy1, lBC);
+      XBasis (Nx-1, dummy1, rBC);
+    }
+    else if (xbc == NATURAL) {
+      XBasis (0   , dummy1, dummy2, lBC);
+      XBasis (Nx-1, dummy1, dummy2, rBC);
+    }
+    lBC[3] = rBC[3] = 0.0;
+    for (int iy=0; iy<Ny; iy++)
+      for (int iz=0; iz<Nz; iz++)
+	SolveDerivInterp1D(XBasis, data(Range::all(), iy, iz),  P(Range::all(), iy+1, iz+1), lBC, rBC);
+  }
+  ////////////////////
+  // Do Y direction //
+  ////////////////////
+  if (ybc == PERIODIC) {
+    for (int ix=0; ix<Mx; ix++)
+      for (int iz=0; iz<Mz; iz++) 
+	SolvePeriodicInterp1D(YBasis, P(ix, Range(1,Ny), iz), P(ix, Range::all(), iz));
+  }
+  else {
+    if (ybc == FLAT) {
+      YBasis (0,    dummy1, lBC);
+      YBasis (Ny-1, dummy1, rBC);
+    }
+    else if (ybc == NATURAL) {
+      YBasis (0,    dummy1, dummy2, lBC);
+      YBasis (Ny-1, dummy1, dummy2, rBC);
+    }
+    lBC[3] = rBC[3] = 0.0;
+    for (int ix=0; ix<Mx; ix++)
+      for (int iz=0; iz<Mz; iz++)
+	SolveDerivInterp1D(YBasis, P(ix,Range(1,Ny), iz),  P(ix, Range::all(), iz), lBC, rBC);
+  }
+  ////////////////////
+  // Do Z direction //
+  ////////////////////
+  if (zbc == PERIODIC) {
+    for (int ix=0; ix<Mx; ix++)
+      for (int iy=0; iy<My; iy++) 
+	SolvePeriodicInterp1D(ZBasis, P(ix, iy, Range(1,Nz)), P(ix, iy, Range::all()));
+  }
+  else {
+    if (zbc == FLAT) {
+      ZBasis (0,    dummy1, lBC);
+      ZBasis (Nz-1, dummy1, rBC);
+    }
+    else if (zbc == NATURAL) {
+      ZBasis (0,    dummy1, dummy2, lBC);
+      ZBasis (Nz-1, dummy1, dummy2, rBC);
+    }
+    lBC[3] = rBC[3] = 0.0;
+    for (int ix=0; ix<Mx; ix++)
+      for (int iy=0; iy<My; iy++)
+	SolveDerivInterp1D(ZBasis, P(ix, iy, Range(1,Nz)),  P(ix, iy, Range::all()), lBC, rBC);
+  }
+}
+
+
+template<typename XGridType, typename YGridType, typename ZGridType>
+inline void
+TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate (TinyVector<double,3> r,
+								  float &val,
+								  TinyVector<float,3> &grad,
+								  float &laplacian) const
+{
+  TinyVector<double,4> a, da, d2a, b, db, d2b, c, dc, d2c;
+  __m128 av, dav, d2av, bv, dbv, d2bv, cv, dcv, d2cv;
+  // Evaluate 1D basis functions
+  int ix0 = XBasis(r[0], a, da, d2a); int ix1=ix0+1; int ix2=ix0+2; int ix3=ix0+3;
+  int iy0 = YBasis(r[1], b, db, d2b); int iy1=iy0+1; int iy2=iy0+2; int iy3=iy0+3;
+  int iz0 = ZBasis(r[2], c, dc, d2c); int iz1=iz0+1; int iz2=iz0+2; int iz3=iz0+3;
+  av = _mm_loadu_ps (&(a[0]));  dav = _mm_loadu_ps (&(da[0])); d2av = _mm_loadu_ps (&(d2a[0]));
+  bv = _mm_loadu_ps (&(b[0]));  dbv = _mm_loadu_ps (&(db[0])); d2bv = _mm_loadu_ps (&(d2b[0]));
+  cv = _mm_loadu_ps (&(c[0]));  dcv = _mm_loadu_ps (&(dc[0])); d2cv = _mm_loadu_ps (&(d2c[0]));
+
+  __m128 Pi[16], cP[4], bcP;
+  Pi[0]  = _mm_loadu_ps (&P(ix0, iy0, iz0));
+  Pi[1]  = _mm_loadu_ps (&P(ix0, iy1, iz0));
+  Pi[2]  = _mm_loadu_ps (&P(ix0, iy2, iz0));
+  Pi[3]  = _mm_loadu_ps (&P(ix0, iy3, iz0));
+  Pi[4]  = _mm_loadu_ps (&P(ix1, iy0, iz0));
+  Pi[5]  = _mm_loadu_ps (&P(ix1, iy1, iz0));
+  Pi[6]  = _mm_loadu_ps (&P(ix1, iy2, iz0));
+  Pi[7]  = _mm_loadu_ps (&P(ix1, iy3, iz0));
+  Pi[8]  = _mm_loadu_ps (&P(ix2, iy0, iz0));
+  Pi[9]  = _mm_loadu_ps (&P(ix2, iy1, iz0));
+  Pi[10] = _mm_loadu_ps (&P(ix2, iy2, iz0));
+  Pi[11] = _mm_loadu_ps (&P(ix2, iy3, iz0));
+  Pi[12] = _mm_loadu_ps (&P(ix3, iy0, iz0));
+  Pi[13] = _mm_loadu_ps (&P(ix3, iy1, iz0));
+  Pi[14] = _mm_loadu_ps (&P(ix3, iy2, iz0));
+  Pi[15] = _mm_loadu_ps (&P(ix3, iy3, iz0));
+
+
+}
+
+template<typename XGridType, typename YGridType, typename ZGridType>
+inline void
+TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate 
+(TinyVector<double,3> r, float &val, TinyVector<float,3> &grad, TinyMatrix<float,3,3> &secDerivs) const
+{
+  TinyVector<double,4> a, da, d2a, b, db, d2b, c, dc, d2c;
+  TinyVector<float,4>  af, daf, d2af, bf, dbf, d2bf, cf, dcf, d2cf;
+  __m128 av, dav, d2av, bv, dbv, d2bv, cv, dcv, d2cv;
+  // Evaluate 1D basis functions
+  int ix0 = XBasis(r[0], a, da, d2a); int ix1=ix0+1; int ix2=ix0+2; int ix3=ix0+3;
+  int iy0 = YBasis(r[1], b, db, d2b); int iy1=iy0+1; int iy2=iy0+2; int iy3=iy0+3;
+  int iz0 = ZBasis(r[2], c, dc, d2c); int iz1=iz0+1; int iz2=iz0+2; int iz3=iz0+3;
+  af=a; daf=da; d2af = d2a;
+  bf=b; dbf=db; d2bf = d2b;
+  cf=c; dcf=dc; d2cf = d2c;
+  av = _mm_loadu_ps (&(af[0]));  dav = _mm_loadu_ps (&(daf[0])); d2av = _mm_loadu_ps (&(d2af[0]));
+  bv = _mm_loadu_ps (&(bf[0]));  dbv = _mm_loadu_ps (&(dbf[0])); d2bv = _mm_loadu_ps (&(d2bf[0]));
+  cv = _mm_loadu_ps (&(cf[0]));  dcv = _mm_loadu_ps (&(dcf[0])); d2cv = _mm_loadu_ps (&(d2cf[0]));
+
+  __m128 Pi[16], tmp[16], cP[4], dcP[4], bcP, bdcP;
+  Pi[0]  = _mm_loadu_ps (&(P(ix0, iy0, iz0)));
+  Pi[1]  = _mm_loadu_ps (&(P(ix0, iy1, iz0)));
+  Pi[2]  = _mm_loadu_ps (&(P(ix0, iy2, iz0)));
+  Pi[3]  = _mm_loadu_ps (&(P(ix0, iy3, iz0)));
+  Pi[4]  = _mm_loadu_ps (&(P(ix1, iy0, iz0)));
+  Pi[5]  = _mm_loadu_ps (&(P(ix1, iy1, iz0)));
+  Pi[6]  = _mm_loadu_ps (&(P(ix1, iy2, iz0)));
+  Pi[7]  = _mm_loadu_ps (&(P(ix1, iy3, iz0)));
+  Pi[8]  = _mm_loadu_ps (&(P(ix2, iy0, iz0)));
+  Pi[9]  = _mm_loadu_ps (&(P(ix2, iy1, iz0)));
+  Pi[10] = _mm_loadu_ps (&(P(ix2, iy2, iz0)));
+  Pi[11] = _mm_loadu_ps (&(P(ix2, iy3, iz0)));
+  Pi[12] = _mm_loadu_ps (&(P(ix3, iy0, iz0)));
+  Pi[13] = _mm_loadu_ps (&(P(ix3, iy1, iz0)));
+  Pi[14] = _mm_loadu_ps (&(P(ix3, iy2, iz0)));
+  Pi[15] = _mm_loadu_ps (&(P(ix3, iy3, iz0)));
+
+  tmp[0]  = _mm_mul_ps (cv, Pi[0]);
+  tmp[1]  = _mm_mul_ps (cv, Pi[1]);
+  tmp[2]  = _mm_mul_ps (cv, Pi[2]);
+  tmp[3]  = _mm_mul_ps (cv, Pi[3]);
+  tmp[4]  = _mm_mul_ps (cv, Pi[4]);
+  tmp[5]  = _mm_mul_ps (cv, Pi[5]);
+  tmp[6]  = _mm_mul_ps (cv, Pi[6]);
+  tmp[7]  = _mm_mul_ps (cv, Pi[7]);
+  tmp[8]  = _mm_mul_ps (cv, Pi[8]);
+  tmp[9]  = _mm_mul_ps (cv, Pi[9]);
+  tmp[10] = _mm_mul_ps (cv, Pi[10]);
+  tmp[11] = _mm_mul_ps (cv, Pi[11]);
+  tmp[12] = _mm_mul_ps (cv, Pi[12]);
+  tmp[13] = _mm_mul_ps (cv, Pi[13]);
+  tmp[14] = _mm_mul_ps (cv, Pi[14]);
+  tmp[15] = _mm_mul_ps (cv, Pi[15]);
+
+  tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
+  tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
+  tmp[2]  = _mm_hadd_ps (tmp[4],  tmp[5]);
+  tmp[3]  = _mm_hadd_ps (tmp[6],  tmp[7]);
+  tmp[4]  = _mm_hadd_ps (tmp[8],  tmp[9]);
+  tmp[5]  = _mm_hadd_ps (tmp[10], tmp[11]);
+  tmp[6]  = _mm_hadd_ps (tmp[12], tmp[13]);
+  tmp[7]  = _mm_hadd_ps (tmp[14], tmp[15]);
+
+  cP[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  cP[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  cP[2] = _mm_hadd_ps (tmp[4], tmp[5]);
+  cP[3] = _mm_hadd_ps (tmp[6], tmp[7]);
+  
+  // Now cP has P tensor times c vector
+  tmp[0]  = _mm_mul_ps (dcv, Pi[0]);
+  tmp[1]  = _mm_mul_ps (dcv, Pi[1]);
+  tmp[2]  = _mm_mul_ps (dcv, Pi[2]);
+  tmp[3]  = _mm_mul_ps (dcv, Pi[3]);
+  tmp[4]  = _mm_mul_ps (dcv, Pi[4]);
+  tmp[5]  = _mm_mul_ps (dcv, Pi[5]);
+  tmp[6]  = _mm_mul_ps (dcv, Pi[6]);
+  tmp[7]  = _mm_mul_ps (dcv, Pi[7]);
+  tmp[8]  = _mm_mul_ps (dcv, Pi[8]);
+  tmp[9]  = _mm_mul_ps (dcv, Pi[9]);
+  tmp[10] = _mm_mul_ps (dcv, Pi[10]);
+  tmp[11] = _mm_mul_ps (dcv, Pi[11]);
+  tmp[12] = _mm_mul_ps (dcv, Pi[12]);
+  tmp[13] = _mm_mul_ps (dcv, Pi[13]);
+  tmp[14] = _mm_mul_ps (dcv, Pi[14]);
+  tmp[15] = _mm_mul_ps (dcv, Pi[15]);
+
+  tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
+  tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
+  tmp[2]  = _mm_hadd_ps (tmp[4],  tmp[5]);
+  tmp[3]  = _mm_hadd_ps (tmp[6],  tmp[7]);
+  tmp[4]  = _mm_hadd_ps (tmp[8],  tmp[9]);
+  tmp[5]  = _mm_hadd_ps (tmp[10], tmp[11]);
+  tmp[6]  = _mm_hadd_ps (tmp[12], tmp[13]);
+  tmp[7]  = _mm_hadd_ps (tmp[14], tmp[15]);
+
+  dcP[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  dcP[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  dcP[2] = _mm_hadd_ps (tmp[4], tmp[5]);
+  dcP[3] = _mm_hadd_ps (tmp[6], tmp[7]);
+
+  // Now compute bcP and bdcP
+  tmp[0] = _mm_mul_ps (bv, cP[0]);
+  tmp[1] = _mm_mul_ps (bv, cP[1]);
+  tmp[2] = _mm_mul_ps (bv, cP[2]);
+  tmp[3] = _mm_mul_ps (bv, cP[3]);
+
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  bcP    = _mm_hadd_ps (tmp[0], tmp[1]);
+
+  tmp[0] = _mm_mul_ps (bv, dcP[0]);
+  tmp[1] = _mm_mul_ps (bv, dcP[1]);
+  tmp[2] = _mm_mul_ps (bv, dcP[2]);
+  tmp[3] = _mm_mul_ps (bv, dcP[3]);
+
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  bdcP    = _mm_hadd_ps (tmp[0], tmp[1]);
+
+  // Compute value
+  tmp[0] = _mm_mul_ps (av, bcP);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  _mm_store_ss (&val, tmp[0]);
+
+  // Compute gradient
+  tmp[0] = _mm_mul_ps (dav, bcP);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  _mm_store_ss (&(grad[0]), tmp[0]);
+  
+  tmp[0] = _mm_mul_ps (dbv, cP[0]);
+  tmp[1] = _mm_mul_ps (dbv, cP[1]);
+  tmp[2] = _mm_mul_ps (dbv, cP[2]);
+  tmp[3] = _mm_mul_ps (dbv, cP[3]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[0] = _mm_mul_ps  (av, tmp[0]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  _mm_store_ss (&grad[1], tmp[0]);
+  
+  tmp[0] = _mm_mul_ps (av, bdcP);
+  tmp[0] = _mm_hadd_ps(tmp[0], tmp[0]);
+  tmp[0] = _mm_hadd_ps(tmp[0], tmp[0]);
+  _mm_store_ss (&grad[2], tmp[0]);
+
+
+//   // Compute value
+//   val = a[0]*bcP[0] + a[1]*bcP[1] + a[2]*bcP[2] + a[3]*bcP[3];
+
+//   // Compute gradient
+//   grad[0] = 
+//     (da[0]*bcP[0] + da[1]*bcP[1] + da[2]*bcP[2] + da[3]*bcP[3]);
+  
+//   grad[1] =
+//     (a[0]*(cP(0,0)*db[0]+cP(0,1)*db[1]+cP(0,2)*db[2]+cP(0,3)*db[3]) +
+//      a[1]*(cP(1,0)*db[0]+cP(1,1)*db[1]+cP(1,2)*db[2]+cP(1,3)*db[3]) +
+//      a[2]*(cP(2,0)*db[0]+cP(2,1)*db[1]+cP(2,2)*db[2]+cP(2,3)*db[3]) +
+//      a[3]*(cP(3,0)*db[0]+cP(3,1)*db[1]+cP(3,2)*db[2]+cP(3,3)*db[3]));
+
+//   grad[2] = 
+//     (a[0]*bdcP[0] + a[1]*bdcP[1] + a[2]*bdcP[2] + a[3]*bdcP[3]);
+
+
+//   // Compute laplacian
+//   secDerivs(0,0) = 
+//     (d2a[0]*bcP[0] + d2a[1]*bcP[1] + d2a[2]*bcP[2] + d2a[3]*bcP[3]);
+//   secDerivs(0,1) = secDerivs(1,0) = 
+//     (da[0]*(cP(0,0)*db[0]+cP(0,1)*db[1]+cP(0,2)*db[2]+cP(0,3)*db[3]) +
+//      da[1]*(cP(1,0)*db[0]+cP(1,1)*db[1]+cP(1,2)*db[2]+cP(1,3)*db[3]) +
+//      da[2]*(cP(2,0)*db[0]+cP(2,1)*db[1]+cP(2,2)*db[2]+cP(2,3)*db[3]) +
+//      da[3]*(cP(3,0)*db[0]+cP(3,1)*db[1]+cP(3,2)*db[2]+cP(3,3)*db[3]));
+//   secDerivs(0,2) = secDerivs(2,0) = 
+//     (da[0]*bdcP[0] + da[1]*bdcP[1] + da[2]*bdcP[2] + da[3]*bdcP[3]);
+        
+//   secDerivs(1,1) = 
+//     (a[0]*(cP(0,0)*d2b[0]+cP(0,1)*d2b[1]+cP(0,2)*d2b[2]+cP(0,3)*d2b[3]) +
+//      a[1]*(cP(1,0)*d2b[0]+cP(1,1)*d2b[1]+cP(1,2)*d2b[2]+cP(1,3)*d2b[3]) +
+//      a[2]*(cP(2,0)*d2b[0]+cP(2,1)*d2b[1]+cP(2,2)*d2b[2]+cP(2,3)*d2b[3]) +
+//      a[3]*(cP(3,0)*d2b[0]+cP(3,1)*d2b[1]+cP(3,2)*d2b[2]+cP(3,3)*d2b[3]));
+//   secDerivs(1,2) = 
+//     (a[0]*(db[0]*dcP(0,0) + db[1]*dcP(0,1) + db[2]*dcP(0,2) + db[3]*dcP(0,3))+
+//      a[1]*(db[0]*dcP(1,0) + db[1]*dcP(1,1) + db[2]*dcP(1,2) + db[3]*dcP(1,3))+
+//      a[2]*(db[0]*dcP(2,0) + db[1]*dcP(2,1) + db[2]*dcP(2,2) + db[3]*dcP(2,3))+
+//      a[3]*(db[0]*dcP(3,0) + db[1]*dcP(3,1) + db[2]*dcP(3,2) + db[3]*dcP(3,3)));
+//   secDerivs(2,2) = 
+//     (a[0]*(b[0]*(d2c[0]*P(ix0,iy0,iz0)+d2c[1]*P(ix0,iy0,iz1)+d2c[2]*P(ix0,iy0,iz2)+d2c[3]*P(ix0,iy0,iz3))+
+// 	   b[1]*(d2c[0]*P(ix0,iy1,iz0)+d2c[1]*P(ix0,iy1,iz1)+d2c[2]*P(ix0,iy1,iz2)+d2c[3]*P(ix0,iy1,iz3))+
+// 	   b[2]*(d2c[0]*P(ix0,iy2,iz0)+d2c[1]*P(ix0,iy2,iz1)+d2c[2]*P(ix0,iy2,iz2)+d2c[3]*P(ix0,iy2,iz3))+
+// 	   b[3]*(d2c[0]*P(ix0,iy3,iz0)+d2c[1]*P(ix0,iy3,iz1)+d2c[2]*P(ix0,iy3,iz2)+d2c[3]*P(ix0,iy3,iz3)))+
+//      a[1]*(b[0]*(d2c[0]*P(ix1,iy0,iz0)+d2c[1]*P(ix1,iy0,iz1)+d2c[2]*P(ix1,iy0,iz2)+d2c[3]*P(ix1,iy0,iz3))+
+// 	   b[1]*(d2c[0]*P(ix1,iy1,iz0)+d2c[1]*P(ix1,iy1,iz1)+d2c[2]*P(ix1,iy1,iz2)+d2c[3]*P(ix1,iy1,iz3))+
+// 	   b[2]*(d2c[0]*P(ix1,iy2,iz0)+d2c[1]*P(ix1,iy2,iz1)+d2c[2]*P(ix1,iy2,iz2)+d2c[3]*P(ix1,iy2,iz3))+
+// 	   b[3]*(d2c[0]*P(ix1,iy3,iz0)+d2c[1]*P(ix1,iy3,iz1)+d2c[2]*P(ix1,iy3,iz2)+d2c[3]*P(ix1,iy3,iz3)))+
+//      a[2]*(b[0]*(d2c[0]*P(ix2,iy0,iz0)+d2c[1]*P(ix2,iy0,iz1)+d2c[2]*P(ix2,iy0,iz2)+d2c[3]*P(ix2,iy0,iz3))+
+// 	   b[1]*(d2c[0]*P(ix2,iy1,iz0)+d2c[1]*P(ix2,iy1,iz1)+d2c[2]*P(ix2,iy1,iz2)+d2c[3]*P(ix2,iy1,iz3))+
+// 	   b[2]*(d2c[0]*P(ix2,iy2,iz0)+d2c[1]*P(ix2,iy2,iz1)+d2c[2]*P(ix2,iy2,iz2)+d2c[3]*P(ix2,iy2,iz3))+
+// 	   b[3]*(d2c[0]*P(ix2,iy3,iz0)+d2c[1]*P(ix2,iy3,iz1)+d2c[2]*P(ix2,iy3,iz2)+d2c[3]*P(ix2,iy3,iz3)))+
+//      a[3]*(b[0]*(d2c[0]*P(ix3,iy0,iz0)+d2c[1]*P(ix3,iy0,iz1)+d2c[2]*P(ix3,iy0,iz2)+d2c[3]*P(ix3,iy0,iz3))+
+// 	   b[1]*(d2c[0]*P(ix3,iy1,iz0)+d2c[1]*P(ix3,iy1,iz1)+d2c[2]*P(ix3,iy1,iz2)+d2c[3]*P(ix3,iy1,iz3))+
+// 	   b[2]*(d2c[0]*P(ix3,iy2,iz0)+d2c[1]*P(ix3,iy2,iz1)+d2c[2]*P(ix3,iy2,iz2)+d2c[3]*P(ix3,iy2,iz3))+
+// 	   b[3]*(d2c[0]*P(ix3,iy3,iz0)+d2c[1]*P(ix3,iy3,iz1)+d2c[2]*P(ix3,iy3,iz2)+d2c[3]*P(ix3,iy3,iz3))));
+
+}
+
+#endif
+
+
+
+
+#endif
