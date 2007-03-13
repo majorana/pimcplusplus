@@ -8,6 +8,10 @@
 #include <blitz/tinyvec-et.h>
 #include <complex>
 #include "Grid.h"
+#ifdef __SSE2__
+#include <xmmintrin.h>
+#include <pmmintrin.h>
+#endif
 
 using namespace blitz;
 
@@ -25,6 +29,7 @@ private:
   // This is used to avoid division in evalating the splines
   Array<TinyVector<double,3>,1> dxInv;
   bool Periodic;
+  
 public:
   // Initialized xVals and dxInv.
   inline double Grid (int i) { return ((*GridPtr)(i)); }
@@ -37,6 +42,9 @@ public:
   inline int  operator() (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv) const;
   // Same as above, but also computes second derivatives
+  inline int  operator() (double x, TinyVector<float,4>& bfunc,
+			  TinyVector<float,4> &deriv,
+			  TinyVector<float,4> &deriv2) const;
   inline int  operator() (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv,
 			  TinyVector<double,4> &deriv2) const;
@@ -304,9 +312,9 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<float,4> &bfuncs,
 
 template<typename GridType> int
 NUBsplineBasis<GridType>::operator()(double x, 
-			    TinyVector<double,4> &bfuncs,
-			    TinyVector<double,4> &dbfuncs,
-			    TinyVector<double,4> &d2bfuncs) const
+				     TinyVector<double,4> &bfuncs,
+				     TinyVector<double,4> &dbfuncs,
+				     TinyVector<double,4> &d2bfuncs) const
 {
   GridType &grid =  (*GridPtr);
   double b1[2], b2[3];
@@ -342,6 +350,8 @@ NUBsplineBasis<GridType>::operator()(double x,
 
   return i;
 }
+
+
 
 template<typename GridType> void
 NUBsplineBasis<GridType>::operator()(int i, TinyVector<complex<double>,4> &bfuncs,
@@ -402,7 +412,9 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
   d2bfuncs[3] = 6.0 * (+dxInv(i+2)[2]*dxInv(i+2)[1]*b1[1]);
 }
 
-
+#ifdef __SSE2__
+  #include <xmmintrin.h>
+#endif
 
 ////////////////////////////////////////////////////////////
 //              LinearGrid specialization                 //
@@ -417,6 +429,10 @@ private:
   double Periodic, Sixth, TwoThirds;
   inline int Find (double x) const;
   mutable TinyVector<double,4> tp;
+#ifdef __SSE2__
+  mutable __m128 _tp;
+  mutable __m128 _A[4], _dA[4], _d2A[4];
+#endif
   mutable int i0;
 public:
   // Initialized xVals and dxInv.
@@ -433,6 +449,9 @@ public:
   inline int  operator() (double x, TinyVector<double,4>& bfunc,
 			  TinyVector<double,4> &deriv,
 			  TinyVector<double,4> &deriv2) const;
+  inline int  operator() (double x, TinyVector<float,4>& bfunc,
+			  TinyVector<float,4> &deriv,
+			  TinyVector<float,4> &deriv2) const;
   // These versions take the grid point index.  These are needed for
   // the boundary conditions on the interpolating equations.  The
   // complex version return the basis functions in both the real and
@@ -460,15 +479,38 @@ public:
   NUBsplineBasis();
 };
 
-#ifdef __SSE12__
+#ifdef __SSE2__
+#include <xmmintrin.h>
 inline int
 NUBsplineBasis<LinearGrid>::Find(double x) const
 {
-
-
+  double delta = (x - GridStart);
+  double di = Linv * delta;
+  // Compute floor of di with SSE instructions
+  int floor_di;
+  __m128d _di, _floor, _zero, _mask, _m1;
+  _di = _mm_set_sd (di);
+  _m1 = _mm_set_sd (-1.0);
+  _zero = _mm_setzero_pd();
+  _mask = _mm_cmplt_sd (_di, _zero);
+  _m1   = _mm_and_pd(_m1, _mask);
+  _di   = _mm_add_sd (_di, _m1);
+  floor_di =_mm_cvttsd_si32 (_di);
+  //  cerr << "di = " << di << "  floor(di) = " << floor_di << endl;
+  delta -= Periodic * (double)floor_di*L;
+  double fi = delta * GridDeltaInv;
+  __m128d _fi = _mm_set_sd(fi);
+  int i = _mm_cvttsd_si32 (_fi);
+  double t = fi - (double)i;
+  tp[3] = 1.0;
+  tp[2] = t;
+  tp[1] = t*t;
+  tp[0] = t*t*t;
+  _tp = _mm_set_ps (tp[0], tp[1], tp[2], tp[3]);
+  return i;
 }
 
-#endif
+#else
 
 inline int
 NUBsplineBasis<LinearGrid>::Find(double x) const
@@ -485,6 +527,8 @@ NUBsplineBasis<LinearGrid>::Find(double x) const
   tp[3] = 1.0;
   return i;
 }
+
+#endif
 
 inline int
 NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs) const
@@ -541,6 +585,56 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs,
   return i0;
 }
 
+#ifdef __SSE2__
+inline int
+NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
+				       TinyVector<float,4> &dbfuncs,
+				       TinyVector<float,4> &d2bfuncs) const
+{
+  int i0 = Find(x);
+  __m128 tmp0, tmp1, tmp2, tmp3;
+  tmp0 = _mm_mul_ps (_A[0], _tp);
+  tmp1 = _mm_mul_ps (_A[1], _tp);
+  tmp2 = _mm_mul_ps (_A[2], _tp);
+  tmp3 = _mm_mul_ps (_A[3], _tp);
+  tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  tmp1 = _mm_hadd_ps (tmp2, tmp3);
+  tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  _mm_store_ps (&(bfuncs[0]), tmp0);
+
+  tmp0 = _mm_mul_ps (_dA[0], _tp);
+  tmp1 = _mm_mul_ps (_dA[1], _tp);
+  tmp2 = _mm_mul_ps (_dA[2], _tp);
+  tmp3 = _mm_mul_ps (_dA[3], _tp);
+  tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  tmp1 = _mm_hadd_ps (tmp2, tmp3);
+  tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  _mm_store_ps (&(dbfuncs[0]), tmp0);
+
+  tmp0 = _mm_mul_ps (_d2A[0], _tp);
+  tmp1 = _mm_mul_ps (_d2A[1], _tp);
+  tmp2 = _mm_mul_ps (_d2A[2], _tp);
+  tmp3 = _mm_mul_ps (_d2A[3], _tp);
+  tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  tmp1 = _mm_hadd_ps (tmp2, tmp3);
+  tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  _mm_store_ps (&(d2bfuncs[0]), tmp0);
+  return i0;
+}
+
+#else
+inline int
+NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
+				       TinyVector<float,4> &dbfuncs,
+				       TinyVector<float,4> &d2bfuncs) const
+{
+  
+
+
+}
+
+
+#endif
 
 
 inline void
@@ -601,6 +695,23 @@ NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<complex<double>,4> &bfu
   dbfuncs[3] = complex<double>(dfuncs[3], dfuncs[3]);
 }
 
+#ifdef __SSE2__
+void
+NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<float,4> &bfuncs,
+				     TinyVector<float,4> &dbfuncs) const
+{
+  __m128 tmp0, tmp1, tmp2, tmp3;
+  tmp0 = _mm_mul_ps (_A[0], _tp);
+  tmp1 = _mm_mul_ps (_A[1], _tp);
+  tmp2 = _mm_mul_ps (_A[2], _tp);
+  tmp3 = _mm_mul_ps (_A[3], _tp);
+  tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  tmp1 = _mm_hadd_ps (tmp2, tmp3);
+  tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  _mm_store_ps (&(bfuncs[0]), tmp0);
+}
+
+#else
 void
 NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<float,4> &bfuncs,
 				     TinyVector<float,4> &dbfuncs) const
@@ -616,6 +727,7 @@ NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<float,4> &bfuncs,
   dbfuncs[2] = float(dfuncs[2]);
   dbfuncs[3] = float(dfuncs[3]);
 }
+#endif
 
 
 inline void

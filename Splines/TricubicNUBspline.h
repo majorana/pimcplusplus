@@ -668,12 +668,16 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
   TinyVector<float,4>  af, daf, d2af, bf, dbf, d2bf, cf, dcf, d2cf;
   __m128 av, dav, d2av, bv, dbv, d2bv, cv, dcv, d2cv, reg0, reg1, reg2;
   // Evaluate 1D basis functions
-  int ix0 = XBasis(r[0], a, da, d2a); int ix1=ix0+1; int ix2=ix0+2; int ix3=ix0+3;
-  int iy0 = YBasis(r[1], b, db, d2b); int iy1=iy0+1; int iy2=iy0+2; int iy3=iy0+3;
-  int iz0 = ZBasis(r[2], c, dc, d2c); int iz1=iz0+1; int iz2=iz0+2; int iz3=iz0+3;
-  af=a; daf=da; d2af = d2a;
-  bf=b; dbf=db; d2bf = d2b;
-  cf=c; dcf=dc; d2cf = d2c;
+//   int ix0 = XBasis(r[0], a, da, d2a); int ix1=ix0+1; int ix2=ix0+2; int ix3=ix0+3;
+//   int iy0 = YBasis(r[1], b, db, d2b); int iy1=iy0+1; int iy2=iy0+2; int iy3=iy0+3;
+//   int iz0 = ZBasis(r[2], c, dc, d2c); int iz1=iz0+1; int iz2=iz0+2; int iz3=iz0+3;
+//   af=a; daf=da; d2af = d2a;
+//   bf=b; dbf=db; d2bf = d2b;
+//   cf=c; dcf=dc; d2cf = d2c;
+   int ix0 = XBasis(r[0], af, daf, d2af); int ix1=ix0+1; int ix2=ix0+2; int ix3=ix0+3;
+   int iy0 = YBasis(r[1], bf, dbf, d2bf); int iy1=iy0+1; int iy2=iy0+2; int iy3=iy0+3;
+   int iz0 = ZBasis(r[2], cf, dcf, d2cf); int iz1=iz0+1; int iz2=iz0+2; int iz3=iz0+3;
+
   av = _mm_loadu_ps (&(af[0]));  dav = _mm_loadu_ps (&(daf[0])); d2av = _mm_loadu_ps (&(d2af[0]));
   bv = _mm_loadu_ps (&(bf[0]));  dbv = _mm_loadu_ps (&(dbf[0])); d2bv = _mm_loadu_ps (&(d2bf[0]));
   cv = _mm_loadu_ps (&(cf[0]));  dcv = _mm_loadu_ps (&(dcf[0])); d2cv = _mm_loadu_ps (&(d2cf[0]));
