@@ -460,7 +460,7 @@ TricubicNUBspline<T,XGridType,YGridType,ZGridType>::Evaluate
      a[1]*(cP(1,0)*d2b[0]+cP(1,1)*d2b[1]+cP(1,2)*d2b[2]+cP(1,3)*d2b[3]) +
      a[2]*(cP(2,0)*d2b[0]+cP(2,1)*d2b[1]+cP(2,2)*d2b[2]+cP(2,3)*d2b[3]) +
      a[3]*(cP(3,0)*d2b[0]+cP(3,1)*d2b[1]+cP(3,2)*d2b[2]+cP(3,3)*d2b[3]));
-  secDerivs(1,2) = 
+  secDerivs(1,2) = secDerivs(2,1) = 
     (a[0]*(db[0]*dcP(0,0) + db[1]*dcP(0,1) + db[2]*dcP(0,2) + db[3]*dcP(0,3))+
      a[1]*(db[0]*dcP(1,0) + db[1]*dcP(1,1) + db[2]*dcP(1,2) + db[3]*dcP(1,3))+
      a[2]*(db[0]*dcP(2,0) + db[1]*dcP(2,1) + db[2]*dcP(2,2) + db[3]*dcP(2,3))+
@@ -664,7 +664,6 @@ inline void
 TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate 
 (TinyVector<double,3> r, float &val, TinyVector<float,3> &grad, TinyMatrix<float,3,3> &secDerivs) const
 {
-  TinyVector<double,4> a, da, d2a, b, db, d2b, c, dc, d2c;
   TinyVector<float,4>  af, daf, d2af, bf, dbf, d2bf, cf, dcf, d2cf;
   __m128 av, dav, d2av, bv, dbv, d2bv, cv, dcv, d2cv, reg0, reg1, reg2;
   // Evaluate 1D basis functions
@@ -817,8 +816,70 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
   secDerivs(1,0) = secDerivs(0,1);
 
   // (1,1) component
-  
+  tmp[0] = _mm_mul_ps (d2bv, cP[0]);
+  tmp[1] = _mm_mul_ps (d2bv, cP[1]);
+  tmp[2] = _mm_mul_ps (d2bv, cP[2]);
+  tmp[3] = _mm_mul_ps (d2bv, cP[3]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[0] = _mm_mul_ps (av, tmp[0]);
+  tmp[0] = _mm_mul_ps (tmp[0], tmp[0]);
+  tmp[0] = _mm_mul_ps (tmp[0], tmp[0]);
+  _mm_store_ss (&(secDerivs(1,1)), tmp[0]);
 
+  // (1,2) component
+  tmp[0] = _mm_mul_ps (dbv, dcP[0]);
+  tmp[1] = _mm_mul_ps (dbv, dcP[1]);
+  tmp[2] = _mm_mul_ps (dbv, dcP[2]);
+  tmp[3] = _mm_mul_ps (dbv, dcP[3]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[0] = _mm_mul_ps (av, tmp[0]);
+  tmp[0] = _mm_mul_ps (tmp[0], tmp[0]);
+  tmp[0] = _mm_mul_ps (tmp[0], tmp[0]);
+  _mm_store_ss (&(secDerivs(1,2)), tmp[0]);
+  _mm_store_ss (&(secDerivs(2,1)), tmp[0]);
+
+  // (2,2) component
+  reg0 = _mm_loadu_ps (&(P(ix0, iy0, iz0)));  tmp[0]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy1, iz0)));  tmp[1]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy2, iz0)));  tmp[2]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix0, iy3, iz0)));  tmp[3]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));  tmp[4]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  tmp[5]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  tmp[6]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  tmp[7]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));  tmp[8]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  tmp[9]  = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  tmp[10] = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  tmp[11] = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));  tmp[12] = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  tmp[13] = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  tmp[14] = _mm_mul_ps (d2cv, reg0);
+  reg0 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  tmp[15] = _mm_mul_ps (d2cv, reg0);
+  tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
+  tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
+  tmp[2]  = _mm_hadd_ps (tmp[4],  tmp[5]);
+  tmp[3]  = _mm_hadd_ps (tmp[6],  tmp[7]);
+  tmp[4]  = _mm_hadd_ps (tmp[8],  tmp[9]);
+  tmp[5]  = _mm_hadd_ps (tmp[10], tmp[11]);
+  tmp[6]  = _mm_hadd_ps (tmp[12], tmp[13]);
+  tmp[7]  = _mm_hadd_ps (tmp[14], tmp[15]);
+
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  tmp[2] = _mm_hadd_ps (tmp[4], tmp[5]);
+  tmp[3] = _mm_hadd_ps (tmp[6], tmp[7]);
+  
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[0] = _mm_mul_ps  (av, tmp[0]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+  _mm_store_ss (&(secDerivs(2,2)), tmp[0]);
 
 //   // Compute value
 //   val = a[0]*bcP[0] + a[1]*bcP[1] + a[2]*bcP[2] + a[3]*bcP[3];
@@ -853,7 +914,7 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
 //      a[1]*(cP(1,0)*d2b[0]+cP(1,1)*d2b[1]+cP(1,2)*d2b[2]+cP(1,3)*d2b[3]) +
 //      a[2]*(cP(2,0)*d2b[0]+cP(2,1)*d2b[1]+cP(2,2)*d2b[2]+cP(2,3)*d2b[3]) +
 //      a[3]*(cP(3,0)*d2b[0]+cP(3,1)*d2b[1]+cP(3,2)*d2b[2]+cP(3,3)*d2b[3]));
-//   secDerivs(1,2) = 
+//   secDerivs(1,2) = secDerivs(2,1) = 
 //     (a[0]*(db[0]*dcP(0,0) + db[1]*dcP(0,1) + db[2]*dcP(0,2) + db[3]*dcP(0,3))+
 //      a[1]*(db[0]*dcP(1,0) + db[1]*dcP(1,1) + db[2]*dcP(1,2) + db[3]*dcP(1,3))+
 //      a[2]*(db[0]*dcP(2,0) + db[1]*dcP(2,1) + db[2]*dcP(2,2) + db[3]*dcP(2,3))+
