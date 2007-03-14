@@ -8,6 +8,11 @@
 // c:  single precision complex
 // z:  double precision complex
 
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////              Basic type declarations               ////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 typedef enum { PERIODIC, DERIV1, DERIV2, FLAT, NATURAL } bc_code;
 typedef enum { U1D, U2D, U3D, NU1D, NU2D, NU3D } spline_code;
 
@@ -63,17 +68,17 @@ typedef struct
 /////////////////////////////////////
 // Create 1D uniform single-precision, real Bspline
 Bspline *
-create_UBspline_1d_f (Ugrid x_grid, BCtype_s xBC, float *data);
+create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data);
 
 // Create 2D uniform single-precision, real Bspline
 Bspline *
-create_UBspline_2d_f (Ugrid x_grid,   Ugrid y_grid,
+create_UBspline_2d_s (Ugrid x_grid,   Ugrid y_grid,
 		      BCtype_s   xBC, BCtype_s   yBC,
 		      float *data);
 
 // Create 3D uniform single-precision, real Bspline
 Bspline *
-create_UBspline_3d_f (Ugrid x_grid,   Ugrid y_grid,   Ugrid z_grid,
+create_UBspline_3d_s (Ugrid x_grid,   Ugrid y_grid,   Ugrid z_grid,
 		      BCtype_s  xBC,  BCtype_s   yBC, BCtype_s   zBC,
 		      float *data);
 
@@ -123,7 +128,7 @@ create_UBspline_3d_c (Ugrid  x_grid, Ugrid y_grid, Ugrid z_grid,
 ///////////////////////////////////////
 // Create 1D uniform single-precision, real Bspline
 Bspline *
-create_UBspline_1d_z (Ugrid x_grid, BCtype xBC_z, float *data);
+create_UBspline_1d_z (Ugrid x_grid, BCtype_z xBC, float *data);
 
 // Create 2D uniform single-precision, real Bspline
 Bspline *
@@ -146,42 +151,42 @@ create_UBspline_3d_z (Ugrid  x_grid, Ugrid   y_grid, Ugrid z_grid,
 
 // Value only
 inline void
-eval_UBspline_1d_f     (Bspline *spline, double x, float *val);
+eval_UBspline_1d_s     (Bspline *spline, double x, float *val);
 // Value and gradient
 inline void
-eval_UBspline_1d_f_vg  (Bspline *spline, double x, 
-		       float *val, float *grad);
+eval_UBspline_1d_s_vg  (Bspline *spline, double x, 
+			float *val, float *grad);
 // Value, gradient, and Laplacian
 inline void
-eval_UBspline_1d_f_vgl (Bspline *spline, double x, 
+eval_UBspline_1d_s_vgl (Bspline *spline, double x, 
 			float *val, float *grad, float *lapl);
 // Value, gradient, and Hessian
 inline void
-eval_UBspline_1d_f_vgh (Bspline *spline, double x, 
+eval_UBspline_1d_s_vgh (Bspline *spline, double x, 
 			float *val, float *grad, float *hess);
 
 inline void
-eval_UBspline_2d_f     (Bspline *spline, double x, float *val);
+eval_UBspline_2d_s     (Bspline *spline, double x, float *val);
 inline void
-eval_UBspline_2d_f_vg  (Bspline *spline, double x, 
+eval_UBspline_2d_s_vg  (Bspline *spline, double x, 
 		        float *val, float *grad);
 inline void
-eval_UBspline_2d_f_vgl (Bspline *spline, double x, 
+eval_UBspline_2d_s_vgl (Bspline *spline, double x, 
 			float *val, float *grad, float *lapl);
 inline void
-eval_UBspline_2d_f_vgh (Bspline *spline, double x, 
+eval_UBspline_2d_s_vgh (Bspline *spline, double x, 
 			float *val, float *grad, float *hess);
 
 inline void
-eval_UBspline_3d_f (Bspline *spline, double x, float *val);
+eval_UBspline_3d_s (Bspline *spline, double x, float *val);
 inline void
-eval_UBspline_3d_f_vg (Bspline *spline, double x, 
+eval_UBspline_3d_s_vg (Bspline *spline, double x, 
 		       float *val, float *grad);
 inline void
-eval_UBspline_3d_f_vgl (Bspline *spline, double x, 
+eval_UBspline_3d_s_vgl (Bspline *spline, double x, 
 			float *val, float *grad, float *lapl);
 inline void
-eval_UBspline_3d_f_vgh (Bspline *spline, double x, 
+eval_UBspline_3d_s_vgh (Bspline *spline, double x, 
 			float *val, float *grad, float *hess);
 
 // Similarly for the rest of the types.
@@ -204,39 +209,41 @@ typedef struct
   spline_code code;
   float *coefs;
   Ugrid x_grid;
-  BCtype xBC;
+  BCtype_s xBC;
 #ifdef __SSE3__
   __m128 tx;
 #else
   float tx[4];
 #endif
-} UBspline_1d_f;
+} UBspline_1d_s;
 
 typedef struct
 {
   spline_code code;
   float *coefs;
+  int x_stride;
   Ugrid x_grid, y_grid;
-  BCtype xBC, yBC;
+  BCtype_s xBC, yBC;
 #ifdef __SSE3__
   __m128 tx, ty;
 #else
   float tx[4], ty[4];
 #endif
-} UBspline_2d_f;
+} UBspline_2d_s;
 
 typedef struct
 {
   spline_code code;
   float *coefs;
+  int x_stride, y_stride;
   Ugrid x_grid, y_grid, zgrid;
-  BCtype xBC, yBC, zBC;
+  BCtype_s xBC, yBC, zBC;
 #ifdef __SSE3__
   __m128 tx, ty, tz;
 #else
   float tx[4], ty[4], tz[4];
 #endif
-} UBspline_3d_f;
+} UBspline_3d_s;
 
 
 ///////////////////////////
@@ -247,23 +254,25 @@ typedef struct
   spline_code code;
   double *coefs;
   Ugrid x_grid;
-  BCtype xBC;
+  BCtype_d xBC;
 } UBspline_1d_d;
 
 typedef struct
 {
   spline_code code;
   double *coefs;
+  int x_stride;
   Ugrid x_grid, y_grid;
-  BCtype xBC, yBC;
+  BCtype_d xBC, yBC;
 } UBspline_2d_d;
 
 typedef struct
 {
   spline_code code;
   double *coefs;
+  int x_stride, y_stride;
   Ugrid x_grid, y_grid, zgrid;
-  BCtype xBC, yBC, zBC;
+  BCtype_d xBC, yBC, zBC;
 } UBspline_3d_d;
 
 

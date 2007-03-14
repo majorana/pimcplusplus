@@ -66,7 +66,11 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        tcspeval.f                     \
                        tcspline.f                     \
                        v_spline.f                     \
-                       zonfind.f
+                       zonfind.f                      \
+                       bspline_create.c               \
+                       bspline_eval.h                 \
+                       bspline_eval_std.h             \
+                       bspline_eval_sse.h           
 
 includedir=$(prefix)/include/Common/Splines
 
