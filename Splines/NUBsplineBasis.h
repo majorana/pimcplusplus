@@ -431,7 +431,7 @@ private:
   mutable TinyVector<double,4> tp;
 #ifdef __SSE2__
   mutable __m128 _tp;
-  mutable __m128 _A[4], _dA[4], _d2A[4];
+  mutable __m128 _A[4], _dA[4], _d2A[4], _GDE;
 #endif
   mutable int i0;
 public:
@@ -592,7 +592,7 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
 				       TinyVector<float,4> &d2bfuncs) const
 {
   int i0 = Find(x);
-  __m128 tmp0, tmp1, tmp2, tmp3;
+  __m128 tmp0, tmp1, tmp2, tmp3, GDE;
   tmp0 = _mm_mul_ps (_A[0], _tp);
   tmp1 = _mm_mul_ps (_A[1], _tp);
   tmp2 = _mm_mul_ps (_A[2], _tp);
@@ -602,7 +602,6 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
   tmp0 = _mm_hadd_ps (tmp0, tmp1);
   _mm_store_ps (&(bfuncs[0]), tmp0);
 
-
   tmp0 = _mm_mul_ps (_dA[0], _tp);
   tmp1 = _mm_mul_ps (_dA[1], _tp);
   tmp2 = _mm_mul_ps (_dA[2], _tp);
@@ -610,8 +609,8 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
   tmp0 = _mm_hadd_ps (tmp0, tmp1);
   tmp1 = _mm_hadd_ps (tmp2, tmp3);
   tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  tmp0 = _mm_mul_ps  (tmp0, _GDE);
   _mm_store_ps (&(dbfuncs[0]), tmp0);
-  dbfuncs = GridDeltaInv * dbfuncs;
 
   tmp0 = _mm_mul_ps (_d2A[0], _tp);
   tmp1 = _mm_mul_ps (_d2A[1], _tp);
@@ -620,8 +619,9 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
   tmp0 = _mm_hadd_ps (tmp0, tmp1);
   tmp1 = _mm_hadd_ps (tmp2, tmp3);
   tmp0 = _mm_hadd_ps (tmp0, tmp1);
+  tmp0 = _mm_mul_ps  (tmp0, _GDE);
+  tmp0 = _mm_mul_ps  (tmp0, _GDE);
   _mm_store_ps (&(d2bfuncs[0]), tmp0);
-  d2bfuncs = GridDeltaInv*GridDeltaInv * d2bfuncs;
 
   return i0;
 }
@@ -799,6 +799,9 @@ NUBsplineBasis<LinearGrid>::Init(LinearGrid *grid, bool periodic)
   Linv = 1.0/L;
   GridDelta = L/(double)(N-1);
   GridDeltaInv = 1.0/GridDelta;
+#ifdef __SSE2__
+  _GDE = _mm_set_ps (GridDeltaInv, GridDeltaInv, GridDeltaInv, GridDeltaInv);
+#endif
 }
 
 
@@ -835,6 +838,7 @@ NUBsplineBasis<LinearGrid>::NUBsplineBasis()
   _dA[1] = _mm_set_ps ( 0.0,  1.5, -2.0,  0.0);
   _dA[2] = _mm_set_ps ( 0.0, -1.5,  1.0,  0.5);
   _dA[3] = _mm_set_ps ( 0.0,  0.5,  0.0,  0.0);
+
 #endif
 }
 
