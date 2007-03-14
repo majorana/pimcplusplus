@@ -121,7 +121,7 @@ TestComplexNonlinear()
 void SpeedTest()
 {
   double xi=3.1, xf=7.9, yi=2.9, yf=10.0, zi=4.6, zf=14.0;
-  int nx=35, ny=29, nz=44;
+  int nx=100, ny=100, nz=100;
 //   GeneralGrid xGrid, yGrid, zGrid;
 //   Array<double,1> xp(nx), yp(ny), zp(nz);
 //   for (int ix=0; ix<nx; ix++)
@@ -183,7 +183,7 @@ void SpeedTest()
 void FloatSpeedTest()
 {
   double xi=3.1, xf=7.9, yi=2.9, yf=10.0, zi=4.6, zf=14.0;
-  int nx=35, ny=29, nz=44;
+  int nx=100, ny=100, nz=100;
   LinearGrid xGrid(xi, xf, nx);
   LinearGrid yGrid(yi, yf, ny);
   LinearGrid zGrid(zi, zf, nz);
@@ -220,11 +220,11 @@ void FloatSpeedTest()
     r[1] = yi + (yf-yi)*(/*5.0-10.0* */drand48());
     r[2] = zi + (zf-zi)*(/*5.0-10.0* */drand48());
     NUB.Evaluate(r, val, grad, secDerivs);
-    // B.Evaluate (r, val2, grad2, secDerivs2);
+    //B.Evaluate (r, val2, grad2, secDerivs2);
     //     cerr << "Bgrad   = " << grad2 <<  endl;
     //     cerr << "NUBgrad = " << grad  <<  endl;
     // cerr << "Diff = " << (val - val2) << endl;
-    //cerr << "Diff = " << dot (grad-grad2, grad-grad2) << endl;
+     //cerr << "Diff = " << dot (grad-grad2, grad-grad2) << endl;
   }
   NUBend   = clock();
   fprintf (stderr, "B-spline time   = %0.5f\n", 
@@ -270,7 +270,8 @@ void TestCenterGrid()
 
 main()
 {
-  FloatSpeedTest();
+  //FloatSpeedTest();
+  SpeedTest();
   //TestCenterGrid();
   //  TestLinear();
   //  TestComplexNonlinear();

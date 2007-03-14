@@ -665,7 +665,7 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
 (TinyVector<double,3> r, float &val, TinyVector<float,3> &grad, TinyMatrix<float,3,3> &secDerivs) const
 {
   TinyVector<float,4>  af, daf, d2af, bf, dbf, d2bf, cf, dcf, d2cf;
-  __m128 av, dav, d2av, bv, dbv, d2bv, cv, dcv, d2cv, reg0, reg1, reg2;
+  __m128 av, dav, d2av, bv, dbv, d2bv, cv, dcv, d2cv, reg0, reg1, reg2, reg3;
   // Evaluate 1D basis functions
 //   int ix0 = XBasis(r[0], a, da, d2a); int ix1=ix0+1; int ix2=ix0+2; int ix3=ix0+3;
 //   int iy0 = YBasis(r[1], b, db, d2b); int iy1=iy0+1; int iy2=iy0+2; int iy3=iy0+3;
@@ -681,69 +681,183 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
   bv = _mm_loadu_ps (&(bf[0]));  dbv = _mm_loadu_ps (&(dbf[0])); d2bv = _mm_loadu_ps (&(d2bf[0]));
   cv = _mm_loadu_ps (&(cf[0]));  dcv = _mm_loadu_ps (&(dcf[0])); d2cv = _mm_loadu_ps (&(d2cf[0]));
 
-  __m128 tmp[16], cP[4], dcP[4], bcP, bdcP;
-  reg0 = _mm_loadu_ps (&(P(ix0, iy0, iz0)));  tmp[0]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix0, iy1, iz0)));  tmp[1]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix0, iy2, iz0)));  tmp[2]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix0, iy3, iz0)));  tmp[3]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));  tmp[4]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  tmp[5]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  tmp[6]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  tmp[7]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));  tmp[8]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  tmp[9]  = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  tmp[10] = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  tmp[11] = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));  tmp[12] = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  tmp[13] = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  tmp[14] = _mm_mul_ps (cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  tmp[15] = _mm_mul_ps (cv, reg0);
+  __m128 tmp[16], cP[4], dcP[4], d2cP[4], bcP, bdcP;
+  reg0 = _mm_loadu_ps (&(P(ix0, iy0, iz0)));    
+  reg1 = _mm_loadu_ps (&(P(ix0, iy1, iz0)));  
+  reg2 = _mm_loadu_ps (&(P(ix0, iy2, iz0)));  
+  reg3 = _mm_loadu_ps (&(P(ix0, iy3, iz0)));  
+  // cP
+  tmp[0]   = _mm_mul_ps (cv, reg0);
+  tmp[1]   = _mm_mul_ps (cv, reg1);
+  tmp[2]   = _mm_mul_ps (cv, reg2);
+  tmp[3]   = _mm_mul_ps (cv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  cP[0]    = _mm_hadd_ps (tmp[0], tmp[1]);
+  // dcP
+  tmp[0]   = _mm_mul_ps (dcv, reg0);
+  tmp[1]   = _mm_mul_ps (dcv, reg1);
+  tmp[2]   = _mm_mul_ps (dcv, reg2);
+  tmp[3]   = _mm_mul_ps (dcv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  dcP[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  // d2cP
+  tmp[0]   = _mm_mul_ps (d2cv, reg0);
+  tmp[1]   = _mm_mul_ps (d2cv, reg1);
+  tmp[2]   = _mm_mul_ps (d2cv, reg2);
+  tmp[3]   = _mm_mul_ps (d2cv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  d2cP[0]  = _mm_hadd_ps (tmp[0], tmp[1]);
 
-  tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
-  tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
-  tmp[2]  = _mm_hadd_ps (tmp[4],  tmp[5]);
-  tmp[3]  = _mm_hadd_ps (tmp[6],  tmp[7]);
-  tmp[4]  = _mm_hadd_ps (tmp[8],  tmp[9]);
-  tmp[5]  = _mm_hadd_ps (tmp[10], tmp[11]);
-  tmp[6]  = _mm_hadd_ps (tmp[12], tmp[13]);
-  tmp[7]  = _mm_hadd_ps (tmp[14], tmp[15]);
+  reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));    
+  reg1 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  
+  reg2 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  
+  reg3 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  
+  // cP
+  tmp[0]   = _mm_mul_ps (cv, reg0);
+  tmp[1]   = _mm_mul_ps (cv, reg1);
+  tmp[2]   = _mm_mul_ps (cv, reg2);
+  tmp[3]   = _mm_mul_ps (cv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  cP[1]    = _mm_hadd_ps (tmp[0], tmp[1]);
+  // dcP
+  tmp[0]   = _mm_mul_ps (dcv, reg0);
+  tmp[1]   = _mm_mul_ps (dcv, reg1);
+  tmp[2]   = _mm_mul_ps (dcv, reg2);
+  tmp[3]   = _mm_mul_ps (dcv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  dcP[1]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  // d2cP
+  tmp[0]   = _mm_mul_ps (d2cv, reg0);
+  tmp[1]   = _mm_mul_ps (d2cv, reg1);
+  tmp[2]   = _mm_mul_ps (d2cv, reg2);
+  tmp[3]   = _mm_mul_ps (d2cv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  d2cP[1]  = _mm_hadd_ps (tmp[0], tmp[1]);
 
-  cP[0] = _mm_hadd_ps (tmp[0], tmp[1]);
-  cP[1] = _mm_hadd_ps (tmp[2], tmp[3]);
-  cP[2] = _mm_hadd_ps (tmp[4], tmp[5]);
-  cP[3] = _mm_hadd_ps (tmp[6], tmp[7]);
+  reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));    
+  reg1 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  
+  reg2 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  
+  reg3 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  
+  // cP
+  tmp[0]   = _mm_mul_ps (cv, reg0);
+  tmp[1]   = _mm_mul_ps (cv, reg1);
+  tmp[2]   = _mm_mul_ps (cv, reg2);
+  tmp[3]   = _mm_mul_ps (cv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  cP[2]    = _mm_hadd_ps (tmp[0], tmp[1]);
+  // dcP
+  tmp[0]   = _mm_mul_ps (dcv, reg0);
+  tmp[1]   = _mm_mul_ps (dcv, reg1);
+  tmp[2]   = _mm_mul_ps (dcv, reg2);
+  tmp[3]   = _mm_mul_ps (dcv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  dcP[2]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  // d2cP
+  tmp[0]   = _mm_mul_ps (d2cv, reg0);
+  tmp[1]   = _mm_mul_ps (d2cv, reg1);
+  tmp[2]   = _mm_mul_ps (d2cv, reg2);
+  tmp[3]   = _mm_mul_ps (d2cv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  d2cP[2]  = _mm_hadd_ps (tmp[0], tmp[1]);
+
+  reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));    
+  reg1 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  
+  reg2 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  
+  reg3 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  
+  // cP
+  tmp[0]   = _mm_mul_ps (cv, reg0);
+  tmp[1]   = _mm_mul_ps (cv, reg1);
+  tmp[2]   = _mm_mul_ps (cv, reg2);
+  tmp[3]   = _mm_mul_ps (cv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  cP[3]    = _mm_hadd_ps (tmp[0], tmp[1]);
+  // dcP
+  tmp[0]   = _mm_mul_ps (dcv, reg0);
+  tmp[1]   = _mm_mul_ps (dcv, reg1);
+  tmp[2]   = _mm_mul_ps (dcv, reg2);
+  tmp[3]   = _mm_mul_ps (dcv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  dcP[3]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  // d2cP
+  tmp[0]   = _mm_mul_ps (d2cv, reg0);
+  tmp[1]   = _mm_mul_ps (d2cv, reg1);
+  tmp[2]   = _mm_mul_ps (d2cv, reg2);
+  tmp[3]   = _mm_mul_ps (d2cv, reg3);
+  tmp[0]   = _mm_hadd_ps (tmp[0], tmp[1]);
+  tmp[1]   = _mm_hadd_ps (tmp[2], tmp[3]);
+  d2cP[3]  = _mm_hadd_ps (tmp[0], tmp[1]);
+
+
+
+//   reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));  tmp[4]  = _mm_mul_ps (cv, reg0);
+//   reg1 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  tmp[5]  = _mm_mul_ps (cv, reg1);
+//   reg2 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  tmp[6]  = _mm_mul_ps (cv, reg2);
+//   reg3 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  tmp[7]  = _mm_mul_ps (cv, reg3);
+//   reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));  tmp[8]  = _mm_mul_ps (cv, reg0);
+//   reg1 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  tmp[9]  = _mm_mul_ps (cv, reg1);
+//   reg2 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  tmp[10] = _mm_mul_ps (cv, reg2);
+//   reg3 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  tmp[11] = _mm_mul_ps (cv, reg3);
+//   reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));  tmp[12] = _mm_mul_ps (cv, reg0);
+//   reg1 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  tmp[13] = _mm_mul_ps (cv, reg1);
+//   reg2 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  tmp[14] = _mm_mul_ps (cv, reg2);
+//   reg3 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  tmp[15] = _mm_mul_ps (cv, reg3);
+
+//   tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
+//   tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
+//   tmp[2]  = _mm_hadd_ps (tmp[4],  tmp[5]);
+//   tmp[3]  = _mm_hadd_ps (tmp[6],  tmp[7]);
+//   tmp[4]  = _mm_hadd_ps (tmp[8],  tmp[9]);
+//   tmp[5]  = _mm_hadd_ps (tmp[10], tmp[11]);
+//   tmp[6]  = _mm_hadd_ps (tmp[12], tmp[13]);
+//   tmp[7]  = _mm_hadd_ps (tmp[14], tmp[15]);
+
+//   cP[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+//   cP[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+//   cP[2] = _mm_hadd_ps (tmp[4], tmp[5]);
+//   cP[3] = _mm_hadd_ps (tmp[6], tmp[7]);
   
   // Now cP has P tensor times c vector
-  reg0 = _mm_loadu_ps (&(P(ix0, iy0, iz0)));  tmp[0]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix0, iy1, iz0)));  tmp[1]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix0, iy2, iz0)));  tmp[2]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix0, iy3, iz0)));  tmp[3]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));  tmp[4]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  tmp[5]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  tmp[6]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  tmp[7]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));  tmp[8]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  tmp[9]  = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  tmp[10] = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  tmp[11] = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));  tmp[12] = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  tmp[13] = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  tmp[14] = _mm_mul_ps (dcv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  tmp[15] = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix0, iy0, iz0)));  tmp[0]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix0, iy1, iz0)));  tmp[1]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix0, iy2, iz0)));  tmp[2]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix0, iy3, iz0)));  tmp[3]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));  tmp[4]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  tmp[5]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  tmp[6]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  tmp[7]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));  tmp[8]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  tmp[9]  = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  tmp[10] = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  tmp[11] = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));  tmp[12] = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  tmp[13] = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  tmp[14] = _mm_mul_ps (dcv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  tmp[15] = _mm_mul_ps (dcv, reg0);
 
-  tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
-  tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
-  tmp[2]  = _mm_hadd_ps (tmp[4],  tmp[5]);
-  tmp[3]  = _mm_hadd_ps (tmp[6],  tmp[7]);
-  tmp[4]  = _mm_hadd_ps (tmp[8],  tmp[9]);
-  tmp[5]  = _mm_hadd_ps (tmp[10], tmp[11]);
-  tmp[6]  = _mm_hadd_ps (tmp[12], tmp[13]);
-  tmp[7]  = _mm_hadd_ps (tmp[14], tmp[15]);
+//   tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
+//   tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
+//   tmp[2]  = _mm_hadd_ps (tmp[4],  tmp[5]);
+//   tmp[3]  = _mm_hadd_ps (tmp[6],  tmp[7]);
+//   tmp[4]  = _mm_hadd_ps (tmp[8],  tmp[9]);
+//   tmp[5]  = _mm_hadd_ps (tmp[10], tmp[11]);
+//   tmp[6]  = _mm_hadd_ps (tmp[12], tmp[13]);
+//   tmp[7]  = _mm_hadd_ps (tmp[14], tmp[15]);
 
-  dcP[0] = _mm_hadd_ps (tmp[0], tmp[1]);
-  dcP[1] = _mm_hadd_ps (tmp[2], tmp[3]);
-  dcP[2] = _mm_hadd_ps (tmp[4], tmp[5]);
-  dcP[3] = _mm_hadd_ps (tmp[6], tmp[7]);
+//   dcP[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+//   dcP[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+//   dcP[2] = _mm_hadd_ps (tmp[4], tmp[5]);
+//   dcP[3] = _mm_hadd_ps (tmp[6], tmp[7]);
 
   // Now compute bcP and bdcP
   tmp[0] = _mm_mul_ps (bv, cP[0]);
@@ -843,36 +957,47 @@ TricubicNUBspline<float,XGridType,YGridType,ZGridType>::Evaluate
   _mm_store_ss (&(secDerivs(2,1)), tmp[0]);
 
   // (2,2) component
-  reg0 = _mm_loadu_ps (&(P(ix0, iy0, iz0)));  tmp[0]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix0, iy1, iz0)));  tmp[1]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix0, iy2, iz0)));  tmp[2]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix0, iy3, iz0)));  tmp[3]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));  tmp[4]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  tmp[5]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  tmp[6]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  tmp[7]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));  tmp[8]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  tmp[9]  = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  tmp[10] = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  tmp[11] = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));  tmp[12] = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  tmp[13] = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  tmp[14] = _mm_mul_ps (d2cv, reg0);
-  reg0 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  tmp[15] = _mm_mul_ps (d2cv, reg0);
-  tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
-  tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
-  tmp[2]  = _mm_hadd_ps (tmp[4],  tmp[5]);
-  tmp[3]  = _mm_hadd_ps (tmp[6],  tmp[7]);
-  tmp[4]  = _mm_hadd_ps (tmp[8],  tmp[9]);
-  tmp[5]  = _mm_hadd_ps (tmp[10], tmp[11]);
-  tmp[6]  = _mm_hadd_ps (tmp[12], tmp[13]);
-  tmp[7]  = _mm_hadd_ps (tmp[14], tmp[15]);
+//   reg0 = _mm_loadu_ps (&(P(ix0, iy0, iz0)));  tmp[0]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix0, iy1, iz0)));  tmp[1]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix0, iy2, iz0)));  tmp[2]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix0, iy3, iz0)));  tmp[3]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix1, iy0, iz0)));  tmp[4]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix1, iy1, iz0)));  tmp[5]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix1, iy2, iz0)));  tmp[6]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix1, iy3, iz0)));  tmp[7]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix2, iy0, iz0)));  tmp[8]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix2, iy1, iz0)));  tmp[9]  = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix2, iy2, iz0)));  tmp[10] = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix2, iy3, iz0)));  tmp[11] = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix3, iy0, iz0)));  tmp[12] = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix3, iy1, iz0)));  tmp[13] = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix3, iy2, iz0)));  tmp[14] = _mm_mul_ps (d2cv, reg0);
+//   reg0 = _mm_loadu_ps (&(P(ix3, iy3, iz0)));  tmp[15] = _mm_mul_ps (d2cv, reg0);
+//   tmp[0]  = _mm_hadd_ps (tmp[0],  tmp[1]);
+//   tmp[1]  = _mm_hadd_ps (tmp[2],  tmp[3]);
+//   tmp[2]  = _mm_hadd_ps (tmp[4],  tmp[5]);
+//   tmp[3]  = _mm_hadd_ps (tmp[6],  tmp[7]);
+//   tmp[4]  = _mm_hadd_ps (tmp[8],  tmp[9]);
+//   tmp[5]  = _mm_hadd_ps (tmp[10], tmp[11]);
+//   tmp[6]  = _mm_hadd_ps (tmp[12], tmp[13]);
+//   tmp[7]  = _mm_hadd_ps (tmp[14], tmp[15]);
 
-  tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
-  tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
-  tmp[2] = _mm_hadd_ps (tmp[4], tmp[5]);
-  tmp[3] = _mm_hadd_ps (tmp[6], tmp[7]);
+//   tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+//   tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+//   tmp[2] = _mm_hadd_ps (tmp[4], tmp[5]);
+//   tmp[3] = _mm_hadd_ps (tmp[6], tmp[7]);
   
+//   tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+//   tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
+//   tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
+//   tmp[0] = _mm_mul_ps  (av, tmp[0]);
+//   tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+//   tmp[0] = _mm_hadd_ps (tmp[0], tmp[0]);
+//   _mm_store_ss (&(secDerivs(2,2)), tmp[0]);
+  tmp[0] = _mm_mul_ps (bv, d2cP[0]);
+  tmp[1] = _mm_mul_ps (bv, d2cP[1]);
+  tmp[2] = _mm_mul_ps (bv, d2cP[2]);
+  tmp[3] = _mm_mul_ps (bv, d2cP[3]);
   tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
   tmp[1] = _mm_hadd_ps (tmp[2], tmp[3]);
   tmp[0] = _mm_hadd_ps (tmp[0], tmp[1]);
