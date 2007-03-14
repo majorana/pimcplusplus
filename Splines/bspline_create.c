@@ -54,8 +54,6 @@ solve_deriv_interp_1d_s (float bands[][4], float coefs[],
   
   // Finish with first row
   coefs[0] = bands[0][3] - bands[0][1]*coefs[1*cstride] - bands[0][2]*coefs[2*cstride];
-    
-
 }
 
 void
