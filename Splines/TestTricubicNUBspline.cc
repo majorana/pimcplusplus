@@ -270,8 +270,8 @@ void TestCenterGrid()
 
 main()
 {
-  //FloatSpeedTest();
-  SpeedTest();
+  FloatSpeedTest();
+  //SpeedTest();
   //TestCenterGrid();
   //  TestLinear();
   //  TestComplexNonlinear();

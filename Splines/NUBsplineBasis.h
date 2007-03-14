@@ -8,8 +8,9 @@
 #include <blitz/tinyvec-et.h>
 #include <complex>
 #include "Grid.h"
-#ifdef __SSE2__
+#ifdef __SSE3__
 #include <xmmintrin.h>
+#include <emmintrin.h>
 #include <pmmintrin.h>
 #endif
 
@@ -412,7 +413,7 @@ NUBsplineBasis<GridType>::operator()(int i, TinyVector<double,4> &bfuncs,
   d2bfuncs[3] = 6.0 * (+dxInv(i+2)[2]*dxInv(i+2)[1]*b1[1]);
 }
 
-#ifdef __SSE2__
+#ifdef __SSE3__
   #include <xmmintrin.h>
 #endif
 
@@ -429,7 +430,7 @@ private:
   double Periodic, Sixth, TwoThirds;
   inline int Find (double x) const;
   mutable TinyVector<double,4> tp;
-#ifdef __SSE2__
+#ifdef __SSE3__
   mutable __m128 _tp;
   mutable __m128 _A[4], _dA[4], _d2A[4], _GDE;
 #endif
@@ -479,7 +480,7 @@ public:
   NUBsplineBasis();
 };
 
-#ifdef __SSE2__
+#ifdef __SSE3__
 #include <xmmintrin.h>
 inline int
 NUBsplineBasis<LinearGrid>::Find(double x) const
@@ -585,7 +586,7 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<double,4> &bfuncs,
   return i0;
 }
 
-#ifdef __SSE2__
+#ifdef __SSE3__
 inline int
 NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
 				       TinyVector<float,4> &dbfuncs,
@@ -699,7 +700,7 @@ NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<complex<double>,4> &bfu
   dbfuncs[3] = complex<double>(dfuncs[3], dfuncs[3]);
 }
 
-#ifdef __SSE2__
+#ifdef __SSE3__
 void
 NUBsplineBasis<LinearGrid>::operator()(int i, TinyVector<float,4> &bfuncs,
 				     TinyVector<float,4> &dbfuncs) const
@@ -799,7 +800,7 @@ NUBsplineBasis<LinearGrid>::Init(LinearGrid *grid, bool periodic)
   Linv = 1.0/L;
   GridDelta = L/(double)(N-1);
   GridDeltaInv = 1.0/GridDelta;
-#ifdef __SSE2__
+#ifdef __SSE3__
   _GDE = _mm_set_ps (GridDeltaInv, GridDeltaInv, GridDeltaInv, GridDeltaInv);
 #endif
 }
@@ -828,7 +829,7 @@ NUBsplineBasis<LinearGrid>::NUBsplineBasis()
   d3A(1,0)= 0.0; d3A(1,1)= 0.0; d3A(1,2)= 0.0; d3A(1,3)= 0.0;
   d3A(2,0)= 0.0; d3A(2,1)= 0.0; d3A(1,2)= 2.0; d3A(2,3)= 0.0;
   d3A(3,0)=-1.0; d3A(3,1)= 3.0; d3A(3,2)=-3.0; d3A(3,3)= 1.0;
-#ifdef __SSE2__
+#ifdef __SSE3__
   _A[0] = _mm_set_ps (-1.0/6.0,  3.0/6.0, -3.0/6.0, 1.0/6.0);
   _A[1] = _mm_set_ps ( 3.0/6.0, -6.0/6.0,  0.0/6.0, 4.0/6.0);
   _A[2] = _mm_set_ps (-3.0/6.0,  3.0/6.0,  3.0/6.0, 1.0/6.0);
