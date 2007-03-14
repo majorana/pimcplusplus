@@ -602,6 +602,7 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
   tmp0 = _mm_hadd_ps (tmp0, tmp1);
   _mm_store_ps (&(bfuncs[0]), tmp0);
 
+
   tmp0 = _mm_mul_ps (_dA[0], _tp);
   tmp1 = _mm_mul_ps (_dA[1], _tp);
   tmp2 = _mm_mul_ps (_dA[2], _tp);
@@ -610,6 +611,7 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
   tmp1 = _mm_hadd_ps (tmp2, tmp3);
   tmp0 = _mm_hadd_ps (tmp0, tmp1);
   _mm_store_ps (&(dbfuncs[0]), tmp0);
+  dbfuncs = GridDeltaInv * dbfuncs;
 
   tmp0 = _mm_mul_ps (_d2A[0], _tp);
   tmp1 = _mm_mul_ps (_d2A[1], _tp);
@@ -619,6 +621,8 @@ NUBsplineBasis<LinearGrid>::operator()(double x, TinyVector<float,4> &bfuncs,
   tmp1 = _mm_hadd_ps (tmp2, tmp3);
   tmp0 = _mm_hadd_ps (tmp0, tmp1);
   _mm_store_ps (&(d2bfuncs[0]), tmp0);
+  d2bfuncs = GridDeltaInv*GridDeltaInv * d2bfuncs;
+
   return i0;
 }
 
@@ -821,6 +825,17 @@ NUBsplineBasis<LinearGrid>::NUBsplineBasis()
   d3A(1,0)= 0.0; d3A(1,1)= 0.0; d3A(1,2)= 0.0; d3A(1,3)= 0.0;
   d3A(2,0)= 0.0; d3A(2,1)= 0.0; d3A(1,2)= 2.0; d3A(2,3)= 0.0;
   d3A(3,0)=-1.0; d3A(3,1)= 3.0; d3A(3,2)=-3.0; d3A(3,3)= 1.0;
+#ifdef __SSE2__
+  _A[0] = _mm_set_ps (-1.0/6.0,  3.0/6.0, -3.0/6.0, 1.0/6.0);
+  _A[1] = _mm_set_ps ( 3.0/6.0, -6.0/6.0,  0.0/6.0, 4.0/6.0);
+  _A[2] = _mm_set_ps (-3.0/6.0,  3.0/6.0,  3.0/6.0, 1.0/6.0);
+  _A[3] = _mm_set_ps ( 1.0/6.0,  0.0/6.0,  0.0/6.0, 0.0/6.0);
+
+  _dA[0] = _mm_set_ps ( 0.0, -0.5,  1.0, -0.5);
+  _dA[1] = _mm_set_ps ( 0.0,  1.5, -2.0,  0.0);
+  _dA[2] = _mm_set_ps ( 0.0, -1.5,  1.0,  0.5);
+  _dA[3] = _mm_set_ps ( 0.0,  0.5,  0.0,  0.0);
+#endif
 }
 
 
