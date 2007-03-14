@@ -839,6 +839,11 @@ NUBsplineBasis<LinearGrid>::NUBsplineBasis()
   _dA[2] = _mm_set_ps ( 0.0, -1.5,  1.0,  0.5);
   _dA[3] = _mm_set_ps ( 0.0,  0.5,  0.0,  0.0);
 
+  _d2A[0] = _mm_set_ps ( 0.0,  0.0, -1.0,  1.0);
+  _d2A[1] = _mm_set_ps ( 0.0,  0.0,  3.0, -2.0);
+  _d2A[2] = _mm_set_ps ( 0.0,  0.0, -3.0,  1.0);
+  _d2A[3] = _mm_set_ps ( 0.0,  0.0,  1.0,  0.0);
+
 #endif
 }
 
