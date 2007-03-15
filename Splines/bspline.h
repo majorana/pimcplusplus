@@ -1,12 +1,6 @@
 #ifndef BSPLINE_H
 #define BSPLINE_H
 
-#ifdef __SSE3__
-#include <xmmintrin.h>
-#include <emmintrin.h>
-#include <pmmintrin.h>
-#endif
-
 // Conventions:
 // Postfixes:  
 // s:  single precision real
@@ -63,6 +57,19 @@ typedef struct
 } Bspline;
 
 
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////           Bspline structure definitions            ////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+#ifdef __SSE314159__
+#include "bspline_structs_sse.h"
+#include "bspline_eval_sse.h"
+#else
+#include "bspline_structs_std.h"
+#include "bspline_eval_std.h"
+#endif
+
 
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
@@ -74,17 +81,17 @@ typedef struct
 // Uniform, single precision, real //
 /////////////////////////////////////
 // Create 1D uniform single-precision, real Bspline
-Bspline *
+UBspline_1d_s *
 create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data);
 
 // Create 2D uniform single-precision, real Bspline
-Bspline *
+UBspline_2d_s *
 create_UBspline_2d_s (Ugrid x_grid,   Ugrid y_grid,
 		      BCtype_s   xBC, BCtype_s   yBC,
 		      float *data);
 
 // Create 3D uniform single-precision, real Bspline
-Bspline *
+UBspline_3d_s *
 create_UBspline_3d_s (Ugrid x_grid,   Ugrid y_grid,   Ugrid z_grid,
 		      BCtype_s  xBC,  BCtype_s   yBC, BCtype_s   zBC,
 		      float *data);
@@ -158,18 +165,19 @@ create_UBspline_3d_z (Ugrid  x_grid, Ugrid   y_grid, Ugrid z_grid,
 
 // Value only
 inline void
-eval_UBspline_1d_s     (Bspline *spline, double x, float *val);
+eval_UBspline_1d_s     (UBspline_1d_s * restrict spline, double x, 
+			float* restrict val);
 // Value and gradient
 inline void
-eval_UBspline_1d_s_vg  (Bspline *spline, double x, 
+eval_UBspline_1d_s_vg  (UBspline_1d_s *spline, double x, 
 			float *val, float *grad);
 // Value, gradient, and Laplacian
 inline void
-eval_UBspline_1d_s_vgl (Bspline *spline, double x, 
+eval_UBspline_1d_s_vgl (UBspline_1d_s *spline, double x, 
 			float *val, float *grad, float *lapl);
 // Value, gradient, and Hessian
 inline void
-eval_UBspline_1d_s_vgh (Bspline *spline, double x, 
+eval_UBspline_1d_s_vgh (UBspline_1d_s *spline, double x, 
 			float *val, float *grad, float *hess);
 
 inline void
@@ -200,89 +208,5 @@ eval_UBspline_3d_s_vgh (Bspline *spline, double x,
 
 void
 destroy_Bspline (Bspline *ptr);
-
-
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-////           Bspline structure definitions            ////
-////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
-
-///////////////////////////
-// Single precision real //
-///////////////////////////
-typedef struct
-{
-  spline_code code;
-  float *coefs;
-  Ugrid x_grid;
-  BCtype_s xBC;
-#ifdef __SSE3__
-  __m128 tx;
-#else
-  float tx[4];
-#endif
-} UBspline_1d_s;
-
-typedef struct
-{
-  spline_code code;
-  float *coefs;
-  int x_stride;
-  Ugrid x_grid, y_grid;
-  BCtype_s xBC, yBC;
-#ifdef __SSE3__
-  __m128 tx, ty;
-#else
-  float tx[4], ty[4];
-#endif
-} UBspline_2d_s;
-
-typedef struct
-{
-  spline_code code;
-  float *coefs;
-  int x_stride, y_stride;
-  Ugrid x_grid, y_grid, zgrid;
-  BCtype_s xBC, yBC, zBC;
-#ifdef __SSE3__
-  __m128 tx, ty, tz;
-#else
-  float tx[4], ty[4], tz[4];
-#endif
-} UBspline_3d_s;
-
-
-///////////////////////////
-// Double precision real //
-///////////////////////////
-typedef struct
-{
-  spline_code code;
-  double *coefs;
-  Ugrid x_grid;
-  BCtype_d xBC;
-} UBspline_1d_d;
-
-typedef struct
-{
-  spline_code code;
-  double *coefs;
-  int x_stride;
-  Ugrid x_grid, y_grid;
-  BCtype_d xBC, yBC;
-} UBspline_2d_d;
-
-typedef struct
-{
-  spline_code code;
-  double *coefs;
-  int x_stride, y_stride;
-  Ugrid x_grid, y_grid, zgrid;
-  BCtype_d xBC, yBC, zBC;
-} UBspline_3d_d;
-
-
-
 
 #endif BSPLINE_H
