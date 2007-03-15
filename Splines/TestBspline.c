@@ -49,8 +49,8 @@ Test_2d_s()
 
   for (double x=x_grid.start; x<=x_grid.end; x+=0.005) {
     for (double y=y_grid.start; y<=y_grid.end; y+=0.005) {
-      float val;
-      eval_UBspline_2d_s (spline, x, y, &val);
+      float val, grad[2], hess[4];
+	eval_UBspline_2d_s_vgh (spline, x, y, &val, grad, hess);
       fprintf (stdout, "%20.14f ", val);
     }
     fprintf (stdout, "\n");
