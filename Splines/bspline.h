@@ -1,6 +1,12 @@
 #ifndef BSPLINE_H
 #define BSPLINE_H
 
+#ifdef __SSE3__
+#include <xmmintrin.h>
+#include <emmintrin.h>
+#include <pmmintrin.h>
+#endif
+
 // Conventions:
 // Postfixes:  
 // s:  single precision real
