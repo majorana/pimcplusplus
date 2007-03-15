@@ -97,7 +97,8 @@ solve_periodic_interp_1d_s (float bands[][4], float coefs[],
   bands[M-1][3] /= bands[M-1][1];
   coefs[M*cstride] = bands[M-1][3];
   for (int row=M-2; row>=0; row--) 
-    coefs[(row+1)*cstride] = bands[row][3] - bands[row][2]*coefs[(row+2)*cstride] - lastCol[row]*coefs[M*cstride];
+    coefs[(row+1)*cstride] = 
+      bands[row][3] - bands[row][2]*coefs[(row+2)*cstride] - lastCol[row]*coefs[M*cstride];
   
   coefs[0*cstride] = coefs[M*cstride];
   coefs[(M+1)*cstride] = coefs[1*cstride];
@@ -231,14 +232,14 @@ create_UBspline_2d_s (Ugrid x_grid, Ugrid y_grid,
   // First, solve in the X-direction 
   for (int iy=0; iy<My; iy++) {
     int doffset = iy;
-    int coffset = iy+1;
+    int coffset = iy;
     find_coefs_1d (spline->x_grid, xBC, data+doffset, My,
 		   spline->coefs+coffset, Ny);
   }
   
   // Now, solve in the Y-direction
   for (int ix=0; ix<Nx; ix++) {
-    int doffset = (ix+1)*Ny;
+    int doffset = ix*Ny;
     int coffset = ix*Ny;
     find_coefs_1d (spline->y_grid, yBC, spline->coefs+doffset, 1, 
 		   spline->coefs+coffset, 1);
