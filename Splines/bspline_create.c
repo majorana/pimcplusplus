@@ -128,7 +128,7 @@ create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data)
   spline->x_grid   = x_grid;
 
   int M = x_grid.num;
-  spline->coefs = malloc (sizeof(float)*M);
+  spline->coefs = malloc (sizeof(float)*(M+2));
 
   find_coefs_1d (spline->x_grid, xBC, data, 1, spline->coefs, 1);
     

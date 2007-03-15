@@ -13,6 +13,7 @@
 ////              Basic type declarations               ////
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
+
 typedef enum { PERIODIC, DERIV1, DERIV2, FLAT, NATURAL } bc_code;
 typedef enum { U1D, U2D, U3D, NU1D, NU2D, NU3D } spline_code;
 
