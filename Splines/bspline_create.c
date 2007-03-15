@@ -124,7 +124,7 @@ create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data)
   UBspline_1d_s* restrict spline = malloc (sizeof(UBspline_1d_s));
   // Setup internal variables
   x_grid.delta     = (x_grid.end-x_grid.start)/(double)(x_grid.num-1);
-  x_grid.delta_inv = 1.0/spline->x_grid.delta;
+  x_grid.delta_inv = 1.0/x_grid.delta;
   spline->x_grid   = x_grid;
 
   int M = x_grid.num;
