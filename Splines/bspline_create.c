@@ -97,9 +97,9 @@ solve_periodic_interp_1d_s (float bands[][4], float coefs[],
   bands[M-1][3] /= bands[M-1][1];
   coefs[M*cstride] = bands[M-1][3];
   for (int row=M-2; row>=0; row--) 
-    coefs[row+1] = bands[row][3] - bands[row][2]*coefs[row+2] - lastCol[row]*coefs[M];
+    coefs[(row+1)*cstride] = bands[row][3] - bands[row][2]*coefs[(row+2)*cstride] - lastCol[row]*coefs[M*cstride];
   
-  coefs[0] = coefs[M*cstride];
+  coefs[0*cstride] = coefs[M*cstride];
   coefs[(M+1)*cstride] = coefs[1*cstride];
   coefs[(M+2)*cstride] = coefs[2*cstride];
 
@@ -175,7 +175,7 @@ find_coefs_1d (Ugrid grid, BCtype_s bc,
 
 	       
 
-Bspline*
+UBspline_1d_s*
 create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data)
 {
   // Create new spline
@@ -198,5 +198,51 @@ create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data)
   spline->coefs = malloc (sizeof(float)*N);
   find_coefs_1d (spline->x_grid, xBC, data, 1, spline->coefs, 1);
     
-  return (Bspline*) spline;
+  return spline;
+}
+
+
+UBspline_2d_s*
+create_UBspline_2d_s (Ugrid x_grid, Ugrid y_grid,
+		      BCtype_s xBC, BCtype_s yBC, float *data)
+{
+  // Create new spline
+  UBspline_2d_s* restrict spline = malloc (sizeof(UBspline_2d_s));
+  // Setup internal variables
+  int Mx = x_grid.num;
+  int My = y_grid.num;
+  int Nx, Ny;
+
+  if (xBC.lCode == PERIODIC)     Nx = Mx+3;
+  else                           Nx = Mx+2;
+  x_grid.delta = (x_grid.end - x_grid.start)/(double)(Nx-3);
+  x_grid.delta_inv = 1.0/x_grid.delta;
+  spline->x_grid   = x_grid;
+
+  if (yBC.lCode == PERIODIC)     Ny = My+3;
+  else                           Ny = My+2;
+  y_grid.delta = (y_grid.end - y_grid.start)/(double)(Ny-3);
+  y_grid.delta_inv = 1.0/y_grid.delta;
+  spline->y_grid   = y_grid;
+  spline->x_stride = Ny;
+
+  spline->coefs = malloc (sizeof(float)*Nx*Ny);
+
+  // First, solve in the X-direction 
+  for (int iy=0; iy<My; iy++) {
+    int doffset = iy;
+    int coffset = iy+1;
+    find_coefs_1d (spline->x_grid, xBC, data+doffset, My,
+		   spline->coefs+coffset, Ny);
+  }
+  
+  // Now, solve in the Y-direction
+  for (int ix=0; ix<Nx; ix++) {
+    int doffset = (ix+1)*Ny;
+    int coffset = ix*Ny;
+    find_coefs_1d (spline->y_grid, yBC, spline->coefs+doffset, 1, 
+		   spline->coefs+coffset, 1);
+  }
+  
+  return spline;
 }
