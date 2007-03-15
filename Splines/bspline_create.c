@@ -244,6 +244,69 @@ create_UBspline_2d_s (Ugrid x_grid, Ugrid y_grid,
     find_coefs_1d (spline->y_grid, yBC, spline->coefs+doffset, 1, 
 		   spline->coefs+coffset, 1);
   }
+  return spline;
+}
+
+
+UBspline_3d_s*
+create_UBspline_3d_s (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
+		      BCtype_s xBC, BCtype_s yBC, BCtype_s zBC,
+		      float *data)
+{
+  // Create new spline
+  UBspline_3d_s* restrict spline = malloc (sizeof(UBspline_3d_s));
+  // Setup internal variables
+  int Mx = x_grid.num;  int My = y_grid.num; int Mz = z_grid.num;
+  int Nx, Ny, Nz;
+
+  if (xBC.lCode == PERIODIC)     Nx = Mx+3;
+  else                           Nx = Mx+2;
+  x_grid.delta = (x_grid.end - x_grid.start)/(double)(Nx-3);
+  x_grid.delta_inv = 1.0/x_grid.delta;
+  spline->x_grid   = x_grid;
+
+  if (yBC.lCode == PERIODIC)     Ny = My+3;
+  else                           Ny = My+2;
+  y_grid.delta = (y_grid.end - y_grid.start)/(double)(Ny-3);
+  y_grid.delta_inv = 1.0/y_grid.delta;
+  spline->y_grid   = y_grid;
+
+  if (zBC.lCode == PERIODIC)     Nz = Mz+3;
+  else                           Nz = Mz+2;
+  z_grid.delta = (z_grid.end - z_grid.start)/(double)(Nz-3);
+  z_grid.delta_inv = 1.0/z_grid.delta;
+  spline->z_grid   = z_grid;
+
+  spline->x_stride = Ny*Nz;
+  spline->y_stride = Nz;
+
+  spline->coefs = malloc (sizeof(float)*Nx*Ny*Nz);
+
+  // First, solve in the X-direction 
+  for (int iy=0; iy<My; iy++) 
+    for (int iz=0; iz<Mz; iz++) {
+      int doffset = iy*Mz+iz;
+      int coffset = iy*Nz+iz;
+      find_coefs_1d (spline->x_grid, xBC, data+doffset, My*Mz,
+		     spline->coefs+coffset, Ny*Nz);
+    }
   
+  // Now, solve in the Y-direction
+  for (int ix=0; ix<Nx; ix++) 
+    for (int iz=0; iz<Nz; iz++) {
+      int doffset = ix*Ny*Nz + iz;
+      int coffset = ix*Ny*Nz + iz;
+      find_coefs_1d (spline->y_grid, yBC, spline->coefs+doffset, Nz, 
+		     spline->coefs+coffset, Nz);
+    }
+
+  // Now, solve in the Z-direction
+  for (int ix=0; ix<Nx; ix++) 
+    for (int iy=0; iy<Ny; iy++) {
+      int doffset = (ix*Ny+iy)*Nz;
+      int coffset = (ix*Ny+iy)*Nz;
+      find_coefs_1d (spline->z_grid, zBC, spline->coefs+doffset, 1, 
+		     spline->coefs+coffset, 1);
+    }
   return spline;
 }
