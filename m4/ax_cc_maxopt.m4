@@ -25,7 +25,7 @@ dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
 AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([AX_COMPILER_VENDOR])
+AC_REQUIRE([AX_C_COMPILER_VENDOR])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
 AC_ARG_ENABLE(portable-binary, [AC_HELP_STRING([--enable-portable-binary], [disable compiler optimizations that would produce unportable binaries])], 

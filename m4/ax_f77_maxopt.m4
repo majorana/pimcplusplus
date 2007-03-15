@@ -27,7 +27,7 @@ AC_DEFUN([AX_F77_MAXOPT],
 AC_LANG_SAVE
 AC_LANG_FORTRAN77
 AC_REQUIRE([AC_PROG_F77])
-AC_REQUIRE([AX_COMPILER_VENDOR])
+AC_REQUIRE([AX_F77_COMPILER_VENDOR])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
 AC_ARG_ENABLE(portable-binary, [AC_HELP_STRING([--enable-portable-binary], [disable compiler optimizations that would produce unportable binaries])], 
@@ -36,7 +36,7 @@ AC_ARG_ENABLE(portable-binary, [AC_HELP_STRING([--enable-portable-binary], [disa
 # Try to determine "good" native compiler flags if none specified via FFLAGS
 if test "$ac_test_FFLAGS" != "set"; then
   FFLAGS=""
-  case $ax_cv_cxx_compiler_vendor in
+  case $ax_cv_f77_compiler_vendor in
     dec) FFLAGS="-newc -w0 -O5 -ansi_alias -ansi_args -fp_reorder -tune host"
 	 if test "x$acx_maxopt_portable" = xno; then
            FFLAGS="$FFLAGS -arch host"

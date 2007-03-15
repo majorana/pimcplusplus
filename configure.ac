@@ -12,9 +12,12 @@ AC_CONFIG_HEADER([config.h])
 # Check which compilers we're using
 AX_CXX_MAXOPT
 AX_F77_MAXOPT
+AX_CC_MAXOPT
+
 AC_MSG_CHECKING([optimal compiler flags])
 AC_MSG_RESULT([${CXXFLAGS}])
 CXXFLAGS="$CXXFLAGS -pthread"
+CFLAGS="$CFLAGS -std=c99"
 
 
 # Checks for libraries.

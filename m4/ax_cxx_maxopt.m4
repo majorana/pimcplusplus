@@ -27,7 +27,7 @@ AC_DEFUN([AX_CXX_MAXOPT],
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
 AC_REQUIRE([AC_PROG_CXX])
-AC_REQUIRE([AX_COMPILER_VENDOR])
+AC_REQUIRE([AX_CXX_COMPILER_VENDOR])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
 AC_ARG_ENABLE(portable-binary, [AC_HELP_STRING([--enable-portable-binary], [disable compiler optimizations that would produce unportable binaries])], 
