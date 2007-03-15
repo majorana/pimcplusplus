@@ -1,17 +1,5 @@
 #include "bspline.h"
 
-const float A44[4][4] = 
-  { -1.0/6.0,  3.0/6.0, -3.0/6.0, 1.0/6.0,
-     3.0/6.0, -6.0/6.0,  0.0/6.0, 4.0/6.0,
-    -3.0/6.0,  3.0/6.0,  3.0/6.0, 1.0/6.0,
-     1.0/6.0,  0.0/6.0,  0.0/6.0, 0.0/6.0 };
-const float* restrict Af = A44;
-
-/* double A[4][4] = { 1.0/6.0, 2.0/3.0, 1.0/6.0, 0.0, */
-/* 		   1.0/2.0, 0.0/1.0, 1.0/2.0, 0.0, */
-/* 		   1.0/1.0,-2.0/1.0, 1.0/1.0, 0.0 }; */
-
-
 // On input, bands should be filled with:
 // row 0   :  abcdInitial from boundary conditions
 // rows 1:M:  basis functions in first 3 cols, data in last
@@ -63,16 +51,81 @@ solve_deriv_interp_1d_s (float bands[][4], float coefs[],
   coefs[0] = bands[0][3] - bands[0][1]*coefs[1*cstride] - bands[0][2]*coefs[2*cstride];
 }
 
+// On input, bands should be filled with:
+// row 0   :  abcdInitial from boundary conditions
+// rows 1:M:  basis functions in first 3 cols, data in last
+// row M+1 :  abcdFinal   from boundary conditions
+// cstride gives the stride between values in coefs.
+// On exit, coefs with contain interpolating B-spline coefs
+void 
+solve_periodic_interp_1d_s (float bands[][4], float coefs[],
+			    int M, int cstride)
+{
+  float lastCol[M];
+  // Now solve:
+  // First and last rows are different
+  bands[0][2] /= bands[0][1];
+  bands[0][0] /= bands[0][1];
+  bands[0][3] /= bands[0][1];
+  bands[0][1]  = 1.0;
+  bands[M-1][1] -= bands[M-1][2]*bands[0][0];
+  bands[M-1][3] -= bands[M-1][2]*bands[0][3];
+  bands[M-1][2]  = -bands[M-1][2]*bands[0][2];
+  lastCol[0] = bands[0][0];
+  
+  for (int row=1; row < (M-1); row++) {
+    bands[row][1] -= bands[row][0] * bands[row-1][2];
+    bands[row][3] -= bands[row][0] * bands[row-1][3];
+    lastCol[row]   = -bands[row][0] * lastCol[row-1];
+    bands[row][0] = 0.0;
+    bands[row][2] /= bands[row][1];
+    bands[row][3] /= bands[row][1];
+    lastCol[row]  /= bands[row][1];
+    bands[row][1]  = 1.0;
+    if (row < (M-2)) {
+      bands[M-1][3] -= bands[M-1][2]*bands[row][3];
+      bands[M-1][1] -= bands[M-1][2]*lastCol[row];
+      bands[M-1][2] = -bands[M-1][2]*bands[row][2];
+    }
+  }
+
+  // Now do last row
+  // The [2] element and [0] element are now on top of each other 
+  bands[M-1][0] += bands[M-1][2];
+  bands[M-1][1] -= bands[M-1][0] * (bands[M-2][2]+lastCol[M-2]);
+  bands[M-1][3] -= bands[M-1][0] *  bands[M-2][3];
+  bands[M-1][3] /= bands[M-1][1];
+  coefs[M*cstride] = bands[M-1][3];
+  for (int row=M-2; row>=0; row--) 
+    coefs[row+1] = bands[row][3] - bands[row][2]*coefs[row+2] - lastCol[row]*coefs[M];
+  
+  coefs[0] = coefs[M*cstride];
+  coefs[(M+1)*cstride] = coefs[1*cstride];
+  coefs[(M+2)*cstride] = coefs[2*cstride];
+
+
+}
+
+
 void
 find_coefs_1d (Ugrid grid, BCtype_s bc, 
 	       float *data,  int dstride,
 	       float *coefs, int cstride)
 {
   int M = grid.num;
-  float bands[M+2][4];
+  float basis[4] = {1.0/6.0, 2.0/3.0, 1.0/6.0, 0.0};
   if (bc.lCode == PERIODIC) {
+    float bands[M][4];
+    for (int i=0; i<M; i++) {
+      bands[i][0] = basis[0];
+      bands[i][1] = basis[1];
+      bands[i][2] = basis[2];
+      bands[i][3] = data[i*dstride];
+    }
+    solve_periodic_interp_1d_s (bands, coefs, M, cstride);
   }
   else {
+    float bands[M+2][4];
     // Setup boundary conditions
     float abcd_left[4], abcd_right[4];
     // Left boundary
@@ -111,7 +164,6 @@ find_coefs_1d (Ugrid grid, BCtype_s bc,
       bands[0][i]   = abcd_left[i];
       bands[M+1][i] = abcd_right[i];
     }
-    float basis[4] = {1.0/6.0, 2.0/3.0, 1.0/6.0, 0.0};
     for (int i=0; i<M; i++) {
       for (int j=0; j<3; j++)
 	bands[i+1][j] = basis[j];
@@ -130,15 +182,22 @@ create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data)
   // Create new spline
   UBspline_1d_s* restrict spline = malloc (sizeof(UBspline_1d_s));
   // Setup internal variables
-  x_grid.delta     = (x_grid.end-x_grid.start)/(double)(x_grid.num-1);
+  int M = x_grid.num;
+  int N;
+
+  if (xBC.lCode == PERIODIC) {
+    x_grid.delta     = (x_grid.end-x_grid.start)/(double)(x_grid.num);
+    N = M+3;
+  }
+  else {
+    x_grid.delta     = (x_grid.end-x_grid.start)/(double)(x_grid.num-1);
+    N = M+2;
+  }
+
   x_grid.delta_inv = 1.0/x_grid.delta;
   spline->x_grid   = x_grid;
-
-  int M = x_grid.num;
-  spline->coefs = malloc (sizeof(float)*(M+2));
-
+  spline->coefs = malloc (sizeof(float)*N);
   find_coefs_1d (spline->x_grid, xBC, data, 1, spline->coefs, 1);
     
-
   return (Bspline*) spline;
 }
