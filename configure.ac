@@ -17,7 +17,7 @@ AX_CC_MAXOPT
 AC_MSG_CHECKING([optimal compiler flags])
 AC_MSG_RESULT([${CXXFLAGS}])
 CXXFLAGS="$CXXFLAGS -pthread"
-CFLAGS="$CFLAGS -std=c99"
+CFLAGS="$CFLAGS -std=c99 -g"
 
 
 # Checks for libraries.
