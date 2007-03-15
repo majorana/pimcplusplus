@@ -132,33 +132,32 @@ find_coefs_1d (Ugrid grid, BCtype_s bc,
     if (bc.lCode == FLAT || bc.lCode == NATURAL)
       bc.lVal = 0.0;
     if (bc.lCode == FLAT || bc.lCode == DERIV1) {
-      abcd_left[0] = -0.5     * grid.delta_inv;
-      abcd_left[1] =  0.0     * grid.delta_inv; 
-      abcd_left[2] =  0.5     * grid.delta_inv;
-      abcd_left[3] =  bc.lVal * grid.delta_inv;
+      abcd_left[0] = -0.5 * grid.delta_inv;
+      abcd_left[1] =  0.0 * grid.delta_inv; 
+      abcd_left[2] =  0.5 * grid.delta_inv;
+      abcd_left[3] =  bc.lVal;
     }
-    if (bc.lCode == NATURAL || bc.rCode == DERIV2) {
-      abcd_left[0] = 1.0     * grid.delta_inv * grid.delta_inv;
-      abcd_left[1] =-2.0     * grid.delta_inv * grid.delta_inv;
-      abcd_left[2] = 1.0     * grid.delta_inv * grid.delta_inv;
-      abcd_left[3] = bc.lVal * grid.delta_inv * grid.delta_inv;
+    if (bc.lCode == NATURAL || bc.lCode == DERIV2) {
+      abcd_left[0] = 1.0 * grid.delta_inv * grid.delta_inv;
+      abcd_left[1] =-2.0 * grid.delta_inv * grid.delta_inv;
+      abcd_left[2] = 1.0 * grid.delta_inv * grid.delta_inv;
+      abcd_left[3] = bc.lVal;
     }
     
     // Right boundary
     if (bc.rCode == FLAT || bc.rCode == NATURAL)
       bc.rVal = 0.0;
-    if (bc.rCode == FLAT) {
+    if (bc.rCode == FLAT || bc.rCode == DERIV1) {
       abcd_right[0] = -0.5 * grid.delta_inv;
       abcd_right[1] =  0.0 * grid.delta_inv; 
       abcd_right[2] =  0.5 * grid.delta_inv;
-      abcd_right[3] =  bc.rVal * grid.delta_inv;
+      abcd_right[3] =  bc.rVal;
     }
-    if (bc.rCode == NATURAL) {
+    if (bc.rCode == NATURAL || bc.rCode == DERIV2) {
       abcd_right[0] = 1.0 *grid.delta_inv * grid.delta_inv;
       abcd_right[1] =-2.0 *grid.delta_inv * grid.delta_inv;
       abcd_right[2] = 1.0 *grid.delta_inv * grid.delta_inv;
-      abcd_right[3] = 
-	bc.rVal * grid.delta_inv * grid.delta_inv;
+      abcd_right[3] = bc.rVal;
     }
     for (int i=0; i<4; i++) {
       bands[0][i]   = abcd_left[i];
