@@ -373,6 +373,7 @@ eval_UBspline_3d_s (UBspline_3d_s * restrict spline,
 {
   x -= spline->x_grid.start;
   y -= spline->y_grid.start;
+  z -= spline->z_grid.start;
   float ux = x*spline->x_grid.delta_inv;
   float uy = y*spline->y_grid.delta_inv;
   float uz = z*spline->z_grid.delta_inv;
@@ -710,13 +711,15 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
 			float* restrict val, float* restrict grad, float* restrict hess)
 {
   x -= spline->x_grid.start;
-  y -= spline->y_grid.start;
+  y -= spline->y_grid.start;  
+  z -= spline->z_grid.start;
   float ux = x*spline->x_grid.delta_inv;
   float uy = y*spline->y_grid.delta_inv;
+  float uz = z*spline->z_grid.delta_inv;
   float ipartx, iparty, ipartz, tx, ty, tz;
   tx = modff (ux, &ipartx);  int ix = (int) ipartx;
   ty = modff (uy, &iparty);  int iy = (int) iparty;
-  tz = modff (uy, &ipartz);  int iz = (int) ipartz;
+  tz = modff (uz, &ipartz);  int iz = (int) ipartz;
 
   float tpx[4], tpy[4], tpz[4], a[4], b[4], c[4], da[4], db[4], dc[4], 
     d2a[4], d2b[4], d2c[4];

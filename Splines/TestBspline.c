@@ -67,9 +67,54 @@ Test_2d_s()
 
 }
 
+void
+Test_3d_s()
+{
+  Ugrid x_grid, y_grid, z_grid;
+  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 30;
+  y_grid.start = 1.0;  y_grid.end   = 3.0;  y_grid.num = 30;
+  z_grid.start = 1.0;  z_grid.end   = 3.0;  z_grid.num = 30;
+  
+  float *data = malloc (x_grid.num * y_grid.num * z_grid.num * sizeof(float));
+  for (int ix=0; ix<x_grid.num; ix++)
+    for (int iy=0; iy<y_grid.num; iy++)
+      for (int iz=0; iz<z_grid.num; iz++)
+	*(data + ((ix*y_grid.num) + iy)*z_grid.num + iz) = -1.0 + 2.0*drand48();
+  BCtype_s x_bc, y_bc, z_bc;
+  x_bc.lCode = PERIODIC; x_bc.rCode = PERIODIC; 
+  y_bc.lCode = PERIODIC; y_bc.rCode = PERIODIC; 
+  z_bc.lCode = PERIODIC; z_bc.rCode = PERIODIC; 
+  
+  UBspline_3d_s *spline = (UBspline_3d_s*) create_UBspline_3d_s 
+    (x_grid, y_grid, z_grid, x_bc, y_bc, z_bc, data); 
+
+  double z = 1.92341;
+  FILE *fout = fopen ("3dspline.dat", "w");
+  for (double x=x_grid.start; x<=x_grid.end; x+=0.005) {
+    for (double y=y_grid.start; y<=y_grid.end; y+=0.005) {
+      float val, grad[3], hess[9];
+      eval_UBspline_3d_s (spline, x, y, z, &val);
+      fprintf (fout, "%20.14f ", val);
+    }
+    fprintf (fout, "\n");
+  }
+  fclose (fout);
+
+  int ix=15;  int iy=19; int iz = 24;
+  float exval = data[(ix*y_grid.num+iy)*z_grid.num+iz];
+  double x = x_grid.start + (double)ix * spline->x_grid.delta;
+  double y = y_grid.start + (double)iy * spline->y_grid.delta;
+  z =        z_grid.start + (double)iz * spline->z_grid.delta;
+  float spval;
+  eval_UBspline_3d_s (spline, x, y, z, &spval);
+  fprintf (stderr, "exval = %20.15f   spval = %20.15f\n", exval, spval);
+
+}
+
 
 main()
 {
   //  Test_1d_s();
-  Test_2d_s();
+  // Test_2d_s();
+  Test_3d_s();
 }
