@@ -2,6 +2,8 @@
 #define BSPLINE_EVAL_STD_H
 
 #include <math.h>
+#include <stdio.h>
+
 extern const float* restrict   Af;
 extern const float* restrict  dAf;
 extern const float* restrict d2Af;
@@ -701,7 +703,6 @@ eval_UBspline_3d_s_vgl (UBspline_3d_s * restrict spline,
 
 
 
-#include <stdio.h>
 
 /* Value, gradient, and Hessian */
 inline void
