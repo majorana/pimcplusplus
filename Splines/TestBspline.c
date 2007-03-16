@@ -117,9 +117,9 @@ void
 Speed_3d_s()
 {
   Ugrid x_grid, y_grid, z_grid;
-  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 100;
-  y_grid.start = 1.0;  y_grid.end   = 3.0;  y_grid.num = 100;
-  z_grid.start = 1.0;  z_grid.end   = 3.0;  z_grid.num = 100;
+  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 200;
+  y_grid.start = 1.0;  y_grid.end   = 5.0;  y_grid.num = 200;
+  z_grid.start = 1.0;  z_grid.end   = 7.0;  z_grid.num = 200;
   
   float *data = malloc (x_grid.num * y_grid.num * z_grid.num * sizeof(float));
   for (int ix=0; ix<x_grid.num; ix++)
@@ -135,7 +135,14 @@ Speed_3d_s()
     (x_grid, y_grid, z_grid, x_bc, y_bc, z_bc, data); 
 
   float val, grad[3], hess[9];
-  clock_t start, end;
+  clock_t start, end, rstart, rend;
+  rstart = clock();
+  for (int i=0; i<10000000; i++) {
+    double x = x_grid.start+ drand48()*(x_grid.end - x_grid.start);
+    double y = y_grid.start+ drand48()*(y_grid.end - y_grid.start);
+    double z = z_grid.start+ drand48()*(z_grid.end - z_grid.start);
+  }
+  rend = clock();
   start = clock();
   for (int i=0; i<10000000; i++) {
     double x = x_grid.start+ drand48()*(x_grid.end - x_grid.start);
@@ -145,7 +152,7 @@ Speed_3d_s()
   }
   end = clock();
   fprintf (stderr, "10,000,000 evalations in %f seconds.\n", 
-	   (double)(end-start)/(double)CLOCKS_PER_SEC);
+	   (double)(end-start-(rend-rstart))/(double)CLOCKS_PER_SEC);
 }
 
 
