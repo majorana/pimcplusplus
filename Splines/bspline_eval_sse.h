@@ -140,6 +140,11 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   ty = modff (uy, &iparty);  int iy = (int) iparty;
   tz = modff (uz, &ipartz);  int iz = (int) ipartz;
 
+//    __m128 A0 = _mm_set_ps (-1.0/6.0,  3.0/6.0, -3.0/6.0, 1.0/6.0);
+//    __m128 A1 = _mm_set_ps ( 3.0/6.0, -6.0/6.0,  0.0/6.0, 4.0/6.0);
+//    __m128 A2 = _mm_set_ps (-3.0/6.0,  3.0/6.0,  3.0/6.0, 1.0/6.0);
+//    __m128 A3 = _mm_set_ps ( 1.0/6.0,  0.0/6.0,  0.0/6.0, 0.0/6.0);
+
   int xs = spline->x_stride;
   int ys = spline->y_stride;
 #define P(i,j) (spline->coefs+(ix+(i))*xs+(iy+(j))*ys+(iz))
@@ -173,57 +178,57 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   tmp1 = _mm_mul_ps (A1, tpx);
   tmp2 = _mm_mul_ps (A2, tpx);
   tmp3 = _mm_mul_ps (A3, tpx);
-  a    = _mm_mul_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
+  a    = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   tmp0 = _mm_mul_ps (dA0, tpx);
   tmp1 = _mm_mul_ps (dA1, tpx);
   tmp2 = _mm_mul_ps (dA2, tpx);
   tmp3 = _mm_mul_ps (dA3, tpx);
-  da   = _mm_mul_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
+  da   = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   tmp0 = _mm_mul_ps (d2A0, tpx);
   tmp1 = _mm_mul_ps (d2A1, tpx);
   tmp2 = _mm_mul_ps (d2A2, tpx);
   tmp3 = _mm_mul_ps (d2A3, tpx);
-  d2a   = _mm_mul_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
+  d2a  = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   // y-dependent vectors
   tmp0 = _mm_mul_ps (A0, tpy);
   tmp1 = _mm_mul_ps (A1, tpy);
   tmp2 = _mm_mul_ps (A2, tpy);
   tmp3 = _mm_mul_ps (A3, tpy);
-  b    = _mm_mul_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
+  b    = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   tmp0 = _mm_mul_ps (dA0, tpy);
   tmp1 = _mm_mul_ps (dA1, tpy);
   tmp2 = _mm_mul_ps (dA2, tpy);
   tmp3 = _mm_mul_ps (dA3, tpy);
-  db   = _mm_mul_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
+  db   = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   tmp0 = _mm_mul_ps (d2A0, tpy);
   tmp1 = _mm_mul_ps (d2A1, tpy);
   tmp2 = _mm_mul_ps (d2A2, tpy);
   tmp3 = _mm_mul_ps (d2A3, tpy);
-  d2b   = _mm_mul_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
+  d2b  = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   // z-dependent vectors
   tmp0 = _mm_mul_ps (A0, tpz);
   tmp1 = _mm_mul_ps (A1, tpz);
   tmp2 = _mm_mul_ps (A2, tpz);
   tmp3 = _mm_mul_ps (A3, tpz);
-  c    = _mm_mul_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
+  c    = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   tmp0 = _mm_mul_ps (dA0, tpz);
   tmp1 = _mm_mul_ps (dA1, tpz);
   tmp2 = _mm_mul_ps (dA2, tpz);
   tmp3 = _mm_mul_ps (dA3, tpz);
-  dc   = _mm_mul_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
+  dc   = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   tmp0 = _mm_mul_ps (d2A0, tpz);
   tmp1 = _mm_mul_ps (d2A1, tpz);
   tmp2 = _mm_mul_ps (d2A2, tpz);
   tmp3 = _mm_mul_ps (d2A3, tpz);
-  d2c   = _mm_mul_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
+  d2c  = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   // Compute cP, dcP, and d2cP products
   tmp0 = _mm_loadu_ps (P(0,0));
