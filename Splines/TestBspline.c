@@ -112,9 +112,47 @@ Test_3d_s()
 }
 
 
+#include <time.h>
+void
+Speed_3d_s()
+{
+  Ugrid x_grid, y_grid, z_grid;
+  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 100;
+  y_grid.start = 1.0;  y_grid.end   = 3.0;  y_grid.num = 100;
+  z_grid.start = 1.0;  z_grid.end   = 3.0;  z_grid.num = 100;
+  
+  float *data = malloc (x_grid.num * y_grid.num * z_grid.num * sizeof(float));
+  for (int ix=0; ix<x_grid.num; ix++)
+    for (int iy=0; iy<y_grid.num; iy++)
+      for (int iz=0; iz<z_grid.num; iz++)
+	*(data + ((ix*y_grid.num) + iy)*z_grid.num + iz) = -1.0 + 2.0*drand48();
+  BCtype_s x_bc, y_bc, z_bc;
+  x_bc.lCode = PERIODIC; x_bc.rCode = PERIODIC; 
+  y_bc.lCode = PERIODIC; y_bc.rCode = PERIODIC; 
+  z_bc.lCode = PERIODIC; z_bc.rCode = PERIODIC; 
+  
+  UBspline_3d_s *spline = (UBspline_3d_s*) create_UBspline_3d_s 
+    (x_grid, y_grid, z_grid, x_bc, y_bc, z_bc, data); 
+
+  float val, grad[3], hess[9];
+  clock_t start, end;
+  start = clock();
+  for (int i=0; i<10000000; i++) {
+    double x = x_grid.start+ drand48()*(x_grid.end - x_grid.start);
+    double y = y_grid.start+ drand48()*(y_grid.end - y_grid.start);
+    double z = z_grid.start+ drand48()*(z_grid.end - z_grid.start);
+    eval_UBspline_3d_s_vgh (spline, x, y, z, &val, grad, hess);
+  }
+  end = clock();
+  fprintf (stderr, "10,000,000 evalations in %f seconds.\n", 
+	   (double)(end-start)/(double)CLOCKS_PER_SEC);
+}
+
+
 main()
 {
-  //  Test_1d_s();
+  // Test_1d_s();
   // Test_2d_s();
-  Test_3d_s();
+  // Test_3d_s();
+  Speed_3d_s();
 }

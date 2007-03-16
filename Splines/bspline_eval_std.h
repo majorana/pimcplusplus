@@ -1,6 +1,7 @@
 #ifndef BSPLINE_EVAL_STD_H
 #define BSPLINE_EVAL_STD_H
 
+#include <math.h>
 extern const float* restrict   Af;
 extern const float* restrict  dAf;
 extern const float* restrict d2Af;
@@ -700,7 +701,7 @@ eval_UBspline_3d_s_vgl (UBspline_3d_s * restrict spline,
 
 
 
-
+#include <stdio.h>
 
 /* Value, gradient, and Hessian */
 inline void
@@ -714,10 +715,20 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   float ux = x*spline->x_grid.delta_inv;
   float uy = y*spline->y_grid.delta_inv;
   float uz = z*spline->z_grid.delta_inv;
+  ux = fmin (ux, (double)(spline->x_grid.num-1));
+  uy = fmin (uy, (double)(spline->y_grid.num-1));
+  uz = fmin (uz, (double)(spline->z_grid.num-1));
   float ipartx, iparty, ipartz, tx, ty, tz;
   tx = modff (ux, &ipartx);  int ix = (int) ipartx;
   ty = modff (uy, &iparty);  int iy = (int) iparty;
   tz = modff (uz, &ipartz);  int iz = (int) ipartz;
+
+//   if ((ix >= spline->x_grid.num))    x = spline->x_grid.num;
+//   if ((ix < 0))                      x = 0;                 
+//   if ((iy >= spline->y_grid.num))    y = spline->y_grid.num;
+//   if ((iy < 0))                      y = 0;                 
+//   if ((iz >= spline->z_grid.num))    z = spline->z_grid.num;
+//   if ((iz < 0))                      z = 0;                 
 
   float tpx[4], tpy[4], tpz[4], a[4], b[4], c[4], da[4], db[4], dc[4], 
     d2a[4], d2b[4], d2c[4], cP[16], dcP[16], d2cP[16], bcP[4], dbcP[4],
@@ -768,6 +779,12 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   
   int xs = spline->x_stride;
   int ys = spline->y_stride;
+  int offmax = (ix+3)*xs + (iy+3)*ys + iz+3;
+  if (offmax > spline->csize) {
+     fprintf (stderr, "Outside bounds in spline evalutation.\n"
+	      "offmax = %d  csize = %d\n", offmax, spline->csize);
+     fprintf (stderr, "ix=%d   iy=%d   iz=%d\n", ix,iy,iz);
+  }
 #define P(i,j,k) coefs[(ix+(i))*xs+(iy+(j))*ys+(iz+(k))]
   cP[ 0] = (P(0,0,0)*c[0]+P(0,0,1)*c[1]+P(0,0,2)*c[2]+P(0,0,3)*c[3]);
   cP[ 1] = (P(0,1,0)*c[0]+P(0,1,1)*c[1]+P(0,1,2)*c[2]+P(0,1,3)*c[3]);

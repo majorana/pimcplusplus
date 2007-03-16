@@ -281,6 +281,7 @@ create_UBspline_3d_s (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
   spline->y_stride = Nz;
 
   spline->coefs = malloc (sizeof(float)*Nx*Ny*Nz);
+  spline->csize = Nx*Ny*Nz;
 
   // First, solve in the X-direction 
   for (int iy=0; iy<My; iy++) 
