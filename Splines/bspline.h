@@ -62,7 +62,7 @@ typedef struct
 ////           Bspline structure definitions            ////
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
-#ifdef __SSE3__
+#ifdef __SSE3x__
 #include "bspline_structs_sse.h"
 #include "bspline_eval_sse.h"
 #else
