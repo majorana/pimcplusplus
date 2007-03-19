@@ -126,24 +126,33 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
 			float* restrict val, float* restrict grad, 
 			float* restrict hess)
 {
-  /// SSE grid search:
+  /// SSE mesh point determination
   __m128 xyz       = _mm_set_ps (x, y, z, 0.0);
   __m128 x0y0z0    = _mm_set_ps (spline->x_grid.start,  spline->y_grid.start, 
 				 spline->z_grid.start, 0.0);
   __m128 delta_inv = _mm_set_ps (spline->x_grid.delta_inv,spline->y_grid.delta_inv, 
 				 spline->z_grid.delta_inv, 0.0);
   xyz = _mm_sub_ps (xyz, x0y0z0);
+  // ux = (x - x0)/delta_x and same for y and z
   __m128 uxuyuz    = _mm_mul_ps (xyz, delta_inv);
+  // intpart = trunc (ux, uy, uz)
   __m128i intpart  = _mm_cvttps_epi32(uxuyuz);
   __m128i ixiyiz;
   _mm_storeu_si128 (&ixiyiz, intpart);
+  // Store to memory for use in C expressions
+  // xmm registers are stored to memory in reverse order
   int ix = ((int *)&ixiyiz)[3];
   int iy = ((int *)&ixiyiz)[2];
   int iz = ((int *)&ixiyiz)[1];
 
   int xs = spline->x_stride;
   int ys = spline->y_stride;
+  // This macro is used to give the pointer to coefficient data.
+  // i and j should be in the range [0,3].  Coefficients are read four
+  // at a time, so no k value is needed.
 #define P(i,j) (spline->coefs+(ix+(i))*xs+(iy+(j))*ys+(iz))
+  // Prefetch the data from main memory into cache so it's available
+  // when we need to use it.
   _mm_prefetch ((void*)P(0,0), _MM_HINT_T0);
   _mm_prefetch ((void*)P(0,1), _MM_HINT_T0);
   _mm_prefetch ((void*)P(0,2), _MM_HINT_T0);
@@ -161,6 +170,10 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   _mm_prefetch ((void*)P(3,2), _MM_HINT_T0);
   _mm_prefetch ((void*)P(3,3), _MM_HINT_T0);
 
+  // Now compute the vectors:
+  // tpx = [t_x^3 t_x^2 t_x 1]
+  // tpy = [t_y^3 t_y^2 t_y 1]
+  // tpz = [t_z^3 t_z^2 t_z 1]
   __m128 ipart  = _mm_cvtepi32_ps (intpart);
   __m128 txtytz = _mm_sub_ps (uxuyuz, ipart);
   __m128 one    = _mm_set_ps (1.0, 1.0, 1.0, 1.0);
@@ -194,6 +207,10 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
 //   tpy = _mm_set_ps (ty*ty*ty, ty*ty, ty, 1.0);
 //   tpz = _mm_set_ps (tz*tz*tz, tz*tz, tz, 1.0);
 
+
+  // a  =  A * tpx,   b =  A * tpy,   c =  A * tpz
+  // da = dA * tpx,  db = dA * tpy,  dc = dA * tpz, etc.
+  // A is 4x4 matrix given by the rows A0, A1, A2, A3
   __m128 a, b, c, da, db, dc, d2a, d2b, d2c,
     cP[4], dcP[4], d2cP[4], bcP, dbcP, bdcP, d2bcP, dbdcP, bd2cP,
     tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
