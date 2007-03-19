@@ -203,8 +203,17 @@ void FloatSpeedTest()
   TinyVector<float,3> grad, grad2;
   TinyMatrix<float,3,3> secDerivs, secDerivs2;
 
-  clock_t Bstart, Bend, NUBstart, NUBend;
+  clock_t Bstart, Bend, NUBstart, NUBend, rstart, rend;
   const int N = 10000000;
+
+  rstart = clock();
+  for (int i=0; i<N; i++) {
+    r[0] = xi + (xf-xi)*drand48();
+    r[1] = yi + (yf-yi)*drand48();
+    r[2] = zi + (zf-zi)*drand48();
+  }
+  rend   = clock();
+
   Bstart = clock();
   for (int i=0; i<N; i++) {
     r[0] = xi + (xf-xi)*drand48();
@@ -228,9 +237,9 @@ void FloatSpeedTest()
   }
   NUBend   = clock();
   fprintf (stderr, "B-spline time   = %0.5f\n", 
-	   (double)(Bend-Bstart)/(double)CLOCKS_PER_SEC);
+	   (double)(Bend-Bstart-(rend-rstart))/(double)CLOCKS_PER_SEC);
   fprintf (stderr, "NUB-spline time = %0.5f\n", 
-	   (double)(NUBend-NUBstart)/(double)CLOCKS_PER_SEC);
+	   (double)(NUBend-NUBstart-(rend-rstart))/(double)CLOCKS_PER_SEC);
 
 }
 
