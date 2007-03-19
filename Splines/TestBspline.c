@@ -249,6 +249,6 @@ main()
   // Test_2d_s();
   // Test_3d_s();
   // Speed_3d_s();
-  Test_3d_d();
-  //Speed_3d_d();
+  // Test_3d_d();
+  Speed_3d_d();
 }

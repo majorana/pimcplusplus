@@ -19,6 +19,7 @@ public:
   inline double PressureFD(double V);
   inline void SetParams (TinyVector<double,4> params);
   inline TinyVector<double,4> GetParams ();
+  inline double GetDelta();
   LiEOSClass() : third(1.0/3.0)
   { 
   }
@@ -56,6 +57,14 @@ LiEOSClass::operator()(double V)
   
   double E = -Ec*(1.0+a+delta*a*a*a)*exp(-a);
   return E;
+}
+
+inline double 
+LiEOSClass::GetDelta()
+{
+  double eta = sqrt(9.0*B0*V0/Ec);
+  double delta = (B0p-1.0)/(2.0*eta) - third;
+  return delta;
 }
 
 inline double

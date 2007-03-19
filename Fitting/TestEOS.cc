@@ -75,9 +75,11 @@ TestFit2(string fname)
   fitter.Fit (V, E, sigma, params);
   fprintf (stdout, "V0  = %12.8f\n", params[0]);
   fprintf (stdout, "Ec  = %12.8f\n", params[1]);
-  fprintf (stdout, "B0  = %12.8f\n", params[2]);
+  fprintf (stdout, "B0  = %12.8f GPa\n", params[2] * 29421.01);
   fprintf (stdout, "B0p = %12.8f\n", params[3]);
   eos.SetParams(params);
+  fprintf (stdout, "Delta = %1.5f\n", eos.GetDelta());
+  fprintf (stdout, "Lattice const. = %1.6f\n", cbrt(4.0*params[0]));
   string Ename = fname + ".dat";
 
   FILE *fout = fopen (Ename.c_str(), "w");

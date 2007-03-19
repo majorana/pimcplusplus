@@ -54,7 +54,7 @@ AC_CHECK_HEADERS([stdlib.h sys/time.h unistd.h])
 
 # Checks for programs.
 AC_PROG_CXX
-AC_PROG_CC
+AC_PROG_CC_STDC
 AC_PROG_F77
 AC_F77_LIBRARY_LDFLAGS
 AC_F77_MAIN
