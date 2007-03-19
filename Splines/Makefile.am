@@ -23,7 +23,9 @@ TestBspline_SOURCES = TestBspline.c
 LDADD = ../IO/libIO.la ../PlaneWavePHDFT/libpw.la ../FFT/libfft.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(BLITZ_LIBS) $(FFTW3_LIBS) $(LAPACK_LIBS)
 AM_CXXFLAGS = -g $(BLITZ_CFLAGS) $(HDF5_CFLAGS) $(FFTW3_CFLAGS) $(FFT_DEF)
 
-noinst_LTLIBRARIES = libspline.la
+TestBspline_LDADD = libbspline.la 
+
+noinst_LTLIBRARIES = libspline.la libbspline.la
 libspline_la_SOURCES = BicubicSpline.h                \
                        BicubicSpline.cc               \
                        BsplineHelper.h                \
@@ -67,14 +69,15 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        tcspeval.f                     \
                        tcspline.f                     \
                        v_spline.f                     \
-                       zonfind.f                      \
+                       zonfind.f                      
+libbspline_la_SOURCES =                               \
                        bspline_create.c               \
                        bspline_data.c                 \
-                       bspline_eval.h                 \
                        bspline_eval_std_s.h           \
                        bspline_eval_sse_s.h           \
                        bspline_eval_std_d.h           \
                        bspline_eval_sse_d.h           
+
 
 includedir=$(prefix)/include/Common/Splines
 

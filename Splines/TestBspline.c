@@ -1,6 +1,7 @@
 #include "bspline.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 void
 Test_1d_s()

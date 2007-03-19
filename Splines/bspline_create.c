@@ -1,4 +1,6 @@
-#include "bspline.h"
+#include "bspline_create.h"
+#define _XOPEN_SOURCE 600
+#define __USE_XOPEN2K
 #include <stdlib.h>
 
 ////////////////////////////////////////////////////////////
