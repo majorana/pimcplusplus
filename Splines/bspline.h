@@ -64,10 +64,10 @@ typedef struct
 ////////////////////////////////////////////////////////////
 #ifdef __SSE3__
 #include "bspline_structs_sse.h"
-#include "bspline_eval_sse.h"
+#include "bspline_eval_sse_f.h"
 #else
 #include "bspline_structs_std.h"
-#include "bspline_eval_std.h"
+#include "bspline_eval_std_f.h"
 #endif
 
 
