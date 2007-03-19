@@ -1,5 +1,5 @@
-#ifndef BSPLINE_EVAL_SSE_H
-#define BSPLINE_EVAL_SSE_H
+#ifndef BSPLINE_EVAL_SSE_S_H
+#define BSPLINE_EVAL_SSE_S_H
 
 #include <xmmintrin.h>
 #include <emmintrin.h>
@@ -150,11 +150,11 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
 
   int xs = spline->x_stride;
   int ys = spline->y_stride;
+
   // This macro is used to give the pointer to coefficient data.
   // i and j should be in the range [0,3].  Coefficients are read four
   // at a time, so no k value is needed.
 #define P(i,j) (spline->coefs+(ix+(i))*xs+(iy+(j))*ys+(iz))
-#define Q(i,j,k) (spline->coefs+(ix+(i))*xs+(iy+(j))*ys+(iz+k))
   // Prefetch the data from main memory into cache so it's available
   // when we need to use it.
   _mm_prefetch ((void*)P(0,0), _MM_HINT_T0);
@@ -188,29 +188,6 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   __m128 tpz    = txtytz;
   __m128 zero   = one;
   _MM_TRANSPOSE4_PS(zero, tpz, tpy, tpx);
-//   x -= spline->x_grid.start;
-//   y -= spline->y_grid.start;
-//   z -= spline->z_grid.start;
-//   float ux = x*spline->x_grid.delta_inv;
-//   float uy = y*spline->y_grid.delta_inv;
-//   float uz = z*spline->z_grid.delta_inv;
-//   ux = fmin (ux, (double)(spline->x_grid.num)-1.0e-5);
-//   uy = fmin (uy, (double)(spline->y_grid.num)-1.0e-5);
-//   uz = fmin (uz, (double)(spline->z_grid.num)-1.0e-5);
-//   float ipartx, iparty, ipartz, tx, ty, tz;
-//   tx = modff (ux, &ipartx);  int ix = (int) ipartx;
-//   ty = modff (uy, &iparty);  int iy = (int) iparty;
-//   tz = modff (uz, &ipartz);  int iz = (int) ipartz;
-
-//    __m128 A0 = _mm_set_ps (-1.0/6.0,  3.0/6.0, -3.0/6.0, 1.0/6.0);
-//    __m128 A1 = _mm_set_ps ( 3.0/6.0, -6.0/6.0,  0.0/6.0, 4.0/6.0);
-//    __m128 A2 = _mm_set_ps (-3.0/6.0,  3.0/6.0,  3.0/6.0, 1.0/6.0);
-//    __m128 A3 = _mm_set_ps ( 1.0/6.0,  0.0/6.0,  0.0/6.0, 0.0/6.0);
-//   __m128 tpx, tpy, tpz;
-//   tpx = _mm_set_ps (tx*tx*tx, tx*tx, tx, 1.0);
-//   tpy = _mm_set_ps (ty*ty*ty, ty*ty, ty, 1.0);
-//   tpz = _mm_set_ps (tz*tz*tz, tz*tz, tz, 1.0);
-
 
   // a  =  A * tpx,   b =  A * tpy,   c =  A * tpz
   // da = dA * tpx,  db = dA * tpy,  dc = dA * tpz, etc.

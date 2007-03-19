@@ -72,7 +72,9 @@ libspline_la_SOURCES = BicubicSpline.h                \
                        bspline_data.c                 \
                        bspline_eval.h                 \
                        bspline_eval_std_s.h           \
-                       bspline_eval_sse_s.h           
+                       bspline_eval_sse_s.h           \
+                       bspline_eval_std_d.h           \
+                       bspline_eval_sse_d.h           
 
 includedir=$(prefix)/include/Common/Splines
 

@@ -71,4 +71,71 @@ typedef struct
 } UBspline_3d_d;
 
 
+//////////////////////////////
+// Single precision complex //
+//////////////////////////////
+typedef struct
+{
+  spline_code code;
+  float* restrict coefs;
+  int coefs_size;
+  Ugrid x_grid;
+  BCtype_s xBC;
+  __m128 tx;
+} UBspline_1d_c;
+
+typedef struct
+{
+  spline_code code;
+  float *coefs;
+  int x_stride;
+  Ugrid coefs_size, x_grid, y_grid;
+  BCtype_s xBC, yBC;
+  __m128 tx, ty;
+} UBspline_2d_c;
+
+typedef struct
+{
+  spline_code code;
+  float *coefs;
+  int coefs_size, x_stride, y_stride;
+  Ugrid x_grid, y_grid, z_grid;
+  BCtype_s xBC, yBC, zBC;
+  __m128 _tpx, _tpy, _tpz;
+  __m128 _delta_inv;
+} UBspline_3d_c;
+
+
+//////////////////////////////
+// Double precision complex //
+//////////////////////////////
+typedef struct
+{
+  spline_code code;
+  double *coefs;
+  int coefs_size;
+  Ugrid x_grid;
+  BCtype_d xBC;
+} UBspline_1d_z;
+
+typedef struct
+{
+  spline_code code;
+  double *coefs;
+  int coefs_size, x_stride;
+  Ugrid x_grid, y_grid;
+  BCtype_d xBC, yBC;
+} UBspline_2d_z;
+
+typedef struct
+{
+  spline_code code;
+  double *coefs;
+  int coefs_size, x_stride, y_stride;
+  Ugrid x_grid, y_grid, z_grid;
+  BCtype_d xBC, yBC, zBC;
+} UBspline_3d_z;
+
+
+
 #endif
