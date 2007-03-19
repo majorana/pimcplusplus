@@ -183,7 +183,7 @@ void SpeedTest()
 void FloatSpeedTest()
 {
   double xi=3.1, xf=7.9, yi=2.9, yf=10.0, zi=4.6, zf=14.0;
-  int nx=100, ny=100, nz=100;
+  int nx=200, ny=200, nz=200;
   LinearGrid xGrid(xi, xf, nx);
   LinearGrid yGrid(yi, yf, ny);
   LinearGrid zGrid(zi, zf, nz);

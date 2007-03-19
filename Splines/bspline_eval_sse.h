@@ -126,24 +126,20 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
 			float* restrict val, float* restrict grad, 
 			float* restrict hess)
 {
-  x -= spline->x_grid.start;
-  y -= spline->y_grid.start;
-  z -= spline->z_grid.start;
-  float ux = x*spline->x_grid.delta_inv;
-  float uy = y*spline->y_grid.delta_inv;
-  float uz = z*spline->z_grid.delta_inv;
-  ux = fmin (ux, (double)(spline->x_grid.num)-1.0e-5);
-  uy = fmin (uy, (double)(spline->y_grid.num)-1.0e-5);
-  uz = fmin (uz, (double)(spline->z_grid.num)-1.0e-5);
-  float ipartx, iparty, ipartz, tx, ty, tz;
-  tx = modff (ux, &ipartx);  int ix = (int) ipartx;
-  ty = modff (uy, &iparty);  int iy = (int) iparty;
-  tz = modff (uz, &ipartz);  int iz = (int) ipartz;
-
-//    __m128 A0 = _mm_set_ps (-1.0/6.0,  3.0/6.0, -3.0/6.0, 1.0/6.0);
-//    __m128 A1 = _mm_set_ps ( 3.0/6.0, -6.0/6.0,  0.0/6.0, 4.0/6.0);
-//    __m128 A2 = _mm_set_ps (-3.0/6.0,  3.0/6.0,  3.0/6.0, 1.0/6.0);
-//    __m128 A3 = _mm_set_ps ( 1.0/6.0,  0.0/6.0,  0.0/6.0, 0.0/6.0);
+  /// SSE grid search:
+  __m128 xyz       = _mm_set_ps (x, y, z, 0.0);
+  __m128 x0y0z0    = _mm_set_ps (spline->x_grid.start,  spline->y_grid.start, 
+				 spline->z_grid.start, 0.0);
+  __m128 delta_inv = _mm_set_ps (spline->x_grid.delta_inv,spline->y_grid.delta_inv, 
+				 spline->z_grid.delta_inv, 0.0);
+  xyz = _mm_sub_ps (xyz, x0y0z0);
+  __m128 uxuyuz    = _mm_mul_ps (xyz, delta_inv);
+  __m128i intpart  = _mm_cvttps_epi32(uxuyuz);
+  __m128i ixiyiz;
+  _mm_storeu_si128 (&ixiyiz, intpart);
+  int ix = ((int *)&ixiyiz)[3];
+  int iy = ((int *)&ixiyiz)[2];
+  int iz = ((int *)&ixiyiz)[1];
 
   int xs = spline->x_stride;
   int ys = spline->y_stride;
@@ -165,13 +161,43 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   _mm_prefetch ((void*)P(3,2), _MM_HINT_T0);
   _mm_prefetch ((void*)P(3,3), _MM_HINT_T0);
 
-  __m128 tpx, tpy, tpz, a, b, c, da, db, dc, d2a, d2b, d2c,
+  __m128 ipart  = _mm_cvtepi32_ps (intpart);
+  __m128 txtytz = _mm_sub_ps (uxuyuz, ipart);
+  __m128 one    = _mm_set_ps (1.0, 1.0, 1.0, 1.0);
+  __m128 t2     = _mm_mul_ps (txtytz, txtytz);
+  __m128 t3     = _mm_mul_ps (t2, txtytz);
+  __m128 tpx    = t3;
+  __m128 tpy    = t2;
+  __m128 tpz    = txtytz;
+  __m128 zero   = one;
+  _MM_TRANSPOSE4_PS(zero, tpz, tpy, tpx);
+//   x -= spline->x_grid.start;
+//   y -= spline->y_grid.start;
+//   z -= spline->z_grid.start;
+//   float ux = x*spline->x_grid.delta_inv;
+//   float uy = y*spline->y_grid.delta_inv;
+//   float uz = z*spline->z_grid.delta_inv;
+//   ux = fmin (ux, (double)(spline->x_grid.num)-1.0e-5);
+//   uy = fmin (uy, (double)(spline->y_grid.num)-1.0e-5);
+//   uz = fmin (uz, (double)(spline->z_grid.num)-1.0e-5);
+//   float ipartx, iparty, ipartz, tx, ty, tz;
+//   tx = modff (ux, &ipartx);  int ix = (int) ipartx;
+//   ty = modff (uy, &iparty);  int iy = (int) iparty;
+//   tz = modff (uz, &ipartz);  int iz = (int) ipartz;
+
+//    __m128 A0 = _mm_set_ps (-1.0/6.0,  3.0/6.0, -3.0/6.0, 1.0/6.0);
+//    __m128 A1 = _mm_set_ps ( 3.0/6.0, -6.0/6.0,  0.0/6.0, 4.0/6.0);
+//    __m128 A2 = _mm_set_ps (-3.0/6.0,  3.0/6.0,  3.0/6.0, 1.0/6.0);
+//    __m128 A3 = _mm_set_ps ( 1.0/6.0,  0.0/6.0,  0.0/6.0, 0.0/6.0);
+//   __m128 tpx, tpy, tpz;
+//   tpx = _mm_set_ps (tx*tx*tx, tx*tx, tx, 1.0);
+//   tpy = _mm_set_ps (ty*ty*ty, ty*ty, ty, 1.0);
+//   tpz = _mm_set_ps (tz*tz*tz, tz*tz, tz, 1.0);
+
+  __m128 a, b, c, da, db, dc, d2a, d2b, d2c,
     cP[4], dcP[4], d2cP[4], bcP, dbcP, bdcP, d2bcP, dbdcP, bd2cP,
     tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
-  tpx = _mm_set_ps (tx*tx*tx, tx*tx, tx, 1.0);
-  tpy = _mm_set_ps (ty*ty*ty, ty*ty, ty, 1.0);
-  tpz = _mm_set_ps (tz*tz*tz, tz*tz, tz, 1.0);
   
   // x-dependent vectors
   tmp0 = _mm_mul_ps (A0, tpx);
@@ -230,7 +256,9 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   tmp3 = _mm_mul_ps (d2A3, tpz);
   d2c  = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
-  // Compute cP, dcP, and d2cP products
+  // Compute cP, dcP, and d2cP products 1/4 at a time to maximize
+  // register reuse and avoid rerereading from memory or cache.
+  // 1st quarter
   tmp0 = _mm_loadu_ps (P(0,0));
   tmp1 = _mm_loadu_ps (P(0,1));
   tmp2 = _mm_loadu_ps (P(0,2));
@@ -250,7 +278,7 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   tmp6 = _mm_mul_ps (tmp2, d2c);
   tmp7 = _mm_mul_ps (tmp3, d2c);
   d2cP[0] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-
+  // 2nd quarter
   tmp0 = _mm_loadu_ps (P(1,0));
   tmp1 = _mm_loadu_ps (P(1,1));
   tmp2 = _mm_loadu_ps (P(1,2));
@@ -270,7 +298,7 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   tmp6 = _mm_mul_ps (tmp2, d2c);
   tmp7 = _mm_mul_ps (tmp3, d2c);
   d2cP[1] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-
+  // 3rd quarter
   tmp0 = _mm_loadu_ps (P(2,0));
   tmp1 = _mm_loadu_ps (P(2,1));
   tmp2 = _mm_loadu_ps (P(2,2));
@@ -290,7 +318,7 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   tmp6 = _mm_mul_ps (tmp2, d2c);
   tmp7 = _mm_mul_ps (tmp3, d2c);
   d2cP[2] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-
+  // 4th quarter
   tmp0 = _mm_loadu_ps (P(3,0));
   tmp1 = _mm_loadu_ps (P(3,1));
   tmp2 = _mm_loadu_ps (P(3,2));
@@ -311,6 +339,7 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   tmp7 = _mm_mul_ps (tmp3, d2c);
   d2cP[3] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
   
+  // Now compute bcP, dbcP, bdcP, d2bcP, bd2cP, and dbdc products
   tmp0 = _mm_mul_ps (b, cP[0]);
   tmp1 = _mm_mul_ps (b, cP[1]);
   tmp2 = _mm_mul_ps (b, cP[2]);
