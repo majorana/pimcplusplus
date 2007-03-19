@@ -183,7 +183,7 @@ Test_3d_d()
     for (double y=y_grid.start; y<=y_grid.end; y+=0.005) {
       double val, grad[3], hess[9];
       eval_UBspline_3d_d_vgh (spline, x, y, z, &val, grad, hess);
-      fprintf (fout, "%20.14f ", val);
+      fprintf (fout, "%23.17f ", val);
     }
     fprintf (fout, "\n");
   }
@@ -196,7 +196,7 @@ Test_3d_d()
   z =        z_grid.start + (double)iz * spline->z_grid.delta;
   double spval, grad[3], hess[9];
   eval_UBspline_3d_d_vgh (spline, x, y, z, &spval, grad, hess);
-  fprintf (stderr, "exval = %20.15f   spval = %20.15f\n", exval, spval);
+  fprintf (stderr, "exval = %23.17f   spval = %23.17f\n", exval, spval);
 
 }
 
