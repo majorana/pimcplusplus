@@ -139,25 +139,20 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
   _mm_prefetch ((void*)  &A3_01,_MM_HINT_T0);  
   _mm_prefetch ((void*)  &A3_23,_MM_HINT_T0);  
 
-//   /// SSE mesh point determination
-//   __m128d xyz       = _mm_set_ps (x, y, z, 0.0);
-//   __m128d x0y0z0    = _mm_set_ps (spline->x_grid.start,  spline->y_grid.start, 
-// 				 spline->z_grid.start, 0.0);
-//   __m128d delta_inv = _mm_set_ps (spline->x_grid.delta_inv,spline->y_grid.delta_inv, 
-// 				 spline->z_grid.delta_inv, 0.0);
-//   xyz = _mm_sub_ps (xyz, x0y0z0);
-//   // ux = (x - x0)/delta_x and same for y and z
-//   __m128d uxuyuz    = _mm_mul_ps (xyz, delta_inv);
-//   // intpart = trunc (ux, uy, uz)
-//   __m128i intpart  = _mm_cvttps_epi32(uxuyuz);
-//   __m128i ixiyiz;
-//   _mm_storeu_si128 (&ixiyiz, intpart);
-//   // Store to memory for use in C expressions
-//   // xmm registers are stored to memory in reverse order
-   int ix = 1;
-   int iy = 2;
-   int iz = 3;
-
+  x -= spline->x_grid.start;
+  y -= spline->y_grid.start;  
+  z -= spline->z_grid.start;
+  double ux = x*spline->x_grid.delta_inv;
+  double uy = y*spline->y_grid.delta_inv;
+  double uz = z*spline->z_grid.delta_inv;
+  ux = fmin (ux, (double)(spline->x_grid.num)-1.0e-5);
+  uy = fmin (uy, (double)(spline->y_grid.num)-1.0e-5);
+  uz = fmin (uz, (double)(spline->z_grid.num)-1.0e-5);
+  double ipartx, iparty, ipartz, tx, ty, tz;
+  tx = modf (ux, &ipartx);  int ix = (int) ipartx;
+  ty = modf (uy, &iparty);  int iy = (int) iparty;
+  tz = modf (uz, &ipartz);  int iz = (int) ipartz;
+  
   int xs = spline->x_stride;
   int ys = spline->y_stride;
 
@@ -216,6 +211,12 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
     bcP23, dbcP23, bdcP23, d2bcP23, dbdcP23, bd2cP23,
     tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   
+  tpx01 = _mm_set_pd (tx*tx*tx, tx*tx);
+  tpx23 = _mm_set_pd (tx, 1.0);
+  tpy01 = _mm_set_pd (ty*ty*ty, ty*ty);
+  tpy23 = _mm_set_pd (ty, 1.0);
+  tpz01 = _mm_set_pd (tz*tz*tz, tz*tz);
+  tpz23 = _mm_set_pd (tz, 1.0);
 
   
   // x-dependent vectors
@@ -302,18 +303,109 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
   d2cP[0] = _mm_hadd_pd (tmp4, tmp5);
 
   // 2nd eighth
+  tmp0    = _mm_loadu_pd (P(0,2,0));
+  tmp1    = _mm_loadu_pd (P(0,2,2));
+  tmp2    = _mm_loadu_pd (P(0,3,0));
+  tmp3    = _mm_loadu_pd (P(0,3,2));
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, c01),   _mm_mul_pd (tmp1, c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, c01),   _mm_mul_pd (tmp3, c23));
+  cP[1]   = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, dc01),  _mm_mul_pd (tmp1, dc23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, dc01),  _mm_mul_pd (tmp3, dc23));
+  dcP[1]  = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, d2c01), _mm_mul_pd (tmp1, d2c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, d2c01), _mm_mul_pd (tmp3, d2c23));
+  d2cP[1] = _mm_hadd_pd (tmp4, tmp5);
 
   // 3rd eighth
+  tmp0    = _mm_loadu_pd (P(1,0,0));
+  tmp1    = _mm_loadu_pd (P(1,0,2));
+  tmp2    = _mm_loadu_pd (P(1,1,0));
+  tmp3    = _mm_loadu_pd (P(1,1,2));
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, c01),   _mm_mul_pd (tmp1, c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, c01),   _mm_mul_pd (tmp3, c23));
+  cP[2]   = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, dc01),  _mm_mul_pd (tmp1, dc23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, dc01),  _mm_mul_pd (tmp3, dc23));
+  dcP[2]  = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, d2c01), _mm_mul_pd (tmp1, d2c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, d2c01), _mm_mul_pd (tmp3, d2c23));
+  d2cP[2] = _mm_hadd_pd (tmp4, tmp5);
 
   // 4th eighth
+  tmp0    = _mm_loadu_pd (P(1,2,0));
+  tmp1    = _mm_loadu_pd (P(1,2,2));
+  tmp2    = _mm_loadu_pd (P(1,3,0));
+  tmp3    = _mm_loadu_pd (P(1,3,2));
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, c01),   _mm_mul_pd (tmp1, c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, c01),   _mm_mul_pd (tmp3, c23));
+  cP[3]   = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, dc01),  _mm_mul_pd (tmp1, dc23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, dc01),  _mm_mul_pd (tmp3, dc23));
+  dcP[3]  = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, d2c01), _mm_mul_pd (tmp1, d2c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, d2c01), _mm_mul_pd (tmp3, d2c23));
+  d2cP[3] = _mm_hadd_pd (tmp4, tmp5);
 
   // 5th eighth
+  tmp0    = _mm_loadu_pd (P(2,0,0));
+  tmp1    = _mm_loadu_pd (P(2,0,2));
+  tmp2    = _mm_loadu_pd (P(2,1,0));
+  tmp3    = _mm_loadu_pd (P(2,1,2));
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, c01),   _mm_mul_pd (tmp1, c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, c01),   _mm_mul_pd (tmp3, c23));
+  cP[4]   = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, dc01),  _mm_mul_pd (tmp1, dc23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, dc01),  _mm_mul_pd (tmp3, dc23));
+  dcP[4]  = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, d2c01), _mm_mul_pd (tmp1, d2c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, d2c01), _mm_mul_pd (tmp3, d2c23));
+  d2cP[4] = _mm_hadd_pd (tmp4, tmp5);
 
   // 6th eighth
+  tmp0    = _mm_loadu_pd (P(2,2,0));
+  tmp1    = _mm_loadu_pd (P(2,2,2));
+  tmp2    = _mm_loadu_pd (P(2,3,0));
+  tmp3    = _mm_loadu_pd (P(2,3,2));
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, c01),   _mm_mul_pd (tmp1, c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, c01),   _mm_mul_pd (tmp3, c23));
+  cP[5]   = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, dc01),  _mm_mul_pd (tmp1, dc23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, dc01),  _mm_mul_pd (tmp3, dc23));
+  dcP[5]  = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, d2c01), _mm_mul_pd (tmp1, d2c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, d2c01), _mm_mul_pd (tmp3, d2c23));
+  d2cP[5] = _mm_hadd_pd (tmp4, tmp5);
 
   // 7th eighth
+  tmp0    = _mm_loadu_pd (P(3,0,0));
+  tmp1    = _mm_loadu_pd (P(3,0,2));
+  tmp2    = _mm_loadu_pd (P(3,1,0));
+  tmp3    = _mm_loadu_pd (P(3,1,2));
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, c01),   _mm_mul_pd (tmp1, c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, c01),   _mm_mul_pd (tmp3, c23));
+  cP[6]   = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, dc01),  _mm_mul_pd (tmp1, dc23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, dc01),  _mm_mul_pd (tmp3, dc23));
+  dcP[6]  = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, d2c01), _mm_mul_pd (tmp1, d2c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, d2c01), _mm_mul_pd (tmp3, d2c23));
+  d2cP[6] = _mm_hadd_pd (tmp4, tmp5);
 
   // 8th eighth
+  tmp0    = _mm_loadu_pd (P(3,2,0));
+  tmp1    = _mm_loadu_pd (P(3,2,2));
+  tmp2    = _mm_loadu_pd (P(3,3,0));
+  tmp3    = _mm_loadu_pd (P(3,3,2));
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, c01),   _mm_mul_pd (tmp1, c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, c01),   _mm_mul_pd (tmp3, c23));
+  cP[7]   = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, dc01),  _mm_mul_pd (tmp1, dc23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, dc01),  _mm_mul_pd (tmp3, dc23));
+  dcP[7]  = _mm_hadd_pd (tmp4, tmp5);
+  tmp4    = _mm_hadd_pd (_mm_mul_pd (tmp0, d2c01), _mm_mul_pd (tmp1, d2c23));
+  tmp5    = _mm_hadd_pd (_mm_mul_pd (tmp2, d2c01), _mm_mul_pd (tmp3, d2c23));
+  d2cP[7] = _mm_hadd_pd (tmp4, tmp5);
 
   
   // Now compute bcP, dbcP, bdcP, d2bcP, bd2cP, and dbdc products
@@ -383,23 +475,23 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
   tmp0 = _mm_hadd_pd (tmp0, tmp0);
   _mm_store_sd (&hess[0], tmp0);
   // d2y
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bcP01), _mm_mul_pd (a23, bcP23));
+  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, d2bcP01), _mm_mul_pd (a23, d2bcP23));
   tmp0 = _mm_hadd_pd (tmp0, tmp0);
   _mm_store_sd (&hess[4], tmp0);
   // d2z
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bcP01), _mm_mul_pd (a23, bcP23));
+  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bd2cP01), _mm_mul_pd (a23, bd2cP23));
   tmp0 = _mm_hadd_pd (tmp0, tmp0);
   _mm_store_sd (&hess[8], tmp0);
   // dx dy
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bcP01), _mm_mul_pd (a23, bcP23));
+  tmp0 = _mm_hadd_pd (_mm_mul_pd (da01, dbcP01), _mm_mul_pd (da23, dbcP23));
   tmp0 = _mm_hadd_pd (tmp0, tmp0);
   _mm_store_sd (&hess[1], tmp0);
   // dx dz
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bcP01), _mm_mul_pd (a23, bcP23));
+  tmp0 = _mm_hadd_pd (_mm_mul_pd (da01, bdcP01), _mm_mul_pd (da23, bdcP23));
   tmp0 = _mm_hadd_pd (tmp0, tmp0);
   _mm_store_sd (&hess[2], tmp0);
   // dy dz
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bcP01), _mm_mul_pd (a23, bcP23));
+  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, dbdcP01), _mm_mul_pd (a23, dbdcP23));
   tmp0 = _mm_hadd_pd (tmp0, tmp0);
   _mm_store_sd (&hess[5], tmp0);
   // Multiply gradients and hessians by appropriate grid inverses
