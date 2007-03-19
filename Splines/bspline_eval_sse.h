@@ -126,6 +126,9 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
 			float* restrict val, float* restrict grad, 
 			float* restrict hess)
 {
+  _mm_prefetch ((void*)  &A0,_MM_HINT_T0);  _mm_prefetch ((void*)  &A1,_MM_HINT_T0);  
+  _mm_prefetch ((void*)  &A2,_MM_HINT_T0);  _mm_prefetch ((void*)  &A3,_MM_HINT_T0);
+
   /// SSE mesh point determination
   __m128 xyz       = _mm_set_ps (x, y, z, 0.0);
   __m128 x0y0z0    = _mm_set_ps (spline->x_grid.start,  spline->y_grid.start, 
@@ -151,6 +154,7 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   // i and j should be in the range [0,3].  Coefficients are read four
   // at a time, so no k value is needed.
 #define P(i,j) (spline->coefs+(ix+(i))*xs+(iy+(j))*ys+(iz))
+#define Q(i,j,k) (spline->coefs+(ix+(i))*xs+(iy+(j))*ys+(iz+k))
   // Prefetch the data from main memory into cache so it's available
   // when we need to use it.
   _mm_prefetch ((void*)P(0,0), _MM_HINT_T0);
