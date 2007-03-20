@@ -125,21 +125,32 @@ eval_UBspline_3d_d_vgl (UBspline_3d_d * restrict spline,
 // r_l = a0_l*b0_l + a0_h+b0_h + a1_l*b1_l + a1_h*b1_h
 // r_h = a2_l*b2_l + a2_h+b2_h + a3_l*b1_l + a3_h*b1_h
 #ifdef __SSE3__
-#define _MM_DOT4_PD(a0, a1, a2, a3, b0, b1, b2, b3, r)               \
-do {                                                                 \
-   __m128d t0 = _mm_add_pd(_mm_mul_pd (a0, b0),_mm_mul_pd (a1, b1)); \
-   __m128d t1 = _mm_add_pd(_mm_mul_pd (a2, b2),_mm_mul_pd (a3, b3)); \
-   r = _mm_hadd_pd (t0, t1);                                         \
- }								     \
-while(0);
+#define _MM_DDOT4_PD(a0, a1, a2, a3, b0, b1, b2, b3, r)               \
+do {                                                                  \
+   __m128d t0 = _mm_add_pd(_mm_mul_pd (a0, b0),_mm_mul_pd (a1, b1));  \
+   __m128d t1 = _mm_add_pd(_mm_mul_pd (a2, b2),_mm_mul_pd (a3, b3));  \
+   r = _mm_hadd_pd (t0, t1);                                          \
+ } while(0);
+#define _MM_DOT4_PD(a0, a1, b0, b1, p)                                \
+do {                                                                  \
+  __m128d t0 = _mm_add_pd(_mm_mul_pd (a0, b0),_mm_mul_pd (a1, b1));   \
+  __m128d t1 = _mm_hadd_pd (t0,t0);                                   \
+  _mm_store_sd (&(p), t1);                                            \
+ } while (0);
 #else
-#define _MM_DOT4_PD(a0, a1, a2, a3, b0, b1, b2, b3, r)               \
-do {                                                                 \
-   __m128d t0 = _mm_add_pd(_mm_mul_pd (a0, b0),_mm_mul_pd (a1, b1)); \
-   __m128d t1 = _mm_add_pd(_mm_mul_pd (a2, b2),_mm_mul_pd (a3, b3)); \
-   r = _mm_add_pd(_mm_unpacklo_pd(t0,t1),_mm_unpackhi_pd(t0,t1));    \
- }								     \
-while(0);
+#define _MM_DDOT4_PD(a0, a1, a2, a3, b0, b1, b2, b3, r)               \
+do {                                                                  \
+   __m128d t0 = _mm_add_pd(_mm_mul_pd (a0, b0),_mm_mul_pd (a1, b1));  \
+   __m128d t1 = _mm_add_pd(_mm_mul_pd (a2, b2),_mm_mul_pd (a3, b3));  \
+   r = _mm_add_pd(_mm_unpacklo_pd(t0,t1),_mm_unpackhi_pd(t0,t1));     \
+ } while(0);
+#define _MM_DOT4_PD(a0, a1, b0, b1, p)                                \
+do {                                                                  \
+  __m128d t0 = _mm_add_pd(_mm_mul_pd (a0, b0),_mm_mul_pd (a1, b1));   \
+  __m128d t1 =                                                        \
+      _mm_add_pd (_mm_unpacklo_pd(t0,t0), _mm_unpackhi_pd(t0,t0));    \
+  _mm_store_sd (&(p), t1);                                            \
+ } while (0);
 #endif
 
 
@@ -240,70 +251,94 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
 
   
   // x-dependent vectors
-  tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpx01), _mm_mul_pd (A0_23, tpx23));
-  tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpx01), _mm_mul_pd (A1_23, tpx23));
-  tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpx01), _mm_mul_pd (A2_23, tpx23));
-  tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpx01), _mm_mul_pd (A3_23, tpx23));
-  a01  = _mm_hadd_pd(tmp0, tmp1);
-  a23  = _mm_hadd_pd(tmp2, tmp3);
+  _MM_DDOT4_PD (  A0_01,   A0_23,   A1_01,   A1_23, tpx01, tpx23, tpx01, tpx23,   a01);
+  _MM_DDOT4_PD (  A2_01,   A2_23,   A3_01,   A3_23, tpx01, tpx23, tpx01, tpx23,   a23);
+  _MM_DDOT4_PD ( dA0_01,  dA0_23,  dA1_01,  dA1_23, tpx01, tpx23, tpx01, tpx23,  da01);
+  _MM_DDOT4_PD ( dA2_01,  dA2_23,  dA3_01,  dA3_23, tpx01, tpx23, tpx01, tpx23,  da23);
+  _MM_DDOT4_PD (d2A0_01, d2A0_23, d2A1_01, d2A1_23, tpx01, tpx23, tpx01, tpx23, d2a01);
+  _MM_DDOT4_PD (d2A2_01, d2A2_23, d2A3_01, d2A3_23, tpx01, tpx23, tpx01, tpx23, d2a23);
 
-  tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpx01), _mm_mul_pd (dA0_23, tpx23));
-  tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpx01), _mm_mul_pd (dA1_23, tpx23));
-  tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpx01), _mm_mul_pd (dA2_23, tpx23));
-  tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpx01), _mm_mul_pd (dA3_23, tpx23));
-  da01  = _mm_hadd_pd(tmp0, tmp1);
-  da23  = _mm_hadd_pd(tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpx01), _mm_mul_pd (A0_23, tpx23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpx01), _mm_mul_pd (A1_23, tpx23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpx01), _mm_mul_pd (A2_23, tpx23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpx01), _mm_mul_pd (A3_23, tpx23));
+//   a01  = _mm_hadd_pd(tmp0, tmp1);
+//   a23  = _mm_hadd_pd(tmp2, tmp3);
 
-  tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpx01), _mm_mul_pd (d2A0_23, tpx23));
-  tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpx01), _mm_mul_pd (d2A1_23, tpx23));
-  tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpx01), _mm_mul_pd (d2A2_23, tpx23));
-  tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpx01), _mm_mul_pd (d2A3_23, tpx23));
-  d2a01  = _mm_hadd_pd(tmp0, tmp1);
-  d2a23  = _mm_hadd_pd(tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpx01), _mm_mul_pd (dA0_23, tpx23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpx01), _mm_mul_pd (dA1_23, tpx23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpx01), _mm_mul_pd (dA2_23, tpx23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpx01), _mm_mul_pd (dA3_23, tpx23));
+//   da01  = _mm_hadd_pd(tmp0, tmp1);
+//   da23  = _mm_hadd_pd(tmp2, tmp3);
+
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpx01), _mm_mul_pd (d2A0_23, tpx23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpx01), _mm_mul_pd (d2A1_23, tpx23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpx01), _mm_mul_pd (d2A2_23, tpx23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpx01), _mm_mul_pd (d2A3_23, tpx23));
+//   d2a01  = _mm_hadd_pd(tmp0, tmp1);
+//   d2a23  = _mm_hadd_pd(tmp2, tmp3);
+
 
   // y-dependent vectors
-  tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpy01), _mm_mul_pd (A0_23, tpy23));
-  tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpy01), _mm_mul_pd (A1_23, tpy23));
-  tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpy01), _mm_mul_pd (A2_23, tpy23));
-  tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpy01), _mm_mul_pd (A3_23, tpy23));
-  b01  = _mm_hadd_pd(tmp0, tmp1);
-  b23  = _mm_hadd_pd(tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpy01), _mm_mul_pd (A0_23, tpy23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpy01), _mm_mul_pd (A1_23, tpy23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpy01), _mm_mul_pd (A2_23, tpy23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpy01), _mm_mul_pd (A3_23, tpy23));
+//   b01  = _mm_hadd_pd(tmp0, tmp1);
+//   b23  = _mm_hadd_pd(tmp2, tmp3);
 
-  tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpy01), _mm_mul_pd (dA0_23, tpy23));
-  tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpy01), _mm_mul_pd (dA1_23, tpy23));
-  tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpy01), _mm_mul_pd (dA2_23, tpy23));
-  tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpy01), _mm_mul_pd (dA3_23, tpy23));
-  db01  = _mm_hadd_pd(tmp0, tmp1);
-  db23  = _mm_hadd_pd(tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpy01), _mm_mul_pd (dA0_23, tpy23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpy01), _mm_mul_pd (dA1_23, tpy23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpy01), _mm_mul_pd (dA2_23, tpy23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpy01), _mm_mul_pd (dA3_23, tpy23));
+//   db01  = _mm_hadd_pd(tmp0, tmp1);
+//   db23  = _mm_hadd_pd(tmp2, tmp3);
 
-  tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpy01), _mm_mul_pd (d2A0_23, tpz23));
-  tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpy01), _mm_mul_pd (d2A1_23, tpz23));
-  tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpy01), _mm_mul_pd (d2A2_23, tpz23));
-  tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpy01), _mm_mul_pd (d2A3_23, tpz23));
-  d2b01  = _mm_hadd_pd(tmp0, tmp1);
-  d2b23  = _mm_hadd_pd(tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpy01), _mm_mul_pd (d2A0_23, tpz23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpy01), _mm_mul_pd (d2A1_23, tpz23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpy01), _mm_mul_pd (d2A2_23, tpz23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpy01), _mm_mul_pd (d2A3_23, tpz23));
+//   d2b01  = _mm_hadd_pd(tmp0, tmp1);
+//   d2b23  = _mm_hadd_pd(tmp2, tmp3);
+
+  _MM_DDOT4_PD (  A0_01,   A0_23,   A1_01,   A1_23, tpy01, tpy23, tpy01, tpy23,   b01);
+  _MM_DDOT4_PD (  A2_01,   A2_23,   A3_01,   A3_23, tpy01, tpy23, tpy01, tpy23,   b23);
+  _MM_DDOT4_PD ( dA0_01,  dA0_23,  dA1_01,  dA1_23, tpy01, tpy23, tpy01, tpy23,  db01);
+  _MM_DDOT4_PD ( dA2_01,  dA2_23,  dA3_01,  dA3_23, tpy01, tpy23, tpy01, tpy23,  db23);
+  _MM_DDOT4_PD (d2A0_01, d2A0_23, d2A1_01, d2A1_23, tpy01, tpy23, tpy01, tpy23, d2b01);
+  _MM_DDOT4_PD (d2A2_01, d2A2_23, d2A3_01, d2A3_23, tpy01, tpy23, tpy01, tpy23, d2b23);
+
 
   // z-dependent vectors
-  tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpz01), _mm_mul_pd (A0_23, tpz23));
-  tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpz01), _mm_mul_pd (A1_23, tpz23));
-  tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpz01), _mm_mul_pd (A2_23, tpz23));
-  tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpz01), _mm_mul_pd (A3_23, tpz23));
-  c01  = _mm_hadd_pd(tmp0, tmp1);
-  c23  = _mm_hadd_pd(tmp2, tmp3);
+  _MM_DDOT4_PD (  A0_01,   A0_23,   A1_01,   A1_23, tpz01, tpz23, tpz01, tpz23,   c01);
+  _MM_DDOT4_PD (  A2_01,   A2_23,   A3_01,   A3_23, tpz01, tpz23, tpz01, tpz23,   c23);
+  _MM_DDOT4_PD ( dA0_01,  dA0_23,  dA1_01,  dA1_23, tpz01, tpz23, tpz01, tpz23,  dc01);
+  _MM_DDOT4_PD ( dA2_01,  dA2_23,  dA3_01,  dA3_23, tpz01, tpz23, tpz01, tpz23,  dc23);
+  _MM_DDOT4_PD (d2A0_01, d2A0_23, d2A1_01, d2A1_23, tpz01, tpz23, tpz01, tpz23, d2c01);
+  _MM_DDOT4_PD (d2A2_01, d2A2_23, d2A3_01, d2A3_23, tpz01, tpz23, tpz01, tpz23, d2c23);
 
-  tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpz01), _mm_mul_pd (dA0_23, tpz23));
-  tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpz01), _mm_mul_pd (dA1_23, tpz23));
-  tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpz01), _mm_mul_pd (dA2_23, tpz23));
-  tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpz01), _mm_mul_pd (dA3_23, tpz23));
-  dc01  = _mm_hadd_pd(tmp0, tmp1);
-  dc23  = _mm_hadd_pd(tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpz01), _mm_mul_pd (A0_23, tpz23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpz01), _mm_mul_pd (A1_23, tpz23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpz01), _mm_mul_pd (A2_23, tpz23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpz01), _mm_mul_pd (A3_23, tpz23));
+//   c01  = _mm_hadd_pd(tmp0, tmp1);
+//   c23  = _mm_hadd_pd(tmp2, tmp3);
 
-  tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpz01), _mm_mul_pd (d2A0_23, tpz23));
-  tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpz01), _mm_mul_pd (d2A1_23, tpz23));
-  tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpz01), _mm_mul_pd (d2A2_23, tpz23));
-  tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpz01), _mm_mul_pd (d2A3_23, tpz23));
-  d2c01  = _mm_hadd_pd(tmp0, tmp1);
-  d2c23  = _mm_hadd_pd(tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpz01), _mm_mul_pd (dA0_23, tpz23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpz01), _mm_mul_pd (dA1_23, tpz23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpz01), _mm_mul_pd (dA2_23, tpz23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpz01), _mm_mul_pd (dA3_23, tpz23));
+//   dc01  = _mm_hadd_pd(tmp0, tmp1);
+//   dc23  = _mm_hadd_pd(tmp2, tmp3);
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpz01), _mm_mul_pd (d2A0_23, tpz23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpz01), _mm_mul_pd (d2A1_23, tpz23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpz01), _mm_mul_pd (d2A2_23, tpz23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpz01), _mm_mul_pd (d2A3_23, tpz23));
+//   d2c01  = _mm_hadd_pd(tmp0, tmp1);
+//   d2c23  = _mm_hadd_pd(tmp2, tmp3);
  
   // Compute cP, dcP, and d2cP products 1/8 at a time to maximize
   // register reuse and avoid rerereading from memory or cache.
@@ -312,18 +347,18 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
   tmp1    = _mm_loadu_pd (P(0,0,2));
   tmp2    = _mm_loadu_pd (P(0,1,0));
   tmp3    = _mm_loadu_pd (P(0,1,2));
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[0]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[0]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[0]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[0]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[0]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[0]);
 
   // 2nd eighth
   tmp0    = _mm_loadu_pd (P(0,2,0));
   tmp1    = _mm_loadu_pd (P(0,2,2));
   tmp2    = _mm_loadu_pd (P(0,3,0));
   tmp3    = _mm_loadu_pd (P(0,3,2));
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[1]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[1]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[1]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[1]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[1]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[1]);
 
 
   // 3rd eighth
@@ -331,142 +366,168 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
   tmp1    = _mm_loadu_pd (P(1,0,2));
   tmp2    = _mm_loadu_pd (P(1,1,0));
   tmp3    = _mm_loadu_pd (P(1,1,2));
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[2]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[2]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[2]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[2]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[2]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[2]);
 
   // 4th eighth
   tmp0    = _mm_loadu_pd (P(1,2,0));
   tmp1    = _mm_loadu_pd (P(1,2,2));
   tmp2    = _mm_loadu_pd (P(1,3,0));
   tmp3    = _mm_loadu_pd (P(1,3,2));
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[3]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[3]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[3]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[3]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[3]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[3]);
 
   // 5th eighth
   tmp0    = _mm_loadu_pd (P(2,0,0));
   tmp1    = _mm_loadu_pd (P(2,0,2));
   tmp2    = _mm_loadu_pd (P(2,1,0));
   tmp3    = _mm_loadu_pd (P(2,1,2));
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[4]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[4]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[4]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[4]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[4]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[4]);
 
   // 6th eighth
   tmp0    = _mm_loadu_pd (P(2,2,0));
   tmp1    = _mm_loadu_pd (P(2,2,2));
   tmp2    = _mm_loadu_pd (P(2,3,0));
   tmp3    = _mm_loadu_pd (P(2,3,2));
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[5]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[5]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[5]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[5]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[5]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[5]);
 
   // 7th eighth
   tmp0    = _mm_loadu_pd (P(3,0,0));
   tmp1    = _mm_loadu_pd (P(3,0,2));
   tmp2    = _mm_loadu_pd (P(3,1,0));
   tmp3    = _mm_loadu_pd (P(3,1,2));
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[6]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[6]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[6]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[6]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[6]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[6]);
 
   // 8th eighth
   tmp0    = _mm_loadu_pd (P(3,2,0));
   tmp1    = _mm_loadu_pd (P(3,2,2));
   tmp2    = _mm_loadu_pd (P(3,3,0));
   tmp3    = _mm_loadu_pd (P(3,3,2));
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[7]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[7]);
-  _MM_DOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[7]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,  c01,  c23,  c01,  c23,  cP[7]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3, dc01, dc23, dc01, dc23, dcP[7]);
+  _MM_DDOT4_PD(tmp0,tmp1,tmp2,tmp3,d2c01,d2c23,d2c01,d2c23,d2cP[7]);
 
   
   // Now compute bcP, dbcP, bdcP, d2bcP, bd2cP, and dbdc products
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (b01, cP[0]), _mm_mul_pd (b23, cP[1]));
-  tmp1 = _mm_hadd_pd (_mm_mul_pd (b01, cP[2]), _mm_mul_pd (b23, cP[3]));
-  tmp2 = _mm_hadd_pd (_mm_mul_pd (b01, cP[4]), _mm_mul_pd (b23, cP[5]));
-  tmp3 = _mm_hadd_pd (_mm_mul_pd (b01, cP[6]), _mm_mul_pd (b23, cP[7]));
-  bcP01 = _mm_hadd_pd (tmp0, tmp1);
-  bcP23 = _mm_hadd_pd (tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd (_mm_mul_pd (b01, cP[0]), _mm_mul_pd (b23, cP[1]));
+//   tmp1 = _mm_hadd_pd (_mm_mul_pd (b01, cP[2]), _mm_mul_pd (b23, cP[3]));
+//   tmp2 = _mm_hadd_pd (_mm_mul_pd (b01, cP[4]), _mm_mul_pd (b23, cP[5]));
+//   tmp3 = _mm_hadd_pd (_mm_mul_pd (b01, cP[6]), _mm_mul_pd (b23, cP[7]));
+//   bcP01 = _mm_hadd_pd (tmp0, tmp1);
+//   bcP23 = _mm_hadd_pd (tmp2, tmp3);
+  _MM_DDOT4_PD (b01, b23, b01, b23, cP[0], cP[1], cP[2], cP[3], bcP01);
+  _MM_DDOT4_PD (b01, b23, b01, b23, cP[4], cP[5], cP[6], cP[7], bcP23);
 
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (db01, cP[0]), _mm_mul_pd (db23, cP[1]));
-  tmp1 = _mm_hadd_pd (_mm_mul_pd (db01, cP[2]), _mm_mul_pd (db23, cP[3]));
-  tmp2 = _mm_hadd_pd (_mm_mul_pd (db01, cP[4]), _mm_mul_pd (db23, cP[5]));
-  tmp3 = _mm_hadd_pd (_mm_mul_pd (db01, cP[6]), _mm_mul_pd (db23, cP[7]));
-  dbcP01 = _mm_hadd_pd (tmp0, tmp1);
-  dbcP23 = _mm_hadd_pd (tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd (_mm_mul_pd (db01, cP[0]), _mm_mul_pd (db23, cP[1]));
+//   tmp1 = _mm_hadd_pd (_mm_mul_pd (db01, cP[2]), _mm_mul_pd (db23, cP[3]));
+//   tmp2 = _mm_hadd_pd (_mm_mul_pd (db01, cP[4]), _mm_mul_pd (db23, cP[5]));
+//   tmp3 = _mm_hadd_pd (_mm_mul_pd (db01, cP[6]), _mm_mul_pd (db23, cP[7]));
+//   dbcP01 = _mm_hadd_pd (tmp0, tmp1);
+//   dbcP23 = _mm_hadd_pd (tmp2, tmp3);
+  _MM_DDOT4_PD (db01, db23, db01, db23, cP[0], cP[1], cP[2], cP[3], dbcP01);
+  _MM_DDOT4_PD (db01, db23, db01, db23, cP[4], cP[5], cP[6], cP[7], dbcP23);
 
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (b01, dcP[0]), _mm_mul_pd (b23, dcP[1]));
-  tmp1 = _mm_hadd_pd (_mm_mul_pd (b01, dcP[2]), _mm_mul_pd (b23, dcP[3]));
-  tmp2 = _mm_hadd_pd (_mm_mul_pd (b01, dcP[4]), _mm_mul_pd (b23, dcP[5]));
-  tmp3 = _mm_hadd_pd (_mm_mul_pd (b01, dcP[6]), _mm_mul_pd (b23, dcP[7]));
-  bdcP01 = _mm_hadd_pd (tmp0, tmp1);
-  bdcP23 = _mm_hadd_pd (tmp2, tmp3);
 
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (d2b01, cP[0]), _mm_mul_pd (d2b23, cP[1]));
-  tmp1 = _mm_hadd_pd (_mm_mul_pd (d2b01, cP[2]), _mm_mul_pd (d2b23, cP[3]));
-  tmp2 = _mm_hadd_pd (_mm_mul_pd (d2b01, cP[4]), _mm_mul_pd (d2b23, cP[5]));
-  tmp3 = _mm_hadd_pd (_mm_mul_pd (d2b01, cP[6]), _mm_mul_pd (d2b23, cP[7]));
-  d2bcP01 = _mm_hadd_pd (tmp0, tmp1);
-  d2bcP23 = _mm_hadd_pd (tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd (_mm_mul_pd (b01, dcP[0]), _mm_mul_pd (b23, dcP[1]));
+//   tmp1 = _mm_hadd_pd (_mm_mul_pd (b01, dcP[2]), _mm_mul_pd (b23, dcP[3]));
+//   tmp2 = _mm_hadd_pd (_mm_mul_pd (b01, dcP[4]), _mm_mul_pd (b23, dcP[5]));
+//   tmp3 = _mm_hadd_pd (_mm_mul_pd (b01, dcP[6]), _mm_mul_pd (b23, dcP[7]));
+//   bdcP01 = _mm_hadd_pd (tmp0, tmp1);
+//   bdcP23 = _mm_hadd_pd (tmp2, tmp3);
+  _MM_DDOT4_PD (b01, b23, b01, b23, dcP[0], dcP[1], dcP[2], dcP[3], bdcP01);
+  _MM_DDOT4_PD (b01, b23, b01, b23, dcP[4], dcP[5], dcP[6], dcP[7], bdcP23);
 
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (b01, d2cP[0]), _mm_mul_pd (b23, d2cP[1]));
-  tmp1 = _mm_hadd_pd (_mm_mul_pd (b01, d2cP[2]), _mm_mul_pd (b23, d2cP[3]));
-  tmp2 = _mm_hadd_pd (_mm_mul_pd (b01, d2cP[4]), _mm_mul_pd (b23, d2cP[5]));
-  tmp3 = _mm_hadd_pd (_mm_mul_pd (b01, d2cP[6]), _mm_mul_pd (b23, d2cP[7]));
-  bd2cP01 = _mm_hadd_pd (tmp0, tmp1);
-  bd2cP23 = _mm_hadd_pd (tmp2, tmp3);
+
+//   tmp0 = _mm_hadd_pd (_mm_mul_pd (d2b01, cP[0]), _mm_mul_pd (d2b23, cP[1]));
+//   tmp1 = _mm_hadd_pd (_mm_mul_pd (d2b01, cP[2]), _mm_mul_pd (d2b23, cP[3]));
+//   tmp2 = _mm_hadd_pd (_mm_mul_pd (d2b01, cP[4]), _mm_mul_pd (d2b23, cP[5]));
+//   tmp3 = _mm_hadd_pd (_mm_mul_pd (d2b01, cP[6]), _mm_mul_pd (d2b23, cP[7]));
+//   d2bcP01 = _mm_hadd_pd (tmp0, tmp1);
+//   d2bcP23 = _mm_hadd_pd (tmp2, tmp3);
+  _MM_DDOT4_PD (d2b01, d2b23, d2b01, d2b23, cP[0], cP[1], cP[2], cP[3], d2bcP01);
+  _MM_DDOT4_PD (d2b01, d2b23, d2b01, d2b23, cP[4], cP[5], cP[6], cP[7], d2bcP23);
+
+
+//   tmp0 = _mm_hadd_pd (_mm_mul_pd (b01, d2cP[0]), _mm_mul_pd (b23, d2cP[1]));
+//   tmp1 = _mm_hadd_pd (_mm_mul_pd (b01, d2cP[2]), _mm_mul_pd (b23, d2cP[3]));
+//   tmp2 = _mm_hadd_pd (_mm_mul_pd (b01, d2cP[4]), _mm_mul_pd (b23, d2cP[5]));
+//   tmp3 = _mm_hadd_pd (_mm_mul_pd (b01, d2cP[6]), _mm_mul_pd (b23, d2cP[7]));
+//   bd2cP01 = _mm_hadd_pd (tmp0, tmp1);
+//   bd2cP23 = _mm_hadd_pd (tmp2, tmp3);
+  _MM_DDOT4_PD (b01, b23, b01, b23, d2cP[0], d2cP[1], d2cP[2], d2cP[3], bd2cP01);
+  _MM_DDOT4_PD (b01, b23, b01, b23, d2cP[4], d2cP[5], d2cP[6], d2cP[7], bd2cP23);
   
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (db01, dcP[0]), _mm_mul_pd (db23, dcP[1]));
-  tmp1 = _mm_hadd_pd (_mm_mul_pd (db01, dcP[2]), _mm_mul_pd (db23, dcP[3]));
-  tmp2 = _mm_hadd_pd (_mm_mul_pd (db01, dcP[4]), _mm_mul_pd (db23, dcP[5]));
-  tmp3 = _mm_hadd_pd (_mm_mul_pd (db01, dcP[6]), _mm_mul_pd (db23, dcP[7]));
-  dbdcP01 = _mm_hadd_pd (tmp0, tmp1);
-  dbdcP23 = _mm_hadd_pd (tmp2, tmp3);
+//   tmp0 = _mm_hadd_pd (_mm_mul_pd (db01, dcP[0]), _mm_mul_pd (db23, dcP[1]));
+//   tmp1 = _mm_hadd_pd (_mm_mul_pd (db01, dcP[2]), _mm_mul_pd (db23, dcP[3]));
+//   tmp2 = _mm_hadd_pd (_mm_mul_pd (db01, dcP[4]), _mm_mul_pd (db23, dcP[5]));
+//   tmp3 = _mm_hadd_pd (_mm_mul_pd (db01, dcP[6]), _mm_mul_pd (db23, dcP[7]));
+//   dbdcP01 = _mm_hadd_pd (tmp0, tmp1);
+//   dbdcP23 = _mm_hadd_pd (tmp2, tmp3);
+  _MM_DDOT4_PD (db01, db23, db01, db23, dcP[0], dcP[1], dcP[2], dcP[3], dbdcP01);
+  _MM_DDOT4_PD (db01, db23, db01, db23, dcP[4], dcP[5], dcP[6], dcP[7], dbdcP23);
 
   // Compute value
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bcP01), _mm_mul_pd (a23, bcP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (val, tmp0);
-  // Compute gradient
-  // x
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (da01, bcP01), _mm_mul_pd (da23, bcP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (&(grad[0]), tmp0);
-  // y
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, dbcP01), _mm_mul_pd (a23, dbcP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (&grad[1], tmp0);
-  // z
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bdcP01), _mm_mul_pd (a23, bdcP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (&grad[2], tmp0);
+  _MM_DOT4_PD (a01, a23, bcP01, bcP23, *val);
 
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bcP01), _mm_mul_pd (a23, bcP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (val, tmp0);
+  // Compute gradient
+  _MM_DOT4_PD (da01, da23, bcP01, bcP23, grad[0]);
+  _MM_DOT4_PD (a01, a23, dbcP01, dbcP23, grad[1]);
+  _MM_DOT4_PD (a01, a23, bdcP01, bdcP23, grad[2]);
+  // x
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (da01, bcP01), _mm_mul_pd (da23, bcP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (&(grad[0]), tmp0);
+  // y
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, dbcP01), _mm_mul_pd (a23, dbcP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (&grad[1], tmp0);
+  // z
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bdcP01), _mm_mul_pd (a23, bdcP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (&grad[2], tmp0);
+  
   // Compute hessian
   // d2x
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (d2a01, bcP01), _mm_mul_pd (d2a23, bcP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (&hess[0], tmp0);
+  _MM_DOT4_PD (d2a01, d2a23, bcP01, bcP23, hess[0]);
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (d2a01, bcP01), _mm_mul_pd (d2a23, bcP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (&hess[0], tmp0);
   // d2y
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, d2bcP01), _mm_mul_pd (a23, d2bcP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (&hess[4], tmp0);
+  _MM_DOT4_PD (a01, a23, d2bcP01, d2bcP23, hess[4]);
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, d2bcP01), _mm_mul_pd (a23, d2bcP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (&hess[4], tmp0);
   // d2z
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bd2cP01), _mm_mul_pd (a23, bd2cP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (&hess[8], tmp0);
+  _MM_DOT4_PD (a01, a23, bd2cP01, bd2cP23, hess[8]);
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, bd2cP01), _mm_mul_pd (a23, bd2cP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (&hess[8], tmp0);
   // dx dy
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (da01, dbcP01), _mm_mul_pd (da23, dbcP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (&hess[1], tmp0);
+  _MM_DOT4_PD (da01, da23, dbcP01, dbcP23, hess[1]);
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (da01, dbcP01), _mm_mul_pd (da23, dbcP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (&hess[1], tmp0);
   // dx dz
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (da01, bdcP01), _mm_mul_pd (da23, bdcP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (&hess[2], tmp0);
+  _MM_DOT4_PD (da01, da23, bdcP01, bdcP23, hess[2]);
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (da01, bdcP01), _mm_mul_pd (da23, bdcP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (&hess[2], tmp0);
   // dy dz
-  tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, dbdcP01), _mm_mul_pd (a23, dbdcP23));
-  tmp0 = _mm_hadd_pd (tmp0, tmp0);
-  _mm_store_sd (&hess[5], tmp0);
+  _MM_DOT4_PD (a01, a23, dbdcP01, dbdcP23, hess[5]);
+  //   tmp0 = _mm_hadd_pd (_mm_mul_pd (a01, dbdcP01), _mm_mul_pd (a23, dbdcP23));
+  //   tmp0 = _mm_hadd_pd (tmp0, tmp0);
+  //   _mm_store_sd (&hess[5], tmp0);
   // Multiply gradients and hessians by appropriate grid inverses
   double dxInv = spline->x_grid.delta_inv;
   double dyInv = spline->y_grid.delta_inv;
