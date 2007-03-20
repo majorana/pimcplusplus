@@ -1,4 +1,5 @@
 #include "bspline.h"
+#define __USE_XOPEN
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -244,12 +245,12 @@ Speed_3d_d()
 	   (double)(end-start-(rend-rstart))/(double)CLOCKS_PER_SEC);
 }
 
-main()
+int main()
 {
   // Test_1d_s();
   // Test_2d_s();
-  // Test_3d_s();
-  // Speed_3d_s();
-  Test_3d_d();
-  Speed_3d_d();
+  Test_3d_s();
+  Speed_3d_s();
+  // Test_3d_d();
+  // Speed_3d_d();
 }
