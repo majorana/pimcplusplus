@@ -94,7 +94,7 @@ Test_3d_s()
   FILE *fout = fopen ("3dspline.dat", "w");
   for (double x=x_grid.start; x<=x_grid.end; x+=0.005) {
     for (double y=y_grid.start; y<=y_grid.end; y+=0.005) {
-      float val, grad[3], hess[9];
+      float val, grad[3], hess[9], lapl;
       eval_UBspline_3d_s_vgh (spline, x, y, z, &val, grad, hess);
       fprintf (fout, "%20.14f ", val);
     }
@@ -107,7 +107,7 @@ Test_3d_s()
   double x = x_grid.start + (double)ix * spline->x_grid.delta;
   double y = y_grid.start + (double)iy * spline->y_grid.delta;
   z =        z_grid.start + (double)iz * spline->z_grid.delta;
-  float spval, grad[3], hess[9];
+  float spval, grad[3], hess[9], lapl;
   eval_UBspline_3d_s_vgh (spline, x, y, z, &spval, grad, hess);
   fprintf (stderr, "exval = %20.15f   spval = %20.15f\n", exval, spval);
 

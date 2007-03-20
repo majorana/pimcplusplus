@@ -468,8 +468,8 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
   double dyInv = spline->y_grid.delta_inv;
   double dzInv = spline->z_grid.delta_inv;
   grad[0] *= dxInv;
-  grad[1] *= dxInv;
-  grad[2] *= dxInv;
+  grad[1] *= dyInv;
+  grad[2] *= dzInv;
   hess[0] *= dxInv*dxInv;
   hess[4] *= dyInv*dyInv;
   hess[8] *= dzInv*dzInv;
