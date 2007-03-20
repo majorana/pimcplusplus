@@ -239,6 +239,7 @@ Speed_3d_d()
     double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
     double z = z_grid.start+ 0.9999*drand48()*(z_grid.end - z_grid.start);
     eval_UBspline_3d_d_vgh (spline, x, y, z, &val, grad, hess);
+    // eval_UBspline_3d_d (spline, x, y, z, &val);
   }
   end = clock();
   fprintf (stderr, "10,000,000 evalations in %f seconds.\n", 
@@ -249,8 +250,8 @@ int main()
 {
   // Test_1d_s();
   // Test_2d_s();
-  Test_3d_s();
-  Speed_3d_s();
-  // Test_3d_d();
-  // Speed_3d_d();
+  // Test_3d_s();
+  // Speed_3d_s();
+  Test_3d_d();
+  Speed_3d_d();
 }
