@@ -258,51 +258,7 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
   _MM_DDOT4_PD (d2A0_01, d2A0_23, d2A1_01, d2A1_23, tpx01, tpx23, tpx01, tpx23, d2a01);
   _MM_DDOT4_PD (d2A2_01, d2A2_23, d2A3_01, d2A3_23, tpx01, tpx23, tpx01, tpx23, d2a23);
 
-//   tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpx01), _mm_mul_pd (A0_23, tpx23));
-//   tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpx01), _mm_mul_pd (A1_23, tpx23));
-//   tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpx01), _mm_mul_pd (A2_23, tpx23));
-//   tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpx01), _mm_mul_pd (A3_23, tpx23));
-//   a01  = _mm_hadd_pd(tmp0, tmp1);
-//   a23  = _mm_hadd_pd(tmp2, tmp3);
-
-//   tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpx01), _mm_mul_pd (dA0_23, tpx23));
-//   tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpx01), _mm_mul_pd (dA1_23, tpx23));
-//   tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpx01), _mm_mul_pd (dA2_23, tpx23));
-//   tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpx01), _mm_mul_pd (dA3_23, tpx23));
-//   da01  = _mm_hadd_pd(tmp0, tmp1);
-//   da23  = _mm_hadd_pd(tmp2, tmp3);
-
-
-//   tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpx01), _mm_mul_pd (d2A0_23, tpx23));
-//   tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpx01), _mm_mul_pd (d2A1_23, tpx23));
-//   tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpx01), _mm_mul_pd (d2A2_23, tpx23));
-//   tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpx01), _mm_mul_pd (d2A3_23, tpx23));
-//   d2a01  = _mm_hadd_pd(tmp0, tmp1);
-//   d2a23  = _mm_hadd_pd(tmp2, tmp3);
-
-
   // y-dependent vectors
-//   tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpy01), _mm_mul_pd (A0_23, tpy23));
-//   tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpy01), _mm_mul_pd (A1_23, tpy23));
-//   tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpy01), _mm_mul_pd (A2_23, tpy23));
-//   tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpy01), _mm_mul_pd (A3_23, tpy23));
-//   b01  = _mm_hadd_pd(tmp0, tmp1);
-//   b23  = _mm_hadd_pd(tmp2, tmp3);
-
-//   tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpy01), _mm_mul_pd (dA0_23, tpy23));
-//   tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpy01), _mm_mul_pd (dA1_23, tpy23));
-//   tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpy01), _mm_mul_pd (dA2_23, tpy23));
-//   tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpy01), _mm_mul_pd (dA3_23, tpy23));
-//   db01  = _mm_hadd_pd(tmp0, tmp1);
-//   db23  = _mm_hadd_pd(tmp2, tmp3);
-
-//   tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpy01), _mm_mul_pd (d2A0_23, tpz23));
-//   tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpy01), _mm_mul_pd (d2A1_23, tpz23));
-//   tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpy01), _mm_mul_pd (d2A2_23, tpz23));
-//   tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpy01), _mm_mul_pd (d2A3_23, tpz23));
-//   d2b01  = _mm_hadd_pd(tmp0, tmp1);
-//   d2b23  = _mm_hadd_pd(tmp2, tmp3);
-
   _MM_DDOT4_PD (  A0_01,   A0_23,   A1_01,   A1_23, tpy01, tpy23, tpy01, tpy23,   b01);
   _MM_DDOT4_PD (  A2_01,   A2_23,   A3_01,   A3_23, tpy01, tpy23, tpy01, tpy23,   b23);
   _MM_DDOT4_PD ( dA0_01,  dA0_23,  dA1_01,  dA1_23, tpy01, tpy23, tpy01, tpy23,  db01);
@@ -319,27 +275,6 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
   _MM_DDOT4_PD (d2A0_01, d2A0_23, d2A1_01, d2A1_23, tpz01, tpz23, tpz01, tpz23, d2c01);
   _MM_DDOT4_PD (d2A2_01, d2A2_23, d2A3_01, d2A3_23, tpz01, tpz23, tpz01, tpz23, d2c23);
 
-//   tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpz01), _mm_mul_pd (A0_23, tpz23));
-//   tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpz01), _mm_mul_pd (A1_23, tpz23));
-//   tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpz01), _mm_mul_pd (A2_23, tpz23));
-//   tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpz01), _mm_mul_pd (A3_23, tpz23));
-//   c01  = _mm_hadd_pd(tmp0, tmp1);
-//   c23  = _mm_hadd_pd(tmp2, tmp3);
-
-//   tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpz01), _mm_mul_pd (dA0_23, tpz23));
-//   tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpz01), _mm_mul_pd (dA1_23, tpz23));
-//   tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpz01), _mm_mul_pd (dA2_23, tpz23));
-//   tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpz01), _mm_mul_pd (dA3_23, tpz23));
-//   dc01  = _mm_hadd_pd(tmp0, tmp1);
-//   dc23  = _mm_hadd_pd(tmp2, tmp3);
-
-//   tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpz01), _mm_mul_pd (d2A0_23, tpz23));
-//   tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpz01), _mm_mul_pd (d2A1_23, tpz23));
-//   tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpz01), _mm_mul_pd (d2A2_23, tpz23));
-//   tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpz01), _mm_mul_pd (d2A3_23, tpz23));
-//   d2c01  = _mm_hadd_pd(tmp0, tmp1);
-//   d2c23  = _mm_hadd_pd(tmp2, tmp3);
- 
   // Compute cP, dcP, and d2cP products 1/8 at a time to maximize
   // register reuse and avoid rerereading from memory or cache.
   // 1st eighth
@@ -550,6 +485,73 @@ eval_UBspline_3d_d_vgh (UBspline_3d_d * restrict spline,
 
 
 }
+
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpx01), _mm_mul_pd (A0_23, tpx23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpx01), _mm_mul_pd (A1_23, tpx23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpx01), _mm_mul_pd (A2_23, tpx23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpx01), _mm_mul_pd (A3_23, tpx23));
+//   a01  = _mm_hadd_pd(tmp0, tmp1);
+//   a23  = _mm_hadd_pd(tmp2, tmp3);
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpx01), _mm_mul_pd (dA0_23, tpx23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpx01), _mm_mul_pd (dA1_23, tpx23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpx01), _mm_mul_pd (dA2_23, tpx23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpx01), _mm_mul_pd (dA3_23, tpx23));
+//   da01  = _mm_hadd_pd(tmp0, tmp1);
+//   da23  = _mm_hadd_pd(tmp2, tmp3);
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpx01), _mm_mul_pd (d2A0_23, tpx23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpx01), _mm_mul_pd (d2A1_23, tpx23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpx01), _mm_mul_pd (d2A2_23, tpx23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpx01), _mm_mul_pd (d2A3_23, tpx23));
+//   d2a01  = _mm_hadd_pd(tmp0, tmp1);
+//   d2a23  = _mm_hadd_pd(tmp2, tmp3);
+
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpy01), _mm_mul_pd (A0_23, tpy23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpy01), _mm_mul_pd (A1_23, tpy23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpy01), _mm_mul_pd (A2_23, tpy23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpy01), _mm_mul_pd (A3_23, tpy23));
+//   b01  = _mm_hadd_pd(tmp0, tmp1);
+//   b23  = _mm_hadd_pd(tmp2, tmp3);
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpy01), _mm_mul_pd (dA0_23, tpy23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpy01), _mm_mul_pd (dA1_23, tpy23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpy01), _mm_mul_pd (dA2_23, tpy23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpy01), _mm_mul_pd (dA3_23, tpy23));
+//   db01  = _mm_hadd_pd(tmp0, tmp1);
+//   db23  = _mm_hadd_pd(tmp2, tmp3);
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpy01), _mm_mul_pd (d2A0_23, tpz23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpy01), _mm_mul_pd (d2A1_23, tpz23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpy01), _mm_mul_pd (d2A2_23, tpz23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpy01), _mm_mul_pd (d2A3_23, tpz23));
+//   d2b01  = _mm_hadd_pd(tmp0, tmp1);
+//   d2b23  = _mm_hadd_pd(tmp2, tmp3);
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (A0_01, tpz01), _mm_mul_pd (A0_23, tpz23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (A1_01, tpz01), _mm_mul_pd (A1_23, tpz23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (A2_01, tpz01), _mm_mul_pd (A2_23, tpz23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (A3_01, tpz01), _mm_mul_pd (A3_23, tpz23));
+//   c01  = _mm_hadd_pd(tmp0, tmp1);
+//   c23  = _mm_hadd_pd(tmp2, tmp3);
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (dA0_01, tpz01), _mm_mul_pd (dA0_23, tpz23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (dA1_01, tpz01), _mm_mul_pd (dA1_23, tpz23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (dA2_01, tpz01), _mm_mul_pd (dA2_23, tpz23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (dA3_01, tpz01), _mm_mul_pd (dA3_23, tpz23));
+//   dc01  = _mm_hadd_pd(tmp0, tmp1);
+//   dc23  = _mm_hadd_pd(tmp2, tmp3);
+
+//   tmp0 = _mm_hadd_pd(_mm_mul_pd (d2A0_01, tpz01), _mm_mul_pd (d2A0_23, tpz23));
+//   tmp1 = _mm_hadd_pd(_mm_mul_pd (d2A1_01, tpz01), _mm_mul_pd (d2A1_23, tpz23));
+//   tmp2 = _mm_hadd_pd(_mm_mul_pd (d2A2_01, tpz01), _mm_mul_pd (d2A2_23, tpz23));
+//   tmp3 = _mm_hadd_pd(_mm_mul_pd (d2A3_01, tpz01), _mm_mul_pd (d2A3_23, tpz23));
+//   d2c01  = _mm_hadd_pd(tmp0, tmp1);
+//   d2c23  = _mm_hadd_pd(tmp2, tmp3);
+ 
+ 
 
 
 #endif
