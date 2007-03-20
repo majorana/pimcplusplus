@@ -120,7 +120,17 @@ eval_UBspline_3d_d_vgl (UBspline_3d_d * restrict spline,
 
 }
 
-
+#define _MM_DOT4_PD (a0,a1,a2,a3,b1,b2,b3,b4,r)                      \
+do {                                                                 \ 
+  __m128d t0 = _mm_add_pd(_mm_mul_pd (a0, b0),_mm_mul_pd (a1, b1));  \
+  __m128d t1 = _mm_add_pd(_mm_mul_pd (a2, b2),_mm_mul_pd (a3, b3));  \
+  t0 = _mm_add_pd(t1,t0);                                            \
+  __m128d t2 = _mm_unpack_hi_pd (t0, t1);                            \
+  __m128d t3 = _mm_unpack_lo_pd (t0, t1);                            \
+  t0 = _mm_add_pd (t2, t3);                                          \
+  mm_store_sd (&r, t0);                                              \
+}                                                                    \
+while(0);
 
 
 /* Value, gradient, and Hessian */
