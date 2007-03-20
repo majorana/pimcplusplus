@@ -5,16 +5,10 @@
 
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
-////     Single-Precision, Real Creation Routines       ////
+////       Helper functions for spline creation         ////
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-// On input, bands should be filled with:
-// row 0   :  abcdInitial from boundary conditions
-// rows 1:M:  basis functions in first 3 cols, data in last
-// row M+1 :  abcdFinal   from boundary conditions
-// cstride gives the stride between values in coefs.
-// On exit, coefs with contain interpolating B-spline coefs
 void 
 solve_deriv_interp_1d_s (float bands[][4], float coefs[],
 			 int M, int cstride)
@@ -183,8 +177,19 @@ find_coefs_1d_s (Ugrid grid, BCtype_s bc,
   }
 }
 
-	       
 
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////     Single-Precision, Real Creation Routines       ////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+// On input, bands should be filled with:
+// row 0   :  abcdInitial from boundary conditions
+// rows 1:M:  basis functions in first 3 cols, data in last
+// row M+1 :  abcdFinal   from boundary conditions
+// cstride gives the stride between values in coefs.
+// On exit, coefs with contain interpolating B-spline coefs
 UBspline_1d_s*
 create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data)
 {
@@ -205,7 +210,6 @@ create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data)
 
   x_grid.delta_inv = 1.0/x_grid.delta;
   spline->x_grid   = x_grid;
-  //  spline->coefs = malloc (sizeof(float)*N);
   //  spline->coefs = malloc (sizeof(float)*N);
   posix_memalign ((void**)&spline->coefs, 16, (sizeof(float)*N));
   find_coefs_1d_s (spline->x_grid, xBC, data, 1, spline->coefs, 1);
@@ -238,8 +242,8 @@ create_UBspline_2d_s (Ugrid x_grid, Ugrid y_grid,
   spline->y_grid   = y_grid;
   spline->x_stride = Ny;
 
+  // spline->coefs = malloc (sizeof(float)*Nx*Ny);
   posix_memalign ((void**)&spline->coefs, 16, sizeof(float)*Nx*Ny);
-  spline->coefs = malloc (sizeof(float)*Nx*Ny);
 
   // First, solve in the X-direction 
   for (int iy=0; iy<My; iy++) {
@@ -292,7 +296,8 @@ create_UBspline_3d_s (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
   spline->x_stride = Ny*Nz;
   spline->y_stride = Nz;
 
-  spline->coefs      = malloc (sizeof(float)*Nx*Ny*Nz);
+  // spline->coefs      = malloc (sizeof(float)*Nx*Ny*Nz);
+  posix_memalign ((void**)&spline->coefs, 16, (sizeof(float)*Nx*Ny*Nz));
   spline->coefs_size = Nx*Ny*Nz;
 
   // First, solve in the X-direction 
@@ -323,6 +328,208 @@ create_UBspline_3d_s (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
     }
   return spline;
 }
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////    Single-Precision, Complex Creation Routines     ////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+// On input, bands should be filled with:
+// row 0   :  abcdInitial from boundary conditions
+// rows 1:M:  basis functions in first 3 cols, data in last
+// row M+1 :  abcdFinal   from boundary conditions
+// cstride gives the stride between values in coefs.
+// On exit, coefs with contain interpolating B-spline coefs
+UBspline_1d_c*
+create_UBspline_1d_c (Ugrid x_grid, BCtype_c xBC, float *data)
+{
+  // Create new spline
+  UBspline_1d_c* restrict spline = malloc (sizeof(UBspline_1d_c));
+  // Setup internal variables
+  int M = x_grid.num;
+  int N;
+
+  if (xBC.lCode == PERIODIC) {
+    x_grid.delta     = (x_grid.end-x_grid.start)/(double)(x_grid.num);
+    N = M+3;
+  }
+  else {
+    x_grid.delta     = (x_grid.end-x_grid.start)/(double)(x_grid.num-1);
+    N = M+2;
+  }
+
+  x_grid.delta_inv = 1.0/x_grid.delta;
+  spline->x_grid   = x_grid;
+  //  spline->coefs = malloc (sizeof(float)*N);
+  posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(float)*N);
+  BCtype_s xBC_r, xBC_i;
+  xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
+  xBC_r.lVal  = xBC.lVal_r; xBC_r.rVal  = xBC.rVal_r;
+  xBC_i.lCode = xBC.lCode;  xBC_i.rCode = xBC.rCode;
+  xBC_i.lVal  = xBC.lVal_i; xBC_i.rVal  = xBC.rVal_i;
+  // Real part
+  find_coefs_1d_s (spline->x_grid, xBC_r, data, 2, spline->coefs, 2);
+  // Imaginarty part
+  find_coefs_1d_s (spline->x_grid, xBC_i, data+1, 2, spline->coefs+1, 2);
+    
+  return spline;
+}
+
+
+UBspline_2d_c*
+create_UBspline_2d_c (Ugrid x_grid, Ugrid y_grid,
+		      BCtype_c xBC, BCtype_c yBC, float *data)
+{
+  // Create new spline
+  UBspline_2d_c* restrict spline = malloc (sizeof(UBspline_2d_c));
+  // Setup internal variables
+  int Mx = x_grid.num;
+  int My = y_grid.num;
+  int Nx, Ny;
+
+  if (xBC.lCode == PERIODIC)     Nx = Mx+3;
+  else                           Nx = Mx+2;
+  x_grid.delta = (x_grid.end - x_grid.start)/(double)(Nx-3);
+  x_grid.delta_inv = 1.0/x_grid.delta;
+  spline->x_grid   = x_grid;
+
+  if (yBC.lCode == PERIODIC)     Ny = My+3;
+  else                           Ny = My+2;
+  y_grid.delta = (y_grid.end - y_grid.start)/(double)(Ny-3);
+  y_grid.delta_inv = 1.0/y_grid.delta;
+  spline->y_grid   = y_grid;
+  spline->x_stride = Ny;
+
+  // spline->coefs = malloc (2*sizeof(float)*Nx*Ny);
+  posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(float)*Nx*Ny);
+
+  BCtype_s xBC_r, xBC_i, yBC_r, yBC_i;
+  xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
+  xBC_r.lVal  = xBC.lVal_r; xBC_r.rVal  = xBC.rVal_r;
+  xBC_i.lCode = xBC.lCode;  xBC_i.rCode = xBC.rCode;
+  xBC_i.lVal  = xBC.lVal_i; xBC_i.rVal  = xBC.rVal_i;
+  yBC_r.lCode = yBC.lCode;  yBC_r.rCode = yBC.rCode;
+  yBC_r.lVal  = yBC.lVal_r; yBC_r.rVal  = yBC.rVal_r;
+  yBC_i.lCode = yBC.lCode;  yBC_i.rCode = yBC.rCode;
+  yBC_i.lVal  = yBC.lVal_i; yBC_i.rVal  = yBC.rVal_i;
+  // First, solve in the X-direction 
+  for (int iy=0; iy<My; iy++) {
+    int doffset = 2*iy;
+    int coffset = 2*iy;
+    // Real part
+    find_coefs_1d_s (spline->x_grid, xBC_r, data+doffset, 2*My,
+		     spline->coefs+coffset, 2*Ny);
+    // Imag part
+    find_coefs_1d_s (spline->x_grid, xBC_i, data+doffset+1, 2*My,
+		     spline->coefs+coffset+1, 2*Ny);
+  }
+  
+  // Now, solve in the Y-direction
+  for (int ix=0; ix<Nx; ix++) {
+    int doffset = 2*ix*Ny;
+    int coffset = 2*ix*Ny;
+    // Real part
+    find_coefs_1d_s (spline->y_grid, yBC_r, spline->coefs+doffset, 2, 
+		     spline->coefs+coffset, 2);
+    // Imag part
+    find_coefs_1d_s (spline->y_grid, yBC_i, spline->coefs+doffset+1, 2, 
+		     spline->coefs+coffset+1, 2);
+  }
+  return spline;
+}
+
+
+UBspline_3d_c*
+create_UBspline_3d_c (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
+		      BCtype_c xBC, BCtype_c yBC, BCtype_c zBC,
+		      float *data)
+{
+  // Create new spline
+  UBspline_3d_c* restrict spline = malloc (sizeof(UBspline_3d_c));
+  // Setup internal variables
+  int Mx = x_grid.num;  int My = y_grid.num; int Mz = z_grid.num;
+  int Nx, Ny, Nz;
+
+  if (xBC.lCode == PERIODIC)     Nx = Mx+3;
+  else                           Nx = Mx+2;
+  x_grid.delta = (x_grid.end - x_grid.start)/(double)(Nx-3);
+  x_grid.delta_inv = 1.0/x_grid.delta;
+  spline->x_grid   = x_grid;
+
+  if (yBC.lCode == PERIODIC)     Ny = My+3;
+  else                           Ny = My+2;
+  y_grid.delta = (y_grid.end - y_grid.start)/(double)(Ny-3);
+  y_grid.delta_inv = 1.0/y_grid.delta;
+  spline->y_grid   = y_grid;
+
+  if (zBC.lCode == PERIODIC)     Nz = Mz+3;
+  else                           Nz = Mz+2;
+  z_grid.delta = (z_grid.end - z_grid.start)/(double)(Nz-3);
+  z_grid.delta_inv = 1.0/z_grid.delta;
+  spline->z_grid   = z_grid;
+
+  spline->x_stride = Ny*Nz;
+  spline->y_stride = Nz;
+
+  // spline->coefs      = malloc (2*sizeof(float)*Nx*Ny*Nz);
+  posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(float)*Nx*Ny*Nz);
+  spline->coefs_size = Nx*Ny*Nz;
+
+  BCtype_s xBC_r, xBC_i, yBC_r, yBC_i, zBC_r, zBC_i;
+  xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
+  xBC_r.lVal  = xBC.lVal_r; xBC_r.rVal  = xBC.rVal_r;
+  xBC_i.lCode = xBC.lCode;  xBC_i.rCode = xBC.rCode;
+  xBC_i.lVal  = xBC.lVal_i; xBC_i.rVal  = xBC.rVal_i;
+  yBC_r.lCode = yBC.lCode;  yBC_r.rCode = yBC.rCode;
+  yBC_r.lVal  = yBC.lVal_r; yBC_r.rVal  = yBC.rVal_r;
+  yBC_i.lCode = yBC.lCode;  yBC_i.rCode = yBC.rCode;
+  yBC_i.lVal  = yBC.lVal_i; yBC_i.rVal  = yBC.rVal_i;
+  zBC_r.lCode = zBC.lCode;  zBC_r.rCode = zBC.rCode;
+  zBC_r.lVal  = zBC.lVal_r; zBC_r.rVal  = zBC.rVal_r;
+  zBC_i.lCode = zBC.lCode;  zBC_i.rCode = zBC.rCode;
+  zBC_i.lVal  = zBC.lVal_i; zBC_i.rVal  = zBC.rVal_i;
+  // First, solve in the X-direction 
+  for (int iy=0; iy<My; iy++) 
+    for (int iz=0; iz<Mz; iz++) {
+      int doffset = 2*(iy*Mz+iz);
+      int coffset = 2*(iy*Nz+iz);
+      // Real part
+      find_coefs_1d_s (spline->x_grid, xBC_r, data+doffset, 2*My*Mz,
+		       spline->coefs+coffset, 2*Ny*Nz);
+      // Imag part
+      find_coefs_1d_s (spline->x_grid, xBC_i, data+doffset+1, 2*My*Mz,
+		       spline->coefs+coffset+1, 2*Ny*Nz);
+    }
+  
+  // Now, solve in the Y-direction
+  for (int ix=0; ix<Nx; ix++) 
+    for (int iz=0; iz<Nz; iz++) {
+      int doffset = 2*(ix*Ny*Nz + iz);
+      int coffset = 2*(ix*Ny*Nz + iz);
+      // Real part
+      find_coefs_1d_s (spline->y_grid, yBC_r, spline->coefs+doffset, 2*Nz, 
+		       spline->coefs+coffset, 2*Nz);
+      // Imag part
+      find_coefs_1d_s (spline->y_grid, yBC_i, spline->coefs+doffset+1, 2*Nz, 
+		       spline->coefs+coffset+1, 2*Nz);
+    }
+
+  // Now, solve in the Z-direction
+  for (int ix=0; ix<Nx; ix++) 
+    for (int iy=0; iy<Ny; iy++) {
+      int doffset = 2*((ix*Ny+iy)*Nz);
+      int coffset = 2*((ix*Ny+iy)*Nz);
+      // Real part
+      find_coefs_1d_s (spline->z_grid, zBC_r, spline->coefs+doffset+1, 2, 
+		       spline->coefs+coffset, 2);
+      // Imag part
+      find_coefs_1d_s (spline->z_grid, zBC_i, spline->coefs+doffset+1, 2, 
+		       spline->coefs+coffset, 2);
+    }
+  return spline;
+}
+
 
 
 ////////////////////////////////////////////////////////////
@@ -528,12 +735,13 @@ create_UBspline_1d_d (Ugrid x_grid, BCtype_d xBC, double *data)
   x_grid.delta_inv = 1.0/x_grid.delta;
   spline->x_grid   = x_grid;
   //  spline->coefs = malloc (sizeof(double)*N);
-  //  spline->coefs = malloc (sizeof(double)*N);
   posix_memalign ((void**)&spline->coefs, 16, sizeof(double)*N);
   find_coefs_1d_d (spline->x_grid, xBC, data, 1, spline->coefs, 1);
     
   return spline;
 }
+
+
 
 
 UBspline_2d_d*
@@ -560,7 +768,8 @@ create_UBspline_2d_d (Ugrid x_grid, Ugrid y_grid,
   spline->y_grid   = y_grid;
   spline->x_stride = Ny;
 
-  spline->coefs = malloc (sizeof(double)*Nx*Ny);
+  // spline->coefs = malloc (sizeof(double)*Nx*Ny);
+  posix_memalign ((void**)&spline->coefs, 16, (sizeof(double)*Nx*Ny));
 
   // First, solve in the X-direction 
   for (int iy=0; iy<My; iy++) {
@@ -579,6 +788,8 @@ create_UBspline_2d_d (Ugrid x_grid, Ugrid y_grid,
   }
   return spline;
 }
+
+
 
 
 UBspline_3d_d*
@@ -613,7 +824,8 @@ create_UBspline_3d_d (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
   spline->x_stride = Ny*Nz;
   spline->y_stride = Nz;
 
-  spline->coefs      = malloc (sizeof(double)*Nx*Ny*Nz);
+  //spline->coefs      = malloc (sizeof(double)*Nx*Ny*Nz);
+  posix_memalign ((void**)&spline->coefs, 16, (sizeof(double)*Nx*Ny*Nz));
   spline->coefs_size = Nx*Ny*Nz;
 
   // First, solve in the X-direction 
@@ -641,6 +853,212 @@ create_UBspline_3d_d (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
       int coffset = (ix*Ny+iy)*Nz;
       find_coefs_1d_d (spline->z_grid, zBC, spline->coefs+doffset, 1, 
 		       spline->coefs+coffset, 1);
+    }
+  return spline;
+}
+
+
+
+
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////    Double-Precision, Complex Creation Routines     ////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
+// On input, bands should be filled with:
+// row 0   :  abcdInitial from boundary conditions
+// rows 1:M:  basis functions in first 3 cols, data in last
+// row M+1 :  abcdFinal   from boundary conditions
+// cstride gives the stride between values in coefs.
+// On exit, coefs with contain interpolating B-spline coefs
+
+
+UBspline_1d_z*
+create_UBspline_1d_z (Ugrid x_grid, BCtype_z xBC, double *data)
+{
+  // Create new spline
+  UBspline_1d_z* restrict spline = malloc (sizeof(UBspline_1d_z));
+  // Setup internal variables
+  int M = x_grid.num;
+  int N;
+
+  if (xBC.lCode == PERIODIC) {
+    x_grid.delta     = (x_grid.end-x_grid.start)/(double)(x_grid.num);
+    N = M+3;
+  }
+  else {
+    x_grid.delta     = (x_grid.end-x_grid.start)/(double)(x_grid.num-1);
+    N = M+2;
+  }
+
+  x_grid.delta_inv = 1.0/x_grid.delta;
+  spline->x_grid   = x_grid;
+  //  spline->coefs = malloc (sizeof(double)*N);
+  posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(double)*N);
+  BCtype_d xBC_r, xBC_i;
+  xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
+  xBC_r.lVal  = xBC.lVal_r; xBC_r.rVal  = xBC.rVal_r;
+  xBC_i.lCode = xBC.lCode;  xBC_i.rCode = xBC.rCode;
+  xBC_i.lVal  = xBC.lVal_i; xBC_i.rVal  = xBC.rVal_i;
+  // Real part
+  find_coefs_1d_d (spline->x_grid, xBC_r, data, 2, spline->coefs, 2);
+  // Imaginarty part
+  find_coefs_1d_d (spline->x_grid, xBC_i, data+1, 2, spline->coefs+1, 2);
+    
+  return spline;
+}
+
+
+UBspline_2d_z*
+create_UBspline_2d_z (Ugrid x_grid, Ugrid y_grid,
+		      BCtype_z xBC, BCtype_z yBC, double *data)
+{
+  // Create new spline
+  UBspline_2d_z* restrict spline = malloc (sizeof(UBspline_2d_z));
+  // Setup internal variables
+  int Mx = x_grid.num;
+  int My = y_grid.num;
+  int Nx, Ny;
+
+  if (xBC.lCode == PERIODIC)     Nx = Mx+3;
+  else                           Nx = Mx+2;
+  x_grid.delta = (x_grid.end - x_grid.start)/(double)(Nx-3);
+  x_grid.delta_inv = 1.0/x_grid.delta;
+  spline->x_grid   = x_grid;
+
+  if (yBC.lCode == PERIODIC)     Ny = My+3;
+  else                           Ny = My+2;
+  y_grid.delta = (y_grid.end - y_grid.start)/(double)(Ny-3);
+  y_grid.delta_inv = 1.0/y_grid.delta;
+  spline->y_grid   = y_grid;
+  spline->x_stride = Ny;
+
+  // spline->coefs = malloc (2*sizeof(double)*Nx*Ny);
+  posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(double)*Nx*Ny);
+
+  BCtype_d xBC_r, xBC_i, yBC_r, yBC_i;
+  xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
+  xBC_r.lVal  = xBC.lVal_r; xBC_r.rVal  = xBC.rVal_r;
+  xBC_i.lCode = xBC.lCode;  xBC_i.rCode = xBC.rCode;
+  xBC_i.lVal  = xBC.lVal_i; xBC_i.rVal  = xBC.rVal_i;
+  yBC_r.lCode = yBC.lCode;  yBC_r.rCode = yBC.rCode;
+  yBC_r.lVal  = yBC.lVal_r; yBC_r.rVal  = yBC.rVal_r;
+  yBC_i.lCode = yBC.lCode;  yBC_i.rCode = yBC.rCode;
+  yBC_i.lVal  = yBC.lVal_i; yBC_i.rVal  = yBC.rVal_i;
+  // First, solve in the X-direction 
+  for (int iy=0; iy<My; iy++) {
+    int doffset = 2*iy;
+    int coffset = 2*iy;
+    // Real part
+    find_coefs_1d_d (spline->x_grid, xBC_r, data+doffset, 2*My,
+		     spline->coefs+coffset, 2*Ny);
+    // Imag part
+    find_coefs_1d_d (spline->x_grid, xBC_i, data+doffset+1, 2*My,
+		     spline->coefs+coffset+1, 2*Ny);
+  }
+  
+  // Now, solve in the Y-direction
+  for (int ix=0; ix<Nx; ix++) {
+    int doffset = 2*ix*Ny;
+    int coffset = 2*ix*Ny;
+    // Real part
+    find_coefs_1d_d (spline->y_grid, yBC_r, spline->coefs+doffset, 2, 
+		     spline->coefs+coffset, 2);
+    // Imag part
+    find_coefs_1d_d (spline->y_grid, yBC_i, spline->coefs+doffset+1, 2, 
+		     spline->coefs+coffset+1, 2);
+  }
+  return spline;
+}
+
+
+UBspline_3d_z*
+create_UBspline_3d_z (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
+		      BCtype_z xBC, BCtype_z yBC, BCtype_z zBC,
+		      double *data)
+{
+  // Create new spline
+  UBspline_3d_z* restrict spline = malloc (sizeof(UBspline_3d_z));
+  // Setup internal variables
+  int Mx = x_grid.num;  int My = y_grid.num; int Mz = z_grid.num;
+  int Nx, Ny, Nz;
+
+  if (xBC.lCode == PERIODIC)     Nx = Mx+3;
+  else                           Nx = Mx+2;
+  x_grid.delta = (x_grid.end - x_grid.start)/(double)(Nx-3);
+  x_grid.delta_inv = 1.0/x_grid.delta;
+  spline->x_grid   = x_grid;
+
+  if (yBC.lCode == PERIODIC)     Ny = My+3;
+  else                           Ny = My+2;
+  y_grid.delta = (y_grid.end - y_grid.start)/(double)(Ny-3);
+  y_grid.delta_inv = 1.0/y_grid.delta;
+  spline->y_grid   = y_grid;
+
+  if (zBC.lCode == PERIODIC)     Nz = Mz+3;
+  else                           Nz = Mz+2;
+  z_grid.delta = (z_grid.end - z_grid.start)/(double)(Nz-3);
+  z_grid.delta_inv = 1.0/z_grid.delta;
+  spline->z_grid   = z_grid;
+
+  spline->x_stride = Ny*Nz;
+  spline->y_stride = Nz;
+
+  // spline->coefs      = malloc (2*sizeof(double)*Nx*Ny*Nz);
+  posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(double)*Nx*Ny*Nz);
+  spline->coefs_size = Nx*Ny*Nz;
+
+  BCtype_d xBC_r, xBC_i, yBC_r, yBC_i, zBC_r, zBC_i;
+  xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
+  xBC_r.lVal  = xBC.lVal_r; xBC_r.rVal  = xBC.rVal_r;
+  xBC_i.lCode = xBC.lCode;  xBC_i.rCode = xBC.rCode;
+  xBC_i.lVal  = xBC.lVal_i; xBC_i.rVal  = xBC.rVal_i;
+  yBC_r.lCode = yBC.lCode;  yBC_r.rCode = yBC.rCode;
+  yBC_r.lVal  = yBC.lVal_r; yBC_r.rVal  = yBC.rVal_r;
+  yBC_i.lCode = yBC.lCode;  yBC_i.rCode = yBC.rCode;
+  yBC_i.lVal  = yBC.lVal_i; yBC_i.rVal  = yBC.rVal_i;
+  zBC_r.lCode = zBC.lCode;  zBC_r.rCode = zBC.rCode;
+  zBC_r.lVal  = zBC.lVal_r; zBC_r.rVal  = zBC.rVal_r;
+  zBC_i.lCode = zBC.lCode;  zBC_i.rCode = zBC.rCode;
+  zBC_i.lVal  = zBC.lVal_i; zBC_i.rVal  = zBC.rVal_i;
+  // First, solve in the X-direction 
+  for (int iy=0; iy<My; iy++) 
+    for (int iz=0; iz<Mz; iz++) {
+      int doffset = 2*(iy*Mz+iz);
+      int coffset = 2*(iy*Nz+iz);
+      // Real part
+      find_coefs_1d_d (spline->x_grid, xBC_r, data+doffset, 2*My*Mz,
+		       spline->coefs+coffset, 2*Ny*Nz);
+      // Imag part
+      find_coefs_1d_d (spline->x_grid, xBC_i, data+doffset+1, 2*My*Mz,
+		       spline->coefs+coffset+1, 2*Ny*Nz);
+    }
+  
+  // Now, solve in the Y-direction
+  for (int ix=0; ix<Nx; ix++) 
+    for (int iz=0; iz<Nz; iz++) {
+      int doffset = 2*(ix*Ny*Nz + iz);
+      int coffset = 2*(ix*Ny*Nz + iz);
+      // Real part
+      find_coefs_1d_d (spline->y_grid, yBC_r, spline->coefs+doffset, 2*Nz, 
+		       spline->coefs+coffset, 2*Nz);
+      // Imag part
+      find_coefs_1d_d (spline->y_grid, yBC_i, spline->coefs+doffset+1, 2*Nz, 
+		       spline->coefs+coffset+1, 2*Nz);
+    }
+
+  // Now, solve in the Z-direction
+  for (int ix=0; ix<Nx; ix++) 
+    for (int iy=0; iy<Ny; iy++) {
+      int doffset = 2*((ix*Ny+iy)*Nz);
+      int coffset = 2*((ix*Ny+iy)*Nz);
+      // Real part
+      find_coefs_1d_d (spline->z_grid, zBC_r, spline->coefs+doffset+1, 2, 
+		       spline->coefs+coffset, 2);
+      // Imag part
+      find_coefs_1d_d (spline->z_grid, zBC_i, spline->coefs+doffset+1, 2, 
+		       spline->coefs+coffset, 2);
     }
   return spline;
 }

@@ -81,19 +81,19 @@ create_UBspline_3d_c (Ugrid  x_grid, Ugrid y_grid, Ugrid z_grid,
 ///////////////////////////////////////
 // Create 1D uniform double-precision, complex Bspline
 UBspline_1d_z *
-create_UBspline_1d_z (Ugrid x_grid, BCtype_z xBC, float *data);
+create_UBspline_1d_z (Ugrid x_grid, BCtype_z xBC, double *data);
 
 // Create 2D uniform double-precision, complex Bspline
 UBspline_2d_z *
 create_UBspline_2d_z (Ugrid x_grid, Ugrid y_grid,
 		      BCtype_z   xBC, BCtype_z   yBC,
-		      float *data);
+		      double *data);
 
 // Create 3D uniform double-precision, complex Bspline
 UBspline_3d_z *
 create_UBspline_3d_z (Ugrid  x_grid, Ugrid   y_grid, Ugrid z_grid,
 		      BCtype_z  xBC, BCtype_z   yBC, BCtype_z zBC,
-		      float *data);
+		      double *data);
 
 
 #endif
