@@ -8,6 +8,60 @@
 ////       Helper functions for spline creation         ////
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
+#ifdef __SSE2__
+#include <xmmintrin.h>
+
+// Single-precision version of matrices
+extern __m128  A0, A1, A2, A3, dA0, dA1, dA2, dA3, d2A0, d2A1, d2A2, d2A3;
+extern __m128d A0_01, A0_23, A1_01, A1_23, A2_01, A2_23, A3_01, A3_23,
+  dA0_01, dA0_23, dA1_01, dA1_23, dA2_01, dA2_23, dA3_01, dA3_23,
+  d2A0_01, d2A0_23, d2A1_01, d2A1_23, d2A2_01, d2A2_23, d2A3_01, d2A3_23;
+#endif
+
+
+void init_sse_data()
+{
+#ifdef __SSE__
+  A0   = _mm_setr_ps ( 1.0/6.0, -3.0/6.0,  3.0/6.0, -1.0/6.0 );
+  A1   = _mm_setr_ps ( 4.0/6.0,  0.0/6.0, -6.0/6.0,  3.0/6.0 );
+  A2   = _mm_setr_ps ( 1.0/6.0,  3.0/6.0,  3.0/6.0, -3.0/6.0 );
+  A3   = _mm_setr_ps ( 0.0/6.0,  0.0/6.0,  0.0/6.0,  1.0/6.0 );
+  dA0  = _mm_setr_ps ( -0.5,  1.0, -0.5, 0.0  );
+  dA1  = _mm_setr_ps (  0.0, -2.0,  1.5, 0.0  );
+  dA2  = _mm_setr_ps (  0.5,  1.0, -1.5, 0.0  );
+  dA3  = _mm_setr_ps (  0.0,  0.0,  0.5, 0.0  );
+  d2A0 = _mm_setr_ps (  1.0, -1.0,  0.0, 0.0  );
+  d2A1 = _mm_setr_ps ( -2.0,  3.0,  0.0, 0.0  );
+  d2A2 = _mm_setr_ps (  1.0, -3.0,  0.0, 0.0  );
+  d2A3 = _mm_setr_ps (  0.0,  1.0,  0.0, 0.0  );
+#endif
+#ifdef __SSE2__
+  A0_01   = _mm_setr_pd (  3.0/6.0, -1.0/6.0 );
+  A0_23   = _mm_setr_pd (  1.0/6.0, -3.0/6.0 );
+  A1_01   = _mm_setr_pd ( -6.0/6.0,  3.0/6.0 );
+  A1_23   = _mm_setr_pd (  4.0/6.0,  0.0/6.0 );
+  A2_01   = _mm_setr_pd (  3.0/6.0, -3.0/6.0 );
+  A2_23   = _mm_setr_pd (  1.0/6.0,  3.0/6.0 );
+  A3_01   = _mm_setr_pd (  0.0/6.0,  1.0/6.0 );
+  A3_23   = _mm_setr_pd (  0.0/6.0,  0.0/6.0 );
+  dA0_01  = _mm_setr_pd ( -0.5,  0.0 );
+  dA0_23  = _mm_setr_pd ( -0.5,  1.0 );
+  dA1_01  = _mm_setr_pd (  1.5,  0.0 );
+  dA1_23  = _mm_setr_pd (  0.0, -2.0 );
+  dA2_01  = _mm_setr_pd ( -1.5,  0.0 );
+  dA2_23  = _mm_setr_pd (  0.5,  1.0 );
+  dA3_01  = _mm_setr_pd (  0.5,  0.0 );
+  dA3_23  = _mm_setr_pd (  0.0,  0.0 );
+  d2A0_01 = _mm_setr_pd (  0.0,  0.0 );
+  d2A0_23 = _mm_setr_pd (  1.0, -1.0 );
+  d2A1_01 = _mm_setr_pd (  0.0,  0.0 );
+  d2A1_23 = _mm_setr_pd ( -2.0,  3.0 );
+  d2A2_01 = _mm_setr_pd (  0.0,  0.0 );
+  d2A2_23 = _mm_setr_pd (  1.0, -3.0 );
+  d2A3_01 = _mm_setr_pd (  0.0,  0.0 );
+  d2A3_23 = _mm_setr_pd (  0.0,  1.0 );
+#endif
+}
 
 void 
 solve_deriv_interp_1d_s (float bands[][4], float coefs[],
@@ -216,7 +270,8 @@ create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data)
   posix_memalign ((void**)&spline->coefs, 16, (sizeof(float)*N));
 #endif
   find_coefs_1d_s (spline->x_grid, xBC, data, 1, spline->coefs, 1);
-    
+
+  init_sse_data();    
   return spline;
 }
 
@@ -265,6 +320,7 @@ create_UBspline_2d_s (Ugrid x_grid, Ugrid y_grid,
     find_coefs_1d_s (spline->y_grid, yBC, spline->coefs+doffset, 1, 
 		     spline->coefs+coffset, 1);
   }
+  init_sse_data();
   return spline;
 }
 
@@ -334,6 +390,7 @@ create_UBspline_3d_s (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
       find_coefs_1d_s (spline->z_grid, zBC, spline->coefs+doffset, 1, 
 		       spline->coefs+coffset, 1);
     }
+  init_sse_data();
   return spline;
 }
 
@@ -384,7 +441,8 @@ create_UBspline_1d_c (Ugrid x_grid, BCtype_c xBC, float *data)
   find_coefs_1d_s (spline->x_grid, xBC_r, data, 2, spline->coefs, 2);
   // Imaginarty part
   find_coefs_1d_s (spline->x_grid, xBC_i, data+1, 2, spline->coefs+1, 2);
-    
+
+  init_sse_data();    
   return spline;
 }
 
@@ -451,6 +509,7 @@ create_UBspline_2d_c (Ugrid x_grid, Ugrid y_grid,
     find_coefs_1d_s (spline->y_grid, yBC_i, spline->coefs+doffset+1, 2, 
 		     spline->coefs+coffset+1, 2);
   }
+  init_sse_data();
   return spline;
 }
 
@@ -544,6 +603,8 @@ create_UBspline_3d_c (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
       find_coefs_1d_s (spline->z_grid, zBC_i, spline->coefs+doffset+1, 2, 
 		       spline->coefs+coffset, 2);
     }
+
+  init_sse_data();
   return spline;
 }
 
@@ -759,6 +820,7 @@ create_UBspline_1d_d (Ugrid x_grid, BCtype_d xBC, double *data)
 #endif
   find_coefs_1d_d (spline->x_grid, xBC, data, 1, spline->coefs, 1);
     
+  init_sse_data();
   return spline;
 }
 
@@ -810,6 +872,8 @@ create_UBspline_2d_d (Ugrid x_grid, Ugrid y_grid,
     find_coefs_1d_d (spline->y_grid, yBC, spline->coefs+doffset, 1, 
 		     spline->coefs+coffset, 1);
   }
+
+  init_sse_data();
   return spline;
 }
 
@@ -880,6 +944,8 @@ create_UBspline_3d_d (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
       find_coefs_1d_d (spline->z_grid, zBC, spline->coefs+doffset, 1, 
 		       spline->coefs+coffset, 1);
     }
+
+  init_sse_data();
   return spline;
 }
 
@@ -935,7 +1001,8 @@ create_UBspline_1d_z (Ugrid x_grid, BCtype_z xBC, double *data)
   find_coefs_1d_d (spline->x_grid, xBC_r, data, 2, spline->coefs, 2);
   // Imaginarty part
   find_coefs_1d_d (spline->x_grid, xBC_i, data+1, 2, spline->coefs+1, 2);
-    
+ 
+  init_sse_data();   
   return spline;
 }
 
@@ -1002,6 +1069,8 @@ create_UBspline_2d_z (Ugrid x_grid, Ugrid y_grid,
     find_coefs_1d_d (spline->y_grid, yBC_i, spline->coefs+doffset+1, 2, 
 		     spline->coefs+coffset+1, 2);
   }
+
+  init_sse_data();
   return spline;
 }
 
@@ -1095,5 +1164,6 @@ create_UBspline_3d_z (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
       find_coefs_1d_d (spline->z_grid, zBC_i, spline->coefs+doffset+1, 2, 
 		       spline->coefs+coffset, 2);
     }
+  init_sse_data();
   return spline;
 }
