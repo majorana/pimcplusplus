@@ -210,8 +210,11 @@ create_UBspline_1d_s (Ugrid x_grid, BCtype_s xBC, float *data)
 
   x_grid.delta_inv = 1.0/x_grid.delta;
   spline->x_grid   = x_grid;
-  //  spline->coefs = malloc (sizeof(float)*N);
+#ifndef __SSE2__
+  spline->coefs = malloc (sizeof(float)*N);
+#else
   posix_memalign ((void**)&spline->coefs, 16, (sizeof(float)*N));
+#endif
   find_coefs_1d_s (spline->x_grid, xBC, data, 1, spline->coefs, 1);
     
   return spline;
@@ -241,9 +244,11 @@ create_UBspline_2d_s (Ugrid x_grid, Ugrid y_grid,
   y_grid.delta_inv = 1.0/y_grid.delta;
   spline->y_grid   = y_grid;
   spline->x_stride = Ny;
-
-  // spline->coefs = malloc (sizeof(float)*Nx*Ny);
+#ifndef __SSE2__
+  spline->coefs = malloc (sizeof(float)*Nx*Ny);
+#else
   posix_memalign ((void**)&spline->coefs, 16, sizeof(float)*Nx*Ny);
+#endif
 
   // First, solve in the X-direction 
   for (int iy=0; iy<My; iy++) {
@@ -296,8 +301,11 @@ create_UBspline_3d_s (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
   spline->x_stride = Ny*Nz;
   spline->y_stride = Nz;
 
-  // spline->coefs      = malloc (sizeof(float)*Nx*Ny*Nz);
+#ifndef __SSE2__
+  spline->coefs      = malloc (sizeof(float)*Nx*Ny*Nz);
+#else
   posix_memalign ((void**)&spline->coefs, 16, (sizeof(float)*Nx*Ny*Nz));
+#endif
   spline->coefs_size = Nx*Ny*Nz;
 
   // First, solve in the X-direction 
@@ -361,8 +369,12 @@ create_UBspline_1d_c (Ugrid x_grid, BCtype_c xBC, float *data)
 
   x_grid.delta_inv = 1.0/x_grid.delta;
   spline->x_grid   = x_grid;
-  //  spline->coefs = malloc (sizeof(float)*N);
+#ifndef __SSE2__
+  spline->coefs = malloc (sizeof(float)*N);
+#else
   posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(float)*N);
+#endif
+
   BCtype_s xBC_r, xBC_i;
   xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
   xBC_r.lVal  = xBC.lVal_r; xBC_r.rVal  = xBC.rVal_r;
@@ -401,8 +413,11 @@ create_UBspline_2d_c (Ugrid x_grid, Ugrid y_grid,
   spline->y_grid   = y_grid;
   spline->x_stride = Ny;
 
-  // spline->coefs = malloc (2*sizeof(float)*Nx*Ny);
+#ifndef __SSE2__
+  spline->coefs = malloc (2*sizeof(float)*Nx*Ny);
+#else
   posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(float)*Nx*Ny);
+#endif
 
   BCtype_s xBC_r, xBC_i, yBC_r, yBC_i;
   xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
@@ -472,9 +487,11 @@ create_UBspline_3d_c (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
   spline->x_stride = Ny*Nz;
   spline->y_stride = Nz;
 
-  // spline->coefs      = malloc (2*sizeof(float)*Nx*Ny*Nz);
+#ifndef __SSE2__
+  spline->coefs      = malloc (2*sizeof(float)*Nx*Ny*Nz);
+#else
   posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(float)*Nx*Ny*Nz);
-  spline->coefs_size = Nx*Ny*Nz;
+#endif
 
   BCtype_s xBC_r, xBC_i, yBC_r, yBC_i, zBC_r, zBC_i;
   xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
@@ -734,8 +751,12 @@ create_UBspline_1d_d (Ugrid x_grid, BCtype_d xBC, double *data)
 
   x_grid.delta_inv = 1.0/x_grid.delta;
   spline->x_grid   = x_grid;
-  //  spline->coefs = malloc (sizeof(double)*N);
+
+#ifndef __SSE2__
+  spline->coefs = malloc (sizeof(double)*N);
+#else
   posix_memalign ((void**)&spline->coefs, 16, sizeof(double)*N);
+#endif
   find_coefs_1d_d (spline->x_grid, xBC, data, 1, spline->coefs, 1);
     
   return spline;
@@ -768,8 +789,11 @@ create_UBspline_2d_d (Ugrid x_grid, Ugrid y_grid,
   spline->y_grid   = y_grid;
   spline->x_stride = Ny;
 
-  // spline->coefs = malloc (sizeof(double)*Nx*Ny);
+#ifndef __SSE2__
+  spline->coefs = malloc (sizeof(double)*Nx*Ny);
+#else
   posix_memalign ((void**)&spline->coefs, 16, (sizeof(double)*Nx*Ny));
+#endif
 
   // First, solve in the X-direction 
   for (int iy=0; iy<My; iy++) {
@@ -824,9 +848,11 @@ create_UBspline_3d_d (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
   spline->x_stride = Ny*Nz;
   spline->y_stride = Nz;
 
-  //spline->coefs      = malloc (sizeof(double)*Nx*Ny*Nz);
+#ifndef __SSE2__
+  spline->coefs      = malloc (sizeof(double)*Nx*Ny*Nz);
+#else
   posix_memalign ((void**)&spline->coefs, 16, (sizeof(double)*Nx*Ny*Nz));
-  spline->coefs_size = Nx*Ny*Nz;
+#endif
 
   // First, solve in the X-direction 
   for (int iy=0; iy<My; iy++) 
@@ -894,8 +920,12 @@ create_UBspline_1d_z (Ugrid x_grid, BCtype_z xBC, double *data)
 
   x_grid.delta_inv = 1.0/x_grid.delta;
   spline->x_grid   = x_grid;
-  //  spline->coefs = malloc (sizeof(double)*N);
+#ifndef __SSE2__
+  spline->coefs = malloc (sizeof(double)*N);
+#else
   posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(double)*N);
+#endif
+
   BCtype_d xBC_r, xBC_i;
   xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
   xBC_r.lVal  = xBC.lVal_r; xBC_r.rVal  = xBC.rVal_r;
@@ -934,8 +964,11 @@ create_UBspline_2d_z (Ugrid x_grid, Ugrid y_grid,
   spline->y_grid   = y_grid;
   spline->x_stride = Ny;
 
-  // spline->coefs = malloc (2*sizeof(double)*Nx*Ny);
+#ifndef __SSE2__
+  spline->coefs = malloc (2*sizeof(double)*Nx*Ny);
+#else
   posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(double)*Nx*Ny);
+#endif
 
   BCtype_d xBC_r, xBC_i, yBC_r, yBC_i;
   xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
@@ -1005,9 +1038,11 @@ create_UBspline_3d_z (Ugrid x_grid, Ugrid y_grid, Ugrid z_grid,
   spline->x_stride = Ny*Nz;
   spline->y_stride = Nz;
 
-  // spline->coefs      = malloc (2*sizeof(double)*Nx*Ny*Nz);
+#ifndef __SSE2__
+  spline->coefs      = malloc (2*sizeof(double)*Nx*Ny*Nz);
+#else
   posix_memalign ((void**)&spline->coefs, 16, 2*sizeof(double)*Nx*Ny*Nz);
-  spline->coefs_size = Nx*Ny*Nz;
+#endif
 
   BCtype_d xBC_r, xBC_i, yBC_r, yBC_i, zBC_r, zBC_i;
   xBC_r.lCode = xBC.lCode;  xBC_r.rCode = xBC.rCode;
