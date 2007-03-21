@@ -18,7 +18,7 @@ private:
   TinyMatrix<double,M,M> Alpha;
   Array<double,2> AlphaInv;
   double Chi2 (const Array<double,1> &x, const Array<double,1> &y,
-	       const Array<double,1> &y, TinyVector<double,M> params);
+	       const Array<double,1> &sigma, TinyVector<double,M> params);
   void CalcAlphaBeta(const Array<double,1> &x, 
 		     const Array<double,1> &y,
 		     const Array<double,1> &sigma,
