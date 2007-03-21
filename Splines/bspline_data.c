@@ -3,6 +3,8 @@
 /*   SSE Data    */
 /*****************/
 #include <xmmintrin.h>
+#include <emmintrin.h>
+#include <pmmintrin.h>
 
 // Single-precision version of matrices
 const __m128    A0 = { 1.0/6.0, -3.0/6.0,  3.0/6.0, -1.0/6.0  };
