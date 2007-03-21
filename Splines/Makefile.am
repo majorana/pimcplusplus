@@ -75,6 +75,7 @@ libbspline_la_SOURCES =                               \
                        bspline_data.c                 \
                        bspline_eval_std_s.h           \
                        bspline_eval_sse_s.h           \
+                       bspline_eval_std_c.h           \
                        bspline_eval_std_d.h           \
                        bspline_eval_sse_d.h           
 

@@ -14,6 +14,7 @@
 #else
 #include "bspline_structs_std.h"
 #include "bspline_eval_std_s.h"
+#include "bspline_eval_std_c.h"
 #include "bspline_eval_std_d.h"
 #endif
 
