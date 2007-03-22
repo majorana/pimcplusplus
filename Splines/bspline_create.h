@@ -3,7 +3,7 @@
 
 #include "bspline_base.h"
 
-#ifdef __SSE2__
+#ifdef __SSE2x__
 #include "bspline_structs_sse.h"
 #else
 #include "bspline_structs_std.h"
@@ -61,19 +61,19 @@ create_UBspline_3d_d (Ugrid x_grid,   Ugrid   y_grid,   Ugrid z_grid,
 ///////////////////////////////////////
 // Create 1D uniform single-precision, real Bspline
 UBspline_1d_c *
-create_UBspline_1d_c (Ugrid x_grid, BCtype_c xBC, float *data);
+create_UBspline_1d_c (Ugrid x_grid, BCtype_c xBC, complex_float *data);
 
 // Create 2D uniform single-precision, real Bspline
 UBspline_2d_c *
 create_UBspline_2d_c (Ugrid   x_grid, Ugrid   y_grid,
 		      BCtype_c   xBC, BCtype_c   yBC,
-		      float *data);
+		      complex_float *data);
 
 // Create 3D uniform single-precision, real Bspline
 UBspline_3d_c *
 create_UBspline_3d_c (Ugrid  x_grid, Ugrid y_grid, Ugrid z_grid,
 		      BCtype_c  xBC, BCtype_c yBC, BCtype_c zBC,
-		      float *data);
+		      complex_float *data);
 
  
 ///////////////////////////////////////
@@ -81,19 +81,19 @@ create_UBspline_3d_c (Ugrid  x_grid, Ugrid y_grid, Ugrid z_grid,
 ///////////////////////////////////////
 // Create 1D uniform double-precision, complex Bspline
 UBspline_1d_z *
-create_UBspline_1d_z (Ugrid x_grid, BCtype_z xBC, double *data);
+create_UBspline_1d_z (Ugrid x_grid, BCtype_z xBC, complex_double *data);
 
 // Create 2D uniform double-precision, complex Bspline
 UBspline_2d_z *
 create_UBspline_2d_z (Ugrid x_grid, Ugrid y_grid,
 		      BCtype_z   xBC, BCtype_z   yBC,
-		      double *data);
+		      complex_double *data);
 
 // Create 3D uniform double-precision, complex Bspline
 UBspline_3d_z *
 create_UBspline_3d_z (Ugrid  x_grid, Ugrid   y_grid, Ugrid z_grid,
 		      BCtype_z  xBC, BCtype_z   yBC, BCtype_z zBC,
-		      double *data);
+		      complex_double *data);
 
 
 #endif
