@@ -37,7 +37,7 @@ eval_UBspline_1d_c (UBspline_1d_c * restrict spline,
 /* Value and first derivative */
 inline void
 eval_UBspline_1d_c_vg (UBspline_1d_c * restrict spline, double x, 
-		     complex_float* restrict val, complex_float* restrict grad)
+		       complex_float* restrict val, complex_float* restrict grad)
 {
   x -= spline->x_grid.start;
   float u = x*spline->x_grid.delta_inv;
@@ -727,13 +727,6 @@ eval_UBspline_3d_c_vgh (UBspline_3d_c * restrict spline,
   ty = modff (uy, &iparty);  int iy = (int) iparty;
   tz = modff (uz, &ipartz);  int iz = (int) ipartz;
 
-//   if ((ix >= spline->x_grid.num))    x = spline->x_grid.num;
-//   if ((ix < 0))                      x = 0;                 
-//   if ((iy >= spline->y_grid.num))    y = spline->y_grid.num;
-//   if ((iy < 0))                      y = 0;                 
-//   if ((iz >= spline->z_grid.num))    z = spline->z_grid.num;
-//   if ((iz < 0))                      z = 0;                 
-
   float tpx[4], tpy[4], tpz[4], a[4], b[4], c[4], da[4], db[4], dc[4], 
     d2a[4], d2b[4], d2c[4];
   complex_float cP[16], dcP[16], d2cP[16], bcP[4], dbcP[4],
@@ -785,11 +778,7 @@ eval_UBspline_3d_c_vgh (UBspline_3d_c * restrict spline,
   int xs = spline->x_stride;
   int ys = spline->y_stride;
   int offmax = (ix+3)*xs + (iy+3)*ys + iz+3;
-//   if (offmax > spline->coef_size) {
-//      fprintf (stderr, "Outside bounds in spline evalutation.\n"
-// 	      "offmax = %d  csize = %d\n", offmax, spline->csize);
-//      fprintf (stderr, "ix=%d   iy=%d   iz=%d\n", ix,iy,iz);
-//   }
+
 #define P(i,j,k) coefs[(ix+(i))*xs+(iy+(j))*ys+(iz+(k))]
   cP[ 0] = (P(0,0,0)*c[0]+P(0,0,1)*c[1]+P(0,0,2)*c[2]+P(0,0,3)*c[3]);
   cP[ 1] = (P(0,1,0)*c[0]+P(0,1,1)*c[1]+P(0,1,2)*c[2]+P(0,1,3)*c[3]);

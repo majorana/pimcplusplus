@@ -7,9 +7,10 @@
 ////           Bspline structure definitions            ////
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
-#ifdef __SSE2x__
+#ifdef __SSE2__
 #include "bspline_structs_sse.h"
 #include "bspline_eval_sse_s.h"
+#include "bspline_eval_sse_c.h"
 #include "bspline_eval_sse_d.h"
 #else
 #include "bspline_structs_std.h"

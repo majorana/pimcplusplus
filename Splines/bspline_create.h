@@ -3,7 +3,7 @@
 
 #include "bspline_base.h"
 
-#ifdef __SSE2x__
+#ifdef __SSE2__
 #include "bspline_structs_sse.h"
 #else
 #include "bspline_structs_std.h"
