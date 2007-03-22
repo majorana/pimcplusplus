@@ -1,5 +1,5 @@
-#ifndef BSPLINE_EVAL_SSE_H
-#define BSPLINE_EVAL_SSE_H
+#ifndef BSPLINE_EVAL_SSE_D_H
+#define BSPLINE_EVAL_SSE_D_H
 
 #include <xmmintrin.h>
 #include <emmintrin.h>

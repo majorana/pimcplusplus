@@ -410,97 +410,97 @@ Speed_3d_c()
 }
 
 
-// void
-// Test_3d_z()
-// {
-//   Ugrid x_grid, y_grid, z_grid;
-//   x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 30;
-//   y_grid.start = 1.0;  y_grid.end   = 3.0;  y_grid.num = 30;
-//   z_grid.start = 1.0;  z_grid.end   = 3.0;  z_grid.num = 30;
+void
+Test_3d_z()
+{
+  Ugrid x_grid, y_grid, z_grid;
+  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 30;
+  y_grid.start = 1.0;  y_grid.end   = 3.0;  y_grid.num = 30;
+  z_grid.start = 1.0;  z_grid.end   = 3.0;  z_grid.num = 30;
   
-//   complex_double *data = 
-//     malloc (x_grid.num * y_grid.num * z_grid.num * sizeof(complex_double));
-//   for (int ix=0; ix<x_grid.num; ix++)
-//     for (int iy=0; iy<y_grid.num; iy++)
-//       for (int iz=0; iz<z_grid.num; iz++)
-// 	*(data + ((ix*y_grid.num) + iy)*z_grid.num + iz) = 
-// 	  (-1.0 + 2.0*drand48()) + (-1.0 + 2.0*drand48())*1.0fI;
-//   BCtype_z x_bc, y_bc, z_bc;
-//   x_bc.lCode = PERIODIC; x_bc.rCode = PERIODIC; 
-//   y_bc.lCode = PERIODIC; y_bc.rCode = PERIODIC; 
-//   z_bc.lCode = PERIODIC; z_bc.rCode = PERIODIC; 
+  complex_double *data = 
+    malloc (x_grid.num * y_grid.num * z_grid.num * sizeof(complex_double));
+  for (int ix=0; ix<x_grid.num; ix++)
+    for (int iy=0; iy<y_grid.num; iy++)
+      for (int iz=0; iz<z_grid.num; iz++)
+	*(data + ((ix*y_grid.num) + iy)*z_grid.num + iz) = 
+	  (-1.0 + 2.0*drand48()) + (-1.0 + 2.0*drand48())*1.0fI;
+  BCtype_z x_bc, y_bc, z_bc;
+  x_bc.lCode = PERIODIC; x_bc.rCode = PERIODIC; 
+  y_bc.lCode = PERIODIC; y_bc.rCode = PERIODIC; 
+  z_bc.lCode = PERIODIC; z_bc.rCode = PERIODIC; 
   
-//   UBspline_3d_z *spline = create_UBspline_3d_z 
-//     (x_grid, y_grid, z_grid, x_bc, y_bc, z_bc, data); 
+  UBspline_3d_z *spline = create_UBspline_3d_z 
+    (x_grid, y_grid, z_grid, x_bc, y_bc, z_bc, data); 
 
-//   double z = 1.92341;
-//   FILE *fout = fopen ("3dspline.dat", "w");
-//   for (double x=x_grid.start; x<=x_grid.end; x+=0.005) {
-//     for (double y=y_grid.start; y<=y_grid.end; y+=0.005) {
-//       complex_double val, grad[3], hess[9];
-//       eval_UBspline_3d_z_vgh (spline, x, y, z, &val, grad, hess);
-//       fprintf (fout, "%23.17f %23.17f ", crealf(val), cimagf(val));
-//     }
-//     fprintf (fout, "\n");
-//   }
-//   fclose (fout);
+  double z = 1.92341;
+  FILE *fout = fopen ("3dspline.dat", "w");
+  for (double x=x_grid.start; x<=x_grid.end; x+=0.005) {
+    for (double y=y_grid.start; y<=y_grid.end; y+=0.005) {
+      complex_double val, grad[3], hess[9];
+      eval_UBspline_3d_z_vgh (spline, x, y, z, &val, grad, hess);
+      fprintf (fout, "%23.17f %23.17f ", crealf(val), cimagf(val));
+    }
+    fprintf (fout, "\n");
+  }
+  fclose (fout);
 
-//   int ix=9;  int iy=19; int iz = 25;
-//   complex_double exval = data[(ix*y_grid.num+iy)*z_grid.num+iz];
-//   double x = x_grid.start + (double)ix * spline->x_grid.delta;
-//   double y = y_grid.start + (double)iy * spline->y_grid.delta;
-//   z =        z_grid.start + (double)iz * spline->z_grid.delta;
-//   complex_double spval, grad[3], hess[9];
-//   eval_UBspline_3d_z_vgh (spline, x, y, z, &spval, grad, hess);
-//   fprintf (stderr, "exval = (%23.17f + %23.17fi)\nspval = (%23.17f + %23.17fi)\n", 
-// 	   crealf(exval), cimagf(exval), crealf(spval), cimagf(spval));
+  int ix=9;  int iy=19; int iz = 25;
+  complex_double exval = data[(ix*y_grid.num+iy)*z_grid.num+iz];
+  double x = x_grid.start + (double)ix * spline->x_grid.delta;
+  double y = y_grid.start + (double)iy * spline->y_grid.delta;
+  z =        z_grid.start + (double)iz * spline->z_grid.delta;
+  complex_double spval, grad[3], hess[9];
+  eval_UBspline_3d_z_vgh (spline, x, y, z, &spval, grad, hess);
+  fprintf (stderr, "exval = (%23.17f + %23.17fi)\nspval = (%23.17f + %23.17fi)\n", 
+	   crealf(exval), cimagf(exval), crealf(spval), cimagf(spval));
 
-// }
+}
 
 
-// void
-// Speed_3d_z()
-// {
-//   Ugrid x_grid, y_grid, z_grid;
-//   x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 200;
-//   y_grid.start = 1.0;  y_grid.end   = 5.0;  y_grid.num = 200;
-//   z_grid.start = 1.0;  z_grid.end   = 7.0;  z_grid.num = 200;
+void
+Speed_3d_z()
+{
+  Ugrid x_grid, y_grid, z_grid;
+  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 200;
+  y_grid.start = 1.0;  y_grid.end   = 5.0;  y_grid.num = 200;
+  z_grid.start = 1.0;  z_grid.end   = 7.0;  z_grid.num = 200;
   
-//   complex_double *data = 
-//     malloc (x_grid.num * y_grid.num * z_grid.num * sizeof(complex_double));
-//   for (int ix=0; ix<x_grid.num; ix++)
-//     for (int iy=0; iy<y_grid.num; iy++)
-//       for (int iz=0; iz<z_grid.num; iz++)
-// 	*(data + ((ix*y_grid.num) + iy)*z_grid.num + iz) = 
-// 	  (-1.0 + 2.0*drand48()) + (-1.0 + 2.0*drand48())*1.0fI;
-//   BCtype_z x_bc, y_bc, z_bc;
-//   x_bc.lCode = PERIODIC; x_bc.rCode = PERIODIC; 
-//   y_bc.lCode = PERIODIC; y_bc.rCode = PERIODIC; 
-//   z_bc.lCode = PERIODIC; z_bc.rCode = PERIODIC; 
+  complex_double *data = 
+    malloc (x_grid.num * y_grid.num * z_grid.num * sizeof(complex_double));
+  for (int ix=0; ix<x_grid.num; ix++)
+    for (int iy=0; iy<y_grid.num; iy++)
+      for (int iz=0; iz<z_grid.num; iz++)
+	*(data + ((ix*y_grid.num) + iy)*z_grid.num + iz) = 
+	  (-1.0 + 2.0*drand48()) + (-1.0 + 2.0*drand48())*1.0fI;
+  BCtype_z x_bc, y_bc, z_bc;
+  x_bc.lCode = PERIODIC; x_bc.rCode = PERIODIC; 
+  y_bc.lCode = PERIODIC; y_bc.rCode = PERIODIC; 
+  z_bc.lCode = PERIODIC; z_bc.rCode = PERIODIC; 
   
-//   UBspline_3d_z *spline = (UBspline_3d_z*) create_UBspline_3d_z 
-//     (x_grid, y_grid, z_grid, x_bc, y_bc, z_bc, data); 
+  UBspline_3d_z *spline = (UBspline_3d_z*) create_UBspline_3d_z 
+    (x_grid, y_grid, z_grid, x_bc, y_bc, z_bc, data); 
 
-//   complex_double val, grad[3], hess[9];
-//   clock_t start, end, rstart, rend;
-//   rstart = clock();
-//   for (int i=0; i<10000000; i++) {
-//     double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
-//     double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
-//     double z = z_grid.start+ 0.9999*drand48()*(z_grid.end - z_grid.start);
-//   }
-//   rend = clock();
-//   start = clock();
-//   for (int i=0; i<10000000; i++) {
-//     double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
-//     double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
-//     double z = z_grid.start+ 0.9999*drand48()*(z_grid.end - z_grid.start);
-//     eval_UBspline_3d_z_vgh (spline, x, y, z, &val, grad, hess);
-//   }
-//   end = clock();
-//   fprintf (stderr, "10,000,000 evalations in %f seconds.\n", 
-// 	   (double)(end-start-(rend-rstart))/(double)CLOCKS_PER_SEC);
-// }
+  complex_double val, grad[3], hess[9];
+  clock_t start, end, rstart, rend;
+  rstart = clock();
+  for (int i=0; i<10000000; i++) {
+    double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
+    double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
+    double z = z_grid.start+ 0.9999*drand48()*(z_grid.end - z_grid.start);
+  }
+  rend = clock();
+  start = clock();
+  for (int i=0; i<10000000; i++) {
+    double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
+    double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
+    double z = z_grid.start+ 0.9999*drand48()*(z_grid.end - z_grid.start);
+    eval_UBspline_3d_z_vgh (spline, x, y, z, &val, grad, hess);
+  }
+  end = clock();
+  fprintf (stderr, "10,000,000 evalations in %f seconds.\n", 
+	   (double)(end-start-(rend-rstart))/(double)CLOCKS_PER_SEC);
+}
 
 
 int main()
@@ -513,8 +513,8 @@ int main()
   // Speed_3d_s();
   // Test_3d_d();
   // Speed_3d_d();
-  Test_3d_c();
-  Speed_3d_c();
-  // Test_3d_z();
-  // Speed_3d_z();
+  //Test_3d_c();
+  //Speed_3d_c();
+  Test_3d_z();
+  Speed_3d_z();
 }
