@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
+
 
 void
 Test_1d_s()
@@ -49,24 +51,61 @@ Test_2d_s()
   
   UBspline_2d_s *spline = (UBspline_2d_s*) create_UBspline_2d_s (x_grid, y_grid, x_bc, y_bc, data); 
 
+  FILE *fout = fopen ("2dspline.dat", "w");
   for (double x=x_grid.start; x<=x_grid.end; x+=0.005) {
     for (double y=y_grid.start; y<=y_grid.end; y+=0.005) {
       float val, grad[2], hess[4];
 	eval_UBspline_2d_s_vgh (spline, x, y, &val, grad, hess);
-      fprintf (stdout, "%20.14f ", val);
+      fprintf (fout, "%20.14f ", val);
     }
-    fprintf (stdout, "\n");
+    fprintf (fout, "\n");
   }
+  fclose (fout);
 
   int ix=5;
   int iy=7;
   float exval = data[ix*y_grid.num+iy];
   double x = x_grid.start + (double)ix * spline->x_grid.delta;
   double y = y_grid.start + (double)iy * spline->y_grid.delta;
-  float spval;
-  eval_UBspline_2d_s (spline, x, y, &spval);
+  float spval, grad[2], hess[4];
+  eval_UBspline_2d_s_vgh (spline, x, y, &spval, grad, hess);
   fprintf (stderr, "exval = %20.15f   spval = %20.15f\n", exval, spval);
 
+}
+
+void
+Speed_2d_s()
+{
+  Ugrid x_grid, y_grid;
+  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 300;
+  y_grid.start = 1.0;  y_grid.end   = 3.0;  y_grid.num = 300;
+  
+  float *data = malloc (x_grid.num * y_grid.num * sizeof(float));
+  for (int ix=0; ix<x_grid.num; ix++)
+    for (int iy=0; iy<y_grid.num; iy++)
+      *(data + ix*y_grid.num + iy) = -1.0 + 2.0*drand48();
+  BCtype_s x_bc, y_bc;
+  x_bc.lCode = PERIODIC; x_bc.rCode = PERIODIC; 
+  y_bc.lCode = PERIODIC; y_bc.rCode = PERIODIC;
+  
+  UBspline_2d_s *spline = (UBspline_2d_s*) create_UBspline_2d_s (x_grid, y_grid, x_bc, y_bc, data); 
+  float val, grad[2], hess[4];
+  clock_t start, end, rstart, rend;
+  rstart = clock();
+  for (int i=0; i<10000000; i++) {
+    double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
+    double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
+  }
+  rend = clock();
+  start = clock();
+  for (int i=0; i<10000000; i++) {
+    double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
+    double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
+    eval_UBspline_2d_s_vgh (spline, x, y, &val, grad, hess);
+  }
+  end = clock();
+  fprintf (stderr, "10,000,000 evalations in %f seconds.\n", 
+	   (double)(end-start-(rend-rstart))/(double)CLOCKS_PER_SEC);
 }
 
 void
@@ -114,7 +153,6 @@ Test_3d_s()
 }
 
 
-#include <time.h>
 void
 Speed_3d_s()
 {
@@ -271,16 +309,16 @@ Test_3d_c()
     (x_grid, y_grid, z_grid, x_bc, y_bc, z_bc, data); 
 
    double z = 1.92341; 
-/*   FILE *fout = fopen ("3dspline.dat", "w"); */
-/*   for (double x=x_grid.start; x<=x_grid.end; x+=0.005) { */
-/*     for (double y=y_grid.start; y<=y_grid.end; y+=0.005) { */
-/*       complex_float val, grad[3], hess[9]; */
-/*       eval_UBspline_3d_c_vgh (spline, x, y, z, &val, grad, hess); */
-/*       fprintf (fout, "%23.17f %23.17f ", crealf(val), cimagf(val)); */
-/*     } */
-/*     fprintf (fout, "\n"); */
-/*   } */
-/*   fclose (fout); */
+  FILE *fout = fopen ("3dspline.dat", "w");
+  for (double x=x_grid.start; x<0.99999*x_grid.end; x+=0.005) {
+    for (double y=y_grid.start; y<y_grid.end; y+=0.005) {
+      complex_float val, grad[3], hess[9];
+      eval_UBspline_3d_c_vgh (spline, x, y, z, &val, grad, hess);
+      fprintf (fout, "%23.17f %23.17f ", crealf(val), cimagf(val));
+    }
+    fprintf (fout, "\n");
+  }
+  fclose (fout);
 
   int ix=9;  int iy=18; int iz = 24;
   complex_float exval = data[(ix*y_grid.num+iy)*z_grid.num+iz];
@@ -332,6 +370,7 @@ Speed_3d_c()
     double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
     double z = z_grid.start+ 0.9999*drand48()*(z_grid.end - z_grid.start);
     eval_UBspline_3d_c_vgh (spline, x, y, z, &val, grad, hess);
+    //eval_UBspline_3d_c     (spline, x, y, z, &val);
   }
   end = clock();
   fprintf (stderr, "10,000,000 evalations in %f seconds.\n", 
@@ -435,13 +474,14 @@ Speed_3d_c()
 int main()
 {
   // Test_1d_s();
-  // Test_2d_s();
-  // Test_3d_s();
+  Test_2d_s();
+  Speed_2d_s();
+  //Test_3d_s();
   // Speed_3d_s();
   // Test_3d_d();
   // Speed_3d_d();
-  Test_3d_c();
-  Speed_3d_c();
+  // Test_3d_c();
+  // Speed_3d_c();
   // Test_3d_z();
   // Speed_3d_z();
 }

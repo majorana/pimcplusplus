@@ -118,6 +118,98 @@ eval_UBspline_2d_s_vgh (UBspline_2d_s * restrict spline,
 			double x, double y, float* restrict val, 
 			float* restrict grad, float* restrict hess)
 {
+  _mm_prefetch ((void*)  &A0,_MM_HINT_T0);  _mm_prefetch ((void*)  &A1,_MM_HINT_T0);  
+  _mm_prefetch ((void*)  &A2,_MM_HINT_T0);  _mm_prefetch ((void*)  &A3,_MM_HINT_T0);
+  /// SSE mesh point determination
+  __m128 xy        = _mm_set_ps (x, y, 0.0, 0.0);
+  __m128 x0y0      = _mm_set_ps (spline->x_grid.start,  spline->y_grid.start, 0.0, 0.0);
+  __m128 delta_inv = _mm_set_ps (spline->x_grid.delta_inv,spline->y_grid.delta_inv, 0.0, 0.0);
+  xy = _mm_sub_ps (xy, x0y0);
+  // ux = (x - x0)/delta_x and same for y
+  __m128 uxuy    = _mm_mul_ps (xy, delta_inv);
+  // intpart = trunc (ux, uy)
+  __m128i intpart  = _mm_cvttps_epi32(uxuy);
+  __m128i ixiy;
+  _mm_storeu_si128 (&ixiy, intpart);
+  // Store to memory for use in C expressions
+  // xmm registers are stored to memory in reverse order
+  int ix = ((int *)&ixiy)[3];
+  int iy = ((int *)&ixiy)[2];
+
+  int xs = spline->x_stride;
+  // This macro is used to give the pointer to coefficient data.
+  // i and j should be in the range [0,3].  Coefficients are read four
+  // at a time, so no j value is needed.
+#define P(i) (spline->coefs+(ix+(i))*xs+iy)
+  // Prefetch the data from main memory into cache so it's available
+  // when we need to use it.
+  _mm_prefetch ((void*)P(0), _MM_HINT_T0);
+  _mm_prefetch ((void*)P(1), _MM_HINT_T0);
+  _mm_prefetch ((void*)P(2), _MM_HINT_T0);
+  _mm_prefetch ((void*)P(3), _MM_HINT_T0);
+
+  // Now compute the vectors:
+  // tpx = [t_x^3 t_x^2 t_x 1]
+  // tpy = [t_y^3 t_y^2 t_y 1]
+  // tpz = [t_z^3 t_z^2 t_z 1]
+  __m128 ipart  = _mm_cvtepi32_ps (intpart);
+  __m128 txty   = _mm_sub_ps (uxuy, ipart);
+  __m128 one    = _mm_set_ps (1.0, 1.0, 1.0, 1.0);
+  __m128 t2     = _mm_mul_ps (txty, txty);
+  __m128 t3     = _mm_mul_ps (t2, txty);
+  __m128 tpx    = t3;
+  __m128 tpy    = t2;
+  __m128 tpz    = txty;
+  __m128 zero   = one;
+  _MM_TRANSPOSE4_PS(zero, tpz, tpy, tpx);
+
+  // a  =  A * tpx,   b =  A * tpy,   c =  A * tpz
+  // da = dA * tpx,  db = dA * tpy,  dc = dA * tpz, etc.
+  // A is 4x4 matrix given by the rows A0, A1, A2, A3
+  __m128 a, b, da, db, d2a, d2b, bP, dbP, d2bP, 
+    tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+
+  
+  // x-dependent vectors
+  _MM_MATVEC4_PS (  A0,   A1,   A2,   A3, tpx,   a);
+  _MM_MATVEC4_PS ( dA0,  dA1,  dA2,  dA3, tpx,  da);
+  _MM_MATVEC4_PS (d2A0, d2A1, d2A2, d2A3, tpx, d2a);
+  // y-dependent vectors
+  _MM_MATVEC4_PS (  A0,   A1,   A2,   A3, tpy,   b);
+  _MM_MATVEC4_PS ( dA0,  dA1,  dA2,  dA3, tpy,  db);
+  _MM_MATVEC4_PS (d2A0, d2A1, d2A2, d2A3, tpy, d2b);
+  // Compute cP, dcP, and d2cP products 1/4 at a time to maximize
+  // register reuse and avoid rerereading from memory or cache.
+  // 1st quarter
+  tmp0 = _mm_loadu_ps (P(0));
+  tmp1 = _mm_loadu_ps (P(1));
+  tmp2 = _mm_loadu_ps (P(2));
+  tmp3 = _mm_loadu_ps (P(3));
+  _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,   b,   bP);
+  _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,  db,  dbP);
+  _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3, d2b, d2bP);
+  // Compute value
+  _MM_DOT4_PS (a, bP, *val);
+  // Compute gradient
+  _MM_DOT4_PS (da, bP, grad[0]);
+  _MM_DOT4_PS (a, dbP, grad[1]);
+  // Compute hessian
+  _MM_DOT4_PS (d2a, bP, hess[0]);
+  _MM_DOT4_PS (a, d2bP, hess[3]);
+  _MM_DOT4_PS (da, dbP, hess[1]);
+
+  // Multiply gradients and hessians by appropriate grid inverses
+  float dxInv = spline->x_grid.delta_inv;
+  float dyInv = spline->y_grid.delta_inv;
+  grad[0] *= dxInv;
+  grad[1] *= dyInv;
+  hess[0] *= dxInv*dxInv;
+  hess[3] *= dyInv*dyInv;
+  hess[1] *= dxInv*dyInv;
+  // Copy hessian elements into lower half of 2x2 matrix
+  hess[2] = hess[1];
+#undef P
+
 
 }
 
@@ -904,32 +996,8 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
 
 
 }
-// inline void
-// find_x (float x, int* restrict index, 
-// 	__m128* restrict _tp)
-// {
-//   __m128 _fi =_mm_set_ss (fi);
-//   int i = _mm_cvttsd_si32 (_fi);
-//   float t = fi - (float)i;
-//   _tp = _mm_set_ps (t*t*t, t*t, t, 1.0);
-// }
 
-// inline void
-// find_xy (float x, float y,
-// 	 __m128 _start, __m128 _delta_inv,
-// 	 int* restrict ix, int* restrict iy,
-// 	 __m128* restrict tpx, __m128* restrict tpy)
-// {
-//   __m128 _r = _mm_set_ps (x, x, y, y);
-//   __m128 _x, _y;
-//   _r = _mm_sub_ps (_r, _start);
-//   _r = _mm_mul_ps (_r, _delta_inv);
-//   //  __m64 _ixiy = _mm_cvttps_pi32 (_r);
-//   *ix = _mm_cvttss_si32 (_r);
-//   __m128 _  = _mm_unpack_hi (_r, _r);
-//   *iy = _mm_cvttss_si32 (_r);
-// }
-
-
+#undef _MM_MATVEC4_PS
+#undef _MM_DOT4_PS
 
 #endif
