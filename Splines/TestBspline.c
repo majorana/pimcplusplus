@@ -414,9 +414,9 @@ void
 Test_3d_z()
 {
   Ugrid x_grid, y_grid, z_grid;
-  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 30;
-  y_grid.start = 1.0;  y_grid.end   = 3.0;  y_grid.num = 30;
-  z_grid.start = 1.0;  z_grid.end   = 3.0;  z_grid.num = 30;
+  x_grid.start = 1.0;  x_grid.end   = 3.4;  x_grid.num = 30;
+  y_grid.start = 1.0;  y_grid.end   = 3.7;  y_grid.num = 30;
+  z_grid.start = 1.0;  z_grid.end   = 3.9;  z_grid.num = 30;
   
   complex_double *data = 
     malloc (x_grid.num * y_grid.num * z_grid.num * sizeof(complex_double));
@@ -439,7 +439,7 @@ Test_3d_z()
     for (double y=y_grid.start; y<=y_grid.end; y+=0.005) {
       complex_double val, grad[3], hess[9];
       eval_UBspline_3d_z_vgh (spline, x, y, z, &val, grad, hess);
-      fprintf (fout, "%23.17f %23.17f ", crealf(val), cimagf(val));
+      fprintf (fout, "%23.19f %23.19f ", crealf(hess[4]), cimagf(hess[4]));
     }
     fprintf (fout, "\n");
   }
@@ -452,7 +452,7 @@ Test_3d_z()
   z =        z_grid.start + (double)iz * spline->z_grid.delta;
   complex_double spval, grad[3], hess[9];
   eval_UBspline_3d_z_vgh (spline, x, y, z, &spval, grad, hess);
-  fprintf (stderr, "exval = (%23.17f + %23.17fi)\nspval = (%23.17f + %23.17fi)\n", 
+  fprintf (stderr, "exval = (%23.19f + %23.19fi)\nspval = (%23.17f + %23.17fi)\n", 
 	   crealf(exval), cimagf(exval), crealf(spval), cimagf(spval));
 
 }
@@ -516,5 +516,5 @@ int main()
   //Test_3d_c();
   //Speed_3d_c();
   Test_3d_z();
-  Speed_3d_z();
+  // Speed_3d_z();
 }
