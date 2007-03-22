@@ -11,6 +11,9 @@ extern __m128   A0,   A1,   A2,   A3;
 extern __m128  dA0,  dA1,  dA2,  dA3;
 extern __m128 d2A0, d2A1, d2A2, d2A3;
 
+extern const float* restrict   Af;
+extern const float* restrict  dAf;
+extern const float* restrict d2Af;
 
 /// SSE3 add "horizontal add" instructions, which makes things
 /// simpler and faster
@@ -62,7 +65,21 @@ inline void
 eval_UBspline_1d_s (UBspline_1d_s * restrict spline, 
 		    double x, float* restrict val)
 {
+  x -= spline->x_grid.start;
+  float u = x*spline->x_grid.delta_inv;
+  float ipart, t;
+  t = modff (u, &ipart);
+  int i = (int) ipart;
+  
+  float tp[4];
+  tp[0] = t*t*t;  tp[1] = t*t;  tp[2] = t;  tp[3] = 1.0;
+  float* restrict coefs = spline->coefs;
 
+  *val = 
+    (coefs[i+0]*(Af[ 0]*tp[0] + Af[ 1]*tp[1] + Af[ 2]*tp[2] + Af[ 3]*tp[3])+
+     coefs[i+1]*(Af[ 4]*tp[0] + Af[ 5]*tp[1] + Af[ 6]*tp[2] + Af[ 7]*tp[3])+
+     coefs[i+2]*(Af[ 8]*tp[0] + Af[ 9]*tp[1] + Af[10]*tp[2] + Af[11]*tp[3])+
+     coefs[i+3]*(Af[12]*tp[0] + Af[13]*tp[1] + Af[14]*tp[2] + Af[15]*tp[3]));
 }
 
 /* Value and first derivative */
@@ -70,7 +87,26 @@ inline void
 eval_UBspline_1d_s_vg (UBspline_1d_s * restrict spline, double x, 
 		     float* restrict val, float* restrict grad)
 {
+  x -= spline->x_grid.start;
+  float u = x*spline->x_grid.delta_inv;
+  float ipart, t;
+  t = modff (u, &ipart);
+  int i = (int) ipart;
+  
+  float tp[4];
+  tp[0] = t*t*t;  tp[1] = t*t;  tp[2] = t;  tp[3] = 1.0;
+  float* restrict coefs = spline->coefs;
 
+  *val = 
+    (coefs[i+0]*(Af[ 0]*tp[0] + Af[ 1]*tp[1] + Af[ 2]*tp[2] + Af[ 3]*tp[3])+
+     coefs[i+1]*(Af[ 4]*tp[0] + Af[ 5]*tp[1] + Af[ 6]*tp[2] + Af[ 7]*tp[3])+
+     coefs[i+2]*(Af[ 8]*tp[0] + Af[ 9]*tp[1] + Af[10]*tp[2] + Af[11]*tp[3])+
+     coefs[i+3]*(Af[12]*tp[0] + Af[13]*tp[1] + Af[14]*tp[2] + Af[15]*tp[3]));
+  *grad = spline->x_grid.delta_inv * 
+    (coefs[i+0]*(dAf[ 1]*tp[1] + dAf[ 2]*tp[2] + dAf[ 3]*tp[3])+
+     coefs[i+1]*(dAf[ 5]*tp[1] + dAf[ 6]*tp[2] + dAf[ 7]*tp[3])+
+     coefs[i+2]*(dAf[ 9]*tp[1] + dAf[10]*tp[2] + dAf[11]*tp[3])+
+     coefs[i+3]*(dAf[13]*tp[1] + dAf[14]*tp[2] + dAf[15]*tp[3]));
 }
 /* Value, first derivative, and second derivative */
 inline void
@@ -78,7 +114,44 @@ eval_UBspline_1d_s_vgl (UBspline_1d_s * restrict spline, double x,
 			float* restrict val, float* restrict grad,
 			float* restrict lapl)
 {
+  x -= spline->x_grid.start;
+  float u = x*spline->x_grid.delta_inv;
+  float ipart, t;
+  t = modff (u, &ipart);
+  int i = (int) ipart;
 
+  float* restrict coefs = spline->coefs;
+  float tp[4];
+  tp[0] = t*t*t;  tp[1] = t*t;  tp[2] = t;  tp[3] = 1.0;
+
+  // It turns out that std version is faster than SSE in 1D
+//   __m128 tp = _mm_set_ps (t*t*t, t*t, t, 1.0);
+//   __m128 a, da, d2a;
+//   _MM_MATVEC4_PS (  A0,   A1,   A2,   A3, tp,   a);
+//   _MM_MATVEC4_PS ( dA0,  dA1,  dA2,  dA3, tp,  da);
+//   _MM_MATVEC4_PS (d2A0, d2A1, d2A2, d2A3, tp, d2a);
+//   __m128 cf  = _mm_loadu_ps (&(coefs[i]));
+
+//   _MM_DOT4_PS (  a, cf, *val);
+//   _MM_DOT4_PS ( da, cf, *grad);
+//   _MM_DOT4_PS (d2a, cf, *lapl);
+
+
+  *val = 
+    (coefs[i+0]*(Af[ 0]*tp[0] + Af[ 1]*tp[1] + Af[ 2]*tp[2] + Af[ 3]*tp[3])+
+     coefs[i+1]*(Af[ 4]*tp[0] + Af[ 5]*tp[1] + Af[ 6]*tp[2] + Af[ 7]*tp[3])+
+     coefs[i+2]*(Af[ 8]*tp[0] + Af[ 9]*tp[1] + Af[10]*tp[2] + Af[11]*tp[3])+
+     coefs[i+3]*(Af[12]*tp[0] + Af[13]*tp[1] + Af[14]*tp[2] + Af[15]*tp[3]));
+  *grad = spline->x_grid.delta_inv * 
+    (coefs[i+0]*(dAf[ 1]*tp[1] + dAf[ 2]*tp[2] + dAf[ 3]*tp[3])+
+     coefs[i+1]*(dAf[ 5]*tp[1] + dAf[ 6]*tp[2] + dAf[ 7]*tp[3])+
+     coefs[i+2]*(dAf[ 9]*tp[1] + dAf[10]*tp[2] + dAf[11]*tp[3])+
+     coefs[i+3]*(dAf[13]*tp[1] + dAf[14]*tp[2] + dAf[15]*tp[3]));
+  *lapl = spline->x_grid.delta_inv * spline->x_grid.delta_inv * 
+    (coefs[i+0]*(d2Af[ 2]*tp[2] + d2Af[ 3]*tp[3])+
+     coefs[i+1]*(d2Af[ 6]*tp[2] + d2Af[ 7]*tp[3])+
+     coefs[i+2]*(d2Af[10]*tp[2] + d2Af[11]*tp[3])+
+     coefs[i+3]*(d2Af[14]*tp[2] + d2Af[15]*tp[3]));
 }
 
 /************************************************************/
@@ -922,70 +995,14 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   _MM_MATVEC4_PS (  A0,   A1,   A2,   A3, tpx,   a);
   _MM_MATVEC4_PS ( dA0,  dA1,  dA2,  dA3, tpx,  da);
   _MM_MATVEC4_PS (d2A0, d2A1, d2A2, d2A3, tpx, d2a);
-
-//   tmp0 = _mm_mul_ps (A0, tpx);
-//   tmp1 = _mm_mul_ps (A1, tpx);
-//   tmp2 = _mm_mul_ps (A2, tpx);
-//   tmp3 = _mm_mul_ps (A3, tpx);
-//   a    = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (dA0, tpx);
-//   tmp1 = _mm_mul_ps (dA1, tpx);
-//   tmp2 = _mm_mul_ps (dA2, tpx);
-//   tmp3 = _mm_mul_ps (dA3, tpx);
-//   da   = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (d2A0, tpx);
-//   tmp1 = _mm_mul_ps (d2A1, tpx);
-//   tmp2 = _mm_mul_ps (d2A2, tpx);
-//   tmp3 = _mm_mul_ps (d2A3, tpx);
-//   d2a  = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
-
   // y-dependent vectors
   _MM_MATVEC4_PS (  A0,   A1,   A2,   A3, tpy,   b);
   _MM_MATVEC4_PS ( dA0,  dA1,  dA2,  dA3, tpy,  db);
   _MM_MATVEC4_PS (d2A0, d2A1, d2A2, d2A3, tpy, d2b);
-
-//   tmp0 = _mm_mul_ps (A0, tpy);
-//   tmp1 = _mm_mul_ps (A1, tpy);
-//   tmp2 = _mm_mul_ps (A2, tpy);
-//   tmp3 = _mm_mul_ps (A3, tpy);
-//   b    = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (dA0, tpy);
-//   tmp1 = _mm_mul_ps (dA1, tpy);
-//   tmp2 = _mm_mul_ps (dA2, tpy);
-//   tmp3 = _mm_mul_ps (dA3, tpy);
-//   db   = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (d2A0, tpy);
-//   tmp1 = _mm_mul_ps (d2A1, tpy);
-//   tmp2 = _mm_mul_ps (d2A2, tpy);
-//   tmp3 = _mm_mul_ps (d2A3, tpy);
-//   d2b  = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
-
   // z-dependent vectors
   _MM_MATVEC4_PS (  A0,   A1,   A2,   A3, tpz,   c);
   _MM_MATVEC4_PS ( dA0,  dA1,  dA2,  dA3, tpz,  dc);
   _MM_MATVEC4_PS (d2A0, d2A1, d2A2, d2A3, tpz, d2c);
-
-//   tmp0 = _mm_mul_ps (A0, tpz);
-//   tmp1 = _mm_mul_ps (A1, tpz);
-//   tmp2 = _mm_mul_ps (A2, tpz);
-//   tmp3 = _mm_mul_ps (A3, tpz);
-//   c    = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (dA0, tpz);
-//   tmp1 = _mm_mul_ps (dA1, tpz);
-//   tmp2 = _mm_mul_ps (dA2, tpz);
-//   tmp3 = _mm_mul_ps (dA3, tpz);
-//   dc   = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (d2A0, tpz);
-//   tmp1 = _mm_mul_ps (d2A1, tpz);
-//   tmp2 = _mm_mul_ps (d2A2, tpz);
-//   tmp3 = _mm_mul_ps (d2A3, tpz);
-//   d2c  = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps (tmp2, tmp3));
 
   // Compute cP, dcP, and d2cP products 1/4 at a time to maximize
   // register reuse and avoid rerereading from memory or cache.
@@ -997,21 +1014,6 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,   c,   cP[0]);
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,  dc,  dcP[0]);
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3, d2c, d2cP[0]);
-//   tmp4 = _mm_mul_ps (tmp0, c);
-//   tmp5 = _mm_mul_ps (tmp1, c);
-//   tmp6 = _mm_mul_ps (tmp2, c);
-//   tmp7 = _mm_mul_ps (tmp3, c);
-//   cP[0] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-//   tmp4 = _mm_mul_ps (tmp0, dc);
-//   tmp5 = _mm_mul_ps (tmp1, dc);
-//   tmp6 = _mm_mul_ps (tmp2, dc);
-//   tmp7 = _mm_mul_ps (tmp3, dc);
-//   dcP[0] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-//   tmp4 = _mm_mul_ps (tmp0, d2c);
-//   tmp5 = _mm_mul_ps (tmp1, d2c);
-//   tmp6 = _mm_mul_ps (tmp2, d2c);
-//   tmp7 = _mm_mul_ps (tmp3, d2c);
-//   d2cP[0] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
   // 2nd quarter
   tmp0 = _mm_loadu_ps (P(1,0));
   tmp1 = _mm_loadu_ps (P(1,1));
@@ -1020,21 +1022,6 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,   c,   cP[1]);
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,  dc,  dcP[1]);
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3, d2c, d2cP[1]);
-//   tmp4 = _mm_mul_ps (tmp0, c);
-//   tmp5 = _mm_mul_ps (tmp1, c);
-//   tmp6 = _mm_mul_ps (tmp2, c);
-//   tmp7 = _mm_mul_ps (tmp3, c);
-//   cP[1] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-//   tmp4 = _mm_mul_ps (tmp0, dc);
-//   tmp5 = _mm_mul_ps (tmp1, dc);
-//   tmp6 = _mm_mul_ps (tmp2, dc);
-//   tmp7 = _mm_mul_ps (tmp3, dc);
-//   dcP[1] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-//   tmp4 = _mm_mul_ps (tmp0, d2c);
-//   tmp5 = _mm_mul_ps (tmp1, d2c);
-//   tmp6 = _mm_mul_ps (tmp2, d2c);
-//   tmp7 = _mm_mul_ps (tmp3, d2c);
-//   d2cP[1] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
   // 3rd quarter
   tmp0 = _mm_loadu_ps (P(2,0));
   tmp1 = _mm_loadu_ps (P(2,1));
@@ -1043,21 +1030,6 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,   c,   cP[2]);
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,  dc,  dcP[2]);
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3, d2c, d2cP[2]);
-//   tmp4 = _mm_mul_ps (tmp0, c);
-//   tmp5 = _mm_mul_ps (tmp1, c);
-//   tmp6 = _mm_mul_ps (tmp2, c);
-//   tmp7 = _mm_mul_ps (tmp3, c);
-//   cP[2] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-//   tmp4 = _mm_mul_ps (tmp0, dc);
-//   tmp5 = _mm_mul_ps (tmp1, dc);
-//   tmp6 = _mm_mul_ps (tmp2, dc);
-//   tmp7 = _mm_mul_ps (tmp3, dc);
-//   dcP[2] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-//   tmp4 = _mm_mul_ps (tmp0, d2c);
-//   tmp5 = _mm_mul_ps (tmp1, d2c);
-//   tmp6 = _mm_mul_ps (tmp2, d2c);
-//   tmp7 = _mm_mul_ps (tmp3, d2c);
-//   d2cP[2] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
   // 4th quarter
   tmp0 = _mm_loadu_ps (P(3,0));
   tmp1 = _mm_loadu_ps (P(3,1));
@@ -1066,21 +1038,6 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,   c,   cP[3]);
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3,  dc,  dcP[3]);
   _MM_MATVEC4_PS (tmp0, tmp1, tmp2, tmp3, d2c, d2cP[3]);
-//   tmp4 = _mm_mul_ps (tmp0, c);
-//   tmp5 = _mm_mul_ps (tmp1, c);
-//   tmp6 = _mm_mul_ps (tmp2, c);
-//   tmp7 = _mm_mul_ps (tmp3, c);
-//   cP[3] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-//   tmp4 = _mm_mul_ps (tmp0, dc);
-//   tmp5 = _mm_mul_ps (tmp1, dc);
-//   tmp6 = _mm_mul_ps (tmp2, dc);
-//   tmp7 = _mm_mul_ps (tmp3, dc);
-//   dcP[3] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
-//   tmp4 = _mm_mul_ps (tmp0, d2c);
-//   tmp5 = _mm_mul_ps (tmp1, d2c);
-//   tmp6 = _mm_mul_ps (tmp2, d2c);
-//   tmp7 = _mm_mul_ps (tmp3, d2c);
-//   d2cP[3] = _mm_hadd_ps (_mm_hadd_ps (tmp4, tmp5), _mm_hadd_ps(tmp6, tmp7));
   
   // Now compute bcP, dbcP, bdcP, d2bcP, bd2cP, and dbdc products
   _MM_MATVEC4_PS (  cP[0],   cP[1],   cP[2],   cP[3],   b,   bcP);
@@ -1089,42 +1046,6 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   _MM_MATVEC4_PS (  cP[0],   cP[1],   cP[2],   cP[3], d2b, d2bcP);
   _MM_MATVEC4_PS (d2cP[0], d2cP[1], d2cP[2], d2cP[3],   b, bd2cP);
   _MM_MATVEC4_PS ( dcP[0],  dcP[1],  dcP[2],  dcP[3],  db, dbdcP);
-//   tmp0 = _mm_mul_ps (b, cP[0]);
-//   tmp1 = _mm_mul_ps (b, cP[1]);
-//   tmp2 = _mm_mul_ps (b, cP[2]);
-//   tmp3 = _mm_mul_ps (b, cP[3]);
-//   bcP  = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps(tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (db, cP[0]);
-//   tmp1 = _mm_mul_ps (db, cP[1]);
-//   tmp2 = _mm_mul_ps (db, cP[2]);
-//   tmp3 = _mm_mul_ps (db, cP[3]);
-//   dbcP = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps(tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (b, dcP[0]);
-//   tmp1 = _mm_mul_ps (b, dcP[1]);
-//   tmp2 = _mm_mul_ps (b, dcP[2]);
-//   tmp3 = _mm_mul_ps (b, dcP[3]);
-//   bdcP  = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps(tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (d2b, cP[0]);
-//   tmp1 = _mm_mul_ps (d2b, cP[1]);
-//   tmp2 = _mm_mul_ps (d2b, cP[2]);
-//   tmp3 = _mm_mul_ps (d2b, cP[3]);
-//   d2bcP= _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps(tmp2, tmp3));
-
-//   tmp0 = _mm_mul_ps (b, d2cP[0]);
-//   tmp1 = _mm_mul_ps (b, d2cP[1]);
-//   tmp2 = _mm_mul_ps (b, d2cP[2]);
-//   tmp3 = _mm_mul_ps (b, d2cP[3]);
-//   bd2cP= _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps(tmp2, tmp3));
-
-//   tmp0  = _mm_mul_ps (db, dcP[0]);
-//   tmp1  = _mm_mul_ps (db, dcP[1]);
-//   tmp2  = _mm_mul_ps (db, dcP[2]);
-//   tmp3  = _mm_mul_ps (db, dcP[3]);
-//   dbdcP = _mm_hadd_ps (_mm_hadd_ps (tmp0, tmp1), _mm_hadd_ps(tmp2, tmp3));
-
   // Compute value
   _MM_DOT4_PS (a, bcP, *val);
   // Compute gradient
@@ -1138,63 +1059,6 @@ eval_UBspline_3d_s_vgh (UBspline_3d_s * restrict spline,
   _MM_DOT4_PS (da, dbcP, hess[1]);
   _MM_DOT4_PS (da, bdcP, hess[2]);
   _MM_DOT4_PS (a, dbdcP, hess[5]);
-
-//   tmp0 = _mm_mul_ps (a, bcP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (val, tmp0);
-
-  // x
-//   tmp0 = _mm_mul_ps (da, bcP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (&(grad[0]), tmp0);
-//   // y
-//   tmp0 = _mm_mul_ps (a, dbcP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (&(grad[1]), tmp0);
-//   // z
-//   tmp0 = _mm_mul_ps (a, bdcP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (&(grad[2]), tmp0);
-
-  // d2x
-//   tmp0 = _mm_mul_ps  (d2a, bcP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (&(hess[0]), tmp0);
-  
-  // d2y
-//   tmp0 = _mm_mul_ps  (a, d2bcP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (&(hess[4]), tmp0);
-  
-  // d2z
-//   tmp0 = _mm_mul_ps  (a, bd2cP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (&(hess[8]), tmp0);
-
-  // dx dy
-//   tmp0 = _mm_mul_ps  (da, dbcP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (&(hess[1]), tmp0);
-
-  // dx dz
-//   tmp0 = _mm_mul_ps  (da, bdcP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (&(hess[2]), tmp0);
-
-  // dy dz
-//   tmp0 = _mm_mul_ps  (da, dbdcP);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   tmp0 = _mm_hadd_ps (tmp0, tmp0);
-//   _mm_store_ss (&(hess[5]), tmp0);
 
   // Multiply gradients and hessians by appropriate grid inverses
   float dxInv = spline->x_grid.delta_inv;

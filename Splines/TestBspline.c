@@ -18,13 +18,45 @@ Test_1d_s()
   bc.lCode = DERIV2; bc.lVal = 10.0;
   bc.rCode = DERIV2; bc.rVal = -10.0;
   
+  FILE *fout = fopen ("1dSpline.dat", "w");
   UBspline_1d_s *spline = (UBspline_1d_s*) create_UBspline_1d_s (grid, bc, data);
   for (double x=1.0; x<=3.00001; x+=0.001) {
     float val, grad, lapl;
     eval_UBspline_1d_s_vgl (spline, x, &val, &grad, &lapl);
-    fprintf (stdout, "%1.5f %20.14f %20.14f %20.14f\n", x, val, grad, lapl);
+    fprintf (fout, "%1.5f %20.14f %20.14f %20.14f\n", x, val, grad, lapl);
   }
+  fclose (fout);
+}
 
+void
+Speed_1d_s()
+{
+  Ugrid grid;
+  grid.start = 1.0;
+  grid.end   = 3.0;
+  grid.num = 11;
+  float data[] = { 3.0, -4.0, 2.0, 1.0, -2.0, 0.0, 3.0, 2.0, 0.5, 1.0, 3.0 };
+  BCtype_s bc;
+  bc.lCode = DERIV2; bc.lVal = 10.0;
+  bc.rCode = DERIV2; bc.rVal = -10.0;
+  UBspline_1d_s *spline = (UBspline_1d_s*) create_UBspline_1d_s (grid, bc, data);
+
+  float val, grad, lapl;
+  clock_t start, end, rstart, rend;
+
+  rstart = clock();
+  for (int i=0; i<100000000; i++) {
+    double x = grid.start + 0.99999*drand48()*(grid.end-grid.start);
+  }
+  rend = clock();
+  start = clock();
+  for (int i=0; i<100000000; i++) {
+    double x = grid.start + 0.99999*drand48()*(grid.end-grid.start);
+    eval_UBspline_1d_s_vgl (spline, x, &val, &grad, &lapl);
+  }
+  end = clock();
+  fprintf (stderr, "100,000,000 evalations in %f seconds.\n", 
+	   (double)(end-start-(rend-rstart))/(double)CLOCKS_PER_SEC);
 }
 
 
@@ -474,14 +506,15 @@ Speed_3d_c()
 int main()
 {
   // Test_1d_s();
-  Test_2d_s();
-  Speed_2d_s();
+  // Speed_1d_s();
+  // Test_2d_s();
+  // Speed_2d_s();
   //Test_3d_s();
   // Speed_3d_s();
   // Test_3d_d();
   // Speed_3d_d();
-  // Test_3d_c();
-  // Speed_3d_c();
+  Test_3d_c();
+  Speed_3d_c();
   // Test_3d_z();
   // Speed_3d_z();
 }
