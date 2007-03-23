@@ -117,15 +117,6 @@ eval_UBspline_2d_d_vgh (UBspline_2d_d * restrict spline,
 			double x, double y, double* restrict val, 
 			double* restrict grad, double* restrict hess)
 {
-  _mm_prefetch ((void*)  &A0_01,_MM_HINT_T0);  
-  _mm_prefetch ((void*)  &A0_23,_MM_HINT_T0);  
-  _mm_prefetch ((void*)  &A1_01,_MM_HINT_T0);  
-  _mm_prefetch ((void*)  &A1_23,_MM_HINT_T0);  
-  _mm_prefetch ((void*)  &A2_01,_MM_HINT_T0);  
-  _mm_prefetch ((void*)  &A2_23,_MM_HINT_T0);  
-  _mm_prefetch ((void*)  &A3_01,_MM_HINT_T0);  
-  _mm_prefetch ((void*)  &A3_23,_MM_HINT_T0);  
-
   x -= spline->x_grid.start;
   y -= spline->y_grid.start;  
   double ux = x*spline->x_grid.delta_inv;
@@ -138,14 +129,14 @@ eval_UBspline_2d_d_vgh (UBspline_2d_d * restrict spline,
   
   int xs = spline->x_stride;
 #define P(i,j) (spline->coefs+(ix+(i))*xs+(iy+(j)))
-  _mm_prefetch ((void*)P(0,0), _MM_HINT_T0);
-  _mm_prefetch ((void*)P(0,2), _MM_HINT_T0);
-  _mm_prefetch ((void*)P(1,0), _MM_HINT_T0);
-  _mm_prefetch ((void*)P(1,2), _MM_HINT_T0);
-  _mm_prefetch ((void*)P(2,0), _MM_HINT_T0);
-  _mm_prefetch ((void*)P(2,2), _MM_HINT_T0);
-  _mm_prefetch ((void*)P(3,0), _MM_HINT_T0);
-  _mm_prefetch ((void*)P(3,2), _MM_HINT_T0);
+//   _mm_prefetch ((void*)P(0,0), _MM_HINT_T0);
+//   _mm_prefetch ((void*)P(0,2), _MM_HINT_T0);
+//   _mm_prefetch ((void*)P(1,0), _MM_HINT_T0);
+//   _mm_prefetch ((void*)P(1,2), _MM_HINT_T0);
+//   _mm_prefetch ((void*)P(2,0), _MM_HINT_T0);
+//   _mm_prefetch ((void*)P(2,2), _MM_HINT_T0);
+//   _mm_prefetch ((void*)P(3,0), _MM_HINT_T0);
+//   _mm_prefetch ((void*)P(3,2), _MM_HINT_T0);
 
   // Now compute the vectors:
   // tpx = [t_x^3 t_x^2 t_x 1]

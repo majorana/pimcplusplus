@@ -200,13 +200,13 @@ Speed_2d_d()
   double val, grad[2], hess[4];
   clock_t start, end, rstart, rend;
   rstart = clock();
-  for (int i=0; i<10000000; i++) {
+  for (int i=0; i<100000000; i++) {
     double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
     double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
   }
   rend = clock();
   start = clock();
-  for (int i=0; i<10000000; i++) {
+  for (int i=0; i<100000000; i++) {
     double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
     double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
     eval_UBspline_2d_d_vgh (spline, x, y, &val, grad, hess);
