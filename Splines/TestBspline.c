@@ -140,6 +140,82 @@ Speed_2d_s()
 	   (double)(end-start-(rend-rstart))/(double)CLOCKS_PER_SEC);
 }
 
+
+void
+Test_2d_d()
+{
+  Ugrid x_grid, y_grid;
+  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 30;
+  y_grid.start = 1.0;  y_grid.end   = 3.0;  y_grid.num = 30;
+  
+  double *data = malloc (x_grid.num * y_grid.num * sizeof(double));
+  for (int ix=0; ix<x_grid.num; ix++)
+    for (int iy=0; iy<y_grid.num; iy++)
+      *(data + ix*y_grid.num + iy) = -1.0 + 2.0*drand48();
+  BCtype_d x_bc, y_bc;
+  x_bc.lCode = PERIODIC;  x_bc.rCode = PERIODIC;
+  y_bc.lCode = PERIODIC;  y_bc.rCode = PERIODIC;
+  
+  UBspline_2d_d *spline = 
+    create_UBspline_2d_d (x_grid, y_grid, x_bc, y_bc, data); 
+
+  FILE *fout = fopen ("2dspline.dat", "w");
+  for (double x=x_grid.start; x<=x_grid.end; x+=0.005) {
+    for (double y=y_grid.start; y<=y_grid.end; y+=0.005) {
+      double val, grad[2], hess[4];
+      eval_UBspline_2d_d_vgh (spline, x, y, &val, grad, hess);
+      fprintf (fout, "%20.14f ", val);
+    }
+    fprintf (fout, "\n");
+  }
+  fclose (fout);
+  
+  int ix=5;
+  int iy=7;
+  double exval = data[ix*y_grid.num+iy];
+  double x = x_grid.start + (double)ix * spline->x_grid.delta;
+  double y = y_grid.start + (double)iy * spline->y_grid.delta;
+  double spval, grad[2], hess[4];
+  eval_UBspline_2d_d_vgh (spline, x, y, &spval, grad, hess);
+  fprintf (stderr, "exval = %20.15f   spval = %20.15f\n", exval, spval);
+
+}
+
+void
+Speed_2d_d()
+{
+  Ugrid x_grid, y_grid;
+  x_grid.start = 1.0;  x_grid.end   = 3.0;  x_grid.num = 300;
+  y_grid.start = 1.0;  y_grid.end   = 3.0;  y_grid.num = 300;
+  
+  double *data = malloc (x_grid.num * y_grid.num * sizeof(double));
+  for (int ix=0; ix<x_grid.num; ix++)
+    for (int iy=0; iy<y_grid.num; iy++)
+      *(data + ix*y_grid.num + iy) = -1.0 + 2.0*drand48();
+  BCtype_d x_bc, y_bc;
+  x_bc.lCode = PERIODIC; x_bc.rCode = PERIODIC; 
+  y_bc.lCode = PERIODIC; y_bc.rCode = PERIODIC;
+  
+  UBspline_2d_d *spline = (UBspline_2d_d*) create_UBspline_2d_d (x_grid, y_grid, x_bc, y_bc, data); 
+  double val, grad[2], hess[4];
+  clock_t start, end, rstart, rend;
+  rstart = clock();
+  for (int i=0; i<10000000; i++) {
+    double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
+    double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
+  }
+  rend = clock();
+  start = clock();
+  for (int i=0; i<10000000; i++) {
+    double x = x_grid.start+ 0.9999*drand48()*(x_grid.end - x_grid.start);
+    double y = y_grid.start+ 0.9999*drand48()*(y_grid.end - y_grid.start);
+    eval_UBspline_2d_d_vgh (spline, x, y, &val, grad, hess);
+  }
+  end = clock();
+  fprintf (stderr, "10,000,000 evalations in %f seconds.\n", 
+	   (double)(end-start-(rend-rstart))/(double)CLOCKS_PER_SEC);
+}
+
 void
 Test_3d_s()
 {
@@ -509,12 +585,14 @@ int main()
   // Speed_1d_s();
   // Test_2d_s();
   // Speed_2d_s();
-  //Test_3d_s();
+  Test_2d_d();
+  Speed_2d_d();
+  // Test_3d_s();
   // Speed_3d_s();
   // Test_3d_d();
   // Speed_3d_d();
-  //Test_3d_c();
-  //Speed_3d_c();
-  Test_3d_z();
+  // Test_3d_c();
+  // Speed_3d_c();
+  // Test_3d_z();
   // Speed_3d_z();
 }
