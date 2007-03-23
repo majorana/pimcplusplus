@@ -54,6 +54,8 @@ do {                                                                  \
 
 /************************************************************/
 /* 1D single-precision, real evaulation functions           */
+/* NOTE:  SSE does not seem to speed things up in 1D.       */
+/* Therefore, we simply copy the std routines.              */
 /************************************************************/
 
 /* Value only */
@@ -61,7 +63,21 @@ inline void
 eval_UBspline_1d_d (UBspline_1d_d * restrict spline, 
 		    double x, double* restrict val)
 {
+  x -= spline->x_grid.start;
+  double u = x*spline->x_grid.delta_inv;
+  double ipart, t;
+  t = modf (u, &ipart);
+  int i = (int) ipart;
+  
+  double tp[4];
+  tp[0] = t*t*t;  tp[1] = t*t;  tp[2] = t;  tp[3] = 1.0;
+  double* restrict coefs = spline->coefs;
 
+  *val = 
+    (coefs[i+0]*(Af[ 0]*tp[0] + Af[ 1]*tp[1] + Af[ 2]*tp[2] + Af[ 3]*tp[3])+
+     coefs[i+1]*(Af[ 4]*tp[0] + Af[ 5]*tp[1] + Af[ 6]*tp[2] + Af[ 7]*tp[3])+
+     coefs[i+2]*(Af[ 8]*tp[0] + Af[ 9]*tp[1] + Af[10]*tp[2] + Af[11]*tp[3])+
+     coefs[i+3]*(Af[12]*tp[0] + Af[13]*tp[1] + Af[14]*tp[2] + Af[15]*tp[3]));
 }
 
 /* Value and first derivative */
@@ -69,15 +85,59 @@ inline void
 eval_UBspline_1d_d_vg (UBspline_1d_d * restrict spline, double x, 
 		     double* restrict val, double* restrict grad)
 {
+  x -= spline->x_grid.start;
+  double u = x*spline->x_grid.delta_inv;
+  double ipart, t;
+  t = modf (u, &ipart);
+  int i = (int) ipart;
+  
+  double tp[4];
+  tp[0] = t*t*t;  tp[1] = t*t;  tp[2] = t;  tp[3] = 1.0;
+  double* restrict coefs = spline->coefs;
 
+  *val = 
+    (coefs[i+0]*(Ad[ 0]*tp[0] + Ad[ 1]*tp[1] + Ad[ 2]*tp[2] + Ad[ 3]*tp[3])+
+     coefs[i+1]*(Ad[ 4]*tp[0] + Ad[ 5]*tp[1] + Ad[ 6]*tp[2] + Ad[ 7]*tp[3])+
+     coefs[i+2]*(Ad[ 8]*tp[0] + Ad[ 9]*tp[1] + Ad[10]*tp[2] + Ad[11]*tp[3])+
+     coefs[i+3]*(Ad[12]*tp[0] + Ad[13]*tp[1] + Ad[14]*tp[2] + Ad[15]*tp[3]));
+  *grad = spline->x_grid.delta_inv * 
+    (coefs[i+0]*(dAd[ 1]*tp[1] + dAd[ 2]*tp[2] + dAd[ 3]*tp[3])+
+     coefs[i+1]*(dAd[ 5]*tp[1] + dAd[ 6]*tp[2] + dAd[ 7]*tp[3])+
+     coefs[i+2]*(dAd[ 9]*tp[1] + dAd[10]*tp[2] + dAd[11]*tp[3])+
+     coefs[i+3]*(dAd[13]*tp[1] + dAd[14]*tp[2] + dAd[15]*tp[3]));
 }
+
 /* Value, first derivative, and second derivative */
 inline void
 eval_UBspline_1d_d_vgl (UBspline_1d_d * restrict spline, double x, 
 			double* restrict val, double* restrict grad,
 			double* restrict lapl)
 {
+  x -= spline->x_grid.start;
+  double u = x*spline->x_grid.delta_inv;
+  double ipart, t;
+  t = modf (u, &ipart);
+  int i = (int) ipart;
+  
+  double tp[4];
+  tp[0] = t*t*t;  tp[1] = t*t;  tp[2] = t;  tp[3] = 1.0;
+  double* restrict coefs = spline->coefs;
 
+  *val = 
+    (coefs[i+0]*(Ad[ 0]*tp[0] + Ad[ 1]*tp[1] + Ad[ 2]*tp[2] + Ad[ 3]*tp[3])+
+     coefs[i+1]*(Ad[ 4]*tp[0] + Ad[ 5]*tp[1] + Ad[ 6]*tp[2] + Ad[ 7]*tp[3])+
+     coefs[i+2]*(Ad[ 8]*tp[0] + Ad[ 9]*tp[1] + Ad[10]*tp[2] + Ad[11]*tp[3])+
+     coefs[i+3]*(Ad[12]*tp[0] + Ad[13]*tp[1] + Ad[14]*tp[2] + Ad[15]*tp[3]));
+  *grad = spline->x_grid.delta_inv * 
+    (coefs[i+0]*(dAd[ 1]*tp[1] + dAd[ 2]*tp[2] + dAd[ 3]*tp[3])+
+     coefs[i+1]*(dAd[ 5]*tp[1] + dAd[ 6]*tp[2] + dAd[ 7]*tp[3])+
+     coefs[i+2]*(dAd[ 9]*tp[1] + dAd[10]*tp[2] + dAd[11]*tp[3])+
+     coefs[i+3]*(dAd[13]*tp[1] + dAd[14]*tp[2] + dAd[15]*tp[3]));
+  *lapl = spline->x_grid.delta_inv * spline->x_grid.delta_inv * 
+    (coefs[i+0]*(d2Ad[ 2]*tp[2] + d2Ad[ 3]*tp[3])+
+     coefs[i+1]*(d2Ad[ 6]*tp[2] + d2Ad[ 7]*tp[3])+
+     coefs[i+2]*(d2Ad[10]*tp[2] + d2Ad[11]*tp[3])+
+     coefs[i+3]*(d2Ad[14]*tp[2] + d2Ad[15]*tp[3]));
 }
 
 /************************************************************/
@@ -101,6 +161,39 @@ eval_UBspline_2d_d (UBspline_2d_d * restrict spline,
   
   int xs = spline->x_stride;
 #define P(i,j) (spline->coefs+(ix+(i))*xs+(iy+(j)))
+  // Now compute the vectors:
+  // tpx = [t_x^3 t_x^2 t_x 1]
+  // tpy = [t_y^3 t_y^2 t_y 1]
+  // tpz = [t_z^3 t_z^2 t_z 1]
+  // a  =  A * tpx,   b =  A * tpy,   c =  A * tpz
+  // da = dA * tpx,  db = dA * tpy,  dc = dA * tpz, etc.
+  // A is 4x4 matrix given by the rows A0, A1, A2, A3
+  __m128d tpx01, tpx23, tpy01, tpy23, 
+    a01, b01, bP01, a23, b23, bP23,
+    tmp0, tmp1, tmp2, tmp3;
+  
+  tpx01 = _mm_set_pd (tx*tx*tx, tx*tx);
+  tpx23 = _mm_set_pd (tx, 1.0);
+  tpy01 = _mm_set_pd (ty*ty*ty, ty*ty);
+  tpy23 = _mm_set_pd (ty, 1.0);
+  
+  // x-dependent vectors
+  _MM_DDOT4_PD (  A0_01,   A0_23,   A1_01,   A1_23, tpx01, tpx23, tpx01, tpx23,   a01);
+  _MM_DDOT4_PD (  A2_01,   A2_23,   A3_01,   A3_23, tpx01, tpx23, tpx01, tpx23,   a23);
+  // y-dependent vectors
+  _MM_DDOT4_PD (  A0_01,   A0_23,   A1_01,   A1_23, tpy01, tpy23, tpy01, tpy23,   b01);
+  _MM_DDOT4_PD (  A2_01,   A2_23,   A3_01,   A3_23, tpy01, tpy23, tpy01, tpy23,   b23);
+  
+  // Now compute bP, dbP, d2bP products
+  tmp0 = _mm_loadu_pd (P(0,0)); tmp1 = _mm_loadu_pd(P(0,2));
+  tmp2 = _mm_loadu_pd (P(1,0)); tmp3 = _mm_loadu_pd(P(1,2));
+  _MM_DDOT4_PD (tmp0, tmp1, tmp2, tmp3,   b01,   b23,   b01,   b23,   bP01);
+  tmp0 = _mm_loadu_pd (P(2,0)); tmp1 = _mm_loadu_pd(P(2,2));
+  tmp2 = _mm_loadu_pd (P(3,0)); tmp3 = _mm_loadu_pd(P(3,2));
+  _MM_DDOT4_PD (tmp0, tmp1, tmp2, tmp3,   b01,   b23,   b01,   b23,   bP23);
+  
+  // Compute value
+  _MM_DOT4_PD (a01, a23, bP01, bP23, *val);
 }
 
 
@@ -122,6 +215,54 @@ eval_UBspline_2d_d_vg (UBspline_2d_d * restrict spline,
   
   int xs = spline->x_stride;
 #define P(i,j) (spline->coefs+(ix+(i))*xs+(iy+(j)))
+  // Now compute the vectors:
+  // tpx = [t_x^3 t_x^2 t_x 1]
+  // tpy = [t_y^3 t_y^2 t_y 1]
+  // tpz = [t_z^3 t_z^2 t_z 1]
+  // a  =  A * tpx,   b =  A * tpy,   c =  A * tpz
+  // da = dA * tpx,  db = dA * tpy,  dc = dA * tpz, etc.
+  // A is 4x4 matrix given by the rows A0, A1, A2, A3
+  __m128d tpx01, tpx23, tpy01, tpy23, 
+    a01, b01, da01, db01, bP01, dbP01,  
+    a23, b23, da23, db23, bP23, dbP23, 
+    tmp0, tmp1, tmp2, tmp3;
+  
+  tpx01 = _mm_set_pd (tx*tx*tx, tx*tx);
+  tpx23 = _mm_set_pd (tx, 1.0);
+  tpy01 = _mm_set_pd (ty*ty*ty, ty*ty);
+  tpy23 = _mm_set_pd (ty, 1.0);
+  
+  // x-dependent vectors
+  _MM_DDOT4_PD (  A0_01,   A0_23,   A1_01,   A1_23, tpx01, tpx23, tpx01, tpx23,   a01);
+  _MM_DDOT4_PD (  A2_01,   A2_23,   A3_01,   A3_23, tpx01, tpx23, tpx01, tpx23,   a23);
+  _MM_DDOT4_PD ( dA0_01,  dA0_23,  dA1_01,  dA1_23, tpx01, tpx23, tpx01, tpx23,  da01);
+  _MM_DDOT4_PD ( dA2_01,  dA2_23,  dA3_01,  dA3_23, tpx01, tpx23, tpx01, tpx23,  da23);
+  // y-dependent vectors
+  _MM_DDOT4_PD (  A0_01,   A0_23,   A1_01,   A1_23, tpy01, tpy23, tpy01, tpy23,   b01);
+  _MM_DDOT4_PD (  A2_01,   A2_23,   A3_01,   A3_23, tpy01, tpy23, tpy01, tpy23,   b23);
+  _MM_DDOT4_PD ( dA0_01,  dA0_23,  dA1_01,  dA1_23, tpy01, tpy23, tpy01, tpy23,  db01);
+  _MM_DDOT4_PD ( dA2_01,  dA2_23,  dA3_01,  dA3_23, tpy01, tpy23, tpy01, tpy23,  db23);
+  
+  // Now compute bP, dbP, d2bP products
+  tmp0 = _mm_loadu_pd (P(0,0)); tmp1 = _mm_loadu_pd(P(0,2));
+  tmp2 = _mm_loadu_pd (P(1,0)); tmp3 = _mm_loadu_pd(P(1,2));
+  _MM_DDOT4_PD (tmp0, tmp1, tmp2, tmp3,   b01,   b23,   b01,   b23,   bP01);
+  _MM_DDOT4_PD (tmp0, tmp1, tmp2, tmp3,  db01,  db23,  db01,  db23,  dbP01);
+  tmp0 = _mm_loadu_pd (P(2,0)); tmp1 = _mm_loadu_pd(P(2,2));
+  tmp2 = _mm_loadu_pd (P(3,0)); tmp3 = _mm_loadu_pd(P(3,2));
+  _MM_DDOT4_PD (tmp0, tmp1, tmp2, tmp3,   b01,   b23,   b01,   b23,   bP23);
+  _MM_DDOT4_PD (tmp0, tmp1, tmp2, tmp3,  db01,  db23,  db01,  db23,  dbP23);
+  
+  // Compute value
+  _MM_DOT4_PD (a01, a23, bP01, bP23, *val);
+  // Compute gradient
+  _MM_DOT4_PD (da01, da23, bP01, bP23, grad[0]);
+  _MM_DOT4_PD (a01, a23, dbP01, dbP23, grad[1]);
+  double dxInv = spline->x_grid.delta_inv;
+  double dyInv = spline->y_grid.delta_inv;
+  grad[0] *= dxInv;
+  grad[1] *= dyInv;
+#undef P
 }
 
 /* Value, gradient, and laplacian */
