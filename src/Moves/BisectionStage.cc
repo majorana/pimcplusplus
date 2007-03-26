@@ -105,10 +105,74 @@
 //       ///Here we've stored the new position in the path
 //       Path.SetPos(slice+(skip>>1),ptcl,rpp);
 //     }
-//   }
+//   } 
 //   //  cerr<<"My logNewSampleProb is "<<logNewSampleProb<<endl;
 //   return logNewSampleProb;
 // }
+
+
+//void BisectionStageClass::Read(IOSectionClass& IO)
+//{
+
+
+
+
+//}
+
+
+void BisectionStageClass::CalcShift(Array<int,1> &activeParticles,int slice)
+{
+  ///Correlated sampling
+
+  int numActivePtcl=activeParticles.size();
+  Correlated.resize(NDIM*numActivePtcl,NDIM,numActivePtcl);
+  Correlated=0.0;
+  
+  Array<dVec,1> dispShift(numActivePtcl);
+  double sigma;
+  for (int ptclIndex=0;ptclIndex<numActivePtcl;ptclIndex++){
+    int ptcl=activeParticles(ptclIndex);
+    double t1sum;
+    for (int cptcl=0;cptcl<PathData.Path.NumParticles();cptcl++){
+      double dist;
+      dVec disp;
+      PathData.Path.DistDisp(slice,ptcl,cptcl,dist,disp);
+      double t1=PathData.Actions.ShortRange.dUdR(slice,ptcl,cptcl,BisectionLevel);
+      double t2=PathData.Actions.ShortRange.d2UdR2(slice,ptcl,cptcl,BisectionLevel);
+      for (int dim=0;dim<NDIM;dim++){
+	dispShift(ptcl)[dim]-=t1*disp[dim];
+	Correlated(ptcl*NDIM+dim,ptcl*NDIM+dim)-=t2*disp[dim]*disp[dim];
+	for (int dim2=0;dim2<dim;dim2++){
+	  Correlated(ptcl*NDIM+dim,ptcl*NDIM+dim2)-=t2*disp[dim]*disp[dim2];
+	  Correlated(ptcl*NDIM+dim2,ptcl*NDIM+dim)-=t2*disp[dim]*disp[dim2];
+	}
+      }
+      t1sum+=t1;
+    }
+    t1sum*=sigma;
+    for (int dim=0;dim<NDIM;dim++)
+      Correlated(ptcl*NDIM+dim,ptcl*NDIM+dim)+=t1sum;
+    for (int ptclIndex2=0;ptclIndex2<numActivePtcl;ptclIndex2++){
+      int ptcl2=activeParticles(ptclIndex2);
+      double dist;
+      dVec disp;
+      PathData.Path.DistDisp(slice,ptcl,ptcl2,dist,disp);
+      double t2=PathData.Actions.ShortRange.d2UdR2(slice,ptcl,ptcl2,BisectionLevel);
+      for (int dim=0;dim<NDIM;dim++){
+	Correlated(ptcl*NDIM+dim,ptcl2*NDIM+dim)-=t2*disp[dim]*disp[dim];
+	for (int dim2=0;dim2<NDIM;dim2++){
+	  Correlated(ptcl*NDIM+dim,ptcl2*NDIM+dim2)-=t2*disp[dim]*disp[dim2];
+	  Correlated(ptcl*NDIM+dim2,ptcl2*NDIM+dim)-=t2*disp[dim]*disp[dim2];
+	  Correlated(ptcl*NDIM+dim2,ptcl2*NDIM+dim)-=t2*disp[dim]*disp[dim2];
+	  Correlated(ptcl*NDIM+dim,ptcl2*NDIM+dim2)-=t2*disp[dim]*disp[dim2];
+	}
+	  
+      }
+    }
+  }
+  
+}
+
 
 void BisectionStageClass::WriteRatio()
 { 
@@ -145,6 +209,13 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
 #else
   PathClass &Path = PathData.Path;
 #endif
+
+
+
+  if (UseCorrelatedSampling){
+    Correlated.resize(NDIM*activeParticles.size(),NDIM*activeParticles.size());
+  }
+
   int skip = 1<<(BisectionLevel+1);
   double levelTau = 0.5*PathData.Path.tau*skip;
 

@@ -135,11 +135,11 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       else if ((PathData.Path.OpenPaths && level>LowestLevel) || UseApproximateHigherLevelAction){
 	newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
       }
-      else if (level>=PathData.Actions.GetMaxLevels()){
-	newStage->Actions.push_back(&PathData.Actions.ShortRangePrimitive);
-      }
       else if (PathData.Path.OrderN){
 	newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
+      }
+      else if (level>=PathData.Actions.GetMaxLevels()){
+	newStage->Actions.push_back(&PathData.Actions.ShortRangePrimitive);
       }
       else{ // if (level==LowestLevel) //HACK HERE CURRENTLY 
 	perr<<"Adding short range action in BisectionBlock."<<endl;
@@ -147,6 +147,22 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       }
       //      else
       //      	int dummy=5;
+      if (level != LowestLevel){
+	if (PathData.Path.DavidLongRange){
+	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+	}
+	else if (PathData.Actions.HaveLongRange()){
+	  if (PathData.Actions.UseRPA)
+	    newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+	  else
+	    newStage->Actions.push_back(&PathData.Actions.LongRange);
+	}
+	if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
+	  cerr << "Adding fermion node action for species " 
+	       << speciesName << endl;
+	  newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+	}
+      }
       if (level == LowestLevel) {
 	bool useTether=false;
 	in.ReadVar("UseTether",useTether);

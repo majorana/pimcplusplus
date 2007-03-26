@@ -24,6 +24,7 @@ class BisectionStageClass : public LocalStageClass
 {
 public:
   void WriteRatio();
+  //  void Read(IOSectionClass& IO);
   double Sample(int &slice1,int &slice2, 
 		Array<int,1> &activeParticles);
   Array<double,2> Correlated;
@@ -31,6 +32,7 @@ public:
   void Accept();
   void Reject();
   int TotalLevels;
+  void CalcShift(Array<int,1> &activeParticles,int slice);
   BisectionStageClass(PathDataClass &pathData, int level,
 		      IOSectionClass outSection) : 
     LocalStageClass(pathData,outSection)
