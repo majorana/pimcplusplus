@@ -95,7 +95,8 @@ double DavidPAClass::U (double q, double z, double s2, int level)
   double uTemp;
   double duTemp;
   double vTemp;
-  calcUsqz(s,q,z,level,uTemp,duTemp,vTemp);
+  //  calcUsqz(s,q,z,level,uTemp,duTemp,vTemp);
+  calcUsqzFast(s,q,z,level,uTemp);
   return uTemp;
 
 }
@@ -456,6 +457,54 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
 //     cerr<<dU<<" "<<V<<" "<<r<<" "<<rprime<<" "<<s<<" "<<z<<" "<<q<<endl;
 //   }
 }
+
+/// Calculate the U(s,q,z) value when given s,q,z and the level 
+/*! \f[\frac{u_0(r;\tau)+u_0(r';\tau)}{2}+\sum_{k=1}^n 
+  \sum_{j=1}^k u_{kj}(q;\tau)z^{2j}s^{2(k-j)}\f]   */
+void DavidPAClass::calcUsqzFast(double s,double q,double z,int level,
+				double &U)
+{
+  level=level+TauPos;
+  double rmin = ukj(level).grid->Start;
+  U=0.0;
+  double r=q+0.5*z;
+  double rprime=q-0.5*z;
+  if (r > ukj(level).grid->End) {
+    r=ukj(level).grid->End;
+  }
+  if (rprime > ukj(level).grid->End) {
+    rprime=ukj(level).grid->End;
+  }
+  // This is the endpoint action 
+  if ((rprime < rmin) || (r < rmin)){
+    cerr<<"I'm less then the min. Maybe this is messing me up\n";
+    U = 5000.0;
+    return;
+  }
+  U+= 0.5*(ukj(level)(1,r)+ukj(level)(1,rprime));
+  double UDiag=U;
+  if (s > 0.0 && q<ukj(level).grid->End) { // && q<ukj(level).grid->End){
+    double zsquared=z*z;
+    double ssquared=s*s; 
+    double ssquaredinverse=1.0/ssquared;
+    double Sto2k=ssquared;
+    (ukj(level))(q,TempukjArray); 
+    for (int k=1;k<=NumTerms;k++){  
+      double Zto2j=1;
+      double currS=Sto2k;
+      for (int j=0;j<=k;j++){
+	// indexing into the 2darray
+	double Ucof  = TempukjArray(k*(k+1)/2+j+1);
+	U+=(Ucof)*Zto2j*currS;
+	Zto2j*=zsquared;
+	currS=currS*ssquaredinverse;				
+      }				
+      Sto2k=Sto2k*ssquared;
+    } 
+  } 
+}
+
+
 
 void DavidPAClass::ReadSamplingTable(string fileName)
 {

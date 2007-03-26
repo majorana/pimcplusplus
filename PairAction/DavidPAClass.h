@@ -70,6 +70,10 @@ class DavidPAClass : public PairActionFitClass
   /// Calculate the U(s,q,z) value when given s,q,z and the level 
   void calcUsqz(double s,double q,double z,int level,
 		       double &U, double &dU, double &V);
+  void calcUsqzFast(double s,double q,double z,int level,
+		    double &U);
+
+
   /// This is the order of the fit to use. 
   int n;
   /// This is the temperature 
