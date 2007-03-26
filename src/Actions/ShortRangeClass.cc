@@ -95,20 +95,58 @@ ShortRangeClass::dUdR(int slice,int ptcl1, int ptcl2, int level)
   
 }
 
+
+double 
+ShortRangeClass::dUdR_movers(int slice,int ptcl1, int ptcl2, int level)
+{
+  int species1=Path.ParticleSpeciesNum(ptcl1);
+  int species2=Path.ParticleSpeciesNum(ptcl2);
+  PairActionFitClass *PA = PairMatrix(species1, species2);
+  assert(((DavidPAClass*)PA)->SamplingTableRead);
+  double dist;
+  dVec disp;
+  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
+  return ((DavidPAClass*)PA)->dUdRTimesSigma_movers(dist,level);
+}
+
+
+double 
+ShortRangeClass::d2UdR2(int slice,int ptcl1, int ptcl2, int level)
+{
+  int species1=Path.ParticleSpeciesNum(ptcl1);
+  int species2=Path.ParticleSpeciesNum(ptcl2);
+  PairActionFitClass *PA = PairMatrix(species1, species2);
+  assert(((DavidPAClass*)PA)->SamplingTableRead);
+  double dist;
+  dVec disp;
+  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
+  return ((DavidPAClass*)PA)->dUdRTimesSigma(dist,level);
+}
+
+double 
+ShortRangeClass::d2UdR2_movers(int slice,int ptcl1, int ptcl2, int level)
+{
+  int species1=Path.ParticleSpeciesNum(ptcl1);
+  int species2=Path.ParticleSpeciesNum(ptcl2);
+  PairActionFitClass *PA = PairMatrix(species1, species2);
+  assert(((DavidPAClass*)PA)->SamplingTableRead);
+  double dist;
+  dVec disp;
+  PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
+  return ((DavidPAClass*)PA)->dUdRTimesSigma_movers(dist,level);
+}
+
+
 double 
 ShortRangeClass::SingleAction (int slice1, int slice2,
 			       const Array<int,1> &changedParticles,
 			       int level)
 {
-  //  cerr<<"I'm in the short range action"<<endl;
+  //  cerr<<"I'm in short range single action"<<endl;
   double TotalU=0.0;
   //  int startTime=clock();
   //  for (int toRun=0;toRun<1000;toRun++){
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   // First, sum the pair actions
   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
     Path.DoPtcl(ptcl)=true;
@@ -119,7 +157,6 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
     int ptcl1 = changedParticles(ptcl1Index);
     Path.DoPtcl(ptcl1) = false;
     int species1=Path.ParticleSpeciesNum(ptcl1);
-
     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++) {
       if (Path.DoPtcl(ptcl2)){
 	int species2=Path.ParticleSpeciesNum(ptcl2);
@@ -127,42 +164,96 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 	for (int slice=slice1;slice<slice2;slice+=skip){
 	  dVec r, rp;
 	  double rmag, rpmag;
-
 	  PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
 				 rmag, rpmag, r, rp);
 	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
 	  double U;
-// 	  if (rmag<2.8 || rpmag<2.8)
-// 	    U=5000;
-// 	  else 
-// 	    U=0;
 	  U = PA.U(q,z,s2, level);
 	  // Subtract off long-range part from short-range action
 	  if (PA.IsLongRange() && PathData.Actions.UseLongRange)
 	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
-
-	  if (PathData.Path.FunnyCoupling && 
-	      (species1==1 || species2==1))
-	    TotalU +=sqrt(PathData.Path.ExistsCoupling)*U;
-	  else if (PathData.Path.WormOn){
-	    TotalU += U*PathData.Path.ParticleExist(slice,ptcl1)*
-	      PathData.Path.ParticleExist(slice,ptcl2)*
-	      PathData.Path.ParticleExist(slice+skip,ptcl1)*
-	      PathData.Path.ParticleExist(slice+skip,ptcl2);
-	  }
-	  else
-	    TotalU+=U;
+	  TotalU+=U;
+	}
 	}
       }
     }
-  }
 //  cerr<<"Num total U is "<<TotalU<<endl;
 ////  cerr<<"Worm short range action is "<<TotalU<<endl;
 //  cerr<<"I'm out of the short range action"<<endl;
   return (TotalU);
 }
+
+
+// double 
+// ShortRangeClass::SingleAction (int slice1, int slice2,
+// 			       const Array<int,1> &changedParticles,
+// 			       int level)
+// {
+//   //  cerr<<"I'm in the short range action"<<endl;
+//   double TotalU=0.0;
+//   //  int startTime=clock();
+//   //  for (int toRun=0;toRun<1000;toRun++){
+// #ifdef BUILD_DEV
+//   PathClassDev &Path = PathData.Path;
+// #else
+//   PathClass &Path = PathData.Path;
+// #endif
+//   // First, sum the pair actions
+//   for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
+//     Path.DoPtcl(ptcl)=true;
+//   int numChangedPtcls = changedParticles.size();
+//   int skip = 1<<level;
+//   double levelTau = Path.tau* (1<<level);
+//   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
+//     int ptcl1 = changedParticles(ptcl1Index);
+//     Path.DoPtcl(ptcl1) = false;
+//     int species1=Path.ParticleSpeciesNum(ptcl1);
+
+//     for (int ptcl2=0;ptcl2<Path.NumParticles();ptcl2++) {
+//       if (Path.DoPtcl(ptcl2)){
+// 	int species2=Path.ParticleSpeciesNum(ptcl2);
+// 	PairActionFitClass &PA = *(PairMatrix(species1, species2));
+// 	for (int slice=slice1;slice<slice2;slice+=skip){
+// 	  dVec r, rp;
+// 	  double rmag, rpmag;
+
+// 	  PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+// 				 rmag, rpmag, r, rp);
+// 	  double s2 = dot (r-rp, r-rp);
+// 	  double q = 0.5 * (rmag + rpmag);
+// 	  double z = (rmag - rpmag);
+// 	  double U;
+// // 	  if (rmag<2.8 || rpmag<2.8)
+// // 	    U=5000;
+// // 	  else 
+// // 	    U=0;
+// 	  U = PA.U(q,z,s2, level);
+// 	  // Subtract off long-range part from short-range action
+// 	  if (PA.IsLongRange() && PathData.Actions.UseLongRange)
+// 	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
+
+// 	  if (PathData.Path.FunnyCoupling && 
+// 	      (species1==1 || species2==1))
+// 	    TotalU +=sqrt(PathData.Path.ExistsCoupling)*U;
+// 	  else if (PathData.Path.WormOn){
+// 	    TotalU += U*PathData.Path.ParticleExist(slice,ptcl1)*
+// 	      PathData.Path.ParticleExist(slice,ptcl2)*
+// 	      PathData.Path.ParticleExist(slice+skip,ptcl1)*
+// 	      PathData.Path.ParticleExist(slice+skip,ptcl2);
+// 	  }
+// 	  else
+// 	    TotalU+=U;
+// 	}
+//       }
+//     }
+//   }
+// //  cerr<<"Num total U is "<<TotalU<<endl;
+// ////  cerr<<"Worm short range action is "<<TotalU<<endl;
+// //  cerr<<"I'm out of the short range action"<<endl;
+//   return (TotalU);
+// }
 
 //Doesn't deal correctly with the long range term possibly
 double 
@@ -212,6 +303,7 @@ ShortRangeClass::d_dBetaForcedPairAction (int slice1, int slice2,
 					  PairActionFitClass &pa)
 
 {
+  cerr<<"Calling me "<<endl;
   double levelTau=Path.tau;
   int level=0;
   int skip = 1<<level;
