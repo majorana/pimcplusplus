@@ -32,3 +32,15 @@ Quick setup
   - Install:
     If everything compiled, all that's left to do is
        make install
+ 
+The flags necessary to link with the Common library can be obtained
+using pkg-config.  For the serial version, 
+   pkg-config common --cflags
+and
+   pkg-config common --libs
+give the C++ compiler and linker flags, respectively.  For the MPI
+version, use
+   pkg-config mpicommon --cflags
+and
+   pkg-config mpicommon --libs
+instead.
