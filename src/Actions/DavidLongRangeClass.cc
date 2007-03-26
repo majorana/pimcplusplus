@@ -77,23 +77,25 @@ DavidLongRangeClass::SingleAction (int slice1, int slice2,
 
   double total=0;
   double factor;
-  for (int slice=slice1;slice<=slice2;slice++){
-    if ((slice == slice1) || (slice==slice2))
-      factor = 0.5;
-    else
-      factor = 1.0;
     for (int species=0; species<Path.NumSpecies(); species++) {
       ///COMMENTED OUT FOR UPDATERHOK      Path.CalcRho_ks_Fast(slice,species);
       //      PairActionFitClass &pa = *PairMatrix(species,species);
       //      if (pa.IsLongRange()) {
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
-	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
 	double kmagnitude=sqrt(Path.kVecs(ki)[0]*Path.kVecs(ki)[0]+
 			Path.kVecs(ki)[1]*Path.kVecs(ki)[1]);
 	int kcounter=0;
 	while (abs(kmagnitude-Path.MagK(kcounter))>1e-10)
 	  kcounter++;
 	assert(kcounter<Path.MagK.size());
+	
+	for (int slice=slice1;slice<=slice2;slice++){
+	  if ((slice == slice1) || (slice==slice2))
+	    factor = 0.5;
+	  else
+	    factor = 1.0;
+
+	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
 	total +=  factor*rhok2 * uk(Path.MagKint(kcounter));
 	
       }
