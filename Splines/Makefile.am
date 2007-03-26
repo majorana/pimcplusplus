@@ -104,7 +104,7 @@ libspline_la_LIBADD   =
 include_HEADERS = BicubicSpline.h ComplexMultiTricubicSpline.h CubicSpline.h Grid.h MultiTricubicSpline.h \
                   MyTricubicSpline.h PeriodicSpline.h QuinticSpline.h TricubicSpline.h FastCubicSpline.h  \
                   CubicBspline.h BsplineHelper.h BoundaryCondition.h NUBsplineBasis.h TricubicBspline.h   \
-                  TricubicNUBspline.h bspline_base.h bspline_create.h bspline_eval.h bspline_eval_sse_c.h \
+                  TricubicNUBspline.h bspline_base.h bspline_create.h bspline_eval_sse_c.h                \
 	          bspline_eval_sse_d.h bspline_eval_sse.h bspline_eval_sse_s.h bspline_eval_sse_z.h       \
                   bspline_eval_std_c.h bspline_eval_std_d.h bspline_eval_std_s.h bspline_eval_std_z.h     \
                   bspline.h bspline_structs_sse.h bspline_structs_std.h
