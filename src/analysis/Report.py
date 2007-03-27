@@ -5,6 +5,7 @@ import os
 import math
 import stats
 import numarray
+from AcceptRatio import *
 from Energy import *
 from nofr import *
 from PairCorrelation import *
@@ -88,6 +89,9 @@ for secNum in range(0, numSections):
           print "Processing Langevin move."
           ProcessLangevin(infiles, summaryDoc, detailedDoc, StartCut, beta)
           print "Done Langevin."
+     elif moveName=="BisectionBlock":
+          print "Processing Bisection move."
+          ProcessBisectionBlock(infiles,summaryDoc,detailedDoc,StartCut)
      infiles.CloseSection() # Current move section
 infiles.CloseSection() # "Moves"
 
