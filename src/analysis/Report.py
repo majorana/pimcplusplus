@@ -20,6 +20,7 @@ from Langevin import *
 from TimeAnalysis import *
 from VacancyDensity import *
 from SpecificHeat import *
+from Hexatic import *
 from SpecificHeatA import *
 from CycleCount import *
 from StructureFactor import *
@@ -71,7 +72,7 @@ summaryDoc.append(HR())
 #ProcessMove(doc,infiles)
 
 print "PreTopTable"
-(_,tau,numTimeSlices)=ProcessTopTable(summaryDoc,infiles)
+(_,tau,numTimeSlices,box)=ProcessTopTable(summaryDoc,infiles)
 beta = tau*numTimeSlices
 print "PostTopTable"
 ###########
@@ -148,12 +149,15 @@ for counter in range(0,numSections):
      elif myName=="WindingNumber":
          print "Processing Winding Number"
          ProcessWindingNumber(infiles,summaryDoc,detailedDoc,StartCut)
+     elif myName=="Hexatic":
+         print "Processing Hexatic"
+         ProcessHexatic(infiles,summaryDoc,detailedDoc,StartCut) 
 #     elif myName=="Pressure":
 #         ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut)
 #         summaryDoc.append(HR())
 #         detailedDoc.append(HR())
      elif myName=="PlaneDensity":
-          ProcessPlaneDensity(infiles,summaryDoc,detailedDoc,StartCut)
+          ProcessPlaneDensity(infiles,summaryDoc,detailedDoc,StartCut,box)
           summaryDoc.append(HR())
           detailedDoc.append(HR())
      elif myName=="TimeAnalysis":
