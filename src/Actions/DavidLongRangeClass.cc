@@ -33,12 +33,29 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
   ///BUG: Currently hardcoded for actual file
   infile.open(fileName.c_str());
   cerr<<" of "<<fileName.c_str()<<endl;
-  //  cerr<<"Beginning now"<<endl;
-  for (int lvl=0;lvl<2;lvl++)
+  string isRank;
+  infile >> isRank;
+  assert(isRank=="RANK");
+  int is5; infile >> is5; assert(is5==5);
+  int numkVec; infile >> numkVec;
+  int is1; infile >>is1; assert(is1==1); infile >>is1; assert(is1==1);
+  int is3; infile >> is3; assert(is3==3);
+  int numLvl; infile >> numLvl; 
+  infile >> isRank;
+  assert(isRank=="BEGIN");
+  infile >> isRank;
+  assert(isRank=="k-space");
+  infile >>isRank;
+  assert(isRank=="action");
+		    
+  cerr<<"Loading David Long Range: "<<numLvl<<" "<<numkVec<<endl;
+  //  for (int lvl=0;lvl<2;lvl++)
+  for (int lvl=0;lvl<numLvl;lvl++)
     for (int isEnergy=0;isEnergy<3;isEnergy++)
       ///BUG: 
       ///Currently hard coded for 20. Ugly 
-      for (int kVec=0;kVec<20;kVec++){
+      //      for (int kVec=0;kVec<20;kVec++){
+      for (int kVec=0;kVec<numkVec;kVec++){
 	infile>>myNum;
 	cerr<<"My num is "<<myNum<<endl;
 	if (lvl==0 && isEnergy==1){
