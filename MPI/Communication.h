@@ -282,7 +282,9 @@ public:
 
   ///Sums up the vectors in sendBuff.  Processor 0 only gets the
   ///resulting sum.
-  void Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuff);
+  //  void Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuff);
+  template<int N>
+  void Sum (Array<double,N> &sendBuff, Array<double,N> &recvBuff);
 
 
   void Sum (Array<Vec2,1> &sendBuff, Array<Vec2,1> &recvBuff);
