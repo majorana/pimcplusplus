@@ -13,7 +13,6 @@ private:
   MyTricubicSpline &Spline;
   int Direction;
   double Position;
-  void Set();
   ColorMap CMap;
   ColorMapType MapType;
   double MinVal, MaxVal;
@@ -22,6 +21,7 @@ private:
   bool IsInitialized;
   Mat3 Lattice;
 public:
+  void Set();
   void Init();
   void DrawPOV (FILE *out, string rotMatrix);
   void SetPosition (int dir, double pos);

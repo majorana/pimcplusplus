@@ -53,7 +53,8 @@ protected:
   Gtk::HScale kScale, BandScale;
   Gtk::Adjustment kAdjust, BandAdjust;
   Gtk::Frame kFrame, BandFrame;
-  Glib::RefPtr<Gtk::ToggleAction> CoordToggle, SphereToggle, BoxToggle;
+  Glib::RefPtr<Gtk::ToggleAction> CoordToggle, SphereToggle, BoxToggle,
+    TruncRadiiToggle;
   Gtk::RadioButtonGroup DisplayGroup, ColorMapGroup;
   Glib::RefPtr<Gtk::RadioAction> RealRadio, ImagRadio, Mag2Radio;
   
@@ -75,12 +76,17 @@ protected:
   Gtk::Adjustment RadiusAdjust;
   Gtk::HBox RadiusBox;
 
-  //////////////////////////////
-  // Density isosurface stuff //
-  //////////////////////////////
+  //////////////////////
+  // Isosurface stuff //
+  //////////////////////
   IOSectionClass Infile;
   bool FileIsOpen;
   Array<double,3> RhoData;
+  // Localize orbitals
+  bool Localized;
+  Vec3 Center;
+  double TruncRadius;
+  
   Isosurface WFIso;
   LinearGrid Xgrid, Ygrid, Zgrid;
   Gtk::VBox IsoBox, DensityBox;
@@ -158,6 +164,7 @@ protected:
   void OnCoordToggle();
   void OnSphereToggle();
   void OnBoxToggle();
+  void OnTruncRadiiToggle();
   void OnRadiusChange();
   void OnOpen();
   void OnDisplayRadio(WFDisplayType type);

@@ -195,6 +195,11 @@ WFVisualClass::WFVisualClass() :
   BoxToggle = Gtk::ToggleAction::create("Box", "Box", "Show box", true);
   Actions->add (BoxToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnBoxToggle));
+  TruncRadiiToggle = 
+    Gtk::ToggleAction::create("Trunc", "Truncation radii",
+			      "Show truncation radii", true);
+  Actions->add (TruncRadiiToggle,
+		sigc::mem_fun(*this, &WFVisualClass::OnTruncRadiiToggle));
 
   Actions->add (Gtk::Action::create("MenuDisplay", "Display"));
   Mag2Radio = Gtk::RadioAction::create
@@ -264,6 +269,7 @@ WFVisualClass::WFVisualClass() :
     "      <menuitem action='Nuclei'/>"
     "      <menuitem action='Axes'/>"
     "      <menuitem action='Box'/>"
+    "      <menuitem action='Trunc'/>"
     "    </menu>"
     "    <menu action='MenuDisplay'>"
     "      <menuitem action='Real'/>"
@@ -343,8 +349,10 @@ WFVisualClass::WFVisualClass() :
   show_all();
 
   PerspectButton.set_active(true);
+  TruncRadiiToggle->set_active(false);
   UpdateIso = true;
   UpdatePlane[0] = UpdatePlane[1] = UpdatePlane[2] = true;
+  CMapActions[BLUE_WHITE_RED]->set_active(true);
 }
 
 void
@@ -677,6 +685,17 @@ WFVisualClass::DrawFrame(bool offScreen)
       PathVis.Objects.push_back(&zPlane);
     if (IsoButton.get_active()) 
       PathVis.Objects.push_back(&WFIso);
+
+    // If localized, add a translucent sphere to signify the
+    // truncation radius
+    if (Localized && TruncRadiiToggle->get_active()) {
+      SphereObject* truncSphere = new SphereObject(offScreen);
+      truncSphere->SetRadius (TruncRadius);
+      truncSphere->SetPos (Center);
+      truncSphere->SetColor (Vec4 (0.8, 0.8, 0.0, 0.5));
+      PathVis.Objects.push_back(truncSphere);
+    }
+
   }
   if (MultiBandButton.get_active()) {
     if (UpdateIsoVal || UpdateIsoType)
@@ -911,6 +930,19 @@ WFVisualClass::ReadWF (int kpoint, int band)
     (fabs(twist_angle(2)) < 1.0e-12);
   assert (Infile.OpenSection("band", band));
   assert (Infile.ReadVar ("eigenvector", wfdata));
+  Array<double,1> center;
+  Localized = Infile.ReadVar ("center", center);
+  if (Localized) {
+    Center[0]=center(0); 
+    Center[1]=center(1);  
+    Center[2]=center(2);
+    Mat3 l = Box.GetLattice();
+    // Shift by half a box length
+    Center -= 0.5*Vec3(l(0,0)+l(1,0)+l(2,0),
+		       l(0,1)+l(1,1)+l(2,1),
+		       l(0,2)+l(1,2)+l(2,2));
+  }
+  Localized = Localized && Infile.ReadVar ("radius", TruncRadius);
   Infile.CloseSection(); // "eigenstates"
   Infile.CloseSection(); // "twist"
   Infile.CloseSection(); // "band"
@@ -991,6 +1023,12 @@ WFVisualClass::OnSphereToggle()
 
 void
 WFVisualClass::OnBoxToggle()
+{
+  DrawFrame();
+}
+
+void
+WFVisualClass::OnTruncRadiiToggle()
 {
   DrawFrame();
 }
@@ -1294,7 +1332,11 @@ WFVisualClass::OnColorMapRadio (ColorMapType type)
     xPlane.SetColorMap(type);
     yPlane.SetColorMap(type);
     zPlane.SetColorMap(type);
-    DrawFrame();
+    if (xPlaneButton.get_active())    xPlane.Set();
+    if (yPlaneButton.get_active())    yPlane.Set();
+    if (zPlaneButton.get_active())    zPlane.Set();
+    if (xPlaneButton.get_active() || yPlaneButton.get_active() || zPlaneButton.get_active())
+      DrawFrame();
   }
 }
 

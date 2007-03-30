@@ -9,7 +9,7 @@ int  SphereObject::OffScreenListNum(0);
 bool SphereObject::OffScreenListCreated(false);
 
 SphereObject::SphereObject(bool offScreen) : 
-  Radius(1.0), Color(1.0, 0.0, 0.0), Pos(0.0, 0.0, 0.0),
+  Radius(1.0), Color(1.0, 0.0, 0.0, 1.0), Pos(0.0, 0.0, 0.0),
   OffScreen(offScreen), NumFacets (20)
 {
   if (offScreen) {
@@ -48,14 +48,15 @@ SphereObject::Set()
   Start();
   // Set color
   float fcolor[4];
-  fcolor[0] = Color[0]; fcolor[1] = Color[1]; fcolor[2] = Color[2];
-  fcolor[3] = 1.0;
-  glColor3f (Color[0], Color[1], Color[2]);
+  fcolor[0] = Color[0]; fcolor[1] = Color[1]; 
+  fcolor[2] = Color[2]; fcolor[3] = Color[3];
+  glColor4f (Color[0], Color[1], Color[2], Color[3]);
   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
   float spec[4] = { 1.0, 1.0, 1.0, 1.0 };
   glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);
   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30.0);
-
+  if (fabs(Color[3]-1.0) > 1.0e-3)
+    glDepthMask(GL_FALSE);
   // Create sphere
   glPushMatrix();
   glTranslated (Pos[0], Pos[1], Pos[2]);
@@ -72,6 +73,8 @@ SphereObject::Set()
   }
   glPopMatrix();
   //  gluDeleteQuadric (qobj);
+  if (fabs(Color[3]-1.0) > 1.0e-3)
+  glDepthMask(GL_TRUE);
   End();
 }
 
@@ -97,6 +100,16 @@ SphereObject::SetRadius (double radius)
 
 void 
 SphereObject::SetColor (Vec3 color)
+{
+  Color[0] = color[0];
+  Color[1] = color[1];
+  Color[2] = color[2];
+  Color[3] = 1.0;
+  Set();
+}
+
+void 
+SphereObject::SetColor (Vec4 color)
 {
   Color = color;
   Set();
@@ -143,8 +156,12 @@ SphereObject::DrawPOV (FILE *fout, string rotString)
 	   Pos[0], Pos[1], Pos[2], Radius);
   fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "  }\n");    // Sphere
-  fprintf (fout, "    pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
-	   Color[0], Color[1], Color[2]);
+  if (Color[3] < 0.99999)
+    fprintf (fout, "    pigment { color rgbt <%1.5f %1.5f %1.5f %1.5f> }\n", 
+	     0.6*Color[0], 0.6*Color[1], 0.6*Color[2], 1.0-0.7*Color[3]);
+  else
+    fprintf (fout, "    pigment { color rgb <%1.5f %1.5f %1.5f> }\n", 
+	     Color[0], Color[1], Color[2]);
   fprintf (fout, "    finish {\n");
   fprintf (fout, "      ambient 0.1\n  diffuse 0.8\n");
   //  fprintf (fout, "    reflection 0.5\n");

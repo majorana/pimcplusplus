@@ -16,7 +16,6 @@ PlaneObject::SetColorMap(ColorMapType map)
 {
   MapType = map;
   CMap.Init (MinVal, MaxVal, map);
-  Set();
 }
 
 void
