@@ -211,6 +211,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new VariationalPIEnergyClass(PathData,OutFile);
     else if (observeType=="Vacancy")
       tempObs = new VacancyLocClass(PathData,OutFile);
+    else if (observeType=="VacancyNear")
+      tempObs = new VacancyLoc2Class(PathData,OutFile);
     else if (observeType=="VacancyDensity")
       tempObs = new VacancyDensityClass(PathData,OutFile);
     else if (observeType=="Conductivity")
@@ -308,6 +310,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new CouplingMoveClass(PathData,OutFile);
     else if (moveType=="CenterOfMass")
       move = new CenterOfMassMoveClass(PathData,OutFile);
+    else if (moveType=="ReadPath")
+      move = new ReadPathClass(PathData,OutFile);
     else if (moveType=="BisectionSphereBlock")
       move = new BisectionSphereBlockClass(PathData,OutFile);
     else if (moveType=="CenterDroplet")
