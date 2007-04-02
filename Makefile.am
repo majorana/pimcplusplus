@@ -28,12 +28,18 @@ AUX_DIST              = $(ac_aux_dir)/config.guess \
 if PARALLEL
   lib_LTLIBRARIES = libmpicommon.la
   pkgconfig_DATA  = mpicommon.pc
-  EXTRA_DIST      = mpicommon.pc.in turing.conf
 else
   lib_LTLIBRARIES = libcommon.la
   pkgconfig_DATA  = common.pc
   EXTRA_DIST      = common.pc.in turing.conf
 endif 
+  EXTRA_DIST      = common.pc.in mpicommon.pc.in   \
+                    turing.conf turing_serial.conf \
+                    ice.conf                       \
+                    pv.conf pv_serial.conf         \
+                    maranatha.conf                 \
+                    tungsten.conf                  \
+                    cobalt.conf                  
 
 libcommon_la_SOURCES =
 libcommon_la_LIBADD = IO/libIO.la                    \
