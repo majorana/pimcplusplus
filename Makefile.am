@@ -31,7 +31,6 @@ if PARALLEL
 else
   lib_LTLIBRARIES = libcommon.la
   pkgconfig_DATA  = common.pc
-  EXTRA_DIST      = common.pc.in turing.conf
 endif 
   EXTRA_DIST      = common.pc.in mpicommon.pc.in   \
                     turing.conf turing_serial.conf \
