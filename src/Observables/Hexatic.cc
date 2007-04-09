@@ -24,6 +24,31 @@ double unit2angle(double x,double y)
   return angle;
 }
 
+complex<double>
+HexaticClass::OrderParamater(Array<dVec,1> centroidPos,int ptcl)
+{
+  complex<double> op=0.0;
+  for (int nearPtcl=0;nearPtcl<PathData.Path.NumParticles();
+       nearPtcl++){
+    double r12dist;
+    dVec r12disp;
+    if (nearPtcl!=ptcl){
+      r12disp=centroidPos(nearPtcl)-centroidPos(ptcl);
+      r12dist=sqrt(dot(r12disp,r12disp));
+      if (r12dist<DistCutoff){
+	r12disp=r12disp/r12dist;
+	if (abs(dot(r12disp,r12disp)-1.0)>=0.001)
+	  cerr<<dot(r12disp,r12disp);
+	assert(abs(dot(r12disp,r12disp)-1.0)<0.001);
+	double theta_12=unit2angle(r12disp(0),r12disp(1));
+	op=op+complex<double>(cos(theta_12*q),sin(theta_12*q));
+      }
+    }
+  }
+  return op;
+}
+
+
 
 complex<double>
 HexaticClass::OrderParamater(int slice,int ptcl)
@@ -56,7 +81,7 @@ Conj(complex<double> a)
 }
 
 void
-HexaticClass::Accumulate()
+HexaticClass::Accumulate_old()
 {
   
   //  PathData.MoveJoin(PathData.NumTimeSlices()-1);
@@ -79,6 +104,41 @@ HexaticClass::Accumulate()
   }
   NumSamples++;
 }
+
+void
+HexaticClass::Accumulate()
+{
+  Array<dVec,1>  centroidPos(PathData.Path.NumParticles());
+  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+    dVec centroid=0.0;
+    for (int slice=1;slice<PathData.Path.NumTimeSlices()-1;slice++){
+      dVec disp=PathData.Path.Velocity(0,slice,ptcl);
+      centroid += disp;
+    }
+    centroid = centroid / (PathData.Path.NumTimeSlices()-1);
+    centroid = centroid + PathData.Path(0,ptcl);
+    centroidPos(ptcl)=centroid;
+  }
+  //  PathData.MoveJoin(PathData.NumTimeSlices()-1);
+  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+    ParticleOrder(ptcl)=OrderParamater(centroidPos,ptcl);
+  }
+  for (int ptcl1=0;ptcl1<PathData.Path.NumParticles();ptcl1++){
+    for (int ptcl2=0;ptcl2<PathData.Path.NumParticles();ptcl2++){
+      dVec disp=centroidPos(ptcl2)-centroidPos(ptcl1);
+      PathData.Path.PutInBox(disp);
+      double dist=sqrt(dot(disp,disp));
+      if (dist<grid.End){
+	int index=grid.ReverseMap(dist);
+	Histogram(index)=Histogram(index)+
+	  ParticleOrder(ptcl1)*Conj(ParticleOrder(ptcl2));
+      }
+    }
+  }
+  
+  NumSamples++;
+}
+
 
 void
 HexaticClass::WriteBlock()

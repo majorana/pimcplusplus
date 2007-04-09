@@ -27,6 +27,8 @@ protected:
   Array<complex<double>,1> ParticleOrder;
   void ReadGrid(IOSectionClass &in);
   complex<double> OrderParamater(int slice,int ptcl);
+  complex<double> OrderParamater(Array<dVec,1> centroidPos,int ptcl);
+  void Accumulate_old();
   LinearGrid grid;
   Array<complex<double>,1> Histogram;
   Array<double,1> HistDouble;
