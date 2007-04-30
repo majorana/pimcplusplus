@@ -243,16 +243,17 @@ void PathClass::Read (IOSectionClass &inSection)
   int numSpecies = inSection.CountSections ("Species");
   perr<<"we have this many sections: "<<numSpecies<<endl;
   // First loop over species and read info about species
-  bool prevDoMol;
+  //bool prevDoMol;
   for (int Species=0; Species < numSpecies; Species++) {
     inSection.OpenSection("Species", Species);
     SpeciesClass *newSpecies = ReadSpecies (inSection);
-    prevDoMol = doMol;
-    doMol = newSpecies->AssignMoleculeIndex;
-    // check to ensure all species are setting doMol consistently "on" or "off"
-    if(Species>0){
-      assert(doMol == prevDoMol);
-    }
+    // this molecule stuff is OBSOLETE
+    //prevDoMol = doMol;
+    //doMol = newSpecies->AssignMoleculeIndex;
+    //// check to ensure all species are setting doMol consistently "on" or "off"
+    //if(Species>0){
+    //  assert(doMol == prevDoMol);
+    //}
     inSection.CloseSection(); // "Species"
     bool manyParticles=false;
     inSection.ReadVar("ManyParticles",manyParticles);
@@ -263,6 +264,8 @@ void PathClass::Read (IOSectionClass &inSection)
     }
     AddSpecies (newSpecies);
   }
+
+
   inSection.CloseSection(); // Particles
   // Now actually allocate the path
   Allocate();
@@ -341,99 +344,100 @@ void PathClass::Allocate()
 
   /// Set the particle range for the new species
   for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
-    cerr << "  species " << (speciesNum+1) << " of " 
-	 << SpeciesArray.size() << endl;
     int N = SpeciesArray(speciesNum)->NumParticles;
-    cerr << "		I have N = " << N << " and doMol is " << doMol << endl;
     int first = numParticles;
     SpeciesArray(speciesNum)->FirstPtcl = first;
     numParticles=numParticles + N;
     SpeciesArray(speciesNum)->LastPtcl = first + N-1;;
     SpeciesArray(speciesNum)->Ptcls.resize(N);
     
-    int foundAt;
-    int prevIndex;
-    if(doMol){
-      string newMol = SpeciesArray(speciesNum)->molecule;
-      cerr << "		Looking for string " << newMol << endl;
-      bool foundMol = false;
-      for(int m=0; m<MoleculeName.size(); m++){
-	if(newMol == MoleculeName[m]){
-	  foundMol = true;
-	  assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
-	  foundAt = m;
-	  cerr << "		Found at " << foundAt 
-	       << " of " << MoleculeName.size() << endl;
-	}
-      }
-      if(!foundMol){
-	MoleculeName.push_back(newMol);
-	MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
-	int sum = 0;
-	for(int s=0; s<(MoleculeNumber.size()-1); s++)
-	  sum += MoleculeNumber[s];
-	offset.push_back(sum);
-	foundAt = MoleculeName.size() - 1;
-	cerr << "		Added " << newMol << " at " << foundAt << endl;
-      }
-      
-      prevIndex = 0;
-      for(int i=0; i<foundAt; i++){
-	prevIndex += MoleculeNumber[i];
-      }
-      //cerr << "		set prevIndex " << prevIndex << endl;
-      
-      //map<string,int>::iterator findName = (MoleculeMap.find(newMol));
-      //if(findName != MoleculeMap.end()){
-      //	assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
-      //}
-      //else{
-      //	MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
-      //	MoleculeMap[newMol] = MoleculeNumber.size();
-      //}
-      //cerr << "		Doing resizeAndPreserve...";
-      MolRef.resizeAndPreserve(MolRef.size() + N);
-      //cerr << " done" << endl;
-      numMol = MoleculeNumber[0];
-    }
+    // this molecule stuff is OBSOLETE
+//    int foundAt;
+//    int prevIndex;
+//    if(doMol){
+//      string newMol = SpeciesArray(speciesNum)->molecule;
+//      cerr << "		Looking for string " << newMol << endl;
+//      bool foundMol = false;
+//      for(int m=0; m<MoleculeName.size(); m++){
+//	if(newMol == MoleculeName[m]){
+//	  foundMol = true;
+//	  assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
+//	  foundAt = m;
+//	  cerr << "		Found at " << foundAt 
+//	       << " of " << MoleculeName.size() << endl;
+//	}
+//      }
+//      if(!foundMol){
+//	MoleculeName.push_back(newMol);
+//	MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
+//	int sum = 0;
+//	for(int s=0; s<(MoleculeNumber.size()-1); s++)
+//	  sum += MoleculeNumber[s];
+//	offset.push_back(sum);
+//	foundAt = MoleculeName.size() - 1;
+//	cerr << "		Added " << newMol << " at " << foundAt << endl;
+//      }
+//      
+//      prevIndex = 0;
+//      for(int i=0; i<foundAt; i++){
+//	prevIndex += MoleculeNumber[i];
+//      }
+//      //cerr << "		set prevIndex " << prevIndex << endl;
+//      
+//      //map<string,int>::iterator findName = (MoleculeMap.find(newMol));
+//      //if(findName != MoleculeMap.end()){
+//      //	assert(N/SpeciesArray(speciesNum)->formula == MoleculeNumber[m]);
+//      //}
+//      //else{
+//      //	MoleculeNumber.push_back(N/SpeciesArray(speciesNum)->formula);
+//      //	MoleculeMap[newMol] = MoleculeNumber.size();
+//      //}
+//      //cerr << "		Doing resizeAndPreserve...";
+//      MolRef.resizeAndPreserve(MolRef.size() + N);
+//      //cerr << " done" << endl;
+//      numMol = MoleculeNumber[0];
+//    }
     for (int i=0; i < N; i++){
       SpeciesArray(speciesNum)->Ptcls(i) = i+first;
-      if(doMol){
-	//cerr << "		" << i << " prevIndex " << prevIndex << ", foundAt " << foundAt << ", Mol.Num. " << MoleculeNumber[foundAt];
-	//cerr  << " so mod is " << i%MoleculeNumber[foundAt] << endl;
-	MolRef(i+first) = prevIndex + i%MoleculeNumber[foundAt]; // need to assign myMolecule
-	//cerr << "Assigned MolRef " << MolRef(i+first) << " to ptcl " << i+first << endl;
-	
-      }
+
+//      if(doMol){
+//	//cerr << "		" << i << " prevIndex " << prevIndex << ", foundAt " << foundAt << ", Mol.Num. " << MoleculeNumber[foundAt];
+//	//cerr  << " so mod is " << i%MoleculeNumber[foundAt] << endl;
+//	MolRef(i+first) = prevIndex + i%MoleculeNumber[foundAt]; // need to assign myMolecule
+//	//cerr << "Assigned MolRef " << MolRef(i+first) << " to ptcl " << i+first << endl;
+//	
+//      }
     }
   }
-  if(doMol){
-    MolMembers.resize(numMol);
-    vector<int> catalog(numMol); // for storing info to load MolMembers
-    // initialize catalog (all zeros)
-    for(int m = 0; m < catalog.size(); m++)
-      catalog[m] = 0;
-    // get number of ptcls for each molecule m; store in catalog
-    for(int p = 0; p <numParticles; p++)
-      catalog[MolRef(p)]++;
-    // resize MolMembers arrays appropritely; re-initialize catalog
-    for(int m = 0; m < catalog.size(); m++){
-      MolMembers(m).resize(catalog[m]);
-      catalog[m] = 0;
-    }
-    // load ptcls into the MolMembers array; catalog indexes
-    for(int p = 0; p <numParticles; p++){
-      int m = MolRef(p);
-      MolMembers(m)(catalog[m]) = p;
-      catalog[m]++;
-    }
-  }
-  else if(!doMol){
-    MolRef.resize(numParticles);
-    for(int m=0; m<MolRef.size(); m++)
-      MolRef(m) = m;
-    cerr << "Initializing MolRef to default: " << MolRef << endl;
-  }
+
+  // OBSOLETE molecule stuff
+//  if(doMol){
+//    MolMembers.resize(numMol);
+//    vector<int> catalog(numMol); // for storing info to load MolMembers
+//    // initialize catalog (all zeros)
+//    for(int m = 0; m < catalog.size(); m++)
+//      catalog[m] = 0;
+//    // get number of ptcls for each molecule m; store in catalog
+//    for(int p = 0; p <numParticles; p++)
+//      catalog[MolRef(p)]++;
+//    // resize MolMembers arrays appropritely; re-initialize catalog
+//    for(int m = 0; m < catalog.size(); m++){
+//      MolMembers(m).resize(catalog[m]);
+//      catalog[m] = 0;
+//    }
+//    // load ptcls into the MolMembers array; catalog indexes
+//    for(int p = 0; p <numParticles; p++){
+//      int m = MolRef(p);
+//      MolMembers(m)(catalog[m]) = p;
+//      catalog[m]++;
+//    }
+//  }
+//  else if(!doMol){
+//    MolRef.resize(numParticles);
+//    for(int m=0; m<MolRef.size(); m++)
+//      MolRef(m) = m;
+//    cerr << "Initializing MolRef to default: " << MolRef << endl;
+//  }
   if (WormOn)
     numParticles=numParticles+2;
   Path.resize(MyNumSlices,numParticles+OpenPaths);

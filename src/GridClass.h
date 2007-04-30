@@ -21,11 +21,7 @@
 #include <list>
 
 
-#ifdef BUILD_DEV
-  class PathClassDev;
-#else
-  class PathClass;
-#endif
+class PathClass;
 
 class CellInfoClass
 {
@@ -49,11 +45,7 @@ public:
   int Zeffect;
   Array<TinyVector<int,NDIM>,1> AffectedCells;
 
-#ifdef BUILD_DEV
-  PathClassDev &Path;
-#else
   PathClass &Path;
-#endif
 
   double CutoffDistance;
   Array<int,1> NumGrid;
@@ -73,17 +65,10 @@ public:
   void ReGrid(int slice,int ptcl);
   //deprecated  bool InBox(CellInfoClass &theGrid,dVec thePoint);
 
-#ifdef BUILD_DEV
-  CellMethodClass(PathClassDev &path) : Path(path){
-      CutoffDistance=8.0;
-      //do nothing for now
-  }
-#else
   CellMethodClass(PathClass &path) : Path(path){
       CutoffDistance=8.0;
       //do nothing for now
   }
-#endif
 
 
   

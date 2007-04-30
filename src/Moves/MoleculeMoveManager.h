@@ -10,7 +10,7 @@
 #include "MultiStage.h"
 #include "MoleculeBias.h"
 
-class MoleculeManagerClass : public MultiStageClass
+class MoleculeMoveStageManagerClass : public MultiStageClass
 {
 private:
   int SpeciesNum;
@@ -25,7 +25,7 @@ public:
   /// Override base class MakeMove to do a block of moves
   //void MakeMove();
 
-  MoleculeManagerClass(PathDataClass &pathData, IOSectionClass &out) : 
+  MoleculeMoveStageManagerClass(PathDataClass &pathData, IOSectionClass &out) : 
     MultiStageClass(pathData, out)
 
   { 

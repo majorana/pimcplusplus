@@ -90,7 +90,7 @@ void ObsDiffusionClass::Accumulate()
   // loop over slices
   for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
     /// loop over molecules 
-    for (int mol=0;mol<PathData.Path.numMol;mol++){
+    for (int mol=0;mol<PathData.Mol.NumMol();mol++){
 			dVec rt = PathData.Path(slice,mol) - R0(slice,mol);
 			double RSqMag = dot(rt, rt);
 			TotalMSD += RSqMag;
@@ -107,7 +107,7 @@ void ObsDiffusionClass::Initialize()
   TotalCounts = 0;
   TimesCalled=0;
 	totalSlices = PathData.NumTimeSlices()-1;
-	totalMol = PathData.Path.numMol;
+	totalMol = PathData.Mol.NumMol();
 	R0.resize(totalMol, totalSlices);
   for (int slice=0;slice<totalSlices;slice++) {
     /// loop over molecules 

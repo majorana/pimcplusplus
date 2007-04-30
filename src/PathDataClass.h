@@ -19,16 +19,11 @@
 
 #include "Common.h"
 #include "SpeciesClass.h"
-
-#ifdef BUILD_DEV
-  #include "PathClassDev.h"
-#else
-  #include "PathClass.h"
-#endif
-
+#include "PathClass.h"
 #include <Common/MPI/Communication.h>
 #include "Actions/ActionsClass.h"
 #include <Common/Random/Random.h>
+#include "MoleculeHelper.h"
 
 #ifdef USE_QMC
 	#include <QMCApp/QMCInterface.h>
@@ -51,6 +46,8 @@ private:
   int GetWallTime();
 
 public:  
+  MoleculeManagerClass Mol;
+
   bool RUN_QMC;
 	bool IAmQMCManager;
   int Seed;
@@ -97,11 +94,7 @@ public:
   ActionsClass Actions;
   /// The constructor that initializes the action and such
   int &Join;
-#ifdef BUILD_DEV
-  PathClassDev Path;
-#else
   PathClass Path;
-#endif
   inline void ShiftData(int numTimeSlicesToShift){
     Path.ShiftData(numTimeSlicesToShift);
     Actions.ShiftData(numTimeSlicesToShift);

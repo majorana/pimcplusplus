@@ -99,11 +99,11 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
       for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {
         ///loop over protons
         //  don't compute intramolecular interactions
-        if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+        if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
           for (int slice=startSlice;slice<=endSlice;slice+=skip){
             double Ormag;
             dVec Or;
-            PathData.Path.DistDisp(slice,Path.MolRef(ptcl1),Path.MolRef(ptcl2),Ormag,Or);
+            PathData.Path.DistDisp(slice,PathData.Mol(ptcl1),PathData.Mol(ptcl2),Ormag,Or);
             double tempOrmag = Ormag;
             dVec L = Path.GetBox();
             for (int x=-1; x<=1; x++) {
@@ -116,8 +116,8 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
                   // implement spherical cutoff
                   //double Ormag = COMSeparation(slice,ptcl1,ptcl2);
                   if (Ormag <= CUTOFF){
-                    dVec r = Or - (Path(slice,ptcl1) - Path(slice,Path.MolRef(ptcl1)))
-                      + (Path(slice,ptcl2) - Path(slice,Path.MolRef(ptcl2)));
+                    dVec r = Or - (Path(slice,ptcl1) - Path(slice,PathData.Mol(ptcl1)))
+                      + (Path(slice,ptcl2) - Path(slice,PathData.Mol(ptcl2)));
                     double rmag = Mag(r);
                     double ptclCutoff = 1.0;
                     ptclCutoff = Mag(r - Or + Renormalize(Or,CUTOFF));
@@ -147,11 +147,11 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
       for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {
         ///loop over electrons
         //  don't compute intramolecular interactions
-        if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+        if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
           for (int slice=startSlice;slice<=endSlice;slice+=skip){
             double Ormag;
             dVec Or;
-            PathData.Path.DistDisp(slice,Path.MolRef(ptcl1),Path.MolRef(ptcl2),Ormag,Or);
+            PathData.Path.DistDisp(slice,PathData.Mol(ptcl1),PathData.Mol(ptcl2),Ormag,Or);
             dVec L = Path.GetBox();
             double tempOrmag = Ormag;
             for (int x=-1; x<=1; x++) {
@@ -163,8 +163,8 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
                   Ormag = Mag(Or);
 
                   if (Ormag <= CUTOFF){
-                    dVec r = Or - (Path(slice,ptcl1) - Path(slice,Path.MolRef(ptcl1)))
-                      + (Path(slice,ptcl2) - Path(slice,Path.MolRef(ptcl2)));
+                    dVec r = Or - (Path(slice,ptcl1) - Path(slice,PathData.Mol(ptcl1)))
+                      + (Path(slice,ptcl2) - Path(slice,PathData.Mol(ptcl2)));
                     double rmag = Mag(r);
                     double ptclCutoff = 1.0;
                     ptclCutoff = Mag(r - Or + Renormalize(Or,CUTOFF));
@@ -285,7 +285,7 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
       /// calculating coulomb interactions
       for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {///loop over protons
         //  don't compute intramolecular interactions
-        if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+        if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
           for (int slice=startSlice;slice<endSlice;slice+=skip){
             double rmag;
             dVec r;
@@ -303,7 +303,7 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
       }
       for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {///loop over electrons
         //  don't compute intramolecular interactions
-        if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+        if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
           for (int slice=startSlice;slice<endSlice;slice+=skip){
             double rmag;
             dVec r;
@@ -330,7 +330,7 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
   //  cerr << TotalU << " and times beta " << TotalU_times_beta << " at temp " << 1.0/PathData.Path.tau << endl;
   //  cerr << "Energy function is returning " << TotalU << endl;
 
-  double energy_per_molecule = TotalU/PathData.Path.numMol;
+  double energy_per_molecule = TotalU/PathData.Mol.NumMol();
   //  return energy_per_molecule; // + thermal;
   //cerr << "RETURNING " << TotalU << endl;
   return TotalU;
@@ -388,7 +388,7 @@ double ST2WaterClass::EField (Array<int,1> &activeMol, int startSlice, int endSl
         /// calculating coulomb interactions with respect to each partial charge
         for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {///loop over protons
 //  don't compute intramolecular interactions
-	  if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+	  if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
 	    double rmag;
 	    dVec r;
 	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
@@ -403,7 +403,7 @@ double ST2WaterClass::EField (Array<int,1> &activeMol, int startSlice, int endSl
         }
         for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {///loop over electrons
 //  don't compute intramolecular interactions
-	  if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+	  if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
 	    double rmag;
 	    dVec r;
 	    PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
@@ -520,7 +520,7 @@ void ST2WaterClass::EFieldVec (int molIndex, dVec & Efield, double &Emag, int sl
     /// calculating coulomb interactions with respect to each partial charge
     for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {///loop over protons
 //  don't compute intramolecular interactions
-      if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+      if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
         double rmag;
 	dVec r;
 	PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
@@ -536,7 +536,7 @@ void ST2WaterClass::EFieldVec (int molIndex, dVec & Efield, double &Emag, int sl
     }
     for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {///loop over electrons
 //  don't compute intramolecular interactions
-      if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+      if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
         double rmag;
 	dVec r;
 	PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
@@ -616,10 +616,10 @@ double ST2WaterClass::OOSeparation (int slice,int ptcl1,int ptcl2)
   dVec Or;
   double Ormag;
 
-  Optcl1 = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl1);
-  Optcl2 = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl2);
+  Optcl1 = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl1);
+  Optcl2 = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl2);
   PathData.Path.DistDisp(slice, Optcl1, Optcl2, Ormag, Or);
-//  cerr << "We have particles " << ptcl1 << " and " << ptcl2 << " belonging to molecules " << Path.MolRef(ptcl1) << " and " << Path.MolRef(ptcl2) << " and calculate the distance between O " << Optcl1 << " and " << Optcl2 << " from " << Path.MolRef(Optcl1) << " and " << Path.MolRef(Optcl2) << endl;
+//  cerr << "We have particles " << ptcl1 << " and " << ptcl2 << " belonging to molecules " << PathData.Mol(ptcl1) << " and " << PathData.Mol(ptcl2) << " and calculate the distance between O " << Optcl1 << " and " << Optcl2 << " from " << PathData.Mol(Optcl1) << " and " << PathData.Mol(Optcl2) << endl;
   return Ormag;
 }
 
@@ -836,7 +836,7 @@ dVec ST2WaterClass::COMVelocity (int slice1,int slice2,int ptcl)
   int Optcl;
   dVec Ovel;
 
-  Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
+  Optcl = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl);
   Ovel = PathData.Path.Velocity(slice1, slice2, Optcl);
 //cerr << "I'm correcting velocity for ptcl " << ptcl << " of species " << Path.ParticleSpeciesNum(ptcl) << ".  Found COM oxygen at " << Optcl;
 //cerr << "Returning COM velocity " << Ovel << endl;
@@ -849,7 +849,7 @@ dVec ST2WaterClass::COMCoords (int slice, int ptcl)
   int Optcl;
   dVec relative_coords;
 
-  Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
+  Optcl = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl);
   relative_coords = PathData.Path(slice,ptcl) - PathData.Path(slice,Optcl);
 //cerr << "I'm correcting velocity for ptcl " << ptcl << " of species " << Path.ParticleSpeciesNum(ptcl) << ".  Found COM oxygen at " << Optcl;
 //cerr << "Returning COM velocity " << Ovel << endl;
@@ -867,7 +867,7 @@ int ST2WaterClass::FindCOM(int ptcl)
 {
   int speciesO=PathData.Path.SpeciesNum("O");
   int Optcl;
-  Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
+  Optcl = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl);
   return Optcl;
 }
 
@@ -875,7 +875,7 @@ int ST2WaterClass::FindOtherProton(int ptcl)
 {
   int speciesp=PathData.Path.SpeciesNum("p");
   int otherptcl;
-  otherptcl = Path.Species(speciesp).FirstPtcl + Path.MolRef(ptcl);
+  otherptcl = Path.Species(speciesp).FirstPtcl + PathData.Mol(ptcl);
   if (otherptcl == ptcl){
     otherptcl += Path.NumParticles()/5;
   }

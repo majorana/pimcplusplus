@@ -378,17 +378,18 @@ public:
 
 
 	public:
-	// containers for data about user-defined molecules
-	vector<string> MoleculeName; // stores all specified molecule names
-	vector<int> MoleculeNumber;  // stores corresponding number of each molecule
-	vector<int> offset;	// stores starting index for each molecule
-	//map<string,int> MoleculeMap; // maps molecule name to molecule id
-  int numMol; // stores number of molecules of the FIRST type of molecule 
-							///specified, maintained for compatibility with earlier segments of code
-  Array<int,1> MolRef; // maps ptcl index to molecule index
-	bool doMol;
-	// stores (nested) arrays of ptcls j belonging to molecule i (i.e. MolMembers(i).size() = j)
-  Array<Array<int,1>,1> MolMembers;
+  // molecule stuff is obsolete
+	//// containers for data about user-defined molecules
+	//vector<string> MoleculeName; // stores all specified molecule names
+	//vector<int> MoleculeNumber;  // stores corresponding number of each molecule
+	//vector<int> offset;	// stores starting index for each molecule
+	////map<string,int> MoleculeMap; // maps molecule name to molecule id
+  //int numMol; // stores number of molecules of the FIRST type of molecule 
+	//						///specified, maintained for compatibility with earlier segments of code
+  //Array<int,1> MolRef; // maps ptcl index to molecule index
+	//bool doMol;
+	//// stores (nested) arrays of ptcls j belonging to molecule i (i.e. MolMembers(i).size() = j)
+  //Array<Array<int,1>,1> MolMembers;
 
 };
 
@@ -514,13 +515,14 @@ PathClass::PathClass (CommunicatorClass &communicator,
   WormOn=false; //assume the worm is not on 
   Weight=1;
 
-	MoleculeName.resize(0);
-	MoleculeNumber.resize(0);
-	offset.resize(0);
-	//MoleculeMap.resize(0);
-	numMol = 0;
-	MolRef.resize(0);
-	doMol = false;
+  // molecule stuff: OBSOLETE
+	//MoleculeName.resize(0);
+	//MoleculeNumber.resize(0);
+	//offset.resize(0);
+	////MoleculeMap.resize(0);
+	//numMol = 0;
+	//MolRef.resize(0);
+	//doMol = false;
 }
 
 

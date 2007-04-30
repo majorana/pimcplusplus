@@ -42,6 +42,10 @@ ActionsClass::Read(IOSectionClass &in)
 		MoleculeInteractions.Read(in);
 		MoleculeInteractions.SetNumImages(NumImages);
 	}
+  bool doLRCRead = false;
+	if(in.ReadVar("InitLongRangeCoulomb",doLRCRead)){
+		LongRangeCoulomb.Read(in);
+	}
 	bool doQBoxRead = false;
 	if(in.ReadVar("InitQBoxAction",doQBoxRead)){
 		QBoxAction.Read(in);

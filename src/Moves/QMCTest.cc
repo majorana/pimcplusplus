@@ -2,7 +2,7 @@
 
 void QMCTestMove::AssignPtcl(int mol,Array<int,1>& activeParticles){
   for (int i = 0;i<5;i++)
-    activeParticles(i) = mol + PathData.Path.numMol*i;
+    activeParticles(i) = mol + PathData.Mol.NumMol()*i;
 }
 
 dVec QMCTestMove::Translate(double epsilon)

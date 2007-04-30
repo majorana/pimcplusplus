@@ -257,6 +257,8 @@ void EnergyClass::Read(IOSectionClass &in)
 			OtherActions[n] = &PathData.Actions.QMCSampling;
 		} else if(EnergyStrings(n) == "IonIonActionClass"){
 			OtherActions[n] = &PathData.Actions.IonInteraction;
+		} else if(EnergyStrings(n) == "LongRangeCoulomb"){
+			OtherActions[n] = &PathData.Actions.LongRangeCoulomb;
 		}
 		// Other action objects can be specified here of course
 #ifdef USE_QMC

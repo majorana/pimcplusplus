@@ -47,14 +47,14 @@ double MoleculeForceBiasMove::Sample(int &slice1,int &slice2, Array<int,1> &acti
   double Tau = PathData.Path.tau;
 
 	if(mode == SINGLE){
-  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
+  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Mol.NumMol());
 		MoveList(0) = choosemol;
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == SEQUENTIAL){
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == GLOBAL){
 		activeParticles.resize(PathData.Path.NumParticles());
@@ -105,8 +105,8 @@ double MoleculeForceBiasMove::Sample(int &slice1,int &slice2, Array<int,1> &acti
       sumN(2) = 0;
       int activeMol = MoveList(activeMolIndex);
       dVec O = PathData.Path(slice,activeMol);
-      for(int i=0;i<PathData.Path.MolMembers(activeMol).size(); i++){
-        int ptcl = PathData.Path.MolMembers(activeMol)(i);
+      for(int i=0;i<PathData.Mol.MembersOf(activeMol).size(); i++){
+        int ptcl = PathData.Mol.MembersOf(activeMol)(i);
         dVec coord = PathData.Path(slice,ptcl);
         coord -= O;
         dVec F = PathData.Actions.MoleculeInteractions.Force(slice,ptcl); // calculate force
@@ -137,11 +137,11 @@ double MoleculeForceBiasMove::Sample(int &slice1,int &slice2, Array<int,1> &acti
         numAdded ++;
         // do translation
         if(doTrans){
-          dVec move = TranslateMol(slice,PathData.Path.MolMembers(activeMol),dR); 
+          dVec move = TranslateMol(slice,PathData.Mol.MembersOf(activeMol),dR); 
         }
         // do rotation
         if(doRot){  
-          RotateMol(slice,PathData.Path.MolMembers(activeMol), A, theta);
+          RotateMol(slice,PathData.Mol.MembersOf(activeMol), A, theta);
         }
 
         dVec Orev = PathData.Path(slice,activeMol);
@@ -152,8 +152,8 @@ double MoleculeForceBiasMove::Sample(int &slice1,int &slice2, Array<int,1> &acti
         sumNrev(0) = 0;
         sumNrev(1) = 0;
         sumNrev(2) = 0;
-        for(int i=0;i<PathData.Path.MolMembers(activeMol).size(); i++){
-          int ptcl = PathData.Path.MolMembers(activeMol)(i);
+        for(int i=0;i<PathData.Mol.MembersOf(activeMol).size(); i++){
+          int ptcl = PathData.Mol.MembersOf(activeMol)(i);
           dVec coord = PathData.Path(slice,ptcl);
           coord -= Orev;
           dVec F = PathData.Actions.MoleculeInteractions.Force(slice,ptcl); // calculate force
@@ -208,7 +208,7 @@ dVec CalcLever(dVec axis, dVec coord){
 //  double Tau = PathData.Path.tau;
 //  int slice =0; //classical for now
 //
-//  int numMol = PathData.Path.numMol;
+//  int numMol = PathData.Mol.NumMol();
 //  Array<int,1> ActiveParticles(5);
 //  int choosemol = (int)floor(PathData.Path.Random.Local()*numMol);
 //  AssignPtcl(choosemol,ActiveParticles);

@@ -21,6 +21,7 @@
 #include "ShortRangeApproximateClass.h"
 #include "ShortRangePrimitive.h"
 #include "LongRangeClass.h"
+#include "LongRangeCoulombClass.h"
 #include "LongRangeRPAClass.h"
 #include "ShortRangePotClass.h"
 #include "LongRangePotClass.h"
@@ -95,6 +96,8 @@ public:
   /// The long range part of the action, which is summed in k-space.  
   LongRangeClass LongRange;
 
+  LongRangeCoulombClass LongRangeCoulomb;
+  
   /// The Random Phase Approximation-corrected form of the above.
   LongRangeRPAClass LongRangeRPA;
 
@@ -193,6 +196,7 @@ public:
     ShortRangePrimitive(pathData,PairMatrix),
     ShortRangePot(pathData, PairMatrix),
     LongRange(pathData,PairMatrix,PairArray), 
+    LongRangeCoulomb(pathData,PairMatrix,PairArray), 
     DavidLongRange(pathData),
     Josephson(pathData),
     Hermele(pathData),

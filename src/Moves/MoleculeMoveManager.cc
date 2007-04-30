@@ -1,6 +1,6 @@
 #include "MoleculeMoveManager.h"
 
-void MoleculeManagerClass::Read(IOSectionClass &in)
+void MoleculeMoveStageManagerClass::Read(IOSectionClass &in)
 {
   cerr << "MolMoveMgr read..." << endl;
   int stages = 1;

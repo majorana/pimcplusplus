@@ -342,6 +342,13 @@ cerr << "  PIMC: initialized InterComm; ranks is " << ranks << endl;
 
 #endif
 
+  // this is the NEW molecule stuff!!
+  // initialize MoleculeHelperClass
+  if(in.OpenSection("Molecules")){
+    Mol.Read(in);
+    in.CloseSection();
+  }
+
 	moveClock = 0;
 	cerr << "leaving read" << endl;
 }

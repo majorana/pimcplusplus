@@ -101,10 +101,6 @@ if test "x$common_ok" != "xyes"; then
    AC_MSG_ERROR([Could not find common library.  Please install first.])
 fi
 
-# Optionally compile pimcDev, the development version
-AC_ARG_ENABLE(pimcdev, [  --enable-pimcdev      compile development version pimcDev])
-AM_CONDITIONAL([WANT_PIMC_DEV], [test "$enable_pimcdev" = "yes"])
-
 # Optionally compile visual
 AC_ARG_ENABLE(pathvis, [  --enable-pathvis        compile path visualization GUI])
 AM_CONDITIONAL([WANT_PATHVIS], [test "$enable_pathvis" = "yes"])
@@ -191,7 +187,7 @@ fi
 AC_ARG_WITH(qmc,    [  --with-qmcpack=/path/to/my/qmcpack/builddir	enable QMCPACK functionality])
 if (test "x$with_qmcpack" != "x"); then
    	QMC_DEF="-DUSE_QMC -DAPPNAMESPACE=qmcplusplus -I$with_qmcpack/src -I$with_qmcpack/../src"
-	 	QMC_LIB="$with_qmcpack/lib/liboompi.a $with_qmcpack/lib/libqmc.a $with_qmcpack/lib/libqmcdriver.a $with_qmcpack/lib/libqmcham.a $with_qmcpack/lib/libqmcwfs.a $with_qmcpack/lib/libqmcbase.a $with_qmcpack/lib/libqmcutil.a"
+	 	QMC_LIB="$with_qmcpack/lib/libqmc.a $with_qmcpack/lib/libqmcdriver.a $with_qmcpack/lib/libqmcham.a $with_qmcpack/lib/libqmcwfs.a $with_qmcpack/lib/libqmcbase.a $with_qmcpack/lib/libqmcutil.a"
 else # don't link with qmcpack
     QMC_DEF=" "
 		QMC_LIB=" "
@@ -238,6 +234,7 @@ AC_CONFIG_FILES([ Makefile                  \
                   src/Observables/Makefile  \
                   src/Visual/Makefile       \
                   src/Langevin/Makefile     \
+                  src/Rotor/Makefile        \
                   doc/Makefile               ])
 AC_MSG_RESULT([ COMMON_LIBS  = $COMMON_LIBS ])
 AC_OUTPUT

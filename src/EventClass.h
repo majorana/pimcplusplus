@@ -23,9 +23,6 @@ using namespace IO;
 
 class PathDataClass;
 class PathClass;
-#ifdef BUILD_DEV
-  class PathClassDev;
-#endif
 
 /// EventClass is the parent of ObservableClass and MoveClass.  It is
 /// used as a handle by the algorithm to call the different
@@ -43,11 +40,7 @@ protected:
   /// Stores a reference to PathData
   PathDataClass &PathData;
   /// And a reference to Path for convenience
-#ifdef BUILD_DEV
-  PathClassDev &Path;
-#else
   PathClass &Path;
-#endif
 
 public:
   /// Stores the time spent doing the event in seconds.

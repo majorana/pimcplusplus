@@ -43,37 +43,30 @@ void MolMoveClass::Read (IOSectionClass &in){
 	int indexMolecule;
 	if(in.ReadVar("Molecule",setMolecule)){
 		cerr << "got Molecule " << setMolecule << endl;
-		indexMolecule = 0;
-		cerr << " index is " << indexMolecule << " which gets " << PathData.Path.MoleculeName[indexMolecule];
-		cerr  << " out of total size " << PathData.Path.MoleculeName.size() << endl;
-		while((PathData.Path.MoleculeName[indexMolecule] != setMolecule) && (indexMolecule<PathData.Path.MoleculeName.size())){
-			cerr << "indexMolecule is " << indexMolecule << "... max is " << PathData.Path.MoleculeName.size() << endl;
-			indexMolecule++;
-		}
-		molIndex = indexMolecule;
-		numMol = PathData.Path.MoleculeNumber[molIndex];
-		cerr << "Selected molecule " << PathData.Path.MoleculeName[molIndex] << endl;
+		molIndex = PathData.Mol.Index(setMolecule);
+		numMol = PathData.Mol.NumMol(molIndex);
 	}
 	else if (in.ReadVar("Molecule",indexMolecule)){
-		molIndex = indexMolecule;
-		numMol = PathData.Path.MoleculeNumber[molIndex];
-		cerr << "Selected molecule " << PathData.Path.MoleculeName[molIndex] << endl;
+    molIndex = indexMolecule;
+		numMol = PathData.Mol.NumMol(molIndex);
 	}
 	else{
 		molIndex = 0;
-		numMol = PathData.Path.MoleculeNumber[molIndex];
-		cerr << "Selected molecule " << PathData.Path.MoleculeName[molIndex] << " by default" << endl;
+		numMol = PathData.Mol.NumMol(molIndex);
+    cerr << "BY DEFAULT, ";
 	}
+	cerr << "Selected molecule index " << molIndex << "(" << PathData.Mol.NameOf(molIndex) << ") with " << numMol << endl;
 	
 /// Read in update mode: GLOBAL, SEQUENTIAL, SINGLE	
 	string setMode;
 	assert(in.ReadVar("Mode", setMode));
 	if(setMode == "GLOBAL"){
 		mode = GLOBAL;
-		MoveList.resize(numMol);
-		for(int m=0; m<numMol; m++)
-			MoveList(m) = m + PathData.Path.offset[molIndex];
-		cerr << "Set for GLOBAL particle updates." << endl;
+    MoveList = PathData.Mol.MolOfType(molIndex);
+		//MoveList.resize(numMol);
+		//for(int m=0; m<numMol; m++)
+		//	MoveList(m) = m + PathData.Path.offset[molIndex];
+		//cerr << "Set for GLOBAL particle updates." << endl;
 	}
 	else if(setMode == "SEQUENTIAL"){
 		mode = SEQUENTIAL;
@@ -112,6 +105,9 @@ void MolMoveClass::Read (IOSectionClass &in){
   		Actions.push_back(&PathData.Actions.CEIMCAction);
 			cerr << "Added CEIMC calculation of BO energy" << endl;
 #endif
+		}else if(setAction == "LongRangeCoulomb"){
+  		Actions.push_back(&PathData.Actions.LongRangeCoulomb);
+			cerr << "Added long-range coulomb interaction" << endl;
 		}else if(setAction == "IonInteraction"){
   		Actions.push_back(&PathData.Actions.IonInteraction);
 			cerr << "Added intermolecular ion-ion interaction" << endl;
@@ -130,7 +126,7 @@ void MolMoveClass::Read (IOSectionClass &in){
   //  catalog[m] = 0;
 	//// get number of ptcls for each molecule m; store in catalog
   //for(int p = 0; p <PathData.Path.NumParticles(); p++)
-	//	catalog[PathData.Path.MolRef(p)]++;
+	//	catalog[PathData.PathData.Mol(p)]++;
 	//// resize MolMembers arrays appropritely; re-initialize catalog
   //for(int m = 0; m < catalog.size(); m++){
   //  MolMembers(m).resize(catalog[m]);
@@ -138,14 +134,14 @@ void MolMoveClass::Read (IOSectionClass &in){
   //}
 	//// load ptcls into the MolMembers array; catalog indexes
   //for(int p = 0; p <PathData.Path.NumParticles(); p++){
-  //  int m = PathData.Path.MolRef(p);
+  //  int m = PathData.PathData.Mol(p);
 	//	MolMembers(m)(catalog[m]) = p;
 	//	catalog[m]++;
 	//}
 }
 
 dVec MolMoveClass::GetCOM(int slice, int mol){
-  return PathData.Path(slice,PathData.Path.MolMembers(mol)(0));
+  return PathData.Path(slice,PathData.Mol.MembersOf(mol)(0));
 }
 
 // translate members of a molecule by a specified vector translate
@@ -254,7 +250,7 @@ void MolMoveClass::StressBond(int slice, int ptcl, int mol, double s){
 }
 
 void MolMoveClass::StressAngle(int slice, int ptcl, dVec axis, double theta){
-  int mol = PathData.Path.MolRef(ptcl);
+  int mol = PathData.Mol(ptcl);
   dVec O = PathData.Path(slice,mol);
   dVec v = PathData.Path(slice,ptcl) - O;
   v = ArbitraryRotate(axis, v, theta);
@@ -267,7 +263,7 @@ void MolMoveClass::Accept(){
 
 void MolMoveClass::Advance(){
 	MoveList(0) = MoveList(0) + 1;
-	if(MoveList(0) >= PathData.Path.numMol)
+	if(MoveList(0) >= PathData.Mol.NumMol())
 		MoveList(0) = 0;
 }
 

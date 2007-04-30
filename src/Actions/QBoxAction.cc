@@ -2,7 +2,7 @@
 #include "../PathDataClass.h"
 #include <sstream>
 
-ofstream qout("MolIntAct.dat");
+ofstream qout("QBoxAct.dat");
 int qCount;
 
 bool Extract(string s, string find, string& data);

@@ -23,7 +23,7 @@ int clustmax = 0;
 
 void LocalFlip::AssignPtcl(int mol,Array<int,1>& activeParticles){
   for (int i = 0;i<5;i++)
-    activeParticles(i) = mol + PathData.Path.numMol*i;
+    activeParticles(i) = mol + PathData.Mol.NumMol()*i;
 }
 
 double LocalFlip::MolPairAction(int slice,int m,int n){
@@ -31,8 +31,8 @@ double LocalFlip::MolPairAction(int slice,int m,int n){
   Array<int,1> activeParticles(10);
   // load values for molecules m and n
   for (int i = 0;i<5;i++){
-    activeParticles(i) = m + PathData.Path.numMol*i;
-    activeParticles(i+5) = n + PathData.Path.numMol*i;
+    activeParticles(i) = m + PathData.Mol.NumMol()*i;
+    activeParticles(i+5) = n + PathData.Mol.NumMol()*i;
   }
   return PathData.Actions.MoleculeInteractions.Action(slice, slice, activeParticles, 0);
 }
@@ -154,7 +154,7 @@ void LocalFlip::IntegrityCheck(int slice, Array<int,1> activeParticles){
 
 void LocalFlip::MakeMove()
 {
-  int numMol = PathData.Path.numMol;
+  int numMol = PathData.Mol.NumMol();
   double theta = M_PI;
   Array<int,1> ActiveParticles(5);
   Array<bool,1> AlreadyMoved(numMol);
@@ -296,7 +296,7 @@ void GlobalFlip::RotateMol(int slice,int mol,dVec Q){
 
 void GlobalFlip::AssignPtcl(int mol,Array<int,1>& activeParticles){
   for (int i = 0;i<5;i++)
-    activeParticles(i) = mol + PathData.Path.numMol*i;
+    activeParticles(i) = mol + PathData.Mol.NumMol()*i;
 }
 
 double GlobalFlip::MolPairAction(int slice,int m,int n){
@@ -304,15 +304,15 @@ double GlobalFlip::MolPairAction(int slice,int m,int n){
   Array<int,1> activeParticles(10);
   // load values for molecules m and n
   for (int i = 0;i<5;i++){
-    activeParticles(i) = m + PathData.Path.numMol*i;
-    activeParticles(i+5) = n + PathData.Path.numMol*i;
+    activeParticles(i) = m + PathData.Mol.NumMol()*i;
+    activeParticles(i+5) = n + PathData.Mol.NumMol()*i;
   }
   return PathData.Actions.MoleculeInteractions.Action(slice, slice, activeParticles, 0);
 }
 
 void GlobalFlip::MakeMove()
 {
-  int numMol = PathData.Path.numMol;
+  int numMol = PathData.Mol.NumMol();
   double theta = M_PI;
   Array<int,1> ActiveParticles(5);
   Array<bool,1> AlreadyMoved(numMol);

@@ -106,7 +106,7 @@ TIP5PWaterClass::SingleAction (int startSlice, int endSlice,
       for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {
         ///loop over protons
 //  don't compute intramolecular interactions
-	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+	if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
 	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
 	    double rmag;
 	    dVec r;
@@ -125,7 +125,7 @@ TIP5PWaterClass::SingleAction (int startSlice, int endSlice,
       for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {
         ///loop over electrons
 //  don't compute intramolecular interactions
-	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+	if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
 	  for (int slice=startSlice;slice<=endSlice;slice+=skip){
 	    double rmag;
 	    dVec r;
@@ -227,7 +227,7 @@ double TIP5PWaterClass::d_dBeta (int startSlice, int endSlice,  int level)
       /// calculating coulomb interactions
       for (int ptcl2=Path.Species(speciesp).FirstPtcl;ptcl2<=Path.Species(speciesp).LastPtcl;ptcl2++) {///loop over protons
 //  don't compute intramolecular interactions
-	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+	if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
 	  for (int slice=startSlice;slice<endSlice;slice+=skip){
 	    double rmag;
 	    dVec r;
@@ -245,7 +245,7 @@ double TIP5PWaterClass::d_dBeta (int startSlice, int endSlice,  int level)
       }
       for (int ptcl2=Path.Species(speciese).FirstPtcl;ptcl2<=Path.Species(speciese).LastPtcl;ptcl2++) {///loop over electrons
 //  don't compute intramolecular interactions
-	if (Path.DoPtcl(ptcl2)&&Path.MolRef(ptcl1)!=Path.MolRef(ptcl2)){
+	if (Path.DoPtcl(ptcl2)&&PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
 	  for (int slice=startSlice;slice<endSlice;slice+=skip){
 	    double rmag;
 	    dVec r;
@@ -272,7 +272,7 @@ double TIP5PWaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 //  cerr << TotalU << " and times beta " << TotalU_times_beta << " at temp " << 1.0/PathData.Path.tau << endl;
 //  cerr << "Energy function is returning " << TotalU << endl;
 
-  double energy_per_molecule = TotalU/PathData.Path.numMol;
+  double energy_per_molecule = TotalU/PathData.Mol.NumMol();
 //  return energy_per_molecule; // + thermal;
   return TotalU;
 }
@@ -284,10 +284,10 @@ double TIP5PWaterClass::OOSeparation (int slice,int ptcl1,int ptcl2)
   dVec Or;
   double Ormag;
 
-  Optcl1 = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl1);
-  Optcl2 = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl2);
+  Optcl1 = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl1);
+  Optcl2 = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl2);
   PathData.Path.DistDisp(slice, Optcl1, Optcl2, Ormag, Or);
-//  cerr << "We have particles " << ptcl1 << " and " << ptcl2 << " belonging to molecules " << Path.MolRef(ptcl1) << " and " << Path.MolRef(ptcl2) << " and calculate the distance between O " << Optcl1 << " and " << Optcl2 << " from " << Path.MolRef(Optcl1) << " and " << Path.MolRef(Optcl2) << endl;
+//  cerr << "We have particles " << ptcl1 << " and " << ptcl2 << " belonging to molecules " << PathData.Mol(ptcl1) << " and " << PathData.Mol(ptcl2) << " and calculate the distance between O " << Optcl1 << " and " << Optcl2 << " from " << PathData.Mol(Optcl1) << " and " << PathData.Mol(Optcl2) << endl;
   return Ormag;
 }
 
@@ -483,7 +483,7 @@ dVec TIP5PWaterClass::COMVelocity (int slice1,int slice2,int ptcl)
   int Optcl;
   dVec Ovel;
 
-  Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
+  Optcl = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl);
   Ovel = PathData.Path.Velocity(slice1, slice2, Optcl);
 //cerr << "I'm correcting velocity for ptcl " << ptcl << " of species " << Path.ParticleSpeciesNum(ptcl) << ".  Found COM oxygen at " << Optcl;
 //cerr << "Returning COM velocity " << Ovel << endl;
@@ -496,7 +496,7 @@ dVec TIP5PWaterClass::COMCoords (int slice, int ptcl)
   int Optcl;
   dVec relative_coords;
 
-  Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
+  Optcl = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl);
   relative_coords = PathData.Path(slice,ptcl) - PathData.Path(slice,Optcl);
 //cerr << "I'm correcting velocity for ptcl " << ptcl << " of species " << Path.ParticleSpeciesNum(ptcl) << ".  Found COM oxygen at " << Optcl;
 //cerr << "Returning COM velocity " << Ovel << endl;
@@ -514,7 +514,7 @@ int TIP5PWaterClass::FindCOM(int ptcl)
 {
   int speciesO=PathData.Path.SpeciesNum("O");
   int Optcl;
-  Optcl = Path.Species(speciesO).FirstPtcl + Path.MolRef(ptcl);
+  Optcl = Path.Species(speciesO).FirstPtcl + PathData.Mol(ptcl);
   return Optcl;
 }
 
@@ -522,7 +522,7 @@ int TIP5PWaterClass::FindOtherProton(int ptcl)
 {
   int speciesp=PathData.Path.SpeciesNum("p");
   int otherptcl;
-  otherptcl = Path.Species(speciesp).FirstPtcl + Path.MolRef(ptcl);
+  otherptcl = Path.Species(speciesp).FirstPtcl + PathData.Mol(ptcl);
   if (otherptcl == ptcl){
     otherptcl += Path.NumParticles()/5;
   }

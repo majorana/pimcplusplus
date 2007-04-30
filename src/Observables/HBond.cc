@@ -59,23 +59,23 @@ void HbondClass::Read(IOSectionClass& in)
   ObservableClass::Read(in);
   assert(in.ReadVar("Frequency",Frequency));
 	totalSlices = PathData.NumTimeSlices()-1;
-	totalMol = PathData.Path.numMol;
+	totalMol = PathData.Mol.NumMol();
   AgeTable.resize(totalSlices, totalMol, totalMol);
   AgeTable=0;
 	cerr << "resized AgeTable: " << AgeTable.size() << endl;
 
-  BondCount.resize(PathData.Path.numMol,PathData.Path.numMol);
+  BondCount.resize(PathData.Mol.NumMol(),PathData.Mol.NumMol());
   BondCount=0;
 	cerr << "resized BondCount: " << BondCount.size() << endl;
 
 	string ProtonSpecies = "H";
 	in.ReadVar("ProtonSpecies",ProtonSpecies);
-	Protons.resize(PathData.Path.numMol, 2);
+	Protons.resize(PathData.Mol.NumMol(), 2);
 	int totalFound = 0;
-	for(int m=0; m<PathData.Path.numMol; m++){
+	for(int m=0; m<PathData.Mol.NumMol(); m++){
 		int foundIndex = 0;
-  	for (int a = 0; a < PathData.Path.MolMembers(m).size(); a++){
-  	  int ptcl = PathData.Path.MolMembers(m)(a);
+  	for (int a = 0; a < PathData.Mol.MembersOf(m).size(); a++){
+  	  int ptcl = PathData.Mol.MembersOf(m)(a);
 			if(PathData.Path.ParticleSpeciesNum(ptcl) == PathData.Path.SpeciesNum(ProtonSpecies)){
 				Protons(m, foundIndex) = ptcl;
 				foundIndex++;
@@ -140,8 +140,8 @@ void HbondClass::Accumulate()
 	int died=0;
   for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
   	/// loop over molecules 
-    for (int mol1=0;mol1<PathData.Path.numMol-1;mol1++){
-      for (int mol2=mol1+1;mol2<PathData.Path.numMol;mol2++){
+    for (int mol1=0;mol1<PathData.Mol.NumMol()-1;mol1++){
+      for (int mol2=mol1+1;mol2<PathData.Mol.NumMol();mol2++){
 				totalPair++;
         if(IsHBond(slice,mol1,mol2)){
           AgeTable(slice, mol1, mol2)++;

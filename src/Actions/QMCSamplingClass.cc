@@ -81,7 +81,7 @@
 	  		PathData.qmc->execute();
 			}
 		}
-		else {
+		else{ 
       // I'm only supporting VMC for UN-correlated sampling right now
       assert(QMCMethod == "VMC");
 	  	PathData.qmc->SetVMC(dt, walkers, steps, blocks);

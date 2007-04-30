@@ -49,6 +49,7 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
   double oldAction=StageAction(slice1,slice2,activeParticles);
   SetMode(NEWMODE);
   double newAction =StageAction(slice1,slice2,activeParticles);
+  //cout << oldAction << " " << newAction << endl;
   double currActionChange=newAction-oldAction;
   double logAcceptProb=log(sampleRatio)-currActionChange+prevActionChange;
   //  AcceptProb=exp(logAcceptProb);

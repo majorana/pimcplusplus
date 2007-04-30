@@ -66,14 +66,14 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
   double step = Step; // Using Step from input file
 
 	if(mode == SINGLE){
-  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
+  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Mol.NumMol());
 		MoveList(0) = choosemol;
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == SEQUENTIAL){
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == GLOBAL){
 		activeParticles.resize(PathData.Path.NumParticles());
@@ -81,10 +81,10 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 	}
 //cerr << counter << ", ";
 //  int choosemol = counter;
-//	counter = (counter+1)%PathData.Path.numMol;
+//	counter = (counter+1)%PathData.Mol.NumMol();
 //	activeParticles.resize(MolMembers(choosemol).size());
 //	for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(choosemol)(i);
-//cerr << "  chose molecule " << choosemol << " of " << PathData.Path.numMol << endl;
+//cerr << "  chose molecule " << choosemol << " of " << PathData.Mol.NumMol() << endl;
 //cerr << "  Getting info from " << MolMembers(choosemol) << endl;
 //cerr << "  activeParticles is " << activeParticles << endl;
 
@@ -109,7 +109,7 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
 		//cerr << "  Before move: chose slice " << slice << endl;
 		//for(int i=0; i<activeParticles.size(); i++) cerr << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
-  	dVec move = TranslateMol(slice,PathData.Path.MolMembers(MoveList(activeMol)),step); 
+  	dVec move = TranslateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)),step); 
 		//cerr << "  After move: of " << move << endl;
 		//for(int i=0; i<activeParticles.size(); i++) cerr << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
   	move_mag_sq += move(0)*move(0) + move(1)*move(1) + move(2)*move(2);
@@ -117,7 +117,7 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 
   // this block is a hack to output configurations
   // in a format for QBox
-	int numMol = PathData.Path.numMol;
+	int numMol = PathData.Mol.NumMol();
 	int output1 = 0;
 	int output2 = output1 + 1;
 	int output3 = output2 + 1;
@@ -198,7 +198,7 @@ double DimerMove::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles)
     slice2 = slice+1;
   }
 
-  MoveDimerSeparation(slice,PathData.Path.MolMembers(0), PathData.Path.MolMembers(1),step); 
+  MoveDimerSeparation(slice,PathData.Mol.MembersOf(0), PathData.Mol.MembersOf(1),step); 
 
   if (numMoves%10000 == 0 && numMoves>0){
     cerr << numMoves << " moves; current Dimer Move ratio is " << double(numAccepted)/numMoves << " with step size " << step << " really numAcc is " << numAccepted << endl;
@@ -215,14 +215,14 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
   //double dtheta = 2*M_PI*0.3;
 
 	if(mode == SINGLE){
-  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
+  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Mol.NumMol());
 		MoveList(0) = choosemol;
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == SEQUENTIAL){
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == GLOBAL){
 		activeParticles.resize(PathData.Path.NumParticles());
@@ -243,13 +243,13 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	  slice2 = slice+1;
 	}
 
-	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Path.MolMembers(MoveList(0)) << endl;
+	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Mol.MembersOf(MoveList(0)) << endl;
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
 		//activeParticles.resize(MolMembers(MoveList(activeMol)).size());
 		//for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(activeMol))(i);
 		
 		double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
-		RotateMol(slice,PathData.Path.MolMembers(MoveList(activeMol)), theta);
+		RotateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
 
 	}
 
@@ -283,14 +283,14 @@ double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 	//cerr << " ParticleTranslate::Sample" << endl;
 
 	if(mode == SINGLE){
-  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
+  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Mol.NumMol());
 		MoveList(0) = choosemol;
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == SEQUENTIAL){
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == GLOBAL){
 		activeParticles.resize(PathData.Path.NumParticles());
@@ -312,8 +312,8 @@ double ParticleTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
   }
 	//cerr << numMoves << ": ParticleTranslate moving " << activeParticles << endl;
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
-		for(int activeP = 0; activeP<PathData.Path.MolMembers(MoveList(activeMol)).size(); activeP++){
-			int movePtcl = PathData.Path.MolMembers(MoveList(activeMol))(activeP);
+		for(int activeP = 0; activeP<PathData.Mol.MembersOf(MoveList(activeMol)).size(); activeP++){
+			int movePtcl = PathData.Mol.MembersOf(MoveList(activeMol))(activeP);
       //if(Path.ParticleSpeciesNum(movePtcl) != 0){
 			  //cerr << "Moving ptcl " <<  movePtcl << " at slice " << slice << " from " << PathData.Path(slice,movePtcl);
   		TranslatePtcl(slice, movePtcl, Sigma);
@@ -350,14 +350,14 @@ double DummyEvaluate::Sample(int &slice1,int &slice2, Array<int,1> &activePartic
 double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles){
 
 	if(mode == SINGLE){
-  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Path.numMol);
+  	int choosemol = (int)floor(PathData.Path.Random.Local()*PathData.Mol.NumMol());
 		MoveList(0) = choosemol;
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == SEQUENTIAL){
-		activeParticles.resize(PathData.Path.MolMembers(MoveList(0)).size());
-		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Path.MolMembers(MoveList(0))(i);
+		activeParticles.resize(PathData.Mol.MembersOf(MoveList(0)).size());
+		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = PathData.Mol.MembersOf(MoveList(0))(i);
 	}
 	else if(mode == GLOBAL){
 		activeParticles.resize(PathData.Path.NumParticles());
@@ -378,21 +378,21 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
 	  slice2 = slice+1;
 	}
 
-	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Path.MolMembers(MoveList(0)) << endl;
+	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Mol.MembersOf(MoveList(0)) << endl;
 	for(int molIndex=0; molIndex<MoveList.size(); molIndex++){
     int activeMol = MoveList(molIndex);
 
-		// get relevant bonds from MoveList and PathData.Path.MolMembers
+		// get relevant bonds from MoveList and PathData.Mol.MembersOf
     vector<int> bondPtcls(0);
     vector<int*> anglePairs(0);
-    for(int p1=1; p1<PathData.Path.MolMembers(activeMol).size(); p1++){
-      int ptcl1 = PathData.Path.MolMembers(activeMol)(p1);
-      if(ptcl1 != PathData.Path.MolRef(ptcl1)){
+    for(int p1=1; p1<PathData.Mol.MembersOf(activeMol).size(); p1++){
+      int ptcl1 = PathData.Mol.MembersOf(activeMol)(p1);
+      if(ptcl1 != PathData.Mol(ptcl1)){
         bondPtcls.push_back(ptcl1);
         //cerr << "S adding bound ptcl " << ptcl1 << endl;
       }
-      for(int p2=p1+1; p2<PathData.Path.MolMembers(activeMol).size(); p2++){
-        int ptcl2 = PathData.Path.MolMembers(activeMol)(p2);
+      for(int p2=p1+1; p2<PathData.Mol.MembersOf(activeMol).size(); p2++){
+        int ptcl2 = PathData.Mol.MembersOf(activeMol)(p2);
         int pair[2];
         pair[0] = ptcl1;
         pair[1] = ptcl2;

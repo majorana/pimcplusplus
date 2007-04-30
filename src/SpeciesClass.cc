@@ -25,11 +25,12 @@ bool SpeciesClass::Read(IOSectionClass &inSection)
   inSection.ReadVar("PseudoCharge",pseudoCharge);
   inSection.ReadVar("Epsilon",Epsilon);
   inSection.ReadVar("Sigma",Sigma);
-	AssignMoleculeIndex = false;
-	if(inSection.ReadVar("Molecule",molecule)){
-		assert(inSection.ReadVar("Formula",formula));
-		AssignMoleculeIndex = true;
-	}
+  // OBSOLETE
+	//AssignMoleculeIndex = false;
+	//if(inSection.ReadVar("Molecule",molecule)){
+	//	assert(inSection.ReadVar("Formula",formula));
+	//	AssignMoleculeIndex = true;
+	//}
   assert(inSection.ReadVar("NumParticles",NumParticles));
   assert(inSection.ReadVar("NumDim",NumDim));
   assert(inSection.ReadVar("Type",Type));

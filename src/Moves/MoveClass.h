@@ -25,6 +25,7 @@
 #include "PermuteTableClass.h"
 #include "RandomPermMove.h"
 #include "MultiStage.h"
+#include "PreSampling.h"
 #include "IonMoveManager.h"
 #include "MoleculeMoveManager.h"
 #include "GlobalJosephsonMove.h"

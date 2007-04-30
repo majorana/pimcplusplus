@@ -61,10 +61,10 @@ void AutoCorrClass::Read(IOSectionClass& in)
   OneNetHistogram.resize(NumSlots);
   NetNetHistogram.resize(NumSlots);
 	cerr << "OneOneHistogram size is " << OneOneHistogram.size() << endl;
-  DipoleBin.resize(PathData.Path.numMol*(PathData.Path.NumTimeSlices()-1),NumSlots);
+  DipoleBin.resize(PathData.Mol.NumMol()*(PathData.Path.NumTimeSlices()-1),NumSlots);
 	cerr << "DipoleBin size: " << DipoleBin.size() << endl;
   NetDipoleBin.resize((PathData.Path.NumTimeSlices()-1),NumSlots);
-  cerr << "slices " << PathData.NumTimeSlices()-1 << " and molecules " << PathData.Path.numMol << endl;
+  cerr << "slices " << PathData.NumTimeSlices()-1 << " and molecules " << PathData.Mol.NumMol() << endl;
 	cerr << "NumSlots is " << NumSlots << endl;
   in.CloseSection();
 }
@@ -155,7 +155,7 @@ void AutoCorrClass::Print()
 
 
 int AutoCorrClass::MapIndex(int slice, int molecule){
-  int numMol = PathData.Path.numMol;
+  int numMol = PathData.Mol.NumMol();
   return (molecule + slice*numMol); 
 }
 
@@ -168,8 +168,8 @@ void AutoCorrClass::Advance(int& index,int limit){
 // new one
 dVec AutoCorrClass::MeasureDipole(int slice,int molecule){
 	vector<int> dipoleIndex(0);
-  for (int a = 0; a < PathData.Path.MolMembers(molecule).size(); a++){
-    int ptcl = PathData.Path.MolMembers(molecule)(a);
+  for (int a = 0; a < PathData.Mol.MembersOf(molecule).size(); a++){
+    int ptcl = PathData.Mol.MembersOf(molecule)(a);
 		if(PathData.Path.ParticleSpeciesNum(ptcl) == PathData.Path.SpeciesNum(dipoleSpecies)){
 			dipoleIndex.push_back(ptcl);
 		}
@@ -191,7 +191,7 @@ dVec AutoCorrClass::MeasureDipole(int slice,int molecule){
 //dVec AutoCorrClass::MeasureDipole(int slice,int molecule){
 //  Array <int,1> activeParticles(5);
 //  for (int a = 0; a < 5; a++)
-//    activeParticles(a) = molecule + a*PathData.Path.numMol;
+//    activeParticles(a) = molecule + a*PathData.Mol.NumMol();
 //  dVec O = PathData.Path(slice,activeParticles(0));
 //  dVec P1 = PathData.Path(slice,activeParticles(3));
 //  dVec P2 = PathData.Path(slice,activeParticles(4));
@@ -232,13 +232,13 @@ AutoCorrClass::CalcAutoCorr(int index, int t, int limit, double& SingleSingle, d
 	NetNet = 0.0;
   double k = 0.0;
 	//cerr << "calculating autocorrelation between " << index << " and " << Locate(index,t,limit) << endl;;
-  double norm = (PathData.NumTimeSlices()-1)*PathData.Path.numMol;
+  double norm = (PathData.NumTimeSlices()-1)*PathData.Mol.NumMol();
   for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
 		dVec muNet1 = NetDipoleBin(slice, index);
 		dVec muNet2 = NetDipoleBin(slice, Locate(index,t,limit));
 		double NetNetDot = CalcDotProd(muNet1, muNet2);
 		NetNet += NetNetDot;
-    for (int mol=0;mol<PathData.Path.numMol;mol++){
+    for (int mol=0;mol<PathData.Mol.NumMol();mol++){
       dVec mu1 = DipoleBin(MapIndex(slice,mol),index);
       dVec mu2 = DipoleBin(MapIndex(slice,mol),Locate(index,t,limit));
 //cerr << "     slice " << slice << " and mol " << mol << "; mu1 is " << mu1 << " and mu2 is " << mu2;
@@ -283,7 +283,7 @@ void AutoCorrClass::Accumulate()
     // loop over slices
     for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
       /// loop over molecules 
-      for (int mol=0;mol<PathData.Path.numMol;mol++){
+      for (int mol=0;mol<PathData.Mol.NumMol();mol++){
         DipoleBin(MapIndex(slice,mol),now) = v;
       }
     }
@@ -328,7 +328,7 @@ void AutoCorrClass::Accumulate()
   for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
     /// loop over molecules 
 		dVec netMu(0.0, 0.0, 0.0);
-    for (int mol=0;mol<PathData.Path.numMol;mol++){
+    for (int mol=0;mol<PathData.Mol.NumMol();mol++){
 			int index = MapIndex(slice,mol); 
       DipoleBin(index,now) = MeasureDipole(slice,mol);
 			netMu += DipoleBin(index,now);
