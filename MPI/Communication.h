@@ -150,6 +150,20 @@ public:
 //   void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
 //		    int recvProc,       Array<Vec2,1> &recvBuff);
   
+
+  template<int N>
+  void CommunicatorClass::Sum (Array<double,N> &sendBuff, Array<double,N> &recvBuff)
+  {
+    double *sendPtr = sendBuff.data();
+    double *recvPtr = recvBuff.data();
+    int count = sendBuff.size();
+    MPI_Reduce(sendPtr, recvPtr, count, MPI_DOUBLE, MPI_SUM, 0, 
+	       MPIComm);
+  }
+
+
+
+
   template<int N>
   void Sum (Array<complex<double>,N> Ain, Array<complex<double>,N> Aout)
   {
@@ -283,8 +297,6 @@ public:
   ///Sums up the vectors in sendBuff.  Processor 0 only gets the
   ///resulting sum.
   //  void Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuff);
-  template<int N>
-  void Sum (Array<double,N> &sendBuff, Array<double,N> &recvBuff);
 
 
   void Sum (Array<Vec2,1> &sendBuff, Array<Vec2,1> &recvBuff);
