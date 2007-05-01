@@ -5,7 +5,8 @@ endif
 #QMCPACK_ROOT = /home/gergely/qmcPlusPlusNew
 #QMCPACK_HOME = $(QMCPACK_ROOT)/build
 
-SUBDIRS = Actions Moves Observables Langevin Rotor $(MAYBE_PATHVIS)
+#SUBDIRS = Actions Moves Observables Langevin Rotor $(MAYBE_PATHVIS)
+SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
 
   bin_PROGRAMS = pimc++ FreeParticles VacancyLoc vmc
   
