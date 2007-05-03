@@ -15,6 +15,8 @@
 /////////////////////////////////////////////////////////////
 
 #include "StructureFactor.h"
+#include <utility>
+// #include <multimap>
 
 void StructureFactorClass::Read(IOSectionClass& in)
 {
@@ -123,6 +125,7 @@ void StructureFactorClass::WriteBlock()
 {
   Array<dVec,1> &kVecs = PathData.Path.kVecs;
   Array<double,1> SkSum(kVecs.size()+Additionalkvecs.size());
+  SkSum=0.0;
   double norm=0.0;
   int num1 = PathData.Path.Species(Species1).NumParticles;
   int num2 = PathData.Path.Species(Species1).NumParticles;
@@ -174,6 +177,7 @@ void StructureFactorClass::Accumulate()
   }
   TotalCounts++;
   for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++) {
+    multimap<double,double > kList;
     for (int ki=0; ki<kVecs.size(); ki++) {
       double a = PathData.Path.Rho_k(slice, Species1, ki).real();
       double b = PathData.Path.Rho_k(slice, Species1, ki).imag();
@@ -185,6 +189,9 @@ void StructureFactorClass::Accumulate()
 	SkMax=sk;
 	MaxkVec=kVecs(ki);
       }
+      double kMag=sqrt(kVecs(ki)[0]*kVecs(ki)[0]+kVecs(ki)[1]*kVecs(ki)[1]);
+      kList.insert(pair<double,double> (kMag,sk));
+		   //      cerr<<slice<<" "<<ki<<" "<<sk<<endl;
       Sk(ki) += sk;
     }
     for (int ki=kVecs.size();ki<kVecs.size()+Additionalkvecs.size();ki++){
@@ -196,7 +203,10 @@ void StructureFactorClass::Accumulate()
       double sk=a*c+b*d;
       Sk(ki) += sk;
     }
-    
+//     for (multimap<double,double  >::iterator iter=kList.begin();
+// 	 iter!=kList.end();iter++)
+//       cerr<<(*iter).first<<" "<<(*iter).second<<endl;
+      
   }
 }
 void StructureFactorClass::Clear()
