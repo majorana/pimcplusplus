@@ -52,6 +52,7 @@ private:
   DisplaceStageClass DisplaceStage;
 public:
   // Read the parameters from the input file
+  int CurrentPtcl;
   void Read (IOSectionClass &in);
   // Actually attempts the move and accepts or rejects
   void MakeMove();
