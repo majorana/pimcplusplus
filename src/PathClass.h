@@ -180,6 +180,9 @@ public:
 			double &dist, dVec &disp);
   inline void DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 			double &distA, double &distB,dVec &dispA, dVec &dispB);
+  void DistDispFast (int sliceA, int sliceB, int ptcl1, int ptcl2,
+		     double &distA, double &distB,dVec &dispA, dVec &dispB);
+
   void RefDistDisp (int slice, int refPtcl, int ptcl,
 		    double &dist, dVec &disp);
   //  inline double Distance (int slice, int ptcl1, int ptcl2);Not used?
@@ -189,6 +192,7 @@ public:
   dVec MinImageDisp(dVec v1, dVec v2);
 
   inline void PutInBox (dVec &v);
+  void PutInBoxFast (dVec &v);
 
 
   //////////////////////////
