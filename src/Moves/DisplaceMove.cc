@@ -41,6 +41,7 @@ double DisplaceStageClass::Sample (int &slice1, int &slice2,
 void
 DisplaceMoveClass::Read (IOSectionClass &in)
 {
+  CurrentPtcl=0;
   assert(in.ReadVar ("Sigma", Sigma));
   DisplaceStage.Sigma = Sigma;
   Array<string,1> activeSpeciesNames;
@@ -63,7 +64,10 @@ DisplaceMoveClass::Read (IOSectionClass &in)
 //   SetNumParticlesToMove(totalNum);
 
   // Construct action list
-  DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
+  if (PathData.Path.OrderN)
+    DisplaceStage.Actions.push_back(&PathData.Actions.ShortRangeOn);
+  else
+    DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
   if (PathData.Path.LongRange) 
     if (PathData.Actions.UseRPA)
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRangeRPA);
@@ -89,52 +93,69 @@ DisplaceMoveClass::Read (IOSectionClass &in)
   ActiveParticles.resize(NumParticlesToMove);
 }
 
-void
-DisplaceMoveClass::MakeMove ()
+void 
+DisplaceMoveClass::MakeMove()
 {
-  // Move the Join out of the way.
-  PathData.MoveJoin (PathData.Path.NumTimeSlices()-1);
-  Array<int,1> permVec;
-  PathData.Path.TotalPermutation(permVec);
-  PathData.Path.Communicator.Broadcast(0,permVec);
-  vector<int> ptclList;
-  int numLeft=0;
-  for (int i=0; i<ActiveSpecies.size(); i++) {
-    SpeciesClass &species = PathData.Path.Species(ActiveSpecies(i));
-    for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
-      if (permVec(ptcl)==ptcl){
-	ptclList.push_back(ptcl);
-	numLeft++;
-      }
-    }
-  }
-  if (numLeft==0) //if there are no non-permuted particles, abort move
-    return;
-  // First, choose particle to move
-  for (int i=0; i<NumParticlesToMove; i++) {
-    int index = PathData.Path.Random.CommonInt(numLeft);
-    //    cerr<<"Index is "<<index<<endl;
-    //    cerr<<"numLeft is  "<<numLeft<<endl;
-    vector<int>::iterator iter = ptclList.begin();
-    ActiveParticles(i) = ptclList[index];
-    for (int j=0; j<index; j++)
-      iter++;
-    ptclList.erase(iter);
-    numLeft--;
-  }
-
-//   int ptclIndex = 0;
-//   for (int si=0; si < ActiveSpecies.size(); si++) {
-//     SpeciesClass &species = PathData.Path.Species(ActiveSpecies(si));
-//     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
-//       ActiveParticles(ptclIndex) = ptcl;
-//       ptclIndex++;
-//     }
-//   }
   // Next, set timeslices
   Slice1 = 0;
   Slice2 = PathData.Path.NumTimeSlices()-1;
 
-  // Now call MultiStageClass' MakeMove
-  MultiStageClass::MakeMove();
+  for (int i=0;i<PathData.Path.NumParticles();i++){
+    ActiveParticles(0)=i;
+    // Now call MultiStageClass' MakeMove
+    if (PathData.Path.Random.Common()>0.1)
+      MultiStageClass::MakeMove();
+  }
+
+
 }
+
+// void
+// DisplaceMoveClass::MakeMove ()
+// {
+//   // Move the Join out of the way.
+//   PathData.MoveJoin (PathData.Path.NumTimeSlices()-1);
+//   Array<int,1> permVec;
+//   PathData.Path.TotalPermutation(permVec);
+//   PathData.Path.Communicator.Broadcast(0,permVec);
+//   vector<int> ptclList;
+//   int numLeft=0;
+//   for (int i=0; i<ActiveSpecies.size(); i++) {
+//     SpeciesClass &species = PathData.Path.Species(ActiveSpecies(i));
+//     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+//       if (permVec(ptcl)==ptcl){
+// 	ptclList.push_back(ptcl);
+// 	numLeft++;
+//       }
+//     }
+//   }
+//   if (numLeft==0) //if there are no non-permuted particles, abort move
+//     return;
+//   // First, choose particle to move
+//   for (int i=0; i<NumParticlesToMove; i++) {
+//     int index = PathData.Path.Random.CommonInt(numLeft);
+//     //    cerr<<"Index is "<<index<<endl;
+//     //    cerr<<"numLeft is  "<<numLeft<<endl;
+//     vector<int>::iterator iter = ptclList.begin();
+//     ActiveParticles(i) = ptclList[index];
+//     for (int j=0; j<index; j++)
+//       iter++;
+//     ptclList.erase(iter);
+//     numLeft--;
+//   }
+
+// //   int ptclIndex = 0;
+// //   for (int si=0; si < ActiveSpecies.size(); si++) {
+// //     SpeciesClass &species = PathData.Path.Species(ActiveSpecies(si));
+// //     for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+// //       ActiveParticles(ptclIndex) = ptcl;
+// //       ptclIndex++;
+// //     }
+// //   }
+//   // Next, set timeslices
+//   Slice1 = 0;
+//   Slice2 = PathData.Path.NumTimeSlices()-1;
+
+//   // Now call MultiStageClass' MakeMove
+//   MultiStageClass::MakeMove();
+// }
