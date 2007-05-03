@@ -93,10 +93,10 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
     	double rmag, rpmag;
 	if (slice==slice1)
 	  totalParticles++;
-    	PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+    	PathData.Path.DistDispFast(slice, slice+skip, ptcl1, ptcl2,
     			       rmag, rpmag, r, rp);
     	double s2 = dot (r-rp, r-rp);
-   	double q = 0.5 * (rmag + rpmag);
+   	double q = 0.5 * (rmag + rpmag); 
     	double z = (rmag - rpmag);
     	double U;
     	U = PA.U(q,z,s2, level);
@@ -150,7 +150,7 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 	    double rmag, rpmag;
 	    if (slice==slice1)
 	      totalParticles++;
-	    PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+	    PathData.Path.DistDispFast(slice, slice+skip, ptcl1, ptcl2,
 				   rmag, rpmag, r, rp);
 	    double s2 = dot (r-rp, r-rp);
 	    double q = 0.5 * (rmag + rpmag);
@@ -208,7 +208,7 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 	    double rmag, rpmag;
 	    if (slice==slice1)
 	      totalParticles++;
-	    PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+	    PathData.Path.DistDispFast(slice, slice+skip, ptcl1, ptcl2,
 				       rmag, rpmag, r, rp);
 	    double s2 = dot (r-rp, r-rp);
 	    double q = 0.5 * (rmag + rpmag);
@@ -308,7 +308,7 @@ ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
 	    double rmag, rpmag;
 	    if (slice==slice1)
 	      totalParticles++;
-	    PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+	    PathData.Path.DistDispFast(slice, slice+skip, ptcl1, ptcl2,
 				   rmag, rpmag, r, rp);
 	    double s2 = dot (r-rp, r-rp);
 	    double q = 0.5 * (rmag + rpmag);
