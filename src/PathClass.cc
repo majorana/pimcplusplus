@@ -882,6 +882,8 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
   NowOpen.AcceptCopy();
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
     int ptcl = activeParticles(ptclIndex);
+    for (int slice=startSlice;slice<=endSlice;slice++)
+      PutInBoxFast(Path(slice,ptcl));
     Path[OLDMODE](Range(startSlice, endSlice), ptcl) = 
       Path[NEWMODE](Range(startSlice, endSlice), ptcl);
     if (WormOn)
@@ -1384,3 +1386,84 @@ PathClass::WarpPaths (int ionSpecies)
   }
 }
 
+void
+PathClass::DistDispFast (int sliceA, int sliceB, int ptcl1, int ptcl2,
+			 double &distA, double &distB,dVec &dispA, dVec &dispB)
+{
+  dispA = Path(sliceA, ptcl2) - Path(sliceA,ptcl1);
+  dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
+  dVec preA=dispA;
+  dVec preB=dispB;
+  dVec boxOver2=GetBox()/2;
+  dVec box=GetBox();
+  for (int dim=0;dim<NDIM;dim++){
+    if (dispA[dim]>boxOver2[dim])
+      dispA[dim]-=box[dim];
+    if (dispA[dim]<-boxOver2[dim])
+      dispA[dim]+=box[dim];
+  }
+  dVec dispC=dispA-dispB;
+  dVec m;
+  dVec temptempdispB;
+  m[0] = nearbyint((dispA[0]-dispB[0])*BoxInv[0]);
+  m[1] = nearbyint((dispA[1]-dispB[1])*BoxInv[1]);
+  temptempdispB[0] = dispB[0]+m[0]*IsPeriodic[0]*Box[0];
+  temptempdispB[1] = dispB[1]+m[1]*IsPeriodic[1]*Box[1];
+  for (int dim=0;dim<NDIM;dim++){
+    if (dispC[dim]>boxOver2[dim])
+      dispB[dim]+=box[dim];
+    if (dispC[dim]<-boxOver2[dim])
+      dispB[dim]-=box[dim];
+  }
+  bool debug=false;
+  if (debug){
+    dVec tempDispA;
+    dVec tempDispB;
+    double tempDistA;
+    double tempDistB;
+    DistDisp (sliceA, sliceB, ptcl1, ptcl2,
+	      tempDistA, tempDistB,tempDispA, tempDispB);
+    //  if (!((tempDispA==dispA) && (tempDispB==dispB))){
+    if ((abs(tempDispA(0)-dispA(0))>1e-8) || 
+	(abs(tempDispA(1)-dispA(1))>1e-8) ||
+	(abs(tempDispB(0)-dispB(0))>1e-8) ||
+	(abs(tempDispB(1)-dispB(1))>1e-8)){
+      cerr<<tempDispA<<" "<<dispA<<" "<<tempDispB<<" "<<dispB<<endl;
+      cerr<<temptempdispB<<" "<<m<<endl;
+      cerr<<dispC<<endl;
+      cerr<<preA<<" "<<preB<<endl;
+    }
+    //  assert(tempDispA==dispA);
+    //  assert(tempDispB==dispB);
+    assert(abs(tempDispA(0)-dispA(0))<1e-8);
+    assert(abs(tempDispA(1)-dispA(1))<1e-8);
+    assert(abs(tempDispB(0)-dispB(0))<1e-8);
+    assert(abs(tempDispB(1)-dispB(1))<1e-8);
+  }
+  distA = sqrt(dot(dispA,dispA));
+  distB = sqrt(dot(dispB,dispB));
+  return;
+
+  //do nothing for now
+
+}
+
+void PathClass::PutInBoxFast (dVec &v)
+{
+  bool debug=false;
+  dVec oldV;
+  if (debug)
+    oldV=v;
+  dVec box=GetBox();
+  dVec halfBox=GetBox()/2;
+  for (int dim=0;dim<NDIM;dim++){
+    if (v[dim]>halfBox[dim])
+      v[dim]-=box[dim];
+    if (v[dim]<-halfBox[dim])
+      v[dim]+=box[dim];
+  }
+  if (debug){
+    PutInBox(oldV);
+    assert(v==oldV);
+  }
+}
