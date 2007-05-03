@@ -10,6 +10,7 @@ typedef TinyVector<scalar,NDIM> dVec;
 // -jg
 
 dVec crossprod(dVec v1, dVec v2);
+dVec cross(dVec v1, dVec v2);
 
 // return the dot product of two vectors
 double dotprod(dVec vec1, dVec vec2);

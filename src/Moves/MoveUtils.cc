@@ -15,11 +15,16 @@ double dotprod(dVec vec1, dVec vec2, double mag) {
 
 dVec crossprod(dVec v1, dVec v2)
 {
-  dVec cross;
-  cross[0] = v1[1]*v2[2] - v1[2]*v2[1];
-  cross[1] = -v1[0]*v2[2] + v1[2]*v2[0];
-  cross[2] = v1[0]*v2[1] - v1[1]*v2[0];
-  return cross;
+  return cross(v1, v2);
+}
+
+dVec cross(dVec v1, dVec v2)
+{
+  dVec c;
+  c[0] = v1[1]*v2[2] - v1[2]*v2[1];
+  c[1] = -v1[0]*v2[2] + v1[2]*v2[0];
+  c[2] = v1[0]*v2[1] - v1[1]*v2[0];
+  return c;
 }
 
 double Mag(dVec v) {
