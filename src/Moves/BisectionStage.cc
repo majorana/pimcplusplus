@@ -289,7 +289,7 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
 	  double t1=PathData.Actions.ShortRange.dUdR(slice,ptcl,cptcl,BisectionLevel);
 	  for (int dim=0;dim<NDIM;dim++)
 	    rshift[dim]-=t1*disp[dim];
-	}      
+	}     
 	
 	double drmax=0.1*PathData.Path.GetBox()[0];
 	for (int dim=0;dim<NDIM;dim++)
