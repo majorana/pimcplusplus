@@ -153,3 +153,106 @@ void LinFitSVD (Array<double,1> &y, Array<double,1> &sigma,  // inputs
     errors(j) = sqrt(errors(j));
   }
 }
+
+// This is a version of the above that allows certain basis functions
+// to be pinned and not adjusted
+double
+LinFitSVD (Array<double,1> &y, Array<double,1> &sigma,  // inputs
+	   Array<double,2> &F, Array<bool,  1> &adjust,  // inputs
+	   Array<double,1> &t, Array<double,1> &errors, // outputs
+	   double tolerance)
+{
+  int N = F.rows(); // Number of data points
+  int M = F.cols(); // Number of basis functions
+
+  if (y.rows() != F.rows()) {
+    cerr << "Different number of rows in basis functions that in data "
+	 << "points in LinFit.  Exitting.\n";
+    abort();
+  }
+
+  assert (y.rows() == sigma.rows());
+  assert (t.size() == F.cols());
+  errors.resize(F.cols());
+
+  // First, construct A matrix
+  Array<double,2> A(F.rows(), F.cols());
+  for (int i=0; i<N; i++)
+    for (int j=0; j<M; j++)
+      A(i,j) = F(i,j) / sigma(i);
+  
+  // Next, construct b vector
+  Array<double,1> b(y.rows());
+  for (int i=0; i<N; i++)
+    b(i) = y(i)/sigma(i);
+  
+  // Now reduce for constraints
+  int P = M;
+  for (int i=0; i<adjust.size(); i++) 
+    if (!adjust(i))
+      P--;
+
+  // The c is for "constrained"
+  Array<double,2> Ac(N,P);
+  Array<double,1> bc(N), tc(P);
+
+  // Build constrained Ac and bc
+  int j=0;
+  for (int col=0; col<M; col++) {
+    if (adjust(col)) {
+      // Copy column a A to Ac
+      for (int row=0; row<N; row++) 
+	Ac(row,j) = A(row,col);
+      j++;
+    }
+    else {
+      // Otherwise, subtract t(col)*A(:,col) from bc
+      for (int row=0; row<N; row++)
+      	b(row) -= A(row,col)*t(col);
+    }
+  }
+  for (int row=0; row<N; row++)
+    bc(row) = b(row);
+
+  // Now, compute SVD
+  Array<double,2> U (P,P), V(P,P);
+  Array<double,1> S(P), Sinv(P);
+  SVdecomp (Ac, U, S, V);
+
+  // Zero out near-singular values
+  double Smax=S(0);
+  for (int i=1; i<S.size(); i++)
+    Smax = max (S(i),Smax);
+  for (int i=0; i<S.size(); i++)
+    Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
+  
+  tc = 0.0;
+  // Compute t_n, removing singular values
+  for (int k=0; k<tc.size(); k++) 
+    for (int i=0; i<U.cols(); i++) {
+      double coef = 0.0;
+      for (int j=0; j < U.rows(); j++)
+	coef += U(j,i) * bc(j);
+      coef *= Sinv(i);
+      tc(k) += coef * V(k,i);
+    }
+  
+  Array<double,1> cerrors(P);
+  
+  cerrors = 0.0;
+  for (int j=0; j<cerrors.size(); j++) {
+    for (int i=0; i<V.cols(); i++)
+      cerrors(j) += V(j,i)*V(j,i)*(Sinv(i)*Sinv(i));
+    cerrors(j) = sqrt(errors(j));
+  }
+
+  // Now copy tc values into t
+  j=0;
+  for (int i=0; i<M; i++)
+    if (adjust(i)) {
+      t(i)      = tc(j);
+      errors(i) = cerrors(j);
+      j++;
+    }
+  cerr << "Done LinFitSVD.\n";
+}

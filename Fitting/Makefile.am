@@ -15,6 +15,6 @@ libfitting_la_SOURCES = Fitting.cc      \
                         NonlinearFit.h 
 
 libfitting_la_CXXFLAGS = $(BLITZ_CFLAGS) $(AM_CXXFLAGS)
-
+include_HEADERS = Fitting.h
 includedir=$(prefix)/include/Common/Fitting
 
