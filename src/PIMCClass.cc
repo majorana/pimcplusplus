@@ -211,8 +211,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new VariationalPIEnergyClass(PathData,OutFile);
     else if (observeType=="Vacancy")
       tempObs = new VacancyLocClass(PathData,OutFile);
-    //else if (observeType=="VacancyNear")
-    //  tempObs = new VacancyLoc2Class(PathData,OutFile);
+    //    else if (observeType=="VacancyNear")
+    //      tempObs = new VacancyLoc2Class(PathData,OutFile);
     else if (observeType=="VacancyDensity")
       tempObs = new VacancyDensityClass(PathData,OutFile);
     else if (observeType=="Conductivity")
@@ -328,6 +328,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new RefSliceMoveClass(PathData,OutFile);
     else if (moveType=="Displace")
       move = new DisplaceMoveClass(PathData,OutFile);
+    else if (moveType=="DisplaceFast")
+      move = new DisplaceFastMoveClass(PathData,OutFile);
     else if (moveType=="VariationalDisplace")
       move = new VariationalDisplaceMoveClass(PathData,OutFile);
     else if (moveType=="HermeleFourier")
