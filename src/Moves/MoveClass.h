@@ -33,6 +33,7 @@
 #include "CenterofMassMove.h"
 #include "RefSliceMove.h"
 #include "DisplaceMove.h"
+#include "DisplaceMoveFast.h"
 #include "OpenEndMove.h"
 #include "MoleculeMove.h"
 #include "SwapMove.h"

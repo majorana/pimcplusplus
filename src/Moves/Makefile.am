@@ -36,6 +36,8 @@ libmoves_la_SOURCES  =           \
     CouplingStage.cc             \
     DisplaceMove.cc              \
     DisplaceMove.h               \
+    DisplaceMoveFast.cc              \
+    DisplaceMoveFast.h               \
     EmptyStage.h                 \
     EmptyStage.cc                \
     EndStage.cc                  \
