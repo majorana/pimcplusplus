@@ -24,7 +24,7 @@
 
 #include <sprng.h>
 #include <Common/Blitz.h>
-
+#include <fstream>
 typedef TinyVector<double,NDIM> dVec;
 
 /// These are the different mode types for the MirroredArrayClass
@@ -37,6 +37,8 @@ typedef TinyVector<int,2> ParticleID;
 
 
 
+///from codepedia.com
+bool fileExists(const std::string& fileName);
 
 
 /// These are the global variables to be used to decide what part of
