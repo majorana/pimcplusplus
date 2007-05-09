@@ -23,6 +23,7 @@
 #include <Common/IO/FileExpand.h>
 #include "QMCWrapper.h"
 
+
 bool PIMCClass::Read(IOSectionClass &in)
 {
   // tells whether to run or be a dummy
@@ -139,8 +140,28 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     outFileBase = ExpandFileName (outFileBase);
     ostringstream cloneNum;
     cloneNum << (PathData.GetCloneNum() + fileStart);
-    OutFileName = 
-      outFileBase+ "." + cloneNum.str() + ".h5";
+    bool restart;
+    if (!in.ReadVar("Restart",restart))
+      restart=false;
+    if (restart){
+      stringstream tempStream;
+      int counter=0;
+      tempStream<<outFileBase<<"."<<counter<<"."<<(PathData.GetCloneNum()+fileStart)<<".h5";
+      cerr<<"Checking for "<<tempStream.str();
+      while (fileExists(tempStream.str())){
+	counter++;
+	tempStream.str("");
+	tempStream<<outFileBase<<"."<<counter<<"."<<(PathData.GetCloneNum()+fileStart)<<".h5";
+	cerr<<"Checking for "<<tempStream.str();
+      }
+      ostringstream counterNum;
+      counterNum<<counter;
+      OutFileName=outFileBase+"."+counterNum.str()+"."+cloneNum.str()+".h5";
+    }
+    else{
+      OutFileName = 
+	outFileBase+ "." + cloneNum.str() + ".h5";
+    }
     OutFile.NewFile(OutFileName);
     /// This is needed so that all of the decendents of the root
     /// LoopClass object have a real output file that they can flush.
