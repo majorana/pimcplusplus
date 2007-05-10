@@ -58,6 +58,9 @@ private:
   void LeviFlight (Array<dVec,1> &vec, double lambda);
   void ReadOld(string fileName, bool replicate);
   void ReadSqueeze(IOSectionClass &in,string fileName, bool replicate);
+  void Restart(IOSectionClass &in,string fileName,bool replicate,
+	       SpeciesClass &species);
+  
   ////////////////////////////////
   /// Boundary conditions stuff //
   ////////////////////////////////
@@ -72,7 +75,7 @@ private:
  public:
   int Join;
   dVec CenterOfMass;
-
+  double cm2;
   CellMethodClass Cell;
   /// This is the maximum number of k vectors in each direction
   TinyVector<int,NDIM> MaxkIndex;
