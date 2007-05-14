@@ -20,6 +20,7 @@
 void PreSamplingClass::Read(IOSectionClass& in)
 {
   cerr << "Pre-Sampling Move read..." << endl;
+  in.ReadVar("NumPreSteps",TotalNumPreSteps);
   int stages = 1;
   in.ReadVar("NumPreStages",stages);
 	Array<string,1> methodList;
@@ -90,6 +91,7 @@ void PreSamplingClass::WriteRatio()
     (*stageIter)->WriteRatio();
     stageIter++;
   }
+  FinalStage->WriteRatio();
   // handle it here; don't use the default
   //MoveClass::WriteRatio();
   RatioVar.Write(double(NumFinalAccept)/NumSteps);
@@ -145,7 +147,9 @@ void PreSamplingClass::MakeMove()
 
   }
 
+  cout << NumSteps << " with " << NumPreAccept << " presampling moves accepted; FINAL STAGE ACCEPT IS ";
   finalAccept = FinalStage->Attempt(Slice1, Slice2, ActiveParticles, PreDeltaAction);
+  cout << finalAccept << endl;
 
   if(finalAccept){
     NumFinalAccept++;

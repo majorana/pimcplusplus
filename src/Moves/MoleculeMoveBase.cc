@@ -198,6 +198,7 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, d
 	// nonsense to rotate the ptcl at the origin; "O", so loop starts from 1 not 0
   for(int ptcl = 1; ptcl<activePtcls.size(); ptcl++){
     dVec P = PathData.Path(slice, activePtcls(ptcl)) - O;
+    PathData.Path.PutInBox(P);
     dVec newP = ArbitraryRotate(axis, P, theta) + O;
     PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
   }
@@ -215,6 +216,7 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, double theta)
 
 void MolMoveClass::MoveDimerSeparation(int slice, Array<int,1> mol1, Array<int,1> mol2, double Sigma){
   dVec translate = PathData.Path(slice,mol1(0)) - PathData.Path(slice,mol2(0));
+  PathData.Path.PutInBox(translate);
   //cerr << "D vector between O is " << translate << endl;
   double mag = PathData.Path.Random.LocalGaussian(Sigma);
   //cerr << "D random # is " << mag << endl;
@@ -240,6 +242,7 @@ void MolMoveClass::StressBond(int slice, int ptcl, int mol, double s){
   //cerr << "Bond stretch for " << ptcl << " and COM " << mol << endl;
   dVec O = PathData.Path(slice,mol);
   dVec v0 = PathData.Path(slice,ptcl) - O;
+  PathData.Path.PutInBox(v0);
   //cerr << "  Initial coords are " << O << " and " << v0 << " wrt O " << endl;
   double scale = 1 + s;
   //dVec v = Scale(v0,scale);
@@ -253,6 +256,7 @@ void MolMoveClass::StressAngle(int slice, int ptcl, dVec axis, double theta){
   int mol = PathData.Mol(ptcl);
   dVec O = PathData.Path(slice,mol);
   dVec v = PathData.Path(slice,ptcl) - O;
+  PathData.Path.PutInBox(v);
   v = ArbitraryRotate(axis, v, theta);
   PathData.Path.SetPos(slice, ptcl, O+v);
 }

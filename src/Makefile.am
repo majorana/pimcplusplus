@@ -22,6 +22,7 @@ vmc_CXXFLAGS = $(AM_CXXFLAGS)
 SHARED_SOURCES =          \
     det_calc_uekt.h       \
     det_calc_uekt.c       \
+    Common.cc             \
     Common.h              \
     EventClass.h          \
     EventClass.cc         \

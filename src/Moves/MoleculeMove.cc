@@ -62,6 +62,7 @@ void DummyEvaluate::Read(IOSectionClass &moveInput) {
 
 //void MoleculeTranslate::MakeMove() {
 double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+  //cout << "TRANSLATE::SAMPLE" << endl;
   //double step = 0.3;
   double step = Step; // Using Step from input file
 
@@ -79,6 +80,7 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 		activeParticles.resize(PathData.Path.NumParticles());
 		for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = i;
 	}
+  //cout << "chose particles " << activeParticles << endl;
 //cerr << counter << ", ";
 //  int choosemol = counter;
 //	counter = (counter+1)%PathData.Mol.NumMol();
@@ -107,56 +109,58 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 
 	double move_mag_sq = 0.0;
 	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
-		//cerr << "  Before move: chose slice " << slice << endl;
-		//for(int i=0; i<activeParticles.size(); i++) cerr << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
+		//cout << "  Before move: chose slice " << slice << endl;
+		//for(int i=0; i<activeParticles.size(); i++) cout << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
   	dVec move = TranslateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)),step); 
-		//cerr << "  After move: of " << move << endl;
-		//for(int i=0; i<activeParticles.size(); i++) cerr << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
+		//cout << "  After move: of " << move << endl;
+		//for(int i=0; i<activeParticles.size(); i++) cout << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
   	move_mag_sq += move(0)*move(0) + move(1)*move(1) + move(2)*move(2);
 	}
 
-  // this block is a hack to output configurations
-  // in a format for QBox
-	int numMol = PathData.Mol.NumMol();
-	int output1 = 0;
-	int output2 = output1 + 1;
-	int output3 = output2 + 1;
-	if(numMoves == output1){
-		ofstream before("H2O.64.rigid.global.1.dat");
-		for(int i=0; i<numMol; i++){
-			dVec RO = PathData.Path(0,i);
-			dVec RH1 = PathData.Path(0,i+numMol);
-			dVec RH2 = PathData.Path(0,i+2*numMol);
-			before << "O" << " " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
-			before << "H" << " " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
-			before << "H" << " " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
-		}
-		before.close();
-	}
-	else if(numMoves == output2){
-		ofstream after("H2O.64.rigid.global.2.dat");
-		for(int i=0; i<numMol; i++){
-			dVec RO = PathData.Path(0,i);
-			dVec RH1 = PathData.Path(0,i+numMol);
-			dVec RH2 = PathData.Path(0,i+2*numMol);
-			after << "O" << " " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
-			after << "H" << " " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
-			after << "H" << " " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
-		}
-		after.close();
-	}
-	else if(numMoves == output3){
-		ofstream third("H2O.64.rigid.global.3.dat");
-		for(int i=0; i<numMol; i++){
-			dVec RO = PathData.Path(0,i);
-			dVec RH1 = PathData.Path(0,i+numMol);
-			dVec RH2 = PathData.Path(0,i+2*numMol);
-			third << "O" << " " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
-			third << "H" << " " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
-			third << "H" << " " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
-		}
-		third.close();
-	}
+  //// this block is a hack to output configurations
+  //// in a format for QBox
+	//int numMol = PathData.Mol.NumMol();
+	//int output1 = 0;
+	//int output2 = output1 + 1;
+	//int output3 = output2 + 1;
+	//if(numMoves == output1){
+	//	ofstream before("H2O.64.rigid.global.1.dat");
+	//	for(int i=0; i<numMol; i++){
+	//		dVec RO = PathData.Path(0,i);
+	//		dVec RH1 = PathData.Path(0,i+numMol);
+	//		dVec RH2 = PathData.Path(0,i+2*numMol);
+	//		before << "O" << " " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
+	//		before << "H" << " " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
+	//		before << "H" << " " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
+	//	}
+	//	before.close();
+	//}
+	//else if(numMoves == output2){
+	//	ofstream after("H2O.64.rigid.global.2.dat");
+	//	for(int i=0; i<numMol; i++){
+	//		dVec RO = PathData.Path(0,i);
+	//		dVec RH1 = PathData.Path(0,i+numMol);
+	//		dVec RH2 = PathData.Path(0,i+2*numMol);
+	//		after << "O" << " " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
+	//		after << "H" << " " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
+	//		after << "H" << " " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
+	//	}
+	//	after.close();
+	//}
+	//else if(numMoves == output3){
+	//	ofstream third("H2O.64.rigid.global.3.dat");
+	//	for(int i=0; i<numMol; i++){
+	//		dVec RO = PathData.Path(0,i);
+	//		dVec RH1 = PathData.Path(0,i+numMol);
+	//		dVec RH2 = PathData.Path(0,i+2*numMol);
+	//		third << "O" << " " << RO(0) << " " << RO(1) << " " << RO(2) << endl;
+	//		third << "H" << " " << RH1(0) << " " << RH1(1) << " " << RH1(2) << endl;
+	//		third << "H" << " " << RH2(0) << " " << RH2(1) << " " << RH2(2) << endl;
+	//	}
+	//	third.close();
+	//}
+  /////////////////////////////////////////////////////////////////////////////
+
 
   if (numMoves%10000 == 0 && numMoves>0){
     cerr << numMoves << " moves; current translate ratio is " << double(numAccepted)/numMoves << " with step size " << step << endl;
