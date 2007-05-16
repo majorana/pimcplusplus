@@ -877,6 +877,8 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
 void PathClass::AcceptCopy(int startSlice,int endSlice, 
 			   const Array <int,1> &activeParticles)
 {
+  cm2=0.0;
+  static int numAccepts=0;
   ExistsCoupling.AcceptCopy();
   Weight.AcceptCopy();
   NowOpen.AcceptCopy();
@@ -884,19 +886,27 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
     int ptcl = activeParticles(ptclIndex);
     for (int slice=startSlice;slice<=endSlice;slice++)
       PutInBoxFast(Path(slice,ptcl));
-    Path[OLDMODE](Range(startSlice, endSlice), ptcl) = 
-      Path[NEWMODE](Range(startSlice, endSlice), ptcl);
-    if (WormOn)
-      ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl) = 
-	ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl);
 
-    Permutation.AcceptCopy(ptcl);
+    dVec cmPart=0.0;
     for (int slice=startSlice;slice<endSlice;slice++){
       dVec newLoc=Path[NEWMODE](slice,ptcl);
       dVec oldLoc=Path[OLDMODE](slice,ptcl);
       dVec minDisp=MinImageDisp(oldLoc,newLoc);
       CenterOfMass=CenterOfMass+minDisp;
+      cmPart=cmPart+minDisp;
     }
+    cm2=cm2+dot(cmPart,cmPart);
+
+    
+
+    Path[OLDMODE](Range(startSlice, endSlice), ptcl) = 
+      Path[NEWMODE](Range(startSlice, endSlice), ptcl);
+    if (WormOn)
+      ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl) = 
+ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl);
+
+    Permutation.AcceptCopy(ptcl);
+
   }
   //I had this accepting the whole permutation.  Not sure why but have commented it out.  
 // <<<<<<< .mine
@@ -932,6 +942,8 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
       }
     }
   }
+  numAccepts++;
+  // cerr<<"Center of mass: "<<cm2<<" "<<numAccepts<<endl;
 }
 
 void PathClass::RejectCopy(int startSlice,int endSlice, 
