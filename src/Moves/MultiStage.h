@@ -37,8 +37,9 @@ protected:
   list<StageClass*> Stages;
   int NumSteps;
   int Slice1,Slice2;
-
+  ObservableDouble CenterOfMassVar;
 public:
+  double cm2;
   void Read(IOSectionClass &io);
   void Accept();
   void Reject();
@@ -48,6 +49,7 @@ public:
   ///Why was this MakeMove()=0 and virtual?
   void MakeMove();
   MultiStageClass(PathDataClass &pathData, IOSectionClass &outSection) : 
+    CenterOfMassVar("CenterOfMassDrift",IOSection,pathData.Path.Communicator),
     ParticleMoveClass(pathData,outSection) 
   {
     //do nothing for now

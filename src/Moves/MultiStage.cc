@@ -19,6 +19,7 @@
 
 void MultiStageClass::Read(IOSectionClass& in)
 {
+  cm2=0.0;
   ///do nothing for now
 }
 
@@ -32,6 +33,8 @@ void MultiStageClass::WriteRatio()
      stageIter++;
    }  
    MoveClass::WriteRatio();
+   CenterOfMassVar.Write(cm2);
+   cm2=0;
 }
 
 
@@ -78,6 +81,8 @@ void MultiStageClass::Accept()
     (*stageIter)->Accept();
   }  
   NumAccepted++;
+  cm2=cm2+PathData.Path.cm2;
+  
 }
 
 void MultiStageClass::Reject()
