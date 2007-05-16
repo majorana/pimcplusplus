@@ -125,7 +125,7 @@ void BisectionStageClass::CalcShift(Array<int,1> &activeParticles,int slice)
   ///Correlated sampling
 
   int numActivePtcl=activeParticles.size();
-  Correlated.resize(NDIM*numActivePtcl,NDIM,numActivePtcl);
+  Correlated.resize(NDIM*numActivePtcl,NDIM*numActivePtcl);
   Correlated=0.0;
   
   Array<dVec,1> dispShift(numActivePtcl);
