@@ -40,9 +40,13 @@ void MoleculeManagerClass::Read(IOSectionClass& in)
     Members(m).resize(0);
   ListByType.resize(numMolTypes);
   cerr << "SIZE OF LIST IS " << ListByType.size() << endl;
+  int total = 0;
   for(int t=0; t<numMolTypes; t++){
-    ListByType(t).resize(0);
-    cerr << "  SIZE OF EACH ARRAY " << t << " is " << ListByType(t).size() << endl;
+    ListByType(t).resize(num(t));
+    for(int x=0; x<ListByType(t).size(); x++)
+      ListByType(t)(x) = total + x;
+    total += num(t);
+    cerr << "  ARRAY " << t << " is " << ListByType(t) << endl;
   }
 
   assert(in.ReadVar("MoleculeIDs",MolRef));
@@ -74,9 +78,10 @@ void MoleculeManagerClass::Read(IOSectionClass& in)
     cerr << " size " << ListByType(index).size();
     MolLabel(MolRef(p)) = names(index);
     cerr << " MolLabel assigned " << MolLabel(MolRef(p));
-    int typeSize = ListByType(index).size();
-    ListByType(index).resizeAndPreserve(typeSize+1);
-    ListByType(index)(typeSize) = p;
+    //int typeSize = ListByType(index).size();
+    //ListByType(index).resizeAndPreserve(typeSize+1);
+    //ListByType(index)(typeSize) = MolRef(p);
+    //cerr << "added molecule " << p << " to list: " << ListByType(index) << endl;
     cerr << "  added label" << endl;
 
     // initialize arrays with ptcl ids indexed by molecule
@@ -92,6 +97,14 @@ void MoleculeManagerClass::Read(IOSectionClass& in)
 void MoleculeManagerClass::Init()
 {
   // not sure what to have here...
+}
+
+void MoleculeManagerClass::MembersOf(Array<int,1>& members, int mol)
+{
+  assert(mol < totalNumMol);
+  members.resize(Members(mol).size());
+  for(int s=0; s<Members(mol).size(); s++)
+    members(s) = Members(mol)(s);
 }
 
 Array<int,1>& MoleculeManagerClass::MembersOf(int mol)
@@ -128,14 +141,33 @@ string MoleculeManagerClass::NameOf(int mol)
   return MolLabel(mol);
 }
 
-Array<int,1>& MoleculeManagerClass::MolOfType(int type)
+void MoleculeManagerClass::MolOfType(Array<int, 1>& list, int type)
 {
+  cerr << "Returning MolOfType " << ListByType(type) << endl;
+  list.resize(ListByType(type).size());
+  for (int s=0; s<ListByType(type).size(); s++)
+    list(s) = ListByType(type)(s);
+}
+
+void MoleculeManagerClass::MolOfType(Array<int, 1>& list, string typeLabel) 
+{
+  int found = Index(typeLabel);
+  cerr << "MolOfType found MOlID " << found << " for mol " << typeLabel << endl;
+  list.resize(ListByType(found).size());
+  for (int s=0; s<ListByType(found).size(); s++)
+    list(s) = ListByType(found)(s);
+}
+
+Array<int,1> MoleculeManagerClass::MolOfType(int type)
+{
+  cerr << "Returning MolOfType " << ListByType(type) << endl;
   return ListByType(type);
 }
 
-Array<int,1>& MoleculeManagerClass::MolOfType(string typeLabel)
+Array<int,1> MoleculeManagerClass::MolOfType(string typeLabel)
 {
   int found = Index(typeLabel);
+  cerr << "MolOfType found MOlID " << found << " for mol " << typeLabel << endl;
   return ListByType(found);
 }
 
