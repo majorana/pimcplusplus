@@ -22,13 +22,16 @@ class MoleculeManagerClass
   void Read(IOSectionClass& in);
   void Init();
   Array<int,1>& MembersOf(int mol);
+  void MembersOf(Array<int,1>& members, int mol);
   int SizeOf(int mol);
   int NumMol(int type);
   int NumMol(string typeLabel);
   int NumMol();
   string NameOf(int mol);
-  Array<int,1>& MolOfType(int type);
-  Array<int,1>& MolOfType(string typeLabel);
+  Array<int,1> MolOfType(int type);
+  Array<int,1> MolOfType(string typeLabel);
+  void MolOfType(Array<int,1>& list, string typeLabel);
+  void MolOfType(Array<int,1>& list, int type);
   int Index(string label);
   inline const int operator() (int ptcl);
 
