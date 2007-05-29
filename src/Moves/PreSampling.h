@@ -65,5 +65,24 @@ public:
   }
 };
 
+class PreSampleDummy : public DummyEvaluate 
+{
+  list<ActionBaseClass*> PreActions;
+  int numPre, numFinal;
+  int toRead, startI;
+  int numMol, molIndex;
+
+  public:
+  double PreSampleAction(int startSlice,int endSlice,
+		     const Array<int,1> &changedParticles);
+  bool Attempt(int &slice1, int &slice2, 
+			      Array<int,1> &activeParticles,
+			      double &prevActionChange);
+  void Read (IOSectionClass &in);
+
+  PreSampleDummy(PathDataClass& PathData, IOSectionClass& IO, int actionsToRead, int startIndex);
+
+};
+
 
 #endif
