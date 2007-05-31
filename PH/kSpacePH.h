@@ -78,7 +78,7 @@ public:
 
 /// kSpacePH class takes a PH as its constructor argument.  Its only
 /// public member function, V, returns the k-space component.  The
-/// folumae used in this class come from 
+/// formulae used in this class come from 
 /// Foulkes and Schluter Phys. Rev. B 42, 11505 (1990)
 class kSpacePH
 {
