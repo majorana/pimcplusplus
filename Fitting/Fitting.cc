@@ -254,5 +254,4 @@ LinFitSVD (Array<double,1> &y, Array<double,1> &sigma,  // inputs
       errors(i) = cerrors(j);
       j++;
     }
-  cerr << "Done LinFitSVD.\n";
 }
