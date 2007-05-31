@@ -34,13 +34,13 @@ protected:
   double qCurrent, rCurrent;
   typedef enum { NORM, EKB, ZETA_Q, CHI_R } IntegrandType;
   IntegrandType Job;
-  double A(double q, double qp, double R0);
+  double A(double q, double qp);
 public:
   int l;
   // V stores the potential
   // DeltaV stores the potential less to the local potential
   CubicSpline V, DeltaV, u;
-  double rc;
+  double rc, R0;
   // The Kleinman-Bylander projection energy
   double E_KB;
   // The unfiltered projection operators in real-space and reciprocal
@@ -53,9 +53,7 @@ public:
   // This is used as the integrand for the various integrals that are required.
   inline double operator()(double x);
 
-  void SetupProjector(double G_max, double G_FFT, double R0);
-  void FilterProjector(double G_max, double G_FFT,
-		       double R0);
+  void SetupProjector(double G_max, double G_FFT);
 };
 
 class NLPPClass : public Potential
@@ -83,7 +81,7 @@ public:
   // IO routines
   void Write(IOSectionClass &out);
   void Read(IOSectionClass &in);
-  void SetupProjectors(double G_max, double G_FFT, double R0);
+  void SetupProjectors(double G_max, double G_FFT);
 };
 
 
