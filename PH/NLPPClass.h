@@ -30,6 +30,9 @@ protected:
   // The projector is given by norm*deltaVl(r)*ul(r)
   double ProjectorNorm;
   inline double jl(int l, double x);
+  LinearGrid qGrid;
+  typedef enum { NORM, EKB, ZETA_Q, ZETA_R } IntegrandType;
+  IntegrandType Job;
 public:
   int l;
   // V stores the potential
@@ -38,17 +41,17 @@ public:
   double rc;
   // The Kleinman-Bylander projection energy
   double E_KB;
-  // The unfiltered projection operator 
-  double zeta_r(double r);
-  // This is the q-space transform of zeta(r)
-  double zeta_q(double q);
-  // These are the filtered versions of the above:
-  // This stores the reciprocal-space representation of the filtered
-  // projector. 
-  CubicSpline chi_q;
-  // This stores the real-space representation of the filtered
-  // projector. 
-  CubicSpline chi_r;
+  // The unfiltered projection operators in real-space and reciprocal
+  // space.  
+  CubicSpline zeta_r, zeta_q;
+  // These store the real and reciprocal-space representation of the
+  // filtered projector
+  CubicSpline chi_r, chi_q;
+
+  // This is used as the integrand for the various integrals that are required.
+  inline double operator()(double x);
+
+  void SetupProjector(double G_max, double G_FFT, double R0);
   void FilterProjector(double G_max, double G_FFT,
 		       double R0);
 };
@@ -78,6 +81,7 @@ public:
   // IO routines
   void Write(IOSectionClass &out);
   void Read(IOSectionClass &in);
+  void SetupProjectors(double G_max, double G_FFT, double R0);
 };
 
 
@@ -103,6 +107,21 @@ ChannelPotential::jl(int l, double x)
       return 0.0;
   }
 }
+
+
+inline double
+ChannelPotential::operator()(double x)
+{
+  switch (Job) {
+  case NORM:
+    return u(x)*DeltaV(x)*DeltaV(x)*u(x);
+  case EKB:
+    return u(x)*DeltaV(x)*u(x);
+  default:
+    return 0.0;
+  }
+}
+
 
 
 #endif
