@@ -49,7 +49,7 @@ protected:
 
   /// The long range part of the ion-ion potential
   LinearGrid VlongGrid;
-  QuinticSpline Vlong;
+  CubicSpline Vlong;
   Array<double,1> Vlong_G;
   double Vshort_G0;
   /// Breakup the long range potential into short and long range.

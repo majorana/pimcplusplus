@@ -640,7 +640,7 @@ class VshortIntegrand
 {
 private:
   Potential &V;
-  QuinticSpline &Vlong;
+  CubicSpline &Vlong;
 public:
   inline double operator()(double r)
   {
@@ -648,7 +648,7 @@ public:
     return r*r*vshort;
   }
 
-  VshortIntegrand(Potential &v, QuinticSpline &vlong) :
+  VshortIntegrand(Potential &v, CubicSpline &vlong) :
     V(v), Vlong(vlong)
   { /* do nothing */ }
 };
@@ -728,8 +728,10 @@ MPISystemClass::DoOptimizedBreakup()
     if (kComm.MyProc()==0) {
       FILE *fout = fopen ("Vion.dat", "w");
       for (int i=0; i<numPoints; i++)
-	fprintf (fout, "%1.12e %1.12e %1.12e\n",
-		 VlongGrid(i), V_ion_ion->V(VlongGrid(i)), Vlong_r(i));
+// 	fprintf (fout, "%1.12e %1.12e %1.12e\n",
+// 		 VlongGrid(i), V_ion_ion->V(VlongGrid(i)), Vlong_r(i));
+ 	fprintf (fout, "%1.12e %1.12e %1.12e\n",
+ 		 VlongGrid(i), V_ion_ion->V(VlongGrid(i)), Vlong(VlongGrid(i)));
       fclose(fout);
     }
   
