@@ -1,7 +1,8 @@
-check_PROGRAMS = TestkSpacePH MakeGeneralPot
+check_PROGRAMS = TestkSpacePH MakeGeneralPot TestNLPP
 
 TestkSpacePH_SOURCES = TestkSpacePH.cc
 MakeGeneralPot_SOURCES = MakeGeneralPot.cc
+TestNLPP_SOURCES       = TestNLPP.cc
 
 LDADD = libPH.la ../IO/libIO.la   ../MatrixOps/libmatops.la ../Fitting/libfitting.la ../Integration/libquad.la ../Splines/libspline.la $(HDF5_LIBS) $(BLITZ_LIBS) $(G2C_LIBS) $(GSL_LIBS) $(LAPACK_LIBS)
 
@@ -16,6 +17,8 @@ libPH_la_SOURCES = CoreTransform.h    \
                    GeneralPot.cc      \
                    HeAzizPot.h        \
                    HeAzizPot.cc       \
+                   NLPPClass.h        \
+                   NLPPClass.cc       \
                    Potential.h        \
                    Potential.cc       \
                    PotentialBase.h    \
@@ -48,5 +51,5 @@ libPH_la_LIBADD   =
 
 include_HEADERS = CoreTransform.h CoulombPot.h HeAzizPot.h Potential.h  \
                   PotentialBase.h QuinticPH.h ScreenedPot.h SplinePot.h \
-	          kSpacePH.h ToppHopfield.h GeneralPot.h
+	          kSpacePH.h ToppHopfield.h GeneralPot.h NLPPClass.h
 

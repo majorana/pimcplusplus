@@ -14,12 +14,15 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#ifndef POTENTIAL_BASE_H
-#define POTENTIAL_BASE_H
+#ifndef NLPP_CLASS_H
+#define NLPP_CLASS_H
 
+#include "PotentialBase.h"
 #include "../IO/IO.h"
 #include "../Splines/CubicSpline.h"
+#include <vector>
 using namespace IO;
+using namespace blitz;
 
 class ChannelPotential
 {
@@ -27,15 +30,11 @@ protected:
   // The projector is given by norm*deltaVl(r)*ul(r)
   double ProjectorNorm;
   inline double jl(int l, double x);
-  // This stores the reciprocal-space representation of the filtered
-  // projector. 
-  CubicSpline chi_q;
-  // This stores the real-space representation of the filtered
-  // projector. 
-  CubicSpline chi_r;
 public:
   int l;
-  CubicSpline deltaV, u;
+  // V stores the potential
+  // DeltaV stores the potential less to the local potential
+  CubicSpline V, DeltaV, u;
   double rc;
   // The Kleinman-Bylander projection energy
   double E_KB;
@@ -43,6 +42,13 @@ public:
   double zeta_r(double r);
   // This is the q-space transform of zeta(r)
   double zeta_q(double q);
+  // These are the filtered versions of the above:
+  // This stores the reciprocal-space representation of the filtered
+  // projector. 
+  CubicSpline chi_q;
+  // This stores the real-space representation of the filtered
+  // projector. 
+  CubicSpline chi_r;
   void FilterProjector(double G_max, double G_FFT,
 		       double R0);
 };
@@ -50,15 +56,16 @@ public:
 class NLPPClass : public Potential
 {
 protected:
-  CubicSpline Vlocal;
   int lLocal;
-  vector<CubicSpline> deltaVl, ul;
+  vector<ChannelPotential> Vl;  
   // The charge of the ion.  The potential should have a tail of
   // V(r) = -Zion/r for large r.
   double Zion;
-
+  int AtomicNumber;
 public:
-  bool IsNonlocal()                { return false; }
+  bool IsNonlocal();
+  inline int LocalChannel() { return lLocal; }
+  inline int NumChannels()  { return Vl.size(); }
 
   // Required member functions:  These give information about the
   // local part of the pseudopotential only
@@ -75,15 +82,15 @@ public:
 
 
 inline double
-ChannelPotential::j(int l, double x)
+ChannelPotential::jl(int l, double x)
 {
   if (fabs(x) != 0.0) {
     if (l == 0)
       return sin(x)/x;
     else if (l == 1)
-      return sin(z)/(z*z) - cos(z)/z;
+      return sin(x)/(x*x) - cos(x)/x;
     else if (l == 2)
-      retrun ((3.0/(z*z*z) - 1.0/z)*sin(z) - 3.0/(z*z)*cos(z));
+      return ((3.0/(x*x*x) - 1.0/x)*sin(x) - 3.0/(x*x)*cos(x));
     else {
       cerr << "j(l,x) not implemented for l > 2.\n";
       abort();
