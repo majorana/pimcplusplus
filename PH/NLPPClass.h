@@ -31,6 +31,7 @@ protected:
   double ProjectorNorm;
   inline double jl(int l, double x);
   LinearGrid qGrid;
+  double qCurrent;
   typedef enum { NORM, EKB, ZETA_Q, ZETA_R } IntegrandType;
   IntegrandType Job;
 public:
@@ -117,6 +118,8 @@ ChannelPotential::operator()(double x)
     return u(x)*DeltaV(x)*DeltaV(x)*u(x);
   case EKB:
     return u(x)*DeltaV(x)*u(x);
+  case ZETA_Q:
+    return jl(l,qCurrent*x)*x*x*zeta_r(x);
   default:
     return 0.0;
   }
