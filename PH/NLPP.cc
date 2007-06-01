@@ -14,8 +14,6 @@ NLPPClass::Read(IOSectionClass &in)
   assert(in.OpenSection("pseudo"));
   assert(in.ReadVar("AtomicNumber", AtomicNumber));
   assert(in.ReadVar("LocalChannel", lLocal));
-  // HACK HACK HACK HACK
-  // lLocal = 0;
   assert(in.ReadVar("ValenceCharge", Zion));
   
   int numChannels = in.CountSections("lChannel");

@@ -67,8 +67,10 @@ protected:
   int AtomicNumber;
 public:
   bool IsNonlocal();
-  inline int LocalChannel() { return lLocal; }
-  inline int NumChannels()  { return Vl.size(); }
+  inline int LocalChannel()              { return lLocal;       }
+  inline int NumChannels()               { return Vl.size();    }
+  inline CubicSpline& GetLocalSpline ()  { return Vl[lLocal].V; }
+  inline double GetValenceCharge()       { return Zion;         }
 
   // Required member functions:  These give information about the
   // local part of the pseudopotential only
