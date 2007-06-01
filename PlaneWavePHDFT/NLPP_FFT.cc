@@ -17,6 +17,78 @@
 #include "NLPP_FFT.h"
 
 
+////////////////////////////////////////////////////////////
+//                  IonProjector stuff                    //
+////////////////////////////////////////////////////////////
+
+complex<double> 
+Ion_l_Projector::Ylm(int l, int m, Vec3 omega)
+{
+  if (l == 0)
+    return complex<double>(1.0/sqrt(4.0*M_PI), 0.0);
+
+  if (m < 0) {
+    double sign = 1.0;
+    for (int i=0; i<m; i++)
+      sign *= -1.0;
+    return sign * conj(Ylm(l, -m, omega));
+  }
+
+  omega = 1.0/ sqrt(dot(omega, omega)) * omega;
+  double costheta = omega[2];
+  double sintheta = sqrt(1.0-costheta*costheta);
+  double cosphi, sinphi;
+      
+  if (sintheta != 0.0) {
+    double sinthetaInv = 1.0/sintheta;
+    cosphi = sinthetaInv*omega[0];
+    sinphi = sinthetaInv*omega[1];
+  }
+  else { // We're at the poles, phi is undefined
+    cosphi = 1.0;
+    sinphi = 0.0;
+  }
+  if (l == 1) {
+    if (m==0)
+      return -sqrt(3.0/(4.0*M_PI)) * costheta *	complex<double>(1.0, 0.0);
+    else if (m==1)
+      return -sqrt(3.0/(8.0*M_PI))*sintheta * 
+	complex<double> (cosphi, sinphi);
+    else {
+      cerr << "Invalid l,m\n";
+      abort();
+    }
+  }
+  else if (l==2) {
+    if (m==0)
+      return sqrt(5.0/(4.0*M_PI)) * (1.5*costheta *costheta - 0.5) *
+	complex<double>(1.0, 0.0);
+    else if (m == 1)
+      return -sqrt(15.0/(8.0*M_PI))*sintheta*costheta*
+	complex<double>(cosphi, sinphi);
+    else if (m==2){
+      double cos2theta = costheta*costheta - sintheta*sintheta;
+      double sin2theta = 2.0*sintheta*costheta;
+      return 0.25*sqrt(15.0/(2.0*M_PI))*sintheta*sintheta *
+	complex<double>(cos2theta, sin2theta);
+    }
+  }
+  else {
+    cerr << "Ylm not implemtned for l > 2.\n";
+    abort();
+  }
+}
+
+void
+Ion_l_Projector::Setup(KingSmithProjector &projector,
+			Vec3 rion, FFTBox *fft)
+{
+
+
+}
+
+
+
 // Note:  this presently only includes the local potential
 void
 NLPP_FFTClass::Vmatrix (Array<complex<double>,2> &vmat)
@@ -173,7 +245,8 @@ NLPP_FFTClass::Apply (const zVec &c, zVec &Hc,
   // Transform c into real space
   cFFT.PutkVec (c);
   cFFT.k2r();
-  // Multiply by V
+
+  // Apply local potential and VHXC
   //  cFFT.rBox *= (Vr+VHXC);
   for (int ix=0; ix<nx; ix++)
     for (int iy=0; iy<ny; iy++)
