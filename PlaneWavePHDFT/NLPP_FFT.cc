@@ -22,7 +22,7 @@
 ////////////////////////////////////////////////////////////
 
 complex<double> 
-Ion_l_Projector::Ylm(int l, int m, Vec3 omega)
+Ion_l_Projector::Ylm(int l, int m, Vec3 r)
 {
   if (l == 0)
     return complex<double>(1.0/sqrt(4.0*M_PI), 0.0);
@@ -31,10 +31,10 @@ Ion_l_Projector::Ylm(int l, int m, Vec3 omega)
     double sign = 1.0;
     for (int i=0; i<m; i++)
       sign *= -1.0;
-    return sign * conj(Ylm(l, -m, omega));
+    return sign * conj(Ylm(l, -m, r));
   }
 
-  omega = 1.0/ sqrt(dot(omega, omega)) * omega;
+  Vec3 omega = 1.0/ sqrt(dot(r, r)) * r;
   double costheta = omega[2];
   double sintheta = sqrt(1.0-costheta*costheta);
   double cosphi, sinphi;
@@ -74,10 +74,51 @@ Ion_l_Projector::Ylm(int l, int m, Vec3 omega)
     }
   }
   else {
-    cerr << "Ylm not implemtned for l > 2.\n";
+    cerr << "Ylm not implemented for l > 2.\n";
     abort();
   }
+  return 0.0;
 }
+
+
+complex<double> 
+Ion_l_Projector::Ylm2(int l, int m, Vec3 r)
+{
+  if (l == 0)
+    return 0.5*sqrt(1.0/M_PI);
+
+  if (m < 0) {
+    double sign = ((-m)&1) ? -1.0 : 1.0;
+    return sign * conj(Ylm(l, -m, r));
+  }
+
+  double nrm = sqrt (1.0/dot(r, r));
+  double x = nrm*r[0];
+  double y = nrm*r[1];
+  double z = nrm*r[2];
+  if (l==1) {
+    if (m==0) 
+      return 0.5*sqrt(3.0/M_PI)*z;
+    else if (m==1)
+      return -0.5*sqrt(3.0/(2.0*M_PI))*complex<double>(x,y);
+  }
+  else if (l==2) {
+    if (m==0)
+      return 0.25*sqrt(5.0/M_PI)*(3.0*z*z - 1.0);
+    else if (m==1)
+      return -0.5*sqrt(15.0/(2.0*M_PI))*z*complex<double>(x,y);
+    else if (m==2) {
+      complex<double> xy(x,y);
+      return 0.25*(15.0/(2.0*M_PI))*xy*xy;
+    }
+  }
+  else {
+    cerr << "Ylm not implemented for l > 2.\n";
+    abort();
+  }
+  return 0.0;
+}
+
 
 void
 Ion_l_Projector::Setup(KingSmithProjector &projector,

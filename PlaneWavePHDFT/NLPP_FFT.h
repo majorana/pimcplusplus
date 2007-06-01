@@ -44,7 +44,8 @@ class Ion_l_Projector
 {
 private:
   FFTBox *fft;
-  complex<double> Ylm(int l, int m, Vec3 omega);
+  complex<double> Ylm (int l, int m, Vec3 r);
+  complex<double> Ylm2(int l, int m, Vec3 r);
 public:
   Array<Int3, 1> FFTIndices;
   // The first index specifies the point.  The second index specifies
