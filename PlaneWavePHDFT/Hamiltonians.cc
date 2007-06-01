@@ -35,7 +35,7 @@ HamiltonianClass::SetIonPot (Potential &pot, bool useFFT)
       assert (&nlpp != NULL);
       Vion = new NLPP_FFTClass (nlpp, GVecs, FFT);
     }
-    if (pot.IsPH())
+    else if (pot.IsPH())
       Vion = new PHPotFFTClass (pot, GVecs, FFT);
     else
       Vion = new LocalPotFFTClass (pot, GVecs, FFT);

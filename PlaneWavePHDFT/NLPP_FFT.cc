@@ -16,11 +16,27 @@
 
 #include "NLPP_FFT.h"
 
+
+// Note:  this presently only includes the local potential
 void
 NLPP_FFTClass::Vmatrix (Array<complex<double>,2> &vmat)
 {
-  cerr << "NLPP_FFTClass::Vmatrix is not implemented.\n";
-  abort();
+  if (!IsSetup)
+    Setup();
+  double volInv = 1.0/GVecs.GetBoxVol();
+  for (int i=0; i<vmat.rows(); i++) 
+    for (int j=0; j<=i; j++) {
+      Vec3 diff = GVecs(i) - GVecs(j);
+      complex<double> s(0.0,0.0);
+      for (int zi=0; zi<Rions.size(); zi++) {
+	double cosVal, sinVal, phase;
+	phase = dot (diff, Rions(zi));
+	sincos(phase, &sinVal, &cosVal);
+	s += complex<double> (cosVal,sinVal);
+      }
+      vmat (i,j) = s*kPH.V(kPoint, GVecs(i), GVecs(j))*volInv;
+      vmat (j,i) = conj(vmat(i,j));
+    }
 }
 
 
@@ -95,7 +111,8 @@ NLPP_FFTClass::Setup()
   SetuprPotentials();
 
   // Compute the Kleinmain-Bylander projectors:
-
+  double kc = cFFT.GVecs.GetkCut();
+  NLPP.SetupProjectors(kc, 4.0*kc);
 
   IsSetup = true;
 }
@@ -143,7 +160,7 @@ NLPP_FFTClass::Apply (const zVec &c, zVec &Hc)
 
 void 
 NLPP_FFTClass::Apply (const zVec &c, zVec &Hc,
-			 Array<double,3> &VHXC)
+		      Array<double,3> &VHXC)
 {
   if (!IsSetup)
     Setup();
