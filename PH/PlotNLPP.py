@@ -10,6 +10,7 @@ plot (zeta_r[:,0], zeta_r[:,1], 'b',\
       chi_r[:,0], chi_r[:,1], 'b--',\
       zeta_r[:,0], zeta_r[:,2], 'r',\
       chi_r[:,0], chi_r[:,2], 'r--')
+axis ((1.5, 1.58, -1.0e-3, 1.0e-3))
 
 figure(2);
 plot (zeta_q[:,0], zeta_q[:,1], 'b',\

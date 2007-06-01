@@ -88,13 +88,21 @@ public:
 inline double
 ChannelPotential::jl(int l, double x)
 {
-  if (fabs(x) != 0.0) {
+  if (fabs(x) > 0.0) {
     if (l == 0)
       return sin(x)/x;
-    else if (l == 1)
-      return sin(x)/(x*x) - cos(x)/x;
-    else if (l == 2)
-      return ((3.0/(x*x*x) - 1.0/x)*sin(x) - 3.0/(x*x)*cos(x));
+    else if (l == 1) {
+      if (x < 1.0e-4)
+	return x/3.0 - x*x*x/30.0 + x*x*x*x*x/840.0 - x*x*x*x*x*x*x/45360.0;
+      else
+	return sin(x)/(x*x) - cos(x)/x;
+    }
+    else if (l == 2) {
+      if (x < 1.0e-2)
+	return x*x/15.0 - x*x*x*x/210.0 + x*x*x*x*x*x/7560.0 - x*x*x*x*x*x*x*x/498960.0;
+      else
+	return ((3.0/(x*x*x) - 1.0/x)*sin(x) - 3.0/(x*x)*cos(x));
+    }
     else {
       cerr << "j(l,x) not implemented for l > 2.\n";
       abort();

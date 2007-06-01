@@ -14,6 +14,8 @@ NLPPClass::Read(IOSectionClass &in)
   assert(in.OpenSection("pseudo"));
   assert(in.ReadVar("AtomicNumber", AtomicNumber));
   assert(in.ReadVar("LocalChannel", lLocal));
+  // HACK HACK HACK HACK
+  // lLocal = 0;
   assert(in.ReadVar("ValenceCharge", Zion));
   
   int numChannels = in.CountSections("lChannel");
@@ -68,27 +70,43 @@ NLPPClass::SetupProjectors(double G_max, double G_FFT)
       Vl[i].SetupProjector(G_max, G_FFT);
 
   FILE *fout = fopen ("zeta_r.dat", "w");
-  for (double r=0.0; r<50.0; r+=0.001)
-    fprintf (fout, "%12.16e %12.16e %12.16e\n", r, 
-	     Vl[0].zeta_r(r), Vl[1].zeta_r(r));
+  for (double r=0.0; r<50.0; r+=0.001) {
+    fprintf (fout, "%12.16e ", r);
+      for (int l=0; l<Vl.size(); l++)
+	if (l != lLocal)
+	  fprintf (fout, "%12.16e ", Vl[l].zeta_r(r));
+    fprintf (fout, "\n");
+  }
   fclose (fout);
   
   fout = fopen ("zeta_q.dat", "w");
-  for (double q=0.0; q<G_FFT; q+=0.001)
-    fprintf (fout, "%12.16e %12.16e %12.16e\n", q, 
-	     Vl[0].zeta_q(q), Vl[1].zeta_q(q));
+  for (double q=0.0; q<G_FFT; q+=0.001) {
+    fprintf (fout, "%12.16e ", q);
+      for (int l=0; l<Vl.size(); l++)
+	if (l != lLocal)
+	  fprintf (fout, "%12.16e ", Vl[l].zeta_q(q));
+    fprintf (fout, "\n");
+  }
   fclose (fout);
 
   fout = fopen ("chi_q.dat", "w");
-  for (double q=0.0; q<G_FFT; q+=0.001)
-    fprintf (fout, "%12.16e %12.16e %12.16e\n", q, 
-	     Vl[0].chi_q(q), Vl[1].chi_q(q));
+  for (double q=0.0; q<G_FFT; q+=0.001) {
+    fprintf (fout, "%12.16e ", q);
+      for (int l=0; l<Vl.size(); l++)
+	if (l != lLocal)
+	  fprintf (fout, "%12.16e ", Vl[l].chi_q(q));
+    fprintf (fout, "\n");
+  }
   fclose (fout);
 
   fout = fopen ("chi_r.dat", "w");
-  for (double r=0.0; r<50.0; r+=0.001)
-    fprintf (fout, "%12.16e %12.16e %12.16e\n", r, 
-	     Vl[0].chi_r(r), Vl[1].chi_r(r));
+  for (double r=0.0; r<50.0; r+=0.001) {
+    fprintf (fout, "%12.16e ", r);
+      for (int l=0; l<Vl.size(); l++)
+	if (l != lLocal)
+	  fprintf (fout, "%12.16e ", Vl[l].chi_r(r));
+    fprintf (fout, "\n");
+  }
   fclose (fout);
 
 }
@@ -97,25 +115,42 @@ NLPPClass::SetupProjectors(double G_max, double G_FFT)
 double
 ChannelPotential::A(double q, double qp)
 {
-  // HACK to avoid using L'Hospital's rule
-  if (q == qp)
-    q = qp+1.0e-6;
-
-  if (l == 0) 
-    return -1.0/(q*q - qp*qp) * 
-      q * qp *(q*cos(q*R0)*sin(qp*R0) - qp*cos(qp*R0)*sin(q*R0));
-  else if (l == 1)
-    return q*qp/(q*q - qp*qp) *
-      (q*cos(qp*R0)*sin(q*R0) - qp*cos(q*R0)*sin(qp*R0))
-      - 1.0/R0 * sin(q*R0)*sin(qp*R0);
-  else if (l == 2)
-    return sqrt(-1.0);
-  else 
+  if (l == 0) {
+    if (q == qp) 
+      return -0.25*q*(-2.0*q*R0 + sin(2.0*q*R0));
+    else
+      return -1.0/(q*q - qp*qp) * 
+	q * qp *(q*cos(q*R0)*sin(qp*R0) - qp*cos(qp*R0)*sin(q*R0));
+  }
+  else if (l == 1){
+    if (q == qp) 
+      return (-2.0 + 2.0*q*q*R0*R0 + 2.0*cos(2.0*q*R0) + q*R0*sin(2.0*q*R0))/(4.0*R0);
+    else
+      return q*qp/(q*q - qp*qp) *
+	(q*cos(qp*R0)*sin(q*R0) - qp*cos(q*R0)*sin(qp*R0))
+	- 1.0/R0 * sin(q*R0)*sin(qp*R0);
+  }
+  else if (l == 2) {
+    if (qp == 0.0 || q == 0.0)
+      return 0.0;
+    else if (q == qp) 
+      return 1.0/(4*q*q*R0*R0*R0)*
+	(-6.0 -6.0*q*q*R0*R0 + 2.0*q*q*q*q*R0*R0*R0*R0 + 
+	 (6.0-6.0*q*q*R0*R0)*cos(2.0*q*R0) + 
+	 q*R0*(12.0-q*q*R0*R0)*sin(2.0*q*R0));
+    else 
+      return 1.0/(q*qp*(q*q-qp*qp)*R0*R0*R0) *
+	(sin(q*R0)*(qp*R0*(-3.0*qp*qp + q*q*(3.0+qp*qp*R0*R0))*cos(qp*R0) +
+		    3.0*(qp*qp-q*q)*sin(qp*R0)) - q*R0*cos(q*R0) *
+	 (3.0*qp*(q*q - qp*qp)*R0*cos(qp*R0) + 
+	  (3.0*qp*qp + q*q*(-3.0 + qp*qp * R0*R0))*sin(qp*R0)));
+  }
+  else
     return sqrt(-1.0);
 }
 
 // double
-// ChannelPotential::A(double q, double qp, double R0)
+// ChannelPotential::A(double q, double qp)
 // {
 //   double sum = 0.0;
 //   double delta = 0.01;
@@ -157,12 +192,14 @@ ChannelPotential::SetupProjector (double G_max, double G_FFT)
     zeta(i) = integrator.Integrate(0.0, grid.End, 1.0e-12);
   }
   zeta_q.Init (&qGrid, zeta);
-  chi_q.Init (&qGrid, zeta);
+
 
   double gamma = G_FFT - G_max;
   // Zero out zeta_q above gamma;
-  for (int i=0; i<qGrid.NumPoints; i++)
-    chi_q(i) = (qGrid(i) >= gamma) ? 0.0 : zeta_q(i);
+  Array<double,1> chi_q_data(qGrid.NumPoints);
+  for (int i=0; i<qGrid.NumPoints; i++) 
+    chi_q_data(i) = (qGrid(i) >= gamma) ? 0.0 : zeta_q(i);
+  chi_q.Init  (&qGrid, chi_q_data);  
 
   // Now for the magic:  We adjust chi_q between G_max and gamma so
   // that the real-space oscillations outside R0 are damped out
@@ -192,13 +229,17 @@ ChannelPotential::SetupProjector (double G_max, double G_FFT)
     }
     M(i,i) -= 0.5*M_PI*q*q;
   }
-//   if (l==0) {
+//   if (l==2) {
 //     FILE *fout = fopen ("M.dat", "w");
 //     for (int i=0; i<nb; i++) {
 //       for (int j=0; j<nb; j++) 
 // 	fprintf (fout, "%24.16e ", M(i,j));
 //       fprintf (fout, "\n");
 //     }
+//     fclose (fout);
+//     fout = fopen ("b.dat", "w");
+//     for (int i=0; i<nb; i++)
+//       fprintf (fout, "%24.16e\n", b(i));
 //     fclose (fout);
 //   }
   // Now solve Mx = b
@@ -211,20 +252,25 @@ ChannelPotential::SetupProjector (double G_max, double G_FFT)
     chi_q(G_maxIndex+i) = x(i);
   chi_q(G_maxIndex+nb) = 0.0;
   
+//   FILE *fout = fopen("chicheck.dat","w");
+//   for (double q=0.0; q<qGrid.End; q+=0.001)
+//     fprintf (fout, "%24.16e %24.16e\n", q, chi_q(q));
+//   fclose (fout);
+
   // Now transform back to real-space, computing chi(r)
   Job = CHI_R;
-  Array<double,1> chi(grid.NumPoints);
-  for (int i=0; i<grid.NumPoints; i++) {
+  Array<double,1> chi_r_data(grid.NumPoints);
+  for (int i=1; i<grid.NumPoints; i++) {
     rCurrent = grid(i);
-    chi(i) = integrator.Integrate(0.0, qGrid.End, 1.0e-8);
+    chi_r_data(i) = integrator.Integrate(0.0, gamma, 1.0e-10);
   }
-  chi_r.Init (&grid, chi);
+  chi_r.Init (&grid, chi_r_data);
 
   // Finally, check to see if chi_r is small outside R0
   Job = CHECK_CHI_R;
-  double norm2 = integrator.Integrate(0.0, qGrid.End, 1.0e-8);
-  double error = integrator.Integrate( R0, qGrid.End, 1.0e-8);
-  if (error > 1.0e-10)
+  double norm2 = integrator.Integrate(0.0, grid.End, 1.0e-8);
+  double error = integrator.Integrate( R0, grid.End, 1.0e-8);
+  if (error > 1.0e-16)
     cerr << "Fractional error in real-space projection = "
 	 << (error / norm2) << endl;
 }

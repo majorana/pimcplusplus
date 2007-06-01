@@ -8,7 +8,7 @@ TestRead()
   NLPPClass nlpp;
 
 
-// assert (in.OpenFile(ExpandFileName("~/NLPP/Na/CASINO/Na_CASINO_NLPP.h5"));
+//   assert (in.OpenFile(ExpandFileName("~/NLPP/Na/CASINO/Na_CASINO_NLPP.h5")));
 //   nlpp.Read (in);
 //   nlpp.SetupProjectors (4.0, 16.0);
 
