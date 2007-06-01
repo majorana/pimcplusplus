@@ -62,6 +62,10 @@ NLPPClass::Write(IOSectionClass &out)
 }
 
 
+
+// This function computes the Kleinman-Bylander projector for the
+// nonlocal channels of the pseudopotential.  It just calls
+// SetupProjector on each of the nonlocal channels.
 void
 NLPPClass::SetupProjectors(double G_max, double G_FFT)
 {
@@ -112,6 +116,7 @@ NLPPClass::SetupProjectors(double G_max, double G_FFT)
 }
 
 
+// A(q,q') = q^2 q'^2 \int_0^R0 j_l(qr) r^2 j_l(q'r) dr
 double
 ChannelPotential::A(double q, double qp)
 {
@@ -161,7 +166,10 @@ ChannelPotential::A(double q, double qp)
 // }
 
 
-
+// This function computes the Kleinman-Bylander projector from the
+// DeltaV and u splines.  It then applies the methods of King-Smith et
+// al to filter out the high Fourier components, so that the
+// projector can be applied without error in real-space.
 void
 ChannelPotential::SetupProjector (double G_max, double G_FFT)
 {
