@@ -35,6 +35,8 @@ Potential* ReadPotential (IOSectionClass &in)
     pot = new SplinePot;
   else if (type == "HeAziz")
     pot = new HeAzizPot;
+  else if (type == "NLPP")
+    pot = new NLPPClass;
   else {
     cerr << "Unrecognize potential type \"" << type << "\".  Exitting.\n";
     exit(1);

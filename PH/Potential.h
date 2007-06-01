@@ -24,5 +24,6 @@
 #include "SplinePot.h"
 #include "HeAzizPot.h"
 #include "GeneralPot.h"
+#include "NLPP.h"
 
 #endif

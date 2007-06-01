@@ -11,7 +11,6 @@ NLPPClass::IsNonlocal()
 void
 NLPPClass::Read(IOSectionClass &in)
 {
-  assert(in.OpenSection("pseudo"));
   assert(in.ReadVar("AtomicNumber", AtomicNumber));
   assert(in.ReadVar("LocalChannel", lLocal));
   assert(in.ReadVar("ValenceCharge", Zion));
@@ -47,8 +46,6 @@ NLPPClass::Read(IOSectionClass &in)
     Vl[l].rc = rc[l];
     Vl[l].R0 = 1.75*Vl[l].rc;
   }
-
-  in.CloseSection(); // "pseudo"
 }
 
 
