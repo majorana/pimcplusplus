@@ -1,4 +1,4 @@
-#include "NLPPClass.h"
+#include "NLPP.h"
 #include "../IO/FileExpand.h"
 
 void 
