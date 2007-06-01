@@ -67,10 +67,10 @@ Ion_l_Projector::Ylm(int l, int m, Vec3 omega)
       return -sqrt(15.0/(8.0*M_PI))*sintheta*costheta*
 	complex<double>(cosphi, sinphi);
     else if (m==2){
-      double cos2theta = costheta*costheta - sintheta*sintheta;
-      double sin2theta = 2.0*sintheta*costheta;
+      double cos2phi = cosphi*cosphi - sinphi*sinphi;
+      double sin2phi = 2.0*sinphi*cosphi;
       return 0.25*sqrt(15.0/(2.0*M_PI))*sintheta*sintheta *
-	complex<double>(cos2theta, sin2theta);
+	complex<double>(cos2phi, sin2phi);
     }
   }
   else {
