@@ -30,6 +30,11 @@ void
 HamiltonianClass::SetIonPot (Potential &pot, bool useFFT)
 {
   if (useFFT) {
+    if (pot.IsNonlocal()) {
+      NLPPClass &nlpp = dynamic_cast<NLPPClass&> (pot);
+      assert (&nlpp != NULL);
+      Vion = new NLPP_FFTClass (nlpp, GVecs, FFT);
+    }
     if (pot.IsPH())
       Vion = new PHPotFFTClass (pot, GVecs, FFT);
     else

@@ -22,5 +22,6 @@
 #include "PHPot.h"
 #include "PHPotFFT.h"
 #include "LocalPotFFT.h"
+#include "NLPP_FFT.h"
 
 #endif

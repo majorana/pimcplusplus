@@ -18,6 +18,9 @@
 #define NLPP_FFT_H
 
 #include "HamiltonianBase.h"
+#include "../PH/NLPP.h"
+#include "../PH/CoulombPot.h"
+#include "../PH/SplinePot.h"
 
 // Implements the King-Smith method for applying nonlocal
 // pseudopotentials in real space.  See PRB 44, 13063.
@@ -25,11 +28,15 @@
 class NLPP_FFTClass : public VionBase
 {
 private:
-  kSpacePH LocalPot_k;
+  // This computes the reciprocal-space version of the local potential 
+  kSpacePH kPH;
   zVec Vc;
   FFTBox      &cFFT;
   void SetupkPotentials();
   void SetuprPotentials();
+  NLPPClass NLPP;
+  SplinePot Vlocal;
+  CoulombPot Vouter;
 public:
   void Setup();
   void SetIons (const Array<Vec3, 1>& rions);
@@ -40,8 +47,10 @@ public:
   void Apply (const zVec &c, zVec &Hc,
 	      Array<double,3> &VHXC);
   NLPP_FFTClass (NLPPClass &nlpp, GVecsClass &gvecs, FFTBox &fft) :
-    VionBase (gvecs), kPH(ph), cFFT(fft)
+    VionBase (gvecs), kPH(Vlocal), cFFT(fft), NLPP(nlpp)
   {
 
   }
 };
+
+#endif

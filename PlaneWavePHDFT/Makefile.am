@@ -46,6 +46,8 @@ libpw_la_SOURCES = ChargeMixer.h      \
                    LDA.cc             \
                    LocalPotFFT.h      \
                    LocalPotFFT.cc     \
+                   NLPP_FFT.h         \
+                   NLPP_FFT.cc        \
                    PHPot.h            \
                    PHPot.cc           \
                    PHPotFFT.h         \
