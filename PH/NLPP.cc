@@ -1,4 +1,4 @@
-#include "NLPPClass.h"
+#include "NLPP.h"
 #include "../Integration/GKIntegration.h"
 #include "../MatrixOps/MatrixOps.h"
 
