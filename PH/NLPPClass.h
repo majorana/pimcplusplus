@@ -32,7 +32,7 @@ protected:
   inline double jl(int l, double x);
   LinearGrid qGrid;
   double qCurrent, rCurrent;
-  typedef enum { NORM, EKB, ZETA_Q, CHI_R } IntegrandType;
+  typedef enum { NORM, EKB, ZETA_Q, CHI_R, CHECK_CHI_R} IntegrandType;
   IntegrandType Job;
   double A(double q, double qp);
 public:
@@ -121,6 +121,8 @@ ChannelPotential::operator()(double x)
     return jl(l,qCurrent*x)*x*x*zeta_r(x);
   case CHI_R:
     return 2.0/M_PI * x*x*chi_q(x)*jl(l,x*rCurrent);
+  case CHECK_CHI_R:
+    return chi_r(x)*chi_r(x)*x*x;
   default:
     return 0.0;
   }
