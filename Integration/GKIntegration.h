@@ -80,7 +80,7 @@ class GK61 {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-template <class F, class GKRule> 
+template <class F, class GKRule=GK31> 
 class GKIntegration {
  private:
 
@@ -276,6 +276,7 @@ class GKIntegration {
 		   const double absError, const bool absErrorFlag, 
 		   const double relError, const bool relErrorFlag, 
 		   const bool andFlag) {
+    ir.clear();
 
     // #define PRINT_IT
 #ifdef PRINT_IT
