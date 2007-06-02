@@ -43,7 +43,7 @@ public:
 class Ion_l_Projector
 {
 private:
-  FFTBox *fft;
+  FFTBox *FFT;
   complex<double> Ylm (int l, int m, Vec3 r);
   complex<double> Ylm2(int l, int m, Vec3 r);
 public:

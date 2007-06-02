@@ -122,10 +122,50 @@ Ion_l_Projector::Ylm2(int l, int m, Vec3 r)
 
 void
 Ion_l_Projector::Setup(KingSmithProjector &projector,
-			Vec3 rion, FFTBox *fft)
+		       Vec3 rion, FFTBox *fft)
 {
-
-
+  FFT = fft;
+  double R0 = projector.R0;
+  int nx, ny, nz;
+  fft->GetDims (nx, ny, nz);
+  Vec3 box = fft->GVecs.GetBox();
+  Vec3 boxInv(1.0/box[0], 1.0/box[1], 1.0/box[2]);
+  double dx = box[0]/(double)nx;
+  double dy = box[0]/(double)ny;
+  double dz = box[0]/(double)nz;
+  Vec3 r;
+  vector<Int3> indices;
+  vector<Vec3> disps;
+  for (int ix=0; ix<nx; ix++) {
+    r[0] = dx * ix;
+    for (int iy=0; iy<ny; iy++) {
+      r[1] = dy * iy;
+      for (int iz=0; iz<nz; iz++) {
+	r[2] = dz * iz;
+	Vec3 disp = r - rion;
+	disp[0] -= round(disp[0]*boxInv[0])*box[0];
+	disp[1] -= round(disp[1]*boxInv[1])*box[1];
+	disp[2] -= round(disp[2]*boxInv[2])*box[2];
+	if (dot(disp, disp) < R0*R0) {
+	  // This point is inside the projection core
+	  indices.push_back(Int3(ix,iy,iz));
+	  disps.push_back(disp);
+	}
+      }
+    }
+  }
+  cerr << "Found " << indices.size() << " projection points.\n";
+  // Now, compute projector inside the core
+  int l = projector.l;
+  ChiYlm.resize(indices.size(), 2*l+1);
+  FFTIndices.resize(indices.size());
+  for (int i=0; i<indices.size(); i++) {
+    FFTIndices(i) = indices[i];
+    double r = sqrt(dot(disps[i], disps[i]));
+    for (int m=-l; m<=l; m++)
+      ChiYlm(i,l+m) = Ylm(l,m,disps[i]) * projector.chi_r(r);
+  }
+  MeshVol = dx*dy*dz;
 }
 
 
