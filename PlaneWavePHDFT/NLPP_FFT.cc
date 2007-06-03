@@ -84,7 +84,8 @@ Ion_l_Projector::Ylm(int l, int m, Vec3 r)
 complex<double> 
 Ion_l_Projector::Ylm2(int l, int m, Vec3 r)
 {
-  if (l == 0)
+  double r2 = dot(r,r);
+  if (l == 0 || r2==0.0)
     return 0.5*sqrt(1.0/M_PI);
 
   if (m < 0) {
@@ -121,18 +122,19 @@ Ion_l_Projector::Ylm2(int l, int m, Vec3 r)
 
 
 void
-Ion_l_Projector::Setup(KingSmithProjector &projector,
-		       Vec3 rion, FFTBox *fft)
+Ion_l_Projector::Setup(NLPPClass &nlpp, int l_, 
+		       Vec3 rion, FFTBox &fft)
 {
-  FFT = fft;
-  double R0 = projector.R0;
+  FFT = &fft;
+  l = l_;
+  double R0 = nlpp.GetR0(l);
   int nx, ny, nz;
-  fft->GetDims (nx, ny, nz);
-  Vec3 box = fft->GVecs.GetBox();
+  fft.GetDims (nx, ny, nz);
+  Vec3 box = fft.GVecs.GetBox();
   Vec3 boxInv(1.0/box[0], 1.0/box[1], 1.0/box[2]);
   double dx = box[0]/(double)nx;
-  double dy = box[0]/(double)ny;
-  double dz = box[0]/(double)nz;
+  double dy = box[1]/(double)ny;
+  double dz = box[2]/(double)nz;
   Vec3 r;
   vector<Int3> indices;
   vector<Vec3> disps;
@@ -146,7 +148,7 @@ Ion_l_Projector::Setup(KingSmithProjector &projector,
 	disp[0] -= round(disp[0]*boxInv[0])*box[0];
 	disp[1] -= round(disp[1]*boxInv[1])*box[1];
 	disp[2] -= round(disp[2]*boxInv[2])*box[2];
-	if (dot(disp, disp) < R0*R0) {
+	if (dot(disp, disp) <= R0*R0) {
 	  // This point is inside the projection core
 	  indices.push_back(Int3(ix,iy,iz));
 	  disps.push_back(disp);
@@ -156,14 +158,26 @@ Ion_l_Projector::Setup(KingSmithProjector &projector,
   }
   cerr << "Found " << indices.size() << " projection points.\n";
   // Now, compute projector inside the core
-  int l = projector.l;
   ChiYlm.resize(indices.size(), 2*l+1);
   FFTIndices.resize(indices.size());
+  // Psi is normalized such that \sum_{rFFT} = Nx*Ny*Nz.
+  // We adjust the normalization of the projector so that it has the
+  // same convention. 
+  double normFactor = sqrt(box[0]*box[1]*box[2]);
   for (int i=0; i<indices.size(); i++) {
     FFTIndices(i) = indices[i];
     double r = sqrt(dot(disps[i], disps[i]));
-    for (int m=-l; m<=l; m++)
-      ChiYlm(i,l+m) = Ylm(l,m,disps[i]) * projector.chi_r(r);
+    for (int m=-l; m<=l; m++) {
+      ChiYlm(i,l+m) = normFactor*Ylm2(l,m,disps[i]) * nlpp.GetChi_r(l, r);
+      if (isnan(real(ChiYlm(i,l+m))) || isnan(imag(ChiYlm(i,l+m))))
+	cerr << "NAN at r = " << r << " m=" << m << "  l=" << l << endl;
+    }
+  }
+  for (int m=-l; m<=l; m++) {
+    double nrm = 0.0;
+    for (int i=0; i<indices.size(); i++)
+      nrm += norm (ChiYlm(i,l+m));
+    cerr << "l=" << l << "  m=" << m << "  norm=" << nrm << endl;
   }
   MeshVol = dx*dy*dz;
 }
@@ -232,6 +246,7 @@ NLPP_FFTClass::SetupkPotentials()
 void
 NLPP_FFTClass::SetuprPotentials()
 {
+  // Setup local part
   cFFT.kBox = complex<FFT_FLOAT>(0.0, 0.0);
   for (int i=0; i<GVecs.DeltaSize(); i++) {
     Int3 I = GVecs.DeltaI(i);
@@ -239,6 +254,19 @@ NLPP_FFTClass::SetuprPotentials()
   }
   cFFT.k2r();
   Vr = cFFT.rBox;
+
+  // Setup nonlocal part
+  int numProj = NLPP.NumChannels()-1;
+  Ion_l_Projectors.resize( Rions.size(), numProj);
+  for (int ri=0; ri<Rions.size(); ri++) {
+    int iProj = 0;
+    for (int l=0; l<NLPP.NumChannels(); l++) {
+      if (l != NLPP.LocalChannel()) {
+	Ion_l_Projectors(ri, iProj).Setup (NLPP, l, Rions(ri), cFFT);
+	iProj++;
+      }
+    }
+  }
 }
 
 void
@@ -260,12 +288,14 @@ NLPP_FFTClass::Setup()
   Vr.resize(nx,ny,nz);
   Vc.resize(GVecs.size());
   VG.resize(GVecs.DeltaSize());
-  SetupkPotentials();
-  SetuprPotentials();
+  VnlPsi.resize(nx,ny,nz);
 
   // Compute the Kleinmain-Bylander projectors:
   double kc = cFFT.GVecs.GetkCut();
   NLPP.SetupProjectors(kc, 4.0*kc);
+
+  SetupkPotentials();
+  SetuprPotentials();
 
   IsSetup = true;
 }
@@ -285,6 +315,55 @@ NLPP_FFTClass::Setk (Vec3 k)
   SetIons(Rions);
 }
 
+void
+Ion_l_Projector::Project (Array<complex<double>,1> &chi_psi)
+{
+  chi_psi = complex<double>();
+  int nx, ny, nz;
+  FFT->GetDims(nx,ny,nz);
+  double normFactor = 1.0/(double)(nx*ny*nz);
+
+  int numPoints = FFTIndices.size();
+  for (int i=0; i<numPoints; i++) {
+    complex<double> psi = FFT->rBox(FFTIndices(i));
+    for (int m=-l; m<=l; m++) 
+      chi_psi(m+l) += conj(ChiYlm(i,m+l)) * psi;
+  }
+  chi_psi *= normFactor;
+}
+
+void
+NLPP_FFTClass::CalcVnlPsi()
+{
+  VnlPsi = complex<double>(0.0, 0.0);
+  int nx, ny, nz;
+  cFFT.GetDims(nx,ny,nz);
+  double normFactor = 1.0/(double)(nx*ny*nz);
+  int lmax = NLPP.NumChannels()-1;
+  Array<double,1> chi_psi(2*lmax+1);
+
+  for (int ri=0; ri<Rions.size(); ri++) {
+    int iProj = 0;
+    for (int l=0; l<NLPP.NumChannels(); l++) 
+      if (l != NLPP.LocalChannel()) {
+	Ion_l_Projector &proj = Ion_l_Projectors(ri, iProj);
+	double E_KB = NLPP.GetE_KB(l);
+	int numPoints = proj.FFTIndices.size();
+	for (int m=-l; m<=l; m++) {
+	  complex<double> projSum(0.0, 0.0);
+	  for (int i=0; i<numPoints; i++) {
+	    complex<double> psi = cFFT.rBox(proj.FFTIndices(i));
+	    projSum += conj(proj.ChiYlm(i,m+l)) * psi;
+	  }
+	  projSum *= normFactor;
+	  fprintf (stderr, "ri=%d l=%d m=%d projection=(%1.10e,%1.10e)\n", ri, l, m, 
+		   projSum.real(), projSum.imag());
+	}
+	iProj++;
+      }
+  }
+}
+
 
 void 
 NLPP_FFTClass::Apply (const zVec &c, zVec &Hc)
@@ -294,14 +373,23 @@ NLPP_FFTClass::Apply (const zVec &c, zVec &Hc)
   int nx, ny, nz;
   cFFT.GetDims(nx, ny, nz);
 
-  ////////////////////
-  // Potential part //
-  ////////////////////
+  //////////////////////////
+  // Local potential part //
+  //////////////////////////
   // Transform c into real space
   cFFT.PutkVec (c);
   cFFT.k2r();
+
+  ////////////////////
+  // Nonlocal parts //
+  ////////////////////
+  CalcVnlPsi();
+
   // Multiply by V
   cFFT.rBox *= Vr;
+  // Add nonlocal parts
+  cFFT.rBox += VnlPsi;
+
   // Transform back
   cFFT.r2k();
 
@@ -326,6 +414,10 @@ NLPP_FFTClass::Apply (const zVec &c, zVec &Hc,
   // Transform c into real space
   cFFT.PutkVec (c);
   cFFT.k2r();
+  ////////////////////
+  // Nonlocal parts //
+  ////////////////////
+  CalcVnlPsi();
 
   // Apply local potential and VHXC
   //  cFFT.rBox *= (Vr+VHXC);
@@ -333,6 +425,9 @@ NLPP_FFTClass::Apply (const zVec &c, zVec &Hc,
     for (int iy=0; iy<ny; iy++)
       for (int iz=0; iz<nz; iz++)
 	cFFT.rBox(ix,iy,iz) *= (Vr(ix,iy,iz)+VHXC(ix,iy,iz));
+
+  // Add nonlocal parts
+  cFFT.rBox += VnlPsi;
 
   // Transform back
   cFFT.r2k();

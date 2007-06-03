@@ -47,6 +47,7 @@ private:
   complex<double> Ylm (int l, int m, Vec3 r);
   complex<double> Ylm2(int l, int m, Vec3 r);
 public:
+  int l;
   Array<Int3, 1> FFTIndices;
   // The first index specifies the point.  The second index specifies
   // the value of m.  Since chi_r is real and 
@@ -55,8 +56,8 @@ public:
   Array<complex<double>,2> ChiYlm;
   // The volume of a mesh element
   double MeshVol;
-  void Setup(KingSmithProjector &projector,
-	     Vec3 rion, FFTBox *fft);
+  void Setup(NLPPClass &nlpp, int l_,
+	     Vec3 rion, FFTBox &fft);
   // This returns the application of the projector to the contents of
   // the FFTBox in chi_psi.  Thus, for l=0, chi_psi has one element,
   // for l=1: 3 elements, l=2:  5 elements...
@@ -74,11 +75,15 @@ private:
   FFTBox      &cFFT;
   void SetupkPotentials();
   void SetuprPotentials();
-  NLPPClass NLPP;
+  NLPPClass &NLPP;
   SplinePot Vlocal;
   CoulombPot Vouter;
-  Array<Ion_l_Projector,1> Ion_l_Projectors;
-
+  // The first index is the ion number, the second is the projector number. 
+  Array<Ion_l_Projector,2> Ion_l_Projectors;
+  // This is where the results of applying the nonlocal parts get accumulated. 
+  Array<complex<double>,3> VnlPsi;
+  // Apply the nonlocal parts
+  void CalcVnlPsi();
 public:
   void Setup();
   void SetIons (const Array<Vec3, 1>& rions);
