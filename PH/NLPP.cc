@@ -175,7 +175,7 @@ ChannelPotential::SetupProjector (double G_max, double G_FFT)
   double norm = integrator.Integrate(0.0, grid.End, 1.0e-12);
   ProjectorNorm = 1.0/sqrt(norm);
   Job = EKB;
-  double E_KB = norm/integrator.Integrate(0.0, grid.End, 1.0e-12);
+  E_KB = norm/integrator.Integrate(0.0, grid.End, 1.0e-12);
   cerr << "l = " << l << "  Norm is " << norm 
        << "  E_KB is " << E_KB << "  R0 = " << R0 << endl;
   
