@@ -340,25 +340,18 @@ NLPP_FFTClass::CalcVnlPsi()
   cFFT.GetDims(nx,ny,nz);
   double normFactor = 1.0/(double)(nx*ny*nz);
   int lmax = NLPP.NumChannels()-1;
-  Array<double,1> chi_psi(2*lmax+1);
+  Array<complex<double>,1> chi_psi(2*lmax+1);
 
   for (int ri=0; ri<Rions.size(); ri++) {
     int iProj = 0;
     for (int l=0; l<NLPP.NumChannels(); l++) 
       if (l != NLPP.LocalChannel()) {
-	Ion_l_Projector &proj = Ion_l_Projectors(ri, iProj);
 	double E_KB = NLPP.GetE_KB(l);
-	int numPoints = proj.FFTIndices.size();
-	for (int m=-l; m<=l; m++) {
-	  complex<double> projSum(0.0, 0.0);
-	  for (int i=0; i<numPoints; i++) {
-	    complex<double> psi = cFFT.rBox(proj.FFTIndices(i));
-	    projSum += conj(proj.ChiYlm(i,m+l)) * psi;
-	  }
-	  projSum *= normFactor;
+	Ion_l_Projector &proj = Ion_l_Projectors(ri, iProj);
+	proj.Project(chi_psi);
+	for (int m=-l; m<=l; m++) 
 	  fprintf (stderr, "ri=%d l=%d m=%d projection=(%1.10e,%1.10e)\n", ri, l, m, 
-		   projSum.real(), projSum.imag());
-	}
+		   chi_psi(m+l).real(), chi_psi(m+l).imag());
 	iProj++;
       }
   }
