@@ -8,18 +8,48 @@ NLPPClass::IsNonlocal()
   return true;
 }
 
+void 
+ChannelPotential::Read(IOSectionClass &in, Grid *grid)
+{
+  assert (in.ReadVar("l", l));
+  assert (in.ReadVar("n_principal", n_principal));
+  assert (in.ReadVar("Cutoff", rc));
+  R0 = 1.75 * rc;
+  assert (in.ReadVar("Occupation", Occupation));
+  assert (in.ReadVar("Eigenvalue", Eigenvalue));
+  Array<double,1> V_data, u_data;
+  assert (in.ReadVar("Vl", V_data));
+  assert (in.ReadVar("ul", u_data));
+  V.Init (grid, V_data);
+  u.Init (grid, u_data);
+}
+
+void
+ChannelPotential::Write(IOSectionClass &out)
+{
+  out.WriteVar("l", l);
+  out.WriteVar("n_principal", n_principal);
+  out.WriteVar("Cutoff", rc);
+  out.WriteVar("Occupation", Occupation);
+  out.WriteVar("Eigenvalue", Eigenvalue);
+  out.WriteVar("Vl", V.Data());
+  out.WriteVar("ul", u.Data());
+}
+
 void
 NLPPClass::Read(IOSectionClass &in)
 {
   assert(in.ReadVar("AtomicNumber", AtomicNumber));
   assert(in.ReadVar("LocalChannel", lLocal));
   assert(in.ReadVar("ValenceCharge", Zion));
+  assert(in.ReadVar("Symbol", Symbol));
   
   int numChannels = in.CountSections("lChannel");
-  vector<Array<double,1> > vl(numChannels), ul(numChannels);
-  vector<double> rc(numChannels);
+  Vl.resize(numChannels);
+//   vector<Array<double,1> > vl(numChannels), ul(numChannels);
+//   vector<double> rc(numChannels);
   assert (in.OpenSection("PotentialGrid"));
-  Grid *grid = ReadGrid (in);
+  PotentialGrid = ReadGrid (in);
   in.CloseSection(); // "PotentialGrid"
   for (int i=0; i<numChannels; i++) {
     assert (in.OpenSection("lChannel", i));
@@ -29,22 +59,13 @@ NLPPClass::Read(IOSectionClass &in)
       cerr << "Skipped channels in NLPPClass read.\n";
       abort();
     }
-    assert (in.ReadVar("Vl", vl[l]));
-    assert (in.ReadVar("ul", ul[l]));
-    assert (in.ReadVar("Cutoff", rc[l]));
+    Vl[l].Read(in, PotentialGrid);
     in.CloseSection (); // "lChannel"
   }
-  
-  Vl.resize(numChannels);
   for (int l=0; l<numChannels; l++) {
-    Vl[l].l = l;
-    Vl[l].V.Init (grid, vl[l]);
-    Vl[l].u.Init (grid, ul[l]);
-    Array<double,1> deltav(vl[l].size());
-    deltav = vl[l] - vl[lLocal];
-    Vl[l].DeltaV.Init (grid, deltav);
-    Vl[l].rc = rc[l];
-    Vl[l].R0 = 1.75*Vl[l].rc;
+    Array<double,1> deltav(PotentialGrid->NumPoints);
+    deltav = Vl[l].V.Data()- Vl[lLocal].V.Data();
+    Vl[l].DeltaV.Init (PotentialGrid, deltav);
   }
 }
 
@@ -52,8 +73,19 @@ NLPPClass::Read(IOSectionClass &in)
 void
 NLPPClass::Write(IOSectionClass &out)
 {
-  cerr << "NLPPClass::Write not implemented.\n";
-  abort();
+  out.WriteVar ("Type", "NLPP");
+  out.WriteVar ("LocalChannel", lLocal);
+  out.WriteVar ("AtomicNumber", AtomicNumber);
+  out.WriteVar ("Symbol", Symbol);
+  out.WriteVar ("ValenceCharge", Zion);
+  out.NewSection("PotentialGrid");
+  PotentialGrid->Write(out);
+  out.CloseSection();  // "PotentialGrid"
+  for (int i=0; i<Vl.size(); i++) {
+    out.NewSection("lChannel");
+    Vl[i].Write (out);
+    out.CloseSection(); // "lChannel"
+  }
 }
 
 

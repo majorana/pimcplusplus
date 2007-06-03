@@ -39,8 +39,10 @@ public:
   int l;
   // V stores the potential
   // DeltaV stores the potential less to the local potential
+  int n_principal;
   CubicSpline V, DeltaV, u;
   double rc, R0;
+  double Occupation, Eigenvalue;
   // The Kleinman-Bylander projection energy
   double E_KB;
   // The unfiltered projection operators in real-space and reciprocal
@@ -54,6 +56,8 @@ public:
   inline double operator()(double x);
 
   void SetupProjector(double G_max, double G_FFT);
+  void Read  (IOSectionClass &in, Grid* grid);
+  void Write (IOSectionClass &out);
 };
 
 class NLPPClass : public Potential
@@ -65,6 +69,8 @@ protected:
   // V(r) = -Zion/r for large r.
   double Zion;
   int AtomicNumber;
+  string Symbol;
+  Grid *PotentialGrid;
 public:
   // General accessor functions
   bool IsNonlocal();
@@ -75,6 +81,8 @@ public:
 
   // Nonlocal part accessor functions:
   inline double GetChi_r (int l, double r) { return Vl[l].chi_r(r); }
+  // HACK HACK HACK
+  //inline double GetChi_r (int l, double r) { return Vl[l].zeta_r(r); }
   inline double GetE_KB (int l)            { return Vl[l].E_KB;     }
   inline double GetR0 (int l)              { return Vl[l].R0;       }
 
