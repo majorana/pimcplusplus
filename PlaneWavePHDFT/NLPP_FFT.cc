@@ -156,7 +156,6 @@ Ion_l_Projector::Setup(NLPPClass &nlpp, int l_,
       }
     }
   }
-  cerr << "Found " << indices.size() << " projection points.\n";
   // Now, compute projector inside the core
   ChiYlm.resize(indices.size(), 2*l+1);
   FFTIndices.resize(indices.size());
@@ -177,7 +176,6 @@ Ion_l_Projector::Setup(NLPPClass &nlpp, int l_,
     double nrm = 0.0;
     for (int i=0; i<indices.size(); i++)
       nrm += norm (ChiYlm(i,l+m));
-    cerr << "l=" << l << "  m=" << m << "  norm=" << nrm << endl;
   }
   MeshVol = dx*dy*dz;
 }
@@ -333,6 +331,19 @@ Ion_l_Projector::Project (Array<complex<double>,1> &chi_psi)
 }
 
 void
+Ion_l_Projector::AddToVnl (Array<complex<double>,1> &Echi_psi,
+			   Array<complex<double>,3> &VnlPsi)
+{
+  int N = FFTIndices.size();
+  for (int i=0; i<N; i++) {
+    Int3 index = FFTIndices(i);
+    for (int m=-l; m<=l; m++)
+      VnlPsi(index) += ChiYlm(i,m+l)*Echi_psi(m+l);
+  }
+}
+
+
+void
 NLPP_FFTClass::CalcVnlPsi()
 {
   VnlPsi = complex<double>(0.0, 0.0);
@@ -340,7 +351,9 @@ NLPP_FFTClass::CalcVnlPsi()
   cFFT.GetDims(nx,ny,nz);
   double normFactor = 1.0/(double)(nx*ny*nz);
   int lmax = NLPP.NumChannels()-1;
-  Array<complex<double>,1> chi_psi(2*lmax+1);
+  Array<complex<double>,1> chi_psi(2*lmax+1), Echi_psi(2*lmax+1);
+
+  double E_nl = 0.0;
 
   for (int ri=0; ri<Rions.size(); ri++) {
     int iProj = 0;
@@ -349,12 +362,15 @@ NLPP_FFTClass::CalcVnlPsi()
 	double E_KB = NLPP.GetE_KB(l);
 	Ion_l_Projector &proj = Ion_l_Projectors(ri, iProj);
 	proj.Project(chi_psi);
-	for (int m=-l; m<=l; m++) 
-	  fprintf (stderr, "ri=%d l=%d m=%d projection=(%1.10e,%1.10e)\n", ri, l, m, 
-		   chi_psi(m+l).real(), chi_psi(m+l).imag());
+	Echi_psi = E_KB * chi_psi;
+	proj.AddToVnl (Echi_psi, VnlPsi);
+	for (int m=-l; m<=l; m++) {
+	  E_nl += norm (chi_psi(m+l))*E_KB;
+	}
 	iProj++;
       }
   }
+  //  cerr << "E_nl = " << E_nl << endl;
 }
 
 

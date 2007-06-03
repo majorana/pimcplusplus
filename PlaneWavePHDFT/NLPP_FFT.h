@@ -62,6 +62,10 @@ public:
   // the FFTBox in chi_psi.  Thus, for l=0, chi_psi has one element,
   // for l=1: 3 elements, l=2:  5 elements...
   void Project (Array<complex<double>,1> &chi_psi);
+
+  // This adds the contribution of the projector to VnlPsi
+  void AddToVnl (Array<complex<double>,1> &chi_psi,
+		 Array<complex<double>,3> &VnlPsi);
 };
 
 
