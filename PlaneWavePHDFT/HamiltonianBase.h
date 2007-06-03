@@ -66,6 +66,7 @@ public:
   /// This version includes the hartree and exchange-correlation pot
   virtual void Apply   (const zVec &c, zVec &Hc, 
 			Array<double,3> &VHXC);
+  virtual double NonlocalEnergy (const zVec &c);
   virtual void SetIons (const Array<Vec3,1> &rions); 
   virtual void Setup() = 0;
   virtual void Vmatrix (Array<complex<double>,2> &vmat) = 0;

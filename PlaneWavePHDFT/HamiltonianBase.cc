@@ -44,6 +44,12 @@ PWKineticClass::Apply(const zVec &c, zVec &Kc)
 }
 
 
+double
+VionBase::NonlocalEnergy(const zVec &c)
+{
+  return 0.0;
+}
+
 void
 VionBase::SetIons(const Array<Vec3,1> &rions)
 {

@@ -425,16 +425,17 @@ MPISystemClass::CalcVHXC()
 // 	Eelec_ion2 += Rho_r(ix,iy,iz)*H.GetVr()(ix,iy,iz).real();
 
 //   Eelec_ion2 *= vol/(double)Ngrid;
-  Eelec_ion = CalcLocalPPEnergy();
+  Elocal    = CalcLocalPPEnergy();
+  Enonlocal = CalcNonlocalPPEnergy();
   double Ecore = NumElecs*(double)Rions.size() * H.GetVG0();
   
   if (BandComm.MyProc() == 0)
     if (kComm.MyProc() == 0) {
       fprintf (stderr, 
-	       "Iter     EH        EXC       E_el_ion  Eewald    Ecore\n");
+	       "Iter     EH        EXC       Elocal    Enonlocal Eewald    Ecore\n");
       fprintf (stderr, 
-	       "%3d    %9.5f %9.5f %9.5f %9.5f %9.5f\n", SCiter,
-	       EH, EXC, Eelec_ion, EwaldEnergy(), Ecore);
+	       "%3d    %9.5f %9.5f %9.5f %9.5f %9.5f %9.5f\n", SCiter,
+	       EH, EXC, Elocal, Enonlocal, EwaldEnergy(), Ecore);
     }	       
 //   perr << "Energies:\n"
 //        << "   EH         = " << EH  << endl
@@ -458,6 +459,21 @@ MPISystemClass::CalcLocalPPEnergy()
   E *= vol/Ngrid;
   return E;
 }
+
+double
+MPISystemClass::CalcNonlocalPPEnergy()
+{
+  zVec band(Bands.extent(1));
+  double Enl = 0.0;
+  /// We assume that each of the bands is already normalized.
+  for (int bi=CG.GetFirstBand(); bi<=CG.GetLastBand(); bi++) {
+    band = Bands(bi, Range::all());
+    Enl += H.Vion->NonlocalEnergy(band) * Occupancies(bi);
+  }
+  BandComm.AllSum(Enl);
+  return Enl;
+}
+
 
 void
 MPISystemClass::CalcRadialChargeDensity()

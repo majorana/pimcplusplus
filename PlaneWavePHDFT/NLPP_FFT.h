@@ -97,6 +97,8 @@ public:
   void Apply (const zVec &c, zVec &Hc);
   void Apply (const zVec &c, zVec &Hc,
 	      Array<double,3> &VHXC);
+  double NonlocalEnergy (const zVec &c);
+
   NLPP_FFTClass (NLPPClass &nlpp, GVecsClass &gvecs, FFTBox &fft) :
     VionBase (gvecs), kPH(Vlocal), cFFT(fft), NLPP(nlpp)
   {

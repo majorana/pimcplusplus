@@ -172,10 +172,12 @@ Ion_l_Projector::Setup(NLPPClass &nlpp, int l_,
 	cerr << "NAN at r = " << r << " m=" << m << "  l=" << l << endl;
     }
   }
+  // Renormalize the real-space projectors
   for (int m=-l; m<=l; m++) {
     double nrm = 0.0;
     for (int i=0; i<indices.size(); i++)
       nrm += norm (ChiYlm(i,l+m));
+    ChiYlm(Range::all(),l+m) *= sqrt((double)(nx*ny*nz)/nrm);
   }
   MeshVol = dx*dy*dz;
 }
@@ -344,13 +346,35 @@ Ion_l_Projector::AddToVnl (Array<complex<double>,1> &Echi_psi,
 }
 
 
+double
+NLPP_FFTClass::NonlocalEnergy(const zVec &c)
+{
+  cFFT.PutkVec (c);
+  cFFT.k2r();
+
+  int lmax = NLPP.NumChannels()-1;
+  Array<complex<double>,1> chi_psi(2*lmax+1);
+  double E_nl = 0.0;
+  
+  for (int ri=0; ri<Rions.size(); ri++) {
+    int iProj = 0;
+    for (int l=0; l<NLPP.NumChannels(); l++) 
+      if (l != NLPP.LocalChannel()) {
+	double E_KB = NLPP.GetE_KB(l);
+	Ion_l_Projector &proj = Ion_l_Projectors(ri, iProj);
+	proj.Project(chi_psi);
+	for (int m=-l; m<=l; m++) 
+	  E_nl += norm (chi_psi(m+l))*E_KB;
+	iProj++;
+      }
+  }
+  return E_nl;
+}
+
 void
 NLPP_FFTClass::CalcVnlPsi()
 {
   VnlPsi = complex<double>(0.0, 0.0);
-  int nx, ny, nz;
-  cFFT.GetDims(nx,ny,nz);
-  double normFactor = 1.0/(double)(nx*ny*nz);
   int lmax = NLPP.NumChannels()-1;
   Array<complex<double>,1> chi_psi(2*lmax+1), Echi_psi(2*lmax+1);
 
