@@ -135,7 +135,7 @@ MPISystemClass::SolveLDA()
       SubspaceRotate();
 
     CG.Solve();
-    SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-6);
+    SC = (fabs(CG.Energies(highestOcc)-lastE) < 1.0e-8);
     /// Now make sure we all k-points agree that we're
     /// self-consistent.
     if (BandComm.MyProc() == 0) 
@@ -425,7 +425,7 @@ MPISystemClass::CalcVHXC()
 // 	Eelec_ion2 += Rho_r(ix,iy,iz)*H.GetVr()(ix,iy,iz).real();
 
 //   Eelec_ion2 *= vol/(double)Ngrid;
-  Eelec_ion = CalcElectronIonEnergy();
+  Eelec_ion = CalcLocalPPEnergy();
   double Ecore = NumElecs*(double)Rions.size() * H.GetVG0();
   
   if (BandComm.MyProc() == 0)
@@ -446,7 +446,7 @@ MPISystemClass::CalcVHXC()
 
 
 double
-MPISystemClass::CalcElectronIonEnergy()
+MPISystemClass::CalcLocalPPEnergy()
 {
   double E = 0.0;
   for (int ix=0; ix<Rho_r.extent(0); ix++)

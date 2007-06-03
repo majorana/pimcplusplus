@@ -25,7 +25,7 @@ MPIBandStructureClass::Read(IOSectionClass &in)
   PH = ReadPotential (in);
   double Z1Z2 = round (50.0*PH->V(50.0));
   cerr << "Z = " << -Z1Z2 << endl;
-  IonPot.Z1Z2 = Z1Z2;
+  IonPot.Z1Z2 = Z1Z2*Z1Z2;
   in.CloseSection();
 
   // Read the box

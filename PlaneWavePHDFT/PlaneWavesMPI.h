@@ -170,7 +170,8 @@ public:
   inline Vec3 GetIonPos(int i) { return Rions(i); }
   inline const Array<double,3>& GetDensity()
   { return Rho_r; }
-  double CalcElectronIonEnergy ();
+  double CalcLocalPPEnergy ();
+  double CalcNonlocalPPEnergy();
   /// Calculates and returns the ion-ion energy terms
   double EwaldEnergy();
   void CalcIonForces(Array<Vec3,1> &F);

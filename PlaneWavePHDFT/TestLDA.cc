@@ -223,10 +223,10 @@ void TestLDAForces()
     for (int dim=0; dim<3; dim++) {
       rions(pi)[dim] += 1.0e-4;
       system.SetIons(rions);
-      double Eplus = system.CalcElectronIonEnergy()+system.EwaldEnergy();
+      double Eplus = system.CalcLocalPPEnergy()+system.EwaldEnergy();
       rions(pi)[dim] -= 2.0e-4;
       system.SetIons(rions);
-      double Eminus = system.CalcElectronIonEnergy()+system.EwaldEnergy();
+      double Eminus = system.CalcLocalPPEnergy()+system.EwaldEnergy();
       rions(pi)[dim] += 1.0e-4;
       forcesFD(pi)[dim] = -(Eplus-Eminus)/2.0e-4;
       if (bandComm.MyProc() == 0)

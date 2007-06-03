@@ -254,6 +254,7 @@ NLPP_FFTClass::SetuprPotentials()
   Vr = cFFT.rBox;
 
   // Setup nonlocal part
+  cerr << "Setting up nonlocal projectors.\n";
   int numProj = NLPP.NumChannels()-1;
   Ion_l_Projectors.resize( Rions.size(), numProj);
   for (int ri=0; ri<Rions.size(); ri++) {
@@ -370,7 +371,7 @@ NLPP_FFTClass::CalcVnlPsi()
 	iProj++;
       }
   }
-  //  cerr << "E_nl = " << E_nl << endl;
+  //cerr << "E_nl = " << E_nl << endl;
 }
 
 
