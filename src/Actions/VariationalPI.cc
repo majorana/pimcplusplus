@@ -22,9 +22,9 @@
 #include "VariationalPI.h"
 #include "../PathDataClass.h"
 #include <Common/MatrixOps/MatrixOps.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <string>
 
 #ifdef ORDER_N_FERMIONS
 extern "C"{

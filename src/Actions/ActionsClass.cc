@@ -77,7 +77,7 @@ ActionsClass::Read(IOSectionClass &in)
   else      
     perr << "Not using RPA for long range action.\n";
 
-cerr << " going to read pair actions" << endl;
+  cerr << " going to read pair actions" << endl;
   Array<string,1> PAFiles;
   assert (in.ReadVar ("PairActionFiles", PAFiles));
   Array<string,1> SpecificHeatPAFiles;
@@ -87,7 +87,7 @@ cerr << " going to read pair actions" << endl;
   
 
   int numPairActions = PAFiles.size();
-cerr << "Looking for " << numPairActions << endl;
+  cerr << "Looking for " << numPairActions << endl;
   PairArray.resize(numPairActions);
   if (readSpecificHeatFiles)
     SpecificHeatPairArray.resize(SpecificHeatPAFiles.size());
@@ -98,16 +98,19 @@ cerr << "Looking for " << numPairActions << endl;
     for (int j=0; j<Path.NumSpecies(); j++)
       PairMatrix(i,j) = (PairActionFitClass*)NULL;
   // Read pair actions files
-cerr << "declaring IOSectionClass...";
+  cerr << "declaring IOSectionClass...";
   IOSectionClass PAIO;
-cerr << " done" << endl;
-
+  cerr << " done" << endl;
+ 
+  UseNonlocal = false;
   for (int i=0; i<numPairActions; i++) {
     // Allow for tilde-expansion in these files
     string name = ExpandFileName(PAFiles(i));
     assert(PAIO.OpenFile (name));
-cerr << i << ": reading " << name << endl;
+    cerr << i << ": reading " << name << endl;
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
+    if (PairArray(i)->Pot->IsNonlocal())
+      UseNonlocal = true;
     bool paUsed=false;
     for (int spec1=0;spec1<Path.NumSpecies();spec1++)
       for (int spec2=spec1;spec2<Path.NumSpecies();spec2++) 
@@ -136,6 +139,7 @@ cerr << i << ": reading " << name << endl;
 
     PAIO.CloseFile();
   }
+
 
   if (readSpecificHeatFiles){
     cerr<<"I READ SPECIFIC HEAT FILES"<<endl;
@@ -196,6 +200,14 @@ cerr << i << ": reading " << name << endl;
 //   }
   
   ReadNodalActions (in);
+
+  if (UseNonlocal) {
+    if (FixedPhaseA == NULL) {
+      cerr << "Trying to use nonlocal action with a FixedPhase defined.\n";
+      abort();
+    }
+    Nonlocal.Setup(FixedPhaseA);
+  }
 
 //   // Now create nodal actions for Fermions
 //   NodalActions.resize(PathData.Path.NumSpecies());
@@ -268,21 +280,21 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 	&TruncatedInverse;
     }
     else if (type == "FIXEDPHASE") {
-      FixedPhaseClass &fixedPhaseA = *new FixedPhaseClass(PathData);
-      fixedPhaseA.Read (in);
-      FixedPhaseClass &fixedPhaseB = 
-	PathData.Path.UseCorrelatedSampling() ? *new FixedPhaseClass(PathData) : fixedPhaseA;
-      if (PathData.Path.UseCorrelatedSampling())
-	fixedPhaseB.Read (in);
-      NodalActions(fixedPhaseA.UpSpeciesNum) = 
-	new FixedPhaseActionClass 
-	(PathData, fixedPhaseA, fixedPhaseB, fixedPhaseA.UpSpeciesNum);
-      NodalActions(fixedPhaseA.DownSpeciesNum) = 
-	new FixedPhaseActionClass 
-	(PathData, fixedPhaseA, fixedPhaseB, fixedPhaseA.DownSpeciesNum);
-      NodalActions(fixedPhaseA.IonSpeciesNum) = 
-	new FixedPhaseActionClass 
-	(PathData, fixedPhaseA, fixedPhaseB, fixedPhaseA.IonSpeciesNum);
+      FixedPhaseA = new FixedPhaseClass(PathData);
+      FixedPhaseA->Read (in);
+      if (PathData.Path.UseCorrelatedSampling()) {
+	FixedPhaseB = new FixedPhaseClass(PathData);
+	  FixedPhaseB->Read (in);
+      }
+      else
+	FixedPhaseB =  FixedPhaseA;
+      // Now setup up actual actions
+      NodalActions(FixedPhaseA->UpSpeciesNum)   = new FixedPhaseActionClass 
+	(PathData, *FixedPhaseA, *FixedPhaseB, FixedPhaseA->UpSpeciesNum);
+      NodalActions(FixedPhaseA->DownSpeciesNum) = new FixedPhaseActionClass 
+	(PathData, *FixedPhaseA, *FixedPhaseB, FixedPhaseA->DownSpeciesNum);
+      NodalActions(FixedPhaseA->IonSpeciesNum) = new FixedPhaseActionClass 
+	(PathData, *FixedPhaseA, *FixedPhaseB, FixedPhaseA->IonSpeciesNum);
     }
     in.CloseSection();
   }

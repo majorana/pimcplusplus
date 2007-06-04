@@ -17,7 +17,7 @@
 #include "ShortRangeClass.h"
 #include "../PathDataClass.h"
 #include "ShortRangeOnClass.h"
-#include "time.h"
+#include "ctime"
 #include <Common/MatrixOps/MatrixOps.h>
 
 ///This has to be called after pathdata knows how many

@@ -1,11 +1,11 @@
 #ifndef POPEN_2_UTILS_H
 #define POPEN_2_UTILS_H
 
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h>
 #include <unistd.h>
-#include <iostream.h>
-#include <istream.h>
+#include <iostream>
+#include <istream>
 #include <string>
 
 pid_t popen2(const char *shell_cmd, int *p_fd_in, int *p_fd_out);

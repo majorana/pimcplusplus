@@ -8,13 +8,13 @@ pid_t popen2(const char *shell_cmd, int *p_fd_in, int *p_fd_out)
   
   if(pipe(fds_processInput) != 0) //create process input pipe
     {
-      cerr << "pipe (process input) failed\n";
+      std::cerr << "pipe (process input) failed\n";
       exit(1);
     }
   
   if(pipe(fds_processOutput) != 0) //create process output pipe
     {
-      cerr << "pipe (process output) failed\n";
+      std::cerr << "pipe (process output) failed\n";
       exit(1);
     }
   
@@ -22,7 +22,7 @@ pid_t popen2(const char *shell_cmd, int *p_fd_in, int *p_fd_out)
   pid_t pid;
   if((pid = fork()) < 0)
     {
-      cerr << "fork failed\n";
+      std::cerr << "fork failed\n";
       exit(2);
     }
    
@@ -38,7 +38,7 @@ pid_t popen2(const char *shell_cmd, int *p_fd_in, int *p_fd_out)
       
       
       execl("/bin/sh", "sh", "-c", shell_cmd, 0 ); 
-      cerr << "failed to run shell_cmd\n";
+      std::cerr << "failed to run shell_cmd\n";
     }
   else  //parent process
     {

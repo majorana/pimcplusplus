@@ -47,6 +47,8 @@
 #include "Mu.h"
 #include "VariationalPI.h"
 #include "Tether.h"
+#include "NonlocalClass.h"
+
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
 /// It includes kinetic, short range, long range, long range RPA
@@ -61,6 +63,7 @@ private:
   PathDataClass &PathData;
   int MaxLevels; //is this the right place for this?
   void ReadNodalActions (IOSectionClass &in);
+  FixedPhaseClass *FixedPhaseA, *FixedPhaseB;
 public:
   Array<double,1> TauValues;
   Array<PairActionFitClass*,1> SpecificHeatPairArray;
@@ -73,6 +76,8 @@ public:
 
   /// Specifies whether to use long range breakups
   bool UseLongRange;
+  /// Specifies whether we have a nonlocal potential
+  bool UseNonlocal;
 
 
   // Actions
@@ -104,13 +109,14 @@ public:
   ///David's Long Range Class
   DavidLongRangeClass DavidLongRange;
 
-	MoleculeInteractionsClass MoleculeInteractions;
+  // Water-related stuff
+  MoleculeInteractionsClass MoleculeInteractions;
+  QBoxActionClass QBoxAction;
+  ST2WaterClass ST2Water;
+  TIP5PWaterClass TIP5PWater;
 
-	QBoxActionClass QBoxAction;
-
-	ST2WaterClass ST2Water;
-
-	TIP5PWaterClass TIP5PWater;
+  // Nonlocal action
+  NonlocalClass Nonlocal;
 
 #ifdef USE_QMC
   CEIMCActionClass CEIMCAction;
@@ -208,10 +214,10 @@ public:
     KineticSphere(pathData),
     PathData(pathData),
     PairFixedPhase(pathData),
-		MoleculeInteractions(pathData),
-		QBoxAction(pathData),
-		ST2Water(pathData),
-		TIP5PWater(pathData),
+    MoleculeInteractions(pathData),
+    QBoxAction(pathData),
+    ST2Water(pathData),
+    TIP5PWater(pathData),
 #ifdef USE_QMC
     CEIMCAction(pathData),
 #endif
@@ -222,7 +228,9 @@ public:
     StructureReject(pathData),
     TruncatedInverse(pathData),
     NumImages(1),
-    UseLongRange(true)
+    UseLongRange(true),
+    Nonlocal (pathData),
+    FixedPhaseA(NULL), FixedPhaseB(NULL)
   {
     ///Do nothing for now
   }

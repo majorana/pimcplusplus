@@ -6,8 +6,8 @@
 #include "TruncatedInverse.h"
 #include "../PathDataClass.h"
 #include <Common/MatrixOps/MatrixOps.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <string>
 #include <fstream>
 // #ifdef ORDER_N_FERMIONS

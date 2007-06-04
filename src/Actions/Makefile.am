@@ -5,8 +5,8 @@ libactions_la_SOURCES =            \
     ActionBase.cc                  \
     ActionBase.h                   \
     ActionsClass.cc                \
-   ../det_calc_uekt.h              \
-   ../det_calc_uekt.c              \
+    ../det_calc_uekt.h             \
+    ../det_calc_uekt.c             \
     ActionsClass.h                 \
     DavidLongRangeClass.cc         \
     DavidLongRangeClass.h          \
@@ -34,20 +34,22 @@ libactions_la_SOURCES =            \
     LongRangePotClass.h            \
     LongRangeRPAClass.cc           \
     LongRangeRPAClass.h            \
-		MoleculeInteractionsClass.cc   \
-		MoleculeInteractionsClass.h    \
+    MoleculeInteractionsClass.cc   \
+    MoleculeInteractionsClass.h    \
     Mu.h                           \
     Mu.cc                          \
     NodalActionClass.cc            \
     NodalActionClass.h             \
+    NonlocalClass.cc               \
+    NonlocalClass.h                \
     OpenLoopImportance.cc          \
     OpenLoopImportance.h           \
     PairFixedPhase.h               \
     PairFixedPhase.cc              \
     popen2.h                       \
     popen2.cc                      \
-		QBoxAction.cc                  \
-		QBoxAction.h                   \
+    QBoxAction.cc                  \
+    QBoxAction.h                   \
     QMCSamplingClass.h             \
     QMCSamplingClass.cc            \
     ShortRangeApproximateClass.cc  \
@@ -60,13 +62,13 @@ libactions_la_SOURCES =            \
     ShortRangePotClass.h           \
     ShortRangePrimitive.h          \
     ShortRangePrimitive.cc         \
-		ST2WaterClass.cc               \
-		ST2WaterClass.h                \
+    ST2WaterClass.cc               \
+    ST2WaterClass.h                \
     StructureReject.cc             \
     Tether.h                       \
     Tether.cc                      \
-		TIP5PWaterClass.cc             \
-		TIP5PWaterClass.h              \
+    TIP5PWaterClass.cc             \
+    TIP5PWaterClass.h              \
     VariationalPI.h                \
     VariationalPI.cc               \
     TruncatedInverse.h             \

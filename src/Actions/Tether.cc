@@ -72,6 +72,7 @@ TetherClass::SingleAction (int slice1, int slice2,
 	return 999999999.0;
     }
   }
+  return 0.0;
 }
 
 
