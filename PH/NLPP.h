@@ -74,17 +74,20 @@ protected:
 public:
   // General accessor functions
   bool IsNonlocal();
-  inline int LocalChannel()                { return lLocal;         } 
-  inline int NumChannels()                 { return Vl.size();      }
-  inline CubicSpline& GetLocalSpline ()    { return Vl[lLocal].V;   }
-  inline double GetValenceCharge()         { return Zion;           }
+  inline int LocalChannel()                { return lLocal;          } 
+  inline int NumChannels()                 { return Vl.size();       }
+  inline CubicSpline& GetLocalSpline ()    { return Vl[lLocal].V;    }
+  inline double GetValenceCharge()         { return Zion;            }
 
   // Nonlocal part accessor functions:
-  inline double GetChi_r (int l, double r) { return Vl[l].chi_r(r); }
+  inline double GetChi_r (int l, double r) { return Vl[l].chi_r(r);  }
   // HACK HACK HACK
   //inline double GetChi_r (int l, double r) { return Vl[l].zeta_r(r); }
-  inline double GetE_KB (int l)            { return Vl[l].E_KB;     }
-  inline double GetR0 (int l)              { return Vl[l].R0;       }
+  inline double GetE_KB (int l)            { return Vl[l].E_KB;      }
+  inline double GetR0 (int l)              { return Vl[l].R0;        }
+  inline double Getrc(int l)               { return Vl[l].rc;        }
+  inline double GetDeltaV(int l, double r) { return Vl[l].DeltaV(r); }
+
 
   // Required member functions:  These give information about the
   // local part of the pseudopotential only
