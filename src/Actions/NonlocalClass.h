@@ -12,14 +12,16 @@ protected:
   NLPPClass *NLPP;
   FixedPhaseClass *FixedPhase;
   int IonSpecies, UpSpecies, DownSpecies;
-  Array<CubicSpline,1> DeltaV;
   // Points for angular quadrature
-  vector<Vec3> QuadPoints;
+  Array<Vec3,1> QuadPoints, ScaledPoints;
   // Weights for angular quadrature
-  vector<double> QuadWeights;
-  Array<double,1> WFratios;
+  Array<double,1> QuadWeights, Legendre, DeltaV;
+  Array<complex<double>,1> WFratios;
   void SetQuadratureRule (int nrule);
   void CheckQuadratureRule(int lexact);
+  void NearestIon (int slice, int ptcl, Vec3 &ionpos, double &dist);
+  void ScaleQuadPoints (Vec3 ionpos, double dist);
+  Array<int,1> Electrons;
 public:
   double SingleAction (int slice1, int slice2,
 		       const Array<int,1> &activeParticles, int level);

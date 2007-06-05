@@ -1,4 +1,5 @@
 #include "NonlocalClass.h"
+#include "../PathDataClass.h"
 
 NonlocalClass::NonlocalClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)
@@ -88,8 +89,8 @@ NonlocalClass::SetQuadratureRule (int rule)
   int lexact;
   double A, B, C, D;
   A = B = C = D = 0.0;
-  QuadPoints.clear();
-  QuadWeights.clear();
+  vector<Vec3> points;
+  vector<double> weights;
 
   switch (rule) {
   case 1:
@@ -236,24 +237,31 @@ NonlocalClass::SetQuadratureRule (int rule)
   // Now, construct rule
   if (std::fabs(A) > 1.0e-10) 
     for (int i=0; i<a.size(); i++) {
-      QuadPoints.push_back(a[i]);
-      QuadWeights.push_back(A);
+      points.push_back(a[i]);
+      weights.push_back(A);
     }
   if (std::fabs(B) > 1.0e-10) 
     for (int i=0; i<b.size(); i++) {
-      QuadPoints.push_back(b[i]);
-      QuadWeights.push_back(B);
+      points.push_back(b[i]);
+      weights.push_back(B);
     }
   if (std::fabs(C) > 1.0e-10) 
     for (int i=0; i<c.size(); i++) {
-      QuadPoints.push_back(c[i]);
-      QuadWeights.push_back(C);
+      points.push_back(c[i]);
+      weights.push_back(C);
     }
   if (std::fabs(D) > 1.0e-10) 
     for (int i=0; i<d.size(); i++) {
-      QuadPoints.push_back(d[i]);
-      QuadWeights.push_back(D);
+      points.push_back(d[i]);
+      weights.push_back(D);
     }
+  
+  QuadPoints.resize(points.size());
+  QuadWeights.resize(points.size());
+  for (int i=0; i<points.size(); i++) {
+    QuadPoints(i)  = points[i];
+    QuadWeights(i) = weights[i];
+  }
   
   // Allocate storage for wave function ratios
   //  pp_nonloc->resize_warrays(nk,NumNonLocal,Lmax);
@@ -263,10 +271,10 @@ NonlocalClass::SetQuadratureRule (int rule)
   assert (QuadWeights.size() == nk);
   double wSum = 0.0;
   for (int k=0; k < nk; k++) {
-    Vec3 r = QuadPoints[k];
+    Vec3 r = QuadPoints(k);
     double nrm = dot(r,r);
     assert (std::fabs(nrm-1.0) < 1.0e-14);
-    wSum += QuadWeights[k];
+    wSum += QuadWeights(k);
   }
   assert (std::fabs(wSum - 1.0) < 1.0e-14);
   // Check the quadrature rule
@@ -277,17 +285,17 @@ NonlocalClass::SetQuadratureRule (int rule)
 void
 NonlocalClass::CheckQuadratureRule(int lexact)
 {
-  vector<Vec3> &grid = QuadPoints;
-  vector<double> &w = QuadWeights;
+  Array<Vec3,1> &grid = QuadPoints;
+  Array<double,1> &w = QuadWeights;
   for (int l1=0; l1<=lexact; l1++) 
     for (int l2=0; l2 <= (lexact-l1); l2++) 
       for (int m1=-l1; m1<=l1; m1++)
 	for (int m2=-l2; m2<=l2; m2++) {
 	  complex<double> sum(0.0, 0.0);
 	  for (int k=0; k<grid.size(); k++) {
-	    complex<double> v1 = Ylm(l1, m1, grid[k]);
-	    complex<double> v2 = Ylm(l2, m2, grid[k]);
-	    sum += 4.0*M_PI*w[k] * conj(v1)*v2;
+	    complex<double> v1 = Ylm(l1, m1, grid(k));
+	    complex<double> v2 = Ylm(l2, m2, grid(k));
+	    sum += 4.0*M_PI*w(k) * conj(v1)*v2;
 	  }
 	  double re = real (sum);
 	  double im = imag (sum);
@@ -315,7 +323,17 @@ NonlocalClass::Setup (FixedPhaseClass *fixedPhase)
     SetQuadratureRule (i);
   // Set it to a reasonable default
   SetQuadratureRule (4);
+  ScaledPoints.resize(QuadPoints.size());
   WFratios.resize(QuadPoints.size());
+  Legendre.resize(NLPP->NumChannels());
+  DeltaV.resize(NLPP->NumChannels());
+  SpeciesClass &up   = PathData.Path.Species(FixedPhase->UpSpeciesNum);
+  SpeciesClass &down = PathData.Path.Species(FixedPhase->DownSpeciesNum);
+  Electrons.resize (up.NumParticles + down.NumParticles);
+  for (int i=0; i<up.NumParticles; i++)
+    Electrons(i) = i+up.FirstPtcl;
+  for (int i=0; i<down.NumParticles; i++)
+    Electrons(i+up.NumParticles) = i + down.FirstPtcl;
 }
 
 void
@@ -325,20 +343,103 @@ NonlocalClass::Read (IOSectionClass &in)
 
 }
 
+void
+NonlocalClass::NearestIon (int slice, int ptcl, Vec3 &ionpos, double &dist)
+{
+  PathClass &Path = PathData.Path;
+  Vec3 r = Path (slice, ptcl);
+  SpeciesClass &ions = Path.Species(FixedPhase->IonSpeciesNum);
+  int first = ions.FirstPtcl;  int last = ions.LastPtcl;
+  Vec3 disp;
+
+  ionpos = Path(slice,first);
+  disp = r - ionpos;
+  Path.PutInBox(disp);
+  dist = dot (disp, disp);
+  for (int ion=first; ion <= last; ion++) {
+    disp = r - Path(slice, ion);
+    Path.PutInBox(disp);
+    double tryDist = dot (disp, disp);
+    if (tryDist < dist) {
+      dist = tryDist;
+      ionpos = Path(slice, ion);
+    }
+  }
+  dist = sqrt (dist);
+}
+
+void
+NonlocalClass::ScaleQuadPoints (Vec3 ionpos, double dist)
+{
+  // Setup rotation matrix
+
+  // Scale and translate points;
+  for (int i=0; i<ScaledPoints.size(); i++) {
+    ScaledPoints(i) = ionpos + dist * QuadPoints(i);
+    PathData.Path.PutInBox(ScaledPoints(i));
+  }
+}
+
 double
 NonlocalClass::SingleAction(int slice1, int slice2,
 			    const Array<int,1> &activeParticles, int level)
 {
+  PathClass &Path = PathData.Path;
+  int skip = 1<<level;
+  double U = 0.0;
+  // Find maximum cutoff radius
+  double max_rc = 0.0;
+  for (int l=0; l<NLPP->NumChannels(); l++)
+    if (l != NLPP->LocalChannel())
+      if (NLPP->Getrc(l) > max_rc)
+	max_rc = NLPP->Getrc(l);
   
+  double levelTau = ldexp (Path.tau, level);
 
-  return 0.0;
+  // Outer loop overs slices
+  for (int slice=slice1; slice <= slice2; slice++) {
+    double prefactor = (slice==slice1 || slice==slice2) ? 0.5 : 1.0;
+    prefactor *= levelTau/(4.0*M_PI);
+    for (int ptclIndex=0; ptclIndex < activeParticles.size(); ptclIndex++) {
+      int ptcl = activeParticles(ptclIndex);
+      Vec3 ionpos;
+      double dist;
+      NearestIon (ptcl, slice, ionpos, dist);
+      if (dist < max_rc) {
+	ScaleQuadPoints (ionpos, dist);
+	double distInv = 1.0/dist;
+	// Compute the wave function ratios
+	FixedPhase->CalcWFratios (slice, ptcl, ScaledPoints, WFratios);
+	// Now loop over l-channels
+	for (int l=0; l<NLPP->NumChannels(); l++)
+	  DeltaV(l) = NLPP->GetDeltaV(l,dist);
+	DeltaV(NLPP->LocalChannel()) = 0.0;
+	for (int pi=0; pi<ScaledPoints.size(); pi++) {
+	  double costheta = distInv*distInv*dot(ScaledPoints(pi), ionpos);
+	  double P_l, P_lm1, P_lp1;
+	  P_l = 1.0;
+	  P_lm1 = 0.0;
+	  for (int l=0; l<NLPP->NumChannels(); l++) {
+	    double dl = (double)l;
+	    P_lp1 = ((2.0*dl+1.0)*costheta*P_l - dl*P_lm1)/(1.0+dl);
+	    U += prefactor * DeltaV(l) * P_l * real(WFratios(pi)) * QuadWeights(pi);
+	    P_lm1 = P_l;
+	    P_l = P_lp1;
+	  }
+	}
+      }
+    }
+  }
+  return U;
 }
 
 
 double 
 NonlocalClass::d_dBeta (int slice1, int slice2, int level)
 {
-  return 0.0;
+  double levelTau = ldexp (Path.tau, level);
+  double U = SingleAction (slice1, slice2, Electrons, level);
+  return U / levelTau;
 }
 
 void 

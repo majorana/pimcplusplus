@@ -635,6 +635,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
   DownGrad2.resize (PathData.NumTimeSlices());
   UpAction.resize  (PathData.NumTimeSlices()-1);
   DownAction.resize(PathData.NumTimeSlices()-1);
+  OrbitalValues.resize(NumUp);
 
   /////////////////////
   // Allocate caches //
@@ -834,12 +835,37 @@ FixedPhaseClass::GradientDetFD(int slice, int speciesNum)
 }
 
 
+// Note:  This function assumes that the matrix caches are up to date.
 void
-FixedPhaseClass::CalcWFratios (int ptcl, Array<Vec3,1> &pos, Array<complex<double>,1> &ratios)
+FixedPhaseClass::CalcWFratios (int slice, int ptcl, const Array<Vec3,1> &pos, 
+			       Array<complex<double>,1> &ratios)
 {
   // Find which determinant to update
+  int speciesNum = Path.ParticleSpeciesNum(ptcl);
+  if (speciesNum != UpSpeciesNum && speciesNum != DownSpeciesNum) {
+    cerr << "Invalid particle in CalcWFratios.\n";
+    abort();
+  }
+  int first = Path.Species(speciesNum).FirstPtcl;
 
+  Array<complex<double>,3> &matData = 
+    (speciesNum==UpSpeciesNum) ? UpMatrixCache.data() : DownMatrixCache.data();
 
+  // Compute determinant and cofactors
+  Cofactors = matData(slice, Range::all(), Range::all());
+  complex<double> det = ComplexDetCofactors (Cofactors, Workspace);
+  complex<double> detInv = complex<double>(1.0, 0.0) / det;
+
+  // Now loop through positions and compute ratios
+  ratios = complex<double>();
+  for (int ipos=0; ipos<pos.size(); ipos++) {
+    Vec3 r = pos(ipos);
+    Path.PutInBox(r);
+    BandSplines()(r[0], r[1], r[2], OrbitalValues);
+    for (int j=0; j<OrbitalValues.size(); j++)
+      ratios(ipos) += Cofactors(ptcl-first,j)*OrbitalValues(j);
+    ratios(ipos) *= detInv;
+  }
 }
 
 

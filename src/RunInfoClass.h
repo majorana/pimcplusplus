@@ -19,7 +19,7 @@
 
 #include <Common/IO/IO.h>
 #include <unistd.h>
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h>
 #include <pwd.h>
 #include <time.h>

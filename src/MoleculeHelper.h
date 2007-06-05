@@ -33,12 +33,12 @@ class MoleculeManagerClass
   void MolOfType(Array<int,1>& list, string typeLabel);
   void MolOfType(Array<int,1>& list, int type);
   int Index(string label);
-  inline const int operator() (int ptcl);
+  inline int operator() (int ptcl);
 
   MoleculeManagerClass();
 };
 
-inline const int MoleculeManagerClass::operator()(int ptcl)
+inline int MoleculeManagerClass::operator()(int ptcl)
 {
   return MolRef(ptcl);
 }

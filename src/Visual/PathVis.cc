@@ -162,7 +162,7 @@ void PathVisClass::POVRender(string filename)
   }
   
   // do global settings
-  fprintf (fout, "background { color rgb <1.0, 1.0, 1.0> }\n");
+  fprintf (fout, "background { color rgbt <1.0, 1.0, 1.0, 1.0> }\n");
   fprintf (fout, "global_settings { ambient_light rgb <4.0, 4.0, 4.0> }\n");
   double light_position[] = {50.0, 50.0, 60.0, 0.0};
   fprintf (fout, "light_source { <%8.5f, %8.5f, %8.5f> \n",

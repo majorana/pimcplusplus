@@ -71,6 +71,7 @@ private:
   Gtk::CheckButton POVRenderButton;
   Gtk::CheckButton POVAntiAliasButton;
   Gtk::CheckButton POVOnScreenButton;
+  Gtk::CheckButton POVTransparentBGButton;
   Gtk::SpinButton  POVTolerance;
   Gtk::Adjustment  POVTolAdjust;
   Gtk::Label       POVTolLabel;

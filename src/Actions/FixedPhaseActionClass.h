@@ -54,6 +54,7 @@ private:
   Mirrored3DClass<cVec3> UpGradMatCache, DownGradMatCache;
 
   Array<cVec3,1> Gradient;
+  Array<complex<double>,1> OrbitalValues;
   Mirrored1DClass<Vec3> Rions;
   int NumUp, NumDown, NumIons, NumBands, NumFilled;
   Array<int,1> UpParticles, DownParticles;
@@ -95,7 +96,7 @@ public:
   double Action (int slice1, int slice2,
 		 const Array<int,1> &activeParticles, 
 		 int level, int speciesNum);
-  void CalcWFratios (int ptcl, Array<Vec3,1> &pos, 
+  void CalcWFratios (int slice, int ptcl, const Array<Vec3,1> &pos, 
 		     Array<complex<double>,1> &ratios);
   
   double d_dBeta(int slice1, int slice2, int level, int speciesNum);

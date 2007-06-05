@@ -58,10 +58,12 @@ WFExportClass::WFExportClass(WFVisualClass &visual) :
   POVRenderButton.set_label("Render");
   POVAntiAliasButton.set_label("Anti-alias");
   POVOnScreenButton.set_label("On-screen");
+  POVTransparentBGButton.set_label ("Transparent BG");
   POVTolLabel.set_text("AA tolerance");
   POVVBox1.pack_start(POVRenderButton, Gtk::PACK_SHRINK, 5);
   POVVBox1.pack_start(POVAntiAliasButton, Gtk::PACK_SHRINK, 5);
   POVVBox1.pack_start(POVOnScreenButton, Gtk::PACK_SHRINK, 5);
+  POVVBox1.pack_start(POVTransparentBGButton, Gtk::PACK_SHRINK, 5);
   POVVBox2.pack_start(POVTolLabel,  Gtk::PACK_SHRINK, 1);
   POVVBox2.pack_start(POVTolerance, Gtk::PACK_SHRINK, 1);
   POVHBox.pack_start(POVVBox1, Gtk::PACK_SHRINK, 5);
@@ -286,6 +288,8 @@ WFExportClass::RenderPOV()
     povcmd.precision(3);
     povcmd << "+A" << (double)POVTolerance.get_value() << " ";
   }
+  if (POVTransparentBGButton.get_active())
+    povcmd << "+ua ";
   povcmd << "+W" << (int)WidthButton.get_value() 
 	 << " +H" << (int)HeightButton.get_value() << " ";
   povcmd << POVFile;

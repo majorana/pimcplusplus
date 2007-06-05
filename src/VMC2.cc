@@ -16,7 +16,7 @@
 #include <list>
 using namespace boost::numeric::ublas;
 #include <blitz/mstruct.h>
-#include <fstream.h>
+#include <fstream>
 
 
 double k=1.0;
