@@ -315,6 +315,15 @@ void
 NonlocalClass::Setup (FixedPhaseClass *fixedPhase)
 {
   FixedPhase = fixedPhase;
+  // Find potential
+  NLPP = dynamic_cast<NLPPClass*>
+    (PathData.Actions.PairMatrix(FixedPhase->IonSpeciesNum,
+				 FixedPhase->UpSpeciesNum)->Pot);
+  if (NLPP == NULL) {
+    cerr << "The potential passed to Nonlocal action is not an NLPP.\n";
+    abort();
+  }
+
   // Compute DeltaV splines for nonlocal channels
 
 
@@ -430,6 +439,7 @@ NonlocalClass::SingleAction(int slice1, int slice2,
       }
     }
   }
+  cerr << "U = " << U << endl;
   return U;
 }
 

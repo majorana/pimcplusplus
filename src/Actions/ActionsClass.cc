@@ -37,20 +37,20 @@ ActionsClass::Read(IOSectionClass &in)
   Kinetic.SetNumImages (NumImages);
   KineticSphere.SetNumImages(NumImages);
   Mu.Read(in);
-	bool doMolRead = false;
-	if(in.ReadVar("InitMoleculeInteractions",doMolRead)){
-		MoleculeInteractions.Read(in);
-		MoleculeInteractions.SetNumImages(NumImages);
-	}
+  bool doMolRead = false;
+  if(in.ReadVar("InitMoleculeInteractions",doMolRead)){
+    MoleculeInteractions.Read(in);
+    MoleculeInteractions.SetNumImages(NumImages);
+  }
   bool doLRCRead = false;
-	if(in.ReadVar("InitLongRangeCoulomb",doLRCRead)){
-		LongRangeCoulomb.Read(in);
-	}
-	bool doQBoxRead = false;
-	if(in.ReadVar("InitQBoxAction",doQBoxRead)){
-		QBoxAction.Read(in);
-	}
-
+  if(in.ReadVar("InitLongRangeCoulomb",doLRCRead)){
+    LongRangeCoulomb.Read(in);
+  }
+  bool doQBoxRead = false;
+  if(in.ReadVar("InitQBoxAction",doQBoxRead)){
+    QBoxAction.Read(in);
+  }
+  
 #ifdef ORDER_N_FERMIONS
   VariationalPI.Read(in);
   TruncatedInverse.Read(in);

@@ -148,20 +148,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       //      else
       //      	int dummy=5;
       if (level != LowestLevel){
-	if (PathData.Path.DavidLongRange){
+	if (PathData.Path.DavidLongRange)
 	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
-	}
-	else if (PathData.Actions.HaveLongRange()){
-	  if (PathData.Actions.UseRPA)
-	    newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-	  else
-	    newStage->Actions.push_back(&PathData.Actions.LongRange);
-	}
-	if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-	  cerr << "Adding fermion node action for species " 
-	       << speciesName << endl;
-	  newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
-	}
       }
       if (level == LowestLevel) {
 	bool useTether=false;
@@ -187,6 +175,8 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	       << speciesName << endl;
 	  newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
 	}
+	if (PathData.Actions.UseNonlocal) 
+	  newStage->Actions.push_back(&PathData.Actions.Nonlocal);
       }
       newStage->BisectionLevel = level;
       Stages.push_back (newStage);

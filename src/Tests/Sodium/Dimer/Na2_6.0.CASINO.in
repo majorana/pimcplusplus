@@ -14,6 +14,18 @@ Section (System)
   {
     Section (Species)
     {
+      string Name="Na+";
+      string Type="Na+";
+      double lambda=0.0; //classical particle
+      string Statistics="BOLTZMANNON";
+      int NumParticles=2;
+      int NumDim=3;
+      string InitPaths="FIXED";
+      Array<double,2> Positions(2,3)=[ -3.0,  0.0, 0.0,
+                                        3.0,  0.0, 0.0 ];
+    }
+    Section (Species)
+    {
       string Name="eup";
       string Type="e";
       double lambda=0.5;
@@ -35,18 +47,6 @@ Section (System)
       int NumDim        = 3;
       string InitPaths  = "LEVIFLIGHT";
       Array<double,2> Positions(1,3)=[-0.3, 0.0, 0.0];
-    }
-    Section (Species)
-    {
-      string Name="Na+";
-      string Type="Na+";
-      double lambda=0.0; //classical particle
-      string Statistics="BOLTZMANNON";
-      int NumParticles=2;
-      int NumDim=3;
-      string InitPaths="FIXED";
-      Array<double,2> Positions(2,3)=[ -3.0,  0.0, 0.0,
-                                        3.0,  0.0, 0.0 ];
     }
   }
 }
