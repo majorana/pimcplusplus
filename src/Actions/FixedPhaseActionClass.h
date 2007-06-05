@@ -95,6 +95,8 @@ public:
   double Action (int slice1, int slice2,
 		 const Array<int,1> &activeParticles, 
 		 int level, int speciesNum);
+  void CalcWFratios (int ptcl, Array<Vec3,1> &pos, 
+		     Array<complex<double>,1> &ratios);
   
   double d_dBeta(int slice1, int slice2, int level, int speciesNum);
   void CalcDensity     (Array<double,3> &rho);

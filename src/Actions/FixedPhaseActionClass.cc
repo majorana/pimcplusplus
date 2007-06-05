@@ -835,6 +835,15 @@ FixedPhaseClass::GradientDetFD(int slice, int speciesNum)
 
 
 void
+FixedPhaseClass::CalcWFratios (int ptcl, Array<Vec3,1> &pos, Array<complex<double>,1> &ratios)
+{
+  // Find which determinant to update
+
+
+}
+
+
+void
 FixedPhaseClass::UpdateBands()
 {
 #if NDIM==3

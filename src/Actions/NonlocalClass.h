@@ -17,6 +17,7 @@ protected:
   vector<Vec3> QuadPoints;
   // Weights for angular quadrature
   vector<double> QuadWeights;
+  Array<double,1> WFratios;
   void SetQuadratureRule (int nrule);
   void CheckQuadratureRule(int lexact);
 public:

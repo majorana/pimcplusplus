@@ -309,11 +309,13 @@ NonlocalClass::Setup (FixedPhaseClass *fixedPhase)
   FixedPhase = fixedPhase;
   // Compute DeltaV splines for nonlocal channels
 
+
   // Setup quadrature rule -- first, check all the rules
   for (int i=1; i<=7; i++)
     SetQuadratureRule (i);
   // Set it to a reasonable default
   SetQuadratureRule (4);
+  WFratios.resize(QuadPoints.size());
 }
 
 void
@@ -327,6 +329,8 @@ double
 NonlocalClass::SingleAction(int slice1, int slice2,
 			    const Array<int,1> &activeParticles, int level)
 {
+  
+
   return 0.0;
 }
 
