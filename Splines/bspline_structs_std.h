@@ -1,6 +1,8 @@
 #ifndef BSPLINE_STRUCTS_STD_H
 #define BSPLINE_STRUCTS_STD_H
 
+#include "../config.h"
+
 #ifdef __cplusplus
 typedef complex<float>  complex_float;
 typedef complex<double> complex_double;
@@ -9,6 +11,8 @@ typedef complex<double> complex_double;
 typedef complex float  complex_float;
 typedef complex double complex_double;
 #endif
+
+
 
 ///////////////////////////
 // Single precision real //

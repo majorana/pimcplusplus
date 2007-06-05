@@ -4,6 +4,7 @@
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <pmmintrin.h>
+#include "../config.h"
 
 #ifdef __cplusplus
 typedef complex<float>  complex_float;
