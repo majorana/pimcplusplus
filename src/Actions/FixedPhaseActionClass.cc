@@ -593,6 +593,7 @@ FixedPhaseClass::Read(IOSectionClass &in)
   assert (in.ReadVar ("kCut", kCut));
   /// Note that the twist angles are defined between 0 and 1.  Hence,
   /// k_x = pi*twist_angle_x/L_x
+  /// NOTE:  I think this should be 2*pi*twist_angle_x/L_x
   Array<double,2> twistAngles;
   if (in.ReadVar ("TwistAngles", twistAngles)) {
     if (PathData.IntraComm.MyProc()==0)
@@ -604,9 +605,9 @@ FixedPhaseClass::Read(IOSectionClass &in)
 	abort();
       }
     assert (twistAngles.extent(1) == 3);
-    kVec[0] = twistAngles(PathData.GetCloneNum(),0) * M_PI/PathData.Path.GetBox()[0];
-    kVec[1] = twistAngles(PathData.GetCloneNum(),1) * M_PI/PathData.Path.GetBox()[1];
-    kVec[2] = twistAngles(PathData.GetCloneNum(),2) * M_PI/PathData.Path.GetBox()[2];
+    kVec[0] = twistAngles(PathData.GetCloneNum(),0) * 2.0*M_PI/PathData.Path.GetBox()[0];
+    kVec[1] = twistAngles(PathData.GetCloneNum(),1) * 2.0*M_PI/PathData.Path.GetBox()[1];
+    kVec[2] = twistAngles(PathData.GetCloneNum(),2) * 2.0*M_PI/PathData.Path.GetBox()[2];
   }
   else {
     Array<double,1> tmpkVec;
