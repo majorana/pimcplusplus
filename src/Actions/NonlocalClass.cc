@@ -431,7 +431,8 @@ NonlocalClass::SingleAction(int slice1, int slice2,
 	  for (int l=0; l<NLPP->NumChannels(); l++) {
 	    double dl = (double)l;
 	    P_lp1 = ((2.0*dl+1.0)*costheta*P_l - dl*P_lm1)/(1.0+dl);
-	    U += prefactor * DeltaV(l) * P_l * real(WFratios(pi)) * QuadWeights(pi);
+	    U += (2.0*dl+1.0)*prefactor * DeltaV(l) * P_l * 
+	      real(WFratios(pi)) * QuadWeights(pi);
 	    P_lm1 = P_l;
 	    P_l = P_lp1;
 	  }
