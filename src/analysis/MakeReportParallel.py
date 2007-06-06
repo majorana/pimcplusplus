@@ -26,13 +26,13 @@ def Avg (x):
      if x[0] == None:
           return None
      else:
-          return sum(x)/len(x)
+          return numarray.sum(x)/len(x)
 
 #Takes a vector of means and vector of errors and returns the weighted average and error
 def WeightedAvg (means, errors):
      if (errors[0] != 0.0):
           weights = map (lambda x: 1.0/(x*x), errors)
-          norm = 1.0/sum(weights)
+          norm = 1.0/numarray.sum(weights)
           weights = map(lambda x: x*norm, weights)
           avg = 0.0
           error2 = 0.0
@@ -50,7 +50,7 @@ def VecAvg (x):
      if x[0] == None:
           return None
      else:
-          return map(lambda y:sum(y)/len(y),x)
+          return map(lambda y:numarray.sum(y)/len(y),x)
 
 # Takes a list of 2D arrays and returns the unweighted average of the
 # last row.
