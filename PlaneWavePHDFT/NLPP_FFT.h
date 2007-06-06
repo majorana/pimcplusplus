@@ -49,6 +49,7 @@ public:
   complex<double> Ylm2(int l, int m, Vec3 r);
   int l;
   Array<Int3, 1> FFTIndices;
+  Array<int,1> FFTOffsets;
   // The first index specifies the point.  The second index specifies
   // the value of m.  Since chi_r is real and 
   // Y_l{-m} = (-1)^m conj(Y_lm), we only need to store for values of

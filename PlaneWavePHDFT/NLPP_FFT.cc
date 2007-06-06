@@ -222,6 +222,7 @@ Ion_l_Projector::Setup(NLPPClass &nlpp, int l_,
   
   ChiYlm.resize(indices.size(), 2*l+1);
   FFTIndices.resize(indices.size());
+  FFTOffsets.resize(indices.size());
 
   GVecsClass &gvecs = fft.GVecs;
   // Now, compute projectors in reciprocal space
@@ -250,6 +251,7 @@ Ion_l_Projector::Setup(NLPPClass &nlpp, int l_,
     fft.k2r();
     for (int i=0; i<indices.size(); i++) {
       FFTIndices(i) = indices[i];
+      FFTOffsets(i) = (&fft.rBox(indices[i]) - &fft.rBox(0,0,0));
       ChiYlm(i,l+m) = fft.rBox(indices[i]);
     }
   }
@@ -471,7 +473,8 @@ Ion_l_Projector::Project (Array<complex<double>,1> &chi_psi)
 
   int numPoints = FFTIndices.size();
   for (int i=0; i<numPoints; i++) {
-    complex<double> psi = FFT->rBox(FFTIndices(i));
+    //    complex<double> psi = FFT->rBox(FFTIndices(i));
+    complex<double> psi = FFT->rBox.data()[FFTOffsets(i)];
     for (int m=-l; m<=l; m++) 
       chi_psi(m+l) += conj(ChiYlm(i,m+l)) * psi;
   }
@@ -484,9 +487,11 @@ Ion_l_Projector::AddToVnl (Array<complex<double>,1> &Echi_psi,
 {
   int N = FFTIndices.size();
   for (int i=0; i<N; i++) {
-    Int3 index = FFTIndices(i);
+    //    Int3 index = FFTIndices(i);
+    int offset = FFTOffsets(i);
     for (int m=-l; m<=l; m++)
-      VnlPsi(index) += ChiYlm(i,m+l)*Echi_psi(m+l);
+      //      VnlPsi(index) += ChiYlm(i,m+l)*Echi_psi(m+l);
+      VnlPsi.data()[offset] += ChiYlm(i,m+l)*Echi_psi(m+l);
   }
 }
 
