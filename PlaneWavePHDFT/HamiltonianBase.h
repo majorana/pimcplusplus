@@ -73,6 +73,7 @@ public:
   inline const Array<Vec3,1> GetRions() {
     return Rions;
   }
+  virtual void SetProjectors (bool smooth);
 
   inline const Array<double,1>& GetVG()
   { return VG; }

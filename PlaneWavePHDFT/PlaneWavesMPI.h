@@ -88,6 +88,7 @@ protected:
   bool UseLDA;
   bool UseSubspaceRotation;
   bool Verbose;
+  bool SmoothProjectors;
 
   ////////////////
   // IO related //
@@ -167,6 +168,7 @@ public:
   void Setup(Vec3 box, Vec3 k, double kcut, double z, 
 	     bool useLDA, bool useFFT=true);
   void SetIons (const Array<Vec3,1> &rions);
+  void SetProjectors (bool smooth);
   inline Vec3 GetIonPos(int i) { return Rions(i); }
   inline const Array<double,3>& GetDensity()
   { return Rho_r; }

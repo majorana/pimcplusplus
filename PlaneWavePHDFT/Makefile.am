@@ -71,8 +71,7 @@ libpw_la_LIBADD   =
 #if HAVE_GMP
 #     libsprng_la_SOURCES += pmlcg/pmlcg.h pmlcg/pmlcg.c pmlcg/info.h pmlcg/basic.h 
 #endif
-
-
+ 
 include_HEADERS = ConjGrad2.h FFTBox.h GVecs.h Hamiltonian2.h PlaneWaves.h \
                   VectorOps.h PlaneWavesMPI.h ConjGradMPI.h Hamiltonians.h \
                   Coulomb.h CoulombFFT.h HamiltonianBase.h LocalPotFFT.h   \

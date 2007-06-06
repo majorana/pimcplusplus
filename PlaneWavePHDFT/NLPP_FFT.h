@@ -45,8 +45,8 @@ class Ion_l_Projector
 private:
   FFTBox *FFT;
   complex<double> Ylm (int l, int m, Vec3 r);
-  complex<double> Ylm2(int l, int m, Vec3 r);
 public:
+  complex<double> Ylm2(int l, int m, Vec3 r);
   int l;
   Array<Int3, 1> FFTIndices;
   // The first index specifies the point.  The second index specifies
@@ -57,7 +57,7 @@ public:
   // The volume of a mesh element
   double MeshVol;
   void Setup(NLPPClass &nlpp, int l_,
-	     Vec3 rion, FFTBox &fft);
+	     Vec3 rion, FFTBox &fft, bool smooth);
   // This returns the application of the projector to the contents of
   // the FFTBox in chi_psi.  Thus, for l=0, chi_psi has one element,
   // for l=1: 3 elements, l=2:  5 elements...
@@ -77,8 +77,11 @@ private:
   kSpacePH kPH;
   zVec Vc;
   FFTBox      &cFFT;
+  void SetupkProjectors();
   void SetupkPotentials();
   void SetuprPotentials();
+  // Apply the nonlocal part in reciprocal space
+  void ApplyNonlocal (const zVec &c, zVec &Hc);
   NLPPClass &NLPP;
   SplinePot Vlocal;
   CoulombPot Vouter;
@@ -86,10 +89,16 @@ private:
   Array<Ion_l_Projector,2> Ion_l_Projectors;
   // This is where the results of applying the nonlocal parts get accumulated. 
   Array<complex<double>,3> VnlPsi;
+  // The first index is ion number, the second is the projector
+  // number, and the third is the plane-wave index
+  // wave coefficient number
+  Array<complex<double>,3> lambda_lm;
   // Apply the nonlocal parts
   void CalcVnlPsi();
+  bool SmoothProjectors;
 public:
   void Setup();
+  void SetProjectors (bool smooth);
   void SetIons (const Array<Vec3, 1>& rions);
   void Vmatrix (Array<complex<double>,2> &vmat);
   void Setk(Vec3 k);
@@ -99,8 +108,10 @@ public:
 	      Array<double,3> &VHXC);
   double NonlocalEnergy (const zVec &c);
 
-  NLPP_FFTClass (NLPPClass &nlpp, GVecsClass &gvecs, FFTBox &fft) :
-    VionBase (gvecs), kPH(Vlocal), cFFT(fft), NLPP(nlpp)
+  NLPP_FFTClass (NLPPClass &nlpp, GVecsClass &gvecs, FFTBox &fft,
+		 bool smoothProjectors=false) :
+    VionBase (gvecs), kPH(Vlocal), cFFT(fft), NLPP(nlpp),
+    SmoothProjectors(smoothProjectors)
   {
 
   }

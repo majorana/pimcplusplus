@@ -123,11 +123,11 @@ Ion_l_Projector::Ylm2(int l, int m, Vec3 r)
 
 void
 Ion_l_Projector::Setup(NLPPClass &nlpp, int l_, 
-		       Vec3 rion, FFTBox &fft)
+		       Vec3 rion, FFTBox &fft, bool smooth)
 {
   FFT = &fft;
   l = l_;
-  double R0 = nlpp.GetR0(l);
+  double R0 = smooth ? nlpp.GetR0(l) : nlpp.Getrc(l);
   int nx, ny, nz;
   fft.GetDims (nx, ny, nz);
   Vec3 box = fft.GVecs.GetBox();
@@ -167,20 +167,75 @@ Ion_l_Projector::Setup(NLPPClass &nlpp, int l_,
     FFTIndices(i) = indices[i];
     double r = sqrt(dot(disps[i], disps[i]));
     for (int m=-l; m<=l; m++) {
-      ChiYlm(i,l+m) = normFactor*Ylm2(l,m,disps[i]) * nlpp.GetChi_r(l, r);
+      double chi_r = smooth ? nlpp.GetChi_r(l,r) : nlpp.GetZeta_r(l, r);
+      ChiYlm(i,l+m) = normFactor*Ylm2(l,m,disps[i]) * chi_r;
       if (isnan(real(ChiYlm(i,l+m))) || isnan(imag(ChiYlm(i,l+m))))
 	cerr << "NAN at r = " << r << " m=" << m << "  l=" << l << endl;
     }
   }
   // Renormalize the real-space projectors
-  for (int m=-l; m<=l; m++) {
-    double nrm = 0.0;
-    for (int i=0; i<indices.size(); i++)
-      nrm += norm (ChiYlm(i,l+m));
-    ChiYlm(Range::all(),l+m) *= sqrt((double)(nx*ny*nz)/nrm);
-  }
+//   for (int m=-l; m<=l; m++) {
+//     double nrm = 0.0;
+//     for (int i=0; i<indices.size(); i++)
+//       nrm += norm (ChiYlm(i,l+m));
+//     ChiYlm(Range::all(),l+m) *= sqrt((double)(nx*ny*nz)/nrm);
+//   }
   MeshVol = dx*dy*dz;
 }
+
+void
+NLPP_FFTClass::SetupkProjectors()
+{
+  GVecsClass &gvecs = cFFT.GVecs;
+  int numproj = 0;
+  for (int l=0; l<NLPP.NumChannels(); l++)
+    if (l != NLPP.LocalChannel())
+      numproj += 2*l+1;
+
+  lambda_lm.resize(gvecs.size(), Rions.size(), numproj);
+  Ion_l_Projector proj;
+  double prefactor = 4.0*M_PI/sqrt(gvecs.GetBoxVol());
+
+  for (int ig=0; ig<gvecs.size(); ig++) {
+    Vec3 g = gvecs(ig) + kPoint;
+    double gmag = sqrt(dot(g,g));
+    int iproj = 0;
+    complex<double> i2l(1.0, 0.0);
+    for (int l=0; l<NLPP.NumChannels(); l++) {
+      if (l != NLPP.LocalChannel()) {
+      double zeta_q = NLPP.GetZeta_q(l, gmag);
+	for (int m=-l; m<=l; m++) {
+	  complex<double> ylm = proj.Ylm2 (l, m, g);
+	  for (int ion=0; ion<Rions.size(); ion++) {
+	    double phase = dot (g, Rions(ion));
+	    lambda_lm(ig, ion, iproj) = 
+	      prefactor*i2l*ylm*zeta_q*complex<double>(cos(phase), sin(phase));
+	  }
+	  iproj++;
+	}
+      }
+      i2l *= complex<double>(0.0, 1.0);
+    }
+  }
+  for (int ion=0; ion < Rions.size(); ion++) {
+    int iproj = 0;
+    for (int l=0; l<NLPP.NumChannels(); l++) {
+      if (l != NLPP.LocalChannel()) {
+	for (int m=-l; m<=l; m++) {
+	  double nrm = 0.0;
+	  for (int ig=0; ig<gvecs.size(); ig++) 
+	    nrm += norm(lambda_lm(ig, ion, iproj));
+	  // lambda_lm(Range::all(), ion, iproj) *= 1.0/sqrt(nrm);
+	  iproj++;
+	}
+      }
+    }
+  }
+
+}
+
+
+
 
 
 
@@ -243,6 +298,7 @@ NLPP_FFTClass::SetupkPotentials()
   }
 }
 
+
 void
 NLPP_FFTClass::SetuprPotentials()
 {
@@ -263,10 +319,21 @@ NLPP_FFTClass::SetuprPotentials()
     int iProj = 0;
     for (int l=0; l<NLPP.NumChannels(); l++) {
       if (l != NLPP.LocalChannel()) {
-	Ion_l_Projectors(ri, iProj).Setup (NLPP, l, Rions(ri), cFFT);
+	Ion_l_Projectors(ri, iProj).Setup 
+	  (NLPP, l, Rions(ri), cFFT, SmoothProjectors);
 	iProj++;
       }
     }
+  }
+}
+
+void
+NLPP_FFTClass::SetProjectors(bool smooth)
+{
+  if (smooth != SmoothProjectors) {
+    SmoothProjectors = smooth;
+    SetupkProjectors();
+    SetuprPotentials();
   }
 }
 
@@ -275,8 +342,10 @@ NLPP_FFTClass::SetIons(const Array<Vec3,1> &rions)
 {
   // Calculate the structure factor
   VionBase::SetIons(rions);
-  if (IsSetup)
+  if (IsSetup) {
+    SetupkProjectors();
     SetuprPotentials();
+  }
 }
 
 
@@ -296,6 +365,7 @@ NLPP_FFTClass::Setup()
   NLPP.SetupProjectors(kc, 4.0*kc);
 
   SetupkPotentials();
+  SetupkProjectors();
   SetuprPotentials();
 
   IsSetup = true;
@@ -346,30 +416,54 @@ Ion_l_Projector::AddToVnl (Array<complex<double>,1> &Echi_psi,
 }
 
 
+// double
+// NLPP_FFTClass::NonlocalEnergy(const zVec &c)
+// {
+//   cFFT.PutkVec (c);
+//   cFFT.k2r();
+
+//   int lmax = NLPP.NumChannels()-1;
+//   Array<complex<double>,1> chi_psi(2*lmax+1);
+//   double E_nl = 0.0;
+  
+//   for (int ri=0; ri<Rions.size(); ri++) {
+//     int iProj = 0;
+//     for (int l=0; l<NLPP.NumChannels(); l++) 
+//       if (l != NLPP.LocalChannel()) {
+// 	double E_KB = NLPP.GetE_KB(l);
+// 	Ion_l_Projector &proj = Ion_l_Projectors(ri, iProj);
+// 	proj.Project(chi_psi);
+// 	for (int m=-l; m<=l; m++) 
+// 	  E_nl += norm (chi_psi(m+l))*E_KB;
+// 	iProj++;
+//       }
+//   }
+//   return E_nl;
+// }
+
 double
 NLPP_FFTClass::NonlocalEnergy(const zVec &c)
 {
-  cFFT.PutkVec (c);
-  cFFT.k2r();
-
   int lmax = NLPP.NumChannels()-1;
-  Array<complex<double>,1> chi_psi(2*lmax+1);
   double E_nl = 0.0;
-  
-  for (int ri=0; ri<Rions.size(); ri++) {
-    int iProj = 0;
-    for (int l=0; l<NLPP.NumChannels(); l++) 
-      if (l != NLPP.LocalChannel()) {
-	double E_KB = NLPP.GetE_KB(l);
-	Ion_l_Projector &proj = Ion_l_Projectors(ri, iProj);
-	proj.Project(chi_psi);
-	for (int m=-l; m<=l; m++) 
-	  E_nl += norm (chi_psi(m+l))*E_KB;
-	iProj++;
+  GVecsClass &gvecs = cFFT.GVecs;
+  for (int ion=0; ion<Rions.size(); ion++) {
+    int iproj = 0;
+    for (int l=0; l<NLPP.NumChannels(); l++) {
+      if (l != NLPP.NumChannels()) {
+	for (int m=-l; m<=l; m++) {
+	  complex<double> Zlm(0.0, 0.0);
+	  for (int ig=0; ig<gvecs.size(); ig++)
+	    Zlm += conj (lambda_lm(ig, ion, iproj)) * c(ig);
+	  E_nl += norm(Zlm) * NLPP.GetE_KB(l);
+	  iproj++;
+	}
       }
+    }
   }
   return E_nl;
 }
+
 
 void
 NLPP_FFTClass::CalcVnlPsi()
@@ -399,6 +493,29 @@ NLPP_FFTClass::CalcVnlPsi()
 }
 
 
+void
+NLPP_FFTClass::ApplyNonlocal (const zVec &c, zVec &Hc)
+{
+  GVecsClass &gvecs = cFFT.GVecs;
+  for (int ion=0; ion<Rions.size(); ion++) {
+    int iproj = 0;
+    for (int l=0; l<NLPP.NumChannels(); l++) {
+      if (l != NLPP.NumChannels()) {
+	for (int m=-l; m<=l; m++) {
+	  complex<double> Zlm(0.0, 0.0);
+	  for (int ig=0; ig<gvecs.size(); ig++)
+	    Zlm += conj(lambda_lm(ig, ion, iproj)) * c(ig);
+	  Zlm *= NLPP.GetE_KB(l);
+	  for (int ig=0; ig<gvecs.size(); ig++)
+	    Hc(ig) += Zlm * (lambda_lm(ig, ion, iproj));
+	  iproj++;
+	}
+      }
+    }
+  }
+}
+
+
 void 
 NLPP_FFTClass::Apply (const zVec &c, zVec &Hc)
 {
@@ -417,7 +534,8 @@ NLPP_FFTClass::Apply (const zVec &c, zVec &Hc)
   ////////////////////
   // Nonlocal parts //
   ////////////////////
-  CalcVnlPsi();
+  ApplyNonlocal (c, Hc);
+  //CalcVnlPsi();
 
   // Multiply by V
   cFFT.rBox *= Vr;
@@ -451,7 +569,8 @@ NLPP_FFTClass::Apply (const zVec &c, zVec &Hc,
   ////////////////////
   // Nonlocal parts //
   ////////////////////
-  CalcVnlPsi();
+  ApplyNonlocal(c, Hc);
+  //CalcVnlPsi();
 
   // Apply local potential and VHXC
   //  cFFT.rBox *= (Vr+VHXC);
@@ -461,7 +580,7 @@ NLPP_FFTClass::Apply (const zVec &c, zVec &Hc,
 	cFFT.rBox(ix,iy,iz) *= (Vr(ix,iy,iz)+VHXC(ix,iy,iz));
 
   // Add nonlocal parts
-  cFFT.rBox += VnlPsi;
+  //cFFT.rBox += VnlPsi;
 
   // Transform back
   cFFT.r2k();

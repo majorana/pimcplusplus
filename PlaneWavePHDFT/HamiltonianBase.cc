@@ -69,6 +69,11 @@ VionBase::SetIons(const Array<Vec3,1> &rions)
   }
 }
 
+void
+VionBase::SetProjectors (bool smooth)
+{
+  // do nothing
+}
 
 void
 VionBase::Apply   (const zVec &c, zVec &Hc, 

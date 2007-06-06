@@ -251,9 +251,21 @@ MPISystemClass::Read(IOSectionClass &in)
   in.ReadVar("SmearWidth", SmearWidth, 0.01);
   double lambda;
   in.ReadVar("KerkerLambda", lambda, 0.65);
+  in.ReadVar("SmoothProjectors", SmoothProjectors, false);
+  if (SmoothProjectors) 
+    cerr << "Using King-Smith projector smoothing.\n";
+  else
+    cerr << "Not using King-Smith projector smoothing.\n";
+  H.Vion->SetProjectors(SmoothProjectors);
   ChargeMixer->SetLambda(lambda);
   Smearer.SetOrder(SmearOrder);
   Smearer.SetWidth(SmearWidth);
+}
+
+void
+MPISystemClass::SetProjectors (bool smooth)
+{
+  H.Vion->SetProjectors(smooth);
 }
 
 

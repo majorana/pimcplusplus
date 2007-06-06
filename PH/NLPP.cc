@@ -220,7 +220,7 @@ ChannelPotential::SetupProjector (double G_max, double G_FFT)
 
   // Compute zeta(q)
   Job = ZETA_Q;
-  qGrid.Init (0.0, G_FFT, 1000);
+  qGrid.Init (0.0, G_FFT, 2000);
   zeta.resize(qGrid.NumPoints);
   for (int i=0; i<qGrid.NumPoints; i++) {
     qCurrent = qGrid(i);

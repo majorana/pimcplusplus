@@ -83,7 +83,6 @@ MPIBandStructureClass::Read(IOSectionClass &in)
   }
   
 
-
   // Read the number of interpolation points per kPoint
   assert (in.ReadVar ("InterpPoints", InterpPoints));
 
@@ -91,6 +90,8 @@ MPIBandStructureClass::Read(IOSectionClass &in)
   assert(in.ReadVar("kCut", kCut));
   System = new MPISystemClass(NumBands, NumElecs,
 			      BandComm, kComm);
+
+
 
   // Read the output file name
   assert (in.ReadVar ("OutFilename", OutFilename));
@@ -102,6 +103,14 @@ MPIBandStructureClass::Read(IOSectionClass &in)
     System->Setup (Box, kPoints(0), kCut, *PH, IonPot, UseLDA);
   System->SetIons(Rions);
 
+  bool smoothProjectors;
+  in.ReadVar("SmoothProjectors", smoothProjectors, false);
+  if (smoothProjectors) 
+    cerr << "Using King-Smith projector smoothing.\n";
+  else
+    cerr << "Not using King-Smith projector smoothing.\n";
+  System->SetProjectors (smoothProjectors);
+  
 
 }
 

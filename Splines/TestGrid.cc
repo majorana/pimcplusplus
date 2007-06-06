@@ -76,10 +76,54 @@ void TestGeneral()
   in.CloseFile();
 }
 
+#include <time.h>
+
+void TestSpeed()
+{
+  clock_t cstart, cend, gstart, gend, rstart, rend;
+  CenterGrid center;
+  GeneralGrid general;
+  const int N = 100000000;
+  int csum=0, gsum=0;
+
+  center.Init  (-10.0, 10.0, 15.0, 200);
+  general.Init (center.Points());
+
+  rstart = clock();
+  for (int i=0; i<N; i++) {
+    double r = -10.0 + 20.0*drand48();
+  }
+  rend = clock();
+  
+  cstart = clock();
+  for (int i=0; i<N; i++) {
+    double r = -10.0 + 20.0*drand48();
+    csum += center.ReverseMap (r);
+  }
+  cend = clock();
+  
+  gstart = clock();
+  for (int i=0; i<N; i++) {
+    double r = -10.0 + 20.0*drand48();
+    gsum += general.ReverseMap (r);
+  }
+  gend = clock();
+  cerr << "csum = " << csum << "  gsum = " << gsum << endl;
+
+  double centerTime = 
+    (double)(cend - cstart + rstart - rend)/(double)CLOCKS_PER_SEC;
+  double generalTime = 
+    (double)(gend - gstart + rstart - rend)/(double)CLOCKS_PER_SEC;
+
+  cerr << "CenterGrid time  = " << centerTime  << " seconds.\n";
+  cerr << "GeneralGrid time = " << generalTime << " seconds.\n";
+}
+
 
 main()
 {
-  TestGeneral();
+  TestSpeed();
+  //  TestGeneral();
 //   TestOptimal();
 //   TestOptimal2();
 //   TestCluster();

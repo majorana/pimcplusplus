@@ -4,7 +4,7 @@
 
 void TestBasis()
 {
-  LinearGrid grid(0.0, 1.0, 11);
+  LinearGrid grid(-1.0, 1.0, 11);
   NUBsplineBasis<LinearGrid> uniform;
   uniform.Init(&grid);
 

@@ -44,7 +44,7 @@ MPISystemClass::InitLDA()
   Occupancies.resize(NumBands);
   CalcRadialChargeDensity();
   Smearer.SetOrder(1);
-  Smearer.SetWidth(0.01);
+  Smearer.SetWidth(0.001);
   DoOptimizedBreakup();
   if (BandComm.MyProc() == 0) {
     Numk = kComm.NumProcs();

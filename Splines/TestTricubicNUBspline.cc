@@ -245,41 +245,76 @@ void FloatSpeedTest()
 
 void TestCenterGrid()
 {
-  CenterGrid grid;
-  grid.Init (-1.0, 1.0, 10, 24);
+  CenterGrid center;
+  center.Init (-1.0, 1.0, 10, 18);
 //   for (int i=0; i<50; i++)
-//     fprintf (stderr, "%22.16e\n", grid(i));
+//     fprintf (stderr, "%22.16e\n", center(i));
 
   // Check ReverseMap for correctness
   for (int i=0; i<10000; i++) {
     double x = 2.0*drand48()-1.0;
-    int j = grid.ReverseMap(x);
-    if (grid(j) > x) 
-      cerr << "x=" << x << "  j=" << j << " grid(j)=" << grid(j) << endl;
-    if (x >= grid(j+1)) 
-      cerr << "x=" << x << "  j=" << j << " grid(j)=" << grid(j) << endl;
+    int j = center.ReverseMap(x);
+    if (center(j) > x) 
+      cerr << "x=" << x << "  j=" << j << " center(j)=" << center(j) << endl;
+    if (x >= center(j+1)) 
+      cerr << "x=" << x << "  j=" << j << " center(j)=" << center(j) << endl;
   }
 
   // Write out a nonuniform 
   NUBsplineBasis<CenterGrid> basis;
-  basis.Init (&grid);
+  basis.Init (&center);
   TinyVector<double,4> b;
+  FILE *fout = fopen ("NUbasis.dat", "w");
   for (double x=-1.0; x<1.0; x+= 0.001) {
     basis (x, b);
-    int i0 = (100-grid.ReverseMap(x)+0)%4;
-    int i1 = (100-grid.ReverseMap(x)+1)%4;
-    int i2 = (100-grid.ReverseMap(x)+2)%4;
-    int i3 = (100-grid.ReverseMap(x)+3)%4;
-    fprintf (stdout, "%22.16e %22.16e %22.16e %22.16e %22.16e\n",
+    int i0 = (100-center.ReverseMap(x)+0)%4;
+    int i1 = (100-center.ReverseMap(x)+1)%4;
+    int i2 = (100-center.ReverseMap(x)+2)%4;
+    int i3 = (100-center.ReverseMap(x)+3)%4;
+    fprintf (fout, "%22.16e %22.16e %22.16e %22.16e %22.16e\n",
 	     x, b[i0], b[i1], b[i2], b[i3]);
   }
+  fclose (fout);
+  fout = fopen ("CenterGrid.dat", "w");
+  for (int i=0; i<center.NumPoints; i++)
+    fprintf (fout, "%1.16e\n", center(i));
+  fclose(fout);
+
+}
+
+
+void TestLinearGrid()
+{
+  LinearGrid linear;
+  linear.Init (-1.0, 1.0, 18);
+  // Write out a nonuniform 
+  NUBsplineBasis<LinearGrid> basis;
+  basis.Init (&linear);
+  TinyVector<double,4> b;
+  FILE *fout = fopen ("Ubasis.dat", "w");
+  for (double x=-1.0; x<1.0; x+= 0.001) {
+    basis (x, b);
+    int i0 = (100-linear.ReverseMap(x)+0)%4;
+    int i1 = (100-linear.ReverseMap(x)+1)%4;
+    int i2 = (100-linear.ReverseMap(x)+2)%4;
+    int i3 = (100-linear.ReverseMap(x)+3)%4;
+    fprintf (fout, "%22.16e %22.16e %22.16e %22.16e %22.16e\n",
+	     x, b[i0], b[i1], b[i2], b[i3]);
+  }
+  fclose (fout);
+  fout = fopen ("LinearGrid.dat", "w");
+  for (int i=0; i<linear.NumPoints; i++)
+    fprintf (fout, "%1.16e\n", linear(i));
+  fclose(fout);
 
 }
 
 
 main()
 {
-  FloatSpeedTest();
+  TestCenterGrid();
+  TestLinearGrid();
+  //FloatSpeedTest();
   //SpeedTest();
   //TestCenterGrid();
   //  TestLinear();
