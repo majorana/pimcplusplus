@@ -57,7 +57,7 @@ public:
   // The volume of a mesh element
   double MeshVol;
   void Setup(NLPPClass &nlpp, int l_,
-	     Vec3 rion, FFTBox &fft, bool smooth);
+	     Vec3 rion, Vec3 k, FFTBox &fft, bool smooth);
   // This returns the application of the projector to the contents of
   // the FFTBox in chi_psi.  Thus, for l=0, chi_psi has one element,
   // for l=1: 3 elements, l=2:  5 elements...
