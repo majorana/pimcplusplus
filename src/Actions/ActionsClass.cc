@@ -305,7 +305,8 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 
 void
 ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong, 
-		      double &node, double &vShort, double &vLong)
+		      double &node, double &vShort, double &vLong,
+		      double &duNonlocal)
 //void ActionsClass::Energy(map<double>& Energies)
 {
 	//double kinetic, dUShort, dULong, node, vShort, vLong;
@@ -337,12 +338,16 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
     if (doLongRange)
       vLong  += factor *  LongRangePot.V(slice);
   }
-	//Energies["kinetic"] = kinetic;
-	//Energies["dUShort"] = dUShort;
-	//Energies["dULong"] = dULong;
-	//Energies["node"] = node;
-	//Energies["vShort"] = vShort;
-	//Energies["vLong"] = vLong;
+  if (UseNonlocal)
+    duNonlocal = Nonlocal.d_dBeta(0,M,0);
+  else
+    duNonlocal = 0.0;
+  //Energies["kinetic"] = kinetic;
+  //Energies["dUShort"] = dUShort;
+  //Energies["dULong"] = dULong;
+  //Energies["node"] = node;
+  //Energies["vShort"] = vShort;
+  //Energies["vLong"] = vLong;
 }
 
 

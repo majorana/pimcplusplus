@@ -34,8 +34,9 @@ void EnergyClass::Accumulate()
   NumSamples++;
 
   	//map<double> Energies;
-  double kinetic, dUShort, dULong, node, vShort, vLong, tip5p;
-  PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong);
+  double kinetic, dUShort, dULong, node, vShort, vLong, tip5p, dUNonlocal;
+  PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong,
+			   dUNonlocal);
   //PathData.Actions.Energy(Energies);
 	//kinetic = Energies["kinetic"];
 	//dUShort = Energies["dUShort"];
@@ -44,13 +45,14 @@ void EnergyClass::Accumulate()
 	//vShort = Energies["vShort"];
 	//vLong = Energies["vLong"];
 
-  TotalSum   += kinetic + dUShort + dULong + node;// + tip5p;
+  TotalSum   += kinetic + dUShort + dULong + node + dUNonlocal;// + tip5p;
   KineticSum += kinetic;
   dUShortSum += dUShort;
   dULongSum  += dULong;
   NodeSum    += node;
   VShortSum  += vShort;
   VLongSum   += vLong;
+  dUNonlocalSum += dUNonlocal;
 
   int slice1 = 0;
   int slice2 = PathData.Path.NumTimeSlices() - 1;
@@ -138,6 +140,7 @@ void EnergyClass::WriteBlock()
   NodeVar.Write    (Prefactor*PathData.Path.Communicator.Sum(NodeSum)*norm);
   VShortVar.Write  (Prefactor*PathData.Path.Communicator.Sum(VShortSum)*norm);
   VLongVar.Write   (Prefactor*PathData.Path.Communicator.Sum(VLongSum)*norm);
+  dUNonlocalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(dUNonlocalSum)*norm);
 	for(int n=0; n<numEnergies; n++){
 		OtherVars[n]->Write(Prefactor*PathData.Path.Communicator.Sum(OtherSums[n])*norm);
 		OtherSums[n] = 0.0;
@@ -157,6 +160,7 @@ void EnergyClass::WriteBlock()
   NodeSum        = 0.0;
   VShortSum      = 0.0;
   VLongSum       = 0.0;
+  dUNonlocalSum = 0.0;
 //   TotalActionSum = 0.0;
 //   ExpTotalActionSum = 0.0;
   //  TIP5PSum   = 0.0;
@@ -296,8 +300,9 @@ void EnergySignClass::Accumulate()
   
   NumSamples++;
 
-  double kinetic, dUShort, dULong, node, vShort, vLong;
-  PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong);
+  double kinetic, dUShort, dULong, node, vShort, vLong, dUNonlocal;
+  PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong,
+			   dUNonlocal);
   
   TotalSum   += (kinetic + dUShort + dULong + node)/* *PathData.Path.Weight*/;
   KineticSum += kinetic/* * PathData.Path.Weight*/;
@@ -306,6 +311,7 @@ void EnergySignClass::Accumulate()
   NodeSum    += node/* * PathData.Path.Weight*/;
   VShortSum  += vShort/* * PathData.Path.Weight*/;
   VLongSum   += vLong/* * PathData.Path.Weight*/;
+  dUNonlocalSum += dUNonlocal;
 }
 
 
@@ -327,6 +333,7 @@ void EnergySignClass::WriteBlock()
   NodeVar.Write(PathData.Path.Communicator.Sum(NodeSum)*norm);
   VShortVar.Write(PathData.Path.Communicator.Sum(VShortSum)*norm);
   VLongVar.Write(PathData.Path.Communicator.Sum(VLongSum)*norm);
+  dUNonlocalVar.Write(PathData.Path.Communicator.Sum(dUNonlocalSum)*norm);
 
   if (PathData.Path.Communicator.MyProc()==0)
     IOSection.FlushFile();
@@ -338,6 +345,7 @@ void EnergySignClass::WriteBlock()
   NodeSum    = 0.0;
   VShortSum  = 0.0;
   VLongSum   = 0.0;
+  dUNonlocalSum = 0.0;
   NumSamples = 0;
 }
 

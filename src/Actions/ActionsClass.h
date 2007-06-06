@@ -163,7 +163,8 @@ public:
   /// the path.  Must do global sum to get total energy.
 	//void Energy(map<double>& Energies);
   void Energy (double& kinetic, double &duShort, double &duLong, 
-	       double &node, double &vShort, double &vLong);
+	       double &node, double &vShort, double &vLong,
+	       double &duNonlocal);
   /// Read the action parameters from the input file and do the
   /// necessary initialization.  This reads the pair actions, and does
   /// long range breakups and RPA corrections if necessary.

@@ -24,19 +24,21 @@ class EnergyClass : public ObservableClass
 
 private:
   double TotalSum, KineticSum, dUShortSum, dULongSum, NodeSum, 
-    VShortSum, VLongSum;//, TotalActionSum, ExpTotalActionSum, TIP5PSum;
+    VShortSum, VLongSum, dUNonlocalSum;
+  //, TotalActionSum, ExpTotalActionSum, TIP5PSum;
 
   ObservableDouble TotalVar, KineticVar, dUShortVar, dULongVar, NodeVar,
-    VShortVar, VLongVar;//, TotalActionVar, ExpTotalActionVar, TIP5PVar;
+    VShortVar, VLongVar, dUNonlocalVar;
+  //, TotalActionVar, ExpTotalActionVar, TIP5PVar;
 
   int NumSamples;
   int TimesCalled;
   int Freq;
   int DumpFreq;
-	vector<ActionBaseClass*> OtherActions;
-	vector<ObservableDouble*> OtherVars;
-	vector<double> OtherSums;
-	int numEnergies;
+  vector<ActionBaseClass*> OtherActions;
+  vector<ObservableDouble*> OtherVars;
+  vector<double> OtherSums;
+  int numEnergies;
 public:
   void Accumulate();
   void WriteBlock();
@@ -44,24 +46,26 @@ public:
   void Read(IOSectionClass& in);
   EnergyClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) , 
-      TotalVar  ("Total",  IOSection,myPathData.Path.Communicator),
-      KineticVar("Kinetic",IOSection,myPathData.Path.Communicator), 
-      dUShortVar("dUShort",IOSection,myPathData.Path.Communicator), 
-      dULongVar ("dULong", IOSection,myPathData.Path.Communicator), 
-      NodeVar   ("Node",   IOSection,myPathData.Path.Communicator), 
-      VShortVar ("VShort",IOSection,myPathData.Path.Communicator), 
-      VLongVar  ("VLong",IOSection,myPathData.Path.Communicator)
-    // TotalActionVar ("TotalAction",IOSection,myPathData.Path.Communicator),
-    // ExpTotalActionVar ("ExpTotalAction",IOSection,myPathData.Path.Communicator)
-    // TIP5PVar  ("TIP5P",IOSection,myPathData.Path.Communicator)
+      TotalVar     ("Total",  IOSection,myPathData.Path.Communicator),
+      KineticVar   ("Kinetic",IOSection,myPathData.Path.Communicator), 
+      dUShortVar   ("dUShort",IOSection,myPathData.Path.Communicator), 
+      dULongVar    ("dULong", IOSection,myPathData.Path.Communicator), 
+      NodeVar      ("Node",   IOSection,myPathData.Path.Communicator), 
+      VShortVar    ("VShort",IOSection,myPathData.Path.Communicator), 
+      VLongVar     ("VLong",IOSection,myPathData.Path.Communicator),
+      dUNonlocalVar("dUNonlocal", IOSection,myPathData.Path.Communicator)
+// TotalActionVar ("TotalAction",IOSection,myPathData.Path.Communicator),
+// ExpTotalActionVar ("ExpTotalAction",IOSection,myPathData.Path.Communicator)
+// TIP5PVar  ("TIP5P",IOSection,myPathData.Path.Communicator)
   {
-    TotalSum   = 0.0;
-    KineticSum = 0.0;
-    dUShortSum = 0.0;
-    dULongSum  = 0.0;
-    NodeSum    = 0.0;
-    VShortSum  = 0.0;
-    VLongSum   = 0.0;
+    TotalSum      = 0.0;
+    KineticSum    = 0.0;
+    dUShortSum    = 0.0;
+    dULongSum     = 0.0;
+    NodeSum       = 0.0;
+    VShortSum     = 0.0;
+    VLongSum      = 0.0;
+    dUNonlocalSum = 0.0;
 //     TotalActionSum = 0.0;
 //     ExpTotalActionSum = 0.0;
     NumSamples = 0;
@@ -78,10 +82,10 @@ class EnergySignClass : public ObservableClass
 
 private:
   double TotalSum, KineticSum, dUShortSum, dULongSum, NodeSum, 
-    VShortSum, VLongSum;
+    VShortSum, VLongSum, dUNonlocalSum;
 
   ObservableDouble TotalVar, KineticVar, dUShortVar, dULongVar, NodeVar,
-    VShortVar, VLongVar;
+    VShortVar, VLongVar, dUNonlocalVar;
 
   int NumSamples;
   int TimesCalled;
@@ -94,13 +98,14 @@ public:
   void Read(IOSectionClass& in);
   EnergySignClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) , 
-      TotalVar  ("Total",  IOSection,myPathData.Path.Communicator),
-      KineticVar("Kinetic",IOSection,myPathData.Path.Communicator), 
-      dUShortVar("dUShort",IOSection,myPathData.Path.Communicator), 
-      dULongVar ("dULong", IOSection,myPathData.Path.Communicator), 
-      NodeVar   ("Node",   IOSection,myPathData.Path.Communicator), 
-      VShortVar ("VShort",IOSection,myPathData.Path.Communicator), 
-      VLongVar  ("VLong",IOSection,myPathData.Path.Communicator)
+      TotalVar     ("Total",  IOSection,myPathData.Path.Communicator),
+      KineticVar   ("Kinetic",IOSection,myPathData.Path.Communicator), 
+      dUShortVar   ("dUShort",IOSection,myPathData.Path.Communicator), 
+      dULongVar    ("dULong", IOSection,myPathData.Path.Communicator), 
+      NodeVar      ("Node",   IOSection,myPathData.Path.Communicator), 
+      VShortVar    ("VShort",IOSection,myPathData.Path.Communicator), 
+      VLongVar     ("VLong",IOSection,myPathData.Path.Communicator),
+      dUNonlocalVar("dUNonlocal", IOSection,myPathData.Path.Communicator)
   {
     TotalSum   = 0.0;
     KineticSum = 0.0;

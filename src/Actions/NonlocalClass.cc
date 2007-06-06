@@ -365,7 +365,7 @@ NonlocalClass::NearestIon (int slice, int ptcl, Vec3 &ionpos, double &dist)
   disp = r - ionpos;
   Path.PutInBox(disp);
   dist = dot (disp, disp);
-  for (int ion=first; ion <= last; ion++) {
+  for (int ion=first+1; ion <= last; ion++) {
     disp = r - Path(slice, ion);
     Path.PutInBox(disp);
     double tryDist = dot (disp, disp);
@@ -413,7 +413,7 @@ NonlocalClass::SingleAction(int slice1, int slice2,
       int ptcl = activeParticles(ptclIndex);
       Vec3 ionpos;
       double dist;
-      NearestIon (ptcl, slice, ionpos, dist);
+      NearestIon (slice, ptcl, ionpos, dist);
       if (dist < max_rc) {
 	ScaleQuadPoints (ionpos, dist);
 	double distInv = 1.0/dist;
@@ -439,7 +439,7 @@ NonlocalClass::SingleAction(int slice1, int slice2,
       }
     }
   }
-  cerr << "U = " << U << endl;
+  //  cerr << "U = " << U << endl;
   return U;
 }
 
