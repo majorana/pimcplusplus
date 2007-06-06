@@ -432,9 +432,9 @@ MPISystemClass::CalcVHXC()
   if (BandComm.MyProc() == 0)
     if (kComm.MyProc() == 0) {
       fprintf (stderr, 
-	       "Iter     EH        EXC       Elocal    Enonlocal Eewald    Ecore\n");
+	       "Iter      EH         EXC        Elocal     Enonlocal  Eewald     Ecore\n");
       fprintf (stderr, 
-	       "%3d    %9.5f %9.5f %9.5f %9.5f %9.5f %9.5f\n", SCiter,
+	       "%3d    %10.6f %10.6f %10.6f %10.6f %10.6f %10.6f\n", SCiter,
 	       EH, EXC, Elocal, Enonlocal, EwaldEnergy(), Ecore);
     }	       
 //   perr << "Energies:\n"
