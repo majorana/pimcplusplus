@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "StructureReject.h"
 #include "../PathDataClass.h"
+#include "StructureReject.h"
 
 ///This has to be called after pathdata knows how many
 ///particles it has

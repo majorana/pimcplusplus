@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "KineticSphereClass.h"
 #include "../PathDataClass.h"
+#include "KineticSphereClass.h"
 #include <Common/SpecialFunctions/SpecialFunctions.h>
 ///This has to be called after pathdata knows how many
 ///particles it has

@@ -17,10 +17,10 @@
 #ifndef PATH_DATA_CLASS
 #define PATH_DATA_CLASS
 
+#include <Common/MPI/Communication.h>
 #include "Common.h"
 #include "SpeciesClass.h"
 #include "PathClass.h"
-#include <Common/MPI/Communication.h>
 #include "Actions/ActionsClass.h"
 #include <Common/Random/Random.h>
 #include "MoleculeHelper.h"

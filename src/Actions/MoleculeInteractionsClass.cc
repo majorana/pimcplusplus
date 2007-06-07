@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "MoleculeInteractionsClass.h"
 #include "../PathDataClass.h"
+#include "MoleculeInteractionsClass.h"
 #include "../Moves/MoveUtils.h"
 
 // hack some extra output

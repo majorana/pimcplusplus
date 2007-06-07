@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "NoPermuteStage.h"
 #include "BisectionSphereBlock.h"
+#include "NoPermuteStage.h"
 #include "StructureRejectStage.h"
 
 //void BisectionSphereBlockClass::WriteRatio()

@@ -1,5 +1,5 @@
-#include "ST2WaterClass.h"
 #include "../PathDataClass.h"
+#include "ST2WaterClass.h"
 
 //double CUTOFF = 7.75; // setcutoff: spherical cutoff in angstroms
 double CUTOFF = 18.0; // setcutoff: spherical cutoff in angstroms

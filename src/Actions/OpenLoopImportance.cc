@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "OpenLoopImportance.h"
 #include "../PathDataClass.h"
+#include "OpenLoopImportance.h"
 
 ///BUG: Will not currently work in parallel
 

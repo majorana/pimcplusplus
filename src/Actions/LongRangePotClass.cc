@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "LongRangePotClass.h"
 #include "../PathDataClass.h"
+#include "LongRangePotClass.h"
 
 LongRangePotClass::LongRangePotClass 
 (PathDataClass &pathData, Array<PairActionFitClass*,2> &pairMatrix) :

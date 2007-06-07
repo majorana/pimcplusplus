@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "ShortRangeApproximateClass.h"
 #include "../PathDataClass.h"
+#include "ShortRangeApproximateClass.h"
 
 ///This has to be called after pathdata knows how many
 ///particles it has

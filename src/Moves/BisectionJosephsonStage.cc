@@ -14,6 +14,7 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include <Common/MPI/Communication.h>
 #include "BisectionJosephsonStage.h"
 
 void BisectionJosephsonStageClass::WriteRatio()

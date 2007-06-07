@@ -14,9 +14,9 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include "PathDataClass.h"
 #include "LoopClass.h"
 #include "WriteData.h"
-#include "PathDataClass.h"
 #include "Moves/MoveBase.h"
 #include "Observables/ObservableBase.h"
 #include <sstream>

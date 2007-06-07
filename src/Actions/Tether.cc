@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "Tether.h"
 #include "../PathDataClass.h"
+#include "Tether.h"
 
 std::string 
 TetherClass::GetName()

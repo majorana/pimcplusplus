@@ -14,6 +14,7 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include <Common/MPI/Communication.h>
 #include "ActionsClass.h"
 #include "../PathDataClass.h"
 #include <Common/Ewald/OptimizedBreakup.h>

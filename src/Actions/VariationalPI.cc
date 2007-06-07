@@ -19,8 +19,8 @@
 // #include <gsl/gsl_linalg.h>
 // #include <gsl/gsl_blas.h>
 
-#include "VariationalPI.h"
 #include "../PathDataClass.h"
+#include "VariationalPI.h"
 #include <Common/MatrixOps/MatrixOps.h>
 #include <cstdlib>
 #include <cstdio>

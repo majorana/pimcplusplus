@@ -1,5 +1,5 @@
-#include "QMCSamplingClass.h"
 #include "../PathDataClass.h"
+#include "QMCSamplingClass.h"
 
 
 #ifdef USE_QMC

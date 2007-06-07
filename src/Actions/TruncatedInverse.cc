@@ -2,9 +2,9 @@
 #define ORDER_N_FERMIONS
 // #include <gsl/gsl_linalg.h>
 // #include <gsl/gsl_blas.h>
+#include "../PathDataClass.h"
 #include <algorithm>
 #include "TruncatedInverse.h"
-#include "../PathDataClass.h"
 #include <Common/MatrixOps/MatrixOps.h>
 #include <cstdlib>
 #include <cstdio>

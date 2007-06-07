@@ -15,6 +15,7 @@
 /////////////////////////////////////////////////////////////
 
 
+#include <Common/MPI/Communication.h>
 #include "Josephson.h"
 #include "../PathDataClass.h"
 #include <fftw3.h>

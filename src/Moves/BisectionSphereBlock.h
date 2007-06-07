@@ -18,8 +18,8 @@
 #define BISECTION_SPHERE_BLOCK_CLASS_H
 
 
-#include "MoveBase.h"
 #include "../PathDataClass.h"
+#include "MoveBase.h"
 #include "PermuteStage.h"
 #include "CoupledPermuteStage.h"
 #include "BisectionSphereStage.h"

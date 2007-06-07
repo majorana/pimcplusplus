@@ -17,8 +17,8 @@
 #ifndef READ_PATH_H
 #define READ_PATH_H
 
-#include "MoveBase.h"
 #include "../PathDataClass.h"
+#include "MoveBase.h"
 
 class ReadPathClass : public MoveClass
 {

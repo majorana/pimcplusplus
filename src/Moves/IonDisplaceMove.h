@@ -17,8 +17,8 @@
 #ifndef ION_DISPLACE_MOVE_H
 #define ION_DISPLACE_MOVE_H
 
-#include "MultiStage.h"
 #include "../PathDataClass.h"
+#include "MultiStage.h"
 #include "SpaceWarp.h"
 
 /// This stage attempts to displace a list of whole paths.  It should

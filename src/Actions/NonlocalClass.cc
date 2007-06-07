@@ -1,5 +1,5 @@
-#include "NonlocalClass.h"
 #include "../PathDataClass.h"
+#include "NonlocalClass.h"
 
 NonlocalClass::NonlocalClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)

@@ -14,6 +14,7 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include <Common/MPI/Communication.h>
 #include "OpenStage.h"
 #include "EndStage.h"
 

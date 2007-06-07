@@ -17,9 +17,9 @@
 #ifndef DISPLACE_MOVE_FAST_H
 #define DISPLACE_MOVE_FAST_H
 
+#include "../PathDataClass.h"
 #include "MultiStage.h"
 #include "EmptyStage.h"
-#include "../PathDataClass.h"
 
 
 /// This stage attempts to displace a list of whole paths.  It should

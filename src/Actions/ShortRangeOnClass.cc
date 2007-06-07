@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "ShortRangeOnClass.h"
 #include "../PathDataClass.h"
+#include "ShortRangeOnClass.h"
 #include  "time.h"
 ///DO NOT USE IF YOUR CUTOFF IS SUCH THAT ALL PARTICLE WILL BE INCLUDED IN ANY DIRECTION! THERE IS A BUG THAT WILL CAUSE IT TO BREAK!
 ///This has to be called after pathdata knows how many

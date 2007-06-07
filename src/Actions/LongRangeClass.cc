@@ -14,11 +14,11 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include <Common/MPI/Communication.h>
 #include "LongRangeClass.h"
 #include "../PathDataClass.h"
 #include <Common/Ewald/OptimizedBreakup.h>
 #include <Common/Integration/GKIntegration.h>
-#include <Common/MPI/Communication.h>
 
 class CoulombXkIntegrand
 {

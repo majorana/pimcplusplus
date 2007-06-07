@@ -2,8 +2,8 @@
 #define ION_MOVE_MANAGER_CLASS_H
 
 
-#include "MoveBase.h"
 #include "../PathDataClass.h"
+#include "MoveBase.h"
 #include "../Observables/ObservableVar.h"
 #include "IonMoveStage.h"
 

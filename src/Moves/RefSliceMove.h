@@ -17,8 +17,8 @@
 #ifndef REF_SLICE_MOVE_H
 #define REF_SLICE_MOVE_H
 
-#include "MoveBase.h"
 #include "../PathDataClass.h"
+#include "MoveBase.h"
 #include "PermuteStage.h"
 #include "BisectionStage.h"
 

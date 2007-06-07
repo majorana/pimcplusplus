@@ -14,6 +14,7 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include <Common/MPI/Communication.h>
 #include <Common/Blitz.h>
 #include <Common/Random/Random.h>
 #include <Common/IO/IO.h>

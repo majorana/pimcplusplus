@@ -1,6 +1,6 @@
 
-#include "Josephson.h"
 #include "../PathDataClass.h"
+#include "Josephson.h"
 #include <fftw3.h>
 
 ///This has to be called after pathdata knows how many

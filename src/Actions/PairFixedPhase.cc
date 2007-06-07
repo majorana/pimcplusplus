@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "PairFixedPhase.h"
 #include "../PathDataClass.h"
+#include "PairFixedPhase.h"
 #include <Common/MatrixOps/MatrixOps.h>
 
 double 

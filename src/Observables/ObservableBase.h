@@ -18,8 +18,8 @@
 #define OBSERVABLE_BASE_H
 
 
-#include "../Common.h"
 #include "../PathDataClass.h"
+#include "../Common.h"
 #include "ObservableVar.h"
 #include "../EventClass.h"
 #include <Common/IO/IO.h>

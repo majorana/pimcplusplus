@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "FixedPhaseActionClass.h"
 #include "../PathDataClass.h"
+#include "FixedPhaseActionClass.h"
 #include <Common/MatrixOps/MatrixOps.h>
 
 FixedPhaseClass::FixedPhaseClass(PathDataClass &pathData) :

@@ -17,9 +17,10 @@
 #ifndef STAGE_H
 #define STAGE_H
 
+#include <Common/MPI/Communication.h>
+#include "../Actions/ActionBase.h"
 #include <list>
 #include "../Observables/ObservableVar.h"
-#include "../Actions/ActionBase.h"
  
 ///Some moves are built out of stages.  This class is the parent class
 ///for a stage.  If it is the first stage it will typically need to

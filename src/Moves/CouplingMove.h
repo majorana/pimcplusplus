@@ -18,8 +18,8 @@
 #define COUPLINGMOVE_CLASS_H
 
 
-#include "MoveBase.h"
 #include "../PathDataClass.h"
+#include "MoveBase.h"
 #include "MultiStage.h"
 
 

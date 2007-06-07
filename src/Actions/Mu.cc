@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "Mu.h"
 #include "../PathDataClass.h"
+#include "Mu.h"
 
 ///This has to be called after pathdata knows how many
 ///particles it has

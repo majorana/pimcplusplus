@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "ShortRangePotClass.h"
 #include "../PathDataClass.h"
+#include "ShortRangePotClass.h"
 
 ShortRangePotClass::ShortRangePotClass 
 (PathDataClass &pathData, Array<PairActionFitClass*,2> &pairMatrix) :

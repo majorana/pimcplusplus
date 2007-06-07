@@ -17,8 +17,8 @@
 #ifndef VARIATIONAL_DISPLACE_MOVE_H
 #define VARIATIONAL_DISPLACE_MOVE_H
 
-#include "MultiStage.h"
 #include "../PathDataClass.h"
+#include "MultiStage.h"
 
 
 /// This stage attempts to displace a list of whole paths.  It should

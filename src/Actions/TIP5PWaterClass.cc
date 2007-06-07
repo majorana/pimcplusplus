@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "TIP5PWaterClass.h"
 #include "../PathDataClass.h"
+#include "TIP5PWaterClass.h"
 
 TIP5PWaterClass::TIP5PWaterClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)

@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "GridClass.h"
 #include "PathClass.h"
+#include "GridClass.h"
 
 
 ///affected cells are the cells that are within the cutoff and need to be used.  

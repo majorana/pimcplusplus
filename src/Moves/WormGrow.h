@@ -17,9 +17,9 @@
 #ifndef WORM_GROW_MOVE_H
 #define WORM_GROW_MOVE_H
 
+#include "../PathDataClass.h"
 #include "WormStage.h"
 #include "MultiStage.h"
-#include "../PathDataClass.h"
 
 
 

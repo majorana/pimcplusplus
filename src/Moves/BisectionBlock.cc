@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "EmptyStage.h"
 #include "BisectionBlock.h"
+#include "EmptyStage.h"
 #include "StructureRejectStage.h"
 #include "CouplingStage.h"
 //#include "WormPermuteStage.h"

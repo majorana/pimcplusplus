@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "KineticClass.h"
 #include "../PathDataClass.h"
+#include "KineticClass.h"
 
 ///This has to be called after pathdata knows how many
 ///particles it has

@@ -14,9 +14,9 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include "../PathDataClass.h"
 #include <Common/Integration/RungeKutta.h>
 #include "LongRangeRPAClass.h"
-#include "../PathDataClass.h"
 
 LongRangeRPAClass::LongRangeRPAClass(PathDataClass &pathData,
 				     Array<PairActionFitClass* ,2> &pairMatrix,
