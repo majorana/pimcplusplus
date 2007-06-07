@@ -59,7 +59,7 @@ Section (Action)
   int NumImages = 0;
   bool UseLongRange = false;
   Array<string,1> PairActionFiles(3) = 
-    ["~/PairActions/Na_CASINO.beta16.0.tricubicfit2.h5",
+    ["~/PairActions/Na_CASINO_slocal.beta16.0.tricubicfit2.h5",
      "~/PairActions/e-e.fit.beta16.0.h5",
      "~/PairActions/Na-Na.PairAction"];
   Section (NodalAction)
@@ -72,6 +72,7 @@ Section (Action)
     bool UseLDA = true;
     bool UseSubspaceRotation = true;
     bool SmoothProjectors = true;
+    //    double kCut = 10.0;
     double kCut = 5.0;
     int SmearOrder = 1;
     double SmearWidth = 0.0015;
@@ -83,7 +84,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "Na2_6.0_tau0.25_beta300.CASINO";
+  string OutFileBase = "Na2_6.0_tau0.5_beta300.CASINO_slocal";
   Section (Observable) {
     string Type = "Energy";
     string Name = "Energy";
@@ -115,7 +116,7 @@ Section (Moves){
     string PermuteType = "NONE";
     string Species = "eup";
     int StepsPerBlock = 4;
-    int NumLevels=5;
+    int NumLevels=6;
   }
   Section (Move)
   {
@@ -124,7 +125,7 @@ Section (Moves){
     string PermuteType = "NONE";
     string Species = "edown";
     int StepsPerBlock = 4;
-    int NumLevels=5;
+    int NumLevels=6;
   }
   Section (Move)
   {
