@@ -353,24 +353,24 @@ NonlocalClass::Read (IOSectionClass &in)
 }
 
 void
-NonlocalClass::NearestIon (int slice, int ptcl, Vec3 &ionpos, double &dist)
+NonlocalClass::NearestIon (int slice, int ptcl, Vec3 &ionpos, Vec3 &disp, double &dist)
 {
   PathClass &Path = PathData.Path;
   Vec3 r = Path (slice, ptcl);
   SpeciesClass &ions = Path.Species(FixedPhase->IonSpeciesNum);
   int first = ions.FirstPtcl;  int last = ions.LastPtcl;
-  Vec3 disp;
 
   ionpos = Path(slice,first);
   disp = r - ionpos;
   Path.PutInBox(disp);
   dist = dot (disp, disp);
   for (int ion=first+1; ion <= last; ion++) {
-    disp = r - Path(slice, ion);
-    Path.PutInBox(disp);
-    double tryDist = dot (disp, disp);
+    Vec3 tryDisp = r - Path(slice, ion);
+    Path.PutInBox(tryDisp);
+    double tryDist = dot (tryDisp, tryDisp);
     if (tryDist < dist) {
       dist = tryDist;
+      disp = tryDisp;
       ionpos = Path(slice, ion);
     }
   }
@@ -408,12 +408,16 @@ NonlocalClass::SingleAction(int slice1, int slice2,
   // Outer loop overs slices
   for (int slice=slice1; slice <= slice2; slice++) {
     double prefactor = (slice==slice1 || slice==slice2) ? 0.5 : 1.0;
-    prefactor *= levelTau/(4.0*M_PI);
+    //prefactor *= levelTau/(4.0*M_PI);
+    prefactor *= levelTau;
     for (int ptclIndex=0; ptclIndex < activeParticles.size(); ptclIndex++) {
       int ptcl = activeParticles(ptclIndex);
-      Vec3 ionpos;
+      // r is the electron position
+      Vec3 r = Path (slice, ptcl);
+      // ionpos is the ion position, disp = PutInBox(r-IonPos)
+      Vec3 ionpos, disp;
       double dist;
-      NearestIon (slice, ptcl, ionpos, dist);
+      NearestIon (slice, ptcl, ionpos, disp, dist);
       if (dist < max_rc) {
 	ScaleQuadPoints (ionpos, dist);
 	double distInv = 1.0/dist;
@@ -423,16 +427,29 @@ NonlocalClass::SingleAction(int slice1, int slice2,
 	for (int l=0; l<NLPP->NumChannels(); l++)
 	  DeltaV(l) = NLPP->GetDeltaV(l,dist);
 	DeltaV(NLPP->LocalChannel()) = 0.0;
-	for (int pi=0; pi<ScaledPoints.size(); pi++) {
-	  double costheta = distInv*distInv*dot(ScaledPoints(pi), ionpos);
+	for (int pi=0; pi<ScaledPoints.size(); pi++) {	  
+	  double costheta = distInv*dot(QuadPoints(pi), disp);
+	  if (fabs(costheta) > 1.0) {
+	    double qmag = dot (QuadPoints(pi), QuadPoints(pi));
+	    double dispmag = distInv * sqrt (dot (disp, disp));
+
+	    cerr << "Error!  |costheta| = " << fabs(costheta) << endl;
+	    cerr << "dr   = " << (ScaledPoints(pi)-ionpos) << endl;
+	    cerr << "disp = " << (r - ionpos ) << endl;
+	    cerr << "dist = " << dist << endl;
+	    cerr << "qmag = " << qmag << endl;
+	    cerr << "dispmag = " << dispmag << endl;
+	  }
+
 	  double P_l, P_lm1, P_lp1;
 	  P_l = 1.0;
 	  P_lm1 = 0.0;
 	  for (int l=0; l<NLPP->NumChannels(); l++) {
 	    double dl = (double)l;
-	    P_lp1 = ((2.0*dl+1.0)*costheta*P_l - dl*P_lm1)/(1.0+dl);
-	    U += (2.0*dl+1.0)*prefactor * DeltaV(l) * P_l * 
+	    double val = (2.0*dl+1.0)*prefactor * DeltaV(l) * P_l * 
 	      real(WFratios(pi)) * QuadWeights(pi);
+	    U += val;
+	    P_lp1 = ((2.0*dl+1.0)*costheta*P_l - dl*P_lm1)/(1.0+dl);
 	    P_lm1 = P_l;
 	    P_l = P_lp1;
 	  }

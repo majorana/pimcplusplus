@@ -19,7 +19,7 @@ protected:
   Array<complex<double>,1> WFratios;
   void SetQuadratureRule (int nrule);
   void CheckQuadratureRule(int lexact);
-  void NearestIon (int slice, int ptcl, Vec3 &ionpos, double &dist);
+  void NearestIon (int slice, int ptcl, Vec3 &ionpos, Vec3 &disp, double &dist);
   void ScaleQuadPoints (Vec3 ionpos, double dist);
   Array<int,1> Electrons;
 public:
