@@ -17,6 +17,8 @@
 #ifndef PA_FIT_BASE_H
 #define PA_FIT_BASE_H
 
+#include "../MPI/Communication.h" //include not needed
+
 #include "../IO/IO.h"
 #include "../PH/Potential.h"
 #include "../Splines/CubicSpline.h"

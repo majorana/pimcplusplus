@@ -14,9 +14,9 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include "../MPI/Communication.h"
 #include "ConjGradMPI.h"
 #include "../MatrixOps/MatrixOps.h"
-#include "../MPI/Communication.h"
 
 void ConjGradMPI::Setup()
 {

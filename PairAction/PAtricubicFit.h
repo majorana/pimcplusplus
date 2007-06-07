@@ -16,9 +16,9 @@
 
 #ifndef PA_TRICUBIC_FIT_H
 #define PA_TRICUBIC_FIT_H
+#include "../MPI/Communication.h"
 #include "PAFitBase.h"
 #include "../Splines/MyTricubicSpline.h"
-#include "../MPI/Communication.h"
 
 class PAtricubicFitClass : public PairActionFitClass
 {

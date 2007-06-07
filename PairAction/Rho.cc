@@ -13,7 +13,7 @@
 // For more information, please see the PIMC++ Home Page:  //
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
-
+#include "../MPI/Communication.h" //include not needed
 #include "Rho.h"
 #include "../SpecialFunctions/SpecialFunctions.h"
 #include "../nan.h"

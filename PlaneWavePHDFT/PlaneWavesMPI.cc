@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "PlaneWavesMPI.h"
 #include "../MPI/Communication.h"
+#include "PlaneWavesMPI.h"
 
 void
 MPISystemClass::Setup (Vec3 box, Vec3 k, double kcut, 

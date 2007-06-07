@@ -14,9 +14,9 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include "../MPI/Communication.h"
 #include "PlaneWavesMPI.h"
 #include "../MatrixOps/MatrixOps.h"
-#include "../MPI/Communication.h"
 #include "../DFT/Functionals.h"
 #include "../Ewald/OptimizedBreakup.h"
 #include "../Integration/GKIntegration.h"

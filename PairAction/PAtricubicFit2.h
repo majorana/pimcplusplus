@@ -16,11 +16,11 @@
 
 #ifndef PA_TRICUBIC_FIT2_H
 #define PA_TRICUBIC_FIT2_H
-#include "PAFitBase.h"
-#include "../Splines/MyTricubicSpline.h"
 #ifdef MAKE_FIT
 #include "../MPI/Communication.h"
 #endif
+#include "PAFitBase.h"
+#include "../Splines/MyTricubicSpline.h"
 
 class PAtricubicFit2Class : public PairActionFitClass
 {

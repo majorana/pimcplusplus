@@ -14,6 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include "../MPI/Communication.h"
+
 #include "ConjGrad2.h"
 #include "../MatrixOps/MatrixOps.h"
 
@@ -61,8 +63,6 @@ void ConjGrad::Setup()
   IsSetup = true;
 }
 
-
-#include "../MPI/Communication.h"
 
 void ConjGrad::InitBands()
 {

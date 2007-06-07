@@ -14,10 +14,10 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include "../MPI/Communication.h"
 #include "OptimizedBreakup.h"
 #include "../MatrixOps/MatrixOps.h"
 #include "../Integration/GKIntegration.h"
-#include "../MPI/Communication.h"
 
 class cIntegrand
 {

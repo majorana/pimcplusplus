@@ -1,4 +1,5 @@
 SUBDIRS =                  \
+          MPI              \
 	  IO               \
           Splines          \
           SpecialFunctions \
@@ -8,7 +9,6 @@ SUBDIRS =                  \
           Fitting          \
           DFT              \
           PH               \
-          MPI              \
           Distributed      \
           Ewald            \
           FFT              \
@@ -26,7 +26,7 @@ AUX_DIST              = $(ac_aux_dir)/config.guess \
                         $(ac_aux_dir)/mkinstalldirs
 
 if PARALLEL
-  lib_LTLIBRARIES = libmpicommon.la
+  lib_LTLIBRARIES = libmpicommon.la 
   pkgconfig_DATA  = mpicommon.pc
 else
   lib_LTLIBRARIES = libcommon.la

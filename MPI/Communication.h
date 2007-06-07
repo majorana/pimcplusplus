@@ -16,12 +16,13 @@
 
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
-#include "../Blitz.h"
-#include <fstream>
 
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
+
+#include "../Blitz.h"
+#include <fstream>
 
 extern ostream perr;
 

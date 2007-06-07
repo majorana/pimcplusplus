@@ -13,7 +13,7 @@
 // For more information, please see the PIMC++ Home Page:  //
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
-
+#include "../MPI/Communication.h" //include not needed
 #include "U_l.h"
 #include "../Integration/GKIntegration.h"
 #include "../Integration/HermiteQuad.h"

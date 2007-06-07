@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include "PlaneWavesMPI.h"
 #include "../MPI/Communication.h"
+#include "PlaneWavesMPI.h"
 
 main(int argc, char **argv)
 {

@@ -16,6 +16,7 @@
 
 #ifndef PA_DIPOLE_FIT_H
 #define PA_DIPOLE_FIT_H
+#include "../MPI/Communication.h" //include not needed
 #include "PAFitBase.h"
 
 class PADipoleFitClass : public PairActionFitClass

@@ -14,9 +14,9 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include "../MPI/Communication.h"
 #include "PlaneWavesMPI.h"
 #include "../IO/IO.h"
-#include "../MPI/Communication.h"
 
 void TestInitCharge()
 {

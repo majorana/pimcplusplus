@@ -17,6 +17,7 @@
 #ifndef DavidPAClass_H
 #define DavidPAClass_H
 
+#include "../MPI/Communication.h" //include not needed
 #include "PAFitBase.h"
 #include "../Blitz.h"
 #include <fstream>
