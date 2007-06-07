@@ -110,7 +110,7 @@ Ion_l_Projector::Ylm2(int l, int m, Vec3 r)
       return -0.5*sqrt(15.0/(2.0*M_PI))*z*complex<double>(x,y);
     else if (m==2) {
       complex<double> xy(x,y);
-      return 0.25*(15.0/(2.0*M_PI))*xy*xy;
+      return 0.25*sqrt(15.0/(2.0*M_PI))*xy*xy;
     }
   }
   else {
