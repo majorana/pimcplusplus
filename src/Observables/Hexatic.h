@@ -23,6 +23,7 @@ class HexaticClass : public ObservableClass
 {
 protected:
   int q;
+  bool Centroid;
   double DistCutoff;
   Array<complex<double>,1> ParticleOrder;
   void ReadGrid(IOSectionClass &in);
@@ -38,13 +39,14 @@ protected:
   int NumSamples;
 public:
   void Accumulate();
+  void WriteInfo();
   void WriteBlock();
   void Read(IOSectionClass &in);
   HexaticClass(PathDataClass &pathData, IOSectionClass &ioSection) :
     ObservableClass (pathData, ioSection), 
     HexaticRealVar("HexaticReal",IOSection,pathData.Path.Communicator),
     HexaticImagVar("HexaticImag",IOSection,pathData.Path.Communicator),
-    q(6), DistCutoff(3.5)
+    q(6), DistCutoff(2.56)
     {}
 
 };

@@ -85,7 +85,7 @@ HexaticClass::Accumulate_old()
 {
   
   //  PathData.MoveJoin(PathData.NumTimeSlices()-1);
-  for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++){
+  for (int slice=0;slice<PathData.Path.NumTimeSlices()-1;slice++){
     for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
       ParticleOrder(ptcl)=OrderParamater(slice,ptcl);
     }
@@ -108,6 +108,10 @@ HexaticClass::Accumulate_old()
 void
 HexaticClass::Accumulate()
 {
+  if (!Centroid){
+    Accumulate_old();
+    return;
+  }
   Array<dVec,1>  centroidPos(PathData.Path.NumParticles());
   for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
     dVec centroid=0.0;
@@ -171,6 +175,29 @@ HexaticClass::WriteBlock()
 }
 
 void 
+HexaticClass::WriteInfo()
+{
+  ObservableClass::WriteInfo();
+  IOSection.NewSection("grid");
+  grid.Write(IOSection);
+  IOSection.CloseSection();
+
+  int numBins = grid.NumPoints-1;
+  Array<double,1> r(numBins);
+  for (int i=0; i<numBins; i++) {
+    double ra = grid(i);
+    double rb = grid(i+1);
+    r(i) = 0.6666 * (rb*rb*rb-ra*ra*ra)/(rb*rb-ra*ra);
+  }
+  IOSection.WriteVar("x", r);
+  IOSection.WriteVar("xlabel", "r");
+  IOSection.WriteVar("ylabel", "g(r)");
+  IOSection.WriteVar("Type","CorrelationFunction");
+  IOSection.WriteVar("Cumulative", false);
+}
+
+
+void 
 HexaticClass::ReadGrid(IOSectionClass &in)
 {
   assert(in.OpenSection("Grid"));
@@ -211,5 +238,10 @@ HexaticClass::Read (IOSectionClass &in)
   ///It's probably important that the grid is the same grid that is in
   ///the pair correlation function. Not sure how to authenticate this.
   ReadGrid(in);
+  if (!in.ReadVar("Centroid",Centroid))
+      Centroid=false;
   ObservableClass::Read(in);
+  if (PathData.Path.Communicator.MyProc()==0)
+    WriteInfo();
+
 }
