@@ -420,24 +420,35 @@ PathClass::InitPaths (IOSectionClass &in)
       }
     }
     else if (InitPaths=="ALLFIXED"){
+      int myFirstSlice, myLastSlice, myProc;
+      myProc = Communicator.MyProc();
+      SliceRange (myProc, myFirstSlice, myLastSlice);
       Array<double,3> Positions;
       assert(in.ReadVar("Positions",Positions));
-      cerr<<"My time slices are "<<NumTimeSlices()<<endl;
-      assert(Positions.extent(0)==NumTimeSlices()-1);
-      assert(Positions.extent(1)==species.NumParticles);
-      for (int ptcl=species.FirstPtcl;
-	   ptcl<=species.LastPtcl;ptcl++){
-	for (int slice=0;slice<NumTimeSlices()-1;slice++){
-	  dVec pos;
-	  pos=0.0;
-	  for (int dim=0; dim<species.NumDim; dim++)
-	    pos(dim) = Positions(slice,ptcl-species.FirstPtcl,dim);
-	  Path(slice,ptcl) = pos;	  
+      for (int ptcl=0;ptcl<NumParticles();ptcl++){
+	for (int slice=0;slice<TotalNumSlices;slice++){
+
+	  int sliceOwner = SliceOwner(slice);
+	  int relSlice = slice-myFirstSlice;
+	  ///      if (myProc==sliceOwner){
+	  if (myFirstSlice<=slice && slice<=myLastSlice){
+	    dVec pos;
+	    pos = 0.0;
+	    for (int dim=0; dim<NDIM; dim++)
+	      pos(dim) = Positions(slice,ptcl,dim);
+	    Path(relSlice,ptcl) = pos;
+	  }
 	}
-	dVec pos;
-	for (int dim=0; dim<species.NumDim; dim++)
-	  pos(dim) = Positions(0,ptcl-species.FirstPtcl,dim);
-	Path(NumTimeSlices()-1,ptcl)=pos;
+	///If you are the last processors you must make sure the last
+	///slice is the same as the first slice on the first
+	///processors. The  join should be at the
+	if (myProc==Communicator.NumProcs()-1){
+	  dVec pos;
+	  pos = 0.0;
+	  for (int dim=0; dim<NDIM; dim++)
+	    pos(dim) = Positions(0,ptcl,dim);
+	  Path(NumTimeSlices()-1,ptcl) = pos;
+	}
       }
     }
     else if (InitPaths == "FIXED") {
