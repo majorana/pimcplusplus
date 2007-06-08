@@ -24,8 +24,14 @@ double DisplaceStageClass::Sample (int &slice1, int &slice2,
     int ptcl = activeParticles(ptclIndex);
     dVec disp;
     ///    PathData.Path.Random.CommonGaussianVec (Sigma, disp);
+#if NDIM==3
     disp(0)=PathData.Path.Random.Common()-0.5;disp(1)=PathData.Path.Random.Common()-0.5;disp(2)=PathData.Path.Random.Common()-0.5;
+#endif
+#if NDIM==2
+    disp(0)=PathData.Path.Random.Common()-0.5;disp(1)=PathData.Path.Random.Common()-0.5;
+#endif
     disp=disp*Sigma;
+
     
 
     // Actually displace the path
@@ -66,7 +72,7 @@ DisplaceMoveClass::Read (IOSectionClass &in)
   // Construct action list
   if (PathData.Path.OrderN)
     DisplaceStage.Actions.push_back(&PathData.Actions.ShortRangeOn);
-  else
+  else 
     DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
   if (PathData.Path.LongRange) 
     if (PathData.Actions.UseRPA)
@@ -103,7 +109,7 @@ DisplaceMoveClass::MakeMove()
   for (int i=0;i<PathData.Path.NumParticles();i++){
     ActiveParticles(0)=i;
     // Now call MultiStageClass' MakeMove
-    if (PathData.Path.Random.Common()>0.1)
+    if (PathData.Path.Random.Common()<0.1)
       MultiStageClass::MakeMove();
   }
 
