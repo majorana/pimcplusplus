@@ -126,7 +126,7 @@ inline Vec2 RadialWF::PseudoDerivs (double r, Vec2 &u_and_du)
   derivs[0] = u_and_du[1];
   double A = pot->A(r);
   double B = pot->B(r);
-  double V = pot->V(r);
+  double V = pot->V(l,r);
   double dAdr = pot->dAdr(r);
   derivs[1] =  1.0/A*
     (-dAdr*u_and_du[1] + (dAdr/r + (double)(l*(l+1))*B/(r*r) 
@@ -138,7 +138,7 @@ inline Vec2 RadialWF::PseudoDerivs (double r, Vec2 &u_and_du)
 inline Vec2 RadialWF::NormalDerivs(double r, Vec2 &u_and_du)
 {
   Vec2 derivs;
-  double V = pot->V(r);
+  double V = pot->V(l,r);
   derivs[0] = u_and_du[1];
   derivs[1] = ((double)(l*(l+1))/(r*r) + 2.0*(V-Energy))*u_and_du[0];
   return derivs;
@@ -152,7 +152,7 @@ inline Vec2 RadialWF::ScalarRelDerivs (double r, Vec2 &u_and_du)
 
   Vec2 derivs;
   derivs[0] = u_and_du[1];
-  double V = pot->V(r);
+  double V = pot->V(l,r);
   double dVdr = pot->dVdr(r);
   double M = 1.0 - alpha*alpha*0.5*(V-Energy);
   

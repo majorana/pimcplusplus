@@ -31,7 +31,7 @@ RadialWF::TurningIndex()
       double r = grid(index);
       double A = pot->A(r);
       double B = pot->B(r);
-      double V = pot->V(r);
+      double V = pot->V(l,r);
       double dAdr = pot->dAdr(r);
       double E = Energy;
       double sl = (double) l;
@@ -54,7 +54,7 @@ RadialWF::OriginBC(double r0, double &u0, double &du0)
 {
   if (pot->NeedsRel()) {  // Use relativistic equations
     const double alpha = 1.0/137.036;
-    double Z = -pot->V(r0)*r0;
+    double Z = -pot->V(l,r0)*r0;
     double a2Z2 = alpha*alpha*(double)Z*(double)Z;
     
     double sl = (double) l;
@@ -73,7 +73,7 @@ RadialWF::OriginBC(double r0, double &u0, double &du0)
 	double E = Energy;
 	double A = pot->A(r0);
 	double B = pot->B(r0);
-	double V = pot->V(r0);
+	double V = pot->V(l,r0);
 	if (V > Energy)
 	  {
 	    double kappa = sqrt(2.0 * (V-E)/A);
@@ -214,8 +214,8 @@ RadialWF::InfinityBC(double rend, double &uend, double &duend)
 {
   // Infinity should be outside core, so we don't need to worry about
   // A and B.
-  double Vend = pot->V(rend);
-  double dVdrend = pot->dVdr(rend);
+  double Vend = pot->V(l,rend);
+  double dVdrend = pot->dVdr(l,rend);
   double E = Energy;
   double k;
   uend = 1.0;
@@ -259,17 +259,17 @@ RadialWF::Solve(double tolerance)
 
   if (pot->NeedsRel()){
     double N = n;
-    double Z = -pot->V(grid(0))*grid(0);
+    double Z = -pot->V(l,grid(0))*grid(0);
     Elow = -1.5*Z*Z/(N*N);
   } 
   else {
     // Eigenenergy can't be lower than lowest potential -- otherwise
     // we'd have no turning point.
-    Elow = pot->V(grid(0));
+    Elow = pot->V(l,grid(0));
     for (int i=1; i<grid.NumPoints; i++) {
       double r = grid(i);
-      if (pot->V(r) < Elow)
-	Elow = pot->V(r);
+      if (pot->V(l,r) < Elow)
+	Elow = pot->V(l,r);
     }
   }
 

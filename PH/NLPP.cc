@@ -312,6 +312,33 @@ ChannelPotential::SetupProjector (double G_max, double G_FFT)
 
 
 double
+NLPPClass::V(int l, double r)
+{
+  if (l < Vl.size())
+    return Vl[l].V(r);
+  else
+    return Vl[lLocal].V(r);
+}
+
+double
+NLPPClass::dVdr(int l, double r)
+{
+  if (l < Vl.size())
+    return Vl[l].V.Deriv(r);
+  else
+    return Vl[lLocal].V.Deriv(r);
+}
+
+double
+NLPPClass::d2Vdr2(int l, double r)
+{
+  if (l < Vl.size())
+    return Vl[l].V.Deriv2(r);
+  else
+    return Vl[lLocal].V.Deriv2(r);
+}
+
+double
 NLPPClass::V(double r)
 {
   return Vl[lLocal].V(r);

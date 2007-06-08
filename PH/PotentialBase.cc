@@ -27,3 +27,15 @@ Potential::NeedsRel()
 {
   return false;
 }
+
+double
+Potential::V(int l, double r)
+{  return V(r); }
+
+double
+Potential::dVdr(int l, double r)
+{  return dVdr(r); }
+
+double
+Potential::d2Vdr2(int l, double r)
+{  return d2Vdr2(r); }

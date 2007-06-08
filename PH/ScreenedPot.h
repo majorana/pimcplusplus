@@ -35,6 +35,10 @@ public:
   double dAdr   (double r);
   double d2Adr2 (double r);
 
+  double V      (int l, double r);
+  double dVdr   (int l, double r);
+  double d2Vdr2 (int l, double r);
+
   double V      (double r);
   double dVdr   (double r);
   double d2Vdr2 (double r);

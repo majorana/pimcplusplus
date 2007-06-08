@@ -1,7 +1,7 @@
-check_PROGRAMS = TestDFTAtom TestRadialWF
+check_PROGRAMS = TestDFTAtom TestRadialWF TestNLPPAtom
 
-TestDFTAtom_SOURCES  = TestDFTAtom.cc
-
+TestDFTAtom_SOURCES  = TestDFTAtom.cc 
+TestNLPPAtom_SOURCES = TestNLPPAtom.cc 
 TestRadialWF_SOURCES = TestRadialWF.cc
 
 LDADD   = libatom.la                 ../IO/libIO.la           \

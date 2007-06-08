@@ -75,6 +75,29 @@ double ScreenedPot::d2Vdr2(double r)
 }
 
 
+double ScreenedPot::V (int l, double r)
+{
+  double VHXC;
+  VHXC = (r <= HXC.grid->End) ? HXC(r) : Charge/r;
+  return (VHXC + BarePot->V(l, r));
+}
+
+
+double ScreenedPot::dVdr (int l, double r)
+{
+  double dVHXC;
+  dVHXC = (r <= HXC.grid->End) ? HXC.Deriv(r) : -Charge/(r*r);
+  return (dVHXC + BarePot->dVdr(l, r));
+}
+
+double ScreenedPot::d2Vdr2(int l, double r)
+{
+  double d2VHXC;
+  d2VHXC = (r <= HXC.grid->End) ? HXC.Deriv2(r) : 2.0*Charge/(r*r*r);
+  return (d2VHXC + BarePot->d2Vdr2(l, r));
+}
+
+
 void ScreenedPot::Write (IOSectionClass &out)
 {
   out.WriteVar ("Type", "Screened");

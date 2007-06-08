@@ -90,6 +90,10 @@ public:
   inline double GetR0 (int l)              { return Vl[l].R0;         }
   inline double Getrc(int l)               { return Vl[l].rc;         }
   inline double GetDeltaV(int l, double r) { return Vl[l].DeltaV(r);  }
+  // Override default for local potentials
+  double V     (int l, double r);
+  double dVdr  (int l, double r);
+  double d2Vdr2(int l, double r);
 
 
   // Required member functions:  These give information about the

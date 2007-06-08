@@ -27,6 +27,10 @@ public:
   // you do not need to define these
   virtual bool IsPH();
   virtual bool IsNonlocal()        { return false; }
+  // Nonlocal version of functions
+  virtual double V     (int l, double r);
+  virtual double dVdr  (int l, double r);
+  virtual double d2Vdr2(int l, double r);
   virtual bool NeedsRel(); 
   virtual double GetCoreRadius()   { return 0.0; }
   virtual double A      (double r) { return 1.0; }
