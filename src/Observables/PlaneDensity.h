@@ -43,7 +43,7 @@ public:
   {
     NumSamples = 0; 
     TimesCalled=0;
-    int numPoints=50;
+    int numPoints=100;
     Grid.resize(numPoints,numPoints);
     Grid=0.0;
   }
