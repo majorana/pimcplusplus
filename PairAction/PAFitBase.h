@@ -133,7 +133,7 @@ public:
   // Fills in the Vlong_k and dVlong_k array.
   virtual void DoBreakup (const Vec3 &box, const Array<Vec3,1> &kVecs) 
   { }
-  PairActionFitClass() : Z1Z2(0.0), SamplingTableRead(false)
+  PairActionFitClass() : Z1Z2(0.0), SamplingTableRead(false), Pot(NULL)
   { /* Do nothing */ }
 };
 
