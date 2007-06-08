@@ -110,8 +110,9 @@ ActionsClass::Read(IOSectionClass &in)
     assert(PAIO.OpenFile (name));
     cerr << i << ": reading " << name << endl;
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
-    if (PairArray(i)->Pot->IsNonlocal())
-      UseNonlocal = true;
+    if (PairArray(i)->Pot != NULL)
+      if (PairArray(i)->Pot->IsNonlocal())
+	UseNonlocal = true;
     bool paUsed=false;
     for (int spec1=0;spec1<Path.NumSpecies();spec1++)
       for (int spec2=spec1;spec2<Path.NumSpecies();spec2++) 

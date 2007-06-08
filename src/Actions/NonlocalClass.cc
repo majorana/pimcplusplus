@@ -424,7 +424,8 @@ NonlocalClass::SingleAction(int slice1, int slice2,
     if (l != NLPP->LocalChannel())
       if (NLPP->Getrc(l) > max_rc)
 	max_rc = NLPP->Getrc(l);
-  
+  max_rc = 1.2*max_rc;
+
   double levelTau = ldexp (Path.tau, level);
 
   // Outer loop overs slices

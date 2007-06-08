@@ -1,4 +1,4 @@
-double tau=0.25;
+double tau=0.125;
 
 Section (Parallel) {
   int ProcsPerClone = 1;
@@ -6,7 +6,7 @@ Section (Parallel) {
 
 Section (System)
 {
-  int NumTimeSlices=1200;
+  int NumTimeSlices=2400;
   Array<double,1> Box(3)=[20.0,15.0,15.0];
   Array<bool,1> IsPeriodic(3)=[true, true, true];
   //  double kCutoff = 0.15;
@@ -53,7 +53,7 @@ Section (System)
 
 Section (Action)
 {
-  int MaxLevels = 6;
+  int MaxLevels = 7;
   bool UseRPA = false;
   int NumBreakupKnots = 20;
   int NumImages = 0;
@@ -73,7 +73,7 @@ Section (Action)
     bool UseSubspaceRotation = true;
     bool SmoothProjectors = true;
     //    double kCut = 10.0;
-    double kCut = 5.0;
+    double kCut = 7.0;
     int SmearOrder = 1;
     double SmearWidth = 0.0015;
 //    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
@@ -84,7 +84,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "Na2_6.0_tau0.5_beta300.CASINO_slocal_rule6";
+  string OutFileBase = "Na2_6.0_tau0.125_beta300.CASINO_slocal_rule6";
   Section (Observable) {
     string Type = "Energy";
     string Name = "Energy";
@@ -116,7 +116,7 @@ Section (Moves){
     string PermuteType = "NONE";
     string Species = "eup";
     int StepsPerBlock = 4;
-    int NumLevels=6;
+    int NumLevels=7;
   }
   Section (Move)
   {
@@ -125,7 +125,7 @@ Section (Moves){
     string PermuteType = "NONE";
     string Species = "edown";
     int StepsPerBlock = 4;
-    int NumLevels=6;
+    int NumLevels=7;
   }
   Section (Move)
   {
