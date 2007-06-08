@@ -245,7 +245,7 @@ GetIndex(Vec3 a[3], Vec3 b[3], Vec3 gvec)
 
   Vec3 gprime = (double)i[0]*b[0] + (double)i[1]*b[1] + (double)i[2]*b[2];
   Vec3 diff = gprime - gvec;
-  assert (dot(diff,diff) < 1.0e-14);
+  assert (dot(diff,diff) < 1.0e-10);
 
   return i;
 }
@@ -260,11 +260,13 @@ GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor)
   a[0] = lattice(0,0), lattice(0,1), lattice(0,2);
   a[1] = lattice(1,0), lattice(1,1), lattice(1,2);
   a[2] = lattice(2,0), lattice(2,1), lattice(2,2);
-  double vol = fabs(dot(cross(a[0],a[1]),a[2]));
+  double det_a = dot(cross(a[0],a[1]),a[2]);
+  double detInv = 1.0/det_a;
+  double vol = fabs(det_a);
   double volInv = 1.0/vol;
-  b[0] = 2.0*M_PI*volInv * cross(a[1], a[2]);  
-  b[1] = 2.0*M_PI*volInv * cross(a[2], a[0]);
-  b[2] = 2.0*M_PI*volInv * cross(a[0], a[1]);
+  b[0] = 2.0*M_PI*detInv * cross(a[1], a[2]);  
+  b[1] = 2.0*M_PI*detInv * cross(a[2], a[0]);
+  b[2] = 2.0*M_PI*detInv * cross(a[0], a[1]);
   LatticeInv(0,0) =  (Lattice(1,1)*Lattice(2,2) - Lattice(2,1)*Lattice(1,2));
   LatticeInv(1,0) = -(Lattice(1,0)*Lattice(2,2) - Lattice(1,2)*Lattice(2,0));
   LatticeInv(2,0) =  (Lattice(1,0)*Lattice(2,1) - Lattice(1,1)*Lattice(2,0));
@@ -274,7 +276,7 @@ GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor)
   LatticeInv(0,2) =  (Lattice(0,1)*Lattice(1,2) - Lattice(0,2)*Lattice(1,1));
   LatticeInv(1,2) = -(Lattice(0,0)*Lattice(1,2) - Lattice(0,2)*Lattice(1,0));
   LatticeInv(2,2) =  (Lattice(0,0)*Lattice(1,1) - Lattice(0,1)*Lattice(1,0));
-  LatticeInv   = volInv * LatticeInv;
+  LatticeInv   = (1.0/det_a) * LatticeInv;
   RecipLattice = 2.0*M_PI * LatticeInv;
   /// Make sure we've computed the inverse lattice properly
   Mat3 ident = LatticeInv * Lattice;
