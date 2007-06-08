@@ -331,7 +331,7 @@ NonlocalClass::Setup (FixedPhaseClass *fixedPhase)
   for (int i=1; i<=7; i++)
     SetQuadratureRule (i);
   // Set it to a reasonable default
-  SetQuadratureRule (4);
+  SetQuadratureRule (6);
   ScaledPoints.resize(QuadPoints.size());
   WFratios.resize(QuadPoints.size());
   Legendre.resize(NLPP->NumChannels());
