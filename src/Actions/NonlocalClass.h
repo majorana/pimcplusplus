@@ -13,7 +13,7 @@ protected:
   FixedPhaseClass *FixedPhase;
   int IonSpecies, UpSpecies, DownSpecies;
   // Points for angular quadrature
-  Array<Vec3,1> QuadPoints, ScaledPoints;
+  Array<Vec3,1> QuadPoints, ScaledPoints, RotatedPoints;
   // Weights for angular quadrature
   Array<double,1> QuadWeights, Legendre, DeltaV;
   Array<complex<double>,1> WFratios;

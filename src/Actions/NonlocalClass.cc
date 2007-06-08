@@ -333,6 +333,7 @@ NonlocalClass::Setup (FixedPhaseClass *fixedPhase)
   // Set it to a reasonable default
   SetQuadratureRule (6);
   ScaledPoints.resize(QuadPoints.size());
+  RotatedPoints.resize(QuadPoints.size());
   WFratios.resize(QuadPoints.size());
   Legendre.resize(NLPP->NumChannels());
   DeltaV.resize(NLPP->NumChannels());
@@ -381,10 +382,31 @@ void
 NonlocalClass::ScaleQuadPoints (Vec3 ionpos, double dist)
 {
   // Setup rotation matrix
+  // First, rotate around z axis
+  double phi, psi;
+  double costheta, sintheta, cosphi, sinphi, cospsi, sinpsi;
+  costheta = 2.0*PathData.Random.Local() - 1.0;
+  sintheta = sqrt(1.0-costheta*costheta);
+  psi = 2.0*M_PI*PathData.Random.Local();
+  phi = 2.0*M_PI*PathData.Random.Local();
+  sincos (psi, &sinpsi, &cospsi);
+  sincos (phi, &sinphi, &cosphi);
+  
+  TinyMatrix<double,3,3> rotMat;
+  rotMat(0,0) = cosphi*costheta*cospsi-sinphi*sinpsi;
+  rotMat(0,1) = sinphi*costheta*cospsi+cosphi*sinpsi;
+  rotMat(0,2) = -sintheta*cospsi;
+  rotMat(1,0) = -cosphi*costheta*sinpsi-sinphi*cospsi;
+  rotMat(1,1) = -sinphi*costheta*sinpsi+cosphi*cospsi;
+  rotMat(1,2) = sintheta*sinpsi;
+  rotMat(2,0) = cosphi*sintheta;
+  rotMat(2,1) = sinphi*sintheta;
+  rotMat(2,2) = costheta;
 
   // Scale and translate points;
   for (int i=0; i<ScaledPoints.size(); i++) {
-    ScaledPoints(i) = ionpos + dist * QuadPoints(i);
+    RotatedPoints(i) = rotMat*QuadPoints(i);
+    ScaledPoints(i) = ionpos + dist * RotatedPoints(i);
     PathData.Path.PutInBox(ScaledPoints(i));
   }
 }
@@ -428,7 +450,7 @@ NonlocalClass::SingleAction(int slice1, int slice2,
 	  DeltaV(l) = NLPP->GetDeltaV(l,dist);
 	DeltaV(NLPP->LocalChannel()) = 0.0;
 	for (int pi=0; pi<ScaledPoints.size(); pi++) {	  
-	  double costheta = distInv*dot(QuadPoints(pi), disp);
+	  double costheta = distInv*dot(RotatedPoints(pi), disp);
 	  if (fabs(costheta) > 1.0) {
 	    double qmag = dot (QuadPoints(pi), QuadPoints(pi));
 	    double dispmag = distInv * sqrt (dot (disp, disp));

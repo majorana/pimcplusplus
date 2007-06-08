@@ -84,7 +84,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "Na2_6.0_tau0.5_beta300.CASINO_slocal";
+  string OutFileBase = "Na2_6.0_tau0.5_beta300.CASINO_slocal_rule6";
   Section (Observable) {
     string Type = "Energy";
     string Name = "Energy";
