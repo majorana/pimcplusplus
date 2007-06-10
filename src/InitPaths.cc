@@ -26,6 +26,7 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
 // This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
 
   cerr<<"Restarting"<<endl;
+  int myProc=Communicator.MyProc();
   IOSectionClass inFile;
   stringstream oss;
   bool parallelFileRead;
@@ -44,6 +45,9 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
       cerr<<"Checking THIS for "<<tempStream.str();
     }
     counter--;
+    ///broadcast so everyone agrees on the answer.  
+    Communicator.Broadcast(0,counter);
+
     if (counter==-1){
       Array<double,2> Positions;
       assert (in.ReadVar ("Positions", Positions));
@@ -61,6 +65,7 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
       }
       return;
     }
+    ////done broadcasting
     oss<<fileName<<"."<<counter<<"."<<MyClone<<".h5";
     cerr<<"Using "<<oss.str()<<endl;
     //    oss<<fileName<<"."<<MyClone<<".h5";
@@ -70,6 +75,11 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
   }
   string fullFileName=oss.str();
   cerr<<"THE FULL FILE NAME IS "<<fullFileName<<endl;
+
+  
+  
+
+
   assert (inFile.OpenFile(fullFileName.c_str()));
   //  assert (inFile.OpenFile(fileName.c_str()));
   inFile.OpenSection("System");
@@ -83,7 +93,7 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
   Array<int,2> oldPermutation;
   assert(inFile.ReadVar("Permutation",oldPermutation));
   SetMode(NEWMODE);
-  int myProc=Communicator.MyProc();
+  //  int myProc=Communicator.MyProc();
   if (myProc==Communicator.NumProcs()-1){
     for (int ptcl=0;ptcl<NumParticles();ptcl++)
       Permutation(ptcl) = oldPermutation(oldPermutation.extent(0)-1,ptcl);
