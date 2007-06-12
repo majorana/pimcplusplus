@@ -84,14 +84,14 @@ Section (Action)
     double KerkerLambda = 0.8;
     double SmearWidth = 0.015;
 //    Array<double,1> kVec(3)  =  [ 0.04, 0.04, 0.04 ];
-    Array<double,2> TwistAngles(1,3) = [ 0.05, 0.05, 0.05 ];
+    Array<double,2> TwistAngles(1,3) = [ 0.25, 0.25, 0.25 ];
   }
   bool UseBackground = false;
 }
 
 Section (Observables)
 {
-  string OutFileBase = "Si2_4.24_tau0.125_beta150.CASINO_with2lp1";
+  string OutFileBase = "Si2_4.24_tau0.125_beta150.CASINO_k0.25";
   Section (Observable) {
     string Type = "Energy";
     string Name = "Energy";
