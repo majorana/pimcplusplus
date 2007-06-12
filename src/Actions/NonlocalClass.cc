@@ -285,6 +285,7 @@ NonlocalClass::SetQuadratureRule (int rule)
 void
 NonlocalClass::CheckQuadratureRule(int lexact)
 {
+  cerr << "Check quadrature rule with lexact = " << lexact << ":\n";
   Array<Vec3,1> &grid = QuadPoints;
   Array<double,1> &w = QuadWeights;
   for (int l1=0; l1<=lexact; l1++) 
@@ -344,6 +345,7 @@ NonlocalClass::Setup (FixedPhaseClass *fixedPhase)
     Electrons(i) = i+up.FirstPtcl;
   for (int i=0; i<down.NumParticles; i++)
     Electrons(i+up.NumParticles) = i + down.FirstPtcl;
+  cerr << "Electrons = " << Electrons << endl;
 }
 
 void
@@ -404,8 +406,14 @@ NonlocalClass::ScaleQuadPoints (Vec3 ionpos, double dist)
   rotMat(2,2) = costheta;
 
   // Scale and translate points;
+  double sum = 0.0;
   for (int i=0; i<ScaledPoints.size(); i++) {
     RotatedPoints(i) = rotMat*QuadPoints(i);
+    if (fabs(dot(RotatedPoints(i), RotatedPoints(i)) - 1.0) > 1.0e-12) {
+      cerr << "Bad rotated point.\n";
+      cerr << "norm = " << dot(RotatedPoints(i), RotatedPoints(i)) << endl;
+      cerr << "Quad norm = " << dot (QuadPoints(i), QuadPoints(i)) << endl;
+    }
     ScaledPoints(i) = ionpos + dist * RotatedPoints(i);
     PathData.Path.PutInBox(ScaledPoints(i));
   }
@@ -424,12 +432,12 @@ NonlocalClass::SingleAction(int slice1, int slice2,
     if (l != NLPP->LocalChannel())
       if (NLPP->Getrc(l) > max_rc)
 	max_rc = NLPP->Getrc(l);
-  max_rc = 1.2*max_rc;
-
+  max_rc *= 1.2;
+  
   double levelTau = ldexp (Path.tau, level);
 
   // Outer loop overs slices
-  for (int slice=slice1; slice <= slice2; slice++) {
+  for (int slice=slice1; slice <= slice2; slice+=skip) {
     double prefactor = (slice==slice1 || slice==slice2) ? 0.5 : 1.0;
     //prefactor *= levelTau/(4.0*M_PI);
     prefactor *= levelTau;
@@ -467,10 +475,18 @@ NonlocalClass::SingleAction(int slice1, int slice2,
 	  double P_l, P_lm1, P_lp1;
 	  P_l = 1.0;
 	  P_lm1 = 0.0;
+	  //	  Vec3 normDisp = distInv * disp;
 	  for (int l=0; l<NLPP->NumChannels(); l++) {
+// 	    complex<double> Plsum(0.0, 0.0);
+// 	    for (int m=-l; m<=l; m++) {
+// 	      Plsum += 4.0*M_PI*Ylm (l, m, normDisp) * 
+// 		conj(Ylm (l, m, RotatedPoints(pi)));
+// 	    } 
+// 	    cerr << "Plsum / Pl = " << real(Plsum)/((2.0*dl+1)*P_l) << endl;
+
 	    double dl = (double)l;
-	    double val = (2.0*dl+1.0)*prefactor * DeltaV(l) * P_l * 
-	      real(WFratios(pi)) * QuadWeights(pi);
+ 	    double val = (2.0*dl+1.0)*prefactor * DeltaV(l) * P_l * 
+ 	      WFratios(pi).real() * QuadWeights(pi);
 	    U += val;
 	    P_lp1 = ((2.0*dl+1.0)*costheta*P_l - dl*P_lm1)/(1.0+dl);
 	    P_lm1 = P_l;

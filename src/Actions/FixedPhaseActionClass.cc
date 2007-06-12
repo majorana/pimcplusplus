@@ -858,6 +858,22 @@ FixedPhaseClass::CalcWFratios (int slice, int ptcl, const Array<Vec3,1> &pos,
   complex<double> det = ComplexDetCofactors (Cofactors, Workspace);
   complex<double> detInv = complex<double>(1.0, 0.0) / det;
 
+  // Make sure we're doing this right:
+  Vec3 rnow = Path(slice, ptcl);
+  Path.PutInBox(rnow);
+  BandSplines()(rnow[0], rnow[1], rnow[2], OrbitalValues);
+  complex<double> shouldBone(0.0, 0.0);
+  for (int j=0; j<OrbitalValues.size(); j++)
+    shouldBone += Cofactors(ptcl-first,j)*OrbitalValues(j);
+  shouldBone *= detInv;
+  if ((fabs(1.0-shouldBone.real()) > 1.0e-10) ||
+      (fabs(shouldBone.imag()) > 1.0e-10)) {
+    cerr << "Error in CalcWFratios.!\n";
+    cerr << "shouldBone = " << shouldBone << "     ";
+    cerr << "ptcl = " << ptcl << "  slice = " << slice <<  endl;
+  }
+    
+
   // Now loop through positions and compute ratios
   ratios = complex<double>();
   for (int ipos=0; ipos<pos.size(); ipos++) {
