@@ -49,19 +49,47 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
     Communicator.Broadcast(0,counter);
 
     if (counter==-1){
-      Array<double,2> Positions;
-      assert (in.ReadVar ("Positions", Positions));
-      assert (Positions.rows() == species.NumParticles);
-      assert (Positions.cols() == species.NumDim);
-      for (int ptcl=species.FirstPtcl; 
-	   ptcl<=species.LastPtcl; ptcl++){
-	for (int slice=0; slice<NumTimeSlices(); slice++) {
-	  dVec pos;
-	  pos = 0.0;
-	  for (int dim=0; dim<species.NumDim; dim++)
-	    pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
-	  Path(slice,ptcl) = pos;
-	}      
+      bool doBCC;
+      assert(in.ReadVar("DoBCC",doBCC));
+      if (doBCC){
+	assert(NDIM==2);
+	int num = species.NumParticles;
+	bool isCubic = (Box[0]==Box[1]);
+	if (!isCubic) {
+	  perr << "A cubic box is current required for cubic initilization\n";
+	  abort();
+	}
+	int numPerDim = (int) ceil (pow(0.5*(double)num, 1.0/2.0)-1.0e-6);
+	double delta = Box[0] / numPerDim;
+	for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+	  int ip = (ptcl-species.FirstPtcl)/2;
+	  int ix, iy;
+	  ix = ip/(numPerDim*numPerDim);
+	  iy = (ip-(ix*numPerDim*numPerDim))/numPerDim;
+	dVec r;
+	r[0] = ix*delta-0.5*Box[0];
+	r[1] = iy*delta-0.5*Box[1];
+	if (ptcl % 2) 
+	  r += 0.5*delta;
+	for (int slice=0; slice<NumTimeSlices(); slice++) 
+	  Path(slice,ptcl) = r;
+	}
+      }
+      else {
+	Array<double,2> Positions;
+	assert (in.ReadVar ("Positions", Positions));
+	assert (Positions.rows() == species.NumParticles);
+	assert (Positions.cols() == species.NumDim);
+	for (int ptcl=species.FirstPtcl; 
+	     ptcl<=species.LastPtcl; ptcl++){
+	  for (int slice=0; slice<NumTimeSlices(); slice++) {
+	    dVec pos;
+	    pos = 0.0;
+	    for (int dim=0; dim<species.NumDim; dim++)
+	      pos(dim) = Positions(ptcl-species.FirstPtcl,dim);
+	    Path(slice,ptcl) = pos;
+	  }      
+	}
       }
       return;
     }
@@ -403,6 +431,7 @@ PathClass::InitPaths (IOSectionClass &in)
       }
     }
     else if (InitPaths == "BCC") {
+      assert(NDIM==2);
       int num = species.NumParticles;
       bool isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
       if (!isCubic) {
