@@ -1,0 +1,1 @@
+It appears that there may be a subtle ergodicity problem when using the d-channel as local.  In particular, this may be very bad if the nonlocal part of the action is only evaluated at the lowest level, since electrons may become "stuck" in the attractive potential of the d channel.
