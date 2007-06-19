@@ -120,7 +120,7 @@ SphereObject::SetBox (Vec3 box)
 {
   Mat3 lattice;
   lattice = box[0], 0.0, 0.0, 0.0, box[1], 0.0, 0.0, 0.0, box[2];
-  SetBox (box);
+  SetBox (lattice);
 }
 
 void

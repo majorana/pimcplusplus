@@ -49,9 +49,9 @@ BoxObject::Set (Mat3 lattice, bool visible, bool useClip)
   p01 = 1.0/sqrt(dot(p01, p01)) * p01;
   p12 = 1.0/sqrt(dot(p12, p12)) * p12;
   p20 = 1.0/sqrt(dot(p20, p20)) * p20;
-  double d01 = 0.5001*dot(LatticeVecs[2], p01);
-  double d12 = 0.5001*dot(LatticeVecs[0], p12);
-  double d20 = 0.5001*dot(LatticeVecs[1], p20);
+  double d01 = fabs(0.5001*dot(LatticeVecs[2], p01));
+  double d12 = fabs(0.5001*dot(LatticeVecs[0], p12));
+  double d20 = fabs(0.5001*dot(LatticeVecs[1], p20));
 
   if (useClip) {
     GLdouble eqn0[4] = { p01[0], p01[1], p01[2], d01};

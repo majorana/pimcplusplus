@@ -193,10 +193,13 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
   if (RhoVar != NULL) {
     Isosurface *isoPtr = new Isosurface;
     Isosurface &iso = *isoPtr;
-    Xgrid.Init(-0.5*Box[0], 0.5*Box[0], RhoData.extent(0));
-    Ygrid.Init(-0.5*Box[1], 0.5*Box[1], RhoData.extent(1));
-    Zgrid.Init(-0.5*Box[2], 0.5*Box[2], RhoData.extent(2));
+    Xgrid.Init(-0.5, 0.5, RhoData.extent(0));
+    Ygrid.Init(-0.5, 0.5, RhoData.extent(1));
+    Zgrid.Init(-0.5, 0.5, RhoData.extent(2));
     iso.Init (&Xgrid, &Ygrid, &Zgrid, RhoData, true);
+    Mat3 lattice;
+    lattice =  Box[0], 0.0, 0.0, 0.0, Box[1], 0.0, 0.0, 0.0, Box[2];
+    iso.SetLattice (lattice);
     iso.SetIsoval(MaxRho*RhoAdjust.get_value());
     //iso.SetIsoval(7.0e-9);
     PathVis.Objects.push_back(isoPtr);
