@@ -153,7 +153,7 @@ public:
   
 
   template<int N>
-  void CommunicatorClass::Sum (Array<double,N> &sendBuff, Array<double,N> &recvBuff)
+  void Sum (Array<double,N> &sendBuff, Array<double,N> &recvBuff)
   {
     double *sendPtr = sendBuff.data();
     double *recvPtr = recvBuff.data();
