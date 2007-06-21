@@ -6,23 +6,35 @@ from HTMLPlots import *
 import stats
 
 
-
+def ProcessDisplaceMove(infiles,summaryDoc,detailedDoc,StartCut):
+    totalAcceptRatioVec=infiles.ReadVar("AcceptRatio")
+    for proc in range(0,len(totalAcceptRatioVec)):
+        totalAcceptRatioVec[proc]=sum(totalAcceptRatioVec[proc])/len(totalAcceptRatioVec[proc])
+    totalAcceptRatio=sum(totalAcceptRatioVec)/len(totalAcceptRatioVec)
+    AcceptTable=BuildTable(1,2)
+    AcceptTable.body[0][0]="Displace"
+    AcceptTable.body[0][1]=totalAcceptRatio    
+    summaryDoc.append(AcceptTable)
 
 def ProcessBisectionBlock(infiles,summaryDoc,detailedDoc,StartCut):
     totalAcceptRatioVec=infiles.ReadVar("AcceptRatio")
     for proc in range(0,len(totalAcceptRatioVec)):
-        totalAcceptRatioVec[proc]=totalAcceptRatioVec[proc][len(totalAcceptRatioVec[proc])-1]
+        totalAcceptRatioVec[proc]=sum(totalAcceptRatioVec[proc])/len(totalAcceptRatioVec[proc])
     totalAcceptRatio=sum(totalAcceptRatioVec)/len(totalAcceptRatioVec)
     numStages=infiles.CountSections()
-    infiles.OpenSection(0)
-    acceptedPerms=infiles.ReadVar("Acceptance Ratio")
-    print "Accepted perms: ",acceptedPerms
-    print "Length",len(acceptedPerms[0])
-    print "A:  ",acceptedPerms[proc][len(acceptedPerms[proc])-1]
-    for proc in range(0,len(acceptedPerms)):
-        acceptedPerms[proc]=acceptedPerms[proc][len(acceptedPerms[proc])-1]
-    print "B: ",acceptedPerms
-    abort()
+    AcceptTable=BuildTable(1,numStages+2)
+    AcceptTable.body[0][0]="Bisection Block"
+    AcceptTable.body[0][1]=totalAcceptRatio
+    for stage in range(0,numStages):
+        infiles.OpenSection(stage)
+        acceptedPerms=infiles.ReadVar("AcceptRatio")
+        for proc in range(0,len(acceptedPerms)):
+                acceptedPerms[proc]=sum(acceptedPerms[proc])/len(acceptedPerms[proc])
+        acceptedPerm=sum(acceptedPerms)/len(acceptedPerms)
+        AcceptTable.body[0][stage+2]=acceptedPerm
+        print acceptedPerm
+        infiles.CloseSection()
+    summaryDoc.append(AcceptTable)
 #    
 #    
 #    for stage in range(0,numStages):
