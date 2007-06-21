@@ -41,7 +41,7 @@ def ProcessSystemInfo(infiles):
      totalTable.border=0
      totalTable.body.append([systemTable])
      totalTable.body.append([speciesTable])
-     return (totalTable,tau,numTimeSlices)
+     return (totalTable,tau,numTimeSlices,box)
      
 
 def ProcessRunInfo(infiles):
@@ -63,7 +63,7 @@ def ProcessTopTable(doc,infiles):
      runTable=ProcessRunInfo(infiles)
      infiles.CloseSection()
      infiles.OpenSection("System")
-     (speciesTable,tau,numTimeSlices)=ProcessSystemInfo(infiles)
+     (speciesTable,tau,numTimeSlices,box)=ProcessSystemInfo(infiles)
      #speciesTable="broken"
      infiles.CloseSection()
      # Write the input file to the output directory
@@ -75,4 +75,4 @@ def ProcessTopTable(doc,infiles):
      largeTable.body.append([runTable,speciesTable])
      doc.append(largeTable)
      doc.append(HR())
-     return (doc,tau,numTimeSlices)
+     return (doc,tau,numTimeSlices,box)
