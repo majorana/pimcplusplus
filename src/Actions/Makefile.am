@@ -18,6 +18,8 @@ libactions_la_SOURCES =            \
     GroundStateNodalActionClass.h  \
     Hermele.h                      \
     DualHermele.h                  \
+    EAMClass.cc                    \
+    EAMClass.h                     \
     Hermele.cc                     \
     DualHermele.cc                 \
     Josephson.h                    \
