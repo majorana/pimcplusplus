@@ -20,6 +20,7 @@
 // specification of energy observables 
 // to compute; see below -John
 #include "../Actions/MoleculeInteractionsClass.h"
+#include "../Actions/EAMClass.h"
 #include "../Actions/QBoxAction.h"
 #include "../Actions/ST2WaterClass.h"
 #include "../Actions/QMCSamplingClass.h"
@@ -255,6 +256,8 @@ void EnergyClass::Read(IOSectionClass &in)
 			//PathData.Actions.MoleculeInteractions.Read(in);
 		} else if(EnergyStrings(n) == "ST2WaterClass"){
 			OtherActions[n] = &PathData.Actions.ST2Water;
+		} else if(EnergyStrings(n) == "EAMClass"){
+			OtherActions[n] = &PathData.Actions.EAM;
 		} else if(EnergyStrings(n) == "QBoxActionClass"){
 			OtherActions[n] = &PathData.Actions.QBoxAction;
 		} else if(EnergyStrings(n) == "QMCSamplingClass"){
