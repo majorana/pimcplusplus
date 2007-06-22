@@ -63,6 +63,7 @@ void MolMoveClass::Read (IOSectionClass &in){
 	if(setMode == "GLOBAL"){
 		mode = GLOBAL;
     MoveList = PathData.Mol.MolOfType(molIndex);
+    cerr << "GLOBAL move init MoveList is " << MoveList << endl;
 		//MoveList.resize(numMol);
 		//for(int m=0; m<numMol; m++)
 		//	MoveList(m) = m + PathData.Path.offset[molIndex];
@@ -108,6 +109,9 @@ void MolMoveClass::Read (IOSectionClass &in){
 		}else if(setAction == "LongRangeCoulomb"){
   		Actions.push_back(&PathData.Actions.LongRangeCoulomb);
 			cerr << "Added long-range coulomb interaction" << endl;
+		}else if(setAction == "EAM"){
+  		Actions.push_back(&PathData.Actions.EAM);
+			cerr << "Added Al EAM action" << endl;
 		}else if(setAction == "IonInteraction"){
   		Actions.push_back(&PathData.Actions.IonInteraction);
 			cerr << "Added intermolecular ion-ion interaction" << endl;
