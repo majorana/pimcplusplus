@@ -29,6 +29,7 @@
 #include "MoleculeInteractionsClass.h"
 #include "ST2WaterClass.h"
 #include "TIP5PWaterClass.h"
+#include "EAMClass.h"
 #include "NodalActionClass.h"
 #include "FreeNodalActionClass.h"
 #include "PairFixedPhase.h"
@@ -117,6 +118,8 @@ public:
 
   // Nonlocal action
   NonlocalClass Nonlocal;
+
+  EAMPotentialClass EAM;
 
 #ifdef USE_QMC
   CEIMCActionClass CEIMCAction;
@@ -219,6 +222,7 @@ public:
     QBoxAction(pathData),
     ST2Water(pathData),
     TIP5PWater(pathData),
+    EAM(pathData),
 #ifdef USE_QMC
     CEIMCAction(pathData),
 #endif
