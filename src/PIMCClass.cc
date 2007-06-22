@@ -250,7 +250,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new HexaticClass(PathData,OutFile);
     else if (observeType=="HBond")
       tempObs = new HbondClass(PathData,OutFile);
-    else if (observeType=="MeanSqDiffusion")
+    else if (observeType=="MeanSqDiffusion" || observeType=="MSD")
       tempObs = new ObsDiffusionClass(PathData,OutFile);
     else if (observeType=="DistanceToOpen")
       tempObs = new HeadLocClass(PathData,OutFile);
