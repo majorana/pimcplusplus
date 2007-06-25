@@ -151,7 +151,7 @@ private:
   /// The components of the Hartree term in k-space
   zVec h_G;
   /// The Hartree and exchance-corelation energies
-  double EH, EXC, Elocal, Enonlocal;
+  double EH, EXC, Elocal, Enonlocal, Ekinetic;
   /// This radial density is used to calculate 
   OptimalGrid AtomGrid;
   CubicSpline RadialChargeDensity;
@@ -174,6 +174,7 @@ public:
   { return Rho_r; }
   double CalcLocalPPEnergy ();
   double CalcNonlocalPPEnergy();
+  double CalcKineticEnergy();
   /// Calculates and returns the ion-ion energy terms
   double EwaldEnergy();
   void CalcIonForces(Array<Vec3,1> &F);

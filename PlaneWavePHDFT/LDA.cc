@@ -427,15 +427,17 @@ MPISystemClass::CalcVHXC()
 //   Eelec_ion2 *= vol/(double)Ngrid;
   Elocal    = CalcLocalPPEnergy();
   Enonlocal = CalcNonlocalPPEnergy();
+  Ekinetic  = CalcKineticEnergy();
   double Ecore = NumElecs*(double)Rions.size() * H.GetVG0();
   
   if (BandComm.MyProc() == 0)
     if (kComm.MyProc() == 0) {
       fprintf (stderr, 
-	       "Iter      EH         EXC        Elocal     Enonlocal  Eewald     Ecore\n");
+	       "Iter      Ekinetic EH        EXC       Elocal    Enonlocal Eewald    Ecore\n");
       fprintf (stderr, 
-	       "%3d    %10.6f %10.6f %10.6f %10.6f %10.6f %10.6f\n", SCiter,
-	       EH, EXC, Elocal, Enonlocal, EwaldEnergy(), Ecore);
+	       "%3d    %9.6f %10.6f %10.6f %10.6f %10.6f %10.6f %10.6f\n", 
+	       SCiter, Ekinetic, EH, EXC, Elocal, Enonlocal, EwaldEnergy(), 
+	       Ecore);
     }	       
 //   perr << "Energies:\n"
 //        << "   EH         = " << EH  << endl
@@ -472,6 +474,22 @@ MPISystemClass::CalcNonlocalPPEnergy()
   }
   BandComm.AllSum(Enl);
   return Enl;
+}
+
+double
+MPISystemClass::CalcKineticEnergy()
+{
+  zVec band(Bands.extent(1));
+  double KE = 0.0;
+  /// We assume that each of the bands is already normalized.
+  for (int gi=0; gi<GVecs.size(); gi++) {
+    Vec3 GplusK = GVecs(gi) + GVecs.Getk();
+    double E = 0.5 * dot(GplusK, GplusK);
+    for (int bi=CG.GetFirstBand(); bi<=CG.GetLastBand(); bi++) 
+      KE += Occupancies(bi)*norm (Bands(bi, gi)) * E;
+  }
+  BandComm.AllSum(KE);
+  return KE;
 }
 
 

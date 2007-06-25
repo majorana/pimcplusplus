@@ -101,6 +101,9 @@ public:
   inline Vec3 GetkBox()
   { return kBox; }
 
+  inline Vec3 Getk()
+  { return k; }
+
   void GetFFTBoxSize (int &nx, int &ny, int &nz);
 
   GVecsClass& operator=(const GVecsClass &gvecs);
