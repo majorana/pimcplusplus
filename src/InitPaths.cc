@@ -634,7 +634,10 @@ PathClass::InitPaths (IOSectionClass &in)
     }
     else if (InitPaths == "LEVIFLIGHT") {
       Array<double,2> Positions;
+      double sigmaFactor = 1.0;
       assert (in.ReadVar ("Positions", Positions));
+      if (in.ReadVar ("SigmaFactor", sigmaFactor, 1.0))
+	perr << "SigmaFactor = " << sigmaFactor << endl;
       assert (Positions.rows() == species.NumParticles);
       assert (Positions.cols() == species.NumDim);
       Array<dVec,1> R0(species.NumParticles);
@@ -642,7 +645,7 @@ PathClass::InitPaths (IOSectionClass &in)
 	for (int dim=0; dim<NDIM; dim++)
 	  R0(ptcl)[dim] = Positions(ptcl,dim);
       // NodeAvoidingLeviFlight (speciesIndex,R0);
-      PhaseAvoidingLeviFlight(speciesIndex, R0);
+      PhaseAvoidingLeviFlight(speciesIndex, R0, sigmaFactor);
     }
     else if (InitPaths == "RANDOMFIXED") {
       InitRandomFixed (in, species);
@@ -994,7 +997,8 @@ PathClass::NodeAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 
 
 void 
-PathClass::PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
+PathClass::PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0,
+				    double sigmaFactor)
 {
   SpeciesClass &species = Species(speciesNum);
   int numPtcls = species.NumParticles;
@@ -1030,7 +1034,7 @@ PathClass::PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
     
     double delta = (double)(N-slice-1);
     double taueff = tau*(1.0 - 1.0/(delta+1.0));
-    double sigma = sqrt (2.0*lambda*taueff);
+    double sigma = sigmaFactor*sqrt (2.0*lambda*taueff);
     bool positive = false;
     
     int numRejects = 0;
@@ -1064,7 +1068,7 @@ PathClass::PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &R0)
 	    for (int dim=0; dim<NDIM; dim++)
 	      R0(i)[dim] = Box[dim] *(Random.Common()-0.5);
 	  perr << "Calling recursively to start over.\n";
-	  PhaseAvoidingLeviFlight (speciesNum, R0);
+	  PhaseAvoidingLeviFlight (speciesNum, R0, sigmaFactor);
 	  return;
 	}
 // 	if ((numRejects%50)==0)

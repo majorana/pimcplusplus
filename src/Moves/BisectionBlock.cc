@@ -170,14 +170,17 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	  else
 	    newStage->Actions.push_back(&PathData.Actions.LongRange);
 	}
-	if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-	  cerr << "Adding fermion node action for species " 
-	       << speciesName << endl;
-	  newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
-	}
-	if (PathData.Actions.UseNonlocal) 
-	  newStage->Actions.push_back(&PathData.Actions.Nonlocal);
       }
+      // HACK HACK HACK
+      // These used to be only pushed on at the lowest level
+      if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
+	cerr << "Adding fermion node action for species " 
+	     << speciesName << endl;
+	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+      }
+      if (PathData.Actions.UseNonlocal) 
+	newStage->Actions.push_back(&PathData.Actions.Nonlocal);
+      
       newStage->BisectionLevel = level;
       Stages.push_back (newStage);
 

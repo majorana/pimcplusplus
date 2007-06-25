@@ -248,7 +248,8 @@ public:
   /// species(speciesNum).  If the species is fermion, it will do its
   /// best to construct a node-avoiding walk that is reasonable.
   void NodeAvoidingLeviFlight  (int speciesNum, Array<dVec,1> &initialPoints);
-  void PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &initialPoints);
+  void PhaseAvoidingLeviFlight (int speciesNum, Array<dVec,1> &initialPoints,
+				double sigmaFactor);
 
   void SetupClones();
   inline PathClass(CommunicatorClass &communicator,

@@ -1,4 +1,4 @@
-double tau=0.125;
+double tau=0.0625;
 
 Section (Parallel) {
   int ProcsPerClone = 1;
@@ -6,8 +6,8 @@ Section (Parallel) {
 
 Section (System)
 {
-  int NumTimeSlices=1200;
-  Array<double,1> Box(3)=[20.0,15.0,15.0];
+  int NumTimeSlices=2400;
+  Array<double,1> Box(3)=[ 30.0, 20.0, 20.0 ];
   Array<bool,1> IsPeriodic(3)=[true, true, true];
   //double kCutoff = 0.15;
   Section (Particles)
@@ -34,6 +34,7 @@ Section (System)
       int NumParticles  = 4;
       int NumDim        = 3;
       string InitPaths  = "LEVIFLIGHT";
+      double SigmaFactor = 0.00001;
       Array<double,2> Positions(4,3)=[2.0,  0.0, 0.0,
 	                              2.1,  0.1, 0.0,
                                       -1.9, -0.1, 0.1, 
@@ -49,6 +50,7 @@ Section (System)
       int NumParticles  = 4;
       int NumDim        = 3;
       string InitPaths  = "LEVIFLIGHT";
+      double SigmaFactor = 0.00001;
       Array<double,2> Positions(4,3)=[2.2,     0.0, 0.0,
 	                              2.15,    0.1, 0.0,
                                       -1.92, -0.14, 0.14, 
@@ -79,7 +81,7 @@ Section (Action)
     bool UseLDA = true;
     bool UseSubspaceRotation = true;
     bool SmoothProjectors = true;
-    double kCut = 7.0;
+    double kCut = 6.0;
     int SmearOrder = 1;
     double KerkerLambda = 0.8;
     double SmearWidth = 0.015;
@@ -91,7 +93,7 @@ Section (Action)
 
 Section (Observables)
 {
-  string OutFileBase = "Si2_4.24_tau0.125_beta150.CASINO_k0.25";
+  string OutFileBase = "Si2_4.24_tau0.0625_beta150.CASINO_k0.25.ergodic";
   Section (Observable) {
     string Type = "Energy";
     string Name = "Energy";
@@ -110,6 +112,16 @@ Section (Observables)
       double start = 0.0;
       double end = 7.5;
       int NumPoints = 200;
+    }
+  }
+  Section(Observable) {
+    string Type = "PathDump";
+    string Name = "PathDump";
+    int Frequency = 1;
+    Section(RhoDump) {
+      int Nx = 68;
+      int Ny = 68;
+      int Nz = 68;
     }
   }
 }
@@ -155,14 +167,15 @@ Section (Algorithm)
       int Steps = 20;
       Section(Loop) {
 	int Steps = 80;
-	Section (Move)      { string Name = "upBlock";   } 
-	Section (Move)      { string Name = "downBlock"; } 
-	Section (Move)      { string Name = "Shift";     }
+	Section (Move)    { string Name = "upBlock";   } 
+	Section (Move)    { string Name = "downBlock"; } 
+	Section (Move)    { string Name = "Shift";     }
       }
       Section (Observe)   { string Name = "eup-SiPC";  }
       Section (Observe)   { string Name = "Energy";    }
     }
-    Section   (WriteData) {                         }
+    Section (Observe)     { string Name = "PathDump";  }
+    Section (WriteData)   {                            }
     //Section (Observe) {string Name = "PathDump";}
   }
 }
