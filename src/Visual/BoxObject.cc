@@ -219,8 +219,8 @@ BoxObject::DrawPOV (FILE *fout, string rotString)
  	         r[0][0], r[0][1], r[0][2], radius, rotString);
 
   POVLine (fout, r[4][0], r[4][1], r[4][2],
- 	         r[5][0], r[4][1], r[5][2], radius, rotString);
-  POVLine (fout, r[5][0], r[4][1], r[5][2],
+ 	         r[5][0], r[5][1], r[5][2], radius, rotString);
+  POVLine (fout, r[5][0], r[5][1], r[5][2],
  	         r[6][0], r[6][1], r[6][2], radius, rotString);
   POVLine (fout, r[6][0], r[6][1], r[6][2],
  	         r[7][0], r[7][1], r[7][2], radius, rotString);

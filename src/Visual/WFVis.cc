@@ -753,8 +753,14 @@ WFVisualClass::SetupBandTable()
   VisibleBandTable.attach (BandLabel, 2, 3, 0, 1, Gtk::EXPAND, Gtk::SHRINK, 3);
   VisibleBandRows.resize (Numk*NumBands);
   int row = 0;
-  for (int ki=0; ki<Numk; ki++) 
+  assert (Infile.OpenSection("eigenstates"));
+  for (int ki=0; ki<Numk; ki++) {
+    assert (Infile.OpenSection("twist", ki));
+    int numSpin[2] = {0, 0};
     for (int bi=0; bi<NumBands; bi++) {
+      assert (Infile.OpenSection("band", bi));
+      int spin;
+      Infile.ReadVar ("spin", spin, 0);
       BandRow &band = *(new BandRow(*this));
       band.Check.signal_toggled().connect 
 	(sigc::bind<int>
@@ -765,12 +771,12 @@ WFVisualClass::SetupBandTable()
 			      Gtk::EXPAND, Gtk::SHRINK);
       VisibleBandTable.attach(band.BandLabel, 2, 3, row+1, row+2, 
 			      Gtk::EXPAND, Gtk::SHRINK);
-      char kstr[50], bstr[50];
+      char kstr[50], bstr[250];
       snprintf (kstr, 50, "%d", ki+1);
-      snprintf (bstr, 50, "%d", bi+1);
+      snprintf (bstr, 250, "%d<span  font_family=\"Standard Symbols L\">&#%d;</span>", numSpin[spin]+1, 0x2191+2*spin); 
       band.kLabel.set_text(kstr);
-      band.BandLabel.set_text(bstr);
-      if (bi < NumElectrons/2) {
+      band.BandLabel.set_markup(bstr);
+      if (numSpin[spin] < NumElectrons/2) {
 	band.kLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("black"));
 	band.BandLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("black"));
       }
@@ -780,7 +786,12 @@ WFVisualClass::SetupBandTable()
       }
       VisibleBandRows[row] = &band;
       row++;
-    }		   
+      Infile.CloseSection (); //"band"
+      numSpin[spin]++;
+    }
+    Infile.CloseSection(); // "twist"
+  }
+  Infile.CloseSection(); // "eigenstates"
   VisibleBandTable.show_all();
 }
 
