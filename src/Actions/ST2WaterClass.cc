@@ -6,7 +6,7 @@ double CUTOFF = 18.0; // setcutoff: spherical cutoff in angstroms
 double innerCUTOFF = CUTOFF - 2;
 
 // hack extra output
-ofstream xout("ST2WaterAction.dat");
+//ofstream xout("ST2WaterAction.dat");
 int aCount;
 
 string ST2WaterClass::GetName(){
@@ -17,7 +17,7 @@ ST2WaterClass::ST2WaterClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)
 {
   aCount = 0;
-  xout << aCount << endl;
+  //xout << aCount << endl;
   //Do  nothing for now
 }
 
@@ -29,8 +29,8 @@ double ST2WaterClass::SingleAction (int slice1, int slice2, const Array<int,1> &
 double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
 {
   aCount++;
-  if(aCount%64 == 0)
-    xout << aCount << endl;
+  //if(aCount%64 == 0)
+    //xout << aCount << endl;
   //  cerr << "I'm calculating the Action" << endl;
   for (int counter=0;counter<Path.DoPtcl.size();counter++){
     Path.DoPtcl(counter)=true;
