@@ -21,7 +21,7 @@
 #include <Common/Integration/GKIntegration.h>
 
 // hack
-ofstream out;
+//ofstream out;
 bool isEnergy;
 double halfbox;
 int allPairs, excludedPairs;
@@ -41,8 +41,8 @@ LongRangeCoulombClass::LongRangeCoulombClass(PathDataClass &pathData,
   SI = 1/(4*M_PI*epsilon_not);
   prefactor = SI*angstrom_to_m*elementary_charge*elementary_charge*N_Avogadro/kcal_to_joule;
   initPhi = false;
-  out.open("LRCEnergies.dat");
-  out << "##kspace self real realTest" << endl;
+  //out.open("LRCEnergies.dat");
+  //out << "##kspace self real realTest" << endl;
   allPairs = 0;
   //excludedPairs = 0;
 }
@@ -258,8 +258,8 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
     }
   }
 
-  if(isEnergy)
-    out << kspace << " " << correction << " " << real << " " << realTest << endl;
+  //if(isEnergy)
+    //out << kspace << " " << correction << " " << real << " " << realTest << endl;
 
   double U = (kspace + real - correction);
   return (U);

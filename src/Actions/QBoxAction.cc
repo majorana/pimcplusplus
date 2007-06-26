@@ -2,7 +2,7 @@
 #include "QBoxAction.h"
 #include <sstream>
 
-ofstream qout("QBoxAct.dat");
+//ofstream qout("QBoxAct.dat");
 int qCount;
 
 bool Extract(string s, string find, string& data);
@@ -15,9 +15,9 @@ QBoxActionClass::GetName()
 	
 QBoxActionClass::QBoxActionClass(PathDataClass &pathData) : ActionBaseClass (pathData){
   cerr << "QBoxActionClass Constructor: " << endl;
-  out.open("convergence.dat");
-  out.precision(16);
-  out << "## Rx Ry Rz oldS(10) oldS(20) oldS(25) oldS(30) oldS(full) oldConverged Rx Ry Rz newS(10) newS(20) newS(25) newS(30) newS(full) newConverged" << endl;
+  //out.open("convergence.dat");
+  //out.precision(16);
+  //out << "## Rx Ry Rz oldS(10) oldS(20) oldS(25) oldS(30) oldS(full) oldConverged Rx Ry Rz newS(10) newS(20) newS(25) newS(30) newS(full) newConverged" << endl;
   //out << "## Rxnew Rynew Rznew newS(5) newS(10) newS(15) newS(20) newS(full) newConverged" << endl;
   isAction = false;
   qCount = 0;
@@ -25,7 +25,7 @@ QBoxActionClass::QBoxActionClass(PathDataClass &pathData) : ActionBaseClass (pat
 	
 double QBoxActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level){
   qCount++;
-  qout << qCount << endl;
+  //qout << qCount << endl;
 	int myAge = PathData.moveClock;
 	double Utotal = 0.0;
   isAction = true;
@@ -51,7 +51,7 @@ double QBoxActionClass::ComputeEnergy(int slice1,int slice2,const Array<int,1> &
 		double Utotal = 0.0;
 		SetPtclPos(slice, activeParticles);
     dVec R = PathData.Path(slice, activeParticles(0));
-    out << R(0) << " " << R(1) << " " << R(2) << " ";
+    //out << R(0) << " " << R(1) << " " << R(2) << " ";
 		//toqbox << "run 1 " << steps << endl;
     ostringstream runCmd;
     runCmd << "run 1 " << steps;
@@ -120,7 +120,7 @@ double QBoxActionClass::Collect(){
           iterations == trigger3 ||
           iterations == trigger4 )
           && isAction){
-        out << e0*tau << " ";
+        //out << e0*tau << " ";
       }
 		}
     else if(Extract(tag, "<etotal>", data)){
@@ -130,13 +130,13 @@ double QBoxActionClass::Collect(){
   }
 	value = atof(data.c_str());
   if(isAction){
-    out << value*tau;
+    //out << value*tau;
 		double diff = abs(e0 - e1);
-    out << " " << diff;
-	  if(GetMode() == NEWMODE)
-      out << endl;
-    else
-      out << " ";
+    //out << " " << diff;
+	  //if(GetMode() == NEWMODE)
+      //out << endl;
+    //else
+      //out << " ";
   }
 	if(feedback){
 		double diff = abs(e0 - e1);
