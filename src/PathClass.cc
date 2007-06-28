@@ -464,6 +464,11 @@ void PathClass::Allocate()
   if (LongRange) {
 #if NDIM==3    
     SetupkVecs3D();
+
+    if (DavidLongRange)
+      SortRhoK();
+
+
 #endif
 #if NDIM==2
     SetupkVecs2D();
@@ -547,8 +552,11 @@ void PathClass::SortRhoK()
   MagK.resize(kVecs.size());
   MagKint.resize(kVecs.size());
   for (int kVec=0;kVec<kVecs.size();kVec++){
-    MagK(kVec)=sqrt(kVecs(kVec)[0]*kVecs(kVec)[0]+
-			kVecs(kVec)[1]*kVecs(kVec)[1]);
+    //    MagK(kVec)=sqrt(kVecs(kVec)[0]*kVecs(kVec)[0]+
+    //			kVecs(kVec)[1]*kVecs(kVec)[1]);
+    MagK(kVec)=sqrt(dot(kVecs(kVec),kVecs(kVec)));
+
+
   }
   int smallIndex=0;
  

@@ -58,6 +58,7 @@ main(int argc, char **argv)
     IOSectionClass in;
 	cerr << "done" << endl;
 	cerr << "opening input...";
+	cerr<<argv[1]<<endl;
     assert (in.OpenFile(argv[1]));
 		cerr << " done" << endl;
 		cerr << "new PIMC...";
@@ -73,4 +74,5 @@ main(int argc, char **argv)
 			PIMC.Dummy();
 		}
   }
+  MPI_Finalize();
 }

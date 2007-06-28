@@ -431,7 +431,7 @@ PathClass::InitPaths (IOSectionClass &in)
       }
     }
     else if (InitPaths == "BCC") {
-      assert(NDIM==2);
+      //      assert(NDIM==2);
       int num = species.NumParticles;
       bool isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
       if (!isCubic) {
