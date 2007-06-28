@@ -15,7 +15,7 @@
 /////////////////////////////////////////////////////////////
 
 #include <Python.h>
-#include <numarray/libnumarray.h>
+#include <numpy/libnumarray.h>
 #include "InputOutput.h"
 
 

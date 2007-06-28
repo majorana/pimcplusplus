@@ -1,12 +1,18 @@
 from distutils.core import setup, Extension
+import numpy
+import numpy.numarray as nn
+numpyincludedirs = numpy.get_include()
+numarrayincludedirs = nn.get_numarray_include_dirs()
 
 module1 = Extension('IOSection',
                     sources = ['IOPythonWrapper.cc','IO.cc',\
                                'IOHDF5.cc', 'IOASCII.cc',\
                                'IOVarHDF5.cc' ],\
                     include_dirs=['/usr/include/libxml2',\
-                                  '/home/kesler/include'],
-                    library_dirs=['/home/kesler/lib'],
+                                  '/usr/include',\
+                                  numpyincludedirs,\
+                                  numarrayincludedirs[0]],
+                    library_dirs=['/usr/lib'],
                     libraries =  ['blitz', 'xml2', 'hdf5'])
 
 setup (name = 'IO',
