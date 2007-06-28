@@ -369,10 +369,11 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==INT_TYPE){
       blitz::Array<int,1> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int len = val.size();
+      npy_intp dims = val.size();
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tInt32, 1, len);
+	//array = NA_NewArray (NULL, tInt32, 1, len);
+	array = PyArray_SimpleNew (1, &dims, tInt32);
 	// Now copy data into new array
 	for (int i=0; i<len; i++)
 	  *(((int*)array->data)+i) = val(i);
@@ -384,10 +385,11 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==DOUBLE_TYPE){
       blitz::Array<double,1> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int len = val.size();
+      npy_intp dims = val.size();
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tFloat64, 1, len);
+	//	array = NA_NewArray (NULL, tFloat64, 1, len);
+	array = PyArray_SimpleNew (1, &dims, tFloat64);
 	// Now copy data into new array
 	for (int i=0; i<len; i++)
 	  *(((double*)array->data)+i) = val(i);
@@ -400,9 +402,11 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       blitz::Array<complex<double>,1> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
       int len = val.size();
+      npy_intp dims = val.size();
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tComplex64, 1, len);
+	//	array = NA_NewArray (NULL, tComplex64, 1, len);
+	array = PyArray_SimpleNew (1, &dims, tFloat64);
 	// Now copy data into new array
 	for (int i=0; i<len; i++)
 	  *(((complex<double>*)array->data)+i) = val(i);
@@ -415,6 +419,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       blitz::Array<bool,1> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
       int len = val.size();
+      npy_intp dims = val.size();
       if (success) {
 	PyArrayObject *array;
 	array = NA_NewArray (NULL, tBool, 1, len);
