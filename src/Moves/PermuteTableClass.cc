@@ -263,6 +263,8 @@ void PermuteTableClass::Read(IOSectionClass &inSection)
   inSection.ReadVar("zfocus",zfocus);
   if (zfocus)
     assert(inSection.ReadVar("zalpha",zalpha));
+  else
+    zalpha=0.0;
   //  assert(inSection.ReadVar("SpeciesNum",SpeciesNum));
   
   
