@@ -176,68 +176,13 @@ void TablePermuteStageClass::Read (IOSectionClass &in)
       
 }
 
-bool TablePermuteStageClass::Attempt (int &slice1, int &slice2, 
-				      Array<int,1> &activeParticles, double &prevActionChange)
-{
-  HaveBeenAcceptedOrRejected=false;
-  if (activeParticles(0)==-1){
-    if ((PathData.Path.OpenPaths && slice1<=PathData.Path.OpenLink && 
-	 PathData.Path.OpenLink<=slice2) || 
-	(PathData.Path.OpenLink==PathData.Path.NumTimeSlices()-1 &&
-	 (slice1==0 || slice2==0))){
-      if (NeedToRebuildTable)
-	Forw->ConstructCycleTable(SpeciesNum, slice1, slice2,
-				  PathData.Path.OpenPtcl);
-    }
-    else {
-      if (NeedToRebuildTable)
-	Forw->ConstructCycleTable(SpeciesNum, slice1, slice2);
-    }
-    int NumPerms = 0;
-    // Choose a permutation cycle
-    double forwT = Forw->AttemptPermutation();
-    activeParticles.resize (Forw->CurrentCycle.Length);
-    activeParticles = Forw->CurrentParticles();
-    if (Forw->CurrentCycle.Length!=1)
-      Rev->UpdateHTable(Forw->CurrentCycle);
-    double revT = Rev->CalcReverseProb(*Forw);
-
-    int len=Forw->CurrentCycle.Length;
-    if (len % 2 ==0){
-      PathData.Path.Weight=PathData.Path.Weight*-1;
-    }
-
-    double actionChange = -1.0*log(Forw->CurrentCycle.P/Forw->Gamma[len-1]);
-    //    double actionChange = 0;
-    Array<int,1> currentParticles=Forw->CurrentParticles();  
-    double pi_ratio = exp(-actionChange+prevActionChange);
-    double Tratio = forwT/revT;
-    double acceptProb = min(1.0, pi_ratio/Tratio);
-    prevActionChange = actionChange;
-    //    if (Forw->CurrentCycle.Length>1){
-      //      cerr<<"Lenght: "<<Forw->CurrentCycle.Length<<" "<<actionChange<<endl;
-      //      cerr<<"Tratio: "<<Tratio<<" "<<forwT<<" "<<revT<<" "<<Forw->CurrentCycle.P<<endl;
-      //      cerr<<"PiRation: "<<pi_ratio<<" "<<Tratio<<endl;
-    //    }
-    double psi = PathData.Path.Random.Local();
-    bool toAccept=(acceptProb > psi);
-    return toAccept;
-  }
-  else{
-    //    sleep(10);
-
-    return true;    
-  }
-}
-
-// //You must call accept or reject after having called attempt once
 // bool TablePermuteStageClass::Attempt (int &slice1, int &slice2, 
 // 				      Array<int,1> &activeParticles, double &prevActionChange)
 // {
 //   HaveBeenAcceptedOrRejected=false;
 //   if (activeParticles(0)==-1){
 //     if ((PathData.Path.OpenPaths && slice1<=PathData.Path.OpenLink && 
-// 	PathData.Path.OpenLink<=slice2) || 
+// 	 PathData.Path.OpenLink<=slice2) || 
 // 	(PathData.Path.OpenLink==PathData.Path.NumTimeSlices()-1 &&
 // 	 (slice1==0 || slice2==0))){
 //       if (NeedToRebuildTable)
@@ -250,37 +195,72 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
 //     }
 //     int NumPerms = 0;
 //     // Choose a permutation cycle
-//     //    double forwT;
-//     forwT= Forw->AttemptPermutation();
+//     double forwT = Forw->AttemptPermutation();
 //     activeParticles.resize (Forw->CurrentCycle.Length);
 //     activeParticles = Forw->CurrentParticles();
+//     if (Forw->CurrentCycle.Length!=1)
+//       Rev->UpdateHTable(Forw->CurrentCycle);
+//     double revT = Rev->CalcReverseProb(*Forw);
 
-//     ///NEW
-//     prevActionChange=0;
-//     return true;
+//     int len=Forw->CurrentCycle.Length;
+//     if (len % 2 ==0){
+//       PathData.Path.Weight=PathData.Path.Weight*-1;
+//     }
 
-// //     if (Forw->CurrentCycle.Length!=1)
-// //       Rev->UpdateHTable(Forw->CurrentCycle);
-// //     double revT = Rev->CalcReverseProb(*Forw);
-
-// //     int len=Forw->CurrentCycle.Length;
-// //     if (len % 2 ==0){
-// //       PathData.Path.Weight=PathData.Path.Weight*-1;
-// //     }
-
-// //     double actionChange = -log(Forw->CurrentCycle.P/Forw->Gamma[len-1]);
-// //     Array<int,1> currentParticles=Forw->CurrentParticles();  
-// //     double pi_ratio = exp(-actionChange+prevActionChange);
-// //     double Tratio = forwT/revT;
-// //     double acceptProb = min(1.0, pi_ratio/Tratio);
-// //     prevActionChange = actionChange;
-
-// //     double psi = PathData.Path.Random.Local();
-// //     bool toAccept=(acceptProb > psi);
-// //     return toAccept;
+//     double actionChange = -1.0*log(Forw->CurrentCycle.P/Forw->Gamma[len-1]);
+//     //    double actionChange = 0;
+//     Array<int,1> currentParticles=Forw->CurrentParticles();  
+//     double pi_ratio = exp(-actionChange+prevActionChange);
+//     double Tratio = forwT/revT;
+//     double acceptProb = min(1.0, pi_ratio/Tratio);
+//     prevActionChange = actionChange;
+//     //    if (Forw->CurrentCycle.Length>1){
+//       //      cerr<<"Lenght: "<<Forw->CurrentCycle.Length<<" "<<actionChange<<endl;
+//       //      cerr<<"Tratio: "<<Tratio<<" "<<forwT<<" "<<revT<<" "<<Forw->CurrentCycle.P<<endl;
+//       //      cerr<<"PiRation: "<<pi_ratio<<" "<<Tratio<<endl;
+//     //    }
+//     double psi = PathData.Path.Random.Local();
+//     bool toAccept=(acceptProb > psi);
+//     return toAccept;
 //   }
 //   else{
 //     //    sleep(10);
+
+//     return true;    
+//   }
+// }
+
+//You must call accept or reject after having called attempt once
+bool TablePermuteStageClass::Attempt (int &slice1, int &slice2, 
+				      Array<int,1> &activeParticles, double &prevActionChange)
+{
+  HaveBeenAcceptedOrRejected=false;
+  if (activeParticles(0)==-1){
+    if ((PathData.Path.OpenPaths && slice1<=PathData.Path.OpenLink && 
+	PathData.Path.OpenLink<=slice2) || 
+	(PathData.Path.OpenLink==PathData.Path.NumTimeSlices()-1 &&
+	 (slice1==0 || slice2==0))){
+      if (NeedToRebuildTable)
+	Forw->ConstructCycleTable(SpeciesNum, slice1, slice2,
+				  PathData.Path.OpenPtcl);
+    }
+    else {
+      if (NeedToRebuildTable)
+	Forw->ConstructCycleTable(SpeciesNum, slice1, slice2);
+    }
+    int NumPerms = 0;
+    // Choose a permutation cycle
+    //    double forwT;
+    forwT= Forw->AttemptPermutation();
+    activeParticles.resize (Forw->CurrentCycle.Length);
+    activeParticles = Forw->CurrentParticles();
+
+
+    ///NEW
+    ///TRY SOMETHING ELSE    prevActionChange=0;
+    int len=Forw->CurrentCycle.Length;
+    prevActionChange = -log(Forw->CurrentCycle.P/Forw->Gamma[len-1]);
+    return true;
 
 //     if (Forw->CurrentCycle.Length!=1)
 //       Rev->UpdateHTable(Forw->CurrentCycle);
@@ -293,8 +273,7 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
 
 //     double actionChange = -log(Forw->CurrentCycle.P/Forw->Gamma[len-1]);
 //     Array<int,1> currentParticles=Forw->CurrentParticles();  
-//     //    double pi_ratio = exp(-actionChange+prevActionChange);
-//     double pi_ratio = exp(-actionChange);
+//     double pi_ratio = exp(-actionChange+prevActionChange);
 //     double Tratio = forwT/revT;
 //     double acceptProb = min(1.0, pi_ratio/Tratio);
 //     prevActionChange = actionChange;
@@ -302,6 +281,30 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
 //     double psi = PathData.Path.Random.Local();
 //     bool toAccept=(acceptProb > psi);
 //     return toAccept;
+  }
+  else{
+    //    sleep(10);
 
-//   }
-// }
+    if (Forw->CurrentCycle.Length!=1)
+      Rev->UpdateHTable(Forw->CurrentCycle);
+    double revT = Rev->CalcReverseProb(*Forw);
+
+    int len=Forw->CurrentCycle.Length;
+    if (len % 2 ==0){
+      PathData.Path.Weight=PathData.Path.Weight*-1;
+    }
+
+    double actionChange = -log(Forw->CurrentCycle.P/Forw->Gamma[len-1]);
+    Array<int,1> currentParticles=Forw->CurrentParticles();  
+    //    double pi_ratio = exp(-actionChange+prevActionChange);
+    double pi_ratio = exp(-actionChange);
+    double Tratio = forwT/revT;
+    double acceptProb = min(1.0, pi_ratio/Tratio);
+    prevActionChange = actionChange;
+
+    double psi = PathData.Path.Random.Local();
+    bool toAccept=(acceptProb > psi);
+    return toAccept;
+
+  }
+}

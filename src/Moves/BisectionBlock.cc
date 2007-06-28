@@ -190,7 +190,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
   /// EVIL BAD ERROR!!!  Pushing onto the stack twice causes the stage
   /// to be accepted twice, which causes swapping the forward and
   // reverse tables twice!
-  ///  Stages.push_back (PermuteStage);
+  Stages.push_back (PermuteStage);
 
 //   ///HACK! Addding a stage that will reject the move if the structure
 //   //factor gets too large
