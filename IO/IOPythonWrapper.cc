@@ -3,7 +3,7 @@
 //                                                         //
 // This program is free software; you can redistribute it  //
 // and/or modify it under the terms of the GNU General     //
-// Public License as published by the Free Software        //
+// Public License as published by the Free Software        // 
 // Foundation; either version 2 of the License, or         //
 // (at your option) any later version.  This program is    //
 // distributed in the hope that it will be useful, but     //
@@ -14,8 +14,8 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include <Python.h>
-#include <numarray/libnumarray.h>
+#include <Python.h>  
+#include <numpy/libnumarray.h>
 #include "IO.h"
 
 using namespace IO;
@@ -35,7 +35,7 @@ IOSection_CountSectionsName (PyObject *self, PyObject *args)
 {
   char *name;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"is" : (char*)"ls";
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr,&name))
     return NULL;
@@ -52,7 +52,7 @@ extern "C" PyObject*
 IOSection_CountSections (PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"i" : (char*)"l";
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -68,7 +68,7 @@ extern "C" PyObject*
 IOSection_CountVars (PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"i" : (char*)"l";
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -85,7 +85,7 @@ IOSection_OpenFile (PyObject *self, PyObject *args)
 {
   char *fileName;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"is" : (char*)"ls";
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr,&fileName)) {
     cerr << "Error in IOSection_OpenFile.\n";
@@ -102,7 +102,7 @@ extern "C" PyObject*
 IOSection_GetName(PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"i" : (char*)"l";
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -120,7 +120,7 @@ IOSection_NewFile(PyObject *self, PyObject *args)
 {
   char *fileName;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"is" : (char*)"ls";
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr,&fileName))
     return NULL;
@@ -136,7 +136,7 @@ extern "C" PyObject*
 IOSection_CloseFile(PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"i" : (char*)"l";
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -151,7 +151,7 @@ extern "C" PyObject*
 IOSection_FlushFile(PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"i" : (char*)"l";
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -166,7 +166,7 @@ IOSection_OpenSectionName (PyObject *self, PyObject *args)
 {
   char *sectionName;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"is" : (char*)"ls";
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr,&sectionName))
     return NULL;
@@ -183,7 +183,7 @@ IOSection_OpenSectionNameNum (PyObject *self, PyObject *args)
   char *sectionName;
   void *IOSectionPtr;
   int num;
-  char *str = (sizeof(int) == sizeof(void*)) ? "isi" : "lsi";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"isi" : (char*)"lsi";
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&sectionName,&num))
     return NULL;
@@ -199,7 +199,7 @@ IOSection_OpenSectionNum (PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
   int num;
-  char *str = (sizeof(int) == sizeof(void*)) ? "ii" : "li";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"ii" : (char*)"li";
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&num))
     return NULL;
@@ -216,7 +216,7 @@ IOSection_IncludeSection (PyObject *self, PyObject *args)
   void *IOSectionPtr;
   char *name;
   char *fileName;
-  char *str = (sizeof(int) == sizeof(void*)) ? "iss" : "lss";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"iss" : (char*)"lss";
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&name,&fileName))
     return NULL;
@@ -232,7 +232,7 @@ IOSection_NewSectionName(PyObject *self, PyObject *args)
 {
   char *sectionName;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"is" : (char*)"ls";
 
   if (PyArg_ParseTuple (args, str, &IOSectionPtr,&sectionName))
     ((IOSectionClass*)IOSectionPtr)->NewSection(sectionName);
@@ -245,7 +245,7 @@ IOSection_NewSectionFile (PyObject *self, PyObject *args)
   void *IOSectionPtr;
   char *name;
   char *fileName;
-  char *str = (sizeof(int) == sizeof(void*)) ? "iss" : "lss";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"iss" : (char*)"lss";
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&name,&fileName))
     return NULL;
@@ -259,7 +259,7 @@ extern "C" PyObject*
 IOSection_CloseSection(PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"i" : (char*)"l";
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr))
     return NULL;
@@ -274,7 +274,7 @@ IOSection_GetVarName(PyObject *self, PyObject *args)
 {
   int num;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "ii" : "li";
+  char *str = (sizeof(int) == sizeof(void*)) ? (char*)"ii" : (char*)"li";
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&num))
     return NULL;
@@ -298,7 +298,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
   handle=PyTuple_GetItem(args,0);
   varToRead=PyTuple_GetItem(args,1);
   if (PyInt_Check(varToRead)){
-    char *str = (sizeof(int) == sizeof(void*)) ? "ii" : "li";
+    char *str = (sizeof(int) == sizeof(void*)) ? (char*)"ii" : (char*)"li";
     int num;
     if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&num)){
       return Py_None;
@@ -307,7 +307,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     name=varPtr->GetName().c_str();
   }
   else {
-    char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+    char *str = (sizeof(int) == sizeof(void*)) ? (char*)"is" : (char*)"ls";
     if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&name)){
       return Py_None;
     }
