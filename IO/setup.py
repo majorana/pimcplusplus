@@ -5,7 +5,7 @@ numpyincludedirs = numpy.get_include()
 numarrayincludedirs = nn.get_numarray_include_dirs()
 
 module1 = Extension('IOSection',
-                    sources = ['IOPythonWrapper.cc','IO.cc',\
+                    sources = ['IONumPyWrapper.cc','IO.cc',\
                                'IOHDF5.cc', 'IOASCII.cc',\
                                'IOVarHDF5.cc' ],\
                     include_dirs=['/usr/include/libxml2',\

@@ -35,7 +35,7 @@ IOSection_CountSectionsName (PyObject *self, PyObject *args)
 {
   char *name;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (char*)( (sizeof(int) == sizeof(void*)) ? "is" : "ls");
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr,&name))
     return NULL;
@@ -52,7 +52,7 @@ extern "C" PyObject*
 IOSection_CountSections (PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "i" : "l");
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -68,7 +68,7 @@ extern "C" PyObject*
 IOSection_CountVars (PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "i" : "l");
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -85,7 +85,7 @@ IOSection_OpenFile (PyObject *self, PyObject *args)
 {
   char *fileName;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "is" : "ls");
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr,&fileName)) {
     cerr << "Error in IOSection_OpenFile.\n";
@@ -102,7 +102,7 @@ extern "C" PyObject*
 IOSection_GetName(PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "i" : "l");
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -120,7 +120,7 @@ IOSection_NewFile(PyObject *self, PyObject *args)
 {
   char *fileName;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "is" : "ls");
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr,&fileName))
     return NULL;
@@ -136,7 +136,7 @@ extern "C" PyObject*
 IOSection_CloseFile(PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "i" : "l");
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -151,7 +151,7 @@ extern "C" PyObject*
 IOSection_FlushFile(PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "i" : "l");
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr))
     return NULL;
@@ -166,7 +166,7 @@ IOSection_OpenSectionName (PyObject *self, PyObject *args)
 {
   char *sectionName;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "is" : "ls");
 
   if (!PyArg_ParseTuple (args, str ,&IOSectionPtr,&sectionName))
     return NULL;
@@ -183,7 +183,7 @@ IOSection_OpenSectionNameNum (PyObject *self, PyObject *args)
   char *sectionName;
   void *IOSectionPtr;
   int num;
-  char *str = (sizeof(int) == sizeof(void*)) ? "isi" : "lsi";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "isi" : "lsi");
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&sectionName,&num))
     return NULL;
@@ -199,7 +199,7 @@ IOSection_OpenSectionNum (PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
   int num;
-  char *str = (sizeof(int) == sizeof(void*)) ? "ii" : "li";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "ii" : "li");
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&num))
     return NULL;
@@ -216,7 +216,7 @@ IOSection_IncludeSection (PyObject *self, PyObject *args)
   void *IOSectionPtr;
   char *name;
   char *fileName;
-  char *str = (sizeof(int) == sizeof(void*)) ? "iss" : "lss";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "iss" : "lss");
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&name,&fileName))
     return NULL;
@@ -232,7 +232,7 @@ IOSection_NewSectionName(PyObject *self, PyObject *args)
 {
   char *sectionName;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "is" : "ls");
 
   if (PyArg_ParseTuple (args, str, &IOSectionPtr,&sectionName))
     ((IOSectionClass*)IOSectionPtr)->NewSection(sectionName);
@@ -245,7 +245,7 @@ IOSection_NewSectionFile (PyObject *self, PyObject *args)
   void *IOSectionPtr;
   char *name;
   char *fileName;
-  char *str = (sizeof(int) == sizeof(void*)) ? "iss" : "lss";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "iss" : "lss");
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&name,&fileName))
     return NULL;
@@ -259,7 +259,7 @@ extern "C" PyObject*
 IOSection_CloseSection(PyObject *self, PyObject *args)
 {
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "i" : "l";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "i" : "l");
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr))
     return NULL;
@@ -274,7 +274,7 @@ IOSection_GetVarName(PyObject *self, PyObject *args)
 {
   int num;
   void *IOSectionPtr;
-  char *str = (sizeof(int) == sizeof(void*)) ? "ii" : "li";
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "ii" : "li");
 
   if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&num))
     return NULL;
@@ -298,7 +298,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
   handle=PyTuple_GetItem(args,0);
   varToRead=PyTuple_GetItem(args,1);
   if (PyInt_Check(varToRead)){
-    char *str = (sizeof(int) == sizeof(void*)) ? "ii" : "li";
+    char *str = (char*)((sizeof(int) == sizeof(void*)) ? "ii" : "li");
     int num;
     if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&num)){
       return Py_None;
@@ -307,7 +307,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     name=varPtr->GetName().c_str();
   }
   else {
-    char *str = (sizeof(int) == sizeof(void*)) ? "is" : "ls";
+    char *str = (char*)((sizeof(int) == sizeof(void*)) ? "is" : "ls");
     if (!PyArg_ParseTuple (args, str, &IOSectionPtr,&name)){
       return Py_None;
     }
@@ -372,10 +372,10 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       npy_intp dims = val.size();
       if (success) {
 	PyArrayObject *array;
-	//array = NA_NewArray (NULL, tInt32, 1, len);
-	array = PyArray_SimpleNew (1, &dims, tInt32);
+	//array = NA_NewArray (NULL, NPY_INT, 1, len);
+	array = (PyArrayObject*)PyArray_SimpleNew (1, &dims, NPY_INT);
 	// Now copy data into new array
-	for (int i=0; i<len; i++)
+	for (int i=0; i<dims; i++)
 	  *(((int*)array->data)+i) = val(i);
 	return (PyObject *) array;
       }
@@ -388,10 +388,10 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       npy_intp dims = val.size();
       if (success) {
 	PyArrayObject *array;
-	//	array = NA_NewArray (NULL, tFloat64, 1, len);
-	array = PyArray_SimpleNew (1, &dims, tFloat64);
+	//	array = NA_NewArray (NULL, NPY_DOUBLE, 1, len);
+	array = (PyArrayObject*)PyArray_SimpleNew (1, &dims, NPY_DOUBLE);
 	// Now copy data into new array
-	for (int i=0; i<len; i++)
+	for (int i=0; i<dims; i++)
 	  *(((double*)array->data)+i) = val(i);
 	return (PyObject *) array;
       }
@@ -405,10 +405,10 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       npy_intp dims = val.size();
       if (success) {
 	PyArrayObject *array;
-	//	array = NA_NewArray (NULL, tComplex64, 1, len);
-	array = PyArray_SimpleNew (1, &dims, tFloat64);
+	//	array = NA_NewArray (NULL, NPY_CDOUBLE, 1, len);
+	array = (PyArrayObject*)PyArray_SimpleNew (1, &dims, NPY_CDOUBLE);
 	// Now copy data into new array
-	for (int i=0; i<len; i++)
+	for (int i=0; i<dims; i++)
 	  *(((complex<double>*)array->data)+i) = val(i);
 	return (PyObject *) array;
       }
@@ -422,9 +422,10 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       npy_intp dims = val.size();
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tBool, 1, len);
+	// array = NA_NewArray (NULL, NPY_BOOL, 1, len);
+	array = (PyArrayObject*)PyArray_SimpleNew (1, &dims, NPY_BOOL);
 	// Now copy data into new array
-	for (int i=0; i<len; i++)
+	for (int i=0; i<dims; i++)
 	  *(((bool*)array->data)+i) = val(i);
 	return (PyObject *) array;
       }
@@ -451,15 +452,15 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==INT_TYPE){
       blitz::Array<int,2> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0);
-      int d1 = val.extent(1);
+      npy_intp dims[2] = { val.extent(0), val.extent(1) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tInt32, 2, d0, d1);
+	// array = NA_NewArray (NULL, NPY_INT, 2, d0, d1);
+	array = (PyArrayObject*)PyArray_SimpleNew (2, dims, NPY_INT);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    *(((int*)array->data)+(i*d1)+j) = val(i,j);
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    *(((int*)array->data)+(i*dims[1])+j) = val(i,j);
 	return (PyObject *) array;
       }
       else
@@ -468,15 +469,15 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==DOUBLE_TYPE) {
       blitz::Array<double,2> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0);
-      int d1 = val.extent(1);
+      npy_intp dims[2] = { val.extent(0), val.extent(1) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tFloat64, 2, d0, d1);
+	// array = NA_NewArray (NULL, NPY_DOUBLE, 2, d0, d1);
+	array = (PyArrayObject*)PyArray_SimpleNew (2, dims, NPY_DOUBLE);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    *(((double*)array->data)+(i*d1)+j) = val(i,j);
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    *(((double*)array->data)+(i*dims[1])+j) = val(i,j);
 	return (PyObject *) array;
       }
       else
@@ -484,16 +485,16 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     }
     if (type==COMPLEX_TYPE) {
       blitz::Array<complex<double>,2> val;
+      npy_intp dims[2] = { val.extent(0), val.extent(1) };
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0);
-      int d1 = val.extent(1);
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tComplex64, 2, d0, d1);
+	// array = NA_NewArray (NULL, NPY_CDOUBLE, 2, d0, d1);
+	array = (PyArrayObject*)PyArray_SimpleNew (2, dims, NPY_CDOUBLE);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    *(((complex<double>*)array->data)+(i*d1)+j) = val(i,j);
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    *(((complex<double>*)array->data)+(i*dims[1])+j) = val(i,j);
 	return (PyObject *) array;
       }
       else
@@ -502,15 +503,15 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==BOOL_TYPE){
       blitz::Array<bool,2> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0);
-      int d1 = val.extent(1);
+      npy_intp dims[2] = { val.extent(0), val.extent(1) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tBool, 2, d0, d1);
+	//array = NA_NewArray (NULL, NPY_BOOL, 2, d0, d1);
+	array = (PyArrayObject*)PyArray_SimpleNew (2, dims, NPY_BOOL);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    *(((bool*)array->data)+(i*d1)+j) = val(i,j);
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    *(((bool*)array->data)+(i*dims[1])+j) = val(i,j);
 	return (PyObject *) array;
       }
       else
@@ -541,15 +542,16 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==INT_TYPE){
       blitz::Array<int,3> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0); int d1 = val.extent(1); int d2 = val.extent(2);
+      npy_intp dims[3] = { val.extent(0), val.extent(1), val.extent(2) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tInt32, 3, d0, d1, d2);
+	//array = NA_NewArray (NULL, NPY_INT, 3, d0, d1, d2);
+	array = (PyArrayObject*)PyArray_SimpleNew (3, dims, NPY_INT);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    for (int k=0; k<d2; k++)
-	      *(((int*)array->data)+(i*d1*d2)+(j*d2)+k) = val(i,j,k);
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    for (int k=0; k<dims[2]; k++)
+	      *(((int*)array->data)+(i*dims[1]*dims[2])+(j*dims[2])+k) = val(i,j,k);
 	return (PyObject *) array;
       }
       else
@@ -558,15 +560,16 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==DOUBLE_TYPE) {
       blitz::Array<double,3> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0); int d1 = val.extent(1); int d2 = val.extent(2);
+      npy_intp dims[3] = { val.extent(0), val.extent(1), val.extent(2) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tFloat64, 3, d0, d1, d2);
+	//array = NA_NewArray (NULL, NPY_DOUBLE, 3, d0, d1, d2);
+	array = (PyArrayObject*)PyArray_SimpleNew (3, dims, NPY_DOUBLE);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    for (int k=0; k<d2; k++)
-	      *(((double*)array->data)+(i*d1*d2)+j*d2+k) = val(i,j,k);
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    for (int k=0; k<dims[2]; k++)
+	      *(((double*)array->data)+(i*dims[1]*dims[2])+j*dims[2]+k) = val(i,j,k);
 	return (PyObject *) array;
       }
       else
@@ -575,15 +578,16 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==COMPLEX_TYPE) {
       blitz::Array<complex<double>,3> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0); int d1 = val.extent(1); int d2 = val.extent(2);
+      npy_intp dims[3] = { val.extent(0), val.extent(1), val.extent(2) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tComplex64, 3, d0, d1, d2);
+	//array = NA_NewArray (NULL, NPY_CDOUBLE, 3, d0, d1, d2);
+	array = (PyArrayObject*)PyArray_SimpleNew (3, dims, NPY_CDOUBLE);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    for (int k=0; k<d2; k++)
-	      *(((complex<double>*)array->data)+(i*d1*d2)+j*d2+k) = val(i,j,k);
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    for (int k=0; k<dims[2]; k++)
+	      *(((complex<double>*)array->data)+(i*dims[1]*dims[2])+j*dims[2]+k) = val(i,j,k);
 	return (PyObject *) array;
       }
       else
@@ -592,15 +596,16 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==BOOL_TYPE){
       blitz::Array<bool,3> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0); int d1 = val.extent(1); int d2 = val.extent(2);
+      npy_intp dims[3] = { val.extent(0), val.extent(1), val.extent(2) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tBool, 3, d0, d1, d2);
+	//array = NA_NewArray (NULL, NPY_BOOL, 3, d0, d1, d2);
+	array = (PyArrayObject*)PyArray_SimpleNew (3, dims, NPY_BOOL);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    for (int k=0; k<d2; k++)
-	      *(((bool*)array->data)+(i*d1*d2)+j*d2+k) = val(i,j,k);
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    for (int k=0; k<dims[2]; k++)
+	      *(((bool*)array->data)+(i*dims[1]*dims[2])+j*dims[2]+k) = val(i,j,k);
 	return (PyObject *) array;
       }
       else
@@ -633,17 +638,18 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==INT_TYPE){
       blitz::Array<int,4> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0); int d1 = val.extent(1); 
-      int d2 = val.extent(2); int d3 = val.extent(3);
+      npy_intp dims[4] = { val.extent(0), val.extent(1), 
+			   val.extent(2), val.extent(3) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tInt32, 4, d0, d1, d2, d3);
+	// array = NA_NewArray (NULL, NPY_INT, 4, d0, d1, d2, d3);
+	array = (PyArrayObject*)PyArray_SimpleNew (4, dims, NPY_INT);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    for (int k=0; k<d2; k++)
-	      for (int m=0; m<d3; m++)
-		*(((int*)array->data)+(i*d1*d2*d3)+(j*d2*d3)+k*d3+m) = 
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    for (int k=0; k<dims[2]; k++)
+	      for (int m=0; m<dims[3]; m++)
+		*(((int*)array->data)+(i*dims[1]*dims[2]*dims[3])+(j*dims[2]*dims[3])+k*dims[3]+m) = 
 		  val(i,j,k,m);
 	return (PyObject *) array;
       }
@@ -653,17 +659,18 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==DOUBLE_TYPE) {
       blitz::Array<double,4> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0); int d1 = val.extent(1); 
-      int d2 = val.extent(2); int d3 = val.extent(3);
+      npy_intp dims[4] = { val.extent(0), val.extent(1), 
+			   val.extent(2), val.extent(3) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tFloat64, 4, d0, d1, d2, d3);
+	// array = NA_NewArray (NULL, NPY_DOUBLE, 4, d0, d1, d2, d3);
+	array = (PyArrayObject*)PyArray_SimpleNew (4, dims, NPY_DOUBLE);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    for (int k=0; k<d2; k++)
-	      for (int m=0; m<d3; m++)
-		*(((double*)array->data)+(i*d1*d2*d3)+j*d2*d3+k*d3+m) = 
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    for (int k=0; k<dims[2]; k++)
+	      for (int m=0; m<dims[3]; m++)
+		*(((double*)array->data)+(i*dims[1]*dims[2]*dims[3])+j*dims[2]*dims[3]+k*dims[3]+m) = 
 		  val(i,j,k,m);
 	return (PyObject *) array;
       }
@@ -673,17 +680,18 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==COMPLEX_TYPE) {
       blitz::Array<complex<double>,4> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0); int d1 = val.extent(1); 
-      int d2 = val.extent(2); int d3 = val.extent(3);
+      npy_intp dims[4] = { val.extent(0), val.extent(1), 
+			   val.extent(2), val.extent(3) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tComplex64, 4, d0, d1, d2, d3);
+	// array = NA_NewArray (NULL, NPY_CDOUBLE, 4, d0, d1, d2, d3);
+	array = (PyArrayObject*)PyArray_SimpleNew (4, dims, NPY_CDOUBLE);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    for (int k=0; k<d2; k++)
-	      for (int m=0; m<d3; m++)
-		*(((complex<double>*)array->data)+(i*d1*d2*d3)+j*d2*d3+k*d3+m) 
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    for (int k=0; k<dims[2]; k++)
+	      for (int m=0; m<dims[3]; m++)
+		*(((complex<double>*)array->data)+(i*dims[1]*dims[2]*dims[3])+j*dims[2]*dims[3]+k*dims[3]+m) 
 		  = val(i,j,k,m);
 	return (PyObject *) array;
       }
@@ -693,17 +701,18 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
     if (type==BOOL_TYPE){
       blitz::Array<bool,4> val;
       success = ((IOSectionClass*)IOSectionPtr)->ReadVar(name,val);
-      int d0 = val.extent(0); int d1 = val.extent(1); 
-      int d2 = val.extent(2); int d3 = val.extent(3);
+      npy_intp dims[4] = { val.extent(0), val.extent(1), 
+			   val.extent(2), val.extent(3) };
       if (success) {
 	PyArrayObject *array;
-	array = NA_NewArray (NULL, tBool, 4, d0, d1, d2, d3);
+	// array = NA_NewArray (NULL, NPY_BOOL, 4, d0, d1, d2, d3);
+	array = (PyArrayObject*)PyArray_SimpleNew (4, dims, NPY_BOOL);
 	// Now copy data into new array
-	for (int i=0; i<d0; i++)
-	  for (int j=0; j<d1; j++)
-	    for (int k=0; k<d2; k++)
-	      for (int m=0; m<d3; m++)
-		*(((bool*)array->data)+(i*d1*d2*d3)+j*d2*d3+k*d3+m) = 
+	for (int i=0; i<dims[0]; i++)
+	  for (int j=0; j<dims[1]; j++)
+	    for (int k=0; k<dims[2]; k++)
+	      for (int m=0; m<dims[3]; m++)
+		*(((bool*)array->data)+(i*dims[1]*dims[2]*dims[3])+j*dims[2]*dims[3]+k*dims[3]+m) = 
 		  val(i,j,k,m);
 	return (PyObject *) array;
       }
@@ -737,6 +746,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return Py_None;
     }
   }
+  return (PyObject*)NULL;
 }
 
 
@@ -787,5 +797,5 @@ PyMODINIT_FUNC
 initIOSection(void)
 {
   (void) Py_InitModule("IOSection", IOSectionMethods);
-  import_libnumarray();
+  import_array();
 }
