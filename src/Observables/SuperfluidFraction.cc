@@ -29,9 +29,11 @@ SuperfluidFractionClass::WriteBlock()
 {
   int species=SpeciesList(0);
   double beta=PathData.Path.tau*PathData.Path.TotalNumSlices;
+  cerr<<"Samples in block"<<SamplesInBlock<<endl;
   int numParticles=
     PathData.Path.Species(species).LastPtcl-PathData.Path.Species(species).FirstPtcl+1;
-  double factor=1.0/((double)SamplesInBlock*(2*PathData.Path.Species(species).lambda*beta*numParticles));
+  double factor=1.0/((2.0*PathData.Path.Species(species).lambda*beta*numParticles));
+
   
   CalcWN2();
   // Only processor 0 writes.
@@ -41,7 +43,9 @@ SuperfluidFractionClass::WriteBlock()
       WriteInfo();
       IOSection.WriteVar("Type",string("Vector"));
     }
-    WN2Array *=factor;
+    for (int dim=0;dim<NDIM;dim++)
+      WN2Array(dim) =WN2Array(dim)*factor*
+	PathData.Path.GetBox()[dim]*PathData.Path.GetBox()[dim];
     SFVar.Write(WN2Array);
   }
 }
