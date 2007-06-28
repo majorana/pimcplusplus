@@ -39,6 +39,7 @@ def GetImportanceFunction():
         
 
 def Processnofr(infiles,summaryDoc,detailedDoc,StartCut):
+    print "Processing nofr"
     #acquire data about the correlation section
 #    species1=infiles.ReadVar("Species1")[0]
 #    species2=infiles.ReadVar("Species2")[0]

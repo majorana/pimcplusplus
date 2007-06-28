@@ -6,7 +6,7 @@ from HTMLPlots import *
 from GraphDraw import *
 import stats
 
-def WriteAsciiFile (asciiFileName,x,y):
+def WriteAsciiFile_1 (asciiFileName,x,y):
      asciiFile = open (asciiFileName, "w")
      n = len(x)
      for i in range(0,n):
@@ -14,6 +14,18 @@ def WriteAsciiFile (asciiFileName,x,y):
           asciiFile.write('%20.16e %20.16e\n' % (x[i], y[i]))
      asciiFile.close()
      return
+
+def WriteAsciiFile (asciiFileName,x,y,z):
+     asciiFile = open (asciiFileName, "w")
+     n = len(x)
+     for i in range(0,n):
+##          asciiFile.write(repr(x[i]) + ' ' + repr(data[-1,i]) +'\n')
+          asciiFile.write('%20.16e %20.16e %20.16e\n' % (x[i], y[i], z[i]))
+     asciiFile.close()
+     return
+
+
+
 
 def ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut):
      #acquire data about the structure factor
@@ -33,44 +45,57 @@ def ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut):
      for d in data:
          for bin in range(0,numBins):
              (mean,var,error,kappa)=stats.Stats(d[StartCut:-1,bin])
+##             (mean,var,error,kappa)=stats.Stats(d[StartCut:StartCut+1,bin])
+##             (mean,var,error,kappa)=stats.Stats(d[0:50,bin])
              meanArray[proc,bin]=mean
              errorArray[proc,bin]=error
          proc = proc + 1
      mean  = zeros(numBins) + 0.0
      error = zeros(numBins) + 0.0
      for bin in range(0,numBins):
-         (mean[bin],error[bin])=stats.WeightedAvg(meanArray[:,bin],errorArray[:,bin])
+#         (mean[bin],error[bin])=stats.WeightedAvg(meanArray[:,bin],errorArray[:,bin])
+         (mean[bin],error[bin])=stats.UnweightedAvg(meanArray[:,bin],errorArray[:,bin])
      y=mean
      x=infiles.ReadVar("x")[0]
+     kVecs=infiles.ReadVar("kVecs")[0]
+     print "KVECS Coming"
+     print kVecs
+     print "KVECS DONE"
      if (x==None):
           return currNum
      toSort=[]
      for counter in range(0,len(x)):
-          toSort.append((x[counter],y[counter]))
+          toSort.append((x[counter],y[counter],error[counter]))
      toSort.sort()
      for counter in range(0,len(x)):
           x[counter]=toSort[counter][0]
           y[counter]=toSort[counter][1]
+          error[counter]=toSort[counter][2]
 
      xNew=[]
      yNew=[]
+     yErrorNew=[]
      counter=1
 #     xNew.append(x[0])
 #     yNew.append(y[0])
      while (counter<len(x)):
           totalY=y[counter]
+          totalYerr=error[counter]*error[counter]
           numY=1
           counter=counter+1
           while (counter<len(x) and x[counter]-x[counter-1]<1e-10):
                totalY=totalY+y[counter]
+               totalYerr=totalYerr+error[counter]*error[counter]
                numY=numY+1
                counter=counter+1
           xNew.append(x[counter-1])
           yNew.append(totalY/(numY+0.0))
+          yErrorNew.append(sqrt(totalYerr)/(numY+0.0))
+          
      description=infiles.ReadVar("Description")[0]
      
      currNum=currNum+1
-     baseName=sectionName+repr(currNum)
+     baseName=sectionName+repr(currNum)+'.'+repr(StartCut)
 
 ##Produce Image
      myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel)
@@ -78,8 +103,14 @@ def ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut):
 ##Produce Ascii file
      asciiFileName = baseName + '.dat'
      asciiFileName_avg = baseName + '_avg.dat'
-     WriteAsciiFile(asciiFileName,x,y)
-     WriteAsciiFile(asciiFileName_avg,xNew,yNew)
+     WriteAsciiFile(asciiFileName,x,y,error)
+     WriteAsciiFile(asciiFileName_avg,xNew,yNew,yErrorNew)
+     xkVecs=[]
+     ykVecs=[]
+     for i in range(0,len(kVecs)):
+          xkVecs.append(kVecs[i][0])
+          ykVecs.append(kVecs[i][1])
+     WriteAsciiFile("SFVecs",xkVecs,ykVecs,y)
      psFileName=baseName+'.ps'
      psFileName_avg=baseName+'_avg.ps'
 

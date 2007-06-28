@@ -1,4 +1,5 @@
-import numarray
+import numpy
+
 import IO
 from Tables import *
 from HTMLgen import *
@@ -6,12 +7,15 @@ from HTMLPlots import *
 import stats
 
 def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
+    print "IN energy"
     N=infiles.CountVars()
+    print "N is ",N
     varList = []
     numProcs=0
     for i in range(0,N):
         data = infiles.ReadVar(i)
-        if (type(data[0])==numarray.numarraycore.NumArray):
+	print data,type(data[0])
+        if (type(data[0])==numpy.ndarray):
             varList.append(i)
             numProcs=len(data)
     scalarVarTable=BuildTable(numProcs+1,len(varList)+1)
@@ -21,7 +25,7 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
     summaryTable.body[0]=["Energy","Mean","Error","Variance","Kappa"]
 
     
-    Etable = 1.0*zeros((numProcs, 2*len(varList)))
+    Etable = 1.0*numpy.zeros((numProcs, 2*len(varList)))
     col=0
     for var in varList:
         data = infiles.ReadVar(var)
@@ -73,6 +77,7 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
         myFrame.width="100%"
         myFrame.height="375"
         detailedDoc.append(myFrame)
+	print "out of energy"
     return infiles,summaryDoc,detailedDoc
 
 

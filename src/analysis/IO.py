@@ -24,7 +24,7 @@ class IOSectionClass:
     def IncludeSection(this,name,fileName):
         return IOSection.IncludeSection(this.handle,name,fileName)
     def NewSection(this,name):
-        return IOSection.IncludeSection(this.handle,name,fileName)
+        return IOSection.NewSection(this.handle,name)
     def CloseSection(this):
         IOSection.CloseSection(this.handle)
     def ReadVar(this,name):

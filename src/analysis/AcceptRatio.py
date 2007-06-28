@@ -22,16 +22,19 @@ def ProcessBisectionBlock(infiles,summaryDoc,detailedDoc,StartCut):
         totalAcceptRatioVec[proc]=sum(totalAcceptRatioVec[proc])/len(totalAcceptRatioVec[proc])
     totalAcceptRatio=sum(totalAcceptRatioVec)/len(totalAcceptRatioVec)
     numStages=infiles.CountSections()
-    AcceptTable=BuildTable(1,numStages+2)
-    AcceptTable.body[0][0]="Bisection Block"
-    AcceptTable.body[0][1]=totalAcceptRatio
+    AcceptTable=BuildTable(2,numStages+2)
+    AcceptTable.body[0][0]="Move"
+    AcceptTable.body[0][1]="Total Acceptance Ratio"
+    AcceptTable.body[1][0]="Bisection Block"
+    AcceptTable.body[1][1]=totalAcceptRatio
     for stage in range(0,numStages):
         infiles.OpenSection(stage)
         acceptedPerms=infiles.ReadVar("AcceptRatio")
         for proc in range(0,len(acceptedPerms)):
                 acceptedPerms[proc]=sum(acceptedPerms[proc])/len(acceptedPerms[proc])
         acceptedPerm=sum(acceptedPerms)/len(acceptedPerms)
-        AcceptTable.body[0][stage+2]=acceptedPerm
+        AcceptTable.body[0][stage+2]="Stage "+str(stage)
+        AcceptTable.body[1][stage+2]=acceptedPerm
         print acceptedPerm
         infiles.CloseSection()
     summaryDoc.append(AcceptTable)

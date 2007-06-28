@@ -25,6 +25,7 @@ from Hexatic import *
 from SpecificHeatA import *
 from CycleCount import *
 from StructureFactor import *
+from SuperfluidFraction import *
 #from Conductivity import *
 
 
@@ -72,27 +73,40 @@ summaryDoc.append(HR())
 
 #ProcessMove(doc,infiles)
 
-print "PreTopTable"
-(_,tau,numTimeSlices,box)=ProcessTopTable(summaryDoc,infiles)
-beta = tau*numTimeSlices
-print "PostTopTable"
+try:
+     print "PreTopTable"
+     (_,tau,numTimeSlices,box)=ProcessTopTable(summaryDoc,infiles)
+     beta = tau*numTimeSlices
+     print "PostTopTable"
+except:
+     print "top table failed"
 ###########
 ## Moves ##
 ###########
 infiles.OpenSection("Moves")
 numSections=infiles.CountSections()
+try:
+     for secNum in range(0, numSections):
+          infiles.OpenSection(secNum)
+          try:
+               moveName = infiles.GetName()
+               if moveName == "Langevin":
+                    print "Processing Langevin move."
+                    ProcessLangevin(infiles, summaryDoc, detailedDoc, StartCut, beta)
+                    print "Done Langevin."
+               elif moveName=="BisectionBlock":
+                    print "Processing Bisection move."
+                    ProcessBisectionBlock(infiles,summaryDoc,detailedDoc,StartCut)
+               elif moveName=="Displace":
+                    print "Processing Displace move."
+                    ProcessDisplaceMove(infiles,summaryDoc,detailedDoc,StartCut)
+               infiles.CloseSection() # Current move section
+          except:
+               print "Moves also broken"
+               infiles.CloseSection() # Current move section
+except:
+     print "Moves broken"
 
-for secNum in range(0, numSections):
-     infiles.OpenSection(secNum)
-     moveName = infiles.GetName()
-     if moveName == "Langevin":
-          print "Processing Langevin move."
-          ProcessLangevin(infiles, summaryDoc, detailedDoc, StartCut, beta)
-          print "Done Langevin."
-     elif moveName=="BisectionBlock":
-          print "Processing Bisection move."
-          ProcessBisectionBlock(infiles,summaryDoc,detailedDoc,StartCut)
-     infiles.CloseSection() # Current move section
 infiles.CloseSection() # "Moves"
 
 
@@ -102,7 +116,7 @@ infiles.CloseSection() # "Moves"
 currNum=0
 infiles.OpenSection("Observables")
 numSections=infiles.CountSections()
-
+print "Number of sections is ",numSections
 for counter in range(0,numSections):
      infiles.OpenSection(counter)
      myName= infiles.GetName()
@@ -121,12 +135,12 @@ for counter in range(0,numSections):
          except:
               print "Error in processing vacancy"
      elif myName=="Energy" or myName=="Energies":
-          try:
+#          try:
                ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut)
                summaryDoc.append(HR())
                detailedDoc.append(HR())
-          except:
-               print "Error in energy processing"
+#          except:
+#               print "Error in energy processing"
      elif myName=="CycleCount":
           ProcessCycleCount(infiles,summaryDoc,detailedDoc,StartCut)
           summaryDoc.append(HR())
@@ -150,12 +164,18 @@ for counter in range(0,numSections):
 #         summaryDoc.append(HR())
 #         detailedDoc.append(HR())
 #         print "Pressure Done"
-     elif myName=="WindingNumber":
-         print "Processing Winding Number"
-         ProcessWindingNumber(infiles,summaryDoc,detailedDoc,StartCut)
+#     elif myName=="WindingNumber":
+#         print "Processing Winding Number"
+#         ProcessWindingNumber(infiles,summaryDoc,detailedDoc,StartCut)
+     elif myName=="SuperfluidFraction":
+         print "Processing Superfluid Fraction"
+         ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut)
      elif myName=="Hexatic":
-         print "Processing Hexatic"
-         ProcessHexatic(infiles,summaryDoc,detailedDoc,StartCut) 
+          try: 
+            print "Processing Hexatic"
+            ProcessHexatic(infiles,summaryDoc,detailedDoc,StartCut)
+          except:
+            print "Hexatic failed"
 #     elif myName=="Pressure":
 #         ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut)
 #         summaryDoc.append(HR())
@@ -173,6 +193,8 @@ for counter in range(0,numSections):
           summaryDoc.append(HR())
           detailedDoc.append(HR())
      elif myName=="StructureFactor":
+#          for i in range(0,20):
+#               ProcessStructureFactor(infiles,summaryDoc,detailedDoc,i*50)
           ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut)
           summaryDoc.append(HR())
           detailedDoc.append(HR())
