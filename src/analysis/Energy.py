@@ -7,14 +7,14 @@ from HTMLPlots import *
 import stats
 
 def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
-    print "IN energy"
+    summaryDoc.append(Heading(2,"Energy"))
+    description=infiles.ReadVar("Description")[0]
+    summaryDoc.append(Heading(4,description))
     N=infiles.CountVars()
-    print "N is ",N
     varList = []
     numProcs=0
     for i in range(0,N):
         data = infiles.ReadVar(i)
-	print data,type(data[0])
         if (type(data[0])==numpy.ndarray):
             varList.append(i)
             numProcs=len(data)
@@ -77,7 +77,6 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
         myFrame.width="100%"
         myFrame.height="375"
         detailedDoc.append(myFrame)
-	print "out of energy"
     return infiles,summaryDoc,detailedDoc
 
 
