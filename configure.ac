@@ -63,6 +63,16 @@ AC_F77_MAIN
 AC_PROG_LIBTOOL
 AC_C_RESTRICT
 
+# Check python stuff for IO wrappers
+AM_PATH_PYTHON(2.3)
+AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+AX_PYTHON_RUN([[import numpy ; print numpy.get_include()]])
+if test $ax_python_cc -ne 0
+then
+  AC_MSG_ERROR([cannot find numpy header files])
+fi
+AC_MSG_RESULT([$ax_python_output])
+AC_SUBST([NUMPY_INC], [-I$ax_python_output])
 
 # Optimization settings.
 AC_CANONICAL_HOST

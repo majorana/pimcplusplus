@@ -45,6 +45,17 @@ libIO_la_SOURCES =   IO.cc               \
                      IOVarHDF5.h          
 
 
+# Python wrappers
+pyIOexecdir = $(pyexecdir)/IO
+
+pyIOexec_PYTHON = IO.py
+
+pyIOexec_LTLIBRARIES = _IO.la
+_IO_la_LDFLAGS  = -module -avoid-version -export-symbols-regex init_IO
+_IO_la_LIBADD   = libIO.la
+_IO_la_CPPFLAGS = $(PYTHON_INCLUDES) $(IO_CFLAGS) $(NUMPY_INC)
+_IO_la_SOURCES  = IONumPyWrapper.cc
+
 
 #if WITH_F77
 #     libsprng_la_SOURCES += common/fwrap_mpi.c
