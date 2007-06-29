@@ -317,22 +317,42 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
   else if (PyArray_Check (dataObject)) {
     cerr << "We're writing a NumPy array:  ";
     PyArrayObject *array = (PyArrayObject*) dataObject;
+    if (array->descr->type == 'l') {
+      int safe = PyArray_CanCastSafely(PyArray_LONG, PyArray_INT);
+      cerr << "Safe = " << safe << endl;
+      array = (PyArrayObject*) PyArray_Cast(array, PyArray_INT);
+    }
     PyArray_Descr *descr = array->descr;
     char type = descr->type;
     int ndim = array->nd;
+    long *dims = array->dimensions;
     cerr << "typecode = " << type << endl;
-    if (type == 'l')
-      cerr << "We're writing an integer array of dimension " << ndim << endl;
-    else if (type == 'f')
-      cerr << "We're writing a float array of dimension " << ndim << endl;
-    else if (type == 'd')
-      cerr << "We're writing a double array of dimension " << ndim << endl;
-    else if (type == '?')
-      cerr << "We're writing a boolean array of dimension " << ndim << endl;
-    else if (type == 'F')
-      cerr << "We're writing a float complex array of dimension " << ndim << endl;
-    else if (type == 'D')
-      cerr << "We're writing a double complex array of dimension " << ndim << endl;
+    if (ndim == 1) {
+      TinyVector<double,1> tvdims, tvstrides; 
+      tvdims[0]     = array->dimensions[0];
+      tvstrides[0]  = array->strides[0];
+
+      if (type == NPY_INTLTR) {
+	int *data = (int*) array->data;
+	Array<int,1> blitzArray(data, tvdims, tvstrides, blitz::neverDeleteData);
+	io.WriteVar (name, blitzArray);
+      }
+      else if (type == NPY_DOUBLELTR) {
+	double *data = (double*) array->data;
+	Array<double,1> blitzArray(data, tvdims, tvstrides, blitz::neverDeleteData);
+	io.WriteVar (name, blitzArray);
+      }
+      else if (type == NPY_BOOLLTR){
+	double *data = (double*) array->data;
+	Array<double,1> blitzArray(data, tvdims, tvstrides, blitz::neverDeleteData);
+	io.WriteVar (name, blitzArray);
+      }
+      else if (type == NPY_CDOUBLELTR) {
+	complex<double> *data = (complex<double>*) array->data;
+	Array<complex<double>,1> blitzArray(data, tvdims, tvstrides, blitz::neverDeleteData);
+	io.WriteVar (name, blitzArray);
+      }
+    }
   }
   else {
     cerr << "Error:  unrecognized object type passed to WriteVar.\n";
