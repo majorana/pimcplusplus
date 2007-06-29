@@ -41,7 +41,7 @@ def ProcessTimeAnalysis(infiles,summaryDoc,detailedDoc,StartCut):
     row = 0
     for i in range(0,numMoves):
         MoveTable.body[i+1] = [MoveNames[i], "%5.2f" % (MT[i]*100.0)]
-    summaryDoc.append(Heading(2,"Energy"))
+    summaryDoc.append(Heading(2,"Time analysis"))
     description=infiles.ReadVar("Description")[0]
     summaryDoc.append(Heading(4,description))
     summaryDoc.append(MoveTable)
