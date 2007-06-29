@@ -29,6 +29,8 @@ class IOSectionClass:
         IOSection.CloseSection(this.handle)
     def ReadVar(this,name):
         return IOSection.ReadVar(this.handle,name)
+    def WriteVar(this,name,data):
+        return IOSection.WriteVar(this.handle,name,data)
     def CountSections(this):
         return IOSection.CountSections(this.handle)
     def CountSections2(this,name):

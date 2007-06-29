@@ -142,7 +142,7 @@ IOSection_CloseFile(PyObject *self, PyObject *args)
     return NULL;
   else {
     ((IOSectionClass*)IOSectionPtr)->CloseFile();
-    return NULL;
+    return Py_True;
   }
 }
 
@@ -208,7 +208,6 @@ IOSection_OpenSectionNum (PyObject *self, PyObject *args)
     return Py_BuildValue("i",(int)success);
   }
 }
-
 
 extern "C" PyObject*
 IOSection_IncludeSection (PyObject *self, PyObject *args)
@@ -282,6 +281,64 @@ IOSection_GetVarName(PyObject *self, PyObject *args)
     string name=((IOSectionClass*)IOSectionPtr)->GetVarName(num);
     return Py_BuildValue("s",(name.c_str()));
   }
+}
+
+
+extern "C" PyObject*
+IOSection_WriteVar (PyObject *self, PyObject *args)
+{
+  // Get the name from the python arguments
+  char *str = (char*)((sizeof(int) == sizeof(void*)) ? "isO" : "lsO");
+  const char *name;
+  void *IOSectionPtr;
+  PyObject *dataObject;
+  if (!PyArg_ParseTuple (args, str, &IOSectionPtr, &name, &dataObject))
+    return Py_None;
+
+  IOSectionClass &io = *((IOSectionClass*)IOSectionPtr);
+
+  if (PyBool_Check (dataObject)) {
+    bool val = (dataObject == Py_True);
+    io.WriteVar (name, val);
+  }
+  else if (PyInt_Check(dataObject)) {
+    int val = PyInt_AsLong (dataObject);
+    io.WriteVar (name, val);
+  }
+  else if (PyFloat_Check(dataObject)) {
+    double val = PyFloat_AsDouble (dataObject);
+    io.WriteVar (name, val);
+  }
+  else if (PyComplex_Check (dataObject)) {
+    complex<double> val (PyComplex_RealAsDouble(dataObject), 
+			 PyComplex_ImagAsDouble(dataObject));
+    io.WriteVar (name, val);
+  }
+  else if (PyArray_Check (dataObject)) {
+    cerr << "We're writing a NumPy array:  ";
+    PyArrayObject *array = (PyArrayObject*) dataObject;
+    PyArray_Descr *descr = array->descr;
+    char type = descr->type;
+    int ndim = array->nd;
+    cerr << "typecode = " << type << endl;
+    if (type == 'l')
+      cerr << "We're writing an integer array of dimension " << ndim << endl;
+    else if (type == 'f')
+      cerr << "We're writing a float array of dimension " << ndim << endl;
+    else if (type == 'd')
+      cerr << "We're writing a double array of dimension " << ndim << endl;
+    else if (type == '?')
+      cerr << "We're writing a boolean array of dimension " << ndim << endl;
+    else if (type == 'F')
+      cerr << "We're writing a float complex array of dimension " << ndim << endl;
+    else if (type == 'D')
+      cerr << "We're writing a double complex array of dimension " << ndim << endl;
+  }
+  else {
+    cerr << "Error:  unrecognized object type passed to WriteVar.\n";
+    return Py_False;
+  }
+  return Py_True;
 }
 
 
@@ -760,6 +817,8 @@ static PyMethodDef IOSectionMethods[] = {
      "Create a new IOSection object."},
     {"ReadVar", IOSection_ReadVar, METH_VARARGS,
      "Reads the named variable, returning appropriate object with data."},
+    {"WriteVar", IOSection_WriteVar, METH_VARARGS,
+     "Writes the named variable with the data pased."},
     {"GetName", IOSection_GetName, METH_VARARGS,
      "Gets the name of the current section"},
     {"NewFile", IOSection_NewFile, METH_VARARGS,
