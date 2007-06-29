@@ -26,6 +26,7 @@ from SpecificHeatA import *
 from CycleCount import *
 from StructureFactor import *
 from SuperfluidFraction import *
+import BisectionBlock
 #from Conductivity import *
 
 
@@ -80,34 +81,46 @@ try:
      print "PostTopTable"
 except:
      print "top table failed"
-###########
-## Moves ##
-###########
+
 infiles.OpenSection("Moves")
 numSections=infiles.CountSections()
-try:
-     for secNum in range(0, numSections):
-          infiles.OpenSection(secNum)
-          try:
-               moveName = infiles.GetName()
-               if moveName == "Langevin":
-                    print "Processing Langevin move."
-                    ProcessLangevin(infiles, summaryDoc, detailedDoc, StartCut, beta)
-                    print "Done Langevin."
-               elif moveName=="BisectionBlock":
-                    print "Processing Bisection move."
-                    ProcessBisectionBlock(infiles,summaryDoc,detailedDoc,StartCut)
-               elif moveName=="Displace":
-                    print "Processing Displace move."
-                    ProcessDisplaceMove(infiles,summaryDoc,detailedDoc,StartCut)
-               infiles.CloseSection() # Current move section
-          except:
-               print "Moves also broken"
-               infiles.CloseSection() # Current move section
-except:
-     print "Moves broken"
+for secNum in range(0,numSections):
+     infiles.OpenSection(secNum)
+     moveName=infiles.GetName()
+     if moveName=="BisectionBlock":
+          print "Processing BisectionBlock"
+          BisectionBlock.Process(infiles,summaryDoc,detailedDoc,StartCut)
+     infiles.CloseSection()
+infiles.CloseSection()
+          
+#############
+#### Moves ##
+#############
+##infiles.OpenSection("Moves")
+##numSections=infiles.CountSections()
+###try:
+##for secNum in range(0, numSections):
+##               infiles.OpenSection(secNum)
+###          try:
+##               moveName = infiles.GetName()
+##               if moveName == "Langevin":
+##                    print "Processing Langevin move."
+##                    ProcessLangevin(infiles, summaryDoc, detailedDoc, StartCut, beta)
+##                    print "Done Langevin."
+##               elif moveName=="BisectionBlock":
+##                    print "Processing Bisection move."
+##                    ProcessBisectionBlock(infiles,summaryDoc,detailedDoc,StartCut)
+##               elif moveName=="Displace":
+##                    print "Processing Displace move."
+##                    ProcessDisplaceMove(infiles,summaryDoc,detailedDoc,StartCut)
+##               infiles.CloseSection() # Current move section
+###          except:
+###               print "Moves also broken"
+###               infiles.CloseSection() # Current move section
+###except:
+###     print "Moves broken"
 
-infiles.CloseSection() # "Moves"
+##infiles.CloseSection() # "Moves"
 
 
 #################
