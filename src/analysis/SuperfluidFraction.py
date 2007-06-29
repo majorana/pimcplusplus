@@ -1,18 +1,11 @@
 from Tables import *
 from HTMLgen import *
 from HTMLPlots import *
-import numarray
+import numpy
 import stats
 
 
 def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
-    #acquire data about the correlation section
-#    species1=infiles.ReadVar("Species1")[0]
-#    species2=infiles.ReadVar("Species2")[0]
-#    baseName = "%s-%s_PC" % (species1, species2)
-    baseName="SuperfluidFraction"
-    hlabel="r"    #infiles.ReadVar("xlabel")[0]
-    vlabel="g(r)" #infiles.ReadVar("ylabel")[0]
     data=infiles.ReadVar("SuperfluidFraction")
     currNum = 0
     if (data==[None]):
@@ -29,26 +22,44 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
             (mean,var,error,kappa)=stats.Stats(d[:,bin])
             meanArray[proc,bin]=mean
             errorArray[proc,bin]=error
-            print kappa
         proc = proc + 1
     mean  = zeros(numBins) + 0.0
     error = zeros(numBins) + 0.0
     for bin in range(0,numBins):
         (mean[bin],error[bin])=stats.UnweightedAvg(meanArray[:,bin],errorArray[:,bin])
-    print "Superfluid",mean,error,(mean[0]+mean[1]+mean[2])/3,sqrt(error[0]*error[0]+error[1]*error[1]+error[2]*error[2])
-#    x=infiles.ReadVar("x")[0]
-    x=[1,2,3]
-    fillx = x
-    revx= x[::-1]
-#    clf()
-    fillx=concatenate((x,revx)) #reverse(x))
-    filly = meanArray+errorArray
-    y1=mean+error
-    y2=mean-error
-    filly=concatenate((y1,y2[::-1]))
-    fill (fillx, filly,hold=True)
-#    hold on
-    plot (x, mean,'r',hold=True)
+    meanSF=average(mean)
+    errorSF=sqrt(sum([x*x for x in error]))
+
+    print "Superfluid",meanSF,errorSF
+    SFTable=BuildTable(3,5)
+    SFTable.body[0]=[" ","x", "y","z","total"]
+    SFTable.body[1][0]="Mean"
+    SFTable.body[2][0]="Error"
+    for i in range(1,4):
+        SFTable.body[1][i]=mean[i-1]
+        SFTable.body[2][i]=error[i-1]
+    SFTable.body[1][4]=meanSF
+    SFTable.body[2][4]=errorSF
+
+
+
+
+    clf()
+    baseName="SuperfluidFraction"
+    hlabel="x,y,z,total"  
+    vlabel="$\rho_s$"
+    matplotlib.rc('text', usetex=True)
+
+    h1=xlabel(hlabel)
+    v1=ylabel(r"$\rho_s$")
+    setp(h1,"FontSize",20)
+    setp(v1,"FontSize",20)
+    labels = get(gca(), 'yticklabels')
+    setp(labels, 'fontsize', 16)
+
+    errorbar([1,2,3],mean,error,fmt='b.')
+    axis([0, 4,0,1.2])
+
     imageName = baseName + ".png"
     epsName = baseName +".eps"
     savefig(imageName,dpi=60)
@@ -72,6 +83,7 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
     img = Image(imageName);
     summaryDoc.append(Heading(2,"Superfluidfraction"))
     summaryDoc.append(Heading(4,description))
+    summaryDoc.append(SFTable)
     summaryDoc.append(img)
     summaryDoc.append(BR())
     summaryDoc.append(fileTable)
