@@ -50,11 +50,11 @@ pyIOexecdir = $(pyexecdir)/IO
 
 pyIOexec_PYTHON = IO.py
 
-pyIOexec_LTLIBRARIES = _IO.la
-_IO_la_LDFLAGS  = -module -avoid-version -export-symbols-regex init_IO
-_IO_la_LIBADD   = libIO.la
-_IO_la_CPPFLAGS = $(PYTHON_INCLUDES) $(IO_CFLAGS) $(NUMPY_INC)
-_IO_la_SOURCES  = IONumPyWrapper.cc
+pyIOexec_LTLIBRARIES = IOSection.la
+IOSection_la_LDFLAGS  = -module -avoid-version -export-symbols-regex init_IO
+IOSection_la_LIBADD   = libIO.la
+IOSection_la_CPPFLAGS = $(PYTHON_INCLUDES) $(IO_CFLAGS) $(NUMPY_INC)
+IOSection_la_SOURCES  = IONumPyWrapper.cc
 
 
 #if WITH_F77
