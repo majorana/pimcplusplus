@@ -116,7 +116,12 @@ ActionsClass::Read(IOSectionClass &in)
   for (int i=0; i<numPairActions; i++) {
     // Allow for tilde-expansion in these files
     string name = ExpandFileName(PAFiles(i));
-    assert(PAIO.OpenFile (name));
+    if (!PAIO.OpenFile(name)){
+      cerr<<"We were unable to find the PairAction file "<<name<<endl;
+      cerr<<"Please make sure you have specified it correctly."<<endl;
+      abort();
+    }
+    //    assert(PAIO.OpenFile (name));
     cerr << i << ": reading " << name << endl;
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
     if (PairArray(i)->Pot != NULL)

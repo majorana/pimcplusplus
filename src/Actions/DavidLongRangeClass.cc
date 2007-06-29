@@ -18,11 +18,9 @@
 #include "DavidLongRangeClass.h"
 #include "../PathDataClass.h"
 
-
 void DavidLongRangeClass::Read(IOSectionClass &in)
 {
   double myNum;
-  cerr<<"The current size of the thing is "<<Path.kVecs.size()<<endl;
   uk.resize(Path.MagK.size());
   duk.resize(Path.MagK.size());
   for (int counter=0;counter<duk.size();counter++){
@@ -70,7 +68,6 @@ void DavidLongRangeClass::Read(IOSectionClass &in)
       }
   //  cerr<<"Done"<<endl;
   infile.close();
-  
 }
 
 inline double mag2 (const complex<double> &z)
@@ -100,8 +97,11 @@ DavidLongRangeClass::SingleAction (int slice1, int slice2,
       //      PairActionFitClass &pa = *PairMatrix(species,species);
       //      if (pa.IsLongRange()) {
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
-	double kmagnitude=sqrt(Path.kVecs(ki)[0]*Path.kVecs(ki)[0]+
-			Path.kVecs(ki)[1]*Path.kVecs(ki)[1]);
+	//	double kmagnitude=sqrt(Path.kVecs(ki)[0]*Path.kVecs(ki)[0]+
+	//			Path.kVecs(ki)[1]*Path.kVecs(ki)[1]);
+	double kmagnitude=sqrt(dot(Path.kVecs(ki),Path.kVecs(ki)));
+			  
+
 	int kcounter=0;
 	while (abs(kmagnitude-Path.MagK(kcounter))>1e-10)
 	  kcounter++;
@@ -145,8 +145,9 @@ double DavidLongRangeClass::d_dBeta (int slice1, int slice2,  int level)
       //      if (pa.IsLongRange()) {
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
-	double kmagnitude=sqrt(Path.kVecs(ki)[0]*Path.kVecs(ki)[0]+
-			Path.kVecs(ki)[1]*Path.kVecs(ki)[1]);
+// 	double kmagnitude=sqrt(Path.kVecs(ki)[0]*Path.kVecs(ki)[0]+
+// 			Path.kVecs(ki)[1]*Path.kVecs(ki)[1]);
+ 	double kmagnitude=sqrt(dot(Path.kVecs(ki),Path.kVecs(ki)));
 	int kcounter=0;
 	while (abs(kmagnitude-Path.MagK(kcounter))>1e-10)
 	  kcounter++;
