@@ -369,7 +369,7 @@ namespace IO {
   template<> bool
   IOVarHDF5<string,4>::VarWrite(const Array<string,4> &val)
   {
-    Array<char,4> charArray
+    Array<char,5> charArray
       (val.extent(0), val.extent(1), val.extent(2), val.extent(3),
        MAX_HDF5_STRING_LENGTH);
     charArray=0;
@@ -378,7 +378,7 @@ namespace IO {
 	for (int k=0; k<val.extent(2); k++)
 	  for (int l=0; l<val.extent(3); l++) {
 	    assert (val(i,j,k,l).length() < (MAX_HDF5_STRING_LENGTH-1));
-	    for (int s=0; s<val(i,j,k).length(); s++)
+	    for (int s=0; s<val(i,j,k,l).length(); s++)
 	      charArray(i,j,k,l,s) = val(i,j,k,l)[s];
 	  }
     hid_t type = H5Dget_type(DatasetID);
