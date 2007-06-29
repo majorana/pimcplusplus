@@ -327,24 +327,37 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
   //                  Array Writes                  //
   ////////////////////////////////////////////////////
   else if (PyArray_Check (dataObject)) {
-    cerr << "We're writing a NumPy array:  ";
     PyArrayObject *array = (PyArrayObject*) dataObject;
     if (array->descr->type == 'l') {
       int safe = PyArray_CanCastSafely(PyArray_LONG, PyArray_INT);
-      cerr << "Safe = " << safe << endl;
       array = (PyArrayObject*) PyArray_Cast(array, PyArray_INT);
     }
     PyArray_Descr *descr = array->descr;
     char type = descr->type;
     int ndim = array->nd;
-    cerr << "typecode = " << type << endl;
+    int typesize;
+    switch (type) {
+      case NPY_INTLTR:
+	typesize = sizeof(int);              break;
+      case NPY_DOUBLELTR:
+	typesize = sizeof(double);           break;
+      case NPY_BOOLLTR:
+	typesize = sizeof(bool);             break;
+      case NPY_CDOUBLE:
+	typesize = sizeof(complex<double>);  break;
+      case NPY_STRING:
+        typesize = sizeof(char);             break;
+      default:
+        typesize = 1;                        break;
+    }
+    //    cerr << "typecode = " << type << endl;
     ////////
     // 1D //
     ////////
     if (ndim == 1) {
       TinyVector<int,1> tvdims, tvstrides; 
       tvdims[0]     = array->dimensions[0];
-      tvstrides[0]  = array->strides[0];
+      tvstrides[0]  = array->strides[0] / typesize;
 
       if (type == NPY_INTLTR) {
 	int *data = (int*) array->data;
@@ -385,7 +398,7 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
       TinyVector<int,2> tvdims, tvstrides; 
       for (int i=0; i<2; i++) {
 	tvdims[i]     = array->dimensions[i];
-	tvstrides[i]  = array->strides[i];
+	tvstrides[i]  = array->strides[i] / typesize;
       }
       
       if (type == NPY_INTLTR) {
@@ -408,6 +421,19 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
 	Array<complex<double>,2> blitzArray(data, tvdims, tvstrides, blitz::neverDeleteData);
 	io.WriteVar (name, blitzArray);
       }
+      else if (type == NPY_STRINGLTR) {
+	char tmp[tvstrides[1]+1];
+	tmp[tvstrides[1]] = '\0';
+	Array<string,2> strArray(tvdims[0], tvdims[1]);
+	for (int i=0; i<tvdims[0]; i++) 
+	  for (int j=0; j<tvdims[1]; j++) {
+	    for (int k=0; k<tvstrides[1]; k++)
+	      tmp[k] = ((char*)array->data)[i*tvstrides[0]+j*tvstrides[1]+k];
+	    strArray(i,j) = tmp;
+	  }
+	io.WriteVar(name, strArray);
+      }
+
     }
     ////////
     // 3D //
@@ -416,7 +442,7 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
       TinyVector<int,3> tvdims, tvstrides; 
       for (int i=0; i<3; i++) {
 	tvdims[i]     = array->dimensions[i];
-	tvstrides[i]  = array->strides[i];
+	tvstrides[i]  = array->strides[i] / typesize;
       }
       
       if (type == NPY_INTLTR) {
@@ -439,6 +465,21 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
 	Array<complex<double>,3> blitzArray(data, tvdims, tvstrides, blitz::neverDeleteData);
 	io.WriteVar (name, blitzArray);
       }
+      else if (type == NPY_STRINGLTR) {
+	char tmp[tvstrides[2]+1];
+	tmp[tvstrides[2]] = '\0';
+	Array<string,3> strArray(tvdims[0], tvdims[1], tvdims[2]);
+	for (int i=0; i<tvdims[0]; i++) 
+	  for (int j=0; j<tvdims[1]; j++) 
+	    for (int k=0; k<tvdims[2]; k++) {
+	      for (int l=0; l<tvstrides[2]; l++) 
+		tmp[l] = 
+		  ((char*)array->data) [i*tvstrides[0]+j*tvstrides[1]+k*tvstrides[2]+l];
+	      strArray(i,j,k) = tmp;
+	    }
+	io.WriteVar(name, strArray);
+      }
+
     }
     ////////
     // 4D //
@@ -447,7 +488,7 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
       TinyVector<int,4> tvdims, tvstrides; 
       for (int i=0; i<4; i++) {
 	tvdims[i]     = array->dimensions[i];
-	tvstrides[i]  = array->strides[i];
+	tvstrides[i]  = array->strides[i] / typesize;
       }
       
       if (type == NPY_INTLTR) {
@@ -469,6 +510,21 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
 	complex<double> *data = (complex<double>*) array->data;
 	Array<complex<double>,4> blitzArray(data, tvdims, tvstrides, blitz::neverDeleteData);
 	io.WriteVar (name, blitzArray);
+      }
+      else if (type == NPY_STRINGLTR) {
+	char tmp[tvstrides[3]+1];
+	tmp[tvstrides[3]] = '\0';
+	Array<string,4> strArray(tvdims[0], tvdims[1], tvdims[2], tvdims[3]);
+	for (int i=0; i<tvdims[0]; i++) 
+	  for (int j=0; j<tvdims[1]; j++) 
+	    for (int k=0; k<tvdims[2]; k++) 
+	      for (int l=0; l<tvdims[3]; l++) {
+		for (int m=0; m<tvstrides[3]; m++) 
+		  tmp[m] = ((char*)array->data) 
+		    [i*tvstrides[0]+j*tvstrides[1]+k*tvstrides[2]+l*tvstrides[3]+m];
+		strArray(i,j,k,l) = tmp;
+	      }
+	io.WriteVar(name, strArray);
       }
     }
   }
