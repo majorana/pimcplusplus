@@ -1,4 +1,4 @@
-##from pylab import *
+from pylab import *
 from HTMLgen import *
 from Tables import *
 
