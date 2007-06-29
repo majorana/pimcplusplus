@@ -335,7 +335,6 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
     PyArray_Descr *descr = array->descr;
     char type = descr->type;
     int ndim = array->nd;
-    long *dims = array->dimensions;
     cerr << "typecode = " << type << endl;
     ////////
     // 1D //
