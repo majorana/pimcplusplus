@@ -321,6 +321,8 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
     string str = PyString_AS_STRING (dataObject);
     io.WriteVar (name, str);
   }
+  else if (PyList_Check (dataObject)) {
+  }
   ////////////////////////////////////////////////////
   //                  Array Writes                  //
   ////////////////////////////////////////////////////
@@ -340,7 +342,7 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
     // 1D //
     ////////
     if (ndim == 1) {
-      TinyVector<double,1> tvdims, tvstrides; 
+      TinyVector<int,1> tvdims, tvstrides; 
       tvdims[0]     = array->dimensions[0];
       tvstrides[0]  = array->strides[0];
 
@@ -364,12 +366,23 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
 	Array<complex<double>,1> blitzArray(data, tvdims, tvstrides, blitz::neverDeleteData);
 	io.WriteVar (name, blitzArray);
       }
+      else if (type == NPY_STRINGLTR) {
+	char tmp[tvstrides[0]+1];
+	tmp[tvstrides[0]] = '\0';
+	Array<string,1> strArray(tvdims[0]);
+	for (int i=0; i<tvdims[0]; i++) {
+	  for (int j=0; j<tvstrides[0]; j++)
+	    tmp[j] = ((char*)array->data)[i*tvstrides[0]+j];
+	  strArray(i) = tmp;
+	}
+	io.WriteVar(name, strArray);
+      }
     }
     ////////
     // 2D //
     ////////
     else if (ndim == 2) {
-      TinyVector<double,2> tvdims, tvstrides; 
+      TinyVector<int,2> tvdims, tvstrides; 
       for (int i=0; i<2; i++) {
 	tvdims[i]     = array->dimensions[i];
 	tvstrides[i]  = array->strides[i];
@@ -400,7 +413,7 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
     // 3D //
     ////////
     else if (ndim == 3) {
-      TinyVector<double,3> tvdims, tvstrides; 
+      TinyVector<int,3> tvdims, tvstrides; 
       for (int i=0; i<3; i++) {
 	tvdims[i]     = array->dimensions[i];
 	tvstrides[i]  = array->strides[i];
@@ -431,7 +444,7 @@ IOSection_WriteVar (PyObject *self, PyObject *args)
     // 4D //
     ////////
     else if (ndim == 4) {
-      TinyVector<double,4> tvdims, tvstrides; 
+      TinyVector<int,4> tvdims, tvstrides; 
       for (int i=0; i<4; i++) {
 	tvdims[i]     = array->dimensions[i];
 	tvstrides[i]  = array->strides[i];
