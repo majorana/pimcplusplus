@@ -46,7 +46,7 @@ libIO_la_SOURCES =   IO.cc               \
 
 
 # Python wrappers
-pyIOexecdir = $(pyexecdir)/IO
+pyIOexecdir = $(pyexecdir)
 
 pyIOexec_PYTHON = IO.py
 
