@@ -1,4 +1,5 @@
-import numarray
+#import numarray
+import numpy
 from IO import *
 from Tables import *
 from HTMLgen import *

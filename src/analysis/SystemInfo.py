@@ -3,7 +3,8 @@ import sys
 import os
 import math
 import stats
-import numarray
+#import numarray
+import numpy
 from Energy import *
 from nofr import *
 from PairCorrelation import *

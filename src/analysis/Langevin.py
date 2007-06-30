@@ -1,4 +1,5 @@
-import numarray
+##import numarray
+import numpy
 import IO
 from HTMLgen import *
 from HTMLPlots import *

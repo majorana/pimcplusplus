@@ -191,8 +191,10 @@ void BisectionStageClass::CalcShift(Array<int,1> &activeParticles,int slice,
     for (int j=0;j<Correlated.extent(1);j++)
       S(i,j)=Correlated(i,j);
   det=Determinant (S);
-  CholeskyBig(S);
-  cerr<<"corrlated Cholesky array"<<endl;
+  //CholeskyBig(S);
+  //cerr<<"corrlated Cholesky array"<<endl;
+  cerr<<"ERROR no call to Cholesky array"<<endl;
+  assert(0);
   for (int i=0;i<S.extent(0);i++){
     for (int j=0;j<S.extent(1);j++)
       cerr<<S(i,j)<<" ";

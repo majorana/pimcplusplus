@@ -1,4 +1,5 @@
-from numarray import *
+##from numarray import *
+from numpy import *
 
 
 def UnweightedAvg(meanList,errorList):

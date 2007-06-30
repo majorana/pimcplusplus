@@ -1,7 +1,8 @@
 from Tables import *
 from HTMLgen import *
 from HTMLPlots import *
-import numarray
+#import numarray
+import numpy
 import stats
 
 def ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut):

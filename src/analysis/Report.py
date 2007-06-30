@@ -4,7 +4,7 @@ import sys
 import os
 import math
 import stats
-import numarray
+##import numarray
 from AcceptRatio import *
 from Energy import *
 from nofr import *
@@ -27,7 +27,7 @@ from CycleCount import *
 from StructureFactor import *
 from SuperfluidFraction import *
 import BisectionBlock
-#from Conductivity import *
+##from Conductivity import *
 
 
 

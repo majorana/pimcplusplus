@@ -1,9 +1,11 @@
-import numarray
+##import numarray
+import numpy
 import IO
 from Tables import *
 from HTMLgen import *
 from HTMLPlots import *
-import numarray.fft
+##import numarray.fft
+import numpy.fft
 import stats
 import math
 
