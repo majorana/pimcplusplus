@@ -51,7 +51,8 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
     matplotlib.rc('text', usetex=True)
 
     h1=xlabel(hlabel)
-    v1=ylabel(r"$\rho_s$")
+##    v1=ylabel(r"$\rho_s$")
+    v1=ylabel("rho_s")
     setp(h1,"FontSize",20)
     setp(v1,"FontSize",20)
     labels = get(gca(), 'yticklabels')
