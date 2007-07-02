@@ -48,7 +48,7 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
     baseName="SuperfluidFraction"
     hlabel="x,y,z,total"  
     vlabel="$\rho_s$"
-    matplotlib.rc('text', usetex=True)
+##    matplotlib.rc('text', usetex=True)
 
     h1=xlabel(hlabel)
 ##    v1=ylabel(r"$\rho_s$")
