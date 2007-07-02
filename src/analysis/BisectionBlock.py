@@ -7,6 +7,7 @@ import stats
 
 
 def Process(infiles,summaryDoc,detailedDoc,StartCut):
+    PermuteTable=[]
     totalAcceptRatioVec=infiles.ReadVar("AcceptRatio")
     for proc in range(0,len(totalAcceptRatioVec)):
         totalAcceptRatioVec[proc]=sum(totalAcceptRatioVec[proc])/len(totalAcceptRatioVec[proc])
@@ -45,4 +46,5 @@ def Process(infiles,summaryDoc,detailedDoc,StartCut):
 #        AcceptTable.body[0][stage+2]="Stage "+str(stage)
         infiles.CloseSection()
     summaryDoc.append(AcceptTable)
-    summaryDoc.append(PermuteTable)
+    if PermuteTable!=[]:
+        summaryDoc.append(PermuteTable)
