@@ -143,7 +143,7 @@ public:
   void Read(string fileName);
   void MakeFrame (int frame, bool offScreen=false);
   void SetFlag(string newFlag);
-  void SetViewportSize(int size);
+  void SetViewportSize(int xsize, int ysize);
 
   VisualClass();
   virtual ~VisualClass();

@@ -855,9 +855,9 @@ VisualClass::OnRhoChange()
 }
 
 void
-VisualClass::SetViewportSize (int size)
+VisualClass::SetViewportSize (int xsize, int ysize)
 {
-  PathVis.set_size_request(size, size);
+  PathVis.set_size_request(xsize, ysize);
   resize(10,10);
 }
 
@@ -908,7 +908,7 @@ int main(int argc, char** argv)
 
   }
   if (parser.Found("small"))
-    visual.SetViewportSize(600);
+    visual.SetViewportSize(800, 600);
 
   visual.Read (parser.GetFile(0));
   kit.run(visual);

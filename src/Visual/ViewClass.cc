@@ -131,12 +131,26 @@ ViewClass::GLtransform()
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
+  double width  = PathVis.get_width();
+  double height = PathVis.get_height();
+  double ratio = width/height;
+  
   //  gluPerspective(40.0, 1.0, 1.0, 10.0);
-  if (UsePerspective)
-    gluPerspective(40.0, 1.0, 1.0, 8.0*Distance/Scale);
-  else
-    glOrtho(-0.6*Distance/Scale, 0.6*Distance/Scale, 
-	    -0.6*Distance/Scale, 0.6*Distance/Scale, 1.0, 8.0*Distance/Scale);
+  if (ratio > 1.0) {
+    if (UsePerspective)
+      gluPerspective(40.0, ratio, 1.0, 8.0*Distance/Scale);
+    else
+      glOrtho(-0.6*Distance*ratio/Scale, 0.6*Distance*ratio/Scale, 
+	      -0.6*Distance/Scale, 0.6*Distance/Scale, 1.0, 8.0*Distance/Scale);
+  }
+  else {
+    double fovy = 2.0*180.0/M_PI*atan (tan(20.0*M_PI/180.0)/ratio);
+    if (UsePerspective)
+      gluPerspective(fovy, ratio, 1.0, 8.0*Distance/Scale);
+    else
+      glOrtho(-0.6*Distance/Scale, 0.6*Distance/Scale, 
+	      -0.6*Distance/(Scale*ratio), 0.6*Distance/(Scale*ratio), 1.0, 8.0*Distance/Scale);
+  }
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
