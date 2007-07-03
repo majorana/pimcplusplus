@@ -374,7 +374,7 @@ void VisualClass::Read(string fileName)
 	  for (int slice=0; slice<PathArray.extent(2); slice++)
 	    PathArray(frame+1,ptcl,slice,dim) += Box[dim];
       }
-
+  FileIsRead = true;
 	       
 
   FrameAdjust.set_upper(PathArray.extent(0)-1);
@@ -383,6 +383,7 @@ void VisualClass::Read(string fileName)
   Infile.CloseSection();
   FrameScale.set_value(0.0);
   MakeFrame (0);
+
 }
 
 void VisualClass::SetFlag(string newFlag){
@@ -443,7 +444,7 @@ VisualClass::VisualClass()
     DetailFrame ("Detail"),  DetailAdjust (1.0, 1.0, 2.0), 
     IsoFrame    ("Isosurf"),    IsoAdjust (0.0, 0.0, 5.0, 0.1),
     RhoFrame    ("Rho"),        RhoAdjust (0.0, 0.0, 1.0, 0.02, 0.1),
-    Export(*this), RhoVar(NULL)
+    Export(*this), RhoVar(NULL), FileIsRead(false)
 {
   TubesImage.set(FindFullPath("tubes.png"));
   LinesImage.set(FindFullPath("lines.png"));
@@ -501,8 +502,8 @@ VisualClass::VisualClass()
   OrthoButton.signal_toggled().connect
     (sigc::mem_fun(*this, &VisualClass::PerspectiveToggle));
 
-  group = OrthoButton.get_group();
-  PerspectButton.set_group (group);
+  Gtk::RadioButtonGroup group2 = PerspectButton.get_group();
+  OrthoButton.set_group (group2);
   OrthoButton.set_label ("Ortho");
   PerspectButton.set_label ("Persp");
 
@@ -674,8 +675,10 @@ void VisualClass::Quit()
 
 void VisualClass::FrameChanged()
 {
-  MakeFrame ((int)floor(FrameAdjust.get_value()));
-  PathVis.Invalidate();
+  if (FileIsRead) {
+    MakeFrame ((int)floor(FrameAdjust.get_value()));
+    PathVis.Invalidate();
+  }
 }
 
 

@@ -136,6 +136,7 @@ protected:
   ExportClass Export;
   string FindFullPath(string filename);
   //  ExportVideoClass ExportVideo;
+  bool FileIsRead;
 public:
   PathVisClass PathVis;
 
