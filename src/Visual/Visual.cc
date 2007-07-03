@@ -1,4 +1,5 @@
 #include "Visual.h"
+#include "ParseCommand.h"
 
 void 
 VisualClass::ReadFrameData(int frame)
@@ -678,53 +679,6 @@ void VisualClass::FrameChanged()
 }
 
 
-//////////
-// Main.//
-//////////
-
-int main(int argc, char** argv)
-{
-  Gtk::Main kit(argc, argv);
-
-  // Init gtkglextmm.
-  Gtk::GL::init(argc, argv);
-
-  if (argc < 2) {
-    cerr << "Usage:\n  Visual myfile.h5\n";
-    exit (1);
-  }
-  // Query OpenGL extension version.
-  int major, minor;
-  Gdk::GL::query_version(major, minor);
-  std::cout << "OpenGL extension version - "
-            << major << "." << minor << std::endl;
-
-//   // Instantiate and run the application.
-  VisualClass visual;
-
-  // John's addition to read in special flags
-  int index = 1;
-  if (argc == 3){
-    cerr << "Read in flag " << argv[1] << endl;
-    visual.SetFlag(argv[1]);
-    index = 2;
-  }
-
-  visual.Read (argv[index]);
-  kit.run(visual);
-
-//   Vec3 r2 (0.99, 0.2, 0.3), r1(1.09, 0.3, 0.4), wall1, wall2;
-//   BoxClass box;
-//   box.Set(2.0, 2.0, 2.0);
-//   if (box.BreakSegment(r1, r2, wall1, wall2)) {
-//     cerr << "r1    = " << r1 << endl;
-//     cerr << "r2    = " << r2 << endl;
-//     cerr << "wall1 = " << wall1 << endl;
-//     cerr << "wall2 = " << wall2 << endl;
-//   }
-
-  return 0;
-}
 
 
 void VisualClass::LineToggle()
@@ -898,4 +852,66 @@ void
 VisualClass::OnRhoChange()
 {
   FrameChanged();
+}
+
+void
+VisualClass::SetViewportSize (int size)
+{
+  PathVis.set_size_request(size, size);
+  resize(10,10);
+}
+
+
+
+
+//////////
+// Main.//
+//////////
+
+int main(int argc, char** argv)
+{
+  Gtk::Main kit(argc, argv);
+
+  // Init gtkglextmm.
+  Gtk::GL::init(argc, argv);
+
+  list<ParamClass> optionList;
+  optionList.push_back(ParamClass("small", false));
+  optionList.push_back(ParamClass("water", false));
+  CommandLineParserClass parser (optionList);
+  bool success = parser.Parse (argc, argv);
+
+  if (!success || parser.NumFiles() < 1) {
+    cerr << "Usage:\n  pathvis++ [--small] [--water] myfile.h5\n";
+    exit (1);
+  }
+
+  // Query OpenGL extension version.
+  int major, minor;
+  Gdk::GL::query_version(major, minor);
+  std::cout << "OpenGL extension version - "
+            << major << "." << minor << std::endl;
+
+  // Instantiate and run the application.
+  VisualClass visual;
+
+  // John's addition to read in special flags
+  // int index = 1;
+  // if (argc == 3){
+  //   cerr << "Read in flag " << argv[1] << endl;
+  //   visual.SetFlag(argv[1]);
+  //   index = 2;
+  // }
+
+  if (parser.Found("water")) {
+    // John, add your stuff here:
+
+  }
+  if (parser.Found("small"))
+    visual.SetViewportSize(600);
+
+  visual.Read (parser.GetFile(0));
+  kit.run(visual);
+
+  return 0;
 }

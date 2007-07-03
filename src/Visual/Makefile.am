@@ -19,6 +19,8 @@ pathvis___SOURCES =       \
     GLObject.cc         \
     GLObject.h          \
     OnePath.h           \
+    ParseCommand.cc     \
+    ParseCommand.h      \
     PathObject.cc       \
     PathObject.h        \
     PathVis.cc          \
