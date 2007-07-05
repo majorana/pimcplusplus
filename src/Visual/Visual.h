@@ -115,7 +115,8 @@ protected:
   Gtk::Adjustment RhoAdjust;
   double MaxRho, MinRho;
 
-
+  Glib::RefPtr<Gtk::ToggleAction> FullscreenToggle;
+  void OnFullscreenToggle();
   Glib::RefPtr<Gtk::ActionGroup> Actions;
   Glib::RefPtr<Gtk::UIManager> Manager;
 
@@ -125,6 +126,8 @@ protected:
   //  bool on_delete_event();
   void Quit();
   void ResetView();
+  void SetFullscreen ();
+
   void PutInBox();
   void OnDetailChange();
   void OnIsoChange();

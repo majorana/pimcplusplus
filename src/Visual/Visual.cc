@@ -579,6 +579,12 @@ VisualClass::VisualClass()
   Actions->add (Gtk::Action::create("MenuView", "View"));
   Actions->add (Gtk::Action::create("Reset", "Reset"),
 		sigc::mem_fun(*this, &VisualClass::ResetView));
+  Actions->add (Gtk::Action::create("Fullscreen", "Fullscreen"),
+		sigc::mem_fun(*this, &Window::fullscreen));
+  FullscreenToggle = Gtk::ToggleAction::create("Fullscreen", "Fullscreen mode",
+					       "Display this window in fullscreen mode", false);
+  Actions->add (FullscreenToggle,
+		sigc::mem_fun(*this, &VisualClass::OnFullscreenToggle));
 
   Manager = Gtk::UIManager::create();
   Manager->insert_action_group(Actions);
@@ -596,6 +602,7 @@ VisualClass::VisualClass()
     "    </menu>"
     "    <menu action='MenuView'>"
     "      <menuitem action='Reset'/>"
+    "      <menuitem action='Fullscreen'/>"
     "    </menu>"
     "  </menubar>"
     "  <toolbar  name='ToolBar'>"
@@ -660,6 +667,15 @@ void VisualClass::ResetView()
   double maxDim = max(max(Box[0], Box[1]), Box[2]);
   PathVis.View.SetDistance (1.2*maxDim);
   PathVis.Invalidate();
+}
+
+void
+VisualClass::OnFullscreenToggle()
+{
+  if (FullscreenToggle->get_active())
+    fullscreen();
+  else
+    unfullscreen();
 }
 
 // bool VisualClass::on_delete_event()
