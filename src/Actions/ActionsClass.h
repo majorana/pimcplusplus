@@ -49,6 +49,7 @@
 #include "VariationalPI.h"
 #include "Tether.h"
 #include "NonlocalClass.h"
+#include "DiagonalActionClass.h"
 
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
@@ -98,6 +99,7 @@ public:
   ShortRangeOnClass ShortRangeOn;
   ShortRangeApproximateClass ShortRangeApproximate;
   ShortRangePrimitiveClass ShortRangePrimitive;
+  DiagonalActionClass DiagonalAction;
 
   /// The long range part of the action, which is summed in k-space.  
   LongRangeClass LongRange;
@@ -205,6 +207,7 @@ public:
     ShortRangeApproximate(pathData,PairMatrix),
     ShortRangePrimitive(pathData,PairMatrix),
     ShortRangePot(pathData, PairMatrix),
+    DiagonalAction(pathData,PairMatrix),
     LongRange(pathData,PairMatrix,PairArray), 
     LongRangeCoulomb(pathData,PairMatrix,PairArray), 
     DavidLongRange(pathData),

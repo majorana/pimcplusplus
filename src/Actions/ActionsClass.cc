@@ -32,7 +32,7 @@ ActionsClass::Read(IOSectionClass &in)
 #else
   PathClass &Path = PathData.Path;
 #endif
-  assert(in.ReadVar ("tau", Path.tau));
+
   assert(in.ReadVar ("MaxLevels", MaxLevels));
   assert(in.ReadVar ("NumImages", NumImages));
   Kinetic.SetNumImages (NumImages);
@@ -116,11 +116,14 @@ ActionsClass::Read(IOSectionClass &in)
   for (int i=0; i<numPairActions; i++) {
     // Allow for tilde-expansion in these files
     string name = ExpandFileName(PAFiles(i));
+    cerr<<"We are about to try to read the PairActon file "<<name<<endl;
+    cerr<<"If the code aborts at this point, most likely the .PairAction or .Sampling.in or .dm file are incorrect or placed in the wrong place."<<endl;
     if (!PAIO.OpenFile(name)){
       cerr<<"We were unable to find the PairAction file "<<name<<endl;
       cerr<<"Please make sure you have specified it correctly."<<endl;
       abort();
     }
+    cerr<<"Done reading the PairAction file "<<name<<endl;
     //    assert(PAIO.OpenFile (name));
     cerr << i << ": reading " << name << endl;
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
@@ -502,6 +505,7 @@ ActionsClass::ShiftData (int slicesToShift)
   ShortRangeOn.ShiftData(slicesToShift);
   ShortRangeApproximate.ShiftData(slicesToShift);
   ShortRangePrimitive.ShiftData(slicesToShift);
+  DiagonalAction.ShiftData(slicesToShift);
   LongRange.ShiftData(slicesToShift);
   LongRangeRPA.ShiftData(slicesToShift);
   DavidLongRange.ShiftData(slicesToShift);
