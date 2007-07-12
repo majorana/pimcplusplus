@@ -17,6 +17,8 @@ libactions_la_SOURCES =            \
     GroundStateNodalActionClass.cc \
     GroundStateNodalActionClass.h  \
     Hermele.h                      \
+    DiagonalActionClass.h          \
+    DiagonalActionClass.cc          \
     DualHermele.h                  \
     EAMClass.cc                    \
     EAMClass.h                     \

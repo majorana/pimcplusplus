@@ -3,6 +3,19 @@
 #include "DiagonalActionClass.h"
 #include "ctime"
 
+string 
+DiagonalActionClass::GetName()
+{
+  return "DiagonalActionClass";
+}
+
+
+double 
+DiagonalActionClass::d_dBeta (int slice1, int slice2, int level)
+{
+  assert(1==2);
+}
+
 
 double 
 DiagonalActionClass::SingleAction (int slice1, int slice2,
@@ -43,4 +56,15 @@ DiagonalActionClass::SingleAction (int slice1, int slice2,
 ////  cerr<<"Worm short range action is "<<TotalU<<endl;
 //  cerr<<"I'm out of the short range action"<<endl;
   return (TotalU);
+}
+
+
+DiagonalActionClass::DiagonalActionClass(PathDataClass &pathData,
+					 Array<PairActionFitClass* ,2> 
+					 &pairMatrix) : 
+
+  ActionBaseClass (pathData),
+  PairMatrix(pairMatrix)
+{
+
 }

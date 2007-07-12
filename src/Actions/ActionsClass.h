@@ -16,6 +16,7 @@
 
 #ifndef ACTIONS_CLASS_H
 #define ACTIONS_CLASS_H
+#include "DiagonalActionClass.h"
 #include "ShortRangeClass.h"
 #include "ShortRangeOnClass.h"
 #include "ShortRangeApproximateClass.h"
@@ -49,7 +50,7 @@
 #include "VariationalPI.h"
 #include "Tether.h"
 #include "NonlocalClass.h"
-#include "DiagonalActionClass.h"
+
 
 /// ActionsClass is a shell of a class holding all of the necessary
 /// ActionBaseClass derivatives representing the different actions.
