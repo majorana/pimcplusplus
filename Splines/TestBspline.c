@@ -284,7 +284,7 @@ Speed_2d_d()
     eval_UBspline_2d_d_vgh (spline, x, y, &val, grad, hess);
   }
   end = clock();
-  fprintf (stderr, "10,000,000 evalations in %f seconds.\n", 
+  fprintf (stderr, "100,000,000 evalations in %f seconds.\n", 
 	   (double)(end-start-(rend-rstart))/(double)CLOCKS_PER_SEC);
 }
 

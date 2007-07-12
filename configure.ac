@@ -44,10 +44,9 @@ fi
 #AC_CHECK_LIB([g2c],[do_lio],[],[],[frtbegin])
 #AC_CHECK_LIB([gfortran],[do_lio])
 
-### taken out
-###if test "x$gsl_ok" = "xno"; then
-###   AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
-###fi
+if test "x$gsl_ok" = "xno"; then
+   AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
+fi
 
 AC_MSG_CHECKING([LIBS = $LIBS])
 # Checks for header files.

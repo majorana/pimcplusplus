@@ -20,6 +20,7 @@
 #include "../MPI/Communication.h" //include not needed
 #include "PAFitBase.h"
 #include "../Blitz.h"
+#include "../Splines/LinearSpline.h"
 #include <fstream>
 #include <iostream>
 //#include "../../PathDataClass.h"
@@ -58,6 +59,7 @@ class DavidPAClass : public PairActionFitClass
   /// value and a temporary array to get all of the values in that
   /// column. 
   Array<MultiCubicSpline,1> ukj; ///<(level )
+  Array<LinearSpline,1> UdiagSpline;
   ///Same as ukj but stores the beta derivatives.
   Array<MultiCubicSpline,1> dukj; ///<(level )
   Array<CubicSpline,1> dUdRTimesSigmaSpline; ///<(level

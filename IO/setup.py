@@ -8,11 +8,10 @@ module1 = Extension('IOSection',
                     sources = ['IONumPyWrapper.cc','IO.cc',\
                                'IOHDF5.cc', 'IOASCII.cc',\
                                'IOVarHDF5.cc' ],\
-                    include_dirs=['/usr/include/libxml2',\
+                    library_dirs=['/home/esler/lib'],
                                   '/usr/include',\
                                   numpyincludedirs,\
                                   numarrayincludedirs[0]],
-                    library_dirs=['/usr/lib'],
                     libraries =  ['blitz', 'xml2', 'hdf5'])
 
 setup (name = 'IO',

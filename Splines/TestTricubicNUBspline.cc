@@ -121,7 +121,7 @@ TestComplexNonlinear()
 void SpeedTest()
 {
   double xi=3.1, xf=7.9, yi=2.9, yf=10.0, zi=4.6, zf=14.0;
-  int nx=100, ny=100, nz=100;
+  int nx=200, ny=200, nz=200;
 //   GeneralGrid xGrid, yGrid, zGrid;
 //   Array<double,1> xp(nx), yp(ny), zp(nz);
 //   for (int ix=0; ix<nx; ix++)
@@ -152,8 +152,17 @@ void SpeedTest()
   TinyVector<double,3> r, grad;
   TinyMatrix<double,3,3> secDerivs;
 
-  clock_t Bstart, Bend, NUBstart, NUBend;
+  clock_t Bstart, Bend, NUBstart, NUBend, rstart, rend;
   const int N = 10000000;
+  rstart = clock();
+  for (int i=0; i<N; i++) {
+    r[0] = xi + (xf-xi)*drand48();
+    r[1] = yi + (yf-yi)*drand48();
+    r[2] = zi + (zf-zi)*drand48();
+  }
+  rend   = clock();
+
+
   Bstart = clock();
   for (int i=0; i<N; i++) {
     r[0] = xi + (xf-xi)*drand48();
@@ -173,9 +182,9 @@ void SpeedTest()
   NUBend   = clock();
 
   fprintf (stderr, "B-spline time   = %0.5f\n", 
-	   (double)(Bend-Bstart)/(double)CLOCKS_PER_SEC);
+	   (double)(Bend-Bstart-rend+rstart)/(double)CLOCKS_PER_SEC);
   fprintf (stderr, "NUB-spline time = %0.5f\n", 
-	   (double)(NUBend-NUBstart)/(double)CLOCKS_PER_SEC);
+	   (double)(NUBend-NUBstart-rend+rstart)/(double)CLOCKS_PER_SEC);
 
 }
 

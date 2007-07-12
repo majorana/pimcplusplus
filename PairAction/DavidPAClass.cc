@@ -505,6 +505,19 @@ void DavidPAClass::calcUsqzFast(double s,double q,double z,int level,
 }
 
 
+double
+DavidPAClass::Udiag (double q, int level)
+{
+  // This is the endpoint action   
+  if (q < UdiagSpline(level).Start()) 
+    return 5000.0;
+  else if (q > UdiagSpline(level).End())
+    return UdiagSpline(level)(UdiagSpline(level).End());
+  else
+    return UdiagSpline(level)(q);
+}
+
+
 
 void DavidPAClass::ReadSamplingTable(string fileName)
 {
@@ -830,20 +843,20 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   cerr<<"TauPos is "<<TauPos<<endl;
 }
 
-double DavidPAClass::Udiag(double q, int level)
-{
-  level=level+TauPos;
-  double rmin = ukj(level).grid->Start;
+// double DavidPAClass::Udiag(double q, int level)
+// {
+//   level=level+TauPos;
+//   double rmin = ukj(level).grid->Start;
   
-  if (q > ukj(level).grid->End)
-    q = ukj(level).grid->End;
+//   if (q > ukj(level).grid->End)
+//     q = ukj(level).grid->End;
 
-  // This is the endpoint action   
-  if (q < rmin) 
-    return 5000.0;
+//   // This is the endpoint action   
+//   if (q < rmin) 
+//     return 5000.0;
   
-  return ukj(level)(1,q); 
-}
+//   return ukj(level)(1,q); 
+// }
 
 double DavidPAClass::Udiag_p(double q, int level)
 {
