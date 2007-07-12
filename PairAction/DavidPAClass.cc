@@ -702,6 +702,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
       cerr<<"NumTau is"<<NumTau<<endl;
       ukj.resize(NumTau);
+      UdiagSpline.resize(NumTau);
       ////???      ukj.resize(NumUKJ+1);
       ReadFORTRAN3Tensor(infile,tempUkj);
       Array<double,3> tempUkj2(NumGridPoints,NumUKJ+1,NumTau);
@@ -730,8 +731,9 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   }
 
 
-
+  UdiagSpline.resize(numOfFits);
   for (int counter=0;counter<=numOfFits;counter++){ //Get the beta derivative of U's 
+    
     string RankString =SkipTo(infile,"RANK");
     int theRank=GetNextInt(RankString);
     //cout<<theRank<<endl;
@@ -820,7 +822,9 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       cerr<<"I'm about ot actually initialize dukj now!"<<endl;
       tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
       tempdUkj2(NumGridPoints-1,Range::all(),Range::all())=0.0; ///NOT SURE ABOUT THIS!!!
+      const int numDiagPoints = 200;
       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
+	
 	if (NMax==2){ //NMax again
 	  dukj(levelCounter).Init(theGrid,tempdUkj2(Range::all(),Range::all(),levelCounter),startDeriv,endDeriv);
 	}
@@ -830,6 +834,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       n=NMax;
       
     }
+    
   }
   Potential.resize(potential.size());
   for (int counter=0;counter<potential.size();counter++){
@@ -838,6 +843,18 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   tau=smallestTau;
   for (int i=0;i<TauPos;i++){
     tau *= 2;
+  }
+  for (int level=0; level<NumTau; level++) {
+    const int numDiagPoints = 200;
+    Array<double,1> udiag(numDiagPoints);
+    double start = ukj(level).grid->Start;
+    double end   = ukj(level).grid->End;
+    double dr = (end-start)/(double)(numDiagPoints-1);
+    for (int j=0; j<numDiagPoints; j++) {
+      double r = start + (double)j * dr;
+      calcUsqzFast (0.0, r, 0.0, level, udiag(j));
+    }
+    UdiagSpline(level).Init (start, end, udiag);
   }
   cerr<<"I've FINALLY CHOSEN A TAU OF "<<tau;
   cerr<<"TauPos is "<<TauPos<<endl;

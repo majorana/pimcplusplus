@@ -108,6 +108,8 @@ main(int argc, char *argv[])
   CommunicatorClass comm;
   comm.SetWorld();
 
+  if (comm.MyProc()==0)
+    cerr << "Number of procs = " << comm.NumProcs() << endl;
   bool passed = TestAllGatherRows();  
   if (comm.MyProc()==0)
     cerr << "AllGatherRows() check:  " 
