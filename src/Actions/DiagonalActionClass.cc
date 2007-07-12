@@ -57,7 +57,12 @@ DiagonalActionClass::SingleAction (int slice1, int slice2,
 //  cerr<<"I'm out of the short range action"<<endl;
   return (TotalU);
 }
-
+void 
+DiagonalActionClass::Read(IOSectionClass &in)
+{
+  DoPtcl.resize(PathData.Path.NumParticles());
+  TotalTime=0;
+}
 
 DiagonalActionClass::DiagonalActionClass(PathDataClass &pathData,
 					 Array<PairActionFitClass* ,2> 
@@ -68,3 +73,4 @@ DiagonalActionClass::DiagonalActionClass(PathDataClass &pathData,
 {
 
 }
+
