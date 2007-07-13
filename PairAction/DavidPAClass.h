@@ -50,6 +50,7 @@ class DavidPAClass : public PairActionFitClass
   bool SamplingTableRead;
   inline bool Read(IOSectionClass &IOSection,double desiredTau, int numLevels);
   inline void Print();
+  double Udiag(double q, int level);
   double DesiredTau;
   int TauPos;
   int NumLevels;
@@ -91,8 +92,8 @@ class DavidPAClass : public PairActionFitClass
   double dUdRTimesSigma_movers(double r,int level);
   double d2UdR2TimesSigma(double r,int level);
   double d2UdR2TimesSigma_movers(double r,int level);
-  /// The diagonal action only -- used for long-range breakup
-  double Udiag(double q, int level);
+
+
   /// The q-derivative of the above
   double Udiag_p(double q, int level);
   /// The q-derivative of the above

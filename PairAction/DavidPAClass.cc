@@ -345,7 +345,7 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
   
   
   if ((rprime < rmin) || (r < rmin)){
-    cerr<<"I'm less then the min. Maybe this is messing me up\n";
+    //    cerr<<"I'm less then the min. Maybe this is messing me up\n";
     U = 5000.0; dU = 0.0;
     return;
   }
@@ -477,7 +477,7 @@ void DavidPAClass::calcUsqzFast(double s,double q,double z,int level,
   }
   // This is the endpoint action 
   if ((rprime < rmin) || (r < rmin)){
-    cerr<<"I'm less then the min. Maybe this is messing me up\n";
+    //    cerr<<"I'm less then the min. Maybe this is messing me up\n";
     U = 5000.0;
     return;
   }
@@ -508,6 +508,7 @@ void DavidPAClass::calcUsqzFast(double s,double q,double z,int level,
 double
 DavidPAClass::Udiag (double q, int level)
 {
+  level=level+TauPos;
   // This is the endpoint action   
   if (q < UdiagSpline(level).Start()) 
     return 5000.0;
@@ -731,7 +732,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   }
 
 
-  UdiagSpline.resize(numOfFits);
+
   for (int counter=0;counter<=numOfFits;counter++){ //Get the beta derivative of U's 
     
     string RankString =SkipTo(infile,"RANK");
@@ -745,7 +746,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
     else {
       int NumGridPoints=GetNextInt(RankString);
       int NumUKJ=GetNextInt(RankString);
-      int NumTau=GetNextInt(RankString);
+      NumTau=GetNextInt(RankString);
       
       
       string RGridString =SkipTo(infile,"GRID 1");
@@ -844,6 +845,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   for (int i=0;i<TauPos;i++){
     tau *= 2;
   }
+  cerr << "NumTau = " << NumTau << endl;
   for (int level=0; level<NumTau; level++) {
     const int numDiagPoints = 200;
     Array<double,1> udiag(numDiagPoints);
@@ -852,7 +854,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
     double dr = (end-start)/(double)(numDiagPoints-1);
     for (int j=0; j<numDiagPoints; j++) {
       double r = start + (double)j * dr;
-      calcUsqzFast (0.0, r, 0.0, level, udiag(j));
+      calcUsqzFast (0.0, r, 0.0, level-TauPos, udiag(j));
     }
     UdiagSpline(level).Init (start, end, udiag);
   }
