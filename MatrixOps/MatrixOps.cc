@@ -36,6 +36,7 @@
 #define F77_DSYEVR F77_FUNC(dsyevr,DSYEVR)
 #define F77_ZHEEVR F77_FUNC(zheevr,ZHEEVR)
 #define F77_DGEMV  F77_FUNC(dgemv,DGEMV)
+#define F77_DPOTRF  F77_FUNC(dpotrf,DPOTRF)
 
 
 extern "C" void 
@@ -58,6 +59,10 @@ F77_ZGESVD (char *JOBU, char* JOBVT, int *M, int *N,
 
 extern "C" void 
 F77_DGETRF(int *m, int *n, double A[], int *lda, int ipiv[], int *info);
+
+extern "C" void 
+F77_DPOTRF(char *UPLO, int *n, double A[], int *lda, int *info);
+
 
 extern "C" void 
 F77_ZGETRF(int *m, int *n, complex<double> A[], 
@@ -930,4 +935,19 @@ MatVecProd (Array<double,2> &A, Array<double,1> &x, Array<double,1> &Ax)
 
   F77_DGEMV(&trans, &m, &n, &one, A.data(), &m,
 	    x.data(), &inc, &zero, Ax.data(), &inc);
+}
+
+
+
+void CholeskyBig (Array<double,2> &A)
+{
+  int n=A.extent(0);
+  int lda=A.extent(1);
+  int info;
+  char upper='L';
+  F77_DPOTRF(&upper,&n,A.data(),&lda,&info);
+  for (int i=0;i<A.extent(0);i++)
+    for (int j=0;j<i;j++)
+      A(i,j)=0.0;
+  
 }

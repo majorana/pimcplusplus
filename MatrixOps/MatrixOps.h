@@ -288,6 +288,10 @@ inline Mat3 Transpose(const Mat3 &A)
   return (B);
 }
 
+void CholeskyBig (Array<double,2> &A);
+
+
+
 inline Mat3 Cholesky (Mat3 C)
 {
   Mat3 L;
