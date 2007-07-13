@@ -16,7 +16,7 @@
 
 #include <Common/MPI/Communication.h>
 #include "BisectionStage.h"
-#include "../Common/MatrixOps/MatrixOps.h"
+#include <Common/MatrixOps/MatrixOps.h>
 
 
 // double BisectionStageClass::LogSampleProb(int slice1, int slice2, 

@@ -68,6 +68,7 @@ private:
   bool HaveBeenAcceptedOrRejected;
   double forwT;
   bool zFocus;
+  bool NeedToUpdateHTableOnReject;
 public:
   /// This function will construct a new permutation if
   /// activeParticles is set to the array, [ -1 ];  In this case,

@@ -61,7 +61,7 @@ void TablePermuteStageClass::Reject()
     //  assert(myLen<=4);
     //  assert(myLen>0);
     NumAttempted(myLen-1)++;
-    if (myLen!=1){
+    if (myLen!=1 && NeedToUpdateHTableOnReject){
       //      cerr<<"My current mode is "<<GetMode()<<endl;
       ModeType currMode=GetMode();
       SetMode(OLDMODE);
@@ -235,8 +235,10 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
 				      Array<int,1> &activeParticles, double &prevActionChange)
 {
   HaveBeenAcceptedOrRejected=false;
+  NeedToUpdateHTableOnReject=false;
   if (activeParticles(0)==-1){
-    if ((PathData.Path.OpenPaths && slice1<=PathData.Path.OpenLink && 
+    if (PathData.Path.OpenPaths &&
+	(PathData.Path.OpenPaths && slice1<=PathData.Path.OpenLink && 
 	PathData.Path.OpenLink<=slice2) || 
 	(PathData.Path.OpenLink==PathData.Path.NumTimeSlices()-1 &&
 	 (slice1==0 || slice2==0))){
@@ -254,8 +256,6 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
     forwT= Forw->AttemptPermutation();
     activeParticles.resize (Forw->CurrentCycle.Length);
     activeParticles = Forw->CurrentParticles();
-
-
     ///NEW
     ///TRY SOMETHING ELSE    prevActionChange=0;
     int len=Forw->CurrentCycle.Length;
@@ -285,8 +285,10 @@ bool TablePermuteStageClass::Attempt (int &slice1, int &slice2,
   else{
     //    sleep(10);
 
-    if (Forw->CurrentCycle.Length!=1)
+    if (Forw->CurrentCycle.Length!=1){
+      NeedToUpdateHTableOnReject=true;
       Rev->UpdateHTable(Forw->CurrentCycle);
+    }
     double revT = Rev->CalcReverseProb(*Forw);
 
     int len=Forw->CurrentCycle.Length;

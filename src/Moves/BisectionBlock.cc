@@ -141,9 +141,15 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       else if (level>=PathData.Actions.GetMaxLevels()){
 	newStage->Actions.push_back(&PathData.Actions.ShortRangePrimitive);
       }
-      else{ // if (level==LowestLevel) //HACK HERE CURRENTLY 
+      else if (level>LowestLevel){ // if (level==LowestLevel) //HACK HERE CURRENTLY 
 	perr<<"Adding short range action in BisectionBlock."<<endl;
+	newStage->Actions.push_back(&PathData.Actions.DiagonalAction);
+	//	newStage->Actions.push_back(&PathData.Actions.ShortRange);
+      }
+      else {
+
 	newStage->Actions.push_back(&PathData.Actions.ShortRange);
+	
       }
       //      else
       //      	int dummy=5;
@@ -276,6 +282,7 @@ void BisectionBlockClass::ChooseTimeSlices()
   }
   //  if (PathData.Path.Communicator.MyProc()==0)
   //    cerr<<"Ending Choosing time slices"<<endl;
+  ////  cerr<<"Slices: "<<Slice1<<" "<<Slice2<<endl;
 }
 
 void BisectionBlockClass::MakeMove()
@@ -333,7 +340,6 @@ void BisectionBlockClass::MakeMove()
   }
   if (LowestLevel != 0)
     MakeStraightPaths();
-  //  cerr<<"ending bisection block"<<endl;
 }
 
 
