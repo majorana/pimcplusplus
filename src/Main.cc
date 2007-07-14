@@ -74,5 +74,5 @@ main(int argc, char **argv)
 			PIMC.Dummy();
 		}
   }
-  COMM::Finalize()
+  COMM::Finalize();
 }
