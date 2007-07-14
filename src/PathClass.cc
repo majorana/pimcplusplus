@@ -153,7 +153,7 @@ void PathClass::Read (IOSectionClass &inSection)
   else{
     ExistsCoupling=tempExistsCoupling;
   }
-  double tau;
+
   assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
   ///HACK! HACK! HACK! HACK!
 
