@@ -74,5 +74,5 @@ main(int argc, char **argv)
 			PIMC.Dummy();
 		}
   }
-  MPI_Finalize();
+  COMM::Finalize()
 }
