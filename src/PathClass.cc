@@ -241,7 +241,7 @@ void PathClass::Read (IOSectionClass &inSection)
     perr<<"I am doing DAVID LONG RANGE!"<<endl;
   assert(inSection.OpenSection("Particles"));
   int numSpecies = inSection.CountSections ("Species");
-  perr<<"we have this many sections: "<<numSpecies<<endl;
+  ////  perr<<"we have this many sections: "<<numSpecies<<endl;
   // First loop over species and read info about species
   //bool prevDoMol;
   for (int Species=0; Species < numSpecies; Species++) {

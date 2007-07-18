@@ -114,7 +114,7 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
   Array<double,1> oldBox;
   inFile.ReadVar("Box",oldBox);
   inFile.CloseSection();
-  cerr<<"Read the box"<<endl;
+  ////  cerr<<"Read the box"<<endl;
   inFile.OpenSection("Observables");
   inFile.OpenSection("PathDump");
   Array<double,4> oldPaths; //(58,2560,2,3);
@@ -128,8 +128,8 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
     Permutation.AcceptCopy();
   }
   assert(inFile.ReadVar("Path",oldPaths));
-  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
-       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
+  ///  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
+  ///       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
 
   int myFirstSlice,myLastSlice;
   SliceRange (myProc, myFirstSlice, myLastSlice);
@@ -185,7 +185,7 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
 {
 // This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
 
-  cerr<<"Read squeezing now"<<endl;
+///  cerr<<"Read squeezing now"<<endl;
   IOSectionClass inFile;
   stringstream oss;
   ////  oss<<fileName<<"."<<MyClone<<".h5";
@@ -198,14 +198,14 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
   else
     oss<<fileName<<"."<<0<<".h5";
   string fullFileName=oss.str();
-  cerr<<"THE FULL FILE NAME IS "<<fullFileName<<endl;
+  ////  cerr<<"THE FULL FILE NAME IS "<<fullFileName<<endl;
   assert (inFile.OpenFile(fullFileName.c_str()));
   //  assert (inFile.OpenFile(fileName.c_str()));
   inFile.OpenSection("System");
   Array<double,1> oldBox;
   inFile.ReadVar("Box",oldBox);
   inFile.CloseSection();
-  cerr<<"Read the box"<<endl;
+  ///  cerr<<"Read the box"<<endl;
   inFile.OpenSection("Observables");
   inFile.OpenSection("PathDump");
   Array<double,4> oldPaths; //(58,2560,2,3);
@@ -219,8 +219,8 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
     Permutation.AcceptCopy();
   }
   assert(inFile.ReadVar("Path",oldPaths));
-  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
-       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
+  ///  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
+  ///       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
 
   int myFirstSlice,myLastSlice;
   SliceRange (myProc, myFirstSlice, myLastSlice);  
@@ -274,7 +274,7 @@ void
 PathClass::ReadOld(string fileName,bool replicate)
 {
 // This was modified on Jan 19 2005 to read in a set of classical (P=1) configs and duplicate them to produce a set of PIMC (P>1) configs.  -jg
-  cerr<<"Trying to read old"<<endl;
+///  cerr<<"Trying to read old"<<endl;
   IOSectionClass inFile;
   assert (inFile.OpenFile(fileName.c_str()));
   inFile.OpenSection("Observables");
@@ -359,9 +359,9 @@ PathClass::InitPaths (IOSectionClass &in)
     SpeciesClass &species = *SpeciesArray(speciesIndex);
     assert(in.OpenSection("Species", speciesIndex));
     string InitPaths;
-    cerr<<"about to read the string"<<endl;
+    ///    cerr<<"about to read the string"<<endl;
     in.ReadVar ("InitPaths", InitPaths);
-    cerr<<"Read "<<InitPaths<<endl;
+    ///    cerr<<"Read "<<InitPaths<<endl;
     string Replicate;
     in.ReadVar ("Replicate", Replicate);
 //      cerr<<"Printing Permutation InitPath c"<<endl;
@@ -407,7 +407,7 @@ PathClass::InitPaths (IOSectionClass &in)
       double sigma=sqrt(2*species.lambda*tau);
       for (int ptcl =0;ptcl<NumParticles();ptcl++){
         Random.LocalGaussianVec(1,r0);//under common
-        cerr<<"in PathClass"<<r0*SphereRadius/sqrt(r0[0]*r0[0]+r0[1]*r0[1]+r0[2]*r0[2])<<endl;
+	///        cerr<<"in PathClass"<<r0*SphereRadius/sqrt(r0[0]*r0[0]+r0[1]*r0[1]+r0[2]*r0[2])<<endl;
 	for (int slice=0;slice <NumTimeSlices();slice++){
           SetPos(slice,ptcl,r0*SphereRadius/sqrt(r0[0]*r0[0]+r0[1]*r0[1]+r0[2]*r0[2]));                      
 	}
@@ -566,10 +566,10 @@ PathClass::InitPaths (IOSectionClass &in)
       assert (in.ReadVar ("Positions", Positions));
       //      assert (Positions.rows() >= species.NumParticles);
       //      assert (Positions.cols() == species.NumDim);
-      cerr<<"My extent 1 is "<<Positions.extent(1);
-      cerr<<"MY scale box is "<<ScaleBox<<endl;
+      ///      cerr<<"My extent 1 is "<<Positions.extent(1);
+      ///      cerr<<"MY scale box is "<<ScaleBox<<endl;
       Positions.resizeAndPreserve(species.NumParticles,Positions.extent(1));
-      cerr<<"My ptcl are "<<Path.extent(1)<<" and agaisnt "<<Positions.extent(0)<<endl;
+      ///      cerr<<"My ptcl are "<<Path.extent(1)<<" and agaisnt "<<Positions.extent(0)<<endl;
       for (int ptcl=species.FirstPtcl; 
 	   ptcl<=species.LastPtcl; ptcl++){
 	for (int slice=0; slice<NumTimeSlices(); slice++) {
@@ -617,7 +617,7 @@ PathClass::InitPaths (IOSectionClass &in)
       Restart(in,pathFile,false,species);
     }
     else if (InitPaths == "FILE"){
-      cerr<<"I'm going to read the file now"<<endl;
+      ///      cerr<<"I'm going to read the file now"<<endl;
       bool replicate = false;
       if (Replicate == "ON"){
         replicate = true;

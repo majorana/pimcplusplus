@@ -167,7 +167,7 @@ void PathDataClass::Read (IOSectionClass &in)
 #ifdef USE_QMC
 	useDefaultStrings = true;
 	int M = MetaWorldComm.NumProcs();
-	cerr << MetaWorldComm.MyProc() << ": PathDataClass.cc: N is " << M << endl;
+	//	cerr << MetaWorldComm.MyProc() << ": PathDataClass.cc: N is " << M << endl;
   string QMCFilename;
 	int ceimcProcs = 1;
   RUN_QMC = false;
@@ -250,22 +250,22 @@ void PathDataClass::Read (IOSectionClass &in)
   	  in.CloseSection();
   	}
   	
-  	cerr << "  Set up Inter- and Intra- " << endl;
+	////  	cerr << "  Set up Inter- and Intra- " << endl;
   	// Setup Inter- and IntraComms
   	assert ((N % procsPerClone) == 0);
   	NumClones = N / procsPerClone;
   	MyCloneNum = WorldComm.MyProc()/procsPerClone;
   	// Create IntraComm
-		cerr << "  Going to initialize IntraComm with MyCloneNum " << MyCloneNum << endl;
+	////		cerr << "  Going to initialize IntraComm with MyCloneNum " << MyCloneNum << endl;
   	WorldComm.Split(MyCloneNum, IntraComm);
-		cerr << "  initialized IntraComm" << endl;  
+	///		cerr << "  initialized IntraComm" << endl;  
 		//cerr << "  skipped IntraComm" << endl;  
   	Array<int,1> ranks (NumClones);
   	for (int clone=0; clone<NumClones; clone++)
   	  ranks(clone) = clone*procsPerClone;
-		cerr << "  ranks is " << ranks << "; going to creat Intercomm." << endl;
+	///		cerr << "  ranks is " << ranks << "; going to creat Intercomm." << endl;
   	WorldComm.Subset (ranks, InterComm);
-		cerr << "  PIMC: initialized InterComm; ranks is " << ranks << endl;
+	///		cerr << "  PIMC: initialized InterComm; ranks is " << ranks << endl;
   	
   	int seed;
   	bool haveSeed = in.ReadVar ("Seed", seed);
@@ -292,7 +292,7 @@ void PathDataClass::Read (IOSectionClass &in)
   ////  Join=NumTimeSlices()-1;
   ///  //END MINOR HACK!
   int N = WorldComm.NumProcs();
-cerr << "PathDataClass.cc: N is " << N << endl;
+  ////cerr << "PathDataClass.cc: N is " << N << endl;
   int procsPerClone = 1;
   //bool UsingQMC = false;
   if (N > 1) {
@@ -304,22 +304,22 @@ cerr << "PathDataClass.cc: N is " << N << endl;
     //if(UsingQMC) cerr << "  I am UsingQMC" << endl;
   }
   
-  cerr << "  Set up Inter- and Intra- " << endl;
+  ////  cerr << "  Set up Inter- and Intra- " << endl;
   // Setup Inter- and IntraComms
   assert ((N % procsPerClone) == 0);
   NumClones = N / procsPerClone;
   MyCloneNum = WorldComm.MyProc()/procsPerClone;
   // Create IntraComm
-cerr << "  Going to initialize IntraComm with MyCloneNum " << MyCloneNum << endl;
+  ////cerr << "  Going to initialize IntraComm with MyCloneNum " << MyCloneNum << endl;
   WorldComm.Split(MyCloneNum, IntraComm);
-cerr << "  initialized IntraComm" << endl;  
+  ////cerr << "  initialized IntraComm" << endl;  
 //cerr << "  skipped IntraComm" << endl;  
   Array<int,1> ranks (NumClones);
   for (int clone=0; clone<NumClones; clone++)
     ranks(clone) = clone*procsPerClone;
-cerr << "  ranks is " << ranks << "; going to creat Intercomm." << endl;
+  ////cerr << "  ranks is " << ranks << "; going to creat Intercomm." << endl;
   WorldComm.Subset (ranks, InterComm);
-cerr << "  PIMC: initialized InterComm; ranks is " << ranks << endl;
+  ///cerr << "  PIMC: initialized InterComm; ranks is " << ranks << endl;
   
   int seed;
   bool haveSeed = in.ReadVar ("Seed", seed);
@@ -350,7 +350,7 @@ cerr << "  PIMC: initialized InterComm; ranks is " << ranks << endl;
   }
 
 	moveClock = 0;
-	cerr << "leaving read" << endl;
+	///	cerr << "leaving read" << endl;
 }
 
 #if USE_QMC

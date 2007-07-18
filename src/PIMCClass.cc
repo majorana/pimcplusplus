@@ -28,11 +28,11 @@ bool PIMCClass::Read(IOSectionClass &in)
 {
   // tells whether to run or be a dummy
   bool doPIMCRun = false;
-	cerr << "PIMC::Read" << endl;
+  ////	cerr << "PIMC::Read" << endl;
   // Read the parallelization strategy
   
   PathData.Read (in);
-  perr << "Finished PathData Read.\n";
+  //  perr << "Finished PathData Read.\n";
   
   // this is set to true in PathDataClass::Read
   // when not built with qmcpack
@@ -42,8 +42,7 @@ bool PIMCClass::Read(IOSectionClass &in)
     assert(in.OpenSection("System"));
     PathData.Path.Read(in);
     in.CloseSection();
-    perr << "Finished Path read.\n";
-    
+    ///    perr << "Finished Path read.\n";
     
 #ifdef USE_QMC
 		PathData.AssignPtclSetStrings();
@@ -55,16 +54,16 @@ bool PIMCClass::Read(IOSectionClass &in)
 //	   }
   	// Read in the action information
   	assert(in.OpenSection("Action"));
-  	PathData.Actions.Read(in);
+  	PathData.Actions.Read(in);	
   	in.CloseSection();
-  	perr << "Finished Actions read.\n";
-
+	///  	perr << "Finished Actions read.\n";
 
 
   	// Now actually initialize the paths
-  	perr << "Before InitPaths.\n";
+	///  	perr << "Before InitPaths.\n";
   	assert(in.OpenSection("System"));
   	PathData.Path.InitPaths(in);
+	
 
 
 
@@ -73,25 +72,23 @@ bool PIMCClass::Read(IOSectionClass &in)
 
 
   	in.CloseSection();
-  	perr << "Done InitPaths.\n";
+	//  	perr << "Done InitPaths.\n";
   	if (PathData.Path.UseCorrelatedSampling())
   	  PathData.Path.SetIonConfig(0);
 
 
   	
-  	perr << "Initializing Actions caches.\n";
+	//  	perr << "Initializing Actions caches.\n";
   	PathData.Actions.Init();
-  	perr << "done.\n";
-
+	//  	perr << "done.\n";
 
   	// Read in the Observables
   	assert(in.OpenSection("Observables"));
   	ReadObservables(in);
-  	perr << "Finished Observables Read.\n";
+	//  	perr << "Finished Observables Read.\n";
   	in.CloseSection();
 
   	bool iAmRootProc = (PathData.Path.Communicator.MyProc()==0);
-
   	if (iAmRootProc)
   	  OutFile.NewSection("Actions");
   	if (PathData.Actions.HaveLongRange()) {
@@ -106,13 +103,11 @@ bool PIMCClass::Read(IOSectionClass &in)
   	  PathData.Actions.WriteInfo(OutFile);
   	  OutFile.CloseSection(); // "Actions"
   	}
-
   	// Read in the Moves
   	assert(in.OpenSection("Moves"));
   	ReadMoves(in);
-  	perr << "Finished Moves Read.\n";
+	//  	perr << "Finished Moves Read.\n";
   	in.CloseSection();
-
   	// Read in the Algorithm
   	assert(in.OpenSection("Algorithm"));
   	ReadAlgorithm(in);
@@ -421,7 +416,7 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 void PIMCClass::Run()
 {
   Algorithm.DoEvent();
-  cerr<<"Ending now"<<endl;
+  cerr<<"PIMC++ has completed"<<endl;
   //  Array<MoveClass*,1> Moves;
 //   for (int counter=0;counter<Moves.size();counter++){
 //     cout<<"My name is "<<((MoveClass*)Moves(counter))->Name<<endl;
