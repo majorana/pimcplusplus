@@ -30,7 +30,6 @@ class ShortRangeClass : public ActionBaseClass
 {
 protected:
   Array<PairActionFitClass*,2> &PairMatrix;
-  Array<bool,1> DoPtcl;
   ShortRangeOnClass ToCheck;
   int TotalTime;
   /// These are the coefficients used for the low-variance estimator

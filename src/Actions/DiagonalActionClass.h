@@ -13,7 +13,7 @@ class DiagonalActionClass : public ActionBaseClass
 {
 protected:
   Array<PairActionFitClass*,2> &PairMatrix;
-  Array<bool,1> DoPtcl;
+
   int TotalTime;
   /// These are the coefficients used for the low-variance estimator
   /// for the gradient
@@ -24,6 +24,8 @@ protected:
   void Setup_ck();
   inline double g(double r);
 public:
+
+  
   bool HaveSamplingTable;
   void Read (IOSectionClass &in);
   /*   double dUdR(int slice,int ptcl1, int ptcl2, int level); */
@@ -31,6 +33,7 @@ public:
   /*   double d2UdR2(int slice,int ptcl1, int ptcl2, int level); */
   /*   double d2UdR2_movers(int slice,int ptcl1, int ptcl2, int level); */
   
+
   
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);

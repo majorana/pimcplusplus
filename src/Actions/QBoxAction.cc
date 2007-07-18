@@ -14,7 +14,7 @@ QBoxActionClass::GetName()
 }
 	
 QBoxActionClass::QBoxActionClass(PathDataClass &pathData) : ActionBaseClass (pathData){
-  cerr << "QBoxActionClass Constructor: " << endl;
+  ////  cerr << "QBoxActionClass Constructor: " << endl;
   //out.open("convergence.dat");
   //out.precision(16);
   //out << "## Rx Ry Rz oldS(10) oldS(20) oldS(25) oldS(30) oldS(full) oldConverged Rx Ry Rz newS(10) newS(20) newS(25) newS(30) newS(full) newConverged" << endl;

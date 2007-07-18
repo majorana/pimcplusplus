@@ -97,7 +97,7 @@ ActionsClass::Read(IOSectionClass &in)
   
 
   int numPairActions = PAFiles.size();
-  cerr << "Looking for " << numPairActions << endl;
+  ///  cerr << "Looking for " << numPairActions << endl;
   PairArray.resize(numPairActions);
   if (readSpecificHeatFiles)
     SpecificHeatPairArray.resize(SpecificHeatPAFiles.size());

@@ -24,7 +24,6 @@
 ///particles it has
 void ShortRangeClass::Read(IOSectionClass& in)
 {
-  DoPtcl.resize(PathData.Path.NumParticles());
   TotalTime=0;
 }
 
@@ -176,9 +175,9 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
 	  TotalU+=U;
 	}
-	}
       }
     }
+  }
 //  cerr<<"Num total U is "<<TotalU<<endl;
 ////  cerr<<"Worm short range action is "<<TotalU<<endl;
 //  cerr<<"I'm out of the short range action"<<endl;

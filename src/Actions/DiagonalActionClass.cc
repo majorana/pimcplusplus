@@ -60,8 +60,7 @@ DiagonalActionClass::SingleAction (int slice1, int slice2,
 void 
 DiagonalActionClass::Read(IOSectionClass &in)
 {
-  DoPtcl.resize(PathData.Path.NumParticles());
-  TotalTime=0;
+
 }
 
 DiagonalActionClass::DiagonalActionClass(PathDataClass &pathData,

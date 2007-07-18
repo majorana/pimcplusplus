@@ -26,7 +26,7 @@ EAMPotentialClass::EAMPotentialClass(PathDataClass &pathData) :
   mMax = 3;
   c.resize(6);
   c = 0.64085/12, -6.83764/12, 26.75616/12, -47.16495/12, 36.18925/12, -8.60834/12;
-  cerr << "EAM INITIALIZED coeffs " << c << endl;
+  //  cerr << "EAM INITIALIZED coeffs " << c << endl;
   s.resize(3);
   s = 12.0, 6.0, 24.0;
   Ec = 3.39;
@@ -51,7 +51,7 @@ EAMPotentialClass::EAMPotentialClass(PathDataClass &pathData) :
 
 void EAMPotentialClass::Read(IOSectionClass& in)
 {
-  cerr << "EAM READ" << endl;
+  //  cerr << "EAM READ" << endl;
   rho.resize(PathData.Path.NumParticles());
   rho = 0.0;
 }
