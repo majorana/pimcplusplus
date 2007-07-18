@@ -48,3 +48,11 @@ def Process(infiles,summaryDoc,detailedDoc,StartCut):
     summaryDoc.append(AcceptTable)
     if PermuteTable!=[]:
         summaryDoc.append(PermuteTable)
+    centerOfMass=infiles.ReadVar("CenterOfMassDrift")
+    for proc in range(0,len(centerOfMass)):
+        centerOfMass[proc]=sum(centerOfMass[proc])/len(centerOfMass[proc])
+    totalCenterOfMass=sum(centerOfMass)/len(centerOfMass)
+    AcceptTable=BuildTable(2,1)
+    AcceptTable.body[0][0:1]=["Move","Total Center of Mass Diffusion"]
+    AcceptTable.body[1][0:1]=["Bisection Block",totalCenterOfMass]
+    summaryDoc.append(AcceptTable)
