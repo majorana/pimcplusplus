@@ -44,6 +44,9 @@ if (sys.argv[1]=='-f'):
      basename=basename+"d"
 else:
      basename = sys.argv[1]
+     splitBaseName=string.split(basename,'.')
+     if splitBaseName[-1]=='h5':
+          basename=string.join(splitBaseName[0:-2],'.')
      infiles.OpenFiles(basename);
       
 print 'Found ' +repr(infiles.len()) + ' output files.'
