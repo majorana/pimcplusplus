@@ -597,7 +597,7 @@ void DavidPAClass::ReadSamplingTable(string fileName)
 
 void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 {
-  cerr<<"I AM READING DAVID SQUARER FILE"<<endl;
+  ///  cerr<<"I AM READING DAVID SQUARER FILE"<<endl;
   double tau; //used to be in the base clase
   double smallestTau;
   ifstream infile;
@@ -608,16 +608,19 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   }
   
   string numOfFitsString=SkipTo(infile,"SQUARER");
-  cerr<<GetNextWord(numOfFitsString)<<endl;
+  //  cerr<<GetNextWord(numOfFitsString)<<endl;
+  GetNextWord(numOfFitsString);
   //  double LowTau=atof(GetNextWord(numOfFitsString));
-  cerr<<GetNextWord(numOfFitsString)<<endl;
+  ///  cerr<<GetNextWord(numOfFitsString)<<endl;
+  GetNextWord(numOfFitsString);
   //  cerr<<LowTau<<endl;
-  cerr<<GetNextWord(numOfFitsString)<<endl;
-  cerr<<GetNextWord(numOfFitsString)<<endl;
+  //  cerr<<GetNextWord(numOfFitsString)<<endl;
+  GetNextWord(numOfFitsString);
+  //  cerr<<GetNextWord(numOfFitsString)<<endl;
+  GetNextWord(numOfFitsString);
 
   int numOfFits=GetNextInt(numOfFitsString);
   n = numOfFits;
-  cerr<<"N is "<<n<<endl;
   // Read in  the potential
   Array<double,1> potential;
   string potGridString = SkipTo(infile, "RANK");
@@ -627,12 +630,12 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   potential.resize(numPotPoints);
 
   SkipTo(infile, "potential");
-  cerr<<"I'm reading the potential\n";
+
   for (int i=0; i<numPotPoints; i++){
     infile >> potential(i);
-    cerr<<potential(i)<<endl;
+
   }
-  cerr<<"done\n";
+
   //  string NDERIVString = SkipTo(infile,"NDERIV");
 
 
@@ -701,7 +704,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 	cerr<<"ERROR!!! ERROR!!! We got the beta derivative and not U\n";
       }
       Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
-      cerr<<"NumTau is"<<NumTau<<endl;
+      //      cerr<<"NumTau is"<<NumTau<<endl;
       ukj.resize(NumTau);
       UdiagSpline.resize(NumTau);
       ////???      ukj.resize(NumUKJ+1);
@@ -782,8 +785,8 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       smallestTau=GetNextDouble(TauGridString);
       double largestTau=GetNextDouble(TauGridString);
       int numTauCalc=(int)floor(log(largestTau/smallestTau)/log(2.0)+0.5+1.0); ///I think this -1 is correct but who knows
-      cerr<<"The largest and smallest tau are respectively"
-	  <<largestTau<<" "<<smallestTau<<endl;
+      ////      cerr<<"The largest and smallest tau are respectively"
+      ////	  <<largestTau<<" "<<smallestTau<<endl;
       if (NumTau!=numTauCalc){
 	
 	cerr<<"ERROR!!! ERROR!!! num tau inconsistency \n";
@@ -791,7 +794,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       }
       string beginString=SkipTo(infile,"BEGIN density matrix table");
       int NMax=GetNextInt(beginString); //This is magically the most accurate fit i.e. NDERIV-1
-      cerr<<"NMAX is "<<NMax<<endl;
+      ///      cerr<<"NMAX is "<<NMax<<endl;
       if (GetNextInt(beginString)!=2){ //i.e. if it's not U
 	cerr<<"ERROR!!! ERROR!!! We didn't get the beta derivative.\n";
       }
@@ -813,14 +816,14 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       tau=smallestTau;
       for(int i=0; i<NumTau; i++){ //HACK!
 	tempdUkj2(Range::all(),0,i) = potential;
-	cerr<<"Current tau is "<<tau<<" "<<i<<endl;
+	///	cerr<<"Current tau is "<<tau<<" "<<i<<endl;
 	if (fabs(tau-DesiredTau)<1e-4){
-	  cerr<<"The tau I've chosen is "<<tau;
+	  ///	  cerr<<"The tau I've chosen is "<<tau;
 	  TauPos=i;
 	}
 	tau=tau*2; //HACK!
       }
-      cerr<<"I'm about ot actually initialize dukj now!"<<endl;
+      ///      cerr<<"I'm about ot actually initialize dukj now!"<<endl;
       tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
       tempdUkj2(NumGridPoints-1,Range::all(),Range::all())=0.0; ///NOT SURE ABOUT THIS!!!
       const int numDiagPoints = 200;
@@ -831,7 +834,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
 	}
       }
       //      tau=smallestTau; HACK REMOVAL!
-      cerr<<"My tau is "<<tau<<endl;
+      ////      cerr<<"My tau is "<<tau<<endl;
       n=NMax;
       
     }
@@ -845,7 +848,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   for (int i=0;i<TauPos;i++){
     tau *= 2;
   }
-  cerr << "NumTau = " << NumTau << endl;
+  ///  cerr << "NumTau = " << NumTau << endl;
   for (int level=0; level<NumTau; level++) {
     const int numDiagPoints = 200;
     Array<double,1> udiag(numDiagPoints);
@@ -858,8 +861,8 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
     }
     UdiagSpline(level).Init (start, end, udiag);
   }
-  cerr<<"I've FINALLY CHOSEN A TAU OF "<<tau;
-  cerr<<"TauPos is "<<TauPos<<endl;
+  cerr<<"I've selected a tau of "<<tau<< "in the PairAction file"<<endl;
+  ///  cerr<<"TauPos is "<<TauPos<<endl;
 }
 
 // double DavidPAClass::Udiag(double q, int level)
