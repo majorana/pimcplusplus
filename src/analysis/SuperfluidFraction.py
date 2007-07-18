@@ -46,21 +46,27 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
 
     clf()
     baseName="SuperfluidFraction"
-    hlabel="x,y,z,total"  
     vlabel="$\rho_s$"
 ##    matplotlib.rc('text', usetex=True)
 
-    h1=xlabel(hlabel)
 ##    v1=ylabel(r"$\rho_s$")
     v1=ylabel("rho_s")
-    setp(h1,"FontSize",20)
     setp(v1,"FontSize",20)
     labels = get(gca(), 'yticklabels')
     setp(labels, 'fontsize', 16)
 
-    bar ([0, 1, 2], mean, yerr=error)
+    bar ([0.1, 1.1, 2.1], mean, yerr=error, ecolor='r')
+    hold (True);
+    (a,errlines) = errorbar ([0.5, 1.5, 2.5], mean, error, fmt='r.', capsize=15.0, ms=00.0, lw=5.0);
+    
+    ticks = [0.5, 1.5, 2.5];
+    xticks(ticks, ['x', 'y', 'z'])
+    xticklabels = getp(gca(), 'xticklabels')
+    setp (xticklabels, fontsize=18)
+    hold (False);
+    
     # errorbar([1,2,3],mean,error,fmt='b.')
-    axis([0, 4,0,1.2])
+    #axis([0, 3,0,1.5])
 
     imageName = baseName + ".png"
     epsName = baseName +".eps"
