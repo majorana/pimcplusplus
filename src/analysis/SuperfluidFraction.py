@@ -58,7 +58,8 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
     labels = get(gca(), 'yticklabels')
     setp(labels, 'fontsize', 16)
 
-    errorbar([1,2,3],mean,error,fmt='b.')
+    bar ([0, 1, 2], mean, yerr=error)
+    # errorbar([1,2,3],mean,error,fmt='b.')
     axis([0, 4,0,1.2])
 
     imageName = baseName + ".png"
