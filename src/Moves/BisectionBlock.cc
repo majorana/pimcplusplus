@@ -26,7 +26,7 @@
 
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
-  cerr<<"Reading bisection block"<<endl;
+  //  cerr<<"Reading bisection block"<<endl;
   bool useCorrelatedSampling;
   if (!in.ReadVar("UseCorrelatedSampling",useCorrelatedSampling))
     useCorrelatedSampling=false;
@@ -142,7 +142,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	newStage->Actions.push_back(&PathData.Actions.ShortRangePrimitive);
       }
       else if (level>LowestLevel){ // if (level==LowestLevel) //HACK HERE CURRENTLY 
-	perr<<"Adding short range action in BisectionBlock."<<endl;
+	//	perr<<"Adding short range action in BisectionBlock."<<endl;
 	newStage->Actions.push_back(&PathData.Actions.DiagonalAction);
 	//	newStage->Actions.push_back(&PathData.Actions.ShortRange);
       }
@@ -208,7 +208,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
     structureReject->Read(in);
     Stages.push_back(structureReject);
   }
-  cerr<<"Bisection block done"<<endl;
+  //  cerr<<"Bisection block done"<<endl;
 }
 
 
