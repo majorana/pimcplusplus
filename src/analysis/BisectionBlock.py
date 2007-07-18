@@ -33,7 +33,7 @@ def Process(infiles,summaryDoc,detailedDoc,StartCut):
             PermuteTable.body[0][0]=""
             PermuteTable.body[1][0]="Accepted Permutations"
             PermuteTable.body[2][0]="Attempted Permutations"
-            PermuteTable.body[3][0]="Percent Accepted"
+            PermuteTable.body[3][0]="Fraction Accepted"
             for dim in range(1,5):
                 PermuteTable.body[0][dim]=str(dim)+" ptcl"
                 PermuteTable.body[1][dim]=acceptedPerms[dim-1]
