@@ -23,6 +23,11 @@
 #include "IOASCII.h"
 
 namespace IO {
+  // This output stream is for verbose output from programs.  It is
+  // connected to stderr if SetVerbose(true) is called.
+  extern std::ostream verr;
+  void SetVerbose(bool verb);
+
   template<> inline bool 
   IOTreeClass::WriteVar (string name, const char* val)
   {

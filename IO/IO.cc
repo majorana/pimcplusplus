@@ -15,9 +15,18 @@
 /////////////////////////////////////////////////////////////
 
 #include "IO.h"
+#include <fstream>
 
 namespace IO
 {
+  std::filebuf vbuf;
+  std::ostream verr(&vbuf);
+
+  void SetVerbose (bool verb) {
+    if (verb)
+      verr.rdbuf(cerr.rdbuf());
+  }
+
   /// In the file name format name.extn, returns the extension.
   /// Actually returns everything after the trailing.
   string Extension (string fileName)
