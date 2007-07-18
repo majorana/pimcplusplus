@@ -68,7 +68,12 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
         totalVar=sum(varList)/len(varList)
         totalKappa=sum(kappaList)/len(kappaList)
         (totalMeanStr,totalErrorStr)=stats.MeanErrorString(totalMean,totalError)
-        summaryTable.body[row]=[varName,totalMeanStr,totalErrorStr, '%1.2e' % totalVar ,'%1.2f' % totalKappa]
+        # If the variance is essentially zero, the autocorrelation time is undefined
+        if (totalVar < 1.0e-20):
+            kappaString = "N/A"
+        else:
+            kappaString = '%1.2f' % totalKappa
+        summaryTable.body[row]=[varName,totalMeanStr,totalErrorStr, '%1.2e' % totalVar, kappaString]
     summaryDoc.append(summaryTable)
     detailedDoc.append(scalarVarTable)
     for pageName in scalarTracePageHTMLList:
