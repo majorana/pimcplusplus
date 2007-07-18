@@ -48,14 +48,15 @@ else:
      if splitBaseName[-1]=='h5':
           basename=string.join(splitBaseName[0:-2],'.')
      infiles.OpenFiles(basename);
-      
-print 'Found ' +repr(infiles.len()) + ' output files.'
+
+if (infiles.len() > 1):
+     print 'Found ' +repr(infiles.len()) + ' output files.'
 
 dirName=basename 
 cutoff=None
 StartCut = None
 if (os.access(dirName+"/.pref",os.F_OK)):
-     print dirName+"/.pref"
+#     print dirName+"/.pref"
      prefFile=IOSectionClass()
      prefFile.OpenFile(dirName+"/.pref")
      StartCut = prefFile.ReadVar("StartCut")
@@ -78,10 +79,8 @@ summaryDoc.append(HR())
 #ProcessMove(doc,infiles)
 
 try:
-     print "PreTopTable"
      (_,tau,numTimeSlices,box)=ProcessTopTable(summaryDoc,infiles)
      beta = tau*numTimeSlices
-     print "PostTopTable"
 except:
      print "top table failed"
 
@@ -91,7 +90,7 @@ for secNum in range(0,numSections):
      infiles.OpenSection(secNum)
      moveName=infiles.GetName()
      if moveName=="BisectionBlock":
-          print "Processing BisectionBlock"
+#          print "Processing BisectionBlock"
           BisectionBlock.Process(infiles,summaryDoc,detailedDoc,StartCut)
      infiles.CloseSection()
 infiles.CloseSection()
@@ -132,12 +131,12 @@ infiles.CloseSection()
 currNum=0
 infiles.OpenSection("Observables")
 numSections=infiles.CountSections()
-print "Number of sections is ",numSections
+#print "Number of sections is ",numSections
 for counter in range(0,numSections):
      infiles.OpenSection(counter)
      myName= infiles.GetName()
      myType=infiles.ReadVar("Type")[0]
-     print "Currently processing ",myName
+#     print "Currently processing ",myName
      if myName=="PairCorrelation":
          try:
               ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
@@ -184,11 +183,11 @@ for counter in range(0,numSections):
 #         print "Processing Winding Number"
 #         ProcessWindingNumber(infiles,summaryDoc,detailedDoc,StartCut)
      elif myName=="SuperfluidFraction":
-         print "Processing Superfluid Fraction"
+#         print "Processing Superfluid Fraction"
          ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut)
      elif myName=="Hexatic":
           try: 
-            print "Processing Hexatic"
+ #           print "Processing Hexatic"
             ProcessHexatic(infiles,summaryDoc,detailedDoc,StartCut)
           except:
             print "Hexatic failed"
@@ -226,7 +225,6 @@ for counter in range(0,numSections):
          a=5
      infiles.CloseSection()
 infiles.CloseSection() # "Observables"
-print "Made it here"
 
 summaryDoc.logo=""
 summaryDoc.author="Ken and Bryan"

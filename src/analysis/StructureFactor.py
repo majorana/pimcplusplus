@@ -59,9 +59,9 @@ def ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut):
      y=mean
      x=infiles.ReadVar("x")[0]
      kVecs=infiles.ReadVar("kVecs")[0]
-     print "KVECS Coming"
-     print kVecs
-     print "KVECS DONE"
+#     print "KVECS Coming"
+#     print kVecs
+#     print "KVECS DONE"
      if (x==None):
           return currNum
      toSort=[]

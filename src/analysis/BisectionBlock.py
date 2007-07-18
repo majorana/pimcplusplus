@@ -21,7 +21,7 @@ def Process(infiles,summaryDoc,detailedDoc,StartCut):
         infiles.OpenSection(stage)
         acceptedPerms=infiles.ReadVar("AcceptRatio")
         if acceptedPerms[0]==None:
-            print "Reading permutation data"
+#            print "Reading permutation data"
             acceptedPerms=infiles.ReadVar("Acceptance Ratio")
             permsTried=infiles.ReadVar("Perms Tried")
             acceptedPerms = [x*y for (x,y) in zip(acceptedPerms,permsTried)]
@@ -38,7 +38,7 @@ def Process(infiles,summaryDoc,detailedDoc,StartCut):
                 PermuteTable.body[0][dim]=str(dim)+" ptcl"
                 PermuteTable.body[1][dim]=acceptedPerms[dim-1]
                 PermuteTable.body[2][dim]=permsTried[dim-1]
-                PermuteTable.body[3][dim]=acceptedPerms[dim-1]/permsTried[dim-1]
+                PermuteTable.body[3][dim]= '%1.4f' % (acceptedPerms[dim-1]/permsTried[dim-1])
         else:
             acceptedPerms=[average(x) for x in acceptedPerms]
             acceptedPerms=sum(acceptedPerms)/len(acceptedPerms)

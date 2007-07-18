@@ -30,16 +30,16 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
     meanSF=average(mean)
     errorSF=sqrt(sum([x*x for x in error]))
 
-    print "Superfluid",meanSF,errorSF
+#    print "Superfluid",meanSF,errorSF
     SFTable=BuildTable(3,5)
     SFTable.body[0]=[" ","x", "y","z","total"]
     SFTable.body[1][0]="Mean"
     SFTable.body[2][0]="Error"
     for i in range(1,4):
-        SFTable.body[1][i]=mean[i-1]
-        SFTable.body[2][i]=error[i-1]
-    SFTable.body[1][4]=meanSF
-    SFTable.body[2][4]=errorSF
+        SFTable.body[1][i]= '%1.3f' % mean[i-1]
+        SFTable.body[2][i]= '%1.3f' % error[i-1]
+    SFTable.body[1][4] = '%1.3f' % meanSF
+    SFTable.body[2][4] = '%1.3f' % errorSF
 
 
 

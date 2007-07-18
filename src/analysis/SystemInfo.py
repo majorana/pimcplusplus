@@ -19,7 +19,9 @@ def ProcessSystemInfo(infiles):
      beta=tau*numTimeSlices
      temp=1.0/beta
      systemTable=Table("System")
-     systemTable.body=[["tau",repr(tau)]]
+     tauDigits = math.ceil(-log10(tau)) + 2
+     tauFmt = '%c1.%df' % ('%', tauDigits)
+     systemTable.body=[["tau",tauFmt % tau]]
      systemTable.body.append(["# of Slices",repr(numTimeSlices)])
      systemTable.body.append(["beta", '%1.2f' % beta])
      systemTable.body.append(["temperature", '%1.4e' % temp])
@@ -28,7 +30,7 @@ def ProcessSystemInfo(infiles):
      speciesTable.body=[]
      speciesTable.body.append(["Name","NumParticles","lambda","Type"])
      numSections=infiles.CountSections2("Species")
-     print 'NumSpecies = ', numSections
+#     print 'NumSpecies = ', numSections
      for spec in range(0,numSections):
           infiles.OpenSection2("Species",spec)
           name=infiles.ReadVar("Name")[0]
