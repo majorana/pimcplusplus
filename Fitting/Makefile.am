@@ -12,8 +12,7 @@ noinst_LTLIBRARIES = libfitting.la
 
 libfitting_la_SOURCES = Fitting.cc      \
                         Fitting.h       \
-                        NonlinearFit.h  \
-                        NonlinearFit.cc
+                        NonlinearFit.h 
 
 libfitting_la_CXXFLAGS = $(BLITZ_CFLAGS) $(AM_CXXFLAGS)
 include_HEADERS = Fitting.h NonlinearFit.h
