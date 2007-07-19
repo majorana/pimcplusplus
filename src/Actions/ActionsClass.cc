@@ -26,7 +26,7 @@
 void 
 ActionsClass::Read(IOSectionClass &in)
 { 
-  cerr<<"Starting Actions Read"<<endl;
+  verr<<"Starting Actions Read"<<endl;
 #ifdef BUILD_DEV
   PathClassDev &Path = PathData.Path;
 #else
@@ -66,7 +66,7 @@ ActionsClass::Read(IOSectionClass &in)
   TruncatedInverse.Read(in);
 #endif
   //  VariationalPI.Read(in);
-  perr << "MaxLevels = " << MaxLevels << endl;
+  verr << "MaxLevels = " << MaxLevels << endl;
   bool checkJosephson=false;
   in.ReadVar("Josephson",checkJosephson);
   if (checkJosephson){
@@ -83,11 +83,11 @@ ActionsClass::Read(IOSectionClass &in)
   if (!in.ReadVar ("UseRPA", UseRPA))
     UseRPA = false;
   if (UseRPA) 
-    perr << "Using RPA for long range action.\n";
+    verr << "Using RPA for long range action.\n";
   else      
-    perr << "Not using RPA for long range action.\n";
+    verr << "Not using RPA for long range action.\n";
 
-  cerr << " going to read pair actions" << endl;
+  verr << " going to read pair actions" << endl;
   Array<string,1> PAFiles;
   assert (in.ReadVar ("PairActionFiles", PAFiles));
   Array<string,1> SpecificHeatPAFiles;
@@ -108,7 +108,7 @@ ActionsClass::Read(IOSectionClass &in)
     for (int j=0; j<Path.NumSpecies(); j++)
       PairMatrix(i,j) = (PairActionFitClass*)NULL;
   // Read pair actions files
-  cerr << "declaring IOSectionClass...";
+  verr << "declaring IOSectionClass...";
   IOSectionClass PAIO;
   cerr << " done" << endl;
  
@@ -116,16 +116,16 @@ ActionsClass::Read(IOSectionClass &in)
   for (int i=0; i<numPairActions; i++) {
     // Allow for tilde-expansion in these files
     string name = ExpandFileName(PAFiles(i));
-    cerr<<"We are about to try to read the PairActon file "<<name<<endl;
-    cerr<<"If the code aborts at this point, most likely the .PairAction or .Sampling.in or .dm file are incorrect or placed in the wrong place."<<endl;
+    verr<<"We are about to try to read the PairActon file "<<name<<endl;
+    verr<<"If the code aborts at this point, most likely the .PairAction or .Sampling.in or .dm file are incorrect or placed in the wrong place."<<endl;
     if (!PAIO.OpenFile(name)){
       cerr<<"We were unable to find the PairAction file "<<name<<endl;
       cerr<<"Please make sure you have specified it correctly."<<endl;
       abort();
     }
-    cerr<<"Done reading the PairAction file "<<name<<endl;
+    verr<<"Done reading the PairAction file "<<name<<endl;
     //    assert(PAIO.OpenFile (name));
-    cerr << i << ": reading " << name << endl;
+    verr << i << ": reading " << name << endl;
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
     if (PairArray(i)->Pot != NULL)
       if (PairArray(i)->Pot->IsNonlocal())
@@ -143,7 +143,7 @@ ActionsClass::Read(IOSectionClass &in)
 		 << PairArray(i)->Particle2.Name << ")." << endl;
 	    exit(-1);
 	  }
-	  perr << "Found PAfile for pair (" 
+	  verr << "Found PAfile for pair (" 
 	       << Path.Species(spec1).Name << ", "
 	       << Path.Species(spec2).Name << ")\n";
 	  PairMatrix(spec1,spec2) = PairArray(i);
@@ -236,7 +236,7 @@ ActionsClass::Read(IOSectionClass &in)
 //     else
 //       NodalActions(species) = NULL;
   
-  perr << "Finished reading the action.\n"; 
+  verr << "Finished reading the action.\n"; 
 
   if (in.OpenSection("StructureReject")){
     StructureReject.Read(in);
@@ -317,7 +317,7 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
     }
     in.CloseSection();
   }
-  cerr<<"Ending actions read"<<endl;
+  verr<<"Ending actions read"<<endl;
 }
 
 
