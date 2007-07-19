@@ -126,7 +126,7 @@ class DavidPAClass : public PairActionFitClass
 
 inline bool DavidPAClass::Read(IOSectionClass &in,double x, int y)
 {
-  cerr<<"In DavidPAClass Read"<<endl;
+  verr<<"In DavidPAClass Read"<<endl;
   string fileName;
   DesiredTau=x;
   NumLevels=y;
@@ -148,9 +148,9 @@ inline bool DavidPAClass::Read(IOSectionClass &in,double x, int y)
   ReadDavidSquarerFile(fileName.c_str());
   string samplingTableFile;
   SamplingTableRead=in.ReadVar("SamplingTableFile",samplingTableFile);
-  cerr<<"My sampling table read is "<<SamplingTableRead<<endl;
+  verr<<"My sampling table read is "<<SamplingTableRead<<endl;
   if (SamplingTableRead){
-    cerr<<"Reading sampling table"<<endl;
+    verr<<"Reading sampling table"<<endl;
     ReadSamplingTable(samplingTableFile);
   }
   

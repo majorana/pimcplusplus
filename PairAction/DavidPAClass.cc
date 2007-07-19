@@ -522,7 +522,7 @@ DavidPAClass::Udiag (double q, int level)
 
 void DavidPAClass::ReadSamplingTable(string fileName)
 {
-  cerr<<"Reading the sampling table"<<endl;
+  verr<<"Reading the sampling table"<<endl;
   IOSectionClass in;
   bool success=in.OpenFile(fileName.c_str());
   if (!success){
@@ -533,7 +533,7 @@ void DavidPAClass::ReadSamplingTable(string fileName)
   assert(in.ReadVar("SamplingTau",SamplingTau));
   for (int i=0;i<SamplingTau.size();i++)
     if (fabs(SamplingTau(i)-DesiredTau)<1e-4){
-      cerr<<"The sampling tau I've chosen is "<<SamplingTau(i);
+      verr<<"The sampling tau I've chosen is "<<SamplingTau(i);
       startLevel=i;
     }
   assert(startLevel!=-1);
@@ -592,7 +592,7 @@ void DavidPAClass::ReadSamplingTable(string fileName)
   
   in.CloseSection();
   in.CloseFile();
-  cerr<<"Left the sampling table"<<endl;
+  verr<<"Left the sampling table"<<endl;
 }
 
 void DavidPAClass::ReadDavidSquarerFile(string DMFile)
@@ -861,7 +861,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
     }
     UdiagSpline(level).Init (start, end, udiag);
   }
-  cerr<<"I've selected a tau of "<<tau<< "in the PairAction file"<<endl;
+  verr<<"I've selected a tau of "<<tau<< "in the PairAction file"<<endl;
   ///  cerr<<"TauPos is "<<TauPos<<endl;
 }
 
