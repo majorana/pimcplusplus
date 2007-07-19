@@ -184,7 +184,7 @@ void PathClass::Read (IOSectionClass &inSection)
   bool useBox=inSection.ReadVar("Box",tempBox);
   assert(useBox || useDensity);
   if (needBox && !useDensity) {
-    perr << "Using periodic boundary conditions.\n";
+    verr << "Using periodic boundary conditions.\n";
     assert(tempBox.size()==NDIM);
     for (int counter=0;counter<tempBox.size();counter++)
       Box(counter)=tempBox(counter);
@@ -510,8 +510,8 @@ void PathClass::SetupkVecs2D()
     }
   }
   kIndices.resize(numVecs);
-  perr << "kCutoff = " << kCutoff << endl;
-  perr << "Number of kVecs = " << numVecs << endl;
+  verr << "kCutoff = " << kCutoff << endl;
+  verr << "Number of kVecs = " << numVecs << endl;
   kVecs.resize(numVecs);
   for (int i=0; i<NDIM; i++)
     C[i].resize(2*MaxkIndex[i]+1);
@@ -622,9 +622,9 @@ void PathClass::SetupkVecs3D()
     }
   }
   kIndices.resize(numVecs);
-  perr << "kCutoff = " << kCutoff << endl;
-  perr << "Number of kVecs = " << numVecs << endl;
-  perr << "MaxkIndex = " << MaxkIndex << endl;
+  verr << "kCutoff = " << kCutoff << endl;
+  verr << "Number of kVecs = " << numVecs << endl;
+  verr << "MaxkIndex = " << MaxkIndex << endl;
   kVecs.resize(numVecs);
   MagK.resize(numVecs);
   for (int i=0; i<NDIM; i++)
