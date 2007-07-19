@@ -57,7 +57,7 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
 
     bar ([0.1, 1.1, 2.1], mean, yerr=error, ecolor='r')
     hold (True);
-    (a,errlines) = errorbar ([0.5, 1.5, 2.5], mean, error, fmt='r.', capsize=15.0, ms=00.0, lw=5.0);
+    errorbar ([0.5, 1.5, 2.5], mean, error, fmt='r.', capsize=15.0, ms=00.0);
     
     ticks = [0.5, 1.5, 2.5];
     xticks(ticks, ['x', 'y', 'z'])
