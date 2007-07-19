@@ -63,10 +63,10 @@ main(int argc, char **argv)
     //		cerr << " done" << endl;
     //		cerr << "new PIMC...";
     PIMCClass PIMC;
-		cerr << "done" << endl;
+		verr << "done" << endl;
     bool doRun = PIMC.Read(in);
     if(doRun){
-			cerr << "I am about to run..." << endl;
+			verr << "I am about to run..." << endl;
 			PIMC.Run();
 		}
 		else {
