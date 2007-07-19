@@ -67,7 +67,7 @@ libactions_la_SOURCES =            \
     ShortRangePrimitive.h          \
     ShortRangePrimitive.cc         \
     StructureReject.h              \
-    StructureRecject.cc            \
+    StructureReject.cc             \
     ST2WaterClass.cc               \
     ST2WaterClass.h                \
     StructureReject.cc             \
