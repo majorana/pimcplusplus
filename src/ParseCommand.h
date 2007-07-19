@@ -13,10 +13,11 @@ using namespace std;
 class ParamClass
 {
 private:
-  string Arg, Name;
+  string Arg, Name, ShortName;
 public:
   bool NeedsArg, Found;
-  string GetName () { return Name; }
+  string GetName ()     { return Name;      }
+  string GetShortName() { return ShortName; }
 
   string GetArg  () 
   { 
@@ -27,7 +28,14 @@ public:
     assert (NeedsArg);
     Arg = arg;
   }
-      
+  
+  ParamClass (string name, string shortName, bool needsArg) {
+    Name = name;
+    ShortName = shortName;
+    NeedsArg  = needsArg;
+    Found = false;
+  }
+    
   ParamClass (string name, bool needsArg) {
     Name     = name;
     NeedsArg = needsArg;
@@ -44,6 +52,7 @@ CommandLineParserClass
 {
 private:
   map<string, ParamClass> ArgMap;
+  map<string, ParamClass> ShortMap;
   vector<string> Files;
 public:
   bool Parse (int argc, char **argv);

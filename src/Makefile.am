@@ -50,6 +50,8 @@ pimc___SOURCES =          \
     InitPaths.cc          \
     MoleculeHelper.h      \
     MoleculeHelper.cc     \
+    ParseCommand.cc       \
+    ParseCommand.h        \
     PathClass.cc          \
     PathClass.h           \
     WormHelper.cc         \

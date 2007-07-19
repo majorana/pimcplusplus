@@ -16,6 +16,7 @@
 
 #include "PIMCClass.h"
 #include "MirroredClass.h"
+#include "ParseCommand.h"
 
 ///  \mainpage An overview of PIMC++ 
 ///
@@ -44,35 +45,58 @@
 
 main(int argc, char **argv)
 {
-  //  MirroredClassTest();
   COMM::Init(argc, argv);
   string version = VERSION;
   perr << "pimc++ v. " << version << endl;
 
-  if (argc < 2) {
-    cout << "Usage:\n";
-    cout << "pimc++ myfile.in\n"; 
- }
+  list<ParamClass> argList;
+  argList.push_back (ParamClass("verbose", "v", false));
+  CommandLineParserClass parser(argList);
+  parser.Parse (argc, argv);
+  if (parser.NumFiles() != 1) 
+    cout << "Usage:\n"
+	 << "  pimc++ [-v] myfile.in\n";
   else {
-    //	cerr << "new IO...";
-    IOSectionClass in;
-    //	cerr << "done" << endl;
-    cerr << "opening input...";
-    cerr<<argv[1]<<endl;
-    assert (in.OpenFile(argv[1]));
-    //		cerr << " done" << endl;
-    //		cerr << "new PIMC...";
+    if (parser.Found ("verbose"))
+      IO::SetVerbose(true);
     PIMCClass PIMC;
-		verr << "done" << endl;
-    bool doRun = PIMC.Read(in);
-    if(doRun){
-			verr << "I am about to run..." << endl;
-			PIMC.Run();
-		}
-		else {
-			cerr << "I am about to launch a dummy..." << endl;
-			PIMC.Dummy();
-		}
+    string inputName = parser.GetFile(0);
+    IOSectionClass in;
+    if (!in.OpenFile(inputName)) {
+      cerr << "Could not open " << inputName << " for reading.  Exitting.\n";
+      exit(-1);
+    }
+    if (PIMC.Read(in)) 
+      PIMC.Run();
+    else
+      PIMC.Dummy();
   }
+
+
+//   if (argc < 2) {
+//     cout << "Usage:\n";
+//     cout << "pimc++ myfile.in\n"; 
+//   }
+//   else {
+//     //	cerr << "new IO...";
+//     IOSectionClass in;
+//     //	cerr << "done" << endl;
+//     cerr << "opening input...";
+//     cerr<<argv[1]<<endl;
+//     assert (in.OpenFile(argv[1]));
+//     // cerr << " done" << endl;
+//     // cerr << "new PIMC...";
+//     PIMCClass PIMC;
+//     cerr << "done" << endl;
+//     bool doRun = PIMC.Read(in);
+//     if(doRun){
+//       cerr << "I am about to run..." << endl;
+//       PIMC.Run();
+//     }
+//     else {
+//       cerr << "I am about to launch a dummy..." << endl;
+//       PIMC.Dummy();
+//     }
+//   }
   COMM::Finalize();
 }
