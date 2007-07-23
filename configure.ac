@@ -62,17 +62,6 @@ AC_F77_MAIN
 AC_PROG_LIBTOOL
 AC_C_RESTRICT
 
-# Check python stuff for IO wrappers
-AM_PATH_PYTHON(2.3)
-AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
-AX_PYTHON_RUN([[import numpy ; print numpy.get_include()]])
-if test $ax_python_cc -ne 0
-then
-  AC_MSG_ERROR([cannot find numpy header files])
-fi
-AC_MSG_RESULT([$ax_python_output])
-AC_SUBST([NUMPY_INC], [-I$ax_python_output])
-
 # Optimization settings.
 AC_CANONICAL_HOST
 AC_MSG_CHECKING([host cpu = ])
@@ -133,6 +122,22 @@ esac
 
 CXXFLAGS="$CXXFLAGS -g"
 
+# Check python stuff for IO wrappers
+AC_ARG_ENABLE(python,      [  --enable-python         enable IO python wrappers (default=yes)], ,enable_python=yes)
+AM_CONDITIONAL([WANT_PYTHON_WRAPPERS], [test "$enable_python" = "yes"])
+if test "x$enable_python" = "xyes"; then
+  AM_PATH_PYTHON(2.3)
+  AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+  AX_PYTHON_RUN([[import numpy ; print numpy.get_include()]])
+  if test $ax_python_cc -ne 0
+  then
+    AC_MSG_ERROR([cannot find numpy header files])
+  fi
+  AC_MSG_RESULT([$ax_python_output])
+  AC_SUBST([NUMPY_INC], [-I$ax_python_output])
+fi
+
+
 # Check if we want to use the fftw2mkl wrappers
 AC_ARG_ENABLE(fftw2mkl,    [  --enable-fftw2mkl       enable MKL FFTW wrappers (default=no)])
 if test "x$enable_fftw2mkl" = "xyes"; then
@@ -144,7 +149,7 @@ else
 fi
 
 # Check if we want to use single-precision FFTs for SIMD spead improvements
-AC_ARG_ENABLE(fft-single,    [  --enable-fft-single       enable single-precision FFTs (default=no)])
+AC_ARG_ENABLE(fft-single,    [  --enable-fft-single      enable single-precision FFTs (default=no)])
 if test "$enable_fft_single" = "yes"; then
     FFT_DEF="$FFT_DEF -DFFT_USE_SINGLE"
     if test "$enable-fftw2mkl" != "yes"; then
@@ -177,7 +182,7 @@ fi
 
 
 # Checks if we want MPI support
-AC_ARG_ENABLE(mpi,    [  --enable-mpi              enable MPI support (default=no)])
+AC_ARG_ENABLE(mpi,    [  --enable-mpi             enable MPI support (default=no)])
 AM_CONDITIONAL([PARALLEL], [test "$enable_mpi" = "yes"])
 AC_ARG_WITH(mpi-inc,  [  --with-mpi-cflags=FLAGS   specify MPI compliler flags])
 AC_ARG_WITH(mpi-libs, [  --with-mpi-libs=LIBS      specify MPI linker flags])

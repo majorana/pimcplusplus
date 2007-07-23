@@ -45,16 +45,18 @@ libIO_la_SOURCES =   IO.cc               \
                      IOVarHDF5.h          
 
 
-# Python wrappers
-pyIOexecdir = $(pyexecdir)
+if WANT_PYTHON_WRAPPERS
+  # Python wrappers
+  pyIOexecdir = $(pyexecdir)
 
-pyIOexec_PYTHON = IO.py
+  pyIOexec_PYTHON = IO.py
 
-pyIOexec_LTLIBRARIES = IOSection.la
-IOSection_la_LDFLAGS  = -module -avoid-version -export-symbols-regex init_IO
-IOSection_la_LIBADD   = libIO.la $(HDF5_LIBS) $(BLITZ_LIBS) $(LIBS)
-IOSection_la_CPPFLAGS = $(PYTHON_INCLUDES) $(IO_CFLAGS) $(NUMPY_INC)
-IOSection_la_SOURCES  = IONumPyWrapper.cc
+  pyIOexec_LTLIBRARIES = IOSection.la
+  IOSection_la_LDFLAGS  = -module -avoid-version -export-symbols-regex init_IO
+  IOSection_la_LIBADD   = libIO.la $(HDF5_LIBS) $(BLITZ_LIBS) $(LIBS)
+  IOSection_la_CPPFLAGS = $(PYTHON_INCLUDES) $(IO_CFLAGS) $(NUMPY_INC)
+  IOSection_la_SOURCES  = IONumPyWrapper.cc
+endif
 
 
 #if WITH_F77
