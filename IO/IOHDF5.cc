@@ -66,7 +66,7 @@ namespace IO {
       string intString=str.substr(pos+1,str.length()-1);
       char *endptr;
       myInt=strtol(intString.c_str(),&endptr,10);
-      bool validInt = (*endptr == '\0') && (*nptr != '\0');
+      bool validInt = (*endptr == '\0') && (*(intString.c_str()) != '\0');
       if (!validInt)
 	myInt = -1;
       // assert (*endptr=='\0');
