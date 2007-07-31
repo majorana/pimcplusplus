@@ -198,7 +198,8 @@ namespace IO {
     inline IOVarBase *GetVarPtr(int num)
     { return (CurrentSection->GetVarPtr(num)); }
 
-
+    inline void SetUnderscores(bool use)
+    { CurrentSection->SetUnderscores(use); }
 
     /// Returns the number of subsections within the present section
     /// which have the name name.  If called without a name, it returns

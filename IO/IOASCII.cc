@@ -844,6 +844,7 @@ namespace IO {
     tempSection->Name=name;
     tempSection->Parent=this;
     tempSection->MyNumber=CurrSecNum;
+    tempSection->SetUnderscores(UseUnderscores);
     CurrSecNum++;
     SectionList.push_back(tempSection);
     MarkModified();

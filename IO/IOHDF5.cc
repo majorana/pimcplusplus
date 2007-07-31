@@ -270,10 +270,25 @@ namespace IO {
     newSection->MyNumber=CurrSecNum;
     newSection->BoolType = BoolType;
     newSection->ComplexType = ComplexType;
+    newSection->SetUnderscores(UseUnderscores);
+    int numWithMyName = CountSections(newName);
     SectionList.push_back(newSection);
   
-    string numstr = NumExtension(CurrSecNum);
-    newName += numstr;
+    if (UseUnderscores) {
+      string numstr = NumExtension(CurrSecNum);
+      newName += numstr;
+    }
+    else if (numWithMyName == 1) {
+      // Go back and rename the first section with the same name,
+      // appending an "_0".  
+      string group0Name = newName + "_0";
+      H5Gmove (GroupID, newName.c_str(), group0Name.c_str());
+      newName += "_1";
+    }
+    else if (numWithMyName > 1) {
+      string numstr = NumExtension(numWithMyName);
+      newName += numstr;
+    }      
 
     newSection->GroupID = H5Gcreate(GroupID,
 				    newName.c_str(), 0);

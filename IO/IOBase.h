@@ -36,6 +36,7 @@ namespace IO
   protected:
     // USE ME!  I'm not being used yet.
     bool IsModified;
+    bool UseUnderscores;
   public:
     list<IOVarBase*> VarList;
     list<IOTreeClass*> SectionList;
@@ -135,8 +136,13 @@ namespace IO
     /// to an blitz::Array<double,2>, etc.
     template<class T>
     inline bool AppendVar(string name, T val);
+    inline void SetUnderscores (bool use)
+    { UseUnderscores = use; }
 
-    inline IOTreeClass(){ FileName="";}
+    inline IOTreeClass() : UseUnderscores(false), FileName("")
+    { 
+      // Nothing for now
+    }
   };
 
   void IOTreeClass::MarkModified()
