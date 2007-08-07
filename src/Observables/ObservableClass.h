@@ -41,6 +41,7 @@
 #include "SuperfluidFraction.h"
 #include "SuperfluidFractionPerLayer.h"
 #include "Time.h"
+#include "TimeLindenman.h"
 #include "VacancyLocation.h"
 #include "Weight.h"
 #include "WindingNumber.h"
