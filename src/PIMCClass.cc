@@ -26,7 +26,6 @@
 
 bool PIMCClass::Read(IOSectionClass &in)
 {
-  verr<<"TESTING VERR"<<endl;
   // tells whether to run or be a dummy
   bool doPIMCRun = false;
   ////	cerr << "PIMC::Read" << endl;
