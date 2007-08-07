@@ -63,6 +63,8 @@ libobservables_la_SOURCES  =     \
     StructureFactor.h            \
     Time.cc                      \
     Time.h                       \
+    TimeLindenman.cc             \
+    TimeLindenman.h              \
     VacancyLocation.h            \
     VacancyLocation.cc           \
     VacancyHelper.h              \

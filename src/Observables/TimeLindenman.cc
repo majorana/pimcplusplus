@@ -20,6 +20,8 @@
 void 
 TimeLindenmanClass::ProduceTimeMatrix(int mcStep)
 {
+  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
+    uj_minus_ujp(mcStep,ptcl).clear();
   for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
     ///now loop over nearby ptcls
     for (int nearPtcl=ptcl+1;nearPtcl<PathData.Path.NumParticles();nearPtcl++){
@@ -30,10 +32,10 @@ TimeLindenmanClass::ProduceTimeMatrix(int mcStep)
       PathData.Path.PutInBox(diff);
       dist=sqrt(dot(diff,diff));
       if (dist<DistCutoff){ //the particles are considered nearby
-      pair<int, dVec> nearPair(nearPtcl,diff);
-      pair<int, dVec> nearPair2(ptcl,-diff);
-      uj_minus_ujp(mcStep,ptcl).insert(nearPair);
-      uj_minus_ujp(mcStep,nearPtcl).insert(nearPair2);
+	pair<int, dVec> nearPair(nearPtcl,diff);
+	pair<int, dVec> nearPair2(ptcl,-diff);
+	uj_minus_ujp(mcStep,ptcl).insert(nearPair);
+	uj_minus_ujp(mcStep,nearPtcl).insert(nearPair2);
       }
     }
   }
@@ -41,6 +43,8 @@ TimeLindenmanClass::ProduceTimeMatrix(int mcStep)
 
 ///centroidPos must be resized to the number of particles
 ///when this function is called
+
+///not sure this gets the right centroid in parallel
 void 
 TimeLindenmanClass::CalculateCentroid()
 {
@@ -68,10 +72,12 @@ TimeLindenmanClass::CalcValue(int time1, int time2)
 	 ptclIter++){
       int ptcl2=(*ptclIter).first;
       dVec vec_12_t2=(*ptclIter).second;
-      term1=dot(vec_12_t2,vec_12_t2);
-      dVec vec_12_t1=uj_minus_ujp(time1,ptcl1)[ptcl2];
-      term2=dot(vec_12_t1,vec_12_t1);
-      term3=-2.0*dot(vec_12_t1,vec_12_t2);
+      if (uj_minus_ujp(time1,ptcl1).count(ptcl2)>0){
+	term1+=dot(vec_12_t2,vec_12_t2);
+	dVec vec_12_t1=uj_minus_ujp(time1,ptcl1)[ptcl2];
+	term2+=dot(vec_12_t1,vec_12_t1);
+	term3+=0.0-2.0*dot(vec_12_t1,vec_12_t2);
+      }
     }
   return term1+term2+term3;
 }
@@ -81,7 +87,7 @@ void
 TimeLindenmanClass::Accumulate()
 {
 
-  CurrTime++;
+
   if (!FullyWrapped){
     TotalCurrentData++;
     if (TotalCurrentData>=NumStoredMCSteps)
@@ -104,11 +110,12 @@ void
 TimeLindenmanClass::WriteBlock()
 {
   for (int i=0;i<TimeDisp.size();i++)
-    TimeDisp(i)=TimeDisp(i)/NumStepArray(i);
+    if (NumStepArray(i)!=0)
+      TimeDisp(i)=TimeDisp(i)/NumStepArray(i);
   TimeDispVar.Write(TimeDisp);
   TimeDisp=0.0;
   NumStepArray=0.0;
-  CurrTime=0;
+  ////  CurrTime=0;
 }
 
 void 
@@ -186,5 +193,5 @@ TimeLindenmanClass::Read (IOSectionClass &in)
   uj_minus_ujp.resize(NumStoredMCSteps,PathData.Path.NumParticles());
   TimeDisp.resize(NumStoredMCSteps);
   NumStepArray.resize(NumStoredMCSteps);
-  
+  CentroidPos.resize(PathData.Path.NumParticles());
 }
