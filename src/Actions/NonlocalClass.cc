@@ -82,6 +82,7 @@ Ylm(int l, int m, const TinyVector<double,3>& r)
 void
 NonlocalClass::SetQuadratureRule (int rule)
 {
+#if NDIM==3
   int nk;
   double w;
   typedef enum {SINGLE, TETRA, OCTA, ICOSA} SymmType;
@@ -279,12 +280,18 @@ NonlocalClass::SetQuadratureRule (int rule)
   assert (std::fabs(wSum - 1.0) < 1.0e-14);
   // Check the quadrature rule
   CheckQuadratureRule(lexact);
+#endif
+#if NDIM==2
+  cerr<<"NonLocalClass doesn't work in 2d"<<endl;
+  assert(1==2);
+#endif
 }
 
 
 void
 NonlocalClass::CheckQuadratureRule(int lexact)
 {
+#if NDIM==3
   cerr << "Check quadrature rule with lexact = " << lexact << ":\n";
   Array<Vec3,1> &grid = QuadPoints;
   Array<double,1> &w = QuadWeights;
@@ -310,6 +317,11 @@ NonlocalClass::CheckQuadratureRule(int lexact)
 	  // 	     l1, m1, l2, m2, real(sum), imag(sum));
 	  
 	}
+#endif
+#if NDIM==2
+  cerr<<"Nonlocal class does not work in 2d"<<endl;
+  assert(1==2);
+#endif
 }
 
 void
@@ -358,6 +370,7 @@ NonlocalClass::Read (IOSectionClass &in)
 void
 NonlocalClass::NearestIon (int slice, int ptcl, Vec3 &ionpos, Vec3 &disp, double &dist)
 {
+#if NDIM==3
   PathClass &Path = PathData.Path;
   Vec3 r = Path (slice, ptcl);
   SpeciesClass &ions = Path.Species(FixedPhase->IonSpeciesNum);
@@ -378,11 +391,17 @@ NonlocalClass::NearestIon (int slice, int ptcl, Vec3 &ionpos, Vec3 &disp, double
     }
   }
   dist = sqrt (dist);
+#endif
+#if NDIM==2
+  cerr<<"Nonlocalclass doesn't work in 2d"<<endl;
+  assert(1==2);
+#endif
 }
 
 void
 NonlocalClass::ScaleQuadPoints (Vec3 ionpos, double dist)
 {
+#if NDIM==3
   // Setup rotation matrix
   // First, rotate around z axis
   double phi, psi;
@@ -417,12 +436,18 @@ NonlocalClass::ScaleQuadPoints (Vec3 ionpos, double dist)
     ScaledPoints(i) = ionpos + dist * RotatedPoints(i);
     PathData.Path.PutInBox(ScaledPoints(i));
   }
+#endif 
+#if NDIM==2
+  cerr<<"Nonlocalclass doesn't work in 2d"<<endl;
+  assert(1==2);
+#endif
 }
 
 double
 NonlocalClass::SingleAction(int slice1, int slice2,
 			    const Array<int,1> &activeParticles, int level)
 {
+#if NDIM==3
   PathClass &Path = PathData.Path;
   int skip = 1<<level;
   double U = 0.0;
@@ -498,6 +523,11 @@ NonlocalClass::SingleAction(int slice1, int slice2,
   }
   //  cerr << "U = " << U << endl;
   return U;
+#endif
+#if NDIM==2
+  cerr<<"Nonlocal class doesn't work in 2d"<<endl;
+  assert(1==2);
+#endif
 }
 
 

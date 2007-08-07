@@ -842,6 +842,7 @@ void
 FixedPhaseClass::CalcWFratios (int slice, int ptcl, const Array<Vec3,1> &pos, 
 			       Array<complex<double>,1> &ratios)
 {
+#if NDIM==3
   // Find which determinant to update
   int speciesNum = Path.ParticleSpeciesNum(ptcl);
   if (speciesNum != UpSpeciesNum && speciesNum != DownSpeciesNum) {
@@ -884,6 +885,10 @@ FixedPhaseClass::CalcWFratios (int slice, int ptcl, const Array<Vec3,1> &pos,
       ratios(ipos) += Cofactors(ptcl-first,j)*OrbitalValues(j);
     ratios(ipos) *= detInv;
   }
+#endif
+#if NDIM==2
+  cerr<<"FixedPhaseActionClass.cc doesn't work in 2d"<<endl;
+#endif
 }
 
 
