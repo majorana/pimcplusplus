@@ -19,6 +19,9 @@
 
 #include "ObservableBase.h"
 
+complex<double>
+Conj21(complex<double> a);
+
 class HexaticClass : public ObservableClass
 {
 protected:
@@ -43,7 +46,7 @@ public:
   void WriteBlock();
   void Read(IOSectionClass &in);
   HexaticClass(PathDataClass &pathData, IOSectionClass &ioSection) :
-    ObservableClass (pathData, ioSection), 
+    ObservableClass (pathData, ioSection),
     HexaticRealVar("HexaticReal",IOSection,pathData.Path.Communicator),
     HexaticImagVar("HexaticImag",IOSection,pathData.Path.Communicator),
     q(6), DistCutoff(2.56)

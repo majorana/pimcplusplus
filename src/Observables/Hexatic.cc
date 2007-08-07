@@ -15,6 +15,7 @@
 /////////////////////////////////////////////////////////////
 
 #include "Hexatic.h"
+#include <complex.h>
 
 double unit2angle(double x,double y)
 {
@@ -39,6 +40,9 @@ HexaticClass::OrderParamater(Array<dVec,1> centroidPos,int ptcl)
 	r12disp=r12disp/r12dist;
 	if (abs(dot(r12disp,r12disp)-1.0)>=0.001)
 	  cerr<<dot(r12disp,r12disp);
+	if (!((dot(r12disp,r12disp)-1.0)<0.001))
+	  cerr<<"GRRRL: "<<dot(r12disp,r12disp)<<" "<<r12dist<<" "<<ptcl<<" "<<nearPtcl<<endl;
+	///	cerr<<"hmm: "<<dot(r12disp,r12disp)<<endl;
 	assert(abs(dot(r12disp,r12disp)-1.0)<0.001);
 	double theta_12=unit2angle(r12disp(0),r12disp(1));
 	op=op+complex<double>(cos(theta_12*q),sin(theta_12*q));
@@ -64,6 +68,9 @@ HexaticClass::OrderParamater(int slice,int ptcl)
 	r12disp=r12disp/r12dist;
 	if (abs(dot(r12disp,r12disp)-1.0)>=0.001)
 	  cerr<<dot(r12disp,r12disp);
+	if (!((dot(r12disp,r12disp)-1.0)<0.001))
+	  cerr<<"GRRR2: "<<dot(r12disp,r12disp)<<endl;
+	//	cerr<<"hmm2: "<<dot(r12disp,r12disp)<<endl;
 	assert(abs(dot(r12disp,r12disp)-1.0)<0.001);
 	double theta_12=unit2angle(r12disp(0),r12disp(1));
 	op=op+complex<double>(cos(theta_12*q),sin(theta_12*q));
@@ -74,7 +81,7 @@ HexaticClass::OrderParamater(int slice,int ptcl)
 }
 
 complex<double>
-Conj(complex<double> a)
+Conj21(complex<double> a)
 {
   complex<double> b(a.real(),-a.imag());
   return b;
@@ -88,6 +95,7 @@ HexaticClass::Accumulate_old()
   for (int slice=0;slice<PathData.Path.NumTimeSlices()-1;slice++){
     for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
       ParticleOrder(ptcl)=OrderParamater(slice,ptcl);
+
     }
     for (int ptcl1=0;ptcl1<PathData.Path.NumParticles();ptcl1++){
       for (int ptcl2=0;ptcl2<PathData.Path.NumParticles();ptcl2++){
@@ -96,12 +104,34 @@ HexaticClass::Accumulate_old()
 	PathData.Path.DistDisp(slice,ptcl1,ptcl2,dist,disp);
 	if (dist<grid.End){
 	  int index=grid.ReverseMap(dist);
+//           if (index==0){
+//             cerr<<"GRRR: "<<slice<<" "<<ptcl1<<" "<<ptcl2<<" "<<index<<" "
+//                 <<Histogram(index)<<" "<<ParticleOrder(ptcl1)<<" "
+//                 <<ParticleOrder(ptcl1)<<" "<<ParticleOrder(ptcl2)<<" "
+//                 <<Conj21(ParticleOrder(ptcl2))
+//                 <<" "<<ParticleOrder(ptcl1)*conj(ParticleOrder(ptcl2))<<endl;
+//           }
 	  Histogram(index)=Histogram(index)+
-	    ParticleOrder(ptcl1)*Conj(ParticleOrder(ptcl2));
+	    ParticleOrder(ptcl1)*conj(ParticleOrder(ptcl2));
+// 	  if (index==0){
+//             cerr<<"GRRR: "<<slice<<" "<<ptcl1<<" "<<ptcl2<<" "
+//                 <<Histogram(index)<<" "<<ParticleOrder(ptcl1)<<" "
+//                 <<ParticleOrder(ptcl1)<<" "<<ParticleOrder(ptcl2)<<" "
+// 		<<Conj21(ParticleOrder(ptcl2))
+//                 <<" "<<ParticleOrder(ptcl1)*conj(ParticleOrder(ptcl2))<<endl;
+// 	  }
+
 	}
       }
     }
   }
+//   cerr<<"proc"<<PathData.Path.Communicator.MyProc()<<"HERE"<<endl;
+//   for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+//     cerr<<"proc"<<PathData.Path.Communicator.MyProc()<<"Ptcl "<<ParticleOrder(ptcl)<<" "<<endl;
+//   }
+//   for (int i=0;i<Histogram.size();i++){
+//     cerr<<"proc"<<PathData.Path.Communicator.MyProc()<<" "<<Histogram(i)<<" "<<endl;
+//   }
   NumSamples++;
 }
 
@@ -135,7 +165,7 @@ HexaticClass::Accumulate()
       if (dist<grid.End){
 	int index=grid.ReverseMap(dist);
 	Histogram(index)=Histogram(index)+
-	  ParticleOrder(ptcl1)*Conj(ParticleOrder(ptcl2));
+	  ParticleOrder(ptcl1)*conj(ParticleOrder(ptcl2));
       }
     }
   }
@@ -154,8 +184,10 @@ HexaticClass::WriteBlock()
   PathClass &Path= PathData.Path;
 #endif
   double norm=1.0/((double)NumSamples*Path.TotalNumSlices);
-  for (int counter=0;counter<Histogram.size();counter++)
+  for (int counter=0;counter<Histogram.size();counter++){
+  //    cerr<<"Proc"<<PathData.Path.Communicator.MyProc()<<" "<<counter<<Histogram(counter).real()<<endl;
     HistDouble(counter)=Histogram(counter).real();
+  }
   Path.Communicator.Sum(HistDouble,HistSum);
   HistSum=HistSum*norm;
   HexaticRealVar.Write(HistSum);
@@ -233,6 +265,8 @@ HexaticClass::ReadGrid(IOSectionClass &in)
 void
 HexaticClass::Read (IOSectionClass &in)
 {
+  complex<double> test(1.0,2.0);
+  cerr<<"CONJ: "<<Conj21(test)<<endl;
   NumSamples=0;
   ParticleOrder.resize(PathData.Path.NumParticles());
   ///It's probably important that the grid is the same grid that is in
@@ -241,6 +275,7 @@ HexaticClass::Read (IOSectionClass &in)
   if (!in.ReadVar("Centroid",Centroid))
       Centroid=false;
   ObservableClass::Read(in);
+  cerr<<"Centroid is "<<Centroid<<endl;
   if (PathData.Path.Communicator.MyProc()==0)
     WriteInfo();
 
