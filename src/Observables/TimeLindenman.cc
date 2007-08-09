@@ -121,7 +121,14 @@ TimeLindenmanClass::Accumulate()
       FullyWrapped=true;
   }
   
-  CalculateCentroid();
+//   CalculateCentroid();
+//   Array<dVec,1> Centroid_backup(CentroidPos.size());
+//   for (int i=0;i<CentroidPos.size();i++)
+//     Centroid_backup(i)=CentroidPos(i);
+  CalculateCentroid_parallel();
+//   for (int i=0;i<CentroidPos.size();i++)
+//     for (int dim=0;dim<NDIM;dim++)
+//       assert(Centroid_backup(i)[dim]-CentroidPos(i)[dim]<1e-10);
   CurrTime=(CurrTime+1) % NumStoredMCSteps;
   ProduceTimeMatrix(CurrTime);
   int maxToGo=min(NumStoredMCSteps,TotalCurrentData);
