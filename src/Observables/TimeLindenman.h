@@ -52,10 +52,13 @@ protected:
   int CurrTime;
   double CalcValue(int time1, int time2);
 
+
+
 public:
   void Accumulate();
   Array<dVec,1> CentroidPos;
   void CalculateCentroid();
+  void CalculateCentroid_parallel();
   void WriteInfo();
   void WriteBlock();
   void Read(IOSectionClass &in);
