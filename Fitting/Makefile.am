@@ -1,10 +1,11 @@
 check_PROGRAMS = TestFitting 
-bin_PROGRAMS   = eosfit
+bin_PROGRAMS   = LiFit VinetFit
 
 LDADD = libfitting.la ../MatrixOps/libmatops.la ../IO/libIO.la $(LAPACK_LIBS) $(BLITZ_LIBS) $(HDF5_LIBS)
 
 TestFitting_SOURCES = TestFitting.cc
-eosfit_SOURCES      = TestEOS.cc LiEOS.h
+LiFit_SOURCES       = TestEOS.cc LiEOS.h
+VinetFit_SOURCES    = VinetFit.cc
 
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(HDF5_CFLAGS) $(XML2_CFLAGS)
 
