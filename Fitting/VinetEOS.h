@@ -101,15 +101,10 @@ VinetEOSClass::VinetEOSClass::Grad (double V)
   double da_dB0      =  deta_dB0*(x-1.0);
   double da_dEc      =  deta_dEc*(x-1.0);
 
-  double dE_dV0  = 
-    -Ec*da_dV0*exp(-a) 
-    +Ec*(1.0+a)*exp(-a)*da_dV0; 
-  double dE_dEc  = -(1.0+a)*exp(-a)
-    -Ec*da_dEc*exp(-a)
-    +Ec*(1.0+a)*exp(-a)*da_dEc;
-  double dE_dB0  = 
-    -Ec*da_dB0*exp(-a)
-    +Ec*(1.0+a)*exp(-a)*da_dB0;
+  double dE_dV0  = -Ec*da_dV0*exp(-a) +Ec*(1.0+a)*exp(-a)*da_dV0; 
+  double dE_dEc  = -(1.0+a)*exp(-a) 
+    -Ec*da_dEc*exp(-a) +Ec*(1.0+a)*exp(-a)*da_dEc;
+  double dE_dB0  =  -Ec*da_dB0*exp(-a) + Ec*(1.0+a)*exp(-a)*da_dB0;
 
   return TinyVector<double,3> (dE_dV0, dE_dEc, dE_dB0);
 }

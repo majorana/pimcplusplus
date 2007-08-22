@@ -92,6 +92,7 @@ NonlinearFitClass<M,ModelType>::CalcAlphaBeta (const Array<double,1> &x,
       for (int l=0; l<M; l++)
 	Alpha(k,l) += grad[k]*grad[l]/(sigma(i)*sigma(i));
   }
+  cerr << "Alpha = " << Alpha << endl;
 }
 
 
@@ -149,7 +150,7 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
   int numSmallDecrease = 0;
   while (!done) {
 //     cerr << "Iteration " << iter << ":  Chi2 = " << chiNow << endl;
-//     cerr << "params = " << params << endl;
+    cerr << "params = " << params << endl;
 //     cerr << "lambda = " << lambda << endl;
 
     CalcAlphaBeta (x, y, sigma, params);

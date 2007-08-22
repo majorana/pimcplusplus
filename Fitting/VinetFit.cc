@@ -52,7 +52,7 @@ using namespace IO;
 void
 TestFit2(string fname)
 {
-  TinyVector<double,3> params(80.0, 0.51, 0.0155, 3.0), errors;  
+  TinyVector<double,3> params(80.0, 0.51, 0.0155), errors;  
   VinetEOSClass eos;
   eos.SetParams (params);
   NonlinearFitClass<3,VinetEOSClass> fitter(eos);
@@ -61,6 +61,11 @@ TestFit2(string fname)
 
   IOSectionClass in;
   assert(in.OpenFile (fname));
+  assert(in.ReadVar("V0", params[0]));
+  assert(in.ReadVar("Ec", params[1]));
+  assert(in.ReadVar("B0", params[2]));
+  params[2] /= 29421.01;
+	
   assert(in.ReadVar("V", V));
   assert(in.ReadVar("E", E));
   assert(in.ReadVar("Sigma", sigma));
@@ -81,7 +86,8 @@ TestFit2(string fname)
   errors[2] = sqrt (covar(2,2));
   fprintf (stdout, "V0  = %12.8f +/- %12.8f\n", params[0], errors[0]);
   fprintf (stdout, "Ec  = %12.8f +/- %12.8f\n", params[1], errors[1]);
-  fprintf (stdout, "B0  = %12.8f +/- %12.8f\n", params[2], errors[2]);
+  fprintf (stdout, "B0  = %12.8f +/- %12.8f\n", 
+	   params[2]* 29421.01, errors[2]* 29421.01);
   eos.SetParams(params);
   fprintf (stdout, "B0p = %12.8f\n", eos.GetB0p());
   fprintf (stdout, "Delta = %1.5f\n", 0.0);

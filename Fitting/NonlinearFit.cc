@@ -101,6 +101,7 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
     CalcAlphaBeta (x, y, sigma, params);
     for (int i=0; i<M; i++)
       Alpha(i,i) *= (1.0+lambda);
+    cerr << "params = " << params << endl;
     Solve();
     cerr << "dParams = " << dParams << endl;
     done = true;
