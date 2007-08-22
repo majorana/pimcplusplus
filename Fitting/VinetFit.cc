@@ -52,7 +52,7 @@ using namespace IO;
 void
 TestFit2(string fname)
 {
-  TinyVector<double,3> params(80.0, 0.51, 0.0155, 3.0);  
+  TinyVector<double,3> params(80.0, 0.51, 0.0155, 3.0), errors;  
   VinetEOSClass eos;
   eos.SetParams (params);
   NonlinearFitClass<3,VinetEOSClass> fitter(eos);
@@ -70,20 +70,31 @@ TestFit2(string fname)
 
   fprintf (stdout, "V0  = %12.8f\n", params[0]);
   fprintf (stdout, "Ec  = %12.8f\n", params[1]);
-  fprintf (stdout, "B0  = %12.8f\n", params[2]);
+  fprintf (stdout, "B0  = %12.8f GPa\n", params[2] * 29421.01);
   eos.SetParams (params);
   fprintf (stdout, "B0p = %12.8f\n", eos.GetB0p());
   fitter.Fit (V, E, sigma, params);
-  fprintf (stdout, "V0  = %12.8f\n", params[0]);
-  fprintf (stdout, "Ec  = %12.8f\n", params[1]);
-  fprintf (stdout, "B0  = %12.8f GPa\n", params[2] * 29421.01);
+
+  Array<double,2> &covar = fitter.GetCovariance();
+  errors[0] = sqrt (covar(0,0));
+  errors[1] = sqrt (covar(1,1));
+  errors[2] = sqrt (covar(2,2));
+  fprintf (stdout, "V0  = %12.8f +/- %12.8f\n", params[0], errors[0]);
+  fprintf (stdout, "Ec  = %12.8f +/- %12.8f\n", params[1], errors[1]);
+  fprintf (stdout, "B0  = %12.8f +/- %12.8f\n", params[2], errors[2]);
   eos.SetParams(params);
   fprintf (stdout, "B0p = %12.8f\n", eos.GetB0p());
   fprintf (stdout, "Delta = %1.5f\n", 0.0);
-  fprintf (stdout, "Lattice const. = %1.6f bohr radii\n", cbrt(4.0*params[0]));
-  fprintf (stdout, "               = %1.6f angstrom\n",  
-	   0.52917721*cbrt(4.0*params[0]));
+  double V0 = params[0];
+  double latConst = cbrt(4.0*V0);
+  double latConstError = cbrt(4.0)/(3.0*cbrt(V0)*cbrt(V0)) * errors[0];
+  fprintf (stdout, "Lattice const. = %1.6f +/- %1.6f bohr radii\n",
+	   latConst, latConstError);
+  fprintf (stdout, "               = %1.6f +/- %1.6f angstrom\n",  
+	   0.52917721*latConst, 0.52917721*latConstError);
   string Ename = fname + ".dat";
+
+  
 
   FILE *fout = fopen (Ename.c_str(), "w");
   double delta = (V(0) - V(V.size()-1))/1000.0;
@@ -97,7 +108,7 @@ TestFit2(string fname)
 main(int argc, char **argv)
 {
   TestGrad();
-  TestVal();
+  //TestVal();
   if (argc > 1)
     TestFit2(argv[1]);
   else

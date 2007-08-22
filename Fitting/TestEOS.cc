@@ -79,7 +79,9 @@ TestFit2(string fname)
   fprintf (stdout, "B0p = %12.8f\n", params[3]);
   eos.SetParams(params);
   fprintf (stdout, "Delta = %1.5f\n", eos.GetDelta());
-  fprintf (stdout, "Lattice const. = %1.6f\n", cbrt(4.0*params[0]));
+  fprintf (stdout, "Lattice const. = %1.6f bohr radii\n", cbrt(4.0*params[0]));
+  fprintf (stdout, "               = %1.6f angstrom\n",  
+	   0.52917721*cbrt(4.0*params[0]));
   string Ename = fname + ".dat";
 
   FILE *fout = fopen (Ename.c_str(), "w");

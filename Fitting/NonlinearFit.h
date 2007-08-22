@@ -29,6 +29,9 @@ public:
   void Fit(const Array<double,1> &x, const Array<double,1> &y,
 	   const Array<double,1> &sigma, TinyVector<double,M> &params);
 
+  inline Array<double,2>& GetCovariance()
+  { return AlphaInv; }
+
   NonlinearFitClass(ModelType model) :
     Model(model)
   {
