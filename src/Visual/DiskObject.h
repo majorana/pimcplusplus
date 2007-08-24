@@ -7,7 +7,7 @@
 class DiskObject : public GLObject
 {
 protected:
-  Vec3 Color, Pos;
+  Vec3 Color, Pos, NormVec;
   int Axis;
   double Radius;
   static int DiskListNum, OffScreenListNum;
@@ -16,6 +16,7 @@ protected:
   bool OffScreen;
 public:
   void SetPos (Vec3 pos);
+  void SetNormVec (Vec3 norm);
   void SetAxis (int axis);
   void SetRadius (double radius);
   void SetColor (Vec3 color);

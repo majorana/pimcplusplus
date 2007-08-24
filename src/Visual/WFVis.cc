@@ -31,7 +31,7 @@ WFVisualClass::WFVisualClass() :
   Shift (0.0, 0.0, 0.0),
   CMap(BLUE_WHITE_RED)
 {
-  //Glib::thread_init();
+  Glib::thread_init();
   WFIso.Dynamic = false;
   xPlane.Dynamic = false;
   yPlane.Dynamic = false;
@@ -496,25 +496,15 @@ public:
   }
 };
 
+
 bool
 WFVisualClass::DrawFrame(bool offScreen)
 {
   bool clipping = ClipButton.get_active();
   bool boxVisible = BoxToggle->get_active();
-  for (int i=0; i<PathVis.Objects.size(); i++) {
-    if (PathVis.Objects[i]->Dynamic) {
-      if (dynamic_cast<SphereObject*> (PathVis.Objects[i]) != NULL)
-	delete dynamic_cast<SphereObject*> (PathVis.Objects[i]);
-      else if (dynamic_cast<DiskObject*> (PathVis.Objects[i]) != NULL)
-	delete dynamic_cast<DiskObject*> (PathVis.Objects[i]);
-      else if (dynamic_cast<Isosurface*> (PathVis.Objects[i]) != NULL)
-	delete dynamic_cast<Isosurface*> (PathVis.Objects[i]);
-      else if (dynamic_cast<BoxObject*> (PathVis.Objects[i]) != NULL)
-	delete dynamic_cast<BoxObject*> (PathVis.Objects[i]);
-    }
-
-    //    delete (PathVis.Objects[i]);
-  }
+  for (int i=0; i<PathVis.Objects.size(); i++) 
+    if (PathVis.Objects[i]->Dynamic) 
+      delete PathVis.Objects[i];
   PathVis.Objects.resize(0);
 
   if (CoordToggle->get_active()) {
@@ -587,28 +577,67 @@ WFVisualClass::DrawFrame(bool offScreen)
 	double radius = RadiusScale.get_value() *
 	  ElementData::GetRadius(type);
 	
+	Mat3 lattice = Box.GetLattice();
+	Vec3 unitVecs[3], normVecs[3];
+	for (int i=0; i<3; i++)
+	  unitVecs[i] = Box(i)/sqrt(dot(Box(i),Box(i)));
+	normVecs[0] = cross (unitVecs[1], unitVecs[2]);
+	normVecs[1] = cross (unitVecs[2], unitVecs[0]);
+	normVecs[2] = cross (unitVecs[0], unitVecs[1]);
+	for (int i=0; i<3; i++)
+	  normVecs[i] = normVecs[i]/dot(normVecs[i], normVecs[i]);
+
+	cerr << "normVecs = :\n" 
+	     << normVecs[0] << endl << normVecs[1] 
+	     << endl << normVecs[2] << endl;
+
+	Vec3 n = Box.GetLatticeInv() * r;
+	cerr << "n = " << n << endl;
 	for (int dim=0; dim<3; dim++) {
-	  if ((r[dim]+radius) > 0.5*Box[dim]) {
-	    double l = 0.5*Box[dim]-fabs(r[dim]);
-	    double diskRad = sqrt(radius*radius-l*l);
+	  Vec3 rplus = r - radius*normVecs[dim];
+	  cerr << "r = " << r << "  rplus = " << rplus << endl;
+	  Vec3 nplus = Box.GetLatticeInv() * rplus;
+	  cerr << "nplus = " << nplus << endl;
+	  if (nplus[dim] > 0.5) {
+	    double dr = dot(normVecs[dim], (0.5 -n[dim])*Box(dim));
+	    Vec3 delta = dr*normVecs[dim];
+	    Vec3 c1, c2;
+	    c1 = r + delta;
+	    c2 = c1 - Box(dim);
+	    double diskRad = sqrt(radius*radius - dr*dr);
 	    DiskObject *disk1 = new DiskObject(offScreen);
 	    DiskObject *disk2 = new DiskObject(offScreen);
-	    Vec3 color = ElementData::GetColor (type);
 	    disk1->SetRadius(diskRad);
 	    disk2->SetRadius(diskRad);
-	    disk1->SetAxis(2*dim);
-	    disk2->SetAxis(2*dim+1);
-	    disk1->SetColor(color);
-	    disk2->SetColor(color);
-	    Vec3 r1, r2;
-	    r1 = r; r2 = r;
-	    r1[dim] =  0.5*Box[dim];
-	    r2[dim] = -0.5*Box[dim];
-	    disk1->SetPos(r1);
-	    disk2->SetPos(r2);
+	    disk1->SetNormVec (-1.0*normVecs[dim]);
+	    disk2->SetNormVec (-1.0*normVecs[dim]);
+	    disk1->SetPos(c1);
+	    disk2->SetPos(c2);
 	    PathVis.Objects.push_back(disk1);
 	    PathVis.Objects.push_back(disk2);
 	  }
+
+// 	  if ((r[dim]+radius) > 0.5*Box[dim]) {
+// 	    double l = 0.5*Box[dim]-fabs(r[dim]);
+// 	    double diskRad = sqrt(radius*radius-l*l);
+// 	    DiskObject *disk1 = new DiskObject(offScreen);
+// 	    DiskObject *disk2 = new DiskObject(offScreen);
+// 	    Vec3 color = ElementData::GetColor (type);
+// 	    disk1->SetRadius(diskRad);
+// 	    disk2->SetRadius(diskRad);
+// 	    disk1->SetAxis(2*dim);
+// 	    disk2->SetAxis(2*dim+1);
+// 	    disk1->SetColor(color);
+// 	    disk2->SetColor(color);
+// 	    Vec3 r1, r2;
+// 	    r1 = r; r2 = r;
+// 	    r1[dim] =  0.5*Box[dim];
+// 	    r2[dim] = -0.5*Box[dim];
+// 	    disk1->SetPos(r1);
+// 	    disk2->SetPos(r2);
+// 	    PathVis.Objects.push_back(disk1);
+// 	    PathVis.Objects.push_back(disk2);
+// 	  }
 	}
       }
     }

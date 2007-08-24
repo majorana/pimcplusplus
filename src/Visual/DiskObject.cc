@@ -40,11 +40,52 @@ DiskObject::DiskObject(bool offScreen) :
   }
 }
 
+// void 
+// DiskObject::Set()
+// {
+//   Start();
+//   // Set color
+//   float fcolor[4];
+//   fcolor[0] = Color[0]; fcolor[1] = Color[1]; fcolor[2] = Color[2];
+//   fcolor[3] = 1.0;
+//   glColor3f (Color[0], Color[1], Color[2]);
+//   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor);
+//   float spec[4] = { 1.0, 1.0, 1.0, 1.0 };
+//   glMaterialfv (GL_FRONT_AND_BACK, GL_SPECULAR, spec);
+//   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 30.0);
+
+//   // Create disk
+//   glPushMatrix();
+//   glTranslated (Pos[0], Pos[1], Pos[2]);
+//   glScaled (Radius, Radius, Radius);
+//   if (Axis == 1)
+//     glRotated (270.0, 0.0, 1.0, 0.0);
+//   else if (Axis == 0)
+//     glRotated (90.0,  0.0, 1.0, 0.0);
+//   else if (Axis == 2)
+//     glRotated (270.0, 1.0, 0.0, 0.0);
+//   else if (Axis == 3)
+//     glRotated (90.0,  1.0, 0.0, 0.0);
+//   else if (Axis == 5)
+//     glRotated (180.0, 1.0, 0.0, 0.0);
+//   //  gluDisk(qobj, Radius, 20, 20);
+//   if (OffScreen) {
+//     // glCallList(OffScreenListNum);
+//     GLUquadricObj* qobj = gluNewQuadric();
+//     gluDisk(qobj, 0.0, 1.0, 30, 1);
+//     gluDeleteQuadric(qobj);
+//   }
+//   else
+//     glCallList(DiskListNum);
+//   glPopMatrix();
+//   //  gluDeleteQuadric (qobj);
+//   End();
+// }
+
+
 void 
 DiskObject::Set()
 {
-//   GLUquadricObj* qobj = gluNewQuadric();
-//   gluQuadricDrawStyle(qobj, GLU_FILL);
   Start();
   // Set color
   float fcolor[4];
@@ -60,16 +101,11 @@ DiskObject::Set()
   glPushMatrix();
   glTranslated (Pos[0], Pos[1], Pos[2]);
   glScaled (Radius, Radius, Radius);
-  if (Axis == 1)
-    glRotated (270.0, 0.0, 1.0, 0.0);
-  else if (Axis == 0)
-    glRotated (90.0,  0.0, 1.0, 0.0);
-  else if (Axis == 2)
-    glRotated (270.0, 1.0, 0.0, 0.0);
-  else if (Axis == 3)
-    glRotated (90.0,  1.0, 0.0, 0.0);
-  else if (Axis == 5)
-    glRotated (180.0, 1.0, 0.0, 0.0);
+  Vec3 rotAxis = cross (NormVec, Vec3 (0.0, 0.0, 1.0));
+  
+  cerr << "NormVec = " << NormVec << endl;
+  double angle = -180.0/M_PI * acos(dot(NormVec, Vec3(0.0, 0.0, 1.0)));
+  glRotated (angle, rotAxis[0], rotAxis[1], rotAxis[2]);
   //  gluDisk(qobj, Radius, 20, 20);
   if (OffScreen) {
     // glCallList(OffScreenListNum);
@@ -101,6 +137,13 @@ void
 DiskObject::SetRadius (double radius)
 {
   Radius = radius;
+}
+
+void
+DiskObject::SetNormVec (Vec3 norm)
+{
+  norm = norm/sqrt(dot(norm,norm));
+  NormVec = norm;
 }
 
 void 
