@@ -31,7 +31,8 @@ WFVisualClass::WFVisualClass() :
   Shift (0.0, 0.0, 0.0),
   CMap(BLUE_WHITE_RED)
 {
-  Glib::thread_init();
+  if (!Glib::thread_supported())
+    Glib::thread_init();
   WFIso.Dynamic = false;
   xPlane.Dynamic = false;
   yPlane.Dynamic = false;
@@ -528,6 +529,18 @@ WFVisualClass::DrawFrame(bool offScreen)
   nLattice[0] = Box(0)/length[0];
   nLattice[1] = Box(1)/length[1];
   nLattice[2] = Box(2)/length[2];
+
+  Vec3 unitVecs[3], normVecs[3];
+  for (int i=0; i<3; i++)
+    unitVecs[i] = Box(i)/sqrt(dot(Box(i),Box(i)));
+  normVecs[0] = cross (unitVecs[1], unitVecs[2]);
+  normVecs[1] = cross (unitVecs[2], unitVecs[0]);
+  normVecs[2] = cross (unitVecs[0], unitVecs[1]);
+  for (int i=0; i<3; i++) {
+    normVecs[i] /= sqrt(dot(normVecs[i], normVecs[i]));
+    if (dot(normVecs[i], unitVecs[i]) < 0.0)
+      normVecs[i] = -1.0*normVecs[i];
+  }
   
   if (SphereToggle->get_active()) {
     list<AtomClass>::iterator iter;
@@ -535,41 +548,62 @@ WFVisualClass::DrawFrame(bool offScreen)
     for (int ptcl=0; ptcl < AtomPos.extent(0); ptcl++) 
       sphereList.push_back(AtomClass(AtomPos(ptcl), AtomTypes(ptcl)));
     if (clipping) {
-      for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-	Vec3 &r = (*iter).Pos;
-	Vec3 n = Box.GetLatticeInv() * r; 
-	int type = (*iter).Type;
-	double radius = RadiusScale.get_value() *
-	  ElementData::GetRadius(type);
-	if ((n[0]+radius/length[0]) > 0.5) 
-	  sphereList.push_front(AtomClass(r-Box(0), type));
-	if ((n[0]-radius/length[0]) < -0.5) 
-	  sphereList.push_front(AtomClass(r+Box(0), type));
+      for (int dim=0; dim<3; dim++) {
+	for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+	  int type = (*iter).Type;
+	  double radius = RadiusScale.get_value() *
+	    ElementData::GetRadius(type);
+	  
+	  Vec3 r = (*iter).Pos;
+	  Vec3 n = Box.GetLatticeInv() * r; 
+	  r = Box.GetLattice()*n;
+
+	  Vec3 rplus = r + radius*normVecs[dim];
+	  Vec3 nplus = Box.GetLatticeInv() * rplus;
+	  Vec3 rminus = r - radius*normVecs[dim];
+	  Vec3 nminus = Box.GetLatticeInv() * rminus;
+
+	  if (nplus[dim] < nminus[dim])
+	    swap(nplus, nminus);
+
+	  if ((nplus[dim] > 0.5) || nminus[dim] > 0.5) {
+	    Vec3 nNew = n;
+	    nNew[dim] -= 1.0;
+	    Vec3 rNew = Box.GetLattice()*nNew;
+	    sphereList.push_front(AtomClass(rNew, type));
+	  }
+	  if (nminus[dim] < -0.5 || nplus[dim] < -0.5) {
+	    Vec3 nNew = n;
+	    nNew[dim] += 1.0;
+	    Vec3 rNew = Box.GetLattice()*nNew;
+	    sphereList.push_front(AtomClass(rNew, type));
+	  }
+	}
       }
       
-      for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-	Vec3 &r = (*iter).Pos;
-	Vec3 n = Box.GetLatticeInv() * r; 
-	int type = (*iter).Type;
-	double radius = RadiusScale.get_value() *
-	  ElementData::GetRadius(type)/length[0];
-	if ((n[1]+radius/length[1]) > 0.5)
-	  sphereList.push_front(AtomClass(r-Box(1),type));
-	if ((n[1]-radius/length[1]) < -0.5)
-	  sphereList.push_front(AtomClass(r+Box(1),type));
-      }
+//       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+// 	Vec3 &r = (*iter).Pos;
+// 	Vec3 n = Box.GetLatticeInv() * r; 
+// 	int type = (*iter).Type;
+// 	double radius = RadiusScale.get_value() *
+// 	  ElementData::GetRadius(type)/length[0];
+// 	if ((n[1]+radius/length[1]) > 0.5)
+// 	  sphereList.push_front(AtomClass(r-Box(1),type));
+// 	if ((n[1]-radius/length[1]) < -0.5)
+// 	  sphereList.push_front(AtomClass(r+Box(1),type));
+//       }
       
-      for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
-	Vec3 &r = (*iter).Pos;
-	Vec3 n = Box.GetLatticeInv() * r; 
-	int type = (*iter).Type;
-	double radius = RadiusScale.get_value() *
-	  ElementData::GetRadius(type);
-	if ((n[2]+radius/length[2]) > 0.5)
-	  sphereList.push_front(AtomClass(r-Box(2),type));
-	if ((n[2]-radius/length[2]) < -0.5)
-	  sphereList.push_front(AtomClass(r+Box(2),type));
-      }
+//       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
+// 	Vec3 &r = (*iter).Pos;
+// 	Vec3 n = Box.GetLatticeInv() * r; 
+// 	int type = (*iter).Type;
+// 	double radius = RadiusScale.get_value() *
+// 	  ElementData::GetRadius(type);
+// 	if ((n[2]+radius/length[2]) > 0.5)
+// 	  sphereList.push_front(AtomClass(r-Box(2),type));
+// 	if ((n[2]-radius/length[2]) < -0.5)
+// 	  sphereList.push_front(AtomClass(r+Box(2),type));
+//       }
       // Now make disks to close spheres
       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
 	Vec3 &r = (*iter).Pos;
@@ -588,30 +622,25 @@ WFVisualClass::DrawFrame(bool offScreen)
 	  normVecs[i] = normVecs[i]/sqrt(dot(normVecs[i], normVecs[i]));
 
 	Vec3 n = Box.GetLatticeInv() * r;
-	n[0] -= round(n[0]);
-	n[1] -= round(n[1]);
-	n[2] -= round(n[2]);
 	for (int dim=0; dim<3; dim++) {
 	  Vec3 rplus = r + radius*normVecs[dim];
 	  Vec3 nplus = Box.GetLatticeInv() * rplus;
 	  Vec3 rminus = r - radius*normVecs[dim];
 	  Vec3 nminus = Box.GetLatticeInv() * rminus;
-	  if (fabs(nplus[dim]) > 0.5 || fabs(nminus[dim] > 0.5)) {
-	    cerr << "dim = " << dim << endl;
-	    cerr << "n[dim] = " << n[dim] << endl;
-	    double dr = dot(normVecs[dim], (0.5 -n[dim])*Box(dim));
-	    cerr << "dr = " << dr << endl;
-	    Vec3 delta = dr*normVecs[dim];
+	  if (fabs(nplus[dim]) > 0.5) {
+	    double nsign = nplus[dim]/fabs(nplus[dim]);
+	    double dr = dot(normVecs[dim], (0.5*nsign -n[dim])*Box(dim));
+	    Vec3 delta = 0.9999*dr*normVecs[dim];
 	    Vec3 c1, c2;
 	    c1 = r + delta;
-	    c2 = c1 - Box(dim);
+	    c2 = c1 - nsign*Box(dim);
 	    double diskRad = sqrt(radius*radius - dr*dr);
 	    DiskObject *disk1 = new DiskObject(offScreen);
 	    DiskObject *disk2 = new DiskObject(offScreen);
 	    disk1->SetRadius(diskRad);
 	    disk2->SetRadius(diskRad);
-	    disk1->SetNormVec (-1.0*normVecs[dim]);
-	    disk2->SetNormVec (+1.0*normVecs[dim]);
+	    disk1->SetNormVec (+1.0*normVecs[dim]);
+	    disk2->SetNormVec (-1.0*normVecs[dim]);
 	    Vec3 color = ElementData::GetColor (type);
  	    disk1->SetColor(color);
  	    disk2->SetColor(color);
@@ -866,8 +895,6 @@ WFVisualClass::Read(string filename)
     AtomPos(i) = Vec3(pos(i,0), pos(i,1), pos(i,2));
     for (int j=0; j<3; j++)
       AtomPos(i) -= (0.5-Shift[j])*Box(j);
-    /// HACK HACK HACK
-    AtomPos(i) += Vec3 (0.4, -0.3, 0.8);
   }
   assert (Infile.ReadVar("atom_types", AtomTypes));
   Infile.CloseSection (); // "ions"
