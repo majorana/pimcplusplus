@@ -103,7 +103,6 @@ DiskObject::Set()
   glScaled (Radius, Radius, Radius);
   Vec3 rotAxis = cross (NormVec, Vec3 (0.0, 0.0, 1.0));
   
-  cerr << "NormVec = " << NormVec << endl;
   double angle = -180.0/M_PI * acos(dot(NormVec, Vec3(0.0, 0.0, 1.0)));
   glRotated (angle, rotAxis[0], rotAxis[1], rotAxis[2]);
   //  gluDisk(qobj, Radius, 20, 20);

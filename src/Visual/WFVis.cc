@@ -585,21 +585,22 @@ WFVisualClass::DrawFrame(bool offScreen)
 	normVecs[1] = cross (unitVecs[2], unitVecs[0]);
 	normVecs[2] = cross (unitVecs[0], unitVecs[1]);
 	for (int i=0; i<3; i++)
-	  normVecs[i] = normVecs[i]/dot(normVecs[i], normVecs[i]);
-
-	cerr << "normVecs = :\n" 
-	     << normVecs[0] << endl << normVecs[1] 
-	     << endl << normVecs[2] << endl;
+	  normVecs[i] = normVecs[i]/sqrt(dot(normVecs[i], normVecs[i]));
 
 	Vec3 n = Box.GetLatticeInv() * r;
-	cerr << "n = " << n << endl;
+	n[0] -= round(n[0]);
+	n[1] -= round(n[1]);
+	n[2] -= round(n[2]);
 	for (int dim=0; dim<3; dim++) {
-	  Vec3 rplus = r - radius*normVecs[dim];
-	  cerr << "r = " << r << "  rplus = " << rplus << endl;
+	  Vec3 rplus = r + radius*normVecs[dim];
 	  Vec3 nplus = Box.GetLatticeInv() * rplus;
-	  cerr << "nplus = " << nplus << endl;
-	  if (nplus[dim] > 0.5) {
+	  Vec3 rminus = r - radius*normVecs[dim];
+	  Vec3 nminus = Box.GetLatticeInv() * rminus;
+	  if (fabs(nplus[dim]) > 0.5 || fabs(nminus[dim] > 0.5)) {
+	    cerr << "dim = " << dim << endl;
+	    cerr << "n[dim] = " << n[dim] << endl;
 	    double dr = dot(normVecs[dim], (0.5 -n[dim])*Box(dim));
+	    cerr << "dr = " << dr << endl;
 	    Vec3 delta = dr*normVecs[dim];
 	    Vec3 c1, c2;
 	    c1 = r + delta;
@@ -610,7 +611,10 @@ WFVisualClass::DrawFrame(bool offScreen)
 	    disk1->SetRadius(diskRad);
 	    disk2->SetRadius(diskRad);
 	    disk1->SetNormVec (-1.0*normVecs[dim]);
-	    disk2->SetNormVec (-1.0*normVecs[dim]);
+	    disk2->SetNormVec (+1.0*normVecs[dim]);
+	    Vec3 color = ElementData::GetColor (type);
+ 	    disk1->SetColor(color);
+ 	    disk2->SetColor(color);
 	    disk1->SetPos(c1);
 	    disk2->SetPos(c2);
 	    PathVis.Objects.push_back(disk1);
@@ -862,6 +866,8 @@ WFVisualClass::Read(string filename)
     AtomPos(i) = Vec3(pos(i,0), pos(i,1), pos(i,2));
     for (int j=0; j<3; j++)
       AtomPos(i) -= (0.5-Shift[j])*Box(j);
+    /// HACK HACK HACK
+    AtomPos(i) += Vec3 (0.4, -0.3, 0.8);
   }
   assert (Infile.ReadVar("atom_types", AtomTypes));
   Infile.CloseSection (); // "ions"
