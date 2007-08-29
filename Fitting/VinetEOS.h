@@ -8,7 +8,7 @@ using namespace blitz;
 class VinetEOSClass
 {
 private:
-  double V0, Ec, B0;
+  double V0, Ec, B0, E0;
   double third;
 
 public:

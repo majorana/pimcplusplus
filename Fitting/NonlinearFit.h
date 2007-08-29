@@ -92,7 +92,7 @@ NonlinearFitClass<M,ModelType>::CalcAlphaBeta (const Array<double,1> &x,
       for (int l=0; l<M; l++)
 	Alpha(k,l) += grad[k]*grad[l]/(sigma(i)*sigma(i));
   }
-  cerr << "Alpha = " << Alpha << endl;
+  // cerr << "Alpha = " << Alpha << endl;
 }
 
 
