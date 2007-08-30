@@ -488,6 +488,18 @@ inline Mat3 Inverse (const Mat3 &A)
   return Ainv;
 }
 
+inline Mat3 
+Transpose (const Mat3 &A)
+{
+  Mat3 Atran;
+  Atran(0,0)=A(0,0); Atran(0,1)=A(1,0); Atran(0,2)=A(2,0);
+  Atran(1,0)=A(0,1); Atran(1,1)=A(1,1); Atran(1,2)=A(2,1);
+  Atran(2,0)=A(0,2); Atran(2,1)=A(1,2); Atran(2,2)=A(2,2);
+
+  return Atran;
+}
+
+
 
 #ifndef NAN
 #define NAN sqrt(-1.0)

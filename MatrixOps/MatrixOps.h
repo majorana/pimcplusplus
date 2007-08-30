@@ -273,20 +273,20 @@ inline double det (const Mat2 &C)
 // }
 
 
-inline Mat3 Transpose(const Mat3 &A)
-{
-  Mat3 B;
-  B(0,0) = A(0,0);
-  B(0,1) = A(1,0);
-  B(0,2) = A(2,0);
-  B(1,0) = A(0,1);
-  B(1,1) = A(1,1);
-  B(1,2) = A(2,1);
-  B(2,0) = A(0,2);
-  B(2,1) = A(1,2);
-  B(2,2) = A(2,2);
-  return (B);
-}
+// inline Mat3 Transpose(const Mat3 &A)
+// {
+//   Mat3 B;
+//   B(0,0) = A(0,0);
+//   B(0,1) = A(1,0);
+//   B(0,2) = A(2,0);
+//   B(1,0) = A(0,1);
+//   B(1,1) = A(1,1);
+//   B(1,2) = A(2,1);
+//   B(2,0) = A(0,2);
+//   B(2,1) = A(1,2);
+//   B(2,2) = A(2,2);
+//   return (B);
+// }
 
 void CholeskyBig (Array<double,2> &A);
 
