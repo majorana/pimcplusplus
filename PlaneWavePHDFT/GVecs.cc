@@ -253,7 +253,7 @@ GetIndex(Vec3 a[3], Vec3 b[3], Vec3 gvec)
 
 
 void
-GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor)
+GVecsClass::Set (Mat3 lattice, const Array<Vec3,1> &gvecs, double fftFactor)
 {
   Lattice = lattice;
   Vec3 a[3], b[3];
@@ -426,7 +426,7 @@ GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor)
 
 
 void
-GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, Int3 boxSize)
+GVecsClass::Set (Mat3 lattice, const Array<Vec3,1> &gvecs, Int3 boxSize)
 {
   Lattice = lattice;
   Vec3 a[3], b[3];
@@ -537,7 +537,7 @@ GVecsClass::Set (Mat3 &lattice, Array<Vec3,1> &gvecs, Int3 boxSize)
 
 
 Int3
-GVecsClass::GetFFTBoxSize (Mat3 &lattice, Array<Vec3,1> &gvecs, 
+GVecsClass::GetFFTBoxSize (Mat3 lattice, const Array<Vec3,1> &gvecs, 
 			   double fftFactor)
 {
   Mat3 latticeInv;

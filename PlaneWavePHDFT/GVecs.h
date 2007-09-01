@@ -45,13 +45,15 @@ protected:
 public:
   Int3 GetFFTBoxSize (Vec3 box, Vec3 kvec, double kcut,
 		      double fftFactor=1.0);
-  Int3 GetFFTBoxSize (Mat3 &lattice, Array<Vec3,1> &gvecs, 
+  Int3 GetFFTBoxSize (Mat3 lattice, const Array<Vec3,1> &gvecs, 
 		      double fftFactor=1.0);
 
   void Set (Vec3 box, Vec3 kvec, double kcut, double fftFactor=1.0);
   void Set (Vec3 box, Vec3 kvec, double kcut, Int3 boxSize);
-  void Set (Mat3 &lattice, Array<Vec3,1> &gvecs, double fftFactor=1.0);
-  void Set (Mat3 &lattice, Array<Vec3,1> &gvecs, Int3 boxSize);
+  void Set (Mat3 lattice, const Array<Vec3,1> &gvecs, 
+	    double fftFactor=1.0);
+  void Set (Mat3 lattice, const Array<Vec3,1> &gvecs, 
+	    Int3 boxSize);
 
   inline Vec3 operator()(int i) const
   { return GVecs(i); }
