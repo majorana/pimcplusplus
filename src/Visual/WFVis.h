@@ -36,6 +36,7 @@ protected:
   //////////
   Array<double,3> WFData;
   int CurrBand, Currk, NumBands, Numk, NumElectrons;
+  Vec3 SuperTwistInt;
   Array<Vec3,1> AtomPos;
   Array<int,1> AtomTypes;
   BoxClass Box;

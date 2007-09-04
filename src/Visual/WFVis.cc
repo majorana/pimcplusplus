@@ -1002,6 +1002,15 @@ WFVisualClass::ReadWF (int kpoint, int band)
     (fabs(twist_angle(1)) < 1.0e-12) &&
     (fabs(twist_angle(2)) < 1.0e-12);
   assert (Infile.OpenSection("band", band));
+  Array<double,1> super_twist_int;
+  if (Infile.ReadVar("super_twist_int", super_twist_int)) {
+    SuperTwistInt[0] = super_twist_int(0);
+    SuperTwistInt[1] = super_twist_int(1);
+    SuperTwistInt[2] = super_twist_int(2);
+  }
+  else
+    SuperTwistInt = Vec3(0.0, 0.0, 0.0);
+  cerr << "SuperTwistInt = " << SuperTwistInt << endl;
   assert (Infile.ReadVar ("eigenvector", wfdata));
   Array<double,1> center;
   Localized = Infile.ReadVar ("center", center);
@@ -1058,24 +1067,41 @@ WFVisualClass::ReadWF (int kpoint, int band)
   xShift = (int)round(Shift[0]*wfdata.extent(0));
   yShift = (int)round(Shift[1]*wfdata.extent(1));
   zShift = (int)round(Shift[2]*wfdata.extent(2));
-  for (int ix=0; ix<wfdata.extent(0); ix++)
-    for (int iy=0; iy<wfdata.extent(1); iy++)
+  Vec3 u(0.0, 0.0, 0.0);
+  Vec3 du(1.0/(double)(wfdata.extent(0)-1),
+	  1.0/(double)(wfdata.extent(1)-1),
+	  1.0/(double)(wfdata.extent(2)-1));
+  
+  for (int ix=0; ix<wfdata.extent(0); ix++) {
+    u[1] = 0.0;
+    for (int iy=0; iy<wfdata.extent(1); iy++) {
+      u[2] = 0.0;
       for (int iz=0; iz<wfdata.extent(2); iz++) {
 	// WF data is store from 0 to Lx, not -Lx/2 to Lx/2
 	int jx = (ix-xShift+Nx-1/*+Nx/2*/)%(Nx-1);
 	int jy = (iy-yShift+Ny-1/*+Ny/2*/)%(Ny-1);
 	int jz = (iz-zShift+Nz-1/*+Nz/2*/)%(Nz-1);
-	if (WFDisplay == MAG2) {
-	  double rho = (wfdata(jx,jy,jz,0)*wfdata(jx,jy,jz,0) +
-			wfdata(jx,jy,jz,1)*wfdata(jx,jy,jz,1));
-	  WFData(ix,iy,iz) = rho;
+	complex<double> zval(wfdata(jx,jy,jz,0), wfdata(jx,jy,jz,1));
+
+	if (false) {
+	  double s,c;
+	  sincos(-2.0*M_PI*dot(u,SuperTwistInt), &s, &c);
+	  zval *= complex<double>(c,s);
 	}
+
+	if (WFDisplay == MAG2)
+	  WFData(ix,iy,iz) = norm(zval);
 	else if (WFDisplay == REAL_PART)
-	  WFData(ix,iy,iz) = wfdata(jx, jy, jz, 0);
+	  WFData(ix,iy,iz) = zval.real();
 	else if (WFDisplay == IMAG_PART)
-	  WFData(ix,iy,iz) = wfdata(jx, jy, jz, 1);
+	  WFData(ix,iy,iz) = zval.imag();
 	MaxVal = max(MaxVal, fabs(WFData(ix,iy,iz)));
+	u[2] += du[2];
       }
+      u[1] += du[1];
+    }
+    u[0] += du[0];
+  }
   // cerr << "MaxVal = " << MaxVal << endl;
   return true;
 }
