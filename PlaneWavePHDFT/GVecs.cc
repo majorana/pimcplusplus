@@ -570,9 +570,9 @@ GVecsClass::GetFFTBoxSize (Mat3 lattice, const Array<Vec3,1> &gvecs,
       if (i==j) assert (fabs(ident(i,j)-1.0) < 1.0e-12);
       else      assert (fabs(ident(i,j))      < 1.0e-12);
 
-  Array<Vec3,1> indices;
-  for (int i=0; i<GVecs.size(); i++) 
-    indices(i) = GetIndex(a, b, GVecs(i));
+  Array<Vec3,1> indices(gvecs.size());
+  for (int i=0; i<gvecs.size(); i++) 
+    indices(i) = GetIndex(a, b, gvecs(i));
 
   /// Find FFT box size;
   Int3 maxIndex(0,0,0), minIndex(0,0,0);
@@ -584,13 +584,10 @@ GVecsClass::GetFFTBoxSize (Mat3 lattice, const Array<Vec3,1> &gvecs,
       if (indices(i)[j] > maxIndex[j])
 	maxIndex[j] = indices(i)[j];
     }
-    if (dot (GVecs(i), GVecs(i)) > maxG2)
-      maxG2 = dot (GVecs(i), GVecs(i));
+    if (dot (gvecs(i), gvecs(i)) > maxG2)
+      maxG2 = dot (gvecs(i), gvecs(i));
   }
   kCut = sqrt (maxG2);
-//   cerr << "minIndex = " << minIndex << endl;
-//   cerr << "maxIndex = " << maxIndex << endl;
-//   cerr << "maxG2 = " << maxG2 << endl;
   int nx = 2*(maxIndex[0] - minIndex[0] + 1);
   int ny = 2*(maxIndex[1] - minIndex[1] + 1);
   int nz = 2*(maxIndex[2] - minIndex[2] + 1);
