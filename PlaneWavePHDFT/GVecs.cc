@@ -15,6 +15,7 @@
 /////////////////////////////////////////////////////////////
 
 #include "GVecs.h"
+#include "../MPI/Communication.h"
 #include <vector>
 #include <algorithm>
 
@@ -36,6 +37,40 @@ inline bool operator==(const GVec &g1, const GVec &g2)
   return (fabs(dot(g1.G,g1.G)-dot(g2.G,g2.G)) < 1.0e-12);
 }
 
+
+void
+GVecsClass::Broadcast (CommunicatorClass &comm, int root)
+{
+  bool doResize = comm.MyProc() != root;
+  int nVecs = GVecs.size();
+  int nDiff = GDiff.size();
+  comm.Broadcast (root, nVecs);
+  comm.Broadcast (root, nDiff);
+  if (doResize) {
+    GVecs.resize(nVecs);
+    Indices.resize(nVecs);
+    Multipliers.resize(nVecs);
+    GDiff.resize(nDiff);
+    GDiffInv2.resize(nDiff);
+    IDiff.resize(nDiff);
+  }
+  comm.Broadcast (root, GVecs);
+  comm.Broadcast (root, Indices);
+  comm.Broadcast (root, Multipliers);
+  comm.Broadcast (root, GDiff);
+  comm.Broadcast (root, Lattice);
+  comm.Broadcast (root, LatticeInv);
+  comm.Broadcast (root, RecipLattice);
+  comm.Broadcast (root, GDiffInv2);
+  comm.Broadcast (root, IDiff);
+  comm.Broadcast (root, Box);
+  comm.Broadcast (root, kBox); 
+  comm.Broadcast (root, Nx);
+  comm.Broadcast (root, Ny);
+  comm.Broadcast (root, Nz);
+  comm.Broadcast (root, kCut);
+  comm.Broadcast (root, k);
+}
 
 Int3
 GVecsClass::GetFFTBoxSize(Vec3 box, Vec3 kvec, double kcut, double fftFactor)
@@ -570,7 +605,7 @@ GVecsClass::GetFFTBoxSize (Mat3 lattice, const Array<Vec3,1> &gvecs,
       if (i==j) assert (fabs(ident(i,j)-1.0) < 1.0e-12);
       else      assert (fabs(ident(i,j))      < 1.0e-12);
 
-  Array<Vec3,1> indices(gvecs.size());
+  Array<Int3,1> indices(gvecs.size());
   for (int i=0; i<gvecs.size(); i++) 
     indices(i) = GetIndex(a, b, gvecs(i));
 

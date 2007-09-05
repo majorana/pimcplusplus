@@ -19,6 +19,8 @@
 
 #include "VectorOps.h"
 
+class CommunicatorClass;
+
 class GVecsClass
 {
 protected:
@@ -54,6 +56,7 @@ public:
 	    double fftFactor=1.0);
   void Set (Mat3 lattice, const Array<Vec3,1> &gvecs, 
 	    Int3 boxSize);
+  void Broadcast (CommunicatorClass &comm, int root);
 
   inline Vec3 operator()(int i) const
   { return GVecs(i); }
