@@ -194,10 +194,18 @@ public:
   }
 
   template<int N>
+  void Broadcast (int root, Array<int,N> &a)
+  {
+    assert (a.isStorageContiguous());
+    MPI_Bcast(a.data(), a.size(), MPI_INT, root, MPIComm);
+  }
+
+  template<int N>
   void Broadcast (int root, Array<TinyVector<int,N>,1> &vec)
   {
     MPI_Bcast(&(vec(0)[0]), N*vec.size(), MPI_INT, root, MPIComm);
   }
+
 
   template<int N>
   void SendReceive (int sendProc, const Array<double,N> &sendBuff,
