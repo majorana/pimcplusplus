@@ -20,6 +20,14 @@ private:
   bool HaveTexture, BuiltTexture;
   bool IsInitialized;
   Mat3 Lattice;
+  // Information for contours
+  bool UseContours;
+  static int EdgeTable[4][5];
+  static int EdgeData[16][5];
+  Array<double,2> ValData;
+  Vec3 FindEdge (int ix, int iy, int edgeNum,
+		 Vec3 u0, Vec3 s, Vec3 t,
+		 double isoVal);
 public:
   void Set();
   void Init();

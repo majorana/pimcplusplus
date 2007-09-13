@@ -40,6 +40,52 @@ PlaneObject::~PlaneObject()
     glDeleteTextures(1, &TextureNum);
 }
 
+Vec3
+PlaneObject::FindEdge(int is, int it, int edgeNum,
+		      Vec3 u0, Vec3 s, Vec3 t,
+		      double isoVal)
+{
+  double Ns = ValData.extent(0);
+  double Nt = ValData.extent(1);
+  int dim, is1, is2, it1, it2;
+  dim = EdgeTable[edgeNum][0];
+  is1 = is+EdgeTable[edgeNum][1];
+  is2 = is+EdgeTable[edgeNum][2];
+  it1 = it+EdgeTable[edgeNum][3];
+  it2 = it+EdgeTable[edgeNum][4];
+
+//   cerr << "is1=" << is1 << "  is2=" << is2  << "  "
+//        << "it1=" << it1 << "  it2=" << it2 << endl;
+//   cerr << "isoval=" << isoVal << endl;
+
+//   cerr << "edgeNum = " << edgeNum << endl;
+//   cerr << "is1 = " << is1 << endl;
+//   cerr << "it1 = " << it1 << endl;
+//   cerr << "is2 = " << is2 << endl;
+//   cerr << "it2 = " << it2 << endl;
+
+  Vec3 u1 = u0 + (double)(is1)/Ns * s + 
+    (double)(it1)/Nt *t;
+  Vec3 u2 = u0 + (double)(is2)/Ns * s + 
+    (double)(it2)/Nt *t;
+//   cerr << "is = " << is << endl;
+//   cerr << "it = " << it << endl;
+  double v1 = ValData (is1, it1) - isoVal;
+  double v2 = ValData (is2, it2) - isoVal;
+  //   cerr << "v1 = " << v1 << "   v2 = " << v2 << endl;
+  
+
+  if (v1*v2 >0.0)
+    return (Vec3 (0.0, 0.0, 0.0));
+
+  double frac = fabs(v1/(v2-v1));
+  //  cerr << "frac = " << frac << endl;
+
+  Vec3 u = (1.0-frac)*u1 + frac*u2;
+  return u;
+}
+
+
 void
 PlaneObject::Set()
 {
@@ -58,6 +104,8 @@ PlaneObject::Set()
 
 
   const int N = 256;
+  if (ValData.size() != N*N) 
+    ValData.resize(N,N);
   Array<TinyVector<GLubyte,4>,2> texData(N,N);
   
   Vec3 u0, sVec, tVec;
@@ -81,13 +129,17 @@ PlaneObject::Set()
   }
 
   // Create the data
+  double scale = 1.0/(MaxVal - MinVal);
   double nInv = 1.0/(double)(N-1);
   for (int is=0; is<N; is++) {
-    double s = nInv * (double)is;
+    double s = 0.999999*nInv * (double)is;
     for (int it=0; it<N; it++) {
-      double t = nInv * (double)it;
+      double t = 0.999999*nInv * (double)it;
       Vec3 r = u0 + s*sVec + t*tVec;
       double val = Spline(r[0], r[1], r[2]);
+      ValData(is, it) = (val - MinVal)*scale;
+      // cerr << "val=" << ValData(is,it) << "   r =" << r << endl;
+      
       TinyVector<double,4> color;
       CMap (val, color);
       texData(is, it)[0] = (GLubyte) floor (256.0 * color[0]);
@@ -132,6 +184,44 @@ PlaneObject::Set()
   glTexCoord2f(1.0, 0.0); glVertex3f(r3[0], r3[1], r3[2]);
   glEnd();
   glDisable(GL_TEXTURE_2D);
+
+  // Now add contours
+  int numContours = 20;
+  glColor4d (1.0, 1.0, 1.0, 1.0);
+  glBegin(GL_LINES);
+  for (int cont=0; cont<numContours; cont++) {
+    double isoVal = ((double)cont+0.5)/(double)(numContours+1);
+    for (int is=0; is<(N-1); is++) {
+      for (int it=0; it<(N-1); it++) {
+	int index = 0;
+	index |= ((ValData(is+0,it+0)> isoVal) << 3);
+	index |= ((ValData(is+1,it+0)> isoVal) << 2);
+	index |= ((ValData(is+1,it+1)> isoVal) << 1);
+	index |= ((ValData(is+0,it+1)> isoVal) << 0);
+// 	if (index != 0 && index != 15) {
+// 	  cerr << "\nStart:\n"; 
+// 	  cerr << "v1=" << (ValData(is+0,it+0)-isoVal) << "  "
+// 	       << "v2=" << (ValData(is+1,it+0)-isoVal) << "  "
+// 	       << "v3=" << (ValData(is+1,it+1)-isoVal) << "  "
+// 	       << "v4=" << (ValData(is+0,it+1)-isoVal) << endl;
+// 	  cerr << "is= " << is << "  it=" << it << endl;
+// 	  cerr << "index = " << index << endl;
+// 	}
+	int ei=0;
+	int edge;
+	while ((edge=EdgeData[index][ei]) != -1) {
+	  Vec3 reduced = 
+	    FindEdge (is, it, edge, u0, sVec, tVec, isoVal);
+	  Vec3 vertex = reduced * Lattice;
+	  //  cerr << "vertex = " << vertex << endl;
+	  glVertex3dv (&(vertex[0]));
+	  ei++;
+	}
+      }
+    }
+  }
+  glEnd();
+
   End();
 }
 	
@@ -271,3 +361,32 @@ PlaneObject::SetLattice (Mat3 lattice)
 {
   Lattice = lattice;
 }
+
+
+int PlaneObject::EdgeTable[4][5] = {
+//  dim x1 x2 y1 y2
+  {  0,  0, 1, 0, 0 },
+  {  1,  1, 1, 0, 1 },
+  {  0,  0, 1, 1, 1 },
+  {  1,  0, 0, 0, 1 }
+};
+
+int PlaneObject::EdgeData[16][5]=
+{
+  {-1,-1,-1,-1,-1},
+  { 2, 3,-1,-1,-1},
+  { 1, 2,-1,-1,-1},
+  { 1, 3,-1,-1,-1},
+  { 0, 1,-1,-1,-1},
+  { 3, 0, 1, 3,-1},
+  { 0, 2,-1,-1,-1},
+  { 3, 0,-1,-1,-1},
+  { 3, 0,-1,-1,-1},
+  { 0, 2,-1,-1,-1},
+  { 2, 3, 0, 1,-1},
+  { 0, 1,-1,-1,-1},
+  { 1, 3,-1,-1,-1},
+  { 1, 2,-1,-1,-1},
+  { 2, 3,-1,-1,-1},
+  {-1,-1,-1,-1,-1}
+};
