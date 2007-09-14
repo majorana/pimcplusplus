@@ -232,14 +232,17 @@ PlaneObject::DrawPOV(FILE *fout, string rotMatrix)
   // First, we have to create an image file for the texture map
   const int N = 1024;
   Array<TinyVector<guint8,4>,2> texData(N,N);
+  if (ValData.size() != N*N) 
+    ValData.resize(N,N);
+
   
-  Vec3 r0, sVec, tVec;
+  Vec3 u0, sVec, tVec;
   Vec3 dr[3];
   dr[0] = (Spline.Xgrid->End - Spline.Xgrid->Start) * Vec3(1.0, 0.0, 0.0);
   dr[1] = (Spline.Ygrid->End - Spline.Ygrid->Start) * Vec3(0.0, 1.0, 0.0);
   dr[2] = (Spline.Zgrid->End - Spline.Zgrid->Start) * Vec3(0.0, 0.0, 1.0);
-  r0 = Vec3 (Spline.Xgrid->Start, Spline.Ygrid->Start, Spline.Zgrid->Start);
-  r0 += Position*dr[Direction];
+  u0 = Vec3 (Spline.Xgrid->Start, Spline.Ygrid->Start, Spline.Zgrid->Start);
+  u0 += Position*dr[Direction];
   if (Direction == 0) {
     sVec = dr[1];
     tVec = dr[2];
@@ -254,13 +257,15 @@ PlaneObject::DrawPOV(FILE *fout, string rotMatrix)
   }
 
   // Create the data
+  double scale = 1.0/(MaxVal - MinVal);
   double nInv = 1.0/(double)(N-1);
   for (int is=0; is<N; is++) {
     double s = nInv * (double)is;
     for (int it=0; it<N; it++) {
       double t = nInv * (double)it;
-      Vec3 r = r0 + s*sVec + t*tVec;
+      Vec3 r = u0 + s*sVec + t*tVec;
       double val = Spline(r[0], r[1], r[2]);
+      ValData(is, it) = (val - MinVal)*scale;
       TinyVector<double,4> color;
       CMap (val, color);
       texData(is, it)[0] = (guint8) floor (256.0 * color[0]);
@@ -269,11 +274,71 @@ PlaneObject::DrawPOV(FILE *fout, string rotMatrix)
       texData(is, it)[3] = (guint8) floor (256.0 * color[3]);
     }
   }
+
+  // Old way: create pixbuf directly
+  //   Glib::RefPtr<Gdk::Pixbuf> pixbuf = 
+  //     Gdk::Pixbuf::create_from_data((guint8*)texData.data(), 
+  // 				  Gdk::COLORSPACE_RGB,
+  // 				  true, 8, N, N, 4*N);
+
+  // New way:  create pixmap, draw to it, and then render to the pixbuf.
+  Glib::RefPtr<Gdk::Drawable> drawable = (Glib::RefPtr<Gdk::Drawable>)NULL;
+  Glib::RefPtr<Gdk::Pixmap> pixmap = 
+    Gdk::Pixmap::create(drawable, N, N, 24);
+  Glib::RefPtr<Gdk::Colormap> cmap = Gdk::Colormap::get_system();
+
+  Glib::RefPtr<Gdk::GC> gc = 
+    Gdk::GC::create((Glib::RefPtr<Gdk::Drawable>)pixmap);
+
+  pixmap->draw_rgb_32_image (gc, 0, 0, N, N, Gdk::RGB_DITHER_NONE, 
+			     (guchar*)texData.data(), 4*N);
+
+  Cairo::RefPtr<Cairo::Context> context = pixmap->create_cairo_context();
+  context->set_line_width(1.5);
+  context->set_source_rgb(1.0, 1.0, 1.0);
   
+  // Now add contours
+  int numContours = 20;
+  bool close = false;
+  for (int cont=0; cont<numContours; cont++) {
+    double isoVal = ((double)cont+0.5)/(double)(numContours+1);
+    for (int is=0; is<(N-1); is++) {
+      for (int it=0; it<(N-1); it++) {
+	int index = 0;
+	index |= ((ValData(is+0,it+0)> isoVal) << 3);
+	index |= ((ValData(is+1,it+0)> isoVal) << 2);
+	index |= ((ValData(is+1,it+1)> isoVal) << 1);
+	index |= ((ValData(is+0,it+1)> isoVal) << 0);
+	int ei=0;
+	int edge;
+	while ((edge=EdgeData[index][ei]) != -1) {
+	  Vec3 reduced = 
+	    FindEdge (is, it, edge, u0, sVec, tVec, isoVal);
+	  reduced -= u0;
+	  double x = (double)N*dot (tVec, reduced);
+	  double y = (double)N*dot (sVec, reduced);
+	  if (close)
+	    context->line_to (x, y);
+	  else
+	    context->move_to (x, y);
+	  close = !close;
+	  ei++;
+	}
+      }
+    }
+  }
+  context->stroke();
+		      
+
+//   pixmap->draw_line(gc, 0, 0, N, N);
+//   pixmap->draw_line(gc, 0, N, N, 0);
+
+  // Copy into a pixbuf
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = 
-    Gdk::Pixbuf::create_from_data((guint8*)texData.data(), 
-				  Gdk::COLORSPACE_RGB,
-				  true, 8, N, N, 4*N);
+  Gdk::Pixbuf::create ((Glib::RefPtr<Gdk::Drawable>)pixmap, cmap, 
+		       0, 0, 0, 0, N, N);
+
+  // Write to a file
   stringstream fname;
   fname << "ColorPlane" << Direction << ".png";
   pixbuf->save (fname.str(), (Glib::ustring)"png"); 

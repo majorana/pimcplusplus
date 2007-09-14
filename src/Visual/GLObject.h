@@ -8,8 +8,8 @@ using namespace std;
 class GLObject
 {
 protected:
-  int ListNum;
-  bool Created;
+  int ListNum, OffscreenListNum;
+  bool Created, OffscreenCreated;
   bool Visible;
   bool Transparent;
 public:
