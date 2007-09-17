@@ -196,11 +196,18 @@ WFVisualClass::WFVisualClass() :
   BoxToggle = Gtk::ToggleAction::create("Box", "Box", "Show box", true);
   Actions->add (BoxToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnBoxToggle));
+
   TruncRadiiToggle = 
     Gtk::ToggleAction::create("Trunc", "Truncation radii",
 			      "Show truncation radii", true);
   Actions->add (TruncRadiiToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnTruncRadiiToggle));
+
+  ContourToggle = 
+    Gtk::ToggleAction::create("Isocontours", "Plane isocontours",
+			      "Show isocontours on color planes", true);
+  Actions->add (IsocontourToggle,
+		sigc::mem_fun(*this, &WFVisualClass::OnIsocontourToggle));
 
   Actions->add (Gtk::Action::create("MenuDisplay", "Display"));
   Mag2Radio = Gtk::RadioAction::create
@@ -271,6 +278,7 @@ WFVisualClass::WFVisualClass() :
     "      <menuitem action='Axes'/>"
     "      <menuitem action='Box'/>"
     "      <menuitem action='Trunc'/>"
+    "      <menuitem action='Isocontours'/>"
     "    </menu>"
     "    <menu action='MenuDisplay'>"
     "      <menuitem action='Real'/>"
@@ -351,6 +359,8 @@ WFVisualClass::WFVisualClass() :
 
   PerspectButton.set_active(true);
   TruncRadiiToggle->set_active(false);
+  ContourToggle->set_active(false);
+
   UpdateIso = true;
   UpdatePlane[0] = UpdatePlane[1] = UpdatePlane[2] = true;
   CMapActions[BLUE_WHITE_RED]->set_active(true);
@@ -1129,6 +1139,15 @@ WFVisualClass::OnBoxToggle()
 void
 WFVisualClass::OnTruncRadiiToggle()
 {
+  DrawFrame();
+}
+
+void
+WFVisualClass::OnIsocontourToggle()
+{
+  UpdatePlane[0] = xPlaneButton.get_active();
+  UpdatePlane[1] = yPlaneButton.get_active();
+  UpdatePlane[2] = zPlaneButton.get_active();
   DrawFrame();
 }
 

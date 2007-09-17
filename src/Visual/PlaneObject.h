@@ -33,6 +33,7 @@ public:
   void Init();
   void DrawPOV (FILE *out, string rotMatrix);
   void SetPosition (int dir, double pos);
+  void SetIsocontours (bool show);
   void SetLattice(Mat3 lattice);
   void SetColorMap (ColorMapType map);
   PlaneObject (MyTricubicSpline &spline) : 

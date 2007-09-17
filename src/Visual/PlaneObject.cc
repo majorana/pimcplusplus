@@ -10,6 +10,13 @@ PlaneObject::SetPosition(int dir, double pos)
   Set();
 }
 
+void
+PlaneObject::SetIsocontours (bool show)
+{
+  UseContours = show;
+  Set();
+}
+
 
 void
 PlaneObject::SetColorMap(ColorMapType map)
@@ -186,41 +193,34 @@ PlaneObject::Set()
   glDisable(GL_TEXTURE_2D);
 
   // Now add contours
-  int numContours = 20;
-  glColor4d (1.0, 1.0, 1.0, 1.0);
-  glBegin(GL_LINES);
-  for (int cont=0; cont<numContours; cont++) {
-    double isoVal = ((double)cont+0.5)/(double)(numContours+1);
-    for (int is=0; is<(N-1); is++) {
-      for (int it=0; it<(N-1); it++) {
-	int index = 0;
-	index |= ((ValData(is+0,it+0)> isoVal) << 3);
-	index |= ((ValData(is+1,it+0)> isoVal) << 2);
-	index |= ((ValData(is+1,it+1)> isoVal) << 1);
-	index |= ((ValData(is+0,it+1)> isoVal) << 0);
-// 	if (index != 0 && index != 15) {
-// 	  cerr << "\nStart:\n"; 
-// 	  cerr << "v1=" << (ValData(is+0,it+0)-isoVal) << "  "
-// 	       << "v2=" << (ValData(is+1,it+0)-isoVal) << "  "
-// 	       << "v3=" << (ValData(is+1,it+1)-isoVal) << "  "
-// 	       << "v4=" << (ValData(is+0,it+1)-isoVal) << endl;
-// 	  cerr << "is= " << is << "  it=" << it << endl;
-// 	  cerr << "index = " << index << endl;
-// 	}
-	int ei=0;
-	int edge;
-	while ((edge=EdgeData[index][ei]) != -1) {
-	  Vec3 reduced = 
-	    FindEdge (is, it, edge, u0, sVec, tVec, isoVal);
-	  Vec3 vertex = reduced * Lattice;
-	  //  cerr << "vertex = " << vertex << endl;
-	  glVertex3dv (&(vertex[0]));
-	  ei++;
+  if (UseContours) {
+    int numContours = 20;
+    glColor4d (1.0, 1.0, 1.0, 1.0);
+    glBegin(GL_LINES);
+    for (int cont=0; cont<numContours; cont++) {
+      double isoVal = ((double)cont+0.5)/(double)(numContours+1);
+      for (int is=0; is<(N-1); is++) {
+	for (int it=0; it<(N-1); it++) {
+	  int index = 0;
+	  index |= ((ValData(is+0,it+0)> isoVal) << 3);
+	  index |= ((ValData(is+1,it+0)> isoVal) << 2);
+	  index |= ((ValData(is+1,it+1)> isoVal) << 1);
+	  index |= ((ValData(is+0,it+1)> isoVal) << 0);
+	  int ei=0;
+	  int edge;
+	  while ((edge=EdgeData[index][ei]) != -1) {
+	    Vec3 reduced = 
+	      FindEdge (is, it, edge, u0, sVec, tVec, isoVal);
+	    Vec3 vertex = reduced * Lattice;
+	    //  cerr << "vertex = " << vertex << endl;
+	    glVertex3dv (&(vertex[0]));
+	    ei++;
+	  }
 	}
       }
     }
   }
-  glEnd();
+    glEnd();
 
   End();
 }
@@ -293,21 +293,23 @@ PlaneObject::DrawPOV(FILE *fout, string rotMatrix)
   pixmap->draw_rgb_32_image (gc, 0, 0, N, N, Gdk::RGB_DITHER_NONE, 
 			     (guchar*)texData.data(), 4*N);
 
-  Cairo::RefPtr<Cairo::Context> context = pixmap->create_cairo_context();
-  context->set_line_width(1.5);
-  context->set_source_rgb(1.0, 1.0, 1.0);
-  
-  // Now add contours
-  int numContours = 20;
-  bool close = false;
-  for (int cont=0; cont<numContours; cont++) {
-    double isoVal = ((double)cont+0.5)/(double)(numContours+1);
-    for (int is=0; is<(N-1); is++) {
-      for (int it=0; it<(N-1); it++) {
-	int index = 0;
-	index |= ((ValData(is+0,it+0)> isoVal) << 3);
-	index |= ((ValData(is+1,it+0)> isoVal) << 2);
-	index |= ((ValData(is+1,it+1)> isoVal) << 1);
+  if (UseContours) {
+    // Create cairo context
+    Cairo::RefPtr<Cairo::Context> context = pixmap->create_cairo_context();
+    context->set_line_width(1.5);
+    context->set_source_rgb(1.0, 1.0, 1.0);
+    
+    // Now add contours
+    int numContours = 20;
+    bool close = false;
+    for (int cont=0; cont<numContours; cont++) {
+      double isoVal = ((double)cont+0.5)/(double)(numContours+1);
+      for (int is=0; is<(N-1); is++) {
+	for (int it=0; it<(N-1); it++) {
+	  int index = 0;
+	  index |= ((ValData(is+0,it+0)> isoVal) << 3);
+	  index |= ((ValData(is+1,it+0)> isoVal) << 2);
+	  index |= ((ValData(is+1,it+1)> isoVal) << 1);
 	index |= ((ValData(is+0,it+1)> isoVal) << 0);
 	int ei=0;
 	int edge;
@@ -324,15 +326,12 @@ PlaneObject::DrawPOV(FILE *fout, string rotMatrix)
 	  close = !close;
 	  ei++;
 	}
+	}
       }
     }
+    context->stroke();
   }
-  context->stroke();
 		      
-
-//   pixmap->draw_line(gc, 0, 0, N, N);
-//   pixmap->draw_line(gc, 0, N, N, 0);
-
   // Copy into a pixbuf
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = 
   Gdk::Pixbuf::create ((Glib::RefPtr<Gdk::Drawable>)pixmap, cmap, 
