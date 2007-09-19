@@ -41,6 +41,7 @@ protected:
   Array<double,1> HistSum;
   void ProduceTimeMatrix(int slice);
   ObservableVecDouble1 TimeDispVar;
+  ObservableVecDouble1 NumStepVar;
   Array<double,1> TimeDisp;
   int TotalCurrentData;
   bool FullyWrapped;
@@ -65,6 +66,7 @@ public:
   TimeLindenmanClass(PathDataClass &pathData, IOSectionClass &ioSection) :
     ObservableClass (pathData, ioSection), 
     TimeDispVar("TimeDisp",IOSection,pathData.Path.Communicator),
+    NumStepVar("NumStep",IOSection,pathData.Path.Communicator),
     DistCutoff(2.56), CurrTime(0),TotalCurrentData(-1),FullyWrapped(false)
     {
 

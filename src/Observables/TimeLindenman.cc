@@ -143,10 +143,11 @@ TimeLindenmanClass::Accumulate()
 void
 TimeLindenmanClass::WriteBlock()
 {
-  for (int i=0;i<TimeDisp.size();i++)
-    if (NumStepArray(i)!=0)
-      TimeDisp(i)=TimeDisp(i)/NumStepArray(i);
+//   for (int i=0;i<TimeDisp.size();i++)
+//     if (NumStepArray(i)!=0)
+//       TimeDisp(i)=TimeDisp(i)/NumStepArray(i);
   TimeDispVar.Write(TimeDisp);
+  NumStepVar.Write(NumStepArray);
   TimeDisp=0.0;
   NumStepArray=0.0;
   ////  CurrTime=0;
