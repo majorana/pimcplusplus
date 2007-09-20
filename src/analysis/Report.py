@@ -5,6 +5,7 @@ import os
 import math
 import stats
 ##import numarray
+import TimeLindenman
 from AcceptRatio import *
 from Energy import *
 from nofr import *
@@ -185,22 +186,29 @@ for counter in range(0,numSections):
      elif myName=="SuperfluidFraction":
 #         print "Processing Superfluid Fraction"
          ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut)
-     elif myName=="Hexatic":
-          try: 
- #           print "Processing Hexatic"
-            ProcessHexatic(infiles,summaryDoc,detailedDoc,StartCut)
-          except:
-            print "Hexatic failed"
+##A     elif myName=="Hexatic":
+##A          try: 
+##A #           print "Processing Hexatic"
+##A            ProcessHexatic(infiles,summaryDoc,detailedDoc,StartCut)
+##A          except:
+##A             print "Hexatic failed"
 #     elif myName=="Pressure":
 #         ProcessPressure(infiles,summaryDoc,detailedDoc,StartCut)
 #         summaryDoc.append(HR())
 #         detailedDoc.append(HR())
-     elif myName=="PlaneDensity":
-          ProcessPlaneDensity(infiles,summaryDoc,detailedDoc,StartCut,box)
-          summaryDoc.append(HR())
-          detailedDoc.append(HR())
+##B     elif myName=="PlaneDensity":
+##B	  try:
+##B            ProcessPlaneDensity(infiles,summaryDoc,detailedDoc,StartCut,box)
+##B            summaryDoc.append(HR())
+##B            detailedDoc.append(HR())
+##B	  except:
+##B	    print "Plane Density broken"
      elif myName=="TimeAnalysis":
           ProcessTimeAnalysis(infiles,summaryDoc,detailedDoc,StartCut)
+          summaryDoc.append(HR())
+          detailedDoc.append(HR())
+     elif myName=="TimeLindenman":
+	  TimeLindenman.Process(infiles,summaryDoc,detailedDoc,StartCut)
           summaryDoc.append(HR())
           detailedDoc.append(HR())
      elif myName=="VacancyDensity":
