@@ -32,6 +32,7 @@ private:
   void Set();
   Vec3 LatticeVecs[3];
   Mat3 Lattice;
+  Vec3 uCenter, uMin, uMax;
 public:
   inline void SetLattice (Mat3 lattice);
   int NumTriangles(int i=0);
@@ -39,13 +40,16 @@ public:
   { Isovals.resize(1);  Isovals[0] = val; Set();}
   inline void SetIsoval (vector<double> vals) 
   { Isovals.resize(vals.size()); Isovals = vals; Set(); }
+  inline void SetCenter (Vec3 ucenter, Vec3 umin, Vec3 umax)
+  { uCenter = ucenter;  uMin = umin;   uMax = umax; }
   void DrawPOV(FILE* out, string rotMatrix);
   void SetColor (Vec3 color);
   void SetColor (vector<TinyVector<double,3> > &colors);
   void SetAlpha (double alpha);
   inline void SetColor (double r, double g, double b) 
   { SetColor (TinyVector<double,3>(r,g,b)); }
-  Isosurface() : UseCubicInterp(true), UseNormals(true)
+  Isosurface() : UseCubicInterp(true), UseNormals(true), 
+		 uMin(0.0, 0.0, 0.0), uMax(1.0, 1.0, 1.0)
   {
     Color[0] = 0.0; Color[1] = 0.8; Color[2] = 0.0; Color[3] = 0.5;
     Colors.push_back(Color);

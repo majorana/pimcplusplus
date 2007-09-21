@@ -380,11 +380,6 @@ Isosurface::Set()
 	for (int iz=0; iz<(Nz-1); iz++) { 
 	  index = (index & 0x000000f0) >> 4;
 	  /// Check corners
-	  //	  int index = 0;
-// 	  index |= (F(ix  ,  iy+1, iz  )[0] > Isoval);
-// 	  index |= ((F(ix+1, iy+1, iz  )[0] > Isoval) << 1);
-// 	  index |= ((F(ix+1, iy  , iz  )[0] > Isoval) << 2);
-// 	  index |= ((F(ix  , iy  , iz  )[0] > Isoval) << 3);
 	  index |= ((F(ix  , iy+1, iz+1)[0] > Isoval) << 4);
 	  index |= ((F(ix+1, iy+1, iz+1)[0] > Isoval) << 5);
 	  index |= ((F(ix+1, iy  , iz+1)[0] > Isoval) << 6);
@@ -394,18 +389,16 @@ Isosurface::Set()
 	  while ((edge=EdgeData[index][ei]) != -1) {
 	    numTriangles++;
 	    Vec3 reduced = FindEdge (ix, iy, iz, edge);
-// 	    Vec3 vertex = (reduced[0]*LatticeVecs[0] +
-// 			   reduced[1]*LatticeVecs[1] +
-// 			   reduced[2]*LatticeVecs[2]);
-	    Vec3 vertex = reduced * Lattice;
 	    if (UseNormals) {
 	      Vec3 nred = -1.0*Grad(reduced[0], reduced[1], reduced[2]);
-// 	      Vec3 normal = (nred[0]*LatticeVecs[0]+
-// 			     nred[1]*LatticeVecs[1]+
-// 			     nred[2]*LatticeVecs[2]);
+	      for (int i=0; i<3; i++)
+		nred[i] *= (uMax[i] - uMin[i]);
 	      Vec3 normal = nred*Lattice;
 	      glNormal3dv(&(normal[0]));
 	    }
+	    for (int i=0; i<3; i++) 
+	      reduced[i] = uCenter[i] + (uMax[i]-uMin[i])*reduced[i];
+	    Vec3 vertex = reduced * Lattice;
 	    glVertex3dv(&(vertex[0]));
 	    ei++;
 	  }

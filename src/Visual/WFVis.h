@@ -85,7 +85,7 @@ protected:
   Array<double,3> RhoData;
   // Localize orbitals
   bool Localized;
-  Vec3 Center;
+  Vec3 Center, uMin, uMax, uCenter;
   double TruncRadius;
   
   Isosurface WFIso;

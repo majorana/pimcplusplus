@@ -11,10 +11,9 @@ PlaneObject::SetPosition(int dir, double pos)
 }
 
 void
-PlaneObject::SetIsocontours (bool show)
+PlaneObject::SetIsocontours (bool active)
 {
-  UseContours = show;
-  Set();
+  UseContours = active;
 }
 
 
@@ -71,10 +70,10 @@ PlaneObject::FindEdge(int is, int it, int edgeNum,
 //   cerr << "is2 = " << is2 << endl;
 //   cerr << "it2 = " << it2 << endl;
 
-  Vec3 u1 = u0 + (double)(is1)/Ns * s + 
-    (double)(it1)/Nt *t;
-  Vec3 u2 = u0 + (double)(is2)/Ns * s + 
-    (double)(it2)/Nt *t;
+  Vec3 u1 = u0 + (double)(is1)/(Ns-1.0) * s + 
+    (double)(it1)/(Nt-1.0) *t;
+  Vec3 u2 = u0 + (double)(is2)/(Ns-1.0) * s + 
+    (double)(it2)/(Nt-1.0) *t;
 //   cerr << "is = " << is << endl;
 //   cerr << "it = " << it << endl;
   double v1 = ValData (is1, it1) - isoVal;

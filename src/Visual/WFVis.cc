@@ -203,7 +203,7 @@ WFVisualClass::WFVisualClass() :
   Actions->add (TruncRadiiToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnTruncRadiiToggle));
 
-  ContourToggle = 
+  IsocontourToggle = 
     Gtk::ToggleAction::create("Isocontours", "Plane isocontours",
 			      "Show isocontours on color planes", true);
   Actions->add (IsocontourToggle,
@@ -359,7 +359,10 @@ WFVisualClass::WFVisualClass() :
 
   PerspectButton.set_active(true);
   TruncRadiiToggle->set_active(false);
-  ContourToggle->set_active(false);
+  IsocontourToggle->set_active(true);
+  xPlane.SetIsocontours(true);
+  yPlane.SetIsocontours(true);
+  zPlane.SetIsocontours(true);
 
   UpdateIso = true;
   UpdatePlane[0] = UpdatePlane[1] = UpdatePlane[2] = true;
@@ -721,11 +724,13 @@ WFVisualClass::DrawFrame(bool offScreen)
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
       // WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
       WFIso.SetLattice (Box.GetLattice());
+      WFIso.SetCenter (uCenter, uMin, uMax);
       ResetIso = false;
     }
     if (UpdateIso) {
       if (WFDisplay == MAG2) {
 	WFIso.SetColor (0.0, 0.8, 0.0);
+	WFIso.SetCenter (uCenter, uMin, uMax);
 	WFIso.SetIsoval(MaxVal*IsoAdjust.get_value());
       }
       else {
@@ -733,6 +738,7 @@ WFVisualClass::DrawFrame(bool offScreen)
 	colors.push_back(TinyVector<double,3> (0.8, 0.0, 0.0));
 	colors.push_back(TinyVector<double,3> (0.0, 0.0, 0.8));
 	WFIso.SetColor(colors);
+	WFIso.SetCenter (uCenter, uMin, uMax);
 	vector<double> vals;
 	vals.push_back(+MaxVal*sqrt(IsoAdjust.get_value()));
 	vals.push_back(-MaxVal*sqrt(IsoAdjust.get_value()));
@@ -921,6 +927,7 @@ WFVisualClass::Read(string filename)
 
   /// Read first wave function
   ReadWF(0,0);
+  WFIso.SetCenter (uCenter, uMin, uMax);
 //   Xgrid.Init(-0.5*Box[0], 0.5*Box[0], WFData.extent(0));
 //   Ygrid.Init(-0.5*Box[1], 0.5*Box[1], WFData.extent(1));
 //   Zgrid.Init(-0.5*Box[2], 0.5*Box[2], WFData.extent(2));
@@ -1020,10 +1027,19 @@ WFVisualClass::ReadWF (int kpoint, int band)
   }
   else
     SuperTwistInt = Vec3(0.0, 0.0, 0.0);
-  cerr << "SuperTwistInt = " << SuperTwistInt << endl;
   assert (Infile.ReadVar ("eigenvector", wfdata));
   Array<double,1> center;
   Localized = Infile.ReadVar ("center", center);
+  uMin = Vec3 (0.0, 0.0, 0.0);
+  uMax = Vec3 (1.0, 1.0, 1.0);
+  // CHECK THIS!!!!
+  uCenter = Vec3 (0.0, 0.0, 0.0);
+  Array<double,1> umin, umax;
+  if (Infile.ReadVar ("umin", umin)) 
+    uMin = Vec3 (umin(0), umin(1), umin(2));
+  if (Infile.ReadVar ("umax", umax))
+    uMax = Vec3 (umax(0), umax(1), umax(2));
+
   if (Localized) {
     Center[0]=center(0); 
     Center[1]=center(1);  
@@ -1033,6 +1049,7 @@ WFVisualClass::ReadWF (int kpoint, int band)
     Center -= 0.5*Vec3(l(0,0)+l(1,0)+l(2,0),
 		       l(0,1)+l(1,1)+l(2,1),
 		       l(0,2)+l(1,2)+l(2,2));
+    uCenter = Box.GetLatticeInv () * Center;
   }
   Localized = Localized && Infile.ReadVar ("radius", TruncRadius);
   Infile.CloseSection(); // "eigenstates"
@@ -1145,6 +1162,10 @@ WFVisualClass::OnTruncRadiiToggle()
 void
 WFVisualClass::OnIsocontourToggle()
 {
+  bool active = IsocontourToggle->get_active();
+  xPlane.SetIsocontours (active);
+  yPlane.SetIsocontours (active);
+  zPlane.SetIsocontours (active);
   UpdatePlane[0] = xPlaneButton.get_active();
   UpdatePlane[1] = yPlaneButton.get_active();
   UpdatePlane[2] = zPlaneButton.get_active();
@@ -1364,6 +1385,7 @@ WFVisualClass::OnBandToggle (int row)
 	Ygrid.Init(-0.5, 0.5, WFData.extent(1));
 	Zgrid.Init(-0.5, 0.5, WFData.extent(2));
 	band.Iso->Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+	band.Iso->SetCenter (uCenter, uMin, uMax);
 	//	band.Iso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
 	band.Iso->SetLattice (Box.GetLattice());
 	if (WFDisplay == MAG2) {
@@ -1406,6 +1428,7 @@ WFVisualClass::UpdateMultiIsos()
 	ReadWF(ki, bi);
       if (UpdateIsoType || UpdateIsoVal) {
 	if (WFDisplay == MAG2) {
+	  iso.SetCenter (uCenter, uMin, uMax);
 	  iso.SetColor (0.0, 0.8, 0.0);
 	  iso.SetIsoval(MaxVal*IsoAdjust.get_value());
 	}
