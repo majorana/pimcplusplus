@@ -715,6 +715,9 @@ WFVisualClass::DrawFrame(bool offScreen)
       WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
       // WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
       WFIso.SetLattice (Box.GetLattice());
+      xPlane.SetCenter (uCenter, uMin, uMax);
+      yPlane.SetCenter (uCenter, uMin, uMax);
+      zPlane.SetCenter (uCenter, uMin, uMax);
       xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
     if (ResetIso) {
@@ -744,10 +747,13 @@ WFVisualClass::DrawFrame(bool offScreen)
 	vals.push_back(-MaxVal*sqrt(IsoAdjust.get_value()));
 	WFIso.SetIsoval(vals);
       }
+      xPlane.SetCenter (uCenter, uMin, uMax);
+      yPlane.SetCenter (uCenter, uMin, uMax);
+      zPlane.SetCenter (uCenter, uMin, uMax);
       xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
 
-    if (UpdatePlane[0] && xPlaneButton.get_active())
+    if (UpdatePlane[0] && xPlaneButton.get_active()) 
       xPlane.SetPosition (0, xPlaneScale.get_value());
     if (xPlaneButton.get_active())
       PathVis.Objects.push_back(&xPlane);

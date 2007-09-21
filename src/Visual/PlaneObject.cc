@@ -3,6 +3,14 @@
 #include <gtkmm.h>
 
 void
+PlaneObject::SetCenter (Vec3 ucenter, Vec3 umin, Vec3 umax)
+{
+  uCenter = ucenter;
+  uMin    = umin;
+  uMax    = umax;
+}
+
+void
 PlaneObject::SetPosition(int dir, double pos)
 {
   Direction = dir;
@@ -175,6 +183,14 @@ PlaneObject::Set()
   Vec3 u1 = u0 + sVec;
   Vec3 u2 = u0 + sVec + tVec;
   Vec3 u3 = u0 + tVec;
+  Vec3 u0save = u0;
+  for (int i=0; i<3; i++) {
+    u0[i] = uCenter[i] + (uMax[i]-uMin[i])*u0[i];
+    u1[i] = uCenter[i] + (uMax[i]-uMin[i])*u1[i];
+    u2[i] = uCenter[i] + (uMax[i]-uMin[i])*u2[i];
+    u3[i] = uCenter[i] + (uMax[i]-uMin[i])*u3[i];
+  }
+
   Vec3 r0 = u0*Lattice;
   Vec3 r1 = u1*Lattice;
   Vec3 r2 = u2*Lattice;
@@ -209,7 +225,9 @@ PlaneObject::Set()
 	  int edge;
 	  while ((edge=EdgeData[index][ei]) != -1) {
 	    Vec3 reduced = 
-	      FindEdge (is, it, edge, u0, sVec, tVec, isoVal);
+	      FindEdge (is, it, edge, u0save, sVec, tVec, isoVal);
+	    for (int i=0; i<3; i++) 
+	      reduced[i] = uCenter[i] + (uMax[i]-uMin[i])*reduced[i];
 	    Vec3 vertex = reduced * Lattice;
 	    //  cerr << "vertex = " << vertex << endl;
 	    glVertex3dv (&(vertex[0]));

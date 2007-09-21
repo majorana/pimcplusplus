@@ -28,6 +28,7 @@ private:
   Vec3 FindEdge (int ix, int iy, int edgeNum,
 		 Vec3 u0, Vec3 s, Vec3 t,
 		 double isoVal);
+  Vec3 uMin, uMax, uCenter;
 public:
   void Set();
   void Init();
@@ -36,6 +37,7 @@ public:
   void SetIsocontours (bool show);
   void SetLattice(Mat3 lattice);
   void SetColorMap (ColorMapType map);
+  void SetCenter (Vec3 ucenter, Vec3 umin, Vec3 umax);
   PlaneObject (MyTricubicSpline &spline) : 
     Spline (spline), Direction(0), Position(0),
     HaveTexture(false), BuiltTexture(false),
