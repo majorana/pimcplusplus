@@ -305,8 +305,10 @@ RadialWF::Solve(double tolerance)
     
     Energy = Etrial;
     
-    if ((NumNodes == TotalNodes) && (fabs(Etrial - Eold) < tolerance))
+    if ((NumNodes == TotalNodes) && (fabs(Etrial - Eold) < tolerance)) {
+      Energy = Eold;
       done = true;
+    }
     Eold = Etrial;       
   }
   IntegrateInOut(tindex);
