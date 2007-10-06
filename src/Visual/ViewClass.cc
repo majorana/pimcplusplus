@@ -8,7 +8,8 @@ namespace Trackball {
 
 ViewClass::ViewClass (PathVisClass &pathVis) :
   PathVis(pathVis), Button1Pressed(false), MinScale(0.2), MaxScale(5.0),
-  Scale(1.0), Distance(3.0), UsePerspective(true)
+  Scale(1.0), Distance(3.0), UsePerspective(true),
+  xTrans(0.0), yTrans(0.0)
 {
   for (int i=0; i<4; i++)
     for (int j=0; j<4; j++)
@@ -26,6 +27,7 @@ ViewClass::ViewClass (PathVisClass &pathVis) :
 
   PathVis.add_events(Gdk::BUTTON1_MOTION_MASK    |
 		     Gdk::BUTTON2_MOTION_MASK    |
+		     Gdk::BUTTON3_MOTION_MASK    |
 		     Gdk::BUTTON_PRESS_MASK      |
 		     Gdk::BUTTON_RELEASE_MASK    |
 		     Gdk::VISIBILITY_NOTIFY_MASK |
@@ -41,14 +43,24 @@ ViewClass::OnButtonPress (GdkEventButton *event)
     StartY = event->y;
     Button1Pressed=true;
     Button2Pressed=false;
+    Button3Pressed=false;
   }
   else if (event->button == 2) {
     StartX = event->x;
     StartY = event->y;
     Button1Pressed=false;
     Button2Pressed=true;
+    Button3Pressed=false;
     OldScale = Scale;
   }
+  else if (event->button == 3) {
+    StartX = event->x;
+    StartY = event->y;
+    Button1Pressed=false;
+    Button2Pressed=false;
+    Button3Pressed=true;
+  }
+
   return false;
 }
 
@@ -60,6 +72,8 @@ ViewClass::OnButtonRelease (GdkEventButton *event)
     Button1Pressed = false;
   if (event->button == 2)
     Button2Pressed = false;
+  if (event->button == 3)
+    Button3Pressed = false;
   
   return false;
 }
@@ -93,7 +107,17 @@ ViewClass::OnScroll (GdkEventScroll *event)
 bool 
 ViewClass::OnMotion (GdkEventMotion *event)
 {
-  if (Button1Pressed) {
+  if (Button3Pressed) {
+    double x=event->x, y=event->y;
+   double w = PathVis.get_width();
+    double h = PathVis.get_height();
+    xTrans += (x - StartX)/w;
+    yTrans -= (y - StartY)/h;
+    PathVis.Invalidate();
+    StartX = x;
+    StartY = y;
+  }
+  else if (Button1Pressed) {
     double w = PathVis.get_width();
     double h = PathVis.get_height();
     double x = event->x;
@@ -135,6 +159,8 @@ ViewClass::GLtransform()
   double height = PathVis.get_height();
   double ratio = width/height;
   
+  glTranslatef(2.0*xTrans, 2.0*yTrans, 0.0);
+
   //  gluPerspective(40.0, 1.0, 1.0, 10.0);
   if (ratio > 1.0) {
     if (UsePerspective)
