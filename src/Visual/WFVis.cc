@@ -1041,22 +1041,28 @@ WFVisualClass::ReadWF (int kpoint, int band)
   // CHECK THIS!!!!
   uCenter = Vec3 (0.0, 0.0, 0.0);
   Array<double,1> umin, umax;
-  if (Infile.ReadVar ("umin", umin)) 
+  Truncated = (Infile.ReadVar ("umin", umin) && 
+	       Infile.ReadVar("umax", umax));
+  if (Truncated) { 
     uMin = Vec3 (umin(0), umin(1), umin(2));
-  if (Infile.ReadVar ("umax", umax))
     uMax = Vec3 (umax(0), umax(1), umax(2));
+  }
 
+  Mat3 l = Box.GetLattice();
   if (Localized) {
     Center[0]=center(0); 
     Center[1]=center(1);  
     Center[2]=center(2);
-    Mat3 l = Box.GetLattice();
     // Shift by half a box length
     Center -= 0.5*Vec3(l(0,0)+l(1,0)+l(2,0),
 		       l(0,1)+l(1,1)+l(2,1),
 		       l(0,2)+l(1,2)+l(2,2));
+  }
+  if (Truncated) {
     uCenter = Box.GetLatticeInv () * Center;
   }
+  else
+    uCenter = Vec3 (0.0, 0.0, 0.0);
   Localized = Localized && Infile.ReadVar ("radius", TruncRadius);
   Infile.CloseSection(); // "eigenstates"
   Infile.CloseSection(); // "twist"
@@ -1391,7 +1397,8 @@ WFVisualClass::OnBandToggle (int row)
 	Ygrid.Init(-0.5, 0.5, WFData.extent(1));
 	Zgrid.Init(-0.5, 0.5, WFData.extent(2));
 	band.Iso->Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
-	band.Iso->SetCenter (uCenter, uMin, uMax);
+	if (Truncated)
+	  band.Iso->SetCenter (uCenter, uMin, uMax);
 	//	band.Iso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
 	band.Iso->SetLattice (Box.GetLattice());
 	if (WFDisplay == MAG2) {

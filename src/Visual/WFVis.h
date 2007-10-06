@@ -84,7 +84,7 @@ protected:
   bool FileIsOpen;
   Array<double,3> RhoData;
   // Localize orbitals
-  bool Localized;
+  bool Localized, Truncated;
   Vec3 Center, uMin, uMax, uCenter;
   double TruncRadius;
   
