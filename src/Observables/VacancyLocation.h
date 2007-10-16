@@ -50,6 +50,7 @@ public:
   void WriteInfo();
   void Accumulate();
   void WriteBlock();
+  void WriteBlockv2();
   void Read(IOSectionClass& in);
   VacancyLocClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) , 

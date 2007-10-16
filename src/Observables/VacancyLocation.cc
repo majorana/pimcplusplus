@@ -20,6 +20,7 @@
 
 #define FORT(name) name ## _
 #define F77_LSAPR F77_FUNC(lsapr,LSAPR)
+#define F77_LSAPR48 F77_FUNC(lsapr48,LSAPR48)
 
 using namespace blitz;
 
@@ -27,6 +28,9 @@ using namespace blitz;
 
 extern "C" void 
 F77_LSAPR (int *n,double* c, int *perm);
+
+extern "C" void
+F77_LSAPR48 (int *n,double* c, int *perm);
 
 
 
@@ -220,7 +224,14 @@ void VacancyLocClass::Accumulate()
       }
     }
     int n =FixedLoc.size();
-    F77_LSAPR (&n,DistTable.data(),Perm.data());
+    if (DistTable.extent(0)==180)
+      F77_LSAPR (&n,DistTable.data(),Perm.data());
+    else if (DistTable.extent(0)==48)
+      F77_LSAPR48(&n,DistTable.data(),Perm.data());
+    else {
+      cerr<<"ERROR! ERROR! Don't have a lsapr for that distance"<<endl;
+      assert(1==2);
+    }
     if (numEmptySites==2){
       int vacancy1=Perm(0)-1;
       int vacancy2=Perm(1)-1;
@@ -271,11 +282,15 @@ void VacancyLocClass::Accumulate()
       int halfSlice=PathData.Path.TotalNumSlices/2;
       for (int slice=0;slice<PathData.Path.NumTimeSlices()/2;slice++){
 	int i=DispFromASite(TempVacancyLoc(slice),TempVacancyLoc(slice+halfSlice));
-	if (i!=-1)
+	if (i!=-1){
 	  HistogramDisp(i)=HistogramDisp(i)+1.0;
+	  //	  cerr<<"EF: "<<slice<<" "<<i<<endl;
+	}
 	i=DispFromASite(TempVacancyLoc(slice+halfSlice),TempVacancyLoc(slice));
-	if (i!=-1)
+	if (i!=-1){
+	  //	  cerr<<"GF: "<<slice<<" "<<i<<endl;
 	  HistogramDisp(i)=HistogramDisp(i)+1.0;
+	}
       }
     }
     NumSamples++;
@@ -283,7 +298,7 @@ void VacancyLocClass::Accumulate()
     
 }
 
-void VacancyLocClass::WriteBlock()
+void VacancyLocClass::WriteBlockv2()
 {
   int nSlices=PathData.Path.TotalNumSlices;
   double norm = 1.0/((double)NumSamples*(double)nSlices);
@@ -299,8 +314,39 @@ void VacancyLocClass::WriteBlock()
   HistogramDisp=0.0;
 }
 
+void VacancyLocClass::WriteBlock()
+{
+//   cerr<<"HIST COMING: ";
+//   for (int i=0;i<HistogramDisp.size();i++)
+//     cerr<<HistogramDisp(i)<<" ";
+//   cerr<<endl;
+  int nSlices=PathData.Path.TotalNumSlices;
+  double norm = 1.0/((double)NumSamples*(double)nSlices);
+  //  cerr<<"NORMA: "<<norm<<endl;
+  Array<double,1> histogramWrite(Histogram.size());
+  for (int counter=0;counter<histogramWrite.size();counter++)
+    histogramWrite(counter)=(double)Histogram(counter)*norm;
+  HistogramVar.Write(histogramWrite);
+  Array<double,1> histogramDispSum(Histogram.size());
+  histogramDispSum=0.0;
+  Path.Communicator.Sum(HistogramDisp, histogramDispSum);
 
-void VacancyLocClass::Read(IOSectionClass &in)
+//   cerr<<"grr cOMING";
+//   for (int i=0;i<histogramDispSum.extent(0);i++)
+//     cerr<<histogramDispSum(i)<<" ";
+//   cerr<<endl;
+
+  histogramDispSum=histogramDispSum*norm;
+  HistogramDispVar.Write(histogramDispSum);
+  HistogramVar.Flush();
+  NumSamples = 0;
+  Histogram=0;
+  HistogramDisp=0.0;
+}
+
+
+void 
+VacancyLocClass::Read(IOSectionClass &in)
 {  
 
   int numFixedPoints;
@@ -349,7 +395,7 @@ void VacancyLocClass::Read(IOSectionClass &in)
   IOSection.WriteVar("Multiplicity",toDivide);
 
 
-  TempVacancyLoc.resize(FixedLoc.size());
+  TempVacancyLoc.resize(PathData.Path.NumTimeSlices());
 
   //setting up the table that maps the displacement from the A site
   //Makes the assumption that FixedLoc(0) is part of the A site
