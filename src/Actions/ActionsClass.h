@@ -22,25 +22,26 @@
 #include "ShortRangeApproximateClass.h"
 #include "ShortRangePrimitive.h"
 #include "LongRangeClass.h"
-#include "LongRangeCoulombClass.h"
+//#include "LongRangeCoulombClass.h"
 #include "LongRangeRPAClass.h"
 #include "ShortRangePotClass.h"
 #include "LongRangePotClass.h"
 #include "KineticClass.h"
-#include "MoleculeInteractionsClass.h"
-#include "ST2WaterClass.h"
-#include "TIP5PWaterClass.h"
-#include "EAMClass.h"
+//#include "MoleculeInteractionsClass.h"
+//#include "ST2WaterClass.h"
+//#include "TIP5PWaterClass.h"
+//#include "EAMClass.h"
 #include "NodalActionClass.h"
 #include "FreeNodalActionClass.h"
 #include "PairFixedPhase.h"
 #include "GroundStateNodalActionClass.h"
 #include "FixedPhaseActionClass.h"
 #include "DavidLongRangeClass.h"
-#include "QMCSamplingClass.h"
-#include "QBoxAction.h"
+//#include "QMCSamplingClass.h"
+//#include "QBoxAction.h"
 #include "OpenLoopImportance.h"
 #include "StructureReject.h"
+//#include "KineticRotorClass.h"
 #include "KineticSphereClass.h"
 #include "Josephson.h"
 #include "Hermele.h"
@@ -60,6 +61,16 @@
 class ActionsClass
 {
 private:
+
+  // new functionality
+  // store pointers to ONLY action classes that are used (multiple instantiation also is allowed)
+  std::list<ActionBaseClass*> ActionList;
+  std::list<string> ActionLabels;
+  void ReadPairActions(IOSectionClass &in);
+  public:
+  ActionBaseClass* GetAction(string name);
+
+  private:
   // This stores pointers to the pair actions.
   Array<PairActionFitClass*,1> PairArray;
 
@@ -89,6 +100,8 @@ public:
   /// The Kinetic action
   KineticClass Kinetic;
   KineticSphereClass KineticSphere;
+  //KineticRotorClass KineticRotor;
+  //FixedAxisRotorClass FixedAxisRotor;
   JosephsonClass Josephson;
   HermeleClass Hermele;
   DualHermeleClass DualHermele;
@@ -105,7 +118,7 @@ public:
   /// The long range part of the action, which is summed in k-space.  
   LongRangeClass LongRange;
 
-  LongRangeCoulombClass LongRangeCoulomb;
+  //LongRangeCoulombClass LongRangeCoulomb;
   
   /// The Random Phase Approximation-corrected form of the above.
   LongRangeRPAClass LongRangeRPA;
@@ -113,24 +126,24 @@ public:
   ///David's Long Range Class
   DavidLongRangeClass DavidLongRange;
 
-  // Water-related stuff
-  MoleculeInteractionsClass MoleculeInteractions;
-  QBoxActionClass QBoxAction;
-  ST2WaterClass ST2Water;
-  TIP5PWaterClass TIP5PWater;
+//  // Water-related stuff
+//  MoleculeInteractionsClass MoleculeInteractions;
+//  QBoxActionClass QBoxAction;
+//  ST2WaterClass ST2Water;
+//  TIP5PWaterClass TIP5PWater;
 
   // Nonlocal action
   NonlocalClass Nonlocal;
 
-  EAMPotentialClass EAM;
-
-#ifdef USE_QMC
-  CEIMCActionClass CEIMCAction;
-#endif
-
-  QMCSamplingClass QMCSampling;
-
-	IonIonActionClass IonInteraction;
+//  EAMPotentialClass EAM;
+//
+//#ifdef USE_QMC
+//  CEIMCActionClass CEIMCAction;
+//#endif
+//
+//  QMCSamplingClass QMCSampling;
+//
+//	IonIonActionClass IonInteraction;
 
   /// This array of actions are used for Restricted PIMC for
   /// fermions.  These effective actions ensure that the paths do not
@@ -210,7 +223,7 @@ public:
     ShortRangePot(pathData, PairMatrix),
     DiagonalAction(pathData,PairMatrix),
     LongRange(pathData,PairMatrix,PairArray), 
-    LongRangeCoulomb(pathData,PairMatrix,PairArray), 
+    //LongRangeCoulomb(pathData,PairMatrix,PairArray), 
     DavidLongRange(pathData),
     Josephson(pathData),
     Hermele(pathData),
@@ -219,19 +232,21 @@ public:
     LongRangePot(pathData, PairMatrix),
     OpenLoopImportance(pathData),
     Kinetic(pathData),
+    //KineticRotor(pathData),
+    //FixedAxisRotor(pathData),
     KineticSphere(pathData),
     PathData(pathData),
     PairFixedPhase(pathData),
-    MoleculeInteractions(pathData),
-    QBoxAction(pathData),
-    ST2Water(pathData),
-    TIP5PWater(pathData),
-    EAM(pathData),
-#ifdef USE_QMC
-    CEIMCAction(pathData),
-#endif
-    QMCSampling(pathData),
-    IonInteraction(pathData),
+//    MoleculeInteractions(pathData),
+//    QBoxAction(pathData),
+//    ST2Water(pathData),
+//    TIP5PWater(pathData),
+//    EAM(pathData),
+//#ifdef USE_QMC
+//    CEIMCAction(pathData),
+//#endif
+//    QMCSampling(pathData),
+//    IonInteraction(pathData),
     Mu(pathData),
     VariationalPI(pathData),
     StructureReject(pathData),

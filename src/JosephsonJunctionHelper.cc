@@ -1,8 +1,4 @@
-#ifdef BUILD_DEV
-  #include "PathClassDev.h"
-#else
-  #include "PathClass.h"
-#endif
+#include "PathClass.h"
 
 // void 
 // PathClass::InitializeJosephsonCode()

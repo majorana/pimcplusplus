@@ -29,11 +29,7 @@ void JosephsonPathDumpClass::WriteBlock()
   int slice1 = 0;
   int slice2 = PathData.Path.NumTimeSlices();
   int numTimeSlices=PathData.Path.NumTimeSlices();
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   for (int slice=slice1;slice<slice2;slice++)
     Phase(slice)=Path(slice,0)[0];
   PhaseVar.Write(Phase);  

@@ -19,12 +19,14 @@
 
 #include "MoleculeMoveBase.h"
 #include "MoleculeMove.h"
+#include "../Actions/MoleculeInteractionsClass.h"
 
 class MoleculeForceBiasMove : public MolMoveClass
 {
   int numGen,numProp;
   bool doTrans, doRot;
   double numInProp;
+  MoleculeInteractionsClass* MolAction;
 
  public:
   double Theta;

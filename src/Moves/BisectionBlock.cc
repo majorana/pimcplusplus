@@ -216,11 +216,7 @@ void BisectionBlockClass::ChooseTimeSlices()
 {
   //  if (PathData.Path.Communicator.MyProc()==0)
     //    cerr<<"Choosing time slices"<<endl;
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   int myProc = PathData.Path.Communicator.MyProc();
   // do something special to avoid moving reference slice
   if (HaveRefslice &&
@@ -346,11 +342,7 @@ void BisectionBlockClass::MakeMove()
 void
 BisectionBlockClass::MakeStraightPaths()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   SetMode(NEWMODE);
   int skip = 1<<LowestLevel;
   int first = Path.Species(SpeciesNum).FirstPtcl;

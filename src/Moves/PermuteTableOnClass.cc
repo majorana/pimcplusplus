@@ -146,11 +146,7 @@ double PermuteTableOnClass::calcij(int i, int j)
 
 void PermuteTableOnClass::ConstructHTable()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path=PathData.Path;
-#else
   PathClass &Path=PathData.Path;
-#endif
   int firstPtcl = PathData.Species(SpeciesNum).FirstPtcl;
   int lastPtcl = PathData.Species(SpeciesNum).LastPtcl;
   double lambda = PathData.Species(SpeciesNum).lambda;

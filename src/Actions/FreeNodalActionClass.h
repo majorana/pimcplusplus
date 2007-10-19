@@ -28,11 +28,7 @@
 class FreeNodalActionClass : public NodalActionClass
 {
 private:
-#ifdef BUILD_DEV
-  PathClassDev &Path;
-#else
   PathClass &Path;
-#endif
 
   /// These splines will hold the free-particle action for
   /// periodic boundary conditions.  The array is over time-slice

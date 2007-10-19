@@ -366,6 +366,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new MoleculeMoveStageManagerClass(PathData, OutFile);
     else if (moveType=="PreSampleMoleculeMove")
       move = new PreSamplingClass(PathData, OutFile);
+    else if (moveType=="SPSMoleculeMove")
+      move = new SPSClass(PathData, OutFile);
     else if (moveType=="IonDisplace")
       move = new IonDisplaceMoveClass (PathData, OutFile);
     else if (moveType=="IonMove")

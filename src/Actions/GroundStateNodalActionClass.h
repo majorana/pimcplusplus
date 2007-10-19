@@ -27,11 +27,7 @@ class GroundStateClass
 private:
   SystemClass *System;
   PathDataClass &PathData;
-#ifdef BUILD_DEV
-  PathClassDev &Path;
-#else
   PathClass &Path;
-#endif
   double kCut;
   MultiTricubicSpline BandSplines;
   Potential *PH;

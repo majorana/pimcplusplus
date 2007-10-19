@@ -34,7 +34,8 @@ double LocalFlip::MolPairAction(int slice,int m,int n){
     activeParticles(i) = m + PathData.Mol.NumMol()*i;
     activeParticles(i+5) = n + PathData.Mol.NumMol()*i;
   }
-  return PathData.Actions.MoleculeInteractions.Action(slice, slice, activeParticles, 0);
+  //return PathData.Actions.MoleculeInteractions.Action(slice, slice, activeParticles, 0);
+  return MolAction->Action(slice, slice, activeParticles, 0);
 }
 
 // Original: replacing w/ coordinate inversion
@@ -151,6 +152,18 @@ void LocalFlip::IntegrityCheck(int slice, Array<int,1> activeParticles){
   }
 }
 
+void LocalFlip::Read(IOSectionClass &moveInput) {
+  string typeCheck;
+  assert(moveInput.ReadVar("type",typeCheck));
+  assert(typeCheck=="LocalFlip");
+  assert(moveInput.ReadVar("name",Name));
+  string actionLabel;
+  assert(moveInput.ReadVar("ActionName",actionLabel));
+  ActionBaseClass* newAction = PathData.Actions.GetAction(actionLabel);
+  cerr << "MOLECULEBIAS ACCEPTED ACTION LABELELD " << actionLabel << " AS ACTION TYPE MOLECULEINTERACTIONSCLASS; MAKE SURE THIS IS VALID" << endl;
+  assert(typeid(newAction) == typeid(MoleculeInteractionsClass*));
+  MolAction = static_cast<MoleculeInteractionsClass*> (newAction);
+}
 
 void LocalFlip::MakeMove()
 {
@@ -284,6 +297,19 @@ cerr << "Then Moved a cluster of size " << clustsize << endl;
   }
 }
 
+void GlobalFlip::Read(IOSectionClass &moveInput) {
+  string typeCheck;
+  assert(moveInput.ReadVar("type",typeCheck));
+  assert(typeCheck=="GlobalFlip");
+  assert(moveInput.ReadVar("name",Name));
+  string actionLabel;
+  assert(moveInput.ReadVar("ActionName",actionLabel));
+  ActionBaseClass* newAction = PathData.Actions.GetAction(actionLabel);
+  cerr << "MOLECULEBIAS ACCEPTED ACTION LABELELD " << actionLabel << " AS ACTION TYPE MOLECULEINTERACTIONSCLASS; MAKE SURE THIS IS VALID" << endl;
+  assert(typeid(newAction) == typeid(MoleculeInteractionsClass*));
+  MolAction = static_cast<MoleculeInteractionsClass*> (newAction);
+}
+
 void GlobalFlip::RotateMol(int slice,int mol,dVec Q){
   Array<int,1> activeParticles(5);
   AssignPtcl(mol,activeParticles);
@@ -307,7 +333,8 @@ double GlobalFlip::MolPairAction(int slice,int m,int n){
     activeParticles(i) = m + PathData.Mol.NumMol()*i;
     activeParticles(i+5) = n + PathData.Mol.NumMol()*i;
   }
-  return PathData.Actions.MoleculeInteractions.Action(slice, slice, activeParticles, 0);
+  //return PathData.Actions.MoleculeInteractions.Action(slice, slice, activeParticles, 0);
+  return MolAction->Action(slice, slice, activeParticles, 0);
 }
 
 void GlobalFlip::MakeMove()

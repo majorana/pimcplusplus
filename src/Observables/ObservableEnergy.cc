@@ -250,33 +250,41 @@ void EnergyClass::Read(IOSectionClass &in)
 	OtherVars.resize(numEnergies);
 	OtherSums.resize(numEnergies);	
 	for(int n=0; n<numEnergies; n++){
-		if(EnergyStrings(n) == "MoleculeInteractions"){
-			OtherActions[n] = &PathData.Actions.MoleculeInteractions;
-			// read should be done in action
-			//PathData.Actions.MoleculeInteractions.Read(in);
-		} else if(EnergyStrings(n) == "ST2WaterClass"){
-			OtherActions[n] = &PathData.Actions.ST2Water;
-		} else if(EnergyStrings(n) == "EAMClass"){
-			OtherActions[n] = &PathData.Actions.EAM;
-		} else if(EnergyStrings(n) == "QBoxActionClass"){
-			OtherActions[n] = &PathData.Actions.QBoxAction;
-		} else if(EnergyStrings(n) == "QMCSamplingClass"){
-			OtherActions[n] = &PathData.Actions.QMCSampling;
-		} else if(EnergyStrings(n) == "IonIonActionClass"){
-			OtherActions[n] = &PathData.Actions.IonInteraction;
-		} else if(EnergyStrings(n) == "LongRangeCoulomb"){
-			OtherActions[n] = &PathData.Actions.LongRangeCoulomb;
-		}
-		// Other action objects can be specified here of course
-#ifdef USE_QMC
-		else if(EnergyStrings(n) == "CEIMCActionClass"){
-  		OtherActions[n] = &PathData.Actions.CEIMCAction;
-      PathData.Actions.CEIMCAction.Read(IOSection);
-		}
-#endif
-		else {
-			cerr << "You specified " << EnergyStrings(n) << ", which is not supported for runtime inclusion as a computed energy observable." << endl;
-		}
+    OtherActions[n] = PathData.Actions.GetAction(EnergyStrings(n));
+    cerr << "Energy observable added action with label " << EnergyStrings(n) << endl;
+
+    // old action read in is now deprecated
+		//if(EnergyStrings(n) == "MoleculeInteractions"){
+		//	OtherActions[n] = &PathData.Actions.MoleculeInteractions;
+		//	// read should be done in action
+		//	//PathData.Actions.MoleculeInteractions.Read(in);
+		//} else if(EnergyStrings(n) == "ST2WaterClass"){
+		//	OtherActions[n] = &PathData.Actions.ST2Water;
+		//} else if(EnergyStrings(n) == "EAMClass"){
+		//	OtherActions[n] = &PathData.Actions.EAM;
+		//} else if(EnergyStrings(n) == "KineticRotorActionClass"){
+		//	OtherActions[n] = &PathData.Actions.KineticRotor;
+		//} else if(EnergyStrings(n) == "FixedAxisRotorActionClass"){
+		//	OtherActions[n] = &PathData.Actions.FixedAxisRotor;
+		//} else if(EnergyStrings(n) == "QBoxActionClass"){
+		//	OtherActions[n] = &PathData.Actions.QBoxAction;
+		//} else if(EnergyStrings(n) == "QMCSamplingClass"){
+		//	OtherActions[n] = &PathData.Actions.QMCSampling;
+		//} else if(EnergyStrings(n) == "IonIonActionClass"){
+		//	OtherActions[n] = &PathData.Actions.IonInteraction;
+		//} else if(EnergyStrings(n) == "LongRangeCoulomb"){
+		//	OtherActions[n] = &PathData.Actions.LongRangeCoulomb;
+		//}
+		//// Other action objects can be specified here of course
+//#ifdef USE_QMC
+		//else if(EnergyStrings(n) == "CEIMCActionClass"){
+  	//	OtherActions[n] = &PathData.Actions.CEIMCAction;
+    //  PathData.Actions.CEIMCAction.Read(IOSection);
+		//}
+//#endif
+		//else {
+		//	cerr << "You specified " << EnergyStrings(n) << ", which is not supported for runtime inclusion as a computed energy observable." << endl;
+		//}
 		OtherVars[n] = new ObservableDouble(EnergyStrings(n), IOSection, PathData.Path.Communicator);
 		OtherSums[n] = 0.0;
 	}

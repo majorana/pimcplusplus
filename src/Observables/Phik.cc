@@ -28,11 +28,7 @@ void PhiKClass::Accumulate()
   int slice1 = 0;
   int slice2 = PathData.Path.NumTimeSlices()-1;
   int numTimeSlices=PathData.Path.NumTimeSlices();
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   for (int tau=0;tau<numTimeSlices;tau++)
     for (int slice=slice1;slice<slice2;slice++)
       PhiK(tau) += Path(slice,0)[0]*Path((slice+tau) % PathData.Path.TotalNumSlices,0)[0];

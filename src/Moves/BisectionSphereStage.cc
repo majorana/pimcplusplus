@@ -117,11 +117,7 @@ double BisectionStageSphereClass::Sample(int &slice1,int &slice2,
 				   Array<int,1> &activeParticles)
 {
   
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   int skip = 1<<(BisectionLevel+1);
   double levelTau = 0.5*PathData.Path.tau*skip;
   double randomTheta;

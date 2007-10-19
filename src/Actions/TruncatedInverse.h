@@ -20,11 +20,7 @@ struct doubleint
 class TruncatedInverseClass : public NodalActionClass
 {
 private:
-#ifdef BUILD_DEV
-  PathClassDev &Path;
-#else
   PathClass &Path;
-#endif
   double CutoffAverage;
   void calc_u();
   Array<double,1> u;

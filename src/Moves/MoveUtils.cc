@@ -61,6 +61,8 @@ void Strip(dVec R, dVec u,dVec &aligned, dVec &perp){
 
 double GetAngle(dVec v1, dVec v2)
 {
+  if(v1 == v2)
+    return 0.0;
   double mag = Mag(v1);
   mag *= Mag(v2);
   double dot = dotprod(v1,v2,mag);
@@ -70,7 +72,7 @@ double GetAngle(dVec v1, dVec v2)
 //    cerr << "OH CRAP: DOT PRODUCT IS " << dot << " between " << v1 << " and " << v2 << "; I used mag " << mag << " and I'm going to return " << angle << endl;
 //  }
   if (dot-1 < 0.0001 && dot-1 > 0){
-    cerr << "correcting angle" << endl;
+    cout << "correcting angle " << angle << " to 0" << endl;
     angle = 0.0;
   }
   return angle;
@@ -79,5 +81,5 @@ double GetAngle(dVec v1, dVec v2)
 dVec GetBisector(dVec v1, dVec v2)
 {
   dVec bisector = v1 + v2;
-  return bisector;
+  return Normalize(bisector);
 }

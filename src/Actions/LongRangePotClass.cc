@@ -37,11 +37,7 @@ double LongRangePotClass::V(int slice)
   double k0Homo = 0.0;
   double k0Hetero = 0.0;
   if (PathData.Actions.HaveLongRange()) {
-#ifdef BUILD_DEV
-    PathClassDev &Path = PathData.Path;
-#else
     PathClass &Path = PathData.Path;
-#endif
     // First, do the homologous (same species) terms
     for (int species=0; species<Path.NumSpecies(); species++) {
       Path.CalcRho_ks_Fast(slice,species);

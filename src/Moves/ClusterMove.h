@@ -18,20 +18,15 @@
 #define CLUSTER_MOVE_H
 
 #include "MoveBase.h"
+#include "../Actions/MoleculeInteractionsClass.h"
 
 class LocalFlip : public ParticleMoveClass
 {
+  MoleculeInteractionsClass* MolAction;
  public:
   int numAccepted,numMoves;
   void MakeMove();
-  inline void Read(IOSectionClass &moveInput)
-    {
-      string typeCheck;
-      assert(moveInput.ReadVar("type",typeCheck));
-      assert(typeCheck=="LocalFlip");
-      assert(moveInput.ReadVar("name",Name));
-
-    }
+  void Read(IOSectionClass &moveInput);
   void AssignPtcl(int mol,Array<int,1>& activeParticles);
   double MolPairAction(int slice,int m,int n);
  // void RotateMol(int slice,int mol,dVec axis,double phi);
@@ -56,17 +51,11 @@ class LocalFlip : public ParticleMoveClass
 
 class GlobalFlip : public ParticleMoveClass
 {
+  MoleculeInteractionsClass* MolAction;
  public:
   int numAccepted,numMoves;
   void MakeMove();
-  inline void Read(IOSectionClass &moveInput)
-    {
-      string typeCheck;
-      assert(moveInput.ReadVar("type",typeCheck));
-      assert(typeCheck=="GlobalFlip");
-      assert(moveInput.ReadVar("name",Name));
-
-    }
+  void Read(IOSectionClass &moveInput);
   void AssignPtcl(int mol,Array<int,1>& activeParticles);
   double MolPairAction(int slice,int m,int n);
   void RotateMol(int slice,int mol,dVec Q);

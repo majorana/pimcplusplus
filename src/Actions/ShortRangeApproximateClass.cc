@@ -36,11 +36,7 @@ ShortRangeApproximateClass::SingleAction (int slice1, int slice2,
 					  const Array<int,1> &changedParticles,
 					  int level)
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   //HACK! HACK! HACK!
   //  return 0.0;
   // First, sum the pair actions

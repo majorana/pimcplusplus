@@ -36,7 +36,9 @@ class PreSamplingClass : public MoleculeMoveStageManagerClass
 {
 protected:
   list<StageClass*> PreStages;
-  StageClass* FinalStage;
+  list<ActionBaseClass*> PreActions;
+  list<ActionBaseClass*> FinalActions;
+  //StageClass* FinalStage;
   int TotalNumPreSteps;
   double PreDeltaAction;
   bool FirstMove;
@@ -50,6 +52,7 @@ public:
   void Read(IOSectionClass &io);
   void Accept();
   void Reject();
+  double StageAction(std::list<ActionBaseClass*> ActionList, int startSlice,int endSlice, const Array<int,1> &changedParticles);
   virtual void WriteRatio();
   double NewMoveProb;
   double OldMoveProb;

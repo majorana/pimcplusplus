@@ -37,11 +37,7 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 				 const Array<int,1> &changedParticles,
 				 int level)
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   int xEffect=Path.Cell.Xeffect;
   int yEffect=Path.Cell.Yeffect;
   int zEffect=Path.Cell.Zeffect;
@@ -241,11 +237,7 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 double 
 ShortRangeOnClass::d_dBeta(int slice1, int slice2,int level)
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   int xEffect=Path.Cell.Xeffect;
   int yEffect=Path.Cell.Yeffect;
   int zEffect=Path.Cell.Zeffect;

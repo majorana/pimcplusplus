@@ -72,11 +72,7 @@ void PathDumpClass::Accumulate()
   if (!AllClones && (PathData.GetCloneNum() != 0))
     return;
 
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   int start, end, numProcs, myProc;
   numProcs = Path.Communicator.NumProcs();
   myProc   = Path.Communicator.MyProc();
@@ -255,11 +251,7 @@ PathDumpClass::NodeDump()
 void
 PathDumpClass::FixedPhaseNodeDump()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
 
   if (Path.UseCorrelatedSampling()) 
     Path.SetIonConfig(0);
@@ -388,11 +380,7 @@ PathDumpClass::GroundStateNodeDump()
   int ny = Ygrid.NumPoints;
   int nz = Zgrid.NumPoints;
 
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   Array<double,3> nodeDump(nx,ny,nz);
   int speciesNum = Path.ParticleSpeciesNum(NodePtcl);
   GroundStateNodalActionClass &GS = 
@@ -447,11 +435,7 @@ PathDumpClass::FreeParticleNodeDump()
   int ny = Ygrid.NumPoints;
   int nz = Zgrid.NumPoints;
 
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   Array<double,3> nodeDump(nx,ny,nz);
   int speciesNum = PathData.Path.ParticleSpeciesNum(NodePtcl);
   FreeNodalActionClass &GS = 

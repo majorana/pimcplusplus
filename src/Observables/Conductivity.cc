@@ -20,11 +20,7 @@ void
 ConductivityClass::CalcCurrentT()
 {
 #if NDIM==3
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   MyCurrent = 0.0;
   for (int si=0; si<Path.NumSpecies(); si++) {
     SpeciesClass &species = Path.Species(si);

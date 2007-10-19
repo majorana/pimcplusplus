@@ -1024,11 +1024,7 @@ FixedPhaseClass::Det (int slice, int speciesNum)
 void
 FixedPhaseClass::GetIonForces (Array<Vec3,1> &F)
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   SpeciesClass &ionSpecies = Path.Species(IonSpeciesNum);
   PairActionFitClass& paIonIon = 
     *PathData.Actions.PairMatrix(IonSpeciesNum, IonSpeciesNum);

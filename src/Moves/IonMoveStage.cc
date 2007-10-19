@@ -35,20 +35,9 @@ void IonStageClass::Read(IOSectionClass& in){
   assert (in.ReadVar ("Actions", ActionList));
 	for(int a=0; a<ActionList.size(); a++){
 		string setAction = ActionList(a);
-		#ifdef USE_QMC
-	  if(setAction == "CEIMCAction"){
-  		Actions.push_back(&PathData.Actions.CEIMCAction);
-			cerr << "Added CEIMCAction" << endl;
-			list<ActionBaseClass*>::const_iterator act = Actions.end();
-			act--;
-			(*act)->Read(in);
-		}else 
-		#endif
-		if(setAction == "IonInteraction"){
-  		Actions.push_back(&PathData.Actions.IonInteraction);
-			cerr << "Added IonInteraction" << endl;
-		} else
-    	cerr << "You specified " << setAction << ", which is not supported for this type of move" << endl;
+    ActionBaseClass* newAction = PathData.Actions.GetAction(setAction);
+    Actions.push_back(newAction);
+    cerr << "  Added action with label " << setAction << " and address " << newAction << endl;
 	}
 }
 

@@ -144,11 +144,7 @@ double WormStageClass::Sample(int &slice1,int &slice2,
   //  cerr<<"Sampling now"<<endl;
   //  cerr<<"The join is "<<PathData.Join<<endl;
 
-#ifdef BUILD_DEV
-  PathClassDev &Path=PathData.Path;
-#else
   PathClass &Path=PathData.Path;
-#endif
   int headSlice;
   int headPtcl;
   int tailSlice;

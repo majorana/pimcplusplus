@@ -106,8 +106,8 @@ libmoves_la_SOURCES  =           \
     ClusterMove.h                \
     VariationalDisplaceMove.h    \
     VariationalDisplaceMove.cc   \
-    QMCTest.cc                   \
-    QMCTest.h                    \
+		SPS.cc                       \
+		SPS.h                        \
     WormStage.h                  \
     WormStage.cc                 \
     WormGrow.h                   \

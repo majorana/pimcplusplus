@@ -20,11 +20,7 @@
 #include "ActionBase.h"
 #include <Common/Splines/CubicSpline.h>
 
-#ifdef BUILD_DEV
-  class PathClassDev;
-#else
   class PathClass;
-#endif
 
 typedef enum { FREE_PARTICLE, GROUND_STATE, GROUND_STATE_FP } NodeType;
 

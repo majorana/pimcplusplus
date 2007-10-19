@@ -29,13 +29,14 @@ class EAMPotentialClass : public ActionBaseClass
   protected:
   double Ec, phi0, r0, alpha, beta, gamma, delta;
   double rn, rc;
+  double conversion;
   Array<double, 1> c;
   Array<double, 1> s;
   int mMax, lMax;
   int Level, ki;
   double aob;
 
-  Array<double, 1> rho;
+  Array<double, 2> rho;
 
   public:
   void Read (IOSectionClass &in);

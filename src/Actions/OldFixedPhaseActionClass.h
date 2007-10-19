@@ -29,11 +29,7 @@ class FixedPhaseClass
 private:
   MPISystemClass *System;
   PathDataClass &PathData;
-#ifdef BUILD_DEV
-  PathClassDev &Path;
-#else
   PathClass &Path;
-#endif
   double kCut;
   ComplexMultiTricubicSpline BandSplines;
   Potential *PH;

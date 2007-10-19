@@ -19,11 +19,7 @@
 double
 PressureClass::KineticPressure()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   int numImages = PathData.Actions.Kinetic.NumImages;
 
   double P = 0.0;
@@ -104,11 +100,7 @@ PressureClass::KineticPressure()
 double 
 PressureClass::ShortRangePressure()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   double P = 0.0;
   int M = Path.NumTimeSlices();
   for (int ptcl1=0; ptcl1 < Path.NumParticles(); ptcl1++) {
@@ -150,11 +142,7 @@ inline double mag2(complex<double> z)
 double
 PressureClass::LongRangePressure()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   double homo = 0.0;
   double hetero = 0.0;
   double background = 0.0;
@@ -247,11 +235,7 @@ PressureClass::LongRangePressure()
 double
 PressureClass::NodePressure()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   double P = 0.0;
   int M = Path.NumTimeSlices();
   
@@ -279,11 +263,7 @@ PressureClass::Accumulate()
 void
 PressureClass::WriteBlock()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   KineticSum    /= (double)(NumSamples*Path.TotalNumSlices);
   ShortRangeSum /= (double)(NumSamples*Path.TotalNumSlices);
   LongRangeSum  /= (double)(NumSamples*Path.TotalNumSlices);

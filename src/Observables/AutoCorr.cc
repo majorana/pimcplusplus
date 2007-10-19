@@ -100,11 +100,7 @@ void AutoCorrClass::WriteBlock()
 
 void AutoCorrClass::LocalWriteBlock()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   double norm=(double)(TotalCounts - LastTotal);
 	double sliceNorm = PathData.NumTimeSlices()-1;
   cerr << "TotalCounts is " << TotalCounts << "; normalizing by " << norm << " and sliceNorm is " << sliceNorm << "; LastTotal is " << LastTotal << endl;

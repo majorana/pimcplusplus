@@ -62,7 +62,8 @@ void MolMoveClass::Read (IOSectionClass &in){
 	assert(in.ReadVar("Mode", setMode));
 	if(setMode == "GLOBAL"){
 		mode = GLOBAL;
-    MoveList = PathData.Mol.MolOfType(molIndex);
+    //MoveList = PathData.Mol.MolOfType(molIndex);
+    PathData.Mol.MolOfType(MoveList, molIndex);
     cerr << "GLOBAL move init MoveList is " << MoveList << endl;
 		//MoveList.resize(numMol);
 		//for(int m=0; m<numMol; m++)
@@ -87,39 +88,58 @@ void MolMoveClass::Read (IOSectionClass &in){
 	for(int a=0; a<numActionsToRead; a++){
     cerr << "Read in actions " << ActionList << endl;
 		string setAction = ActionList(a+startIndex);
-	  if(setAction == "MoleculeInteractions"){
-			// read should be done in actions now
-			//PathData.Actions.MoleculeInteractions.Read(in);
-  		Actions.push_back(&PathData.Actions.MoleculeInteractions);
-			cerr << "  Added Molecule Actions" << endl;
-		}else if(setAction == "ST2Water"){
-			//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
-  		Actions.push_back(&PathData.Actions.ST2Water);
-			cerr << "Added ST2Water action" << endl;
-		}else if(setAction == "Kinetic"){
-  		Actions.push_back(&PathData.Actions.Kinetic);
-			cerr << "Added Kinetic action" << endl;
-#ifdef USE_QMC
-		}else if(setAction == "CEIMCAction"){
-			//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
-			PathData.Actions.CEIMCAction.Read(in);
-  		Actions.push_back(&PathData.Actions.CEIMCAction);
-			cerr << "Added CEIMC calculation of BO energy" << endl;
-#endif
-		}else if(setAction == "LongRangeCoulomb"){
-  		Actions.push_back(&PathData.Actions.LongRangeCoulomb);
-			cerr << "Added long-range coulomb interaction" << endl;
-		}else if(setAction == "EAM"){
-  		Actions.push_back(&PathData.Actions.EAM);
-			cerr << "Added Al EAM action" << endl;
-		}else if(setAction == "IonInteraction"){
-  		Actions.push_back(&PathData.Actions.IonInteraction);
-			cerr << "Added intermolecular ion-ion interaction" << endl;
-		} else if(setAction == "QBoxAction"){
-  		Actions.push_back(&PathData.Actions.QBoxAction);
-			cerr << "Computing action with QBox DFT code" << endl;
-		} else
-    	cerr << "You specified " << setAction << ", which is not supported for this type of move" << endl;
+    ActionBaseClass* newAction = PathData.Actions.GetAction(setAction);
+    Actions.push_back(newAction);
+    cerr << "  Added action with label " << setAction << " and address " << newAction << endl;
+
+    // deprecated actions readin
+	  //if(setAction == "MoleculeInteractions"){
+		//	// read should be done in actions now
+		//	//PathData.Actions.MoleculeInteractions.Read(in);
+  	//	Actions.push_back(&PathData.Actions.MoleculeInteractions);
+		//	cerr << "  Added Molecule Actions" << endl;
+		//}else if(setAction == "ST2Water"){
+		//	//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
+  	//	Actions.push_back(&PathData.Actions.ST2Water);
+		//	cerr << "Added ST2Water action" << endl;
+		//}else if(setAction == "Kinetic"){
+  	//	Actions.push_back(&PathData.Actions.Kinetic);
+		//	cerr << "Added Kinetic action" << endl;
+//#ifdef USE_QMC
+		//}else if(setAction == "CEIMCAction"){
+		//	//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
+		//	PathData.Actions.CEIMCAction.Read(in);
+  	//	Actions.push_back(&PathData.Actions.CEIMCAction);
+		//	cerr << "Added CEIMC calculation of BO energy" << endl;
+//#endif
+		//}else if(setAction == "LongRangeCoulomb"){
+  	//	Actions.push_back(&PathData.Actions.LongRangeCoulomb);
+		//	cerr << "Added long-range coulomb interaction" << endl;
+		//}else if(setAction == "EAM"){
+  	//	Actions.push_back(&PathData.Actions.EAM);
+		//	cerr << "Added Al EAM action" << endl;
+		//}else if(setAction == "PairAction"){
+		//	cerr << "Added Diagonal PairAction" << endl;
+    //  Actions.push_back(&PathData.Actions.DiagonalAction);
+		//}else if(setAction == "IonInteraction"){
+  	//	Actions.push_back(&PathData.Actions.IonInteraction);
+		//	cerr << "Added intermolecular ion-ion interaction" << endl;
+		//} else if(setAction == "KineticRotorAction"){
+  	//	Actions.push_back(&PathData.Actions.KineticRotor);
+		//	cerr << "Added Kinetic Rotor Action" << endl;
+		//} else if(setAction == "FixedAxisRotorAction"){
+  	//	Actions.push_back(&PathData.Actions.FixedAxisRotor);
+		//	cerr << "Added Fixed Axis Rotor Action" << endl;
+		//} else if(setAction == "QBoxAction"){
+  	//	Actions.push_back(&PathData.Actions.QBoxAction);
+		//	cerr << "Computing action with QBox DFT code" << endl;
+		//} else if(setAction == "EAM"){
+  	//	Actions.push_back(&PathData.Actions.EAM);
+		//	cerr << "Added Al EAM potential" << endl;
+		//} else {
+    //	cerr << "You specified " << setAction << ", which is not supported for this type of move" << endl;
+    //  assert(0);
+    //}
 	}
 
 	// this should all be done in PathClass.cc now
@@ -142,6 +162,13 @@ void MolMoveClass::Read (IOSectionClass &in){
 	//	MolMembers(m)(catalog[m]) = p;
 	//	catalog[m]++;
 	//}
+}
+
+void MolMoveClass::LoadActions(list<ActionBaseClass*> actions)
+{
+  cerr << "Wiping out actions loading with " << actions.size();
+  Actions = actions;
+  cerr << " " << Actions.size() << "... ok, done" << endl;
 }
 
 dVec MolMoveClass::GetCOM(int slice, int mol){

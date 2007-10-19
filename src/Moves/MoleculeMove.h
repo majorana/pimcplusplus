@@ -18,6 +18,7 @@
 #define MOLECULE_MOVE_H
 
 #include "MoleculeMoveBase.h"
+#include "../Moves/MoveUtils.h"
 
 class MoleculeRotate : public MolMoveClass
 {

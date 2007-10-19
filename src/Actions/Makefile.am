@@ -28,6 +28,8 @@ libactions_la_SOURCES =            \
     Josephson.cc                   \
     KineticClass.cc                \
     KineticClass.h                 \
+    KineticRotorClass.cc           \
+    KineticRotorClass.h            \
     KineticSphereClass.cc          \
     KineticSphereClass.h           \
     LongRangeClass.cc              \

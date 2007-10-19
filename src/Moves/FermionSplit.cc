@@ -39,11 +39,7 @@ void FermionSplitClass::Read(IOSectionClass &in)
 
 void FermionSplitClass::ChooseTimeSlices()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   int myProc = PathData.Path.Communicator.MyProc();
   int sliceSep = 1<<NumLevels;
   assert (sliceSep < PathData.Path.NumTimeSlices());
@@ -92,11 +88,7 @@ void FermionSplitClass::MakeMove()
 void
 FermionSplitClass::MakeStraightPaths()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   SetMode(NEWMODE);
   int skip = 1<<LowestLevel;
   int first = Path.Species(SpeciesNum).FirstPtcl;

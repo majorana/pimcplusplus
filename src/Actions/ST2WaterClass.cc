@@ -1,5 +1,7 @@
 #include "../PathDataClass.h"
 #include "ST2WaterClass.h"
+#include "TIP5PWaterClass.h"
+#include "../Moves/MoveUtils.h"
 
 //double CUTOFF = 7.75; // setcutoff: spherical cutoff in angstroms
 double CUTOFF = 18.0; // setcutoff: spherical cutoff in angstroms
@@ -23,11 +25,19 @@ ST2WaterClass::ST2WaterClass (PathDataClass &pathData) :
 
 double ST2WaterClass::SingleAction (int slice1, int slice2, const Array<int,1> &activeParticles, int level){
 	//cerr << "ST2WaterAction::Action__________________ for slices " << slice1 << " to " << slice2;// << endl;
-	return Action(slice1, slice2, activeParticles, level);
+  double V = Action(slice1, slice2, activeParticles, level);
+  //double K = FixedAxisAction(slice1, slice2, activeParticles, level);
+  //cerr << "  V " << V << " Krot " << K << endl;
+  //return(V + K);
+  return(V);
 }
 
 double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
 {
+	//cerr << "ST2WaterAction::Action__________________ for slices " << startSlice << " to " << endSlice;// << endl;
+  //startSlice++;
+  //endSlice--;
+  //double K = FixedAxisAction(startSlice, endSlice, activeParticles, level);
   aCount++;
   //if(aCount%64 == 0)
     //xout << aCount << endl;
@@ -80,6 +90,7 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
               double lj = 4*PathData.Species(species1).Epsilon*(pow(sigma_over_r,12)-pow(sigma_over_r,6) - offset); // this is in kcal/mol 
               TotalU += lj;
               TotalLJ += lj;
+              //cerr << "slice " << slice << " lj " << lj << endl;
               // harmonic potential for dimer tesing!!
               //double omega = 2.6*pow(10.0,13);
               //double mass = 0.036;
@@ -135,6 +146,7 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
                     //double coulomb = coulomb_const*(1.0/rmag - 1.0/CUTOFF);
                     TotalU += coulomb;
                     TotalCoul += coulomb;
+                    //cerr << "slice " << slice << " coul " << coulomb << endl;
                     //	      cerr << "protons " << coulomb << " at distance " << rmag  << " with offset " << coulomb_const/CUTOFF << endl;
                   //}
                   }
@@ -186,6 +198,7 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
                     //  TotalU += coulomb;
                     //	      cerr << "electrons " << coulomb << " at distance " << rmag << " with offset " << coulomb_const/CUTOFF << endl;
                   //}
+                    //cerr << "slice " << slice << " coul " << coulomb << endl;
                   }
                 }
               }
@@ -202,13 +215,16 @@ double ST2WaterClass::Action (int startSlice, int endSlice, const Array<int,1> &
   //  cerr << TotalU << " and times tau " << TotalU_times_tau << " at temp " << 1.0/PathData.Path.tau << endl;
   //cerr << "I'm returning ST2 action " << TotalU_times_tau << endl;
   //cerr << "  It consists of LJ " << TotalLJ << " and coulomb " << TotalCoul << endl;
+  //cerr << "  V " << TotalU_times_tau << " Krot " << K << endl;
+  //return (TotalU_times_tau + K);
   return (TotalU_times_tau);
 }
 
 double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
 {
+  //double K = FixedAxisEnergy(startSlice, endSlice, level);
   //cerr << "ST2WaterClass::d_dBeta_________________";// << endl;
-  double thermal = 6/PathData.Path.tau;
+  //double thermal = 6/PathData.Path.tau;
   Array<int,1> activeParticles(PathData.Path.NumParticles());
   for (int i=0;i<PathData.Path.NumParticles();i++){
     activeParticles(i)=i;
@@ -333,7 +349,9 @@ double ST2WaterClass::d_dBeta (int startSlice, int endSlice,  int level)
   double energy_per_molecule = TotalU/PathData.Mol.NumMol();
   //  return energy_per_molecule; // + thermal;
   //cerr << "RETURNING " << TotalU << endl;
-  return TotalU;
+  //cout << TotalU+K << " " << TotalU << " " << K << endl;
+  //return (TotalU + K);
+  return (TotalU);
 }
 
 double ST2WaterClass::EField (Array<int,1> &activeMol, int startSlice, int endSlice,  int level)
@@ -1244,34 +1262,52 @@ double ST2WaterClass::SecondProtonKineticEnergy(int startSlice, int endSlice, in
 
 double ST2WaterClass::FixedAxisAction(int startSlice, int endSlice, const Array<int,1> &activeParticles, int level)
 {
+  // need to map activePtcls to active molecules - probably could be done more cleanly
+  Array<bool,1> activeMol;
+  activeMol.resize(PathData.Mol.NumMol());
+  activeMol = false;
+  for(int pindex=0; pindex<activeParticles.size(); pindex++) {
+    int myMol = PathData.Mol(activeParticles(pindex));
+    activeMol(myMol) = true;
+  }
+  vector<int> molRoster(0);
+  for(int mindex=0; mindex<activeMol.size(); mindex++) {
+    if(activeMol(mindex))
+      molRoster.push_back(mindex);
+  }
+  int numChangedPtcls = molRoster.size();
+  //int numChangedPtcls = activeParticles.size();
+
   double R = O_H_moment_arm;
-//cerr << "ok here we go: R is " << R << endl;
+  //cerr << "ok here we go: R is " << R << endl;
   double RotK = 0.0;
-//cerr << "active is " << activeParticles << endl;
-  int numChangedPtcls = activeParticles.size();
+  //cerr << "active molecules " << numChangedPtcls << endl;
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
   int TotalNumParticles = Path.NumParticles();
-  int numMol = TotalNumParticles/5;
-  for (int ptclIndex=0; ptclIndex<numChangedPtcls; ptclIndex++){
-    int ptcl1 = activeParticles(ptclIndex);
-    int ptcl2 = ptcl1 + numMol;
+  int numMol = PathData.Mol.NumMol();//TotalNumParticles/5;
+  for (int molIndex=0; molIndex<numChangedPtcls; molIndex++){
+    int mol = molRoster[molIndex];
+    int ptcl1 = PathData.Mol.MembersOf(mol)(1);
+    int ptcl2 = PathData.Mol.MembersOf(mol)(2);
+    //int ptcl2 = ptcl1 + numMol;
     double FourLambdaTauInv=1.0/(4.0*lambda_p*levelTau);
     for (int slice=startSlice; slice < endSlice;slice+=skip) {
-//cerr << "ptcl1 is " << ptcl1 << " and ptcl2 is " << ptcl2 << " at slice " << slice << endl;
+      //cerr << "  FA between " << slice << " " << slice+skip << endl;
+      //cerr << "ptcl1 is " << ptcl1 << " and ptcl2 is " << ptcl2 << " at slice " << slice << endl;
       // Load coords and their corresponding oxygens (COMs)
       dVec P1 = PathData.Path(slice,ptcl1);
       dVec P2 = PathData.Path(slice,ptcl2);
       dVec P1prime = PathData.Path(slice+skip,ptcl1);
       dVec P2prime = PathData.Path(slice+skip,ptcl2);
-//cerr << "P1 " << P1 << endl;
-//cerr << "P2 " << P2 << endl;
-//cerr << "P1prime " << P1prime << endl;
-//cerr << "P2prime " << P2prime << endl;
+      //cerr << "P1 " << P1 << endl;
+      //cerr << "P2 " << P2 << endl;
+      //cerr << "P1prime " << P1prime << endl;
+      //cerr << "P2prime " << P2prime << endl;
       int Optcl = FindCOM(ptcl1);
       dVec O = PathData.Path(slice,Optcl);
       dVec Oprime = PathData.Path(slice+skip,Optcl);
-//cerr << "identified COM " << Optcl << " with coords " << O << " and " << Oprime << endl;
+      //cerr << "identified COM " << Optcl << " with coords " << O << " and " << Oprime << endl;
       // Redefine coordinates WRT COM
       P1 -= O;
       P2 -= O;
@@ -1281,16 +1317,16 @@ double ST2WaterClass::FixedAxisAction(int startSlice, int endSlice, const Array<
       P2 = Normalize(P2);
       P1prime = Normalize(P1prime);
       P2prime = Normalize(P2prime);
-//cerr << "now WRT COM coords are " << endl;
-//cerr << "P1 " << P1 << endl;
-//cerr << "P2 " << P2 << endl;
-//cerr << "P1prime " << P1prime << endl;
-//cerr << "P2prime " << P2prime << endl;
+      //cerr << "now WRT COM coords are " << endl;
+      //cerr << "P1 " << P1 << endl;
+      //cerr << "P2 " << P2 << endl;
+      //cerr << "P1prime " << P1prime << endl;
+      //cerr << "P2prime " << P2prime << endl;
       // Calculate bisectors for each configuration
       dVec n = Normalize(GetBisector(P1,P2));
       dVec nprime = Normalize(GetBisector(P1prime,P2prime));
-//cerr << "n " << n << endl;
-//cerr << "nprime " << nprime << endl;
+      //cerr << "n " << n << endl;
+      //cerr << "nprime " << nprime << endl;
       double vel_squared;
       double prefactor;
       if (n == nprime){
@@ -1305,7 +1341,7 @@ double ST2WaterClass::FixedAxisAction(int startSlice, int endSlice, const Array<
         // Calculate polar angles and trig functions
         // Calculate azimuthal angle
         double theta = GetAngle(n,nprime);
-//cerr << "theta " << theta << endl;
+        //cerr << "theta " << theta << endl;
         // Calculate lever arms and kinetic energy contributions (mass contained in lambda factor)
         double alpha = HOH_half_angle;
         double SinAlpha = sin(alpha);
@@ -1322,9 +1358,9 @@ double ST2WaterClass::FixedAxisAction(int startSlice, int endSlice, const Array<
         double phi2 = GetAngle(z2,r);
         double psi1 = GetAngle(z1prime,r);
         double psi2 = GetAngle(z2prime,r);
-//cerr << "P1 " << P1 << endl;
-//cerr << "n " << n << endl;
-//cerr << "P2 " << P2 << endl;
+        //cerr << "P1 " << P1 << endl;
+        //cerr << "n " << n << endl;
+        //cerr << "P2 " << P2 << endl;
         double phi = phi1;
         double psi = psi1;
 /*        if(phi1<phi2){
@@ -1369,7 +1405,7 @@ double ST2WaterClass::FixedAxisAction(int startSlice, int endSlice, const Array<
         vel_squared = MSum*gamma*gamma;
         prefactor = gamma/(2*SinHalfGamma);
       }
-//cerr << "from which I calculate vel_squared                      " << vel_squared << endl;
+      //cerr << "from which I calculate vel_squared                      " << vel_squared << endl;
 
       double GaussProd = 1.0;
 //    for (int dim=0; dim<NDIM; dim++) {
@@ -1387,8 +1423,8 @@ double ST2WaterClass::FixedAxisAction(int startSlice, int endSlice, const Array<
     }
   }
   //We are ignoring the \$\frac{3N}{2}*\log{4*\Pi*\lambda*\tau}
-//cerr << "I'm returning kinetic action " << RotK << endl;
-//cerr << "*************************************" << endl;
+  //cerr << "I'm returning kinetic action " << RotK << endl;
+  //cerr << "*************************************" << endl;
   return (RotK);
 }
 
@@ -1404,11 +1440,10 @@ double ST2WaterClass::FixedAxisEnergy(int startSlice, int endSlice, int level)
   double lambda = lambda_p;
   double FourLambdaTauInv = 1.0/(4.0*lambda*levelTau);
   int TotalNumParticles = Path.NumParticles();
-  int numMol = TotalNumParticles/5;
-  int startparticle = 3*numMol;
-  int endparticle = 4*numMol;
-  for (int ptcl1=startparticle; ptcl1<endparticle; ptcl1++) {
-    int ptcl2 = ptcl1 + numMol;
+  int numMol = PathData.Mol.NumMol();
+  for (int mol=0; mol<numMol; mol++) {
+    int ptcl1 = PathData.Mol.MembersOf(mol)(1);
+    int ptcl2 = PathData.Mol.MembersOf(mol)(2);
 //cerr << "I'm working with particles " << ptcl1 << " and " << ptcl2 << endl;
     int speciesNum  = Path.ParticleSpeciesNum(ptcl1);
     if (speciesNum == PathData.Path.SpeciesNum("p")){

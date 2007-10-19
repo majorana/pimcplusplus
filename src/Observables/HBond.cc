@@ -48,7 +48,7 @@ bool HbondClass::CheckPair(int slice, int obond, int ohome, int p){
   dVec OH,OHbond;
   PathData.Path.DistDisp(slice,p,obond,OHbondmag,OHbond);
   PathData.Path.DistDisp(slice,p,ohome,OHmag,OH);
-  double theta = PathData.Actions.TIP5PWater.GetAngle(OHbond,OH);
+  double theta = GetAngle(OHbond,OH);
   if (theta > HOHangle)
     bond = true;
   return bond; 

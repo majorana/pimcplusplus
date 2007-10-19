@@ -32,11 +32,7 @@ class FixedPhaseClass
 private:
   MirroredRefClass<MPISystemClass> System;
   PathDataClass &PathData;
-#ifdef BUILD_DEV
-  PathClassDev &Path;
-#else
   PathClass &Path;
-#endif
   double kCut;
   MirroredClass<ComplexMultiTricubicSpline> BandSplines;
   Potential *V_elec_ion, *V_ion_ion;

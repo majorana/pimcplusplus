@@ -23,11 +23,7 @@
 using namespace IO;
 
 class PathDataClass;
-#ifdef BUILD_DEV
-  class PathClassDev;
-#else
   class PathClass;
-#endif
 
 /// The ActionBaseClass is an abstract base class from which all the
 /// physical action classes are derived.  Its primary methods are
@@ -36,11 +32,7 @@ class ActionBaseClass
 {
 protected:
   PathDataClass &PathData;
-#ifdef BUILD_DEV
-  PathClassDev &Path;
-#else
   PathClass &Path;
-#endif
 public:
   /// This function takes a range of time slices from slice1 to
   /// slice2, inclusive, and an array of particles which are changing
@@ -95,11 +87,7 @@ class PotentialBaseClass
 {
 protected:
   PathDataClass &PathData;
-#ifdef BUILD_DEV
-  PathClassDev &Path;
-#else
   PathClass &Path;
-#endif
 public:
   virtual double V (int slice) = 0;
   PotentialBaseClass (PathDataClass &pathData);

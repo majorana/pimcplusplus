@@ -69,11 +69,7 @@ WormCloseMoveClass::MakeMove()
 
 
   bool toAccept=false;
-#ifdef BUILD_DEV
-  PathClassDev &Path=PathData.Path;
-#else
   PathClass &Path=PathData.Path;
-#endif
   int wormSize,numEmpty;
   int tailSlice,tailPtcl;
   int headSlice,headPtcl;

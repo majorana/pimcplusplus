@@ -34,6 +34,7 @@ class MolMoveClass: public LocalStageClass{
   void Read (IOSectionClass &in);
 	void Accept();
 	void Advance();
+  void LoadActions(list<ActionBaseClass*> actions);
 };
 
 dVec ArbitraryRotate(dVec axis,dVec coord, double phi);

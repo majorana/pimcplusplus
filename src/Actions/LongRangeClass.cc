@@ -117,11 +117,7 @@ public:
 double LongRangeClass::CalcXk (int paIndex, int level, double k, double rc,
 			    JobType task)
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   double absTol = 1.0e-7;
   double relTol = 1.0e-5;
 
@@ -507,11 +503,7 @@ void LongRangeClass::OptimizedBreakup_U(int numKnots,
 {
   /// BUG: Long Range Optimized Breakups only work for NDIM=3
 #if NDIM==3
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();
@@ -709,11 +701,7 @@ void LongRangeClass::OptimizedBreakup_dU(int numKnots,
 
   ///BUG: Optimized Breakup only works when NDIM==3
 #if NDIM==3
-#ifdef BUILD_DEV
-  PathClassDev &Path = PathData.Path;
-#else
   PathClass &Path = PathData.Path;
-#endif
   const double tolerance = 1.0e-7;
   double kCut = Path.Getkc();
   dVec box = Path.GetBox();

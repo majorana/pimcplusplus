@@ -86,11 +86,7 @@ void StructureFactorClass::Read(IOSectionClass& in)
 
 void StructureFactorClass::WriteInfo()
 {
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   Array<dVec,1> &kVecs = PathData.Path.kVecs;
   ObservableClass::WriteInfo();
   Array<double,2> kVecArray(kVecs.size()+Additionalkvecs.size(),NDIM);

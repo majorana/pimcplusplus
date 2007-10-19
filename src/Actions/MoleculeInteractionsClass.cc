@@ -77,7 +77,7 @@ double MoleculeInteractionsClass::SingleAction (int startSlice, int endSlice,
   }
 	bool IsAction = true;
 	double TotalU = ComputeEnergy(startSlice+1, endSlice-1, activeParticles, level, TruncateAction, IsAction);
-	//cerr << " RETURNING " << TotalU*PathData.Path.tau << endl;
+	//cerr << " RETURNING " << TotalU*PathData.Path.tau << " tau " << PathData.Path.tau << endl;
   return(TotalU*PathData.Path.tau);
 }
 
@@ -111,6 +111,8 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 	double TotalSpring = 0.0;
 	double TotalKinetic = 0.0;
 	double TotalHarmonic = 0.0;
+	double TotalPair = 0.0;
+	double TotalCore = 0.0;
   int numChangedPtcls = activeParticles.size();
   int skip = 1<<level;
 
@@ -149,10 +151,12 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
               double sigR = PathData.Species(species1).Sigma*rinv;
               double sigR6 = sigR*sigR*sigR*sigR*sigR*sigR;
 							double offset = 0.0;
-							if(with_truncations){
-  							double sigma_over_cutoff = PathData.Species(species1).Sigma/CUTOFF;
-  							offset = pow(sigma_over_cutoff,12) - pow(sigma_over_cutoff,6);
-							}
+
+							//if(with_truncations){
+  						double sigma_over_cutoff = PathData.Species(species1).Sigma/CUTOFF;
+  						offset = pow(sigma_over_cutoff,12) - pow(sigma_over_cutoff,6);
+							//}
+              //
 							//cerr << "; using offset " << offset << endl;
 	      			double lj = conversion*4*PathData.Species(species1).Epsilon*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
 							TotalLJ += lj;
@@ -374,14 +378,83 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 				}
 			}
 		}
+    // Species-wise pair potential 
+		if(Interacting(species1,5)){
+      //cerr << "Going to check how the potential looks here." << endl;
+      //ofstream check("pair_pot.dat");
+      //double dx = 0.001;
+      //double x0 = 0.;
+      //for(int i=0; i<10000; i++) {
+      //  double x = x0 + i*dx;
+      //  double u = (*spline)(x);
+      //  check << x << " " << u << endl;
+      //}
+      //check.close();
+      //exit(1);
+
+      //cerr << "Pair Potential ptcls " << Path.Species(species1).FirstPtcl << " to " << Path.Species(species1).LastPtcl << " activeP " << activeParticles << " DoPtcl " << Path.DoPtcl << endl;
+  		for (int ptcl2=Path.Species(species1).FirstPtcl; ptcl2<=Path.Species(species1).LastPtcl; ptcl2++){
+        if(ptcl1 != ptcl2 && Path.DoPtcl(ptcl2)) {
+	  			for (int slice=startSlice; slice<=endSlice; slice+=skip){
+            double rmag;
+            dVec r;
+  	        PathData.Path.DistDisp(slice, ptcl1, ptcl2, rmag, r);
+            //cerr << ptcl1 << " " << ptcl2 << " " << slice << " " << rmag << endl;
+            double pair = 0.0;
+            if(rmag < pairCutoff) {
+              pair = (*spline)(rmag);
+            }
+
+            TotalPair += pair;
+            TotalU += pair;
+          }
+        }
+      }
+    }
+
+		if(Interacting(species1,6)){
+  		for (int ptcl2=Path.Species(species1).FirstPtcl; ptcl2<=Path.Species(species1).LastPtcl; ptcl2++){
+        if(ptcl1 != ptcl2) {
+	  			for (int slice=startSlice; slice<=endSlice; slice+=skip){
+            double rmag;
+            dVec r;
+  	        PathData.Path.DistDisp(slice, ptcl1, ptcl2, rmag, r);
+            double U;
+            if(boundary=="zero") {
+              if(rmag > StartCore) {
+                U = 0.;
+              }
+              else {
+                //U = A + (StartCore-rmag)/StartCore*10*A;
+                U = (StartCore-rmag)/StartCore*10*A;
+              }
+            }
+
+            else if(boundary=="infinity") {
+              if(rmag < StartCore) {
+                U = 0.;
+              }
+              else {
+                //U = A + (rmag-StartCore)/StartCore*10*A;
+                U = (rmag-StartCore)/StartCore*10*A;
+              }
+            }
+            //cerr << ptcl1 << " " << ptcl2 << " " << slice << " " << boundary << " " << rmag << " " << U << endl;
+
+            TotalCore += U;
+            TotalU += U;
+          }
+        }
+      }
+    }
 	}
-  //cerr << "MolINtAct returning energy " << TotalU << " and action " << TotalU*PathData.Path.tau << endl;
+  //cerr << "MolINtAct returning energy " << TotalU << " and action " << TotalU*PathData.Path.tau << " tau is " << PathData.Path.tau << " " << Path.tau << endl;
   //cerr << "  It consists of LJ " << TotalLJ << " and coulomb " << TotalCharge << endl;
 	//cerr << "Empirical potential contributions: " << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic;// << endl;
 	// write additional output file
 
 	if(!isAction && special){
-		outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << " " << int1 << " " << int2 << " " << int3 << " " << int4 << endl;
+		outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << " " << TotalPair << " " << int1 << " " << int2 << " " << int3 << " " << int4 << endl;
 	}
   return (TotalU);
 }
@@ -531,17 +604,22 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		in.ReadVar("TruncateEnergy",TruncateEnergy);
 		in.ReadVar("UseImage",useFirstImage);
 
-		Interacting.resize(PathData.NumSpecies(),5);
+		Interacting.resize(PathData.NumSpecies(),7);
 		Interacting = false;
 		LJSpecies.resize(0);
 		ChargeSpecies.resize(0);
 		SpringSpecies.resize(0);
 		KineticSpecies.resize(0);
+		QuadSpecies.resize(0);
+		PairSpecies.resize(0);
+		CoreSpecies.resize(0);
 		in.ReadVar("LJSpecies",LJSpecies);
 		in.ReadVar("ChargeSpecies",ChargeSpecies);
 		in.ReadVar("IntraMolecularSpecies",SpringSpecies);
 		in.ReadVar("KineticActionSpecies",KineticSpecies);
 		in.ReadVar("QuadraticSpecies",QuadSpecies);
+		in.ReadVar("PairActionSpecies",PairSpecies);
+		in.ReadVar("CoreSpecies",CoreSpecies);
 
 		cerr << "Read LJSpec " << LJSpecies << " and chargeSpec " << ChargeSpecies << " etc..." << endl;
 		if(KineticSpecies.size() > 0){
@@ -549,9 +627,53 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 			cerr << "Read lambda for each species: " << lambdas << endl;
 		}
 
+    if(PairSpecies.size() > 0) {
+      if(PairSpecies.size() > 1) {
+        cerr << "ERROR MOLECULE PAIR ACTIONS ONLY IMPLEMENTED FOR SINGLE PAIR INTERACTION!" << endl;
+        assert(0);
+      }
+      int numP;
+      double start;
+      assert(in.ReadVar("NumGridPoints",numP));
+      assert(in.ReadVar("StartGrid",start));
+      assert(start == 0.0);
+      assert(in.ReadVar("EndGrid",pairCutoff));
+      grid = new LinearGrid(start, pairCutoff, numP);
+      Array<double,1> values;
+      assert(in.ReadVar("Spline",values));
+      assert(values.size() == numP);
+      spline = new CubicSpline(grid, values);
+    }
+
+    if(CoreSpecies.size() > 0) {
+      if(PairSpecies.size() > 1) {
+        cerr << "ERROR CORE INTERACTION ONLY IMPLEMENTED FOR SINGLE PAIR INTERACTION!" << endl;
+        assert(0);
+      }
+      assert(in.ReadVar("Onset",StartCore));
+      assert(in.ReadVar("Amplitude",A));
+      bool valid=false;
+      while(!valid) {
+        assert(in.ReadVar("Boundary",boundary));
+        if(boundary == "zero") {
+          cerr << "Core set between zero and " << StartCore << endl;
+          valid = true;
+          LO = A;
+          HI = 0.;
+        } else if (boundary == "infinity") {
+          cerr << "Core set between " << StartCore << " and infinity" << endl;
+          valid = true;
+          LO = 0.;
+          HI = A;
+        } else {
+          cerr << "Boundary " << boundary << " not valid (options are 'zero' or 'infinity')" << endl;
+        }
+      }
+    }
+
 		for(int s=0; s<LJSpecies.size(); s++){
 			Interacting(Path.SpeciesNum(LJSpecies(s)), 0) = true;
-			cerr << "Setting " << LJSpecies(s) << " to interact via LJ!!" << endl;
+			//cerr << "Setting " << LJSpecies(s) << " to interact via LJ!!" << endl;
 		}
 		for(int s=0; s<ChargeSpecies.size(); s++)
 			Interacting(Path.SpeciesNum(ChargeSpecies(s)), 1) = true;
@@ -561,6 +683,10 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 			Interacting(Path.SpeciesNum(KineticSpecies(s)), 3) = true;
 		for(int s=0; s<QuadSpecies.size(); s++)
 			Interacting(Path.SpeciesNum(QuadSpecies(s)), 4) = true;
+		for(int s=0; s<PairSpecies.size(); s++)
+			Interacting(Path.SpeciesNum(PairSpecies(s)), 5) = true;
+		for(int s=0; s<CoreSpecies.size(); s++)
+			Interacting(Path.SpeciesNum(CoreSpecies(s)), 6) = true;
 		cerr << "MoleculeInteractions::Read I have loaded Interacting table " << Interacting << endl;
 
 		// make sure something is filled
@@ -585,7 +711,7 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 			string filename;
 			assert(in.ReadVar("File",filename));
 			outfile.open(filename.c_str());
-			outfile << "# Total LJ Coulomb Intramolecular Quadratic Kinetic Int1 Int2 Int3 Int4" << endl;
+			outfile << "# Total LJ Coulomb Intramolecular Quadratic Kinetic Pair Int1 Int2 Int3 Int4" << endl;
 		}
 			
 		

@@ -41,6 +41,12 @@ void MoleculeForceBiasMove::Read(IOSectionClass &moveInput) {
   Theta *= M_PI;
   numGen = 0;
   numInProp = 0.0;
+  string actionLabel;
+  assert(moveInput.ReadVar("ActionName",actionLabel));
+  ActionBaseClass* newAction = PathData.Actions.GetAction(actionLabel);
+  cerr << "MOLECULEBIAS ACCEPTED ACTION LABELELD " << actionLabel << " AS ACTION TYPE MOLECULEINTERACTIONSCLASS; MAKE SURE THIS IS VALID" << endl;
+  assert(typeid(newAction) == typeid(MoleculeInteractionsClass*));
+  MolAction = static_cast<MoleculeInteractionsClass*> (newAction);
 }
 
 double MoleculeForceBiasMove::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
@@ -109,7 +115,7 @@ double MoleculeForceBiasMove::Sample(int &slice1,int &slice2, Array<int,1> &acti
         int ptcl = PathData.Mol.MembersOf(activeMol)(i);
         dVec coord = PathData.Path(slice,ptcl);
         coord -= O;
-        dVec F = PathData.Actions.MoleculeInteractions.Force(slice,ptcl); // calculate force
+        dVec F = MolAction->Force(slice,ptcl); // calculate force
         sumF += F;
         dVec lever = CalcLever(A,coord);
         sumN += cross(lever,F);
@@ -156,7 +162,7 @@ double MoleculeForceBiasMove::Sample(int &slice1,int &slice2, Array<int,1> &acti
           int ptcl = PathData.Mol.MembersOf(activeMol)(i);
           dVec coord = PathData.Path(slice,ptcl);
           coord -= Orev;
-          dVec F = PathData.Actions.MoleculeInteractions.Force(slice,ptcl); // calculate force
+          dVec F = MolAction->Force(slice,ptcl); // calculate force
           sumFrev += F;
           dVec lever = CalcLever(A,coord);
           sumNrev += cross(lever,F);

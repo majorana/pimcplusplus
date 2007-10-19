@@ -51,9 +51,14 @@ EAMPotentialClass::EAMPotentialClass(PathDataClass &pathData) :
 
 void EAMPotentialClass::Read(IOSectionClass& in)
 {
-  //  cerr << "EAM READ" << endl;
-  rho.resize(PathData.Path.NumParticles());
+  cerr << "EAM READ" << endl;
+  rho.resize(PathData.Path.NumTimeSlices(), PathData.Path.NumParticles());
   rho = 0.0;
+  conversion = 1.0;
+  cerr << "EAM default units are eV and bohr" << endl;
+  if(in.ReadVar("Prefactor",conversion)) {
+    cerr << "EAM using user-defined conversion factor " << conversion << endl;
+  }
 }
 
 
@@ -64,7 +69,7 @@ double EAMPotentialClass::SingleAction (int slice1, int slice2,
   double U = ComputeEnergy(slice1, slice2, changedParticles, level);
   int skip = (1<<level);
   double levelTau = Path.tau * (double)skip;
-  //cerr << "EAM returning U " << U << " * tau " << levelTau << " = " << levelTau*U << endl;
+  //cerr << "EAM returning U " << U << " * tau " << levelTau << " = " << levelTau*U << " over slices " << slice1 << " " << slice2 << " for ptcls " << changedParticles << endl;
   return(levelTau*U);
 }
 
@@ -82,24 +87,29 @@ double EAMPotentialClass::ComputeEnergy (int slice1, int slice2,
 			      const Array<int,1> &changedParticles, int level)
 {
   double U = 0.0;
-  //for (int counter=0; counter<Path.DoPtcl.size(); counter++)
-  //  Path.DoPtcl(counter)=true;
-
   UpdateRho(slice1, slice2, changedParticles);
 
   for(int slice = slice1; slice<=slice2; slice++) {
+    for (int counter=0; counter<Path.DoPtcl.size(); counter++)
+      Path.DoPtcl(counter)=true;
+    // SLOW!! including all terms from RHO; should be done more efficiently
+    for(int ptcl1=0; ptcl1<PathData.Path.NumParticles(); ptcl1++) {
+      U += conversion * F(rho(slice, ptcl1));
+    }
+
     for(int index1=0; index1<changedParticles.size(); index1++) {
       int ptcl1 = changedParticles(index1);
-      //Path.DoPtcl(ptcl1) = false;
+      Path.DoPtcl(ptcl1) = false;
 
-      U += F(rho(ptcl1));
+      //U += conversion * F(rho(slice, ptcl1));
 
       for(int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++) {
-        if(ptcl2 != ptcl1) {
+        if(ptcl2 != ptcl1 && Path.DoPtcl(ptcl2)) {
+          //cerr << "EAM pairs " << ptcl1 << " " << ptcl2 << endl;
           dVec r;
           double rmag;
 	      	PathData.Path.DistDisp(slice, ptcl1, ptcl2, rmag, r);
-          U += 0.5 * phi(rmag);
+          U += conversion * 0.5 * phi(rmag);
         }
       }
     }
@@ -115,9 +125,10 @@ string EAMPotentialClass::GetName()
 void EAMPotentialClass::UpdateRho(int slice1, int slice2, const Array<int,1>& activeP)
 {
   for(int slice=slice1; slice <= slice2; slice++) {
-    for(int i=0; i<activeP.size(); i++) {
+    //for(int i=0; i<activeP.size(); i++) {
+    for(int ptcl1=0; ptcl1<PathData.Path.NumParticles(); ptcl1++) {
       double newRho = 0.0;
-      int ptcl1 = activeP(i);
+      //int ptcl1 = activeP(i);
       for(int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++) {
         if(ptcl2 != ptcl1) {
           dVec r;
@@ -129,7 +140,7 @@ void EAMPotentialClass::UpdateRho(int slice1, int slice2, const Array<int,1>& ac
       //cerr << "Updating rho for ptcl " << ptcl1 << " to " << newRho << endl;
       //cerr << "  size of rho is " << rho.size() << endl;
       //cerr << "  prev value was " << rho(ptcl1) << endl;
-      rho(ptcl1) = newRho;
+      rho(slice, ptcl1) = newRho;
     }
   }
 }

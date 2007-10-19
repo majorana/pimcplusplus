@@ -65,11 +65,7 @@ void PermutationCountClass::Read(IOSectionClass &in)
 void PermutationCountClass::Accumulate()
 {
   TotalCounts++;
-#ifdef BUILD_DEV
-  PathClassDev &Path= PathData.Path;
-#else
   PathClass &Path= PathData.Path;
-#endif
   int N = PathData.Path.NumParticles();
   if (CountedAlready.size() != N) {
     CountedAlready.resize(N);
