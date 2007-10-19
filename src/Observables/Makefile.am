@@ -17,6 +17,7 @@ libobservables_la_SOURCES  =     \
     Forces.cc                    \
     Forces.h                     \
     lsapr.f                      \
+    lsapr48.f                      \
     JosephsonPathDump.h          \
     JosephsonPathDump.cc         \
     Hexatic.h                    \
@@ -65,6 +66,8 @@ libobservables_la_SOURCES  =     \
     Time.h                       \
     TimeLindenman.cc             \
     TimeLindenman.h              \
+    VacancyLocationNearby.h            \
+    VacancyLocationNearby.cc            \
     VacancyLocation.h            \
     VacancyLocation.cc           \
     VacancyHelper.h              \
