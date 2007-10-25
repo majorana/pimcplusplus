@@ -52,6 +52,33 @@ CommunicatorClass::Send (void *sendBuf, int count, MPI_Datatype datatype,
   MPI_Send (sendBuf, count, datatype, dest, tag, MPIComm);
 }
 
+void
+CommunicatorClass::Send (int toProc, double val)
+{
+  MPI_Send (&val, 1, MPI_DOUBLE, toProc, 1, MPIComm);
+}
+
+void
+CommunicatorClass::Receive (int fromProc, double &val)
+{
+  MPI_Status status;
+  MPI_Recv (&val, 1, MPI_DOUBLE, fromProc, 1, MPIComm, &status);
+}
+
+void
+CommunicatorClass::Send (int toProc, int val)
+{
+  MPI_Send (&val, 1, MPI_INT, toProc, 1, MPIComm);
+}
+
+void
+CommunicatorClass::Receive (int fromProc, int &val)
+{
+  MPI_Status status;
+  MPI_Recv (&val, 1, MPI_INT, fromProc, 1, MPIComm, &status);
+}
+
+
 void 
 CommunicatorClass::Send (int toProc, Array<double,1> &buff)
 {

@@ -92,6 +92,12 @@ public:
 	     int dest, int tag);
   void Send (int toProc, Array<double,1> &buff);
   void Send (int toProc, Array<int,1> &buff);
+
+  void Send    (int   toProc, int val);
+  void Receive (int fromProc, int &val);
+  void Send    (int   toProc, double val);
+  void Receive (int fromProc, double &val);
+
   void Broadcast (int root, int &val);
   void Broadcast (int root, bool &val);
   void Broadcast (int root, double &val);
@@ -151,6 +157,20 @@ public:
 //   void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
 //		    int recvProc,       Array<Vec2,1> &recvBuff);
   
+
+  template<int N>
+  void Send (int toProc, TinyVector<double,N> val)
+  {
+    MPI_Send(&val[0], N, MPI_DOUBLE, toProc, 1, MPIComm);
+  }
+
+  template<int N>
+  void Receive (int fromProc, TinyVector<double,N> &val)
+  {
+    MPI_Status status;
+    MPI_Recv(&val[0], N, MPI_DOUBLE, fromProc, 1, MPIComm, &status);
+  }
+
 
   template<int N>
   void Sum (Array<double,N> &sendBuff, Array<double,N> &recvBuff)
