@@ -87,9 +87,11 @@ protected:
   bool Localized, Truncated;
   Vec3 Center, uMin, uMax, uCenter;
   double TruncRadius;
+  bool Nonuniform;
   
   Isosurface WFIso;
   LinearGrid Xgrid, Ygrid, Zgrid;
+  GeneralGrid NUXgrid, NUYgrid, NUZgrid;
   Gtk::VBox IsoBox, DensityBox;
   Gtk::Label rsLabel;
   Gtk::HScale IsoScale;

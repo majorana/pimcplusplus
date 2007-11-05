@@ -29,7 +29,8 @@ WFVisualClass::WFVisualClass() :
   UpdateIsoVal(false),
   DoShift (false),
   Shift (0.0, 0.0, 0.0),
-  CMap(BLUE_WHITE_RED)
+  CMap(BLUE_WHITE_RED),
+  Nonuniform(false)
 {
   if (!Glib::thread_supported())
     Glib::thread_init();
@@ -709,10 +710,14 @@ WFVisualClass::DrawFrame(bool offScreen)
       CurrBand = band;
       Currk    = k;
       ReadWF (k, band);
-      Xgrid.Init(-0.5, 0.5, WFData.extent(0));
-      Ygrid.Init(-0.5, 0.5, WFData.extent(1));
-      Zgrid.Init(-0.5, 0.5, WFData.extent(2));
-      WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+      if (Nonuniform)
+	WFIso.Init(&NUXgrid, &NUYgrid, &NUZgrid, WFData, true);
+      else {
+	Xgrid.Init(-0.5, 0.5, WFData.extent(0));
+	Ygrid.Init(-0.5, 0.5, WFData.extent(1));
+	Zgrid.Init(-0.5, 0.5, WFData.extent(2));
+	WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+      }
       // WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
       WFIso.SetLattice (Box.GetLattice());
       xPlane.SetCenter (uCenter, uMin, uMax);
@@ -721,11 +726,15 @@ WFVisualClass::DrawFrame(bool offScreen)
       xPlane.Init(); yPlane.Init(); zPlane.Init();
     }
     if (ResetIso) {
-      Xgrid.Init(-0.5, 0.5, WFData.extent(0));
-      Ygrid.Init(-0.5, 0.5, WFData.extent(1));
-      Zgrid.Init(-0.5, 0.5, WFData.extent(2));
-      WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
-      // WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
+      if (Nonuniform) 
+	WFIso.Init(&NUXgrid, &NUYgrid, &NUZgrid, WFData, true);
+      else {
+	Xgrid.Init(-0.5, 0.5, WFData.extent(0));
+	Ygrid.Init(-0.5, 0.5, WFData.extent(1));
+	Zgrid.Init(-0.5, 0.5, WFData.extent(2));
+	WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+	// WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
+      }
       WFIso.SetLattice (Box.GetLattice());
       WFIso.SetCenter (uCenter, uMin, uMax);
       ResetIso = false;
@@ -940,7 +949,10 @@ WFVisualClass::Read(string filename)
   Xgrid.Init(-0.5, 0.5, WFData.extent(0));
   Ygrid.Init(-0.5, 0.5, WFData.extent(1));
   Zgrid.Init(-0.5, 0.5, WFData.extent(2));
-  WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+  if (Nonuniform) 
+    WFIso.Init(&NUXgrid, &NUYgrid, &NUZgrid, WFData, true);
+  else 
+    WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
   //  WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
   WFIso.SetLattice(Box.GetLattice());
   CurrBand = 0; 
@@ -1064,6 +1076,28 @@ WFVisualClass::ReadWF (int kpoint, int band)
   else
     uCenter = Vec3 (0.0, 0.0, 0.0);
   Localized = Localized && Infile.ReadVar ("radius", TruncRadius);
+
+  Nonuniform = Infile.OpenSection ("xgrid");
+  if (Nonuniform) {
+    cerr << "Read nonuniform spline.\n";
+    Array<double,1> points;
+    Infile.ReadVar ("points", points);
+    points = points - 0.5;
+    NUXgrid.Init (points);
+    Infile.CloseSection();
+    Infile.OpenSection ("ygrid");
+    Infile.ReadVar ("points", points);
+    points = points - 0.5;
+    NUYgrid.Init (points);
+    Infile.CloseSection();
+    Infile.OpenSection ("zgrid");
+    Infile.ReadVar("points", points);
+    points = points - 0.5;
+    NUZgrid.Init (points);
+    Infile.CloseSection();
+  }
+
+
   Infile.CloseSection(); // "eigenstates"
   Infile.CloseSection(); // "twist"
   Infile.CloseSection(); // "band"
