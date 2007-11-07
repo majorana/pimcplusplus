@@ -189,7 +189,7 @@ CommunicatorClass::Receive (int toProc, Array<double,1> &buff)
 void 
 CommunicatorClass::Receive (int toProc, Array<int,1> &buff)
 {
-  Receive(buff.data(), buff.size(), MPI_DOUBLE, toProc, 1);
+  Receive(buff.data(), buff.size(), MPI_INT, toProc, 1);
 }
 
 bool 

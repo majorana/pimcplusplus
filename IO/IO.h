@@ -58,6 +58,15 @@ namespace IO {
     return true;
   }
 
+  template<typename T, int LEN> bool
+  IOTreeClass::WriteVar (string name, const TinyVector<T,LEN> &val)
+  {
+    Array<T,1> aVal(LEN);
+    for (int i=0; i<LEN; i++)
+      aVal(i) = val[i];
+    WriteVar (name, aVal);
+  }
+
   template<typename T, int RANK> bool 
   IOTreeClass::WriteVar (string name, const Array<T,RANK> &val)
   {

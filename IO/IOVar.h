@@ -45,7 +45,50 @@ namespace IO {
       cerr << "Error:  unknown type in IOVarBase::Read().\n";
       abort();
     }
-  }	
+  }
+
+  template<typename T, int LEN> bool
+  IOVarBase::Read(TinyVector<T,LEN> &val) 
+  {
+    if (GetFileType() == HDF5_TYPE) {
+      IOVarHDF5<T,1>* newVar = dynamic_cast<IOVarHDF5<T,1>*>(this);
+      if (newVar == NULL) {
+	cerr << "Error in dynamic cast to IOVarHDF5.\n";
+	abort();
+      }
+      Array<T,1> aVal;
+      bool success = newVar->VarRead (aVal);
+      if (!success)
+	return false;
+      else if (aVal.size() == LEN) 
+	for (int i=0; i<LEN; i++)
+	  val[i] = aVal(i);
+      else
+	return false;
+      return true;
+    }
+    else if (GetFileType() == ASCII_TYPE) {
+      IOVarASCII<T,1>* newVar = dynamic_cast<IOVarASCII<T,1>*>(this); 
+      if (newVar == NULL) {
+	cerr << "Error in dynamic cast to IOVarASCII.\n";
+	abort();
+      }
+      Array<T,1> aVal;
+      bool success = newVar->VarRead (aVal);
+      if (!success)
+	return false;
+      else if (aVal.size() == LEN) 
+	for (int i=0; i<LEN; i++)
+	  val[i] = aVal(i);
+      else
+	return false;
+      return true;
+    }
+    else {
+      cerr << "Error:  unknown type in IOVarBase::Read().\n";
+      abort();
+    }
+  }
 
   template<typename T, int RANK> bool
   IOVarBase::Read(Array<T,RANK> &val)

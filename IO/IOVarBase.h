@@ -60,6 +60,7 @@ namespace IO {
     /// Read functions ///
     //////////////////////
     template<typename T> bool Read(T &val);
+    template<typename T, int  LEN> bool Read(TinyVector<T,LEN> &val);
     template<typename T, int RANK> bool Read(Array<T,RANK> &val);
     template<typename T,  int RANK,    typename T0, typename T1, typename T2,
 	     typename T3, typename T4, typename T5, typename T6, typename T7,
