@@ -239,10 +239,47 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, d
 // of a molecule using ArbitraryRotate
 // i.e. it generates its own axis of rotation
 void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, double theta){
-  // generate a unit vector
+  // generate a unit vector on the unit sphere!
   dVec axis;
-  for(int i = 0; i<3; i++) axis(i) = PathData.Path.Random.Local()-0.5;
+  double x = 2 * (PathData.Path.Random.Local()-0.5);
+  double A = sqrt(1 - x*x);
+  double y = 2 * A * (PathData.Path.Random.Local()-0.5);
+  if((PathData.Path.Random.Local()-0.5)<0)
+    y *= -1;
+  double z = sqrt(1 - x*x - y*y);
+  if((PathData.Path.Random.Local()-0.5)<0)
+    z *= -1;
+  //cout << x << " " << y << " " << z << endl;
+  axis(0) = x; axis(1) = y; axis(2) = z;
   RotateMol(slice, activePtcls, axis, theta);
+}
+
+// Rotation of molecule about x-, y-, or z-axis, randomly chosen
+void MolMoveClass::RotateMolXYZ(int slice, Array<int,1>& activePtcls, double theta){
+  int x,y;
+  int z = (int)floor(3*PathData.Path.Random.Local());
+  if (z == 0){
+    x = 1;
+    y = 2;
+  }
+  else if (z == 1){
+    x = 2;
+    y = 0;
+  }
+  else if (z == 2){
+    x = 0;
+    y = 1;
+  }
+	int mol = activePtcls(0);
+  // find COM vector
+  dVec O = GetCOM(slice, mol);
+	// nonsense to rotate the ptcl at the origin; "O", so loop starts from 1 not 0
+  for(int ptcl = 1; ptcl<activePtcls.size(); ptcl++){
+    dVec P = PathData.Path(slice, activePtcls(ptcl)) - O;
+    PathData.Path.PutInBox(P);
+    dVec newP = RotateXYZ(P, x, y, z, theta) + O;
+    PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
+  }
 }
 
 void MolMoveClass::MoveDimerSeparation(int slice, Array<int,1> mol1, Array<int,1> mol2, double Sigma){
@@ -330,3 +367,19 @@ dVec ArbitraryRotate(dVec axis,dVec coord, double phi){
   //return (Scale(newcoord,perp_mag) + coord_aligned);
 }
 
+// Rotate a coodinate about the x-, y-, or z-axis
+// indices u1, u2, u3 should be a permutation
+// of [0,1,2] to specify the axis about which
+// to rotate
+dVec RotateXYZ(dVec coord,int u1,int u2,int u3,double theta)
+{
+  double x0 = coord[u1];
+  double y0 = coord[u2];
+  double costheta = cos(theta);
+  double sintheta = sin(theta);
+  dVec new_coord;
+  new_coord[u1] = x0*costheta - y0*sintheta;
+  new_coord[u2] = y0*costheta + x0*sintheta;
+  new_coord[u3] = coord[u3];
+  return new_coord;
+}

@@ -362,8 +362,8 @@ PathClass::InitPaths (IOSectionClass &in)
     ///    cerr<<"about to read the string"<<endl;
     in.ReadVar ("InitPaths", InitPaths);
     ///    cerr<<"Read "<<InitPaths<<endl;
-    string Replicate;
-    in.ReadVar ("Replicate", Replicate);
+    bool replicate = false;
+    in.ReadVar ("Replicate", replicate);
 //      cerr<<"Printing Permutation InitPath c"<<endl;
 //      for (int ptcl=0;ptcl<NumParticles();ptcl++)
 //	cerr<<Permutation(ptcl)<<endl;
@@ -618,9 +618,7 @@ PathClass::InitPaths (IOSectionClass &in)
     }
     else if (InitPaths == "FILE"){
       ///      cerr<<"I'm going to read the file now"<<endl;
-      bool replicate = false;
-      if (Replicate == "ON"){
-        replicate = true;
+      if (replicate){
         perr << "Replicate 'ON'; Using time slice 0 for all time slices." << endl;
       }
       string pathFile;

@@ -19,7 +19,7 @@
 #include "../Moves/MoveUtils.h"
 
 KineticRotorClass::KineticRotorClass(PathDataClass &pathData ) : 
-  ActionBaseClass (pathData)
+  RotorActionBaseClass (pathData)
 {
 }
 
@@ -39,17 +39,44 @@ void KineticRotorClass::Read(IOSectionClass& in)
   B = 1.0/(2*Ib);//5.7207e-5;
   C = 1.0/(2*Ic);//3.8105e-5;
 
-  int setJmax;
-  assert(in.ReadVar("SetJmax",setJmax));
-  int setPrec = 100;
-  assert(in.ReadVar("SetPrecision",setPrec));
+  //int setJmax;
+  //assert(in.ReadVar("SetJmax",setJmax));
+  //int setPrec = 100;
+  //assert(in.ReadVar("SetPrecision",setPrec));
   //rho = new RotorRhoClass(A, B, C, setJmax, setPrec); 
   //rho->SetTau(PathData.Path.tau);
+  ////rho->Init(setJmax, 0., M_PI/2, 1000);
+  //rho->Init(setJmax, 0., M_PI, 1999);
+  //cerr << "WARNING: FOR TESTING I AM doing explicit comutation of rho: THIS WILL BE SLOW" << endl;
 
-  //cerr << "WARNING: FOR TESTING I AM NOT READING IN GRIDPOINTS: THIS WILL BE SLOW" << endl;
   ReadGridPoints(in);
   ReadEnergyGridPoints(in);
   cerr << "LEAVING KINETIC ROTOR READ" << endl;
+
+  // debugging init
+  //err.open("Rotor.err.dat");
+  //tolrho.open("Rotor.rho.tolerance.dat");
+  //overX.open("Rotor.overflow.exact.dat");
+  //overS.open("Rotor.overflow.spline.dat");
+  tout.open("Rotor.theta.dat");
+  pout.open("Rotor.phi.dat");
+  chiout.open("Rotor.chi.dat");
+  thist.resize(300);
+  phist.resize(300);
+  chist.resize(300);
+  for(int z=0; z<thist.size(); z++) {
+    thist(z) = 0;
+    phist(z) = 0;
+    chist(z) = 0;
+  }
+  cerr << "arrays init " << thist.size() << " " << phist.size() << " " << chist.size() << endl;
+  DT = M_PI/300;
+  DP = 2*M_PI/300;
+  times=0;
+  maxRhoS = 0.;
+  maxRhoX = 0.;
+  TotalZ = 0.; TotalE = 0.; TotalESq = 0.;
+  THETA = 0; PHI = 0; CHI = 0;
 }
 
 void KineticRotorClass::ReadGridPoints(IOSectionClass& in)
@@ -124,7 +151,7 @@ void KineticRotorClass::ReadGridPoints(IOSectionClass& in)
       values(nt, np) = logRho;
       if(checkP == 0) {//) && checkC == 0) {
         countT++;
-        cout << countT << " " << (*ThetaGrid)(nt) << " " << (*PhiGrid)(np) << " " << values(nt,np) << " " << exp(values(nt,np)) << endl;
+        //cout << countT << " " << (*ThetaGrid)(nt) << " " << (*PhiGrid)(np) << " " << values(nt,np) << " " << exp(values(nt,np)) << endl;
       }
       count ++;
       //}
@@ -209,6 +236,7 @@ double
 KineticRotorClass::SingleAction (int slice1, int slice2,
 			    const Array<int,1> &changedParticles, int level)
 {
+  //cerr << "KineticRotor slices " << slice1 << " " << slice2 << endl;
   //cerr << "KineticRotor testing..." << endl;
   //int numP = 1000;
   ////double dt = M_PI/numP;
@@ -224,8 +252,8 @@ KineticRotorClass::SingleAction (int slice1, int slice2,
   //  //  phi = 2*(dt*p + t0);
   //  //  for(int c=0; c<numP; c++) {
   //  //    chi = 2*(dt*c + t0);
-  //      double KE = -1 * EnergySpline(theta, phi, chi);
-  //      double logR = spline(theta, phi, chi);
+  //      double KE = EnergySpline(theta, phi + chi);
+  //      double logR = spline(theta, phi + chi);
   //      cout << theta << " " << phi << " " << chi << " " << logR << " " << exp(logR) << " " << KE << endl;
   //  //  }
   //  //}
@@ -257,55 +285,217 @@ KineticRotorClass::SingleAction (int slice1, int slice2,
     for (int slice=slice1; slice < slice2;slice+=skip) {
       double theta, phi, chi;
       getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
+      //double tInv, pInv, cInv;
+      //getAngles(slice+skip, mol, slice, mol, tInv, pInv, cInv);
+      //cerr << "ANGLES " << phi << " " << theta << " " << chi << endl;
+      //cerr << "       " << pInv << " " << tInv << " " << cInv << endl;
+
       // explicit computation:
-      //cout << "Calling CalcRho with angles " << phi << " " << theta << " " << chi << " between slices " << slice << " " << slice+skip << endl;
-      //double r = rho->CalcRhoAllJExact(phi, theta, chi);
-      //cerr << '\n';
-      //// need to check for negative rho; use noisy correction
+      //cerr << "Calling CalcRho with angles " << phi << " " << theta << " " << chi << " between slices " << slice << " " << slice+skip << endl;
+      //double r = rho->CalcRhoAllJ(phi, theta, chi);
+      //////cerr << endl;
+      ////// need to check for negative rho; use noisy correction
       //if(r<0) {
-      //  cout << "Got NEGATIVE rho " << r;
-      //  double a = -1 * PathData.Path.Random.Local() * r;
-      //  cout << " generated noise " << a << endl;
-      //  r = a;
+      //  //err << "Got NEGATIVE exact rho " << r << " " << phi << " " << theta << " " << chi << endl;
+      //  //double a = -1 * PathData.Path.Random.Local() * r;
+      //  //cout << " generated noise " << a << endl;
+      //  //r = a;
+      //  r = abs(r);
       //}
-      //double logRho = log(r);
-      //cout << "Computed rho " << r << " and log " << logRho << endl;
+      //double XlogRho = log(r);
+      //////cerr << "Computed exact rho " << r << " and log " << XlogRho;// << endl;
+
       //cerr << "Accessed spline at indices " << theta << " " << phi << " " << chi << " value ";
-      //double logRho = spline(theta, phi, chi);
+      // 2D spline: rho is a function of **sum** of phi and chi
       double logRho = spline(theta, phi + chi);
-      //cerr << logRho << endl; 
-      TotalK += logRho;
+      //cout << XlogRho << " " << logRho << " " << logRho - XlogRho << endl;
+      //double logRho = spline(theta, phi, chi);
+      //cerr << "Spline logRho " << logRho << endl; 
+      //if(abs(XlogRho-logRho) > 1e-2)
+      //  tolrho << theta << " " << phi << " " << chi << " " << XlogRho << " " << logRho << endl;
+      TotalK -= logRho;
+      //TotalK += XlogRho;
+      //if(theta > 1) {
+      //  cout << slice << " " << theta << " " << chi+phi << " " << logRho << " " << exp(logRho) << endl;
+      //}
+      //cout << slice << " " << theta << " " << chi+phi << " " << logRho << " || ";
     }
   }
   //cout << "returning Action " << TotalK << endl << endl;
   return (TotalK);
 }
 
+            // cang checkangles
+            // get coords; check getAngles
+            //dVec u(cos(phi)*sin(theta), sin(phi)*sin(theta), cos(theta));
+            //dVec ref=cross(u,(0.,0.,1.));
+            //double cchi, schi;
+            //cchi = cos(chi); schi=sin(chi);
+            //dVec perp = cross(u,ref);
+            //dVec p = Renormalize(ref,cchi) + Renormalize(perp, schi);
+            ////double x = 2 * (PathData.Path.Random.Local() - 0.5);
+            ////double y = 2 * (sqrt(1-x*x)) * (PathData.Path.Random.Local() - 0.5);
+            ////double z = (-x*u(0) -y*u(1))/u(2);
+            ////chi = GetAngle(ref, p);
+            //err << theta << " " << phi << " " << chi << " ";// << u << " " << p << endl;
+            ////err << p(0) << " " << p(1) << " " << p(2) << " " << Mag(p) << " " << chi << endl;
+            //u = Renormalize(u, 0.58588);
+            //p = Renormalize(p, 0.75695);
+            //dVec p2a = u + p;
+            //dVec p2b = u - p;
+            //dVec p1a(-0.75695, 0., 0.58588);
+            //dVec p1b(0.75695, 0., 0.58588);
+
+            //// FROM GETANGLES
+            //// compute bisector, norm, and in-plane unit vectors
+            //dVec b1 = GetBisector(p1a, p1b);
+            //dVec n1 = Normalize(cross(p1a, p1b));
+            //dVec u1 = Normalize(cross(b1, n1));
+            //dVec b2 = GetBisector(p2a, p2b);
+            //dVec n2 = Normalize(cross(p2a, p2b));
+            //dVec u2 = Normalize(cross(b2, n2));
+
+            //// theta is angle between in-plane vectors u
+            //// (rotation about norm to molecule plane)
+            //if(isEqual(u1, u2)) {
+            //  theta = 0.;
+            //  phi = GetAngle(b2, b1);
+            //  chi = 0.;
+            //}
+            //else if(isEqualOpp(u1, u2)) {
+            //  theta = M_PI;
+            //  dVec newB = -1 * b1;
+            //  phi = GetAngle(b2, newB);
+            //  chi = 0.;
+            //} else {
+            //  theta = GetAngle(u2, u1);
+            //  // axis of rotation for theta is cross of in-plane vectors u
+            //  dVec A;
+            //  A = Normalize(cross(u1,u2));
+
+            //  // phi is angle between norm n1 and A
+            //  phi = GetAngle(n1, A);
+            //
+            //  // chi is angle between norm A and n2
+            //  chi = GetAngle(A, n2);
+            //}
+            //err << theta << " " << phi << " " << chi << endl;
+
 double KineticRotorClass::d_dBeta (int slice1, int slice2,
 			      int level)
 {
+  //cerr << "COORDS SLICE0 SLICE1 SLICE2" << endl;
+  //cerr << PathData.Path(0,0) << PathData.Path(1,0) << PathData.Path(2,0) << endl;
+  //cerr << PathData.Path(0,1) << PathData.Path(1,1) << PathData.Path(2,1) << endl;
+  //cerr << PathData.Path(0,2) << PathData.Path(1,2) << PathData.Path(2,2) << endl;
+  //
+  int numS = 0;
   int M = PathData.Path.NumTimeSlices()-1;
-  cerr << "Calculating energy over slices " << slice1 << " " << slice2 << endl;
+  //cerr << "Calculating energy over slices " << slice1 << " " << slice2 << endl;
   double TotalK = 0.0;
+  double TotalXK = 0.0;
   double Z = 0.0;
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
+  double theta, phi, chi;
   for (int molIndex=0; molIndex<PathData.Mol.NumMol(); molIndex++){
     int mol = molIndex;
     for (int slice=slice1; slice < slice2;slice+=skip) {
+      numS++;
       double theta, phi, chi;
       getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
-      //double KE = rho->CalcEnergyExact(phi, theta, chi);
-      // typo error: negatiave sign in tabulated energy, corrected here!!
-      double KE = -1 * EnergySpline(theta, phi + chi);
+
+      //double XKE = rho->CalcEnergyAllJ(phi, theta, chi);
+      //TotalZ += 1;
+      //TotalE += XKE;
+      //cout << TotalE/TotalZ << " " << XKE << endl;
+      //cerr << slice << " " << slice+skip << " " << theta << " " << phi << " " << chi << endl;
+      //int count=0;
+      //for(int t=0; t<=200; t++) {
+      //  for(int p=0; p<=500; p++) {
+      //    for(int c=0; c<=500; c++) {
+      //      //double phi = p * 2 * M_PI/50;
+      //      //double chi = c * 2 * M_PI/50;
+      //      //double theta = t * M_PI/200;
+      //theta = M_PI * PathData.Path.Random.Local();
+      //phi = 2 * M_PI * PathData.Path.Random.Local();
+      //chi = 2 * M_PI * PathData.Path.Random.Local();
+      //double w = sin(theta);// * M_PI/200 * M_PI/25 * M_PI/25;
+      //      double w = 1.;
+
+      //      double Z, E, ESq;
+      //      //rho->Quadrature(phi + chi, theta, Z, E, ESq);
+      //      //cerr << theta << " " << phi+chi << " " << Z << " " << E << " " << ESq << endl;
+      //      Z = exp(spline(theta, phi+chi));
+      //      E = EnergySpline(theta, phi+chi);
+      //      ESq = 0.;
+      //      TotalZ += w*Z*Z;
+      //      TotalE += w*Z*Z*E;
+      //      TotalESq += w*Z*ESq;
+      //      //count++;
+      // test angular distribution
+      times++;
+      int index = int(theta/DT);
+      //thist(index) += w*Z*Z;
+      thist(index) += 1;
+      index = int(phi/DP);
+      //phist(index) += w*Z*Z;
+      phist(index) += 1;
+      index = int(chi/DP);
+      //chist(index) += w*Z*Z;
+      chist(index) += 1;
+      //      if(count%500000 == 0)
+      //        cerr << count << " " << TotalE/TotalZ << " " << TotalZ << endl;
+      //    }
+      //  }
+      //}
+      if(times == 500000) {
+        for(int n=0; n<300; n++) {
+          //tout << DT*(n+1) << " " << thist(n)/TotalZ << " " << double(thist(n))/times*sin(DT*(n+1)) << endl;
+          //pout << DP*(n+1) << " " << phist(n)/TotalZ << endl;
+          //chiout << DP*(n+1) << " " << chist(n)/TotalZ << endl;
+          tout << DT*(n+1) << " " << thist(n)/times << " " << double(thist(n))/times*sin(DT*(n+1)) << endl;
+          pout << DP*(n+1) << " " << phist(n)/times << endl;
+          chiout << DP*(n+1) << " " << chist(n)/times << endl;
+        }
+        exit(1);
+      }
+      
+       
+      //cout << theta << " " << phi+chi << " " << TotalE/TotalZ << " " << E/Z << endl;
+      //exit(1);
+        
+        
+      //typo error: negatiave sign in tabulated energy, corrected here!!
+      //double KE = -1 * EnergySpline(theta, phi + chi);
       double z = exp(spline(theta, phi + chi));
-      //cerr << slice << " " << mol << " " << phi << " " << theta << " " << chi << " " << KE << endl;
+      double KE = EnergySpline(theta, phi + chi);
+      //cerr << slice << " " << mol << " " << phi << " " << theta << " " << chi << " " << KE << " " << XKE << endl;
+      //TotalE += KE*z*z;
+      //TotalK += KE*z*z;
+      ////TotalXK += XKE;
+      //TotalZ += z*z;
+      TotalE += KE;
+      //TotalXK += XKE;
+      TotalZ += 1;
       TotalK += KE;
-      Z += z;
+      //cerr << slice << " " << KE << " " << TotalK << endl;
+      //if(abs(XKE) > maxRhoX) {
+      //  overX << theta << " " << phi << " " << chi << " " << slice << " " << XKE << endl;
+      //  maxRhoX = abs(XKE);
+      //}
+      //if(abs(KE) > maxRhoS) {
+      //  overS << theta << " " << phi << " " << chi << " " << slice << " " << KE << " " << KE/z << endl;
+      //  maxRhoS = abs(KE);
+      //}
     }
   }
-  //cerr << TotalK << " " << Z << " " << TotalK/Z << endl;
-  return (TotalK/(M*Z));
+  //cerr << "returning " << TotalK/M << " slices " << numS << " " << " divide by " << M << endl;
+  //cerr << "==============  Z  KE/Z  XKE/Z " << endl;
+  //cout << TotalE/TotalZ << " " << 2*TotalE/TotalZ << " " << TotalZ << " " << endl;
+  //cout << TotalK << " " << TotalK/M << " " << TotalE/TotalZ << " " << TotalE/(M*TotalZ) << endl;//" " << theta << " " << phi+chi << endl;
+  return (TotalK);
+  //return (TotalE/TotalZ);
 }
 
 
@@ -315,38 +505,81 @@ KineticRotorClass::GetName()
   return "KineticRotor";
 }
 
-const double TOL = 1e-6;
+const double TOL = 1e-5;
 
 bool isEqual(dVec u, dVec v)
 {
+  bool eq = false;
   if (abs(u(0) - v(0))< TOL) {
     if (abs(u(1) - v(1)) < TOL) {
       if (abs(u(2) - v(2)) < TOL) {
-    return true;
+        eq = true;
       }
     }
   }
-  else
-    return false;
+  return eq;
 }
 
 bool isEqualOpp(dVec u, dVec v)
 {
-  if (u(0) + v(0) < TOL) {
-    if (u(1) + v(1) < TOL) {
-      if (u(2) + v(2) < TOL) {
-        return true;
+  bool eq = false;
+  if (abs(u(0) + v(0)) < TOL) {
+    if (abs(u(1) + v(1)) < TOL) {
+      if (abs(u(2) + v(2)) < TOL) {
+        eq = true;
       }
     }
   }
-  else
-    return false;
+  return eq;
 }
 
+// untested trial version
+//void RotorActionBaseClass::getAngles(int slice1, int mol1, int slice2, int mol2, double& theta, double& phi, double& chi)
+//{
+//  // get molecule coordinates WRT molecule center
+//  Array<int,1> mol1Members, mol2Members;
+//  PathData.Mol.MembersOf(mol1Members, mol1);
+//  PathData.Mol.MembersOf(mol2Members, mol2);
+//  dVec p1a = PathData.Path(slice1, mol1Members(1)) - PathData.Path(slice1, mol1Members(0));
+//  dVec p1b = PathData.Path(slice1, mol1Members(2)) - PathData.Path(slice1, mol1Members(0));
+//  dVec p2a = PathData.Path(slice2, mol2Members(1)) - PathData.Path(slice2, mol2Members(0));
+//  dVec p2b = PathData.Path(slice2, mol2Members(2)) - PathData.Path(slice2, mol2Members(0));
+//
+//  // compute bisector, norm, and in-plane unit vectors
+//  dVec b1 = GetBisector(p1a, p1b);
+//  dVec n1 = Normalize(cross(p1a, p1b));
+//  dVec u1 = Normalize(cross(b1, n1));
+//  dVec b2 = GetBisector(p2a, p2b);
+//  dVec n2 = Normalize(cross(p2a, p2b));
+//  dVec u2 = Normalize(cross(b2, n2));
+//
+//  double theta1 = acos(b1(2));
+//  double theta2 = acos(b2(2));
+//  double phi1 = acos(b1(0)/sin(theta1));
+//  double phi2 = acos(b2(0)/sin(theta2));
+//  dVec perp1 = p1a - Renormalize(b1,0.75695);
+//  dVec ref1 = Normalize(cross(b1,(0.,0.,1.)));
+//  double chi1 = GetAngle(ref1, perp1);
+//  dVec perp2 = p2a - Renormalize(b2,0.75695);
+//  dVec ref2 = Normalize(cross(b2,(0.,0.,1.)));
+//  double chi2 = GetAngle(ref2, perp2);
+//
+//  theta = theta2 - theta1;
+//  phi = phi2 - phi1;
+//  chi = chi2 - chi1;
+//  while(theta<0)
+//    theta += M_PI;
+//  while(phi<0)
+//    phi += 2*M_PI;
+//  while(chi<0)
+//    chi += 2*M_PI;
+//}
+
+// original version to use correct euler conventions!
 // map cartesian coordinates of two WATER molecules
 // to an angular displacement expressed in terms of Euler angles
 // Note this is specialized for a 3D rotor such as WATER!!
-void KineticRotorClass::getAngles(int slice1, int mol1, int slice2, int mol2, double& theta, double& phi, double& chi)
+void RotorActionBaseClass::getAngles(int slice1, int mol1, int slice2, int mol2, double& theta, double& phi, double& chi)
 {
   // get molecule coordinates WRT molecule center
   Array<int,1> mol1Members, mol2Members;
@@ -367,32 +600,43 @@ void KineticRotorClass::getAngles(int slice1, int mol1, int slice2, int mol2, do
 
   // theta is angle between in-plane vectors u
   // (rotation about norm to molecule plane)
-  theta = GetAngle(u2, u1);
-
-  // axis of rotation for theta is cross of in-plane vectors u
-  dVec A;
-  if(isEqual(u1,u2))
-    A = n1;
-  else if(isEqualOpp(u1, u2))
-    A = n1;
-  else
+  if(isEqual(u1, u2)) {
+    theta = 0.;
+    phi = GetAngle(b2, b1);
+    dVec N = Normalize(cross(b1, b2));
+    if(isEqualOpp(N, u1))
+      phi = 2*M_PI - phi;
+    chi = 0.;
+  }
+  else if(isEqualOpp(u1, u2)) {
+    theta = M_PI;
+    phi = 0.;
+    dVec newB = -1 * b1;
+    chi = GetAngle(b2, newB);
+    dVec N = Normalize(cross(newB, b2));
+    if(isEqualOpp(N, u2))
+      chi = 2*M_PI - chi;
+  } else {
+    theta = GetAngle(u2, u1);
+    // axis of rotation for theta is cross of in-plane vectors u
+    dVec A;
     A = Normalize(cross(u1,u2));
 
-  // phi is angle between norm n1 and A
-  if(isEqual(n1,A))
-    phi = 0.;
-  else if(isEqualOpp(A, n1))
-    phi = M_PI;
-  else
+    // phi is angle between norm n1 and A
     phi = GetAngle(n1, A);
+    dVec N = Normalize(cross(n1, A));
+    if(isEqualOpp(N,u1))
+      phi = 2*M_PI - phi;
   
-  // chi is angle between norm A and n2
-  if(isEqual(A, n2))
-    chi = 0.;
-  else if(isEqualOpp(A, n2))
-    chi = M_PI;
-  else
+    // chi is angle between norm A and n2
     chi = GetAngle(A, n2);
+    N = Normalize(cross(A, n2));
+    if(isEqualOpp(N,u2))
+      chi = 2*M_PI - chi;
+  }
+
+  //cerr << "ANGLES " << phi << " " << theta << " " << chi << endl;
+  //cerr << "       " << phiInv << " " << thetaInv << " " << chiInv << endl;
 
   //if(isnan(chi)) {
   //  cerr << "Crap chi=NAN A " << A << " " << n1 << " " << n2 << endl;
@@ -415,13 +659,13 @@ void KineticRotorClass::getAngles(int slice1, int mol1, int slice2, int mol2, do
 }
 
 FixedAxisRotorClass::FixedAxisRotorClass(PathDataClass &pathData ) : 
-  ActionBaseClass (pathData), rotor(pathData)
+  RotorActionBaseClass (pathData)
 {
   // hard-wired values
   Ia = 4381.1018999999997;
   Ib = 8739.8981000000003;
   Ic = 13121.0;
-  C = 0.5*2.65146*0.0493089;
+  C = 1.;//0.5*2.65146*0.0493089;
 }
 
 double FixedAxisRotorClass::SingleAction (int slice1, int slice2, 
@@ -449,7 +693,7 @@ double FixedAxisRotorClass::SingleAction (int slice1, int slice2,
     int mol = molRoster[molIndex];
     for (int slice=slice1; slice < slice2;slice+=skip) {
       double theta, phi, chi;
-      rotor.getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
+      getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
       double r = CalcRho(phi, theta, chi);
       // need to check for negative rho; use noisy correction
       //if(r<0) {
@@ -462,7 +706,7 @@ double FixedAxisRotorClass::SingleAction (int slice1, int slice2,
       double logRho = log(r);
       //cout << "Computed FIXED AXIS rho " << r << " and log " << logRho << endl;
       //double logRho = spline(theta, phi, chi);
-      TotalK += logRho;
+      TotalK -= logRho;
     }
   }
   //cout << "returning FIXED AXIS Action " << TotalK << endl << endl;
@@ -481,14 +725,13 @@ double FixedAxisRotorClass::d_dBeta (int slice1, int slice2, int level)
     int mol = molIndex;
     for (int slice=slice1; slice < slice2;slice+=skip) {
       double theta, phi, chi;
-      rotor.getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
-      double r = CalcRho(phi, theta, chi);
-      TotalK += r * CalcFAEnergy(phi, theta, chi);
-      Z += r;
+      getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
+      //double r = CalcRho(phi, theta, chi);
+      TotalK += CalcFAEnergy(phi, theta, chi);
+      //Z += r;
     }
   }
-  return (TotalK/(M*Z));
-
+  return (TotalK);
 }
 
 void FixedAxisRotorClass::Read (IOSectionClass &in)
@@ -524,17 +767,19 @@ double FixedAxisRotorClass::CalcRho(double phi, double theta, double psi)
   double sinG2 = sin(gamma/2);
   double gammaOverSinG2 = gamma/sinG2;
   //if(phi==0. && psi==0. && theta==0.)
-  if((phi==0. && psi==0.) || theta==0.)
+  if(gamma<TOL) {
     gammaOverSinG2 = 2.;
+  }
 
-  double nDotI = eta*eta*Ib + xi*xi*Ic + zeta*zeta*Ia;
+  double nDotI = (eta*eta*Ib + xi*xi*Ic + zeta*zeta*Ia);///(eta*eta + xi*xi + zeta*zeta);
 
   double SFA;
   SFA = 0.5 * gammaOverSinG2 * gammaOverSinG2 * nDotI/tau;
+  //cerr << "FA ndoti " << nDotI << " tau " << tau << " gammaOSin " << gammaOverSinG2 << " SFA " << SFA << " angles " << phi << " " << theta << " " << psi << endl;
 
-  double D = sqrt((Ia * Ib * Ic)/(tau*tau*tau))*gammaOverSinG2;
+  double D = 0.5 * sqrt((Ia * Ib * Ic)/(tau*tau*tau))*gammaOverSinG2;
 
-  double Q = C * D * exp(-SFA);
+  double Q = D * exp(-SFA);
   //cerr << "C " << C << " D " << D << " SFA " << SFA << endl;
   return Q;
 }
@@ -553,17 +798,21 @@ double FixedAxisRotorClass::CalcFAEnergy(double phi, double theta, double psi)
   //if(gammaOverSinG2 > 1e2) {
   //  cerr << phi << " " << theta << " " << psi << " " << gamma << " " << sinG2 << " " << gammaOverSinG2 << endl;
   //}
-  if((phi==0. && psi==0.) || theta==0.)
-    gammaOverSinG2 = 2.;
+  //if((phi==0. && psi==0.) || theta==0.)
+  //  gammaOverSinG2 = 2.;
+  if(gamma<TOL) {
+      gammaOverSinG2 = 2.;
+  }
 
-  //double nDotI = eta*eta*Ib + xi*xi*Ic + zeta*zeta*Ia;
+  double nDotI = (eta*eta*Ib + xi*xi*Ic + zeta*zeta*Ia);///(eta*eta + xi*xi + zeta*zeta);
 
   //double SFA;
   //SFA = 0.5 * gammaOverSinG2 * gammaOverSinG2 * nDotI/tau;
 
-  //double D = sqrt((Ia * Ib * Ic)/(tau*tau*tau))*gammaOverSinG2;
+  //double D = 0.5 * sqrt((Ia * Ib * Ic)/(tau*tau*tau))*gammaOverSinG2;
 
-  double Q = 1.0/(2 * tau * tau) * gammaOverSinG2 * gammaOverSinG2
+  double Q = (-1.0 * nDotI * gammaOverSinG2 * gammaOverSinG2)/(2 * tau * tau)
     + 1.5/tau;
+
   return Q;
 }

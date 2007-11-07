@@ -30,6 +30,20 @@
 ////#include "../Rotor/RhoFixedAxis.h"
 //#include "../Rotor/legendre/legendre.h"
 
+class RotorActionBaseClass : public ActionBaseClass
+{
+  public:
+  void getAngles(int slice1, int mol1, int slice2, int mol2, double& theta, double& phi, double& chi);
+
+  RotorActionBaseClass(PathDataClass &pathData) :
+    ActionBaseClass(pathData)
+    {
+    }
+};
+
+bool isEqualOpp(dVec u, dVec v);
+bool isEqual(dVec u, dVec v);
+
 /// The KineticRotorClass calculates the 
 /// rotational kinetic part of the action 
 /// for a rigid asymmetric rotor.
@@ -38,7 +52,7 @@
 /// \f$ K \equiv \left(4\pi\lambda\tau\right)^{-\frac{ND}{2}} 
 /// \exp\left[-\frac{(R-R')^2}{4\lambda\tau}\right] \f$
 
-class KineticRotorClass : public ActionBaseClass
+class KineticRotorClass : public RotorActionBaseClass
 {
   //moments of inertia
   double Ia, Ib, Ic;
@@ -58,7 +72,16 @@ class KineticRotorClass : public ActionBaseClass
 
   // explicit calculatoin for testing
   //RotorRhoClass* rho; 
-   
+
+  // some things for debugging
+  //ofstream err, tolrho, overX, overS;
+  ofstream tout, pout, chiout;
+  Array<double,1> thist, phist, chist;
+  double DT, DP;
+  int times;
+  double maxRhoX, maxRhoS;
+  double TotalZ, TotalE, TotalESq;
+  double THETA, PHI, CHI;
 public:
   int NumImages;
 
@@ -76,18 +99,16 @@ public:
 //			   int level,
 //			   double forcedTau);
   
-  void getAngles(int slice1, int mol1, int slice2, int mol2, double& theta, double& phi, double& chi);
   string GetName();
   inline void SetNumImages (int num) { NumImages = num; }
   KineticRotorClass (PathDataClass &pathData);
 };
 
 
-class FixedAxisRotorClass : public ActionBaseClass
+class FixedAxisRotorClass : public RotorActionBaseClass
 {
   double Ia, Ib, Ic;
   double C;
-  KineticRotorClass rotor;
 
   public:
 
