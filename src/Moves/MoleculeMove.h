@@ -22,6 +22,7 @@
 
 class MoleculeRotate : public MolMoveClass
 {
+  bool doAllSlices;
  public:
   double Theta;
   void Set(double setTheta);
