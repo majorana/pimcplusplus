@@ -30,6 +30,7 @@ class MolMoveClass: public LocalStageClass{
   void RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, double theta);
   void RotateMol(int slice, Array<int,1>& activePtcls, double theta);
   void RotateMolXYZ(int slice, Array<int,1>& activePtcls, double theta);
+  void RotateMolXYZ(Array<int,1>& Slices, Array<int,1>& activePtcls, double theta);
   void StressAngle(int slice, int ptcl, dVec axis, double theta);
   void StressBond(int slice, int ptcl, int mol, double s);
   void Read (IOSectionClass &in);

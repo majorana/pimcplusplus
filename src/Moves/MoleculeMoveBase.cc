@@ -256,6 +256,13 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, double theta)
 
 // Rotation of molecule about x-, y-, or z-axis, randomly chosen
 void MolMoveClass::RotateMolXYZ(int slice, Array<int,1>& activePtcls, double theta){
+  Array<int,1> slices(1);
+  slices(0) = slice;
+  RotateMolXYZ(slices, activePtcls, theta);
+}
+
+// Rotation of molecule about x-, y-, or z-axis, randomly chosen
+void MolMoveClass::RotateMolXYZ(Array<int,1>& Slices, Array<int,1>& activePtcls, double theta){
   int x,y;
   int z = (int)floor(3*PathData.Path.Random.Local());
   if (z == 0){
@@ -272,13 +279,16 @@ void MolMoveClass::RotateMolXYZ(int slice, Array<int,1>& activePtcls, double the
   }
 	int mol = activePtcls(0);
   // find COM vector
-  dVec O = GetCOM(slice, mol);
-	// nonsense to rotate the ptcl at the origin; "O", so loop starts from 1 not 0
-  for(int ptcl = 1; ptcl<activePtcls.size(); ptcl++){
-    dVec P = PathData.Path(slice, activePtcls(ptcl)) - O;
-    PathData.Path.PutInBox(P);
-    dVec newP = RotateXYZ(P, x, y, z, theta) + O;
-    PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
+  for(int s=0; s<Slices.size(); s++) {
+    int slice = Slices(s);
+    dVec O = GetCOM(slice, mol);
+	  // nonsense to rotate the ptcl at the origin; "O", so loop starts from 1 not 0
+    for(int ptcl = 1; ptcl<activePtcls.size(); ptcl++){
+      dVec P = PathData.Path(slice, activePtcls(ptcl)) - O;
+      PathData.Path.PutInBox(P);
+      dVec newP = RotateXYZ(P, x, y, z, theta) + O;
+      PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
+    }
   }
 }
 
