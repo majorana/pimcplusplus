@@ -21,6 +21,8 @@
 ///particles it has
 void KineticClass::Read(IOSectionClass& in)
 {
+  NumImages = 0;
+  in.ReadVar("NumImages",NumImages);
 }
 
 KineticClass::KineticClass(PathDataClass &pathData ) : 
