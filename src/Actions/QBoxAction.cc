@@ -24,6 +24,16 @@ QBoxActionClass::QBoxActionClass(PathDataClass &pathData) : ActionBaseClass (pat
 }
 	
 double QBoxActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level){
+  if(slice1 == 0 && slice2 == 0){
+    slice1 -= 1;
+    slice1 += 1;
+  }
+  else if (slice1 == 0 && slice2 == PathData.Path.TotalNumSlices-1) {
+    slice1 -= 1;
+    slice2 += 1;
+  }
+  slice1 += 1;
+  slice2 -= 1;
   qCount++;
   //qout << qCount << endl;
 	int myAge = PathData.moveClock;
@@ -47,35 +57,40 @@ double QBoxActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &a
 }
 
 double QBoxActionClass::ComputeEnergy(int slice1,int slice2,const Array<int,1> &activeParticles,int level){
-		int slice = 0;
+		//int slice = 0;
 		double Utotal = 0.0;
-		SetPtclPos(slice, activeParticles);
-    dVec R = PathData.Path(slice, activeParticles(0));
-    //out << R(0) << " " << R(1) << " " << R(2) << " ";
-		//toqbox << "run 1 " << steps << endl;
-    ostringstream runCmd;
-    runCmd << "run 1 " << steps;
-		myWrite(towrite, runCmd.str());
-		Utotal = Collect();
-		cerr << "Qbox action received energy " << Utotal << endl;
+    for(int slice=slice1; slice<=slice2; slice++) {
+		  SetPtclPos(slice, activeParticles);
+      dVec R = PathData.Path(slice, activeParticles(0));
+      //out << R(0) << " " << R(1) << " " << R(2) << " ";
+		  //toqbox << "run 1 " << steps << endl;
+      ostringstream runCmd;
+      runCmd << "run 1 " << steps;
+		  myWrite(towrite, runCmd.str());
+		  Utotal += Collect();
+		  cerr << "Qbox action received energy " << Utotal << endl;
+    }
 	return Utotal;
 }
 
 
 double QBoxActionClass::d_dBeta (int slice1, int slice2, int level){
-	int slice = 0;
-  isAction = false;
-	Array<int,1> activeParticles;
-	activeParticles.resize(PathData.Path.NumParticles());
-	for(int a=0; a<activeParticles.size(); a++){
-		activeParticles(a) = a;
-	}
-	SetPtclPos(slice, activeParticles);
-	//toqbox << "run 1 " << steps << endl;
-  ostringstream runCmd;
-  runCmd << "run 1 " << steps;
-	myWrite(towrite, runCmd.str());
-	double Utotal = Collect();
+	//int slice = 0;
+  double Utotal = 0.0;
+  for(int slice=slice1; slice<=slice2; slice++) {
+    isAction = false;
+	  Array<int,1> activeParticles;
+	  activeParticles.resize(PathData.Path.NumParticles());
+	  for(int a=0; a<activeParticles.size(); a++){
+	  	activeParticles(a) = a;
+	  }
+	  SetPtclPos(slice, activeParticles);
+	  //toqbox << "run 1 " << steps << endl;
+    ostringstream runCmd;
+    runCmd << "run 1 " << steps;
+	  myWrite(towrite, runCmd.str());
+	  Utotal += Collect();
+  }
 	return Utotal;
 }
 

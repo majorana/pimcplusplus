@@ -21,7 +21,9 @@ void MoleculeRotate::Read(IOSectionClass &moveInput) {
   //assert(moveInput.ReadVar("SetTheta",Theta));
   assert(moveInput.ReadVar("SetAngle",Theta));
   doAllSlices = false;
-  moveInput.ReadVar("AllSlices",doAllSlices);
+  if(moveInput.ReadVar("AllSlices",doAllSlices))
+    cerr << "Rotate over all slices set to " << doAllSlices << endl;
+  
 	MolMoveClass::Read(moveInput);
 }
 
@@ -239,10 +241,15 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
   int startS, endS;
 	int numSlices = PathData.Path.TotalNumSlices;
   if(doAllSlices) {
+    //cerr << "ALL SLICE SAMPLE" << endl;
     startS = 1;
     endS = numSlices - 1;
     slice1 = 0;
-    slice2 = numSlices;
+    slice2 = numSlices - 1;
+	  for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
+	    double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
+	    RotateMolXYZAll(PathData.Mol.MembersOf(MoveList(activeMol)), theta);
+    }
   }
   else {
 	  // choose a time slice to move
@@ -257,21 +264,16 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	    slice1 = slice-1;
 	    slice2 = slice+1;
 	  }
-    startS = slice;
-    endS = slice;
-  }
-  ActiveSlices.resize(endS-startS+1);
-  for(int s=0; s<=ActiveSlices.size(); s++)
-    ActiveSlices(s) = startS + s;
-	//cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Mol.MembersOf(MoveList(0)) << endl;
-	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
-	  	//activeParticles.resize(MolMembers(MoveList(activeMol)).size());
-	  	//for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(activeMol))(i);
-	  	
-	  	double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
-	  	//RotateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
-	  	//RotateMolXYZ(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
-	  	RotateMolXYZ(ActiveSlices,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
+	  //cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Mol.MembersOf(MoveList(0)) << endl;
+	  for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
+	    	//activeParticles.resize(MolMembers(MoveList(activeMol)).size());
+	    	//for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(activeMol))(i);
+	    	
+	    	double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
+	    	//RotateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
+	    	//RotateMolXYZ(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
+	    	RotateMolXYZ(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
+    }
   }
 
   if (numMoves%10000 == 0 && numMoves>0){

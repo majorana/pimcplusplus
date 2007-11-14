@@ -256,13 +256,6 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, double theta)
 
 // Rotation of molecule about x-, y-, or z-axis, randomly chosen
 void MolMoveClass::RotateMolXYZ(int slice, Array<int,1>& activePtcls, double theta){
-  Array<int,1> slices(1);
-  slices(0) = slice;
-  RotateMolXYZ(slices, activePtcls, theta);
-}
-
-// Rotation of molecule about x-, y-, or z-axis, randomly chosen
-void MolMoveClass::RotateMolXYZ(Array<int,1>& Slices, Array<int,1>& activePtcls, double theta){
   int x,y;
   int z = (int)floor(3*PathData.Path.Random.Local());
   if (z == 0){
@@ -279,14 +272,50 @@ void MolMoveClass::RotateMolXYZ(Array<int,1>& Slices, Array<int,1>& activePtcls,
   }
 	int mol = activePtcls(0);
   // find COM vector
-  for(int s=0; s<Slices.size(); s++) {
-    int slice = Slices(s);
+  dVec O = GetCOM(slice, mol);
+	// nonsense to rotate the ptcl at the origin; "O", so loop starts from 1 not 0
+  for(int ptcl = 1; ptcl<activePtcls.size(); ptcl++){
+    dVec P = PathData.Path(slice, activePtcls(ptcl)) - O;
+    PathData.Path.PutInBox(P);
+    dVec newP = RotateXYZ(P, x, y, z, theta) + O;
+    PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
+  }
+}
+
+// Rotation of molecule about x-, y-, or z-axis, randomly chosen
+// rotates all slices of the molecule about a common COM
+void MolMoveClass::RotateMolXYZAll(Array<int,1>& activePtcls, double theta){
+  int x,y;
+  int z = (int)floor(3*PathData.Path.Random.Local());
+  if (z == 0){
+    x = 1;
+    y = 2;
+  }
+  else if (z == 1){
+    x = 2;
+    y = 0;
+  }
+  else if (z == 2){
+    x = 0;
+    y = 1;
+  }
+  int numS = PathData.Path.TotalNumSlices;
+	int mol = activePtcls(0);
+  // find COM vector
+  dVec COM(0., 0., 0.);
+  int norm = 0;
+  for(int slice=0; slice<numS; slice++) {
     dVec O = GetCOM(slice, mol);
-	  // nonsense to rotate the ptcl at the origin; "O", so loop starts from 1 not 0
-    for(int ptcl = 1; ptcl<activePtcls.size(); ptcl++){
-      dVec P = PathData.Path(slice, activePtcls(ptcl)) - O;
+    COM += O;
+    norm += 1;
+    //cerr << slice << " " << O << " " << COM << endl;
+  }
+  COM *= 1./norm;
+  for(int slice=0; slice<=numS; slice++) {
+    for(int ptcl = 0; ptcl<activePtcls.size(); ptcl++){
+      dVec P = PathData.Path(slice, activePtcls(ptcl)) - COM;
       PathData.Path.PutInBox(P);
-      dVec newP = RotateXYZ(P, x, y, z, theta) + O;
+      dVec newP = RotateXYZ(P, x, y, z, theta) + COM;
       PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
     }
   }
