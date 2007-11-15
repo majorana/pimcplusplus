@@ -32,7 +32,167 @@ F77_LSAPR (int *n,double* c, int *perm);
 extern "C" void
 F77_LSAPR48 (int *n,double* c, int *perm);
 
+void VacancyLocClass::PrintInfo()
+{
+  Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
+  DistTable.resize(FixedLoc.size(), FixedLoc.size());
+  Array<int,1> Perm;
+  Perm.resize(FixedLoc.size());
+  DistTable=0.0;
+  int numEmptySites=FixedLoc.size()-PathData.Path.NumParticles();
 
+  Array<dVec,1> centers;
+  centers.resize(PathData.Path.NumParticles());
+  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+    dVec totalVec=0.0;
+    for (int slice=1;slice<PathData.Path.NumTimeSlices()-1;slice++)
+      totalVec=totalVec+PathData.Path(slice,ptcl);
+    totalVec=totalVec/(PathData.Path.NumTimeSlices()-2);
+    totalVec=totalVec+PathData.Path(0,ptcl);
+    centers(ptcl)=totalVec;
+  }
+  
+  dVec moveDiff=
+    centers(PathData.Path.Random.LocalInt(PathData.Path.NumParticles()))-
+    FixedLoc(0);
+  PathData.Path.PutInBox(moveDiff);
+  for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
+    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+      dVec disp;
+      double dist2;
+      disp=centers(ptcl)-FixedLoc(latticeSite);
+      PathData.Path.PutInBox(disp);
+      dist2=dot(disp,disp);
+      DistTable(latticeSite,ptcl+numEmptySites)=dist2;
+    }
+  }
+  int n =FixedLoc.size();
+  if (DistTable.extent(0)==180)
+    F77_LSAPR (&n,DistTable.data(),Perm.data());
+  else if (DistTable.extent(0)==48)
+    F77_LSAPR48(&n,DistTable.data(),Perm.data());
+  else {
+    cerr<<"ERROR! ERROR! Don't have a lsapr for that distance"<<endl;
+    assert(1==2);
+  }
+  cerr<<"VACANCY IS "<<Perm(0)-1<<" "<<FixedLoc(Perm(0)-1)<<endl;
+
+  for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++){
+  for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
+    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+      dVec disp;
+      double dist2;
+      disp=PathData.Path(slice,ptcl)-FixedLoc(latticeSite);
+      PathData.Path.PutInBox(disp);
+      dist2=dot(disp,disp);
+      DistTable(latticeSite,ptcl+numEmptySites)=dist2;
+    }
+  }
+  n =FixedLoc.size();
+  if (DistTable.extent(0)==180)
+    F77_LSAPR (&n,DistTable.data(),Perm.data());
+  else if (DistTable.extent(0)==48)
+    F77_LSAPR48(&n,DistTable.data(),Perm.data());
+  else {
+    cerr<<"ERROR! ERROR! Don't have a lsapr for that distance"<<endl;
+    assert(1==2);
+  }
+  cerr<<"VACANCY IS "<<slice<<" "<<Perm(0)-1<<" "<<FixedLoc(Perm(0)-1)<<endl;
+
+  }
+
+}
+void VacancyLocClass::Recenter()
+{
+  Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
+  DistTable.resize(FixedLoc.size(), FixedLoc.size());
+  Array<int,1> Perm;
+  Perm.resize(FixedLoc.size());
+  DistTable=0.0;
+  int numEmptySites=FixedLoc.size()-PathData.Path.NumParticles();
+
+  Array<dVec,1> centers;
+  centers.resize(PathData.Path.NumParticles());
+  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+    dVec totalVec=0.0;
+    for (int slice=1;slice<PathData.Path.NumTimeSlices()-1;slice++)
+      totalVec=totalVec+PathData.Path(slice,ptcl);
+    totalVec=totalVec/(PathData.Path.NumTimeSlices()-2);
+    totalVec=totalVec+PathData.Path(0,ptcl);
+    centers(ptcl)=totalVec;
+  }
+  
+  dVec moveDiff=
+    centers(PathData.Path.Random.LocalInt(PathData.Path.NumParticles()))-
+    FixedLoc(0);
+  PathData.Path.PutInBox(moveDiff);
+  for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
+    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+      dVec disp;
+      double dist2;
+      disp=centers(ptcl)-FixedLoc(latticeSite);
+      PathData.Path.PutInBox(disp);
+      dist2=dot(disp,disp);
+      DistTable(latticeSite,ptcl+numEmptySites)=dist2;
+    }
+  }
+  int n =FixedLoc.size();
+  if (DistTable.extent(0)==180)
+    F77_LSAPR (&n,DistTable.data(),Perm.data());
+  else if (DistTable.extent(0)==48)
+    F77_LSAPR48(&n,DistTable.data(),Perm.data());
+  else {
+    cerr<<"ERROR! ERROR! Don't have a lsapr for that distance"<<endl;
+    assert(1==2);
+  }
+  double totalDist=0.0;
+  for (int i=1;i<Perm.size();i++){
+    dVec diff=centers(i-1)-FixedLoc(Perm(i)-1);
+    PathData.Path.PutInBox(diff);
+    totalDist+=dot(diff,diff);
+  }
+  //do it again shifted
+  for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
+    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+      dVec disp;
+      double dist2;
+      disp=(centers(ptcl)-moveDiff)-FixedLoc(latticeSite);
+      PathData.Path.PutInBox(disp);
+      dist2=dot(disp,disp);
+      DistTable(latticeSite,ptcl+numEmptySites)=dist2;
+    }
+  }
+  n =FixedLoc.size();
+  if (DistTable.extent(0)==180)
+    F77_LSAPR (&n,DistTable.data(),Perm.data());
+  else if (DistTable.extent(0)==48)
+    F77_LSAPR48(&n,DistTable.data(),Perm.data());
+  else {
+    cerr<<"ERROR! ERROR! Don't have a lsapr for that distance"<<endl;
+    assert(1==2);
+  }
+  double totalDist2=0.0;
+  for (int i=1;i<Perm.size();i++){
+    dVec diff=(centers(i-1)-moveDiff)-FixedLoc(Perm(i)-1);
+    PathData.Path.PutInBox(diff);
+    totalDist2+=dot(diff,diff);
+  }
+  if (totalDist2<totalDist){
+  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
+    for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++){
+      PathData.Path.Path(slice,ptcl)-=moveDiff;
+    }
+  cerr<<"My moveDiff is "<<moveDiff<<endl;
+  Array<int,1> activeParticles(PathData.Path.NumParticles());
+  for (int i=0;i<activeParticles.size();i++)
+    activeParticles(i)=i;
+  PathData.AcceptMove(0,PathData.Path.NumTimeSlices()-1,activeParticles);
+  PathData.Path.CenterOfMass=0.0;
+  }
+  else
+    cerr<<"Chose not to move"<<endl;
+
+}
 
 // void VacancyLocClass::PrintNearbySites()
 // {
@@ -202,6 +362,7 @@ F77_LSAPR48 (int *n,double* c, int *perm);
 
 void VacancyLocClass::Accumulate()
 {
+  cerr<<"Vacancy Loc accumulating"<<endl;
   TimesCalled++;
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
   
@@ -294,7 +455,7 @@ void VacancyLocClass::Accumulate()
       }
     }
     NumSamples++;
-
+    cerr<<"Vacancy Loc ending"<<endl;
     
 }
 
@@ -392,8 +553,9 @@ VacancyLocClass::Read(IOSectionClass &in)
       }
     }
   }
-  IOSection.WriteVar("Multiplicity",toDivide);
-
+  if (PathData.Path.Communicator.MyProc()==0){
+    IOSection.WriteVar("Multiplicity",toDivide);
+  }
 
   TempVacancyLoc.resize(PathData.Path.NumTimeSlices());
 
@@ -414,6 +576,11 @@ VacancyLocClass::Read(IOSectionClass &in)
       }
     }
   }
+  for (int i=0;i<500;i++)
+    Recenter();
+  PrintInfo();
+  //  Recenter();
+  //  Recenter();
 }
 
 

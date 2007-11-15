@@ -32,6 +32,7 @@ private:
   ///This is the set of locations you should compare against to decide
   ///the location of the head and the tail
   Array<dVec,1> FixedLoc;
+  void PrintInfo();
   Array<int,2> DispFromASite;
   Array<int,1> TempVacancyLoc;
   ObservableVecDouble1 HistogramVar;
@@ -42,6 +43,8 @@ private:
   int Freq;
   int DumpFreq;
 public:
+  void Recenter();
+
   void TabulateNearbySites();
   void PrintNearbySites();
   bool NeighborsVacancyFree(int site);

@@ -36,8 +36,12 @@ F77_LSAPR48 (int *n,double* c, int *perm);
 
 void VacancyLocNearbyClass::Accumulate()
 {
+  cerr<<"VacancyLocNearby Called"<<endl;
   TimesCalled++;
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
+  int myProc=PathData.Path.Communicator.MyProc();
+  int firstSlice,endSlice;
+  PathData.Path.SliceRange(myProc,firstSlice,endSlice);
 
   Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
   DistTable.resize(FixedLoc.size(), FixedLoc.size());
@@ -47,7 +51,8 @@ void VacancyLocNearbyClass::Accumulate()
   int numEmptySites=FixedLoc.size()-PathData.Path.NumParticles();
   assert(numEmptySites==1);
 
-  for (int slice=0;slice<=PathData.NumTimeSlices()-1;slice++){
+  for (int slice=0;slice<PathData.NumTimeSlices()-1;slice++){
+  //  for (int slice=0;slice<PathData.Path.TotalNumSlices;slice++){
     for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
       for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
 	dVec disp;
@@ -68,17 +73,23 @@ void VacancyLocNearbyClass::Accumulate()
       assert(1==2);
     }
     int vacancy1=Perm(0)-1;	
-    TempVacancyLocNearby(slice)=vacancy1;
+    TempVacancyLocNearby(firstSlice+slice)=vacancy1;
   }
-  
+  Array<double,1> TempVacancyLocNearbyDouble(TempVacancyLocNearby.size());
+  for (int i=0;i<TempVacancyLocNearbyDouble.size();i++)
+    TempVacancyLocNearbyDouble(i)=TempVacancyLocNearby(i);
+  PathData.Path.Communicator.AllGatherVec(TempVacancyLocNearbyDouble);
+  for (int i=0;i<TempVacancyLocNearbyDouble.size();i++)
+    TempVacancyLocNearby(i)=(int)TempVacancyLocNearbyDouble(i);
+
   int nextSlice= 1;
   int arraySpot=0;
-  while (nextSlice<PathData.Path.NumTimeSlices()){
-    for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++){
-      int i=DispFromASite(TempVacancyLocNearby(slice),TempVacancyLocNearby((slice+nextSlice) % PathData.Path.NumTimeSlices()));
+  while (nextSlice<PathData.Path.NumTimeSlices()-1){
+    for (int slice=0;slice<PathData.Path.NumTimeSlices()-1;slice++){
+      int i=DispFromASite(TempVacancyLocNearby(slice),TempVacancyLocNearby((slice+nextSlice) % PathData.Path.TotalNumSlices));
       if (i!=-1)
 	HistogramDisp(arraySpot,i)=HistogramDisp(arraySpot,i)+1.0;
-      i=DispFromASite(TempVacancyLocNearby(((slice+nextSlice) % PathData.Path.NumTimeSlices())),TempVacancyLocNearby(slice));
+      i=DispFromASite(TempVacancyLocNearby(((slice+nextSlice) % PathData.Path.TotalNumSlices)),TempVacancyLocNearby(slice));
       if (i!=-1)
 	HistogramDisp(arraySpot,i)=HistogramDisp(arraySpot,i)+1.0;
     }
@@ -89,22 +100,24 @@ void VacancyLocNearbyClass::Accumulate()
   nextSlice=PathData.Path.TotalNumSlices/2;
   arraySpot=HistogramDisp.extent(0)-1;
   for (int slice=0;slice<PathData.Path.NumTimeSlices()/2;slice++){
-    int i=DispFromASite(TempVacancyLocNearby(slice),TempVacancyLocNearby((slice+nextSlice) % PathData.Path.NumTimeSlices()));
+    int i=DispFromASite(TempVacancyLocNearby(slice),TempVacancyLocNearby((slice+nextSlice) % PathData.Path.TotalNumSlices));
     if (i!=-1){
       //      cerr<<"AB: "<<slice<<" "<<i<<endl;
       HistogramDisp(arraySpot,i)=HistogramDisp(arraySpot,i)+1.0;
     }
-    i=DispFromASite(TempVacancyLocNearby(((slice+nextSlice) % PathData.Path.NumTimeSlices())),TempVacancyLocNearby(slice));
+    i=DispFromASite(TempVacancyLocNearby(((slice+nextSlice) % PathData.Path.TotalNumSlices)),TempVacancyLocNearby(slice));
     if (i!=-1){
       //      cerr<<"CD: "<<slice<<" "<<i<<endl;
       HistogramDisp(arraySpot,i)=HistogramDisp(arraySpot,i)+1.0;
     }
   }
   NumSamples++;
+  cerr<<"VacancyLocNearby Ended"<<endl;
 }
 
 void VacancyLocNearbyClass::WriteBlock()
 {
+  cerr<<"Trying to sum in earbyClass"<<endl;
   int nSlices=PathData.Path.TotalNumSlices;
   double norm = 1.0/((double)NumSamples*(double)nSlices);
   //  cerr<<"NORMB: "<<norm<<endl;
@@ -127,6 +140,7 @@ void VacancyLocNearbyClass::WriteBlock()
   NumSamples = 0;
   Histogram=0;
   HistogramDisp=0.0;
+  cerr<<"done Trying to sum in earbyClass"<<endl;
 }
 
 
@@ -139,7 +153,7 @@ VacancyLocNearbyClass::Read(IOSectionClass &in)
   assert(in.ReadVar("NumFixedPoints",numFixedPoints));
   FixedLoc.resize(numFixedPoints);
   Histogram.resize(numFixedPoints);
-  double logVal=log((double)(PathData.Path.NumTimeSlices()))/log(2.0);
+  double logVal=log((double)(PathData.Path.TotalNumSlices))/log(2.0);
   int numTau=(int)(trunc(logVal))+2;
   HistogramDisp.resize(numTau,numFixedPoints);
   Histogram=0;
@@ -179,10 +193,12 @@ VacancyLocNearbyClass::Read(IOSectionClass &in)
       }
     }
   }
-  IOSection.WriteVar("Multiplicity",toDivide);
+  if (PathData.Path.Communicator.MyProc()==0){
+    IOSection.WriteVar("Multiplicity",toDivide);
+  }
 
-
-  TempVacancyLocNearby.resize(PathData.Path.NumTimeSlices());
+  ////  TempVacancyLocNearby.resize(PathData.Path.NumTimeSlices());
+  TempVacancyLocNearby.resize(PathData.Path.TotalNumSlices);
 
   //setting up the table that maps the displacement from the A site
   //Makes the assumption that FixedLoc(0) is part of the A site
