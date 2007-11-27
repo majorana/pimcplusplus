@@ -3,12 +3,11 @@ import numpy
 import numpy.numarray as nn
 numpyincludedirs = numpy.get_include()
 numarrayincludedirs = nn.get_numarray_include_dirs()
-
 module1 = Extension('IOSection',
                     sources = ['IONumPyWrapper.cc','IO.cc',\
                                'IOHDF5.cc', 'IOASCII.cc',\
                                'IOVarHDF5.cc' ],\
-                    library_dirs=['/home/esler/lib'],
+                    library_dirs=['/home/esler/lib',
                                   '/usr/include',\
                                   numpyincludedirs,\
                                   numarrayincludedirs[0]],

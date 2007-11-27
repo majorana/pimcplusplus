@@ -20,6 +20,7 @@
 #include "IOVarBase.h"
 
 namespace IO {
+  using namespace blitz;
 #define MAX_HDF5_STRING_LENGTH 200
   ///////////////////////////////////////////////////////////
   ///                HDF5 Specializations                 ///  
@@ -75,7 +76,7 @@ namespace IO {
     void Resize(int n);
 
     bool VarRead(T &val);
-    bool VarRead(Array<T,RANK> &val);
+    bool VarRead(blitz::Array<T,RANK> &val);
     template<typename T0, typename T1, typename T2, typename T3, typename T4,
 	     typename T5, typename T6, typename T7, typename T8, typename T9,
 	     typename T10>
@@ -84,7 +85,7 @@ namespace IO {
 
 
     bool VarWrite(T val);
-    bool VarWrite(const Array<T,RANK> &val);
+    bool VarWrite(const blitz::Array<T,RANK> &val);
     template<typename TVAL, typename T0, typename T1, typename T2, typename T3, typename T4,
 	     typename T5, typename T6, typename T7, typename T8, typename T9,
 	     typename T10>
@@ -126,25 +127,25 @@ namespace IO {
   /// and bools.                                               ///
   ////////////////////////////////////////////////////////////////
   template<> bool IOVarHDF5<string,0>::VarRead(string &val);
-  template<> bool IOVarHDF5<string,1>::VarRead(Array<string,1> &val);
-  template<> bool IOVarHDF5<string,2>::VarRead(Array<string,2> &val);
-  template<> bool IOVarHDF5<string,3>::VarRead(Array<string,3> &val);
-  template<> bool IOVarHDF5<string,4>::VarRead(Array<string,4> &val);
+  template<> bool IOVarHDF5<string,1>::VarRead(blitz::Array<string,1> &val);
+  template<> bool IOVarHDF5<string,2>::VarRead(blitz::Array<string,2> &val);
+  template<> bool IOVarHDF5<string,3>::VarRead(blitz::Array<string,3> &val);
+  template<> bool IOVarHDF5<string,4>::VarRead(blitz::Array<string,4> &val);
   template<> bool IOVarHDF5<bool,  0>::VarRead(bool &val);
-  template<> bool IOVarHDF5<bool,  1>::VarRead(Array<bool,1> &val);
-  template<> bool IOVarHDF5<bool,  2>::VarRead(Array<bool,2> &val);
-  template<> bool IOVarHDF5<bool,  3>::VarRead(Array<bool,3> &val);
-  template<> bool IOVarHDF5<bool,  4>::VarRead(Array<bool,4> &val);
+  template<> bool IOVarHDF5<bool,  1>::VarRead(blitz::Array<bool,1> &val);
+  template<> bool IOVarHDF5<bool,  2>::VarRead(blitz::Array<bool,2> &val);
+  template<> bool IOVarHDF5<bool,  3>::VarRead(blitz::Array<bool,3> &val);
+  template<> bool IOVarHDF5<bool,  4>::VarRead(blitz::Array<bool,4> &val);
   template<> bool IOVarHDF5<string,0>::VarWrite(string val);
-  template<> bool IOVarHDF5<string,1>::VarWrite(const Array<string,1> &val);
-  template<> bool IOVarHDF5<string,2>::VarWrite(const Array<string,2> &val);
-  template<> bool IOVarHDF5<string,3>::VarWrite(const Array<string,3> &val);
-  template<> bool IOVarHDF5<string,4>::VarWrite(const Array<string,4> &val);
+  template<> bool IOVarHDF5<string,1>::VarWrite(const blitz::Array<string,1> &val);
+  template<> bool IOVarHDF5<string,2>::VarWrite(const blitz::Array<string,2> &val);
+  template<> bool IOVarHDF5<string,3>::VarWrite(const blitz::Array<string,3> &val);
+  template<> bool IOVarHDF5<string,4>::VarWrite(const blitz::Array<string,4> &val);
   template<> bool IOVarHDF5<bool,  0>::VarWrite(bool val);
-  template<> bool IOVarHDF5<bool,  1>::VarWrite(const Array<bool,1> &val);
-  template<> bool IOVarHDF5<bool,  2>::VarWrite(const Array<bool,2> &val);
-  template<> bool IOVarHDF5<bool,  3>::VarWrite(const Array<bool,3> &val);
-  template<> bool IOVarHDF5<bool,  4>::VarWrite(const Array<bool,4> &val);
+  template<> bool IOVarHDF5<bool,  1>::VarWrite(const blitz::Array<bool,1> &val);
+  template<> bool IOVarHDF5<bool,  2>::VarWrite(const blitz::Array<bool,2> &val);
+  template<> bool IOVarHDF5<bool,  3>::VarWrite(const blitz::Array<bool,3> &val);
+  template<> bool IOVarHDF5<bool,  4>::VarWrite(const blitz::Array<bool,4> &val);
 
 
 
@@ -190,7 +191,7 @@ namespace IO {
   /// variable for writing.                                    ///
   ////////////////////////////////////////////////////////////////
   template<typename T, int RANK>
-  IOVarBase *NewIOVarHDF5(hid_t groupID, string name, const Array<T,RANK> &val,
+  IOVarBase *NewIOVarHDF5(hid_t groupID, string name, const blitz::Array<T,RANK> &val,
 			  hid_t boolType, hid_t cmplxType)
   {
     /// First, create a new DataSpace.
@@ -573,7 +574,7 @@ namespace IO {
   /// This routine should cover double and int types.  Strings and bools
   /// need to be handled explicitly
   template<class T, int RANK> bool
-  IOVarHDF5<T,RANK>::VarRead(Array<T,RANK> &val)
+  IOVarHDF5<T,RANK>::VarRead(blitz::Array<T,RANK> &val)
   {
     IODataType dataType = TypeConvert<T>::Type;
     hid_t memType;
@@ -634,7 +635,7 @@ namespace IO {
   /// This routine should cover double and int types.  Strings and bools
   /// need to be handled explicitly
   template<class T, int RANK> bool
-  IOVarHDF5<T,RANK>::VarWrite(const Array<T,RANK> &val)
+  IOVarHDF5<T,RANK>::VarWrite(const blitz::Array<T,RANK> &val)
   {
     /// Check to see if we have the write dimensions.
     assert (H5Sget_simple_extent_ndims(MemSpaceID) == RANK);

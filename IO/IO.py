@@ -91,53 +91,6 @@ class IOSectionClassList:
     
 
 
-class IOSectionClassSeq:
-    IOlist = []
-    def OpenFiles(this, baseName):
-        proc=0
-        done = 0
-        while (done == 0):
-            name = baseName + '.' + repr(proc) + '.h5'
-            if (os.access(name,os.F_OK)):
-                infile = IOSectionClass()
-                success = infile.OpenFile (name)
-                if (success==1) :
-                    this.IOlist.append(infile)
-            else:
-                done=1
-            proc = proc + 1
-    def GetName(this):
-        return this.IOlist[0].GetName()
-    def OpenSection(this,namenum):
-        success = 1
-        for i in range(0,len(this.IOlist)):
-            success = success and this.IOlist[i].OpenSection(namenum)
-        return success
-    def OpenSection2(this,name,num):
-        success = 1
-        for i in range(0,len(this.IOlist)):
-            success = success and this.IOlist[i].OpenSection2(name,num)
-        return success
-    def CloseSection(this):
-        map (lambda x: x.CloseSection(), this.IOlist)
-    def ReadVar(this,name):
-        data = map (lambda x: x.ReadVar(name),this.IOlist)
-        newData=[]
-        newData.append(data)
-        data=newData
-        return data
-    def CountSections(this):
-        return this.IOlist[0].CountSections()
-    def CountSections2(this,name):
-        return this.IOlist[0].CountSections2(name)
-    def CountVars(this):
-        return this.IOlist[0].CountVars()
-    def GetVarName(this,num):
-        return this.IOlist[0].GetVarName(num)
-    def len(this):
-        return len(this.IOlist)
-    
-
     
 
 #a=IOSectionClass()

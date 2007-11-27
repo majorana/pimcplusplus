@@ -157,7 +157,8 @@ IOSection_FlushFile(PyObject *self, PyObject *args)
     return NULL;
   else {
     ((IOSectionClass*)IOSectionPtr)->FlushFile();
-    return NULL;
+    return Py_True;
+    //    return NULL;
   }
 }
 
@@ -235,7 +236,9 @@ IOSection_NewSectionName(PyObject *self, PyObject *args)
 
   if (PyArg_ParseTuple (args, str, &IOSectionPtr,&sectionName))
     ((IOSectionClass*)IOSectionPtr)->NewSection(sectionName);
-  return NULL;
+  bool success = true;
+   return Py_BuildValue("i",(int)success);
+   //  return NULL;
 }
 
 extern "C" PyObject*

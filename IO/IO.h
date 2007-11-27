@@ -68,7 +68,7 @@ namespace IO {
   }
 
   template<typename T, int RANK> bool 
-  IOTreeClass::WriteVar (string name, const Array<T,RANK> &val)
+  IOTreeClass::WriteVar (string name, const blitz::Array<T,RANK> &val)
   {
     if (GetFileType() == HDF5_TYPE) {
       IOTreeHDF5Class *h5Tree = dynamic_cast<IOTreeHDF5Class*>(this);
@@ -190,7 +190,7 @@ namespace IO {
     { return CurrentSection->WriteVar(name, val); }
 
     template<typename T, int RANK> bool
-    WriteVar (string name, const Array<T,RANK>& val)
+    WriteVar (string name, const blitz::Array<T,RANK>& val)
     { return CurrentSection->WriteVar(name, val); }
   
     template<class T> bool
@@ -198,7 +198,7 @@ namespace IO {
     { return CurrentSection->AppendVar(name, val); }
 
     template<typename T, int RANK> bool
-    AppendVar (string name, const Array<T,RANK>& val)
+    AppendVar (string name, const blitz::Array<T,RANK>& val)
     { return CurrentSection->AppendVar(name, val); }
   
     inline IOVarBase *GetVarPtr(string name)

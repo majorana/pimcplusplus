@@ -91,7 +91,7 @@ namespace IO {
   }
 
   template<typename T, int RANK> bool
-  IOVarBase::Read(Array<T,RANK> &val)
+  IOVarBase::Read(blitz::Array<T,RANK> &val)
   {
     if (GetFileType() == HDF5_TYPE) {
       IOVarHDF5<T,RANK>* newVar = dynamic_cast<IOVarHDF5<T,RANK>*>(this);
@@ -119,7 +119,7 @@ namespace IO {
   template<typename T,  int RANK, typename T0, typename T1, typename T2, 
 	   typename T3, typename T4, typename T5, typename T6, typename T7, 
 	   typename T8, typename T9, typename T10> bool
-  IOVarBase::Read(Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4,
+  IOVarBase::Read(blitz::Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4,
 		  T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10)
   {
     static const int numSlices = 
@@ -160,7 +160,7 @@ namespace IO {
   template<typename T,  int RANK, typename T0, typename T1, typename T2, 
 	   typename T3, typename T4, typename T5, typename T6, typename T7, 
 	   typename T8, typename T9, typename T10> bool
-  IOVarBase::Write(const Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4,
+  IOVarBase::Write(const blitz::Array<T,RANK> &val, T0 s0, T1 s1, T2 s2, T3 s3, T4 s4,
 		   T5 s5, T6 s6, T7 s7, T8 s8, T9 s9, T10 s10)
   {
     static const int numSlices = 
@@ -239,7 +239,7 @@ namespace IO {
 //   }
   
   template<class T> bool
-  IOVarBase::Append(const Array<T,1> &val)
+  IOVarBase::Append(const blitz::Array<T,1> &val)
   {
     assert (GetRank()==2);
     int n = GetExtent(0);
@@ -249,7 +249,7 @@ namespace IO {
   } 
 
   template<class T> bool
-  IOVarBase::Append(const Array<T,2> &val)
+  IOVarBase::Append(const blitz::Array<T,2> &val)
   {
     assert (GetRank()==3);
     int n = GetExtent(0);
@@ -260,7 +260,7 @@ namespace IO {
   } 
 
   template<class T> bool
-  IOVarBase::Append(const Array<T,3> &val)
+  IOVarBase::Append(const blitz::Array<T,3> &val)
   {
     assert (GetRank()==4);
     int n = GetExtent(0);
@@ -272,7 +272,7 @@ namespace IO {
   } 
 
   template<class T> bool
-  IOVarBase::Append(const Array<T,4> &val)
+  IOVarBase::Append(const blitz::Array<T,4> &val)
   {
     assert (GetRank()==5);
     int n = GetExtent(0);

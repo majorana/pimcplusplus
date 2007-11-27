@@ -236,6 +236,8 @@ IOSection_NewSectionName(PyObject *self, PyObject *args)
 
   if (PyArg_ParseTuple (args, str, &IOSectionPtr,&sectionName))
     ((IOSectionClass*)IOSectionPtr)->NewSection(sectionName);
+  bool success=true;
+  return Py_BuildValue("i",(int)success); 
   return NULL;
 }
 
