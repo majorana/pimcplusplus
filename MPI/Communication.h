@@ -455,6 +455,13 @@ public:
       abort();
     }
   }
+  template<typename T>
+  inline void Send (int toProc, T &val) 
+  {
+    cerr << "Sends are not support in serial version of CommunicatorClass.\n";
+    abort();
+  }
+
   inline void Send (int toProc, Array<double,1> &buff)
   {
     cerr << "Sends not supported in serial mode.\n";
@@ -481,6 +488,13 @@ public:
     abort();
   }
   
+  template<typename T>
+  void Receive (int recvProc, T val)
+  {
+    cerr << "Receives are not supported in serial mode.\n";
+    abort();
+  }
+
   template<int N>
   void Receive (int recvProc, Array<complex<double>,N> recvBuff)
   {
