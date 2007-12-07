@@ -1,5 +1,5 @@
-#ifndef LI_EOS_H
-#define LI_EOS_H
+#ifndef VINET_EOS2_H
+#define VINET_EOS2_H
 
 #include <blitz/tinyvec.h>
 
