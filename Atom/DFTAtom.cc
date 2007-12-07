@@ -174,7 +174,7 @@ DFTAtom::SolveIter()
     RadialWFs(i).Solve();
     maxDiff = max(fabs(OldEnergies(i)-RadialWFs(i).Energy), maxDiff);
     OldEnergies(i) = RadialWFs(i).Energy;
-    //fprintf (stderr, "Energy(%d) = %1.16f\n", i, RadialWFs(i).Energy);
+    // fprintf (stderr, "Energy(%d) = %1.16f\n", i, RadialWFs(i).Energy);
   }
   oldCharge = ChargeDensity.Data();
   UpdateChargeDensity();
@@ -198,7 +198,7 @@ void DFTAtom::Solve()
   // Now solve radial equations
   for (int i=0; i<RadialWFs.size(); i++) {
     RadialWFs(i).Solve();
-    //fprintf (stderr, "Energy(%d) = %1.16f\n", i, RadialWFs(i).Energy);
+    // fprintf (stderr, "Energy(%d) = %1.16f\n", i, RadialWFs(i).Energy);
     oldEnergies(i) = RadialWFs(i).Energy;
   }
 

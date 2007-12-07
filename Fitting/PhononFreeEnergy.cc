@@ -6,14 +6,13 @@ PhononFreeEnergy::EvalBasis(double V, double T,
 			    Array<double,1> basis)
 {
   double V2i = 1.0;
-  double T2j = 1.0;
   assert (basis.size() == Vorder*Torder);
-  int index = 0;
   for (int i=0; i<Vorder; i++) {
+    double T2j = 1.0;
     for (int j=0; j<Torder; j++) {
+      int index = (i*Torder)+j;
       basis (index) = V2i*T2j;
       T2j *= T;
-      index++;
     }
     V2i *= V;
   }
@@ -34,10 +33,17 @@ PhononFreeEnergy::FitF(int vorder, int torder,
   Array<double,1> sigma(F.size());
   Array<double,2> basis(F.size(),Vorder*Torder);
   for (int i=0; i<F.size(); i++) {
+//     fprintf (stderr, "F(i) = %1.8f T(i) = %1.8f  V(i) = %1.8f\n", 
+// 	     F(i), T(i), V(i));
     sigma(i) = 1.0e-5;
     EvalBasis(V(i), T(i), basis(i,Range::all()));
+//     if (T(i) != 0.0)
+//       F(i) += 3.0 * kB*T(i)*log(T(i));
+    // cerr << "basis(" << i << " = " << basis(i,Range::all()) << endl;
   }
-  LinFitSVD (F, sigma, basis, FCoefs, errors, 1.0e-10);
+  //LinFitSVD (F, sigma, basis, FCoefs, errors, 1.0e-50);
+  LinFitLU (F, sigma, basis, FCoefs, errors);
+  // cerr << "FCoefs = " << FCoefs << endl;
 }
 
 double 
@@ -47,6 +53,8 @@ PhononFreeEnergy::F_VT(double V, double T)
   double F = 0.0;
   for (int i=0; i<FCoefs.size(); i++)
     F += FCoefs(i)*Btmp(i);
+
+//   F -= 3.0 * kB*T*log(T);
   return F;
 }
 
@@ -57,8 +65,9 @@ PhononFreeEnergy::P_VT(double V, double T)
   double T2j = 1.0;
   double P = 0.0;
   for (int i=1; i<Vorder; i++) {
+    T2j = 1.0;
     for (int j=0; j<Torder; j++) {
-      double index = (i*Torder) + j;
+      int index = (i*Torder) + j;
       P += T2j * (double)i * V2im1 * FCoefs(index);
       T2j *= T;
     }
@@ -78,9 +87,9 @@ double
 PhononFreeEnergy::dP_dT (double V, double T)
 {
   double V2im1 = 1.0;
-  double T2jm1 = 1.0;
   double dP = 0.0;
   for (int i=1; i<Vorder; i++) {
+    double T2jm1 = 1.0;
     for (int j=1; j<Torder; j++) {
       int index = (i*Torder)+j;
       dP += FCoefs(index)*(double)(i*j)*V2im1*T2jm1;
@@ -102,9 +111,9 @@ double
 PhononFreeEnergy::dP_dV (double V, double T)
 {
   double V2im2 = 1.0;
-  double T2j = 1.0;
   double dP = 0.0;
   for (int i=2; i<Vorder; i++) {
+    double T2j = 1.0;
     for (int j=0; j<Torder; j++) {
       int index = (i*Torder)+j;
       dP += FCoefs(index)*(double)(i*(i-1))*V2im2+T2j;

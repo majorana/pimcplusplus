@@ -268,6 +268,7 @@ RadialWF::Solve(double tolerance)
     Elow = pot->V(l,grid(0));
     for (int i=1; i<grid.NumPoints; i++) {
       double r = grid(i);
+      // cerr << "r = " << r << "   V(l,r) = " << pot->V(l,r) << endl;
       if (pot->V(l,r) < Elow)
 	Elow = pot->V(l,r);
     }
@@ -277,7 +278,7 @@ RadialWF::Solve(double tolerance)
   Eold = Etrial = Energy;
   bool done = false;
   while (!done) {
-    //cerr << "Ehigh = " << Ehigh << " Elow = " << Elow << endl;
+    // cerr << "Ehigh = " << Ehigh << " Elow = " << Elow << endl;
     double CuspValue = IntegrateInOut(tindex);
     //cerr << "Cusp value = " << CuspValue << "\n";    
     NumNodes = CountNodes();

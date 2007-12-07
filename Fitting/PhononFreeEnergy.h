@@ -10,6 +10,7 @@ class PhononFreeEnergy
   void EvalBasis (double V, double T,
 		  Array<double,1> basis);
   Array<double,1> Btmp;
+  const double kB;  // Hartrees per Kelvin
 public:
   double F_VT(double V, double T);
   double F_PT(double P, double T);
@@ -30,6 +31,9 @@ public:
 	     Array<double,1> &U,
 	     Array<double,1> &V,
 	     Array<double,1> &T);
+  PhononFreeEnergy() : kB(3.16681526543384e-06)
+  {
+  }
 };
 
 #endif

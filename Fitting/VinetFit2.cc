@@ -200,7 +200,24 @@ ThermalFit (string fname, PhononFreeEnergy &phonons)
     U(i) = Uvec[i];
   }
   
-  phonons.FitF(3, 3, F, V, T);
+  phonons.FitF(4, 6, F, V, T);
+  
+  FILE *fout = fopen ("300K_FofV.dat", "w");
+  double Tval = 300.0;
+  for (double Vval=40.0; Vval<95.0; Vval+=0.01) {
+    double Fval = phonons.F_VT(Vval,Tval);
+    fprintf (fout, "%1.8f %1.8e\n", Vval, Fval);
+  }
+  fclose(fout); 
+
+  fout = fopen ("V0_FofT.dat", "w");
+  double Vval = 79.7469;
+  for (double Tval=0.0; Tval<3000.0; Tval+=1.0) {
+   double Fval = phonons.F_VT(Vval,Tval);
+    fprintf (fout, "%1.8f %1.8e\n", Tval, Fval);
+  }
+  fclose(fout);
+
 }
 
 void
@@ -221,6 +238,7 @@ main(int argc, char **argv)
     VinetEOSClass staticEOS;
     StaticFit (argv[1], staticEOS);
     PhononFreeEnergy thermalEOS;
+    ThermalFit (argv[2], thermalEOS);
   }
   else if (argc > 1) {
     VinetEOSClass staticEOS;
