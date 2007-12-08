@@ -19,6 +19,7 @@ public:
   inline void SetN    (int n);
   inline void SetTheta(double theta);
   inline double F(double T);
+  inline double dF_dTheta (double T);
   double OptTheta (Array<double,1> &Fvals, Array<double,1> &Tvals);
   inline double CalcTheta (double F, double T);
   DebyeModel() : kB(3.16681526543384e-06)
@@ -33,13 +34,18 @@ private:
   vector<double> V, Theta, F0;
   DebyeModel Debye;
   Array<double,1> ThetaCoefs;
-  inline double Theta_V (double V);
 public:
   void AddModel (double V, vector<double> &F,
 		 vector<double> &T);
+  inline double Theta_V (double V);
+  inline double dTheta_dV (double V);
   
   void FitTheta_V(int numCoefs);
+  // Helmholtz free energy
   double F(double V, double T);
+  // Thermal pressure
+  double P(double V, double T);
+  double P_FD(double V, double T);
 
   DebyeFreeEnergy()
   {
@@ -55,6 +61,18 @@ DebyeFreeEnergy::Theta_V(double V)
   for (int i=0; i<ThetaCoefs.size(); i++) {
     tsum += ThetaCoefs(i) * V2i;
     V2i *= V;
+  }
+  return tsum;
+}
+
+inline double 
+DebyeFreeEnergy::dTheta_dV(double V)
+{
+  double V2im1 = 1.0;
+  double tsum = 0.0;
+  for (int i=1; i<ThetaCoefs.size(); i++) {
+    tsum += ThetaCoefs(i) * (double)i * V2im1;
+    V2im1 *= V;
   }
   return tsum;
 }
@@ -106,5 +124,15 @@ DebyeModel::F(double T)
 // 	   Theta, T, F);
   return f;
 }
+
+inline double
+DebyeModel::dF_dTheta (double T)
+{
+  double x = T * ThetaInv;
+  double D3 = gsl_sf_debye_3(1.0/x);
+  
+  return ThetaInv * 3.0*N*kB*T*D3;
+}
+
 
 #endif

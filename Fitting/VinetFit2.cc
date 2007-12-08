@@ -303,16 +303,31 @@ DebyeFit (string fname, DebyeFreeEnergy &debye)
     else
       done = true;
   }
+  debye.FitTheta_V (4);
+  FILE *fout = fopen ("ThetaV.dat", "w");
+  for (double V=40.0; V<=95.0; V+=0.01) {
+    double theta = debye.Theta_V(V);
+    fprintf (fout, "%1.2f %1.10e\n", V, theta);
+  }
+  fclose (fout);
 }
 
 
 
 void
 CalcProperties (VinetEOSClass &staticEOS,
-		PhononFreeEnergy &phonons)
+		DebyeFreeEnergy &thermalEOS)
 {
+  // Compute Thermal Pressure
+  const double au2GPa = 29421.01;
   
-
+  FILE *fout = fopen ("ThermalPressure.dat", "w");
+  double V = 80.0;
+  for (double T=1.0; T<3000.0; T+=1.0) 
+    fprintf (fout, "%5.1f %12.8e %12.8e\n", T, 
+	     au2GPa * thermalEOS.P(V,T),
+	     au2GPa * thermalEOS.P_FD(V,T));
+  fclose (fout);
 }
 
 
@@ -330,6 +345,7 @@ main(int argc, char **argv)
     //DebyeFit (argv[2], models);
     DebyeFreeEnergy debyeEOS;
     DebyeFit (argv[2], debyeEOS);
+    CalcProperties (staticEOS, debyeEOS);
   }
   else if (argc > 1) {
     VinetEOSClass staticEOS;
