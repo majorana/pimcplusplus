@@ -3,6 +3,7 @@
 #include "../IO/IO.h"
 #include <vector>
 #include "PhononFreeEnergy.h"
+#include "DebyeModel.h"
 
 void
 TestGrad()
@@ -221,6 +222,61 @@ ThermalFit (string fname, PhononFreeEnergy &phonons)
 }
 
 void
+DebyeFit (string fname, vector<DebyeModel> &fits)
+{
+  FILE *fin = fopen (fname.c_str(), "r");
+  std::vector<double> Vvec, Tvec, Fvec, Uvec;
+  double lastv = 0;
+  bool done=false;
+  int i = 0;
+  while (!done) {
+    double v,t,f,u;
+    int retval = fscanf (fin, "%lf %lf %lf %lf", &v, &t, &f, &u);
+    if (v != lastv || retval != 4) {
+      if (Vvec.size() != 0) {
+	DebyeModel debye;
+	debye.SetN (2);
+	Array<double,1> T(Tvec.size()), F(Fvec.size());
+	for (int i=0; i<Tvec.size(); i++) {
+	  F(i) = Fvec[i]-Fvec[0];  T(i) = Tvec[i];
+	}
+	double theta = debye.OptTheta (F, T);
+	debye.SetTheta (theta);
+	fprintf (stderr, "%8.5f %10.5f %1.8e\n",
+		 cbrt(4.0*lastv), theta, Fvec[0]);
+	
+	fits.push_back(debye);
+	char name[1000];
+	snprintf (name, 1000, "Phonon_%1.2f.dat",
+		  lastv);
+	FILE *fout = fopen (name, "w");
+	for (int i=0; i<Tvec.size(); i++) 
+	  fprintf (fout, "%1.3f %1.9e %1.9e\n",
+		   Tvec[i], Fvec[i]-Fvec[0], debye.F(Tvec[i]));
+	fclose (fout);
+      }
+      Vvec.clear();
+      Tvec.clear();
+      Fvec.clear();
+      Uvec.clear();
+    }
+    if (retval == 4) {
+      Vvec.push_back (v);
+      Tvec.push_back (t);
+      Fvec.push_back (f);
+      Uvec.push_back (u);
+      lastv = v;
+    }
+    else
+      done = true;
+  }
+  
+
+
+}
+
+
+void
 CalcProperties (VinetEOSClass &staticEOS,
 		PhononFreeEnergy &phonons)
 {
@@ -239,6 +295,8 @@ main(int argc, char **argv)
     StaticFit (argv[1], staticEOS);
     PhononFreeEnergy thermalEOS;
     ThermalFit (argv[2], thermalEOS);
+    vector<DebyeModel> models;
+    DebyeFit (argv[2], models);
   }
   else if (argc > 1) {
     VinetEOSClass staticEOS;
