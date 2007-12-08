@@ -336,6 +336,15 @@ CalcProperties (VinetEOSClass &staticEOS,
 	     thermalEOS.dF_dT (V,T), thermalEOS.dF_dT_FD(V,T));
   }
   fclose (fout);
+
+  // Test d2F_dTheta_dT
+  fout = fopen ("d2F_dTheta_dT.dat", "w");
+  for (double T=1.0; T<3000.0; T+=1.0) {
+    fprintf (fout, "%5.1f %12.8e %12.8e\n", T,
+	     thermalEOS.d2F_dTheta_dT (V,T), 
+	     thermalEOS.d2F_dTheta_dT_FD(V,T));
+  }
+  fclose (fout);
 }
 
 

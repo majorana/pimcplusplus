@@ -19,8 +19,10 @@ public:
   inline void SetN    (int n);
   inline void SetTheta(double theta);
   inline double F(double T);
-  inline double dF_dTheta (double T);
-  inline double dF_dT     (double T);
+  inline double dF_dTheta        (double T);
+  inline double dF_dT            (double T);
+  inline double d2F_dTheta_dT    (double T);
+  inline double d2F_dTheta_dT_FD (double T);
   double OptTheta (Array<double,1> &Fvals, Array<double,1> &Tvals);
   inline double CalcTheta (double F, double T);
   DebyeModel() : kB(3.16681526543384e-06)
@@ -46,6 +48,8 @@ public:
   double F(double V, double T);
   double dF_dT (double V, double T);
   double dF_dT_FD (double V, double T);
+  double d2F_dTheta_dT (double V, double T);
+  double d2F_dTheta_dT_FD (double V, double T);
   
   // Thermal pressure
   double P(double V, double T);
@@ -145,7 +149,19 @@ DebyeModel::dF_dT (double T)
   return N*kB*(3.0*log1p(-exp(-Theta/T)) - 4.0*gsl_sf_debye_3(1.0/x));
 }
 
+inline double
+DebyeModel::d2F_dTheta_dT (double T)
+{
+  double x = Theta / T;
+  return 3.0*N*kB*(4.0*gsl_sf_debye_3(x)/Theta - 3.0/(T*(expm1(x))));
+}
 
+inline double
+DebyeModel::d2F_dTheta_dT_FD (double T)
+{
+  double eps = 1.0e-8;
+  return (dF_dTheta(T+eps)-dF_dTheta(T-eps))/(2.0*eps);
+}
 
 
 #endif

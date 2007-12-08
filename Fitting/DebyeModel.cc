@@ -119,6 +119,23 @@ DebyeFreeEnergy::dF_dT (double Vval, double Tval)
 }
 
 double
+DebyeFreeEnergy::d2F_dTheta_dT (double Vval, double Tval)
+{
+  Debye.SetTheta (Theta_V(Vval));
+  return Debye.d2F_dTheta_dT (Tval);
+}
+
+double
+DebyeFreeEnergy::d2F_dTheta_dT_FD (double Vval, double Tval)
+{
+  Debye.SetTheta (Theta_V(Vval));
+  return Debye.d2F_dTheta_dT_FD (Tval);
+}
+
+
+
+
+double
 DebyeFreeEnergy::dF_dT_FD (double Vval, double Tval)
 {
   double eps = 1.0e-8;
