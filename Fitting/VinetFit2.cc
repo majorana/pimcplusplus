@@ -328,6 +328,14 @@ CalcProperties (VinetEOSClass &staticEOS,
 	     au2GPa * thermalEOS.P(V,T),
 	     au2GPa * thermalEOS.P_FD(V,T));
   fclose (fout);
+
+  // Test dF_dT
+  fout = fopen ("dF_dT.dat", "w");
+  for (double T=1.0; T<3000.0; T+=1.0) {
+    fprintf (fout, "%5.1f %12.8e %12.8e\n", T,
+	     thermalEOS.dF_dT (V,T), thermalEOS.dF_dT_FD(V,T));
+  }
+  fclose (fout);
 }
 
 

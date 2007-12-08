@@ -111,3 +111,16 @@ DebyeFreeEnergy::P_FD (double Vval, double Tval)
   return ((F(Vval-eps,Tval)-F(Vval+eps,Tval))/(2.0*eps));
 }  
 
+double
+DebyeFreeEnergy::dF_dT (double Vval, double Tval)
+{
+  Debye.SetTheta (Theta_V(Vval));
+  return Debye.dF_dT (Tval);
+}
+
+double
+DebyeFreeEnergy::dF_dT_FD (double Vval, double Tval)
+{
+  double eps = 1.0e-8;
+  return ((F(Vval, Tval+eps) - F(Vval, Tval-eps))/(2.0*eps));
+}
