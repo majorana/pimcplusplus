@@ -30,15 +30,34 @@ public:
 class DebyeFreeEnergy
 {
 private:
-  vector<DebyeModel> Models;
-  vector<double> V, F0, Theta;
+  vector<double> V, Theta, F0;
+  DebyeModel Debye;
+  Array<double,1> ThetaCoefs;
+  inline double Theta_V (double V);
 public:
-  void AddModel (double V, Array<double,1> &F,
-		 Array<double,1> &T);
+  void AddModel (double V, vector<double> &F,
+		 vector<double> &T);
   
-  void FitTheta_V();
-    
+  void FitTheta_V(int numCoefs);
+  double F(double V, double T);
+
+  DebyeFreeEnergy()
+  {
+    Debye.SetN(2);
+  }
 };
+
+inline double 
+DebyeFreeEnergy::Theta_V(double V)
+{
+  double V2i = 1.0;
+  double tsum = 0.0;
+  for (int i=0; i<ThetaCoefs.size(); i++) {
+    tsum += ThetaCoefs(i) * V2i;
+    V2i *= V;
+  }
+  return tsum;
+}
 
 
 inline double

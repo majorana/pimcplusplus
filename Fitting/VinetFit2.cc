@@ -277,6 +277,37 @@ DebyeFit (string fname, vector<DebyeModel> &fits)
 
 
 void
+DebyeFit (string fname, DebyeFreeEnergy &debye)
+{
+  FILE *fin = fopen (fname.c_str(), "r");
+  std::vector<double> Vvec, Tvec, Fvec, Uvec;
+  double lastv = 0;
+  bool done=false;
+  int i = 0;
+  while (!done) {
+    double v,t,f,u;
+    int retval = fscanf (fin, "%lf %lf %lf %lf", &v, &t, &f, &u);
+    if (v != lastv || retval != 4) {
+      if (Vvec.size() != 0) 
+	debye.AddModel (lastv, Fvec, Tvec);
+      Vvec.clear();
+      Tvec.clear();
+      Fvec.clear();
+      Uvec.clear();
+    }
+    if (retval == 4) {
+      Vvec.push_back (v);      Tvec.push_back (t);
+      Fvec.push_back (f);      Uvec.push_back (u);
+      lastv = v;
+    }
+    else
+      done = true;
+  }
+}
+
+
+
+void
 CalcProperties (VinetEOSClass &staticEOS,
 		PhononFreeEnergy &phonons)
 {
@@ -295,8 +326,10 @@ main(int argc, char **argv)
     StaticFit (argv[1], staticEOS);
     PhononFreeEnergy thermalEOS;
     ThermalFit (argv[2], thermalEOS);
-    vector<DebyeModel> models;
-    DebyeFit (argv[2], models);
+    //vector<DebyeModel> models;
+    //DebyeFit (argv[2], models);
+    DebyeFreeEnergy debyeEOS;
+    DebyeFit (argv[2], debyeEOS);
   }
   else if (argc > 1) {
     VinetEOSClass staticEOS;

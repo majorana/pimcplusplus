@@ -1,4 +1,5 @@
 #include "DebyeModel.h"
+#include "Fitting.h"
 
 double
 DebyeModel::Chi2 (double theta, 
@@ -50,3 +51,47 @@ DebyeModel::OptTheta (Array<double,1> &Fvals, Array<double,1> &Tvals)
   return mid;
 }
 
+void
+DebyeFreeEnergy::AddModel (double Vval, vector<double> &Fvec,
+			   vector<double> &Tvec)
+{
+  DebyeModel debye;
+  debye.SetN(2);
+  Array<double,1> F(Fvec.size()), T(Tvec.size());
+  for (int i=0; i<Fvec.size(); i++) {
+    F(i) = Fvec[i] - Fvec[0];
+    T(i) = Tvec[i];
+  }
+  double theta = debye.OptTheta (F, T);
+  V.push_back(Vval);
+  F0.push_back(Fvec[0]);
+  Theta.push_back(theta);
+}
+
+
+void
+DebyeFreeEnergy::FitTheta_V (int numCoefs)
+{
+  int N = V.size();
+  Array<double,2> basis(N, numCoefs);
+  for (int i=0; i<N; i++) {
+    basis(i,0) = 1.0;
+    for (int j=1; j<numCoefs; j++)
+      basis(i,j) = V[i]*basis(i,j-1);
+  }
+  ThetaCoefs.resize(numCoefs);
+  Array<double,1> sigma(N), theta(N), errors(numCoefs);
+  for (int i=0; i<N; i++) {
+    sigma(i) = 1.0e-7;
+    theta(i) = Theta[i];
+  }
+  LinFitLU(theta, sigma, basis, ThetaCoefs, errors);
+}
+
+
+double
+DebyeFreeEnergy::F(double Vval, double T)
+{
+  Debye.SetTheta (Theta_V(Vval));
+  return Debye.F(T);
+}
