@@ -23,6 +23,7 @@ public:
   inline double dF_dT            (double T);
   inline double d2F_dTheta_dT    (double T);
   inline double d2F_dTheta_dT_FD (double T);
+  inline double d2F_dTheta2      (double T);
   double OptTheta (Array<double,1> &Fvals, Array<double,1> &Tvals);
   inline double CalcTheta (double F, double T);
   DebyeModel() : kB(3.16681526543384e-06)
@@ -42,18 +43,28 @@ public:
 		 vector<double> &T);
   inline double Theta_V (double V);
   inline double dTheta_dV (double V);
+  inline double d2Theta_dV2 (double V);
   
   void FitTheta_V(int numCoefs);
   // Helmholtz free energy
   double F(double V, double T);
   double dF_dT (double V, double T);
   double dF_dT_FD (double V, double T);
+  double dF_dTheta (double V, double T);
   double d2F_dTheta_dT (double V, double T);
   double d2F_dTheta_dT_FD (double V, double T);
+  double d2F_dTheta2 (double V, double T);
   
   // Thermal pressure
   double P(double V, double T);
   double P_FD(double V, double T);
+  double dP_dV (double V, double T);
+
+  // Bulk modulus
+  double K_T (double V, double T);
+  double K_T_FD (double V, double T);
+  // Isothermal compressiblity
+  double Chi_T (double V, double T);
 
   DebyeFreeEnergy()
   {
@@ -81,6 +92,18 @@ DebyeFreeEnergy::dTheta_dV(double V)
   for (int i=1; i<ThetaCoefs.size(); i++) {
     tsum += ThetaCoefs(i) * (double)i * V2im1;
     V2im1 *= V;
+  }
+  return tsum;
+}
+
+inline double
+DebyeFreeEnergy::d2Theta_dV2 (double V)
+{
+  double V2im2 = 1.0;
+  double tsum = 0.0;
+  for (int i=2; i<ThetaCoefs.size(); i++) {
+    tsum += ThetaCoefs(i) * (double)(i*(i-1))*V2im2;
+    V2im2 *= V;
   }
   return tsum;
 }
@@ -161,6 +184,14 @@ DebyeModel::d2F_dTheta_dT_FD (double T)
 {
   double eps = 1.0e-8;
   return (dF_dTheta(T+eps)-dF_dTheta(T-eps))/(2.0*eps);
+}
+
+
+inline double
+DebyeModel::d2F_dTheta2 (double T)
+{
+  return 9.0 * N * kB/ (Theta * expm1(Theta/T))
+    - 12.0*N*kB*T/(Theta*Theta) * gsl_sf_debye_3(Theta/T);
 }
 
 

@@ -133,11 +133,47 @@ DebyeFreeEnergy::d2F_dTheta_dT_FD (double Vval, double Tval)
 }
 
 
-
-
 double
 DebyeFreeEnergy::dF_dT_FD (double Vval, double Tval)
 {
   double eps = 1.0e-8;
   return ((F(Vval, Tval+eps) - F(Vval, Tval-eps))/(2.0*eps));
+}
+
+double
+DebyeFreeEnergy::dF_dTheta (double Vval, double Tval)
+{
+  Debye.SetTheta (Theta_V(Vval));
+  return Debye.dF_dTheta(Tval);
+}
+
+
+double
+DebyeFreeEnergy::d2F_dTheta2 (double Vval, double Tval)
+{
+  Debye.SetTheta (Theta_V(Vval));
+  return Debye.d2F_dTheta2(Tval);
+//   double eps = 1.0e-7;
+//   double theta = Theta_V(Vval);
+//   Debye.SetTheta (theta + eps);
+//   double plus = Debye.dF_dTheta(Tval);
+//   Debye.SetTheta (theta - eps);
+//   double minus = Debye.dF_dTheta (Tval);
+//   return (plus-minus)/(2.0*eps);
+}
+
+
+double
+DebyeFreeEnergy::K_T (double Vval, double Tval)
+{
+  return Vval * (dF_dTheta(Vval,Tval) * d2Theta_dV2(Vval) +
+		 dTheta_dV(Vval) * dTheta_dV(Vval) * d2F_dTheta2(Vval, Tval));
+}
+
+double
+DebyeFreeEnergy::K_T_FD(double Vval, double Tval)
+{
+  double eps = 1.0e-7;
+  
+  return -Vval *(P(Vval+eps,Tval)-P(Vval-eps,Tval))/(2.0*eps);
 }

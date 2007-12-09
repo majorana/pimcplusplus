@@ -345,6 +345,15 @@ CalcProperties (VinetEOSClass &staticEOS,
 	     thermalEOS.d2F_dTheta_dT_FD(V,T));
   }
   fclose (fout);
+
+  // Test thermal bulk modulus
+  fout = fopen ("K_T.dat", "w");
+  for (double T=1.0; T<3000.0; T+=1.0) {
+    fprintf (fout, "%5.1f %12.8e %12.8e\n", T,
+	     thermalEOS.K_T(V,T), 
+	     thermalEOS.K_T_FD(V,T));
+  }
+  fclose (fout);
 }
 
 
