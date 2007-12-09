@@ -20,6 +20,8 @@ public:
   inline void SetParams (TinyVector<double,4> params);
   inline TinyVector<double,4> GetParams ();
   inline double GetB0p();
+  inline double K_T (double V);
+
   VinetEOSClass() : third(1.0/3.0), Atomic2GPa(29421.01)
   { 
   }
@@ -64,6 +66,13 @@ VinetEOSClass::Pressure(double V)
   double eta = 1.5*(B0p-1.0);
   double dE_dV = -3.0*B0/(x*x)*(1.0-x)*exp(eta*(1.0-x));
   return -Atomic2GPa * dE_dV;
+}
+
+inline double
+VinetEOSClass::K_T (double V)
+{
+  double eps = 1.0e-7;
+  return V*(Pressure(V+eps)-Pressure(V-eps))/(2.0*eps);
 }
 
 

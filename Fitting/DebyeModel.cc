@@ -177,3 +177,19 @@ DebyeFreeEnergy::K_T_FD(double Vval, double Tval)
   
   return -Vval *(P(Vval+eps,Tval)-P(Vval-eps,Tval))/(2.0*eps);
 }
+
+
+double
+DebyeFreeEnergy::dP_dT (double Vval, double Tval)
+{
+  Debye.SetTheta(Theta_V(Vval));
+  return -dTheta_dV(Vval) * Debye.d2F_dTheta_dT (Tval);
+}
+
+double
+DebyeFreeEnergy::dP_dT_FD (double Vval, double Tval)
+{
+  double eps = 1.0e-7;
+  return (P(Vval,Tval+eps)-P(Vval,Tval-eps))/(2.0*eps);
+}
+

@@ -59,12 +59,12 @@ public:
   double P(double V, double T);
   double P_FD(double V, double T);
   double dP_dV (double V, double T);
+  double dP_dT (double V, double T);
+  double dP_dT_FD (double V, double T);
 
   // Bulk modulus
   double K_T (double V, double T);
   double K_T_FD (double V, double T);
-  // Isothermal compressiblity
-  double Chi_T (double V, double T);
 
   DebyeFreeEnergy()
   {

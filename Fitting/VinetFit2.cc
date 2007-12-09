@@ -322,7 +322,7 @@ CalcProperties (VinetEOSClass &staticEOS,
   const double au2GPa = 29421.01;
   
   FILE *fout = fopen ("ThermalPressure.dat", "w");
-  double V = 80.0;
+  double V = 79.701;
   for (double T=1.0; T<3000.0; T+=1.0) 
     fprintf (fout, "%5.1f %12.8e %12.8e\n", T, 
 	     au2GPa * thermalEOS.P(V,T),
@@ -350,10 +350,31 @@ CalcProperties (VinetEOSClass &staticEOS,
   fout = fopen ("K_T.dat", "w");
   for (double T=1.0; T<3000.0; T+=1.0) {
     fprintf (fout, "%5.1f %12.8e %12.8e\n", T,
-	     thermalEOS.K_T(V,T), 
-	     thermalEOS.K_T_FD(V,T));
+	     au2GPa*thermalEOS.K_T(V,T), 
+	     au2GPa*thermalEOS.K_T_FD(V,T));
   }
   fclose (fout);
+
+  // Test dP_dT
+  fout = fopen ("dP_dT.dat", "w");
+  for (double T=1.0; T<3000.0; T+=1.0) {
+    fprintf (fout, "%5.1f %12.8e %12.8e\n", T,
+	     au2GPa*thermalEOS.dP_dT(V,T), 
+	     au2GPa*thermalEOS.dP_dT_FD(V,T));
+  }
+  fclose (fout);
+
+  // Thermal expansion coefficient
+  fout = fopen ("alpha.dat", "w");
+  for (double T=1.0; T<3000.0; T+=1.0) {
+    double K_T = au2GPa*thermalEOS.K_T(V,T) 
+      + staticEOS.K_T(V);
+    double dP_dT = au2GPa * thermalEOS.dP_dT(V,T);
+    double alpha = dP_dT/K_T;
+    fprintf (fout, "%5.1f %12.8e\n", T, alpha);
+  }
+  fclose (fout);
+
 }
 
 
