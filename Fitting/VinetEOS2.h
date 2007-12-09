@@ -72,7 +72,7 @@ inline double
 VinetEOSClass::K_T (double V)
 {
   double eps = 1.0e-7;
-  return V*(Pressure(V+eps)-Pressure(V-eps))/(2.0*eps);
+  return -V*(Pressure(V+eps)-Pressure(V-eps))/(2.0*eps);
 }
 
 

@@ -371,7 +371,7 @@ CalcProperties (VinetEOSClass &staticEOS,
       + staticEOS.K_T(V);
     double dP_dT = au2GPa * thermalEOS.dP_dT(V,T);
     double alpha = dP_dT/K_T;
-    fprintf (fout, "%5.1f %12.8e\n", T, alpha);
+    fprintf (fout, "%5.1f %12.8e %12.8f\n", T, alpha, K_T);
   }
   fclose (fout);
 
