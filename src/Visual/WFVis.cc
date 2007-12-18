@@ -1079,7 +1079,6 @@ WFVisualClass::ReadWF (int kpoint, int band)
 
   Nonuniform = Infile.OpenSection ("xgrid");
   if (Nonuniform) {
-    cerr << "Read nonuniform spline.\n";
     Array<double,1> points;
     Infile.ReadVar ("points", points);
     points = points - 0.5;
