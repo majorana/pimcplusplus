@@ -55,7 +55,8 @@ protected:
   Gtk::Adjustment kAdjust, BandAdjust;
   Gtk::Frame kFrame, BandFrame;
   Glib::RefPtr<Gtk::ToggleAction> CoordToggle, SphereToggle, BoxToggle,
-    TruncRadiiToggle, IsocontourToggle;
+    TruncRadiiToggle, IsocontourToggle, FullscreenToggle;
+;
   Gtk::RadioButtonGroup DisplayGroup, ColorMapGroup;
   Glib::RefPtr<Gtk::RadioAction> RealRadio, ImagRadio, Mag2Radio;
   
@@ -173,6 +174,7 @@ protected:
   void OnOpen();
   void OnDisplayRadio(WFDisplayType type);
   void OnColorMapRadio(ColorMapType type);
+  void OnFullscreenToggle();
   bool UpToDate;
 
   ///////////////////

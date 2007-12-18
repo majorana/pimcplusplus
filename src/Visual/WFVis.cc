@@ -209,6 +209,10 @@ WFVisualClass::WFVisualClass() :
 			      "Show isocontours on color planes", true);
   Actions->add (IsocontourToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnIsocontourToggle));
+  FullscreenToggle = Gtk::ToggleAction::create("Fullscreen", "Fullscreen mode",
+					       "Display this window in fullscreen mode", false);
+  Actions->add (FullscreenToggle,
+		sigc::mem_fun(*this, &WFVisualClass::OnFullscreenToggle));
 
   Actions->add (Gtk::Action::create("MenuDisplay", "Display"));
   Mag2Radio = Gtk::RadioAction::create
@@ -280,6 +284,7 @@ WFVisualClass::WFVisualClass() :
     "      <menuitem action='Box'/>"
     "      <menuitem action='Trunc'/>"
     "      <menuitem action='Isocontours'/>"
+    "      <menuitem action='Fullscreen'/>"
     "    </menu>"
     "    <menu action='MenuDisplay'>"
     "      <menuitem action='Real'/>"
@@ -1510,6 +1515,17 @@ WFVisualClass::SetViewportSize (int size)
   PathVis.set_size_request(size, size);
   resize(10,10);
 }
+
+
+void
+WFVisualClass::OnFullscreenToggle()
+{
+  if (FullscreenToggle->get_active())
+    fullscreen();
+  else
+    unfullscreen();
+}
+
 
 void
 WFVisualClass::OnColorMapRadio (ColorMapType type)
