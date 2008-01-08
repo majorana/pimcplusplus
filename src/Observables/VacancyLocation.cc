@@ -180,7 +180,7 @@ void VacancyLocClass::Recenter()
   if (totalDist2<totalDist){
   for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++)
     for (int slice=0;slice<PathData.Path.NumTimeSlices();slice++){
-      PathData.Path.Path(slice,ptcl)-=moveDiff;
+      PathData.Path(slice,ptcl)-=moveDiff;
     }
   cerr<<"My moveDiff is "<<moveDiff<<endl;
   Array<int,1> activeParticles(PathData.Path.NumParticles());
