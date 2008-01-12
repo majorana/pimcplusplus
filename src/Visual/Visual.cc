@@ -88,7 +88,6 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
 //       }
 //     }
 //   }
-  cerr << "Paths.size() = " << Paths.size() << endl;
   for (int li=0; li<Paths.size(); li++) {
     PathObject* pathObj = new PathObject;
 // // <<<<<<< .mine
@@ -117,7 +116,6 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
   }
   for (int si=0; si<numSpecies; si++) {
     if(!processH2O || (processH2O && Species(si).Name!="e")){
-      cerr << "Handling species " << Species(si).Name << endl;
       if (Species(si).lambda == 0){
         for (int ptcl=Species(si).FirstParticle; ptcl<=Species(si).LastParticle;
 	   ptcl++) {
@@ -200,7 +198,9 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
     iso.Init (&Xgrid, &Ygrid, &Zgrid, RhoData, true);
     Mat3 lattice;
     lattice =  Box[0], 0.0, 0.0, 0.0, Box[1], 0.0, 0.0, 0.0, Box[2];
+    Vec3 uCenter(0.0, 0.0, 0.0), uMin(0.0, 0.0, 0.0), uMax(1.0, 1.0, 1.0);
     iso.SetLattice (lattice);
+    iso.SetCenter (uCenter, uMin, uMax);
     iso.SetIsoval(MaxRho*RhoAdjust.get_value());
     //iso.SetIsoval(7.0e-9);
     PathVis.Objects.push_back(isoPtr);
@@ -269,7 +269,6 @@ void VisualClass::Read(string fileName)
   assert (Infile.OpenSection("System"));
   assert (Infile.ReadVar ("Box", box));
   Box.Set (box(0), box(1), box(2));
-  cerr << "Box = " << box << endl;
 
   double maxDim = max(max(box(0), box(1)), box(2));
   PathVis.View.SetDistance (1.2*maxDim);
@@ -282,7 +281,6 @@ void VisualClass::Read(string fileName)
   for (int i=0; i<numSpecies; i++) {
     Infile.OpenSection("Species",i);
     assert (Infile.ReadVar("lambda", Species(i).lambda));
-    cerr << "lambda = " << Species(i).lambda << endl;
     assert (Infile.ReadVar("Name", Species(i).Name));
     assert (Infile.ReadVar("NumParticles", Species(i).NumParticles));
     for (int j=i+1; j<numSpecies; j++)
@@ -292,10 +290,10 @@ void VisualClass::Read(string fileName)
     Infile.CloseSection(); // Species
   }
 
-  for (int i=0; i<numSpecies; i++) 
-    cerr << "Species:  Name = " << Species(i).Name << "    First Ptcl = " 
-	 << Species(i).FirstParticle 
-	 << "   Last Ptcl = " << Species(i).LastParticle << "\n";
+//   for (int i=0; i<numSpecies; i++) 
+//     cerr << "Species:  Name = " << Species(i).Name << "    First Ptcl = " 
+// 	 << Species(i).FirstParticle 
+// 	 << "   Last Ptcl = " << Species(i).LastParticle << "\n";
 
   Infile.CloseSection (); // "System"
 
@@ -635,7 +633,6 @@ void VisualClass::OnOpen()
   int result = FileChooser.run();
   switch (result) {
     case (Gtk::RESPONSE_OK): {
-      cerr << "Opening file " << FileChooser.get_filename() << endl;
       Read (FileChooser.get_filename());
       FrameChanged();
       break;
@@ -727,8 +724,6 @@ void VisualClass::WrapToggle()
 void VisualClass::PerspectiveToggle()
 {
   bool persp = !OrthoButton.get_active();
-  cerr << "Now using " << (persp ? "perspective" : "orthographic") 
-       << " projection.\n";
   PathVis.View.SetPerspective(persp);
   //  PathVis.Invalidate();
   FrameChanged();
@@ -747,7 +742,6 @@ void VisualClass::MakePaths(int frame)
   Paths.resize(0);
 
   vector<vector<int> > loopList;
-  cerr << "NumParticles =" << numPtcls << endl;
   // Constuct list of permuting loops.  Ignore classical particles.
   for (int ptcl=0; ptcl<numPtcls; ptcl++) {
     if (!used(ptcl) && (PtclSpecies(ptcl).lambda!=0.0)) {
@@ -763,10 +757,6 @@ void VisualClass::MakePaths(int frame)
        } while (permPtcl != ptcl);
 
        if (haveOpen) {  // make sure open ptcl is las
-	 cerr << "open cycle loop = ";
-	 for (int i=0; i<loop.size(); i++)
-	   cerr << loop[i] << " ";
-	 cerr << endl;
 	 if (loop.size()==2)
 	   std::swap (loop[0], loop[1]);
 // 	 while (loop[loop.size()-1] != OpenPtcl(frame) {
@@ -778,7 +768,6 @@ void VisualClass::MakePaths(int frame)
     }
   }
   //  Paths.resize(loopList.size());
-  cerr << loopList.size() << " loops.\n";
   for (int li=0; li<loopList.size(); li++) {
     vector<int> &loop = loopList[li];
     OnePath &path = (*new OnePath);
