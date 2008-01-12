@@ -27,6 +27,8 @@ VisualClass::ReadFrameData(int frame)
     // 	  RhoData(ix,iy,iz) = rho(nx-ix-1,ny-iy-1,nz-iz-1);
     //     RhoData = rho;
 
+    RhoData = log (RhoData);
+
     MaxRho=0.0;
     MinRho = 1.0e100;
     for (int ix=0; ix<RhoData.extent(0); ix++)
@@ -207,7 +209,7 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
     Vec3 uCenter(0.0, 0.0, 0.0), uMin(0.0, 0.0, 0.0), uMax(1.0, 1.0, 1.0);
     iso.SetLattice (lattice);
     iso.SetCenter (uCenter, uMin, uMax);
-    iso.SetIsoval(MaxRho*RhoAdjust.get_value());
+    iso.SetIsoval(0.01*MaxRho*RhoAdjust.get_value());
     //iso.SetIsoval(7.0e-9);
     PathVis.Objects.push_back(isoPtr);
   }
@@ -447,7 +449,7 @@ VisualClass::VisualClass()
     Wrap(false), Smooth(false), 
     DetailFrame ("Detail"),  DetailAdjust (1.0, 1.0, 2.0), 
     IsoFrame    ("Isosurf"),    IsoAdjust (0.0, 0.0, 5.0, 0.1),
-    RhoFrame    ("Rho"),        RhoAdjust (0.0, 0.0, 1.0, 0.02, 0.1),
+    RhoFrame    (/*"Rho"*/"V (% max)"),        RhoAdjust (0.0, 0.0, 100.0, 1.0, 10.0),
     Export(*this), RhoVar(NULL), FileIsRead(false)
 {
   TubesImage.set(FindFullPath("tubes.png"));
@@ -551,8 +553,8 @@ VisualClass::VisualClass()
 
   // Setup rho stuff
   RhoScale.set_adjustment(RhoAdjust);
-  RhoScale.set_digits(2);
-  RhoAdjust.set_step_increment(0.02);
+  RhoScale.set_digits(0);
+  RhoAdjust.set_step_increment(1.0);
   RhoAdjust.signal_value_changed().connect
     (sigc::mem_fun(*this, &VisualClass::OnRhoChange));
   RhoFrame.add(RhoScale);
@@ -626,8 +628,11 @@ VisualClass::VisualClass()
   m_VBox.pack_start(FrameScale, Gtk::PACK_SHRINK,0);
   m_VBox.pack_start(m_ButtonQuit, Gtk::PACK_SHRINK, 0);
 
+
   // Show window.
   show_all();
+  // HACK HACK HACK  
+  IsoFrame.hide();
   processH2O = false;
 }
 

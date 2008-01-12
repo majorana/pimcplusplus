@@ -195,14 +195,19 @@ void
 ViewClass::POVtransform (FILE *fout)
 {
   fprintf (fout, "camera {\n");
+//   fprintf (fout, "  location <%14.10f, %14.10f %14.10f>\n",
+// 	   0.0, 0.0, 2.0*Distance/Scale);
   fprintf (fout, "  location <%14.10f, %14.10f %14.10f>\n",
-	   0.0, 0.0, 2.0*Distance/Scale);
+	   -2.0*Distance*xTrans, -2.0*Distance*yTrans, 2.0*Distance/Scale);
   double angle = 51.661;
   angle = 40.0;
   fprintf (fout, "  angle %1.5f\n", angle);
   fprintf (fout, "  right <-1.0,0,0>\n");
+//   fprintf (fout, "  look_at <%14.10f %14.10f %14.10f>\n}\n\n",
+// 	   0.0, 0.0, 0.0);
   fprintf (fout, "  look_at <%14.10f %14.10f %14.10f>\n}\n\n",
-	   0.0, 0.0, 0.0);
+	   -2.0*Distance*xTrans, -2.0*Distance*yTrans, 0.0);
+
 }
 
 
@@ -228,7 +233,7 @@ ViewClass::Reset()
 string
 ViewClass::RotationString()
 {
-  char rotString[500];
+  char rotString[500], transString[500];
   
   snprintf(rotString,500,
 	   "  matrix <%8.5f, %8.5f, %8.5f,\n          %8.5f, %8.5f, %8.5f,\n          %8.5f, %8.5f, %8.5f,\n          %8.5f, %8.5f, %8.5f >\n",
@@ -236,7 +241,11 @@ ViewClass::RotationString()
 	    RotMat[1][0], RotMat[1][1], RotMat[1][2],
 	    RotMat[2][0], RotMat[2][1], RotMat[2][2],
 	    0.0         , 0.0         , 0.0         );
-  string str = rotString;
+  snprintf (transString, 500,
+	    "  translate <%8.5f, %8.5f, %8.5f> \n", 
+	    2.0*Distance*xTrans, 2.0*Distance*yTrans, 0.0);
+  cerr << "Distance = " << Distance << endl;
+  string str = (string)rotString /*+ (string)transString*/;
   return str;
 }
 
