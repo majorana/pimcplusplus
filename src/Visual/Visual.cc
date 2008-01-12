@@ -1,5 +1,7 @@
 #include "Visual.h"
 #include "ParseCommand.h"
+#include <GL/glut.h>
+#include "CoordObject.h"
 
 void 
 VisualClass::ReadFrameData(int frame)
@@ -45,6 +47,10 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
       delete PathVis.Objects[i];
   
   PathVis.Objects.resize(0);
+  CoordObject *coord = new CoordObject;
+  Vec3 box = Box(0) + Box(1) + Box(2);
+  coord->Set (box);
+  PathVis.Objects.push_back(coord);
 
   ReadFrameData (frame);
 
@@ -882,6 +888,7 @@ int main(int argc, char** argv)
 
   // Init gtkglextmm.
   Gtk::GL::init(argc, argv);
+  glutInit (&argc, argv);
 
   list<ParamClass> optionList;
   optionList.push_back(ParamClass("small", false));
