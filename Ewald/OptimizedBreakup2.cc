@@ -71,7 +71,7 @@ double BasisClass::c0(int n)
   c0Integrand integrand(*this, n);
   GKIntegration<c0Integrand,GK31> integrator(integrand);
   integrator.SetRelativeErrorMode();
-  return integrator.Integrate (ra, rb, 1.0e-12, 1.0e-10, false);
+  return integrator.Integrate (ra, rb, 1.0e-14, 1.0e-14, false);
 }
 
 void OptimizedBreakupClass::Addk(double k, double degeneracy)

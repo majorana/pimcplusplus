@@ -194,11 +194,11 @@ void TestFeO()
   LPQHI_BasisClass basis;
   basis.SetLattice(a);
   basis.Set_rc(rcut);
-  basis.SetNumKnots(20);
+  basis.SetNumKnots(25);
   OptimizedBreakupClass breakup(basis);
-  double nonDimCut = 10.0;
+  double nonDimCut = 40.0;
   double kcut = nonDimCut / rcut;
-  breakup.SetkVecs (kcut, 25.0, 1000.0);
+  breakup.SetkVecs (kcut, 30.0, 1000.0);
   Array<double,1> Xk(breakup.kpoints.size());
   for (int i=0; i<breakup.kpoints.size(); i++) {
     double k = breakup.kpoints(i)[0];
@@ -209,6 +209,10 @@ void TestFeO()
   Array<bool,1> adjust(N);
   adjust = true;
   t = 0.0;
+  double delta = basis.GetDelta();
+  t(N-3) = 1.0/rcut;                           adjust(N-3) = false;
+  t(N-2) = -1.0/(rcut*rcut)*delta;             adjust(N-2) = false;
+  t(N-1) = 2.0/(rcut*rcut*rcut)*delta*delta;   adjust(N-1) = false;
   
   double chi2 = breakup.DoBreakup(Xk, t, adjust);
   fprintf (stderr, "%1.16e %1.16e\n", rcut*kcut, chi2);
@@ -311,8 +315,7 @@ void TestFeO()
 
 
   cerr << "Long-range contribution = " << Vlong << endl;
-  cerr << "Total = " << (Vlong + Vshort)/ 8.0 << endl;
-  cerr << "Basis.Omega = " << basis.Omega << endl;
+  fprintf (stderr, "Total = %1.12f\n", (Vlong+Vshort)/8.0);
 }
 
 
@@ -461,5 +464,6 @@ main()
 //   TestLPQHI();
 //   TestCoulomb();
   // CoulombError();
+  // TestCoulomb();
   TestFeO();
 }
