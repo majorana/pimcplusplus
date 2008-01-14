@@ -2,6 +2,7 @@
 #define LATTICE_CLASS_H
 
 #include "../Blitz.h"
+#include <vector>
 
 
 class LatticeClass
@@ -22,6 +23,9 @@ public:
   // Returns the radius of the largest inscribed sphere
   inline double rMax();
   inline TinyVector<int,3> MinIndices(double kcut);
+  inline vector<Vec3> GenGvecs(Vec3 k, double Ecut);
+  inline Vec3 MinImage(Vec3 disp);
+  inline double Volume();
 
   LatticeClass (Mat3 lattice)
   { Set (lattice); }
@@ -112,6 +116,50 @@ LatticeClass::MinIndices(double kcut)
     I[i] = (int)ceil(kcut/perpDist)+1;
   }
   return I;
+}
+
+vector<Vec3>
+LatticeClass::GenGvecs (Vec3 k, double Ecut)
+{
+  double kcut = sqrt(2.0*Ecut);
+  TinyVector<int,3> minIndex = MinIndices(kcut);
+  TinyVector<int,3> realMax (0,0,0);
+  TinyVector<int,3> realMin (0,0,0);
+
+
+  vector<Vec3> vecs;
+  for (int i0=-minIndex[0]; i0<=minIndex[0]; i0++)
+    for (int i1=-minIndex[1]; i1<=minIndex[1]; i1++)
+      for (int i2=-minIndex[2]; i2<=minIndex[2]; i2++) {
+	Vec3 G = (double)i0*b(0) + (double)i1*b(1) + (double)i2*b(2);
+	double E = 0.5*dot(G+k,G+k);
+	if (E<=Ecut) {
+	  vecs.push_back(G);
+	  realMax[0]=max(i0,realMax[0]);  realMin[0]=min(i0,realMin[0]);
+	  realMax[1]=max(i1,realMax[1]);  realMin[1]=min(i1,realMin[1]);
+	  realMax[2]=max(i2,realMax[2]);  realMin[2]=min(i2,realMin[2]);
+	}
+      }
+//   cerr << "realMax = " << realMax << endl;
+//   cerr << "realMin = " << realMin << endl;
+  return vecs;
+}
+
+inline Vec3
+LatticeClass::MinImage(Vec3 disp)
+{
+  Vec3 u = Cart2Reduced (disp);
+  u[0] -= round(u[0]);
+  u[1] -= round(u[1]);
+  u[2] -= round(u[2]);
+  return Reduced2Cart(u);
+}
+
+
+inline double
+LatticeClass::Volume()
+{
+  return fabs(det(Lattice));
 }
 
 #endif
