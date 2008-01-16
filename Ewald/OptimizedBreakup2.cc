@@ -127,7 +127,7 @@ void OptimizedBreakupClass::SetkVecs(double kc, double kCont, double kMax)
 double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk, 
 					Array<double,1> &t)
 {
-  const double tolerance = 1.0e-16;
+  const double tolerance = 1.0e-24;
   //const double tolerance = 0.0;
   assert(t.rows()==Basis.NumElements());
   Array<double,2> A;
@@ -178,7 +178,7 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
     if (Sinv(i) == 0.0)
       numSingular++;
   if (numSingular > 0)
-    perr << "There were " << numSingular << " singular values.\n";
+    cerr << "There were " << numSingular << " singular values.\n";
   t = 0.0;
   // Compute t_n, removing singular values
   for (int i=0; i<numElem; i++) {
@@ -276,40 +276,52 @@ double OptimizedBreakupClass::DoBreakup(const Array<double,1> &Vk,
       j++;
     }
 
-  // Now do SVD decomposition:
-  Array<double,2> U(M, M), V(M, M);
-  Array<double,1> S(M), Sinv(M);
-  SVdecomp(Ac, U, S, V);
+  Array<double,2> LU(M,M);
+  Array<int,1> perm(M);
+  LU = Ac;
+  double sign;
+  LUdecomp(LU, perm, sign);
+  tc = bc;
+  LUsolve (LU, perm, tc);
+  
+  cerr << "tc = " << tc << endl;
 
-  // Zero out near-singular values
-  double Smax=S(0);
-  for (int i=1; i<M; i++)
-    Smax = max (S(i),Smax);
+//   tc = 0.0;
+//   // Now do SVD decomposition:
+//   Array<double,2> U(M, M), V(M, M);
+//   Array<double,1> S(M), Sinv(M);
+//   SVdecomp(Ac, U, S, V);
 
-  for (int i=0; i<M; i++)
-    if (S(i) < 0.0)
-      perr << "negative singlar value.\n";
+//   // Zero out near-singular values
+//   double Smax=S(0);
+//   for (int i=1; i<M; i++)
+//     Smax = max (S(i),Smax);
 
-  //  perr << "Smax = " << Smax << endl;
+//   for (int i=0; i<M; i++)
+//     if (S(i) < 0.0)
+//       perr << "negative singlar value.\n";
 
-  for (int i=0; i<M; i++)
-    Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
-  int numSingular = 0;
-  for (int i=0; i<Sinv.size(); i++)
-    if (Sinv(i) == 0.0)
-      numSingular++;
-  if (numSingular > 0)
-    perr << "There were " << numSingular << " singular values.\n";
-  tc = 0.0;
-  // Compute t_n, removing singular values
-  for (int i=0; i<M; i++) {
-    double coef = 0.0;
-    for (int j=0; j<M; j++)
-      coef += U(j,i) * bc(j);
-    coef *= Sinv(i);
-    for (int k=0; k<M; k++)
-      tc(k) += coef * V(k,i);
-  }
+//   //  perr << "Smax = " << Smax << endl;
+
+//   for (int i=0; i<M; i++)
+//     Sinv(i) = (S(i) < (tolerance*Smax)) ? 0.0 : (1.0/S(i));
+//   int numSingular = 0;
+//   for (int i=0; i<Sinv.size(); i++)
+//     if (Sinv(i) == 0.0)
+//       numSingular++;
+//   if (numSingular > 0)
+//     perr << "There were " << numSingular << " singular values.\n";
+//   tc = 0.0;
+//   // Compute t_n, removing singular values
+//   for (int i=0; i<M; i++) {
+//     double coef = 0.0;
+//     for (int j=0; j<M; j++)
+//       coef += U(j,i) * bc(j);
+//     coef *= Sinv(i);
+//     for (int k=0; k<M; k++)
+//       tc(k) += coef * V(k,i);
+//   }
+//  cerr << "tc = " << tc << endl;
 
   // Now copy tc values into t
   j=0;

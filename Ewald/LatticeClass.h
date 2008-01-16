@@ -83,16 +83,23 @@ LatticeClass::rMax()
   double r = 1.0e200;
   Vec3 c = 0.5*((*this)[0] + (*this)[1] + (*this)[2]);
   for (int i=0; i<3; i++) {
-    Vec3 v1 = (*this)[(i+1)%3];
-    Vec3 v2 = (*this)[(i+2)%3];
+    // Vec3 v1 = (*this)[(i+1)%3];
+    // Vec3 v2 = (*this)[(i+2)%3];
     
-    double beta1 = (dot(v2,v2)*dot(c,v1) - dot (v1,v2)*dot(c,v2))/
-	(dot(v1,v1)*dot(v2,v2) - dot(v1,v2)*dot(v1,v2));
-    double beta2 = (dot(v1,v1)*dot(c,v2) - dot (v1,v2)*dot(c,v1))/
-	(dot(v1,v1)*dot(v2,v2) - dot(v1,v2)*dot(v1,v2));
+    // double beta1 = (dot(v2,v2)*dot(c,v1) - dot (v1,v2)*dot(c,v2))/
+    //	(dot(v1,v1)*dot(v2,v2) - dot(v1,v2)*dot(v1,v2));
+    // double beta2 = (dot(v1,v1)*dot(c,v2) - dot (v1,v2)*dot(c,v1))/
+    //	(dot(v1,v1)*dot(v2,v2) - dot(v1,v2)*dot(v1,v2));
+    
+    // Vec3 p = beta1*v1 + beta2*v2;
+    // double dist = sqrt(dot(c-p, c-p));
+    
+    Vec3 A = a(i);
+    Vec3 B = a((i+1)%3);
+    Vec3 C = a((i+2)%3);
+    Vec3 BxC = cross(B,C);
+    double dist = 0.5*fabs(dot(A,BxC))/sqrt(dot(BxC,BxC));
 
-    Vec3 p = beta1*v1 + beta2*v2;
-    double dist = sqrt(dot(c-p, c-p));
     r = min (r, dist);
   }
   return r;

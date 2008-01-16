@@ -194,9 +194,9 @@ void TestFeO()
   LPQHI_BasisClass basis;
   basis.SetLattice(a);
   basis.Set_rc(rcut);
-  basis.SetNumKnots(25);
+  basis.SetNumKnots(40);
   OptimizedBreakupClass breakup(basis);
-  double nonDimCut = 40.0;
+  double nonDimCut = 15.0;
   double kcut = nonDimCut / rcut;
   breakup.SetkVecs (kcut, 30.0, 1000.0);
   Array<double,1> Xk(breakup.kpoints.size());
@@ -260,6 +260,7 @@ void TestFeO()
   // Long-range contribution
   Vec3 kvec (0.0, 0.0, 0.0);
   vector<Vec3> Gvecs = lattice.GenGvecs(kvec, 0.5*kcut*kcut);
+  cerr << "Using " << Gvecs.size() << " G-vectors.\n";
   vector<double> Vlong_k(Gvecs.size());
   for (int i=0; i<Gvecs.size(); i++) {
     double k = sqrt(dot(Gvecs[i], Gvecs[i]));
