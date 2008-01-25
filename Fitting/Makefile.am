@@ -5,9 +5,9 @@ LDADD = libfitting.la ../MatrixOps/libmatops.la ../IO/libIO.la $(LAPACK_LIBS) $(
 
 TestFitting_SOURCES = TestFitting.cc
 LiFit_SOURCES       = TestEOS.cc LiEOS.h
-VinetFit_SOURCES    = VinetFit.cc
+VinetFit_SOURCES    = VinetFit.cc VinetEOS.h
 VinetFit2_SOURCES   = VinetFit2.cc PhononFreeEnergy.h PhononFreeEnergy.cc \
-                      DebyeModel.h DebyeModel.cc
+                      DebyeModel.h DebyeModel.cc VinetEOS2.h
 
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(HDF5_CFLAGS) $(XML2_CFLAGS)
 
