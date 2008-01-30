@@ -3,22 +3,22 @@ check_PROGRAMS =  TestFastCubic TestFastMultiCubic TestBicubic TestComplexMultiT
                   TestCubicBspline TestTricubicBspline TestBlips TestNonuniform               \
                   TestNUBspline TestTricubicNUBspline TestBspline
 
-TestFastCubic_SOURCES = TestFastCubic.cc
-TestFastMultiCubic_SOURCES = TestFastMultiCubic.cc
-TestBicubic_SOURCES = TestBicubic.cc 
+TestFastCubic_SOURCES                  = TestFastCubic.cc
+TestFastMultiCubic_SOURCES             = TestFastMultiCubic.cc
+TestBicubic_SOURCES                    = TestBicubic.cc 
 TestComplexMultiTricubicSpline_SOURCES = TestComplexMultiTricubicSpline.cc
-TestGrid_SOURCES = TestGrid.cc
-TestMultiTricubicSpline_SOURCES = TestMultiTricubicSpline.cc
-TestMyTricubic_SOURCES = TestMyTricubic.cc
-TestPeriodic_SOURCES = TestPeriodic.cc
-TestQuintic_SOURCES = TestQuintic.cc
-TestCubicBspline_SOURCES = TestCubicBspline.cc
-TestTricubicBspline_SOURCES = TestTricubicBspline.cc
-TestBlips_SOURCES = TestBlips.cc
-TestNonuniform_SOURCES = TestNonuniform.cc
-TestNUBspline_SOURCES = TestNUBspline.cc
-TestTricubicNUBspline_SOURCES= = TestTricubicNUBspline.cc
-TestBspline_SOURCES = TestBspline.c
+TestGrid_SOURCES                       = TestGrid.cc
+TestMultiTricubicSpline_SOURCES        = TestMultiTricubicSpline.cc
+TestMyTricubic_SOURCES                 = TestMyTricubic.cc
+TestPeriodic_SOURCES                   = TestPeriodic.cc
+TestQuintic_SOURCES                    = TestQuintic.cc
+TestCubicBspline_SOURCES               = TestCubicBspline.cc
+TestTricubicBspline_SOURCES            = TestTricubicBspline.cc
+TestBlips_SOURCES                      = TestBlips.cc
+TestNonuniform_SOURCES                 = TestNonuniform.cc
+TestNUBspline_SOURCES                  = TestNUBspline.cc
+TestTricubicNUBspline_SOURCES          = TestTricubicNUBspline.cc
+TestBspline_SOURCES                    = TestBspline.c
 
 LDADD = ../IO/libIO.la ../PlaneWavePHDFT/libpw.la ../FFT/libfft.la libspline.la  $(HDF5_LIBS) $(FLIBS) $(BLITZ_LIBS) $(FFTW3_LIBS) $(LAPACK_LIBS)
 AM_CXXFLAGS = -g $(BLITZ_CFLAGS) $(HDF5_CFLAGS) $(FFTW3_CFLAGS) $(FFT_DEF)
