@@ -1,6 +1,8 @@
-check_PROGRAMS = TestGradients
+check_PROGRAMS = TestGradients TestHDF
 
 TestGradients_SOURCES = TestGradients.cc
+
+TestHDF_SOURCES = testHDF.cc
 
 LDADD = libpairact.la  ../Fitting/libfitting.la ../MatrixOps/libmatops.la ../PH/libPH.la ../Splines/libspline.la  ../IO/libIO.la ../Integration/libquad.la ../Distributed/libdistrib.la ../SpecialFunctions/libspecfun.la  ../MPI/libcomm.la $(HDF5_LIBS) $(BLITZ_LIBS) $(GSL_LIBS) $(FLIBS) $(MPI_LIBS) $(LAPACK_LIBS)
 AM_CXXFLAGS = $(MPI_DEF) $(BLITZ_CFLAGS) $(HDF5_CFLAGS) $(GSL_CFLAGS) $(MPI_CFLAGS)

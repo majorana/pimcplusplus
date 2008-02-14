@@ -84,6 +84,7 @@ class DavidPAClass : public PairActionFitClass
   //////  double tau;
   /// Function to read David's squarer file input.
   void ReadDavidSquarerFile(string DMFile);
+  void ReadDavidSquarerFileHDF5(string DMFile);
   void ReadSamplingTable(string fileName);
   double U (double q, double z, double s2, int level);
   double dU(double q, double z, double s2, int level);
@@ -145,7 +146,16 @@ inline bool DavidPAClass::Read(IOSectionClass &in,double x, int y)
   //  assert(in.ReadVar("tau",DesiredTau));
   //  assert(in.ReadVar("MaxLevels",NumLevels));
   assert(in.ReadVar("Daviddmfile",fileName));
-  ReadDavidSquarerFile(fileName.c_str());
+  int l = fileName.size();
+  // slice last two characters of the filename. i.e. the extension
+  string extension(fileName, l-2, 2);
+  cerr << "Read dm file extension " << extension << endl;
+  if(extension == "dm")
+    ReadDavidSquarerFile(fileName.c_str());
+  else if (extension == "h5")
+    ReadDavidSquarerFileHDF5(fileName.c_str());
+  else
+    assert(0);
   string samplingTableFile;
   SamplingTableRead=in.ReadVar("SamplingTableFile",samplingTableFile);
   verr<<"My sampling table read is "<<SamplingTableRead<<endl;
