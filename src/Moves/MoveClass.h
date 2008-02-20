@@ -38,7 +38,6 @@
 #include "OpenEndMove.h"
 #include "MoleculeMove.h"
 #include "SwapMove.h"
-#include "WaterMoveRing.h"
 #include "ClusterMove.h"
 #include "StructureRejectStage.h"
 #include "CouplingMove.h"
