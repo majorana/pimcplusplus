@@ -22,6 +22,8 @@
 class PermutationCountClass : public ObservableClass
 {
  private:
+  Array<double,1> PermutationNumber;
+  ObservableVecDouble1 PermutationNumberVar;
   int Freq,DumpFreq;
   int TotalCounts;
   int TimesCalled;
@@ -36,6 +38,7 @@ public:
   void WriteBlock();
   PermutationCountClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
     ObservableClass(myPathData,ioSection), 
+    PermutationNumberVar("Partition Function",IOSection,myPathData.Path.Communicator),
     CycleCountVar("y", IOSection, myPathData.Path.Communicator)
   {
     TimesCalled=0;

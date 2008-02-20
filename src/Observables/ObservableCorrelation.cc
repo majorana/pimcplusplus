@@ -372,7 +372,7 @@ void nofrClass::Accumulate()
     int openPtcl=(int)(PathData.Path.OpenPtcl);
     PathData.Path.DistDisp(openLink,openPtcl,PathData.Path.NumParticles(),
     			   dist2,disp); //This is distance between head and tail!
-  
+    cerr<<"DIST IS "<<dist2<<endl;
   int numLinks=PathData.Path.NumTimeSlices()-1;
   disp=0.0;
   int currSlice=openLink;

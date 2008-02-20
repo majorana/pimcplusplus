@@ -23,6 +23,7 @@
 
 #define FORT(name) name ## _
 #define F77_LSAPR F77_FUNC(lsapr,LSAPR)
+#define F77_LSAPR48 F77_FUNC(lsapr48,LSAPR48)
 
 using namespace blitz;
 
@@ -31,16 +32,40 @@ using namespace blitz;
 extern "C" void 
 F77_LSAPR (int *n,double* c, int *perm);
 
+extern "C" void
+F77_LSAPR48 (int *n,double* c, int *perm);
+
+
+void
+VacancyHelperClass::FindVacancy(int slice,Array<dVec,1> &array)
+{
+  PathData.MoveJoin(PathData.NumTimeSlices()-1);
+  DistTable=0.0;
+  int numEmptySites=NumVacancies;
+  for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
+    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+      dVec disp;
+      double dist2;
+      disp=PathData.Path(slice,ptcl)-FixedLoc(latticeSite);
+      PathData.Path.PutInBox(disp);
+      dist2=dot(disp,disp);
+      DistTable(latticeSite,ptcl+numEmptySites)=dist2;
+    }
+    int n =FixedLoc.size();
+    F77_LSAPR (&n,DistTable.data(),Perm.data());
+    for (int i=0;i<NumVacancies;i++)
+      //subtract by 1 is to compensate for the fact that fortran is
+      //indexing by 1 
+      VacancyArray(i)=Perm(i)-1;
+  }
+}
+
 void 
 VacancyHelperClass::FindVacancy(int slice)
 {
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
-  Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
-  DistTable.resize(FixedLoc.size(), FixedLoc.size());
-  Array<int,1> Perm;
-  Perm.resize(FixedLoc.size());
   DistTable=0.0;
-  int numEmptySites=FixedLoc.size()-PathData.Path.NumParticles();
+  int numEmptySites=NumVacancies;
   for (int latticeSite=0;latticeSite<FixedLoc.size();latticeSite++){
     for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
       dVec disp;
@@ -75,8 +100,11 @@ void VacancyHelperClass::Read(IOSectionClass &in)
     FixedLoc(loc) = pos;
   }      
   NumVacancies=FixedLoc.size()-PathData.Path.NumParticles();
-  cerr<<"Size of Vacancy ARray is "<<NumVacancies<<endl;
   VacancyArray.resize(NumVacancies);
+  //  Array<double,2> DistTable(1,1,ColumnMajorArray<2>());
+  DistTable.resize(FixedLoc.size(), FixedLoc.size());
+  Perm.resize(FixedLoc.size());
+
   
 }
 

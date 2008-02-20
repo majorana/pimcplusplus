@@ -27,9 +27,12 @@ void PermutationCountClass::WriteBlock()
 {
   //  Array<double,1> CorSum(Correlation.size());
   //  Path.Communicator.Sum(Correlation, CorSum);
-
+  
   CycleCount=CycleCount/TotalCounts;
   CycleCountVar.Write(CycleCount);
+  PermutationNumber=PermutationNumber/TotalCounts;
+  PermutationNumberVar.Write(PermutationNumber);
+  PermutationNumber=0;
   CycleCountVar.Flush();
   CycleCount=0;
   TotalCounts=0;
@@ -54,7 +57,9 @@ void PermutationCountClass::Read(IOSectionClass &in)
     IOSection.WriteVar("Cumulative", false);
   }
   CycleCount.resize(PathData.Path.NumParticles());
+  PermutationNumber.resize(PathData.Path.NumParticles()*2);
   CycleCount=0;
+  PermutationNumber=0;
   TotalCounts=0;
   /// Now write the one-time output variables
 //   if (PathData.Path.Communicator.MyProc()==0)
@@ -65,6 +70,7 @@ void PermutationCountClass::Read(IOSectionClass &in)
 void PermutationCountClass::Accumulate()
 {
   TotalCounts++;
+  int totalPerms=0;
   PathClass &Path= PathData.Path;
   int N = PathData.Path.NumParticles();
   if (CountedAlready.size() != N) {
@@ -88,9 +94,11 @@ void PermutationCountClass::Accumulate()
 	  roamingPtcl=TotalPerm(roamingPtcl);
 	}
 	CycleCount(cycleLength)++;
+	totalPerms+=cycleLength;
       }
       ptcl++;
     }
+  PermutationNumber(totalPerms)=PermutationNumber(totalPerms)+1;
 }
 
 

@@ -23,10 +23,12 @@ class EnergyClass : public ObservableClass
 {
 
 private:
+  int GetPermNumber();
   double TotalSum, KineticSum, dUShortSum, dULongSum, NodeSum, 
     VShortSum, VLongSum, dUNonlocalSum;
   //, TotalActionSum, ExpTotalActionSum, TIP5PSum;
-
+  Array<double,1> EnergyVals;
+  ObservableVecDouble1 EnergyValsVar;
   ObservableDouble TotalVar, KineticVar, dUShortVar, dULongVar, NodeVar,
     VShortVar, VLongVar, dUNonlocalVar;
   //, TotalActionVar, ExpTotalActionVar, TIP5PVar;
@@ -39,6 +41,8 @@ private:
   vector<ObservableDouble*> OtherVars;
   vector<double> OtherSums;
   int numEnergies;
+  Array<bool,1> CountedAlready;
+  Array<int,1> TotalPerm;
 public:
   void Accumulate();
   void WriteBlock();
@@ -53,7 +57,8 @@ public:
       NodeVar      ("Node",   IOSection,myPathData.Path.Communicator), 
       VShortVar    ("VShort",IOSection,myPathData.Path.Communicator), 
       VLongVar     ("VLong",IOSection,myPathData.Path.Communicator),
-      dUNonlocalVar("dUNonlocal", IOSection,myPathData.Path.Communicator)
+      dUNonlocalVar("dUNonlocal", IOSection,myPathData.Path.Communicator),
+      EnergyValsVar("Energy Vals",IOSection,myPathData.Path.Communicator)
 // TotalActionVar ("TotalAction",IOSection,myPathData.Path.Communicator),
 // ExpTotalActionVar ("ExpTotalAction",IOSection,myPathData.Path.Communicator)
 // TIP5PVar  ("TIP5P",IOSection,myPathData.Path.Communicator)

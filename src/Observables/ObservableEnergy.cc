@@ -28,6 +28,7 @@
 // Fix to include final link between link M and 0
 void EnergyClass::Accumulate()
 {
+
   //Move the join to the end so we don't have to worry about
   //permutations
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
@@ -45,6 +46,8 @@ void EnergyClass::Accumulate()
 	//node = Energies["node"];
 	//vShort = Energies["vShort"];
 	//vLong = Energies["vLong"];
+  int myGetPermNumber=GetPermNumber();
+
 
   TotalSum   += kinetic + dUShort + dULong + node + dUNonlocal;// + tip5p;
   KineticSum += kinetic;
@@ -54,6 +57,9 @@ void EnergyClass::Accumulate()
   VShortSum  += vShort;
   VLongSum   += vLong;
   dUNonlocalSum += dUNonlocal;
+  cerr<<"My get perm number is "<<myGetPermNumber<<endl;
+  EnergyVals(myGetPermNumber)+=kinetic;
+  cerr<<"ENERGY VVLAS"<<EnergyVals<<"ASDF "<<kinetic<<endl;
 
   int slice1 = 0;
   int slice2 = PathData.Path.NumTimeSlices() - 1;
@@ -129,6 +135,41 @@ void EnergyClass::ShiftData (int NumTimeSlices)
   // Do nothing
 }
 
+int EnergyClass::GetPermNumber()
+{
+  int totalPerms=0;
+  PathClass &Path= PathData.Path;
+  int N = PathData.Path.NumParticles();
+  if (CountedAlready.size() != N) {
+    CountedAlready.resize(N);
+    TotalPerm.resize(N);
+  }
+  PathData.Path.TotalPermutation (TotalPerm);
+  CountedAlready =false;
+  int ptcl=0;
+  /// Only proc 0 gets TotalPerm
+  if (Path.Communicator.MyProc() == 0) 
+    while (ptcl < N) {
+      if (!CountedAlready(ptcl)) {
+	int startPtcl=ptcl;
+	int roamingPtcl=ptcl;
+	int cycleLength=0;
+	roamingPtcl = TotalPerm(roamingPtcl);
+	while (roamingPtcl!=startPtcl){
+	  CountedAlready(roamingPtcl)=true;
+	  cycleLength++;
+	  roamingPtcl=TotalPerm(roamingPtcl);
+	}
+	//	CycleCount(cycleLength)++;
+	totalPerms+=cycleLength;
+      }
+      ptcl++;
+    }
+  return totalPerms;
+
+
+
+}
 void EnergyClass::WriteBlock()
 {
   int nslices=PathData.Path.TotalNumSlices;
@@ -142,6 +183,12 @@ void EnergyClass::WriteBlock()
   VShortVar.Write  (Prefactor*PathData.Path.Communicator.Sum(VShortSum)*norm);
   VLongVar.Write   (Prefactor*PathData.Path.Communicator.Sum(VLongSum)*norm);
   dUNonlocalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(dUNonlocalSum)*norm);
+  cerr<<"norm is "<<norm<<endl;
+  cerr<<"norm"<<EnergyVals<<endl;
+  EnergyVals=EnergyVals*norm;
+  cerr<<"norm"<<EnergyVals<<endl;
+  EnergyValsVar.Write(EnergyVals);
+  EnergyVals=0.0;
 	for(int n=0; n<numEnergies; n++){
 		OtherVars[n]->Write(Prefactor*PathData.Path.Communicator.Sum(OtherSums[n])*norm);
 		OtherSums[n] = 0.0;
@@ -162,6 +209,7 @@ void EnergyClass::WriteBlock()
   VShortSum      = 0.0;
   VLongSum       = 0.0;
   dUNonlocalSum = 0.0;
+  EnergyVals=0.0;
 //   TotalActionSum = 0.0;
 //   ExpTotalActionSum = 0.0;
   //  TIP5PSum   = 0.0;
@@ -239,7 +287,8 @@ void EnergyClass::Read(IOSectionClass &in)
     WriteInfo();
     IOSection.WriteVar("Type","Scalar");
   }
-
+  EnergyVals.resize(PathData.Path.NumParticles()*2);
+  EnergyVals=0.0;
 	// New code to read in and accumulate
 	// energies from specified action objects
 	// Added by John on June 16 2006
@@ -336,7 +385,7 @@ void EnergySignClass::WriteBlock()
 {
   int nslices=PathData.Path.TotalNumSlices;
   double norm = 1.0/((double)NumSamples*(double)nslices);
-  
+
   TotalVar.Write(PathData.Path.Communicator.Sum(TotalSum)*norm);
   KineticVar.Write(PathData.Path.Communicator.Sum(KineticSum)*norm);
   dUShortVar.Write(PathData.Path.Communicator.Sum(dUShortSum)*norm);

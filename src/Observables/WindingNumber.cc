@@ -69,6 +69,7 @@ WindingNumberClass::Read(IOSectionClass& in)
     }
   }
   WN2Array.resize(NDIM);
+  WN2ArrayLowVariance.resize(NDIM);
 }
 
 
@@ -80,6 +81,30 @@ WindingNumberClass::CalcWN2()
 	 << "there is any data available.\n";  
     abort();
   }
+
+  ///Better variance version
+  WN2ArrayLowVariance=0.0;
+  for (int dim=0;dim<NDIM;dim++){
+    double W2avg=0.0; double Wavg=0.0;
+    for (int i=0;i<WNVec.size();i++){
+      W2avg+=WNVec[i][dim]*WNVec[i][dim];
+      Wavg+=WNVec[i][dim];
+    }
+    double Wavg2=Wavg*Wavg;
+    double W2avgsum;
+    double Wavgsum;
+    double Wavg2sum;
+    W2avgsum=PathData.Path.Communicator.Sum(W2avg);
+    Wavgsum=PathData.Path.Communicator.Sum(Wavg);
+    Wavg2sum=PathData.Path.Communicator.Sum(Wavg2);
+    
+    if (PathData.Path.Communicator.MyProc()==0){
+      double N=(double)(PathData.Path.Communicator.NumProcs());
+      double k=(double)(WNVec.size());
+      WN2ArrayLowVariance(dim) = W2avgsum/k + ((Wavgsum*Wavgsum)-Wavg2sum)/(k*k);
+    }
+  }
+    //end better variance version
 
   Array<dVec,1> sendVec(WNVec.size()), recvVec(WNVec.size());
   recvVec=0.0;
@@ -110,6 +135,7 @@ WindingNumberClass::WriteBlock()
       IOSection.WriteVar("Type",string("Vector"));
     }
     WNVar.Write(WN2Array);
+    WNVarLowVariance.Write(WN2ArrayLowVariance);
   }
 }
 
