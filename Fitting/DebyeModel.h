@@ -11,20 +11,28 @@ private:
   double Theta, ThetaInv;
   double kB; // In Hartrees per Kelvin
   double N;
-  double Chi2 (double theta, Array<double,1> &Fvals,
-	       Array<double,1> &Tvals);
-  double MinTheta (Array<double,1> &Fvals, Array<double,1> &Tvals,
-		   double startTheta, double endTheta);
+  double Chi2_F (double theta, Array<double,1> &Fvals,
+		 Array<double,1> &Tvals);
+  double MinTheta_F (Array<double,1> &Fvals, Array<double,1> &Tvals,
+		     double startTheta, double endTheta);
+  double Chi2_U (double theta, Array<double,1> &Fvals,
+		 Array<double,1> &Tvals);
+  double MinTheta_U (Array<double,1> &Fvals, Array<double,1> &Tvals,
+		     double startTheta, double endTheta);
 public:
   inline void SetN    (int n);
   inline void SetTheta(double theta);
   inline double F(double T);
+  inline double U(double T);
   inline double dF_dTheta        (double T);
   inline double dF_dT            (double T);
   inline double d2F_dTheta_dT    (double T);
   inline double d2F_dTheta_dT_FD (double T);
   inline double d2F_dTheta2      (double T);
-  double OptTheta (Array<double,1> &Fvals, Array<double,1> &Tvals);
+  // Heat capacity
+  inline double C_V (double T);
+  double OptTheta_F (Array<double,1> &Fvals, Array<double,1> &Tvals);
+  double OptTheta_U (Array<double,1> &Uvals, Array<double,1> &Tvals);
   inline double CalcTheta (double F, double T);
   DebyeModel() : kB(3.16681526543384e-06)
   {
@@ -35,12 +43,14 @@ public:
 class DebyeFreeEnergy
 {
 private:
-  vector<double> V, Theta, F0;
+  vector<double> V, Theta, F0, U0;
   DebyeModel Debye;
   Array<double,1> ThetaCoefs;
 public:
-  void AddModel (double V, vector<double> &F,
-		 vector<double> &T);
+  void AddVolume_F (double V, vector<double> &F,
+		    vector<double> &T);
+  void AddVolume_U (double V, vector<double> &U,
+		    vector<double> &T);
   inline double Theta_V (double V);
   inline double dTheta_dV (double V);
   inline double d2Theta_dV2 (double V);
@@ -54,6 +64,8 @@ public:
   double d2F_dTheta_dT (double V, double T);
   double d2F_dTheta_dT_FD (double V, double T);
   double d2F_dTheta2 (double V, double T);
+  // Internal energy
+  double U(double V, double T);
   
   // Thermal pressure
   double P(double V, double T);
@@ -65,6 +77,9 @@ public:
   // Bulk modulus
   double K_T (double V, double T);
   double K_T_FD (double V, double T);
+
+  // Heat capacity
+  double C_V (double V, double T);
 
   DebyeFreeEnergy()
   {
@@ -144,16 +159,33 @@ DebyeModel::SetTheta (double theta)
 inline double
 DebyeModel::F(double T)
 {
-  double x = T * ThetaInv;
-  if (x == 0.0)
-    x = 1.0e-10;
+  double Tstar = T * ThetaInv;
+  if (Tstar == 0.0)
+    Tstar = 1.0e-10;
   
-  double D = gsl_sf_debye_3(1.0/x);
-  double f = N*kB*T*(3.0*log1p(-exp(-1.0/x)) - D  /*-9.0/(8.0*x) */);
+  double D = gsl_sf_debye_3(1.0/Tstar);
+  double f = N*kB*T*(3.0*log1p(-exp(-1.0/Tstar)) - D  /*-9.0/(8.0*Tstar) */);
   // cerr << "theta = " << Theta << "  T = " << T << "  F = " << f << endl;
 //   fprintf (stderr, "theta = %1.5f   T = %1.5f   F = %1.8e  D = %1.8e\n", 
 // 	   Theta, T, F);
   return f;
+}
+
+inline double
+DebyeModel::U(double T)
+{
+  double x = Theta/T;
+  if (isinf(x))
+    x = 1.0e10;
+  return 3.0 * N * kB * T * gsl_sf_debye_3(x);
+}
+
+inline double
+DebyeModel::C_V(double T)
+{
+  double x = (T == 0) ? 1.0e10 : Theta/T;
+  return 3.0*N*kB *
+    (4.0*gsl_sf_debye_3(x) - 3.0*x/expm1(x));
 }
 
 inline double

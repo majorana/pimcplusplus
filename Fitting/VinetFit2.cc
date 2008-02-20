@@ -4,6 +4,8 @@
 #include <vector>
 #include "PhononFreeEnergy.h"
 #include "DebyeModel.h"
+#include "RamanFreq.h"
+#include "../Random/Random.h"
 
 void
 TestGrad()
@@ -110,7 +112,120 @@ TestFit2(string fname)
   for (double v=V(V.size()-1); v<=V(0); v+=delta)
     fprintf (fout, "%20.16f %20.16f %20.16f %20.16f\n", v, eos(v), eos.Pressure(v), eos.PressureFD(v));
   fclose (fout);
+
+  // Write out Goncharovs residuals
+  FILE *fin = fopen ("GoncharovEOSData.png.dat", "r");
+  fout = fopen ("GoncharovResiduals.dat", "w");
+  double Vval, Pval;
+  while (fscanf (fin, "%lf %lf\n", &Pval, &Vval) == 2) {
+    Vval *= 79.7535137356486;
+    double diff = Pval - eos.Pressure(Vval);
+    fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+  }
+  fclose(fout);
 }
+
+
+
+void
+TestFitErrors(string fname)
+{
+  TinyVector<double,4> params(80.0, 0.51, 0.0155), errors; 
+  VinetEOSClass eos;
+  eos.SetParams (params);
+  NonlinearFitClass<4,VinetEOSClass> fitter(eos);
+  Array<double,1> V, E, sigma;
+
+
+  IOSectionClass in;
+  assert(in.OpenFile (fname));
+  assert(in.ReadVar("V0",  params[0]));
+  assert(in.ReadVar("E0",  params[1]));
+  assert(in.ReadVar("B0",  params[2]));
+  assert(in.ReadVar("B0p", params[3]));
+  params[2] /= 29421.01;
+	
+  assert(in.ReadVar("V", V));
+  assert(in.ReadVar("E", E));
+  assert(in.ReadVar("Sigma", sigma));
+  eos.SetParams (params);
+  fitter.Fit (V, E, sigma, params);
+
+  int numSamples = 5000;
+  int numVol     = 100;
+  Array<double,1> Epert(E.size());
+  CommunicatorClass local;
+  RandomClass random(local);
+  random.Init();
+  Array<double,2> Pressures(numVol,numSamples);
+  for (int i=0; i<numSamples; i++) {
+    TinyVector<double,4> params2;
+    params2 = params;
+    VinetEOSClass eos2;
+    for (int j=0; j<E.size(); j++) 
+      Epert(j) = E(j) + random.LocalGaussian(sigma(j));
+    eos2.SetParams (params2);
+    fitter.Fit (V, Epert, sigma, params2);
+    eos2.SetParams(params2);
+    for (int vi=0; vi<numVol; vi++) {
+      double v0 = V(0);
+      double v1 = V(V.size()-1);
+      double v = v0 + (v1-v0)*(double)(vi)/(double)(numVol-1);
+      Pressures(vi, i) = eos2.Pressure (v);
+    }
+  }
+
+  string errorName = fname + ".errors.dat";
+  FILE *ferr = fopen (errorName.c_str(), "w");
+  eos.SetParams (params);
+  // Now compute error bars as a function of volume
+  for (int vi=0; vi<numVol; vi++) {
+    double v0 = V(0);
+    double v1 = V(V.size()-1);
+    double v = v0 + (v1-v0)*(double)vi/(double)(numVol-1);
+    double Psum=0.0, P2sum=0.0;
+    for (int j=0; j<numSamples; j++) {
+      Psum += Pressures(vi,j);
+      P2sum += Pressures(vi,j)*Pressures(vi,j);
+    }
+    double Pmean = Psum / (double)numSamples;
+    double Pvar  = P2sum/ (double)numSamples - Pmean*Pmean;
+    double Perr  = sqrt (Pvar);
+    fprintf (ferr, "%1.8f %1.8f %1.12f %1.8f\n",
+	     v, eos.Pressure(v), Pmean, Perr);
+  }
+      
+
+  Array<double,2> &covar = fitter.GetCovariance();
+  errors[0] = sqrt (covar(0,0));
+  errors[1] = sqrt (covar(1,1));
+  errors[2] = sqrt (covar(2,2));
+  errors[3] = sqrt (covar(3,3));
+  fprintf (stdout, "V0  = %12.8f +/- %12.8f\n", params[0], errors[0]);
+  fprintf (stdout, "E0  = %12.8f +/- %12.8f\n", params[1], errors[1]);
+  fprintf (stdout, "B0  = %12.8f +/- %12.8f\n", 
+	   params[2]* 29421.01, errors[2]* 29421.01);
+  eos.SetParams(params);
+  fprintf (stdout, "B0p = %12.8f +/- %12.8f\n", params[3], errors[3]);
+  fprintf (stdout, "Delta = %1.5f\n", 0.0);
+  double V0 = params[0];
+  double latConst = cbrt(4.0*V0);
+  double latConstError = cbrt(4.0)/(3.0*cbrt(V0)*cbrt(V0)) * errors[0];
+  fprintf (stdout, "Lattice const. = %1.6f +/- %1.6f bohr radii\n",
+	   latConst, latConstError);
+  fprintf (stdout, "               = %1.6f +/- %1.6f angstrom\n",  
+	   0.52917721*latConst, 0.52917721*latConstError);
+  string Ename = fname + ".dat";
+
+
+  FILE *fout = fopen (Ename.c_str(), "w");
+  double delta = (V(0) - V(V.size()-1))/1000.0;
+  for (double v=V(V.size()-1); v<=V(0); v+=delta)
+    fprintf (fout, "%20.16f %20.16f %20.16f %20.16f\n", v, eos(v), eos.Pressure(v), eos.PressureFD(v));
+  fclose (fout);
+}
+
+
 
 
 void 
@@ -170,6 +285,44 @@ StaticFit (string fname, VinetEOSClass &eos)
   for (double v=V(V.size()-1); v<=V(0); v+=delta)
     fprintf (fout, "%20.16f %20.16f %20.16f %20.16f\n", v, eos(v), eos.Pressure(v), eos.PressureFD(v));
   fclose (fout);
+
+  // Write out Goncharovs residuals
+  FILE *fin = fopen ("GoncharovEOSData.png.dat", "r");
+  fout = fopen ("GoncharovResiduals.dat", "w");
+  double Vval, Pval;
+  while (fscanf (fin, "%lf %lf\n", &Pval, &Vval) == 2) {
+    Vval *= 79.7535137356486;
+    double diff = Pval - eos.Pressure(Vval);
+    fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+  }
+  fclose(fout);
+  fclose(fin);
+
+  // Write out Datchi's residuals
+  fin = fopen ("DatchiEOS.dat", "r");
+  fout = fopen ("DatchiResiduals.dat", "w");
+  double aVal, Tval;
+  char dummyLine[100];
+  fgets (dummyLine, 100, fin);
+  fgets (dummyLine, 100, fin);
+  while (fscanf (fin, "%lf %lf %lf %lf\n", &Pval, &Tval, &aVal, &Vval) == 4) {
+    Vval = 1.8897261*1.8897261*1.8897261*aVal*aVal*aVal/4.0;
+    double diff = Pval - eos.Pressure(Vval);
+    fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+  }
+  fclose(fout);
+  fclose (fin);
+
+  // Write out Knittles's residuals
+  fin = fopen ("Exp300K_P-V.dat", "r");
+  fout = fopen ("KnittleResiduals.dat", "w");
+  while (fscanf (fin, "%lf %lf\n", &Vval, &Pval) == 2) {
+    Vval *= 79.7535137356486;
+    double diff = Pval - eos.Pressure(Vval);
+    fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+  }
+  fclose(fout);
+  fclose (fin);
 }
 
 
@@ -240,7 +393,7 @@ DebyeFit (string fname, vector<DebyeModel> &fits)
 	for (int i=0; i<Tvec.size(); i++) {
 	  F(i) = Fvec[i]-Fvec[0];  T(i) = Tvec[i];
 	}
-	double theta = debye.OptTheta (F, T);
+	double theta = debye.OptTheta_F (F, T);
 	debye.SetTheta (theta);
 	fprintf (stderr, "%8.5f %10.5f %1.8e\n",
 		 cbrt(4.0*lastv), theta, Fvec[0]);
@@ -289,7 +442,8 @@ DebyeFit (string fname, DebyeFreeEnergy &debye)
     int retval = fscanf (fin, "%lf %lf %lf %lf", &v, &t, &f, &u);
     if (v != lastv || retval != 4) {
       if (Vvec.size() != 0) 
-	debye.AddModel (lastv, Fvec, Tvec);
+	//debye.AddVolume_F (lastv, Fvec, Tvec);
+	debye.AddVolume_U (lastv, Uvec, Tvec);
       Vvec.clear();
       Tvec.clear();
       Fvec.clear();
@@ -304,7 +458,7 @@ DebyeFit (string fname, DebyeFreeEnergy &debye)
       done = true;
   }
   debye.FitTheta_V (4);
-  FILE *fout = fopen ("ThetaV.dat", "w");
+  FILE *fout = fopen ("Theta_Fdat", "w");
   for (double V=40.0; V<=95.0; V+=0.01) {
     double theta = debye.Theta_V(V);
     fprintf (fout, "%1.2f %1.10e\n", V, theta);
@@ -313,6 +467,25 @@ DebyeFit (string fname, DebyeFreeEnergy &debye)
 }
 
 
+double FindV (double P, double T,
+	      VinetEOSClass &staticEOS,
+	      DebyeFreeEnergy &thermalEOS)
+{
+  double Vlo = 10.0;
+  double Vhi = 150.0;
+  double au2GPa = 29421.01;
+
+  while ((Vhi - Vlo) > 1.0e-10) {
+    double Vtry = 0.5*(Vlo + Vhi);
+    double Ptry = staticEOS.Pressure(Vtry) +
+      au2GPa * thermalEOS.P(Vtry,T);
+    if (Ptry > P)
+      Vlo = Vtry;
+    else
+      Vhi = Vtry;
+  }
+  return 0.5*(Vlo+Vhi);
+}
 
 void
 CalcProperties (VinetEOSClass &staticEOS,
@@ -323,6 +496,7 @@ CalcProperties (VinetEOSClass &staticEOS,
   
   FILE *fout = fopen ("ThermalPressure.dat", "w");
   double V = 79.701;
+  //double V = 60.0;
   for (double T=1.0; T<3000.0; T+=1.0) 
     fprintf (fout, "%5.1f %12.8e %12.8e\n", T, 
 	     au2GPa * thermalEOS.P(V,T),
@@ -371,10 +545,66 @@ CalcProperties (VinetEOSClass &staticEOS,
       + staticEOS.K_T(V);
     double dP_dT = au2GPa * thermalEOS.dP_dT(V,T);
     double alpha = dP_dT/K_T;
-    fprintf (fout, "%5.1f %12.8e %12.8f\n", T, alpha, K_T);
+    double C_V = thermalEOS.C_V (V, T);
+    fprintf (fout, "%5.1f %12.8e %12.8f %12.8f \n", T, alpha, K_T);
+  }
+  fclose (fout);
+  // Gruineissen parameter
+  fout = fopen ("gamma.dat", "w");
+  for (double T=1.0; T<3000.0; T+=1.0) {
+    double K_T = thermalEOS.K_T(V,T) 
+      + staticEOS.K_T(V)/au2GPa;
+    double dP_dT = thermalEOS.dP_dT(V,T);
+    double alpha = dP_dT/K_T;
+    double C_V = thermalEOS.C_V(V,T);
+    double gamma = V * dP_dT / C_V;
+//     double theta = thermalEOS.Theta_V(V);
+//     double gamma = -(V/theta)*thermalEOS.dTheta_dV(V);
+    fprintf (fout, "%5.1f %12.8e\n", T, gamma);
   }
   fclose (fout);
 
+  // Heat capacity
+  fout = fopen ("C_V_from_F.dat", "w");
+  for (double T=1.0; T<3000.0; T+=1.0) {
+    double C_V = thermalEOS.C_V(V,T);
+    fprintf (fout, "%5.1f %12.8e\n", T, C_V);
+  }
+  fclose (fout);
+
+  // TO phonon mode as a function of P,T
+  fout = fopen ("0P_Raman.dat", "w");
+  RamanFreq raman;
+  for (double T=300.0; T<1250.0; T+=1.0) {
+    double V = FindV (0.0, T, staticEOS, thermalEOS);
+    double freq = raman(V);
+    fprintf (fout, "%5.1f %12.8f\n", T, freq);
+  }
+  fclose (fout);
+
+  // TO phonon mode as a function of P,T
+  vector<int> Tlist;
+  Tlist.push_back(300);
+  Tlist.push_back(373);
+  Tlist.push_back(473);
+  Tlist.push_back(573);
+  Tlist.push_back(673);
+  Tlist.push_back(723);
+  for (int ti=0; ti<Tlist.size(); ti++) {
+    char fname[100];
+    snprintf (fname, 100, "%dK_Raman.dat", Tlist[ti]);
+    double T = (double)Tlist[ti];
+    double P = 0.0;
+    fout = fopen (fname, "w");
+    double deltaV = FindV(0.0, 300, staticEOS, thermalEOS) - 
+      (6.8317379*6.8317379*6.8317379)/4.0;
+    for (double P=0.0; P<800.0; P+=1.0) {
+      double V = FindV (P, T, staticEOS, thermalEOS);
+      double freq = raman(V);
+      fprintf (fout, "%5.1f %12.8f\n", P, freq);
+    }
+    fclose (fout);
+  }
 }
 
 
@@ -397,6 +627,7 @@ main(int argc, char **argv)
   else if (argc > 1) {
     VinetEOSClass staticEOS;
     StaticFit (argv[1], staticEOS);
+    TestFitErrors(argv[1]);
   }
 
   else
