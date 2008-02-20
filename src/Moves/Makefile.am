@@ -1,6 +1,6 @@
-check_PROGRAMS = TestSpaceWarp
+#check_PROGRAMS = TestSpaceWarp
 
-TestSpaceWarp_SOURCES = TestSpaceWarp.cc
+#TestSpaceWarp_SOURCES = TestSpaceWarp.cc
 
 LDADD = $(COMMON_LIBS) libmoves.la
 
@@ -73,6 +73,7 @@ libmoves_la_SOURCES  =           \
     MoveUtils.h                  \
     MultiStage.cc                \
     MultiStage.h                 \
+    NoPermuteClass.h             \
     NoPermuteClass.cc            \
     OpenStage.h                  \
     OpenStage.cc                 \
@@ -80,6 +81,7 @@ libmoves_la_SOURCES  =           \
     OpenEndMove.h                \
     OpenStage.h                  \
     OpenStage.cc                 \
+    PermuteStage.h               \
     PermuteStage.cc              \
     PermuteTableOnClass.cc       \
     PermuteTableOnClass.h        \
