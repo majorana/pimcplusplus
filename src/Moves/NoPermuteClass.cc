@@ -36,7 +36,7 @@ bool NoPermuteStageClass::Attempt (int &slice1, int &slice2,
     activeParticles.resize (1);
     //HACK! HACK! HACK! HACK!
     if (PathData.Path.OpenPaths && slice1<PathData.Path.OpenLink &&
-	PathData.Path.OpenLink<slice2 && 1==2){
+	PathData.Path.OpenLink<slice2){
       do {
 	activeParticles(0) = ChooseParticle();
       } while (activeParticles(0)==PathData.Path.OpenPtcl);
