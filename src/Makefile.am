@@ -8,7 +8,7 @@ endif
 #SUBDIRS = Actions Moves Observables Langevin Rotor $(MAYBE_PATHVIS)
 SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
 
-  bin_PROGRAMS = pimc++ FreeParticles VacancyLoc vmc
+  bin_PROGRAMS = pimc++ FreeParticles VacancyLoc 
   
 
 
@@ -67,6 +67,7 @@ VacancyLoc_LDADD = $(COMMON_LIBS)
 
 vmc_SOURCES = VMC6.cc 
 vmc_LDADD = $(COMMON_LIBS) $(LAPACK_LIBS)
+
 
 pimc___LDADD = Moves/libmoves.la Actions/libactions.la \
                Observables/libobservables.la $(COMMON_LIBS) $(QMC_LIB) $(ORDER_N_LIBS) $(BOOST_LIB) $(LIBXML_LIB)
