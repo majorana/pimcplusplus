@@ -73,8 +73,8 @@ libmoves_la_SOURCES  =           \
     MoveUtils.h                  \
     MultiStage.cc                \
     MultiStage.h                 \
-    NoPermuteClass.h             \
-    NoPermuteClass.cc            \
+    NoPermuteClasss.cc             \
+    NoPermuteStage.h            \
     OpenStage.h                  \
     OpenStage.cc                 \
     OpenEndMove.cc               \
