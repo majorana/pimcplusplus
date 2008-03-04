@@ -16,7 +16,7 @@
 class Isosurface : public MyTricubicSpline, public GLObject
 {
 private:
-  static int EdgeData[256][13];
+  static int EdgeData[256][16];
   static int EdgeTable[12][7];
   /// Returns the number of real solutions
   int CubicFormula (double a, double b, double c, double d,
