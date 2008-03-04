@@ -2,7 +2,6 @@
 #include "WFVis.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <revel.h>
 #include <Common/Splines/CubicSpline.h>
 
 using namespace IO;

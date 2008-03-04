@@ -2,7 +2,6 @@
 #include "Visual.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <revel.h>
 #include <Common/Splines/CubicSpline.h>
 
 using namespace IO;
@@ -118,6 +117,10 @@ void ExportClass::SetupWidgets()
   InterpFactorButton.set_range(1.0, 500.0);
   InterpFactorButton.set_digits(0);
   InterpFactorButton.set_increments (1.0, 10.0);
+
+#ifndef HAVE_LIBREVEL
+  MovieButton.set_sensitive(false);
+#endif
 }  
 
 void ExportClass::InitGLStuff()
@@ -242,11 +245,16 @@ ExportClass::ExportPOV(string basename)
   Visual.PathVis.POVRender (filename);
 }
 
+#ifdef HAVE_LIBREVEL
+#include <revel.h>
+#endif
+
 void
 ExportClass::ExportMovie (string basename, 
 			  int firstFrame, int lastFrame, 
 			  int interpFactor)
 {
+#ifdef HAVE_LIBREVEL
   ///////////////////
   // Encoder setup //
   ///////////////////
@@ -339,7 +347,9 @@ ExportClass::ExportMovie (string basename,
   int totalSize;
   Revel_EncodeEnd(encoderHandle, &totalSize);
   Revel_DestroyEncoder(encoderHandle);
+#endif
 }
+
 
 
 void

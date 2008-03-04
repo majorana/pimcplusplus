@@ -2,7 +2,9 @@
 #include "MDVis.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <revel.h>
+#ifdef HAVE_LIBREVEL
+  #include <revel.h>
+#endif
 #include <Common/Splines/CubicSpline.h>
 
 using namespace IO;
@@ -106,6 +108,10 @@ MDExportClass::MDExportClass(MDVisualClass &mdvisual) :
     (sigc::mem_fun(*this, &MDExportClass::OnChooserChange));
   BaseNameEntry.signal_activate().connect
     (sigc::mem_fun(*this, &MDExportClass::OnEntryChange));
+
+#ifndef HAVE_LIBREVEL
+  MovieButton.set_sensitive(false);
+#endif
 }
 
 
@@ -254,6 +260,7 @@ MDExportClass::ExportMovie (string basename,
 			    int firstFrame, int lastFrame, 
 			    int interpFactor)
 {
+#ifdef HAVE_LIBREVEL
   ///////////////////
   // Encoder setup //
   ///////////////////
@@ -313,6 +320,7 @@ MDExportClass::ExportMovie (string basename,
   int totalSize;
   Revel_EncodeEnd(encoderHandle, &totalSize);
   Revel_DestroyEncoder(encoderHandle);
+#endif
 }
 
 
