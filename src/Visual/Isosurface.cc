@@ -393,7 +393,7 @@ Isosurface::Set()
 	      Vec3 nred = -1.0*Grad(reduced[0], reduced[1], reduced[2]);
 	      for (int i=0; i<3; i++)
 		nred[i] *= (uMax[i] - uMin[i]);
-	      Vec3 normal = nred*Lattice;
+	      Vec3 normal = nred*LatticeInv;
 	      //Vec3 normal = Lattice*nred;
 	      glNormal3dv(&(normal[0]));
 	    }

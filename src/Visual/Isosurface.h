@@ -31,7 +31,7 @@ private:
   double Alpha;
   void Set();
   Vec3 LatticeVecs[3];
-  Mat3 Lattice;
+  Mat3 Lattice, LatticeInv;
   Vec3 uCenter, uMin, uMax;
 public:
   inline void SetLattice (Mat3 lattice);
@@ -65,6 +65,7 @@ inline void
 Isosurface::SetLattice (Mat3 lattice)
 {
   Lattice = lattice;
+  LatticeInv = Inverse(lattice);
   LatticeVecs[0] = Vec3 (lattice(0,0), lattice(0,1), lattice(0,2));
   LatticeVecs[1] = Vec3 (lattice(1,0), lattice(1,1), lattice(1,2));
   LatticeVecs[2] = Vec3 (lattice(2,0), lattice(2,1), lattice(2,2));
