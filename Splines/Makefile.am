@@ -108,7 +108,7 @@ include_HEADERS = BicubicSpline.h ComplexMultiTricubicSpline.h CubicSpline.h Gri
                   TricubicNUBspline.h bspline_base.h bspline_create.h bspline_eval_sse_c.h                \
                   bspline_eval_sse_d.h bspline_eval_sse_s.h bspline_eval_sse_z.h bspline_eval_std_c.h     \
                   bspline_eval_std_d.h bspline_eval_std_s.h bspline_eval_std_z.h bspline.h                \
-                  bspline_structs_sse.h bspline_structs_std.h LinearSpline.h
+                  bspline_structs_sse.h bspline_structs_std.h LinearSpline.h CubicNUBspline.h
 
 
 EXTRA_DIST = CubicSplines.tex

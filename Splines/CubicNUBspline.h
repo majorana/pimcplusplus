@@ -9,6 +9,7 @@ class CubicNUBspline
 private:
   NUBsplineBasis<GridType> Basis;
   bool Interpolating, Periodic;
+  GridType *SplineGrid;
 
   // The control points
   Array<double,1> P;
@@ -35,6 +36,7 @@ CubicNUBspline<GridType>::Init(GridType &grid, Array<double,1> &data,
 {
   TinyVector<double,4> rBC, lBC, dummy1, dummy2;
   int N = grid.NumPoints;
+  SplineGrid = &grid;
 
   if (startBC.GetType() == PERIODIC) {
     Basis.Init(&grid, true);
@@ -79,6 +81,7 @@ inline double
 CubicNUBspline<GridType>::operator()(double x) const
 {
   TinyVector<double,4> bfuncs;
+  x = min (x, SplineGrid->End - 1.0e-10);
   int i = Basis (x, bfuncs);
   return P(i)*bfuncs[0] + P(i+1)*bfuncs[1] + P(i+2)*bfuncs[2] + P(i+3)*bfuncs[3];
 }

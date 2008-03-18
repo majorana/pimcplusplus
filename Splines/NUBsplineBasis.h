@@ -83,8 +83,8 @@ NUBsplineBasis<GridType>::Init(GridType *gridPtr, bool periodic)
   GridType &grid =  (*GridPtr);
 
   int N = grid.NumPoints;
-  dxInv.resize(grid.NumPoints+2);
-  xVals.resize(N+4);
+  dxInv.resize(N+3);
+  xVals.resize(N+6);
   for (int i=0; i<N; i++)
     xVals(i+2) = grid(i);
   if (!Periodic) {
@@ -92,14 +92,17 @@ NUBsplineBasis<GridType>::Init(GridType *gridPtr, bool periodic)
     xVals(1) = grid(0) - 1.0*(grid(1)-grid(0));
     xVals(N+2) = grid(N-1) + 1.0*(grid(N-1)-grid(N-2));
     xVals(N+3) = grid(N-1) + 2.0*(grid(N-1)-grid(N-2));
+    xVals(N+4) = grid(N-1) + 3.0*(grid(N-1)-grid(N-2));
+    xVals(N+5) = grid(N-1) + 4.0*(grid(N-1)-grid(N-2));
   }
   else {
     xVals(1)   = grid(0)   - (grid(N-1) - grid(N-2));
     xVals(0)   = grid(0)   - (grid(N-1) - grid(N-3));
     xVals(N+2) = grid(N-1) + (grid(1)   - grid(0));
     xVals(N+3) = grid(N-1) + (grid(2)   - grid(0));
+    xVals(N+4) = grid(N-1) + (grid(3)   - grid(0));
   }
-  for (int i=0; i<N+2; i++) 
+  for (int i=0; i<N+3; i++) 
     for (int j=0; j<3; j++) 
       dxInv(i)[j] = 1.0/(xVals(i+j+1)-xVals(i));
 }
@@ -871,7 +874,7 @@ SolveDerivInterp1D (NUBsplineBasis<GridType> &basis,
     basis (i, bands(i+1));
     bands(i+1)[3] = data(i);
   }
-    
+
   // Now solve:
   // First and last rows are different
   bands(0)[1] /= bands(0)[0];

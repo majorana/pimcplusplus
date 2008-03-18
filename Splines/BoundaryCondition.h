@@ -2,6 +2,7 @@
 #define BOUNDARY_CONDITION_H
 
 #include <iostream>
+#include <cassert>
 
 typedef enum {PERIODIC, FIXED_FIRST, FIXED_SECOND, FLAT, NATURAL} BCType;
 

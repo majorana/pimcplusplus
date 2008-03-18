@@ -163,7 +163,7 @@ class GeneralGrid : public Grid
 	  lo = i;
 	done = (hi-lo)<2;
       }
-      return (lo);
+      return min (lo, NumPoints-2);
     }
   }
 
