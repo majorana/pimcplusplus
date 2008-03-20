@@ -942,7 +942,6 @@ WFVisualClass::Read(string filename)
   NumBands = Infile.CountSections("band");
   Infile.CloseSection(); // "twist"
   Infile.CloseSection(); // "eigenstates"
-  cerr << "Numk = " << Numk << "   NumBands = " << NumBands << endl;
   SetupBandTable();
 
   /// Read first wave function
@@ -965,7 +964,13 @@ WFVisualClass::Read(string filename)
   BandAdjust.set_upper(NumBands-1.0);
   kAdjust.set_upper(Numk-1.0);
 
-  double maxDim = max(max(lattice(0,0), lattice(1,1)), lattice(2,2));
+  Vec3 a[3];
+  a[0] = Vec3 (lattice(0,0), lattice(0,1), lattice(0,2));
+  a[1] = Vec3 (lattice(1,0), lattice(1,1), lattice(1,2));
+  a[2] = Vec3 (lattice(2,0), lattice(2,1), lattice(2,2));
+  double maxDim = 1.2*
+    max(sqrt(dot(a[0],a[0])), max(sqrt(dot(a[1],a[1])),
+				  sqrt(dot(a[2],a[2]))));
   PathVis.View.SetDistance (1.2*maxDim);
   
   IsoButton.set_active(true);
@@ -1179,7 +1184,6 @@ WFVisualClass::ReadWF (int kpoint, int band)
     }
     u[0] += du[0];
   }
-  // cerr << "MaxVal = " << MaxVal << endl;
   return true;
 }
 
@@ -1594,8 +1598,8 @@ int main(int argc, char** argv)
   // Query OpenGL extension version.
   int major, minor;
   Gdk::GL::query_version(major, minor);
-  std::cout << "OpenGL extension version - "
-            << major << "." << minor << std::endl;
+  // std::cout << "OpenGL extension version - "
+  //           << major << "." << minor << std::endl;
 
   // Instantiate and run the application.
   WFVisualClass wfvisual;

@@ -151,6 +151,9 @@ PlaneObject::Set()
       double t = 0.999999*nInv * (double)it;
       Vec3 r = u0 + s*sVec + t*tVec;
       double val = Spline(r[0], r[1], r[2]);
+      val = min(val, MaxVal);
+      val = max(val, MinVal);
+      
       ValData(is, it) = (val - MinVal)*scale;
       // cerr << "val=" << ValData(is,it) << "   r =" << r << endl;
       

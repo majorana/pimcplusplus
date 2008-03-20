@@ -31,8 +31,8 @@ public:
 inline void
 ColorMap::operator() (double x, TinyVector<double,3> &val)
 {
-  x = max (Min, x);
-  x = min (Max, x);
+  x = max (Min+1.0e-6, x);
+  x = min (Max-1.0e-6, x);
   val[0] = max(0.0, min(Splines[0](x), 1.0));
   val[1] = max(0.0, min(Splines[1](x), 1.0));
   val[2] = max(0.0, min(Splines[2](x), 1.0));
@@ -42,8 +42,8 @@ inline void
 ColorMap::operator() (double x, TinyVector<double,4> &val)
 {
   if (Initialized) {
-    x = max (Min, x);
-    x = min (Max, x);
+    x = max (Min+1.0e-6, x);
+    x = min (Max-1.0e-6, x);
     val[0] = max(0.0, min(Splines[0](x), 1.0));
     val[1] = max(0.0, min(Splines[1](x), 1.0));
     val[2] = max(0.0, min(Splines[2](x), 1.0));
