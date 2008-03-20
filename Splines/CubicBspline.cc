@@ -53,6 +53,8 @@ CubicBspline::Init(double start, double end, Array<double,1> &data,
   Interpolating = interpolating;
   GridStart = start;
   GridEnd   = end;
+  L = GridEnd - GridStart;
+  Linv = 1.0/L;
   int N = data.size();
   
   if (startBC.GetType() == PERIODIC) {
@@ -60,6 +62,7 @@ CubicBspline::Init(double start, double end, Array<double,1> &data,
       cerr << "If startBC is periodic, endBC must also be.\n";
       abort();
     }
+    Periodic = true;
     GridDelta = (end-start)/(double)(data.size());
     GridDeltaInv = 1.0/GridDelta;
     P.resize(data.size()+3);
@@ -74,6 +77,7 @@ CubicBspline::Init(double start, double end, Array<double,1> &data,
     P(N+2) = P(2);
   }
   else {
+    Periodic = false;
     if (endBC.GetType() == PERIODIC) {
      cerr << "If endBC is periodic, startBC must also be.\n";
       abort();
@@ -120,7 +124,7 @@ CubicBspline::Init(double start, double end, Array<double,1> &data,
 }
 
 
-CubicBspline::CubicBspline()
+CubicBspline::CubicBspline() 
 {
   A(0,0) = -1.0/6.0; A(0,1) =  3.0/6.0; A(0,2) = -3.0/6.0; A(0,3) = 1.0/6.0;
   A(1,0) =  3.0/6.0; A(1,1) = -6.0/6.0; A(1,2) =  3.0/6.0; A(1,3) = 0.0/6.0;

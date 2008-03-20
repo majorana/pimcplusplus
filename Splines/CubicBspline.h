@@ -44,7 +44,6 @@ inline void
 CubicBspline::Find(double x) const
 {
   double delta = x - GridStart;
-
   // Enforce PBC
   if (Periodic) 
     delta -= nearbyint(delta*Linv)*L;
