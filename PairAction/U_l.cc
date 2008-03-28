@@ -27,7 +27,8 @@ U_l::Initialize(int l_, double lambda_, double FinalBeta, int NumSquares,
 {
   lambda = lambda_;
   l = l_;
-  beta = FinalBeta * pow(0.5, NumSquares);
+  //beta = FinalBeta * pow(0.5, NumSquares);
+  beta = ldexp (FinalBeta, -NumSquares);
   grid = grid_;
   transform = transform_;
   Pot = Pot_;

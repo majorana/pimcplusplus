@@ -2,7 +2,7 @@ check_PROGRAMS = Test
 
 Test_SOURCES = Test.cc 
 
-LDADD = libmatops.la $(LAPACK_LIBS) $(BLAS_LIBS)
+LDADD = libmatops.la $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 AM_CXXFLAGS = $(LAPACK_LIBS) $(BLAS_LIBS) $(BLITZ_CFLAGS)
 
 noinst_LTLIBRARIES = libmatops.la

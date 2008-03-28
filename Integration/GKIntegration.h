@@ -285,7 +285,8 @@ class GKIntegration {
 
     double errorUnresolved=0.0;
     const int iterationMax=30;
-    double lengthMin = (b-a)*pow(0.5,iterationMax);
+    // double lengthMin = (b-a)*pow(0.5,iterationMax);
+    double lengthMin = ldexp(b-a,-iterationMax);
     
     IntervalResult r0(a,b,b-a);
     GK(r0);

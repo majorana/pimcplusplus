@@ -34,7 +34,8 @@ void Rho::Initialize(int lmax, double Lambda, scalar FinalBeta, int NumSquares,
   grid = newGrid;
   Pot = newPot;
   Transform.Initialize(Pot, 1000);
-  beta = FinalBeta * pow(0.5, NumSquares);
+  //beta = FinalBeta * pow(0.5, NumSquares);
+  beta = ldexp(FinalBeta, -NumSquares);
   WorldComm.SetWorld();
   int numProcs = WorldComm.NumProcs();
   NumChannels = lmax + 1;
