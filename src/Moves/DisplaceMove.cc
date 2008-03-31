@@ -70,14 +70,23 @@ DisplaceMoveClass::Read (IOSectionClass &in)
 //   SetNumParticlesToMove(totalNum);
 
   // Construct action list
-  if (PathData.Path.OrderN)
-    DisplaceStage.Actions.push_back(&PathData.Actions.ShortRangeOn);
-  else 
-    DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
+  Array<string,1> samplingActions;
+  assert(in.ReadVar("SamplingActions",samplingActions));
+  for (int i=0;i<samplingActions.size();i++)
+    DisplaceStage.Actions.push_back(PathData.Actions.GetAction(samplingActions(i)));
+      ///If it's David's long range class then do this
+
+  
+//   if (PathData.Path.OrderN)
+//     DisplaceStage.Actions.push_back(&PathData.Actions.ShortRangeOn);
+//   else 
+//     //  DisplaceStage.Actions.push_back(&PathData.Actions.DiagonalAction);
+//    DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
   if (PathData.Path.LongRange) 
     if (PathData.Actions.UseRPA)
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRangeRPA);
     else if (PathData.Path.DavidLongRange){
+      cerr<<"Displace move pushing davidlongrange"<<endl;
       DisplaceStage.Actions.push_back(&PathData.Actions.DavidLongRange);
     }
     else
@@ -109,7 +118,7 @@ DisplaceMoveClass::MakeMove()
   for (int i=0;i<PathData.Path.NumParticles();i++){
     ActiveParticles(0)=i;
     // Now call MultiStageClass' MakeMove
-    if (PathData.Path.Random.Common()<0.1)
+    if (PathData.Path.Random.Common()<0.05)
       MultiStageClass::MakeMove();
   }
 
