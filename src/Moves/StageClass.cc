@@ -15,7 +15,7 @@
 /////////////////////////////////////////////////////////////
 
 #include "StageClass.h"
-
+#include "sys/time.h"
 
 void StageClass::Read(IOSectionClass &in)
 {
@@ -43,14 +43,21 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
 			      Array<int,1> &activeParticles,
 			      double &prevActionChange)
 {
+  struct timeval start, end;
+  struct timezone tz;
+
+
   SetMode (NEWMODE);
   double sampleRatio=Sample(slice1,slice2,activeParticles);
   SetMode(OLDMODE);
+  gettimeofday(&start, &tz);
   double oldAction=StageAction(slice1,slice2,activeParticles);
   SetMode(NEWMODE);
   double newAction =StageAction(slice1,slice2,activeParticles);
+  gettimeofday(&end,   &tz);
   //cout << oldAction << " " << newAction << endl;
   double currActionChange=newAction-oldAction;
+  //  cerr<<"Curr action change is "<<currActionChange<<endl;
   double logAcceptProb=log(sampleRatio)-currActionChange+prevActionChange;
   //  AcceptProb=exp(logAcceptProb);
   //  OldAcceptProb=exp(log(1/sampleRatio)+currActionChange);
@@ -58,13 +65,21 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
   //    AcceptProb=1.0;
   //  if (OldAcceptProb>1.0)
   //    OldAcceptProb=1.0;
-  bool toAccept = logAcceptProb>=log(PathData.Path.Random.Local()); /// Accept condition
+  double ran_number=PathData.Path.Random.Local();
+  //  bool toAccept = logAcceptProb>=log(PathData.Path.Random.Local()); /// Accept condition
+  bool toAccept = logAcceptProb>=log(ran_number); /// Accept condition
   if (toAccept){
     NumAccepted++;
+  }
+  else{
   }
   NumAttempted++;
   //  cerr<<"Curr action change is "<<currActionChange<<endl;
   prevActionChange=currActionChange;
+
+  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+
 
   return toAccept;
 }
@@ -103,6 +118,12 @@ bool CommonStageClass::Attempt(int &slice1, int &slice2,
 double StageClass::StageAction(int startSlice,int endSlice,
 				      const Array<int,1> &changedParticles)
 {
+  // cerr<<endl;
+  //  cerr<<"Short range On is "<<PathData.Actions.ShortRangeOn.Action(startSlice,endSlice,changedParticles,BisectionLevel)<<endl;
+  //  cerr<<"Short range is "<<PathData.Actions.ShortRange.Action(startSlice,endSlice,changedParticles,BisectionLevel)<<endl;
+  //  cerr<<"Diagonal is "<<PathData.Actions.DiagonalAction.Action(startSlice,endSlice,changedParticles,BisectionLevel)<<endl;
+  //  cerr<<"On Diagonal is "<<PathData.Actions.ShortRangeOnDiagonal.Action(startSlice,endSlice,changedParticles,BisectionLevel)<<endl;
+  //  cerr<<endl;
   double TotalAction=0.0;
   list<ActionBaseClass*>::iterator actionIter=Actions.begin();
   while (actionIter!=Actions.end()){
