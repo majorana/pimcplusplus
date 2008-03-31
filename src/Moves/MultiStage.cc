@@ -16,7 +16,7 @@
 
 #include <Common/MPI/Communication.h>
 #include "MultiStage.h"
-
+#include "sys/time.h"
 
 void MultiStageClass::Read(IOSectionClass& in)
 {
@@ -48,9 +48,18 @@ void MultiStageClass::MakeMove()
   //  OldMoveProb=1.0;
   //  cerr<<"In "<<endl;
   
+  struct timeval start, end;
+  struct timezone tz;
+
+
   while (stageIter!=Stages.end() && toAccept){
+    gettimeofday(&start, &tz);
     toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 				     ActiveParticles,prevActionChange);
+  gettimeofday(&end, &tz);
+  TimeSpent2 += (double)(end.tv_sec-start.tv_sec) +
+    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+
 
 //     if (toAccept){
 //       NewMoveProb*=(*stageIter)->NewSample*(*stageIter)->AcceptProb;
@@ -64,11 +73,14 @@ void MultiStageClass::MakeMove()
 
     stageIter++;
   }
+
   //  cerr<<"Out "<<endl;
-  if (toAccept)
+  if (toAccept){
     Accept();
-  else 
+  }
+  else {
     Reject();
+  }
   //MoveClass::MakeMove();
   //  cerr<<NewMoveProb<<" "<<OldMoveProb<<endl;
 }
