@@ -53,6 +53,7 @@ private:
 public:
   /// Number of levels the bisection move works on 
   void Read(IOSectionClass &in);
+  void Read_new(IOSectionClass &in);
   
   /// Override base class MakeMove to do a block of moves
   void MakeMove();
@@ -60,9 +61,10 @@ public:
   {
     return (double)(NumAccepted)/(double)NumAttempted;
   }
+  double TimeSpent;
   BisectionBlockClass(PathDataClass &pathData, IOSectionClass &out) : 
     //    PermuteRatioVar("PermuteRatioVar",IOSection,pathData.Path.Communicator),
-    MultiStageClass(pathData, out),StepNum(0)
+    MultiStageClass(pathData, out),StepNum(0),TimeSpent(0.0)
 
   { 
     NumAttempted=0;

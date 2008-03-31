@@ -37,6 +37,7 @@ protected:
   ObservableDouble AcceptRatioVar;
 public:
   int NumAccepted, NumAttempted;
+  double TimeSpent;
   int BisectionLevel;
   list<ActionBaseClass*> Actions;
   ///Stores the transition probability that you have made this move. 
