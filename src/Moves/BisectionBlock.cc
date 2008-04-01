@@ -21,11 +21,115 @@
 //#include "WormPermuteStage.h"
 #include "OpenStage.h"
 #include "NoPermuteStage.h"
+#include "sys/time.h"
+
+
+void BisectionBlockClass::Read_new(IOSectionClass &in)
+{
+  bool useCorrelatedSampling;
+  if (!in.ReadVar("UseCorrelatedSampling",useCorrelatedSampling))
+    useCorrelatedSampling=false;
+  if (useCorrelatedSampling)
+    cerr<<"Using correlated sampling"<<endl;
+  string permuteType, speciesName;
+  assert (in.ReadVar ("NumLevels", NumLevels));
+  LowestLevel = 0;
+  if (!in.ReadVar ("LowestLevel", LowestLevel))
+    LowestLevel = 0;
+  assert (LowestLevel < NumLevels);
+  assert (in.ReadVar ("Species", speciesName));
+  assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
+  SpeciesNum = PathData.Path.SpeciesNum (speciesName);
+  if    (PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION){
+    HaveRefslice=true;
+  }
+  HaveRefslice = 
+    ((PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION) &&
+     (PathData.Actions.NodalActions(SpeciesNum) != NULL) &&
+     (!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
+  /// Set up permutation
+  assert (in.ReadVar ("PermuteType", permuteType));
+  if (permuteType == "TABLE") 
+    PermuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels,
+					      IOSection);
+  else if (permuteType=="COUPLE")
+    PermuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,
+					       IOSection);
+  else if (permuteType=="WORMMOVE")
+    PermuteStage=new OpenStageClass(PathData,SpeciesNum,NumLevels,
+				    IOSection);
+  else if (permuteType == "NONE") 
+    PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
+					   IOSection);
+  else {
+    cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
+    exit(EXIT_FAILURE);
+  }
+  PermuteStage->Read (in);
+  Stages.push_back (PermuteStage);
+  
+  for (int level=NumLevels-1; level>=LowestLevel; level--) {
+    BisectionStageClass *newStage;
+    newStage = new BisectionStageClass (PathData, level,
+					IOSection);
+    newStage->TotalLevels=NumLevels;
+    newStage->UseCorrelatedSampling=useCorrelatedSampling;
+    newStage->Actions.push_back(&PathData.Actions.Kinetic);
+    if (level!=LowestLevel){
+      Array<string,1> higherLevelActions;
+      assert(in.ReadVar("HigherLevelActions",higherLevelActions));
+      for (int i=0;i<higherLevelActions.size();i++)
+	newStage->Actions.push_back(PathData.Actions.GetAction(higherLevelActions(i)));
+    }
+    else if (level==LowestLevel){
+      Array<string,1> samplingActions;
+      assert(in.ReadVar("SamplingActions",samplingActions));
+      for (int i=0;i<samplingActions.size();i++)
+	newStage->Actions.push_back(PathData.Actions.GetAction(samplingActions(i)));
+      ///If it's David's long range class then do this
+      if (PathData.Path.DavidLongRange){
+	cerr<<"Pushing david long range at lowetst level"<<endl;
+	newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+      }
+      else if (PathData.Actions.HaveLongRange()){
+	if (PathData.Actions.UseRPA)
+	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+	else
+	  newStage->Actions.push_back(&PathData.Actions.LongRange);
+      }
+    }
+    // HACK HACK HACK
+    // These used to be only pushed on at the lowest level
+    if (level==0){
+      if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
+	cerr << "Adding fermion node action for species " 
+	     << speciesName << endl;
+	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+      }
+    }
+    if (PathData.Actions.UseNonlocal) 
+      newStage->Actions.push_back(&PathData.Actions.Nonlocal);
+    
+    newStage->BisectionLevel = level;
+    Stages.push_back (newStage);
+    
+  }
+
+  // Add the second stage of the permutation step
+  /// EVIL BAD ERROR!!!  Pushing onto the stack twice causes the stage
+  /// to be accepted twice, which causes swapping the forward and
+  // reverse tables twice!
+  Stages.push_back (PermuteStage);
+
+}
+
 
 
 
 void BisectionBlockClass::Read(IOSectionClass &in)
 {
+  Read_new(in);
+  return;
   //  cerr<<"Reading bisection block"<<endl;
   bool useCorrelatedSampling;
   if (!in.ReadVar("UseCorrelatedSampling",useCorrelatedSampling))
@@ -142,20 +246,22 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	newStage->Actions.push_back(&PathData.Actions.ShortRangePrimitive);
       }
       else if (level>LowestLevel){ // if (level==LowestLevel) //HACK HERE CURRENTLY 
+	cerr<<"Pushing on the diagonal action!"<<endl;
 	//	perr<<"Adding short range action in BisectionBlock."<<endl;
-	newStage->Actions.push_back(&PathData.Actions.DiagonalAction);
-	//	newStage->Actions.push_back(&PathData.Actions.ShortRange);
+	//	newStage->Actions.push_back(&PathData.Actions.DiagonalAction);
+	newStage->Actions.push_back(&PathData.Actions.ShortRange);
       }
       else {
-
+	//	newStage->Actions.push_back(&PathData.Actions.DiagonalAction);
+	//	cerr<<"Pushing on the short range action!"<<endl;
 	newStage->Actions.push_back(&PathData.Actions.ShortRange);
 	
       }
       //      else
       //      	int dummy=5;
       if (level != LowestLevel){
-	if (PathData.Path.DavidLongRange)
-	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+	//	if (PathData.Path.DavidLongRange)
+	//	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
       }
       if (level == LowestLevel) {
 	bool useTether=false;
@@ -168,6 +274,7 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 	}
 	///If it's David's long range class then do this
 	if (PathData.Path.DavidLongRange){
+	  cerr<<"PUshing david long range at lowetst level"<<endl;
 	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
 	}
 	else if (PathData.Actions.HaveLongRange()){
@@ -179,10 +286,12 @@ void BisectionBlockClass::Read(IOSectionClass &in)
       }
       // HACK HACK HACK
       // These used to be only pushed on at the lowest level
+      if (level==0){
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
 	cerr << "Adding fermion node action for species " 
 	     << speciesName << endl;
 	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+      }
       }
       if (PathData.Actions.UseNonlocal) 
 	newStage->Actions.push_back(&PathData.Actions.Nonlocal);
@@ -283,6 +392,9 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
+  struct timeval start, end;
+  struct timezone tz;
+
 
   ////  FP.CheckxyzDeriv();
   ///  FP.CheckGradRho();
@@ -332,10 +444,27 @@ void BisectionBlockClass::MakeMove()
   for (int step=0; step<StepsPerBlock; step++) {
     NumAttempted++;
     ActiveParticles(0)=-1;
+  gettimeofday(&start, &tz);
     MultiStageClass::MakeMove();
+  gettimeofday(&end,   &tz);
+  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+
   }
+
   if (LowestLevel != 0)
     MakeStraightPaths();
+  cerr<<"Time spent is "<<TimeSpent<<endl;
+  cerr<<"Time spent2 is "<<TimeSpent2<<endl;
+  list<StageClass*>::iterator stageIter=Stages.begin();
+  while (stageIter!=Stages.end()){
+    cerr<<"LEVEL A IS "<<(*stageIter)->TimeSpent<<endl;
+    for (list<ActionBaseClass*>::iterator actionIter=(*stageIter)->Actions.begin();actionIter!=(*stageIter)->Actions.end();actionIter++){
+      cerr<<"    Action value was "<<(*actionIter)->TimeSpent<<endl;
+    }
+    stageIter++;
+  }
+
 }
 
 
