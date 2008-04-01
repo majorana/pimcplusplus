@@ -19,6 +19,7 @@
 #include "DiagonalActionClass.h"
 #include "ShortRangeClass.h"
 #include "ShortRangeOnClass.h"
+#include "ShortRangeOn_diagonal_Class.h"
 #include "ShortRangeApproximateClass.h"
 #include "ShortRangePrimitive.h"
 #include "LongRangeClass.h"
@@ -37,6 +38,7 @@
 #include "GroundStateNodalActionClass.h"
 #include "FixedPhaseActionClass.h"
 #include "DavidLongRangeClass.h"
+#include "DavidLongRangeClassYk.h"
 //#include "QMCSamplingClass.h"
 //#include "QBoxAction.h"
 #include "OpenLoopImportance.h"
@@ -111,6 +113,7 @@ public:
   /// short-range action is summed in real space. 
   ShortRangeClass ShortRange;
   ShortRangeOnClass ShortRangeOn;
+  ShortRangeOn_diagonal_class ShortRangeOnDiagonal;
   ShortRangeApproximateClass ShortRangeApproximate;
   ShortRangePrimitiveClass ShortRangePrimitive;
   DiagonalActionClass DiagonalAction;
@@ -124,7 +127,7 @@ public:
   LongRangeRPAClass LongRangeRPA;
 
   ///David's Long Range Class
-  DavidLongRangeClass DavidLongRange;
+  DavidLongRangeClassYk DavidLongRange;
 
 //  // Water-related stuff
 //  MoleculeInteractionsClass MoleculeInteractions;
@@ -218,13 +221,14 @@ public:
     Tether(pathData),
     ShortRange(pathData,PairMatrix),
     ShortRangeOn(pathData,PairMatrix),
+    ShortRangeOnDiagonal(pathData,PairMatrix),
     ShortRangeApproximate(pathData,PairMatrix),
     ShortRangePrimitive(pathData,PairMatrix),
     ShortRangePot(pathData, PairMatrix),
     DiagonalAction(pathData,PairMatrix),
     LongRange(pathData,PairMatrix,PairArray), 
     //LongRangeCoulomb(pathData,PairMatrix,PairArray), 
-    DavidLongRange(pathData),
+    DavidLongRange(pathData,PairMatrix,PairArray),
     Josephson(pathData),
     Hermele(pathData),
     DualHermele(pathData),
