@@ -235,6 +235,11 @@ void guassianDisplace(dVec rbar)
 double BisectionStageClass::Sample(int &slice1,int &slice2,
 				   Array<int,1> &activeParticles)
 {
+  struct timeval start, end;
+  struct timezone tz;
+  gettimeofday(&start, &tz);
+
+
   PathClass &Path = PathData.Path;
 
 
@@ -252,6 +257,9 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
   double logSampleProb=0.0;
   double logOldSampleProb=0.0;
   dVec firstDelta;
+
+  
+
   for (int ptclIndex=0;ptclIndex<activeParticles.size();ptclIndex++){
     int ptcl=activeParticles(ptclIndex);
     //HACK! BUG!
@@ -387,6 +395,13 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
   slice2=oldSlice2;
   //  NewSample=exp(logSampleProb);
   //  OldSample=exp(logOldSampleProb);
+
+
+	gettimeofday(&end,   &tz);
+
+	//	//	TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+	//	//	  1.0e-6*(double)(end.tv_usec-start.tv_usec);
+	//	cerr<<"What's time of day"<<TimeSpent<<endl;
   return exp(-logSampleProb+logOldSampleProb);
   //return (exp (-newSample + oldSample));
 }

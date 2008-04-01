@@ -19,10 +19,12 @@
 
 #include "MultiStage.h"
 #include "../Observables/ObservableVar.h"
+#include <sys/time.h>
 
 class BisectionStageClass : public LocalStageClass
 {
 public:
+  
   void WriteRatio();
   //  void Read(IOSectionClass& IO);
   void CalcShift(Array<int,1> &activeParticles,int slice,
@@ -43,10 +45,11 @@ public:
 
   BisectionStageClass(PathDataClass &pathData, int level,
 		      IOSectionClass outSection) : 
-    LocalStageClass(pathData,outSection)
+    LocalStageClass(pathData,outSection) 
   { 
     //do nothing for now
     BisectionLevel = level;
+    TimeSpent=0.0;
 
   }
 };
