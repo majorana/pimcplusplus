@@ -37,6 +37,7 @@ protected:
   list<StageClass*> Stages;
   int NumSteps;
   int Slice1,Slice2;
+  double TimeSpent2;
   ObservableDouble CenterOfMassVar;
 public:
   double cm2;
@@ -50,7 +51,7 @@ public:
   void MakeMove();
   MultiStageClass(PathDataClass &pathData, IOSectionClass &outSection) : 
     CenterOfMassVar("CenterOfMassDrift",IOSection,pathData.Path.Communicator),
-    ParticleMoveClass(pathData,outSection) 
+    ParticleMoveClass(pathData,outSection) , TimeSpent2(0)
   {
     //do nothing for now
   }
