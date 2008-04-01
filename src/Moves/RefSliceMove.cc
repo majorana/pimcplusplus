@@ -50,7 +50,8 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level,
 							     IOSection);
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
-    newStage->Actions.push_back(&PathData.Actions.ShortRange);
+    newStage->UseCorrelatedSampling=false;
+    ///HACK!    newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
       if (PathData.Path.LongRange) 
 	if (PathData.Actions.UseRPA)
@@ -68,6 +69,7 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
       }
     }
     newStage->BisectionLevel = level;
+    newStage->TotalLevels=NumLevels;
     Stages.push_back (newStage);
   }
   
@@ -118,6 +120,12 @@ bool RefSliceMoveClass::NodeCheck()
 /// This version is for the processor with the reference slice
 void RefSliceMoveClass::MakeMoveMaster()
 {
+    static bool firstTime=true;
+  cerr<<"MAKING REF SLICE MOVE"<<endl;
+  cerr<<"NODE CHECK IS "<<NodeCheck()<<endl;
+  cerr<<"DONE NODECHECK"<<endl;
+  if (!firstTime)
+    return;
   PathClass &Path=PathData.Path;
   int myProc = PathData.Path.Communicator.MyProc();
   int firstSlice, lastSlice;
@@ -144,6 +152,7 @@ void RefSliceMoveClass::MakeMoveMaster()
   int stageCounter = 0;
   ((PermuteStageClass*)PermuteStage)->InitBlock(Slice1, Slice2);
   while (stageIter!=Stages.end() && toAccept){
+    cerr<<"Attempting level"<<(*stageIter)->BisectionLevel<<endl;
     toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 				     ActiveParticles,prevActionChange);
     stageCounter++;
@@ -159,20 +168,32 @@ void RefSliceMoveClass::MakeMoveMaster()
 //     if ((NodeAccept+NodeReject) % 1000 == 999)
 //       fprintf (stderr, "Node accept ratio = %5.3f\n",
 // 	       (double)NodeAccept/(double)(NodeAccept+NodeReject));
+
     if (NodeCheck()) {
+
       NodeAccept++;
       Accept();
       Path.RefPath.AcceptCopy();
+      cerr<<"ACCEPTNG REF SLICE MOVE"<<endl;
+    }
+    else if (firstTime){
+      firstTime=false;
+      NodeAccept++;
+      Accept();
+      Path.RefPath.AcceptCopy();
+      cerr<<"ACCEPTNG REF SLICE MOVE FOR FIRSTTIME"<<endl;
     }
     else {
       NodeReject++;
       Reject();
       Path.RefPath.RejectCopy();
+      cerr<<"REJECTING REF SLICE MOVE BY NODECHECK"<<endl;
     }
   }
   // Otherwise, reject the whole move
   else {
     Reject();
+    cerr<<"REJECTING REF SLICE MOVE BY LOCAL REJECt"<<endl;
     Path.RefPath.RejectCopy();
   }
 
