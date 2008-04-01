@@ -18,6 +18,7 @@
 #include "DavidLongRangeClass.h"
 #include "../PathDataClass.h"
 
+
 void DavidLongRangeClass::Read(IOSectionClass &in)
 {
   double myNum;
@@ -85,7 +86,6 @@ DavidLongRangeClass::SingleAction (int slice1, int slice2,
 				   int level)
 
 {
-
   if (GetMode() == NEWMODE)
     Path.UpdateRho_ks(slice1, slice2, activeParticles, level);
 
@@ -172,6 +172,7 @@ double DavidLongRangeClass::d_dBeta (int slice1, int slice2,  int level)
 
 
 }
+
 
 DavidLongRangeClass::DavidLongRangeClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)
