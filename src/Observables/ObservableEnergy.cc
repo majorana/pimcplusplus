@@ -57,9 +57,9 @@ void EnergyClass::Accumulate()
   VShortSum  += vShort;
   VLongSum   += vLong;
   dUNonlocalSum += dUNonlocal;
-  cerr<<"My get perm number is "<<myGetPermNumber<<endl;
+  //  cerr<<"My get perm number is "<<myGetPermNumber<<endl;
   EnergyVals(myGetPermNumber)+=kinetic;
-  cerr<<"ENERGY VVLAS"<<EnergyVals<<"ASDF "<<kinetic<<endl;
+  //  cerr<<"ENERGY VVLAS"<<EnergyVals<<"ASDF "<<kinetic<<endl;
 
   int slice1 = 0;
   int slice2 = PathData.Path.NumTimeSlices() - 1;
@@ -183,10 +183,10 @@ void EnergyClass::WriteBlock()
   VShortVar.Write  (Prefactor*PathData.Path.Communicator.Sum(VShortSum)*norm);
   VLongVar.Write   (Prefactor*PathData.Path.Communicator.Sum(VLongSum)*norm);
   dUNonlocalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(dUNonlocalSum)*norm);
-  cerr<<"norm is "<<norm<<endl;
-  cerr<<"norm"<<EnergyVals<<endl;
+  //  cerr<<"norm is "<<norm<<endl;
+  //  cerr<<"norm"<<EnergyVals<<endl;
   EnergyVals=EnergyVals*norm;
-  cerr<<"norm"<<EnergyVals<<endl;
+  //  cerr<<"norm"<<EnergyVals<<endl;
   EnergyValsVar.Write(EnergyVals);
   EnergyVals=0.0;
 	for(int n=0; n<numEnergies; n++){
