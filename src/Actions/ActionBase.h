@@ -34,6 +34,7 @@ protected:
   PathDataClass &PathData;
   PathClass &Path;
 public:
+  double TimeSpent;
   /// This function takes a range of time slices from slice1 to
   /// slice2, inclusive, and an array of particles which are changing
   /// positions.  The level is used in bisection moves in which, at
