@@ -57,6 +57,7 @@ FreeNodalActionClass::ActionkSum (double L, double lambdaBeta,
 void 
 FreeNodalActionClass::SetupFreeActions()
 {
+  cerr<<"SETTING UP FREE ACTION"<<endl;
   const int nPoints = 1000;
   // Setup grids
   for (int i=0; i<NDIM; i++)
@@ -704,10 +705,12 @@ FreeNodalActionClass::Read (IOSectionClass &in)
 
 /// Return essentiall 0 or infinity
 double 
-FreeNodalActionClass::SimpleAction (int startSlice, int endSlice,
+FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
 				    const Array<int,1> &changePtcls,
 				    int level)
 {
+  cerr<<"Into SingleAction"<<endl;
+  bool brokenNode=false;
   int skip = 1<<level;
   int myStart, myEnd;
   Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
@@ -716,18 +719,23 @@ FreeNodalActionClass::SimpleAction (int startSlice, int endSlice,
   double uNode=0.0;
   for (int slice=startSlice; slice <= endSlice; slice+=skip) {
     if ((slice != refSlice) && (slice != refSlice+Path.TotalNumSlices))
-      if (Det(slice) < 0.0)
-	uNode += 1.0e50;
+      if (Det(slice) < 0.0){
+    	uNode += 1.0e50;
+	cerr<<"Broken slice is "<<slice<<endl;
+      }
   }
+
+  cerr<<"Out of SingleAction"<<endl;
   return uNode;
 }
 
 
 double 
-FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
+FreeNodalActionClass::SimpleAction (int startSlice, int endSlice,
 				    const Array<int,1> &changePtcls, 
 				    int level)
 { 
+  cerr<<"TRYING SINGLE ACTION"<<endl;
   /// HACK HACK HACK HACK
 //   startSlice = 0;
 //   endSlice = Path.NumTimeSlices()-1;

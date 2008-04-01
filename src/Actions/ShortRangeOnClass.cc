@@ -89,13 +89,15 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
     	double rmag, rpmag;
 	if (slice==slice1)
 	  totalParticles++;
-    	PathData.Path.DistDispFast(slice, slice+skip, ptcl1, ptcl2,
+    	PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
     			       rmag, rpmag, r, rp);
     	double s2 = dot (r-rp, r-rp);
    	double q = 0.5 * (rmag + rpmag); 
     	double z = (rmag - rpmag);
     	double U;
-    	U = PA.U(q,z,s2, level);
+	//	U = ((DavidPAClass*)&PA)->UDiag_exact(q, level);
+
+	U = PA.U(q,z,s2, level);
 	// Subtract off long-range part from short-range action
 	//	  if (PA.IsLongRange())
 	//	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
@@ -146,12 +148,13 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 	    double rmag, rpmag;
 	    if (slice==slice1)
 	      totalParticles++;
-	    PathData.Path.DistDispFast(slice, slice+skip, ptcl1, ptcl2,
+	    PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
 				   rmag, rpmag, r, rp);
 	    double s2 = dot (r-rp, r-rp);
 	    double q = 0.5 * (rmag + rpmag);
 	    double z = (rmag - rpmag);
 	    double U;
+	    ///	U = ((DavidPAClass*)&PA)->UDiag_exact(q, level);
 	    U = PA.U(q,z,s2, level);
 	    // Subtract off long-range part from short-range action
 	    //	  if (PA.IsLongRange())
@@ -204,13 +207,14 @@ ShortRangeOnClass::SingleAction (int slice1, int slice2,
 	    double rmag, rpmag;
 	    if (slice==slice1)
 	      totalParticles++;
-	    PathData.Path.DistDispFast(slice, slice+skip, ptcl1, ptcl2,
+	    PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
 				       rmag, rpmag, r, rp);
 	    double s2 = dot (r-rp, r-rp);
 	    double q = 0.5 * (rmag + rpmag);
 	    double z = (rmag - rpmag);
 	    double U;
 	    U = PA.U(q,z,s2, level);
+	    //	    U = ((DavidPAClass*)&PA)->UDiag_exact(q, level);
 	    // Subtract off long-range part from short-range action
 	    //	  if (PA.IsLongRange())
 	    //	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));

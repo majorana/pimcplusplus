@@ -33,7 +33,7 @@ class DavidLongRangeClass : public ActionBaseClass
 protected:
   //  Array<PairActionFitClass*,2> &PairMatrix;
   //  Array<PairActionFitClass*,1> &PairArray;
-  //  LinearGrid LongGrid;
+ //  LinearGrid LongGrid;
 
 
   /// This calculates the quantity 

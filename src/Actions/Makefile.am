@@ -10,6 +10,8 @@ libactions_la_SOURCES =            \
     ActionsClass.h                 \
     DavidLongRangeClass.cc         \
     DavidLongRangeClass.h          \
+    DavidLongRangeClassYk.cc         \
+    DavidLongRangeClassYk.h         \
     FixedPhaseActionClass.cc       \
     FixedPhaseActionClass.h        \
     FreeNodalActionClass.cc        \
@@ -64,6 +66,8 @@ libactions_la_SOURCES =            \
     ShortRangeClass.h              \
     ShortRangeOnClass.h            \
     ShortRangeOnClass.cc           \
+    ShortRangeOn_diagonal_Class.cc           \
+    ShortRangeOn_diagonal_Class.h           \
     ShortRangePotClass.cc          \
     ShortRangePotClass.h           \
     ShortRangePrimitive.h          \

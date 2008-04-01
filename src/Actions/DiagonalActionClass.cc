@@ -22,9 +22,12 @@ DiagonalActionClass::SingleAction (int slice1, int slice2,
 			       const Array<int,1> &changedParticles,
 			       int level)
 {
+  cerr<<"Calling diagonal action"<<endl;
   double TotalU=0.0;
   PathClass &Path = PathData.Path;
-  Path.DoPtcl=true;
+  for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
+    Path.DoPtcl(ptcl)=true;
+
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
@@ -43,7 +46,10 @@ DiagonalActionClass::SingleAction (int slice1, int slice2,
 	  double factor=1.0;
 	  if (slice==slice1 || slice==slice2)
 	    factor=0.5;
-	  double U=factor*PA.Udiag(rmag,level);
+	  //	  double U=factor*PA.U(rmag,0,0, level);
+	  double U = factor*((DavidPAClass*)&PA)->UDiag_exact(rmag, level);
+	  //	  double U = factor*PA.Udiag(rmag, level);
+	  //	  double U = factor*((DavidPAClass*)(&PA)).Udiag_exact(rmag,level);
 	  // Subtract off long-range part from short-range action
 	  if (PA.IsLongRange() && PathData.Actions.UseLongRange)
 	    U -=  (PA.Ulong(level)(rmag));

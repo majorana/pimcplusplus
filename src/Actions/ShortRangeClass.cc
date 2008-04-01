@@ -19,12 +19,13 @@
 #include "ShortRangeOnClass.h"
 #include "ctime"
 #include <Common/MatrixOps/MatrixOps.h>
-
+#include "sys/time.h"
 ///This has to be called after pathdata knows how many
 ///particles it has
 void ShortRangeClass::Read(IOSectionClass& in)
 {
   TotalTime=0;
+  TimeSpent=0;
 }
 
 ShortRangeClass::ShortRangeClass(PathDataClass &pathData,
@@ -141,17 +142,18 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 			       const Array<int,1> &changedParticles,
 			       int level)
 {
-  //  cerr<<"I'm in short range single action"<<endl;
+  struct timeval start, end;
+  struct timezone tz;
   double TotalU=0.0;
   //  int startTime=clock();
   //  for (int toRun=0;toRun<1000;toRun++){
   PathClass &Path = PathData.Path;
   // First, sum the pair actions
-  for (int ptcl=0;ptcl<Path.DoPtcl.size();ptcl++)
-    Path.DoPtcl(ptcl)=true;
+  Path.DoPtcl=true;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
+  gettimeofday(&start, &tz);
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = changedParticles(ptcl1Index);
     Path.DoPtcl(ptcl1) = false;
@@ -163,24 +165,27 @@ ShortRangeClass::SingleAction (int slice1, int slice2,
 	for (int slice=slice1;slice<slice2;slice+=skip){
 	  dVec r, rp;
 	  double rmag, rpmag;
-	  PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
-				 rmag, rpmag, r, rp);
+ 	  PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
+ 				     rmag, rpmag, r, rp);
 	  double s2 = dot (r-rp, r-rp);
 	  double q = 0.5 * (rmag + rpmag);
 	  double z = (rmag - rpmag);
+
 	  double U;
 	  U = PA.U(q,z,s2, level);
+	  //	  double UP = 0.5*(PA.U(rmag,0,0, level)+PA.U(rpmag,0,0,level))
 	  // Subtract off long-range part from short-range action
 	  if (PA.IsLongRange() && PathData.Actions.UseLongRange)
 	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
+	  //	  TotalU+=U;
 	  TotalU+=U;
 	}
       }
     }
   }
-//  cerr<<"Num total U is "<<TotalU<<endl;
-////  cerr<<"Worm short range action is "<<TotalU<<endl;
-//  cerr<<"I'm out of the short range action"<<endl;
+  gettimeofday(&end,   &tz);
+  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+    1.0e-6*(double)(end.tv_usec-start.tv_usec);
   return (TotalU);
 }
 
