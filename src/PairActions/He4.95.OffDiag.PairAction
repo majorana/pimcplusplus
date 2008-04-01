@@ -1,3 +1,5 @@
+string SamplingTableFile="He4.95.Sampling.in";
+
 Section (Fits)
 {
   string Type = "DavidFit";
