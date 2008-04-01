@@ -42,6 +42,7 @@
 #include "PairFixedPhase.h"
 #include "GroundStateNodalActionClass.h"
 #include "FixedPhaseActionClass.h"
+#include "DavidLongRangeClassYk.h"
 #include "DavidLongRangeClass.h"
 #include "QMCSamplingClass.h"
 #include "QBoxAction.h"
@@ -293,7 +294,8 @@ void ActionsClass::Read(IOSectionClass &in)
   }
   ///Reading in information for David long range action
   if (PathData.Path.DavidLongRange){
-    DavidLongRange.Read(in);
+    DavidLongRange.ReadYk();
+    //    DavidLongRangeYk.ReadYk(in);
   }
   if (PathData.Path.OpenPaths)
     OpenLoopImportance.Read(in);
@@ -323,6 +325,12 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new KineticClass(PathData);
     } else if (type == "ShortRange") {
       newAction = new ShortRangeClass(PathData, PairMatrix);
+    } else if (type == "DiagonalAction") {
+      newAction = new DiagonalActionClass(PathData,PairMatrix);
+    } else if (type == "DiagonalActionOrderN") {
+      newAction = new ShortRangeOn_diagonal_class(PathData,PairMatrix);
+    } else if (type == "ShortRangeOrderN") {
+      newAction = new ShortRangeOnClass(PathData,PairMatrix);
     } else if (type == "MoleculeInteractions") {
       newAction = new MoleculeInteractionsClass(PathData);
     } else if (type == "ST2Water") {
@@ -759,19 +767,24 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
     else
       dULong = LongRange.d_dBeta (0, M, 0);
   }
-  if (PathData.Path.DavidLongRange)
+  vShort  = 0.0; vLong   = 0.0;  
+  if (PathData.Path.DavidLongRange){
     dULong = DavidLongRange.d_dBeta(0,M,0);
+    vLong= DavidLongRange.V(0,M,0);
+  }
   node = 0.0;
   for (int species=0; species<PathData.Path.NumSpecies(); species++)
     if (NodalActions(species) != NULL)
       node += NodalActions(species)->d_dBeta(0, M, 0);
 
-  vShort  = 0.0; vLong   = 0.0;  
+
+  
   for (int slice=0; slice <= M; slice++) {
     double factor = ((slice==0)||(slice==M)) ? 0.5 : 1.0;
     vShort += factor * ShortRangePot.V(slice);
     if (doLongRange)
       vLong  += factor *  LongRangePot.V(slice);
+   
   }
   if (UseNonlocal)
     duNonlocal = Nonlocal.d_dBeta(0,M,0);
@@ -919,6 +932,7 @@ ActionsClass::ShiftData (int slicesToShift)
   StructureReject.ShiftData(slicesToShift);
   ShortRange.ShiftData(slicesToShift);
   ShortRangeOn.ShiftData(slicesToShift);
+  ShortRangeOnDiagonal.ShiftData(slicesToShift);
   ShortRangeApproximate.ShiftData(slicesToShift);
   ShortRangePrimitive.ShiftData(slicesToShift);
   DiagonalAction.ShiftData(slicesToShift);
