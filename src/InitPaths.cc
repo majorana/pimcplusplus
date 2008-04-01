@@ -60,12 +60,12 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
 	  abort();
 	}
 	int numPerDim = (int) ceil (pow(0.5*(double)num, 1.0/2.0)-1.0e-6);
-	double delta = Box[0] / numPerDim;
+	double delta = Box[0] / (double)numPerDim;
 	for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
 	  int ip = (ptcl-species.FirstPtcl)/2;
 	  int ix, iy;
-	  ix = ip/(numPerDim*numPerDim);
-	  iy = (ip-(ix*numPerDim*numPerDim))/numPerDim;
+	  ix = ip/(numPerDim);
+	  iy = (ip-(ix*numPerDim));
 	dVec r;
 	r[0] = ix*delta-0.5*Box[0];
 	r[1] = iy*delta-0.5*Box[1];
@@ -73,6 +73,11 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
 	  r += 0.5*delta;
 	for (int slice=0; slice<NumTimeSlices(); slice++) 
 	  Path(slice,ptcl) = r;
+	cerr<<"INIT PATH: "<<Path(0,ptcl)[0]<<" "
+	    <<Path(0,ptcl)[1]
+	    <<endl;
+	
+
 	}
       }
       else {
