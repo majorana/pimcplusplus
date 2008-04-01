@@ -36,39 +36,46 @@ class DavidPAClass : public PairActionFitClass
  private:
   
   ///Holds the Ukj coefficients for a given q
-  Array<double,1> TempukjArray;
-  Array<double,1> TempdukjArray;
+  blitz::Array<double,1> TempukjArray;
+  blitz::Array<double,1> TempdukjArray;
   int NumTerms;
   //  DistanceTableClass *DistanceTable;
   /// Skips to the next string in the file whose substring matches skipToString
   inline string SkipTo(ifstream &infile, string skipToString);
   /// Reads a Fortran 3 tensor
-  inline void ReadFORTRAN3Tensor(ifstream &infile, Array<double,3> &tempUkj);
+  inline void ReadFORTRAN3Tensor(ifstream &infile, blitz::Array<double,3> &tempUkj);
  public:
-  Array<double,1> Potential; 
+  int dummyPairActionClass;
+  blitz::Array<double,1> Potential; 
   string type1,type2;
   bool SamplingTableRead;
   inline bool Read(IOSectionClass &IOSection,double desiredTau, int numLevels);
   inline void Print();
   double Udiag(double q, int level);
+  double UDiag_exact(double q,int level);
+  
   double DesiredTau;
   int TauPos;
   int NumLevels;
   int NumTau;
+  int LongRangeDim;
+  double LongRangeMass1;
+  double LongRangeMass2;
+  Array<double,1> LongRangeBox;
   /// This stores the coefficients of the expansion specified above.
   /// The array index is over the levels.  You call it with the q
   /// value and a temporary array to get all of the values in that
   /// column. 
-  Array<MultiCubicSpline,1> ukj; ///<(level )
-  Array<LinearSpline,1> UdiagSpline;
+  blitz::Array<MultiCubicSpline,1> ukj; ///<(level )
+  blitz::Array<LinearSpline,1> UdiagSpline;
   ///Same as ukj but stores the beta derivatives.
-  Array<MultiCubicSpline,1> dukj; ///<(level )
-  Array<CubicSpline,1> dUdRTimesSigmaSpline; ///<(level
-  Array<CubicSpline,1> dUdRTimesSigmaSpline_movers; ///<(level
-  Array<CubicSpline,1> d2UdR2TimesSigmaSpline; ///<(level
-  Array<CubicSpline,1> d2UdR2TimesSigmaSpline_movers; ///<(level
+  blitz::Array<MultiCubicSpline,1> dukj; ///<(level )
+  blitz::Array<CubicSpline,1> dUdRTimesSigmaSpline; ///<(level
+  blitz::Array<CubicSpline,1> dUdRTimesSigmaSpline_movers; ///<(level
+  blitz::Array<CubicSpline,1> d2UdR2TimesSigmaSpline; ///<(level
+  blitz::Array<CubicSpline,1> d2UdR2TimesSigmaSpline_movers; ///<(level
 
-  Array<double,1> SamplingTau;
+  blitz::Array<double,1> SamplingTau;
 
   /////  MultiCubicSpline Pot;
   /// Calculate the U(s,q,z) value when given s,q,z and the level 
@@ -83,6 +90,7 @@ class DavidPAClass : public PairActionFitClass
   /// This is the temperature 
   //////  double tau;
   /// Function to read David's squarer file input.
+  void ReadLongRangeHDF5(IOSectionClass &in);
   void ReadDavidSquarerFile(string DMFile);
   void ReadDavidSquarerFileHDF5(string DMFile);
   void ReadSamplingTable(string fileName);
@@ -93,6 +101,10 @@ class DavidPAClass : public PairActionFitClass
   double dUdRTimesSigma_movers(double r,int level);
   double d2UdR2TimesSigma(double r,int level);
   double d2UdR2TimesSigma_movers(double r,int level);
+
+
+  blitz::Array<double,1> kVals;
+  blitz::Array<double,1> uk_long;
 
 
   /// The q-derivative of the above
@@ -187,7 +199,7 @@ inline string DavidPAClass::SkipTo(ifstream &infile,string skipToString)
 }
 
 
-inline void DavidPAClass::ReadFORTRAN3Tensor(ifstream &infile,Array<double,3> &tempUkj)
+inline void DavidPAClass::ReadFORTRAN3Tensor(ifstream &infile,blitz::Array<double,3> &tempUkj)
 {
 
    

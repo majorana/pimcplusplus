@@ -505,6 +505,27 @@ void DavidPAClass::calcUsqzFast(double s,double q,double z,int level,
 }
 
 
+double 
+DavidPAClass::UDiag_exact(double q,int level)
+{
+  level=level+TauPos;
+  double rmin = ukj(level).grid->Start;
+  double U=0.0;
+  double r=q;
+  if (r > ukj(level).grid->End) {
+    r=ukj(level).grid->End;
+  }
+  // This is the endpoint action 
+  if (r < rmin){
+    U = 5000.0;
+    return U;
+  }
+  U+= (ukj(level)(1,r));
+  return U;
+}
+
+
+
 double
 DavidPAClass::Udiag (double q, int level)
 {
@@ -866,6 +887,21 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   ///  cerr<<"TauPos is "<<TauPos<<endl;
 }
 
+void DavidPAClass::ReadLongRangeHDF5(IOSectionClass &in)
+{
+
+
+
+  assert(in.ReadVar("kPoints",kVals));  
+  assert(in.ReadVar("u_k",uk_long));
+  assert(in.ReadVar("Box",LongRangeBox));
+  assert(in.ReadVar("mass1",LongRangeMass1));
+  assert(in.ReadVar("mass2",LongRangeMass2));
+  assert(in.ReadVar("ndim",LongRangeDim));
+}
+
+
+
 void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
 {
   cerr << "READDAVIDSQUARERFILE -- HDF5 -- " << endl;
@@ -901,7 +937,9 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
     assert(in.OpenSection(SectionTitle));
 
     int theRank;
+    cerr<<"Reading rank"<<endl;
     in.ReadVar("Rank",theRank);
+    cerr<<"rank read"<<endl;
     if (theRank!=3){
       //cerr<<"ERROR! ERROR! Rank was not 3" << endl;
       counter--;
@@ -940,9 +978,10 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
 	    //cerr <<"ERROR!!! ERROR!!! The tau grid is not a LOG Grid\n";
 	    //cerr <<shouldBeLog<<endl;
       //}
-
+      cerr<<"Reading taus"<<endl;
       Array<double,1> Taus;
       in.ReadVar("Taus",Taus);
+      cerr<<"taus read"<<endl;
       smallestTau=Taus(0);
       double largestTau=Taus(Taus.size()-1);
       int numTauCalc=(int)floor(log(largestTau/smallestTau)/log(2.0)+0.5+1.0); ///I think this -1 is correct but who knows
@@ -1001,7 +1040,9 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
     assert(in.OpenSection(SectionTitle));
 
     int theRank;
+    cerr<<"Reading du rank"<<endl;
     in.ReadVar("Rank",theRank);
+    cerr<<"du rank read"<<endl;
     assert(theRank == 3);
     int NumGridPoints, NumUKJ;
     in.ReadVar("NumUkj",NumUKJ);
@@ -1028,8 +1069,10 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
 	    cerr << "Unrecognized grid type in ReadDavidSquarerFile.\n";
 	    cerr << "GridType = \"" << GridType << "\"\n";
     }
+    cerr<<"Reading taus"<<endl;
     Array<double,1> Taus;
     in.ReadVar("Taus",Taus);
+    cerr<<"taus rad"<<endl;
     smallestTau=Taus(0);
     double largestTau=Taus(Taus.size()-1);
     int numTauCalc=(int)floor(log(largestTau/smallestTau)/log(2.0)+0.5+1.0); ///I think this -1 is correct but who knows
@@ -1057,7 +1100,7 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
     startDeriv=5.0e30;
     Array<double,1> endDeriv(NumUKJ+1);
     endDeriv=0.0;
-
+    cerr<<"Reading data"<<endl;
     in.ReadVar("Data",tempdUkj);
     /////      tau=largestTau; //HACK
       tau=smallestTau;
@@ -1084,6 +1127,7 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
     ////      cerr<<"My tau is "<<tau<<endl;
     n=NMax;
     in.CloseSection();
+    cerr<<"Bottom of lop"<<endl;
   }
 
   Potential.resize(potential.size());
@@ -1094,8 +1138,10 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
   for (int i=0;i<TauPos;i++){
     tau *= 2;
   }
-  ///  cerr << "NumTau = " << NumTau << endl;
+  cerr<<"pre splining"<<endl;
+  cerr << "NumTau = " << NumTau << endl;
   for (int level=0; level<NumTau; level++) {
+    cerr<<"level is "<<level<<endl;
     const int numDiagPoints = 200;
     Array<double,1> udiag(numDiagPoints);
     double start = ukj(level).grid->Start;
@@ -1106,10 +1152,19 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
       calcUsqzFast (0.0, r, 0.0, level-TauPos, udiag(j));
     }
     UdiagSpline(level).Init (start, end, udiag);
+    cerr<<"Bottom of loop"<<endl;
   }
+  cerr<<"done with loop"<<endl;
   verr<<"I've selected a tau of "<<tau<< "in the PairAction file"<<endl;
-  ///  cerr<<"TauPos is "<<TauPos<<endl;
+  cerr<<"TauPos is "<<TauPos<<endl;
+  if (in.OpenSection("LongRange")){
+    cerr<<"In long range finding"<<endl;
+    ReadLongRangeHDF5(in);
+    in.CloseSection();
+    cerr<<"done with long range finding"<<endl;
+  }
   cerr << "Leaving DavidSquarer HDF5 read" << endl;
+
 }
 
 // double DavidPAClass::Udiag(double q, int level)

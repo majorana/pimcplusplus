@@ -41,16 +41,16 @@ private:
   }
   void SetSCscale();
   void UdU_PH (double r, double rp, double costheta, 
-	       Array<double,1> &Ulvec, Array<double,1> &dUlvec,
+	       blitz::Array<double,1> &Ulvec, blitz::Array<double,1> &dUlvec,
 	       double &U, double &dU);
   void UdU_local (double r, double rp, double costheta, 
-		  Array<double,1> &Ulvec, Array<double,1> &dUlvec,
+		  blitz::Array<double,1> &Ulvec, blitz::Array<double,1> &dUlvec,
 		  double &U, double &dU);
 
 
   FILE *DebugFile;
 public:
-  Array<U_l, 1> U_ls;
+  blitz::Array<U_l, 1> U_ls;
   Grid *grid;
   Potential *Pot;
   CoreTransform Transform;
@@ -72,13 +72,13 @@ public:
   /// Do a squaring, doubling beta
   void Square();
   void U_lArray(double r, double rp, 
-		Array<double,1> &Ulvec, Array<double,1> &dUlvec);
-  double U (double r, double rp, double costheta, Array<double,1> &Uvec);
+		blitz::Array<double,1> &Ulvec, blitz::Array<double,1> &dUlvec);
+  double U (double r, double rp, double costheta, blitz::Array<double,1> &Uvec);
   double U (double r, double rp, double costheta);
   void UdU (double r, double rp, double costheta, 
 	    double &U, double &dU);
   void UdU (double r, double rp, double costheta, 
-	    Array<double,1> &Ulvec, Array<double,1> &dUlvec,
+	    blitz::Array<double,1> &Ulvec, blitz::Array<double,1> &dUlvec,
 	    double &U, double &dU);
   void UdU_Coulomb (double r, double rp, double costheta, 
 		    double &U, double &dU);

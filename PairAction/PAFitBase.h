@@ -35,26 +35,26 @@ public:
   /// These store the long-range part of the action/potential in real
   /// space.  This will be subtracted from the total U to get the
   /// short-range part.
-  Array<QuinticSpline,1> Ulong, dUlong;
+  blitz::Array<QuinticSpline,1> Ulong, dUlong;
   QuinticSpline Vlong;
   /// This stores the long-ranged part of the potential in k-space.  
   /// Indices: (level, k-point).  dUlong_k stores the beta-derivative.
   /// dUlong_dk stores the k-derivative of Ulong_k
-  Array<double,2> Ulong_k, dUlong_k, dUlong_dk;
-  Array<double,1> Vlong_k;
+  blitz::Array<double,2> Ulong_k, dUlong_k, dUlong_dk;
+  blitz::Array<double,1> Vlong_k;
   /// This stores U_long(r=0);  Index is the level number.
-  Array<double,1> Ulong_r0, dUlong_r0;
+  blitz::Array<double,1> Ulong_r0, dUlong_r0;
   double Vlong_r0;
   /// This stores (U/dU/V)_short(k=0);  Index is the level number.
-  Array<double,1> Ushort_k0, dUshort_k0;
+  blitz::Array<double,1> Ushort_k0, dUshort_k0;
   double Vshort_k0;
   /// This stores (U/dU/V)_long(k=0);  Index is the level number.
-  Array<double,1> Ulong_k0, dUlong_k0;
+  blitz::Array<double,1> Ulong_k0, dUlong_k0;
   double Vlong_k0;
   /// Stores the RPA form of the above.  This should be computed by
   /// ActionClass, since it couples all of the species pairs together
   /// and needs to know about the number of particles.
-  Array<double,2> U_RPA_long_k, dU_RPA_long_k;
+  blitz::Array<double,2> U_RPA_long_k, dU_RPA_long_k;
   /// This stores the beta-derivative of the above.
   bool SamplingTableRead;
   // Product of the two charges.  Zero if not coulomb or not charged.
@@ -131,7 +131,7 @@ public:
   virtual double dXk_U_dk  (double k, int level) { return 0.0; }
 
   // Fills in the Vlong_k and dVlong_k array.
-  virtual void DoBreakup (const Vec3 &box, const Array<Vec3,1> &kVecs) 
+  virtual void DoBreakup (const Vec3 &box, const blitz::Array<Vec3,1> &kVecs) 
   { }
   PairActionFitClass() : Z1Z2(0.0), SamplingTableRead(false), Pot(NULL)
   { /* Do nothing */ }
@@ -144,7 +144,7 @@ public:
 // {
 // private:
 //   bool GridIsMine;
-//   Array<double, 1> Coefs;
+//   blitz::Array<double, 1> Coefs;
 // public:
 //   bool UsePBC;
 //   int Order;
@@ -152,8 +152,8 @@ public:
 
 //   // Real space parameters
 //   /// The array is over different values of beta
-//   Array<MultiBicubicSpline,1> Uk;
-//   Array<MultiBicubicSpline,1> dUk;
+//   blitz::Array<MultiBicubicSpline,1> Uk;
+//   blitz::Array<MultiBicubicSpline,1> dUk;
 
 //   /// k-space paramters
 
@@ -174,7 +174,7 @@ public:
 // public:
 //   int Order;
 //   MultiCubicSpline Ukj;
-//   Array<double,1> Coefs;
+//   blitz::Array<double,1> Coefs;
 //   inline double operator() (double q, double s, double z)
 //   {
 //     Ukj(q, Coefs);
@@ -200,7 +200,7 @@ public:
 //     }
 //     return (Usum);
 //   }
-//   void Init (Grid *qgrid, int order, Array<double,2> Ukjvals)
+//   void Init (Grid *qgrid, int order, blitz::Array<double,2> Ukjvals)
 //   {
 //     Order = order;
 //     Ukj.Init(qgrid, Ukjvals);
@@ -218,8 +218,8 @@ public:
 // public:
 //   int Order;
 //   MultiBicubicSpline Uk, dUk;
-//   Array<double,1> Coefs;
-//   Array<double,1> Hn;
+//   blitz::Array<double,1> Coefs;
+//   blitz::Array<double,1> Hn;
 //   double sigmainv;
 
 //   inline double operator() (double q, double s, double z)
@@ -256,7 +256,7 @@ public:
 //   }
 
 
-//   void Init (Grid *rgrid, Array<double,3> &Ukvals, Array<double,3> &dUkvals)
+//   void Init (Grid *rgrid, blitz::Array<double,3> &Ukvals, blitz::Array<double,3> &dUkvals)
 //   {
 //     Order = Ukvals.extent(2)-1;
 //     Uk.Init(rgrid, rgrid, Ukvals);

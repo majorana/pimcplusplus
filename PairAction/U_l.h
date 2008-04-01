@@ -52,7 +52,7 @@ private:
 public:
   SymmBicubicSpline Uspline;
   SymmBicubicSpline dUspline;
-  Array<double,1> Yl;
+  blitz::Array<double,1> Yl;
   BicubicSpline SCspline;
 
   double beta, lambda, TailPower, AbsTol, RelTol;

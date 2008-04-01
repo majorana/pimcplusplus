@@ -1,6 +1,49 @@
+import pylab
 from IO import *
 import sys
 from numpy import *
+
+def dToe(myString):
+  newString=""
+  for i in myString:
+    if i!='d' and i!="D":
+        newString=newString+i
+    else:
+      newString=newString+"e"
+  return newString
+      
+class LongRangeParser:
+  def __init__(self,baseName,outfilename):
+     self.fileName=baseName
+     self.a=IOSectionClass()
+     self.a.OpenFile(outfilename)
+  def ReadYK(self):
+     vals=pylab.load(self.fileName+"yk")
+     self.a.NewSection("LongRange")
+     self.a.WriteVar("Type","yk")
+     kPoints=vals[:,0].copy()
+     uk=vals[:,1].copy()
+     self.a.WriteVar("kPoints",kPoints)
+     self.a.WriteVar("u_k",uk)
+     potgen_inFile=open(self.fileName+"in")
+     a=potgen_inFile.readlines()
+     mass1=float(dToe(a[1].split()[2]))
+     mass2=float(dToe(a[2].split()[2]))
+     self.a.WriteVar("mass1",mass1)
+     self.a.WriteVar("mass2",mass2)
+     ndim=int(a[5].split()[5])
+     box=zeros(ndim,float)
+     self.a.WriteVar("ndim",ndim)
+
+     for dim in range(ndim):
+       box[dim]=float(dToe(a[5].split()[8+dim]))
+     self.a.WriteVar("Box",box)
+     print box
+     print mass1,mass2
+  def Done(self):
+    self.a.FlushFile()
+    self.a.CloseFile()
+
 
 class Squarer2HDFParser:
   def __init__(self,filename):
@@ -58,13 +101,13 @@ class Squarer2HDFParser:
     check(g,'TYPE')
     self.a.NewSection("Type")
     self.a.WriteVar("Species",self.next())
-    self.a.WriteVar("Lambda",float(self.next()))
+    self.a.WriteVar("Lambda",float(dToe(self.next())))
     self.a.CloseSection()
     g = self.next() 
     check(g,'TYPE')
     self.a.NewSection("Type")
     self.a.WriteVar("Species",self.next())
-    self.a.WriteVar("Lambda",float(self.next()))
+    self.a.WriteVar("Lambda",float(dToe(self.next())))
     self.a.CloseSection()
     
     ### get important stats for remainder of read
@@ -324,17 +367,30 @@ def check(s, sCheck):
   return(True);
 
 ### main ###
-if(len(sys.argv)!=2):
-  print "Usage: python dmparse.py squarer_output_file.dm"
-  sys.exit()
+def main():
+  if(len(sys.argv)!=2):
+    print "Usage: python dmparse.py squarer_output_file.dm"
+    sys.exit()
 
-sq = Squarer2HDFParser(sys.argv[1])
-sq.ProcessSquarerInfo()
-sq.ProcessPotential()
-for sec in range(0,sq.numFits + 1):
-  sq.ProcessU()
-for sec in range(0,sq.numFits + 1):
-  sq.ProcessdU_dBeta()
-sq.ProcessSampling()
-sq.ProcessSampling()
-sq.Done()
+  sq = Squarer2HDFParser(sys.argv[1])
+  sq.ProcessSquarerInfo()
+  sq.ProcessPotential()
+  for sec in range(0,sq.numFits + 1):
+    sq.ProcessU()
+  for sec in range(0,sq.numFits + 1):
+    sq.ProcessdU_dBeta()
+  sq.ProcessSampling()
+  sq.ProcessSampling()
+  sq.Done()
+  
+  basename = sys.argv[1][:-2]
+  outfilename =basename + 'h5'
+  infilename=basename+"yk"
+  if os.path.exists(infilename):
+      print "About to process the long range file",infilename
+      #should check to see if it's consistent somehow?
+      longRangeParse=LongRangeParser(basename,outfilename)
+      longRangeParse.ReadYK()
+      longRangeParse.Done()
+main()
+
