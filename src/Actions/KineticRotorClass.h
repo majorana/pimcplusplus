@@ -117,6 +117,7 @@ class FixedAxisRotorClass : public RotorActionBaseClass
   double d_dBeta (int slice1, int slice2, int level);
   double CalcRho(double phi, double theta, double psi);
   double CalcFAEnergy(double phi, double theta, double psi);
+  double AltFixedAxis (int slice, int mol, double phi, double theta, double psi);
   void Read (IOSectionClass &in);
   string GetName();
   

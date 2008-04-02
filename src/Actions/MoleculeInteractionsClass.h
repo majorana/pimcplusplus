@@ -50,7 +50,7 @@ class MoleculeInteractionsClass : public ActionBaseClass
 	ofstream outfile;
 	bool special;
 
-  CubicSpline* spline;
+  Array<CubicSpline*, 2> PairVTable;
   Grid* grid;
   double pairCutoff;
 

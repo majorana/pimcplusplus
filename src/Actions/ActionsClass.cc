@@ -303,6 +303,10 @@ void ActionsClass::Read(IOSectionClass &in)
   // /////////////////////////////////////////////////////////////////////
 
 
+  //cerr << "FIRST PA INIT" << endl;
+  //for (int pai=0; pai<PairArray.size(); pai++)
+  //  cerr << PairArray(pai) << endl;
+
 
   // new read section
   assert(in.ReadVar("MaxLevels",MaxLevels));
@@ -343,6 +347,8 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new FixedAxisRotorClass(PathData);
     } else if (type == "KineticRotor") {
       newAction = new KineticRotorClass(PathData);
+    } else if (type == "LongRangeCoulomb") {
+      newAction = new LongRangeCoulombClass(PathData, PairMatrix, PairArray);
     } else {
       cerr << endl << "ActionBaseClass Type " << type << " not recognized" << endl;
       exit(0);
@@ -417,6 +423,16 @@ ActionsClass::ReadPairActions(IOSectionClass &in)
     PAIO.CloseFile();
   }
   cerr<<"Done reading PairAction files"<<endl;
+  //cerr << "READPAIRACTION PA INIT" << endl;
+  //for (int pai=0; pai<PairArray.size(); pai++) {
+  //  cout << PairArray(pai) << " " << PairArray(pai)->Particle1.Name << " " << PairArray(pai)->Particle2.Name << endl;
+  //  for(int i=0; i<100; i++) {
+  //    double r = i*2./30;
+	//    double U;
+	//    U = PairArray(pai)->U(r,0,0, 0);
+  //    cout << r << " " << U << endl;
+  //  }
+  //}
 }
 
 ActionBaseClass* ActionsClass::GetAction(string name)

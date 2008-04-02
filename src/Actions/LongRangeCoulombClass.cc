@@ -50,7 +50,11 @@ LongRangeCoulombClass::LongRangeCoulombClass(PathDataClass &pathData,
 void LongRangeCoulombClass::Read(IOSectionClass& in)
 {
   assert(in.ReadVar("Alpha",alpha));
+  double conversion = 1.0;
+  in.ReadVar("Conversion",conversion);
+  prefactor = prefactor*conversion;
   in.ReadVar("Prefactor",prefactor);
+  cerr << "Coulomb prefactor " << prefactor << endl;
   sq_alpha = sqrt(alpha);
   int kPts = Path.kVecs.size();
   cerr << "LongRangeCoulomb: using " << kPts << " kPts from Path.kVecs" << endl;
@@ -77,6 +81,7 @@ void LongRangeCoulombClass::Read(IOSectionClass& in)
     volume *= Path.GetBox()(i);
   cerr << "I have box volume " << volume << endl;
   halfbox = 0.5*Path.GetBox()(0);
+
 }
 
 
@@ -119,25 +124,48 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
       double kSq = dot(Path.kVecs(i), Path.kVecs(i));
       k2(i) = kSq;
       phi(i) = exp(-k2(i)/(4*alpha*alpha));
-      cerr << i << " " << kSq << " " << k2(i) << " " << phi(i) << endl;
+      //cerr << i << " " << kSq << " " << k2(i) << " " << phi(i) << endl;
     }
     cerr << "LRC initialized phi of size " << phi.size() << " inside action!" << endl;
     initPhi = true;
+
+    // initialize Rho_k
+    for (int slice=0; slice<=Path.TotalNumSlices; slice+=1) {
+      for (int species=0; species<Path.NumSpecies(); species++) {
+        Path.CalcRho_ks_Fast(slice, species);
+      }
+    }
   }
 
   for (int counter=0; counter<Path.DoPtcl.size(); counter++)
     Path.DoPtcl(counter)=true;
 
   int skip = (1<<level);
-  //if (GetMode() == NEWMODE)
-  //{
+  if (GetMode() == NEWMODE)
+  {
     //Path.UpdateRho_ks(slice1, slice2, changedParticles, level);
-  for (int slice=slice1; slice<=slice2; slice+=skip) {
-    for (int species=0; species<Path.NumSpecies(); species++) {
-      Path.CalcRho_ks_Slow(slice, species);
+    for (int slice=slice1; slice<=slice2; slice+=skip) {
+      for (int species=0; species<Path.NumSpecies(); species++) {
+        Path.CalcRho_ks_Fast(slice, species);
+      }
     }
   }
+  //cerr << "RHO CALC FAST " << endl;
+  //for(int s=0; s<Path.TotalNumSlices; s++)
+  //  for(int spec=0; spec<Path.NumSpecies(); spec++)
+  //    for(int k=0; k<Path.kVecs.size(); k++)
+  //      cerr << s << " " << spec << " " << k << " " << Path.Rho_k(s, spec, k) << endl;
+
+  //for (int slice=slice1; slice<=slice2; slice+=skip) {
+  //  for (int species=0; species<Path.NumSpecies(); species++) {
+  //    Path.CalcRho_ks_Slow(slice, species);
+  //  }
   //}
+  //cerr << "RHO CALC SLOW" << endl;
+  //for(int s=0; s<Path.TotalNumSlices; s++)
+  //  for(int spec=0; spec<Path.NumSpecies(); spec++)
+  //    for(int k=0; k<Path.kVecs.size(); k++)
+  //      cerr << s << " " << spec << " " << k << " " << Path.Rho_k(s, spec, k) << endl;
   
   double kspace = 0.0;
   double real = 0.0;
@@ -261,6 +289,7 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
   //if(isEnergy)
     //out << kspace << " " << correction << " " << real << " " << realTest << endl;
 
+  //cerr << kspace << " " << correction << " " << real << " " << realTest << endl;
   double U = (kspace + real - correction);
   return (U);
 }

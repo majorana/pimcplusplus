@@ -58,9 +58,6 @@ void KineticRotorClass::Read(IOSectionClass& in)
   //tolrho.open("Rotor.rho.tolerance.dat");
   //overX.open("Rotor.overflow.exact.dat");
   //overS.open("Rotor.overflow.spline.dat");
-  tout.open("Rotor.theta.dat");
-  pout.open("Rotor.phi.dat");
-  chiout.open("Rotor.chi.dat");
   thist.resize(300);
   phist.resize(300);
   chist.resize(300);
@@ -449,17 +446,26 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
       //    }
       //  }
       //}
-      if(times == 500000) {
-        for(int n=0; n<300; n++) {
-          //tout << DT*(n+1) << " " << thist(n)/TotalZ << " " << double(thist(n))/times*sin(DT*(n+1)) << endl;
-          //pout << DP*(n+1) << " " << phist(n)/TotalZ << endl;
-          //chiout << DP*(n+1) << " " << chist(n)/TotalZ << endl;
-          tout << DT*(n+1) << " " << thist(n)/times << " " << double(thist(n))/times*sin(DT*(n+1)) << endl;
-          pout << DP*(n+1) << " " << phist(n)/times << endl;
-          chiout << DP*(n+1) << " " << chist(n)/times << endl;
-        }
-        exit(1);
-      }
+       
+
+      // write out angular distributions
+      //if(times%5000000==0) {
+      //  tout.open("Rotor.theta.dat");
+      //  pout.open("Rotor.phi.dat");
+      //  chiout.open("Rotor.chi.dat");
+      //  for(int n=0; n<300; n++) {
+      //    //tout << DT*(n+1) << " " << thist(n)/TotalZ << " " << double(thist(n))/times*sin(DT*(n+1)) << endl;
+      //    //pout << DP*(n+1) << " " << phist(n)/TotalZ << endl;
+      //    //chiout << DP*(n+1) << " " << chist(n)/TotalZ << endl;
+      //    tout << DT*(n+1) << " " << thist(n)/times << " " << double(thist(n))/times*sin(DT*(n+1)) << endl;
+      //    pout << DP*(n+1) << " " << phist(n)/times << endl;
+      //    chiout << DP*(n+1) << " " << chist(n)/times << endl;
+      //  }
+      //  tout.close();
+      //  pout.close();
+      //  chiout.close();
+      //  //exit(1);
+      //}
       
        
       //cout << theta << " " << phi+chi << " " << TotalE/TotalZ << " " << E/Z << endl;
@@ -478,7 +484,7 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
       TotalE += KE;
       //TotalXK += XKE;
       TotalZ += 1;
-      TotalK += KE;
+      TotalK += KE/z;
       //cerr << slice << " " << KE << " " << TotalK << endl;
       //if(abs(XKE) > maxRhoX) {
       //  overX << theta << " " << phi << " " << chi << " " << slice << " " << XKE << endl;
@@ -575,7 +581,6 @@ bool isEqualOpp(dVec u, dVec v)
 //    chi += 2*M_PI;
 //}
 
-// original version to use correct euler conventions!
 // map cartesian coordinates of two WATER molecules
 // to an angular displacement expressed in terms of Euler angles
 // Note this is specialized for a 3D rotor such as WATER!!
@@ -589,6 +594,11 @@ void RotorActionBaseClass::getAngles(int slice1, int mol1, int slice2, int mol2,
   dVec p1b = PathData.Path(slice1, mol1Members(2)) - PathData.Path(slice1, mol1Members(0));
   dVec p2a = PathData.Path(slice2, mol2Members(1)) - PathData.Path(slice2, mol2Members(0));
   dVec p2b = PathData.Path(slice2, mol2Members(2)) - PathData.Path(slice2, mol2Members(0));
+  // must impose minimum image for molecules at boundaries
+  PathData.Path.PutInBox(p1a);
+  PathData.Path.PutInBox(p1b);
+  PathData.Path.PutInBox(p2a);
+  PathData.Path.PutInBox(p2b);
 
   // compute bisector, norm, and in-plane unit vectors
   dVec b1 = GetBisector(p1a, p1b);
@@ -694,7 +704,14 @@ double FixedAxisRotorClass::SingleAction (int slice1, int slice2,
     for (int slice=slice1; slice < slice2;slice+=skip) {
       double theta, phi, chi;
       getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
-      double r = CalcRho(phi, theta, chi);
+      //if(slice==1) {
+      cerr << "GETANGLES " << theta << " " << phi << " " << chi << endl;
+      //  AltFixedAxis(slice, mol);
+      //}
+      
+      double r;
+      r = AltFixedAxis(slice, mol, phi, theta, chi);
+      r = CalcRho(phi, theta, chi);
       // need to check for negative rho; use noisy correction
       //if(r<0) {
       //  cout << "Got NEGATIVE rho " << r;
@@ -719,6 +736,7 @@ double FixedAxisRotorClass::d_dBeta (int slice1, int slice2, int level)
   //cerr << "Calculating FIXED AXIS energy over slices " << slice1 << " " << slice2 << " with " << M << " total slices" << endl;
   double TotalK = 0.0;
   double Z = 0.0;
+  double altFA = 0.;
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
   for (int molIndex=0; molIndex<PathData.Mol.NumMol(); molIndex++){
@@ -727,8 +745,12 @@ double FixedAxisRotorClass::d_dBeta (int slice1, int slice2, int level)
       double theta, phi, chi;
       getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
       //double r = CalcRho(phi, theta, chi);
+      double FAR = AltFixedAxis (slice, mol, phi, theta, chi);
       TotalK += CalcFAEnergy(phi, theta, chi);
-      //Z += r;
+      //cout << theta << " " << phi << " " << chi << " ";// << endl;
+      //altFA += AltFixedAxis(slice, mol);
+      ////Z += r;
+      //cout << altFA << " " << TotalK << endl;
     }
   }
   return (TotalK);
@@ -782,6 +804,124 @@ double FixedAxisRotorClass::CalcRho(double phi, double theta, double psi)
   double Q = D * exp(-SFA);
   //cerr << "C " << C << " D " << D << " SFA " << SFA << endl;
   return Q;
+}
+
+// testing
+double FixedAxisRotorClass::AltFixedAxis (int slice, int mol, double phi, double theta, double psi)
+{
+  double RotK = 0.0;
+  int skip = 1;
+  int ptcl1 = PathData.Mol.MembersOf(mol)(1);
+  int ptcl2 = PathData.Mol.MembersOf(mol)(2);
+  dVec P1 = PathData.Path(slice,ptcl1);
+  dVec P2 = PathData.Path(slice,ptcl2);
+  dVec P1prime = PathData.Path(slice+skip,ptcl1);
+  dVec P2prime = PathData.Path(slice+skip,ptcl2);
+  //cerr << "P1 " << P1 << endl;
+  //cerr << "P2 " << P2 << endl;
+  //cerr << "P1prime " << P1prime << endl;
+  //cerr << "P2prime " << P2prime << endl;
+  int Optcl = PathData.Mol(ptcl1);
+  assert(mol == Optcl);
+  dVec O = PathData.Path(slice,Optcl);
+  dVec Oprime = PathData.Path(slice+skip,Optcl);
+  //cerr << "identified COM " << Optcl << " with coords " << O << " and " << Oprime << endl;
+  // Redefine coordinates WRT COM
+  P1 -= O;
+  P2 -= O;
+  P1prime -= Oprime;
+  P2prime -= Oprime;
+  PathData.Path.PutInBox(P1);
+  PathData.Path.PutInBox(P1prime);
+  PathData.Path.PutInBox(P2);
+  PathData.Path.PutInBox(P2prime);
+  P1 = Normalize(P1);
+  P2 = Normalize(P2);
+  P1prime = Normalize(P1prime);
+  P2prime = Normalize(P2prime);
+  //cerr << "now WRT COM coords are " << endl;
+  //cerr << "P1 " << P1 << endl;
+  //cerr << "P2 " << P2 << endl;
+  //cerr << "P1prime " << P1prime << endl;
+  //cerr << "P2prime " << P2prime << endl;
+  // Calculate bisectors for each configuration
+  dVec n = Normalize(GetBisector(P1,P2));
+  dVec nprime = Normalize(GetBisector(P1prime,P2prime));
+  //cerr << "n " << n << endl;
+  //cerr << "nprime " << nprime << endl;
+  double vel_squared;
+  double prefactor;
+  //double theta, phi, psi;
+  dVec r;
+  if (isEqual(n, nprime)){
+    cerr << "EQUAL--------------------------------" << endl;
+    theta = 0.;
+    r = Normalize(cross(P1prime,P2prime));
+  }
+  else{
+// << "I DECIDED THEY WEREN'T EQUAL.  WHATEVER." << endl;
+    // Calculate the cross product - the axis of rotation
+    r = Normalize(cross(n,nprime));
+// << "r " << r << endl;
+    // Calculate polar angles and trig functions
+    // Calculate azimuthal angle
+    theta = GetAngle(n,nprime);
+  }
+  //cerr << "theta " << theta << endl;
+  // Calculate lever arms and kinetic energy contributions (mass contained in lambda factor)
+  //double alpha = HOH_half_angle;
+  double alpha = 0.912135247; // 52.26deg
+  double SinAlpha = sin(alpha);
+  double CosAlpha = cos(alpha);
+  dVec u1 = Normalize(P1 - Renormalize(n,CosAlpha));
+  dVec z1 = Normalize(cross(P1,n));
+  dVec u2 = Normalize(P2 - Renormalize(n,CosAlpha));
+  dVec z2 = Normalize(cross(P2,n));
+  dVec u1prime = Normalize(P1prime - Renormalize(nprime,CosAlpha));
+  dVec z1prime = Normalize(cross(P1prime,nprime));
+  dVec u2prime = Normalize(P2prime - Renormalize(nprime,CosAlpha));
+  dVec z2prime = Normalize(cross(P2prime,nprime));
+  double phi1 = GetAngle(z1,r);
+  double phi2 = GetAngle(z2,r);
+  double psi1 = GetAngle(z1prime,r);
+  double psi2 = GetAngle(z2prime,r);
+  //cerr << "P1 " << P1 << endl;
+  //cerr << "n " << n << endl;
+  //cerr << "P2 " << P2 << endl;
+  phi = phi1;
+  psi = psi1;
+  //cerr << "ALT " << theta << " " << phi << " " << psi << " ";//<< endl;
+
+  // Calculate quaternions
+  double chi = cos(theta/2)*cos((psi + phi)/2);
+  double eta = sin(theta/2)*cos((psi - phi)/2);
+  double xi = sin(theta/2)*sin((psi - phi)/2);
+  double zeta = cos(theta/2)*sin((psi + phi)/2);
+
+  // Calculate Fixed-Axis Approximation parameters
+  double gamma = 2*acos(chi);
+  double SinHalfGamma = sin(gamma/2);
+  // Rotation Moment Matrix
+  //double Lx = R*R;
+  //double Ly = R*R*CosAlpha*CosAlpha;
+  //double Lz = R*R*SinAlpha*SinAlpha;
+  double Lx = 0.027215;
+  double Ly = 0.078226;
+  double Lz = 0.04167;
+  // Axis of Rotation;
+  double ex = eta/SinHalfGamma;
+  double ey = -xi/SinHalfGamma;
+  double ez = zeta/SinHalfGamma;
+  // Rotation Matrix Elements <e|L|e>
+  double Mx = ex*Lx*ex;
+  double My = ey*Ly*ey;
+  double Mz = ez*Lz*ez;
+  double MSum = Mx + My + Mz;
+  vel_squared = MSum*gamma*gamma;
+  prefactor = gamma/(2*SinHalfGamma);
+  double GaussSum=0.0;
+  RotK += prefactor*exp(-vel_squared);
+  return (RotK);
 }
 
 double FixedAxisRotorClass::CalcFAEnergy(double phi, double theta, double psi)
