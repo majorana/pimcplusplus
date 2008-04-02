@@ -36,6 +36,9 @@ void BondStretch::Read(IOSectionClass &moveInput) {
 void MoleculeTranslate::Read(IOSectionClass &moveInput) {
   cerr << "  Molecule Translate read in" << endl;
   assert(moveInput.ReadVar("SetStep",Step));
+  doAllSlices = false;
+  if(moveInput.ReadVar("AllSlices",doAllSlices))
+    cerr << "Translate over all slices set to " << doAllSlices << endl;
 	MolMoveClass::Read(moveInput);
 }
 
@@ -97,29 +100,39 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 //	activeParticles.resize(PathData.Path.NumParticles());
 //	for(int x=0; x<activeParticles.size(); x++) activeParticles(x) = x;
 
-  // choose a time slice to move
   int numSlices = PathData.Path.TotalNumSlices;
-	int slice =0;
-  slice1 = slice;
-  slice2 = slice;
-  if(numSlices>1){
-    int P_max = numSlices - 1;
-    slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
-    //slice1 = slice;
-    //slice2 = slice;
-    slice1 = slice-1;
-    slice2 = slice+1;
+  if(doAllSlices) {
+    //cerr << "ALL SLICE SAMPLE" << endl;
+    slice1 = 0;
+    slice2 = numSlices - 1;
+	  for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
+    	dVec move = TranslateMolAll(PathData.Mol.MembersOf(MoveList(activeMol)),step); 
+    }
   }
+  else {
+    // choose a time slice to move
+	  int slice =0;
+    slice1 = slice;
+    slice2 = slice;
+    if(numSlices>1){
+      int P_max = numSlices - 1;
+      slice = (int)floor(P_max*PathData.Path.Random.Local()) + 1;
+      //slice1 = slice;
+      //slice2 = slice;
+      slice1 = slice-1;
+      slice2 = slice+1;
+    }
 
-	double move_mag_sq = 0.0;
-	for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
-		//cout << "  Before move: chose slice " << slice << endl;
-		//for(int i=0; i<activeParticles.size(); i++) cout << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
-  	dVec move = TranslateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)),step); 
-		//cout << "  After move: of " << move << endl;
-		//for(int i=0; i<activeParticles.size(); i++) cout << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
-  	move_mag_sq += move(0)*move(0) + move(1)*move(1) + move(2)*move(2);
-	}
+	  double move_mag_sq = 0.0;
+	  for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
+	  	//cout << "  Before move: chose slice " << slice << endl;
+	  	//for(int i=0; i<activeParticles.size(); i++) cout << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
+    	dVec move = TranslateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)),step); 
+	  	//cout << "  After move: of " << move << endl;
+	  	//for(int i=0; i<activeParticles.size(); i++) cout << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
+    	move_mag_sq += move(0)*move(0) + move(1)*move(1) + move(2)*move(2);
+	  }
+  }
 
   //// this block is a hack to output configurations
   //// in a format for QBox
@@ -168,9 +181,9 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
 
   if (numMoves%10000 == 0 && numMoves>0){
     cerr << numMoves << " moves; current translate ratio is " << double(numAccepted)/numMoves << " with step size " << step << endl;
-    double avg = sqrt(move_mag_sq)/numAccepted;
-    double diff = move_mag_sq/numMoves;
-    cerr << "TRANSLATE diffusion value is " << diff << " avg step is " << avg << endl;
+    //double avg = sqrt(move_mag_sq)/numAccepted;
+    //double diff = move_mag_sq/numMoves;
+    //cerr << "TRANSLATE diffusion value is " << diff << " avg step is " << avg << endl;
   }
   numMoves++;
 
@@ -238,12 +251,12 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	}
 
   Array<int,1> ActiveSlices;
-  int startS, endS;
+  //int startS, endS;
 	int numSlices = PathData.Path.TotalNumSlices;
   if(doAllSlices) {
     //cerr << "ALL SLICE SAMPLE" << endl;
-    startS = 1;
-    endS = numSlices - 1;
+    //startS = 1;
+    //endS = numSlices - 1;
     slice1 = 0;
     slice2 = numSlices - 1;
 	  for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
@@ -270,9 +283,38 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	    	//for(int i=0; i<activeParticles.size(); i++) activeParticles(i) = MolMembers(MoveList(activeMol))(i);
 	    	
 	    	double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
-	    	//RotateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
+        //cin >> theta;
+        //cout << " theta " << theta << endl;
+        //// ********************************************
+        //Array<int,1> mol1Members;
+        //int slice1 = 1;
+        //int slice2 = 2;
+        //PathData.Mol.MembersOf(mol1Members, 0);
+        //dVec p1a = PathData.Path(slice1, mol1Members(1)) - PathData.Path(slice1, mol1Members(0));
+        //dVec p1b = PathData.Path(slice1, mol1Members(2)) - PathData.Path(slice1, mol1Members(0));
+        //dVec p2a = PathData.Path(slice2, mol1Members(1)) - PathData.Path(slice2, mol1Members(0));
+        //dVec p2b = PathData.Path(slice2, mol1Members(2)) - PathData.Path(slice2, mol1Members(0));
+
+        //// compute bisector, norm, and in-plane unit vectors
+        //dVec b1 = GetBisector(p1a, p1b);
+        //dVec n1 = Normalize(cross(p1a, p1b));
+        //dVec u1 = Normalize(cross(b1, n1));
+        //dVec b2 = GetBisector(p2a, p2b);
+        //dVec n2 = Normalize(cross(p2a, p2b));
+        //dVec u2 = Normalize(cross(b2, n2));
+        //RotateMol(slice, PathData.Mol.MembersOf(MoveList(activeMol)), n1, theta);
+        //cerr << "ROTATE " << theta << " about " << n1 << endl;
+        //// **********************************************
+	    	RotateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
 	    	//RotateMolXYZ(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
-	    	RotateMolXYZ(slice,PathData.Mol.MembersOf(MoveList(activeMol)), theta);
+        //dVec axis;
+        //cin >> axis(0);
+        //cin >> axis(1);
+        //cin >> axis(2);
+        //cout << " A_x " << axis(0) << endl;
+        //cout << " A_y " << axis(1) << endl;
+        //cout << " A_z " << axis(2) << endl;
+	    	//RotateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)), axis, theta);
     }
   }
 
@@ -432,15 +474,19 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
     for(int a=0; a<anglePairs.size(); a++){
       dVec v1 = PathData.Path(slice,anglePairs[a][0]) - PathData.Path(slice,activeMol);
       dVec v2 = PathData.Path(slice,anglePairs[a][1]) - PathData.Path(slice,activeMol);
+      Path.PutInBox(v1);
+      Path.PutInBox(v2);
       double theta0 = GetAngle(v1,v2);
       double dtheta = 2*s*theta0*(PathData.Path.Random.Local()-0.5);
       //cerr << "S going to stretch angle " << theta0*180/M_PI << " by dtheta which is in deg " << dtheta*180/M_PI << endl;
       dVec u = crossprod(v1,v2);
       StressAngle(slice, anglePairs[a][1],Normalize(u),dtheta);
 
-      v1 = PathData.Path(slice,anglePairs[a][0]) - PathData.Path(slice,activeMol);
-      v2 = PathData.Path(slice,anglePairs[a][1]) - PathData.Path(slice,activeMol);
-      double afterTheta = GetAngle(v1,v2);
+      //v1 = PathData.Path(slice,anglePairs[a][0]) - PathData.Path(slice,activeMol);
+      //v2 = PathData.Path(slice,anglePairs[a][1]) - PathData.Path(slice,activeMol);
+      //Path.PutInBox(v1);
+      //Path.PutInBox(v2);
+      //double afterTheta = GetAngle(v1,v2);
       //cerr << "S and after stress angle is " << afterTheta << " in deg " << afterTheta*180/M_PI << endl;
 	  }
   }

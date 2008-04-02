@@ -74,6 +74,7 @@ class BondStretch : public MolMoveClass
 
 class MoleculeTranslate : public MolMoveClass
 {
+  bool doAllSlices;
 	int counter;
  	public:
   double Step;

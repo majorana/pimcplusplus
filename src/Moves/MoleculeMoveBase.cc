@@ -88,9 +88,16 @@ void MolMoveClass::Read (IOSectionClass &in){
 	for(int a=0; a<numActionsToRead; a++){
     cerr << "Read in actions " << ActionList << endl;
 		string setAction = ActionList(a+startIndex);
-    ActionBaseClass* newAction = PathData.Actions.GetAction(setAction);
-    Actions.push_back(newAction);
-    cerr << "  Added action with label " << setAction << " and address " << newAction << endl;
+    // hack: needs to be integrated into new scheme!
+    if(setAction == "ShortRange") {
+      cerr << "TEMP HACK: ADDING ACTIONS.SHORTRANGE TO MOLECULEMOVEBASE.ACTIONS" << endl;
+      Actions.push_back(&PathData.Actions.ShortRange);
+    }
+    else {
+      ActionBaseClass* newAction = PathData.Actions.GetAction(setAction);
+      Actions.push_back(newAction);
+      cerr << "  Added action with label " << setAction << " and address " << newAction << endl;
+    }
 
     // deprecated actions readin
 	  //if(setAction == "MoleculeInteractions"){
@@ -189,9 +196,17 @@ dVec MolMoveClass::TranslateMol(int slice, Array<int,1>& activePtcls, dVec trans
 dVec MolMoveClass::TranslateMol(int slice, Array<int,1>& activePtcls, double epsilon){
   dVec translate;
   for(int i = 0; i<3; i++) translate[i] = (PathData.Path.Random.Local()-0.5)*2*epsilon;	
-//cerr << "  translate by " << translate << endl;
+  //cin >> translate(0);
+  //cin >> translate(1);
+  //cin >> translate(2);
+  //cout << "trans_x " << translate(0) <<endl;
+  //cout << "trans_y " << translate(1) <<endl;
+  //cout << "trans_z " << translate(2) <<endl;
+  //cerr << "  translate by " << translate << endl;
   for(int ptcl = 0; ptcl<activePtcls.size(); ptcl++){
     dVec newP = PathData.Path(slice,activePtcls(ptcl)) + translate;
+    //cerr << "  " << ptcl << " " << activePtcls(ptcl) << " " << newP;// << endl;
+    //cerr << newP << endl;
     PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
   }
 	///////////////////// hackity
@@ -211,6 +226,21 @@ dVec MolMoveClass::TranslateMol(int slice, Array<int,1>& activePtcls, double eps
 	return translate;
 }
 
+// Generates a translation vector and moves all
+// particles in the molecule over a range of slices INCLUSIVE
+dVec MolMoveClass::TranslateMolAll(Array<int,1>& activePtcls, double epsilon){
+  dVec translate;
+  for(int i = 0; i<3; i++) translate[i] = (PathData.Path.Random.Local()-0.5)*2*epsilon;	
+  int numS = PathData.Path.TotalNumSlices;
+  for(int slice=0; slice<=numS; slice++) {
+    for(int ptcl = 0; ptcl<activePtcls.size(); ptcl++){
+      dVec newP = PathData.Path(slice,activePtcls(ptcl)) + translate;
+      PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
+    }
+  }
+	return translate;
+}
+
 void MolMoveClass::TranslatePtcl(int slice, int ptcl, double Sigma){
     dVec translate;
     PathData.Path.Random.CommonGaussianVec (Sigma, translate);
@@ -222,6 +252,7 @@ void MolMoveClass::TranslatePtcl(int slice, int ptcl, double Sigma){
 // This will orchestrate the rotation of molecule mol
 // about a specified axis, axis, by an angle theta
 void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, double theta){
+  //cerr << "RotateMol slice " << slice << " mol " << activePtcls << " about " << axis << " theta " << theta << endl;
 	int mol = activePtcls(0);
   axis = Normalize(axis);
   // find COM vector
@@ -229,9 +260,12 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, d
 	// nonsense to rotate the ptcl at the origin; "O", so loop starts from 1 not 0
   for(int ptcl = 1; ptcl<activePtcls.size(); ptcl++){
     dVec P = PathData.Path(slice, activePtcls(ptcl)) - O;
+    //cerr << "  " << ptcl << " " << activePtcls(ptcl) << " old " << P;
     PathData.Path.PutInBox(P);
+    //cerr << " putinbox " << P;
     dVec newP = ArbitraryRotate(axis, P, theta) + O;
     PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
+    //cerr << " new " << newP << endl;
   }
 }
 
@@ -250,6 +284,7 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, double theta)
   if((PathData.Path.Random.Local()-0.5)<0)
     z *= -1;
   //cout << x << " " << y << " " << z << endl;
+  assert(abs(x*x + y*y + z*z - 1) < 1e-5);
   axis(0) = x; axis(1) = y; axis(2) = z;
   RotateMol(slice, activePtcls, axis, theta);
 }
@@ -302,11 +337,13 @@ void MolMoveClass::RotateMolXYZAll(Array<int,1>& activePtcls, double theta){
   int numS = PathData.Path.TotalNumSlices;
 	int mol = activePtcls(0);
   // find COM vector
-  dVec COM(0., 0., 0.);
-  int norm = 0;
-  for(int slice=0; slice<numS; slice++) {
-    dVec O = GetCOM(slice, mol);
-    COM += O;
+  int norm = 1;
+  dVec O_0 = PathData.Path(0, mol);
+  dVec COM = O_0;
+  for(int slice=1; slice<numS; slice++) {
+    dVec O = GetCOM(slice, mol) - O_0;
+    PathData.Path.PutInBox(O);
+    COM += O + O_0;
     norm += 1;
     //cerr << slice << " " << O << " " << COM << endl;
   }
@@ -316,6 +353,7 @@ void MolMoveClass::RotateMolXYZAll(Array<int,1>& activePtcls, double theta){
       dVec P = PathData.Path(slice, activePtcls(ptcl)) - COM;
       PathData.Path.PutInBox(P);
       dVec newP = RotateXYZ(P, x, y, z, theta) + COM;
+      PathData.Path.PutInBox(newP);
       PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
     }
   }
