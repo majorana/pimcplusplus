@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 check_PROGRAMS = TestFitting 
 bin_PROGRAMS   = LiFit VinetFit VinetFit2
 

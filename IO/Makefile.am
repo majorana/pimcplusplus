@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 check_PROGRAMS = TestIO
 #check_PROGRAMS = TestHDF5 TestIO TestXML GrabRho
 

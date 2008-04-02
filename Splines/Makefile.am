@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 check_PROGRAMS =  TestFastCubic TestFastMultiCubic TestBicubic TestComplexMultiTricubicSpline \
                   TestGrid TestMultiTricubicSpline TestMyTricubic TestPeriodic TestQuintic    \
                   TestCubicBspline TestTricubicBspline TestBlips TestNonuniform               \

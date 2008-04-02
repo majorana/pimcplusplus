@@ -243,49 +243,49 @@ inline void warning(char* m){
 }
 
 template<class T> inline 
-void warning(char* m, const T& t){
+void warning(const char* m, const T& t){
   ostringstream ss;
   ss << m << " " << t;
   WriteWarning(ss);
 }
 
 template<class T, class U> inline
-void warning(char* m, const T& t, const U& u){
+void warning(const char* m, const T& t, const U& u){
   ostringstream ss;
   ss << m << " " << t << " " << u;
   WriteWarning(ss);
 }
 
 template<class T, class U, class V> inline
-void warning(char* m, const T& t, const U& u, const V& v){
+void warning(const char* m, const T& t, const U& u, const V& v){
   ostringstream ss;
   ss << m << " " << t << " " << u << " " << v;
   WriteWarning(ss);
 }
 
 template<class T, class U, class V, class W> inline
-void warning(char* m, const T& t, const U& u, const V& v, const W& w){
+void warning(const char* m, const T& t, const U& u, const V& v, const W& w){
   ostringstream ss;
   ss << m << " " << t << " " << u << " " << v << " " << w;
   WriteWarning(ss);
 }
 
 template<class T, class U, class V, class W, class X> inline
-void warning(char* m, const T& t, const U& u, const V& v, const W& w, const X& x){
+void warning(const char* m, const T& t, const U& u, const V& v, const W& w, const X& x){
   ostringstream ss;
   ss << m << " " << t << " " << u << " " << v << " " << w << " " << x;
   WriteWarning(ss);
 }
 
 template<class T, class U, class V, class W, class X, class Y> inline
-void warning(char* m, const T& t, const U& u, const V& v, const W& w, const X& x, const Y& y){
+void warning(const char* m, const T& t, const U& u, const V& v, const W& w, const X& x, const Y& y){
   ostringstream ss;
   ss << m << " " << t << " " << u << " " << v << " " << w << " " << x << " " << y;
   WriteWarning(ss);
 }
 
 template<class T, class U, class V, class W, class X, class Y, class Z> inline
-void warning(char* m, const T& t, const U& u, const V& v, const W& w, const X& x, const Y& y, const Z& z){
+void warning(const char* m, const T& t, const U& u, const V& v, const W& w, const X& x, const Y& y, const Z& z){
   ostringstream ss;
   ss << m << " " << t << " " << u << " " << v << " " << w << " " << x << " " << y << " " << z;
   WriteWarning(ss);

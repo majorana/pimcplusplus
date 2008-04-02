@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 check_PROGRAMS = TestHermite TestLegendre TestPoly TestPolySet
 
 TestHermite_SOURCES = TestHermite.cc

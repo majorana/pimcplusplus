@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 check_PROGRAMS = TestIntegrate TestHermite
 
 TestIntegrate_SOURCES = TestIntegrate.cc

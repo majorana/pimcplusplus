@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 check_PROGRAMS = TestPW2 BandStructure MPIBandStructure TestPWMPI TestLDA
 
 TestPW2_SOURCES = TestPW2.cc

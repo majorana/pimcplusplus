@@ -16,7 +16,7 @@ AX_CC_MAXOPT
 
 AC_MSG_CHECKING([optimal compiler flags])
 AC_MSG_RESULT([${CXXFLAGS}])
-CXXFLAGS="$CXXFLAGS -pthread"
+#CXXFLAGS="$CXXFLAGS -pthread"
 CFLAGS="$CFLAGS -std=c99 -g"
 
 
@@ -180,6 +180,14 @@ if test "x$fftw3_ok" = "xno"; then
 fi
 
 
+# Check if we want static-only binaries
+AC_ARG_ENABLE(all-static, AC_HELP_STRING([--enable-all-static], [build static binaries (default=no)]))
+if test "$enable_all_static" = "yes"; then
+  ALL_STATIC="-all-static"
+else
+  ALL_STATIC=""
+fi
+AC_SUBST(ALL_STATIC)
 
 # Checks if we want MPI support
 AC_ARG_ENABLE(mpi,    [  --enable-mpi             enable MPI support (default=no)])

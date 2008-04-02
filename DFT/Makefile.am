@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 noinst_LTLIBRARIES = libdft.la
 libdft_la_SOURCES = ExCorr.f        \
                     Functionals.cc  \

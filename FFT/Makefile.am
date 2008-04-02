@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 check_PROGRAMS = TestFFT
 
 TestFFT_SOURCES = TestFFT.cc

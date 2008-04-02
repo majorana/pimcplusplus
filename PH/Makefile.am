@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 check_PROGRAMS = TestkSpacePH MakeGeneralPot TestNLPP
 
 TestkSpacePH_SOURCES = TestkSpacePH.cc

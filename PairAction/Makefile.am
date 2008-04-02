@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 check_PROGRAMS = TestGradients TestHDF
 
 TestGradients_SOURCES = TestGradients.cc
