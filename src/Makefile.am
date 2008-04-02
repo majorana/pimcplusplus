@@ -1,3 +1,5 @@
+AM_LDFLAGS = $(ALL_STATIC)
+
 if WANT_PATHVIS
    MAYBE_PATHVIS = Visual
 endif

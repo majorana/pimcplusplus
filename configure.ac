@@ -82,8 +82,18 @@ case "${host_cpu}" in
        FFLAGS="-O3 $TUNEOPT -g";;
 esac
 
-CXXFLAGS="$CXXFLAGS -g -pthread"
+#CXXFLAGS="$CXXFLAGS -g -pthread"
+CXX_FLAGS="$CXXFLAGS -g"
 FFLAGS="$FFLAGS -g"
+
+# Check if we want static-only binaries
+AC_ARG_ENABLE(all-static, AC_HELP_STRING([--enable-all-static], [build static binaries (default=no)]))
+if test "$enable_all_static" = "yes"; then
+  ALL_STATIC="-all-static"
+else
+  ALL_STATIC=""
+fi
+AC_SUBST(ALL_STATIC)
 
 # Checks if we want MPI support
 AC_ARG_ENABLE(mpi,    [  --enable-mpi            enable MPI support (default=no)])
