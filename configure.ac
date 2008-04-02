@@ -199,7 +199,7 @@ AC_ARG_WITH(mpi-run,  [  --with-mpi-run=cmd        specify MPI run command (defa
 if test "$enable_mpi" = "yes"; then
     MPI_DEF="-DUSE_MPI"
     if test "X$with_mpi_libs" = "X"; then
-        MPI_LIBS="-lmpi"
+        MPI_LIBS=""
     else
         MPI_LIBS="$with_mpi_libs"
     fi
