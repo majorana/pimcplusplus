@@ -181,6 +181,9 @@ public:
   /////////////////////////////////
   inline void DistDisp (int slice, int ptcl1, int ptcl2,
 			double &dist, dVec &disp);
+  inline void DistDispFast (int slice, int ptcl1, int ptcl2,
+			    double &dist, dVec &disp);
+
   inline void DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
 			double &distA, double &distB,dVec &dispA, dVec &dispB);
   void DistDispFast (int sliceA, int sliceB, int ptcl1, int ptcl2,
@@ -663,6 +666,23 @@ PathClass::DistDisp (int slice, int ptcl1, int ptcl2,
   }
 #endif
 }
+
+inline void 
+PathClass::DistDispFast (int slice, int ptcl1, int ptcl2,
+			 double &dist, dVec &disp)
+{
+  disp = Path(slice, ptcl2) -Path(slice, ptcl1);
+  dVec boxOver2=GetBox()/2;
+  dVec box=GetBox();
+  for (int dim=0;dim<NDIM;dim++){
+    if (disp[dim]>boxOver2[dim])
+      disp[dim]-=box[dim];
+    else if (disp[dim]<-boxOver2[dim])
+      disp[dim]+=box[dim];
+  }
+  dist = sqrt(dot(disp,disp));
+}
+
 
 inline void 
 PathClass::DistDisp (int sliceA, int sliceB, int ptcl1, int ptcl2,
