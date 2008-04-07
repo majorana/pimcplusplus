@@ -87,6 +87,30 @@ Conj21(complex<double> a)
   return b;
 }
 
+
+void 
+HexaticClass::CalculateCentroid_parallel()
+{
+
+
+  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+    dVec centroid;
+    dVec zeroVec=PathData.Path(0,ptcl);
+    PathData.Path.Communicator.Broadcast(0,zeroVec);
+    dVec localCentroid=0.0;
+    for (int slice=0;slice<PathData.Path.NumTimeSlices()-1;slice++){
+      dVec disp=PathData.Path.MinImageDisp(zeroVec,PathData.Path(slice,ptcl));
+      localCentroid += disp;
+    }
+    for (int dim=0;dim<NDIM;dim++)
+      centroid(dim)=PathData.Path.Communicator.Sum(localCentroid(dim));
+    centroid = centroid / (PathData.Path.TotalNumSlices);
+    centroid = centroid + zeroVec;
+    CentroidPos(ptcl)=centroid;
+  }  
+}
+
+
 void
 HexaticClass::Accumulate_old()
 {
@@ -142,24 +166,13 @@ HexaticClass::Accumulate()
     Accumulate_old();
     return;
   }
-  Array<dVec,1>  centroidPos(PathData.Path.NumParticles());
+  CalculateCentroid_parallel();
   for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
-    dVec centroid=0.0;
-    for (int slice=1;slice<PathData.Path.NumTimeSlices()-1;slice++){
-      dVec disp=PathData.Path.Velocity(0,slice,ptcl);
-      centroid += disp;
-    }
-    centroid = centroid / (PathData.Path.NumTimeSlices()-1);
-    centroid = centroid + PathData.Path(0,ptcl);
-    centroidPos(ptcl)=centroid;
-  }
-  //  PathData.MoveJoin(PathData.NumTimeSlices()-1);
-  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
-    ParticleOrder(ptcl)=OrderParamater(centroidPos,ptcl);
+    ParticleOrder(ptcl)=OrderParamater(CentroidPos,ptcl);
   }
   for (int ptcl1=0;ptcl1<PathData.Path.NumParticles();ptcl1++){
     for (int ptcl2=0;ptcl2<PathData.Path.NumParticles();ptcl2++){
-      dVec disp=centroidPos(ptcl2)-centroidPos(ptcl1);
+      dVec disp=CentroidPos(ptcl2)-CentroidPos(ptcl1);
       PathData.Path.PutInBox(disp);
       double dist=sqrt(dot(disp,disp));
       if (dist<grid.End){
@@ -265,6 +278,7 @@ HexaticClass::Read (IOSectionClass &in)
   cerr<<"CONJ: "<<Conj21(test)<<endl;
   NumSamples=0;
   ParticleOrder.resize(PathData.Path.NumParticles());
+  CentroidPos.resize(PathData.Path.NumParticles());
   ///It's probably important that the grid is the same grid that is in
   ///the pair correlation function. Not sure how to authenticate this.
   ReadGrid(in);

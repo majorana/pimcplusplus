@@ -217,6 +217,7 @@ TimeLindenmanClass::Read (IOSectionClass &in)
   ///It's probably important that the grid is the same grid that is in
   ///the pair correlation function. Not sure how to authenticate this.
   ReadGrid(in);
+
   if (!in.ReadVar("Centroid",Centroid))
       Centroid=false;
   ObservableClass::Read(in);
