@@ -123,6 +123,15 @@ esac
 CXXFLAGS="$CXXFLAGS -g"
 
 # Check python stuff for IO wrappers
+AC_ARG_ENABLE(pthread, AC_HELP_STRING([--enable-pthread], [compile with -pthread]))
+if test "x$enable_pthread" = "xyes"; then
+   CXXFLAGS="$CXXFLAGS -pthread"
+   PTHREAD_FLAG="-pthread"
+else
+   PTHREAD_FLAG=""
+fi
+AC_SUBST(PTHREAD_FLAG)
+
 AC_ARG_ENABLE(python,      [  --enable-python         enable IO python wrappers (default=yes)], ,enable_python=yes)
 AM_CONDITIONAL([WANT_PYTHON_WRAPPERS], [test "$enable_python" = "yes"])
 if test "x$enable_python" = "xyes"; then
