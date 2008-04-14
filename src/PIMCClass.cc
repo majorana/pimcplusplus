@@ -263,6 +263,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables);
     else if (observeType=="TimeLindenman")
       tempObs= new TimeLindenmanClass(PathData,OutFile);
+    else if (observeType=="TimeHexatic")
+      tempObs= new TimeHexaticClass(PathData,OutFile);
     else if (observeType=="Angular")
       tempObs = new AngularClass(PathData,OutFile);
     else if (observeType=="PathDump")
