@@ -167,7 +167,6 @@ TimeHexaticClass::Accumulate()
 	complex<double> val = histVals.first;
 	if (dist<grid.End && dist>1.0){
 	  int index=grid.ReverseMap(dist);      
-	  cerr<<"index is "<<index<<endl;
 	  TimeDisp(index,i)+=val;
 	  gofrDisp(index,i)+=1;
 	}
