@@ -66,6 +66,8 @@ libobservables_la_SOURCES  =     \
     Time.h                       \
     TimeLindenman.cc             \
     TimeLindenman.h              \
+    TimeHexatic.cc             \
+    TimeHexatic.h              \
     VacancyLocationNearby.h            \
     VacancyLocationNearby.cc            \
     VacancyLocation.h            \

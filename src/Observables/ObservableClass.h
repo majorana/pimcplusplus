@@ -43,6 +43,7 @@
 #include "SuperfluidFractionPerLayer.h"
 #include "Time.h"
 #include "TimeLindenman.h"
+#include "TimeHexatic.h"
 #include "VacancyLocation.h"
 //#include "VacancyLocation2.h"
 #include "VacancyLocationNearby.h"
