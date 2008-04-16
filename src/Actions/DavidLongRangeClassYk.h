@@ -44,15 +44,19 @@ protected:
   //  int Level, ki;
 
   ///The values of the action will be uk*\rho_k*\rho_{-k}
-  Array<double,1> uk;
-  Array<double,1> duk;
+  //Array<double,1> uk;
+  //Array<double,1> duk;
+  Array<double,2> uk;
+  Array<double,2> duk;
 
 public:
-  Array<double,1> Vlong_k;
+  //Array<double,1> Vlong_k;
+  Array<double,2> Vlong_k;
   // void Init(IOSectionClass &in);
   void Read (IOSectionClass &in);
   void ReadYk();
   void BuildRPA_SingleSpecies();
+  void Build_MultipleSpecies();
   double V(int slice1,int slice2,int level);
 
   double SingleAction (int slice1, int slice2, 

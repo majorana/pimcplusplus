@@ -17,6 +17,7 @@
 #include <Common/MPI/Communication.h>
 #include "DavidLongRangeClassYk.h"
 #include "../PathDataClass.h"
+#include <set>
 
 bool fequals(double a,double b,double tol)
 {
@@ -29,6 +30,50 @@ bool vecEquals(dVec &a, dVec &b,double tol)
   for (int dim=0;dim<NDIM;dim++)
     equals= equals && fequals(a[dim],b[dim],tol);
   return equals;
+}
+
+void DavidLongRangeClassYk::Build_MultipleSpecies()
+{
+  //int speciesNum=0;
+  double vol=1.0;
+  for (int dim=0;dim<NDIM;dim++)
+    vol*=Path.GetBox()[dim];
+  for(int speciesNum=0; speciesNum<PairArray.size(); speciesNum++) {
+    DavidPAClass &pa(*(DavidPAClass*)PairArray(speciesNum));
+    int ncomps=Path.Species(speciesNum).NumParticles;
+    double lambda=Path.Species(speciesNum).lambda;
+    //cerr<<"lambda is "<<lambda<<endl;
+    //cerr<<"ncomps is "<<ncomps<<endl;
+    //cerr<<"Vol is "<<vol<<endl;
+    for (int i=0;i<pa.kVals.size();i++){
+      double k=pa.kVals(i);
+      double arg=1.0+ncomps*2.0*pa.uk_long(i)/(lambda*k*k*vol);
+      double theta=0.5*k*k*lambda*Path.tau;
+      double q;
+      double s;
+      double tn;
+      if (arg<0){
+        q=sqrt(-arg);
+        tn=tan(q*theta);
+        s=q*(1-q*tn)/(q+tn);
+      }
+      else if (arg==0)
+        s=1.0/(1.0+theta);
+      else {
+        q=sqrt(arg);
+        tn=tanh(theta*q);
+        s=q*(1.0+q*tn)/(q+tn);
+      }
+      for (int j=0;j<Path.kVecs.size();j++){
+        if (fequals(sqrt(blitz::dot(Path.kVecs(j),Path.kVecs(j))),k,1e-10)){
+          Vlong_k(speciesNum, j)=pa.uk_long(i)/(vol);
+          uk(speciesNum, j)=Vlong_k(speciesNum, j)*Path.tau;//(-1.0+s)/ncomps;
+          duk(speciesNum, j)=Vlong_k(speciesNum, j);//pa.uk_long(i)/(vol)-lambda*k*k*uk(j)*((1.0+0.5*ncomps*uk(j)));
+          cerr<<"VLONG IS "<<Vlong_k(j)<<endl;
+        }
+      }
+    }
+  }
 }
 
 void DavidLongRangeClassYk::BuildRPA_SingleSpecies()
@@ -64,16 +109,16 @@ void DavidLongRangeClassYk::BuildRPA_SingleSpecies()
     }
     for (int j=0;j<Path.kVecs.size();j++){
       if (fequals(sqrt(blitz::dot(Path.kVecs(j),Path.kVecs(j))),k,1e-10)){
-	uk(j)=(-1.0+s)/ncomps;
-	duk(j)=pa.uk_long(i)/(vol)-lambda*k*k*uk(j)*((1.0+0.5*ncomps*uk(j)));
-	Vlong_k(j)=pa.uk_long(i)/(vol);
-	cerr<<"VLONG IS "<<Vlong_k(j)<<endl;
+	uk(speciesNum, j)=(-1.0+s)/ncomps;
+	duk(speciesNum, j)=pa.uk_long(i)/(vol)-lambda*k*k*uk(speciesNum, j)*((1.0+0.5*ncomps*uk(speciesNum, j)));
+	Vlong_k(speciesNum, j)=pa.uk_long(i)/(vol);
+	cerr<<"VLONG IS "<<Vlong_k(speciesNum, j)<<endl;
       }
     }
   }
   cerr<<"I have built the rpa"<<endl;
-  for (int i=0;i<uk.size();i++)
-    cerr<<"KVecs: "<<sqrt(blitz::dot(Path.kVecs(i),Path.kVecs(i)))<<" "<<uk(i)<<" "<<duk(i)<<endl;
+  for (int i=0;i<uk.extent(1);i++)
+    cerr<<"KVecs: "<<sqrt(blitz::dot(Path.kVecs(i),Path.kVecs(i)))<<" "<<uk(speciesNum, i)<<" "<<duk(speciesNum, i)<<endl;
 }
 
 
@@ -86,10 +131,14 @@ void DavidLongRangeClassYk::ReadYk()
     assert(pa.LongRangeBox(dim)==Path.GetBox()[dim]);
   assert(pa.LongRangeMass1==pa.LongRangeMass2);
   assert(pa.LongRangeMass1==Path.Species(0).lambda);
-  uk.resize(Path.kVecs.size());
-  duk.resize(Path.kVecs.size());
-  Vlong_k.resize(Path.kVecs.size());
-  BuildRPA_SingleSpecies();  
+  uk.resize(PairArray.size(), Path.kVecs.size());
+  duk.resize(PairArray.size(), Path.kVecs.size());
+  Vlong_k.resize(PairArray.size(), Path.kVecs.size());
+  if(PairArray.size()==1)
+    BuildRPA_SingleSpecies();  
+  else {
+
+  }
 
 //   uk=-999;
 //   for (int i=0;i<Path.kVals.size();i++){
@@ -177,7 +226,14 @@ DavidLongRangeClassYk::SingleAction (int slice1, int slice2,
 				   int level)
 
 {
-  int species=0;
+  //int species=0;
+  set<int> speciesList;
+  for(int p=0; p<activeParticles.size(); p++) {
+    int ptcl = activeParticles(p);
+    int spec = Path.ParticleSpeciesNum(ptcl);
+    speciesList.insert(speciesList.begin(), spec);
+  }
+
   if (GetMode() == NEWMODE)
     Path.UpdateRho_ks(slice1, slice2, activeParticles, level);
 
@@ -189,8 +245,11 @@ DavidLongRangeClassYk::SingleAction (int slice1, int slice2,
 	factor = 0.5;
       else
 	factor = 1.0;
-      double rhok2 = mag2(Path.Rho_k(slice,species,ki));
-      total +=  factor*rhok2 * uk(ki);
+      for(set<int>::iterator it = speciesList.begin(); it!=speciesList.end(); it++) {
+        int species = *it;
+        double rhok2 = mag2(Path.Rho_k(slice,species,ki));
+        total +=  factor*rhok2 * uk(species, ki);
+      }
     }
   }
 
@@ -213,7 +272,7 @@ double DavidLongRangeClassYk::d_dBeta (int slice1, int slice2,  int level)
       Path.CalcRho_ks_Fast(slice,species);
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
-	sliceTotal +=  factor*rhok2 * duk(ki);
+	sliceTotal +=  factor*rhok2 * duk(species, ki);
       }
     }
     total += sliceTotal;
@@ -238,7 +297,7 @@ double DavidLongRangeClassYk::V (int slice1, int slice2,  int level)
       Path.CalcRho_ks_Fast(slice,species);
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	double rhok2 = mag2(Path.Rho_k(slice,species,ki));
-	sliceTotal +=  factor*rhok2 * Vlong_k(ki);
+	sliceTotal +=  factor*rhok2 * Vlong_k(species, ki);
       }
     }
     total += sliceTotal;
