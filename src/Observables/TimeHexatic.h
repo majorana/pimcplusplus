@@ -35,7 +35,7 @@ protected:
   void ReadGrid(IOSectionClass &in);
   void BuildDistanceTable(int time1, int time2);
   ///  complex<double> OrderParamater(int slice,int ptcl);
-  complex<double> OrderParamater(Array<dVec,1> centroidPos,int ptcl);
+  complex<double> OrderParamater(Array<dVec,1> &centroidPos,int ptcl);
   ///  void Accumulate_old();
   LinearGrid grid;
   void ProduceTimeMatrix(int slice);
@@ -44,7 +44,7 @@ protected:
   ObservableVecDouble2 TimeDispVar;
   ObservableVecDouble1 NumStepVar;
   Array<complex<double> ,2> TimeDisp; // r x time
-  Array<double ,2> gofrDisp; // r x time
+  Array<double ,2> gofrDisp; // r x time 
   Array<double ,2> TimeDisp_double;
   int TotalCurrentData;
   bool FullyWrapped;
@@ -74,7 +74,7 @@ public:
     gofrDispVar("gofr",IOSection,pathData.Path.Communicator),
     NumStepVar("NumStep",IOSection,pathData.Path.Communicator),
     DistCutoff(2.56), CurrTime(0),TotalCurrentData(-1),FullyWrapped(false),
-    q(6.0)
+    q(6)
     {
 
     }

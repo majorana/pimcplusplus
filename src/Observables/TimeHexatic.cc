@@ -26,7 +26,7 @@ double TimeHexaticClass::unit2angle(double x,double y)
 }
 
 complex<double>
-TimeHexaticClass::OrderParamater(Array<dVec,1> centroidPos,int ptcl)
+TimeHexaticClass::OrderParamater(Array<dVec,1> &centroidPos,int ptcl)
 {
   complex<double> op=0.0;
   for (int nearPtcl=0;nearPtcl<PathData.Path.NumParticles();
@@ -40,9 +40,8 @@ TimeHexaticClass::OrderParamater(Array<dVec,1> centroidPos,int ptcl)
 	r12disp=r12disp/r12dist;
 	if (abs(dot(r12disp,r12disp)-1.0)>=0.001)
 	  cerr<<dot(r12disp,r12disp);
-	if (!((dot(r12disp,r12disp)-1.0)<0.001))
+	if (!((dot(r12disp,r12disp)-1.0)<=0.001))
 	  cerr<<"GRRRL: "<<dot(r12disp,r12disp)<<" "<<r12dist<<" "<<ptcl<<" "<<nearPtcl<<endl;
-	///	cerr<<"hmm: "<<dot(r12disp,r12disp)<<endl;
 	assert(abs(dot(r12disp,r12disp)-1.0)<0.001);
 	double theta_12=unit2angle(r12disp(0),r12disp(1));
 	op=op+complex<double>(cos(theta_12*q),sin(theta_12*q));
@@ -58,6 +57,7 @@ TimeHexaticClass::OrderParamater(Array<dVec,1> centroidPos,int ptcl)
 void 
 TimeHexaticClass::ProduceTimeMatrix(int mcStep)
 {
+  assert(mcStep<PosArray.extent(0));
   for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
     OPArray(mcStep,ptcl)=OrderParamater(CentroidPos,ptcl);
     PosArray(mcStep,ptcl)=CentroidPos(ptcl);
@@ -144,21 +144,18 @@ TimeHexaticClass::CalcValue(int time1, int time2,int ptcl1,int ptcl2)
 void
 TimeHexaticClass::Accumulate()
 {
-
-
   if (!FullyWrapped){
     TotalCurrentData++;
     if (TotalCurrentData>=NumStoredMCSteps)
       FullyWrapped=true;
   }
-  
   CalculateCentroid_parallel();
   CurrTime=(CurrTime+1) % NumStoredMCSteps;
   ProduceTimeMatrix(CurrTime);
   int maxToGo=min(NumStoredMCSteps,TotalCurrentData);
   int numParticles=PathData.Path.NumParticles();
   pair<complex<double> ,double> histVals;
-  for (int i=0;i<maxToGo;i++){
+  for (int i=0;i<maxToGo;i+=TimeResolution){
     BuildDistanceTable(CurrTime,(CurrTime-i +NumStoredMCSteps) % NumStoredMCSteps);
     for (int ptcl1=0;ptcl1<numParticles;ptcl1++)
       for (int ptcl2=0;ptcl2<numParticles;ptcl2++){
@@ -167,11 +164,17 @@ TimeHexaticClass::Accumulate()
 	complex<double> val = histVals.first;
 	if (dist<grid.End && dist>1.0){
 	  int index=grid.ReverseMap(dist);      
-	  TimeDisp(index,i)+=val;
-	  gofrDisp(index,i)+=1;
+	  if (i/TimeResolution>=TimeDisp.extent(1) || 
+	      index>=TimeDisp.extent(0))
+	    cerr<<"ERROR! "<<endl;
+	  assert(i/TimeResolution<TimeDisp.extent(1));
+	  assert(index<TimeDisp.extent(0));
+	  TimeDisp(index,i/TimeResolution)+=val;
+	  gofrDisp(index,i/TimeResolution)+=1;
 	}
       }
-    NumStepArray(i)=NumStepArray(i)+1.0;
+    assert(i/TimeResolution<NumStepArray.size());
+    NumStepArray(i/TimeResolution)=NumStepArray(i/TimeResolution)+1.0;
   }
 }
 
@@ -262,13 +265,13 @@ TimeHexaticClass::Read (IOSectionClass &in)
     WriteInfo();
   assert(in.ReadVar("TimeWindow",TimeWindow));
   assert(in.ReadVar("TimeResolution",TimeResolution));
-  NumStoredMCSteps=TimeWindow/TimeResolution;
+  NumStoredMCSteps=TimeWindow; ///TimeResolution;
   OPArray.resize(NumStoredMCSteps,PathData.Path.NumParticles());
   PosArray.resize(NumStoredMCSteps,PathData.Path.NumParticles());
-  TimeDisp.resize(numGridPoints,NumStoredMCSteps);
-  gofrDisp.resize(numGridPoints,NumStoredMCSteps);
-  TimeDisp_double.resize(numGridPoints,NumStoredMCSteps);
-  NumStepArray.resize(NumStoredMCSteps);
+  TimeDisp.resize(numGridPoints,NumStoredMCSteps/TimeResolution);
+  gofrDisp.resize(numGridPoints,NumStoredMCSteps/TimeResolution);
+  TimeDisp_double.resize(numGridPoints,NumStoredMCSteps/TimeResolution);
+  NumStepArray.resize(NumStoredMCSteps/TimeResolution);
   CentroidPos.resize(PathData.Path.NumParticles());
   ParticleOrder.resize(PathData.Path.NumParticles());
   DistanceTable.resize(PathData.Path.NumParticles(),PathData.Path.NumParticles());
