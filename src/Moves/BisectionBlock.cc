@@ -454,13 +454,13 @@ void BisectionBlockClass::MakeMove()
 
   if (LowestLevel != 0)
     MakeStraightPaths();
-  cerr<<"Time spent is "<<TimeSpent<<endl;
-  cerr<<"Time spent2 is "<<TimeSpent2<<endl;
+  //  cerr<<"Time spent is "<<TimeSpent<<endl;
+  //  cerr<<"Time spent2 is "<<TimeSpent2<<endl;
   list<StageClass*>::iterator stageIter=Stages.begin();
   while (stageIter!=Stages.end()){
-    cerr<<"LEVEL A IS "<<(*stageIter)->TimeSpent<<endl;
+    //    cerr<<"LEVEL A IS "<<(*stageIter)->TimeSpent<<endl;
     for (list<ActionBaseClass*>::iterator actionIter=(*stageIter)->Actions.begin();actionIter!=(*stageIter)->Actions.end();actionIter++){
-      cerr<<"    Action value was "<<(*actionIter)->TimeSpent<<endl;
+      //      cerr<<"    Action value was "<<(*actionIter)->TimeSpent<<endl;
     }
     stageIter++;
   }
