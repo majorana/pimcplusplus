@@ -599,6 +599,10 @@ void RotorActionBaseClass::getAngles(int slice1, int mol1, int slice2, int mol2,
   PathData.Path.PutInBox(p1b);
   PathData.Path.PutInBox(p2a);
   PathData.Path.PutInBox(p2b);
+	p1a = Normalize(p1a);
+	p1b = Normalize(p1b);
+	p2a = Normalize(p2a);
+	p2b = Normalize(p2b);
 
   // compute bisector, norm, and in-plane unit vectors
   dVec b1 = GetBisector(p1a, p1b);
