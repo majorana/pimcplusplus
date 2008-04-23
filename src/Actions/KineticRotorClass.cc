@@ -85,15 +85,18 @@ void KineticRotorClass::ReadGridPoints(IOSectionClass& in)
   //assert(in.ReadVar("NumChiPoints",Nchi));
   //double last = M_PI * (1. - 1./(Ntheta+1));
   //ThetaGrid = new LinearGrid(0., last, Ntheta);
-  //last = 2*M_PI * (1. - 1./(Nphi+1));
+  double lastTheta = M_PI * (1. - 1./Ntheta);
+  double lastPhi = 4*M_PI * (1. - 1./Nphi);
   //PhiGrid = new LinearGrid(0., last, Nphi);
   //last = 2*M_PI * (1. - 1./(Nchi+1));
   //ChiGrid = new LinearGrid(0., last, Nchi);
 
   // hack testing spline init
-  ThetaGrid = new LinearGrid(0., M_PI, Ntheta);
+  //ThetaGrid = new LinearGrid(0., M_PI, Ntheta);
+  ThetaGrid = new LinearGrid(0., lastTheta, Ntheta);
   //PhiGrid = new LinearGrid(0., 2*M_PI, Nphi);
-  PhiGrid = new LinearGrid(0., 4*M_PI, Nphi);
+  //PhiGrid = new LinearGrid(0., 4*M_PI, Nphi);
+  PhiGrid = new LinearGrid(0., lastPhi, Nphi);
   //ChiGrid = new LinearGrid(0., 2*M_PI, Nchi);
 
   // read in spline gridpoints
@@ -169,8 +172,12 @@ void KineticRotorClass::ReadEnergyGridPoints(IOSectionClass& in)
   assert(in.ReadVar("NumEnergyThetaPoints",Ntheta));
   assert(in.ReadVar("NumEnergyPhiPoints",Nphi));
   //assert(in.ReadVar("NumEnergyChiPoints",Nchi));
-  ThetaEnergyGrid = new LinearGrid(0., M_PI, Ntheta);
-  PhiEnergyGrid = new LinearGrid(0., 4*M_PI, Nphi);
+  double lastTheta = M_PI * (1. - 1./Ntheta);
+  double lastPhi = 4*M_PI * (1. - 1./Nphi);
+  ThetaEnergyGrid = new LinearGrid(0., lastTheta, Ntheta);
+  PhiEnergyGrid = new LinearGrid(0., lastPhi, Nphi);
+  //ThetaEnergyGrid = new LinearGrid(0., M_PI, Ntheta);
+  //PhiEnergyGrid = new LinearGrid(0., 4*M_PI, Nphi);
   //ChiEnergyGrid = new LinearGrid(0., 2*M_PI, Nchi);
 
   // read in spline gridpoints
@@ -400,7 +407,9 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
     for (int slice=slice1; slice < slice2;slice+=skip) {
       numS++;
       double theta, phi, chi;
+      //cerr << "getting angles...";
       getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
+      //cerr << "got " << theta << " " << phi+chi << endl;
 
       //double XKE = rho->CalcEnergyAllJ(phi, theta, chi);
       //TotalZ += 1;
@@ -474,8 +483,12 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
         
       //typo error: negatiave sign in tabulated energy, corrected here!!
       //double KE = -1 * EnergySpline(theta, phi + chi);
+      //cerr << "accessing spline " << theta << " " << phi+chi << endl;
       double z = exp(spline(theta, phi + chi));
+      //cerr << "  " << z << endl;
+      //cerr << "accessing energySpline " << theta << " " << phi+chi << endl;
       double KE = EnergySpline(theta, phi + chi);
+      //cerr << "  " << KE << endl;
       //cerr << slice << " " << mol << " " << phi << " " << theta << " " << chi << " " << KE << " " << XKE << endl;
       //TotalE += KE*z*z;
       //TotalK += KE*z*z;
@@ -502,6 +515,7 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
   //cout << TotalK << " " << TotalK/M << " " << TotalE/TotalZ << " " << TotalE/(M*TotalZ) << endl;//" " << theta << " " << phi+chi << endl;
   return (TotalK);
   //return (TotalE/TotalZ);
+  //cerr << "leaving dBeta" << endl;
 }
 
 
@@ -614,6 +628,7 @@ void RotorActionBaseClass::getAngles(int slice1, int mol1, int slice2, int mol2,
 
   // theta is angle between in-plane vectors u
   // (rotation about norm to molecule plane)
+  dVec A;
   if(isEqual(u1, u2)) {
     theta = 0.;
     phi = GetAngle(b2, b1);
@@ -633,32 +648,43 @@ void RotorActionBaseClass::getAngles(int slice1, int mol1, int slice2, int mol2,
   } else {
     theta = GetAngle(u2, u1);
     // axis of rotation for theta is cross of in-plane vectors u
-    dVec A;
     A = Normalize(cross(u1,u2));
 
     // phi is angle between norm n1 and A
-    phi = GetAngle(n1, A);
-    dVec N = Normalize(cross(n1, A));
-    if(isEqualOpp(N,u1))
-      phi = 2*M_PI - phi;
+    if(isEqual(A, n1))
+      phi = 0.;
+    else if(isEqualOpp(A, n1))
+      phi = M_PI;
+    else {
+      phi = GetAngle(n1, A);
+      dVec N = Normalize(cross(n1, A));
+      if(isEqualOpp(N,u1))
+        phi = 2*M_PI - phi;
+    }
   
     // chi is angle between norm A and n2
-    chi = GetAngle(A, n2);
-    N = Normalize(cross(A, n2));
-    if(isEqualOpp(N,u2))
-      chi = 2*M_PI - chi;
+    if(isEqual(A, n2))
+      chi = 0.;
+    else if(isEqualOpp(A, n2))
+      chi = M_PI;
+    else {
+      chi = GetAngle(A, n2);
+      dVec N = Normalize(cross(A, n2));
+      if(isEqualOpp(N,u2))
+        chi = 2*M_PI - chi;
+    }
   }
 
   //cerr << "ANGLES " << phi << " " << theta << " " << chi << endl;
   //cerr << "       " << phiInv << " " << thetaInv << " " << chiInv << endl;
 
   //if(isnan(chi)) {
-  //  cerr << "Crap chi=NAN A " << A << " " << n1 << " " << n2 << endl;
+  //  cerr << "Crap chi=NAN A " << A << " " << n1 << " " << n2 << " theta " << theta <<  " " << endl;
   //  cerr << "isEqual gives " << isEqual(A,n2) << " and negative " << isEqualOpp(A, n2) << " between " << A << " " << (-1*n2) << endl;
   //  cerr << "p1a " << p1a << " p1b " << p1b << " p2a " << p2a << " p2b " << p2b << endl;
   //}
   //if(isnan(phi)) {
-  //  cerr << "Crap phi=NAN A " << A << " " << n1 << " " << n2 << endl;
+  //  cerr << "Crap phi=NAN A " << A << " " << n1 << " " << n2 << " theta " << theta <<  " " << endl;
   //  cerr << "isEqual gives " << isEqual(A,n1) << " and negative " << isEqualOpp(A, n1) << " between " << A << " " << (-1*n1) << endl;
   //  cerr << "p1a " << p1a << " p1b " << p1b << " p2a " << p2a << " p2b " << p2b << endl;
   //}
