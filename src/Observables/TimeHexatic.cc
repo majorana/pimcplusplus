@@ -150,6 +150,7 @@ TimeHexaticClass::Accumulate()
       FullyWrapped=true;
   }
   CalculateCentroid_parallel();
+  CentroidPosVar.Write(CentroidPos[CurrTime]);
   CurrTime=(CurrTime+1) % NumStoredMCSteps;
   ProduceTimeMatrix(CurrTime);
   int maxToGo=min(NumStoredMCSteps,TotalCurrentData);

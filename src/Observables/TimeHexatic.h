@@ -40,6 +40,7 @@ protected:
   LinearGrid grid;
   void ProduceTimeMatrix(int slice);
   Array<double,2> DistanceTable;
+  ObservableVecDouble1 CentroidPosVar;
   ObservableVecDouble2 gofrDispVar;
   ObservableVecDouble2 TimeDispVar;
   ObservableVecDouble1 NumStepVar;
@@ -72,6 +73,7 @@ public:
     ObservableClass (pathData, ioSection), 
     TimeDispVar("TimeDisp",IOSection,pathData.Path.Communicator),
     gofrDispVar("gofr",IOSection,pathData.Path.Communicator),
+    CentroidPosVar("CentroidPos",IOSection,pathData.Path.Communicator),
     NumStepVar("NumStep",IOSection,pathData.Path.Communicator),
     DistCutoff(2.56), CurrTime(0),TotalCurrentData(-1),FullyWrapped(false),
     q(6)
