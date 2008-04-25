@@ -76,6 +76,11 @@ void MolMoveClass::Read (IOSectionClass &in){
 		MoveList(0) = 0;
 		cerr << "Set for SEQUENTIAL particle updates." << endl;
 	}
+	else if(setMode == "MULTIPLE"){
+		mode = MULTIPLE;
+    assert(in.ReadVar("Radius",rc));
+		cerr << "Set for MULTIPLE particle updates." << endl;
+	}
 	else{
 		cerr << "Set for SINGLE particle updates." << endl;
 		MoveList.resize(1);
@@ -89,9 +94,13 @@ void MolMoveClass::Read (IOSectionClass &in){
     cerr << "Read in actions " << ActionList << endl;
 		string setAction = ActionList(a+startIndex);
     // hack: needs to be integrated into new scheme!
-    if(setAction == "ShortRange") {
-      cerr << "TEMP HACK: ADDING ACTIONS.SHORTRANGE TO MOLECULEMOVEBASE.ACTIONS" << endl;
-      Actions.push_back(&PathData.Actions.ShortRange);
+    //if(setAction == "ShortRange") {
+    //  cerr << "TEMP HACK: ADDING ACTIONS.SHORTRANGE TO MOLECULEMOVEBASE.ACTIONS" << endl;
+    //  Actions.push_back(&PathData.Actions.ShortRange);
+    //}
+    if(setAction == "DavidLongRange") {
+      cerr << "TEMP HACK: ADDING ACTIONS.DAVIDLONGRANGE TO MOLECULEMOVEBASE.ACTIONS" << endl;
+      Actions.push_back(&PathData.Actions.DavidLongRange);
     }
     else {
       ActionBaseClass* newAction = PathData.Actions.GetAction(setAction);

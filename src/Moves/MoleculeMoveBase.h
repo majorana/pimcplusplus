@@ -6,7 +6,7 @@
 
 // Identifies whether moves should be attempted globally
 // or one particle at a time (SINGLE)
-enum MoveMode{GLOBAL, SINGLE, SEQUENTIAL};
+enum MoveMode{GLOBAL, SINGLE, SEQUENTIAL, MULTIPLE};
 
 //class MolMoveClass: public ParticleMoveClass{
 class MolMoveClass: public LocalStageClass{
@@ -15,6 +15,7 @@ class MolMoveClass: public LocalStageClass{
   public:
 	MoveMode mode;
 	int numAccepted, numMoves;
+  double rc;
 	// located in PathClass now
   // This will store an array of active particles for each molecule in the sim;
   // should eliminate the need to repeatedly asemble these arrays at each move
