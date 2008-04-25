@@ -23,6 +23,7 @@
 class MoleculeRotate : public MolMoveClass
 {
   bool doAllSlices;
+  int sizeOfMulti;
  public:
   double Theta;
   void Set(double setTheta);
@@ -50,6 +51,7 @@ class MoleculeRotate : public MolMoveClass
 
 class BondStretch : public MolMoveClass
 {
+  bool doAllSlices;
  public:
   double s;
   double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
