@@ -121,6 +121,7 @@ TimeHexaticClass::BuildDistanceTable(int time1, int time2)
       dVec pos1=PosArray(time1,ptcl1);
       dVec pos2=PosArray(time2,ptcl2);
       dVec disp = pos1-pos2;
+      PathData.Path.PutInBox(disp);
       double dist = sqrt(dot(disp,disp));
       DistanceTable(ptcl1,ptcl2)=dist;
     }
