@@ -82,11 +82,18 @@ void KineticRotorClass::ReadGridPoints(IOSectionClass& in)
   int Ntheta, Nphi, Nchi;
   assert(in.ReadVar("NumThetaPoints",Ntheta));
   assert(in.ReadVar("NumPhiPoints",Nphi));
+  bool oldFormat = false;
+  in.ReadVar("OldFormat",oldFormat);
   //assert(in.ReadVar("NumChiPoints",Nchi));
   //double last = M_PI * (1. - 1./(Ntheta+1));
   //ThetaGrid = new LinearGrid(0., last, Ntheta);
+
   double lastTheta = M_PI * (1. - 1./Ntheta);
   double lastPhi = 4*M_PI * (1. - 1./Nphi);
+  if(oldFormat) {
+    lastTheta = M_PI;
+    lastPhi = 4 * M_PI;
+  }
   //PhiGrid = new LinearGrid(0., last, Nphi);
   //last = 2*M_PI * (1. - 1./(Nchi+1));
   //ChiGrid = new LinearGrid(0., last, Nchi);
@@ -172,8 +179,14 @@ void KineticRotorClass::ReadEnergyGridPoints(IOSectionClass& in)
   assert(in.ReadVar("NumEnergyThetaPoints",Ntheta));
   assert(in.ReadVar("NumEnergyPhiPoints",Nphi));
   //assert(in.ReadVar("NumEnergyChiPoints",Nchi));
+  bool oldFormat = false;
+  in.ReadVar("EnergyOldFormat",oldFormat);
   double lastTheta = M_PI * (1. - 1./Ntheta);
   double lastPhi = 4*M_PI * (1. - 1./Nphi);
+  if(oldFormat) {
+    lastTheta = M_PI;
+    lastPhi = 4 * M_PI;
+  }
   ThetaEnergyGrid = new LinearGrid(0., lastTheta, Ntheta);
   PhiEnergyGrid = new LinearGrid(0., lastPhi, Nphi);
   //ThetaEnergyGrid = new LinearGrid(0., M_PI, Ntheta);
@@ -489,7 +502,6 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
       //cerr << "accessing energySpline " << theta << " " << phi+chi << endl;
       double KE = EnergySpline(theta, phi + chi);
       //cerr << "  " << KE << endl;
-      //cerr << slice << " " << mol << " " << phi << " " << theta << " " << chi << " " << KE << " " << XKE << endl;
       //TotalE += KE*z*z;
       //TotalK += KE*z*z;
       ////TotalXK += XKE;
@@ -497,7 +509,11 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
       TotalE += KE;
       //TotalXK += XKE;
       TotalZ += 1;
-      TotalK += KE/z;
+      if(z < 1e-5 && KE>z)
+        TotalK += 0.;
+        //cerr << slice << " " << mol << " angles " << phi << " " << theta << " " << chi << " KE " << KE << " " << z << " ratio " << KE/z << " accum " << TotalK << endl;
+      else
+        TotalK += KE/z;
       //cerr << slice << " " << KE << " " << TotalK << endl;
       //if(abs(XKE) > maxRhoX) {
       //  overX << theta << " " << phi << " " << chi << " " << slice << " " << XKE << endl;
