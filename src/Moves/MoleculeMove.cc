@@ -481,10 +481,14 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
     exit(1);
   }
 
+  int startSlice = 0;
+  int endSlice = 0;
   int numSlices = PathData.Path.TotalNumSlices;
   if(doAllSlices) {
     slice1 = 0;
     slice2 = numSlices - 1;
+    startSlice = 0;
+    endSlice = numSlices;
   }
   else {
     // choose a time slice to move
@@ -498,6 +502,8 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
       //slice2 = slice;
       slice1 = slice-1;
       slice2 = slice+1;
+      startSlice = slice;
+      endSlice = slice;
     }
   }
 
@@ -526,12 +532,12 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
     // stretch bonds along their length
     for(int b=0; b<bondPtcls.size(); b++){
       double strain = 2*s*(PathData.Path.Random.Local()-0.5);
-      for(int slice=slice1; slice<=slice2; slice++) {
+      for(int slice=startSlice; slice<=endSlice; slice++) {
         StressBond(slice, bondPtcls[b], activeMol, strain);
       }
     }
     // stretch angles by rotating
-    for(int slice=slice1; slice<=slice2; slice++) {
+    for(int slice=startSlice; slice<=endSlice; slice++) {
       for(int a=0; a<anglePairs.size(); a++){
         dVec v1 = PathData.Path(slice,anglePairs[a][0]) - PathData.Path(slice,activeMol);
         dVec v2 = PathData.Path(slice,anglePairs[a][1]) - PathData.Path(slice,activeMol);
