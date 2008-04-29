@@ -489,6 +489,7 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
     slice2 = numSlices - 1;
     startSlice = 0;
     endSlice = numSlices;
+    cerr << "STRETCH all slice1 " << slice1 << " " << slice2 << " " << startSlice << " " << endSlice << endl;
   }
   else {
     // choose a time slice to move
@@ -507,6 +508,7 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
     }
   }
 
+  double theta0 = 1.910611932158; // 109.47 degrees in rad
   //cerr << "Rotate choosing slice " << slice << " and molecule " << MoveList << " wit members " << PathData.Mol.MembersOf(MoveList(0)) << endl;
   for(int molIndex=0; molIndex<MoveList.size(); molIndex++){
     int activeMol = MoveList(molIndex);
@@ -537,14 +539,14 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
       }
     }
     // stretch angles by rotating
+    double dtheta = 2*s*theta0*(PathData.Path.Random.Local()-0.5);
     for(int slice=startSlice; slice<=endSlice; slice++) {
       for(int a=0; a<anglePairs.size(); a++){
         dVec v1 = PathData.Path(slice,anglePairs[a][0]) - PathData.Path(slice,activeMol);
         dVec v2 = PathData.Path(slice,anglePairs[a][1]) - PathData.Path(slice,activeMol);
         Path.PutInBox(v1);
         Path.PutInBox(v2);
-        double theta0 = GetAngle(v1,v2);
-        double dtheta = 2*s*theta0*(PathData.Path.Random.Local()-0.5);
+        //double theta0 = GetAngle(v1,v2);
         //cerr << "S going to stretch angle " << theta0*180/M_PI << " by dtheta which is in deg " << dtheta*180/M_PI << endl;
         dVec u = crossprod(v1,v2);
         StressAngle(slice, anglePairs[a][1],Normalize(u),dtheta);
