@@ -10,8 +10,7 @@ endif
 #SUBDIRS = Actions Moves Observables Langevin Rotor $(MAYBE_PATHVIS)
 SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
 
-  bin_PROGRAMS = pimc++ FreeParticles VacancyLoc 
-  
+bin_PROGRAMS = pimc++ FreeParticles VacancyLoc 
 
 
 AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) $(LIBXML_LIB)
@@ -19,7 +18,7 @@ AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) $(LIBXML_LIB)
 pimc___CXXFLAGS = $(AM_CXXFLAGS)
 FreeParticles_CXXFLAGS = $(AM_CXXFLAGS)
 VacancyLoc_CXXFLAGS = $(AM_CXXFLAGS)
-vmc_CXXFLAGS = $(AM_CXXFLAGS)
+#vmc_CXXFLAGS = $(AM_CXXFLAGS)
 
 SHARED_SOURCES =          \
     det_calc_uekt.h       \
@@ -67,8 +66,8 @@ VacancyLoc_SOURCES = \
                       VacancyLoc.cc  
 VacancyLoc_LDADD = $(COMMON_LIBS)
 
-vmc_SOURCES = VMC6.cc 
-vmc_LDADD = $(COMMON_LIBS) $(LAPACK_LIBS)
+#vmc_SOURCES = VMC6.cc 
+#vmc_LDADD = $(COMMON_LIBS) $(LAPACK_LIBS)
 
 
 pimc___LDADD = Moves/libmoves.la Actions/libactions.la \
