@@ -18,6 +18,7 @@
 #include "DavidLongRangeClassYk.h"
 #include "../PathDataClass.h"
 #include <set>
+#include  "sys/time.h"
 
 bool fequals(double a,double b,double tol)
 {
@@ -226,6 +227,11 @@ DavidLongRangeClassYk::SingleAction (int slice1, int slice2,
 				   int level)
 
 {
+  struct timeval start, end;
+  struct timezone tz;
+  gettimeofday(&start, &tz);
+
+
   //int species=0;
   set<int> speciesList;
   for(int p=0; p<activeParticles.size(); p++) {
@@ -252,6 +258,11 @@ DavidLongRangeClassYk::SingleAction (int slice1, int slice2,
       }
     }
   }
+
+  gettimeofday(&end,   &tz);
+  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+
 
   return total;
     
