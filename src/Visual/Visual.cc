@@ -124,40 +124,6 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
   }
   for (int si=0; si<numSpecies; si++) {
     if(!processH2O || (processH2O && Species(si).Name!="e")){
-//<<<<<<< .mine
-//      classical=true;
-//      if(classical) {
-//        //cerr << "Handling species " << Species(si).Name << endl;
-//        //cerr << "WARNING IGNORING PARTICLES WITH LAMBDA=0!!!!!!!!!!!!!!!!!!!!" << endl;
-//        if (Species(si).lambda == 0){
-//          for (int ptcl=Species(si).FirstParticle; ptcl<=Species(si).LastParticle;
-//	      ptcl++) {
-//	          SphereObject* sphere = new SphereObject(offScreen);
-//	          dVec pos;
-//	          pos[0] = PathArray(frame, ptcl, 0, 0);
-// 	          pos[1] = PathArray(frame, ptcl, 0, 1);
-// 	          pos[2] = PathArray(frame, ptcl, 0, 2);
-//	          /// HACK HACK HACK HACK
-////           	pos[0] += 0.5*Box[0];
-////           	pos[1] += 0.5*Box[1];
-////           	pos[2] += 0.5*Box[2];
-//	          Box.PutInBox(pos);
-//	          sphere->SetPos (pos);
-//	          sphere->SetBox(Box);
-////           	if (ptcl==0)
-////           	  sphere->SetColor (Vec3(1.0, 0.0, 1.0));
-////           	else
-//              Vec3 colorCode(1.0, 0.0, 0.0);
-//              if(processH2O && (Species(si).Name == "p" || Species(si).Name == "H")){
-//                colorCode(0) = 0.8;
-//                colorCode(1) = 1.0;
-//                colorCode(2) = 0.8;
-//              }
-//	            //sphere->SetColor (Vec3(1.0, 0.0, 0.0));
-//	            sphere->SetColor (colorCode);
-//	          PathVis.Objects.push_back(sphere);
-//          }
-//=======
       if (Species(si).lambda == 0){
         for (int ptcl=Species(si).FirstParticle; ptcl<=Species(si).LastParticle;
 	   ptcl++) {
@@ -185,7 +151,6 @@ void VisualClass::MakeFrame(int frame, bool offScreen)
 	          //sphere->SetColor (Vec3(1.0, 0.0, 0.0));
 	          sphere->SetColor (colorCode);
 	        PathVis.Objects.push_back(sphere);
-//>>>>>>> .r1734
         }
       }
     }
@@ -402,20 +367,6 @@ void VisualClass::Read(string fileName)
   else
     HaveBNodeData = false;
 
-  //cerr << "PATH CONTAINS " << endl;
-  //cerr << "frame ptcl slice [x, y, z]" << endl;
-  for (int f=0; f<PathArray.extent(0); f++) {
-    for (int p=0; p<PathArray.extent(1); p++) {
-      for (int s=0; s<PathArray.extent(2); s++) {
-        //cerr << f << " " << p << " " << s << " [";
-        for (int x=0; x<PathArray.extent(3); x++) {
-          //cerr << PathArray(f,p,s,x) << ", ";
-        }
-        //cerr << "]" << endl;
-      }
-    }
-  }
-
   /// Make sure images are continuous from frame to frame
   for (int frame=0; frame<PathArray.extent(0)-1; frame++) 
     for (int ptcl=0; ptcl<PathArray.extent(1); ptcl++) 
@@ -445,10 +396,6 @@ void VisualClass::SetFlag(string newFlag){
   if(newFlag == "water"){
     processH2O = true;
     cerr << "setting processH2O true " << processH2O << endl;
-  }
-  else if(newFlag == "classical"){
-    classical = true;
-    cerr << "setting classical true " << classical << endl;
   }
 }
 
@@ -687,7 +634,6 @@ VisualClass::VisualClass()
   // HACK HACK HACK  
   IsoFrame.hide();
   processH2O = false;
-  classical = false;
 }
 
 VisualClass::~VisualClass()
@@ -799,7 +745,6 @@ void VisualClass::MakePaths(int frame)
 {
   int numPtcls  = PathArray.extent(1);
   int numSlices = PathArray.extent(2);
-  cerr << "MakePaths numPtcls " << numPtcls << endl;
   Array<bool,1> used(numPtcls);
   used = false;
 
@@ -810,20 +755,16 @@ void VisualClass::MakePaths(int frame)
   vector<vector<int> > loopList;
   // Constuct list of permuting loops.  Ignore classical particles.
   for (int ptcl=0; ptcl<numPtcls; ptcl++) {
-    //if (!used(ptcl) && (PtclSpecies(ptcl).lambda!=0.0)) {
-    if (!used(ptcl)) {
+    if (!used(ptcl) && (PtclSpecies(ptcl).lambda!=0.0)) {
       vector<int> loop;
       int permPtcl = ptcl;
       bool haveOpen = false;
        do {
-       cerr << "push back " << permPtcl << " ptcl " << ptcl << " and size " << used.size();// << endl;
 	 loop.push_back(permPtcl);
 	 if (permPtcl == OpenPtcl(frame))
 	   haveOpen = true;
 	 used(permPtcl) = true;
-   cerr << " * " ;//<< endl;
 	 permPtcl = PermArray(frame, permPtcl);
-   cerr << " next is " << permPtcl << endl;
        } while (permPtcl != ptcl);
 
        if (haveOpen) {  // make sure open ptcl is las

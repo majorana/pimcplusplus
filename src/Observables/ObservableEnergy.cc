@@ -176,7 +176,7 @@ void EnergyClass::WriteBlock()
   double norm = 1.0/((double)NumSamples*(double)nslices);
   
   TotalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(TotalSum)*norm);
-  //KineticVar.Write (Prefactor*PathData.Path.Communicator.Sum(KineticSum)*norm);
+  KineticVar.Write (Prefactor*PathData.Path.Communicator.Sum(KineticSum)*norm);
   dUShortVar.Write (Prefactor*PathData.Path.Communicator.Sum(dUShortSum)*norm);
   dULongVar.Write  (Prefactor*PathData.Path.Communicator.Sum(dULongSum)*norm);
   NodeVar.Write    (Prefactor*PathData.Path.Communicator.Sum(NodeSum)*norm);

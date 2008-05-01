@@ -75,7 +75,7 @@
 				  //WeightIndex1 = PathData.qmc->qmcDriver->addObservable("WPsi1");
         }
         else{
-          PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
+          //PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
           PathData.qmc->qmcDriver->Estimators->reset();
         }
 	  		PathData.qmc->execute();
@@ -157,7 +157,7 @@
       if(isNewDriver) {
 	  	  PathData.qmc->process();
       } else {
-        PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
+        //PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
         PathData.qmc->qmcDriver->Estimators->reset();
       }
 	

@@ -11,7 +11,6 @@ from AcceptRatio import *
 from Energy import *
 from nofr import *
 from PairCorrelation import *
-from AutoCorrelation import *
 from HTMLgen import *
 from SystemInfo import *
 from Josephson import *
@@ -161,10 +160,6 @@ for counter in range(0,numSections):
 #               print "Error in energy processing"
      elif myName=="CycleCount":
           ProcessCycleCount(infiles,summaryDoc,detailedDoc,StartCut)
-          summaryDoc.append(HR())
-          detailedDoc.append(HR())
-     elif myName=="AutoCorr":
-          ProcessAutoCorr(infiles,summaryDoc,detailedDoc,StartCut)
           summaryDoc.append(HR())
           detailedDoc.append(HR())
      elif myName=="SpecificHeat":

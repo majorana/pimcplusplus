@@ -24,8 +24,6 @@ void PathDumpClass::WriteBlock()
 void PathDumpClass::Read(IOSectionClass &in)
 {
   ObservableClass::Read(in);
-  dump2file = false;
-  in.ReadVar("DumpToFile",dump2file);
   in.ReadVar("AllClones", AllClones);
   DumpNodes = in.OpenSection("NodeDump");
   if (DumpNodes) {
@@ -71,7 +69,6 @@ void PathDumpClass::Read(IOSectionClass &in)
 
 void PathDumpClass::Accumulate()
 {
-  cerr << "PathDump Accumulate " << dump2file << endl;
   if (!AllClones && (PathData.GetCloneNum() != 0))
     return;
 
@@ -167,16 +164,6 @@ void PathDumpClass::Accumulate()
   }
   PathVar.Flush();
   FirstTime = false;
-  if(dump2file) {
-    ofstream out("dump.dat");
-    for(int p=0; p<PathData.NumParticles(); p++) {
-      for(int x=0; x<NDIM; x++)
-        out << PathData.Path(0, p)[x] << ", ";
-      out << endl;
-    }
-    out.close();
-    cerr << "PathDump coord file written" << endl;
-  }
 }
 
 void

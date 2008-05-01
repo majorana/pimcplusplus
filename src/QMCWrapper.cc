@@ -60,7 +60,7 @@ void QMCWrapperClass::QMCDummy(PathDataClass& PathData){
 			  //WeightIndex1 = PathData.qmc->qmcDriver->addObservable("WPsi1");
       }
       else{
-        PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
+        //PathData.qmc->qmcDriver->Estimators->resetReportSettings(false);
         PathData.qmc->qmcDriver->Estimators->reset();
       }
   		PathData.qmc->execute();
