@@ -25,7 +25,7 @@ ActionBaseClass::Read (IOSectionClass &in)
 }
 
 ActionBaseClass::ActionBaseClass(PathDataClass &pathData) : 
-  PathData(pathData), Path(pathData.Path)
+  PathData(pathData), Path(pathData.Path), TimeSpent(0)
 {
   /* Do nothing */
 }
