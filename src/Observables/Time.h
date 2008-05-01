@@ -20,7 +20,7 @@
 #include "ObservableBase.h"
 #include "../Moves/MoveBase.h"
 #include <time.h>
-
+#include <sys/time.h>
 ///Currently only owrks in serial mode
 class MCTimeClass : public ObservableClass
 {
@@ -38,6 +38,8 @@ private:
   list<ObservableClass*> &Observables;
 
 public:
+  struct timeval start, end;
+  struct timezone tz;
   void WriteInfo();
   void Accumulate();
   void WriteBlock();

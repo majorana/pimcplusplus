@@ -15,7 +15,7 @@
 /////////////////////////////////////////////////////////////
 
 #include "Time.h"
-
+#include <sys/time.h>
 
 
 void MCTimeClass::Accumulate()
@@ -48,14 +48,18 @@ void MCTimeClass::WriteBlock()
 	 observableIter!=Observables.end();observableIter++) {
       observableNames(i) = ((*observableIter)->Name);
       i++;
-    }
+    } 
     if (PathData.Path.Communicator.MyProc()==0) {
       IOSection.WriteVar("MoveNames", moveNames);
       IOSection.WriteVar("ObserveNames", observableNames);
     }
   }
-  TotalTime+=(double)(clock()-StartTime)/(double)CLOCKS_PER_SEC;
-  StartTime=clock();
+  gettimeofday(&end, &tz);
+  TotalTime+= ((double)(end.tv_sec-start.tv_sec) +
+	       1.0e-6*(double)(end.tv_usec-start.tv_usec));
+  gettimeofday(&start, &tz);
+  //  TotalTime+=(double)(clock()-StartTime)/(double)CLOCKS_PER_SEC;
+  //  StartTime=clock();
   TotalTimeVar.Write(TotalTime);
   list<MoveClass*>::iterator moveIter;
   int i=0;
@@ -88,7 +92,8 @@ void MCTimeClass::Read(IOSectionClass &in)
     WriteInfo();
     IOSection.WriteVar("Type","Scalar");
   }
-  StartTime=0;
+  gettimeofday(&start, &tz);
+
 }
 
 
