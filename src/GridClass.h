@@ -49,6 +49,8 @@ public:
 
   double CutoffDistance;
   Array<int,1> NumGrid;
+
+
   Array<CellInfoClass,NDIM> GridsArray;
   void Init(dVec box,Array<int,1> numGrid);
   bool GridsAffect(CellInfoClass &grid1,CellInfoClass &grid2);

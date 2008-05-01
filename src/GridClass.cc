@@ -200,12 +200,13 @@ void CellMethodClass::FindBox(dVec myPoint,int &x,int &y)
 {
   Path.PutInBox(myPoint);
   dVec box=Path.GetBox();
-  double xStart=-box[0]/2.0;
-  double yStart=-box[1]/2.0;
-  double xSize=box[0]/NumGrid(0);
-  double ySize=box[1]/NumGrid(1);
-  x=(int)floor((myPoint[0]-xStart-0.001)/xSize);
-  y=(int)floor((myPoint[1]-yStart-0.001)/ySize);
+  dVec box_inv=Path.GetBoxInv();
+  double xStart=-box[0]*0.5; 
+  double yStart=-box[1]*0.5; // /2.0;
+  double one_over_xSize=NumGrid(0)*box_inv(0);
+  double one_over_ySize=NumGrid(1)*box_inv(1);
+  x=(int)floor((myPoint[0]-xStart-0.001)*one_over_xSize);
+  y=(int)floor((myPoint[1]-yStart-0.001)*one_over_ySize);
   x=x+(x<0);
   y=y+(y<0);
 
