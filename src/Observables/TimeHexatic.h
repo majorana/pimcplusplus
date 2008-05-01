@@ -40,7 +40,8 @@ protected:
   LinearGrid grid;
   void ProduceTimeMatrix(int slice);
   Array<double,2> DistanceTable;
-  ObservableVecDouble1 CentroidPosVar;
+  
+  ObservableVecDouble2 CentroidPosVar;
   ObservableVecDouble2 gofrDispVar;
   ObservableVecDouble2 TimeDispVar;
   ObservableVecDouble1 NumStepVar;
@@ -63,6 +64,7 @@ protected:
 public:
   void Accumulate();
   Array<dVec,1> CentroidPos;
+  Array<double,2> CentroidPos_write;
   Array<complex<double>,1> ParticleOrder;
   void CalculateCentroid();
   void CalculateCentroid_parallel();

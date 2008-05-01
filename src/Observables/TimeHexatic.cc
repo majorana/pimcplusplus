@@ -151,7 +151,10 @@ TimeHexaticClass::Accumulate()
       FullyWrapped=true;
   }
   CalculateCentroid_parallel();
-  CentroidPosVar.Write(CentroidPos[CurrTime]);
+  for (int i=0;i<CentroidPos.size();i++)
+    for (int dim=0;dim<NDIM;dim++)
+      CentroidPos_write(i,dim)=CentroidPos(i)[dim];
+  CentroidPosVar.Write(CentroidPos_write);
   CurrTime=(CurrTime+1) % NumStoredMCSteps;
   ProduceTimeMatrix(CurrTime);
   int maxToGo=min(NumStoredMCSteps,TotalCurrentData);
@@ -275,6 +278,7 @@ TimeHexaticClass::Read (IOSectionClass &in)
   TimeDisp_double.resize(numGridPoints,NumStoredMCSteps/TimeResolution);
   NumStepArray.resize(NumStoredMCSteps/TimeResolution);
   CentroidPos.resize(PathData.Path.NumParticles());
+  CentroidPos_write.resize(PathData.Path.NumParticles(),NDIM);
   ParticleOrder.resize(PathData.Path.NumParticles());
   DistanceTable.resize(PathData.Path.NumParticles(),PathData.Path.NumParticles());
 }
