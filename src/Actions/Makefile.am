@@ -34,6 +34,8 @@ libactions_la_SOURCES =            \
     KineticRotorClass.h            \
     KineticSphereClass.cc          \
     KineticSphereClass.h           \
+    KineticVibrationClass.cc       \
+    KineticVibrationClass.h        \
     LongRangeClass.cc              \
     LongRangeClass.h               \
     LongRangeCoulombClass.cc       \

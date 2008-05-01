@@ -50,6 +50,7 @@
 #include "StructureReject.h"
 #include "KineticRotorClass.h"
 #include "KineticSphereClass.h"
+#include "KineticVibrationClass.h"
 #include "Josephson.h"
 #include "Hermele.h"
 #include "DualHermele.h"
@@ -347,6 +348,8 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new FixedAxisRotorClass(PathData);
     } else if (type == "KineticRotor") {
       newAction = new KineticRotorClass(PathData);
+    } else if (type == "KineticVibration") {
+      newAction = new KineticVibrationClass(PathData);
     } else if (type == "LongRangeCoulomb") {
       newAction = new LongRangeCoulombClass(PathData, PairMatrix, PairArray);
     } else {
