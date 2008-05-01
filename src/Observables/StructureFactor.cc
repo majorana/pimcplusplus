@@ -46,8 +46,11 @@ void StructureFactorClass::Read(IOSectionClass& in)
 
   TotalCounts=0;
 
+  
+
   //These are kVecs that wouldn't be calculated given the kcutoff
   Array<double,2> tempkvecs;
+  Array<double,1> kMagRange;
   if (in.ReadVar("AdditionalkVecs",tempkvecs)){
     assert(tempkvecs.extent(1)==NDIM);
     Additionalkvecs.resize(tempkvecs.extent(0));
@@ -56,6 +59,39 @@ void StructureFactorClass::Read(IOSectionClass& in)
 	Additionalkvecs(kvec)[dim]=tempkvecs(kvec,dim);
       }
   }
+  else if (in.ReadVar("kMagRange",kMagRange)){
+    vector<dVec> tempkvecs_vec;
+    assert(kMagRange.size()==2);
+#ifdef NDIM==2
+    int maxI=int(kMagRange(1)*PathData.Path.GetBox()[0]/(2.0*M_PI))+1;
+    int maxJ=int(kMagRange(1)*PathData.Path.GetBox()[1]/(2.0*M_PI))+1;
+    cerr<<"Maxes are "<<maxI<<" "<<maxJ<<endl;
+    for (int i=0;i<maxI;i++)
+      for (int j=0;j<maxJ;j++){
+	double kmag=sqrt(
+			 (2*i*M_PI/PathData.Path.GetBox()[0])*
+			 (2*i*M_PI/PathData.Path.GetBox()[0])+
+			 (2*j*M_PI/PathData.Path.GetBox()[1])*
+			 (2*j*M_PI/PathData.Path.GetBox()[1]));
+	cerr<<kMagRange(0)<<" "<<kmag<<" "<<kMagRange(1)<<" "<<i<<" "<<j<<endl;
+	if (kMagRange(0)<kmag && kmag<kMagRange(1)){
+	  dVec kVec((2*i*M_PI/PathData.Path.GetBox()[0]),(2*j*M_PI/PathData.Path.GetBox()[1]));
+	  tempkvecs_vec.push_back(kVec);
+	  kVec[0]=-kVec[0];
+	  tempkvecs_vec.push_back(kVec);
+	}
+      }
+    Additionalkvecs.resize(tempkvecs_vec.size());
+    cerr<<"Additional kvecs are "<<endl;
+    for (int kvec=0;kvec<tempkvecs_vec.size();kvec++){
+      Additionalkvecs(kvec)=tempkvecs_vec[kvec];
+      cerr<<Additionalkvecs(kvec)[0]<<" "<<Additionalkvecs(kvec)[1]<<endl;
+    }
+    cerr<<"done"<<endl;
+#else
+	cerr<<"DOES NOT SUPPORT 3d yet"<<endl;
+#endif
+  }	  
   else{
     Additionalkvecs.resize(0);
   }
