@@ -77,9 +77,13 @@ void BisectionBlockClass::Read_new(IOSectionClass &in)
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     if (level!=LowestLevel){
       Array<string,1> higherLevelActions;
-      assert(in.ReadVar("HigherLevelActions",higherLevelActions));
-      for (int i=0;i<higherLevelActions.size();i++)
-	newStage->Actions.push_back(PathData.Actions.GetAction(higherLevelActions(i)));
+      if (in.ReadVar("HigherLevelActions",higherLevelActions)){
+	for (int i=0;i<higherLevelActions.size();i++)
+	  newStage->Actions.push_back(PathData.Actions.GetAction(higherLevelActions(i)));
+      }
+      else {
+	cerr<<"WARNING! No Higher Level Actions in BisectionBlock"<<endl;
+      }
     }
     else if (level==LowestLevel){
       Array<string,1> samplingActions;
@@ -456,17 +460,31 @@ void BisectionBlockClass::MakeMove()
     MakeStraightPaths();
   //  cerr<<"Time spent is "<<TimeSpent<<endl;
   //  cerr<<"Time spent2 is "<<TimeSpent2<<endl;
-  list<StageClass*>::iterator stageIter=Stages.begin();
-  while (stageIter!=Stages.end()){
-    //    cerr<<"LEVEL A IS "<<(*stageIter)->TimeSpent<<endl;
-    for (list<ActionBaseClass*>::iterator actionIter=(*stageIter)->Actions.begin();actionIter!=(*stageIter)->Actions.end();actionIter++){
-      //      cerr<<"    Action value was "<<(*actionIter)->TimeSpent<<endl;
-    }
-    stageIter++;
-  }
+
+}
+void BisectionBlockClass::WriteRatio()
+{
+  PrintTimeSpent();
+  MultiStageClass::WriteRatio();
 
 }
 
+void BisectionBlockClass::PrintTimeSpent()
+{
+  
+  list<StageClass*>::iterator stageIter=Stages.begin();
+  while (stageIter!=Stages.end()){
+    //    cerr<<"LEVEL A IS "<<(*stageIter)->TimeSpent<<endl;
+    cerr<<"START"<<endl;
+    for (list<ActionBaseClass*>::iterator actionIter=(*stageIter)->Actions.begin();actionIter!=(*stageIter)->Actions.end();actionIter++){
+      cerr<<"    Action value was "<<(*actionIter)->TimeSpent<<" "<<(*actionIter)->GetName()<<endl;
+      
+    }
+    cerr<<"Time spent is "<<TimeSpent<<endl;
+    cerr<<"END"<<endl;
+    stageIter++;
+  }
+}
 
 void
 BisectionBlockClass::MakeStraightPaths()

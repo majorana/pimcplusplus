@@ -48,6 +48,8 @@ private:
   /// If we do not bisect down to the lowest level, interpolate the
   /// paths in imaginary time.
   void MakeStraightPaths();
+  void PrintTimeSpent();
+  void WriteRatio();
   StageClass* PermuteStage;
   //  ObservableDouble AcceptanceRatioVar;
 public:
