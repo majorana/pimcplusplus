@@ -23,6 +23,7 @@
 class PathDumpClass : public ObservableClass
 {
 private:
+  bool dump2file;
   ObservableVecDouble3 PathVar;
   ObservableVecInt1 PermVar;
   ObservableInt OpenLinkVar;

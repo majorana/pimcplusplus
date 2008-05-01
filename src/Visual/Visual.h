@@ -71,6 +71,7 @@ protected:
   // items to process water molecules //
   //////////////////////////////////////
   bool processH2O;
+  bool classical;
 
   /// This stores the global permutations for the paths.
   /// (frame, ptcl).  The permutation acts between the last and first

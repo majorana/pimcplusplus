@@ -756,7 +756,7 @@ double FixedAxisRotorClass::SingleAction (int slice1, int slice2,
       //}
       
       double r;
-      r = AltFixedAxis(slice, mol, phi, theta, chi);
+      //r = AltFixedAxis(slice, mol, phi, theta, chi);
       r = CalcRho(phi, theta, chi);
       // need to check for negative rho; use noisy correction
       //if(r<0) {
