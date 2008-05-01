@@ -29,10 +29,15 @@ class ShortRangeOn_diagonal_class : public ActionBaseClass
 protected:
   Array<PairActionFitClass*,2> &PairMatrix;
   Array<bool,1> DoPtcl;
+  Array<bool,1> todoIt;
 public:
   void Read (IOSectionClass &in);
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
+  double SingleAction_slow (int slice1, int slice2,
+			    const Array<int,1> &changedParticles,
+			    int level);
+
   double d_dBeta (int slice1, int slice2, int level);
   string GetName();
   ShortRangeOn_diagonal_class (PathDataClass &pathData,

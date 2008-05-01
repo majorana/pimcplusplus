@@ -13,16 +13,18 @@
 // For more information, please see the PIMC++ Home Page:  //
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
-
+#include <omp.h>
 #include "../PathDataClass.h"
 #include "ShortRangeOn_diagonal_Class.h"
-#include  "time.h"
+#include  "sys/time.h"
+#include <omp.h>
 ///DO NOT USE IF YOUR CUTOFF IS SUCH THAT ALL PARTICLE WILL BE INCLUDED IN ANY DIRECTION! THERE IS A BUG THAT WILL CAUSE IT TO BREAK!
 ///This has to be called after pathdata knows how many
 ///particles it has
 void ShortRangeOn_diagonal_class::Read(IOSectionClass& in)
 {
   DoPtcl.resize(PathData.Path.NumParticles());
+  todoIt.resize(PathData.Path.NumParticles());
 }
 
 ShortRangeOn_diagonal_class::ShortRangeOn_diagonal_class(PathDataClass &pathData,
@@ -32,11 +34,111 @@ ShortRangeOn_diagonal_class::ShortRangeOn_diagonal_class(PathDataClass &pathData
 {
 }
 
+
 double 
 ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
 				 const Array<int,1> &changedParticles,
 				 int level)
 {
+  struct timeval start, end;
+  struct timezone tz;
+  gettimeofday(&start, &tz);
+
+  PathClass &Path = PathData.Path;
+  // First, sum the pair actions
+  double TotalU = 0.0;
+  int numChangedPtcls = changedParticles.size();
+  int skip = 1<<level;
+  double levelTau = Path.tau* (1<<level);
+  
+  int totalParticles=0;
+  int startSlice=slice1;
+  if (slice1==0 && slice2==PathData.Path.NumTimeSlices()-1)
+    startSlice=slice1;
+  else 
+    startSlice=slice1+skip;
+  for (int slice=startSlice;slice<slice2;slice+=skip){
+    double factor=1.0;
+    if (slice==slice1  || slice==slice2)
+      factor=0.5;
+    Path.DoPtcl=true;
+    
+    //     ///changed particles loop against themselvs
+    for (int ptcl1Index=0;ptcl1Index<numChangedPtcls;ptcl1Index++){
+      int ptcl1 = changedParticles(ptcl1Index);
+      int species1=Path.ParticleSpeciesNum(ptcl1);
+      Path.DoPtcl(ptcl1)=false;
+      for (int ptcl2Index=ptcl1Index+1;ptcl2Index<numChangedPtcls;ptcl2Index++){
+    	int ptcl2=changedParticles(ptcl2Index);
+    	PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
+    	dVec r, rp;
+    	double rmag, rpmag;
+	PathData.Path.DistDispFast(slice, ptcl1, ptcl2,
+				   rmag, r);
+    	double U;
+	U = factor*((DavidPAClass*)&PA)->UDiag_exact(rmag, level);
+    	TotalU += U;
+      }
+    }
+
+
+    for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
+      int ptcl1 = changedParticles(ptcl1Index);
+      Path.DoPtcl(ptcl1) = false;
+      int species1=Path.ParticleSpeciesNum(ptcl1);
+      int xBox,yBox;
+      Path.Cell.FindBox(Path(slice,ptcl1),xBox,yBox);
+      //      cerr<<"Affected cells"<<Path.Cell.AffectedCells.size()<<endl;
+      int numAffectedCells=Path.Cell.AffectedCells.size();
+
+ {
+
+      for (int cellVal=0;cellVal<numAffectedCells;cellVal++){ 
+	int rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
+	int rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
+	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox).Particles(slice);
+	for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
+	  int ptcl2=*i;
+	  if (Path.DoPtcl(ptcl2)){ //I think this is ok
+	    PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
+	    dVec r;
+	    double rmag;
+	    PathData.Path.DistDispFast(slice, ptcl1,ptcl2,
+				       rmag, r);
+	    //	    double U=0.0;
+
+	    double U = factor*((DavidPAClass*)&PA)->UDiag_exact(rmag, level);
+	    //  double U = factor*PA.Udiag(rmag, level);
+	    TotalU += U;
+	  }
+	}
+      }
+    } //parallel end
+    }
+    
+
+    
+  } //end slice loop
+  //  cerr<<"My total number of particles is "<<totalParticles<<endl;
+  gettimeofday(&end,   &tz);
+  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+  //  cerr<<"Time spent in diagonal class is "<<TimeSpent<<endl;
+  //  double checkU=SingleAction_slow(slice1,slice2,changedParticles,level);
+  //  cerr<<"CHECK: "<<checkU<<" "<<TotalU<<endl;
+  return (TotalU);
+}
+
+
+double 
+ShortRangeOn_diagonal_class::SingleAction_slow (int slice1, int slice2,
+				 const Array<int,1> &changedParticles,
+				 int level)
+{
+  struct timeval start, end;
+  struct timezone tz;
+  gettimeofday(&start, &tz);
+
   PathClass &Path = PathData.Path;
   int xEffect=Path.Cell.Xeffect;
   int yEffect=Path.Cell.Yeffect;
@@ -89,15 +191,19 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
     	PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
     	dVec r, rp;
     	double rmag, rpmag;
-	if (slice==slice1)
-	  totalParticles++;
     	PathData.Path.DistDispFast(slice, ptcl1, ptcl2,
 				   rmag, r);
 	//    	double s2 = dot (r-rp, r-rp);
 	//   	double q = 0.5 * (rmag + rpmag); 
 	//    	double z = (rmag - rpmag);
     	double U;
-       	U = factor*((DavidPAClass*)&PA)->UDiag_exact(rmag, level);
+	//	gettimeofday(&start, &tz);
+  
+	U = factor*((DavidPAClass*)&PA)->UDiag_exact(rmag, level);
+	//	gettimeofday(&end,   &tz);
+	//	TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+	//	  1.0e-6*(double)(end.tv_usec-start.tv_usec);
+	
 	//	U =factor*PA.Udiag(rmag,level);
 	// Subtract off long-range part from short-range action
 	//	  if (PA.IsLongRange())
@@ -155,7 +261,13 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
 	    //	    double q = 0.5 * (rmag + rpmag);
 	    //	    double z = (rmag - rpmag);
 	    double U;
+	    //	gettimeofday(&start, &tz);
+
 	    U = factor*((DavidPAClass*)&PA)->UDiag_exact(rmag, level);
+	    //  gettimeofday(&end,   &tz);
+	    //  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+	    //    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+
 	    //	    U = factor*PA.Udiag(rmag, level);
 	    // Subtract off long-range part from short-range action
 	    //	  if (PA.IsLongRange())
@@ -215,7 +327,13 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
 	    //	    double z = (rmag - rpmag);
 	    double U;
 	    //	    U = factor*PA.Udiag(rmag, level);
+	    //	gettimeofday(&start, &tz);
+
 	    U = factor*((DavidPAClass*)&PA)->UDiag_exact(rmag, level);
+	    //  gettimeofday(&end,   &tz);
+	    //  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+	    //    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+
 	    // Subtract off long-range part from short-range action
 	    //	  if (PA.IsLongRange())
 	    //	    U -= 0.5* (PA.Ulong(level)(rmag) + PA.Ulong(level)(rpmag));
@@ -234,6 +352,10 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
     
   } //end slice loop
   //  cerr<<"My total number of particles is "<<totalParticles<<endl;
+  gettimeofday(&end,   &tz);
+  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+  //  cerr<<"Time spent in diagonal class is "<<TimeSpent<<endl;
   return (TotalU);
 }
 
