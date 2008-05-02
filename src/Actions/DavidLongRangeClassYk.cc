@@ -125,7 +125,7 @@ void DavidLongRangeClassYk::BuildRPA_SingleSpecies()
 
 void DavidLongRangeClassYk::ReadYk()
 { 
-  assert(PairArray.size()==1);
+  //assert(PairArray.size()==1);
   DavidPAClass &pa(*((DavidPAClass*)PairArray(0)));
   assert(pa.LongRangeDim==NDIM);
   for (int dim=0;dim<NDIM;dim++)
@@ -138,7 +138,7 @@ void DavidLongRangeClassYk::ReadYk()
   if(PairArray.size()==1)
     BuildRPA_SingleSpecies();  
   else {
-
+    Build_MultipleSpecies();
   }
 
 //   uk=-999;
