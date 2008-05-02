@@ -40,7 +40,7 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
 				 const Array<int,1> &changedParticles,
 				 int level)
 {
-#ifdef NDIM==2
+#if NDIM==2
   struct timeval start, end;
   struct timezone tz;
   gettimeofday(&start, &tz);
@@ -127,10 +127,10 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
   //  cerr<<"Time spent in diagonal class is "<<TimeSpent<<endl;
   //  double checkU=SingleAction_slow(slice1,slice2,changedParticles,level);
   //  cerr<<"CHECK: "<<checkU<<" "<<TotalU<<endl;
+  return (TotalU);
 #else
   cerr<<"not implemented short range o(n) diagonal class in 2d"<<endl;
 #endif
-  return (TotalU);
 }
 
 
