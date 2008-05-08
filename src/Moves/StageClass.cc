@@ -26,16 +26,22 @@ void StageClass::WriteRatio()
   AcceptRatioVar.Write((double)NumAccepted/(double)NumAttempted);
   AcceptRatioVar.Flush();
 }
-
+//BUG: DOES NOT HAVE CORRECT SLICES!
 void StageClass::Accept()
 {
   NumAccepted++;
   NumAttempted++;
+  for (list<ActionBaseClass*>::iterator actionIter=Actions.begin();
+       actionIter!=Actions.end();actionIter++)
+    (*actionIter)->AcceptCopy(0,0);
 }
-
+//BUG: DOES NOT HAVE CORRECT SLICES
 void StageClass::Reject()
 {
   NumAttempted++;
+  for (list<ActionBaseClass*>::iterator actionIter=Actions.begin();
+       actionIter!=Actions.end();actionIter++)
+    (*actionIter)->RejectCopy(0,0);
 }
 
 
@@ -51,9 +57,11 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2,
   double sampleRatio=Sample(slice1,slice2,activeParticles);
   SetMode(OLDMODE);
   gettimeofday(&start, &tz);
-  double oldAction=StageAction(slice1,slice2,activeParticles);
+  double oldAction;
+  double newAction;
+  oldAction=StageAction(slice1,slice2,activeParticles);
   SetMode(NEWMODE);
-  double newAction =StageAction(slice1,slice2,activeParticles);
+  newAction =StageAction(slice1,slice2,activeParticles);
   gettimeofday(&end,   &tz);
   //cout << oldAction << " " << newAction << endl;
   double currActionChange=newAction-oldAction;
