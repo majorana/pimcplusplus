@@ -396,6 +396,8 @@ void BisectionBlockClass::ChooseTimeSlices()
 
 void BisectionBlockClass::MakeMove()
 {
+
+  {
   struct timeval start, end;
   struct timezone tz;
 
@@ -460,6 +462,7 @@ void BisectionBlockClass::MakeMove()
     MakeStraightPaths();
   //  cerr<<"Time spent is "<<TimeSpent<<endl;
   //  cerr<<"Time spent2 is "<<TimeSpent2<<endl;
+  }
 
 }
 void BisectionBlockClass::WriteRatio()
