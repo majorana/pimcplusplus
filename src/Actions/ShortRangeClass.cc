@@ -389,7 +389,7 @@ ShortRangeClass::GradAction(int slice1, int slice2,
 			    const Array<int,1> &ptcls, int level,
 			    Array<dVec,1> &gradVec)
 {
-#if NDIM==3
+
   PathClass &Path = PathData.Path;
   int skip = (1<<level);
   assert (gradVec.size() == ptcls.size());
@@ -401,15 +401,17 @@ ShortRangeClass::GradAction(int slice1, int slice2,
       PairActionFitClass &PA=*(PathData.Actions.PairMatrix(species1,species2));
       if (ptcl1 != ptcl2) {
 	for (int slice=slice1; slice<slice2; slice += skip) {
-	  	  dVec r, rp;
+	  //	  double check=0.0;
+	  dVec r, rp;
 	  double rmag, rpmag, du_dq, du_dz;
 	  Path.DistDisp(slice, slice+skip, ptcl1, ptcl2, rmag, rpmag, r, rp);
+	  //	  check += dUdR(slice,ptcl1,ptcl2,level)+dUdR(slice+skip,ptcl1,ptcl2,level);
 	  double q = 0.5*(rmag+rpmag);
 	  double z = (rmag-rpmag);
 	  double s2 = dot (r-rp, r-rp);
 	  PA.Derivs(q,z,s2,level,du_dq, du_dz);
-	  Vec3 rhat  = (1.0/rmag)*r;
-	  Vec3 rphat = (1.0/rpmag)*rp;
+	  dVec rhat  = (1.0/rmag)*r;
+	  dVec rphat = (1.0/rpmag)*rp;
 	  
 	  double g1 = 1.0;
 	  double g2 = 1.0;
@@ -419,6 +421,8 @@ ShortRangeClass::GradAction(int slice1, int slice2,
 	  }
 	  gradVec(pi) -= (g1*(0.5*du_dq + du_dz)*rhat + 
 			  g2*(0.5*du_dq - du_dz)*rphat);
+	  //	  cerr<<"VALS: "<<(g1*(0.5*du_dq + du_dz)*rhat + 
+	  //			   g2*(0.5*du_dq - du_dz)*rphat)<<" "<<check<<endl;
 	  // gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
 	  /// Now, subtract off long-range part that shouldn't be in
 	  /// here 
@@ -429,10 +433,10 @@ ShortRangeClass::GradAction(int slice1, int slice2,
       }
     }
   }
-#else
-  cerr<<"Gradient not working in 2d"<<endl;
-  assert(1==2);
-#endif
+
+  //  cerr<<"Gradient not working in 2d"<<endl;
+  //  assert(1==2);
+
 }
 
 
