@@ -25,6 +25,7 @@
 #include "DiagonalActionClass.h"
 #include "ShortRangeClass.h"
 #include "ShortRangeOnClass.h"
+#include "ShortRangeOn_diagonal_Class.h"
 #include "ShortRangeApproximateClass.h"
 #include "ShortRangePrimitive.h"
 #include "LongRangeClass.h"
@@ -769,14 +770,26 @@ void
 ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong, 
 		      double &node, double &vShort, double &vLong,
 		      double &duNonlocal)
+{
+  double residual;
+  Energy(kinetic,dUShort,dULong,node,vShort,vLong,duNonlocal,residual);
+}
+
+void
+ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong, 
+		      double &node, double &vShort, double &vLong,
+		      double &duNonlocal,
+		      double &residual)
 //void ActionsClass::Energy(map<double>& Energies)
 {
 	//double kinetic, dUShort, dULong, node, vShort, vLong;
   bool doLongRange = HaveLongRange() && UseLongRange;
   int M = PathData.Path.NumTimeSlices()-1;
   kinetic = Kinetic.d_dBeta (0, M, 0);
-  if (PathData.Path.OrderN)
+  if (PathData.Path.OrderN){
     dUShort=ShortRangeOn.d_dBeta(0,M,0);
+    residual=((ShortRangeOn_diagonal_class*)(GetAction("DiagonalActionOrderN")))->residual_energy();
+  }
   else
     dUShort = ShortRange.d_dBeta (0, M, 0);
   dULong=0.0;
