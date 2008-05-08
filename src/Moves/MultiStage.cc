@@ -52,6 +52,7 @@ void MultiStageClass::MakeMove()
   struct timezone tz;
 
 
+
   while (stageIter!=Stages.end() && toAccept){
     gettimeofday(&start, &tz);
     toAccept = (*stageIter)->Attempt(Slice1,Slice2,
@@ -59,7 +60,7 @@ void MultiStageClass::MakeMove()
   gettimeofday(&end, &tz);
   TimeSpent2 += (double)(end.tv_sec-start.tv_sec) +
     1.0e-6*(double)(end.tv_usec-start.tv_usec);
-
+  
 
 //     if (toAccept){
 //       NewMoveProb*=(*stageIter)->NewSample*(*stageIter)->AcceptProb;
@@ -74,7 +75,6 @@ void MultiStageClass::MakeMove()
     stageIter++;
   }
 
-  //  cerr<<"Out "<<endl;
   if (toAccept){
     Accept();
   }
@@ -88,6 +88,7 @@ void MultiStageClass::MakeMove()
 
 void MultiStageClass::Accept()
 {
+  //  cerr<<"going to accept"<<endl;
   PathData.AcceptMove(Slice1,Slice2,ActiveParticles);
   for (list<StageClass*>::iterator stageIter=Stages.begin();
        stageIter!=Stages.end();stageIter++){
@@ -100,6 +101,7 @@ void MultiStageClass::Accept()
 
 void MultiStageClass::Reject()
 {
+  //  cerr<<"Going to reject"<<endl;
   PathData.RejectMove(Slice1,Slice2,ActiveParticles);
   for (list<StageClass*>::iterator 
 	 stageIter=Stages.begin();stageIter!=Stages.end();stageIter++){
