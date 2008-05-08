@@ -79,6 +79,8 @@ void DavidLongRangeClassYk::Build_MultipleSpecies()
 
 void DavidLongRangeClassYk::BuildRPA_SingleSpecies()
 {
+  for (int i=0;i<uk.extent(1);i++)
+    uk(0,i)=-1;
   int speciesNum=0;
   double vol=1.0;
   for (int dim=0;dim<NDIM;dim++)
@@ -231,6 +233,7 @@ DavidLongRangeClassYk::SingleAction (int slice1, int slice2,
   struct timezone tz;
   gettimeofday(&start, &tz);
 
+  int skip = 1<<level;
 
   //int species=0;
   set<int> speciesList;
@@ -240,16 +243,33 @@ DavidLongRangeClassYk::SingleAction (int slice1, int slice2,
     speciesList.insert(speciesList.begin(), spec);
   }
 
-  if (GetMode() == NEWMODE)
-    Path.UpdateRho_ks(slice1, slice2, activeParticles, level);
-
+  bool only_do_inclusive=false;
+  if (slice1==0 && slice2==PathData.Path.NumTimeSlices()-1)
+    only_do_inclusive=false;
+  else
+    only_do_inclusive=true;
+  //only_do_inclusive=false;
+  if (GetMode() == NEWMODE){
+    if (!only_do_inclusive)
+      Path.UpdateRho_ks(slice1, slice2-skip, activeParticles, level);
+    else
+      Path.UpdateRho_ks(slice1+skip,slice2-skip,activeParticles,level);
+  }
+  
   double total=0;
   double factor;
+  int startSlice=slice1;
+  int endSlice=slice2-skip;
+  if (only_do_inclusive){
+    startSlice=slice1+skip;
+    endSlice=slice2-skip;
+  }
+
   for (int ki=0; ki<Path.kVecs.size(); ki++) {
-    for (int slice=slice1;slice<=slice2;slice++){
-      if ((slice == slice1) || (slice==slice2))
-	factor = 0.5;
-      else
+    for (int slice=startSlice;slice<=endSlice;slice+=skip){
+      //      if ((slice == slice1) || (slice==slice2))
+      //	factor = 0.5;
+      //      else
 	factor = 1.0;
       for(set<int>::iterator it = speciesList.begin(); it!=speciesList.end(); it++) {
         int species = *it;
