@@ -213,12 +213,14 @@ void BisectionStageClass::WriteRatio()
 
 void BisectionStageClass::Accept()
 {
+  LocalStageClass::Accept();
   //do nothing for now
   
 }
 
 void BisectionStageClass::Reject()
 {
+  LocalStageClass::Reject();
   //do nothing for now
 
 }
