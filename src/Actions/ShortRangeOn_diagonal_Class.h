@@ -30,18 +30,40 @@ protected:
   Array<PairActionFitClass*,2> &PairMatrix;
   Array<bool,1> DoPtcl;
   Array<bool,1> todoIt;
+  Array<int,1> ptcls;
+  Array<dVec,1> gradVec;
+  Array<double,1> gradVecSquared;
+  vector<double> distancesNew;
+  vector<double> distancesOld;
+  vector<double> factorArrayNew;
+  vector<double> factorArrayOld;
+  vector<double> *distances;
+  vector<double> *factorArray;
 public:
+  void AcceptCopy (int slice1, int slice2);
+  void RejectCopy (int slice1, int slice2);
+  
   void Read (IOSectionClass &in);
   double SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &activeParticles, int level);
   double SingleAction_slow (int slice1, int slice2,
 			    const Array<int,1> &changedParticles,
 			    int level);
+  double SingleAction_fast (int slice1, int slice2,
+			    const Array<int,1> &changedParticles,
+			    int level);
+
 
   double d_dBeta (int slice1, int slice2, int level);
   string GetName();
+  double residual_energy();
+  void GradAction_help(int slice1, int slice2,
+		       const Array<int,1> &ptcls, 
+		       int level,
+		       Array<dVec,1> &gradVec,
+		       Array<double,1> &gradVecSquared);
   ShortRangeOn_diagonal_class (PathDataClass &pathData,
-		   Array<PairActionFitClass*, 2> &pairMatrix);
+			       Array<PairActionFitClass*, 2> &pairMatrix);
 };
 
 #endif

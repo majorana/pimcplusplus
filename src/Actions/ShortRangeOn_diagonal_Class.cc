@@ -21,10 +21,127 @@
 ///DO NOT USE IF YOUR CUTOFF IS SUCH THAT ALL PARTICLE WILL BE INCLUDED IN ANY DIRECTION! THERE IS A BUG THAT WILL CAUSE IT TO BREAK!
 ///This has to be called after pathdata knows how many
 ///particles it has
+void ShortRangeOn_diagonal_class::AcceptCopy (int slice1, int slice2)
+{
+  distancesNew.clear();
+  distancesOld.clear();
+  factorArrayNew.clear();
+  factorArrayOld.clear();
+
+}
+void ShortRangeOn_diagonal_class::RejectCopy (int slice1, int slice2)
+{
+  distancesNew.clear();
+  factorArrayNew.clear();
+
+  distancesOld.clear();
+  factorArrayOld.clear();
+
+
+}
+
+double 
+ShortRangeOn_diagonal_class::residual_energy()
+{
+  int M=PathData.Path.NumTimeSlices()-1;
+  int numParticles=PathData.Path.NumParticles();
+  for (int i=0;i<PathData.Path.NumParticles();i++)
+    ptcls(i)=i;
+  gradVec=0.0;
+  gradVecSquared=0.0;
+  GradAction_help(0,M,ptcls,0,gradVec,gradVecSquared);
+  double totalEnergy=0.0;
+  for (int i=0;i<PathData.Path.NumParticles();i++){
+    //    cerr<<gradVec(i)<<endl;
+    double lambda=PathData.Path.ParticleSpecies(i).lambda;
+    totalEnergy-=lambda/3.0*dot(gradVec(i),gradVec(i));
+    totalEnergy+=1.0/3.0*gradVecSquared(i);
+  }
+  return totalEnergy;
+}
+
+
+//Gradient of the action only works in 3d!!!!!!!
+void
+ShortRangeOn_diagonal_class::GradAction_help(int slice1, int slice2, 
+					     const Array<int,1> &ptcls, 
+					     int level,
+					     Array<dVec,1> &gradVec,
+					     Array<double,1> &gradVecSquared)
+{
+
+  PathClass &Path = PathData.Path;
+  int skip = (1<<level);
+  assert (gradVec.size() == ptcls.size());
+  assert(gradVecSquared.size()==ptcls.size());
+  for (int pi=0; pi<ptcls.size(); pi++) {
+    int ptcl1 = ptcls(pi);
+    int species1 = Path.ParticleSpeciesNum(ptcl1);
+    double lambda_i=PathData.Path.ParticleSpecies(ptcl1).lambda;
+    for (int ptcl2=0; ptcl2<Path.NumParticles(); ptcl2++) {
+      double lambda_j=PathData.Path.ParticleSpecies(ptcl2).lambda;
+      int species2 = Path.ParticleSpeciesNum(ptcl2);
+      PairActionFitClass &PA=*(PathData.Actions.PairMatrix(species1,species2));
+      if (ptcl1 != ptcl2) {
+	for (int slice=slice1; slice<slice2; slice += skip) {
+	  //	  double check=0.0;
+	  dVec r, rp;
+	  double rmag, rpmag, du_dq, du_dz;
+	  Path.DistDisp(slice, slice+skip, ptcl1, ptcl2, rmag, rpmag, r, rp);
+	  //	  check += dUdR(slice,ptcl1,ptcl2,level)+dUdR(slice+skip,ptcl1,ptcl2,level);
+	  double q = 0.5*(rmag+rpmag);
+	  double z = (rmag-rpmag);
+	  double s2 = dot (r-rp, r-rp);
+	  PA.Derivs(q,z,s2,level,du_dq, du_dz);
+	  dVec rhat  = (1.0/rmag)*r;
+	  dVec rphat = (1.0/rpmag)*rp;
+	  
+	  double g1 = 1.0;
+	  double g2 = 1.0;
+
+	  dVec grad_ij = - (g1*(0.5*du_dq + du_dz)*rhat + 
+			  g2*(0.5*du_dq - du_dz)*rphat);
+// 	  cerr<<"ptcls: "<<ptcl1<<" "<<ptcl2<<" "<<slice<<" "<<slice+skip<<endl;
+// 	  cerr<<"rmags "<<rhat<<" "<<rphat<<" "<<rmag<<" "<<rpmag<<endl;
+// 	  cerr<<"pre-vals "<<q<<" "<<z<<" "<<s2<<" "<<du_dq<<" "<<du_dz<<endl;
+// 	  cerr<<"grad_ij is "<<grad_ij<<endl;
+	  if (ptcl1!=ptcl2)
+	    gradVec(pi) += grad_ij;
+	  if (ptcl1<ptcl2)
+	    gradVecSquared(pi) += dot(grad_ij,grad_ij)*(lambda_i+lambda_j);
+	  
+  
+	  //	  cerr<<"VALS: "<<(g1*(0.5*du_dq + du_dz)*rhat + 
+	  //			   g2*(0.5*du_dq - du_dz)*rphat)<<" "<<check<<endl;
+	  // gradVec(pi) -= (0.5*du_dq*(rhat+rphat) + du_dz*(rhat-rphat));
+	  /// Now, subtract off long-range part that shouldn't be in
+	  /// here 
+	  if (PA.IsLongRange() && PathData.Actions.UseLongRange)
+	    gradVec(pi) += 0.5*(PA.Ulong(level).Deriv(rmag)*g1*rhat+
+				PA.Ulong(level).Deriv(rpmag)*g2*rphat);
+	}
+      }
+    }
+  }
+
+  //  cerr<<"Gradient not working in 2d"<<endl;
+  //  assert(1==2);
+
+}
+
+
 void ShortRangeOn_diagonal_class::Read(IOSectionClass& in)
 {
   DoPtcl.resize(PathData.Path.NumParticles());
   todoIt.resize(PathData.Path.NumParticles());
+  distancesNew.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
+  factorArrayNew.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
+  distancesOld.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
+  factorArrayOld.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
+
+  ptcls.resize(PathData.Path.NumParticles());
+  gradVec.resize(PathData.Path.NumParticles());
+  gradVecSquared.resize(PathData.Path.NumParticles());
 }
 
 ShortRangeOn_diagonal_class::ShortRangeOn_diagonal_class(PathDataClass &pathData,
@@ -36,7 +153,7 @@ ShortRangeOn_diagonal_class::ShortRangeOn_diagonal_class(PathDataClass &pathData
 
 
 double 
-ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
+ShortRangeOn_diagonal_class::SingleAction_fast (int slice1, int slice2,
 				 const Array<int,1> &changedParticles,
 				 int level)
 {
@@ -134,12 +251,188 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
 }
 
 
+
+
+double 
+ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
+				 const Array<int,1> &changedParticles,
+				 int level)
+{
+  struct timeval start, end;
+  struct timezone tz;
+  gettimeofday(&start, &tz);
+
+  PathClass &Path = PathData.Path;
+  // First, sum the pair actions
+  double TotalU = 0.0;
+  int numChangedPtcls = changedParticles.size();
+  int skip = 1<<level;
+  double levelTau = Path.tau* (1<<level);
+  if (GetMode()==NEWMODE){
+    distances=&distancesNew;
+    factorArray=&factorArrayNew;
+  }
+  else if (GetMode()==OLDMODE){
+    distances=&distancesOld;
+    factorArray=&factorArrayOld;
+
+  }
+  int totalParticles=0;
+  int startSlice=slice1;
+  if (slice1==0 && slice2==PathData.Path.NumTimeSlices()-1){
+    startSlice=slice1;
+  }
+  else {
+    startSlice=slice1+skip;
+    skip=skip*2;
+  }
+
+  for (int slice=startSlice;slice<slice2;slice+=skip){
+    double factor=1.0;
+    if (slice==slice1  || slice==slice2)
+      factor=0.5;
+    Path.DoPtcl=true;
+    
+    //     ///changed particles loop against themselvs
+    for (int ptcl1Index=0;ptcl1Index<numChangedPtcls;ptcl1Index++){
+      int ptcl1 = changedParticles(ptcl1Index);
+      int species1=Path.ParticleSpeciesNum(ptcl1);
+      Path.DoPtcl(ptcl1)=false;
+      for (int ptcl2Index=ptcl1Index+1;ptcl2Index<numChangedPtcls;ptcl2Index++){
+    	int ptcl2=changedParticles(ptcl2Index);
+	//    	PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
+    	dVec r, rp;
+    	double rmag, rpmag;
+	PathData.Path.DistDispFast(slice, ptcl1, ptcl2,
+				   rmag, r);
+
+	  distances->push_back(rmag);
+	  factorArray->push_back(factor);
+
+	//    	double U;
+	//	U = factor*((DavidPAClass*)&PA)->UDiag_exact(rmag, level);
+	//    	TotalU += U;
+      }
+    }
+
+
+    for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
+      int ptcl1 = changedParticles(ptcl1Index);
+      Path.DoPtcl(ptcl1) = false;
+      int species1=Path.ParticleSpeciesNum(ptcl1);
+      int xBox,yBox;
+      Path.Cell.FindBox(Path(slice,ptcl1),xBox,yBox);
+      //      cerr<<"Affected cells"<<Path.Cell.AffectedCells.size()<<endl;
+      int numAffectedCells=Path.Cell.AffectedCells.size();
+
+ {
+
+      for (int cellVal=0;cellVal<numAffectedCells;cellVal++){ 
+	int rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
+	int rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
+	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox).Particles(slice);
+	for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
+	  int ptcl2=*i;
+	  if (Path.DoPtcl(ptcl2)){ //I think this is ok
+	    ///	    PairActionFitClass &PA = *(PairMatrix(species1, Path.ParticleSpeciesNum(ptcl2)));
+	    dVec r;
+	    double rmag;
+	    PathData.Path.DistDispFast(slice, ptcl1,ptcl2,
+				       rmag, r);
+	    //	    rmag=2.0;
+	    //	    double U=0.0;
+
+	      distances->push_back(rmag);
+	      factorArray->push_back(factor);
+
+	    //	    double U = factor*((DavidPAClass*)&PA)->UDiag_exact(rmag, level);
+	    //  double U = factor*PA.Udiag(rmag, level);
+	    //	    TotalU += U;
+	  }
+	}
+      }
+    } //parallel end
+  }
+    
+
+    
+  } //end slice loop
+  PairActionFitClass &PA = *(PairMatrix(0, 0));
+  DavidPAClass *DPA=((DavidPAClass*)&PA);
+  int loopSize=distances->size();
+  double TotalUp=0.0;
+//   cerr<<"START"<<endl;
+//   cerr<<"Diagonal end is "<<((DPA->UdiagSpline)(0)).End()<<endl;
+//   cerr<<"Diagonal start is "<<((DPA->UdiagSpline)(0)).Start()<<endl;
+//   cerr<<"dx is "<<((DPA->UdiagSpline)(4)).dx<<" "<<((DPA->UdiagSpline)(4)).dxInv<<endl;
+//   cerr<<"second is "<<((DPA->UdiagSpline)(4)).Data(10)<<endl;
+//   cerr<<"third  is "<<((DPA->UdiagSpline)(4)).Data.size()<<endl;
+//   double deltar=((DPA->UdiagSpline(0)).End()-(DPA->UdiagSpline(0)).Start())/(1999);
+//   cerr<<"deltar is "<<deltar<<endl;
+//   for (double r=0.01;r<7;r+=deltar){
+//     cerr<<r<<" ";
+//     cerr<<DPA->Udiag(r, 0)<<" "; 
+//     cerr<<DPA->UDiag_exact(r, 0)<<endl; 
+    
+//     double id = ((DPA->UdiagSpline)(4)).dxInv*(r-((DPA->UdiagSpline)(4)).GridStart);
+//     double ipart;
+//     double frac = modf (id, &ipart);
+
+//     int i = (int) ipart;
+//     cerr<<"ipart is "<<ipart<<" "<<frac<<" "<<i<<" "<<id<<endl;
+//     cerr<<((1.0-frac)*((DPA->UdiagSpline)(4)).Data(i) + frac*((DPA->UdiagSpline)(4)).Data(i+1))<<endl;
+
+
+
+
+
+//   }
+//   exit(1);
+
+  for (int i=0;i<loopSize;i++){
+    //    cerr<<(*factorArray)[i]*DPA->Udiag((*distances)[i], level)<<" "; 
+    //    cerr<<(*factorArray)[i]*DPA->UDiag_exact((*distances)[i], level)<<endl; 
+
+      TotalU+=(*factorArray)[i]*DPA->Udiag((*distances)[i], level); 
+    //    TotalU+=DPA->Udiag((*distances)[i], level); 
+    //    TotalUp+=(*factorArray)[i]*DPA->UDiag_exact((*distances)[i], level); 
+
+//     double id = ((DPA->UdiagSpline)(level+4)).dxInv*((*distances)[i])-((DPA->UdiagSpline)(level+4)).GridStart;
+//     double ipart;
+//     double frac = modf (id, &ipart);
+
+//     int i = (int) ipart;
+//     //cerr<<"ipart is "<<ipart<<" "<<frac<<" "<<i<<" "<<id<<endl;
+//     TotalU+=(*factorArray)[i]*(((1.0-frac)*((DPA->UdiagSpline)(level+4)).Data(i) + frac*((DPA->UdiagSpline)(level+4)).Data(i+1)));
+
+
+
+  }
+
+  //  cerr<<"Diff: "<<TotalU<<" "<<TotalUp<<endl;
+  //  cerr<<setprecision(12)<<endl;
+  //  cerr<<"Diff: "<<TotalU-TotalUp<<endl;
+
+  //  cerr<<"My total number of particles is "<<totalParticles<<endl;
+  gettimeofday(&end,   &tz);
+  //  cerr<<"OUT IS "<< (double)(end.tv_sec-start.tv_sec) +
+  //    1.0e-6*(double)(end.tv_usec-start.tv_usec)<<endl;
+
+  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
+    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+  //  cerr<<"Time spent in diagonal class is "<<TimeSpent<<endl;
+  //  double checkU=SingleAction_slow(slice1,slice2,changedParticles,level);
+  //  cerr<<"CHECK: "<<checkU<<" "<<TotalU<<endl;
+  return (TotalU);
+} 
+
+
 double 
 ShortRangeOn_diagonal_class::SingleAction_slow (int slice1, int slice2,
 				 const Array<int,1> &changedParticles,
 				 int level)
 {
-  struct timeval start, end;
+  struct timeval start, end; 
   struct timezone tz;
   gettimeofday(&start, &tz);
 
