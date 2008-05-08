@@ -36,9 +36,10 @@ void EnergyClass::Accumulate()
   NumSamples++;
 
   	//map<double> Energies;
-  double kinetic, dUShort, dULong, node, vShort, vLong, tip5p, dUNonlocal;
+  double kinetic, dUShort, dULong, node, vShort, vLong, tip5p, dUNonlocal,
+    residual;
   PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong,
-			   dUNonlocal);
+			   dUNonlocal,residual);
   //PathData.Actions.Energy(Energies);
 	//kinetic = Energies["kinetic"];
 	//dUShort = Energies["dUShort"];
@@ -57,6 +58,7 @@ void EnergyClass::Accumulate()
   VShortSum  += vShort;
   VLongSum   += vLong;
   dUNonlocalSum += dUNonlocal;
+  Residual += residual;
   //  cerr<<"My get perm number is "<<myGetPermNumber<<endl;
   EnergyVals(myGetPermNumber)+=kinetic;
   //  cerr<<"ENERGY VVLAS"<<EnergyVals<<"ASDF "<<kinetic<<endl;
@@ -183,6 +185,7 @@ void EnergyClass::WriteBlock()
   VShortVar.Write  (Prefactor*PathData.Path.Communicator.Sum(VShortSum)*norm);
   VLongVar.Write   (Prefactor*PathData.Path.Communicator.Sum(VLongSum)*norm);
   dUNonlocalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(dUNonlocalSum)*norm);
+  ResidualVar.Write(Prefactor*PathData.Path.Communicator.Sum(Residual)*norm);
   //  cerr<<"norm is "<<norm<<endl;
   //  cerr<<"norm"<<EnergyVals<<endl;
   EnergyVals=EnergyVals*norm;
@@ -209,6 +212,7 @@ void EnergyClass::WriteBlock()
   VShortSum      = 0.0;
   VLongSum       = 0.0;
   dUNonlocalSum = 0.0;
+  Residual=0.0;
   EnergyVals=0.0;
 //   TotalActionSum = 0.0;
 //   ExpTotalActionSum = 0.0;

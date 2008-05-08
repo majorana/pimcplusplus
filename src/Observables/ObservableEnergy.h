@@ -25,12 +25,12 @@ class EnergyClass : public ObservableClass
 private:
   int GetPermNumber();
   double TotalSum, KineticSum, dUShortSum, dULongSum, NodeSum, 
-    VShortSum, VLongSum, dUNonlocalSum;
+    VShortSum, VLongSum, dUNonlocalSum,Residual;
   //, TotalActionSum, ExpTotalActionSum, TIP5PSum;
   Array<double,1> EnergyVals;
   ObservableVecDouble1 EnergyValsVar;
   ObservableDouble TotalVar, KineticVar, dUShortVar, dULongVar, NodeVar,
-    VShortVar, VLongVar, dUNonlocalVar;
+    VShortVar, VLongVar, dUNonlocalVar,ResidualVar;
   //, TotalActionVar, ExpTotalActionVar, TIP5PVar;
 
   int NumSamples;
@@ -58,7 +58,8 @@ public:
       VShortVar    ("VShort",IOSection,myPathData.Path.Communicator), 
       VLongVar     ("VLong",IOSection,myPathData.Path.Communicator),
       dUNonlocalVar("dUNonlocal", IOSection,myPathData.Path.Communicator),
-      EnergyValsVar("Energy Vals",IOSection,myPathData.Path.Communicator)
+      EnergyValsVar("Energy Vals",IOSection,myPathData.Path.Communicator),
+      ResidualVar("Residual Energy",IOSection,myPathData.Path.Communicator)
 // TotalActionVar ("TotalAction",IOSection,myPathData.Path.Communicator),
 // ExpTotalActionVar ("ExpTotalAction",IOSection,myPathData.Path.Communicator)
 // TIP5PVar  ("TIP5P",IOSection,myPathData.Path.Communicator)
@@ -71,6 +72,7 @@ public:
     VShortSum     = 0.0;
     VLongSum      = 0.0;
     dUNonlocalSum = 0.0;
+    Residual=0.0;
 //     TotalActionSum = 0.0;
 //     ExpTotalActionSum = 0.0;
     NumSamples = 0;
