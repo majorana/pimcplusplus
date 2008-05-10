@@ -848,7 +848,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       ///      cerr<<"I'm about ot actually initialize dukj now!"<<endl;
       tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
       tempdUkj2(NumGridPoints-1,Range::all(),Range::all())=0.0; ///NOT SURE ABOUT THIS!!!
-      const int numDiagPoints = 200;
+      const int numDiagPoints = 2000;
       for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
 	
 	if (NMax==2){ //NMax again
@@ -872,7 +872,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   }
   ///  cerr << "NumTau = " << NumTau << endl;
   for (int level=0; level<NumTau; level++) {
-    const int numDiagPoints = 200;
+    const int numDiagPoints = 20000;
     Array<double,1> udiag(numDiagPoints);
     double start = ukj(level).grid->Start;
     double end   = ukj(level).grid->End;
@@ -1116,7 +1116,7 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
       ///      cerr<<"I'm about ot actually initialize dukj now!"<<endl;
     tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
     tempdUkj2(NumGridPoints-1,Range::all(),Range::all())=0.0; ///NOT SURE ABOUT THIS!!!
-    const int numDiagPoints = 200;
+    const int numDiagPoints = 20000;
     for (int levelCounter=0;levelCounter<NumTau;levelCounter++){
 	
 	if(NMax==2){ //NMax again
@@ -1142,7 +1142,7 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
   cerr << "NumTau = " << NumTau << endl;
   for (int level=0; level<NumTau; level++) {
     cerr<<"level is "<<level<<endl;
-    const int numDiagPoints = 200;
+    const int numDiagPoints = 20000;
     Array<double,1> udiag(numDiagPoints);
     double start = ukj(level).grid->Start;
     double end   = ukj(level).grid->End;

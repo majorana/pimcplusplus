@@ -89,7 +89,9 @@ class Squarer2HDFParser:
 
   def ProcessSquarerInfo(self):
     print "ProcessSquarerInfo"
-    ### collect squarer run info 
+    ### collect squarer run info
+    print self.a
+    print self.a.NewSection
     self.a.NewSection("Squarer")
     self.a.NewSection("Units")
     g = self.next()
