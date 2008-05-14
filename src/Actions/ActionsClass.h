@@ -66,21 +66,22 @@ private:
 
   // new functionality
   // store pointers to ONLY action classes that are used (multiple instantiation also is allowed)
-  std::list<ActionBaseClass*> ActionList;
-  std::list<string> ActionLabels;
   void ReadPairActions(IOSectionClass &in);
   public:
   ActionBaseClass* GetAction(string name);
-
+  Array<PairActionFitClass*,1> PairArray;
   private:
   // This stores pointers to the pair actions.
-  Array<PairActionFitClass*,1> PairArray;
+
 
   PathDataClass &PathData;
   int MaxLevels; //is this the right place for this?
   void ReadNodalActions (IOSectionClass &in);
   FixedPhaseClass *FixedPhaseA, *FixedPhaseB;
 public:
+  std::list<ActionBaseClass*> ActionList;
+  std::list<string> ActionLabels;
+
   Array<double,1> TauValues;
   Array<PairActionFitClass*,1> SpecificHeatPairArray;
   // This stores pointers to pair action fits for each pair of species.
