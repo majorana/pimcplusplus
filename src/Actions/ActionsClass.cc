@@ -787,8 +787,9 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
   int M = PathData.Path.NumTimeSlices()-1;
   kinetic = Kinetic.d_dBeta (0, M, 0);
   if (PathData.Path.OrderN){
-    dUShort=ShortRangeOn.d_dBeta(0,M,0);
-    residual=((ShortRangeOn_diagonal_class*)(GetAction("DiagonalActionOrderN")))->residual_energy();
+    //    dUShort=ShortRangeOn.d_dBeta(0,M,0);
+    dUShort=((ShortRangeOn_diagonal_class*)(GetAction("DiagonalActionOrderN")))->d_dBeta(0,M,0);
+    //    residual=((ShortRangeOn_diagonal_class*)(GetAction("DiagonalActionOrderN")))->residual_energy();
   }
   else
     dUShort = ShortRange.d_dBeta (0, M, 0);
@@ -810,14 +811,14 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
       node += NodalActions(species)->d_dBeta(0, M, 0);
 
 
-  
-  for (int slice=0; slice <= M; slice++) {
-    double factor = ((slice==0)||(slice==M)) ? 0.5 : 1.0;
-    vShort += factor * ShortRangePot.V(slice);
-    if (doLongRange)
-      vLong  += factor *  LongRangePot.V(slice);
-   
-  }
+//   ///HACK! BUG! Removing V  
+//   for (int slice=0; slice <= M; slice++) {
+//     double factor = ((slice==0)||(slice==M)) ? 0.5 : 1.0;
+//     vShort += factor * ShortRangePot.V(slice);
+//     if (doLongRange)
+//       vLong  += factor *  LongRangePot.V(slice);
+ 
+//   }
   if (UseNonlocal)
     duNonlocal = Nonlocal.d_dBeta(0,M,0);
   else
