@@ -838,5 +838,5 @@ ShortRangeOn_diagonal_class::d_dBeta(int slice1, int slice2,int level)
 string 
 ShortRangeOn_diagonal_class::GetName()
 {
-  return "ShortRangeOn";
+  return "ShortRangeOn_diagonal";
 }
