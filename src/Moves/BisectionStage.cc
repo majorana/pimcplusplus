@@ -264,8 +264,6 @@ double BisectionStageClass::Sample(int &slice1,int &slice2,
 
   for (int ptclIndex=0;ptclIndex<activeParticles.size();ptclIndex++){
     int ptcl=activeParticles(ptclIndex);
-    //HACK! BUG!
-    ///    ptcl=139;
     double lambda=PathData.Path.ParticleSpecies(ptcl).lambda;
     double sigma2=(1.0*lambda*levelTau);
     double sigma=sqrt(sigma2);
