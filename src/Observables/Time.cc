@@ -31,11 +31,14 @@ void MCTimeClass::WriteBlock()
     FirstTime=false;
     MoveTime.resize(Moves.size());
     ObservableTime.resize(Observables.size());
+    ActionTime.resize(Actions.size());
     MoveTime=0;
     ObservableTime=0;
+    ActionTime=0;
     TotalTime=0;
     Array<string,1> moveNames       (Moves.size());
     Array<string,1> observableNames (Observables.size());
+    Array<string,1> actionNames (Actions.size());
     list<MoveClass*>::iterator moveIter;
     int i=0;
     for (moveIter=Moves.begin();moveIter!=Moves.end();moveIter++) {
@@ -49,9 +52,16 @@ void MCTimeClass::WriteBlock()
       observableNames(i) = ((*observableIter)->Name);
       i++;
     } 
+    list<ActionBaseClass*>::iterator actionIter;
+    for (actionIter=Actions.begin(),i=0;
+	 actionIter!=Actions.end();actionIter++,i++) {
+      actionNames(i) = ((*actionIter)->GetName());
+    } 
+
     if (PathData.Path.Communicator.MyProc()==0) {
       IOSection.WriteVar("MoveNames", moveNames);
       IOSection.WriteVar("ObserveNames", observableNames);
+      IOSection.WriteVar("ActionNames", actionNames);
     }
   }
   gettimeofday(&end, &tz);
@@ -74,10 +84,18 @@ void MCTimeClass::WriteBlock()
     ObservableTime(i)=((*observeIter)->TimeSpent)/TotalTime;
     i++;
   }
+
+  list<ActionBaseClass*>::iterator actionIter; 
+  for (actionIter=Actions.begin(),i=0;
+       actionIter!=Actions.end();actionIter++,i++){
+    ActionTime(i)=((*actionIter)->TimeSpent)/TotalTime;
+  }
   
+
+
   MoveTimeVar.Write(MoveTime);
   ObservableTimeVar.Write(ObservableTime);
-
+  ActionTimeVar.Write(ActionTime);
 
   if (PathData.Path.Communicator.MyProc()==0)
     IOSection.FlushFile();
