@@ -658,8 +658,80 @@ ShortRangeOn_diagonal_class::SingleAction_slow (int slice1, int slice2,
 
 
 
+
+ double 
+ ShortRangeOn_diagonal_class::d_dBeta (int slice1, int slice2,
+				       int level)
+{
+  struct timeval start, end;
+  struct timezone tz;
+  PathClass &Path = PathData.Path;
+
+
+  double TotalU = 0.0;
+  int skip = 1<<level;
+  double levelTau = Path.tau* (1<<level);
+  if (GetMode()==NEWMODE){
+    distances=&distancesNew;
+    factorArray=&factorArrayNew;
+  }
+  else if (GetMode()==OLDMODE){
+    distances=&distancesOld;
+    factorArray=&factorArrayOld;
+
+  }
+  int totalParticles=0;
+  int startSlice=slice1;
+  for (int slice=startSlice;slice<slice2;slice+=skip){
+    double factor=1.0;
+    if (slice==slice1  || slice==slice2)
+      factor=0.5;
+    Path.DoPtcl=true;
+    for (int ptcl1=0; ptcl1<PathData.Path.NumParticles(); ptcl1++){
+      Path.DoPtcl(ptcl1) = false;
+      int species1=Path.ParticleSpeciesNum(ptcl1);
+      int xBox,yBox;
+      Path.Cell.FindBox(Path(slice,ptcl1),xBox,yBox);
+      int numAffectedCells=Path.Cell.AffectedCells.size();
+      {
+	
+	for (int cellVal=0;cellVal<numAffectedCells;cellVal++){ 
+	  int rxbox=(xBox+Path.Cell.AffectedCells(cellVal)[0] +2 * Path.Cell.GridsArray.extent(0)) % Path.Cell.GridsArray.extent(0);
+	  int rybox=(yBox+Path.Cell.AffectedCells(cellVal)[1] + 2 * Path.Cell.GridsArray.extent(1)) % Path.Cell.GridsArray.extent(1);
+	list<int> &ptclList=Path.Cell.GridsArray(rxbox,rybox).Particles(slice);
+	for (list<int>::iterator i=ptclList.begin();i!=ptclList.end();i++) {
+	  int ptcl2=*i;
+	  if (Path.DoPtcl(ptcl2)){ //I think this is ok
+	    dVec r;
+	    double rmag;
+	    PathData.Path.DistDispFast(slice, ptcl1,ptcl2,
+				       rmag, r);
+	    distances->push_back(rmag);
+	    factorArray->push_back(factor);
+	  }
+	}
+	}
+      } //parallel end
+    }
+    
+  } //end slice loop
+  PairActionFitClass &PA = *(PairMatrix(0, 0));
+  DavidPAClass *DPA=((DavidPAClass*)&PA);
+  int loopSize=distances->size();
+  double TotalUp=0.0;
+  for (int i=0;i<loopSize;i++){
+    TotalU+=(*factorArray)[i]*DPA->dUdiag((*distances)[i], 0); 
+    //TotalU+=(*factorArray)[i]*DPA->dUdiag_fast((*distances)[i], 0); 
+  }
+  return (TotalU);
+} 
+
+
+
+    
+
 double 
-ShortRangeOn_diagonal_class::d_dBeta(int slice1, int slice2,int level)
+ShortRangeOn_diagonal_class::d_dBeta_slow(int slice1, int slice2,int level)
 {
   PathClass &Path = PathData.Path;
   int xEffect=Path.Cell.Xeffect;
@@ -798,6 +870,7 @@ ShortRangeOn_diagonal_class::d_dBeta(int slice1, int slice2,int level)
   //  cerr<<"My total number of particles is "<<totalParticles<<endl;
   return (dU);
 }
+    
 
 
 
