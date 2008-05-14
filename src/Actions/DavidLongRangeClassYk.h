@@ -46,13 +46,15 @@ protected:
   ///The values of the action will be uk*\rho_k*\rho_{-k}
   //Array<double,1> uk;
   //Array<double,1> duk;
+public:
   Array<double,2> uk;
   Array<double,2> duk;
 
-public:
+
   //Array<double,1> Vlong_k;
   Array<double,2> Vlong_k;
   // void Init(IOSectionClass &in);
+  Array<double,1> yk_zero;
   void Read (IOSectionClass &in);
   void ReadYk();
   void BuildRPA_SingleSpecies();
