@@ -31,6 +31,8 @@ private:
   ObservableVecDouble1 EnergyValsVar;
   ObservableDouble TotalVar, KineticVar, dUShortVar, dULongVar, NodeVar,
     VShortVar, VLongVar, dUNonlocalVar,ResidualVar;
+  ObservableVecDouble1 VTailSRVar;
+  ObservableDouble VTailLRVar;
   //, TotalActionVar, ExpTotalActionVar, TIP5PVar;
 
   int NumSamples;
@@ -59,7 +61,9 @@ public:
       VLongVar     ("VLong",IOSection,myPathData.Path.Communicator),
       dUNonlocalVar("dUNonlocal", IOSection,myPathData.Path.Communicator),
       EnergyValsVar("Energy Vals",IOSection,myPathData.Path.Communicator),
-      ResidualVar("Residual Energy",IOSection,myPathData.Path.Communicator)
+      ResidualVar("Residual Energy",IOSection,myPathData.Path.Communicator),
+      VTailSRVar("VTail Short Range",IOSection,myPathData.Path.Communicator),
+      VTailLRVar("VTail Long Range",IOSection,myPathData.Path.Communicator)
 // TotalActionVar ("TotalAction",IOSection,myPathData.Path.Communicator),
 // ExpTotalActionVar ("ExpTotalAction",IOSection,myPathData.Path.Communicator)
 // TIP5PVar  ("TIP5P",IOSection,myPathData.Path.Communicator)

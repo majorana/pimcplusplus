@@ -24,6 +24,7 @@
 #include "../Actions/QBoxAction.h"
 #include "../Actions/ST2WaterClass.h"
 #include "../Actions/QMCSamplingClass.h"
+#include "../Actions/DavidLongRangeClassYk.h"
 
 // Fix to include final link between link M and 0
 void EnergyClass::Accumulate()
@@ -40,6 +41,8 @@ void EnergyClass::Accumulate()
     residual;
   PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong,
 			   dUNonlocal,residual);
+
+
   //PathData.Actions.Energy(Energies);
 	//kinetic = Energies["kinetic"];
 	//dUShort = Energies["dUShort"];
@@ -174,9 +177,24 @@ int EnergyClass::GetPermNumber()
 }
 void EnergyClass::WriteBlock()
 {
+  
   int nslices=PathData.Path.TotalNumSlices;
   double norm = 1.0/((double)NumSamples*(double)nslices);
-  
+  if (FirstTime){
+    FirstTime=false;
+    Array<double,1> vtail;
+    vtail.resize(PathData.Actions.PairArray.size());
+    double longrange_vtail;
+    for (int i=0;i<PathData.Actions.PairArray.size();i++)
+      vtail(i)=((DavidPAClass*)(PathData.Actions.PairArray(i)))->Vimage;
+    if (PathData.Path.DavidLongRange){
+      //      DavidLongRangeClassYk *lr = (DavidLongRangeClassYk*)(PathData.Actions.GetAction("DavidLongRange"));
+      DavidLongRangeClassYk *lr = (DavidLongRangeClassYk*)(&(PathData.Actions.DavidLongRange));
+      longrange_vtail=0.5*lr->yk_zero(0)*PathData.Path.NumParticles()/Path.GetVol();
+    }
+    VTailSRVar.Write(vtail);
+    VTailLRVar.Write(longrange_vtail);
+  }
   TotalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(TotalSum)*norm);
   KineticVar.Write (Prefactor*PathData.Path.Communicator.Sum(KineticSum)*norm);
   dUShortVar.Write (Prefactor*PathData.Path.Communicator.Sum(dUShortSum)*norm);
@@ -387,6 +405,7 @@ void EnergySignClass::ShiftData (int NumTimeSlices)
 
 void EnergySignClass::WriteBlock()
 {
+
   int nslices=PathData.Path.TotalNumSlices;
   double norm = 1.0/((double)NumSamples*(double)nslices);
 
