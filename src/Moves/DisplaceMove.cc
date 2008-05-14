@@ -16,6 +16,13 @@
 
 #include "DisplaceMove.h"
 
+void DisplaceMoveClass::WriteRatio()
+{
+  NumAttemptedVar.Write(NumAttempted);
+  NumAcceptedVar.Write(NumAccepted);
+  MultiStageClass::WriteRatio();
+}
+
 double DisplaceStageClass::Sample (int &slice1, int &slice2,
 				   Array<int,1> &activeParticles)
 {
@@ -118,8 +125,10 @@ DisplaceMoveClass::MakeMove()
   for (int i=0;i<PathData.Path.NumParticles();i++){
     ActiveParticles(0)=i;
     // Now call MultiStageClass' MakeMove
-    if (PathData.Path.Random.Common()<0.05)
+    if (PathData.Path.Random.Common()<0.05){
+      NumAttempted++;
       MultiStageClass::MakeMove();
+    }
   }
 
 

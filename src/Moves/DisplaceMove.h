@@ -50,15 +50,27 @@ private:
   /// This is the standard distribution of the displacement gaussian
   double Sigma;
   DisplaceStageClass DisplaceStage;
+  ObservableInt NumAttemptedVar;
+  ObservableInt NumAcceptedVar;
+  int NumAttempted;
 public:
   // Read the parameters from the input file
   int CurrentPtcl;
+  inline double AcceptanceRatio() 
+  {
+    double accept_ratio=(double)(NumAccepted)/(double)NumAttempted;
+    return accept_ratio;
+  }
+  void WriteRatio();
   void Read (IOSectionClass &in);
   // Actually attempts the move and accepts or rejects
   void MakeMove();
   DisplaceMoveClass (PathDataClass &pathData, IOSectionClass &outSection) :
+    NumAttempted(0),
     MultiStageClass(pathData, outSection),
-    DisplaceStage(pathData, outSection)
+    DisplaceStage(pathData, outSection),
+    NumAttemptedVar("NumAttempted", IOSection, pathData.Path.Communicator),
+    NumAcceptedVar("NumAccepted", IOSection, pathData.Path.Communicator)
   {
     DumpFreq = 20;
   }
