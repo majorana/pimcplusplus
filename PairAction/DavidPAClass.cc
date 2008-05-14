@@ -893,6 +893,9 @@ void DavidPAClass::ReadLongRangeHDF5(IOSectionClass &in)
 
 
   assert(in.ReadVar("kPoints",kVals));  
+  kCutoff=0.0;
+  if (!in.ReadVar("kcut",kCutoff))
+    cerr<<"kCutoff is not specified.  Files could be inconsistent";
   assert(in.ReadVar("u_k",uk_long));
   assert(in.ReadVar("Box",LongRangeBox));
   assert(in.ReadVar("mass1",LongRangeMass1));
@@ -913,6 +916,9 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
   int numOfFits;
   assert(in.OpenSection("Squarer"));
   assert(in.ReadVar("NumFits", numOfFits));
+  Vimage=0.0;
+  if (!in.ReadVar("vimage",Vimage))
+    cerr<<"WARNING! This is a pre-vimage dm matrix and will not give the right correction to the energy"<<endl;
   in.CloseSection();
   n = numOfFits;
 

@@ -45,6 +45,8 @@ class DavidPAClass : public PairActionFitClass
   /// Reads a Fortran 3 tensor
   inline void ReadFORTRAN3Tensor(ifstream &infile, blitz::Array<double,3> &tempUkj);
  public:
+  double Vimage;
+  double kCutoff;
   int dummyPairActionClass;
   blitz::Array<double,1> Potential; 
   string type1,type2;

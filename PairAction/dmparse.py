@@ -3,6 +3,8 @@ from IO import *
 import sys
 from numpy import *
 
+
+
 def dToe(myString):
   newString=""
   for i in myString:
@@ -13,14 +15,16 @@ def dToe(myString):
   return newString
       
 class LongRangeParser:
-  def __init__(self,baseName,outfilename):
+  def __init__(self,baseName,outfilename,kcut):
      self.fileName=baseName
      self.a=IOSectionClass()
      self.a.OpenFile(outfilename)
+     self.kcut=kcut
   def ReadYK(self):
      vals=pylab.load(self.fileName+"yk")
      self.a.NewSection("LongRange")
      self.a.WriteVar("Type","yk")
+     self.a.WriteVar("kcut",self.kcut)
      kPoints=vals[:,0].copy()
      uk=vals[:,1].copy()
      self.a.WriteVar("kPoints",kPoints)
@@ -119,6 +123,14 @@ class Squarer2HDFParser:
     self.next()
     self.numFits = int(self.next())
     self.a.WriteVar("NumFits",self.numFits)
+    self.find("POT")
+    self.next()
+    self.next()
+    self.kcut=float(self.next())
+    print "KCUT IS",self.kcut
+    self.find("VIMAGE")
+    self.vimage=float(self.next())
+    self.a.WriteVar("vimage",self.vimage)
     self.a.CloseSection()
     #self.a.WriteVar("NumFits",self.numFits)
     self.a.FlushFile()
@@ -391,7 +403,7 @@ def main():
   if os.path.exists(infilename):
       print "About to process the long range file",infilename
       #should check to see if it's consistent somehow?
-      longRangeParse=LongRangeParser(basename,outfilename)
+      longRangeParse=LongRangeParser(basename,outfilename,sq.kcut)
       longRangeParse.ReadYK()
       longRangeParse.Done()
 main()
