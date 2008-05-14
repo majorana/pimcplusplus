@@ -93,6 +93,11 @@ void DavidLongRangeClassYk::BuildRPA_SingleSpecies()
   cerr<<"Vol is "<<vol<<endl;
   for (int i=0;i<pa.kVals.size();i++){
     double k=pa.kVals(i);
+    if (fequals(0.0,k,1e-10))
+      yk_zero(0)=pa.uk_long(i);
+  }
+  for (int i=0;i<pa.kVals.size();i++){
+    double k=pa.kVals(i);
     double arg=1.0+ncomps*2.0*pa.uk_long(i)/(lambda*k*k*vol);
     double theta=0.5*k*k*lambda*Path.tau;
     double q;
@@ -137,10 +142,13 @@ void DavidLongRangeClassYk::ReadYk()
   uk.resize(PairArray.size(), Path.kVecs.size());
   duk.resize(PairArray.size(), Path.kVecs.size());
   Vlong_k.resize(PairArray.size(), Path.kVecs.size());
-  if(PairArray.size()==1)
+  yk_zero.resize(PairArray.size());
+  if(PairArray.size()==1){
     BuildRPA_SingleSpecies();  
+  }
   else {
     Build_MultipleSpecies();
+
   }
 
 //   uk=-999;
