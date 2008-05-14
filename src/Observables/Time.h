@@ -32,11 +32,13 @@ private:
   Array<double,1> ObservableTime;
   ObservableVecDouble1 ObservableTimeVar;
   ObservableDouble TotalTimeVar;
+  ObservableVecDouble1 ActionTimeVar;
+  Array<double,1> ActionTime;
   int StartTime;
   double TotalTime;
   list<MoveClass*>  &Moves;
   list<ObservableClass*> &Observables;
-
+  list<ActionBaseClass* > &Actions;
 public:
   struct timeval start, end;
   struct timezone tz;
@@ -46,16 +48,21 @@ public:
   void Read(IOSectionClass& in);
   MCTimeClass(PathDataClass &myPathData, IOSectionClass &ioSection,
 	      list<MoveClass*> &moves,
-	      list<ObservableClass*> &observables)
+	      list<ObservableClass*> &observables,
+	      list<ActionBaseClass* > &actions)
     : ObservableClass(myPathData, ioSection) , 
       MoveTimeVar("MoveTime",IOSection,myPathData.Path.Communicator),
       ObservableTimeVar("ObservableTime",
 			IOSection,myPathData.Path.Communicator),
+      ActionTimeVar("ActionTime",
+		    IOSection,myPathData.Path.Communicator),
       TotalTimeVar("TotalTime",
 		   IOSection,myPathData.Path.Communicator),
 
       Moves(moves),
-      Observables(observables)
+      Observables(observables),
+      Actions(actions)
+
   {
     TimesCalled=0;
   }
