@@ -260,7 +260,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     else if (observeType=="VacancyLocation")
       tempObs = new VacancyLocClass(PathData,OutFile);
     else if (observeType=="TimeAnalysis")
-      tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables);
+      tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables,
+				PathData.Actions.ActionList);
     else if (observeType=="TimeLindenman")
       tempObs= new TimeLindenmanClass(PathData,OutFile);
     else if (observeType=="TimeHexatic")
