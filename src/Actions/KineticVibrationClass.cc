@@ -90,9 +90,13 @@ KineticVibrationClass::SingleAction (int slice1, int slice2,
       PathData.Path.PutInBox(p1b);
       PathData.Path.PutInBox(p2a);
       PathData.Path.PutInBox(p2b);
-      double draSq = dot(p1a-p2a, p1a-p2a);
-      double drbSq = dot(p1b-p2b, p1b-p2b);
-      double rAvg = 0.25*(Mag(p1a) + Mag(p1b) + Mag(p2a) + Mag(p2b));
+      double p1aMag = Mag(p1a);
+      double p1bMag = Mag(p1b);
+      double p2aMag = Mag(p2a);
+      double p2bMag = Mag(p2b);
+      double dra = p1aMag - p2aMag;
+      double drb = p1bMag - p2bMag;
+      double rAvg = 0.25*(p1aMag + p1bMag + p2aMag + p2bMag);
       p1a = Normalize(p1a);
       p1b = Normalize(p1b);
       p2a = Normalize(p2a);
@@ -100,7 +104,7 @@ KineticVibrationClass::SingleAction (int slice1, int slice2,
       double phi1 = GetAngle(p1a,p1b);
       double phi2 = GetAngle(p2a,p2b);
       double dArc = rAvg * (phi2 - phi1);
-      double distSq = dArc*dArc + draSq + drbSq;
+      double distSq = dArc*dArc + dra*dra + drb*drb;
 
       // now get the effective vel right!
       //dVec vel;
@@ -249,14 +253,23 @@ double KineticVibrationClass::d_dBeta (int slice1, int slice2,
       dVec p1b = PathData.Path(slice, molMembers(2)) - O1;
       dVec p2a = PathData.Path(slice+skip, molMembers(1)) - O2;
       dVec p2b = PathData.Path(slice+skip, molMembers(2)) - O2;
+      //cerr << O1 << " " << p1a << " " << p1b << endl;
+      //cerr << O2 << " " << p2a << " " << p2b << endl;
       // must impose minimum image for molecules at boundaries
       PathData.Path.PutInBox(p1a);
       PathData.Path.PutInBox(p1b);
       PathData.Path.PutInBox(p2a);
       PathData.Path.PutInBox(p2b);
-      double draSq = dot(p1a-p2a, p1a-p2a);
-      double drbSq = dot(p1b-p2b, p1b-p2b);
-      double rAvg = 0.25*(Mag(p1a) + Mag(p1b) + Mag(p2a) + Mag(p2b));
+      //cerr << p1a << " " << p1b << endl;
+      //cerr << p2a << " " << p2b << endl;
+      double p1aMag = Mag(p1a);
+      double p1bMag = Mag(p1b);
+      double p2aMag = Mag(p2a);
+      double p2bMag = Mag(p2b);
+      double dra = p1aMag - p2aMag;
+      double drb = p1bMag - p2bMag;
+      //double rAvg = 0.25*(Mag(p1a) + Mag(p1b) + Mag(p2a) + Mag(p2b));
+      double rAvg = 0.25*(p1aMag + p1bMag + p2aMag + p2bMag);
       p1a = Normalize(p1a);
       p1b = Normalize(p1b);
       p2a = Normalize(p2a);
@@ -264,12 +277,14 @@ double KineticVibrationClass::d_dBeta (int slice1, int slice2,
       double phi1 = GetAngle(p1a,p1b);
       double phi2 = GetAngle(p2a,p2b);
       double dArc = rAvg * (phi2 - phi1);
-      double distSq = dArc*dArc + draSq + drbSq;
+      double distSq = dArc*dArc + dra*dra + drb*drb;
+      //cerr << slice << " " << slice+skip << " " << dArc << " " << dra << " " << drb << endl;
       double GaussProd = exp(-distSq * FourLambdaTauInv);
       spring += distSq * FourLambdaTauInv/levelTau;
       // I don't think this is correct yet.
     }
   }
+  //cerr << "returning " << spring << endl;
   return (spring);
 }
 
