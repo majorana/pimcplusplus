@@ -231,7 +231,7 @@ TestFitErrors(string fname)
 void 
 StaticFit (string fname, VinetEOSClass &eos)
 {
-  TinyVector<double,4> params(80.0, 0.51, 0.0155), errors;  
+  TinyVector<double,4> params(80.0, 0.51, 0.0155, 3.7), errors;  
   eos.SetParams (params);
   NonlinearFitClass<4,VinetEOSClass> fitter(eos);
   Array<double,1> V, E, sigma;

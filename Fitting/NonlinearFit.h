@@ -168,7 +168,7 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
 	params = params + dParams;
 	if ((chiNow - chiNew) < 0.001)
 	  numSmallDecrease++;
-	if (numSmallDecrease > 2)
+	if (numSmallDecrease > 4)
 	  done = true;
 	chiNow = chiNew;
       }

@@ -15,12 +15,12 @@ private:
   double Atomic2GPa;
 public:
   inline double operator()(double V);
-  inline TinyVector<double,4> Grad(double V);
-  inline TinyVector<double,4> GradFD(double V);
+  inline TinyVector<double,N+2> Grad(double V);
+  inline TinyVector<double,N+2> GradFD(double V);
   inline double Pressure(double V);
   inline double PressureFD(double V);
   inline void SetParams (TinyVector<double,N+2> params);
-  inline TinyVector<double,4> GetParams ();
+  inline TinyVector<double,N+2> GetParams ();
   inline double GetB0p();
   inline double K_T (double V);
 
@@ -83,7 +83,7 @@ BirchEOSClass<N>::Pressure(double V)
   }
   P *= 2.0/(3.0*V)*(t + 1.0);
 
-  return Atomic2GPa * dE_dV;
+  return -Atomic2GPa * P;
 }
 
 template<int N>
@@ -111,7 +111,7 @@ BirchEOSClass<N>::GetB0p()
 
 template<int N>
 inline TinyVector<double,N+2>
-BirchEOSClass::BirchEOSClass<N>::Grad (double V)
+BirchEOSClass<N>::Grad (double V)
 {
 }
 
