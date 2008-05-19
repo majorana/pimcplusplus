@@ -113,16 +113,36 @@ template<int N>
 inline TinyVector<double,N+2>
 BirchEOSClass<N>::Grad (double V)
 {
+  TinyVector<double,N+2> grad;
+  grad[1] = 1.0;
+  // Find grad[1]
+  double x = cbrt(V/V0);
+  double t = x*x - 1.0;
+  double dt_dV0 = -2.0/3.0*x*x/V0;
+  double t_np1 = t;
+  grad[0] = 0.0;
+  for (int n=0; n<N; n++) {
+    grad[0] += bn[n] * (double)(n+2) * t_np1;
+    t_np1 *= t;
+  }
+  grad[0] *= dt_dV0;
+  
+  double t_np2 = t*t;
+  for (int n=0; n<N; n++) {
+    grad[n+2] = t_np2;
+    t_np2 *= t;
+  }
+  return grad;
 }
 
 template<int N>
 inline TinyVector<double,N+2>
 BirchEOSClass<N>::GradFD(double V)
 {
-  TinyVector<double,4> p, p_plus, p_minus, grad;
+  TinyVector<double,N+2> p, p_plus, p_minus, grad;
   double Eplus, Eminus;
   p = GetParams();
-  for (int i=0; i<4; i++) {
+  for (int i=0; i<N+2; i++) {
     p_plus = p; p_minus = p;
     p_plus[i]  += 1.0e-7;
     p_minus[i] -= 1.0e-7;
