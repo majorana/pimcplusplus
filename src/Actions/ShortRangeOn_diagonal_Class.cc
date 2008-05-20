@@ -258,6 +258,7 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
 				 const Array<int,1> &changedParticles,
 				 int level)
 {
+#if NDIM==2
   struct timeval start, end;
   struct timezone tz;
   gettimeofday(&start, &tz);
@@ -424,6 +425,9 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
   //  double checkU=SingleAction_slow(slice1,slice2,changedParticles,level);
   //  cerr<<"CHECK: "<<checkU<<" "<<TotalU<<endl;
   return (TotalU);
+#else
+  cerr<<"not implemented short range o(n) diagonal class in 2d"<<endl;
+#endif
 } 
 
 
@@ -663,6 +667,7 @@ ShortRangeOn_diagonal_class::SingleAction_slow (int slice1, int slice2,
  ShortRangeOn_diagonal_class::d_dBeta (int slice1, int slice2,
 				       int level)
 {
+#if NDIM==2
   struct timeval start, end;
   struct timezone tz;
   PathClass &Path = PathData.Path;
@@ -724,6 +729,9 @@ ShortRangeOn_diagonal_class::SingleAction_slow (int slice1, int slice2,
     //TotalU+=(*factorArray)[i]*DPA->dUdiag_fast((*distances)[i], 0); 
   }
   return (TotalU);
+#else
+  cerr<<"not implemented short range o(n) diagonal class in 2d"<<endl;
+#endif
 } 
 
 
