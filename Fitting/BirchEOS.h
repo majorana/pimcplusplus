@@ -23,9 +23,11 @@ public:
   inline TinyVector<double,N+2> GetParams ();
   inline double GetB0();
   inline double GetB(double V);
+  inline double GetBFD(double V);
   inline double GetB0FD();
   inline double GetB0p();
   inline double GetB0pFD();
+  inline double GetBpFD(double V);
   inline double K_T (double V);
 
   BirchEOSClass() : third(1.0/3.0), Atomic2GPa(29421.01)
@@ -113,21 +115,50 @@ BirchEOSClass<N>::GetB0()
   return Atomic2GPa*8.0*bn[0]/(9.0*V0);
 }
 
+// template<int N>
+// inline double
+// BirchEOSClass<N>::GetB(double V)
+// {
+//   double x = cbrt(V/V0);
+//   double t = x*x - 1.0;
+//   double prefact = 2.0/(9.0*V)*(t + 1.0);
+//   double sum = 0.0;
+//   double t_n = 1.0;
+//   for (int n=0; n<N; n++) {
+//     sum += (double)(n+2)*((double)(2*n+2) + (double)(2*n+7)*t)*bn[n]*t_n;
+//     t_n *= t;
+//   }
+//   return Atomic2GPa*prefact*sum;
+// }
+
 template<int N>
 inline double
 BirchEOSClass<N>::GetB(double V)
 {
+  double V_3 = cbrt(V);
+  double V0_3 = cbrt(V0);
   double x = cbrt(V/V0);
   double t = x*x - 1.0;
-  double prefact = 2.0/(9.0*V)*(t + 1.0);
+  double prefact = -Atomic2GPa * 2.0/(9.0*V_3*V0_3*V0_3);
   double sum = 0.0;
-  double t_n = 1.0;
-  for (int n=0; n<(N-1); n++) {
-    sum += (double)(n+2)*((double)(2*n+2) + (double)(2*n+7)*t)*bn[n]*t_n;
-    t_n *= t;
+  double t2n = 1.0;
+  for (int n=0; n<N; n++) {
+    sum += (double)(n+2)*bn[n]*t2n*(t-(double)(2*(n+1))*(t+1.0));
+    t2n *= t;
   }
-  return Atomic2GPa*prefact*sum;
+  return prefact*sum;
 }
+
+template<int N>
+inline double
+BirchEOSClass<N>::GetBFD(double V)
+{
+  double eps = 1.0e-7;
+  double Pplus = Pressure(V+eps);
+  double Pminus = Pressure(V-eps);
+  return -V*(Pplus-Pminus)/(2.0*eps);
+}
+
 
 template<int N>
 inline double
@@ -143,7 +174,7 @@ template<int N>
 inline double
 BirchEOSClass<N>::GetB0p()
 {
-  return 4.0 + (16.0*bn[1])/(9.0*V0*GetB0());
+  return - Atomic2GPa*(16.0*bn[1])/(9.0*V0*GetB0());
 }
 
 template<int N>
@@ -152,10 +183,22 @@ BirchEOSClass<N>::GetB0pFD()
 {
   double eps = 1.0e-7;
   double Bplus = GetB(V0+eps);
-  double Bminus = GetB(V-eps);
+  double Bminus = GetB(V0-eps);
   double dB_dV = (Bplus - Bminus) / (2.0*eps);
   double B0 = GetB(V0);
-  return (-(V/B0*dB_dV);
+  return -(V0/B0*dB_dV);
+}
+
+template<int N>
+inline double
+BirchEOSClass<N>::GetBpFD(double V)
+{
+  double eps = 1.0e-7;
+  double Bplus = GetB(V+eps);
+  double Bminus = GetB(V-eps);
+  double dB_dV = (Bplus - Bminus) / (2.0*eps);
+  double B = GetB(V);
+  return -(V/B*dB_dV);
 }
 
 
@@ -204,8 +247,5 @@ BirchEOSClass<N>::GradFD(double V)
   }
   return grad;
 }
-
-
-
 
 #endif

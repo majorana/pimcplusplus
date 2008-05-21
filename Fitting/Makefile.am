@@ -1,7 +1,7 @@
 AM_LDFLAGS = $(ALL_STATIC)
 
 check_PROGRAMS = TestFitting TestBirch
-bin_PROGRAMS   = LiFit VinetFit VinetFit2
+bin_PROGRAMS   = LiFit VinetFit VinetFit2 BirchFit
 
 LDADD = libfitting.la ../MatrixOps/libmatops.la ../IO/libIO.la $(LAPACK_LIBS) $(BLITZ_LIBS) $(HDF5_LIBS) $(GSL_LIBS) $(SPRNG2_LIBS) $(FLIBS)
 
@@ -9,8 +9,12 @@ TestFitting_SOURCES = TestFitting.cc
 LiFit_SOURCES       = TestEOS.cc LiEOS.h
 VinetFit_SOURCES    = VinetFit.cc VinetEOS.h
 VinetFit2_SOURCES   = VinetFit2.cc PhononFreeEnergy.h PhononFreeEnergy.cc \
-                      DebyeModel.h DebyeModel.cc VinetEOS2.h RamanFreq.h RamanFreq.cc
-TestBirch_SOURCES = TestBirch.cc
+                      DebyeModel.h DebyeModel.cc VinetEOS2.h              \
+                      RamanFreq.h RamanFreq.cc
+BirchFit_SOURCES    = BirchFit.cc PhononFreeEnergy.h PhononFreeEnergy.cc \
+                      DebyeModel.h DebyeModel.cc VinetEOS2.h             \
+                      RamanFreq.h RamanFreq.cc
+TestBirch_SOURCES   = TestBirch.cc
 
 
 AM_CXXFLAGS = $(BLITZ_CFLAGS) $(HDF5_CFLAGS) $(XML2_CFLAGS) $(GSL_CFLAGS)
