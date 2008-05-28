@@ -3,7 +3,7 @@
 int main()
 {
   BirchEOSClass<4> birch;
-  TinyVector<double, 6> params(-50.0, 40.0, 3.0, -2000.1, 5e4, 0.8);
+  TinyVector<double, 6> params(-50.0, 40.0, 3.0, -2000.1, 5e0, 0.8);
   TinyVector<double, 6> grad, gradFD;
 
 
@@ -17,8 +17,13 @@ int main()
 
   grad = birch.Grad(41.0);
   gradFD = birch.GradFD(41.0);
-  cerr << "grad   = " << grad << endl;
-  cerr << "gradFD = " << gradFD << endl << endl;
+  cerr << "grad = " << endl;
+  for (int i=0; i<6; i++)
+    fprintf (stderr, "%14.8e ", grad[i]);
+  cerr << "\ngradFD = " << endl;
+  for (int i=0; i<6; i++)
+    fprintf (stderr, "%14.8e ", gradFD[i]);
+  cerr << endl;
 
   double B0 = birch.GetB0();
   double B  = birch.GetB(params[0]);
