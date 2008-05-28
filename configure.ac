@@ -30,7 +30,7 @@ PKG_CHECK_MODULES(BLITZ, blitz, blitz_ok=yes, blitz_ok=no)
 # this creates and AC_SUBST's vars SPRNG2_CFLAGS and SPRNG2_LIBS
 PKG_CHECK_MODULES(SPRNG2, sprng2, sprng2_ok=yes, sprng2_ok=no)
 # this creates and AC_SUBST's vars GSL_CFLAGS and GSL_LIBS
-PKG_CHECK_MODULES(GSL, gsl, gsl_ok=yes, gsl_ok=no)
+##PKG_CHECK_MODULES(GSL, gsl, gsl_ok=yes, gsl_ok=no)
 
 AC_CHECK_LIB([m], [sqrt])
 AC_CHECK_LIB([hdf5], [H5open],[hdf5_ok=yes], hdf5_ok=no)
@@ -44,9 +44,9 @@ fi
 #AC_CHECK_LIB([g2c],[do_lio],[],[],[frtbegin])
 #AC_CHECK_LIB([gfortran],[do_lio])
 
-if test "x$gsl_ok" = "xno"; then
-   AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
-fi
+##if test "x$gsl_ok" = "xno"; then
+##   AM_PATH_GSL(1.4,gsl_ok=yes,gsl_ok=no)
+##fi
 
 AC_MSG_CHECKING([LIBS = $LIBS])
 # Checks for header files.

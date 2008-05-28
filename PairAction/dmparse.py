@@ -60,6 +60,8 @@ class Squarer2HDFParser:
     self.SpitPotential = True
     self.Ucounter = 0 
     self.dUcounter = 0
+    self.spec1 = ''
+    self.spec2 = ''
 
   def Done(self):
     print "Done."
@@ -106,13 +108,15 @@ class Squarer2HDFParser:
     g = self.next() 
     check(g,'TYPE')
     self.a.NewSection("Type")
-    self.a.WriteVar("Species",self.next())
+    self.spec1 = self.next()
+    self.a.WriteVar("Species",self.spec1)
     self.a.WriteVar("Lambda",float(dToe(self.next())))
     self.a.CloseSection()
     g = self.next() 
     check(g,'TYPE')
     self.a.NewSection("Type")
-    self.a.WriteVar("Species",self.next())
+    self.spec2 = self.next()
+    self.a.WriteVar("Species",self.spec2)
     self.a.WriteVar("Lambda",float(dToe(self.next())))
     self.a.CloseSection()
     
@@ -393,8 +397,12 @@ def main():
     sq.ProcessU()
   for sec in range(0,sq.numFits + 1):
     sq.ProcessdU_dBeta()
-  sq.ProcessSampling()
-  sq.ProcessSampling()
+  print "Species are",sq.spec1,sq.spec2
+  if(sq.spec1 == sq.spec2):
+    sq.ProcessSampling()
+    sq.ProcessSampling()
+  else:
+    print "Skipping sampling table for different species"
   sq.Done()
   
   basename = sys.argv[1][:-2]
@@ -406,5 +414,5 @@ def main():
       longRangeParse=LongRangeParser(basename,outfilename,sq.kcut)
       longRangeParse.ReadYK()
       longRangeParse.Done()
-main()
 
+main()

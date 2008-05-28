@@ -344,11 +344,15 @@ void DavidPAClass::calcUsqz(double s,double q,double z,int level,
   // This is the endpoint action 
   
   
-  if ((rprime < rmin) || (r < rmin)){
-    //    cerr<<"I'm less then the min. Maybe this is messing me up\n";
-    U = 5000.0; dU = 0.0;
-    return;
-  }
+  if (rprime < rmin)
+    rprime = rmin;
+  if(r < rmin)
+    r = rmin;
+  //if ((rprime < rmin) || (r < rmin)){
+  //  //    cerr<<"I'm less then the min. Maybe this is messing me up\n";
+  //  U = 5000.0; dU = 0.0;
+  //  return;
+  //}
   
 //   if (q<ukj(level).grid->Start){
 //     q=ukj(level).grid->Start;
@@ -478,7 +482,9 @@ void DavidPAClass::calcUsqzFast(double s,double q,double z,int level,
   // This is the endpoint action 
   if ((rprime < rmin) || (r < rmin)){
     //    cerr<<"I'm less then the min. Maybe this is messing me up\n";
-    U = 5000.0;
+    //U = 5000.0;
+    U = ukj(level)(1,rmin);
+    cerr << "DavidPAClass: rprime < rmin; assigning U_0 = " << U << endl;
     return;
   }
   U+= 0.5*(ukj(level)(1,r)+ukj(level)(1,rprime));
@@ -532,7 +538,8 @@ DavidPAClass::Udiag (double q, int level)
   level=level+TauPos;
   // This is the endpoint action   
   if (q < UdiagSpline(level).Start()) 
-    return 5000.0;
+    //return 5000.0;
+    q = UdiagSpline(level).Start();
   else if (q > UdiagSpline(level).End())
     return UdiagSpline(level)(UdiagSpline(level).End());
   else
@@ -1198,7 +1205,8 @@ double DavidPAClass::Udiag_p(double q, int level)
 
   // This is the endpoint action   
   if (q < rmin) 
-    return 5000.0;
+    //return 5000.0;
+    q = rmin;
   
   return ukj(level).Deriv(1,q); 
 }
@@ -1213,7 +1221,8 @@ double DavidPAClass::Udiag_pp(double q, int level)
 
   // This is the endpoint action   
   if (q < rmin) 
-    return 5000.0;
+    //return 5000.0;
+    q = rmin;
   
   return ukj(level).Deriv2(1,q); 
 }
@@ -1228,7 +1237,8 @@ double DavidPAClass::dUdiag(double q, int level)
     q = ukj(level).grid->End;
 
   if (q < rmin) 
-    return 5000.0;
+    //return 5000.0;
+    q = rmin;
   
   // This is the endpoint action
   //                            this is V(q)
@@ -1247,7 +1257,8 @@ double DavidPAClass::dUdiag_p(double q, int level)
     q = ukj(level).grid->End;
 
   if (q < rmin) 
-    return 5000.0;
+    //return 5000.0;
+    q = rmin;
   
   // This is the endpoint action
   //                            this is V(q)
@@ -1266,7 +1277,8 @@ double DavidPAClass::dUdiag_pp(double q, int level)
     q = ukj(level).grid->End;
 
   if (q < rmin) 
-    return 5000.0;
+    //return 5000.0;
+    q = rmin;
   
   // This is the endpoint action
   //                            this is V(q)
