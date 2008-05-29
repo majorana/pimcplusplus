@@ -1,7 +1,7 @@
 AM_LDFLAGS = $(ALL_STATIC)
 
 check_PROGRAMS = TestFitting TestBirch
-bin_PROGRAMS   = #LiFit VinetFit VinetFit2 BirchFit
+bin_PROGRAMS   = LiFit VinetFit VinetFit2 BirchFit
 
 LDADD = libfitting.la ../MatrixOps/libmatops.la ../IO/libIO.la $(LAPACK_LIBS) $(BLITZ_LIBS) $(HDF5_LIBS) $(GSL_LIBS) $(SPRNG2_LIBS) $(FLIBS)
 
