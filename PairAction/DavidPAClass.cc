@@ -914,6 +914,7 @@ void DavidPAClass::ReadLongRangeHDF5(IOSectionClass &in)
 
 void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
 {
+  TauPos = -1;
   cerr << "READDAVIDSQUARERFILE -- HDF5 -- " << endl;
   double tau; //used to be in the base clase
   double smallestTau;
@@ -941,6 +942,7 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
   Grid *theGrid;
   //int checkNumU = in.CountSections("Ukj");
   //assert(checkNumU == (numOfFits+1));
+  Array<double,1> Taus;
   for (int counter=0;counter<=numOfFits;counter++) {
     cerr << "  " << counter << " of " << numOfFits << endl;
     ostringstream stream;
@@ -992,7 +994,7 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
 	    //cerr <<shouldBeLog<<endl;
       //}
       cerr<<"Reading taus"<<endl;
-      Array<double,1> Taus;
+      //Array<double,1> Taus;
       in.ReadVar("Taus",Taus);
       cerr<<"taus read"<<endl;
       smallestTau=Taus(0);
@@ -1083,7 +1085,6 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
 	    cerr << "GridType = \"" << GridType << "\"\n";
     }
     cerr<<"Reading taus"<<endl;
-    Array<double,1> Taus;
     in.ReadVar("Taus",Taus);
     cerr<<"taus rad"<<endl;
     smallestTau=Taus(0);
@@ -1116,17 +1117,17 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
     cerr<<"Reading data"<<endl;
     in.ReadVar("Data",tempdUkj);
     /////      tau=largestTau; //HACK
-      tau=smallestTau;
-      for(int i=0; i<NumTau; i++){ //HACK!
-	tempdUkj2(Range::all(),0,i) = potential;
-	///	cerr<<"Current tau is "<<tau<<" "<<i<<endl;
-	if (fabs(tau-DesiredTau)<1e-4){
-	  ///	  cerr<<"The tau I've chosen is "<<tau;
-	  TauPos=i;
-	}
-	tau=tau*2; //HACK!
+    tau=smallestTau;
+    for(int i=0; i<NumTau; i++){ //HACK!
+      tempdUkj2(Range::all(),0,i) = potential;
+      ///	cerr<<"Current tau is "<<tau<<" "<<i<<endl;
+      if (fabs(tau-DesiredTau)<1e-4){
+        ///	  cerr<<"The tau I've chosen is "<<tau;
+        TauPos=i;
       }
-      ///      cerr<<"I'm about ot actually initialize dukj now!"<<endl;
+      tau=tau*2; //HACK!
+    }
+    ///      cerr<<"I'm about ot actually initialize dukj now!"<<endl;
     tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
     tempdUkj2(NumGridPoints-1,Range::all(),Range::all())=0.0; ///NOT SURE ABOUT THIS!!!
     const int numDiagPoints = 20000;
@@ -1148,6 +1149,11 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
     Potential(counter)=potential(counter);
   }
   tau=smallestTau;
+  if(TauPos == -1) {
+    cerr << "Tau of " << DesiredTau << " not found.  Possibilities are " << Taus << endl;
+    cerr << "ABORTING" << endl;
+    exit(1);
+  }
   for (int i=0;i<TauPos;i++){
     tau *= 2;
   }
