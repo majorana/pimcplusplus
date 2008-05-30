@@ -56,7 +56,11 @@ pimc___SOURCES =          \
     PathClass.cc          \
     PathClass.h           \
     WormHelper.cc         \
-    Main.cc               
+    Main.cc               \ 
+    Version.h
+
+Version.h:
+	echo "#define PIMC_VERSION "`svn info | grep Revision | cut -d " " -f 2` > Version.h
 
 FreeParticles_SOURCES =  FreeParticles.cc
 FreeParticles_LDADD   = $(COMMON_LIBS)
