@@ -787,8 +787,9 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
   int M = PathData.Path.NumTimeSlices()-1;
   kinetic = Kinetic.d_dBeta (0, M, 0);
   if (PathData.Path.OrderN){
-    //    dUShort=ShortRangeOn.d_dBeta(0,M,0);
+    double dUShortp=ShortRangeOn.d_dBeta(0,M,0);
     dUShort=((ShortRangeOn_diagonal_class*)(GetAction("DiagonalActionOrderN")))->d_dBeta(0,M,0);
+    cerr<<"Actions: "<<dUShort<<" "<<dUShortp<<endl;
     //    residual=((ShortRangeOn_diagonal_class*)(GetAction("DiagonalActionOrderN")))->residual_energy();
   }
   else

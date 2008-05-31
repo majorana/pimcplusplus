@@ -685,12 +685,16 @@ ShortRangeOn_diagonal_class::SingleAction_slow (int slice1, int slice2,
     factorArray=&factorArrayOld;
 
   }
+  distances->clear();
+  factorArray->clear();
   int totalParticles=0;
   int startSlice=slice1;
-  for (int slice=startSlice;slice<slice2;slice+=skip){
+  for (int slice=startSlice;slice<=slice2;slice+=skip){
     double factor=1.0;
     if (slice==slice1  || slice==slice2)
       factor=0.5;
+    else
+      factor=1.0; 
     Path.DoPtcl=true;
     for (int ptcl1=0; ptcl1<PathData.Path.NumParticles(); ptcl1++){
       Path.DoPtcl(ptcl1) = false;
