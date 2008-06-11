@@ -224,6 +224,7 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
     Permutation.AcceptCopy();
   }
   assert(inFile.ReadVar("Path",oldPaths));
+  int sliceRatio=oldPaths.extent(2)/TotalNumSlices;
   ///  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
   ///       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
 
@@ -241,11 +242,13 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
 	  if (replicate){
 	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim)*(Box[dim]/oldBox(dim));
 	  }
-	  else if (slice>=oldPaths.extent(2)){
+	//UNHACK	  else if (slice>=oldPaths.extent(2)){
+	  else if (sliceRatio*slice>=oldPaths.extent(2)){
 	    pos(dim)=oldPaths(oldPaths.extent(0)-1,ptcl,oldPaths.extent(2)-1,dim)*(Box[dim]/oldBox(dim));
 	  }
 	  else{
-	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim)*(Box[dim]/oldBox(dim));
+	    //UNHACK	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim)*(Box[dim]/oldBox(dim));
+	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,(int)trunc(sliceRatio*slice),dim)*(Box[dim]/oldBox(dim));
 	  }
 
 	Path(relSlice,ptcl) = pos;
