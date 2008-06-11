@@ -70,6 +70,8 @@ libactions_la_SOURCES =            \
     ShortRangeOnClass.cc           \
     ShortRangeOn_diagonal_Class.cc           \
     ShortRangeOn_diagonal_Class.h           \
+    ShortRangeOn_diagonal_displace_Class.cc           \
+    ShortRangeOn_diagonal_displace_Class.h           \
     ShortRangePotClass.cc          \
     ShortRangePotClass.h           \
     ShortRangePrimitive.h          \

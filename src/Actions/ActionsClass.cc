@@ -25,7 +25,8 @@
 #include "DiagonalActionClass.h"
 #include "ShortRangeClass.h"
 #include "ShortRangeOnClass.h"
-#include "ShortRangeOn_diagonal_Class.h"
+#include "ShortRangeOn_diagonal_Class.h" 
+#include "ShortRangeOn_diagonal_displace_Class.h" 
 #include "ShortRangeApproximateClass.h"
 #include "ShortRangePrimitive.h"
 #include "LongRangeClass.h"
@@ -335,6 +336,8 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new DiagonalActionClass(PathData,PairMatrix);
     } else if (type == "DiagonalActionOrderN") {
       newAction = new ShortRangeOn_diagonal_class(PathData,PairMatrix);
+    } else if (type == "DiagonalDisplaceActionOrderN") {
+      newAction = new ShortRangeOn_diagonal_displace_class(PathData,PairMatrix);
     } else if (type == "ShortRangeOrderN") {
       newAction = new ShortRangeOnClass(PathData,PairMatrix);
     } else if (type == "MoleculeInteractions") {
@@ -787,10 +790,13 @@ ActionsClass::Energy (double& kinetic, double &dUShort, double &dULong,
   int M = PathData.Path.NumTimeSlices()-1;
   kinetic = Kinetic.d_dBeta (0, M, 0);
   if (PathData.Path.OrderN){
-    double dUShortp=ShortRangeOn.d_dBeta(0,M,0);
+
+    //dUShort=0.0;
+    ///    dUShort=ShortRangeOn.d_dBeta(0,M,0);
     dUShort=((ShortRangeOn_diagonal_class*)(GetAction("DiagonalActionOrderN")))->d_dBeta(0,M,0);
-    cerr<<"Actions: "<<dUShort<<" "<<dUShortp<<endl;
-    //    residual=((ShortRangeOn_diagonal_class*)(GetAction("DiagonalActionOrderN")))->residual_energy();
+
+    //    cerr<<"Energies: "<<dUShort<<" "<<dUShortp<<endl;
+    //residual=((ShortRangeOn_diagonal_class*)(GetAction("DiagonalActionOrderN")))->residual_energy();
   }
   else
     dUShort = ShortRange.d_dBeta (0, M, 0);
