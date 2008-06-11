@@ -55,6 +55,7 @@ public:
 
 
   double d_dBeta (int slice1, int slice2, int level);
+  double d_dBeta_check (int slice1, int slice2, int level);
   double d_dBeta_slow (int slice1, int slice2, int level);
   string GetName();
   double residual_energy();
