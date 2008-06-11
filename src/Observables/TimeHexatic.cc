@@ -155,6 +155,7 @@ TimeHexaticClass::Accumulate()
     for (int dim=0;dim<NDIM;dim++)
       CentroidPos_write(i,dim)=CentroidPos(i)[dim];
   CentroidPosVar.Write(CentroidPos_write);
+  return;
   CurrTime=(CurrTime+1) % NumStoredMCSteps;
   ProduceTimeMatrix(CurrTime);
   int maxToGo=min(NumStoredMCSteps,TotalCurrentData);
@@ -187,6 +188,7 @@ TimeHexaticClass::Accumulate()
 void
 TimeHexaticClass::WriteBlock()
 {
+  return; 
 //   for (int i=0;i<TimeDisp.size();i++)
 //     if (NumStepArray(i)!=0)
 //       TimeDisp(i)=TimeDisp(i)/NumStepArray(i);
