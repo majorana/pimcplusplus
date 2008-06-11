@@ -996,6 +996,7 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
 
 void PathClass::ShiftData(int slicesToShift)
 {
+
   if (WormOn)
     ShiftParticleExist(slicesToShift);
   ShiftPathData(slicesToShift);
@@ -1029,6 +1030,8 @@ void PathClass::ShiftData(int slicesToShift)
     //    assert(openLinkOld==(int)OpenLink);
     OpenLink[OLDMODE]=OpenLink[NEWMODE];
   }
+
+
 }
 
 void PathClass::ShiftRho_kData(int slicesToShift)
