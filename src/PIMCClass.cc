@@ -444,7 +444,10 @@ void PIMCClass::WriteSystemInfo()
 {
   dVec box = PathData.Path.GetBox();
   Array<double,1> boxArray(3);
-  boxArray(0) = box[0];   boxArray(1) = box[1];   boxArray(2) = box[2];
+  boxArray(0) = box[0];   boxArray(1) = box[1];   
+#if NDIM==3
+  boxArray(2) = box[2];
+#endif
   OutFile.WriteVar ("Box", boxArray);
   OutFile.WriteVar("tau",PathData.Path.tau);
   OutFile.WriteVar("NumTimeSlices",PathData.Path.TotalNumSlices);
