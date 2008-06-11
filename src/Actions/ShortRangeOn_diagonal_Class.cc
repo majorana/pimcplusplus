@@ -242,8 +242,8 @@ ShortRangeOn_diagonal_class::SingleAction_fast (int slice1, int slice2,
   TimeSpent += (double)(end.tv_sec-start.tv_sec) +
     1.0e-6*(double)(end.tv_usec-start.tv_usec);
   //  cerr<<"Time spent in diagonal class is "<<TimeSpent<<endl;
-  //  double checkU=SingleAction_slow(slice1,slice2,changedParticles,level);
-  //  cerr<<"CHECK: "<<checkU<<" "<<TotalU<<endl;
+  double checkU=SingleAction_slow(slice1,slice2,changedParticles,level);
+  cerr<<"CHECK: "<<checkU<<" "<<TotalU<<endl;
   return (TotalU);
 #else
   cerr<<"not implemented short range o(n) diagonal class in 2d"<<endl;
@@ -278,17 +278,17 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
     factorArray=&factorArrayOld;
 
   }
+
   int totalParticles=0;
-  int startSlice=slice1;
-  if (slice1==0 && slice2==PathData.Path.NumTimeSlices()-1){
-    startSlice=slice1;
-  }
-  else {
-    startSlice=slice1+skip;
-    skip=skip*2;
-  }
+  int startSlice=slice1+skip;
+  skip=skip*2;
+  
+  //  distances->clear();
+  //  factorArray->clear();
+
 
   for (int slice=startSlice;slice<slice2;slice+=skip){
+    //for (int slice=startSlice;slice<=slice2;slice+=skip){
     double factor=1.0;
     if (slice==slice1  || slice==slice2)
       factor=0.5;
@@ -394,7 +394,7 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
     //    cerr<<(*factorArray)[i]*DPA->Udiag((*distances)[i], level)<<" "; 
     //    cerr<<(*factorArray)[i]*DPA->UDiag_exact((*distances)[i], level)<<endl; 
 
-      TotalU+=(*factorArray)[i]*DPA->Udiag((*distances)[i], level); 
+      TotalU+=(*factorArray)[i]*DPA->UDiag_exact((*distances)[i], level); 
     //    TotalU+=DPA->Udiag((*distances)[i], level); 
     //    TotalUp+=(*factorArray)[i]*DPA->UDiag_exact((*distances)[i], level); 
 
@@ -667,6 +667,7 @@ ShortRangeOn_diagonal_class::SingleAction_slow (int slice1, int slice2,
  ShortRangeOn_diagonal_class::d_dBeta (int slice1, int slice2,
 				       int level)
 {
+
 #if NDIM==2
   struct timeval start, end;
   struct timezone tz;
@@ -732,6 +733,8 @@ ShortRangeOn_diagonal_class::SingleAction_slow (int slice1, int slice2,
     TotalU+=(*factorArray)[i]*DPA->dUdiag((*distances)[i], 0); 
     //TotalU+=(*factorArray)[i]*DPA->dUdiag_fast((*distances)[i], 0); 
   }
+  distances->clear();
+  factorArray->clear();
   return (TotalU);
 #else
   cerr<<"not implemented short range o(n) diagonal class in 2d"<<endl;
