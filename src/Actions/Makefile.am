@@ -58,6 +58,8 @@ libactions_la_SOURCES =            \
     PairFixedPhase.cc              \
     popen2.h                       \
     popen2.cc                      \
+		pwscfAction.cc                 \
+		pwscfAction.h                  \
     QBoxAction.cc                  \
     QBoxAction.h                   \
     QMCSamplingClass.h             \

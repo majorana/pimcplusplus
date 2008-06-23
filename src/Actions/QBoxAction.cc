@@ -26,7 +26,7 @@ QBoxActionClass::QBoxActionClass(PathDataClass &pathData) : ActionBaseClass (pat
 double QBoxActionClass::SingleAction(int slice1,int slice2,const Array<int,1> &activeParticles,int level){
   if(slice1 == 0 && slice2 == 0){
     slice1 -= 1;
-    slice1 += 1;
+    slice2 += 1;
   }
   else if (slice1 == 0 && slice2 == PathData.Path.TotalNumSlices-1) {
     slice1 -= 1;

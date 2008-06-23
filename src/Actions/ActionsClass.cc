@@ -49,6 +49,7 @@
 #include "QMCSamplingClass.h"
 #include "QBoxAction.h"
 #include "OpenLoopImportance.h"
+#include "pwscfAction.h"
 #include "StructureReject.h"
 #include "KineticRotorClass.h"
 #include "KineticSphereClass.h"
@@ -348,6 +349,8 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new EAMPotentialClass(PathData);
     } else if (type == "QboxAction") {
       newAction = new QBoxActionClass(PathData);
+    } else if (type == "pwscfAction") {
+      newAction = new pwscfActionClass(PathData);
     } else if (type == "FixedAxisRotor") {
       newAction = new FixedAxisRotorClass(PathData);
     } else if (type == "KineticRotor") {
