@@ -41,11 +41,12 @@ double pwscfActionClass::ComputeEnergy(int slice1,int slice2,const Array<int,1> 
   //cerr << "pwscf Compute Energy " << slice1 << " " << slice2 << endl;
   for(int slice=slice1; slice<=slice2; slice++) {
     ostringstream coordname;
-    coordname << "coords." << qCount << "." << slice;
-    if(GetMode() == NEWMODE)
-      coordname << ".new.dat";
-    else
-      coordname << ".old.dat";
+    //coordname << "coords." << qCount << "." << slice;
+    coordname << "coords.tmp.dat";
+    //if(GetMode() == NEWMODE)
+    //  coordname << ".new.dat";
+    //else
+    //  coordname << ".old.dat";
     SetPtclPos(slice, coordname.str().c_str());
     ostringstream command;
     command << "./exec_pwscf.py " << coordname.str() << " energy.out";
@@ -104,8 +105,9 @@ void pwscfActionClass::SetPtclPos(int slice, const char* filename){
 		string spec = PathData.Path.Species(speciesNum).Name;
     out << spec;
 		dVec R = PathData.Path(slice,ptcl);
+    PathData.Path.PutInBox(R);
     for(int x=0; x<NDIM; x++) {
-      R(x) = (R(x) - box(x)/2)/box(x);
+      R(x) = (R(x) + box(x)/2)/box(x);
       out << " " << R(x);
     }
     out << endl;
