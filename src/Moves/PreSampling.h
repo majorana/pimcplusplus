@@ -47,6 +47,8 @@ protected:
   int Slice1,Slice2;
   int NumPtcls, NumSlices;
   Array<dVec,2> InitialPath;
+  Array<int,1> NumPreSampleSteps;
+  Array<int,1> NumPreSampleAccept;
 
 public:
   void Read(IOSectionClass &io);

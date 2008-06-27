@@ -24,6 +24,12 @@ void PreSamplingClass::Read(IOSectionClass& in)
   in.ReadVar("NumPreSteps",TotalNumPreSteps);
   int stages = 1;
   in.ReadVar("NumPreStages",stages);
+  NumPreSampleSteps.resize(stages);
+  NumPreSampleAccept.resize(stages);
+  for(int n=0; n<stages; n++) {
+    NumPreSampleSteps(n) = 0;
+    NumPreSampleAccept(n) = 0;
+  }
 	Array<string,1> methodList;
 	assert(in.ReadVar("MoveMethod",methodList));
   assert(methodList.size() == stages);
@@ -261,9 +267,11 @@ void PreSamplingClass::MakeMove()
   double oldPreAction=StageAction(PreActions, Slice1,Slice2,ActiveParticles);
 
   for(int i=0; i<TotalNumPreSteps; i++){
+    int stageIndex = 0;
     list<StageClass*>::iterator stageIter=PreStages.begin();
     while (stageIter!=PreStages.end())
     {
+      NumPreSampleSteps(stageIndex)++;
       prevActionChange = 0.0;
       toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 	  			     ActiveParticles,prevActionChange);
@@ -287,7 +295,7 @@ void PreSamplingClass::MakeMove()
             myActiveP(size) = ptcl;
           }
         }
-
+        NumPreSampleAccept(stageIndex)++;
       } else {
         //PathData.RejectMove(Slice1,Slice2,ActiveParticles);
         Reject();
@@ -298,6 +306,7 @@ void PreSamplingClass::MakeMove()
 
       //cout << "now activeP is " << myActiveP << endl;
       stageIter++;
+      stageIndex++;
     }
     //cerr << "PreDeltAction " << PreDeltaAction << endl;
     //double predS, finaldS;
@@ -324,7 +333,7 @@ void PreSamplingClass::MakeMove()
   //cerr << "Now resetting old path" << endl;
   //SetMode(OLDMODE);
   //AssignInitialPath();
-  //cerr << NumSteps << " FINAL PreDeltaAction " << PreDeltaAction;// << endl;
+  cerr << NumSteps << " PreDeltaAction " << PreDeltaAction;// << endl;
   //cout << "FINAL PATHS OLD NEW" << endl;
   //PrintPaths(NumSlices, NumPtcls, PathData);
   //ActiveParticles.resize(NumPtcls);
@@ -336,9 +345,9 @@ void PreSamplingClass::MakeMove()
 
   double currActionChange=newAction-oldAction;
   prevActionChange = newPreAction - oldPreAction;
-  //cerr << "  Compare with " << prevActionChange << endl;
   //double logAcceptProb = -currActionChange+prevActionChange;
   double logAcceptProb = -currActionChange+PreDeltaAction;
+  cerr << " FinalDeltaAction " << currActionChange << " logAccProb " << logAcceptProb << endl;
   double logRand = log(PathData.Path.Random.Local());
   finalAccept = logAcceptProb>= logRand; /// Accept condition
 
@@ -359,10 +368,12 @@ void PreSamplingClass::MakeMove()
   }
   //NumAttempted++;
   
-  //cout << NumSteps << "; presample accept " << NumPreAccept << "; FINAL STAGE ACCEPT ";
-  //cout << "FINAL ACCEPT ";
-  //cout << finalAccept;
-  //cout << " ratio " << setw(10) << double(NumFinalAccept)/NumSteps << endl;
+  cout << NumSteps;
+  for(int n=0; n<NumPreSampleSteps.size(); n++)
+    cout << " " << double(NumPreSampleAccept(n))/NumPreSampleSteps(n);
+  cout << " FINAL ACCEPT ";
+  cout << finalAccept;
+  cout << " ratio " << setw(10) << double(NumFinalAccept)/NumSteps << endl;
 
   //cerr << "QUITTING" << endl;
   //exit(1);
