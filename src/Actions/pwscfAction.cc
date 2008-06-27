@@ -74,7 +74,7 @@ double pwscfActionClass::d_dBeta (int slice1, int slice2, int level){
 	//int slice = 0;
   cerr << "pwscf dBeta " << slice1 << " " << slice2 << endl;
   double Utotal = 0.0;
-  for(int slice=slice1; slice<=slice2; slice++) {
+  for(int slice=slice1; slice<slice2; slice++) {
 	  SetPtclPos(slice, "dBeta_coords.dat");
     ostringstream command;
     command << "./exec_pwscf.py dBeta_coords.dat energy.out";
