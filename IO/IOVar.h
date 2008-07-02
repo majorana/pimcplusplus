@@ -95,6 +95,15 @@ namespace IO {
   {
     if (GetFileType() == HDF5_TYPE) {
       IOVarHDF5<T,RANK>* newVar = dynamic_cast<IOVarHDF5<T,RANK>*>(this);
+      if (RANK==1 && newVar == NULL) {
+	IOVarHDF5<T,0>* newVar0 = dynamic_cast<IOVarHDF5<T,0>*>(this);
+	if (newVar0==NULL) {
+	  cerr << "Error in dynamic cast to IOVarHDF5 rank 0.\n";
+	  abort();
+	}
+	val.resize(1);
+	return newVar0->Read(val(0));
+      }
       if (newVar == NULL) {
 	cerr << "Error in dynamic cast to IOVarHDF5.\n";
 	abort();
