@@ -92,6 +92,8 @@ libmoves_la_SOURCES  =           \
     RandomPermClass.cc           \
     RandomPermClass.h            \
     RandomPermMove.h             \
+    ReadPath.h                   \
+    ReadPath.cc                  \
     RefSliceMove.cc              \
     RefSliceMove.h               \
     SpaceWarp.cc                 \
