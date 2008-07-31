@@ -333,8 +333,8 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new CouplingMoveClass(PathData,OutFile);
     else if (moveType=="CenterOfMass")
       move = new CenterOfMassMoveClass(PathData,OutFile);
-    //else if (moveType=="ReadPath")
-    //  move = new ReadPathClass(PathData,OutFile);
+    else if (moveType=="ReadPath")
+      move = new ReadPathClass(PathData,OutFile);
     else if (moveType=="BisectionSphereBlock")
       move = new BisectionSphereBlockClass(PathData,OutFile);
     else if (moveType=="CenterDroplet")
@@ -447,7 +447,7 @@ void PIMCClass::WriteSystemInfo()
   boxArray(0) = box[0];   boxArray(1) = box[1];   
 #if NDIM==3
   boxArray(2) = box[2];
-#endif
+#endif 
   OutFile.WriteVar ("Box", boxArray);
   OutFile.WriteVar("tau",PathData.Path.tau);
   OutFile.WriteVar("NumTimeSlices",PathData.Path.TotalNumSlices);
