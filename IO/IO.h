@@ -67,6 +67,8 @@ namespace IO {
     WriteVar (name, aVal);
   }
 
+    
+
   template<typename T, int RANK> bool 
   IOTreeClass::WriteVar (string name, const blitz::Array<T,RANK> &val)
   {
@@ -91,6 +93,19 @@ namespace IO {
     }
     return true;
   }
+
+  template<typename T, int RANK, int LEN> bool
+  IOTreeClass::WriteVar (string name, const blitz::Array<TinyVector<T,LEN>,RANK> &val)
+  {
+    TinyVector<int,RANK+1> shape;
+    for (int dim=0; dim<RANK; dim++)
+      shape[dim] = val.extent(dim);
+    shape[RANK] = LEN;
+
+    Array<T,RANK+1> aval((T*)&(val(0)[0]), shape, blitz::neverDeleteData);
+    return WriteVar (name, aval);
+  }
+
 
 
   /// In the file name format name.extn, returns the extension.

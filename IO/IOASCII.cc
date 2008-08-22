@@ -631,6 +631,7 @@ namespace IO {
     }
     else
       return NULL;
+    return NULL;
   }
 
 

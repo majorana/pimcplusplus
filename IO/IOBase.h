@@ -131,6 +131,8 @@ namespace IO
     template<typename T> bool WriteVar (string name, T val);
     template<typename T, int  LEN> bool  WriteVar (string name, const TinyVector<T,LEN> &val);
     template<typename T, int RANK> bool WriteVar (string name, const blitz::Array<T,RANK> &val);
+    template<typename T, int RANK, int LEN> bool WriteVar 
+    (string name, const blitz::Array<TinyVector<T,LEN>,RANK> &val);
 
 
     /// Append a value to a variable of dimension of 1 higher than val.
