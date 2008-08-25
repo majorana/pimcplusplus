@@ -70,6 +70,9 @@ public:
   inline Int3 Multiplier (int i) const
   { return Multipliers(i); }
 
+  inline const Array<Int3,1>& GetMultipliers() const
+  { return Multipliers; }
+
   inline Vec3 DeltaG (int i) const
   { return GDiff(i); }
 
