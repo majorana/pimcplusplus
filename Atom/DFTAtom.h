@@ -48,6 +48,8 @@ public:
   void Read  (IOSectionClass &in);
   void SetGrid (Grid *newGrid);
   void SetBarePot (Potential *pot);
+
+  inline double rho (double r) { return ChargeDensity(r); }
   
   inline double Hartree1 (double r, double sum);
   inline double Hartree2 (double r, double sum);
