@@ -60,6 +60,7 @@ private:
   void ReadSqueeze(IOSectionClass &in,string fileName, bool replicate);
   void Restart(IOSectionClass &in,string fileName,bool replicate,
 	       SpeciesClass &species);
+  void Tile(IOSectionClass &in,string fileName,bool replicate);
   
   ////////////////////////////////
   /// Boundary conditions stuff //
@@ -170,7 +171,7 @@ public:
   /// TimeSlice parallelism stuff //
   //////////////////////////////////
 
-  /// Returns the range of time slices that a processor holds.
+  /// Returns the range of time slices that a processor holds (inclusive).
   inline void SliceRange (int proc, int &slice1, int &slice2);
   /// Returns which processor owns the given slice
   inline int SliceOwner (int slice);
@@ -199,7 +200,7 @@ public:
 
   inline void PutInBox (dVec &v);
   void PutInBoxFast (dVec &v);
-
+  void PutInBox(dVec &v,dVec &box);
 
   //////////////////////////
   /// Data manipulations ///

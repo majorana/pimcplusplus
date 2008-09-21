@@ -1471,6 +1471,17 @@ PathClass::DistDispFast (int sliceA, int sliceB, int ptcl1, int ptcl2,
 
 }
 
+void PathClass::PutInBox(dVec &v,dVec &box)
+{
+  dVec boxInv;
+  for (int dim=0;dim<NDIM;dim++)
+    boxInv(dim)=1.0/box(dim);
+  for (int i=0; i<NDIM; i++) {
+    double n = -floor(v(i)*boxInv(i)+0.5);
+    v(i) += n*IsPeriodic(i)*box(i);
+  }
+}
+
 void PathClass::PutInBoxFast (dVec &v)
 {
   bool debug=false;

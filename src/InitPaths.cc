@@ -122,9 +122,10 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
   ////  cerr<<"Read the box"<<endl;
   inFile.OpenSection("Observables");
   inFile.OpenSection("PathDump");
-  Array<double,4> oldPaths; //(58,2560,2,3);
+  Array<double,3> oldPaths; //(58,2560,2,3);
   Array<int,2> oldPermutation;
   assert(inFile.ReadVar("Permutation",oldPermutation));
+  cerr<<"Read init permutations "<<myProc<<endl;
   SetMode(NEWMODE);
   //  int myProc=Communicator.MyProc();
   if (myProc==Communicator.NumProcs()-1){
@@ -132,56 +133,100 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
       Permutation(ptcl) = oldPermutation(oldPermutation.extent(0)-1,ptcl);
     Permutation.AcceptCopy();
   }
-  assert(inFile.ReadVar("Path",oldPaths));
-  ///  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
-  ///       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
+  cerr<<"About to read paths"<<endl;
+  IOVarBase *pathVar = inFile.GetVarPtr("Path");
+  int numDumps=pathVar->GetExtent(0);
+  cerr<<"Number of path dumps is "<<numDumps<<endl;
+  cerr<<"Number of permutations is "<<oldPermutation.extent(0)<<endl;
+  int extent0; int extent1; int extent2;
+  if (Communicator.MyProc()==0){
+    pathVar->Read(oldPaths,numDumps-1,Range::all(),Range::all(),Range::all());  
+    extent0=oldPaths.extent(0); 
+    extent1=oldPaths.extent(1);
+    extent2=oldPaths.extent(2);
+  }
+  Communicator.Broadcast(0,extent0);
+  Communicator.Broadcast(0,extent1);
+  Communicator.Broadcast(0,extent2);
+  if (Communicator.MyProc()!=0){
+    oldPaths.resize(extent0,extent1,extent2);
+  }
+  Communicator.Broadcast(0,oldPaths);
 
   int myFirstSlice,myLastSlice;
   SliceRange (myProc, myFirstSlice, myLastSlice);
+  //  int lastSlice=min(TotalNumSlices-1,myLastSlice);
+
+  //  Array<double,2> firstSlice;
+  //  pathVar->Read(firstSlice,numDumps-1,Range::all(),0,Range::all());
+  
+
+  //  assert(inFile.ReadVar("Path",oldPaths));
+  cerr<<"Read paths init "<<myProc<<endl;
+  ///  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
+  ///       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
+  
+
+  
   for (int ptcl=0;ptcl<NumParticles();ptcl++){
+    if (Communicator.MyProc()==1){
+      cerr<<"I've started ptcl "<<ptcl<<endl;
+    }
+    int endSlice=min(myLastSlice,TotalNumSlices-1);
     for (int slice=0; slice<TotalNumSlices; slice++) {
-      int sliceOwner = SliceOwner(slice);
+    //    for (int slice=myFirstSlice; slice<=endSlice; slice++) {
+
+      //      int sliceOwner = SliceOwner(slice);
       int relSlice = slice-myFirstSlice;
       ///      if (myProc==sliceOwner){
       if (myFirstSlice<=slice && slice<=myLastSlice){
-     dVec pos;
-     pos = 0.0;
-     for (int dim=0; dim<NDIM; dim++)
-       if (replicate){
-         pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim)*(Box[dim]/oldBox(dim));
-       }
-       else if (slice>=oldPaths.extent(2)){
-         pos(dim)=oldPaths(oldPaths.extent(0)-1,ptcl,oldPaths.extent(2)-1,dim)*(Box[dim]/oldBox(dim));
-       }
-       else{
-         pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim)*(Box[dim]/oldBox(dim));
-       }
-
-     Path(relSlice,ptcl) = pos;
+	dVec pos;
+	pos = 0.0;
+	for (int dim=0; dim<NDIM; dim++)
+	  if (replicate){
+	    pos(dim) = oldPaths(ptcl,0,dim)*(Box[dim]/oldBox(dim));
+	  }
+	  else if (slice>=oldPaths.extent(1)){
+	    pos(dim)=oldPaths(ptcl,oldPaths.extent(1)-1,dim)*(Box[dim]/oldBox(dim));
+	  }
+	  else{
+	    pos(dim) = oldPaths(ptcl,slice,dim)*(Box[dim]/oldBox(dim));
+	  }
+	Path(relSlice,ptcl) = pos;
       }
-    }
+      
+      }
+      if (Communicator.MyProc()==1){
+	cerr<<"I've done parrticle "<<ptcl<<endl;
+      }
+    //    cerr<<"All but last processor done "<<Communicator.MyProc()<<endl;
     ///If you are the last processors you must make sure the last
     ///slice is the same as the first slice on the first
     ///processors. The  join should be at the
     if (myProc==Communicator.NumProcs()-1){
+      cerr<<"The last processor is doing ptcl "<<ptcl<<endl;
       dVec pos;
       pos = 0.0;
       for (int dim=0; dim<NDIM; dim++)
      if (replicate){//not sure this works for replicate
-       pos(dim) = oldPaths(oldPaths.extent(0)-1,Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
+       //       pos(dim) = oldPaths(oldPaths.extent(0)-1,Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
+       pos(dim) = oldPaths(Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
      }
      else{//you want to end up on the person you permute onto
-       pos(dim) = oldPaths(oldPaths.extent(0)-1,Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
+       //       pos(dim) = oldPaths(oldPaths.extent(0)-1,Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
+       pos(dim) = oldPaths(Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
      }
-
+    
       Path(NumTimeSlices()-1,ptcl) = pos;
     }
-  }
-  inFile.CloseSection();
+    }
+    cerr<<"Closing things "<<endl;
+    inFile.CloseSection();
   inFile.CloseSection();
   inFile.CloseFile();
   if (myProc==Communicator.NumProcs()-1)
     MoveJoin(NumTimeSlices()-1,1);
+  cerr<<"I have finished initializing here so I can continue "<<Communicator.MyProc()<<endl;
 }
 
 
@@ -213,18 +258,25 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
   ///  cerr<<"Read the box"<<endl;
   inFile.OpenSection("Observables");
   inFile.OpenSection("PathDump");
-  Array<double,4> oldPaths; //(58,2560,2,3);
+  Array<double,3> oldPaths; //(58,2560,2,3);
   Array<int,2> oldPermutation;
   assert(inFile.ReadVar("Permutation",oldPermutation));
-  SetMode(NEWMODE);
+  SetMode(NEWMODE);;
   int myProc=Communicator.MyProc();
   if (myProc==Communicator.NumProcs()-1){
     for (int ptcl=0;ptcl<NumParticles();ptcl++)
       Permutation(ptcl) = oldPermutation(oldPermutation.extent(0)-1,ptcl);
     Permutation.AcceptCopy();
   }
-  assert(inFile.ReadVar("Path",oldPaths));
-  int sliceRatio=oldPaths.extent(2)/TotalNumSlices;
+    IOVarBase *pathVar = inFile.GetVarPtr("Path");
+  int numDumps=pathVar->GetExtent(0);
+  cerr<<"Number of path dumps is "<<numDumps<<endl;
+  cerr<<"Number of permutations is "<<oldPermutation.extent(0)<<endl;
+  pathVar->Read(oldPaths,numDumps-1,Range::all(),Range::all(),Range::all());
+  cerr<<"My data is now read"<<endl;
+  //  assert(inFile.ReadVar("Path",oldPaths));
+  double sliceRatio=(double)oldPaths.extent(1)/(double)TotalNumSlices;
+  cerr<<"Sliceratio is "<<sliceRatio<<endl;
   ///  cerr << "My paths are of size"  << oldPaths.extent(0) << " "
   ///       << oldPaths.extent(1)<<" " << oldPaths.extent(2) << endl;
 
@@ -240,15 +292,15 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
 	pos = 0.0;
 	for (int dim=0; dim<NDIM; dim++)
 	  if (replicate){
-	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,0,dim)*(Box[dim]/oldBox(dim));
+	    pos(dim) = oldPaths(ptcl,0,dim)*(Box[dim]/oldBox(dim));
 	  }
 	//UNHACK	  else if (slice>=oldPaths.extent(2)){
-	  else if (sliceRatio*slice>=oldPaths.extent(2)){
-	    pos(dim)=oldPaths(oldPaths.extent(0)-1,ptcl,oldPaths.extent(2)-1,dim)*(Box[dim]/oldBox(dim));
+	  else if (sliceRatio*slice>=oldPaths.extent(1)){
+	    pos(dim)=oldPaths(ptcl,oldPaths.extent(1)-1,dim)*(Box[dim]/oldBox(dim));
 	  }
 	  else{
 	    //UNHACK	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,slice,dim)*(Box[dim]/oldBox(dim));
-	    pos(dim) = oldPaths(oldPaths.extent(0)-1,ptcl,(int)trunc(sliceRatio*slice),dim)*(Box[dim]/oldBox(dim));
+	    pos(dim) = oldPaths(ptcl,(int)trunc(sliceRatio*slice),dim)*(Box[dim]/oldBox(dim));
 	  }
 
 	Path(relSlice,ptcl) = pos;
@@ -262,21 +314,145 @@ PathClass::ReadSqueeze(IOSectionClass &in,string fileName,bool replicate)
       pos = 0.0;
       for (int dim=0; dim<NDIM; dim++)
 	if (replicate){//not sure this works for replicate
-	  pos(dim) = oldPaths(oldPaths.extent(0)-1,Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
+	  pos(dim) = oldPaths(Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
 	}
 	else{//you want to end up on the person you permute onto
-	  pos(dim) = oldPaths(oldPaths.extent(0)-1,Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
+	  pos(dim) = oldPaths(Permutation(ptcl),0,dim)*(Box[dim]/oldBox(dim));
 	}
     
       Path(NumTimeSlices()-1,ptcl) = pos;
     }
   }
+  cerr<<"Finished with particles"<<endl;
   inFile.CloseSection();
   inFile.CloseSection();
   inFile.CloseFile();
   if (myProc==Communicator.NumProcs()-1)
     MoveJoin(NumTimeSlices()-1,1);
 }
+
+
+
+void 
+PathClass::Tile(IOSectionClass &in,string fileName,bool replicate)
+{
+  //Invariants: There are no permutations.  
+  //Invariants: NDIM==2
+  cerr<<"starting tile " <<Communicator.MyProc()<<endl;
+  IOSectionClass inFile;
+  stringstream oss;
+  bool parallelFileRead;
+  if (!in.ReadVar("ParallelFileRead",parallelFileRead)){
+    parallelFileRead=true;
+  }
+  if (parallelFileRead)
+    oss<<fileName<<"."<<MyClone<<".h5";
+  else
+    oss<<fileName<<"."<<0<<".h5";
+  string fullFileName=oss.str();
+  assert (inFile.OpenFile(fullFileName.c_str()));
+  inFile.OpenSection("System");
+  Array<double,1> oldBox;
+  inFile.ReadVar("Box",oldBox);
+  inFile.CloseSection();
+  inFile.OpenSection("Observables");
+  inFile.OpenSection("PathDump");
+  Array<double,3> oldPaths; //(58,2560,2,3);
+  Array<int,2> oldPermutation;
+  assert(inFile.ReadVar("Permutation",oldPermutation));
+  SetMode(NEWMODE);
+  int myProc=Communicator.MyProc();
+  for (int ptcl=0;ptcl<NumParticles();ptcl++)
+    Permutation(ptcl) = ptcl; //oldPermutation(oldPermutation.extent(0)-1,ptcl);
+  Permutation.AcceptCopy();
+  cerr<<"About to read paths"<<endl;
+  IOVarBase *pathVar = inFile.GetVarPtr("Path");
+  int numDumps=pathVar->GetExtent(0);
+  cerr<<"Number of path dumps is "<<numDumps<<endl;
+  pathVar->Read(oldPaths,numDumps-1,Range::all(),Range::all(),Range::all());
+  double sliceRatio=(double)oldPaths.extent(1)/(double)TotalNumSlices;
+  assert(fabs(sliceRatio-1)<1e-10);
+  int oldParticles;
+  oldParticles=oldPaths.extent(0);
+  int numTiles=NumParticles()/oldParticles;
+  cerr<<"numTiles is "<<numTiles<<endl;
+  cerr<<"oldParticles is "<<oldParticles<<endl;
+  cerr<<"OldBox is "<<oldBox<<endl;
+  dVec oldBox_dVec;
+  for (int dim=0;dim<NDIM;dim++)
+    oldBox_dVec(dim)=oldBox(dim);
+  cerr<<"Box is "<<Box<<endl;
+  cerr<<"Sliceratio is "<<sliceRatio<<endl;
+
+  int myFirstSlice,myLastSlice;
+
+  Array<dVec,1> first_slice(NumParticles());
+  SliceRange (myProc, myFirstSlice, myLastSlice);  
+  for (int ptcl=0;ptcl<NumParticles();ptcl++){
+    dVec prev_pos;
+    for (int slice=0; slice<TotalNumSlices; slice++) {
+      int relSlice = slice-myFirstSlice;
+
+      dVec pos;
+      pos = 0.0;
+      for (int dim=0; dim<NDIM; dim++)
+	pos(dim) = oldPaths(ptcl % oldParticles,(int)trunc(sliceRatio*slice),dim); //(Box[dim]/oldBox(dim));
+      PutInBox(pos,oldBox_dVec);
+      if (ptcl/oldParticles==1 || ptcl/oldParticles==3)
+	pos(0)=pos(0)+oldBox(0);
+      if (ptcl/oldParticles==2 || ptcl/oldParticles==3)
+	pos(1)=pos(1)+oldBox(1);
+      if (slice!=0){
+	dVec diff=pos-prev_pos;
+	PutInBox(diff,oldBox_dVec);
+	pos=diff+prev_pos;
+      }
+      assert(NDIM==2);
+      prev_pos=pos;
+      if (slice==0)
+	first_slice(ptcl)=pos;
+      if (myFirstSlice<=slice && slice<=myLastSlice){
+	Path(relSlice,ptcl) = pos;
+      }
+    }
+    ///If you are the last processors you must make sure the last
+    ///slice is the same as the first slice on the first
+    ///processors. The  join should be at the 
+    if (myProc==Communicator.NumProcs()-1){
+      dVec pos;
+      pos = 0.0;
+      for (int dim=0; dim<NDIM; dim++)
+	pos(dim) = oldPaths(ptcl % oldParticles,0,dim); //*(Box[dim]/oldBox(dim));
+      PutInBox(pos,oldBox_dVec);
+      if (ptcl/oldParticles==1 || ptcl/oldParticles==3)
+	pos(0)=pos(0)+oldBox(0);
+      if (ptcl/oldParticles==2 || ptcl/oldParticles==3)
+	pos(1)=pos(1)+oldBox(1);
+      dVec diff=pos-prev_pos;
+      PutInBox(diff,oldBox_dVec);
+      pos=diff+prev_pos;
+      if (fabs(pos[0]-first_slice(ptcl)[0])>1e-5 || fabs(pos[1]-first_slice(ptcl)[1])>1e-5){
+	cerr<<"BROKEN: "<<ptcl<<" "<<pos<<" "<<first_slice(ptcl)<<" "<<prev_pos<<" "<<diff<<" "<<endl;
+	cerr<<"BROKEN2: "<<oldPaths(ptcl % oldParticles,0,0)<<" "<<oldPaths(ptcl % oldParticles,0,1)<<" "<<oldPaths(ptcl % oldParticles,0,2)<<endl;
+	cerr<<"NUMTIMESLICES "<<NumTimeSlices()<<endl;
+	for (int slice=0;slice<TotalNumSlices;slice++)
+	  cerr<<"A1234 "<<slice<<" "<<oldPaths(ptcl % oldParticles,slice,0)<<" "<<oldPaths(ptcl % oldParticles,slice,1)<<" "<<oldPaths(ptcl % oldParticles,slice,2)<<endl;
+      
+	assert(pos==first_slice(ptcl));
+      }
+      Path(NumTimeSlices()-1,ptcl) = pos;
+    }
+  }
+  cerr<<"Almost done initializing"<<endl;
+  inFile.CloseSection();
+  inFile.CloseSection();
+  inFile.CloseFile();
+  if (myProc==Communicator.NumProcs()-1)
+    MoveJoin(NumTimeSlices()-1,1);
+  cerr<<"ending tile " <<Communicator.MyProc()<<endl;
+  cerr<<"Done initializing"<<endl;
+}
+
 
 void 
 PathClass::ReadOld(string fileName,bool replicate)
@@ -623,9 +799,10 @@ PathClass::InitPaths (IOSectionClass &in)
       string pathFile;
       assert(in.ReadVar("File",pathFile));
       Restart(in,pathFile,false,species);
+      cerr<<"Done with initpaths restart"<<endl;
     }
     else if (InitPaths == "FILE"){
-      ///      cerr<<"I'm going to read the file now"<<endl;
+      cerr<<"I'm going to read the file now"<<endl;
       if (replicate){
         perr << "Replicate 'ON'; Using time slice 0 for all time slices." << endl;
       }
@@ -634,6 +811,13 @@ PathClass::InitPaths (IOSectionClass &in)
       ReadSqueeze(in,pathFile,replicate);
       //      ReadOld(pathFile,replicate);
     }
+    else if (InitPaths == "TILE"){
+      string pathFile;
+      assert(in.ReadVar("File",pathFile));
+      Tile(in,pathFile,replicate);
+    }
+
+
     else if (InitPaths == "SQUEEZE"){
       string pathFile;
       assert(in.ReadVar("File",pathFile));
@@ -682,8 +866,11 @@ PathClass::InitPaths (IOSectionClass &in)
 	   << InitPaths << endl;
       abort();
     }
+    cerr<<"Initing real slices"<<endl;
     InitRealSlices();
+    cerr<<"Done with that"<<endl;
     in.CloseSection(); // Species
+    cerr<<"Closing species section"<<endl;
 // 	THIS IS OBSOLETE
 //   jgadd: get numMol
 //    if (speciesIndex == 0){  
@@ -691,6 +878,7 @@ PathClass::InitPaths (IOSectionClass &in)
 //    }
   }
   in.CloseSection(); // "Particles"
+  cerr<<"Closing particle section"<<endl;
 
 /// THIS IS OBSOLETE; SHOULD BE REMOVED
 /*
@@ -705,14 +893,16 @@ PathClass::InitPaths (IOSectionClass &in)
     perr << m << " " << MolRef(m) << endl;
   }
 */
- 
+  cerr<<"Shouldn't be open paths"<<endl;
   string openSpeciesName;
   if (OpenPaths) {
     assert(in.ReadVar("OpenSpecies",openSpeciesName));
     OpenSpeciesNum=SpeciesNum(openSpeciesName);
     InitOpenPaths();
   }  
+  cerr<<"About to order n"<<endl;
   if (OrderN){
+    cerr<<"inside order n things"<<endl;
     double cutoff;
     assert(in.ReadVar("CutoffDistance",cutoff));
     Cell.CutoffDistance=cutoff;
@@ -762,7 +952,7 @@ PathClass::InitPaths (IOSectionClass &in)
   ExistsCoupling.AcceptCopy();
   if (LongRange)
     UpdateRho_ks();
-
+  cerr<<"Done with this function"<<endl;
 }
 
 
