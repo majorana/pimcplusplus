@@ -73,7 +73,7 @@ void StructureFactorClass::Read(IOSectionClass& in)
 			 (2*i*M_PI/PathData.Path.GetBox()[0])+
 			 (2*j*M_PI/PathData.Path.GetBox()[1])*
 			 (2*j*M_PI/PathData.Path.GetBox()[1]));
-	cerr<<kMagRange(0)<<" "<<kmag<<" "<<kMagRange(1)<<" "<<i<<" "<<j<<endl;
+	//	cerr<<kMagRange(0)<<" "<<kmag<<" "<<kMagRange(1)<<" "<<i<<" "<<j<<endl;
 	if (kMagRange(0)<kmag && kmag<kMagRange(1)){
 	  dVec kVec((2*i*M_PI/PathData.Path.GetBox()[0]),(2*j*M_PI/PathData.Path.GetBox()[1]));
 	  tempkvecs_vec.push_back(kVec);
@@ -82,10 +82,10 @@ void StructureFactorClass::Read(IOSectionClass& in)
 	}
       }
     Additionalkvecs.resize(tempkvecs_vec.size());
-    cerr<<"Additional kvecs are "<<endl;
+    //    cerr<<"Additional kvecs are "<<endl;
     for (int kvec=0;kvec<tempkvecs_vec.size();kvec++){
       Additionalkvecs(kvec)=tempkvecs_vec[kvec];
-      cerr<<Additionalkvecs(kvec)[0]<<" "<<Additionalkvecs(kvec)[1]<<endl;
+      //      cerr<<Additionalkvecs(kvec)[0]<<" "<<Additionalkvecs(kvec)[1]<<endl;
     }
     cerr<<"done"<<endl;
 #else
@@ -115,6 +115,8 @@ void StructureFactorClass::Read(IOSectionClass& in)
   
 
   Sk.resize(PathData.Path.kVecs.size()+Additionalkvecs.size());
+  rho_k_real.resize(PathData.Path.kVecs.size()+Additionalkvecs.size());
+  rho_k_imag.resize(PathData.Path.kVecs.size()+Additionalkvecs.size());
   Sk=0;
 }
 
@@ -163,6 +165,20 @@ void StructureFactorClass::WriteBlock()
   int num2 = PathData.Path.Species(Species1).NumParticles;
   norm = PathData.Path.TotalNumSlices*TotalCounts * sqrt((double)num1*num2);
   SkMaxVar.Write(SkMax);
+
+  Array<double,1> rho_k_realSum(kVecs.size()+Additionalkvecs.size());
+  rho_k_realSum=0.0;
+  PathData.Path.Communicator.Sum(rho_k_real, rho_k_realSum);
+  rho_k_realSum=rho_k_realSum/norm;
+  rho_k_realVar.Write(rho_k_realSum);
+
+  rho_k_realSum=0.0;
+  PathData.Path.Communicator.Sum(rho_k_imag, rho_k_realSum);
+  rho_k_realSum=rho_k_realSum/norm;
+  rho_k_imagVar.Write(rho_k_realSum);
+
+    
+
   PathData.Path.Communicator.Sum(Sk, SkSum);
   if (PathData.Path.Communicator.MyProc()==0) 
     if (FirstTime) {
@@ -177,6 +193,8 @@ void StructureFactorClass::WriteBlock()
   SofkVar.Write(SofkArray);
   ///Clear the structure factor counts
   Sk=0;
+  rho_k_real=0;
+  rho_k_imag=0;
   TotalCounts=0;
   SkMax=0;
   MaxkVec=0;
@@ -217,6 +235,8 @@ void StructureFactorClass::Accumulate()
       double d = PathData.Path.Rho_k(slice, Species2, ki).imag();
       // \f$ Sk(ki) :=  Sk(ki) + \Re(rho^1_k * rho^2_{-k}) \f
       double sk=a*c+b*d;
+      rho_k_real(ki)+=a;
+      rho_k_imag(ki)+=b;
       if (sk>SkMax){
 	SkMax=sk;
 	MaxkVec=kVecs(ki);
@@ -234,6 +254,9 @@ void StructureFactorClass::Accumulate()
       // \f$ Sk(ki) :=  Sk(ki) + \Re(rho^1_k * rho^2_{-k}) \f
       double sk=a*c+b*d;
       Sk(ki) += sk;
+      rho_k_real(ki)+=a;
+      rho_k_imag(ki)+=b;
+
     }
 //     for (multimap<double,double  >::iterator iter=kList.begin();
 // 	 iter!=kList.end();iter++)
@@ -244,6 +267,9 @@ void StructureFactorClass::Accumulate()
 void StructureFactorClass::Clear()
 {
   Sk=0;
+  rho_k_real=0;
+  rho_k_imag=0;
+
   TotalCounts=0;
 }
 

@@ -37,6 +37,10 @@ public:
   dVec MaxkVec;
   /// Stores number of counts in each bin
   Array<double,1> Sk;
+  Array<double,1> rho_k_real;
+  Array<double,1> rho_k_imag;
+  ObservableVecDouble1 rho_k_realVar;
+  ObservableVecDouble1 rho_k_imagVar;
   /// The species between which I am calculating the pair correlation
   /// function.
   int Species1, Species2;
@@ -53,6 +57,8 @@ public:
   StructureFactorClass(PathDataClass &myPathData, IOSectionClass &ioSection) : 
     ObservableClass(myPathData,ioSection),
     SkMaxVar("SkMax",IOSection,myPathData.Path.Communicator),
+    rho_k_realVar("RhoK_real",IOSection,myPathData.Path.Communicator),
+    rho_k_imagVar("RhoK_imag",IOSection,myPathData.Path.Communicator),
     SofkVar("y", IOSection, myPathData.Path.Communicator)
     {
       TimesCalled=0;
@@ -62,8 +68,10 @@ public:
     ObservableClass(myPathData, ioSection), 
     Species1(species1), Species2(species2),
     SkMaxVar("SkMax",IOSection,myPathData.Path.Communicator),
-    SofkVar("y", IOSection, myPathData.Path.Communicator)
-  { Initialize(); }
+    SofkVar("y", IOSection, myPathData.Path.Communicator),
+    rho_k_realVar("RhoK_real",IOSection,myPathData.Path.Communicator),
+    rho_k_imagVar("RhoK_imag",IOSection,myPathData.Path.Communicator)
+    { Initialize(); }
 };
 
 
