@@ -123,14 +123,27 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
   inFile.OpenSection("Observables");
   inFile.OpenSection("PathDump");
   Array<double,3> oldPaths; //(58,2560,2,3);
-  Array<int,2> oldPermutation;
-  assert(inFile.ReadVar("Permutation",oldPermutation));
-  cerr<<"Read init permutations "<<myProc<<endl;
+  Array<int,1> oldPermutation;
+  //only read in ther permutations on processor 0 and then broadcast
+  int extent0; int extent1; int extent2;
+  if (myProc==0){ 
+    IOVarBase *permutationVar=inFile.GetVarPtr("Permutation");
+    int numDumps=permutationVar->GetExtent(0);
+    permutationVar->Read(oldPermutation,numDumps-1,Range::all());
+    extent0=oldPermutation.extent(0);
+  }
+  Communicator.Broadcast(0,extent0);
+  if (Communicator.MyProc()!=0){
+    oldPermutation.resize(extent0);
+  }
+  Communicator.Broadcast(0,oldPermutation);
+  //  assert(inFile.ReadVar("Permutation",oldPermutation));
+  //  cerr<<"Read init permutations "<<myProc<<endl;
   SetMode(NEWMODE);
   //  int myProc=Communicator.MyProc();
   if (myProc==Communicator.NumProcs()-1){
     for (int ptcl=0;ptcl<NumParticles();ptcl++)
-      Permutation(ptcl) = oldPermutation(oldPermutation.extent(0)-1,ptcl);
+      Permutation(ptcl) = oldPermutation(ptcl);
     Permutation.AcceptCopy();
   }
   cerr<<"About to read paths"<<endl;
@@ -138,7 +151,7 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
   int numDumps=pathVar->GetExtent(0);
   cerr<<"Number of path dumps is "<<numDumps<<endl;
   cerr<<"Number of permutations is "<<oldPermutation.extent(0)<<endl;
-  int extent0; int extent1; int extent2;
+
   if (Communicator.MyProc()==0){
     pathVar->Read(oldPaths,numDumps-1,Range::all(),Range::all(),Range::all());  
     extent0=oldPaths.extent(0); 
@@ -226,7 +239,17 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
   inFile.CloseFile();
   if (myProc==Communicator.NumProcs()-1)
     MoveJoin(NumTimeSlices()-1,1);
+
+//   ofstream outfile;
+//   outfile.open("positions.dat");
+//   for (int slice=0;slice<NumTimeSlices();slice++)
+//     for (int ptcl=0;ptcl<NumParticles();ptcl++)
+//       outfile<<slice<<" "<<ptcl<<"  "<<Path(slice,ptcl)[0]<<" "<<Path(slice,ptcl)[1]<<endl;
+//   outfile.close();
+
+
   cerr<<"I have finished initializing here so I can continue "<<Communicator.MyProc()<<endl;
+
 }
 
 
