@@ -113,7 +113,7 @@ public:
   }
   
   
-  void Init(int seed, int numClones=1)
+  void Init(int seed, int numClones=1, bool SameSeed=false)
   {
     NumClones=numClones;
     int myProc=MyComm.MyProc();
@@ -122,9 +122,15 @@ public:
     CloneNumber = myProc/procsPerClone;
     int commID  = numProcs+CloneNumber;
     int worldID = numProcs+NumClones;
-    ///LocalStream is a stream of random numbers unique to the node
-    LocalStream = 
-      init_sprng(SPRNG_DEFAULT,myProc,numProcs+NumClones+1,seed,SPRNG_DEFAULT);
+    if(!SameSeed) {
+      ///LocalStream is a stream of random numbers unique to the node
+      LocalStream = 
+        init_sprng(SPRNG_DEFAULT,myProc,numProcs+NumClones+1,seed,SPRNG_DEFAULT);
+    } else {
+      ///unless you explicitly sync the streams
+      LocalStream = 
+        init_sprng(SPRNG_DEFAULT,0,numProcs+NumClones+1,seed,SPRNG_DEFAULT);
+    }
     /// CommonStream is a stream of random numbers shared between all
     /// processors that are on the same clone 
     CommonStream = 
