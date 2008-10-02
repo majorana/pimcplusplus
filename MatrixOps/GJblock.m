@@ -1,5 +1,5 @@
-N = 4;
-BS = 2;
+N = 128;
+BS = 32;
 
 A = rand(N,N);
 Acopy = A;
@@ -15,11 +15,11 @@ for k = 1:NB
    y = k*BS;
    pivot = A(x:y,x:y);
    mydet = pivot * mydet;
-   A(:,x:y) = -[A(1:x-1,x:y);z;A(y+1:N,x:y)] / pivot
-   A      = A + A(:,x:y)*A(x:y,:)
-   A(x:y,:) = ([A(x:y,1:x-1),one,A(x:y,y+1:N)]' /pivot')'
+   A(:,x:y) = -[A(1:x-1,x:y);z;A(y+1:N,x:y)] / pivot;
+   A      = A + A(:,x:y)*A(x:y,:);
+   A(x:y,:) = ([A(x:y,1:x-1),one,A(x:y,y+1:N)]' /pivot')';
 end
 
-A*Acopy
-det(mydet)
+norm(A*Acopy-eye(N))/norm(Acopy^(-1)*Acopy - eye(N))
+(det(mydet)-det(Acopy))/det(Acopy)
 det(Acopy)
