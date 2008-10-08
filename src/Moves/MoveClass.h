@@ -45,4 +45,5 @@
 #include "VariationalDisplaceMove.h"
 #include "IonDisplaceMove.h"
 #include "WormGrow.h"
+#include "ReadPath.h"
 #endif
