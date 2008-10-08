@@ -1154,8 +1154,8 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
 //         ///	  cerr<<"The tau I've chosen is "<<tau;
 //         TauPos=i;
 // >>>>>>> .r1260
-      }
-      tau=tau*2; //HACK!
+//      }
+//      tau=tau*2; //HACK!
     }
     ///      cerr<<"I'm about ot actually initialize dukj now!"<<endl;
     tempdUkj2(Range::all(),Range(1,NumUKJ),Range::all()) = tempdUkj;
