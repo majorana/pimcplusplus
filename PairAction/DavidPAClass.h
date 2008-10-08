@@ -54,6 +54,7 @@ class DavidPAClass : public PairActionFitClass
   inline bool Read(IOSectionClass &IOSection,double desiredTau, int numLevels);
   inline void Print();
   double Udiag(double q, int level);
+  double dUdiag_fast(double q, int level);
   double UDiag_exact(double q,int level);
   
   double DesiredTau;
@@ -70,6 +71,7 @@ class DavidPAClass : public PairActionFitClass
   /// column. 
   blitz::Array<MultiCubicSpline,1> ukj; ///<(level )
   blitz::Array<LinearSpline,1> UdiagSpline;
+  blitz::Array<LinearSpline,1> dUdiagSpline;
   ///Same as ukj but stores the beta derivatives.
   blitz::Array<MultiCubicSpline,1> dukj; ///<(level )
   blitz::Array<CubicSpline,1> dUdRTimesSigmaSpline; ///<(level

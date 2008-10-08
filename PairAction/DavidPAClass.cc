@@ -546,6 +546,19 @@ DavidPAClass::Udiag (double q, int level)
     return UdiagSpline(level)(q);
 }
 
+double
+DavidPAClass::dUdiag_fast (double q, int level)
+{
+  level=level+TauPos;
+  // This is the endpoint action   
+  if (q < dUdiagSpline(level).Start()) 
+    return 5000.0;
+  else if (q > dUdiagSpline(level).End())
+    return dUdiagSpline(level)(dUdiagSpline(level).End());
+  else
+    return dUdiagSpline(level)(q);
+}
+
 
 
 void DavidPAClass::ReadSamplingTable(string fileName)
@@ -735,6 +748,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       //      cerr<<"NumTau is"<<NumTau<<endl;
       ukj.resize(NumTau);
       UdiagSpline.resize(NumTau);
+      dUdiagSpline.resize(NumTau);
       ////???      ukj.resize(NumUKJ+1);
       ReadFORTRAN3Tensor(infile,tempUkj);
       Array<double,3> tempUkj2(NumGridPoints,NumUKJ+1,NumTau);
@@ -846,7 +860,7 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
       for(int i=0; i<NumTau; i++){ //HACK!
 	tempdUkj2(Range::all(),0,i) = potential;
 	///	cerr<<"Current tau is "<<tau<<" "<<i<<endl;
-	if (fabs(tau-DesiredTau)<1e-4){
+	if (fabs(tau-DesiredTau)<1e-12){
 	  ///	  cerr<<"The tau I've chosen is "<<tau;
 	  TauPos=i;
 	}
@@ -881,14 +895,17 @@ void DavidPAClass::ReadDavidSquarerFile(string DMFile)
   for (int level=0; level<NumTau; level++) {
     const int numDiagPoints = 20000;
     Array<double,1> udiag(numDiagPoints);
+    Array<double,1> dUdiag(numDiagPoints);
     double start = ukj(level).grid->Start;
     double end   = ukj(level).grid->End;
     double dr = (end-start)/(double)(numDiagPoints-1);
     for (int j=0; j<numDiagPoints; j++) {
       double r = start + (double)j * dr;
       calcUsqzFast (0.0, r, 0.0, level-TauPos, udiag(j));
+      dUdiag(j)=dU(r,0.0,0.0,level-TauPos);
     }
     UdiagSpline(level).Init (start, end, udiag);
+    dUdiagSpline(level).Init (start, end, dUdiag);
   }
   verr<<"I've selected a tau of "<<tau<< "in the PairAction file"<<endl;
   ///  cerr<<"TauPos is "<<TauPos<<endl;
@@ -1015,6 +1032,7 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
       Array<double,3> tempUkj(NumGridPoints,NumUKJ,NumTau);
       ukj.resize(NumTau);
       UdiagSpline.resize(NumTau);
+      dUdiagSpline.resize(NumTau);
       in.ReadVar("Data",tempUkj);
       Array<double,3> tempUkj2(NumGridPoints,NumUKJ+1,NumTau);
       for(int i=0; i<NumTau; i++){
@@ -1117,13 +1135,25 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
     cerr<<"Reading data"<<endl;
     in.ReadVar("Data",tempdUkj);
     /////      tau=largestTau; //HACK
-    tau=smallestTau;
-    for(int i=0; i<NumTau; i++){ //HACK!
-      tempdUkj2(Range::all(),0,i) = potential;
-      ///	cerr<<"Current tau is "<<tau<<" "<<i<<endl;
-      if (fabs(tau-DesiredTau)<1e-4){
-        ///	  cerr<<"The tau I've chosen is "<<tau;
-        TauPos=i;
+
+      tau=smallestTau;
+      for(int i=0; i<NumTau; i++){ //HACK!
+	tempdUkj2(Range::all(),0,i) = potential;
+	///	cerr<<"Current tau is "<<tau<<" "<<i<<endl;
+	if (fabs(tau-DesiredTau)<1e-12){
+	  ///	  cerr<<"The tau I've chosen is "<<tau;
+	  TauPos=i;
+	}
+	tau=tau*2; //HACK!
+// =======
+//     tau=smallestTau;
+//     for(int i=0; i<NumTau; i++){ //HACK!
+//       tempdUkj2(Range::all(),0,i) = potential;
+//       ///	cerr<<"Current tau is "<<tau<<" "<<i<<endl;
+//       if (fabs(tau-DesiredTau)<1e-4){
+//         ///	  cerr<<"The tau I've chosen is "<<tau;
+//         TauPos=i;
+// >>>>>>> .r1260
       }
       tau=tau*2; //HACK!
     }
@@ -1163,14 +1193,17 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
     cerr<<"level is "<<level<<endl;
     const int numDiagPoints = 20000;
     Array<double,1> udiag(numDiagPoints);
+    Array<double,1> dUdiag(numDiagPoints);
     double start = ukj(level).grid->Start;
     double end   = ukj(level).grid->End;
     double dr = (end-start)/(double)(numDiagPoints-1);
     for (int j=0; j<numDiagPoints; j++) {
       double r = start + (double)j * dr;
       calcUsqzFast (0.0, r, 0.0, level-TauPos, udiag(j));
+      dUdiag(j)=dU(r,0.0,0.0,level-TauPos);
     }
     UdiagSpline(level).Init (start, end, udiag);
+    dUdiagSpline(level).Init (start, end, dUdiag);
     cerr<<"Bottom of loop"<<endl;
   }
   cerr<<"done with loop"<<endl;
