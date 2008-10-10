@@ -41,30 +41,26 @@ void DavidLongRangeClassYk::Build_MultipleSpecies()
     vol*=Path.GetBox()[dim];
   for(int speciesNum=0; speciesNum<PairArray.size(); speciesNum++) {
     DavidPAClass &pa(*(DavidPAClass*)PairArray(speciesNum));
-    int ncomps=Path.Species(speciesNum).NumParticles;
-    double lambda=Path.Species(speciesNum).lambda;
-    //cerr<<"lambda is "<<lambda<<endl;
-    //cerr<<"ncomps is "<<ncomps<<endl;
     //cerr<<"Vol is "<<vol<<endl;
     for (int i=0;i<pa.kVals.size();i++){
       double k=pa.kVals(i);
-      double arg=1.0+ncomps*2.0*pa.uk_long(i)/(lambda*k*k*vol);
-      double theta=0.5*k*k*lambda*Path.tau;
-      double q;
-      double s;
-      double tn;
-      if (arg<0){
-        q=sqrt(-arg);
-        tn=tan(q*theta);
-        s=q*(1-q*tn)/(q+tn);
-      }
-      else if (arg==0)
-        s=1.0/(1.0+theta);
-      else {
-        q=sqrt(arg);
-        tn=tanh(theta*q);
-        s=q*(1.0+q*tn)/(q+tn);
-      }
+//       double arg=1.0+ncomps*2.0*pa.uk_long(i)/(lambda*k*k*vol);
+//       double theta=0.5*k*k*lambda*Path.tau;
+//       double q;
+//       double s;
+//       double tn;
+//       if (arg<0){
+//         q=sqrt(-arg);
+//         tn=tan(q*theta);
+//         s=q*(1-q*tn)/(q+tn);
+//       }
+//       else if (arg==0)
+//         s=1.0/(1.0+theta);
+//       else {
+//         q=sqrt(arg);
+//         tn=tanh(theta*q);
+//         s=q*(1.0+q*tn)/(q+tn);
+//       }
       for (int j=0;j<Path.kVecs.size();j++){
         if (fequals(sqrt(blitz::dot(Path.kVecs(j),Path.kVecs(j))),k,1e-10)){
           Vlong_k(speciesNum, j)=pa.uk_long(i)/(vol);
@@ -133,12 +129,27 @@ void DavidLongRangeClassYk::BuildRPA_SingleSpecies()
 void DavidLongRangeClassYk::ReadYk()
 { 
   //assert(PairArray.size()==1);
-  DavidPAClass &pa(*((DavidPAClass*)PairArray(0)));
-  assert(pa.LongRangeDim==NDIM);
-  for (int dim=0;dim<NDIM;dim++)
-    assert(pa.LongRangeBox(dim)==Path.GetBox()[dim]);
-  assert(pa.LongRangeMass1==pa.LongRangeMass2);
-  assert(pa.LongRangeMass1==Path.Species(0).lambda);
+  for (int pai=0;pai<PairArray.size();pai++){
+    DavidPAClass &pa(*((DavidPAClass*)PairArray(pai)));
+    assert(pa.LongRangeDim==NDIM);
+    for (int dim=0;dim<NDIM;dim++)
+      assert(pa.LongRangeBox(dim)==Path.GetBox()[dim]);
+    //    assert(pa.LongRangeMass1==pa.LongRangeMass2);
+
+    int specNum1=0;
+    while (Path.Species(specNum1).Type!=pa.Particle1.Name){
+      specNum1++;
+      assert(specNum1<Path.NumSpecies());
+    }
+    int specNum2=0;
+    while (Path.Species(specNum2).Type!=pa.Particle2.Name){
+      specNum2++;
+      assert(specNum2<Path.NumSpecies());
+    }
+    cerr<<"MASSES: "<<pa.LongRangeMass1<<" "<<pa.LongRangeMass2<<" "<<Path.Species(specNum1).lambda<<" "<<Path.Species(specNum2).lambda<<endl;
+    assert(fabs(pa.LongRangeMass1-Path.Species(specNum1).lambda)<1e-10);
+    assert(fabs(pa.LongRangeMass2-Path.Species(specNum2).lambda)<1e-10);
+  }
   uk.resize(PairArray.size(), Path.kVecs.size());
   duk.resize(PairArray.size(), Path.kVecs.size());
   Vlong_k.resize(PairArray.size(), Path.kVecs.size());
