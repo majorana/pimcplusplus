@@ -467,7 +467,7 @@ void BisectionBlockClass::MakeMove()
 }
 void BisectionBlockClass::WriteRatio()
 {
-  PrintTimeSpent();
+  //  PrintTimeSpent();
   MultiStageClass::WriteRatio();
 
 }
