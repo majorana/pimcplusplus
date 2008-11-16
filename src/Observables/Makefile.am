@@ -8,8 +8,8 @@ libobservables_la_SOURCES  =     \
     AngularMomCor.cc             \
     AutoCorr.cc                  \
     AutoCorr.h                   \
-    Conductivity.h               \
-    Conductivity.cc              \
+		Conductivity.h               \
+		Conductivity.cc              \
     Coupling.cc                  \
     Coupling.h                   \
     DistanceToHead.cc            \
@@ -38,6 +38,8 @@ libobservables_la_SOURCES  =     \
     ObservableEnergy.h           \
     OpenOrientation.h            \
     OpenOrientation.cc           \
+    PairCorrelationReweighting.cc     \
+    PairCorrelationReweighting.h      \
     ParticleAverageLoc.h         \
     ParticleAverageLoc.cc        \
     PathDump.cc                  \

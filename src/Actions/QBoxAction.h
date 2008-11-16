@@ -2,13 +2,15 @@
 #define QBOX_DFT_ACTION_CLASS_H
 
 #include "ActionBase.h"
+#include "/home/gergely/build/qbox-1.44.0/src/qbInterface.h"
 #include <vector>
 #include <fstream>
-#include "popen2.h"
 
 class QBoxActionClass: public ActionBaseClass
 {
 	Array<string, 1> ptclSet;
+  // interface to qbox
+  qbox::qbLib* qb;
 	int age;
 	double prevEnergy, newEnergy, oldEnergy;
 	int steps;

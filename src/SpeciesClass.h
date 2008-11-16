@@ -44,6 +44,7 @@ public:
   /// classical particle.
   double lambda;
   double Charge;
+  double chargeSpread;
   // I added this parameter for use with empirical potentials
   // in a pre-rejection context, where having the "real" charge
   // is also necessary - john

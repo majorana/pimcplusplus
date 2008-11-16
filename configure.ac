@@ -203,6 +203,16 @@ else # don't link with qmcpack
 		QMC_LIB=" "
 fi
 
+# Checks if we want qbox functionality for DFT energies 
+AC_ARG_WITH(qbox,    [  --with-qbox=/path/to/my/qbox/builddir	enable qbox functionality])
+if (test "x$with_qbox" != "x"); then
+   	QBOX_DEF="-I$with_qbox/../src"
+	 	QBOX_LIB="$with_qbox/lib/libqbox.a -L/opt/intel/mkl/10.0.1.014/lib/emt64t -lxerces-c -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_intel_lp64 -lfftw"
+else # don't link with qbox
+    QBOX_DEF=" "
+		QBOX_LIB=" "
+fi
+
 AC_ARG_WITH(boost,    [  --with-boost=/path/to/my/boost	include boost libraries; needed for qmcpack])
 if (test "x$with_boost" != "x"); then
 	 	BOOST_LIB="-I$with_boost/include -L$with_boost/lib"
@@ -221,6 +231,8 @@ AC_SUBST(QMC_DEF)
 AC_SUBST(QMC_LIB)
 AC_SUBST(BOOST_LIB)
 AC_SUBST(LIBXML_LIB)
+AC_SUBST(QBOX_DEF)
+AC_SUBST(QBOX_LIB)
 
 AC_F77_WRAPPERS
 

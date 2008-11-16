@@ -282,6 +282,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new WeightClass(PathData,OutFile);
     else if (observeType=="Forces")
       tempObs = new ForcesClass(PathData,OutFile);
+    else if (observeType=="PairCorrelationReweighting")
+      tempObs = new PairCorrelationReweightingClass(PathData,OutFile);
     //  else if ( "OpenOrientation")
     //   tempObs = new OpenOrientationClass(PathData,OutFile);
     else {

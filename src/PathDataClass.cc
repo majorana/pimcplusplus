@@ -295,9 +295,11 @@ void PathDataClass::Read (IOSectionClass &in)
   ////cerr << "PathDataClass.cc: N is " << N << endl;
   int procsPerClone = 1;
   //bool UsingQMC = false;
+  bool sameSeed = false;
   if (N > 1) {
     assert (in.OpenSection ("Parallel"));
     assert (in.ReadVar("ProcsPerClone", procsPerClone));
+    in.ReadVar("SameLocalSeed",sameSeed);
     //in.ReadVar("Talk_To_QMC", UsingQMC); // flag for CEIMC, using qmcPACK
     //if(UsingQMC && procsPerClone > 1) cerr << "ERROR: YOU HAVE Talk_To_QMC ON AND ProcsPerClone > 1: THIS IS NOT YET SUPPORTED!!!!!!!!!!!!!!!" << endl;
     in.CloseSection();
@@ -328,7 +330,7 @@ void PathDataClass::Read (IOSectionClass &in)
 
   //  int seed;
   if (in.ReadVar("Seed",Seed)){
-    Random.Init (Seed, NumClones);
+    Random.Init (Seed, NumClones, sameSeed);
   }
   else {
     Seed=Random.InitWithRandomSeed(NumClones);
@@ -336,6 +338,7 @@ void PathDataClass::Read (IOSectionClass &in)
   //    Random.Init (314159, numClones);
   
 
+  //cerr << WorldComm.MyProc() << " clone " << Path.MyClone << " " << Seed << endl;
   //BAD BUG!  Path.MyClone=IntraComm.MyProc()/procsPerClone;
   Path.MyClone=WorldComm.MyProc()/procsPerClone;
 

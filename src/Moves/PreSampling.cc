@@ -333,7 +333,6 @@ void PreSamplingClass::MakeMove()
   //cerr << "Now resetting old path" << endl;
   //SetMode(OLDMODE);
   //AssignInitialPath();
-  cerr << NumSteps << " PreDeltaAction " << PreDeltaAction;// << endl;
   //cout << "FINAL PATHS OLD NEW" << endl;
   //PrintPaths(NumSlices, NumPtcls, PathData);
   //ActiveParticles.resize(NumPtcls);
@@ -347,7 +346,8 @@ void PreSamplingClass::MakeMove()
   prevActionChange = newPreAction - oldPreAction;
   //double logAcceptProb = -currActionChange+prevActionChange;
   double logAcceptProb = -currActionChange+PreDeltaAction;
-  cerr << " FinalDeltaAction " << currActionChange << " logAccProb " << logAcceptProb << endl;
+  perr << NumSteps << " PreDeltaS " << PreDeltaAction << " " << prevActionChange;// << endl;
+  perr << " FinalDeltaS " << currActionChange << " logAccProb " << logAcceptProb << endl;
   double logRand = log(PathData.Path.Random.Local());
   finalAccept = logAcceptProb>= logRand; /// Accept condition
 

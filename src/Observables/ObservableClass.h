@@ -31,6 +31,7 @@
 #include "ObservableDiffusion.h"
 #include "ObservableEnergy.h"
 #include "OpenOrientation.h"
+#include "PairCorrelationReweighting.h"
 #include "ParticleAverageLoc.h"
 //#include "VacancyLocation3.h"
 #include "PathDump.h"

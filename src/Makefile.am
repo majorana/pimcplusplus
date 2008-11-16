@@ -7,13 +7,12 @@ endif
 #QMCPACK_ROOT = /home/gergely/qmcPlusPlusNew
 #QMCPACK_HOME = $(QMCPACK_ROOT)/build
 
-#SUBDIRS = Actions Moves Observables Langevin Rotor $(MAYBE_PATHVIS)
 SUBDIRS = Actions Moves Observables Langevin $(MAYBE_PATHVIS)
 
 bin_PROGRAMS = pimc++ FreeParticles VacancyLoc 
 
 
-AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) $(LIBXML_LIB)
+AM_CXXFLAGS = $(COMMON_CFLAGS) $(MPI_DEF) $(QMC_DEF) $(QBOX_DEF) $(LIBXML_LIB)
 
 pimc___CXXFLAGS = $(AM_CXXFLAGS)
 FreeParticles_CXXFLAGS = $(AM_CXXFLAGS)
@@ -75,4 +74,4 @@ VacancyLoc_LDADD = $(COMMON_LIBS)
 
 
 pimc___LDADD = Moves/libmoves.la Actions/libactions.la \
-               Observables/libobservables.la $(COMMON_LIBS) $(QMC_LIB) $(ORDER_N_LIBS) $(BOOST_LIB) $(LIBXML_LIB)
+               Observables/libobservables.la $(COMMON_LIBS) $(QMC_LIB) $(QBOX_LIB) $(ORDER_N_LIBS) $(BOOST_LIB) $(LIBXML_LIB)
