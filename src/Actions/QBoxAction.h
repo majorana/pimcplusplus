@@ -2,10 +2,12 @@
 #define QBOX_DFT_ACTION_CLASS_H
 
 #include "ActionBase.h"
-#include "/home/gergely/build/qbox-1.44.0/src/qbInterface.h"
 #include <vector>
 #include <fstream>
 
+#ifdef USE_QBOX
+
+#include "/home/gergely/build/qbox-1.44.0/src/qbInterface.h"
 class QBoxActionClass: public ActionBaseClass
 {
 	Array<string, 1> ptclSet;
@@ -41,5 +43,6 @@ class QBoxActionClass: public ActionBaseClass
   
   QBoxActionClass(PathDataClass &pathData);
 };
+#endif
 
 #endif

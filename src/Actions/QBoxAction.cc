@@ -2,6 +2,8 @@
 #include "QBoxAction.h"
 #include <sstream>
 
+#ifdef USE_QBOX
+
 int qcount = 0;
 
 std::string
@@ -138,3 +140,5 @@ void QBoxActionClass::RejectCopy (int slice1, int slice2){
 	//prevEnergy = oldEnergy;
 	//cerr << "QBOX reject: caching " << prevEnergy << endl;
 }
+
+#endif

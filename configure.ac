@@ -206,7 +206,7 @@ fi
 # Checks if we want qbox functionality for DFT energies 
 AC_ARG_WITH(qbox,    [  --with-qbox=/path/to/my/qbox/builddir	enable qbox functionality])
 if (test "x$with_qbox" != "x"); then
-   	QBOX_DEF="-I$with_qbox/../src"
+   	QBOX_DEF="-DUSE_QBOX -I$with_qbox/../src"
 	 	QBOX_LIB="$with_qbox/lib/libqbox.a -L/opt/intel/mkl/10.0.1.014/lib/emt64t -lxerces-c -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_intel_lp64 -lfftw"
 else # don't link with qbox
     QBOX_DEF=" "
