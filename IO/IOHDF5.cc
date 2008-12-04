@@ -275,7 +275,8 @@ namespace IO {
     SectionList.push_back(newSection);
   
     if (UseUnderscores) {
-      string numstr = NumExtension(CurrSecNum);
+      // string numstr = NumExtension(CurrSecNum);
+      string numstr = NumExtension(numWithMyName);
       newName += numstr;
     }
     else if (numWithMyName == 1) {
