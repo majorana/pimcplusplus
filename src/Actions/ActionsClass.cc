@@ -22,6 +22,7 @@
 #include <Common/IO/FileExpand.h>
 
 // now include ActionBaseClass headers here, not in .h
+#include "CummingsWaterPotential.h"
 #include "DiagonalActionClass.h"
 #include "ShortRangeClass.h"
 #include "ShortRangeOnClass.h"
@@ -47,7 +48,9 @@
 #include "DavidLongRangeClassYk.h"
 #include "DavidLongRangeClass.h"
 #include "QMCSamplingClass.h"
-#include "QBoxAction.h"
+#ifdef USE_QBOX
+  #include "QBoxAction.h"
+#endif
 #include "OpenLoopImportance.h"
 #include "pwscfAction.h"
 #include "StructureReject.h"
@@ -62,6 +65,8 @@
 #include "VariationalPI.h"
 #include "Tether.h"
 #include "NonlocalClass.h"
+#include "ReadAction.h"
+#include "BlendActions.h"
 
 ///Actionsclass. Stores all the actsion
 
@@ -343,6 +348,8 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new ShortRangeOnClass(PathData,PairMatrix);
     } else if (type == "MoleculeInteractions") {
       newAction = new MoleculeInteractionsClass(PathData);
+    } else if (type == "CummingsWater") {
+      newAction = new CummingsWaterPotentialClass(PathData);
     } else if (type == "ST2Water") {
       newAction = new ST2WaterClass(PathData);
     } else if (type == "EAM") {
@@ -359,6 +366,10 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new KineticVibrationClass(PathData);
     } else if (type == "LongRangeCoulomb") {
       newAction = new LongRangeCoulombClass(PathData, PairMatrix, PairArray);
+    } else if (type == "ReadFromFile") {
+      newAction = new ReadFromFileActionClass(PathData);
+    } else if (type == "BlendActions") {
+      newAction = new BlendActionsClass(PathData);
     } else {
       cerr << endl << "ActionBaseClass Type " << type << " not recognized" << endl;
       exit(0);
@@ -458,6 +469,10 @@ ActionBaseClass* ActionsClass::GetAction(string name)
     labelIt++;
   } while(labelIt != ActionLabels.end());
 
+  if(name == "") {
+    cerr << "ActionsClass::GetAction WARNING returning NULL action because you specified an empty string.  Are you sure this was intended?" << endl;
+    return NULL;
+  }
   cerr << "ActionsClass::GetAction ERROR:" << endl;
   cerr << "Requested ActionBaseClass object with label " << name << " was not found.  Make sure it's specified in the Actions section of the input file." << endl;
   exit(1);
