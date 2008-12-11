@@ -114,11 +114,13 @@ TestFit2(string fname)
   fclose (fout);
 
   // Write out Goncharovs residuals
-  FILE *fin = fopen ("GoncharovEOSData.png.dat", "r");
+  //  FILE *fin = fopen ("GoncharovEOSData.png.dat", "r");
+  FILE *fin = fopen ("GoncharovEOS.Holzapfel.dat", "r");
   fout = fopen ("GoncharovResiduals.dat", "w");
   double Vval, Pval;
   while (fscanf (fin, "%lf %lf\n", &Pval, &Vval) == 2) {
-    Vval *= 79.7535137356486;
+    // Vval *= 79.7535137356486;
+    Vval *= 79.714027629;
     double diff = Pval - eos.Pressure(Vval);
     fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
   }
@@ -218,9 +220,16 @@ TestFitErrors(string fname)
   string Ename = fname + ".dat";
 
 
+
+
   FILE *fout = fopen (Ename.c_str(), "w");
-  double delta = (V(0) - V(V.size()-1))/1000.0;
-  for (double v=V(V.size()-1); v<=V(0); v+=delta)
+  double Vmin=V(0), Vmax=V(0), delta;
+  for (int i=0; i<V.size(); i++) {
+    Vmin = min(Vmin, V(i));
+    Vmax = max(Vmax, V(i));
+  }
+  delta = (Vmax - Vmin) / 1000.0;
+  for (double v=Vmin; v<=Vmax; v+=delta)
     fprintf (fout, "%20.16f %20.16f %20.16f %20.16f\n", v, eos(v), eos.Pressure(v), eos.PressureFD(v));
   fclose (fout);
 }
@@ -281,48 +290,65 @@ StaticFit (string fname, VinetEOSClass &eos)
 
 
   FILE *fout = fopen (Ename.c_str(), "w");
-  double delta = (V(0) - V(V.size()-1))/1000.0;
-  for (double v=V(V.size()-1); v<=V(0); v+=delta)
+  double Vmin=V(0), Vmax=V(0), delta;
+  for (int i=0; i<V.size(); i++) {
+    Vmin = min(Vmin, V(i));
+    Vmax = max(Vmax, V(i));
+  }
+  cerr << "Vmin = " << Vmin << "  Vmax = " << Vmax << endl;
+
+  delta = (Vmax - Vmin) / 1000.0;
+  for (double v=Vmin; v<=Vmax; v+=delta)
     fprintf (fout, "%20.16f %20.16f %20.16f %20.16f\n", v, eos(v), eos.Pressure(v), eos.PressureFD(v));
   fclose (fout);
 
   // Write out Goncharovs residuals
-  FILE *fin = fopen ("GoncharovEOSData.png.dat", "r");
-  fout = fopen ("GoncharovResiduals.dat", "w");
-  double Vval, Pval;
-  while (fscanf (fin, "%lf %lf\n", &Pval, &Vval) == 2) {
-    Vval *= 79.7535137356486;
-    double diff = Pval - eos.Pressure(Vval);
-    fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+  //  FILE *fin = fopen ("GoncharovEOSData.png.dat", "r");
+  FILE *fin = fopen ("GoncharovEOS.Holzapfel.dat", "r");
+  double Vval, Pval, aval;
+  if (fin) {
+    fout = fopen ("GoncharovResiduals.dat", "w");
+    while (fscanf (fin, "%lf %lf\n", &Pval, &aval) == 2) {
+      //      Vval *= 79.7535137356486;
+      aval *= 1.8897261;  // Angstrom to bohr radius
+      Vval = 0.25 * aval * aval * aval;
+      double diff = Pval - eos.Pressure(Vval);
+      fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+    }
+    fclose(fout);
+    fclose(fin);
   }
-  fclose(fout);
-  fclose(fin);
 
   // Write out Datchi's residuals
   fin = fopen ("DatchiEOS.dat", "r");
-  fout = fopen ("DatchiResiduals.dat", "w");
-  double aVal, Tval;
-  char dummyLine[100];
-  fgets (dummyLine, 100, fin);
-  fgets (dummyLine, 100, fin);
-  while (fscanf (fin, "%lf %lf %lf %lf\n", &Pval, &Tval, &aVal, &Vval) == 4) {
-    Vval = 1.8897261*1.8897261*1.8897261*aVal*aVal*aVal/4.0;
-    double diff = Pval - eos.Pressure(Vval);
-    fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+  if (fin) {
+    fout = fopen ("DatchiResiduals.dat", "w");
+    double aVal, Tval;
+    char dummyLine[100];
+    fgets (dummyLine, 100, fin);
+    fgets (dummyLine, 100, fin);
+    while (fscanf (fin, "%lf %lf %lf %lf\n", &Pval, &Tval, &aVal, &Vval) == 4) {
+      Vval = 1.8897261*1.8897261*1.8897261*aVal*aVal*aVal/4.0;
+      double diff = Pval - eos.Pressure(Vval);
+      fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+    }
+    fclose(fout);
+    fclose (fin);
   }
-  fclose(fout);
-  fclose (fin);
 
   // Write out Knittles's residuals
   fin = fopen ("Exp300K_P-V.dat", "r");
-  fout = fopen ("KnittleResiduals.dat", "w");
-  while (fscanf (fin, "%lf %lf\n", &Vval, &Pval) == 2) {
-    Vval *= 79.7535137356486;
-    double diff = Pval - eos.Pressure(Vval);
-    fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+  if (fin) {
+    fout = fopen ("KnittleResiduals.dat", "w");
+    while (fscanf (fin, "%lf %lf\n", &Vval, &Pval) == 2) {
+      Vval *= 79.714027629;
+      // Vval *= 79.7535137356486;
+      double diff = Pval - eos.Pressure(Vval);
+      fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+    }
+    fclose(fout);
+    fclose (fin);
   }
-  fclose(fout);
-  fclose (fin);
 }
 
 
@@ -442,8 +468,8 @@ DebyeFit (string fname, DebyeFreeEnergy &debye)
     int retval = fscanf (fin, "%lf %lf %lf %lf", &v, &t, &f, &u);
     if (v != lastv || retval != 4) {
       if (Vvec.size() != 0) 
-	//debye.AddVolume_F (lastv, Fvec, Tvec);
-	debye.AddVolume_U (lastv, Uvec, Tvec);
+	debye.AddVolume_F (lastv, Fvec, Tvec);
+      //debye.AddVolume_U (lastv, Uvec, Tvec);
       Vvec.clear();
       Tvec.clear();
       Fvec.clear();
@@ -458,6 +484,32 @@ DebyeFit (string fname, DebyeFreeEnergy &debye)
       done = true;
   }
   debye.FitTheta_V (4);
+  fclose (fin);
+  fin = fopen (fname.c_str(), "r");
+  lastv = 0;
+  done=false;
+  i = 0;
+  double F0 = 0.0;
+  double U0 = 0.0;
+  FILE *out = fopen ("ModelF.dat", "w");
+  while (!done) {
+    double v,t,f,u;
+    int retval = fscanf (fin, "%lf %lf %lf %lf", &v, &t, &f, &u);
+    if (retval != 4)
+      done = true;
+    else {
+      if (v != lastv)
+	F0 = f; U0 = u;
+      fprintf (out, "%1.9f  %5.1f   %12.14f  %12.14f\n",
+	       v, t, F0 + debye.F(v,t), U0 + debye.U(v,t));
+      lastv = v;
+    }
+  }
+  fclose(out);
+  fclose (fin);
+
+
+
   FILE *fout = fopen ("Theta_Fdat", "w");
   for (double V=40.0; V<=95.0; V+=0.01) {
     double theta = debye.Theta_V(V);

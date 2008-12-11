@@ -163,6 +163,14 @@ DebyeFreeEnergy::F(double Vval, double T)
   return Debye.F(T);
 }
 
+double
+DebyeFreeEnergy::U(double Vval, double T)
+{
+  Debye.SetTheta (Theta_V(Vval));
+  return Debye.U(T);
+}
+
+
 
 double
 DebyeFreeEnergy::P(double Vval, double T)
