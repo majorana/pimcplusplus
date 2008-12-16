@@ -11,7 +11,7 @@ class AVBMove: public MolMoveClass{
   public:
   AVBMove(PathDataClass &myPathData,IOSectionClass outSection); 
   AVBMove(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
-    MolMoveClass (myPathData,outSection, numToRead, start)
+    MolMoveClass (myPathData,outSection)
     {
     }
 	void Read(IOSectionClass &moveInput);

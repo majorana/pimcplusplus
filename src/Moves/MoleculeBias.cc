@@ -23,12 +23,6 @@ MoleculeForceBiasMove::MoleculeForceBiasMove(PathDataClass &myPathData,IOSection
 	cerr << "MoleculeForceBias constructor" << endl;
 }
 
-MoleculeForceBiasMove::MoleculeForceBiasMove(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start)
-  : MolMoveClass (myPathData,outSection, numToRead, start)
-{
-	cerr << "MoleculeForceBias constructor" << endl;
-}
-
 void MoleculeForceBiasMove::Read(IOSectionClass &moveInput) {
   cerr << "  Force Bias read in" << endl;
   moveInput.ReadVar("DoTranslation",doTrans);

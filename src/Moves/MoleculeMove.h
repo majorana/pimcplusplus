@@ -37,10 +37,6 @@ class MoleculeRotate : public MolMoveClass
 			cerr << "MoleculeRotate constructor" << endl;
     }
 
-  MoleculeRotate(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
-    MolMoveClass (myPathData,outSection, numToRead, start)
-    {
-    }
   //  double AcceptanceRatio(int numAccepted,int numMoves);
 
   //void WriteRatio()
@@ -48,6 +44,22 @@ class MoleculeRotate : public MolMoveClass
   //  };
 };
 
+class PairActionTestClass : public MolMoveClass
+{
+ public:
+  double r0, rc;
+  string filename;
+  string spec1, spec2;
+  int ptcl1, ptcl2;
+  double Sample(int &slice1,int &slice2, Array<int,1> &activeParticles);
+  void Read(IOSectionClass &moveInput);
+
+  PairActionTestClass(PathDataClass &myPathData,IOSectionClass outSection) : 
+    MolMoveClass (myPathData,outSection)
+    {
+    }
+
+};
 
 class BondStretch : public MolMoveClass
 {
@@ -63,10 +75,6 @@ class BondStretch : public MolMoveClass
 			cerr << "BondStretch constructor" << endl;
     }
 
-  BondStretch(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
-    MolMoveClass (myPathData,outSection, numToRead, start)
-    {
-    }
   //  double AcceptanceRatio(int numAccepted,int numMoves);
 
   //void WriteRatio()
@@ -95,10 +103,6 @@ class MoleculeTranslate : public MolMoveClass
 			counter = 0;
     }
 
-  MoleculeTranslate(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
-    MolMoveClass (myPathData,outSection, numToRead, start)
-    {
-    }
 };
 
 // individual intramolecular moves
@@ -121,11 +125,6 @@ class ParticleTranslate : public MolMoveClass
     {
 			counter = 0;
     }
-
-  ParticleTranslate(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
-    MolMoveClass (myPathData,outSection, numToRead, start)
-    {
-    }
 };
 
 class DimerMove : public MolMoveClass
@@ -142,10 +141,6 @@ class DimerMove : public MolMoveClass
     {
     }
 
-  DimerMove(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
-    MolMoveClass (myPathData,outSection, numToRead, start)
-    {
-    }
 };
 
 class DummyEvaluate : public MolMoveClass
@@ -162,11 +157,6 @@ class DummyEvaluate : public MolMoveClass
     MolMoveClass (myPathData,outSection)
     {
 			counter = 0;
-    }
-
-  DummyEvaluate(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
-    MolMoveClass (myPathData,outSection, numToRead, start)
-    {
     }
 };
 
@@ -190,11 +180,6 @@ class MoleculeMulti : public MolMoveClass
 			cerr << "MoleculeMulti constructor" << endl;
     }
 
-  MoleculeMulti(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start) : 
-    MolMoveClass (myPathData,outSection, numToRead, start),
-    Rotate(myPathData, outSection, numToRead, start), Trans(myPathData, outSection, numToRead, start), Stretch(myPathData, outSection, numToRead, start)
-    {
-    }
 };
 
 #endif

@@ -28,6 +28,24 @@ void MoleculeRotate::Read(IOSectionClass &moveInput) {
   sizeOfMulti = 0;
 }
 
+void PairActionTestClass::Read(IOSectionClass &moveInput) {
+  assert(moveInput.ReadVar("rstart",r0));
+  assert(moveInput.ReadVar("rend",rc));
+  assert(moveInput.ReadVar("File",filename));
+  assert(moveInput.ReadVar("Species1",spec1));
+  assert(moveInput.ReadVar("Species2",spec2));
+  int s1num = PathData.Path.SpeciesNum(spec1.c_str());
+  int s2num = PathData.Path.SpeciesNum(spec2.c_str());
+  ptcl1 = PathData.Path.Species(s1num).FirstPtcl;
+  if(s1num == s2num)
+    ptcl2 = ptcl1 + 1;
+  else
+    ptcl2 = PathData.Path.Species(s2num).FirstPtcl;
+  cerr << "PairActionTest for species " << spec1 << " " << spec2 << endl;
+  cerr << "Using ptcls " << ptcl1 << " " << ptcl2 << endl;
+	MolMoveClass::Read(moveInput);
+}
+
 void BondStretch::Read(IOSectionClass &moveInput) {
   cerr << "  Stretch read in" << endl;
   assert(moveInput.ReadVar("SetStrain",s));
@@ -138,7 +156,7 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
     	dVec move = TranslateMol(slice,PathData.Mol.MembersOf(MoveList(activeMol)),step); 
 	  	//cout << "  After move: of " << move << endl;
 	  	//for(int i=0; i<activeParticles.size(); i++) cout << "  " << activeParticles(i) << ": " << PathData.Path(slice,activeParticles(i)) << endl;
-    	move_mag_sq += move(0)*move(0) + move(1)*move(1) + move(2)*move(2);
+    	//move_mag_sq += move(0)*move(0) + move(1)*move(1) + move(2)*move(2);
 	  }
   }
 
@@ -239,6 +257,7 @@ double DimerMove::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles)
 
 //void MoleculeRotate::MakeMove()
 double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+  //cerr<<"CUMMING Rotating"<<endl;
   double dtheta = M_PI*Theta; // Using Theta from input file
   //cerr << " MoleculeRotate::Sample ";
   //double dtheta = 2*M_PI*0.3;
@@ -372,7 +391,62 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
 	return 1;
 }
 
+double PairActionTestClass::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+  int nPoints = 200;
+  double dx = (rc - r0)/float(nPoints);
+  cerr << "PATest sample ptcls " << ptcl1 << " " << ptcl2 << endl;
+  cerr << "PATest sample " << nPoints << " " << r0 << " " << rc << " " << dx << endl;
+  activeParticles.resize(2);
+  activeParticles(0) = ptcl1;
+  activeParticles(1) = ptcl2;
+  ofstream out(filename.c_str());
+  out << "# r";
+  list<ActionBaseClass*>::iterator actionIter=Actions.begin();
+  while(actionIter != Actions.end()) {
+    out << " " << (*actionIter)->GetName();
+    actionIter++;
+  }
+  out << endl;
+
+  int numSlices = PathData.Path.TotalNumSlices;
+  assert(numSlices > 3);
+  int BisectionLevel = 0;
+  slice1 = 0;
+  slice2 = numSlices - 1;
+  //int slice = 1;
+  dVec R0((0., 0., 0.));
+  dVec R1((0., 0., 0.));
+  cerr << "positions " << R0 << " " << R1 << endl;
+  R1(0) = r0;
+  cerr << "positions " << R0 << " " << R1 << endl;
+  for(int s=0; s<=numSlices; s++) {
+    PathData.Path.SetPos(s,ptcl1,R0);
+    PathData.Path.SetPos(s,ptcl2,R1);
+  }
+  for(int n=0; n<nPoints; n++) {
+    double r = r0 + n*dx;
+    R1(0) = r;
+    //for(int s=1; s<=2; s++)
+    for(int s=0; s<=numSlices; s++)
+      PathData.Path.SetPos(s,ptcl2,R1);
+    cerr << n << " " << r << " " << R1 << endl;
+    out << r;
+    actionIter=Actions.begin();
+    while (actionIter!=Actions.end()){
+      double S = ((*actionIter)->Action(slice1, slice2, activeParticles, BisectionLevel));
+      out << " " << S;
+      actionIter++;
+    }
+    out << endl;
+  }
+
+  out.close();
+  cerr << "Wrote " << filename << "; Done." << endl;
+  exit(1);
+}
+
 double MoleculeMulti::Sample(int &slice1,int &slice2, Array<int,1> &activeParticles) {
+  //cerr<<"CUMMING MOleculeMulti Rotate"<<endl;
   double r = Rotate.Sample(slice1, slice2, activeParticles);
   double t = Trans.Sample(slice1, slice2, activeParticles);
   double s = Stretch.Sample(slice1, slice2, activeParticles);
@@ -549,7 +623,7 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
         //double theta0 = GetAngle(v1,v2);
         //cerr << "S going to stretch angle " << theta0*180/M_PI << " by dtheta which is in deg " << dtheta*180/M_PI << endl;
         dVec u = crossprod(v1,v2);
-        StressAngle(slice, anglePairs[a][1],Normalize(u),dtheta);
+        //StressAngle(slice, anglePairs[a][1],Normalize(u),dtheta);
 
         //v1 = PathData.Path(slice,anglePairs[a][0]) - PathData.Path(slice,activeMol);
         //v2 = PathData.Path(slice,anglePairs[a][1]) - PathData.Path(slice,activeMol);

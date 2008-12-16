@@ -22,46 +22,40 @@ void PreSamplingClass::Read(IOSectionClass& in)
 {
   cerr << "Pre-Sampling Move read..." << endl;
   in.ReadVar("NumPreSteps",TotalNumPreSteps);
-  int stages = 1;
-  in.ReadVar("NumPreStages",stages);
+  int stages = in.CountSections("PreStage");
+  assert(stages>0);
+  //in.ReadVar("NumPreStages",stages);
   NumPreSampleSteps.resize(stages);
   NumPreSampleAccept.resize(stages);
   for(int n=0; n<stages; n++) {
     NumPreSampleSteps(n) = 0;
     NumPreSampleAccept(n) = 0;
   }
-	Array<string,1> methodList;
-	assert(in.ReadVar("MoveMethod",methodList));
-  assert(methodList.size() == stages);
-  Array<int,1> numActions(stages);
-  numActions = 1;
-  assert(in.ReadVar("NumActions", numActions));
-  //assert((numActions.size()-1) == stages);
-  int startIndex = 0;
   for(int s=0; s<stages; s++){
+    in.OpenSection("PreStage",s);
+	  string method;
+	  assert(in.ReadVar("MoveMethod",method));
     StageClass* MoveStage;
-    string method = methodList(s);
-    int actionsToRead = numActions(s);
-    cerr << "  Init " << s+1 << " of " << stages << " stages: " << method << endl;
+    //cerr << "  Init " << s+1 << " of " << stages << " stages: " << method << endl;
 	  if(method == "Translate"){
 	  	cerr << "Creating new Translate move...";
-    	MoveStage = new MoleculeTranslate(PathData, IOSection, actionsToRead, startIndex);
+    	MoveStage = new MoleculeTranslate(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else if (method == "Rotate"){
 	  	cerr << "Creating new Rotate move...";
-    	MoveStage = new MoleculeRotate(PathData, IOSection, actionsToRead, startIndex);
+    	MoveStage = new MoleculeRotate(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else if (method == "Multi"){
 	  	cerr << "Creating new Multiple move...";
-    	MoveStage = new MoleculeMulti(PathData, IOSection, actionsToRead, startIndex);
+    	MoveStage = new MoleculeMulti(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else if (method == "Stretch"){
 	  	cerr << "Creating new bond-stretching move...";
-    	MoveStage = new BondStretch(PathData, IOSection, actionsToRead, startIndex);
+    	MoveStage = new BondStretch(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else if (method == "ForceBias"){
 	  	cerr << "Creating new Force Bias move...";
-    	MoveStage = new MoleculeForceBiasMove(PathData, IOSection, actionsToRead, startIndex);
+    	MoveStage = new MoleculeForceBiasMove(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else {
 	  	cerr << "ERROR: method " << method << " is not supported." << endl;
@@ -69,7 +63,8 @@ void PreSamplingClass::Read(IOSectionClass& in)
 	  }
     MoveStage->Read(in);
     PreStages.push_back(MoveStage);
-    startIndex += numActions(s);
+    //startIndex += numActions(s);
+    in.CloseSection();
   }
 
   // read in actions for presampling
@@ -123,76 +118,6 @@ void PreSamplingClass::Read(IOSectionClass& in)
   InitialPath.resize(NumSlices, NumPtcls);
   cerr << "PreSamplingClass read I have " << NumPtcls << " particles and " << NumSlices-1 << " time slices" << endl;
 }
-
-// old read
-//void PreSamplingClass::Read(IOSectionClass& in)
-//{
-//  cerr << "Pre-Sampling Move read..." << endl;
-//  in.ReadVar("NumPreSteps",TotalNumPreSteps);
-//  int stages = 1;
-//  in.ReadVar("NumPreStages",stages);
-//	Array<string,1> methodList;
-//	assert(in.ReadVar("MoveMethod",methodList));
-//  assert(methodList.size() == stages);
-//  Array<int,1> numActions(stages);
-//  numActions = 1;
-//  assert(in.ReadVar("NumActions", numActions));
-//  //assert((numActions.size()-1) == stages);
-//  int startIndex = 0;
-//  for(int s=0; s<stages; s++){
-//    StageClass* MoveStage;
-//    string method = methodList(s);
-//    int actionsToRead = numActions(s);
-//    cerr << "  Init " << s+1 << " of " << stages << " stages: " << method << endl;
-//	  if(method == "Translate"){
-//	  	cerr << "Creating new Translate move...";
-//    	MoveStage = new MoleculeTranslate(PathData, IOSection, actionsToRead, startIndex);
-//	  	cerr << " done." << endl;
-//	  } else if (method == "Rotate"){
-//	  	cerr << "Creating new Rotate move...";
-//    	MoveStage = new MoleculeRotate(PathData, IOSection, actionsToRead, startIndex);
-//	  	cerr << " done." << endl;
-//	  } else if (method == "Multi"){
-//	  	cerr << "Creating new Multiple move...";
-//    	MoveStage = new MoleculeMulti(PathData, IOSection, actionsToRead, startIndex);
-//	  	cerr << " done." << endl;
-//	  } else if (method == "Stretch"){
-//	  	cerr << "Creating new bond-stretching move...";
-//    	MoveStage = new BondStretch(PathData, IOSection, actionsToRead, startIndex);
-//	  	cerr << " done." << endl;
-//	  } else if (method == "ForceBias"){
-//	  	cerr << "Creating new Force Bias move...";
-//    	MoveStage = new MoleculeForceBiasMove(PathData, IOSection, actionsToRead, startIndex);
-//	  	cerr << " done." << endl;
-//	  } else {
-//	  	cerr << "ERROR: method " << method << " is not supported." << endl;
-//      exit(1);
-//	  }
-//    MoveStage->Read(in);
-//    PreStages.push_back(MoveStage);
-//    startIndex += numActions(s);
-//  }
-//
-//  string finalMethod;
-//  assert(in.ReadVar("FinalStageMethod",finalMethod));
-//  int actionsToRead = numActions(numActions.size()-1);
-//	if (finalMethod == "Dummy"){
-//	  cerr << "Creating new dummy stage to evaluate the specified action (should be preceded by an actual move stage which is evaluate with a \"cheap\" action...";
-//    FinalStage = new PreSampleDummy(PathData, IOSection, actionsToRead, startIndex);
-//    cerr << " done." << endl;
-//  } else {
-//    cerr << "Actually, I'm not supporting anything other than ``Dummy'' for the final move stage for this algorithm" << endl;
-//    assert(0);
-//  }
-//  FinalStage->Read(in);
-//
-//  // initialize stuff
-//  NumPtcls = PathData.Path.NumParticles();
-//  NumSlices = PathData.Path.NumTimeSlices();
-//  InitialPath.resize(NumSlices, NumPtcls);
-//  cerr << "PreSamplingClass read I have " << NumPtcls << " particles and " << NumSlices-1 << " time slices" << endl;
-//
-//}
 
 void PreSamplingClass::WriteRatio()
 {
@@ -346,8 +271,8 @@ void PreSamplingClass::MakeMove()
   prevActionChange = newPreAction - oldPreAction;
   //double logAcceptProb = -currActionChange+prevActionChange;
   double logAcceptProb = -currActionChange+PreDeltaAction;
-  perr << NumSteps << " PreDeltaS " << PreDeltaAction << " " << prevActionChange;// << endl;
-  perr << " FinalDeltaS " << currActionChange << " logAccProb " << logAcceptProb << endl;
+  //perr << NumSteps << " PreDeltaS " << PreDeltaAction << " " << prevActionChange;// << endl;
+  //perr << " FinalDeltaS " << currActionChange << " logAccProb " << logAcceptProb << endl;
   double logRand = log(PathData.Path.Random.Local());
   finalAccept = logAcceptProb>= logRand; /// Accept condition
 
@@ -368,12 +293,14 @@ void PreSamplingClass::MakeMove()
   }
   //NumAttempted++;
   
-  cout << NumSteps;
-  for(int n=0; n<NumPreSampleSteps.size(); n++)
-    cout << " " << double(NumPreSampleAccept(n))/NumPreSampleSteps(n);
-  cout << " FINAL ACCEPT ";
-  cout << finalAccept;
-  cout << " ratio " << setw(10) << double(NumFinalAccept)/NumSteps << endl;
+  if(NumSteps % 1 == 0) {
+    cout << NumSteps;
+    for(int n=0; n<NumPreSampleSteps.size(); n++)
+      cout << " " << double(NumPreSampleAccept(n))/NumPreSampleSteps(n);
+    cout << " FINAL ACCEPT ";
+    cout << finalAccept;
+    cout << " ratio " << setw(10) << double(NumFinalAccept)/NumSteps << endl;
+  }
 
   //cerr << "QUITTING" << endl;
   //exit(1);
@@ -436,12 +363,12 @@ void PreSamplingClass::Reject()
   //}
 }
 
-PreSampleDummy::PreSampleDummy(PathDataClass& PathData, IOSectionClass& IO, int actionsToRead, int startIndex):
-  DummyEvaluate(PathData, IO, actionsToRead, startIndex)
-{
-  toRead = actionsToRead;
-  startI = startIndex;
-}
+//PreSampleDummy::PreSampleDummy(PathDataClass& PathData, IOSectionClass& IO, int actionsToRead, int startIndex):
+//  DummyEvaluate(PathData, IO, actionsToRead, startIndex)
+//{
+//  toRead = actionsToRead;
+//  startI = startIndex;
+//}
 
 bool PreSampleDummy::Attempt(int &slice1, int &slice2, 
 			      Array<int,1> &activeParticles,
@@ -459,17 +386,17 @@ bool PreSampleDummy::Attempt(int &slice1, int &slice2,
   SetMode(NEWMODE);
   double newAction =StageAction(slice1,slice2,activeParticles);
   double newPreAction=PreSampleAction(slice1,slice2,activeParticles);
-  cout << "newFinal " << setw(12) << newAction;
-  cout << " oldFinal " << setw(12) << oldAction;
-  cout << " newPre " << setw(12) << newPreAction;
-  cout << " oldPre " << setw(12) << oldPreAction;
-  cout << " rold " << setw(12) << rold << " rnew " << setw(12) << rnew;
-  cout << "FINAL DELTA-ACTION " << setw(12) << newAction-oldAction;
-  cout << " PRE DELTA-ACTION " << setw(12) << newPreAction-oldPreAction;
+  //cout << "newFinal " << setw(12) << newAction;
+  //cout << " oldFinal " << setw(12) << oldAction;
+  //cout << " newPre " << setw(12) << newPreAction;
+  //cout << " oldPre " << setw(12) << oldPreAction;
+  //cout << " rold " << setw(12) << rold << " rnew " << setw(12) << rnew;
+  //cout << "FINAL DELTA-ACTION " << setw(12) << newAction-oldAction;
+  //cout << " PRE DELTA-ACTION " << setw(12) << newPreAction-oldPreAction;
   double currActionChange=newAction-oldAction;
   prevActionChange = newPreAction - oldPreAction;
 
-  cerr << "PREACTINOCHANGE " << prevActionChange << endl;
+  //cout << "PREACTINOCHANGE " << prevActionChange << endl;
   //cout << "ATTEMPT log(sample) " << log(sampleRatio) << " -currActChg " << -currActionChange << " prevActChg " << prevActionChange << endl;
   double logAcceptProb=log(sampleRatio)-currActionChange+prevActionChange;
   //cout << "  so logAcceptProb is " << logAcceptProb << endl;

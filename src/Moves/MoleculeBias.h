@@ -35,7 +35,6 @@ class MoleculeForceBiasMove : public MolMoveClass
   void Read(IOSectionClass &moveInput);
 
   MoleculeForceBiasMove(PathDataClass &myPathData,IOSectionClass outSection);
-  MoleculeForceBiasMove(PathDataClass &myPathData,IOSectionClass outSection, int numToRead, int start);
 };
 
 dVec CalcLever(dVec axis, dVec coord);

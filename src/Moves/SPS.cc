@@ -27,48 +27,50 @@ void SPSClass::Read(IOSectionClass& in)
   Tf2s = Ts2f = 0;
   in.ReadVar("LogTransProb",Tf2s); 
   in.ReadVar("LogReverseTransProb",Ts2f); 
-  int stages = 1;
-  in.ReadVar("NumMoveStages",stages);
-	Array<string,1> methodList;
-	assert(in.ReadVar("MoveMethod",methodList));
-  assert(methodList.size() == stages);
-  Array<int,1> numActions(stages);
-  numActions = 1;
-  assert(in.ReadVar("NumActions", numActions));
+  int stages = in.CountSections("Stage");
+  //in.ReadVar("NumMoveStages",stages);
+	//Array<string,1> methodList;
+	//assert(in.ReadVar("MoveMethod",methodList));
+  //assert(methodList.size() == stages);
+  //Array<int,1> numActions(stages);
+  //numActions = 1;
+  //assert(in.ReadVar("NumActions", numActions));
   //assert((numActions.size()-1) == stages);
-  int startIndex = 0;
+  //int startIndex = 0;
   for(int s=0; s<stages; s++){
     MolMoveClass* fullMoveStage;
     MolMoveClass* switchMoveStage;
-    string method = methodList(s);
-    int actionsToRead = numActions(s);
+    assert(in.OpenSection("Stage",s));
+    string method;
+    assert(in.ReadVar("MoveMethod",method));
+    //int actionsToRead = numActions(s);
     // adding this; actionstoRead should be deprecated!!
-    actionsToRead = 0;
+    //actionsToRead = 0;
     cerr << "  Init " << s+1 << " of " << stages << " stages: " << method << endl;
 	  if(method == "Translate"){
 	  	cerr << "Creating new Translate move...";
-    	fullMoveStage = new MoleculeTranslate(PathData, IOSection, actionsToRead, startIndex);
-    	switchMoveStage = new MoleculeTranslate(PathData, IOSection, actionsToRead, startIndex);
+    	fullMoveStage = new MoleculeTranslate(PathData, IOSection);//, actionsToRead, startIndex);
+    	switchMoveStage = new MoleculeTranslate(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else if (method == "Rotate"){
 	  	cerr << "Creating new Rotate move...";
-    	fullMoveStage = new MoleculeRotate(PathData, IOSection, actionsToRead, startIndex);
-    	switchMoveStage = new MoleculeRotate(PathData, IOSection, actionsToRead, startIndex);
+    	fullMoveStage = new MoleculeRotate(PathData, IOSection);//, actionsToRead, startIndex);
+    	switchMoveStage = new MoleculeRotate(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else if (method == "Multi"){
 	  	cerr << "Creating new Multiple move...";
-    	fullMoveStage = new MoleculeMulti(PathData, IOSection, actionsToRead, startIndex);
-    	switchMoveStage = new MoleculeMulti(PathData, IOSection, actionsToRead, startIndex);
+    	fullMoveStage = new MoleculeMulti(PathData, IOSection);//, actionsToRead, startIndex);
+    	switchMoveStage = new MoleculeMulti(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else if (method == "Stretch"){
 	  	cerr << "Creating new bond-stretching move...";
-    	fullMoveStage = new BondStretch(PathData, IOSection, actionsToRead, startIndex);
-    	switchMoveStage = new BondStretch(PathData, IOSection, actionsToRead, startIndex);
+    	fullMoveStage = new BondStretch(PathData, IOSection);//, actionsToRead, startIndex);
+    	switchMoveStage = new BondStretch(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else if (method == "ForceBias"){
 	  	cerr << "Creating new Force Bias move...";
-    	fullMoveStage = new MoleculeForceBiasMove(PathData, IOSection, actionsToRead, startIndex);
-    	switchMoveStage = new MoleculeForceBiasMove(PathData, IOSection, actionsToRead, startIndex);
+    	fullMoveStage = new MoleculeForceBiasMove(PathData, IOSection);//, actionsToRead, startIndex);
+    	switchMoveStage = new MoleculeForceBiasMove(PathData, IOSection);//, actionsToRead, startIndex);
 	  	cerr << " done." << endl;
 	  } else {
 	  	cerr << "ERROR: method " << method << " is not supported." << endl;
@@ -78,17 +80,18 @@ void SPSClass::Read(IOSectionClass& in)
     switchMoveStage->Read(in);
     FullMoveStages.push_back(fullMoveStage);
     SwitchMoveStages.push_back(switchMoveStage);
-    startIndex += numActions(s);
+    //startIndex += numActions(s);
+    in.CloseSection();
   }
 
   Array<string,1> ActionList;
   assert (in.ReadVar ("FullActions", ActionList));
   int numActionsToRead = ActionList.size();
-  cerr << "  Looking for " << numActionsToRead << " actions starting at index " << startIndex << endl;
+  //cerr << "  Looking for " << numActionsToRead << " actions starting at index " << startIndex << endl;
   //assert ((numActionsToRead + startIndex) <= ActionList.size());
 	for(int a=0; a<numActionsToRead; a++){
     cerr << "Read in actions " << ActionList << endl;
-		string setAction = ActionList(a+startIndex);
+		string setAction = ActionList(a);//+startIndex);
     ActionBaseClass* newAction = PathData.Actions.GetAction(setAction);
     FullActions.push_back(newAction);
     cerr << "  Added action with label " << setAction << " and address " << newAction << endl;
@@ -100,11 +103,11 @@ void SPSClass::Read(IOSectionClass& in)
   }
   assert (in.ReadVar ("SwitchActions", ActionList));
   numActionsToRead = ActionList.size();
-  cerr << "  Looking for " << numActionsToRead << " actions starting at index " << startIndex << endl;
-  assert ((numActionsToRead + startIndex) <= ActionList.size());
+  //cerr << "  Looking for " << numActionsToRead << " actions starting at index " << startIndex << endl;
+  //assert ((numActionsToRead + startIndex) <= ActionList.size());
 	for(int a=0; a<numActionsToRead; a++){
     cerr << "Read in actions " << ActionList << endl;
-		string setAction = ActionList(a+startIndex);
+		string setAction = ActionList(a);//+startIndex);
     ActionBaseClass* newAction = PathData.Actions.GetAction(setAction);
     SwitchActions.push_back(newAction);
     cerr << "  Added action with label " << setAction << " and address " << newAction << endl;

@@ -24,17 +24,17 @@ MolMoveClass::MolMoveClass(PathDataClass& myPathData, IO::IOSectionClass outSect
   }*/
 }
 
-MolMoveClass::MolMoveClass(PathDataClass& myPathData, IO::IOSectionClass outSection, int numToRead, int start):
-  LocalStageClass (myPathData,outSection)
-{
-	numAccepted = 0;
-	numMoves = 0;
-
-	mode = SINGLE;
-
-  startIndex = start;
-  numActionsToRead = numToRead;
-}
+//MolMoveClass::MolMoveClass(PathDataClass& myPathData, IO::IOSectionClass outSection, int numToRead, int start):
+//  LocalStageClass (myPathData,outSection)
+//{
+//	numAccepted = 0;
+//	numMoves = 0;
+//
+//	mode = SINGLE;
+//
+//  startIndex = start;
+//  numActionsToRead = numToRead;
+//}
 
 void MolMoveClass::Read (IOSectionClass &in){
 	/// Read in the molecule to move by string or int
@@ -88,11 +88,12 @@ void MolMoveClass::Read (IOSectionClass &in){
 		
   Array<string,1> ActionList;
   assert (in.ReadVar ("Actions", ActionList));
-  cerr << "  Looking for " << numActionsToRead << " actions starting at index " << startIndex << endl;
-  assert ((numActionsToRead + startIndex) <= ActionList.size());
-	for(int a=0; a<numActionsToRead; a++){
-    cerr << "Read in actions " << ActionList << endl;
-		string setAction = ActionList(a+startIndex);
+  //cerr << "  Looking for " << numActionsToRead << " actions starting at index " << startIndex << endl;
+  //assert ((numActionsToRead + startIndex) <= ActionList.size());
+  cerr << "Read in actions " << ActionList << endl;
+	for(int a=0; a<ActionList.size(); a++){
+		string setAction = ActionList(a);
+		//string setAction = ActionList(a+startIndex);
     // hack: needs to be integrated into new scheme!
     //if(setAction == "ShortRange") {
     //  cerr << "TEMP HACK: ADDING ACTIONS.SHORTRANGE TO MOLECULEMOVEBASE.ACTIONS" << endl;
@@ -105,79 +106,9 @@ void MolMoveClass::Read (IOSectionClass &in){
     else {
       ActionBaseClass* newAction = PathData.Actions.GetAction(setAction);
       Actions.push_back(newAction);
-      cerr << "  Added action with label " << setAction << " and address " << newAction << endl;
+      cerr << a+1 << " of " << ActionList.size() << ": Added action with label " << setAction << " and address " << newAction << endl;
     }
-
-    // deprecated actions readin
-	  //if(setAction == "MoleculeInteractions"){
-		//	// read should be done in actions now
-		//	//PathData.Actions.MoleculeInteractions.Read(in);
-  	//	Actions.push_back(&PathData.Actions.MoleculeInteractions);
-		//	cerr << "  Added Molecule Actions" << endl;
-		//}else if(setAction == "ST2Water"){
-		//	//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
-  	//	Actions.push_back(&PathData.Actions.ST2Water);
-		//	cerr << "Added ST2Water action" << endl;
-		//}else if(setAction == "Kinetic"){
-  	//	Actions.push_back(&PathData.Actions.Kinetic);
-		//	cerr << "Added Kinetic action" << endl;
-//#ifdef USE_QMC
-		//}else if(setAction == "CEIMCAction"){
-		//	//ActionBaseClass* newAction(PathData.Actions.CEIMCAction);
-		//	PathData.Actions.CEIMCAction.Read(in);
-  	//	Actions.push_back(&PathData.Actions.CEIMCAction);
-		//	cerr << "Added CEIMC calculation of BO energy" << endl;
-//#endif
-		//}else if(setAction == "LongRangeCoulomb"){
-  	//	Actions.push_back(&PathData.Actions.LongRangeCoulomb);
-		//	cerr << "Added long-range coulomb interaction" << endl;
-		//}else if(setAction == "EAM"){
-  	//	Actions.push_back(&PathData.Actions.EAM);
-		//	cerr << "Added Al EAM action" << endl;
-		//}else if(setAction == "PairAction"){
-		//	cerr << "Added Diagonal PairAction" << endl;
-    //  Actions.push_back(&PathData.Actions.DiagonalAction);
-		//}else if(setAction == "IonInteraction"){
-  	//	Actions.push_back(&PathData.Actions.IonInteraction);
-		//	cerr << "Added intermolecular ion-ion interaction" << endl;
-		//} else if(setAction == "KineticRotorAction"){
-  	//	Actions.push_back(&PathData.Actions.KineticRotor);
-		//	cerr << "Added Kinetic Rotor Action" << endl;
-		//} else if(setAction == "FixedAxisRotorAction"){
-  	//	Actions.push_back(&PathData.Actions.FixedAxisRotor);
-		//	cerr << "Added Fixed Axis Rotor Action" << endl;
-		//} else if(setAction == "QBoxAction"){
-  	//	Actions.push_back(&PathData.Actions.QBoxAction);
-		//	cerr << "Computing action with QBox DFT code" << endl;
-		//} else if(setAction == "EAM"){
-  	//	Actions.push_back(&PathData.Actions.EAM);
-		//	cerr << "Added Al EAM potential" << endl;
-		//} else {
-    //	cerr << "You specified " << setAction << ", which is not supported for this type of move" << endl;
-    //  assert(0);
-    //}
 	}
-
-	// this should all be done in PathClass.cc now
-  //MolMembers.resize(numMol);
-  //vector<int> catalog(numMol); // for storing info to load MolMembers
-  //// initialize catalog (all zeros)
-  //for(int m = 0; m < catalog.size(); m++)
-  //  catalog[m] = 0;
-	//// get number of ptcls for each molecule m; store in catalog
-  //for(int p = 0; p <PathData.Path.NumParticles(); p++)
-	//	catalog[PathData.PathData.Mol(p)]++;
-	//// resize MolMembers arrays appropritely; re-initialize catalog
-  //for(int m = 0; m < catalog.size(); m++){
-  //  MolMembers(m).resize(catalog[m]);
-	//	catalog[m] = 0;
-  //}
-	//// load ptcls into the MolMembers array; catalog indexes
-  //for(int p = 0; p <PathData.Path.NumParticles(); p++){
-  //  int m = PathData.PathData.Mol(p);
-	//	MolMembers(m)(catalog[m]) = p;
-	//	catalog[m]++;
-	//}
 }
 
 void MolMoveClass::LoadActions(list<ActionBaseClass*> actions)
@@ -272,9 +203,11 @@ void MolMoveClass::RotateMol(int slice, Array<int,1>& activePtcls, dVec& axis, d
     //cerr << "  " << ptcl << " " << activePtcls(ptcl) << " old " << P;
     PathData.Path.PutInBox(P);
     //cerr << " putinbox " << P;
-    dVec newP = ArbitraryRotate(axis, P, theta) + O;
-    PathData.Path.SetPos(slice,activePtcls(ptcl),newP);
-    //cerr << " new " << newP << endl;
+    if(Mag(P) > 1e-7) {
+      P = ArbitraryRotate(axis, P, theta) + O;
+      PathData.Path.SetPos(slice,activePtcls(ptcl),P);
+    }
+    //cerr << " new " << P << endl;
   }
 }
 
