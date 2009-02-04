@@ -8,6 +8,10 @@ libactions_la_SOURCES =            \
     ../det_calc_uekt.h             \
     ../det_calc_uekt.c             \
     ActionsClass.h                 \
+    BlendActions.h                 \
+    BlendActions.cc                \
+    CummingsWaterPotential.cc      \
+    CummingsWaterPotential.h       \
     DavidLongRangeClass.cc         \
     DavidLongRangeClass.h          \
     DavidLongRangeClassYk.cc         \
