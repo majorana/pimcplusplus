@@ -52,6 +52,7 @@ public:
 
   void Set (Vec3 box, Vec3 kvec, double kcut, double fftFactor=1.0);
   void Set (Vec3 box, Vec3 kvec, double kcut, Int3 boxSize);
+  void Set (Mat3 lattice, Vec3 kvec, double kcut, Int3 boxSize);
   void Set (Mat3 lattice, const Array<Vec3,1> &gvecs, 
 	    double fftFactor=1.0);
   void Set (Mat3 lattice, const Array<Vec3,1> &gvecs, 

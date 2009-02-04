@@ -239,6 +239,133 @@ void GVecsClass::Set (Vec3 box, Vec3 kVec, double kcut, Int3 boxSize)
 }
 
 
+void GVecsClass::Set (Mat3 lattice, Vec3 kVec, double kcut, Int3 boxSize)
+{
+  k = kVec;
+  Lattice = lattice;
+  Vec3 a[3], b[3];
+  a[0] = lattice(0,0), lattice(0,1), lattice(0,2);
+  a[1] = lattice(1,0), lattice(1,1), lattice(1,2);
+  a[2] = lattice(2,0), lattice(2,1), lattice(2,2);
+  double det_a = dot(cross(a[0],a[1]),a[2]);
+  double detInv = 1.0/det_a;
+  double vol = fabs(det_a);
+  double volInv = 1.0/vol;
+  b[0] = 2.0*M_PI*detInv * cross(a[1], a[2]);  
+  b[1] = 2.0*M_PI*detInv * cross(a[2], a[0]);
+  b[2] = 2.0*M_PI*detInv * cross(a[0], a[1]);
+  LatticeInv(0,0) =  (Lattice(1,1)*Lattice(2,2) - Lattice(2,1)*Lattice(1,2));
+  LatticeInv(1,0) = -(Lattice(1,0)*Lattice(2,2) - Lattice(1,2)*Lattice(2,0));
+  LatticeInv(2,0) =  (Lattice(1,0)*Lattice(2,1) - Lattice(1,1)*Lattice(2,0));
+  LatticeInv(0,1) = -(Lattice(0,1)*Lattice(2,2) - Lattice(0,2)*Lattice(2,1));
+  LatticeInv(1,1) =  (Lattice(0,0)*Lattice(2,2) - Lattice(0,2)*Lattice(2,0));
+  LatticeInv(2,1) = -(Lattice(0,0)*Lattice(2,1) - Lattice(0,1)*Lattice(2,0));
+  LatticeInv(0,2) =  (Lattice(0,1)*Lattice(1,2) - Lattice(0,2)*Lattice(1,1));
+  LatticeInv(1,2) = -(Lattice(0,0)*Lattice(1,2) - Lattice(0,2)*Lattice(1,0));
+  LatticeInv(2,2) =  (Lattice(0,0)*Lattice(1,1) - Lattice(0,1)*Lattice(1,0));
+  LatticeInv   = (1.0/det_a) * LatticeInv;
+  RecipLattice = 2.0*M_PI * LatticeInv;
+  /// Make sure we've computed the inverse lattice properly
+  Mat3 ident = LatticeInv * Lattice;
+
+  for (int i=0; i<3; i++)
+    for (int j=0; j<3; j++) 
+      if (i==j) assert (fabs(ident(i,j)-1.0) < 1.0e-12);
+      else      assert (fabs(ident(i,j))      < 1.0e-12);
+
+  Box = Vec3(lattice(0,0), lattice(1,1), lattice(2,2));
+
+  kCut = kcut;
+  kBox[0]=2.0*M_PI/lattice(0,0); kBox[1]=2.0*M_PI/lattice(1,1); kBox[2]=2.0*M_PI/lattice(2,2);
+
+  int maxX, maxY, maxZ;
+  maxX = (int) ceil(kcut * sqrt(dot(a[0],a[0]))/(2.0*M_PI)) + 1;
+  maxY = (int) ceil(kcut * sqrt(dot(a[1],a[1]))/(2.0*M_PI)) + 1;
+  maxZ = (int) ceil(kcut * sqrt(dot(a[2],a[2]))/(2.0*M_PI)) + 1;
+
+  Nx = boxSize[0];
+  Ny = boxSize[1];
+  Nz = boxSize[2];
+
+  ////////////////////////////////////////////
+  // First, set up G-vectors and difference //
+  ////////////////////////////////////////////
+  vector<GVec> vecs;
+  GVec vec;
+
+  /// First, count k-vectors
+  for (int ix=-maxX; ix<=maxX; ix++) {
+    vec.M[0] = ix;
+    vec.I[0] = (ix+Nx)%Nx;
+    for (int iy=-maxY; iy<=maxY; iy++) {
+      vec.M[1] = iy;
+      vec.I[1] = (iy+Ny)%Ny;
+      for (int iz=-maxZ; iz<=maxZ; iz++) {
+	vec.G = ix*b[0] + iy*b[1] + iz*b[2];
+	vec.M[2] = iz;
+	vec.I[2] = (iz+Nz)%Nz;
+	vec.G2 = dot (vec.G,vec.G);
+	if (dot(vec.G+kVec,vec.G+kVec) < (kcut*kcut))
+	  vecs.push_back(vec);
+      }
+    }
+  }
+  sort (vecs.begin(), vecs.end());
+  GVecs.resize(vecs.size());
+  Indices.resize(vecs.size());
+  Multipliers.resize(vecs.size());
+  int numUnique = 1;
+  for (int i=0; i<vecs.size(); i++) {
+    GVecs(i) = vecs[i].G;
+    Indices(i) = vecs[i].I;
+    Multipliers(i) = vecs[i].M;
+    if (i>0)
+      if (!(vecs[i] == vecs[i-1]))
+	numUnique++;
+  }
+  cerr << "Using " << vecs.size() << " G-vectors, of which " 
+       << numUnique << " have unique magnitudes.\n";
+  ////////////////////////////////////////////
+  // Now, set up G-vector differences.      //
+  ////////////////////////////////////////////
+  vecs.clear();
+  /// First, count k-vectors
+  for (int ix=-2*maxX; ix<=2*maxX; ix++) {
+    vec.I[0] = (ix+Nx)%Nx;
+    for (int iy=-2*maxY; iy<=2*maxY; iy++) {
+      vec.I[1] = (iy+Ny)%Ny;
+      for (int iz=-2*maxZ; iz<=2*maxZ; iz++) {
+	vec.G = ix*b[0] + iy*b[1] + iz*b[2];
+	vec.I[2] = (iz+Nz)%Nz;
+	vec.G2 = dot (vec.G, vec.G);
+	if (vec.G2 < (4.0*kcut*kcut))
+	  vecs.push_back(vec);
+      }
+    }
+  }
+  sort (vecs.begin(), vecs.end());
+  GDiff.resize(vecs.size());
+  GDiffInv2.resize(vecs.size());
+  IDiff.resize(vecs.size());
+  numUnique = 1;
+  for (int i=0; i<vecs.size(); i++) {
+    GDiff(i) = vecs[i].G;
+    if (vecs[i].I != TinyVector<int,3>(0,0,0))
+      GDiffInv2(i) = 1.0/dot(vecs[i].G, vecs[i].G);
+    else
+      GDiffInv2(i) = 0.0;
+    IDiff(i) = vecs[i].I;
+    if (i>0)
+      if (!(vecs[i] == vecs[i-1]))
+	numUnique++;
+  }
+  cerr << "Using " << vecs.size() << " G-difference vectors, of which "
+       << numUnique << " have unique magnitudes.\n";
+}
+
+
+
+
 void GVecsClass::GetFFTBoxSize(int &nx, int &ny, int &nz)
 {
   nx=Nx; ny=Ny; nz=Nz;
