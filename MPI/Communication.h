@@ -489,7 +489,7 @@ public:
   }
   
   template<typename T>
-  void Receive (int recvProc, T val)
+  void Receive (int recvProc, T &val)
   {
     cerr << "Receives are not supported in serial mode.\n";
     abort();
