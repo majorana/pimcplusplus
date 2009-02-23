@@ -714,11 +714,14 @@ WFVisualClass::DrawFrame(bool offScreen)
   }
 
   if (BondsToggle->get_active()) {
-    const double bondLength = 2.0;
+    //    const double bondLength = 2.0;
     for (int i=0; i < AtomPos.extent(0); i++) {
       Vec3 ri = AtomPos(i);
+      double rad1 = ElementData::GetRadius(AtomTypes(i));
       for (int j=i+1; j < AtomPos.extent(0); j++) {
 	Vec3 rj = AtomPos(j);
+	double rad2 = ElementData::GetRadius(AtomTypes(j));
+	double bondLength = 0.8 * (rad1+rad2);
 	if (dot(ri-rj, ri-rj) < bondLength*bondLength) {
 	  CylinderObject* bond = new CylinderObject(offScreen);
 	  bond->SetPos (ri, rj);
