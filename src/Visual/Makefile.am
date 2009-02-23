@@ -75,6 +75,8 @@ wfvis___SOURCES =       \
     ColorMap.cc         \
     CoordObject.cc      \
     CoordObject.h       \
+    CylinderObject.cc   \
+    CylinderObject.h    \
     DiskObject.cc       \
     DiskObject.h        \
     ElementData.cc      \

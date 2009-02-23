@@ -6,6 +6,7 @@
 #include "CoordObject.h"
 #include "Isosurface.h"
 #include "PlaneObject.h"
+#include "CylinderObject.h"
 #include "WFExport.h"
 #include <Common/IO/IO.h>
 #include <gtkmm/adjustment.h>
@@ -55,7 +56,7 @@ protected:
   Gtk::Adjustment kAdjust, BandAdjust;
   Gtk::Frame kFrame, BandFrame;
   Glib::RefPtr<Gtk::ToggleAction> CoordToggle, SphereToggle, BoxToggle,
-    TruncRadiiToggle, IsocontourToggle, FullscreenToggle;
+    TruncRadiiToggle, IsocontourToggle, FullscreenToggle, BondsToggle;
 ;
   Gtk::RadioButtonGroup DisplayGroup, ColorMapGroup;
   Glib::RefPtr<Gtk::RadioAction> RealRadio, ImagRadio, Mag2Radio;
@@ -167,6 +168,7 @@ protected:
   void OnViewReset();
   void OnCoordToggle();
   void OnSphereToggle();
+  void OnBondsToggle();
   void OnBoxToggle();
   void OnTruncRadiiToggle();
   void OnIsocontourToggle();

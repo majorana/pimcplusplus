@@ -194,6 +194,11 @@ WFVisualClass::WFVisualClass() :
   Actions->add (SphereToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnSphereToggle));
 
+  BondsToggle = Gtk::ToggleAction::create("Bonds", "Bonds",
+					  "Show bonds", false);
+  Actions->add (BondsToggle,
+		sigc::mem_fun(*this, &WFVisualClass::OnBondsToggle));
+
   BoxToggle = Gtk::ToggleAction::create("Box", "Box", "Show box", true);
   Actions->add (BoxToggle,
 		sigc::mem_fun(*this, &WFVisualClass::OnBoxToggle));
@@ -280,6 +285,7 @@ WFVisualClass::WFVisualClass() :
     "    <menu action='MenuView'>"
     "      <menuitem action='Reset'/>"
     "      <menuitem action='Nuclei'/>"
+    "      <menuitem action='Bonds'/>"
     "      <menuitem action='Axes'/>"
     "      <menuitem action='Box'/>"
     "      <menuitem action='Trunc'/>"
@@ -706,6 +712,25 @@ WFVisualClass::DrawFrame(bool offScreen)
       PathVis.Objects.push_back(sphere);
     }
   }
+
+  if (BondsToggle->get_active()) {
+    const double bondLength = 2.0;
+    for (int i=0; i < AtomPos.extent(0); i++) {
+      Vec3 ri = AtomPos(i);
+      for (int j=i+1; j < AtomPos.extent(0); j++) {
+	Vec3 rj = AtomPos(j);
+	if (dot(ri-rj, ri-rj) < bondLength*bondLength) {
+	  CylinderObject* bond = new CylinderObject(offScreen);
+	  bond->SetPos (ri, rj);
+	  bond->SetRadius(0.2);
+	  bond->SetColor (Vec3 (0.5, 0.5, 0.5));
+	  bond->SetBox (Box.GetLattice());
+	  PathVis.Objects.push_back(bond);
+	}
+      }
+    }
+  }
+
 
   if (FileIsOpen && !MultiBandButton.get_active()) {
     int band, k;
@@ -1200,6 +1225,14 @@ WFVisualClass::OnSphereToggle()
 {
   DrawFrame();
 }
+
+
+void
+WFVisualClass::OnBondsToggle()
+{
+  DrawFrame();
+}
+
 
 void
 WFVisualClass::OnBoxToggle()
