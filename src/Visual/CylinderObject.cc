@@ -163,8 +163,10 @@ CylinderObject::DrawPOV (FILE *fout, string rotString)
   fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "  }\n");
   fprintf (fout, "  cylinder {\n");
+  fprintf (fout, "    <%10.8f, %10.8f, %10.8f>,\n",
+	   Pos1[0], Pos1[1], Pos1[2]);
   fprintf (fout, "    <%10.8f, %10.8f, %10.8f>, %10.8f\n",
-	   Pos1[0], Pos1[1], Pos1[2], Radius);
+	   Pos2[0], Pos2[1], Pos2[2], Radius);
   fprintf (fout, "%s", rotString.c_str());
   fprintf (fout, "  }\n");    // Cylinder
   if (Color[3] < 0.99999)
