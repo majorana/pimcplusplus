@@ -66,7 +66,6 @@ CylinderObject::Set()
   dr /= sqrt(dot(dr,dr));
   double theta = 180.0/M_PI * acos(dr[2]);
   double phi   = 180.0/M_PI * atan2 (dr[1], dr[0]);
-  cerr << "theta = " << theta << "  phi = " << phi << endl;
 
   if (OffScreen) {
     //    glCallList(OffScreenListNum);
