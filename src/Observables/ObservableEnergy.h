@@ -18,7 +18,7 @@
 #define OBSERVABLE_ENERGY_H
 
 #include "ObservableBase.h"
-
+#include "HistogramClass.h"
 class EnergyClass : public ObservableClass
 {
 
@@ -32,6 +32,7 @@ private:
   ObservableDouble TotalVar, KineticVar, dUShortVar, dULongVar, NodeVar,
     VShortVar, VLongVar, dUNonlocalVar,ResidualVar;
   ObservableVecDouble1 VTailSRVar;
+  ObservableVecDouble1 EnergyHistogramVar;
   ObservableDouble VTailLRVar;
   //, TotalActionVar, ExpTotalActionVar, TIP5PVar;
 
@@ -45,6 +46,8 @@ private:
   int numEnergies;
   Array<bool,1> CountedAlready;
   Array<int,1> TotalPerm;
+  HistogramClass EnergyHistogram;
+  Array<double,1> EnergyHistogramSum;
 public:
   void Accumulate();
   void WriteBlock();
@@ -52,18 +55,19 @@ public:
   void Read(IOSectionClass& in);
   EnergyClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) , 
-      TotalVar     ("Total",  IOSection,myPathData.Path.Communicator),
-      KineticVar   ("Kinetic",IOSection,myPathData.Path.Communicator), 
-      dUShortVar   ("dUShort",IOSection,myPathData.Path.Communicator), 
-      dULongVar    ("dULong", IOSection,myPathData.Path.Communicator), 
-      NodeVar      ("Node",   IOSection,myPathData.Path.Communicator), 
-      VShortVar    ("VShort",IOSection,myPathData.Path.Communicator), 
-      VLongVar     ("VLong",IOSection,myPathData.Path.Communicator),
-      dUNonlocalVar("dUNonlocal", IOSection,myPathData.Path.Communicator),
-      EnergyValsVar("Energy Vals",IOSection,myPathData.Path.Communicator),
-      ResidualVar("Residual Energy",IOSection,myPathData.Path.Communicator),
-      VTailSRVar("VTail Short Range",IOSection,myPathData.Path.Communicator),
-      VTailLRVar("VTail Long Range",IOSection,myPathData.Path.Communicator)
+    TotalVar     ("Total",  IOSection,myPathData.Path.Communicator),
+    KineticVar   ("Kinetic",IOSection,myPathData.Path.Communicator), 
+    dUShortVar   ("dUShort",IOSection,myPathData.Path.Communicator), 
+    dULongVar    ("dULong", IOSection,myPathData.Path.Communicator), 
+    NodeVar      ("Node",   IOSection,myPathData.Path.Communicator), 
+    VShortVar    ("VShort",IOSection,myPathData.Path.Communicator), 
+    VLongVar     ("VLong",IOSection,myPathData.Path.Communicator),
+    dUNonlocalVar("dUNonlocal", IOSection,myPathData.Path.Communicator),
+    EnergyValsVar("Energy Vals",IOSection,myPathData.Path.Communicator),
+    ResidualVar("Residual Energy",IOSection,myPathData.Path.Communicator),
+    VTailSRVar("VTail Short Range",IOSection,myPathData.Path.Communicator),
+    VTailLRVar("VTail Long Range",IOSection,myPathData.Path.Communicator),
+    EnergyHistogramVar("Energy Histogram",IOSection,myPathData.Path.Communicator)
 // TotalActionVar ("TotalAction",IOSection,myPathData.Path.Communicator),
 // ExpTotalActionVar ("ExpTotalAction",IOSection,myPathData.Path.Communicator)
 // TIP5PVar  ("TIP5P",IOSection,myPathData.Path.Communicator)
@@ -107,6 +111,7 @@ public:
   void WriteBlock();
   void ShiftData(int numTimeSlices);
   void Read(IOSectionClass& in);
+
   EnergySignClass(PathDataClass &myPathData, IOSectionClass &ioSection)
     : ObservableClass(myPathData, ioSection) , 
       TotalVar     ("Total",  IOSection,myPathData.Path.Communicator),

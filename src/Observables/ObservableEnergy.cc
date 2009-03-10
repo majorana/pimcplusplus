@@ -42,7 +42,7 @@ void EnergyClass::Accumulate()
   PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong,
 			   dUNonlocal,residual);
 
-
+  
   //PathData.Actions.Energy(Energies);
 	//kinetic = Energies["kinetic"];
 	//dUShort = Energies["dUShort"];
@@ -89,6 +89,7 @@ void EnergyClass::Accumulate()
 
   //  TIP5PSum   += tip5p;
 	//cerr << "ObservableEnergy leaving Accumulate" << endl;
+	EnergyHistogram.add(TotalSum,1.0);
 }
 
 
@@ -195,6 +196,10 @@ void EnergyClass::WriteBlock()
     VTailSRVar.Write(vtail);
     VTailLRVar.Write(longrange_vtail);
   }
+  Array<double,1> EnergyHistogramTemp(&(EnergyHistogram.histogram[0]),shape(EnergyHistogram.histogram.size()),neverDeleteData);
+  PathData.Path.Communicator.Sum(EnergyHistogramTemp,EnergyHistogramSum);
+  EnergyHistogramSum=EnergyHistogramSum*norm*Prefactor;
+  EnergyHistogramVar.Write(EnergyHistogramSum);
   TotalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(TotalSum)*norm);
   KineticVar.Write (Prefactor*PathData.Path.Communicator.Sum(KineticSum)*norm);
   dUShortVar.Write (Prefactor*PathData.Path.Communicator.Sum(dUShortSum)*norm);
@@ -360,7 +365,7 @@ void EnergyClass::Read(IOSectionClass &in)
 		OtherSums[n] = 0.0;
 	}
 	// End John's block of code
-
+	EnergyHistogram.Init(1000,9,11);
 }
 
 
@@ -385,7 +390,7 @@ void EnergySignClass::Accumulate()
   double kinetic, dUShort, dULong, node, vShort, vLong, dUNonlocal;
   PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong,
 			   dUNonlocal);
-  
+  //  cerr<<"ENERGIES: "<<kinetic<<" "<<duShort<<" "<<dULong<<" "<<node<<" "<<vShort<<" "<<vLong<<" "<<dUNonlocal<<endl;
   TotalSum   += (kinetic + dUShort + dULong + node)/* *PathData.Path.Weight*/;
   KineticSum += kinetic/* * PathData.Path.Weight*/;
   dUShortSum += dUShort/* * PathData.Path.Weight*/;
