@@ -30,8 +30,11 @@ class CummingsWaterPotentialClass : public ActionBaseClass
 	Array<bool, 2> Interacting;
 	Array<string, 1> LJSpecies;
 	Array<string, 1> ChargeSpecies;
+  Array<double,1> k2;
+  Array<double,3> phi;
 	double Dyn2kcal;
 
+  double volfactor;
   // model parameters
   double sigma_COM, alpha, tolerance, gamma, mu_0;
   // reaction field parameters

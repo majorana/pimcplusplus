@@ -18,6 +18,11 @@
 #include "CummingsWaterPotential.h"
 #include "../Moves/MoveUtils.h"
 
+inline double mag2 (const complex<double> &z)
+{
+  return (z.real()*z.real() + z.imag()*z.imag());
+}
+
 CummingsWaterPotentialClass::CummingsWaterPotentialClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)
 {
@@ -96,8 +101,8 @@ void CummingsWaterPotentialClass::Update_Ep(int slice) {
   Update_RF_p(slice);
   for (int i=0; i<PathData.Mol.NumMol(); i++)
     for(int x=0; x<3; x++)
-      Ep(slice,i)(x) = RF_p(slice,i)(x)/prefactor_Efield; // this unit business is hokey but I think this consistent
       //Ep(slice,i)(x) = 0.;
+      Ep(slice,i)(x) = RF_p(slice,i)(x)/(conversion*prefactor_Efield); // this unit business is hokey but I think this consistent
   //for (int i=0; i<PathData.Mol.NumMol()-1; i++){
   //  for (int j=i+1; j<PathData.Mol.NumMol(); j++){
   //    for(int m=0; m<3; m++) {
@@ -132,7 +137,7 @@ void CummingsWaterPotentialClass::Update_RF_q(int slice) {
     b = PathData.Path(slice,m+numMol) - PathData.Path(slice,m);
     b = Normalize(b);
     p_permanent(slice,m) = mu_0 * b;
-    RF_q(slice, m) = prefactor_RF * p_permanent(slice, m);
+    RF_q(slice, m) = conversion * prefactor_RF * p_permanent(slice, m);
   }
   for(int l=0; l<numMol; l++) {
     for(int m=l+1; m<numMol; m++) {
@@ -140,8 +145,8 @@ void CummingsWaterPotentialClass::Update_RF_q(int slice) {
       double rmag;
       PathData.Path.DistDisp(slice,l, m, rmag, R_lm);
       if(rmag < Rcut_RF) {
-        RF_q(slice, m) += prefactor_RF * p_permanent(slice,l);
-        RF_q(slice, l) += prefactor_RF * p_permanent(slice,m);
+        RF_q(slice, m) += conversion * prefactor_RF * p_permanent(slice,l);
+        RF_q(slice, l) += conversion * prefactor_RF * p_permanent(slice,m);
       }
     }
   }
@@ -172,9 +177,12 @@ void CummingsWaterPotentialClass::Update_Eq(int slice) {
 
 // particle-wise update to Eq
 void CummingsWaterPotentialClass::Update_Eq(int slice, int i) {
-  // initalize to reaction field contribution
-  for(int x=0; x<3; x++)
+  for(int x=0; x<3; x++) {
+    // initalize to reaction field contribution
     Eq(slice,i)(x) = RF_q(slice, i)(x);
+    //  skip Reaction Field
+    //Eq(slice,i)(x) = 0.;
+  }
   //int species1=Path.ParticleSpeciesNum(i);
   for(int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++) {
    	int species2=Path.ParticleSpeciesNum(ptcl2);
@@ -183,21 +191,28 @@ void CummingsWaterPotentialClass::Update_Eq(int slice, int i) {
       double rmag;
       dVec r;
       PathData.Path.DistDisp(slice,ptcl2,i,rmag,r);
-      PathData.Path.PutInBox(r);
-      double E_2_scalar = conversion * prefactor_Efield  / (rmag*rmag*rmag)
-        * PathData.Species(species2).pseudoCharge
-        * (erf(rmag / sqrt(2 * (sigma_COM*sigma_COM + PathData.Species(species2).chargeSpread)))
-            - sqrt(2) * rmag / sqrt(M_PI * (sigma_COM*sigma_COM + PathData.Species(species2).chargeSpread))
-            * exp(-1 * rmag*rmag / (2 * (sigma_COM*sigma_COM + PathData.Species(species2).chargeSpread))));
-      dVec E_2;
-      for(int x=0; x<3; x++) {
-        E_2(x) = E_2_scalar * r(x);
-        Eq(slice, i)(x) += E_2(x);
+      if(rmag < CUTOFF) {
+	    //double Ormag;
+	    //dVec Or;
+	    //PathData.Path.DistDisp(slice,PathData.Mol(i),PathData.Mol(ptcl2),Ormag,Or);
+      //if (Ormag <= CUTOFF){
+        //PathData.Path.PutInBox(r);
+        double E_2_scalar = conversion * prefactor_Efield  / (rmag*rmag*rmag)
+          * PathData.Species(species2).pseudoCharge
+          * (erf(rmag / sqrt(2 * (sigma_COM*sigma_COM + PathData.Species(species2).chargeSpread)))
+              - sqrt(2) * rmag / sqrt(M_PI * (sigma_COM*sigma_COM + PathData.Species(species2).chargeSpread))
+              * exp(-1 * rmag*rmag / (2 * (sigma_COM*sigma_COM + PathData.Species(species2).chargeSpread))));
+        dVec E_2;
+        for(int x=0; x<3; x++) {
+          E_2(x) = E_2_scalar * r(x);
+          Eq(slice, i)(x) += E_2(x);
+        }
+        //cerr << slice << " Eq " << i << ", " << ptcl2 << " " << E_2 << endl;;
       }
-      //cerr << slice << " Eq " << i << ", " << ptcl2 << " " << E_2 << endl;;
     }
   }
   //cerr << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2 " << slice << ", " << i << " Eq " << Eq(slice,i) << endl;
+  //cerr << "by the way prefactor " << prefactor_Efield*conversion << endl;
 }
 
 // call this function for global updates to E fields and 
@@ -242,7 +257,7 @@ void CummingsWaterPotentialClass::SolveDipole(int slice) {
         //b = PathData.Path(s,m+numMol) - PathData.Path(s,m);
         //PathData.Path.PutInBox(b);
         //b = Normalize(b);
-        p(s,m) = alpha*Eq(slice,m)/prefactor_Efield;
+        p(s,m) = alpha*Eq(slice,m)/(conversion*prefactor_Efield);
         //p(s,m) = mu_0 * b;
         //p(s,m) = ((0., 0., 0.));
         //cerr << m << " " << b << " " << p(s,m) << endl;
@@ -279,7 +294,7 @@ void CummingsWaterPotentialClass::SolveDipole(int slice) {
       //cerr << i << " " << tries << " " << p(slice,i) << " " << Eq(slice,i)/prefactor_Efield << " " << Ep(slice,i) << endl;
       for(int x=0; x<3; x++) {
         p_last(i)(x) = p(slice,i)(x);
-        p(slice,i)(x) = alpha*(Eq(slice,i)(x)/prefactor_Efield + Ep(slice,i)(x));
+        p(slice,i)(x) = alpha*(Eq(slice,i)(x)/(conversion*prefactor_Efield) + Ep(slice,i)(x));
         //p(slice,i)(x) = p0(slice,i)(x) + alpha*(Eq(slice,i)(x)/prefactor_Efield + Ep(slice,i)(x));
       }
       dp = sqrt(dot((p(slice,i)-p_last(i)), (p(slice,i)-p_last(i))));
@@ -288,7 +303,7 @@ void CummingsWaterPotentialClass::SolveDipole(int slice) {
     }
     tries++;
     //if(tries>100)
-    //  cerr << tries << " " << dp_max << " " << tolerance << endl;
+    //cerr << tries << " " << dp_max << " " << tolerance << endl;
   }
   if(tries>20)
     cerr << tries << " attempts to converge dipole moments avg netP " << netP/(tries*PathData.Mol.NumMol()) << endl;
@@ -373,17 +388,108 @@ double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice,
   for (int counter=0; counter<Path.DoPtcl.size(); counter++)
     Path.DoPtcl(counter)=true;
 
-  double piece1_BC=0.0;
-  double piece2_BC=0.0;
-  double piece3_BC=0.0;
   double TotalU = 0.0;
 	double TotalExp6 = 0.0;
 	double TotalCharge = 0.0;
+	double kspace = 0.0;
 	double TotalDipole = 0.0;
   double TotalReactionField = 0.0;
   double checkDi = 0.0;
   int numChangedPtcls = activeParticles.size();
   int skip = 1<<level;
+
+  // long range kspace initialization
+  if(firstTime){
+    vector<int> activeSpec(0);
+    int numActiveSpec = 0;
+    for (int species=0; species<Path.NumSpecies(); species++) {
+		  if(Interacting(species,1)) {
+        activeSpec.push_back(species);
+        numActiveSpec++;
+      }
+    }
+    int kPts = Path.kVecs.size();
+    k2.resize(kPts);
+    for(int i=0; i<kPts; i++){
+      double kSq = dot(Path.kVecs(i), Path.kVecs(i));
+      k2(i) = kSq;
+    }
+    phi.resize(numActiveSpec, numActiveSpec, kPts);
+    for(int si=0; si<numActiveSpec; si++) {
+      int spec1 = activeSpec[si];
+      for(int sj=0; sj<numActiveSpec; sj++) {
+        int spec2 = activeSpec[sj];
+        double kalpha = 0.5/(PathData.Species(spec1).chargeSpread + PathData.Species(spec2).chargeSpread);
+        for(int i=0; i<kPts; i++){
+          phi(spec1, spec2, i) = exp(-k2(i)/(4*kalpha*kalpha));
+        }
+      }
+    }
+    cerr << "GCPM Long Range initialized phi of size " << phi.size() << endl;
+    firstTime= false;
+    //cerr << "activespec " << activeSpecies << endl;
+
+    // initialize Rho_k
+    for (int slice=0; slice<=Path.TotalNumSlices; slice+=1) {
+      for (int species=0; species<Path.NumSpecies(); species++) {
+		    if(Interacting(species,1)){
+          Path.CalcRho_ks_Fast(slice, species);
+        }
+      }
+    }
+    volfactor = 1.0;
+    for(int i=0; i<3; i++)
+      volfactor *= 1.0/Path.GetBox()(i);
+  }
+  // update rho_k
+  if (GetMode() == NEWMODE)
+  {
+    for (int slice=startSlice; slice<=endSlice; slice+=skip) {
+      for (int species=0; species<Path.NumSpecies(); species++) {
+		    if(Interacting(species,1)){
+          Path.CalcRho_ks_Fast(slice, species);
+        }
+      }
+    }
+  }
+  // kspace summation of gaussian charge interactions
+  for (int species1=0; species1<Path.NumSpecies(); species1++) {
+	  if(Interacting(species1,1)) {
+      for (int slice=startSlice; slice<=endSlice; slice+=skip) {
+        // First, do the homologous (same species) terms
+        double qi = PathData.Species(species1).Charge;
+        //cerr << "homo: spec " << species << " with q " << qi << " Path.NumSpec is " << Path.NumSpecies() << endl;
+        for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	        double rhok2 = mag2(Path.Rho_k(slice,species1,ki));
+          double myKterm = prefactor*volfactor * 2*M_PI * qi*qi * rhok2 * phi(species1, species1, ki)/k2(ki);
+          if(isnan(myKterm))
+            cerr << "NAN " << species1 << " " << ki << " " << mag2 << " " << myKterm << endl;
+	        kspace += myKterm;
+	      }
+
+        // Now do the heterologous terms
+        for (int species2=species1+1; species2<Path.NumSpecies(); species2++) {
+          if (Interacting(species2,1)){
+            double qi = PathData.Species(species1).Charge;
+            double qj = PathData.Species(species2).Charge;
+	          for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	            double rhorho = 
+	              Path.Rho_k(slice, species1, ki).real() *
+	              Path.Rho_k(slice, species2, ki).real() + 
+	              Path.Rho_k(slice, species1, ki).imag() *
+	              Path.Rho_k(slice, species2, ki).imag();
+	            double myKterm = prefactor*volfactor * 2*M_PI * qi*qj * rhorho * phi(species1, species2, ki)/k2(ki);
+              if(isnan(myKterm))
+                cerr << "NAN het " << species1 << " " << species2 << " " << ki << " " << mag2 << " " << myKterm << endl;
+	            kspace += myKterm;
+              //cerr << "hetero " << ki << " qi " << qi << " qj " << qj << " rhorho " << rhorho << " phi_k " << phi(ki) << " k^-2 " << 1.0/k2(ki) << " total " << myKterm << endl;
+            }
+          }
+        }
+      }
+    }
+  }
+  TotalU += kspace;
 
   double rSeparation;
   // update and sum up contributions from induced dipole
@@ -393,18 +499,25 @@ double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice,
     // this is done molecule-wise
     for (int mol=0; mol<PathData.Mol.NumMol(); mol++) {
       dVec netE = -1*Eq(slice,mol) - 0.5*Ep(slice,mol) * prefactor_Efield + 1./(2*alpha)*p(slice,mol) * prefactor_Efield; // eqn 8
+      double piece1_BC=0.0;
+      double piece2_BC=0.0;
+      double piece3_BC=0.0;
       piece1_BC+=dot(p(slice,mol),Eq(slice,mol));
       piece2_BC+=dot(p(slice,mol),0.5*Ep(slice,mol) * prefactor_Efield);
       piece3_BC+=dot(p(slice,mol),1./(2*alpha)*p(slice,mol) * prefactor_Efield);
       checkDi += dot(p(slice,mol), netE); // eqn 8
-      TotalDipole -= 0.5 * dot(p(slice,mol), Eq(slice,mol)); // eqn 9
+      TotalDipole -= 0.5 * dot(p(slice,mol), Eq(slice,mol)); // eqn 9s
+      //cout << mol << "p " << p(slice,mol) << endl;
+      //cout << mol << "Eq " << Eq(slice,mol) << endl;
       // long-range reaction field contribution
       TotalReactionField -= 0.5 * p_permanent(slice, mol) * RF_q(slice, mol);
+      //cout << mol << " " << piece1_BC << " " << piece2_BC << " " << piece3_BC << endl;
     }
   }
   TotalU += TotalDipole;
   TotalU += TotalReactionField;
 
+  // Particle-wise terms (Exp6, and for comparison short-range charges)
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = activeParticles(ptcl1Index);
     Path.DoPtcl(ptcl1) = false;
@@ -442,6 +555,7 @@ double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice,
                 * PathData.Species(species1).Epsilon
                 * (6*expPart/gamma - sigR6) - shift; // this is in kcal/mol by default
 							TotalExp6 += exp_6;
+              //cerr << ptcl1 << " " << ptcl2 << " " << rmag << " " << exp_6 << endl;
 	      			TotalU += exp_6;
               rSeparation = rmag;
             }
@@ -451,20 +565,21 @@ double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice,
     }
 
     /// calculating electrostatic coulomb interactions
-    /// using diffuse Gaussian charge distributions
 		if(Interacting(species1,1)){
+      // original calculations
   		for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
     		int species2=Path.ParticleSpeciesNum(ptcl2);
     		if (Interacting(species2,1) && Path.DoPtcl(ptcl2)){
 					if(PathData.Mol(ptcl1)!=PathData.Mol(ptcl2)){
 	  				for (int slice=startSlice;slice<=endSlice;slice+=skip){
-	    				double Ormag;
-	    				dVec Or;
-	    				PathData.Path.DistDisp(slice,PathData.Mol(ptcl1),PathData.Mol(ptcl2),Ormag,Or);
-              if (Ormag <= CUTOFF){
+	    				//double Ormag;
+	    				//dVec Or;
+	    				//PathData.Path.DistDisp(slice,PathData.Mol(ptcl1),PathData.Mol(ptcl2),Ormag,Or);
+              //if (Ormag <= CUTOFF){
                 double rmag;
                 dVec r;
                 PathData.Path.DistDisp(slice,ptcl1,ptcl2,rmag,r);
+              if(rmag < CUTOFF) {
                 double coulomb;
                 // we don't double count so factor of 0.5 is not needed
                 //coulomb = 0.5 * conversion * prefactor / rmag
@@ -473,8 +588,9 @@ double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice,
                   * PathData.Species(species2).pseudoCharge
                   * erf(rmag / sqrt(2 * (PathData.Species(species1).chargeSpread + PathData.Species(species2).chargeSpread)));
                 //cerr << "charge " << slice << " " << ptcl1 << " " << ptcl2 << " " << Ormag  << " " << rmag << " " << coulomb << endl;
+                //cerr << ptcl1 << " " << ptcl2 << " " << rmag << " " << coulomb << endl;
                 TotalCharge += coulomb;
-                TotalU += coulomb;
+                //TotalU += coulomb;
               }
   	        }
 					}
@@ -484,9 +600,12 @@ double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice,
   }
   //cerr<<"Bryan check: "<<piece1_BC<<" "<<piece2_BC<<" "<<piece3_BC<<" "<< checkDi <<" "<<TotalDipole<<endl;
   
-  if(!isAction)
-    cout << TotalDipole << " " << TotalExp6 << " " << TotalCharge << " " << TotalReactionField << " " << TotalU << endl;
+  if(!isAction) {
+    //cout << "Dipole Exp6 Charge_short Charge_kspace_total Total" << endl;
+    cout << TotalDipole << " " << TotalExp6 << " " << TotalCharge << " " << kspace << " " << TotalU << endl;
     //cout << TotalDipole << "  " << TotalExp6 << " " << TotalCharge << " " << TotalU << " " << rSeparation << endl;
+    //cout << "Erf(1) " << erf(1) << " prefactor " << conversion*prefactor << endl;
+  }
   return (TotalU);
 }
 
@@ -517,13 +636,15 @@ void CummingsWaterPotentialClass::Read (IOSectionClass &in)
 	    // conversion factor for mdyn*bohr^-1 --> kcal*mol^-1*bohr^-2
 	    Dyn2kcal = 76.138;
     }
+    cerr << "UNITS PREFACTOR " << prefactor << endl;
+    cerr << "UNITS k_B " << 1.38e-23*N_Avogadro/kcal_to_joule << endl;
 
 		CUTOFF = Path.GetBox()(0)/2;
     Rcut_RF = CUTOFF;
 
     conversion = 1.0;
 		if(in.ReadVar("Prefactor",conversion)){
-      cerr << "Setting conversion factor to " << conversion << ". Default units are kcal/mol with length in " << units << endl;
+      cerr << "Setting conversion factor to " << conversion << ". Default units are kcal/mol with length in " << units << " overall prefactor is now " << prefactor*conversion << endl;
     }
 		in.ReadVar("Cutoff",CUTOFF);
 		assert(in.ReadVar("sigma",sigma_COM));
@@ -589,5 +710,6 @@ void CummingsWaterPotentialClass::Read (IOSectionClass &in)
 		ReadComplete = true;
 	}
   with_truncations = true;
+  in.ReadVar("Truncate",with_truncations);
 	cerr<<"CUMMINGS READ END "<<endl;
 }
