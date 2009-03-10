@@ -197,6 +197,10 @@ void EnergyClass::WriteBlock()
     }
     VTailSRVar.Write(vtail);
     VTailLRVar.Write(longrange_vtail);
+    HistStart.Write(EnergyHistogram.startVal);
+    HistEnd.Write(EnergyHistogram.endVal);
+    NumPoints.Write(EnergyHistogram.NumPoints);
+
   }
   Array<double,1> EnergyHistogramTemp(&(EnergyHistogram.histogram[0]),shape(EnergyHistogram.histogram.size()),neverDeleteData);
   cerr<<"Being called"<<endl;
@@ -372,7 +376,13 @@ void EnergyClass::Read(IOSectionClass &in)
 		OtherSums[n] = 0.0;
 	}
 	// End John's block of code
-	EnergyHistogram.Init(50,9.0,13.0);
+	double histStart=9.0;
+	double histEnd=13.0;
+	int histPoints=50;
+	in.ReadVar("HistStart",histStart);
+	in.ReadVar("HistEnd",histEnd);
+	in.ReadVar("HistPoints",histPoints);
+	EnergyHistogram.Init(histPoints,histStart,histEnd);
 	EnergyHistogramSum.resize(EnergyHistogram.histogram.size());
 }
 
@@ -418,7 +428,7 @@ void EnergySignClass::ShiftData (int NumTimeSlices)
 
 void EnergySignClass::WriteBlock()
 {
-
+  
   int nslices=PathData.Path.TotalNumSlices;
   double norm = 1.0/((double)NumSamples*(double)nslices);
 
