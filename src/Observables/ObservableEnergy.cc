@@ -51,9 +51,9 @@ void EnergyClass::Accumulate()
 	//vShort = Energies["vShort"];
 	//vLong = Energies["vLong"];
   int myGetPermNumber=GetPermNumber();
-
-
-  TotalSum   += kinetic + dUShort + dULong + node + dUNonlocal;// + tip5p;
+  double localSum=0.0;
+  localSum+=kinetic + dUShort + dULong + node + dUNonlocal;// + tip5p;
+  TotalSum   += localSum;
   KineticSum += kinetic;
   dUShortSum += dUShort;
   dULongSum  += dULong;
@@ -72,6 +72,7 @@ void EnergyClass::Accumulate()
 		//cerr << "ObsEnergy computing dBeta";
 		double otherE = OtherActions[n]->d_dBeta(slice1,slice2,0);
 		OtherSums[n] += otherE;
+		localSum+=otherE;
 		TotalSum += otherE;
 		//cerr << "  finished." << endl;
 	}
@@ -89,7 +90,8 @@ void EnergyClass::Accumulate()
 
   //  TIP5PSum   += tip5p;
 	//cerr << "ObservableEnergy leaving Accumulate" << endl;
-	EnergyHistogram.add(TotalSum,1.0);
+	cerr<<"TotalSum is "<<localSum/(double)PathData.Path.TotalNumSlices<<endl;
+	EnergyHistogram.add(localSum/(double)PathData.Path.TotalNumSlices,1.0);
 }
 
 
@@ -197,8 +199,12 @@ void EnergyClass::WriteBlock()
     VTailLRVar.Write(longrange_vtail);
   }
   Array<double,1> EnergyHistogramTemp(&(EnergyHistogram.histogram[0]),shape(EnergyHistogram.histogram.size()),neverDeleteData);
+  cerr<<"Being called"<<endl;
+  for (int i=0;i<EnergyHistogramTemp.size();i++)
+    cerr<<EnergyHistogramTemp(i)<<endl;
+
   PathData.Path.Communicator.Sum(EnergyHistogramTemp,EnergyHistogramSum);
-  EnergyHistogramSum=EnergyHistogramSum*norm*Prefactor;
+  EnergyHistogramSum=EnergyHistogramSum*norm*Prefactor*nslices;
   EnergyHistogramVar.Write(EnergyHistogramSum);
   TotalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(TotalSum)*norm);
   KineticVar.Write (Prefactor*PathData.Path.Communicator.Sum(KineticSum)*norm);
@@ -241,6 +247,7 @@ void EnergyClass::WriteBlock()
 //   ExpTotalActionSum = 0.0;
   //  TIP5PSum   = 0.0;
   NumSamples = 0;
+  EnergyHistogram.Clear();
 }
 
 //   double totSum;
@@ -365,7 +372,8 @@ void EnergyClass::Read(IOSectionClass &in)
 		OtherSums[n] = 0.0;
 	}
 	// End John's block of code
-	EnergyHistogram.Init(1000,9,11);
+	EnergyHistogram.Init(50,9.0,13.0);
+	EnergyHistogramSum.resize(EnergyHistogram.histogram.size());
 }
 
 
@@ -435,6 +443,7 @@ void EnergySignClass::WriteBlock()
   VLongSum   = 0.0;
   dUNonlocalSum = 0.0;
   NumSamples = 0;
+
 }
 
 

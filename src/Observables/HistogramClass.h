@@ -22,6 +22,11 @@ class HistogramClass
       for (int i=0;i<histogram.size();i++) histogram[i]=0.0;
       //    histogram=0.0;
     }
+  void Clear()
+  {
+    for (int i=0;i<histogram.size();i++) histogram[i]=0.0;
+    totalPoints=0.0;
+  }
   HistogramClass()
     {
 
