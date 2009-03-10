@@ -89,7 +89,8 @@ DisplaceMoveClass::Read (IOSectionClass &in)
 //   else 
 //     //  DisplaceStage.Actions.push_back(&PathData.Actions.DiagonalAction);
 //    DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
-  if (PathData.Path.LongRange) 
+  if (PathData.Path.LongRange) {
+    cerr<<"Displace thinks long range is on"<<endl;
     if (PathData.Actions.UseRPA)
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRangeRPA);
     else if (PathData.Path.DavidLongRange){
@@ -98,7 +99,7 @@ DisplaceMoveClass::Read (IOSectionClass &in)
     }
     else
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRange);
-
+  }
   for (int i=0; i<activeSpecies.size(); i++) {
     int speciesNum = activeSpecies(i);
     if ((PathData.Actions.NodalActions(speciesNum)!=NULL)) {
@@ -113,11 +114,13 @@ DisplaceMoveClass::Read (IOSectionClass &in)
   Stages.push_back(&DisplaceStage);
 
   ActiveParticles.resize(NumParticlesToMove);
+  cerr<<"The number of actions for Displace is "<<DisplaceStage.Actions.size()<<endl;
 }
 
 void 
 DisplaceMoveClass::MakeMove()
 {
+  //  cerr<<"displace move begin"<<endl;
   // Next, set timeslices
   Slice1 = 0;
   Slice2 = PathData.Path.NumTimeSlices()-1;
@@ -125,13 +128,13 @@ DisplaceMoveClass::MakeMove()
   for (int i=0;i<PathData.Path.NumParticles();i++){
     ActiveParticles(0)=i;
     // Now call MultiStageClass' MakeMove
-    if (PathData.Path.Random.Common()<0.05){
+    if (PathData.Path.Random.Common()<0.1){
       NumAttempted++;
-      MultiStageClass::MakeMove();
+       MultiStageClass::MakeMove();
     }
   }
 
-
+  //  cerr<<"displace move end"<<endl;
 }
 
 // void
