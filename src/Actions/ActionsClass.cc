@@ -65,7 +65,7 @@
 #include "VariationalPI.h"
 #include "Tether.h"
 #include "NonlocalClass.h"
-#include "ReadAction.h"
+//#include "ReadAction.h"
 #include "BlendActions.h"
 
 ///Actionsclass. Stores all the actsion
@@ -354,8 +354,10 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new ST2WaterClass(PathData);
     } else if (type == "EAM") {
       newAction = new EAMPotentialClass(PathData);
+#ifdef USE_QBOX
     } else if (type == "QboxAction") {
       newAction = new QBoxActionClass(PathData);
+#endif
     } else if (type == "pwscfAction") {
       newAction = new pwscfActionClass(PathData);
     } else if (type == "FixedAxisRotor") {
@@ -366,8 +368,8 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new KineticVibrationClass(PathData);
     } else if (type == "LongRangeCoulomb") {
       newAction = new LongRangeCoulombClass(PathData, PairMatrix, PairArray);
-    } else if (type == "ReadFromFile") {
-      newAction = new ReadFromFileActionClass(PathData);
+//    } else if (type == "ReadFromFile") {
+//      newAction = new ReadFromFileActionClass(PathData);
     } else if (type == "BlendActions") {
       newAction = new BlendActionsClass(PathData);
     } else {
