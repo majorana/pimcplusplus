@@ -19,6 +19,7 @@ class MoleculeManagerClass
 
   public:
 
+  int checkNumParticles;
   void Read(IOSectionClass& in);
   void Init();
   Array<int,1>& MembersOf(int mol);
