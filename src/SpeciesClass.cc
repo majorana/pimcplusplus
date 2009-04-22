@@ -20,9 +20,11 @@ bool SpeciesClass::Read(IOSectionClass &inSection)
 {
   assert(inSection.ReadVar("Name",Name));
   assert(inSection.ReadVar("lambda",lambda));
+  Charge = 0.0;
   inSection.ReadVar("Charge",Charge);
   pseudoCharge = Charge;
   inSection.ReadVar("PseudoCharge",pseudoCharge);
+  inSection.ReadVar("ChargeSpread",chargeSpread);
   inSection.ReadVar("Epsilon",Epsilon);
   inSection.ReadVar("Sigma",Sigma);
   // OBSOLETE

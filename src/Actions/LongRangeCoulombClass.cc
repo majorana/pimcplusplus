@@ -54,8 +54,17 @@ void LongRangeCoulombClass::Read(IOSectionClass& in)
   in.ReadVar("Conversion",conversion);
   prefactor = prefactor*conversion;
   in.ReadVar("Prefactor",prefactor);
-  cerr << "Coulomb prefactor " << prefactor << endl;
+  doRealSpace = true;
+  in.ReadVar("CalcRealSpace",doRealSpace);
+  cerr << "LRC: Overall coulomb prefactor " << prefactor << endl;
   sq_alpha = sqrt(alpha);
+  Array<string, 1> specNames;
+  assert(in.ReadVar("ActiveSpecies",specNames));
+  activeSpecies.resize(Path.NumSpecies());
+  activeSpecies = false;
+  for(int s=0; s<specNames.size(); s++)
+    activeSpecies(Path.SpeciesNum(specNames(s))) = true;
+  cerr << "LongRangeCoulomb active species are " << specNames << " " << activeSpecies << endl;
   int kPts = Path.kVecs.size();
   cerr << "LongRangeCoulomb: using " << kPts << " kPts from Path.kVecs" << endl;
   phi.resize(kPts);
@@ -71,8 +80,10 @@ void LongRangeCoulombClass::Read(IOSectionClass& in)
   double a = alpha/sqrt(M_PI);
   for(int n=0; n<Path.NumParticles(); n++){
     int spec = Path.ParticleSpeciesNum(n);
-    double q = PathData.Species(spec).Charge;
-    self += prefactor*a*q*q;
+    if(activeSpecies(spec)) {
+      double q = PathData.Species(spec).Charge;
+      self += prefactor*a*q*q;
+    }
   }
   cerr << "Computed self-interaction correction " << self << endl;
 
@@ -81,7 +92,9 @@ void LongRangeCoulombClass::Read(IOSectionClass& in)
     volume *= Path.GetBox()(i);
   cerr << "I have box volume " << volume << endl;
   halfbox = 0.5*Path.GetBox()(0);
-
+  cerr << "initPhi " << initPhi << endl;
+  initPhi = false;
+  LRfirstTime = true;
 }
 
 
@@ -116,7 +129,8 @@ double LongRangeCoulombClass::d_dBeta (int slice1, int slice2,  int level)
 double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
 			      const Array<int,1> &changedParticles, int level)
 {
-  if(!initPhi){
+  //cerr << "in LRCE " << firstTime << endl;
+  if(LRfirstTime){
     int kPts = Path.kVecs.size();
     k2.resize(kPts);
     phi.resize(kPts);
@@ -127,12 +141,15 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
       //cerr << i << " " << kSq << " " << k2(i) << " " << phi(i) << endl;
     }
     cerr << "LRC initialized phi of size " << phi.size() << " inside action!" << endl;
-    initPhi = true;
+    LRfirstTime= false;
+    cerr << "activespec " << activeSpecies << endl;
 
     // initialize Rho_k
     for (int slice=0; slice<=Path.TotalNumSlices; slice+=1) {
       for (int species=0; species<Path.NumSpecies(); species++) {
-        Path.CalcRho_ks_Fast(slice, species);
+        if(activeSpecies(species)) {
+          Path.CalcRho_ks_Fast(slice, species);
+        }
       }
     }
   }
@@ -146,7 +163,9 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
     //Path.UpdateRho_ks(slice1, slice2, changedParticles, level);
     for (int slice=slice1; slice<=slice2; slice+=skip) {
       for (int species=0; species<Path.NumSpecies(); species++) {
-        Path.CalcRho_ks_Fast(slice, species);
+        if(activeSpecies(species)) {
+          Path.CalcRho_ks_Fast(slice, species);
+        }
       }
     }
   }
@@ -179,60 +198,68 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
 
 
     // First, do the Real-space terms 
-    for(int iIndex=0; iIndex<changedParticles.size(); iIndex++){
-      int i = changedParticles(iIndex);
-      Path.DoPtcl(i) = false;
-      int speci = Path.ParticleSpeciesNum(i);
-      double qi = PathData.Species(speci).Charge;
-      //cerr << "real: spec " << speci << " with q " << qi << endl;
+    if(doRealSpace) {
+      for(int iIndex=0; iIndex<changedParticles.size(); iIndex++){
+        int i = changedParticles(iIndex);
+        Path.DoPtcl(i) = false;
+        int speci = Path.ParticleSpeciesNum(i);
+        if(activeSpecies(speci)) {
+          double qi = PathData.Species(speci).Charge;
+          //cerr << "real: spec " << speci << " with q " << qi << endl;
 
-      for(int j=0; j<PathData.Path.NumParticles(); j++){
-        if(Path.DoPtcl(j)){
-          int specj = Path.ParticleSpeciesNum(j);
-          double qj = PathData.Species(specj).Charge;
-          if((qi*qj) != 0.0){
-            dVec Rij;
-            double rijmag;
-	    	    PathData.Path.DistDisp(slice, i, j, rijmag, Rij);
+          for(int j=0; j<PathData.Path.NumParticles(); j++){
+            if(Path.DoPtcl(j)){
+              int specj = Path.ParticleSpeciesNum(j);
+              if(activeSpecies(specj)) {
+                double qj = PathData.Species(specj).Charge;
+                if((qi*qj) != 0.0){
+                  dVec Rij;
+                  double rijmag;
+	        	      PathData.Path.DistDisp(slice, i, j, rijmag, Rij);
 
-            if(PathData.Mol(i) != PathData.Mol(j)){
-              allPairs++;
-              dVec Oij;
-              double Oijmag;
-	    	      PathData.Path.DistDisp(slice, PathData.Mol(i), PathData.Mol(j), Oijmag, Oij);
-              if(Oijmag < halfbox){
-                // real-space term
-                real += prefactor* qi*qj * erfc(alpha*rijmag)/rijmag;
-                realTest += prefactor*qi*qj/rijmag;
+                  if(PathData.Mol(i) != PathData.Mol(j)){
+                    allPairs++;
+                    dVec Oij;
+                    double Oijmag;
+	        	        PathData.Path.DistDisp(slice, PathData.Mol(i), PathData.Mol(j), Oijmag, Oij);
+                    if(Oijmag < halfbox){
+                      // real-space term
+                      real += prefactor* qi*qj * erfc(alpha*rijmag)/rijmag;
+                      realTest += prefactor*qi*qj/rijmag;
+                    }
+                    //else{
+                    //  excludedPairs++;
+                    //  if(allPairs%500000 == 0){
+                    //    cerr << "excluded " << excludedPairs << " pairs with ratio " << double(excludedPairs)/allPairs << endl;
+                    //  }
+                    //}
+                  }
+                }
               }
-              //else{
-              //  excludedPairs++;
-              //  if(allPairs%500000 == 0){
-              //    cerr << "excluded " << excludedPairs << " pairs with ratio " << double(excludedPairs)/allPairs << endl;
-              //  }
-              //}
             }
           }
         }
+        //dVec Ri = PathData.Path(slice,i);
+        //vacuum += 2*M_PI/(3*volume) * qi*qi * dot(Ri,Ri);
       }
-      //dVec Ri = PathData.Path(slice,i);
-      //vacuum += 2*M_PI/(3*volume) * qi*qi * dot(Ri,Ri);
     }
 
     // Now k-space terms over all ptcl pairs!
     // First, do the homologous (same species) terms
     for (int species=0; species<Path.NumSpecies(); species++) {
       //int speci = Path.ParticleSpeciesNum(species);
-      double qi = PathData.Species(species).Charge;
-      //cerr << "homo: spec " << species << " with q " << qi << " Path.NumSpec is " << Path.NumSpecies() << endl;
-      if(qi != 0.0){
-        for (int ki=0; ki<Path.kVecs.size(); ki++) {
-	        double rhok2 = mag2(Path.Rho_k(slice,species,ki));
-          double myKterm = prefactor*factor * 2*M_PI * qi*qi * rhok2 * phi(ki)/k2(ki);
-	        kspace += myKterm;
-	        //kspace += prefactor*factor * 2*M_PI * qi*qi * rhok2 * phi(ki)/k2(ki);
-          //cerr << "homo " << ki << " qi " << qi << " rhok2 " << rhok2 << " phi_k " << phi(ki) << " k^-2 " << 1.0/k2(ki) << " total " << myKterm << endl;
-	      }
+      if(activeSpecies(species)) {
+        double qi = PathData.Species(species).Charge;
+        //cerr << "homo: spec " << species << " with q " << qi << " Path.NumSpec is " << Path.NumSpecies() << endl;
+        if(qi != 0.0){
+          for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	          double rhok2 = mag2(Path.Rho_k(slice,species,ki));
+            double myKterm = prefactor*factor * 2*M_PI * qi*qi * rhok2 * phi(ki)/k2(ki);
+	          kspace += myKterm;
+	          //kspace += prefactor*factor * 2*M_PI * qi*qi * rhok2 * phi(ki)/k2(ki);
+            //cerr << "homo " << ki << " qi " << qi << " rhok2 " << rhok2 << " phi_k " << phi(ki) << " k^-2 " << 1.0/k2(ki) << " total " << myKterm << endl;
+	        }
+        }
       }
     }
 
@@ -240,23 +267,27 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
     
     // Now do the heterologous terms
     for (int species1=0; species1<Path.NumSpecies(); species1++){
-      for (int species2=species1+1; species2<Path.NumSpecies(); species2++) {
-        //int speci = Path.ParticleSpeciesNum(species1);
-        double qi = PathData.Species(species1).Charge;
-        //int specj = Path.ParticleSpeciesNum(species2);
-        double qj = PathData.Species(species2).Charge;
-        if(qi != 0.0 && qj != 0.0){
-	        for (int ki=0; ki<Path.kVecs.size(); ki++) {
-	          double rhorho = 
-	            Path.Rho_k(slice, species1, ki).real() *
-	            Path.Rho_k(slice, species2, ki).real() + 
-	            Path.Rho_k(slice, species1, ki).imag() *
-	            Path.Rho_k(slice, species2, ki).imag();
-	          double myKterm = prefactor*factor * 2*M_PI * qi*qj * rhorho * phi(ki)/k2(ki);
-	          //kspace += prefactor*factor * 2*M_PI * qi*qj * rhorho * phi(ki)/k2(ki);
-	          kspace += myKterm;
-            //cerr << "hetero " << ki << " qi " << qi << " qj " << qj << " rhorho " << rhorho << " phi_k " << phi(ki) << " k^-2 " << 1.0/k2(ki) << " total " << myKterm << endl;
-	        }
+      if(activeSpecies(species1)) {
+        for (int species2=species1+1; species2<Path.NumSpecies(); species2++) {
+          if(activeSpecies(species2)) {
+            //int speci = Path.ParticleSpeciesNum(species1);
+            double qi = PathData.Species(species1).Charge;
+            //int specj = Path.ParticleSpeciesNum(species2);
+            double qj = PathData.Species(species2).Charge;
+            if(qi != 0.0 && qj != 0.0){
+	            for (int ki=0; ki<Path.kVecs.size(); ki++) {
+	              double rhorho = 
+	                Path.Rho_k(slice, species1, ki).real() *
+	                Path.Rho_k(slice, species2, ki).real() + 
+	                Path.Rho_k(slice, species1, ki).imag() *
+	                Path.Rho_k(slice, species2, ki).imag();
+	              double myKterm = prefactor*factor * 2*M_PI * qi*qj * rhorho * phi(ki)/k2(ki);
+	              //kspace += prefactor*factor * 2*M_PI * qi*qj * rhorho * phi(ki)/k2(ki);
+	              kspace += myKterm;
+                //cerr << "hetero " << ki << " qi " << qi << " qj " << qj << " rhorho " << rhorho << " phi_k " << phi(ki) << " k^-2 " << 1.0/k2(ki) << " total " << myKterm << endl;
+	            }
+            }
+          }
         }
       }
     }
@@ -267,20 +298,24 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
     double a = alpha/sqrt(M_PI);
     for(int i=0; i<PathData.Path.NumParticles(); i++){
       int speci = Path.ParticleSpeciesNum(i);
-      double qi = PathData.Species(speci).Charge;
-      //correction += prefactor*a*qi*qi;
-      //cerr << "ptcl " << i << " has friends";
-      for(int jIndex=0; jIndex<PathData.Mol.MembersOf(PathData.Mol(i)).size(); jIndex++){
-        int j = PathData.Mol.MembersOf(PathData.Mol(i))(jIndex);
-        //cerr << " " << j;
-        if(i!=j){
-          int specj = Path.ParticleSpeciesNum(j);
-          double qj = PathData.Species(specj).Charge;
-          dVec Rij;
-          double rijmag;
-	      	PathData.Path.DistDisp(slice, i, j, rijmag, Rij);
-          // not sure about factor of 0.5; don't think it's right
-          correction += 0.5*prefactor* qi*qj * erf(alpha*rijmag)/rijmag;
+      if(activeSpecies(speci)) {
+        double qi = PathData.Species(speci).Charge;
+        //correction += prefactor*a*qi*qi;
+        //cerr << "ptcl " << i << " has friends";
+        for(int jIndex=0; jIndex<PathData.Mol.MembersOf(PathData.Mol(i)).size(); jIndex++){
+          int j = PathData.Mol.MembersOf(PathData.Mol(i))(jIndex);
+          //cerr << " " << j;
+          if(i!=j){
+            int specj = Path.ParticleSpeciesNum(j);
+            if(activeSpecies(specj)) {
+              double qj = PathData.Species(specj).Charge;
+              dVec Rij;
+              double rijmag;
+	        	  PathData.Path.DistDisp(slice, i, j, rijmag, Rij);
+              // not sure about factor of 0.5; don't think it's right
+              correction += 0.5*prefactor* qi*qj * erf(alpha*rijmag)/rijmag;
+            }
+          }
         }
       }
     }
@@ -289,14 +324,15 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
   //if(isEnergy)
     //out << kspace << " " << correction << " " << real << " " << realTest << endl;
 
-  //cerr << kspace << " " << correction << " " << real << " " << realTest << endl;
+  //if(isEnergy)
+  //  cerr << "LR ONLY KSPACE " << kspace << " " << self << " " << correction << " " << real << " " << realTest << endl;
+  //cerr << "LR terms " << doRealSpace << " " << kspace << " " << self << " " << correction << " " << real << " " << realTest << endl;
   double U = (kspace + real - correction);
+  //double U = kspace;
   return (U);
 }
 
-
-void
-LongRangeCoulombClass::GradAction(int slice1, int slice2, 
+void LongRangeCoulombClass::GradAction(int slice1, int slice2, 
 			   const Array<int,1> &ptcls, int level,
 			   Array<dVec,1> &gradVec)
 {
@@ -308,23 +344,27 @@ LongRangeCoulombClass::GradAction(int slice1, int slice2,
     for (int pi=0; pi<ptcls.size(); pi++) {
       int ptcl = ptcls(pi);
       int species1 = Path.ParticleSpeciesNum(ptcl);
-      for (int ki=0; ki<Path.kVecs.size(); ki++) {
-	dVec r = Path(slice,ptcl);
-	dVec k = Path.kVecs(ki);
-	double phi = dot(r,k);
-	double re, im;
-	sincos(phi, &im, &re);
-	complex<double> z(re, im);
-	complex<double> rho_uSum(0.0, 0.0);
-	for (int si=0; si<Path.NumSpecies(); si++) {
-	  PairActionFitClass &PA = *PairMatrix(species1,si);
-	  rho_uSum += PA.Ulong_k(level,ki) * Path.Rho_k(slice, si, ki);
-	}
-	rho_uSum = conj (rho_uSum);
-	// Now, compute the imaginary part of the product, and
-	// multiply by k
-	gradVec(pi) -= 
-	  factor*(z.real()*rho_uSum.imag() + z.imag()*rho_uSum.real())*k;
+      if(activeSpecies(species1)) {
+        for (int ki=0; ki<Path.kVecs.size(); ki++) {
+          dVec r = Path(slice,ptcl);
+          dVec k = Path.kVecs(ki);
+          double phi = dot(r,k);
+          double re, im;
+          sincos(phi, &im, &re);
+          complex<double> z(re, im);
+          complex<double> rho_uSum(0.0, 0.0);
+          for (int si=0; si<Path.NumSpecies(); si++) {
+            if(activeSpecies(si)) {
+              PairActionFitClass &PA = *PairMatrix(species1,si);
+              rho_uSum += PA.Ulong_k(level,ki) * Path.Rho_k(slice, si, ki);
+            }
+          }
+          rho_uSum = conj (rho_uSum);
+          // Now, compute the imaginary part of the product, and
+          // multiply by k
+          gradVec(pi) -= 
+            factor*(z.real()*rho_uSum.imag() + z.imag()*rho_uSum.real())*k;
+        }
       }
     } // end pi loop
   } // end slice loop

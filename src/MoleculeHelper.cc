@@ -50,6 +50,7 @@ void MoleculeManagerClass::Read(IOSectionClass& in)
   }
 
   assert(in.ReadVar("MoleculeIDs",MolRef));
+  checkNumParticles = MolRef.size();
   cerr << "Read in array of size " << MolRef.size() << endl;
   for(int p=0; p<MolRef.size(); p++){
     cerr << p << " belongs to ";
@@ -72,17 +73,17 @@ void MoleculeManagerClass::Read(IOSectionClass& in)
     //  index++;
     //}
     //count ++;
-    cerr << "Problem is...";
-    cerr << " name " << names(index);
-    cerr << " index " << index;
-    cerr << " size " << ListByType(index).size();
+    //cerr << "Problem is...";
+    //cerr << " name " << names(index);
+    //cerr << " index " << index;
+    //cerr << " size " << ListByType(index).size();
     MolLabel(MolRef(p)) = names(index);
-    cerr << " MolLabel assigned " << MolLabel(MolRef(p));
+    //cerr << " MolLabel assigned " << MolLabel(MolRef(p));
     //int typeSize = ListByType(index).size();
     //ListByType(index).resizeAndPreserve(typeSize+1);
     //ListByType(index)(typeSize) = MolRef(p);
     //cerr << "added molecule " << p << " to list: " << ListByType(index) << endl;
-    cerr << "  added label" << endl;
+    //cerr << "  added label" << endl;
 
     // initialize arrays with ptcl ids indexed by molecule
     int myMol = MolRef(p);

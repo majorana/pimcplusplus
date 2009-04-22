@@ -39,6 +39,7 @@ protected:
   //void OptimizedBreakup_V(int numKnots,  IOSectionClass &out);
 
   // jg i need these!
+	Array<bool,1> activeSpecies;
   double alpha, sq_alpha;
   Array<double,1> k2;
   Array<double,1> phi;
@@ -48,7 +49,8 @@ protected:
   double elementary_charge, N_Avogadro, kcal_to_joule,
 		epsilon_not, angstrom_to_m, SI, k_B, erg_to_eV, joule_to_eV, bohr_per_angstrom;
 
-  bool initPhi;
+  bool initPhi, LRfirstTime;
+  bool doRealSpace;
 
   /// This calculates the quantity 
   /// \f$ X_k \equiv -\frac{4\pi}{\Omega k} \int_{r_c}^\infty dr \, r \sin(kr) V(r).\f$

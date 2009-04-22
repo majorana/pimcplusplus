@@ -1,6 +1,6 @@
   noinst_LTLIBRARIES = libactions.la
 
-libactions_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF) $(BOOST_LIB) $(LIBXML_LIB) $(MPI_DEF)
+libactions_la_CXXFLAGS = $(COMMON_CFLAGS) $(QMC_DEF) $(QBOX_DEF) $(BOOST_LIB) $(LIBXML_LIB) $(MPI_DEF)
 libactions_la_SOURCES =            \
     ActionBase.cc                  \
     ActionBase.h                   \
@@ -68,6 +68,8 @@ libactions_la_SOURCES =            \
     QBoxAction.h                   \
     QMCSamplingClass.h             \
     QMCSamplingClass.cc            \
+		ReadAction.cc                  \
+		ReadAction.h                   \
     ShortRangeApproximateClass.cc  \
     ShortRangeApproximateClass.h   \
     ShortRangeClass.cc             \
