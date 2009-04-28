@@ -154,9 +154,6 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
     }
   }
 
-  for (int counter=0; counter<Path.DoPtcl.size(); counter++)
-    Path.DoPtcl(counter)=true;
-
   int skip = (1<<level);
   if (GetMode() == NEWMODE)
   {
@@ -200,6 +197,8 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
 
     // First, do the Real-space terms 
     if(doRealSpace) {
+      for (int counter=0; counter<Path.DoPtcl.size(); counter++)
+        Path.DoPtcl(counter)=true;
       for(int iIndex=0; iIndex<changedParticles.size(); iIndex++){
         int i = changedParticles(iIndex);
         Path.DoPtcl(i) = false;
