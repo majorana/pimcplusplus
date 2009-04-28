@@ -78,18 +78,14 @@ void LongRangeCoulombClass::Read(IOSectionClass& in)
 
   self = 0.0;
   double a = alpha/sqrt(M_PI);
-  int sliceCount = 0;
-  for (int slice=0; slice<Path.TotalNumSlices; slice+=1) {
-    sliceCount ++;
-    for(int n=0; n<Path.NumParticles(); n++){
-      int spec = Path.ParticleSpeciesNum(n);
-      if(activeSpecies(spec)) {
-        double q = PathData.Species(spec).Charge;
-        self += prefactor*a*q*q;
-      }
+  for(int n=0; n<Path.NumParticles(); n++){
+    int spec = Path.ParticleSpeciesNum(n);
+    if(activeSpecies(spec)) {
+      double q = PathData.Species(spec).Charge;
+      self += prefactor*a*q*q;
     }
   }
-  cerr << "Computed self-interaction correction " << self << " over " << sliceCount << " slices" << endl;
+  cerr << "Computed self-interaction correction " << self << endl;
 
   volume = 1.0;
   for(int i=0; i<3; i++)
@@ -193,12 +189,13 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
   double kspace = 0.0;
   double real = 0.0;
   double realTest = 0.0;
-  double correction = self;
+  double correction = 0;
   //double vacuum = 0.0;
   // charge-neutral only!!
   double factor = 1.0/(volume);
 
   for (int slice=slice1; slice<=slice2; slice+=skip) {
+    correction += self;
 
 
     // First, do the Real-space terms 
