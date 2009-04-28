@@ -78,14 +78,18 @@ void LongRangeCoulombClass::Read(IOSectionClass& in)
 
   self = 0.0;
   double a = alpha/sqrt(M_PI);
-  for(int n=0; n<Path.NumParticles(); n++){
-    int spec = Path.ParticleSpeciesNum(n);
-    if(activeSpecies(spec)) {
-      double q = PathData.Species(spec).Charge;
-      self += prefactor*a*q*q;
+  int sliceCount = 0;
+  for (int slice=0; slice<Path.TotalNumSlices; slice+=1) {
+    sliceCount ++;
+    for(int n=0; n<Path.NumParticles(); n++){
+      int spec = Path.ParticleSpeciesNum(n);
+      if(activeSpecies(spec)) {
+        double q = PathData.Species(spec).Charge;
+        self += prefactor*a*q*q;
+      }
     }
   }
-  cerr << "Computed self-interaction correction " << self << endl;
+  cerr << "Computed self-interaction correction " << self << " over " << sliceCount << " slices" << endl;
 
   volume = 1.0;
   for(int i=0; i<3; i++)
@@ -225,6 +229,7 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
                     if(Oijmag < halfbox){
                       // real-space term
                       real += prefactor* qi*qj * erfc(alpha*rijmag)/rijmag;
+                      //real += prefactor* qi*qj * (1 - erf(alpha*rijmag))/rijmag;
                       realTest += prefactor*qi*qj/rijmag;
                     }
                     //else{
