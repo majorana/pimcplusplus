@@ -79,6 +79,9 @@ double MoleculeInteractionsClass::SingleAction (int startSlice, int endSlice,
     startSlice -= 1;
     endSlice += 1;
   }
+  else if (startSlice == 0 && endSlice == PathData.Path.TotalNumSlices) {
+    startSlice -= 1;
+  }
   //cerr << "MolInAct over slices " << startSlice+1 << " " << endSlice-1 << endl;
 	bool IsAction = true;
 	double TotalU = ComputeEnergy(startSlice+1, endSlice-1, activeParticles, level, TruncateAction, IsAction);

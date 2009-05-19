@@ -130,7 +130,7 @@ double MoleculeTranslate::Sample(int &slice1,int &slice2, Array<int,1> &activePa
   if(doAllSlices) {
     //cerr << "ALL SLICE SAMPLE" << endl;
     slice1 = 0;
-    slice2 = numSlices - 1;
+    slice2 = numSlices;
 	  for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
     	dVec move = TranslateMolAll(PathData.Mol.MembersOf(MoveList(activeMol)),step); 
     }
@@ -292,7 +292,7 @@ double MoleculeRotate::Sample(int &slice1,int &slice2, Array<int,1> &activeParti
     //startS = 1;
     //endS = numSlices - 1;
     slice1 = 0;
-    slice2 = numSlices - 1;
+    slice2 = numSlices;
 	  for(int activeMol=0; activeMol<MoveList.size(); activeMol++){
 	    double theta = 2*(PathData.Path.Random.Local()-0.5)*dtheta;
 	    RotateMolXYZAll(PathData.Mol.MembersOf(MoveList(activeMol)), theta);
@@ -560,7 +560,7 @@ double BondStretch::Sample(int &slice1,int &slice2, Array<int,1> &activeParticle
   int numSlices = PathData.Path.TotalNumSlices;
   if(doAllSlices) {
     slice1 = 0;
-    slice2 = numSlices - 1;
+    slice2 = numSlices;
     startSlice = 0;
     endSlice = numSlices;
     cerr << "STRETCH all slice1 " << slice1 << " " << slice2 << " " << startSlice << " " << endSlice << endl;

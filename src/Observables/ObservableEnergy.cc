@@ -203,9 +203,9 @@ void EnergyClass::WriteBlock()
 
   }
   Array<double,1> EnergyHistogramTemp(&(EnergyHistogram.histogram[0]),shape(EnergyHistogram.histogram.size()),neverDeleteData);
-  cerr<<"Being called"<<endl;
-  for (int i=0;i<EnergyHistogramTemp.size();i++)
-    cerr<<EnergyHistogramTemp(i)<<endl;
+  //cerr<<"Being called"<<endl;
+  //for (int i=0;i<EnergyHistogramTemp.size();i++)
+  //  cerr<<EnergyHistogramTemp(i)<<endl;
 
   PathData.Path.Communicator.Sum(EnergyHistogramTemp,EnergyHistogramSum);
   EnergyHistogramSum=EnergyHistogramSum*norm*Prefactor*nslices;

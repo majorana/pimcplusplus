@@ -108,6 +108,9 @@ double LongRangeCoulombClass::SingleAction (int slice1, int slice2,
 			      int level)
 {
   isEnergy = false;
+  if (slice1 == 0 && slice2 == PathData.Path.TotalNumSlices) {
+    slice2 -= 1;
+  }
   double U = ComputeEnergy(slice1, slice2, changedParticles, level);
   int skip = (1<<level);
   double levelTau = Path.tau * (double)skip;
