@@ -735,8 +735,12 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 			outfile.open(filename.c_str());
 			outfile << "# Total LJ Coulomb Intramolecular Quadratic Kinetic Pair Int1 Int2 Int3 Int4" << endl;
 		}
-			
-		
+
+    if(PathData.Mol.checkNumParticles != PathData.Path.NumParticles()) {
+      cerr << "ERROR: SIZE OF MOLREF DOES NOT MATCH TOTAL NUMBER OF PARTICLES " << PathData.Mol.checkNumParticles << " " << PathData.Path.NumParticles() << endl;
+      exit(1);
+    }
+
 		ReadComplete = true;
 	}
 }
