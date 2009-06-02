@@ -51,6 +51,13 @@ void KineticRotorClass::Read(IOSectionClass& in)
 
   ReadGridPoints(in);
   ReadEnergyGridPoints(in);
+  doESq = false;
+  in.ReadVar("ReadEnergySquared",doESq);
+  if(doESq) {
+    string esqfilename;
+    assert(in.ReadVar("EnergySquaredOutput",esqfilename));
+    esqOut.open(esqfilename.c_str());
+  }
   cerr << "LEAVING KINETIC ROTOR READ" << endl;
 
   // debugging init
@@ -253,7 +260,7 @@ double
 KineticRotorClass::SingleAction (int slice1, int slice2,
 			    const Array<int,1> &changedParticles, int level)
 {
-  //cerr << "KineticRotor slices " << slice1 << " " << slice2 << endl;
+  //cerr << "CONVENTIONAL KineticRotor slices " << slice1 << " " << slice2 << endl;
   //cerr << "KineticRotor testing..." << endl;
   //int numP = 1000;
   ////double dt = M_PI/numP;
@@ -411,6 +418,7 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
   //cerr << "Calculating energy over slices " << slice1 << " " << slice2 << endl;
   double TotalK = 0.0;
   double TotalXK = 0.0;
+  double TotalESq = 0.0;
   double Z = 0.0;
   int skip = 1<<level;
   double levelTau = Path.tau* (1<<level);
@@ -514,6 +522,9 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
         //cerr << slice << " " << mol << " angles " << phi << " " << theta << " " << chi << " KE " << KE << " " << z << " ratio " << KE/z << " accum " << TotalK << endl;
       else
         TotalK += KE/z;
+      if(doESq) {
+        TotalESq += KE/(z*z);
+      }
       //cerr << slice << " " << KE << " " << TotalK << endl;
       //if(abs(XKE) > maxRhoX) {
       //  overX << theta << " " << phi << " " << chi << " " << slice << " " << XKE << endl;
@@ -525,6 +536,8 @@ double KineticRotorClass::d_dBeta (int slice1, int slice2,
       //}
     }
   }
+  if(doESq)
+    esqOut << TotalESq << " " << TotalK << endl;
   //cerr << "returning " << TotalK/M << " slices " << numS << " " << " divide by " << M << endl;
   //cerr << "==============  Z  KE/Z  XKE/Z " << endl;
   //cout << TotalE/TotalZ << " " << 2*TotalE/TotalZ << " " << TotalZ << " " << endl;
@@ -727,6 +740,7 @@ FixedAxisRotorClass::FixedAxisRotorClass(PathDataClass &pathData ) :
 double FixedAxisRotorClass::SingleAction (int slice1, int slice2, 
 		       const Array<int,1> &changedParticles, int level)
 {
+  //cerr << "FA action intertia " << Ia << " " << Ib << " " << Ic << endl;
   double TotalK = 0.0;
   // need to map activePtcls to active molecules - probably could be done more cleanly
   Array<bool,1> activeMol;
@@ -749,15 +763,18 @@ double FixedAxisRotorClass::SingleAction (int slice1, int slice2,
     int mol = molRoster[molIndex];
     for (int slice=slice1; slice < slice2;slice+=skip) {
       double theta, phi, chi;
-      getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
       //if(slice==1) {
-      cerr << "GETANGLES " << theta << " " << phi << " " << chi << endl;
       //  AltFixedAxis(slice, mol);
       //}
       
-      double r;
-      r = AltFixedAxis(slice, mol, phi, theta, chi);
-      r = CalcRho(phi, theta, chi);
+      double r, rAlt;
+      rAlt = AltFixedAxis(slice, mol, phi, theta, chi);
+      r = rAlt;
+      //cerr << "GETANGLES_ALT " << theta << " " << phi << " " << chi << " rho " << rAlt << endl;
+
+      //getAngles(slice, mol, slice+skip, mol, theta, phi, chi);
+      //r = CalcRho(phi, theta, chi);
+      //cerr << "GETANGLES " << theta << " " << phi << " " << chi << " rho " << r << endl;
       // need to check for negative rho; use noisy correction
       //if(r<0) {
       //  cout << "Got NEGATIVE rho " << r;
@@ -853,7 +870,7 @@ double FixedAxisRotorClass::CalcRho(double phi, double theta, double psi)
 }
 
 // testing
-double FixedAxisRotorClass::AltFixedAxis (int slice, int mol, double phi, double theta, double psi)
+double FixedAxisRotorClass::AltFixedAxis (int slice, int mol, double& phi, double& theta, double& psi)
 {
   double RotK = 0.0;
   int skip = 1;
