@@ -47,8 +47,8 @@ class IOSectionClass:
 
 import os
 class IOSectionClassList:
-    IOlist = []
     def OpenFiles(this, baseName):
+        this.IOlist = []
         proc=0
         done = 0
         while (done == 0):
