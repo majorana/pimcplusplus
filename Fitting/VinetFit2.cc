@@ -116,7 +116,7 @@ TestFit2(string fname)
   // Write out Goncharovs residuals
   //  FILE *fin = fopen ("GoncharovEOSData.png.dat", "r");
   FILE *fin = fopen ("GoncharovEOS.Holzapfel.dat", "r");
-  fout = fopen ("GoncharovResiduals.dat", "w");
+  fout = fopen ("GoncharovResiduals.Holzapfel.dat", "w");
   double Vval, Pval;
   while (fscanf (fin, "%lf %lf\n", &Pval, &Vval) == 2) {
     // Vval *= 79.7535137356486;
@@ -125,6 +125,19 @@ TestFit2(string fname)
     fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
   }
   fclose(fout);
+  fclose(fin);
+
+  fin = fopen ("GoncharovEOS.png.dat", "r");
+  fout = fopen ("GoncharovResiduals.dat", "w");
+  while (fscanf (fin, "%lf %lf\n", &Pval, &Vval) == 2) {
+    // Vval *= 79.7535137356486;
+    Vval *= 79.714027629;
+    double diff = Pval - eos.Pressure(Vval);
+    fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+  }
+  fclose(fout);
+
+
 }
 
 
@@ -307,6 +320,21 @@ StaticFit (string fname, VinetEOSClass &eos)
   FILE *fin = fopen ("GoncharovEOS.Holzapfel.dat", "r");
   double Vval, Pval, aval;
   if (fin) {
+    fout = fopen ("GoncharovResiduals.Holzapfel.dat", "w");
+    while (fscanf (fin, "%lf %lf\n", &Pval, &aval) == 2) {
+      //      Vval *= 79.7535137356486;
+      aval *= 1.8897261;  // Angstrom to bohr radius
+      Vval = 0.25 * aval * aval * aval;
+      double diff = Pval - eos.Pressure(Vval);
+      fprintf (fout, "%1.12e %1.12e\n", Vval, diff);
+    }
+    fclose(fout);
+    fclose(fin);
+  }
+
+
+  fin = fopen ("GoncharovEOS.png.dat", "r");
+  if (fin) {
     fout = fopen ("GoncharovResiduals.dat", "w");
     while (fscanf (fin, "%lf %lf\n", &Pval, &aval) == 2) {
       //      Vval *= 79.7535137356486;
@@ -318,6 +346,7 @@ StaticFit (string fname, VinetEOSClass &eos)
     fclose(fout);
     fclose(fin);
   }
+
 
   // Write out Datchi's residuals
   fin = fopen ("DatchiEOS.dat", "r");

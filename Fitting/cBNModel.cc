@@ -476,19 +476,19 @@ cBNModel::SetAll (string staticName,
 main(int argc, char **argv)
 {
   cBNModel model;
-  if (argc > 3) {
-    model.SetAll (argv[1], argv[2], argv[3]);
-    
-  }
   // if (argc > 3) {
-  //   model.SetStatic (argv[1]);
-  //   model.SetPhonon (argv[2]);
-  //   model.SetRaman  (argv[3]);
-  //   FILE *fout = fopen ("300K_Model.dat", "w");
-  //   for (double V=40.0; V<=95.0; V+=0.01)
-  //     fprintf (fout, "%5.2f %10.6f\n", V, model.P(V, 300.0));
-  //   fclose(fout);
+  //   model.SetAll (argv[1], argv[2], argv[3]);
+    
   // }
+  if (argc > 3) {
+    model.SetStatic (argv[1]);
+    model.SetPhonon (argv[2]);
+    model.SetRaman  (argv[3]);
+    FILE *fout = fopen ("300K_Model.dat", "w");
+    for (double V=40.0; V<=95.0; V+=0.01)
+      fprintf (fout, "%5.2f %10.6f\n", V, model.P(V, 300.0));
+    fclose(fout);
+  }
 
   model.Write_nuPT_Table();
   ThermalExpansion (model);
