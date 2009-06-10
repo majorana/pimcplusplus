@@ -119,7 +119,7 @@ WindingNumberClass::CalcWN2()
     for (int i=0; i<recvVec.size(); i++)
       for (int j=0; j<NDIM; j++){
 	WN2Array(j) += (recvVec(i)[j]*recvVec(i)[j]);
-	WN2ArraySign(j) += (recvVec(i)[j]*recvVec(i)[j]*PathData.Path.Sign);
+	WN2ArraySign(j) += (recvVec(i)[j]*recvVec(i)[j]*PathData.Path.Weight);
       }
     WN2Array /= (double)SamplesInBlock;
     WN2ArraySign /= (double)SamplesInBlock;
