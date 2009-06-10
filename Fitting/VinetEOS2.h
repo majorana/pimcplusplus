@@ -27,6 +27,7 @@ public:
   }
 };
 
+
 inline void
 VinetEOSClass::SetParams (TinyVector<double,4> p)
 {
@@ -126,6 +127,79 @@ VinetEOSClass::GradFD(double V)
 }
 
 
+class VinetPressure
+{
+private:
+  double V0, B0, B0p;
+  double third;
+  double Atomic2GPa;
+public:
+  inline double operator()(double V);
+  inline TinyVector<double,3> Grad(double V);
+  inline TinyVector<double,3> GradFD(double V);
+  inline double Pressure(double V);
+  inline double PressureFD(double V);
+  inline void SetParams (TinyVector<double,3> params);
+  inline TinyVector<double,3> GetParams ();
+  inline double GetB0p();
+  inline double K_T (double V);
 
+  VinetPressure() : third(1.0/3.0), Atomic2GPa(29421.01)
+  { 
+  }
+};
+
+
+inline double
+VinetPressure::operator()(double V)
+{
+  double x = cbrt(V/V0);
+  double eta = 1.5*(B0p-1.0);
+  double dE_dV = -3.0*B0/(x*x)*(1.0-x)*exp(eta*(1.0-x));
+  return -Atomic2GPa * dE_dV;
+}
+
+inline TinyVector<double,3>
+VinetPressure::Grad (double V)
+{
+  double x = cbrt(V/V0);
+  double eta = 1.5*(B0p-1.0);
+
+  double dP_dx = -Atomic2GPa*(6.0*B0/(x*x*x)*(1.0-x)*exp(eta*(1.0-x))
+			      + 3.0*B0/(x*x)*exp(eta*(1.0-x))
+			      -eta*-3.0*B0/(x*x)*(1.0-x)*exp(eta*(1.0-x)));
+  double dP_dV0  = -(1.0/3.0)*cbrt(V/(V0*V0*V0*V0)) * dP_dx;
+  double dP_dB0  = -(-3.0/(x*x)*(1.0-x)*exp(eta*(1.0-x)));
+  double dP_dB0p = -Atomic2GPa*-3.0*B0/(x*x)*(1.0-x)*exp(eta*(1.0-x))*
+    (1.0-x)*1.5;
+
+  return TinyVector<double,3> (dP_dV0, dP_dB0, dP_dB0p);
+}
+
+inline TinyVector<double,3> 
+VinetPressure::GetParams()
+{ return TinyVector<double,3> (V0, Atomic2GPa*B0, B0p); }
+
+inline void
+VinetPressure::SetParams(TinyVector<double,3> params)
+{ V0=params[0]; B0=params[1]/Atomic2GPa; B0p=params[2]; }
+
+
+inline TinyVector<double,3>
+VinetPressure::GradFD(double V)
+{
+  TinyVector<double,3> p, p_plus, p_minus, grad;
+  double Eplus, Eminus;
+  p = GetParams();
+  for (int i=0; i<3; i++) {
+    p_plus = p; p_minus = p;
+    p_plus[i]  += 1.0e-7;
+    p_minus[i] -= 1.0e-7;
+    SetParams(p_plus);   Eplus  = (*this)(V);
+    SetParams(p_minus);  Eminus = (*this)(V);
+    grad[i] = (Eplus-Eminus)/(2.0e-7);
+  }
+  return grad;
+}
 
 #endif

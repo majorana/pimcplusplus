@@ -26,6 +26,7 @@ public:
   inline double U(double T);
   inline double dF_dTheta        (double T);
   inline double dF_dT            (double T);
+  inline double dU_dTheta        (double T);
   inline double d2F_dTheta_dT    (double T);
   inline double d2F_dTheta_dT_FD (double T);
   inline double d2F_dTheta2      (double T);
@@ -34,12 +35,13 @@ public:
   double OptTheta_F (Array<double,1> &Fvals, Array<double,1> &Tvals);
   double OptTheta_U (Array<double,1> &Uvals, Array<double,1> &Tvals);
   inline double CalcTheta (double F, double T);
-  DebyeModel() : kB(3.16681526543384e-06)
+  DebyeModel() : kB(3.16681526543384e-06), N(2)
   {
   }
 };
 
 
+  
 class DebyeFreeEnergy
 {
 private:
@@ -133,8 +135,9 @@ DebyeModel::CalcTheta(double Fval, double T)
   while ((thetaHigh - thetaLow) > 1.0e-10) {
     double theta = 0.5*(thetaHigh + thetaLow);
     SetTheta (theta);
-    double Ftry = F(T);
-    if (Ftry > Fval) 
+    double Ftry = F(T) - F(0.0);
+    //cerr << "Ftry = " << Ftry << "  Fval = " << Fval << endl;
+    if (Ftry < Fval) 
       thetaLow = theta;
     else
       thetaHigh = theta;
@@ -175,7 +178,7 @@ inline double
 DebyeModel::U(double T)
 {
   double x = Theta/T;
-  if (isinf(x))
+  if (isinf(x) || x < 0.0)
     x = 1.0e10;
   return 3.0 * N * kB * T * gsl_sf_debye_3(x);
 }
@@ -196,6 +199,21 @@ DebyeModel::dF_dTheta (double T)
   
   return ThetaInv * 3.0*N*kB*T*D3;
 }
+
+
+inline double
+DebyeModel::dU_dTheta (double T)
+{
+  double eps = 1.0e-6;
+  double temp = Theta;
+  Theta = temp + eps;
+  double Uplus = U(T);
+  Theta = temp - eps;
+  double Uminus = U(T);
+  Theta = temp;
+  return ((Uplus - Uminus)/(2.0*eps));
+}
+
 
 inline double
 DebyeModel::dF_dT (double T)
@@ -226,5 +244,52 @@ DebyeModel::d2F_dTheta2 (double T)
     - 12.0*N*kB*T/(Theta*Theta) * gsl_sf_debye_3(Theta/T);
 }
 
+
+// Model fit for Debye temperature as a function of T
+class DebyeTemp
+{
+private:
+  double T0, alpha, c;
+public:
+  inline double operator()(double T);
+  inline TinyVector<double,3> Grad(double T);
+  inline void SetParams(TinyVector<double,3> params);
+  inline TinyVector<double,3> GetParams();
+
+  DebyeTemp() : T0 (2000.0), alpha(0.005), c(-100.0)
+  { }
+
+};
+
+inline double
+DebyeTemp::operator()(double T)
+{
+  return T0 + c * exp(-alpha * T);
+}
+
+inline TinyVector<double,3> 
+DebyeTemp::Grad(double T)
+{
+  TinyVector<double,3> grad;
+  grad[0] = 1.0;
+  grad[1] = -c * T * exp(-alpha*T);
+  grad[2] = exp(-alpha * T);
+  return grad;
+}
+
+inline void
+DebyeTemp::SetParams(TinyVector<double,3> params)
+{
+  T0    = params[0];
+  alpha = params[1];
+  c     = params[2];
+}
+
+
+inline TinyVector<double,3>
+DebyeTemp::GetParams()
+{
+  return TinyVector<double,3>(T0, alpha, c);
+}
 
 #endif
