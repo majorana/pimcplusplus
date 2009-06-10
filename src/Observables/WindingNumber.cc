@@ -69,6 +69,7 @@ WindingNumberClass::Read(IOSectionClass& in)
     }
   }
   WN2Array.resize(NDIM);
+  WN2ArraySign.resize(NDIM);
   WN2ArrayLowVariance.resize(NDIM);
 }
 
@@ -114,14 +115,18 @@ WindingNumberClass::CalcWN2()
 
   if (PathData.Path.Communicator.MyProc()==0) {
     WN2Array = 0.0;
+    WN2ArraySign = 0.0;
     for (int i=0; i<recvVec.size(); i++)
-      for (int j=0; j<NDIM; j++)
+      for (int j=0; j<NDIM; j++){
 	WN2Array(j) += (recvVec(i)[j]*recvVec(i)[j]);
+	WN2ArraySign(j) += (recvVec(i)[j]*recvVec(i)[j]*PathData.Path.Sign);
+      }
     WN2Array /= (double)SamplesInBlock;
+    WN2ArraySign /= (double)SamplesInBlock;
   }
   WNVec.clear();
   SamplesInBlock = 0;
-}
+} 
 
 void
 WindingNumberClass::WriteBlock()
@@ -135,6 +140,7 @@ WindingNumberClass::WriteBlock()
       IOSection.WriteVar("Type",string("Vector"));
     }
     WNVar.Write(WN2Array);
+    WNVarSign.Write(WN2ArraySign);
     WNVarLowVariance.Write(WN2ArrayLowVariance);
   }
 }

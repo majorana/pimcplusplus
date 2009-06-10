@@ -25,6 +25,7 @@ class WindingNumberClass : public ObservableClass
 {
  protected:
   ObservableVecDouble1 WNVar;
+  ObservableVecDouble1 WNVarSign;
   ObservableVecDouble1 WNVarLowVariance;
   /// This stores a list of integers corresponding to the species that
   /// are included in the winding number calculation.
@@ -35,6 +36,7 @@ class WindingNumberClass : public ObservableClass
   /// last writeblock.
   std::vector<dVec> WNVec;
   Array<double,1> WN2Array;
+  Array<double,1> WN2ArraySign;
   Array<double,1> WN2ArrayLowVariance;
   int SamplesInBlock;
   void CalcWN2();
@@ -45,6 +47,7 @@ class WindingNumberClass : public ObservableClass
   WindingNumberClass(PathDataClass &myPathData,IOSectionClass &ioSection) :
     ObservableClass(myPathData,ioSection),
     WNVar("W2", IOSection, myPathData.Path.Communicator),
+    WNVarSign("W2Sign", IOSection, myPathData.Path.Communicator),
     WNVarLowVariance("W2LowVariance", IOSection, myPathData.Path.Communicator)
   {
     W2Sum = 0.0;
