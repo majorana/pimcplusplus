@@ -29,6 +29,7 @@ void AutoCorrClass::Read(IOSectionClass& in)
   assert(in.ReadVar("Frequency", Frequency));
   assert(in.ReadVar("dumpFrequency", dumpFrequency));
   assert(in.ReadVar("numSlots",NumSlots));
+  assert(in.ReadVar("BinSize", BinSize));
 	if(!in.ReadVar("Species",dipoleSpecies))
 		dipoleSpecies = "p";
   assert(in.OpenSection("Grid"));
@@ -47,7 +48,7 @@ void AutoCorrClass::Read(IOSectionClass& in)
 //  if (!readEndGrid){
  //   if (PathData.Path.GetPeriodic()[0]){
     //gridEnd=PathData.Path.GetBox()[0];
-    gridEnd=NumSlots*Frequency;
+    gridEnd=NumSlots*BinSize;
 //    }
 //    else {
 //      cerr<<"I don't know where you want me to end this grid"<<endl;
@@ -170,8 +171,11 @@ dVec AutoCorrClass::MeasureDipole(int slice,int molecule){
 			dipoleIndex.push_back(ptcl);
 		}
 	}
+	//cerr << "autocorr loaded molecule " << molecule << " and protons size " << dipoleIndex.size() << ":";
+  //for(int dp=0; dp< dipoleIndex.size(); dp++)
+  //  cerr << " " << dipoleIndex[dp];
+  //cerr << endl;
 	assert(dipoleIndex.size() == 2);
-	//cerr << "autocorr loaded molecule " << molecule << " and protons " << dipoleIndex << endl;
   dVec O = PathData.Path(slice,molecule);
   dVec P1 = PathData.Path(slice,dipoleIndex[0]);
   dVec P2 = PathData.Path(slice,dipoleIndex[1]);
@@ -345,6 +349,7 @@ void AutoCorrClass::Accumulate()
       NetNetHistogram(t) += NetNetCorr;
 			//cerr << TotalCounts << ": adding " << OneOneCorr << " to bin " << t << endl;
     }
+    //cerr << TotalCounts << " binned autocorr" << endl;
 		//cerr << "Accumulate: after entry is " << DipoleBin(50,now) << endl;
 		//cerr << "  and Net is " << NetDipoleBin(50,now) << endl;
 		//cerr << "  column updated to " << now << ". ";
