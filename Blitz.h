@@ -3,14 +3,16 @@
 
 #include <complex>
 using namespace std;
+
 #include <blitz/array.h>
 #include <blitz/tinyvec-et.h>
-
+using namespace blitz;
 typedef double scalar;
 
 // #define NDIM 3
 
 using namespace blitz;
+typedef TinyVector<scalar,1> Vec1;
 typedef TinyVector<scalar,2> Vec2;
 typedef TinyVector<scalar,3> Vec3;
 typedef TinyVector<scalar,4> Vec4;
@@ -30,6 +32,7 @@ typedef TinyMatrix<complex<double>,3,3> cMat3;
 #define isinf(x) __isinfd(x)
 #endif
 
+// using blitz::Array;
 template <class T, int size>
 inline TinyVector<T,size> operator-(TinyVector<T,size> v)
 {
@@ -298,7 +301,7 @@ inline double distSqrd(Vec3 a,Vec3 b)
 template<class T> class SymmArray
 {
 private:
-  Array<T,1> A;
+  blitz::Array<T,1> A;
   int N;
   inline int index(int row, int col) const 
   { return ((row > col) ? ((row*(row+1)>>1)+col) : ((col*(col+1)>>1)+row)); }
@@ -335,7 +338,7 @@ public:
 
   
 inline 
-void Vec2Array (Array<Vec2,1> &vec, Array<double,1> &array)
+void Vec2Array (blitz::Array<Vec2,1> &vec, blitz::Array<double,1> &array)
 {
   assert (array.extent(0) == (2*vec.size()));
   memcpy(array.data(), vec.data(), 
@@ -343,7 +346,7 @@ void Vec2Array (Array<Vec2,1> &vec, Array<double,1> &array)
 }
 
 inline 
-void Vec2Array (Array<Vec3,1> &vec, Array<double,1> &array)
+void Vec2Array (blitz::Array<Vec3,1> &vec, blitz::Array<double,1> &array)
 {
   assert (array.extent(0) == (3*vec.size()));
   for (int i=0; i<vec.size(); i++) {
@@ -356,7 +359,7 @@ void Vec2Array (Array<Vec3,1> &vec, Array<double,1> &array)
 }
 
 inline 
-void Array2Vec (Array<double,1> &array, Array<Vec2,1> &vec)
+void Array2Vec (blitz::Array<double,1> &array, blitz::Array<Vec2,1> &vec)
 {
   assert (array.extent(0) == (2*vec.size()));
   memcpy (vec.data(), array.data(), 
@@ -364,7 +367,7 @@ void Array2Vec (Array<double,1> &array, Array<Vec2,1> &vec)
 }
 
 inline 
-void Array2Vec (Array<double,1> &array, Array<Vec3,1> &vec)
+void Array2Vec (blitz::Array<double,1> &array, blitz::Array<Vec3,1> &vec)
 {
   assert (array.extent(0) == (3*vec.size()));
   memcpy (vec.data(), array.data(), 
@@ -373,7 +376,7 @@ void Array2Vec (Array<double,1> &array, Array<Vec3,1> &vec)
 
 
 inline 
-void Vec2Array (Array<Vec2,1> &vec, Array<double,2> &array)
+void Vec2Array (blitz::Array<Vec2,1> &vec, blitz::Array<double,2> &array)
 {
   assert (array.extent(0) == vec.size());
   assert (array.extent(1) == 2);
@@ -382,7 +385,7 @@ void Vec2Array (Array<Vec2,1> &vec, Array<double,2> &array)
 }
 
 inline
-void Vec2Array (Array<Vec3,1> &vec, Array<double,2> &array)
+void Vec2Array (blitz::Array<Vec3,1> &vec, blitz::Array<double,2> &array)
 {
   assert (array.extent(0) == vec.size());
   assert (array.extent(1) == 3);
@@ -397,7 +400,7 @@ void Vec2Array (Array<Vec3,1> &vec, Array<double,2> &array)
 
 
 inline 
-void Array2Vec (Array<double,2> &array, Array<Vec2,1> &vec)
+void Array2Vec (blitz::Array<double,2> &array, blitz::Array<Vec2,1> &vec)
 {
   assert (array.extent(0) == vec.size());
   assert (array.extent(1) == 2);
@@ -406,7 +409,7 @@ void Array2Vec (Array<double,2> &array, Array<Vec2,1> &vec)
 }
 
 inline
-void Array2Vec (Array<double,2> &array, Array<Vec3,1> &vec)
+void Array2Vec (blitz::Array<double,2> &array, blitz::Array<Vec3,1> &vec)
 {
   assert (array.extent(0) == vec.size());
   assert (array.extent(1) == 3);
@@ -414,17 +417,17 @@ void Array2Vec (Array<double,2> &array, Array<Vec3,1> &vec)
 	 array.size()*sizeof(double));
 }
 
-inline Array<Vec3,1> operator+(const Array<Vec3,1> &array, Vec3 vec)
+inline blitz::Array<Vec3,1> operator+(const blitz::Array<Vec3,1> &array, Vec3 vec)
 {
-  Array<Vec3,1> result(array.size());
+  blitz::Array<Vec3,1> result(array.size());
   for (int i=0; i<array.size(); i++)
     result(i) = vec + array(i);
   return result;
 }
 
-inline Array<Vec3,1> operator+(Vec3 vec, const Array<Vec3,1> &array)
+inline blitz::Array<Vec3,1> operator+(Vec3 vec, const blitz::Array<Vec3,1> &array)
 {
-  Array<Vec3,1> result(array.size());
+  blitz::Array<Vec3,1> result(array.size());
   for (int i=0; i<array.size(); i++)
     result(i) = vec + array(i);
   return result;
@@ -449,8 +452,8 @@ inline bool operator!=(const TinyVector<T,N> &a,
 
 
 template<typename T1,typename T2>
-inline void copy(const Array<T1,3> &src,
-		 Array<T2,3> &dest)
+inline void copy(const blitz::Array<T1,3> &src,
+		 blitz::Array<T2,3> &dest)
 {
   assert (src.shape() == dest.shape());
   for (int ix=0; ix<src.extent(0); ix++)
