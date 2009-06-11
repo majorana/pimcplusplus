@@ -145,6 +145,11 @@ CommunicatorClass::Broadcast (int root, Array<complex<double>,2> &buff)
   MPI_Bcast(buff.data(), 2*buff.size(), MPI_DOUBLE, root, MPIComm);
 }
 
+void 
+CommunicatorClass::Broadcast (int root, Array<Vec1,1> &buff)
+{
+  MPI_Bcast(buff.data(), buff.size(), MPI_DOUBLE, root, MPIComm);
+}
 
 void 
 CommunicatorClass::Broadcast (int root, Array<Vec2,1> &buff)
@@ -368,6 +373,36 @@ CommunicatorClass::AllGatherVec(Array<double,1> &vec)
   MPI_Allgatherv(sendBuf, sendCount, MPI_DOUBLE, receiveBuf, 
 		 receiveCounts, displacements, MPI_DOUBLE, MPIComm);
 }
+
+///somewhat dangerous if your processor isn't split up in this way
+void
+CommunicatorClass::AllGatherVec(Array<int,1> &vec)
+{
+  int numProcs = NumProcs();
+  int myProc   = MyProc();
+  int elems = vec.size();
+  int displacements[numProcs];
+  int receiveCounts[numProcs];
+  int sendCount;
+  void *sendBuf, *receiveBuf;
+
+  int currElem = 0;
+  for (int proc=0; proc<numProcs; proc++) {
+    int procElems = elems/numProcs + ((elems%numProcs)>proc);
+    displacements[proc] = currElem;
+    receiveCounts[proc] = procElems;
+    if (proc == myProc) {
+      sendBuf = &(vec(currElem));
+      sendCount = procElems;
+    }
+    currElem += procElems;
+  }
+  receiveBuf = vec.data();
+  MPI_Allgatherv(sendBuf, sendCount, MPI_INT, receiveBuf, 
+		 receiveCounts, displacements, MPI_INT, MPIComm);
+}
+
+
 
 
 void 

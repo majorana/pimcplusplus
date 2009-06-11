@@ -28,6 +28,7 @@ extern ostream perr;
 
 namespace COMM
 {
+  using blitz::Array;
 #ifdef USE_MPI
   inline void Init (int argc, char **argv)
   {
@@ -90,8 +91,8 @@ public:
   int NumProcs();
   void Send (void *sendBuf, int count, MPI_Datatype datatype,
 	     int dest, int tag);
-  void Send (int toProc, Array<double,1> &buff);
-  void Send (int toProc, Array<int,1> &buff);
+  void Send (int toProc, blitz::Array<double,1> &buff);
+  void Send (int toProc, blitz::Array<int,1> &buff);
 
   void Send    (int   toProc, int val);
   void Receive (int fromProc, int &val);
@@ -101,62 +102,66 @@ public:
   void Broadcast (int root, int &val);
   void Broadcast (int root, bool &val);
   void Broadcast (int root, double &val);
-  void Broadcast (int root, Array<int,1> &buff);
-  void Broadcast (int root, Array<double,1> &buff);
-  void Broadcast (int root, Array<double,2> &buff);
-  void Broadcast (int root, Array<double,3> &buff);
-  void Broadcast (int root, Array<complex<double>,1> &buff);
-  void Broadcast (int root, Array<complex<double>,2> &buff);
-  void Broadcast (int root, Array<Vec2,1> &buff);
-  void Broadcast (int root, Array<Vec3,1> &buff);
-  void Broadcast (int root, Array<double,4> &buff);
-  void Broadcast (int root, Array<complex<double>,4> &buff);
+  void Broadcast (int root, blitz::Array<int,1> &buff);
+  void Broadcast (int root, blitz::Array<double,1> &buff);
+  void Broadcast (int root, blitz::Array<double,2> &buff);
+  void Broadcast (int root, blitz::Array<double,3> &buff);
+  void Broadcast (int root, blitz::Array<complex<double>,1> &buff);
+  void Broadcast (int root, blitz::Array<complex<double>,2> &buff);
+  void Broadcast (int root, blitz::Array<Vec1,1> &buff);
+  void Broadcast (int root, blitz::Array<Vec2,1> &buff);
+  void Broadcast (int root, blitz::Array<Vec3,1> &buff);
+  void Broadcast (int root, blitz::Array<double,4> &buff);
+  void Broadcast (int root, blitz::Array<complex<double>,4> &buff);
   void Receive (void *recvBuf, int count, MPI_Datatype datatype,
 		int source, int tag);
-  void Receive (int toProc, Array<double,1> &buff);
-  void Receive (int toProc, Array<int,1> &buff);
+  void Receive (int toProc, blitz::Array<double,1> &buff);
+  void Receive (int toProc, blitz::Array<int,1> &buff);
   bool Probe(int source, int tag, CommStatusClass &status);
-  void Gather (Array<complex<double>,1> &sendVec, 
-	       Array<complex<double>,1> &recvVec, 
-	       Array<int,1> &recvCounts, int root=0);
-  void Gather (Array<TinyVector<double,3>,1> &sendVec, 
-	       Array<TinyVector<double,3>,1> &recvVec, 
-	       Array<int,1> &recvCounts, int root=0);
-  void Gather (Array<double,1> &sendVec, Array<double,2> &recvMat,
+  void Gather (blitz::Array<complex<double>,1> &sendVec, 
+	       blitz::Array<complex<double>,1> &recvVec, 
+	       blitz::Array<int,1> &recvCounts, int root=0);
+  void Gather (blitz::Array<TinyVector<double,3>,1> &sendVec, 
+	       blitz::Array<TinyVector<double,3>,1> &recvVec, 
+	       blitz::Array<int,1> &recvCounts, int root=0);
+  void Gather (blitz::Array<double,1> &sendVec, blitz::Array<double,2> &recvMat,
 	       int root=0);
-  void Gather (Array<int,1> &sendVec, Array<int,2> &recvMat,
+  void Gather (blitz::Array<int,1> &sendVec, blitz::Array<int,2> &recvMat,
 	       int root=0);
   void AllGather(void *sendbuf, int sendcount, 
 		 MPI_Datatype sendtype, 
 		       void* recvbuf, int recvcount,
 		 MPI_Datatype recvtype);
-  void AllGather (Array<double,1> &SendVec, 
-		  Array<double,1> &RecvVec);
-  void AllGather (Array<int,1> &SendVec, 
-		  Array<int,1> &RecvVec);
+  void AllGather (blitz::Array<double,1> &SendVec, 
+		  blitz::Array<double,1> &RecvVec);
+  void AllGather (blitz::Array<int,1> &SendVec, 
+		  blitz::Array<int,1> &RecvVec);
   /// This function gathers all rows of a matrix to all processors.
   /// It assumes that each processor receives an equal number of rows,
   /// with any left over being distributed to the low number
   /// processors. E.g. If there are 8 rows and 3 processors, procs 0
   /// and 1 would get 3 rows and proc 2 would get 2 rows.
-  void AllGatherRows (Array<complex<double>,2> &mat);
-  void AllGatherRows (Array<double,2> &mat);
+  void AllGatherRows (blitz::Array<complex<double>,2> &mat);
+  void AllGatherRows (blitz::Array<double,2> &mat);
 
   /// This function uses the same division stragegy as above, but
   /// gathers single elements, instead.
-  void AllGatherVec (Array<double,1> &vec);
+  void AllGatherVec (blitz::Array<double,1> &vec);
+  void AllGatherVec(blitz::Array<int,1> &vec);
+
 
   void Split (int color, CommunicatorClass &newComm);
-  void Subset (Array<int,1> &ranks, CommunicatorClass &newComm);
+  void Subset (blitz::Array<int,1> &ranks, CommunicatorClass &newComm);
 
 //   ///Sends and receives an array of dVec
-//   void SendReceive (int sendProc, const Array<Vec3,1> &sendBuff,
-// 		    int recvProc,       Array<Vec3,1> &recvBuff);
+//   void SendReceive (int sendProc, const blitz::Array<Vec3,1> &sendBuff,
+// 		    int recvProc,       blitz::Array<Vec3,1> &recvBuff);
 
 //   ///Sends and receives an array of dVec
-//   void SendReceive (int sendProc, const Array<Vec2,1> &sendBuff,
-//		    int recvProc,       Array<Vec2,1> &recvBuff);
+//   void SendReceive (int sendProc, const blitz::Array<Vec2,1> &sendBuff,
+//		    int recvProc,       blitz::Array<Vec2,1> &recvBuff);
   
+
 
   template<int N>
   void Send (int toProc, TinyVector<double,N> val)
@@ -186,7 +191,7 @@ public:
 
 
   template<int N>
-  void Sum (Array<complex<double>,N> Ain, Array<complex<double>,N> Aout)
+  void Sum (blitz::Array<complex<double>,N> Ain, blitz::Array<complex<double>,N> Aout)
   {
     assert (Ain.size() == Aout.size());
     MPI_Reduce ((void*)Ain.data(), (void*)Aout.data(), 
@@ -194,7 +199,7 @@ public:
   }
 
   template<int N>
-  void AllSum (Array<complex<double>,N> Ain, Array<complex<double>,N> Aout)
+  void AllSum (blitz::Array<complex<double>,N> Ain, blitz::Array<complex<double>,N> Aout)
   {
     assert (Ain.size() == Aout.size());
     MPI_Allreduce ((void*)Ain.data(), (void*)Aout.data(), 
@@ -212,6 +217,7 @@ public:
   {
     MPI_Bcast(&(mat(0,0)), N*M, MPI_DOUBLE, root, MPIComm);
   }
+
 
   template<int N>
   void Broadcast (int root, Array<int,N> &a)
@@ -238,8 +244,8 @@ public:
   }
 
   template<int N, int M>
-  void SendReceive (int sendProc, const Array<TinyVector<double,M>,N> &sendBuff,
-		    int recvProc,       Array<TinyVector<double,M>,N> &recvBuff)
+  void SendReceive (int sendProc, const blitz::Array<TinyVector<double,M>,N> &sendBuff,
+		    int recvProc,       blitz::Array<TinyVector<double,M>,N> &recvBuff)
   {
     MPI_Status status;
     MPI_Sendrecv((void*)sendBuff.data(), M*sendBuff.size(), MPI_DOUBLE, sendProc, 2,
@@ -248,8 +254,8 @@ public:
   }
   
   template<int N>
-  void SendReceive (int sendProc, const Array<complex<double>,N> sendBuff,
-		    int recvProc,       Array<complex<double>,N> recvBuff)
+  void SendReceive (int sendProc, const blitz::Array<complex<double>,N> sendBuff,
+		    int recvProc,       blitz::Array<complex<double>,N> recvBuff)
   {
     MPI_Status status;
     MPI_Sendrecv((void*)sendBuff.data(), 2*sendBuff.size(), MPI_DOUBLE, sendProc, 2,
@@ -258,14 +264,14 @@ public:
   }
 
   template<int N>
-  void Send (int sendProc, const Array<complex<double>,N> sendBuff)
+  void Send (int sendProc, const blitz::Array<complex<double>,N> sendBuff)
   {
     MPI_Send((void*)sendBuff.data(), 2*sendBuff.size(), MPI_DOUBLE, sendProc, 2,
 	     MPIComm);
   }
   
   template<int N>
-  void Receive (int recvProc, Array<complex<double>,N> recvBuff)
+  void Receive (int recvProc, blitz::Array<complex<double>,N> recvBuff)
   {
     MPI_Status status;
     MPI_Recv((void*)recvBuff.data(), 2*recvBuff.size(), MPI_DOUBLE, recvProc, 2,
@@ -273,8 +279,8 @@ public:
   }
 
   template<int N, int M>
-  void SendReceive (int sendProc, const Array<TinyVector<complex<double>,M>,N> &sendBuff,
-		    int recvProc,       Array<TinyVector<complex<double>,M>,N> &recvBuff)
+  void SendReceive (int sendProc, const blitz::Array<TinyVector<complex<double>,M>,N> &sendBuff,
+		    int recvProc,       blitz::Array<TinyVector<complex<double>,M>,N> &recvBuff)
   {
     MPI_Status status;
     MPI_Sendrecv((void*)sendBuff.data(), 2*M*sendBuff.size(), MPI_DOUBLE, sendProc, 2,
@@ -283,8 +289,8 @@ public:
   }
 
   template<int N>
-  void SendReceive (int sendProc, const Array<int,N> &sendBuff,
-		    int recvProc,       Array<int,N> &recvBuff)
+  void SendReceive (int sendProc, const blitz::Array<int,N> &sendBuff,
+		    int recvProc,       blitz::Array<int,N> &recvBuff)
   {
     MPI_Status status;
     MPI_Sendrecv((void*)sendBuff.data(), sendBuff.size(), MPI_INT, sendProc, 3,
@@ -293,8 +299,8 @@ public:
   }
 
   template<int N, int M>
-  void SendReceive (int sendProc, const Array<TinyVector<int,M>,N> &sendBuff,
-		    int recvProc,       Array<TinyVector<int,M>,N> &recvBuff)
+  void SendReceive (int sendProc, const blitz::Array<TinyVector<int,M>,N> &sendBuff,
+		    int recvProc,       blitz::Array<TinyVector<int,M>,N> &recvBuff)
   {
     MPI_Status status;
     MPI_Sendrecv((void*)sendBuff.data(), M*sendBuff.size(), MPI_INT, sendProc, 3,
@@ -303,39 +309,39 @@ public:
   }
 
 //   ///Sends and receives an array of double
-//   void SendReceive (int sendProc, const Array<double,1> &sendBuff,
-// 		    int recvProc,       Array<double,1> &recvBuff);
+//   void SendReceive (int sendProc, const blitz::Array<double,1> &sendBuff,
+// 		    int recvProc,       blitz::Array<double,1> &recvBuff);
 
 //   ///Sends and receives an array of double
-//   void SendReceive (int sendProc, const Array<double,2> &sendBuff,
-// 		    int recvProc,       Array<double,2> &recvBuff);
+//   void SendReceive (int sendProc, const blitz::Array<double,2> &sendBuff,
+// 		    int recvProc,       blitz::Array<double,2> &recvBuff);
 
 //   ///Sends and receives an array of double
-//   void SendReceive (int sendProc, const Array<double,3> &sendBuff,
-// 		    int recvProc,       Array<double,3> &recvBuff);
+//   void SendReceive (int sendProc, const blitz::Array<double,3> &sendBuff,
+// 		    int recvProc,       blitz::Array<double,3> &recvBuff);
 
 
 //   ///Sends and receives an array of complex
-//   void SendReceive (int sendProc, const Array<complex<double>,1> &sendBuff,
-// 		    int recvProc,       Array<complex<double>,1> &recvBuff);
+//   void SendReceive (int sendProc, const blitz::Array<complex<double>,1> &sendBuff,
+// 		    int recvProc,       blitz::Array<complex<double>,1> &recvBuff);
   
 //   ///Sends and receives an array of int
-//   void SendReceive (int sendProc, const Array<int,1> &sendBuff,
-// 		    int recvProc,       Array<int,1> &recvBuff);
+//   void SendReceive (int sendProc, const blitz::Array<int,1> &sendBuff,
+// 		    int recvProc,       blitz::Array<int,1> &recvBuff);
 
 
 
   ///Sums up the vectors in sendBuff.  Processor 0 only gets the
   ///resulting sum.
-  void Sum (Array<int,1> &sendBuff, Array<int,1> &recvBuff);
+  void Sum (blitz::Array<int,1> &sendBuff, blitz::Array<int,1> &recvBuff);
 
   ///Sums up the vectors in sendBuff.  Processor 0 only gets the
   ///resulting sum.
-  //  void Sum (Array<double,1> &sendBuff, Array<double,1> &recvBuff);
+  //  void Sum (blitz::Array<double,1> &sendBuff, blitz::Array<double,1> &recvBuff);
 
 
-  void Sum (Array<Vec2,1> &sendBuff, Array<Vec2,1> &recvBuff);
-  void Sum (Array<Vec3,1> &sendBuff, Array<Vec3,1> &recvBuff);
+  void Sum (blitz::Array<Vec2,1> &sendBuff, blitz::Array<Vec2,1> &recvBuff);
+  void Sum (blitz::Array<Vec3,1> &sendBuff, blitz::Array<Vec3,1> &recvBuff);
   ///Sums up all values a.  Only processor 0 gets the result.  All
   ///other processors return 0;
   double Sum (double a);
@@ -343,13 +349,13 @@ public:
   /// Sums up all values of a on all processors.  All processors
   ///  get result.
   double AllSum (double a);
-  void AllSum (Array<double,1> &in, Array<double,1> &out);
-  void AllSum (Array<double,2> &in, Array<double,2> &out);
-  void AllSum (Array<double,3> &in, Array<double,3> &out);
-  void AllSum (Array<TinyVector<double,2>,1> &in, 
-	       Array<TinyVector<double,2>,1> &out);
-  void AllSum (Array<TinyVector<double,3>,1> &in, 
-	       Array<TinyVector<double,3>,1> &out);
+  void AllSum (blitz::Array<double,1> &in, blitz::Array<double,1> &out);
+  void AllSum (blitz::Array<double,2> &in, blitz::Array<double,2> &out);
+  void AllSum (blitz::Array<double,3> &in, blitz::Array<double,3> &out);
+  void AllSum (blitz::Array<TinyVector<double,2>,1> &in, 
+	       blitz::Array<TinyVector<double,2>,1> &out);
+  void AllSum (blitz::Array<TinyVector<double,3>,1> &in, 
+	       blitz::Array<TinyVector<double,3>,1> &out);
   void AllAnd (bool &TorF);
   template<int N> 
   inline void AllMax (TinyVector<int,N> &vec) {
@@ -380,29 +386,29 @@ public:
     return 1;
   }
 
-  inline void Gather (Array<complex<double>,1> &sendVec, 
-		      Array<complex<double>,1> &recvVec, 
-		      Array<int,1>& recvCounts, int root=0)
+  inline void Gather (blitz::Array<complex<double>,1> &sendVec, 
+		      blitz::Array<complex<double>,1> &recvVec, 
+		      blitz::Array<int,1>& recvCounts, int root=0)
   {
     recvVec = sendVec;
   }
 
-  inline void Gather (Array<TinyVector<double,3>,1> &sendVec, 
-		      Array<TinyVector<double,3>,1> &recvVec, 
-		      Array<int,1>& recvCounts, int root=0)
+  inline void Gather (blitz::Array<TinyVector<double,3>,1> &sendVec, 
+		      blitz::Array<TinyVector<double,3>,1> &recvVec, 
+		      blitz::Array<int,1>& recvCounts, int root=0)
   {
     recvVec = sendVec;
   }
-  inline void Gather (Array<double,1> &sendVec, 
-		      Array<double,2> &recvMat,
+  inline void Gather (blitz::Array<double,1> &sendVec, 
+		      blitz::Array<double,2> &recvMat,
 		      int root = 0)
   {
     assert (recvMat.rows() == NumProcs());
     assert (recvMat.cols() == sendVec.size());
     recvMat(0,Range::all()) = sendVec;
   }
-  inline void Gather (Array<int,1> &sendVec, 
-		      Array<int,2> &recvMat,
+  inline void Gather (blitz::Array<int,1> &sendVec, 
+		      blitz::Array<int,2> &recvMat,
 		      int root = 0)
   {
     assert (recvMat.rows() == NumProcs());
@@ -410,14 +416,14 @@ public:
     recvMat(0,Range::all()) = sendVec;
   }
 
-  inline void AllGather (Array<double,1> &SendVec, 
-			 Array<double,1> &RecvVec)
+  inline void AllGather (blitz::Array<double,1> &SendVec, 
+			 blitz::Array<double,1> &RecvVec)
   {
     RecvVec = SendVec;
   }
 
-  inline void AllGather (Array<int,1> &SendVec, 
-			 Array<int,1> &RecvVec)
+  inline void AllGather (blitz::Array<int,1> &SendVec, 
+			 blitz::Array<int,1> &RecvVec)
   {
     RecvVec = SendVec;
   }
@@ -427,18 +433,18 @@ public:
   /// with any left over being distributed to the low number
   /// processors. E.g. If there are 8 rows and 3 processors, procs 0
   /// and 1 would get 3 rows and proc 2 would get 2 rows.
-  inline void AllGatherRows (Array<double,2> &mat) 
+  inline void AllGatherRows (blitz::Array<double,2> &mat) 
   {
     // Do nothing
   }
-  inline void AllGatherRows (Array<complex<double>,2> &mat) 
+  inline void AllGatherRows (blitz::Array<complex<double>,2> &mat) 
   {
     // Do nothing
   }
 
   /// This function uses the same division stragegy as above, but
   /// gathers single elements, instead.
-  void AllGatherVec (Array<double,1> &vec) 
+  void AllGatherVec (blitz::Array<double,1> &vec) 
   {
     // do nothing
   }
@@ -447,7 +453,7 @@ public:
   {
     // Do nothing
   }
-  inline void Subset (Array<int,1> ranks, CommunicatorClass &newComm)
+  inline void Subset (blitz::Array<int,1> ranks, CommunicatorClass &newComm)
   {
     if (ranks.size() !=1) {
       cerr << "Serial verion of code does not support nontrivial "
@@ -455,6 +461,9 @@ public:
       abort();
     }
   }
+// <<<<<<< .mine
+//   inline void Send (int toProc, blitz::Array<double,1> &buff)
+// =======
   template<typename T>
   inline void Send (int toProc, T &val) 
   {
@@ -462,27 +471,28 @@ public:
     abort();
   }
 
-  inline void Send (int toProc, Array<double,1> &buff)
+  inline void Send (int toProc, blitz::Array<double,1> &buff)
+// >>>>>>> .r1224
   {
     cerr << "Sends not supported in serial mode.\n";
     abort();
   }
 
-  inline void Send (int toProc, Array<int,1> &buff)
+  inline void Send (int toProc, blitz::Array<int,1> &buff)
   {
     cerr << "Sends not supported in serial mode.\n";
     abort();
   }
 
   template<int N>
-  void SendReceive (int sendProc, const Array<complex<double>,N> sendBuff,
-		    int recvProc,       Array<complex<double>,N> recvBuff)
+  void SendReceive (int sendProc, const blitz::Array<complex<double>,N> sendBuff,
+		    int recvProc,       blitz::Array<complex<double>,N> recvBuff)
   {
     // do nothing for serial version
   }
 
   template<int N>
-  void Send (int sendProc, const Array<complex<double>,N> sendBuff)
+  void Send (int sendProc, const blitz::Array<complex<double>,N> sendBuff)
   {
     cerr << "Sends not supported in serial mode.\n";
     abort();
@@ -496,7 +506,7 @@ public:
   }
 
   template<int N>
-  void Receive (int recvProc, Array<complex<double>,N> recvBuff)
+  void Receive (int recvProc, blitz::Array<complex<double>,N> recvBuff)
   {
     cerr << "Receives not supported in serial mode.\n";
     abort();
@@ -505,9 +515,9 @@ public:
   template<typename T>
   void Broadcast(int root, T &val) { }
 
-  inline void Receive (int toProc, Array<double,1> &buff)
+  inline void Receive (int toProc, blitz::Array<double,1> &buff)
   { cerr << "Receives not supported in serial mode.\n";  abort(); }
-  inline void Receive (int toProc, Array<int,1> &buff)
+  inline void Receive (int toProc, blitz::Array<int,1> &buff)
   { cerr << "Receives not supported in serial mode.\n";    abort(); }
 
   template<typename T>
@@ -521,7 +531,7 @@ public:
   { return a; }
 
   template<class T, int N>
-  inline void Sum(Array<T,N> &sendBuff, Array<T,N> &recvBuff)
+  inline void Sum(blitz::Array<T,N> &sendBuff, blitz::Array<T,N> &recvBuff)
   { recvBuff = sendBuff; }
   
   /// Sums up all values of a on all processors.  All processors get result.
@@ -529,7 +539,7 @@ public:
   {  return a; } 
 
   template<class T, int N>
-  inline void AllSum (Array<T, N> &in, Array<T, N> &out)
+  inline void AllSum (blitz::Array<T, N> &in, blitz::Array<T, N> &out)
   { out = in; }
 
   inline void AllAnd (bool &TorF)
