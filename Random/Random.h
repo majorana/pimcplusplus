@@ -58,6 +58,11 @@ public:
   inline double WorldGaussian  (double sigma);
   
   /// Produces a guassian random vector with radius that has STD sigma
+  inline void LocalGaussianVec (double sigma, Vec1 &c);
+  inline void CommonGaussianVec(double sigma, Vec1 &c);
+  inline void WorldGaussianVec (double sigma, Vec1 &c);
+
+
   inline void LocalGaussianVec (double sigma, Vec2 &c);
   inline void CommonGaussianVec(double sigma, Vec2 &c);
   inline void WorldGaussianVec (double sigma, Vec2 &c);
@@ -296,6 +301,25 @@ RandomClass::CommonGaussianVec(double sigma,Vec2 &c)
 { 
   c(0)=CommonGaussian(sigma); 
   c(1)=CommonGaussian(sigma); 
+}
+
+inline void 
+RandomClass::WorldGaussianVec(double sigma,Vec1 &c)
+{ 
+  c(0)=WorldGaussian(sigma); 
+}
+
+/// Produces a guassian random vector with radius that has STD sigma 
+inline void 
+RandomClass::LocalGaussianVec(double sigma,Vec1 &c)
+{ 
+  c(0)=LocalGaussian(sigma); 
+}
+ 
+inline void 
+RandomClass::CommonGaussianVec(double sigma,Vec1 &c)
+{ 
+  c(0)=CommonGaussian(sigma); 
 }
 
 inline void 
