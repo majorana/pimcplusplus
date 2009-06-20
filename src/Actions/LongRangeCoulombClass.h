@@ -43,6 +43,7 @@ protected:
   double alpha, sq_alpha;
   Array<double,1> k2;
   Array<double,1> phi;
+  Array<double,1> PtclCharge;
   double self;
   double volume;
   double prefactor;

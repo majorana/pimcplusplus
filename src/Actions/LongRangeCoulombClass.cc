@@ -65,6 +65,19 @@ void LongRangeCoulombClass::Read(IOSectionClass& in)
   for(int s=0; s<specNames.size(); s++)
     activeSpecies(Path.SpeciesNum(specNames(s))) = true;
   cerr << "LongRangeCoulomb active species are " << specNames << " " << activeSpecies << endl;
+  PtclCharge.resize(PathData.NumSpecies());
+  for(int s=0; s<PathData.NumSpecies(); s++)
+    PtclCharge(s) = PathData.Species(s).pseudoCharge;
+  cerr << "Original Species charges:" << PtclCharge << endl;
+  Array<double,1> setCharge;
+  assert(in.ReadVar("ActiveCharges",setCharge));
+  int chargeIndex = 0;
+	for(int s=0; s<specNames.size(); s++) {
+	  int myS = Path.SpeciesNum(specNames(s));
+    PtclCharge(myS) = setCharge(chargeIndex);
+    chargeIndex++;
+  }
+  cerr << "Assigned charges for each species:" << PtclCharge << endl;
   int kPts = Path.kVecs.size();
   cerr << "LongRangeCoulomb: using " << kPts << " kPts from Path.kVecs" << endl;
   phi.resize(kPts);
@@ -81,7 +94,8 @@ void LongRangeCoulombClass::Read(IOSectionClass& in)
   for(int n=0; n<Path.NumParticles(); n++){
     int spec = Path.ParticleSpeciesNum(n);
     if(activeSpecies(spec)) {
-      double q = PathData.Species(spec).Charge;
+      //double q = PathData.Species(spec).Charge;
+      double q = PtclCharge(spec);
       self += prefactor*a*q*q;
     }
   }
@@ -207,14 +221,16 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
         Path.DoPtcl(i) = false;
         int speci = Path.ParticleSpeciesNum(i);
         if(activeSpecies(speci)) {
-          double qi = PathData.Species(speci).Charge;
+          //double qi = PathData.Species(speci).Charge;
+          double qi = PtclCharge(speci);
           //cerr << "real: spec " << speci << " with q " << qi << endl;
 
           for(int j=0; j<PathData.Path.NumParticles(); j++){
             if(Path.DoPtcl(j)){
               int specj = Path.ParticleSpeciesNum(j);
               if(activeSpecies(specj)) {
-                double qj = PathData.Species(specj).Charge;
+                double qj = PtclCharge(specj);
+                //double qj = PathData.Species(specj).Charge;
                 if((qi*qj) != 0.0){
                   dVec Rij;
                   double rijmag;
@@ -253,7 +269,8 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
     for (int species=0; species<Path.NumSpecies(); species++) {
       //int speci = Path.ParticleSpeciesNum(species);
       if(activeSpecies(species)) {
-        double qi = PathData.Species(species).Charge;
+        double qi = PtclCharge(species);
+        //double qi = PathData.Species(species).Charge;
         //cerr << "homo: spec " << species << " with q " << qi << " Path.NumSpec is " << Path.NumSpecies() << endl;
         if(qi != 0.0){
           for (int ki=0; ki<Path.kVecs.size(); ki++) {
@@ -275,9 +292,11 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
         for (int species2=species1+1; species2<Path.NumSpecies(); species2++) {
           if(activeSpecies(species2)) {
             //int speci = Path.ParticleSpeciesNum(species1);
-            double qi = PathData.Species(species1).Charge;
             //int specj = Path.ParticleSpeciesNum(species2);
-            double qj = PathData.Species(species2).Charge;
+            //double qi = PathData.Species(species1).Charge;
+            //double qj = PathData.Species(species2).Charge;
+            double qi = PtclCharge(species1);
+            double qj = PtclCharge(species2);
             if(qi != 0.0 && qj != 0.0){
 	            for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	              double rhorho = 
@@ -303,7 +322,8 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
     for(int i=0; i<PathData.Path.NumParticles(); i++){
       int speci = Path.ParticleSpeciesNum(i);
       if(activeSpecies(speci)) {
-        double qi = PathData.Species(speci).Charge;
+        double qi = PtclCharge(speci);
+        //double qi = PathData.Species(speci).Charge;
         //correction += prefactor*a*qi*qi;
         //cerr << "ptcl " << i << " has friends";
         for(int jIndex=0; jIndex<PathData.Mol.MembersOf(PathData.Mol(i)).size(); jIndex++){
@@ -312,7 +332,8 @@ double LongRangeCoulombClass::ComputeEnergy (int slice1, int slice2,
           if(i!=j){
             int specj = Path.ParticleSpeciesNum(j);
             if(activeSpecies(specj)) {
-              double qj = PathData.Species(specj).Charge;
+              //double qj = PathData.Species(specj).Charge;
+              double qj = PtclCharge(specj);
               dVec Rij;
               double rijmag;
 	        	  PathData.Path.DistDisp(slice, i, j, rijmag, Rij);
