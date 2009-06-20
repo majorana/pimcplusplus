@@ -27,6 +27,7 @@ class MoleculeInteractionsClass : public ActionBaseClass
 	bool IntraMolecular;
 	bool TruncateAction, TruncateEnergy;
   bool useFirstImage;
+  bool hacksOn;
 	enum Interactions{LJ,CHARGE,SPRING};
 	Array<bool, 2> Interacting;
 	Array<string, 1> LJSpecies;
@@ -36,17 +37,18 @@ class MoleculeInteractionsClass : public ActionBaseClass
 	Array<string, 1> QuadSpecies;
 	Array<string, 1> PairSpecies;
 	Array<string, 1> CoreSpecies;
-  Array<double,1> PtclCharge;
 	Array<bool,2> Updated;
 	Array<double,2> COMTable;
 	Array<dVec,2> COMVecs;
 	Array<double, 1> lambdas;
+	Array<double,1> PtclCharge;
 	int NumImages;
 	// parameters for ST2 modulation function
 	double RL, RU;
 	// parameters for SPC quadratic intramolecular potential
 	double b, c, d, D, rho, R_OH_0, R_HH_0, alpha;
 	double Dyn2kcal;
+  double omega;
 	// this is kind of a hack
 	ofstream outfile;
 	bool special;
@@ -83,6 +85,8 @@ public:
 						const Array<int,1> &activeParticles, int level,
 						bool with_truncations, bool isAction);
   dVec Force(int slice, int ptcl);
+  dVec Force(int slice, int ptcl, int ptcl2);
+  dVec Force(int slice, int ptcl, Array<int,1>& activePtcls);
   double CalcCutoff(int ptcl1, int ptcl2, int slice, double Rcmag);
 	double COMSeparation(int slice,int ptcl1,int ptcl2);
 	double S(double r);
