@@ -169,7 +169,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 	      			double lj = conversion*4*PathData.Species(species1).Epsilon*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
 							TotalLJ += lj;
 	      			TotalU += lj;
-							//cerr  << TotalU << " added " << lj << " from LJ interaction between " << ptcl1 << " and " << ptcl2 << " " << rmag << endl;
+
             }
 						//cerr << "... outside" << endl;
 	  			}
@@ -226,9 +226,12 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 							        	if(withS)
 							        		modulation = S(Ormag);
                         double coulomb;
-                      	coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
-							        									*PathData.Species(species2).pseudoCharge*modulation
-                                        *(1.0/rmag - truncate/ptclCutoff);
+                      	//coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
+							        	//								*PathData.Species(species2).pseudoCharge*modulation
+                        //                *(1.0/rmag - truncate/ptclCutoff);
+                      	coulomb = conversion*prefactor* PtclCharge(species1)
+							        									* PtclCharge(species2) * modulation
+                                        * (1.0/rmag - truncate/ptclCutoff);
 							        	TotalCharge += coulomb;
 	      			        	TotalU += coulomb;
                         //cerr << "  " << ptcl1 << " - " << ptcl2 << " rmag " << rmag << " coulomb " << coulomb << " tmpOrmag " << tempOrmag << endl;
@@ -257,9 +260,8 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 							  	if(withS)
 							  		modulation = S(Ormag);
                   double coulomb;
-                	coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
-							  									*PathData.Species(species2).pseudoCharge*modulation
-                                  *(1.0/rmag - truncate/ptclCutoff);
+                	coulomb = conversion*prefactor * PtclCharge(species1) * PtclCharge(species2)
+							  									* modulation * (1.0/rmag - truncate/ptclCutoff);
                   //if(ptcl2%(ptcl1-1) == 0)
                   //  cerr << ptcl1 << ", " << ptcl2 << " " << rmag << " " << coulomb << " " << truncate/ptclCutoff << " " << conversion*prefactor*PathData.Species(species1).pseudoCharge*PathData.Species(species2).pseudoCharge*modulation << endl;
                   //coulomb = prefactor*PathData.Species(species1).pseudoCharge*PathData.Species(species2).pseudoCharge/rmag;
@@ -277,18 +279,18 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 			// quadratic intramolecular potential
 			// SPC/F2; see Lobaugh and Voth, JCP 106, 2400 (1997)
 			double spring = 0.0;
-	  	for (int slice=startSlice;slice<=endSlice;slice+=skip){
-				vector<int> activeP(0);
-				activeP.push_back(ptcl1);
-				//cerr << " INTRA added " << ptcl1;
-  			for (int index2=1; index2<PathData.Mol.MembersOf(ptcl1).size(); index2++){
-					int ptcl2 = PathData.Mol.MembersOf(ptcl1)(index2);
-    			int species2=Path.ParticleSpeciesNum(ptcl2);
-    			if (Interacting(species2,2) && Path.DoPtcl(ptcl2)){
-						activeP.push_back(ptcl2);
-						//cerr << " INTRA added " << ptcl2;
-					}
+			vector<int> activeP(0);
+			activeP.push_back(ptcl1);
+			//cerr << " INTRA added " << ptcl1;
+  		for (int index2=1; index2<PathData.Mol.MembersOf(ptcl1).size(); index2++){
+				int ptcl2 = PathData.Mol.MembersOf(ptcl1)(index2);
+    		int species2=Path.ParticleSpeciesNum(ptcl2);
+    		if (Interacting(species2,2) && Path.DoPtcl(ptcl2)){
+					activeP.push_back(ptcl2);
+					//cerr << " INTRA added " << ptcl2;
 				}
+			}
+	  	for (int slice=startSlice;slice<=endSlice;slice+=skip){
         assert(activeP.size() == 3);
 				dVec r;
 				double ROH1, ROH2, RHH;
@@ -367,7 +369,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 			// hard-wired parameters for ST2 water dimer
 			// could be generalized
 			double harmonic = 0.0;
-			double omega = 26; // ps^-1
+			//double omega = 26; // ps^-1
 			// for Rossky ST2 in kcal/mol*s^2 m^-2
 			//double m_H2O = 0.043265; // ???? this seems off by a factor of 2
       //double m_H2O = 0.02163; // kcal/mol*ps^2 angstrom^-2
@@ -405,7 +407,9 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
               //cerr << ptcl1 << " " << ptcl2 << " " << slice << " " << rmag << endl;
               double pair = 0.0;
               if(rmag < pairCutoff) {
+                //cerr << "accessing " << species1 << " " << species2 << " " << rmag << endl;
                 pair = (*PairVTable(species1,species2))(rmag);
+                //cerr << "  " << pair << endl;
               }
 
               TotalPair += pair;
@@ -457,6 +461,7 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
 	//cerr << "Empirical potential contributions: " << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic;// << endl;
 	// write additional output file
 
+  //cerr << "MI " << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << " " << TotalPair << " " << endl;
 	if(!isAction && special){
 		outfile << TotalU << " " << TotalLJ << " " << TotalCharge << " " << TotalSpring << " " << TotalHarmonic << " " << TotalKinetic << " " << TotalPair << " " << int1 << " " << int2 << " " << int3 << " " << int4 << endl;
 	}
@@ -599,7 +604,7 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 
 		CUTOFF = Path.GetBox()(0)/2;
 		IntraMolecular = false;
-		withS = true;
+		withS = false;
 		TruncateAction = true;
 		TruncateEnergy = false;
     useFirstImage = true;
@@ -607,6 +612,7 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
     conversion = 1.0;
 		if(in.ReadVar("Prefactor",conversion)){
       cerr << "Setting conversion factor to " << conversion << ". Default units are kcal/mol with length in " << units << endl;
+      cerr << "Absolute energy prefactor will be prodcut of " << prefactor <<"*" << conversion <<" " << prefactor*conversion << endl;
     }
 		in.ReadVar("Cutoff",CUTOFF);
 		in.ReadVar("Modulated",withS);
@@ -633,6 +639,22 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		in.ReadVar("CoreSpecies",CoreSpecies);
 
 		cerr << "Read LJSpec " << LJSpecies << " and chargeSpec " << ChargeSpecies << " etc..." << endl;
+    PtclCharge.resize(PathData.NumSpecies());
+    for(int s=0; s<PathData.NumSpecies(); s++)
+      PtclCharge(s) = PathData.Species(s).pseudoCharge;
+    cerr << "Original Species charges:" << PtclCharge << endl;
+    if(ChargeSpecies.size() > 0) {
+      Array<double,1> setCharge;
+      assert(in.ReadVar("ActiveCharges",setCharge));
+      int chargeIndex = 0;
+		  for(int s=0; s<ChargeSpecies.size(); s++) {
+			  int myS = Path.SpeciesNum(ChargeSpecies(s));
+        PtclCharge(myS) = setCharge(chargeIndex);
+        chargeIndex++;
+      }
+    }
+    cerr << "Assigned charges for each species:" << PtclCharge << endl;
+
 		if(KineticSpecies.size() > 0){
 			assert(in.ReadVar("Lambdas",lambdas));
 			cerr << "Read lambda for each species: " << lambdas << endl;
@@ -692,6 +714,11 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
         }
       }
     }
+    if(QuadSpecies.size() > 0) {
+      omega = 26;
+      in.ReadVar("omega",omega);
+      cerr << "HARMONIC POT omega " << omega << endl;
+    }
 
 		for(int s=0; s<LJSpecies.size(); s++){
 			Interacting(Path.SpeciesNum(LJSpecies(s)), 0) = true;
@@ -747,6 +774,21 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 
 dVec MoleculeInteractionsClass::Force(int slice, int ptcl)
 {
+  Array<int,1> activeP(PathData.Path.NumParticles());
+  for (int p=0; p<PathData.Path.NumParticles(); p++)
+    activeP(p) = p;
+  return(Force(slice, ptcl, activeP));
+}
+
+dVec MoleculeInteractionsClass::Force(int slice, int ptcl, int ptcl2)
+{
+  Array<int,1> activeP(1);
+  activeP(0) = ptcl2;
+  return(Force(slice, ptcl, activeP));
+}
+
+dVec MoleculeInteractionsClass::Force(int slice, int ptcl, Array<int,1>& activePtcls)
+{
   if(withS)
     cerr << "WARNING MOLECULEINTERACTIONSCLASS::FORCE NOT BUILT TO INCLUDE ST2 MODULATION" << endl;
 
@@ -768,10 +810,12 @@ dVec MoleculeInteractionsClass::Force(int slice, int ptcl)
   //int speciese=Path.SpeciesNum("e");
 
   if (Interacting(species1,0)){
-    for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
+    for (int ptcl2Index=0; ptcl2Index<activePtcls.size(); ptcl2Index++){
+      int ptcl2 = activePtcls(ptcl2Index);
       int species2=Path.ParticleSpeciesNum(ptcl2);
       if (Interacting(species2,0) && Path.DoPtcl(ptcl2)
           && PathData.Mol(ptcl)!=PathData.Mol(ptcl2)){
+        //cerr << "LJ " << ptcl << " " << ptcl2 << endl;
         dVec r, unitr;
         double rmag;
         PathData.Path.DistDisp(slice, ptcl, ptcl2, rmag, r);
@@ -792,9 +836,11 @@ dVec MoleculeInteractionsClass::Force(int slice, int ptcl)
   if(Interacting(species1,1)){
     /// calculating charge-charge interactions
 
-    for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
+    for (int ptcl2Index=0; ptcl2Index<activePtcls.size(); ptcl2Index++){
+      int ptcl2 = activePtcls(ptcl2Index);
       int species2=Path.ParticleSpeciesNum(ptcl2);
       if (Interacting(species2,1) && Path.DoPtcl(ptcl2)){
+        //cerr << "QQ " << ptcl << " " << ptcl2 << endl;
         //	don't compute intramolecular interactions
         //  unless told to
         if(IntraMolecular || PathData.Mol(ptcl)!=PathData.Mol(ptcl2)){
@@ -808,8 +854,9 @@ dVec MoleculeInteractionsClass::Force(int slice, int ptcl)
           unitr[1] = r[1]/rmag;
           unitr[2] = r[2]/rmag;
           double coulomb;
-          coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
-            *PathData.Species(species2).pseudoCharge/(rmag*rmag);
+          coulomb = conversion * prefactor * PtclCharge(species1) * PtclCharge(species2) / (rmag*rmag);
+          //coulomb = conversion*prefactor*PathData.Species(species1).pseudoCharge
+          //  *PathData.Species(species2).pseudoCharge/(rmag*rmag);
           F[0] += coulomb*unitr[0];
           F[1] += coulomb*unitr[1];
           F[2] += coulomb*unitr[2];
@@ -817,7 +864,71 @@ dVec MoleculeInteractionsClass::Force(int slice, int ptcl)
       }
     }
   }
+  if(Interacting(species1,4)){
+    // force from harmonic potential
+  	double harmonic = 0.0;
+  	//double omega = 26; // ps^-1
+    double m_H2O = 0.0060537; // kcal/mol*ps^2 bohr^-2
+  	double R0 = 5.39; // bohr
+  	for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
+  		int species2=Path.ParticleSpeciesNum(ptcl2);
+  		if (Interacting(species2,4) && Path.DoPtcl(ptcl2)){
+        if(PathData.Mol(ptcl)!=PathData.Mol(ptcl2)){
+  		    dVec COMr;
+  			  double COMrmag;
+  			  PathData.Path.DistDisp(slice, ptcl, ptcl2, COMrmag, COMr);
+          dVec unitr;
+          unitr[0] = COMr[0]/COMrmag;
+          unitr[1] = COMr[1]/COMrmag;
+          unitr[2] = COMr[2]/COMrmag;
+  			  harmonic = -1 * conversion * m_H2O *omega*omega * (COMrmag - R0);
+  			  F[0] += harmonic * unitr[0];
+  			  F[1] += harmonic * unitr[1];
+  			  F[2] += harmonic * unitr[2];
+        }
+  		}
+  	}
+  }
+  if(Interacting(species1,5)){
+  	for (int ptcl2=0; ptcl2<PathData.Path.NumParticles(); ptcl2++){
+  		int species2=Path.ParticleSpeciesNum(ptcl2);
+  		if (Interacting(species2,5)){
+    //cerr << "Pair Potential ptcls " << Path.Species(species1).FirstPtcl << " to " << Path.Species(species1).LastPtcl << " activeP " << activeParticles << " DoPtcl " << Path.DoPtcl << endl;
+        if(ptcl != ptcl2 && Path.DoPtcl(ptcl2)) {
+          double rmag;
+          dVec r;
+          PathData.Path.DistDisp(slice, ptcl, ptcl2, rmag, r);
+          //cerr << ptcl << " " << ptcl2 << " " << slice << " " << rmag << endl;
+          double pair = 0.0;
+          if(rmag < pairCutoff) {
+            //cerr << "accessing " << species1 << " " << species2 << " " << rmag << endl;
+            pair = (*PairVTable(species1,species2)).Deriv(rmag);
+            //cerr << "  " << pair << endl;
+          }
+          dVec unitr;
+          unitr[0] = r[0]/rmag;
+          unitr[1] = r[1]/rmag;
+          unitr[2] = r[2]/rmag;
+          F[0] += pair*unitr[0];
+          F[1] += pair*unitr[1];
+          F[2] += pair*unitr[2];
+        }
+      }
+    }
+  }
+        //ofstream harm("harmonicForce.dat");
+        //double x = 2.0;
+        //double dx = 6.0/500;
+        //for (int i=0; i<500; i++) {
+        //  x += dx;
+  			//  harmonic = -1 * conversion * m_H2O *omega*omega * (x - R0);
+        //  harm << x << " " << harmonic << endl;
+        //}
+        //harm.close();
+        //cerr << "Done" << endl;
+        //exit(1);
 
+  //cerr << "Force " << ptcl << " " << activePtcls << " " << F << endl;
   return F;
 }
 

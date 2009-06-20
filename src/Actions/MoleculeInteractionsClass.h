@@ -36,6 +36,7 @@ class MoleculeInteractionsClass : public ActionBaseClass
 	Array<string, 1> QuadSpecies;
 	Array<string, 1> PairSpecies;
 	Array<string, 1> CoreSpecies;
+  Array<double,1> PtclCharge;
 	Array<bool,2> Updated;
 	Array<double,2> COMTable;
 	Array<dVec,2> COMVecs;
