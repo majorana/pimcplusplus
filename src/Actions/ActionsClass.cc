@@ -366,6 +366,8 @@ void ActionsClass::Read(IOSectionClass &in)
       newAction = new KineticRotorClass(PathData);
     } else if (type == "KineticVibration") {
       newAction = new KineticVibrationClass(PathData);
+    } else if (type == "KineticVibrationEigenFunction") {
+      newAction = new KineticVibrationEigenFunctionClass(PathData);
     } else if (type == "LongRangeCoulomb") {
       newAction = new LongRangeCoulombClass(PathData, PairMatrix, PairArray);
 //    } else if (type == "ReadFromFile") {

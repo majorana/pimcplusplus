@@ -47,5 +47,25 @@ public:
   KineticVibrationClass (PathDataClass &pathData);
 };
 
+class KineticVibrationEigenFunctionClass : public ActionBaseClass
+{
+  double lambda, R_OH_0, R_HH_0, omega_OH, omega_HH;
+  int maxH;
+public:
+  void Read (IOSectionClass &in);
+  double SingleAction (int slice1, int slice2, 
+		       const Array<int,1> &activeParticles, int level);
+  double SingleActionForcedTau (int slice1, int slice2,
+				const Array<int,1> &changedParticles, 
+				int level,
+				double forcedTau);
+  double d_dBeta (int slice1, int slice2, int level);
+  double d_dBetaForcedTau (int slice1, int slice2,
+			   int level,
+			   double forcedTau);
+  
+  string GetName();
+  KineticVibrationEigenFunctionClass (PathDataClass &pathData);
+};
 
 #endif
