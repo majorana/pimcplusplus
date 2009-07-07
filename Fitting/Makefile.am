@@ -21,7 +21,7 @@ cBNModel_SOURCES    = cBNModel.cc cBNModel.h Raman.h Raman.cc             \
                       DebyeModel.h DebyeModel.cc VinetEOS2.h
 MGFit_SOURCES       = MGFit.cc MieGruineisen.h DebyeModel.h DebyeModel.cc
 DatchiRamanModel_SOURCES = DatchiRamanModel.h DatchiRamanModel.cc
-GoncharovRamanModel_SOURCES = DatchiRamanModel.h DatchiRamanModelNoT.cc
+GoncharovRamanModel_SOURCES = GoncharovRamanModel.h GoncharovRamanModel.cc
 
 cBNModel_LDADD = libfitting.la ../MatrixOps/libmatops.la ../Splines/libspline.la ../IO/libIO.la $(LAPACK_LIBS) $(BLITZ_LIBS) $(HDF5_LIBS) $(GSL_LIBS) $(SPRNG2_LIBS) $(FLIBS)
 
