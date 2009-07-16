@@ -22,11 +22,18 @@
 
 class ReadPathClass : public MoveClass
 {
+  bool overrideTimeSliceCheck;
+  bool doAllConfigs;
+  int fileIndex, configIndex;
+  Array< Array<int, 1>, 1> configIDs;
+  Array<string,1> filenames;
 public:  
   int NumConfigs;
   int currConfig;
   void MakeMove();
   void Read(IOSectionClass &input);
+  void Init(string filename);
+  void Close();
   IOVarBase *IOVar;
   Array<int,1> ActiveParticles;
   ReadPathClass(PathDataClass &myPathData, IOSectionClass &io) :
