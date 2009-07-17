@@ -156,17 +156,18 @@ double MoleculeInteractionsClass::ComputeEnergy(int startSlice, int endSlice,
             if (rmag <= CUTOFF){
 							//cerr << "<"<<CUTOFF;
               double rinv = 1.0/rmag;
-              double sigR = PathData.Species(species1).Sigma*rinv;
+              double sigR = PtclSigma(species1)*rinv;
               double sigR6 = sigR*sigR*sigR*sigR*sigR*sigR;
 							double offset = 0.0;
 
 							if(with_truncations){
-  						  double sigma_over_cutoff = PathData.Species(species1).Sigma/CUTOFF;
+  						  double sigma_over_cutoff = PtclSigma(species1)/CUTOFF;
   						  offset = pow(sigma_over_cutoff,12) - pow(sigma_over_cutoff,6);
 							}
               //
 							//cerr << "; using offset " << offset << endl;
-	      			double lj = conversion*4*PathData.Species(species1).Epsilon*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
+	      			//double lj = conversion*4*PathData.Species(species1).Epsilon*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
+	      			double lj = conversion*4*PtclEpsilon(species1)*(sigR6*(sigR6-1) - offset); // this is in kcal/mol 
 							TotalLJ += lj;
 	      			TotalU += lj;
 
@@ -639,6 +640,26 @@ void MoleculeInteractionsClass::Read (IOSectionClass &in)
 		in.ReadVar("CoreSpecies",CoreSpecies);
 
 		cerr << "Read LJSpec " << LJSpecies << " and chargeSpec " << ChargeSpecies << " etc..." << endl;
+    PtclEpsilon.resize(PathData.NumSpecies());
+    PtclSigma.resize(PathData.NumSpecies());
+    for(int s=0; s<PathData.NumSpecies(); s++) {
+      PtclEpsilon(s) = PathData.Species(s).Epsilon;
+      PtclSigma(s) = PathData.Species(s).Sigma;
+    }
+    cerr << "Original Species LJ params:" << PtclEpsilon << PtclSigma << endl;
+    if(LJSpecies.size() > 0) {
+      Array<double,1> setEps, setSig;
+      assert(in.ReadVar("ActiveEpsilon",setEps));
+      assert(in.ReadVar("ActiveSigma",setSig));
+      int epsIndex = 0;
+		  for(int s=0; s<LJSpecies.size(); s++) {
+			  int myS = Path.SpeciesNum(LJSpecies(s));
+        PtclEpsilon(myS) = setEps(epsIndex);
+        PtclSigma(myS) = setSig(epsIndex);
+        epsIndex++;
+      }
+    }
+    cerr << "Assigned LJ Params for each species:" << PtclEpsilon << PtclSigma << endl;
     PtclCharge.resize(PathData.NumSpecies());
     for(int s=0; s<PathData.NumSpecies(); s++)
       PtclCharge(s) = PathData.Species(s).pseudoCharge;
@@ -823,10 +844,12 @@ dVec MoleculeInteractionsClass::Force(int slice, int ptcl, Array<int,1>& activeP
         unitr[1] = r[1]/rmag;
         unitr[2] = r[2]/rmag;
         double rinv = 1.0/rmag;
-        double sigR = PathData.Species(species1).Sigma*rinv;
+        //double sigR = PathData.Species(species1).Sigma*rinv;
+        double sigR = PtclSigma(species1)*rinv;
         double sigR6 = sigR*sigR*sigR*sigR*sigR*sigR;
         // this is in kcal/mol 
-        double ljmag = conversion*24*PathData.Species(species1).Epsilon*rinv*sigR6*(sigR6-1);
+        //double ljmag = conversion*24*PathData.Species(species1).Epsilon*rinv*sigR6*(sigR6-1);
+        double ljmag = conversion*24*PtclEpsilon(species1)*rinv*sigR6*(sigR6-1);
         F[0] += ljmag*unitr[0];
         F[1] += ljmag*unitr[1];
         F[2] += ljmag*unitr[2];

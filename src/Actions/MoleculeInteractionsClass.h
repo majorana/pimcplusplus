@@ -42,6 +42,8 @@ class MoleculeInteractionsClass : public ActionBaseClass
 	Array<dVec,2> COMVecs;
 	Array<double, 1> lambdas;
 	Array<double,1> PtclCharge;
+	Array<double,1> PtclEpsilon;
+	Array<double,1> PtclSigma;
 	int NumImages;
 	// parameters for ST2 modulation function
 	double RL, RU;
