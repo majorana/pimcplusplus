@@ -353,7 +353,7 @@ cBNModel::Write_nuPT_Table()
       E[i] = Raman.Energies[iV](i);
     spectrum.SetEnergies(E);
     spectrum.SetVolume(V);
-    for (double T=1.0; T <= 1001.0; T+=10.0) {
+    for (double T=1.0; T <= 2001.0; T+=10.0) {
       spectrum.SetTemp (T);
       double P = Static.Pressure(V) + Phonon.P(V,T);
       double nu = spectrum.MeanFrequency();

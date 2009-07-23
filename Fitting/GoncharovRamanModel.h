@@ -51,8 +51,7 @@ public:
     double b  =  b0 +  b1*T +  b2*T*T;
     double R  =  R0 +  R1*T +  R2*T*T;
     double nubar = nu0 + nu1*T + nu2*T*T;
-    
-    return nubar * pow(b*P/R + 1.0, -b);
+    return nubar * pow(b*P/R + 1.0, 1.0/b);
   }
 
   inline TinyVector<double,9> 
@@ -65,11 +64,15 @@ public:
     double b  =  b0 +  b1*T +  b2*T*T;
     double R  =  R0 +  R1*T +  R2*T*T;
     double nubar = nu0 + nu1*T + nu2*T*T;
-    double nu = nubar * pow(b*P/R + 1.0, -b);
+    double nu = nubar * pow(b*P/R + 1.0, 1.0/b);
 
-    double dnu_db = nu * (-log(b*P/R + 1.0) - 1.0/(R/(b*P) + 1.0));
-    double dnu_dR = nubar*b*b*P/(R*R) * pow(b*P/R + 1.0, -(b+1.0));
-    double dnu_dnubar = pow(b*P/R + 1.0, -b);
+    // cerr << "b  = " << b << endl;
+    // cerr << "R  = " << R << endl;
+    // cerr << "nu = " << nu << endl;
+
+    double dnu_db     = nu * (-1.0/(b*b) * log(b*P/R + 1.0) + (P/b)/(b*P+R));
+    double dnu_dR     = -nubar*P/(R*R) * pow(b*P/R + 1.0, (1.0/b-1.0));
+    double dnu_dnubar = pow(b*P/R + 1.0, 1.0/b);
     
     G[0] = dnu_db;
     G[1] = dnu_db*T;
@@ -84,15 +87,14 @@ public:
     G[8] = dnu_dnubar*T*T;
 
     GFD = Grad_FD(PT);
-    fprintf (stderr, "GFD = %16.12e %16.12e %12.12e\n", GFD[0], GFD[1], GFD[2]);
-    fprintf (stderr, "G   = %16.12e %16.12e %12.12e\n",   G[0],   G[1],   G[2]);
+    // fprintf (stderr, "GFD = %16.12e %16.12e %12.12e\n", GFD[0], GFD[1], GFD[2]);
+    // fprintf (stderr, "G   = %16.12e %16.12e %12.12e\n",   G[0],   G[1],   G[2]);
 
-    fprintf (stderr, "GFD = %16.12e %16.12e %12.12e\n", GFD[3], GFD[4], GFD[5]);
-    fprintf (stderr, "G   = %16.12e %16.12e %12.12e\n",   G[3],   G[4],   G[5]);
+    // fprintf (stderr, "GFD = %16.12e %16.12e %12.12e\n", GFD[3], GFD[4], GFD[5]);
+    // fprintf (stderr, "G   = %16.12e %16.12e %12.12e\n",   G[3],   G[4],   G[5]);
 
-    fprintf (stderr, "GFD = %16.12e %16.12e %12.12e\n", GFD[6], GFD[7], GFD[8]);
-    fprintf (stderr, "G   = %16.12e %16.12e %12.12e\n",   G[6],   G[7],   G[8]);
-
+    // fprintf (stderr, "GFD = %16.12e %16.12e %12.12e\n", GFD[6], GFD[7], GFD[8]);
+    // fprintf (stderr, "G   = %16.12e %16.12e %12.12e\n",   G[6],   G[7],   G[8]);
 
     return G;
   }
