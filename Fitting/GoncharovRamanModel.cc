@@ -84,7 +84,9 @@ void FitRamanError(string fname)
     
     model.SetParams(myparams);
     params = myparams;
+    cerr << "Before fitter.Fit.\n";
     fitter.Fit (PT, nuPert, sigma, params);
+    cerr << "After fitter.Fit.\n";
     model.SetParams(params);
     for (int iP=0; iP<=1000; iP++) {
       double P = (double)iP;
@@ -170,7 +172,9 @@ void FitRaman(string fname)
   DatchiModel.SetParams(Dparams);
   model.SetParams(myparams);
   params = myparams;
+  cerr << "Before fit\n";
   fitter.Fit (PT, nu, sigma, params);
+  cerr << "After fit\n";
   model.SetParams(params);
   fprintf (stderr, "b0     = %12.5e\n", params[0]);
   fprintf (stderr, "b1     = %12.5e\n", params[1]);
@@ -203,9 +207,11 @@ void FitRaman(string fname)
 
 main(int argc, char **argv)
 {
+  cerr << "Before Test.\n";
   TestGoncharovRaman();
+  cerr << "After Test.\n";
   if (argc > 1) {
-    FitRamanError(argv[1]);
+    //FitRamanError(argv[1]);
     FitRaman(argv[1]);
   }
 }

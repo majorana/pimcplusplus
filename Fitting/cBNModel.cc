@@ -107,7 +107,7 @@ cBNModel::SetPhonon (string fname)
 	  numFit = 0;
 	}
       }
-      if (t <= 3000.0 && t >= 0.0) {
+      if (t <= 10000.0 && t >= 0.0) {
 	T.push_back (t);
 	F_T.push_back (f);
 	U_T.push_back (u);
@@ -343,6 +343,8 @@ cBNModel::Write_nuPT_Table()
   const double c = 2.9979246e+10;
   const double hc = h*c;
 
+  double T_P0 = 1500.0;
+  double T_P900 = 10000.0;
 
   RamanSpectrum spectrum;
 
@@ -353,12 +355,15 @@ cBNModel::Write_nuPT_Table()
       E[i] = Raman.Energies[iV](i);
     spectrum.SetEnergies(E);
     spectrum.SetVolume(V);
-    for (double T=1.0; T <= 2001.0; T+=10.0) {
+    double Ps = Static.Pressure(V);
+    double x = Ps/900.0;
+    double Tmax = T_P0 + x*(T_P900 - T_P0);
+    for (double T=10.0; T <= Tmax; T+=10.0) {
       spectrum.SetTemp (T);
       double P = Static.Pressure(V) + Phonon.P(V,T);
       double nu = spectrum.MeanFrequency();
-      fprintf (fout, "%12.5f  %12.5f  %12.5f   %12.5f  %12.5f\n",
-	       V, T, P, nu, Raman.Sigma[iV](0)/hc);
+      fprintf (fout, "%12.5f  %12.5f  %12.5f   %12.5f  %12.5f %12.5f\n",
+	       V, T, P, nu, Raman.Sigma[iV](0)/hc, Phonon.P(V,T));
     }
   }
   fclose (fout);
