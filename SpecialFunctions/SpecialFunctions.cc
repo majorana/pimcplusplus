@@ -138,6 +138,21 @@ double il(int l, double z)
     }
 }
 
+double jl(int l, double z)
+{
+  gsl_sf_result result;
+  int ErrorCode;
+  ErrorCode = gsl_sf_bessel_jl_e (l, z, &result);
+  if (ErrorCode != GSL_SUCCESS)
+    {
+      fprintf (stderr, "Error in il.\n");
+      fprintf (stderr, "l = %d z = %1.8e ErrCode = %d\n",
+	       l, z, ErrorCode);
+      exit(1);
+    }
+  return (result.val*exp(fabs(z)));
+}
+
 
 
 /*double il_scaled(int l, double z)

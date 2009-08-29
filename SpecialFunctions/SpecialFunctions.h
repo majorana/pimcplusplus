@@ -36,4 +36,5 @@ double d2il_dz2_scaled (int l, double z);
 void Test_il_Derivs();
 void Test_il_series_large();
 void Test_il_series_small();
+double jl(int l, double z);
 #endif
