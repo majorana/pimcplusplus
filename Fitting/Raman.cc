@@ -6,13 +6,13 @@
 double
 VFitClass::GetGridStart()
 {
-  return Grid(0);
+  return xstart;
 }
 
 double
 VFitClass::GetGridEnd()
 {
-  return Grid(Grid.size()-1);
+  return xend;
 }
 
 double
@@ -85,8 +85,8 @@ VFitClass::Read (IOSectionClass &in)
   DoFit (E);
   cerr << "coefs = " << Vcoefs << endl;
 
-  xstart   = Grid(0);
-  xend     = Grid(N-1);
+  xstart   = 1.0*Grid(0);
+  xend     = 1.0*Grid(N-1);
   Vstart   = (*this)(xstart+1.0e-12);
   dVstart  = Deriv(xstart);
   // HACK HACK HACK
@@ -96,9 +96,9 @@ VFitClass::Read (IOSectionClass &in)
   dVend    = Deriv(xend);
   d2Vend   = Deriv2(xend);
 
-  string name = in.GetFileName();
-  FILE *fout = fopen ((name+".fit.dat").c_str(), "w");
-  for (double x=1.0*Grid(0); x<=1.0*Grid(N-1); x+=0.001)
+  fname = in.GetFileName();
+  FILE *fout = fopen ((fname+".fit.dat").c_str(), "w");
+  for (double x=2.2*xstart; x<=2.2*xend; x+=0.001)
     fprintf (fout, "%1.12f %1.12f\n", x, (*this)(x));
   fclose (fout);
 }
@@ -356,6 +356,15 @@ PhononClass::SolveError(int desiredNodes)
     vfit.DoFit (vfit.E);
   }
   E = Solve(desiredNodes);
+  ostringstream outname;
+  outname << Vfunction->fname << "_" << desiredNodes << ".dat";
+  FILE *fout = fopen (outname.str().c_str(), "w");
+  for (int i=0; i<IntegrationGrid.NumPoints; i++)
+    fprintf (fout, "%1.8e %1.8e %1.8e %1.8e\n",
+	     IntegrationGrid(i), u_du(i)[0], u_du(i)[1], E);
+  fclose(fout);
+
+
   return TinyVector<double,2> (E, sigma);
 }
 

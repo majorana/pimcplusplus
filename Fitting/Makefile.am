@@ -1,7 +1,7 @@
 AM_LDFLAGS = $(ALL_STATIC)
 
 check_PROGRAMS = TestFitting TestBirch
-bin_PROGRAMS   = LiFit VinetFit VinetFit2 BirchFit cBNModel MGFit DatchiRamanModel GoncharovRamanModel VinetFitP
+bin_PROGRAMS   = LiFit VinetFit VinetFit2 BirchFit cBNModel MGFit DatchiRamanModel GoncharovRamanModel VinetFitP MyRamanModel
 
 LDADD = libfitting.la ../MatrixOps/libmatops.la ../IO/libIO.la $(LAPACK_LIBS) $(BLITZ_LIBS) $(HDF5_LIBS) $(GSL_LIBS) $(SPRNG2_LIBS) $(FLIBS)
 
@@ -22,6 +22,7 @@ cBNModel_SOURCES    = cBNModel.cc cBNModel.h Raman.h Raman.cc             \
 MGFit_SOURCES       = MGFit.cc MieGruineisen.h DebyeModel.h DebyeModel.cc
 DatchiRamanModel_SOURCES = DatchiRamanModel.h DatchiRamanModel.cc
 GoncharovRamanModel_SOURCES = GoncharovRamanModel.h GoncharovRamanModel.cc
+MyRamanModel_SOURCES = MyRamanModel.h MyRamanModel.cc
 
 cBNModel_LDADD = libfitting.la ../MatrixOps/libmatops.la ../Splines/libspline.la ../IO/libIO.la $(LAPACK_LIBS) $(BLITZ_LIBS) $(HDF5_LIBS) $(GSL_LIBS) $(SPRNG2_LIBS) $(FLIBS)
 

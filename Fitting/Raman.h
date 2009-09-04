@@ -12,6 +12,7 @@ class Vfunc
 {
 public:
   bool UseHarmonic;
+  string fname;
   virtual double operator()(double x)=0;
   virtual void Read (IOSectionClass &in)=0;
   virtual double GetGridStart() = 0;
@@ -29,7 +30,6 @@ public:
   // Data from which the fit is derived.
   Array<double,1> Grid, E, Sigma;
   Array<double,2> F;
-
   void DoFit (Array<double,1> &Etry);
 
   TinyVector<double,4> Vcoefs;
@@ -241,7 +241,7 @@ public:
   }
 
 
-  RamanModel() : NumEnergies(12), NumCoefs(3), Random(Comm)
+  RamanModel() : NumEnergies(11), NumCoefs(3), Random(Comm)
   {
     Random.Init();
   }

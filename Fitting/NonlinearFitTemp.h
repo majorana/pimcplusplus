@@ -50,7 +50,7 @@ NonlinearFitClass<M,ModelType,ArgType>::Chi2
   assert (sigma.size() == N);
   Model.SetParams(params);
 
-  double chi2 = 0;
+  double chi2 = 0.0;
   for (int i=0; i<N; i++) {
     double val = Model (x(i));
 //     cerr << "val = " << val << endl; 
@@ -58,6 +58,7 @@ NonlinearFitClass<M,ModelType,ArgType>::Chi2
 //     cerr << "sigma = " << sigma(i) << endl;
     chi2 += (val-y(i))*(val-y(i))/(sigma(i)*sigma(i));
   }
+  cerr << "chi2 = " << chi2 << endl;
   return chi2;
 }
 
@@ -140,13 +141,17 @@ NonlinearFitClass<M,ModelType,ArgType>::Fit
  const Array<double,1> &sigma, TinyVector<double,M> &params)
 {
   double chiNow = Chi2 (x, y, sigma, params);
-  double lambda = 0.01;
+  double lambda = 0.1;
   
   bool done = false;
   int iter = 1;
   int numSmallDecrease = 0;
   while (!done) {
-//     cerr << "Iteration " << iter << ":  Chi2 = " << chiNow << endl;
+     cerr << "Iteration " << iter << ":  Chi2 = " << chiNow << endl;
+     fprintf (stderr, "Parameters:\n  ");
+     for (int i=0; i<M; i++)
+       fprintf (stderr, "  %10.5e", params[i]);
+     fprintf (stderr, "\n");
 //    cerr << "params = " << params << endl;
 //     cerr << "lambda = " << lambda << endl;
 

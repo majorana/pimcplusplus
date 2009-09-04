@@ -264,8 +264,6 @@ double
 cBNModel::MeanFrequency_PT(double P, double T)
 {
   double V = FindV(P, T);
-  // fprintf (stderr, "P = %1.2f  T = %1.2f  V = %1.4f\n",
-  // 	   P, T, V);
   return Raman.MeanFrequency (V,T);
 }
 
@@ -323,9 +321,9 @@ CalcProperties(cBNModel &model)
   fclose(fout);
 
   fout = fopen ("MeanFrequency_T.dat", "w");
-  for (double T=0.0; T<2000.0; T+= 1.0) {
+  for (double T=0.0; T<10000.0; T+= 1.0) {
     fprintf (fout, "%12.1f ", T);
-    for (double P=0; P<100.0; P+=5.0) 
+    for (double P=0; P<=900.0; P+=20.0) 
       fprintf (fout, "%11.6f ", model.MeanFrequency_PT(P, T));
     fprintf (fout, "\n");
   }
@@ -343,10 +341,14 @@ cBNModel::Write_nuPT_Table()
   const double c = 2.9979246e+10;
   const double hc = h*c;
 
-  double T_P0 = 1500.0;
+  double T_P0 = 2000.0;
   double T_P900 = 10000.0;
+  // double T_P0   = 2000.0;
+  // double T_P900 = 2000.0;
 
   RamanSpectrum spectrum;
+
+
 
   for (int iV=0; iV < Raman.Volume.size(); iV++) {
     double V = Raman.Volume[iV];
@@ -358,13 +360,22 @@ cBNModel::Write_nuPT_Table()
     double Ps = Static.Pressure(V);
     double x = Ps/900.0;
     double Tmax = T_P0 + x*(T_P900 - T_P0);
-    for (double T=10.0; T <= Tmax; T+=10.0) {
+    for (int iT=0; iT<100; iT++) {
+      double x = (double)iT/99.0;
+      double T = 10.0*(1.0-x) + x*Tmax;
       spectrum.SetTemp (T);
       double P = Static.Pressure(V) + Phonon.P(V,T);
       double nu = spectrum.MeanFrequency();
       fprintf (fout, "%12.5f  %12.5f  %12.5f   %12.5f  %12.5f %12.5f\n",
-	       V, T, P, nu, Raman.Sigma[iV](0)/hc, Phonon.P(V,T));
+    	       V, T, P, nu, Raman.Sigma[iV](0)/hc, Phonon.P(V,T));
     }
+    // for (double T=10.0; T <= Tmax; T+=10.0) {
+    //   spectrum.SetTemp (T);
+    //   double P = Static.Pressure(V) + Phonon.P(V,T);
+    //   double nu = spectrum.MeanFrequency();
+    //   fprintf (fout, "%12.5f  %12.5f  %12.5f   %12.5f  %12.5f %12.5f\n",
+    // 	       V, T, P, nu, Raman.Sigma[iV](0)/hc, Phonon.P(V,T));
+    // }
   }
   fclose (fout);
 }
