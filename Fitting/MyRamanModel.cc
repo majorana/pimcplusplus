@@ -62,16 +62,16 @@ void FitRamanError(string fname)
     Array<double,1> nuPert(nu.size());
     for (int i=0; i<nu.size(); i++)
       nuPert(i) = nu(i) + rand.LocalGaussian(sigma(i));
-
-    TinyVector<double,7> myparams (2.995, 1e-3, 1e-4,
+    
+    TinyVector<double,9> myparams (2.995, 1e-3, 1e-4,
 				   325.6, -1.11e-4, -8.9e-8, 
 				   1062.3, -100.0, 4000.0);
     
     model.SetParams(myparams);
     
-    NonlinearFitClass<7, MyRamanModel, TinyVector<double,2> > fitter(model);
+    NonlinearFitClass<9, MyRamanModel, TinyVector<double,2> > fitter(model);
     TinyVector<double,9> Goncharov_params;
-    TinyVector<double,7> params;
+    TinyVector<double,9> params;
     
     model.SetParams(myparams);
     params = myparams;
@@ -111,18 +111,18 @@ void FitRaman(string fname)
   ifstream fin;
   fin.open(fname.c_str());
   vector<double> Pvec, Tvec, nuvec, sigmavec;
-
-
+  
+  
   while (!fin.eof()) {
     char line[500];
     fin.getline(line,500);
     if (line[0] == '#') continue;
-
+    
     istrstream sin(line);
     double V, T, P, nu, sigma;
     sin >> V >> T >> P >> nu >> sigma;
     const double Timport = 1000.0;
-    if ((T < 5000.0 && P > -10.0)) {
+    if (T < 8000.0 && P > -10.0) {
       Pvec.push_back(P);
       Tvec.push_back(T);
       nuvec.push_back(nu);
@@ -146,9 +146,22 @@ void FitRaman(string fname)
   TinyVector<double,9> Dparams (1.9597, 0.0, 0.0,
 				452.63, -0.035640, 0.0,
 				1058.3, -0.0100, -1.42e-5);
-  TinyVector<double,7> myparams (2.874,
-				 395, 200.0, 200.0,   //2771.1,  96.26,
-				 1073.58, -154.58, 1400.0);
+  // TinyVector<double,9> myparams (2.874,
+  // 				 395, 200.0, 200.0,   //2771.1,  96.26,
+  // 				 1073.58, -154.58, 1400.0, -300.0, 2800.0);
+  TinyVector<double,9> myparams (3.01257e+00,
+				 3.67975e+02,
+				 -9.99484e+58,
+				 7.27727e+01,
+				 1.06604e+03,
+				 -1.44138e+02,
+				 1.92935e+03,
+				 -5.55005e+01,
+				 1.79345e+03 );
+
+
+
+
 
   GoncharovModel.SetParams(Gparams);
 
@@ -159,9 +172,9 @@ void FitRaman(string fname)
   }
   fclose(fcheck);
     
-  NonlinearFitClass<7, MyRamanModel, TinyVector<double,2> > fitter(model);
+  NonlinearFitClass<9, MyRamanModel, TinyVector<double,2> > fitter(model);
   TinyVector<double,9>  Goncharov_params;
-  TinyVector<double,7> params;
+  TinyVector<double,9> params;
 
   GoncharovModel.SetParams(Gparams);
   DatchiModel.SetParams(Dparams);
@@ -180,6 +193,8 @@ void FitRaman(string fname)
   fprintf (stderr, "nu0    = %12.5e\n", params[4]);
   fprintf (stderr, "nu1    = %12.5e\n", params[5]);
   fprintf (stderr, "nu2    = %12.5e\n", params[6]);
+  fprintf (stderr, "nu3    = %12.5e\n", params[7]);
+  fprintf (stderr, "nu4    = %12.5e\n", params[8]);
 
   FILE *fout = fopen ("AllRamanModelsNew.dat", "w");
   
@@ -198,10 +213,108 @@ void FitRaman(string fname)
   cerr << "params = " << params << endl;
 }
 
+TinyVector<double,3> FitRoomTemp()
+{
+  ifstream fin;
+  fin.open("nu_T300.dat");
+  vector<double> Pvec, Tvec, nuvec, sigmavec;
+
+  while (!fin.eof()) {
+    char line[500];
+    fin.getline(line,500);
+    if (line[0] == '#') continue;
+
+    istrstream sin(line);
+    double V, T, P, nu, sigma;
+    sin >> V >> T >> P >> nu >> sigma;
+    const double Timport = 1000.0;
+    Pvec.push_back(P);
+    Tvec.push_back(T);
+    nuvec.push_back(nu);
+    sigmavec.push_back(sigma);
+  }
+  fin.close();
+  int N = Pvec.size();
+  Array<double,1> nu(N), sigma(N);
+  Array<TinyVector<double,2>,1> PT(N);
+  for (int i=0; i<N; i++) {
+    nu(i) = nuvec[i];
+    sigma(i) = sigmavec[i];
+    PT(i) = TinyVector<double,2>(Pvec[i],Tvec[i]);
+  }
+
+  TinyVector<double,3> myparams (3.01257e+00,
+				 3.67975e+02,
+				 1.06604e+03);
+  TinyVector<double,3> params;
+  RoomTempRamanModel model;
+  NonlinearFitClass<3, RoomTempRamanModel, TinyVector<double,2> > fitter(model);
+  model.SetParams(myparams);
+  params = myparams;
+  fitter.Fit (PT, nu, sigma, params);
+  model.SetParams(params);
+  fprintf (stderr, "b0     = %12.5e\n", params[0]);
+  fprintf (stderr, "R0     = %12.5e\n", params[1]);
+  fprintf (stderr, "nu0    = %12.5e\n", params[2]);
+
+  return params;
+}
+
+
+void FitHighTemp(TinyVector<double,3> roomT)
+{
+  ifstream fin;
+  fin.open("nu_PT.dat");
+  vector<double> Pvec, Tvec, nuvec, sigmavec;
+
+  while (!fin.eof()) {
+    char line[500];
+    fin.getline(line,500);
+    if (line[0] == '#') continue;
+
+    istrstream sin(line);
+    double V, T, P, nu, sigma;
+    sin >> V >> T >> P >> nu >> sigma;
+    const double Timport = 1000.0;
+    if (P > -10.0) {
+      Pvec.push_back(P);
+      Tvec.push_back(T);
+      nuvec.push_back(nu);
+      sigmavec.push_back(sigma);
+    }
+  }
+  fin.close();
+  int N = Pvec.size();
+  Array<double,1> nu(N), sigma(N);
+  Array<TinyVector<double,2>,1> PT(N);
+  for (int i=0; i<N; i++) {
+    nu(i) = nuvec[i];
+    sigma(i) = sigmavec[i];
+    PT(i) = TinyVector<double,2>(Pvec[i],Tvec[i]);
+  }
+
+  TinyVector<double,2> myparams (-166.0, 1500.0);
+  TinyVector<double,2> params;
+  HighTempRamanModel model;
+  NonlinearFitClass<2, HighTempRamanModel, TinyVector<double,2> > fitter(model);
+  model.SetRoomTemp(roomT);
+  model.SetParams(myparams);
+  params = myparams;
+  fitter.Fit (PT, nu, sigma, params);
+  model.SetParams(params);
+  fprintf (stderr, "b0     = %12.5e\n",  roomT[0]);
+  fprintf (stderr, "R0     = %12.5e\n",  roomT[1]);
+  fprintf (stderr, "nu0    = %12.5e\n",  roomT[2]);
+  fprintf (stderr, "nu1    = %12.5e\n", params[0]);
+  fprintf (stderr, "nu2    = %12.5e\n", params[1]);
+}
 
 
 main(int argc, char **argv)
 {
+  TinyVector<double,3> roomT = FitRoomTemp();
+  FitHighTemp(roomT);
+
   if (argc > 1) {
     //FitRamanError(argv[1]);
     FitRaman(argv[1]);

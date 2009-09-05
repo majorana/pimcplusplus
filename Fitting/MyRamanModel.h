@@ -3,12 +3,145 @@
 
 #include "../Blitz.h"
 
+class RoomTempRamanModel
+{
+private:
+  double b0, R0, nu0;
+
+public:
+  inline void SetParams (TinyVector<double,3> params)
+  {
+    b0    = params[0];  
+    R0    = params[1];  
+    nu0   = params[2];  
+  }
+
+  inline void GetParams (TinyVector<double,3> &params)
+  {
+    params[0] = b0 ;  
+    params[1] = R0 ;  
+    params[2] = nu0;  
+  }
+
+  
+  inline TinyVector<double,3> 
+  Grad_FD(TinyVector<double,2> PT)
+  {
+    TinyVector<double,3> save, grad, plus, minus;
+    GetParams(save);
+    for (int i=0; i<3; i++) {
+      double eps = max(1.0e-6 * fabs(save[i]), 1.0e-10);
+      plus = minus = save;
+      plus[i]  = save[i] + eps;
+      minus[i] = save[i] - eps;
+      SetParams(plus);
+      double nu_plus  = (*this)(PT);
+      SetParams(minus);
+      double nu_minus = (*this)(PT);
+      grad[i] = (nu_plus - nu_minus) / (2.0*eps);
+    }
+    SetParams(save);
+    return grad;
+  }
+  
+  inline double operator() (TinyVector<double,2> PT)
+  {
+    double P = PT[0];
+    double T = PT[1];
+
+    return nu0 * pow(b0*P/R0 + 1.0, 1.0/b0);    
+  }
+
+  inline TinyVector<double,3> 
+  Grad(TinyVector<double,2> PT)
+  {
+    TinyVector<double,3> G, GFD;
+    GFD = Grad_FD(PT);
+    return GFD;
+  }
+};
+
+class HighTempRamanModel
+{
+private:
+  double b0, R0, nu0;
+  double R1, nu1, nu1_P;
+  double R2, nu2, nu2_P;
+  
+public:
+  inline void SetRoomTemp (TinyVector<double,3> params)
+  {
+    b0  = params[0];
+    R0  = params[1];
+    nu0 = params[2];
+  }
+
+  inline void SetParams (TinyVector<double,4> params)
+  {
+    nu1   = params[0];  
+    nu2   = params[1];  
+    nu1_P = params[2];
+    nu2_P = params[3];
+  }
+
+  inline void GetParams (TinyVector<double,4> &params)
+  {
+    params[0] = nu1;  
+    params[1] = nu2;  
+    params[2] = nu1_P;  
+    params[3] = nu2_P;  
+  }
+
+  
+  inline TinyVector<double,4> 
+  Grad_FD(TinyVector<double,2> PT)
+  {
+    TinyVector<double,4> save, grad, plus, minus;
+    GetParams(save);
+    for (int i=0; i<4; i++) {
+      double eps = max(1.0e-6 * fabs(save[i]), 1.0e-10);
+      plus = minus = save;
+      plus[i]  = save[i] + eps;
+      minus[i] = save[i] - eps;
+      SetParams(plus);
+      double nu_plus  = (*this)(PT);
+      SetParams(minus);
+      double nu_minus = (*this)(PT);
+      grad[i] = (nu_plus - nu_minus) / (2.0*eps);
+    }
+    SetParams(save);
+    return grad;
+  }
+  
+  inline double operator() (TinyVector<double,2> PT)
+  {
+    double P = PT[0];
+    double T = PT[1];
+    
+    double nu_0 = nu0 * pow(b0*P/R0 + 1.0, 1.0/b0);
+    double nu_1 = nu1 * pow(b0*P/R0 + 1.0, 1.0/b0);
+    double nu_2 = nu2 * pow(b0*P/R0 + 1.0, 1.0/b0);
+    return nu_0 + nu_1*exp(-nu_2/T) - nu_1*exp(-nu_2/300.0);
+  }
+
+  inline TinyVector<double,2> 
+  Grad(TinyVector<double,2> PT)
+  {
+    TinyVector<double,2> G, GFD;
+    GFD = Grad_FD(PT);
+    return GFD;
+  }
+};
+
+
+
+
 class MyRamanModel
 {
 private:
-  double b0, b1, b2, R0, R1, R2, nu0, nu1, nu2;
+  double b0, b1, b2, R0, R1, R2, nu0, nu1, nu2, nu3, nu4;
 public:
-  inline void SetParams (TinyVector<double,7> params)
+  inline void SetParams (TinyVector<double,9> params)
   {
     b0    = params[0];  
     R0    = params[1];  
@@ -17,9 +150,11 @@ public:
     nu0   = params[4];  
     nu1   = params[5];  
     nu2   = params[6];
+    nu3   = params[7];  
+    nu4   = params[8];
   }
 
-  inline void GetParams (TinyVector<double,7> &params)
+  inline void GetParams (TinyVector<double,9> &params)
   {
     params[0] = b0 ;  
     params[1] = R0 ;  
@@ -28,15 +163,18 @@ public:
     params[4] = nu0;  
     params[5] = nu1;  
     params[6] = nu2;
+    params[7] = nu3;  
+    params[8] = nu4;
+
   }
 
   
-  inline TinyVector<double,7> 
+  inline TinyVector<double,9> 
   Grad_FD(TinyVector<double,2> PT)
   {
-    TinyVector<double,7> save, grad, plus, minus;
+    TinyVector<double,9> save, grad, plus, minus;
     GetParams(save);
-    for (int i=0; i<7; i++) {
+    for (int i=0; i<9; i++) {
       double eps = max(1.0e-6 * fabs(save[i]), 1.0e-10);
       plus = minus = save;
       plus[i]  = save[i] + eps;
@@ -59,8 +197,11 @@ public:
     double nu_0 = nu0 * pow(b0*P/R0 + 1.0, 1.0/b0);    
     double nu_1 = nu1 * pow(b0*P/R1 + 1.0, 1.0/b0);
     double nu_2 = nu2 * pow(b0*P/R2 + 1.0, 1.0/b0);
+    double nu_3 = nu3 * pow(b0*P/R1 + 1.0, 1.0/b0);
+    double nu_4 = nu4 * pow(b0*P/R2 + 1.0, 1.0/b0);
 
-    return nu_0 + nu_1*exp(-nu_2/T);
+
+    return nu_0 + nu_1*exp(-nu_2/T) + nu_3*exp(-nu4/T);
 
     // double b  =  b0 +  b1*T + b2*T*T;
     // double R  =  R0 +  R1*exp(-R2/T);
@@ -68,10 +209,10 @@ public:
     // return nubar * pow(b*P/R + 1.0, 1.0/b);
   }
 
-  inline TinyVector<double,7> 
+  inline TinyVector<double,9> 
   Grad(TinyVector<double,2> PT)
   {
-    TinyVector<double,7> G, GFD;
+    TinyVector<double,9> G, GFD;
     double P = PT[0];
     double T = PT[1];
 

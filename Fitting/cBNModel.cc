@@ -348,7 +348,8 @@ cBNModel::Write_nuPT_Table()
 
   RamanSpectrum spectrum;
 
-
+  FILE *f300 = fopen ("nu_T300.dat", "w");
+fprintf (f300, "# Volume      Temperature   Pressure      nu_TO    sigam_nu\n");
 
   for (int iV=0; iV < Raman.Volume.size(); iV++) {
     double V = Raman.Volume[iV];
@@ -360,6 +361,13 @@ cBNModel::Write_nuPT_Table()
     double Ps = Static.Pressure(V);
     double x = Ps/900.0;
     double Tmax = T_P0 + x*(T_P900 - T_P0);
+    
+
+    spectrum.SetTemp (300.0);
+    double P300 = Static.Pressure(V) + Phonon.P(V,300.0);
+    double nu300 = spectrum.MeanFrequency();
+    fprintf (f300, "%12.5f  %12.5f  %12.5f   %12.5f  %12.5f %12.5f\n",
+	     V, 300.0, P300, nu300, Raman.Sigma[iV](0)/hc, Phonon.P(V,300.0));
     for (int iT=0; iT<100; iT++) {
       double x = (double)iT/99.0;
       double T = 10.0*(1.0-x) + x*Tmax;
@@ -378,6 +386,7 @@ cBNModel::Write_nuPT_Table()
     // }
   }
   fclose (fout);
+  fclose (f300);
 }
 
 
