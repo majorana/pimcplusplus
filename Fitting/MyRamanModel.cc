@@ -63,8 +63,8 @@ void FitRamanError(string fname)
     for (int i=0; i<nu.size(); i++)
       nuPert(i) = nu(i) + rand.LocalGaussian(sigma(i));
 
-    TinyVector<double,7> myparams (2.995, //-1.75e-4, -8.55e-8, 
-				   325.6, -1.11e-2, -8.9e-6, 
+    TinyVector<double,7> myparams (2.995, 1e-3, 1e-4,
+				   325.6, -1.11e-4, -8.9e-8, 
 				   1062.3, -100.0, 4000.0);
     
     model.SetParams(myparams);
@@ -121,6 +121,7 @@ void FitRaman(string fname)
     istrstream sin(line);
     double V, T, P, nu, sigma;
     sin >> V >> T >> P >> nu >> sigma;
+    const double Timport = 1000.0;
     if ((T < 5000.0 && P > -10.0)) {
       Pvec.push_back(P);
       Tvec.push_back(T);
@@ -145,9 +146,9 @@ void FitRaman(string fname)
   TinyVector<double,9> Dparams (1.9597, 0.0, 0.0,
 				452.63, -0.035640, 0.0,
 				1058.3, -0.0100, -1.42e-5);
-  TinyVector<double,7> myparams (3.00257, //3.00257, 3.00256,
-				 358.0, 358.0, 358.0,
-				 1062.3, -240.0, 2000.0);
+  TinyVector<double,7> myparams (2.874,
+				 395, 200.0, 200.0,   //2771.1,  96.26,
+				 1073.58, -154.58, 1400.0);
 
   GoncharovModel.SetParams(Gparams);
 
@@ -169,7 +170,7 @@ void FitRaman(string fname)
   fitter.Fit (PT, nu, sigma, params);
   model.SetParams(params);
   fprintf (stderr, "b0     = %12.5e\n", params[0]);
-  // fprintf (stderr, "b1     = %12.5e\n", params[1]);
+  //  fprintf (stderr, "b1     = %12.5e\n", params[1]);
   // fprintf (stderr, "b2     = %12.5e\n", params[2]);
 
   fprintf (stderr, "R0     = %12.5e\n", params[1]);

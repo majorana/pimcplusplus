@@ -12,7 +12,7 @@ public:
   {
     b0    = params[0];  
     R0    = params[1];  
-    R1    = params[2];  
+    R1    = params[2];
     R2    = params[3];  
     nu0   = params[4];  
     nu1   = params[5];  
@@ -56,9 +56,9 @@ public:
     double P = PT[0];
     double T = PT[1];
 
-    double nu_0 = nu0 * pow(b0*P/(R0) + 1.0, 1.0/(b0));    
-    double nu_1 = nu1 * pow(b0*P/(R1) + 1.0, 1.0/(b0));
-    double nu_2 = nu2 * pow(b0*P/(R2) + 1.0, 1.0/(b0));
+    double nu_0 = nu0 * pow(b0*P/R0 + 1.0, 1.0/b0);    
+    double nu_1 = nu1 * pow(b0*P/R1 + 1.0, 1.0/b0);
+    double nu_2 = nu2 * pow(b0*P/R2 + 1.0, 1.0/b0);
 
     return nu_0 + nu_1*exp(-nu_2/T);
 
@@ -125,7 +125,7 @@ public:
     // fprintf (stderr, "nu2    = %12.5e\n\n", nu2);
     
 
-     GFD = Grad_FD(PT);
+    GFD = Grad_FD(PT);
     // fprintf (stderr, "\nGFD = %16.12e %16.12e %12.12e\n", GFD[0], GFD[1], GFD[2]);
     // fprintf (stderr, "G   = %16.12e %16.12e %12.12e\n",   G[0],   G[1],   G[2]);
 
