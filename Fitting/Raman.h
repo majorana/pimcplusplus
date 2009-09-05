@@ -197,6 +197,7 @@ class RamanModel
 {
 private:
   RamanSpectrum Spectrum;
+  const double kB, h, c;
   const int NumEnergies, NumCoefs;
   RandomClass Random;
   CommunicatorClass Comm;
@@ -241,7 +242,8 @@ public:
   }
 
 
-  RamanModel() : NumEnergies(11), NumCoefs(3), Random(Comm)
+  RamanModel() : NumEnergies(11), NumCoefs(3), Random(Comm),
+		 kB(3.1668152e-06), c(2.9979246e+10), h(1.5198298e-16) 
   {
     Random.Init();
   }

@@ -267,6 +267,10 @@ void FitHighTemp(TinyVector<double,3> roomT)
   fin.open("nu_PT.dat");
   vector<double> Pvec, Tvec, nuvec, sigmavec;
 
+  RoomTempRamanModel RT;
+  RT.SetParams(roomT);
+
+  double nu10;
   while (!fin.eof()) {
     char line[500];
     fin.getline(line,500);
@@ -276,6 +280,8 @@ void FitHighTemp(TinyVector<double,3> roomT)
     double V, T, P, nu, sigma;
     sin >> V >> T >> P >> nu >> sigma;
     const double Timport = 1000.0;
+    if (fabs(T-10.0) < 0.001)
+      nu10 = nu;
     if (P > -10.0) {
       Pvec.push_back(P);
       Tvec.push_back(T);
@@ -293,10 +299,10 @@ void FitHighTemp(TinyVector<double,3> roomT)
     PT(i) = TinyVector<double,2>(Pvec[i],Tvec[i]);
   }
 
-  TinyVector<double,2> myparams (-166.0, 1500.0);
-  TinyVector<double,2> params;
+  TinyVector<double,4> myparams (-1.66873e+02, 1.58037e+03, 3.06830e+03, 1.12348e+02);
+  TinyVector<double,4> params;
   HighTempRamanModel model;
-  NonlinearFitClass<2, HighTempRamanModel, TinyVector<double,2> > fitter(model);
+  NonlinearFitClass<4, HighTempRamanModel, TinyVector<double,2> > fitter(model);
   model.SetRoomTemp(roomT);
   model.SetParams(myparams);
   params = myparams;
@@ -307,6 +313,11 @@ void FitHighTemp(TinyVector<double,3> roomT)
   fprintf (stderr, "nu0    = %12.5e\n",  roomT[2]);
   fprintf (stderr, "nu1    = %12.5e\n", params[0]);
   fprintf (stderr, "nu2    = %12.5e\n", params[1]);
+  fprintf (stderr, "R1     = %12.5e\n", params[2]);
+  fprintf (stderr, "R2     = %12.5e\n", params[3]);
+  // fprintf (stderr, "nu2_P  = %12.5e\n", params[3]);
+  // fprintf (stderr, "nu1_P2 = %12.5e\n", params[4]);
+  // fprintf (stderr, "nu2_P2 = %12.5e\n", params[5]);
 }
 
 

@@ -381,6 +381,9 @@ RamanModel::AddVolume(string fname)
   fprintf (stderr, "Adding volume %1.6f to phonon database.\n", V);
   phonon.Read(in);
 
+  string freqName = fname+".freq.dat";
+  FILE *fout = fopen (freqName.c_str(), "w");
+
   Array<double,1> E(NumEnergies), sigma(NumEnergies);
   TinyVector<double,2> E_sigma;
   for (int i=0; i<NumEnergies; i++) {
@@ -388,6 +391,12 @@ RamanModel::AddVolume(string fname)
     E(i)     = E_sigma[0];
     sigma(i) = E_sigma[1];
   }
+  for (int i=1; i<NumEnergies; i++) 
+    fprintf (fout, "%12.5f %12.5f %12.5f\n",
+	     (E(i)-E(0))/kB, (E(i) - E(i-1))/(h*c), 
+	     sigma(i)/(h*c));
+  fclose(fout);
+
   Energies.push_back(E);
   Sigma.push_back(sigma);
 }

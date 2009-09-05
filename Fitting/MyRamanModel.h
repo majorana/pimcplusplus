@@ -65,8 +65,8 @@ class HighTempRamanModel
 {
 private:
   double b0, R0, nu0;
-  double R1, nu1, nu1_P;
-  double R2, nu2, nu2_P;
+  double b1, R1, nu1, nu1_P, nu1_P2;
+  double b2, R2, nu2, nu2_P, nu2_P2;
   
 public:
   inline void SetRoomTemp (TinyVector<double,3> params)
@@ -78,18 +78,18 @@ public:
 
   inline void SetParams (TinyVector<double,4> params)
   {
-    nu1   = params[0];  
-    nu2   = params[1];  
-    nu1_P = params[2];
-    nu2_P = params[3];
+    nu1    = params[0];  
+    nu2    = params[1];
+    R1     = params[2];
+    R2     = params[3];
   }
 
   inline void GetParams (TinyVector<double,4> &params)
   {
     params[0] = nu1;  
     params[1] = nu2;  
-    params[2] = nu1_P;  
-    params[3] = nu2_P;  
+    params[2] = R1;
+    params[3] = R2;
   }
 
   
@@ -98,7 +98,7 @@ public:
   {
     TinyVector<double,4> save, grad, plus, minus;
     GetParams(save);
-    for (int i=0; i<4; i++) {
+    for (int i=0; i<3; i++) {
       double eps = max(1.0e-6 * fabs(save[i]), 1.0e-10);
       plus = minus = save;
       plus[i]  = save[i] + eps;
@@ -119,15 +119,15 @@ public:
     double T = PT[1];
     
     double nu_0 = nu0 * pow(b0*P/R0 + 1.0, 1.0/b0);
-    double nu_1 = nu1 * pow(b0*P/R0 + 1.0, 1.0/b0);
-    double nu_2 = nu2 * pow(b0*P/R0 + 1.0, 1.0/b0);
+    double nu_1 = nu1 * pow(b0*P/R1 + 1.0, 1.0/b0);
+    double nu_2 = nu2 * pow(b0*P/R2 + 1.0, 1.0/b0);
     return nu_0 + nu_1*exp(-nu_2/T) - nu_1*exp(-nu_2/300.0);
   }
 
-  inline TinyVector<double,2> 
+  inline TinyVector<double,4> 
   Grad(TinyVector<double,2> PT)
   {
-    TinyVector<double,2> G, GFD;
+    TinyVector<double,4> G, GFD;
     GFD = Grad_FD(PT);
     return GFD;
   }
