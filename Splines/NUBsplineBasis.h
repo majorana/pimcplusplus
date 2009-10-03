@@ -480,7 +480,7 @@ public:
   inline void operator() (int i, TinyVector<complex<double>,4>& bfuncs,
 			  TinyVector<complex<double>,4> &dbfuncs,
 			  TinyVector<complex<double>,4> &d2bfuncs) const;
-  NUBsplineBasis();
+  inline NUBsplineBasis();
 };
 
 #ifdef __SSE3__

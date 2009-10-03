@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <cstdlib>
 
 typedef enum {PERIODIC, FIXED_FIRST, FIXED_SECOND, FLAT, NATURAL} BCType;
 

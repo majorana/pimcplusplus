@@ -20,6 +20,7 @@
 #include "../DFT/Functionals.h"
 #include "../Ewald/OptimizedBreakup.h"
 #include "../Integration/GKIntegration.h"
+#include <algorithm>
 
 void
 MPISystemClass::InitLDA()

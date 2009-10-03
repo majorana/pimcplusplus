@@ -25,11 +25,11 @@ public:
   double dP_dT (double V, double T);
   double dP_dT_FD (double V, double T);
   
-  void FitF (int vorder, int vorder,
+  void FitF (int vorder, int Torder,
 	     Array<double,1> &F,
 	     Array<double,1> &V,
 	     Array<double,1> &T);
-  void FitU (int vorder, int vorder,
+  void FitU (int vorder, int Torder,
 	     Array<double,1> &U,
 	     Array<double,1> &V,
 	     Array<double,1> &T);
