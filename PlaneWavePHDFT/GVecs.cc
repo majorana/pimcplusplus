@@ -305,6 +305,10 @@ void GVecsClass::Set (Mat3 lattice, Vec3 kVec, double kcut, Int3 boxSize)
 	vec.M[2] = iz;
 	vec.I[2] = (iz+Nz)%Nz;
 	vec.G2 = dot (vec.G,vec.G);
+	assert (vec.I[0] >= 0);
+	assert (vec.I[1] >= 0);
+	assert (vec.I[2] >= 0);
+
 	if (dot(vec.G+kVec,vec.G+kVec) < (kcut*kcut))
 	  vecs.push_back(vec);
       }
