@@ -198,7 +198,7 @@ namespace IO {
     TinyVector<hsize_t, RANK> h5Dims, h5MaxDims;
     h5Dims = val.shape();
     h5MaxDims = val.shape();
-    h5MaxDims[0] = H5S_UNLIMITED;
+    //    h5MaxDims[0] = H5S_UNLIMITED;
     hid_t diskSpaceID = H5Screate_simple(RANK, &(h5Dims[0]), &(h5MaxDims[0]));
     hid_t typeID;
     bool mustCloseType = false;
@@ -225,7 +225,7 @@ namespace IO {
     if (RANK < 3)
       chunk_dims[0]=30;
     else
-      chunk_dims[0]=3;
+      chunk_dims[0]=1;
     for (int i=1;i<RANK;i++)
       chunk_dims[i]=val.extent(i);
 

@@ -5,7 +5,6 @@ class IOSectionClass:
     fileName=""
     def __init__(this):
         this.handle=IOSection.New()
-        print "Loaded"
     def OpenFile(this,fileName):
         return IOSection.OpenFile(this.handle,fileName)
     def GetName(this):
