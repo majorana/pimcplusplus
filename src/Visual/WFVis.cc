@@ -567,13 +567,11 @@ WFVisualClass::DrawFrame(bool offScreen)
       normVecs[i] = -1.0*normVecs[i];
   }
   
-  cerr << "Before Spheres.\n";
   if (SphereToggle->get_active()) {
     list<AtomClass>::iterator iter;
     list<AtomClass> sphereList;
     for (int ptcl=0; ptcl < AtomPos.extent(0); ptcl++) 
       sphereList.push_back(AtomClass(AtomPos(ptcl), AtomTypes(ptcl)));
-    cerr << "After push_back's.\n";
     if (clipping) {
       for (int dim=0; dim<3; dim++) {
 	for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
@@ -700,27 +698,19 @@ WFVisualClass::DrawFrame(bool offScreen)
 	}
       }
     }
-    cerr << "After Spheres.\n";
     /// Add sphere objects from list
     for (iter=sphereList.begin(); iter!=sphereList.end(); iter++) {
       SphereObject *sphere = new SphereObject (offScreen);
-      cerr << "Pos = " << iter->Pos << endl;
       sphere->SetPos((*iter).Pos);
-      cerr << "Type = " << iter->Type << endl;
       Vec3 color = ElementData::GetColor (iter->Type);
-      cerr << "color = " << color << endl;
       double radius = RadiusScale.get_value() *
 	ElementData::GetRadius(iter->Type);
-      cerr << "Before SetColor.\n";
       sphere->SetColor(color);
-      cerr << "Before SetBox.\n";
       sphere->SetBox(Box.GetLattice());
-      cerr << "Before SetRadius.\n";
       sphere->SetRadius(radius);
       PathVis.Objects.push_back(sphere);
     }
   }
-  cerr << "Before bonds.\n";
 
   if (BondsToggle->get_active()) {
     //    const double bondLength = 2.0;
@@ -743,13 +733,10 @@ WFVisualClass::DrawFrame(bool offScreen)
     }
   }
 
-  cerr << "Before FileIsOpen.\n";
   if (FileIsOpen && !MultiBandButton.get_active()) {
     int band, k;
     band = (int)round(BandScale.get_value());
     k    = (int)round(kScale.get_value());
-    cerr << "k    = " << k << endl;
-    cerr << "band = " << band << endl;
     if ((CurrBand != band) || (Currk != k)) {
       CurrBand = band;
       Currk    = k;
@@ -1004,8 +991,6 @@ WFVisualClass::Read_ESHDF ()
   zPlane.SetLattice (ToMat3(lattice));
   Infile.CloseSection(); // "supercell"
   
-  cerr << "Read supercell.\n";
-
   assert(Infile.OpenSection("atoms"));
   Array<double,2> pos;
   assert (Infile.ReadVar("positions", pos));
@@ -1030,7 +1015,6 @@ WFVisualClass::Read_ESHDF ()
     AtomTypes(iat) = atomic_numbers(species_ids(iat));
   Infile.CloseSection(); // "atoms"
 
-  cerr << "Read atoms.\n";
   assert (Infile.OpenSection("electrons"));
   TinyVector<int,2> num_elecs;
   assert (Infile.ReadVar("number_of_electrons", num_elecs));
@@ -1044,7 +1028,6 @@ WFVisualClass::Read_ESHDF ()
 
   Infile.CloseSection(); // "electrons"
   SetupBandTable_ESHDF();
-  cerr << "Read electrons.\n";
 
 
   /// Read first wave function
@@ -1053,13 +1036,10 @@ WFVisualClass::Read_ESHDF ()
   Xgrid.Init(-0.5, 0.5, WFData.extent(0));
   Ygrid.Init(-0.5, 0.5, WFData.extent(1));
   Zgrid.Init(-0.5, 0.5, WFData.extent(2));
-  cerr << "After grid init.\n";
-  cerr << "WFData.shape() = " << WFData.shape() << endl;
   if (Nonuniform) 
     WFIso.Init(&NUXgrid, &NUYgrid, &NUZgrid, WFData, true);
   else 
     WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
-  cerr << "After spline init.\n";
   //  WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
   WFIso.SetLattice(Box.GetLattice());
   CurrBand = 0; 
@@ -1079,9 +1059,7 @@ WFVisualClass::Read_ESHDF ()
   IsoButton.set_active(true);
   IsoButton.set_sensitive(true);
   IsoFrame.set_sensitive(true);
-  cerr << "Before DrawFrame. \n";
   DrawFrame();
-  cerr << "After DrawFrame.\n";
 
 }
 
@@ -1235,16 +1213,13 @@ WFVisualClass::~WFVisualClass()
 bool
 WFVisualClass::ReadWF_ESHDF (int kpoint, int band)
 {
-  cerr << "In ReadWF_ESHDF.\n";
   int is_complex(1);
 
   assert (Infile.OpenSection("electrons"));
   assert (Infile.ReadVar("psi_r_is_complex", is_complex));
-  cerr << "is_complex = " << is_complex << endl;
   assert (Infile.OpenSection("kpoint", kpoint));
   Array<double,1> twist_angle;
   assert (Infile.ReadVar("reduced_k", twist_angle));
-  cerr << "twist_angle = " << twist_angle << endl;
   bool gammaPoint = 
     (fabs(twist_angle(0)) < 1.0e-12) &&
     (fabs(twist_angle(1)) < 1.0e-12) &&
@@ -1259,7 +1234,6 @@ WFVisualClass::ReadWF_ESHDF (int kpoint, int band)
   if (is_complex) {
     Array<double,4> zdata;
     assert (Infile.ReadVar ("psi_r", zdata));
-    cerr << "zdata.shape() = " << zdata.shape() << endl;
     if (gammaPoint && ((WFDisplay == REAL_PART) || (WFDisplay == IMAG_PART))) {
       double maxRho = 0.0;
       int ixMax, iyMax, izMax;
@@ -1273,7 +1247,6 @@ WFVisualClass::ReadWF_ESHDF (int kpoint, int band)
 	      ixMax = ix; iyMax = iy; izMax=iz;
 	    }
 	  }
-      cerr << "maxRho = " << maxRho << endl;
       double phase = atan2 (zdata(ixMax, iyMax, izMax,1),
 			    zdata(ixMax, iyMax, izMax,0));
       complex<double> factor (cos(phase), -sin(phase));
@@ -1307,8 +1280,6 @@ WFVisualClass::ReadWF_ESHDF (int kpoint, int band)
   else 
     assert (Infile.ReadVar ("psi_r", wfdata));
     
-  cerr << "Finished read.\n";
-
   int Nx = wfdata.extent(0) + 1;
   int Ny = wfdata.extent(1) + 1;
   int Nz = wfdata.extent(2) + 1;
@@ -1347,8 +1318,6 @@ WFVisualClass::ReadWF_ESHDF (int kpoint, int band)
   Infile.CloseSection(); // "state"
   Infile.CloseSection(); // "kpoint"
   Infile.CloseSection(); // "electrons"
-
-  cerr << "Finished copy.\n";
 
   Nonuniform = false;
 
