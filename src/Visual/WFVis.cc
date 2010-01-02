@@ -567,11 +567,13 @@ WFVisualClass::DrawFrame(bool offScreen)
       normVecs[i] = -1.0*normVecs[i];
   }
   
+  cerr << "Before Spheres.\n";
   if (SphereToggle->get_active()) {
     list<AtomClass>::iterator iter;
     list<AtomClass> sphereList;
     for (int ptcl=0; ptcl < AtomPos.extent(0); ptcl++) 
       sphereList.push_back(AtomClass(AtomPos(ptcl), AtomTypes(ptcl)));
+    cerr << "After push_back's.\n";
     if (clipping) {
       for (int dim=0; dim<3; dim++) {
 	for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
@@ -605,7 +607,6 @@ WFVisualClass::DrawFrame(bool offScreen)
 	  }
 	}
       }
-      
 //       for (iter=sphereList.begin(); iter != sphereList.end(); iter++) {
 // 	Vec3 &r = (*iter).Pos;
 // 	Vec3 n = Box.GetLatticeInv() * r; 
@@ -699,19 +700,27 @@ WFVisualClass::DrawFrame(bool offScreen)
 	}
       }
     }
+    cerr << "After Spheres.\n";
     /// Add sphere objects from list
     for (iter=sphereList.begin(); iter!=sphereList.end(); iter++) {
       SphereObject *sphere = new SphereObject (offScreen);
+      cerr << "Pos = " << iter->Pos << endl;
       sphere->SetPos((*iter).Pos);
+      cerr << "Type = " << iter->Type << endl;
       Vec3 color = ElementData::GetColor (iter->Type);
+      cerr << "color = " << color << endl;
       double radius = RadiusScale.get_value() *
 	ElementData::GetRadius(iter->Type);
+      cerr << "Before SetColor.\n";
       sphere->SetColor(color);
+      cerr << "Before SetBox.\n";
       sphere->SetBox(Box.GetLattice());
+      cerr << "Before SetRadius.\n";
       sphere->SetRadius(radius);
       PathVis.Objects.push_back(sphere);
     }
   }
+  cerr << "Before bonds.\n";
 
   if (BondsToggle->get_active()) {
     //    const double bondLength = 2.0;
@@ -721,7 +730,7 @@ WFVisualClass::DrawFrame(bool offScreen)
       for (int j=i+1; j < AtomPos.extent(0); j++) {
 	Vec3 rj = AtomPos(j);
 	double rad2 = ElementData::GetRadius(AtomTypes(j));
-	double bondLength = 0.8 * (rad1+rad2);
+	double bondLength = 0.9 * (rad1+rad2);
 	if (dot(ri-rj, ri-rj) < bondLength*bondLength) {
 	  CylinderObject* bond = new CylinderObject(offScreen);
 	  bond->SetPos (ri, rj);
@@ -734,15 +743,20 @@ WFVisualClass::DrawFrame(bool offScreen)
     }
   }
 
-
+  cerr << "Before FileIsOpen.\n";
   if (FileIsOpen && !MultiBandButton.get_active()) {
     int band, k;
     band = (int)round(BandScale.get_value());
     k    = (int)round(kScale.get_value());
+    cerr << "k    = " << k << endl;
+    cerr << "band = " << band << endl;
     if ((CurrBand != band) || (Currk != k)) {
       CurrBand = band;
       Currk    = k;
-      ReadWF (k, band);
+      if (IsESHDF) 
+	ReadWF_ESHDF (k, band);
+      else
+	ReadWF (k, band);
       if (Nonuniform)
 	WFIso.Init(&NUXgrid, &NUYgrid, &NUZgrid, WFData, true);
       else {
@@ -921,6 +935,156 @@ WFVisualClass::SetupBandTable()
   VisibleBandTable.show_all();
 }
 
+
+void
+WFVisualClass::SetupBandTable_ESHDF()
+{
+  kLabel.set_text ("k");
+  BandLabel.set_text ("Band");
+  VisibleBandTable.resize(Numk*NumBands+1,3);
+  VisibleBandTable.attach (kLabel,    1, 2, 0, 1, Gtk::EXPAND, Gtk::SHRINK, 3);
+  VisibleBandTable.attach (BandLabel, 2, 3, 0, 1, Gtk::EXPAND, Gtk::SHRINK, 3);
+  VisibleBandRows.resize (Numk*NumBands);
+  int row = 0;
+  assert (Infile.OpenSection("electrons"));
+  int numSpins;
+  assert (Infile.ReadVar("number_of_spins", numSpins));
+  for (int ki=0; ki<Numk; ki++) {
+    assert (Infile.OpenSection("kpoint", ki));
+    for (int spin=0; spin<numSpins; spin++) {
+      assert (Infile.OpenSection("spin", spin));
+      for (int bi=0; bi<NumBands; bi++) {
+	assert (Infile.OpenSection("state", bi));
+	BandRow &band = *(new BandRow(*this));
+	band.Check.signal_toggled().connect 
+	  (sigc::bind<int>
+	   (sigc::mem_fun(*this, &WFVisualClass::OnBandToggle),row));
+	VisibleBandTable.attach(band.Check,     0, 1, row+1, row+2, 
+				Gtk::EXPAND, Gtk::SHRINK);
+	VisibleBandTable.attach(band.kLabel,    1, 2, row+1, row+2,
+				Gtk::EXPAND, Gtk::SHRINK);
+	VisibleBandTable.attach(band.BandLabel, 2, 3, row+1, row+2, 
+				Gtk::EXPAND, Gtk::SHRINK);
+	char kstr[50], bstr[250];
+	snprintf (kstr, 50, "%d", ki+1);
+	snprintf (bstr, 250, "%d<span  font_family=\"Standard Symbols L\">&#%d;</span>", bi+1, 0x2191+2*spin); 
+	band.kLabel.set_text(kstr);
+	band.BandLabel.set_markup(bstr);
+	if (bi < NumElectrons/2) {
+	  band.kLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("black"));
+	  band.BandLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("black"));
+	}
+	else {
+	  band.kLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("red"));
+	  band.BandLabel.modify_fg(Gtk::STATE_NORMAL, Gdk::Color("red"));
+	}
+	VisibleBandRows[row] = &band;
+	row++;
+	Infile.CloseSection (); // "band"
+      }
+      Infile.CloseSection();    // "spin"
+    }
+    Infile.CloseSection();    // "kpoint"
+  }
+  Infile.CloseSection();      // "eigenstates"
+  VisibleBandTable.show_all();
+}
+
+
+void
+WFVisualClass::Read_ESHDF ()
+{
+  
+  assert (Infile.OpenSection("supercell"));
+  Array<double,2> lattice;
+  assert (Infile.ReadVar("primitive_vectors", lattice));
+  Box.Set (ToMat3(lattice));
+  xPlane.SetLattice (ToMat3(lattice));
+  yPlane.SetLattice (ToMat3(lattice));
+  zPlane.SetLattice (ToMat3(lattice));
+  Infile.CloseSection(); // "supercell"
+  
+  cerr << "Read supercell.\n";
+
+  assert(Infile.OpenSection("atoms"));
+  Array<double,2> pos;
+  assert (Infile.ReadVar("positions", pos));
+  AtomPos.resize(pos.extent(0));
+  for (int i=0; i<pos.extent(0); i++) {
+    AtomPos(i) = Vec3(pos(i,0), pos(i,1), pos(i,2));
+    for (int j=0; j<3; j++)
+      AtomPos(i) -= (0.5-Shift[j])*Box(j);
+  }
+  Array<int,1> species_ids;
+  assert (Infile.ReadVar("species_ids", species_ids));
+  int num_species;
+  assert (Infile.ReadVar("number_of_species", num_species));
+  Array<int,1> atomic_numbers(num_species);
+  for (int isp=0; isp < num_species; isp++) {
+    assert (Infile.OpenSection("species", isp));
+    assert (Infile.ReadVar("atomic_number", atomic_numbers(isp)));
+    Infile.CloseSection(); // "species"
+  }
+  AtomTypes.resize(species_ids.size());
+  for (int iat=0; iat<species_ids.size(); iat++)
+    AtomTypes(iat) = atomic_numbers(species_ids(iat));
+  Infile.CloseSection(); // "atoms"
+
+  cerr << "Read atoms.\n";
+  assert (Infile.OpenSection("electrons"));
+  TinyVector<int,2> num_elecs;
+  assert (Infile.ReadVar("number_of_electrons", num_elecs));
+  NumElectrons = num_elecs[0] + num_elecs[1];
+  Infile.ReadVar("number_of_kpoints", Numk);
+  assert (Infile.OpenSection("kpoint", 0));
+  assert (Infile.OpenSection("spin", 0));
+  assert (Infile.ReadVar("number_of_states", NumBands));
+  Infile.CloseSection(); // "spin"
+  Infile.CloseSection(); // "kpoint"
+
+  Infile.CloseSection(); // "electrons"
+  SetupBandTable_ESHDF();
+  cerr << "Read electrons.\n";
+
+
+  /// Read first wave function
+  ReadWF_ESHDF(0,0);
+  WFIso.SetCenter (uCenter, uMin, uMax);
+  Xgrid.Init(-0.5, 0.5, WFData.extent(0));
+  Ygrid.Init(-0.5, 0.5, WFData.extent(1));
+  Zgrid.Init(-0.5, 0.5, WFData.extent(2));
+  cerr << "After grid init.\n";
+  cerr << "WFData.shape() = " << WFData.shape() << endl;
+  if (Nonuniform) 
+    WFIso.Init(&NUXgrid, &NUYgrid, &NUZgrid, WFData, true);
+  else 
+    WFIso.Init(&Xgrid, &Ygrid, &Zgrid, WFData, true);
+  cerr << "After spline init.\n";
+  //  WFIso.Init (-0.5, 0.5, -0.5, 0.5, -0.5, 0.5, WFData);
+  WFIso.SetLattice(Box.GetLattice());
+  CurrBand = 0; 
+  Currk = 0;
+  BandAdjust.set_upper(NumBands-1.0);
+  kAdjust.set_upper(Numk-1.0);
+
+  Vec3 a[3];
+  a[0] = Vec3 (lattice(0,0), lattice(0,1), lattice(0,2));
+  a[1] = Vec3 (lattice(1,0), lattice(1,1), lattice(1,2));
+  a[2] = Vec3 (lattice(2,0), lattice(2,1), lattice(2,2));
+  double maxDim = 1.2*
+    max(sqrt(dot(a[0],a[0])), max(sqrt(dot(a[1],a[1])),
+				  sqrt(dot(a[2],a[2]))));
+  PathVis.View.SetDistance (1.2*maxDim);
+  
+  IsoButton.set_active(true);
+  IsoButton.set_sensitive(true);
+  IsoFrame.set_sensitive(true);
+  cerr << "Before DrawFrame. \n";
+  DrawFrame();
+  cerr << "After DrawFrame.\n";
+
+}
+
 void
 WFVisualClass::Read(string filename)
 {
@@ -928,7 +1092,12 @@ WFVisualClass::Read(string filename)
     Infile.CloseFile();
   assert (Infile.OpenFile(filename));
   FileIsOpen = true;
-  
+  string format;
+  Infile.ReadVar("format", format);
+  IsESHDF = format == "ES-HDF";
+  if (IsESHDF) 
+    return Read_ESHDF();
+
   /// Read lattice vectors
   assert (Infile.OpenSection("parameters"));
   Array<double,2> lattice;
@@ -1061,6 +1230,134 @@ WFVisualClass::~WFVisualClass()
 {
 
 }
+
+
+bool
+WFVisualClass::ReadWF_ESHDF (int kpoint, int band)
+{
+  cerr << "In ReadWF_ESHDF.\n";
+  int is_complex(1);
+
+  assert (Infile.OpenSection("electrons"));
+  assert (Infile.ReadVar("psi_r_is_complex", is_complex));
+  cerr << "is_complex = " << is_complex << endl;
+  assert (Infile.OpenSection("kpoint", kpoint));
+  Array<double,1> twist_angle;
+  assert (Infile.ReadVar("reduced_k", twist_angle));
+  cerr << "twist_angle = " << twist_angle << endl;
+  bool gammaPoint = 
+    (fabs(twist_angle(0)) < 1.0e-12) &&
+    (fabs(twist_angle(1)) < 1.0e-12) &&
+    (fabs(twist_angle(2)) < 1.0e-12);
+  assert (Infile.OpenSection("spin", 0));
+  assert (Infile.OpenSection("state", band));
+  SuperTwistInt = Vec3(0.0, 0.0, 0.0);
+  uMin = Vec3 (0.0, 0.0, 0.0);
+  uMax = Vec3 (1.0, 1.0, 1.0);
+  uCenter = Vec3 (0.0, 0.0, 0.0);
+  Array<double,3> wfdata;
+  if (is_complex) {
+    Array<double,4> zdata;
+    assert (Infile.ReadVar ("psi_r", zdata));
+    cerr << "zdata.shape() = " << zdata.shape() << endl;
+    if (gammaPoint && ((WFDisplay == REAL_PART) || (WFDisplay == IMAG_PART))) {
+      double maxRho = 0.0;
+      int ixMax, iyMax, izMax;
+      for (int ix=0; ix<zdata.extent(0); ix+=5)
+	for (int iy=0; iy<zdata.extent(1); iy+=5)
+	  for (int iz=0; iz<zdata.extent(2); iz+=5) {
+	    double rho = (zdata(ix,iy,iz,0)*zdata(ix,iy,iz,0) +
+			  zdata(ix,iy,iz,1)*zdata(ix,iy,iz,1));
+	    if (rho > maxRho) {
+	      maxRho = rho;
+	      ixMax = ix; iyMax = iy; izMax=iz;
+	    }
+	  }
+      cerr << "maxRho = " << maxRho << endl;
+      double phase = atan2 (zdata(ixMax, iyMax, izMax,1),
+			    zdata(ixMax, iyMax, izMax,0));
+      complex<double> factor (cos(phase), -sin(phase));
+      for (int ix=0; ix<zdata.extent(0); ix++)
+	for (int iy=0; iy<zdata.extent(1); iy++)
+	  for (int iz=0; iz<zdata.extent(2); iz++) {
+	    complex<double> wf(zdata(ix,iy,iz,0), zdata(ix,iy,iz,1));	  
+	    wf *= factor;
+	    zdata(ix,iy,iz,0) = wf.real();
+	    zdata(ix,iy,iz,1) = wf.imag();
+	  }
+    }
+    wfdata.resize(zdata.extent(0), zdata.extent(1), zdata.extent(2));
+    if (WFDisplay == MAG2) 
+      for (int ix=0; ix<zdata.extent(0); ix++)
+	for (int iy=0; iy<zdata.extent(1); iy++)
+	  for (int iz=0; iz<zdata.extent(2); iz++)
+	    wfdata(ix,iy,iz) = (zdata(ix,iy,iz,0)*zdata(ix,iy,iz,0) + 
+				zdata(ix,iy,iz,1)*zdata(ix,iy,iz,1));
+    else if (WFDisplay == REAL_PART)
+      for (int ix=0; ix<zdata.extent(0); ix++)
+	for (int iy=0; iy<zdata.extent(1); iy++)
+	  for (int iz=0; iz<zdata.extent(2); iz++)
+	    wfdata(ix,iy,iz) = zdata(ix,iy,iz,0);
+    else
+      for (int ix=0; ix<zdata.extent(0); ix++)
+	for (int iy=0; iy<zdata.extent(1); iy++)
+	  for (int iz=0; iz<zdata.extent(2); iz++)
+	    wfdata(ix,iy,iz) = zdata(ix,iy,iz,1);
+  }
+  else 
+    assert (Infile.ReadVar ("psi_r", wfdata));
+    
+  cerr << "Finished read.\n";
+
+  int Nx = wfdata.extent(0) + 1;
+  int Ny = wfdata.extent(1) + 1;
+  int Nz = wfdata.extent(2) + 1;
+  WFData.resize(Nx,Ny,Nz);
+
+
+  MaxVal = 0.0;
+  int xShift, yShift, zShift;
+  xShift = (int)round(Shift[0]*wfdata.extent(0));
+  yShift = (int)round(Shift[1]*wfdata.extent(1));
+  zShift = (int)round(Shift[2]*wfdata.extent(2));
+  Vec3 u(0.0, 0.0, 0.0);
+  Vec3 du(1.0/(double)(wfdata.extent(0)),
+	  1.0/(double)(wfdata.extent(1)),
+	  1.0/(double)(wfdata.extent(2)));
+  
+  for (int ix=0; ix<Nx; ix++) {
+    u[1] = 0.0;
+    for (int iy=0; iy<Ny; iy++) {
+      u[2] = 0.0;
+      for (int iz=0; iz<Nz; iz++) {
+	// WF data is store from 0 to Lx, not -Lx/2 to Lx/2
+	int jx = (ix-xShift+Nx-1)%(Nx-1);
+	int jy = (iy-yShift+Ny-1)%(Ny-1);
+	int jz = (iz-zShift+Nz-1)%(Nz-1);
+	WFData(ix,iy,iz) = wfdata(jx,jy,jz);
+	MaxVal = max(MaxVal, fabs(WFData(ix,iy,iz)));
+	u[2] += du[2];
+      }
+      u[1] += du[1];
+    }
+    u[0] += du[0];
+  }
+
+  Infile.CloseSection(); // "spin"
+  Infile.CloseSection(); // "state"
+  Infile.CloseSection(); // "kpoint"
+  Infile.CloseSection(); // "electrons"
+
+  cerr << "Finished copy.\n";
+
+  Nonuniform = false;
+
+  return true;
+}
+
+
+
+
 
 bool
 WFVisualClass::ReadWF (int kpoint, int band)
@@ -1281,7 +1578,10 @@ WFVisualClass::OnDisplayRadio(WFDisplayType type)
 
   if (WFDisplay != newtype) {
     WFDisplay = newtype;
-    ReadWF (Currk, CurrBand);
+    if (IsESHDF)
+      ReadWF_ESHDF(Currk,CurrBand);
+    else
+      ReadWF (Currk, CurrBand);
     UpdatePlane[0] = UpdatePlane[1] = UpdatePlane[2] = true;
     UpdateIso = true;  ResetIso = true;
     DrawFrame ();
@@ -1470,7 +1770,10 @@ WFVisualClass::OnBandToggle (int row)
     if (band.Iso == NULL) {
       band.Iso = new Isosurface;
       if (FileIsOpen) {
-	ReadWF (ki, bi);
+	if (IsESHDF)
+	  ReadWF_ESHDF (ki, bi);
+	else
+	  ReadWF (ki, bi);
 	Xgrid.Init(-0.5, 0.5, WFData.extent(0));
 	Ygrid.Init(-0.5, 0.5, WFData.extent(1));
 	Zgrid.Init(-0.5, 0.5, WFData.extent(2));
@@ -1516,7 +1819,10 @@ WFVisualClass::UpdateMultiIsos()
     if (VisibleBandRows[i]->Iso != NULL) {
       Isosurface &iso = *(VisibleBandRows[i]->Iso);
       if (UpdateIsoType) 
-	ReadWF(ki, bi);
+	if (IsESHDF)
+	  ReadWF_ESHDF(ki, bi);
+	else
+	  ReadWF(ki, bi);
       if (UpdateIsoType || UpdateIsoVal) {
 	if (WFDisplay == MAG2) {
 	  iso.SetCenter (uCenter, uMin, uMax);

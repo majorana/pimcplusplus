@@ -128,6 +128,7 @@ protected:
   Gtk::Label kLabel, BandLabel;
   Gtk::CheckButton MultiBandButton;
   void SetupBandTable();
+  void SetupBandTable_ESHDF();
   void OnMultiBandToggle(), OnBandToggle(int row);
   void UpdateMultiIsos();
 
@@ -184,13 +185,16 @@ protected:
   ///////////////////
   string FindFullPath(string filename);
   bool ReadWF (int kPoint, int band);
+  bool ReadWF_ESHDF (int kPoint, int band);
+  bool IsESHDF;
 public:
   PathVisClass PathVis;
 
   ////////////////////
   // Public methods //
   ////////////////////
-  void Read(string filename);
+  void Read(string filename);  
+  void Read_ESHDF();
   bool ReadState (string fname);
   bool DrawFrame(bool offScreen=false);
   void SetShift (Vec3 shift);
