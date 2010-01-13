@@ -72,7 +72,52 @@ bool TestInv()
       C(i,j) = 2.0*drand48()-1.0;
   
   Cinv = C;
-  GJInverse(Cinv);
+  double det = Determinant (C);
+  double gjdet = GJInverse(Cinv);
+
+  fprintf (stderr, "det   = %20.16e\n", det);
+  fprintf (stderr, "gjdet = %20.16e\n", gjdet);
+
+  eye = 0.0;
+  for (int i=0; i<N; i++)
+    for (int j=0; j<N; j++)
+      for (int k=0; k<N; k++)
+	eye(i,j) += Cinv(i,k)*C(k,j);
+
+  eye = Cinv * C;
+  bool failed = false;
+  for (int i=0; i<N; i++)
+    for (int j=0; j<N; j++)
+      if (i == j)
+	failed = (fabs(eye(i,j) - 1.0) > 1.0e-14);
+      else
+	failed = (fabs(eye(i,j)) > 1.0e-14);
+  cerr << "eye = " << eye << endl;
+  if (failed)
+    cerr << "Failed inverse test.\n";
+  else
+    cerr << "Passed inverse test.\n";
+
+  return !failed;
+}
+
+bool TestInvPartial()
+{
+  const int N = 5;
+  Array<double,2> C(N,N), Cinv(N,N), eye(N,N);
+  
+  // Random matrix
+  for (int i=0; i<N; i++) 
+    for (int j=0; j<N; j++)
+      C(i,j) = 2.0*drand48()-1.0;
+  
+  Cinv = C;
+  double det = Determinant (C);
+  double gjdet = GJInversePartial(Cinv);
+
+  fprintf (stderr, "det   = %20.16e\n", det);
+  fprintf (stderr, "gjdet = %20.16e\n", gjdet);
+
   eye = 0.0;
   for (int i=0; i<N; i++)
     for (int j=0; j<N; j++)
@@ -193,9 +238,10 @@ TimeDetCofactors()
 
 main()
 {
+  TestInvPartial();
   //TestDetCofactors();
-  TimeDetCofactors();
-  TimeDet();
+  //TimeDetCofactors();
+  //TimeDet();
 //   for (int N=10; N<300; N+=5)
 //     cerr << "N = " << N << " Rate = " << MulTest(N) << endl;
 

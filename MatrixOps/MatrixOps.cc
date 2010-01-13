@@ -311,8 +311,9 @@ Determinant (const Array<complex<double>,2> &A)
 
 // Replaces A with its inverse by gauss-jordan elimination with full pivoting
 // Adapted from Numerical Recipes in C
-void GJInverse (Array<double,2> &A)
+double GJInverse (Array<double,2> &A)
 {
+  
   const int maxSize = 2000;
   assert (A.cols() == A.rows());
   assert (A.cols() <= maxSize);
@@ -326,8 +327,10 @@ void GJInverse (Array<double,2> &A)
     A(0,1) = -b*detInv;
     A(1,0) = -c*detInv;
     A(1,1) = a*detInv;
-    return;
+    return 1.0/detInv;
   }
+  double det = 1.0;
+
 
   int colIndex[maxSize], rowIndex[maxSize], ipiv[maxSize];
   double big, dum, pivInv, temp;
@@ -367,6 +370,7 @@ void GJInverse (Array<double,2> &A)
       cerr << "A = " << A << endl;
       abort();
     }
+    det *= A(icol,icol);
     pivInv = 1.0/A(icol,icol);
     A(icol,icol) = 1.0;
     for (int l=0; l<n; l++)
@@ -381,11 +385,61 @@ void GJInverse (Array<double,2> &A)
   }
   // Now unscramble the permutations
   for (int l=n-1; l>=0; l--) {
-    if (rowIndex[l] != colIndex[l])
+    if (rowIndex[l] != colIndex[l]) {
       for (int k=0; k<n ; k++)
 	swap (A(k,rowIndex[l]),A(k, colIndex[l]));
+      det *= -1.0;
+    }
   }
+  return det; 
 }
+
+
+double GJInversePartial (Array<double,2> &A)
+{
+  const int maxSize = 2000;
+  assert (A.cols() == A.rows());
+  assert (A.cols() <= maxSize);
+  int n = A.rows();
+
+  double det = 1.0;
+
+
+  int colIndex[maxSize], rowIndex[maxSize], ipiv[maxSize];
+  double big, dum, pivInv, temp;
+  int icol, irow;
+  
+  for (int i=0; i<n; i++) {
+    big = 0.0;
+    int ipiv = 0;
+    for (int j=i; j<n; j++) 
+      if (fabs(A(j,i)) < big) {
+	big = fabs(A(j,i));
+	ipiv = j;
+      }
+    // HACK 
+    // for (int j=0; j<n; j++)
+    //   swap (A(i,j), A(ipiv,j));
+
+    //ipiv = i;
+
+    det *= A(ipiv,i);
+    double pivInv = 1.0/A(ipiv,i);
+
+    A(ipiv,i) = 1.0;
+    for (int j=0; j<n; j++) 
+      A(ipiv,j) *= pivInv;
+    for (int j=0; j<n; j++)
+      if (j != ipiv) {
+	double tmp = A(j,i);
+	A(j,i) = 0.0;
+	for (int k=0; k<n; k++)
+	  A(j,k) -= A(ipiv,k)*tmp;
+      }
+  }
+  return det;
+}
+
 
 
 

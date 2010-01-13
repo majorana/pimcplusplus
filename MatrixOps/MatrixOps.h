@@ -85,7 +85,8 @@ complex<double> ComplexDetCofactors (Array<complex<double>,2> &A,
 				     Array<complex<double>,1> &work);
 int ComplexDetCofactorsWorksize(int N);
 
-void GJInverse (Array<double,2> &A);
+double GJInverse (Array<double,2> &A);
+double GJInversePartial (Array<double,2> &A);
 
 Array<double,2> Inverse (Array<double,2> &A);
 
