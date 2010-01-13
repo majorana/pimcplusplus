@@ -190,7 +190,7 @@ NonlinearFitClass<M,ModelType>::Fit (const Array<double,1> &x,
 //     fprintf (stderr, "\n");
 //   }
   Model.SetParams (params);
-  cerr << "Chi2 = " << chiNow << endl;
+  //  cerr << "Chi2 = " << chiNow << endl;
 }
 
 #endif

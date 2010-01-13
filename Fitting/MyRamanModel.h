@@ -121,7 +121,8 @@ public:
     double nu_0 = nu0 * pow(b0*P/R0 + 1.0, 1.0/b0);
     double nu_1 = nu1 * pow(b0*P/R1 + 1.0, 1.0/b0);
     double nu_2 = nu2 * pow(b0*P/R2 + 1.0, 1.0/b0);
-    return nu_0 + nu_1*exp(-nu_2/T) - nu_1*exp(-nu_2/300.0);
+    //return nu_0 + nu_1*exp(-nu_2/T);// - nu_1*exp(-nu_2/300.0);
+    return nu_0 + nu_1*exp(-nu_2/T);
   }
 
   inline TinyVector<double,4> 

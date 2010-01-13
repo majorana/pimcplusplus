@@ -233,12 +233,20 @@ cBNModel::SetPhonon (string fname)
       double modelTheta = tempModel(T[iT]);
       
       double v = V[iV];
-      double theta0 = (4.510998e+03      + -5.723577e+01*v +
-		       3.103155e-01*v*v  + -6.082507e-04*v*v*v);
-      double alpha  = (3.344318e-03      + -1.533690e-04*v +
-		       3.712041e-06*v*v  + -2.682415e-08*v*v*v);
-      double beta   = ( -5.133928e+03    +  1.715907e+02*v +
-		       -1.937482e+00*v*v + 7.446629e-03*v*v*v);
+      // double theta0 = (4.510998e+03      + -5.723577e+01*v +
+      // 		       3.103155e-01*v*v  + -6.082507e-04*v*v*v);
+      // double alpha  = (3.344318e-03      + -1.533690e-04*v +
+      // 		       3.712041e-06*v*v  + -2.682415e-08*v*v*v);
+      // double beta   = ( -5.133928e+03    +  1.715907e+02*v +
+      // 		       -1.937482e+00*v*v + 7.446629e-03*v*v*v);
+      double theta0 = (4.836656e+03      + -6.929704e+01*v +
+		       4.634278e-01*v*v  + -1.273468e-03*v*v*v);
+      double alpha  = (2.598608e-03      + -1.200504e-04*v +
+		       2.789128e-06*v*v  + -2.008994e-08*v*v*v);
+      double beta   =(-4.869563e+03      + 1.763443e+02*v +
+		      -2.186053e+00*v*v  + 9.303181e-03*v*v*v);
+
+
       double modelTheta2 = theta0 + beta*exp(-fabs(alpha)*T[iT]);
 
       fprintf (dout, "%12.5f %12.5f  %14.8e  %14.8e  %14.8e  %14.8e ",
