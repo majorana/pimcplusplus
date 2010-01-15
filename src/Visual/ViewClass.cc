@@ -194,13 +194,18 @@ ViewClass::GLtransform()
 void 
 ViewClass::POVtransform (FILE *fout)
 {
+  double angle = 51.661;
+  angle = 40.0;
+
   fprintf (fout, "camera {\n");
+  if (!UsePerspective) {
+    fprintf (fout, "  orthographic\n");
+    angle = 34.0;
+  }
 //   fprintf (fout, "  location <%14.10f, %14.10f %14.10f>\n",
 // 	   0.0, 0.0, 2.0*Distance/Scale);
   fprintf (fout, "  location <%14.10f, %14.10f %14.10f>\n",
 	   -2.0*Distance*xTrans, -2.0*Distance*yTrans, 2.0*Distance/Scale);
-  double angle = 51.661;
-  angle = 40.0;
   fprintf (fout, "  angle %1.5f\n", angle);
   fprintf (fout, "  right <-1.0,0,0>\n");
 //   fprintf (fout, "  look_at <%14.10f %14.10f %14.10f>\n}\n\n",
