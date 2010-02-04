@@ -567,9 +567,9 @@ WFVisualClass::DrawFrame(bool offScreen)
       normVecs[i] = -1.0*normVecs[i];
   }
   
+  list<AtomClass> sphereList;
   if (SphereToggle->get_active()) {
     list<AtomClass>::iterator iter;
-    list<AtomClass> sphereList;
     for (int ptcl=0; ptcl < AtomPos.extent(0); ptcl++) 
       sphereList.push_back(AtomClass(AtomPos(ptcl), AtomTypes(ptcl)));
     if (clipping) {
@@ -713,13 +713,22 @@ WFVisualClass::DrawFrame(bool offScreen)
   }
 
   if (BondsToggle->get_active()) {
+    list<AtomClass>::iterator iter1, iter2;
     //    const double bondLength = 2.0;
-    for (int i=0; i < AtomPos.extent(0); i++) {
-      Vec3 ri = AtomPos(i);
-      double rad1 = ElementData::GetRadius(AtomTypes(i));
-      for (int j=i+1; j < AtomPos.extent(0); j++) {
-	Vec3 rj = AtomPos(j);
-	double rad2 = ElementData::GetRadius(AtomTypes(j));
+    for (iter1=sphereList.begin(); iter1!=sphereList.end(); iter1++) {
+      // for (int i=0; i < AtomPos.extent(0); i++) {
+      // Vec3 ri = AtomPos(i);
+      // double rad1 = ElementData::GetRadius(AtomTypes(i));
+      Vec3 ri = iter1->Pos;
+      double rad1 = ElementData::GetRadius(iter1->Type);
+      // for (int j=i+1; j < AtomPos.extent(0); j++) {
+      // 	Vec3 rj = AtomPos(j);
+      // 	double rad2 = ElementData::GetRadius(AtomTypes(j));
+      iter2 = iter1;
+      iter2++;
+      for (; iter2!=sphereList.end(); iter2++) {
+	Vec3 rj = iter2->Pos;
+	double rad2 = ElementData::GetRadius(iter2->Type);
 	double bondLength = 0.9 * (rad1+rad2);
 	if (dot(ri-rj, ri-rj) < bondLength*bondLength) {
 	  CylinderObject* bond = new CylinderObject(offScreen);
