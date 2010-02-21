@@ -43,6 +43,13 @@ class IOSectionClass:
         return IOSection.CountVars(this.handle)
     def GetVarName(this,num):
         return IOSection.GetVarName(this.handle,num)
+    def SetUnderscores(this,use):
+        if (use):
+            num = 1
+        else:
+            num = 0
+        return IOSection.SetUnderscores(this.handle,num)
+
 
 import os
 class IOSectionClassList:

@@ -20,6 +20,23 @@
 
 using namespace IO;
 
+extern "C" PyObject* IOSection_SetUnderscores(PyObject *self, PyObject *args)
+{
+  void *IOSectionPtr;
+  int use;
+  char *str = (char*)( (sizeof(int) == sizeof(void*)) ? "ii" : "li");
+
+
+  if (!PyArg_ParseTuple (args, str ,&IOSectionPtr,&use)) {
+    cerr << "Error in IOSection_OpenFile.\n";
+    return NULL;
+  }
+  else
+    ((IOSectionClass*)IOSectionPtr)->SetUnderscores(use);
+  return Py_None;
+}
+
+
 extern "C" PyObject* IOSection_New(PyObject *self, PyObject *args)
 {
   IOSectionClass *newSect=new IOSectionClass();
@@ -1046,6 +1063,8 @@ static PyMethodDef IOSectionMethods[] = {
      "Counts the total number of variables in the current section"},
     {"GetVarName", IOSection_GetVarName, METH_VARARGS,
      "Returns the name of the num'th variable"},
+    {"SetUnderscores", IOSection_SetUnderscores, METH_VARARGS,
+     "Sets whether to always include underscores or not."},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
