@@ -4,7 +4,7 @@
 #include "../Splines/CubicNUBspline.h"
 #include "../Integration/RungeKutta.h"
 #include "../IO/IO.h"
-#include <Common/Random/Random.h>
+#include "../Random/Random.h"
 
 #include <vector>
 
