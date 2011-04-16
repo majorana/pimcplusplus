@@ -1,9 +1,10 @@
 #ifndef MYBLITZ_H
 #define MYBLITZ_H
-
+#include <cstdio>
+#include <cstdlib>
 #include <complex>
+#include <cstring>
 using namespace std;
-
 #include <blitz/array.h>
 #include <blitz/tinyvec-et.h>
 using namespace blitz;
