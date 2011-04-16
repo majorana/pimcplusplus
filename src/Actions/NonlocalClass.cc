@@ -1,5 +1,6 @@
 #include "../PathDataClass.h"
 #include "NonlocalClass.h"
+#include <cstdlib>
 
 NonlocalClass::NonlocalClass (PathDataClass &pathData) :
   ActionBaseClass (pathData)

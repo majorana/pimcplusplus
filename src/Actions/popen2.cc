@@ -1,4 +1,5 @@
 #include "popen2.h"
+#include <cstdlib>
 
 pid_t popen2(const char *shell_cmd, int *p_fd_in, int *p_fd_out)
 {
