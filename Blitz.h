@@ -2,6 +2,7 @@
 #define MYBLITZ_H
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <complex>
 #include <cstring>
 using namespace std;
