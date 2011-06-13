@@ -53,9 +53,11 @@ bool PIMCClass::Read(IOSectionClass &in)
 //	     PathData.Path.ExistsCoupling=(double)(myProc)/100;
 //	   }
   	// Read in the action information
+		cerr<<"Reading actions"<<endl;	
   	assert(in.OpenSection("Action"));
   	PathData.Actions.Read(in);	
   	in.CloseSection();
+	cerr<<"Done reading actions"<<endl;
 	///  	perr << "Finished Actions read.\n";
 
 
@@ -72,20 +74,20 @@ bool PIMCClass::Read(IOSectionClass &in)
 
 
   	in.CloseSection();
-	//  	perr << "Done InitPaths.\n";
+	cerr << "Done InitPaths.\n";
   	if (PathData.Path.UseCorrelatedSampling())
   	  PathData.Path.SetIonConfig(0);
 
 
   	
-	//  	perr << "Initializing Actions caches.\n";
+	cerr << "Initializing Actions caches.\n";
   	PathData.Actions.Init();
-	//  	perr << "done.\n";
-
+	cerr << "done.\n";
+	
   	// Read in the Observables
   	assert(in.OpenSection("Observables"));
   	ReadObservables(in);
-	//  	perr << "Finished Observables Read.\n";
+	cerr << "Finished Observables Read.\n";
   	in.CloseSection();
 
   	bool iAmRootProc = (PathData.Path.Communicator.MyProc()==0);
@@ -105,22 +107,27 @@ bool PIMCClass::Read(IOSectionClass &in)
   	}
   	// Read in the Moves
   	assert(in.OpenSection("Moves"));
+	cerr<<"Beginning moves read"<<endl;
   	ReadMoves(in);
-	//  	perr << "Finished Moves Read.\n";
+	cerr << "Finished Moves Read "<<PathData.Path.Communicator.MyProc()<<endl;
   	in.CloseSection();
   	// Read in the Algorithm
+	cerr<<"Reading the algorithm now "<<PathData.Path.Communicator.MyProc()<<endl;
   	assert(in.OpenSection("Algorithm"));
   	ReadAlgorithm(in);
+	cerr<<"Done reading the algorithm"<<endl;
   	in.CloseSection();
 	}
 	else
 		QMCWrapper = new QMCWrapperClass(PathData);
+	cerr<<"Finished the PIMCClass read "<<PathData.Path.Communicator.MyProc()<<endl;
 	return doPIMCRun;
+
 }
 
 
 
-
+ 
 void PIMCClass::ReadObservables(IOSectionClass &in)
 {
   int myProc=PathData.Path.Communicator.MyProc();
@@ -278,6 +285,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new PermutationCountClass(PathData,OutFile);
     else if (observeType=="StructureFactor")
       tempObs = new StructureFactorClass(PathData,OutFile);
+    else if (observeType=="DynamicStructureFactor")
+      tempObs = new DynamicStructureFactorClass(PathData,OutFile);
     else if (observeType=="Sign")
       tempObs = new WeightClass(PathData,OutFile);
     else if (observeType=="Forces")
@@ -402,7 +411,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     OutFile.CloseSection (); // "Moves"
     OutFile.FlushFile();
   }
-  
+  cerr<<"I have finished reading the moves"<<endl;
 }
 
 
@@ -420,7 +429,9 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 	 << ((minutes != 1) ? " minutes, and " : " minute, and ") << seconds 
 	 << ((seconds != 1) ? " seconds.\n" : " second.\n");
   }
+  cerr<<"Calling algorithm read"<<endl;
   Algorithm.Read(in,1);
+  
 }
 
 
