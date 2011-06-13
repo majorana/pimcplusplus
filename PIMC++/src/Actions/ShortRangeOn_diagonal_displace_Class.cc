@@ -99,7 +99,8 @@ ShortRangeOn_diagonal_displace_class::GradAction_help(int slice1, int slice2,
 	  double g1 = 1.0;
 	  double g2 = 1.0;
 
-	  dVec grad_ij = -1.0*(g1*(0.5*du_dq + du_dz)*rhat + g2*(0.5*du_dq -1.0*du_dz)*rphat);
+	  dVec grad_ij = -1.0* (g1*(0.5*du_dq + du_dz)*rhat + 
+			  g2*(0.5*du_dq - du_dz)*rphat);
 // 	  cerr<<"ptcls: "<<ptcl1<<" "<<ptcl2<<" "<<slice<<" "<<slice+skip<<endl;
 // 	  cerr<<"rmags "<<rhat<<" "<<rphat<<" "<<rmag<<" "<<rpmag<<endl;
 // 	  cerr<<"pre-vals "<<q<<" "<<z<<" "<<s2<<" "<<du_dq<<" "<<du_dz<<endl;
@@ -133,10 +134,10 @@ void ShortRangeOn_diagonal_displace_class::Read(IOSectionClass& in)
 {
   DoPtcl.resize(PathData.Path.NumParticles());
   todoIt.resize(PathData.Path.NumParticles());
-  distancesNew.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
-  factorArrayNew.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
-  distancesOld.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
-  factorArrayOld.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
+  distancesNew.reserve(PathData.Path.NumParticles()*10*8);
+  factorArrayNew.reserve(PathData.Path.NumParticles()*10*8);
+  distancesOld.reserve(PathData.Path.NumParticles()*10*8);
+  factorArrayOld.reserve(PathData.Path.NumParticles()*10*8);
 
   ptcls.resize(PathData.Path.NumParticles());
   gradVec.resize(PathData.Path.NumParticles());

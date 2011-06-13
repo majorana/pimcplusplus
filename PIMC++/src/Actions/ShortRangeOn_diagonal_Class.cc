@@ -17,7 +17,6 @@
 #include "../PathDataClass.h"
 #include "ShortRangeOn_diagonal_Class.h"
 #include  "sys/time.h"
-#include <cstdlib>
 #include <omp.h>
 ///DO NOT USE IF YOUR CUTOFF IS SUCH THAT ALL PARTICLE WILL BE INCLUDED IN ANY DIRECTION! THERE IS A BUG THAT WILL CAUSE IT TO BREAK!
 ///This has to be called after pathdata knows how many
@@ -100,7 +99,8 @@ ShortRangeOn_diagonal_class::GradAction_help(int slice1, int slice2,
 	  double g1 = 1.0;
 	  double g2 = 1.0;
 
-	  dVec grad_ij = -1.0*(g1*(0.5*du_dq + du_dz)*rhat + g2*(0.5*du_dq-1.0*du_dz)*rphat);
+	  dVec grad_ij = -1.0* (g1*(0.5*du_dq + du_dz)*rhat + 
+			  g2*(0.5*du_dq - du_dz)*rphat);
 // 	  cerr<<"ptcls: "<<ptcl1<<" "<<ptcl2<<" "<<slice<<" "<<slice+skip<<endl;
 // 	  cerr<<"rmags "<<rhat<<" "<<rphat<<" "<<rmag<<" "<<rpmag<<endl;
 // 	  cerr<<"pre-vals "<<q<<" "<<z<<" "<<s2<<" "<<du_dq<<" "<<du_dz<<endl;
@@ -134,10 +134,10 @@ void ShortRangeOn_diagonal_class::Read(IOSectionClass& in)
 {
   DoPtcl.resize(PathData.Path.NumParticles());
   todoIt.resize(PathData.Path.NumParticles());
-  distancesNew.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
-  factorArrayNew.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
-  distancesOld.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
-  factorArrayOld.reserve(PathData.Path.NumParticles()*PathData.Path.NumParticles()*8);
+  //  distancesNew.reserve(PathData.Path.NumParticles()*10*8);
+  //  factorArrayNew.reserve(PathData.Path.NumParticles()*10*8);
+  //  distancesOld.reserve(PathData.Path.NumParticles()*10*8);
+  //  factorArrayOld.reserve(PathData.Path.NumParticles()*10*8);
 
   ptcls.resize(PathData.Path.NumParticles());
   gradVec.resize(PathData.Path.NumParticles());
@@ -362,7 +362,7 @@ ShortRangeOn_diagonal_class::SingleAction (int slice1, int slice2,
   DavidPAClass *DPA=((DavidPAClass*)&PA);
   int loopSize=distances->size();
   double TotalUp=0.0;
-//   cerr<<"START"<<endl;
+  //   cerr<<"START"<<endl;
 //   cerr<<"Diagonal end is "<<((DPA->UdiagSpline)(0)).End()<<endl;
 //   cerr<<"Diagonal start is "<<((DPA->UdiagSpline)(0)).Start()<<endl;
 //   cerr<<"dx is "<<((DPA->UdiagSpline)(4)).dx<<" "<<((DPA->UdiagSpline)(4)).dxInv<<endl;
