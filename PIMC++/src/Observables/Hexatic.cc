@@ -15,7 +15,7 @@
 /////////////////////////////////////////////////////////////
 
 #include "Hexatic.h"
-#include <complex>
+#include <complex.h>
 
 double unit2angle(double x,double y)
 {
