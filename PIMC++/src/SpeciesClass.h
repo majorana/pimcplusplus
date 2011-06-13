@@ -43,6 +43,7 @@ public:
   /// \$ \lambda \equiv \frac{\hbar^2}{2m} \$.  This is zero for a
   /// classical particle.
   double lambda;
+  dVec assymetric_lambda;
   double Charge;
   double chargeSpread;
   // I added this parameter for use with empirical potentials
