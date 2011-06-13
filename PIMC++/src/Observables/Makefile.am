@@ -14,6 +14,8 @@ libobservables_la_SOURCES  =     \
     Coupling.h                   \
     DistanceToHead.cc            \
     DistanceToHead.h             \
+    DynamicStructureFactor.cc            \
+    DynamicStructureFactor.h             \
     Forces.cc                    \
     Forces.h                     \
     lsapr.f                      \
