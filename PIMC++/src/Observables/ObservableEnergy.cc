@@ -25,6 +25,7 @@
 #include "../Actions/ST2WaterClass.h"
 #include "../Actions/QMCSamplingClass.h"
 #include "../Actions/DavidLongRangeClassYk.h"
+#include "../Actions/ShortRangeOn_diagonal_displace_Class.h"
 
 // Fix to include final link between link M and 0
 void EnergyClass::Accumulate()
@@ -43,6 +44,21 @@ void EnergyClass::Accumulate()
 			   dUNonlocal,residual);
 
   
+  Array<int,1> changedParticles(PathData.Path.NumParticles());
+  for (int i=0;i<changedParticles.size();i++)
+    changedParticles(i)=i;
+  int M=PathData.Path.NumTimeSlices();
+  //  a//  kinetic=PathData.Actions.Kinetic.SingleAction(0,M-1,changedParticles,0);
+  //  a//  dUShort= ((ShortRangeOn_diagonal_displace_class*)(PathData.Actions.GetAction("DiagonalDisplaceActionOrderN")))->SingleAction(0,M-1,changedParticles,0);
+  //  a//  ((ShortRangeOn_diagonal_displace_class*)(PathData.Actions.GetAction("DiagonalDisplaceActionOrderN")))->RejectCopy(0,0);
+  //double  dUShortp= ((ShortRangeOn_diagonal_class*)(PathData.Actions.GetAction("DiagonalActionOrderN")))->SingleAction(0,M-1,changedParticles,0);
+  //  cerr<<dUShort<<" "<<dUShortp<<endl;
+  //  ((ShortRangeOn_diagonal_class*)(PathData.Actions.GetAction("DiagonalActionOrderN")))->RejectCopy(0,0);
+
+
+  // a //  dULong = PathData.Actions.DavidLongRange.SingleAction(0,M-1,changedParticles,0);
+  //A  if (PathData.Path.Communicator.MyProc()==0)
+  //A    cerr<<endl<<"Kinetic: "<<kinetic<<" "<<dUShort<<" "<<dULong<<endl;
   //PathData.Actions.Energy(Energies);
 	//kinetic = Energies["kinetic"];
 	//dUShort = Energies["dUShort"];
@@ -90,8 +106,10 @@ void EnergyClass::Accumulate()
 
   //  TIP5PSum   += tip5p;
 	//cerr << "ObservableEnergy leaving Accumulate" << endl;
-	cerr<<"TotalSum is "<<localSum/(double)PathData.Path.TotalNumSlices<<endl;
-	EnergyHistogram.add(localSum/(double)PathData.Path.TotalNumSlices,1.0);
+	double completeSum=PathData.Path.Communicator.Sum(localSum)/(double)PathData.Path.TotalNumSlices;
+	//  if (PathData.Path.Communicator.MyProc()==0)
+    //    cerr<<"TotalSum is "<<completeSum<<endl;
+	EnergyHistogram.add(PathData.Path.Communicator.Sum(localSum)/(double)PathData.Path.TotalNumSlices,1.0);
 }
 
 
@@ -202,14 +220,16 @@ void EnergyClass::WriteBlock()
     NumPoints.Write(EnergyHistogram.NumPoints);
 
   }
+  for (int i=0;i<EnergyHistogram.histogram.size();i++)
+    EnergyHistogram.histogram[i]=EnergyHistogram.histogram[i]*norm*nslices*Prefactor;
   Array<double,1> EnergyHistogramTemp(&(EnergyHistogram.histogram[0]),shape(EnergyHistogram.histogram.size()),neverDeleteData);
-  //cerr<<"Being called"<<endl;
-  //for (int i=0;i<EnergyHistogramTemp.size();i++)
-  //  cerr<<EnergyHistogramTemp(i)<<endl;
+  //  cerr<<"Being called"<<endl;
+  //  for (int i=0;i<EnergyHistogramTemp.size();i++)
+  //    cerr<<EnergyHistogramTemp(i)<<endl;
 
-  PathData.Path.Communicator.Sum(EnergyHistogramTemp,EnergyHistogramSum);
-  EnergyHistogramSum=EnergyHistogramSum*norm*Prefactor*nslices;
-  EnergyHistogramVar.Write(EnergyHistogramSum);
+  //  PathData.Path.Communicator.Sum(EnergyHistogramTemp,EnergyHistogramSum);
+  //  EnergyHistogramSum=EnergyHistogramSum*norm*Prefactor*nslices;
+  EnergyHistogramVar.Write(EnergyHistogramTemp);
   TotalVar.Write   (Prefactor*PathData.Path.Communicator.Sum(TotalSum)*norm);
   KineticVar.Write (Prefactor*PathData.Path.Communicator.Sum(KineticSum)*norm);
   dUShortVar.Write (Prefactor*PathData.Path.Communicator.Sum(dUShortSum)*norm);

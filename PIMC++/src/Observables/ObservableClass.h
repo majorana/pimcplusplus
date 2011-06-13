@@ -23,6 +23,7 @@
 #include "Conductivity.h"
 #include "Coupling.h"
 #include "DistanceToHead.h"
+#include "DynamicStructureFactor.h"
 #include "Forces.h"
 #include "Hexatic.h"
 #include "HBond.h"

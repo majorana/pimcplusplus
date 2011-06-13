@@ -41,7 +41,6 @@ class AutoCorrClass : public ObservableClass
   int dumpFrequency;
   int now;
 	string dipoleSpecies;
-  int BinSize;
 public:
 	int NumSlots;
 	int WaitToFill;
