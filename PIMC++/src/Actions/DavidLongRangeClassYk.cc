@@ -129,6 +129,16 @@ void DavidLongRangeClassYk::BuildRPA_SingleSpecies()
 void DavidLongRangeClassYk::ReadYk()
 { 
   //assert(PairArray.size()==1);
+// <<<<<<< .mine
+//   DavidPAClass &pa(*((DavidPAClass*)PairArray(0)));
+//   assert(pa.LongRangeDim==NDIM);
+//   for (int dim=0;dim<NDIM;dim++)
+//     assert(pa.LongRangeBox(dim)==Path.GetBox()[dim]);
+//   assert(pa.LongRangeMass1==pa.LongRangeMass2);
+//   if (abs(pa.LongRangeMass1-Path.Species(0).lambda)>1e-10)
+//      cerr<<"Broken: "<<pa.LongRangeMass1<<" "<<Path.Species(0).lambda<<endl;
+//   assert(abs(pa.LongRangeMass1-Path.Species(0).lambda)<1e-10);
+// =======
   for (int pai=0;pai<PairArray.size();pai++){
     DavidPAClass &pa(*((DavidPAClass*)PairArray(pai)));
     assert(pa.LongRangeDim==NDIM);
@@ -150,6 +160,7 @@ void DavidLongRangeClassYk::ReadYk()
     assert(fabs(pa.LongRangeMass1-Path.Species(specNum1).lambda)<1e-10);
     assert(fabs(pa.LongRangeMass2-Path.Species(specNum2).lambda)<1e-10);
   }
+  ///>>>>>>> .r1855
   uk.resize(PairArray.size(), Path.kVecs.size());
   duk.resize(PairArray.size(), Path.kVecs.size());
   Vlong_k.resize(PairArray.size(), Path.kVecs.size());
