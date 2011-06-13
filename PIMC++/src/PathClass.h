@@ -150,6 +150,8 @@ public:
   /// from all of the processors individual permutation vector.
   /// Only processor 0 gets the result
   void TotalPermutation (Array<int,1> &permVec);
+  Array<int,2> permMat;
+    //  permMat.resize(numProcs,permVec.size());
   RandomClass &Random;
   int TotalNumSlices;
   double tau; //we need to set this still

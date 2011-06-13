@@ -1273,10 +1273,16 @@ void PathClass::TotalPermutation(Array<int,1> &permVec)
   int myProc = Communicator.MyProc();
   int numProcs = Communicator.NumProcs();
   int numPtcls = NumParticles();
-  permVec.resize(Permutation.size());
+  if (permVec.size()!=Permutation.size())
+    permVec.resize(Permutation.size());
+  if (permMat.extent(0) !=numProcs || permMat.extent(1)!=Permutation.size()){
+    permMat.resize(numProcs,Permutation.size());
+    //    Array<int,2> permMat(numProcs, permVec.size());
+  }
+  //  cerr<<"Perm sizes: "<<Permutation.size()<<" "<<numProcs<<" "<<permMat.extent(0)<<" "<<permMat.extent(1)<<" "<<permVec.size()<<endl;
   for (int i=0; i<permVec.size(); i++)
     permVec(i) = Permutation(i);
-  Array<int,2> permMat(numProcs, permVec.size());
+
 
   // First, collect all the individual permutation vectors
   Communicator.Gather (permVec, permMat, 0);
