@@ -56,8 +56,8 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
 	int num = species.NumParticles;
 	bool isCubic = (Box[0]==Box[1]);
 	if (!isCubic) {
-	  perr << "A cubic box is current required for cubic initilization\n";
-	  abort();
+	  perr << "A cubic box is typically preferred for cubic initilization\n";
+	  //	  abort();
 	}
 	int numPerDim = (int) ceil (pow(0.5*(double)num, 1.0/2.0)-1.0e-6);
 	double delta = Box[0] / (double)numPerDim;
@@ -119,7 +119,7 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
   Array<double,1> oldBox;
   inFile.ReadVar("Box",oldBox);
   inFile.CloseSection();
-  ////  cerr<<"Read the box"<<endl;
+  cerr<<"Read the box "<<myProc<<endl;
   inFile.OpenSection("Observables");
   inFile.OpenSection("PathDump");
   Array<double,3> oldPaths; //(58,2560,2,3);
@@ -138,7 +138,7 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
   }
   Communicator.Broadcast(0,oldPermutation);
   //  assert(inFile.ReadVar("Permutation",oldPermutation));
-  //  cerr<<"Read init permutations "<<myProc<<endl;
+  cerr<<"Read init permutations "<<myProc<<endl;
   SetMode(NEWMODE);
   //  int myProc=Communicator.MyProc();
   if (myProc==Communicator.NumProcs()-1){
@@ -146,7 +146,7 @@ PathClass::Restart(IOSectionClass &in,string fileName,bool replicate,
       Permutation(ptcl) = oldPermutation(ptcl);
     Permutation.AcceptCopy();
   }
-  cerr<<"About to read paths"<<endl;
+  cerr<<"About to read paths "<<myProc<<endl;
   IOVarBase *pathVar = inFile.GetVarPtr("Path");
   int numDumps=pathVar->GetExtent(0);
   cerr<<"Number of path dumps is "<<numDumps<<endl;
@@ -819,8 +819,10 @@ PathClass::InitPaths (IOSectionClass &in)
       }
     }    
     else if (InitPaths=="RESTART"){
+      cerr<<"Restarting being read"<<endl;
       string pathFile;
       assert(in.ReadVar("File",pathFile));
+      cerr<<"The path file is "<<pathFile<<endl;
       Restart(in,pathFile,false,species);
       cerr<<"Done with initpaths restart"<<endl;
     }
