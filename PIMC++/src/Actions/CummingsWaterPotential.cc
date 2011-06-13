@@ -510,7 +510,7 @@ double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice,
       //cout << mol << "p " << p(slice,mol) << endl;
       //cout << mol << "Eq " << Eq(slice,mol) << endl;
       // long-range reaction field contribution
-      TotalReactionField -= 0.5 * p_permanent(slice, mol) * RF_q(slice, mol);
+      TotalReactionField -= 0.5 * dot(p_permanent(slice, mol),RF_q(slice, mol));
       //cout << mol << " " << piece1_BC << " " << piece2_BC << " " << piece3_BC << endl;
     }
   }
