@@ -124,7 +124,7 @@ double mysign(double num)
 double EndStageClass::Sample(int &slice1,int &slice2, 
 	      Array<int,1> &activeParticles)
 {
-  cerr<<"I am samplign now"<<endl;
+  cerr<<"I am sampling now"<<endl;
   int procWithRefSlice = PathData.Path.SliceOwner (PathData.Path.RefSlice);
   //  cerr<<"Entering end stage class" <<procWithRefSlice<<" "
   //      <<PathData.Path.RefSlice<<" "
@@ -171,16 +171,21 @@ double EndStageClass::Sample(int &slice1,int &slice2,
   activeParticles.resize (1);
   activeParticles(0) = (int)PathData.Path.OpenPtcl;
 
-
   int changePtcl;
-
+  int skipSign;
+  dVec oldrdiff;
+  dVec oldPos;
   if (Open==HEAD){
     cerr<<"Setting to head"<<endl;
     changePtcl=(int)PathData.Path.OpenPtcl;
+    oldrdiff = Path.Velocity(slice1,slice2,changePtcl);
+    oldPos = PathData.Path(slice2,changePtcl);
   }
   else if (Open==TAIL){
     cerr<<"Setting to Tail"<<endl;
     changePtcl=PathData.Path.NumParticles();
+    oldrdiff = Path.Velocity(slice1, slice2, (int)PathData.Path.OpenPtcl);
+    oldPos = PathData.Path(slice1,(int)PathData.Path.OpenPtcl);
   }
   else {
     cerr<<
@@ -188,28 +193,48 @@ double EndStageClass::Sample(int &slice1,int &slice2,
     abort();
   }
 
-  dVec oldPos=PathData.Path(PathData.Path.OpenLink,changePtcl);
-  dVec newPos;///was /10 instead of /40 for the free particles
-  newPos(0)= oldPos[0]+
-    //    PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/10.0)*
-    //HACK
-    PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/5.0)*
-    mysign(PathData.Path.Random.Local()-0.5);
-  newPos(1)= oldPos[1]+
-    PathData.Path.Random.Local()*(PathData.Path.GetBox()(1)/5.0)*
-    mysign(PathData.Path.Random.Local()-0.5);
-  newPos(2)=  oldPos[2]+
-    PathData.Path.Random.Local()*(PathData.Path.GetBox()(2)/5.0)*
-    mysign(PathData.Path.Random.Local()-0.5);
-  if (OnlyX){
-    newPos(1)=oldPos[1];
-    newPos(2)=oldPos[2];
-  }
-  if (fabs(newPos(0))>500 || fabs(newPos(1))>500 || fabs(newPos(2))>500){
-    cerr<<"ERROR! ERROR! ERROR!"<<newPos(0)
-	<<" "<<newPos(1)<<" "<<newPos(2)<<endl;
-  } 
+  int skip = (1<<NumLevels);
+  double levelTau = PathData.Path.tau*skip;
+  double lambda=PathData.Path.ParticleSpecies(activeParticles(0)).lambda;
+  double sigma2=(2.0*lambda*levelTau);
+  double sigma=sqrt(sigma2);
+
+  dVec Delta;
+  Path.Random.LocalGaussianVec(sigma,Delta);
+  PathData.Path.PutInBox(Delta);
+
+  dVec newPos= oldPos + Delta;
+
+  dVec newrdiff = Delta;
+
+  double logOldSampleProb = -0.5*dot(oldrdiff,oldrdiff)/sigma2;
+  double logSampleProb = -0.5*dot(newrdiff,newrdiff)/sigma2;
+
   PathData.Path.SetPos(PathData.Path.OpenLink,changePtcl,newPos);
+
+  return exp(-logSampleProb+logOldSampleProb);
+
+  // Throw in Box
+  //
   //  cerr<<"Existing as a correct processor with correct time slices"<<endl;
-  return 1.0;
+  //return 1.0;
+  //newPos(0)= oldPos(0)+
+  //  //    PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/10.0)*
+  //  //HACK
+  //  PathData.Path.Random.Local()*(PathData.Path.GetBox()(0)/5.0)*
+  //  mysign(PathData.Path.Random.Local()-0.5);
+  //newPos(1)= oldPos(1)+
+  //  PathData.Path.Random.Local()*(PathData.Path.GetBox()(1)/5.0)*
+  //  mysign(PathData.Path.Random.Local()-0.5);
+  ////newPos(2)=  oldPos(2)+
+  ////  PathData.Path.Random.Local()*(PathData.Path.GetBox()(2)/5.0)*
+  ////  mysign(PathData.Path.Random.Local()-0.5);
+  //if (OnlyX){
+  //  newPos(1)=oldPos(0);
+  //  //newPos(2)=oldPos(2);
+  //}
+  //if (fabs(newPos(0))>500 || fabs(newPos(1))>500) { // || fabs(newPos(2))>500){
+  //  cerr<<"ERROR! ERROR! ERROR!"<<newPos(0)
+	//<<" "<<newPos(1)<<endl;//" "<<newPos(2)<<endl;
+  //}
 }

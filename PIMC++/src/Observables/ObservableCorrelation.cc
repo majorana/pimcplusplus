@@ -261,6 +261,7 @@ void nofrClass::Read(IOSectionClass& in)
   double gridEnd;
   int numGridPoints;
   assert(in.ReadVar("Type",gridType));
+  // Hack (Forced Linear)
   assert(gridType=="Linear");
   bool readStartGrid=in.ReadVar("start",gridStart);
   bool readEndGrid=in.ReadVar("end",gridEnd);
@@ -295,10 +296,12 @@ void nofrClass::WriteInfo()
 
   int numBins = grid.NumPoints-1;
   Array<double,1> r(numBins);
+  Array<double,1> r2(numBins);
   for (int i=0; i<numBins; i++) {
     double ra = grid(i);
     double rb = grid(i+1);
-    r(i) = 0.75 * (rb*rb*rb*rb-ra*ra*ra*ra)/(rb*rb*rb-ra*ra*ra);
+    //r(i) = 0.75 * (rb*rb*rb*rb-ra*ra*ra*ra)/(rb*rb*rb-ra*ra*ra);
+    r(i) = 0.5*(ra+rb);
   }
   IOSection.WriteVar("x", r);
   IOSection.WriteVar("xlabel", "r");
@@ -306,7 +309,6 @@ void nofrClass::WriteInfo()
   IOSection.WriteVar("Type","CorrelationFunction");
   IOSection.WriteVar("Cumulative", false);
 }
-  
 
 ///Writes a block of histogram data.  Does not compensate for volume
 ///effects or for importance sampling. This has to be done after the
@@ -327,15 +329,25 @@ void nofrClass::WriteBlock()
       FirstTime=false;
       WriteInfo();
     }
-    Array<double,1> gofrArray(HistSum.size());
+    Array<double,1> nofrArray(HistSum.size());
     for (int i=0; i<grid.NumPoints-1; i++){
       double r1 = grid(i);
       double r2 = (i<(grid.NumPoints-1)) ? grid(i+1):(2.0*grid(i)-grid(i-1));
       double r = 0.5*(r1+r2);
+#if NDIM==3
       double binVol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-      gofrArray(i) = (double) HistSum(i) / (norm);
+#endif
+#if NDIM==2
+      double binVol = M_PI * (r2*r2-r1*r1);
+#endif
+      //////////////////////////
+      // This line does not normalize by volume for a dimer, e.g. -jg
+      // nofrArray(i) = (double) HistSum(i) / (norm);
+      //////////////////////////
+      nofrArray(i) = (double) HistSum(i) / (binVol*norm);
     }
-    nofrVar.Write(gofrArray);
+    nofrVar.Write(nofrArray);
+    nofrVar.Flush();
   }
   TotalCounts=0;
   Histogram=0;
@@ -350,9 +362,14 @@ void nofrClass::Print()
       double r1 = grid(i);
       double r2 = grid(i+1);
       double r = 0.5*(r1+r2);
+#if NDIM==3
       double vol = 4.0*M_PI/3 * (r2*r2*r2-r1*r1*r1);
-      double gofr = (double) Histogram(i) / (vol*TotalCounts);
-      fprintf (stderr, "%1.12e %1.12e\n", r, gofr);
+#endif
+#if NDIM==2
+      double vol = M_PI * (r2*r2-r1*r1);
+#endif
+      double nofr = (double) Histogram(i) / (vol*TotalCounts);
+      fprintf (stderr, "%1.12e %1.12e\n", r, nofr);
     }
 }
 

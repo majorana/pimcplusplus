@@ -78,37 +78,37 @@ void BisectionBlockClass::Read_new(IOSectionClass &in)
     if (level!=LowestLevel){
       Array<string,1> higherLevelActions;
       if (in.ReadVar("HigherLevelActions",higherLevelActions)){
-	for (int i=0;i<higherLevelActions.size();i++)
-	  newStage->Actions.push_back(PathData.Actions.GetAction(higherLevelActions(i)));
+	      for (int i=0;i<higherLevelActions.size();i++)
+	        newStage->Actions.push_back(PathData.Actions.GetAction(higherLevelActions(i)));
       }
       else {
-	cerr<<"WARNING! No Higher Level Actions in BisectionBlock"<<endl;
+	      cerr<<"WARNING! No Higher Level Actions in BisectionBlock"<<endl;
       }
     }
     else if (level==LowestLevel){
       Array<string,1> samplingActions;
       assert(in.ReadVar("SamplingActions",samplingActions));
       for (int i=0;i<samplingActions.size();i++)
-	newStage->Actions.push_back(PathData.Actions.GetAction(samplingActions(i)));
+	      newStage->Actions.push_back(PathData.Actions.GetAction(samplingActions(i)));
       ///If it's David's long range class then do this
       if (PathData.Path.DavidLongRange){
-	cerr<<"Pushing david long range at lowetst level"<<endl;
-	newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+	      cerr<<"Pushing david long range at lowetst level"<<endl;
+	      newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
       }
       else if (PathData.Actions.HaveLongRange()){
-	if (PathData.Actions.UseRPA)
-	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-	else
-	  newStage->Actions.push_back(&PathData.Actions.LongRange);
+	      if (PathData.Actions.UseRPA)
+	        newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+      	else
+	       newStage->Actions.push_back(&PathData.Actions.LongRange);
       }
     }
     // HACK HACK HACK
     // These used to be only pushed on at the lowest level
     if (level==0){
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-	cerr << "Adding fermion node action for species " 
-	     << speciesName << endl;
-	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+	      cerr << "Adding fermion node action for species " 
+	           << speciesName << endl;
+	      newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
       }
     }
     if (PathData.Actions.UseNonlocal) 

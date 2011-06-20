@@ -16,6 +16,8 @@ libactions_la_SOURCES =            \
     DavidLongRangeClass.h          \
     DavidLongRangeClassYk.cc         \
     DavidLongRangeClassYk.h         \
+    ExternalPotential.cc      \
+    ExternalPotential.h       \
     FixedPhaseActionClass.cc       \
     FixedPhaseActionClass.h        \
     FreeNodalActionClass.cc        \

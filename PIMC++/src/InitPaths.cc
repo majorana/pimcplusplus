@@ -584,9 +584,16 @@ PathClass::InitPaths (IOSectionClass &in)
     }
     else if (InitPaths == "CUBIC") {
       int num = species.NumParticles;
-      bool isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
+      bool isCubic = 0;
+#if NDIM==2   
+      isCubic = (Box[0]==Box[1]);
+      cerr << isCubic << endl;
+#endif
+#if NDIM==3    
+      isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
+#endif
       if (!isCubic) {
-	perr << "A cubic box is current required for cubic initilization\n";
+	perr << isCubic << " A cubic box is current required for cubic initilization\n";
 	abort();
       }
       int numPerDim = (int) ceil (pow((double)num, 1.0/3.0)-1.0e-6);
@@ -596,11 +603,13 @@ PathClass::InitPaths (IOSectionClass &in)
 	int ip = ptcl-species.FirstPtcl;
 	ix = ip/(numPerDim*numPerDim);
 	iy = (ip-(ix*numPerDim*numPerDim))/numPerDim;
-	iz = ip - ix*numPerDim*numPerDim - iy*numPerDim;
 	dVec r;
 	r[0] = ix*delta;
 	r[1] = iy*delta;
+#if NDIM==3    
+	iz = ip - ix*numPerDim*numPerDim - iy*numPerDim;
 	r[2] = iz*delta;
+#endif
 	for (int slice=0; slice<NumTimeSlices(); slice++) 
 	  Path(slice,ptcl) = r;
       }
@@ -640,7 +649,14 @@ PathClass::InitPaths (IOSectionClass &in)
     else if (InitPaths == "BCC") {
       //      assert(NDIM==2);
       int num = species.NumParticles;
-      bool isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
+      bool isCubic = 0;
+#if NDIM==2   
+      isCubic = (Box[0]==Box[1]);
+      cerr << isCubic << endl;
+#endif
+#if NDIM==3    
+      isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
+#endif
       if (!isCubic) {
 	perr << "A cubic box is current required for cubic initilization\n";
 	abort();
@@ -652,11 +668,15 @@ PathClass::InitPaths (IOSectionClass &in)
 	int ix, iy, iz;
 	ix = ip/(numPerDim*numPerDim);
 	iy = (ip-(ix*numPerDim*numPerDim))/numPerDim;
+#if NDIM==3
 	iz = ip - ix*numPerDim*numPerDim - iy*numPerDim;
+#endif
 	dVec r;
 	r[0] = ix*delta-0.5*Box[0];
 	r[1] = iy*delta-0.5*Box[1];
+#if NDIM==3
 	r[2] = iz*delta-0.5*Box[2];
+#endif
 	if (ptcl % 2) 
 	  r += 0.5*delta;
 // 	fprintf (stderr, "BCC ptcl %d position = [%8.4f %8.4f %8.4f]\n",

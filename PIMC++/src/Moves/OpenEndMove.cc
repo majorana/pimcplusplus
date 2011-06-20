@@ -59,15 +59,21 @@ void OpenEndMoveClass::Read(IOSectionClass &in)
   StageClass* endStage;
   endStage=new EndStageClass(PathData,NumLevels,IOSection);
   endStage->Read(in);
+  endStage->Actions.push_back(&PathData.Actions.Kinetic);
+  endStage->BisectionLevel = NumLevels;
   Stages.push_back (endStage);
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = 
       new BisectionStageClass (PathData, level, IOSection);
 
+    newStage->UseCorrelatedSampling=false;
+    newStage->TotalLevels=NumLevels;
+
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
-    if (level==0)
-      newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
-    if (level>0)
+    // May need later
+    //if (level==0)
+      //newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
+    if (level>0) 
       newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
     else if (PathData.Path.OrderN)
       newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
@@ -75,30 +81,26 @@ void OpenEndMoveClass::Read(IOSectionClass &in)
       newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
       if (PathData.Path.LongRange){
-	if (PathData.Actions.UseRPA)
-	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-	///If it's David's long range class then do this
-	else if (PathData.Path.DavidLongRange){
-	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
-	}
-	////
-	else
-	  newStage->Actions.push_back(&PathData.Actions.LongRange);
-	
-	
+         if (PathData.Actions.UseRPA)
+           newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+         ///If it's David's long range class then do this
+         else if (PathData.Path.DavidLongRange){
+           newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+         }
+         ////
+         else
+           newStage->Actions.push_back(&PathData.Actions.LongRange);
       }
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-	cerr << "Adding fermion node action for species " 
+	      cerr << "Adding fermion node action for species " 
 	     << speciesName << endl;
 
-	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+	      newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
       }
     }
-
     newStage->BisectionLevel = level;
     Stages.push_back (newStage);
   }
-
 }
 
 

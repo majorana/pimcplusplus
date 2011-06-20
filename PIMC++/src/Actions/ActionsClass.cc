@@ -22,6 +22,7 @@
 #include <Common/IO/FileExpand.h>
 
 // now include ActionBaseClass headers here, not in .h
+#include "ExternalPotential.h"
 #include "CummingsWaterPotential.h"
 #include "DiagonalActionClass.h"
 #include "ShortRangeClass.h"
@@ -306,8 +307,8 @@ void ActionsClass::Read(IOSectionClass &in)
     DavidLongRange.ReadYk();
     //    DavidLongRangeYk.ReadYk(in);
   }
-  if (PathData.Path.OpenPaths)
-    OpenLoopImportance.Read(in);
+  //if (PathData.Path.OpenPaths)
+    //OpenLoopImportance.Read(in);
   // end old section to be deprecated
   // /////////////////////////////////////////////////////////////////////
 
@@ -374,6 +375,8 @@ void ActionsClass::Read(IOSectionClass &in)
 //      newAction = new ReadFromFileActionClass(PathData);
     } else if (type == "BlendActions") {
       newAction = new BlendActionsClass(PathData);
+    } else if (type == "ExternalPotential") {
+      newAction = new ExternalPotential(PathData);
     } else {
       cerr << endl << "ActionBaseClass Type " << type << " not recognized" << endl;
       exit(0);

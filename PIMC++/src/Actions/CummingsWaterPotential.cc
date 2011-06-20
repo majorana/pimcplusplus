@@ -384,7 +384,7 @@ double CummingsWaterPotentialClass::d_dBeta (int startSlice, int endSlice,  int 
 // don't think this can be avoided!
 double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice, 
 	       const Array<int,1> &activeParticles, int level, bool isAction)
-{
+{/*
   for (int counter=0; counter<Path.DoPtcl.size(); counter++)
     Path.DoPtcl(counter)=true;
 
@@ -510,7 +510,7 @@ double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice,
       //cout << mol << "p " << p(slice,mol) << endl;
       //cout << mol << "Eq " << Eq(slice,mol) << endl;
       // long-range reaction field contribution
-      TotalReactionField -= 0.5 * dot(p_permanent(slice, mol),RF_q(slice, mol));
+      TotalReactionField -= 0.5 * p_permanent(slice, mol) * RF_q(slice, mol);
       //cout << mol << " " << piece1_BC << " " << piece2_BC << " " << piece3_BC << endl;
     }
   }
@@ -605,8 +605,8 @@ double CummingsWaterPotentialClass::ComputeEnergy(int startSlice, int endSlice,
     cout << TotalDipole << " " << TotalExp6 << " " << TotalCharge << " " << kspace << " " << TotalU << endl;
     //cout << TotalDipole << "  " << TotalExp6 << " " << TotalCharge << " " << TotalU << " " << rSeparation << endl;
     //cout << "Erf(1) " << erf(1) << " prefactor " << conversion*prefactor << endl;
-  }
-  return (TotalU);
+    }*/
+  return 0;//(TotalU);
 }
 
 void CummingsWaterPotentialClass::Read (IOSectionClass &in)
