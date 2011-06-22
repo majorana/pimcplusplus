@@ -54,7 +54,9 @@ dVec OpenStageClass::RandomBoxLocation()
   dVec boxSize=PathData.Path.GetBox();
   myLoc[0]=PathData.Path.Random.Local()*(2*boxSize[0])-boxSize[0];
   myLoc[1]=PathData.Path.Random.Local()*(2*boxSize[1])-boxSize[1];
-  //myLoc[2]=PathData.Path.Random.Local()*(2*boxSize[2])-boxSize[2];
+#ifdef NDIM==3
+  myLoc[2]=PathData.Path.Random.Local()*(2*boxSize[2])-boxSize[2];
+#endif
   return myLoc;
 }
 
@@ -78,7 +80,6 @@ bool OpenStageClass::Attempt (int &slice1, int &slice2,
   }
   else 
     return true;
-  
   
 }
 
