@@ -6,16 +6,16 @@ Section (Fits)
   {
     string Name = "p";
     double lambda = 1.0;
-    int Ndim = 3;
-    double Charge = 1;
+    int Ndim = 2;
+    double Charge = 0;
   }
 
   Section (Particle2)
   {
     string Name = "p";
     double lambda = 1.0;
-    int Ndim = 3;
-    double Charge = 1;
+    int Ndim = 2;
+    double Charge = 0;
   }
 
   Section (Potential)

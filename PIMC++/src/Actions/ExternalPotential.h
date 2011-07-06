@@ -27,6 +27,7 @@ class ExternalPotential : public ActionBaseClass
 {
 protected:
   int TotalTime;
+  double extConst;
 public:
   void Read (IOSectionClass &in);
   double dUdR(int slice, int ptcl1, int level);

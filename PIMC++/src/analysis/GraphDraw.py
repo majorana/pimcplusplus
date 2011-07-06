@@ -9,12 +9,14 @@ def IsMonotonic (x):
           isMono = isMono and (x[i+1] > x[i])
      return isMono
 
-def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
+def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel,cutoff):
      clf()
      #if (IsMonotonic(x)):
      #     plot(x, y)
      #else:
-     plot(x, y, 'o')
+     numLines=len(y)
+     for line in range(0,numLines):
+       plot(x[line], y[line], 'o')
      h1=xlabel(hlabel)
      setp(h1,"FontSize",20)
      v1=ylabel(vlabel)
@@ -23,9 +25,34 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel):
      setp(labels, 'fontsize', 16)
      labels = get(gca(), 'yticklabels')
      setp(labels, 'fontsize', 16)
-     currAxis=axis()
-##     currAxis[0]=cutoff
+     currAxis=list(axis())
+     currAxis[1]=cutoff
      axis(currAxis)
+     savefig(fileBase+".png",dpi=60)
+     savefig(fileBase+".ps")
+     myImg=Image(fileBase+".png")
+     return myImg
+
+def ProduceCorrelationPictureLogLog(x,y,fileBase,hlabel,vlabel,cutoff):
+     clf()
+     #if (IsMonotonic(x)):
+     #     plot(x, y)
+     #else:
+     numLines=len(y)
+     for line in range(0,numLines):
+       loglog(x[line], y[line], 'o', basex=10)
+     h1=xlabel(hlabel)
+     setp(h1,"FontSize",20)
+     v1=ylabel(vlabel)
+     setp(v1,"FontSize",20)
+     labels = get(gca(), 'xticklabels')
+     setp(labels, 'fontsize', 16)
+     labels = get(gca(), 'yticklabels')
+     setp(labels, 'fontsize', 16)
+     currAxis=list(axis())
+     currAxis[1]=cutoff
+     axis(currAxis)
+     ylim(0.001,1.001)
      savefig(fileBase+".png",dpi=60)
      savefig(fileBase+".ps")
      myImg=Image(fileBase+".png")

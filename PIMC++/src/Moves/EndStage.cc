@@ -124,7 +124,7 @@ double mysign(double num)
 double EndStageClass::Sample(int &slice1,int &slice2, 
 	      Array<int,1> &activeParticles)
 {
-  cerr<<"I am sampling now"<<endl;
+  //  cerr<<"I am sampling now"<<endl;
   int procWithRefSlice = PathData.Path.SliceOwner (PathData.Path.RefSlice);
   //  cerr<<"Entering end stage class" <<procWithRefSlice<<" "
   //      <<PathData.Path.RefSlice<<" "
@@ -176,13 +176,13 @@ double EndStageClass::Sample(int &slice1,int &slice2,
   dVec oldrdiff;
   dVec oldPos;
   if (Open==HEAD){
-    cerr<<"Setting to head"<<endl;
+    // cerr<<"Setting to head"<<endl;
     changePtcl=(int)PathData.Path.OpenPtcl;
     oldrdiff = Path.Velocity(slice1,slice2,changePtcl);
     oldPos = PathData.Path(slice2,changePtcl);
   }
   else if (Open==TAIL){
-    cerr<<"Setting to Tail"<<endl;
+    // cerr<<"Setting to Tail"<<endl;
     changePtcl=PathData.Path.NumParticles();
     oldrdiff = Path.Velocity(slice1, slice2, (int)PathData.Path.OpenPtcl);
     oldPos = PathData.Path(slice1,(int)PathData.Path.OpenPtcl);

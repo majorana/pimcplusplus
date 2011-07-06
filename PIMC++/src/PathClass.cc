@@ -336,10 +336,10 @@ void PathClass::Allocate()
   /// until we run out of extra slices. The last slice on processor i
   /// is the first slice on processor i+1.
   MyNumSlices=TotalNumSlices/numProcs+1+(myProc<(TotalNumSlices % numProcs));
-  
+
   // Initialize reference slice position to be 0 on processor 0.  
   RefSlice = 0;
-    
+
   int numParticles = 0;
 
   /// Set the particle range for the new species
@@ -350,8 +350,8 @@ void PathClass::Allocate()
     numParticles=numParticles + N;
     SpeciesArray(speciesNum)->LastPtcl = first + N-1;;
     SpeciesArray(speciesNum)->Ptcls.resize(N);
-    
-    // this molecule stuff is OBSOLETE
+
+// this molecule stuff is OBSOLETE
 //    int foundAt;
 //    int prevIndex;
 //    if(doMol){
@@ -526,7 +526,7 @@ void PathClass::SetupkVecs2D()
       //	k[2] = iz*kBox[2];
       //	ki[2]= iz+MaxkIndex[2];
 	if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
-	  perr<<"This k vec is "<<k[0]<<" "<<k[1]<<endl;
+	   //perr<<"This k vec is "<<k[0]<<" "<<k[1]<<endl;
 	  kVecs(numVecs) = k;
 	  kIndices(numVecs)=ki;
 	  numVecs++;
@@ -542,9 +542,9 @@ void PathClass::SetupkVecs2D()
 
 
 ///Puts in the vector MagKInt a number that corresponds to the sorted
-///order of teh magnitude of the k vectors. Doesn't actually change
+///order of the magnitude of the k vectors. Doesn't actually change
 ///what's in kVec. Currently only used for the reading of David's long
-///range class. 
+///range class.
 void PathClass::SortRhoK()
 {
   /////  Array<double,1> MagK;
@@ -555,16 +555,12 @@ void PathClass::SortRhoK()
     //    MagK(kVec)=sqrt(kVecs(kVec)[0]*kVecs(kVec)[0]+
     //			kVecs(kVec)[1]*kVecs(kVec)[1]);
     MagK(kVec)=sqrt(dot(kVecs(kVec),kVecs(kVec)));
-
-
   }
   int smallIndex=0;
  
   for (int counter=0;counter<MagKint.size();counter++){
     MagKint(counter)=-1;
   }
-
-
 
   for (int currentNum=0;currentNum<kVecs.size();currentNum++){
     for (int counter=0;counter<MagK.size();counter++){
@@ -585,9 +581,9 @@ void PathClass::SortRhoK()
     if (smallIndex==-1)
       currentNum=kVecs.size()+1;
   }
-  for (int counter=0;counter<MagKint.size();counter++){
-    perr<<"My mag K int is "<<MagKint(counter)<<endl;
-  }
+ // for (int counter=0;counter<MagKint.size();counter++){
+ //   perr<<"My mag K int is "<<MagKint(counter)<<endl;
+ // }
 
 }
 
@@ -615,9 +611,9 @@ void PathClass::SetupkVecs3D()
     for (int iy=-MaxkIndex[1]; iy<=MaxkIndex[1]; iy++) {
       k[1] = iy*kBox[1];
       for (int iz=-MaxkIndex[2]; iz<=MaxkIndex[2]; iz++) {
-	k[2] = iz*kBox[2];
-	if ((dot(k,k)<kCutoff*kCutoff) && Include(k))
-	  numVecs++;
+        k[2] = iz*kBox[2];
+        if ((dot(k,k)<kCutoff*kCutoff) && Include(k))
+          numVecs++;
       }
     }
   }
@@ -637,24 +633,18 @@ void PathClass::SetupkVecs3D()
       k[1] = iy*kBox[1];
       ki[1]= iy+MaxkIndex[1];
       for (int iz=-MaxkIndex[2]; iz<=MaxkIndex[2]; iz++) {
-	k[2] = iz*kBox[2];
-	ki[2]= iz+MaxkIndex[2];
-	if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
-	  kVecs(numVecs) = k;
-	  kIndices(numVecs)=ki;
-	  MagK(numVecs) = sqrt(dot(k,k));
-	  numVecs++;
-	}
+        k[2] = iz*kBox[2];
+        ki[2]= iz+MaxkIndex[2];
+        if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
+          kVecs(numVecs) = k;
+          kIndices(numVecs)=ki;
+          MagK(numVecs) = sqrt(dot(k,k));
+          numVecs++;
+        }
       }
     }
   }
 }
-
-// void PathClas::Calc_Ylm(int slice,int species)
-// {
-
-
-// }
 
 void PathClass::CalcRho_ks_Slow(int slice, int species,Array<dVec,1> &thekvecs,
 				Array<complex<double> ,3> rho_k)
@@ -662,8 +652,7 @@ void PathClass::CalcRho_ks_Slow(int slice, int species,Array<dVec,1> &thekvecs,
   for (int ki=0; ki<thekvecs.size(); ki++) {
     complex<double> rho;
     rho = 0.0;
-    for (int ptcl=Species(species).FirstPtcl; 
-	 ptcl <= Species(species).LastPtcl; ptcl++) {
+    for (int ptcl=Species(species).FirstPtcl; ptcl <= Species(species).LastPtcl; ptcl++) {
       const dVec &r = (*this)(slice, ptcl);
       double phase = dot(r, thekvecs(ki));
       rho += complex<double> (cos(phase), sin(phase));
@@ -677,8 +666,7 @@ void PathClass::CalcRho_ks_Slow(int slice, int species)
   for (int ki=0; ki<kVecs.size(); ki++) {
     complex<double> rho;
     rho = 0.0;
-    for (int ptcl=Species(species).FirstPtcl; 
-	 ptcl <= Species(species).LastPtcl; ptcl++) {
+    for (int ptcl=Species(species).FirstPtcl; ptcl <= Species(species).LastPtcl; ptcl++) {
       const dVec &r = (*this)(slice, ptcl);
       double phase = dot(r, kVecs(ki));
       rho += complex<double> (cos(phase), sin(phase));
@@ -694,8 +682,7 @@ void PathClass::CalcRho_ks_Fast(int slice,int species)
   for (int ki=0;ki<kIndices.size();ki++)
     Rho_k(slice,species,ki)=0.0;
 
-  for (int ptcl=Species(species).FirstPtcl; 
-       ptcl <= Species(species).LastPtcl; ptcl++) {
+  for (int ptcl=Species(species).FirstPtcl;  ptcl <= Species(species).LastPtcl; ptcl++) {
     // First, compute C arrays
     const dVec &r = (*this)(slice, ptcl);
     for (int dim=0;dim<NDIM;dim++){
@@ -704,38 +691,32 @@ void PathClass::CalcRho_ks_Fast(int slice,int species)
       tempC=complex<double>(cos(phi), sin(phi));
       C[dim](MaxkIndex[dim]) = 1.0;
       for (int n=1; n<=MaxkIndex[dim]; n++) {
-	C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
-	C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));
+        C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
+        C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));
       }
     }
     // Now, loop over k-vector indices;
     for (int ki=0; ki<kIndices.size(); ki++) {
       const TinyVector<int,NDIM> &kIndex = kIndices(ki);
-      //#ifdef THREE_D
 #if NDIM==3
-      Rho_k(slice,species,ki) += 
-	C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
+      Rho_k(slice,species,ki) += C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
 #endif
-      //#ifdef TWO_D
 #if NDIM==2
       Rho_k(slice,species,ki) += C[0](kIndex[0])*C[1](kIndex[1]);
 #endif
     }
   }
-  //  perr<<"ending the calcrhok stuff"<<endl;
 }
-      
-void 
-PathClass::UpdateRho_ks(int slice1, int slice2,
-			const Array<int,1> &changedParticles, int level)
+
+void PathClass::UpdateRho_ks(int slice1, int slice2, const Array<int,1> &changedParticles, int level)
 {
   int skip = 1<<level;
   /// First, reset new to old;
   for (int slice=slice1; slice<=slice2; slice+=skip)
     for (int species=0; species<NumSpecies(); species++)
       for (int ki=0; ki<kIndices.size(); ki++)
-	Rho_k[NEWMODE](slice,species,ki) = Rho_k[OLDMODE](slice,species,ki);
-  
+        Rho_k[NEWMODE](slice,species,ki) = Rho_k[OLDMODE](slice,species,ki);
+
   /// Now update the new depending on the changed positions.
   for (int pi=0; pi<changedParticles.size(); pi++) {
     int ptcl = changedParticles(pi);
@@ -744,49 +725,43 @@ PathClass::UpdateRho_ks(int slice1, int slice2,
       dVec &rnew = Path[NEWMODE](slice,ptcl);
       dVec &rold = Path[OLDMODE](slice,ptcl);
       for (int dim=0;dim<NDIM;dim++){
-	complex<double> tempC;
-	double phi = rnew[dim] * kBox[dim];
-	tempC=complex<double>(cos(phi), sin(phi));
-	C[dim](MaxkIndex[dim]) = 1.0;
-	for (int n=1; n<=MaxkIndex[dim]; n++) {
-	  C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
-	  C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));
-	}
+        complex<double> tempC;
+        double phi = rnew[dim] * kBox[dim];
+        tempC=complex<double>(cos(phi), sin(phi));
+        C[dim](MaxkIndex[dim]) = 1.0;
+        for (int n=1; n<=MaxkIndex[dim]; n++) {
+          C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
+          C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));
+        }
       }
       // Now, loop over k-vector indices;
       for (int ki=0; ki<kIndices.size(); ki++) {
-	const TinyVector<int,NDIM> &kIndex = kIndices(ki);
-	//#ifdef THREE_D
+        const TinyVector<int,NDIM> &kIndex = kIndices(ki);
 #if NDIM==3
-	Rho_k[NEWMODE](slice,species,ki) += 
-	  C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
+        Rho_k[NEWMODE](slice,species,ki) += C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
 #endif
-	//#ifdef TWO_D
 #if NDIM==2
-	Rho_k[NEWMODE](slice,species,ki) += C[0](kIndex[0])*C[1](kIndex[1]);
+        Rho_k[NEWMODE](slice,species,ki) += C[0](kIndex[0])*C[1](kIndex[1]);
 #endif
       }
       for (int dim=0;dim<NDIM;dim++){
-	complex<double> tempC;
-	double phi = rold[dim] * kBox[dim];
-	tempC=complex<double>(cos(phi), sin(phi));
-	C[dim](MaxkIndex[dim]) = 1.0;
-	for (int n=1; n<=MaxkIndex[dim]; n++) {
-	  C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
-	  C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));
-	}
+        complex<double> tempC;
+        double phi = rold[dim] * kBox[dim];
+        tempC=complex<double>(cos(phi), sin(phi));
+        C[dim](MaxkIndex[dim]) = 1.0;
+        for (int n=1; n<=MaxkIndex[dim]; n++) {
+          C[dim](MaxkIndex[dim]+n) = tempC * C[dim](MaxkIndex[dim]+n-1);
+          C[dim](MaxkIndex[dim]-n) = conj(C[dim](MaxkIndex[dim]+n));
+        }
       }
       // Now, loop over k-vector indices;
       for (int ki=0; ki<kIndices.size(); ki++) {
-	const TinyVector<int,NDIM> &kIndex = kIndices(ki);
-	//#ifdef THREE_D
+        const TinyVector<int,NDIM> &kIndex = kIndices(ki);
 #if NDIM==3
-	Rho_k[NEWMODE](slice,species,ki) -= 
-	  C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
+        Rho_k[NEWMODE](slice,species,ki) -= C[0](kIndex[0])*C[1](kIndex[1])*C[2](kIndex[2]);
 #endif
-	//#ifdef TWO_D
 #if NDIM==2
-	Rho_k[NEWMODE](slice,species,ki) -= C[0](kIndex[0])*C[1](kIndex[1]);
+        Rho_k[NEWMODE](slice,species,ki) -= C[0](kIndex[0])*C[1](kIndex[1]);
 #endif
       }
     }
@@ -828,16 +803,16 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){
       //      cerr<<"Slice "<<timeSlice<<endl;
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	//	cerr<<"ptcl "<<ptcl<<" "<<Permutation(ptcl)<<endl;
-	Path[OLDMODE](timeSlice,ptcl)=Path[NEWMODE](timeSlice,Permutation(ptcl));
-	if (OpenPaths) {
-	  //	  cerr<<"IN OPEN PATHS"<<endl;
-	  if (timeSlice==(int)OpenLink && Permutation(ptcl)==(int)OpenPtcl && !swappedAlready){
-	    OpenPtcl[OLDMODE]=ptcl;
-	    OpenPtcl[NEWMODE]=ptcl;
-	    swappedAlready=true;
-	  }
-	}
+        // cerr<<"ptcl "<<ptcl<<" "<<Permutation(ptcl)<<endl;
+        Path[OLDMODE](timeSlice,ptcl)=Path[NEWMODE](timeSlice,Permutation(ptcl));
+        if (OpenPaths) {
+          // cerr<<"IN OPEN PATHS"<<endl;
+          if (timeSlice==(int)OpenLink && Permutation(ptcl)==(int)OpenPtcl && !swappedAlready){
+            OpenPtcl[OLDMODE]=ptcl;
+            OpenPtcl[NEWMODE]=ptcl;
+            swappedAlready=true;
+          }
+        }
       }
     }
     //    cerr<<"B MOve join"<<endl;
@@ -845,8 +820,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     //information into B
     for (int timeSlice=oldJoin+1;timeSlice<=newJoin;timeSlice++){ 
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
-
+        Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
       }
     }
   }
@@ -855,13 +829,13 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     //  else if (oldJoin>=newJoin){//CHANGED!
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++){
-	if (OpenPaths)
-	  if (timeSlice==(int)OpenLink && ptcl==(int)OpenPtcl && !swappedAlready){
-	    OpenPtcl[OLDMODE]=Permutation(ptcl);
-	    OpenPtcl[NEWMODE]=Permutation(ptcl);
-	    swappedAlready=true;
-	  }
-	Path[OLDMODE](timeSlice,Permutation(ptcl))=Path[NEWMODE](timeSlice,ptcl);
+        if (OpenPaths)
+          if (timeSlice==(int)OpenLink && ptcl==(int)OpenPtcl && !swappedAlready){
+            OpenPtcl[OLDMODE]=Permutation(ptcl);
+            OpenPtcl[NEWMODE]=Permutation(ptcl);
+            swappedAlready=true;
+          }
+        Path[OLDMODE](timeSlice,Permutation(ptcl))=Path[NEWMODE](timeSlice,ptcl);
       }
     }
     //    cerr<<"D MOve join"<<endl;
@@ -869,7 +843,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
     //information into B
     for (int timeSlice=newJoin+1;timeSlice<=oldJoin;timeSlice++){
       for (int ptcl=0;ptcl<NumParticles();ptcl++)
-	Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
+        Path[NEWMODE](timeSlice,ptcl)=Path[OLDMODE](timeSlice,ptcl);
     }
   }
   //  perr<<Path(OpenLink,OpenPtcl)<<endl;

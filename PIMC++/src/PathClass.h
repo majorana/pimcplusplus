@@ -182,6 +182,8 @@ public:
   /////////////////////////////////
   /// Displacements / Distances ///
   /////////////////////////////////
+  inline void Mag (dVec &v, double &mag);
+  inline void MagSquared (dVec &v, double &mag2);
   inline void DistDisp (int slice, int ptcl1, int ptcl2,
 			double &dist, dVec &disp);
   inline void DistDispFast (int slice, int ptcl1, int ptcl2,
@@ -876,6 +878,17 @@ PathClass::VelocityBetweenPtcl (int sliceA, int ptclA,int sliceB, int ptclB)
   return vel;
 }
 
+inline void
+PathClass::Mag (dVec &v, double &mag)
+{
+  mag = sqrt(dot(v,v));
+}
+
+inline void
+PathClass::MagSquared (dVec &v, double &mag2)
+{
+  mag2 = dot(v,v);
+}
 
 inline void 
 PathClass::PutInBox (dVec &v)

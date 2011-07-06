@@ -30,6 +30,7 @@ void ExternalPotential::Read(IOSectionClass& in)
 ExternalPotential::ExternalPotential(PathDataClass &pathData)
   : ActionBaseClass (pathData)
 {
+  extConst = 1.0;
 }
 
 double 
@@ -65,13 +66,11 @@ ExternalPotential::SingleAction (int slice1, int slice2,
     int species1=Path.ParticleSpeciesNum(ptcl1);
 
 	  for (int slice=slice1;slice<slice2;slice+=skip){
-	    dVec r, rp;
-	    double rmag, rpmag;
- 	    //PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
- 	  	//		     rmag, rpmag, r, rp);
-  
+	    double rmag2;
 	    double U;
-	    U = 0.0;
+	    dVec r = PathData.Path(slice, ptcl1);
+            PathData.Path.MagSquared(r,rmag2); 
+            U = extConst * rmag2;   
 	    TotalU+=U;
 	  }
   }
@@ -94,13 +93,11 @@ ExternalPotential::d_dBeta (int slice1, int slice2, int level)
     int species1=Path.ParticleSpeciesNum(ptcl1);
 
 	  for (int slice=slice1;slice<slice2;slice+=skip){
-	    dVec r, rp;
-	    double rmag, rpmag;
- 	    //PathData.Path.DistDisp(slice, slice+skip, ptcl1, ptcl2,
- 	  	//		     rmag, rpmag, r, rp);
-  
+	    double rmag2;
 	    double U;
-	    U = 0.0;
+	    dVec r = PathData.Path(slice, ptcl1);
+            PathData.Path.MagSquared(r,rmag2); 
+            U = extConst * rmag2;   
 	    TotalU+=U;
 	  }
   }

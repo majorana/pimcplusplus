@@ -83,19 +83,20 @@ summaryDoc.append(HR())
 try:
      (_,tau,numTimeSlices,box)=ProcessTopTable(summaryDoc,infiles)
      beta = tau*numTimeSlices
+     print box
 except:
      print "top table failed"
 
-infiles.OpenSection("Moves")
-numSections=infiles.CountSections()
-for secNum in range(0,numSections):
-     infiles.OpenSection(secNum)
-     moveName=infiles.GetName()
-     if moveName=="BisectionBlock":
-#          print "Processing BisectionBlock"
-          BisectionBlock.Process(infiles,summaryDoc,detailedDoc,StartCut)
-     infiles.CloseSection()
-infiles.CloseSection()
+#infiles.OpenSection("Moves")
+#numSections=infiles.CountSections()
+#for secNum in range(0,numSections):
+#     infiles.OpenSection(secNum)
+#     moveName=infiles.GetName()
+#     if moveName=="BisectionBlock":
+##          print "Processing BisectionBlock"
+#          BisectionBlock.Process(infiles,summaryDoc,detailedDoc,StartCut)
+#     infiles.CloseSection()
+#infiles.CloseSection()
           
 #############
 #### Moves ##
@@ -158,10 +159,10 @@ for counter in range(0,numSections):
                detailedDoc.append(HR())
 #          except:
 #               print "Error in energy processing"
-     elif myName=="CycleCount":
-          ProcessCycleCount(infiles,summaryDoc,detailedDoc,StartCut)
-          summaryDoc.append(HR())
-          detailedDoc.append(HR())
+#     elif myName=="CycleCount":
+#          ProcessCycleCount(infiles,summaryDoc,detailedDoc,StartCut)
+#          summaryDoc.append(HR())
+#          detailedDoc.append(HR())
      elif myName=="SpecificHeat":
          ProcessSpecificHeat(infiles,summaryDoc,detailedDoc,StartCut)
          summaryDoc.append(HR())
@@ -172,7 +173,7 @@ for counter in range(0,numSections):
          detailedDoc.append(HR())
 
      elif myName=="nofr":
-         Processnofr(infiles,summaryDoc,detailedDoc,StartCut)
+         Processnofr(infiles,summaryDoc,detailedDoc,StartCut,box)
          summaryDoc.append(HR())
          detailedDoc.append(HR())
 #     elif myName=="Pressure":
@@ -185,7 +186,7 @@ for counter in range(0,numSections):
 #         print "Processing Winding Number"
 #         ProcessWindingNumber(infiles,summaryDoc,detailedDoc,StartCut)
      elif myName=="SuperfluidFraction":
-#         print "Processing Superfluid Fraction"
+         print "Processing Superfluid Fraction"
          ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut)
 ##A     elif myName=="Hexatic":
 ##A          try: 
@@ -216,12 +217,12 @@ for counter in range(0,numSections):
           ProcessVacancyDensity(infiles,summaryDoc,detailedDoc,StartCut)
           summaryDoc.append(HR())
           detailedDoc.append(HR())
-     elif myName=="StructureFactor":
-#          for i in range(0,20):
-#               ProcessStructureFactor(infiles,summaryDoc,detailedDoc,i*50)
-          ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut)
-          summaryDoc.append(HR())
-          detailedDoc.append(HR())
+#     elif myName=="StructureFactor":
+##          for i in range(0,20):
+##               ProcessStructureFactor(infiles,summaryDoc,detailedDoc,i*50)
+#          ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut)
+#          summaryDoc.append(HR())
+#          detailedDoc.append(HR())
 
      elif myName=="PhiK":
          ProcessJosephson(infiles,summaryDoc,detailedDoc,\

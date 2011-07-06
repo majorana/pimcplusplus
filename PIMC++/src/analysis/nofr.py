@@ -4,7 +4,9 @@ from IO import *
 from Tables import *
 from HTMLgen import *
 from HTMLPlots import *
+from GraphDraw import *
 import stats
+import pickle
 import math
 
 def numericMap(func,myArray):
@@ -39,13 +41,13 @@ def GetImportanceFunction():
         print "Code not yet written for said importance function"
         
 
-def Processnofr(infiles,summaryDoc,detailedDoc,StartCut):
+def Processnofr(infiles,summaryDoc,detailedDoc,StartCut,box):
     print "Processing nofr"
     #acquire data about the correlation section
 #    species1=infiles.ReadVar("Species1")[0]
 #    species2=infiles.ReadVar("Species2")[0]
     hlabel="r"    #infiles.ReadVar("xlabel")[0]
-    vlabel="g(r)" #infiles.ReadVar("ylabel")[0]
+    vlabel="n(r)" #infiles.ReadVar("ylabel")[0]
     data=infiles.ReadVar("y")
     data = map (lambda y: y[StartCut:],data)
     if (data==[None]):
@@ -69,38 +71,62 @@ def Processnofr(infiles,summaryDoc,detailedDoc,StartCut):
     baseName="nofr"
     
 ##Produce Image
-    print len(x),len(totalMean),len(totalError)
-    myImgTable=ProduceCorrelationPictureWithErrors(x, totalMean,totalError,baseName,hlabel,vlabel)
+    print len(x), len(totalMean), len(totalError)
+    first=0
+    last=len(totalMean)
+    for i in range(0,last):
+      if totalMean[i]!=0:
+        first=i
+        break
+    for i in range(0,last):
+      if totalMean[i]<0.00001:
+        totalMean[i]=0.00001
+        print "Warning: Zero Value, setting to ", totalMean[i]
+    x=x[first:last]
+    totalMean=totalMean[first:last]
+    totalError=totalError[first:last]
+    print "First non-zero element: ", first, "(", x[0], ",", totalMean[0], ")"
+    y=totalMean.copy()/totalMean[0]
+    f = open('../nofrlineDump', 'a')
+    pickle.dump(x.tolist(),f)
+    pickle.dump(y.tolist(),f)
+    f.close()
+    myImgTable=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel,box[0]/2)
+    myImgTable2=ProduceCorrelationPictureLogLog(x, y,baseName+"loglog",hlabel,vlabel,box[0]/2)
     importanceFunction=GetImportanceFunction()
     y=totalMean.copy()
     y1=totalMean+totalError
     y2=totalMean-totalError
     for counter in range(0,len(y)):
         if y[counter]!=0:
-            y[counter]=math.log(y[counter]*math.exp(importanceFunction(x[counter])))/math.log(10)
+            y[counter]=math.log(y[counter])/math.log(10)
 #            y[counter]=math.log(y[counter]*math.exp(importanceFunction(x[counter]))/(x[counter]*x[counter]))/math.log(10)
         else:
             y[counter]=0
+            print "Warning: Zero Value"
     for counter in range(0,len(y1)):
         if y1[counter]!=0:
-            y1[counter]=math.log(y1[counter]*math.exp(importanceFunction(x[counter])))/math.log(10)
+            y1[counter]=math.log(y1[counter])/math.log(10)
 #            y1[counter]=math.log(y1[counter]*math.exp(importanceFunction(x[counter]))/(x[counter]*x[counter]))/math.log(10)
         else:
             y1[counter]=0
 
     for counter in range(0,len(y2)):
         if y2[counter]!=0:
-            y2[counter]=math.log(y2[counter]*math.exp(importanceFunction(x[counter])))/math.log(10)
+            y2[counter]=math.log(y2[counter])/math.log(10)
 #            y2[counter]=math.log(y2[counter]*math.exp(importanceFunction(x[counter]))/(x[counter]*x[counter]))/math.log(10)
         else:
             y2[counter]=0
     yError=(y1-y2)/2
     baseName="nofrCorrected"
-    correctedImgTable=ProduceCorrelationPictureWithErrors(x, y,yError,baseName,hlabel,vlabel)
+    correctedImgTable=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel,box[0]/2)
+    #correctedImgTable2=ProduceCorrelationPictureLogLog(x, y,baseName+"loglog",hlabel,vlabel,box[0]/2)
     sectionName=infiles.GetName()
     description=infiles.ReadVar("Description")[0]
     summaryDoc.append(Heading(1,sectionName))
     summaryDoc.append(Heading(4,description))
     summaryDoc.append(myImgTable)
+    summaryDoc.append(myImgTable2)
     summaryDoc.append(correctedImgTable)
+    #summaryDoc.append(correctedImgTable2)
     return 0
