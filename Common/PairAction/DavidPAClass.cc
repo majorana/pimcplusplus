@@ -484,7 +484,7 @@ void DavidPAClass::calcUsqzFast(double s,double q,double z,int level,
     //    cerr<<"I'm less then the min. Maybe this is messing me up\n";
     //U = 5000.0;
     U = ukj(level)(1,rmin);
-    cerr << "DavidPAClass: rprime < rmin; assigning U_0 = " << U << endl;
+    // cerr << "DavidPAClass: rprime < rmin; assigning U_0 = " << U << endl;
     return;
   }
   U+= 0.5*(ukj(level)(1,r)+ukj(level)(1,rprime));
