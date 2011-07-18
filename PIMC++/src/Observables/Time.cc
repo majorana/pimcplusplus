@@ -29,6 +29,7 @@ void MCTimeClass::WriteBlock()
 {
   if (FirstTime){
     FirstTime=false;
+    BlockNumber = 0;
     MoveTime.resize(Moves.size());
     ObservableTime.resize(Observables.size());
     ActionTime.resize(Actions.size());
@@ -65,11 +66,11 @@ void MCTimeClass::WriteBlock()
     }
   }
   gettimeofday(&end, &tz);
-  TotalTime+= ((double)(end.tv_sec-start.tv_sec) +
-	       1.0e-6*(double)(end.tv_usec-start.tv_usec));
+  double BlockTime = ((double)(end.tv_sec-start.tv_sec) + 1.0e-6*(double)(end.tv_usec-start.tv_usec));
+  TotalTime += BlockTime;
   gettimeofday(&start, &tz);
   //  TotalTime+=(double)(clock()-StartTime)/(double)CLOCKS_PER_SEC;
-  //  StartTime=clock();
+  //  StartTime=clock(); << TotalTime << endl;
   TotalTimeVar.Write(TotalTime);
   list<MoveClass*>::iterator moveIter;
   int i=0;
@@ -99,7 +100,13 @@ void MCTimeClass::WriteBlock()
 
   if (PathData.Path.Communicator.MyProc()==0)
     IOSection.FlushFile();
-  
+
+  // Block Info
+  cerr << "##################################" << endl;
+  cerr << "#  Block #: " << BlockNumber << endl;
+  cerr << "#  Block Time: " << BlockTime << endl;
+  cerr << "#  Total Time: " << TotalTime << endl;
+  BlockNumber++;
 }
 
 void MCTimeClass::Read(IOSectionClass &in)

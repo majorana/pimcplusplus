@@ -27,12 +27,10 @@ SuperfluidFractionClass::Read(IOSectionClass& IO)
 void
 SuperfluidFractionClass::WriteBlock()
 {
-  int species=SpeciesList(0);
-  double beta=PathData.Path.tau*PathData.Path.TotalNumSlices;
-  cerr<<"Samples in block"<<SamplesInBlock<<endl;
-  int numParticles=
-    PathData.Path.Species(species).LastPtcl-PathData.Path.Species(species).FirstPtcl+1;
-  double factor=1.0/((2.0*PathData.Path.Species(species).lambda*beta*numParticles));
+  int species = SpeciesList(0);
+  double beta = PathData.Path.tau*PathData.Path.TotalNumSlices;
+  int numParticles = PathData.Path.Species(species).LastPtcl - PathData.Path.Species(species).FirstPtcl + 1;
+  double factor = 1.0/((2.0*PathData.Path.Species(species).lambda*beta*numParticles));
 
   
   CalcWN2();

@@ -23,14 +23,13 @@ void
 WriteDataClass::DoEvent()
 {
   list<MoveClass*>::iterator moveIter;
-  for (moveIter=Moves.begin(); moveIter!=Moves.end(); moveIter++) 
-    (*moveIter)->WriteRatio();
+  for (moveIter = Moves.begin(); moveIter != Moves.end(); moveIter++) 
+    (*moveIter) -> WriteRatio();
 
   list<ObservableClass*>::iterator observeIter;
-  for (observeIter=Observables.begin(); observeIter!=Observables.end(); 
-       observeIter++) 
-    (*observeIter)->WriteBlock();
-  if (PathData.Path.Communicator.MyProc()==0)
+  for (observeIter = Observables.begin(); observeIter != Observables.end(); observeIter++) 
+    (*observeIter) -> WriteBlock();
+  if (PathData.Path.Communicator.MyProc() ==  0)
     IOSection.FlushFile();
 }
 
@@ -40,7 +39,3 @@ WriteDataClass::Read(IOSectionClass &in)
 {
   //do nothing for now
 }
-
-
-
-    

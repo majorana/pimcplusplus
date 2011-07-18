@@ -5,7 +5,7 @@ import numpy
 import stats
 
 
-def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
+def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut,temp):
     data=infiles.ReadVar("SuperfluidFraction")
     currNum = 0
     if (data==[None]):
@@ -13,6 +13,8 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
     s = shape(data[0])
     numProcs = len(data)
     (_,numBins) = shape(data[0])
+    dim = numBins
+    # print s, numProcs, numBins
     mShape = (numProcs, numBins)
     meanArray=zeros(mShape)+0.0
     errorArray=zeros(mShape)+0.0
@@ -31,18 +33,22 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
     errorSF=sqrt(sum([x*x for x in error]))
 
 #    print "Superfluid",meanSF,errorSF
-    SFTable=BuildTable(3,5)
-    SFTable.body[0]=[" ","x", "y","z","total"]
+    SFTable=BuildTable(3,dim+2)
+    if (dim==1):
+      SFTable.body[0]=[" ","x","total"]
+    elif (dim==2):
+      SFTable.body[0]=[" ","x", "y","total"]
+    elif (dim==3):
+      SFTable.body[0]=[" ","x", "y","z","total"]
+    else:
+      print "Unrecognized dimension."
     SFTable.body[1][0]="Mean"
     SFTable.body[2][0]="Error"
-    for i in range(1,4):
+    for i in range(1,dim+1):
         SFTable.body[1][i]= '%1.3f' % mean[i-1]
         SFTable.body[2][i]= '%1.3f' % error[i-1]
-    SFTable.body[1][4] = '%1.3f' % meanSF
-    SFTable.body[2][4] = '%1.3f' % errorSF
-
-
-
+    SFTable.body[1][dim+1] = '%1.3f' % meanSF
+    SFTable.body[2][dim+1] = '%1.3f' % errorSF
 
     clf()
     baseName="SuperfluidFraction"
@@ -55,18 +61,53 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
     labels = get(gca(), 'yticklabels')
     setp(labels, 'fontsize', 16)
 
-    bar ([0.1, 1.1, 2.1], mean, yerr=error, ecolor='r')
+    if (dim==1):
+      barLoc = [0.1]
+      errorLoc = [0.5]
+      labels = ['x']
+    elif (dim==2):
+      barLoc = [0.1, 1.1]
+      errLoc = [0.5, 1.5]
+      labels = ['x','y']
+    elif (dim==3):
+      barLoc = [0.1, 1.1, 2.1]
+      errLoc = [0.5, 1.5, 2.5]
+      labels = ['x','y','z']
+    else:
+      print "Unrecognized Dimension."
+
+    bar (barLoc, mean, yerr=error, ecolor='r')
     hold (True);
-    errorbar ([0.5, 1.5, 2.5], mean, error, fmt='r.', capsize=15.0, ms=00.0);
+    errorbar (errLoc, mean, error, fmt='r.', capsize=15.0, ms=00.0);
     
-    ticks = [0.5, 1.5, 2.5];
-    xticks(ticks, ['x', 'y', 'z'])
+    ticks = errLoc;
+    xticks(ticks, labels)
     xticklabels = getp(gca(), 'xticklabels')
     setp (xticklabels, fontsize=18)
     hold (False);
     
     # errorbar([1,2,3],mean,error,fmt='b.')
     #axis([0, 3,0,1.5])
+
+    DataDump = open ('SuperfluidFraction.dat', 'w')
+    
+    for row in range(0, numProcs):
+      totalMean = 0
+      totalError = 0
+      for col in range(0, len(barLoc)):
+        if (numProcs > 1):
+          totalMean += mean[row][col]
+          totalError += error[row][col]
+        else:
+          totalMean += mean[col]
+          totalError += error[col]
+      totalMean = totalMean/len(barLoc)
+      totalError = totalError/len(barLoc)
+      DataDump.write ('%1.6f ' % temp)
+      DataDump.write ('%1.6f ' % totalMean)
+      DataDump.write ('%1.6f ' % totalError)
+      DataDump.write ('\n')
+    DataDump.close()
 
     imageName = baseName + ".png"
     epsName = baseName +".eps"
@@ -90,7 +131,7 @@ def ProcessSuperfluidFraction(infiles,summaryDoc,detailedDoc,StartCut):
 ##Write things to document
     img = Image(imageName);
     summaryDoc.append(Heading(2,"Superfluidfraction"))
-    summaryDoc.append(Heading(4,description))
+    summaryDoc.append(Heading(dim+2,description))
     summaryDoc.append(SFTable)
     summaryDoc.append(img)
     summaryDoc.append(BR())

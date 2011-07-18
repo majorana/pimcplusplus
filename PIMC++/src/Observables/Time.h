@@ -39,6 +39,7 @@ private:
   list<MoveClass*>  &Moves;
   list<ObservableClass*> &Observables;
   list<ActionBaseClass* > &Actions;
+  int BlockNumber;
 public:
   struct timeval start, end;
   struct timezone tz;
