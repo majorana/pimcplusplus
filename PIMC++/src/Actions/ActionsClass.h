@@ -81,6 +81,7 @@ private:
 public:
   std::list<ActionBaseClass*> ActionList;
   std::list<string> ActionLabels;
+  std::list<ActionBaseClass*> EnergyList;
 
   Array<double,1> TauValues;
   Array<PairActionFitClass*,1> SpecificHeatPairArray;

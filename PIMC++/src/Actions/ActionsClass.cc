@@ -43,6 +43,7 @@
 #include "EAMClass.h"
 #include "NodalActionClass.h"
 #include "FreeNodalActionClass.h"
+#include "SHONodalActionClass.h"
 #include "PairFixedPhase.h"
 #include "GroundStateNodalActionClass.h"
 #include "FixedPhaseActionClass.h"
@@ -74,6 +75,7 @@
 void ActionsClass::Read(IOSectionClass &in)
 { 
   // old part; should be deprecated
+  cerr<<"Reading Action."<<endl;
   verr<<"Starting Actions Read"<<endl;
   PathClass &Path = PathData.Path;
 
@@ -273,7 +275,7 @@ void ActionsClass::Read(IOSectionClass &in)
 //     else
 //       NodalActions(spIndex) = NULL;
 //   }
-  
+  cerr << "About to Read Nodal Action." << endl;
   ReadNodalActions (in);
 
   if (UseNonlocal) {
@@ -731,7 +733,9 @@ ActionBaseClass* ActionsClass::GetAction(string name)
 void
 ActionsClass::ReadNodalActions(IOSectionClass &in)
 {
+  std::cerr << "Reading Nodal Action." << endl;
   int numNodeSections=in.CountSections("NodalAction");
+  cerr << "Found " << numNodeSections << " Nodal Actions." << endl;
   NodalActions.resize (PathData.Path.NumSpecies());
   NodalActions = NULL;
   for (int nodeSection=0; nodeSection<numNodeSections; nodeSection++) {
@@ -741,7 +745,6 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
     if (type == "FREE") {
       assert (in.ReadVar("Species", speciesString));
       int species = PathData.Path.SpeciesNum(speciesString);
-
       FreeNodalActionClass &nodeAction = 
 	*(new FreeNodalActionClass (PathData, species));
       nodeAction.Read(in);
@@ -776,8 +779,7 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
       if (PathData.Path.UseCorrelatedSampling()) {
 	FixedPhaseB = new FixedPhaseClass(PathData);
 	  FixedPhaseB->Read (in);
-      }
-      else
+      }  else
 	FixedPhaseB =  FixedPhaseA;
       // Now setup up actual actions
       NodalActions(FixedPhaseA->UpSpeciesNum)   = new FixedPhaseActionClass 
@@ -786,6 +788,16 @@ ActionsClass::ReadNodalActions(IOSectionClass &in)
 	(PathData, *FixedPhaseA, *FixedPhaseB, FixedPhaseA->DownSpeciesNum);
       NodalActions(FixedPhaseA->IonSpeciesNum) = new FixedPhaseActionClass 
 	(PathData, *FixedPhaseA, *FixedPhaseB, FixedPhaseA->IonSpeciesNum);
+    }
+    else if (type == "SHO") {
+      cerr << "SHO Nodal Action." << endl;
+      assert (in.ReadVar("Species", speciesString));
+      int species = PathData.Path.SpeciesNum(speciesString);
+      cerr << "Action Species: " << species << endl;
+// AGGRESSIVE COMPILING ERROR (FIX)
+      SHONodalActionClass *nodeAction = (new SHONodalActionClass (PathData, species));
+      nodeAction -> Read(in);
+      NodalActions(species) = nodeAction;
     }
     in.CloseSection();
   }

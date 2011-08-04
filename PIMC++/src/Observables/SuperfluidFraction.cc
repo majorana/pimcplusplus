@@ -21,29 +21,27 @@ void
 SuperfluidFractionClass::Read(IOSectionClass& IO)
 {
   WindingNumberClass::Read(IO);
-  assert(SpeciesList.size()==1);
+  assert(SpeciesList.size() == 1);
 }
 
 void
 SuperfluidFractionClass::WriteBlock()
 {
   int species = SpeciesList(0);
-  double beta = PathData.Path.tau*PathData.Path.TotalNumSlices;
+  double beta = PathData.Path.tau * PathData.Path.TotalNumSlices;
   int numParticles = PathData.Path.Species(species).LastPtcl - PathData.Path.Species(species).FirstPtcl + 1;
-  double factor = 1.0/((2.0*PathData.Path.Species(species).lambda*beta*numParticles));
+  double factor = 1.0/(2.0 * PathData.Path.Species(species).lambda * beta * numParticles);
 
-  
   CalcWN2();
   // Only processor 0 writes.
-  if (PathData.Path.Communicator.MyProc()==0) {
+  if (PathData.Path.Communicator.MyProc() == 0) {
     if (FirstTime) {
       FirstTime = false;
       WriteInfo();
       IOSection.WriteVar("Type",string("Vector"));
     }
-    for (int dim=0;dim<NDIM;dim++)
-      WN2Array(dim) =WN2Array(dim)*factor*
-	PathData.Path.GetBox()[dim]*PathData.Path.GetBox()[dim];
+    for (int dim = 0; dim < NDIM; dim++)
+      WN2Array(dim) = WN2Array(dim) * factor * PathData.Path.GetBox()[dim] * PathData.Path.GetBox()[dim];
     SFVar.Write(WN2Array);
   }
 }

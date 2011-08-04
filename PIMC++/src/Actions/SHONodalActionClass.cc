@@ -3,7 +3,7 @@
 //                                                         //
 // This program is free software; you can redistribute it  //
 // and/or modify it under the terms of the GNU General     //
-// Public License as published by the Free Software        //
+// Public License as published by the SHO Software        //
 // Foundation; either version 2 of the License, or         //
 // (at your option) any later version.  This program is    //
 // distributed in the hope that it will be useful, but     //
@@ -15,12 +15,12 @@
 /////////////////////////////////////////////////////////////
 
 #include <Common/MPI/Communication.h>
-#include "FreeNodalActionClass.h"
+#include "SHONodalActionClass.h"
 #include "../PathDataClass.h"
 #include <Common/MatrixOps/MatrixOps.h>
 
 double 
-FreeNodalActionClass::ActionImageSum (double L, double lambdaBeta, 
+SHONodalActionClass::ActionImageSum (double L, double lambdaBeta, 
 				      double disp)
 {
   int numImages = 10;
@@ -38,7 +38,7 @@ FreeNodalActionClass::ActionImageSum (double L, double lambdaBeta,
 }
 
 double 
-FreeNodalActionClass::ActionkSum (double L, double lambdaBeta, 
+SHONodalActionClass::ActionkSum (double L, double lambdaBeta, 
 				  double disp)
 {
   double kmax = sqrt (50.0/lambdaBeta);
@@ -55,7 +55,7 @@ FreeNodalActionClass::ActionkSum (double L, double lambdaBeta,
 
 
 void 
-FreeNodalActionClass::SetupFreeActions()
+SHONodalActionClass::SetupSHOActions()
 {
   cerr<<"SETTING UP FREE ACTION"<<endl;
   const int nPoints = 1000;
@@ -70,7 +70,7 @@ FreeNodalActionClass::SetupFreeActions()
 
   /// DEBUG
   FILE *fout;
-  fout = fopen ("FreeImageActions.dat", "w");
+  fout = fopen ("SHOImageActions.dat", "w");
   // Now, setup up actions
   ActionSplines.resize(nSplines);
   for (int spline=0; spline<nSplines; spline++) {
@@ -92,7 +92,7 @@ FreeNodalActionClass::SetupFreeActions()
   }
   fclose (fout);
 
-//   fout = fopen ("FreekActions.dat", "w");
+//   fout = fopen ("SHOkActions.dat", "w");
 //   // Now, setup up actions
 //   ActionSplines.resize(nSplines);
 //   for (int spline=0; spline<nSplines; spline++) {
@@ -118,7 +118,7 @@ FreeNodalActionClass::SetupFreeActions()
 
 
 
-FreeNodalActionClass::FreeNodalActionClass (PathDataClass &pathData,
+SHONodalActionClass::SHONodalActionClass (PathDataClass &pathData,
 					    int speciesNum) :
   NodalActionClass (pathData), 
   Path (pathData.Path), 
@@ -135,7 +135,7 @@ FreeNodalActionClass::FreeNodalActionClass (PathDataClass &pathData,
 
 
 double
-FreeNodalActionClass::Det (int slice)
+SHONodalActionClass::Det (int slice)
 {
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;
@@ -167,7 +167,7 @@ FreeNodalActionClass::Det (int slice)
 }
 
 // Array<double,2>
-// FreeNodalActionClass::GetMatrix (int slice)
+// SHONodalActionClass::GetMatrix (int slice)
 // {
 //   SpeciesClass &species = Path.Species(SpeciesNum);
 //   int first = species.FirstPtcl;
@@ -198,7 +198,7 @@ FreeNodalActionClass::Det (int slice)
 // }
 
 bool
-FreeNodalActionClass::IsPositive (int slice)
+SHONodalActionClass::IsPositive (int slice)
 {
   int myStartSlice, myEndSlice;
   int myProc = PathData.Path.Communicator.MyProc();
@@ -215,7 +215,7 @@ FreeNodalActionClass::IsPositive (int slice)
 
 
 void 
-FreeNodalActionClass::GradientDet (int slice, double &det, 
+SHONodalActionClass::GradientDet (int slice, double &det, 
 				   Array<dVec,1> &gradient)
 {
   SpeciesClass &species = Path.Species(SpeciesNum);
@@ -311,7 +311,7 @@ FreeNodalActionClass::GradientDet (int slice, double &det,
 
 
 void 
-FreeNodalActionClass::GradientDetFD (int slice, double &det, 
+SHONodalActionClass::GradientDetFD (int slice, double &det, 
 				     Array<dVec,1> &gradient)
 {
   SpeciesClass &species = Path.Species(SpeciesNum);
@@ -397,7 +397,7 @@ FreeNodalActionClass::GradientDetFD (int slice, double &det,
 
 
 double 
-FreeNodalActionClass::NodalDist (int slice)
+SHONodalActionClass::NodalDist (int slice)
 {
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;
@@ -455,7 +455,7 @@ FreeNodalActionClass::NodalDist (int slice)
 /// method.  If this method says we're far from the nodes, we go with
 /// that.  If it says we're close, call LineSearchDist to get a more
 /// accurate value.
-double FreeNodalActionClass::HybridDist (int slice, double lambdaTau)
+double SHONodalActionClass::HybridDist (int slice, double lambdaTau)
 {
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;
@@ -496,7 +496,7 @@ double FreeNodalActionClass::HybridDist (int slice, double lambdaTau)
 
 
 double 
-FreeNodalActionClass::MaxDist(int slice)
+SHONodalActionClass::MaxDist(int slice)
 {
   if (Det(slice) < 0.0)
     return (-1.0);
@@ -518,7 +518,7 @@ FreeNodalActionClass::MaxDist(int slice)
 
 
 double 
-FreeNodalActionClass::LineSearchDist (int slice)
+SHONodalActionClass::LineSearchDist (int slice)
 {
   SpeciesClass &species = Path.Species(SpeciesNum);
   double epsilon = 1.0e-4 * sqrt (4.0*species.lambda*Path.tau);
@@ -594,7 +594,7 @@ FreeNodalActionClass::LineSearchDist (int slice)
 
 
 double 
-FreeNodalActionClass::NewtonRaphsonDist (int slice)
+SHONodalActionClass::NewtonRaphsonDist (int slice)
 {
   SpeciesClass &species = Path.Species(SpeciesNum);
   int first = species.FirstPtcl;
@@ -696,20 +696,20 @@ FreeNodalActionClass::NewtonRaphsonDist (int slice)
 
 
 void 
-FreeNodalActionClass::Read (IOSectionClass &in)
+SHONodalActionClass::Read (IOSectionClass &in)
 {
   // Do nothing for now
-  SetupFreeActions();
+  SetupSHOActions();
 }
 
 
 /// Return essentiall 0 or infinity
 double 
-FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
+SHONodalActionClass::SimpleAction (int startSlice, int endSlice,
 				    const Array<int,1> &changePtcls,
 				    int level)
 {
-  //cerr<<"Into SingleAction"<<endl;
+  cerr<<"Into SingleAction"<<endl;
   bool brokenNode=false;
   int skip = 1<<level;
   int myStart, myEnd;
@@ -725,13 +725,13 @@ FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
       }
   }
 
-  //cerr<<"Out of SingleAction"<<endl;
+  cerr<<"Out of SingleAction"<<endl;
   return uNode;
 }
 
 
 double 
-FreeNodalActionClass::SimpleAction (int startSlice, int endSlice,
+SHONodalActionClass::SingleAction (int startSlice, int endSlice,
 				    const Array<int,1> &changePtcls, 
 				    int level)
 { 
@@ -812,7 +812,7 @@ FreeNodalActionClass::SimpleAction (int startSlice, int endSlice,
 
 
 double 
-FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
+SHONodalActionClass::d_dBeta (int slice1, int slice2, int level)
 { 
   Array<int,1> changedPtcls(1);
   
@@ -882,26 +882,26 @@ FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
   return uNode/(double)Path.TotalNumSlices;
 }
 
-NodeType FreeNodalActionClass::Type()
+NodeType SHONodalActionClass::Type()
 {
   return FREE_PARTICLE;
 }
 
 
 bool
-FreeNodalActionClass::IsGroundState()
+SHONodalActionClass::IsGroundState()
 {
   return (false);
 }
 
 void
-FreeNodalActionClass::WriteInfo (IOSectionClass &out)
+SHONodalActionClass::WriteInfo (IOSectionClass &out)
 {
   out.WriteVar ("Type", "FREE_PARTICLE");
 }
 
 string
-FreeNodalActionClass::GetName()
+SHONodalActionClass::GetName()
 {
-  return "FreeNodal";
+  return "SHONodal";
 }

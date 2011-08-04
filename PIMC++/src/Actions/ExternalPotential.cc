@@ -33,23 +33,18 @@ ExternalPotential::ExternalPotential(PathDataClass &pathData)
   extConst = 1.0;
 }
 
-double 
-ExternalPotential::dUdR(int slice, int ptcl, int level)
+double ExternalPotential::dUdR(int slice, int ptcl, int level)
 {
   return 0.0;
 }
 
-double 
-ExternalPotential::d2UdR2(int slice, int ptcl1, int ptcl2, int level)
+double ExternalPotential::d2UdR2(int slice, int ptcl1, int ptcl2, int level)
 {
   assert(1==2);
   return 0.0;
 }
 
-double 
-ExternalPotential::SingleAction (int slice1, int slice2,
-			       const Array<int,1> &changedParticles,
-			       int level)
+double ExternalPotential::SingleAction (int slice1, int slice2, const Array<int,1> &changedParticles, int level)
 {
   struct timeval start, end;
   struct timezone tz;
@@ -59,29 +54,28 @@ ExternalPotential::SingleAction (int slice1, int slice2,
   PathClass &Path = PathData.Path;
   int numChangedPtcls = changedParticles.size();
   int skip = 1<<level;
-  double levelTau = Path.tau* (1<<level);
+  double levelTau = Path.tau * (1<<level);
 
   for (int ptcl1Index=0; ptcl1Index<numChangedPtcls; ptcl1Index++){
     int ptcl1 = changedParticles(ptcl1Index);
     int species1=Path.ParticleSpeciesNum(ptcl1);
 
-	  for (int slice=slice1;slice<slice2;slice+=skip){
-	    double rmag2;
-	    double U;
-	    dVec r = PathData.Path(slice, ptcl1);
-            PathData.Path.MagSquared(r,rmag2); 
-            U = extConst * rmag2;   
-	    TotalU+=U;
-	  }
+    for (int slice=slice1; slice<slice2; slice+=skip){
+      double rmag2;
+      double U;
+      dVec r = PathData.Path(slice, ptcl1);
+      PathData.Path.PutInBox(r);
+      PathData.Path.MagSquared(r,rmag2);
+      U = 0.5 * levelTau * extConst * rmag2;
+      TotalU+=U;
+    }
   }
   gettimeofday(&end,   &tz);
-  TimeSpent += (double)(end.tv_sec-start.tv_sec) +
-    1.0e-6*(double)(end.tv_usec-start.tv_usec);
+  TimeSpent += (double)(end.tv_sec-start.tv_sec) + 1.0e-6*(double)(end.tv_usec-start.tv_usec);
   return (TotalU);
 }
 
-double 
-ExternalPotential::d_dBeta (int slice1, int slice2, int level)
+double ExternalPotential::d_dBeta (int slice1, int slice2, int level)
 {
   double TotalU=0.0;
   PathClass &Path = PathData.Path;
@@ -89,25 +83,24 @@ ExternalPotential::d_dBeta (int slice1, int slice2, int level)
   double levelTau = Path.tau* (1<<level);
 
   for (int ptcl1Index=0; ptcl1Index<Path.NumParticles(); ptcl1Index++){
-    int ptcl1 = ptcl1Index;//changedParticles(ptcl1Index);
+    int ptcl1 = ptcl1Index;
     int species1=Path.ParticleSpeciesNum(ptcl1);
 
-	  for (int slice=slice1;slice<slice2;slice+=skip){
-	    double rmag2;
-	    double U;
-	    dVec r = PathData.Path(slice, ptcl1);
-            PathData.Path.MagSquared(r,rmag2); 
-            U = extConst * rmag2;   
-	    TotalU+=U;
-	  }
+    for (int slice=slice1; slice<slice2; slice+=skip){
+      double rmag2;
+      double U;
+      dVec r = PathData.Path(slice, ptcl1);
+      PathData.Path.PutInBox(r);
+      PathData.Path.MagSquared(r,rmag2);
+      U = 0.5 * extConst * rmag2;
+      TotalU+=U;
+    }
   }
-
   return (TotalU);
 }
 
 ////Gradient of the action only works in 3d!!!!!!!
-//void
-//ExternalPotential::GradAction(int slice1, int slice2, 
+//void ExternalPotential::GradAction(int slice1, int slice2, 
 //			    const Array<int,1> &ptcls, int level,
 //			    Array<dVec,1> &gradVec)
 //{

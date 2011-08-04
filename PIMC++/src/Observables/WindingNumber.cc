@@ -27,7 +27,7 @@ WindingNumberClass::Accumulate()
 {
   SamplesInBlock++;
   // Move the join to the end so we don't have to worry about
-  // permutations 
+  // permutation
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
 
   dVec totalDisp;
@@ -39,16 +39,17 @@ WindingNumberClass::Accumulate()
   //    SpeciesClass &species = PathData.Path.Species(SpeciesList(si));
   //    int first = species.FirstPtcl;
   //    int last  = species.LastPtcl;
-    for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
-      for (int slice=0;slice<numLinks;slice++) {
-	dVec disp;
-	disp=PathData.Path.Velocity(slice,slice+1,ptcl);
-	totalDisp += disp;
-      }
+  for (int ptcl=0;ptcl<PathData.Path.NumParticles();ptcl++){
+    for (int slice=0;slice<numLinks;slice++) {
+       dVec disp;
+       disp = PathData.Path.Velocity(slice,slice+1,ptcl);
+       totalDisp += disp;
     }
-    //  }
-  for (int i=0; i<NDIM; i++)
+  }
+
+  for (int i=0; i<NDIM; i++) {
     totalDisp[i] *= PathData.Path.GetBoxInv()[i];
+  }
 
   WNVec.push_back(totalDisp);
 }
@@ -63,8 +64,7 @@ WindingNumberClass::Read(IOSectionClass& in)
   for (int i=0; i<speciesStrings.size(); i++) {
     SpeciesList(i) = PathData.Path.SpeciesNum(speciesStrings(i));
     if (SpeciesList(i) == -1) {
-      perr << "Unrecognized species name """ << speciesStrings(i) 
-	   << """.  Aborting.\n";
+      perr << "Unrecognized species name " << speciesStrings(i) << "\n";
       abort();
     }
   }
@@ -77,46 +77,47 @@ void
 WindingNumberClass::CalcWN2()
 {
   if (SamplesInBlock == 0) {
-    cerr << "WindingNumberClass::CalcWN2 called before "
-	 << "there is any data available.\n";  
+    cerr << "WindingNumberClass::CalcWN2 called before there is any data available.\n";
     abort();
   }
 
-  ///Better variance version
-  WN2ArrayLowVariance=0.0;
-  for (int dim=0;dim<NDIM;dim++){
-    double W2avg=0.0; double Wavg=0.0;
-    for (int i=0;i<WNVec.size();i++){
-      W2avg+=WNVec[i][dim]*WNVec[i][dim];
-      Wavg+=WNVec[i][dim];
+  // Better variance version
+  WN2ArrayLowVariance = 0.0;
+  for (int dim = 0; dim < NDIM; dim++){
+    double W2avg = 0.0; 
+    double Wavg = 0.0;
+    for (int i = 0; i < WNVec.size(); i++){
+      W2avg += WNVec[i][dim] * WNVec[i][dim];
+      Wavg += WNVec[i][dim];
     }
-    double Wavg2=Wavg*Wavg;
+    double Wavg2 = Wavg*Wavg;
     double W2avgsum;
     double Wavgsum;
     double Wavg2sum;
-    W2avgsum=PathData.Path.Communicator.Sum(W2avg);
-    Wavgsum=PathData.Path.Communicator.Sum(Wavg);
-    Wavg2sum=PathData.Path.Communicator.Sum(Wavg2);
-    
-    if (PathData.Path.Communicator.MyProc()==0){
-      double N=(double)(PathData.Path.Communicator.NumProcs());
-      double k=(double)(WNVec.size());
+    W2avgsum = PathData.Path.Communicator.Sum(W2avg);
+    Wavgsum = PathData.Path.Communicator.Sum(Wavg);
+    Wavg2sum = PathData.Path.Communicator.Sum(Wavg2);
+    if (PathData.Path.Communicator.MyProc() == 0){
+      double N = (double)(PathData.Path.Communicator.NumProcs());
+      double k = (double)(WNVec.size());
       WN2ArrayLowVariance(dim) = W2avgsum/k + ((Wavgsum*Wavgsum)-Wavg2sum)/(k*k);
     }
   }
-    //end better variance version
+  //end better variance version
 
   Array<dVec,1> sendVec(WNVec.size()), recvVec(WNVec.size());
-  recvVec=0.0;
-  for (int i=0; i<WNVec.size(); i++)
+  recvVec = 0.0;
+  for (int i = 0; i < WNVec.size(); i++)
     sendVec(i) = WNVec[i];
   PathData.Path.Communicator.Sum(sendVec, recvVec);
 
-  if (PathData.Path.Communicator.MyProc()==0) {
+  if (PathData.Path.Communicator.MyProc() == 0) {
     WN2Array = 0.0;
-    for (int i=0; i<recvVec.size(); i++)
-      for (int j=0; j<NDIM; j++)
-	WN2Array(j) += (recvVec(i)[j]*recvVec(i)[j]);
+    for (int i = 0; i < recvVec.size(); i++) {
+      for (int j = 0; j < NDIM; j++) {
+        WN2Array(j) += recvVec(i)[j] * recvVec(i)[j];
+      }
+    }
     WN2Array /= (double)SamplesInBlock;
   }
   WNVec.clear();

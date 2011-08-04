@@ -277,9 +277,9 @@ void PermuteTableClass::ConstructCycleTable(int speciesNum,
 					    int excludeParticle)
 {
   /// HACK HACK HACK HACK
-//   if (PathData.Path.Species(SpeciesNum).GetParticleType()==FERMION)
-//     ConstructFermionCycleTable(speciesNum,slice1,slice2);
-//   else
+   if (PathData.Path.Species(SpeciesNum).GetParticleType()==FERMION)
+     ConstructFermionCycleTable(speciesNum,slice1,slice2);
+   else
     ConstructBosonCycleTable(speciesNum,slice1,slice2,excludeParticle);
 }
 

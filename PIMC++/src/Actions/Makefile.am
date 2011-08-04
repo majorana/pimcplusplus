@@ -20,6 +20,8 @@ libactions_la_SOURCES =            \
     ExternalPotential.h       \
     FixedPhaseActionClass.cc       \
     FixedPhaseActionClass.h        \
+    SHONodalActionClass.cc         \
+    SHONodalActionClass.h          \
     FreeNodalActionClass.cc        \
     FreeNodalActionClass.h         \
     GroundStateNodalActionClass.cc \

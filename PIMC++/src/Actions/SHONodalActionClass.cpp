@@ -709,7 +709,7 @@ FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
 				    const Array<int,1> &changePtcls,
 				    int level)
 {
-  //cerr<<"Into SingleAction"<<endl;
+  cerr<<"Into SingleAction"<<endl;
   bool brokenNode=false;
   int skip = 1<<level;
   int myStart, myEnd;
@@ -725,7 +725,7 @@ FreeNodalActionClass::SingleAction (int startSlice, int endSlice,
       }
   }
 
-  //cerr<<"Out of SingleAction"<<endl;
+  cerr<<"Out of SingleAction"<<endl;
   return uNode;
 }
 

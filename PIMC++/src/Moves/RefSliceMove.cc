@@ -120,12 +120,12 @@ bool RefSliceMoveClass::NodeCheck()
 /// This version is for the processor with the reference slice
 void RefSliceMoveClass::MakeMoveMaster()
 {
-    static bool firstTime=true;
-  cerr<<"MAKING REF SLICE MOVE"<<endl;
-  cerr<<"NODE CHECK IS "<<NodeCheck()<<endl;
-  cerr<<"DONE NODECHECK"<<endl;
-  if (!firstTime)
-    return;
+//    static bool firstTime=true;
+//  cerr<<"MAKING REF SLICE MOVE"<<endl;
+//  cerr<<"NODE CHECK IS "<<NodeCheck()<<endl;
+//  cerr<<"DONE NODECHECK"<<endl;
+//  if (!firstTime)
+//    return;
   PathClass &Path=PathData.Path;
   int myProc = PathData.Path.Communicator.MyProc();
   int firstSlice, lastSlice;
@@ -176,13 +176,13 @@ void RefSliceMoveClass::MakeMoveMaster()
       Path.RefPath.AcceptCopy();
       cerr<<"ACCEPTNG REF SLICE MOVE"<<endl;
     }
-    else if (firstTime){
-      firstTime=false;
-      NodeAccept++;
-      Accept();
-      Path.RefPath.AcceptCopy();
-      cerr<<"ACCEPTNG REF SLICE MOVE FOR FIRSTTIME"<<endl;
-    }
+//    else if (firstTime){
+//      firstTime=false;
+//      NodeAccept++;
+//      Accept();
+//      Path.RefPath.AcceptCopy();
+//      cerr<<"ACCEPTNG REF SLICE MOVE FOR FIRSTTIME"<<endl;
+//    }
     else {
       NodeReject++;
       Reject();
