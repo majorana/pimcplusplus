@@ -1,0 +1,981 @@
+\documentclass{book}
+%\usepackage{verbatim}
+%\usepackage{moreverb}
+%\usepackage{boxedminipage}
+%\usepackage{shadow}
+\usepackage{fancybox}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+
+\renewcommand{\shadowsize}{2pt}
+\author{Kenneth P. Esler, Jr. and Bryan K. Clark}
+\title{pimc++}
+%\subtitle{Path Integral Monte Carlo Simulation Tool}
+
+\begin{document}
+\maketitle
+\chapter{Introduction}
+{\em pimc++} is a general, high-performance tool to perform
+fully-correlated simulations of quantum systems at finite temperature.
+In essense, it samples the many-body thermal density matrix to compute
+thermal equilibrium averages of quantum observables.  Written in very
+object-oriented C++, it is intended to be a nearly universal tool that
+can be easily extended to perform novel simulations.  Its current
+features include:
+\begin{itemize}
+  \item Arbitrary number of particles, species, and timeslices,
+        limited only by memory requirements.
+  \item Time-slices can be distributed across processors using MPI to
+        communicate, making possible efficient simulations with
+        thousands of time-slices.
+  \item Multiple ``clones'' of the same simulation may be run with
+        automatic generation of different random number seeds.  This
+        can be used to improve statistics.
+  \item Very high-accuracy pair-actions can be used.  These are
+        generated with the coupled squarer++/fitter++ package.
+  \item Bose, Fermi, and Boltzmann statistics are supported.
+  \item Output is efficiently and accurately stored in HDF5 format.
+  \item Extremely flexible input file format allows specification of
+        the Monte Carlo algorithm in the input.
+  \item Free and periodic boundary conditions are specified
+        independently for each dimension allowing slab and column
+        geometries. 
+  \item Statistical analysis and HTML report generation with
+        automatic creation of embedded plots.
+  \item 3D OpenGL-based visualization tool can be used for debugging
+        and pedagogy.  Supports exporting to the POVray ray-tracer for 
+        photo-realistic rendering.  Also supports MPEG4 movie generation.
+\end{itemize}
+
+\chapter{Installing}
+\section{Dependencies}
+In the spirit of the open source movement, {\em pimc++} makes use of a
+number of freely-available libraries.  These libraries perform their
+individual tasks very well and avoid the reinvention of the wheel.
+The following libriaries need to be installed before attempting to
+install {\em pimc++}:
+\begin{itemize}
+  \item {\bf BLAS/LAPACK:}  These are linear algebra routines for
+    matrix multiplies, factorization, inversion, etc.  They are utilized
+    in the plane-wave portions of the code, long-range optimized
+    breakups, and fermion determinants.  \\
+    (\href{http://www.netlib.org/lapack}{http://www.netlib.org/lapack})
+  \item {\bf Gnu Scientific Library (GSL):}  Though this library is
+    extensive, we use it mainly for computing special functions.\\
+    (\href{http://http://www.gnu.org/software/gsl/}{http://http://www.gnu.org/software/gsl/})
+  \item {\bf SPRNG:}  The Simple Parallel Random Number Generator is
+    used to generate pseudo-random numbers for driving the Monte Carlo.
+    It has the somewhat unique feature of being able to generate streams
+    of random numbers that are shared between processors.\\
+   (\href{http://esler.physics.uiuc.edu/downloads/sprng-2.0.tar.gz}{http://esler.physics.uiuc.edu/downloads/sprng-2.0.tar.gz})
+  \item {\bf HDF5:}  The Hierarchical Data Format is used to store
+    data in a platform-independent binary form.  \\
+    (\href{http://hdf.ncsa.uiuc.edu/HDF5/}{http://hdf.ncsa.uiuc.edu/HDF5/})
+  \item {\bf MPI:} ({\em Optional})  The Message Passing Interface is
+    used for communication between nodes when doing parallel runs.
+\end{itemize}
+
+\section{Installing the Common library}
+Many of the routines used in {\em pimc++} are shared with a number of
+other codes in the suite, such as {\em squarer++}, {\em phgen++}, and
+{\em pathvis++}.  Because of this, we packaged these routines in a
+library we call {\em common} for lack of a better name.  The {\em common}
+library must be installed before {\em pimc++}.  
+
+The {\em common} library, {\em pimc++}, and all the other programs in
+the suite use the standard autoconf/automake approach to building.
+The basic setup involves doing\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+./configure
+make
+make install
+\end{verbatim}
+\end{minipage}}\\
+\subsection{Building from the subversion repository}
+If you have checked out the code from subversion, the
+\texttt{configure} script will not yet exist in the code directory.
+It can be generated with the autoconf command\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+autoreconf --install
+\end{verbatim}
+\end{minipage}}\\
+This will generate the necessary autoconf and automake scripts.
+Problems at this stage usually come from having out-of-date autoconf
+and/or automake installations.  Upgrade these packages and try again.
+
+The \texttt{configure} script has numerous options.  They may be
+listed by doing ``\texttt{./configure~--help}''.  For systems on which
+you have root access, it is often preferable to install in the
+\texttt{/usr} directory (instead of \texttt{/usr/local}), which can be
+done with the option \texttt{--prefix=/usr} to \texttt{configure}.  
+\subsection{Compiling with MPI support}
+In order to include MPI support for parallel runs, we must use the
+following options to \texttt{configure} when building both libsprng and libcommon:
+\begin{itemize}
+\item \texttt{--enable-mpi}
+\item \texttt{--with-mpi-cflags=-I/path/to/mpi/headers}
+\item \texttt{--with-mpi-libs="}{\em flags needed to link mpi libs}\texttt{"}
+\end{itemize}
+The necessary \texttt{cflags} and \texttt{libs} can often be found by
+typing something like \texttt{mpic++ --show}.
+
+\chapter{Input Files}
+\section{Introduction}
+All of the file input and output in pimc++ is done through our 
+C++ Input And Output ({\em CIAO}) library.  This library is designed
+to provide a common programming interface to several hierachical data
+formats.  In particular, we currently implement a custom ASCII format,
+HDF5, and XML.  For input files, we use the ASCII format almost
+exclusively.  For files which store heavy numeric data, such as the
+pair action spline tables, we use HDF5.  XML is appealing for some
+compatibility reasons, but we do not currently use it for anything.
+The following sections will explain the use of our ASCII format.  
+
+\section{Defining variables}
+Upon looking at a sample input file, the reader will note a strong
+resemblence to C++.  This was an intentional choice on the part of the
+developers, since those who were familiar enough with C++ to extend
+the code should feel quite at-home with this format.  There are very
+few constructs to learn in the input files, yet we have found them to
+be very versatile.  
+
+Before diving into the details of the file format, let us begin with
+an example.  In Figure~\ref{fig:InputEx}, we have a fictitious input
+file in the {\em CIAO} ASCII format.
+\begin{figure}
+\shadowbox{\begin{minipage}{5in}
+\begin{verbatim}
+Section(System) {
+  int NumParticles = 6;
+  Array<double,1> Masses(6) = [ 0.5, 0.5, 0.5, 1.0, 1.0, 1.0 ];
+\}
+
+Section(Potentials) {
+  Section(Potential) {
+    string Type = "Coulomb";
+    double q1 = 1.0;
+    double q2 = -1.0;
+  \}
+
+  Section(Potential) {
+    string Type = "Lennard-Jones";
+    double sigma = 5.0;    // this is in units of bohr radii
+    double epsilon = 3.2;  // and this is in Hartrees
+  \}
+\}
+\end{verbatim}
+\end{minipage}}
+\caption{Example {\em CIAO} input file.}
+\label{fig:InputEx}
+\end{figure}
+
+The most basic construct is a named variable to which a value is
+assigned.  An example is \\
+\rule{0.6cm}{0cm}\shadowbox{\parbox{4.4in}{\texttt{int NumParticles = 6;}}} \\
+In this case, \texttt{NumParticles} is an {\em atomic} variable.
+Currently, {\em CIAO} supports the atomic types {\texttt int, double,
+  bool and string}.  It also supports array variables.  We have taken
+the syntax for our array variables from the popular {\em blitz++}
+template array package. \\
+\rule{0.6cm}{0cm}\shadowbox{\parbox{4.4in}{\texttt{Array<double,1>
+      Masses(6) = [0.5, 0.5, 0.5, 1.0, 1.0, 1.0]; }}} \\
+Here, the \texttt{Array<double,1>} indicates a one-dimensional array
+of doubles.  {\em CIAO} supports up to four-dimensional arrays.  The
+\texttt{(6)} after the variable name, \texttt{Masses}, gives the size
+of the array.  For a multidimensional array, the dimensions are
+separated by commas, such as\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+Array<double,2> Ident(3,3) = [ 1.0, 0.0, 0.0,
+                               0.0, 1.0, 0.0,
+                               0.0, 0.0, 1.0 ];
+\end{verbatim}
+\end{minipage}}\\
+The blank lines are not required -- they are included only for
+clarity.  
+
+\section{Creating hierachy with sections}
+Following the object-oriented paradigm, we find it to be extremely
+useful to allow hierarchy in our input files.  We do this through the
+use of {\em sections}.  A section is defined in the following way:\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+  Section (Cattle) {
+    Section (Cows) {
+      Array<string,1> Names(2) = ["Bessie", "Bovina"];
+      Array<int,1> NumSpots(2) = [1, 47];
+    }
+    Section (Bulls) {
+      Array<string,1> Names(2) = ["Charger", "Red"];
+      Array<int,1> NumSpots(2) = [13, 5];
+    }
+  }
+\end{verbatim}
+\end{minipage}}
+
+\section{Format}
+\section{Global parameters}
+\begin{itemize}
+\item \texttt{tau}: double variable specifies the time step to be used
+  for the simulation.  This time step needs to be in the pairaction
+  files that are being used. Moreover, note that
+  $\frac{1}{\tau*\texttt{NumTimeSlices}}$ gives the temperature of the
+  system.
+\end{itemize}
+\section{The ``Parallel'' section}
+PIMC++ currently allows two modes of parallelization: cloning
+parallelization and time slice parallelization.  Cloning
+parallelization is the ``trivial'' form where  many copies of the same
+simulation are run.  Nothing needs to be done for cloning
+parallelization to happen.  PIMC++ will simply ``cloning parallelize''
+over the number of processors on which it is run.  In this case,
+different output files (each 
+appended with .ProcNumber.h5) are created.  In time slice
+parallelization, each processor is assigned some percent of the time
+slices in the entire system and operates on those time slices.  The \\
+\begin{itemize}
+\item \texttt{ProcsPerClone}: integer variable specifies how many
+  processors to divide the time slices over. If this does not evenly
+  divide the number of time slices, then some processors get an extra
+  time slice.  It is required that the number of processors PIMC++ is
+  being run on evenly divides ProcsPerClone.  
+\end{itemize}
+\section{The ``System'' section}
+   The section descibes the system to be studied.  It specifies the
+   size of the paths, the species and numbers of particles, the size
+   of the box, etc.  Here, we will describe the required parameters
+\begin{itemize}
+   \item \texttt{NumTimeSlices}:  Integer variable giving the total
+   number of time slices to use.  Thus
+   $\texttt{tau}*\texttt{NumTimeSlices}$ gives the $\beta$ for the
+   system.
+   \item \texttt{Array<bool,1> IsPeriodic(NDIM)}:  This is an array of
+   booleans of length 2 or 3, dependending on the dimensionality of
+   the system, of whether the system is periodic in each of the
+   cardinal directions, $\hat{x},\hat{y},\text{and } \hat{z}$
+   \item \texttt{Section (Particles)}  Inside the System section there
+   is a hiearchal section call the particles section.  The particle
+   section  describes properties of the  particles in the system.  It is comprised of one or more
+   \texttt{Species} sections.
+     \subitem \texttt{Section (Species)} A heiarchal section inside
+   the particles section.  Describes a group of
+        identicle particles.  Examples include electrons, protons,
+        or helium atoms.
+        \subsubitem \texttt{Name} string variable which gives the name
+   of the particle. This name may be arbitrarily chosen.  For example,
+   in a simulation of an atom, one of your variables might be
+   ``UpElectrons''
+       \subsubitem \texttt{Type} string variable that identifies the
+   type of the particle. This must match the types that are used in
+   the Pair Action files.  In the above example, the type might be
+   ``electron''
+       \subsubitem \texttt{lambda} double variable that specifies the
+   value of $\lambda=\frac{\hbar^2}{2m}$ of the particle. (We should
+   check that this is consistent with the data read in from the
+   pairaction file)
+       \subsubitem \texttt{Statistics}: string variable that must take
+   one of the following strings: BOSON, FERMION, BOLTZMANNON.
+   Indicates the statistics for this particle. Currently, there is no
+   distinction between the boson and boltzmannon statistics (to turn
+   on permutations, you must change the value of \texttt{TABLE} inside the
+   BisectionBlock move).  Using fermions, will not allow odd
+   permutations and will turn on some features associated with nodes.
+       \subsubitem \texttt{NumParticles}: integer variable specifies
+   the number of particles of this type in your simulation.
+       \subsubitem \texttt{NumDim}: specifies the dimensionality of
+   your particle.  This is effectively always equal to NDIM.
+   Different dimensional particles would be useful for vortex rings
+   and lines but haven't been imlemented.
+       \subsubitem \texttt{InitPaths}: string variable specifies how
+   the particles in your system should be initialized. Current choices
+   are ``FIXED'',''ALLFIXED'',''CUBIC'',''FILE''.  ``FIXED'' (add
+   information about Levi-Flight and squeeze..soon how initialization of the
+   particles works is going to be redone a little) requires
+   the addition of variable Positions that is  Array<double,2> of size
+   NumParticles X dimensions that explicitly specifies the location of
+   all the particles.  All time slices will start at the same
+   poisitions.  ``ALLFIXED'' is similar to fixed except it requires
+   the addition of a variable Positions that is Array<double,3> of
+   size NumTimeSlices x NumParticles x NumDim.  In this situation all
+   time slices are explicitly specified. ``CUBIC'' places all the
+   particles in a cubic array filling the box. All time slices are at
+   the same point.  ``FILE''  requires the specification of an
+   additional string variable ``File'' that specifies the name of the
+   file. This file must have a PathDump observable in it. The last
+   configuration from this pathdump will be read in as the initial
+   configuration. This file MUST be different from the BASE file you
+   specify. 
+     
+\end{itemize}
+
+
+\section{The ``Action'' section}
+\subsection{Pair Actions}
+You must include a pair action file for each pair of particle types.
+If you have only one species in your system, (e.g. $^4He$ atoms), you
+need only one pair action file.  If you have two different particle types
+(e.g. electrons and protons), you will need three files
+(e.g. electron-electron, electron-proton, and proton-proton).  These
+files are specified by the variable \texttt{Array<string,1>
+  PairActionFiles($n$)}, where $n$ is the number of files.  For
+example, \\ 
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+Array<string,1> PairActionsFiles(3) = 
+    [ "e-e.h5", "e-p.h5", "p-p.h5" ];
+\end{verbatim}
+\end{minipage}}\\
+These files are the ones generated by {\em fitter++}, which is
+described in an accompanying document.
+
+\subsection{Pair Actions (from David's squarer)}
+PIMC++ is capable of reading Pair Actions from David's squarer output.
+For each dm file used, a separate .PairAction file must be created.
+This PairAction file must have the following structure:\\
+\rule{0.0cm}{0.75cm}\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+Section (Fits)
+{
+  string Type = "DavidFit";
+  string Daviddmfile="He4.95.dm";
+  int NumOffDiagonalTerms=2 
+  Section (Particle1)
+  {
+    string Name=''He3''
+    double lambda = 6.059615;
+    int Ndim = 3;
+  }
+ 
+  Section (Particle2)
+  {
+    string Name = "He";
+    double lambda = 0.0;
+    int Ndim = 3;
+  }
+ 
+
+}
+\end{verbatim}
+\end{minipage}}\\
+The Type variable being set to DavidFit indicates that David's squarer
+is to be used for input.  The variable Daviddmfile gives the name of
+the density matrix file to use.  This file must be in the directory
+from which youa re running the code. If it is not, a cryptic error
+message such as assert(PAIO.ReadFile==false).  The variable
+NumOffDiagonalTerms indicates how many off diagonal terms to use from
+the dm file.  In the two particle sections it is important to use
+Names that are consistent with the rest of the code. Currently, the
+other variables must be included but are not actually used for any
+purpose (as far as I am aware..they really should do a sanity check
+against the code to make sure that what you are reading in is
+consistent with other input).
+
+\subsection{MaxLevels}
+This integer variable gives the maximum number of levels which are
+used in bisection-type moves.  It is required since we need to know
+how may different $\tau$'s we need to read in from each pair action
+file.  E.g.\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+int MaxLevels = 6;
+\end{verbatim}
+\end{minipage}}
+\subsection{NumImages}
+In the Kinetic action, the minimum image convention is used in its
+calculation. In a regime where $\sqrt{*\lambda*\tau}$ is on the order
+of the box size, this is not an accurate approximation. In that case,
+more images need to be used. By setting this integer variable to 1,
+you use the nearest 27 images (6 in 2 dimensions).  This will
+contribute to a reasonably significant spped loss in the code and so
+should be avoided when possible.
+\subsection{Long-range variables}
+For systems containing particles with long-range (e.g. coulomb)
+interactions, there are several variables which are required:
+\subsubsection{UseRPA:}
+   This boolean variable indicates whether or not a Random Phase
+ Approximation correction to the long-range part of the interaction
+ should be applied.  It has not been extensively tested.\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+bool UseRPA = false;
+\end{verbatim}
+\end{minipage}}\\
+\subsubsection{NumBreakupKnots:}
+This integer variable specifies how may spline knots should be used in
+representing the optimal long-range action in real space.  A value of
+about 10-20 is usually sufficient.  Too large a value could
+potentially lead to numerical instabilities.\\
+\rule{0.0cm}{0.75cm}\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+int NumBreakupKnots = 20;
+\end{verbatim}
+\end{minipage}}\\
+
+
+
+\subsection{Nodal actions}
+For systems involving fermions, we utilize implement the Restricted
+Path Integral Monte Carlo method, RPIMC.  In this method, we force the
+density matrix to have the same nodes (zero crossings) as a trial
+density matrix.  In the case of complex trial functions, this is
+generalized to enforcing that the phase of the sampled density matrix
+matches some trial density matrix.  These methods are often referred
+to as {\em fixed-node} and {\em fixed-phase}, since they were derived
+from those ground-state methods.  
+
+Since there are several different types of trial functions which can
+be use for nodes/phases, each nodal action is specified in its own
+section.  
+\subsubsection{Free particle:}
+The density matrix for a system of non-interacting fermions can be
+computed exactly in free or periodic boundary conditions.  For
+high-temperature or weakly interacting particles (such as in some
+metals), the nodes from such a density matrix are fairly accurate.  To
+specify these free-particle nodes, we need only two variables: \\ \\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+Section (NodalAction)
+{
+  string Type = "Free";
+  string Species= "eup";
+}
+\end{verbatim}
+\end{minipage}}
+The first variable, \texttt{Type}, specifies we are using
+free-particle nodes.  The second specifies which species is associated
+with the nodal action.  If you have separate up and down electron
+species (as you probably should), you need a
+\texttt{Section(NodalAction)} for each species.
+
+\subsection{Ground state:}
+\rule{0.0cm}{0.75cm}\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+Section (NodalAction)
+{
+  string Type = "GROUNDSTATE";
+  string IonSpecies  = "Na";
+  string UpSpecies   = "eup";
+  string DownSpecies = "edown";
+  double kCut = 4.0;
+}
+\end{verbatim}
+\end{minipage}}
+
+In the limit of zero temperature, the density matrix can be written in
+terms of the wave function for the system.  At low, but non-zero,
+temperature, the using nodes from the ground state wave function is
+often a very good approximation.  Above, we show how ground state
+nodes are specified in the \texttt{Action} section.  First, the
+\texttt{``Type''} is given as \texttt{``GroundState''}.  We next
+specify the species of the ions.  The code will solve for the bands of
+non-interacting electrons in the potential of the ions.  This
+potential is determined from the pair action file.  Next, we specify
+the {\em up} and {\em down} electron species.  Finally, we specify the
+cutoff in $k$-space which we use for the band structure calculation.
+
+\subsubsection{Fixed-phase:}
+\rule{0.0cm}{0.75cm}\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+Section (NodalAction)
+{
+  string Type = "FIXEDPHASE";
+  string IonSpecies  = "Na";
+  string UpSpecies   = "eup";
+  string DownSpecies = "edown";
+  double kCut = 4.0;
+  Array<double,1> kVec(3) = [ 0.04, 0.04, 0.04 ];
+}
+\end{verbatim}
+\end{minipage}}\\
+In the above example, we first specify the type as fixed-phase with
+the \texttt{Type} string variable.  Next, we specify the names of the
+species corresponding to up electrons, down electrons, and nuclei.
+This well be used to perform a band structure calculation to construct
+a trial wave-function.  Since we use a trial wave function instead of
+the trial density matrix, the phases are independent of $\beta$, and
+are thus probably only suitable for low-temperature calculations.
+
+\subsection{UseBackground}
+This boolean variable specifies whether or not we will include and
+neutralizing charge background.  This should only be used for systems
+which are not charge-neutral, such as jellium.
+
+\section{The ``Moves'' section}
+
+PIMC++ deals with moves and observables in a two steps. First, in this
+section of the input file, the possible moves (observables) are
+defined and given their appropriate parameters (i.e. what species they
+will work on, how many levels the bisection has, etc).  Then, in the
+algorithms section these moves are called.  This gives you flexibility
+over when the moves happen during the PIMC run.  
+
+\begin{itemize}
+   \item \texttt{type}:  Type of move that is being
+   defined.  For example, if you are defining a BisectionBlock move
+   then your type will be BisectionBlock.
+
+   \item \texttt{name}:  The name of your move. This may be anything
+   but must be unique for each move in your Input File (the code should
+   really check for this, btw).  This is the name you will use in the
+   algorithm in specifying that this move is to be called.
+
+\end{itemize}
+
+\subsection{BisectionBlock Moves}
+ 
+\begin{itemize}
+
+  \item \texttt{NumLevels}: integer that is the number of levels the
+  bisection should use.
+   
+  \item \texttt{ActiveSpecies}: Should be deprecated. Please remove
+  from your input file. 
+
+  \item \texttt{StepsPerBlock}: integer representing how many steps
+  the BisectionBlock takes.  All steps of the bisectionblock are done
+  with the same subset of time slices.  When permutations are on, doing $n$
+  \texttt{StepsPerBlock} is more effecient then running the move $n$
+  times, because it takes advantages of previous computation.  
+
+  
+   \item \texttt{Species}: string variable that contains the name of
+   the species that the Move operates on.  This name should correspond
+   to the value given to \texttt{Name} in the \texttt{Species}
+   section.
+
+
+   \item \texttt{PermuteType}: Indicates how (and whether) this move
+   does permutations.  Note that this currently is a better indicator
+   of whether the system is acting Bosonic then the statistics type of
+   the species.  Choices include \texttt{Table} which performs up to 4
+   particle permutations and \texttt{None} which indicates no
+   permutations will happen.
+
+   \item \texttt{Array<double,1> Gamma(4)}: Array of enhancement
+     factors for 1,2,3, and 4 particle
+     permutations when using a \texttt{PermuteType} of \texttt{Table}.
+     These {\em must} be greater then 1.  Each factor will
+     multiplicatively enhance the
+     probability a permutation (of the appropriate size) will be chosen.
+     
+   \item \texttt{epsilon}: a cutoff that forbids sampling permutations with
+     a probability (as determined by the kinetic action) smaller then epsilon 
+     of being accepted.  Only to be used with \texttt{PermuteType} of
+     \texttt{Table}. Epsilon significantly increases the 
+     effeciency of the permutation algorithm moving it from
+     approximately a $n^4$ to a $n^2$ algorithm. 
+
+\end{itemize}
+
+\subsection{Open End Moves}
+The open end move works by choosing at random one of the two open ends
+of the open loops and displacing it randomly within a box (currently
+the size of the box is some percent of the total box size. For certain
+applications this will not be effective).  It then rebuilds a brownian
+bridge between the new ``end'' and the time slice  $2^{\texttt{NumLevels}}$ before the end  using the bisection algorithm.   It is currently IMPORTANT that this move be commented out (both in the moves section and the algorithm) if the code is running in non-OpenLoops mode. Otherwise illegal memory access will happen (we should edit the code to enforce this constraint).
+\begin{itemize}
+\item The \texttt{type} for this move must be OpenEnd
+\item \texttt{NumLevels} This variable designates how many levels are used in the bisection used to rebuild a brownian bridge to the open time slice.
+\end{itemize}
+
+\subsection{ShiftMove}
+All code in PIMC++ follows the invariant that the initial and final
+time slice in memory are not to be altered.   Notice, without time
+slice parallelization these two time slices will be permutations of
+one another. With time slice parallelization, the last time slice of
+processor i will be a permutation of the first time slice of processor
+i+1 (modulo the number of processors).  Keeping this invariant is
+crucial to the proper functioning of time slice
+parallelization. Because of this, shift moves are occassionally
+done. A shift move, shifts all of the time slices in memory a random
+amount. This allows time slices that used to be unmovable (because of
+the above invariant) to be moved.  Without doing this, we would not be
+able to ensure ergodicity for the entire path.   
+\begin{itemize}
+\item The \texttt{type} for this move must be ShiftMove.
+\end{itemize}
+
+
+
+
+\section{The ``Observables'' section}
+The observable section contains a series of ``observe'' sections that
+specify paramaters for each observable.  It also contains the
+variable \\
+\begin{itemize}
+\item \texttt{OutFileBase}:  string observable that specifies the base
+  of the output file name. It is important to note that when doing
+  ``cloning'' parallelization each clone produces its own unique
+  output file. Because of this, the base file name will be added a .xxx.h5
+  where xxx specifies the ``clone'' number that produced this output
+  file. In the case in which the code is running in serial mode, the
+  addition is .0.h5.
+\end{itemize}
+Each observable section mus have the following variables:
+\begin{itemize}
+\item \texttt{type}: The type of the observable is unique for each
+  type of observable.  It indicates to the code what observable is being
+  defined and specified below in the individual sections.
+
+\item \texttt{Name}: The name of your observable. This may be anything
+   but must be unique for each observable in your Input File (the code should
+   really check for this, btw).  This is the name you will use in the
+   algorithm in specifying that this observable to be called.
+
+\item \texttt{freq}:  The observable will accumulate its statistics
+  after being called ``freq'' number of times.  
+\item \texttt{dumpFreq}: The observable will write data to the output
+  file after being called ``dumpFreq'' number of times. Soon to be
+  deprecated.
+\item \texttt {Description}: Variable to add comments about your
+  observable. Information will be stored in the output file but not
+  specifically used for anything.
+
+\end{itemize}
+\subsection{Time Analysis}
+There are internal clocks in PIMC++ that measure that amount of time
+spent in every move and observable.  The time analysis observable
+summarizes this information and outputs it to the hdf5 file. It is
+recommended that all runs include a time analysis observable (by doing
+so, the algorithm can be tuned to spend a reasonable amount of time in
+each section of the code) 
+The input parameters for the time analysis observables are 
+\begin{itemize}
+\item The \texttt{type} of this observable must be ``TimeAnalysis''
+\end{itemize}
+\subsection{Energy}
+The energy observable calculates the Kinetic, Short Range, Long Range,
+Potential, and Nodal energies. Note that the bulk of this calculation
+is done by querying the ActionClasses. At some point in the near
+future, it wil be able to be specified what energies are used in the
+observable energy but this feature is currently not implemented.  (PUT
+HERE THE FORMULAS FOR THESE DIFFERENT ENERGIES) 
+The input parameters for the Energy observable are 
+\begin{itemize}
+\item The \texttt{type} of this observable must be ``Energy''
+\end{itemize}
+
+\subsection{Pair Correlation}
+The pair correlation observable calculates the pair correlation   
+$$g(r)=\frac{3}{4\Pi}\frac{\Omega}{N1*N2}$$ where $N1$ and $N2$ are
+the total number of particles in each species. In the case where
+species 1 and species 2 are the same, $N2=N1-1$ 
+\begin{itemize}
+\item The \texttt{type} of this observable must be
+`''PairCorrelation''
+\item \texttt{Species1}: String variable indication one of the two species used to calculate the
+  pair correlation. Must be consistently the same string as used in
+  other parts of the code.
+\item \texttt{Species2}: String variable indication one of the two species used to calculate the
+  pair correlation. Must be consistently the same string as used in
+  other parts of the code.
+\end{itemize}
+The pair correlation observable has a grid subsection. This means that
+your pair correlation observable will look like \\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+ Section (Observable)
+    {
+      string type = "PairCorrelation";
+      string Name = "HeHePC";
+      string Species1 = "He";
+      string Species2 = "He";
+      string Description="Helium-Helium Pair Correlation";
+      int freq=2;
+      int dumpFreq=20;
+      Section (Grid)
+        {
+          string type = "Linear";
+          double start = 0.0;
+          int NumPoints = 100;
+        }
+    }
+\end{verbatim}
+\end{minipage}}\\
+The grid section allows for the following variables:
+\begin{itemize}
+\item \texttt{type}: string variable specifies whether the grid is
+  ``Linear'' or of some other type. I've never tested a non-linear
+  grid so don't guarentee it works with this observable correctly.
+\item \texttt{start}: double variable specifying what gridpoint the grid
+  starts at. Typically should be 0.0.
+\item \texttt{end}: double variable specificying what gridpoint the
+  grid ends at. Will default to something reasonable if omitted.
+\item \texttt{NumPoints}: Indicates how many points are used in the grid.
+\end{itemize}
+\subsection{$n(r)$}
+The $n(r)$ observable is an off diagonal observable used for
+establishing condensate fractions, the existence of Off Diagonal Long
+Range Order, etc. It will only work property when the \texttt{OpenLoops}
+variable is set to true.
+\begin{itemize}
+\item The \texttt{type} of this observable must be ``nofr''
+\item \texttt{Species1}: String variable indication one of the two species used to calculate the
+  pair correlation. Must be consistently the same string as used in
+  other parts of the code.
+\item \texttt{Species2}: String variable indication one of the two species used to calculate the
+  pair correlation. Must be consistently the same string as used in
+  other parts of the code.
+\end{itemize}
+Like the pair correlation observable, the $n(r)$ observable has a
+grid. The parameters for the grid are identical (as follows):
+\begin{itemize}
+\item \texttt{type}: string variable specifies whether the grid is
+  ``Linear'' or of some other type. I've never tested a non-linear
+  grid so don't guarentee it works with this observable correctly.
+\item \texttt{start}: double variable specifying what gridpoint the grid
+  starts at. Typically should be 0.0.
+\item \texttt{end}: double variable specificying what gridpoint the
+  grid ends at. Will default to something reasonable if omitted.
+\item \texttt{NumPoints}: Indicates how many points are used in the grid.
+\end{itemize}
+\subsection{PathDump}
+The PathDump observable outputs the the current state of the path
+including the cooridinates of all particles at all points in time as
+well as the current permutation.  
+\begin{itemize}
+\item The \texttt{type} of this observable must be ``PathDump''
+\end{itemize}
+\section{The ``Algorithm'' section}
+In the algorithm section, the specific procedure to be followed in the
+PIMC++ run is specified.  There are three basic constructs in this
+section: the loop, the move, and the observe. The overlying structure
+is a set of loops that are iterated a specified number of times.
+Inside these loops, moves and observables are called.  The use of
+these constructs are clear from the following example:
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+
+ Section (Loop){ 
+    int steps=20; //This loop will run 20 times
+    Section (Move) {string name="BisectHelium";} //Each time this
+                                                 // move is called.
+    Section (Loop){
+      int steps=500;
+      Section (Move) {string name="OpenEndMove";}
+    }
+    Section (Move) {string name = "Shift";}
+    Section (Observe) {string name = "TimeObservable"; }
+    Section (Observe) {string name = ``HeHePairCorrelation"; }
+  }
+
+\end{verbatim}
+\end{minipage}}
+This piece of code would run 20 times.  It first runs the move that
+has the variable name BisectHelium. It then runs the move that has the
+variable name OpenEndMove 500 times in another loop.  Finally it runs
+the move named shift and calls two observables named TimeObservable
+and HeHePairCorrelation. Notice, that calling these observable may do
+nothing substational if they haven't been called some modulo or freq
+or dumpfreq times. The algorithm section may also contain the variable
+\begin{itemize}
+\item \texttt{MaxWallTime}: integer variable which specifies the
+  maximum amount of time the code runs before aborting. This ensures
+  the code finishes oni a supercomputer before being abnormally
+  terminated.  The unit of time this is specified in is minutes (I
+  think although Ken is free to tell me otherwise).
+\end{itemize}
+
+\chapter{Analysis Tools}
+\section{MakeReport}
+\section{pathvis++}
+
+
+\chapter{Modifing pimc++}
+\section{Useful things to know}
+Each particle in PIMC++ is indexed by a unique integer.  To access the
+location of a particle in a move or observable, use
+PathData.Path(slice,ptclNumber). Each species in PIMC++ has a unique
+species number and a unique species name.  To get the species number
+given the species name call PathData.Path.SpeciesNum(SpeciesName).
+The $\lambda$ of a given species is accessed by
+PathData.Path.Species(speciesNum).lambda.   It is assumed
+that a given species is allocated a continuous range of particle
+numbers.  To access the beginning of this range call
+PathData.Path.Species(speciesNum).FirstPtcl (respectively use LastPtcl
+to acess the end of this range).  These number are inclusive.
+\section{Adding a new ``Move''}
+There are two steps to adding a new move. First, the move needs to be
+created and then the appropriate files need to be changed to allow the
+move to be ``glued'' into the rest of the code.
+
+There are two types of moves. There are normal moves and then
+multistage moves. We will start by discussion normal moves.
+
+
+All normal moves must inherit from the class ParticleMoveClass and 
+create the following four functions: \\
+a constructor,\\
+\texttt{MakeMove()},\\
+\texttt{Read(IOSectionClass \&in)},  \\
+\texttt{WriteRatio()}.
+
+
+The constructor of a move must look like the following:\\
+
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+  NameOfMyMoveClass(PathDataClass &myPathData, 
+  IOSectionClass outSection) :
+  ParticleMoveClass(myPathData,outSection)
+    {
+      /* Add code you want here */
+    }
+\end{verbatim}
+\end{minipage}}
+
+It is important to remember to send a pathdata reference and an
+  IOSectionClass (so acceptance ratios can be written out)  to ParticleMoveClass 
+  as is done above. Note the 
+  capatilization used in this example. It is important. 
+
+
+The function \texttt{MakeMove()} will be called by the algorithm 
+and is in charge of the entire move. This means that it is in charge
+of performing the metropolis proceudure by itself (This includes calling
+the appropriate actions and then using a random number to decide on 
+acceptance or rejection)
+At the end of the move, it is {\em mandatory} that \texttt{MakeMove()} 
+either accepts or
+rejects the move by calling either \\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+PathData.Path.AcceptMove(startSlice,endSlice,ActiveParticles)
+\end{verbatim}
+\end{minipage}}\\
+if the move is accepted or by calling\\
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+PathData.Path.RejectMove(startSlice,endSlice,ActiveParticles) 
+\end{verbatim}
+\end{minipage}}\\
+ if the move is rejected.  
+The parameters sent to these functions
+include the range (inclusive) of slices that the move has altered as
+well as an array of particle indices 
+(of type  \texttt{Array<int,1>} ) that the move has changed.  
+By accepting the move, all knowledge of the previous state of the path
+will be erased. By rejecting the move all changes the move made in the
+slice ranges defined by \texttt{[startSlice:endSlice]} on the particles defined
+by the array \texttt{ActiveParticles} will be overwritten by the previous state
+of the path at these locations.  
+
+
+We will not worry about \texttt{WriteRatio()} for the time being other then to
+say that it is relevant for getting the acceptance ratio outputs
+correctly.
+
+The function \texttt{Read(IOSectionClass \&in)} is called immediately after the
+move is created so that the move has the opportunity to read relevant
+input information.  When it is called, the IOSectionClass object
+will be inside \texttt{Section (Moves)} for the appropriate move. 
+(it is neither responsible for call \texttt{infile.OpenSection(``Move'')}, not
+ for closing the section it is in (i.e. there needs to
+be exactly the same number of \texttt{OpenSection} and  \texttt{CloseSection} calls in
+the \texttt{Read} function).
+ The move is then responsible for reading the input parameters it needs
+by calling \texttt{in.Readvar(``varString'',var)}. For example, it might read the 
+number of levels it is to operate on by calling 
+\texttt{in.ReadVar(``NumLevels'',numLevels)} Note,
+
+To glue the read function into your code, there are currently three
+steps. First, add the name of the .h and .cc files to the Makefile.am in the Moves directory. 
+Secondly,  your move needs
+to be added to the .h file of \texttt{MovesClass.h}. This ensures that it will
+get included when other files \#include the moves. Finally, inside
+PIMCClass.cc, there is a ReadMoves() function which will need to have the
+move added to it.  In the series of ``if'' statements, you need to add
+\rule{0.6cm}{0cm}\shadowbox{\begin{minipage}{4.4in}
+\begin{verbatim}
+ else if (MoveType==''MyMoveType''){
+    moveName=''MyMoveName'';
+    Moves(counter)=new MyMoveClass(PathData,OutFile);
+    Moves(counter)->Read(in);
+}
+\end{verbatim}
+\end{minipage}}\\
+The moveType will have to be the type the user must type under
+\texttt{Section (Move)} for the move.
+
+
+
+
+
+\section{Adding a new ``Observable''}
+There are two steps to adding a new observable. First, the observable
+needs to be created and then appropriate files need to be changed to
+allow the observable to be ``glued'' into the rest of the code.
+\subsection{Creating an observable}
+All observables are located in the Observables directory underneath
+the src directory. All observables inherit from the function
+ObservableClass (located in ObservableBase.h). Every observable has a
+``name'' and a ``description'' and all
+observables must implement the functions: \\
+\texttt{void Accumulate()} \\
+\texttt{void WriteBlock()} \\ 
+The following functions may be overwritten by an observable, but need
+not be: \\
+\texttt{void Read(IOSectionClass\& IO)} \\
+\texttt{void WriteInfo()} \\
+A standard observable should also have two variables called \texttt{Freq} and
+\texttt{DumpFreq} that are read in from the input file and respectively
+establish how many times the observable must be called before it
+accumulates its running average and how many times it must be called
+before it outputs its running average to the output file.
+
+
+To simplify the writing of observables, one should use 
+the children of the \texttt{ObservableVar} class. (Such children include 
+\texttt{ObservableDouble},\texttt{ObservableVecDouble1},
+\texttt{ObsservableInt},etc.) One of these should be used for each
+variable you write (recurringly) to your hdf file.  
+To use them you must call their constructor with three parameters:
+the name of the variable to be used in the output file, a reference to 
+an IOSectionClass that will NOT be deleted upon exiting the constructor
+(concretely this means that you need to call it with the capatilized and not
+lowercase version of IOSection), and I reference to a communicator that 
+will be used among the time slice parallel versions of the ...
+
+First we examine how the ObservableVariables are created.
+
+
+To simplify the writing of observables, one should use 
+the children of the \texttt{ObservableVar} class. (Such children include 
+\texttt{ObservableDouble},\texttt{ObservableVecDouble1},
+\texttt{ObsservableInt},etc.) One of these should be used for each
+variable you write (recurringly) to your hdf file.  
+To use them you must call their constructor with three parameters:
+the name of the variable to be used in the output file, a reference to 
+an IOSectionClass that will NOT be deleted upon exiting the constructor
+(concretely this means that you need to call it with the capatilized and not
+lowercase version of IOSection), and I reference to a communicator that 
+will be used among the time slice parallel versions of the ...
+
+
+\subsubsection{Accumulate()}
+The accumulate function gets called each time that an observable is
+told to accumulate in the code's algorithm.  A correctly implemented
+accumulate should call WriteBlock() every DumpFreq amount of times and
+should perform the functions inside of itself every Freq amount of
+times it is called.  The functions inside of itself should add onto
+its running average the value of the observable it is in charge
+of. For example if it was an energy observable, it might accumulate
+the running sum of the kinetic and potential energies.
+
+
+\chapter{Code Verification}
+As with any computational physics code, it is important to
+authenticate that the code produces accurate results. We do that by
+verifying the results of calculations against analytical results,
+other Path Integral codes (such as UPI) and general sanity checks. In
+this chapter we document many of these tests to increase confidence in
+the code's use.  We encourage other quantum monte carlo codes to
+perform a similar exercise (ideally with similar systems to allow
+comparison among different codes.
+
+
+\end{document}
