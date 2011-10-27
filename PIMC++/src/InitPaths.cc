@@ -612,6 +612,8 @@ PathClass::InitPaths (IOSectionClass &in)
 #endif
 	for (int slice=0; slice<NumTimeSlices(); slice++) 
 	  Path(slice,ptcl) = r;
+        dVec disp = r;
+        cerr << ptcl << " " << r << " " << endl;
       }
     }
     else if(InitPaths=="UniformSphere") {

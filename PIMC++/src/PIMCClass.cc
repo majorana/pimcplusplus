@@ -437,7 +437,11 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 
 void PIMCClass::Run()
 {
+  cerr<<"Simulation started."<<endl;
   Algorithm.DoEvent();
+  for (unsigned int i = 0; i < PathData.NumParticles(); i++) {
+    cerr<<i<<" "<<PathData.Path(0,i)<<endl;
+  }
   cerr<<"PIMC++ has completed"<<endl;
   //  Array<MoveClass*,1> Moves;
 //   for (int counter=0;counter<Moves.size();counter++){

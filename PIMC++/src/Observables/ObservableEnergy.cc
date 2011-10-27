@@ -212,6 +212,7 @@ void EnergyClass::WriteBlock()
       //      DavidLongRangeClassYk *lr = (DavidLongRangeClassYk*)(PathData.Actions.GetAction("DavidLongRange"));
       DavidLongRangeClassYk *lr = (DavidLongRangeClassYk*)(&(PathData.Actions.DavidLongRange));
       longrange_vtail=0.5*lr->yk_zero(0)*PathData.Path.NumParticles()/Path.GetVol();
+      cerr << "Writing David Long Range energy" << endl;
     }
     VTailSRVar.Write(vtail);
     VTailLRVar.Write(longrange_vtail);
@@ -396,9 +397,9 @@ void EnergyClass::Read(IOSectionClass &in)
 		OtherSums[n] = 0.0;
 	}
 	// End John's block of code
-	double histStart=9.0;
-	double histEnd=13.0;
-	int histPoints=50;
+	double histStart=0.0;
+	double histEnd=100.0;
+	int histPoints=100;
 	in.ReadVar("HistStart",histStart);
 	in.ReadVar("HistEnd",histEnd);
 	in.ReadVar("HistPoints",histPoints);

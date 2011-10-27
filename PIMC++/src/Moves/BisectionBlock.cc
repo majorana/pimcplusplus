@@ -340,6 +340,7 @@ void BisectionBlockClass::ChooseTimeSlices()
     // refSlice is relative to my first slice
     int refSlice = Path.GetRefSlice() - myStart;
     int numSlices = Path.NumTimeSlices();
+    //cerr << "bSlices: " << bSlices << " numSlices:" << numSlices << " myProc:" << myProc << endl;
     assert(bSlices*2<numSlices);
     if (refSlice < bSlices) {  
       int numStarts = numSlices - bSlices - refSlice;

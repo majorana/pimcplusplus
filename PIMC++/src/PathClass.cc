@@ -87,14 +87,14 @@ void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
   for (int i=0; i<NDIM; i++) {
     double n = -floor(disp(i)*BoxInv(i)+0.5);
     disp(i) += n*IsPeriodic(i)*Box(i);
-    if (!(-Box(i)/2.0<=disp(i))){
+    if (!(-Box(i)/2.0<=disp(i)+0.00001)){
       perr<<"ERROR: "<<Box(i)<<" "<<disp(i)<<" "
 	  <<slice<<" "<<ptcl<<" "<<refPtcl<<" "
 	  <<BoxInv(i)<<Path(slice,ptcl)<<" "<<endl;
 //      sleep(5000);
     }
-    assert(-Box(i)/2.0<=disp(i));
-    assert(disp(i)<=Box(i)/2.0);
+    //assert(-Box(i)/2.0<=disp(i));
+    //assert(disp(i)<=Box(i)/2.0);
   }
   dist = sqrt(dot(disp,disp));
 

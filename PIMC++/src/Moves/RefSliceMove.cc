@@ -54,11 +54,14 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
     ///HACK!    newStage->Actions.push_back(&PathData.Actions.ShortRange);
     if (level == 0) {
       if (PathData.Path.LongRange) 
-	if (PathData.Actions.UseRPA)
+	if (PathData.Actions.UseRPA){
+          cerr<<"Using RPA"<<endl;
 	  newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-	else
-	  newStage->Actions.push_back(&PathData.Actions.LongRange);
-      
+        }else{
+          cerr<<"Not using RPA"<<endl;
+          //newStage->Actions.push_back(&PathData.Actions.LongRange);
+	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+        }
 //       for (int i=0; i<PathData.Actions.NodalActions.size(); i++)
 // 	newStage->Actions.push_back(PathData.Actions.NodalActions(i));
 
@@ -152,7 +155,7 @@ void RefSliceMoveClass::MakeMoveMaster()
   int stageCounter = 0;
   ((PermuteStageClass*)PermuteStage)->InitBlock(Slice1, Slice2);
   while (stageIter!=Stages.end() && toAccept){
-    cerr<<"Attempting level"<<(*stageIter)->BisectionLevel<<endl;
+    //cerr<<"Attempting level "<<(*stageIter)->BisectionLevel<<endl;
     toAccept = (*stageIter)->Attempt(Slice1,Slice2,
 				     ActiveParticles,prevActionChange);
     stageCounter++;
@@ -174,7 +177,7 @@ void RefSliceMoveClass::MakeMoveMaster()
       NodeAccept++;
       Accept();
       Path.RefPath.AcceptCopy();
-      cerr<<"ACCEPTNG REF SLICE MOVE"<<endl;
+      cerr<<"ACCEPTING REF SLICE MOVE"<<endl;
     }
 //    else if (firstTime){
 //      firstTime=false;
@@ -193,7 +196,7 @@ void RefSliceMoveClass::MakeMoveMaster()
   // Otherwise, reject the whole move
   else {
     Reject();
-    cerr<<"REJECTING REF SLICE MOVE BY LOCAL REJECt"<<endl;
+    cerr<<"REJECTING REF SLICE MOVE BY LOCAL REJECT"<<endl;
     Path.RefPath.RejectCopy();
   }
 
@@ -238,11 +241,16 @@ void RefSliceMoveClass::MakeMove()
 {
   PathClass &Path=PathData.Path;
   MasterProc = Path.SliceOwner (Path.GetRefSlice());
-  if (PathData.Path.Communicator.MyProc() == MasterProc)
+  cerr<<"Starting RefSlice move."<<endl;
+  if (PathData.Path.Communicator.MyProc() == MasterProc){
+    //cerr<<"MakeMoveMaster();"<<endl;
     MakeMoveMaster();
-  else
+  }else{
+    //cerr<<"MakeMoveSlave();"<<endl;
     MakeMoveSlave();
+  }
   if ((NodeAccept+NodeReject) % 1000 == 999)
     fprintf (stderr, "Node accept ratio = %5.3f\n",
 	     (double)NodeAccept/(double)(NodeAccept+NodeReject));
+  //cerr<<"Finished RefSlice move."<<endl;
 }

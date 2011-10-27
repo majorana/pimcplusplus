@@ -275,9 +275,10 @@ LongRangeClass::SingleAction (int slice1, int slice2,
 			      const Array<int,1> &changedParticles,
 			      int level)
 {
+  cerr<<"Getting LongRangeClass SingleAction"<<endl;
   if (GetMode() == NEWMODE)
     Path.UpdateRho_ks(slice1, slice2, changedParticles, level);
-  
+  cerr<<"Updated Rho, continue."<<endl;
   int skip = (1<<level);
 #ifdef DEBUG
   // Check to see if matrices are updated properly
@@ -318,13 +319,18 @@ LongRangeClass::SingleAction (int slice1, int slice2,
     // First, do the homologous (same species) terms
     for (int species=0; species<Path.NumSpecies(); species++) {
       // Path.CalcRho_ks_Fast(slice,species);
+      cerr<<"species "<<species<<endl;
       PairActionFitClass &pa = *PairMatrix(species,species);
+      cerr<<"long range?"<<pa.IsLongRange()<<endl;
       if (pa.IsLongRange()) {
 	for (int ki=0; ki<Path.kVecs.size(); ki++) {
 	  double rhok2 = mag2(Path.Rho_k(slice,species,ki));
+          cerr<<"Ulong_k "<<pa.Ulong_k(level,ki)<<endl;
 	  homo += factor * 0.5 * 2.0* rhok2 * pa.Ulong_k(level,ki);
 	}
       }
+      cerr<<"pa.Ushort_k0 "<<pa.Ushort_k0(level)<<endl;
+      cerr<<"Ulong_r0 "<<pa.Ulong_r0(level)<<endl;
       int N = Path.Species(species).NumParticles;
       // We can't forget the Madelung term.
       homo -= factor * 0.5 * N * pa.Ulong_r0(level);
@@ -334,6 +340,7 @@ LongRangeClass::SingleAction (int slice1, int slice2,
     }
     
     // Now do the heterologous terms
+    cerr<<"slice"<<slice<<endl;
     for (int species1=0; species1<Path.NumSpecies(); species1++)
       for (int species2=species1+1; species2<Path.NumSpecies(); species2++) {
 	PairActionFitClass &pa= *PairMatrix(species1, species2);
@@ -359,6 +366,7 @@ LongRangeClass::SingleAction (int slice1, int slice2,
   else
     U += (k0Homo+k0Hetero);
   //  return (homo+hetero);
+  cerr<<"Got U "<<U<<endl;
   return (U);
 }
 

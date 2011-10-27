@@ -310,6 +310,7 @@ void PathDataClass::Read (IOSectionClass &in)
   // Setup Inter- and IntraComms
   assert ((N % procsPerClone) == 0);
   NumClones = N / procsPerClone;
+  cerr << "N : " << N << ", procPerClone : " << procsPerClone << " " << endl;
   MyCloneNum = WorldComm.MyProc()/procsPerClone;
   // Create IntraComm
   ////cerr << "  Going to initialize IntraComm with MyCloneNum " << MyCloneNum << endl;

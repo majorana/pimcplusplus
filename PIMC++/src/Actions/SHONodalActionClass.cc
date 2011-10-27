@@ -721,7 +721,7 @@ SHONodalActionClass::SimpleAction (int startSlice, int endSlice,
     if ((slice != refSlice) && (slice != refSlice+Path.TotalNumSlices))
       if (Det(slice) < 0.0){
     	uNode += 1.0e50;
-	cerr<<"Broken slice is "<<slice<<endl;
+	//cerr<<"Broken slice is "<<slice<<endl;
       }
   }
 
