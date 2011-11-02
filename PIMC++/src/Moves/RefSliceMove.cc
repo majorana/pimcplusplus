@@ -241,7 +241,7 @@ void RefSliceMoveClass::MakeMove()
 {
   PathClass &Path=PathData.Path;
   MasterProc = Path.SliceOwner (Path.GetRefSlice());
-  cerr<<"Starting RefSlice move."<<endl;
+  //cerr<<"Starting RefSlice move."<<endl;
   if (PathData.Path.Communicator.MyProc() == MasterProc){
     //cerr<<"MakeMoveMaster();"<<endl;
     MakeMoveMaster();

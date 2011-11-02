@@ -28,7 +28,7 @@ LoopClass::DoEvent()
   std::list<EventClass*>::iterator iter;
   for (int step=0; step<NumSteps; step++){
     for (iter=Events.begin(); iter!=Events.end(); iter++) {
-     cerr << (*iter)->Name << " started." << endl;
+     cerr << "Do " << (*iter)->Name << "." << endl;
      if (PathData.ExceededWallTime()) {
 	cerr << "PIMC++ exceeded wall clock limit.  Exitting LoopClass.\n";
 	return;
@@ -44,8 +44,9 @@ LoopClass::DoEvent()
 	(*iter)->TimeSpent += (double)(end.tv_sec-start.tv_sec) +
 	  1.0e-6*(double)(end.tv_usec-start.tv_usec);
       }
-      cerr << (*iter)->Name << " done." << endl;
+      cerr << "Done." << endl;
     }
+    cerr << "***" << step << "/" << NumSteps << endl;
   }
 }
 
