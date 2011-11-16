@@ -352,12 +352,14 @@ void EnergyClass::Read(IOSectionClass &in)
 	// energies from specified action objects
 	// Added by John on June 16 2006
   Array<string,1> EnergyStrings(0);
-  in.ReadVar("ComputeEnergies", EnergyStrings);
-  numEnergies = EnergyStrings.size();
-	OtherActions.resize(numEnergies);
-	OtherVars.resize(numEnergies);
-	OtherSums.resize(numEnergies);	
-	for(int n=0; n<numEnergies; n++){
+  if (in.ReadVar("ComputeEnergies", EnergyStrings))
+    numEnergies = EnergyStrings.size();
+  else 
+    numEnergies=0;
+  OtherActions.resize(numEnergies);
+  OtherVars.resize(numEnergies);
+  OtherSums.resize(numEnergies);	
+  for(int n=0; n<numEnergies; n++){
     OtherActions[n] = PathData.Actions.GetAction(EnergyStrings(n));
     cerr << "Energy observable added action with label " << EnergyStrings(n) << endl;
 
