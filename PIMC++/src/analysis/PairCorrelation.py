@@ -7,7 +7,7 @@ from HTMLPlots import *
 from GraphDraw import *
 import stats
 
-def ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut):
+def ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut,L):
     #acquire data about the correlation section
     species1=infiles.ReadVar("Species1")[0]
     species2=infiles.ReadVar("Species2")[0]
@@ -67,8 +67,9 @@ def ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut):
     asciiFile = open (asciiName, "w")
     n = len(x)
     for i in range(0,n):
-          asciiFile.write('%20.16e %20.16e %20.16e\n' \
-                          % (x[i], mean[i], error[i]))
+      if x[i] <= L/2:
+        asciiFile.write('%20.16e %20.16e %20.16e\n' \
+                         % (x[i], mean[i], error[i]))
     asciiFile.close()
     
     #WriteAsciiFile(asciiFileName,x,y)

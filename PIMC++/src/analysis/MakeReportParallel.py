@@ -4,7 +4,7 @@ import sys
 import os
 import math
 import stats
-import numarray
+import numpy
 from GraphDraw import *
 #from matplotlib.matlab import *
 from pylab import *
@@ -26,13 +26,13 @@ def Avg (x):
      if x[0] == None:
           return None
      else:
-          return numarray.sum(x)/len(x)
+          return numpy.sum(x)/len(x)
 
 #Takes a vector of means and vector of errors and returns the weighted average and error
 def WeightedAvg (means, errors):
      if (errors[0] != 0.0):
           weights = map (lambda x: 1.0/(x*x), errors)
-          norm = 1.0/numarray.sum(weights)
+          norm = 1.0/numpy.sum(weights)
           weights = map(lambda x: x*norm, weights)
           avg = 0.0
           error2 = 0.0
@@ -50,7 +50,7 @@ def VecAvg (x):
      if x[0] == None:
           return None
      else:
-          return map(lambda y:numarray.sum(y)/len(y),x)
+          return map(lambda y:numpy.sum(y)/len(y),x)
 
 # Takes a list of 2D arrays and returns the unweighted average of the
 # last row.
@@ -283,7 +283,7 @@ def ProcessLongRangeAction(infiles):
 ##      numVars=infiles.CountVars()
 ##      for counter in range(0,numVars):
 ##           data=infiles.ReadVar(counter)
-##           if type(data)==numarray.numarraycore.NumArray:
+##           if type(data)==numpy.numpycore.NumArray:
 
 ##                varName=infiles.GetVarName(counter)
 ##                doc.append(Name(sectionName+varName+repr(currNum)))
@@ -346,7 +346,7 @@ def ProcessScalarSection(infiles,doc,currNum):
           data = infiles.ReadVar(counter)
           varName = infiles.GetVarName(counter)
           if ((varName!="TotalAction") and (varName!="ExpTotalAction")):
-               if type(data[0])==numarray.numarraycore.NumArray:
+               if type(data[0])==numpy.numpycore.NumArray:
                     currNum=currNum+1
                     varName=infiles.GetVarName(counter)
                     procScalarTable.body[0].append(varName+" Mean")
