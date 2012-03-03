@@ -31,7 +31,8 @@ from SuperfluidFraction import *
 import BisectionBlock
 ##from Conductivity import *
 
-
+import resource
+print resource.getrlimit(resource.RLIMIT_NOFILE)
 
 infiles = IOSectionClassList()
 if (sys.argv[1]=='-f'):
@@ -54,21 +55,31 @@ else:
 if (infiles.len() > 1):
      print 'Found ' +repr(infiles.len()) + ' output files.'
 
-dirName=basename 
-cutoff=None
+dirName = basename
 StartCut = None
-if (os.access(dirName+"/.pref",os.F_OK)):
-#     print dirName+"/.pref"
-     prefFile=IOSectionClass()
-     prefFile.OpenFile(dirName+"/.pref")
-     StartCut = prefFile.ReadVar("StartCut")
-     print "StartCut = ", StartCut
-     print prefFile.ReadVar("cutoff")
-     cutoff=prefFile.ReadVar("cutoff")
-     print "cutoff = ", cutoff
-#     prefFile.CloseFile() 
-if cutoff==None:
-     cutoff=0
+if (len(sys.argv) > 2):
+  StartCut = int(sys.argv[2])
+elif (os.access(dirName+"/.pref",os.F_OK)):
+  prefFile=IOSectionClass()
+  prefFile.OpenFile(dirName+"/.pref")
+  StartCut = prefFile.ReadVar("StartCut")
+  prefFile.CloseFile() 
+else:
+  StartCut = 0
+print "StartCut = ", StartCut
+
+cutoff = None
+if (len(sys.argv) > 3):
+  cutoff = int(sys.argv[3])
+elif (os.access(dirName+"/.pref",os.F_OK)):
+  prefFile=IOSectionClass()
+  prefFile.OpenFile(dirName+"/.pref")
+  cutoff = prefFile.ReadVar("cutoff")
+  prefFile.CloseFile() 
+else:
+  cutoff=0
+print "cutoff = ", cutoff
+
 if not(os.access(dirName,os.F_OK)):
      os.mkdir(dirName)
 os.chdir(dirName)
@@ -128,7 +139,6 @@ except:
 
 ##infiles.CloseSection() # "Moves"
 
-
 #################
 ## Observables ##
 #################
@@ -138,12 +148,12 @@ numSections=infiles.CountSections()
 #print "Number of sections is ",numSections
 for counter in range(0,numSections):
   infiles.OpenSection(counter)
-  myName= infiles.GetName()
-  myType=infiles.ReadVar("Type")[0]
+  myName = infiles.GetName()
+  myType = infiles.ReadVar("Type")[0]
   print "Currently processing ", myName
   if 1==1:
     if myName=="PairCorrelation":
-      ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
+      ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut,box[0])
     if myName=="Vacancy":
       ProcessVacancy(infiles,summaryDoc,detailedDoc,StartCut)
       summaryDoc.append(HR())
@@ -195,8 +205,8 @@ for counter in range(0,numSections):
       summaryDoc.append(HR())
       detailedDoc.append(HR())
     elif myName=="StructureFactor":
-#      for i in range(0,20):
-#        ProcessStructureFactor(infiles,summaryDoc,detailedDoc,i*50)
+#     for i in range(0,20):
+#       ProcessStructureFactor(infiles,summaryDoc,detailedDoc,i*50)
       ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut)
       summaryDoc.append(HR())
       detailedDoc.append(HR())
