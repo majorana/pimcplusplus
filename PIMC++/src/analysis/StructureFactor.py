@@ -99,8 +99,9 @@ def ProcessStructureFactor(infiles,summaryDoc,detailedDoc,StartCut):
      baseName=sectionName+repr(currNum)+'.'+repr(StartCut)
 
 ##Produce Image
-     myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel)
-     myImg_avg=ProduceCorrelationPicture(xNew,yNew,baseName+"_avg",hlabel,vlabel)
+     cutoff = 1.0
+     myImg=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel,cutoff)
+     myImg_avg=ProduceCorrelationPicture(xNew,yNew,baseName+"_avg",hlabel,vlabel,cutoff)
 ##Produce Ascii file
      asciiFileName = baseName + '.dat'
      asciiFileName_avg = baseName + '_avg.dat'

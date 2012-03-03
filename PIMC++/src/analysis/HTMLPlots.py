@@ -1,3 +1,5 @@
+import matplotlib as mpl
+mpl.use('Agg')
 from pylab import *
 from HTMLgen import *
 from Tables import *
@@ -19,6 +21,10 @@ def ProduceTracePicture(valArray,fileBase,hlabel,vlabel,myTitle=''):
             plot(x[:,i], valArray[:,i])
         hold(False)
     else:
+        if(vlabel == "Residual Energy"):
+          for i in range(0,len(valArray)):
+            if(valArray[i]<1e-100):
+              valArray[i] = 0
         for i in range(0,len(x)):
             x[i] = i
         plot(x,valArray)

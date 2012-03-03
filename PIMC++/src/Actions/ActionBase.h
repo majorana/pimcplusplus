@@ -40,9 +40,7 @@ public:
   /// positions.  The level is used in bisection moves in which, at
   /// higher levels, we skip 2^level intervening time slices, building
   /// up a new path in a recursive style.
-  virtual double SingleAction(int slice1, int slice2,
-			      const Array<int,1> &activeParticles,
-			      int level) = 0;
+  virtual double SingleAction(int slice1, int slice2, const Array<int,1> &activeParticles, int level) = 0;
 
   /// This is the main function that gets called.  It simply returns
   /// SingleAction if we are not using correlated sampling.  If we are
@@ -51,25 +49,20 @@ public:
   /// something special, so Action should not be called with
   /// Correlated sampling on and level = 0;  Note that this is
   /// virtual, so that the nodal classes can override.
-  virtual double Action(int slice1, int slice2,
-			const Array<int,1> &activeParticles,
-			int level);
+  virtual double Action(int slice1, int slice2, const Array<int,1> &activeParticles, int level);
 
   /// This function returns the \f$\beta\f$-derivative of the above
   /// function.  Since we are interested in total energy, it does not
-  /// take a list of particles we are moving. 
-  virtual double d_dBeta (int slice1, int slice2,
-			  int level) = 0;
+  /// take a list of particles we are moving.
+  virtual double d_dBeta (int slice1, int slice2, int level) = 0;
 
   /// This function returns the gradient of the action on a specified
   /// set of particles, summed over the timeslices from slice1 to
   /// slice2, inclusive.  The function adds its contribution to
   /// whatever is already in gradVec.  The default implementation does
   /// nothing.  
-  virtual void GradAction (int slice1, int slice2, 
-			   const Array<int,1> &ptcls, int level,
-			   Array<dVec,1> &gradVec);
-			     
+  virtual void GradAction (int slice1, int slice2, const Array<int,1> &ptcls, int level, Array<dVec,1> &gradVec);
+
   // This returns the sum over all time slices, using MPI
   // to sum over processors if necessary.
   virtual void Read (IOSectionClass &in);
@@ -78,7 +71,7 @@ public:
   virtual string GetName()=0;
   virtual void AcceptCopy (int slice1, int slice2);
   virtual void RejectCopy (int slice1, int slice2);
-  ActionBaseClass(PathDataClass &pathData);				   
+  ActionBaseClass(PathDataClass &pathData);
 };
 
 /// The PotentialBaseClass is an abstract base class for storing

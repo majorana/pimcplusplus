@@ -644,47 +644,101 @@ PathClass::InitPaths (IOSectionClass &in)
           Random.LocalGaussianVec(sigma,r);
           r=r0+r;
           SetPos(slice,ptcl,r*SphereRadius/sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]));
-                                                                                
         }
       }
     }
     else if (InitPaths == "BCC") {
-      //      assert(NDIM==2);
       int num = species.NumParticles;
       bool isCubic = 0;
 #if NDIM==2   
       isCubic = (Box[0]==Box[1]);
       cerr << isCubic << endl;
 #endif
-#if NDIM==3    
+#if NDIM==3
       isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
 #endif
       if (!isCubic) {
-	perr << "A cubic box is current required for cubic initilization\n";
-	abort();
+        perr << "A cubic box is current required for cubic initilization\n";
+        abort();
       }
       int numPerDim = (int) ceil (pow(0.5*(double)num, 1.0/3.0)-1.0e-6);
       double delta = Box[0] / numPerDim;
       for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
-	int ip = (ptcl-species.FirstPtcl)/2;
-	int ix, iy, iz;
-	ix = ip/(numPerDim*numPerDim);
-	iy = (ip-(ix*numPerDim*numPerDim))/numPerDim;
+        int ip = (ptcl-species.FirstPtcl)/2;
+        int ix, iy, iz;
+        ix = ip/(numPerDim*numPerDim);
+        iy = (ip-(ix*numPerDim*numPerDim))/numPerDim;
 #if NDIM==3
-	iz = ip - ix*numPerDim*numPerDim - iy*numPerDim;
+        iz = ip - ix*numPerDim*numPerDim - iy*numPerDim;
 #endif
-	dVec r;
-	r[0] = ix*delta-0.5*Box[0];
-	r[1] = iy*delta-0.5*Box[1];
+        dVec r;
+        r[0] = ix*delta-0.5*Box[0];
+        r[1] = iy*delta-0.5*Box[1];
 #if NDIM==3
-	r[2] = iz*delta-0.5*Box[2];
+        r[2] = iz*delta-0.5*Box[2];
 #endif
-	if (ptcl % 2) 
-	  r += 0.5*delta;
-// 	fprintf (stderr, "BCC ptcl %d position = [%8.4f %8.4f %8.4f]\n",
-// 		 ptcl, r[0], r[1], r[2]);
-	for (int slice=0; slice<NumTimeSlices(); slice++) 
-	  Path(slice,ptcl) = r;
+        if (ptcl % 2)
+          r += 0.5*delta;
+        for (int slice=0; slice<NumTimeSlices(); slice++)
+          Path(slice,ptcl) = r;
+      }
+    }
+    else if (InitPaths == "DIAG") {
+      for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+        dVec r;
+        r[0] = ptcl;
+        r[1] = ptcl;
+#if NDIM==3
+        r[2] = ptcl;
+#endif
+        for (int slice=0; slice<NumTimeSlices(); slice++) {
+          Path(slice,ptcl) = r + 0.1*r/sqrt(3.0*ptcl*ptcl);
+        }
+      }
+    }
+    else if (InitPaths == "BCCe") {
+      // BCC lattice with slices forming a circle of radius eps around the lattice site
+      int num = species.NumParticles;
+      bool isCubic = 0;
+#if NDIM==2
+      isCubic = (Box[0]==Box[1]);
+      cerr << isCubic << endl;
+#endif
+#if NDIM==3
+      isCubic = (Box[0]==Box[1]) && (Box[1]==Box[2]);
+#endif
+      if (!isCubic) {
+        perr << "A cubic box is current required for cubic initilization\n";
+        abort();
+      }
+      int numPerDim = (int) ceil (pow(0.5*(double)num, 1.0/3.0)-1.0e-6);
+      double delta = Box[0] / numPerDim;
+      double eps = 1.0e-2 * delta;
+      for (int ptcl=species.FirstPtcl; ptcl<=species.LastPtcl; ptcl++) {
+        int ip = (ptcl-species.FirstPtcl)/2;
+        int ix, iy, iz;
+        ix = ip/(numPerDim*numPerDim);
+        iy = (ip-(ix*numPerDim*numPerDim))/numPerDim;
+#if NDIM==3
+        iz = ip - ix*numPerDim*numPerDim - iy*numPerDim;
+#endif
+        dVec r;
+        r[0] = ix*delta-0.5*Box[0];
+        r[1] = iy*delta-0.5*Box[1];
+#if NDIM==3
+        r[2] = iz*delta-0.5*Box[2];
+#endif
+        if (ptcl % 2) 
+          r += 0.5*delta;
+        for (int slice=0; slice<NumTimeSlices(); slice++) {
+          double dx = eps * cos((slice/(double)NumTimeSlices())*2*pi);
+          double dy = eps * sin((slice/(double)NumTimeSlices())*2*pi);
+          dVec dr;
+          dr[0] = dx;
+          dr[1] = dy;
+          dr[2] = 0.0;
+          Path(slice,ptcl) = r + dr;
+        }
       }
     }
     else if (InitPaths=="ALLFIXED"){
@@ -885,6 +939,7 @@ PathClass::InitPaths (IOSectionClass &in)
       PhaseAvoidingLeviFlight(speciesIndex, R0, sigmaFactor);
     }
     else if (InitPaths == "RANDOMFIXED") {
+      cerr << " random fixed " << endl;
       InitRandomFixed (in, species);
     }
 //     else if (InitPaths == "LEVIFLIGHT") {
@@ -909,45 +964,21 @@ PathClass::InitPaths (IOSectionClass &in)
 //     }
 
     else {
-      perr << "Unrecognize initialization strategy " 
-	   << InitPaths << endl;
+      perr << "Unrecognize initialization strategy " << InitPaths << endl;
       abort();
     }
-    cerr<<"Initing real slices"<<endl;
+    cerr<<Communicator.MyProc()<<" "<<species.Name<<" Init real slices"<<endl;
     InitRealSlices();
-    cerr<<"Done with that"<<endl;
     in.CloseSection(); // Species
-    cerr<<"Closing species section"<<endl;
-// 	THIS IS OBSOLETE
-//   jgadd: get numMol
-//    if (speciesIndex == 0){  
-//      numMol = species.NumParticles;
-//    }
   }
   in.CloseSection(); // "Particles"
-  cerr<<"Closing particle section"<<endl;
 
-/// THIS IS OBSOLETE; SHOULD BE REMOVED
-/*
-// jgadd: correct entries where necessary
-//  perr << "PRINT MolRef corrected" << endl;
-  for(int m = 0;m < MolRef.size(); m++){
-    int ref = MolRef(m);
-    while(ref >= numMol){
-      ref -= numMol;
-    MolRef(m) = ref;
-    }
-    perr << m << " " << MolRef(m) << endl;
-  }
-*/
-  cerr<<"Shouldn't be open paths"<<endl;
   string openSpeciesName;
   if (OpenPaths) {
     assert(in.ReadVar("OpenSpecies",openSpeciesName));
     OpenSpeciesNum=SpeciesNum(openSpeciesName);
     InitOpenPaths();
-  }  
-  cerr<<"About to order n"<<endl;
+  }
   if (OrderN){
     cerr<<"inside order n things"<<endl;
     double cutoff;
@@ -999,7 +1030,6 @@ PathClass::InitPaths (IOSectionClass &in)
   ExistsCoupling.AcceptCopy();
   if (LongRange)
     UpdateRho_ks();
-  cerr<<"Done with this function"<<endl;
 }
 
 

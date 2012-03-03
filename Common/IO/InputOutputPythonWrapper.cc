@@ -242,7 +242,7 @@ IOSection_CloseSection(PyObject *self, PyObject *args)
     return NULL;
   else {
     ((IOSectionClass*)IOSectionPtr)->CloseSection();
-    return Py_None;
+    Py_RETURN_NONE;
   }
 }
 
@@ -275,7 +275,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
   if (PyInt_Check(varToRead)){
     int num;
     if (!PyArg_ParseTuple (args, "ii",&IOSectionPtr,&num)){
-      return Py_None;
+      Py_RETURN_NONE;
     }
     varPtr=((IOSectionClass*)IOSectionPtr)->GetVarPtr(num);
     name=varPtr->Name.c_str();
@@ -283,13 +283,13 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
   else {
 
     if (!PyArg_ParseTuple (args, "is",&IOSectionPtr,&name)){
-      return Py_None;
+      Py_RETURN_NONE;
     }
     varPtr=((IOSectionClass*)IOSectionPtr)->GetVarPtr(name);
   }
   varPtr=((IOSectionClass*)IOSectionPtr)->GetVarPtr(name);
   if (varPtr==NULL)
-    return Py_None;
+    Py_RETURN_NONE;
   int type=varPtr->Type;
   int dim=varPtr->Dim;
   if (dim == 0) {
@@ -299,7 +299,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       if (success)
 	return Py_BuildValue("i",val);
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     else if (type==DOUBLE_TYPE){
       double val;    
@@ -307,7 +307,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       if (success)
 	return Py_BuildValue("d",val);
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     else if (type==STRING_TYPE){
       string val;    
@@ -315,7 +315,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       if (success)
 	return Py_BuildValue("s",val.c_str());
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     else if (type==BOOL_TYPE){
       bool val;    
@@ -323,7 +323,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
       if (success)
 	return Py_BuildValue("i",(int)val);
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
   }
   // 1D arrays
@@ -341,7 +341,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     if (type==DOUBLE_TYPE){
       blitz::Array<double,1> val;
@@ -356,7 +356,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     if (type==BOOL_TYPE){
       blitz::Array<bool,1> val;
@@ -371,7 +371,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     else if (type==STRING_TYPE){
       blitz::Array<string,1> val;    
@@ -385,7 +385,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject*)array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
   }
   // 2D arrays
@@ -405,7 +405,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     if (type==DOUBLE_TYPE) {
       blitz::Array<double,2> val;
@@ -422,7 +422,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     if (type==BOOL_TYPE){
       blitz::Array<bool,2> val;
@@ -439,7 +439,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     else if (type==STRING_TYPE){
       blitz::Array<string,2> val;    
@@ -458,7 +458,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject*)totalArray;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
   }
   // 3D arrays
@@ -478,7 +478,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     if (type==DOUBLE_TYPE) {
       blitz::Array<double,3> val;
@@ -495,7 +495,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     if (type==BOOL_TYPE){
       blitz::Array<bool,3> val;
@@ -512,7 +512,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     else if (type==STRING_TYPE){
       blitz::Array<string,3> val;    
@@ -533,7 +533,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject*)l0;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
   }
   // 4D arrays
@@ -556,7 +556,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     if (type==DOUBLE_TYPE) {
       blitz::Array<double,4> val;
@@ -576,7 +576,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     if (type==BOOL_TYPE){
       blitz::Array<bool,4> val;
@@ -596,7 +596,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject *) array;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
     else if (type==STRING_TYPE){
       blitz::Array<string,4> val;    
@@ -622,7 +622,7 @@ IOSection_ReadVar(PyObject *self, PyObject *args)
 	return (PyObject*)l0;
       }
       else
-	return Py_None;
+	Py_RETURN_NONE;
     }
   }
 }

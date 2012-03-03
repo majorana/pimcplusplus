@@ -28,25 +28,24 @@ LoopClass::DoEvent()
   std::list<EventClass*>::iterator iter;
   for (int step=0; step<NumSteps; step++){
     for (iter=Events.begin(); iter!=Events.end(); iter++) {
-     cerr << "Do " << (*iter)->Name << "." << endl;
+     stringstream output;
+     output<<(*iter)->Name<<"("<<step<<"/"<<NumSteps<<")("<<PathData.Path.Communicator.MyProc()<<") ";
+     cerr<<output.str();
      if (PathData.ExceededWallTime()) {
-	cerr << "PIMC++ exceeded wall clock limit.  Exitting LoopClass.\n";
-	return;
+        cerr << "PIMC++ exceeded wall clock limit.  Exitting LoopClass.\n";
+        return;
       }
       else {
-	struct timeval start, end;
-	struct timezone tz;
-	gettimeofday(&start, &tz);
+        struct timeval start, end;
+        struct timezone tz;
+        gettimeofday(&start, &tz);
 
-	(*iter)->DoEvent();
+        (*iter)->DoEvent();
 
-	gettimeofday(&end,   &tz);
-	(*iter)->TimeSpent += (double)(end.tv_sec-start.tv_sec) +
-	  1.0e-6*(double)(end.tv_usec-start.tv_usec);
+        gettimeofday(&end,   &tz);
+        (*iter)->TimeSpent += (double)(end.tv_sec-start.tv_sec) + 1.0e-6*(double)(end.tv_usec-start.tv_usec);
       }
-      cerr << "Done." << endl;
     }
-    cerr << "***" << step << "/" << NumSteps << endl;
   }
 }
 
@@ -72,7 +71,6 @@ LoopClass::FindObservable(string name)
       return (*iter);
   return NULL;
 }
-  
 
 void
 LoopClass::Read(IOSectionClass &in)
@@ -96,8 +94,8 @@ LoopClass::Read(IOSectionClass &in, int steps)
       assert (in.ReadVar("Name", name));
       EventClass *event = FindMove(name);
       if (event == NULL) {
-	cerr << "Unknown move """ << name << """.\n";
-	abort();
+        cerr << "Unknown move """ << name << """.\n";
+        abort();
       }
       Events.push_back(event);
     }
@@ -106,22 +104,18 @@ LoopClass::Read(IOSectionClass &in, int steps)
       assert (in.ReadVar("Name", name));
       EventClass *event = FindObservable(name);
       if (event == NULL) {
-	cerr << "Unknown observable """ << name << """.\n";
-	abort();
+        cerr << "Unknown observable """ << name << """.\n";
+        abort();
       }
       Events.push_back(event);
     }
     else if (in.GetName() == "Loop") {
-      LoopClass *newLoop = 
-	new LoopClass (PathData, IOSection, Moves, Observables);
+      LoopClass *newLoop = new LoopClass (PathData, IOSection, Moves, Observables);
       newLoop->Read(in);
       Events.push_back(newLoop);
     }
-    else if (in.GetName() == "WriteData") 
+    else if (in.GetName() == "WriteData")
       Events.push_back(new WriteDataClass(PathData,IOSection,Moves,Observables));
-    in.CloseSection(); 
+    in.CloseSection();
   }
 }
-
-
-    

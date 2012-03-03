@@ -49,6 +49,7 @@ private:
   int numEnergies;
   Array<bool,1> CountedAlready;
   Array<int,1> TotalPerm;
+  bool DoHist;
   HistogramClass EnergyHistogram;
   Array<double,1> EnergyHistogramSum;
 public:
@@ -57,27 +58,23 @@ public:
   void ShiftData(int numTimeSlices);
   void Read(IOSectionClass& in);
   EnergyClass(PathDataClass &myPathData, IOSectionClass &ioSection)
-    : ObservableClass(myPathData, ioSection) , 
-    TotalVar     ("Total",  IOSection,myPathData.Path.Communicator),
-    KineticVar   ("Kinetic",IOSection,myPathData.Path.Communicator), 
-    dUShortVar   ("dUShort",IOSection,myPathData.Path.Communicator), 
-    dULongVar    ("dULong", IOSection,myPathData.Path.Communicator), 
-    NodeVar      ("Node",   IOSection,myPathData.Path.Communicator), 
-    VShortVar    ("VShort",IOSection,myPathData.Path.Communicator), 
-    VLongVar     ("VLong",IOSection,myPathData.Path.Communicator),
-    dUNonlocalVar("dUNonlocal", IOSection,myPathData.Path.Communicator),
-    EnergyValsVar("Energy Vals",IOSection,myPathData.Path.Communicator),
-    ResidualVar("Residual Energy",IOSection,myPathData.Path.Communicator),
-      VTailSRVar("VTail Short Range",IOSection,myPathData.Path.Communicator),
-      VTailLRVar("VTail Long Range",IOSection,myPathData.Path.Communicator),
-      EnergyHistogramVar("Energy Histogram",IOSection,myPathData.Path.Communicator),
-      HistStart("HistStart",IOSection,myPathData.Path.Communicator),
-      HistEnd("HistEnd",IOSection,myPathData.Path.Communicator),
-      NumPoints("NumPoints",IOSection,myPathData.Path.Communicator)
-      
-// TotalActionVar ("TotalAction",IOSection,myPathData.Path.Communicator),
-// ExpTotalActionVar ("ExpTotalAction",IOSection,myPathData.Path.Communicator)
-// TIP5PVar  ("TIP5P",IOSection,myPathData.Path.Communicator)
+    : ObservableClass(myPathData, ioSection),
+      TotalVar           ( "Total",  IOSection,myPathData.Path.Communicator),
+      KineticVar         ( "Kinetic",IOSection,myPathData.Path.Communicator),
+      dUShortVar         ( "dUShort",IOSection,myPathData.Path.Communicator),
+      dULongVar          ( "dULong", IOSection,myPathData.Path.Communicator),
+      NodeVar            ( "Node",   IOSection,myPathData.Path.Communicator),
+      VShortVar          ( "VShort",IOSection,myPathData.Path.Communicator),
+      VLongVar           ( "VLong",IOSection,myPathData.Path.Communicator),
+      dUNonlocalVar      ( "dUNonlocal", IOSection,myPathData.Path.Communicator),
+      EnergyValsVar      ( "Energy Vals",IOSection,myPathData.Path.Communicator),
+      ResidualVar        ( "Residual Energy",IOSection,myPathData.Path.Communicator),
+      VTailSRVar         ( "VTail Short Range",IOSection,myPathData.Path.Communicator),
+      VTailLRVar         ( "VTail Long Range",IOSection,myPathData.Path.Communicator),
+      EnergyHistogramVar ( "Energy Histogram",IOSection,myPathData.Path.Communicator),
+      HistStart          ( "HistStart",IOSection,myPathData.Path.Communicator),
+      HistEnd            ( "HistEnd",IOSection,myPathData.Path.Communicator),
+      NumPoints          ( "NumPoints",IOSection,myPathData.Path.Communicator)
   {
     TotalSum      = 0.0;
     KineticSum    = 0.0;
@@ -88,14 +85,11 @@ public:
     VLongSum      = 0.0;
     dUNonlocalSum = 0.0;
     Residual=0.0;
-//     TotalActionSum = 0.0;
-//     ExpTotalActionSum = 0.0;
     NumSamples = 0;
     TimesCalled=0;
-    //    TIP5PSum = 0;
-		OtherActions.resize(0);
-		OtherVars.resize(0);
-		OtherSums.resize(0);
+    OtherActions.resize(0);
+    OtherVars.resize(0);
+    OtherSums.resize(0);
   }
 };
 

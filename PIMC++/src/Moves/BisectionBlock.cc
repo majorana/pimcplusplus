@@ -26,6 +26,7 @@
 
 void BisectionBlockClass::Read_new(IOSectionClass &in)
 {
+  string moveName = "BisectionBlock";
   bool useCorrelatedSampling;
   if (!in.ReadVar("UseCorrelatedSampling",useCorrelatedSampling))
     useCorrelatedSampling=false;
@@ -40,83 +41,82 @@ void BisectionBlockClass::Read_new(IOSectionClass &in)
   assert (in.ReadVar ("Species", speciesName));
   assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
   SpeciesNum = PathData.Path.SpeciesNum (speciesName);
-  if    (PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION){
+  if (PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION)
     HaveRefslice=true;
-  }
-  HaveRefslice = 
-    ((PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION) &&
-     (PathData.Actions.NodalActions(SpeciesNum) != NULL) &&
-     (!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
+  HaveRefslice = ((PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION) &&
+                  (PathData.Actions.NodalActions(SpeciesNum) != NULL) &&
+                  (!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
   /// Set up permutation
   assert (in.ReadVar ("PermuteType", permuteType));
-  if (permuteType == "TABLE") 
-    PermuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels,
-					      IOSection);
+  if (permuteType == "TABLE")
+    PermuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels, IOSection);
   else if (permuteType=="COUPLE")
-    PermuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,
-					       IOSection);
+    PermuteStage = new CoupledPermuteStageClass(PathData, SpeciesNum, NumLevels, IOSection);
   else if (permuteType=="WORMMOVE")
-    PermuteStage=new OpenStageClass(PathData,SpeciesNum,NumLevels,
-				    IOSection);
-  else if (permuteType == "NONE") 
-    PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
-					   IOSection);
+    PermuteStage = new OpenStageClass(PathData, SpeciesNum, NumLevels, IOSection);
+  else if (permuteType == "NONE")
+    PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels, IOSection);
   else {
     cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
     exit(EXIT_FAILURE);
   }
   PermuteStage->Read (in);
   Stages.push_back (PermuteStage);
-  
+
   for (int level=NumLevels-1; level>=LowestLevel; level--) {
     BisectionStageClass *newStage;
-    newStage = new BisectionStageClass (PathData, level,
-					IOSection);
+    newStage = new BisectionStageClass (PathData, level, IOSection);
     newStage->TotalLevels=NumLevels;
     newStage->UseCorrelatedSampling=useCorrelatedSampling;
+    cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Kinetic Action"<<endl;
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     if (level!=LowestLevel){
       Array<string,1> higherLevelActions;
       if (in.ReadVar("HigherLevelActions",higherLevelActions)){
-	      for (int i=0;i<higherLevelActions.size();i++)
-	        newStage->Actions.push_back(PathData.Actions.GetAction(higherLevelActions(i)));
+        for (int i=0;i<higherLevelActions.size();i++) {
+          cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding "<<(*PathData.Actions.GetAction(higherLevelActions(i))).GetName()<<" Action"<<endl;
+          newStage->Actions.push_back(PathData.Actions.GetAction(higherLevelActions(i)));
+        }
       }
-      else {
-	      cerr<<"WARNING! No Higher Level Actions in BisectionBlock"<<endl;
-      }
+      //else {
+      //  cerr<<moveName<<" "<<speciesName<<" "<<level<<" WARNING! No Action"<<endl;
+      //}
     }
-    else if (level==LowestLevel){
+    else if (level == LowestLevel) {
       Array<string,1> samplingActions;
       assert(in.ReadVar("SamplingActions",samplingActions));
-      for (int i=0;i<samplingActions.size();i++)
-	      newStage->Actions.push_back(PathData.Actions.GetAction(samplingActions(i)));
-      ///If it's David's long range class then do this
-      if (PathData.Path.DavidLongRange){
-	      cerr<<"Pushing david long range at lowetst level"<<endl;
-	      newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+      for (int i=0;i<samplingActions.size();i++) {
+        cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding "<<(*PathData.Actions.GetAction(samplingActions(i))).GetName()<<" Action"<<endl;
+        newStage -> Actions.push_back(PathData.Actions.GetAction(samplingActions(i)));
       }
-      else if (PathData.Actions.HaveLongRange()){
-	      if (PathData.Actions.UseRPA)
-	        newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-      	else
-	       newStage->Actions.push_back(&PathData.Actions.LongRange);
+      if (PathData.Path.DavidLongRange) {
+        cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding DavidLongRange Action"<<endl;
+        newStage -> Actions.push_back(&PathData.Actions.DavidLongRange);
+      } else if (PathData.Actions.HaveLongRange()) {
+        if (PathData.Actions.UseRPA) {
+          cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRangeRPA Action"<<endl;
+          newStage -> Actions.push_back(&PathData.Actions.LongRangeRPA);
+        } else {
+          cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRange Action"<<endl;
+          newStage -> Actions.push_back(&PathData.Actions.LongRange);
+        }
       }
     }
-    // HACK HACK HACK
-    // These used to be only pushed on at the lowest level
-    if (level==0){
+    //HACK!!! These used to be only pushed on at the lowest level
+    if (level==0) {
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-	      cerr << "Adding fermion node action for species " 
-	           << speciesName << endl;
-	      newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+        cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Node Action"<<endl;
+        newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
       }
     }
-    if (PathData.Actions.UseNonlocal) 
+    if (PathData.Actions.UseNonlocal) {
+      cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Nonlocal Action"<<endl;
       newStage->Actions.push_back(&PathData.Actions.Nonlocal);
-    
+    }
+
     newStage->BisectionLevel = level;
     Stages.push_back (newStage);
-    
+
   }
 
   // Add the second stage of the permutation step
@@ -134,194 +134,176 @@ void BisectionBlockClass::Read(IOSectionClass &in)
 {
   Read_new(in);
   return;
-  //  cerr<<"Reading bisection block"<<endl;
-  bool useCorrelatedSampling;
-  if (!in.ReadVar("UseCorrelatedSampling",useCorrelatedSampling))
-    useCorrelatedSampling=false;
-  if (useCorrelatedSampling)
-    cerr<<"Using correlated sampling"<<endl;
-  ////  FP.Read(in);
-  //  bool orderNBosons;
-  string permuteType, speciesName;
-  //  StageClass *permuteStage;
-  assert (in.ReadVar ("NumLevels", NumLevels));
-  in.ReadVar("UseApproximateHigherLevelAction",UseApproximateHigherLevelAction);
-  // now just use primitive action assert (NumLevels <= PathData.Actions.GetMaxLevels());
-  LowestLevel = 0;
-  if (!in.ReadVar ("LowestLevel", LowestLevel))
-    LowestLevel = 0;
-  assert (LowestLevel < NumLevels);
-  assert (in.ReadVar ("Species", speciesName));
-  assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
-  Josephson=false;
-  if (in.ReadVar("Josephson",Josephson))
-    cerr << "Read in Josephson Data" << endl;
-  //  in.ReadVar("OrderNBosons",orderNBosons);
-  bool addStructureRejectStage=false;
-  in.ReadVar("StructureReject",addStructureRejectStage);
-  SpeciesNum = PathData.Path.SpeciesNum (speciesName);
-  if    (PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION){
-    HaveRefslice=true;
-  }
-  HaveRefslice = 
-    ((PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION) &&
-     (PathData.Actions.NodalActions(SpeciesNum) != NULL) &&
-     (!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
-//   cerr<<"I have a ref slice? "<<HaveRefslice<<" ";
-//   cerr<<(PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION); 
-//   cerr<<(PathData.Actions.NodalActions(SpeciesNum) != NULL);
-//   cerr<<(!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState());
-//   cerr<<(!(PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
-//   cerr<<endl;
-  /// Set up permutation
-  assert (in.ReadVar ("PermuteType", permuteType));
-  if (permuteType == "TABLE") 
-    PermuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels,
-					      IOSection);
-  else if (permuteType=="COUPLE")
-    PermuteStage= new CoupledPermuteStageClass(PathData,SpeciesNum,NumLevels,
-					       IOSection);
-  else if (permuteType=="WORMMOVE")
-    PermuteStage=new OpenStageClass(PathData,SpeciesNum,NumLevels,
-				    IOSection);
-  else if (permuteType == "NONE") 
-    PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels,
-					   IOSection);
-//   else if (permuteType=="OPEN")
-//     PermuteStage = new WormPermuteStageClass(PathData,SpeciesNum,NumLevels,
-// 					     IOSection);
-  else {
-    cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
-    exit(EXIT_FAILURE);
-  }
-  PermuteStage->Read (in);
-  Stages.push_back (PermuteStage);
-  //   if (permuteType=="OPEN"){
-//     EmptyStageClass *newStage=new EmptyStageClass(PathData,NumLevels-1,OutSection);
-//     newStage->Read(in);
-//     newStage->Actions.push_back(&PathData.Actions.Kinetic);
-//     newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
-//     Stages.push_back(newStage);
-//   }
-//   if (PathData.Path.Random.Local()>0.5)
-//     PathData.Path.ExistsCoupling=1;
-//   else
-//     PathData.Path.ExistsCoupling=0;
-  for (int level=NumLevels-1; level>=LowestLevel; level--) {
-    if (Josephson){
-      BisectionJosephsonStageClass *newStage;
-      //      BisectionStageClass *newStage;
+  ////  cerr<<"Reading bisection block"<<endl;
+  //bool useCorrelatedSampling;
+  //if (!in.ReadVar("UseCorrelatedSampling",useCorrelatedSampling))
+  //  useCorrelatedSampling=false;
+  //if (useCorrelatedSampling)
+  //  cerr<<"Using correlated sampling"<<endl;
+  //////  FP.Read(in);
+  ////  bool orderNBosons;
+  //string permuteType, speciesName;
+  ////  StageClass *permuteStage;
+  //assert (in.ReadVar ("NumLevels", NumLevels));
+  //in.ReadVar("UseApproximateHigherLevelAction",UseApproximateHigherLevelAction);
+  //// now just use primitive action assert (NumLevels <= PathData.Actions.GetMaxLevels());
+  //LowestLevel = 0;
+  //if (!in.ReadVar ("LowestLevel", LowestLevel))
+  //  LowestLevel = 0;
+  //assert (LowestLevel < NumLevels);
+  //assert (in.ReadVar ("Species", speciesName));
+  //assert (in.ReadVar ("StepsPerBlock", StepsPerBlock));
+  //Josephson=false;
+  //if (in.ReadVar("Josephson",Josephson))
+  //  cerr << "Read in Josephson Data" << endl;
+  ////  in.ReadVar("OrderNBosons",orderNBosons);
+  //bool addStructureRejectStage=false;
+  //in.ReadVar("StructureReject",addStructureRejectStage);
+  //SpeciesNum = PathData.Path.SpeciesNum (speciesName);
+  //if (PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION)
+  //  HaveRefslice=true;
+  //HaveRefslice = ((PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION) &&
+  //                (PathData.Actions.NodalActions(SpeciesNum) != NULL) &&
+  //                (!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
+  //// cerr<<"I have a ref slice? "<<HaveRefslice<<" ";
+  //// cerr<<(PathData.Path.Species(SpeciesNum).GetParticleType() == FERMION); 
+  //// cerr<<(PathData.Actions.NodalActions(SpeciesNum) != NULL);
+  //// cerr<<(!PathData.Actions.NodalActions(SpeciesNum)->IsGroundState());
+  //// cerr<<(!(PathData.Actions.NodalActions(SpeciesNum)->IsGroundState()));
+  //// cerr<<endl;
+  ///// Set up permutation
+  //assert (in.ReadVar ("PermuteType", permuteType));
+  //if (permuteType == "TABLE")
+  //  PermuteStage = new TablePermuteStageClass(PathData, SpeciesNum, NumLevels, IOSection);
+  //else if (permuteType=="COUPLE")
+  //  PermuteStage = new CoupledPermuteStageClass(PathData, SpeciesNum, NumLevels, IOSection);
+  //else if (permuteType=="WORMMOVE")
+  //  PermuteStage = new OpenStageClass(PathData, SpeciesNum, NumLevels, IOSection);
+  //else if (permuteType == "NONE")
+  //  PermuteStage = new NoPermuteStageClass(PathData, SpeciesNum, NumLevels, IOSection);
+  //// else if (permuteType=="OPEN")
+  ////   PermuteStage = new WormPermuteStageClass(PathData, SpeciesNum, NumLevels, IOSection);
+  //else {
+  //  cerr << "Unrecognized PermuteType, """ << permuteType << """\n";
+  //  exit(EXIT_FAILURE);
+  //}
+  //PermuteStage->Read (in);
+  //Stages.push_back (PermuteStage);
+  //// if (permuteType=="OPEN"){
+  ////   EmptyStageClass *newStage=new EmptyStageClass(PathData,NumLevels-1,OutSection);
+  ////   newStage->Read(in);
+  ////   newStage->Actions.push_back(&PathData.Actions.Kinetic);
+  ////   newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
+  ////   Stages.push_back(newStage);
+  //// }
+  //// if (PathData.Path.Random.Local()>0.5)
+  ////   PathData.Path.ExistsCoupling=1;
+  //// else
+  ////   PathData.Path.ExistsCoupling=0;
+  //for (int level=NumLevels-1; level>=LowestLevel; level--) {
+  //  if (Josephson){
+  //    BisectionJosephsonStageClass *newStage;
+  //    // BisectionStageClass *newStage;
 
 
-      newStage = new BisectionJosephsonStageClass(PathData, level,
-						  IOSection);
-      if (level==LowestLevel)
-	newStage->Actions.push_back(&PathData.Actions.DualHermele);
-      //newStage->Actions.push_back(&PathData.Actions.Josephson);
-      //      newStage = new BisectionStageClass(PathData, level,
-      //					  IOSection);
-      newStage->TotalLevels=NumLevels;
-      newStage->BisectionLevel = level;
-      Stages.push_back (newStage);
-    
+  //    newStage = new BisectionJosephsonStageClass(PathData, level, IOSection);
+  //    if (level==LowestLevel)
+  //      newStage->Actions.push_back(&PathData.Actions.DualHermele);
+  //    // newStage->Actions.push_back(&PathData.Actions.Josephson);
+  //    // newStage = new BisectionStageClass(PathData, level,IOSection);
+  //    newStage->TotalLevels=NumLevels;
+  //    newStage->BisectionLevel = level;
+  //    Stages.push_back (newStage);
 
-    }
-    else{
-      BisectionStageClass *newStage;
-      newStage = new BisectionStageClass (PathData, level,
-					  IOSection);
-      newStage->TotalLevels=NumLevels;
-      newStage->UseCorrelatedSampling=useCorrelatedSampling;
-      newStage->Actions.push_back(&PathData.Actions.Kinetic);
-      //      newStage->Actions.push_back(&PathData.Actions.PairFixedPhase);
-      
-      if (PathData.Path.OpenPaths && level==LowestLevel){
-	newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
-      }
-      if (PathData.Path.OpenPaths && level>LowestLevel) // && permuteType=="OPEN")
-	cerr<<"Don't look at short range"<<endl;
-      else if ((PathData.Path.OpenPaths && level>LowestLevel) || UseApproximateHigherLevelAction){
-	newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
-      }
-      else if (PathData.Path.OrderN){
-	newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
-      }
-      else if (level>=PathData.Actions.GetMaxLevels()){
-	newStage->Actions.push_back(&PathData.Actions.ShortRangePrimitive);
-      }
-      else if (level>LowestLevel){ // if (level==LowestLevel) //HACK HERE CURRENTLY 
-	cerr<<"Pushing on the diagonal action!"<<endl;
-	//	perr<<"Adding short range action in BisectionBlock."<<endl;
-	//	newStage->Actions.push_back(&PathData.Actions.DiagonalAction);
-	newStage->Actions.push_back(&PathData.Actions.ShortRange);
-      }
-      else {
-	//	newStage->Actions.push_back(&PathData.Actions.DiagonalAction);
-	//	cerr<<"Pushing on the short range action!"<<endl;
-	newStage->Actions.push_back(&PathData.Actions.ShortRange);
-	
-      }
-      //      else
-      //      	int dummy=5;
-      if (level != LowestLevel){
-	//	if (PathData.Path.DavidLongRange)
-	//	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
-      }
-      if (level == LowestLevel) {
-	bool useTether=false;
-	in.ReadVar("UseTether",useTether);
-	if (useTether){
-	  newStage->Actions.push_back(&PathData.Actions.Tether);
-	}
-	if (addStructureRejectStage){
-	  newStage->Actions.push_back(&PathData.Actions.StructureReject);
-	}
-	///If it's David's long range class then do this
-	if (PathData.Path.DavidLongRange){
-	  cerr<<"PUshing david long range at lowetst level"<<endl;
-	  newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
-	}
-	else if (PathData.Actions.HaveLongRange()){
-	  if (PathData.Actions.UseRPA)
-	    newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
-	  else
-	    newStage->Actions.push_back(&PathData.Actions.LongRange);
-	}
-      }
-      // HACK HACK HACK
-      // These used to be only pushed on at the lowest level
-      if (level==0){
-      if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-	cerr << "Adding fermion node action for species " 
-	     << speciesName << endl;
-	newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
-      }
-      }
-      if (PathData.Actions.UseNonlocal) 
-	newStage->Actions.push_back(&PathData.Actions.Nonlocal);
-      
-      newStage->BisectionLevel = level;
-      Stages.push_back (newStage);
+  //  }
+  //  else{
+  //    BisectionStageClass *newStage;
+  //    newStage = new BisectionStageClass (PathData, level, IOSection);
+  //    newStage->TotalLevels=NumLevels;
+  //    newStage->UseCorrelatedSampling=useCorrelatedSampling;
+  //    newStage->Actions.push_back(&PathData.Actions.Kinetic);
+  //    // newStage->Actions.push_back(&PathData.Actions.PairFixedPhase);
 
-    }
-  }
-  // Add the second stage of the permutation step
-  /// EVIL BAD ERROR!!!  Pushing onto the stack twice causes the stage
-  /// to be accepted twice, which causes swapping the forward and
-  // reverse tables twice!
-  Stages.push_back (PermuteStage);
+  //    if (PathData.Path.OpenPaths && level==LowestLevel){
+  //      newStage->Actions.push_back(&PathData.Actions.OpenLoopImportance);
+  //    }
+  //    if (PathData.Path.OpenPaths && level>LowestLevel) // && permuteType=="OPEN")
+  //      cerr<<"Don't look at short range"<<endl;
+  //    else if ((PathData.Path.OpenPaths && level>LowestLevel) || UseApproximateHigherLevelAction){
+  //      newStage->Actions.push_back(&PathData.Actions.ShortRangeApproximate);
+  //    }
+  //    else if (PathData.Path.OrderN){
+  //      newStage->Actions.push_back(&PathData.Actions.ShortRangeOn);
+  //    }
+  //    else if (level>=PathData.Actions.GetMaxLevels()){
+  //      newStage->Actions.push_back(&PathData.Actions.ShortRangePrimitive);
+  //    }
+  //    else if (level>LowestLevel){
+  //      // cerr<<"Pushing on the diagonal action!"<<endl;
+  //      // cerr<<"Adding short range action in BisectionBlock."<<endl;
+  //      // newStage->Actions.push_back(&PathData.Actions.DiagonalAction);
+  //      newStage->Actions.push_back(&PathData.Actions.ShortRange);
+  //    }
+  //    else {
+  //      // newStage->Actions.push_back(&PathData.Actions.DiagonalAction);
+  //      newStage->Actions.push_back(&PathData.Actions.ShortRange);
+  //    }
+  //    if (level != LowestLevel){
+  //      // if (PathData.Path.DavidLongRange)
+  //      //   newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+  //    }
+  //    if (level == LowestLevel) {
+  //      bool useTether=false;
+  //      in.ReadVar("UseTether",useTether);
+  //      if (useTether){
+  //        newStage->Actions.push_back(&PathData.Actions.Tether);
+  //      }
+  //      if (addStructureRejectStage){
+  //        newStage->Actions.push_back(&PathData.Actions.StructureReject);
+  //      }
+  //      if (PathData.Path.DavidLongRange){
+  //        cerr<<"Pushing DavidLongRange at lowest level"<<endl;
+  //        newStage->Actions.push_back(&PathData.Actions.DavidLongRange);
+  //      }
+  //      else if (PathData.Actions.HaveLongRange()){
+  //        if (PathData.Actions.UseRPA)
+  //          newStage->Actions.push_back(&PathData.Actions.LongRangeRPA);
+  //        else
+  //          newStage->Actions.push_back(&PathData.Actions.LongRange);
+  //      }
+  //    }
+  //    // HACK HACK HACK
+  //    // These used to be only pushed on at the lowest level
+  //    if (level==0){
+  //      if (PathData.Actions.NodalActions(SpeciesNum)!=NULL) {
+  //        cerr << "Adding Node Action: species("<<speciesName<<")" << endl;
+  //        newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
+  //      }
+  //    }
+  //    if (PathData.Actions.UseNonlocal)
+  //      newStage->Actions.push_back(&PathData.Actions.Nonlocal);
 
-//   ///HACK! Addding a stage that will reject the move if the structure
-//   //factor gets too large
-  bool useStructureRejectStage=false;
-  in.ReadVar("StructureReject",useStructureRejectStage);
-  if (useStructureRejectStage){
-    StructureRejectStageClass* structureReject =
-      new StructureRejectStageClass(PathData,in,IOSection);
-    structureReject->Read(in);
-    Stages.push_back(structureReject);
-  }
-  //  cerr<<"Bisection block done"<<endl;
+  //    newStage->BisectionLevel = level;
+  //    Stages.push_back (newStage);
+
+  //  }
+  //}
+  //// Add the second stage of the permutation step
+  ///// EVIL BAD ERROR!!!  Pushing onto the stack twice causes the stage
+  ///// to be accepted twice, which causes swapping the forward and
+  //// reverse tables twice!
+  //Stages.push_back (PermuteStage);
+
+////   ///HACK! Addding a stage that will reject the move if the structure
+////   //factor gets too large
+  //bool useStructureRejectStage=false;
+  //in.ReadVar("StructureReject",useStructureRejectStage);
+  //if (useStructureRejectStage){
+  //  StructureRejectStageClass* structureReject =
+  //    new StructureRejectStageClass(PathData,in,IOSection);
+  //  structureReject->Read(in);
+  //  Stages.push_back(structureReject);
+  //}
 }
 
 
@@ -448,6 +430,7 @@ void BisectionBlockClass::MakeMove()
 
   ((PermuteStageClass*)PermuteStage)->InitBlock(Slice1,Slice2);
   ActiveParticles.resize(1);
+  //cerr << "Bisecting" << endl;
   for (int step=0; step<StepsPerBlock; step++) {
     NumAttempted++;
     ActiveParticles(0)=-1;

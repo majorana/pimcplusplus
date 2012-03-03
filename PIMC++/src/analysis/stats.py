@@ -32,16 +32,19 @@ def WeightedAvg (means, errors):
 
 
 def MeanErrorString (mean, error):
+     if (isnan(mean)):
+	  return ("nan","nan")
      if (mean!=0.0):
           meanDigits = math.floor(math.log(abs(mean))/math.log(10))
      else:
           meanDigits=2
-     if (error!=0.0):
+     if (error!=0.0 and not(isnan(error))):
           rightDigits = -math.floor(math.log(error)/math.log(10))+1
      else:
           rightDigits=2
      if (rightDigits < 0):
           rightDigits = 0
+
      formatstr = '%1.' + '%d' % rightDigits + 'f'
      meanstr  = formatstr % mean
      errorstr = formatstr % error
@@ -58,6 +61,8 @@ def c(i,x,mean,var):
                          
 def Stats(x):
     N=len(x)
+    if(N == 0):
+      N = 1
     mean=sum(x)/(N+0.0)
     xSquared=x*x
     var=sum(xSquared)/(N+0.0)-mean*mean
@@ -71,6 +76,10 @@ def Stats(x):
     if kappa == 0.0:
         kappa = 1.0
     Neff=(N+0.0)/(kappa+0.0)
+    if(math.isnan(var) or var < 0.0):
+        var = 0.0
+    if(Neff == 0):
+        Neff = 1
     error=sqrt(var/Neff)
     return (mean,var,error,kappa)
 

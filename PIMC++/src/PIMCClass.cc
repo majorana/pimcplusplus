@@ -28,106 +28,97 @@ bool PIMCClass::Read(IOSectionClass &in)
 {
   // tells whether to run or be a dummy
   bool doPIMCRun = false;
-  ////	cerr << "PIMC::Read" << endl;
+
   // Read the parallelization strategy
-  
   PathData.Read (in);
-  //  perr << "Finished PathData Read.\n";
-  
-  // this is set to true in PathDataClass::Read
-  // when not built with qmcpack
+
+  // this is set to true in PathDataClass::Read when not built with qmcpack
   if(PathData.IAmQMCManager){
     doPIMCRun = true;
     // Read in the system information and allocate the path
     assert(in.OpenSection("System"));
     PathData.Path.Read(in);
     in.CloseSection();
-    ///    perr << "Finished Path read.\n";
-    
+
 #ifdef USE_QMC
-		PathData.AssignPtclSetStrings();
+    PathData.AssignPtclSetStrings();
 #endif
 
-//	   if (PathData.Path.ExistsCoupling){
-//	     int myProc=PathData.InterComm.MyProc();
-//	     PathData.Path.ExistsCoupling=(double)(myProc)/100;
-//	   }
-  	// Read in the action information
-		cerr<<"Reading actions"<<endl;	
-  	assert(in.OpenSection("Action"));
-  	PathData.Actions.Read(in);	
-  	in.CloseSection();
-	cerr<<"Done reading actions"<<endl;
-	///  	perr << "Finished Actions read.\n";
+    // if (PathData.Path.ExistsCoupling){
+    //   int myProc=PathData.InterComm.MyProc();
+    //   PathData.Path.ExistsCoupling=(double)(myProc)/100;
+    // }
 
+    // Read in the action information
+    cerr <<PathData.Path.Communicator.MyProc()<<" Reading Actions"<<endl;
+    assert(in.OpenSection("Action"));
+    PathData.Actions.Read(in);
+    in.CloseSection();
 
-  	// Now actually initialize the paths
-	///  	perr << "Before InitPaths.\n";
-  	assert(in.OpenSection("System"));
-  	PathData.Path.InitPaths(in);
-	
+    // Now actually initialize the paths
+    cerr <<PathData.Path.Communicator.MyProc()<<" Initializing Paths"<<endl;
+    assert(in.OpenSection("System"));
+    PathData.Path.InitPaths(in);
 
+    // Variational PI ONLY
+    PathData.Actions.VariationalPI.BuildDeterminantMatrix();
 
+    in.CloseSection();
 
+    if (PathData.Path.UseCorrelatedSampling())
+      PathData.Path.SetIonConfig(0);
 
-	PathData.Actions.VariationalPI.BuildDeterminantMatrix();
+    // Init Actions caches
+    cerr <<PathData.Path.Communicator.MyProc()<<" Initializing Actions Caches"<<endl;
+    PathData.Actions.Init();
 
+    // Read in the Observables
+    cerr <<PathData.Path.Communicator.MyProc()<< " Reading Observables"<<endl;
+    assert(in.OpenSection("Observables"));
+    ReadObservables(in);
+    in.CloseSection();
 
-  	in.CloseSection();
-	cerr << "Done InitPaths.\n";
-  	if (PathData.Path.UseCorrelatedSampling())
-  	  PathData.Path.SetIonConfig(0);
+    // Check for root processor
+    bool iAmRootProc = (PathData.Path.Communicator.MyProc()==0);
 
+    // Create Actions section in output file
+    if (iAmRootProc)
+      OutFile.NewSection("Actions");
 
-  	
-	cerr << "Initializing Actions caches.\n";
-  	PathData.Actions.Init();
-	cerr << "done.\n";
-	
-  	// Read in the Observables
-  	assert(in.OpenSection("Observables"));
-  	ReadObservables(in);
-	cerr << "Finished Observables Read.\n";
-  	in.CloseSection();
+    // Append Long Range Action
+    if (PathData.Actions.HaveLongRange()) {
+      cerr << "Initializing Long Range" << endl;
+      assert (in.OpenSection ("Action"));
+      PathData.Actions.LongRange.Init (in, OutFile);
+      if (PathData.Actions.UseRPA)
+        PathData.Actions.LongRangeRPA.Init(in);
+      in.CloseSection();
+    }
+    if (iAmRootProc) {
+      PathData.Actions.WriteInfo(OutFile);
+      OutFile.CloseSection(); // "Actions"
+    }
 
-  	bool iAmRootProc = (PathData.Path.Communicator.MyProc()==0);
-  	if (iAmRootProc)
-  	  OutFile.NewSection("Actions");
-  	if (PathData.Actions.HaveLongRange()) {
-  	  assert (in.OpenSection ("Action"));
-  	  PathData.Actions.LongRange.Init (in, OutFile);
-  	  if (PathData.Actions.UseRPA)
-  	    PathData.Actions.LongRangeRPA.Init(in);
-  	  in.CloseSection();
-  	}
+    // Read in the Moves
+    cerr <<PathData.Path.Communicator.MyProc()<<" Reading Moves"<<endl;
+    assert(in.OpenSection("Moves"));
+    ReadMoves(in);
+    in.CloseSection();
 
-  	if (iAmRootProc) {
-  	  PathData.Actions.WriteInfo(OutFile);
-  	  OutFile.CloseSection(); // "Actions"
-  	}
-  	// Read in the Moves
-  	assert(in.OpenSection("Moves"));
-	cerr<<"Beginning moves read"<<endl;
-  	ReadMoves(in);
-	cerr << "Finished Moves Read "<<PathData.Path.Communicator.MyProc()<<endl;
-  	in.CloseSection();
-  	// Read in the Algorithm
-	cerr<<"Reading the algorithm now "<<PathData.Path.Communicator.MyProc()<<endl;
-  	assert(in.OpenSection("Algorithm"));
-  	ReadAlgorithm(in);
-	cerr<<"Done reading the algorithm"<<endl;
-  	in.CloseSection();
-	}
-	else
-		QMCWrapper = new QMCWrapperClass(PathData);
-	cerr<<"Finished the PIMCClass read "<<PathData.Path.Communicator.MyProc()<<endl;
-	return doPIMCRun;
+    // Read in the Algorithm
+    cerr <<PathData.Path.Communicator.MyProc()<<" Reading Algorithm"<<endl;
+    assert(in.OpenSection("Algorithm"));
+    ReadAlgorithm(in);
+    in.CloseSection();
+  } else {
+    QMCWrapper = new QMCWrapperClass(PathData);
+  }
+
+  return doPIMCRun;
 
 }
 
 
-
- 
 void PIMCClass::ReadObservables(IOSectionClass &in)
 {
   int myProc=PathData.Path.Communicator.MyProc();
@@ -149,12 +140,12 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       stringstream tempStream;
       int counter=0;
       tempStream<<outFileBase<<"."<<counter<<"."<<(PathData.GetCloneNum()+fileStart)<<".h5";
-      cerr<<"Checking for "<<tempStream.str();
+      //cerr<<"Checking for "<<tempStream.str();
       while (fileExists(tempStream.str())){
 	counter++;
 	tempStream.str("");
 	tempStream<<outFileBase<<"."<<counter<<"."<<(PathData.GetCloneNum()+fileStart)<<".h5";
-	cerr<<"Checking for "<<tempStream.str();
+	//cerr<<"Checking for "<<tempStream.str();
       }
       ostringstream counterNum;
       counterNum<<counter;
@@ -411,7 +402,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
     OutFile.CloseSection (); // "Moves"
     OutFile.FlushFile();
   }
-  cerr<<"I have finished reading the moves"<<endl;
+  //cerr<<"I have finished reading the moves"<<endl;
 }
 
 
@@ -429,7 +420,7 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 	 << ((minutes != 1) ? " minutes, and " : " minute, and ") << seconds 
 	 << ((seconds != 1) ? " seconds.\n" : " second.\n");
   }
-  cerr<<"Calling algorithm read"<<endl;
+  //cerr<<"Calling algorithm read"<<endl;
   Algorithm.Read(in,1);
   
 }
@@ -437,12 +428,9 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 
 void PIMCClass::Run()
 {
-  cerr<<"Simulation started."<<endl;
+  cerr <<PathData.Path.Communicator.MyProc()<< " Simulation started." << endl;
   Algorithm.DoEvent();
-  for (unsigned int i = 0; i < PathData.NumParticles(); i++) {
-    cerr<<i<<" "<<PathData.Path(0,i)<<endl;
-  }
-  cerr<<"PIMC++ has completed"<<endl;
+  cerr<<PathData.Path.Communicator.MyProc()<<" PIMC++ has completed"<<endl;
   //  Array<MoveClass*,1> Moves;
 //   for (int counter=0;counter<Moves.size();counter++){
 //     cout<<"My name is "<<((MoveClass*)Moves(counter))->Name<<endl;
@@ -461,7 +449,8 @@ void PIMCClass::WriteSystemInfo()
 {
   dVec box = PathData.Path.GetBox();
   Array<double,1> boxArray(3);
-  boxArray(0) = box[0];   boxArray(1) = box[1];   
+  boxArray(0) = box[0];
+  boxArray(1) = box[1];
 #if NDIM==3
   boxArray(2) = box[2];
 #endif 

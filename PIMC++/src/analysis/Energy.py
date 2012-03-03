@@ -27,12 +27,24 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
     
     Etable = 1.0*numpy.zeros((numProcs, 2*len(varList)))
     col=0
-    for var in varList:
-        data = infiles.ReadVar(var)
+    for varCounter in varList:
+        data = infiles.ReadVar(varCounter)
+        data = data[data < 1e90]
         for proc in range(0,numProcs):
-            (mean,var, error,kappa) = stats.Stats(data[proc][StartCut:-1])
+            nodeblows = 0
+            #for i in range(0,len(data[proc])):
+            #  if (data[proc][i].ndim == 0 and data[proc][i] > 1e90):
+            #    print data[proc][i]
+            #    print data[proc][i]
+            #    nodeblows += 1
+            if len(data[proc]) > StartCut:
+              (mean,var, error,kappa) = stats.Stats(data[proc][StartCut:-1])
+            else:
+              (mean,var, error,kappa) = stats.Stats(data[proc])
             Etable[proc,2*col]   = mean
             Etable[proc,2*col+1] = error
+            if nodeblows > 0:
+              print varCounter, proc, "Node Blow Ups:", nodeblows
         col = col + 1
     Efile = open ('Energies.dat', 'w')
     for row in range(0, numProcs):
@@ -40,9 +52,9 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
             Efile.write ('%1.6f ' % Etable[row][col])
         Efile.write ('\n')
     Efile.close()
-            
-            
-    row = 0            
+
+
+    row = 0
     for varCounter in varList:
         row = row + 1
         meanList=[]
@@ -52,11 +64,20 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
         data = infiles.ReadVar(varCounter)
         varName = infiles.GetVarName(varCounter)
         baseName=varName+"Energy"
-        if (len(data[0]) > 1 and numProcs<50):
+        #if (len(data[0]) > 1 and numProcs<50):
+        if (len(data[0]) > 1):
             scalarTracePageHTMLList.append(BuildScalarTracePage(data,baseName,varName,StartCut))
         scalarVarTable.body[0][row]=varName
         for proc in range(0,numProcs):
-            (mean,var,error,kappa)=stats.Stats(data[proc][StartCut:-1])
+            nodeblows = 0
+            for i in range(0,len(data[proc])):
+              if (data[proc][i].ndim == 0  and data[proc][i] > 1e90):
+                numpy.delete(data[proc],i)
+                nodeblows += 1
+            if len(data[proc]) > StartCut:
+              (mean,var,error,kappa)=stats.Stats(data[proc][StartCut:-1])
+            else:
+              (mean,var,error,kappa)=stats.Stats(data[proc])
             meanList.append(mean)
             errorList.append(error)
             varList.append(var)
@@ -64,7 +85,10 @@ def ProcessEnergy(infiles,summaryDoc,detailedDoc,StartCut):
             (meanstr, errorstr) = stats.MeanErrorString (mean, error)
             scalarVarTable.body[proc+1][0]=repr(proc)
             scalarVarTable.body[proc+1][row]=meanstr + "+/-" + errorstr
-        (totalMean,totalError)=stats.UnweightedAvg(meanList,errorList)
+            if nodeblows > 0:
+              print varCounter, proc, "Node Blow Ups:", nodeblows
+        (totalMean,totalError)=stats.UnweightedAvg(meanList,errorList) 
+        print varName, totalMean, totalError
         totalVar=sum(varList)/len(varList)
         totalKappa=sum(kappaList)/len(kappaList)
         (totalMeanStr,totalErrorStr)=stats.MeanErrorString(totalMean,totalError)

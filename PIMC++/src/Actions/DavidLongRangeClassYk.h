@@ -57,7 +57,7 @@ public:
   Array<double,1> yk_zero;
   void Read (IOSectionClass &in);
   void ReadYk();
-  void BuildRPA_SingleSpecies();
+  void BuildRPA_SingleType();
   void Build_MultipleSpecies();
   double V(int slice1,int slice2,int level);
 

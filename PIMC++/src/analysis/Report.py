@@ -141,7 +141,7 @@ for counter in range(0,numSections):
   myName= infiles.GetName()
   myType=infiles.ReadVar("Type")[0]
   print "Currently processing ", myName
-  try:
+  if 1==1:
     if myName=="PairCorrelation":
       ProcessPairCorrelation(infiles,summaryDoc,detailedDoc,StartCut)
     if myName=="Vacancy":
@@ -208,8 +208,8 @@ for counter in range(0,numSections):
       ProcessCoupling(infiles,summaryDoc,detailedDoc,StartCut)
     else:
       a=5
-  except:
-     print "Error in processing ", myName
+  #except:
+     #print "Error in processing ", myName
   infiles.CloseSection()
 infiles.CloseSection() # "Observables"
 

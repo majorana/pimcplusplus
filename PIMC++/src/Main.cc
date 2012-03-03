@@ -14,11 +14,12 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
+#include <omp.h>
 #include "PIMCClass.h"
 #include "MirroredClass.h"
 #include "ParseCommand.h"
 
-///  \mainpage An overview of PIMC++ 
+/// \mainpage An overview of PIMC++ 
 ///
 /// \section intro_sec Introduction
 ///
@@ -38,7 +39,7 @@
 /// \subsection species_subsection The Species
 /// Every particle is assigned a specific species.  Each species has
 /// certain information associated with it. This includes
-///  
+///
 /// \section moves_sec The Moves
 /// There are two ways that a move can be built in PIMC++
 ///
@@ -53,9 +54,8 @@ main(int argc, char **argv)
   argList.push_back (ParamClass("verbose", "v", false));
   CommandLineParserClass parser(argList);
   parser.Parse (argc, argv);
-  if (parser.NumFiles() != 1) 
-    cout << "Usage:\n"
-	 << "  pimc++ [-v] myfile.in\n";
+  if (parser.NumFiles() != 1)
+    cout << "Usage:\n" << "  pimc++ [-v] myfile.in\n";
   else {
     if (parser.Found ("verbose"))
       IO::SetVerbose(true);
@@ -66,37 +66,12 @@ main(int argc, char **argv)
       cerr << "Could not open " << inputName << " for reading.  Exitting.\n";
       exit(-1);
     }
-    if (PIMC.Read(in)) 
+    if (PIMC.Read(in)) {
       PIMC.Run();
-    else
+    } else {
       PIMC.Dummy();
+    }
   }
 
-
-//   if (argc < 2) {
-//     cout << "Usage:\n";
-//     cout << "pimc++ myfile.in\n"; 
-//   }
-//   else {
-//     //	cerr << "new IO...";
-//     IOSectionClass in;
-//     //	cerr << "done" << endl;
-//     cerr << "opening input...";
-//     cerr<<argv[1]<<endl;
-//     assert (in.OpenFile(argv[1]));
-//     // cerr << " done" << endl;
-//     // cerr << "new PIMC...";
-//     PIMCClass PIMC;
-//     cerr << "done" << endl;
-//     bool doRun = PIMC.Read(in);
-//     if(doRun){
-//       cerr << "I am about to run..." << endl;
-//       PIMC.Run();
-//     }
-//     else {
-//       cerr << "I am about to launch a dummy..." << endl;
-//       PIMC.Dummy();
-//     }
-//   }
   COMM::Finalize();
 }
