@@ -18,11 +18,7 @@
 #include <sys/time.h>
 
 
-void MCTimeClass::Accumulate()
-{
-
-  
-}
+void MCTimeClass::Accumulate() {}
 
 
 void MCTimeClass::WriteBlock()
@@ -48,20 +44,18 @@ void MCTimeClass::WriteBlock()
     }
     i = 0;
     list<ObservableClass*>::iterator observableIter;
-    for (observableIter=Observables.begin();
-	 observableIter!=Observables.end();observableIter++) {
+    for (observableIter=Observables.begin();observableIter!=Observables.end();observableIter++) {
       observableNames(i) = ((*observableIter)->Name);
       i++;
     } 
     list<ActionBaseClass*>::iterator actionIter;
-    for (actionIter=Actions.begin(),i=0;
-	 actionIter!=Actions.end();actionIter++,i++) {
+    for (actionIter=Actions.begin(),i=0;actionIter!=Actions.end();actionIter++,i++) {
       actionNames(i) = ((*actionIter)->GetName());
-    } 
+    }
 
     if (PathData.Path.Communicator.MyProc()==0) {
       IOSection.WriteVar("MoveNames", moveNames);
-      IOSection.WriteVar("ObserveNames", observableNames);
+      IOSection.WriteVar("ObservableNames", observableNames);
       IOSection.WriteVar("ActionNames", actionNames);
     }
   }
@@ -91,8 +85,6 @@ void MCTimeClass::WriteBlock()
        actionIter!=Actions.end();actionIter++,i++){
     ActionTime(i)=((*actionIter)->TimeSpent)/TotalTime;
   }
-  
-
 
   MoveTimeVar.Write(MoveTime);
   ObservableTimeVar.Write(ObservableTime);
@@ -101,16 +93,14 @@ void MCTimeClass::WriteBlock()
   if (PathData.Path.Communicator.MyProc()==0)
     IOSection.FlushFile();
 
-  // Block Info
-  cerr << "##################################" << endl;
-  cerr << "#  Block #: " << BlockNumber << endl;
-  cerr << "#  Block Time: " << BlockTime << endl;
-  cerr << "#  Total Time: " << TotalTime << endl;
+  /// Block Info
+  // cerr << " Proc: " << PathData.Path.Communicator.MyProc() << "  Block: " << BlockNumber << " Time: " << BlockTime << " Total Time: " << TotalTime << endl;
   BlockNumber++;
 }
 
+
 void MCTimeClass::Read(IOSectionClass &in)
-{  
+{
 
   ObservableClass::Read(in);
   if (PathData.Path.Communicator.MyProc()==0){
@@ -122,20 +112,18 @@ void MCTimeClass::Read(IOSectionClass &in)
 }
 
 
-
 void MCTimeClass::WriteInfo()
 {
-//   Array<string,1> movesString;
-//   Array<string,1> observeString;
-//   movesString.resize(Moves.size());
-//   observeString.resize(Observables.size());
-//   for (int i=0;i<Moves.size();i++){
-//     movesString(i)=Moves(i)->Name;
-//   }
-//   for (int i=0;i<Observables.size();i++){
-//     observeString(i)=Observables(i)->Name;
-//   }
-  //  IOSection.WriteVar("Move Names",movesString);
-  //  IOSection.WriteVar("Observable Names",observeString);
-  
+  // Array<string,1> movesString;
+  // Array<string,1> observeString;
+  // movesString.resize(Moves.size());
+  // observeString.resize(Observables.size());
+  // for (int i=0;i<Moves.size();i++){
+  //   movesString(i)=Moves(i)->Name;
+  // }
+  // for (int i=0;i<Observables.size();i++){
+  //   observeString(i)=Observables(i)->Name;
+  // }
+  // IOSection.WriteVar("Move Names",movesString);
+  // IOSection.WriteVar("Observable Names",observeString);
 }

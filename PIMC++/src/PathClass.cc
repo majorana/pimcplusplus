@@ -39,14 +39,12 @@ dVec PathClass::MinImageDisp(dVec v1, dVec v2)
 }
 
 
-const dVec& 
-PathClass::GetOpenTail()
+const dVec& PathClass::GetOpenTail()
 {
   return Path(OpenLink,NumParticles());
 }
 
-const dVec
-PathClass::ReturnOpenHead()
+const dVec PathClass::ReturnOpenHead()
 {
   return Path(OpenLink,OpenPtcl);
 }
@@ -58,8 +56,7 @@ PathClass::ReturnOpenHead()
 //   return Path(OpenLink,OpenPtcl);
 // }
 
-void 
-PathClass::SetHead(const dVec &r,int join)
+void PathClass::SetHead(const dVec &r,int join)
 {
   (*this)(OpenLink, OpenPtcl) = r;
   if (OpenLink==NumTimeSlices()-1){
@@ -70,8 +67,7 @@ PathClass::SetHead(const dVec &r,int join)
   }
 }
 
-void 
-PathClass::SetTail(const dVec &r)
+void PathClass::SetTail(const dVec &r)
 {
   (*this)(OpenLink, NumParticles()) = r;
 }
@@ -79,22 +75,16 @@ PathClass::SetTail(const dVec &r)
 
 
 
-void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
-			     double &dist, dVec &disp)
+void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl, double &dist, dVec &disp)
 {
   disp = Path(slice, ptcl)- RefPath(refPtcl);
-  
+
   for (int i=0; i<NDIM; i++) {
     double n = -floor(disp(i)*BoxInv(i)+0.5);
     disp(i) += n*IsPeriodic(i)*Box(i);
     if (!(-Box(i)/2.0<=disp(i)+0.00001)){
-      perr<<"ERROR: "<<Box(i)<<" "<<disp(i)<<" "
-	  <<slice<<" "<<ptcl<<" "<<refPtcl<<" "
-	  <<BoxInv(i)<<Path(slice,ptcl)<<" "<<endl;
-//      sleep(5000);
+      perr<<"ERROR: "<<Box(i)<<" "<<disp(i)<<" "<<slice<<" "<<ptcl<<" "<<refPtcl<<" "<<BoxInv(i)<<Path(slice,ptcl)<<" "<<endl;
     }
-    //assert(-Box(i)/2.0<=disp(i));
-    //assert(disp(i)<=Box(i)/2.0);
   }
   dist = sqrt(dot(disp,disp));
 
@@ -108,19 +98,17 @@ void PathClass::RefDistDisp (int slice, int refPtcl, int ptcl,
     if (fabs(DBdisp(i)-disp(i)) > 1.0e-12){ 
       perr<<DBdisp(i)<<" "<<disp(i)<<endl;
     }
-    //    assert (fabs(DBdisp(i)-disp(i)) < 1.0e-12);
   }
 #endif
 }
 
 
 
-void
-PathClass::SetIonConfig(int config)
+void PathClass::SetIonConfig(int config)
 {
   ConfigNum = config;
   int first = Species(IonSpecies).FirstPtcl;
-  
+
   SetMode(OLDMODE);
   for (int ptcl=0; ptcl<IonConfigs[config].size(); ptcl++) 
     for (int slice=0; slice<NumTimeSlices(); slice++)
@@ -215,46 +203,38 @@ void PathClass::Read (IOSectionClass &inSection)
     perr << "Using free boundary conditions.\n";
   OrderN=false;
   inSection.ReadVar("OrderN",OrderN);
-	      
+
   if (!inSection.ReadVar("OpenLoops",OpenPaths))
     OpenPaths=false;
   if (!inSection.ReadVar("WormOn",WormOn))
     WormOn=false;
-    
 
 #ifndef OPEN_LOOPS
   if (OpenPaths) {
-    cerr << "OpenPaths are not enabled in the code!\n"
-	 << "Reconfigure with --enable-open and \n" 
-	 << "  make clean; make ...\nAborting.\n";
+    cerr << "OpenPaths are not enabled in the code!\n" << "Reconfigure with --enable-open and \n" << "  make clean; make ...\nAborting.\n";
     abort();
   }
 #endif
 
-  // Read in the k-space radius.  If we don't have that,
-  // we're not long-ranged.
+  // Read in the k-space radius.  If we don't have that, we're not long-ranged.
   LongRange = inSection.ReadVar("kCutoff", kCutoff);
-  if (!(inSection.ReadVar("DavidLongRange",DavidLongRange))){
-    DavidLongRange=false;
+  if (LongRange) {
+    if (!(inSection.ReadVar("DavidLongRange",DavidLongRange))){
+      DavidLongRange=false;
+    }
+    if (DavidLongRange)
+      cerr<<"Using David Long Range!"<<endl;
+    else
+      cerr<<"Using Long Range!"<<endl;
   }
-  if (DavidLongRange)
-    perr<<"I am doing DAVID LONG RANGE!"<<endl;
+
   assert(inSection.OpenSection("Particles"));
   int numSpecies = inSection.CountSections ("Species");
-  ////  perr<<"we have this many sections: "<<numSpecies<<endl;
   // First loop over species and read info about species
-  //bool prevDoMol;
   for (int Species=0; Species < numSpecies; Species++) {
     inSection.OpenSection("Species", Species);
     SpeciesClass *newSpecies = ReadSpecies (inSection);
-    // this molecule stuff is OBSOLETE
-    //prevDoMol = doMol;
-    //doMol = newSpecies->AssignMoleculeIndex;
-    //// check to ensure all species are setting doMol consistently "on" or "off"
-    //if(Species>0){
-    //  assert(doMol == prevDoMol);
-    //}
-    inSection.CloseSection(); // "Species"
+    inSection.CloseSection();
     bool manyParticles=false;
     inSection.ReadVar("ManyParticles",manyParticles);
     if (manyParticles){
@@ -265,12 +245,9 @@ void PathClass::Read (IOSectionClass &inSection)
     AddSpecies (newSpecies);
   }
 
-
   inSection.CloseSection(); // Particles
   // Now actually allocate the path
   Allocate();
-    
-
 
   /// Read to see if we are using correlated sampling
   string ionSpecies;
@@ -288,8 +265,8 @@ void PathClass::Read (IOSectionClass &inSection)
     IonConfigs[1].resize(ionConfigB.extent(0));
     for (int i=0; i<ionConfigA.extent(0); i++)
       for (int j=0; j<3; j++) {
-	IonConfigs[0](i)[j] = ionConfigA(i,j);
-	IonConfigs[1](i)[j] = ionConfigB(i,j);
+        IonConfigs[0](i)[j] = ionConfigA(i,j);
+        IonConfigs[1](i)[j] = ionConfigB(i,j);
       }
     cerr << "IonConfigs[0] = " << IonConfigs[0] << endl;
     cerr << "IonConfigs[1] = " << IonConfigs[1] << endl;
@@ -307,7 +284,6 @@ void PathClass::Read (IOSectionClass &inSection)
     abort();
   }
 
-
 }
 
 
@@ -323,7 +299,7 @@ inline bool Include(dVec k)
   else
     return false;
 }
- 
+
 
 void PathClass::Allocate()
 {
@@ -451,8 +427,7 @@ void PathClass::Allocate()
   DoPtcl.resize(numParticles+OpenPaths);
   /// Assign the species number to the SpeciesNumber array
   for (int speciesNum=0;speciesNum<SpeciesArray.size();speciesNum++){
-    for (int i=SpeciesArray(speciesNum)->FirstPtcl; 
-	 i<= SpeciesArray(speciesNum)->LastPtcl; i++)
+    for (int i=SpeciesArray(speciesNum)->FirstPtcl; i<= SpeciesArray(speciesNum)->LastPtcl; i++)
       SpeciesNumber(i) = speciesNum;
   }
   //Sets to the identity permutaiton 
@@ -462,39 +437,31 @@ void PathClass::Allocate()
   //  cerr<<ptcl<<" "<<Permutation(ptcl)<<endl;
   }
   if (LongRange) {
-#if NDIM==3    
+#if NDIM==3
     SetupkVecs3D();
 
     if (DavidLongRange)
       SortRhoK();
-
-
 #endif
 #if NDIM==2
     SetupkVecs2D();
 #endif
     Rho_k.resize(MyNumSlices, NumSpecies(), kVecs.size());
-
-
   }
   //  InitializeJosephsonCode();
 }
 
 void PathClass::SetupkVecs2D()
 {
-
+  assert (NDIM == 2);
   for (int i=0; i<NDIM; i++)
     kBox[i] = 2.0*M_PI/Box[i];
-  
+
   int numVecs=0;
-
-  assert (NDIM == 2);
-
   for (int i=0;i<NDIM;i++){
     MaxkIndex[i]= (int) ceil(1.1*kCutoff/kBox[i]);
     // perr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
   }
-
 
   dVec k;
   TinyVector<int,NDIM> ki;
@@ -502,11 +469,8 @@ void PathClass::SetupkVecs2D()
     k[0] = ix*kBox[0];
     for (int iy=-MaxkIndex[1]; iy<=MaxkIndex[1]; iy++) {
       k[1] = iy*kBox[1];
-      //      for (int iz=-MaxkIndex[2]; iz<=MaxkIndex[2]; iz++) {
-      //	k[2] = iz*kBox[2];
       if ((dot(k,k)<kCutoff*kCutoff) && Include(k))
-	numVecs++;
-      //}
+        numVecs++;
     }
   }
   kIndices.resize(numVecs);
@@ -522,21 +486,16 @@ void PathClass::SetupkVecs2D()
     for (int iy=-MaxkIndex[1]; iy<=MaxkIndex[1]; iy++) {
       k[1] = iy*kBox[1];
       ki[1]= iy+MaxkIndex[1];
-      //      for (int iz=-MaxkIndex[2]; iz<=MaxkIndex[2]; iz++) {
-      //	k[2] = iz*kBox[2];
-      //	ki[2]= iz+MaxkIndex[2];
-	if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
-	   //perr<<"This k vec is "<<k[0]<<" "<<k[1]<<endl;
-	  kVecs(numVecs) = k;
-	  kIndices(numVecs)=ki;
-	  numVecs++;
-	}
-	//      }
+      if ((dot(k,k)<kCutoff*kCutoff) && Include(k)) {
+        //perr<<"This k vec is "<<k[0]<<" "<<k[1]<<endl;
+        kVecs(numVecs) = k;
+        kIndices(numVecs)=ki;
+        numVecs++;
+      }
     }
   }
   SortRhoK();
   ///Now it's conceivable that we might want to add some k vectors to be additionally computed
-
 
 }
 
@@ -547,17 +506,13 @@ void PathClass::SetupkVecs2D()
 ///range class.
 void PathClass::SortRhoK()
 {
-  /////  Array<double,1> MagK;
-  //  Array<int,1> MagKint;
   MagK.resize(kVecs.size());
   MagKint.resize(kVecs.size());
   for (int kVec=0;kVec<kVecs.size();kVec++){
-    //    MagK(kVec)=sqrt(kVecs(kVec)[0]*kVecs(kVec)[0]+
-    //			kVecs(kVec)[1]*kVecs(kVec)[1]);
     MagK(kVec)=sqrt(dot(kVecs(kVec),kVecs(kVec)));
   }
   int smallIndex=0;
- 
+
   for (int counter=0;counter<MagKint.size();counter++){
     MagKint(counter)=-1;
   }
@@ -565,44 +520,37 @@ void PathClass::SortRhoK()
   for (int currentNum=0;currentNum<kVecs.size();currentNum++){
     for (int counter=0;counter<MagK.size();counter++){
       if (MagKint(counter)==-1 && MagK(counter)<MagK(smallIndex)){
-	smallIndex=counter;
+        smallIndex=counter;
       }
     }
     for (int counter=0;counter<MagK.size();counter++){
       if (abs(MagK(smallIndex)-MagK(counter))<1e-4){
-	MagKint(counter)=currentNum;
+        MagKint(counter)=currentNum;
       }
     }
     smallIndex=-1;
     for (int counter=0;counter<MagK.size();counter++){
       if (MagKint(counter)==-1)
-	smallIndex=counter;
+        smallIndex=counter;
     }
     if (smallIndex==-1)
       currentNum=kVecs.size()+1;
   }
- // for (int counter=0;counter<MagKint.size();counter++){
- //   perr<<"My mag K int is "<<MagKint(counter)<<endl;
- // }
 
 }
 
 
 void PathClass::SetupkVecs3D()
 {
-
+  assert (NDIM == 3);
   for (int i=0; i<NDIM; i++)
     kBox[i] = 2.0*M_PI/Box[i];
-  
+
   int numVecs=0;
-
-  assert (NDIM == 3);
-
   for (int i=0;i<NDIM;i++){
     MaxkIndex[i]= (int) ceil(1.1*kCutoff/kBox[i]);
     // perr << "MaxkIndex[" << i << "] = " << MaxkIndex[i] << endl;
   }
-
 
   dVec k;
   TinyVector<int,NDIM> ki;
@@ -646,8 +594,7 @@ void PathClass::SetupkVecs3D()
   }
 }
 
-void PathClass::CalcRho_ks_Slow(int slice, int species,Array<dVec,1> &thekvecs,
-				Array<complex<double> ,3> rho_k)
+void PathClass::CalcRho_ks_Slow(int slice, int species,Array<dVec,1> &thekvecs, Array<complex<double> ,3> rho_k)
 {
   for (int ki=0; ki<thekvecs.size(); ki++) {
     complex<double> rho;
@@ -856,8 +803,7 @@ void PathClass::MoveJoin(int oldJoin, int newJoin)
 
 
 
-void PathClass::AcceptCopy(int startSlice,int endSlice, 
-			   const Array <int,1> &activeParticles)
+void PathClass::AcceptCopy(int startSlice,int endSlice, const Array <int,1> &activeParticles)
 {
   cm2=0.0;
   static int numAccepts=0;
@@ -879,13 +825,10 @@ void PathClass::AcceptCopy(int startSlice,int endSlice,
     }
     cm2=cm2+dot(cmPart,cmPart);
 
-    
-
     Path[OLDMODE](Range(startSlice, endSlice), ptcl) = 
       Path[NEWMODE](Range(startSlice, endSlice), ptcl);
     if (WormOn)
-      ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl) = 
-ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl);
+      ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl) = ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl);
 
     Permutation.AcceptCopy(ptcl);
 
@@ -928,8 +871,7 @@ ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl);
   // cerr<<"Center of mass: "<<cm2<<" "<<numAccepts<<endl;
 }
 
-void PathClass::RejectCopy(int startSlice,int endSlice, 
-				  const Array <int,1> &activeParticles)
+void PathClass::RejectCopy(int startSlice,int endSlice, const Array <int,1> &activeParticles)
 {
   ExistsCoupling.RejectCopy();
   Weight.RejectCopy();
@@ -939,9 +881,7 @@ void PathClass::RejectCopy(int startSlice,int endSlice,
     Path[NEWMODE](Range(startSlice, endSlice), ptcl) = 
       Path[OLDMODE](Range(startSlice, endSlice), ptcl);
     if (WormOn)
-      ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl) = 
-	ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl);
-
+      ParticleExist[NEWMODE](Range(startSlice, endSlice), ptcl) = ParticleExist[OLDMODE](Range(startSlice, endSlice), ptcl);
     Permutation.RejectCopy(ptcl);
   }
   //For some reason rejecting the entire permutation?
@@ -990,9 +930,7 @@ void PathClass::ShiftData(int slicesToShift)
     int openLinkOld=(int)OpenLink;
     int startSliceOpenLinkProc;
     int endSliceOpenLinkProc;
-    SliceRange(SliceOwner(RefSlice),startSliceOpenLinkProc,
-	       endSliceOpenLinkProc);
-    
+    SliceRange(SliceOwner(RefSlice),startSliceOpenLinkProc,endSliceOpenLinkProc);
     OpenLink=RefSlice-startSliceOpenLinkProc;
     if ((int)OpenLink==0){
       OpenLink=NumTimeSlices()-1;
@@ -1030,16 +968,15 @@ void PathClass::ShiftRho_kData(int slicesToShift)
   if (slicesToShift>0) {
     for (int slice=numSlices-1; slice>=slicesToShift;slice--)
       for (int species=0; species<numSpecies; species++)
-	for (int ki=0; ki<numk; ki++)
-	  Rho_k[0](slice,species,ki)=Rho_k[0](slice-slicesToShift,species,ki);
+        for (int ki=0; ki<numk; ki++)
+          Rho_k[0](slice,species,ki)=Rho_k[0](slice-slicesToShift,species,ki);
   }
   else {
     for (int slice=0; slice<numSlices+slicesToShift;slice++)
       for (int species=0; species<numSpecies; species++)
-	for (int ki=0; ki<numk; ki++)
-	  Rho_k[0](slice,species,ki)=Rho_k[0](slice-slicesToShift,species,ki);
+        for (int ki=0; ki<numk; ki++)
+          Rho_k[0](slice,species,ki)=Rho_k[0](slice-slicesToShift,species,ki);
   }
-  
 
   /// Now bundle up the data to send to adjacent processor
   int bufferSize=abs(slicesToShift)*numSpecies*numk;
@@ -1050,31 +987,31 @@ void PathClass::ShiftRho_kData(int slicesToShift)
     startSlice=numSlices-slicesToShift;
     for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++)
       for (int species=0; species<numSpecies; species++)
-	for (int ki=0; ki<numk; ki++) {
-	  /// If shifting forward, don't send the last time slice (so always)
-	  /// send slice-1
-	  sendBuffer(buffIndex)=Rho_k[1](slice-1,species,ki);
-	  buffIndex++;
-	}
+        for (int ki=0; ki<numk; ki++) {
+          /// If shifting forward, don't send the last time slice (so always)
+          /// send slice-1
+          sendBuffer(buffIndex)=Rho_k[1](slice-1,species,ki);
+          buffIndex++;
+        }
   }
   else {
     startSlice=0;
     for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++)
       for (int species=0; species<numSpecies; species++)
-	for (int ki=0; ki<numk; ki++) {
-	  /// If shifting backward, don't send the first time slice (so always)
-	  /// send slice+1
-	  sendBuffer(buffIndex)=Rho_k[1](slice+1,species,ki);
-	  buffIndex++;
-	}
+        for (int ki=0; ki<numk; ki++) {
+          /// If shifting backward, don't send the first time slice (so always)
+          /// send slice+1
+          sendBuffer(buffIndex)=Rho_k[1](slice+1,species,ki);
+          buffIndex++;
+        }
   }
 
   /// Send and receive data to/from neighbors.
   Communicator.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
-  
+
   if (slicesToShift>0)
     startSlice=0;
-  else 
+  else
     startSlice=numSlices+slicesToShift;
 
   /// Copy the data into the A copy
@@ -1082,16 +1019,16 @@ void PathClass::ShiftRho_kData(int slicesToShift)
   for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++)
     for (int species=0; species<numSpecies; species++)
       for (int ki=0; ki<numk; ki++) {
-	Rho_k[0](slice,species,ki)=receiveBuffer(buffIndex);
-	buffIndex++;
+        Rho_k[0](slice,species,ki)=receiveBuffer(buffIndex);
+        buffIndex++;
       }
-  
+
   // Now copy A into B, since A has all the good, shifted data now.
   for (int slice=0; slice<numSlices; slice++)
     for (int species=0; species<numSpecies; species++)
       for (int ki=0; ki<numk; ki++) 
-	Rho_k[1](slice,species,ki) = Rho_k[0](slice,species,ki);
-  
+        Rho_k[1](slice,species,ki) = Rho_k[0](slice,species,ki);
+
   // And we're done! 
 }
 
@@ -1119,14 +1056,13 @@ void PathClass::ShiftPathData(int slicesToShift)
   if (slicesToShift>0){
     for (int slice=numSlices-1; slice>=slicesToShift;slice--)
       for (int ptcl=0;ptcl<numPtcls;ptcl++)
-	Path[NEWMODE](slice,ptcl) = Path[NEWMODE](slice-slicesToShift,ptcl);
+        Path[NEWMODE](slice,ptcl) = Path[NEWMODE](slice-slicesToShift,ptcl);
   }
   else {
     for (int slice=0; slice<numSlices+slicesToShift;slice++)
       for (int ptcl=0;ptcl<numPtcls;ptcl++)
-	Path[NEWMODE](slice,ptcl) = Path[NEWMODE](slice-slicesToShift,ptcl);
+        Path[NEWMODE](slice,ptcl) = Path[NEWMODE](slice-slicesToShift,ptcl);
   }
-  
 
   /// Now bundle up the data to send to adjacent processor
   int bufferSize=abs(slicesToShift)*numPtcls;
@@ -1137,10 +1073,10 @@ void PathClass::ShiftPathData(int slicesToShift)
     startSlice=numSlices-slicesToShift;
     for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
       for (int ptcl=0;ptcl<numPtcls;ptcl++){
-	///If shifting forward, don't send the last time slice (so always)
-	///send slice-1
-	sendBuffer(buffIndex)=Path[OLDMODE](slice-1,ptcl);
-	buffIndex++;
+        ///If shifting forward, don't send the last time slice (so always)
+        ///send slice-1
+        sendBuffer(buffIndex)=Path[OLDMODE](slice-1,ptcl);
+        buffIndex++;
       }
     }
   }
@@ -1148,20 +1084,20 @@ void PathClass::ShiftPathData(int slicesToShift)
     startSlice=0;
     for (int slice=startSlice; slice<startSlice+abs(slicesToShift);slice++){
       for (int ptcl=0;ptcl<numPtcls;ptcl++){
-	///If shifting backward, don't send the first time slice (so always)
-	///send slice+1
-	sendBuffer(buffIndex)=Path[OLDMODE](slice+1,ptcl);
-	buffIndex++;
+        ///If shifting backward, don't send the first time slice (so always)
+        ///send slice+1
+        sendBuffer(buffIndex)=Path[OLDMODE](slice+1,ptcl);
+        buffIndex++;
       }
     }
   }
 
   /// Send and receive data to/from neighbors.
   Communicator.SendReceive(sendProc, sendBuffer,recvProc, receiveBuffer);
-  
+
   if (slicesToShift>0)
     startSlice=0;
-  else 
+  else
     startSlice=numSlices+slicesToShift;
 
   /// Copy the data into the A copy
@@ -1172,7 +1108,7 @@ void PathClass::ShiftPathData(int slicesToShift)
       buffIndex++;
     }
   }
-  
+
   // Now copy A into B, since A has all the good, shifted data now.
   for (int slice=0; slice<numSlices; slice++)
     for (int ptcl=0; ptcl<numPtcls; ptcl++)
@@ -1216,7 +1152,7 @@ void PathClass::BroadcastRefPath()
   SetMode (NEWMODE);
   // Figure which processor has the reference slice
   int procWithRefSlice = SliceOwner (RefSlice);
-  
+
   Array<dVec,1> buffer(NumParticles());
   if (procWithRefSlice == Communicator.MyProc()) {
     int myStart, myEnd;
@@ -1224,7 +1160,7 @@ void PathClass::BroadcastRefPath()
     for (int ptcl=0; ptcl<NumParticles(); ptcl++)
       buffer(ptcl) = Path(RefSlice-myStart, ptcl);
   }
-  
+
   //  perr << "procWithRefSlice = " << procWithRefSlice << endl;
 
   // Do broadcast
@@ -1233,7 +1169,7 @@ void PathClass::BroadcastRefPath()
   // Now, all processors have reference slice.  Note that the 
   // labeling of particles may not be right since with haven't
   // propogated the permuation matrices.
-  
+
   // Now, copy into path
   for (int ptcl=0; ptcl<NumParticles(); ptcl++)
     RefPath(ptcl) = buffer(ptcl);
@@ -1257,7 +1193,6 @@ void PathClass::TotalPermutation(Array<int,1> &permVec)
   for (int i=0; i<permVec.size(); i++)
     permVec(i) = Permutation(i);
 
-
   // First, collect all the individual permutation vectors
   Communicator.Gather (permVec, permMat, 0);
   // Now apply them in sequence.
@@ -1265,7 +1200,7 @@ void PathClass::TotalPermutation(Array<int,1> &permVec)
     for (int pi=0; pi < numPtcls; pi++) {
       int ptcl = pi;
       for (int proc=0; proc<numProcs; proc++)
-	ptcl = permMat(proc, ptcl);
+        ptcl = permMat(proc, ptcl);
       permVec(pi) = ptcl;
     }
   }
@@ -1371,27 +1306,26 @@ PathClass::WarpPaths (int ionSpecies)
   for (int elec=0; elec<NumParticles(); elec++) {
     if (ParticleSpeciesNum(elec) != ionSpecies) {
       for (int slice=0; slice<NumTimeSlices(); slice++) {
-	dVec disp;
-	double dist;
-	double totalWeight = 0.0;
-	for (int ion=0; ion<N; ion++) {
-	  DistDisp(slice, elec, ion+ions.FirstPtcl, dist, disp);
-	  totalWeight += 1.0/(dist*dist*dist*dist);
-	}
-	for (int ion=0; ion<N; ion++) {
-	  DistDisp(slice, elec, ion+ions.FirstPtcl, dist, disp);
-	  double weight = 1.0/(dist*dist*dist*dist*totalWeight);
-	  Path[1](slice, elec) += weight*Rdelta(ion);
-	}
-	Path[0](slice, elec) = Path[1](slice, elec);
+        dVec disp;
+        double dist;
+        double totalWeight = 0.0;
+        for (int ion=0; ion<N; ion++) {
+          DistDisp(slice, elec, ion+ions.FirstPtcl, dist, disp);
+          totalWeight += 1.0/(dist*dist*dist*dist);
+        }
+        for (int ion=0; ion<N; ion++) {
+          DistDisp(slice, elec, ion+ions.FirstPtcl, dist, disp);
+          double weight = 1.0/(dist*dist*dist*dist*totalWeight);
+          Path[1](slice, elec) += weight*Rdelta(ion);
+        }
+        Path[0](slice, elec) = Path[1](slice, elec);
       }
     }
   }
 }
 
 void
-PathClass::DistDispFast (int sliceA, int sliceB, int ptcl1, int ptcl2,
-			 double &distA, double &distB,dVec &dispA, dVec &dispB)
+PathClass::DistDispFast (int sliceA, int sliceB, int ptcl1, int ptcl2, double &distA, double &distB,dVec &dispA, dVec &dispB)
 {
   dispA = Path(sliceA, ptcl2) - Path(sliceA,ptcl1);
   dispB = Path(sliceB, ptcl2) - Path(sliceB,ptcl1);
@@ -1424,13 +1358,12 @@ PathClass::DistDispFast (int sliceA, int sliceB, int ptcl1, int ptcl2,
     dVec tempDispB;
     double tempDistA;
     double tempDistB;
-    DistDisp (sliceA, sliceB, ptcl1, ptcl2,
-	      tempDistA, tempDistB,tempDispA, tempDispB);
+    DistDisp (sliceA, sliceB, ptcl1, ptcl2, tempDistA, tempDistB,tempDispA, tempDispB);
     //  if (!((tempDispA==dispA) && (tempDispB==dispB))){
-    if ((abs(tempDispA(0)-dispA(0))>1e-8) || 
-	(abs(tempDispA(1)-dispA(1))>1e-8) ||
-	(abs(tempDispB(0)-dispB(0))>1e-8) ||
-	(abs(tempDispB(1)-dispB(1))>1e-8)){
+    if ((abs(tempDispA(0)-dispA(0))>1e-8) ||
+        (abs(tempDispA(1)-dispA(1))>1e-8) ||
+        (abs(tempDispB(0)-dispB(0))>1e-8) ||
+        (abs(tempDispB(1)-dispB(1))>1e-8)) {
       cerr<<tempDispA<<" "<<dispA<<" "<<tempDispB<<" "<<dispB<<endl;
       cerr<<temptempdispB<<" "<<m<<endl;
       cerr<<dispC<<endl;

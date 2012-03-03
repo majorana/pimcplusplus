@@ -9,6 +9,30 @@ def IsMonotonic (x):
           isMono = isMono and (x[i+1] > x[i])
      return isMono
 
+def ProduceErrorCorrelationPicture(x,y,err,fileBase,hlabel,vlabel,cutoff):
+     clf()
+     #if (IsMonotonic(x)):
+     #     plot(x, y)
+     #else:
+     numLines=len(y)
+     for line in range(0,numLines):
+       errorbar(x[line], y[line], yerr=err[line])
+     h1=xlabel(hlabel)
+     setp(h1,"FontSize",20)
+     v1=ylabel(vlabel)
+     setp(v1,"FontSize",20)
+     labels = get(gca(), 'xticklabels')
+     setp(labels, 'fontsize', 16)
+     labels = get(gca(), 'yticklabels')
+     setp(labels, 'fontsize', 16)
+     currAxis=list(axis())
+     #currAxis[1]=cutoff
+     axis(currAxis)
+     savefig(fileBase+".png",dpi=60)
+     savefig(fileBase+".ps")
+     myImg=Image(fileBase+".png")
+     return myImg
+
 def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel,cutoff):
      clf()
      #if (IsMonotonic(x)):
@@ -26,7 +50,7 @@ def ProduceCorrelationPicture(x,y,fileBase,hlabel,vlabel,cutoff):
      labels = get(gca(), 'yticklabels')
      setp(labels, 'fontsize', 16)
      currAxis=list(axis())
-     currAxis[1]=cutoff
+     #currAxis[1]=cutoff
      axis(currAxis)
      savefig(fileBase+".png",dpi=60)
      savefig(fileBase+".ps")

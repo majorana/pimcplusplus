@@ -19,111 +19,7 @@
 #include <Common/MatrixOps/MatrixOps.h>
 
 
-// double BisectionStageClass::LogSampleProb(int slice1, int slice2, 
-// 					  Array<int,1> particles)
-// {
-//   PathClass &Path = PathData.Path;
-//   dVec rpp;
-//   int skip = 1<<(BisectionLevel+1);
-//   double logSampleProb=0.0;
-
-//   double levelTau = 0.5*PathData.Action.tau*skip;
-//   for (int ptclIndex=0;ptclIndex<particles.size();ptclIndex++){
-//     int ptcl = particles(ptclIndex);
-//     double lambda=Path.ParticleSpecies(ptcl).lambda;
-//     double sigma2=(1.0*lambda*levelTau);
-//     double sigma=sqrt(sigma2);
-//     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
-//     for (int slice=slice1;slice<slice2;slice+=skip){
-//       dVec r = Path(slice,ptcl);
-//       dVec rdiff = Path.Velocity(slice, slice+skip, ptcl);
-
-//       dVec rpp=Path(slice+(skip>>1),ptcl);
-      
-//       // We've ignored boundary conditions here (well we think this is
-//       // fixed but we're not sure)  
-//       dVec rbar=r + 0.5*rdiff;
-//       dVec Delta= rpp - rbar;
-//       Path.PutInBox(Delta);
-      
-//       double GaussProd=1.0;
-//       for (int dim=0; dim<NDIM; dim++) {
-// 	double GaussSum = 0.0;
-// 	int NumImage = 1;
-// 	for (int image=-NumImage; image <= NumImage; image++) {
-// 	  double dist = Delta[dim]+(double)image*Path.GetBox()[dim];
-// 	  GaussSum += exp(-0.5*dist*dist/sigma2);
-// 	}
-// 	GaussProd *= GaussSum;
-//       }
-//       logSampleProb += prefactorOfSampleProb + log(GaussProd);
-
-//     }
-//   }
-//   return logSampleProb;
-// }
-
-// double BisectionStageClass::SamplePaths(int startSlice, int endSlice, 
-// 					Array<int,1> particles) 
-// {
-//   dVec rpp;
-//   int skip = 1<<(BisectionLevel+1);
-//   double logNewSampleProb=0.0;
-//   PathClass &Path = PathData.Path;
-//   ActionClass &Action = PathData.Action;
-//   double levelTau = 0.5*PathData.Action.tau*skip;
-//   for (int ptclIndex=0;ptclIndex<particles.size();ptclIndex++){
-//     int  ptcl=particles(ptclIndex);
-//     double lambda=PathData.Path.ParticleSpecies(ptcl).lambda;
-//     double sigma2=(1.0*lambda*levelTau);
-//     double sigma=sqrt(sigma2);
-//     double prefactorOfSampleProb=0.0;//-NDIM/2.0*log(2*M_PI*sigma2);
-//     for (int slice=startSlice;slice<endSlice;slice+=skip){
-//       dVec r = Path(slice,ptcl);
-//       //\\     dVec rp= Path(slice+skip,ptcl);
-//       dVec rpp; //\\=Path(slice+(skip>>1),ptcl);
-//       //      Path.PutInBox(r);
-//       //      Path.PutInBox(rp);
-//       //      Path.PutInBox(rpp);
-//       dVec rdiff=Path.Velocity(slice, slice+skip, ptcl);
-//       dVec rbar = r + 0.5*rdiff;
-//       dVec newDelta;
-//       Path.Random.LocalGaussianVec(sigma,newDelta);
-//       PathData.Path.PutInBox(newDelta);
-//       double GaussProd=1.0;
-//       for (int dim=0; dim<NDIM; dim++) {
-// 	  double GaussSum = 0.0;
-// 	  int NumImage = 1;
-// 	  for (int image=-NumImage; image <= NumImage; image++) {
-// 	    double dist = newDelta[dim]+(double)image*Path.GetBox()[dim];
-// 	    GaussSum += exp(-0.5*dist*dist/sigma2);
-// 	  }
-// 	  GaussProd *= GaussSum;
-//       }
-//       logNewSampleProb += prefactorOfSampleProb + log(GaussProd);
-//       rpp=rbar+newDelta;
-
-//       ///Here we've stored the new position in the path
-//       Path.SetPos(slice+(skip>>1),ptcl,rpp);
-//     }
-//   } 
-//   //  cerr<<"My logNewSampleProb is "<<logNewSampleProb<<endl;
-//   return logNewSampleProb;
-// }
-
-
-//void BisectionStageClass::Read(IOSectionClass& IO)
-//{
-
-
-
-
-//}
-
-
-void BisectionStageClass::CalcShift(Array<int,1> &activeParticles,int slice,
-				    double sigma,
-				    double &det)
+void BisectionStageClass::CalcShift(Array<int,1> &activeParticles,int slice,double sigma,double &det)
 {
   ///Correlated sampling
   cerr<<"Entering array"<<endl;
@@ -131,7 +27,7 @@ void BisectionStageClass::CalcShift(Array<int,1> &activeParticles,int slice,
   cerr<<"Active particle size is "<<numActivePtcl<<endl;
   Correlated.resize(NDIM*numActivePtcl,NDIM*numActivePtcl);
   Correlated=0.0;
-  
+
   //  Array<dVec,1> dispShift(numActivePtcl);
   dispShift.resize(numActivePtcl);
   dispShift=0.0;
@@ -200,13 +96,12 @@ void BisectionStageClass::CalcShift(Array<int,1> &activeParticles,int slice,
       cerr<<S(i,j)<<" ";
     cerr<<endl;
   }
-  
 
 }
 
 
 void BisectionStageClass::WriteRatio()
-{ 
+{
   AcceptRatioVar.Write((double)NumAccepted/(double)NumAttempted);
   AcceptRatioVar.Flush();
 }
@@ -215,36 +110,28 @@ void BisectionStageClass::Accept()
 {
   LocalStageClass::Accept();
   //do nothing for now
-  
 }
 
 void BisectionStageClass::Reject()
 {
   LocalStageClass::Reject();
   //do nothing for now
-
 }
 
 ///Calculates a new rbar that is displaced
 ///by the old rbar via the correlated sampling
 void guassianDisplace(dVec rbar)
 {
-  
-
 
 }
 
-double BisectionStageClass::Sample(int &slice1,int &slice2,
-				   Array<int,1> &activeParticles)
+double BisectionStageClass::Sample(int &slice1, int &slice2, Array<int,1> &activeParticles)
 {
   struct timeval start, end;
   struct timezone tz;
   gettimeofday(&start, &tz);
 
-
   PathClass &Path = PathData.Path;
-
-
 
   if (UseCorrelatedSampling){
     Correlated.resize(NDIM*activeParticles.size(),NDIM*activeParticles.size());

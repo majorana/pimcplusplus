@@ -90,9 +90,10 @@ def Processnofr(infiles,summaryDoc,detailedDoc,StartCut,box):
     f = open('../nofrlineDump', 'a')
     pickle.dump(x.tolist(),f)
     pickle.dump(y.tolist(),f)
+    pickle.dump(totalError.tolist(),f)
     f.close()
-    myImgTable=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel,box[0]/2)
-    myImgTable2=ProduceCorrelationPictureLogLog(x, y,baseName+"loglog",hlabel,vlabel,box[0]/2)
+    myImgTable=ProduceErrorCorrelationPicture(x, y, totalError, baseName,hlabel,vlabel,box[0]/2)
+    myImgTable2=ProduceCorrelationPictureLogLog(x, y, baseName+"loglog",hlabel,vlabel,box[0]/2)
     importanceFunction=GetImportanceFunction()
     y=totalMean.copy()
     y1=totalMean+totalError
@@ -119,8 +120,8 @@ def Processnofr(infiles,summaryDoc,detailedDoc,StartCut,box):
             y2[counter]=0
     yError=(y1-y2)/2
     baseName="nofrCorrected"
-    correctedImgTable=ProduceCorrelationPicture(x, y,baseName,hlabel,vlabel,box[0]/2)
-    #correctedImgTable2=ProduceCorrelationPictureLogLog(x, y,baseName+"loglog",hlabel,vlabel,box[0]/2)
+    correctedImgTable=ProduceErrorCorrelationPicture(x, y, yError, baseName,hlabel,vlabel,box[0]/2)
+    #correctedImgTable2=ProduceCorrelationPictureLogLog(x, y, yError, baseName+"loglog",hlabel,vlabel,box[0]/2)
     sectionName=infiles.GetName()
     description=infiles.ReadVar("Description")[0]
     summaryDoc.append(Heading(1,sectionName))

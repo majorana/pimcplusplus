@@ -26,9 +26,9 @@
 #include "MoleculeHelper.h"
 
 #ifdef USE_QMC
-	#include <QMCApp/QMCInterface.h>
-	#include "Message/Communicate.h"
-	#include "Utilities/OhmmsInfo.h"
+  #include <QMCApp/QMCInterface.h>
+  #include "Message/Communicate.h"
+  #include "Utilities/OhmmsInfo.h"
 #endif
 
 
@@ -45,11 +45,11 @@ private:
   int StartWallTime, MaxWallTime;
   int GetWallTime();
 
-public:  
+public:
   MoleculeManagerClass Mol;
 
   bool RUN_QMC;
-	bool IAmQMCManager;
+  bool IAmQMCManager;
   int Seed;
   /// This defines a communicator for the group of processors working
   /// on this PathDataClass.
@@ -64,27 +64,27 @@ public:
 
 #ifdef USE_QMC
   qmcplusplus::QMCInterface* qmc;
-	CommunicatorClass MetaWorldComm;
-	CommunicatorClass QMCComm;
-	void AssignPtclSetStrings();
-	bool useDefaultStrings;
-	// user-defined parameters to control QMC run
-	// read in from input file
+  CommunicatorClass MetaWorldComm;
+  CommunicatorClass QMCComm;
+  void AssignPtclSetStrings();
+  bool useDefaultStrings;
+  // user-defined parameters to control QMC run
+  // read in from input file
 public:
-	Array<string, 1> ptclSet0, ptclSet1;
-	double dt;
-	int walkers, chains, steps, blocks;
-	bool correlated;
-	string QMCMethod;
+  Array<string, 1> ptclSet0, ptclSet1;
+  double dt;
+  int walkers, chains, steps, blocks;
+  bool correlated;
+  string QMCMethod;
 #endif
 
-	// global clock for number of moves made
-	// incremented (by ALL moves) in MoveBase::DoEvent()
-	int moveClock;
+  // global clock for number of moves made
+  // incremented (by ALL moves) in MoveBase::DoEvent()
+  int moveClock;
 
   ///////////////////////////////////////////////////////////////////
-  ///                        Wall Time Data                        // 
-  ///////////////////////////////////////////////////////////////////  
+  ///                        Wall Time Data                        //
+  ///////////////////////////////////////////////////////////////////
   /// This function returns true if we have exceeded the maximum wall
   /// time.
   void SetMaxWallTime(int maxWallTime);
@@ -109,7 +109,6 @@ public:
     Actions.MoveJoin(Join,newJoin);
     Join=newJoin;
   }
-  
 
   ////Worm Moves///
   bool SliceFullandNextSliceEmpty(int slice,int ptcl);
@@ -118,9 +117,7 @@ public:
   void FindTail(int &tailSlice,int &tailPtcl);
   void MoveTailToSliceZero();
   void Next(int &slice, int &ptcl);
-  void WormInfo(int &headSlice, int &headPtcl,
-		int &tailSlice, int &tailPtcl,
-		int &numEmpty, int &wormSize);
+  void WormInfo(int &headSlice, int &headPtcl, int &tailSlice, int &tailPtcl, int &numEmpty, int &wormSize);
 
   //////////
   void MoveOpenLinkToEnd();
@@ -134,25 +131,21 @@ public:
   inline int NumTimeSlices() {  return Path.NumTimeSlices();  }
 
   /// Do all copies necessary to accept a move.
-  inline void AcceptMove(int startTimeSlice,int endTimeSlice,
-			 const Array <int,1> &activeParticles);
-		  
+  inline void AcceptMove(int startTimeSlice,int endTimeSlice, const Array <int,1> &activeParticles);
+
   /// Do all copies necessary to accept a move.
-  inline void RejectMove(int startTimeSlice,int endTimeSlice,
-			 const Array <int,1> &activeParticles);
-		  
+  inline void RejectMove(int startTimeSlice,int endTimeSlice, const Array <int,1> &activeParticles);
+
   /// Returns the number of particle species in the path
   inline int NumSpecies(){ return Path.NumSpecies();  }
 
   /// Returns the total number of particles
   inline int NumParticles(){ return Path.NumParticles(); }
 
-
   /// Returns a reference to the SpeciesClass object of number species
   inline SpeciesClass& Species(int species){ return Path.Species(species); }
 
   inline int SpeciesNum(string speciesName);
-
 
   /// Returns the position of the particle of type species, particle
   /// number particle, and time slice timeSlice.
@@ -160,7 +153,7 @@ public:
     return Path(timeSlice,particle);
   }
 
-  /// Sets the position of the particle labeled by 
+  /// Sets the position of the particle labeled by
   /// (species, particle, timeSlice) to r and updates the time stamp
   /// of that piece of information.
   inline void SetPos(int timeSlice, int particle, const dVec& r){
@@ -172,21 +165,19 @@ public:
   inline int GetNumClones() { return NumClones; }
 
   void Read (IOSectionClass &in);
-  PathDataClass() : 
-    /* Action(*this), */Actions(*this), Random(WorldComm), 
-			Path(IntraComm,Random, Actions), MaxWallTime(-1),
-			Join(Path.Join)
-		
-  { 
-    Join = 1; 
+
+  /// Constructor
+  PathDataClass() :
+    /* Action(*this), */Actions(*this), Random(WorldComm), Path(IntraComm,Random, Actions), MaxWallTime(-1), Join(Path.Join)
+  {
+    Join = 1;
     StartWallTime = GetWallTime();
   }
 
 
 };
- 
-inline int 
-PathDataClass::SpeciesNum(string name)
+
+inline int PathDataClass::SpeciesNum(string name)
 {
   for (int spec=0;spec<NumSpecies();spec++){
     if (Species(spec).Name==name){
@@ -196,20 +187,16 @@ PathDataClass::SpeciesNum(string name)
   return -1;
 }
 
-inline void 
-PathDataClass::AcceptMove(int startTimeSlice,int endTimeSlice,
-			  const Array <int,1> &activeParticles)
+inline void PathDataClass::AcceptMove(int startTimeSlice, int endTimeSlice, const Array <int,1> &activeParticles)
 {
-  Actions.AcceptCopy (startTimeSlice, endTimeSlice, activeParticles);
-  Path.AcceptCopy(startTimeSlice,endTimeSlice,activeParticles);
+  Actions.AcceptCopy(startTimeSlice, endTimeSlice, activeParticles);
+  Path.AcceptCopy(startTimeSlice, endTimeSlice, activeParticles);
 }
 
-inline void 
-PathDataClass::RejectMove(int startTimeSlice,int endTimeSlice,
-			  const Array <int,1> &activeParticles)
+inline void PathDataClass::RejectMove(int startTimeSlice, int endTimeSlice, const Array <int,1> &activeParticles)
 {
-  Actions.RejectCopy (startTimeSlice, endTimeSlice, activeParticles);
-  Path.RejectCopy(startTimeSlice,endTimeSlice,activeParticles); 
+  Actions.RejectCopy(startTimeSlice, endTimeSlice, activeParticles);
+  Path.RejectCopy(startTimeSlice, endTimeSlice, activeParticles);
 }
 
 

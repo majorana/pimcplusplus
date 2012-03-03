@@ -23,8 +23,7 @@ void DisplaceMoveClass::WriteRatio()
   MultiStageClass::WriteRatio();
 }
 
-double DisplaceStageClass::Sample (int &slice1, int &slice2,
-				   Array<int,1> &activeParticles)
+double DisplaceStageClass::Sample (int &slice1, int &slice2, Array<int,1> &activeParticles)
 {
   /// Now, choose a random displacement 
   for (int ptclIndex=0; ptclIndex<activeParticles.size(); ptclIndex++) {
@@ -39,8 +38,6 @@ double DisplaceStageClass::Sample (int &slice1, int &slice2,
 #endif
     disp=disp*Sigma;
 
-    
-
     // Actually displace the path
     SetMode(NEWMODE);
     for (int slice=0; slice<PathData.NumTimeSlices(); slice++)
@@ -54,6 +51,7 @@ double DisplaceStageClass::Sample (int &slice1, int &slice2,
 void
 DisplaceMoveClass::Read (IOSectionClass &in)
 {
+  string moveName = "Displace";
   CurrentPtcl=0;
   assert(in.ReadVar ("Sigma", Sigma));
   DisplaceStage.Sigma = Sigma;
@@ -70,51 +68,48 @@ DisplaceMoveClass::Read (IOSectionClass &in)
     activeSpecies(i) = PathData.Path.SpeciesNum(activeSpeciesNames(i));
   SetActiveSpecies (activeSpecies);
 
-//   // Move all particles at the same time.
-//   int totalNum = 0;
-//   for (int si=0; si<activeSpecies.size(); si++)
-//     totalNum += PathData.Path.Species(activeSpecies(si)).NumParticles;
-//   SetNumParticlesToMove(totalNum);
+  // // Move all particles at the same time.
+  // int totalNum = 0;
+  // for (int si=0; si<activeSpecies.size(); si++)
+  //   totalNum += PathData.Path.Species(activeSpecies(si)).NumParticles;
+  // SetNumParticlesToMove(totalNum);
 
   // Construct action list
   Array<string,1> samplingActions;
   assert(in.ReadVar("SamplingActions",samplingActions));
-  for (int i=0;i<samplingActions.size();i++)
+  for (int i=0;i<samplingActions.size();i++) {
+    cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" Adding "<<(*PathData.Actions.GetAction(samplingActions(i))).GetName()<<" Action"<<endl;
     DisplaceStage.Actions.push_back(PathData.Actions.GetAction(samplingActions(i)));
-      ///If it's David's long range class then do this
-
-  
-//   if (PathData.Path.OrderN)
-//     DisplaceStage.Actions.push_back(&PathData.Actions.ShortRangeOn);
-//   else 
-//     //  DisplaceStage.Actions.push_back(&PathData.Actions.DiagonalAction);
-//    DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
+  }
+  // if (PathData.Path.OrderN)
+  //   DisplaceStage.Actions.push_back(&PathData.Actions.ShortRangeOn);
+  // else 
+  //   //  DisplaceStage.Actions.push_back(&PathData.Actions.DiagonalAction);
+  //  DisplaceStage.Actions.push_back(&PathData.Actions.ShortRange);
   if (PathData.Path.LongRange) {
-    cerr<<"Displace thinks long range is on"<<endl;
-    if (PathData.Actions.UseRPA)
+    if (PathData.Actions.UseRPA) {
+      cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" Adding LongRangeRPA Action"<<endl;
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRangeRPA);
-    else if (PathData.Path.DavidLongRange){
-      cerr<<"Displace move pushing davidlongrange"<<endl;
+    } else if (PathData.Path.DavidLongRange) {
+      cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" Adding DavidLongRange Action"<<endl;
       DisplaceStage.Actions.push_back(&PathData.Actions.DavidLongRange);
-    }
-    else
+    } else {
+      cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" Adding LongRange Action"<<endl;
       DisplaceStage.Actions.push_back(&PathData.Actions.LongRange);
+    }
   }
   for (int i=0; i<activeSpecies.size(); i++) {
     int speciesNum = activeSpecies(i);
     if ((PathData.Actions.NodalActions(speciesNum)!=NULL)) {
-      cerr << "DisplaceMove adding fermion node action for species " 
-	   << activeSpeciesNames(i) << endl;
-      DisplaceStage.Actions.push_back
-	(PathData.Actions.NodalActions(speciesNum));
+      cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<activeSpeciesNames(i)<<" Adding Node Action"<<endl;
+      DisplaceStage.Actions.push_back(PathData.Actions.NodalActions(speciesNum));
     }
   }
-    
+
   // Now construct stage list
   Stages.push_back(&DisplaceStage);
 
   ActiveParticles.resize(NumParticlesToMove);
-  cerr<<"The number of actions for Displace is "<<DisplaceStage.Actions.size()<<endl;
 }
 
 void 
