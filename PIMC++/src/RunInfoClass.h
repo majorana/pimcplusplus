@@ -71,8 +71,8 @@ public:
   }
   inline RunInfoClass()
   {
-    struct passwd* pwInfo = getpwuid(getuid());
-    UserName = pwInfo->pw_name;
+    //struct passwd* pwInfo = getpwuid(getuid());
+    UserName = "ethan"; //pwInfo->pw_name;
     BuildDate = __DATE__;
     BuildTime = __TIME__;
     char hostname[300];
