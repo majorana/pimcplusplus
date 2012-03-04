@@ -14,7 +14,6 @@
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
 
-#include <omp.h>
 #include "PIMCClass.h"
 #include "MirroredClass.h"
 #include "ParseCommand.h"

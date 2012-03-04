@@ -17,6 +17,7 @@
 #ifndef FREE_NODAL_ACTION_CLASS_H
 #define FREE_NODAL_ACTION_CLASS_H
 
+#include <omp.h>
 #include "NodalActionClass.h"
 #include <Common/Splines/CubicSpline.h>
 
