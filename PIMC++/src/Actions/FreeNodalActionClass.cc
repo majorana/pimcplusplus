@@ -473,8 +473,8 @@ double FreeNodalActionClass::LineSearchDist (int slice)
   double maxDist=sqrt(dot(PathData.Path.GetBox(),PathData.Path.GetBox()));
   while ((det*det0 > 0.0) && ((maxFactor*dist)<maxDist)) {
     maxFactor *= 2.0;
-    for (int i=0; i<N; i++) 
-      Path (slice, i+first) = SavePath(i) - maxFactor*dist*GradVec2(i);
+    for (int i=0; i<N; i++)
+      Path (slice, i+first) = SavePath2(i) - maxFactor*dist*GradVec2(i);
     det = Det(slice);
   }
 
@@ -485,7 +485,7 @@ double FreeNodalActionClass::LineSearchDist (int slice)
     while (((maxFactor-minFactor)*dist > epsilon) && (minFactor*dist < maxDist)) {
       tryFactor = 0.5*(maxFactor+minFactor);
       for (int i=0; i<N; i++)
-        Path (slice, i+first) = SavePath(i) - tryFactor*dist*GradVec2(i);
+        Path (slice, i+first) = SavePath2(i) - tryFactor*dist*GradVec2(i);
       det = Det (slice);
       if (det*det0 > 0.0)
         minFactor = tryFactor;
@@ -688,7 +688,7 @@ double FreeNodalActionClass::SingleAction (int startSlice, int endSlice, const A
   #pragma omp parallel for shared(uNode)
   for (int slice=startSlice; slice < endSlice; slice+=skip) {
     #pragma omp flush (abort)
-    //if (!abort) {
+    if (!abort) {
       if ((slice!=refSlice) && (slice != refSlice+totalSlices)) {
         if (Det(slice) < 0.0) {
           //uNode += 1.0e100;
@@ -728,7 +728,7 @@ double FreeNodalActionClass::SingleAction (int startSlice, int endSlice, const A
       slice1IsRef = slice2IsRef;
       dist1 = dist2;
     }
-  //}
+  }
   #pragma omp barrier
 
   if (abort)
@@ -786,10 +786,10 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
       if (!slice2IsRef) {
         dist2 = HybridDist (slice+skip, lambda*levelTau);
         if (dist2 < 0.0) {
-    #pragma omp flush (abort)
-          cerr << "dist = " << dist2 << " skip = " << skip << " slice2 = " << slice+skip << " refSlice = " << refSlice << " species = " << species.Name << endl;
+          cerr << "ERROR: dist = " << dist2 << " skip = " << skip << " slice2 = " << slice+skip << " refSlice = " << refSlice << " species = " << species.Name << endl;
           abort = 1;
           //return 1.0e100;
+    #pragma omp flush (abort)
         }
       }
 

@@ -17,7 +17,6 @@
 #ifndef FREE_NODAL_ACTION_CLASS_H
 #define FREE_NODAL_ACTION_CLASS_H
 
-#include <omp.h>
 #include "NodalActionClass.h"
 #include <Common/Splines/CubicSpline.h>
 
@@ -57,6 +56,7 @@ private:
   double NewtonRaphsonDist (int slice);
   int SpeciesNum;
   int NumGradDists, NumLineDists;
+  int nBisections0, nBisections;
   int nSingular;
 public:
   double SingleAction (int slice1, int slice2, const Array<int,1> &activeParticles, int level);
