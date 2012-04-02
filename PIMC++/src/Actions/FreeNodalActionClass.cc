@@ -691,42 +691,44 @@ double FreeNodalActionClass::SingleAction (int startSlice, int endSlice, const A
     if (!abort) {
       if ((slice!=refSlice) && (slice != refSlice+totalSlices)) {
         if (Det(slice) < 0.0) {
-          //uNode += 1.0e100;
           abort = 1;
-    #pragma omp flush (abort)
-          //return uNode;
+          #pragma omp flush (abort)
+        }
+      }
+      slice1IsRef = (slice == refSlice) || (slice == refSlice+Path.TotalNumSlices);
+      if (!slice1IsRef) {
+        dist1 = HybridDist (slice, lambda*levelTau);
+        if (dist1 < 0.0) {
+          abort = 1;
+          #pragma omp flush(abort)
         }
       }
       slice2IsRef = (slice+skip == refSlice) || (slice+skip == refSlice+totalSlices);
       if (!slice2IsRef&&!abort) {
-        //dist2 = MaxDist(slice+skip);//LineSearchDist (slice+skip);//NodalDist (slice+skip);
         dist2 = HybridDist (slice+skip, lambda*levelTau);
         if (dist2 < 0.0) {
-          //uNode += 1.0e100;
           abort = 1;
-    #pragma omp flush (abort)
-          //return uNode;
+          #pragma omp flush (abort)
         }
       }
 
       if (!slice1IsRef && (dist1<0.0)) {
-        //uNode += 1.0e100;
         abort = 1;
-    #pragma omp flush (abort)
+        #pragma omp flush (abort)
       }
       else if (!slice2IsRef && (dist2 < 0.0)) {
-        //uNode += 1.0e100;
         abort = 1;
-    #pragma omp flush (abort)
+        #pragma omp flush (abort)
       }
-      else if (slice1IsRef || (dist1==0.0))
+      else if (slice1IsRef || (dist1==0.0)) {
         uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
-      else if (slice2IsRef || (dist2==0.0))
+      }
+      else if (slice2IsRef || (dist2==0.0)) {
         uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
-      else
+      }
+      else {
         uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
-      slice1IsRef = slice2IsRef;
-      dist1 = dist2;
+      }
     }
   }
   #pragma omp barrier

@@ -218,10 +218,9 @@ void PathClass::Read (IOSectionClass &inSection)
 
   // Read in the k-space radius.  If we don't have that, we're not long-ranged.
   LongRange = inSection.ReadVar("kCutoff", kCutoff);
+  if (!(inSection.ReadVar("DavidLongRange",DavidLongRange)))
+    DavidLongRange=false;
   if (LongRange) {
-    if (!(inSection.ReadVar("DavidLongRange",DavidLongRange))){
-      DavidLongRange=false;
-    }
     if (DavidLongRange)
       cerr<<"Using David Long Range!"<<endl;
     else
