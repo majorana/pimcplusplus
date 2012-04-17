@@ -1,0 +1,5253 @@
+------------------------------------------------------------------------
+r599 | esler | 2005-07-11 15:31:16 -0500 (Mon, 11 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Ewald/Makefile.am
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+
+Fixed boundary conditions in test to reflect changes long ago to the basis functions.  We no longer include the \delta^\alpha term in the LPQHI basis functions.
+------------------------------------------------------------------------
+r598 | esler | 2005-07-07 17:00:07 -0500 (Thu, 07 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/Makefile.am
+
+Make check now works on turing.
+------------------------------------------------------------------------
+r597 | esler | 2005-07-07 16:56:46 -0500 (Thu, 07 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Ewald/Makefile.am
+
+Added lapack libs in Ewald directory needed for TestOptimizedBreakup.
+------------------------------------------------------------------------
+r596 | esler | 2005-07-07 16:53:34 -0500 (Thu, 07 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/PH/Makefile.am
+
+Added lapack libs in PH directory needed for TestkSpacePH.
+------------------------------------------------------------------------
+r595 | esler | 2005-07-07 15:56:33 -0500 (Thu, 07 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/Splines/Makefile.am
+   M /trunk/configure.ac
+   M /trunk/turing.conf
+
+Added lots of fixes for turing.
+------------------------------------------------------------------------
+r594 | esler | 2005-07-07 13:14:47 -0500 (Thu, 07 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Atom/Makefile.am
+   M /trunk/IO/Makefile.am
+   M /trunk/MPI/Makefile.am
+   M /trunk/configure.ac
+   A /trunk/turing.conf
+
+Seems to be compiling on turing now.
+------------------------------------------------------------------------
+r593 | esler | 2005-07-06 16:59:44 -0500 (Wed, 06 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Atom/Makefile.am
+   M /trunk/IO/Makefile.am
+   M /trunk/PH/Makefile.am
+   M /trunk/PlaneWavePHDFT/Makefile.am
+   M /trunk/Splines/TricubicSpline.h
+   M /trunk/configure.ac
+
+Lots of little fixes.
+------------------------------------------------------------------------
+r592 | esler | 2005-07-06 15:53:05 -0500 (Wed, 06 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/MPI/Communication.h
+   M /trunk/PairAction/FreeParticles.cc
+   M /trunk/PairAction/Rho.cc
+   M /trunk/PairAction/U_l.cc
+   M /trunk/common.pc.in
+   M /trunk/configure.ac
+
+Added config flags for CBLAS.
+------------------------------------------------------------------------
+r591 | esler | 2005-07-06 13:17:00 -0500 (Wed, 06 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/configure.ac
+
+Added check for MAC environment to compensate for missing isnan, etc.
+------------------------------------------------------------------------
+r590 | esler | 2005-07-06 12:08:15 -0500 (Wed, 06 Jul 2005) | 1 line
+Changed paths:
+   A /trunk/AUTHORS
+   M /trunk/DFT/Functionals.cc
+   M /trunk/IO/Makefile.am
+   A /trunk/NEWS
+   A /trunk/README
+   M /trunk/SpecialFunctions/SpecialFunctions.h
+   M /trunk/configure.ac
+
+Fixed a few details here and there.
+------------------------------------------------------------------------
+r589 | esler | 2005-07-05 18:26:02 -0500 (Tue, 05 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.cc
+   M /trunk/PairAction/DavidPAClass.h
+   A /trunk/PairAction/FreeParticles.cc
+   A /trunk/PairAction/FreeParticles.h
+   M /trunk/PairAction/Makefile.am
+   M /trunk/PairAction/PADipoleFit.cc
+   M /trunk/PairAction/PADipoleFit.h
+   M /trunk/PairAction/PAFitBase.h
+   M /trunk/PairAction/PAMonopoleFit.cc
+   M /trunk/PairAction/PAMonopoleFit.h
+   M /trunk/PairAction/PATripoleFit.cc
+   M /trunk/PairAction/PATripoleFit.h
+   M /trunk/PairAction/PAclassicalFit.cc
+   M /trunk/PairAction/PAclassicalFit.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.h
+   M /trunk/PairAction/PAtricubicFit.cc
+   M /trunk/PairAction/PAtricubicFit.h
+   M /trunk/PairAction/PAtricubicFit2.cc
+   M /trunk/PairAction/PAtricubicFit2.h
+   M /trunk/PairAction/PAzeroFit.h
+   A /trunk/PairAction/Rho.cc
+   A /trunk/PairAction/Rho.h
+   A /trunk/PairAction/U_l.cc
+   A /trunk/PairAction/U_l.h
+
+Added some of the squarer stuff into the PairAction Directory so that the routines for making fits could be compiled into the library.
+------------------------------------------------------------------------
+r588 | esler | 2005-07-05 16:18:21 -0500 (Tue, 05 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Distributed/Makefile.am
+
+Fixed includedir.
+------------------------------------------------------------------------
+r587 | esler | 2005-07-05 16:12:46 -0500 (Tue, 05 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/common.pc.in
+
+Added missing XML2_CFLAGS reference
+------------------------------------------------------------------------
+r586 | esler | 2005-07-05 15:38:46 -0500 (Tue, 05 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/common.pc.in
+
+Added MPI_DEF to pkg-config.
+------------------------------------------------------------------------
+r585 | esler | 2005-07-05 15:32:13 -0500 (Tue, 05 Jul 2005) | 3 lines
+Changed paths:
+   M /trunk/Atom/Makefile.am
+   M /trunk/Ewald/Ewald.tex
+   M /trunk/Ewald/Makefile.am
+   M /trunk/Makefile.am
+
+Fixed typos in Ewald.tex.  Fixed recursive reference to AM_CXXFLAGS in
+Makefile.am's.
+
+------------------------------------------------------------------------
+r584 | esler | 2005-07-05 12:40:58 -0500 (Tue, 05 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Distributed/Makefile.am
+   A /trunk/INSTALL
+   M /trunk/Splines/Makefile.am
+
+Fixed inappropriate use of CXX_FLAGS.
+------------------------------------------------------------------------
+r583 | esler | 2005-07-05 11:29:38 -0500 (Tue, 05 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/PlaneWavePHDFT/Makefile.am
+   A /trunk/common.pc.in
+   M /trunk/configure.ac
+
+Added pkg-config input file.
+------------------------------------------------------------------------
+r582 | esler | 2005-07-05 11:10:15 -0500 (Tue, 05 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/DFT/Functionals.cc
+   M /trunk/Makefile.am
+   M /trunk/Splines/ComplexMultiTricubicSpline.h
+   M /trunk/Splines/MultiTricubicSpline.h
+   M /trunk/Splines/QuinticSpline.cc
+   M /trunk/Splines/TricubicSpline.h
+
+Updated subdirs to use the F77_FUNC macro for fortran routines.
+------------------------------------------------------------------------
+r581 | esler | 2005-07-05 10:29:39 -0500 (Tue, 05 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Atom/Makefile.am
+   M /trunk/DFT/Makefile.am
+   M /trunk/Distributed/Makefile.am
+   M /trunk/Ewald/Makefile.am
+   M /trunk/FFT/Makefile.am
+   M /trunk/Fitting/Makefile.am
+   M /trunk/IO/Makefile.am
+   M /trunk/Integration/Makefile.am
+   M /trunk/MPI/Makefile.am
+   M /trunk/Makefile.am
+   M /trunk/MatrixOps/Makefile.am
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/PH/Makefile.am
+   M /trunk/PairAction/Makefile.am
+   M /trunk/PlaneWavePHDFT/Makefile.am
+   M /trunk/Random/Makefile.am
+   M /trunk/SpecialFunctions/Makefile.am
+   M /trunk/Splines/Makefile.am
+   M /trunk/configure.ac
+
+Fixed F77 references for MatrixOps and fixed CXXFLAGS references.  Seems to build common library okay, but I'm concerned that it's including blitz somehow in the library.
+------------------------------------------------------------------------
+r580 | esler | 2005-07-04 10:42:04 -0500 (Mon, 04 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+
+Added libcommon, which combines all sub-libraries into one.
+------------------------------------------------------------------------
+r579 | esler | 2005-07-04 10:23:39 -0500 (Mon, 04 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/Random/Makefile.am
+   M /trunk/configure.ac
+
+Added autotools stuff for Random.
+------------------------------------------------------------------------
+r578 | esler | 2005-07-04 10:00:58 -0500 (Mon, 04 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+   D /trunk/SpecialFunctions/HermitePoly.cc
+   M /trunk/SpecialFunctions/Makefile.am
+   A /trunk/SpecialFunctions/TestHermite.cc (from /trunk/SpecialFunctions/HermitePoly.cc:560)
+   M /trunk/configure.ac
+
+Added autotools stuff for SpecialFunctions.
+------------------------------------------------------------------------
+r577 | esler | 2005-07-02 17:45:15 -0500 (Sat, 02 Jul 2005) | 1 line
+Changed paths:
+   A /trunk/PlaneWavePHDFT/Makefile.am
+
+Added autoconf/automake files to PlaneWavePHDFT directory.
+------------------------------------------------------------------------
+r576 | esler | 2005-07-02 17:45:06 -0500 (Sat, 02 Jul 2005) | 1 line
+Changed paths:
+   A /trunk/FFT/Makefile.am
+
+Adding automake input file.
+------------------------------------------------------------------------
+r575 | esler | 2005-07-02 17:43:55 -0500 (Sat, 02 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/configure.ac
+
+Added autoconf/automake files to PlaneWavePHDFT directory.
+------------------------------------------------------------------------
+r574 | esler | 2005-07-02 17:21:47 -0500 (Sat, 02 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Makefile.am
+   M /trunk/PairAction/DavidPAClass.cc
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/PairAction/Makefile.am
+   M /trunk/PairAction/PADipoleFit.cc
+   M /trunk/PairAction/PADipoleFit.h
+   D /trunk/PairAction/PAFit.cc
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAFitBase.h
+   M /trunk/PairAction/PAMonopoleFit.h
+   M /trunk/PairAction/PATripoleFit.h
+   M /trunk/PairAction/PAclassicalFit.h
+   M /trunk/PairAction/PAcoulombBCFit.h
+   D /trunk/PairAction/PAcoulombFit.cc
+   D /trunk/PairAction/PAcoulombFit.h
+   D /trunk/PairAction/PAsFit.cc
+   D /trunk/PairAction/PAsFit.h
+   D /trunk/PairAction/PAszFit.cc
+   D /trunk/PairAction/PAszFit.h
+   A /trunk/PairAction/old
+   A /trunk/PairAction/old/PAFit.cc (from /trunk/PairAction/PAFit.cc:560)
+   A /trunk/PairAction/old/PAcoulombFit.cc (from /trunk/PairAction/PAcoulombFit.cc:560)
+   A /trunk/PairAction/old/PAcoulombFit.h (from /trunk/PairAction/PAcoulombFit.h:560)
+   A /trunk/PairAction/old/PAsFit.cc (from /trunk/PairAction/PAsFit.cc:560)
+   A /trunk/PairAction/old/PAsFit.h (from /trunk/PairAction/PAsFit.h:560)
+   A /trunk/PairAction/old/PAszFit.cc (from /trunk/PairAction/PAszFit.cc:560)
+   A /trunk/PairAction/old/PAszFit.h (from /trunk/PairAction/PAszFit.h:560)
+   M /trunk/Splines/BicubicSpline.h
+   M /trunk/configure.ac
+
+Autoconf/automake'd the pair actions.  Moved crufty ones into PairActions/old directory.
+------------------------------------------------------------------------
+r573 | esler | 2005-07-02 13:39:58 -0500 (Sat, 02 Jul 2005) | 1 line
+Changed paths:
+   D /trunk/Ewald/Ewald.h
+   D /trunk/Ewald/EwaldBase.cc
+   D /trunk/Ewald/EwaldBase.h
+   M /trunk/Ewald/Makefile.am
+   D /trunk/Ewald/NaClTest.cc
+   D /trunk/Ewald/SimpleEwald.cc
+   D /trunk/Ewald/SimpleEwald.h
+   A /trunk/Ewald/old
+   A /trunk/Ewald/old/Ewald.h (from /trunk/Ewald/Ewald.h:560)
+   A /trunk/Ewald/old/EwaldBase.cc (from /trunk/Ewald/EwaldBase.cc:560)
+   A /trunk/Ewald/old/EwaldBase.h (from /trunk/Ewald/EwaldBase.h:560)
+   A /trunk/Ewald/old/NaClTest.cc (from /trunk/Ewald/NaClTest.cc:560)
+   A /trunk/Ewald/old/SimpleEwald.cc (from /trunk/Ewald/SimpleEwald.cc:560)
+   A /trunk/Ewald/old/SimpleEwald.h (from /trunk/Ewald/SimpleEwald.h:560)
+   M /trunk/Makefile.am
+   M /trunk/configure.ac
+
+Added some more autotools and moved some crufty Ewald stuff into Ewald/old.
+------------------------------------------------------------------------
+r572 | esler | 2005-07-02 13:21:10 -0500 (Sat, 02 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Distributed/Makefile.am
+   M /trunk/MPI/Makefile.am
+   A /trunk/MPI/old
+   M /trunk/Makefile.am
+   M /trunk/configure.ac
+
+Added more autotools stuff.
+------------------------------------------------------------------------
+r571 | esler | 2005-07-01 16:19:06 -0500 (Fri, 01 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Atom/Makefile.am
+   M /trunk/Blitz.h
+   M /trunk/DFT/Functionals.cc
+   M /trunk/DFT/Functionals.h
+   M /trunk/DFT/Makefile.am
+   M /trunk/Fitting/Makefile.am
+   D /trunk/Fitting/Test.cc
+   A /trunk/Fitting/TestFitting.cc (from /trunk/Fitting/Test.cc:560)
+   M /trunk/IO/Makefile.am
+   M /trunk/Integration/HermiteQuad.h
+   M /trunk/Integration/Makefile.am
+   M /trunk/Integration/Standard.h
+   M /trunk/Makefile.am
+   M /trunk/MatrixOps/Makefile.am
+   D /trunk/PH/Atom.cc
+   D /trunk/PH/Atom.h
+   D /trunk/PH/Chebyshev.cc
+   D /trunk/PH/Chebyshev.h
+   D /trunk/PH/Cost.cc
+   D /trunk/PH/Cost.h
+   M /trunk/PH/Makefile.am
+   D /trunk/PH/PH.cc
+   D /trunk/PH/PH.h
+   A /trunk/PH/old
+   A /trunk/PH/old/Atom.cc (from /trunk/PH/Atom.cc:560)
+   A /trunk/PH/old/Atom.h (from /trunk/PH/Atom.h:560)
+   A /trunk/PH/old/Chebyshev.cc (from /trunk/PH/Chebyshev.cc:560)
+   A /trunk/PH/old/Chebyshev.h (from /trunk/PH/Chebyshev.h:560)
+   A /trunk/PH/old/Cost.cc (from /trunk/PH/Cost.cc:560)
+   A /trunk/PH/old/Cost.h (from /trunk/PH/Cost.h:560)
+   A /trunk/PH/old/PH.cc (from /trunk/PH/PH.cc:560)
+   A /trunk/PH/old/PH.h (from /trunk/PH/PH.h:560)
+   M /trunk/Splines/Makefile.am
+   M /trunk/configure.ac
+
+Succeeded in getting autotools to work for several subdirectories.  Several left to go.
+------------------------------------------------------------------------
+r570 | esler | 2005-07-01 13:48:39 -0500 (Fri, 01 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/Makefile.am
+   M /trunk/Splines/TestComplexMultiTricubicSpline.cc
+   A /trunk/Splines/bcspeval.f
+   A /trunk/Splines/bcspline.f
+   A /trunk/Splines/evtricub.f
+   A /trunk/Splines/herm3ev.f
+   A /trunk/Splines/ibc_ck.f
+   A /trunk/Splines/mktricubw.f
+   A /trunk/Splines/splinck.f
+   A /trunk/Splines/tcspeval.f
+   A /trunk/Splines/tcspline.f
+   A /trunk/Splines/v_spline.f
+   A /trunk/Splines/zonfind.f
+
+Seem to have everything working with autotools.
+------------------------------------------------------------------------
+r569 | esler | 2005-07-01 13:36:37 -0500 (Fri, 01 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/ComplexMultiTricubicSpline.cc
+   M /trunk/Splines/Makefile.am
+   M /trunk/Splines/z3spline.f
+
+Moving crufty stuff.
+------------------------------------------------------------------------
+r568 | esler | 2005-07-01 13:13:15 -0500 (Fri, 01 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Atom/Makefile.am
+   D /trunk/Atom/NewAtom.cc
+   A /trunk/Atom/old
+   A /trunk/Atom/old/NewAtom.cc (from /trunk/Atom/NewAtom.cc:560)
+
+Adding autoconf stuff and moved old crufty stuff to old/ directory.
+------------------------------------------------------------------------
+r567 | esler | 2005-07-01 11:38:57 -0500 (Fri, 01 Jul 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/TestComplexMultiTricubicSpline.cc (from /trunk/Splines/TestComplexMultiTricubicSpline2.cc:560)
+   D /trunk/Splines/TestComplexMultiTricubicSpline2.cc
+
+Moving old stuff around.
+------------------------------------------------------------------------
+r566 | esler | 2005-07-01 11:38:18 -0500 (Fri, 01 Jul 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/ComplexMultiTricubicSpline.cc (from /trunk/Splines/ComplexMultiTricubicSpline2.cc:560)
+   A /trunk/Splines/ComplexMultiTricubicSpline.h (from /trunk/Splines/ComplexMultiTricubicSpline2.h:560)
+   D /trunk/Splines/ComplexMultiTricubicSpline2.cc
+   D /trunk/Splines/ComplexMultiTricubicSpline2.h
+   D /trunk/Splines/TestComplexMultiTricubicSpline.cc
+   A /trunk/Splines/old/TestComplexMultiTricubicSpline.cc (from /trunk/Splines/TestComplexMultiTricubicSpline.cc:560)
+
+Moving old stuff around.
+------------------------------------------------------------------------
+r565 | esler | 2005-07-01 11:37:20 -0500 (Fri, 01 Jul 2005) | 1 line
+Changed paths:
+   D /trunk/Splines/ComplexMultiTricubicSpline.cc
+   D /trunk/Splines/ComplexMultiTricubicSpline.h
+   M /trunk/Splines/Makefile.am
+   M /trunk/Splines/MultiTricubicSpline.cc
+   A /trunk/Splines/old/ComplexMultiTricubicSpline.cc (from /trunk/Splines/ComplexMultiTricubicSpline.cc:560)
+   A /trunk/Splines/old/ComplexMultiTricubicSpline.h (from /trunk/Splines/ComplexMultiTricubicSpline.h:560)
+
+Moving old version to old directory.
+------------------------------------------------------------------------
+r564 | esler | 2005-07-01 11:17:50 -0500 (Fri, 01 Jul 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/MultiTricubicSpline.cc (from /trunk/Splines/MultiTricubicSpline3.cc:560)
+   A /trunk/Splines/MultiTricubicSpline.h (from /trunk/Splines/MultiTricubicSpline3.h:560)
+   D /trunk/Splines/MultiTricubicSpline3.cc
+   D /trunk/Splines/MultiTricubicSpline3.h
+
+Moving the 3rd version (fastest) into the now only version.  Old versions are in the old directory.
+------------------------------------------------------------------------
+r563 | esler | 2005-07-01 11:16:00 -0500 (Fri, 01 Jul 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/BicubicSpline.h
+   M /trunk/Splines/Grid.h
+   M /trunk/Splines/Makefile.am
+   D /trunk/Splines/MultiTricubicSpline.cc
+   D /trunk/Splines/MultiTricubicSpline.h
+   A /trunk/Splines/MultiTricubicSpline.old.cc (from /trunk/Splines/MultiTricubicSpline.cc:560)
+   A /trunk/Splines/MultiTricubicSpline.old.h (from /trunk/Splines/MultiTricubicSpline.h:560)
+   A /trunk/Splines/MultiTricubicSpline.old2.cc (from /trunk/Splines/MultiTricubicSpline2.cc:560)
+   A /trunk/Splines/MultiTricubicSpline.old2.h (from /trunk/Splines/MultiTricubicSpline2.h:560)
+   D /trunk/Splines/MultiTricubicSpline2.cc
+   D /trunk/Splines/MultiTricubicSpline2.h
+   A /trunk/Splines/old
+   A /trunk/Splines/old/MultiTricubicSpline.cc (from /trunk/Splines/MultiTricubicSpline.cc:560)
+   A /trunk/Splines/old/MultiTricubicSpline.h (from /trunk/Splines/MultiTricubicSpline.h:560)
+   A /trunk/Splines/old/MultiTricubicSpline2.cc (from /trunk/Splines/MultiTricubicSpline2.cc:560)
+   A /trunk/Splines/old/MultiTricubicSpline2.h (from /trunk/Splines/MultiTricubicSpline2.h:560)
+
+Crufty stuff into old.
+------------------------------------------------------------------------
+r562 | esler | 2005-06-30 17:24:18 -0500 (Thu, 30 Jun 2005) | 1 line
+Changed paths:
+   M /trunk/IO/Makefile.am
+   M /trunk/configure.ac
+
+Got IO library building with autoconf/automake.
+------------------------------------------------------------------------
+r561 | esler | 2005-06-30 13:58:51 -0500 (Thu, 30 Jun 2005) | 1 line
+Changed paths:
+   M /trunk/IO/Makefile.am
+   M /trunk/Makefile.am
+   A /trunk/configure.ac
+
+Adding autoconf/automake stuff.  Doesn't work quite yet.
+------------------------------------------------------------------------
+r560 | esler | 2005-06-20 15:02:24 -0500 (Mon, 20 Jun 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit2.cc
+
+Fixed misplaced brace.
+------------------------------------------------------------------------
+r559 | esler | 2005-06-20 14:55:44 -0500 (Mon, 20 Jun 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit2.cc
+   M /trunk/PairAction/PAtricubicFit2.h
+
+Trying to extrapolate values outside y and t grid.
+------------------------------------------------------------------------
+r558 | esler | 2005-06-17 10:47:09 -0500 (Fri, 17 Jun 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit2.cc
+
+Moved misplaced closing brace.
+------------------------------------------------------------------------
+r557 | esler | 2005-06-16 16:51:23 -0500 (Thu, 16 Jun 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAtricubicFit.cc
+   M /trunk/PairAction/PAtricubicFit2.cc
+
+Fixed segmentation fault problem.  Replicated classes in PAtricubicFit2Class.
+------------------------------------------------------------------------
+r556 | esler | 2005-06-15 11:38:15 -0500 (Wed, 15 Jun 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit2.cc
+
+Fixed a couple of syntax errors.
+------------------------------------------------------------------------
+r555 | esler | 2005-06-14 17:28:18 -0500 (Tue, 14 Jun 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   A /trunk/PairAction/PAtricubicFit2.cc
+   A /trunk/PairAction/PAtricubicFit2.h
+   M /trunk/PairAction/template.make
+
+Adding a new way of doing tricubic fits.
+------------------------------------------------------------------------
+r554 | esler | 2005-06-14 11:18:38 -0500 (Tue, 14 Jun 2005) | 1 line
+Changed paths:
+   A /trunk/PlaneWavePHDFT/TestBands.in
+
+Adding input file.
+------------------------------------------------------------------------
+r553 | esler | 2005-06-14 11:18:14 -0500 (Tue, 14 Jun 2005) | 1 line
+Changed paths:
+   A /trunk/PlaneWavePHDFT/BandStructure.cc
+   A /trunk/PlaneWavePHDFT/BandStructure.h
+   M /trunk/PlaneWavePHDFT/ConjGrad2.h
+   M /trunk/PlaneWavePHDFT/PlaneWaves.cc
+   M /trunk/PlaneWavePHDFT/PlaneWaves.h
+   M /trunk/PlaneWavePHDFT/template.make
+
+Added new band structure computation.
+------------------------------------------------------------------------
+r552 | esler | 2005-06-08 15:28:35 -0500 (Wed, 08 Jun 2005) | 1 line
+Changed paths:
+   D /trunk/PairAction/PACoulombFit.cc
+   D /trunk/PairAction/PACoulombFit.h
+   A /trunk/PairAction/PAMonopoleFit.cc (from /trunk/PairAction/PACoulombFit.cc:549)
+   A /trunk/PairAction/PAMonopoleFit.h (from /trunk/PairAction/PACoulombFit.h:549)
+
+Renaming to avoid a case-insensitive problem on MAC.
+------------------------------------------------------------------------
+r551 | esler | 2005-06-07 10:18:35 -0500 (Tue, 07 Jun 2005) | 1 line
+Changed paths:
+   A /trunk/IO/FileExpand.h
+
+Adding file expansion routine.
+------------------------------------------------------------------------
+r550 | esler | 2005-06-03 15:20:18 -0500 (Fri, 03 Jun 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Reduced qmax transition to SC approximation to 3.5 from 8.0.
+------------------------------------------------------------------------
+r549 | esler | 2005-05-26 21:38:53 -0500 (Thu, 26 May 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Removed annoying cerr statement.
+------------------------------------------------------------------------
+r548 | esler | 2005-05-26 16:53:12 -0500 (Thu, 26 May 2005) | 1 line
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Had N where I should have had N^2.
+------------------------------------------------------------------------
+r547 | esler | 2005-05-26 15:26:53 -0500 (Thu, 26 May 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAFitBase.h
+
+Added storage of Ulong_k0, dUlong_k0, and Vlong_k0 terms.
+------------------------------------------------------------------------
+r546 | esler | 2005-05-26 14:55:22 -0500 (Thu, 26 May 2005) | 1 line
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Added k=0 terms.
+------------------------------------------------------------------------
+r545 | esler | 2005-05-24 11:31:28 -0500 (Tue, 24 May 2005) | 1 line
+Changed paths:
+   M /trunk/MatrixOps/MatrixOps.cc
+
+Removed some unnecessary debug messages.
+------------------------------------------------------------------------
+r544 | esler | 2005-05-24 10:55:54 -0500 (Tue, 24 May 2005) | 1 line
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+
+Fixed issues with perr and serial version.
+------------------------------------------------------------------------
+r543 | esler | 2005-05-23 17:52:56 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/MPI/Communication.h
+
+I think I fixed the perr thing.
+------------------------------------------------------------------------
+r542 | esler | 2005-05-23 16:15:13 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/Ewald/template.make
+
+Added reference to Communication.o in Ewald's test executables.
+------------------------------------------------------------------------
+r541 | esler | 2005-05-23 15:58:05 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+
+Changed many cerr's to perr's.
+------------------------------------------------------------------------
+r540 | esler | 2005-05-23 15:18:19 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+
+Added perr initialization.
+------------------------------------------------------------------------
+r539 | esler | 2005-05-23 15:17:32 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/TricubicSpline.h
+
+Remove turing isnan hacks.
+------------------------------------------------------------------------
+r538 | esler | 2005-05-23 15:06:13 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/IO/InputOutput.h
+
+Adding GetFileName() function.
+------------------------------------------------------------------------
+r537 | bclark | 2005-05-23 13:44:42 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/PairAction/DavidPAClass.cc
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/Random/Random.h
+   M /trunk/Random/TestRandom.cc
+
+Some extra cerr statments in random.h and communication.cc for debugging and some changes to how DavidsPairAction deals with off diagonal terms (it now allows a parameter from the pairaction file that tells it how many to keep
+------------------------------------------------------------------------
+r536 | esler | 2005-05-23 12:11:50 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+
+Removed lots of parallel debugging stuff.
+------------------------------------------------------------------------
+r535 | esler | 2005-05-23 11:27:52 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/QuinticSpline.cc
+
+Fixed valgrind error.  I think it was innocuous.
+------------------------------------------------------------------------
+r534 | esler | 2005-05-23 11:27:31 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+
+Added Array<double,4> broadcast.
+------------------------------------------------------------------------
+r533 | esler | 2005-05-23 10:48:21 -0500 (Mon, 23 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+   M /trunk/PlaneWavePHDFT/template.make
+
+Added lots of debugging output.  Still searching for cause of segfault and differences between bands.
+------------------------------------------------------------------------
+r532 | esler | 2005-05-20 10:50:44 -0500 (Fri, 20 May 2005) | 1 line
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+
+Added a PrintSync function to facilitate parallel debugging.
+------------------------------------------------------------------------
+r531 | esler | 2005-05-19 17:39:33 -0500 (Thu, 19 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/QuinticSpline.cc
+   M /trunk/Splines/QuinticSpline.h
+
+Replaced isnormals with  not isnan's so that zero values count as derivative constraints.
+------------------------------------------------------------------------
+r530 | esler | 2005-05-08 00:08:01 -0500 (Sun, 08 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/QuinticPH.cc
+   M /trunk/PH/kSpacePH.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+   M /trunk/Splines/QuinticSpline.cc
+
+Found bug in HDF5 bool reading.  Removed debugging kludges.  Things should (hopefully) be back to normal.
+------------------------------------------------------------------------
+r529 | esler | 2005-05-07 23:54:12 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Initializing bools to false before reading to deal with 4 byte booleans on mac processors.
+------------------------------------------------------------------------
+r528 | esler | 2005-05-07 23:48:41 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/QuinticPH.cc
+
+Print sizeof(bool) to track down HDF5 problem.
+------------------------------------------------------------------------
+r527 | esler | 2005-05-07 23:28:22 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/QuinticPH.cc
+   M /trunk/Splines/QuinticSpline.cc
+   M /trunk/Splines/QuinticSpline.h
+
+Added test to see if Vcore is true.
+------------------------------------------------------------------------
+r526 | esler | 2005-05-07 23:23:11 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/QuinticSpline.cc
+
+Fixed QuinticSpline::Read, maybe.
+------------------------------------------------------------------------
+r525 | esler | 2005-05-07 22:41:28 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/QuinticSpline.cc
+
+Added printing of NumParams.
+------------------------------------------------------------------------
+r524 | esler | 2005-05-07 22:39:53 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/QuinticSpline.cc
+
+Added printing of NumParams.
+------------------------------------------------------------------------
+r523 | esler | 2005-05-07 22:24:24 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/QuinticSpline.cc
+
+Added printing for debugging on turing.
+------------------------------------------------------------------------
+r522 | esler | 2005-05-07 18:09:21 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/QuinticSpline.h
+
+Changed not isnans to isnormals.
+------------------------------------------------------------------------
+r521 | esler | 2005-05-07 17:58:35 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/QuinticSpline.cc
+
+Changed not isnans to isnormals.
+------------------------------------------------------------------------
+r520 | esler | 2005-05-07 17:45:23 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+writing out Vk integrand.
+------------------------------------------------------------------------
+r519 | esler | 2005-05-07 17:32:42 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+removed tails to check that part.
+------------------------------------------------------------------------
+r518 | esler | 2005-05-07 17:29:31 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Adding print of Vk to debug.
+------------------------------------------------------------------------
+r517 | esler | 2005-05-07 17:18:26 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Changed V integrator to GK15.
+------------------------------------------------------------------------
+r516 | esler | 2005-05-07 17:13:17 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Removed hacks and decreased error tolerance for V(k) integration.
+------------------------------------------------------------------------
+r515 | esler | 2005-05-07 17:08:45 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Added hack to see if error comes from small r integration.
+------------------------------------------------------------------------
+r514 | esler | 2005-05-07 17:04:59 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Added hack to see if error comes from small r integration.
+------------------------------------------------------------------------
+r513 | esler | 2005-05-07 17:00:33 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Removed debugging hacks.
+------------------------------------------------------------------------
+r512 | esler | 2005-05-07 16:54:57 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Hack to see which part of PH contributes to error on turing.
+------------------------------------------------------------------------
+r511 | esler | 2005-05-07 16:52:21 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Hack to see which part of PH contributes to error on turing.
+------------------------------------------------------------------------
+r510 | esler | 2005-05-07 16:31:52 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Changed j2 cutoff condition.
+------------------------------------------------------------------------
+r509 | esler | 2005-05-07 16:15:40 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+
+Changing cuttoff of numerical integral to 30.
+------------------------------------------------------------------------
+r508 | esler | 2005-05-07 16:09:28 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.cc
+
+Changing cuttoff of numerical integral to 30.
+------------------------------------------------------------------------
+r507 | esler | 2005-05-07 16:06:47 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Changed integration tolerance to relative mode.
+------------------------------------------------------------------------
+r506 | esler | 2005-05-07 16:00:07 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Adding printing of tail coefs in kSpacePH.
+------------------------------------------------------------------------
+r505 | esler | 2005-05-07 15:35:23 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Decrease tolerance in kSpacePH integrals.
+------------------------------------------------------------------------
+r504 | esler | 2005-05-07 15:17:17 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+
+Now writes mini H-matrix to file for debugging.
+------------------------------------------------------------------------
+r503 | esler | 2005-05-07 14:26:02 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+
+Printing mini H matrix.
+------------------------------------------------------------------------
+r502 | esler | 2005-05-07 14:12:34 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+
+Decrease tolerance in ConjGrad2.
+------------------------------------------------------------------------
+r501 | esler | 2005-05-07 13:12:37 -0500 (Sat, 07 May 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/template.make
+   M /trunk/template.make
+
+Added F77FLAGS to template.make's.
+------------------------------------------------------------------------
+r500 | esler | 2005-05-07 11:49:58 -0500 (Sat, 07 May 2005) | 2 lines
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+   M /trunk/PlaneWavePHDFT/PlaneWaves.cc
+
+Now we do the mini-hamiltonian calculation whenever we move the ions.
+
+------------------------------------------------------------------------
+r499 | esler | 2005-05-03 21:22:47 -0500 (Tue, 03 May 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Pushed hacked transition to semiclassical action further out from 5 to 8.
+------------------------------------------------------------------------
+r498 | esler | 2005-05-02 16:33:34 -0500 (Mon, 02 May 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.cc
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/PairAction/PACoulombFit.cc
+   M /trunk/PairAction/PACoulombFit.h
+   M /trunk/PairAction/PADipoleFit.cc
+   M /trunk/PairAction/PADipoleFit.h
+   M /trunk/PairAction/PAFitBase.h
+   M /trunk/PairAction/PATripoleFit.cc
+   M /trunk/PairAction/PATripoleFit.h
+   M /trunk/PairAction/PAclassicalFit.cc
+   M /trunk/PairAction/PAclassicalFit.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.h
+   M /trunk/PairAction/PAszFit.cc
+   M /trunk/PairAction/PAszFit.h
+   M /trunk/PairAction/PAtricubicFit.cc
+   M /trunk/PairAction/PAtricubicFit.h
+   M /trunk/PairAction/PAzeroFit.h
+
+Changed creation of fits to be written one at a time in order to save memory.
+------------------------------------------------------------------------
+r497 | esler | 2005-05-02 13:24:50 -0500 (Mon, 02 May 2005) | 1 line
+Changed paths:
+   A /trunk/Ewald/Simone_long_range_notes.tex
+
+Adding Simone Chiesa's notes.
+------------------------------------------------------------------------
+r496 | esler | 2005-04-30 21:58:01 -0500 (Sat, 30 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Fixed a place where I had min where I should have had max.
+------------------------------------------------------------------------
+r495 | esler | 2005-04-30 20:20:53 -0500 (Sat, 30 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Patched tail for pseudohamiltonians to circumvent l-channel summation problem on diagonal.
+------------------------------------------------------------------------
+r494 | esler | 2005-04-26 15:18:49 -0500 (Tue, 26 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+   M /trunk/PairAction/PAclassicalFit.cc
+   M /trunk/PairAction/PAclassicalFit.h
+
+Added missing Xk routines from PAclassicalFitClass.  A bit hacked -- assumed a coulomb potential.
+------------------------------------------------------------------------
+r493 | esler | 2005-04-23 14:08:01 -0500 (Sat, 23 Apr 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/r3spline.f
+
+Forgot to add this file with previous commit.
+------------------------------------------------------------------------
+r492 | esler | 2005-04-23 14:07:37 -0500 (Sat, 23 Apr 2005) | 2 lines
+Changed paths:
+   M /trunk/Splines/MultiTricubicSpline3.h
+   M /trunk/Splines/TestMultiTricubicSpline3.cc
+   M /trunk/Splines/template.make
+
+Added fortran evaluation for real MultiTricublicSpline.
+
+------------------------------------------------------------------------
+r491 | esler | 2005-04-23 14:06:52 -0500 (Sat, 23 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/IO/InputOutputPythonWrapper.cc
+
+Fixed typo in CountSectionsName.
+------------------------------------------------------------------------
+r490 | esler | 2005-04-18 22:42:08 -0500 (Mon, 18 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/ComplexMultiTricubicSpline2.h
+   M /trunk/Splines/TestComplexMultiTricubicSpline2.cc
+   M /trunk/Splines/template.make
+
+Added forgotten MySplines gradient in.
+------------------------------------------------------------------------
+r489 | esler | 2005-04-18 21:19:46 -0500 (Mon, 18 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Distributed/template.make
+   M /trunk/FFT/template.make
+   M /trunk/IO/template.make
+   M /trunk/Optimize/template.make
+   M /trunk/PairAction/template.make
+   M /trunk/Plotting/template.make
+   M /trunk/Random/template.make
+   M /trunk/SpecialFunctions/template.make
+
+Added +'s to allow more parallel builds.
+------------------------------------------------------------------------
+r488 | esler | 2005-04-18 21:16:06 -0500 (Mon, 18 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Atom/template.make
+   M /trunk/DFT/template.make
+   M /trunk/Ewald/template.make
+   M /trunk/MPI/template.make
+   M /trunk/MatrixOps/template.make
+   M /trunk/PH/template.make
+   M /trunk/PlaneWavePHDFT/template.make
+   M /trunk/Splines/template.make
+   M /trunk/template.make
+
+Added +'s to allow more parallel builds.
+------------------------------------------------------------------------
+r487 | esler | 2005-04-18 18:32:30 -0500 (Mon, 18 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/TestComplexMultiTricubicSpline2.cc
+
+Fixed up timing tests.
+------------------------------------------------------------------------
+r486 | esler | 2005-04-18 18:16:06 -0500 (Mon, 18 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/TestComplexMultiTricubicSpline2.cc
+   M /trunk/Splines/template.make
+
+Removed debug info
+------------------------------------------------------------------------
+r485 | esler | 2005-04-18 17:53:19 -0500 (Mon, 18 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/ComplexMultiTricubicSpline2.cc
+   M /trunk/Splines/ComplexMultiTricubicSpline2.h
+   M /trunk/Splines/TestComplexMultiTricubicSpline2.cc
+   M /trunk/Splines/template.make
+   M /trunk/Splines/z3spline.f
+
+Fixed many, many typos all over ComplexMultiTricubicSpline2 and z3spline.
+------------------------------------------------------------------------
+r484 | esler | 2005-04-18 14:06:39 -0500 (Mon, 18 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/ComplexMultiTricubicSpline2.h
+   M /trunk/Splines/TestComplexMultiTricubicSpline2.cc
+
+Fixed compilation errors.
+------------------------------------------------------------------------
+r483 | esler | 2005-04-18 13:51:56 -0500 (Mon, 18 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/ComplexMultiTricubicSpline2.h
+   M /trunk/Splines/TestComplexMultiTricubicSpline2.cc
+
+Adding c++ wrapper to fortran routines.
+------------------------------------------------------------------------
+r482 | esler | 2005-04-18 11:49:46 -0500 (Mon, 18 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/z3spline.f
+
+Added valgrad to z3spline.f
+------------------------------------------------------------------------
+r481 | esler | 2005-04-16 11:48:13 -0500 (Sat, 16 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/ComplexMultiTricubicSpline2.h
+   M /trunk/Splines/TestComplexMultiTricubicSpline2.cc
+   M /trunk/Splines/TestMultiTricubicSpline2.cc
+   M /trunk/Splines/template.make
+   M /trunk/Splines/z3spline.f
+
+Fixed fortran tricubic spline eval.
+------------------------------------------------------------------------
+r480 | esler | 2005-04-15 16:38:12 -0500 (Fri, 15 Apr 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/z3spline.f
+
+Adding fortran77 routine for evaluating tricubic splines.
+------------------------------------------------------------------------
+r479 | esler | 2005-04-15 13:39:59 -0500 (Fri, 15 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/ComplexMultiTricubicSpline.h
+   A /trunk/Splines/ComplexMultiTricubicSpline2.cc
+   M /trunk/Splines/ComplexMultiTricubicSpline2.h
+   M /trunk/Splines/TestComplexMultiTricubicSpline.cc
+   A /trunk/Splines/TestComplexMultiTricubicSpline2.cc
+   M /trunk/Splines/template.make
+
+Adding a new form of complex tricubic splines.
+------------------------------------------------------------------------
+r478 | esler | 2005-04-15 11:04:06 -0500 (Fri, 15 Apr 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/ComplexMultiTricubicSpline2.h
+
+Adding a new approach to ComplexMultiTricubicSpline.
+------------------------------------------------------------------------
+r477 | esler | 2005-04-13 10:39:24 -0500 (Wed, 13 Apr 2005) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Decreased semiclassical transition tolerance.
+
+------------------------------------------------------------------------
+r476 | esler | 2005-04-12 18:44:59 -0500 (Tue, 12 Apr 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/ComplexMultiTricubicSpline.cc
+   A /trunk/Splines/ComplexMultiTricubicSpline.h
+   M /trunk/Splines/MultiTricubicSpline3.h
+   A /trunk/Splines/TestComplexMultiTricubicSpline.cc
+   M /trunk/Splines/template.make
+
+Adding complex version of the MultiTricubicSpline.
+------------------------------------------------------------------------
+r475 | esler | 2005-04-12 12:56:01 -0500 (Tue, 12 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/MultiTricubicSpline3.h
+   M /trunk/Splines/TestMultiTricubicSpline3.cc
+
+Added a value and gradient function to MultiTricubicSpline3.h
+------------------------------------------------------------------------
+r474 | esler | 2005-04-11 17:34:23 -0500 (Mon, 11 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/PH/QuinticPH.h
+
+Fixed bug in QuinticPH::SetNumVParams() which didn't preserve boundary conditions at the end.
+------------------------------------------------------------------------
+r473 | esler | 2005-04-11 16:52:16 -0500 (Mon, 11 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Atom/DFTAtom.cc
+   M /trunk/Atom/RadialWF.cc
+   M /trunk/Atom/RadialWF.h
+   M /trunk/FFT/FFT.cc
+   M /trunk/FFT/FFT.h
+   M /trunk/PH/QuinticPH.cc
+   M /trunk/PH/QuinticPH.h
+   M /trunk/PH/kSpacePH.cc
+   M /trunk/Splines/CubicSpline.h
+   A /trunk/cycle.h
+   M /trunk/template.make
+
+Fixed a bug in which V was not set properly at the core radius, somehow.  Adding new PH's.
+------------------------------------------------------------------------
+r472 | esler | 2005-04-11 12:16:56 -0500 (Mon, 11 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/PH/PH.h
+
+Finally compiles in parallel on tungsten./pimc++
+------------------------------------------------------------------------
+r471 | esler | 2005-04-07 15:04:06 -0500 (Thu, 07 Apr 2005) | 1 line
+Changed paths:
+   A /trunk/PlaneWavePHDFT/NaUnscreenedPH_Feb18_05.h5
+
+Adding to repository for tests.
+------------------------------------------------------------------------
+r470 | esler | 2005-04-07 12:49:58 -0500 (Thu, 07 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/Distributed/template.make
+   M /trunk/MPI/template.make
+   M /trunk/PlaneWavePHDFT/VectorOps.h
+   M /trunk/PlaneWavePHDFT/template.make
+   M /trunk/Splines/template.make
+
+Now compiles on tungsten with intel compiler.
+------------------------------------------------------------------------
+r469 | esler | 2005-04-06 13:49:41 -0500 (Wed, 06 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Fixed deprecated hssize_t in HDF5 stuff.
+------------------------------------------------------------------------
+r468 | esler | 2005-04-05 16:20:14 -0500 (Tue, 05 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/CubicSplines.tex
+
+Added documentation of tricubic splines.
+------------------------------------------------------------------------
+r467 | esler | 2005-04-05 13:59:25 -0500 (Tue, 05 Apr 2005) | 3 lines
+Changed paths:
+   M /trunk/Splines/CubicSplines.tex
+
+Added documentation for natural and complete boundary conditions 
+and added documentation of bicubic splines.
+
+------------------------------------------------------------------------
+r466 | esler | 2005-04-04 16:26:16 -0500 (Mon, 04 Apr 2005) | 3 lines
+Changed paths:
+   M /trunk/PlaneWavePHDFT/PlaneWaves.cc
+   M /trunk/Splines/TestMultiTricubicSpline3.cc
+
+Added SetRealSpaceBandNum to SystemClass and added a test for
+MultiTricubicSpline's in periodic boundary conditions.
+
+------------------------------------------------------------------------
+r465 | esler | 2005-04-04 12:01:28 -0500 (Mon, 04 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/MultiTricubicSpline3.cc
+   M /trunk/Splines/MultiTricubicSpline3.h
+   M /trunk/Splines/PeriodicSpline.cc
+   M /trunk/Splines/TestMultiTricubicSpline3.cc
+
+Added periodic boundary conditions to MultiTricubicSpline3.
+------------------------------------------------------------------------
+r464 | esler | 2005-04-02 17:33:16 -0600 (Sat, 02 Apr 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/MultiTricubicSpline2.cc
+
+Added an old file.
+------------------------------------------------------------------------
+r463 | esler | 2005-04-02 16:57:40 -0600 (Sat, 02 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/PeriodicSpline.cc
+   M /trunk/Splines/TestPeriodic.cc
+
+Removed debugging print statements.
+------------------------------------------------------------------------
+r462 | esler | 2005-04-02 16:52:54 -0600 (Sat, 02 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/CubicSplines.tex
+   M /trunk/Splines/PeriodicSpline.cc
+   M /trunk/Splines/PeriodicSpline.h
+   M /trunk/Splines/TestPeriodic.cc
+   M /trunk/Splines/template.make
+
+Fixed indexing error in last row.  Had N-1 where I should have had N-2.
+------------------------------------------------------------------------
+r461 | esler | 2005-04-02 14:47:41 -0600 (Sat, 02 Apr 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/PeriodicSpline.cc
+   M /trunk/Splines/TestPeriodic.cc
+
+I think I fixed a problem with the initial conditions.
+------------------------------------------------------------------------
+r460 | esler | 2005-04-01 15:43:58 -0600 (Fri, 01 Apr 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/CubicSplines.tex
+   A /trunk/Splines/PeriodicSpline.cc
+   A /trunk/Splines/PeriodicSpline.h
+   A /trunk/Splines/TestPeriodic.cc
+   M /trunk/Splines/template.make
+
+Added splines with periodic boundary conditions.
+------------------------------------------------------------------------
+r459 | esler | 2005-03-30 15:09:00 -0600 (Wed, 30 Mar 2005) | 3 lines
+Changed paths:
+   M /trunk/PlaneWavePHDFT/PlaneWaves.h
+   M /trunk/Splines/MultiTricubicSpline3.h
+
+Added GetBoxDims function.  Working on adding periodic boundary conditions
+to MultiTricubicSplines.
+
+------------------------------------------------------------------------
+r458 | esler | 2005-03-29 18:07:36 -0600 (Tue, 29 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/Blitz.h
+
+Compiles now on turing.
+------------------------------------------------------------------------
+r457 | esler | 2005-03-29 09:07:50 -0600 (Tue, 29 Mar 2005) | 3 lines
+Changed paths:
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/MatrixOps/MatrixOps.h
+   M /trunk/MatrixOps/Test.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.h
+   M /trunk/PlaneWavePHDFT/PlaneWaves.h
+   M /trunk/PlaneWavePHDFT/TestPW2.cc
+   M /trunk/Splines/MultiTricubicSpline3.h
+
+Added a LAPACK-based determinant and cofactor function to MatrixOps. 
+Fixed operator()'s in MultiTricubicSpline3.  
+
+------------------------------------------------------------------------
+r456 | esler | 2005-03-14 21:12:25 -0600 (Mon, 14 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/MatrixOps/Test.cc
+
+Changed determinant time test a bit.
+------------------------------------------------------------------------
+r455 | esler | 2005-03-14 21:05:38 -0600 (Mon, 14 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/MatrixOps/Test.cc
+
+Added determinant time test.
+------------------------------------------------------------------------
+r454 | esler | 2005-03-14 16:52:55 -0600 (Mon, 14 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.h
+   M /trunk/PlaneWavePHDFT/template.make
+
+Got working on turing (perhaps).
+------------------------------------------------------------------------
+r453 | esler | 2005-03-14 13:56:45 -0600 (Mon, 14 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/template.make
+
+Fixed incorrect dependency.
+------------------------------------------------------------------------
+r452 | esler | 2005-03-14 13:48:41 -0600 (Mon, 14 Mar 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/TestMultiTricubicSpline2.cc
+
+Adding test to repository.
+------------------------------------------------------------------------
+r451 | esler | 2005-03-14 13:17:56 -0600 (Mon, 14 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/MultiTricubicSpline2.h
+   A /trunk/Splines/MultiTricubicSpline3.cc
+   A /trunk/Splines/MultiTricubicSpline3.h
+   A /trunk/Splines/TestMultiTricubicSpline3.cc
+   M /trunk/Splines/template.make
+
+Added a faster version of the MultiTricubicSpline that has runtime adjustable size.
+------------------------------------------------------------------------
+r450 | esler | 2005-03-12 14:34:10 -0600 (Sat, 12 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/MultiTricubicSpline2.h
+
+Sped up the MultiTricubicSpline2 by a factor of 2 by reorganizing loop structure.
+------------------------------------------------------------------------
+r449 | esler | 2005-03-11 22:35:20 -0600 (Fri, 11 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/Splines/MultiTricubicSpline.h
+   A /trunk/Splines/MultiTricubicSpline2.h
+   M /trunk/Splines/template.make
+
+Adding MultiTricubicSpline2.  It's faster by using templates.
+------------------------------------------------------------------------
+r448 | esler | 2005-03-11 21:35:20 -0600 (Fri, 11 Mar 2005) | 1 line
+Changed paths:
+   A /trunk/Splines/MultiTricubicSpline.cc
+   A /trunk/Splines/MultiTricubicSpline.h
+   A /trunk/Splines/TestMultiTricubicSpline.cc
+   M /trunk/Splines/template.make
+
+Adding MultiTricubicSplines.
+------------------------------------------------------------------------
+r447 | esler | 2005-03-11 15:45:39 -0600 (Fri, 11 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/MatrixOps/MatrixOps.h
+
+Added SymmEigPairs for hermitian matrices.
+------------------------------------------------------------------------
+r446 | esler | 2005-03-11 14:23:51 -0600 (Fri, 11 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad2.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.h
+   M /trunk/PlaneWavePHDFT/PlaneWaves.cc
+   M /trunk/PlaneWavePHDFT/PlaneWaves.h
+   M /trunk/PlaneWavePHDFT/TestPW2.cc
+   M /trunk/PlaneWavePHDFT/VectorOps.h
+   M /trunk/PlaneWavePHDFT/template.make
+
+Things working okay now for multiple bands, I think.
+------------------------------------------------------------------------
+r445 | esler | 2005-03-07 23:25:02 -0600 (Mon, 07 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/TestPW2.cc
+
+Mini-H diagonalization working okay now.
+------------------------------------------------------------------------
+r444 | esler | 2005-03-07 23:19:20 -0600 (Mon, 07 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.cc
+   M /trunk/PlaneWavePHDFT/PlaneWaves.cc
+   M /trunk/PlaneWavePHDFT/TestPW2.cc
+
+Fixed error in PHPotClass's and PHPotFFTClass's Vmatrix functions.
+------------------------------------------------------------------------
+r443 | esler | 2005-03-07 22:50:08 -0600 (Mon, 07 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad2.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad2.h
+   M /trunk/PlaneWavePHDFT/GVecs.cc
+   M /trunk/PlaneWavePHDFT/GVecs.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.h
+   M /trunk/PlaneWavePHDFT/PlaneWaves.cc
+   M /trunk/PlaneWavePHDFT/PlaneWaves.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+   M /trunk/PlaneWavePHDFT/TestPW2.cc
+
+Added mini Hamiltonian lapack diagonalization to initialize bands.
+------------------------------------------------------------------------
+r442 | esler | 2005-03-07 17:35:46 -0600 (Mon, 07 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/TestPW2.cc
+
+Verified that PHPotClass and PHPotFFTClass produce nearly the same results, except in cases of degeneracies.
+------------------------------------------------------------------------
+r441 | esler | 2005-03-07 17:31:11 -0600 (Mon, 07 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian2.h
+   M /trunk/PlaneWavePHDFT/TestPW2.cc
+
+Fixed CoulombClass::Apply.
+------------------------------------------------------------------------
+r440 | esler | 2005-03-07 17:06:18 -0600 (Mon, 07 Mar 2005) | 1 line
+Changed paths:
+   A /trunk/PlaneWavePHDFT/ConjGrad2.cc
+   A /trunk/PlaneWavePHDFT/ConjGrad2.h
+   M /trunk/PlaneWavePHDFT/GVecs.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   A /trunk/PlaneWavePHDFT/Hamiltonian2.cc
+   A /trunk/PlaneWavePHDFT/Hamiltonian2.h
+   A /trunk/PlaneWavePHDFT/PlaneWaves.cc
+   A /trunk/PlaneWavePHDFT/PlaneWaves.h
+   A /trunk/PlaneWavePHDFT/TestPW2.cc
+   M /trunk/PlaneWavePHDFT/template.make
+
+Added new interface to code, which allows setting ion positions.  Verified correct results with hydrogen, compared to Kris' code.
+------------------------------------------------------------------------
+r439 | esler | 2005-03-04 13:50:02 -0600 (Fri, 04 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+   M /trunk/PlaneWavePHDFT/VectorOps.h
+
+Symmetry of box seemed to be causing problems with diagonalizer.  Now, we get lowest bands.
+------------------------------------------------------------------------
+r438 | esler | 2005-03-03 18:17:21 -0600 (Thu, 03 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+
+Orthogonality seems to be working somewhat, now.  Not sure if I'm getting all lowest eigenvectors.
+------------------------------------------------------------------------
+r437 | esler | 2005-03-03 15:44:11 -0600 (Thu, 03 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+   M /trunk/PlaneWavePHDFT/VectorOps.h
+
+Think I have orthogonalization working now.\n
+------------------------------------------------------------------------
+r436 | esler | 2005-03-03 01:47:31 -0600 (Thu, 03 Mar 2005) | 1 line
+Changed paths:
+   A /trunk/PlaneWavePHDFT/Convergence.eps
+   A /trunk/PlaneWavePHDFT/NaRhoComparison.eps
+   A /trunk/PlaneWavePHDFT/hydrogenRho.eps
+
+Adding eps figures for reference.
+------------------------------------------------------------------------
+r435 | esler | 2005-03-03 01:46:53 -0600 (Thu, 03 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad.h
+   M /trunk/PlaneWavePHDFT/GVecs.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+   M /trunk/PlaneWavePHDFT/VectorOps.h
+   M /trunk/PlaneWavePHDFT/template.make
+
+Added Orthogonalize function based on BLAS level 2 calls.
+------------------------------------------------------------------------
+r434 | esler | 2005-03-01 16:46:45 -0600 (Tue, 01 Mar 2005) | 2 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.cc
+
+Fixed a typo the Read function.
+
+------------------------------------------------------------------------
+r433 | esler | 2005-03-01 14:23:49 -0600 (Tue, 01 Mar 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/FFTBox.cc
+   M /trunk/PlaneWavePHDFT/GVecs.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+
+Added some speedups.
+------------------------------------------------------------------------
+r432 | esler | 2005-02-28 22:35:13 -0600 (Mon, 28 Feb 2005) | 3 lines
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/FFT/FFT.cc
+   M /trunk/PH/kSpacePH.cc
+   M /trunk/PH/kSpacePH.h
+   M /trunk/template.make
+
+Added a couple of functions to allow me to use a sorted G-vector list
+and obviate the need for the caching of values.
+
+------------------------------------------------------------------------
+r431 | esler | 2005-02-28 22:34:15 -0600 (Mon, 28 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/GVecs.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+
+Greatly reduced setup time by sorting Gvectors.
+------------------------------------------------------------------------
+r430 | esler | 2005-02-28 21:00:54 -0600 (Mon, 28 Feb 2005) | 1 line
+Changed paths:
+   A /trunk/PlaneWavePHDFT/FFTBox.cc
+   A /trunk/PlaneWavePHDFT/FFTBox.h
+   A /trunk/PlaneWavePHDFT/GVecs.cc
+   A /trunk/PlaneWavePHDFT/GVecs.h
+   A /trunk/PlaneWavePHDFT/VectorOps.h
+
+Adding these files to repository.
+------------------------------------------------------------------------
+r429 | esler | 2005-02-28 21:00:18 -0600 (Mon, 28 Feb 2005) | 2 lines
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+   M /trunk/PlaneWavePHDFT/template.make
+
+Now PH's work with FFTs!
+
+------------------------------------------------------------------------
+r428 | esler | 2005-02-28 13:37:44 -0600 (Mon, 28 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+
+Added G-vector differences to GVecsClass.
+------------------------------------------------------------------------
+r427 | esler | 2005-02-28 12:47:18 -0600 (Mon, 28 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/FFT/FFT.cc
+   M /trunk/FFT/FFT.h
+   M /trunk/FFT/TestFFT.cc
+
+Added FFT for Array<TinyMatrix<complex<double>,3,3>,3>.  Added tests, which appear to be passed.
+------------------------------------------------------------------------
+r426 | esler | 2005-02-28 10:41:42 -0600 (Mon, 28 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/FFT/FFT.cc
+   M /trunk/FFT/FFT.h
+   M /trunk/FFT/TestFFT.cc
+
+Added an FFT for an Array<TinyVector<complex<double>,3>,3>
+------------------------------------------------------------------------
+r425 | esler | 2005-02-26 21:44:37 -0600 (Sat, 26 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+
+Added PH capability in hackish way.
+------------------------------------------------------------------------
+r424 | esler | 2005-02-25 22:32:44 -0600 (Fri, 25 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+
+Instabilities result from stupid initial guess.  Now truncating coefficients for large G.  Stable now.
+------------------------------------------------------------------------
+r423 | esler | 2005-02-25 22:17:55 -0600 (Fri, 25 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+
+Noticed an instability in the conjugate gradients as we go to a large number of plane waves.
+------------------------------------------------------------------------
+r422 | esler | 2005-02-25 21:42:27 -0600 (Fri, 25 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+
+Conjugate gradient approach is now working for a single band.
+------------------------------------------------------------------------
+r421 | esler | 2005-02-25 19:01:01 -0600 (Fri, 25 Feb 2005) | 4 lines
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+   M /trunk/PlaneWavePHDFT/template.make
+
+Fixed formula from thetaMin in ConjGrad, which is wrong in the
+Payne et al.'s RMP.  Also, implemented application of coulomb
+part with FFT's.
+
+------------------------------------------------------------------------
+r420 | esler | 2005-02-24 18:17:35 -0600 (Thu, 24 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PlaneWavePHDFT/ConjGrad.cc
+   M /trunk/PlaneWavePHDFT/ConjGrad.h
+   M /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   M /trunk/PlaneWavePHDFT/Hamiltonian.h
+   M /trunk/PlaneWavePHDFT/TestPW.cc
+   M /trunk/PlaneWavePHDFT/template.make
+
+Working somewhat, but thetaMin is being miscalculated.
+------------------------------------------------------------------------
+r419 | esler | 2005-02-24 17:24:04 -0600 (Thu, 24 Feb 2005) | 1 line
+Changed paths:
+   A /trunk/PlaneWavePHDFT
+   A /trunk/PlaneWavePHDFT/ConjGrad.cc
+   A /trunk/PlaneWavePHDFT/ConjGrad.h
+   A /trunk/PlaneWavePHDFT/Hamiltonian.cc
+   A /trunk/PlaneWavePHDFT/Hamiltonian.h
+   A /trunk/PlaneWavePHDFT/TestPW.cc
+   A /trunk/PlaneWavePHDFT/template.make
+
+Initially adding to repository.
+------------------------------------------------------------------------
+r418 | esler | 2005-02-23 15:56:39 -0600 (Wed, 23 Feb 2005) | 1 line
+Changed paths:
+   A /trunk/FFT/FFT.cc
+   A /trunk/FFT/FFT.h
+   A /trunk/FFT/TestFFT.cc
+   A /trunk/FFT/template.make
+
+Adding FFT files to repository.
+------------------------------------------------------------------------
+r417 | esler | 2005-02-23 10:17:03 -0600 (Wed, 23 Feb 2005) | 2 lines
+Changed paths:
+   A /trunk/FFT
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r416 | esler | 2005-02-23 10:16:06 -0600 (Wed, 23 Feb 2005) | 3 lines
+Changed paths:
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/MatrixOps/MatrixOps.h
+
+Added SymmEigenPairs function for calculating eigenvectors and values
+of a symmetric, real matrix.
+
+------------------------------------------------------------------------
+r415 | esler | 2005-02-22 15:20:03 -0600 (Tue, 22 Feb 2005) | 2 lines
+Changed paths:
+   A /trunk/PH/PlotRhos.m
+   A /trunk/PH/RadialRho.dat
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r414 | esler | 2005-02-22 15:19:18 -0600 (Tue, 22 Feb 2005) | 2 lines
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+
+Fixed messed up j2 for k=0.
+
+------------------------------------------------------------------------
+r413 | esler | 2005-02-21 22:27:13 -0600 (Mon, 21 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PH/TestkSpacePH.cc
+   M /trunk/PH/kSpacePH.cc
+
+Fixed a bug in which I was dividing the kinetic energy operator in the Hamiltonian by the cell volume, which shouldn't be done.
+------------------------------------------------------------------------
+r412 | esler | 2005-02-21 21:51:30 -0600 (Mon, 21 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PH/TestkPH.in
+   M /trunk/PH/TestkSpacePH.cc
+   M /trunk/PH/kSpacePH.cc
+
+Fixed some issues with diagonal elements.  Still get the wrong answer, though.
+------------------------------------------------------------------------
+r411 | esler | 2005-02-21 18:14:54 -0600 (Mon, 21 Feb 2005) | 2 lines
+Changed paths:
+   A /trunk/PH/NaUnscreenedPH_Feb18_05.h5
+   A /trunk/PH/TestkPH.in
+   M /trunk/PH/TestkSpacePH.cc
+   M /trunk/PH/kSpacePH.cc
+   M /trunk/PH/kSpacePH.h
+
+Caching of integrals now seems to work, speeding problem considerably.
+
+------------------------------------------------------------------------
+r410 | esler | 2005-02-21 16:18:18 -0600 (Mon, 21 Feb 2005) | 3 lines
+Changed paths:
+   M /trunk/PH/TestkSpacePH.cc
+   M /trunk/PH/kSpacePH.cc
+   M /trunk/PH/kSpacePH.h
+
+Working on Testing kSpace coefficients.  Must add caching of
+integrals to run at a reasonable rate.
+
+------------------------------------------------------------------------
+r409 | esler | 2005-02-21 14:19:48 -0600 (Mon, 21 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PH/template.make
+
+Fixed minor problem in template.make
+------------------------------------------------------------------------
+r408 | esler | 2005-02-21 14:17:52 -0600 (Mon, 21 Feb 2005) | 1 line
+Changed paths:
+   A /trunk/PH/TestkSpacePH.cc
+   M /trunk/PH/template.make
+
+Adding TestkSpacePH to version control.
+------------------------------------------------------------------------
+r407 | esler | 2005-02-18 16:36:05 -0600 (Fri, 18 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+   M /trunk/PH/kSpacePH.h
+
+kSpacePH done, but not tested at all.
+------------------------------------------------------------------------
+r406 | esler | 2005-02-18 16:13:52 -0600 (Fri, 18 Feb 2005) | 2 lines
+Changed paths:
+   M /trunk/PH/kSpacePH.cc
+   M /trunk/PH/kSpacePH.h
+
+kSpacePH is almost done.
+
+------------------------------------------------------------------------
+r405 | esler | 2005-02-18 14:49:31 -0600 (Fri, 18 Feb 2005) | 1 line
+Changed paths:
+   A /trunk/PH/kSpacePH.cc
+   A /trunk/PH/kSpacePH.h
+
+Adding kSpace stuff to repository.
+------------------------------------------------------------------------
+r404 | esler | 2005-02-18 14:49:01 -0600 (Fri, 18 Feb 2005) | 2 lines
+Changed paths:
+   M /trunk/PH/template.make
+
+Adding kSpacePH to compilation list.
+
+------------------------------------------------------------------------
+r403 | esler | 2005-02-18 12:21:57 -0600 (Fri, 18 Feb 2005) | 2 lines
+Changed paths:
+   M /trunk/Atom/AtomBase.h
+
+Added missing return statment in Atom::NumElecs().
+
+------------------------------------------------------------------------
+r402 | esler | 2005-02-17 16:27:21 -0600 (Thu, 17 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/PH/SplinePot.h
+
+Moved Vouter from protected to public section.
+------------------------------------------------------------------------
+r401 | esler | 2005-02-17 16:18:17 -0600 (Thu, 17 Feb 2005) | 3 lines
+Changed paths:
+   M /trunk/PH/SplinePot.cc
+   M /trunk/PH/SplinePot.h
+
+Added a Vouter member pointer in SplinePot in order to deal with
+the potential outside the tabulated spline grid.
+
+------------------------------------------------------------------------
+r400 | esler | 2005-02-14 15:50:57 -0600 (Mon, 14 Feb 2005) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+
+Added a gather function.
+
+------------------------------------------------------------------------
+r399 | esler | 2005-02-08 16:35:40 -0600 (Tue, 08 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/Splines/TricubicSpline.h
+
+Added a way to avoid isnan definition on nonmacs
+------------------------------------------------------------------------
+r398 | esler | 2005-02-08 15:14:43 -0600 (Tue, 08 Feb 2005) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.cc
+
+Fixed a bug in bool Broadcast function.
+
+------------------------------------------------------------------------
+r397 | esler | 2005-02-08 13:52:01 -0600 (Tue, 08 Feb 2005) | 1 line
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/Splines/Grid.h
+   M /trunk/Splines/MyTricubicSpline.h
+   M /trunk/Splines/QuinticSplines.f
+   M /trunk/Splines/TricubicSpline.h
+   M /trunk/Splines/fortran/Makefile
+
+updating common communicatorclass
+------------------------------------------------------------------------
+r396 | esler | 2005-02-07 22:34:22 -0600 (Mon, 07 Feb 2005) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Fixed a bug in which we were dividing by (smax-z), which could become
+zero.  Fixed the limit checks from <= to < to prevent this.
+
+------------------------------------------------------------------------
+r395 | esler | 2005-02-02 10:50:14 -0600 (Wed, 02 Feb 2005) | 5 lines
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+   M /trunk/PH/SplinePot.cc
+   M /trunk/Splines/BicubicSpline.h
+   M /trunk/Splines/CubicSpline.h
+
+To splinePot, added a check to return zero when we're outside the
+tabulated region.  Nothing really changed in CubicSpline.h or
+BicubicSpline.h -- just debugging prints were added and deleted.
+Added a couple of new functions to Communication.
+
+------------------------------------------------------------------------
+r394 | esler | 2005-01-19 17:05:11 -0600 (Wed, 19 Jan 2005) | 5 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAtricubicFit.cc
+   M /trunk/PairAction/PAtricubicFit.h
+
+Added stuff for doing long range breakups on PAtricubicFitClass, but
+mainly just copied from PAcoulombBCFitClass.  Probably have to fix the
+way we are doing the V_k's and Xk_V's since we don't have a perfect
+coulomb potential for V.
+
+------------------------------------------------------------------------
+r393 | bclark | 2005-01-19 14:47:23 -0600 (Wed, 19 Jan 2005) | 2 lines
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+
+Removed references to NDIM throughout common (it has now been moved to the makefile).  Also, added a send and a receive that works with int arrays into the communication
+
+------------------------------------------------------------------------
+r392 | bclark | 2004-12-06 16:01:23 -0600 (Mon, 06 Dec 2004) | 1 line
+Changed paths:
+   M /trunk/DFT/Functionals.cc
+   M /trunk/IO/InputOutputHDF5.h
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/Random/Random.h
+   M /trunk/Splines/QuinticSpline.cc
+   M /trunk/Splines/TricubicSpline.h
+
+Fixed bug in fortran_ problem
+------------------------------------------------------------------------
+r391 | esler | 2004-12-03 10:37:42 -0600 (Fri, 03 Dec 2004) | 2 lines
+Changed paths:
+   A /trunk/Ewald/Dsign.m
+   A /trunk/Ewald/Esign.m
+   A /trunk/Ewald/LPQHI.eps
+   A /trunk/Ewald/PlotBasis.m
+   A /trunk/Ewald/PlotLong.m
+   A /trunk/Ewald/c.m
+   A /trunk/Ewald/cone.m
+   A /trunk/Ewald/h.m
+   A /trunk/Ewald/hn.m
+   A /trunk/Ewald/hone.m
+
+Added some stuff to Ewald directory that should have been there.
+
+------------------------------------------------------------------------
+r390 | esler | 2004-12-02 15:43:44 -0600 (Thu, 02 Dec 2004) | 1 line
+Changed paths:
+   M /trunk/Atom/template.make
+   M /trunk/DFT/Functionals.cc
+   M /trunk/DFT/template.make
+   M /trunk/Distributed/template.make
+   M /trunk/Ewald/template.make
+   M /trunk/Fitting/template.make
+   M /trunk/IO/template.make
+   M /trunk/Integration/template.make
+   M /trunk/MPI/template.make
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/MatrixOps/template.make
+   M /trunk/Optimize/template.make
+   M /trunk/PH/PH.h
+   M /trunk/PH/template.make
+   M /trunk/PairAction/template.make
+   M /trunk/Plotting/template.make
+   M /trunk/Random/template.make
+   M /trunk/SpecialFunctions/template.make
+   M /trunk/Splines/QuinticSpline.cc
+   M /trunk/Splines/TricubicSpline.h
+   M /trunk/Splines/template.make
+   M /trunk/template.make
+
+Fixed problems which prevented compilation with xlC, IBM compiler.
+------------------------------------------------------------------------
+r389 | esler | 2004-12-01 22:56:43 -0600 (Wed, 01 Dec 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/Splines/BicubicSpline.h
+
+Fixed more warnings.
+
+------------------------------------------------------------------------
+r388 | esler | 2004-12-01 22:49:18 -0600 (Wed, 01 Dec 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/template.make
+
+Stopped compiling antiquated InputFile.o
+
+------------------------------------------------------------------------
+r387 | esler | 2004-12-01 22:44:12 -0600 (Wed, 01 Dec 2004) | 1 line
+Changed paths:
+   M /trunk/Ewald/SimpleEwald.h
+   M /trunk/Splines/BicubicSpline.h
+
+Fixed some picky IBM compiler warnings.
+------------------------------------------------------------------------
+r386 | esler | 2004-12-01 22:37:11 -0600 (Wed, 01 Dec 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Made RANK variables const int to satisfy non-GNU compilers.
+
+------------------------------------------------------------------------
+r385 | esler | 2004-12-01 22:31:17 -0600 (Wed, 01 Dec 2004) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/Random/Random.h
+
+Added a couple of Broadcast funtions, etc.
+
+------------------------------------------------------------------------
+r384 | esler | 2004-11-17 17:40:35 -0600 (Wed, 17 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/MatrixOps/MatrixOps.cc
+
+Not really changed.  Tracked down a bug to something else.
+
+------------------------------------------------------------------------
+r383 | esler | 2004-11-15 11:43:37 -0600 (Mon, 15 Nov 2004) | 4 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/PairAction/PAcoulombBCFit.cc
+
+NumBetas was not being set in PAcoulombBCFit.  Fixed this.
+No real changes to InputOutputHDF5.cc.  Just debugging an error
+that was somewhere else.
+
+------------------------------------------------------------------------
+r382 | esler | 2004-11-11 16:14:37 -0600 (Thu, 11 Nov 2004) | 4 lines
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/Integration/GKIntegration.h
+
+Made some portability changes so that the code compiles on lemieux.
+Also, hopefully fixed a bug in GKIntegration.h which older gcc
+did not catch.
+
+------------------------------------------------------------------------
+r381 | esler | 2004-11-11 14:48:02 -0600 (Thu, 11 Nov 2004) | 3 lines
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+   M /trunk/MatrixOps/MatrixOps.cc
+
+Changed capitalize of BroadCast to Broadcast.  Added 2x2 optimization
+for determinant.
+
+------------------------------------------------------------------------
+r380 | esler | 2004-11-06 15:49:55 -0600 (Sat, 06 Nov 2004) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+
+Added a few routines for broadcasts and global sums.
+
+------------------------------------------------------------------------
+r379 | bclark | 2004-10-25 10:47:33 -0500 (Mon, 25 Oct 2004) | 1 line
+Changed paths:
+   M /trunk/Random/Random.h
+
+Added a common integer to the random number class
+------------------------------------------------------------------------
+r378 | esler | 2004-10-25 10:44:20 -0500 (Mon, 25 Oct 2004) | 2 lines
+Changed paths:
+   M /trunk/Random/Random.h
+
+Added a random integer routine to class.
+
+------------------------------------------------------------------------
+r377 | esler | 2004-10-07 15:17:54 -0500 (Thu, 07 Oct 2004) | 2 lines
+Changed paths:
+   M /trunk/Random/Random.h
+
+Added global random gaussian scalar and vectors.
+
+------------------------------------------------------------------------
+r376 | esler | 2004-10-05 10:16:43 -0500 (Tue, 05 Oct 2004) | 3 lines
+Changed paths:
+   M /trunk/Atom/template.make
+   M /trunk/DFT/template.make
+   M /trunk/Distributed/template.make
+   M /trunk/Ewald/template.make
+   M /trunk/Fitting/template.make
+   M /trunk/IO/template.make
+   M /trunk/Integration/template.make
+   M /trunk/MPI/template.make
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/MatrixOps/MatrixOps.h
+   M /trunk/MatrixOps/Test.cc
+   M /trunk/MatrixOps/template.make
+   M /trunk/Optimize/template.make
+   M /trunk/PH/template.make
+   M /trunk/PairAction/template.make
+   M /trunk/Random/template.make
+   M /trunk/Splines/template.make
+   M /trunk/template.make
+
+Switched the -M flag to -MM in Makefile dependency generation to be
+faster.  Added determinant and inverse operation to MatrixOps.
+
+------------------------------------------------------------------------
+r375 | esler | 2004-09-28 16:57:57 -0500 (Tue, 28 Sep 2004) | 4 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Fixed erroneous error messages in Append functions.  These
+were copied and pasted for each Append function, and weren't modified
+to be consistent with the real routine.
+
+------------------------------------------------------------------------
+r374 | bclark | 2004-09-15 18:48:59 -0500 (Wed, 15 Sep 2004) | 1 line
+Changed paths:
+   M /trunk/PairAction/PAzeroFit.cc
+   M /trunk/PairAction/PAzeroFit.h
+
+Changed paZeroFit to return 0 for the potential instead of segfaulting while looking for the pointer to V
+------------------------------------------------------------------------
+r373 | bclark | 2004-09-15 16:23:30 -0500 (Wed, 15 Sep 2004) | 1 line
+Changed paths:
+   M /trunk/MPI/Communication.h
+
+Adding in CommunicationClass.h an ability to do Sum() over double
+------------------------------------------------------------------------
+r372 | root | 2004-09-13 16:39:30 -0500 (Mon, 13 Sep 2004) | 4 lines
+Changed paths:
+   M /trunk/PairAction/PAclassicalFit.cc
+
+Thi is a test of the subversion committing. 
+
+
+
+------------------------------------------------------------------------
+r371 | esler | 2004-09-10 17:20:48 -0500 (Fri, 10 Sep 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Sign and other minor corrections.
+
+------------------------------------------------------------------------
+r370 | esler | 2004-09-10 10:44:08 -0500 (Fri, 10 Sep 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+The RPA equations now seem to agree with William Magro's thesis.
+
+------------------------------------------------------------------------
+r369 | esler | 2004-09-07 22:26:20 -0500 (Tue, 07 Sep 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Added more RPA stuff.
+
+------------------------------------------------------------------------
+r368 | esler | 2004-08-26 16:51:22 -0500 (Thu, 26 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Adding info for RPA long range action.
+
+------------------------------------------------------------------------
+r367 | esler | 2004-08-25 18:09:07 -0500 (Wed, 25 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Adding discussion of adaptation to PIMC and RPA improvements.
+
+------------------------------------------------------------------------
+r366 | esler | 2004-08-25 11:16:07 -0500 (Wed, 25 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PACoulombFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.cc
+
+Had wrong sign on Vk.
+
+------------------------------------------------------------------------
+r365 | esler | 2004-08-24 17:17:26 -0500 (Tue, 24 Aug 2004) | 4 lines
+Changed paths:
+   M /trunk/PairAction/PACoulombFit.cc
+   M /trunk/PairAction/PACoulombFit.h
+   M /trunk/PairAction/PAFitBase.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.h
+
+Added virtual function Vk(k) to base class and to two
+specializations.  This will be required for all long ranged
+pair actions.
+
+------------------------------------------------------------------------
+r364 | esler | 2004-08-24 17:16:30 -0500 (Tue, 24 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/Integration/RungeKutta.h
+
+Added a new class which integrates arbitrary number of coupled equations.
+
+------------------------------------------------------------------------
+r363 | esler | 2004-08-24 17:16:04 -0500 (Tue, 24 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Added functions for the RPA corrections to the long range action.
+
+------------------------------------------------------------------------
+r362 | esler | 2004-08-16 18:33:49 -0500 (Mon, 16 Aug 2004) | 5 lines
+Changed paths:
+   M /trunk/PairAction/PAFitBase.h
+
+I added the term necessary for charged systems -- a particles
+interacting with the neutralizing charge background.  I seem to get the
+right Madelung constant for simple cubic lattice of charges in
+an opposite background.
+
+------------------------------------------------------------------------
+r361 | esler | 2004-08-16 16:34:57 -0500 (Mon, 16 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Added terms for charge background.
+
+------------------------------------------------------------------------
+r360 | esler | 2004-08-12 18:09:47 -0500 (Thu, 12 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Added formulae for Xk for 1/r, 1/r^2, 1/r^3, and 1/r^4 potentials.
+
+------------------------------------------------------------------------
+r359 | esler | 2004-08-12 15:26:12 -0500 (Thu, 12 Aug 2004) | 4 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.h
+
+Long range breakup is much more stable with the analytic integrals now.
+We are still missing a term in the breakup for the background charge
+in non-neutral systems.
+
+------------------------------------------------------------------------
+r358 | esler | 2004-08-10 16:20:22 -0500 (Tue, 10 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Integration/GKIntegration.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.h
+
+The breakups for PAcoulombBCClass now seem to be more stable.
+
+------------------------------------------------------------------------
+r357 | esler | 2004-08-10 12:18:01 -0500 (Tue, 10 Aug 2004) | 4 lines
+Changed paths:
+   M /trunk/PairAction/PACoulombFit.cc
+   M /trunk/PairAction/PACoulombFit.h
+   A /trunk/PairAction/PADipoleFit.cc
+   A /trunk/PairAction/PADipoleFit.h
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAFitBase.h
+   A /trunk/PairAction/PATripoleFit.cc
+   A /trunk/PairAction/PATripoleFit.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/template.make
+
+Adding this "fits" to repository.  These are really only classical
+potentials masquerading as pair actions for purposes of developing
+a new Optimized breakup method.
+
+------------------------------------------------------------------------
+r356 | esler | 2004-08-09 16:19:21 -0500 (Mon, 09 Aug 2004) | 2 lines
+Changed paths:
+   A /trunk/PairAction/PACoulombFit.cc
+   A /trunk/PairAction/PACoulombFit.h
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r355 | esler | 2004-08-04 14:57:26 -0500 (Wed, 04 Aug 2004) | 4 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/OptimizedBreakup.h
+
+Changed LPQHI basis so that the basis elements are dimensionless.
+This appears to solve a problem in which the SVD decomposition
+became unstable for large box sizes and many knot points.
+
+------------------------------------------------------------------------
+r354 | esler | 2004-08-03 14:25:21 -0500 (Tue, 03 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/IO.py
+   M /trunk/IO/InputOutputPythonWrapper.cc
+
+Added countsections2 to IO.py and readsectionnamenum to the wrapper
+
+------------------------------------------------------------------------
+r353 | esler | 2004-08-02 16:41:24 -0500 (Mon, 02 Aug 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.cc
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+
+Fixed problems with Udiag, dUdiag, etc.
+
+------------------------------------------------------------------------
+r352 | esler | 2004-08-02 16:41:07 -0500 (Mon, 02 Aug 2004) | 4 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+
+Working on fixing issue with long-range breakup.  Changed integration
+tolerance in CalkXk to take into account beta dependence.
+Working on fixing last bin problem in PairCorrelation.
+
+------------------------------------------------------------------------
+r351 | esler | 2004-07-30 17:19:38 -0500 (Fri, 30 Jul 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombBCFit.cc
+
+Fixed a missing initialization of weight to 0.
+
+------------------------------------------------------------------------
+r350 | esler | 2004-07-29 17:02:00 -0500 (Thu, 29 Jul 2004) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAclassicalFit.cc
+   M /trunk/PairAction/PAclassicalFit.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.h
+   M /trunk/PairAction/PAtricubicFit.cc
+   M /trunk/PairAction/PAtricubicFit.h
+   M /trunk/PairAction/template.make
+
+Fixed a couple of problems regarding PAFitClasses we have commented out
+because they are not ready for long range breakups.
+
+------------------------------------------------------------------------
+r349 | esler | 2004-07-27 18:16:13 -0500 (Tue, 27 Jul 2004) | 11 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.h
+
+Long range actions and energies appear to be sane now.  We had forgotten
+to implement Udiag, dUdiag, etc. in PAcoulombBCFitClass.  Thus we
+were getting garbage.  Added some checks for LongRange variable.
+We also fixed a bug in which we fail to subtract dUlong and Vlong in
+calculating the short range part.  Note that we have not yet fixed the fact
+that we subtract off Ulong(q), but then when we do the long range part
+in k-space, we calculate rho using r at each timeslice, not q.  This is a
+problem!  Removed overzelous error reporting from GKIntegration.
+Added Udiag, Udiag_p, Udiag_pp, dUdiag, dUdiag_p, dUdiag_pp to
+PAcoulombBCFitClass.
+
+------------------------------------------------------------------------
+r348 | esler | 2004-07-27 18:15:22 -0500 (Tue, 27 Jul 2004) | 9 lines
+Changed paths:
+   M /trunk/Integration/GKIntegration.h
+
+Long range actions and energies appear to be sane now.  We had forgotten
+to implement Udiag, dUdiag, etc. in PAcoulombBCFitClass.  Thus we
+were getting garbage.  Added some checks for LongRange variable.
+We also fixed a bug in which we fail to subtract dUlong and Vlong in
+calculating the short range part.  Note that we have not yet fixed the fact
+that we subtract off Ulong(q), but then when we do the long range part
+in k-space, we calculate rho using r at each timeslice, not q.  This is a
+problem!  Removed overzelous error reporting from GKIntegration.
+
+------------------------------------------------------------------------
+r347 | esler | 2004-07-27 18:14:45 -0500 (Tue, 27 Jul 2004) | 9 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+
+Long range actions and energies appear to be sane now.  We had forgotten
+to implement Udiag, dUdiag, etc. in PAcoulombBCFitClass.  Thus we
+were getting garbage.  Added some checks for LongRange variable.
+We also fixed a bug in which we fail to subtract dUlong and Vlong in
+calculating the short range part.  Note that we have not yet fixed the fact
+that we subtract off Ulong(q), but then when we do the long range part
+in k-space, we calculate rho using r at each timeslice, not q.  This is a
+problem!
+
+------------------------------------------------------------------------
+r346 | bclark | 2004-07-26 17:01:04 -0500 (Mon, 26 Jul 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputBase.h
+   M /trunk/IO/InputOutputPythonWrapper.cc
+
+Made the data analysis code prettier
+
+------------------------------------------------------------------------
+r345 | bclark | 2004-07-26 14:11:51 -0500 (Mon, 26 Jul 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputPythonWrapper.cc
+
+Fixed a bug in countsections, cleanresults.py and made it so that a single element is treated as atomic and not as an array of 1 element. Also added run info to the output file.
+
+------------------------------------------------------------------------
+r344 | bclark | 2004-07-23 19:24:58 -0500 (Fri, 23 Jul 2004) | 3 lines
+Changed paths:
+   M /trunk/IO/IO.py
+   M /trunk/IO/InputOutputPythonWrapper.cc
+
+Changed around how some of the observables work to get better data analysis possibilities
+Fixed some code here and changed null-> None
+
+------------------------------------------------------------------------
+r343 | esler | 2004-07-23 11:43:11 -0500 (Fri, 23 Jul 2004) | 2 lines
+Changed paths:
+   A /trunk/IO/junk.dat
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r342 | esler | 2004-07-23 11:19:53 -0500 (Fri, 23 Jul 2004) | 3 lines
+Changed paths:
+   M /trunk/IO/IO.py
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputPythonWrapper.cc
+
+All ReadVars now appear to work.  Fixed a minor typo in ASCII in
+which we had a 4 instead of a 3.
+
+------------------------------------------------------------------------
+r341 | esler | 2004-07-22 17:09:05 -0500 (Thu, 22 Jul 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputPythonWrapper.cc
+
+Fixed a small bug.
+
+------------------------------------------------------------------------
+r340 | esler | 2004-07-22 17:05:44 -0500 (Thu, 22 Jul 2004) | 3 lines
+Changed paths:
+   M /trunk/IO/IO.py
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputPythonWrapper.cc
+
+Put more sane ordering of 2,3, and 4D ASCII arrays.  Added function
+for 2D array of strings, but it's currently broken.
+
+------------------------------------------------------------------------
+r339 | esler | 2004-07-22 16:17:56 -0500 (Thu, 22 Jul 2004) | 2 lines
+Changed paths:
+   A /trunk/IO/IO.py
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputPythonWrapper.cc
+   A /trunk/IO/TestWrapper.py
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r338 | esler | 2004-07-21 15:27:51 -0500 (Wed, 21 Jul 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/setup.py
+
+Adding necessar library references.
+
+------------------------------------------------------------------------
+r337 | esler | 2004-07-21 15:14:53 -0500 (Wed, 21 Jul 2004) | 2 lines
+Changed paths:
+   A /trunk/IO/InputOutputPythonWrapper.cc
+   A /trunk/IO/setup.py
+
+Adding to repository.  This is a python wrapper for our InputOutput classes.
+
+------------------------------------------------------------------------
+r336 | bclark | 2004-07-21 10:24:00 -0500 (Wed, 21 Jul 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.cc
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/Splines/fortran/Makefile
+
+Not sure what I did with these
+
+------------------------------------------------------------------------
+r335 | bclark | 2004-07-21 10:23:29 -0500 (Wed, 21 Jul 2004) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.cc
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r334 | esler | 2004-07-06 15:19:25 -0500 (Tue, 06 Jul 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFitBase.h
+
+Made a more sane default for the V, Vp, and Vpp functions.
+
+------------------------------------------------------------------------
+r333 | esler | 2004-07-01 17:15:54 -0500 (Thu, 01 Jul 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFitBase.h
+
+Added stuff for long-range breakup of dU and V.
+
+------------------------------------------------------------------------
+r332 | esler | 2004-06-30 11:25:12 -0500 (Wed, 30 Jun 2004) | 2 lines
+Changed paths:
+   A /trunk/Atom/Makefile.am
+   A /trunk/DFT/Makefile.am
+   A /trunk/Distributed/Makefile.am
+   A /trunk/Ewald/Makefile.am
+   A /trunk/Fitting/Makefile.am
+   A /trunk/IO/Makefile.am
+   A /trunk/Integration/Makefile.am
+   A /trunk/MPI/Makefile.am
+   A /trunk/Makefile.am
+   A /trunk/MatrixOps/Makefile.am
+   A /trunk/Optimize/Makefile.am
+   A /trunk/PH/Makefile.am
+   A /trunk/PairAction/Makefile.am
+   A /trunk/Random/Makefile.am
+   A /trunk/SpecialFunctions/Makefile.am
+   A /trunk/Splines/Makefile.am
+   M /trunk/Splines/fortran/Makefile
+
+Adding files for autoconf/automake Makefile generation.
+
+------------------------------------------------------------------------
+r331 | esler | 2004-06-29 14:57:07 -0500 (Tue, 29 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+
+Finishing discussion of optimized breakup.  Moving on to PIMC.
+
+------------------------------------------------------------------------
+r330 | esler | 2004-06-28 18:35:30 -0500 (Mon, 28 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Adding explanation of singular value decomposition.
+
+------------------------------------------------------------------------
+r329 | esler | 2004-06-26 15:38:46 -0500 (Sat, 26 Jun 2004) | 5 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+
+Found the source of the problem with a large number of knots:  the
+tolerance for the singular value decomposition was too high.  Now
+using a tolerance of 1.0e-16 and we get much better results for,
+say, 20 knots.
+
+------------------------------------------------------------------------
+r328 | esler | 2004-06-25 23:37:52 -0500 (Fri, 25 Jun 2004) | 3 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+
+Reduced the number of knots and we appear to be getting the right answer
+bang on for NaCl.
+
+------------------------------------------------------------------------
+r327 | esler | 2004-06-25 19:56:52 -0500 (Fri, 25 Jun 2004) | 3 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/OptimizedBreakup.h
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+   M /trunk/PairAction/PAFitBase.h
+   M /trunk/PairAction/PAclassicalFit.cc
+   M /trunk/PairAction/PAclassicalFit.h
+
+Got optimized Ewald potentials integrated into PIMC code.  It's giving
+reasonable results, but it's not perfect yet.
+
+------------------------------------------------------------------------
+r326 | esler | 2004-06-25 11:04:40 -0500 (Fri, 25 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAclassicalFit.cc
+
+Merging Bryan and my edits.
+
+------------------------------------------------------------------------
+r325 | esler | 2004-06-25 10:55:29 -0500 (Fri, 25 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+
+Added stuff to print chi-squared.
+
+------------------------------------------------------------------------
+r324 | bclark | 2004-06-23 09:25:06 -0500 (Wed, 23 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/CubicSpline.h
+
+Nothing substational changed in CubicSpline.h..just added and removed some comments and such
+
+------------------------------------------------------------------------
+r323 | bclark | 2004-06-23 09:24:36 -0500 (Wed, 23 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.cc
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/template.make
+
+Fixed a couple bugs in how the energies were being read in. It might be that it actually produces correct results for helium (no permutations on still) but I havne't totally verified that yet.
+
+------------------------------------------------------------------------
+r322 | esler | 2004-06-23 09:07:05 -0500 (Wed, 23 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/OptimizedBreakup.h
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+
+Added chi-squared calculation.
+
+------------------------------------------------------------------------
+r321 | esler | 2004-06-23 07:38:20 -0500 (Wed, 23 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+
+Optimized breakup now works with constraints.
+
+------------------------------------------------------------------------
+r320 | esler | 2004-06-22 18:41:01 -0500 (Tue, 22 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/OptimizedBreakup.h
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+
+Added approximate k-space degeneracy for large-k states.
+
+------------------------------------------------------------------------
+r319 | esler | 2004-06-22 16:31:57 -0500 (Tue, 22 Jun 2004) | 4 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+
+The code is now working for optimizing the long-range part of the
+potential!  Gives good results even for relatively small k-space
+cutoff of 50.0.
+
+------------------------------------------------------------------------
+r318 | esler | 2004-06-22 16:00:37 -0500 (Tue, 22 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/OptimizedBreakup.h
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+
+Made use of degeneracy.
+
+------------------------------------------------------------------------
+r317 | esler | 2004-06-22 15:02:16 -0500 (Tue, 22 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/OptimizedBreakup.h
+
+Fixed c_nk coefficients for LPQHI basis.
+
+------------------------------------------------------------------------
+r316 | esler | 2004-06-22 09:52:05 -0500 (Tue, 22 Jun 2004) | 3 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/OptimizedBreakup.h
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+   M /trunk/Ewald/template.make
+
+Sort of working, using numerical integrals for c_nk.  Must figure out
+correct integrals.
+
+------------------------------------------------------------------------
+r315 | esler | 2004-06-21 22:16:31 -0500 (Mon, 21 Jun 2004) | 3 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/OptimizedBreakup.h
+   M /trunk/Ewald/TestOptimizedBreakup.cc
+   M /trunk/Ewald/template.make
+
+Committing for safety, although the breakup does not yet work
+correctly.
+
+------------------------------------------------------------------------
+r314 | esler | 2004-06-21 10:40:37 -0500 (Mon, 21 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/OptimizedBreakup.cc
+   M /trunk/Ewald/OptimizedBreakup.h
+
+Committing stuff from last week.
+
+------------------------------------------------------------------------
+r313 | esler | 2004-06-17 17:38:54 -0500 (Thu, 17 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+   A /trunk/Ewald/OptimizedBreakup.cc
+   A /trunk/Ewald/OptimizedBreakup.h
+   A /trunk/Ewald/TestOptimizedBreakup.cc
+   M /trunk/Ewald/template.make
+
+Adding these files to the repository.
+
+------------------------------------------------------------------------
+r312 | esler | 2004-06-16 10:55:01 -0500 (Wed, 16 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+   M /trunk/PairAction/PAclassicalFit.cc
+
+Added missing factor of q_1 q_2 in long-range gaussian screening v_k.
+
+------------------------------------------------------------------------
+r311 | bclark | 2004-06-15 19:29:29 -0500 (Tue, 15 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAclassicalFit.cc
+
+Fixed a bug where we weren't setting data in the array in correctly
+
+------------------------------------------------------------------------
+r310 | esler | 2004-06-15 17:13:30 -0500 (Tue, 15 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAclassicalFit.cc
+
+We are in the midst of getting the ewald sums to work (hopefully)
+
+------------------------------------------------------------------------
+r309 | esler | 2004-06-14 17:01:25 -0500 (Mon, 14 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Added algorithm for fast computation of Rho_k.
+
+------------------------------------------------------------------------
+r308 | esler | 2004-06-11 18:11:17 -0500 (Fri, 11 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+   M /trunk/PairAction/PAFitBase.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/template.make
+
+Added lots of stuff for doing long-range potential sums.
+
+------------------------------------------------------------------------
+r307 | esler | 2004-06-10 16:15:30 -0500 (Thu, 10 Jun 2004) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAzeroFit.cc
+   M /trunk/PairAction/PAzeroFit.h
+
+Added function to say that this is not, indeed a long-range potential,
+since it's not a potential at all.
+
+------------------------------------------------------------------------
+r306 | esler | 2004-06-08 16:23:40 -0500 (Tue, 08 Jun 2004) | 2 lines
+Changed paths:
+   A /trunk/Ewald/Ewald.h
+   A /trunk/Ewald/NaClTest.cc
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r305 | esler | 2004-06-07 17:45:14 -0500 (Mon, 07 Jun 2004) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAFitBase.h
+   M /trunk/PairAction/PAclassicalFit.cc
+   M /trunk/PairAction/PAclassicalFit.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.h
+   M /trunk/PairAction/template.make
+
+Added a bunch of stuff to store long-range part of potentials for
+Ewald summations.
+
+------------------------------------------------------------------------
+r304 | esler | 2004-06-07 17:44:43 -0500 (Mon, 07 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/EwaldBase.cc
+   M /trunk/Ewald/EwaldBase.h
+   M /trunk/Ewald/SimpleEwald.cc
+   M /trunk/Ewald/SimpleEwald.h
+
+Added Class to end of class names, to be consistent with naming conventions.
+
+------------------------------------------------------------------------
+r303 | esler | 2004-06-04 17:44:24 -0500 (Fri, 04 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+   M /trunk/Ewald/template.make
+
+Added stuff for Gaussian charge breakup.
+
+------------------------------------------------------------------------
+r302 | esler | 2004-06-04 11:13:28 -0500 (Fri, 04 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+   M /trunk/Ewald/template.make
+
+Added some stuff.
+
+------------------------------------------------------------------------
+r301 | esler | 2004-06-04 11:13:14 -0500 (Fri, 04 Jun 2004) | 2 lines
+Changed paths:
+   M /trunk/template.make
+
+Probably added ewald stuff.
+
+------------------------------------------------------------------------
+r300 | esler | 2004-05-24 16:51:10 -0500 (Mon, 24 May 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Finished most of the main terms in the calculations.
+
+------------------------------------------------------------------------
+r299 | esler | 2004-05-22 17:14:19 -0500 (Sat, 22 May 2004) | 2 lines
+Changed paths:
+   M /trunk/Ewald/Ewald.tex
+
+Added more math to this explanation of Ewald breakups.
+
+------------------------------------------------------------------------
+r298 | bclark | 2004-05-21 11:20:53 -0500 (Fri, 21 May 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.cc
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/PairAction/PAFitBase.h
+
+Current version of the code with non-working energy for David's DM file
+
+------------------------------------------------------------------------
+r297 | esler | 2004-05-20 21:33:51 -0500 (Thu, 20 May 2004) | 2 lines
+Changed paths:
+   A /trunk/Ewald
+   A /trunk/Ewald/Ewald.tex
+   A /trunk/Ewald/EwaldBase.cc
+   A /trunk/Ewald/EwaldBase.h
+   A /trunk/Ewald/SimpleEwald.cc
+   A /trunk/Ewald/SimpleEwald.h
+   A /trunk/Ewald/template.make
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r296 | bclark | 2004-05-09 14:13:32 -0500 (Sun, 09 May 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.cc
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/PairAction/PAFitBase.h
+
+Currently working on getting the pair correlation function and energy to be appropriately matching.
+
+------------------------------------------------------------------------
+r295 | esler | 2004-05-04 15:38:28 -0500 (Tue, 04 May 2004) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Fixed a bug in which BoolType wasn't being propagated down to lower
+sections when we Open an HDF5 file.
+
+------------------------------------------------------------------------
+r294 | bclark | 2004-05-03 15:26:19 -0500 (Mon, 03 May 2004) | 3 lines
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.h
+
+Fixed a bug in which we were not checking to see if we were below
+the lowest grid point for the diagonal action (r and rprime).
+
+------------------------------------------------------------------------
+r293 | esler | 2004-05-02 21:43:01 -0500 (Sun, 02 May 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Fixed a typo in the semiclassical approximation.
+
+------------------------------------------------------------------------
+r292 | esler | 2004-04-30 15:09:38 -0500 (Fri, 30 Apr 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Made a couple of changes.
+
+------------------------------------------------------------------------
+r291 | bclark | 2004-04-29 11:32:03 -0500 (Thu, 29 Apr 2004) | 4 lines
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/Random/Random.h
+
+Removed the distance table. Fixed things that were broken with how it was being put in the box and maybe have the Helium pair correlation function working
+
+Fixe dsome things with the DavidPAClass
+
+------------------------------------------------------------------------
+r290 | esler | 2004-04-26 14:19:52 -0500 (Mon, 26 Apr 2004) | 4 lines
+Changed paths:
+   M /trunk/Splines/QuinticSpline.cc
+   M /trunk/Splines/QuinticSpline.h
+
+Fixed a problem with reading and writing in which StartDeriv was
+begin written twice instead of it and StartDeriv2.  Similarly with
+EndDeriv and EndDeriv2.
+
+------------------------------------------------------------------------
+r289 | esler | 2004-04-23 15:41:25 -0500 (Fri, 23 Apr 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Minor changes.
+
+------------------------------------------------------------------------
+r288 | esler | 2004-04-14 14:29:25 -0500 (Wed, 14 Apr 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/Cost.cc
+   M /trunk/PH/Cost.h
+   M /trunk/PH/PH.cc
+   M /trunk/PH/PH.h
+   M /trunk/PH/template.make
+   M /trunk/Splines/Grid.cc
+   M /trunk/Splines/Grid.h
+
+Removed crufty old-style Read and Write routines.
+
+------------------------------------------------------------------------
+r287 | esler | 2004-04-07 10:24:51 -0500 (Wed, 07 Apr 2004) | 2 lines
+Changed paths:
+   A /trunk/PairAction/DavidPAClass.cc
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r286 | esler | 2004-04-06 14:42:08 -0500 (Tue, 06 Apr 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/DavidPAClass.h
+   M /trunk/PairAction/template.make
+
+Added Aziz potential and DavidPAClass
+
+------------------------------------------------------------------------
+r285 | bclark | 2004-04-06 14:03:47 -0500 (Tue, 06 Apr 2004) | 2 lines
+Changed paths:
+   A /trunk/PairAction/DavidPAClass.h
+
+This is the david pa class
+
+------------------------------------------------------------------------
+r284 | bclark | 2004-04-06 13:40:07 -0500 (Tue, 06 Apr 2004) | 2 lines
+Changed paths:
+   A /trunk/PH/HeAzizPot.cc
+   A /trunk/PH/HeAzizPot.h
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r283 | bclark | 2004-04-06 13:39:44 -0500 (Tue, 06 Apr 2004) | 2 lines
+Changed paths:
+   M /trunk/Atom/template.make
+   M /trunk/PH/Potential.cc
+   M /trunk/PH/Potential.h
+   M /trunk/PH/template.make
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/template.make
+
+Now links in HeAzizPot.o.
+
+------------------------------------------------------------------------
+r282 | esler | 2004-04-05 10:18:04 -0500 (Mon, 05 Apr 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/MyTricubicSpline.h
+
+Added cross derivatives, dxdy, dxdz, and dydz.
+
+------------------------------------------------------------------------
+r281 | esler | 2004-04-02 18:42:56 -0600 (Fri, 02 Apr 2004) | 2 lines
+Changed paths:
+   A /trunk/Splines/DyutimanTest.cc
+   A /trunk/Splines/orbitals.dat
+   M /trunk/Splines/template.make
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r280 | esler | 2004-04-02 16:44:45 -0600 (Fri, 02 Apr 2004) | 3 lines
+Changed paths:
+   M /trunk/Splines/MyTricubicSpline.h
+   M /trunk/Splines/TricubicSpline.h
+
+Added 1st and 2nd derivatives, gradient and laplacian to my
+splines.
+
+------------------------------------------------------------------------
+r279 | esler | 2004-04-02 16:14:10 -0600 (Fri, 02 Apr 2004) | 3 lines
+Changed paths:
+   M /trunk/PH/ScreenedPot.cc
+
+Fixed a bug in which I had BarePot->Read(in) instead of
+BarePot = ReadPotential(in).
+
+------------------------------------------------------------------------
+r278 | esler | 2004-04-02 13:41:39 -0600 (Fri, 02 Apr 2004) | 3 lines
+Changed paths:
+   M /trunk/Splines/Grid.h
+   M /trunk/Splines/QuinticSpline.h
+
+Added an assignment operator for easy copying.  Not sure how I changed
+Grid.h.
+
+------------------------------------------------------------------------
+r277 | esler | 2004-04-02 13:41:19 -0600 (Fri, 02 Apr 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.h
+
+Added an assignment operator for easy copying.
+
+------------------------------------------------------------------------
+r276 | esler | 2004-04-01 11:40:23 -0600 (Thu, 01 Apr 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.cc
+
+Added a missing CloseSection().
+
+------------------------------------------------------------------------
+r275 | esler | 2004-04-01 11:39:15 -0600 (Thu, 01 Apr 2004) | 3 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.cc
+   M /trunk/PH/QuinticPH.h
+
+Made a separte routine WriteWithoutVouter for use in phgen++.
+Regular Write() method does now write Vouter.
+
+------------------------------------------------------------------------
+r274 | esler | 2004-03-31 18:24:18 -0600 (Wed, 31 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/PH/CoreTransform.cc
+   M /trunk/PH/PotentialBase.h
+   M /trunk/PH/QuinticPH.cc
+   M /trunk/PH/QuinticPH.h
+   M /trunk/PH/ScreenedPot.cc
+   M /trunk/PH/ScreenedPot.h
+
+Here I fixed a naming problem in the base class.  Changed method
+CoreRadius() to GetCoreRadius().
+
+------------------------------------------------------------------------
+r273 | esler | 2004-03-31 18:23:48 -0600 (Wed, 31 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Atom/RadialWF.cc
+   M /trunk/Atom/RadialWF.h
+
+Just debugging.
+
+------------------------------------------------------------------------
+r272 | esler | 2004-03-31 12:53:03 -0600 (Wed, 31 Mar 2004) | 4 lines
+Changed paths:
+   M /trunk/PH/CoulombPot.cc
+   M /trunk/PH/CoulombPot.h
+   M /trunk/PH/PotentialBase.h
+   M /trunk/PH/ScreenedPot.cc
+   M /trunk/PH/ScreenedPot.h
+
+Added a NeedsRel() member function to the base class, which tells
+whether or not the potential requires the use of scalar relativistic
+derivatives.  Defaults to false if it is not overridden.
+
+------------------------------------------------------------------------
+r271 | esler | 2004-03-31 12:52:12 -0600 (Wed, 31 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Fixed a formatting bug in PrintTree().
+
+------------------------------------------------------------------------
+r270 | esler | 2004-03-31 12:51:49 -0600 (Wed, 31 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Atom/DFTAtom.cc
+   M /trunk/Atom/RadialWF.cc
+   M /trunk/Atom/RadialWF.h
+
+Added nonPH, nonrelativistic derivatives.
+
+------------------------------------------------------------------------
+r269 | esler | 2004-03-30 14:57:56 -0600 (Tue, 30 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/template.make
+
+Modified template.make so that Plotting isn't included.
+
+------------------------------------------------------------------------
+r268 | esler | 2004-03-30 14:15:21 -0600 (Tue, 30 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAFitBase.h
+   M /trunk/PairAction/PAclassicalFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombFit.cc
+   M /trunk/PairAction/PAsFit.cc
+   M /trunk/PairAction/PAszFit.cc
+   M /trunk/PairAction/PAtricubicFit.cc
+   M /trunk/PairAction/PAzeroFit.cc
+
+Switched to the new Potential class, replacing the old PseudoHamiltonian
+class.  Hopefully is a cleaner interface.
+
+------------------------------------------------------------------------
+r267 | esler | 2004-03-30 14:15:08 -0600 (Tue, 30 Mar 2004) | 4 lines
+Changed paths:
+   M /trunk/PH/CoreTransform.cc
+   M /trunk/PH/CoreTransform.h
+   M /trunk/PH/SplinePot.cc
+
+Switched to the new Potential class, replacing the old PseudoHamiltonian
+class.  Hopefully is a cleaner interface.  Fixed a missing
+CloseSection in SplinePot::Read().
+
+------------------------------------------------------------------------
+r266 | esler | 2004-03-29 18:59:12 -0600 (Mon, 29 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputHDF5.cc
+
+Fixed a problem with including HDF5 files from another file.  The
+parent was begin set improperly.
+
+------------------------------------------------------------------------
+r265 | esler | 2004-03-29 17:41:20 -0600 (Mon, 29 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/template.make
+
+Update template files.
+
+------------------------------------------------------------------------
+r264 | esler | 2004-03-29 16:21:27 -0600 (Mon, 29 Mar 2004) | 2 lines
+Changed paths:
+   A /trunk/PH/SplinePot.cc
+   A /trunk/PH/SplinePot.h
+
+Adding to repository.  This is a general potential file.
+
+------------------------------------------------------------------------
+r263 | esler | 2004-03-29 16:17:28 -0600 (Mon, 29 Mar 2004) | 2 lines
+Changed paths:
+   A /trunk/PH/OldPotential.cc
+
+This is the old Potential.cc file.
+
+------------------------------------------------------------------------
+r262 | esler | 2004-03-26 18:26:57 -0600 (Fri, 26 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/PH/Potential.cc
+   M /trunk/PH/Potential.h
+   M /trunk/PH/PotentialBase.h
+   M /trunk/PH/QuinticPH.cc
+   M /trunk/PH/QuinticPH.h
+   M /trunk/PH/template.make
+
+Added a SplinePot.  Also modified QuinticPH so that it read
+Vouter if that section exists in the input being read.
+
+------------------------------------------------------------------------
+r261 | esler | 2004-03-26 18:26:19 -0600 (Fri, 26 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/Atom/RadialWF.cc
+   M /trunk/Atom/template.make
+
+Added writing of unscreened PH.  Fixed a bug in which the occupancy wasn't
+being set correctly by ValanceConfig.
+
+------------------------------------------------------------------------
+r260 | esler | 2004-03-26 15:51:15 -0600 (Fri, 26 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.cc
+
+Caught a bug in which B(r) was returning 0.0 instead of 1.0 outside the
+core.
+
+------------------------------------------------------------------------
+r259 | esler | 2004-03-26 15:33:52 -0600 (Fri, 26 Mar 2004) | 4 lines
+Changed paths:
+   M /trunk/IO/InputOutputBase.h
+   M /trunk/IO/InputOutputHDF5.cc
+
+Fixed a subtle bug that was causing the destructor for VarHDF5Class to
+fail to be called, leaving the datasets open, and causing a delayed close.
+Also made sure that we close the H5 property variable DSprops.
+
+------------------------------------------------------------------------
+r258 | esler | 2004-03-25 17:10:33 -0600 (Thu, 25 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/template.make
+
+Added hooks for Plotting.
+
+------------------------------------------------------------------------
+r257 | esler | 2004-03-25 16:29:06 -0600 (Thu, 25 Mar 2004) | 2 lines
+Changed paths:
+   A /trunk/Plotting
+   A /trunk/Plotting/GracePlot.cc
+   A /trunk/Plotting/GracePlot.h
+   A /trunk/Plotting/TestGracePlot.cc
+   A /trunk/Plotting/template.make
+
+Adding to repository.  Not thrilled with grace's capabilities.
+
+------------------------------------------------------------------------
+r256 | esler | 2004-03-25 10:15:52 -0600 (Thu, 25 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.cc
+
+Fixed a bug in which ABmin was not be saved or read from the file in
+Read and Write methods.
+
+------------------------------------------------------------------------
+r255 | esler | 2004-03-24 21:43:59 -0600 (Wed, 24 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Atom/AtomBase.h
+
+Added a GetGrid() member function.
+
+------------------------------------------------------------------------
+r254 | esler | 2004-03-24 17:16:01 -0600 (Wed, 24 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.h
+
+Not sure what I changed here.
+
+------------------------------------------------------------------------
+r253 | esler | 2004-03-24 17:15:40 -0600 (Wed, 24 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/Atom/RadialWF.cc
+   M /trunk/Atom/RadialWF.h
+
+Added functions for calculating the partial norms and the logarithmic
+derivaties.
+
+------------------------------------------------------------------------
+r252 | esler | 2004-03-24 15:13:57 -0600 (Wed, 24 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.h
+
+Small sign error fixed in SetABmin()
+
+------------------------------------------------------------------------
+r251 | esler | 2004-03-23 18:16:33 -0600 (Tue, 23 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Blitz.h
+
+Added a Vec4.
+
+------------------------------------------------------------------------
+r250 | esler | 2004-03-23 15:25:09 -0600 (Tue, 23 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.cc
+   M /trunk/PH/QuinticPH.h
+
+Moved IsPH() function into .cc file.
+
+------------------------------------------------------------------------
+r249 | esler | 2004-03-23 15:24:42 -0600 (Tue, 23 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/Atom/RadialWF.cc
+   M /trunk/Atom/RadialWF.h
+
+Fixed a bug in which ScalarRelDerivs were being called instead of
+PseudoDerivs.
+
+------------------------------------------------------------------------
+r248 | esler | 2004-03-23 11:19:41 -0600 (Tue, 23 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.h
+
+Fixed bug in which B(0) was not updated when A(0) was changed.
+
+------------------------------------------------------------------------
+r247 | esler | 2004-03-23 10:55:22 -0600 (Tue, 23 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.h
+
+Fixed a couple of typos.
+
+------------------------------------------------------------------------
+r246 | esler | 2004-03-22 18:26:30 -0600 (Mon, 22 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.h
+
+Fixed a bug in SetAval and SetBval.
+
+------------------------------------------------------------------------
+r245 | esler | 2004-03-16 17:03:18 -0600 (Tue, 16 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/QuinticSpline.h
+
+Not sure what I changed here.
+
+------------------------------------------------------------------------
+r244 | esler | 2004-03-16 17:02:34 -0600 (Tue, 16 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/PH/QuinticPH.h
+
+Added a few member functions for manipulating the parameters and an
+Init function for initilization.
+
+------------------------------------------------------------------------
+r243 | esler | 2004-03-16 17:02:02 -0600 (Tue, 16 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+
+Fixed a bug in which the ASCII version of OpenFile would abort if it
+could not find the file, instead of the proper behavior of returning false.
+
+------------------------------------------------------------------------
+r242 | esler | 2004-03-16 17:00:31 -0600 (Tue, 16 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/Atom/AtomBase.h
+   M /trunk/Atom/DFTAtom.cc
+   M /trunk/Atom/DFTAtom.h
+
+Added a virtual Type function to the base class and DFTAtom that
+returns the atom type.
+
+------------------------------------------------------------------------
+r241 | esler | 2004-03-12 14:14:46 -0600 (Fri, 12 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/Distributed/template.make
+   M /trunk/Fitting/template.make
+   M /trunk/MatrixOps/template.make
+   M /trunk/Random/template.make
+   M /trunk/SpecialFunctions/template.make
+   M /trunk/Splines/template.make
+
+Fixed template.make so that it does not relink the executable unless
+it has to.
+
+------------------------------------------------------------------------
+r240 | esler | 2004-03-12 12:24:26 -0600 (Fri, 12 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/CoulombPot.cc
+
+Write wasn't writing the type to the file.
+
+------------------------------------------------------------------------
+r239 | esler | 2004-03-12 12:24:09 -0600 (Fri, 12 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Atom/NewAtom.h
+
+Added a ReadAtom function.
+
+------------------------------------------------------------------------
+r238 | esler | 2004-03-11 15:14:59 -0600 (Thu, 11 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/ScreenedPot.cc
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r237 | esler | 2004-03-11 15:14:49 -0600 (Thu, 11 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/Atom/DFTAtom.cc
+   M /trunk/Atom/RadialWF.cc
+
+Wasn't setting the ScreenedPot's charge.  This cause a problems with
+infinityBC.
+
+------------------------------------------------------------------------
+r236 | esler | 2004-03-11 11:50:51 -0600 (Thu, 11 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Atom/RadialWF.cc
+
+Had two typos in TurningIndex, which was causing the problem.
+
+------------------------------------------------------------------------
+r235 | esler | 2004-03-11 11:06:25 -0600 (Thu, 11 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Atom/RadialWF.cc
+
+Added some debuging info.
+
+------------------------------------------------------------------------
+r234 | esler | 2004-03-11 10:51:09 -0600 (Thu, 11 Mar 2004) | 2 lines
+Changed paths:
+   A /trunk/IO/TestHDF5.cc
+
+Forgot to add to repository.
+
+------------------------------------------------------------------------
+r233 | esler | 2004-03-11 10:49:42 -0600 (Thu, 11 Mar 2004) | 5 lines
+Changed paths:
+   M /trunk/Splines/CubicSpline.h
+   M /trunk/Splines/Grid.h
+   M /trunk/Splines/TricubicSpline.h
+
+Changed Points() function in grid to return a reference to the
+Array<double,1> of the grid points data.  Added a Data() to return a
+double* to that same data.  Added a Data() function to CubicSpline which
+returns a reference to Array<double,1> to the y data.
+
+------------------------------------------------------------------------
+r232 | esler | 2004-03-11 10:47:28 -0600 (Thu, 11 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/PH/Potential.h
+   M /trunk/PH/ScreenedPot.cc
+
+Fixed ReadPotential so it works.  Forgot to actually do the reading and
+return the potential last time.
+
+------------------------------------------------------------------------
+r231 | esler | 2004-03-11 10:46:58 -0600 (Thu, 11 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+
+Addead a ReadVar which takes a default value for the variable.
+
+------------------------------------------------------------------------
+r230 | esler | 2004-03-11 10:46:34 -0600 (Thu, 11 Mar 2004) | 2 lines
+Changed paths:
+   A /trunk/Atom/AtomBase.h
+   M /trunk/Atom/DFTAtom.cc
+   A /trunk/Atom/DFTAtom.h
+   M /trunk/Atom/NewAtom.h
+   M /trunk/Atom/RadialWF.cc
+   M /trunk/Atom/RadialWF.h
+   M /trunk/Atom/TestDFTAtom.cc
+   M /trunk/Atom/TestRadialWF.cc
+   M /trunk/Atom/template.make
+
+Lot's of modifications to get the new atom classes working.
+
+------------------------------------------------------------------------
+r229 | esler | 2004-03-09 17:36:08 -0600 (Tue, 09 Mar 2004) | 2 lines
+Changed paths:
+   A /trunk/Atom/DFTAtom.cc
+   A /trunk/Atom/TestDFTAtom.cc
+   A /trunk/PH/CoulombPot.cc
+   A /trunk/PH/CoulombPot.h
+   A /trunk/PH/Potential.h
+   A /trunk/PH/PotentialBase.h
+   A /trunk/PH/QuinticPH.cc
+   A /trunk/PH/QuinticPH.h
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r228 | esler | 2004-03-09 17:33:37 -0600 (Tue, 09 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/Splines/CubicSpline.h
+   M /trunk/Splines/Grid.h
+   M /trunk/Splines/QuinticSpline.h
+
+Added a Data() member function to CubicSpline which returns a reference
+to y for convenience.
+
+------------------------------------------------------------------------
+r227 | esler | 2004-03-09 17:33:04 -0600 (Tue, 09 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.h
+   M /trunk/PH/template.make
+
+Probably modified something or other.
+
+------------------------------------------------------------------------
+r226 | esler | 2004-03-09 17:32:48 -0600 (Tue, 09 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Atom/Atom.cc
+   M /trunk/Atom/Atom.h
+   M /trunk/Atom/NewAtom.h
+   M /trunk/Atom/RadialWF.cc
+   M /trunk/Atom/template.make
+
+Seems to be working okay.
+
+------------------------------------------------------------------------
+r225 | esler | 2004-03-09 14:17:35 -0600 (Tue, 09 Mar 2004) | 2 lines
+Changed paths:
+   A /trunk/PH/ScreenedPot.cc
+   A /trunk/PH/ScreenedPot.h
+
+Adding to respository.  Renamed from XCPot.h and XCPot.cc.
+
+------------------------------------------------------------------------
+r224 | esler | 2004-03-09 13:27:11 -0600 (Tue, 09 Mar 2004) | 2 lines
+Changed paths:
+   A /trunk/Atom/NewAtom.cc
+   A /trunk/Atom/NewAtom.h
+   A /trunk/Atom/RadialWF.cc
+   A /trunk/Atom/RadialWF.h
+   A /trunk/Atom/TestRadialWF.cc
+   A /trunk/Atom/template.make
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r223 | esler | 2004-03-08 19:13:55 -0600 (Mon, 08 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Integration/RungeKutta.h
+   M /trunk/Integration/TestIntegrate.cc
+
+Sped the integration up just a tiny bit.
+
+------------------------------------------------------------------------
+r222 | esler | 2004-03-08 18:51:25 -0600 (Mon, 08 Mar 2004) | 2 lines
+Changed paths:
+   A /trunk/Integration/TestIntegrate.cc
+
+Adding test to repository.
+
+------------------------------------------------------------------------
+r221 | esler | 2004-03-08 18:51:08 -0600 (Mon, 08 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/Integration/Integrate.cc
+   M /trunk/Integration/RungeKutta.h
+   M /trunk/Integration/template.make
+
+Fixed RungeKutta.h -- a template replacement for Integrate.h and
+Integrate.cc.
+
+------------------------------------------------------------------------
+r220 | esler | 2004-03-08 17:25:11 -0600 (Mon, 08 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Integration/Integrate.cc
+   M /trunk/Integration/Integrate.h
+   A /trunk/Integration/RungeKutta.h
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r219 | esler | 2004-03-03 14:05:34 -0600 (Wed, 03 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputHDF5.h
+   M /trunk/IO/template.make
+
+Finally got around to adding support for bools to HDF5 through
+enumerated types.
+
+------------------------------------------------------------------------
+r218 | esler | 2004-03-02 18:21:31 -0600 (Tue, 02 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Atom/Atom.cc
+   M /trunk/Atom/Atom.h
+
+Moves some public stuff in RadialWF into private.
+
+------------------------------------------------------------------------
+r217 | esler | 2004-03-02 18:21:03 -0600 (Tue, 02 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/template.make
+
+Fixed a little problem.
+
+------------------------------------------------------------------------
+r216 | esler | 2004-03-02 17:12:12 -0600 (Tue, 02 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/QuinticSpline.cc
+   M /trunk/Splines/QuinticSpline.h
+   A /trunk/Splines/TestQuintic.cc
+   M /trunk/Splines/template.make
+
+Quintic splines seem to be working.  Added a test routine.
+
+------------------------------------------------------------------------
+r215 | esler | 2004-03-01 16:01:10 -0600 (Mon, 01 Mar 2004) | 3 lines
+Changed paths:
+   M /trunk/Integration/GKIntegration.h
+
+A little tweaking.  I think I fixed a problem with the way it was evaluating
+the error between Gauss and Kronrod.
+
+------------------------------------------------------------------------
+r214 | esler | 2004-03-01 12:47:06 -0600 (Mon, 01 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Not sure what I changed.
+
+------------------------------------------------------------------------
+r213 | esler | 2004-03-01 12:46:55 -0600 (Mon, 01 Mar 2004) | 2 lines
+Changed paths:
+   M /trunk/Integration/GKIntegration.h
+
+Tweaked the GKintegration routines.
+
+------------------------------------------------------------------------
+r212 | esler | 2004-02-26 15:41:50 -0600 (Thu, 26 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/MyTricubicSpline.h
+   M /trunk/Splines/TestMyTricubic.cc
+   M /trunk/Splines/template.make
+
+Fortran code for MyTricubicSpline.h now 20% than fortran code.
+
+------------------------------------------------------------------------
+r211 | esler | 2004-02-26 15:41:18 -0600 (Thu, 26 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/SpecialFunctions/SpecialFunctions.cc
+
+Added a new function for bessel functions in the regime of large l.
+
+------------------------------------------------------------------------
+r210 | esler | 2004-02-26 15:40:47 -0600 (Thu, 26 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Code now 20% faster than fortran code.
+
+------------------------------------------------------------------------
+r209 | esler | 2004-02-23 11:09:16 -0600 (Mon, 23 Feb 2004) | 5 lines
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+   M /trunk/PairAction/PAtricubicFit.h
+
+Some changes for extrapolation in l for Rho.cc.  Changed PAtricubicFit to
+use MyTricubicSpline, which uses less memory.  Added a catch for z==0.0
+in SpecialFunctions.cc for il_scaled.  Updated an include for DensityMatrix.h
+which is no longer used.
+
+------------------------------------------------------------------------
+r208 | esler | 2004-02-19 15:50:12 -0600 (Thu, 19 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.h
+   M /trunk/Splines/TestBicubic.cc
+
+Increased speed of Bicubic splines with loop unrolling.
+
+------------------------------------------------------------------------
+r207 | esler | 2004-02-17 18:54:02 -0600 (Tue, 17 Feb 2004) | 4 lines
+Changed paths:
+   M /trunk/Integration/GKIntegration.h
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Discovered that expm1 trick is bad at low temperature.  Fixed this
+problem.  Maybe improved accuracy of GKIntegration, but haven't tested this
+yet.
+
+------------------------------------------------------------------------
+r206 | esler | 2004-02-16 10:26:16 -0600 (Mon, 16 Feb 2004) | 4 lines
+Changed paths:
+   M /trunk/Fitting/Test.cc
+   M /trunk/IO/InputFile.h
+   M /trunk/Integration/GKIntegration.cc
+   M /trunk/Integration/HermiteQuad.cc
+   M /trunk/Integration/HermiteQuad.h
+   M /trunk/Integration/Standard.h
+   M /trunk/Integration/TestHermite.cc
+
+Fixed alot of bugs.  Major change was to make use of expm1 and log1p
+functions to avoid loss of precision in U at high temperatures.  Fixed
+some antiquated includes that the icc compiler complains about.
+
+------------------------------------------------------------------------
+r205 | bclark | 2004-02-12 18:46:00 -0600 (Thu, 12 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/Random/TestRandom.cc
+
+Fixed permutations a little although they still appear to be broken.  Began writing block moves of permutations and bisections
+
+------------------------------------------------------------------------
+r204 | bclark | 2004-02-12 18:45:52 -0600 (Thu, 12 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputBase.h
+
+ Fixed permutations a little although they still appear to be broken.  Began writing block moves of permutations and bisections
+
+------------------------------------------------------------------------
+r203 | esler | 2004-02-11 15:01:22 -0600 (Wed, 11 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Made some change long ago that I don't remember.
+
+------------------------------------------------------------------------
+r202 | bclark | 2004-02-10 16:09:53 -0600 (Tue, 10 Feb 2004) | 4 lines
+Changed paths:
+   M /trunk/Random/Random.h
+
+We have added a BisectionMoveClass2 to replace the BisectionMoveClass.  Currently that appears to be working.  After this revision we will replace the BisectionMoveClass with the BisectionMoveClass2 but we wanted to keep a working copy of the code committed.
+
+Random now takes a seed if you want
+
+------------------------------------------------------------------------
+r201 | esler | 2004-02-10 10:09:03 -0600 (Tue, 10 Feb 2004) | 3 lines
+Changed paths:
+   M /trunk/DFT/template.make
+   M /trunk/IO/InputOutputASCII.cc
+
+Fixed Makefiles for use with tungsten.  Added a ReadParams routine
+and a Run routine to UClass.
+
+------------------------------------------------------------------------
+r200 | esler | 2004-02-10 10:01:46 -0600 (Tue, 10 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/fortran/Makefile
+
+Fixed Makefile to use $(F77) instead of g77.
+
+------------------------------------------------------------------------
+r199 | esler | 2004-02-07 15:42:37 -0600 (Sat, 07 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.cc
+
+Fixed a problem with improper use of length tag in probing.
+
+------------------------------------------------------------------------
+r198 | esler | 2004-02-06 15:41:29 -0600 (Fri, 06 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/MyTricubicSpline.h
+
+Adding some debugging lines.  Cleaned up now.  Unrelated bug.
+
+------------------------------------------------------------------------
+r197 | esler | 2004-02-05 10:07:11 -0600 (Thu, 05 Feb 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/MyTricubicSpline.h
+
+Added some asserts to ensure size consistency.
+
+------------------------------------------------------------------------
+r196 | esler | 2004-01-28 18:11:55 -0600 (Wed, 28 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/MyTricubicSpline.h
+   M /trunk/Splines/template.make
+
+Added an empty () constructor.
+
+------------------------------------------------------------------------
+r195 | esler | 2004-01-28 17:32:33 -0600 (Wed, 28 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/Splines/MyTricubicSpline.cc
+
+Tiny mistake in comment
+
+------------------------------------------------------------------------
+r194 | esler | 2004-01-28 17:19:38 -0600 (Wed, 28 Jan 2004) | 2 lines
+Changed paths:
+   A /trunk/Splines/MyTricubicSpline.cc
+   A /trunk/Splines/MyTricubicSpline.h
+   A /trunk/Splines/TestMyTricubic.cc
+   M /trunk/Splines/TricubicSpline.h
+   M /trunk/Splines/template.make
+
+Added a new tricubic spline class.
+
+------------------------------------------------------------------------
+r193 | esler | 2004-01-26 17:56:19 -0600 (Mon, 26 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Fixed a bug in the infinity cut off in PH_Colomb.
+
+------------------------------------------------------------------------
+r192 | esler | 2004-01-23 22:38:37 -0600 (Fri, 23 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/Distributed/DistributedMat.cc
+   M /trunk/Distributed/DistributedMat.h
+   M /trunk/Distributed/TestDistributedMat.cc
+
+Added a "real" distributed Array3.
+
+------------------------------------------------------------------------
+r191 | esler | 2004-01-23 22:38:23 -0600 (Fri, 23 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/template.make
+
+Fixed ordering of common object builds to match dependencies.
+
+------------------------------------------------------------------------
+r190 | bclark | 2004-01-23 21:51:01 -0600 (Fri, 23 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/Random/Random.h
+
+Made a new common Random number generator class based on sprng.
+
+------------------------------------------------------------------------
+r189 | bclark | 2004-01-23 21:50:38 -0600 (Fri, 23 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/Distributed/template.make
+   M /trunk/template.make
+
+Changed order of Common objects so that we can build.
+
+------------------------------------------------------------------------
+r188 | bclark | 2004-01-23 21:47:19 -0600 (Fri, 23 Jan 2004) | 2 lines
+Changed paths:
+   A /trunk/MPI/Communication.cc
+   M /trunk/MPI/Communication.h
+   M /trunk/MPI/template.make
+
+Merged PIMC CommunicatorClass routines into the common repository version.
+
+------------------------------------------------------------------------
+r187 | esler | 2004-01-23 20:33:51 -0600 (Fri, 23 Jan 2004) | 3 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Fixed a minor bug in the truncation behavior of Coulomb3D class at the
+origin.
+
+------------------------------------------------------------------------
+r186 | bclark | 2004-01-22 18:06:00 -0600 (Thu, 22 Jan 2004) | 2 lines
+Changed paths:
+   A /trunk/PairAction/PAzeroFit.cc
+   A /trunk/PairAction/PAzeroFit.h
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r185 | esler | 2004-01-22 17:59:03 -0600 (Thu, 22 Jan 2004) | 4 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Added much in the way of new ideas, particular separate storage and
+tabulation of the kinetic and potential action.  Kinetic squaring
+seems to be perhaps close to working.
+
+------------------------------------------------------------------------
+r184 | bclark | 2004-01-22 12:09:11 -0600 (Thu, 22 Jan 2004) | 2 lines
+Changed paths:
+   A /trunk/Random/Random.h
+   A /trunk/Random/TestRandom.cc
+   M /trunk/Random/template.make
+
+Added a class that produces local and common random numbers.
+
+------------------------------------------------------------------------
+r183 | bclark | 2004-01-14 17:39:48 -0600 (Wed, 14 Jan 2004) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/template.make
+
+
+Added zero fit pair action for free particles
+
+------------------------------------------------------------------------
+r182 | bclark | 2004-01-14 17:38:36 -0600 (Wed, 14 Jan 2004) | 9 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+
+Added code to have the input correctly read and process moves and
+specify the algorithm in the input.
+
+Debugged periodic boundary conditions. We believe they are working now
+but the code is sortof hard coded for the pbc case with many images.
+Still need to correct beta derivative for PBC case.
+
+Also fixed bug about [dim] missing on something.
+
+------------------------------------------------------------------------
+r181 | esler | 2004-01-12 23:36:03 -0600 (Mon, 12 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/MatrixOps/MatrixOps.h
+
+Added some operators for Mat3's.
+
+------------------------------------------------------------------------
+r180 | esler | 2004-01-09 17:56:27 -0600 (Fri, 09 Jan 2004) | 3 lines
+Changed paths:
+   A /trunk/PH/CoreTransform.cc
+   A /trunk/PH/CoreTransform.h
+   M /trunk/PH/template.make
+
+Adding to Common repository so it can be used by more than one
+project.
+
+------------------------------------------------------------------------
+r179 | bclark | 2004-01-08 13:48:38 -0600 (Thu, 08 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/template.make
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r178 | esler | 2004-01-08 13:19:51 -0600 (Thu, 08 Jan 2004) | 2 lines
+Changed paths:
+   A /trunk/Integration/TestHermite.cc
+
+Added to repository.
+
+------------------------------------------------------------------------
+r177 | esler | 2004-01-07 16:45:04 -0600 (Wed, 07 Jan 2004) | 2 lines
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/Integration/HermiteQuad.cc
+   M /trunk/Integration/HermiteQuad.h
+   M /trunk/Integration/template.make
+   M /trunk/template.make
+
+Don't know what was changed here.
+
+------------------------------------------------------------------------
+r176 | esler | 2003-12-12 09:28:17 -0600 (Fri, 12 Dec 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAtricubicFit.cc
+
+Removed extraneous printing.
+
+------------------------------------------------------------------------
+r175 | esler | 2003-12-11 17:30:10 -0600 (Thu, 11 Dec 2003) | 2 lines
+Changed paths:
+   M /trunk/SpecialFunctions/Polynomial.h
+   M /trunk/SpecialFunctions/PolynomialSet.cc
+   M /trunk/SpecialFunctions/PolynomialSet.h
+
+Fixed a problem in which the normalization constant could become NAN.
+
+------------------------------------------------------------------------
+r174 | esler | 2003-12-11 17:29:43 -0600 (Thu, 11 Dec 2003) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAsFit.cc
+   M /trunk/PairAction/PAsFit.h
+   M /trunk/PairAction/PAszFit.cc
+   M /trunk/PairAction/PAszFit.h
+   M /trunk/PairAction/PAtricubicFit.cc
+
+I've modified the tricubic fit to be a little smarter.  It uses a
+special semiclassical approximation for the far off-diagonal elements.
+
+------------------------------------------------------------------------
+r173 | esler | 2003-12-05 16:53:25 -0600 (Fri, 05 Dec 2003) | 2 lines
+Changed paths:
+   A /trunk/Atom
+   A /trunk/Atom/Atom.cc
+   A /trunk/Atom/Atom.h
+   A /trunk/Atom/Energies.cc
+   A /trunk/Atom/Energies.h
+
+Initial add to repository.
+
+------------------------------------------------------------------------
+r172 | esler | 2003-12-04 23:23:40 -0600 (Thu, 04 Dec 2003) | 2 lines
+Changed paths:
+   A /trunk/PairAction/PAtricubicFit.cc
+   A /trunk/PairAction/PAtricubicFit.h
+
+Adding new fit.
+
+------------------------------------------------------------------------
+r171 | esler | 2003-12-04 23:20:56 -0600 (Thu, 04 Dec 2003) | 2 lines
+Changed paths:
+   A /trunk/Splines/TestTricubic.cc
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r170 | esler | 2003-12-04 23:17:45 -0600 (Thu, 04 Dec 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/TricubicSpline.h
+
+Added copy constructor and operator=() functions for resizeAndPreserve.
+
+------------------------------------------------------------------------
+r169 | esler | 2003-12-03 17:35:51 -0600 (Wed, 03 Dec 2003) | 4 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.cc
+   M /trunk/Splines/BicubicSpline.h
+   M /trunk/Splines/TricubicSpline.h
+
+Fixed (at least some) problems with SymmBicubicSpline class.
+I had not realized that derivatives of a symmetric function are not
+symmetric.
+
+------------------------------------------------------------------------
+r168 | esler | 2003-12-03 17:34:59 -0600 (Wed, 03 Dec 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAsFit.cc
+   M /trunk/PairAction/template.make
+
+Added tricubic spline fit.  Fixed costheta problem at origin in PAsFit.cc.
+
+------------------------------------------------------------------------
+r167 | esler | 2003-12-02 15:46:22 -0600 (Tue, 02 Dec 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/fortran/Makefile
+   M /trunk/Splines/fortran/bcspeval.f
+   M /trunk/Splines/fortran/bcspline.f
+   M /trunk/Splines/fortran/evtricub.f
+   M /trunk/Splines/fortran/herm3ev.f
+   M /trunk/Splines/fortran/ibc_ck.f
+   M /trunk/Splines/fortran/mktricubw.f
+   M /trunk/Splines/fortran/splinck.f
+   M /trunk/Splines/fortran/tcspeval.f
+   M /trunk/Splines/fortran/tcspline.f
+   M /trunk/Splines/fortran/zonfind.f
+
+Fixed a problem in that implicit reals were not real*8's.
+
+------------------------------------------------------------------------
+r166 | esler | 2003-12-02 15:44:40 -0600 (Tue, 02 Dec 2003) | 2 lines
+Changed paths:
+   A /trunk/Splines/QuinticSpline.cc
+   A /trunk/Splines/QuinticSpline.h
+   M /trunk/Splines/TestBicubic.cc
+   M /trunk/Splines/TricubicSpline.h
+   M /trunk/Splines/template.make
+
+Adding quintic spline files.  Got tricubic splines working, preliminarily.
+
+------------------------------------------------------------------------
+r165 | esler | 2003-12-02 15:37:36 -0600 (Tue, 02 Dec 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Turned off error printing if a file doesn't exist when we try to open.
+
+------------------------------------------------------------------------
+r164 | esler | 2003-11-24 19:33:37 -0600 (Mon, 24 Nov 2003) | 2 lines
+Changed paths:
+   A /trunk/Splines/fortran/Makefile
+
+Forgot to add with other files.
+
+------------------------------------------------------------------------
+r163 | esler | 2003-11-24 19:33:02 -0600 (Mon, 24 Nov 2003) | 2 lines
+Changed paths:
+   A /trunk/Splines/fortran
+   A /trunk/Splines/fortran/bcspeval.f
+   A /trunk/Splines/fortran/bcspline.f
+   A /trunk/Splines/fortran/evtricub.f
+   A /trunk/Splines/fortran/herm3ev.f
+   A /trunk/Splines/fortran/ibc_ck.f
+   A /trunk/Splines/fortran/mktricubw.f
+   A /trunk/Splines/fortran/splinck.f
+   A /trunk/Splines/fortran/tcspeval.f
+   A /trunk/Splines/fortran/tcspline.f
+   A /trunk/Splines/fortran/v_spline.f
+   A /trunk/Splines/fortran/zonfind.f
+
+Adding necessary fortran files for tricubic splines.
+
+------------------------------------------------------------------------
+r162 | esler | 2003-11-24 19:31:44 -0600 (Mon, 24 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/Grid.h
+   A /trunk/Splines/TestTricubicSpline.cc
+   A /trunk/Splines/TricubicSpline.h
+   M /trunk/Splines/template.make
+
+Adding a tricubic spline class based on PSPLINE fortran package.
+
+------------------------------------------------------------------------
+r161 | esler | 2003-11-21 14:23:14 -0600 (Fri, 21 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAsFit.cc
+
+Tweaked a bit.  Will try a better fit soon.
+
+------------------------------------------------------------------------
+r160 | esler | 2003-11-21 14:22:53 -0600 (Fri, 21 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.h
+
+Added a Probe function for checking to see if there a messages pending.
+
+------------------------------------------------------------------------
+r159 | esler | 2003-11-19 16:32:50 -0600 (Wed, 19 Nov 2003) | 2 lines
+Changed paths:
+   A /trunk/Distributed/template.make
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r158 | jvincent | 2003-11-19 11:29:50 -0600 (Wed, 19 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputHDF5.h
+   M /trunk/IO/InputOutputXML.cc
+   M /trunk/IO/InputOutputXML.h
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r157 | jvincent | 2003-11-19 11:15:33 -0600 (Wed, 19 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputFile.cc
+   M /trunk/IO/InputFile.h
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/InputOutputBase.h
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r156 | esler | 2003-11-18 17:32:16 -0600 (Tue, 18 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.cc
+   M /trunk/Splines/BicubicSpline.h
+
+Added a SymmBicubicSpline class.
+
+------------------------------------------------------------------------
+r155 | esler | 2003-11-18 17:31:50 -0600 (Tue, 18 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAsFit.cc
+   M /trunk/PairAction/PAsFit.h
+
+Parallelized the fitting procedure.
+
+------------------------------------------------------------------------
+r154 | esler | 2003-11-18 17:31:31 -0600 (Tue, 18 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.h
+
+Added a Broadcast member function.
+
+------------------------------------------------------------------------
+r153 | esler | 2003-11-18 17:31:12 -0600 (Tue, 18 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/Distributed/DistributedMat.h
+   M /trunk/Distributed/TestDistributedMat.cc
+
+Fixed some minor errors.
+
+------------------------------------------------------------------------
+r152 | esler | 2003-11-18 17:30:52 -0600 (Tue, 18 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/Blitz.h
+   M /trunk/template.make
+
+Added a SymmArray<T> class.  This is a symmetric Array<T,2>.
+
+------------------------------------------------------------------------
+r151 | esler | 2003-11-17 15:00:51 -0600 (Mon, 17 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/Distributed/DistributedMat.cc
+   M /trunk/Distributed/DistributedMat.h
+   A /trunk/Distributed/TestDistributedMat.cc
+
+Adding Test module file.
+
+------------------------------------------------------------------------
+r150 | esler | 2003-11-12 18:13:20 -0600 (Wed, 12 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAsFit.cc
+
+Fixed errors in U and dU functions.
+
+------------------------------------------------------------------------
+r149 | esler | 2003-11-11 13:30:49 -0600 (Tue, 11 Nov 2003) | 3 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.h
+
+Added copy constructors and assignement operators to MultiBicubicSpline
+for resizeAndPreserve operation.
+
+------------------------------------------------------------------------
+r148 | esler | 2003-11-11 13:30:13 -0600 (Tue, 11 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAsFit.cc
+
+Fixed a couple of small bugs.
+
+------------------------------------------------------------------------
+r147 | esler | 2003-11-11 11:19:58 -0600 (Tue, 11 Nov 2003) | 2 lines
+Changed paths:
+   A /trunk/Distributed
+   A /trunk/Distributed/DistributedMat.cc
+   A /trunk/Distributed/DistributedMat.h
+
+Adding these to the Common repository.  Added a DistributedArray3.
+
+------------------------------------------------------------------------
+r146 | esler | 2003-11-10 23:54:36 -0600 (Mon, 10 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAsFit.cc
+
+Fixed an error in the Error function.
+
+------------------------------------------------------------------------
+r145 | esler | 2003-11-10 23:27:46 -0600 (Mon, 10 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAsFit.cc
+   M /trunk/PairAction/PAsFit.h
+
+Close to a working fit for PH actions.
+
+------------------------------------------------------------------------
+r144 | esler | 2003-11-07 11:19:56 -0600 (Fri, 07 Nov 2003) | 2 lines
+Changed paths:
+   A /trunk/PairAction/PAsFit.cc
+   A /trunk/PairAction/PAsFit.h
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r143 | esler | 2003-11-07 11:17:31 -0600 (Fri, 07 Nov 2003) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/template.make
+
+Added a new fit, in which we expand in s.  Coefficients are tabulated
+in a MultiBicubicSpline as a function of q and z.
+
+------------------------------------------------------------------------
+r142 | esler | 2003-11-07 11:16:40 -0600 (Fri, 07 Nov 2003) | 3 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Fixed a bug in PH_CubicSplineXC::Read, in which Amin and Bmin weren't
+being set.
+
+------------------------------------------------------------------------
+r141 | esler | 2003-11-07 11:16:15 -0600 (Fri, 07 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+
+Don't remember what the problem here was.
+
+------------------------------------------------------------------------
+r140 | esler | 2003-11-04 19:56:09 -0600 (Tue, 04 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombBCFit.cc
+
+Fixed something or other.
+
+------------------------------------------------------------------------
+r139 | esler | 2003-11-04 19:55:56 -0600 (Tue, 04 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Added a blank Read function to PH_Zero.
+
+------------------------------------------------------------------------
+r138 | esler | 2003-11-03 18:31:10 -0600 (Mon, 03 Nov 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombBCFit.cc
+
+Wasn't setting SmallestBeta.
+
+------------------------------------------------------------------------
+r137 | esler | 2003-10-31 18:17:17 -0600 (Fri, 31 Oct 2003) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/InputOutputBase.h
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputHDF5.h
+   M /trunk/IO/InputOutputXML.cc
+   M /trunk/IO/InputOutputXML.h
+
+Added 4D arrays of all based types to IOSectionClass implementations.
+Phew, that was a pain...
+
+------------------------------------------------------------------------
+r136 | esler | 2003-10-31 12:23:59 -0600 (Fri, 31 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Changed number scheme to use _'s instead of .'s.
+
+------------------------------------------------------------------------
+r135 | esler | 2003-10-30 15:51:01 -0600 (Thu, 30 Oct 2003) | 2 lines
+Changed paths:
+   A /trunk/PairAction/PAclassicalFit.cc
+   A /trunk/PairAction/PAclassicalFit.h
+
+Added this for interaction between classical particles.
+
+------------------------------------------------------------------------
+r134 | esler | 2003-10-30 15:49:22 -0600 (Thu, 30 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.cc
+   M /trunk/PH/PH.h
+
+Added a straight coulomb type.
+
+------------------------------------------------------------------------
+r133 | esler | 2003-10-30 15:27:33 -0600 (Thu, 30 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAcoulombBCFit.cc
+   M /trunk/PairAction/PAcoulombBCFit.h
+   M /trunk/PairAction/template.make
+
+Added a fit type for classical (lambda=0) particles.
+
+------------------------------------------------------------------------
+r132 | esler | 2003-10-29 23:08:20 -0600 (Wed, 29 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.h
+
+Added copy constructor and operator= necessary for array resizeAndPreserve.
+
+------------------------------------------------------------------------
+r131 | esler | 2003-10-29 23:06:45 -0600 (Wed, 29 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombBCFit.h
+
+Added missing include of BicubicSpline.h.
+
+------------------------------------------------------------------------
+r130 | esler | 2003-10-29 22:57:34 -0600 (Wed, 29 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombBCFit.cc
+
+Minor bug fixes.
+
+------------------------------------------------------------------------
+r129 | esler | 2003-10-29 15:13:52 -0600 (Wed, 29 Oct 2003) | 2 lines
+Changed paths:
+   A /trunk/PairAction/PAcoulombBCFit.cc
+   A /trunk/PairAction/PAcoulombBCFit.h
+
+Adding a bicubic-spline-based coulomb action fit.
+
+------------------------------------------------------------------------
+r128 | esler | 2003-10-29 15:13:15 -0600 (Wed, 29 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/SpecialFunctions/PolynomialSet.cc
+
+Don't remember what changed.
+
+------------------------------------------------------------------------
+r127 | esler | 2003-10-29 15:13:06 -0600 (Wed, 29 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAcoulombFit.cc
+   M /trunk/PairAction/template.make
+
+Added a bicublic spline-based coulomb fit class.
+
+------------------------------------------------------------------------
+r126 | esler | 2003-10-28 17:49:34 -0600 (Tue, 28 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/SpecialFunctions/PolynomialSet.cc
+   M /trunk/SpecialFunctions/TestPolySet.cc
+
+Fixed some bugs, added tests.
+
+------------------------------------------------------------------------
+r125 | esler | 2003-10-28 17:49:17 -0600 (Tue, 28 Oct 2003) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombFit.cc
+   M /trunk/PairAction/PAcoulombFit.h
+
+Added several different fit types based on orthogonal polynomials.
+Still in a state of flux.
+
+------------------------------------------------------------------------
+r124 | esler | 2003-10-28 10:07:28 -0600 (Tue, 28 Oct 2003) | 3 lines
+Changed paths:
+   M /trunk/SpecialFunctions/PolynomialSet.cc
+   M /trunk/SpecialFunctions/TestPolySet.cc
+
+Added a couple of tests for the polynomial sets.  These tests located
+a bug in which the n=0 (constant) polynomial wasn't being normalized.
+
+------------------------------------------------------------------------
+r123 | esler | 2003-10-27 17:39:12 -0600 (Mon, 27 Oct 2003) | 2 lines
+Changed paths:
+   A /trunk/SpecialFunctions/Polynomial.h
+   A /trunk/SpecialFunctions/PolynomialSet.cc
+   A /trunk/SpecialFunctions/PolynomialSet.h
+   A /trunk/SpecialFunctions/TestPoly.cc
+   A /trunk/SpecialFunctions/TestPolySet.cc
+   M /trunk/SpecialFunctions/template.make
+
+Added polynomial class and orthogonal polynomial set classes.
+
+------------------------------------------------------------------------
+r122 | esler | 2003-10-24 17:56:40 -0500 (Fri, 24 Oct 2003) | 2 lines
+Changed paths:
+   A /trunk/SpecialFunctions/LegendrePoly.h
+   A /trunk/SpecialFunctions/TestLegendre.cc
+
+Adding legendre stuff to repository.
+
+------------------------------------------------------------------------
+r121 | esler | 2003-10-24 17:56:12 -0500 (Fri, 24 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/SpecialFunctions/template.make
+
+Added legendre polynomials.
+
+------------------------------------------------------------------------
+r120 | esler | 2003-10-24 17:55:58 -0500 (Fri, 24 Oct 2003) | 6 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombFit.cc
+
+Switched fitting method to integration w.r.t orthogonal polynomials.
+A little more stable.  In particular, we now use Legendre polynomials,
+but this doesn't properly weight with the free-particle density matrix.
+The next step will be to create a custom set of orthonal polynomials which
+are orthogonal on our fixed interval w.r.t our weight function.
+
+------------------------------------------------------------------------
+r119 | esler | 2003-10-23 12:21:34 -0500 (Thu, 23 Oct 2003) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutputXML.cc
+   M /trunk/IO/Test1.xml
+
+Finished the ReadVal routines.  Must remember to do the right thing
+for includes.  Must also do the writing when changes are made.
+
+------------------------------------------------------------------------
+r118 | esler | 2003-10-21 17:27:13 -0500 (Tue, 21 Oct 2003) | 2 lines
+Changed paths:
+   A /trunk/IO/TestXML.cc
+
+Forgot to add earlier.
+
+------------------------------------------------------------------------
+r117 | esler | 2003-10-10 12:03:58 -0500 (Fri, 10 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputXML.cc
+
+Fixed two typos.
+
+------------------------------------------------------------------------
+r116 | esler | 2003-10-10 11:58:42 -0500 (Fri, 10 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/template.make
+
+Added XML interface to objects needed.
+
+------------------------------------------------------------------------
+r115 | esler | 2003-10-10 11:54:58 -0500 (Fri, 10 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputBase.h
+   M /trunk/IO/InputOutputXML.cc
+   M /trunk/IO/InputOutputXML.h
+   M /trunk/IO/Test1.xml
+
+About half working.
+
+------------------------------------------------------------------------
+r114 | esler | 2003-10-09 12:10:17 -0500 (Thu, 09 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   A /trunk/IO/InputOutputXML.cc
+   A /trunk/IO/InputOutputXML.h
+   A /trunk/IO/Test1.xml
+   M /trunk/IO/template.make
+
+Adding an XML parser.
+
+------------------------------------------------------------------------
+r113 | esler | 2003-10-02 10:35:40 -0500 (Thu, 02 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombFit.cc
+
+Fixed bad commit.
+
+------------------------------------------------------------------------
+r112 | esler | 2003-10-02 10:35:27 -0500 (Thu, 02 Oct 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombFit.cc
+
+Mistake.  Bad commit.
+
+------------------------------------------------------------------------
+r111 | esler | 2003-10-01 17:13:43 -0500 (Wed, 01 Oct 2003) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+   M /trunk/PairAction/PAFitBase.h
+   M /trunk/PairAction/PAcoulombFit.cc
+   M /trunk/PairAction/PAcoulombFit.h
+   M /trunk/PairAction/PAszFit.cc
+   M /trunk/PairAction/PAszFit.h
+
+The pair correlation observable and the energy observable are
+(maybe correctly) implemented
+
+------------------------------------------------------------------------
+r110 | esler | 2003-10-01 15:44:10 -0500 (Wed, 01 Oct 2003) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputBase.h
+
+Fixed a minor bug in which we didn't return an ASCIIvar from
+ReadASCIIArray or somthing...
+
+------------------------------------------------------------------------
+r109 | esler | 2003-09-29 16:49:26 -0500 (Mon, 29 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombFit.cc
+   M /trunk/PairAction/PAszFit.cc
+
+Moved ReadParams into the MAKE_FIT only section.
+
+------------------------------------------------------------------------
+r108 | esler | 2003-09-29 16:44:46 -0500 (Mon, 29 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/template.make
+
+Removed PAFit.o from target objects.
+
+------------------------------------------------------------------------
+r107 | esler | 2003-09-29 16:43:17 -0500 (Mon, 29 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAcoulombFit.cc
+   M /trunk/PairAction/PAszFit.cc
+
+ideffed out some stuff for PIMC version.
+
+------------------------------------------------------------------------
+r106 | esler | 2003-09-29 16:39:11 -0500 (Mon, 29 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFitBase.h
+
+Adding missing includes for PIMC inclusion.
+
+------------------------------------------------------------------------
+r105 | esler | 2003-09-29 16:30:08 -0500 (Mon, 29 Sep 2003) | 2 lines
+Changed paths:
+   A /trunk/PairAction/template.make
+
+Forgot to add this to CVS.
+
+------------------------------------------------------------------------
+r104 | esler | 2003-09-26 15:14:37 -0500 (Fri, 26 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.h
+
+Added a missing CloseSection().
+
+------------------------------------------------------------------------
+r103 | esler | 2003-09-26 14:55:03 -0500 (Fri, 26 Sep 2003) | 2 lines
+Changed paths:
+   A /trunk/PairAction/PAFitBase.h
+   A /trunk/PairAction/PAcoulombFit.cc
+   A /trunk/PairAction/PAcoulombFit.h
+   A /trunk/PairAction/PAszFit.cc
+   A /trunk/PairAction/PAszFit.h
+
+Initial entry to CVS.
+
+------------------------------------------------------------------------
+r102 | esler | 2003-09-26 14:53:07 -0500 (Fri, 26 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.cc
+   M /trunk/PairAction/PAFit.h
+
+The coulomb fits seem to be working okay.
+
+------------------------------------------------------------------------
+r101 | esler | 2003-09-26 14:52:41 -0500 (Fri, 26 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Added some return trues in Read functions to satisfy compiler warnings.
+
+------------------------------------------------------------------------
+r100 | esler | 2003-09-24 16:28:38 -0500 (Wed, 24 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/CubicSpline.h
+
+Added assignment operators.  Necessary for Array resizeAndPreserve.
+
+------------------------------------------------------------------------
+r99 | esler | 2003-09-24 15:23:20 -0500 (Wed, 24 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/CubicSpline.h
+
+Added copy constructor for MultiCubicSpline.
+
+------------------------------------------------------------------------
+r98 | esler | 2003-09-24 15:23:04 -0500 (Wed, 24 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.cc
+   M /trunk/PairAction/PAFit.h
+
+Refactorizing fits.
+
+------------------------------------------------------------------------
+r97 | esler | 2003-09-22 17:43:00 -0500 (Mon, 22 Sep 2003) | 3 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.cc
+   M /trunk/PairAction/PAFit.h
+
+Refactorized writing of header information into FitterClass.  Now,
+PairActionClass only handles fit-specific writing.
+
+------------------------------------------------------------------------
+r96 | esler | 2003-09-22 17:42:10 -0500 (Mon, 22 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputBase.h
+
+Don't remember.
+
+------------------------------------------------------------------------
+r95 | esler | 2003-09-22 17:41:31 -0500 (Mon, 22 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/template.make
+
+Added new subdirectories to recursive Makefiles.
+
+------------------------------------------------------------------------
+r94 | esler | 2003-09-17 11:53:38 -0500 (Wed, 17 Sep 2003) | 2 lines
+Changed paths:
+   A /trunk/Splines/TestGrid.cc
+
+Adding a file for testing grids.
+
+------------------------------------------------------------------------
+r93 | esler | 2003-09-13 16:55:15 -0500 (Sat, 13 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/Grid.h
+
+Added check for "Optimal2" type in ReadGrid().
+
+------------------------------------------------------------------------
+r92 | esler | 2003-09-13 16:31:57 -0500 (Sat, 13 Sep 2003) | 3 lines
+Changed paths:
+   M /trunk/Splines/Grid.h
+   M /trunk/Splines/template.make
+
+Added ClusterGrid and OptimalGrid2.  OptimalGrid2 is the same as
+OptimalGrid, but you can specify the location of the first point.
+
+------------------------------------------------------------------------
+r91 | esler | 2003-09-13 16:31:18 -0500 (Sat, 13 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/Particle.h
+
+Fixed some syntax errors.  Corrected Read and Write routines.
+
+------------------------------------------------------------------------
+r90 | esler | 2003-09-13 16:30:47 -0500 (Sat, 13 Sep 2003) | 4 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Added a virtual Potential class which inherits from PH, from which
+generic potentials (which have constant masses) can be derives.  PH.h
+must be simplified some time!
+
+------------------------------------------------------------------------
+r89 | esler | 2003-09-13 16:29:58 -0500 (Sat, 13 Sep 2003) | 5 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/InputOutputBase.h
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputHDF5.h
+
+First, fixed a bug in which the ASCII ReadVar's did not return any value.
+Second, fixed a bug in which an ASCII file would be rewritten even in it
+was never modified.  I believe the behavior is correct now.  Added dummy
+bool WriteVars and AppendVars to the HDF5 files.
+
+------------------------------------------------------------------------
+r88 | esler | 2003-09-10 18:38:31 -0500 (Wed, 10 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.cc
+   M /trunk/PH/PH.h
+
+Added a coulomb potential which is smoothed at the origin.
+
+------------------------------------------------------------------------
+r87 | esler | 2003-09-08 12:25:23 -0500 (Mon, 08 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.h
+   M /trunk/Splines/TestBicubic.cc
+
+Added routines for d_dx, d_dy, d^2_dx^2, d^2_dy^2, and d^2_dxdy.
+
+------------------------------------------------------------------------
+r86 | esler | 2003-09-08 12:24:33 -0500 (Mon, 08 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/SpecialFunctions/SpecialFunctions.cc
+
+Added an explicit z=0 check to il_scaled.
+
+------------------------------------------------------------------------
+r85 | esler | 2003-09-04 15:33:11 -0500 (Thu, 04 Sep 2003) | 2 lines
+Changed paths:
+   M /trunk/SpecialFunctions/SpecialFunctions.cc
+
+Added besselj and besseln routines, I think.
+
+------------------------------------------------------------------------
+r84 | esler | 2003-08-25 21:43:51 -0500 (Mon, 25 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/SpecialFunctions/SpecialFunctions.cc
+
+Working on tracking down underflow problems.
+
+------------------------------------------------------------------------
+r83 | esler | 2003-08-25 21:42:45 -0500 (Mon, 25 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/PairAction/PAFit.cc
+
+Working on adding fit classes.
+
+------------------------------------------------------------------------
+r82 | esler | 2003-08-21 15:58:53 -0500 (Thu, 21 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.h
+   M /trunk/Splines/TestBicubic.cc
+
+Implemented 1st, 2nd, and 3rd derivatives w.r.t. y.  Added a test for this.
+
+------------------------------------------------------------------------
+r81 | esler | 2003-08-18 18:32:30 -0500 (Mon, 18 Aug 2003) | 3 lines
+Changed paths:
+   A /trunk/PairAction
+   A /trunk/PairAction/PAFit.cc
+   A /trunk/PairAction/PAFit.h
+   A /trunk/PairAction/Particle.h
+
+New additions to CVS.  Hopefully, a unified set of classes for pair action
+fits.
+
+------------------------------------------------------------------------
+r80 | esler | 2003-08-18 17:14:58 -0500 (Mon, 18 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.h
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r79 | esler | 2003-08-14 17:50:43 -0500 (Thu, 14 Aug 2003) | 2 lines
+Changed paths:
+   A /trunk/Splines/TestBicubic.cc
+
+Added test.
+
+------------------------------------------------------------------------
+r78 | esler | 2003-08-13 19:13:09 -0500 (Wed, 13 Aug 2003) | 2 lines
+Changed paths:
+   A /trunk/SpecialFunctions/HermitePoly.cc
+   A /trunk/SpecialFunctions/HermitePoly.h
+
+Contains functions for Hermite polynomials.
+
+------------------------------------------------------------------------
+r77 | esler | 2003-08-13 19:12:21 -0500 (Wed, 13 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.cc
+   M /trunk/Splines/BicubicSpline.h
+
+Added routines for MultiBicubicSpline updates.
+
+------------------------------------------------------------------------
+r76 | esler | 2003-08-13 19:11:56 -0500 (Wed, 13 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/SpecialFunctions/template.make
+
+Added test for HermitePoly.
+
+------------------------------------------------------------------------
+r75 | esler | 2003-08-13 19:11:36 -0500 (Wed, 13 Aug 2003) | 3 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Fixed minor bug.  Wasn't setting UseVHXC to false when reading a
+PH_CubicSplineXC.
+
+------------------------------------------------------------------------
+r74 | esler | 2003-08-13 19:10:47 -0500 (Wed, 13 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Fitting/Fitting.cc
+
+Now fitting s in q and z with Hermite polynomials.
+
+------------------------------------------------------------------------
+r73 | esler | 2003-08-12 17:48:34 -0500 (Tue, 12 Aug 2003) | 3 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.h
+
+Added dummy Deriv, Deriv2, and Deriv3 member functions that aren't
+implemented for real yet.  Just dummy stubs that print error and abort.
+
+------------------------------------------------------------------------
+r72 | esler | 2003-08-11 19:39:05 -0500 (Mon, 11 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.cc
+   M /trunk/Splines/BicubicSpline.h
+
+Added BiUpToDate check.
+
+------------------------------------------------------------------------
+r71 | esler | 2003-08-11 19:34:56 -0500 (Mon, 11 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.cc
+
+Fixed Nx/Ny mistakes in Updates.
+
+------------------------------------------------------------------------
+r70 | esler | 2003-08-11 19:34:21 -0500 (Mon, 11 Aug 2003) | 3 lines
+Changed paths:
+   M /trunk/template.make
+
+Reordered object generation so IO objects get created first, since
+some other objects depend on them.
+
+------------------------------------------------------------------------
+r69 | esler | 2003-08-11 19:26:54 -0500 (Mon, 11 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.cc
+   M /trunk/Splines/BicubicSpline.h
+
+Fixed most of bugs.
+
+------------------------------------------------------------------------
+r68 | esler | 2003-08-11 16:01:57 -0500 (Mon, 11 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/BicubicSpline.cc
+   M /trunk/Splines/BicubicSpline.h
+   M /trunk/Splines/template.make
+
+Have new X and Y spline updates working.
+
+------------------------------------------------------------------------
+r67 | esler | 2003-08-10 21:13:23 -0500 (Sun, 10 Aug 2003) | 2 lines
+Changed paths:
+   A /trunk/Splines/BicubicSpline.cc
+   A /trunk/Splines/BicubicSpline.h
+   M /trunk/Splines/template.make
+
+Adding BicubicSpline class.  Not done yet...
+
+------------------------------------------------------------------------
+r66 | esler | 2003-08-08 16:18:43 -0500 (Fri, 08 Aug 2003) | 3 lines
+Changed paths:
+   M /trunk/MatrixOps/MatrixOps.cc
+
+Fixed SVDdecomp so that it only calculates the relevant vectors.
+That is if A is MxN, we only calculate min(M,N) vectors.
+
+------------------------------------------------------------------------
+r65 | esler | 2003-08-08 16:17:50 -0500 (Fri, 08 Aug 2003) | 3 lines
+Changed paths:
+   M /trunk/Fitting/Fitting.cc
+   M /trunk/Fitting/Test.cc
+
+Fitting working okay with SVD decompostion and trimming of small
+singular values, but still is not excellent.
+
+------------------------------------------------------------------------
+r64 | esler | 2003-08-08 00:29:59 -0500 (Fri, 08 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Fitting/Fitting.cc
+   M /trunk/Fitting/Fitting.h
+   M /trunk/Fitting/Test.cc
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/MatrixOps/MatrixOps.h
+   M /trunk/MatrixOps/Test.cc
+   M /trunk/template.make
+
+Implemented Singular Value Decomposition for fitting.
+
+------------------------------------------------------------------------
+r63 | esler | 2003-08-07 10:26:55 -0500 (Thu, 07 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Fitting/Fitting.cc
+   M /trunk/Fitting/Test.cc
+   M /trunk/Fitting/template.make
+
+Finished implementation and added a test, which passed.
+
+------------------------------------------------------------------------
+r62 | esler | 2003-08-06 18:12:03 -0500 (Wed, 06 Aug 2003) | 2 lines
+Changed paths:
+   A /trunk/Fitting/Fitting.cc
+   A /trunk/Fitting/Test.cc
+   A /trunk/Fitting/template.make
+
+Adding to repository.
+
+------------------------------------------------------------------------
+r61 | esler | 2003-08-06 18:11:41 -0500 (Wed, 06 Aug 2003) | 2 lines
+Changed paths:
+   A /trunk/Fitting
+   A /trunk/Fitting/Fitting.h
+
+Moved definitions into Fitting.cc.
+
+------------------------------------------------------------------------
+r60 | esler | 2003-08-06 18:11:15 -0500 (Wed, 06 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/MatrixOps/MatrixOps.cc
+   M /trunk/MatrixOps/MatrixOps.h
+   M /trunk/MatrixOps/Test.cc
+
+Fixed errors and included automatic tests.
+
+------------------------------------------------------------------------
+r59 | esler | 2003-08-06 17:08:09 -0500 (Wed, 06 Aug 2003) | 2 lines
+Changed paths:
+   A /trunk/MatrixOps
+   A /trunk/MatrixOps/MatrixOps.cc
+   A /trunk/MatrixOps/MatrixOps.h
+   A /trunk/MatrixOps/Test.cc
+   A /trunk/MatrixOps/template.make
+
+Initial addition to repository.
+
+------------------------------------------------------------------------
+r58 | esler | 2003-08-06 12:21:19 -0500 (Wed, 06 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/CubicSpline.h
+   M /trunk/Splines/Grid.h
+
+Debugged a problem that was somewhere else.
+
+------------------------------------------------------------------------
+r57 | esler | 2003-08-06 12:20:52 -0500 (Wed, 06 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.h
+
+Adding an Aziz potential.
+
+------------------------------------------------------------------------
+r56 | esler | 2003-08-05 22:45:34 -0500 (Tue, 05 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputBase.h
+
+Fixed off-by-one error in FindSection.
+
+------------------------------------------------------------------------
+r55 | esler | 2003-08-05 14:44:11 -0500 (Tue, 05 Aug 2003) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputBase.h
+   M /trunk/IO/InputOutputHDF5.cc
+
+Tracked down problem with const character "C-strings" being converted
+to bools.  Fixed.
+
+------------------------------------------------------------------------
+r54 | esler | 2003-08-05 11:28:09 -0500 (Tue, 05 Aug 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/InputOutputHDF5.cc
+
+Made some minor updates.
+
+------------------------------------------------------------------------
+r53 | esler | 2003-07-23 18:16:56 -0500 (Wed, 23 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputBase.h
+
+Moved the IsModified flag from IOSectionClass to IOTreeClass.
+
+------------------------------------------------------------------------
+r52 | esler | 2003-07-21 13:36:26 -0500 (Mon, 21 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+
+Finished the Appends.
+
+------------------------------------------------------------------------
+r51 | esler | 2003-07-18 17:13:03 -0500 (Fri, 18 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/InputOutputBase.h
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputHDF5.h
+
+Got ASCII combined IO mostly working.
+
+------------------------------------------------------------------------
+r50 | esler | 2003-07-17 18:31:44 -0500 (Thu, 17 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/template.make
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r49 | esler | 2003-07-17 15:55:35 -0500 (Thu, 17 Jul 2003) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/InputOutputBase.h
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputHDF5.h
+
+The HDF reader and writer (we believe) is now currently working. Added a flush.
+Starting to work on ASCII
+
+------------------------------------------------------------------------
+r48 | esler | 2003-07-17 13:08:23 -0500 (Thu, 17 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/CubicSpline.h
+   M /trunk/Splines/Grid.h
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r47 | esler | 2003-07-17 13:08:14 -0500 (Thu, 17 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.cc
+   M /trunk/PH/PH.h
+
+Not sure exactly what what done here.
+
+------------------------------------------------------------------------
+r46 | esler | 2003-07-17 13:07:49 -0500 (Thu, 17 Jul 2003) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputBase.h
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputHDF5.h
+   M /trunk/IO/template.make
+
+Merging Input and Output classes into IO classes.  Nearly done with HDF5
+version.
+
+------------------------------------------------------------------------
+r45 | esler | 2003-07-15 10:01:26 -0500 (Tue, 15 Jul 2003) | 3 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Really fixed the extension, now, hopefully.  Before had the '.' out of
+place.
+
+------------------------------------------------------------------------
+r44 | esler | 2003-07-15 09:55:28 -0500 (Tue, 15 Jul 2003) | 5 lines
+Changed paths:
+   M /trunk/IO/InputOutputHDF5.cc
+
+Found the real bug in the HDF5 writer.  The U_ls were being written
+out of order because the writer was apending .0 .1, etc.  So when we
+read, we were reading U.0, U.1, U.11, U.12, instead of U.0, U.1,
+U.2...  Changed the writer to append .00000001, .00000002, 00000003, etc.
+
+------------------------------------------------------------------------
+r43 | esler | 2003-07-11 12:28:17 -0500 (Fri, 11 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/QuinticSplines.f
+
+Changed REAL's to REAL*8's.
+
+------------------------------------------------------------------------
+r42 | esler | 2003-07-09 12:36:41 -0500 (Wed, 09 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+
+Added a destructor for VarASCIIClass and fixed a couple of minor things.
+
+------------------------------------------------------------------------
+r41 | bclark | 2003-07-09 12:04:26 -0500 (Wed, 09 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r40 | esler | 2003-07-09 11:58:23 -0500 (Wed, 09 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+
+Fixed a boolean bug in calling ReadAbort in checking for quotes in strings.
+
+------------------------------------------------------------------------
+r39 | esler | 2003-07-09 11:48:53 -0500 (Wed, 09 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+
+Addes CloseFile function and more comments.
+
+------------------------------------------------------------------------
+r38 | esler | 2003-07-09 11:36:00 -0500 (Wed, 09 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputASCII.cc
+
+Added lots of commets.  Changed array inputs to be row-ordered.
+
+------------------------------------------------------------------------
+r37 | bclark | 2003-07-08 18:26:33 -0500 (Tue, 08 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/InputOutputHDF5.cc
+
+ASCII input is working!!  We hope...
+
+------------------------------------------------------------------------
+r36 | bclark | 2003-07-08 17:30:30 -0500 (Tue, 08 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/InputOutputBase.h
+
+We have ASCII input sort of working now.
+
+------------------------------------------------------------------------
+r35 | bclark | 2003-07-07 16:53:51 -0500 (Mon, 07 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+   M /trunk/IO/template.make
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r34 | bclark | 2003-07-07 15:45:01 -0500 (Mon, 07 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.cc
+   M /trunk/IO/InputOutputASCII.h
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r33 | esler | 2003-07-07 13:33:51 -0500 (Mon, 07 Jul 2003) | 3 lines
+Changed paths:
+   M /trunk/Splines/CubicSpline.cc
+   M /trunk/Splines/CubicSpline.h
+   M /trunk/Splines/Grid.h
+
+Made some changes to make the cubic spline faster.  In particular
+inlined many of the functions.
+
+------------------------------------------------------------------------
+r32 | esler | 2003-07-02 12:09:25 -0500 (Wed, 02 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/DFT/template.make
+   M /trunk/Optimize/template.make
+   M /trunk/SpecialFunctions/template.make
+
+Fixed SOURCES.
+
+------------------------------------------------------------------------
+r31 | esler | 2003-07-02 11:48:21 -0500 (Wed, 02 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/template.make
+   M /trunk/Integration/template.make
+
+Fixed SOURCES.
+
+------------------------------------------------------------------------
+r30 | esler | 2003-07-02 11:46:17 -0500 (Wed, 02 Jul 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/template.make
+
+Fixed template.make SOURCES
+
+------------------------------------------------------------------------
+r29 | esler | 2003-07-02 11:41:29 -0500 (Wed, 02 Jul 2003) | 2 lines
+Changed paths:
+   A /trunk/PH/Cost.h
+
+Forgot to add earlier.
+
+------------------------------------------------------------------------
+r28 | esler | 2003-07-02 10:58:15 -0500 (Wed, 02 Jul 2003) | 2 lines
+Changed paths:
+   A /trunk/IO/InputOutputBase.h
+   A /trunk/PH/Cost.cc
+
+Forgot to add this earlier.
+
+------------------------------------------------------------------------
+r27 | esler | 2003-07-01 10:44:04 -0500 (Tue, 01 Jul 2003) | 2 lines
+Changed paths:
+   A /trunk/Splines/QuinticSplines.f
+
+Added a FORTRAN code for calculating coefficients of quintic splines.
+
+------------------------------------------------------------------------
+r26 | esler | 2003-06-30 16:45:57 -0500 (Mon, 30 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/Grid.h
+
+Correctly missing NumPoints variable in OptimalGrid::Write.
+
+------------------------------------------------------------------------
+r25 | esler | 2003-06-30 16:45:32 -0500 (Mon, 30 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.cc
+   M /trunk/PH/PH.h
+
+Added Read and Write routines for most of the PH types.
+
+------------------------------------------------------------------------
+r24 | esler | 2003-06-30 16:45:08 -0500 (Mon, 30 Jun 2003) | 4 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+
+Slightly changed interface for OpenSection.  It now takes an optional
+section number parameter, specifying which of sections with the same
+name to open.
+
+------------------------------------------------------------------------
+r23 | esler | 2003-06-28 20:30:56 -0500 (Sat, 28 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/Splines/CubicSpline.h
+   M /trunk/Splines/Grid.h
+   M /trunk/Splines/template.make
+
+Added some Read and Write routines.
+
+------------------------------------------------------------------------
+r22 | esler | 2003-06-28 20:30:40 -0500 (Sat, 28 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/Random/template.make
+   M /trunk/SpecialFunctions/template.make
+
+Recursive make clean added.
+
+------------------------------------------------------------------------
+r21 | esler | 2003-06-28 20:30:24 -0500 (Sat, 28 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.cc
+   M /trunk/PH/PH.h
+   M /trunk/PH/Potential.cc
+   M /trunk/PH/template.make
+
+Added some Read and Write routines for PH's.
+
+------------------------------------------------------------------------
+r20 | esler | 2003-06-28 20:30:04 -0500 (Sat, 28 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/Optimize/template.make
+
+Recursive make clean.
+
+------------------------------------------------------------------------
+r19 | esler | 2003-06-28 20:29:40 -0500 (Sat, 28 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/MPI/Communication.h
+   M /trunk/MPI/template.make
+
+Added serial version of new CommunicatorClass functions.
+
+------------------------------------------------------------------------
+r18 | esler | 2003-06-28 20:29:17 -0500 (Sat, 28 Jun 2003) | 2 lines
+Changed paths:
+   A /trunk/Integration/HermiteQuad.cc
+   A /trunk/Integration/HermiteQuad.h
+   M /trunk/Integration/template.make
+
+Added HermiteQuad stuff to repository.
+
+------------------------------------------------------------------------
+r17 | esler | 2003-06-28 20:28:53 -0500 (Sat, 28 Jun 2003) | 4 lines
+Changed paths:
+   M /trunk/IO/InputOutput.h
+   M /trunk/IO/InputOutputHDF5.cc
+   M /trunk/IO/InputOutputHDF5.h
+   M /trunk/IO/template.make
+
+Trying a recurxive make clean.  Also added a new wrapper for
+InputSectionClass.  It now has an interface which is nearly precisely the
+same as OutputSectionClass.  Much cleaner.
+
+------------------------------------------------------------------------
+r16 | esler | 2003-06-28 20:27:31 -0500 (Sat, 28 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/DFT/template.make
+   M /trunk/template.make
+
+Trying a recurxive make clean.
+
+------------------------------------------------------------------------
+r15 | esler | 2003-06-27 19:33:48 -0500 (Fri, 27 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/PH/PH.cc
+   A /trunk/PH/PH.cc.old
+   M /trunk/PH/PH.h
+   A /trunk/PH/PH.h.old
+   A /trunk/PH/Potential.cc.old
+
+Removed old PH_Chebyshev.  Stored old versions in the .old files.
+
+------------------------------------------------------------------------
+r14 | esler | 2003-06-27 00:17:11 -0500 (Fri, 27 Jun 2003) | 2 lines
+Changed paths:
+   A /trunk/DFT/template.make
+   A /trunk/Integration/template.make
+   A /trunk/MPI/template.make
+   M /trunk/Optimize/Minimize.cc
+   A /trunk/Optimize/template.make
+   A /trunk/PH/template.make
+   A /trunk/Random
+   A /trunk/Random/template.make
+   A /trunk/SpecialFunctions/template.make
+   M /trunk/Splines/Grid.h
+   A /trunk/Splines/template.make
+   A /trunk/template.make
+
+Got recursive make working.
+
+------------------------------------------------------------------------
+r13 | esler | 2003-06-27 00:16:32 -0500 (Fri, 27 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputOutputASCII.h
+   A /trunk/IO/template.make
+
+*** empty log message ***
+
+------------------------------------------------------------------------
+r12 | esler | 2003-06-26 20:34:18 -0500 (Thu, 26 Jun 2003) | 3 lines
+Changed paths:
+   A /trunk/PH/Atom.cc
+   A /trunk/PH/Atom.h
+   M /trunk/PH/Chebyshev.h
+   M /trunk/PH/PH.cc
+   M /trunk/PH/PH.h
+   A /trunk/PH/Potential.cc
+   M /trunk/Splines/Grid.h
+
+Added to common repository and updated include links to point to
+common repository.
+
+------------------------------------------------------------------------
+r11 | esler | 2003-06-26 20:33:36 -0500 (Thu, 26 Jun 2003) | 2 lines
+Changed paths:
+   A /trunk/DFT
+   A /trunk/DFT/ExCorr.f
+   A /trunk/DFT/Functionals.cc
+   A /trunk/DFT/Functionals.h
+   A /trunk/Optimize
+   A /trunk/Optimize/Minimize.cc
+   A /trunk/Optimize/Minimize.h
+
+Added to common repository.
+
+------------------------------------------------------------------------
+r10 | esler | 2003-06-26 20:33:22 -0500 (Thu, 26 Jun 2003) | 2 lines
+Changed paths:
+   M /trunk/IO/InputFile.h
+   M /trunk/IO/InputOutput.h
+   A /trunk/Integration
+   A /trunk/Integration/GKIntegration.cc
+   A /trunk/Integration/GKIntegration.h
+   A /trunk/Integration/Integrate.cc
+   A /trunk/Integration/Integrate.h
+   A /trunk/Integration/Standard.h
+
+Updated include links to point to common repository.
+
+------------------------------------------------------------------------
+r9 | esler | 2003-06-26 18:38:16 -0500 (Thu, 26 Jun 2003) | 2 lines
+Changed paths:
+   A /trunk/SpecialFunctions
+   A /trunk/SpecialFunctions/SpecialFunctions.cc
+   A /trunk/SpecialFunctions/SpecialFunctions.h
+
+Added SpecialFunctions files.
+
+------------------------------------------------------------------------
+r8 | esler | 2003-06-26 18:34:00 -0500 (Thu, 26 Jun 2003) | 3 lines
+Changed paths:
+   M /trunk/Splines/Grid.h
+
+Added some files.
+Added a virtual protype for Write(OutputSectionClass &outSection);
+
+------------------------------------------------------------------------
+r7 | esler | 2003-06-26 18:33:32 -0500 (Thu, 26 Jun 2003) | 2 lines
+Changed paths:
+   A /trunk/IO/InputFile.cc
+   A /trunk/IO/InputFile.h
+   M /trunk/IO/InputOutput.h
+   A /trunk/PH
+   A /trunk/PH/Chebyshev.cc
+   A /trunk/PH/Chebyshev.h
+   A /trunk/PH/PH.cc
+   A /trunk/PH/PH.h
+
+Added some files.
+
+------------------------------------------------------------------------
+r6 | esler | 2003-06-26 18:10:40 -0500 (Thu, 26 Jun 2003) | 2 lines
+Changed paths:
+   A /trunk/Blitz.h
+
+Added Blitz.h.
+
+------------------------------------------------------------------------
+r2 | esler | 2003-06-26 18:07:36 -0500 (Thu, 26 Jun 2003) | 2 lines
+Changed paths:
+   A /trunk/IO
+   A /trunk/IO/InputOutput.cc
+   A /trunk/IO/InputOutput.h
+   A /trunk/IO/InputOutputASCII.cc
+   A /trunk/IO/InputOutputASCII.h
+   A /trunk/IO/InputOutputHDF5.cc
+   A /trunk/IO/InputOutputHDF5.h
+   A /trunk/MPI
+   A /trunk/MPI/Communication.h
+   A /trunk/Splines
+   A /trunk/Splines/CubicSpline.cc
+   A /trunk/Splines/CubicSpline.h
+   A /trunk/Splines/Grid.cc
+   A /trunk/Splines/Grid.h
+
+Initial revision
+
+------------------------------------------------------------------------
+r1 | (no author) | 2003-06-26 18:07:36 -0500 (Thu, 26 Jun 2003) | 1 line
+Changed paths:
+   A /branches
+   A /tags
+   A /trunk
+
+New repository initialized by cvs2svn.
+------------------------------------------------------------------------

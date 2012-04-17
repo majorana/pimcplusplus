@@ -1,0 +1,60 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.59)
+AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
+AC_CONFIG_SRCDIR([src/ActionClass.cc])
+AC_CONFIG_HEADER([config.h])
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_MAKE_SET
+
+# Checks for libraries.
+# FIXME: Replace `main' with a function in `-lm':
+AC_CHECK_LIB([m], [sqrt])
+
+# FIXME: Replace `main' with a function in `-lpspline':
+AC_CHECK_LIB([pspline], [main])
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS([string.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIZE_T
+
+# Checks for libraries.
+PKG_CHECK_MODULES(BLITZ, blitz, blitz_ok=yes, blitz_ok=no)
+
+# Checks for library functions.
+
+
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_STRTOD
+AC_CHECK_FUNCS([floor pow sqrt strtol])
+
+AC_CONFIG_FILES([Makefile
+                 src/Common/Atom/Makefile
+                 src/Common/DFT/Makefile
+                 src/Common/Distributed/Makefile
+                 src/Common/Ewald/Makefile
+                 src/Common/Fitting/Makefile
+                 src/Common/IO/Makefile
+                 src/Common/Integration/Makefile
+                 src/Common/MPI/Makefile
+                 src/Common/Makefile
+                 src/Common/MatrixOps/Makefile
+                 src/Common/Optimize/Makefile
+                 src/Common/PH/Makefile
+                 src/Common/PairAction/Makefile
+                 src/Common/Random/Makefile
+                 src/Common/SpecialFunctions/Makefile
+                 src/Common/Splines/Makefile
+                 src/Common/Splines/fortran/Makefile
+                 src/Makefile
+                 src/Tests/Makefile])
+AC_OUTPUT

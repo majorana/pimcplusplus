@@ -1,0 +1,146 @@
+double tau=1.0;
+
+Section (System)
+{
+  int NumTimeSlices=150;
+  Array<double,1> Box(3)=[150.0,150.0,150.0];
+  Array<bool,1> IsPeriodic(3)=[true, true, true];
+  Section (Particles)
+  {
+    Section (Species)
+    {
+      string Name="e";
+      double lambda=0.5;
+      string Type="FERMION";
+      int NumParticles=2;
+      int NumDim=3;
+      string InitPaths="FIXED";
+      Array<double,2> Positions(2,3)=[-0.3, 0.3,
+                                      0.0,  0.0,
+                                      0.0,  0.0];
+    }
+    Section (Species)
+    {
+      string Name="Na+";
+      double lambda=0.0; //classical particle
+      string Type="FERMION";
+      int NumParticles=2;
+      int NumDim=3;
+      string InitPaths="FIXED";
+      Array<double,2> Positions(2,3)=[-2.5,  2.5,
+				       0.00,  0.00,
+                                       0.00,  0.00];
+    }
+  }
+}
+
+Section (Action)
+{
+  int MaxLevels = 3;
+  Array<string,1> PairActionFiles(3) = ["Na1_beta8.0.TC.h5",
+	                                "e-e_beta8.0.coulombBCfit.h5",
+                                        "Na-Na.PairAction"];
+}
+
+Section (Observables)
+{
+  string OutFile = "Na2_5.0_tau1.0_beta150.0.h5";
+  Section (Observable)
+    {
+      string type = "Energy";
+      string name = "Energy";
+      int freq=20;
+      int dumpFreq=500;
+    }
+  Section (Observable)
+    {
+      string type = "PairCorrelation";
+      string name = "e-NaPC";
+      string type1 = "e";
+      string type2 = "Na+";
+      int freq = 20;
+      int dumpFreq = 7000;
+      Section (Grid)
+	{
+	  string type = "Linear";
+	  double start = 0.0;
+	  double end = 6.0;
+	  int NumPoints = 200;
+	}
+    }
+}
+
+Section (Moves){
+  Section (Move)
+  {
+    string type="Bisection";
+    string name="eBisection";
+    
+    Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
+    ///here should be electron
+    int NumParticlesToMove=1;
+    int StartTimeSlice=0; //Not sure if this is always set the same now?
+    string NumLevels="Max";
+  }
+  Section (Move)
+  {
+    string type="ShiftMove";
+    string name="electronShift";
+  }
+  Section (Move)
+  {
+    string type="PrintMove";
+    string name="Loop1";
+    string toprint="This is loop1";
+  }
+  Section (Move)
+  {
+    string type="PrintMove";
+    string name="Loop2";
+    string toprint="This is loop2";
+  }
+  Section (Move)
+  {
+    string type="PrintMove";
+    string name="Loop3";
+    string toprint="This is loop3";
+  }
+  Section (Move)
+  {
+    string type="CycleBlock";
+    string name="BlockCycleMove";
+    int NumLevels=3;
+    Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 0.0];
+    double epsilon=0.0;
+    int Steps=9;
+    string Species="p";
+  }
+}
+
+
+Section (Algorithm)
+{
+  Section (Loop){ // Before Accumulating Observables
+    int steps=10000; 
+    Section (Loop){ 
+
+      int steps=3;
+      //Section (Move) {string name="BlockCycleMove";} 
+      Section (Move) {string name="eBisection";}
+    }
+    Section (Move) {string name = "electronShift";}
+  }
+  Section (Loop){ //Start Accumulating observables
+    int steps=300000000;
+    Section (Loop){
+      int steps=3;
+      // Section (Move) {string name="BlockCycleMove";} 
+      Section (Move) {string name="eBisection";} 
+    }
+    Section (Move) {string name = "electronShift"; }
+    Section (Observe) {string name = "e-NaPC";}
+    Section (Observe) {string name = "Energy"; }
+    //Section (Observe) {string name = "PathDump";}
+  }
+}
+	  
