@@ -267,25 +267,25 @@ double DavidLongRangeClassYk::SingleAction (int slice1, int slice2,const Array<i
     endSlice=slice2-skip;
   }
 
-  // Check to see if matrices are updated properly
-  Array<complex<double>,1> temp(Path.kVecs.size());
-  for (int slice=slice1; slice<=slice2; slice+=skip) {
-    for (int species=0; species<Path.NumSpecies(); species++) {
-    //       if (GetMode() == NEWMODE)
-    //      Path.CalcRho_ks_Fast(slice,species);
-    for (int ki=0; ki<Path.kVecs.size(); ki++)
-      temp(ki) = Path.Rho_k(slice,species,ki);
-      Path.CalcRho_ks_Fast(slice,species);
-      for (int ki=0; ki<Path.kVecs.size(); ki++)
-        if (mag2(temp(ki)-Path.Rho_k(slice,species,ki)) > 1.0e-12) 
-        cerr << "Error in LongRangeClass::SingleAction.  "
-        << "Cache inconsisency at slice=" 
-        << slice << " species=" << Path.Species(species).Name 
-        << "  Mode=" << GetMode() << endl
-        << "temp  = " << temp(ki) << endl
-        << "Rho_k = " << Path.Rho_k(slice,species,ki) << endl;
-    }
-  }
+  //// Check to see if matrices are updated properly
+  //Array<complex<double>,1> temp(Path.kVecs.size());
+  //for (int slice=slice1; slice<=slice2; slice+=skip) {
+  //  for (int species=0; species<Path.NumSpecies(); species++) {
+  //  //       if (GetMode() == NEWMODE)
+  //  //      Path.CalcRho_ks_Fast(slice,species);
+  //  for (int ki=0; ki<Path.kVecs.size(); ki++)
+  //    temp(ki) = Path.Rho_k(slice,species,ki);
+  //    Path.CalcRho_ks_Fast(slice,species);
+  //    for (int ki=0; ki<Path.kVecs.size(); ki++)
+  //      if (mag2(temp(ki)-Path.Rho_k(slice,species,ki)) > 1.0e-12) 
+  //      cerr << "Error in LongRangeClass::SingleAction.  "
+  //      << "Cache inconsisency at slice=" 
+  //      << slice << " species=" << Path.Species(species).Name 
+  //      << "  Mode=" << GetMode() << endl
+  //      << "temp  = " << temp(ki) << endl
+  //      << "Rho_k = " << Path.Rho_k(slice,species,ki) << endl;
+  //  }
+  //}
 
   for (int ki=0; ki<Path.kVecs.size(); ki++) {
     for (int slice=startSlice;slice<=endSlice;slice+=skip){

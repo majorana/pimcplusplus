@@ -43,7 +43,9 @@ SHARED_SOURCES =          \
     SpeciesClass.cc       \
     SpeciesClass.h        \
     WriteData.h           \
-    WriteData.cc          
+    WriteData.cc          \
+    SwitchClass.h         \
+    SwitchClass.cc
 
 pimc___SOURCES =          \
     $(SHARED_SOURCES)     \
@@ -55,7 +57,7 @@ pimc___SOURCES =          \
     PathClass.cc          \
     PathClass.h           \
     WormHelper.cc         \
-    Main.cc               \ 
+    Main.cc               \
     Version.h
 
 Version.h:
@@ -66,7 +68,7 @@ FreeParticles_LDADD   = $(COMMON_LIBS)
 
 VacancyLoc_SOURCES = \
                       Observables/lsapr.f           \
-                      VacancyLoc.cc  
+                      VacancyLoc.cc
 VacancyLoc_LDADD = $(COMMON_LIBS)
 
 #vmc_SOURCES = VMC6.cc 

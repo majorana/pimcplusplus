@@ -105,6 +105,12 @@ bool PIMCClass::Read(IOSectionClass &in)
     ReadMoves(in);
     in.CloseSection();
 
+    // Read Switches
+    //cerr <<PathData.Path.Communicator.MyProc()<<" Reading Moves"<<endl;
+    //assert(in.OpenSection("Switches"));
+    //ReadSwitches(in);
+    //in.CloseSection();
+
     // Read in the Algorithm
     cerr <<PathData.Path.Communicator.MyProc()<<" Reading Algorithm"<<endl;
     assert(in.OpenSection("Algorithm"));
@@ -142,18 +148,17 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempStream<<outFileBase<<"."<<counter<<"."<<(PathData.GetCloneNum()+fileStart)<<".h5";
       //cerr<<"Checking for "<<tempStream.str();
       while (fileExists(tempStream.str())){
-	counter++;
-	tempStream.str("");
-	tempStream<<outFileBase<<"."<<counter<<"."<<(PathData.GetCloneNum()+fileStart)<<".h5";
-	//cerr<<"Checking for "<<tempStream.str();
+        counter++;
+        tempStream.str("");
+        tempStream<<outFileBase<<"."<<counter<<"."<<(PathData.GetCloneNum()+fileStart)<<".h5";
+        //cerr<<"Checking for "<<tempStream.str();
       }
       ostringstream counterNum;
       counterNum<<counter;
       OutFileName=outFileBase+"."+counterNum.str()+"."+cloneNum.str()+".h5";
     }
-    else{
-      OutFileName = 
-	outFileBase+ "." + cloneNum.str() + ".h5";
+    else {
+      OutFileName = outFileBase+ "." + cloneNum.str() + ".h5";
     }
     OutFile.NewFile(OutFileName);
     /// This is needed so that all of the decendents of the root
@@ -172,8 +177,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     char *buffer=new char[length+1];
     infile.read(buffer,length);
     buffer[length] = '\0';
-    infile.close(); 
-    string fileCopy(buffer);   
+    infile.close();
+    string fileCopy(buffer);
     delete buffer;
     OutFile.WriteVar("InputFile",fileCopy);
 
@@ -183,7 +188,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     OutFile.CloseSection();
     OutFile.NewSection("System");
     WriteSystemInfo();
-    OutFile.CloseSection(); // "System" 
+    OutFile.CloseSection(); // "System"
     OutFile.NewSection ("Observables");
     Array<double,1> weights;
     if (in.ReadVar("Weights", weights)) {
@@ -192,7 +197,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     }
   }
   int numOfObservables=in.CountSections("Observable");
-  
+
   for (int counter=0;counter<numOfObservables;counter++){
     in.OpenSection("Observable",counter);
     string observeType, observeName;
@@ -201,8 +206,8 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     if (iAmRoot)
       OutFile.NewSection(observeType);
     ObservableClass* tempObs;
-    if (observeType=="PairCorrelation") 
-	tempObs = new PairCorrelationClass(PathData,OutFile);
+    if (observeType=="PairCorrelation")
+      tempObs = new PairCorrelationClass(PathData,OutFile);
     else if (observeType=="nofr")
       tempObs=new nofrClass(PathData,OutFile);
     else if (observeType=="PlaneDensity")
@@ -227,8 +232,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs = new VacancyLocClass(PathData,OutFile);
     else if (observeType=="VacancyNear")
       tempObs = new VacancyLocNearbyClass(PathData,OutFile);
-    //    else if (observeType=="VacancyNear")
-    //      tempObs = new VacancyLoc2Class(PathData,OutFile);
+    //  tempObs = new VacancyLoc2Class(PathData,OutFile);
     else if (observeType=="VacancyDensity")
       tempObs = new VacancyDensityClass(PathData,OutFile);
     else if (observeType=="Conductivity")
@@ -258,8 +262,7 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
     else if (observeType=="VacancyLocation")
       tempObs = new VacancyLocClass(PathData,OutFile);
     else if (observeType=="TimeAnalysis")
-      tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables,
-				PathData.Actions.ActionList);
+      tempObs = new MCTimeClass(PathData,OutFile,Moves,Observables,PathData.Actions.ActionList);
     else if (observeType=="TimeLindenman")
       tempObs= new TimeLindenmanClass(PathData,OutFile);
     else if (observeType=="TimeHexatic")
@@ -311,7 +314,7 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
   int steps;
   int myProc=PathData.Path.Communicator.MyProc();
   bool iAmRoot = (myProc == 0);
-  MoveClass* move;  
+  MoveClass* move;
   if (iAmRoot)
     OutFile.NewSection("Moves");
   for (int counter=0;counter<numOfMoves;counter++){
@@ -359,14 +362,6 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
       move = new VariationalDisplaceMoveClass(PathData,OutFile);
     else if (moveType=="HermeleFourier")
       move = new HermeleFourierMoveClass(PathData,OutFile);
-    //     else if (moveType=="WaterRotate")
-//     else if (moveType=="VariationalDisplace")
-//        move = new VariationalDisplaceMoveClass(PathData,OutFile);
-		/// This is just here for debugging; should be deleted in the future
-    else if (moveType=="WaterMove"){
-			cerr << "ERROR: 'WaterMove' IS OBSOLETE: USE 'MoleculeMove' NOW" << endl;
-			assert(0);
-		}
     else if (moveType=="MoleculeMove")
       move = new MoleculeMoveStageManagerClass(PathData, OutFile);
     else if (moveType=="PreSampleMoleculeMove")
@@ -406,6 +401,37 @@ void PIMCClass::ReadMoves(IOSectionClass &in)
 }
 
 
+//void PIMCClass::ReadSwitches(IOSectionClass &in)
+//{
+//
+//  int numOfSwitches=in.CountSections("Switches");
+//  int myProc=PathData.Path.Communicator.MyProc();
+//  bool iAmRoot = (myProc == 0);
+//  SwitchClass* Switch = new SwitchClass(PathData, OutFile);
+//  if (iAmRoot)
+//    OutFile.NewSection("Switches");
+//  for (int counter=0;counter<numOfSwitches;counter++){
+//    in.OpenSection("Switch",counter);
+//    string SwitchType, SwitchName;
+//    assert(in.ReadVar("Type",SwitchType));
+//    assert(in.ReadVar("Name",SwitchName));
+//    if (iAmRoot)
+//      OutFile.NewSection(SwitchType);
+//    }
+//    Switch->Name = SwitchName;
+//    Switch->Read(in);
+//    Switches.push_back(Switch);
+//    if (iAmRoot)
+//      OutFile.CloseSection();
+//    in.CloseSection();
+//  }
+//  if (iAmRoot) {
+//    OutFile.CloseSection (); // "Switches"
+//    OutFile.FlushFile();
+//  }
+//  //cerr<<"I have finished reading the Switches"<<endl;
+//}
+
 
 void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 {
@@ -415,35 +441,30 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
     int hours = maxWallTime/3600;
     int minutes = (maxWallTime-3600*hours)/60;
     int seconds = maxWallTime%60;
-    perr << "Maximum wall time is " << hours 
-	 << ((hours != 1) ? " hours, " : " hour, ") << minutes
-	 << ((minutes != 1) ? " minutes, and " : " minute, and ") << seconds 
-	 << ((seconds != 1) ? " seconds.\n" : " second.\n");
+    perr << "Maximum wall time is " << hours
+         << ((hours != 1) ? " hours, " : " hour, ") << minutes
+         << ((minutes != 1) ? " minutes, and " : " minute, and ") << seconds
+         << ((seconds != 1) ? " seconds.\n" : " second.\n");
   }
   //cerr<<"Calling algorithm read"<<endl;
   Algorithm.Read(in,1);
-  
 }
 
 
 void PIMCClass::Run()
 {
-  cerr <<PathData.Path.Communicator.MyProc()<< " Simulation started." << endl;
+  cerr << PathData.Path.Communicator.MyProc()<< " Simulation started." << endl;
   Algorithm.DoEvent();
-  cerr<<PathData.Path.Communicator.MyProc()<<" PIMC++ has completed"<<endl;
-  //  Array<MoveClass*,1> Moves;
-//   for (int counter=0;counter<Moves.size();counter++){
-//     cout<<"My name is "<<((MoveClass*)Moves(counter))->Name<<endl;
-//     cout<<"My acceptance ratio is "<<((MoveClass*)Moves(counter))->AcceptanceRatio()<<endl;
-//   }
-  
+  cerr << PathData.Path.Communicator.MyProc()<< " Simulation completed." <<endl;
 }
+
 
 void PIMCClass::Dummy()
 {
-	while(true)
-		QMCWrapper->QMCDummy(PathData);
+  while(true)
+    QMCWrapper->QMCDummy(PathData);
 }
+
 
 void PIMCClass::WriteSystemInfo()
 {
@@ -453,12 +474,12 @@ void PIMCClass::WriteSystemInfo()
   boxArray(1) = box[1];
 #if NDIM==3
   boxArray(2) = box[2];
-#endif 
-  OutFile.WriteVar ("Box", boxArray);
+#endif
+  OutFile.WriteVar("Box", boxArray);
   OutFile.WriteVar("tau",PathData.Path.tau);
   OutFile.WriteVar("NumTimeSlices",PathData.Path.TotalNumSlices);
   OutFile.WriteVar("seed",PathData.Seed);
-  for (int speciesIndex=0; speciesIndex < PathData.Path.NumSpecies(); 
+  for (int speciesIndex=0; speciesIndex < PathData.Path.NumSpecies();
        speciesIndex++) {
     SpeciesClass &species = PathData.Path.Species(speciesIndex);
     OutFile.NewSection("Species");
@@ -474,4 +495,5 @@ void PIMCClass::WriteSystemInfo()
       OutFile.WriteVar ("ParticleType", "Boltzmannon");
     OutFile.CloseSection(); //"Species"
   }
+  OutFile.WriteVar("NEquilibrate", PathData.Path.NEquilibrate);
 }

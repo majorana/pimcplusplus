@@ -122,6 +122,7 @@ void PathClass::SetIonConfig(int config)
 
 void PathClass::Read (IOSectionClass &inSection)
 {
+  Equilibrate=1;
   CenterOfMass=0.0;
   SetMode(OLDMODE);
   NowOpen=false;
@@ -143,18 +144,6 @@ void PathClass::Read (IOSectionClass &inSection)
   }
 
   assert(inSection.ReadVar ("NumTimeSlices", TotalNumSlices));
-  ///HACK! HACK! HACK! HACK!
-
-  //  if ((MyClone/10)==0)
-  //    TotalNumSlices=50;
-  //  else if ((MyClone/10)==1)
-  //    TotalNumSlices=100;
-  //  else if ((MyClone/10)==2)
-  //    TotalNumSlices=200;
-  //  else if ((MyClone/10)==3)
-  //    TotalNumSlices=400;
-  //  else if ((MyClone/10)==4)
-  //    TotalNumSlices=800;
   assert(inSection.ReadVar ("tau", tau));
   Array<double,1> tempBox;
   Array<bool,1> tempPeriodic;
@@ -215,6 +204,9 @@ void PathClass::Read (IOSectionClass &inSection)
     abort();
   }
 #endif
+
+  if(!inSection.ReadVar("NEquilibrate", NEquilibrate))
+    NEquilibrate = 0;
 
   // Read in the k-space radius.  If we don't have that, we're not long-ranged.
   LongRange = inSection.ReadVar("kCutoff", kCutoff);

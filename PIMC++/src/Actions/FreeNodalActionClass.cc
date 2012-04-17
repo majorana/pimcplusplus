@@ -188,7 +188,7 @@ void FreeNodalActionClass::GradientDet (int slice, double &det, Array<dVec,1> &g
   // Compute determinant
   det = Determinant (DetMatrix2);
   if (det < 0.0) {
-    //return;
+    return;
   }
 
   // Check if singular
@@ -200,7 +200,7 @@ void FreeNodalActionClass::GradientDet (int slice, double &det, Array<dVec,1> &g
     nSingular++;
     det = -1.0;
     gradient(0)[0] = sqrt(-1.0);
-    //return;
+    return;
   }
 
   Cofactors2 = DetMatrix2;
@@ -378,12 +378,13 @@ double FreeNodalActionClass::HybridDist (int slice, double lambdaTau)
 
   Array<dVec,1> GradVec2(N);
   GradientDet (slice, det, GradVec2);
-  double grad2 = 0.0;
-  for (int i=0; i<N; i++)
-    grad2 += dot (GradVec2(i), GradVec2(i));
 
   if (det < 0.0)
     return -1.0;
+
+  double grad2 = 0.0;
+  for (int i=0; i<N; i++)
+    grad2 += dot (GradVec2(i), GradVec2(i));
 
   double gradDist = det/sqrt(grad2);
 
@@ -614,6 +615,19 @@ void FreeNodalActionClass::Read (IOSectionClass &in)
 }
 
 
+double FreeNodalActionClass::SingleAction (int startSlice, int endSlice, const Array<int,1> &changePtcls, int level)
+{
+  if (PathData.Path.Equilibrate) {
+    cerr << "0" << endl;
+    return SimpleAction(startSlice,endSlice,changePtcls,level);
+  }
+  else {
+    cerr << "1" << endl;
+    return PreciseAction(startSlice,endSlice,changePtcls,level);
+  }
+}
+
+
 /// Return essentially 0 or infinity
 double FreeNodalActionClass::SimpleAction (int startSlice, int endSlice, const Array<int,1> &changePtcls, int level)
 {
@@ -627,21 +641,25 @@ double FreeNodalActionClass::SimpleAction (int startSlice, int endSlice, const A
   int refSlice = Path.GetRefSlice() - myStart;
 
   double uNode=0.0;
+  bool abort = 0;
+  #pragma omp parallel for
   for (int slice=startSlice; slice <= endSlice; slice+=skip) {
-    if ((slice != refSlice) && (slice != refSlice+Path.TotalNumSlices)) {
-      double det = Det(slice);
-      if (det < 0.0){
-        uNode += 1.0e100;
-        return uNode;
+    #pragma omp flush (abort)
+    if (!abort) {
+      if ((slice != refSlice) && (slice != refSlice+Path.TotalNumSlices)) {
+        double det = Det(slice);
+        if (det < 0.0){
+          #pragma omp critical
+          {
+            abort = 1;
+          }
+        }
       }
-     // double dist = HybridDist(slice, PathData.Path.tau*(double)skip*Path.Species(SpeciesNum).lambda);
-     // if (dist < 0.0) {
-     //   cerr << "Det > 0.0 while Dist < 0.0 : " << slice << " " << skip << " " << dist << endl;
-     //   uNode += 1.0e100;
-     //   return uNode;
-     // }
     }
   }
+
+  if(abort)
+    uNode = 1.0e100;
 
   gettimeofday(&end, &tz);
   TimeSpent += (double)(end.tv_sec-start.tv_sec) +
@@ -651,8 +669,7 @@ double FreeNodalActionClass::SimpleAction (int startSlice, int endSlice, const A
 }
 
 
-
-double FreeNodalActionClass::SingleAction (int startSlice, int endSlice, const Array<int,1> &changePtcls, int level)
+double FreeNodalActionClass::PreciseAction (int startSlice, int endSlice, const Array<int,1> &changePtcls, int level)
 {
   struct timeval start, end;
   struct timezone tz;
@@ -669,69 +686,55 @@ double FreeNodalActionClass::SingleAction (int startSlice, int endSlice, const A
   Path.SliceRange(PathData.Path.Communicator.MyProc(), myStart, myEnd);
   int refSlice = Path.GetRefSlice() - myStart;
 
-  double dist1, dist2;
-  bool slice1IsRef, slice2IsRef;
-  slice1IsRef = (startSlice == refSlice) || (startSlice==refSlice+Path.TotalNumSlices);
-  if (!slice1IsRef) {
-    //dist1 = MaxDist(slice+skip);//LineSearchDist (slice+skip);//NodalDist (slice+skip);
-    dist1 = HybridDist (startSlice, lambda*levelTau);
-    if (dist1 < 0.0) {
-      uNode += 1.0e100;
-      return uNode;
-    }
-  }
-  else
-    dist1 = sqrt(-1.0);
-
   int totalSlices = Path.TotalNumSlices;
+  int numSlices = (endSlice - startSlice)/skip + 1;
+  if (numSlices < 2)
+    cerr << "ERROR: numSlices < 2 in FreeNodalAction" << endl;
+  double dist[numSlices];
+  for (int i=0; i<numSlices; i++)
+    dist[i] = 0.0;
   bool abort = 0;
-  #pragma omp parallel for shared(uNode)
-  for (int slice=startSlice; slice < endSlice; slice+=skip) {
+  #pragma omp parallel for
+  for (int slice=startSlice; slice <= endSlice; slice+=skip) {
     #pragma omp flush (abort)
     if (!abort) {
-      if ((slice!=refSlice) && (slice != refSlice+totalSlices)) {
-        if (Det(slice) < 0.0) {
-          abort = 1;
-          #pragma omp flush (abort)
+      bool sliceIsRef = (slice == refSlice) || (slice == refSlice+totalSlices);
+      if (!sliceIsRef&&!abort) {
+        int i = (slice - startSlice)/skip;
+        dist[i] = HybridDist (slice, lambda*levelTau);
+        if (dist[i] < 0.0) {
+          #pragma omp critical
+          {
+            abort = 1;
+          }
         }
-      }
-      slice1IsRef = (slice == refSlice) || (slice == refSlice+Path.TotalNumSlices);
-      if (!slice1IsRef) {
-        dist1 = HybridDist (slice, lambda*levelTau);
-        if (dist1 < 0.0) {
-          abort = 1;
-          #pragma omp flush(abort)
-        }
-      }
-      slice2IsRef = (slice+skip == refSlice) || (slice+skip == refSlice+totalSlices);
-      if (!slice2IsRef&&!abort) {
-        dist2 = HybridDist (slice+skip, lambda*levelTau);
-        if (dist2 < 0.0) {
-          abort = 1;
-          #pragma omp flush (abort)
-        }
-      }
-
-      if (!slice1IsRef && (dist1<0.0)) {
-        abort = 1;
-        #pragma omp flush (abort)
-      }
-      else if (!slice2IsRef && (dist2 < 0.0)) {
-        abort = 1;
-        #pragma omp flush (abort)
-      }
-      else if (slice1IsRef || (dist1==0.0)) {
-        uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
-      }
-      else if (slice2IsRef || (dist2==0.0)) {
-        uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
-      }
-      else {
-        uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
       }
     }
   }
   #pragma omp barrier
+
+  if (abort)
+    uNode = 1.0e100;
+  else {
+    int i = 0;
+    for (int slice = startSlice; slice < endSlice; slice+=skip) {
+      bool slice1IsRef = (slice == refSlice) || (slice == refSlice+totalSlices);
+      bool slice2IsRef = (slice+skip == refSlice) || (slice+skip == refSlice+totalSlices);
+      double dist1 = dist[i];
+      double dist2 = dist[i+1];
+      if (!slice1IsRef && (dist1<0.0))
+        abort = 1;
+      else if (!slice2IsRef && (dist2 < 0.0))
+        abort = 1;
+      else if (slice1IsRef || (dist1==0.0))
+        uNode -= log1p(-exp(-dist2*dist2/(lambda*levelTau)));
+      else if (slice2IsRef || (dist2==0.0))
+        uNode -= log1p(-exp(-dist1*dist1/(lambda*levelTau)));
+      else
+        uNode -= log1p(-exp(-dist1*dist2/(lambda*levelTau)));
+      i += 1;
+    }
+  }
 
   if (abort)
     uNode = 1.0e100;
@@ -759,64 +762,62 @@ double FreeNodalActionClass::d_dBeta (int slice1, int slice2, int level)
   int sliceDiff1 = abs(slice1-refSlice);
   sliceDiff1 = min (sliceDiff1, PathData.Path.TotalNumSlices-sliceDiff1);
 
-  double dist1, dist2;
-
-  bool slice1IsRef, slice2IsRef;
-  slice1IsRef = (slice1 == refSlice) || (slice1==refSlice+Path.TotalNumSlices);
-
-  bool abort = 0;
-  if (!slice1IsRef) {
-    dist1 = HybridDist (slice1, lambda*levelTau);
-    if (dist1 < 0.0) {
-      cerr << "dist1 = " << dist1  << " slice1 = " << slice1 << " refSlice = " << refSlice << " species = " << species.Name << endl;
-      abort = 1;
-      //return 1.0e100;
-    }
-  }
-  else
-    dist1 = sqrt(-1.0);
-
   int totalSlices = Path.TotalNumSlices;
-  double uNode = 0.0;
-  #pragma omp parallel for shared(uNode)
-  for (int slice=slice1; slice < slice2; slice+=skip) {
+  int numSlices = (slice2 - slice1)/skip + 1;
+  if (numSlices < 2)
+    cerr << "ERROR: numSlices < 2 in FreeNodalAction" << endl;
+  double dist[numSlices];
+  for (int i=0; i<numSlices; i++)
+    dist[i] = 0.0;
+  bool abort = 0;
+  #pragma omp parallel for
+  for (int slice=slice1; slice <= slice2; slice+=skip) {
     #pragma omp flush (abort)
     if (!abort) {
-      int sliceDiff = slice - refSlice;
-      sliceDiff = min (sliceDiff, PathData.Path.TotalNumSlices - sliceDiff);
-      slice2IsRef = (slice+skip == refSlice) || (slice+skip == refSlice+Path.TotalNumSlices);
-      if (!slice2IsRef) {
-        dist2 = HybridDist (slice+skip, lambda*levelTau);
-        if (dist2 < 0.0) {
-          cerr << "ERROR: dist = " << dist2 << " skip = " << skip << " slice2 = " << slice+skip << " refSlice = " << refSlice << " species = " << species.Name << endl;
-          abort = 1;
-          //return 1.0e100;
-    #pragma omp flush (abort)
+      bool sliceIsRef = (slice == refSlice) || (slice == refSlice+totalSlices);
+      if (!sliceIsRef&&!abort) {
+        int i = (slice - slice1)/skip;
+        dist[i] = HybridDist (slice, lambda*levelTau);
+        if (dist[i] < 0.0) {
+          #pragma omp critical
+          {
+            cerr << "ERROR: dist = " << dist[i] << " skip = " << skip << " slice2 = " << slice+skip << " refSlice = " << refSlice << " species = " << species.Name << endl;
+            abort = 1;
+          }
         }
       }
-
-      double prod;
-      if (slice1IsRef || (dist1==0.0))
-        prod = dist2*dist2;
-      else if (slice2IsRef || (dist2==0.0))
-        prod = dist1*dist1;
-      else
-        prod = dist1*dist2;
-
-      double prod_llt = prod/(lambda*levelTau);
-      double exp_m1 = expm1 (prod_llt);
-      if (fpclassify(exp_m1)==FP_NORMAL)
-        if (!isnan(exp_m1) && !isinf(exp_m1))
-          if (isnormal(exp_m1))
-            if ((!isnan(prod_llt)) && (exp_m1 != 0.0))
-              uNode += prod_llt / (levelTau*exp_m1);
-      if (isnan(uNode))
-        cerr << "uNode broken again!\n";
-      dist1 = dist2;
-      slice1IsRef = slice2IsRef;
     }
   }
   #pragma omp barrier
+
+  double uNode = 0.0;
+  int i = 0;
+  for (int slice=slice1; slice < slice2; slice+=skip) {
+    int sliceDiff = slice - refSlice;
+    sliceDiff = min (sliceDiff, PathData.Path.TotalNumSlices - sliceDiff);
+    bool slice1IsRef = (slice == refSlice) || (slice == refSlice+totalSlices);
+    bool slice2IsRef = (slice+skip == refSlice) || (slice+skip == refSlice+totalSlices);
+    double dist1 = dist[i];
+    double dist2 = dist[i+1];
+    double prod;
+    if (slice1IsRef || (dist1==0.0))
+      prod = dist2*dist2;
+    else if (slice2IsRef || (dist2==0.0))
+      prod = dist1*dist1;
+    else
+      prod = dist1*dist2;
+
+    double prod_llt = prod/(lambda*levelTau);
+    double exp_m1 = expm1 (prod_llt);
+    if (fpclassify(exp_m1)==FP_NORMAL)
+      if (!isnan(exp_m1) && !isinf(exp_m1))
+        if (isnormal(exp_m1))
+          if ((!isnan(prod_llt)) && (exp_m1 != 0.0))
+            uNode += prod_llt / (levelTau*exp_m1);
+    if (isnan(uNode))
+      cerr << "uNode broken again!\n";
+    i += 1;
+  }
 
   if (abort)
     uNode = 1.0e100;

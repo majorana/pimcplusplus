@@ -136,6 +136,10 @@ private:
   void MoveJoinParticleExist(int oldJoin, int newJoin);
   
 public:
+  // EQUILIBRATION
+  bool Equilibrate;
+  int NEquilibrate;
+
   /// Stores the position of the reference slice w.r.t. time slice 0
   /// on processor 0.
   int RefSlice;

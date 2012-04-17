@@ -17,6 +17,7 @@
 #ifndef FREE_NODAL_ACTION_CLASS_H
 #define FREE_NODAL_ACTION_CLASS_H
 
+//#include <omp.h>
 #include "NodalActionClass.h"
 #include <Common/Splines/CubicSpline.h>
 
@@ -56,12 +57,12 @@ private:
   double NewtonRaphsonDist (int slice);
   int SpeciesNum;
   int NumGradDists, NumLineDists;
-  int nBisections0, nBisections;
   int nSingular;
 public:
   double SingleAction (int slice1, int slice2, const Array<int,1> &activeParticles, int level);
-  double d_dBeta (int slice1, int slice2, int level);
   double SimpleAction (int slice1, int slice2, const Array<int,1> &activeParticles, int level);
+  double PreciseAction (int slice1, int slice2, const Array<int,1> &activeParticles, int level);
+  double d_dBeta (int slice1, int slice2, int level);
   /// Returns true if the nodal restriction is satisfied for my
   /// species at timeslice slice.  If slice is the reference slice,
   /// returns true.
