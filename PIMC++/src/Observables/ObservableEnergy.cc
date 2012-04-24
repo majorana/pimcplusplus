@@ -223,6 +223,9 @@ void EnergyClass::Read(IOSectionClass &in)
 }
 
 
+////Code for energy sign class
+
+
 // Fix to include final link between link M and 0
 void EnergySignClass::Accumulate()
 {
@@ -235,24 +238,26 @@ void EnergySignClass::Accumulate()
   }
   //Move the join to the end so we don't have to worry about permutations
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
-
+  double FullWeight;
+  double currWeight=PathData.Path.Weight;
+  PathData.Path.Communicator.GatherProd(currWeight,FullWeight,0);
+  
   NumSamples++;
 
   double kinetic, dUShort, dULong, node, vShort, vLong, dUNonlocal;
-  PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong, dUNonlocal);
-  if (abs(node) > 1e50) { // Check for odd node energies
-    cerr<<"ENERGIES: "<<kinetic<<" "<<dUShort<<" "<<dULong<<" "<<node<<" "<<vShort<<" "<<vLong<<" "<<dUNonlocal<<endl;
-    //abort();
-  }
-  TotalSum   += (kinetic + dUShort + dULong + node)/* *PathData.Path.Weight*/;
-  KineticSum += kinetic/* * PathData.Path.Weight*/;
-  dUShortSum += dUShort/* * PathData.Path.Weight*/;
-  dULongSum  += dULong/* * PathData.Path.Weight*/;
-  NodeSum    += node/* * PathData.Path.Weight*/;
-  VShortSum  += vShort/* * PathData.Path.Weight*/;
-  VLongSum   += vLong/* * PathData.Path.Weight*/;
-  dUNonlocalSum += dUNonlocal;
+  PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong,
+			   dUNonlocal);
+  //  cerr<<"ENERGIES: "<<kinetic<<" "<<duShort<<" "<<dULong<<" "<<node<<" "<<vShort<<" "<<vLong<<" "<<dUNonlocal<<endl;
+  TotalSum   += (kinetic + dUShort + dULong + node)*FullWeight;
+  KineticSum += kinetic*FullWeight;/* * PathData.Path.Weight*/;
+  dUShortSum += dUShort*FullWeight;/* * PathData.Path.Weight*/;
+  dULongSum  += dULong*FullWeight;/* * PathData.Path.Weight*/;
+  NodeSum    += node*FullWeight;/* * PathData.Path.Weight*/;
+  VShortSum  += vShort*FullWeight;/* * PathData.Path.Weight*/;
+  VLongSum   += vLong*FullWeight;/* * PathData.Path.Weight*/;
+  dUNonlocalSum += dUNonlocal*FullWeight;
 }
+
 
 
 void EnergySignClass::ShiftData (int NumTimeSlices)
@@ -262,7 +267,7 @@ void EnergySignClass::ShiftData (int NumTimeSlices)
 
 void EnergySignClass::WriteBlock()
 {
-
+  
   int nslices=PathData.Path.TotalNumSlices;
   double norm = 1.0/((double)NumSamples*(double)nslices);
 
@@ -277,7 +282,7 @@ void EnergySignClass::WriteBlock()
 
   if (PathData.Path.Communicator.MyProc()==0)
     IOSection.FlushFile();
-
+  
   TotalSum   = 0.0;
   KineticSum = 0.0;
   dUShortSum = 0.0;
@@ -292,11 +297,11 @@ void EnergySignClass::WriteBlock()
 
 
 void EnergySignClass::Read(IOSectionClass &in)
-{
+{  
   ObservableClass::Read(in);
-  assert(in.ReadVar("freq",Freq));
-  assert(in.ReadVar("dumpFreq",DumpFreq));
-  if (PathData.Path.Communicator.MyProc()==0) {
+  assert(in.ReadVar("Frequency",Freq));
+  //  assert(in.ReadVar("dumpFreq",DumpFreq));
+  if (PathData.Path.Communicator.MyProc()==0){
     WriteInfo();
     IOSection.WriteVar("Type","Scalar");
   }
