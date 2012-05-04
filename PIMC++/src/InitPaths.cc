@@ -967,7 +967,7 @@ PathClass::InitPaths (IOSectionClass &in)
       perr << "Unrecognize initialization strategy " << InitPaths << endl;
       abort();
     }
-    cerr<<Communicator.MyProc()<<" "<<species.Name<<" Init real slices"<<endl;
+    cout<<Communicator.MyProc()<<" "<<species.Name<<" Init real slices"<<endl;
     InitRealSlices();
     in.CloseSection(); // Species
   }

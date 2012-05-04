@@ -32,9 +32,9 @@ LoopClass::DoEvent()
     for (iter=Events.begin(); iter!=Events.end(); iter++) {
      stringstream output;
      output<<(*iter)->Name<<"("<<step<<"/"<<NumSteps<<")("<<PathData.Path.Communicator.MyProc()<<") ";
-     //cerr<<output.str();
+     //out<<output.str();
      if (PathData.ExceededWallTime()) {
-        cerr << "PIMC++ exceeded wall clock limit.  Exitting LoopClass.\n";
+        cout << "PIMC++ exceeded wall clock limit.  Exitting LoopClass.\n";
         return;
       }
       else {

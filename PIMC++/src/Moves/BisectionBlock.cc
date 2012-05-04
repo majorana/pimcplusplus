@@ -31,7 +31,7 @@ void BisectionBlockClass::Read_new(IOSectionClass &in)
   if (!in.ReadVar("UseCorrelatedSampling",useCorrelatedSampling))
     useCorrelatedSampling=false;
   if (useCorrelatedSampling)
-    cerr<<"Using correlated sampling"<<endl;
+    cout<<"Using correlated sampling"<<endl;
   string permuteType, speciesName;
   assert (in.ReadVar ("NumLevels", NumLevels));
   LowestLevel = 0;
@@ -68,13 +68,13 @@ void BisectionBlockClass::Read_new(IOSectionClass &in)
     newStage = new BisectionStageClass (PathData, level, IOSection);
     newStage->TotalLevels=NumLevels;
     newStage->UseCorrelatedSampling=useCorrelatedSampling;
-    cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Kinetic Action"<<endl;
+    //cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Kinetic Action"<<endl;
     newStage->Actions.push_back(&PathData.Actions.Kinetic);
     if (level!=LowestLevel){
       Array<string,1> higherLevelActions;
       if (in.ReadVar("HigherLevelActions",higherLevelActions)){
         for (int i=0;i<higherLevelActions.size();i++) {
-          cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding "<<(*PathData.Actions.GetAction(higherLevelActions(i))).GetName()<<" Action"<<endl;
+          //cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding "<<(*PathData.Actions.GetAction(higherLevelActions(i))).GetName()<<" Action"<<endl;
           newStage->Actions.push_back(PathData.Actions.GetAction(higherLevelActions(i)));
         }
       }
@@ -86,18 +86,18 @@ void BisectionBlockClass::Read_new(IOSectionClass &in)
       Array<string,1> samplingActions;
       assert(in.ReadVar("SamplingActions",samplingActions));
       for (int i=0;i<samplingActions.size();i++) {
-        cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding "<<(*PathData.Actions.GetAction(samplingActions(i))).GetName()<<" Action"<<endl;
+        //cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding "<<(*PathData.Actions.GetAction(samplingActions(i))).GetName()<<" Action"<<endl;
         newStage -> Actions.push_back(PathData.Actions.GetAction(samplingActions(i)));
       }
       if (PathData.Path.DavidLongRange) {
-        cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding DavidLongRange Action"<<endl;
+        //cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding DavidLongRange Action"<<endl;
         newStage -> Actions.push_back(&PathData.Actions.DavidLongRange);
       } else if (PathData.Actions.HaveLongRange()) {
         if (PathData.Actions.UseRPA) {
-          cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRangeRPA Action"<<endl;
+          //cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRangeRPA Action"<<endl;
           newStage -> Actions.push_back(&PathData.Actions.LongRangeRPA);
         } else {
-          cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRange Action"<<endl;
+          //cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRange Action"<<endl;
           newStage -> Actions.push_back(&PathData.Actions.LongRange);
         }
       }
@@ -105,12 +105,12 @@ void BisectionBlockClass::Read_new(IOSectionClass &in)
     //HACK!!! These used to be only pushed on at the lowest level
     if (level==0) {
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-        cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Node Action"<<endl;
+        //cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Node Action"<<endl;
         newStage->Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
       }
     }
     if (PathData.Actions.UseNonlocal) {
-      cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Nonlocal Action"<<endl;
+      //cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Nonlocal Action"<<endl;
       newStage->Actions.push_back(&PathData.Actions.Nonlocal);
     }
 
@@ -462,13 +462,12 @@ void BisectionBlockClass::PrintTimeSpent()
   list<StageClass*>::iterator stageIter=Stages.begin();
   while (stageIter!=Stages.end()){
     //    cerr<<"LEVEL A IS "<<(*stageIter)->TimeSpent<<endl;
-    cerr<<"START"<<endl;
+    cout<<"START"<<endl;
     for (list<ActionBaseClass*>::iterator actionIter=(*stageIter)->Actions.begin();actionIter!=(*stageIter)->Actions.end();actionIter++){
-      cerr<<"    Action value was "<<(*actionIter)->TimeSpent<<" "<<(*actionIter)->GetName()<<endl;
-      
+      cout<<"    Action value was "<<(*actionIter)->TimeSpent<<" "<<(*actionIter)->GetName()<<endl;
     }
-    cerr<<"Time spent is "<<TimeSpent<<endl;
-    cerr<<"END"<<endl;
+    cout<<"Time spent is "<<TimeSpent<<endl;
+    cout<<"END"<<endl;
     stageIter++;
   }
 }

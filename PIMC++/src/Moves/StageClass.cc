@@ -71,9 +71,14 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2, Array<int,1> &activePart
   double ran_number = PathData.Path.Random.Local();
   bool toAccept = logAcceptProb >= log(ran_number); // Accept condition
 
-  if (abs(newAction) > 1e50 || abs(oldAction) > 1e50) { // Nodal Rejection
+  if (abs(newAction) > 1e50 || abs(oldAction) > 1e50) {
     if (toAccept) {
-      cerr << "Broken Staging: " << BisectionLevel << " " << toAccept << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << endl;
+      if (abs(newAction) > 1e50 && abs(oldAction) < 1e50)
+        cerr << "Broken Staging (new): " << BisectionLevel << " " << toAccept << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << endl;
+      else if (abs(oldAction) > 1e50 && abs(newAction) < 1e50)
+        cerr << "Broken Staging (old): " << BisectionLevel << " " << toAccept << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << endl;
+      else
+         cerr << "Broken Staging (both): " << BisectionLevel << " " << toAccept << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << endl;
       toAccept = 0;
       assert(1==2);
     }

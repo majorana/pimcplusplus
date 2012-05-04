@@ -50,13 +50,13 @@ bool PIMCClass::Read(IOSectionClass &in)
     // }
 
     // Read in the action information
-    cerr <<PathData.Path.Communicator.MyProc()<<" Reading Actions"<<endl;
+    cout <<PathData.Path.Communicator.MyProc()<<" Reading Actions"<<endl;
     assert(in.OpenSection("Action"));
     PathData.Actions.Read(in);
     in.CloseSection();
 
     // Now actually initialize the paths
-    cerr <<PathData.Path.Communicator.MyProc()<<" Initializing Paths"<<endl;
+    cout <<PathData.Path.Communicator.MyProc()<<" Initializing Paths"<<endl;
     assert(in.OpenSection("System"));
     PathData.Path.InitPaths(in);
 
@@ -69,11 +69,11 @@ bool PIMCClass::Read(IOSectionClass &in)
       PathData.Path.SetIonConfig(0);
 
     // Init Actions caches
-    cerr <<PathData.Path.Communicator.MyProc()<<" Initializing Actions Caches"<<endl;
+    cout <<PathData.Path.Communicator.MyProc()<<" Initializing Actions Caches"<<endl;
     PathData.Actions.Init();
 
     // Read in the Observables
-    cerr <<PathData.Path.Communicator.MyProc()<< " Reading Observables"<<endl;
+    cout <<PathData.Path.Communicator.MyProc()<< " Reading Observables"<<endl;
     assert(in.OpenSection("Observables"));
     ReadObservables(in);
     in.CloseSection();
@@ -87,7 +87,7 @@ bool PIMCClass::Read(IOSectionClass &in)
 
     // Append Long Range Action
     if (PathData.Actions.HaveLongRange()) {
-      cerr << "Initializing Long Range" << endl;
+      cout << "Initializing Long Range" << endl;
       assert (in.OpenSection ("Action"));
       PathData.Actions.LongRange.Init (in, OutFile);
       if (PathData.Actions.UseRPA)
@@ -100,19 +100,19 @@ bool PIMCClass::Read(IOSectionClass &in)
     }
 
     // Read in the Moves
-    cerr <<PathData.Path.Communicator.MyProc()<<" Reading Moves"<<endl;
+    cout <<PathData.Path.Communicator.MyProc()<<" Reading Moves"<<endl;
     assert(in.OpenSection("Moves"));
     ReadMoves(in);
     in.CloseSection();
 
     // Read Switches
-    //cerr <<PathData.Path.Communicator.MyProc()<<" Reading Moves"<<endl;
+    //cout <<PathData.Path.Communicator.MyProc()<<" Reading Moves"<<endl;
     //assert(in.OpenSection("Switches"));
     //ReadSwitches(in);
     //in.CloseSection();
 
     // Read in the Algorithm
-    cerr <<PathData.Path.Communicator.MyProc()<<" Reading Algorithm"<<endl;
+    cout <<PathData.Path.Communicator.MyProc()<<" Reading Algorithm"<<endl;
     assert(in.OpenSection("Algorithm"));
     ReadAlgorithm(in);
     in.CloseSection();
@@ -456,9 +456,9 @@ void PIMCClass::ReadAlgorithm(IOSectionClass &in)
 
 void PIMCClass::Run()
 {
-  cerr << PathData.Path.Communicator.MyProc()<< " Simulation started." << endl;
+  cout << PathData.Path.Communicator.MyProc()<< " Simulation started." << endl;
   Algorithm.DoEvent();
-  cerr << PathData.Path.Communicator.MyProc()<< " Simulation completed." <<endl;
+  cout << PathData.Path.Communicator.MyProc()<< " Simulation completed." <<endl;
 }
 
 

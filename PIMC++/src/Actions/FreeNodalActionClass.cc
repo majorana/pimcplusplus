@@ -67,8 +67,8 @@ FreeNodalActionClass::SetupFreeActions()
 
 
   /// DEBUG
-  FILE *fout;
-  fout = fopen ("FreeImageActions.dat", "w");
+  //FILE *fout;
+  //fout = fopen ("FreeImageActions.dat", "w");
   // Now, setup up actions
   ActionSplines.resize(nSplines);
   for (int spline=0; spline<nSplines; spline++) {
@@ -78,15 +78,15 @@ FreeNodalActionClass::SetupFreeActions()
       for (int i=0; i<nPoints; i++) {
         double disp = ActionGrids[dim](i);
         actionData(i) = ActionImageSum (L, lambdaBeta, disp) - ActionImageSum(L, lambdaBeta, 0.0);
-        fprintf (fout, "%1.12e ", actionData(i));
+        //fprintf (fout, "%1.12e ", actionData(i));
       }
-      fprintf (fout, "\n");
+      //fprintf (fout, "\n");
       // Since the action is periodic, the slope should be zero
       // at the boundaries
       ActionSplines(spline)[dim].Init (&ActionGrids[dim], actionData, 0.0, 0.0);
     }
   }
-  fclose (fout);
+  //fclose (fout);
 
 }
 
@@ -618,11 +618,9 @@ void FreeNodalActionClass::Read (IOSectionClass &in)
 double FreeNodalActionClass::SingleAction (int startSlice, int endSlice, const Array<int,1> &changePtcls, int level)
 {
   if (PathData.Path.Equilibrate) {
-    cerr << "0" << endl;
     return SimpleAction(startSlice,endSlice,changePtcls,level);
   }
   else {
-    cerr << "1" << endl;
     return PreciseAction(startSlice,endSlice,changePtcls,level);
   }
 }

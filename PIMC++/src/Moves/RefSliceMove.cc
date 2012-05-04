@@ -47,26 +47,26 @@ void RefSliceMoveClass::Read(IOSectionClass &in)
 
   for (int level=NumLevels-1; level>=0; level--) {
     BisectionStageClass *newStage = new BisectionStageClass (PathData, level, IOSection);
-    cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Kinetic Action"<<endl;
+    cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Kinetic Action"<<endl;
     newStage -> Actions.push_back(&PathData.Actions.Kinetic);
     newStage -> UseCorrelatedSampling=false;
     if (level == 0) {
-      cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding ShortRange Action"<<endl;
+      cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding ShortRange Action"<<endl;
       newStage -> Actions.push_back(&PathData.Actions.ShortRange);
       if (PathData.Path.LongRange) {
         if (PathData.Actions.UseRPA){
-          cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRangeRPA Action"<<endl;
+          cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRangeRPA Action"<<endl;
           newStage -> Actions.push_back(&PathData.Actions.LongRangeRPA);
         } else if (PathData.Path.DavidLongRange) {
-          cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding DavidLongRange Action"<<endl;
+          cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding DavidLongRange Action"<<endl;
           newStage -> Actions.push_back(&PathData.Actions.DavidLongRange);
         } else {
-          cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRangeAction"<<endl;
+          cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding LongRangeAction"<<endl;
           newStage -> Actions.push_back(&PathData.Actions.LongRange);
         }
       }
       if ((PathData.Actions.NodalActions(SpeciesNum)!=NULL)) {
-        cerr<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Node Action"<<endl;
+        cout<<PathData.Path.Communicator.MyProc()<<" "<<moveName<<" "<<speciesName<<" "<<level<<" Adding Node Action"<<endl;
         newStage -> Actions.push_back(PathData.Actions.NodalActions(SpeciesNum));
       }
     }
