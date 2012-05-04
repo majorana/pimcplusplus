@@ -1219,7 +1219,7 @@ void DavidPAClass::ReadDavidSquarerFileHDF5(string DMFile)
     in.CloseSection();
     //cerr<<"done with long range finding"<<endl;
   }
-  cerr << "Finished DavidSquarer HDF5 read" << endl;
+  cout << "Finished DavidSquarer HDF5 read" << endl;
 
 }
 

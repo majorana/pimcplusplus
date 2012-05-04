@@ -310,7 +310,7 @@ void PathDataClass::Read (IOSectionClass &in)
   // Setup Inter- and IntraComms
   assert ((N % procsPerClone) == 0);
   NumClones = N / procsPerClone;
-  cerr << "N : " << N << ", procPerClone : " << procsPerClone << " " << endl;
+  cout << "N : " << N << ", procPerClone : " << procsPerClone << " " << endl;
   MyCloneNum = WorldComm.MyProc()/procsPerClone;
   // Create IntraComm
   ////cerr << "  Going to initialize IntraComm with MyCloneNum " << MyCloneNum << endl;
@@ -363,7 +363,7 @@ void PathDataClass::AssignPtclSetStrings()
 {
 	if(!useDefaultStrings){
 		assert(ptclSet0.size() == Path.NumSpecies());
-		cerr << "  Got the following qmcpack particleset labels:\n";
+		cout << "  Got the following qmcpack particleset labels:\n";
 	}
 	else{
 		ptclSet0.resize(Path.NumSpecies());
@@ -372,11 +372,11 @@ void PathDataClass::AssignPtclSetStrings()
 			ptclSet0(s) = Path.Species(s).Name;
 			ptclSet1(s) = Path.Species(s).Name + '1';
 		}
-		cerr << "  Didn't read in particleset names; generated defaults:" << endl;
+		cout << "  Didn't read in particleset names; generated defaults:" << endl;
 	}
 
-	cerr << "SPECIES		SET 0		SET 1" << endl; 
-	for(int s=0; s<ptclSet0.size(); s++) cerr << Path.Species(s).Name << "  " << ptclSet0(s) << "  " << ptclSet1(s) << endl;
+	cout << "SPECIES		SET 0		SET 1" << endl; 
+	for(int s=0; s<ptclSet0.size(); s++) cout << Path.Species(s).Name << "  " << ptclSet0(s) << "  " << ptclSet1(s) << endl;
 }
 #endif
 

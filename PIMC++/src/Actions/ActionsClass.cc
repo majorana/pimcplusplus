@@ -77,9 +77,9 @@ void ActionsClass::Read(IOSectionClass &in)
   PathClass &Path = PathData.Path;
 
   assert(in.ReadVar ("MaxLevels", MaxLevels));
-  cerr <<PathData.Path.Communicator.MyProc()<<" MaxLevels("<<MaxLevels<<")"<<endl;
+  cout <<PathData.Path.Communicator.MyProc()<<" MaxLevels("<<MaxLevels<<")"<<endl;
   assert(in.ReadVar ("NumImages", NumImages));
-  cerr <<PathData.Path.Communicator.MyProc()<<" NumImage("<<NumImages<<")"<<endl;
+  cout <<PathData.Path.Communicator.MyProc()<<" NumImage("<<NumImages<<")"<<endl;
   Kinetic.SetNumImages (NumImages);
   KineticSphere.SetNumImages(NumImages);
   Mu.Read(in);
@@ -140,9 +140,9 @@ void ActionsClass::Read(IOSectionClass &in)
   if (!in.ReadVar ("UseRPA", UseRPA))
     UseRPA = false;
   if (UseRPA)
-    cerr << PathData.Path.Communicator.MyProc()<< " Using RPA for long range action." << endl;
+    cout << PathData.Path.Communicator.MyProc()<< " Using RPA for long range action." << endl;
   else
-    cerr << PathData.Path.Communicator.MyProc()<< " Not using RPA for long range action." << endl;;
+    cout << PathData.Path.Communicator.MyProc()<< " Not using RPA for long range action." << endl;;
 
   Array<string,1> PAFiles;
   assert (in.ReadVar ("PairActionFiles", PAFiles));
@@ -189,12 +189,12 @@ void ActionsClass::Read(IOSectionClass &in)
             ((Path.Species(spec2).Type==PairArray(i)->Particle1.Name)&&
              (Path.Species(spec1).Type==PairArray(i)->Particle2.Name))) {
           if (PairMatrix(spec1,spec2) != NULL) {
-            perr << "More than one pair action for species types (" 
+            cerr << "More than one pair action for species types (" 
                  << PairArray(i)->Particle1.Name << ", "
                  << PairArray(i)->Particle2.Name << ")." << endl;
             exit(-1);
           }
-          verr << "Found PAfile for pair (" 
+          cout << "Found PAfile for pair (" 
                << Path.Species(spec1).Name << ", "
                << Path.Species(spec2).Name << ")\n";
           PairMatrix(spec1,spec2) = PairArray(i);
@@ -202,7 +202,7 @@ void ActionsClass::Read(IOSectionClass &in)
           paUsed = true;
         }
     if (!paUsed) {
-      perr << "Warning:  Pair action for species types (" 
+      cerr << "Warning:  Pair action for species types (" 
            << PairArray(i)->Particle1.Name << ", "
            << PairArray(i)->Particle1.Name << ") not used.\n";
     }
@@ -230,7 +230,7 @@ void ActionsClass::Read(IOSectionClass &in)
       if (PairMatrix(species1,species2) == NULL) {
         if ((species1 != species2) || 
             (Path.Species(species1).NumParticles > 1)) {
-          perr << "We're missing a PairAction for species1 = "
+          cerr << "We're missing a PairAction for species1 = "
                << Path.Species(species1).Name << " and species2 = "
                << Path.Species(species2).Name << endl;
           exit(1);
@@ -239,7 +239,7 @@ void ActionsClass::Read(IOSectionClass &in)
 
   in.ReadVar("UseLongRange", UseLongRange);
   if (HaveLongRange()) {
-    perr << "*** Using long-range/short-range breakup. ***\n";
+    cout << "*** Using long-range/short-range breakup. ***\n";
     assert (in.ReadVar("UseBackground", LongRange.UseBackground));
     LongRangePot.UseBackground = LongRange.UseBackground;
     LongRangeRPA.UseBackground = LongRange.UseBackground;
@@ -324,13 +324,13 @@ void ActionsClass::Read(IOSectionClass &in)
 
   int numActions = in.CountSections("Action");
   vector<string> L(0);
-  cerr <<PathData.Path.Communicator.MyProc()<< " Initializing " << numActions << " action objects" << endl;
+  cout <<PathData.Path.Communicator.MyProc()<< " Initializing " << numActions << " action objects" << endl;
   for(int n=0; n<numActions; n++){
     in.OpenSection("Action",n);
     string type, label;
     assert(in.ReadVar("Type", type));
     assert(in.ReadVar("Name", label));
-    cerr<<PathData.Path.Communicator.MyProc()<< " Initializing: action(" << label << ") type(" << type<<") ";// << endl;
+    cout<<PathData.Path.Communicator.MyProc()<< " Initializing: action(" << label << ") type(" << type<<") ";// << endl;
     // add menu of all possible ActionBase objects here
     if(type == "Kinetic"){
       newAction = new KineticClass(PathData);
@@ -379,9 +379,7 @@ void ActionsClass::Read(IOSectionClass &in)
       exit(0);
     }
 
-    cerr << "; Added action: type(" << type<<")";
     newAction->Read(in);
-    cerr << " address(" << newAction <<")"<< endl;
     ActionList.push_back(newAction);
     ActionLabels.push_back(label);
     // check for duplicate labels
@@ -399,7 +397,6 @@ void ActionsClass::Read(IOSectionClass &in)
 
 void ActionsClass::ReadPairActions(IOSectionClass &in)
 {
-  cerr <<PathData.Path.Communicator.MyProc()<< " Reading PairActions" << endl;
   PathClass &Path=PathData.Path;
   Array<string,1> PAFiles;
   assert (in.ReadVar ("PairActionFiles", PAFiles));
@@ -416,7 +413,7 @@ void ActionsClass::ReadPairActions(IOSectionClass &in)
     // Allow for tilde-expansion in these files
     string name = ExpandFileName(PAFiles(i));
     assert(PAIO.OpenFile (name));
-    cerr <<PathData.Path.Communicator.MyProc()<<" PA("<<i<<") "<<name<<endl;
+    cout <<PathData.Path.Communicator.MyProc()<<" PA("<<i<<") "<<name<<endl;
     PairArray(i) = ReadPAFit (PAIO, Path.tau, MaxLevels);
     bool paUsed=false;
     for (int spec1=0;spec1<Path.NumSpecies();spec1++) {
@@ -426,12 +423,12 @@ void ActionsClass::ReadPairActions(IOSectionClass &in)
             ((Path.Species(spec2).Type==PairArray(i)->Particle1.Name)&&
              (Path.Species(spec1).Type==PairArray(i)->Particle2.Name))) {
           if (PairMatrix(spec1,spec2) != NULL) {
-            perr <<PathData.Path.Communicator.MyProc()<< " More than one pair action for species types ("
+            cerr <<PathData.Path.Communicator.MyProc()<< " More than one pair action for species types ("
                  << PairArray(i)->Particle1.Name << ", "
                  << PairArray(i)->Particle2.Name << ")." << endl;
             exit(-1);
           }
-          perr <<PathData.Path.Communicator.MyProc()<< " Found PAfile for pair (" 
+          cout <<PathData.Path.Communicator.MyProc()<< " Found PAfile for pair (" 
                << Path.Species(spec1).Name << ", "
                << Path.Species(spec2).Name << ")\n";
           PairMatrix(spec1,spec2) = PairArray(i);
@@ -441,7 +438,7 @@ void ActionsClass::ReadPairActions(IOSectionClass &in)
       }
     }
     if (!paUsed) {
-      perr <<PathData.Path.Communicator.MyProc()<< " Warning:  Pair action for species types ("
+      cerr <<PathData.Path.Communicator.MyProc()<< " Warning:  Pair action for species types ("
            << PairArray(i)->Particle1.Name << ", "
            << PairArray(i)->Particle1.Name << ") not used.\n";
     }
@@ -727,9 +724,9 @@ ActionBaseClass* ActionsClass::GetAction(string name)
 void
 ActionsClass::ReadNodalActions(IOSectionClass &in)
 {
-  std::cerr << PathData.Path.Communicator.MyProc() <<" Reading Nodal Action" << endl;
+  cout << PathData.Path.Communicator.MyProc() <<" Reading Nodal Action" << endl;
   int numNodeSections=in.CountSections("NodalAction");
-  cerr << PathData.Path.Communicator.MyProc() <<" Found " << numNodeSections << " Nodal Actions." << endl;
+  cout << PathData.Path.Communicator.MyProc() <<" Found " << numNodeSections << " Nodal Actions." << endl;
   NodalActions.resize (PathData.Path.NumSpecies());
   NodalActions = NULL;
   for (int nodeSection=0; nodeSection<numNodeSections; nodeSection++) {

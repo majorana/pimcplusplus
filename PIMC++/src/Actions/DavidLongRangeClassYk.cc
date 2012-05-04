@@ -66,7 +66,7 @@ void DavidLongRangeClassYk::Build_MultipleSpecies()
           Vlong_k(speciesNum, j)=pa.uk_long(i)/(vol);
           uk(speciesNum, j)=Vlong_k(speciesNum, j)*Path.tau;//(-1.0+s)/ncomps;
           duk(speciesNum, j)=Vlong_k(speciesNum, j);//pa.uk_long(i)/(vol)-lambda*k*k*uk(j)*((1.0+0.5*ncomps*uk(j)));
-          cerr<<"VLONG IS "<<Vlong_k(j)<<endl;
+          //cout<<"VLONG IS "<<Vlong_k(j)<<endl;
         }
       }
     }
@@ -118,7 +118,7 @@ void DavidLongRangeClassYk::BuildRPA_SingleType()
         }
       }
     }
-    cerr<<PathData.Path.Communicator.MyProc()<<" RPA Built: species("<<speciesNum<<") lambda("<<lambda<<") N("<<ncomps<<") Vol("<<vol<<")"<<endl;
+    cout<<PathData.Path.Communicator.MyProc()<<" RPA Built: species("<<speciesNum<<") lambda("<<lambda<<") N("<<ncomps<<") Vol("<<vol<<")"<<endl;
     //for (int i=0;i<uk.extent(1);i++)
     //  cerr<<"KVecs: "<<sqrt(blitz::dot(Path.kVecs(i),Path.kVecs(i)))<<" "<<uk(speciesNum, i)<<" "<<duk(speciesNum, i)<<endl;
   }
@@ -143,7 +143,7 @@ void DavidLongRangeClassYk::ReadYk()
       specNum2++;
       assert(specNum2<Path.NumSpecies());
     }
-    cerr<<PathData.Path.Communicator.MyProc()<<" Masses: "<<pa.LongRangeMass1<<" "<<pa.LongRangeMass2<<" "<<Path.Species(specNum1).lambda<<" "<<Path.Species(specNum2).lambda<<endl;
+    cout<<PathData.Path.Communicator.MyProc()<<" Masses: "<<pa.LongRangeMass1<<" "<<pa.LongRangeMass2<<" "<<Path.Species(specNum1).lambda<<" "<<Path.Species(specNum2).lambda<<endl;
     assert(fabs(pa.LongRangeMass1-Path.Species(specNum1).lambda)<1e-10);
     assert(fabs(pa.LongRangeMass2-Path.Species(specNum2).lambda)<1e-10);
   }
@@ -156,11 +156,11 @@ void DavidLongRangeClassYk::ReadYk()
   Vlong_k.resize(Path.NumSpecies(),Path.kVecs.size());
   yk_zero.resize(Path.NumSpecies());
   if(PairArray.size()==1){
-    cerr<<PathData.Path.Communicator.MyProc()<<" Building RPA for single type" << endl;
+    cout<<PathData.Path.Communicator.MyProc()<<" Building RPA for single type" << endl;
     BuildRPA_SingleType();
   }
   else {
-    cerr << "Building RPA for multiple types" << endl;
+    cout <<PathData.Path.Communicator.MyProc()<< "Building RPA for multiple types" << endl;
     Build_MultipleSpecies();
 
   }
@@ -180,7 +180,6 @@ void DavidLongRangeClassYk::Read(IOSectionClass &in)
   ifstream infile;
   ///BUG: Currently hardcoded for actual file
   infile.open(fileName.c_str());
-  cerr<<" of "<<fileName.c_str()<<endl;
   string isRank;
   infile >> isRank;
   assert(isRank=="RANK");
@@ -196,12 +195,11 @@ void DavidLongRangeClassYk::Read(IOSectionClass &in)
   infile >>isRank;
   assert(isRank=="action");
 
-  cerr<<"Loading David Long Range: "<<numLvl<<" "<<numkVec<<endl;
+  cout<<"Loading David Long Range: "<<numLvl<<" "<<numkVec<<endl;
   for (int lvl=0;lvl<numLvl;lvl++)
     for (int isEnergy=0;isEnergy<3;isEnergy++)
       for (int kVec=0;kVec<numkVec;kVec++){
         infile>>myNum;
-        cerr<<"My num is "<<myNum<<endl;
         if (lvl==0 && isEnergy==1){
           uk(kVec)=myNum;
         }

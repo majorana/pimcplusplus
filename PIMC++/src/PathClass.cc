@@ -185,7 +185,7 @@ void PathClass::Read (IOSectionClass &inSection)
     assert(tempBox.size()==NDIM);
     for (int counter=0;counter<tempBox.size();counter++)
       Box(counter)=tempBox(counter)*scaleBox;
-    cerr<<"The BOX I am setting is "<<Box<<endl;
+    cout<<"The BOX I am setting is "<<Box<<endl;
     SetBox (Box);
   }
   else 
@@ -214,9 +214,9 @@ void PathClass::Read (IOSectionClass &inSection)
     DavidLongRange=false;
   if (LongRange) {
     if (DavidLongRange)
-      cerr<<"Using David Long Range!"<<endl;
+      cout<<"Using David Long Range!"<<endl;
     else
-      cerr<<"Using Long Range!"<<endl;
+      cout<<"Using Long Range!"<<endl;
   }
 
   assert(inSection.OpenSection("Particles"));
@@ -259,8 +259,8 @@ void PathClass::Read (IOSectionClass &inSection)
         IonConfigs[0](i)[j] = ionConfigA(i,j);
         IonConfigs[1](i)[j] = ionConfigB(i,j);
       }
-    cerr << "IonConfigs[0] = " << IonConfigs[0] << endl;
-    cerr << "IonConfigs[1] = " << IonConfigs[1] << endl;
+    cout << "IonConfigs[0] = " << IonConfigs[0] << endl;
+    cout << "IonConfigs[1] = " << IonConfigs[1] << endl;
     SetIonConfig(0);
   }
   /// Checking rounding mode
@@ -1355,10 +1355,10 @@ PathClass::DistDispFast (int sliceA, int sliceB, int ptcl1, int ptcl2, double &d
         (abs(tempDispA(1)-dispA(1))>1e-8) ||
         (abs(tempDispB(0)-dispB(0))>1e-8) ||
         (abs(tempDispB(1)-dispB(1))>1e-8)) {
-      cerr<<tempDispA<<" "<<dispA<<" "<<tempDispB<<" "<<dispB<<endl;
-      cerr<<temptempdispB<<" "<<m<<endl;
-      cerr<<dispC<<endl;
-      cerr<<preA<<" "<<preB<<endl;
+      cout<<tempDispA<<" "<<dispA<<" "<<tempDispB<<" "<<dispB<<endl;
+      cout<<temptempdispB<<" "<<m<<endl;
+      cout<<dispC<<endl;
+      cout<<preA<<" "<<preB<<endl;
     }
     //  assert(tempDispA==dispA);
     //  assert(tempDispB==dispB);
