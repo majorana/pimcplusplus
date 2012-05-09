@@ -118,6 +118,7 @@ public:
   void Receive (int toProc, blitz::Array<double,1> &buff);
   void Receive (int toProc, blitz::Array<int,1> &buff);
   bool Probe(int source, int tag, CommStatusClass &status);
+  void GatherProd(double &send, double &recv, int root);
   void Gather (blitz::Array<complex<double>,1> &sendVec, 
 	       blitz::Array<complex<double>,1> &recvVec, 
 	       blitz::Array<int,1> &recvCounts, int root=0);
@@ -373,6 +374,7 @@ public:
   
 
 #else   // Serial version
+
   inline void SetWorld()
   {
     // Do nothing
@@ -391,6 +393,10 @@ public:
 		      blitz::Array<int,1>& recvCounts, int root=0)
   {
     recvVec = sendVec;
+  }
+  void GatherProd(double &send, double &recv, int root)
+  {
+    recv=send;
   }
 
   inline void Gather (blitz::Array<TinyVector<double,3>,1> &sendVec, 
