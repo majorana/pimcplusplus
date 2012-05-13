@@ -40,6 +40,7 @@
 #include "Phik.h"
 #include "Pressure.h"
 #include "StructureFactor.h"     
+#include "Sign.h"
 #include "SuperfluiDrop.h"
 #include "SuperfluidFraction.h"
 #include "SuperfluidFractionPerLayer.h"

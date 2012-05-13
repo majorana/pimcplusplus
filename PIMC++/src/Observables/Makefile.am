@@ -54,6 +54,8 @@ libobservables_la_SOURCES  =     \
     Phik.cc                      \
     PlaneDensity.h               \
     PlaneDensity.cc              \
+    Sign.h                       \
+    Sign.cc                      \
     SpecificHeat.h               \
     SpecificHeat.cc              \
     SpecificHeatA.h               \
