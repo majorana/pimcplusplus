@@ -74,16 +74,15 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2, Array<int,1> &activePart
   if (abs(newAction) > 1e50 || abs(oldAction) > 1e50) {
     if (toAccept) {
       if (abs(newAction) > 1e50 && abs(oldAction) < 1e50)
-        cerr << "Broken Staging (new): " << BisectionLevel << " " << toAccept << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << endl;
+        cerr << "Broken Staging (new): " << BisectionLevel << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << " " << sampleRatio << " " << currActionChange << " " << prevActionChange << endl;
       else if (abs(oldAction) > 1e50 && abs(newAction) < 1e50)
-        cerr << "Broken Staging (old): " << BisectionLevel << " " << toAccept << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << endl;
+        cerr << "Broken Staging (old): " << BisectionLevel << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << " " << sampleRatio << " " << currActionChange << " " << prevActionChange << endl;
       else
-         cerr << "Broken Staging (both): " << BisectionLevel << " " << toAccept << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << endl;
+         cerr << "Broken Staging (both): " << BisectionLevel << " " << slice1 << " " << slice2 << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldAction << " " << newAction << " " << sampleRatio << " " << currActionChange << " " << prevActionChange << endl;
       toAccept = 0;
       assert(1==2);
     }
   }
-
   if (toAccept){
     NumAccepted++;
   }

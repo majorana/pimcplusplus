@@ -335,7 +335,7 @@ double DavidLongRangeClassYk::d_dBeta (int slice1, int slice2,  int level)
       Path.CalcRho_ks_Fast(slice,species);
       for (int ki=0; ki<Path.kVecs.size(); ki++) {
          double rhok2 = mag2(Path.Rho_k(slice,species,ki));
-         sliceTotal +=  factor*rhok2 * duk(species, ki); 
+         sliceTotal +=  factor*rhok2 * duk(species, ki);
       }
     }
     total += sliceTotal;
@@ -354,7 +354,7 @@ double DavidLongRangeClassYk::d_dBeta (int slice1, int slice2,  int level)
         Path.CalcRho_ks_Fast(slice,species1);
         for (int ki = 0; ki < Path.kVecs.size(); ki++) {
           double rhok2 = mag2(Path.Rho_k(slice,species0,ki),Path.Rho_k(slice,species1,ki));
-          sliceTotal += factor*rhok2 * uk(species0, ki);
+          sliceTotal += factor*rhok2 * duk(species0, ki);
         }
       }
     }

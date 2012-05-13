@@ -240,8 +240,8 @@ void EnergySignClass::Accumulate()
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
   double FullWeight;
   double currWeight=PathData.Path.Weight;
-  PathData.Path.Communicator.GatherProd(currWeight,FullWeight,0);
-  
+  //PathData.Path.Communicator.GatherProd(currWeight,FullWeight,0);
+  FullWeight = 1;
   NumSamples++;
 
   double kinetic, dUShort, dULong, node, vShort, vLong, dUNonlocal;

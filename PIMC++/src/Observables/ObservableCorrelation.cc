@@ -22,7 +22,7 @@
 
 void PairCorrelationClass::Read(IOSectionClass& in)
 {
-  
+
   ObservableClass::Read(in);
   string species1Name;
   string species2Name;
@@ -106,11 +106,9 @@ void PairCorrelationClass::WriteBlock()
   int N1 = PathData.Species(Species1).NumParticles;
   int N2 = PathData.Species(Species2).NumParticles;
   if (Species1==Species2) //Normalizes things when species are same
-    norm = 0.5*(double)TotalCounts * PathData.Path.TotalNumSlices*
-      (double)(N1*(N1-1.0))/PathData.Path.GetVol();
+    norm = 0.5*(double)TotalCounts * PathData.Path.TotalNumSlices * (double)(N1*(N1-1.0))/PathData.Path.GetVol();
   else
-    norm = (double)TotalCounts * PathData.Path.TotalNumSlices*
-      (double)(N1*N2)/PathData.Path.GetVol();
+    norm = (double)TotalCounts * PathData.Path.TotalNumSlices * (double)(N1*N2)/PathData.Path.GetVol();
 
   Path.Communicator.Sum(Histogram, HistSum);
   Array<double,1> gofrArray(HistSum.size());
@@ -124,10 +122,10 @@ void PairCorrelationClass::WriteBlock()
 #if NDIM==2
     double binVol = M_PI * (r2*r2-r1*r1);
 #endif
-		//////////////////////////
-		// This line does not normalize by volume for a dimer, e.g. -jg
+    //////////////////////////
+    // This line does not normalize by volume for a dimer, e.g. -jg
     //gofrArray(i) = (double) HistSum(i) / (norm);
-		//////////////////////////
+    //////////////////////////
     gofrArray(i) = (double) HistSum(i) / (binVol*norm);
   }
   gofrVar.Write(gofrArray);
