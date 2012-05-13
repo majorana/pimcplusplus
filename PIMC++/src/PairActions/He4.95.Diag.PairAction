@@ -1,0 +1,22 @@
+Section (Fits)
+{
+  string Type = "DavidFit";
+  int NumOffDiagonalTerms=0;
+  Section (Particle1)
+  {
+    string Name = "He";
+    double lambda = 6.059615;
+    int Ndim = 3;
+  }
+
+  Section (Particle2)
+  {
+    string Name = "He";
+    double lambda = 0.0;
+    int Ndim = 3;
+  }
+
+  string Daviddmfile="He4.95.dm";
+
+
+}

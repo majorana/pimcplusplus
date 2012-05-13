@@ -1,0 +1,157 @@
+double tau=0.05;
+
+Section (System)
+{
+  int NumTimeSlices=20;
+  Array<double,1> Box(3)=[3.0,3.0,3.0];
+  Section (Particles)
+  {
+    Section (Species)
+    {
+      string Name="p";
+      double lambda=1.0; //classical particle
+      string Type="FERMION";
+      int NumParticles=4;
+      int NumDim=3;
+      string InitPaths="FIXED";
+      Array<double,2> Positions(4,3)=[0.0, 0.1,-0.1,0.2, 
+				      0.0, 0.1,-0.1,0.2,
+                                      0.0, 0.1,-0.1,0.2];
+    }
+  }
+}
+
+Section (Action)
+{
+  int MaxLevels = 3;
+  Array<string,1> PairActionFiles(1) = ["zero.PairAction"];
+  string Daviddmfile="He4.95.dm";
+}
+
+Section (Observables)
+{
+  string OutFile = "feb27.h5";
+  Section (Observable)
+    {
+      string type = "Energy";
+      string name = "Energy";
+      int freq=2;
+      int dumpFreq=500;
+      
+    }
+  Section (Observable)
+    {
+      string type="PathDump";
+      string name="PathDump";
+    }
+
+  Section (Observable)
+    {
+      string type = "PairCorrelation";
+      string name = "ppPC";
+      string type1 = "p";
+      string type2 = "p";
+      int freq=20;
+      int dumpFreq=700;
+      
+	
+      Section (Grid)
+	{
+  string type = "Linear";
+	  double start = 0.0;
+	  double end = 12.0;
+	  int NumPoints = 100;
+	}
+    }
+  
+}
+
+
+Section (Moves){
+  Section (Move)
+    {
+      string type="Bisection";
+      string name="eBisection";
+      
+      Array<int,1> ActiveSpecies(1)=[0]; //This needs to be prettier input
+      ///here should be electron
+      int NumParticlesToMove=1;
+      int StartTimeSlice=0; //Not sure if this is always set the same now?
+      string NumLevels="Max";
+      
+      
+    }
+  Section (Move)
+    {
+      string type="ShiftMove";
+      string name="electronShift";
+    }
+  Section (Move)
+    {
+      string type="PrintMove";
+      string name="Loop1";
+      string toprint="This is loop1";
+    }
+  Section (Move)
+    {
+      string type="PrintMove";
+      string name="Loop2";
+      string toprint="This is loop2";
+    }
+  Section (Move)
+    {
+      string type="PrintMove";
+      string name="Loop3";
+      string toprint="This is loop3";
+    }
+  Section (Move)
+    {
+      string type="CycleBlock";
+      string name="BlockCycleMove";
+      int NumLevels=3;
+      Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 0.0];
+      double epsilon=0.0;
+      int Steps=9;
+      string Species="p";
+    }
+}
+
+
+
+//Section (Permutations)
+//{
+//  double epsilon = 0.0;
+//  Array<double,1> Gamma(4) = [1.0, 1.0, 1.0, 1.0];
+//}
+
+
+Section (Algorithm)
+{
+  Section (Loop){ // Before Accumulating Observables
+    int steps=10000; 
+    Section (Loop){ 
+
+      int steps=3;
+      Section (Move) {string name="BlockCycleMove";} 
+      //      Section (Move) {string name="eBisection";}
+    }
+    Section (Move) {string name = "electronShift";}
+  }
+  Section (Loop){ //Start Accumulating observables
+    int steps=3000000;
+    Section (Loop){
+      int steps=3;
+      Section (Move) {string name="BlockCycleMove";} 
+      //      Section (Move) {string name="eBisection";} 
+    }
+    Section (Move) {string name = "electronShift"; }
+    //    Section (Observe) {string name = "ppPC";}
+    Section (Observe) {string name = "Energy"; }
+    //    Section (Observe) {string name = "PathDump";}
+  }
+}
+
+
+
+
+	  
