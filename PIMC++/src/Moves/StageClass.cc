@@ -53,7 +53,7 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2, Array<int,1> &activePart
   //cerr << BisectionLevel << " ";
 
   SetMode (NEWMODE);
-  double sampleRatio = Sample(slice1,slice2,activeParticles);
+  double logSampleRatio = Sample(slice1,slice2,activeParticles);
   //cerr << sampleRatio << " ";
 
   SetMode (OLDMODE);
@@ -67,7 +67,7 @@ bool LocalStageClass::Attempt(int &slice1, int &slice2, Array<int,1> &activePart
 
   gettimeofday(&end, &tz);
   double currActionChange = newAction - oldAction;
-  double logAcceptProb = log(sampleRatio) - currActionChange + prevActionChange;
+  double logAcceptProb = logSampleRatio - currActionChange + prevActionChange;
   double ran_number = PathData.Path.Random.Local();
   bool toAccept = logAcceptProb >= log(ran_number); // Accept condition
 

@@ -353,10 +353,8 @@ public:
   void AllSum (blitz::Array<double,1> &in, blitz::Array<double,1> &out);
   void AllSum (blitz::Array<double,2> &in, blitz::Array<double,2> &out);
   void AllSum (blitz::Array<double,3> &in, blitz::Array<double,3> &out);
-  void AllSum (blitz::Array<TinyVector<double,2>,1> &in, 
-	       blitz::Array<TinyVector<double,2>,1> &out);
-  void AllSum (blitz::Array<TinyVector<double,3>,1> &in, 
-	       blitz::Array<TinyVector<double,3>,1> &out);
+  void AllSum (blitz::Array<TinyVector<double,2>,1> &in, blitz::Array<TinyVector<double,2>,1> &out);
+  void AllSum (blitz::Array<TinyVector<double,3>,1> &in, blitz::Array<TinyVector<double,3>,1> &out);
   void AllAnd (bool &TorF);
   template<int N> 
   inline void AllMax (TinyVector<int,N> &vec) {
