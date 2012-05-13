@@ -45,7 +45,7 @@ double DisplaceStageClass::Sample (int &slice1, int &slice2, Array<int,1> &activ
   }
 
   // And return sample probability ratio
-  return 1.0;
+  return log(1.0);
 }
 
 void

@@ -672,7 +672,6 @@ CommunicatorClass::AllAnd (bool &TorF)
   TorF = (outval == NumProcs());
 }
 
-
 void
 CommunicatorClass::BarrierSync()
 {

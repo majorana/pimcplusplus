@@ -212,7 +212,6 @@ void PIMCClass::ReadObservables(IOSectionClass &in)
       tempObs=new nofrClass(PathData,OutFile);
     else if (observeType=="Sign")
       tempObs = new SignClass(PathData,OutFile);
-
     else if (observeType=="PlaneDensity")
       tempObs=new PlaneDensityClass(PathData,OutFile);
     else if (observeType=="AngularMomentumCorrelation")
