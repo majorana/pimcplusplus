@@ -13,7 +13,7 @@
 // For more information, please see the PIMC++ Home Page:  //
 //           http://pathintegrals.info                     //
 /////////////////////////////////////////////////////////////
-#include "../Communication/Communication.h"
+#include <Common/MPI/Communication.h>
 #include "Sign.h"
 
 
