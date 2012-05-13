@@ -213,6 +213,10 @@ CommunicatorClass::Probe(int source, int tag, CommStatusClass &status)
   return (flag != 0);
 }
 
+void CommunicatorClass::GatherProd(double &send, double &recv, int root)
+{
+  MPI_Reduce(&send,&recv,1,MPI_DOUBLE,MPI_PROD,root,MPIComm);
+}
 
 void 
 CommunicatorClass::Gather (Array<complex<double>,1> &sendVec, 
@@ -667,7 +671,6 @@ CommunicatorClass::AllAnd (bool &TorF)
   MPI_Allreduce (&inval, &outval, 1, MPI_INT, MPI_SUM, MPIComm);
   TorF = (outval == NumProcs());
 }
-
 
 void
 CommunicatorClass::BarrierSync()

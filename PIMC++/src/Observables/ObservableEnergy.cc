@@ -230,23 +230,21 @@ void EnergyClass::Read(IOSectionClass &in)
 void EnergySignClass::Accumulate()
 {
   TimesCalled++;
-  if (TimesCalled % DumpFreq==0)
-    WriteBlock();
 
   if ((TimesCalled % Freq)!=0){
     return;
   }
+
   //Move the join to the end so we don't have to worry about permutations
   PathData.MoveJoin(PathData.NumTimeSlices()-1);
   double FullWeight;
   double currWeight=PathData.Path.Weight;
-  //PathData.Path.Communicator.GatherProd(currWeight,FullWeight,0);
-  FullWeight = 1;
+  PathData.Path.Communicator.GatherProd(currWeight,FullWeight,0);
+
   NumSamples++;
 
   double kinetic, dUShort, dULong, node, vShort, vLong, dUNonlocal;
-  PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong,
-			   dUNonlocal);
+  PathData.Actions.Energy (kinetic, dUShort, dULong, node, vShort, vLong, dUNonlocal);
   //  cerr<<"ENERGIES: "<<kinetic<<" "<<duShort<<" "<<dULong<<" "<<node<<" "<<vShort<<" "<<vLong<<" "<<dUNonlocal<<endl;
   TotalSum   += (kinetic + dUShort + dULong + node)*FullWeight;
   KineticSum += kinetic*FullWeight;/* * PathData.Path.Weight*/;
@@ -300,7 +298,6 @@ void EnergySignClass::Read(IOSectionClass &in)
 {  
   ObservableClass::Read(in);
   assert(in.ReadVar("Frequency",Freq));
-  //  assert(in.ReadVar("dumpFreq",DumpFreq));
   if (PathData.Path.Communicator.MyProc()==0){
     WriteInfo();
     IOSection.WriteVar("Type","Scalar");

@@ -284,7 +284,7 @@ double BisectionStageClass::Sample(int &slice1, int &slice2, Array<int,1> &activ
 	//	//	TimeSpent += (double)(end.tv_sec-start.tv_sec) +
 	//	//	  1.0e-6*(double)(end.tv_usec-start.tv_usec);
 	//	cerr<<"What's time of day"<<TimeSpent<<endl;
-  return exp(-logSampleProb+logOldSampleProb);
+  return -logSampleProb+logOldSampleProb;
   //return (exp (-newSample + oldSample));
 }
 
