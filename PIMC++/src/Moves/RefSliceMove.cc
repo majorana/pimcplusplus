@@ -98,11 +98,12 @@ bool RefSliceMoveClass::NodeCheck()
     double globalChange = PathData.Path.Communicator.AllSum (localChange);
     bool toAccept = (-globalChange)>=log(PathData.Path.Random.Common());
 
-    if (abs(newLocalNode) > 1e50) { // Nodal Rejection
-      if (toAccept) {
-        cerr << "Broken NodeCheck: " << toAccept << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldLocalNode << " " << newLocalNode << endl;
-        toAccept = 0;
-      }
+    // Check if Broken
+    if ((abs(newLocalNode) > 1e50 || abs(oldLocalNode) > 1e50) && toAccept) {
+      std::cout << "Broken NodeCheck!!!" << toAccept << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldLocalNode << " " << newLocalNode << " " << localChange << " " << globalChange << endl;
+      toAccept = 0;
+    } else {
+      //std::cout << toAccept << " " << PathData.Path.GetRefSlice() << " " << PathData.Path.SliceOwner(PathData.Path.GetRefSlice()) << " " << PathData.Path.Communicator.MyProc() << " " << oldLocalNode << " " << newLocalNode << " " << localChange << " " << globalChange << endl;
     }
 
     return toAccept;
@@ -230,10 +231,10 @@ void RefSliceMoveClass::MakeMove()
   MasterProc = Path.SliceOwner (Path.GetRefSlice());
   //cerr<<"Starting RefSlice move."<<endl;
   if (PathData.Path.Communicator.MyProc() == MasterProc){
-    //cerr<<"MakeMoveMaster();"<<endl;
+    //std::cout<<"MakeMoveMaster();"<<endl;
     MakeMoveMaster();
   } else {
-    //cerr<<"MakeMoveSlave();"<<endl;
+    //std::cout<<"MakeMoveSlave();"<<endl;
     MakeMoveSlave();
   }
   if ((NodeAccept+NodeReject) % 1000 == 999)

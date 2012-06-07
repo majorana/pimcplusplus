@@ -7,7 +7,7 @@ module1 = Extension('IOSection',
                     sources = ['IONumPyWrapper.cc','IO.cc',\
                                'IOHDF5.cc', 'IOASCII.cc',\
                                'IOVarHDF5.cc' ],\
-                    library_dirs=['/home/esler/lib',
+                    library_dirs=['/ccs/home/ethan/lib',
                                   '/usr/include',\
                                   numpyincludedirs,\
                                   numarrayincludedirs[0]],

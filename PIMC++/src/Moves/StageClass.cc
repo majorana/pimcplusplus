@@ -102,7 +102,7 @@ bool CommonStageClass::Attempt (int &slice1, int &slice2, Array<int,1> &activePa
 
   SetMode (NEWMODE);
   double sampleRatio=Sample(slice1,slice2,activeParticles);
-  double logSampleRatio = log(sampleRatio);
+  double logSampleRatio = sampleRatio;
   logSampleRatio = PathData.Path.Communicator.AllSum (logSampleRatio);
   SetMode(OLDMODE);
   double oldAction= GlobalStageAction(activeParticles);
